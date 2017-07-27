@@ -100,7 +100,7 @@ func resourceComputeInstanceV2() *schema.Resource {
 			"security_groups": &schema.Schema{
 				Type:     schema.TypeSet,
 				Optional: true,
-				ForceNew: false,
+				ForceNew: true,	// This is RO for Huawei provider
 				Computed: true,
 				Elem:     &schema.Schema{Type: schema.TypeString},
 				Set:      schema.HashString,
