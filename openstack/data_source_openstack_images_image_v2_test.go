@@ -18,6 +18,7 @@ func TestAccOpenStackImagesV2ImageDataSource_basic(t *testing.T) {
 			},
 			resource.TestStep{
 				Config: testAccOpenStackImagesV2ImageDataSource_basic,
+				ExpectNonEmptyPlan: true,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckImagesV2DataSourceID("data.openstack_images_image_v2.image_1"),
 					resource.TestCheckResourceAttr(

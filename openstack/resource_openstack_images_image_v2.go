@@ -485,10 +485,12 @@ func resourceImagesImageV2RefreshFunc(client *gophercloud.ServiceClient, id stri
 		}
 		log.Printf("[DEBUG] OpenStack image status is: %s", img.Status)
 
+		// Huawei provider doesn't have this set initially.
+/*
 		if img.Checksum != checksum || int64(img.SizeBytes) != fileSize {
 			return img, fmt.Sprintf("%s", img.Status), fmt.Errorf("Error wrong size %v or checksum %q", img.SizeBytes, img.Checksum)
 		}
-
+*/
 		return img, fmt.Sprintf("%s", img.Status), nil
 	}
 }
