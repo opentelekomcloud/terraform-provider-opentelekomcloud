@@ -1,19 +1,19 @@
 ---
 layout: "openstack"
-page_title: "OpenStack: openstack_networking_router_v2"
+page_title: "HWCloud: hwcloud_networking_router_v2"
 sidebar_current: "docs-openstack-resource-networking-router-v2"
 description: |-
-  Manages a V2 router resource within OpenStack.
+  Manages a V2 router resource within HWCloud.
 ---
 
 # openstack\_networking\_router_v2
 
-Manages a V2 router resource within OpenStack.
+Manages a V2 router resource within HWCloud.
 
 ## Example Usage
 
 ```hcl
-resource "openstack_networking_router_v2" "router_1" {
+resource "hwcloud_networking_router_v2" "router_1" {
   name             = "my_router"
   external_gateway = "f67f0d72-0ddf-11e4-9d95-e1f29f417e2f"
 }

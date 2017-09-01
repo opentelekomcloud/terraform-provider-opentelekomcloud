@@ -1,4 +1,4 @@
-Terraform OpenStack Provider
+Terraform HWCloud Provider
 ============================
 
 - Website: https://www.terraform.io

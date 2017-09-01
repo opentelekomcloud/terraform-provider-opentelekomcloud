@@ -1,19 +1,19 @@
 ---
 layout: "openstack"
-page_title: "OpenStack: openstack_compute_secgroup_v2"
+page_title: "HWCloud: hwcloud_compute_secgroup_v2"
 sidebar_current: "docs-openstack-resource-compute-secgroup-v2"
 description: |-
-  Manages a V2 security group resource within OpenStack.
+  Manages a V2 security group resource within HWCloud.
 ---
 
 # openstack\_compute\_secgroup_v2
 
-Manages a V2 security group resource within OpenStack.
+Manages a V2 security group resource within HWCloud.
 
 ## Example Usage
 
 ```hcl
-resource "openstack_compute_secgroup_v2" "secgroup_1" {
+resource "hwcloud_compute_secgroup_v2" "secgroup_1" {
   name        = "my_secgroup"
   description = "my security group"
 
@@ -108,12 +108,12 @@ A list of ICMP types and codes can be found [here](https://en.wikipedia.org/wiki
 When referencing a security group in a configuration (for example, a configuration creates a new security group and then needs to apply it to an instance being created in the same configuration), it is currently recommended to reference the security group by name and not by ID, like this:
 
 ```hcl
-resource "openstack_compute_instance_v2" "test-server" {
+resource "hwcloud_compute_instance_v2" "test-server" {
   name            = "tf-test"
   image_id        = "ad091b52-742f-469e-8f3c-fd81cadf0743"
   flavor_id       = "3"
   key_pair        = "my_key_pair_name"
-  security_groups = ["${openstack_compute_secgroup_v2.secgroup_1.name}"]
+  security_groups = ["${hwcloud_compute_secgroup_v2.secgroup_1.name}"]
 }
 ```
 
@@ -122,5 +122,5 @@ resource "openstack_compute_instance_v2" "test-server" {
 Security Groups can be imported using the `id`, e.g.
 
 ```
-$ terraform import openstack_compute_secgroup_v2.my_secgroup 1bc30ee9-9d5b-4c30-bdd5-7f1e663f5edf
+$ terraform import hwcloud_compute_secgroup_v2.my_secgroup 1bc30ee9-9d5b-4c30-bdd5-7f1e663f5edf
 ```

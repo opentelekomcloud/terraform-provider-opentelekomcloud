@@ -1,19 +1,19 @@
 ---
 layout: "openstack"
-page_title: "OpenStack: openstack_objectstorage_container_v1"
+page_title: "HWCloud: hwcloud_objectstorage_container_v1"
 sidebar_current: "docs-openstack-resource-objectstorage-container-v1"
 description: |-
-  Manages a V1 container resource within OpenStack.
+  Manages a V1 container resource within HWCloud.
 ---
 
 # openstack\_objectstorage\_container_v1
 
-Manages a V1 container resource within OpenStack.
+Manages a V1 container resource within HWCloud.
 
 ## Example Usage
 
 ```hcl
-resource "openstack_objectstorage_container_v1" "container_1" {
+resource "hwcloud_objectstorage_container_v1" "container_1" {
   region = "RegionOne"
   name   = "tf-test-container-1"
 

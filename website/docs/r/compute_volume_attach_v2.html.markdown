@@ -1,6 +1,6 @@
 ---
 layout: "openstack"
-page_title: "OpenStack: openstack_compute_volume_attach_v2"
+page_title: "HWCloud: hwcloud_compute_volume_attach_v2"
 sidebar_current: "docs-openstack-resource-compute-volume-attach-v2"
 description: |-
   Attaches a Block Storage Volume to an Instance.
@@ -8,7 +8,7 @@ description: |-
 
 # openstack\_compute\_volume_attach_v2
 
-Attaches a Block Storage Volume to an Instance using the OpenStack
+Attaches a Block Storage Volume to an Instance using the HWCloud
 Compute (Nova) v2 API.
 
 ## Example Usage
@@ -16,44 +16,44 @@ Compute (Nova) v2 API.
 ### Basic attachment of a single volume to a single instance
 
 ```hcl
-resource "openstack_blockstorage_volume_v2" "volume_1" {
+resource "hwcloud_blockstorage_volume_v2" "volume_1" {
   name = "volume_1"
   size = 1
 }
 
-resource "openstack_compute_instance_v2" "instance_1" {
+resource "hwcloud_compute_instance_v2" "instance_1" {
   name            = "instance_1"
   security_groups = ["default"]
 }
 
-resource "openstack_compute_volume_attach_v2" "va_1" {
-  instance_id = "${openstack_compute_instance_v2.instance_1.id}"
-  volume_id   = "${openstack_blockstorage_volume_v2.volume_1.id}"
+resource "hwcloud_compute_volume_attach_v2" "va_1" {
+  instance_id = "${hwcloud_compute_instance_v2.instance_1.id}"
+  volume_id   = "${hwcloud_blockstorage_volume_v2.volume_1.id}"
 }
 ```
 
 ### Attaching multiple volumes to a single instance
 
 ```hcl
-resource "openstack_blockstorage_volume_v2" "volumes" {
+resource "hwcloud_blockstorage_volume_v2" "volumes" {
   count = 2
   name  = "${format("vol-%02d", count.index + 1)}"
   size  = 1
 }
 
-resource "openstack_compute_instance_v2" "instance_1" {
+resource "hwcloud_compute_instance_v2" "instance_1" {
   name            = "instance_1"
   security_groups = ["default"]
 }
 
-resource "openstack_compute_volume_attach_v2" "attachments" {
+resource "hwcloud_compute_volume_attach_v2" "attachments" {
   count       = 2
-  instance_id = "${openstack_compute_instance_v2.instance_1.id}"
-  volume_id   = "${element(openstack_blockstorage_volume_v2.volumes.*.id, count.index)}"
+  instance_id = "${hwcloud_compute_instance_v2.instance_1.id}"
+  volume_id   = "${element(hwcloud_blockstorage_volume_v2.volumes.*.id, count.index)}"
 }
 
 output "volume devices" {
-  value = "${openstack_compute_volume_attach_v2.attachments.*.device}"
+  value = "${hwcloud_compute_volume_attach_v2.attachments.*.device}"
 }
 ```
 
@@ -94,5 +94,5 @@ Volume Attachments can be imported using the Instance ID and Volume ID
 separated by a slash, e.g.
 
 ```
-$ terraform import openstack_compute_volume_attach_v2.va_1 89c60255-9bd6-460c-822a-e2b959ede9d2/45670584-225f-46c3-b33e-6707b589b666
+$ terraform import hwcloud_compute_volume_attach_v2.va_1 89c60255-9bd6-460c-822a-e2b959ede9d2/45670584-225f-46c3-b33e-6707b589b666
 ```

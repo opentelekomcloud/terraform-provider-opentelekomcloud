@@ -1,19 +1,19 @@
 ---
 layout: "openstack"
-page_title: "OpenStack: openstack_images_image_v2"
+page_title: "HWCloud: hwcloud_images_image_v2"
 sidebar_current: "docs-openstack-datasource-images-image-v2"
 description: |-
-  Get information on an OpenStack Image.
+  Get information on an HWCloud Image.
 ---
 
 # openstack\_images\_image\_v2
 
-Use this data source to get the ID of an available OpenStack image.
+Use this data source to get the ID of an available HWCloud image.
 
 ## Example Usage
 
 ```hcl
-data "openstack_images_image_v2" "ubuntu" {
+data "hwcloud_images_image_v2" "ubuntu" {
   name = "Ubuntu 16.04"
   most_recent = true
 }

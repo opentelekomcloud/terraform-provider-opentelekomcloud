@@ -1,19 +1,19 @@
 ---
 layout: "openstack"
-page_title: "OpenStack: openstack_lb_member_v2"
+page_title: "HWCloud: hwcloud_lb_member_v2"
 sidebar_current: "docs-openstack-resource-lb-member-v2"
 description: |-
-  Manages a V2 member resource within OpenStack.
+  Manages a V2 member resource within HWCloud.
 ---
 
 # openstack\_lb\_member\_v2
 
-Manages a V2 member resource within OpenStack.
+Manages a V2 member resource within HWCloud.
 
 ## Example Usage
 
 ```hcl
-resource "openstack_lb_member_v2" "member_1" {
+resource "hwcloud_lb_member_v2" "member_1" {
   address       = "192.168.199.23"
   protocol_port = 8080
 }
