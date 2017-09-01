@@ -1,21 +1,21 @@
 ---
 layout: "openstack"
-page_title: "OpenStack: openstack_dns_zone_v2"
+page_title: "HWCloud: hwcloud_dns_zone_v2"
 sidebar_current: "docs-openstack-resource-dns-zone-v2"
 description: |-
-  Manages a DNS zone in the OpenStack DNS Service
+  Manages a DNS zone in the HWCloud DNS Service
 ---
 
 # openstack\_dns\_zone_v2
 
-Manages a DNS zone in the OpenStack DNS Service.
+Manages a DNS zone in the HWCloud DNS Service.
 
 ## Example Usage
 
 ### Automatically detect the correct network
 
 ```hcl
-resource "openstack_dns_zone_v2" "example.com" {
+resource "hwcloud_dns_zone_v2" "example.com" {
   name = "example.com."
   email = "jdoe@example.com"
   description = "An example zone"
@@ -73,5 +73,5 @@ The following attributes are exported:
 This resource can be imported by specifying the zone ID:
 
 ```
-$ terraform import openstack_dns_zone_v2.zone_1 <zone_id>
+$ terraform import hwcloud_dns_zone_v2.zone_1 <zone_id>
 ```

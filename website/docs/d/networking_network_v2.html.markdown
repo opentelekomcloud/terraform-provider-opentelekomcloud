@@ -1,19 +1,19 @@
 ---
 layout: "openstack"
-page_title: "OpenStack: openstack_networking_network_v2"
+page_title: "HWCloud: hwcloud_networking_network_v2"
 sidebar_current: "docs-openstack-datasource-networking-network-v2"
 description: |-
-  Get information on an OpenStack Network.
+  Get information on an HWCloud Network.
 ---
 
 # openstack\_networking\_network\_v2
 
-Use this data source to get the ID of an available OpenStack network.
+Use this data source to get the ID of an available HWCloud network.
 
 ## Example Usage
 
 ```hcl
-data "openstack_networking_network_v2" "network" {
+data "hwcloud_networking_network_v2" "network" {
   name = "tf_test_network"
 }
 ```

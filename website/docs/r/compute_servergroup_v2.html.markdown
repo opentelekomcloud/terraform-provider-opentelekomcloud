@@ -1,19 +1,19 @@
 ---
 layout: "openstack"
-page_title: "OpenStack: openstack_compute_servergroup_v2"
+page_title: "HWCloud: hwcloud_compute_servergroup_v2"
 sidebar_current: "docs-openstack-resource-compute-servergroup-v2"
 description: |-
-  Manages a V2 Server Group resource within OpenStack.
+  Manages a V2 Server Group resource within HWCloud.
 ---
 
 # openstack\_compute\_servergroup_v2
 
-Manages a V2 Server Group resource within OpenStack.
+Manages a V2 Server Group resource within HWCloud.
 
 ## Example Usage
 
 ```hcl
-resource "openstack_compute_servergroup_v2" "test-sg" {
+resource "hwcloud_compute_servergroup_v2" "test-sg" {
   name     = "my-sg"
   policies = ["anti-affinity"]
 }
@@ -59,5 +59,5 @@ The following attributes are exported:
 Server Groups can be imported using the `id`, e.g.
 
 ```
-$ terraform import openstack_compute_servergroup_v2.test-sg 1bc30ee9-9d5b-4c30-bdd5-7f1e663f5edf
+$ terraform import hwcloud_compute_servergroup_v2.test-sg 1bc30ee9-9d5b-4c30-bdd5-7f1e663f5edf
 ```

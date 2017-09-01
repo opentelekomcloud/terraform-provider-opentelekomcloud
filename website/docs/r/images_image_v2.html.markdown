@@ -1,19 +1,19 @@
 ---
 layout: "openstack"
-page_title: "OpenStack: openstack_images_image_v2"
+page_title: "HWCloud: hwcloud_images_image_v2"
 sidebar_current: "docs-openstack-resource-images-image-v2"
 description: |-
-  Manages a V2 Image resource within OpenStack Glance.
+  Manages a V2 Image resource within HWCloud Glance.
 ---
 
 # openstack\_images\_image_v2
 
-Manages a V2 Image resource within OpenStack Glance.
+Manages a V2 Image resource within HWCloud Glance.
 
 ## Example Usage
 
 ```hcl
-resource "openstack_images_image_v2" "rancheros" {
+resource "hwcloud_images_image_v2" "rancheros" {
   name   = "RancherOS"
   image_source_url = "https://releases.rancher.com/os/latest/rancheros-openstack.img"
   container_format = "bare"
@@ -65,7 +65,7 @@ The following arguments are supported:
 
 * `visibility` - (Optional) The visibility of the image. Must be one of
    "public", "private", "community", or "shared". The ability to set the
-   visibility depends upon the configuration of the OpenStack cloud.
+   visibility depends upon the configuration of the HWCloud cloud.
 
 Note: The `properties` attribute handling in the gophercloud library is currently buggy
 and needs to be fixed before being implemented in this resource.
@@ -105,5 +105,5 @@ The following attributes are exported:
 Images can be imported using the `id`, e.g.
 
 ```
-$ terraform import openstack_images_image_v2.rancheros 89c60255-9bd6-460c-822a-e2b959ede9d2
+$ terraform import hwcloud_images_image_v2.rancheros 89c60255-9bd6-460c-822a-e2b959ede9d2
 ```

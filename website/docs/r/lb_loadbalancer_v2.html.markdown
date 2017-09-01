@@ -1,19 +1,19 @@
 ---
 layout: "openstack"
-page_title: "OpenStack: openstack_lb_loadbalancer_v2"
+page_title: "HWCloud: hwcloud_lb_loadbalancer_v2"
 sidebar_current: "docs-openstack-resource-lb-loadbalancer-v2"
 description: |-
-  Manages a V2 loadbalancer resource within OpenStack.
+  Manages a V2 loadbalancer resource within HWCloud.
 ---
 
 # openstack\_lb\_loadbalancer\_v2
 
-Manages a V2 loadbalancer resource within OpenStack.
+Manages a V2 loadbalancer resource within HWCloud.
 
 ## Example Usage
 
 ```hcl
-resource "openstack_lb_loadbalancer_v2" "lb_1" {
+resource "hwcloud_lb_loadbalancer_v2" "lb_1" {
   vip_subnet_id = "d9415786-5f1a-428b-b35f-2f1523e146d2"
 }
 ```
