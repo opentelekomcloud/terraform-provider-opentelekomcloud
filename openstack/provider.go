@@ -142,14 +142,16 @@ func Provider() terraform.ResourceProvider {
 		},
 
 		DataSourcesMap: map[string]*schema.Resource{
-			"openstack_images_image_v2":       dataSourceImagesImageV2(),
-			"openstack_networking_network_v2": dataSourceNetworkingNetworkV2(),
+			"openstack_images_image_v2":        dataSourceImagesImageV2(),
+			"openstack_networking_network_v2":  dataSourceNetworkingNetworkV2(),
+			"openstack_networking_secgroup_v2": dataSourceNetworkingSecGroupV2(),
 		},
 
 		ResourcesMap: map[string]*schema.Resource{
 			"openstack_blockstorage_volume_v1":          resourceBlockStorageVolumeV1(),
 			"openstack_blockstorage_volume_v2":          resourceBlockStorageVolumeV2(),
 			"openstack_blockstorage_volume_attach_v2":   resourceBlockStorageVolumeAttachV2(),
+			"openstack_compute_flavor_v2":               resourceComputeFlavorV2(),
 			"openstack_compute_instance_v2":             resourceComputeInstanceV2(),
 			"openstack_compute_keypair_v2":              resourceComputeKeypairV2(),
 			"openstack_compute_secgroup_v2":             resourceComputeSecGroupV2(),
@@ -162,6 +164,8 @@ func Provider() terraform.ResourceProvider {
 			"openstack_fw_firewall_v1":                  resourceFWFirewallV1(),
 			"openstack_fw_policy_v1":                    resourceFWPolicyV1(),
 			"openstack_fw_rule_v1":                      resourceFWRuleV1(),
+			"openstack_identity_project_v3":             resourceIdentityProjectV3(),
+			"openstack_identity_user_v3":                resourceIdentityUserV3(),
 			"openstack_images_image_v2":                 resourceImagesImageV2(),
 			"openstack_lb_member_v1":                    resourceLBMemberV1(),
 			"openstack_lb_monitor_v1":                   resourceLBMonitorV1(),

@@ -21,9 +21,9 @@ func resourceLoadBalancerV2() *schema.Resource {
 		Delete: resourceLoadBalancerV2Delete,
 
 		Timeouts: &schema.ResourceTimeout{
-			Create: schema.DefaultTimeout(20 * time.Minute),
-			Update: schema.DefaultTimeout(20 * time.Minute),
-			Delete: schema.DefaultTimeout(10 * time.Minute),
+			Create: schema.DefaultTimeout(10 * time.Minute),
+			Update: schema.DefaultTimeout(10 * time.Minute),
+			Delete: schema.DefaultTimeout(5 * time.Minute),
 		},
 
 		Schema: map[string]*schema.Schema{
@@ -79,14 +79,6 @@ func resourceLoadBalancerV2() *schema.Resource {
 				Type:     schema.TypeString,
 				Optional: true,
 				ForceNew: true,
-			},
-
-			"provider": &schema.Schema{
-				Type:       schema.TypeString,
-				Optional:   true,
-				Computed:   true,
-				ForceNew:   true,
-				Deprecated: "Please use loadbalancer_provider",
 			},
 
 			"loadbalancer_provider": &schema.Schema{
@@ -213,8 +205,14 @@ func resourceLoadBalancerV2Update(d *schema.ResourceData, meta interface{}) erro
 		updateOpts.AdminStateUp = &asu
 	}
 
-	log.Printf("[DEBUG] Updating loadbalancer %s with options: %#v", d.Id(), updateOpts)
+	// Wait for LoadBalancer to become active before continuing
 	timeout := d.Timeout(schema.TimeoutUpdate)
+	err = waitForLBV2LoadBalancer(networkingClient, d.Id(), "ACTIVE", nil, timeout)
+	if err != nil {
+		return err
+	}
+
+	log.Printf("[DEBUG] Updating loadbalancer %s with options: %#v", d.Id(), updateOpts)
 	err = resource.Retry(timeout, func() *resource.RetryError {
 		_, err = loadbalancers.Update(networkingClient, d.Id(), updateOpts).Extract()
 		if err != nil {
