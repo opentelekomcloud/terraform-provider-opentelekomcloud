@@ -9,6 +9,7 @@ import (
 	"github.com/hashicorp/terraform/terraform"
 )
 
+// KNOWN issue (#13)
 func TestAccLBV2Listener_basic(t *testing.T) {
 	var listener listeners.Listener
 

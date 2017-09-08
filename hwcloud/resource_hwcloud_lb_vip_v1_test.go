@@ -1,5 +1,6 @@
 package hwcloud
 
+/*
 import (
 	"fmt"
 	"testing"
@@ -10,6 +11,7 @@ import (
 	"github.com/gophercloud/gophercloud/openstack/networking/v2/extensions/lbaas/vips"
 )
 
+// SKIP deprecated
 func TestAccLBV1VIP_basic(t *testing.T) {
 	var vip vips.VirtualIP
 
@@ -34,6 +36,7 @@ func TestAccLBV1VIP_basic(t *testing.T) {
 	})
 }
 
+// SKIP deprecated
 func TestAccLBV1VIP_timeout(t *testing.T) {
 	var vip vips.VirtualIP
 
@@ -208,3 +211,4 @@ resource "hwcloud_lb_vip_v1" "vip_1" {
   }
 }
 `
+*/

@@ -1,5 +1,6 @@
 package hwcloud
 
+/*
 import (
 	"testing"
 
@@ -27,3 +28,4 @@ func TestAccLBV1Monitor_importBasic(t *testing.T) {
 		},
 	})
 }
+*/

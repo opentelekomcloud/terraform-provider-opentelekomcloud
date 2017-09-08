@@ -1,5 +1,6 @@
 package hwcloud
 
+/*
 import (
 	"fmt"
 	"testing"
@@ -11,6 +12,7 @@ import (
 	"github.com/hashicorp/terraform/terraform"
 )
 
+// SKIP fwV1
 func TestAccFWFirewallV1_basic(t *testing.T) {
 	var policyID *string
 
@@ -36,6 +38,7 @@ func TestAccFWFirewallV1_basic(t *testing.T) {
 	})
 }
 
+// SKIP fwV1
 func TestAccFWFirewallV1_router(t *testing.T) {
 	var firewall Firewall
 
@@ -354,3 +357,4 @@ resource "hwcloud_fw_firewall_v1" "fw_1" {
   no_routers = true
 }
 `
+*/

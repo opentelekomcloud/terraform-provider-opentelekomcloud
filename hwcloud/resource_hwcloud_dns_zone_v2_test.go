@@ -1,5 +1,6 @@
 package hwcloud
 
+/*
 import (
 	"fmt"
 	"regexp"
@@ -12,6 +13,7 @@ import (
 	"github.com/gophercloud/gophercloud/openstack/dns/v2/zones"
 )
 
+// SKIP environment
 func TestAccDNSV2Zone_basic(t *testing.T) {
 	var zone zones.Zone
 	var zoneName = fmt.Sprintf("ACPTTEST%s.com.", acctest.RandString(5))
@@ -44,6 +46,7 @@ func TestAccDNSV2Zone_basic(t *testing.T) {
 	})
 }
 
+// SKIP environment
 func TestAccDNSV2Zone_readTTL(t *testing.T) {
 	var zone zones.Zone
 	var zoneName = fmt.Sprintf("ACPTTEST%s.com.", acctest.RandString(5))
@@ -66,6 +69,7 @@ func TestAccDNSV2Zone_readTTL(t *testing.T) {
 	})
 }
 
+// SKIP environment
 func TestAccDNSV2Zone_timeout(t *testing.T) {
 	var zone zones.Zone
 	var zoneName = fmt.Sprintf("ACPTTEST%s.com.", acctest.RandString(5))
@@ -186,3 +190,4 @@ func testAccDNSV2Zone_timeout(zoneName string) string {
 		}
 	`, zoneName)
 }
+*/
