@@ -1,5 +1,6 @@
 package hwcloud
 
+/*
 import (
 	"fmt"
 	"testing"
@@ -16,6 +17,7 @@ import (
 	"github.com/gophercloud/gophercloud/openstack/networking/v2/subnets"
 )
 
+// SKIP deprecated
 func TestAccLBV1Pool_basic(t *testing.T) {
 	var pool pools.Pool
 
@@ -41,6 +43,7 @@ func TestAccLBV1Pool_basic(t *testing.T) {
 	})
 }
 
+// SKIP deprecated
 func TestAccLBV1Pool_fullstack(t *testing.T) {
 	var instance1, instance2 servers.Server
 	var monitor monitors.Monitor
@@ -85,6 +88,7 @@ func TestAccLBV1Pool_fullstack(t *testing.T) {
 	})
 }
 
+// SKIP deprecated
 func TestAccLBV1Pool_timeout(t *testing.T) {
 	var pool pools.Pool
 
@@ -512,3 +516,4 @@ resource "hwcloud_lb_pool_v1" "pool_1" {
   subnet_id = "${hwcloud_networking_subnet_v2.subnet_1.id}"
 }
 `
+*/

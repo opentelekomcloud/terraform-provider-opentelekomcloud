@@ -15,6 +15,7 @@ import (
 	"github.com/gophercloud/gophercloud/openstack/networking/v2/subnets"
 )
 
+// PASS
 func TestAccNetworkingV2Network_basic(t *testing.T) {
 	var network networks.Network
 
@@ -41,6 +42,7 @@ func TestAccNetworkingV2Network_basic(t *testing.T) {
 	})
 }
 
+// PASS
 func TestAccNetworkingV2Network_netstack(t *testing.T) {
 	var network networks.Network
 	var subnet subnets.Subnet
@@ -52,7 +54,8 @@ func TestAccNetworkingV2Network_netstack(t *testing.T) {
 		CheckDestroy: testAccCheckNetworkingV2NetworkDestroy,
 		Steps: []resource.TestStep{
 			resource.TestStep{
-				Config: testAccNetworkingV2Network_netstack,
+				Config:             testAccNetworkingV2Network_netstack,
+				ExpectNonEmptyPlan: true,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckNetworkingV2NetworkExists("hwcloud_networking_network_v2.network_1", &network),
 					testAccCheckNetworkingV2SubnetExists("hwcloud_networking_subnet_v2.subnet_1", &subnet),
@@ -65,6 +68,7 @@ func TestAccNetworkingV2Network_netstack(t *testing.T) {
 	})
 }
 
+// KNOWN problem (#18)
 func TestAccNetworkingV2Network_fullstack(t *testing.T) {
 	var instance servers.Server
 	var network networks.Network
@@ -91,6 +95,7 @@ func TestAccNetworkingV2Network_fullstack(t *testing.T) {
 	})
 }
 
+// PASS
 func TestAccNetworkingV2Network_timeout(t *testing.T) {
 	var network networks.Network
 
@@ -109,6 +114,7 @@ func TestAccNetworkingV2Network_timeout(t *testing.T) {
 	})
 }
 
+// SKIP needs admin user
 func TestAccNetworkingV2Network_multipleSegmentMappings(t *testing.T) {
 	var network networks.Network
 

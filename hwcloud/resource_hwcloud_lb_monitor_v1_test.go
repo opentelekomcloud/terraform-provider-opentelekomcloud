@@ -10,6 +10,7 @@ import (
 	"github.com/gophercloud/gophercloud/openstack/networking/v2/extensions/lbaas/monitors"
 )
 
+// SKIP deprecated
 func TestAccLBV1Monitor_basic(t *testing.T) {
 	var monitor monitors.Monitor
 
@@ -34,6 +35,7 @@ func TestAccLBV1Monitor_basic(t *testing.T) {
 	})
 }
 
+// SKIP deprecated
 func TestAccLBV1Monitor_timeout(t *testing.T) {
 	var monitor monitors.Monitor
 

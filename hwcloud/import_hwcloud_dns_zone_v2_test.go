@@ -1,5 +1,6 @@
 package hwcloud
 
+/*
 import (
 	"fmt"
 	"testing"
@@ -30,3 +31,4 @@ func TestAccDNSV2Zone_importBasic(t *testing.T) {
 		},
 	})
 }
+*/

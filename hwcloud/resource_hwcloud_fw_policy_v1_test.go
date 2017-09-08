@@ -1,5 +1,6 @@
 package hwcloud
 
+/*
 import (
 	"fmt"
 	"testing"
@@ -11,6 +12,7 @@ import (
 	"github.com/hashicorp/terraform/terraform"
 )
 
+// SKIP fwV1
 func TestAccFWPolicyV1_basic(t *testing.T) {
 	resource.Test(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
@@ -28,6 +30,7 @@ func TestAccFWPolicyV1_basic(t *testing.T) {
 	})
 }
 
+// SKIP fwV1
 func TestAccFWPolicyV1_addRules(t *testing.T) {
 	resource.Test(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
@@ -45,6 +48,7 @@ func TestAccFWPolicyV1_addRules(t *testing.T) {
 	})
 }
 
+// SKIP fwV1
 func TestAccFWPolicyV1_deleteRules(t *testing.T) {
 	resource.Test(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
@@ -62,6 +66,7 @@ func TestAccFWPolicyV1_deleteRules(t *testing.T) {
 	})
 }
 
+// SKIP fwV1
 func TestAccFWPolicyV1_timeout(t *testing.T) {
 	resource.Test(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
@@ -197,3 +202,4 @@ resource "hwcloud_fw_policy_v1" "policy_1" {
   }
 }
 `
+*/

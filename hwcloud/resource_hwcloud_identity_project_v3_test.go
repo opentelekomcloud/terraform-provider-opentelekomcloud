@@ -11,6 +11,7 @@ import (
 	"github.com/gophercloud/gophercloud/openstack/identity/v3/projects"
 )
 
+// SKIP need admin user
 func TestAccIdentityV3Project_basic(t *testing.T) {
 	var project projects.Project
 	var projectName = fmt.Sprintf("ACCPTTEST-%s", acctest.RandString(5))

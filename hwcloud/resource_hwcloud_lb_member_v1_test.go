@@ -1,5 +1,6 @@
 package hwcloud
 
+/*
 import (
 	"fmt"
 	"testing"
@@ -9,6 +10,7 @@ import (
 	"github.com/hashicorp/terraform/terraform"
 )
 
+// SKIP deprecated
 func TestAccLBV1Member_basic(t *testing.T) {
 	var member members.Member
 
@@ -33,6 +35,7 @@ func TestAccLBV1Member_basic(t *testing.T) {
 	})
 }
 
+// SKIP deprecated
 func TestAccLBV1Member_timeout(t *testing.T) {
 	var member members.Member
 
@@ -189,3 +192,4 @@ resource "hwcloud_lb_member_v1" "member_1" {
   }
 }
 `
+*/

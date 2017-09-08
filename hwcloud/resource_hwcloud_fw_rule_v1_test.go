@@ -1,5 +1,6 @@
 package hwcloud
 
+/*
 import (
 	"fmt"
 	"reflect"
@@ -12,6 +13,7 @@ import (
 	"github.com/hashicorp/terraform/terraform"
 )
 
+// SKIP fwV1
 func TestAccFWRuleV1_basic(t *testing.T) {
 	rule1 := &rules.Rule{
 		Name:      "rule_1",
@@ -74,6 +76,7 @@ func TestAccFWRuleV1_basic(t *testing.T) {
 	})
 }
 
+// SKIP fwV1
 func TestAccFWRuleV1_anyProtocol(t *testing.T) {
 	rule := &rules.Rule{
 		Name:            "rule_1",
@@ -216,3 +219,4 @@ resource "hwcloud_fw_rule_v1" "rule_1" {
 	enabled = true
 }
 `
+*/

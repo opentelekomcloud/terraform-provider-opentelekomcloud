@@ -13,6 +13,7 @@ import (
 	"github.com/gophercloud/gophercloud/openstack/networking/v2/subnets"
 )
 
+// PASS
 func TestAccNetworkingV2Port_basic(t *testing.T) {
 	var network networks.Network
 	var port ports.Port
@@ -36,6 +37,7 @@ func TestAccNetworkingV2Port_basic(t *testing.T) {
 	})
 }
 
+// PASS
 func TestAccNetworkingV2Port_noip(t *testing.T) {
 	var network networks.Network
 	var port ports.Port
@@ -59,6 +61,7 @@ func TestAccNetworkingV2Port_noip(t *testing.T) {
 	})
 }
 
+// KNOWN problem (#7)
 func TestAccNetworkingV2Port_multipleNoIP(t *testing.T) {
 	var network networks.Network
 	var port ports.Port
@@ -82,6 +85,7 @@ func TestAccNetworkingV2Port_multipleNoIP(t *testing.T) {
 	})
 }
 
+// PASS
 func TestAccNetworkingV2Port_allowedAddressPairs(t *testing.T) {
 	var network networks.Network
 	var subnet subnets.Subnet
@@ -93,7 +97,8 @@ func TestAccNetworkingV2Port_allowedAddressPairs(t *testing.T) {
 		CheckDestroy: testAccCheckNetworkingV2PortDestroy,
 		Steps: []resource.TestStep{
 			resource.TestStep{
-				Config: testAccNetworkingV2Port_allowedAddressPairs,
+				Config:             testAccNetworkingV2Port_allowedAddressPairs,
+				ExpectNonEmptyPlan: true,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckNetworkingV2SubnetExists("hwcloud_networking_subnet_v2.vrrp_subnet", &subnet),
 					testAccCheckNetworkingV2NetworkExists("hwcloud_networking_network_v2.vrrp_network", &network),
@@ -106,6 +111,7 @@ func TestAccNetworkingV2Port_allowedAddressPairs(t *testing.T) {
 	})
 }
 
+// KNOWN problem (#7)
 func TestAccNetworkingV2Port_multipleFixedIPs(t *testing.T) {
 	var network networks.Network
 	var port ports.Port
@@ -129,6 +135,7 @@ func TestAccNetworkingV2Port_multipleFixedIPs(t *testing.T) {
 	})
 }
 
+// PASS
 func TestAccNetworkingV2Port_timeout(t *testing.T) {
 	var network networks.Network
 	var port ports.Port
@@ -151,6 +158,7 @@ func TestAccNetworkingV2Port_timeout(t *testing.T) {
 	})
 }
 
+// KNOWN problem (#7)
 func TestAccNetworkingV2Port_fixedIPs(t *testing.T) {
 	resource.Test(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
@@ -170,6 +178,7 @@ func TestAccNetworkingV2Port_fixedIPs(t *testing.T) {
 	})
 }
 
+// KNOWN Problem (#15)
 func TestAccNetworkingV2Port_updateSecurityGroups(t *testing.T) {
 	var network networks.Network
 	var port ports.Port
