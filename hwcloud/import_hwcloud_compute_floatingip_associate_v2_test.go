@@ -6,6 +6,7 @@ import (
 	"github.com/hashicorp/terraform/helper/resource"
 )
 
+// KNOWN problem, floating ip info
 func TestAccComputeV2FloatingIPAssociate_importBasic(t *testing.T) {
 	resourceName := "hwcloud_compute_floatingip_associate_v2.fip_1"
 

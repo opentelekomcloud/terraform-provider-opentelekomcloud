@@ -6,6 +6,7 @@ import (
 	"github.com/hashicorp/terraform/helper/resource"
 )
 
+// DEPRECATED
 func TestAccBlockStorageV1Volume_importBasic(t *testing.T) {
 	resourceName := "hwcloud_blockstorage_volume_v1.volume_1"
 

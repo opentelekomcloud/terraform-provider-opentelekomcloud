@@ -35,9 +35,10 @@ func resourceNetworkingSubnetV2() *schema.Resource {
 				ForceNew: true,
 			},
 			"network_id": &schema.Schema{
-				Type:     schema.TypeString,
-				Required: true,
-				ForceNew: true,
+				Type:             schema.TypeString,
+				Required:         true,
+				ForceNew:         true,
+				DiffSuppressFunc: suppressAsuDiff,
 			},
 			"cidr": &schema.Schema{
 				Type:     schema.TypeString,
@@ -135,9 +136,11 @@ func resourceNetworkingSubnetV2Create(d *schema.ResourceData, meta interface{}) 
 		return fmt.Errorf("Error creating HWCloud networking client: %s", err)
 	}
 
+	log.Printf("[DEBUG] Checking Subnet 0 %s: network_id: %s", d.Id(), d.Get("network_id").(string))
+	_, nid := ExtractValSFromNid(d.Get("network_id").(string))
 	createOpts := SubnetCreateOpts{
 		subnets.CreateOpts{
-			NetworkID:       d.Get("network_id").(string),
+			NetworkID:       nid,
 			CIDR:            d.Get("cidr").(string),
 			Name:            d.Get("name").(string),
 			TenantID:        d.Get("tenant_id").(string),
@@ -149,6 +152,7 @@ func resourceNetworkingSubnetV2Create(d *schema.ResourceData, meta interface{}) 
 		MapValueSpecs(d),
 	}
 
+	log.Printf("[DEBUG] Checking Subnet 1 %s: network_id: %s", d.Id(), d.Get("network_id").(string))
 	noGateway := d.Get("no_gateway").(bool)
 	gatewayIP := d.Get("gateway_ip").(string)
 
@@ -168,6 +172,7 @@ func resourceNetworkingSubnetV2Create(d *schema.ResourceData, meta interface{}) 
 	enableDHCP := d.Get("enable_dhcp").(bool)
 	createOpts.EnableDHCP = &enableDHCP
 
+	log.Printf("[DEBUG] Checking Subnet 2 %s: network_id: %s", d.Id(), d.Get("network_id").(string))
 	if v, ok := d.GetOk("ip_version"); ok {
 		ipVersion := resourceNetworkingSubnetV2DetermineIPVersion(v.(int))
 		createOpts.IPVersion = ipVersion
@@ -191,11 +196,13 @@ func resourceNetworkingSubnetV2Create(d *schema.ResourceData, meta interface{}) 
 
 	d.SetId(s.ID)
 
+	log.Printf("[DEBUG] Checking Subnet 3 %s: network_id: %s", d.Id(), d.Get("network_id").(string))
 	log.Printf("[DEBUG] Created Subnet %s: %#v", s.ID, s)
 	return resourceNetworkingSubnetV2Read(d, meta)
 }
 
 func resourceNetworkingSubnetV2Read(d *schema.ResourceData, meta interface{}) error {
+	log.Printf("[DEBUG] Checking Subnet 4 %s: network_id: %s", d.Id(), d.Get("network_id").(string))
 	config := meta.(*Config)
 	networkingClient, err := config.networkingV2Client(GetRegion(d, config))
 	if err != nil {
@@ -209,7 +216,9 @@ func resourceNetworkingSubnetV2Read(d *schema.ResourceData, meta interface{}) er
 
 	log.Printf("[DEBUG] Retrieved Subnet %s: %#v", d.Id(), s)
 
-	d.Set("network_id", s.NetworkID)
+	asu, _ := ExtractValSFromNid(d.Get("network_id").(string))
+	nid := FormatNidFromValS(asu, s.NetworkID)
+	d.Set("network_id", nid)
 	d.Set("cidr", s.CIDR)
 	d.Set("ip_version", s.IPVersion)
 	d.Set("name", s.Name)

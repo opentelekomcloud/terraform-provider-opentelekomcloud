@@ -6,6 +6,7 @@ import (
 	"github.com/hashicorp/terraform/helper/resource"
 )
 
+// PASS
 func TestAccDNSV2RecordSet_importBasic(t *testing.T) {
 	zoneName := randomZoneName()
 	resourceName := "hwcloud_dns_recordset_v2.recordset_1"

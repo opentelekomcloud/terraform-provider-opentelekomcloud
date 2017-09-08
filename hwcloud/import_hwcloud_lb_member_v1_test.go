@@ -6,6 +6,7 @@ import (
 	"github.com/hashicorp/terraform/helper/resource"
 )
 
+// SKIP deprecated
 func TestAccLBV1Member_importBasic(t *testing.T) {
 	resourceName := "hwcloud_lb_member_v1.member_1"
 

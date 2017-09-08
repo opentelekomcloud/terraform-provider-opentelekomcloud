@@ -142,11 +142,16 @@ func resourceNetworkingPortV2Create(d *schema.ResourceData, meta interface{}) er
 		return fmt.Errorf("Error creating HWCloud networking client: %s", err)
 	}
 
+	asu, id := ExtractValFromNid(d.Get("network_id").(string))
+	pAsu := resourcePortAdminStateUpV2(d)
+	if !asu {
+		pAsu = &asu
+	}
 	createOpts := PortCreateOpts{
 		ports.CreateOpts{
 			Name:                d.Get("name").(string),
-			AdminStateUp:        resourcePortAdminStateUpV2(d),
-			NetworkID:           d.Get("network_id").(string),
+			AdminStateUp:        pAsu,
+			NetworkID:           id,
 			MACAddress:          d.Get("mac_address").(string),
 			TenantID:            d.Get("tenant_id").(string),
 			DeviceOwner:         d.Get("device_owner").(string),
@@ -196,9 +201,11 @@ func resourceNetworkingPortV2Read(d *schema.ResourceData, meta interface{}) erro
 
 	log.Printf("[DEBUG] Retrieved Port %s: %+v", d.Id(), p)
 
+	asu, _ := ExtractValSFromNid(d.Get("network_id").(string))
+	nid := FormatNidFromValS(asu, p.NetworkID)
 	d.Set("name", p.Name)
 	d.Set("admin_state_up", p.AdminStateUp)
-	d.Set("network_id", p.NetworkID)
+	d.Set("network_id", nid)
 	d.Set("mac_address", p.MACAddress)
 	d.Set("tenant_id", p.TenantID)
 	d.Set("device_owner", p.DeviceOwner)
@@ -250,7 +257,12 @@ func resourceNetworkingPortV2Update(d *schema.ResourceData, meta interface{}) er
 	}
 
 	if d.HasChange("admin_state_up") {
-		updateOpts.AdminStateUp = resourcePortAdminStateUpV2(d)
+		asu, _ := ExtractValFromNid(d.Get("network_id").(string))
+		pAsu := resourcePortAdminStateUpV2(d)
+		if !asu {
+			pAsu = &asu
+		}
+		updateOpts.AdminStateUp = pAsu
 	}
 
 	if d.HasChange("device_owner") {

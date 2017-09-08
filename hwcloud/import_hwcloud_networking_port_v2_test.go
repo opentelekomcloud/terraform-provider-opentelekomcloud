@@ -6,6 +6,7 @@ import (
 	"github.com/hashicorp/terraform/helper/resource"
 )
 
+// PASS
 func TestAccNetworkingV2Port_importBasic(t *testing.T) {
 	resourceName := "hwcloud_networking_port_v2.port_1"
 

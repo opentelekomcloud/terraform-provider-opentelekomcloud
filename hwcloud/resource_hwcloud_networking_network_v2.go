@@ -12,7 +12,41 @@ import (
 	"github.com/gophercloud/gophercloud"
 	"github.com/gophercloud/gophercloud/openstack/networking/v2/extensions/provider"
 	"github.com/gophercloud/gophercloud/openstack/networking/v2/networks"
+	"strings"
 )
+
+func suppressBooleanDiffs(k, old, new string, d *schema.ResourceData) bool {
+	return true
+}
+
+func ExtractValSFromNid(s string) (string, string) {
+	rgs := strings.Split(s, ":")
+	if len(rgs) >= 2 {
+		log.Printf("[DEBUG] ExtractValSFromNid: %s:%s from (%s)", rgs[0], rgs[1], s)
+		return rgs[0], rgs[1]
+	}
+	log.Printf("[DEBUG] ExtractValSFromNid: true:'%s' from (%s)", s, s)
+	return "true", s
+}
+
+func ExtractValFromNid(s string) (bool, string) {
+	sasu, id := ExtractValSFromNid(s)
+	asu, err := strconv.ParseBool(sasu)
+	if err != nil {
+		return true, id // Should never occur?
+	}
+	return asu, id
+}
+
+func FormatNidFromValS(asu string, id string) string {
+	return fmt.Sprintf("%s:%s", asu, id)
+}
+
+func suppressAsuDiff(k, old, new string, d *schema.ResourceData) bool {
+	_, id_old := ExtractValSFromNid(old)
+	_, id_new := ExtractValSFromNid(new)
+	return id_old == id_new
+}
 
 func resourceNetworkingNetworkV2() *schema.Resource {
 	return &schema.Resource{
@@ -46,6 +80,7 @@ func resourceNetworkingNetworkV2() *schema.Resource {
 				Optional: true,
 				ForceNew: false,
 				Computed: true,
+				//DiffSuppressFunc: suppressBooleanDiffs,
 			},
 			"shared": &schema.Schema{
 				Type:     schema.TypeString,
@@ -108,12 +143,15 @@ func resourceNetworkingNetworkV2Create(d *schema.ResourceData, meta interface{})
 	}
 
 	asuRaw := d.Get("admin_state_up").(string)
+	asu := false
 	if asuRaw != "" {
-		asu, err := strconv.ParseBool(asuRaw)
+		asuT, err := strconv.ParseBool(asuRaw)
 		if err != nil {
 			return fmt.Errorf("admin_state_up, if provided, must be either 'true' or 'false'")
 		}
-		createOpts.AdminStateUp = &asu
+		asu = asuT
+		//asuFake := true
+		//createOpts.AdminStateUp = &asuFake //&asu
 	}
 
 	sharedRaw := d.Get("shared").(string)
@@ -143,6 +181,7 @@ func resourceNetworkingNetworkV2Create(d *schema.ResourceData, meta interface{})
 	if err != nil {
 		return fmt.Errorf("Error creating HWCloud Neutron network: %s", err)
 	}
+	d.SetId(FormatNidFromValS(strconv.FormatBool(asu), n.ID))
 
 	log.Printf("[INFO] Network ID: %s", n.ID)
 
@@ -159,7 +198,7 @@ func resourceNetworkingNetworkV2Create(d *schema.ResourceData, meta interface{})
 
 	_, err = stateConf.WaitForState()
 
-	d.SetId(n.ID)
+	d.SetId(FormatNidFromValS(strconv.FormatBool(asu), n.ID))
 
 	return resourceNetworkingNetworkV2Read(d, meta)
 }
@@ -171,7 +210,8 @@ func resourceNetworkingNetworkV2Read(d *schema.ResourceData, meta interface{}) e
 		return fmt.Errorf("Error creating HWCloud networking client: %s", err)
 	}
 
-	n, err := networks.Get(networkingClient, d.Id()).Extract()
+	asu, id := ExtractValSFromNid(d.Id())
+	n, err := networks.Get(networkingClient, id).Extract()
 	if err != nil {
 		return CheckDeleted(d, err, "network")
 	}
@@ -179,11 +219,12 @@ func resourceNetworkingNetworkV2Read(d *schema.ResourceData, meta interface{}) e
 	log.Printf("[DEBUG] Retrieved Network %s: %+v", d.Id(), n)
 
 	d.Set("name", n.Name)
-	d.Set("admin_state_up", strconv.FormatBool(n.AdminStateUp))
+	d.Set("admin_state_up", asu)
 	d.Set("shared", strconv.FormatBool(n.Shared))
 	d.Set("tenant_id", n.TenantID)
 	d.Set("region", GetRegion(d, config))
 
+	d.SetId(FormatNidFromValS(asu, n.ID))
 	return nil
 }
 
@@ -198,14 +239,17 @@ func resourceNetworkingNetworkV2Update(d *schema.ResourceData, meta interface{})
 	if d.HasChange("name") {
 		updateOpts.Name = d.Get("name").(string)
 	}
+	asu := false
 	if d.HasChange("admin_state_up") {
 		asuRaw := d.Get("admin_state_up").(string)
 		if asuRaw != "" {
-			asu, err := strconv.ParseBool(asuRaw)
+			asuT, err := strconv.ParseBool(asuRaw)
 			if err != nil {
 				return fmt.Errorf("admin_state_up, if provided, must be either 'true' or 'false'")
 			}
-			updateOpts.AdminStateUp = &asu
+			asu = asuT
+			//asuFake := true
+			//updateOpts.AdminStateUp = &asuFake //&asu
 		}
 	}
 	if d.HasChange("shared") {
@@ -218,14 +262,16 @@ func resourceNetworkingNetworkV2Update(d *schema.ResourceData, meta interface{})
 			updateOpts.Shared = &shared
 		}
 	}
+	asu, id := ExtractValFromNid(d.Id())
 
-	log.Printf("[DEBUG] Updating Network %s with options: %+v", d.Id(), updateOpts)
+	log.Printf("[DEBUG] Updating Network %s with options: %+v", id, updateOpts)
 
-	_, err = networks.Update(networkingClient, d.Id(), updateOpts).Extract()
+	_, err = networks.Update(networkingClient, id, updateOpts).Extract()
 	if err != nil {
 		return fmt.Errorf("Error updating HWCloud Neutron Network: %s", err)
 	}
 
+	d.SetId(FormatNidFromValS(strconv.FormatBool(asu), id))
 	return resourceNetworkingNetworkV2Read(d, meta)
 }
 
@@ -236,10 +282,11 @@ func resourceNetworkingNetworkV2Delete(d *schema.ResourceData, meta interface{})
 		return fmt.Errorf("Error creating HWCloud networking client: %s", err)
 	}
 
+	_, id := ExtractValFromNid(d.Id())
 	stateConf := &resource.StateChangeConf{
 		Pending:    []string{"ACTIVE"},
 		Target:     []string{"DELETED"},
-		Refresh:    waitForNetworkDelete(networkingClient, d.Id()),
+		Refresh:    waitForNetworkDelete(networkingClient, id),
 		Timeout:    d.Timeout(schema.TimeoutDelete),
 		Delay:      5 * time.Second,
 		MinTimeout: 3 * time.Second,

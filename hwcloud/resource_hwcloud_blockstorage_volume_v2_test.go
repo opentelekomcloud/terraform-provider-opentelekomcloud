@@ -11,6 +11,7 @@ import (
 	"github.com/gophercloud/gophercloud/openstack/blockstorage/v2/volumes"
 )
 
+// PASS
 func TestAccBlockStorageV2Volume_basic(t *testing.T) {
 	var volume volumes.Volume
 
@@ -41,6 +42,7 @@ func TestAccBlockStorageV2Volume_basic(t *testing.T) {
 	})
 }
 
+// PASS
 func TestAccBlockStorageV2Volume_image(t *testing.T) {
 	var volume volumes.Volume
 
@@ -61,6 +63,7 @@ func TestAccBlockStorageV2Volume_image(t *testing.T) {
 	})
 }
 
+// PASS
 func TestAccBlockStorageV2Volume_timeout(t *testing.T) {
 	var volume volumes.Volume
 
@@ -200,7 +203,7 @@ resource "hwcloud_blockstorage_volume_v2" "volume_1" {
 var testAccBlockStorageV2Volume_image = fmt.Sprintf(`
 resource "hwcloud_blockstorage_volume_v2" "volume_1" {
   name = "volume_1"
-  size = 5
+  size = 12
   image_id = "%s"
 }
 `, OS_IMAGE_ID)

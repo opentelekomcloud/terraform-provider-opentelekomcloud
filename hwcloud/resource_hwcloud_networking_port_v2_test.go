@@ -25,6 +25,7 @@ func TestAccNetworkingV2Port_basic(t *testing.T) {
 		Steps: []resource.TestStep{
 			resource.TestStep{
 				Config: testAccNetworkingV2Port_basic,
+				//ExpectNonEmptyPlan: true,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckNetworkingV2SubnetExists("hwcloud_networking_subnet_v2.subnet_1", &subnet),
 					testAccCheckNetworkingV2NetworkExists("hwcloud_networking_network_v2.network_1", &network),

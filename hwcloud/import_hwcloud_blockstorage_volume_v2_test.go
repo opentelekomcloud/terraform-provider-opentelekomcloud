@@ -6,6 +6,7 @@ import (
 	"github.com/hashicorp/terraform/helper/resource"
 )
 
+// PASS
 func TestAccBlockStorageV2Volume_importBasic(t *testing.T) {
 	resourceName := "hwcloud_blockstorage_volume_v2.volume_1"
 

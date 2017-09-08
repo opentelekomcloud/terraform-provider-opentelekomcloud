@@ -6,6 +6,7 @@ import (
 	"github.com/hashicorp/terraform/helper/resource"
 )
 
+// Taking 15m+ in time...
 func TestAccImagesImageV2_importBasic(t *testing.T) {
 	resourceName := "hwcloud_images_image_v2.image_1"
 

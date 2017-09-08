@@ -6,6 +6,7 @@ import (
 	"github.com/hashicorp/terraform/helper/resource"
 )
 
+// SKIP deprecated
 func TestAccLBV1Pool_importBasic(t *testing.T) {
 	resourceName := "hwcloud_lb_pool_v1.pool_1"
 

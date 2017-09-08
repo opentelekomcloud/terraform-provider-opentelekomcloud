@@ -8,6 +8,7 @@ import (
 	"github.com/hashicorp/terraform/helper/resource"
 )
 
+// SKIP, requires admin user
 func TestAccIdentityV3Project_importBasic(t *testing.T) {
 	resourceName := "hwcloud_identity_project_v3.project_1"
 	var projectName = fmt.Sprintf("ACCPTTEST-%s", acctest.RandString(5))

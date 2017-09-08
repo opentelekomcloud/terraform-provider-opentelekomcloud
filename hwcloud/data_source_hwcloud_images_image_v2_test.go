@@ -14,7 +14,8 @@ func TestAccHWCloudImagesV2ImageDataSource_basic(t *testing.T) {
 		Providers: testAccProviders,
 		Steps: []resource.TestStep{
 			resource.TestStep{
-				Config: testAccHWCloudImagesV2ImageDataSource_cirros,
+				Config:             testAccHWCloudImagesV2ImageDataSource_cirros,
+				ExpectNonEmptyPlan: true,
 			},
 			resource.TestStep{
 				Config:             testAccHWCloudImagesV2ImageDataSource_basic,
@@ -47,10 +48,12 @@ func TestAccHWCloudImagesV2ImageDataSource_testQueries(t *testing.T) {
 		Providers: testAccProviders,
 		Steps: []resource.TestStep{
 			resource.TestStep{
-				Config: testAccHWCloudImagesV2ImageDataSource_cirros,
+				Config:             testAccHWCloudImagesV2ImageDataSource_cirros,
+				ExpectNonEmptyPlan: true,
 			},
 			resource.TestStep{
-				Config: testAccHWCloudImagesV2ImageDataSource_queryTag,
+				Config:             testAccHWCloudImagesV2ImageDataSource_queryTag,
+				ExpectNonEmptyPlan: true,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckImagesV2DataSourceID("data.hwcloud_images_image_v2.image_1"),
 				),
@@ -62,13 +65,15 @@ func TestAccHWCloudImagesV2ImageDataSource_testQueries(t *testing.T) {
 				),
 			},
 			resource.TestStep{
-				Config: testAccHWCloudImagesV2ImageDataSource_querySizeMax,
+				Config:             testAccHWCloudImagesV2ImageDataSource_querySizeMax,
+				ExpectNonEmptyPlan: true,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckImagesV2DataSourceID("data.hwcloud_images_image_v2.image_1"),
 				),
 			},
 			resource.TestStep{
-				Config: testAccHWCloudImagesV2ImageDataSource_cirros,
+				Config:             testAccHWCloudImagesV2ImageDataSource_cirros,
+				ExpectNonEmptyPlan: true,
 			},
 		},
 	})
