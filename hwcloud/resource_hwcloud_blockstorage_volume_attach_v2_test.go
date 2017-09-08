@@ -11,6 +11,7 @@ import (
 	"github.com/gophercloud/gophercloud/openstack/blockstorage/v2/volumes"
 )
 
+// KNOWN problem (#17)
 func TestAccBlockStorageVolumeAttachV2_basic(t *testing.T) {
 	var va volumes.Attachment
 
@@ -29,6 +30,7 @@ func TestAccBlockStorageVolumeAttachV2_basic(t *testing.T) {
 	})
 }
 
+// KNOWN problem (#17)
 func TestAccBlockStorageVolumeAttachV2_timeout(t *testing.T) {
 	var va volumes.Attachment
 

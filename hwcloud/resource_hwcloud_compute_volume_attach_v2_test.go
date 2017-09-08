@@ -149,6 +149,9 @@ resource "hwcloud_blockstorage_volume_v2" "volume_1" {
 resource "hwcloud_compute_instance_v2" "instance_1" {
   name = "instance_1"
   security_groups = ["default"]
+  network {
+    uuid = "2a9d80f2-beef-4845-a733-9fd45833f7c4"
+  }
 }
 
 resource "hwcloud_compute_volume_attach_v2" "va_1" {
@@ -166,6 +169,9 @@ resource "hwcloud_blockstorage_volume_v2" "volume_1" {
 resource "hwcloud_compute_instance_v2" "instance_1" {
   name = "instance_1"
   security_groups = ["default"]
+  network {
+    uuid = "2a9d80f2-beef-4845-a733-9fd45833f7c4"
+  }
 }
 
 resource "hwcloud_compute_volume_attach_v2" "va_1" {
@@ -184,6 +190,9 @@ resource "hwcloud_blockstorage_volume_v2" "volume_1" {
 resource "hwcloud_compute_instance_v2" "instance_1" {
   name = "instance_1"
   security_groups = ["default"]
+  network {
+    uuid = "2a9d80f2-beef-4845-a733-9fd45833f7c4"
+  }
 }
 
 resource "hwcloud_compute_volume_attach_v2" "va_1" {

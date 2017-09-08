@@ -6,6 +6,7 @@ import (
 	"github.com/hashicorp/terraform/helper/resource"
 )
 
+// SKIP deprecated
 func TestAccLBV1Monitor_importBasic(t *testing.T) {
 	resourceName := "hwcloud_lb_monitor_v1.monitor_1"
 

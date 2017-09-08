@@ -12,6 +12,7 @@ import (
 	"github.com/hashicorp/terraform/terraform"
 )
 
+// KNOWN problem (floating ip info)
 func TestAccComputeV2FloatingIPAssociate_basic(t *testing.T) {
 	var instance servers.Server
 	var fip floatingips.FloatingIP
@@ -33,6 +34,7 @@ func TestAccComputeV2FloatingIPAssociate_basic(t *testing.T) {
 	})
 }
 
+// KNOWN problem (floating ip info)
 func TestAccComputeV2FloatingIPAssociate_fixedIP(t *testing.T) {
 	var instance servers.Server
 	var fip floatingips.FloatingIP
@@ -54,6 +56,7 @@ func TestAccComputeV2FloatingIPAssociate_fixedIP(t *testing.T) {
 	})
 }
 
+// KNOWN problem (floating ip info)
 func TestAccComputeV2FloatingIPAssociate_attachToFirstNetwork(t *testing.T) {
 	var instance servers.Server
 	var fip floatingips.FloatingIP
@@ -75,6 +78,7 @@ func TestAccComputeV2FloatingIPAssociate_attachToFirstNetwork(t *testing.T) {
 	})
 }
 
+// KNOWN problem (floating ip info)
 func TestAccComputeV2FloatingIPAssociate_attachToSecondNetwork(t *testing.T) {
 	var instance servers.Server
 	var fip floatingips.FloatingIP
@@ -96,6 +100,7 @@ func TestAccComputeV2FloatingIPAssociate_attachToSecondNetwork(t *testing.T) {
 	})
 }
 
+// KNOWN problem (floating ip info)
 func TestAccComputeV2FloatingIPAssociate_attachNew(t *testing.T) {
 	var instance servers.Server
 	var fip_1 floatingips.FloatingIP
@@ -203,6 +208,9 @@ const testAccComputeV2FloatingIPAssociate_basic = `
 resource "hwcloud_compute_instance_v2" "instance_1" {
   name = "instance_1"
   security_groups = ["default"]
+  network {
+    uuid = "2a9d80f2-beef-4845-a733-9fd45833f7c4"
+  }
 }
 
 resource "hwcloud_networking_floatingip_v2" "fip_1" {
@@ -218,6 +226,9 @@ const testAccComputeV2FloatingIPAssociate_fixedIP = `
 resource "hwcloud_compute_instance_v2" "instance_1" {
   name = "instance_1"
   security_groups = ["default"]
+  network {
+    uuid = "2a9d80f2-beef-4845-a733-9fd45833f7c4"
+  }
 }
 
 resource "hwcloud_networking_floatingip_v2" "fip_1" {
@@ -291,6 +302,9 @@ const testAccComputeV2FloatingIPAssociate_attachNew_1 = `
 resource "hwcloud_compute_instance_v2" "instance_1" {
   name = "instance_1"
   security_groups = ["default"]
+  network {
+    uuid = "2a9d80f2-beef-4845-a733-9fd45833f7c4"
+  }
 }
 
 resource "hwcloud_networking_floatingip_v2" "fip_1" {
@@ -309,6 +323,9 @@ const testAccComputeV2FloatingIPAssociate_attachNew_2 = `
 resource "hwcloud_compute_instance_v2" "instance_1" {
   name = "instance_1"
   security_groups = ["default"]
+  network {
+    uuid = "2a9d80f2-beef-4845-a733-9fd45833f7c4"
+  }
 }
 
 resource "hwcloud_networking_floatingip_v2" "fip_1" {

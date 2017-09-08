@@ -1,11 +1,13 @@
 package hwcloud
 
+/*
 import (
 	"testing"
 
 	"github.com/hashicorp/terraform/helper/resource"
 )
 
+// UNSUPPORTED FWv1
 func TestAccFWPolicyV1_importBasic(t *testing.T) {
 	resourceName := "hwcloud_fw_policy_v1.policy_1"
 
@@ -26,3 +28,4 @@ func TestAccFWPolicyV1_importBasic(t *testing.T) {
 		},
 	})
 }
+*/

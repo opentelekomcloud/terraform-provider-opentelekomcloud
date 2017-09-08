@@ -11,6 +11,7 @@ import (
 	"github.com/gophercloud/gophercloud/openstack/blockstorage/v1/volumes"
 )
 
+// SKIP deprecated
 func TestAccBlockStorageV1Volume_basic(t *testing.T) {
 	var volume volumes.Volume
 
@@ -41,6 +42,7 @@ func TestAccBlockStorageV1Volume_basic(t *testing.T) {
 	})
 }
 
+// SKIP deprecated
 func TestAccBlockStorageV1Volume_image(t *testing.T) {
 	var volume volumes.Volume
 
@@ -61,6 +63,7 @@ func TestAccBlockStorageV1Volume_image(t *testing.T) {
 	})
 }
 
+// SKIP deprecated
 func TestAccBlockStorageV1Volume_timeout(t *testing.T) {
 	var volume volumes.Volume
 

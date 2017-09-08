@@ -60,8 +60,9 @@ func dataSourceNetworkingNetworkV2Read(d *schema.ResourceData, meta interface{})
 	config := meta.(*Config)
 	networkingClient, err := config.networkingV2Client(GetRegion(d, config))
 
+	_, id := ExtractValSFromNid(d.Get("network_id").(string))
 	listOpts := networks.ListOpts{
-		ID:       d.Get("network_id").(string),
+		ID:       id,
 		Name:     d.Get("name").(string),
 		TenantID: d.Get("tenant_id").(string),
 		Status:   "ACTIVE",

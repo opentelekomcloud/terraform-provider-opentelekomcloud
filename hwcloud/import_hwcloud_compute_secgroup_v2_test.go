@@ -6,6 +6,7 @@ import (
 	"github.com/hashicorp/terraform/helper/resource"
 )
 
+// PASS
 func TestAccComputeV2SecGroup_importBasic(t *testing.T) {
 	resourceName := "hwcloud_compute_secgroup_v2.sg_1"
 

@@ -11,6 +11,7 @@ import (
 	"github.com/gophercloud/gophercloud/openstack/compute/v2/flavors"
 )
 
+// SKIP requires admin user
 func TestAccComputeV2Flavor_basic(t *testing.T) {
 	var flavor flavors.Flavor
 	var flavorName = fmt.Sprintf("ACCPTTEST-%s", acctest.RandString(5))

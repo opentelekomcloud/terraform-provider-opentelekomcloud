@@ -8,6 +8,7 @@ import (
 	"github.com/hashicorp/terraform/helper/resource"
 )
 
+// REQUIRES admin
 func TestAccComputeV2Flavor_importBasic(t *testing.T) {
 	resourceName := "hwcloud_compute_flavor_v2.flavor_1"
 	var projectName = fmt.Sprintf("ACCPTTEST-%s", acctest.RandString(5))

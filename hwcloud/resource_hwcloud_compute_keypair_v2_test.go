@@ -10,6 +10,7 @@ import (
 	"github.com/gophercloud/gophercloud/openstack/compute/v2/extensions/keypairs"
 )
 
+// PASS
 func TestAccComputeV2Keypair_basic(t *testing.T) {
 	var keypair keypairs.KeyPair
 

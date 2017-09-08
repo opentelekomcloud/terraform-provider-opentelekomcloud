@@ -1,11 +1,13 @@
 package hwcloud
 
+/*
 import (
 	"testing"
 
 	"github.com/hashicorp/terraform/helper/resource"
 )
 
+// UNSUPPORTED FWv1
 func TestAccFWFirewallV1_importBasic(t *testing.T) {
 	resourceName := "hwcloud_fw_firewall_v1.fw_1"
 
@@ -26,3 +28,4 @@ func TestAccFWFirewallV1_importBasic(t *testing.T) {
 		},
 	})
 }
+*/

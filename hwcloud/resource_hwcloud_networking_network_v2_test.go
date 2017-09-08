@@ -30,7 +30,8 @@ func TestAccNetworkingV2Network_basic(t *testing.T) {
 				),
 			},
 			resource.TestStep{
-				Config: testAccNetworkingV2Network_update,
+				Config:             testAccNetworkingV2Network_update,
+				ExpectNonEmptyPlan: true,
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr(
 						"hwcloud_networking_network_v2.network_1", "name", "network_2"),
@@ -141,7 +142,8 @@ func testAccCheckNetworkingV2NetworkDestroy(s *terraform.State) error {
 			continue
 		}
 
-		_, err := networks.Get(networkingClient, rs.Primary.ID).Extract()
+		_, id := ExtractValFromNid(rs.Primary.ID)
+		_, err := networks.Get(networkingClient, id).Extract()
 		if err == nil {
 			return fmt.Errorf("Network still exists")
 		}
@@ -167,12 +169,13 @@ func testAccCheckNetworkingV2NetworkExists(n string, network *networks.Network) 
 			return fmt.Errorf("Error creating HWCloud networking client: %s", err)
 		}
 
-		found, err := networks.Get(networkingClient, rs.Primary.ID).Extract()
+		_, id := ExtractValFromNid(rs.Primary.ID)
+		found, err := networks.Get(networkingClient, id).Extract()
 		if err != nil {
 			return err
 		}
 
-		if found.ID != rs.Primary.ID {
+		if found.ID != id {
 			return fmt.Errorf("Network not found")
 		}
 
@@ -192,7 +195,7 @@ resource "hwcloud_networking_network_v2" "network_1" {
 const testAccNetworkingV2Network_update = `
 resource "hwcloud_networking_network_v2" "network_1" {
   name = "network_2"
-  admin_state_up = "true"
+  admin_state_up = "false"
 }
 `
 

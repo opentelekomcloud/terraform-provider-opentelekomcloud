@@ -8,6 +8,7 @@ import (
 	"github.com/hashicorp/terraform/terraform"
 )
 
+// PASS
 func TestAccHWCloudNetworkingSecGroupV2DataSource_basic(t *testing.T) {
 	resource.Test(t, resource.TestCase{
 		PreCheck:  func() { testAccPreCheck(t) },
@@ -28,6 +29,7 @@ func TestAccHWCloudNetworkingSecGroupV2DataSource_basic(t *testing.T) {
 	})
 }
 
+// PASS
 func TestAccHWCloudNetworkingSecGroupV2DataSource_secGroupID(t *testing.T) {
 	resource.Test(t, resource.TestCase{
 		PreCheck:  func() { testAccPreCheck(t) },

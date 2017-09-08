@@ -6,6 +6,7 @@ import (
 	"github.com/hashicorp/terraform/helper/resource"
 )
 
+// KNOWN problem
 func TestAccComputeV2FloatingIP_importBasic(t *testing.T) {
 	resourceName := "hwcloud_compute_floatingip_v2.fip_1"
 
