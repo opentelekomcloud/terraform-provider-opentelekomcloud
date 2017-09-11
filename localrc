@@ -1,5 +1,5 @@
 export OS_USERNAME=tf_user
-export OS_PASSWORD=Huawei@123
+export OS_PASSWORD=######
 export OS_DOMAIN_ID=aabfd43152224b8085d39aa2e065d36c
 export OS_AUTH_URL=https://iam.eu-de.otc.t-systems.com:443/v3
 export OS_TENANT_NAME=eu-de
