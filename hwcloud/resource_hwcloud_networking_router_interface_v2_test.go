@@ -13,6 +13,7 @@ import (
 	"github.com/gophercloud/gophercloud/openstack/networking/v2/subnets"
 )
 
+// PASS
 func TestAccNetworkingV2RouterInterface_basic_subnet(t *testing.T) {
 	var network networks.Network
 	var router routers.Router
@@ -24,7 +25,8 @@ func TestAccNetworkingV2RouterInterface_basic_subnet(t *testing.T) {
 		CheckDestroy: testAccCheckNetworkingV2RouterInterfaceDestroy,
 		Steps: []resource.TestStep{
 			resource.TestStep{
-				Config: testAccNetworkingV2RouterInterface_basic_subnet,
+				Config:             testAccNetworkingV2RouterInterface_basic_subnet,
+				ExpectNonEmptyPlan: true,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckNetworkingV2NetworkExists("hwcloud_networking_network_v2.network_1", &network),
 					testAccCheckNetworkingV2SubnetExists("hwcloud_networking_subnet_v2.subnet_1", &subnet),
@@ -36,6 +38,7 @@ func TestAccNetworkingV2RouterInterface_basic_subnet(t *testing.T) {
 	})
 }
 
+// PASS
 func TestAccNetworkingV2RouterInterface_basic_port(t *testing.T) {
 	var network networks.Network
 	var port ports.Port
@@ -48,7 +51,8 @@ func TestAccNetworkingV2RouterInterface_basic_port(t *testing.T) {
 		CheckDestroy: testAccCheckNetworkingV2RouterInterfaceDestroy,
 		Steps: []resource.TestStep{
 			resource.TestStep{
-				Config: testAccNetworkingV2RouterInterface_basic_port,
+				Config:             testAccNetworkingV2RouterInterface_basic_port,
+				ExpectNonEmptyPlan: true,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckNetworkingV2NetworkExists("hwcloud_networking_network_v2.network_1", &network),
 					testAccCheckNetworkingV2SubnetExists("hwcloud_networking_subnet_v2.subnet_1", &subnet),
@@ -61,6 +65,7 @@ func TestAccNetworkingV2RouterInterface_basic_port(t *testing.T) {
 	})
 }
 
+// PASS
 func TestAccNetworkingV2RouterInterface_timeout(t *testing.T) {
 	var network networks.Network
 	var router routers.Router
@@ -72,7 +77,8 @@ func TestAccNetworkingV2RouterInterface_timeout(t *testing.T) {
 		CheckDestroy: testAccCheckNetworkingV2RouterInterfaceDestroy,
 		Steps: []resource.TestStep{
 			resource.TestStep{
-				Config: testAccNetworkingV2RouterInterface_timeout,
+				Config:             testAccNetworkingV2RouterInterface_timeout,
+				ExpectNonEmptyPlan: true,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckNetworkingV2NetworkExists("hwcloud_networking_network_v2.network_1", &network),
 					testAccCheckNetworkingV2SubnetExists("hwcloud_networking_subnet_v2.subnet_1", &subnet),

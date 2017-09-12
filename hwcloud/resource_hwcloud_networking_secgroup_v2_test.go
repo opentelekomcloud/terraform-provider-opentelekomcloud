@@ -10,6 +10,7 @@ import (
 	"github.com/gophercloud/gophercloud/openstack/networking/v2/extensions/security/groups"
 )
 
+// PASS
 func TestAccNetworkingV2SecGroup_basic(t *testing.T) {
 	var security_group groups.SecGroup
 
@@ -39,6 +40,7 @@ func TestAccNetworkingV2SecGroup_basic(t *testing.T) {
 	})
 }
 
+// PASS
 func TestAccNetworkingV2SecGroup_noDefaultRules(t *testing.T) {
 	var security_group groups.SecGroup
 
@@ -59,6 +61,7 @@ func TestAccNetworkingV2SecGroup_noDefaultRules(t *testing.T) {
 	})
 }
 
+// PASS
 func TestAccNetworkingV2SecGroup_timeout(t *testing.T) {
 	var security_group groups.SecGroup
 
