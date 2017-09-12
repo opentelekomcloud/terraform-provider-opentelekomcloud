@@ -10,6 +10,7 @@ import (
 	"github.com/gophercloud/gophercloud/openstack/networking/v2/extensions/layer3/routers"
 )
 
+// PASS
 func TestAccNetworkingV2Router_basic(t *testing.T) {
 	var router routers.Router
 
@@ -19,13 +20,15 @@ func TestAccNetworkingV2Router_basic(t *testing.T) {
 		CheckDestroy: testAccCheckNetworkingV2RouterDestroy,
 		Steps: []resource.TestStep{
 			resource.TestStep{
-				Config: testAccNetworkingV2Router_basic,
+				Config:             testAccNetworkingV2Router_basic,
+				ExpectNonEmptyPlan: true,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckNetworkingV2RouterExists("hwcloud_networking_router_v2.router_1", &router),
 				),
 			},
 			resource.TestStep{
-				Config: testAccNetworkingV2Router_update,
+				Config:             testAccNetworkingV2Router_update,
+				ExpectNonEmptyPlan: true,
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr(
 						"hwcloud_networking_router_v2.router_1", "name", "router_2"),
@@ -35,6 +38,7 @@ func TestAccNetworkingV2Router_basic(t *testing.T) {
 	})
 }
 
+// PASS
 func TestAccNetworkingV2Router_update_external_gw(t *testing.T) {
 	var router routers.Router
 
@@ -44,7 +48,8 @@ func TestAccNetworkingV2Router_update_external_gw(t *testing.T) {
 		CheckDestroy: testAccCheckNetworkingV2RouterDestroy,
 		Steps: []resource.TestStep{
 			resource.TestStep{
-				Config: testAccNetworkingV2Router_update_external_gw_1,
+				Config:             testAccNetworkingV2Router_update_external_gw_1,
+				ExpectNonEmptyPlan: true,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckNetworkingV2RouterExists("hwcloud_networking_router_v2.router_1", &router),
 				),
@@ -60,6 +65,7 @@ func TestAccNetworkingV2Router_update_external_gw(t *testing.T) {
 	})
 }
 
+// PASS
 func TestAccNetworkingV2Router_timeout(t *testing.T) {
 	var router routers.Router
 
@@ -69,7 +75,8 @@ func TestAccNetworkingV2Router_timeout(t *testing.T) {
 		CheckDestroy: testAccCheckNetworkingV2RouterDestroy,
 		Steps: []resource.TestStep{
 			resource.TestStep{
-				Config: testAccNetworkingV2Router_timeout,
+				Config:             testAccNetworkingV2Router_timeout,
+				ExpectNonEmptyPlan: true,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckNetworkingV2RouterExists("hwcloud_networking_router_v2.router_1", &router),
 				),

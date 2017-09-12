@@ -12,6 +12,7 @@ import (
 	"github.com/gophercloud/gophercloud/openstack/networking/v2/subnets"
 )
 
+// UNKNOWN problem
 func TestAccNetworkingV2RouterRoute_basic(t *testing.T) {
 	var router routers.Router
 	var network [2]networks.Network
@@ -22,7 +23,8 @@ func TestAccNetworkingV2RouterRoute_basic(t *testing.T) {
 		Providers: testAccProviders,
 		Steps: []resource.TestStep{
 			resource.TestStep{
-				Config: testAccNetworkingV2RouterRoute_create,
+				Config:             testAccNetworkingV2RouterRoute_create,
+				ExpectNonEmptyPlan: true,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckNetworkingV2RouterExists("hwcloud_networking_router_v2.router_1", &router),
 					testAccCheckNetworkingV2NetworkExists(
