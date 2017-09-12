@@ -10,6 +10,7 @@ import (
 	"github.com/hashicorp/terraform/terraform"
 )
 
+// PASS
 func TestAccImagesImageV2_basic(t *testing.T) {
 	var image images.Image
 
@@ -37,6 +38,7 @@ func TestAccImagesImageV2_basic(t *testing.T) {
 	})
 }
 
+// PASS
 func TestAccImagesImageV2_name(t *testing.T) {
 	var image images.Image
 
@@ -67,6 +69,7 @@ func TestAccImagesImageV2_name(t *testing.T) {
 	})
 }
 
+// PASS
 func TestAccImagesImageV2_tags(t *testing.T) {
 	var image images.Image
 
@@ -288,7 +291,7 @@ func testAccCheckImagesImageV2TagCount(n string, expected int) resource.TestChec
 var testAccImagesImageV2_basic = `
   resource "hwcloud_images_image_v2" "image_1" {
       name   = "Rancher TerraformAccTest"
-      image_source_url = "https://releases.rancher.com/os/latest/rancheros-hwcloud.img"
+      image_source_url = "https://releases.rancher.com/os/latest/rancheros-openstack.img"
       container_format = "bare"
       disk_format = "qcow2"
   }`
@@ -296,7 +299,7 @@ var testAccImagesImageV2_basic = `
 var testAccImagesImageV2_name_1 = `
   resource "hwcloud_images_image_v2" "image_1" {
       name   = "Rancher TerraformAccTest"
-      image_source_url = "https://releases.rancher.com/os/latest/rancheros-hwcloud.img"
+      image_source_url = "https://releases.rancher.com/os/latest/rancheros-openstack.img"
       container_format = "bare"
       disk_format = "qcow2"
   }`
@@ -304,7 +307,7 @@ var testAccImagesImageV2_name_1 = `
 var testAccImagesImageV2_name_2 = `
   resource "hwcloud_images_image_v2" "image_1" {
       name   = "TerraformAccTest Rancher"
-      image_source_url = "https://releases.rancher.com/os/latest/rancheros-hwcloud.img"
+      image_source_url = "https://releases.rancher.com/os/latest/rancheros-openstack.img"
       container_format = "bare"
       disk_format = "qcow2"
   }`
@@ -312,7 +315,7 @@ var testAccImagesImageV2_name_2 = `
 var testAccImagesImageV2_tags_1 = `
   resource "hwcloud_images_image_v2" "image_1" {
       name   = "Rancher TerraformAccTest"
-      image_source_url = "https://releases.rancher.com/os/latest/rancheros-hwcloud.img"
+      image_source_url = "https://releases.rancher.com/os/latest/rancheros-openstack.img"
       container_format = "bare"
       disk_format = "qcow2"
       tags = ["foo","bar"]
@@ -321,7 +324,7 @@ var testAccImagesImageV2_tags_1 = `
 var testAccImagesImageV2_tags_2 = `
   resource "hwcloud_images_image_v2" "image_1" {
       name   = "Rancher TerraformAccTest"
-      image_source_url = "https://releases.rancher.com/os/latest/rancheros-hwcloud.img"
+      image_source_url = "https://releases.rancher.com/os/latest/rancheros-openstack.img"
       container_format = "bare"
       disk_format = "qcow2"
       tags = ["foo","bar","baz"]
@@ -330,7 +333,7 @@ var testAccImagesImageV2_tags_2 = `
 var testAccImagesImageV2_tags_3 = `
   resource "hwcloud_images_image_v2" "image_1" {
       name   = "Rancher TerraformAccTest"
-      image_source_url = "https://releases.rancher.com/os/latest/rancheros-hwcloud.img"
+      image_source_url = "https://releases.rancher.com/os/latest/rancheros-openstack.img"
       container_format = "bare"
       disk_format = "qcow2"
       tags = ["foo","baz"]
@@ -339,7 +342,7 @@ var testAccImagesImageV2_tags_3 = `
 var testAccImagesImageV2_visibility_1 = `
   resource "hwcloud_images_image_v2" "image_1" {
       name   = "Rancher TerraformAccTest"
-      image_source_url = "https://releases.rancher.com/os/latest/rancheros-hwcloud.img"
+      image_source_url = "https://releases.rancher.com/os/latest/rancheros-openstack.img"
       container_format = "bare"
       disk_format = "qcow2"
       visibility = "private"
@@ -348,7 +351,7 @@ var testAccImagesImageV2_visibility_1 = `
 var testAccImagesImageV2_visibility_2 = `
   resource "hwcloud_images_image_v2" "image_1" {
       name   = "Rancher TerraformAccTest"
-      image_source_url = "https://releases.rancher.com/os/latest/rancheros-hwcloud.img"
+      image_source_url = "https://releases.rancher.com/os/latest/rancheros-openstack.img"
       container_format = "bare"
       disk_format = "qcow2"
       visibility = "public"
@@ -357,7 +360,7 @@ var testAccImagesImageV2_visibility_2 = `
 var testAccImagesImageV2_timeout = `
   resource "hwcloud_images_image_v2" "image_1" {
       name   = "Rancher TerraformAccTest"
-      image_source_url = "https://releases.rancher.com/os/latest/rancheros-hwcloud.img"
+      image_source_url = "https://releases.rancher.com/os/latest/rancheros-openstack.img"
       container_format = "bare"
       disk_format = "qcow2"
 
