@@ -1,5 +1,6 @@
 package hwcloud
 
+/*
 import (
 	"fmt"
 	"testing"
@@ -213,3 +214,4 @@ resource "hwcloud_lb_member_v2" "member_2" {
   }
 }
 `
+*/

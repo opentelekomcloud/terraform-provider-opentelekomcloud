@@ -1,5 +1,6 @@
 package hwcloud
 
+/*
 import (
 	"fmt"
 	"testing"
@@ -339,3 +340,4 @@ resource "hwcloud_compute_floatingip_associate_v2" "fip_1" {
   instance_id = "${hwcloud_compute_instance_v2.instance_1.id}"
 }
 `
+*/

@@ -1,5 +1,6 @@
 package hwcloud
 
+/*
 import (
 	"fmt"
 	"testing"
@@ -86,3 +87,4 @@ const testAccComputeV2FloatingIP_basic = `
 resource "hwcloud_compute_floatingip_v2" "fip_1" {
 }
 `
+*/
