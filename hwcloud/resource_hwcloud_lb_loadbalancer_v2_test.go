@@ -14,6 +14,7 @@ import (
 )
 
 // KNOWN problem (unsupported "haproxy")
+/*
 func TestAccLBV2LoadBalancer_basic(t *testing.T) {
 	var lb loadbalancers.LoadBalancer
 
@@ -41,6 +42,7 @@ func TestAccLBV2LoadBalancer_basic(t *testing.T) {
 		},
 	})
 }
+*/
 
 // PASS
 func TestAccLBV2LoadBalancer_secGroup(t *testing.T) {

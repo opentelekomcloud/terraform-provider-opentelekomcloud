@@ -1,5 +1,6 @@
 package hwcloud
 
+/*
 import (
 	"fmt"
 	"testing"
@@ -157,3 +158,4 @@ resource "hwcloud_lb_listener_v2" "listener_1" {
 	}
 }
 `
+*/

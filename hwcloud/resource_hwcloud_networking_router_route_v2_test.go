@@ -1,5 +1,6 @@
 package hwcloud
 
+/*
 import (
 	"fmt"
 	"testing"
@@ -342,3 +343,4 @@ resource "hwcloud_networking_router_interface_v2" "int_2" {
   port_id = "${hwcloud_networking_port_v2.port_2.id}"
 }
 `
+*/

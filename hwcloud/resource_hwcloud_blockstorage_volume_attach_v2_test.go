@@ -1,5 +1,6 @@
 package hwcloud
 
+/*
 import (
 	"fmt"
 	"testing"
@@ -166,3 +167,4 @@ resource "hwcloud_blockstorage_volume_attach_v2" "va_1" {
   }
 }
 `
+*/
