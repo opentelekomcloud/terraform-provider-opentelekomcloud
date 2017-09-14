@@ -2,7 +2,7 @@ package hwcloud
 
 import (
 	"fmt"
-	"regexp"
+	//"regexp"
 	"testing"
 
 	"github.com/hashicorp/terraform/helper/resource"
