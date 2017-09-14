@@ -16,7 +16,8 @@ func TestAccImagesImageV2_importBasic(t *testing.T) {
 		CheckDestroy: testAccCheckImagesImageV2Destroy,
 		Steps: []resource.TestStep{
 			resource.TestStep{
-				Config: testAccImagesImageV2_basic,
+				Config:             testAccImagesImageV2_basic,
+				ExpectNonEmptyPlan: true,
 			},
 
 			resource.TestStep{
