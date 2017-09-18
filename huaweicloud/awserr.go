@@ -1,4 +1,4 @@
-package hwcloud
+package huaweicloud
 
 import (
 	"strings"
