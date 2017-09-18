@@ -8,7 +8,7 @@ data "aws_ami" "packstack_standard" {
   name_regex = "^packstack-standard-ocata"
 }
 
-resource "aws_spot_instance_request" "hwcloud_acc_tests" {
+resource "aws_spot_instance_request" "huaweicloud_acc_tests" {
   ami = "${data.aws_ami.packstack_standard.id}"
   spot_price = "0.0441"
   instance_type = "m3.xlarge"
@@ -23,13 +23,13 @@ resource "aws_spot_instance_request" "hwcloud_acc_tests" {
   }
 
   tags {
-    Name = "HWCloud Acceptance Test Infra"
+    Name = "HuaweiCloud Acceptance Test Infra"
   }
 }
 
 resource "aws_security_group" "allow_all" {
-  name        = "hwcloud_test_instance_allow_all"
-  description = "HWCloud Test Infra Allow all inbound/outbound traffic"
+  name        = "huaweicloud_test_instance_allow_all"
+  description = "HuaweiCloud Test Infra Allow all inbound/outbound traffic"
 
   ingress {
     from_port   = 0
@@ -64,14 +64,14 @@ resource "null_resource" "rc_files" {
   provisioner "local-exec" {
     command = <<EOF
       while true ; do
-        wget http://${aws_spot_instance_request.hwcloud_acc_tests.public_ip}/keystonerc_demo 2> /dev/null
+        wget http://${aws_spot_instance_request.huaweicloud_acc_tests.public_ip}/keystonerc_demo 2> /dev/null
         if [ $? = 0 ]; then
           break
         fi
         sleep 20
       done
 
-      wget http://${aws_spot_instance_request.hwcloud_acc_tests.public_ip}/keystonerc_admin
+      wget http://${aws_spot_instance_request.huaweicloud_acc_tests.public_ip}/keystonerc_admin
     EOF
   }
 }

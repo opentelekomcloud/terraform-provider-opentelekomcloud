@@ -1,19 +1,19 @@
 ---
 layout: "openstack"
-page_title: "HWCloud: hwcloud_fw_firewall_v1"
+page_title: "HuaweiCloud: huaweicloud_fw_firewall_v1"
 sidebar_current: "docs-openstack-resource-fw-firewall-v1"
 description: |-
-  Manages a v1 firewall resource within HWCloud.
+  Manages a v1 firewall resource within HuaweiCloud.
 ---
 
 # openstack\_fw\_firewall_v1
 
-Manages a v1 firewall resource within HWCloud.
+Manages a v1 firewall resource within HuaweiCloud.
 
 ## Example Usage
 
 ```hcl
-resource "hwcloud_fw_rule_v1" "rule_1" {
+resource "huaweicloud_fw_rule_v1" "rule_1" {
   name             = "my-rule-1"
   description      = "drop TELNET traffic"
   action           = "deny"
@@ -22,7 +22,7 @@ resource "hwcloud_fw_rule_v1" "rule_1" {
   enabled          = "true"
 }
 
-resource "hwcloud_fw_rule_v1" "rule_2" {
+resource "huaweicloud_fw_rule_v1" "rule_2" {
   name             = "my-rule-2"
   description      = "drop NTP traffic"
   action           = "deny"
@@ -31,17 +31,17 @@ resource "hwcloud_fw_rule_v1" "rule_2" {
   enabled          = "false"
 }
 
-resource "hwcloud_fw_policy_v1" "policy_1" {
+resource "huaweicloud_fw_policy_v1" "policy_1" {
   name = "my-policy"
 
-  rules = ["${hwcloud_fw_rule_v1.rule_1.id}",
-    "${hwcloud_fw_rule_v1.rule_2.id}",
+  rules = ["${huaweicloud_fw_rule_v1.rule_1.id}",
+    "${huaweicloud_fw_rule_v1.rule_2.id}",
   ]
 }
 
-resource "hwcloud_fw_firewall_v1" "firewall_1" {
+resource "huaweicloud_fw_firewall_v1" "firewall_1" {
   name      = "my-firewall"
-  policy_id = "${hwcloud_fw_policy_v1.policy_1.id}"
+  policy_id = "${huaweicloud_fw_policy_v1.policy_1.id}"
 }
 ```
 
@@ -99,5 +99,5 @@ The following attributes are exported:
 Firewalls can be imported using the `id`, e.g.
 
 ```
-$ terraform import hwcloud_fw_firewall_v1.firewall_1 c9e39fb2-ce20-46c8-a964-25f3898c7a97
+$ terraform import huaweicloud_fw_firewall_v1.firewall_1 c9e39fb2-ce20-46c8-a964-25f3898c7a97
 ```
