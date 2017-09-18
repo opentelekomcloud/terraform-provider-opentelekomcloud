@@ -2,10 +2,10 @@ package main
 
 import (
 	"github.com/hashicorp/terraform/plugin"
-	"github.com/khdegraaf/terraform-provider-hwcloud/hwcloud" // TODO: Revert path when merge
+	"github.com/khdegraaf/terraform-provider-huaweicloud/huaweicloud" // TODO: Revert path when merge
 )
 
 func main() {
 	plugin.Serve(&plugin.ServeOpts{
-		ProviderFunc: hwcloud.Provider})
+		ProviderFunc: huaweicloud.Provider})
 }

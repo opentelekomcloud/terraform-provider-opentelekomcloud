@@ -1,42 +1,42 @@
 ---
 layout: "openstack"
-page_title: "HWCloud: hwcloud_networking_router_route_v2"
+page_title: "HuaweiCloud: huaweicloud_networking_router_route_v2"
 sidebar_current: "docs-openstack-resource-networking-router-route-v2"
 description: |-
-  Creates a routing entry on a HWCloud V2 router.
+  Creates a routing entry on a HuaweiCloud V2 router.
 ---
 
 # openstack\_networking\_router_route_v2
 
-Creates a routing entry on a HWCloud V2 router.
+Creates a routing entry on a HuaweiCloud V2 router.
 
 ## Example Usage
 
 ```hcl
-resource "hwcloud_networking_router_v2" "router_1" {
+resource "huaweicloud_networking_router_v2" "router_1" {
   name           = "router_1"
   admin_state_up = "true"
 }
 
-resource "hwcloud_networking_network_v2" "network_1" {
+resource "huaweicloud_networking_network_v2" "network_1" {
   name           = "network_1"
   admin_state_up = "true"
 }
 
-resource "hwcloud_networking_subnet_v2" "subnet_1" {
-  network_id = "${hwcloud_networking_network_v2.network_1.id}"
+resource "huaweicloud_networking_subnet_v2" "subnet_1" {
+  network_id = "${huaweicloud_networking_network_v2.network_1.id}"
   cidr       = "192.168.199.0/24"
   ip_version = 4
 }
 
-resource "hwcloud_networking_router_interface_v2" "int_1" {
-  router_id = "${hwcloud_networking_router_v2.router_1.id}"
-  subnet_id = "${hwcloud_networking_subnet_v2.subnet_1.id}"
+resource "huaweicloud_networking_router_interface_v2" "int_1" {
+  router_id = "${huaweicloud_networking_router_v2.router_1.id}"
+  subnet_id = "${huaweicloud_networking_subnet_v2.subnet_1.id}"
 }
 
-resource "hwcloud_networking_router_route_v2" "router_route_1" {
-  depends_on       = ["hwcloud_networking_router_interface_v2.int_1"]
-  router_id        = "${hwcloud_networking_router_v2.router_1.id}"
+resource "huaweicloud_networking_router_route_v2" "router_route_1" {
+  depends_on       = ["huaweicloud_networking_router_interface_v2.int_1"]
+  router_id        = "${huaweicloud_networking_router_v2.router_1.id}"
   destination_cidr = "10.0.1.0/24"
   next_hop         = "192.168.199.254"
 }
@@ -71,6 +71,6 @@ The following attributes are exported:
 
 ## Notes
 
-The `next_hop` IP address must be directly reachable from the router at the ``hwcloud_networking_router_route_v2``
-resource creation time.  You can ensure that by explicitly specifying a dependency on the ``hwcloud_networking_router_interface_v2``
+The `next_hop` IP address must be directly reachable from the router at the ``huaweicloud_networking_router_route_v2``
+resource creation time.  You can ensure that by explicitly specifying a dependency on the ``huaweicloud_networking_router_interface_v2``
 resource that connects the next hop to the router, as in the example above.

@@ -1,19 +1,19 @@
 ---
 layout: "openstack"
-page_title: "HWCloud: hwcloud_lb_monitor_v1"
+page_title: "HuaweiCloud: huaweicloud_lb_monitor_v1"
 sidebar_current: "docs-openstack-resource-lb-monitor-v1"
 description: |-
-  Manages a V1 load balancer monitor resource within HWCloud.
+  Manages a V1 load balancer monitor resource within HuaweiCloud.
 ---
 
 # openstack\_lb\_monitor_v1
 
-Manages a V1 load balancer monitor resource within HWCloud.
+Manages a V1 load balancer monitor resource within HuaweiCloud.
 
 ## Example Usage
 
 ```hcl
-resource "hwcloud_lb_monitor_v1" "monitor_1" {
+resource "huaweicloud_lb_monitor_v1" "monitor_1" {
   type           = "PING"
   delay          = 30
   timeout        = 5
@@ -86,5 +86,5 @@ The following attributes are exported:
 Load Balancer Members can be imported using the `id`, e.g.
 
 ```
-$ terraform import hwcloud_lb_monitor_v1.monitor_1 119d7530-72e9-449a-aa97-124a5ef1992c
+$ terraform import huaweicloud_lb_monitor_v1.monitor_1 119d7530-72e9-449a-aa97-124a5ef1992c
 ```

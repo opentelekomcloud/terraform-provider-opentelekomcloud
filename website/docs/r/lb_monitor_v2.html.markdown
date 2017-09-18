@@ -1,20 +1,20 @@
 ---
 layout: "openstack"
-page_title: "HWCloud: hwcloud_lb_monitor_v2"
+page_title: "HuaweiCloud: huaweicloud_lb_monitor_v2"
 sidebar_current: "docs-openstack-resource-lb-monitor-v2"
 description: |-
-  Manages a V2 monitor resource within HWCloud.
+  Manages a V2 monitor resource within HuaweiCloud.
 ---
 
 # openstack\_lb\_monitor\_v2
 
-Manages a V2 monitor resource within HWCloud.
+Manages a V2 monitor resource within HuaweiCloud.
 
 ## Example Usage
 
 ```hcl
-resource "hwcloud_lb_monitor_v2" "monitor_1" {
-  pool_id     = "${hwcloud_lb_pool_v2.pool_1.id}"
+resource "huaweicloud_lb_monitor_v2" "monitor_1" {
+  pool_id     = "${huaweicloud_lb_pool_v2.pool_1.id}"
   type        = "PING"
   delay       = 20
   timeout     = 10

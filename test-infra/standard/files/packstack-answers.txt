@@ -18,61 +18,61 @@ CONFIG_SERVICE_WORKERS=%{::processorcount}
 # Specify 'y' to install MariaDB. ['y', 'n']
 CONFIG_MARIADB_INSTALL=y
 
-# Specify 'y' to install HWCloud Image Service (glance). ['y', 'n']
+# Specify 'y' to install HuaweiCloud Image Service (glance). ['y', 'n']
 CONFIG_GLANCE_INSTALL=y
 
-# Specify 'y' to install HWCloud Block Storage (cinder). ['y', 'n']
+# Specify 'y' to install HuaweiCloud Block Storage (cinder). ['y', 'n']
 CONFIG_CINDER_INSTALL=y
 
-# Specify 'y' to install HWCloud Shared File System (manila). ['y',
+# Specify 'y' to install HuaweiCloud Shared File System (manila). ['y',
 # 'n']
 CONFIG_MANILA_INSTALL=y
 
-# Specify 'y' to install HWCloud Compute (nova). ['y', 'n']
+# Specify 'y' to install HuaweiCloud Compute (nova). ['y', 'n']
 CONFIG_NOVA_INSTALL=y
 
-# Specify 'y' to install HWCloud Networking (neutron) ['y']
+# Specify 'y' to install HuaweiCloud Networking (neutron) ['y']
 CONFIG_NEUTRON_INSTALL=y
 
-# Specify 'y' to install HWCloud Dashboard (horizon). ['y', 'n']
+# Specify 'y' to install HuaweiCloud Dashboard (horizon). ['y', 'n']
 CONFIG_HORIZON_INSTALL=n
 
-# Specify 'y' to install HWCloud Object Storage (swift). ['y', 'n']
+# Specify 'y' to install HuaweiCloud Object Storage (swift). ['y', 'n']
 CONFIG_SWIFT_INSTALL=y
 
-# Specify 'y' to install HWCloud Metering (ceilometer). ['y', 'n']
+# Specify 'y' to install HuaweiCloud Metering (ceilometer). ['y', 'n']
 CONFIG_CEILOMETER_INSTALL=n
 
-# Specify 'y' to install HWCloud Telemetry Alarming (Aodh). Note
+# Specify 'y' to install HuaweiCloud Telemetry Alarming (Aodh). Note
 # Aodh requires Ceilometer to be installed as well. ['y', 'n']
 CONFIG_AODH_INSTALL=n
 
-# Specify 'y' to install HWCloud Metering as a Service (gnocchi).
+# Specify 'y' to install HuaweiCloud Metering as a Service (gnocchi).
 # ['y', 'n']
 CONFIG_GNOCCHI_INSTALL=n
 
-# Specify 'y' to install HWCloud Events Service (panko). ['y', 'n']
+# Specify 'y' to install HuaweiCloud Events Service (panko). ['y', 'n']
 CONFIG_PANKO_INSTALL=n
 
-# Specify 'y' to install HWCloud Data Processing (sahara). In case
+# Specify 'y' to install HuaweiCloud Data Processing (sahara). In case
 # of sahara installation packstack also installs heat.['y', 'n']
 CONFIG_SAHARA_INSTALL=n
 
-# Specify 'y' to install HWCloud Orchestration (heat). ['y', 'n']
+# Specify 'y' to install HuaweiCloud Orchestration (heat). ['y', 'n']
 CONFIG_HEAT_INSTALL=n
 
-# Specify 'y' to install HWCloud Container Infrastructure
+# Specify 'y' to install HuaweiCloud Container Infrastructure
 # Management Service (magnum). ['y', 'n']
 CONFIG_MAGNUM_INSTALL=n
 
-# Specify 'y' to install HWCloud Database (trove) ['y', 'n']
+# Specify 'y' to install HuaweiCloud Database (trove) ['y', 'n']
 CONFIG_TROVE_INSTALL=n
 
-# Specify 'y' to install HWCloud Bare Metal Provisioning (ironic).
+# Specify 'y' to install HuaweiCloud Bare Metal Provisioning (ironic).
 # ['y', 'n']
 CONFIG_IRONIC_INSTALL=n
 
-# Specify 'y' to install the HWCloud Client packages (command-line
+# Specify 'y' to install the HuaweiCloud Client packages (command-line
 # tools). An admin "rc" file will also be installed. ['y', 'n']
 CONFIG_CLIENT_INSTALL=y
 
@@ -80,8 +80,8 @@ CONFIG_CLIENT_INSTALL=y
 # should not install ntpd on instances.
 CONFIG_NTP_SERVERS=
 
-# Specify 'y' to install Nagios to monitor HWCloud hosts. Nagios
-# provides additional tools for monitoring the HWCloud environment.
+# Specify 'y' to install Nagios to monitor HuaweiCloud hosts. Nagios
+# provides additional tools for monitoring the HuaweiCloud environment.
 # ['y', 'n']
 CONFIG_NAGIOS_INSTALL=n
 
@@ -92,11 +92,11 @@ CONFIG_NAGIOS_INSTALL=n
 # need to exclude any servers.
 EXCLUDE_SERVERS=
 
-# Specify 'y' if you want to run HWCloud services in debug mode;
+# Specify 'y' if you want to run HuaweiCloud services in debug mode;
 # otherwise, specify 'n'. ['y', 'n']
 CONFIG_DEBUG_MODE=y
 
-# Server on which to install HWCloud services specific to the
+# Server on which to install HuaweiCloud services specific to the
 # controller role (for example, API servers or dashboard).
 CONFIG_CONTROLLER_HOST=127.0.0.1
 
@@ -104,7 +104,7 @@ CONFIG_CONTROLLER_HOST=127.0.0.1
 CONFIG_COMPUTE_HOSTS=127.0.0.1
 
 # List of servers on which to install the network service such as
-# Compute networking (nova network) or HWCloud Networking (neutron).
+# Compute networking (nova network) or HuaweiCloud Networking (neutron).
 CONFIG_NETWORK_HOSTS=127.0.0.1
 
 # Specify 'y' if you want to use VMware vCenter as hypervisor and
@@ -139,12 +139,12 @@ CONFIG_VCENTER_PASSWORD=
 # compute, otherwise all computes are mapped to same cluster.
 CONFIG_VCENTER_CLUSTER_NAMES=
 
-# (Unsupported!) Server on which to install HWCloud services
+# (Unsupported!) Server on which to install HuaweiCloud services
 # specific to storage servers such as Image or Block Storage services.
 CONFIG_STORAGE_HOST=127.0.0.1
 
-# (Unsupported!) Server on which to install HWCloud services
-# specific to HWCloud Data Processing (sahara).
+# (Unsupported!) Server on which to install HuaweiCloud services
+# specific to HuaweiCloud Data Processing (sahara).
 CONFIG_SAHARA_HOST=127.0.0.1
 
 # Specify 'y' to enable the EPEL repository (Extra Packages for
@@ -708,11 +708,11 @@ CONFIG_CINDER_SOLIDFIRE_PASSWORD=
 # Hostname (or IP address) for the SolidFire storage system's MVIP.
 CONFIG_CINDER_SOLIDFIRE_HOSTNAME=
 
-# Password to use for HWCloud Bare Metal Provisioning (ironic) to
+# Password to use for HuaweiCloud Bare Metal Provisioning (ironic) to
 # access the database.
 CONFIG_IRONIC_DB_PW=PW_PLACEHOLDER
 
-# Password to use for HWCloud Bare Metal Provisioning to
+# Password to use for HuaweiCloud Bare Metal Provisioning to
 # authenticate with the Identity service.
 CONFIG_IRONIC_KS_PW=PW_PLACEHOLDER
 
@@ -775,36 +775,36 @@ CONFIG_NOVA_PCI_PASSTHROUGH_WHITELIST=
 # metal hardware. For nested KVM set it explicitly to 'kvm'.
 CONFIG_NOVA_LIBVIRT_VIRT_TYPE=qemu
 
-# Password to use for HWCloud Networking (neutron) to authenticate
+# Password to use for HuaweiCloud Networking (neutron) to authenticate
 # with the Identity service.
 CONFIG_NEUTRON_KS_PW=2cf390ce7eaa4b3e
 
-# The password to use for HWCloud Networking to access the
+# The password to use for HuaweiCloud Networking to access the
 # database.
 CONFIG_NEUTRON_DB_PW=b4342e8152ac4f10
 
 # The name of the Open vSwitch bridge (or empty for linuxbridge) for
-# the HWCloud Networking L3 agent to use for external  traffic.
+# the HuaweiCloud Networking L3 agent to use for external  traffic.
 # Specify 'provider' if you intend to use a provider network to handle
 # external traffic.
 CONFIG_NEUTRON_L3_EXT_BRIDGE=br-ex
 
-# Password for the HWCloud Networking metadata agent.
+# Password for the HuaweiCloud Networking metadata agent.
 CONFIG_NEUTRON_METADATA_PW=a3c0a1f55e294b7c
 
-# Specify 'y' to install HWCloud Networking's Load-Balancing-
+# Specify 'y' to install HuaweiCloud Networking's Load-Balancing-
 # as-a-Service (LBaaS). ['y', 'n']
 CONFIG_LBAAS_INSTALL=y
 
-# Specify 'y' to install HWCloud Networking's L3 Metering agent
+# Specify 'y' to install HuaweiCloud Networking's L3 Metering agent
 # ['y', 'n']
 CONFIG_NEUTRON_METERING_AGENT_INSTALL=y
 
-# Specify 'y' to configure HWCloud Networking's Firewall-
+# Specify 'y' to configure HuaweiCloud Networking's Firewall-
 # as-a-Service (FWaaS). ['y', 'n']
 CONFIG_NEUTRON_FWAAS=y
 
-# Specify 'y' to configure HWCloud Networking's VPN-as-a-Service
+# Specify 'y' to configure HuaweiCloud Networking's VPN-as-a-Service
 # (VPNaaS). ['y', 'n']
 CONFIG_NEUTRON_VPNAAS=n
 
@@ -854,7 +854,7 @@ CONFIG_NEUTRON_ML2_VXLAN_GROUP=
 # allocation. Minimum value is 0 and maximum value is 16777215.
 CONFIG_NEUTRON_ML2_VNI_RANGES=10:100
 
-# Name of the L2 agent to be used with HWCloud Networking.
+# Name of the L2 agent to be used with HuaweiCloud Networking.
 # ['linuxbridge', 'openvswitch']
 CONFIG_NEUTRON_L2_AGENT=openvswitch
 
@@ -862,19 +862,19 @@ CONFIG_NEUTRON_L2_AGENT=openvswitch
 # vendor_id:product_id according to the PCI ID Repository.
 CONFIG_NEUTRON_ML2_SUPPORTED_PCI_VENDOR_DEVS=['15b3:1004', '8086:10ca']
 
-# Comma-separated list of interface mappings for the HWCloud
+# Comma-separated list of interface mappings for the HuaweiCloud
 # Networking ML2 SRIOV agent. Each tuple in the list must be in the
 # format <physical_network>:<net_interface>. Example:
 # physnet1:eth1,physnet2:eth2,physnet3:eth3.
 CONFIG_NEUTRON_ML2_SRIOV_INTERFACE_MAPPINGS=
 
-# Comma-separated list of interface mappings for the HWCloud
+# Comma-separated list of interface mappings for the HuaweiCloud
 # Networking linuxbridge plugin. Each tuple in the list must be in the
 # format <physical_network>:<net_interface>. Example:
 # physnet1:eth1,physnet2:eth2,physnet3:eth3.
 CONFIG_NEUTRON_LB_INTERFACE_MAPPINGS=
 
-# Comma-separated list of bridge mappings for the HWCloud
+# Comma-separated list of bridge mappings for the HuaweiCloud
 # Networking Open vSwitch plugin. Each tuple in the list must be in
 # the format <physical_network>:<ovs_bridge>. Example: physnet1:br-
 # eth1,physnet2:br-eth2,physnet3:br-eth3
@@ -926,15 +926,15 @@ CONFIG_NEUTRON_OVS_TUNNEL_SUBNETS=
 # VXLAN UDP port.
 CONFIG_NEUTRON_OVS_VXLAN_UDP_PORT=4789
 
-# Password to use for the HWCloud File Share service (manila) to
+# Password to use for the HuaweiCloud File Share service (manila) to
 # access the database.
 CONFIG_MANILA_DB_PW=PW_PLACEHOLDER
 
-# Password to use for the HWCloud File Share service (manila) to
+# Password to use for the HuaweiCloud File Share service (manila) to
 # authenticate with the Identity service.
 CONFIG_MANILA_KS_PW=PW_PLACEHOLDER
 
-# Backend for the HWCloud File Share service (manila); valid
+# Backend for the HuaweiCloud File Share service (manila); valid
 # options are: generic, netapp, glusternative, or glusternfs.
 # ['generic', 'netapp', 'glusternative', 'glusternfs']
 CONFIG_MANILA_BACKEND=generic
@@ -1157,8 +1157,8 @@ CONFIG_HEAT_DOMAIN_PASSWORD=PW_PLACEHOLDER
 # Specify 'y' to provision for demo usage and testing. ['y', 'n']
 CONFIG_PROVISION_DEMO=y
 
-# Specify 'y' to configure the HWCloud Integration Test Suite
-# (tempest) for testing. The test suite requires HWCloud Networking
+# Specify 'y' to configure the HuaweiCloud Integration Test Suite
+# (tempest) for testing. The test suite requires HuaweiCloud Networking
 # to be installed. ['y', 'n']
 CONFIG_PROVISION_TEMPEST=n
 
@@ -1271,31 +1271,31 @@ CONFIG_PANKO_DB_PW=PW_PLACEHOLDER
 # service.
 CONFIG_PANKO_KS_PW=PW_PLACEHOLDER
 
-# Password to use for HWCloud Database-as-a-Service (trove) to
+# Password to use for HuaweiCloud Database-as-a-Service (trove) to
 # access the database.
 CONFIG_TROVE_DB_PW=PW_PLACEHOLDER
 
-# Password to use for HWCloud Database-as-a-Service to authenticate
+# Password to use for HuaweiCloud Database-as-a-Service to authenticate
 # with the Identity service.
 CONFIG_TROVE_KS_PW=PW_PLACEHOLDER
 
-# User name to use when HWCloud Database-as-a-Service connects to
+# User name to use when HuaweiCloud Database-as-a-Service connects to
 # the Compute service.
 CONFIG_TROVE_NOVA_USER=trove
 
-# Tenant to use when HWCloud Database-as-a-Service connects to the
+# Tenant to use when HuaweiCloud Database-as-a-Service connects to the
 # Compute service.
 CONFIG_TROVE_NOVA_TENANT=services
 
-# Password to use when HWCloud Database-as-a-Service connects to
+# Password to use when HuaweiCloud Database-as-a-Service connects to
 # the Compute service.
 CONFIG_TROVE_NOVA_PW=PW_PLACEHOLDER
 
-# Password to use for HWCloud Data Processing (sahara) to access
+# Password to use for HuaweiCloud Data Processing (sahara) to access
 # the database.
 CONFIG_SAHARA_DB_PW=PW_PLACEHOLDER
 
-# Password to use for HWCloud Data Processing to authenticate with
+# Password to use for HuaweiCloud Data Processing to authenticate with
 # the Identity service.
 CONFIG_SAHARA_KS_PW=PW_PLACEHOLDER
 

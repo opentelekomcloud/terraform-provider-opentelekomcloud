@@ -1,19 +1,19 @@
 ---
 layout: "openstack"
-page_title: "HWCloud: hwcloud_networking_secgroup_v2"
+page_title: "HuaweiCloud: huaweicloud_networking_secgroup_v2"
 sidebar_current: "docs-openstack-datasource-networking-secgroup-v2"
 description: |-
-  Get information on an HWCloud Security Group.
+  Get information on an HuaweiCloud Security Group.
 ---
 
 # openstack\_networking\_secgroup\_v2
 
-Use this data source to get the ID of an available HWCloud security group.
+Use this data source to get the ID of an available HuaweiCloud security group.
 
 ## Example Usage
 
 ```hcl
-data "hwcloud_networking_secgroup_v2" "secgroup" {
+data "huaweicloud_networking_secgroup_v2" "secgroup" {
   name = "tf_test_secgroup"
 }
 ```
