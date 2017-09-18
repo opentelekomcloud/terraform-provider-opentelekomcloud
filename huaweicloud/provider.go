@@ -13,6 +13,20 @@ var osMutexKV = mutexkv.NewMutexKV()
 func Provider() terraform.ResourceProvider {
 	return &schema.Provider{
 		Schema: map[string]*schema.Schema{
+			"access_key": {
+				Type:        schema.TypeString,
+				Optional:    true,
+				Default:     "",
+				Description: descriptions["access_key"],
+			},
+
+			"secret_key": {
+				Type:        schema.TypeString,
+				Optional:    true,
+				Default:     "",
+				Description: descriptions["secret_key"],
+			},
+
 			"auth_url": &schema.Schema{
 				Type:        schema.TypeString,
 				Required:    true,
@@ -196,6 +210,12 @@ var descriptions map[string]string
 
 func init() {
 	descriptions = map[string]string{
+		"access_key": "The access key for API operations. You can retrieve this\n" +
+			"from the 'Security & Credentials' section of the AWS console.",
+
+		"secret_key": "The secret key for API operations. You can retrieve this\n" +
+			"from the 'Security & Credentials' section of the AWS console.",
+
 		"auth_url": "The Identity authentication URL.",
 
 		"region": "The HuaweiCloud region to connect to.",
@@ -235,6 +255,8 @@ func init() {
 
 func configureProvider(d *schema.ResourceData) (interface{}, error) {
 	config := Config{
+		AccessKey:        d.Get("access_key").(string),
+		SecretKey:        d.Get("secret_key").(string),
 		CACertFile:       d.Get("cacert_file").(string),
 		ClientCertFile:   d.Get("cert").(string),
 		ClientKeyFile:    d.Get("key").(string),

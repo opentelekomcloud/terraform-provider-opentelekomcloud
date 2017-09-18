@@ -16,6 +16,8 @@ import (
 )
 
 type Config struct {
+	AccessKey     	 string
+	SecretKey     	 string
 	CACertFile       string
 	ClientCertFile   string
 	ClientKeyFile    string
