@@ -1,21 +1,21 @@
 ---
 layout: "openstack"
-page_title: "HWCloud: hwcloud_compute_instance_v2"
+page_title: "HuaweiCloud: huaweicloud_compute_instance_v2"
 sidebar_current: "docs-openstack-resource-compute-instance-v2"
 description: |-
-  Manages a V2 VM instance resource within HWCloud.
+  Manages a V2 VM instance resource within HuaweiCloud.
 ---
 
 # openstack\_compute\_instance_v2
 
-Manages a V2 VM instance resource within HWCloud.
+Manages a V2 VM instance resource within HuaweiCloud.
 
 ## Example Usage
 
 ### Basic Instance
 
 ```hcl
-resource "hwcloud_compute_instance_v2" "basic" {
+resource "huaweicloud_compute_instance_v2" "basic" {
   name            = "basic"
   image_id        = "ad091b52-742f-469e-8f3c-fd81cadf0743"
   flavor_id       = "3"
@@ -35,12 +35,12 @@ resource "hwcloud_compute_instance_v2" "basic" {
 ### Instance With Attached Volume
 
 ```hcl
-resource "hwcloud_blockstorage_volume_v2" "myvol" {
+resource "huaweicloud_blockstorage_volume_v2" "myvol" {
   name = "myvol"
   size = 1
 }
 
-resource "hwcloud_compute_instance_v2" "myinstance" {
+resource "huaweicloud_compute_instance_v2" "myinstance" {
   name            = "myinstance"
   image_id        = "ad091b52-742f-469e-8f3c-fd81cadf0743"
   flavor_id       = "3"
@@ -52,16 +52,16 @@ resource "hwcloud_compute_instance_v2" "myinstance" {
   }
 }
 
-resource "hwcloud_compute_volume_attach_v2" "attached" {
-  compute_id = "${hwcloud_compute_instance_v2.myinstance.id}"
-  volume_id = "${hwcloud_blockstorage_volume_v2.myvol.id}"
+resource "huaweicloud_compute_volume_attach_v2" "attached" {
+  compute_id = "${huaweicloud_compute_instance_v2.myinstance.id}"
+  volume_id = "${huaweicloud_blockstorage_volume_v2.myvol.id}"
 }
 ```
 
 ### Boot From Volume
 
 ```hcl
-resource "hwcloud_compute_instance_v2" "boot-from-volume" {
+resource "huaweicloud_compute_instance_v2" "boot-from-volume" {
   name            = "boot-from-volume"
   flavor_id       = "3"
   key_pair        = "my_key_pair_name"
@@ -85,20 +85,20 @@ resource "hwcloud_compute_instance_v2" "boot-from-volume" {
 ### Boot From an Existing Volume
 
 ```hcl
-resource "hwcloud_blockstorage_volume_v1" "myvol" {
+resource "huaweicloud_blockstorage_volume_v1" "myvol" {
   name     = "myvol"
   size     = 5
   image_id = "<image-id>"
 }
 
-resource "hwcloud_compute_instance_v2" "boot-from-volume" {
+resource "huaweicloud_compute_instance_v2" "boot-from-volume" {
   name            = "bootfromvolume"
   flavor_id       = "3"
   key_pair        = "my_key_pair_name"
   security_groups = ["default"]
 
   block_device {
-    uuid                  = "${hwcloud_blockstorage_volume_v1.myvol.id}"
+    uuid                  = "${huaweicloud_blockstorage_volume_v1.myvol.id}"
     source_type           = "volume"
     boot_index            = 0
     destination_type      = "volume"
@@ -114,7 +114,7 @@ resource "hwcloud_compute_instance_v2" "boot-from-volume" {
 ### Boot Instance, Create Volume, and Attach Volume as a Block Device
 
 ```hcl
-resource "hwcloud_compute_instance_v2" "instance_1" {
+resource "huaweicloud_compute_instance_v2" "instance_1" {
   name            = "instance_1"
   image_id        = "<image-id>"
   flavor_id       = "3"
@@ -142,12 +142,12 @@ resource "hwcloud_compute_instance_v2" "instance_1" {
 ### Boot Instance and Attach Existing Volume as a Block Device
 
 ```hcl
-resource "hwcloud_blockstorage_volume_v2" "volume_1" {
+resource "huaweicloud_blockstorage_volume_v2" "volume_1" {
   name = "volume_1"
   size = 1
 }
 
-resource "hwcloud_compute_instance_v2" "instance_1" {
+resource "huaweicloud_compute_instance_v2" "instance_1" {
   name            = "instance_1"
   image_id        = "<image-id>"
   flavor_id       = "3"
@@ -163,7 +163,7 @@ resource "hwcloud_compute_instance_v2" "instance_1" {
   }
 
   block_device {
-    uuid                  = "${hwcloud_blockstorage_volume_v2.volume_1.id}"
+    uuid                  = "${huaweicloud_blockstorage_volume_v2.volume_1.id}"
     source_type           = "volume"
     destination_type      = "volume"
     boot_index            = 1
@@ -175,11 +175,11 @@ resource "hwcloud_compute_instance_v2" "instance_1" {
 ### Instance With Multiple Networks
 
 ```hcl
-resource "hwcloud_networking_floatingip_v2" "myip" {
+resource "huaweicloud_networking_floatingip_v2" "myip" {
   pool = "my_pool"
 }
 
-resource "hwcloud_compute_instance_v2" "multi-net" {
+resource "huaweicloud_compute_instance_v2" "multi-net" {
   name            = "multi-net"
   image_id        = "ad091b52-742f-469e-8f3c-fd81cadf0743"
   flavor_id       = "3"
@@ -195,17 +195,17 @@ resource "hwcloud_compute_instance_v2" "multi-net" {
   }
 }
 
-resource "hwcloud_compute_floatingip_associate_v2" "myip" {
-  floating_ip = "${hwcloud_networking_floatingip_v2.myip.address}"
-  instance_id = "${hwcloud_compute_instance_v2.multi-net.id}"
-  fixed_ip = "${hwcloud_compute_instance_v2.multi-net.network.1.fixed_ip_v4}"
+resource "huaweicloud_compute_floatingip_associate_v2" "myip" {
+  floating_ip = "${huaweicloud_networking_floatingip_v2.myip.address}"
+  instance_id = "${huaweicloud_compute_instance_v2.multi-net.id}"
+  fixed_ip = "${huaweicloud_compute_instance_v2.multi-net.network.1.fixed_ip_v4}"
 }
 ```
 
 ### Instance With Personality
 
 ```hcl
-resource "hwcloud_compute_instance_v2" "personality" {
+resource "huaweicloud_compute_instance_v2" "personality" {
   name            = "personality"
   image_id        = "ad091b52-742f-469e-8f3c-fd81cadf0743"
   flavor_id       = "3"
@@ -226,7 +226,7 @@ resource "hwcloud_compute_instance_v2" "personality" {
 ### Instance with Multiple Ephemeral Disks
 
 ```hcl
-resource "hwcloud_compute_instance_v2" "multi-eph" {
+resource "huaweicloud_compute_instance_v2" "multi-eph" {
   name            = "multi_eph"
   image_id        = "ad091b52-742f-469e-8f3c-fd81cadf0743"
   flavor_id       = "3"
@@ -262,7 +262,7 @@ resource "hwcloud_compute_instance_v2" "multi-eph" {
 ### Instance with User Data (cloud-init)
 
 ```hcl
-resource "hwcloud_compute_instance_v2" "instance_1" {
+resource "huaweicloud_compute_instance_v2" "instance_1" {
   name            = "basic"
   image_id        = "ad091b52-742f-469e-8f3c-fd81cadf0743"
   flavor_id       = "3"
@@ -350,7 +350,7 @@ The following arguments are supported:
     before destroying it, thus giving chance for guest OS daemons to stop correctly.
     If instance doesn't stop within timeout, it will be destroyed anyway.
 
-* `force_delete` - (Optional) Whether to force the HWCloud instance to be
+* `force_delete` - (Optional) Whether to force the HuaweiCloud instance to be
     forcefully deleted. This is useful for environments that have reclaim / soft
     deletion enabled.
 
@@ -461,7 +461,7 @@ The following example shows how to create an instance with multiple ephemeral
 disks:
 
 ```
-resource "hwcloud_compute_instance_v2" "foo" {
+resource "huaweicloud_compute_instance_v2" "foo" {
   name            = "terraform-test"
   security_groups = ["default"]
 
@@ -499,7 +499,7 @@ there are some notes to be aware of when mixing Instances and Ports:
 * When attaching an Instance to one or more networks using Ports, place the
 security groups on the Port and not the Instance. If you place the security
 groups on the Instance, the security groups will not be applied upon creation,
-but they will be applied upon a refresh. This is a known HWCloud bug.
+but they will be applied upon a refresh. This is a known HuaweiCloud bug.
 
 * Network IP information is not available within an instance for networks that
 are attached with Ports. This is mostly due to the flexibility Neutron Ports
@@ -510,7 +510,7 @@ information. Therefore, in order for a Provisioner to connect to an Instance
 via it's network Port, customize the `connection` information:
 
 ```hcl
-resource "hwcloud_networking_port_v2" "port_1" {
+resource "huaweicloud_networking_port_v2" "port_1" {
   name           = "port_1"
   admin_state_up = "true"
 
@@ -522,16 +522,16 @@ resource "hwcloud_networking_port_v2" "port_1" {
   ]
 }
 
-resource "hwcloud_compute_instance_v2" "instance_1" {
+resource "huaweicloud_compute_instance_v2" "instance_1" {
   name = "instance_1"
 
   network {
-    port = "${hwcloud_networking_port_v2.port_1.id}"
+    port = "${huaweicloud_networking_port_v2.port_1.id}"
   }
 
   connection {
     user        = "root"
-    host        = "${hwcloud_networking_port_v2.port_1.fixed_ip.0.ip_address}"
+    host        = "${huaweicloud_networking_port_v2.port_1.fixed_ip.0.ip_address}"
     private_key = "~/path/to/key"
   }
 

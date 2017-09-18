@@ -1,26 +1,26 @@
 ---
 layout: "openstack"
-page_title: "HWCloud: hwcloud_networking_port_v2"
+page_title: "HuaweiCloud: huaweicloud_networking_port_v2"
 sidebar_current: "docs-openstack-resource-networking-port-v2"
 description: |-
-  Manages a V2 port resource within HWCloud.
+  Manages a V2 port resource within HuaweiCloud.
 ---
 
 # openstack\_networking\_port_v2
 
-Manages a V2 port resource within HWCloud.
+Manages a V2 port resource within HuaweiCloud.
 
 ## Example Usage
 
 ```hcl
-resource "hwcloud_networking_network_v2" "network_1" {
+resource "huaweicloud_networking_network_v2" "network_1" {
   name           = "network_1"
   admin_state_up = "true"
 }
 
-resource "hwcloud_networking_port_v2" "port_1" {
+resource "huaweicloud_networking_port_v2" "port_1" {
   name           = "port_1"
-  network_id     = "${hwcloud_networking_network_v2.network_1.id}"
+  network_id     = "${huaweicloud_networking_network_v2.network_1.id}"
   admin_state_up = "true"
 }
 ```
@@ -104,7 +104,7 @@ The following attributes are exported:
 Ports can be imported using the `id`, e.g.
 
 ```
-$ terraform import hwcloud_networking_port_v2.port_1 eae26a3e-1c33-4cc1-9c31-0cd729c438a1
+$ terraform import huaweicloud_networking_port_v2.port_1 eae26a3e-1c33-4cc1-9c31-0cd729c438a1
 ```
 
 ## Notes
@@ -112,5 +112,5 @@ $ terraform import hwcloud_networking_port_v2.port_1 eae26a3e-1c33-4cc1-9c31-0cd
 ### Ports and Instances
 
 There are some notes to consider when connecting Instances to networks using
-Ports. Please see the `hwcloud_compute_instance_v2` documentation for further
+Ports. Please see the `huaweicloud_compute_instance_v2` documentation for further
 documentation.
