@@ -1,19 +1,19 @@
 ---
 layout: "openstack"
-page_title: "HWCloud: hwcloud_objectstorage_container_v1"
+page_title: "HuaweiCloud: huaweicloud_objectstorage_container_v1"
 sidebar_current: "docs-openstack-resource-objectstorage-container-v1"
 description: |-
-  Manages a V1 container resource within HWCloud.
+  Manages a V1 container resource within HuaweiCloud.
 ---
 
 # openstack\_objectstorage\_container_v1
 
-Manages a V1 container resource within HWCloud.
+Manages a V1 container resource within HuaweiCloud.
 
 ## Example Usage
 
 ```hcl
-resource "hwcloud_objectstorage_container_v1" "container_1" {
+resource "huaweicloud_objectstorage_container_v1" "container_1" {
   region = "RegionOne"
   name   = "tf-test-container-1"
 

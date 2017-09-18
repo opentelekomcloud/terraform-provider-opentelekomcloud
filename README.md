@@ -1,4 +1,4 @@
-Terraform HWCloud Provider
+Terraform HuaweiCloud Provider
 ============================
 
 - Website: https://www.terraform.io

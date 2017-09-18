@@ -1,27 +1,27 @@
 ---
 layout: "openstack"
-page_title: "HWCloud: hwcloud_identity_user_v3"
+page_title: "HuaweiCloud: huaweicloud_identity_user_v3"
 sidebar_current: "docs-openstack-resource-identity-user-v3"
 description: |-
-  Manages a V3 User resource within HWCloud Keystone.
+  Manages a V3 User resource within HuaweiCloud Keystone.
 ---
 
 # openstack\_identity\_user_v3
 
-Manages a V3 User resource within HWCloud Keystone.
+Manages a V3 User resource within HuaweiCloud Keystone.
 
-Note: You _must_ have admin privileges in your HWCloud cloud to use
+Note: You _must_ have admin privileges in your HuaweiCloud cloud to use
 this resource.
 
 ## Example Usage
 
 ```hcl
-resource "hwcloud_identity_project_v3" "project_1" {
+resource "huaweicloud_identity_project_v3" "project_1" {
   name = "project_1"
 }
 
-resource "hwcloud_identity_user_v3" "user_1" {
-  default_project_id = "${hwcloud_identity_project_v3.project_1.id}"
+resource "huaweicloud_identity_user_v3" "user_1" {
+  default_project_id = "${huaweicloud_identity_project_v3.project_1.id}"
   name = "user_1"
   description = "A user"
 
@@ -101,5 +101,5 @@ The following attributes are exported:
 Users can be imported using the `id`, e.g.
 
 ```
-$ terraform import hwcloud_identity_user_v3.user_1 89c60255-9bd6-460c-822a-e2b959ede9d2
+$ terraform import huaweicloud_identity_user_v3.user_1 89c60255-9bd6-460c-822a-e2b959ede9d2
 ```

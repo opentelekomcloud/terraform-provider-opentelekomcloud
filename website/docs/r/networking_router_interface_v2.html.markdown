@@ -1,37 +1,37 @@
 ---
 layout: "openstack"
-page_title: "HWCloud: hwcloud_networking_router_interface_v2"
+page_title: "HuaweiCloud: huaweicloud_networking_router_interface_v2"
 sidebar_current: "docs-openstack-resource-networking-router-interface-v2"
 description: |-
-  Manages a V2 router interface resource within HWCloud.
+  Manages a V2 router interface resource within HuaweiCloud.
 ---
 
 # openstack\_networking\_router_interface_v2
 
-Manages a V2 router interface resource within HWCloud.
+Manages a V2 router interface resource within HuaweiCloud.
 
 ## Example Usage
 
 ```hcl
-resource "hwcloud_networking_network_v2" "network_1" {
+resource "huaweicloud_networking_network_v2" "network_1" {
   name           = "tf_test_network"
   admin_state_up = "true"
 }
 
-resource "hwcloud_networking_subnet_v2" "subnet_1" {
-  network_id = "${hwcloud_networking_network_v2.network_1.id}"
+resource "huaweicloud_networking_subnet_v2" "subnet_1" {
+  network_id = "${huaweicloud_networking_network_v2.network_1.id}"
   cidr       = "192.168.199.0/24"
   ip_version = 4
 }
 
-resource "hwcloud_networking_router_v2" "router_1" {
+resource "huaweicloud_networking_router_v2" "router_1" {
   name             = "my_router"
   external_gateway = "f67f0d72-0ddf-11e4-9d95-e1f29f417e2f"
 }
 
-resource "hwcloud_networking_router_interface_v2" "router_interface_1" {
-  router_id = "${hwcloud_networking_router_v2.router_1.id}"
-  subnet_id = "${hwcloud_networking_subnet_v2.subnet_1.id}"
+resource "huaweicloud_networking_router_interface_v2" "router_interface_1" {
+  router_id = "${huaweicloud_networking_router_v2.router_1.id}"
+  subnet_id = "${huaweicloud_networking_subnet_v2.subnet_1.id}"
 }
 ```
 
