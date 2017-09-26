@@ -1,5 +1,7 @@
 package huaweicloud
 
+/*
+// UNSUPPORTED
 import (
 	"fmt"
 	"log"
@@ -321,3 +323,4 @@ func waitForFirewallDeletion(networkingClient *gophercloud.ServiceClient, id str
 		return fw, "DELETING", nil
 	}
 }
+*/
