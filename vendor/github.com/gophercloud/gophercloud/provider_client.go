@@ -3,10 +3,12 @@ package gophercloud
 import (
 	"bytes"
 	"encoding/json"
+	//"fmt"
 	"io"
 	"io/ioutil"
 	"net/http"
 	"strings"
+	//"reflect"
 )
 
 // DefaultUserAgent is the default User-Agent string set in the request header.
@@ -112,6 +114,7 @@ func (client *ProviderClient) Request(method, url string, options *RequestOpts) 
 	var body io.Reader
 	var contentType *string
 
+	//fmt.Printf("Request method: %s, url: %s, options=%+v.\n", method, url, options)
 	// Derive the content body by either encoding an arbitrary object as JSON, or by taking a provided
 	// io.ReadSeeker as-is. Default the content-type to application/json.
 	if options.JSONBody != nil {
@@ -125,6 +128,7 @@ func (client *ProviderClient) Request(method, url string, options *RequestOpts) 
 		}
 
 		body = bytes.NewReader(rendered)
+		//fmt.Printf("Request body: %s.\n", body)
 		contentType = &applicationJSON
 	}
 
@@ -233,6 +237,7 @@ func (client *ProviderClient) Request(method, url string, options *RequestOpts) 
 						return nil, e
 					}
 				}
+				//fmt.Printf("Error response1: %+v, code=%d, body=%s.\n", resp, resp.StatusCode, body)
 				return resp, nil
 			}
 			err = ErrDefault401{respErr}
@@ -274,6 +279,7 @@ func (client *ProviderClient) Request(method, url string, options *RequestOpts) 
 		if err == nil {
 			err = respErr
 		}
+		//fmt.Printf("Error response: %+v, code=%d, body=%s.\n", resp, resp.StatusCode, body)
 
 		return resp, err
 	}
@@ -282,10 +288,16 @@ func (client *ProviderClient) Request(method, url string, options *RequestOpts) 
 	if options.JSONResponse != nil {
 		defer resp.Body.Close()
 		if err := json.NewDecoder(resp.Body).Decode(options.JSONResponse); err != nil {
+			//fmt.Printf("JSON error: %+v, code=%d, body=%s.\n", resp, resp.StatusCode, body)
 			return nil, err
 		}
+		//rv := reflect.ValueOf(options.JSONResponse)
+		//fmt.Printf("JSON OK: JSONResponse=%+v.\n", reflect.Indirect(rv))
 	}
 
+	//body2, _ := ioutil.ReadAll(resp.Body)
+	//resp.Body.Close()
+	//fmt.Printf("OK response: %+v, code=%d, body=%s\n", resp, resp.StatusCode, body2)
 	return resp, nil
 }
 

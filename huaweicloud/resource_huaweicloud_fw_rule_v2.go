@@ -1,23 +1,21 @@
 package huaweicloud
 
-/*
-// UNSUPPORTED
 import (
 	"fmt"
 	"log"
 
 	"github.com/gophercloud/gophercloud"
-	"github.com/gophercloud/gophercloud/openstack/networking/v2/extensions/fwaas/policies"
-	"github.com/gophercloud/gophercloud/openstack/networking/v2/extensions/fwaas/rules"
+	"github.com/gophercloud/gophercloud/openstack/networking/v2/extensions/fwaas_v2/policies"
+	"github.com/gophercloud/gophercloud/openstack/networking/v2/extensions/fwaas_v2/rules"
 	"github.com/hashicorp/terraform/helper/schema"
 )
 
-func resourceFWRuleV1() *schema.Resource {
+func resourceFWRuleV2() *schema.Resource {
 	return &schema.Resource{
-		Create: resourceFWRuleV1Create,
-		Read:   resourceFWRuleV1Read,
-		Update: resourceFWRuleV1Update,
-		Delete: resourceFWRuleV1Delete,
+		Create: resourceFWRuleV2Create,
+		Read:   resourceFWRuleV2Read,
+		Update: resourceFWRuleV2Update,
+		Delete: resourceFWRuleV2Delete,
 		Importer: &schema.ResourceImporter{
 			State: schema.ImportStatePassthrough,
 		},
@@ -85,7 +83,7 @@ func resourceFWRuleV1() *schema.Resource {
 	}
 }
 
-func resourceFWRuleV1Create(d *schema.ResourceData, meta interface{}) error {
+func resourceFWRuleV2Create(d *schema.ResourceData, meta interface{}) error {
 
 	config := meta.(*Config)
 	networkingClient, err := config.networkingV2Client(GetRegion(d, config))
@@ -94,8 +92,8 @@ func resourceFWRuleV1Create(d *schema.ResourceData, meta interface{}) error {
 	}
 
 	enabled := d.Get("enabled").(bool)
-	ipVersion := resourceFWRuleV1DetermineIPVersion(d.Get("ip_version").(int))
-	protocol := resourceFWRuleV1DetermineProtocol(d.Get("protocol").(string))
+	ipVersion := resourceFWRuleV2DetermineIPVersion(d.Get("ip_version").(int))
+	protocol := resourceFWRuleV2DetermineProtocol(d.Get("protocol").(string))
 
 	ruleConfiguration := RuleCreateOpts{
 		rules.CreateOpts{
@@ -126,10 +124,10 @@ func resourceFWRuleV1Create(d *schema.ResourceData, meta interface{}) error {
 
 	d.SetId(rule.ID)
 
-	return resourceFWRuleV1Read(d, meta)
+	return resourceFWRuleV2Read(d, meta)
 }
 
-func resourceFWRuleV1Read(d *schema.ResourceData, meta interface{}) error {
+func resourceFWRuleV2Read(d *schema.ResourceData, meta interface{}) error {
 	log.Printf("[DEBUG] Retrieve information about firewall rule: %s", d.Id())
 
 	config := meta.(*Config)
@@ -166,7 +164,7 @@ func resourceFWRuleV1Read(d *schema.ResourceData, meta interface{}) error {
 	return nil
 }
 
-func resourceFWRuleV1Update(d *schema.ResourceData, meta interface{}) error {
+func resourceFWRuleV2Update(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*Config)
 	networkingClient, err := config.networkingV2Client(GetRegion(d, config))
 	if err != nil {
@@ -177,7 +175,7 @@ func resourceFWRuleV1Update(d *schema.ResourceData, meta interface{}) error {
 	description := d.Get("description").(string)
 	protocol := d.Get("protocol").(string)
 	action := d.Get("action").(string)
-	ipVersion := resourceFWRuleV1DetermineIPVersion(d.Get("ip_version").(int))
+	ipVersion := resourceFWRuleV2DetermineIPVersion(d.Get("ip_version").(int))
 	sourceIPAddress := d.Get("source_ip_address").(string)
 	sourcePort := d.Get("source_port").(string)
 	destinationIPAddress := d.Get("destination_ip_address").(string)
@@ -203,10 +201,10 @@ func resourceFWRuleV1Update(d *schema.ResourceData, meta interface{}) error {
 		return err
 	}
 
-	return resourceFWRuleV1Read(d, meta)
+	return resourceFWRuleV2Read(d, meta)
 }
 
-func resourceFWRuleV1Delete(d *schema.ResourceData, meta interface{}) error {
+func resourceFWRuleV2Delete(d *schema.ResourceData, meta interface{}) error {
 	log.Printf("[DEBUG] Destroy firewall rule: %s", d.Id())
 
 	config := meta.(*Config)
@@ -230,7 +228,7 @@ func resourceFWRuleV1Delete(d *schema.ResourceData, meta interface{}) error {
 	return rules.Delete(networkingClient, d.Id()).Err
 }
 
-func resourceFWRuleV1DetermineIPVersion(ipv int) gophercloud.IPVersion {
+func resourceFWRuleV2DetermineIPVersion(ipv int) gophercloud.IPVersion {
 	// Determine the IP Version
 	var ipVersion gophercloud.IPVersion
 	switch ipv {
@@ -243,7 +241,7 @@ func resourceFWRuleV1DetermineIPVersion(ipv int) gophercloud.IPVersion {
 	return ipVersion
 }
 
-func resourceFWRuleV1DetermineProtocol(p string) rules.Protocol {
+func resourceFWRuleV2DetermineProtocol(p string) rules.Protocol {
 	var protocol rules.Protocol
 	switch p {
 	case "any":
@@ -258,4 +256,3 @@ func resourceFWRuleV1DetermineProtocol(p string) rules.Protocol {
 
 	return protocol
 }
-*/
