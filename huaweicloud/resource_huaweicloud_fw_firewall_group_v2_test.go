@@ -291,7 +291,7 @@ resource "huaweicloud_fw_policy_v2" "policy_2" {
 }
 `
 
-const testAccFWFirewallV2_port = `
+var testAccFWFirewallV2_port = fmt.Sprintf(`
 resource "huaweicloud_networking_network_v2" "network_1" {
   name = "network_1"
   admin_state_up = "true"
@@ -308,6 +308,7 @@ resource "huaweicloud_networking_subnet_v2" "subnet_1" {
 resource "huaweicloud_networking_router_v2" "router_1" {
   name = "router_1"
   admin_state_up = "true"
+  external_gateway = "%s"
   distributed = "false"
 }
 
@@ -340,7 +341,7 @@ resource "huaweicloud_fw_firewall_group_v2" "fw_1" {
 	"${huaweicloud_networking_port_v2.port_1.id}"
   ]
 }
-`
+`, OS_EXTGW_ID)
 
 const testAccFWFirewallV2_port_add = `
 resource "huaweicloud_networking_network_v2" "network_1" {
@@ -358,6 +359,7 @@ resource "huaweicloud_networking_subnet_v2" "subnet_1" {
 resource "huaweicloud_networking_router_v2" "router_1" {
   name = "router_1"
   admin_state_up = "true"
+  external_gateway = "%s"
   distributed = "false"
 }
 
