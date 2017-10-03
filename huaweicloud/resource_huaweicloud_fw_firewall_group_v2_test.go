@@ -309,7 +309,6 @@ resource "huaweicloud_networking_router_v2" "router_1" {
   name = "router_1"
   admin_state_up = "true"
   external_gateway = "%s"
-  distributed = "false"
 }
 
 resource "huaweicloud_networking_port_v2" "port_1" {
@@ -361,15 +360,18 @@ resource "huaweicloud_networking_router_v2" "router_1" {
   name = "router_1"
   admin_state_up = "true"
   external_gateway = "%s"
-  distributed = "false"
+}
+
+resource "huaweicloud_networking_router_v2" "router_2" {
+  name = "router_2"
+  admin_state_up = "true"
+  external_gateway = "%s"
 }
 
 resource "huaweicloud_networking_port_v2" "port_1" {
   name = "port_1"
   admin_state_up = "true"
   network_id = "${huaweicloud_networking_network_v2.network_1.id}"
-  device_owner = "network:router_interface"
-  device_id = "${huaweicloud_networking_router_v2.router_1.id}"
 
   fixed_ip {
     subnet_id =  "${huaweicloud_networking_subnet_v2.subnet_1.id}"
@@ -381,8 +383,6 @@ resource "huaweicloud_networking_port_v2" "port_2" {
   name = "port_2"
   admin_state_up = "true"
   network_id = "${huaweicloud_networking_network_v2.network_1.id}"
-  device_owner = "network:router_interface"
-  device_id = "${huaweicloud_networking_router_v2.router_1.id}"
 
   fixed_ip {
     subnet_id =  "${huaweicloud_networking_subnet_v2.subnet_1.id}"
@@ -396,7 +396,7 @@ resource "huaweicloud_networking_router_interface_v2" "router_interface_1" {
 }
 
 resource "huaweicloud_networking_router_interface_v2" "router_interface_2" {
-  router_id = "${huaweicloud_networking_router_v2.router_1.id}"
+  router_id = "${huaweicloud_networking_router_v2.router_2.id}"
   port_id = "${huaweicloud_networking_port_v2.port_2.id}"
 }
 
@@ -407,8 +407,8 @@ resource "huaweicloud_fw_policy_v2" "policy_1" {
 resource "huaweicloud_fw_firewall_group_v2" "fw_1" {
   name = "firewall_1"
   description = "firewall router test"
-  ingress_policy_id = "${huaweicloud_fw_policy_v1.policy_1.id}"
-  egress_policy_id = "${huaweicloud_fw_policy_v1.policy_1.id}"
+  ingress_policy_id = "${huaweicloud_fw_policy_v2.policy_1.id}"
+  egress_policy_id = "${huaweicloud_fw_policy_v2.policy_1.id}"
   ports = [
 	"${huaweicloud_networking_port_v2.port_1.id}",
 	"${huaweicloud_networking_port_v2.port_2.id}"
