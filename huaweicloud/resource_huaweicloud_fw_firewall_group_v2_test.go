@@ -340,10 +340,11 @@ resource "huaweicloud_fw_firewall_group_v2" "fw_1" {
   ports = [
 	"${huaweicloud_networking_port_v2.port_1.id}"
   ]
+  depends_on = ["huaweicloud_networking_router_interface_v2.router_interface_1"]
 }
 `, OS_EXTGW_ID)
 
-const testAccFWFirewallV2_port_add = `
+var testAccFWFirewallV2_port_add = fmt.Sprintf(`
 resource "huaweicloud_networking_network_v2" "network_1" {
   name = "network_1"
   admin_state_up = "true"
@@ -372,7 +373,7 @@ resource "huaweicloud_networking_port_v2" "port_1" {
 
   fixed_ip {
     subnet_id =  "${huaweicloud_networking_subnet_v2.subnet_1.id}"
-    ip_address = "192.168.199.23"
+    #ip_address = "192.168.199.23"
   }
 }
 
@@ -385,8 +386,18 @@ resource "huaweicloud_networking_port_v2" "port_2" {
 
   fixed_ip {
     subnet_id =  "${huaweicloud_networking_subnet_v2.subnet_1.id}"
-    ip_address = "192.168.199.24"
+    #ip_address = "192.168.199.24"
   }
+}
+
+resource "huaweicloud_networking_router_interface_v2" "router_interface_1" {
+  router_id = "${huaweicloud_networking_router_v2.router_1.id}"
+  port_id = "${huaweicloud_networking_port_v2.port_1.id}"
+}
+
+resource "huaweicloud_networking_router_interface_v2" "router_interface_2" {
+  router_id = "${huaweicloud_networking_router_v2.router_1.id}"
+  port_id = "${huaweicloud_networking_port_v2.port_2.id}"
 }
 
 resource "huaweicloud_fw_policy_v2" "policy_1" {
@@ -402,8 +413,9 @@ resource "huaweicloud_fw_firewall_group_v2" "fw_1" {
 	"${huaweicloud_networking_port_v2.port_1.id}",
 	"${huaweicloud_networking_port_v2.port_2.id}"
   ]
+  depends_on = ["huaweicloud_networking_router_interface_v2.router_interface_1", "huaweicloud_networking_router_interface_v2.router_interface_2"]
 }
-`
+`, OS_EXTGW_ID)
 
 const testAccFWFirewallV2_port_remove = `
 resource "huaweicloud_fw_policy_v2" "policy_1" {
