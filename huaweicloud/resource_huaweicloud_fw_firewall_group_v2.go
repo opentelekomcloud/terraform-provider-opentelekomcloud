@@ -202,6 +202,7 @@ func resourceFWFirewallGroupV2Update(d *schema.ResourceData, meta interface{}) e
 	var portIds []string
 	if d.HasChange("ports") {
 		portsRaw := d.Get("ports").(*schema.Set).List()
+		log.Printf("[DEBUG] Will attempt to associate Firewall group with port(s): %+v", portsRaw)
 		for _, v := range portsRaw {
 			portIds = append(portIds, v.(string))
 		}
