@@ -4,13 +4,13 @@ import (
 	"github.com/gophercloud/gophercloud/openstack/networking/v2/extensions/fwaas_v2/firewall_groups"
 )
 
-// CreateOptsExt adds a RouterIDs option to the base CreateOpts.
+// CreateOptsExt adds a PortIDs option to the base CreateOpts.
 type CreateOptsExt struct {
 	firewall_groups.CreateOptsBuilder
 	PortIDs []string `json:"ports"`
 }
 
-// ToFirewallGroupCreateMap adds router_ids to the base firewall creation options.
+// ToFirewallGroupCreateMap adds ports to the base firewall creation options.
 func (opts CreateOptsExt) ToFirewallGroupCreateMap() (map[string]interface{}, error) {
 	base, err := opts.CreateOptsBuilder.ToFirewallGroupCreateMap()
 	if err != nil {
@@ -23,14 +23,14 @@ func (opts CreateOptsExt) ToFirewallGroupCreateMap() (map[string]interface{}, er
 	return base, nil
 }
 
-// UpdateOptsExt updates a RouterIDs option to the base UpdateOpts.
+// UpdateOptsExt updates a PortIDs option to the base UpdateOpts.
 type UpdateOptsExt struct {
 	firewall_groups.UpdateOptsBuilder
 	PortIDs []string `json:"ports"`
 }
 
-// ToFirewallUpdateMap adds router_ids to the base firewall update options.
-func (opts UpdateOptsExt) ToFirewallUpdateMap() (map[string]interface{}, error) {
+// ToFirewallGroupUpdateMap adds ports to the base firewall update options.
+func (opts UpdateOptsExt) ToFirewallGroupUpdateMap() (map[string]interface{}, error) {
 	base, err := opts.UpdateOptsBuilder.ToFirewallGroupUpdateMap()
 	if err != nil {
 		return nil, err
