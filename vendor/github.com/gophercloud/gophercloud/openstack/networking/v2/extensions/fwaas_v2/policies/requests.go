@@ -20,7 +20,7 @@ type ListOpts struct {
 	TenantID    string `q:"tenant_id"`
 	Name        string `q:"name"`
 	Description string `q:"description"`
-	Shared      *bool  `q:"shared"`
+	Shared      *bool  `q:"public"`
 	Audited     *bool  `q:"audited"`
 	ID          string `q:"id"`
 	Limit       int    `q:"limit"`
@@ -70,7 +70,7 @@ type CreateOpts struct {
 	TenantID    string   `json:"tenant_id,omitempty"`
 	Name        string   `json:"name,omitempty"`
 	Description string   `json:"description,omitempty"`
-	Shared      *bool    `json:"shared,omitempty"`
+	Shared      *bool    `json:"public,omitempty"`
 	Audited     *bool    `json:"audited,omitempty"`
 	Rules       []string `json:"firewall_rules,omitempty"`
 }
