@@ -49,7 +49,7 @@ func TestAccFWFirewallGroupV2_port0(t *testing.T) {
 				Config: testAccFWFirewallV2_port,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckFWFirewallGroupV2Exists("huaweicloud_fw_firewall_group_v2.fw_1", &firewall_group),
-					testAccCheckFWFirewallRouterCount(&firewall_group, 1),
+					testAccCheckFWFirewallPortCount(&firewall_group, 1),
 				),
 			},
 		},
@@ -69,7 +69,7 @@ func TestAccFWFirewallGroupV2_no_ports(t *testing.T) {
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckFWFirewallGroupV2Exists("huaweicloud_fw_firewall_group_v2.fw_1", &firewall_group),
 					resource.TestCheckResourceAttr("huaweicloud_fw_firewall_group_v2.fw_1", "description", "firewall router test"),
-					testAccCheckFWFirewallRouterCount(&firewall_group, 0),
+					testAccCheckFWFirewallPortCount(&firewall_group, 0),
 				),
 			},
 		},
@@ -88,14 +88,14 @@ func TestAccFWFirewallGroupV2_port_update(t *testing.T) {
 				Config: testAccFWFirewallV2_port,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckFWFirewallGroupV2Exists("huaweicloud_fw_firewall_group_v2.fw_1", &firewall_group),
-					testAccCheckFWFirewallRouterCount(&firewall_group, 1),
+					testAccCheckFWFirewallPortCount(&firewall_group, 1),
 				),
 			},
 			resource.TestStep{
 				Config: testAccFWFirewallV2_port_add,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckFWFirewallGroupV2Exists("huaweicloud_fw_firewall_group_v2.fw_1", &firewall_group),
-					testAccCheckFWFirewallRouterCount(&firewall_group, 2),
+					testAccCheckFWFirewallPortCount(&firewall_group, 2),
 				),
 			},
 		},
@@ -114,14 +114,14 @@ func TestAccFWFirewallGroupV2_port_remove(t *testing.T) {
 				Config: testAccFWFirewallV2_port,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckFWFirewallGroupV2Exists("huaweicloud_fw_firewall_v2.fw_1", &firewall_group),
-					testAccCheckFWFirewallRouterCount(&firewall_group, 1),
+					testAccCheckFWFirewallPortCount(&firewall_group, 1),
 				),
 			},
 			resource.TestStep{
 				Config: testAccFWFirewallV2_port_remove,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckFWFirewallGroupV2Exists("huaweicloud_fw_firewall_v2.fw_1", &firewall_group),
-					testAccCheckFWFirewallRouterCount(&firewall_group, 0),
+					testAccCheckFWFirewallPortCount(&firewall_group, 0),
 				),
 			},
 		},
@@ -183,7 +183,7 @@ func testAccCheckFWFirewallGroupV2Exists(n string, firewall_group *FirewallGroup
 	}
 }
 
-func testAccCheckFWFirewallRouterCount(firewall_group *FirewallGroup, expected int) resource.TestCheckFunc {
+func testAccCheckFWFirewallPortCount(firewall_group *FirewallGroup, expected int) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
 		if len(firewall_group.PortIDs) != expected {
 			return fmt.Errorf("Expected %d Ports, got %d", expected, len(firewall_group.PortIDs))
@@ -415,7 +415,7 @@ resource "huaweicloud_fw_firewall_group_v2" "fw_1" {
   ]
   depends_on = ["huaweicloud_networking_router_interface_v2.router_interface_1", "huaweicloud_networking_router_interface_v2.router_interface_2"]
 }
-`, OS_EXTGW_ID)
+`, OS_EXTGW_ID, OS_EXTGW_ID)
 
 const testAccFWFirewallV2_port_remove = `
 resource "huaweicloud_fw_policy_v2" "policy_1" {
