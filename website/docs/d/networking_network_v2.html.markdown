@@ -1,12 +1,12 @@
 ---
-layout: "openstack"
+layout: "huaweicloud"
 page_title: "HuaweiCloud: huaweicloud_networking_network_v2"
-sidebar_current: "docs-openstack-datasource-networking-network-v2"
+sidebar_current: "docs-huaweicloud-datasource-networking-network-v2"
 description: |-
   Get information on an HuaweiCloud Network.
 ---
 
-# openstack\_networking\_network\_v2
+# huaweicloud\_networking\_network\_v2
 
 Use this data source to get the ID of an available HuaweiCloud network.
 

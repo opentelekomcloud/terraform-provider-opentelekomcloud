@@ -1,12 +1,12 @@
 ---
-layout: "openstack"
+layout: "huaweicloud"
 page_title: "HuaweiCloud: huaweicloud_compute_keypair_v2"
-sidebar_current: "docs-openstack-resource-compute-keypair-v2"
+sidebar_current: "docs-huaweicloud-resource-compute-keypair-v2"
 description: |-
   Manages a V2 keypair resource within HuaweiCloud.
 ---
 
-# openstack\_compute\_keypair_v2
+# huaweicloud\_compute\_keypair_v2
 
 Manages a V2 keypair resource within HuaweiCloud.
 

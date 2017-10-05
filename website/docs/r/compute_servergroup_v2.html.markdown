@@ -1,12 +1,12 @@
 ---
-layout: "openstack"
+layout: "huaweicloud"
 page_title: "HuaweiCloud: huaweicloud_compute_servergroup_v2"
-sidebar_current: "docs-openstack-resource-compute-servergroup-v2"
+sidebar_current: "docs-huaweicloud-resource-compute-servergroup-v2"
 description: |-
   Manages a V2 Server Group resource within HuaweiCloud.
 ---
 
-# openstack\_compute\_servergroup_v2
+# huaweicloud\_compute\_servergroup_v2
 
 Manages a V2 Server Group resource within HuaweiCloud.
 

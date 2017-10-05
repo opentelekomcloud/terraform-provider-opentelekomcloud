@@ -1,12 +1,12 @@
 ---
-layout: "openstack"
+layout: "huaweicloud"
 page_title: "HuaweiCloud: huaweicloud_lb_vip_v1"
-sidebar_current: "docs-openstack-resource-lb-vip-v1"
+sidebar_current: "docs-huaweicloud-resource-lb-vip-v1"
 description: |-
   Manages a V1 load balancer vip resource within HuaweiCloud.
 ---
 
-# openstack\_lb\_vip_v1
+# huaweicloud\_lb\_vip_v1
 
 Manages a V1 load balancer vip resource within HuaweiCloud.
 
