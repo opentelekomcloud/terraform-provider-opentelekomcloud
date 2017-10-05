@@ -34,7 +34,7 @@ Using the provider
 ----------------------
 Please see the documentation at [terraform.io](https://www.terraform.io/docs/providers/openstack/index.html).
 
-Or you can browse the documentation within this repo [here](https://github.com/terraform-providers/terraform-provider-openstack/tree/master/website/docs).
+Or you can browse the documentation within this repo [here](https://github.com/terraform-providers/terraform-provider-huaweicloud/tree/master/website/docs).
 
 Developing the Provider
 ---------------------------

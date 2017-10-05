@@ -1,12 +1,12 @@
 ---
-layout: "openstack"
+layout: "huaweicloud"
 page_title: "HuaweiCloud: huaweicloud_lb_member_v1"
-sidebar_current: "docs-openstack-resource-lb-member-v1"
+sidebar_current: "docs-huaweicloud-resource-lb-member-v1"
 description: |-
   Manages a V1 load balancer member resource within HuaweiCloud.
 ---
 
-# openstack\_lb\_member_v1
+# huaweicloud\_lb\_member_v1
 
 Manages a V1 load balancer member resource within HuaweiCloud.
 

@@ -1,19 +1,19 @@
 ---
-layout: "openstack"
-page_title: "HuaweiCloud: huaweicloud_fw_rule_v1"
-sidebar_current: "docs-openstack-resource-fw-rule-v1"
+layout: "huaweicloud"
+page_title: "HuaweiCloud: huaweicloud_fw_rule_v2"
+sidebar_current: "docs-huaweicloud-resource-fw-rule-v1"
 description: |-
-  Manages a v1 firewall rule resource within HuaweiCloud.
+  Manages a v1 firewall group rule resource within HuaweiCloud.
 ---
 
-# openstack\_fw\_rule_v1
+# huaweicloud\_fw\_rule_v2
 
-Manages a v1 firewall rule resource within HuaweiCloud.
+Manages a v2 firewall rule resource within HuaweiCloud.
 
 ## Example Usage
 
 ```hcl
-resource "huaweicloud_fw_rule_v1" "rule_1" {
+resource "huaweicloud_fw_rule_v2" "rule_1" {
   name             = "my_rule"
   description      = "drop TELNET traffic"
   action           = "deny"
@@ -97,5 +97,5 @@ The following attributes are exported:
 Firewall Rules can be imported using the `id`, e.g.
 
 ```
-$ terraform import huaweicloud_fw_rule_v1.rule_1 8dbc0c28-e49c-463f-b712-5c5d1bbac327
+$ terraform import huaweicloud_fw_rule_v2.rule_1 8dbc0c28-e49c-463f-b712-5c5d1bbac327
 ```
