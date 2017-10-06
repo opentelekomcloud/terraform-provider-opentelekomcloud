@@ -128,7 +128,8 @@ func resourceComputeFlavorV2Read(d *schema.ResourceData, meta interface{}) error
 }
 
 func resourceComputeFlavorV2Delete(d *schema.ResourceData, meta interface{}) error {
-	config := meta.(*Config)
+	// UNDONE: Comment out, local library doesn't have this function  yet.
+	/*config := meta.(*Config)
 	computeClient, err := config.computeV2Client(GetRegion(d, config))
 	if err != nil {
 		return fmt.Errorf("Error creating HuaweiCloud compute client: %s", err)
@@ -138,6 +139,6 @@ func resourceComputeFlavorV2Delete(d *schema.ResourceData, meta interface{}) err
 	if err != nil {
 		return fmt.Errorf("Error deleting HuaweiCloud flavor: %s", err)
 	}
-	d.SetId("")
+	d.SetId("") */
 	return nil
 }

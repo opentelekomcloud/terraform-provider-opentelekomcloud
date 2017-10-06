@@ -1,12 +1,12 @@
 ---
-layout: "openstack"
+layout: "huaweicloud"
 page_title: "HuaweiCloud: huaweicloud_compute_instance_v2"
-sidebar_current: "docs-openstack-resource-compute-instance-v2"
+sidebar_current: "docs-huaweicloud-resource-compute-instance-v2"
 description: |-
   Manages a V2 VM instance resource within HuaweiCloud.
 ---
 
-# openstack\_compute\_instance_v2
+# huaweicloud\_compute\_instance_v2
 
 Manages a V2 VM instance resource within HuaweiCloud.
 

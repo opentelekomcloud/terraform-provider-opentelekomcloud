@@ -23,6 +23,8 @@ website/node_modules
 *.iml
 *.test
 *.iml
+localrc2
+localrc
 
 website/vendor
 

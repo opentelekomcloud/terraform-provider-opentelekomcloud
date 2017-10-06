@@ -1,12 +1,12 @@
 ---
-layout: "openstack"
+layout: "huaweicloud"
 page_title: "HuaweiCloud: huaweicloud_blockstorage_volume_v1"
-sidebar_current: "docs-openstack-resource-blockstorage-volume-v1"
+sidebar_current: "docs-huaweicloud-resource-blockstorage-volume-v1"
 description: |-
   Manages a V1 volume resource within HuaweiCloud.
 ---
 
-# openstack\_blockstorage\_volume_v1
+# huaweicloud\_blockstorage\_volume_v1
 
 Manages a V1 volume resource within HuaweiCloud.
 

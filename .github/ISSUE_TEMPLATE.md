@@ -36,7 +36,7 @@ Please list the steps required to reproduce the issue, for example:
 1. `terraform apply`
 
 ### Important Factoids
-Are there anything atypical about your accounts that we should know? For example: Running in EC2 Classic? Custom version of OpenStack? Tight ACLs?
+Are there anything atypical about your accounts that we should know? For example: Which version of HuaweiCloud? Tight ACLs?
 
 ### References
 Are there any other GitHub issues (open or closed) or Pull Requests that should be linked here? For example:

@@ -667,9 +667,6 @@ const testAccComputeV2Instance_basic = `
 resource "huaweicloud_compute_instance_v2" "instance_1" {
   name = "instance_1"
   security_groups = ["default"]
-  network {
-    uuid = "2a9d80f2-beef-4845-a733-9fd45833f7c4"
-  }
   metadata {
     foo = "bar"
   }

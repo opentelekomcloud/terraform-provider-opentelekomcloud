@@ -1,23 +1,21 @@
 package huaweicloud
 
-/*
 import (
 	"testing"
 
 	"github.com/hashicorp/terraform/helper/resource"
 )
 
-// UNSUPPORTED FWv1
-func TestAccFWPolicyV1_importBasic(t *testing.T) {
-	resourceName := "huaweicloud_fw_policy_v1.policy_1"
+func TestAccFWFirewallV2_importBasic(t *testing.T) {
+	resourceName := "huaweicloud_fw_firewall_v2.fw_1"
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
 		Providers:    testAccProviders,
-		CheckDestroy: testAccCheckFWPolicyV1Destroy,
+		CheckDestroy: testAccCheckFWFirewallGroupV2Destroy,
 		Steps: []resource.TestStep{
 			resource.TestStep{
-				Config: testAccFWPolicyV1_addRules,
+				Config: testAccFWFirewallGroupV2_basic_1,
 			},
 
 			resource.TestStep{
@@ -28,4 +26,3 @@ func TestAccFWPolicyV1_importBasic(t *testing.T) {
 		},
 	})
 }
-*/

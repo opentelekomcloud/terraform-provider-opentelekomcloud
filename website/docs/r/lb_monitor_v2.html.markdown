@@ -1,12 +1,12 @@
 ---
-layout: "openstack"
+layout: "huaweicloud"
 page_title: "HuaweiCloud: huaweicloud_lb_monitor_v2"
-sidebar_current: "docs-openstack-resource-lb-monitor-v2"
+sidebar_current: "docs-huaweicloud-resource-lb-monitor-v2"
 description: |-
   Manages a V2 monitor resource within HuaweiCloud.
 ---
 
-# openstack\_lb\_monitor\_v2
+# huaweicloud\_lb\_monitor\_v2
 
 Manages a V2 monitor resource within HuaweiCloud.
 

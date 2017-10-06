@@ -1,12 +1,12 @@
 ---
-layout: "openstack"
+layout: "huaweicloud"
 page_title: "HuaweiCloud: huaweicloud_images_image_v2"
-sidebar_current: "docs-openstack-resource-images-image-v2"
+sidebar_current: "docs-huaweicloud-resource-images-image-v2"
 description: |-
   Manages a V2 Image resource within HuaweiCloud Glance.
 ---
 
-# openstack\_images\_image_v2
+# huaweicloud\_images\_image_v2
 
 Manages a V2 Image resource within HuaweiCloud Glance.
 
@@ -88,7 +88,7 @@ The following attributes are exported:
 * `min_disk_gb` - See Argument Reference above.
 * `min_ram_mb` - See Argument Reference above.
 * `name` - See Argument Reference above.
-* `owner` - The id of the openstack user who owns the image.
+* `owner` - The id of the huaweicloud user who owns the image.
 * `protected` - See Argument Reference above.
 * `region` - See Argument Reference above.
 * `schema` - The path to the JSON-schema that represent

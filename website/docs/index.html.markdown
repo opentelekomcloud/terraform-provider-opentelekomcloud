@@ -1,7 +1,7 @@
 ---
-layout: "openstack"
+layout: "huaweicloud"
 page_title: "Provider: HuaweiCloud"
-sidebar_current: "docs-openstack-index"
+sidebar_current: "docs-huaweicloud-index"
 description: |-
   The HuaweiCloud provider is used to interact with the many resources supported by HuaweiCloud. The provider needs to be configured with the proper credentials before it can be used.
 ---
@@ -18,7 +18,7 @@ Use the navigation to the left to read about the available resources.
 
 ```hcl
 # Configure the HuaweiCloud Provider
-provider "openstack" {
+provider "huaweicloud" {
   user_name   = "admin"
   tenant_name = "admin"
   password    = "pwd"

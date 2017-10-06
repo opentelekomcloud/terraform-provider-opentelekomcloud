@@ -1,12 +1,12 @@
 ---
-layout: "openstack"
+layout: "huaweicloud"
 page_title: "HuaweiCloud: huaweicloud_networking_floatingip_v2"
-sidebar_current: "docs-openstack-resource-networking-floatingip-v2"
+sidebar_current: "docs-huaweicloud-resource-networking-floatingip-v2"
 description: |-
   Manages a V2 floating IP resource within HuaweiCloud Neutron (networking).
 ---
 
-# openstack\_networking\_floatingip_v2
+# huaweicloud\_networking\_floatingip_v2
 
 Manages a V2 floating IP resource within HuaweiCloud Neutron (networking)
 that can be used for load balancers.

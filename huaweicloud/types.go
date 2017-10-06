@@ -14,10 +14,10 @@ import (
 	"github.com/gophercloud/gophercloud/openstack/compute/v2/extensions/servergroups"
 	"github.com/gophercloud/gophercloud/openstack/dns/v2/recordsets"
 	"github.com/gophercloud/gophercloud/openstack/dns/v2/zones"
-	"github.com/gophercloud/gophercloud/openstack/networking/v2/extensions/fwaas/firewalls"
-	"github.com/gophercloud/gophercloud/openstack/networking/v2/extensions/fwaas/policies"
-	"github.com/gophercloud/gophercloud/openstack/networking/v2/extensions/fwaas/routerinsertion"
-	"github.com/gophercloud/gophercloud/openstack/networking/v2/extensions/fwaas/rules"
+	"github.com/gophercloud/gophercloud/openstack/networking/v2/extensions/fwaas_v2/firewall_groups"
+	"github.com/gophercloud/gophercloud/openstack/networking/v2/extensions/fwaas_v2/policies"
+	"github.com/gophercloud/gophercloud/openstack/networking/v2/extensions/fwaas_v2/routerinsertion"
+	"github.com/gophercloud/gophercloud/openstack/networking/v2/extensions/fwaas_v2/rules"
 	"github.com/gophercloud/gophercloud/openstack/networking/v2/extensions/layer3/floatingips"
 	"github.com/gophercloud/gophercloud/openstack/networking/v2/extensions/layer3/routers"
 	"github.com/gophercloud/gophercloud/openstack/networking/v2/networks"
@@ -47,7 +47,7 @@ func (lrt *LogRoundTripper) RoundTrip(request *http.Request) (*http.Response, er
 
 	if lrt.OsDebug {
 		log.Printf("[DEBUG] HuaweiCloud Request URL: %s %s", request.Method, request.URL)
-		log.Printf("[DEBUG] Openstack Request Headers:\n%s", FormatHeaders(request.Header, "\n"))
+		log.Printf("[DEBUG] HuaweiCloud Request Headers:\n%s", FormatHeaders(request.Header, "\n"))
 
 		if request.Body != nil {
 			request.Body, err = lrt.logRequest(request.Body, request.Header.Get("Content-Type"))
@@ -63,8 +63,8 @@ func (lrt *LogRoundTripper) RoundTrip(request *http.Request) (*http.Response, er
 	}
 
 	if lrt.OsDebug {
-		log.Printf("[DEBUG] Openstack Response Code: %d", response.StatusCode)
-		log.Printf("[DEBUG] Openstack Response Headers:\n%s", FormatHeaders(response.Header, "\n"))
+		log.Printf("[DEBUG] HuaweiCloud Response Code: %d", response.StatusCode)
+		log.Printf("[DEBUG] HuaweiCloud Response Headers:\n%s", FormatHeaders(response.Header, "\n"))
 
 		response.Body, err = lrt.logResponse(response.Body, response.Header.Get("Content-Type"))
 	}
@@ -153,30 +153,30 @@ func (lrt *LogRoundTripper) formatJSON(raw []byte) string {
 	return string(pretty)
 }
 
-// Firewall is an HuaweiCloud firewall.
-type Firewall struct {
-	firewalls.Firewall
-	routerinsertion.FirewallExt
+// FirewallGroup is an HuaweiCloud firewall group.
+type FirewallGroup struct {
+	firewall_groups.FirewallGroup
+	routerinsertion.FirewallGroupExt
 }
 
-// FirewallCreateOpts represents the attributes used when creating a new firewall.
-type FirewallCreateOpts struct {
-	firewalls.CreateOpts
+// FirewallGroupCreateOpts represents the attributes used when creating a new firewall.
+type FirewallGroupCreateOpts struct {
+	firewall_groups.CreateOpts
 	ValueSpecs map[string]string `json:"value_specs,omitempty"`
 }
 
 // ToFirewallCreateMap casts a CreateOptsExt struct to a map.
 // It overrides firewalls.ToFirewallCreateMap to add the ValueSpecs field.
-func (opts FirewallCreateOpts) ToFirewallCreateMap() (map[string]interface{}, error) {
-	return BuildRequest(opts, "firewall")
+func (opts FirewallGroupCreateOpts) ToFirewallCreateMap() (map[string]interface{}, error) {
+	return BuildRequest(opts, "firewall_group")
 }
 
 //FirewallUpdateOpts
-type FirewallUpdateOpts struct {
-	firewalls.UpdateOptsBuilder
+type FirewallGroupUpdateOpts struct {
+	firewall_groups.UpdateOptsBuilder
 }
 
-func (opts FirewallUpdateOpts) ToFirewallUpdateMap() (map[string]interface{}, error) {
+func (opts FirewallGroupUpdateOpts) ToFirewallUpdateMap() (map[string]interface{}, error) {
 	return BuildRequest(opts, "firewall")
 }
 
