@@ -1,12 +1,12 @@
 ---
-layout: "openstack"
+layout: "huaweicloud"
 page_title: "HuaweiCloud: huaweicloud_networking_subnet_v2"
-sidebar_current: "docs-openstack-resource-networking-subnet-v2"
+sidebar_current: "docs-huaweicloud-resource-networking-subnet-v2"
 description: |-
   Manages a V2 Neutron subnet resource within HuaweiCloud.
 ---
 
-# openstack\_networking\_subnet_v2
+# huaweicloud\_networking\_subnet_v2
 
 Manages a V2 Neutron subnet resource within HuaweiCloud.
 

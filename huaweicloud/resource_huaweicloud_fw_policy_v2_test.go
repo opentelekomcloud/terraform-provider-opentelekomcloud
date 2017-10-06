@@ -1,97 +1,92 @@
 package huaweicloud
 
-/*
 import (
 	"fmt"
 	"testing"
 	"time"
 
 	"github.com/gophercloud/gophercloud"
-	"github.com/gophercloud/gophercloud/openstack/networking/v2/extensions/fwaas/policies"
+	"github.com/gophercloud/gophercloud/openstack/networking/v2/extensions/fwaas_v2/policies"
 	"github.com/hashicorp/terraform/helper/resource"
 	"github.com/hashicorp/terraform/terraform"
 )
 
-// SKIP fwV1
-func TestAccFWPolicyV1_basic(t *testing.T) {
+func TestAccFWPolicyV2_basic(t *testing.T) {
 	resource.Test(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
 		Providers:    testAccProviders,
-		CheckDestroy: testAccCheckFWPolicyV1Destroy,
+		CheckDestroy: testAccCheckFWPolicyV2Destroy,
 		Steps: []resource.TestStep{
 			resource.TestStep{
-				Config: testAccFWPolicyV1_basic,
+				Config: testAccFWPolicyV2_basic,
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckFWPolicyV1Exists(
-						"huaweicloud_fw_policy_v1.policy_1", "", "", 0),
+					testAccCheckFWPolicyV2Exists(
+						"huaweicloud_fw_policy_v2.policy_1", "", "", 0),
 				),
 			},
 		},
 	})
 }
 
-// SKIP fwV1
-func TestAccFWPolicyV1_addRules(t *testing.T) {
+func TestAccFWPolicyV2_addRules(t *testing.T) {
 	resource.Test(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
 		Providers:    testAccProviders,
-		CheckDestroy: testAccCheckFWPolicyV1Destroy,
+		CheckDestroy: testAccCheckFWPolicyV2Destroy,
 		Steps: []resource.TestStep{
 			resource.TestStep{
-				Config: testAccFWPolicyV1_addRules,
+				Config: testAccFWPolicyV2_addRules,
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckFWPolicyV1Exists(
-						"huaweicloud_fw_policy_v1.policy_1", "policy_1", "terraform acceptance test", 2),
+					testAccCheckFWPolicyV2Exists(
+						"huaweicloud_fw_policy_v2.policy_1", "policy_1", "terraform acceptance test", 2),
 				),
 			},
 		},
 	})
 }
 
-// SKIP fwV1
-func TestAccFWPolicyV1_deleteRules(t *testing.T) {
+func TestAccFWPolicyV2_deleteRules(t *testing.T) {
 	resource.Test(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
 		Providers:    testAccProviders,
-		CheckDestroy: testAccCheckFWPolicyV1Destroy,
+		CheckDestroy: testAccCheckFWPolicyV2Destroy,
 		Steps: []resource.TestStep{
 			resource.TestStep{
-				Config: testAccFWPolicyV1_deleteRules,
+				Config: testAccFWPolicyV2_deleteRules,
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckFWPolicyV1Exists(
-						"huaweicloud_fw_policy_v1.policy_1", "policy_1", "terraform acceptance test", 1),
+					testAccCheckFWPolicyV2Exists(
+						"huaweicloud_fw_policy_v2.policy_1", "policy_1", "terraform acceptance test", 1),
 				),
 			},
 		},
 	})
 }
 
-// SKIP fwV1
-func TestAccFWPolicyV1_timeout(t *testing.T) {
+func TestAccFWPolicyV2_timeout(t *testing.T) {
 	resource.Test(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
 		Providers:    testAccProviders,
-		CheckDestroy: testAccCheckFWPolicyV1Destroy,
+		CheckDestroy: testAccCheckFWPolicyV2Destroy,
 		Steps: []resource.TestStep{
 			resource.TestStep{
-				Config: testAccFWPolicyV1_timeout,
+				Config: testAccFWPolicyV2_timeout,
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckFWPolicyV1Exists(
-						"huaweicloud_fw_policy_v1.policy_1", "", "", 0),
+					testAccCheckFWPolicyV2Exists(
+						"huaweicloud_fw_policy_v2.policy_1", "", "", 0),
 				),
 			},
 		},
 	})
 }
 
-func testAccCheckFWPolicyV1Destroy(s *terraform.State) error {
+func testAccCheckFWPolicyV2Destroy(s *terraform.State) error {
 	config := testAccProvider.Meta().(*Config)
 	networkingClient, err := config.networkingV2Client(OS_REGION_NAME)
 	if err != nil {
 		return fmt.Errorf("Error creating HuaweiCloud networking client: %s", err)
 	}
 	for _, rs := range s.RootModule().Resources {
-		if rs.Type != "huaweicloud_fw_policy_v1" {
+		if rs.Type != "huaweicloud_fw_policy_v2" {
 			continue
 		}
 		_, err = policies.Get(networkingClient, rs.Primary.ID).Extract()
@@ -105,7 +100,7 @@ func testAccCheckFWPolicyV1Destroy(s *terraform.State) error {
 	return nil
 }
 
-func testAccCheckFWPolicyV1Exists(n, name, description string, ruleCount int) resource.TestCheckFunc {
+func testAccCheckFWPolicyV2Exists(n, name, description string, ruleCount int) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
 		rs, ok := s.RootModule().Resources[n]
 		if !ok {
@@ -154,34 +149,34 @@ func testAccCheckFWPolicyV1Exists(n, name, description string, ruleCount int) re
 	}
 }
 
-const testAccFWPolicyV1_basic = `
-resource "huaweicloud_fw_policy_v1" "policy_1" {
+const testAccFWPolicyV2_basic = `
+resource "huaweicloud_fw_policy_v2" "policy_1" {
 }
 `
 
-const testAccFWPolicyV1_addRules = `
-resource "huaweicloud_fw_policy_v1" "policy_1" {
+const testAccFWPolicyV2_addRules = `
+resource "huaweicloud_fw_policy_v2" "policy_1" {
   name = "policy_1"
   description =  "terraform acceptance test"
   rules = [
-    "${huaweicloud_fw_rule_v1.udp_deny.id}",
-    "${huaweicloud_fw_rule_v1.tcp_allow.id}"
+    "${huaweicloud_fw_rule_v2.udp_deny.id}",
+    "${huaweicloud_fw_rule_v2.tcp_allow.id}"
   ]
 }
 
-resource "huaweicloud_fw_rule_v1" "tcp_allow" {
+resource "huaweicloud_fw_rule_v2" "tcp_allow" {
   protocol = "tcp"
   action = "allow"
 }
 
-resource "huaweicloud_fw_rule_v1" "udp_deny" {
+resource "huaweicloud_fw_rule_v2" "udp_deny" {
   protocol = "udp"
   action = "deny"
 }
 `
 
-const testAccFWPolicyV1_deleteRules = `
-resource "huaweicloud_fw_policy_v1" "policy_1" {
+const testAccFWPolicyV2_deleteRules = `
+resource "huaweicloud_fw_policy_v2" "policy_1" {
   name = "policy_1"
   description =  "terraform acceptance test"
   rules = [
@@ -189,17 +184,16 @@ resource "huaweicloud_fw_policy_v1" "policy_1" {
   ]
 }
 
-resource "huaweicloud_fw_rule_v1" "udp_deny" {
+resource "huaweicloud_fw_rule_v2" "udp_deny" {
   protocol = "udp"
   action = "deny"
 }
 `
 
-const testAccFWPolicyV1_timeout = `
-resource "huaweicloud_fw_policy_v1" "policy_1" {
+const testAccFWPolicyV2_timeout = `
+resource "huaweicloud_fw_policy_v2" "policy_1" {
   timeouts {
     create = "5m"
   }
 }
 `
-*/

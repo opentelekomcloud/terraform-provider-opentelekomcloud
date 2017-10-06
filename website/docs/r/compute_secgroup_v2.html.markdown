@@ -1,12 +1,12 @@
 ---
-layout: "openstack"
+layout: "huaweicloud"
 page_title: "HuaweiCloud: huaweicloud_compute_secgroup_v2"
-sidebar_current: "docs-openstack-resource-compute-secgroup-v2"
+sidebar_current: "docs-huaweicloud-resource-compute-secgroup-v2"
 description: |-
   Manages a V2 security group resource within HuaweiCloud.
 ---
 
-# openstack\_compute\_secgroup_v2
+# huaweicloud\_compute\_secgroup_v2
 
 Manages a V2 security group resource within HuaweiCloud.
 

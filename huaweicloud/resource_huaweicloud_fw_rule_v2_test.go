@@ -1,6 +1,5 @@
 package huaweicloud
 
-/*
 import (
 	"fmt"
 	"reflect"
@@ -8,13 +7,12 @@ import (
 	"time"
 
 	"github.com/gophercloud/gophercloud"
-	"github.com/gophercloud/gophercloud/openstack/networking/v2/extensions/fwaas/rules"
+	"github.com/gophercloud/gophercloud/openstack/networking/v2/extensions/fwaas_v2/rules"
 	"github.com/hashicorp/terraform/helper/resource"
 	"github.com/hashicorp/terraform/terraform"
 )
 
-// SKIP fwV1
-func TestAccFWRuleV1_basic(t *testing.T) {
+func TestAccFWRuleV2_basic(t *testing.T) {
 	rule1 := &rules.Rule{
 		Name:      "rule_1",
 		Protocol:  "udp",
@@ -52,32 +50,31 @@ func TestAccFWRuleV1_basic(t *testing.T) {
 	resource.Test(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
 		Providers:    testAccProviders,
-		CheckDestroy: testAccCheckFWRuleV1Destroy,
+		CheckDestroy: testAccCheckFWRuleV2Destroy,
 		Steps: []resource.TestStep{
 			resource.TestStep{
-				Config: testAccFWRuleV1_basic_1,
+				Config: testAccFWRuleV2_basic_1,
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckFWRuleV1Exists("huaweicloud_fw_rule_v1.rule_1", rule1),
+					testAccCheckFWRuleV2Exists("huaweicloud_fw_rule_v2.rule_1", rule1),
 				),
 			},
 			resource.TestStep{
-				Config: testAccFWRuleV1_basic_2,
+				Config: testAccFWRuleV2_basic_2,
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckFWRuleV1Exists("huaweicloud_fw_rule_v1.rule_1", rule2),
+					testAccCheckFWRuleV2Exists("huaweicloud_fw_rule_v2.rule_1", rule2),
 				),
 			},
 			resource.TestStep{
-				Config: testAccFWRuleV1_basic_3,
+				Config: testAccFWRuleV2_basic_3,
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckFWRuleV1Exists("huaweicloud_fw_rule_v1.rule_1", rule3),
+					testAccCheckFWRuleV2Exists("huaweicloud_fw_rule_v2.rule_1", rule3),
 				),
 			},
 		},
 	})
 }
 
-// SKIP fwV1
-func TestAccFWRuleV1_anyProtocol(t *testing.T) {
+func TestAccFWRuleV2_anyProtocol(t *testing.T) {
 	rule := &rules.Rule{
 		Name:            "rule_1",
 		Description:     "Allow any protocol",
@@ -91,19 +88,19 @@ func TestAccFWRuleV1_anyProtocol(t *testing.T) {
 	resource.Test(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
 		Providers:    testAccProviders,
-		CheckDestroy: testAccCheckFWRuleV1Destroy,
+		CheckDestroy: testAccCheckFWRuleV2Destroy,
 		Steps: []resource.TestStep{
 			resource.TestStep{
-				Config: testAccFWRuleV1_anyProtocol,
+				Config: testAccFWRuleV2_anyProtocol,
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckFWRuleV1Exists("huaweicloud_fw_rule_v1.rule_1", rule),
+					testAccCheckFWRuleV2Exists("huaweicloud_fw_rule_v2.rule_1", rule),
 				),
 			},
 		},
 	})
 }
 
-func testAccCheckFWRuleV1Destroy(s *terraform.State) error {
+func testAccCheckFWRuleV2Destroy(s *terraform.State) error {
 	config := testAccProvider.Meta().(*Config)
 	networkingClient, err := config.networkingV2Client(OS_REGION_NAME)
 	if err != nil {
@@ -125,7 +122,7 @@ func testAccCheckFWRuleV1Destroy(s *terraform.State) error {
 	return nil
 }
 
-func testAccCheckFWRuleV1Exists(n string, expected *rules.Rule) resource.TestCheckFunc {
+func testAccCheckFWRuleV2Exists(n string, expected *rules.Rule) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
 		rs, ok := s.RootModule().Resources[n]
 		if !ok {
@@ -170,16 +167,16 @@ func testAccCheckFWRuleV1Exists(n string, expected *rules.Rule) resource.TestChe
 	}
 }
 
-const testAccFWRuleV1_basic_1 = `
-resource "huaweicloud_fw_rule_v1" "rule_1" {
+const testAccFWRuleV2_basic_1 = `
+resource "huaweicloud_fw_rule_v2" "rule_1" {
 	name = "rule_1"
 	protocol = "udp"
 	action = "deny"
 }
 `
 
-const testAccFWRuleV1_basic_2 = `
-resource "huaweicloud_fw_rule_v1" "rule_1" {
+const testAccFWRuleV2_basic_2 = `
+resource "huaweicloud_fw_rule_v2" "rule_1" {
 	name = "rule_1"
 	description = "Terraform accept test"
 	protocol = "udp"
@@ -193,8 +190,8 @@ resource "huaweicloud_fw_rule_v1" "rule_1" {
 }
 `
 
-const testAccFWRuleV1_basic_3 = `
-resource "huaweicloud_fw_rule_v1" "rule_1" {
+const testAccFWRuleV2_basic_3 = `
+resource "huaweicloud_fw_rule_v2" "rule_1" {
 	name = "rule_1"
 	description = "Terraform accept test updated"
 	protocol = "tcp"
@@ -208,8 +205,8 @@ resource "huaweicloud_fw_rule_v1" "rule_1" {
 }
 `
 
-const testAccFWRuleV1_anyProtocol = `
-resource "huaweicloud_fw_rule_v1" "rule_1" {
+const testAccFWRuleV2_anyProtocol = `
+resource "huaweicloud_fw_rule_v2" "rule_1" {
 	name = "rule_1"
 	description = "Allow any protocol"
 	protocol = "any"
@@ -219,4 +216,3 @@ resource "huaweicloud_fw_rule_v1" "rule_1" {
 	enabled = true
 }
 `
-*/

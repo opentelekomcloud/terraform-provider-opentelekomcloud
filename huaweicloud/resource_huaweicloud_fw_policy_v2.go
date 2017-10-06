@@ -6,17 +6,17 @@ import (
 	"time"
 
 	"github.com/gophercloud/gophercloud"
-	"github.com/gophercloud/gophercloud/openstack/networking/v2/extensions/fwaas/policies"
+	"github.com/gophercloud/gophercloud/openstack/networking/v2/extensions/fwaas_v2/policies"
 	"github.com/hashicorp/terraform/helper/resource"
 	"github.com/hashicorp/terraform/helper/schema"
 )
 
-func resourceFWPolicyV1() *schema.Resource {
+func resourceFWPolicyV2() *schema.Resource {
 	return &schema.Resource{
-		Create: resourceFWPolicyV1Create,
-		Read:   resourceFWPolicyV1Read,
-		Update: resourceFWPolicyV1Update,
-		Delete: resourceFWPolicyV1Delete,
+		Create: resourceFWPolicyV2Create,
+		Read:   resourceFWPolicyV2Read,
+		Update: resourceFWPolicyV2Update,
+		Delete: resourceFWPolicyV2Delete,
 		Importer: &schema.ResourceImporter{
 			State: schema.ImportStatePassthrough,
 		},
@@ -69,7 +69,7 @@ func resourceFWPolicyV1() *schema.Resource {
 	}
 }
 
-func resourceFWPolicyV1Create(d *schema.ResourceData, meta interface{}) error {
+func resourceFWPolicyV2Create(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*Config)
 	networkingClient, err := config.networkingV2Client(GetRegion(d, config))
 	if err != nil {
@@ -115,10 +115,10 @@ func resourceFWPolicyV1Create(d *schema.ResourceData, meta interface{}) error {
 
 	d.SetId(policy.ID)
 
-	return resourceFWPolicyV1Read(d, meta)
+	return resourceFWPolicyV2Read(d, meta)
 }
 
-func resourceFWPolicyV1Read(d *schema.ResourceData, meta interface{}) error {
+func resourceFWPolicyV2Read(d *schema.ResourceData, meta interface{}) error {
 	log.Printf("[DEBUG] Retrieve information about firewall policy: %s", d.Id())
 
 	config := meta.(*Config)
@@ -145,7 +145,7 @@ func resourceFWPolicyV1Read(d *schema.ResourceData, meta interface{}) error {
 	return nil
 }
 
-func resourceFWPolicyV1Update(d *schema.ResourceData, meta interface{}) error {
+func resourceFWPolicyV2Update(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*Config)
 	networkingClient, err := config.networkingV2Client(GetRegion(d, config))
 	if err != nil {
@@ -182,10 +182,10 @@ func resourceFWPolicyV1Update(d *schema.ResourceData, meta interface{}) error {
 		return err
 	}
 
-	return resourceFWPolicyV1Read(d, meta)
+	return resourceFWPolicyV2Read(d, meta)
 }
 
-func resourceFWPolicyV1Delete(d *schema.ResourceData, meta interface{}) error {
+func resourceFWPolicyV2Delete(d *schema.ResourceData, meta interface{}) error {
 	log.Printf("[DEBUG] Destroy firewall policy: %s", d.Id())
 
 	config := meta.(*Config)

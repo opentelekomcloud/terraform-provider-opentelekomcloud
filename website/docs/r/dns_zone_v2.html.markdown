@@ -1,12 +1,12 @@
 ---
-layout: "openstack"
+layout: "huaweicloud"
 page_title: "HuaweiCloud: huaweicloud_dns_zone_v2"
-sidebar_current: "docs-openstack-resource-dns-zone-v2"
+sidebar_current: "docs-huaweicloud-resource-dns-zone-v2"
 description: |-
   Manages a DNS zone in the HuaweiCloud DNS Service
 ---
 
-# openstack\_dns\_zone_v2
+# huaweicloud\_dns\_zone_v2
 
 Manages a DNS zone in the HuaweiCloud DNS Service.
 
