@@ -1,4 +1,4 @@
-package huaweicloud
+package aws
 
 import (
 	"log"
@@ -69,7 +69,6 @@ func setElbV2Tags(conn *elbv2.ELBV2, d *schema.ResourceData) error {
 	return nil
 }
 
-/*
 func setVolumeTags(conn *ec2.EC2, d *schema.ResourceData) error {
 	if d.HasChange("volume_tags") {
 		oraw, nraw := d.GetChange("volume_tags")
@@ -126,7 +125,6 @@ func setVolumeTags(conn *ec2.EC2, d *schema.ResourceData) error {
 
 	return nil
 }
-*/
 
 // setTags is a helper to set the tags for a resource. It expects the
 // tags field to be named "tags"
