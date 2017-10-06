@@ -1,4 +1,4 @@
-package huaweicloud
+package aws
 
 import (
 	"fmt"
@@ -76,6 +76,7 @@ func validateElastiCacheClusterId(v interface{}, k string) (ws []string, errors 
 	return
 }
 
+/*
 func validateASGScheduleTimestamp(v interface{}, k string) (ws []string, errors []error) {
 	value := v.(string)
 	_, err := time.Parse(awsAutoscalingScheduleTimeLayout, value)
@@ -86,6 +87,7 @@ func validateASGScheduleTimestamp(v interface{}, k string) (ws []string, errors 
 
 	return
 }
+*/
 
 // validateTagFilters confirms the "value" component of a tag filter is one of
 // AWS's three allowed types.

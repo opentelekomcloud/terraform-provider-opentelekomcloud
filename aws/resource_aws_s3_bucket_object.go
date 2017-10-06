@@ -1,4 +1,4 @@
-package huaweicloud
+package aws
 
 import (
 	"bytes"
