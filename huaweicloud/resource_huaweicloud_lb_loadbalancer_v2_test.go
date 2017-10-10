@@ -11,10 +11,10 @@ import (
 	"github.com/gophercloud/gophercloud/openstack/networking/v2/extensions/lbaas_v2/loadbalancers"
 	"github.com/gophercloud/gophercloud/openstack/networking/v2/extensions/security/groups"
 	"github.com/gophercloud/gophercloud/openstack/networking/v2/ports"
+	"regexp"
 )
 
 // KNOWN problem (unsupported "haproxy")
-/*
 func TestAccLBV2LoadBalancer_basic(t *testing.T) {
 	var lb loadbalancers.LoadBalancer
 
@@ -42,7 +42,6 @@ func TestAccLBV2LoadBalancer_basic(t *testing.T) {
 		},
 	})
 }
-*/
 
 // PASS
 func TestAccLBV2LoadBalancer_secGroup(t *testing.T) {
