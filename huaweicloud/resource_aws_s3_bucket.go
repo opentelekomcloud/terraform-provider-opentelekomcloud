@@ -964,10 +964,13 @@ func resourceAwsS3BucketRead(d *schema.ResourceData, meta interface{}) error {
 	}
 
 	// Add the hosted zone ID for this bucket's region as an attribute
+	// UNUSED?
+	/*
 	hostedZoneID := HostedZoneIDForRegion(region)
 	if err := d.Set("hosted_zone_id", hostedZoneID); err != nil {
 		return err
 	}
+	*/
 
 	// Add website_endpoint as an attribute
 	websiteEndpoint, err := websiteEndpoint(s3conn, d)
@@ -992,7 +995,8 @@ func resourceAwsS3BucketRead(d *schema.ResourceData, meta interface{}) error {
 		return err
 	}
 
-	d.Set("arn", fmt.Sprintf("arn:%s:s3:::%s", meta.(*Config).partition, d.Id()))
+	// UNUSED?
+	//d.Set("arn", fmt.Sprintf("arn:%s:s3:::%s", meta.(*Config).partition, d.Id()))
 
 	return nil
 }
