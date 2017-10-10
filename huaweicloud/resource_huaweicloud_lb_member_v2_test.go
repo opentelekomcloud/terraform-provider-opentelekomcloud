@@ -1,6 +1,5 @@
 package huaweicloud
 
-/*
 import (
 	"fmt"
 	"testing"
@@ -21,14 +20,16 @@ func TestAccLBV2Member_basic(t *testing.T) {
 		CheckDestroy: testAccCheckLBV2MemberDestroy,
 		Steps: []resource.TestStep{
 			resource.TestStep{
-				Config: TestAccLBV2MemberConfig_basic,
+				Config:             TestAccLBV2MemberConfig_basic,
+				ExpectNonEmptyPlan: true,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckLBV2MemberExists("huaweicloud_lb_member_v2.member_1", &member_1),
 					testAccCheckLBV2MemberExists("huaweicloud_lb_member_v2.member_2", &member_2),
 				),
 			},
 			resource.TestStep{
-				Config: TestAccLBV2MemberConfig_update,
+				Config:             TestAccLBV2MemberConfig_update,
+				ExpectNonEmptyPlan: true,
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr("huaweicloud_lb_member_v2.member_1", "weight", "10"),
 					resource.TestCheckResourceAttr("huaweicloud_lb_member_v2.member_2", "weight", "15"),
@@ -214,4 +215,3 @@ resource "huaweicloud_lb_member_v2" "member_2" {
   }
 }
 `
-*/
