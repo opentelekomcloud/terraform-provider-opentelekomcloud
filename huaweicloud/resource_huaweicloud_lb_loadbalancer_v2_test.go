@@ -193,7 +193,7 @@ resource "huaweicloud_networking_subnet_v2" "subnet_1" {
 
 resource "huaweicloud_lb_loadbalancer_v2" "loadbalancer_1" {
   name = "loadbalancer_1"
-  loadbalancer_provider = "haproxy"
+  #loadbalancer_provider = "haproxy"
   vip_subnet_id = "${huaweicloud_networking_subnet_v2.subnet_1.id}"
 
   timeouts {
@@ -219,7 +219,7 @@ resource "huaweicloud_networking_subnet_v2" "subnet_1" {
 
 resource "huaweicloud_lb_loadbalancer_v2" "loadbalancer_1" {
   name = "loadbalancer_1_updated"
-  loadbalancer_provider = "haproxy"
+  #loadbalancer_provider = "haproxy"
   admin_state_up = "true"
   vip_subnet_id = "${huaweicloud_networking_subnet_v2.subnet_1.id}"
 
