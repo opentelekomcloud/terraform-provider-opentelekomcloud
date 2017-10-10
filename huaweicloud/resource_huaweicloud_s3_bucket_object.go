@@ -15,7 +15,7 @@ import (
 
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/awserr"
-	"github.com/aws/aws-sdk-go/service/kms"
+	//"github.com/aws/aws-sdk-go/service/kms"
 	"github.com/aws/aws-sdk-go/service/s3"
 )
 
@@ -263,21 +263,23 @@ func resourceAwsS3BucketObjectRead(d *schema.ResourceData, meta interface{}) err
 	d.Set("website_redirect", resp.WebsiteRedirectLocation)
 
 	// Only set non-default KMS key ID (one that doesn't match default)
-	if resp.SSEKMSKeyId != nil {
-		// retrieve S3 KMS Default Master Key
-		kmsconn := meta.(*AWSClient).kmsconn
-		kmsresp, err := kmsconn.DescribeKey(&kms.DescribeKeyInput{
-			KeyId: aws.String("alias/aws/s3"),
-		})
-		if err != nil {
-			return fmt.Errorf("Failed to describe default S3 KMS key (alias/aws/s3): %s", err)
-		}
+	// Unsupported by OTC?
+	/*
+		if resp.SSEKMSKeyId != nil {
+			// retrieve S3 KMS Default Master Key
+			kmsconn := meta.(*AWSClient).kmsconn
+			kmsresp, err := kmsconn.DescribeKey(&kms.DescribeKeyInput{
+				KeyId: aws.String("alias/aws/s3"),
+			})
+			if err != nil {
+				return fmt.Errorf("Failed to describe default S3 KMS key (alias/aws/s3): %s", err)
+			}
 
-		if *resp.SSEKMSKeyId != *kmsresp.KeyMetadata.Arn {
-			log.Printf("[DEBUG] S3 object is encrypted using a non-default KMS Key ID: %s", *resp.SSEKMSKeyId)
-			d.Set("kms_key_id", resp.SSEKMSKeyId)
-		}
-	}
+			if *resp.SSEKMSKeyId != *kmsresp.KeyMetadata.Arn {
+				log.Printf("[DEBUG] S3 object is encrypted using a non-default KMS Key ID: %s", *resp.SSEKMSKeyId)
+				d.Set("kms_key_id", resp.SSEKMSKeyId)
+			}
+		} */
 	d.Set("etag", strings.Trim(*resp.ETag, `"`))
 
 	// The "STANDARD" (which is also the default) storage

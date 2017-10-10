@@ -23,6 +23,8 @@ var (
 	OS_NETWORK_ID             = os.Getenv("OS_NETWORK_ID")
 	OS_POOL_NAME              = os.Getenv("OS_POOL_NAME")
 	OS_REGION_NAME            = os.Getenv("OS_REGION_NAME")
+	OS_ACCESS_KEY             = os.Getenv("OS_ACCESS_KEY")
+	OS_SECRET_KEY             = os.Getenv("OS_SECRET_KEY")
 	OS_SWIFT_ENVIRONMENT      = os.Getenv("OS_SWIFT_ENVIRONMENT")
 )
 
@@ -48,6 +50,22 @@ func testAccPreCheckRequiredEnvVars(t *testing.T) {
 
 	if OS_POOL_NAME == "" {
 		t.Fatal("OS_POOL_NAME must be set for acceptance tests")
+	}
+
+	if OS_REGION_NAME == "" {
+		t.Fatal("OS_REGION_NAME must be set for acceptance tests")
+	}
+
+	if OS_ACCESS_KEY == "" {
+		t.Fatal("OS_ACCESS_KEY must be set for acceptance tests")
+	}
+
+	if OS_SECRET_KEY == "" {
+		t.Fatal("OS_SECRET_KEY must be set for acceptance tests")
+	}
+
+	if OS_REGION_NAME == "" {
+		t.Fatal("OS_REGION_NAME must be set for acceptance tests")
 	}
 
 	if OS_FLAVOR_ID == "" && OS_FLAVOR_NAME == "" {

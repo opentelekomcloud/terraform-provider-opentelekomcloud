@@ -431,11 +431,11 @@ func resourceAwsS3BucketCreate(d *schema.ResourceData, meta interface{}) error {
 	// See "Request Elements: http://docs.aws.amazon.com/AmazonS3/latest/API/RESTBucketPUT.html
 	// NOT RELEVANT to OTC
 	/*
-	if awsRegion != "us-east-1" {
-		req.CreateBucketConfiguration = &s3.CreateBucketConfiguration{
-			LocationConstraint: aws.String(awsRegion),
-		}
-	} */
+		if awsRegion != "us-east-1" {
+			req.CreateBucketConfiguration = &s3.CreateBucketConfiguration{
+				LocationConstraint: aws.String(awsRegion),
+			}
+		} */
 
 	if err := validateS3BucketName(bucket, awsRegion); err != nil {
 		return fmt.Errorf("Error validating S3 bucket name: %s", err)
@@ -966,10 +966,10 @@ func resourceAwsS3BucketRead(d *schema.ResourceData, meta interface{}) error {
 	// Add the hosted zone ID for this bucket's region as an attribute
 	// UNUSED?
 	/*
-	hostedZoneID := HostedZoneIDForRegion(region)
-	if err := d.Set("hosted_zone_id", hostedZoneID); err != nil {
-		return err
-	}
+		hostedZoneID := HostedZoneIDForRegion(region)
+		if err := d.Set("hosted_zone_id", hostedZoneID); err != nil {
+			return err
+		}
 	*/
 
 	// Add website_endpoint as an attribute
