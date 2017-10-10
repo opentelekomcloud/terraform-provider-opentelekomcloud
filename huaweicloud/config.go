@@ -8,12 +8,17 @@ import (
 	"net/http"
 	"os"
 
+	"github.com/aws/aws-sdk-go/aws"
+	"github.com/aws/aws-sdk-go/aws/session"
+	"github.com/aws/aws-sdk-go/service/s3"
 	"github.com/gophercloud/gophercloud"
 	"github.com/gophercloud/gophercloud/openstack"
 	"github.com/gophercloud/gophercloud/openstack/objectstorage/v1/swauth"
+	"github.com/hashicorp/errwrap"
+	"github.com/hashicorp/go-cleanhttp"
 	"github.com/hashicorp/terraform/helper/pathorcontents"
 	"github.com/hashicorp/terraform/terraform"
-	"github.com/aws/aws-sdk-go/service/s3"
+	"strings"
 )
 
 type Config struct {
@@ -37,7 +42,7 @@ type Config struct {
 	UserID           string
 
 	OsClient *gophercloud.ProviderClient
-	s3conn *s3.S3
+	s3conn   *s3.S3
 }
 
 func (c *Config) LoadAndValidate() error {
@@ -137,8 +142,52 @@ func (c *Config) LoadAndValidate() error {
 	}
 
 	c.OsClient = client
+	//fmt.Printf("[DEBUG] Region: %s.\n", c.Region)
+
+	// Setup AWS/S3 client/config information for Swift S3 buckets
+	awsConfig := &aws.Config{
+		//Credentials:      creds,
+		Region: aws.String(c.Region),
+		//MaxRetries:       aws.Int(c.MaxRetries),
+		HTTPClient: cleanhttp.DefaultClient(),
+		//S3ForcePathStyle: aws.Bool(c.S3ForcePathStyle),
+	}
+
+	if osDebug {
+		awsConfig.LogLevel = aws.LogLevel(aws.LogDebugWithHTTPBody | aws.LogDebugWithRequestRetries | aws.LogDebugWithRequestErrors)
+		awsConfig.Logger = awsLogger{}
+	}
+
+	if c.Insecure {
+		transport := awsConfig.HTTPClient.Transport.(*http.Transport)
+		transport.TLSClientConfig = &tls.Config{
+			InsecureSkipVerify: true,
+		}
+	}
+
+	// Set up base session
+	sess, err := session.NewSession(awsConfig)
+	if err != nil {
+		return errwrap.Wrapf("Error creating AWS session: {{err}}", err)
+	}
+
+	// UNDONE: compute or figure this
+	awsS3Sess := sess.Copy(&aws.Config{Endpoint: aws.String("https://obs.eu-de.otc.t-systems.com/")}) //aws.String(c.S3Endpoint)})
+	c.s3conn = s3.New(awsS3Sess)
 
 	return nil
+}
+
+type awsLogger struct{}
+
+func (l awsLogger) Log(args ...interface{}) {
+	tokens := make([]string, 0, len(args))
+	for _, arg := range args {
+		if token, ok := arg.(string); ok {
+			tokens = append(tokens, token)
+		}
+	}
+	log.Printf("[DEBUG] [aws-sdk-go] %s", strings.Join(tokens, " "))
 }
 
 func (c *Config) determineRegion(region string) string {

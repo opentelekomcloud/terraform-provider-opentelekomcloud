@@ -29,7 +29,7 @@ func TestAccAWSS3Bucket_basic(t *testing.T) {
 	resource.Test(t, resource.TestCase{
 		PreCheck: func() { testAccPreCheck(t) },
 		/*
-			IDRefreshName:   "aws_s3_bucket.bucket",
+			IDRefreshName:   "huaweicloud_s3_bucket.bucket",
 			IDRefreshIgnore: []string{"force_destroy"},
 		*/
 		Providers:    testAccProviders,
@@ -38,19 +38,19 @@ func TestAccAWSS3Bucket_basic(t *testing.T) {
 			{
 				Config: testAccAWSS3BucketConfig(rInt),
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckAWSS3BucketExists("aws_s3_bucket.bucket"),
+					testAccCheckAWSS3BucketExists("huaweicloud_s3_bucket.bucket"),
 					/*resource.TestCheckResourceAttr(
-						"aws_s3_bucket.bucket", "hosted_zone_id", HostedZoneIDForRegion("us-west-2")), */
+					"huaweicloud_s3_bucket.bucket", "hosted_zone_id", HostedZoneIDForRegion("us-west-2")), */
 					resource.TestCheckResourceAttr(
-						"aws_s3_bucket.bucket", "region", "us-west-2"),
+						"huaweicloud_s3_bucket.bucket", "region", "eu-de-01"),
 					resource.TestCheckNoResourceAttr(
-						"aws_s3_bucket.bucket", "website_endpoint"),
+						"huaweicloud_s3_bucket.bucket", "website_endpoint"),
 					/*resource.TestMatchResourceAttr(
-						"aws_s3_bucket.bucket", "arn", arnRegexp), */
+					"huaweicloud_s3_bucket.bucket", "arn", arnRegexp), */
 					resource.TestCheckResourceAttr(
-						"aws_s3_bucket.bucket", "bucket", testAccBucketName(rInt)),
+						"huaweicloud_s3_bucket.bucket", "bucket", testAccBucketName(rInt)),
 					resource.TestCheckResourceAttr(
-						"aws_s3_bucket.bucket", "bucket_domain_name", testAccBucketDomainName(rInt)),
+						"huaweicloud_s3_bucket.bucket", "bucket_domain_name", testAccBucketDomainName(rInt)),
 				),
 			},
 		},
@@ -80,9 +80,9 @@ func TestAccAWSS3Bucket_namePrefix(t *testing.T) {
 			{
 				Config: testAccAWSS3BucketConfig_namePrefix,
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckAWSS3BucketExists("aws_s3_bucket.test"),
+					testAccCheckAWSS3BucketExists("huaweicloud_s3_bucket.test"),
 					resource.TestMatchResourceAttr(
-						"aws_s3_bucket.test", "bucket", regexp.MustCompile("^tf-test-")),
+						"huaweicloud_s3_bucket.test", "bucket", regexp.MustCompile("^tf-test-")),
 				),
 			},
 		},
@@ -98,7 +98,7 @@ func TestAccAWSS3Bucket_generatedName(t *testing.T) {
 			{
 				Config: testAccAWSS3BucketConfig_generatedName,
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckAWSS3BucketExists("aws_s3_bucket.test"),
+					testAccCheckAWSS3BucketExists("huaweicloud_s3_bucket.test"),
 				),
 			},
 		},
@@ -116,8 +116,8 @@ func TestAccAWSS3Bucket_region(t *testing.T) {
 			{
 				Config: testAccAWSS3BucketConfigWithRegion(rInt),
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckAWSS3BucketExists("aws_s3_bucket.bucket"),
-					resource.TestCheckResourceAttr("aws_s3_bucket.bucket", "region", "eu-west-1"),
+					testAccCheckAWSS3BucketExists("huaweicloud_s3_bucket.bucket"),
+					resource.TestCheckResourceAttr("huaweicloud_s3_bucket.bucket", "region", "eu-de-01"),
 				),
 			},
 		},
@@ -135,17 +135,17 @@ func TestAccAWSS3Bucket_acceleration(t *testing.T) {
 			{
 				Config: testAccAWSS3BucketConfigWithAcceleration(rInt),
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckAWSS3BucketExists("aws_s3_bucket.bucket"),
+					testAccCheckAWSS3BucketExists("huaweicloud_s3_bucket.bucket"),
 					resource.TestCheckResourceAttr(
-						"aws_s3_bucket.bucket", "acceleration_status", "Enabled"),
+						"huaweicloud_s3_bucket.bucket", "acceleration_status", "Enabled"),
 				),
 			},
 			{
 				Config: testAccAWSS3BucketConfigWithoutAcceleration(rInt),
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckAWSS3BucketExists("aws_s3_bucket.bucket"),
+					testAccCheckAWSS3BucketExists("huaweicloud_s3_bucket.bucket"),
 					resource.TestCheckResourceAttr(
-						"aws_s3_bucket.bucket", "acceleration_status", "Suspended"),
+						"huaweicloud_s3_bucket.bucket", "acceleration_status", "Suspended"),
 				),
 			},
 		},
@@ -163,26 +163,26 @@ func TestAccAWSS3Bucket_RequestPayer(t *testing.T) {
 			{
 				Config: testAccAWSS3BucketConfigRequestPayerBucketOwner(rInt),
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckAWSS3BucketExists("aws_s3_bucket.bucket"),
+					testAccCheckAWSS3BucketExists("huaweicloud_s3_bucket.bucket"),
 					resource.TestCheckResourceAttr(
-						"aws_s3_bucket.bucket",
+						"huaweicloud_s3_bucket.bucket",
 						"request_payer",
 						"BucketOwner"),
 					testAccCheckAWSS3RequestPayer(
-						"aws_s3_bucket.bucket",
+						"huaweicloud_s3_bucket.bucket",
 						"BucketOwner"),
 				),
 			},
 			{
 				Config: testAccAWSS3BucketConfigRequestPayerRequester(rInt),
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckAWSS3BucketExists("aws_s3_bucket.bucket"),
+					testAccCheckAWSS3BucketExists("huaweicloud_s3_bucket.bucket"),
 					resource.TestCheckResourceAttr(
-						"aws_s3_bucket.bucket",
+						"huaweicloud_s3_bucket.bucket",
 						"request_payer",
 						"Requester"),
 					testAccCheckAWSS3RequestPayer(
-						"aws_s3_bucket.bucket",
+						"huaweicloud_s3_bucket.bucket",
 						"Requester"),
 				),
 			},
@@ -229,25 +229,25 @@ func TestAccAWSS3Bucket_Policy(t *testing.T) {
 			{
 				Config: testAccAWSS3BucketConfigWithPolicy(rInt),
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckAWSS3BucketExists("aws_s3_bucket.bucket"),
+					testAccCheckAWSS3BucketExists("huaweicloud_s3_bucket.bucket"),
 					testAccCheckAWSS3BucketPolicy(
-						"aws_s3_bucket.bucket", testAccAWSS3BucketPolicy(rInt)),
+						"huaweicloud_s3_bucket.bucket", testAccAWSS3BucketPolicy(rInt)),
 				),
 			},
 			{
 				Config: testAccAWSS3BucketConfig(rInt),
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckAWSS3BucketExists("aws_s3_bucket.bucket"),
+					testAccCheckAWSS3BucketExists("huaweicloud_s3_bucket.bucket"),
 					testAccCheckAWSS3BucketPolicy(
-						"aws_s3_bucket.bucket", ""),
+						"huaweicloud_s3_bucket.bucket", ""),
 				),
 			},
 			{
 				Config: testAccAWSS3BucketConfigWithEmptyPolicy(rInt),
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckAWSS3BucketExists("aws_s3_bucket.bucket"),
+					testAccCheckAWSS3BucketExists("huaweicloud_s3_bucket.bucket"),
 					testAccCheckAWSS3BucketPolicy(
-						"aws_s3_bucket.bucket", ""),
+						"huaweicloud_s3_bucket.bucket", ""),
 				),
 			},
 		},
@@ -267,17 +267,17 @@ func TestAccAWSS3Bucket_UpdateAcl(t *testing.T) {
 			{
 				Config: preConfig,
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckAWSS3BucketExists("aws_s3_bucket.bucket"),
+					testAccCheckAWSS3BucketExists("huaweicloud_s3_bucket.bucket"),
 					resource.TestCheckResourceAttr(
-						"aws_s3_bucket.bucket", "acl", "public-read"),
+						"huaweicloud_s3_bucket.bucket", "acl", "public-read"),
 				),
 			},
 			{
 				Config: postConfig,
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckAWSS3BucketExists("aws_s3_bucket.bucket"),
+					testAccCheckAWSS3BucketExists("huaweicloud_s3_bucket.bucket"),
 					resource.TestCheckResourceAttr(
-						"aws_s3_bucket.bucket", "acl", "private"),
+						"huaweicloud_s3_bucket.bucket", "acl", "private"),
 				),
 			},
 		},
@@ -294,31 +294,31 @@ func TestAccAWSS3Bucket_Website_Simple(t *testing.T) {
 			{
 				Config: testAccAWSS3BucketWebsiteConfig(rInt),
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckAWSS3BucketExists("aws_s3_bucket.bucket"),
+					testAccCheckAWSS3BucketExists("huaweicloud_s3_bucket.bucket"),
 					testAccCheckAWSS3BucketWebsite(
-						"aws_s3_bucket.bucket", "index.html", "", "", ""),
+						"huaweicloud_s3_bucket.bucket", "index.html", "", "", ""),
 					resource.TestCheckResourceAttr(
-						"aws_s3_bucket.bucket", "website_endpoint", testAccWebsiteEndpoint(rInt)),
+						"huaweicloud_s3_bucket.bucket", "website_endpoint", testAccWebsiteEndpoint(rInt)),
 				),
 			},
 			{
 				Config: testAccAWSS3BucketWebsiteConfigWithError(rInt),
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckAWSS3BucketExists("aws_s3_bucket.bucket"),
+					testAccCheckAWSS3BucketExists("huaweicloud_s3_bucket.bucket"),
 					testAccCheckAWSS3BucketWebsite(
-						"aws_s3_bucket.bucket", "index.html", "error.html", "", ""),
+						"huaweicloud_s3_bucket.bucket", "index.html", "error.html", "", ""),
 					resource.TestCheckResourceAttr(
-						"aws_s3_bucket.bucket", "website_endpoint", testAccWebsiteEndpoint(rInt)),
+						"huaweicloud_s3_bucket.bucket", "website_endpoint", testAccWebsiteEndpoint(rInt)),
 				),
 			},
 			{
 				Config: testAccAWSS3BucketConfig(rInt),
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckAWSS3BucketExists("aws_s3_bucket.bucket"),
+					testAccCheckAWSS3BucketExists("huaweicloud_s3_bucket.bucket"),
 					testAccCheckAWSS3BucketWebsite(
-						"aws_s3_bucket.bucket", "", "", "", ""),
+						"huaweicloud_s3_bucket.bucket", "", "", "", ""),
 					resource.TestCheckResourceAttr(
-						"aws_s3_bucket.bucket", "website_endpoint", ""),
+						"huaweicloud_s3_bucket.bucket", "website_endpoint", ""),
 				),
 			},
 		},
@@ -335,31 +335,31 @@ func TestAccAWSS3Bucket_WebsiteRedirect(t *testing.T) {
 			{
 				Config: testAccAWSS3BucketWebsiteConfigWithRedirect(rInt),
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckAWSS3BucketExists("aws_s3_bucket.bucket"),
+					testAccCheckAWSS3BucketExists("huaweicloud_s3_bucket.bucket"),
 					testAccCheckAWSS3BucketWebsite(
-						"aws_s3_bucket.bucket", "", "", "", "hashicorp.com"),
+						"huaweicloud_s3_bucket.bucket", "", "", "", "hashicorp.com"),
 					resource.TestCheckResourceAttr(
-						"aws_s3_bucket.bucket", "website_endpoint", testAccWebsiteEndpoint(rInt)),
+						"huaweicloud_s3_bucket.bucket", "website_endpoint", testAccWebsiteEndpoint(rInt)),
 				),
 			},
 			{
 				Config: testAccAWSS3BucketWebsiteConfigWithHttpsRedirect(rInt),
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckAWSS3BucketExists("aws_s3_bucket.bucket"),
+					testAccCheckAWSS3BucketExists("huaweicloud_s3_bucket.bucket"),
 					testAccCheckAWSS3BucketWebsite(
-						"aws_s3_bucket.bucket", "", "", "https", "hashicorp.com"),
+						"huaweicloud_s3_bucket.bucket", "", "", "https", "hashicorp.com"),
 					resource.TestCheckResourceAttr(
-						"aws_s3_bucket.bucket", "website_endpoint", testAccWebsiteEndpoint(rInt)),
+						"huaweicloud_s3_bucket.bucket", "website_endpoint", testAccWebsiteEndpoint(rInt)),
 				),
 			},
 			{
 				Config: testAccAWSS3BucketConfig(rInt),
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckAWSS3BucketExists("aws_s3_bucket.bucket"),
+					testAccCheckAWSS3BucketExists("huaweicloud_s3_bucket.bucket"),
 					testAccCheckAWSS3BucketWebsite(
-						"aws_s3_bucket.bucket", "", "", "", ""),
+						"huaweicloud_s3_bucket.bucket", "", "", "", ""),
 					resource.TestCheckResourceAttr(
-						"aws_s3_bucket.bucket", "website_endpoint", ""),
+						"huaweicloud_s3_bucket.bucket", "website_endpoint", ""),
 				),
 			},
 		},
@@ -376,11 +376,11 @@ func TestAccAWSS3Bucket_WebsiteRoutingRules(t *testing.T) {
 			{
 				Config: testAccAWSS3BucketWebsiteConfigWithRoutingRules(rInt),
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckAWSS3BucketExists("aws_s3_bucket.bucket"),
+					testAccCheckAWSS3BucketExists("huaweicloud_s3_bucket.bucket"),
 					testAccCheckAWSS3BucketWebsite(
-						"aws_s3_bucket.bucket", "index.html", "error.html", "", ""),
+						"huaweicloud_s3_bucket.bucket", "index.html", "error.html", "", ""),
 					testAccCheckAWSS3BucketWebsiteRoutingRules(
-						"aws_s3_bucket.bucket",
+						"huaweicloud_s3_bucket.bucket",
 						[]*s3.RoutingRule{
 							{
 								Condition: &s3.Condition{
@@ -393,18 +393,18 @@ func TestAccAWSS3Bucket_WebsiteRoutingRules(t *testing.T) {
 						},
 					),
 					resource.TestCheckResourceAttr(
-						"aws_s3_bucket.bucket", "website_endpoint", testAccWebsiteEndpoint(rInt)),
+						"huaweicloud_s3_bucket.bucket", "website_endpoint", testAccWebsiteEndpoint(rInt)),
 				),
 			},
 			{
 				Config: testAccAWSS3BucketConfig(rInt),
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckAWSS3BucketExists("aws_s3_bucket.bucket"),
+					testAccCheckAWSS3BucketExists("huaweicloud_s3_bucket.bucket"),
 					testAccCheckAWSS3BucketWebsite(
-						"aws_s3_bucket.bucket", "", "", "", ""),
-					testAccCheckAWSS3BucketWebsiteRoutingRules("aws_s3_bucket.bucket", nil),
+						"huaweicloud_s3_bucket.bucket", "", "", "", ""),
+					testAccCheckAWSS3BucketWebsiteRoutingRules("huaweicloud_s3_bucket.bucket", nil),
 					resource.TestCheckResourceAttr(
-						"aws_s3_bucket.bucket", "website_endpoint", ""),
+						"huaweicloud_s3_bucket.bucket", "website_endpoint", ""),
 				),
 			},
 		},
@@ -424,8 +424,8 @@ func TestAccAWSS3Bucket_shouldFailNotFound(t *testing.T) {
 			{
 				Config: testAccAWSS3BucketDestroyedConfig(rInt),
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckAWSS3BucketExists("aws_s3_bucket.bucket"),
-					testAccCheckAWSS3DestroyBucket("aws_s3_bucket.bucket"),
+					testAccCheckAWSS3BucketExists("huaweicloud_s3_bucket.bucket"),
+					testAccCheckAWSS3DestroyBucket("huaweicloud_s3_bucket.bucket"),
 				),
 				ExpectNonEmptyPlan: true,
 			},
@@ -443,25 +443,25 @@ func TestAccAWSS3Bucket_Versioning(t *testing.T) {
 			{
 				Config: testAccAWSS3BucketConfig(rInt),
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckAWSS3BucketExists("aws_s3_bucket.bucket"),
+					testAccCheckAWSS3BucketExists("huaweicloud_s3_bucket.bucket"),
 					testAccCheckAWSS3BucketVersioning(
-						"aws_s3_bucket.bucket", ""),
+						"huaweicloud_s3_bucket.bucket", ""),
 				),
 			},
 			{
 				Config: testAccAWSS3BucketConfigWithVersioning(rInt),
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckAWSS3BucketExists("aws_s3_bucket.bucket"),
+					testAccCheckAWSS3BucketExists("huaweicloud_s3_bucket.bucket"),
 					testAccCheckAWSS3BucketVersioning(
-						"aws_s3_bucket.bucket", s3.BucketVersioningStatusEnabled),
+						"huaweicloud_s3_bucket.bucket", s3.BucketVersioningStatusEnabled),
 				),
 			},
 			{
 				Config: testAccAWSS3BucketConfigWithDisableVersioning(rInt),
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckAWSS3BucketExists("aws_s3_bucket.bucket"),
+					testAccCheckAWSS3BucketExists("huaweicloud_s3_bucket.bucket"),
 					testAccCheckAWSS3BucketVersioning(
-						"aws_s3_bucket.bucket", s3.BucketVersioningStatusSuspended),
+						"huaweicloud_s3_bucket.bucket", s3.BucketVersioningStatusSuspended),
 				),
 			},
 		},
@@ -508,9 +508,9 @@ func TestAccAWSS3Bucket_Cors(t *testing.T) {
 			{
 				Config: testAccAWSS3BucketConfigWithCORS(rInt),
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckAWSS3BucketExists("aws_s3_bucket.bucket"),
+					testAccCheckAWSS3BucketExists("huaweicloud_s3_bucket.bucket"),
 					testAccCheckAWSS3BucketCors(
-						"aws_s3_bucket.bucket",
+						"huaweicloud_s3_bucket.bucket",
 						[]*s3.CORSRule{
 							{
 								AllowedHeaders: []*string{aws.String("*")},
@@ -521,16 +521,16 @@ func TestAccAWSS3Bucket_Cors(t *testing.T) {
 							},
 						},
 					),
-					updateBucketCors("aws_s3_bucket.bucket"),
+					updateBucketCors("huaweicloud_s3_bucket.bucket"),
 				),
 				ExpectNonEmptyPlan: true,
 			},
 			{
 				Config: testAccAWSS3BucketConfigWithCORS(rInt),
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckAWSS3BucketExists("aws_s3_bucket.bucket"),
+					testAccCheckAWSS3BucketExists("huaweicloud_s3_bucket.bucket"),
 					testAccCheckAWSS3BucketCors(
-						"aws_s3_bucket.bucket",
+						"huaweicloud_s3_bucket.bucket",
 						[]*s3.CORSRule{
 							{
 								AllowedHeaders: []*string{aws.String("*")},
@@ -557,9 +557,9 @@ func TestAccAWSS3Bucket_Logging(t *testing.T) {
 			{
 				Config: testAccAWSS3BucketConfigWithLogging(rInt),
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckAWSS3BucketExists("aws_s3_bucket.bucket"),
+					testAccCheckAWSS3BucketExists("huaweicloud_s3_bucket.bucket"),
 					testAccCheckAWSS3BucketLogging(
-						"aws_s3_bucket.bucket", "aws_s3_bucket.log_bucket", "log/"),
+						"huaweicloud_s3_bucket.bucket", "huaweicloud_s3_bucket.log_bucket", "log/"),
 				),
 			},
 		},
@@ -576,97 +576,97 @@ func TestAccAWSS3Bucket_Lifecycle(t *testing.T) {
 			{
 				Config: testAccAWSS3BucketConfigWithLifecycle(rInt),
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckAWSS3BucketExists("aws_s3_bucket.bucket"),
+					testAccCheckAWSS3BucketExists("huaweicloud_s3_bucket.bucket"),
 					resource.TestCheckResourceAttr(
-						"aws_s3_bucket.bucket", "lifecycle_rule.0.id", "id1"),
+						"huaweicloud_s3_bucket.bucket", "lifecycle_rule.0.id", "id1"),
 					resource.TestCheckResourceAttr(
-						"aws_s3_bucket.bucket", "lifecycle_rule.0.prefix", "path1/"),
+						"huaweicloud_s3_bucket.bucket", "lifecycle_rule.0.prefix", "path1/"),
 					resource.TestCheckResourceAttr(
-						"aws_s3_bucket.bucket", "lifecycle_rule.0.expiration.2613713285.days", "365"),
+						"huaweicloud_s3_bucket.bucket", "lifecycle_rule.0.expiration.2613713285.days", "365"),
 					resource.TestCheckResourceAttr(
-						"aws_s3_bucket.bucket", "lifecycle_rule.0.expiration.2613713285.date", ""),
+						"huaweicloud_s3_bucket.bucket", "lifecycle_rule.0.expiration.2613713285.date", ""),
 					resource.TestCheckResourceAttr(
-						"aws_s3_bucket.bucket", "lifecycle_rule.0.expiration.2613713285.expired_object_delete_marker", "false"),
+						"huaweicloud_s3_bucket.bucket", "lifecycle_rule.0.expiration.2613713285.expired_object_delete_marker", "false"),
 					resource.TestCheckResourceAttr(
-						"aws_s3_bucket.bucket", "lifecycle_rule.0.transition.2000431762.date", ""),
+						"huaweicloud_s3_bucket.bucket", "lifecycle_rule.0.transition.2000431762.date", ""),
 					resource.TestCheckResourceAttr(
-						"aws_s3_bucket.bucket", "lifecycle_rule.0.transition.2000431762.days", "30"),
+						"huaweicloud_s3_bucket.bucket", "lifecycle_rule.0.transition.2000431762.days", "30"),
 					resource.TestCheckResourceAttr(
-						"aws_s3_bucket.bucket", "lifecycle_rule.0.transition.2000431762.storage_class", "STANDARD_IA"),
+						"huaweicloud_s3_bucket.bucket", "lifecycle_rule.0.transition.2000431762.storage_class", "STANDARD_IA"),
 					resource.TestCheckResourceAttr(
-						"aws_s3_bucket.bucket", "lifecycle_rule.0.transition.6450812.date", ""),
+						"huaweicloud_s3_bucket.bucket", "lifecycle_rule.0.transition.6450812.date", ""),
 					resource.TestCheckResourceAttr(
-						"aws_s3_bucket.bucket", "lifecycle_rule.0.transition.6450812.days", "60"),
+						"huaweicloud_s3_bucket.bucket", "lifecycle_rule.0.transition.6450812.days", "60"),
 					resource.TestCheckResourceAttr(
-						"aws_s3_bucket.bucket", "lifecycle_rule.0.transition.6450812.storage_class", "GLACIER"),
+						"huaweicloud_s3_bucket.bucket", "lifecycle_rule.0.transition.6450812.storage_class", "GLACIER"),
 					resource.TestCheckResourceAttr(
-						"aws_s3_bucket.bucket", "lifecycle_rule.1.id", "id2"),
+						"huaweicloud_s3_bucket.bucket", "lifecycle_rule.1.id", "id2"),
 					resource.TestCheckResourceAttr(
-						"aws_s3_bucket.bucket", "lifecycle_rule.1.prefix", "path2/"),
+						"huaweicloud_s3_bucket.bucket", "lifecycle_rule.1.prefix", "path2/"),
 					resource.TestCheckResourceAttr(
-						"aws_s3_bucket.bucket", "lifecycle_rule.1.expiration.2855832418.date", "2016-01-12"),
+						"huaweicloud_s3_bucket.bucket", "lifecycle_rule.1.expiration.2855832418.date", "2016-01-12"),
 					resource.TestCheckResourceAttr(
-						"aws_s3_bucket.bucket", "lifecycle_rule.1.expiration.2855832418.days", "0"),
+						"huaweicloud_s3_bucket.bucket", "lifecycle_rule.1.expiration.2855832418.days", "0"),
 					resource.TestCheckResourceAttr(
-						"aws_s3_bucket.bucket", "lifecycle_rule.1.expiration.2855832418.expired_object_delete_marker", "false"),
+						"huaweicloud_s3_bucket.bucket", "lifecycle_rule.1.expiration.2855832418.expired_object_delete_marker", "false"),
 					resource.TestCheckResourceAttr(
-						"aws_s3_bucket.bucket", "lifecycle_rule.2.id", "id3"),
+						"huaweicloud_s3_bucket.bucket", "lifecycle_rule.2.id", "id3"),
 					resource.TestCheckResourceAttr(
-						"aws_s3_bucket.bucket", "lifecycle_rule.2.prefix", "path3/"),
+						"huaweicloud_s3_bucket.bucket", "lifecycle_rule.2.prefix", "path3/"),
 					resource.TestCheckResourceAttr(
-						"aws_s3_bucket.bucket", "lifecycle_rule.2.transition.460947558.days", "0"),
+						"huaweicloud_s3_bucket.bucket", "lifecycle_rule.2.transition.460947558.days", "0"),
 					resource.TestCheckResourceAttr(
-						"aws_s3_bucket.bucket", "lifecycle_rule.3.id", "id4"),
+						"huaweicloud_s3_bucket.bucket", "lifecycle_rule.3.id", "id4"),
 					resource.TestCheckResourceAttr(
-						"aws_s3_bucket.bucket", "lifecycle_rule.3.prefix", "path4/"),
+						"huaweicloud_s3_bucket.bucket", "lifecycle_rule.3.prefix", "path4/"),
 					resource.TestCheckResourceAttr(
-						"aws_s3_bucket.bucket", "lifecycle_rule.3.tags.tagKey", "tagValue"),
+						"huaweicloud_s3_bucket.bucket", "lifecycle_rule.3.tags.tagKey", "tagValue"),
 					resource.TestCheckResourceAttr(
-						"aws_s3_bucket.bucket", "lifecycle_rule.3.tags.terraform", "hashicorp"),
+						"huaweicloud_s3_bucket.bucket", "lifecycle_rule.3.tags.terraform", "hashicorp"),
 				),
 			},
 			{
 				Config: testAccAWSS3BucketConfigWithVersioningLifecycle(rInt),
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckAWSS3BucketExists("aws_s3_bucket.bucket"),
+					testAccCheckAWSS3BucketExists("huaweicloud_s3_bucket.bucket"),
 					resource.TestCheckResourceAttr(
-						"aws_s3_bucket.bucket", "lifecycle_rule.0.id", "id1"),
+						"huaweicloud_s3_bucket.bucket", "lifecycle_rule.0.id", "id1"),
 					resource.TestCheckResourceAttr(
-						"aws_s3_bucket.bucket", "lifecycle_rule.0.prefix", "path1/"),
+						"huaweicloud_s3_bucket.bucket", "lifecycle_rule.0.prefix", "path1/"),
 					resource.TestCheckResourceAttr(
-						"aws_s3_bucket.bucket", "lifecycle_rule.0.enabled", "true"),
+						"huaweicloud_s3_bucket.bucket", "lifecycle_rule.0.enabled", "true"),
 					resource.TestCheckResourceAttr(
-						"aws_s3_bucket.bucket", "lifecycle_rule.0.noncurrent_version_expiration.80908210.days", "365"),
+						"huaweicloud_s3_bucket.bucket", "lifecycle_rule.0.noncurrent_version_expiration.80908210.days", "365"),
 					resource.TestCheckResourceAttr(
-						"aws_s3_bucket.bucket", "lifecycle_rule.0.noncurrent_version_transition.1377917700.days", "30"),
+						"huaweicloud_s3_bucket.bucket", "lifecycle_rule.0.noncurrent_version_transition.1377917700.days", "30"),
 					resource.TestCheckResourceAttr(
-						"aws_s3_bucket.bucket", "lifecycle_rule.0.noncurrent_version_transition.1377917700.storage_class", "STANDARD_IA"),
+						"huaweicloud_s3_bucket.bucket", "lifecycle_rule.0.noncurrent_version_transition.1377917700.storage_class", "STANDARD_IA"),
 					resource.TestCheckResourceAttr(
-						"aws_s3_bucket.bucket", "lifecycle_rule.0.noncurrent_version_transition.2528035817.days", "60"),
+						"huaweicloud_s3_bucket.bucket", "lifecycle_rule.0.noncurrent_version_transition.2528035817.days", "60"),
 					resource.TestCheckResourceAttr(
-						"aws_s3_bucket.bucket", "lifecycle_rule.0.noncurrent_version_transition.2528035817.storage_class", "GLACIER"),
+						"huaweicloud_s3_bucket.bucket", "lifecycle_rule.0.noncurrent_version_transition.2528035817.storage_class", "GLACIER"),
 					resource.TestCheckResourceAttr(
-						"aws_s3_bucket.bucket", "lifecycle_rule.1.id", "id2"),
+						"huaweicloud_s3_bucket.bucket", "lifecycle_rule.1.id", "id2"),
 					resource.TestCheckResourceAttr(
-						"aws_s3_bucket.bucket", "lifecycle_rule.1.prefix", "path2/"),
+						"huaweicloud_s3_bucket.bucket", "lifecycle_rule.1.prefix", "path2/"),
 					resource.TestCheckResourceAttr(
-						"aws_s3_bucket.bucket", "lifecycle_rule.1.enabled", "false"),
+						"huaweicloud_s3_bucket.bucket", "lifecycle_rule.1.enabled", "false"),
 					resource.TestCheckResourceAttr(
-						"aws_s3_bucket.bucket", "lifecycle_rule.1.noncurrent_version_expiration.80908210.days", "365"),
+						"huaweicloud_s3_bucket.bucket", "lifecycle_rule.1.noncurrent_version_expiration.80908210.days", "365"),
 					resource.TestCheckResourceAttr(
-						"aws_s3_bucket.bucket", "lifecycle_rule.2.id", "id3"),
+						"huaweicloud_s3_bucket.bucket", "lifecycle_rule.2.id", "id3"),
 					resource.TestCheckResourceAttr(
-						"aws_s3_bucket.bucket", "lifecycle_rule.2.prefix", "path3/"),
+						"huaweicloud_s3_bucket.bucket", "lifecycle_rule.2.prefix", "path3/"),
 					resource.TestCheckResourceAttr(
-						"aws_s3_bucket.bucket", "lifecycle_rule.2.noncurrent_version_transition.3732708140.days", "0"),
+						"huaweicloud_s3_bucket.bucket", "lifecycle_rule.2.noncurrent_version_transition.3732708140.days", "0"),
 					resource.TestCheckResourceAttr(
-						"aws_s3_bucket.bucket", "lifecycle_rule.2.noncurrent_version_transition.3732708140.storage_class", "GLACIER"),
+						"huaweicloud_s3_bucket.bucket", "lifecycle_rule.2.noncurrent_version_transition.3732708140.storage_class", "GLACIER"),
 				),
 			},
 			{
 				Config: testAccAWSS3BucketConfig(rInt),
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckAWSS3BucketExists("aws_s3_bucket.bucket"),
+					testAccCheckAWSS3BucketExists("huaweicloud_s3_bucket.bucket"),
 				),
 			},
 		},
@@ -694,18 +694,18 @@ func TestAccAWSS3Bucket_Replication(t *testing.T) {
 			{
 				Config: testAccAWSS3BucketConfigReplication(rInt),
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckAWSS3BucketExistsWithProviders("aws_s3_bucket.bucket", &providers),
+					testAccCheckAWSS3BucketExistsWithProviders("huaweicloud_s3_bucket.bucket", &providers),
 				),
 			},
 			{
 				Config: testAccAWSS3BucketConfigReplicationWithConfiguration(rInt),
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckAWSS3BucketExistsWithProviders("aws_s3_bucket.bucket", &providers),
-					resource.TestCheckResourceAttr("aws_s3_bucket.bucket", "replication_configuration.#", "1"),
-					resource.TestCheckResourceAttr("aws_s3_bucket.bucket", "replication_configuration.0.rules.#", "1"),
-					resource.TestCheckResourceAttr("aws_s3_bucket.bucket", "replication_configuration.0.rules.2229345141.id", "foobar"),
-					resource.TestCheckResourceAttr("aws_s3_bucket.bucket", "replication_configuration.0.rules.2229345141.prefix", "foo"),
-					resource.TestCheckResourceAttr("aws_s3_bucket.bucket", "replication_configuration.0.rules.2229345141.status", s3.ReplicationRuleStatusEnabled),
+					testAccCheckAWSS3BucketExistsWithProviders("huaweicloud_s3_bucket.bucket", &providers),
+					resource.TestCheckResourceAttr("huaweicloud_s3_bucket.bucket", "replication_configuration.#", "1"),
+					resource.TestCheckResourceAttr("huaweicloud_s3_bucket.bucket", "replication_configuration.0.rules.#", "1"),
+					resource.TestCheckResourceAttr("huaweicloud_s3_bucket.bucket", "replication_configuration.0.rules.2229345141.id", "foobar"),
+					resource.TestCheckResourceAttr("huaweicloud_s3_bucket.bucket", "replication_configuration.0.rules.2229345141.prefix", "foo"),
+					resource.TestCheckResourceAttr("huaweicloud_s3_bucket.bucket", "replication_configuration.0.rules.2229345141.status", s3.ReplicationRuleStatusEnabled),
 				),
 			},
 		},
@@ -734,7 +734,7 @@ func TestAccAWSS3Bucket_ReplicationWithoutStorageClass(t *testing.T) {
 			{
 				Config: testAccAWSS3BucketConfigReplicationWithoutStorageClass(rInt),
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckAWSS3BucketExistsWithProviders("aws_s3_bucket.bucket", &providers),
+					testAccCheckAWSS3BucketExistsWithProviders("huaweicloud_s3_bucket.bucket", &providers),
 				),
 			},
 		},
@@ -853,7 +853,7 @@ func testAccCheckAWSS3BucketDestroyWithProvider(s *terraform.State, provider *sc
 	conn := provider.Meta().(*Config).s3conn
 
 	for _, rs := range s.RootModule().Resources {
-		if rs.Type != "aws_s3_bucket" {
+		if rs.Type != "huaweicloud_s3_bucket" {
 			continue
 		}
 		_, err := conn.DeleteBucket(&s3.DeleteBucketInput{
@@ -1184,7 +1184,7 @@ func testAccAWSS3BucketPolicy(randInt int) string {
 
 func testAccAWSS3BucketConfig(randInt int) string {
 	return fmt.Sprintf(`
-resource "aws_s3_bucket" "bucket" {
+resource "huaweicloud_s3_bucket" "bucket" {
 	bucket = "tf-test-bucket-%d"
 	acl = "public-read"
 }
@@ -1194,7 +1194,7 @@ resource "aws_s3_bucket" "bucket" {
 func testAccAWSS3MultiBucketConfigWithTags(randInt int) string {
 	t := template.Must(template.New("t1").
 		Parse(`
-resource "aws_s3_bucket" "bucket1" {
+resource "huaweicloud_s3_bucket" "bucket1" {
 	bucket = "tf-test-bucket-1-{{.GUID}}"
 	acl = "private"
 	force_destroy = true
@@ -1204,7 +1204,7 @@ resource "aws_s3_bucket" "bucket1" {
 	}
 }
 
-resource "aws_s3_bucket" "bucket2" {
+resource "huaweicloud_s3_bucket" "bucket2" {
 	bucket = "tf-test-bucket-2-{{.GUID}}"
 	acl = "private"
 	force_destroy = true
@@ -1214,7 +1214,7 @@ resource "aws_s3_bucket" "bucket2" {
 	}
 }
 
-resource "aws_s3_bucket" "bucket3" {
+resource "huaweicloud_s3_bucket" "bucket3" {
 	bucket = "tf-test-bucket-3-{{.GUID}}"
 	acl = "private"
 	force_destroy = true
@@ -1224,7 +1224,7 @@ resource "aws_s3_bucket" "bucket3" {
 	}
 }
 
-resource "aws_s3_bucket" "bucket4" {
+resource "huaweicloud_s3_bucket" "bucket4" {
 	bucket = "tf-test-bucket-4-{{.GUID}}"
 	acl = "private"
 	force_destroy = true
@@ -1234,7 +1234,7 @@ resource "aws_s3_bucket" "bucket4" {
 	}
 }
 
-resource "aws_s3_bucket" "bucket5" {
+resource "huaweicloud_s3_bucket" "bucket5" {
 	bucket = "tf-test-bucket-5-{{.GUID}}"
 	acl = "private"
 	force_destroy = true
@@ -1244,7 +1244,7 @@ resource "aws_s3_bucket" "bucket5" {
 	}
 }
 
-resource "aws_s3_bucket" "bucket6" {
+resource "huaweicloud_s3_bucket" "bucket6" {
 	bucket = "tf-test-bucket-6-{{.GUID}}"
 	acl = "private"
 	force_destroy = true
@@ -1261,22 +1261,22 @@ resource "aws_s3_bucket" "bucket6" {
 
 func testAccAWSS3BucketConfigWithRegion(randInt int) string {
 	return fmt.Sprintf(`
-provider "aws" {
-	alias = "west"
-	region = "eu-west-1"
+provider "huaweicloud" {
+	alias = "reg1"
+	region = "eu-de-01"
 }
 
-resource "aws_s3_bucket" "bucket" {
-	provider = "aws.west"
+resource "huaweicloud_s3_bucket" "bucket" {
+	provider = "huaweicloud.reg1"
 	bucket = "tf-test-bucket-%d"
-	region = "eu-west-1"
+	region = "eu-de-01"
 }
 `, randInt)
 }
 
 func testAccAWSS3BucketWebsiteConfig(randInt int) string {
 	return fmt.Sprintf(`
-resource "aws_s3_bucket" "bucket" {
+resource "huaweicloud_s3_bucket" "bucket" {
 	bucket = "tf-test-bucket-%d"
 	acl = "public-read"
 
@@ -1289,7 +1289,7 @@ resource "aws_s3_bucket" "bucket" {
 
 func testAccAWSS3BucketWebsiteConfigWithError(randInt int) string {
 	return fmt.Sprintf(`
-resource "aws_s3_bucket" "bucket" {
+resource "huaweicloud_s3_bucket" "bucket" {
 	bucket = "tf-test-bucket-%d"
 	acl = "public-read"
 
@@ -1303,7 +1303,7 @@ resource "aws_s3_bucket" "bucket" {
 
 func testAccAWSS3BucketWebsiteConfigWithRedirect(randInt int) string {
 	return fmt.Sprintf(`
-resource "aws_s3_bucket" "bucket" {
+resource "huaweicloud_s3_bucket" "bucket" {
 	bucket = "tf-test-bucket-%d"
 	acl = "public-read"
 
@@ -1316,7 +1316,7 @@ resource "aws_s3_bucket" "bucket" {
 
 func testAccAWSS3BucketWebsiteConfigWithHttpsRedirect(randInt int) string {
 	return fmt.Sprintf(`
-resource "aws_s3_bucket" "bucket" {
+resource "huaweicloud_s3_bucket" "bucket" {
 	bucket = "tf-test-bucket-%d"
 	acl = "public-read"
 
@@ -1329,7 +1329,7 @@ resource "aws_s3_bucket" "bucket" {
 
 func testAccAWSS3BucketWebsiteConfigWithRoutingRules(randInt int) string {
 	return fmt.Sprintf(`
-resource "aws_s3_bucket" "bucket" {
+resource "huaweicloud_s3_bucket" "bucket" {
 	bucket = "tf-test-bucket-%d"
 	acl = "public-read"
 
@@ -1353,15 +1353,15 @@ EOF
 
 func testAccAWSS3BucketConfigWithAcceleration(randInt int) string {
 	return fmt.Sprintf(`
-provider "aws" {
-	alias = "west"
-	region = "eu-west-1"
+provider "huaweicloud" {
+	alias = "reg1"
+	region = "eu-de-01"
 }
 
-resource "aws_s3_bucket" "bucket" {
-	provider = "aws.west"
+resource "huaweicloud_s3_bucket" "bucket" {
+	provider = "huaweicloud.reg1"
 	bucket = "tf-test-bucket-%d"
-	region = "eu-west-1"
+	region = "eu-de-01"
 	acl = "public-read"
 	acceleration_status = "Enabled"
 }
@@ -1370,15 +1370,15 @@ resource "aws_s3_bucket" "bucket" {
 
 func testAccAWSS3BucketConfigWithoutAcceleration(randInt int) string {
 	return fmt.Sprintf(`
-provider "aws" {
-	alias = "west"
-	region = "eu-west-1"
+provider "huaweicloud" {
+	alias = "reg1"
+	region = "eu-de-01"
 }
 
-resource "aws_s3_bucket" "bucket" {
-	provider = "aws.west"
+resource "huaweicloud_s3_bucket" "bucket" {
+	provider = "huaweicloud.reg1"
 	bucket = "tf-test-bucket-%d"
-	region = "eu-west-1"
+	region = "eu-de-01"
 	acl = "public-read"
 	acceleration_status = "Suspended"
 }
@@ -1387,7 +1387,7 @@ resource "aws_s3_bucket" "bucket" {
 
 func testAccAWSS3BucketConfigRequestPayerBucketOwner(randInt int) string {
 	return fmt.Sprintf(`
-resource "aws_s3_bucket" "bucket" {
+resource "huaweicloud_s3_bucket" "bucket" {
 	bucket = "tf-test-bucket-%d"
 	acl = "public-read"
 	request_payer = "BucketOwner"
@@ -1397,7 +1397,7 @@ resource "aws_s3_bucket" "bucket" {
 
 func testAccAWSS3BucketConfigRequestPayerRequester(randInt int) string {
 	return fmt.Sprintf(`
-resource "aws_s3_bucket" "bucket" {
+resource "huaweicloud_s3_bucket" "bucket" {
 	bucket = "tf-test-bucket-%d"
 	acl = "public-read"
 	request_payer = "Requester"
@@ -1407,7 +1407,7 @@ resource "aws_s3_bucket" "bucket" {
 
 func testAccAWSS3BucketConfigWithPolicy(randInt int) string {
 	return fmt.Sprintf(`
-resource "aws_s3_bucket" "bucket" {
+resource "huaweicloud_s3_bucket" "bucket" {
 	bucket = "tf-test-bucket-%d"
 	acl = "public-read"
 	policy = %s
@@ -1417,7 +1417,7 @@ resource "aws_s3_bucket" "bucket" {
 
 func testAccAWSS3BucketDestroyedConfig(randInt int) string {
 	return fmt.Sprintf(`
-resource "aws_s3_bucket" "bucket" {
+resource "huaweicloud_s3_bucket" "bucket" {
 	bucket = "tf-test-bucket-%d"
 	acl = "public-read"
 }
@@ -1426,7 +1426,7 @@ resource "aws_s3_bucket" "bucket" {
 
 func testAccAWSS3BucketConfigWithEmptyPolicy(randInt int) string {
 	return fmt.Sprintf(`
-resource "aws_s3_bucket" "bucket" {
+resource "huaweicloud_s3_bucket" "bucket" {
 	bucket = "tf-test-bucket-%d"
 	acl = "public-read"
 	policy = ""
@@ -1436,7 +1436,7 @@ resource "aws_s3_bucket" "bucket" {
 
 func testAccAWSS3BucketConfigWithVersioning(randInt int) string {
 	return fmt.Sprintf(`
-resource "aws_s3_bucket" "bucket" {
+resource "huaweicloud_s3_bucket" "bucket" {
 	bucket = "tf-test-bucket-%d"
 	acl = "public-read"
 	versioning {
@@ -1448,7 +1448,7 @@ resource "aws_s3_bucket" "bucket" {
 
 func testAccAWSS3BucketConfigWithDisableVersioning(randInt int) string {
 	return fmt.Sprintf(`
-resource "aws_s3_bucket" "bucket" {
+resource "huaweicloud_s3_bucket" "bucket" {
 	bucket = "tf-test-bucket-%d"
 	acl = "public-read"
 	versioning {
@@ -1460,7 +1460,7 @@ resource "aws_s3_bucket" "bucket" {
 
 func testAccAWSS3BucketConfigWithCORS(randInt int) string {
 	return fmt.Sprintf(`
-resource "aws_s3_bucket" "bucket" {
+resource "huaweicloud_s3_bucket" "bucket" {
 	bucket = "tf-test-bucket-%d"
 	acl = "public-read"
 	cors_rule {
@@ -1475,14 +1475,14 @@ resource "aws_s3_bucket" "bucket" {
 }
 
 var testAccAWSS3BucketConfigWithAcl = `
-resource "aws_s3_bucket" "bucket" {
+resource "huaweicloud_s3_bucket" "bucket" {
 	bucket = "tf-test-bucket-%d"
 	acl = "public-read"
 }
 `
 
 var testAccAWSS3BucketConfigWithAclUpdate = `
-resource "aws_s3_bucket" "bucket" {
+resource "huaweicloud_s3_bucket" "bucket" {
 	bucket = "tf-test-bucket-%d"
 	acl = "private"
 }
@@ -1490,15 +1490,15 @@ resource "aws_s3_bucket" "bucket" {
 
 func testAccAWSS3BucketConfigWithLogging(randInt int) string {
 	return fmt.Sprintf(`
-resource "aws_s3_bucket" "log_bucket" {
+resource "huaweicloud_s3_bucket" "log_bucket" {
 	bucket = "tf-test-log-bucket-%d"
 	acl = "log-delivery-write"
 }
-resource "aws_s3_bucket" "bucket" {
+resource "huaweicloud_s3_bucket" "bucket" {
 	bucket = "tf-test-bucket-%d"
 	acl = "private"
 	logging {
-		target_bucket = "${aws_s3_bucket.log_bucket.id}"
+		target_bucket = "${huaweicloud_s3_bucket.log_bucket.id}"
 		target_prefix = "log/"
 	}
 }
@@ -1507,7 +1507,7 @@ resource "aws_s3_bucket" "bucket" {
 
 func testAccAWSS3BucketConfigWithLifecycle(randInt int) string {
 	return fmt.Sprintf(`
-resource "aws_s3_bucket" "bucket" {
+resource "huaweicloud_s3_bucket" "bucket" {
 	bucket = "tf-test-bucket-%d"
 	acl = "private"
 	lifecycle_rule {
@@ -1567,7 +1567,7 @@ resource "aws_s3_bucket" "bucket" {
 
 func testAccAWSS3BucketConfigWithVersioningLifecycle(randInt int) string {
 	return fmt.Sprintf(`
-resource "aws_s3_bucket" "bucket" {
+resource "huaweicloud_s3_bucket" "bucket" {
 	bucket = "tf-test-bucket-%d"
 	acl = "private"
 	versioning {
@@ -1614,17 +1614,17 @@ resource "aws_s3_bucket" "bucket" {
 }
 
 const testAccAWSS3BucketConfigReplicationBasic = `
-provider "aws" {
-  alias  = "euwest"
-  region = "eu-west-1"
+provider "huaweicloud" {
+  alias  = "reg1"
+  region = "eu-de-01"
 }
 
-provider "aws" {
-  alias  = "uswest2"
-  region = "us-west-2"
+provider "huaweicloud" {
+  alias  = "reg2"
+  region = "us-de-02"
 }
 
-resource "aws_iam_role" "role" {
+resource "huaweicloud_iam_role" "role" {
   name               = "tf-iam-role-replication-%d"
   assume_role_policy = <<POLICY
 {
@@ -1646,8 +1646,8 @@ POLICY
 
 func testAccAWSS3BucketConfigReplication(randInt int) string {
 	return fmt.Sprintf(testAccAWSS3BucketConfigReplicationBasic+`
-resource "aws_s3_bucket" "bucket" {
-    provider = "aws.uswest2"
+resource "huaweicloud_s3_bucket" "bucket" {
+    provider = "huaweicloud.reg1"
     bucket   = "tf-test-bucket-%d"
     acl      = "private"
 
@@ -1656,10 +1656,10 @@ resource "aws_s3_bucket" "bucket" {
     }
 }
 
-resource "aws_s3_bucket" "destination" {
-    provider = "aws.euwest"
+resource "huaweicloud_s3_bucket" "destination" {
+    provider = "huaweicloud.reg2"
     bucket   = "tf-test-bucket-destination-%d"
-    region   = "eu-west-1"
+    region   = "eu-de-01"
 
     versioning {
         enabled = true
@@ -1670,8 +1670,8 @@ resource "aws_s3_bucket" "destination" {
 
 func testAccAWSS3BucketConfigReplicationWithConfiguration(randInt int) string {
 	return fmt.Sprintf(testAccAWSS3BucketConfigReplicationBasic+`
-resource "aws_s3_bucket" "bucket" {
-    provider = "aws.uswest2"
+resource "huaweicloud_s3_bucket" "bucket" {
+    provider = "huaweicloud.reg2"
     bucket   = "tf-test-bucket-%d"
     acl      = "private"
 
@@ -1680,24 +1680,24 @@ resource "aws_s3_bucket" "bucket" {
     }
 
     replication_configuration {
-        role = "${aws_iam_role.role.arn}"
+        role = "${huaweicloud_iam_role.role.arn}"
         rules {
             id     = "foobar"
             prefix = "foo"
             status = "Enabled"
 
             destination {
-                bucket        = "${aws_s3_bucket.destination.arn}"
+                bucket        = "${huaweicloud_s3_bucket.destination.arn}"
                 storage_class = "STANDARD"
             }
         }
     }
 }
 
-resource "aws_s3_bucket" "destination" {
-    provider = "aws.euwest"
+resource "huaweicloud_s3_bucket" "destination" {
+    provider = "huaweicloud.reg1"
     bucket   = "tf-test-bucket-destination-%d"
-    region   = "eu-west-1"
+    region   = "eu-de-01"
 
     versioning {
         enabled = true
@@ -1708,8 +1708,8 @@ resource "aws_s3_bucket" "destination" {
 
 func testAccAWSS3BucketConfigReplicationWithoutStorageClass(randInt int) string {
 	return fmt.Sprintf(testAccAWSS3BucketConfigReplicationBasic+`
-resource "aws_s3_bucket" "bucket" {
-    provider = "aws.uswest2"
+resource "huaweicloud_s3_bucket" "bucket" {
+    provider = "huaweicloud.reg2"
     bucket   = "tf-test-bucket-%d"
     acl      = "private"
 
@@ -1718,23 +1718,23 @@ resource "aws_s3_bucket" "bucket" {
     }
 
     replication_configuration {
-        role = "${aws_iam_role.role.arn}"
+        role = "${huaweicloud_iam_role.role.arn}"
         rules {
             id     = "foobar"
             prefix = "foo"
             status = "Enabled"
 
             destination {
-                bucket        = "${aws_s3_bucket.destination.arn}"
+                bucket        = "${huaweicloud_s3_bucket.destination.arn}"
             }
         }
     }
 }
 
-resource "aws_s3_bucket" "destination" {
-    provider = "aws.euwest"
+resource "huaweicloud_s3_bucket" "destination" {
+    provider = "huaweicloud.reg1"
     bucket   = "tf-test-bucket-destination-%d"
-    region   = "eu-west-1"
+    region   = "eu-de-01"
 
     versioning {
         enabled = true
@@ -1745,30 +1745,30 @@ resource "aws_s3_bucket" "destination" {
 
 func testAccAWSS3BucketConfigReplicationNoVersioning(randInt int) string {
 	return fmt.Sprintf(testAccAWSS3BucketConfigReplicationBasic+`
-resource "aws_s3_bucket" "bucket" {
-    provider = "aws.uswest2"
+resource "huaweicloud_s3_bucket" "bucket" {
+    provider = "huaweicloud.reg2"
     bucket   = "tf-test-bucket-%d"
     acl      = "private"
 
     replication_configuration {
-        role = "${aws_iam_role.role.arn}"
+        role = "${huaweicloud_iam_role.role.arn}"
         rules {
             id     = "foobar"
             prefix = "foo"
             status = "Enabled"
 
             destination {
-                bucket        = "${aws_s3_bucket.destination.arn}"
+                bucket        = "${huaweicloud_s3_bucket.destination.arn}"
                 storage_class = "STANDARD"
             }
         }
     }
 }
 
-resource "aws_s3_bucket" "destination" {
-    provider = "aws.euwest"
+resource "huaweicloud_s3_bucket" "destination" {
+    provider = "huaweicloud.reg1"
     bucket   = "tf-test-bucket-destination-%d"
-    region   = "eu-west-1"
+    region   = "eu-de-01"
 
     versioning {
         enabled = true
@@ -1778,13 +1778,13 @@ resource "aws_s3_bucket" "destination" {
 }
 
 const testAccAWSS3BucketConfig_namePrefix = `
-resource "aws_s3_bucket" "test" {
+resource "huaweicloud_s3_bucket" "test" {
 	bucket_prefix = "tf-test-"
 }
 `
 
 const testAccAWSS3BucketConfig_generatedName = `
-resource "aws_s3_bucket" "test" {
+resource "huaweicloud_s3_bucket" "test" {
 	bucket_prefix = "tf-test-"
 }
 `

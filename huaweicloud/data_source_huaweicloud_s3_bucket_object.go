@@ -1,4 +1,4 @@
-package aws
+package huaweicloud
 
 import (
 	"bytes"
@@ -106,7 +106,7 @@ func dataSourceAwsS3BucketObject() *schema.Resource {
 }
 
 func dataSourceAwsS3BucketObjectRead(d *schema.ResourceData, meta interface{}) error {
-	conn := meta.(*AWSClient).s3conn
+	conn := meta.(*Config).s3conn
 
 	bucket := d.Get("bucket").(string)
 	key := d.Get("key").(string)

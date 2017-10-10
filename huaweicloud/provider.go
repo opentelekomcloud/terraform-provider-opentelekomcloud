@@ -16,14 +16,14 @@ func Provider() terraform.ResourceProvider {
 			"access_key": {
 				Type:        schema.TypeString,
 				Optional:    true,
-				Default:     "",
+				DefaultFunc: schema.EnvDefaultFunc("OS_ACCESS_KEY", ""),
 				Description: descriptions["access_key"],
 			},
 
 			"secret_key": {
 				Type:        schema.TypeString,
 				Optional:    true,
-				Default:     "",
+				DefaultFunc: schema.EnvDefaultFunc("OS_SECRET_KEY", ""),
 				Description: descriptions["secret_key"],
 			},
 
@@ -159,6 +159,7 @@ func Provider() terraform.ResourceProvider {
 			"huaweicloud_images_image_v2":        dataSourceImagesImageV2(),
 			"huaweicloud_networking_network_v2":  dataSourceNetworkingNetworkV2(),
 			"huaweicloud_networking_secgroup_v2": dataSourceNetworkingSecGroupV2(),
+			"huaweicloud_s3_bucket_object":       dataSourceAwsS3BucketObject(),
 		},
 
 		ResourcesMap: map[string]*schema.Resource{
@@ -200,6 +201,9 @@ func Provider() terraform.ResourceProvider {
 			"huaweicloud_networking_secgroup_v2":          resourceNetworkingSecGroupV2(),
 			"huaweicloud_networking_secgroup_rule_v2":     resourceNetworkingSecGroupRuleV2(),
 			"huaweicloud_objectstorage_container_v1":      resourceObjectStorageContainerV1(),
+			"huaweicloud_s3_bucket":                       resourceAwsS3Bucket(),
+			"huaweicloud_s3_bucket_policy":                resourceAwsS3BucketPolicy(),
+			"huaweicloud_s3_bucket_object":                resourceAwsS3BucketObject(),
 		},
 
 		ConfigureFunc: configureProvider,
