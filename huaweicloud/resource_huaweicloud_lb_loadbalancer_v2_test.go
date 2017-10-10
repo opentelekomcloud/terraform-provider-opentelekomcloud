@@ -11,10 +11,10 @@ import (
 	"github.com/gophercloud/gophercloud/openstack/networking/v2/extensions/lbaas_v2/loadbalancers"
 	"github.com/gophercloud/gophercloud/openstack/networking/v2/extensions/security/groups"
 	"github.com/gophercloud/gophercloud/openstack/networking/v2/ports"
+	"regexp"
 )
 
 // KNOWN problem (unsupported "haproxy")
-/*
 func TestAccLBV2LoadBalancer_basic(t *testing.T) {
 	var lb loadbalancers.LoadBalancer
 
@@ -42,7 +42,6 @@ func TestAccLBV2LoadBalancer_basic(t *testing.T) {
 		},
 	})
 }
-*/
 
 // PASS
 func TestAccLBV2LoadBalancer_secGroup(t *testing.T) {
@@ -194,7 +193,7 @@ resource "huaweicloud_networking_subnet_v2" "subnet_1" {
 
 resource "huaweicloud_lb_loadbalancer_v2" "loadbalancer_1" {
   name = "loadbalancer_1"
-  loadbalancer_provider = "haproxy"
+  #loadbalancer_provider = "haproxy"
   vip_subnet_id = "${huaweicloud_networking_subnet_v2.subnet_1.id}"
 
   timeouts {
@@ -220,7 +219,7 @@ resource "huaweicloud_networking_subnet_v2" "subnet_1" {
 
 resource "huaweicloud_lb_loadbalancer_v2" "loadbalancer_1" {
   name = "loadbalancer_1_updated"
-  loadbalancer_provider = "haproxy"
+  #loadbalancer_provider = "haproxy"
   admin_state_up = "true"
   vip_subnet_id = "${huaweicloud_networking_subnet_v2.subnet_1.id}"
 
