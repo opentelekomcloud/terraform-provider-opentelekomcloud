@@ -13,11 +13,12 @@ import (
 	"github.com/gophercloud/gophercloud/openstack/objectstorage/v1/swauth"
 	"github.com/hashicorp/terraform/helper/pathorcontents"
 	"github.com/hashicorp/terraform/terraform"
+	"github.com/aws/aws-sdk-go/service/s3"
 )
 
 type Config struct {
-	AccessKey     	 string
-	SecretKey     	 string
+	AccessKey        string
+	SecretKey        string
 	CACertFile       string
 	ClientCertFile   string
 	ClientKeyFile    string
@@ -36,6 +37,7 @@ type Config struct {
 	UserID           string
 
 	OsClient *gophercloud.ProviderClient
+	s3conn *s3.S3
 }
 
 func (c *Config) LoadAndValidate() error {
