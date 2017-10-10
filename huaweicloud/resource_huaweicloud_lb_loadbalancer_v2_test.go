@@ -14,7 +14,7 @@ import (
 	"regexp"
 )
 
-// KNOWN problem (unsupported "haproxy")
+// PASS
 func TestAccLBV2LoadBalancer_basic(t *testing.T) {
 	var lb loadbalancers.LoadBalancer
 
