@@ -87,23 +87,27 @@ func resourceListenerV2() *schema.Resource {
 				Type:     schema.TypeInt,
 				Optional: true,
 				Computed: true,
+				ForceNew: true,
 			},
 
 			"default_tls_container_ref": &schema.Schema{
 				Type:     schema.TypeString,
 				Optional: true,
+				ForceNew: true,
 			},
 
 			"sni_container_refs": &schema.Schema{
 				Type:     schema.TypeList,
 				Optional: true,
 				Elem:     &schema.Schema{Type: schema.TypeString},
+				ForceNew: true,
 			},
 
 			"admin_state_up": &schema.Schema{
 				Type:     schema.TypeBool,
 				Default:  true,
 				Optional: true,
+				ForceNew: true,
 			},
 
 			"id": &schema.Schema{
