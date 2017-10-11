@@ -443,7 +443,8 @@ func resourceAwsS3BucketCreate(d *schema.ResourceData, meta interface{}) error {
 
 	err := resource.Retry(5*time.Minute, func() *resource.RetryError {
 		log.Printf("[DEBUG] Trying to create new S3 bucket: %q", bucket)
-		_, err := s3conn.CreateBucket(req)
+		ret, err := s3conn.CreateBucket(req)
+		log.Printf("[DEBUG] Created new S3 bucket: %+v.\n", ret)
 		if awsErr, ok := err.(awserr.Error); ok {
 			if awsErr.Code() == "OperationAborted" {
 				log.Printf("[WARN] Got an error while trying to create S3 bucket %s: %s", bucket, err)
@@ -986,14 +987,16 @@ func resourceAwsS3BucketRead(d *schema.ResourceData, meta interface{}) error {
 		}
 	}
 
-	tagSet, err := getTagSetS3(s3conn, d.Id())
-	if err != nil {
-		return err
-	}
+	/*
+		tagSet, err := getTagSetS3(s3conn, d.Id())
+		if err != nil {
+			return err
+		}
 
-	if err := d.Set("tags", tagsToMapS3(tagSet)); err != nil {
-		return err
-	}
+		if err := d.Set("tags", tagsToMapS3(tagSet)); err != nil {
+			return err
+		}
+	*/
 
 	// UNUSED?
 	//d.Set("arn", fmt.Sprintf("arn:%s:s3:::%s", meta.(*Config).partition, d.Id()))

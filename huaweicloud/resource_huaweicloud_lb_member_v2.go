@@ -148,6 +148,12 @@ func resourceMemberV2Create(d *schema.ResourceData, meta interface{}) error {
 	if err != nil {
 		return err
 	}
+	// Wait for LB member to become ACTIVE too
+	/*
+		err = waitForLBV2Member(networkingClient, poolID, "admin_state_up", "true", nil, timeout)
+		if err != nil {
+			return err
+		} */
 
 	d.SetId(member.ID)
 
