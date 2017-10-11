@@ -9,7 +9,7 @@ import (
 	"github.com/hashicorp/terraform/terraform"
 )
 
-// KNOWN issue (#13)
+// PASS, but should be able to set connection_limit to a number, but can't yet.
 func TestAccLBV2Listener_basic(t *testing.T) {
 	var listener listeners.Listener
 
@@ -32,7 +32,7 @@ func TestAccLBV2Listener_basic(t *testing.T) {
 					resource.TestCheckResourceAttr(
 						"huaweicloud_lb_listener_v2.listener_1", "name", "listener_1_updated"),
 					resource.TestCheckResourceAttr(
-						"huaweicloud_lb_listener_v2.listener_1", "connection_limit", "-1"),
+						"huaweicloud_lb_listener_v2.listener_1", "connection_limit", "100"),
 				),
 			},
 		},
@@ -146,7 +146,7 @@ resource "huaweicloud_lb_listener_v2" "listener_1" {
   name = "listener_1_updated"
   protocol = "HTTP"
   protocol_port = 8080
-  #connection_limit = 100
+  connection_limit = 100
   admin_state_up = "true"
   loadbalancer_id = "${huaweicloud_lb_loadbalancer_v2.loadbalancer_1.id}"
 
