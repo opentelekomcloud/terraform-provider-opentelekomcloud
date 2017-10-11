@@ -83,12 +83,12 @@ func resourceListenerV2() *schema.Resource {
 				Optional: true,
 			},
 
-			"connection_limit": &schema.Schema{
+			/*"connection_limit": &schema.Schema{
 				Type:     schema.TypeInt,
 				Optional: true,
 				Computed: true,
 				ForceNew: true,
-			},
+			}, */
 
 			"default_tls_container_ref": &schema.Schema{
 				Type:     schema.TypeString,
@@ -146,10 +146,10 @@ func resourceListenerV2Create(d *schema.ResourceData, meta interface{}) error {
 		AdminStateUp:           &adminStateUp,
 	}
 
-	if v, ok := d.GetOk("connection_limit"); ok {
+	/*if v, ok := d.GetOk("connection_limit"); ok {
 		connectionLimit := v.(int)
 		createOpts.ConnLimit = &connectionLimit
-	}
+	} */
 
 	log.Printf("[DEBUG] Create Options: %#v", createOpts)
 
@@ -207,7 +207,7 @@ func resourceListenerV2Read(d *schema.ResourceData, meta interface{}) error {
 	d.Set("protocol_port", listener.ProtocolPort)
 	d.Set("admin_state_up", listener.AdminStateUp)
 	d.Set("default_pool_id", listener.DefaultPoolID)
-	d.Set("connection_limit", listener.ConnLimit)
+	//d.Set("connection_limit", listener.ConnLimit)
 	d.Set("sni_container_refs", listener.SniContainerRefs)
 	d.Set("default_tls_container_ref", listener.DefaultTlsContainerRef)
 	d.Set("region", GetRegion(d, config))
@@ -229,10 +229,10 @@ func resourceListenerV2Update(d *schema.ResourceData, meta interface{}) error {
 	if d.HasChange("description") {
 		updateOpts.Description = d.Get("description").(string)
 	}
-	if d.HasChange("connection_limit") {
+	/*if d.HasChange("connection_limit") {
 		connLimit := d.Get("connection_limit").(int)
 		updateOpts.ConnLimit = &connLimit
-	}
+	} */
 	if d.HasChange("default_tls_container_ref") {
 		updateOpts.DefaultTlsContainerRef = d.Get("default_tls_container_ref").(string)
 	}
