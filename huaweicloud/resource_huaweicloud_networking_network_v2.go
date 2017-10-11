@@ -39,7 +39,9 @@ func ExtractValFromNid(s string) (bool, string) {
 }
 
 func FormatNidFromValS(asu string, id string) string {
-	return fmt.Sprintf("%s:%s", asu, id)
+	// Causing problems with instance network lookups right now
+	//return fmt.Sprintf("%s:%s", asu, id)
+	return fmt.Sprintf("%s", id)
 }
 
 func suppressAsuDiff(k, old, new string, d *schema.ResourceData) bool {
