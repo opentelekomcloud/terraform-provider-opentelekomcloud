@@ -42,7 +42,7 @@ func TestAccAWSS3Bucket_basic(t *testing.T) {
 					/*resource.TestCheckResourceAttr(
 					"huaweicloud_s3_bucket.bucket", "hosted_zone_id", HostedZoneIDForRegion("us-west-2")), */
 					resource.TestCheckResourceAttr(
-						"huaweicloud_s3_bucket.bucket", "region", "eu-de-01"),
+						"huaweicloud_s3_bucket.bucket", "region", "eu-de"),
 					resource.TestCheckNoResourceAttr(
 						"huaweicloud_s3_bucket.bucket", "website_endpoint"),
 					/*resource.TestMatchResourceAttr(

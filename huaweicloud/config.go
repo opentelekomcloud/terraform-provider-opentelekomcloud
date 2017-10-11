@@ -9,6 +9,7 @@ import (
 	"os"
 
 	"github.com/aws/aws-sdk-go/aws"
+	"github.com/aws/aws-sdk-go/aws/awserr"
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/s3"
 	"github.com/gophercloud/gophercloud"
@@ -145,9 +146,29 @@ func (c *Config) LoadAndValidate() error {
 	//fmt.Printf("[DEBUG] Region: %s.\n", c.Region)
 
 	// Setup AWS/S3 client/config information for Swift S3 buckets
+	log.Println("[INFO] Building AWS auth structure")
+	creds, err := GetCredentials(c)
+	if err != nil {
+		return err
+	}
+	// Call Get to check for credential provider. If nothing found, we'll get an
+	// error, and we can present it nicely to the user
+	cp, err := creds.Get()
+	if err != nil {
+		if awsErr, ok := err.(awserr.Error); ok && awsErr.Code() == "NoCredentialProviders" {
+			return fmt.Errorf(`No valid credential sources found for AWS Provider.
+  Please see https://terraform.io/docs/providers/aws/index.html for more information on
+  providing credentials for the AWS Provider`)
+		}
+
+		return fmt.Errorf("Error loading credentials for AWS Provider: %s", err)
+	}
+
+	log.Printf("[INFO] AWS Auth provider used: %q", cp.ProviderName)
+
 	awsConfig := &aws.Config{
-		//Credentials:      creds,
-		Region: aws.String(c.Region),
+		Credentials: creds,
+		Region:      aws.String(c.Region),
 		//MaxRetries:       aws.Int(c.MaxRetries),
 		HTTPClient: cleanhttp.DefaultClient(),
 		//S3ForcePathStyle: aws.Bool(c.S3ForcePathStyle),
