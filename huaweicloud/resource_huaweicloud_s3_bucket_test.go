@@ -591,7 +591,7 @@ func TestAccAWSS3Bucket_Logging(t *testing.T) {
 	})
 }
 
-// FAIL: MalformedXML
+// FAIL: MalformedXML, some of the details aren't supported, like transition?
 func TestAccAWSS3Bucket_Lifecycle(t *testing.T) {
 	rInt := acctest.RandInt()
 	resource.Test(t, resource.TestCase{
@@ -1650,6 +1650,7 @@ resource "huaweicloud_s3_bucket" "bucket" {
 `, randInt)
 }
 
+/*
 const testAccAWSS3BucketConfigReplicationBasic = `
 provider "huaweicloud" {
   alias  = "reg1"
@@ -1813,6 +1814,7 @@ resource "huaweicloud_s3_bucket" "destination" {
 }
 `, randInt, randInt, randInt)
 }
+*/
 
 const testAccAWSS3BucketConfig_namePrefix = `
 resource "huaweicloud_s3_bucket" "test" {
