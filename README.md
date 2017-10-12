@@ -16,17 +16,17 @@ Requirements
 Building The Provider
 ---------------------
 
-Clone repository to: `$GOPATH/src/github.com/hashicorp/terraform-provider-$PROVIDER_NAME`
+Clone repository to: `$GOPATH/src/github.com/$OWNER/terraform-provider-huaweicloud`
 
 ```sh
-$ mkdir -p $GOPATH/src/github.com/hashicorp; cd $GOPATH/src/github.com/hashicorp
-$ git clone git@github.com:hashicorp/terraform-provider-$PROVIDER_NAME
+$ mkdir -p $GOPATH/src/github.com/$OWNER; cd $GOPATH/src/github.com/$OWNER
+$ git clone git@github.com:$OWNER/terraform-provider-huaweicloud
 ```
 
 Enter the provider directory and build the provider
 
 ```sh
-$ cd $GOPATH/src/github.com/hashicorp/terraform-provider-$PROVIDER_NAME
+$ cd $GOPATH/src/github.com/$OWNER/terraform-provider-huaweicloud
 $ make build
 ```
 
@@ -34,7 +34,7 @@ Using the provider
 ----------------------
 Please see the documentation at [terraform.io](https://www.terraform.io/docs/providers/openstack/index.html).
 
-Or you can browse the documentation within this repo [here](https://github.com/terraform-providers/terraform-provider-huaweicloud/tree/master/website/docs).
+Or you can browse the documentation within this repo [here](https://github.com/$OWNER/terraform-provider-huaweicloud/tree/master/website/docs).
 
 Developing the Provider
 ---------------------------
@@ -46,7 +46,7 @@ To compile the provider, run `make build`. This will build the provider and put 
 ```sh
 $ make bin
 ...
-$ $GOPATH/bin/terraform-provider-$PROVIDER_NAME
+$ $GOPATH/bin/terraform-provider-huaweicloud
 ...
 ```
 
