@@ -1,14 +1,14 @@
 package huaweicloud
 
 import (
-	"bytes"
+	//"bytes"
 	"encoding/json"
 	"fmt"
 	"reflect"
 	"regexp"
 	"strconv"
 	"testing"
-	"text/template"
+	//"text/template"
 
 	"github.com/hashicorp/terraform/helper/acctest"
 	"github.com/hashicorp/terraform/helper/resource"
@@ -22,6 +22,7 @@ import (
 	"github.com/hashicorp/terraform/helper/schema"
 )
 
+// PASS
 func TestAccAWSS3Bucket_basic(t *testing.T) {
 	rInt := acctest.RandInt()
 	//arnRegexp := regexp.MustCompile("^arn:aws:s3:::")
@@ -57,6 +58,8 @@ func TestAccAWSS3Bucket_basic(t *testing.T) {
 	})
 }
 
+// NOT SUPPORTED
+/*
 func TestAccAWSS3MultiBucket_withTags(t *testing.T) {
 	rInt := acctest.RandInt()
 	resource.Test(t, resource.TestCase{
@@ -70,7 +73,9 @@ func TestAccAWSS3MultiBucket_withTags(t *testing.T) {
 		},
 	})
 }
+*/
 
+// PASS
 func TestAccAWSS3Bucket_namePrefix(t *testing.T) {
 	resource.Test(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
@@ -89,6 +94,7 @@ func TestAccAWSS3Bucket_namePrefix(t *testing.T) {
 	})
 }
 
+// PASS
 func TestAccAWSS3Bucket_generatedName(t *testing.T) {
 	resource.Test(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
@@ -105,6 +111,7 @@ func TestAccAWSS3Bucket_generatedName(t *testing.T) {
 	})
 }
 
+// PASS
 func TestAccAWSS3Bucket_region(t *testing.T) {
 	rInt := acctest.RandInt()
 
@@ -117,13 +124,15 @@ func TestAccAWSS3Bucket_region(t *testing.T) {
 				Config: testAccAWSS3BucketConfigWithRegion(rInt),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckAWSS3BucketExists("huaweicloud_s3_bucket.bucket"),
-					resource.TestCheckResourceAttr("huaweicloud_s3_bucket.bucket", "region", "eu-de-01"),
+					resource.TestCheckResourceAttr("huaweicloud_s3_bucket.bucket", "region", "eu-de"),
 				),
 			},
 		},
 	})
 }
 
+// NOT SUPPORTED
+/*
 func TestAccAWSS3Bucket_acceleration(t *testing.T) {
 	rInt := acctest.RandInt()
 
@@ -151,7 +160,10 @@ func TestAccAWSS3Bucket_acceleration(t *testing.T) {
 		},
 	})
 }
+*/
 
+// UNSUPPORTED
+/*
 func TestAccAWSS3Bucket_RequestPayer(t *testing.T) {
 	rInt := acctest.RandInt()
 
@@ -189,7 +201,10 @@ func TestAccAWSS3Bucket_RequestPayer(t *testing.T) {
 		},
 	})
 }
+*/
 
+// PASS, but not needed or supported
+/*
 func TestResourceAWSS3BucketRequestPayer_validation(t *testing.T) {
 	_, errors := validateS3BucketRequestPayerType("incorrect", "request_payer")
 	if len(errors) == 0 {
@@ -217,7 +232,9 @@ func TestResourceAWSS3BucketRequestPayer_validation(t *testing.T) {
 		}
 	}
 }
+*/
 
+// PASS
 func TestAccAWSS3Bucket_Policy(t *testing.T) {
 	rInt := acctest.RandInt()
 
@@ -254,6 +271,7 @@ func TestAccAWSS3Bucket_Policy(t *testing.T) {
 	})
 }
 
+// PASS
 func TestAccAWSS3Bucket_UpdateAcl(t *testing.T) {
 	ri := acctest.RandInt()
 	preConfig := fmt.Sprintf(testAccAWSS3BucketConfigWithAcl, ri)
@@ -284,6 +302,7 @@ func TestAccAWSS3Bucket_UpdateAcl(t *testing.T) {
 	})
 }
 
+// PASS
 func TestAccAWSS3Bucket_Website_Simple(t *testing.T) {
 	rInt := acctest.RandInt()
 	resource.Test(t, resource.TestCase{
@@ -325,6 +344,7 @@ func TestAccAWSS3Bucket_Website_Simple(t *testing.T) {
 	})
 }
 
+// PASS
 func TestAccAWSS3Bucket_WebsiteRedirect(t *testing.T) {
 	rInt := acctest.RandInt()
 	resource.Test(t, resource.TestCase{
@@ -366,6 +386,7 @@ func TestAccAWSS3Bucket_WebsiteRedirect(t *testing.T) {
 	})
 }
 
+// PASS
 func TestAccAWSS3Bucket_WebsiteRoutingRules(t *testing.T) {
 	rInt := acctest.RandInt()
 	resource.Test(t, resource.TestCase{
@@ -414,6 +435,7 @@ func TestAccAWSS3Bucket_WebsiteRoutingRules(t *testing.T) {
 // Test TestAccAWSS3Bucket_shouldFailNotFound is designed to fail with a "plan
 // not empty" error in Terraform, to check against regresssions.
 // See https://github.com/hashicorp/terraform/pull/2925
+// PASS
 func TestAccAWSS3Bucket_shouldFailNotFound(t *testing.T) {
 	rInt := acctest.RandInt()
 	resource.Test(t, resource.TestCase{
@@ -433,6 +455,7 @@ func TestAccAWSS3Bucket_shouldFailNotFound(t *testing.T) {
 	})
 }
 
+// PASS
 func TestAccAWSS3Bucket_Versioning(t *testing.T) {
 	rInt := acctest.RandInt()
 	resource.Test(t, resource.TestCase{
@@ -468,6 +491,7 @@ func TestAccAWSS3Bucket_Versioning(t *testing.T) {
 	})
 }
 
+// PASS
 func TestAccAWSS3Bucket_Cors(t *testing.T) {
 	rInt := acctest.RandInt()
 
@@ -547,6 +571,7 @@ func TestAccAWSS3Bucket_Cors(t *testing.T) {
 	})
 }
 
+// PASS
 func TestAccAWSS3Bucket_Logging(t *testing.T) {
 	rInt := acctest.RandInt()
 	resource.Test(t, resource.TestCase{
@@ -566,6 +591,7 @@ func TestAccAWSS3Bucket_Logging(t *testing.T) {
 	})
 }
 
+// FAIL: MalformedXML
 func TestAccAWSS3Bucket_Lifecycle(t *testing.T) {
 	rInt := acctest.RandInt()
 	resource.Test(t, resource.TestCase{
@@ -673,6 +699,8 @@ func TestAccAWSS3Bucket_Lifecycle(t *testing.T) {
 	})
 }
 
+// UNSUPPORTED
+/*
 func TestAccAWSS3Bucket_Replication(t *testing.T) {
 	rInt := acctest.RandInt()
 
@@ -711,8 +739,11 @@ func TestAccAWSS3Bucket_Replication(t *testing.T) {
 		},
 	})
 }
+*/
 
 // StorageClass issue: https://github.com/hashicorp/terraform/issues/10909
+// UNSUPPORTED
+/*
 func TestAccAWSS3Bucket_ReplicationWithoutStorageClass(t *testing.T) {
 	rInt := acctest.RandInt()
 
@@ -741,6 +772,7 @@ func TestAccAWSS3Bucket_ReplicationWithoutStorageClass(t *testing.T) {
 	})
 }
 
+// FAIL provider "huaweicloud" is not available
 func TestAccAWSS3Bucket_ReplicationExpectVersioningValidationError(t *testing.T) {
 	rInt := acctest.RandInt()
 
@@ -766,6 +798,7 @@ func TestAccAWSS3Bucket_ReplicationExpectVersioningValidationError(t *testing.T)
 		},
 	})
 }
+*/
 
 func TestAWSS3BucketName(t *testing.T) {
 	validDnsNames := []string{
@@ -1175,11 +1208,11 @@ func testAccBucketDomainName(randInt int) string {
 }
 
 func testAccWebsiteEndpoint(randInt int) string {
-	return fmt.Sprintf("tf-test-bucket-%d.s3-website-us-west-2.amazonaws.com", randInt)
+	return fmt.Sprintf("tf-test-bucket-%d.s3-website.eu-de.amazonaws.com", randInt)
 }
 
 func testAccAWSS3BucketPolicy(randInt int) string {
-	return fmt.Sprintf(`{ "Version": "2012-10-17", "Statement": [ { "Sid": "", "Effect": "Allow", "Principal": { "AWS": "*" }, "Action": "s3:GetObject", "Resource": "arn:aws:s3:::tf-test-bucket-%d/*" } ] }`, randInt)
+	return fmt.Sprintf(`{ "Version": "2008-10-17", "Statement": [ { "Effect": "Allow", "Principal": { "AWS": ["*"] }, "Action": ["s3:GetObject"], "Resource": ["arn:aws:s3:::tf-test-bucket-%d/*"] } ] }`, randInt)
 }
 
 func testAccAWSS3BucketConfig(randInt int) string {
@@ -1191,6 +1224,7 @@ resource "huaweicloud_s3_bucket" "bucket" {
 `, randInt)
 }
 
+/*
 func testAccAWSS3MultiBucketConfigWithTags(randInt int) string {
 	t := template.Must(template.New("t1").
 		Parse(`
@@ -1258,18 +1292,19 @@ resource "huaweicloud_s3_bucket" "bucket6" {
 	t.Execute(&doc, struct{ GUID int }{GUID: randInt})
 	return doc.String()
 }
+*/
 
 func testAccAWSS3BucketConfigWithRegion(randInt int) string {
 	return fmt.Sprintf(`
 provider "huaweicloud" {
 	alias = "reg1"
-	region = "eu-de-01"
+	region = "eu-de"
 }
 
 resource "huaweicloud_s3_bucket" "bucket" {
 	provider = "huaweicloud.reg1"
 	bucket = "tf-test-bucket-%d"
-	region = "eu-de-01"
+	region = "eu-de"
 }
 `, randInt)
 }
@@ -1355,13 +1390,13 @@ func testAccAWSS3BucketConfigWithAcceleration(randInt int) string {
 	return fmt.Sprintf(`
 provider "huaweicloud" {
 	alias = "reg1"
-	region = "eu-de-01"
+	region = "eu-de"
 }
 
 resource "huaweicloud_s3_bucket" "bucket" {
 	provider = "huaweicloud.reg1"
 	bucket = "tf-test-bucket-%d"
-	region = "eu-de-01"
+	region = "eu-de"
 	acl = "public-read"
 	acceleration_status = "Enabled"
 }
@@ -1372,19 +1407,20 @@ func testAccAWSS3BucketConfigWithoutAcceleration(randInt int) string {
 	return fmt.Sprintf(`
 provider "huaweicloud" {
 	alias = "reg1"
-	region = "eu-de-01"
+	region = "eu-de"
 }
 
 resource "huaweicloud_s3_bucket" "bucket" {
 	provider = "huaweicloud.reg1"
 	bucket = "tf-test-bucket-%d"
-	region = "eu-de-01"
+	region = "eu-de"
 	acl = "public-read"
 	acceleration_status = "Suspended"
 }
 `, randInt)
 }
 
+/*
 func testAccAWSS3BucketConfigRequestPayerBucketOwner(randInt int) string {
 	return fmt.Sprintf(`
 resource "huaweicloud_s3_bucket" "bucket" {
@@ -1404,6 +1440,7 @@ resource "huaweicloud_s3_bucket" "bucket" {
 }
 `, randInt)
 }
+*/
 
 func testAccAWSS3BucketConfigWithPolicy(randInt int) string {
 	return fmt.Sprintf(`
@@ -1552,10 +1589,10 @@ resource "huaweicloud_s3_bucket" "bucket" {
 		prefix = "path4/"
 		enabled = true
 
-		tags {
-			"tagKey" = "tagValue"
-			"terraform" = "hashicorp"
-		}
+		#tags {
+		#	"tagKey" = "tagValue"
+		#	"terraform" = "hashicorp"
+		#}
 
 		expiration {
 			date = "2016-01-12"
@@ -1616,12 +1653,12 @@ resource "huaweicloud_s3_bucket" "bucket" {
 const testAccAWSS3BucketConfigReplicationBasic = `
 provider "huaweicloud" {
   alias  = "reg1"
-  region = "eu-de-01"
+  region = "eu-de"
 }
 
 provider "huaweicloud" {
   alias  = "reg2"
-  region = "us-de-02"
+  region = "ap-sg"
 }
 
 resource "huaweicloud_iam_role" "role" {
@@ -1659,7 +1696,7 @@ resource "huaweicloud_s3_bucket" "bucket" {
 resource "huaweicloud_s3_bucket" "destination" {
     provider = "huaweicloud.reg2"
     bucket   = "tf-test-bucket-destination-%d"
-    region   = "eu-de-01"
+    region   = "eu-de"
 
     versioning {
         enabled = true
@@ -1697,7 +1734,7 @@ resource "huaweicloud_s3_bucket" "bucket" {
 resource "huaweicloud_s3_bucket" "destination" {
     provider = "huaweicloud.reg1"
     bucket   = "tf-test-bucket-destination-%d"
-    region   = "eu-de-01"
+    region   = "eu-de"
 
     versioning {
         enabled = true
@@ -1734,7 +1771,7 @@ resource "huaweicloud_s3_bucket" "bucket" {
 resource "huaweicloud_s3_bucket" "destination" {
     provider = "huaweicloud.reg1"
     bucket   = "tf-test-bucket-destination-%d"
-    region   = "eu-de-01"
+    region   = "eu-de"
 
     versioning {
         enabled = true
@@ -1768,7 +1805,7 @@ resource "huaweicloud_s3_bucket" "bucket" {
 resource "huaweicloud_s3_bucket" "destination" {
     provider = "huaweicloud.reg1"
     bucket   = "tf-test-bucket-destination-%d"
-    region   = "eu-de-01"
+    region   = "eu-de"
 
     versioning {
         enabled = true

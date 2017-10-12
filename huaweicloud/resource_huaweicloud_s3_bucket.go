@@ -19,6 +19,11 @@ import (
 	"github.com/hashicorp/terraform/helper/schema"
 )
 
+/* func foo() int {
+	return 0
+}
+*/
+
 func resourceAwsS3Bucket() *schema.Resource {
 	return &schema.Resource{
 		Create: resourceAwsS3BucketCreate,
@@ -319,24 +324,25 @@ func resourceAwsS3Bucket() *schema.Resource {
 				Default:  false,
 			},
 
-			"acceleration_status": {
+			/* "acceleration_status": {
 				Type:         schema.TypeString,
 				Optional:     true,
 				Computed:     true,
 				ValidateFunc: validateS3BucketAccelerationStatus,
-			},
+			}, */
 
-			"request_payer": {
+			/* "request_payer": {
 				Type:         schema.TypeString,
 				Optional:     true,
 				Computed:     true,
 				ValidateFunc: validateS3BucketRequestPayerType,
-			},
+			}, */
 
-			"replication_configuration": {
-				Type:     schema.TypeList,
-				Optional: true,
-				MaxItems: 1,
+			/* "replication_configuration": {
+				Type:             schema.TypeList,
+				Optional:         true,
+				MaxItems:         1,
+				DiffSuppressFunc: suppressEquivalentReplicationConfigurations,
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
 						"role": {
@@ -390,9 +396,9 @@ func resourceAwsS3Bucket() *schema.Resource {
 						},
 					},
 				},
-			},
+			}, */
 
-			"tags": tagsSchema(),
+			//"tags": tagsSchema(),
 		},
 	}
 }
@@ -517,23 +523,23 @@ func resourceAwsS3BucketUpdate(d *schema.ResourceData, meta interface{}) error {
 		}
 	}
 
-	if d.HasChange("acceleration_status") {
+	/* if d.HasChange("acceleration_status") {
 		if err := resourceAwsS3BucketAccelerationUpdate(s3conn, d); err != nil {
 			return err
 		}
-	}
+	} */
 
-	if d.HasChange("request_payer") {
+	/* if d.HasChange("request_payer") {
 		if err := resourceAwsS3BucketRequestPayerUpdate(s3conn, d); err != nil {
 			return err
 		}
-	}
+	} */
 
-	if d.HasChange("replication_configuration") {
+	/* if d.HasChange("replication_configuration") {
 		if err := resourceAwsS3BucketReplicationConfigurationUpdate(s3conn, d); err != nil {
 			return err
 		}
-	}
+	} */
 
 	return resourceAwsS3BucketRead(d, meta)
 }
@@ -688,6 +694,7 @@ func resourceAwsS3BucketRead(d *schema.ResourceData, meta interface{}) error {
 	}
 
 	// Read the versioning configuration
+	//log.Printf("foo=%d.\n", foo())
 
 	versioningResponse, err := retryOnAwsCode("NoSuchBucket", func() (interface{}, error) {
 		return s3conn.GetBucketVersioning(&s3.GetBucketVersioningInput{
@@ -720,51 +727,53 @@ func resourceAwsS3BucketRead(d *schema.ResourceData, meta interface{}) error {
 	}
 
 	// Read the acceleration status
-
-	accelerateResponse, err := retryOnAwsCode("NoSuchBucket", func() (interface{}, error) {
-		return s3conn.GetBucketAccelerateConfiguration(&s3.GetBucketAccelerateConfigurationInput{
-			Bucket: aws.String(d.Id()),
+	/*
+		accelerateResponse, err := retryOnAwsCode("NoSuchBucket", func() (interface{}, error) {
+			return s3conn.GetBucketAccelerateConfiguration(&s3.GetBucketAccelerateConfigurationInput{
+				Bucket: aws.String(d.Id()),
+			})
 		})
-	})
-	accelerate := accelerateResponse.(*s3.GetBucketAccelerateConfigurationOutput)
-	if err != nil {
-		// Amazon S3 Transfer Acceleration might not be supported in the
-		// given region, for example, China (Beijing) and the Government
-		// Cloud does not support this feature at the moment.
-		if awsErr, ok := err.(awserr.Error); ok && awsErr.Code() != "UnsupportedArgument" {
-			return err
-		}
+		accelerate := accelerateResponse.(*s3.GetBucketAccelerateConfigurationOutput)
+		if err != nil {
+			// Amazon S3 Transfer Acceleration might not be supported in the
+			// given region, for example, China (Beijing) and the Government
+			// Cloud does not support this feature at the moment.
+			if awsErr, ok := err.(awserr.Error); ok && awsErr.Code() != "UnsupportedArgument" {
+				return err
+			}
 
-		var awsRegion string
-		if region, ok := d.GetOk("region"); ok {
-			awsRegion = region.(string)
+			var awsRegion string
+			if region, ok := d.GetOk("region"); ok {
+				awsRegion = region.(string)
+			} else {
+				awsRegion = meta.(*Config).Region
+			}
+
+			log.Printf("[WARN] S3 bucket: %s, the S3 Transfer Acceleration is not supported in the region: %s", d.Id(), awsRegion)
 		} else {
-			awsRegion = meta.(*Config).Region
+			log.Printf("[DEBUG] S3 bucket: %s, read Acceleration: %v", d.Id(), accelerate)
+			d.Set("acceleration_status", accelerate.Status)
 		}
-
-		log.Printf("[WARN] S3 bucket: %s, the S3 Transfer Acceleration is not supported in the region: %s", d.Id(), awsRegion)
-	} else {
-		log.Printf("[DEBUG] S3 bucket: %s, read Acceleration: %v", d.Id(), accelerate)
-		d.Set("acceleration_status", accelerate.Status)
-	}
+	*/
 
 	// Read the request payer configuration.
-
-	payerResponse, err := retryOnAwsCode("NoSuchBucket", func() (interface{}, error) {
-		return s3conn.GetBucketRequestPayment(&s3.GetBucketRequestPaymentInput{
-			Bucket: aws.String(d.Id()),
+	/*
+		payerResponse, err := retryOnAwsCode("NoSuchBucket", func() (interface{}, error) {
+			return s3conn.GetBucketRequestPayment(&s3.GetBucketRequestPaymentInput{
+				Bucket: aws.String(d.Id()),
+			})
 		})
-	})
-	payer := payerResponse.(*s3.GetBucketRequestPaymentOutput)
-	if err != nil {
-		return err
-	}
-	log.Printf("[DEBUG] S3 Bucket: %s, read request payer: %v", d.Id(), payer)
-	if payer.Payer != nil {
-		if err := d.Set("request_payer", *payer.Payer); err != nil {
+		payer := payerResponse.(*s3.GetBucketRequestPaymentOutput)
+		if err != nil {
 			return err
 		}
-	}
+		log.Printf("[DEBUG] S3 Bucket: %s, read request payer: %v", d.Id(), payer)
+		if payer.Payer != nil {
+			if err := d.Set("request_payer", *payer.Payer); err != nil {
+				return err
+			}
+		}
+	*/
 
 	// Read the logging configuration
 	loggingResponse, err := retryOnAwsCode("NoSuchBucket", func() (interface{}, error) {
@@ -921,26 +930,27 @@ func resourceAwsS3BucketRead(d *schema.ResourceData, meta interface{}) error {
 	}
 
 	// Read the bucket replication configuration
-
-	replicationResponse, err := retryOnAwsCode("NoSuchBucket", func() (interface{}, error) {
-		return s3conn.GetBucketReplication(&s3.GetBucketReplicationInput{
-			Bucket: aws.String(d.Id()),
+	/*
+		replicationResponse, err := retryOnAwsCode("NoSuchBucket", func() (interface{}, error) {
+			return s3conn.GetBucketReplication(&s3.GetBucketReplicationInput{
+				Bucket: aws.String(d.Id()),
+			})
 		})
-	})
-	replication := replicationResponse.(*s3.GetBucketReplicationOutput)
-	if err != nil {
-		if awsError, ok := err.(awserr.RequestFailure); ok && awsError.StatusCode() != 404 {
-			return err
+		replication := replicationResponse.(*s3.GetBucketReplicationOutput)
+		if err != nil {
+			if awsError, ok := err.(awserr.RequestFailure); ok && awsError.StatusCode() != 404 {
+				return err
+			}
 		}
-	}
 
-	log.Printf("[DEBUG] S3 Bucket: %s, read replication configuration: %v", d.Id(), replication)
-	if r := replication.ReplicationConfiguration; r != nil {
-		if err := d.Set("replication_configuration", flattenAwsS3BucketReplicationConfiguration(replication.ReplicationConfiguration)); err != nil {
-			log.Printf("[DEBUG] Error setting replication configuration: %s", err)
-			return err
+		log.Printf("[DEBUG] S3 Bucket: %s, read replication configuration: %v", d.Id(), replication)
+		if r := replication.ReplicationConfiguration; r != nil {
+			if err := d.Set("replication_configuration", flattenAwsS3BucketReplicationConfiguration(replication.ReplicationConfiguration)); err != nil {
+				log.Printf("[DEBUG] Error setting replication configuration: %s", err)
+				return err
+			}
 		}
-	}
+	*/
 
 	// Add the region as an attribute
 
@@ -1452,6 +1462,7 @@ func resourceAwsS3BucketLoggingUpdate(s3conn *s3.S3, d *schema.ResourceData) err
 	return nil
 }
 
+/*
 func resourceAwsS3BucketAccelerationUpdate(s3conn *s3.S3, d *schema.ResourceData) error {
 	bucket := d.Get("bucket").(string)
 	enableAcceleration := d.Get("acceleration_status").(string)
@@ -1473,7 +1484,9 @@ func resourceAwsS3BucketAccelerationUpdate(s3conn *s3.S3, d *schema.ResourceData
 
 	return nil
 }
+*/
 
+/*
 func resourceAwsS3BucketRequestPayerUpdate(s3conn *s3.S3, d *schema.ResourceData) error {
 	bucket := d.Get("bucket").(string)
 	payer := d.Get("request_payer").(string)
@@ -1495,7 +1508,9 @@ func resourceAwsS3BucketRequestPayerUpdate(s3conn *s3.S3, d *schema.ResourceData
 
 	return nil
 }
+*/
 
+/*
 func resourceAwsS3BucketReplicationConfigurationUpdate(s3conn *s3.S3, d *schema.ResourceData) error {
 	bucket := d.Get("bucket").(string)
 	replicationConfiguration := d.Get("replication_configuration").([]interface{})
@@ -1582,6 +1597,7 @@ func resourceAwsS3BucketReplicationConfigurationUpdate(s3conn *s3.S3, d *schema.
 
 	return nil
 }
+*/
 
 func resourceAwsS3BucketLifecycleUpdate(s3conn *s3.S3, d *schema.ResourceData) error {
 	bucket := d.Get("bucket").(string)
@@ -1742,6 +1758,7 @@ func resourceAwsS3BucketLifecycleUpdate(s3conn *s3.S3, d *schema.ResourceData) e
 	return nil
 }
 
+/*
 func flattenAwsS3BucketReplicationConfiguration(r *s3.ReplicationConfiguration) []map[string]interface{} {
 	replication_configuration := make([]map[string]interface{}, 0, 1)
 	m := make(map[string]interface{})
@@ -1781,6 +1798,7 @@ func flattenAwsS3BucketReplicationConfiguration(r *s3.ReplicationConfiguration) 
 
 	return replication_configuration
 }
+*/
 
 func normalizeRoutingRules(w []*s3.RoutingRule) (string, error) {
 	withNulls, err := json.Marshal(w)
@@ -1849,6 +1867,7 @@ func normalizeRegion(region string) string {
 	return region
 }
 
+/*
 func validateS3BucketAccelerationStatus(v interface{}, k string) (ws []string, errors []error) {
 	validTypes := map[string]struct{}{
 		"Enabled":   struct{}{},
@@ -1870,6 +1889,7 @@ func validateS3BucketRequestPayerType(v interface{}, k string) (ws []string, err
 	}
 	return
 }
+*/
 
 // validateS3BucketName validates any S3 bucket name that is not inside the us-east-1 region.
 // Buckets outside of this region have to be DNS-compliant. After the same restrictions are

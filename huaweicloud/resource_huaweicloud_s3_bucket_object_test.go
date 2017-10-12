@@ -16,6 +16,7 @@ import (
 	"github.com/aws/aws-sdk-go/service/s3"
 )
 
+// PASS
 func TestAccAWSS3BucketObject_source(t *testing.T) {
 	tmpFile, err := ioutil.TempFile("", "tf-acc-s3-obj-source")
 	if err != nil {
@@ -38,12 +39,13 @@ func TestAccAWSS3BucketObject_source(t *testing.T) {
 		Steps: []resource.TestStep{
 			resource.TestStep{
 				Config: testAccAWSS3BucketObjectConfigSource(rInt, tmpFile.Name()),
-				Check:  testAccCheckAWSS3BucketObjectExists("aws_s3_bucket_object.object", &obj),
+				Check:  testAccCheckAWSS3BucketObjectExists("huaweicloud_s3_bucket_object.object", &obj),
 			},
 		},
 	})
 }
 
+// PASS
 func TestAccAWSS3BucketObject_content(t *testing.T) {
 	rInt := acctest.RandInt()
 	var obj s3.GetObjectOutput
@@ -56,12 +58,13 @@ func TestAccAWSS3BucketObject_content(t *testing.T) {
 			resource.TestStep{
 				PreConfig: func() {},
 				Config:    testAccAWSS3BucketObjectConfigContent(rInt),
-				Check:     testAccCheckAWSS3BucketObjectExists("aws_s3_bucket_object.object", &obj),
+				Check:     testAccCheckAWSS3BucketObjectExists("huaweicloud_s3_bucket_object.object", &obj),
 			},
 		},
 	})
 }
 
+// PASS
 func TestAccAWSS3BucketObject_withContentCharacteristics(t *testing.T) {
 	tmpFile, err := ioutil.TempFile("", "tf-acc-s3-obj-content-characteristics")
 	if err != nil {
@@ -86,17 +89,18 @@ func TestAccAWSS3BucketObject_withContentCharacteristics(t *testing.T) {
 			resource.TestStep{
 				Config: testAccAWSS3BucketObjectConfig_withContentCharacteristics(rInt, tmpFile.Name()),
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckAWSS3BucketObjectExists("aws_s3_bucket_object.object", &obj),
+					testAccCheckAWSS3BucketObjectExists("huaweicloud_s3_bucket_object.object", &obj),
 					resource.TestCheckResourceAttr(
-						"aws_s3_bucket_object.object", "content_type", "binary/octet-stream"),
+						"huaweicloud_s3_bucket_object.object", "content_type", "binary/octet-stream"),
 					resource.TestCheckResourceAttr(
-						"aws_s3_bucket_object.object", "website_redirect", "http://google.com"),
+						"huaweicloud_s3_bucket_object.object", "website_redirect", "http://google.com"),
 				),
 			},
 		},
 	})
 }
 
+// PASS
 func TestAccAWSS3BucketObject_updates(t *testing.T) {
 	tmpFile, err := ioutil.TempFile("", "tf-acc-s3-obj-updates")
 	if err != nil {
@@ -119,8 +123,8 @@ func TestAccAWSS3BucketObject_updates(t *testing.T) {
 			resource.TestStep{
 				Config: testAccAWSS3BucketObjectConfig_updates(rInt, tmpFile.Name()),
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckAWSS3BucketObjectExists("aws_s3_bucket_object.object", &obj),
-					resource.TestCheckResourceAttr("aws_s3_bucket_object.object", "etag", "647d1d58e1011c743ec67d5e8af87b53"),
+					testAccCheckAWSS3BucketObjectExists("huaweicloud_s3_bucket_object.object", &obj),
+					resource.TestCheckResourceAttr("huaweicloud_s3_bucket_object.object", "etag", "647d1d58e1011c743ec67d5e8af87b53"),
 				),
 			},
 			resource.TestStep{
@@ -132,14 +136,15 @@ func TestAccAWSS3BucketObject_updates(t *testing.T) {
 				},
 				Config: testAccAWSS3BucketObjectConfig_updates(rInt, tmpFile.Name()),
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckAWSS3BucketObjectExists("aws_s3_bucket_object.object", &obj),
-					resource.TestCheckResourceAttr("aws_s3_bucket_object.object", "etag", "1c7fd13df1515c2a13ad9eb068931f09"),
+					testAccCheckAWSS3BucketObjectExists("huaweicloud_s3_bucket_object.object", &obj),
+					resource.TestCheckResourceAttr("huaweicloud_s3_bucket_object.object", "etag", "1c7fd13df1515c2a13ad9eb068931f09"),
 				),
 			},
 		},
 	})
 }
 
+// PASS
 func TestAccAWSS3BucketObject_updatesWithVersioning(t *testing.T) {
 	tmpFile, err := ioutil.TempFile("", "tf-acc-s3-obj-updates-w-versions")
 	if err != nil {
@@ -163,8 +168,8 @@ func TestAccAWSS3BucketObject_updatesWithVersioning(t *testing.T) {
 			resource.TestStep{
 				Config: testAccAWSS3BucketObjectConfig_updatesWithVersioning(rInt, tmpFile.Name()),
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckAWSS3BucketObjectExists("aws_s3_bucket_object.object", &originalObj),
-					resource.TestCheckResourceAttr("aws_s3_bucket_object.object", "etag", "cee4407fa91906284e2a5e5e03e86b1b"),
+					testAccCheckAWSS3BucketObjectExists("huaweicloud_s3_bucket_object.object", &originalObj),
+					resource.TestCheckResourceAttr("huaweicloud_s3_bucket_object.object", "etag", "cee4407fa91906284e2a5e5e03e86b1b"),
 				),
 			},
 			resource.TestStep{
@@ -176,8 +181,8 @@ func TestAccAWSS3BucketObject_updatesWithVersioning(t *testing.T) {
 				},
 				Config: testAccAWSS3BucketObjectConfig_updatesWithVersioning(rInt, tmpFile.Name()),
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckAWSS3BucketObjectExists("aws_s3_bucket_object.object", &modifiedObj),
-					resource.TestCheckResourceAttr("aws_s3_bucket_object.object", "etag", "00b8c73b1b50e7cc932362c7225b8e29"),
+					testAccCheckAWSS3BucketObjectExists("huaweicloud_s3_bucket_object.object", &modifiedObj),
+					resource.TestCheckResourceAttr("huaweicloud_s3_bucket_object.object", "etag", "00b8c73b1b50e7cc932362c7225b8e29"),
 					testAccCheckAWSS3BucketObjectVersionIdDiffers(&originalObj, &modifiedObj),
 				),
 			},
@@ -206,7 +211,7 @@ func testAccCheckAWSS3BucketObjectDestroy(s *terraform.State) error {
 	s3conn := testAccProvider.Meta().(*Config).s3conn
 
 	for _, rs := range s.RootModule().Resources {
-		if rs.Type != "aws_s3_bucket_object" {
+		if rs.Type != "huaweicloud_s3_bucket_object" {
 			continue
 		}
 
@@ -263,7 +268,7 @@ func TestAccAWSS3BucketObject_kms(t *testing.T) {
 			resource.TestStep{
 				PreConfig: func() {},
 				Config:    testAccAWSS3BucketObjectConfig_withKMSId(rInt),
-				Check:     testAccCheckAWSS3BucketObjectExists("aws_s3_bucket_object.object", &obj),
+				Check:     testAccCheckAWSS3BucketObjectExists("huaweicloud_s3_bucket_object.object", &obj),
 			},
 		},
 	})
@@ -295,10 +300,10 @@ func TestAccAWSS3BucketObject_sse(t *testing.T) {
 				Config:    testAccAWSS3BucketObjectConfig_withSSE(rInt, tmpFile.Name()),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckAWSS3BucketObjectExists(
-						"aws_s3_bucket_object.object",
+						"huaweicloud_s3_bucket_object.object",
 						&obj),
 					testAccCheckAWSS3BucketObjectSSE(
-						"aws_s3_bucket_object.object",
+						"huaweicloud_s3_bucket_object.object",
 						"aws:kms"),
 				),
 			},
@@ -319,13 +324,13 @@ func TestAccAWSS3BucketObject_acl(t *testing.T) {
 				Config: testAccAWSS3BucketObjectConfig_acl(rInt, "private"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckAWSS3BucketObjectExists(
-						"aws_s3_bucket_object.object", &obj),
+						"huaweicloud_s3_bucket_object.object", &obj),
 					resource.TestCheckResourceAttr(
-						"aws_s3_bucket_object.object",
+						"huaweicloud_s3_bucket_object.object",
 						"acl",
 						"private"),
 					testAccCheckAWSS3BucketObjectAcl(
-						"aws_s3_bucket_object.object",
+						"huaweicloud_s3_bucket_object.object",
 						[]string{"FULL_CONTROL"}),
 				),
 			},
@@ -333,14 +338,14 @@ func TestAccAWSS3BucketObject_acl(t *testing.T) {
 				Config: testAccAWSS3BucketObjectConfig_acl(rInt, "public-read"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckAWSS3BucketObjectExists(
-						"aws_s3_bucket_object.object",
+						"huaweicloud_s3_bucket_object.object",
 						&obj),
 					resource.TestCheckResourceAttr(
-						"aws_s3_bucket_object.object",
+						"huaweicloud_s3_bucket_object.object",
 						"acl",
 						"public-read"),
 					testAccCheckAWSS3BucketObjectAcl(
-						"aws_s3_bucket_object.object",
+						"huaweicloud_s3_bucket_object.object",
 						[]string{"FULL_CONTROL", "READ"}),
 				),
 			},
@@ -418,14 +423,14 @@ func TestAccAWSS3BucketObject_storageClass(t *testing.T) {
 				Config:    testAccAWSS3BucketObjectConfigContent(rInt),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckAWSS3BucketObjectExists(
-						"aws_s3_bucket_object.object",
+						"huaweicloud_s3_bucket_object.object",
 						&obj),
 					resource.TestCheckResourceAttr(
-						"aws_s3_bucket_object.object",
+						"huaweicloud_s3_bucket_object.object",
 						"storage_class",
 						"STANDARD"),
 					testAccCheckAWSS3BucketObjectStorageClass(
-						"aws_s3_bucket_object.object",
+						"huaweicloud_s3_bucket_object.object",
 						"STANDARD"),
 				),
 			},
@@ -433,14 +438,14 @@ func TestAccAWSS3BucketObject_storageClass(t *testing.T) {
 				Config: testAccAWSS3BucketObjectConfig_storageClass(rInt, "REDUCED_REDUNDANCY"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckAWSS3BucketObjectExists(
-						"aws_s3_bucket_object.object",
+						"huaweicloud_s3_bucket_object.object",
 						&obj),
 					resource.TestCheckResourceAttr(
-						"aws_s3_bucket_object.object",
+						"huaweicloud_s3_bucket_object.object",
 						"storage_class",
 						"REDUCED_REDUNDANCY"),
 					testAccCheckAWSS3BucketObjectStorageClass(
-						"aws_s3_bucket_object.object",
+						"huaweicloud_s3_bucket_object.object",
 						"REDUCED_REDUNDANCY"),
 				),
 			},
@@ -547,8 +552,8 @@ func TestAccAWSS3BucketObject_tags(t *testing.T) {
 				PreConfig: func() {},
 				Config:    testAccAWSS3BucketObjectConfig_withTags(rInt),
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckAWSS3BucketObjectExists("aws_s3_bucket_object.object", &obj),
-					resource.TestCheckResourceAttr("aws_s3_bucket_object.object", "tags.%", "2"),
+					testAccCheckAWSS3BucketObjectExists("huaweicloud_s3_bucket_object.object", &obj),
+					resource.TestCheckResourceAttr("huaweicloud_s3_bucket_object.object", "tags.%", "2"),
 				),
 			},
 		},
@@ -557,11 +562,11 @@ func TestAccAWSS3BucketObject_tags(t *testing.T) {
 
 func testAccAWSS3BucketObjectConfigSource(randInt int, source string) string {
 	return fmt.Sprintf(`
-resource "aws_s3_bucket" "object_bucket" {
+resource "huaweicloud_s3_bucket" "object_bucket" {
     bucket = "tf-object-test-bucket-%d"
 }
-resource "aws_s3_bucket_object" "object" {
-	bucket = "${aws_s3_bucket.object_bucket.bucket}"
+resource "huaweicloud_s3_bucket_object" "object" {
+	bucket = "${huaweicloud_s3_bucket.object_bucket.bucket}"
 	key = "test-key"
 	source = "%s"
 	content_type = "binary/octet-stream"
@@ -571,12 +576,12 @@ resource "aws_s3_bucket_object" "object" {
 
 func testAccAWSS3BucketObjectConfig_withContentCharacteristics(randInt int, source string) string {
 	return fmt.Sprintf(`
-resource "aws_s3_bucket" "object_bucket_2" {
+resource "huaweicloud_s3_bucket" "object_bucket_2" {
 	bucket = "tf-object-test-bucket-%d"
 }
 
-resource "aws_s3_bucket_object" "object" {
-	bucket = "${aws_s3_bucket.object_bucket_2.bucket}"
+resource "huaweicloud_s3_bucket_object" "object" {
+	bucket = "${huaweicloud_s3_bucket.object_bucket_2.bucket}"
 	key = "test-key"
 	source = "%s"
 	content_language = "en"
@@ -588,11 +593,11 @@ resource "aws_s3_bucket_object" "object" {
 
 func testAccAWSS3BucketObjectConfigContent(randInt int) string {
 	return fmt.Sprintf(`
-resource "aws_s3_bucket" "object_bucket" {
+resource "huaweicloud_s3_bucket" "object_bucket" {
         bucket = "tf-object-test-bucket-%d"
 }
-resource "aws_s3_bucket_object" "object" {
-        bucket = "${aws_s3_bucket.object_bucket.bucket}"
+resource "huaweicloud_s3_bucket_object" "object" {
+        bucket = "${huaweicloud_s3_bucket.object_bucket.bucket}"
         key = "test-key"
         content = "some_bucket_content"
 }
@@ -601,12 +606,12 @@ resource "aws_s3_bucket_object" "object" {
 
 func testAccAWSS3BucketObjectConfig_updates(randInt int, source string) string {
 	return fmt.Sprintf(`
-resource "aws_s3_bucket" "object_bucket_3" {
+resource "huaweicloud_s3_bucket" "object_bucket_3" {
 	bucket = "tf-object-test-bucket-%d"
 }
 
-resource "aws_s3_bucket_object" "object" {
-	bucket = "${aws_s3_bucket.object_bucket_3.bucket}"
+resource "huaweicloud_s3_bucket_object" "object" {
+	bucket = "${huaweicloud_s3_bucket.object_bucket_3.bucket}"
 	key = "updateable-key"
 	source = "%s"
 	etag = "${md5(file("%s"))}"
@@ -616,15 +621,15 @@ resource "aws_s3_bucket_object" "object" {
 
 func testAccAWSS3BucketObjectConfig_updatesWithVersioning(randInt int, source string) string {
 	return fmt.Sprintf(`
-resource "aws_s3_bucket" "object_bucket_3" {
+resource "huaweicloud_s3_bucket" "object_bucket_3" {
 	bucket = "tf-object-test-bucket-%d"
 	versioning {
 		enabled = true
 	}
 }
 
-resource "aws_s3_bucket_object" "object" {
-	bucket = "${aws_s3_bucket.object_bucket_3.bucket}"
+resource "huaweicloud_s3_bucket_object" "object" {
+	bucket = "${huaweicloud_s3_bucket.object_bucket_3.bucket}"
 	key = "updateable-key"
 	source = "%s"
 	etag = "${md5(file("%s"))}"
@@ -634,30 +639,30 @@ resource "aws_s3_bucket_object" "object" {
 
 func testAccAWSS3BucketObjectConfig_withKMSId(randInt int) string {
 	return fmt.Sprintf(`
-resource "aws_kms_key" "kms_key_1" {
+resource "huaweicloud_kms_key" "kms_key_1" {
 }
 
-resource "aws_s3_bucket" "object_bucket_2" {
+resource "huaweicloud_s3_bucket" "object_bucket_2" {
 	bucket = "tf-object-test-bucket-%d"
 }
 
-resource "aws_s3_bucket_object" "object" {
-	bucket = "${aws_s3_bucket.object_bucket_2.bucket}"
+resource "huaweicloud_s3_bucket_object" "object" {
+	bucket = "${huaweicloud_s3_bucket.object_bucket_2.bucket}"
 	key = "test-key"
 	content = "stuff"
-	kms_key_id = "${aws_kms_key.kms_key_1.arn}"
+	kms_key_id = "${huaweicloud_kms_key.kms_key_1.arn}"
 }
 `, randInt)
 }
 
 func testAccAWSS3BucketObjectConfig_withSSE(randInt int, source string) string {
 	return fmt.Sprintf(`
-resource "aws_s3_bucket" "object_bucket" {
+resource "huaweicloud_s3_bucket" "object_bucket" {
 	bucket = "tf-object-test-bucket-%d"
 }
 
-resource "aws_s3_bucket_object" "object" {
-	bucket = "${aws_s3_bucket.object_bucket.bucket}"
+resource "huaweicloud_s3_bucket_object" "object" {
+	bucket = "${huaweicloud_s3_bucket.object_bucket.bucket}"
 	key = "test-key"
 	source = "%s"
 	server_side_encryption = "aws:kms"
@@ -667,11 +672,11 @@ resource "aws_s3_bucket_object" "object" {
 
 func testAccAWSS3BucketObjectConfig_acl(randInt int, acl string) string {
 	return fmt.Sprintf(`
-resource "aws_s3_bucket" "object_bucket" {
+resource "huaweicloud_s3_bucket" "object_bucket" {
         bucket = "tf-object-test-bucket-%d"
 }
-resource "aws_s3_bucket_object" "object" {
-        bucket = "${aws_s3_bucket.object_bucket.bucket}"
+resource "huaweicloud_s3_bucket_object" "object" {
+        bucket = "${huaweicloud_s3_bucket.object_bucket.bucket}"
         key = "test-key"
         content = "some_bucket_content"
         acl = "%s"
@@ -681,11 +686,11 @@ resource "aws_s3_bucket_object" "object" {
 
 func testAccAWSS3BucketObjectConfig_storageClass(randInt int, storage_class string) string {
 	return fmt.Sprintf(`
-resource "aws_s3_bucket" "object_bucket" {
+resource "huaweicloud_s3_bucket" "object_bucket" {
         bucket = "tf-object-test-bucket-%d"
 }
-resource "aws_s3_bucket_object" "object" {
-        bucket = "${aws_s3_bucket.object_bucket.bucket}"
+resource "huaweicloud_s3_bucket_object" "object" {
+        bucket = "${huaweicloud_s3_bucket.object_bucket.bucket}"
         key = "test-key"
         content = "some_bucket_content"
         storage_class = "%s"
@@ -695,12 +700,12 @@ resource "aws_s3_bucket_object" "object" {
 
 func testAccAWSS3BucketObjectConfig_withTags(randInt int) string {
 	return fmt.Sprintf(`
-resource "aws_s3_bucket" "object_bucket_2" {
+resource "huaweicloud_s3_bucket" "object_bucket_2" {
 	bucket = "tf-object-test-bucket-%d"
 }
 
-resource "aws_s3_bucket_object" "object" {
-	bucket = "${aws_s3_bucket.object_bucket_2.bucket}"
+resource "huaweicloud_s3_bucket_object" "object" {
+	bucket = "${huaweicloud_s3_bucket.object_bucket_2.bucket}"
 	key = "test-key"
 	content = "stuff"
 	tags {
