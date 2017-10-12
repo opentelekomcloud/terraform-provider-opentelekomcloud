@@ -20,6 +20,11 @@ func suppressEquivalentAwsPolicyDiffs(k, old, new string, d *schema.ResourceData
 	return equivalent
 }
 
+func suppressEquivalentReplicationConfigurations(k, old, new string, d *schema.ResourceData) bool {
+	// UNDONE: write this function
+	return true
+}
+
 // Suppresses minor version changes to the db_instance engine_version attribute
 func suppressAwsDbEngineVersionDiffs(k, old, new string, d *schema.ResourceData) bool {
 	// First check if the old/new values are nil.
