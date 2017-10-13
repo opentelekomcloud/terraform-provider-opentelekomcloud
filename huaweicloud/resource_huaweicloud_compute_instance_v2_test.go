@@ -34,7 +34,7 @@ func TestAccComputeV2Instance_basic(t *testing.T) {
 					resource.TestCheckResourceAttr(
 						"huaweicloud_compute_instance_v2.instance_1", "all_metadata.foo", "bar"),
 					resource.TestCheckResourceAttr(
-						"huaweicloud_compute_instance_v2.instance_1", "availability_zone", "eu-de-02"),
+						"huaweicloud_compute_instance_v2.instance_1", "availability_zone", OS_AVAILABILITY_ZONE),
 				),
 			},
 		},
@@ -663,17 +663,21 @@ func testAccCheckComputeV2InstanceInstanceIDsDoNotMatch(
 	}
 }
 
-const testAccComputeV2Instance_basic = `
+var testAccComputeV2Instance_basic = fmt.Sprintf(`
 resource "huaweicloud_compute_instance_v2" "instance_1" {
   name = "instance_1"
   security_groups = ["default"]
+  availability_zone = "%s"
   metadata {
     foo = "bar"
   }
+  network {
+    uuid = "%s"
+  }
 }
-`
+`, OS_AVAILABILITY_ZONE, OS_NETWORK_ID)
 
-const testAccComputeV2Instance_secgroupMulti = `
+var testAccComputeV2Instance_secgroupMulti = fmt.Sprintf(`
 resource "huaweicloud_compute_secgroup_v2" "secgroup_1" {
   name = "secgroup_1"
   description = "a security group"
@@ -689,12 +693,12 @@ resource "huaweicloud_compute_instance_v2" "instance_1" {
   name = "instance_1"
   security_groups = ["default", "${huaweicloud_compute_secgroup_v2.secgroup_1.name}"]
   network {
-    uuid = "2a9d80f2-beef-4845-a733-9fd45833f7c4"
+    uuid = "%s"
   }
 }
-`
+`, OS_NETWORK_ID)
 
-const testAccComputeV2Instance_secgroupMultiUpdate_1 = `
+var testAccComputeV2Instance_secgroupMultiUpdate_1 = fmt.Sprintf(`
 resource "huaweicloud_compute_secgroup_v2" "secgroup_1" {
   name = "secgroup_1"
   description = "a security group"
@@ -721,12 +725,12 @@ resource "huaweicloud_compute_instance_v2" "instance_1" {
   name = "instance_1"
   security_groups = ["default"]
   network {
-    uuid = "2a9d80f2-beef-4845-a733-9fd45833f7c4"
+    uuid = "%s"
   }
 }
-`
+`, OS_NETWORK_ID)
 
-const testAccComputeV2Instance_secgroupMultiUpdate_2 = `
+var testAccComputeV2Instance_secgroupMultiUpdate_2 = fmt.Sprintf(`
 resource "huaweicloud_compute_secgroup_v2" "secgroup_1" {
   name = "secgroup_1"
   description = "a security group"
@@ -753,33 +757,34 @@ resource "huaweicloud_compute_instance_v2" "instance_1" {
   name = "instance_1"
   security_groups = ["default", "${huaweicloud_compute_secgroup_v2.secgroup_1.name}", "${huaweicloud_compute_secgroup_v2.secgroup_2.name}"]
   network {
-    uuid = "2a9d80f2-beef-4845-a733-9fd45833f7c4"
+    uuid = "%s"
   }
 }
-`
+`, OS_NETWORK_ID)
 
 var testAccComputeV2Instance_bootFromVolumeImage = fmt.Sprintf(`
 resource "huaweicloud_compute_instance_v2" "instance_1" {
   name = "instance_1"
   security_groups = ["default"]
+  availability_zone = "%s"
   network {
-    uuid = "2a9d80f2-beef-4845-a733-9fd45833f7c4"
+    uuid = "%s"
   }
   block_device {
     uuid = "%s"
     source_type = "image"
-    volume_size = 12
+    volume_size = 50
     boot_index = 0
     destination_type = "volume"
     delete_on_termination = true
   }
 }
-`, OS_IMAGE_ID)
+`, OS_AVAILABILITY_ZONE, OS_NETWORK_ID, OS_IMAGE_ID)
 
 var testAccComputeV2Instance_bootFromVolumeVolume = fmt.Sprintf(`
 resource "huaweicloud_blockstorage_volume_v2" "vol_1" {
   name = "vol_1"
-  size = 12
+  size = 50
   image_id = "%s"
 }
 
@@ -787,7 +792,7 @@ resource "huaweicloud_compute_instance_v2" "instance_1" {
   name = "instance_1"
   security_groups = ["default"]
   network {
-    uuid = "2a9d80f2-beef-4845-a733-9fd45833f7c4"
+    uuid = "%s"
   }
   block_device {
     uuid = "${huaweicloud_blockstorage_volume_v2.vol_1.id}"
@@ -797,50 +802,50 @@ resource "huaweicloud_compute_instance_v2" "instance_1" {
     delete_on_termination = true
   }
 }
-`, OS_IMAGE_ID)
+`, OS_IMAGE_ID, OS_NETWORK_ID)
 
 var testAccComputeV2Instance_bootFromVolumeForceNew_1 = fmt.Sprintf(`
 resource "huaweicloud_compute_instance_v2" "instance_1" {
   name = "instance_1"
   security_groups = ["default"]
   network {
-    uuid = "2a9d80f2-beef-4845-a733-9fd45833f7c4"
+    uuid = "%s"
   }
   block_device {
     uuid = "%s"
     source_type = "image"
-    volume_size = 12
+    volume_size = 50
     boot_index = 0
     destination_type = "volume"
     delete_on_termination = true
   }
 }
-`, OS_IMAGE_ID)
+`, OS_NETWORK_ID, OS_IMAGE_ID)
 
 var testAccComputeV2Instance_bootFromVolumeForceNew_2 = fmt.Sprintf(`
 resource "huaweicloud_compute_instance_v2" "instance_1" {
   name = "instance_1"
   security_groups = ["default"]
   network {
-    uuid = "2a9d80f2-beef-4845-a733-9fd45833f7c4"
+    uuid = "%s"
   }
   block_device {
     uuid = "%s"
     source_type = "image"
-    volume_size = 12
+    volume_size = 50
     boot_index = 0
     destination_type = "volume"
     delete_on_termination = true
   }
 }
-`, OS_IMAGE_ID)
+`, OS_NETWORK_ID, OS_IMAGE_ID)
 
 var testAccComputeV2Instance_blockDeviceNewVolume = fmt.Sprintf(`
 resource "huaweicloud_compute_instance_v2" "instance_1" {
   name = "instance_1"
   security_groups = ["default"]
   network {
-    uuid = "2a9d80f2-beef-4845-a733-9fd45833f7c4"
+    uuid = "%s"
   }
   block_device {
     uuid = "%s"
@@ -857,7 +862,7 @@ resource "huaweicloud_compute_instance_v2" "instance_1" {
     delete_on_termination = true
   }
 }
-`, OS_IMAGE_ID)
+`, OS_NETWORK_ID, OS_IMAGE_ID)
 
 var testAccComputeV2Instance_blockDeviceExistingVolume = fmt.Sprintf(`
 resource "huaweicloud_blockstorage_volume_v2" "volume_1" {
@@ -869,7 +874,7 @@ resource "huaweicloud_compute_instance_v2" "instance_1" {
   name = "instance_1"
   security_groups = ["default"]
   network {
-    uuid = "2a9d80f2-beef-4845-a733-9fd45833f7c4"
+    uuid = "%s"
   }
   block_device {
     uuid = "%s"
@@ -886,14 +891,14 @@ resource "huaweicloud_compute_instance_v2" "instance_1" {
     delete_on_termination = true
   }
 }
-`, OS_IMAGE_ID)
+`, OS_NETWORK_ID, OS_IMAGE_ID)
 
-const testAccComputeV2Instance_personality = `
+var testAccComputeV2Instance_personality = fmt.Sprintf(`
 resource "huaweicloud_compute_instance_v2" "instance_1" {
   name = "instance_1"
   security_groups = ["default"]
   network {
-    uuid = "2a9d80f2-beef-4845-a733-9fd45833f7c4"
+    uuid = "%s"
   }
   personality {
     file = "/tmp/foobar.txt"
@@ -904,14 +909,14 @@ resource "huaweicloud_compute_instance_v2" "instance_1" {
     content = "angry"
   }
 }
-`
+`, OS_NETWORK_ID)
 
 var testAccComputeV2Instance_multiEphemeral = fmt.Sprintf(`
 resource "huaweicloud_compute_instance_v2" "instance_1" {
   name = "terraform-test"
   security_groups = ["default"]
   network {
-    uuid = "2a9d80f2-beef-4845-a733-9fd45833f7c4"
+    uuid = "%s"
   }
   block_device {
     boot_index = 0
@@ -935,7 +940,7 @@ resource "huaweicloud_compute_instance_v2" "instance_1" {
     volume_size = 1
   }
 }
-`, OS_IMAGE_ID)
+`, OS_NETWORK_ID, OS_IMAGE_ID)
 
 var testAccComputeV2Instance_accessIPv4 = fmt.Sprintf(`
 resource "huaweicloud_networking_network_v2" "network_1" {
@@ -991,69 +996,69 @@ resource "huaweicloud_compute_instance_v2" "instance_1" {
 }
 `, OS_NETWORK_ID)
 
-const testAccComputeV2Instance_stopBeforeDestroy = `
+var testAccComputeV2Instance_stopBeforeDestroy = fmt.Sprintf(`
 resource "huaweicloud_compute_instance_v2" "instance_1" {
   name = "instance_1"
   security_groups = ["default"]
   network {
-    uuid = "2a9d80f2-beef-4845-a733-9fd45833f7c4"
+    uuid = "%s"
   }
   stop_before_destroy = true
 }
-`
+`, OS_NETWORK_ID)
 
-const testAccComputeV2Instance_metadataRemove_1 = `
+var testAccComputeV2Instance_metadataRemove_1 = fmt.Sprintf(`
 resource "huaweicloud_compute_instance_v2" "instance_1" {
   name = "instance_1"
   security_groups = ["default"]
   network {
-    uuid = "2a9d80f2-beef-4845-a733-9fd45833f7c4"
+    uuid = "%s"
   }
   metadata {
     foo = "bar"
     abc = "def"
   }
 }
-`
+`, OS_NETWORK_ID)
 
-const testAccComputeV2Instance_metadataRemove_2 = `
+var testAccComputeV2Instance_metadataRemove_2 = fmt.Sprintf(`
 resource "huaweicloud_compute_instance_v2" "instance_1" {
   name = "instance_1"
   security_groups = ["default"]
   network {
-    uuid = "2a9d80f2-beef-4845-a733-9fd45833f7c4"
+    uuid = "%s"
   }
   metadata {
     foo = "bar"
     ghi = "jkl"
   }
 }
-`
+`, OS_NETWORK_ID)
 
-const testAccComputeV2Instance_forceDelete = `
+var testAccComputeV2Instance_forceDelete = fmt.Sprintf(`
 resource "huaweicloud_compute_instance_v2" "instance_1" {
   name = "instance_1"
   security_groups = ["default"]
   network {
-    uuid = "2a9d80f2-beef-4845-a733-9fd45833f7c4"
+    uuid = "%s"
   }
   force_delete = true
 }
-`
+`, OS_NETWORK_ID)
 
-const testAccComputeV2Instance_timeout = `
+var testAccComputeV2Instance_timeout = fmt.Sprintf(`
 resource "huaweicloud_compute_instance_v2" "instance_1" {
   name = "instance_1"
   security_groups = ["default"]
   network {
-    uuid = "2a9d80f2-beef-4845-a733-9fd45833f7c4"
+    uuid = "%s"
   }
 
   timeouts {
     create = "10m"
   }
 }
-`
+`, OS_NETWORK_ID)
 
 var testAccComputeV2Instance_networkNameToID = fmt.Sprintf(`
 resource "huaweicloud_networking_network_v2" "network_1" {
