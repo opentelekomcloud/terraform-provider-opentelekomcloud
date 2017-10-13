@@ -43,7 +43,7 @@ func TestAccAWSS3Bucket_basic(t *testing.T) {
 					/*resource.TestCheckResourceAttr(
 					"huaweicloud_s3_bucket.bucket", "hosted_zone_id", HostedZoneIDForRegion("us-west-2")), */
 					resource.TestCheckResourceAttr(
-						"huaweicloud_s3_bucket.bucket", "region", "eu-de"),
+						"huaweicloud_s3_bucket.bucket", "region", OS_REGION_NAME),
 					resource.TestCheckNoResourceAttr(
 						"huaweicloud_s3_bucket.bucket", "website_endpoint"),
 					/*resource.TestMatchResourceAttr(
@@ -124,7 +124,7 @@ func TestAccAWSS3Bucket_region(t *testing.T) {
 				Config: testAccAWSS3BucketConfigWithRegion(rInt),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckAWSS3BucketExists("huaweicloud_s3_bucket.bucket"),
-					resource.TestCheckResourceAttr("huaweicloud_s3_bucket.bucket", "region", "eu-de"),
+					resource.TestCheckResourceAttr("huaweicloud_s3_bucket.bucket", "region", OS_REGION_NAME),
 				),
 			},
 		},
@@ -1208,7 +1208,7 @@ func testAccBucketDomainName(randInt int) string {
 }
 
 func testAccWebsiteEndpoint(randInt int) string {
-	return fmt.Sprintf("tf-test-bucket-%d.s3-website.eu-de.amazonaws.com", randInt)
+	return fmt.Sprintf("tf-test-bucket-%d.s3-website.%s.amazonaws.com", randInt, OS_REGION_NAME)
 }
 
 func testAccAWSS3BucketPolicy(randInt int) string {
@@ -1298,15 +1298,15 @@ func testAccAWSS3BucketConfigWithRegion(randInt int) string {
 	return fmt.Sprintf(`
 provider "huaweicloud" {
 	alias = "reg1"
-	region = "eu-de"
+	region = "%s"
 }
 
 resource "huaweicloud_s3_bucket" "bucket" {
 	provider = "huaweicloud.reg1"
 	bucket = "tf-test-bucket-%d"
-	region = "eu-de"
+	region = "%s"
 }
-`, randInt)
+`, randInt, OS_REGION_NAME, OS_REGION_NAME)
 }
 
 func testAccAWSS3BucketWebsiteConfig(randInt int) string {
@@ -1390,34 +1390,34 @@ func testAccAWSS3BucketConfigWithAcceleration(randInt int) string {
 	return fmt.Sprintf(`
 provider "huaweicloud" {
 	alias = "reg1"
-	region = "eu-de"
+	region = "%s"
 }
 
 resource "huaweicloud_s3_bucket" "bucket" {
 	provider = "huaweicloud.reg1"
 	bucket = "tf-test-bucket-%d"
-	region = "eu-de"
+	region = "%s"
 	acl = "public-read"
 	acceleration_status = "Enabled"
 }
-`, randInt)
+`, OS_REGION_NAME, randInt, OS_REGION_NAME)
 }
 
 func testAccAWSS3BucketConfigWithoutAcceleration(randInt int) string {
 	return fmt.Sprintf(`
 provider "huaweicloud" {
 	alias = "reg1"
-	region = "eu-de"
+	region = "%s"
 }
 
 resource "huaweicloud_s3_bucket" "bucket" {
 	provider = "huaweicloud.reg1"
 	bucket = "tf-test-bucket-%d"
-	region = "eu-de"
+	region = "%s"
 	acl = "public-read"
 	acceleration_status = "Suspended"
 }
-`, randInt)
+`, OS_REGION_NAME, randInt, OS_REGION_NAME)
 }
 
 /*

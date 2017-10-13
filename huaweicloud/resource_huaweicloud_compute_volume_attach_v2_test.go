@@ -143,7 +143,7 @@ func testAccCheckComputeV2VolumeAttachDevice(
 	}
 }
 
-const testAccComputeV2VolumeAttach_basic = `
+var testAccComputeV2VolumeAttach_basic = fmt.Sprintf(`
 resource "huaweicloud_blockstorage_volume_v2" "volume_1" {
   name = "volume_1"
   size = 1
@@ -153,7 +153,7 @@ resource "huaweicloud_compute_instance_v2" "instance_1" {
   name = "instance_1"
   security_groups = ["default"]
   network {
-    uuid = "2a9d80f2-beef-4845-a733-9fd45833f7c4"
+    uuid = "%s"
   }
 }
 
@@ -161,9 +161,9 @@ resource "huaweicloud_compute_volume_attach_v2" "va_1" {
   instance_id = "${huaweicloud_compute_instance_v2.instance_1.id}"
   volume_id = "${huaweicloud_blockstorage_volume_v2.volume_1.id}"
 }
-`
+`, OS_NETWORK_ID)
 
-const testAccComputeV2VolumeAttach_device = `
+var testAccComputeV2VolumeAttach_device = fmt.Sprintf(`
 resource "huaweicloud_blockstorage_volume_v2" "volume_1" {
   name = "volume_1"
   size = 1
@@ -173,7 +173,7 @@ resource "huaweicloud_compute_instance_v2" "instance_1" {
   name = "instance_1"
   security_groups = ["default"]
   network {
-    uuid = "2a9d80f2-beef-4845-a733-9fd45833f7c4"
+    uuid = "%s"
   }
 }
 
@@ -182,9 +182,9 @@ resource "huaweicloud_compute_volume_attach_v2" "va_1" {
   volume_id = "${huaweicloud_blockstorage_volume_v2.volume_1.id}"
   device = "/dev/vdc"
 }
-`
+`, OS_NETWORK_ID)
 
-const testAccComputeV2VolumeAttach_timeout = `
+var testAccComputeV2VolumeAttach_timeout = fmt.Sprintf(`
 resource "huaweicloud_blockstorage_volume_v2" "volume_1" {
   name = "volume_1"
   size = 1
@@ -194,7 +194,7 @@ resource "huaweicloud_compute_instance_v2" "instance_1" {
   name = "instance_1"
   security_groups = ["default"]
   network {
-    uuid = "2a9d80f2-beef-4845-a733-9fd45833f7c4"
+    uuid = "%s"
   }
 }
 
@@ -207,4 +207,4 @@ resource "huaweicloud_compute_volume_attach_v2" "va_1" {
     delete = "5m"
   }
 }
-`
+`, OS_NETWORK_ID)
