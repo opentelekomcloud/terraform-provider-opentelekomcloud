@@ -159,7 +159,7 @@ func Provider() terraform.ResourceProvider {
 			"opentelekomcloud_images_image_v2":        dataSourceImagesImageV2(),
 			"opentelekomcloud_networking_network_v2":  dataSourceNetworkingNetworkV2(),
 			"opentelekomcloud_networking_secgroup_v2": dataSourceNetworkingSecGroupV2(),
-			"opentelekomcloud_s3_bucket_object":       dataSourceAwsS3BucketObject(),
+			//"opentelekomcloud_s3_bucket_object":       dataSourceAwsS3BucketObject(),
 		},
 
 		ResourcesMap: map[string]*schema.Resource{
@@ -201,9 +201,9 @@ func Provider() terraform.ResourceProvider {
 			"opentelekomcloud_networking_secgroup_v2":          resourceNetworkingSecGroupV2(),
 			"opentelekomcloud_networking_secgroup_rule_v2":     resourceNetworkingSecGroupRuleV2(),
 			"opentelekomcloud_objectstorage_container_v1":      resourceObjectStorageContainerV1(),
-			"opentelekomcloud_s3_bucket":                       resourceAwsS3Bucket(),
-			"opentelekomcloud_s3_bucket_policy":                resourceAwsS3BucketPolicy(),
-			"opentelekomcloud_s3_bucket_object":                resourceAwsS3BucketObject(),
+			//"opentelekomcloud_s3_bucket":                       resourceAwsS3Bucket(),
+			//"opentelekomcloud_s3_bucket_policy":                resourceAwsS3BucketPolicy(),
+			//"opentelekomcloud_s3_bucket_object":                resourceAwsS3BucketObject(),
 		},
 
 		ConfigureFunc: configureProvider,
