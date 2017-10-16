@@ -1020,5 +1020,5 @@
 			"versionExact": "v1.6.1"
 		}
 	],
-	"rootPath": "github.com/khdegraaf/terraform-provider-huaweicloud"
+	"rootPath": "github.com/khdegraaf/terraform-provider-opentelekomcloud"
 }
