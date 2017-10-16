@@ -10,12 +10,12 @@ import (
 
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/awserr"
-	"github.com/aws/aws-sdk-go/aws/session"
+	//"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/s3"
 	"github.com/gophercloud/gophercloud"
 	"github.com/gophercloud/gophercloud/openstack"
 	"github.com/gophercloud/gophercloud/openstack/objectstorage/v1/swauth"
-	"github.com/hashicorp/errwrap"
+	//"github.com/hashicorp/errwrap"
 	"github.com/hashicorp/go-cleanhttp"
 	"github.com/hashicorp/terraform/helper/pathorcontents"
 	"github.com/hashicorp/terraform/terraform"
@@ -187,14 +187,16 @@ func (c *Config) LoadAndValidate() error {
 	}
 
 	// Set up base session
-	sess, err := session.NewSession(awsConfig)
-	if err != nil {
-		return errwrap.Wrapf("Error creating AWS session: {{err}}", err)
-	}
+	/*
+		sess, err := session.NewSession(awsConfig)
+		if err != nil {
+			return errwrap.Wrapf("Error creating AWS session: {{err}}", err)
+		}
 
-	// UNDONE: compute or figure this
-	awsS3Sess := sess.Copy(&aws.Config{Endpoint: aws.String("https://obs.eu-de.otc.t-systems.com/")}) //aws.String(c.S3Endpoint)})
-	c.s3conn = s3.New(awsS3Sess)
+		// UNDONE: compute or figure this
+		awsS3Sess := sess.Copy(make&aws.Config{Endpoint: aws.String("https://obs.eu-de.otc.t-systems.com/")}) //aws.String(c.S3Endpoint)})
+		c.s3conn = s3.New(awsS3Sess)
+	*/
 
 	return nil
 }
