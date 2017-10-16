@@ -1,21 +1,21 @@
 ---
-layout: "huaweicloud"
-page_title: "HuaweiCloud: huaweicloud_compute_instance_v2"
-sidebar_current: "docs-huaweicloud-resource-compute-instance-v2"
+layout: "opentelekomcloud"
+page_title: "OpenTelekomCloud: opentelekomcloud_compute_instance_v2"
+sidebar_current: "docs-opentelekomcloud-resource-compute-instance-v2"
 description: |-
-  Manages a V2 VM instance resource within HuaweiCloud.
+  Manages a V2 VM instance resource within OpenTelekomCloud.
 ---
 
-# huaweicloud\_compute\_instance_v2
+# opentelekomcloud\_compute\_instance_v2
 
-Manages a V2 VM instance resource within HuaweiCloud.
+Manages a V2 VM instance resource within OpenTelekomCloud.
 
 ## Example Usage
 
 ### Basic Instance
 
 ```hcl
-resource "huaweicloud_compute_instance_v2" "basic" {
+resource "opentelekomcloud_compute_instance_v2" "basic" {
   name            = "basic"
   image_id        = "ad091b52-742f-469e-8f3c-fd81cadf0743"
   flavor_id       = "3"
@@ -35,12 +35,12 @@ resource "huaweicloud_compute_instance_v2" "basic" {
 ### Instance With Attached Volume
 
 ```hcl
-resource "huaweicloud_blockstorage_volume_v2" "myvol" {
+resource "opentelekomcloud_blockstorage_volume_v2" "myvol" {
   name = "myvol"
   size = 1
 }
 
-resource "huaweicloud_compute_instance_v2" "myinstance" {
+resource "opentelekomcloud_compute_instance_v2" "myinstance" {
   name            = "myinstance"
   image_id        = "ad091b52-742f-469e-8f3c-fd81cadf0743"
   flavor_id       = "3"
@@ -52,16 +52,16 @@ resource "huaweicloud_compute_instance_v2" "myinstance" {
   }
 }
 
-resource "huaweicloud_compute_volume_attach_v2" "attached" {
-  compute_id = "${huaweicloud_compute_instance_v2.myinstance.id}"
-  volume_id = "${huaweicloud_blockstorage_volume_v2.myvol.id}"
+resource "opentelekomcloud_compute_volume_attach_v2" "attached" {
+  compute_id = "${opentelekomcloud_compute_instance_v2.myinstance.id}"
+  volume_id = "${opentelekomcloud_blockstorage_volume_v2.myvol.id}"
 }
 ```
 
 ### Boot From Volume
 
 ```hcl
-resource "huaweicloud_compute_instance_v2" "boot-from-volume" {
+resource "opentelekomcloud_compute_instance_v2" "boot-from-volume" {
   name            = "boot-from-volume"
   flavor_id       = "3"
   key_pair        = "my_key_pair_name"
@@ -85,20 +85,20 @@ resource "huaweicloud_compute_instance_v2" "boot-from-volume" {
 ### Boot From an Existing Volume
 
 ```hcl
-resource "huaweicloud_blockstorage_volume_v1" "myvol" {
+resource "opentelekomcloud_blockstorage_volume_v1" "myvol" {
   name     = "myvol"
   size     = 5
   image_id = "<image-id>"
 }
 
-resource "huaweicloud_compute_instance_v2" "boot-from-volume" {
+resource "opentelekomcloud_compute_instance_v2" "boot-from-volume" {
   name            = "bootfromvolume"
   flavor_id       = "3"
   key_pair        = "my_key_pair_name"
   security_groups = ["default"]
 
   block_device {
-    uuid                  = "${huaweicloud_blockstorage_volume_v1.myvol.id}"
+    uuid                  = "${opentelekomcloud_blockstorage_volume_v1.myvol.id}"
     source_type           = "volume"
     boot_index            = 0
     destination_type      = "volume"
@@ -114,7 +114,7 @@ resource "huaweicloud_compute_instance_v2" "boot-from-volume" {
 ### Boot Instance, Create Volume, and Attach Volume as a Block Device
 
 ```hcl
-resource "huaweicloud_compute_instance_v2" "instance_1" {
+resource "opentelekomcloud_compute_instance_v2" "instance_1" {
   name            = "instance_1"
   image_id        = "<image-id>"
   flavor_id       = "3"
@@ -142,12 +142,12 @@ resource "huaweicloud_compute_instance_v2" "instance_1" {
 ### Boot Instance and Attach Existing Volume as a Block Device
 
 ```hcl
-resource "huaweicloud_blockstorage_volume_v2" "volume_1" {
+resource "opentelekomcloud_blockstorage_volume_v2" "volume_1" {
   name = "volume_1"
   size = 1
 }
 
-resource "huaweicloud_compute_instance_v2" "instance_1" {
+resource "opentelekomcloud_compute_instance_v2" "instance_1" {
   name            = "instance_1"
   image_id        = "<image-id>"
   flavor_id       = "3"
@@ -163,7 +163,7 @@ resource "huaweicloud_compute_instance_v2" "instance_1" {
   }
 
   block_device {
-    uuid                  = "${huaweicloud_blockstorage_volume_v2.volume_1.id}"
+    uuid                  = "${opentelekomcloud_blockstorage_volume_v2.volume_1.id}"
     source_type           = "volume"
     destination_type      = "volume"
     boot_index            = 1
@@ -175,11 +175,11 @@ resource "huaweicloud_compute_instance_v2" "instance_1" {
 ### Instance With Multiple Networks
 
 ```hcl
-resource "huaweicloud_networking_floatingip_v2" "myip" {
+resource "opentelekomcloud_networking_floatingip_v2" "myip" {
   pool = "my_pool"
 }
 
-resource "huaweicloud_compute_instance_v2" "multi-net" {
+resource "opentelekomcloud_compute_instance_v2" "multi-net" {
   name            = "multi-net"
   image_id        = "ad091b52-742f-469e-8f3c-fd81cadf0743"
   flavor_id       = "3"
@@ -195,17 +195,17 @@ resource "huaweicloud_compute_instance_v2" "multi-net" {
   }
 }
 
-resource "huaweicloud_compute_floatingip_associate_v2" "myip" {
-  floating_ip = "${huaweicloud_networking_floatingip_v2.myip.address}"
-  instance_id = "${huaweicloud_compute_instance_v2.multi-net.id}"
-  fixed_ip = "${huaweicloud_compute_instance_v2.multi-net.network.1.fixed_ip_v4}"
+resource "opentelekomcloud_compute_floatingip_associate_v2" "myip" {
+  floating_ip = "${opentelekomcloud_networking_floatingip_v2.myip.address}"
+  instance_id = "${opentelekomcloud_compute_instance_v2.multi-net.id}"
+  fixed_ip = "${opentelekomcloud_compute_instance_v2.multi-net.network.1.fixed_ip_v4}"
 }
 ```
 
 ### Instance With Personality
 
 ```hcl
-resource "huaweicloud_compute_instance_v2" "personality" {
+resource "opentelekomcloud_compute_instance_v2" "personality" {
   name            = "personality"
   image_id        = "ad091b52-742f-469e-8f3c-fd81cadf0743"
   flavor_id       = "3"
@@ -226,7 +226,7 @@ resource "huaweicloud_compute_instance_v2" "personality" {
 ### Instance with Multiple Ephemeral Disks
 
 ```hcl
-resource "huaweicloud_compute_instance_v2" "multi-eph" {
+resource "opentelekomcloud_compute_instance_v2" "multi-eph" {
   name            = "multi_eph"
   image_id        = "ad091b52-742f-469e-8f3c-fd81cadf0743"
   flavor_id       = "3"
@@ -262,7 +262,7 @@ resource "huaweicloud_compute_instance_v2" "multi-eph" {
 ### Instance with User Data (cloud-init)
 
 ```hcl
-resource "huaweicloud_compute_instance_v2" "instance_1" {
+resource "opentelekomcloud_compute_instance_v2" "instance_1" {
   name            = "basic"
   image_id        = "ad091b52-742f-469e-8f3c-fd81cadf0743"
   flavor_id       = "3"
@@ -350,7 +350,7 @@ The following arguments are supported:
     before destroying it, thus giving chance for guest OS daemons to stop correctly.
     If instance doesn't stop within timeout, it will be destroyed anyway.
 
-* `force_delete` - (Optional) Whether to force the HuaweiCloud instance to be
+* `force_delete` - (Optional) Whether to force the OpenTelekomCloud instance to be
     forcefully deleted. This is useful for environments that have reclaim / soft
     deletion enabled.
 
@@ -461,7 +461,7 @@ The following example shows how to create an instance with multiple ephemeral
 disks:
 
 ```
-resource "huaweicloud_compute_instance_v2" "foo" {
+resource "opentelekomcloud_compute_instance_v2" "foo" {
   name            = "terraform-test"
   security_groups = ["default"]
 
@@ -499,7 +499,7 @@ there are some notes to be aware of when mixing Instances and Ports:
 * When attaching an Instance to one or more networks using Ports, place the
 security groups on the Port and not the Instance. If you place the security
 groups on the Instance, the security groups will not be applied upon creation,
-but they will be applied upon a refresh. This is a known HuaweiCloud bug.
+but they will be applied upon a refresh. This is a known OpenTelekomCloud bug.
 
 * Network IP information is not available within an instance for networks that
 are attached with Ports. This is mostly due to the flexibility Neutron Ports
@@ -510,7 +510,7 @@ information. Therefore, in order for a Provisioner to connect to an Instance
 via it's network Port, customize the `connection` information:
 
 ```hcl
-resource "huaweicloud_networking_port_v2" "port_1" {
+resource "opentelekomcloud_networking_port_v2" "port_1" {
   name           = "port_1"
   admin_state_up = "true"
 
@@ -522,16 +522,16 @@ resource "huaweicloud_networking_port_v2" "port_1" {
   ]
 }
 
-resource "huaweicloud_compute_instance_v2" "instance_1" {
+resource "opentelekomcloud_compute_instance_v2" "instance_1" {
   name = "instance_1"
 
   network {
-    port = "${huaweicloud_networking_port_v2.port_1.id}"
+    port = "${opentelekomcloud_networking_port_v2.port_1.id}"
   }
 
   connection {
     user        = "root"
-    host        = "${huaweicloud_networking_port_v2.port_1.fixed_ip.0.ip_address}"
+    host        = "${opentelekomcloud_networking_port_v2.port_1.fixed_ip.0.ip_address}"
     private_key = "~/path/to/key"
   }
 

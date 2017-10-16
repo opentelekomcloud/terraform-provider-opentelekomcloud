@@ -1,19 +1,19 @@
 ---
-layout: "huaweicloud"
-page_title: "HuaweiCloud: huaweicloud_networking_router_v2"
-sidebar_current: "docs-huaweicloud-resource-networking-router-v2"
+layout: "opentelekomcloud"
+page_title: "OpenTelekomCloud: opentelekomcloud_networking_router_v2"
+sidebar_current: "docs-opentelekomcloud-resource-networking-router-v2"
 description: |-
-  Manages a V2 router resource within HuaweiCloud.
+  Manages a V2 router resource within OpenTelekomCloud.
 ---
 
-# huaweicloud\_networking\_router_v2
+# opentelekomcloud\_networking\_router_v2
 
-Manages a V2 router resource within HuaweiCloud.
+Manages a V2 router resource within OpenTelekomCloud.
 
 ## Example Usage
 
 ```hcl
-resource "huaweicloud_networking_router_v2" "router_1" {
+resource "opentelekomcloud_networking_router_v2" "router_1" {
   name             = "my_router"
   external_gateway = "f67f0d72-0ddf-11e4-9d95-e1f29f417e2f"
 }

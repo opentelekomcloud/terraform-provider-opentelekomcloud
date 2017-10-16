@@ -1,19 +1,19 @@
 ---
-layout: "huaweicloud"
-page_title: "HuaweiCloud: huaweicloud_networking_network_v2"
-sidebar_current: "docs-huaweicloud-datasource-networking-network-v2"
+layout: "opentelekomcloud"
+page_title: "OpenTelekomCloud: opentelekomcloud_networking_network_v2"
+sidebar_current: "docs-opentelekomcloud-datasource-networking-network-v2"
 description: |-
-  Get information on an HuaweiCloud Network.
+  Get information on an OpenTelekomCloud Network.
 ---
 
-# huaweicloud\_networking\_network\_v2
+# opentelekomcloud\_networking\_network\_v2
 
-Use this data source to get the ID of an available HuaweiCloud network.
+Use this data source to get the ID of an available OpenTelekomCloud network.
 
 ## Example Usage
 
 ```hcl
-data "huaweicloud_networking_network_v2" "network" {
+data "opentelekomcloud_networking_network_v2" "network" {
   name = "tf_test_network"
 }
 ```

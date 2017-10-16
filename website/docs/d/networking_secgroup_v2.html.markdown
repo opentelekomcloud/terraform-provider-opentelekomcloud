@@ -1,19 +1,19 @@
 ---
-layout: "huaweicloud"
-page_title: "HuaweiCloud: huaweicloud_networking_secgroup_v2"
-sidebar_current: "docs-huaweicloud-datasource-networking-secgroup-v2"
+layout: "opentelekomcloud"
+page_title: "OpenTelekomCloud: opentelekomcloud_networking_secgroup_v2"
+sidebar_current: "docs-opentelekomcloud-datasource-networking-secgroup-v2"
 description: |-
-  Get information on an HuaweiCloud Security Group.
+  Get information on an OpenTelekomCloud Security Group.
 ---
 
-# huaweicloud\_networking\_secgroup\_v2
+# opentelekomcloud\_networking\_secgroup\_v2
 
-Use this data source to get the ID of an available HuaweiCloud security group.
+Use this data source to get the ID of an available OpenTelekomCloud security group.
 
 ## Example Usage
 
 ```hcl
-data "huaweicloud_networking_secgroup_v2" "secgroup" {
+data "opentelekomcloud_networking_secgroup_v2" "secgroup" {
   name = "tf_test_secgroup"
 }
 ```

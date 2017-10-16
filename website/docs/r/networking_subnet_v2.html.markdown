@@ -1,25 +1,25 @@
 ---
-layout: "huaweicloud"
-page_title: "HuaweiCloud: huaweicloud_networking_subnet_v2"
-sidebar_current: "docs-huaweicloud-resource-networking-subnet-v2"
+layout: "opentelekomcloud"
+page_title: "OpenTelekomCloud: opentelekomcloud_networking_subnet_v2"
+sidebar_current: "docs-opentelekomcloud-resource-networking-subnet-v2"
 description: |-
-  Manages a V2 Neutron subnet resource within HuaweiCloud.
+  Manages a V2 Neutron subnet resource within OpenTelekomCloud.
 ---
 
-# huaweicloud\_networking\_subnet_v2
+# opentelekomcloud\_networking\_subnet_v2
 
-Manages a V2 Neutron subnet resource within HuaweiCloud.
+Manages a V2 Neutron subnet resource within OpenTelekomCloud.
 
 ## Example Usage
 
 ```hcl
-resource "huaweicloud_networking_network_v2" "network_1" {
+resource "opentelekomcloud_networking_network_v2" "network_1" {
   name           = "tf_test_network"
   admin_state_up = "true"
 }
 
-resource "huaweicloud_networking_subnet_v2" "subnet_1" {
-  network_id = "${huaweicloud_networking_network_v2.network_1.id}"
+resource "opentelekomcloud_networking_subnet_v2" "subnet_1" {
+  network_id = "${opentelekomcloud_networking_network_v2.network_1.id}"
   cidr       = "192.168.199.0/24"
 }
 ```
@@ -108,5 +108,5 @@ The following attributes are exported:
 Subnets can be imported using the `id`, e.g.
 
 ```
-$ terraform import huaweicloud_networking_subnet_v2.subnet_1 da4faf16-5546-41e4-8330-4d0002b74048
+$ terraform import opentelekomcloud_networking_subnet_v2.subnet_1 da4faf16-5546-41e4-8330-4d0002b74048
 ```

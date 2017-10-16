@@ -1,33 +1,33 @@
 ---
-layout: "huaweicloud"
-page_title: "HuaweiCloud: huaweicloud_networking_secgroup_rule_v2"
-sidebar_current: "docs-huaweicloud-resource-networking-secgroup-rule-v2"
+layout: "opentelekomcloud"
+page_title: "OpenTelekomCloud: opentelekomcloud_networking_secgroup_rule_v2"
+sidebar_current: "docs-opentelekomcloud-resource-networking-secgroup-rule-v2"
 description: |-
-  Manages a V2 Neutron security group rule resource within HuaweiCloud.
+  Manages a V2 Neutron security group rule resource within OpenTelekomCloud.
 ---
 
-# huaweicloud\_networking\_secgroup\_rule_v2
+# opentelekomcloud\_networking\_secgroup\_rule_v2
 
-Manages a V2 neutron security group rule resource within HuaweiCloud.
+Manages a V2 neutron security group rule resource within OpenTelekomCloud.
 Unlike Nova security groups, neutron separates the group from the rules
 and also allows an admin to target a specific tenant_id.
 
 ## Example Usage
 
 ```hcl
-resource "huaweicloud_networking_secgroup_v2" "secgroup_1" {
+resource "opentelekomcloud_networking_secgroup_v2" "secgroup_1" {
   name        = "secgroup_1"
   description = "My neutron security group"
 }
 
-resource "huaweicloud_networking_secgroup_rule_v2" "secgroup_rule_1" {
+resource "opentelekomcloud_networking_secgroup_rule_v2" "secgroup_rule_1" {
   direction         = "ingress"
   ethertype         = "IPv4"
   protocol          = "tcp"
   port_range_min    = 22
   port_range_max    = 22
   remote_ip_prefix  = "0.0.0.0/0"
-  security_group_id = "${huaweicloud_networking_secgroup_v2.secgroup_1.id}"
+  security_group_id = "${opentelekomcloud_networking_secgroup_v2.secgroup_1.id}"
 }
 ```
 
@@ -81,11 +81,11 @@ The following arguments are supported:
     CIDR (i.e. 192.168.0.0/16). Changing this creates a new security group rule.
 
 * `remote_group_id` - (Optional) The remote group id, the value needs to be an
-    HuaweiCloud ID of a security group in the same tenant. Changing this creates
+    OpenTelekomCloud ID of a security group in the same tenant. Changing this creates
     a new security group rule.
 
 * `security_group_id` - (Required) The security group id the rule should belong
-    to, the value needs to be an HuaweiCloud ID of a security group in the same
+    to, the value needs to be an OpenTelekomCloud ID of a security group in the same
     tenant. Changing this creates a new security group rule.
 
 * `tenant_id` - (Optional) The owner of the security group. Required if admin
@@ -112,5 +112,5 @@ The following attributes are exported:
 Security Group Rules can be imported using the `id`, e.g.
 
 ```
-$ terraform import huaweicloud_networking_secgroup_rule_v2.secgroup_rule_1 aeb68ee3-6e9d-4256-955c-9584a6212745
+$ terraform import opentelekomcloud_networking_secgroup_rule_v2.secgroup_rule_1 aeb68ee3-6e9d-4256-955c-9584a6212745
 ```

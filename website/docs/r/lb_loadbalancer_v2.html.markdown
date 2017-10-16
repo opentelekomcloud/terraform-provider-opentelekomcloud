@@ -1,19 +1,19 @@
 ---
-layout: "huaweicloud"
-page_title: "HuaweiCloud: huaweicloud_lb_loadbalancer_v2"
-sidebar_current: "docs-huaweicloud-resource-lb-loadbalancer-v2"
+layout: "opentelekomcloud"
+page_title: "OpenTelekomCloud: opentelekomcloud_lb_loadbalancer_v2"
+sidebar_current: "docs-opentelekomcloud-resource-lb-loadbalancer-v2"
 description: |-
-  Manages a V2 loadbalancer resource within HuaweiCloud.
+  Manages a V2 loadbalancer resource within OpenTelekomCloud.
 ---
 
-# huaweicloud\_lb\_loadbalancer\_v2
+# opentelekomcloud\_lb\_loadbalancer\_v2
 
-Manages a V2 loadbalancer resource within HuaweiCloud.
+Manages a V2 loadbalancer resource within OpenTelekomCloud.
 
 ## Example Usage
 
 ```hcl
-resource "huaweicloud_lb_loadbalancer_v2" "lb_1" {
+resource "opentelekomcloud_lb_loadbalancer_v2" "lb_1" {
   vip_subnet_id = "d9415786-5f1a-428b-b35f-2f1523e146d2"
 }
 ```

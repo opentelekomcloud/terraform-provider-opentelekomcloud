@@ -1,22 +1,22 @@
 ---
-layout: "huaweicloud"
-page_title: "HuaweiCloud: huaweicloud_compute_floatingip_associate_v2"
-sidebar_current: "docs-huaweicloud-resource-compute-floatingip-associate-v2"
+layout: "opentelekomcloud"
+page_title: "OpenTelekomCloud: opentelekomcloud_compute_floatingip_associate_v2"
+sidebar_current: "docs-opentelekomcloud-resource-compute-floatingip-associate-v2"
 description: |-
   Associate a floating IP to an instance
 ---
 
-# huaweicloud\_compute\_floatingip_associate_v2
+# opentelekomcloud\_compute\_floatingip_associate_v2
 
 Associate a floating IP to an instance. This can be used instead of the
-`floating_ip` options in `huaweicloud_compute_instance_v2`.
+`floating_ip` options in `opentelekomcloud_compute_instance_v2`.
 
 ## Example Usage
 
 ### Automatically detect the correct network
 
 ```hcl
-resource "huaweicloud_compute_instance_v2" "instance_1" {
+resource "opentelekomcloud_compute_instance_v2" "instance_1" {
   name            = "instance_1"
   image_id        = "ad091b52-742f-469e-8f3c-fd81cadf0743"
   flavor_id       = 3
@@ -24,20 +24,20 @@ resource "huaweicloud_compute_instance_v2" "instance_1" {
   security_groups = ["default"]
 }
 
-resource "huaweicloud_networking_floatingip_v2" "fip_1" {
+resource "opentelekomcloud_networking_floatingip_v2" "fip_1" {
   pool = "my_pool"
 }
 
-resource "huaweicloud_compute_floatingip_associate_v2" "fip_1" {
-  floating_ip = "${huaweicloud_networking_floatingip_v2.fip_1.address}"
-  instance_id = "${huaweicloud_compute_instance_v2.instance_1.id}"
+resource "opentelekomcloud_compute_floatingip_associate_v2" "fip_1" {
+  floating_ip = "${opentelekomcloud_networking_floatingip_v2.fip_1.address}"
+  instance_id = "${opentelekomcloud_compute_instance_v2.instance_1.id}"
 }
 ```
 
 ### Explicitly set the network to attach to
 
 ```hcl
-resource "huaweicloud_compute_instance_v2" "instance_1" {
+resource "opentelekomcloud_compute_instance_v2" "instance_1" {
   name            = "instance_1"
   image_id        = "ad091b52-742f-469e-8f3c-fd81cadf0743"
   flavor_id       = 3
@@ -53,14 +53,14 @@ resource "huaweicloud_compute_instance_v2" "instance_1" {
   }
 }
 
-resource "huaweicloud_networking_floatingip_v2" "fip_1" {
+resource "opentelekomcloud_networking_floatingip_v2" "fip_1" {
   pool = "my_pool"
 }
 
-resource "huaweicloud_compute_floatingip_associate_v2" "fip_1" {
-  floating_ip = "${huaweicloud_networking_floatingip_v2.fip_1.address}"
-  instance_id = "${huaweicloud_compute_instance_v2.instance_1.id}"
-  fixed_ip    = "${huaweicloud_compute_instance_v2.instance_1.network.1.fixed_ip_v4}"
+resource "opentelekomcloud_compute_floatingip_associate_v2" "fip_1" {
+  floating_ip = "${opentelekomcloud_networking_floatingip_v2.fip_1.address}"
+  instance_id = "${opentelekomcloud_compute_instance_v2.instance_1.id}"
+  fixed_ip    = "${opentelekomcloud_compute_instance_v2.instance_1.network.1.fixed_ip_v4}"
 }
 ```
 
@@ -94,5 +94,5 @@ This resource can be imported by specifying all three arguments, separated
 by a forward slash:
 
 ```
-$ terraform import huaweicloud_compute_floatingip_associate_v2.fip_1 <floating_ip>/<instance_id>/<fixed_ip>
+$ terraform import opentelekomcloud_compute_floatingip_associate_v2.fip_1 <floating_ip>/<instance_id>/<fixed_ip>
 ```

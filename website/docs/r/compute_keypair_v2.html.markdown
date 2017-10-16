@@ -1,19 +1,19 @@
 ---
-layout: "huaweicloud"
-page_title: "HuaweiCloud: huaweicloud_compute_keypair_v2"
-sidebar_current: "docs-huaweicloud-resource-compute-keypair-v2"
+layout: "opentelekomcloud"
+page_title: "OpenTelekomCloud: opentelekomcloud_compute_keypair_v2"
+sidebar_current: "docs-opentelekomcloud-resource-compute-keypair-v2"
 description: |-
-  Manages a V2 keypair resource within HuaweiCloud.
+  Manages a V2 keypair resource within OpenTelekomCloud.
 ---
 
-# huaweicloud\_compute\_keypair_v2
+# opentelekomcloud\_compute\_keypair_v2
 
-Manages a V2 keypair resource within HuaweiCloud.
+Manages a V2 keypair resource within OpenTelekomCloud.
 
 ## Example Usage
 
 ```hcl
-resource "huaweicloud_compute_keypair_v2" "test-keypair" {
+resource "opentelekomcloud_compute_keypair_v2" "test-keypair" {
   name       = "my-keypair"
   public_key = "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQDAjpC1hwiOCCmKEWxJ4qzTTsJbKzndLotBCz5PcwtUnflmU+gHJtWMZKpuEGVi29h0A/+ydKek1O18k10Ff+4tyFjiHDQAnOfgWf7+b1yK+qDip3X1C0UPMbwHlTfSGWLGZqd9LvEFx9k3h/M+VtMvwR1lJ9LUyTAImnNjWG7TaIPmui30HvM2UiFEmqkr4ijq45MyX2+fLIePLRIF61p4whjHAQYufqyno3BS48icQb4p6iVEZPo4AE2o9oIyQvj2mx4dk5Y8CgSETOZTYDOR3rU2fZTRDRgPJDH9FWvQjF5tA0p3d9CoWWd2s6GKKbfoUIi8R/Db1BSPJwkqB"
 }
@@ -49,5 +49,5 @@ The following attributes are exported:
 Keypairs can be imported using the `name`, e.g.
 
 ```
-$ terraform import huaweicloud_compute_keypair_v2.my-keypair test-keypair
+$ terraform import opentelekomcloud_compute_keypair_v2.my-keypair test-keypair
 ```
