@@ -1306,7 +1306,7 @@ resource "huaweicloud_s3_bucket" "bucket" {
 	bucket = "tf-test-bucket-%d"
 	region = "%s"
 }
-`, randInt, OS_REGION_NAME, OS_REGION_NAME)
+`, OS_REGION_NAME, randInt, OS_REGION_NAME)
 }
 
 func testAccAWSS3BucketWebsiteConfig(randInt int) string {
