@@ -180,7 +180,7 @@ resource "opentelekomcloud_fw_policy_v2" "policy_1" {
   name = "policy_1"
   description =  "terraform acceptance test"
   rules = [
-    "${opentelekomcloud_fw_rule_v1.udp_deny.id}"
+    "${opentelekomcloud_fw_rule_v2.udp_deny.id}"
   ]
 }
 
