@@ -1,37 +1,37 @@
 ---
-layout: "huaweicloud"
-page_title: "HuaweiCloud: huaweicloud_blockstorage_volume_attach_v2"
-sidebar_current: "docs-huaweicloud-resource-blockstorage-volume-attach-v2"
+layout: "opentelekomcloud"
+page_title: "OpenTelekomCloud: opentelekomcloud_blockstorage_volume_attach_v2"
+sidebar_current: "docs-opentelekomcloud-resource-blockstorage-volume-attach-v2"
 description: |-
   Creates an attachment connection to a Block Storage volume
 ---
 
-# huaweicloud\_blockstorage\_volume\_attach\_v2
+# opentelekomcloud\_blockstorage\_volume\_attach\_v2
 
 This resource is experimental and may be removed in the future! Feedback
 is requested if you find this resource useful or if you find any problems
 with it.
 
 Creates a general purpose attachment connection to a Block
-Storage volume using the HuaweiCloud Block Storage (Cinder) v2 API.
+Storage volume using the OpenTelekomCloud Block Storage (Cinder) v2 API.
 Depending on your Block Storage service configuration, this
-resource can assist in attaching a volume to a non-HuaweiCloud resource
+resource can assist in attaching a volume to a non-OpenTelekomCloud resource
 such as a bare-metal server or a remote virtual machine in a
 different cloud provider.
 
 This does not actually attach a volume to an instance. Please use
-the `huaweicloud_compute_volume_attach_v2` resource for that.
+the `opentelekomcloud_compute_volume_attach_v2` resource for that.
 
 ## Example Usage
 
 ```hcl
-resource "huaweicloud_blockstorage_volume_v2" "volume_1" {
+resource "opentelekomcloud_blockstorage_volume_v2" "volume_1" {
   name = "volume_1"
   size = 1
 }
 
-resource "huaweicloud_blockstorage_volume_attach_v2" "va_1" {
-  volume_id = "${huaweicloud_blockstorage_volume_v2.volume_1.id}"
+resource "opentelekomcloud_blockstorage_volume_attach_v2" "va_1" {
+  volume_id = "${opentelekomcloud_blockstorage_volume_v2.volume_1.id}"
   device = "auto"
   host_name = "devstack"
   ip_address = "192.168.255.10"
@@ -123,8 +123,8 @@ iscsiadm -m node -T ${self.data.target_iqn} -p ${self.data.target_portal} --resc
 The contents of `data` will vary from each Block Storage service. You must have
 a good understanding of how the service is configured and how to make the
 appropriate final connection. However, if used correctly, this has the
-flexibility to be able to attach HuaweiCloud Block Storage volumes to
-non-HuaweiCloud resources.
+flexibility to be able to attach OpenTelekomCloud Block Storage volumes to
+non-OpenTelekomCloud resources.
 
 ## Import
 

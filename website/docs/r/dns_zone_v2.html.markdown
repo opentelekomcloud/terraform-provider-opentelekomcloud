@@ -1,21 +1,21 @@
 ---
-layout: "huaweicloud"
-page_title: "HuaweiCloud: huaweicloud_dns_zone_v2"
-sidebar_current: "docs-huaweicloud-resource-dns-zone-v2"
+layout: "opentelekomcloud"
+page_title: "OpenTelekomCloud: opentelekomcloud_dns_zone_v2"
+sidebar_current: "docs-opentelekomcloud-resource-dns-zone-v2"
 description: |-
-  Manages a DNS zone in the HuaweiCloud DNS Service
+  Manages a DNS zone in the OpenTelekomCloud DNS Service
 ---
 
-# huaweicloud\_dns\_zone_v2
+# opentelekomcloud\_dns\_zone_v2
 
-Manages a DNS zone in the HuaweiCloud DNS Service.
+Manages a DNS zone in the OpenTelekomCloud DNS Service.
 
 ## Example Usage
 
 ### Automatically detect the correct network
 
 ```hcl
-resource "huaweicloud_dns_zone_v2" "example.com" {
+resource "opentelekomcloud_dns_zone_v2" "example.com" {
   name = "example.com."
   email = "jdoe@example.com"
   description = "An example zone"
@@ -73,5 +73,5 @@ The following attributes are exported:
 This resource can be imported by specifying the zone ID:
 
 ```
-$ terraform import huaweicloud_dns_zone_v2.zone_1 <zone_id>
+$ terraform import opentelekomcloud_dns_zone_v2.zone_1 <zone_id>
 ```

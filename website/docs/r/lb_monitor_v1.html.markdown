@@ -1,19 +1,19 @@
 ---
-layout: "huaweicloud"
-page_title: "HuaweiCloud: huaweicloud_lb_monitor_v1"
-sidebar_current: "docs-huaweicloud-resource-lb-monitor-v1"
+layout: "opentelekomcloud"
+page_title: "OpenTelekomCloud: opentelekomcloud_lb_monitor_v1"
+sidebar_current: "docs-opentelekomcloud-resource-lb-monitor-v1"
 description: |-
-  Manages a V1 load balancer monitor resource within HuaweiCloud.
+  Manages a V1 load balancer monitor resource within OpenTelekomCloud.
 ---
 
-# huaweicloud\_lb\_monitor_v1
+# opentelekomcloud\_lb\_monitor_v1
 
-Manages a V1 load balancer monitor resource within HuaweiCloud.
+Manages a V1 load balancer monitor resource within OpenTelekomCloud.
 
 ## Example Usage
 
 ```hcl
-resource "huaweicloud_lb_monitor_v1" "monitor_1" {
+resource "opentelekomcloud_lb_monitor_v1" "monitor_1" {
   type           = "PING"
   delay          = 30
   timeout        = 5
@@ -86,5 +86,5 @@ The following attributes are exported:
 Load Balancer Members can be imported using the `id`, e.g.
 
 ```
-$ terraform import huaweicloud_lb_monitor_v1.monitor_1 119d7530-72e9-449a-aa97-124a5ef1992c
+$ terraform import opentelekomcloud_lb_monitor_v1.monitor_1 119d7530-72e9-449a-aa97-124a5ef1992c
 ```

@@ -1,19 +1,19 @@
 ---
-layout: "huaweicloud"
-page_title: "HuaweiCloud: huaweicloud_lb_vip_v1"
-sidebar_current: "docs-huaweicloud-resource-lb-vip-v1"
+layout: "opentelekomcloud"
+page_title: "OpenTelekomCloud: opentelekomcloud_lb_vip_v1"
+sidebar_current: "docs-opentelekomcloud-resource-lb-vip-v1"
 description: |-
-  Manages a V1 load balancer vip resource within HuaweiCloud.
+  Manages a V1 load balancer vip resource within OpenTelekomCloud.
 ---
 
-# huaweicloud\_lb\_vip_v1
+# opentelekomcloud\_lb\_vip_v1
 
-Manages a V1 load balancer vip resource within HuaweiCloud.
+Manages a V1 load balancer vip resource within OpenTelekomCloud.
 
 ## Example Usage
 
 ```hcl
-resource "huaweicloud_lb_vip_v1" "vip_1" {
+resource "opentelekomcloud_lb_vip_v1" "vip_1" {
   name      = "tf_test_lb_vip"
   subnet_id = "12345"
   protocol  = "HTTP"
@@ -104,5 +104,5 @@ The following attributes are exported:
 Load Balancer VIPs can be imported using the `id`, e.g.
 
 ```
-$ terraform import huaweicloud_lb_vip_v1.vip_1 50e16b26-89c1-475e-a492-76167182511e
+$ terraform import opentelekomcloud_lb_vip_v1.vip_1 50e16b26-89c1-475e-a492-76167182511e
 ```

@@ -1,27 +1,27 @@
 ---
-layout: "huaweicloud"
-page_title: "HuaweiCloud: huaweicloud_identity_user_v3"
-sidebar_current: "docs-huaweicloud-resource-identity-user-v3"
+layout: "opentelekomcloud"
+page_title: "OpenTelekomCloud: opentelekomcloud_identity_user_v3"
+sidebar_current: "docs-opentelekomcloud-resource-identity-user-v3"
 description: |-
-  Manages a V3 User resource within HuaweiCloud Keystone.
+  Manages a V3 User resource within OpenTelekomCloud Keystone.
 ---
 
-# huaweicloud\_identity\_user_v3
+# opentelekomcloud\_identity\_user_v3
 
-Manages a V3 User resource within HuaweiCloud Keystone.
+Manages a V3 User resource within OpenTelekomCloud Keystone.
 
-Note: You _must_ have admin privileges in your HuaweiCloud cloud to use
+Note: You _must_ have admin privileges in your OpenTelekomCloud cloud to use
 this resource.
 
 ## Example Usage
 
 ```hcl
-resource "huaweicloud_identity_project_v3" "project_1" {
+resource "opentelekomcloud_identity_project_v3" "project_1" {
   name = "project_1"
 }
 
-resource "huaweicloud_identity_user_v3" "user_1" {
-  default_project_id = "${huaweicloud_identity_project_v3.project_1.id}"
+resource "opentelekomcloud_identity_user_v3" "user_1" {
+  default_project_id = "${opentelekomcloud_identity_project_v3.project_1.id}"
   name = "user_1"
   description = "A user"
 
@@ -101,5 +101,5 @@ The following attributes are exported:
 Users can be imported using the `id`, e.g.
 
 ```
-$ terraform import huaweicloud_identity_user_v3.user_1 89c60255-9bd6-460c-822a-e2b959ede9d2
+$ terraform import opentelekomcloud_identity_user_v3.user_1 89c60255-9bd6-460c-822a-e2b959ede9d2
 ```

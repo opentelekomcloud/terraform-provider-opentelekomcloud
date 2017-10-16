@@ -1,19 +1,19 @@
 ---
-layout: "huaweicloud"
-page_title: "HuaweiCloud: huaweicloud_compute_flavor_v2"
-sidebar_current: "docs-huaweicloud-resource-compute-flavor-v2"
+layout: "opentelekomcloud"
+page_title: "OpenTelekomCloud: opentelekomcloud_compute_flavor_v2"
+sidebar_current: "docs-opentelekomcloud-resource-compute-flavor-v2"
 description: |-
-  Manages a V2 flavor resource within HuaweiCloud.
+  Manages a V2 flavor resource within OpenTelekomCloud.
 ---
 
-# huaweicloud\_compute\_flavor_v2
+# opentelekomcloud\_compute\_flavor_v2
 
-Manages a V2 flavor resource within HuaweiCloud.
+Manages a V2 flavor resource within OpenTelekomCloud.
 
 ## Example Usage
 
 ```hcl
-resource "huaweicloud_compute_flavor_v2" "test-flavor" {
+resource "opentelekomcloud_compute_flavor_v2" "test-flavor" {
   name  = "my-flavor"
   ram   = "8"
   vcpus = "2"
@@ -69,5 +69,5 @@ The following attributes are exported:
 Flavors can be imported using the `ID`, e.g.
 
 ```
-$ terraform import huaweicloud_compute_flavor_v2.my-flavor 4142e64b-1b35-44a0-9b1e-5affc7af1106
+$ terraform import opentelekomcloud_compute_flavor_v2.my-flavor 4142e64b-1b35-44a0-9b1e-5affc7af1106
 ```

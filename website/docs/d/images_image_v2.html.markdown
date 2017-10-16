@@ -1,19 +1,19 @@
 ---
-layout: "huaweicloud"
-page_title: "HuaweiCloud: huaweicloud_images_image_v2"
-sidebar_current: "docs-huaweicloud-datasource-images-image-v2"
+layout: "opentelekomcloud"
+page_title: "OpenTelekomCloud: opentelekomcloud_images_image_v2"
+sidebar_current: "docs-opentelekomcloud-datasource-images-image-v2"
 description: |-
-  Get information on an HuaweiCloud Image.
+  Get information on an OpenTelekomCloud Image.
 ---
 
-# huaweicloud\_images\_image\_v2
+# opentelekomcloud\_images\_image\_v2
 
-Use this data source to get the ID of an available HuaweiCloud image.
+Use this data source to get the ID of an available OpenTelekomCloud image.
 
 ## Example Usage
 
 ```hcl
-data "huaweicloud_images_image_v2" "ubuntu" {
+data "opentelekomcloud_images_image_v2" "ubuntu" {
   name = "Ubuntu 16.04"
   most_recent = true
 }
