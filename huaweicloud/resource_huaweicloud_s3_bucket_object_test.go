@@ -256,6 +256,8 @@ func testAccCheckAWSS3BucketObjectExists(n string, obj *s3.GetObjectOutput) reso
 	}
 }
 
+// UNSUPPORTED
+/*
 func TestAccAWSS3BucketObject_kms(t *testing.T) {
 	rInt := acctest.RandInt()
 	var obj s3.GetObjectOutput
@@ -273,6 +275,7 @@ func TestAccAWSS3BucketObject_kms(t *testing.T) {
 		},
 	})
 }
+*/
 
 func TestAccAWSS3BucketObject_sse(t *testing.T) {
 	tmpFile, err := ioutil.TempFile("", "tf-acc-s3-obj-source-sse")
@@ -409,6 +412,8 @@ func TestResourceAWSS3BucketObjectAcl_validation(t *testing.T) {
 	}
 }
 
+// UNSUPPORTED
+/*
 func TestAccAWSS3BucketObject_storageClass(t *testing.T) {
 	rInt := acctest.RandInt()
 	var obj s3.GetObjectOutput
@@ -452,6 +457,7 @@ func TestAccAWSS3BucketObject_storageClass(t *testing.T) {
 		},
 	})
 }
+*/
 
 func TestResourceAWSS3BucketObjectStorageClass_validation(t *testing.T) {
 	_, errors := validateS3BucketObjectStorageClassType("incorrect", "storage_class")

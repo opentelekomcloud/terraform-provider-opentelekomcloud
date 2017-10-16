@@ -84,12 +84,12 @@ func resourceAwsS3BucketObject() *schema.Resource {
 				ConflictsWith: []string{"source"},
 			},
 
-			"storage_class": {
+			/*"storage_class": {
 				Type:         schema.TypeString,
 				Optional:     true,
 				Computed:     true,
 				ValidateFunc: validateS3BucketObjectStorageClassType,
-			},
+			}, */
 
 			"server_side_encryption": {
 				Type:         schema.TypeString,
@@ -98,11 +98,11 @@ func resourceAwsS3BucketObject() *schema.Resource {
 				Computed:     true,
 			},
 
-			"kms_key_id": {
+			/*"kms_key_id": {
 				Type:         schema.TypeString,
 				Optional:     true,
 				ValidateFunc: validateArn,
-			},
+			}, */
 
 			"etag": {
 				Type: schema.TypeString,
@@ -119,7 +119,7 @@ func resourceAwsS3BucketObject() *schema.Resource {
 				Computed: true,
 			},
 
-			"tags": tagsSchema(),
+			//"tags": tagsSchema(),
 
 			"website_redirect": {
 				Type:     schema.TypeString,
@@ -165,9 +165,9 @@ func resourceAwsS3BucketObjectPut(d *schema.ResourceData, meta interface{}) erro
 		Body:   body,
 	}
 
-	if v, ok := d.GetOk("storage_class"); ok {
+	/*if v, ok := d.GetOk("storage_class"); ok {
 		putInput.StorageClass = aws.String(v.(string))
-	}
+	} */
 
 	if v, ok := d.GetOk("cache_control"); ok {
 		putInput.CacheControl = aws.String(v.(string))
@@ -193,12 +193,12 @@ func resourceAwsS3BucketObjectPut(d *schema.ResourceData, meta interface{}) erro
 		putInput.ServerSideEncryption = aws.String(v.(string))
 	}
 
-	if v, ok := d.GetOk("kms_key_id"); ok {
+	/* if v, ok := d.GetOk("kms_key_id"); ok {
 		putInput.SSEKMSKeyId = aws.String(v.(string))
 		putInput.ServerSideEncryption = aws.String(s3.ServerSideEncryptionAwsKms)
-	}
+	} */
 
-	if v, ok := d.GetOk("tags"); ok {
+	/*if v, ok := d.GetOk("tags"); ok {
 		if restricted {
 			return fmt.Errorf("This region does not allow for tags on S3 objects")
 		}
@@ -209,7 +209,7 @@ func resourceAwsS3BucketObjectPut(d *schema.ResourceData, meta interface{}) erro
 			values.Add(k, v.(string))
 		}
 		putInput.Tagging = aws.String(values.Encode())
-	}
+	} */
 
 	if v, ok := d.GetOk("website_redirect"); ok {
 		putInput.WebsiteRedirectLocation = aws.String(v.(string))
@@ -282,6 +282,8 @@ func resourceAwsS3BucketObjectRead(d *schema.ResourceData, meta interface{}) err
 		} */
 	d.Set("etag", strings.Trim(*resp.ETag, `"`))
 
+	// UNSUPPORTED
+	/*
 	// The "STANDARD" (which is also the default) storage
 	// class when set would not be included in the results.
 	d.Set("storage_class", s3.StorageClassStandard)
@@ -300,6 +302,7 @@ func resourceAwsS3BucketObjectRead(d *schema.ResourceData, meta interface{}) err
 		}
 		d.Set("tags", tagsToMapS3(tagResp.TagSet))
 	}
+	*/
 
 	return nil
 }
