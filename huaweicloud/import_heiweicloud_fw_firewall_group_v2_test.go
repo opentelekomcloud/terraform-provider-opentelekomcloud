@@ -7,7 +7,7 @@ import (
 )
 
 func TestAccFWFirewallV2_importBasic(t *testing.T) {
-	resourceName := "huaweicloud_fw_firewall_v2.fw_1"
+	resourceName := "huaweicloud_fw_firewall_group_v2.fw_1"
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },

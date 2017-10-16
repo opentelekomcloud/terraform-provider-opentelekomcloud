@@ -539,6 +539,8 @@ func testAccCheckAWSS3BucketObjectSSE(n, expectedSSE string) resource.TestCheckF
 	}
 }
 
+// UNSUPPORTED
+/*
 func TestAccAWSS3BucketObject_tags(t *testing.T) {
 	rInt := acctest.RandInt()
 	var obj s3.GetObjectOutput
@@ -559,6 +561,7 @@ func TestAccAWSS3BucketObject_tags(t *testing.T) {
 		},
 	})
 }
+*/
 
 func testAccAWSS3BucketObjectConfigSource(randInt int, source string) string {
 	return fmt.Sprintf(`
