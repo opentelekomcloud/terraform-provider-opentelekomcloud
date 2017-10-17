@@ -55,8 +55,6 @@ Using the provider
 ----------------------
 Please see the documentation at [provider usage](website/docs/index.html.markdown).
 
-Or you can browse the documentation within this repo [here](https://github.com/gator1/terraform-provider-opentelekomcloud/blob/master/website/docs/index.html.markdown).
-
 Developing the Provider
 ---------------------------
 
