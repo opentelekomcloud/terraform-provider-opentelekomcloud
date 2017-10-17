@@ -98,20 +98,20 @@ func resourceAwsS3BucketObject() *schema.Resource {
 				Computed:     true,
 			},
 
-			/*"kms_key_id": {
+			"kms_key_id": {
 				Type:         schema.TypeString,
 				Optional:     true,
 				ValidateFunc: validateArn,
-			}, */
+			},
 
 			"etag": {
 				Type: schema.TypeString,
 				// This will conflict with SSE-C and SSE-KMS encryption and multi-part upload
 				// if/when it's actually implemented. The Etag then won't match raw-file MD5.
 				// See http://docs.aws.amazon.com/AmazonS3/latest/API/RESTCommonResponseHeaders.html
-				Optional:      true,
-				Computed:      true,
-				ConflictsWith: []string{"kms_key_id", "server_side_encryption"},
+				Optional: true,
+				Computed: true,
+				//ConflictsWith: []string{"kms_key_id", "server_side_encryption"},
 			},
 
 			"version_id": {
@@ -193,10 +193,10 @@ func resourceAwsS3BucketObjectPut(d *schema.ResourceData, meta interface{}) erro
 		putInput.ServerSideEncryption = aws.String(v.(string))
 	}
 
-	/* if v, ok := d.GetOk("kms_key_id"); ok {
+	if v, ok := d.GetOk("kms_key_id"); ok {
 		putInput.SSEKMSKeyId = aws.String(v.(string))
 		putInput.ServerSideEncryption = aws.String(s3.ServerSideEncryptionAwsKms)
-	} */
+	}
 
 	/*if v, ok := d.GetOk("tags"); ok {
 		if restricted {
