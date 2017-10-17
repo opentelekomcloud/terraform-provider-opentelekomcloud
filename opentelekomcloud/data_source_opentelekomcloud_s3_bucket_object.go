@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"log"
 	"regexp"
-	"strings"
+	//"strings"
 	"time"
 
 	"github.com/aws/aws-sdk-go/aws"
@@ -50,10 +50,10 @@ func dataSourceAwsS3BucketObject() *schema.Resource {
 				Type:     schema.TypeString,
 				Computed: true,
 			},
-			"etag": &schema.Schema{
+			/* "etag": &schema.Schema{
 				Type:     schema.TypeString,
 				Computed: true,
-			},
+			}, */
 			"expiration": &schema.Schema{
 				Type:     schema.TypeString,
 				Computed: true,
@@ -82,14 +82,14 @@ func dataSourceAwsS3BucketObject() *schema.Resource {
 				Type:     schema.TypeString,
 				Computed: true,
 			},
-			"sse_kms_key_id": &schema.Schema{
+			/* "sse_kms_key_id": &schema.Schema{
 				Type:     schema.TypeString,
 				Computed: true,
-			},
-			"storage_class": &schema.Schema{
+			}, */
+			/* "storage_class": &schema.Schema{
 				Type:     schema.TypeString,
 				Computed: true,
-			},
+			}, */
 			"version_id": &schema.Schema{
 				Type:     schema.TypeString,
 				Optional: true,
@@ -100,7 +100,7 @@ func dataSourceAwsS3BucketObject() *schema.Resource {
 				Computed: true,
 			},
 
-			"tags": tagsSchemaComputed(),
+			//"tags": tagsSchemaComputed(),
 		},
 	}
 }
@@ -150,22 +150,24 @@ func dataSourceAwsS3BucketObjectRead(d *schema.ResourceData, meta interface{}) e
 	d.Set("content_length", out.ContentLength)
 	d.Set("content_type", out.ContentType)
 	// See https://forums.aws.amazon.com/thread.jspa?threadID=44003
-	d.Set("etag", strings.Trim(*out.ETag, `"`))
+	//d.Set("etag", strings.Trim(*out.ETag, `"`))
 	d.Set("expiration", out.Expiration)
 	d.Set("expires", out.Expires)
 	d.Set("last_modified", out.LastModified.Format(time.RFC1123))
 	d.Set("metadata", pointersMapToStringList(out.Metadata))
 	d.Set("server_side_encryption", out.ServerSideEncryption)
-	d.Set("sse_kms_key_id", out.SSEKMSKeyId)
+	//d.Set("sse_kms_key_id", out.SSEKMSKeyId)
 	d.Set("version_id", out.VersionId)
 	d.Set("website_redirect_location", out.WebsiteRedirectLocation)
 
-	// The "STANDARD" (which is also the default) storage
-	// class when set would not be included in the results.
-	d.Set("storage_class", s3.StorageClassStandard)
-	if out.StorageClass != nil {
-		d.Set("storage_class", out.StorageClass)
-	}
+	/*
+		// The "STANDARD" (which is also the default) storage
+		// class when set would not be included in the results.
+		d.Set("storage_class", s3.StorageClassStandard)
+		if out.StorageClass != nil {
+			d.Set("storage_class", out.StorageClass)
+		}
+	*/
 
 	if isContentTypeAllowed(out.ContentType) {
 		input := s3.GetObjectInput{
@@ -203,15 +205,17 @@ func dataSourceAwsS3BucketObjectRead(d *schema.ResourceData, meta interface{}) e
 			uniqueId, contentType)
 	}
 
-	tagResp, err := conn.GetObjectTagging(
-		&s3.GetObjectTaggingInput{
-			Bucket: aws.String(bucket),
-			Key:    aws.String(key),
-		})
-	if err != nil {
-		return err
-	}
-	d.Set("tags", tagsToMapS3(tagResp.TagSet))
+	/*
+		tagResp, err := conn.GetObjectTagging(
+			&s3.GetObjectTaggingInput{
+				Bucket: aws.String(bucket),
+				Key:    aws.String(key),
+			})
+		if err != nil {
+			return err
+		}
+		d.Set("tags", tagsToMapS3(tagResp.TagSet))
+	*/
 
 	return nil
 }
