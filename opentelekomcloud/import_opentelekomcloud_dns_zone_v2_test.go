@@ -1,6 +1,5 @@
 package opentelekomcloud
 
-/*
 import (
 	"fmt"
 	"testing"
@@ -9,7 +8,7 @@ import (
 	"github.com/hashicorp/terraform/helper/resource"
 )
 
-// SKIP environment doesn't support?
+// SKIP
 func TestAccDNSV2Zone_importBasic(t *testing.T) {
 	var zoneName = fmt.Sprintf("ACPTTEST%s.com.", acctest.RandString(5))
 	resourceName := "opentelekomcloud_dns_zone_v2.zone_1"
@@ -31,4 +30,3 @@ func TestAccDNSV2Zone_importBasic(t *testing.T) {
 		},
 	})
 }
-*/
