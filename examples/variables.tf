@@ -1,11 +1,17 @@
 ### OpenTelekomCloud Credentials
 variable "username" {
+  # If you don't fill this in, you will be prompted for it
+  #default = "your_username"
 }
 
 variable "password" {
+  # If you don't fill this in, you will be prompted for it
+  #default = "your_password'
 }
 
 variable "domain_name" {
+  # If you don't fill this in, you will be prompted for it
+  #default = "your_domainname"
 }
 
 variable "tenant_name" {
