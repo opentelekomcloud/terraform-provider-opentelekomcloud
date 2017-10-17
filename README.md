@@ -20,13 +20,13 @@ Clone repository to: `$GOPATH/src/github.com/gator1/terraform-provider-opentelek
 
 ```sh
 $ mkdir -p $GOPATH/src/github.com/gator1; cd $GOPATH/src/github.com/gator1
-$ git clone git@github.com:$OWNER/terraform-provider-opentelekomcloud
+$ git clone git@github.com:gator1/terraform-provider-opentelekomcloud
 ```
 
 Enter the provider directory and build the provider
 
 ```sh
-$ cd $GOPATH/src/github.com/$OWNER/terraform-provider-opentelekomcloud
+$ cd $GOPATH/src/github.com/gator1/terraform-provider-opentelekomcloud
 $ make build
 ```
 
@@ -55,7 +55,7 @@ Using the provider
 ----------------------
 Please see the documentation at [provider usage](website/docs/index.html.markdown).
 
-Or you can browse the documentation within this repo [here](https://github.com/gator1/terraform-provider-opentelekomcloud/tree/master/website/docs).
+Or you can browse the documentation within this repo [here](https://github.com/gator1/terraform-provider-opentelekomcloud/blob/master/website/docs/index.html.markdown).
 
 Developing the Provider
 ---------------------------
