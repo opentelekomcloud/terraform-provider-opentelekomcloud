@@ -16,25 +16,49 @@ Requirements
 Building The Provider
 ---------------------
 
-Clone repository to: `$GOPATH/src/github.com/$OWNER/terraform-provider-opentelekomcloud`
+Clone repository to: `$GOPATH/src/github.com/gator1/terraform-provider-opentelekomcloud`
 
 ```sh
-$ mkdir -p $GOPATH/src/github.com/$OWNER; cd $GOPATH/src/github.com/$OWNER
-$ git clone git@github.com:$OWNER/terraform-provider-opentelekomcloud
+$ mkdir -p $GOPATH/src/github.com/gator1; cd $GOPATH/src/github.com/gator1
+$ git clone git@github.com:gator1/terraform-provider-opentelekomcloud
 ```
 
 Enter the provider directory and build the provider
 
 ```sh
-$ cd $GOPATH/src/github.com/$OWNER/terraform-provider-opentelekomcloud
+$ cd $GOPATH/src/github.com/gator1/terraform-provider-opentelekomcloud
 $ make build
 ```
 
+## Quick Start
+
+```hcl
+# Configure the OpenTelekomCloud Provider
+provider "opentelekomcloud" {
+  user_name   = "user"
+  tenant_name = "tenant"
+  domain_name = "domain"
+  password    = "pwd"
+  auth_url    = "https://iam.eu-de.otc.t-systems.com/v3"
+  region      = "eu-de"
+}
+
+# Create a web server
+resource "opentelekomcloud_compute_instance_v2" "test-server" {
+  name		  = "test-server"
+  image_name  = "Standard_CentOS_7_latest"
+  flavor_name = "s1.medium"
+}
+```
+
+### Full Example
+----------------------
+Please see full example at https://github.com/gator1/terraform-provider-opentelekomcloud/tree/master/examples, 
+you must fill in the required variables in variables.tf.
+
 Using the provider
 ----------------------
-Please see the documentation at [terraform.io](https://www.terraform.io/docs/providers/openstack/index.html).
-
-Or you can browse the documentation within this repo [here](https://github.com/$OWNER/terraform-provider-opentelekomcloud/tree/master/website/docs).
+Please see the documentation at [provider usage](website/docs/index.html.markdown).
 
 Developing the Provider
 ---------------------------
