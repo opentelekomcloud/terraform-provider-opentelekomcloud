@@ -120,6 +120,14 @@ func resourceBlockStorageVolumeV2() *schema.Resource {
 	}
 }
 
+func resourceContainerMetadataV2(d *schema.ResourceData) map[string]string {
+	m := make(map[string]string)
+	for key, val := range d.Get("metadata").(map[string]interface{}) {
+		m[key] = val.(string)
+	}
+	return m
+}
+
 func resourceBlockStorageVolumeV2Create(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*Config)
 	blockStorageClient, err := config.blockStorageV2Client(GetRegion(d, config))

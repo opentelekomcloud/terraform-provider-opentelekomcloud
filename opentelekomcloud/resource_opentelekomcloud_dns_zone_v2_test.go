@@ -1,6 +1,5 @@
 package opentelekomcloud
 
-/*
 import (
 	"fmt"
 	"regexp"
@@ -190,4 +189,3 @@ func testAccDNSV2Zone_timeout(zoneName string) string {
 		}
 	`, zoneName)
 }
-*/

@@ -61,32 +61,6 @@ func TestAccNetworkingV2Port_noip(t *testing.T) {
 	})
 }
 
-// KNOWN problem (#7)
-/*
-func TestAccNetworkingV2Port_multipleNoIP(t *testing.T) {
-	var network networks.Network
-	var port ports.Port
-	var subnet subnets.Subnet
-
-	resource.Test(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
-		CheckDestroy: testAccCheckNetworkingV2PortDestroy,
-		Steps: []resource.TestStep{
-			resource.TestStep{
-				Config: testAccNetworkingV2Port_multipleNoIP,
-				Check: resource.ComposeTestCheckFunc(
-					testAccCheckNetworkingV2SubnetExists("opentelekomcloud_networking_subnet_v2.subnet_1", &subnet),
-					testAccCheckNetworkingV2NetworkExists("opentelekomcloud_networking_network_v2.network_1", &network),
-					testAccCheckNetworkingV2PortExists("opentelekomcloud_networking_port_v2.port_1", &port),
-					testAccCheckNetworkingV2PortCountFixedIPs(&port, 3),
-				),
-			},
-		},
-	})
-}
-*/
-
 // PASS
 func TestAccNetworkingV2Port_allowedAddressPairs(t *testing.T) {
 	var network networks.Network
@@ -113,32 +87,6 @@ func TestAccNetworkingV2Port_allowedAddressPairs(t *testing.T) {
 	})
 }
 
-// KNOWN problem (#7)
-/*
-func TestAccNetworkingV2Port_multipleFixedIPs(t *testing.T) {
-	var network networks.Network
-	var port ports.Port
-	var subnet subnets.Subnet
-
-	resource.Test(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
-		CheckDestroy: testAccCheckNetworkingV2PortDestroy,
-		Steps: []resource.TestStep{
-			resource.TestStep{
-				Config: testAccNetworkingV2Port_multipleFixedIPs,
-				Check: resource.ComposeTestCheckFunc(
-					testAccCheckNetworkingV2SubnetExists("opentelekomcloud_networking_subnet_v2.subnet_1", &subnet),
-					testAccCheckNetworkingV2NetworkExists("opentelekomcloud_networking_network_v2.network_1", &network),
-					testAccCheckNetworkingV2PortExists("opentelekomcloud_networking_port_v2.port_1", &port),
-					testAccCheckNetworkingV2PortCountFixedIPs(&port, 3),
-				),
-			},
-		},
-	})
-}
-*/
-
 // PASS
 func TestAccNetworkingV2Port_timeout(t *testing.T) {
 	var network networks.Network
@@ -161,90 +109,6 @@ func TestAccNetworkingV2Port_timeout(t *testing.T) {
 		},
 	})
 }
-
-// KNOWN problem (#7)
-/*
-func TestAccNetworkingV2Port_fixedIPs(t *testing.T) {
-	resource.Test(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
-		CheckDestroy: testAccCheckNetworkingV2PortDestroy,
-		Steps: []resource.TestStep{
-			resource.TestStep{
-				Config: testAccNetworkingV2Port_fixedIPs,
-				Check: resource.ComposeTestCheckFunc(
-					resource.TestCheckResourceAttr(
-						"opentelekomcloud_networking_port_v2.port_1", "all_fixed_ips.0", "192.168.199.23"),
-					resource.TestCheckResourceAttr(
-						"opentelekomcloud_networking_port_v2.port_1", "all_fixed_ips.1", "192.168.199.24"),
-				),
-			},
-		},
-	})
-}
-*/
-
-// KNOWN Problem (#15)
-/*
-func TestAccNetworkingV2Port_updateSecurityGroups(t *testing.T) {
-	var network networks.Network
-	var port ports.Port
-	var security_group groups.SecGroup
-	var subnet subnets.Subnet
-
-	resource.Test(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
-		CheckDestroy: testAccCheckNetworkingV2PortDestroy,
-		Steps: []resource.TestStep{
-			resource.TestStep{
-				Config: testAccNetworkingV2Port_updateSecurityGroups_1,
-				Check: resource.ComposeTestCheckFunc(
-					testAccCheckNetworkingV2SubnetExists("opentelekomcloud_networking_subnet_v2.subnet_1", &subnet),
-					testAccCheckNetworkingV2NetworkExists("opentelekomcloud_networking_network_v2.network_1", &network),
-					testAccCheckNetworkingV2PortExists("opentelekomcloud_networking_port_v2.port_1", &port),
-					testAccCheckNetworkingV2SecGroupExists(
-						"opentelekomcloud_networking_secgroup_v2.secgroup_1", &security_group),
-					testAccCheckNetworkingV2PortCountSecurityGroups(&port, 1),
-				),
-			},
-			resource.TestStep{
-				Config: testAccNetworkingV2Port_updateSecurityGroups_2,
-				Check: resource.ComposeTestCheckFunc(
-					testAccCheckNetworkingV2SubnetExists("opentelekomcloud_networking_subnet_v2.subnet_1", &subnet),
-					testAccCheckNetworkingV2NetworkExists("opentelekomcloud_networking_network_v2.network_1", &network),
-					testAccCheckNetworkingV2PortExists("opentelekomcloud_networking_port_v2.port_1", &port),
-					testAccCheckNetworkingV2SecGroupExists(
-						"opentelekomcloud_networking_secgroup_v2.secgroup_1", &security_group),
-					testAccCheckNetworkingV2PortCountSecurityGroups(&port, 1),
-				),
-			},
-			resource.TestStep{
-				Config: testAccNetworkingV2Port_updateSecurityGroups_3,
-				Check: resource.ComposeTestCheckFunc(
-					testAccCheckNetworkingV2SubnetExists("opentelekomcloud_networking_subnet_v2.subnet_1", &subnet),
-					testAccCheckNetworkingV2NetworkExists("opentelekomcloud_networking_network_v2.network_1", &network),
-					testAccCheckNetworkingV2PortExists("opentelekomcloud_networking_port_v2.port_1", &port),
-					testAccCheckNetworkingV2SecGroupExists(
-						"opentelekomcloud_networking_secgroup_v2.secgroup_1", &security_group),
-					testAccCheckNetworkingV2PortCountSecurityGroups(&port, 1),
-				),
-			},
-			resource.TestStep{
-				Config: testAccNetworkingV2Port_updateSecurityGroups_4,
-				Check: resource.ComposeTestCheckFunc(
-					testAccCheckNetworkingV2SubnetExists("opentelekomcloud_networking_subnet_v2.subnet_1", &subnet),
-					testAccCheckNetworkingV2NetworkExists("opentelekomcloud_networking_network_v2.network_1", &network),
-					testAccCheckNetworkingV2PortExists("opentelekomcloud_networking_port_v2.port_1", &port),
-					testAccCheckNetworkingV2SecGroupExists(
-						"opentelekomcloud_networking_secgroup_v2.secgroup_1", &security_group),
-					testAccCheckNetworkingV2PortCountSecurityGroups(&port, 0),
-				),
-			},
-		},
-	})
-}
-*/
 
 func testAccCheckNetworkingV2PortDestroy(s *terraform.State) error {
 	config := testAccProvider.Meta().(*Config)
