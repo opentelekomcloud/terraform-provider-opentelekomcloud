@@ -8,15 +8,15 @@ import (
 	"net/http"
 	"os"
 
-	"github.com/aws/aws-sdk-go/aws"
-	"github.com/aws/aws-sdk-go/aws/awserr"
+	//"github.com/aws/aws-sdk-go/aws"
+	//"github.com/aws/aws-sdk-go/aws/awserr"
 	//"github.com/aws/aws-sdk-go/aws/session"
-	"github.com/aws/aws-sdk-go/service/s3"
+	//"github.com/aws/aws-sdk-go/service/s3"
 	"github.com/gophercloud/gophercloud"
 	"github.com/gophercloud/gophercloud/openstack"
 	"github.com/gophercloud/gophercloud/openstack/objectstorage/v1/swauth"
 	//"github.com/hashicorp/errwrap"
-	"github.com/hashicorp/go-cleanhttp"
+	//"github.com/hashicorp/go-cleanhttp"
 	"github.com/hashicorp/terraform/helper/pathorcontents"
 	"github.com/hashicorp/terraform/terraform"
 	"strings"
@@ -43,7 +43,7 @@ type Config struct {
 	UserID           string
 
 	OsClient *gophercloud.ProviderClient
-	s3conn   *s3.S3
+	//s3conn   *s3.S3
 }
 
 func (c *Config) LoadAndValidate() error {
@@ -146,56 +146,56 @@ func (c *Config) LoadAndValidate() error {
 	//fmt.Printf("[DEBUG] Region: %s.\n", c.Region)
 
 	// Setup AWS/S3 client/config information for Swift S3 buckets
-	log.Println("[INFO] Building AWS auth structure")
-	creds, err := GetCredentials(c)
-	if err != nil {
-		return err
-	}
-	// Call Get to check for credential provider. If nothing found, we'll get an
-	// error, and we can present it nicely to the user
-	cp, err := creds.Get()
-	if err != nil {
-		if awsErr, ok := err.(awserr.Error); ok && awsErr.Code() == "NoCredentialProviders" {
-			return fmt.Errorf(`No valid credential sources found for AWS Provider.
-  Please see https://terraform.io/docs/providers/aws/index.html for more information on
-  providing credentials for the AWS Provider`)
-		}
-
-		return fmt.Errorf("Error loading credentials for AWS Provider: %s", err)
-	}
-
-	log.Printf("[INFO] AWS Auth provider used: %q", cp.ProviderName)
-
-	awsConfig := &aws.Config{
-		Credentials: creds,
-		Region:      aws.String(c.Region),
-		//MaxRetries:       aws.Int(c.MaxRetries),
-		HTTPClient: cleanhttp.DefaultClient(),
-		//S3ForcePathStyle: aws.Bool(c.S3ForcePathStyle),
-	}
-
-	if osDebug {
-		awsConfig.LogLevel = aws.LogLevel(aws.LogDebugWithHTTPBody | aws.LogDebugWithRequestRetries | aws.LogDebugWithRequestErrors)
-		awsConfig.Logger = awsLogger{}
-	}
-
-	if c.Insecure {
-		transport := awsConfig.HTTPClient.Transport.(*http.Transport)
-		transport.TLSClientConfig = &tls.Config{
-			InsecureSkipVerify: true,
-		}
-	}
-
-	// Set up base session
 	/*
-		sess, err := session.NewSession(awsConfig)
-		if err != nil {
-			return errwrap.Wrapf("Error creating AWS session: {{err}}", err)
-		}
+			log.Println("[INFO] Building AWS auth structure")
+			creds, err := GetCredentials(c)
+			if err != nil {
+				return err
+			}
+			// Call Get to check for credential provider. If nothing found, we'll get an
+			// error, and we can present it nicely to the user
+			cp, err := creds.Get()
+			if err != nil {
+				if awsErr, ok := err.(awserr.Error); ok && awsErr.Code() == "NoCredentialProviders" {
+					return fmt.Errorf(`No valid credential sources found for AWS Provider.
+		  Please see https://terraform.io/docs/providers/aws/index.html for more information on
+		  providing credentials for the AWS Provider`)
+				}
 
-		// UNDONE: compute or figure this
-		awsS3Sess := sess.Copy(make&aws.Config{Endpoint: aws.String("https://obs.eu-de.otc.t-systems.com/")}) //aws.String(c.S3Endpoint)})
-		c.s3conn = s3.New(awsS3Sess)
+				return fmt.Errorf("Error loading credentials for AWS Provider: %s", err)
+			}
+
+			log.Printf("[INFO] AWS Auth provider used: %q", cp.ProviderName)
+
+			awsConfig := &aws.Config{
+				Credentials: creds,
+				Region:      aws.String(c.Region),
+				//MaxRetries:       aws.Int(c.MaxRetries),
+				HTTPClient: cleanhttp.DefaultClient(),
+				//S3ForcePathStyle: aws.Bool(c.S3ForcePathStyle),
+			}
+
+			if osDebug {
+				awsConfig.LogLevel = aws.LogLevel(aws.LogDebugWithHTTPBody | aws.LogDebugWithRequestRetries | aws.LogDebugWithRequestErrors)
+				awsConfig.Logger = awsLogger{}
+			}
+
+			if c.Insecure {
+				transport := awsConfig.HTTPClient.Transport.(*http.Transport)
+				transport.TLSClientConfig = &tls.Config{
+					InsecureSkipVerify: true,
+				}
+			}
+
+			// Set up base session
+				sess, err := session.NewSession(awsConfig)
+				if err != nil {
+					return errwrap.Wrapf("Error creating AWS session: {{err}}", err)
+				}
+
+				// UNDONE: compute or figure this
+				awsS3Sess := sess.Copy(make&aws.Config{Endpoint: aws.String("https://obs.eu-de.otc.t-systems.com/")}) //aws.String(c.S3Endpoint)})
+				c.s3conn = s3.New(awsS3Sess)
 	*/
 
 	return nil
