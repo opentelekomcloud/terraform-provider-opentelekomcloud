@@ -256,8 +256,7 @@ func testAccCheckAWSS3BucketObjectExists(n string, obj *s3.GetObjectOutput) reso
 	}
 }
 
-// UNSUPPORTED
-/*
+// UNSUPPORTED?  maybe partially?
 func TestAccAWSS3BucketObject_kms(t *testing.T) {
 	rInt := acctest.RandInt()
 	var obj s3.GetObjectOutput
@@ -275,8 +274,8 @@ func TestAccAWSS3BucketObject_kms(t *testing.T) {
 		},
 	})
 }
-*/
 
+// PASS
 func TestAccAWSS3BucketObject_sse(t *testing.T) {
 	tmpFile, err := ioutil.TempFile("", "tf-acc-s3-obj-source-sse")
 	if err != nil {
@@ -314,6 +313,7 @@ func TestAccAWSS3BucketObject_sse(t *testing.T) {
 	})
 }
 
+// PASS
 func TestAccAWSS3BucketObject_acl(t *testing.T) {
 	rInt := acctest.RandInt()
 	var obj s3.GetObjectOutput
@@ -384,6 +384,7 @@ func testAccCheckAWSS3BucketObjectAcl(n string, expectedPerms []string) resource
 	}
 }
 
+// PASS
 func TestResourceAWSS3BucketObjectAcl_validation(t *testing.T) {
 	_, errors := validateS3BucketObjectAclType("incorrect", "acl")
 	if len(errors) == 0 {
@@ -459,6 +460,7 @@ func TestAccAWSS3BucketObject_storageClass(t *testing.T) {
 }
 */
 
+// PASS
 func TestResourceAWSS3BucketObjectStorageClass_validation(t *testing.T) {
 	_, errors := validateS3BucketObjectStorageClassType("incorrect", "storage_class")
 	if len(errors) == 0 {
