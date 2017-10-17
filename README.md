@@ -32,7 +32,7 @@ $ make build
 
 Using the provider
 ----------------------
-Please see the documentation at [terraform.io](https://www.terraform.io/docs/providers/openstack/index.html).
+Please see the documentation at [provider usage](website/docs/index.html.markdown).
 
 Or you can browse the documentation within this repo [here](https://github.com/$OWNER/terraform-provider-opentelekomcloud/tree/master/website/docs).
 
