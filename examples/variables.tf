@@ -1,14 +1,11 @@
 ### OpenTelekomCloud Credentials
 variable "username" {
-  default = "tf_user"
 }
 
 variable "password" {
-  default = "Huawei@123.UhOh"
 }
 
 variable "domain_name" {
-  default = "OTC-EU-DE-00000000001000022296"
 }
 
 variable "tenant_name" {
