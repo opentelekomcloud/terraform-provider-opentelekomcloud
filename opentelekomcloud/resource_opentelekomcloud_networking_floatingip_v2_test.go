@@ -30,28 +30,6 @@ func TestAccNetworkingV2FloatingIP_basic(t *testing.T) {
 	})
 }
 
-// KNOWN problem (#7)
-/*
-func TestAccNetworkingV2FloatingIP_fixedip_bind(t *testing.T) {
-	var fip floatingips.FloatingIP
-
-	resource.Test(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
-		CheckDestroy: testAccCheckNetworkingV2FloatingIPDestroy,
-		Steps: []resource.TestStep{
-			resource.TestStep{
-				Config: testAccNetworkingV2FloatingIP_fixedip_bind,
-				Check: resource.ComposeTestCheckFunc(
-					testAccCheckNetworkingV2FloatingIPExists("opentelekomcloud_networking_floatingip_v2.fip_1", &fip),
-					testAccCheckNetworkingV2FloatingIPBoundToCorrectIP(&fip, "192.168.199.20"),
-				),
-			},
-		},
-	})
-}
-*/
-
 // PASS
 func TestAccNetworkingV2FloatingIP_timeout(t *testing.T) {
 	var fip floatingips.FloatingIP

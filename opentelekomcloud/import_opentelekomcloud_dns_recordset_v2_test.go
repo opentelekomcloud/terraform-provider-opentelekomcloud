@@ -1,6 +1,5 @@
 package opentelekomcloud
 
-/*
 import (
 	"testing"
 
@@ -28,4 +27,3 @@ func TestAccDNSV2RecordSet_importBasic(t *testing.T) {
 		},
 	})
 }
-*/
