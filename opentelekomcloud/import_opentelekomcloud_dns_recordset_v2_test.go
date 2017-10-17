@@ -6,7 +6,7 @@ import (
 	"github.com/hashicorp/terraform/helper/resource"
 )
 
-// PASS
+// PASS, but normally skip
 func TestAccDNSV2RecordSet_importBasic(t *testing.T) {
 	zoneName := randomZoneName()
 	resourceName := "opentelekomcloud_dns_recordset_v2.recordset_1"
@@ -17,7 +17,8 @@ func TestAccDNSV2RecordSet_importBasic(t *testing.T) {
 		CheckDestroy: testAccCheckDNSV2RecordSetDestroy,
 		Steps: []resource.TestStep{
 			resource.TestStep{
-				Config: testAccDNSV2RecordSet_basic(zoneName),
+				Config:             testAccDNSV2RecordSet_basic(zoneName),
+				ExpectNonEmptyPlan: true,
 			},
 			resource.TestStep{
 				ResourceName:      resourceName,
