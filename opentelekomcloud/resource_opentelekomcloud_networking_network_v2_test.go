@@ -68,35 +68,6 @@ func TestAccNetworkingV2Network_netstack(t *testing.T) {
 	})
 }
 
-// KNOWN problem (#18)
-/*
-func TestAccNetworkingV2Network_fullstack(t *testing.T) {
-	var instance servers.Server
-	var network networks.Network
-	var port ports.Port
-	var secgroup secgroups.SecurityGroup
-	var subnet subnets.Subnet
-
-	resource.Test(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
-		CheckDestroy: testAccCheckNetworkingV2NetworkDestroy,
-		Steps: []resource.TestStep{
-			resource.TestStep{
-				Config: testAccNetworkingV2Network_fullstack,
-				Check: resource.ComposeTestCheckFunc(
-					testAccCheckNetworkingV2NetworkExists("opentelekomcloud_networking_network_v2.network_1", &network),
-					testAccCheckNetworkingV2SubnetExists("opentelekomcloud_networking_subnet_v2.subnet_1", &subnet),
-					testAccCheckComputeV2SecGroupExists("opentelekomcloud_compute_secgroup_v2.secgroup_1", &secgroup),
-					testAccCheckNetworkingV2PortExists("opentelekomcloud_networking_port_v2.port_1", &port),
-					testAccCheckComputeV2InstanceExists("opentelekomcloud_compute_instance_v2.instance_1", &instance),
-				),
-			},
-		},
-	})
-}
-*/
-
 // PASS
 func TestAccNetworkingV2Network_timeout(t *testing.T) {
 	var network networks.Network

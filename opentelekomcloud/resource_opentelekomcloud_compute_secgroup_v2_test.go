@@ -129,29 +129,6 @@ func TestAccComputeV2SecGroup_icmpZero(t *testing.T) {
 	})
 }
 
-// KNOWN problem (#19)
-/*
-func TestAccComputeV2SecGroup_lowerCaseCIDR(t *testing.T) {
-	var secgroup secgroups.SecurityGroup
-
-	resource.Test(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
-		CheckDestroy: testAccCheckComputeV2SecGroupDestroy,
-		Steps: []resource.TestStep{
-			resource.TestStep{
-				Config: testAccComputeV2SecGroup_lowerCaseCIDR,
-				Check: resource.ComposeTestCheckFunc(
-					testAccCheckComputeV2SecGroupExists("opentelekomcloud_compute_secgroup_v2.sg_1", &secgroup),
-					resource.TestCheckResourceAttr(
-						"opentelekomcloud_compute_secgroup_v2.sg_1", "rule.3862435458.cidr", "2001:558:fc00::/39"),
-				),
-			},
-		},
-	})
-}
-*/
-
 // PASS
 func TestAccComputeV2SecGroup_timeout(t *testing.T) {
 	var secgroup secgroups.SecurityGroup
