@@ -257,6 +257,7 @@ func testAccCheckAWSS3BucketObjectExists(n string, obj *s3.GetObjectOutput) reso
 }
 
 // UNSUPPORTED?  maybe partially?
+/*
 func TestAccAWSS3BucketObject_kms(t *testing.T) {
 	rInt := acctest.RandInt()
 	var obj s3.GetObjectOutput
@@ -274,6 +275,7 @@ func TestAccAWSS3BucketObject_kms(t *testing.T) {
 		},
 	})
 }
+*/
 
 // PASS
 func TestAccAWSS3BucketObject_sse(t *testing.T) {
@@ -648,6 +650,7 @@ resource "opentelekomcloud_s3_bucket_object" "object" {
 `, randInt, source, source)
 }
 
+/*
 func testAccAWSS3BucketObjectConfig_withKMSId(randInt int) string {
 	return fmt.Sprintf(`
 resource "opentelekomcloud_kms_key" "kms_key_1" {
@@ -665,6 +668,7 @@ resource "opentelekomcloud_s3_bucket_object" "object" {
 }
 `, randInt)
 }
+*/
 
 func testAccAWSS3BucketObjectConfig_withSSE(randInt int, source string) string {
 	return fmt.Sprintf(`

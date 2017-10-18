@@ -613,7 +613,7 @@ func TestAccAWSS3Bucket_Lifecycle(t *testing.T) {
 						"opentelekomcloud_s3_bucket.bucket", "lifecycle_rule.0.expiration.2613713285.date", ""),
 					resource.TestCheckResourceAttr(
 						"opentelekomcloud_s3_bucket.bucket", "lifecycle_rule.0.expiration.2613713285.expired_object_delete_marker", "false"),
-					resource.TestCheckResourceAttr(
+					/*resource.TestCheckResourceAttr(
 						"opentelekomcloud_s3_bucket.bucket", "lifecycle_rule.0.transition.2000431762.date", ""),
 					resource.TestCheckResourceAttr(
 						"opentelekomcloud_s3_bucket.bucket", "lifecycle_rule.0.transition.2000431762.days", "30"),
@@ -624,7 +624,7 @@ func TestAccAWSS3Bucket_Lifecycle(t *testing.T) {
 					resource.TestCheckResourceAttr(
 						"opentelekomcloud_s3_bucket.bucket", "lifecycle_rule.0.transition.6450812.days", "60"),
 					resource.TestCheckResourceAttr(
-						"opentelekomcloud_s3_bucket.bucket", "lifecycle_rule.0.transition.6450812.storage_class", "GLACIER"),
+						"opentelekomcloud_s3_bucket.bucket", "lifecycle_rule.0.transition.6450812.storage_class", "GLACIER"), */
 					resource.TestCheckResourceAttr(
 						"opentelekomcloud_s3_bucket.bucket", "lifecycle_rule.1.id", "id2"),
 					resource.TestCheckResourceAttr(
@@ -639,8 +639,8 @@ func TestAccAWSS3Bucket_Lifecycle(t *testing.T) {
 						"opentelekomcloud_s3_bucket.bucket", "lifecycle_rule.2.id", "id3"),
 					resource.TestCheckResourceAttr(
 						"opentelekomcloud_s3_bucket.bucket", "lifecycle_rule.2.prefix", "path3/"),
-					resource.TestCheckResourceAttr(
-						"opentelekomcloud_s3_bucket.bucket", "lifecycle_rule.2.transition.460947558.days", "0"),
+					/*resource.TestCheckResourceAttr(
+					"opentelekomcloud_s3_bucket.bucket", "lifecycle_rule.2.transition.460947558.days", "0"), */
 					resource.TestCheckResourceAttr(
 						"opentelekomcloud_s3_bucket.bucket", "lifecycle_rule.3.id", "id4"),
 					resource.TestCheckResourceAttr(
@@ -1556,14 +1556,14 @@ resource "opentelekomcloud_s3_bucket" "bucket" {
 			days = 365
 		}
 
-		transition {
-			days = 30
-			storage_class = "STANDARD_IA"
-		}
-		transition {
-			days = 60
-			storage_class = "GLACIER"
-		}
+		#transition {
+		#	days = 30
+		#	storage_class = "STANDARD_IA"
+		#}
+		#transition {
+		#	days = 60
+		#	storage_class = "GLACIER"
+		#}
 	}
 	lifecycle_rule {
 		id = "id2"
@@ -1579,10 +1579,10 @@ resource "opentelekomcloud_s3_bucket" "bucket" {
 		prefix = "path3/"
 		enabled = true
 
-		transition {
-			days = 0
-			storage_class = "GLACIER"
-		}
+		#transition {
+		#	days = 0
+		#	storage_class = "GLACIER"
+		#}
 	}
 	lifecycle_rule {
 		id = "id4"

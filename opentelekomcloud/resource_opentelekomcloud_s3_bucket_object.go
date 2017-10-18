@@ -98,11 +98,11 @@ func resourceAwsS3BucketObject() *schema.Resource {
 				Computed:     true,
 			},
 
-			"kms_key_id": {
+			/*"kms_key_id": {
 				Type:         schema.TypeString,
 				Optional:     true,
 				ValidateFunc: validateArn,
-			},
+			}, */
 
 			"etag": {
 				Type: schema.TypeString,
@@ -193,10 +193,10 @@ func resourceAwsS3BucketObjectPut(d *schema.ResourceData, meta interface{}) erro
 		putInput.ServerSideEncryption = aws.String(v.(string))
 	}
 
-	if v, ok := d.GetOk("kms_key_id"); ok {
+	/*if v, ok := d.GetOk("kms_key_id"); ok {
 		putInput.SSEKMSKeyId = aws.String(v.(string))
 		putInput.ServerSideEncryption = aws.String(s3.ServerSideEncryptionAwsKms)
-	}
+	} */
 
 	/*if v, ok := d.GetOk("tags"); ok {
 		if restricted {
