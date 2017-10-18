@@ -32,23 +32,26 @@ $ make build
 
 ## Exact steps on clean Ubuntu 16.04
 
-- prerequisites are sudo privileges, zip, make, wget and git.  Use apt install if missing.
-- wget https://storage.googleapis.com/golang/go1.9.1.linux-amd64.tar.gz
-- sudo tar -C /usr/local -xzf go1.9.1.linux-amd64.tar.gz
-- export PATH=$PATH:/usr/local/go/bin # You should put in your .profile or .bashrc
-- go version # to verify it runs and version #
-- go get github.com/gator1/terraform-provider-opentelekomcloud
-- cd ~/go/src/github.com/gator1/terraform-provider-opentelekomcloud/
-- make build
-- export PATH=$PATH:~/go/bin # You should put in your .profile or .bashrc
-- wget https://releases.hashicorp.com/terraform/0.10.7/terraform_0.10.7_linux_amd64.zip
-- unzip terraform_0.10.7_linux_amd64.zip
-- mv terraform ~/go/bin
-- terraform version # to verify it runs and version #
-- vi test.tf # paste in Quick Start contents, fix authentication information
-- terraform init
-- terraform plan
-- terraform apply # Should all work if everything is correct.
+```sh
+# prerequisites are sudo privileges, unzip, make, wget and git.  Use apt install if missing.
+$ wget https://storage.googleapis.com/golang/go1.9.1.linux-amd64.tar.gz
+$ sudo tar -C /usr/local -xzf go1.9.1.linux-amd64.tar.gz
+$ export PATH=$PATH:/usr/local/go/bin # You should put in your .profile or .bashrc
+$ go version # to verify it runs and version #
+$ go get github.com/gator1/terraform-provider-opentelekomcloud
+$ cd ~/go/src/github.com/gator1/terraform-provider-opentelekomcloud/
+$ make build
+$ export PATH=$PATH:~/go/bin # You should put in your .profile or .bashrc
+$ wget https://releases.hashicorp.com/terraform/0.10.7/terraform_0.10.7_linux_amd64.zip
+$ unzip terraform_0.10.7_linux_amd64.zip
+$ mv terraform ~/go/bin
+$ terraform version # to verify it runs and version #
+$ vi test.tf # paste in Quick Start contents, fix authentication information
+$ terraform init
+$ terraform plan
+$ terraform apply # Should all work if everything is correct.
+
+```
 
 ## Quick Start
 
