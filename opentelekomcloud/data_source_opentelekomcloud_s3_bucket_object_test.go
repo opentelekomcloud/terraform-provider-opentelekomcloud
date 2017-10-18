@@ -82,7 +82,8 @@ func TestAccDataSourceAWSS3BucketObject_readableBody(t *testing.T) {
 	})
 }
 
-// NOT YET
+// UNSUPPORTED?
+/*
 func TestAccDataSourceAWSS3BucketObject_kmsEncrypted(t *testing.T) {
 	rInt := acctest.RandInt()
 	resourceOnlyConf, conf := testAccAWSDataSourceS3ObjectConfig_kmsEncrypted(rInt)
@@ -119,6 +120,7 @@ func TestAccDataSourceAWSS3BucketObject_kmsEncrypted(t *testing.T) {
 		},
 	})
 }
+*/
 
 // PASS
 func TestAccDataSourceAWSS3BucketObject_allParams(t *testing.T) {
@@ -243,6 +245,7 @@ data "opentelekomcloud_s3_bucket_object" "obj" {
 	return resources, both
 }
 
+/*
 func testAccAWSDataSourceS3ObjectConfig_kmsEncrypted(randInt int) (string, string) {
 	resources := fmt.Sprintf(`
 resource "opentelekomcloud_s3_bucket" "object_bucket" {
@@ -269,6 +272,7 @@ data "opentelekomcloud_s3_bucket_object" "obj" {
 
 	return resources, both
 }
+*/
 
 func testAccAWSDataSourceS3ObjectConfig_allParams(randInt int) (string, string) {
 	resources := fmt.Sprintf(`
