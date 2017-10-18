@@ -589,6 +589,13 @@
 			"revisionTime": "2017-10-04T00:41:52Z"
 		},
 		{
+			"checksumSHA1": "0jlRZ3K8peSwCqbqFwad+siT2pA=",
+			"origin": "github.com/rancher/go-rancher/vendor/github.com/gorilla/websocket",
+			"path": "github.com/gorilla/websocket",
+			"revision": "1ac11f2e1f01a98673f2f5a182b49ea6e0450252",
+			"revisionTime": "2017-09-25T20:46:05Z"
+		},
+		{
 			"checksumSHA1": "cdOCt0Yb+hdErz8NAQqayxPmRsY=",
 			"path": "github.com/hashicorp/errwrap",
 			"revision": "7554cd9344cec97297fa6649b055a8c98c2a1e55"
@@ -910,10 +917,23 @@
 			"revisionTime": "2016-10-03T17:45:16Z"
 		},
 		{
+			"checksumSHA1": "2HSjyUZ4IMkCeA34TjJ0/f+Kk/k=",
+			"origin": "github.com/rancher/go-rancher/vendor/github.com/pkg/errors",
+			"path": "github.com/pkg/errors",
+			"revision": "1ac11f2e1f01a98673f2f5a182b49ea6e0450252",
+			"revisionTime": "2017-09-25T20:46:05Z"
+		},
+		{
 			"checksumSHA1": "u5s2PZ7fzCOqQX7bVPf9IJ+qNLQ=",
 			"path": "github.com/rancher/go-rancher",
 			"revision": "ec24b7f12fca9f78fbfcd62a0ea8bce14ade8792",
 			"revisionTime": "2017-04-07T04:09:43Z"
+		},
+		{
+			"checksumSHA1": "HaWkK5qs6scz0y5pm+R13bEDBOI=",
+			"path": "github.com/rancher/go-rancher/client",
+			"revision": "1ac11f2e1f01a98673f2f5a182b49ea6e0450252",
+			"revisionTime": "2017-09-25T20:46:05Z"
 		},
 		{
 			"checksumSHA1": "zmC8/3V4ls53DJlNTKDZwPSC/dA=",
@@ -1020,5 +1040,5 @@
 			"versionExact": "v1.6.1"
 		}
 	],
-	"rootPath": "github.com/khdegraaf/terraform-provider-opentelekomcloud"
+	"rootPath": "github.com/gator1/terraform-provider-opentelekomcloud"
 }
