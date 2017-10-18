@@ -13,6 +13,23 @@ Requirements
 -	[Terraform](https://www.terraform.io/downloads.html) 0.10.x
 -	[Go](https://golang.org/doc/install) 1.8 (to build the provider plugin)
 
+
+Building The Provider
+---------------------
+
+Clone repository to: `$GOPATH/src/github.com/gator1/terraform-provider-opentelekomcloud`
+
+```sh
+$ go get github.com/gator1/terraform-provider-opentelekomcloud
+```
+
+Enter the provider directory and build the provider
+
+```sh
+$ cd $GOPATH/src/github.com/gator1/terraform-provider-opentelekomcloud
+$ make build
+```
+
 ## Exact steps on clean Ubuntu 16.04
 
 - prerequisites are sudo privileges, zip, make, wget and git.  Use apt install if missing.
@@ -32,23 +49,6 @@ Requirements
 - terraform init
 - terraform plan
 - terraform apply # Should all work if everything is correct.
-
-
-Building The Provider
----------------------
-
-Clone repository to: `$GOPATH/src/github.com/gator1/terraform-provider-opentelekomcloud`
-
-```sh
-$ go get github.com/gator1/terraform-provider-opentelekomcloud
-```
-
-Enter the provider directory and build the provider
-
-```sh
-$ cd $GOPATH/src/github.com/gator1/terraform-provider-opentelekomcloud
-$ make build
-```
 
 ## Quick Start
 
