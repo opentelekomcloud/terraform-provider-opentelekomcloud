@@ -37,7 +37,11 @@ func resourceAwsS3BucketPolicy() *schema.Resource {
 }
 
 func resourceAwsS3BucketPolicyPut(d *schema.ResourceData, meta interface{}) error {
-	s3conn := meta.(*Config).s3conn
+	config := meta.(*Config)
+	s3conn, err := config.computeS3conn(GetRegion(d, config))
+	if err != nil {
+		return fmt.Errorf("Error creating OpenTelekomCloud s3 client: %s", err)
+	}
 
 	bucket := d.Get("bucket").(string)
 	policy := d.Get("policy").(string)
@@ -51,7 +55,7 @@ func resourceAwsS3BucketPolicyPut(d *schema.ResourceData, meta interface{}) erro
 		Policy: aws.String(policy),
 	}
 
-	err := resource.Retry(1*time.Minute, func() *resource.RetryError {
+	err = resource.Retry(1*time.Minute, func() *resource.RetryError {
 		if _, err := s3conn.PutBucketPolicy(params); err != nil {
 			if awserr, ok := err.(awserr.Error); ok {
 				if awserr.Code() == "MalformedPolicy" {
@@ -71,7 +75,11 @@ func resourceAwsS3BucketPolicyPut(d *schema.ResourceData, meta interface{}) erro
 }
 
 func resourceAwsS3BucketPolicyRead(d *schema.ResourceData, meta interface{}) error {
-	s3conn := meta.(*Config).s3conn
+	config := meta.(*Config)
+	s3conn, err := config.computeS3conn(GetRegion(d, config))
+	if err != nil {
+		return fmt.Errorf("Error creating OpenTelekomCloud s3 client: %s", err)
+	}
 
 	log.Printf("[DEBUG] S3 bucket policy, read for bucket: %s", d.Id())
 	pol, err := s3conn.GetBucketPolicy(&s3.GetBucketPolicyInput{
@@ -90,12 +98,16 @@ func resourceAwsS3BucketPolicyRead(d *schema.ResourceData, meta interface{}) err
 }
 
 func resourceAwsS3BucketPolicyDelete(d *schema.ResourceData, meta interface{}) error {
-	s3conn := meta.(*Config).s3conn
+	config := meta.(*Config)
+	s3conn, err := config.computeS3conn(GetRegion(d, config))
+	if err != nil {
+		return fmt.Errorf("Error creating OpenTelekomCloud s3 client: %s", err)
+	}
 
 	bucket := d.Get("bucket").(string)
 
 	log.Printf("[DEBUG] S3 bucket: %s, delete policy", bucket)
-	_, err := s3conn.DeleteBucketPolicy(&s3.DeleteBucketPolicyInput{
+	_, err = s3conn.DeleteBucketPolicy(&s3.DeleteBucketPolicyInput{
 		Bucket: aws.String(bucket),
 	})
 

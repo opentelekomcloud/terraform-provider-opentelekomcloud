@@ -1,6 +1,7 @@
 package opentelekomcloud
 
 import (
+	"fmt"
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/awserr"
 	"github.com/aws/aws-sdk-go/service/s3"
@@ -15,7 +16,11 @@ func resourceAwsS3BucketImportState(
 	results := make([]*schema.ResourceData, 1, 1)
 	results[0] = d
 
-	conn := meta.(*Config).s3conn
+	config := meta.(*Config)
+	conn, err := config.computeS3conn(GetRegion(d, config))
+	if err != nil {
+		return nil, fmt.Errorf("Error creating OpenTelekomCloud s3 client: %s", err)
+	}
 	pol, err := conn.GetBucketPolicy(&s3.GetBucketPolicyInput{
 		Bucket: aws.String(d.Id()),
 	})

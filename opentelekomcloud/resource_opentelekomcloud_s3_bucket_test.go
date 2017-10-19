@@ -502,8 +502,12 @@ func TestAccAWSS3Bucket_Cors(t *testing.T) {
 				return fmt.Errorf("Not found: %s", n)
 			}
 
-			conn := testAccProvider.Meta().(*Config).s3conn
-			_, err := conn.PutBucketCors(&s3.PutBucketCorsInput{
+			config := testAccProvider.Meta().(*Config)
+			conn, err := config.computeS3conn(OS_REGION_NAME)
+			if err != nil {
+				return fmt.Errorf("Error creating OpenTelekomCloud s3 client: %s", err)
+			}
+			_, err = conn.PutBucketCors(&s3.PutBucketCorsInput{
 				Bucket: aws.String(rs.Primary.ID),
 				CORSConfiguration: &s3.CORSConfiguration{
 					CORSRules: []*s3.CORSRule{
@@ -591,7 +595,9 @@ func TestAccAWSS3Bucket_Logging(t *testing.T) {
 	})
 }
 
-// FAIL: MalformedXML, some of the details aren't supported, like transition?
+// FAIL: MalformedXML, gets Internal Error if XML is right
+// UNSUPPORTED due to being broken.
+/*
 func TestAccAWSS3Bucket_Lifecycle(t *testing.T) {
 	rInt := acctest.RandInt()
 	resource.Test(t, resource.TestCase{
@@ -613,7 +619,7 @@ func TestAccAWSS3Bucket_Lifecycle(t *testing.T) {
 						"opentelekomcloud_s3_bucket.bucket", "lifecycle_rule.0.expiration.2613713285.date", ""),
 					resource.TestCheckResourceAttr(
 						"opentelekomcloud_s3_bucket.bucket", "lifecycle_rule.0.expiration.2613713285.expired_object_delete_marker", "false"),
-					/*resource.TestCheckResourceAttr(
+					resource.TestCheckResourceAttr(
 						"opentelekomcloud_s3_bucket.bucket", "lifecycle_rule.0.transition.2000431762.date", ""),
 					resource.TestCheckResourceAttr(
 						"opentelekomcloud_s3_bucket.bucket", "lifecycle_rule.0.transition.2000431762.days", "30"),
@@ -624,7 +630,7 @@ func TestAccAWSS3Bucket_Lifecycle(t *testing.T) {
 					resource.TestCheckResourceAttr(
 						"opentelekomcloud_s3_bucket.bucket", "lifecycle_rule.0.transition.6450812.days", "60"),
 					resource.TestCheckResourceAttr(
-						"opentelekomcloud_s3_bucket.bucket", "lifecycle_rule.0.transition.6450812.storage_class", "GLACIER"), */
+						"opentelekomcloud_s3_bucket.bucket", "lifecycle_rule.0.transition.6450812.storage_class", "GLACIER"),
 					resource.TestCheckResourceAttr(
 						"opentelekomcloud_s3_bucket.bucket", "lifecycle_rule.1.id", "id2"),
 					resource.TestCheckResourceAttr(
@@ -639,8 +645,8 @@ func TestAccAWSS3Bucket_Lifecycle(t *testing.T) {
 						"opentelekomcloud_s3_bucket.bucket", "lifecycle_rule.2.id", "id3"),
 					resource.TestCheckResourceAttr(
 						"opentelekomcloud_s3_bucket.bucket", "lifecycle_rule.2.prefix", "path3/"),
-					/*resource.TestCheckResourceAttr(
-					"opentelekomcloud_s3_bucket.bucket", "lifecycle_rule.2.transition.460947558.days", "0"), */
+					resource.TestCheckResourceAttr(
+					"opentelekomcloud_s3_bucket.bucket", "lifecycle_rule.2.transition.460947558.days", "0"),
 					resource.TestCheckResourceAttr(
 						"opentelekomcloud_s3_bucket.bucket", "lifecycle_rule.3.id", "id4"),
 					resource.TestCheckResourceAttr(
@@ -698,6 +704,7 @@ func TestAccAWSS3Bucket_Lifecycle(t *testing.T) {
 		},
 	})
 }
+*/
 
 // UNSUPPORTED
 /*
@@ -883,7 +890,11 @@ func testAccCheckAWSS3BucketDestroyWithProviders(providers *[]*schema.Provider) 
 }
 
 func testAccCheckAWSS3BucketDestroyWithProvider(s *terraform.State, provider *schema.Provider) error {
-	conn := provider.Meta().(*Config).s3conn
+	config := testAccProvider.Meta().(*Config)
+	conn, err := config.computeS3conn(OS_REGION_NAME)
+	if err != nil {
+		return fmt.Errorf("Error creating OpenTelekomCloud s3 client: %s", err)
+	}
 
 	for _, rs := range s.RootModule().Resources {
 		if rs.Type != "opentelekomcloud_s3_bucket" {
@@ -923,8 +934,12 @@ func testAccCheckAWSS3BucketExistsWithProviders(n string, providers *[]*schema.P
 				continue
 			}
 
-			conn := provider.Meta().(*Config).s3conn
-			_, err := conn.HeadBucket(&s3.HeadBucketInput{
+			config := testAccProvider.Meta().(*Config)
+			conn, err := config.computeS3conn(OS_REGION_NAME)
+			if err != nil {
+				return fmt.Errorf("Error creating OpenTelekomCloud s3 client: %s", err)
+			}
+			_, err = conn.HeadBucket(&s3.HeadBucketInput{
 				Bucket: aws.String(rs.Primary.ID),
 			})
 
@@ -949,8 +964,12 @@ func testAccCheckAWSS3DestroyBucket(n string) resource.TestCheckFunc {
 			return fmt.Errorf("No S3 Bucket ID is set")
 		}
 
-		conn := testAccProvider.Meta().(*Config).s3conn
-		_, err := conn.DeleteBucket(&s3.DeleteBucketInput{
+		config := testAccProvider.Meta().(*Config)
+		conn, err := config.computeS3conn(OS_REGION_NAME)
+		if err != nil {
+			return fmt.Errorf("Error creating OpenTelekomCloud s3 client: %s", err)
+		}
+		_, err = conn.DeleteBucket(&s3.DeleteBucketInput{
 			Bucket: aws.String(rs.Primary.ID),
 		})
 
@@ -964,7 +983,11 @@ func testAccCheckAWSS3DestroyBucket(n string) resource.TestCheckFunc {
 func testAccCheckAWSS3BucketPolicy(n string, policy string) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
 		rs, _ := s.RootModule().Resources[n]
-		conn := testAccProvider.Meta().(*Config).s3conn
+		config := testAccProvider.Meta().(*Config)
+		conn, err := config.computeS3conn(OS_REGION_NAME)
+		if err != nil {
+			return fmt.Errorf("Error creating OpenTelekomCloud s3 client: %s", err)
+		}
 
 		out, err := conn.GetBucketPolicy(&s3.GetBucketPolicyInput{
 			Bucket: aws.String(rs.Primary.ID),
@@ -1011,7 +1034,11 @@ func testAccCheckAWSS3BucketPolicy(n string, policy string) resource.TestCheckFu
 func testAccCheckAWSS3BucketWebsite(n string, indexDoc string, errorDoc string, redirectProtocol string, redirectTo string) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
 		rs, _ := s.RootModule().Resources[n]
-		conn := testAccProvider.Meta().(*Config).s3conn
+		config := testAccProvider.Meta().(*Config)
+		conn, err := config.computeS3conn(OS_REGION_NAME)
+		if err != nil {
+			return fmt.Errorf("Error creating OpenTelekomCloud s3 client: %s", err)
+		}
 
 		out, err := conn.GetBucketWebsite(&s3.GetBucketWebsiteInput{
 			Bucket: aws.String(rs.Primary.ID),
@@ -1067,7 +1094,11 @@ func testAccCheckAWSS3BucketWebsite(n string, indexDoc string, errorDoc string, 
 func testAccCheckAWSS3BucketWebsiteRoutingRules(n string, routingRules []*s3.RoutingRule) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
 		rs, _ := s.RootModule().Resources[n]
-		conn := testAccProvider.Meta().(*Config).s3conn
+		config := testAccProvider.Meta().(*Config)
+		conn, err := config.computeS3conn(OS_REGION_NAME)
+		if err != nil {
+			return fmt.Errorf("Error creating OpenTelekomCloud s3 client: %s", err)
+		}
 
 		out, err := conn.GetBucketWebsite(&s3.GetBucketWebsiteInput{
 			Bucket: aws.String(rs.Primary.ID),
@@ -1091,7 +1122,11 @@ func testAccCheckAWSS3BucketWebsiteRoutingRules(n string, routingRules []*s3.Rou
 func testAccCheckAWSS3BucketVersioning(n string, versioningStatus string) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
 		rs, _ := s.RootModule().Resources[n]
-		conn := testAccProvider.Meta().(*Config).s3conn
+		config := testAccProvider.Meta().(*Config)
+		conn, err := config.computeS3conn(OS_REGION_NAME)
+		if err != nil {
+			return fmt.Errorf("Error creating OpenTelekomCloud s3 client: %s", err)
+		}
 
 		out, err := conn.GetBucketVersioning(&s3.GetBucketVersioningInput{
 			Bucket: aws.String(rs.Primary.ID),
@@ -1118,7 +1153,11 @@ func testAccCheckAWSS3BucketVersioning(n string, versioningStatus string) resour
 func testAccCheckAWSS3BucketCors(n string, corsRules []*s3.CORSRule) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
 		rs, _ := s.RootModule().Resources[n]
-		conn := testAccProvider.Meta().(*Config).s3conn
+		config := testAccProvider.Meta().(*Config)
+		conn, err := config.computeS3conn(OS_REGION_NAME)
+		if err != nil {
+			return fmt.Errorf("Error creating OpenTelekomCloud s3 client: %s", err)
+		}
 
 		out, err := conn.GetBucketCors(&s3.GetBucketCorsInput{
 			Bucket: aws.String(rs.Primary.ID),
@@ -1139,7 +1178,11 @@ func testAccCheckAWSS3BucketCors(n string, corsRules []*s3.CORSRule) resource.Te
 func testAccCheckAWSS3RequestPayer(n, expectedPayer string) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
 		rs, _ := s.RootModule().Resources[n]
-		conn := testAccProvider.Meta().(*Config).s3conn
+		config := testAccProvider.Meta().(*Config)
+		conn, err := config.computeS3conn(OS_REGION_NAME)
+		if err != nil {
+			return fmt.Errorf("Error creating OpenTelekomCloud s3 client: %s", err)
+		}
 
 		out, err := conn.GetBucketRequestPayment(&s3.GetBucketRequestPaymentInput{
 			Bucket: aws.String(rs.Primary.ID),
@@ -1161,7 +1204,11 @@ func testAccCheckAWSS3RequestPayer(n, expectedPayer string) resource.TestCheckFu
 func testAccCheckAWSS3BucketLogging(n, b, p string) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
 		rs, _ := s.RootModule().Resources[n]
-		conn := testAccProvider.Meta().(*Config).s3conn
+		config := testAccProvider.Meta().(*Config)
+		conn, err := config.computeS3conn(OS_REGION_NAME)
+		if err != nil {
+			return fmt.Errorf("Error creating OpenTelekomCloud s3 client: %s", err)
+		}
 
 		out, err := conn.GetBucketLogging(&s3.GetBucketLoggingInput{
 			Bucket: aws.String(rs.Primary.ID),

@@ -130,7 +130,11 @@ func resourceAwsS3BucketObject() *schema.Resource {
 }
 
 func resourceAwsS3BucketObjectPut(d *schema.ResourceData, meta interface{}) error {
-	s3conn := meta.(*Config).s3conn
+	config := meta.(*Config)
+	s3conn, err := config.computeS3conn(GetRegion(d, config))
+	if err != nil {
+		return fmt.Errorf("Error creating OpenTelekomCloud s3 client: %s", err)
+	}
 
 	//restricted := false //meta.(*AWSClient).IsGovCloud() || meta.(*AWSClient).IsChinaCloud()
 
@@ -229,7 +233,11 @@ func resourceAwsS3BucketObjectPut(d *schema.ResourceData, meta interface{}) erro
 }
 
 func resourceAwsS3BucketObjectRead(d *schema.ResourceData, meta interface{}) error {
-	s3conn := meta.(*Config).s3conn
+	config := meta.(*Config)
+	s3conn, err := config.computeS3conn(GetRegion(d, config))
+	if err != nil {
+		return fmt.Errorf("Error creating OpenTelekomCloud s3 client: %s", err)
+	}
 
 	//restricted := false //meta.(*AWSClient).IsGovCloud() || meta.(*AWSClient).IsChinaCloud()
 
@@ -308,7 +316,11 @@ func resourceAwsS3BucketObjectRead(d *schema.ResourceData, meta interface{}) err
 }
 
 func resourceAwsS3BucketObjectDelete(d *schema.ResourceData, meta interface{}) error {
-	s3conn := meta.(*Config).s3conn
+	config := meta.(*Config)
+	s3conn, err := config.computeS3conn(GetRegion(d, config))
+	if err != nil {
+		return fmt.Errorf("Error creating OpenTelekomCloud s3 client: %s", err)
+	}
 
 	bucket := d.Get("bucket").(string)
 	key := d.Get("key").(string)

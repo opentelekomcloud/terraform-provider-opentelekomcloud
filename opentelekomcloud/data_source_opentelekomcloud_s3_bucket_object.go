@@ -107,7 +107,11 @@ func dataSourceAwsS3BucketObject() *schema.Resource {
 }
 
 func dataSourceAwsS3BucketObjectRead(d *schema.ResourceData, meta interface{}) error {
-	conn := meta.(*Config).s3conn
+	config := meta.(*Config)
+	conn, err := config.computeS3conn(GetRegion(d, config))
+	if err != nil {
+		return fmt.Errorf("Error creating OpenTelekomCloud s3 client: %s", err)
+	}
 
 	bucket := d.Get("bucket").(string)
 	key := d.Get("key").(string)
