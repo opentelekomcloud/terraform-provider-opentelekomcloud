@@ -83,7 +83,11 @@ func testAccCheckAWSS3BucketHasPolicy(n string, expectedPolicyText string) resou
 			return fmt.Errorf("No S3 Bucket ID is set")
 		}
 
-		conn := testAccProvider.Meta().(*Config).s3conn
+		config := testAccProvider.Meta().(*Config)
+		conn, err := config.computeS3conn(OS_REGION_NAME)
+		if err != nil {
+			return fmt.Errorf("Error creating OpenTelekomCloud s3 client: %s", err)
+		}
 
 		policy, err := conn.GetBucketPolicy(&s3.GetBucketPolicyInput{
 			Bucket: aws.String(rs.Primary.ID),

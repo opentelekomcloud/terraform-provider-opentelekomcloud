@@ -208,7 +208,11 @@ func testAccCheckAWSS3BucketObjectVersionIdDiffers(first, second *s3.GetObjectOu
 }
 
 func testAccCheckAWSS3BucketObjectDestroy(s *terraform.State) error {
-	s3conn := testAccProvider.Meta().(*Config).s3conn
+	config := testAccProvider.Meta().(*Config)
+	s3conn, err := config.computeS3conn(OS_REGION_NAME)
+	if err != nil {
+		return fmt.Errorf("Error creating OpenTelekomCloud s3 client: %s", err)
+	}
 
 	for _, rs := range s.RootModule().Resources {
 		if rs.Type != "opentelekomcloud_s3_bucket_object" {
@@ -239,7 +243,11 @@ func testAccCheckAWSS3BucketObjectExists(n string, obj *s3.GetObjectOutput) reso
 			return fmt.Errorf("No S3 Bucket Object ID is set")
 		}
 
-		s3conn := testAccProvider.Meta().(*Config).s3conn
+		config := testAccProvider.Meta().(*Config)
+		s3conn, err := config.computeS3conn(OS_REGION_NAME)
+		if err != nil {
+			return fmt.Errorf("Error creating OpenTelekomCloud s3 client: %s", err)
+		}
 		out, err := s3conn.GetObject(
 			&s3.GetObjectInput{
 				Bucket:  aws.String(rs.Primary.Attributes["bucket"]),
@@ -361,7 +369,11 @@ func TestAccAWSS3BucketObject_acl(t *testing.T) {
 func testAccCheckAWSS3BucketObjectAcl(n string, expectedPerms []string) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
 		rs, _ := s.RootModule().Resources[n]
-		s3conn := testAccProvider.Meta().(*Config).s3conn
+		config := testAccProvider.Meta().(*Config)
+		s3conn, err := config.computeS3conn(OS_REGION_NAME)
+		if err != nil {
+			return fmt.Errorf("Error creating OpenTelekomCloud s3 client: %s", err)
+		}
 
 		out, err := s3conn.GetObjectAcl(&s3.GetObjectAclInput{
 			Bucket: aws.String(rs.Primary.Attributes["bucket"]),
@@ -494,7 +506,11 @@ func TestResourceAWSS3BucketObjectStorageClass_validation(t *testing.T) {
 func testAccCheckAWSS3BucketObjectStorageClass(n, expectedClass string) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
 		rs, _ := s.RootModule().Resources[n]
-		s3conn := testAccProvider.Meta().(*Config).s3conn
+		config := testAccProvider.Meta().(*Config)
+		s3conn, err := config.computeS3conn(OS_REGION_NAME)
+		if err != nil {
+			return fmt.Errorf("Error creating OpenTelekomCloud s3 client: %s", err)
+		}
 
 		out, err := s3conn.HeadObject(&s3.HeadObjectInput{
 			Bucket: aws.String(rs.Primary.Attributes["bucket"]),
@@ -524,7 +540,11 @@ func testAccCheckAWSS3BucketObjectStorageClass(n, expectedClass string) resource
 func testAccCheckAWSS3BucketObjectSSE(n, expectedSSE string) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
 		rs, _ := s.RootModule().Resources[n]
-		s3conn := testAccProvider.Meta().(*Config).s3conn
+		config := testAccProvider.Meta().(*Config)
+		s3conn, err := config.computeS3conn(OS_REGION_NAME)
+		if err != nil {
+			return fmt.Errorf("Error creating OpenTelekomCloud s3 client: %s", err)
+		}
 
 		out, err := s3conn.HeadObject(&s3.HeadObjectInput{
 			Bucket: aws.String(rs.Primary.Attributes["bucket"]),

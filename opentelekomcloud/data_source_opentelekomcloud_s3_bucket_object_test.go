@@ -185,7 +185,11 @@ func testAccCheckAwsS3ObjectDataSourceExists(n string, obj *s3.GetObjectOutput) 
 			return fmt.Errorf("S3 object data source ID not set")
 		}
 
-		s3conn := testAccProvider.Meta().(*Config).s3conn
+		config := testAccProvider.Meta().(*Config)
+		s3conn, err := config.computeS3conn(OS_REGION_NAME)
+		if err != nil {
+			return fmt.Errorf("Error creating OpenTelekomCloud s3 client: %s", err)
+		}
 		out, err := s3conn.GetObject(
 			&s3.GetObjectInput{
 				Bucket: aws.String(rs.Primary.Attributes["bucket"]),

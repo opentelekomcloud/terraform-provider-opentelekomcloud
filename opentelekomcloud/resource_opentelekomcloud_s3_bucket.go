@@ -404,7 +404,11 @@ func resourceAwsS3Bucket() *schema.Resource {
 }
 
 func resourceAwsS3BucketCreate(d *schema.ResourceData, meta interface{}) error {
-	s3conn := meta.(*Config).s3conn
+	config := meta.(*Config)
+	s3conn, err := config.computeS3conn(GetRegion(d, config))
+	if err != nil {
+		return fmt.Errorf("Error creating OpenTelekomCloud s3 client: %s", err)
+	}
 
 	// Get the bucket and acl
 	var bucket string
@@ -447,7 +451,7 @@ func resourceAwsS3BucketCreate(d *schema.ResourceData, meta interface{}) error {
 		return fmt.Errorf("Error validating S3 bucket name: %s", err)
 	}
 
-	err := resource.Retry(5*time.Minute, func() *resource.RetryError {
+	err = resource.Retry(5*time.Minute, func() *resource.RetryError {
 		log.Printf("[DEBUG] Trying to create new S3 bucket: %q", bucket)
 		ret, err := s3conn.CreateBucket(req)
 		log.Printf("[DEBUG] Created new S3 bucket: %+v.\n", ret)
@@ -476,8 +480,11 @@ func resourceAwsS3BucketCreate(d *schema.ResourceData, meta interface{}) error {
 }
 
 func resourceAwsS3BucketUpdate(d *schema.ResourceData, meta interface{}) error {
-	s3conn := meta.(*Config).s3conn
-	//s3conn := meta.(*AWSClient).s3conn
+	config := meta.(*Config)
+	s3conn, err := config.computeS3conn(GetRegion(d, config))
+	if err != nil {
+		return fmt.Errorf("Error creating OpenTelekomCloud s3 client: %s", err)
+	}
 	if err := setTagsS3(s3conn, d); err != nil {
 		return fmt.Errorf("%q: %s", d.Get("bucket").(string), err)
 	}
@@ -545,9 +552,11 @@ func resourceAwsS3BucketUpdate(d *schema.ResourceData, meta interface{}) error {
 }
 
 func resourceAwsS3BucketRead(d *schema.ResourceData, meta interface{}) error {
-	s3conn := meta.(*Config).s3conn
-
-	var err error
+	config := meta.(*Config)
+	s3conn, err := config.computeS3conn(GetRegion(d, config))
+	if err != nil {
+		return fmt.Errorf("Error creating OpenTelekomCloud s3 client: %s", err)
+	}
 
 	_, err = retryOnAwsCode("NoSuchBucket", func() (interface{}, error) {
 		return s3conn.HeadBucket(&s3.HeadBucketInput{
@@ -1015,10 +1024,14 @@ func resourceAwsS3BucketRead(d *schema.ResourceData, meta interface{}) error {
 }
 
 func resourceAwsS3BucketDelete(d *schema.ResourceData, meta interface{}) error {
-	s3conn := meta.(*Config).s3conn
+	config := meta.(*Config)
+	s3conn, err := config.computeS3conn(GetRegion(d, config))
+	if err != nil {
+		return fmt.Errorf("Error creating OpenTelekomCloud s3 client: %s", err)
+	}
 
 	log.Printf("[DEBUG] S3 Delete Bucket: %s", d.Id())
-	_, err := s3conn.DeleteBucket(&s3.DeleteBucketInput{
+	_, err = s3conn.DeleteBucket(&s3.DeleteBucketInput{
 		Bucket: aws.String(d.Id()),
 	})
 	if err != nil {
