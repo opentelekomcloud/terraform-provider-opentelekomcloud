@@ -420,13 +420,6 @@
 			"tree": true
 		},
 		{
-			"checksumSHA1": "1K+xrZ1PBez190iGt5OnMtGdih4=",
-			"comment": "v1.8.6",
-			"path": "github.com/go-ini/ini",
-			"revision": "766e555c68dc8bda90d197ee8946c37519c19409",
-			"revisionTime": "2017-01-17T13:00:17Z"
-		},
-		{
 			"checksumSHA1": "TQ8kDcngYTatY8vUAPMc3xnALLg=",
 			"path": "github.com/gophercloud/gophercloud",
 			"revision": "f8ec1b3d8dea084885975d404872b37be20b3984",
@@ -591,30 +584,6 @@
 		{
 			"checksumSHA1": "p2ivHupXGBmyHkusnob2NsbsCQk=",
 			"path": "github.com/gophercloud/gophercloud/openstack/imageservice/v2/images",
-			"revision": "f8ec1b3d8dea084885975d404872b37be20b3984",
-			"revisionTime": "2017-10-04T00:41:52Z"
-		},
-		{
-			"checksumSHA1": "YqqqrMdOCKY2xwFkwxskkx8XtTQ=",
-			"path": "github.com/gophercloud/gophercloud/openstack/networking/v2/extensions/fwaas/firewalls",
-			"revision": "f8ec1b3d8dea084885975d404872b37be20b3984",
-			"revisionTime": "2017-10-04T00:41:52Z"
-		},
-		{
-			"checksumSHA1": "14ZhP0wE/WCL/6oujcML755AaH4=",
-			"path": "github.com/gophercloud/gophercloud/openstack/networking/v2/extensions/fwaas/policies",
-			"revision": "f8ec1b3d8dea084885975d404872b37be20b3984",
-			"revisionTime": "2017-10-04T00:41:52Z"
-		},
-		{
-			"checksumSHA1": "nHGhVRP69paJsebTRp4Q1cfQtag=",
-			"path": "github.com/gophercloud/gophercloud/openstack/networking/v2/extensions/fwaas/routerinsertion",
-			"revision": "f8ec1b3d8dea084885975d404872b37be20b3984",
-			"revisionTime": "2017-10-04T00:41:52Z"
-		},
-		{
-			"checksumSHA1": "sYET5A7WTyJ7dpuxR/VXYoReldw=",
-			"path": "github.com/gophercloud/gophercloud/openstack/networking/v2/extensions/fwaas/rules",
 			"revision": "f8ec1b3d8dea084885975d404872b37be20b3984",
 			"revisionTime": "2017-10-04T00:41:52Z"
 		},
@@ -1059,13 +1028,6 @@
 			"path": "github.com/jen20/awspolicyequivalence",
 			"revision": "3d48364a137a7847c1191b83740052dc7695878e",
 			"revisionTime": "2017-08-31T20:16:02Z"
-		},
-		{
-			"checksumSHA1": "0ZrwvB6KoGPj2PoDNSEJwxQ6Mog=",
-			"comment": "0.2.2-2-gc01cf91",
-			"path": "github.com/jmespath/go-jmespath",
-			"revision": "bd40a432e4c76585ef6b72d3fd96fb9b6dc7b68d",
-			"revisionTime": "2016-08-03T19:07:31Z"
 		},
 		{
 			"checksumSHA1": "guxbLo8KHHBeM0rzou4OTzzpDNs=",
