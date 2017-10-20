@@ -9,7 +9,7 @@ import (
 	"github.com/hashicorp/terraform/terraform"
 )
 
-// KNOWN problem (?, plan diff currently)
+// PASS with diff
 func TestAccLBV2Member_basic(t *testing.T) {
 	var member_1 pools.Member
 	var member_2 pools.Member

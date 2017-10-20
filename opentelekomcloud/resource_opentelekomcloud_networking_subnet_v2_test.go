@@ -65,29 +65,6 @@ func TestAccNetworkingV2Subnet_enableDHCP(t *testing.T) {
 	})
 }
 
-// KNOWN problem (enable_dhcp must be true, #3)
-/*
-func TestAccNetworkingV2Subnet_disableDHCP(t *testing.T) {
-	var subnet subnets.Subnet
-
-	resource.Test(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
-		CheckDestroy: testAccCheckNetworkingV2SubnetDestroy,
-		Steps: []resource.TestStep{
-			resource.TestStep{
-				Config: testAccNetworkingV2Subnet_disableDHCP,
-				Check: resource.ComposeTestCheckFunc(
-					testAccCheckNetworkingV2SubnetExists("opentelekomcloud_networking_subnet_v2.subnet_1", &subnet),
-					resource.TestCheckResourceAttr(
-						"opentelekomcloud_networking_subnet_v2.subnet_1", "enable_dhcp", "false"),
-				),
-			},
-		},
-	})
-}
-*/
-
 // PASS
 func TestAccNetworkingV2Subnet_noGateway(t *testing.T) {
 	var subnet subnets.Subnet

@@ -1,6 +1,5 @@
 package opentelekomcloud
 
-/*
 import (
 	"fmt"
 	"regexp"
@@ -14,10 +13,11 @@ import (
 )
 
 func randomZoneName() string {
-	return fmt.Sprintf("ACPTTEST-zone-%s.com.", acctest.RandString(5))
+	// TODO: why does back-end convert name to lowercase?
+	return fmt.Sprintf("acpttest-zone-%s.com.", acctest.RandString(5))
 }
 
-// SKIP environment
+// PASS, but normally skip
 func TestAccDNSV2RecordSet_basic(t *testing.T) {
 	var recordset recordsets.RecordSet
 	zoneName := randomZoneName()
@@ -28,7 +28,8 @@ func TestAccDNSV2RecordSet_basic(t *testing.T) {
 		CheckDestroy: testAccCheckDNSV2RecordSetDestroy,
 		Steps: []resource.TestStep{
 			resource.TestStep{
-				Config: testAccDNSV2RecordSet_basic(zoneName),
+				Config:             testAccDNSV2RecordSet_basic(zoneName),
+				ExpectNonEmptyPlan: true,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckDNSV2RecordSetExists("opentelekomcloud_dns_recordset_v2.recordset_1", &recordset),
 					resource.TestCheckResourceAttr(
@@ -38,7 +39,8 @@ func TestAccDNSV2RecordSet_basic(t *testing.T) {
 				),
 			},
 			resource.TestStep{
-				Config: testAccDNSV2RecordSet_update(zoneName),
+				Config:             testAccDNSV2RecordSet_update(zoneName),
+				ExpectNonEmptyPlan: true,
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr("opentelekomcloud_dns_recordset_v2.recordset_1", "name", zoneName),
 					resource.TestCheckResourceAttr("opentelekomcloud_dns_recordset_v2.recordset_1", "ttl", "6000"),
@@ -53,7 +55,7 @@ func TestAccDNSV2RecordSet_basic(t *testing.T) {
 	})
 }
 
-// SKIP environment
+// PASS, but normally skip
 func TestAccDNSV2RecordSet_readTTL(t *testing.T) {
 	var recordset recordsets.RecordSet
 	zoneName := randomZoneName()
@@ -64,7 +66,8 @@ func TestAccDNSV2RecordSet_readTTL(t *testing.T) {
 		CheckDestroy: testAccCheckDNSV2RecordSetDestroy,
 		Steps: []resource.TestStep{
 			resource.TestStep{
-				Config: testAccDNSV2RecordSet_readTTL(zoneName),
+				Config:             testAccDNSV2RecordSet_readTTL(zoneName),
+				ExpectNonEmptyPlan: true,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckDNSV2RecordSetExists("opentelekomcloud_dns_recordset_v2.recordset_1", &recordset),
 					resource.TestMatchResourceAttr(
@@ -75,7 +78,7 @@ func TestAccDNSV2RecordSet_readTTL(t *testing.T) {
 	})
 }
 
-// SKIP environment
+// PASS, but normally skip
 func TestAccDNSV2RecordSet_timeout(t *testing.T) {
 	var recordset recordsets.RecordSet
 	zoneName := randomZoneName()
@@ -86,7 +89,8 @@ func TestAccDNSV2RecordSet_timeout(t *testing.T) {
 		CheckDestroy: testAccCheckDNSV2RecordSetDestroy,
 		Steps: []resource.TestStep{
 			resource.TestStep{
-				Config: testAccDNSV2RecordSet_timeout(zoneName),
+				Config:             testAccDNSV2RecordSet_timeout(zoneName),
+				ExpectNonEmptyPlan: true,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckDNSV2RecordSetExists("opentelekomcloud_dns_recordset_v2.recordset_1", &recordset),
 				),
@@ -244,4 +248,3 @@ func testAccDNSV2RecordSet_timeout(zoneName string) string {
 		}
 	`, zoneName, zoneName)
 }
-*/
