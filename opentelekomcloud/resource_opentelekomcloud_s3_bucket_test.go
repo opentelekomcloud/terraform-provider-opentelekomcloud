@@ -18,6 +18,7 @@ import (
 
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/awserr"
+	//"github.com/aws/aws-sdk-go/service/ec2"
 	"github.com/aws/aws-sdk-go/service/s3"
 	"github.com/hashicorp/terraform/helper/schema"
 )
@@ -875,44 +876,6 @@ func testAccCheckAWSS3BucketDestroy(s *terraform.State) error {
 	return nil
 }
 
-func testAccCheckAWSS3BucketDestroyWithProviders(providers *[]*schema.Provider) resource.TestCheckFunc {
-	return func(s *terraform.State) error {
-		for _, provider := range *providers {
-			if provider.Meta() == nil {
-				continue
-			}
-			if err := testAccCheckAWSS3BucketDestroyWithProvider(s, provider); err != nil {
-				return err
-			}
-		}
-		return nil
-	}
-}
-
-func testAccCheckAWSS3BucketDestroyWithProvider(s *terraform.State, provider *schema.Provider) error {
-	config := testAccProvider.Meta().(*Config)
-	conn, err := config.computeS3conn(OS_REGION_NAME)
-	if err != nil {
-		return fmt.Errorf("Error creating OpenTelekomCloud s3 client: %s", err)
-	}
-
-	for _, rs := range s.RootModule().Resources {
-		if rs.Type != "opentelekomcloud_s3_bucket" {
-			continue
-		}
-		_, err := conn.DeleteBucket(&s3.DeleteBucketInput{
-			Bucket: aws.String(rs.Primary.ID),
-		})
-		if err != nil {
-			if awsErr, ok := err.(awserr.Error); ok && awsErr.Code() == "NoSuchBucket" {
-				return nil
-			}
-			return err
-		}
-	}
-	return nil
-}
-
 func testAccCheckAWSS3BucketExists(n string) resource.TestCheckFunc {
 	providers := []*schema.Provider{testAccProvider}
 	return testAccCheckAWSS3BucketExistsWithProviders(n, &providers)
@@ -1581,6 +1544,7 @@ resource "opentelekomcloud_s3_bucket" "log_bucket" {
 resource "opentelekomcloud_s3_bucket" "bucket" {
 	bucket = "tf-test-bucket-%d"
 	acl = "private"
+	force_destroy = "true"
 	logging {
 		target_bucket = "${opentelekomcloud_s3_bucket.log_bucket.id}"
 		target_prefix = "log/"
