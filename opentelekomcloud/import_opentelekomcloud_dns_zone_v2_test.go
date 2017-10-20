@@ -1,6 +1,5 @@
 package opentelekomcloud
 
-/*
 import (
 	"fmt"
 	"testing"
@@ -9,7 +8,7 @@ import (
 	"github.com/hashicorp/terraform/helper/resource"
 )
 
-// SKIP environment doesn't support?
+// PASS, but normally skip
 func TestAccDNSV2Zone_importBasic(t *testing.T) {
 	var zoneName = fmt.Sprintf("ACPTTEST%s.com.", acctest.RandString(5))
 	resourceName := "opentelekomcloud_dns_zone_v2.zone_1"
@@ -20,7 +19,8 @@ func TestAccDNSV2Zone_importBasic(t *testing.T) {
 		CheckDestroy: testAccCheckDNSV2ZoneDestroy,
 		Steps: []resource.TestStep{
 			resource.TestStep{
-				Config: testAccDNSV2Zone_basic(zoneName),
+				Config:             testAccDNSV2Zone_basic(zoneName),
+				ExpectNonEmptyPlan: true,
 			},
 
 			resource.TestStep{
@@ -31,4 +31,3 @@ func TestAccDNSV2Zone_importBasic(t *testing.T) {
 		},
 	})
 }
-*/

@@ -13,28 +13,77 @@ Requirements
 -	[Terraform](https://www.terraform.io/downloads.html) 0.10.x
 -	[Go](https://golang.org/doc/install) 1.8 (to build the provider plugin)
 
+
 Building The Provider
 ---------------------
 
-Clone repository to: `$GOPATH/src/github.com/$OWNER/terraform-provider-opentelekomcloud`
+Clone repository to: `$GOPATH/src/github.com/gator1/terraform-provider-opentelekomcloud`
 
 ```sh
-$ mkdir -p $GOPATH/src/github.com/$OWNER; cd $GOPATH/src/github.com/$OWNER
-$ git clone git@github.com:$OWNER/terraform-provider-opentelekomcloud
+$ go get github.com/gator1/terraform-provider-opentelekomcloud
 ```
 
 Enter the provider directory and build the provider
 
 ```sh
-$ cd $GOPATH/src/github.com/$OWNER/terraform-provider-opentelekomcloud
+$ cd $GOPATH/src/github.com/gator1/terraform-provider-opentelekomcloud
 $ make build
 ```
 
+## Exact steps on clean Ubuntu 16.04
+
+```sh
+# prerequisites are sudo privileges, unzip, make, wget and git.  Use apt install if missing.
+$ wget https://storage.googleapis.com/golang/go1.9.1.linux-amd64.tar.gz
+$ sudo tar -C /usr/local -xzf go1.9.1.linux-amd64.tar.gz
+$ export PATH=$PATH:/usr/local/go/bin # You should put in your .profile or .bashrc
+$ go version # to verify it runs and version #
+$ go get github.com/gator1/terraform-provider-opentelekomcloud
+$ cd ~/go/src/github.com/gator1/terraform-provider-opentelekomcloud/
+$ make build
+$ export PATH=$PATH:~/go/bin # You should put in your .profile or .bashrc
+$ wget https://releases.hashicorp.com/terraform/0.10.7/terraform_0.10.7_linux_amd64.zip
+$ unzip terraform_0.10.7_linux_amd64.zip
+$ mv terraform ~/go/bin
+$ terraform version # to verify it runs and version #
+$ vi test.tf # paste in Quick Start contents, fix authentication information
+$ terraform init
+$ terraform plan
+$ terraform apply # Should all work if everything is correct.
+
+```
+
+## Quick Start
+
+```hcl
+# Configure the OpenTelekomCloud Provider
+# This will work with a single defined/default network, otherwise you need to specify network
+# to fix errrors about multiple networks found.
+provider "opentelekomcloud" {
+  user_name   = "user"
+  tenant_name = "tenant"
+  domain_name = "domain"
+  password    = "pwd"
+  auth_url    = "https://iam.eu-de.otc.t-systems.com/v3"
+  region      = "eu-de"
+}
+
+# Create a web server
+resource "opentelekomcloud_compute_instance_v2" "test-server" {
+  name		  = "test-server"
+  image_name  = "Standard_CentOS_7_latest"
+  flavor_name = "s1.medium"
+}
+```
+
+### Full Example
+----------------------
+Please see full example at https://github.com/gator1/terraform-provider-opentelekomcloud/tree/master/examples, 
+you must fill in the required variables in variables.tf.
+
 Using the provider
 ----------------------
-Please see the documentation at [terraform.io](https://www.terraform.io/docs/providers/openstack/index.html).
-
-Or you can browse the documentation within this repo [here](https://github.com/$OWNER/terraform-provider-opentelekomcloud/tree/master/website/docs).
+Please see the documentation at [provider usage](website/docs/index.html.markdown).
 
 Developing the Provider
 ---------------------------

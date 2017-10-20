@@ -140,82 +140,6 @@ func TestAccComputeV2Instance_bootFromVolumeVolume(t *testing.T) {
 	})
 }
 
-// KNOWN problem (delete_on_termination=true) not working
-/*
-func TestAccComputeV2Instance_bootFromVolumeForceNew(t *testing.T) {
-	var instance1_1 servers.Server
-	var instance1_2 servers.Server
-
-	resource.Test(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
-		CheckDestroy: testAccCheckComputeV2InstanceDestroy,
-		Steps: []resource.TestStep{
-			resource.TestStep{
-				Config: testAccComputeV2Instance_bootFromVolumeForceNew_1,
-				Check: resource.ComposeTestCheckFunc(
-					testAccCheckComputeV2InstanceExists(
-						"opentelekomcloud_compute_instance_v2.instance_1", &instance1_1),
-				),
-			},
-			resource.TestStep{
-				Config: testAccComputeV2Instance_bootFromVolumeForceNew_2,
-				Check: resource.ComposeTestCheckFunc(
-					testAccCheckComputeV2InstanceExists(
-						"opentelekomcloud_compute_instance_v2.instance_1", &instance1_2),
-					testAccCheckComputeV2InstanceInstanceIDsDoNotMatch(&instance1_1, &instance1_2),
-				),
-			},
-		},
-	})
-}
-*/
-
-// KNOWN problem (image destination_type="local") not working
-/*
-func TestAccComputeV2Instance_blockDeviceNewVolume(t *testing.T) {
-	var instance servers.Server
-
-	resource.Test(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
-		CheckDestroy: testAccCheckComputeV2InstanceDestroy,
-		Steps: []resource.TestStep{
-			resource.TestStep{
-				Config: testAccComputeV2Instance_blockDeviceNewVolume,
-				Check: resource.ComposeTestCheckFunc(
-					testAccCheckComputeV2InstanceExists("opentelekomcloud_compute_instance_v2.instance_1", &instance),
-				),
-			},
-		},
-	})
-}
-*/
-
-// KNOWN problem (image destination_type="local") not working
-/*
-func TestAccComputeV2Instance_blockDeviceExistingVolume(t *testing.T) {
-	var instance servers.Server
-	var volume volumes.Volume
-
-	resource.Test(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
-		CheckDestroy: testAccCheckComputeV2InstanceDestroy,
-		Steps: []resource.TestStep{
-			resource.TestStep{
-				Config: testAccComputeV2Instance_blockDeviceExistingVolume,
-				Check: resource.ComposeTestCheckFunc(
-					testAccCheckComputeV2InstanceExists("opentelekomcloud_compute_instance_v2.instance_1", &instance),
-					testAccCheckBlockStorageV2VolumeExists(
-						"opentelekomcloud_blockstorage_volume_v2.volume_1", &volume),
-				),
-			},
-		},
-	})
-}
-*/
-
 // TODO: verify the personality really exists on the instance.
 func TestAccComputeV2Instance_personality(t *testing.T) {
 	var instance servers.Server
@@ -234,51 +158,6 @@ func TestAccComputeV2Instance_personality(t *testing.T) {
 		},
 	})
 }
-
-// KNOWN problem (image destination_type="local") not working
-/*
-func TestAccComputeV2Instance_multiEphemeral(t *testing.T) {
-	var instance servers.Server
-
-	resource.Test(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
-		CheckDestroy: testAccCheckComputeV2InstanceDestroy,
-		Steps: []resource.TestStep{
-			resource.TestStep{
-				Config: testAccComputeV2Instance_multiEphemeral,
-				Check: resource.ComposeTestCheckFunc(
-					testAccCheckComputeV2InstanceExists(
-						"opentelekomcloud_compute_instance_v2.instance_1", &instance),
-				),
-			},
-		},
-	})
-}
-*/
-
-// KNOWN problem (#18)
-/*
-func TestAccComputeV2Instance_accessIPv4(t *testing.T) {
-	var instance servers.Server
-
-	resource.Test(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
-		CheckDestroy: testAccCheckComputeV2InstanceDestroy,
-		Steps: []resource.TestStep{
-			resource.TestStep{
-				Config: testAccComputeV2Instance_accessIPv4,
-				Check: resource.ComposeTestCheckFunc(
-					testAccCheckComputeV2InstanceExists("opentelekomcloud_compute_instance_v2.instance_1", &instance),
-					resource.TestCheckResourceAttr(
-						"opentelekomcloud_compute_instance_v2.instance_1", "access_ip_v4", "192.168.1.100"),
-				),
-			},
-		},
-	})
-}
-*/
 
 func TestAccComputeV2Instance_changeFixedIP(t *testing.T) {
 	var instance1_1 servers.Server
@@ -362,26 +241,6 @@ func TestAccComputeV2Instance_metadataRemove(t *testing.T) {
 	})
 }
 
-// KNOWN problem (force_delete=true) not working
-/*
-func TestAccComputeV2Instance_forceDelete(t *testing.T) {
-	var instance servers.Server
-	resource.Test(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
-		CheckDestroy: testAccCheckComputeV2InstanceDestroy,
-		Steps: []resource.TestStep{
-			resource.TestStep{
-				Config: testAccComputeV2Instance_forceDelete,
-				Check: resource.ComposeTestCheckFunc(
-					testAccCheckComputeV2InstanceExists("opentelekomcloud_compute_instance_v2.instance_1", &instance),
-				),
-			},
-		},
-	})
-}
-*/
-
 func TestAccComputeV2Instance_timeout(t *testing.T) {
 	var instance servers.Server
 	resource.Test(t, resource.TestCase{
@@ -398,113 +257,6 @@ func TestAccComputeV2Instance_timeout(t *testing.T) {
 		},
 	})
 }
-
-// KNOWN problem (#18)
-/*
-func TestAccComputeV2Instance_networkNameToID(t *testing.T) {
-	var instance servers.Server
-	var network networks.Network
-	resource.Test(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
-		CheckDestroy: testAccCheckComputeV2InstanceDestroy,
-		Steps: []resource.TestStep{
-			resource.TestStep{
-				Config: testAccComputeV2Instance_networkNameToID,
-				Check: resource.ComposeTestCheckFunc(
-					testAccCheckComputeV2InstanceExists("opentelekomcloud_compute_instance_v2.instance_1", &instance),
-					testAccCheckNetworkingV2NetworkExists("opentelekomcloud_networking_network_v2.network_1", &network),
-					resource.TestCheckResourceAttrPtr(
-						"opentelekomcloud_compute_instance_v2.instance_1", "network.1.uuid", &network.ID),
-				),
-			},
-		},
-	})
-}
-*/
-
-// UNKNOWN problem (new test?)
-/*
-func TestAccComputeV2Instance_crazyNICs(t *testing.T) {
-	var instance servers.Server
-	var network_1 networks.Network
-	var network_2 networks.Network
-	var port_1 ports.Port
-	var port_2 ports.Port
-	var port_3 ports.Port
-	var port_4 ports.Port
-
-	resource.Test(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
-		CheckDestroy: testAccCheckComputeV2InstanceDestroy,
-		Steps: []resource.TestStep{
-			resource.TestStep{
-				Config: testAccComputeV2Instance_crazyNICs,
-				Check: resource.ComposeTestCheckFunc(
-					testAccCheckComputeV2InstanceExists("opentelekomcloud_compute_instance_v2.instance_1", &instance),
-					testAccCheckNetworkingV2NetworkExists(
-						"opentelekomcloud_networking_network_v2.network_1", &network_1),
-					testAccCheckNetworkingV2NetworkExists(
-						"opentelekomcloud_networking_network_v2.network_2", &network_2),
-					testAccCheckNetworkingV2PortExists(
-						"opentelekomcloud_networking_port_v2.port_1", &port_1),
-					testAccCheckNetworkingV2PortExists(
-						"opentelekomcloud_networking_port_v2.port_2", &port_2),
-					testAccCheckNetworkingV2PortExists(
-						"opentelekomcloud_networking_port_v2.port_3", &port_3),
-					testAccCheckNetworkingV2PortExists(
-						"opentelekomcloud_networking_port_v2.port_4", &port_4),
-					resource.TestCheckResourceAttrPtr(
-						"opentelekomcloud_compute_instance_v2.instance_1", "network.1.uuid", &network_1.ID),
-					resource.TestCheckResourceAttrPtr(
-						"opentelekomcloud_compute_instance_v2.instance_1", "network.2.uuid", &network_2.ID),
-					resource.TestCheckResourceAttrPtr(
-						"opentelekomcloud_compute_instance_v2.instance_1", "network.3.uuid", &network_1.ID),
-					resource.TestCheckResourceAttrPtr(
-						"opentelekomcloud_compute_instance_v2.instance_1", "network.4.uuid", &network_2.ID),
-					resource.TestCheckResourceAttrPtr(
-						"opentelekomcloud_compute_instance_v2.instance_1", "network.5.uuid", &network_1.ID),
-					resource.TestCheckResourceAttrPtr(
-						"opentelekomcloud_compute_instance_v2.instance_1", "network.6.uuid", &network_2.ID),
-					resource.TestCheckResourceAttr(
-						"opentelekomcloud_compute_instance_v2.instance_1", "network.1.name", "network_1"),
-					resource.TestCheckResourceAttr(
-						"opentelekomcloud_compute_instance_v2.instance_1", "network.2.name", "network_2"),
-					resource.TestCheckResourceAttr(
-						"opentelekomcloud_compute_instance_v2.instance_1", "network.3.name", "network_1"),
-					resource.TestCheckResourceAttr(
-						"opentelekomcloud_compute_instance_v2.instance_1", "network.4.name", "network_2"),
-					resource.TestCheckResourceAttr(
-						"opentelekomcloud_compute_instance_v2.instance_1", "network.5.name", "network_1"),
-					resource.TestCheckResourceAttr(
-						"opentelekomcloud_compute_instance_v2.instance_1", "network.6.name", "network_2"),
-					resource.TestCheckResourceAttr(
-						"opentelekomcloud_compute_instance_v2.instance_1", "network.7.name", "network_1"),
-					resource.TestCheckResourceAttr(
-						"opentelekomcloud_compute_instance_v2.instance_1", "network.8.name", "network_2"),
-					resource.TestCheckResourceAttr(
-						"opentelekomcloud_compute_instance_v2.instance_1", "network.1.fixed_ip_v4", "192.168.1.100"),
-					resource.TestCheckResourceAttr(
-						"opentelekomcloud_compute_instance_v2.instance_1", "network.2.fixed_ip_v4", "192.168.2.100"),
-					resource.TestCheckResourceAttr(
-						"opentelekomcloud_compute_instance_v2.instance_1", "network.3.fixed_ip_v4", "192.168.1.101"),
-					resource.TestCheckResourceAttr(
-						"opentelekomcloud_compute_instance_v2.instance_1", "network.4.fixed_ip_v4", "192.168.2.101"),
-					resource.TestCheckResourceAttrPtr(
-						"opentelekomcloud_compute_instance_v2.instance_1", "network.5.port", &port_1.ID),
-					resource.TestCheckResourceAttrPtr(
-						"opentelekomcloud_compute_instance_v2.instance_1", "network.6.port", &port_2.ID),
-					resource.TestCheckResourceAttrPtr(
-						"opentelekomcloud_compute_instance_v2.instance_1", "network.7.port", &port_3.ID),
-					resource.TestCheckResourceAttrPtr(
-						"opentelekomcloud_compute_instance_v2.instance_1", "network.8.port", &port_4.ID),
-				),
-			},
-		},
-	})
-}
-*/
 
 func testAccCheckComputeV2InstanceDestroy(s *terraform.State) error {
 	config := testAccProvider.Meta().(*Config)
