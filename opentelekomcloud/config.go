@@ -145,51 +145,54 @@ func (c *Config) LoadAndValidate() error {
 	c.OsClient = client
 	//fmt.Printf("[DEBUG] Region: %s.\n", c.Region)
 
-	// Setup AWS/S3 client/config information for Swift S3 buckets
-	log.Println("[INFO] Building Swift S3 auth structure")
-	creds, err := GetCredentials(c)
-	if err != nil {
-		return err
-	}
-	// Call Get to check for credential provider. If nothing found, we'll get an
-	// error, and we can present it nicely to the user
-	cp, err := creds.Get()
-	if err != nil {
-		if awsErr, ok := err.(awserr.Error); ok && awsErr.Code() == "NoCredentialProviders" {
-			return fmt.Errorf(`No valid credential sources found for Swift S3 Provider.
+	// Don't get AWS session unless we need it for Accesskey, SecretKey.
+	if c.AccessKey != "" && c.SecretKey != "" {
+		// Setup AWS/S3 client/config information for Swift S3 buckets
+		log.Println("[INFO] Building Swift S3 auth structure")
+		creds, err := GetCredentials(c)
+		if err != nil {
+			return err
+		}
+		// Call Get to check for credential provider. If nothing found, we'll get an
+		// error, and we can present it nicely to the user
+		cp, err := creds.Get()
+		if err != nil {
+			if awsErr, ok := err.(awserr.Error); ok && awsErr.Code() == "NoCredentialProviders" {
+				return fmt.Errorf(`No valid credential sources found for Swift S3 Provider.
   Please see https://terraform.io/docs/providers/aws/index.html for more information on
   providing credentials for the AWS Provider`)
+			}
+
+			return fmt.Errorf("Error loading credentials for Swift S3 Provider: %s", err)
 		}
 
-		return fmt.Errorf("Error loading credentials for Swift S3 Provider: %s", err)
-	}
+		log.Printf("[INFO] Swift S3 Auth provider used: %q", cp.ProviderName)
 
-	log.Printf("[INFO] Swift S3 Auth provider used: %q", cp.ProviderName)
-
-	awsConfig := &aws.Config{
-		Credentials: creds,
-		Region:      aws.String(c.Region),
-		//MaxRetries:       aws.Int(c.MaxRetries),
-		HTTPClient: cleanhttp.DefaultClient(),
-		//S3ForcePathStyle: aws.Bool(c.S3ForcePathStyle),
-	}
-
-	if osDebug {
-		awsConfig.LogLevel = aws.LogLevel(aws.LogDebugWithHTTPBody | aws.LogDebugWithRequestRetries | aws.LogDebugWithRequestErrors)
-		awsConfig.Logger = awsLogger{}
-	}
-
-	if c.Insecure {
-		transport := awsConfig.HTTPClient.Transport.(*http.Transport)
-		transport.TLSClientConfig = &tls.Config{
-			InsecureSkipVerify: true,
+		awsConfig := &aws.Config{
+			Credentials: creds,
+			Region:      aws.String(c.Region),
+			//MaxRetries:       aws.Int(c.MaxRetries),
+			HTTPClient: cleanhttp.DefaultClient(),
+			//S3ForcePathStyle: aws.Bool(c.S3ForcePathStyle),
 		}
-	}
 
-	// Set up base session for AWS/Swift S3
-	c.s3sess, err = session.NewSession(awsConfig)
-	if err != nil {
-		return errwrap.Wrapf("Error creating Swift S3 session: {{err}}", err)
+		if osDebug {
+			awsConfig.LogLevel = aws.LogLevel(aws.LogDebugWithHTTPBody | aws.LogDebugWithRequestRetries | aws.LogDebugWithRequestErrors)
+			awsConfig.Logger = awsLogger{}
+		}
+
+		if c.Insecure {
+			transport := awsConfig.HTTPClient.Transport.(*http.Transport)
+			transport.TLSClientConfig = &tls.Config{
+				InsecureSkipVerify: true,
+			}
+		}
+
+		// Set up base session for AWS/Swift S3
+		c.s3sess, err = session.NewSession(awsConfig)
+		if err != nil {
+			return errwrap.Wrapf("Error creating Swift S3 session: {{err}}", err)
+		}
 	}
 
 	return nil
@@ -219,6 +222,10 @@ func (c *Config) determineRegion(region string) string {
 }
 
 func (c *Config) computeS3conn(region string) (*s3.S3, error) {
+	if c.s3sess == nil {
+		return nil, fmt.Errorf("Missing credentials for Swift S3 Provider, need access_key and secret_key values for provider.")
+	}
+
 	client, err := openstack.NewImageServiceV2(c.OsClient, gophercloud.EndpointOpts{
 		Region:       c.determineRegion(region),
 		Availability: c.getEndpointType(),
