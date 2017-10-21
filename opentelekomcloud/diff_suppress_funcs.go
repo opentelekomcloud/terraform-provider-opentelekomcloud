@@ -7,6 +7,7 @@ import (
 	"net/url"
 	"strings"
 
+	//"fmt"
 	"github.com/hashicorp/terraform/helper/schema"
 	"github.com/jen20/awspolicyequivalence"
 )
@@ -23,6 +24,15 @@ func suppressEquivalentAwsPolicyDiffs(k, old, new string, d *schema.ResourceData
 func suppressEquivalentReplicationConfigurations(k, old, new string, d *schema.ResourceData) bool {
 	// UNDONE: write this function
 	return true
+}
+
+func suppressComputedFixedWhenFloatingIp(k, old, new string, d *schema.ResourceData) bool {
+	//fmt.Printf("suppressComputedFixedWhenFloatingIp: k=%s, old=%s, new=%s, d=%+v.\n", k, old, new, d)
+	//return true
+	if v, ok := d.GetOk("floating_ip"); ok && v != "" {
+		return new == "" || old == new
+	}
+	return false
 }
 
 // Suppresses minor version changes to the db_instance engine_version attribute

@@ -40,9 +40,10 @@ func resourceComputeFloatingIPAssociateV2() *schema.Resource {
 				ForceNew: true,
 			},
 			"fixed_ip": &schema.Schema{
-				Type:     schema.TypeString,
-				Optional: true,
-				ForceNew: true,
+				Type:             schema.TypeString,
+				Optional:         true,
+				ForceNew:         true,
+				DiffSuppressFunc: suppressComputedFixedWhenFloatingIp,
 			},
 		},
 	}
@@ -106,7 +107,7 @@ func resourceComputeFloatingIPAssociateV2Read(d *schema.ResourceData, meta inter
 	var exists bool
 	if networkEnabled {
 		log.Printf("[DEBUG] Checking for Floating IP existence via Network API")
-		exists, err = resourceComputeFloatingIPAssociateV2NetworkExists(networkClient, floatingIP)
+		exists, fixedIP, err = resourceComputeFloatingIPAssociateV2NetworkExists(networkClient, floatingIP)
 	} else {
 		log.Printf("[DEBUG] Checking for Floating IP existence via Compute API")
 		exists, err = resourceComputeFloatingIPAssociateV2ComputeExists(computeClient, floatingIP)
@@ -128,12 +129,16 @@ func resourceComputeFloatingIPAssociateV2Read(d *schema.ResourceData, meta inter
 		}
 	}
 
+	fmt.Printf("Looking for fixedIP=%s, floatingIP=%s.\n", fixedIP, floatingIP)
 	// Finally, check and see if the floating ip is still associated with the instance.
 	var associated bool
 	for _, networkAddresses := range instance.Addresses {
 		for _, element := range networkAddresses.([]interface{}) {
 			address := element.(map[string]interface{})
-			if address["OS-EXT-IPS:type"] == "floating" && address["addr"] == floatingIP {
+			fmt.Printf("address=%+v.\n", address)
+			if (address["OS-EXT-IPS:type"] == "floating" && address["addr"] == floatingIP) ||
+				(address["OS-EXT-IPS:type"] == "fixed" && address["addr"] == fixedIP) {
+				fmt.Printf("associated=true.\n")
 				associated = true
 			}
 		}
@@ -148,6 +153,8 @@ func resourceComputeFloatingIPAssociateV2Read(d *schema.ResourceData, meta inter
 	d.Set("instance_id", instanceId)
 	d.Set("fixed_ip", fixedIP)
 	d.Set("region", GetRegion(d, config))
+
+	fmt.Printf("resourceComputeFloatingIPAssociateV2Read=%+v.\n", d)
 
 	return nil
 }
@@ -188,29 +195,29 @@ func parseComputeFloatingIPAssociateId(id string) (string, string, string, error
 	return floatingIP, instanceId, fixedIP, nil
 }
 
-func resourceComputeFloatingIPAssociateV2NetworkExists(networkClient *gophercloud.ServiceClient, floatingIP string) (bool, error) {
+func resourceComputeFloatingIPAssociateV2NetworkExists(networkClient *gophercloud.ServiceClient, floatingIP string) (bool, string, error) {
 	listOpts := nfloatingips.ListOpts{
 		FloatingIP: floatingIP,
 	}
 	allPages, err := nfloatingips.List(networkClient, listOpts).AllPages()
 	if err != nil {
-		return false, err
+		return false, "", err
 	}
 
 	allFips, err := nfloatingips.ExtractFloatingIPs(allPages)
 	if err != nil {
-		return false, err
+		return false, "", err
 	}
 
 	if len(allFips) > 1 {
-		return false, fmt.Errorf("There was a problem retrieving the floating IP")
+		return false, "", fmt.Errorf("There was a problem retrieving the floating IP")
 	}
 
 	if len(allFips) == 0 {
-		return false, nil
+		return false, "", nil
 	}
 
-	return true, nil
+	return true, allFips[0].FixedIP, nil
 }
 
 func resourceComputeFloatingIPAssociateV2ComputeExists(computeClient *gophercloud.ServiceClient, floatingIP string) (bool, error) {
