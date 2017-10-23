@@ -6,7 +6,7 @@ import (
 	"github.com/hashicorp/terraform/helper/resource"
 )
 
-// FAIL, dangling resource
+// PASS
 func TestAccComputeV2FloatingIP_importBasic(t *testing.T) {
 	resourceName := "opentelekomcloud_compute_floatingip_v2.fip_1"
 
