@@ -21,14 +21,8 @@ func suppressEquivalentAwsPolicyDiffs(k, old, new string, d *schema.ResourceData
 	return equivalent
 }
 
-func suppressEquivalentReplicationConfigurations(k, old, new string, d *schema.ResourceData) bool {
-	// UNDONE: write this function
-	return true
-}
-
+// Suppress changes if we get a fixed ip when not expecting one, if we have a floating ip (generates fixed ip).
 func suppressComputedFixedWhenFloatingIp(k, old, new string, d *schema.ResourceData) bool {
-	//fmt.Printf("suppressComputedFixedWhenFloatingIp: k=%s, old=%s, new=%s, d=%+v.\n", k, old, new, d)
-	//return true
 	if v, ok := d.GetOk("floating_ip"); ok && v != "" {
 		return new == "" || old == new
 	}
