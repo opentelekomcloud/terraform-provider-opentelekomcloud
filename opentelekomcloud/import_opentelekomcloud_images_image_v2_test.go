@@ -17,7 +17,6 @@ func TestAccImagesImageV2_importBasic(t *testing.T) {
 		Steps: []resource.TestStep{
 			resource.TestStep{
 				Config: testAccImagesImageV2_basic,
-				//ExpectNonEmptyPlan: true,
 			},
 
 			resource.TestStep{

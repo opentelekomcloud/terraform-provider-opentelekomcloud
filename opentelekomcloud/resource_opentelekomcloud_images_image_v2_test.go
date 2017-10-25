@@ -21,7 +21,6 @@ func TestAccImagesImageV2_basic(t *testing.T) {
 		Steps: []resource.TestStep{
 			resource.TestStep{
 				Config: testAccImagesImageV2_basic,
-				//ExpectNonEmptyPlan: true,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckImagesImageV2Exists("opentelekomcloud_images_image_v2.image_1", &image),
 					resource.TestCheckResourceAttr(
@@ -49,7 +48,6 @@ func TestAccImagesImageV2_name(t *testing.T) {
 		Steps: []resource.TestStep{
 			resource.TestStep{
 				Config: testAccImagesImageV2_name_1,
-				//ExpectNonEmptyPlan: true,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckImagesImageV2Exists("opentelekomcloud_images_image_v2.image_1", &image),
 					resource.TestCheckResourceAttr(
@@ -58,7 +56,6 @@ func TestAccImagesImageV2_name(t *testing.T) {
 			},
 			resource.TestStep{
 				Config: testAccImagesImageV2_name_2,
-				//ExpectNonEmptyPlan: true,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckImagesImageV2Exists("opentelekomcloud_images_image_v2.image_1", &image),
 					resource.TestCheckResourceAttr(
@@ -80,7 +77,6 @@ func TestAccImagesImageV2_tags(t *testing.T) {
 		Steps: []resource.TestStep{
 			resource.TestStep{
 				Config: testAccImagesImageV2_tags_1,
-				//ExpectNonEmptyPlan: true,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckImagesImageV2Exists("opentelekomcloud_images_image_v2.image_1", &image),
 					testAccCheckImagesImageV2HasTag("opentelekomcloud_images_image_v2.image_1", "foo"),
@@ -90,7 +86,6 @@ func TestAccImagesImageV2_tags(t *testing.T) {
 			},
 			resource.TestStep{
 				Config: testAccImagesImageV2_tags_2,
-				//ExpectNonEmptyPlan: true,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckImagesImageV2Exists("opentelekomcloud_images_image_v2.image_1", &image),
 					testAccCheckImagesImageV2HasTag("opentelekomcloud_images_image_v2.image_1", "foo"),
@@ -101,7 +96,6 @@ func TestAccImagesImageV2_tags(t *testing.T) {
 			},
 			resource.TestStep{
 				Config: testAccImagesImageV2_tags_3,
-				//ExpectNonEmptyPlan: true,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckImagesImageV2Exists("opentelekomcloud_images_image_v2.image_1", &image),
 					testAccCheckImagesImageV2HasTag("opentelekomcloud_images_image_v2.image_1", "foo"),
@@ -126,7 +120,6 @@ func TestAccImagesImageV2_visibility(t *testing.T) {
 		Steps: []resource.TestStep{
 			resource.TestStep{
 				Config: testAccImagesImageV2_visibility_1,
-				//ExpectNonEmptyPlan: true,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckImagesImageV2Exists("opentelekomcloud_images_image_v2.image_1", &image),
 					resource.TestCheckResourceAttr(
@@ -135,7 +128,6 @@ func TestAccImagesImageV2_visibility(t *testing.T) {
 			},
 			resource.TestStep{
 				Config: testAccImagesImageV2_visibility_2,
-				//ExpectNonEmptyPlan: true,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckImagesImageV2Exists("opentelekomcloud_images_image_v2.image_1", &image),
 					resource.TestCheckResourceAttr(
@@ -156,7 +148,6 @@ func TestAccImagesImageV2_timeout(t *testing.T) {
 		Steps: []resource.TestStep{
 			resource.TestStep{
 				Config: testAccImagesImageV2_timeout,
-				//ExpectNonEmptyPlan: true,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckImagesImageV2Exists("opentelekomcloud_images_image_v2.image_1", &image),
 				),
