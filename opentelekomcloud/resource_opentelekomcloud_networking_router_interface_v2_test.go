@@ -25,8 +25,8 @@ func TestAccNetworkingV2RouterInterface_basic_subnet(t *testing.T) {
 		CheckDestroy: testAccCheckNetworkingV2RouterInterfaceDestroy,
 		Steps: []resource.TestStep{
 			resource.TestStep{
-				Config:             testAccNetworkingV2RouterInterface_basic_subnet,
-				ExpectNonEmptyPlan: true,
+				Config: testAccNetworkingV2RouterInterface_basic_subnet,
+				//ExpectNonEmptyPlan: true,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckNetworkingV2NetworkExists("opentelekomcloud_networking_network_v2.network_1", &network),
 					testAccCheckNetworkingV2SubnetExists("opentelekomcloud_networking_subnet_v2.subnet_1", &subnet),
@@ -51,8 +51,8 @@ func TestAccNetworkingV2RouterInterface_basic_port(t *testing.T) {
 		CheckDestroy: testAccCheckNetworkingV2RouterInterfaceDestroy,
 		Steps: []resource.TestStep{
 			resource.TestStep{
-				Config:             testAccNetworkingV2RouterInterface_basic_port,
-				ExpectNonEmptyPlan: true,
+				Config: testAccNetworkingV2RouterInterface_basic_port,
+				//ExpectNonEmptyPlan: true,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckNetworkingV2NetworkExists("opentelekomcloud_networking_network_v2.network_1", &network),
 					testAccCheckNetworkingV2SubnetExists("opentelekomcloud_networking_subnet_v2.subnet_1", &subnet),
@@ -77,8 +77,8 @@ func TestAccNetworkingV2RouterInterface_timeout(t *testing.T) {
 		CheckDestroy: testAccCheckNetworkingV2RouterInterfaceDestroy,
 		Steps: []resource.TestStep{
 			resource.TestStep{
-				Config:             testAccNetworkingV2RouterInterface_timeout,
-				ExpectNonEmptyPlan: true,
+				Config: testAccNetworkingV2RouterInterface_timeout,
+				//ExpectNonEmptyPlan: true,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckNetworkingV2NetworkExists("opentelekomcloud_networking_network_v2.network_1", &network),
 					testAccCheckNetworkingV2SubnetExists("opentelekomcloud_networking_subnet_v2.subnet_1", &subnet),

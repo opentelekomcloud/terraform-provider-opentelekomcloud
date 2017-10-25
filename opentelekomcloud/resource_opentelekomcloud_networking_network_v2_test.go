@@ -31,8 +31,8 @@ func TestAccNetworkingV2Network_basic(t *testing.T) {
 				),
 			},
 			resource.TestStep{
-				Config:             testAccNetworkingV2Network_update,
-				ExpectNonEmptyPlan: true,
+				Config: testAccNetworkingV2Network_update,
+				//ExpectNonEmptyPlan: true,
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr(
 						"opentelekomcloud_networking_network_v2.network_1", "name", "network_2"),
@@ -54,8 +54,8 @@ func TestAccNetworkingV2Network_netstack(t *testing.T) {
 		CheckDestroy: testAccCheckNetworkingV2NetworkDestroy,
 		Steps: []resource.TestStep{
 			resource.TestStep{
-				Config:             testAccNetworkingV2Network_netstack,
-				ExpectNonEmptyPlan: true,
+				Config: testAccNetworkingV2Network_netstack,
+				//ExpectNonEmptyPlan: true,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckNetworkingV2NetworkExists("opentelekomcloud_networking_network_v2.network_1", &network),
 					testAccCheckNetworkingV2SubnetExists("opentelekomcloud_networking_subnet_v2.subnet_1", &subnet),
@@ -174,7 +174,8 @@ resource "opentelekomcloud_networking_network_v2" "network_1" {
 const testAccNetworkingV2Network_update = `
 resource "opentelekomcloud_networking_network_v2" "network_1" {
   name = "network_2"
-  admin_state_up = "false"
+  # Can't do this to a network on OTC
+  #admin_state_up = "false"
 }
 `
 

@@ -96,11 +96,12 @@ func resourceImagesImageV2() *schema.Resource {
 			},
 
 			"min_disk_gb": &schema.Schema{
-				Type:         schema.TypeInt,
-				Optional:     true,
-				ForceNew:     true,
-				ValidateFunc: validatePositiveInt,
-				Default:      0,
+				Type:             schema.TypeInt,
+				Optional:         true,
+				ForceNew:         true,
+				ValidateFunc:     validatePositiveInt,
+				Default:          0,
+				DiffSuppressFunc: suppressMinDisk,
 			},
 
 			"min_ram_mb": &schema.Schema{
