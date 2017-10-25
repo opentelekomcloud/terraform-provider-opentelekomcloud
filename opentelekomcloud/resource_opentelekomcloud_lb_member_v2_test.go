@@ -21,7 +21,7 @@ func TestAccLBV2Member_basic(t *testing.T) {
 		Steps: []resource.TestStep{
 			resource.TestStep{
 				Config:             TestAccLBV2MemberConfig_basic,
-				ExpectNonEmptyPlan: true,
+				ExpectNonEmptyPlan: true, // Because admin_state_up remains false, unfinished elb?
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckLBV2MemberExists("opentelekomcloud_lb_member_v2.member_1", &member_1),
 					testAccCheckLBV2MemberExists("opentelekomcloud_lb_member_v2.member_2", &member_2),
@@ -29,7 +29,7 @@ func TestAccLBV2Member_basic(t *testing.T) {
 			},
 			resource.TestStep{
 				Config:             TestAccLBV2MemberConfig_update,
-				ExpectNonEmptyPlan: true,
+				ExpectNonEmptyPlan: true, // Because admin_state_up remains false, unfinished elb?
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr("opentelekomcloud_lb_member_v2.member_1", "weight", "10"),
 					resource.TestCheckResourceAttr("opentelekomcloud_lb_member_v2.member_2", "weight", "15"),

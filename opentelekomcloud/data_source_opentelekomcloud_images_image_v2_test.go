@@ -15,12 +15,12 @@ func TestAccOpenTelekomCloudImagesV2ImageDataSource_basic(t *testing.T) {
 		Providers: testAccProviders,
 		Steps: []resource.TestStep{
 			resource.TestStep{
-				Config:             testAccOpenTelekomCloudImagesV2ImageDataSource_cirros,
-				ExpectNonEmptyPlan: true,
+				Config: testAccOpenTelekomCloudImagesV2ImageDataSource_cirros,
+				//ExpectNonEmptyPlan: true,
 			},
 			resource.TestStep{
-				Config:             testAccOpenTelekomCloudImagesV2ImageDataSource_basic,
-				ExpectNonEmptyPlan: true,
+				Config: testAccOpenTelekomCloudImagesV2ImageDataSource_basic,
+				//ExpectNonEmptyPlan: true,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckImagesV2DataSourceID("data.opentelekomcloud_images_image_v2.image_1"),
 					resource.TestCheckResourceAttr(
@@ -50,33 +50,33 @@ func TestAccOpenTelekomCloudImagesV2ImageDataSource_testQueries(t *testing.T) {
 		Providers: testAccProviders,
 		Steps: []resource.TestStep{
 			resource.TestStep{
-				Config:             testAccOpenTelekomCloudImagesV2ImageDataSource_cirros,
-				ExpectNonEmptyPlan: true,
+				Config: testAccOpenTelekomCloudImagesV2ImageDataSource_cirros,
+				//ExpectNonEmptyPlan: true,
 			},
 			resource.TestStep{
-				Config:             testAccOpenTelekomCloudImagesV2ImageDataSource_queryTag,
-				ExpectNonEmptyPlan: true,
+				Config: testAccOpenTelekomCloudImagesV2ImageDataSource_queryTag,
+				//ExpectNonEmptyPlan: true,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckImagesV2DataSourceID("data.opentelekomcloud_images_image_v2.image_1"),
 				),
 			},
 			resource.TestStep{
-				Config:             testAccOpenTelekomCloudImagesV2ImageDataSource_querySizeMin,
-				ExpectNonEmptyPlan: true,
+				Config: testAccOpenTelekomCloudImagesV2ImageDataSource_querySizeMin,
+				//ExpectNonEmptyPlan: true,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckImagesV2DataSourceID("data.opentelekomcloud_images_image_v2.image_1"),
 				),
 			},
 			resource.TestStep{
-				Config:             testAccOpenTelekomCloudImagesV2ImageDataSource_querySizeMax,
-				ExpectNonEmptyPlan: true,
+				Config: testAccOpenTelekomCloudImagesV2ImageDataSource_querySizeMax,
+				//ExpectNonEmptyPlan: true,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckImagesV2DataSourceID("data.opentelekomcloud_images_image_v2.image_1"),
 				),
 			},
 			resource.TestStep{
-				Config:             testAccOpenTelekomCloudImagesV2ImageDataSource_cirros,
-				ExpectNonEmptyPlan: true,
+				Config: testAccOpenTelekomCloudImagesV2ImageDataSource_cirros,
+				//ExpectNonEmptyPlan: true,
 			},
 		},
 	})

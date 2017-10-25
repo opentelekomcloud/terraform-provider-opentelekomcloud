@@ -552,7 +552,7 @@ func TestAccAWSS3Bucket_Cors(t *testing.T) {
 					),
 					updateBucketCors("opentelekomcloud_s3_bucket.bucket"),
 				),
-				ExpectNonEmptyPlan: true,
+				ExpectNonEmptyPlan: true, // TODO: No diff in real life, so maybe a timing problem?
 			},
 			{
 				Config: testAccAWSS3BucketConfigWithCORS(rInt),
