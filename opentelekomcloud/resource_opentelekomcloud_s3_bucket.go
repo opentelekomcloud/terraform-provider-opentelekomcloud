@@ -1617,7 +1617,7 @@ func resourceAwsS3BucketLifecycleUpdate(s3conn *s3.S3, d *schema.ResourceData) e
 
 	lifecycleRules := d.Get("lifecycle_rule").([]interface{})
 
-	fmt.Printf("lifecycleRules=%+v.\n", lifecycleRules)
+	//fmt.Printf("lifecycleRules=%+v.\n", lifecycleRules)
 	if len(lifecycleRules) == 0 {
 		i := &s3.DeleteBucketLifecycleInput{
 			Bucket: aws.String(bucket),
@@ -1754,14 +1754,14 @@ func resourceAwsS3BucketLifecycleUpdate(s3conn *s3.S3, d *schema.ResourceData) e
 		rules = append(rules, rule)
 	}
 
-	fmt.Printf("Rules=%+v.\n", rules)
+	//fmt.Printf("Rules=%+v.\n", rules)
 	i := &s3.PutBucketLifecycleConfigurationInput{
 		Bucket: aws.String(bucket),
 		LifecycleConfiguration: &s3.BucketLifecycleConfiguration{
 			Rules: rules,
 		},
 	}
-	fmt.Printf("PutBucketLifecycleConfigurationInput=%+v.\n", i)
+	//fmt.Printf("PutBucketLifecycleConfigurationInput=%+v.\n", i)
 
 	err := resource.Retry(1*time.Minute, func() *resource.RetryError {
 		if _, err := s3conn.PutBucketLifecycleConfiguration(i); err != nil {
