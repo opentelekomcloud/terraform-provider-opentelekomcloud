@@ -129,16 +129,13 @@ func resourceComputeFloatingIPAssociateV2Read(d *schema.ResourceData, meta inter
 		}
 	}
 
-	//fmt.Printf("Looking for fixedIP=%s, floatingIP=%s.\n", fixedIP, floatingIP)
 	// Finally, check and see if the floating ip is still associated with the instance.
 	var associated bool
 	for _, networkAddresses := range instance.Addresses {
 		for _, element := range networkAddresses.([]interface{}) {
 			address := element.(map[string]interface{})
-			fmt.Printf("address=%+v.\n", address)
 			if (address["OS-EXT-IPS:type"] == "floating" && address["addr"] == floatingIP) ||
 				(address["OS-EXT-IPS:type"] == "fixed" && address["addr"] == fixedIP) {
-				//fmt.Printf("associated=true.\n")
 				associated = true
 			}
 		}
@@ -153,8 +150,6 @@ func resourceComputeFloatingIPAssociateV2Read(d *schema.ResourceData, meta inter
 	d.Set("instance_id", instanceId)
 	d.Set("fixed_ip", fixedIP)
 	d.Set("region", GetRegion(d, config))
-
-	//fmt.Printf("resourceComputeFloatingIPAssociateV2Read=%+v.\n", d)
 
 	return nil
 }

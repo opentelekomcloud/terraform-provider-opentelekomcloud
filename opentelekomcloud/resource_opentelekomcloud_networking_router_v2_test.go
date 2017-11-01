@@ -20,15 +20,13 @@ func TestAccNetworkingV2Router_basic(t *testing.T) {
 		CheckDestroy: testAccCheckNetworkingV2RouterDestroy,
 		Steps: []resource.TestStep{
 			resource.TestStep{
-				Config:             testAccNetworkingV2Router_basic,
-				ExpectNonEmptyPlan: true,
+				Config: testAccNetworkingV2Router_basic,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckNetworkingV2RouterExists("opentelekomcloud_networking_router_v2.router_1", &router),
 				),
 			},
 			resource.TestStep{
-				Config:             testAccNetworkingV2Router_update,
-				ExpectNonEmptyPlan: true,
+				Config: testAccNetworkingV2Router_update,
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr(
 						"opentelekomcloud_networking_router_v2.router_1", "name", "router_2"),
@@ -48,8 +46,7 @@ func TestAccNetworkingV2Router_update_external_gw(t *testing.T) {
 		CheckDestroy: testAccCheckNetworkingV2RouterDestroy,
 		Steps: []resource.TestStep{
 			resource.TestStep{
-				Config:             testAccNetworkingV2Router_update_external_gw_1,
-				ExpectNonEmptyPlan: true,
+				Config: testAccNetworkingV2Router_update_external_gw_1,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckNetworkingV2RouterExists("opentelekomcloud_networking_router_v2.router_1", &router),
 				),
@@ -75,8 +72,7 @@ func TestAccNetworkingV2Router_timeout(t *testing.T) {
 		CheckDestroy: testAccCheckNetworkingV2RouterDestroy,
 		Steps: []resource.TestStep{
 			resource.TestStep{
-				Config:             testAccNetworkingV2Router_timeout,
-				ExpectNonEmptyPlan: true,
+				Config: testAccNetworkingV2Router_timeout,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckNetworkingV2RouterExists("opentelekomcloud_networking_router_v2.router_1", &router),
 				),

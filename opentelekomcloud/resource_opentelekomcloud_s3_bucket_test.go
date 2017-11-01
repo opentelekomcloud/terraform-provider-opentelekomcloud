@@ -552,7 +552,7 @@ func TestAccAWSS3Bucket_Cors(t *testing.T) {
 					),
 					updateBucketCors("opentelekomcloud_s3_bucket.bucket"),
 				),
-				ExpectNonEmptyPlan: true,
+				ExpectNonEmptyPlan: true, // TODO: No diff in real life, so maybe a timing problem?
 			},
 			{
 				Config: testAccAWSS3BucketConfigWithCORS(rInt),
@@ -598,7 +598,6 @@ func TestAccAWSS3Bucket_Logging(t *testing.T) {
 
 // FAIL: MalformedXML, gets Internal Error if XML is right
 // UNSUPPORTED due to being broken.
-/*
 func TestAccAWSS3Bucket_Lifecycle(t *testing.T) {
 	rInt := acctest.RandInt()
 	resource.Test(t, resource.TestCase{
@@ -620,7 +619,7 @@ func TestAccAWSS3Bucket_Lifecycle(t *testing.T) {
 						"opentelekomcloud_s3_bucket.bucket", "lifecycle_rule.0.expiration.2613713285.date", ""),
 					resource.TestCheckResourceAttr(
 						"opentelekomcloud_s3_bucket.bucket", "lifecycle_rule.0.expiration.2613713285.expired_object_delete_marker", "false"),
-					resource.TestCheckResourceAttr(
+					/*resource.TestCheckResourceAttr(
 						"opentelekomcloud_s3_bucket.bucket", "lifecycle_rule.0.transition.2000431762.date", ""),
 					resource.TestCheckResourceAttr(
 						"opentelekomcloud_s3_bucket.bucket", "lifecycle_rule.0.transition.2000431762.days", "30"),
@@ -631,7 +630,7 @@ func TestAccAWSS3Bucket_Lifecycle(t *testing.T) {
 					resource.TestCheckResourceAttr(
 						"opentelekomcloud_s3_bucket.bucket", "lifecycle_rule.0.transition.6450812.days", "60"),
 					resource.TestCheckResourceAttr(
-						"opentelekomcloud_s3_bucket.bucket", "lifecycle_rule.0.transition.6450812.storage_class", "GLACIER"),
+						"opentelekomcloud_s3_bucket.bucket", "lifecycle_rule.0.transition.6450812.storage_class", "GLACIER"), */
 					resource.TestCheckResourceAttr(
 						"opentelekomcloud_s3_bucket.bucket", "lifecycle_rule.1.id", "id2"),
 					resource.TestCheckResourceAttr(
@@ -646,16 +645,16 @@ func TestAccAWSS3Bucket_Lifecycle(t *testing.T) {
 						"opentelekomcloud_s3_bucket.bucket", "lifecycle_rule.2.id", "id3"),
 					resource.TestCheckResourceAttr(
 						"opentelekomcloud_s3_bucket.bucket", "lifecycle_rule.2.prefix", "path3/"),
-					resource.TestCheckResourceAttr(
-					"opentelekomcloud_s3_bucket.bucket", "lifecycle_rule.2.transition.460947558.days", "0"),
+					/*resource.TestCheckResourceAttr(
+					"opentelekomcloud_s3_bucket.bucket", "lifecycle_rule.2.transition.460947558.days", "0"), */
 					resource.TestCheckResourceAttr(
 						"opentelekomcloud_s3_bucket.bucket", "lifecycle_rule.3.id", "id4"),
 					resource.TestCheckResourceAttr(
 						"opentelekomcloud_s3_bucket.bucket", "lifecycle_rule.3.prefix", "path4/"),
-					resource.TestCheckResourceAttr(
+					/*resource.TestCheckResourceAttr(
 						"opentelekomcloud_s3_bucket.bucket", "lifecycle_rule.3.tags.tagKey", "tagValue"),
 					resource.TestCheckResourceAttr(
-						"opentelekomcloud_s3_bucket.bucket", "lifecycle_rule.3.tags.terraform", "hashicorp"),
+						"opentelekomcloud_s3_bucket.bucket", "lifecycle_rule.3.tags.terraform", "hashicorp"), */
 				),
 			},
 			{
@@ -670,14 +669,14 @@ func TestAccAWSS3Bucket_Lifecycle(t *testing.T) {
 						"opentelekomcloud_s3_bucket.bucket", "lifecycle_rule.0.enabled", "true"),
 					resource.TestCheckResourceAttr(
 						"opentelekomcloud_s3_bucket.bucket", "lifecycle_rule.0.noncurrent_version_expiration.80908210.days", "365"),
-					resource.TestCheckResourceAttr(
+					/*resource.TestCheckResourceAttr(
 						"opentelekomcloud_s3_bucket.bucket", "lifecycle_rule.0.noncurrent_version_transition.1377917700.days", "30"),
 					resource.TestCheckResourceAttr(
 						"opentelekomcloud_s3_bucket.bucket", "lifecycle_rule.0.noncurrent_version_transition.1377917700.storage_class", "STANDARD_IA"),
 					resource.TestCheckResourceAttr(
 						"opentelekomcloud_s3_bucket.bucket", "lifecycle_rule.0.noncurrent_version_transition.2528035817.days", "60"),
 					resource.TestCheckResourceAttr(
-						"opentelekomcloud_s3_bucket.bucket", "lifecycle_rule.0.noncurrent_version_transition.2528035817.storage_class", "GLACIER"),
+						"opentelekomcloud_s3_bucket.bucket", "lifecycle_rule.0.noncurrent_version_transition.2528035817.storage_class", "GLACIER"), */
 					resource.TestCheckResourceAttr(
 						"opentelekomcloud_s3_bucket.bucket", "lifecycle_rule.1.id", "id2"),
 					resource.TestCheckResourceAttr(
@@ -690,10 +689,10 @@ func TestAccAWSS3Bucket_Lifecycle(t *testing.T) {
 						"opentelekomcloud_s3_bucket.bucket", "lifecycle_rule.2.id", "id3"),
 					resource.TestCheckResourceAttr(
 						"opentelekomcloud_s3_bucket.bucket", "lifecycle_rule.2.prefix", "path3/"),
-					resource.TestCheckResourceAttr(
+					/*resource.TestCheckResourceAttr(
 						"opentelekomcloud_s3_bucket.bucket", "lifecycle_rule.2.noncurrent_version_transition.3732708140.days", "0"),
 					resource.TestCheckResourceAttr(
-						"opentelekomcloud_s3_bucket.bucket", "lifecycle_rule.2.noncurrent_version_transition.3732708140.storage_class", "GLACIER"),
+						"opentelekomcloud_s3_bucket.bucket", "lifecycle_rule.2.noncurrent_version_transition.3732708140.storage_class", "GLACIER"), */
 				),
 			},
 			{
@@ -705,7 +704,6 @@ func TestAccAWSS3Bucket_Lifecycle(t *testing.T) {
 		},
 	})
 }
-*/
 
 // UNSUPPORTED
 /*
@@ -1590,6 +1588,10 @@ resource "opentelekomcloud_s3_bucket" "bucket" {
 		prefix = "path3/"
 		enabled = true
 
+		expiration {
+			days = "30"
+		}
+
 		#transition {
 		#	days = 0
 		#	storage_class = "GLACIER"
@@ -1629,14 +1631,14 @@ resource "opentelekomcloud_s3_bucket" "bucket" {
 		noncurrent_version_expiration {
 			days = 365
 		}
-		noncurrent_version_transition {
-			days = 30
-			storage_class = "STANDARD_IA"
-		}
-		noncurrent_version_transition {
-			days = 60
-			storage_class = "GLACIER"
-		}
+		#noncurrent_version_transition {
+		#	days = 30
+		#	storage_class = "STANDARD_IA"
+		#}
+		#noncurrent_version_transition {
+		#	days = 60
+		#	storage_class = "GLACIER"
+		#}
 	}
 	lifecycle_rule {
 		id = "id2"
@@ -1652,10 +1654,13 @@ resource "opentelekomcloud_s3_bucket" "bucket" {
 		prefix = "path3/"
 		enabled = true
 
-		noncurrent_version_transition {
-			days = 0
-			storage_class = "GLACIER"
+		noncurrent_version_expiration {
+			days = 30
 		}
+		#noncurrent_version_transition {
+		#	days = 0
+		#	storage_class = "GLACIER"
+		#}
 	}
 }
 `, randInt)
