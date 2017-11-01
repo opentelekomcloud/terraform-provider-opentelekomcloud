@@ -19,11 +19,6 @@ import (
 	"github.com/hashicorp/terraform/helper/schema"
 )
 
-/* func foo() int {
-	return 0
-}
-*/
-
 func resourceAwsS3Bucket() *schema.Resource {
 	return &schema.Resource{
 		Create: resourceAwsS3BucketCreate,
@@ -230,6 +225,7 @@ func resourceAwsS3Bucket() *schema.Resource {
 							Type:     schema.TypeBool,
 							Required: true,
 						},
+						// TODO: Does this work?
 						"abort_incomplete_multipart_upload_days": {
 							Type:     schema.TypeInt,
 							Optional: true,
