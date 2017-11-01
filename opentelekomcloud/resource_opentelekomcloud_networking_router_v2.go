@@ -49,9 +49,10 @@ func resourceNetworkingRouterV2() *schema.Resource {
 				Computed: true,
 			},
 			"external_gateway": &schema.Schema{
-				Type:     schema.TypeString,
-				Optional: true,
-				ForceNew: false,
+				Type:             schema.TypeString,
+				Optional:         true,
+				ForceNew:         false,
+				DiffSuppressFunc: suppressExternalGateway,
 			},
 			"tenant_id": &schema.Schema{
 				Type:     schema.TypeString,

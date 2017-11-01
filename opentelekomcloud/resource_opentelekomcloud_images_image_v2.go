@@ -59,10 +59,11 @@ func resourceImagesImageV2() *schema.Resource {
 			},
 
 			"disk_format": &schema.Schema{
-				Type:         schema.TypeString,
-				Required:     true,
-				ForceNew:     true,
-				ValidateFunc: resourceImagesImageV2ValidateDiskFormat,
+				Type:             schema.TypeString,
+				Required:         true,
+				ForceNew:         true,
+				ValidateFunc:     resourceImagesImageV2ValidateDiskFormat,
+				DiffSuppressFunc: suppressDiffAll, // UNDONE: OTC appears broken here, so hack work-around...
 			},
 
 			"file": &schema.Schema{
@@ -96,11 +97,12 @@ func resourceImagesImageV2() *schema.Resource {
 			},
 
 			"min_disk_gb": &schema.Schema{
-				Type:         schema.TypeInt,
-				Optional:     true,
-				ForceNew:     true,
-				ValidateFunc: validatePositiveInt,
-				Default:      0,
+				Type:             schema.TypeInt,
+				Optional:         true,
+				ForceNew:         true,
+				ValidateFunc:     validatePositiveInt,
+				Default:          0,
+				DiffSuppressFunc: suppressMinDisk,
 			},
 
 			"min_ram_mb": &schema.Schema{

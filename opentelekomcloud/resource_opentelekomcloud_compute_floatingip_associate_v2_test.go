@@ -24,7 +24,6 @@ func TestAccComputeV2FloatingIPAssociate_basic(t *testing.T) {
 		Steps: []resource.TestStep{
 			resource.TestStep{
 				Config: testAccComputeV2FloatingIPAssociate_basic,
-				//ExpectNonEmptyPlan: true,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckComputeV2InstanceExists("opentelekomcloud_compute_instance_v2.instance_1", &instance),
 					testAccCheckNetworkingV2FloatingIPExists("opentelekomcloud_networking_floatingip_v2.fip_1", &fip),
@@ -79,7 +78,7 @@ func TestAccComputeV2FloatingIPAssociate_attachToFirstNetwork(t *testing.T) {
 	})
 }
 
-// UNSUPPORTED?  Can't connect instance to network without being in a VPC?
+// UNSUPPORTED:  Can't connect instance to network without being in a VPC?
 /*
 func TestAccComputeV2FloatingIPAssociate_attachToSecondNetwork(t *testing.T) {
 	var instance servers.Server
@@ -162,14 +161,12 @@ func testAccCheckComputeV2FloatingIPAssociateDestroy(s *terraform.State) error {
 			}
 			return err
 		}
-		fmt.Printf("instance=%+v.\n", instance)
 
 		// But if the instance still exists, then walk through its known addresses
 		// and see if there's a floating IP.
 		for _, networkAddresses := range instance.Addresses {
 			for _, element := range networkAddresses.([]interface{}) {
 				address := element.(map[string]interface{})
-				fmt.Printf("address=%+v, floatingIP=%s.\n", address, floatingIP)
 				if address["OS-EXT-IPS:type"] == "floating" || address["OS-EXT-IPS:type"] == "fixed" {
 					return fmt.Errorf("Floating IP %s is still attached to instance %s", floatingIP, instanceId)
 				}
@@ -191,8 +188,6 @@ func testAccCheckComputeV2FloatingIPAssociateAssociated(
 			return err
 		}
 
-		fmt.Printf("testAccCheckComputeV2FloatingIPAssociateAssociated server=%+v.\n", newInstance)
-		fmt.Printf("fip=%+v.\n", fip)
 		// Walk through the instance's addresses and find the match
 		i := 0
 		for _, networkAddresses := range newInstance.Addresses {
@@ -202,7 +197,6 @@ func testAccCheckComputeV2FloatingIPAssociateAssociated(
 			}
 			for _, element := range networkAddresses.([]interface{}) {
 				address := element.(map[string]interface{})
-				fmt.Printf("address=%+v.\n", address)
 				if (address["OS-EXT-IPS:type"] == "floating" && address["addr"] == fip.FloatingIP) ||
 					(address["OS-EXT-IPS:type"] == "fixed" && address["addr"] == fip.FixedIP) {
 					return nil

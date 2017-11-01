@@ -19,11 +19,6 @@ import (
 	"github.com/hashicorp/terraform/helper/schema"
 )
 
-/* func foo() int {
-	return 0
-}
-*/
-
 func resourceAwsS3Bucket() *schema.Resource {
 	return &schema.Resource{
 		Create: resourceAwsS3BucketCreate,
@@ -225,11 +220,12 @@ func resourceAwsS3Bucket() *schema.Resource {
 							Type:     schema.TypeString,
 							Optional: true,
 						},
-						"tags": tagsSchema(),
+						//"tags": tagsSchema(),
 						"enabled": {
 							Type:     schema.TypeBool,
 							Required: true,
 						},
+						// TODO: Does this work?
 						"abort_incomplete_multipart_upload_days": {
 							Type:     schema.TypeInt,
 							Optional: true,
@@ -271,7 +267,7 @@ func resourceAwsS3Bucket() *schema.Resource {
 								},
 							},
 						},
-						"transition": {
+						/*"transition": {
 							Type:     schema.TypeSet,
 							Optional: true,
 							Set:      transitionHash,
@@ -313,7 +309,7 @@ func resourceAwsS3Bucket() *schema.Resource {
 									},
 								},
 							},
-						},
+						}, */
 					},
 				},
 			},
@@ -1617,6 +1613,7 @@ func resourceAwsS3BucketLifecycleUpdate(s3conn *s3.S3, d *schema.ResourceData) e
 
 	lifecycleRules := d.Get("lifecycle_rule").([]interface{})
 
+	//fmt.Printf("lifecycleRules=%+v.\n", lifecycleRules)
 	if len(lifecycleRules) == 0 {
 		i := &s3.DeleteBucketLifecycleInput{
 			Bucket: aws.String(bucket),
@@ -1642,7 +1639,7 @@ func resourceAwsS3BucketLifecycleUpdate(s3conn *s3.S3, d *schema.ResourceData) e
 		rule := &s3.LifecycleRule{}
 
 		// Filter
-		tags := r["tags"].(map[string]interface{})
+		/* tags := r["tags"].(map[string]interface{})
 		filter := &s3.LifecycleRuleFilter{}
 		if len(tags) > 0 {
 			lifecycleRuleAndOp := &s3.LifecycleRuleAndOperator{}
@@ -1652,7 +1649,9 @@ func resourceAwsS3BucketLifecycleUpdate(s3conn *s3.S3, d *schema.ResourceData) e
 		} else {
 			filter.SetPrefix(r["prefix"].(string))
 		}
-		rule.SetFilter(filter)
+		rule.SetFilter(filter) */
+		// OTC only supports deprecated location for this.
+		rule.SetPrefix(r["prefix"].(string))
 
 		// ID
 		if val, ok := r["id"].(string); ok && val != "" {
@@ -1708,7 +1707,7 @@ func resourceAwsS3BucketLifecycleUpdate(s3conn *s3.S3, d *schema.ResourceData) e
 		}
 
 		// Transitions
-		transitions := d.Get(fmt.Sprintf("lifecycle_rule.%d.transition", i)).(*schema.Set).List()
+		/*transitions := d.Get(fmt.Sprintf("lifecycle_rule.%d.transition", i)).(*schema.Set).List()
 		if len(transitions) > 0 {
 			rule.Transitions = make([]*s3.Transition, 0, len(transitions))
 			for _, transition := range transitions {
@@ -1746,17 +1745,19 @@ func resourceAwsS3BucketLifecycleUpdate(s3conn *s3.S3, d *schema.ResourceData) e
 
 				rule.NoncurrentVersionTransitions = append(rule.NoncurrentVersionTransitions, i)
 			}
-		}
+		} */
 
 		rules = append(rules, rule)
 	}
 
+	//fmt.Printf("Rules=%+v.\n", rules)
 	i := &s3.PutBucketLifecycleConfigurationInput{
 		Bucket: aws.String(bucket),
 		LifecycleConfiguration: &s3.BucketLifecycleConfiguration{
 			Rules: rules,
 		},
 	}
+	//fmt.Printf("PutBucketLifecycleConfigurationInput=%+v.\n", i)
 
 	err := resource.Retry(1*time.Minute, func() *resource.RetryError {
 		if _, err := s3conn.PutBucketLifecycleConfiguration(i); err != nil {

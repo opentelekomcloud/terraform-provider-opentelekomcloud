@@ -26,7 +26,6 @@ func TestAccNetworkingV2Port_basic(t *testing.T) {
 		Steps: []resource.TestStep{
 			resource.TestStep{
 				Config: testAccNetworkingV2Port_basic,
-				//ExpectNonEmptyPlan: true,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckNetworkingV2SubnetExists("opentelekomcloud_networking_subnet_v2.subnet_1", &subnet),
 					testAccCheckNetworkingV2NetworkExists("opentelekomcloud_networking_network_v2.network_1", &network),
@@ -73,8 +72,7 @@ func TestAccNetworkingV2Port_allowedAddressPairs(t *testing.T) {
 		CheckDestroy: testAccCheckNetworkingV2PortDestroy,
 		Steps: []resource.TestStep{
 			resource.TestStep{
-				Config:             testAccNetworkingV2Port_allowedAddressPairs,
-				ExpectNonEmptyPlan: true,
+				Config: testAccNetworkingV2Port_allowedAddressPairs,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckNetworkingV2SubnetExists("opentelekomcloud_networking_subnet_v2.vrrp_subnet", &subnet),
 					testAccCheckNetworkingV2NetworkExists("opentelekomcloud_networking_network_v2.vrrp_network", &network),

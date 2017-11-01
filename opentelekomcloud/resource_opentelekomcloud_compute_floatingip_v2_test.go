@@ -10,7 +10,7 @@ import (
 	"github.com/gophercloud/gophercloud/openstack/compute/v2/extensions/floatingips"
 )
 
-// FAIL: Dangling resources
+// PASS
 func TestAccComputeV2FloatingIP_basic(t *testing.T) {
 	var fip floatingips.FloatingIP
 
