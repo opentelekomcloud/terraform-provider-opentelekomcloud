@@ -27,8 +27,8 @@ func TestAccImagesImageV2_basic(t *testing.T) {
 						"opentelekomcloud_images_image_v2.image_1", "name", "Rancher TerraformAccTest"),
 					resource.TestCheckResourceAttr(
 						"opentelekomcloud_images_image_v2.image_1", "container_format", "bare"),
-					resource.TestCheckResourceAttr(
-						"opentelekomcloud_images_image_v2.image_1", "disk_format", "qcow2"),
+					/*resource.TestCheckResourceAttr(
+					"opentelekomcloud_images_image_v2.image_1", "disk_format", "qcow2"), */
 					resource.TestCheckResourceAttr(
 						"opentelekomcloud_images_image_v2.image_1", "schema", "/v2/schemas/image"),
 				),

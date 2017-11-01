@@ -59,10 +59,11 @@ func resourceImagesImageV2() *schema.Resource {
 			},
 
 			"disk_format": &schema.Schema{
-				Type:         schema.TypeString,
-				Required:     true,
-				ForceNew:     true,
-				ValidateFunc: resourceImagesImageV2ValidateDiskFormat,
+				Type:             schema.TypeString,
+				Required:         true,
+				ForceNew:         true,
+				ValidateFunc:     resourceImagesImageV2ValidateDiskFormat,
+				DiffSuppressFunc: suppressDiffAll, // UNDONE: OTC appears broken here, so hack work-around...
 			},
 
 			"file": &schema.Schema{
