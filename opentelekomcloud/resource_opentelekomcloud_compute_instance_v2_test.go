@@ -140,6 +140,35 @@ func TestAccComputeV2Instance_bootFromVolumeVolume(t *testing.T) {
 	})
 }
 
+// PASS
+func TestAccComputeV2Instance_bootFromVolumeForceNew(t *testing.T) {
+	var instance1_1 servers.Server
+	var instance1_2 servers.Server
+
+	resource.Test(t, resource.TestCase{
+		PreCheck:     func() { testAccPreCheck(t) },
+		Providers:    testAccProviders,
+		CheckDestroy: testAccCheckComputeV2InstanceDestroy,
+		Steps: []resource.TestStep{
+			resource.TestStep{
+				Config: testAccComputeV2Instance_bootFromVolumeForceNew_1,
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckComputeV2InstanceExists(
+						"opentelekomcloud_compute_instance_v2.instance_1", &instance1_1),
+				),
+			},
+			resource.TestStep{
+				Config: testAccComputeV2Instance_bootFromVolumeForceNew_2,
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckComputeV2InstanceExists(
+						"opentelekomcloud_compute_instance_v2.instance_1", &instance1_2),
+					testAccCheckComputeV2InstanceInstanceIDsDoNotMatch(&instance1_1, &instance1_2),
+				),
+			},
+		},
+	})
+}
+
 // TODO: verify the personality really exists on the instance.
 func TestAccComputeV2Instance_personality(t *testing.T) {
 	var instance servers.Server
@@ -584,7 +613,7 @@ resource "opentelekomcloud_compute_instance_v2" "instance_1" {
   block_device {
     uuid = "%s"
     source_type = "image"
-    volume_size = 50
+    volume_size = 51
     boot_index = 0
     destination_type = "volume"
     delete_on_termination = true
@@ -787,6 +816,7 @@ resource "opentelekomcloud_compute_instance_v2" "instance_1" {
 }
 `, OS_NETWORK_ID)
 
+/*
 var testAccComputeV2Instance_forceDelete = fmt.Sprintf(`
 resource "opentelekomcloud_compute_instance_v2" "instance_1" {
   name = "instance_1"
@@ -797,6 +827,7 @@ resource "opentelekomcloud_compute_instance_v2" "instance_1" {
   force_delete = true
 }
 `, OS_NETWORK_ID)
+*/
 
 var testAccComputeV2Instance_timeout = fmt.Sprintf(`
 resource "opentelekomcloud_compute_instance_v2" "instance_1" {
