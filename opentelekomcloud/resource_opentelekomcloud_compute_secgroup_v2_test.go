@@ -373,7 +373,7 @@ resource "opentelekomcloud_compute_secgroup_v2" "sg_1" {
     from_port = 0
     to_port = 0
     ip_protocol = "icmp"
-    cidr = "2001:558:FC00::/39"
+    cidr = "2001:558:FC00:0::/39"
   }
 }
 `

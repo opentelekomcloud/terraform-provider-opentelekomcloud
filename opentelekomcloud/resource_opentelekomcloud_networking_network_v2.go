@@ -78,11 +78,11 @@ func resourceNetworkingNetworkV2() *schema.Resource {
 				ForceNew: false,
 			},
 			"admin_state_up": &schema.Schema{
-				Type:     schema.TypeString,
-				Optional: true,
-				ForceNew: false,
-				Computed: true,
-				//DiffSuppressFunc: suppressBooleanDiffs,
+				Type:         schema.TypeString,
+				Optional:     true,
+				ForceNew:     false,
+				Computed:     true,
+				ValidateFunc: validateTrueOnly,
 			},
 			"shared": &schema.Schema{
 				Type:     schema.TypeString,
