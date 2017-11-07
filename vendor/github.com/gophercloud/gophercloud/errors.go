@@ -1,6 +1,9 @@
 package gophercloud
 
-import "fmt"
+import (
+	"fmt"
+	"encoding/json"
+)
 
 // BaseError is an error type that all other error types embed.
 type BaseError struct {
@@ -54,6 +57,39 @@ type ErrUnexpectedResponseCode struct {
 	Body     []byte
 }
 
+func (e ErrUnexpectedResponseCode) getMessage() string {
+	var jr interface{}
+	body := e.Body
+	err := json.Unmarshal(body, &jr)
+	if err != nil {
+		return ""
+	}
+	m1, ok := jr.(map[string]interface{})
+	if ok {
+		fmt.Printf("JSON OK1: JSONResponse=%+v.\n", m1)
+		//m1 := (*(options.JSONResponse)).(map[string]interface{})
+		ok = false
+		var m2 interface{}
+		// Just fetch the first value, should only be one...
+		for _, v := range m1 { ok = true; m2 = v; break }
+		if ok {
+			//fmt.Printf("convert1a\n")
+			m2a, ok := m2.(map[string]interface{})
+			if ok {
+				//fmt.Printf("convert1b\n")
+				if msg := m2a["message"]; msg != nil {
+					//fmt.Printf("convert2a\n")
+					if msgs, ok := msg.(string); ok {
+						//fmt.Printf("convert3a\n")
+						return msgs
+					}
+				}
+			}
+		}
+	}
+	return ""
+}
+
 func (e ErrUnexpectedResponseCode) Error() string {
 	e.DefaultErrString = fmt.Sprintf(
 		"Expected HTTP response code %v when accessing [%s %s], but got %d instead\n%s",
@@ -103,12 +139,18 @@ type ErrDefault503 struct {
 }
 
 func (e ErrDefault400) Error() string {
+	if msg := e.getMessage(); msg != "" {
+		return msg
+	}
 	return "Invalid request due to incorrect syntax or missing required parameters."
 }
 func (e ErrDefault401) Error() string {
 	return "Authentication failed"
 }
 func (e ErrDefault404) Error() string {
+	if msg := e.getMessage(); msg != "" {
+		return msg
+	}
 	return "Resource not found"
 }
 func (e ErrDefault405) Error() string {
