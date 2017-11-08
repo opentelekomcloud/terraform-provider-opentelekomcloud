@@ -26,6 +26,15 @@ func suppressDiffAll(k, old, new string, d *schema.ResourceData) bool {
 	return true
 }
 
+// Suppress equivalent device name changes, only compare string after first two characters
+func suppressDiffDevice(k, old, new string, d *schema.ResourceData) bool {
+	// If too short (shouldn't happen, but to be safe), suppress diff
+	if len(old) < 2 || len(new) < 2 {
+		return true
+	}
+	return (old[2:] == new[2:])
+}
+
 // Suppress changes if we get a computed min_disk_gb if value is unspecified (default 0)
 func suppressMinDisk(k, old, new string, d *schema.ResourceData) bool {
 	return new == "0" || old == new

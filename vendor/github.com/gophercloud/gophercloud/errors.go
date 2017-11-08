@@ -66,7 +66,7 @@ func (e ErrUnexpectedResponseCode) getMessage() string {
 	}
 	m1, ok := jr.(map[string]interface{})
 	if ok {
-		fmt.Printf("JSON OK1: JSONResponse=%+v.\n", m1)
+		//fmt.Printf("JSON OK1: JSONResponse=%+v.\n", m1)
 		//m1 := (*(options.JSONResponse)).(map[string]interface{})
 		ok = false
 		var m2 interface{}
