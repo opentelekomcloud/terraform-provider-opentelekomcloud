@@ -12,12 +12,12 @@ import (
 	"github.com/hashicorp/terraform/helper/schema"
 )
 
-func resourceAwsS3BucketPolicy() *schema.Resource {
+func resourceS3BucketPolicy() *schema.Resource {
 	return &schema.Resource{
-		Create: resourceAwsS3BucketPolicyPut,
-		Read:   resourceAwsS3BucketPolicyRead,
-		Update: resourceAwsS3BucketPolicyPut,
-		Delete: resourceAwsS3BucketPolicyDelete,
+		Create: resourceS3BucketPolicyPut,
+		Read:   resourceS3BucketPolicyRead,
+		Update: resourceS3BucketPolicyPut,
+		Delete: resourceS3BucketPolicyDelete,
 
 		Schema: map[string]*schema.Schema{
 			"bucket": {
@@ -36,7 +36,7 @@ func resourceAwsS3BucketPolicy() *schema.Resource {
 	}
 }
 
-func resourceAwsS3BucketPolicyPut(d *schema.ResourceData, meta interface{}) error {
+func resourceS3BucketPolicyPut(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*Config)
 	s3conn, err := config.computeS3conn(GetRegion(d, config))
 	if err != nil {
@@ -74,7 +74,7 @@ func resourceAwsS3BucketPolicyPut(d *schema.ResourceData, meta interface{}) erro
 	return nil
 }
 
-func resourceAwsS3BucketPolicyRead(d *schema.ResourceData, meta interface{}) error {
+func resourceS3BucketPolicyRead(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*Config)
 	s3conn, err := config.computeS3conn(GetRegion(d, config))
 	if err != nil {
@@ -97,7 +97,7 @@ func resourceAwsS3BucketPolicyRead(d *schema.ResourceData, meta interface{}) err
 	return nil
 }
 
-func resourceAwsS3BucketPolicyDelete(d *schema.ResourceData, meta interface{}) error {
+func resourceS3BucketPolicyDelete(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*Config)
 	s3conn, err := config.computeS3conn(GetRegion(d, config))
 	if err != nil {
