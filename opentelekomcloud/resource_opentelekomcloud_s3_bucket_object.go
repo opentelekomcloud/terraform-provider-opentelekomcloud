@@ -19,12 +19,12 @@ import (
 	"github.com/aws/aws-sdk-go/service/s3"
 )
 
-func resourceAwsS3BucketObject() *schema.Resource {
+func resourceS3BucketObject() *schema.Resource {
 	return &schema.Resource{
-		Create: resourceAwsS3BucketObjectPut,
-		Read:   resourceAwsS3BucketObjectRead,
-		Update: resourceAwsS3BucketObjectPut,
-		Delete: resourceAwsS3BucketObjectDelete,
+		Create: resourceS3BucketObjectPut,
+		Read:   resourceS3BucketObjectRead,
+		Update: resourceS3BucketObjectPut,
+		Delete: resourceS3BucketObjectDelete,
 
 		Schema: map[string]*schema.Schema{
 			"bucket": {
@@ -84,25 +84,12 @@ func resourceAwsS3BucketObject() *schema.Resource {
 				ConflictsWith: []string{"source"},
 			},
 
-			/*"storage_class": {
-				Type:         schema.TypeString,
-				Optional:     true,
-				Computed:     true,
-				ValidateFunc: validateS3BucketObjectStorageClassType,
-			}, */
-
 			"server_side_encryption": {
 				Type:         schema.TypeString,
 				Optional:     true,
 				ValidateFunc: validateS3BucketObjectServerSideEncryption,
 				Computed:     true,
 			},
-
-			/*"kms_key_id": {
-				Type:         schema.TypeString,
-				Optional:     true,
-				ValidateFunc: validateArn,
-			}, */
 
 			"etag": {
 				Type: schema.TypeString,
@@ -119,8 +106,6 @@ func resourceAwsS3BucketObject() *schema.Resource {
 				Computed: true,
 			},
 
-			//"tags": tagsSchema(),
-
 			"website_redirect": {
 				Type:     schema.TypeString,
 				Optional: true,
@@ -129,14 +114,12 @@ func resourceAwsS3BucketObject() *schema.Resource {
 	}
 }
 
-func resourceAwsS3BucketObjectPut(d *schema.ResourceData, meta interface{}) error {
+func resourceS3BucketObjectPut(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*Config)
 	s3conn, err := config.computeS3conn(GetRegion(d, config))
 	if err != nil {
 		return fmt.Errorf("Error creating OpenTelekomCloud s3 client: %s", err)
 	}
-
-	//restricted := false //meta.(*AWSClient).IsGovCloud() || meta.(*AWSClient).IsChinaCloud()
 
 	var body io.ReadSeeker
 
@@ -169,10 +152,6 @@ func resourceAwsS3BucketObjectPut(d *schema.ResourceData, meta interface{}) erro
 		Body:   body,
 	}
 
-	/*if v, ok := d.GetOk("storage_class"); ok {
-		putInput.StorageClass = aws.String(v.(string))
-	} */
-
 	if v, ok := d.GetOk("cache_control"); ok {
 		putInput.CacheControl = aws.String(v.(string))
 	}
@@ -197,24 +176,6 @@ func resourceAwsS3BucketObjectPut(d *schema.ResourceData, meta interface{}) erro
 		putInput.ServerSideEncryption = aws.String(v.(string))
 	}
 
-	/*if v, ok := d.GetOk("kms_key_id"); ok {
-		putInput.SSEKMSKeyId = aws.String(v.(string))
-		putInput.ServerSideEncryption = aws.String(s3.ServerSideEncryptionAwsKms)
-	} */
-
-	/*if v, ok := d.GetOk("tags"); ok {
-		if restricted {
-			return fmt.Errorf("This region does not allow for tags on S3 objects")
-		}
-
-		// The tag-set must be encoded as URL Query parameters.
-		values := url.Values{}
-		for k, v := range v.(map[string]interface{}) {
-			values.Add(k, v.(string))
-		}
-		putInput.Tagging = aws.String(values.Encode())
-	} */
-
 	if v, ok := d.GetOk("website_redirect"); ok {
 		putInput.WebsiteRedirectLocation = aws.String(v.(string))
 	}
@@ -229,10 +190,10 @@ func resourceAwsS3BucketObjectPut(d *schema.ResourceData, meta interface{}) erro
 
 	d.Set("version_id", resp.VersionId)
 	d.SetId(key)
-	return resourceAwsS3BucketObjectRead(d, meta)
+	return resourceS3BucketObjectRead(d, meta)
 }
 
-func resourceAwsS3BucketObjectRead(d *schema.ResourceData, meta interface{}) error {
+func resourceS3BucketObjectRead(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*Config)
 	s3conn, err := config.computeS3conn(GetRegion(d, config))
 	if err != nil {
@@ -270,52 +231,12 @@ func resourceAwsS3BucketObjectRead(d *schema.ResourceData, meta interface{}) err
 	d.Set("server_side_encryption", resp.ServerSideEncryption)
 	d.Set("website_redirect", resp.WebsiteRedirectLocation)
 
-	// Only set non-default KMS key ID (one that doesn't match default)
-	// Unsupported by OTC?
-	/*
-		if resp.SSEKMSKeyId != nil {
-			// retrieve S3 KMS Default Master Key
-			kmsconn := meta.(*AWSClient).kmsconn
-			kmsresp, err := kmsconn.DescribeKey(&kms.DescribeKeyInput{
-				KeyId: aws.String("alias/aws/s3"),
-			})
-			if err != nil {
-				return fmt.Errorf("Failed to describe default S3 KMS key (alias/aws/s3): %s", err)
-			}
-
-			if *resp.SSEKMSKeyId != *kmsresp.KeyMetadata.Arn {
-				log.Printf("[DEBUG] S3 object is encrypted using a non-default KMS Key ID: %s", *resp.SSEKMSKeyId)
-				d.Set("kms_key_id", resp.SSEKMSKeyId)
-			}
-		} */
 	d.Set("etag", strings.Trim(*resp.ETag, `"`))
-
-	// UNSUPPORTED
-	/*
-		// The "STANDARD" (which is also the default) storage
-		// class when set would not be included in the results.
-		d.Set("storage_class", s3.StorageClassStandard)
-		if resp.StorageClass != nil {
-			d.Set("storage_class", resp.StorageClass)
-		}
-
-		if !restricted {
-			tagResp, err := s3conn.GetObjectTagging(
-				&s3.GetObjectTaggingInput{
-					Bucket: aws.String(bucket),
-					Key:    aws.String(key),
-				})
-			if err != nil {
-				return fmt.Errorf("Failed to get object tags (bucket: %s, key: %s): %s", bucket, key, err)
-			}
-			d.Set("tags", tagsToMapS3(tagResp.TagSet))
-		}
-	*/
 
 	return nil
 }
 
-func resourceAwsS3BucketObjectDelete(d *schema.ResourceData, meta interface{}) error {
+func resourceS3BucketObjectDelete(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*Config)
 	s3conn, err := config.computeS3conn(GetRegion(d, config))
 	if err != nil {

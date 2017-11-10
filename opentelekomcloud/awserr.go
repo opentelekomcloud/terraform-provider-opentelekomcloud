@@ -1,19 +1,11 @@
 package opentelekomcloud
 
 import (
-	"strings"
 	"time"
 
 	"github.com/aws/aws-sdk-go/aws/awserr"
 	"github.com/hashicorp/terraform/helper/resource"
 )
-
-func isAWSErr(err error, code string, message string) bool {
-	if err, ok := err.(awserr.Error); ok {
-		return err.Code() == code && strings.Contains(err.Message(), message)
-	}
-	return false
-}
 
 func retryOnAwsCode(code string, f func() (interface{}, error)) (interface{}, error) {
 	var resp interface{}

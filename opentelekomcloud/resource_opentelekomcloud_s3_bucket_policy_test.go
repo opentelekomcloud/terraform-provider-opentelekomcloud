@@ -13,7 +13,7 @@ import (
 )
 
 // PASS
-func TestAccAWSS3BucketPolicy_basic(t *testing.T) {
+func TestAccS3BucketPolicy_basic(t *testing.T) {
 	name := fmt.Sprintf("tf-test-bucket-%d", acctest.RandInt())
 
 	expectedPolicyText := fmt.Sprintf(
@@ -23,13 +23,13 @@ func TestAccAWSS3BucketPolicy_basic(t *testing.T) {
 	resource.Test(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
 		Providers:    testAccProviders,
-		CheckDestroy: testAccCheckAWSS3BucketDestroy,
+		CheckDestroy: testAccCheckS3BucketDestroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccAWSS3BucketPolicyConfig(name),
+				Config: testAccS3BucketPolicyConfig(name),
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckAWSS3BucketExists("opentelekomcloud_s3_bucket.bucket"),
-					testAccCheckAWSS3BucketHasPolicy("opentelekomcloud_s3_bucket.bucket", expectedPolicyText),
+					testAccCheckS3BucketExists("opentelekomcloud_s3_bucket.bucket"),
+					testAccCheckS3BucketHasPolicy("opentelekomcloud_s3_bucket.bucket", expectedPolicyText),
 				),
 			},
 		},
@@ -37,7 +37,7 @@ func TestAccAWSS3BucketPolicy_basic(t *testing.T) {
 }
 
 // PASS
-func TestAccAWSS3BucketPolicy_policyUpdate(t *testing.T) {
+func TestAccS3BucketPolicy_policyUpdate(t *testing.T) {
 	name := fmt.Sprintf("tf-test-bucket-%d", acctest.RandInt())
 
 	expectedPolicyText1 := fmt.Sprintf(
@@ -51,28 +51,28 @@ func TestAccAWSS3BucketPolicy_policyUpdate(t *testing.T) {
 	resource.Test(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
 		Providers:    testAccProviders,
-		CheckDestroy: testAccCheckAWSS3BucketDestroy,
+		CheckDestroy: testAccCheckS3BucketDestroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccAWSS3BucketPolicyConfig(name),
+				Config: testAccS3BucketPolicyConfig(name),
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckAWSS3BucketExists("opentelekomcloud_s3_bucket.bucket"),
-					testAccCheckAWSS3BucketHasPolicy("opentelekomcloud_s3_bucket.bucket", expectedPolicyText1),
+					testAccCheckS3BucketExists("opentelekomcloud_s3_bucket.bucket"),
+					testAccCheckS3BucketHasPolicy("opentelekomcloud_s3_bucket.bucket", expectedPolicyText1),
 				),
 			},
 
 			{
-				Config: testAccAWSS3BucketPolicyConfig_updated(name),
+				Config: testAccS3BucketPolicyConfig_updated(name),
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckAWSS3BucketExists("opentelekomcloud_s3_bucket.bucket"),
-					testAccCheckAWSS3BucketHasPolicy("opentelekomcloud_s3_bucket.bucket", expectedPolicyText2),
+					testAccCheckS3BucketExists("opentelekomcloud_s3_bucket.bucket"),
+					testAccCheckS3BucketHasPolicy("opentelekomcloud_s3_bucket.bucket", expectedPolicyText2),
 				),
 			},
 		},
 	})
 }
 
-func testAccCheckAWSS3BucketHasPolicy(n string, expectedPolicyText string) resource.TestCheckFunc {
+func testAccCheckS3BucketHasPolicy(n string, expectedPolicyText string) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
 		rs, ok := s.RootModule().Resources[n]
 		if !ok {
@@ -111,7 +111,7 @@ func testAccCheckAWSS3BucketHasPolicy(n string, expectedPolicyText string) resou
 	}
 }
 
-func testAccAWSS3BucketPolicyConfig(bucketName string) string {
+func testAccS3BucketPolicyConfig(bucketName string) string {
 	return fmt.Sprintf(`
 resource "opentelekomcloud_s3_bucket" "bucket" {
 	bucket = "%s"
@@ -144,7 +144,7 @@ POLICY
 `, bucketName, bucketName, bucketName)
 }
 
-func testAccAWSS3BucketPolicyConfig_updated(bucketName string) string {
+func testAccS3BucketPolicyConfig_updated(bucketName string) string {
 	return fmt.Sprintf(`
 resource "opentelekomcloud_s3_bucket" "bucket" {
 	bucket = "%s"

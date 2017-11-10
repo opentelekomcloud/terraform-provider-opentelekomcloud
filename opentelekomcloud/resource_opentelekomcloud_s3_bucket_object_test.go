@@ -17,7 +17,7 @@ import (
 )
 
 // PASS
-func TestAccAWSS3BucketObject_source(t *testing.T) {
+func TestAccS3BucketObject_source(t *testing.T) {
 	tmpFile, err := ioutil.TempFile("", "tf-acc-s3-obj-source")
 	if err != nil {
 		t.Fatal(err)
@@ -35,37 +35,37 @@ func TestAccAWSS3BucketObject_source(t *testing.T) {
 	resource.Test(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
 		Providers:    testAccProviders,
-		CheckDestroy: testAccCheckAWSS3BucketObjectDestroy,
+		CheckDestroy: testAccCheckS3BucketObjectDestroy,
 		Steps: []resource.TestStep{
 			resource.TestStep{
-				Config: testAccAWSS3BucketObjectConfigSource(rInt, tmpFile.Name()),
-				Check:  testAccCheckAWSS3BucketObjectExists("opentelekomcloud_s3_bucket_object.object", &obj),
+				Config: testAccS3BucketObjectConfigSource(rInt, tmpFile.Name()),
+				Check:  testAccCheckS3BucketObjectExists("opentelekomcloud_s3_bucket_object.object", &obj),
 			},
 		},
 	})
 }
 
 // PASS
-func TestAccAWSS3BucketObject_content(t *testing.T) {
+func TestAccS3BucketObject_content(t *testing.T) {
 	rInt := acctest.RandInt()
 	var obj s3.GetObjectOutput
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
 		Providers:    testAccProviders,
-		CheckDestroy: testAccCheckAWSS3BucketObjectDestroy,
+		CheckDestroy: testAccCheckS3BucketObjectDestroy,
 		Steps: []resource.TestStep{
 			resource.TestStep{
 				PreConfig: func() {},
-				Config:    testAccAWSS3BucketObjectConfigContent(rInt),
-				Check:     testAccCheckAWSS3BucketObjectExists("opentelekomcloud_s3_bucket_object.object", &obj),
+				Config:    testAccS3BucketObjectConfigContent(rInt),
+				Check:     testAccCheckS3BucketObjectExists("opentelekomcloud_s3_bucket_object.object", &obj),
 			},
 		},
 	})
 }
 
 // PASS
-func TestAccAWSS3BucketObject_withContentCharacteristics(t *testing.T) {
+func TestAccS3BucketObject_withContentCharacteristics(t *testing.T) {
 	tmpFile, err := ioutil.TempFile("", "tf-acc-s3-obj-content-characteristics")
 	if err != nil {
 		t.Fatal(err)
@@ -84,12 +84,12 @@ func TestAccAWSS3BucketObject_withContentCharacteristics(t *testing.T) {
 	resource.Test(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
 		Providers:    testAccProviders,
-		CheckDestroy: testAccCheckAWSS3BucketObjectDestroy,
+		CheckDestroy: testAccCheckS3BucketObjectDestroy,
 		Steps: []resource.TestStep{
 			resource.TestStep{
-				Config: testAccAWSS3BucketObjectConfig_withContentCharacteristics(rInt, tmpFile.Name()),
+				Config: testAccS3BucketObjectConfig_withContentCharacteristics(rInt, tmpFile.Name()),
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckAWSS3BucketObjectExists("opentelekomcloud_s3_bucket_object.object", &obj),
+					testAccCheckS3BucketObjectExists("opentelekomcloud_s3_bucket_object.object", &obj),
 					resource.TestCheckResourceAttr(
 						"opentelekomcloud_s3_bucket_object.object", "content_type", "binary/octet-stream"),
 					resource.TestCheckResourceAttr(
@@ -101,7 +101,7 @@ func TestAccAWSS3BucketObject_withContentCharacteristics(t *testing.T) {
 }
 
 // PASS
-func TestAccAWSS3BucketObject_updates(t *testing.T) {
+func TestAccS3BucketObject_updates(t *testing.T) {
 	tmpFile, err := ioutil.TempFile("", "tf-acc-s3-obj-updates")
 	if err != nil {
 		t.Fatal(err)
@@ -118,12 +118,12 @@ func TestAccAWSS3BucketObject_updates(t *testing.T) {
 	resource.Test(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
 		Providers:    testAccProviders,
-		CheckDestroy: testAccCheckAWSS3BucketObjectDestroy,
+		CheckDestroy: testAccCheckS3BucketObjectDestroy,
 		Steps: []resource.TestStep{
 			resource.TestStep{
-				Config: testAccAWSS3BucketObjectConfig_updates(rInt, tmpFile.Name()),
+				Config: testAccS3BucketObjectConfig_updates(rInt, tmpFile.Name()),
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckAWSS3BucketObjectExists("opentelekomcloud_s3_bucket_object.object", &obj),
+					testAccCheckS3BucketObjectExists("opentelekomcloud_s3_bucket_object.object", &obj),
 					resource.TestCheckResourceAttr("opentelekomcloud_s3_bucket_object.object", "etag", "647d1d58e1011c743ec67d5e8af87b53"),
 				),
 			},
@@ -134,9 +134,9 @@ func TestAccAWSS3BucketObject_updates(t *testing.T) {
 						t.Fatal(err)
 					}
 				},
-				Config: testAccAWSS3BucketObjectConfig_updates(rInt, tmpFile.Name()),
+				Config: testAccS3BucketObjectConfig_updates(rInt, tmpFile.Name()),
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckAWSS3BucketObjectExists("opentelekomcloud_s3_bucket_object.object", &obj),
+					testAccCheckS3BucketObjectExists("opentelekomcloud_s3_bucket_object.object", &obj),
 					resource.TestCheckResourceAttr("opentelekomcloud_s3_bucket_object.object", "etag", "1c7fd13df1515c2a13ad9eb068931f09"),
 				),
 			},
@@ -145,7 +145,7 @@ func TestAccAWSS3BucketObject_updates(t *testing.T) {
 }
 
 // PASS
-func TestAccAWSS3BucketObject_updatesWithVersioning(t *testing.T) {
+func TestAccS3BucketObject_updatesWithVersioning(t *testing.T) {
 	tmpFile, err := ioutil.TempFile("", "tf-acc-s3-obj-updates-w-versions")
 	if err != nil {
 		t.Fatal(err)
@@ -163,12 +163,12 @@ func TestAccAWSS3BucketObject_updatesWithVersioning(t *testing.T) {
 	resource.Test(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
 		Providers:    testAccProviders,
-		CheckDestroy: testAccCheckAWSS3BucketObjectDestroy,
+		CheckDestroy: testAccCheckS3BucketObjectDestroy,
 		Steps: []resource.TestStep{
 			resource.TestStep{
-				Config: testAccAWSS3BucketObjectConfig_updatesWithVersioning(rInt, tmpFile.Name()),
+				Config: testAccS3BucketObjectConfig_updatesWithVersioning(rInt, tmpFile.Name()),
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckAWSS3BucketObjectExists("opentelekomcloud_s3_bucket_object.object", &originalObj),
+					testAccCheckS3BucketObjectExists("opentelekomcloud_s3_bucket_object.object", &originalObj),
 					resource.TestCheckResourceAttr("opentelekomcloud_s3_bucket_object.object", "etag", "cee4407fa91906284e2a5e5e03e86b1b"),
 				),
 			},
@@ -179,18 +179,18 @@ func TestAccAWSS3BucketObject_updatesWithVersioning(t *testing.T) {
 						t.Fatal(err)
 					}
 				},
-				Config: testAccAWSS3BucketObjectConfig_updatesWithVersioning(rInt, tmpFile.Name()),
+				Config: testAccS3BucketObjectConfig_updatesWithVersioning(rInt, tmpFile.Name()),
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckAWSS3BucketObjectExists("opentelekomcloud_s3_bucket_object.object", &modifiedObj),
+					testAccCheckS3BucketObjectExists("opentelekomcloud_s3_bucket_object.object", &modifiedObj),
 					resource.TestCheckResourceAttr("opentelekomcloud_s3_bucket_object.object", "etag", "00b8c73b1b50e7cc932362c7225b8e29"),
-					testAccCheckAWSS3BucketObjectVersionIdDiffers(&originalObj, &modifiedObj),
+					testAccCheckS3BucketObjectVersionIdDiffers(&originalObj, &modifiedObj),
 				),
 			},
 		},
 	})
 }
 
-func testAccCheckAWSS3BucketObjectVersionIdDiffers(first, second *s3.GetObjectOutput) resource.TestCheckFunc {
+func testAccCheckS3BucketObjectVersionIdDiffers(first, second *s3.GetObjectOutput) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
 		if first.VersionId == nil {
 			return fmt.Errorf("Expected first object to have VersionId: %s", first)
@@ -207,7 +207,7 @@ func testAccCheckAWSS3BucketObjectVersionIdDiffers(first, second *s3.GetObjectOu
 	}
 }
 
-func testAccCheckAWSS3BucketObjectDestroy(s *terraform.State) error {
+func testAccCheckS3BucketObjectDestroy(s *terraform.State) error {
 	config := testAccProvider.Meta().(*Config)
 	s3conn, err := config.computeS3conn(OS_REGION_NAME)
 	if err != nil {
@@ -226,13 +226,13 @@ func testAccCheckAWSS3BucketObjectDestroy(s *terraform.State) error {
 				IfMatch: aws.String(rs.Primary.Attributes["etag"]),
 			})
 		if err == nil {
-			return fmt.Errorf("AWS S3 Object still exists: %s", rs.Primary.ID)
+			return fmt.Errorf("Swift S3 Object still exists: %s", rs.Primary.ID)
 		}
 	}
 	return nil
 }
 
-func testAccCheckAWSS3BucketObjectExists(n string, obj *s3.GetObjectOutput) resource.TestCheckFunc {
+func testAccCheckS3BucketObjectExists(n string, obj *s3.GetObjectOutput) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
 		rs, ok := s.RootModule().Resources[n]
 		if !ok {
@@ -264,29 +264,8 @@ func testAccCheckAWSS3BucketObjectExists(n string, obj *s3.GetObjectOutput) reso
 	}
 }
 
-// UNSUPPORTED?  maybe partially?
-/*
-func TestAccAWSS3BucketObject_kms(t *testing.T) {
-	rInt := acctest.RandInt()
-	var obj s3.GetObjectOutput
-
-	resource.Test(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
-		CheckDestroy: testAccCheckAWSS3BucketObjectDestroy,
-		Steps: []resource.TestStep{
-			resource.TestStep{
-				PreConfig: func() {},
-				Config:    testAccAWSS3BucketObjectConfig_withKMSId(rInt),
-				Check:     testAccCheckAWSS3BucketObjectExists("opentelekomcloud_s3_bucket_object.object", &obj),
-			},
-		},
-	})
-}
-*/
-
 // PASS
-func TestAccAWSS3BucketObject_sse(t *testing.T) {
+func TestAccS3BucketObject_sse(t *testing.T) {
 	tmpFile, err := ioutil.TempFile("", "tf-acc-s3-obj-source-sse")
 	if err != nil {
 		t.Fatal(err)
@@ -305,16 +284,16 @@ func TestAccAWSS3BucketObject_sse(t *testing.T) {
 	resource.Test(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
 		Providers:    testAccProviders,
-		CheckDestroy: testAccCheckAWSS3BucketObjectDestroy,
+		CheckDestroy: testAccCheckS3BucketObjectDestroy,
 		Steps: []resource.TestStep{
 			resource.TestStep{
 				PreConfig: func() {},
-				Config:    testAccAWSS3BucketObjectConfig_withSSE(rInt, tmpFile.Name()),
+				Config:    testAccS3BucketObjectConfig_withSSE(rInt, tmpFile.Name()),
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckAWSS3BucketObjectExists(
+					testAccCheckS3BucketObjectExists(
 						"opentelekomcloud_s3_bucket_object.object",
 						&obj),
-					testAccCheckAWSS3BucketObjectSSE(
+					testAccCheckS3BucketObjectSSE(
 						"opentelekomcloud_s3_bucket_object.object",
 						"aws:kms"),
 				),
@@ -324,40 +303,40 @@ func TestAccAWSS3BucketObject_sse(t *testing.T) {
 }
 
 // PASS
-func TestAccAWSS3BucketObject_acl(t *testing.T) {
+func TestAccS3BucketObject_acl(t *testing.T) {
 	rInt := acctest.RandInt()
 	var obj s3.GetObjectOutput
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
 		Providers:    testAccProviders,
-		CheckDestroy: testAccCheckAWSS3BucketObjectDestroy,
+		CheckDestroy: testAccCheckS3BucketObjectDestroy,
 		Steps: []resource.TestStep{
 			resource.TestStep{
-				Config: testAccAWSS3BucketObjectConfig_acl(rInt, "private"),
+				Config: testAccS3BucketObjectConfig_acl(rInt, "private"),
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckAWSS3BucketObjectExists(
+					testAccCheckS3BucketObjectExists(
 						"opentelekomcloud_s3_bucket_object.object", &obj),
 					resource.TestCheckResourceAttr(
 						"opentelekomcloud_s3_bucket_object.object",
 						"acl",
 						"private"),
-					testAccCheckAWSS3BucketObjectAcl(
+					testAccCheckS3BucketObjectAcl(
 						"opentelekomcloud_s3_bucket_object.object",
 						[]string{"FULL_CONTROL"}),
 				),
 			},
 			resource.TestStep{
-				Config: testAccAWSS3BucketObjectConfig_acl(rInt, "public-read"),
+				Config: testAccS3BucketObjectConfig_acl(rInt, "public-read"),
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckAWSS3BucketObjectExists(
+					testAccCheckS3BucketObjectExists(
 						"opentelekomcloud_s3_bucket_object.object",
 						&obj),
 					resource.TestCheckResourceAttr(
 						"opentelekomcloud_s3_bucket_object.object",
 						"acl",
 						"public-read"),
-					testAccCheckAWSS3BucketObjectAcl(
+					testAccCheckS3BucketObjectAcl(
 						"opentelekomcloud_s3_bucket_object.object",
 						[]string{"FULL_CONTROL", "READ"}),
 				),
@@ -366,7 +345,7 @@ func TestAccAWSS3BucketObject_acl(t *testing.T) {
 	})
 }
 
-func testAccCheckAWSS3BucketObjectAcl(n string, expectedPerms []string) resource.TestCheckFunc {
+func testAccCheckS3BucketObjectAcl(n string, expectedPerms []string) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
 		rs, _ := s.RootModule().Resources[n]
 		config := testAccProvider.Meta().(*Config)
@@ -399,7 +378,7 @@ func testAccCheckAWSS3BucketObjectAcl(n string, expectedPerms []string) resource
 }
 
 // PASS
-func TestResourceAWSS3BucketObjectAcl_validation(t *testing.T) {
+func TestResourceS3BucketObjectAcl_validation(t *testing.T) {
 	_, errors := validateS3BucketObjectAclType("incorrect", "acl")
 	if len(errors) == 0 {
 		t.Fatalf("Expected to trigger a validation error")
@@ -427,55 +406,8 @@ func TestResourceAWSS3BucketObjectAcl_validation(t *testing.T) {
 	}
 }
 
-// UNSUPPORTED
-/*
-func TestAccAWSS3BucketObject_storageClass(t *testing.T) {
-	rInt := acctest.RandInt()
-	var obj s3.GetObjectOutput
-
-	resource.Test(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
-		CheckDestroy: testAccCheckAWSS3BucketObjectDestroy,
-		Steps: []resource.TestStep{
-			resource.TestStep{
-				PreConfig: func() {},
-				Config:    testAccAWSS3BucketObjectConfigContent(rInt),
-				Check: resource.ComposeTestCheckFunc(
-					testAccCheckAWSS3BucketObjectExists(
-						"opentelekomcloud_s3_bucket_object.object",
-						&obj),
-					resource.TestCheckResourceAttr(
-						"opentelekomcloud_s3_bucket_object.object",
-						"storage_class",
-						"STANDARD"),
-					testAccCheckAWSS3BucketObjectStorageClass(
-						"opentelekomcloud_s3_bucket_object.object",
-						"STANDARD"),
-				),
-			},
-			resource.TestStep{
-				Config: testAccAWSS3BucketObjectConfig_storageClass(rInt, "REDUCED_REDUNDANCY"),
-				Check: resource.ComposeTestCheckFunc(
-					testAccCheckAWSS3BucketObjectExists(
-						"opentelekomcloud_s3_bucket_object.object",
-						&obj),
-					resource.TestCheckResourceAttr(
-						"opentelekomcloud_s3_bucket_object.object",
-						"storage_class",
-						"REDUCED_REDUNDANCY"),
-					testAccCheckAWSS3BucketObjectStorageClass(
-						"opentelekomcloud_s3_bucket_object.object",
-						"REDUCED_REDUNDANCY"),
-				),
-			},
-		},
-	})
-}
-*/
-
 // PASS
-func TestResourceAWSS3BucketObjectStorageClass_validation(t *testing.T) {
+func TestResourceS3BucketObjectStorageClass_validation(t *testing.T) {
 	_, errors := validateS3BucketObjectStorageClassType("incorrect", "storage_class")
 	if len(errors) == 0 {
 		t.Fatalf("Expected to trigger a validation error")
@@ -503,41 +435,7 @@ func TestResourceAWSS3BucketObjectStorageClass_validation(t *testing.T) {
 	}
 }
 
-func testAccCheckAWSS3BucketObjectStorageClass(n, expectedClass string) resource.TestCheckFunc {
-	return func(s *terraform.State) error {
-		rs, _ := s.RootModule().Resources[n]
-		config := testAccProvider.Meta().(*Config)
-		s3conn, err := config.computeS3conn(OS_REGION_NAME)
-		if err != nil {
-			return fmt.Errorf("Error creating OpenTelekomCloud s3 client: %s", err)
-		}
-
-		out, err := s3conn.HeadObject(&s3.HeadObjectInput{
-			Bucket: aws.String(rs.Primary.Attributes["bucket"]),
-			Key:    aws.String(rs.Primary.Attributes["key"]),
-		})
-
-		if err != nil {
-			return fmt.Errorf("HeadObject error: %v", err)
-		}
-
-		// The "STANDARD" (which is also the default) storage
-		// class when set would not be included in the results.
-		storageClass := s3.StorageClassStandard
-		if out.StorageClass != nil {
-			storageClass = *out.StorageClass
-		}
-
-		if storageClass != expectedClass {
-			return fmt.Errorf("Expected Storage Class to be %v, got %v",
-				expectedClass, storageClass)
-		}
-
-		return nil
-	}
-}
-
-func testAccCheckAWSS3BucketObjectSSE(n, expectedSSE string) resource.TestCheckFunc {
+func testAccCheckS3BucketObjectSSE(n, expectedSSE string) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
 		rs, _ := s.RootModule().Resources[n]
 		config := testAccProvider.Meta().(*Config)
@@ -569,31 +467,7 @@ func testAccCheckAWSS3BucketObjectSSE(n, expectedSSE string) resource.TestCheckF
 	}
 }
 
-// UNSUPPORTED
-/*
-func TestAccAWSS3BucketObject_tags(t *testing.T) {
-	rInt := acctest.RandInt()
-	var obj s3.GetObjectOutput
-
-	resource.Test(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
-		CheckDestroy: testAccCheckAWSS3BucketObjectDestroy,
-		Steps: []resource.TestStep{
-			resource.TestStep{
-				PreConfig: func() {},
-				Config:    testAccAWSS3BucketObjectConfig_withTags(rInt),
-				Check: resource.ComposeTestCheckFunc(
-					testAccCheckAWSS3BucketObjectExists("opentelekomcloud_s3_bucket_object.object", &obj),
-					resource.TestCheckResourceAttr("opentelekomcloud_s3_bucket_object.object", "tags.%", "2"),
-				),
-			},
-		},
-	})
-}
-*/
-
-func testAccAWSS3BucketObjectConfigSource(randInt int, source string) string {
+func testAccS3BucketObjectConfigSource(randInt int, source string) string {
 	return fmt.Sprintf(`
 resource "opentelekomcloud_s3_bucket" "object_bucket" {
     bucket = "tf-object-test-bucket-%d"
@@ -607,7 +481,7 @@ resource "opentelekomcloud_s3_bucket_object" "object" {
 `, randInt, source)
 }
 
-func testAccAWSS3BucketObjectConfig_withContentCharacteristics(randInt int, source string) string {
+func testAccS3BucketObjectConfig_withContentCharacteristics(randInt int, source string) string {
 	return fmt.Sprintf(`
 resource "opentelekomcloud_s3_bucket" "object_bucket_2" {
 	bucket = "tf-object-test-bucket-%d"
@@ -624,7 +498,7 @@ resource "opentelekomcloud_s3_bucket_object" "object" {
 `, randInt, source)
 }
 
-func testAccAWSS3BucketObjectConfigContent(randInt int) string {
+func testAccS3BucketObjectConfigContent(randInt int) string {
 	return fmt.Sprintf(`
 resource "opentelekomcloud_s3_bucket" "object_bucket" {
         bucket = "tf-object-test-bucket-%d"
@@ -637,7 +511,7 @@ resource "opentelekomcloud_s3_bucket_object" "object" {
 `, randInt)
 }
 
-func testAccAWSS3BucketObjectConfig_updates(randInt int, source string) string {
+func testAccS3BucketObjectConfig_updates(randInt int, source string) string {
 	return fmt.Sprintf(`
 resource "opentelekomcloud_s3_bucket" "object_bucket_3" {
 	bucket = "tf-object-test-bucket-%d"
@@ -652,7 +526,7 @@ resource "opentelekomcloud_s3_bucket_object" "object" {
 `, randInt, source, source)
 }
 
-func testAccAWSS3BucketObjectConfig_updatesWithVersioning(randInt int, source string) string {
+func testAccS3BucketObjectConfig_updatesWithVersioning(randInt int, source string) string {
 	return fmt.Sprintf(`
 resource "opentelekomcloud_s3_bucket" "object_bucket_3" {
 	bucket = "tf-object-test-bucket-%d"
@@ -670,27 +544,7 @@ resource "opentelekomcloud_s3_bucket_object" "object" {
 `, randInt, source, source)
 }
 
-/*
-func testAccAWSS3BucketObjectConfig_withKMSId(randInt int) string {
-	return fmt.Sprintf(`
-resource "opentelekomcloud_kms_key" "kms_key_1" {
-}
-
-resource "opentelekomcloud_s3_bucket" "object_bucket_2" {
-	bucket = "tf-object-test-bucket-%d"
-}
-
-resource "opentelekomcloud_s3_bucket_object" "object" {
-	bucket = "${opentelekomcloud_s3_bucket.object_bucket_2.bucket}"
-	key = "test-key"
-	content = "stuff"
-	kms_key_id = "${opentelekomcloud_kms_key.kms_key_1.arn}"
-}
-`, randInt)
-}
-*/
-
-func testAccAWSS3BucketObjectConfig_withSSE(randInt int, source string) string {
+func testAccS3BucketObjectConfig_withSSE(randInt int, source string) string {
 	return fmt.Sprintf(`
 resource "opentelekomcloud_s3_bucket" "object_bucket" {
 	bucket = "tf-object-test-bucket-%d"
@@ -705,7 +559,7 @@ resource "opentelekomcloud_s3_bucket_object" "object" {
 `, randInt, source)
 }
 
-func testAccAWSS3BucketObjectConfig_acl(randInt int, acl string) string {
+func testAccS3BucketObjectConfig_acl(randInt int, acl string) string {
 	return fmt.Sprintf(`
 resource "opentelekomcloud_s3_bucket" "object_bucket" {
         bucket = "tf-object-test-bucket-%d"
@@ -717,36 +571,4 @@ resource "opentelekomcloud_s3_bucket_object" "object" {
         acl = "%s"
 }
 `, randInt, acl)
-}
-
-func testAccAWSS3BucketObjectConfig_storageClass(randInt int, storage_class string) string {
-	return fmt.Sprintf(`
-resource "opentelekomcloud_s3_bucket" "object_bucket" {
-        bucket = "tf-object-test-bucket-%d"
-}
-resource "opentelekomcloud_s3_bucket_object" "object" {
-        bucket = "${opentelekomcloud_s3_bucket.object_bucket.bucket}"
-        key = "test-key"
-        content = "some_bucket_content"
-        storage_class = "%s"
-}
-`, randInt, storage_class)
-}
-
-func testAccAWSS3BucketObjectConfig_withTags(randInt int) string {
-	return fmt.Sprintf(`
-resource "opentelekomcloud_s3_bucket" "object_bucket_2" {
-	bucket = "tf-object-test-bucket-%d"
-}
-
-resource "opentelekomcloud_s3_bucket_object" "object" {
-	bucket = "${opentelekomcloud_s3_bucket.object_bucket_2.bucket}"
-	key = "test-key"
-	content = "stuff"
-	tags {
-		Key1 = "Value One"
-		Description = "Very interesting"
-	}
-}
-`, randInt)
 }

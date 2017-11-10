@@ -159,12 +159,11 @@ func Provider() terraform.ResourceProvider {
 			"opentelekomcloud_images_image_v2":        dataSourceImagesImageV2(),
 			"opentelekomcloud_networking_network_v2":  dataSourceNetworkingNetworkV2(),
 			"opentelekomcloud_networking_secgroup_v2": dataSourceNetworkingSecGroupV2(),
-			"opentelekomcloud_s3_bucket_object":       dataSourceAwsS3BucketObject(),
+			"opentelekomcloud_s3_bucket_object":       dataSourceS3BucketObject(),
 		},
 
 		ResourcesMap: map[string]*schema.Resource{
 			"opentelekomcloud_blockstorage_volume_v2":          resourceBlockStorageVolumeV2(),
-			"opentelekomcloud_compute_flavor_v2":               resourceComputeFlavorV2(),
 			"opentelekomcloud_compute_instance_v2":             resourceComputeInstanceV2(),
 			"opentelekomcloud_compute_keypair_v2":              resourceComputeKeypairV2(),
 			"opentelekomcloud_compute_secgroup_v2":             resourceComputeSecGroupV2(),
@@ -177,8 +176,6 @@ func Provider() terraform.ResourceProvider {
 			"opentelekomcloud_fw_firewall_group_v2":            resourceFWFirewallGroupV2(),
 			"opentelekomcloud_fw_policy_v2":                    resourceFWPolicyV2(),
 			"opentelekomcloud_fw_rule_v2":                      resourceFWRuleV2(),
-			"opentelekomcloud_identity_project_v3":             resourceIdentityProjectV3(),
-			"opentelekomcloud_identity_user_v3":                resourceIdentityUserV3(),
 			"opentelekomcloud_images_image_v2":                 resourceImagesImageV2(),
 			"opentelekomcloud_lb_loadbalancer_v2":              resourceLoadBalancerV2(),
 			"opentelekomcloud_lb_listener_v2":                  resourceListenerV2(),
@@ -194,9 +191,9 @@ func Provider() terraform.ResourceProvider {
 			"opentelekomcloud_networking_router_route_v2":      resourceNetworkingRouterRouteV2(),
 			"opentelekomcloud_networking_secgroup_v2":          resourceNetworkingSecGroupV2(),
 			"opentelekomcloud_networking_secgroup_rule_v2":     resourceNetworkingSecGroupRuleV2(),
-			"opentelekomcloud_s3_bucket":                       resourceAwsS3Bucket(),
-			"opentelekomcloud_s3_bucket_policy":                resourceAwsS3BucketPolicy(),
-			"opentelekomcloud_s3_bucket_object":                resourceAwsS3BucketObject(),
+			"opentelekomcloud_s3_bucket":                       resourceS3Bucket(),
+			"opentelekomcloud_s3_bucket_policy":                resourceS3BucketPolicy(),
+			"opentelekomcloud_s3_bucket_object":                resourceS3BucketObject(),
 		},
 
 		ConfigureFunc: configureProvider,
@@ -208,10 +205,10 @@ var descriptions map[string]string
 func init() {
 	descriptions = map[string]string{
 		"access_key": "The access key for API operations. You can retrieve this\n" +
-			"from the 'Security & Credentials' section of the AWS console.",
+			"from the 'My Credential' section of the console.",
 
 		"secret_key": "The secret key for API operations. You can retrieve this\n" +
-			"from the 'Security & Credentials' section of the AWS console.",
+			"from the 'My Credential' section of the console.",
 
 		"auth_url": "The Identity authentication URL.",
 

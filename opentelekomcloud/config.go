@@ -160,7 +160,7 @@ func (c *Config) LoadAndValidate() error {
 			if awsErr, ok := err.(awserr.Error); ok && awsErr.Code() == "NoCredentialProviders" {
 				return fmt.Errorf(`No valid credential sources found for Swift S3 Provider.
   Please see https://terraform.io/docs/providers/aws/index.html for more information on
-  providing credentials for the AWS Provider`)
+  providing credentials for the S3 Provider`)
 			}
 
 			return fmt.Errorf("Error loading credentials for Swift S3 Provider: %s", err)
