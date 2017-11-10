@@ -13,9 +13,9 @@ import (
 )
 
 // PASS
-func TestAccDataSourceAWSS3BucketObject_basic(t *testing.T) {
+func TestAccDataSourceS3BucketObject_basic(t *testing.T) {
 	rInt := acctest.RandInt()
-	resourceOnlyConf, conf := testAccAWSDataSourceS3ObjectConfig_basic(rInt)
+	resourceOnlyConf, conf := testAccDataSourceS3ObjectConfig_basic(rInt)
 
 	var rObj s3.GetObjectOutput
 	var dsObj s3.GetObjectOutput
@@ -28,7 +28,7 @@ func TestAccDataSourceAWSS3BucketObject_basic(t *testing.T) {
 			resource.TestStep{
 				Config: resourceOnlyConf,
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckAWSS3BucketObjectExists("opentelekomcloud_s3_bucket_object.object", &rObj),
+					testAccCheckS3BucketObjectExists("opentelekomcloud_s3_bucket_object.object", &rObj),
 				),
 			},
 			resource.TestStep{
@@ -48,9 +48,9 @@ func TestAccDataSourceAWSS3BucketObject_basic(t *testing.T) {
 }
 
 // PASS
-func TestAccDataSourceAWSS3BucketObject_readableBody(t *testing.T) {
+func TestAccDataSourceS3BucketObject_readableBody(t *testing.T) {
 	rInt := acctest.RandInt()
-	resourceOnlyConf, conf := testAccAWSDataSourceS3ObjectConfig_readableBody(rInt)
+	resourceOnlyConf, conf := testAccDataSourceS3ObjectConfig_readableBody(rInt)
 
 	var rObj s3.GetObjectOutput
 	var dsObj s3.GetObjectOutput
@@ -63,7 +63,7 @@ func TestAccDataSourceAWSS3BucketObject_readableBody(t *testing.T) {
 			resource.TestStep{
 				Config: resourceOnlyConf,
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckAWSS3BucketObjectExists("opentelekomcloud_s3_bucket_object.object", &rObj),
+					testAccCheckS3BucketObjectExists("opentelekomcloud_s3_bucket_object.object", &rObj),
 				),
 			},
 			resource.TestStep{
@@ -82,50 +82,10 @@ func TestAccDataSourceAWSS3BucketObject_readableBody(t *testing.T) {
 	})
 }
 
-// UNSUPPORTED?
-/*
-func TestAccDataSourceAWSS3BucketObject_kmsEncrypted(t *testing.T) {
-	rInt := acctest.RandInt()
-	resourceOnlyConf, conf := testAccAWSDataSourceS3ObjectConfig_kmsEncrypted(rInt)
-
-	var rObj s3.GetObjectOutput
-	var dsObj s3.GetObjectOutput
-
-	resource.Test(t, resource.TestCase{
-		PreCheck:                  func() { testAccPreCheck(t) },
-		Providers:                 testAccProviders,
-		PreventPostDestroyRefresh: true,
-		Steps: []resource.TestStep{
-			resource.TestStep{
-				Config: resourceOnlyConf,
-				Check: resource.ComposeTestCheckFunc(
-					testAccCheckAWSS3BucketObjectExists("opentelekomcloud_s3_bucket_object.object", &rObj),
-				),
-			},
-			resource.TestStep{
-				Config: conf,
-				Check: resource.ComposeTestCheckFunc(
-					testAccCheckAwsS3ObjectDataSourceExists("data.opentelekomcloud_s3_bucket_object.obj", &dsObj),
-					resource.TestCheckResourceAttr("data.opentelekomcloud_s3_bucket_object.obj", "content_length", "22"),
-					resource.TestCheckResourceAttr("data.opentelekomcloud_s3_bucket_object.obj", "content_type", "text/plain"),
-					resource.TestMatchResourceAttr("data.opentelekomcloud_s3_bucket_object.obj", "etag", regexp.MustCompile("^[a-f0-9]{32}$")),
-					resource.TestCheckResourceAttr("data.opentelekomcloud_s3_bucket_object.obj", "server_side_encryption", "aws:kms"),
-					resource.TestMatchResourceAttr("data.opentelekomcloud_s3_bucket_object.obj", "sse_kms_key_id",
-						regexp.MustCompile("^arn:aws:kms:[a-z]{2}-[a-z]+-\\d{1}:[0-9]{12}:key/[a-z0-9-]{36}$")),
-					resource.TestMatchResourceAttr("data.opentelekomcloud_s3_bucket_object.obj", "last_modified",
-						regexp.MustCompile("^[a-zA-Z]{3}, [0-9]+ [a-zA-Z]+ [0-9]{4} [0-9:]+ [A-Z]+$")),
-					resource.TestCheckResourceAttr("data.opentelekomcloud_s3_bucket_object.obj", "body", "Keep Calm and Carry On"),
-				),
-			},
-		},
-	})
-}
-*/
-
 // PASS
 func TestAccDataSourceAWSS3BucketObject_allParams(t *testing.T) {
 	rInt := acctest.RandInt()
-	resourceOnlyConf, conf := testAccAWSDataSourceS3ObjectConfig_allParams(rInt)
+	resourceOnlyConf, conf := testAccDataSourceS3ObjectConfig_allParams(rInt)
 
 	var rObj s3.GetObjectOutput
 	var dsObj s3.GetObjectOutput
@@ -138,7 +98,7 @@ func TestAccDataSourceAWSS3BucketObject_allParams(t *testing.T) {
 			resource.TestStep{
 				Config: resourceOnlyConf,
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckAWSS3BucketObjectExists("opentelekomcloud_s3_bucket_object.object", &rObj),
+					testAccCheckS3BucketObjectExists("opentelekomcloud_s3_bucket_object.object", &rObj),
 				),
 			},
 			resource.TestStep{
@@ -150,8 +110,6 @@ func TestAccDataSourceAWSS3BucketObject_allParams(t *testing.T) {
 					resource.TestCheckResourceAttr("data.opentelekomcloud_s3_bucket_object.obj", "etag", "723f7a6ac0c57b445790914668f98640"),
 					resource.TestMatchResourceAttr("data.opentelekomcloud_s3_bucket_object.obj", "last_modified",
 						regexp.MustCompile("^[a-zA-Z]{3}, [0-9]+ [a-zA-Z]+ [0-9]{4} [0-9:]+ [A-Z]+$")),
-					// TODO: Why is this different?
-					//resource.TestMatchResourceAttr("data.opentelekomcloud_s3_bucket_object.obj", "version_id", regexp.MustCompile("^.{32}$")),
 					resource.TestCheckNoResourceAttr("data.opentelekomcloud_s3_bucket_object.obj", "body"),
 					resource.TestCheckResourceAttr("data.opentelekomcloud_s3_bucket_object.obj", "cache_control", "no-cache"),
 					resource.TestCheckResourceAttr("data.opentelekomcloud_s3_bucket_object.obj", "content_disposition", "attachment"),
@@ -160,14 +118,11 @@ func TestAccDataSourceAWSS3BucketObject_allParams(t *testing.T) {
 					// Encryption is off
 					resource.TestCheckResourceAttr("data.opentelekomcloud_s3_bucket_object.obj", "server_side_encryption", ""),
 					resource.TestCheckResourceAttr("data.opentelekomcloud_s3_bucket_object.obj", "sse_kms_key_id", ""),
-					// Supported, but difficult to reproduce in short testing time
-					//resource.TestCheckResourceAttr("data.opentelekomcloud_s3_bucket_object.obj", "storage_class", "STANDARD"),
 					resource.TestCheckResourceAttr("data.opentelekomcloud_s3_bucket_object.obj", "expiration", ""),
 					// Currently unsupported in opentelekomcloud_s3_bucket_object resource
 					resource.TestCheckResourceAttr("data.opentelekomcloud_s3_bucket_object.obj", "expires", ""),
 					resource.TestCheckResourceAttr("data.opentelekomcloud_s3_bucket_object.obj", "website_redirect_location", ""),
 					resource.TestCheckResourceAttr("data.opentelekomcloud_s3_bucket_object.obj", "metadata.%", "0"),
-					//resource.TestCheckResourceAttr("data.opentelekomcloud_s3_bucket_object.obj", "tags.%", "1"),
 				),
 			},
 		},
@@ -206,7 +161,7 @@ func testAccCheckAwsS3ObjectDataSourceExists(n string, obj *s3.GetObjectOutput) 
 	}
 }
 
-func testAccAWSDataSourceS3ObjectConfig_basic(randInt int) (string, string) {
+func testAccDataSourceS3ObjectConfig_basic(randInt int) (string, string) {
 	resources := fmt.Sprintf(`
 resource "opentelekomcloud_s3_bucket" "object_bucket" {
 	bucket = "tf-object-test-bucket-%d"
@@ -227,7 +182,7 @@ data "opentelekomcloud_s3_bucket_object" "obj" {
 	return resources, both
 }
 
-func testAccAWSDataSourceS3ObjectConfig_readableBody(randInt int) (string, string) {
+func testAccDataSourceS3ObjectConfig_readableBody(randInt int) (string, string) {
 	resources := fmt.Sprintf(`
 resource "opentelekomcloud_s3_bucket" "object_bucket" {
 	bucket = "tf-object-test-bucket-%d"
@@ -249,36 +204,7 @@ data "opentelekomcloud_s3_bucket_object" "obj" {
 	return resources, both
 }
 
-/*
-func testAccAWSDataSourceS3ObjectConfig_kmsEncrypted(randInt int) (string, string) {
-	resources := fmt.Sprintf(`
-resource "opentelekomcloud_s3_bucket" "object_bucket" {
-	bucket = "tf-object-test-bucket-%d"
-}
-resource "opentelekomcloud_kms_key" "example" {
-  description             = "TF Acceptance Test KMS key"
-  deletion_window_in_days = 7
-}
-resource "opentelekomcloud_s3_bucket_object" "object" {
-	bucket = "${opentelekomcloud_s3_bucket.object_bucket.bucket}"
-	key = "tf-testing-obj-%d-encrypted"
-	content = "Keep Calm and Carry On"
-	content_type = "text/plain"
-	kms_key_id = "${opentelekomcloud_kms_key.example.arn}"
-}
-`, randInt, randInt)
-
-	both := fmt.Sprintf(`%s
-data "opentelekomcloud_s3_bucket_object" "obj" {
-	bucket = "tf-object-test-bucket-%d"
-	key = "tf-testing-obj-%d-encrypted"
-}`, resources, randInt, randInt)
-
-	return resources, both
-}
-*/
-
-func testAccAWSDataSourceS3ObjectConfig_allParams(randInt int) (string, string) {
+func testAccDataSourceS3ObjectConfig_allParams(randInt int) (string, string) {
 	resources := fmt.Sprintf(`
 resource "opentelekomcloud_s3_bucket" "object_bucket" {
 	bucket = "tf-object-test-bucket-%d"

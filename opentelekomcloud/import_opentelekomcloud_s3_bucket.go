@@ -9,7 +9,7 @@ import (
 	"github.com/hashicorp/terraform/helper/schema"
 )
 
-func resourceAwsS3BucketImportState(
+func resourceS3BucketImportState(
 	d *schema.ResourceData,
 	meta interface{}) ([]*schema.ResourceData, error) {
 
@@ -32,7 +32,7 @@ func resourceAwsS3BucketImportState(
 		return nil, errwrap.Wrapf("Error importing AWS S3 bucket policy: {{err}}", err)
 	}
 
-	policy := resourceAwsS3BucketPolicy()
+	policy := resourceS3BucketPolicy()
 	pData := policy.Data(nil)
 	pData.SetId(d.Id())
 	pData.SetType("opentelekomcloud_s3_bucket_policy")

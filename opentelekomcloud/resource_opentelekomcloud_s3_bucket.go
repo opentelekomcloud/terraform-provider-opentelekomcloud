@@ -19,14 +19,14 @@ import (
 	"github.com/hashicorp/terraform/helper/schema"
 )
 
-func resourceAwsS3Bucket() *schema.Resource {
+func resourceS3Bucket() *schema.Resource {
 	return &schema.Resource{
-		Create: resourceAwsS3BucketCreate,
-		Read:   resourceAwsS3BucketRead,
-		Update: resourceAwsS3BucketUpdate,
-		Delete: resourceAwsS3BucketDelete,
+		Create: resourceS3BucketCreate,
+		Read:   resourceS3BucketRead,
+		Update: resourceS3BucketUpdate,
+		Delete: resourceS3BucketDelete,
 		Importer: &schema.ResourceImporter{
-			State: resourceAwsS3BucketImportState,
+			State: resourceS3BucketImportState,
 		},
 
 		Schema: map[string]*schema.Schema{
@@ -220,12 +220,10 @@ func resourceAwsS3Bucket() *schema.Resource {
 							Type:     schema.TypeString,
 							Optional: true,
 						},
-						//"tags": tagsSchema(),
 						"enabled": {
 							Type:     schema.TypeBool,
 							Required: true,
 						},
-						// TODO: Does this work?
 						"abort_incomplete_multipart_upload_days": {
 							Type:     schema.TypeInt,
 							Optional: true,
@@ -267,49 +265,6 @@ func resourceAwsS3Bucket() *schema.Resource {
 								},
 							},
 						},
-						/*"transition": {
-							Type:     schema.TypeSet,
-							Optional: true,
-							Set:      transitionHash,
-							Elem: &schema.Resource{
-								Schema: map[string]*schema.Schema{
-									"date": {
-										Type:         schema.TypeString,
-										Optional:     true,
-										ValidateFunc: validateS3BucketLifecycleTimestamp,
-									},
-									"days": {
-										Type:         schema.TypeInt,
-										Optional:     true,
-										ValidateFunc: validateS3BucketLifecycleTransitionDays,
-									},
-									"storage_class": {
-										Type:         schema.TypeString,
-										Required:     true,
-										ValidateFunc: validateS3BucketLifecycleStorageClass,
-									},
-								},
-							},
-						},
-						"noncurrent_version_transition": {
-							Type:     schema.TypeSet,
-							Optional: true,
-							Set:      transitionHash,
-							Elem: &schema.Resource{
-								Schema: map[string]*schema.Schema{
-									"days": {
-										Type:         schema.TypeInt,
-										Optional:     true,
-										ValidateFunc: validateS3BucketLifecycleTransitionDays,
-									},
-									"storage_class": {
-										Type:         schema.TypeString,
-										Required:     true,
-										ValidateFunc: validateS3BucketLifecycleStorageClass,
-									},
-								},
-							},
-						}, */
 					},
 				},
 			},
@@ -319,87 +274,11 @@ func resourceAwsS3Bucket() *schema.Resource {
 				Optional: true,
 				Default:  false,
 			},
-
-			/* "acceleration_status": {
-				Type:         schema.TypeString,
-				Optional:     true,
-				Computed:     true,
-				ValidateFunc: validateS3BucketAccelerationStatus,
-			}, */
-
-			/* "request_payer": {
-				Type:         schema.TypeString,
-				Optional:     true,
-				Computed:     true,
-				ValidateFunc: validateS3BucketRequestPayerType,
-			}, */
-
-			/* "replication_configuration": {
-				Type:             schema.TypeList,
-				Optional:         true,
-				MaxItems:         1,
-				DiffSuppressFunc: suppressEquivalentReplicationConfigurations,
-				Elem: &schema.Resource{
-					Schema: map[string]*schema.Schema{
-						"role": {
-							Type:     schema.TypeString,
-							Required: true,
-						},
-						"rules": {
-							Type:     schema.TypeSet,
-							Required: true,
-							Set:      rulesHash,
-							Elem: &schema.Resource{
-								Schema: map[string]*schema.Schema{
-									"id": {
-										Type:         schema.TypeString,
-										Optional:     true,
-										ValidateFunc: validateS3BucketReplicationRuleId,
-									},
-									"destination": {
-										Type:     schema.TypeSet,
-										MaxItems: 1,
-										MinItems: 1,
-										Required: true,
-										Set:      destinationHash,
-										Elem: &schema.Resource{
-											Schema: map[string]*schema.Schema{
-												"bucket": {
-													Type:         schema.TypeString,
-													Required:     true,
-													ValidateFunc: validateArn,
-												},
-												"storage_class": {
-													Type:         schema.TypeString,
-													Optional:     true,
-													ValidateFunc: validateS3BucketReplicationDestinationStorageClass,
-												},
-											},
-										},
-									},
-									"prefix": {
-										Type:         schema.TypeString,
-										Required:     true,
-										ValidateFunc: validateS3BucketReplicationRulePrefix,
-									},
-									"status": {
-										Type:         schema.TypeString,
-										Required:     true,
-										ValidateFunc: validateS3BucketReplicationRuleStatus,
-									},
-								},
-							},
-						},
-					},
-				},
-			}, */
-
-			//"tags": tagsSchema(),
 		},
 	}
 }
 
-func resourceAwsS3BucketCreate(d *schema.ResourceData, meta interface{}) error {
+func resourceS3BucketCreate(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*Config)
 	s3conn, err := config.computeS3conn(GetRegion(d, config))
 	if err != nil {
@@ -433,16 +312,6 @@ func resourceAwsS3BucketCreate(d *schema.ResourceData, meta interface{}) error {
 	}
 	log.Printf("[DEBUG] S3 bucket create: %s, using region: %s", bucket, awsRegion)
 
-	// Special case us-east-1 region and do not set the LocationConstraint.
-	// See "Request Elements: http://docs.aws.amazon.com/AmazonS3/latest/API/RESTBucketPUT.html
-	// NOT RELEVANT to OTC
-	/*
-		if awsRegion != "us-east-1" {
-			req.CreateBucketConfiguration = &s3.CreateBucketConfiguration{
-				LocationConstraint: aws.String(awsRegion),
-			}
-		} */
-
 	if err := validateS3BucketName(bucket, awsRegion); err != nil {
 		return fmt.Errorf("Error validating S3 bucket name: %s", err)
 	}
@@ -472,50 +341,47 @@ func resourceAwsS3BucketCreate(d *schema.ResourceData, meta interface{}) error {
 
 	// Assign the bucket name as the resource ID
 	d.SetId(bucket)
-	return resourceAwsS3BucketUpdate(d, meta)
+	return resourceS3BucketUpdate(d, meta)
 }
 
-func resourceAwsS3BucketUpdate(d *schema.ResourceData, meta interface{}) error {
+func resourceS3BucketUpdate(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*Config)
 	s3conn, err := config.computeS3conn(GetRegion(d, config))
 	if err != nil {
 		return fmt.Errorf("Error creating OpenTelekomCloud s3 client: %s", err)
 	}
-	if err := setTagsS3(s3conn, d); err != nil {
-		return fmt.Errorf("%q: %s", d.Get("bucket").(string), err)
-	}
 
 	if d.HasChange("policy") {
-		if err := resourceAwsS3BucketPolicyUpdate(s3conn, d); err != nil {
+		if err := resourceS3BucketPolicyUpdate(s3conn, d); err != nil {
 			return err
 		}
 	}
 
 	if d.HasChange("cors_rule") {
-		if err := resourceAwsS3BucketCorsUpdate(s3conn, d); err != nil {
+		if err := resourceS3BucketCorsUpdate(s3conn, d); err != nil {
 			return err
 		}
 	}
 
 	if d.HasChange("website") {
-		if err := resourceAwsS3BucketWebsiteUpdate(s3conn, d); err != nil {
+		if err := resourceS3BucketWebsiteUpdate(s3conn, d); err != nil {
 			return err
 		}
 	}
 
 	if d.HasChange("versioning") {
-		if err := resourceAwsS3BucketVersioningUpdate(s3conn, d); err != nil {
+		if err := resourceS3BucketVersioningUpdate(s3conn, d); err != nil {
 			return err
 		}
 	}
 	if d.HasChange("acl") {
-		if err := resourceAwsS3BucketAclUpdate(s3conn, d); err != nil {
+		if err := resourceS3BucketAclUpdate(s3conn, d); err != nil {
 			return err
 		}
 	}
 
 	if d.HasChange("logging") {
-		if err := resourceAwsS3BucketLoggingUpdate(s3conn, d); err != nil {
+		if err := resourceS3BucketLoggingUpdate(s3conn, d); err != nil {
 			return err
 		}
 	}
@@ -526,28 +392,10 @@ func resourceAwsS3BucketUpdate(d *schema.ResourceData, meta interface{}) error {
 		}
 	}
 
-	/* if d.HasChange("acceleration_status") {
-		if err := resourceAwsS3BucketAccelerationUpdate(s3conn, d); err != nil {
-			return err
-		}
-	} */
-
-	/* if d.HasChange("request_payer") {
-		if err := resourceAwsS3BucketRequestPayerUpdate(s3conn, d); err != nil {
-			return err
-		}
-	} */
-
-	/* if d.HasChange("replication_configuration") {
-		if err := resourceAwsS3BucketReplicationConfigurationUpdate(s3conn, d); err != nil {
-			return err
-		}
-	} */
-
-	return resourceAwsS3BucketRead(d, meta)
+	return resourceS3BucketRead(d, meta)
 }
 
-func resourceAwsS3BucketRead(d *schema.ResourceData, meta interface{}) error {
+func resourceS3BucketRead(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*Config)
 	s3conn, err := config.computeS3conn(GetRegion(d, config))
 	if err != nil {
@@ -698,9 +546,6 @@ func resourceAwsS3BucketRead(d *schema.ResourceData, meta interface{}) error {
 		return err
 	}
 
-	// Read the versioning configuration
-	//log.Printf("foo=%d.\n", foo())
-
 	versioningResponse, err := retryOnAwsCode("NoSuchBucket", func() (interface{}, error) {
 		return s3conn.GetBucketVersioning(&s3.GetBucketVersioningInput{
 			Bucket: aws.String(d.Id()),
@@ -730,55 +575,6 @@ func resourceAwsS3BucketRead(d *schema.ResourceData, meta interface{}) error {
 			return err
 		}
 	}
-
-	// Read the acceleration status
-	/*
-		accelerateResponse, err := retryOnAwsCode("NoSuchBucket", func() (interface{}, error) {
-			return s3conn.GetBucketAccelerateConfiguration(&s3.GetBucketAccelerateConfigurationInput{
-				Bucket: aws.String(d.Id()),
-			})
-		})
-		accelerate := accelerateResponse.(*s3.GetBucketAccelerateConfigurationOutput)
-		if err != nil {
-			// Amazon S3 Transfer Acceleration might not be supported in the
-			// given region, for example, China (Beijing) and the Government
-			// Cloud does not support this feature at the moment.
-			if awsErr, ok := err.(awserr.Error); ok && awsErr.Code() != "UnsupportedArgument" {
-				return err
-			}
-
-			var awsRegion string
-			if region, ok := d.GetOk("region"); ok {
-				awsRegion = region.(string)
-			} else {
-				awsRegion = meta.(*Config).Region
-			}
-
-			log.Printf("[WARN] S3 bucket: %s, the S3 Transfer Acceleration is not supported in the region: %s", d.Id(), awsRegion)
-		} else {
-			log.Printf("[DEBUG] S3 bucket: %s, read Acceleration: %v", d.Id(), accelerate)
-			d.Set("acceleration_status", accelerate.Status)
-		}
-	*/
-
-	// Read the request payer configuration.
-	/*
-		payerResponse, err := retryOnAwsCode("NoSuchBucket", func() (interface{}, error) {
-			return s3conn.GetBucketRequestPayment(&s3.GetBucketRequestPaymentInput{
-				Bucket: aws.String(d.Id()),
-			})
-		})
-		payer := payerResponse.(*s3.GetBucketRequestPaymentOutput)
-		if err != nil {
-			return err
-		}
-		log.Printf("[DEBUG] S3 Bucket: %s, read request payer: %v", d.Id(), payer)
-		if payer.Payer != nil {
-			if err := d.Set("request_payer", *payer.Payer); err != nil {
-				return err
-			}
-		}
-	*/
 
 	// Read the logging configuration
 	loggingResponse, err := retryOnAwsCode("NoSuchBucket", func() (interface{}, error) {
@@ -837,10 +633,6 @@ func resourceAwsS3BucketRead(d *schema.ResourceData, meta interface{}) error {
 					// Prefix
 					if filter.And.Prefix != nil && *filter.And.Prefix != "" {
 						rule["prefix"] = *filter.And.Prefix
-					}
-					// Tag
-					if len(filter.And.Tags) > 0 {
-						rule["tags"] = tagsToMapS3(filter.And.Tags)
 					}
 				} else {
 					// Prefix
@@ -934,29 +726,6 @@ func resourceAwsS3BucketRead(d *schema.ResourceData, meta interface{}) error {
 		}
 	}
 
-	// Read the bucket replication configuration
-	/*
-		replicationResponse, err := retryOnAwsCode("NoSuchBucket", func() (interface{}, error) {
-			return s3conn.GetBucketReplication(&s3.GetBucketReplicationInput{
-				Bucket: aws.String(d.Id()),
-			})
-		})
-		replication := replicationResponse.(*s3.GetBucketReplicationOutput)
-		if err != nil {
-			if awsError, ok := err.(awserr.RequestFailure); ok && awsError.StatusCode() != 404 {
-				return err
-			}
-		}
-
-		log.Printf("[DEBUG] S3 Bucket: %s, read replication configuration: %v", d.Id(), replication)
-		if r := replication.ReplicationConfiguration; r != nil {
-			if err := d.Set("replication_configuration", flattenAwsS3BucketReplicationConfiguration(replication.ReplicationConfiguration)); err != nil {
-				log.Printf("[DEBUG] Error setting replication configuration: %s", err)
-				return err
-			}
-		}
-	*/
-
 	// Add the region as an attribute
 
 	locationResponse, err := retryOnAwsCode("NoSuchBucket", func() (interface{}, error) {
@@ -1019,7 +788,7 @@ func resourceAwsS3BucketRead(d *schema.ResourceData, meta interface{}) error {
 	return nil
 }
 
-func resourceAwsS3BucketDelete(d *schema.ResourceData, meta interface{}) error {
+func resourceS3BucketDelete(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*Config)
 	s3conn, err := config.computeS3conn(GetRegion(d, config))
 	if err != nil {
@@ -1083,7 +852,7 @@ func resourceAwsS3BucketDelete(d *schema.ResourceData, meta interface{}) error {
 				}
 
 				// this line recurses until all objects are deleted or an error is returned
-				return resourceAwsS3BucketDelete(d, meta)
+				return resourceS3BucketDelete(d, meta)
 			}
 		}
 		return fmt.Errorf("Error deleting S3 Bucket: %s %q", err, d.Get("bucket").(string))
@@ -1091,7 +860,7 @@ func resourceAwsS3BucketDelete(d *schema.ResourceData, meta interface{}) error {
 	return nil
 }
 
-func resourceAwsS3BucketPolicyUpdate(s3conn *s3.S3, d *schema.ResourceData) error {
+func resourceS3BucketPolicyUpdate(s3conn *s3.S3, d *schema.ResourceData) error {
 	bucket := d.Get("bucket").(string)
 	policy := d.Get("policy").(string)
 
@@ -1134,7 +903,7 @@ func resourceAwsS3BucketPolicyUpdate(s3conn *s3.S3, d *schema.ResourceData) erro
 	return nil
 }
 
-func resourceAwsS3BucketCorsUpdate(s3conn *s3.S3, d *schema.ResourceData) error {
+func resourceS3BucketCorsUpdate(s3conn *s3.S3, d *schema.ResourceData) error {
 	bucket := d.Get("bucket").(string)
 	rawCors := d.Get("cors_rule").([]interface{})
 
@@ -1199,7 +968,7 @@ func resourceAwsS3BucketCorsUpdate(s3conn *s3.S3, d *schema.ResourceData) error 
 	return nil
 }
 
-func resourceAwsS3BucketWebsiteUpdate(s3conn *s3.S3, d *schema.ResourceData) error {
+func resourceS3BucketWebsiteUpdate(s3conn *s3.S3, d *schema.ResourceData) error {
 	ws := d.Get("website").([]interface{})
 
 	if len(ws) == 1 {
@@ -1209,15 +978,15 @@ func resourceAwsS3BucketWebsiteUpdate(s3conn *s3.S3, d *schema.ResourceData) err
 		} else {
 			w = make(map[string]interface{})
 		}
-		return resourceAwsS3BucketWebsitePut(s3conn, d, w)
+		return resourceS3BucketWebsitePut(s3conn, d, w)
 	} else if len(ws) == 0 {
-		return resourceAwsS3BucketWebsiteDelete(s3conn, d)
+		return resourceS3BucketWebsiteDelete(s3conn, d)
 	} else {
 		return fmt.Errorf("Cannot specify more than one website.")
 	}
 }
 
-func resourceAwsS3BucketWebsitePut(s3conn *s3.S3, d *schema.ResourceData, website map[string]interface{}) error {
+func resourceS3BucketWebsitePut(s3conn *s3.S3, d *schema.ResourceData, website map[string]interface{}) error {
 	bucket := d.Get("bucket").(string)
 
 	var indexDocument, errorDocument, redirectAllRequestsTo, routingRules string
@@ -1287,7 +1056,7 @@ func resourceAwsS3BucketWebsitePut(s3conn *s3.S3, d *schema.ResourceData, websit
 	return nil
 }
 
-func resourceAwsS3BucketWebsiteDelete(s3conn *s3.S3, d *schema.ResourceData) error {
+func resourceS3BucketWebsiteDelete(s3conn *s3.S3, d *schema.ResourceData) error {
 	bucket := d.Get("bucket").(string)
 	deleteInput := &s3.DeleteBucketWebsiteInput{Bucket: aws.String(bucket)}
 
@@ -1348,35 +1117,10 @@ func WebsiteEndpoint(bucket string, region string) *S3Website {
 func WebsiteDomainUrl(region string) string {
 	region = normalizeRegion(region)
 
-	// New regions uses different syntax for website endpoints
-	// http://docs.aws.amazon.com/AmazonS3/latest/dev/WebsiteEndpoints.html
-	if isOldRegion(region) {
-		return fmt.Sprintf("s3-website-%s.amazonaws.com", region)
-	}
 	return fmt.Sprintf("s3-website.%s.amazonaws.com", region)
 }
 
-func isOldRegion(region string) bool {
-	oldRegions := []string{
-		"ap-northeast-1",
-		"ap-southeast-1",
-		"ap-southeast-2",
-		"eu-west-1",
-		"sa-east-1",
-		"us-east-1",
-		"us-gov-west-1",
-		"us-west-1",
-		"us-west-2",
-	}
-	for _, r := range oldRegions {
-		if region == r {
-			return true
-		}
-	}
-	return false
-}
-
-func resourceAwsS3BucketAclUpdate(s3conn *s3.S3, d *schema.ResourceData) error {
+func resourceS3BucketAclUpdate(s3conn *s3.S3, d *schema.ResourceData) error {
 	acl := d.Get("acl").(string)
 	bucket := d.Get("bucket").(string)
 
@@ -1396,7 +1140,7 @@ func resourceAwsS3BucketAclUpdate(s3conn *s3.S3, d *schema.ResourceData) error {
 	return nil
 }
 
-func resourceAwsS3BucketVersioningUpdate(s3conn *s3.S3, d *schema.ResourceData) error {
+func resourceS3BucketVersioningUpdate(s3conn *s3.S3, d *schema.ResourceData) error {
 	v := d.Get("versioning").([]interface{})
 	bucket := d.Get("bucket").(string)
 	vc := &s3.VersioningConfiguration{}
@@ -1436,7 +1180,7 @@ func resourceAwsS3BucketVersioningUpdate(s3conn *s3.S3, d *schema.ResourceData) 
 	return nil
 }
 
-func resourceAwsS3BucketLoggingUpdate(s3conn *s3.S3, d *schema.ResourceData) error {
+func resourceS3BucketLoggingUpdate(s3conn *s3.S3, d *schema.ResourceData) error {
 	logging := d.Get("logging").(*schema.Set).List()
 	bucket := d.Get("bucket").(string)
 	loggingStatus := &s3.BucketLoggingStatus{}
@@ -1471,143 +1215,6 @@ func resourceAwsS3BucketLoggingUpdate(s3conn *s3.S3, d *schema.ResourceData) err
 	return nil
 }
 
-/*
-func resourceAwsS3BucketAccelerationUpdate(s3conn *s3.S3, d *schema.ResourceData) error {
-	bucket := d.Get("bucket").(string)
-	enableAcceleration := d.Get("acceleration_status").(string)
-
-	i := &s3.PutBucketAccelerateConfigurationInput{
-		Bucket: aws.String(bucket),
-		AccelerateConfiguration: &s3.AccelerateConfiguration{
-			Status: aws.String(enableAcceleration),
-		},
-	}
-	log.Printf("[DEBUG] S3 put bucket acceleration: %#v", i)
-
-	_, err := retryOnAwsCode("NoSuchBucket", func() (interface{}, error) {
-		return s3conn.PutBucketAccelerateConfiguration(i)
-	})
-	if err != nil {
-		return fmt.Errorf("Error putting S3 acceleration: %s", err)
-	}
-
-	return nil
-}
-*/
-
-/*
-func resourceAwsS3BucketRequestPayerUpdate(s3conn *s3.S3, d *schema.ResourceData) error {
-	bucket := d.Get("bucket").(string)
-	payer := d.Get("request_payer").(string)
-
-	i := &s3.PutBucketRequestPaymentInput{
-		Bucket: aws.String(bucket),
-		RequestPaymentConfiguration: &s3.RequestPaymentConfiguration{
-			Payer: aws.String(payer),
-		},
-	}
-	log.Printf("[DEBUG] S3 put bucket request payer: %#v", i)
-
-	_, err := retryOnAwsCode("NoSuchBucket", func() (interface{}, error) {
-		return s3conn.PutBucketRequestPayment(i)
-	})
-	if err != nil {
-		return fmt.Errorf("Error putting S3 request payer: %s", err)
-	}
-
-	return nil
-}
-*/
-
-/*
-func resourceAwsS3BucketReplicationConfigurationUpdate(s3conn *s3.S3, d *schema.ResourceData) error {
-	bucket := d.Get("bucket").(string)
-	replicationConfiguration := d.Get("replication_configuration").([]interface{})
-
-	if len(replicationConfiguration) == 0 {
-		i := &s3.DeleteBucketReplicationInput{
-			Bucket: aws.String(bucket),
-		}
-
-		err := resource.Retry(1*time.Minute, func() *resource.RetryError {
-			if _, err := s3conn.DeleteBucketReplication(i); err != nil {
-				return resource.NonRetryableError(err)
-			}
-			return nil
-		})
-		if err != nil {
-			return fmt.Errorf("Error removing S3 bucket replication: %s", err)
-		}
-		return nil
-	}
-
-	hasVersioning := false
-	// Validate that bucket versioning is enabled
-	if versioning, ok := d.GetOk("versioning"); ok {
-		v := versioning.([]interface{})
-
-		if v[0].(map[string]interface{})["enabled"].(bool) {
-			hasVersioning = true
-		}
-	}
-
-	if !hasVersioning {
-		return fmt.Errorf("versioning must be enabled to allow S3 bucket replication")
-	}
-
-	c := replicationConfiguration[0].(map[string]interface{})
-
-	rc := &s3.ReplicationConfiguration{}
-	if val, ok := c["role"]; ok {
-		rc.Role = aws.String(val.(string))
-	}
-
-	rcRules := c["rules"].(*schema.Set).List()
-	rules := []*s3.ReplicationRule{}
-	for _, v := range rcRules {
-		rr := v.(map[string]interface{})
-		rcRule := &s3.ReplicationRule{
-			Prefix: aws.String(rr["prefix"].(string)),
-			Status: aws.String(rr["status"].(string)),
-		}
-
-		if rrid, ok := rr["id"]; ok {
-			rcRule.ID = aws.String(rrid.(string))
-		}
-
-		ruleDestination := &s3.Destination{}
-		if destination, ok := rr["destination"]; ok {
-			dest := destination.(*schema.Set).List()
-
-			bd := dest[0].(map[string]interface{})
-			ruleDestination.Bucket = aws.String(bd["bucket"].(string))
-
-			if storageClass, ok := bd["storage_class"]; ok && storageClass != "" {
-				ruleDestination.StorageClass = aws.String(storageClass.(string))
-			}
-		}
-		rcRule.Destination = ruleDestination
-		rules = append(rules, rcRule)
-	}
-
-	rc.Rules = rules
-	i := &s3.PutBucketReplicationInput{
-		Bucket: aws.String(bucket),
-		ReplicationConfiguration: rc,
-	}
-	log.Printf("[DEBUG] S3 put bucket replication configuration: %#v", i)
-
-	_, err := retryOnAwsCode("NoSuchBucket", func() (interface{}, error) {
-		return s3conn.PutBucketReplication(i)
-	})
-	if err != nil {
-		return fmt.Errorf("Error putting S3 replication configuration: %s", err)
-	}
-
-	return nil
-}
-*/
-
 func resourceAwsS3BucketLifecycleUpdate(s3conn *s3.S3, d *schema.ResourceData) error {
 	bucket := d.Get("bucket").(string)
 
@@ -1638,18 +1245,6 @@ func resourceAwsS3BucketLifecycleUpdate(s3conn *s3.S3, d *schema.ResourceData) e
 
 		rule := &s3.LifecycleRule{}
 
-		// Filter
-		/* tags := r["tags"].(map[string]interface{})
-		filter := &s3.LifecycleRuleFilter{}
-		if len(tags) > 0 {
-			lifecycleRuleAndOp := &s3.LifecycleRuleAndOperator{}
-			lifecycleRuleAndOp.SetPrefix(r["prefix"].(string))
-			lifecycleRuleAndOp.SetTags(tagsFromMapS3(tags))
-			filter.SetAnd(lifecycleRuleAndOp)
-		} else {
-			filter.SetPrefix(r["prefix"].(string))
-		}
-		rule.SetFilter(filter) */
 		// OTC only supports deprecated location for this.
 		rule.SetPrefix(r["prefix"].(string))
 
@@ -1683,7 +1278,7 @@ func resourceAwsS3BucketLifecycleUpdate(s3conn *s3.S3, d *schema.ResourceData) e
 			if val, ok := e["date"].(string); ok && val != "" {
 				t, err := time.Parse(time.RFC3339, fmt.Sprintf("%sT00:00:00Z", val))
 				if err != nil {
-					return fmt.Errorf("Error Parsing AWS S3 Bucket Lifecycle Expiration Date: %s", err.Error())
+					return fmt.Errorf("Error Parsing Swift S3 Bucket Lifecycle Expiration Date: %s", err.Error())
 				}
 				i.Date = aws.Time(t)
 			} else if val, ok := e["days"].(int); ok && val > 0 {
@@ -1705,47 +1300,6 @@ func resourceAwsS3BucketLifecycleUpdate(s3conn *s3.S3, d *schema.ResourceData) e
 				}
 			}
 		}
-
-		// Transitions
-		/*transitions := d.Get(fmt.Sprintf("lifecycle_rule.%d.transition", i)).(*schema.Set).List()
-		if len(transitions) > 0 {
-			rule.Transitions = make([]*s3.Transition, 0, len(transitions))
-			for _, transition := range transitions {
-				transition := transition.(map[string]interface{})
-				i := &s3.Transition{}
-				if val, ok := transition["date"].(string); ok && val != "" {
-					t, err := time.Parse(time.RFC3339, fmt.Sprintf("%sT00:00:00Z", val))
-					if err != nil {
-						return fmt.Errorf("Error Parsing AWS S3 Bucket Lifecycle Expiration Date: %s", err.Error())
-					}
-					i.Date = aws.Time(t)
-				} else if val, ok := transition["days"].(int); ok && val >= 0 {
-					i.Days = aws.Int64(int64(val))
-				}
-				if val, ok := transition["storage_class"].(string); ok && val != "" {
-					i.StorageClass = aws.String(val)
-				}
-
-				rule.Transitions = append(rule.Transitions, i)
-			}
-		}
-		// NoncurrentVersionTransitions
-		nc_transitions := d.Get(fmt.Sprintf("lifecycle_rule.%d.noncurrent_version_transition", i)).(*schema.Set).List()
-		if len(nc_transitions) > 0 {
-			rule.NoncurrentVersionTransitions = make([]*s3.NoncurrentVersionTransition, 0, len(nc_transitions))
-			for _, transition := range nc_transitions {
-				transition := transition.(map[string]interface{})
-				i := &s3.NoncurrentVersionTransition{}
-				if val, ok := transition["days"].(int); ok && val >= 0 {
-					i.NoncurrentDays = aws.Int64(int64(val))
-				}
-				if val, ok := transition["storage_class"].(string); ok && val != "" {
-					i.StorageClass = aws.String(val)
-				}
-
-				rule.NoncurrentVersionTransitions = append(rule.NoncurrentVersionTransitions, i)
-			}
-		} */
 
 		rules = append(rules, rule)
 	}
@@ -1771,48 +1325,6 @@ func resourceAwsS3BucketLifecycleUpdate(s3conn *s3.S3, d *schema.ResourceData) e
 
 	return nil
 }
-
-/*
-func flattenAwsS3BucketReplicationConfiguration(r *s3.ReplicationConfiguration) []map[string]interface{} {
-	replication_configuration := make([]map[string]interface{}, 0, 1)
-	m := make(map[string]interface{})
-
-	if r.Role != nil && *r.Role != "" {
-		m["role"] = *r.Role
-	}
-
-	rules := make([]interface{}, 0, len(r.Rules))
-	for _, v := range r.Rules {
-		t := make(map[string]interface{})
-		if v.Destination != nil {
-			rd := make(map[string]interface{})
-			if v.Destination.Bucket != nil {
-				rd["bucket"] = *v.Destination.Bucket
-			}
-			if v.Destination.StorageClass != nil {
-				rd["storage_class"] = *v.Destination.StorageClass
-			}
-			t["destination"] = schema.NewSet(destinationHash, []interface{}{rd})
-		}
-
-		if v.ID != nil {
-			t["id"] = *v.ID
-		}
-		if v.Prefix != nil {
-			t["prefix"] = *v.Prefix
-		}
-		if v.Status != nil {
-			t["status"] = *v.Status
-		}
-		rules = append(rules, t)
-	}
-	m["rules"] = schema.NewSet(rulesHash, rules)
-
-	replication_configuration = append(replication_configuration, m)
-
-	return replication_configuration
-}
-*/
 
 func normalizeRoutingRules(w []*s3.RoutingRule) (string, error) {
 	withNulls, err := json.Marshal(w)
@@ -1880,30 +1392,6 @@ func normalizeRegion(region string) string {
 
 	return region
 }
-
-/*
-func validateS3BucketAccelerationStatus(v interface{}, k string) (ws []string, errors []error) {
-	validTypes := map[string]struct{}{
-		"Enabled":   struct{}{},
-		"Suspended": struct{}{},
-	}
-
-	if _, ok := validTypes[v.(string)]; !ok {
-		errors = append(errors, fmt.Errorf("S3 Bucket Acceleration Status %q is invalid, must be %q or %q", v.(string), "Enabled", "Suspended"))
-	}
-	return
-}
-
-func validateS3BucketRequestPayerType(v interface{}, k string) (ws []string, errors []error) {
-	value := v.(string)
-	if value != s3.PayerRequester && value != s3.PayerBucketOwner {
-		errors = append(errors, fmt.Errorf(
-			"%q contains an invalid Request Payer type %q. Valid types are either %q or %q",
-			k, value, s3.PayerRequester, s3.PayerBucketOwner))
-	}
-	return
-}
-*/
 
 // validateS3BucketName validates any S3 bucket name that is not inside the us-east-1 region.
 // Buckets outside of this region have to be DNS-compliant. After the same restrictions are

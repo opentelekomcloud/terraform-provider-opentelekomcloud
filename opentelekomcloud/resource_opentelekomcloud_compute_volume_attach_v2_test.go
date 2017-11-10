@@ -39,8 +39,7 @@ func TestAccComputeV2VolumeAttach_device(t *testing.T) {
 		CheckDestroy: testAccCheckComputeV2VolumeAttachDestroy,
 		Steps: []resource.TestStep{
 			resource.TestStep{
-				Config:             testAccComputeV2VolumeAttach_device,
-				ExpectNonEmptyPlan: true,
+				Config: testAccComputeV2VolumeAttach_device,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckComputeV2VolumeAttachExists("opentelekomcloud_compute_volume_attach_v2.va_1", &va),
 					//testAccCheckComputeV2VolumeAttachDevice(&va, "/dev/vdc"),
