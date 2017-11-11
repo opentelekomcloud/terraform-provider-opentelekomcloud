@@ -307,7 +307,7 @@ func (c *Config) networkingV1Client(region string) (*gophercloud.ServiceClient, 
 	return openstack.NewOtcV1(c.OsClient, gophercloud.EndpointOpts{
 		Region:       c.determineRegion(region),
 		Availability: c.getEndpointType(),
-	})
+	}, "elb")
 }
 
 func (c *Config) getEndpointType() gophercloud.Availability {

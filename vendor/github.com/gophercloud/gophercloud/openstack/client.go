@@ -9,6 +9,7 @@ import (
 	tokens2 "github.com/gophercloud/gophercloud/openstack/identity/v2/tokens"
 	tokens3 "github.com/gophercloud/gophercloud/openstack/identity/v3/tokens"
 	"github.com/gophercloud/gophercloud/openstack/utils"
+	"strings"
 )
 
 const (
@@ -246,6 +247,17 @@ func NewComputeV2(client *gophercloud.ProviderClient, eo gophercloud.EndpointOpt
 func NewNetworkV2(client *gophercloud.ProviderClient, eo gophercloud.EndpointOpts) (*gophercloud.ServiceClient, error) {
 	sc, err := initClientOpts(client, eo, "network")
 	sc.ResourceBase = sc.Endpoint + "v2.0/"
+	return sc, err
+}
+
+// NewOtcV1 creates a ServiceClient that may be used with the v1 network package.
+func NewOtcV1(client *gophercloud.ProviderClient, eo gophercloud.EndpointOpts, otctype string) (*gophercloud.ServiceClient, error) {
+	sc, err := initClientOpts(client, eo, "compute")
+	//fmt.Printf("client=%+v.\n", sc)
+	sc.Endpoint = strings.Replace(strings.Replace(sc.Endpoint, "ecs", otctype, 1), "/v2/", "/v1.0/", 1)
+	//fmt.Printf("url=%s.\n", sc.Endpoint)
+	sc.ResourceBase = sc.Endpoint
+	sc.Type = otctype
 	return sc, err
 }
 

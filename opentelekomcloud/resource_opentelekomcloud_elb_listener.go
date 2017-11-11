@@ -5,9 +5,9 @@ import (
 	"log"
 	"time"
 
+	"github.com/gophercloud/gophercloud/openstack/networking/v2/extensions/elbaas/listeners"
 	"github.com/hashicorp/terraform/helper/resource"
 	"github.com/hashicorp/terraform/helper/schema"
-	"github.com/gophercloud/gophercloud/openstack/networking/v2/extensions/elbaas/listeners"
 )
 
 func resourceEListener() *schema.Resource {
@@ -144,7 +144,6 @@ func resourceEListenerCreate(d *schema.ResourceData, meta interface{}) error {
 		AdminStateUp:           &adminStateUp,
 	}
 
-   
 	/*if v, ok := d.GetOk("connection_limit"); ok {
 		connectionLimit := v.(int)
 		createOpts.ConnLimit = &connectionLimit
