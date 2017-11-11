@@ -173,4 +173,3 @@ func resourceELBHealthRefreshFunc(networkingClient *gophercloud.ServiceClient, i
 		return health, "ACTIVE", nil
 	}
 }
-
