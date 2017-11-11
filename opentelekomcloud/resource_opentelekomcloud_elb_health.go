@@ -13,10 +13,10 @@ import (
 
 func resourceHealth() *schema.Resource {
 	return &schema.Resource{
-		Create: resourceMonitorV2Create,
-		Read:   resourceMonitorV2Read,
-		Update: resourceMonitorV2Update,
-		Delete: resourceMonitorV2Delete,
+		Create: resourceHealthV1Create,
+		Read:   resourceHealthV1Read,
+		Update: resourceHealthV1Update,
+		Delete: resourceHealthV1Delete,
 
 		Timeouts: &schema.ResourceTimeout{
 			Create: schema.DefaultTimeout(10 * time.Minute),
@@ -97,7 +97,7 @@ func resourceHealth() *schema.Resource {
 	}
 }
 
-func resourceHealthCreate(d *schema.ResourceData, meta interface{}) error {
+func resourceHealthV1Create(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*Config)
 	networkingClient, err := config.networkingV2Client(GetRegion(d, config))
 	if err != nil {
@@ -147,7 +147,7 @@ func resourceHealthCreate(d *schema.ResourceData, meta interface{}) error {
 	return resourceMonitorV2Read(d, meta)
 }
 
-func resourceMonitorV2Read(d *schema.ResourceData, meta interface{}) error {
+func resourceHealthV1Read(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*Config)
 	networkingClient, err := config.networkingV2Client(GetRegion(d, config))
 	if err != nil {
@@ -177,7 +177,7 @@ func resourceMonitorV2Read(d *schema.ResourceData, meta interface{}) error {
 	return nil
 }
 
-func resourceMonitorV2Update(d *schema.ResourceData, meta interface{}) error {
+func resourceHealthV1Update(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*Config)
 	networkingClient, err := config.networkingV2Client(GetRegion(d, config))
 	if err != nil {
@@ -240,7 +240,7 @@ func resourceMonitorV2Update(d *schema.ResourceData, meta interface{}) error {
 	return resourceMonitorV2Read(d, meta)
 }
 
-func resourceMonitorV2Delete(d *schema.ResourceData, meta interface{}) error {
+func resourceHealthV1Delete(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*Config)
 	networkingClient, err := config.networkingV2Client(GetRegion(d, config))
 	if err != nil {
