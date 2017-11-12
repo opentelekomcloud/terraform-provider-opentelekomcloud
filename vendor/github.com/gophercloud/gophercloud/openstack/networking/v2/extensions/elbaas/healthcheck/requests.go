@@ -51,13 +51,6 @@ func List(c *gophercloud.ServiceClient, opts ListOptsBuilder) pagination.Pager {
 	})
 }
 
-// Constants that represent approved monitoring types.
-const (
-	TypePING  = "PING"
-	TypeTCP   = "TCP"
-	TypeHTTP  = "HTTP"
-	TypeHTTPS = "HTTPS"
-)
 
 var (
 	errDelayMustGETimeout = fmt.Errorf("Delay must be greater than or equal to timeout")
@@ -186,7 +179,6 @@ type UpdateOpts struct {
 	HealthcheckTimeout int `json:"healthcheck_timeout,omitempty"`
 	// healthcheck_interval
 	HealthcheckInterval int `json:"healthcheck_interval,omitempty"`
-	
 }
 
 // ToHealthpdateMap casts a UpdateOpts struct to a map.

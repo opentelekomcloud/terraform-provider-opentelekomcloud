@@ -4,44 +4,40 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/gophercloud/gophercloud/openstack/networking/v2/extensions/lbaas_v2/pools"
+	//"github.com/gophercloud/gophercloud/openstack/networking/v2/extensions/elbaas/backendmember"
 	"github.com/hashicorp/terraform/helper/resource"
 	"github.com/hashicorp/terraform/terraform"
 )
 
 // PASS with diff
-func TestAccLBV2Member_basic(t *testing.T) {
-	var member_1 pools.Member
-	var member_2 pools.Member
+func TestAccELBBackend_basic(t *testing.T) {
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
 		Providers:    testAccProviders,
-		CheckDestroy: testAccCheckLBV2MemberDestroy,
+		CheckDestroy: testAccCheckELBBackendDestroy,
 		Steps: []resource.TestStep{
 			resource.TestStep{
-				Config:             TestAccLBV2MemberConfig_basic,
+				Config:             TestAccELBBackendConfig_basic,
 				ExpectNonEmptyPlan: true, // Because admin_state_up remains false, unfinished elb?
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckLBV2MemberExists("opentelekomcloud_lb_member_v2.member_1", &member_1),
-					testAccCheckLBV2MemberExists("opentelekomcloud_lb_member_v2.member_2", &member_2),
+					testAccCheckELBBackendExists("opentelekomcloud_lb_member_v2.member_1"),
 				),
 			},
 			resource.TestStep{
-				Config:             TestAccLBV2MemberConfig_update,
+				Config:             TestAccELBBackendConfig_update,
 				ExpectNonEmptyPlan: true, // Because admin_state_up remains false, unfinished elb?
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr("opentelekomcloud_lb_member_v2.member_1", "weight", "10"),
-					resource.TestCheckResourceAttr("opentelekomcloud_lb_member_v2.member_2", "weight", "15"),
 				),
 			},
 		},
 	})
 }
 
-func testAccCheckLBV2MemberDestroy(s *terraform.State) error {
+func testAccCheckELBBackendDestroy(s *terraform.State) error {
 	config := testAccProvider.Meta().(*Config)
-	networkingClient, err := config.networkingV2Client(OS_REGION_NAME)
+	_, err := config.networkingV1Client(OS_REGION_NAME)
 	if err != nil {
 		return fmt.Errorf("Error creating OpenTelekomCloud networking client: %s", err)
 	}
@@ -51,17 +47,12 @@ func testAccCheckLBV2MemberDestroy(s *terraform.State) error {
 			continue
 		}
 
-		poolId := rs.Primary.Attributes["pool_id"]
-		_, err := pools.GetMember(networkingClient, poolId, rs.Primary.ID).Extract()
-		if err == nil {
-			return fmt.Errorf("Member still exists: %s", rs.Primary.ID)
-		}
 	}
 
 	return nil
 }
 
-func testAccCheckLBV2MemberExists(n string, member *pools.Member) resource.TestCheckFunc {
+func testAccCheckELBBackendExists(n string) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
 		rs, ok := s.RootModule().Resources[n]
 		if !ok {
@@ -73,28 +64,16 @@ func testAccCheckLBV2MemberExists(n string, member *pools.Member) resource.TestC
 		}
 
 		config := testAccProvider.Meta().(*Config)
-		networkingClient, err := config.networkingV2Client(OS_REGION_NAME)
+		_ /*networkingClient*/, err := config.networkingV1Client(OS_REGION_NAME)
 		if err != nil {
 			return fmt.Errorf("Error creating OpenTelekomCloud networking client: %s", err)
 		}
-
-		poolId := rs.Primary.Attributes["pool_id"]
-		found, err := pools.GetMember(networkingClient, poolId, rs.Primary.ID).Extract()
-		if err != nil {
-			return err
-		}
-
-		if found.ID != rs.Primary.ID {
-			return fmt.Errorf("Member not found")
-		}
-
-		*member = *found
 
 		return nil
 	}
 }
 
-const TestAccLBV2MemberConfig_basic = `
+const TestAccELBBackendConfig_basic = `
 resource "opentelekomcloud_networking_network_v2" "network_1" {
   name = "network_1"
   admin_state_up = "true"
@@ -153,7 +132,7 @@ resource "opentelekomcloud_lb_member_v2" "member_2" {
 }
 `
 
-const TestAccLBV2MemberConfig_update = `
+const TestAccELBBackendConfig_update = `
 resource "opentelekomcloud_networking_network_v2" "network_1" {
   name = "network_1"
   admin_state_up = "true"

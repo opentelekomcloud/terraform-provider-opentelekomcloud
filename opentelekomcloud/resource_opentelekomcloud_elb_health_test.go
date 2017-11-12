@@ -4,13 +4,13 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/gophercloud/gophercloud/openstack/networking/v2/extensions/lbaas_v2/monitors"
+	"github.com/gophercloud/gophercloud/openstack/networking/v2/extensions/elbaas/healthcheck"
 	"github.com/hashicorp/terraform/helper/resource"
 	"github.com/hashicorp/terraform/terraform"
 )
 
-func TestAccLBV2Monitor_basic(t *testing.T) {
-	var monitor monitors.Monitor
+func TestAccELBHealth_basic(t *testing.T) {
+	var health healthcheck.Health
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
@@ -18,9 +18,9 @@ func TestAccLBV2Monitor_basic(t *testing.T) {
 		CheckDestroy: testAccCheckLBV2MonitorDestroy,
 		Steps: []resource.TestStep{
 			resource.TestStep{
-				Config: TestAccLBV2MonitorConfig_basic,
+				Config: TestAccELBHealthConfig_basic,
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckLBV2MonitorExists(t, "opentelekomcloud_lb_monitor_v2.monitor_1", &monitor),
+					testAccCheckELBHealthExists(t, "opentelekomcloud_elb_healthcheck.health_1", &health),
 				),
 			},
 			resource.TestStep{
@@ -36,28 +36,28 @@ func TestAccLBV2Monitor_basic(t *testing.T) {
 	})
 }
 
-func testAccCheckLBV2MonitorDestroy(s *terraform.State) error {
+func testAccCheckELBHealthDestroy(s *terraform.State) error {
 	config := testAccProvider.Meta().(*Config)
-	networkingClient, err := config.networkingV2Client(OS_REGION_NAME)
+	networkingClient, err := config.networkingV1Client(OS_REGION_NAME)
 	if err != nil {
 		return fmt.Errorf("Error creating OpenTelekomCloud networking client: %s", err)
 	}
 
 	for _, rs := range s.RootModule().Resources {
-		if rs.Type != "opentelekomcloud_lb_monitor_v2" {
+		if rs.Type != "opentelekomcloud_elb_healthcheck" {
 			continue
 		}
 
-		_, err := monitors.Get(networkingClient, rs.Primary.ID).Extract()
+		_, err := healthcheck.Get(networkingClient, rs.Primary.ID).Extract()
 		if err == nil {
-			return fmt.Errorf("Monitor still exists: %s", rs.Primary.ID)
+			return fmt.Errorf("Health still exists: %s", rs.Primary.ID)
 		}
 	}
 
 	return nil
 }
 
-func testAccCheckLBV2MonitorExists(t *testing.T, n string, monitor *monitors.Monitor) resource.TestCheckFunc {
+func testAccCheckELBHealthExists(t *testing.T, n string, health *healthcheck.Health) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
 		rs, ok := s.RootModule().Resources[n]
 		if !ok {
@@ -69,27 +69,27 @@ func testAccCheckLBV2MonitorExists(t *testing.T, n string, monitor *monitors.Mon
 		}
 
 		config := testAccProvider.Meta().(*Config)
-		networkingClient, err := config.networkingV2Client(OS_REGION_NAME)
+		networkingClient, err := config.networkingV1Client(OS_REGION_NAME)
 		if err != nil {
 			return fmt.Errorf("Error creating OpenTelekomCloud networking client: %s", err)
 		}
 
-		found, err := monitors.Get(networkingClient, rs.Primary.ID).Extract()
+		found, err := healthcheck.Get(networkingClient, rs.Primary.ID).Extract()
 		if err != nil {
 			return err
 		}
 
 		if found.ID != rs.Primary.ID {
-			return fmt.Errorf("Monitor not found")
+			return fmt.Errorf("Health not found")
 		}
 
-		*monitor = *found
+		*health = *found
 
 		return nil
 	}
 }
 
-const TestAccLBV2MonitorConfig_basic = `
+const TestAccELBHealthConfig_basic = `
 resource "opentelekomcloud_networking_network_v2" "network_1" {
   name = "network_1"
   admin_state_up = "true"
@@ -137,7 +137,7 @@ resource "opentelekomcloud_lb_monitor_v2" "monitor_1" {
 }
 `
 
-const TestAccLBV2MonitorConfig_update = `
+const TestAccELBHealthConfig_update = `
 resource "opentelekomcloud_networking_network_v2" "network_1" {
   name = "network_1"
   admin_state_up = "true"

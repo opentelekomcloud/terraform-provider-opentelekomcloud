@@ -93,13 +93,13 @@ func resourceELBLoadBalancerRefreshFunc(networkingClient *gophercloud.ServiceCli
 	}
 }
 
-func waitForELBBackend(networkingClient *gophercloud.ServiceClient, poolID, memberID string, target string, pending []string, timeout time.Duration) error {
+func waitForELBBackend(networkingClient *gophercloud.ServiceClient, memberID string, target string, pending []string, timeout time.Duration) error {
 	log.Printf("[DEBUG] Waiting for member %s to become %s.", memberID, target)
 
 	stateConf := &resource.StateChangeConf{
 		Target:     []string{target},
 		Pending:    pending,
-		Refresh:    resourceELBBackendRefreshFunc(networkingClient, poolID, memberID),
+		Refresh:    resourceELBBackendRefreshFunc(networkingClient, memberID),
 		Timeout:    timeout,
 		Delay:      5 * time.Second,
 		MinTimeout: 1 * time.Second,
@@ -121,7 +121,7 @@ func waitForELBBackend(networkingClient *gophercloud.ServiceClient, poolID, memb
 	return nil
 }
 
-func resourceELBBackendRefreshFunc(networkingClient *gophercloud.ServiceClient, poolID, memberID string) resource.StateRefreshFunc {
+func resourceELBBackendRefreshFunc(networkingClient *gophercloud.ServiceClient, memberID string) resource.StateRefreshFunc {
 	return func() (interface{}, string, error) {
 		//member, err := pools.GetMember(networkingClient, poolID, memberID).Extract()
 		//if err != nil {

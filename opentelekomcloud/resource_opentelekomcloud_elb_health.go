@@ -13,10 +13,10 @@ import (
 
 func resourceHealth() *schema.Resource {
 	return &schema.Resource{
-		Create: resourceHealthV1Create,
-		Read:   resourceHealthV1Read,
-		Update: resourceHealthV1Update,
-		Delete: resourceHealthV1Delete,
+		Create: resourceHealthCreate,
+		Read:   resourceHealthRead,
+		Update: resourceHealthUpdate,
+		Delete: resourceHealthDelete,
 
 		Timeouts: &schema.ResourceTimeout{
 			Create: schema.DefaultTimeout(10 * time.Minute),
@@ -97,121 +97,110 @@ func resourceHealth() *schema.Resource {
 	}
 }
 
-func resourceHealthV1Create(d *schema.ResourceData, meta interface{}) error {
+func resourceHealthCreate(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*Config)
 	networkingClient, err := config.networkingV2Client(GetRegion(d, config))
 	if err != nil {
 		return fmt.Errorf("Error creating OpenTelekomCloud networking client: %s", err)
 	}
 
-	adminStateUp := d.Get("admin_state_up").(bool)
+	//adminStateUp := d.Get("admin_state_up").(bool)
 	createOpts := healthcheck.CreateOpts{
-		PoolID:        d.Get("pool_id").(string),
-		TenantID:      d.Get("tenant_id").(string),
-		Type:          d.Get("type").(string),
-		Delay:         d.Get("delay").(int),
-		Timeout:       d.Get("timeout").(int),
-		MaxRetries:    d.Get("max_retries").(int),
-		URLPath:       d.Get("url_path").(string),
-		HTTPMethod:    d.Get("http_method").(string),
-		ExpectedCodes: d.Get("expected_codes").(string),
-		Name:          d.Get("name").(string),
-		AdminStateUp:  &adminStateUp,
+		ListenerID:             d.Get("listener_id").(string),
+		HealthcheckProtocol:    d.Get("healthcheck_protocol").(string),
+		HealthcheckUri:         d.Get("healthcheck_uri").(string),
+		HealthcheckConnectPort: d.Get("healthcheck_connect_port").(int),
+		HealthyThreshold:       d.Get("healthy_threshold").(int),
+		UnhealthyThreshold:     d.Get("unhealthy_threshold").(int),
+		HealthcheckTimeout:     d.Get("healthcheck_timeout").(int),
+		HealthcheckInterval:    d.Get("healthcheck_interval").(int),
 	}
 
 	timeout := d.Timeout(schema.TimeoutCreate)
-	poolID := createOpts.PoolID
-	err = waitForELB(networkingClient, poolID, "ACTIVE", timeout)
+	// Wait for LoadBalancer to become active before continuing
+	lbID := d.Get("loadbalancer_id").(string)
+	err = waitForELBLoadBalancer(networkingClient, lbID, "ACTIVE", nil, timeout)
 	if err != nil {
 		return err
 	}
 
 	log.Printf("[DEBUG] Create Options: %#v", createOpts)
 	log.Printf("[DEBUG] Attempting to create monitor")
-	var healths *healthcheck.Health
+	var health *healthcheck.Health
 	err = resource.Retry(timeout, func() *resource.RetryError {
-		health, err = healths.Create(networkingClient, createOpts).Extract()
+		health, err = healthcheck.Create(networkingClient, createOpts).Extract()
 		if err != nil {
 			return checkForRetryableError(err)
 		}
 		return nil
 	})
 
-	err = waitForLBV2viaPool(networkingClient, poolID, "ACTIVE", timeout)
-	if err != nil {
-		return err
-	}
+	//err = waitForLBV2viaPool(networkingClient, poolID, "ACTIVE", timeout)
+	//d.SetId(monitor.ID)
 
-	d.SetId(monitor.ID)
-
-	return resourceMonitorV2Read(d, meta)
+	return resourceHealthRead(d, meta)
 }
 
-func resourceHealthV1Read(d *schema.ResourceData, meta interface{}) error {
+func resourceHealthRead(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*Config)
-	networkingClient, err := config.networkingV2Client(GetRegion(d, config))
+	networkingClient, err := config.networkingV1Client(GetRegion(d, config))
 	if err != nil {
 		return fmt.Errorf("Error creating OpenTelekomCloud networking client: %s", err)
 	}
 
-	monitor, err := monitors.Get(networkingClient, d.Id()).Extract()
+	health, err := healthcheck.Get(networkingClient, d.Id()).Extract()
 	if err != nil {
-		return CheckDeleted(d, err, "monitor")
+		return CheckDeleted(d, err, "health")
 	}
 
-	log.Printf("[DEBUG] Retrieved monitor %s: %#v", d.Id(), monitor)
+	log.Printf("[DEBUG] Retrieved health %s: %#v", d.Id(), health)
 
-	d.Set("id", monitor.ID)
-	d.Set("tenant_id", monitor.TenantID)
-	d.Set("type", monitor.Type)
-	d.Set("delay", monitor.Delay)
-	d.Set("timeout", monitor.Timeout)
-	d.Set("max_retries", monitor.MaxRetries)
-	d.Set("url_path", monitor.URLPath)
-	d.Set("http_method", monitor.HTTPMethod)
-	d.Set("expected_codes", monitor.ExpectedCodes)
-	d.Set("admin_state_up", monitor.AdminStateUp)
-	d.Set("name", monitor.Name)
+	d.Set("id", health.ID)
+	//d.Set("type", health.Type)
+	//d.Set("delay", health.Delay)
+	//d.Set("timeout", health.Timeout)
+	//d.Set("max_retries", health.MaxRetries)
+	//d.Set("url_path", health.URLPath)
+	//d.Set("http_method", health.HTTPMethod)
+	//d.Set("expected_codes", health.ExpectedCodes)
+	//d.Set("admin_state_up", health.AdminStateUp)
+	//d.Set("name", health.Name)
 	d.Set("region", GetRegion(d, config))
 
 	return nil
 }
 
-func resourceHealthV1Update(d *schema.ResourceData, meta interface{}) error {
+func resourceHealthUpdate(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*Config)
-	networkingClient, err := config.networkingV2Client(GetRegion(d, config))
+	networkingClient, err := config.networkingV1Client(GetRegion(d, config))
 	if err != nil {
 		return fmt.Errorf("Error creating OpenTelekomCloud networking client: %s", err)
 	}
 
-	var updateOpts monitors.UpdateOpts
-	if d.HasChange("url_path") {
-		updateOpts.URLPath = d.Get("url_path").(string)
+	var updateOpts healthcheck.UpdateOpts
+	if d.HasChange("healthcheck_protocol") {
+		updateOpts.HealthcheckProtocol = d.Get("healthcheck_protocol").(string)
 	}
-	if d.HasChange("expected_codes") {
-		updateOpts.ExpectedCodes = d.Get("expected_codes").(string)
+	if d.HasChange("healthcheck_uri") {
+		updateOpts.HealthcheckUri = d.Get("healthcheck_uri").(string)
 	}
-	if d.HasChange("delay") {
-		updateOpts.Delay = d.Get("delay").(int)
+	if d.HasChange("healthcheck_connect_port") {
+		updateOpts.HealthyThreshold = d.Get("healthcheck_connect_port").(int)
 	}
-	if d.HasChange("timeout") {
-		updateOpts.Timeout = d.Get("timeout").(int)
+	if d.HasChange("healthy_threshold") {
+		updateOpts.HealthyThreshold = d.Get("healthy_threshold").(int)
 	}
-	if d.HasChange("max_retries") {
-		updateOpts.MaxRetries = d.Get("max_retries").(int)
+	if d.HasChange("unhealthy_threshold") {
+		updateOpts.UnhealthyThreshold = d.Get("unhealthy_threshold").(int)
 	}
-	if d.HasChange("admin_state_up") {
-		asu := d.Get("admin_state_up").(bool)
-		updateOpts.AdminStateUp = &asu
+	if d.HasChange("healthcheck_timeout") {
+		updateOpts.HealthcheckTimeout = d.Get("healthcheck_timeout").(int)
 	}
-	if d.HasChange("name") {
-		updateOpts.Name = d.Get("name").(string)
-	}
-	if d.HasChange("http_method") {
-		updateOpts.HTTPMethod = d.Get("http_method").(string)
+	if d.HasChange("healthcheck_interval") {
+		updateOpts.HealthcheckInterval = d.Get("healthcheck_interval").(int)
 	}
 
-	log.Printf("[DEBUG] Updating monitor %s with options: %#v", d.Id(), updateOpts)
+	log.Printf("[DEBUG] Updating health %s with options: %#v", d.Id(), updateOpts)
 	timeout := d.Timeout(schema.TimeoutUpdate)
 	poolID := d.Get("pool_id").(string)
 	err = waitForLBV2viaPool(networkingClient, poolID, "ACTIVE", timeout)
@@ -220,7 +209,7 @@ func resourceHealthV1Update(d *schema.ResourceData, meta interface{}) error {
 	}
 
 	err = resource.Retry(timeout, func() *resource.RetryError {
-		_, err = monitors.Update(networkingClient, d.Id(), updateOpts).Extract()
+		_, err = healthcheck.Update(networkingClient, d.Id(), updateOpts).Extract()
 		if err != nil {
 			return checkForRetryableError(err)
 		}
@@ -232,31 +221,23 @@ func resourceHealthV1Update(d *schema.ResourceData, meta interface{}) error {
 	}
 
 	// Wait for LB to become active before continuing
-	err = waitForLBV2viaPool(networkingClient, poolID, "ACTIVE", timeout)
-	if err != nil {
-		return err
-	}
 
-	return resourceMonitorV2Read(d, meta)
+	return resourceHealthRead(d, meta)
 }
 
-func resourceHealthV1Delete(d *schema.ResourceData, meta interface{}) error {
+func resourceHealthDelete(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*Config)
-	networkingClient, err := config.networkingV2Client(GetRegion(d, config))
+	networkingClient, err := config.networkingV1Client(GetRegion(d, config))
 	if err != nil {
 		return fmt.Errorf("Error creating OpenTelekomCloud networking client: %s", err)
 	}
 
-	log.Printf("[DEBUG] Deleting monitor %s", d.Id())
+	log.Printf("[DEBUG] Deleting health %s", d.Id())
 	timeout := d.Timeout(schema.TimeoutUpdate)
-	poolID := d.Get("pool_id").(string)
-	err = waitForLBV2viaPool(networkingClient, poolID, "ACTIVE", timeout)
-	if err != nil {
-		return err
-	}
+	//err = waitForLBV2viaPool(networkingClient, poolID, "ACTIVE", timeout)
 
 	err = resource.Retry(timeout, func() *resource.RetryError {
-		err = monitors.Delete(networkingClient, d.Id()).ExtractErr()
+		err = healthcheck.Delete(networkingClient, d.Id()).ExtractErr()
 		if err != nil {
 			return checkForRetryableError(err)
 		}
@@ -264,13 +245,10 @@ func resourceHealthV1Delete(d *schema.ResourceData, meta interface{}) error {
 	})
 
 	if err != nil {
-		return fmt.Errorf("Unable to delete monitor %s: %s", d.Id(), err)
+		return fmt.Errorf("Unable to delete health %s: %s", d.Id(), err)
 	}
 
-	err = waitForLBV2viaPool(networkingClient, poolID, "ACTIVE", timeout)
-	if err != nil {
-		return err
-	}
+	//err = waitForLBV2viaPool(networkingClient, poolID, "ACTIVE", timeout)
 
 	return nil
 }
