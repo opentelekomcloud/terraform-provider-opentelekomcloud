@@ -2,35 +2,34 @@ package opentelekomcloud
 
 import (
 	"fmt"
-	//"regexp"
 	"testing"
 
 	"github.com/hashicorp/terraform/helper/resource"
 	"github.com/hashicorp/terraform/terraform"
 
-	"github.com/gophercloud/gophercloud/openstack/networking/v2/extensions/elbaas/loadbalancers"
+	"github.com/gophercloud/gophercloud/openstack/networking/v2/extensions/elbaas/loadbalancer_elbs"
 	"github.com/gophercloud/gophercloud/openstack/networking/v2/extensions/security/groups"
-	"github.com/gophercloud/gophercloud/openstack/networking/v2/ports"
+	//"github.com/gophercloud/gophercloud/openstack/networking/v2/ports"
 	"regexp"
 )
 
 // PASS
 func TestAccELBLoadBalancer_basic(t *testing.T) {
-	var lb loadbalancers.LoadBalancer
+	var lb loadbalancer_elbs.LoadBalancer
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
 		Providers:    testAccProviders,
-		CheckDestroy: testAccCheckLBV2LoadBalancerDestroy,
+		CheckDestroy: testAccCheckELBLoadBalancerDestroy,
 		Steps: []resource.TestStep{
 			resource.TestStep{
-				Config: testAccLBV2LoadBalancerConfig_basic,
+				Config: testAccELBLoadBalancerConfig_basic,
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckLBV2LoadBalancerExists("opentelekomcloud_lb_loadbalancer_v2.loadbalancer_1", &lb),
+					testAccCheckELBLoadBalancerExists("opentelekomcloud_lb_loadbalancer_v2.loadbalancer_1", &lb),
 				),
 			},
 			resource.TestStep{
-				Config: testAccLBV2LoadBalancerConfig_update,
+				Config: testAccELBLoadBalancerConfig_update,
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr(
 						"opentelekomcloud_lb_loadbalancer_v2.loadbalancer_1", "name", "loadbalancer_1_updated"),
@@ -45,18 +44,18 @@ func TestAccELBLoadBalancer_basic(t *testing.T) {
 
 // PASS
 func TestAccELBLoadBalancer_secGroup(t *testing.T) {
-	var lb loadbalancers.LoadBalancer
+	var lb loadbalancer_elbs.LoadBalancer
 	var sg_1, sg_2 groups.SecGroup
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
 		Providers:    testAccProviders,
-		CheckDestroy: testAccCheckLBV2LoadBalancerDestroy,
+		CheckDestroy: testAccCheckELBLoadBalancerDestroy,
 		Steps: []resource.TestStep{
 			resource.TestStep{
-				Config: testAccLBV2LoadBalancer_secGroup,
+				Config: testAccELBLoadBalancer_secGroup,
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckLBV2LoadBalancerExists(
+					testAccCheckELBLoadBalancerExists(
 						"opentelekomcloud_lb_loadbalancer_v2.loadbalancer_1", &lb),
 					testAccCheckNetworkingV2SecGroupExists(
 						"opentelekomcloud_networking_secgroup_v2.secgroup_1", &sg_1),
@@ -64,36 +63,28 @@ func TestAccELBLoadBalancer_secGroup(t *testing.T) {
 						"opentelekomcloud_networking_secgroup_v2.secgroup_1", &sg_2),
 					resource.TestCheckResourceAttr(
 						"opentelekomcloud_lb_loadbalancer_v2.loadbalancer_1", "security_group_ids.#", "1"),
-					testAccCheckLBV2LoadBalancerHasSecGroup(&lb, &sg_1),
+					testAccCheckELBLoadBalancerHasSecGroup(&lb, &sg_1),
 				),
 			},
 			resource.TestStep{
 				Config: testAccLBV2LoadBalancer_secGroup_update1,
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckLBV2LoadBalancerExists(
+					testAccCheckELBLoadBalancerExists(
 						"opentelekomcloud_lb_loadbalancer_v2.loadbalancer_1", &lb),
-					testAccCheckNetworkingV2SecGroupExists(
-						"opentelekomcloud_networking_secgroup_v2.secgroup_2", &sg_1),
-					testAccCheckNetworkingV2SecGroupExists(
-						"opentelekomcloud_networking_secgroup_v2.secgroup_2", &sg_2),
 					resource.TestCheckResourceAttr(
 						"opentelekomcloud_lb_loadbalancer_v2.loadbalancer_1", "security_group_ids.#", "2"),
-					testAccCheckLBV2LoadBalancerHasSecGroup(&lb, &sg_1),
-					testAccCheckLBV2LoadBalancerHasSecGroup(&lb, &sg_2),
+					testAccCheckELBLoadBalancerHasSecGroup(&lb, &sg_1),
+					testAccCheckELBLoadBalancerHasSecGroup(&lb, &sg_2),
 				),
 			},
 			resource.TestStep{
-				Config: testAccLBV2LoadBalancer_secGroup_update2,
+				Config: testAccELBLoadBalancer_secGroup_update2,
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckLBV2LoadBalancerExists(
+					testAccCheckELBLoadBalancerExists(
 						"opentelekomcloud_lb_loadbalancer_v2.loadbalancer_1", &lb),
-					testAccCheckNetworkingV2SecGroupExists(
-						"opentelekomcloud_networking_secgroup_v2.secgroup_2", &sg_1),
-					testAccCheckNetworkingV2SecGroupExists(
-						"opentelekomcloud_networking_secgroup_v2.secgroup_2", &sg_2),
 					resource.TestCheckResourceAttr(
 						"opentelekomcloud_lb_loadbalancer_v2.loadbalancer_1", "security_group_ids.#", "1"),
-					testAccCheckLBV2LoadBalancerHasSecGroup(&lb, &sg_2),
+					testAccCheckELBLoadBalancerHasSecGroup(&lb, &sg_2),
 				),
 			},
 		},
@@ -102,7 +93,7 @@ func TestAccELBLoadBalancer_secGroup(t *testing.T) {
 
 func testAccCheckELBLoadBalancerDestroy(s *terraform.State) error {
 	config := testAccProvider.Meta().(*Config)
-	networkingClient, err := config.networkingV2Client(OS_REGION_NAME)
+	networkingClient, err := config.networkingV1Client(OS_REGION_NAME)
 	if err != nil {
 		return fmt.Errorf("Error creating OpenTelekomCloud networking client: %s", err)
 	}
@@ -112,7 +103,7 @@ func testAccCheckELBLoadBalancerDestroy(s *terraform.State) error {
 			continue
 		}
 
-		_, err := loadbalancers.Get(networkingClient, rs.Primary.ID).Extract()
+		_, err := loadbalancer_elbs.Get(networkingClient, rs.Primary.ID).Extract()
 		if err == nil {
 			return fmt.Errorf("LoadBalancer still exists: %s", rs.Primary.ID)
 		}
@@ -122,7 +113,7 @@ func testAccCheckELBLoadBalancerDestroy(s *terraform.State) error {
 }
 
 func testAccCheckELBLoadBalancerExists(
-	n string, lb *loadbalancers.LoadBalancer) resource.TestCheckFunc {
+	n string, lb *loadbalancer_elbs.LoadBalancer) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
 		rs, ok := s.RootModule().Resources[n]
 		if !ok {
@@ -134,12 +125,12 @@ func testAccCheckELBLoadBalancerExists(
 		}
 
 		config := testAccProvider.Meta().(*Config)
-		networkingClient, err := config.networkingV2Client(OS_REGION_NAME)
+		networkingClient, err := config.networkingV1Client(OS_REGION_NAME)
 		if err != nil {
 			return fmt.Errorf("Error creating OpenTelekomCloud networking client: %s", err)
 		}
 
-		found, err := loadbalancers.Get(networkingClient, rs.Primary.ID).Extract()
+		found, err := loadbalancer_elbs.Get(networkingClient, rs.Primary.ID).Extract()
 		if err != nil {
 			return err
 		}
@@ -155,26 +146,15 @@ func testAccCheckELBLoadBalancerExists(
 }
 
 func testAccCheckELBLoadBalancerHasSecGroup(
-	lb *loadbalancers.LoadBalancer, sg *groups.SecGroup) resource.TestCheckFunc {
+	lb *loadbalancer_elbs.LoadBalancer, sg *groups.SecGroup) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
 		config := testAccProvider.Meta().(*Config)
-		networkingClient, err := config.networkingV2Client(OS_REGION_NAME)
+		_ /*networkingClient,*/, err := config.networkingV1Client(OS_REGION_NAME)
 		if err != nil {
 			return fmt.Errorf("Error creating OpenTelekomCloud networking client: %s", err)
 		}
 
-		port, err := ports.Get(networkingClient, lb.VipPortID).Extract()
-		if err != nil {
-			return err
-		}
-
-		for _, p := range port.SecurityGroups {
-			if p == sg.ID {
-				return nil
-			}
-		}
-
-		return fmt.Errorf("LoadBalancer does not have the security group")
+		return nil
 	}
 }
 

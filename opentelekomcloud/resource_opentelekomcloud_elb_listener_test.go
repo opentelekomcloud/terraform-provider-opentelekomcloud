@@ -4,30 +4,30 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/gophercloud/gophercloud/openstack/networking/v2/extensions/lbaas_v2/listeners"
+	"github.com/gophercloud/gophercloud/openstack/networking/v2/extensions/elbaas/listeners"
 	"github.com/hashicorp/terraform/helper/resource"
 	"github.com/hashicorp/terraform/terraform"
 )
 
 // PASS
-func TestAccLBV2Listener_basic(t *testing.T) {
+func TestAccELBListener_basic(t *testing.T) {
 	var listener listeners.Listener
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
 		Providers:    testAccProviders,
-		CheckDestroy: testAccCheckLBV2ListenerDestroy,
+		CheckDestroy: testAccCheckELBListenerDestroy,
 		Steps: []resource.TestStep{
 			resource.TestStep{
-				Config: TestAccLBV2ListenerConfig_basic,
+				Config: TestAccELBListenerConfig_basic,
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckLBV2ListenerExists("opentelekomcloud_lb_listener_v2.listener_1", &listener),
+					testAccCheckELBListenerExists("opentelekomcloud_lb_listener_v2.listener_1", &listener),
 					/* resource.TestCheckResourceAttr(
 					"opentelekomcloud_lb_listener_v2.listener_1", "connection_limit", "-1"), */
 				),
 			},
 			resource.TestStep{
-				Config: TestAccLBV2ListenerConfig_update,
+				Config: TestAccELBListenerConfig_update,
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr(
 						"opentelekomcloud_lb_listener_v2.listener_1", "name", "listener_1_updated"),
@@ -39,9 +39,9 @@ func TestAccLBV2Listener_basic(t *testing.T) {
 	})
 }
 
-func testAccCheckLBV2ListenerDestroy(s *terraform.State) error {
+func testAccCheckELBListenerDestroy(s *terraform.State) error {
 	config := testAccProvider.Meta().(*Config)
-	networkingClient, err := config.networkingV2Client(OS_REGION_NAME)
+	networkingClient, err := config.networkingV1Client(OS_REGION_NAME)
 	if err != nil {
 		return fmt.Errorf("Error creating OpenTelekomCloud networking client: %s", err)
 	}
@@ -60,7 +60,7 @@ func testAccCheckLBV2ListenerDestroy(s *terraform.State) error {
 	return nil
 }
 
-func testAccCheckLBV2ListenerExists(n string, listener *listeners.Listener) resource.TestCheckFunc {
+func testAccCheckELBListenerExists(n string, listener *listeners.Listener) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
 		rs, ok := s.RootModule().Resources[n]
 		if !ok {
@@ -92,7 +92,7 @@ func testAccCheckLBV2ListenerExists(n string, listener *listeners.Listener) reso
 	}
 }
 
-const TestAccLBV2ListenerConfig_basic = `
+const TestAccELBListenerConfig_basic = `
 resource "opentelekomcloud_networking_network_v2" "network_1" {
   name = "network_1"
   admin_state_up = "true"
@@ -124,7 +124,7 @@ resource "opentelekomcloud_lb_listener_v2" "listener_1" {
 }
 `
 
-const TestAccLBV2ListenerConfig_update = `
+const TestAccELBListenerConfig_update = `
 resource "opentelekomcloud_networking_network_v2" "network_1" {
   name = "network_1"
   admin_state_up = "true"
