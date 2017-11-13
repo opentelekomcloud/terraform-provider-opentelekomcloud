@@ -105,11 +105,6 @@ func resourceELoadBalancer() *schema.Resource {
 				Type:     schema.TypeString,
 				Optional: true,
 			},
-
-			"tenantId": &schema.Schema{
-				Type:     schema.TypeString,
-				Optional: true,
-			},
 		},
 	}
 }

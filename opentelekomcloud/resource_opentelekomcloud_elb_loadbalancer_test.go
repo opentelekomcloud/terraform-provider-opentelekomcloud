@@ -176,8 +176,6 @@ resource "opentelekomcloud_elb_loadbalancer" "loadbalancer_1" {
   #vip_subnet_id = "${opentelekomcloud_networking_subnet_v2.subnet_1.id}"
 
   vpc_id = "%s"
-  #tenant_id = "%s"
-  tenantId = "%s"
   type = "External"
 
   timeouts {
@@ -186,7 +184,7 @@ resource "opentelekomcloud_elb_loadbalancer" "loadbalancer_1" {
     delete = "5m"
   }
 }
-`, OS_VPC_ID, OS_TENANT_ID)
+`, OS_VPC_ID)
 
 const testAccELBLoadBalancerConfig_update = `
 resource "opentelekomcloud_networking_network_v2" "network_1" {
