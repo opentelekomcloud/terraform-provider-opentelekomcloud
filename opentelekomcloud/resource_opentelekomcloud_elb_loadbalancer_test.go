@@ -158,7 +158,7 @@ func testAccCheckELBLoadBalancerHasSecGroup(
 	}
 }
 
-const testAccELBLoadBalancerConfig_basic = fmt.Sprintf(`
+var testAccELBLoadBalancerConfig_basic = fmt.Sprintf(`
 resource "opentelekomcloud_networking_network_v2" "network_1" {
   name = "network_1"
   admin_state_up = "true"
@@ -175,9 +175,10 @@ resource "opentelekomcloud_elb_loadbalancer" "loadbalancer_1" {
   name = "loadbalancer_1"
   #vip_subnet_id = "${opentelekomcloud_networking_subnet_v2.subnet_1.id}"
 
-  vpc_id = %s
-  tenant_id = %s
-  type = "external"
+  vpc_id = "%s"
+  #tenant_id = "%s"
+  tenantId = "%s"
+  type = "External"
 
   timeouts {
     create = "5m"
@@ -186,7 +187,6 @@ resource "opentelekomcloud_elb_loadbalancer" "loadbalancer_1" {
   }
 }
 `, OS_VPC_ID, OS_TENANT_ID)
-# is this the way to do it? I put them in provider_test.go
 
 const testAccELBLoadBalancerConfig_update = `
 resource "opentelekomcloud_networking_network_v2" "network_1" {
