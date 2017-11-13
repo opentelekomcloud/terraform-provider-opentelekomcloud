@@ -25,16 +25,16 @@ func TestAccELBLoadBalancer_basic(t *testing.T) {
 			resource.TestStep{
 				Config: testAccELBLoadBalancerConfig_basic,
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckELBLoadBalancerExists("opentelekomcloud_lb_loadbalancer_v2.loadbalancer_1", &lb),
+					testAccCheckELBLoadBalancerExists("opentelekomcloud_elb_loadbalancer.loadbalancer_1", &lb),
 				),
 			},
 			resource.TestStep{
 				Config: testAccELBLoadBalancerConfig_update,
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr(
-						"opentelekomcloud_lb_loadbalancer_v2.loadbalancer_1", "name", "loadbalancer_1_updated"),
+						"opentelekomcloud_elb_loadbalancer.loadbalancer_1", "name", "loadbalancer_1_updated"),
 					resource.TestMatchResourceAttr(
-						"opentelekomcloud_lb_loadbalancer_v2.loadbalancer_1", "vip_port_id",
+						"opentelekomcloud_elb_loadbalancer.loadbalancer_1", "vip_port_id",
 						regexp.MustCompile("^[a-f0-9-]+")),
 				),
 			},
@@ -56,13 +56,13 @@ func TestAccELBLoadBalancer_secGroup(t *testing.T) {
 				Config: testAccELBLoadBalancer_secGroup,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckELBLoadBalancerExists(
-						"opentelekomcloud_lb_loadbalancer_v2.loadbalancer_1", &lb),
+						"opentelekomcloud_elb_loadbalancer.loadbalancer_1", &lb),
 					testAccCheckNetworkingV2SecGroupExists(
 						"opentelekomcloud_networking_secgroup_v2.secgroup_1", &sg_1),
 					testAccCheckNetworkingV2SecGroupExists(
 						"opentelekomcloud_networking_secgroup_v2.secgroup_1", &sg_2),
 					resource.TestCheckResourceAttr(
-						"opentelekomcloud_lb_loadbalancer_v2.loadbalancer_1", "security_group_ids.#", "1"),
+						"opentelekomcloud_elb_loadbalancer.loadbalancer_1", "security_group_ids.#", "1"),
 					testAccCheckELBLoadBalancerHasSecGroup(&lb, &sg_1),
 				),
 			},
@@ -70,9 +70,9 @@ func TestAccELBLoadBalancer_secGroup(t *testing.T) {
 				Config: testAccLBV2LoadBalancer_secGroup_update1,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckELBLoadBalancerExists(
-						"opentelekomcloud_lb_loadbalancer_v2.loadbalancer_1", &lb),
+						"opentelekomcloud_elb_loadbalancer.loadbalancer_1", &lb),
 					resource.TestCheckResourceAttr(
-						"opentelekomcloud_lb_loadbalancer_v2.loadbalancer_1", "security_group_ids.#", "2"),
+						"opentelekomcloud_elb_loadbalancer.loadbalancer_1", "security_group_ids.#", "2"),
 					testAccCheckELBLoadBalancerHasSecGroup(&lb, &sg_1),
 					testAccCheckELBLoadBalancerHasSecGroup(&lb, &sg_2),
 				),
@@ -81,9 +81,9 @@ func TestAccELBLoadBalancer_secGroup(t *testing.T) {
 				Config: testAccELBLoadBalancer_secGroup_update2,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckELBLoadBalancerExists(
-						"opentelekomcloud_lb_loadbalancer_v2.loadbalancer_1", &lb),
+						"opentelekomcloud_elb_loadbalancer.loadbalancer_1", &lb),
 					resource.TestCheckResourceAttr(
-						"opentelekomcloud_lb_loadbalancer_v2.loadbalancer_1", "security_group_ids.#", "1"),
+						"opentelekomcloud_elb_loadbalancer.loadbalancer_1", "security_group_ids.#", "1"),
 					testAccCheckELBLoadBalancerHasSecGroup(&lb, &sg_2),
 				),
 			},
@@ -99,7 +99,7 @@ func testAccCheckELBLoadBalancerDestroy(s *terraform.State) error {
 	}
 
 	for _, rs := range s.RootModule().Resources {
-		if rs.Type != "opentelekomcloud_lb_loadbalancer_v2" {
+		if rs.Type != "opentelekomcloud_elb_loadbalancer" {
 			continue
 		}
 
@@ -171,9 +171,8 @@ resource "opentelekomcloud_networking_subnet_v2" "subnet_1" {
   network_id = "${opentelekomcloud_networking_network_v2.network_1.id}"
 }
 
-resource "opentelekomcloud_lb_loadbalancer_v2" "loadbalancer_1" {
+resource "opentelekomcloud_elb_loadbalancer" "loadbalancer_1" {
   name = "loadbalancer_1"
-  #loadbalancer_provider = "haproxy"
   vip_subnet_id = "${opentelekomcloud_networking_subnet_v2.subnet_1.id}"
 
   timeouts {
@@ -197,7 +196,7 @@ resource "opentelekomcloud_networking_subnet_v2" "subnet_1" {
   network_id = "${opentelekomcloud_networking_network_v2.network_1.id}"
 }
 
-resource "opentelekomcloud_lb_loadbalancer_v2" "loadbalancer_1" {
+resource "opentelekomcloud_elb_loadbalancer" "loadbalancer_1" {
   name = "loadbalancer_1_updated"
   #loadbalancer_provider = "haproxy"
   admin_state_up = "true"
@@ -233,7 +232,7 @@ resource "opentelekomcloud_networking_subnet_v2" "subnet_1" {
   cidr = "192.168.199.0/24"
 }
 
-resource "opentelekomcloud_lb_loadbalancer_v2" "loadbalancer_1" {
+resource "opentelekomcloud_elb_loadbalancer" "loadbalancer_1" {
     name = "loadbalancer_1"
     vip_subnet_id = "${opentelekomcloud_networking_subnet_v2.subnet_1.id}"
     security_group_ids = [
@@ -264,7 +263,7 @@ resource "opentelekomcloud_networking_subnet_v2" "subnet_1" {
   cidr = "192.168.199.0/24"
 }
 
-resource "opentelekomcloud_lb_loadbalancer_v2" "loadbalancer_1" {
+resource "opentelekomcloud_elb_loadbalancer" "loadbalancer_1" {
     name = "loadbalancer_1"
     vip_subnet_id = "${opentelekomcloud_networking_subnet_v2.subnet_1.id}"
     security_group_ids = [
@@ -296,7 +295,7 @@ resource "opentelekomcloud_networking_subnet_v2" "subnet_1" {
   cidr = "192.168.199.0/24"
 }
 
-resource "opentelekomcloud_lb_loadbalancer_v2" "loadbalancer_1" {
+resource "opentelekomcloud_elb_loadbalancer" "loadbalancer_1" {
     name = "loadbalancer_1"
     vip_subnet_id = "${opentelekomcloud_networking_subnet_v2.subnet_1.id}"
     security_group_ids = [
