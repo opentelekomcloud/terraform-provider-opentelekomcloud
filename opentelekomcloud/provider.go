@@ -194,6 +194,10 @@ func Provider() terraform.ResourceProvider {
 			"opentelekomcloud_s3_bucket":                       resourceS3Bucket(),
 			"opentelekomcloud_s3_bucket_policy":                resourceS3BucketPolicy(),
 			"opentelekomcloud_s3_bucket_object":                resourceS3BucketObject(),
+			"opentelekomcloud_elb_loadbalancer":                resourceELoadBalancer(),
+			"opentelekomcloud_elb_listener":                    resourceEListener(),
+			"opentelekomcloud_elb_backend":                     resourceBackend(),
+			"opentelekomcloud_elb_health":                      resourceHealth(),
 		},
 
 		ConfigureFunc: configureProvider,

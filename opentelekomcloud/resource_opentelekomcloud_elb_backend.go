@@ -33,6 +33,7 @@ func resourceBackend() *schema.Resource {
 			"name": &schema.Schema{
 				Type:     schema.TypeString,
 				Optional: true,
+				ForceNew: true,
 			},
 
 			"tenant_id": &schema.Schema{
@@ -78,6 +79,7 @@ func resourceBackend() *schema.Resource {
 				Type:     schema.TypeBool,
 				Default:  true,
 				Optional: true,
+				ForceNew: true,
 			},
 
 			"pool_id": &schema.Schema{
