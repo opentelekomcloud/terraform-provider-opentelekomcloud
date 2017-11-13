@@ -173,7 +173,15 @@ resource "opentelekomcloud_networking_subnet_v2" "subnet_1" {
 
 resource "opentelekomcloud_elb_loadbalancer" "loadbalancer_1" {
   name = "loadbalancer_1"
-  vip_subnet_id = "${opentelekomcloud_networking_subnet_v2.subnet_1.id}"
+  #vip_subnet_id = "${opentelekomcloud_networking_subnet_v2.subnet_1.id}"
+
+  # got * resource opentelekomcloud_elb_loadbalancer: tenantId: Field name may only contain lowercase alphanumeric characters 
+  #    & underscores.]
+  # how do I get and pass the vpc_id and tenant id here?
+
+  vpc_id = os.Getenv("OS_VPC_ID")
+  tenant_id = os.Getenv("OS_TENANT_ID")
+  type = "external"
 
   timeouts {
     create = "5m"
