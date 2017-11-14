@@ -23,23 +23,21 @@ func resourceBackend() *schema.Resource {
 		},
 
 		Schema: map[string]*schema.Schema{
-			"region": &schema.Schema{
-				Type:     schema.TypeString,
-				Optional: true,
-				Computed: true,
-				ForceNew: true,
-			},
-
 			"name": &schema.Schema{
 				Type:     schema.TypeString,
 				Optional: true,
 				ForceNew: true,
 			},
 
-			"tenant_id": &schema.Schema{
+			"listener_id": &schema.Schema{
 				Type:     schema.TypeString,
-				Optional: true,
-				Computed: true,
+				Required: true,
+				ForceNew: true,
+			},
+
+			"server_id": &schema.Schema{
+				Type:     schema.TypeString,
+				Required: true,
 				ForceNew: true,
 			},
 
@@ -47,18 +45,6 @@ func resourceBackend() *schema.Resource {
 				Type:     schema.TypeString,
 				Required: true,
 				ForceNew: true,
-			},
-
-			"protocol_port": &schema.Schema{
-				Type:     schema.TypeInt,
-				Required: true,
-				ForceNew: true,
-			},
-
-			"weight": &schema.Schema{
-				Type:     schema.TypeInt,
-				Optional: true,
-				Computed: true,
 				ValidateFunc: func(v interface{}, k string) (ws []string, errors []error) {
 					value := v.(int)
 					if value < 1 {
@@ -69,29 +55,11 @@ func resourceBackend() *schema.Resource {
 				},
 			},
 
-			"subnet_id": &schema.Schema{
-				Type:     schema.TypeString,
-				Required: true,
-				ForceNew: true,
-			},
-
 			"admin_state_up": &schema.Schema{
 				Type:     schema.TypeBool,
 				Default:  true,
 				Optional: true,
 				ForceNew: true,
-			},
-
-			"pool_id": &schema.Schema{
-				Type:     schema.TypeString,
-				Required: true,
-				ForceNew: true,
-			},
-
-			"id": &schema.Schema{
-				Type:     schema.TypeString,
-				Optional: true,
-				Computed: true,
 			},
 		},
 	}
@@ -134,14 +102,14 @@ func resourceBackendCreate(d *schema.ResourceData, meta interface{}) error {
 }
 
 func resourceBackendRead(d *schema.ResourceData, meta interface{}) error {
-	config := meta.(*Config)
+	// config := meta.(*Config)
 
 	uri := d.Get("uri").(string)
 	job_id := d.Get("job_id").(string)
 
 	log.Printf("[DEBUG] Retrieved uri %s: job_id %#v", uri, job_id)
 
-	d.Set("region", GetRegion(d, config))
+	//d.Set("region", GetRegion(d, config))
 
 	return nil
 }

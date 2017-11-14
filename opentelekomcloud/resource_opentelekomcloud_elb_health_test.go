@@ -27,9 +27,9 @@ func TestAccELBHealth_basic(t *testing.T) {
 				Config: TestAccLBV2MonitorConfig_update,
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr(
-						"opentelekomcloud_lb_monitor_v2.monitor_1", "name", "monitor_1_updated"),
-					resource.TestCheckResourceAttr("opentelekomcloud_lb_monitor_v2.monitor_1", "delay", "30"),
-					resource.TestCheckResourceAttr("opentelekomcloud_lb_monitor_v2.monitor_1", "timeout", "15"),
+						"opentelekomcloud_elb_healthcheck.health_1", "name", "health1_updated"),
+					resource.TestCheckResourceAttr("opentelekomcloud_elb_healthcheck.health_1", "delay", "30"),
+					resource.TestCheckResourceAttr("opentelekomcloud_elb_healthcheck.health_1", "timeout", "15"),
 				),
 			},
 		},
@@ -89,7 +89,7 @@ func testAccCheckELBHealthExists(t *testing.T, n string, health *healthcheck.Hea
 	}
 }
 
-const TestAccELBHealthConfig_basic = `
+var TestAccELBHealthConfig_basic = fmt.Sprintf(`
 resource "opentelekomcloud_networking_network_v2" "network_1" {
   name = "network_1"
   admin_state_up = "true"
@@ -102,32 +102,28 @@ resource "opentelekomcloud_networking_subnet_v2" "subnet_1" {
   network_id = "${opentelekomcloud_networking_network_v2.network_1.id}"
 }
 
-resource "opentelekomcloud_lb_loadbalancer_v2" "loadbalancer_1" {
+resource "opentelekomcloud_elb_loadbalancer" "loadbalancer_1" {
   name = "loadbalancer_1"
-  vip_subnet_id = "${opentelekomcloud_networking_subnet_v2.subnet_1.id}"
+  //vip_subnet_id = "${opentelekomcloud_networking_subnet_v2.subnet_1.id}"
+  vpc_id = "%s"
+  type = "External"
 }
 
-resource "opentelekomcloud_lb_listener_v2" "listener_1" {
+resource "opentelekomcloud_elb_listener" "listener_1" {
   name = "listener_1"
   protocol = "HTTP"
   protocol_port = 8080
-  loadbalancer_id = "${opentelekomcloud_lb_loadbalancer_v2.loadbalancer_1.id}"
+  loadbalancer_id = "${opentelekomcloud_elb_loadbalancer.loadbalancer_1.id}"
 }
 
-resource "opentelekomcloud_lb_pool_v2" "pool_1" {
-  name = "pool_1"
-  protocol = "HTTP"
-  lb_method = "ROUND_ROBIN"
-  listener_id = "${opentelekomcloud_lb_listener_v2.listener_1.id}"
-}
 
-resource "opentelekomcloud_lb_monitor_v2" "monitor_1" {
-  name = "monitor_1"
+resource "opentelekomcloud_elb_health" "health_1" {
+  name = "health_1"
   type = "PING"
   delay = 20
   timeout = 10
   max_retries = 5
-  pool_id = "${opentelekomcloud_lb_pool_v2.pool_1.id}"
+  // pool_id = "${opentelekomcloud_lb_pool_v2.pool_1.id}"
 
   timeouts {
     create = "5m"
@@ -135,7 +131,7 @@ resource "opentelekomcloud_lb_monitor_v2" "monitor_1" {
     delete = "5m"
   }
 }
-`
+`, OS_VPC_ID)
 
 const TestAccELBHealthConfig_update = `
 resource "opentelekomcloud_networking_network_v2" "network_1" {
@@ -150,33 +146,27 @@ resource "opentelekomcloud_networking_subnet_v2" "subnet_1" {
   network_id = "${opentelekomcloud_networking_network_v2.network_1.id}"
 }
 
-resource "opentelekomcloud_lb_loadbalancer_v2" "loadbalancer_1" {
+resource "opentelekomcloud_elb_loadbalancer" "loadbalancer_1" {
   name = "loadbalancer_1"
   vip_subnet_id = "${opentelekomcloud_networking_subnet_v2.subnet_1.id}"
 }
 
-resource "opentelekomcloud_lb_listener_v2" "listener_1" {
+resource "opentelekomcloud_elb_listener" "listener_1" {
   name = "listener_1"
   protocol = "HTTP"
   protocol_port = 8080
-  loadbalancer_id = "${opentelekomcloud_lb_loadbalancer_v2.loadbalancer_1.id}"
+  loadbalancer_id = "${opentelekomcloud_elb_loadbalancer.loadbalancer_1.id}"
 }
 
-resource "opentelekomcloud_lb_pool_v2" "pool_1" {
-  name = "pool_1"
-  protocol = "HTTP"
-  lb_method = "ROUND_ROBIN"
-  listener_id = "${opentelekomcloud_lb_listener_v2.listener_1.id}"
-}
 
-resource "opentelekomcloud_lb_monitor_v2" "monitor_1" {
-  name = "monitor_1_updated"
+resource "opentelekomcloud_elb_health" "health_1" {
+  name = "health_1_updated"
   type = "PING"
   delay = 30
   timeout = 15
   max_retries = 10
   admin_state_up = "true"
-  pool_id = "${opentelekomcloud_lb_pool_v2.pool_1.id}"
+  //pool_id = "${opentelekomcloud_lb_pool_v2.pool_1.id}"
 
   timeouts {
     create = "5m"
