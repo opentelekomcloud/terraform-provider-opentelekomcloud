@@ -16,7 +16,10 @@ import (
 
 // PASS
 func TestAccELBLoadBalancer_basic(t *testing.T) {
+
 	var lb loadbalancer_elbs.LoadBalancer
+	fmt.Printf("@@@@@@@@@@@@@@@@ TestAccELBLoadBalancer_basic starts \n")
+
 	resource.Test(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
 		Providers:    testAccProviders,
@@ -119,15 +122,17 @@ func testAccCheckELBLoadBalancerDestroy(s *terraform.State) error {
 func testAccCheckELBLoadBalancerExists(
 	n string, lb *loadbalancer_elbs.LoadBalancer) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
+		fmt.Printf("@@@@@@@@@@@@@@@@ testAccCheckELBLoadBalancerExists starts \n")
+
 		rs, ok := s.RootModule().Resources[n]
 		if !ok {
-			fmt.Printf("@@@@@@@@@@@@@@@@ testAccCheckELBLoadBalancerExists Not found: %s", n)
+			fmt.Printf("@@@@@@@@@@@@@@@@ testAccCheckELBLoadBalancerExists Not found: %s \n", n)
 
 			return fmt.Errorf("Not found: %s", n)
 		}
 
 		if rs.Primary.ID == "" {
-			fmt.Printf("@@@@@@@@@@@@@@@@ testAccCheckELBLoadBalancerExists No ID is set")
+			fmt.Printf("@@@@@@@@@@@@@@@@ testAccCheckELBLoadBalancerExists No ID is set \n")
 			return fmt.Errorf("No ID is set")
 		}
 
@@ -137,7 +142,7 @@ func testAccCheckELBLoadBalancerExists(
 			fmt.Printf("@@@@@@@@@@@@@@@@ testAccCheckELBLoadBalancerExists Error creating OpenTelekomCloud networking client: %s", err)
 			return fmt.Errorf("Error creating OpenTelekomCloud networking client: %s", err)
 		}
-		fmt.Printf("@@@@@@@@@@@@@@@@ testAccCheckELBLoadBalancerExists \n ")
+		fmt.Printf("@@@@@@@@@@@@@@@@ testAccCheckELBLoadBalancerExists  middle \n ")
 		found, err := loadbalancer_elbs.Get(networkingClient, rs.Primary.ID).Extract()
 		if err != nil {
 			log.Printf("[#####ERR#####] : %v", err)
