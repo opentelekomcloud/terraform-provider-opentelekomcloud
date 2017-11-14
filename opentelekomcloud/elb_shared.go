@@ -86,6 +86,8 @@ func resourceELBLoadBalancerRefreshFunc(networkingClient *gophercloud.ServiceCli
 	return func() (interface{}, string, error) {
 		lb, err := loadbalancer_elbs.Get(networkingClient, id).Extract()
 		if err != nil {
+			fmt.Printf("@@@@@@@@@@@@@@@@ resourceELBLoadBalancerRefreshFunc  err %s \n", err)
+
 			return nil, "", err
 		}
 

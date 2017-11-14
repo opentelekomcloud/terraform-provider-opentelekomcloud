@@ -122,7 +122,7 @@ func resourceELoadBalancerCreate(d *schema.ResourceData, meta interface{}) error
 		Description:  d.Get("description").(string),
 		VipSubnetID:  d.Get("vip_subnet_id").(string),
 		Tenant_ID:    d.Get("tenant_id").(string),
-		VpcID:        d.Get("vpd_id").(string),
+		VpcID:        d.Get("vpc_id").(string),
 		Bandwidth:    d.Get("bandwidth").(int),
 		Type:         d.Get("type").(string),
 		AdminStateUp: &adminStateUp,
@@ -130,21 +130,26 @@ func resourceELoadBalancerCreate(d *schema.ResourceData, meta interface{}) error
 		ChargeMode:   d.Get("charge_mode").(string),
 		EipType:      d.Get("eip_type").(string),
 		VipAddress:   d.Get("vip_address").(string),
-		TenantID:     d.Get("tenantId").(string),
 	}
 
 	log.Printf("[DEBUG] Create Options: %#v", createOpts)
 	lb, err := loadbalancer_elbs.Create(networkingClient, createOpts).Extract()
 	if err != nil {
+		fmt.Printf("@@@@@@@@@@@@@@@@ resourceELoadBalancerCreate Error creating LoadBalancer: %s \n", err)
+
 		return fmt.Errorf("Error creating LoadBalancer: %s", err)
 	}
+	fmt.Printf("@@@@@@@@@@@@@@@@ resourceELoadBalancerCreate  LoadBalancer:  created %v+ %s \n", lb, lb.ID)
 
 	// Wait for LoadBalancer to become active before continuing
 	timeout := d.Timeout(schema.TimeoutCreate)
 	err = waitForELBLoadBalancer(networkingClient, lb.ID, "ACTIVE", nil, timeout)
 	if err != nil {
+		fmt.Printf("@@@@@@@@@@@@@@@@ resourceELoadBalancerCreate waitForELBLoadBalancer LoadBalancer: %s \n", err)
+
 		return err
 	}
+	fmt.Printf("@@@@@@@@@@@@@@@@ resourceELoadBalancerCreate what I should do? \n")
 
 	// Once the loadbalancer has been created, apply any requested security groups
 	// to the port that was created behind the scenes.
@@ -160,15 +165,21 @@ func resourceELoadBalancerRead(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*Config)
 	networkingClient, err := config.networkingV2Client(GetRegion(d, config))
 	if err != nil {
+		fmt.Printf("@@@@@@@@@@@@@@@@ resourceELoadBalancerRead Error creating OpenTelekomCloud networking client: %s \n", err)
+
 		return fmt.Errorf("Error creating OpenTelekomCloud networking client: %s", err)
 	}
 
 	lb, err := loadbalancer_elbs.Get(networkingClient, d.Id()).Extract()
 	if err != nil {
+		fmt.Printf("@@@@@@@@@@@@@@@@ resourceELoadBalancerRead Extract: %s \n", err)
+
 		return CheckDeleted(d, err, "loadbalancer")
 	}
 
 	log.Printf("[DEBUG] Retrieved loadbalancer %s: %#v", d.Id(), lb)
+
+	fmt.Printf("@@@@@@@@@@@@@@@@ resourceELoadBalancerRead Retrieved loadbalancer %s: %#v \n", d.Id(), lb)
 
 	//?
 	d.Set("region", GetRegion(d, config))
