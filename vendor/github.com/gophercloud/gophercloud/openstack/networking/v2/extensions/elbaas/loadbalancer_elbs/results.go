@@ -121,7 +121,7 @@ func (r commonResult) Extract() (*LoadBalancer, error) {
 	lb := new(LoadBalancer)
 	err := r.ExtractInto(lb)
 	if err != nil {
-		fmt.Printf("Error: %s.\n", err.Error())
+		fmt.Printf("gary Error: %s.\n", err.Error())
 		return nil, err
 	} else {
 		fmt.Printf("Returning extract: %+v.\n", lb)

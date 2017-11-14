@@ -18,7 +18,6 @@ import (
 func TestAccELBLoadBalancer_basic(t *testing.T) {
 
 	var lb loadbalancer_elbs.LoadBalancer
-	fmt.Printf("@@@@@@@@@@@@@@@@ TestAccELBLoadBalancer_basic starts \n")
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
@@ -122,7 +121,6 @@ func testAccCheckELBLoadBalancerDestroy(s *terraform.State) error {
 func testAccCheckELBLoadBalancerExists(
 	n string, lb *loadbalancer_elbs.LoadBalancer) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
-		fmt.Printf("@@@@@@@@@@@@@@@@ testAccCheckELBLoadBalancerExists starts \n")
 
 		rs, ok := s.RootModule().Resources[n]
 		if !ok {
@@ -211,7 +209,7 @@ resource "opentelekomcloud_elb_loadbalancer" "loadbalancer_1" {
   admin_state_up = "true"
   vpc_id = "%s"
   type = "External"
-  bandwidth = 5
+  bandwidth = 3
 
   timeouts {
     create = "5m"
