@@ -2,6 +2,7 @@ package opentelekomcloud
 
 import (
 	"fmt"
+	"log"
 	"testing"
 
 	"github.com/hashicorp/terraform/helper/resource"
@@ -16,7 +17,6 @@ import (
 // PASS
 func TestAccELBLoadBalancer_basic(t *testing.T) {
 	var lb loadbalancer_elbs.LoadBalancer
-
 	resource.Test(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
 		Providers:    testAccProviders,
@@ -95,6 +95,8 @@ func testAccCheckELBLoadBalancerDestroy(s *terraform.State) error {
 	config := testAccProvider.Meta().(*Config)
 	networkingClient, err := config.networkingV1Client(OS_REGION_NAME)
 	if err != nil {
+		fmt.Printf("@@@@@@@@@@@@@@@@ testAccCheckELBLoadBalancerDestroy OpenTelekomCloud networking client: %s", err)
+
 		return fmt.Errorf("Error creating OpenTelekomCloud networking client: %s", err)
 	}
 
@@ -105,6 +107,8 @@ func testAccCheckELBLoadBalancerDestroy(s *terraform.State) error {
 
 		_, err := loadbalancer_elbs.Get(networkingClient, rs.Primary.ID).Extract()
 		if err == nil {
+			fmt.Printf("@@@@@@@@@@@@@@@@ testAccCheckELBLoadBalancerDestroy LoadBalancer still exists: %s", rs.Primary.ID)
+
 			return fmt.Errorf("LoadBalancer still exists: %s", rs.Primary.ID)
 		}
 	}
@@ -117,25 +121,34 @@ func testAccCheckELBLoadBalancerExists(
 	return func(s *terraform.State) error {
 		rs, ok := s.RootModule().Resources[n]
 		if !ok {
+			fmt.Printf("@@@@@@@@@@@@@@@@ testAccCheckELBLoadBalancerExists Not found: %s", n)
+
 			return fmt.Errorf("Not found: %s", n)
 		}
 
 		if rs.Primary.ID == "" {
+			fmt.Printf("@@@@@@@@@@@@@@@@ testAccCheckELBLoadBalancerExists No ID is set")
 			return fmt.Errorf("No ID is set")
 		}
 
 		config := testAccProvider.Meta().(*Config)
 		networkingClient, err := config.networkingV1Client(OS_REGION_NAME)
 		if err != nil {
+			fmt.Printf("@@@@@@@@@@@@@@@@ testAccCheckELBLoadBalancerExists Error creating OpenTelekomCloud networking client: %s", err)
 			return fmt.Errorf("Error creating OpenTelekomCloud networking client: %s", err)
 		}
-
+		fmt.Printf("@@@@@@@@@@@@@@@@ testAccCheckELBLoadBalancerExists \n ")
 		found, err := loadbalancer_elbs.Get(networkingClient, rs.Primary.ID).Extract()
 		if err != nil {
+			log.Printf("[#####ERR#####] : %v", err)
+
+			fmt.Printf("@@@@@@@@@@@@@@@@ testAccCheckELBLoadBalancerExists err1 =%v\n ", err)
 			return err
 		}
 
 		if found.ID != rs.Primary.ID {
+			fmt.Printf("@@@@@@@@@@@@@@@@ testAccCheckELBLoadBalancerExists err2 Member not found \n ")
+
 			return fmt.Errorf("Member not found")
 		}
 
@@ -177,6 +190,7 @@ resource "opentelekomcloud_elb_loadbalancer" "loadbalancer_1" {
 
   vpc_id = "%s"
   type = "External"
+  bandwidth = 5
 
   timeouts {
     create = "5m"
@@ -186,24 +200,13 @@ resource "opentelekomcloud_elb_loadbalancer" "loadbalancer_1" {
 }
 `, OS_VPC_ID)
 
-const testAccELBLoadBalancerConfig_update = `
-resource "opentelekomcloud_networking_network_v2" "network_1" {
-  name = "network_1"
-  admin_state_up = "true"
-}
-
-resource "opentelekomcloud_networking_subnet_v2" "subnet_1" {
-  name = "subnet_1"
-  cidr = "192.168.199.0/24"
-  ip_version = 4
-  network_id = "${opentelekomcloud_networking_network_v2.network_1.id}"
-}
-
+var testAccELBLoadBalancerConfig_update = fmt.Sprintf(`
 resource "opentelekomcloud_elb_loadbalancer" "loadbalancer_1" {
   name = "loadbalancer_1_updated"
-  #loadbalancer_provider = "haproxy"
   admin_state_up = "true"
-  vip_subnet_id = "${opentelekomcloud_networking_subnet_v2.subnet_1.id}"
+  vpc_id = "%s"
+  type = "External"
+  bandwidth = 5
 
   timeouts {
     create = "5m"
@@ -211,7 +214,7 @@ resource "opentelekomcloud_elb_loadbalancer" "loadbalancer_1" {
     delete = "5m"
   }
 }
-`
+`, OS_VPC_ID)
 
 const testAccELBLoadBalancer_secGroup = `
 resource "opentelekomcloud_networking_secgroup_v2" "secgroup_1" {
