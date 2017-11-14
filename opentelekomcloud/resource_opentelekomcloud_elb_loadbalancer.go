@@ -133,37 +133,57 @@ func resourceELoadBalancerCreate(d *schema.ResourceData, meta interface{}) error
 	}
 
 	log.Printf("[DEBUG] Create Options: %#v", createOpts)
-	lb, err := loadbalancer_elbs.Create(networkingClient, createOpts).Extract()
-	if err != nil {
-		fmt.Printf("@@@@@@@@@@@@@@@@ resourceELoadBalancerCreate Error creating LoadBalancer: %s \n", err)
 
-		return fmt.Errorf("Error creating LoadBalancer: %s", err)
-	}
-	fmt.Printf("@@@@@@@@@@@@@@@@ resourceELoadBalancerCreate  LoadBalancer:  created %v+ %s \n", lb, lb.ID)
-
-	// Wait for LoadBalancer to become active before continuing
-	timeout := d.Timeout(schema.TimeoutCreate)
-	err = waitForELBLoadBalancer(networkingClient, lb.ID, "ACTIVE", nil, timeout)
+	job, err := loadbalancer_elbs.Create(networkingClient, createOpts).ExtractJobResponse()
 	if err != nil {
-		fmt.Printf("@@@@@@@@@@@@@@@@ resourceELoadBalancerCreate waitForELBLoadBalancer LoadBalancer: %s \n", err)
+		fmt.Printf("resourceELoadBalancerCreate Error creating LoadBalancer: %s \n", err)
 
 		return err
 	}
-	fmt.Printf("@@@@@@@@@@@@@@@@ resourceELoadBalancerCreate what I should do? \n")
 
-	// Once the loadbalancer has been created, apply any requested security groups
-	// to the port that was created behind the scenes.
-	//?
+	//fmt.Printf("job=%+v.\n", job)
 
-	// If all has been successful, set the ID on the resource
-	d.SetId(lb.ID)
+	log.Printf("Successfully created loadbalancer %s on subnet %s", createOpts.Name, createOpts.VipSubnetID)
+	log.Printf("Waiting for loadbalancer %s to become active", createOpts.Name)
 
-	return resourceELoadBalancerRead(d, meta)
+	if err := WaitForJobSuccess(networkingClient, job.URI, loadbalancerActiveTimeoutSeconds); err != nil {
+		fmt.Printf("WaitForJobSuccess fails err=%v+  %s to become active", err, createOpts.Name)
+		return err
+	}
+
+	mlb, err := GetJobEntity(networkingClient, job.URI, "elb")
+	log.Printf("LoadBalancer %s is active", createOpts.Name)
+
+	if vid, ok := mlb["id"]; ok {
+		fmt.Printf("resourceELoadBalancerCreate: vid=%s.\n", vid)
+		if id, ok := vid.(string); ok {
+			fmt.Printf("id=%s.\n", id)
+			lb, err := loadbalancer_elbs.Get(networkingClient, id).Extract()
+			if err != nil {
+				fmt.Printf("loadbalancer_elbs Extract Error: %s.\n", err.Error())
+				return err
+			}
+			fmt.Printf("got lb=%+v.\n", lb)
+			//return lb, err
+
+			fmt.Printf("@@@@@@@@@@@@@@@@ resourceELoadBalancerCreate  LoadBalancer:  created %v+ %s \n", lb, lb.ID)
+
+			// Once the loadbalancer has been created, apply any requested security groups
+			// to the port that was created behind the scenes.
+			//?
+
+			// If all has been successful, set the ID on the resource
+			d.SetId(lb.ID)
+
+			return resourceELoadBalancerRead(d, meta)
+		}
+	}
+	return nil
 }
 
 func resourceELoadBalancerRead(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*Config)
-	networkingClient, err := config.networkingV2Client(GetRegion(d, config))
+	networkingClient, err := config.networkingV1Client(GetRegion(d, config))
 	if err != nil {
 		fmt.Printf("@@@@@@@@@@@@@@@@ resourceELoadBalancerRead Error creating OpenTelekomCloud networking client: %s \n", err)
 
@@ -182,6 +202,18 @@ func resourceELoadBalancerRead(d *schema.ResourceData, meta interface{}) error {
 	fmt.Printf("@@@@@@@@@@@@@@@@ resourceELoadBalancerRead Retrieved loadbalancer %s: %#v \n", d.Id(), lb)
 
 	//?
+	d.Set("name", lb.Name)
+	d.Set("description", lb.Description)
+	d.Set("vip_subnet_id", lb.VipSubnetID)
+	d.Set("tenant_id", lb.TenantID)
+	d.Set("vip_address", lb.VipAddress)
+	d.Set("vpc_id", lb.VpcID)
+	d.Set("admin_state_up", lb.AdminStateUp)
+	d.Set("az", lb.AZ)
+	d.Set("vip_address", lb.VipAddress)
+	d.Set("eip_type", lb.EipType)
+	d.Set("bandwidth", lb.Bandwidth)
+	d.Set("charge_mode", lb.ChargeMode)
 	d.Set("region", GetRegion(d, config))
 
 	// Get any security groups on the VIP Port
@@ -190,9 +222,11 @@ func resourceELoadBalancerRead(d *schema.ResourceData, meta interface{}) error {
 }
 
 func resourceELoadBalancerUpdate(d *schema.ResourceData, meta interface{}) error {
+	fmt.Printf("[resourceELoadBalancerUpdate] ########## update loadbalancer %s", d.Id())
 	config := meta.(*Config)
-	networkingClient, err := config.networkingV2Client(GetRegion(d, config))
+	networkingClient, err := config.networkingV1Client(GetRegion(d, config))
 	if err != nil {
+		fmt.Printf("Error creating OpenTelekomCloud networking client: %s", err)
 		return fmt.Errorf("Error creating OpenTelekomCloud networking client: %s", err)
 	}
 
@@ -210,7 +244,7 @@ func resourceELoadBalancerUpdate(d *schema.ResourceData, meta interface{}) error
 
 	// Wait for LoadBalancer to become active before continuing
 	timeout := d.Timeout(schema.TimeoutUpdate)
-	err = waitForLBV2LoadBalancer(networkingClient, d.Id(), "ACTIVE", nil, timeout)
+	err = waitForELBLoadBalancer(networkingClient, d.Id(), "ACTIVE", nil, timeout)
 	if err != nil {
 		return err
 	}
@@ -231,28 +265,25 @@ func resourceELoadBalancerUpdate(d *schema.ResourceData, meta interface{}) error
 	}
 
 	// Security Groups get updated separately
-	if d.HasChange("security_group_ids") {
-		vipPortID := d.Get("vip_port_id").(string)
-		if err := resourceLoadBalancerV2SecurityGroups(networkingClient, vipPortID, d); err != nil {
-			return err
-		}
-	}
 
-	return resourceLoadBalancerV2Read(d, meta)
+	return resourceELoadBalancerRead(d, meta)
 }
 
 func resourceELoadBalancerDelete(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*Config)
-	networkingClient, err := config.networkingV2Client(GetRegion(d, config))
+	networkingClient, err := config.networkingV1Client(GetRegion(d, config))
 	if err != nil {
 		return fmt.Errorf("Error creating OpenTelekomCloud networking client: %s", err)
 	}
 
 	log.Printf("[DEBUG] Deleting loadbalancer %s", d.Id())
+	fmt.Printf("[resourceELoadBalancerDelete] ##########nn Deleting loadbalancer %s", d.Id())
 	timeout := d.Timeout(schema.TimeoutDelete)
 	err = resource.Retry(timeout, func() *resource.RetryError {
 		err = loadbalancer_elbs.Delete(networkingClient, d.Id()).ExtractErr()
 		if err != nil {
+			fmt.Printf("[resourceELoadBalancerDelete] ##########nn Deleting err %+v \n", err)
+
 			return checkForRetryableError(err)
 		}
 		return nil
@@ -260,11 +291,15 @@ func resourceELoadBalancerDelete(d *schema.ResourceData, meta interface{}) error
 
 	// Wait for LoadBalancer to become delete
 	pending := []string{"PENDING_UPDATE", "PENDING_DELETE", "ACTIVE"}
+	fmt.Printf("[resourceELoadBalancerDelete] ##########nn waiting loadbalancer %s", d.Id())
+
 	err = waitForELBLoadBalancer(networkingClient, d.Id(), "DELETED", pending, timeout)
 	if err != nil {
+		fmt.Printf("[resourceELoadBalancerDelete] ##########nn Deleting waitForELBLoadBalancer err %+v \n", err)
 		return err
 	}
 
+	fmt.Printf("[resourceELoadBalancerDelete] ##########nn done loadbalancer %s", d.Id())
 	return nil
 }
 
