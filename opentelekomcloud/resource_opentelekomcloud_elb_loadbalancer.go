@@ -104,6 +104,7 @@ func resourceELoadBalancer() *schema.Resource {
 			"vip_address": &schema.Schema{
 				Type:     schema.TypeString,
 				Optional: true,
+				Computed: true,
 			},
 		},
 	}
@@ -290,7 +291,7 @@ func resourceELoadBalancerDelete(d *schema.ResourceData, meta interface{}) error
 	})
 
 	// Wait for LoadBalancer to become delete
-	pending := []string{"PENDING_UPDATE", "PENDING_DELETE", "ACTIVE"}
+	/*pending := []string{"PENDING_UPDATE", "PENDING_DELETE", "ACTIVE"}
 	fmt.Printf("[resourceELoadBalancerDelete] ##########nn waiting loadbalancer %s", d.Id())
 
 	err = waitForELBLoadBalancer(networkingClient, d.Id(), "DELETED", pending, timeout)
@@ -299,7 +300,7 @@ func resourceELoadBalancerDelete(d *schema.ResourceData, meta interface{}) error
 		return err
 	}
 
-	fmt.Printf("[resourceELoadBalancerDelete] ##########nn done loadbalancer %s", d.Id())
+	fmt.Printf("[resourceELoadBalancerDelete] ##########nn done loadbalancer %s", d.Id()) */
 	return nil
 }
 
