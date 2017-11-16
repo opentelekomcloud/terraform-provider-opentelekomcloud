@@ -200,7 +200,7 @@ func resourceELoadBalancerRead(d *schema.ResourceData, meta interface{}) error {
 
 	log.Printf("[DEBUG] Retrieved loadbalancer %s: %#v", d.Id(), lb)
 
-	fmt.Printf("@@@@@@@@@@@@@@@@ resourceELoadBalancerRead Retrieved loadbalancer %s: %#v \n", d.Id(), lb)
+	//fmt.Printf("@@@@@@@@@@@@@@@@ resourceELoadBalancerRead Retrieved loadbalancer %s: %#v \n", d.Id(), lb)
 
 	//?
 	d.Set("name", lb.Name)
@@ -238,17 +238,14 @@ func resourceELoadBalancerUpdate(d *schema.ResourceData, meta interface{}) error
 	if d.HasChange("description") {
 		updateOpts.Description = d.Get("description").(string)
 	}
+	if d.HasChange("bandwidth") {
+		updateOpts.Bandwidth = d.Get("bandwidth").(int)
+	}
 	if d.HasChange("admin_state_up") {
 		asu := d.Get("admin_state_up").(bool)
 		updateOpts.AdminStateUp = &asu
 	}
-
-	// Wait for LoadBalancer to become active before continuing
 	timeout := d.Timeout(schema.TimeoutUpdate)
-	err = waitForELBLoadBalancer(networkingClient, d.Id(), "ACTIVE", nil, timeout)
-	if err != nil {
-		return err
-	}
 
 	log.Printf("[DEBUG] Updating loadbalancer %s with options: %#v", d.Id(), updateOpts)
 	err = resource.Retry(timeout, func() *resource.RetryError {

@@ -78,7 +78,7 @@ func waitForELBLoadBalancer(networkingClient *gophercloud.ServiceClient, id stri
 				fmt.Printf("[DEBUG] waitForELBLoadBalancer DELETED\n")
 				return nil
 			default:
-				fmt.Printf("[DEBUG] waitForELBLoadBalancer default \n")
+				fmt.Printf("[DEBUG] waitForELBLoadBalancer default %s\n", target)
 				return fmt.Errorf("Error: loadbalancer %s not found: %s", id, err)
 			}
 		}
