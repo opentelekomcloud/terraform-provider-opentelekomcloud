@@ -14,32 +14,58 @@ type LoadBalancerID struct {
 // the loadbalancer and port on which client traffic is received, as well
 // as other details such as the load balancing method to be use, protocol, etc.
 type Listener struct {
-	// The unique ID for the Listener.
+	// Specifies the time when information about the listener was updated.
+	UpdateTime string `json:"update_time"`
+	// Specifies the backend port.
+	BackendProtocolPort int `json:"backend_port"`
+	// Specifies the listener ID.
 	ID string `json:"id"`
-	// Owner of the Listener. Only an admin user can specify a tenant ID other than its own.
-	TenantID string `json:"tenant_id"`
-	// Human-readable name for the Listener. Does not have to be unique.
-	Name string `json:"name"`
-	// Human-readable description for the Listener.
+	// Specifies the backend protocol.
+	BackendProtocol Protocol `json:"backend_protocol"`
+	// Specifies the cookie processing method. The value is insert.
+	StickySessionType string `json:"sticky_session_type"`
+	// Provides supplementary information about the listener.
 	Description string `json:"description"`
-	// The protocol to loadbalance. A valid value is TCP, HTTP, or HTTPS.
-	Protocol string `json:"protocol"`
-	// The port on which to listen to client traffic that is associated with the
-	// Loadbalancer. A valid value is from 0 to 65535.
-	ProtocolPort int `json:"protocol_port"`
-	// The UUID of default pool. Must have compatible protocol with listener.
-	DefaultPoolID string `json:"default_pool_id"`
-	// A list of load balancer IDs.
-	Loadbalancers []LoadBalancerID `json:"loadbalancers"`
-	// The maximum number of connections allowed for the Loadbalancer. Default is -1,
-	// meaning no limit.
-	ConnLimit int `json:"connection_limit"`
-	// The list of references to TLS secrets.
-	SniContainerRefs []string `json:"sni_container_refs"`
-	// Optional. A reference to a container of TLS secrets.
-	DefaultTlsContainerRef string `json:"default_tls_container_ref"`
-	// The administrative state of the Listener. A valid value is true (UP) or false (DOWN).
-	AdminStateUp bool         `json:"admin_state_up"`
+	// Specifies the ID of the load balancer to which the listener belongs.
+	LoadbalancerID string `json:"loadbalancer_id"`
+	// Specifies the time when the listener was created.
+	CreateTime string `json:"create_time"`
+	// Specifies the listener status. The value can be ACTIVE, PENDING_CREATE, or ERROR.
+	Status string `json:"status"`
+	// Specifies the listening protocol used for layer 4 or 7.
+	Protocol Protocol `json:"protocol"`
+	// Specifies the listening port.
+	ProtocolPort int `json:"port"`
+	// Specifies the cookie timeout period (minutes).
+	CookieTimeout int `json:"cookie_timeout"`
+	// Specifies the status of the load balancer.
+	AdminStateUp bool `json:"admin_state_up"`
+	// Specifies the quantity of backend ECSs.
+	MemberNumber int `json:"member_number"`
+	// Specifies the health check task ID.
+	HealthCheckID int `json:"healthcheck_id"`
+	// Specifies whether to enable sticky session.
+	SessionSticky bool `json:"session_sticky,omitempty"`
+	// Specifies the load balancing algorithm for the listener.
+	Algorithm string `json:"lb_algorithm"`
+	// Specifies the load balancer name.
+	Name string `json:"name"`
+	// Specifies the certificate ID.
+	CertificateID string `json:"certificate_id"`
+	// Specifies the SSL certificate ID list if the value of protocol is HTTPS.
+	Certificates []string `json:"certificates"`
+	// Specifies the TCP timeout period (minutes).
+	TcpTimeout int `json:"tcp_timeout"`
+	// Specifies the UDP session timeout duration (minutes).
+	UDPTimeout int `json:"udp_timeout"`
+	// Specifies the SSL protocol standard supported by a listener.
+	SSLProtocols string `json:"ssl_protocols"`
+	// Specifies the cipher suite of an encryption protocol.
+	SSLCiphers string `json:"ssl_ciphers"`
+	// Secifies whether to maintain the TCP connection to the backend ECS after the ECS is deleted.
+	TcpDraining bool `json:"tcp_draining"`
+	// Specifies the timeout duration (minutes) for the TCP connection to the backend ECS after the ECS
+	TcpDrainingTimeout int `json:"tcp_draining_timeout"`
 }
 
 // ListenerPage is the page returned by a pager when traversing over a

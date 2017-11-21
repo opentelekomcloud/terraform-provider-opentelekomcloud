@@ -10,6 +10,19 @@ import (
 	"github.com/hashicorp/terraform/helper/schema"
 )
 
+var ProtocolFormats = [5]string{"HTTP", "TCP", "HTTPS", "SSL", "UDP"}
+
+func ValidateProtocolFormat(v interface{}, k string) (ws []string, errors []error) {
+	value := v.(string)
+	for i := range ProtocolFormats {
+		if value == ProtocolFormats[i] {
+			return
+		}
+	}
+	errors = append(errors, fmt.Errorf("%q must be one of %v", k, ProtocolFormats))
+	return
+}
+
 func resourceEListener() *schema.Resource {
 	return &schema.Resource{
 		Create: resourceEListenerCreate,
@@ -31,31 +44,15 @@ func resourceEListener() *schema.Resource {
 				ForceNew: true,
 			},
 
-			"protocol": &schema.Schema{
-				Type:     schema.TypeString,
-				Required: true,
-				ForceNew: true,
-				ValidateFunc: func(v interface{}, k string) (ws []string, errors []error) {
-					value := v.(string)
-					if value != "TCP" && value != "HTTP" && value != "HTTPS" && value != "TERMINATED_HTTPS" {
-						errors = append(errors, fmt.Errorf(
-							"Only 'TCP', 'HTTP', 'HTTPS' and 'TERMINATED_HTTPS' are supported values for 'protocol'"))
-					}
-					return
-				},
-			},
-
-			"protocol_port": &schema.Schema{
-				Type:     schema.TypeInt,
-				Required: true,
-				ForceNew: true,
-			},
-
-			"tenant_id": &schema.Schema{
+			"name": &schema.Schema{
 				Type:     schema.TypeString,
 				Optional: true,
 				Computed: true,
-				ForceNew: true,
+			},
+
+			"description": &schema.Schema{
+				Type:     schema.TypeString,
+				Optional: true,
 			},
 
 			"loadbalancer_id": &schema.Schema{
@@ -64,30 +61,30 @@ func resourceEListener() *schema.Resource {
 				ForceNew: true,
 			},
 
-			"name": &schema.Schema{
-				Type:     schema.TypeString,
-				Optional: true,
-				Computed: true,
+			"protocol": &schema.Schema{
+				Type:         schema.TypeString,
+				Required:     true,
+				ForceNew:     true,
+				ValidateFunc: ValidateProtocolFormat,
 			},
 
-			"default_pool_id": &schema.Schema{
-				Type:     schema.TypeString,
-				Optional: true,
-				Computed: true,
-				ForceNew: true,
-			},
-
-			"description": &schema.Schema{
-				Type:     schema.TypeString,
-				Optional: true,
-			},
-
-			/*"connection_limit": &schema.Schema{
+			"protocol_port": &schema.Schema{
 				Type:     schema.TypeInt,
-				Optional: true,
-				Computed: true,
+				Required: true,
 				ForceNew: true,
-			}, */
+			},
+
+			"backend_protocol": &schema.Schema{
+				Type:         schema.TypeString,
+				Required:     true,
+				ForceNew:     true,
+				ValidateFunc: ValidateProtocolFormat,
+			},
+			"backend_port": &schema.Schema{
+				Type:     schema.TypeInt,
+				Required: true,
+				ForceNew: true,
+			},
 
 			"default_tls_container_ref": &schema.Schema{
 				Type:     schema.TypeString,

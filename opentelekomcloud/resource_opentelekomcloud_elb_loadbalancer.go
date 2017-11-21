@@ -34,13 +34,6 @@ func resourceELoadBalancer() *schema.Resource {
 				ForceNew: true,
 			},
 
-			"tenant_id": &schema.Schema{
-				Type:     schema.TypeString,
-				Optional: true,
-				Computed: true,
-				ForceNew: true,
-			},
-
 			"name": &schema.Schema{
 				Type:     schema.TypeString,
 				Optional: true,
@@ -84,21 +77,10 @@ func resourceELoadBalancer() *schema.Resource {
 				Optional: true,
 			},
 
-			"charge_mode": &schema.Schema{
+			"security_group_id": &schema.Schema{
 				Type:     schema.TypeString,
-				Optional: true,
-			},
-
-			"eip_type": &schema.Schema{
-				Type:     schema.TypeString,
-				Optional: true,
-			},
-			"security_group_ids": &schema.Schema{
-				Type:     schema.TypeSet,
 				Optional: true,
 				Computed: true,
-				Elem:     &schema.Schema{Type: schema.TypeString},
-				Set:      schema.HashString,
 			},
 
 			"vip_address": &schema.Schema{
@@ -122,14 +104,11 @@ func resourceELoadBalancerCreate(d *schema.ResourceData, meta interface{}) error
 		Name:         d.Get("name").(string),
 		Description:  d.Get("description").(string),
 		VipSubnetID:  d.Get("vip_subnet_id").(string),
-		Tenant_ID:    d.Get("tenant_id").(string),
 		VpcID:        d.Get("vpc_id").(string),
 		Bandwidth:    d.Get("bandwidth").(int),
 		Type:         d.Get("type").(string),
 		AdminStateUp: &adminStateUp,
 		AZ:           d.Get("az").(string),
-		ChargeMode:   d.Get("charge_mode").(string),
-		EipType:      d.Get("eip_type").(string),
 		VipAddress:   d.Get("vip_address").(string),
 	}
 
@@ -206,15 +185,12 @@ func resourceELoadBalancerRead(d *schema.ResourceData, meta interface{}) error {
 	d.Set("name", lb.Name)
 	d.Set("description", lb.Description)
 	d.Set("vip_subnet_id", lb.VipSubnetID)
-	d.Set("tenant_id", lb.TenantID)
 	d.Set("vip_address", lb.VipAddress)
 	d.Set("vpc_id", lb.VpcID)
 	d.Set("admin_state_up", lb.AdminStateUp)
 	d.Set("az", lb.AZ)
 	d.Set("vip_address", lb.VipAddress)
-	d.Set("eip_type", lb.EipType)
 	d.Set("bandwidth", lb.Bandwidth)
-	d.Set("charge_mode", lb.ChargeMode)
 	d.Set("region", GetRegion(d, config))
 
 	// Get any security groups on the VIP Port

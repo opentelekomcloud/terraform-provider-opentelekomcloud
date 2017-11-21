@@ -300,10 +300,10 @@
 			"revisionTime": "2017-10-18T18:43:25Z"
 		},
 		{
-			"checksumSHA1": "TQ8kDcngYTatY8vUAPMc3xnALLg=",
+			"checksumSHA1": "BinPv6F3LvGM50jGsoxOZCeGyEk=",
 			"path": "github.com/gophercloud/gophercloud",
-			"revision": "f8ec1b3d8dea084885975d404872b37be20b3984",
-			"revisionTime": "2017-10-04T00:41:52Z"
+			"revision": "35837a2f0f5151dc87ae7d68dbb5fa6ee9735159",
+			"revisionTime": "2017-11-19T02:32:45Z"
 		},
 		{
 			"checksumSHA1": "b7g9TcU1OmW7e2UySYeOAmcfHpY=",

@@ -3,6 +3,7 @@ package listeners
 import (
 	"github.com/gophercloud/gophercloud"
 	"github.com/gophercloud/gophercloud/pagination"
+	"fmt"
 )
 
 type Protocol string
@@ -26,7 +27,7 @@ type ListOptsBuilder interface {
 // sort by a particular listener attribute. SortDir sets the direction, and is
 // either `asc' or `desc'. Marker and Limit are used for pagination.
 type ListOpts struct {
-	ListenerId              string `q:"listener_id"`
+	LoadbalancerId              string `q:"loadbalancer_id"`
 }
 
 // ToListenerListQuery formats a ListOpts into a query string.
@@ -66,35 +67,88 @@ type CreateOptsBuilder interface {
 // CreateOpts is the common options struct used in this package's Create
 // operation.
 type CreateOpts struct {
-	// Human-readable name for the Listener. Does not have to be unique.
+	// Required.  Specifies the load balancer name.
+	// The name is a string of 1 to 64 characters that consist of letters, digits, underscores (_), and hyphens (-).
 	Name string `json:"name", required:"true"`
-	// Human-readable description for the Listener.
+	// Optional. Provides supplementary information about the listener.
+	// The value is a string of 0 to 128 characters and cannot contain angle brackets (<>).
 	Description string `json:"description,omitempty"`
-	// The load balancer on which to provision this listener.
+	// Required.  Specifies the ID of the load balancer to which the listener belongs.
 	LoadbalancerID string `json:"loadbalancer_id" required:"true"`
+	// Required.  Specifies the listening protocol used for layer 4 or 7.
+	// A listener using UDP is not allowed for a private network load balancer.
+	// The value can be HTTP, TCP, HTTPS, SSL, or UDP.
 	// The protocol - can either be TCP, HTTP or HTTPS.
 	Protocol Protocol `json:"protocol" required:"true"`
-	// The port on which to listen for client traffic.
+	// Required.  Specifies the listening port.
+	// The value ranges from 1 to 65535.
 	ProtocolPort int `json:"port" required:"true"`
-	// The protocol - can either be TCP, HTTP or HTTPS.
+	// Required.  Specifies the backend protocol.
+	// If the value of protocol is UDP, the parameter value can only be UDP.
+	// If the value of protocol is SSL, the parameter value can only be TCP.
 	BackendProtocol Protocol `json:"backend_protocol" required:"true"`
-	// The port on which to listen for client traffic.
+	// Required.  Specifies the backend port.
+	// The value ranges from 1 to 65535.
 	BackendProtocolPort int `json:"backend_port" required:"true"`
+	// Required.  Specifies the load balancing algorithm for the listener.
+	// The value can be roundrobin, leastconn, or source.
 	Algorithm string `json:"lb_algorithm" required:"true"`
-	SessionSticky bool `json:"session_sticky,omit_empty"`
-	// Indicates the owner of the Listener. Required for admins.
-	Tenant_ID string `json:"tenant_id,omitempty"`
+	// Optional.  Specifies whether to enable sticky session.
+	// The value can be true or false. Sticky session is enabled when the value is true.
+	// If the value of protocol is SSL, the sticky session is not supported and the parameter is invalid.
+	// If the value of protocol is HTTP, HTTPS, or TCP and the value of lb_algorithm is not roundrobin,
+	// the parameter value can only be false.
+	SessionSticky bool `json:"session_sticky,omitempty"`
+	// Optional.  Specifies the cookie processing method. The value is insert.
+	// insert indicates that the cookie is inserted by the load balancer.
+	// This parameter is valid when protocol is set to HTTP and session_sticky to true.
+	// The default value is insert. This parameter is invalid when protocol is set to TCP, SSL, or UDP,
+	// which means the parameter is empty.
 	// The ID of the default pool with which the Listener is associated.
-	DefaultPoolID string `json:"default_pool_id,omitempty"`
-	// The maximum number of connections allowed for the Listener.
-	ConnLimit *int `json:"connection_limit,omitempty"`
-	// A reference to a container of TLS secrets.
-	DefaultTlsContainerRef string `json:"default_tls_container_ref,omitempty"`
-	// A list of references to TLS secrets.
-	SniContainerRefs []string `json:"sni_container_refs,omitempty"`
-	// The administrative state of the Listener. A valid value is true (UP)
-	// or false (DOWN).
-	AdminStateUp *bool `json:"admin_state_up,omitempty"`
+	StickySessionType string `json:"sticky_session_type,omitempty"`
+	// Optional.  Specifies the cookie timeout period (minutes). This parameter is valid when protocol is set to HTTP,
+	// session_sticky to true, and sticky_session_type to insert. This parameter is invalid when protocol is set to
+	// TCP, UDP, or SSL. The value ranges from 1 to 1440.
+	CookieTimeout int `json:"cookie_timeout,omitempty"`
+	// Optional.  Specifies the TCP timeout period (minutes). This parameter is valid when protocol is set to TCP.
+	// The value ranges from 1 to 5.
+	TcpTimeout int `json:"tcp_timeout,omitempty"`
+	// Optional.  Specifies whether to maintain the TCP connection to the backend ECS after the ECS is deleted.
+	// This parameter is valid when protocol is set to TCP.
+	// The value can be true or false.
+	TcpDraining bool `json:"tcp_draining,omitempty"`
+	// Optional.  Specifies the timeout duration (minutes) for the TCP connection to the backend ECS after the ECS
+	// is deleted. This parameter is valid when protocol is set to TCP and tcp_draining to true.
+	// The value ranges from 0 to 60.
+	TcpDrainingTimeout int `json:"tcp_draining_timeout,omitempty"`
+	// Optional.  Specifies the certificate ID. This parameter is mandatory when protocol is set to HTTPS or SSL.
+	// The value can be obtained by viewing details of the SSL certificate.
+	CertificateID string `json:"certificate_id,omitempty"`
+	// Optional.  Specifies the SSL certificate ID list if the value of protocol is HTTPS.
+	// This parameter is mandatory in SNI scenarios.
+	// This parameter is valid only when the load balancer is a public network load balancer.
+	Certificates []string `json:"certificates,omitempty"`
+	// Optional.  Specifies the UDP session timeout duration (minutes). This parameter is valid when protocol is set to UDP.
+	// The value ranges from 1 to 1440.
+	UDPTimeout int `json:"udp_timeout,omitempty"`
+	// Optional.  Specifies the SSL protocol standard supported by a listener.
+	// This parameter is used for enabling specified encryption protocols and valid only when the value of protocol
+	// is set to HTTPS or SSL.  The value is TLSv1.2 or TLSv1.2 TLSv1.1 TLSv1. The default value is TLSv1.2.
+	SSLProtocols string `json:"ssl_protocols,omitempty"`
+	// Optional.  Specifies the cipher suite of an encryption protocol. This parameter is valid only when the value of protocol is set
+	// to HTTPS or SSL. The value is Default, Extended, or Strict.
+	// The value of Default is ECDHE-RSA-AES256-GCM-SHA384:ECDHE-RSA-AES128-GCM-SHA256:ECDHE-RSA-AES256-SHA384:
+	// ECDHE-RSA-AES128-SHA256.
+	// The value of Extended is ECDHE-ECDSA-AES128-SHA256:ECDHE-RSA-AES128-SHA256:AES128-SHA256:AES256-SHA256:
+	// ECDHE-ECDSA-AES256-SHA384:ECDHE-RSA-AES256-SHA384:ECDHE-ECDSA-AES128-SHA:ECDHE-RSA-AES128-SHA:DHE-RSA-AES128-SHA:
+	// ECDHE-RSA-AES256-SHA:ECDHE-ECDSA-AES256-SHA:AES128-SHA:AES256-SHA:DHE-DSS-AES128-SHA:CAMELLIA128-SHA:
+	// EDH-RSA-DES-CBC3-SHA:DES-CBC3-SHA:ECDHE-RSA-RC4-SHA:RC4-SHA:DHE-RSA-AES256-SHA:DHE-DSS-AES256-SHA:
+	// DHE-RSA-CAMELLIA256-SHA:DHE-DSS-CAMELLIA256-SHA:CAMELLIA256-SHA:EDH-DSS-DES-CBC3-SHA:DHE-RSA-CAMELLIA128-SHA:
+	// DHE-DSS-CAMELLIA128-SHA.
+	// The value of Strict is ECDHE-RSA-AES256-GCM-SHA384:ECDHE-RSA-AES128-GCM-SHA256.
+	// The default value is Default. The value can only be set to Extended if the value of ssl_protocols is set to
+	// TLSv1.2 TLSv1.1 TLSv1.
+	SSLCiphers string `json:"ssl_ciphers,omitempty"`
 }
 
 // ToListenerCreateMap casts a CreateOpts struct to a map.
@@ -138,19 +192,53 @@ type UpdateOptsBuilder interface {
 // UpdateOpts is the common options struct used in this package's Update
 // operation.
 type UpdateOpts struct {
-	// Human-readable name for the Listener. Does not have to be unique.
+	// Required.  Specifies the load balancer name.
+	// The name is a string of 1 to 64 characters that consist of letters, digits, underscores (_), and hyphens (-).
 	Name string `json:"name,omitempty"`
-	// Human-readable description for the Listener.
+	// Optional. Provides supplementary information about the listener.
+	// The value is a string of 0 to 128 characters and cannot contain angle brackets (<>).
 	Description string `json:"description,omitempty"`
-	// The maximum number of connections allowed for the Listener.
-	ConnLimit *int `json:"connection_limit,omitempty"`
-	// A reference to a container of TLS secrets.
-	DefaultTlsContainerRef string `json:"default_tls_container_ref,omitempty"`
-	//  A list of references to TLS secrets.
-	SniContainerRefs []string `json:"sni_container_refs,omitempty"`
-	// The administrative state of the Listener. A valid value is true (UP)
-	// or false (DOWN).
-	AdminStateUp *bool `json:"admin_state_up,omitempty"`
+	// Required.  Specifies the listening port.
+	// The value ranges from 1 to 65535.
+	ProtocolPort int `json:"port,omitempty"`
+	// Required.  Specifies the backend port.
+	// The value ranges from 1 to 65535.
+	BackendProtocolPort int `json:"backend_port,omitempty"`
+	// Required.  Specifies the load balancing algorithm for the listener.
+	// The value can be roundrobin, leastconn, or source.
+	Algorithm string `json:"lb_algorithm,omitempty"`
+	// Optional.  Specifies the TCP timeout period (minutes). This parameter is valid when protocol is set to TCP.
+	// The value ranges from 1 to 5.
+	TcpTimeout int `json:"tcp_timeout,omitempty"`
+	// Optional.  Specifies whether to maintain the TCP connection to the backend ECS after the ECS is deleted.
+	// This parameter is valid when protocol is set to TCP.
+	// The value can be true or false.
+	TcpDraining bool `json:"tcp_draining,omitempty"`
+	// Optional.  Specifies the timeout duration (minutes) for the TCP connection to the backend ECS after the ECS
+	// is deleted. This parameter is valid when protocol is set to TCP and tcp_draining to true.
+	// The value ranges from 0 to 60.
+	TcpDrainingTimeout int `json:"tcp_draining_timeout,omitempty"`
+	// Optional.  Specifies the UDP session timeout duration (minutes). This parameter is valid when protocol is set to UDP.
+	// The value ranges from 1 to 1440.
+	UDPTimeout int `json:"udp_timeout,omitempty"`
+	// Optional.  Specifies the SSL protocol standard supported by a listener.
+	// This parameter is used for enabling specified encryption protocols and valid only when the value of protocol
+	// is set to HTTPS or SSL.  The value is TLSv1.2 or TLSv1.2 TLSv1.1 TLSv1. The default value is TLSv1.2.
+	SSLProtocols string `json:"ssl_protocols,omitempty"`
+	// Optional.  Specifies the cipher suite of an encryption protocol. This parameter is valid only when the value of protocol is set
+	// to HTTPS or SSL. The value is Default, Extended, or Strict.
+	// The value of Default is ECDHE-RSA-AES256-GCM-SHA384:ECDHE-RSA-AES128-GCM-SHA256:ECDHE-RSA-AES256-SHA384:
+	// ECDHE-RSA-AES128-SHA256.
+	// The value of Extended is ECDHE-ECDSA-AES128-SHA256:ECDHE-RSA-AES128-SHA256:AES128-SHA256:AES256-SHA256:
+	// ECDHE-ECDSA-AES256-SHA384:ECDHE-RSA-AES256-SHA384:ECDHE-ECDSA-AES128-SHA:ECDHE-RSA-AES128-SHA:DHE-RSA-AES128-SHA:
+	// ECDHE-RSA-AES256-SHA:ECDHE-ECDSA-AES256-SHA:AES128-SHA:AES256-SHA:DHE-DSS-AES128-SHA:CAMELLIA128-SHA:
+	// EDH-RSA-DES-CBC3-SHA:DES-CBC3-SHA:ECDHE-RSA-RC4-SHA:RC4-SHA:DHE-RSA-AES256-SHA:DHE-DSS-AES256-SHA:
+	// DHE-RSA-CAMELLIA256-SHA:DHE-DSS-CAMELLIA256-SHA:CAMELLIA256-SHA:EDH-DSS-DES-CBC3-SHA:DHE-RSA-CAMELLIA128-SHA:
+	// DHE-DSS-CAMELLIA128-SHA.
+	// The value of Strict is ECDHE-RSA-AES256-GCM-SHA384:ECDHE-RSA-AES128-GCM-SHA256.
+	// The default value is Default. The value can only be set to Extended if the value of ssl_protocols is set to
+	// TLSv1.2 TLSv1.1 TLSv1.
+	SSLCiphers string `json:"ssl_ciphers,omitempty"`
 }
 
 // ToListenerUpdateMap casts a UpdateOpts struct to a map.
@@ -173,6 +261,10 @@ func Update(c *gophercloud.ServiceClient, id string, opts UpdateOpts) (r UpdateR
 
 // Delete will permanently delete a particular Listeners based on its unique ID.
 func Delete(c *gophercloud.ServiceClient, id string) (r DeleteResult) {
-	_, r.Err = c.Delete(resourceURL(c, id), nil)
+	url := resourceURL(c, id)
+	fmt.Printf("Delete listener url: %s.\n", url)
+	_, r.Err = c.Delete1(url, &gophercloud.RequestOpts{
+		OkCodes: []int{204},
+	})
 	return
 }

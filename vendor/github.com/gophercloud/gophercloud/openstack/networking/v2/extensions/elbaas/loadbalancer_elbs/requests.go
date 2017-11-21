@@ -18,7 +18,6 @@ type ListOptsBuilder interface {
 // sort by a particular attribute. SortDir sets the direction, and is
 // either `asc' or `desc'. Marker and Limit are used for pagination.
 type ListOpts struct {
-    Tenant_ID           string `q:"tenant_id"`
     Name               string `q:"name"`
     Description        string `q:"description"`
 	VpcID              string `q:"vpc_id"`
@@ -77,42 +76,42 @@ type CreateOptsBuilder interface {
 // CreateOpts is the common options struct used in this package's Create
 // operation.
 type CreateOpts struct {
-    // Required. The tenant operator id, or is it?
-    Tenant_ID  string `json:"tenant_id,omitempty"` // required:"true"`
-	// Optional. Human-readable name for the Loadbalancer. Does not have to be unique.
-	Name string `json:"name,omitempty"`
-	// Optional. Human-readable description for the Loadbalancer.
+	// Required. Specifies the load balancer name.
+	// The name is a string of 1 to 64 characters that consist of letters, digits, underscores (_), and hyphens (-).
+	Name string `json:"name", required:"true"`
+	// Optional. Provides supplementary information about the load balancer.
+	// The value is a string of 0 to 128 characters and cannot contain angle brackets (<>).
 	Description string `json:"description,omitempty"`
-    // Required. 
-    VpcID string `json:"vpc_id,required:"true"`
+    // Required. Specifies the VPC ID.
+    VpcID string `json:"vpc_id",required:"true"`
     // Optional. Specifies the bandwidth (Mbit/s). This parameter is mandatory when type is 
     // set to External, and it is invalid when type is set to Internal.
     // The value ranges from 1 to 300.
     Bandwidth   int    `json:"bandwidth,omitempty"`
     // Required. Specifies the load balancer type.
     // The value can be Internal or External.
-    Type        string `json:"type,required:"true"`
-    // Optional. The administrative state of the Loadbalancer. A valid value is true (UP)
-	// or false (DOWN).
-	AdminStateUp *bool `json:"admin_state_up,omitempty"`
-    // Required Specifies the ID of the private network to be added. This parameter is mandatory when type 
-    // is set to Internal, and it is invalid when type is set to External. 
+    Type        string `json:"type", required:"true"`
+    // Required.  Specifies the status of the load balancer.
+	// Optional values:
+	// 0 or false: indicates that the load balancer is stopped. Only tenants are allowed to enter these two values.
+	// 1 or true: indicates that the load balancer is running properly.
+	// 2 or false: indicates that the load balancer is frozen. Only tenants are allowed to enter these two values.
+	AdminStateUp *bool `json:"admin_state_up", required:"true"`
+    // Optional.  Specifies the subnet ID of backend ECSs. This parameter is mandatory when type is set to Internal.
     VipSubnetID string `json:"vip_subnet_id,omitempty"`
-    // Optional  Specifies the ID of the availability zone (AZ). This parameter is mandatory when type 
+    // Optional.  Specifies the ID of the availability zone (AZ). This parameter is mandatory when type
     // is set to Internal, and it is invalid when type is set to External.
     AZ          string `json:"az,omitempty"`
-    // Optional  This is a reserved field. If the system supports charging by traffic and this field is 
-    // specified, then you are charged by traffic for elastic IP addresses.
-    ChargeMode  string `json:"charge_mode"`
-	// Optional, This parameter is reserved. should I do it?
-    EipType     string `json:"eip_type,omitempty"`
-	// Optional,
+	// Optional.  Specifies the security group ID.
+	// The value is a string of 1 to 200 characters that consists of uppercase and lowercase letters, digits, and hyphens (-).
+	// This parameter is mandatory when type is set to Internal.
     SecurityGroupID    string `json:"security_group_id,omitempty"`
-	// Optional,
+	// Optional.  Specifies the IP address used by ELB for providing services. When type is set to External,
+	// the parameter value is the elastic IP address. When type is set to Internal, the parameter value is
+	// the private network IP address.
+	// You can select an existing elastic IP address and create a public network load balancer.
+	// When this parameter is configured, parameters bandwidth, charge_mode, and eip_type are invalid.
     VipAddress         string `json:"vip_address,omitempty"`
-    // Only administrative users can specify a tenant UUID other than their own.
-    TenantID string `json:"tenantId,omitempty"`
-    
 }
 
 // ToLoadBalancerCreateMap casts a CreateOpts struct to a map.
@@ -157,12 +156,21 @@ type UpdateOptsBuilder interface {
 // UpdateOpts is the common options struct used in this package's Update
 // operation.
 type UpdateOpts struct {
-	// Optional. Human-readable name for the Loadbalancer. Does not have to be unique.
+	// Required. Specifies the load balancer name.
+	// The name is a string of 1 to 64 characters that consist of letters, digits, underscores (_), and hyphens (-).
 	Name string `json:"name,omitempty"`
-	// Optional. Human-readable description for the Loadbalancer.
+	// Optional. Provides supplementary information about the load balancer.
+	// The value is a string of 0 to 128 characters and cannot contain angle brackets (<>).
 	Description string `json:"description,omitempty"`
-	// Optional. The administrative state of the Loadbalancer. A valid value is true (UP)
-	// or false (DOWN).
+	// Optional. Specifies the bandwidth (Mbit/s). This parameter is mandatory when type is
+	// set to External, and it is invalid when type is set to Internal.
+	// The value ranges from 1 to 300.
+	Bandwidth   int    `json:"bandwidth,omitempty"`
+	// Required.  Specifies the status of the load balancer.
+	// Optional values:
+	// 0 or false: indicates that the load balancer is stopped. Only tenants are allowed to enter these two values.
+	// 1 or true: indicates that the load balancer is running properly.
+	// 2 or false: indicates that the load balancer is frozen. Only tenants are allowed to enter these two values.
 	AdminStateUp *bool `json:"admin_state_up,omitempty"`
 }
 
@@ -186,13 +194,8 @@ func Update(c *gophercloud.ServiceClient, id string, opts UpdateOpts) (r UpdateR
 
 // Delete will permanently delete a particular LoadBalancer based on its unique ID.
 func Delete(c *gophercloud.ServiceClient, id string) (r DeleteResult) {
-	_, r.Err = c.Delete(resourceURL(c, id), &gophercloud.RequestOpts{
+	_, r.Err = c.Delete2(resourceURL(c, id),  &r.Body, &gophercloud.RequestOpts{
 		OkCodes: []int{200},
 	})
-	return
-}
-
-func GetStatuses(c *gophercloud.ServiceClient, id string) (r GetStatusesResult) {
-	_, r.Err = c.Get(statusRootURL(c, id), &r.Body, nil)
 	return
 }
