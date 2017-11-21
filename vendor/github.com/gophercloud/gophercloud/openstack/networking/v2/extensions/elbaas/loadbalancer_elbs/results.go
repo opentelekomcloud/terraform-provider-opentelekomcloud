@@ -11,55 +11,39 @@ import (
 // the virtual IP address on which client traffic is received, as well
 // as other details such as the load balancing method to be use, protocol, etc.
 type LoadBalancer struct {
-    Tenant_ID           string `json:"tenant_id"`
-    // Human-readable name for the LoadBalancer. Does not have to be unique.
-	Name string `json:"name"`
-    // Human-readable description for the Loadbalancer.
-	Description string `json:"description"`
-	// vpc_id
-    VpcID       string `json:"vpc_id"`
-    // 
-    Bandwidth   int    `json:"bandwidth"`
-    //
-    Type        string `json:"type"`
-    // The administrative state of the Loadbalancer. A valid value is true (UP) or false (DOWN).
-	AdminStateUp int `json:"admin_state_up"`
-	// The UUID of the subnet on which to allocate the virtual IP for the Loadbalancer address.
-	VipSubnetID string `json:"vip_subnet_id"`
-    // az
-	AZ       string `json:"az"` 
-	// charge mode
-    ChargeMode   string `json:"charge_mode"`
-    // eip type
-    EipType            string `json:"eip_type"`
-    // security group
-    SecurityGroupID    string `json:"security_group_id"`
-    // The IP address of the Loadbalancer.
-	VipAddress string `json:"vip_address"`
-    // Owner of the LoadBalancer. Only an admin user can specify a tenant ID other than its own.
-    TenantID string `json:"tenantId"`
-	// The unique ID for the LoadBalancer.
+	// Specifies the IP address used by ELB for providing services.
+	VipAddress         string `json:"vip_address"`
+	// Specifies the time when information about the load balancer was updated.
+	UpdateTime string `json:"update_time"`
+	// Specifies the time when the load balancer was created.
+	CreateTime string `json:"create_time"`
+	// Specifies the load balancer ID.
 	ID string `json:"id"`
-
-
-}
-
-type JobResponse struct {
-	URI string `json:"uri"`
-	JobID string `json:"job_id"`
-}
-
-type JobStatus struct {
+	// Specifies the status of the load balancer.
+	// The value can be ACTIVE, PENDING_CREATE, or ERROR.
 	Status string `json:"status"`
-	Entities map[string]interface{} `json:"entities"`
-	JobID string `json:"job_id"`
-	JobType string `json:"job_type"`
-	ErrorCode string `json:"error_code"`
-	FailReason string `json:"fail_reason"`
-}
-
-type StatusTree struct {
-	Loadbalancer *LoadBalancer `json:"loadbalancer"`
+	// Specifies the bandwidth (Mbit/s).
+	Bandwidth   int    `json:"bandwidth"`
+	// Specifies the VPC ID.
+	VpcID string `json:"vpc_id"`
+	// Specifies the status of the load balancer.
+	// Optional values:
+	// 0: The load balancer is disabled.
+	// 1: The load balancer is running properly.
+	// 2: The load balancer is frozen.
+	AdminStateUp int `json:"admin_state_up"`
+	// Specifies the subnet ID of backend ECSs.
+	VipSubnetID string `json:"vip_subnet_id"`
+	// Specifies the load balancer type.
+	Type        string `json:"type"`
+	// Specifies the load balancer name.
+	Name string `json:"name"`
+	// Provides supplementary information about the load balancer.
+	Description string `json:"description"`
+	// Specifies the security group ID.
+	SecurityGroupID    string `json:"security_group_id"`
+	// Specifies the ID of the availability zone (AZ).
+	AZ          string `json:"az"`
 }
 
 // LoadBalancerPage is the page returned by a pager when traversing over a
@@ -71,16 +55,9 @@ type LoadBalancerPage struct {
 // NextPageURL is invoked when a paginated collection of routers has reached
 // the end of a page and the pager seeks to traverse over a new one. In order
 // to do this, it needs to construct the next page's URL.
-func (r LoadBalancerPage) NextPageURL() (string, error) {
-	var s struct {
-		Links []gophercloud.Link `json:"loadbalancers_links"`
-	}
-	err := r.ExtractInto(&s)
-	if err != nil {
-		return "", err
-	}
-	return gophercloud.ExtractNextURL(s.Links)
-}
+/* func (r LoadBalancerPage) NextPageURL() (string, error) {
+	return "", nil
+} */
 
 // IsEmpty checks whether a LoadBalancerPage struct is empty.
 func (p LoadBalancerPage) IsEmpty() (bool, error) {
@@ -103,25 +80,13 @@ type commonResult struct {
 	gophercloud.Result
 }
 
-func (r commonResult) ExtractJobResponse() (*JobResponse, error) {
-	job := new(JobResponse)
-	err := r.ExtractInto(job)
-	return job, err
-}
-
-func (r commonResult) ExtractJobStatus() (*JobStatus, error) {
-	job := new(JobStatus)
-	err := r.ExtractInto(job)
-	return job, err
-}
-
-// Extract is a function that accepts a result and extracts a router.
+// Extract is a function that accepts a result and extracts a loadbalancer.
 func (r commonResult) Extract() (*LoadBalancer, error) {
 	fmt.Printf("Extracting...\n")
 	lb := new(LoadBalancer)
 	err := r.ExtractInto(lb)
 	if err != nil {
-		fmt.Printf("gary Error: %s.\n", err.Error())
+		fmt.Printf("Error: %s.\n", err.Error())
 		return nil, err
 	} else {
 		fmt.Printf("Returning extract: %+v.\n", lb)
@@ -131,15 +96,6 @@ func (r commonResult) Extract() (*LoadBalancer, error) {
 
 type GetStatusesResult struct {
 	gophercloud.Result
-}
-
-// Extract is a function that accepts a result and extracts a Loadbalancer.
-func (r GetStatusesResult) Extract() (*StatusTree, error) {
-	var s struct {
-		Statuses *StatusTree `json:"statuses"`
-	}
-	err := r.ExtractInto(&s)
-	return s.Statuses, err
 }
 
 // CreateResult represents the result of a create operation.
@@ -159,5 +115,5 @@ type UpdateResult struct {
 
 // DeleteResult represents the result of a delete operation.
 type DeleteResult struct {
-	gophercloud.ErrResult
+	commonResult
 }

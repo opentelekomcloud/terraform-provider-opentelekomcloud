@@ -14,10 +14,26 @@ type LoadBalancerID struct {
 // the loadbalancer and port on which client traffic is received, as well
 // as other details such as the load balancing method to be use, protocol, etc.
 type Backend struct {
-	// uri
-	Uri string `json:"uri"`
-	// Owner of the Listener. Only an admin user can specify a tenant ID other than its own.
-	JobId string `json:"job_id"`
+	// Specifies the private IP address of the backend ECS.
+	ServerAddress string `json:"server_address"`
+	// Specifies the backend ECS ID.
+	ID string `json:"id"`
+	// Specifies the floating IP address assigned to the backend ECS.
+	Address string `json:"address"`
+	// Specifies the backend ECS status. The value is ACTIVE, PENDING, or ERROR.
+	Status string `json:"status"`
+	// Specifies the health check status. The value is NORMAL, ABNORMAL, or UNAVAILABLE.
+	HealthStatus string `json:"health_status"`
+	// Specifies the time when information about the backend ECS was updated.
+	UpdateTime string `json:"update_time"`
+	// Specifies the time when the backend ECS was created.
+	CreateTime string `json:"create_time"`
+	// Specifies the backend ECS name.
+	ServerName string `json:"server_name"`
+	// Specifies the original back member ID.
+	ServerID string `json:"server_id"`
+	// Specifies the listener to which the backend ECS belongs.
+	Listeners []map[string]interface{} `json:"listeners"`
 }
 
 // ListenerPage is the page returned by a pager when traversing over a
@@ -67,8 +83,8 @@ func (r commonResult) Extract() (*Backend, error) {
 }
 
 
-// CreateResult represents the result of a create operation.
-type CreateResult struct {
+// AddResult represents the result of a create operation.
+type AddResult struct {
 	commonResult
 }
 
@@ -77,7 +93,7 @@ type GetResult struct {
 	commonResult
 }
 
-// DeleteResult represents the result of a delete operation.
-type DeleteResult struct {
+// RemoveResult represents the result of a delete operation.
+type RemoveResult struct {
 	gophercloud.ErrResult
 }

@@ -2,10 +2,9 @@ package healthcheck
 
 import (
 	"github.com/gophercloud/gophercloud"
-	"github.com/gophercloud/gophercloud/pagination"
+	//"github.com/gophercloud/gophercloud/pagination"
     "fmt"
 )
-
 
 // Health represents a load balancer health check. A health monitor is used
 // to determine whether or not back-end members of the VIP's pool are usable
@@ -23,80 +22,30 @@ import (
 // won't participate in its pool's load balancing. In other words, ALL monitors
 // must declare the member to be healthy for it to stay ACTIVE.
 type Health struct {
-    // Thealthcheck_interval
-    HealthcheckInterval int `json:"healthcheck_interval"`
-
-    // listener_id
-    ListenerId string `json:"listener_id"`
-
-    // The unique ID for the health.
+	// Specifies the maximum interval (s) for health check.
+	HealthcheckInterval int `json:"healthcheck_interval,omitempty"`
+	// Specifies the ID of the listener to which the health check task belongs.
+	ListenerID string `json:"listener_id" required:"true"`
+	// Specifies the health check ID.
 	ID string `json:"id"`
-
-	// The healthcheck_ protocol
-	HealthcheckProtocol string `json:"healthcheck_ protocol"`
-
-	// unhealthy_threshold
-	UnhealthyThreshold int `json:"unhealthy_threshold"`
-
-	// update_time
+	// Specifies the protocol used for the health check. The value can be HTTP or TCP (case-insensitive).
+	HealthcheckProtocol string `json:"healthcheck_protocol,omitempty"`
+	// Specifies the threshold at which the health check result is fail, that is, the number of consecutive
+	// failed health checks when the health check result of the backend server changes from success to fail.
+	UnhealthyThreshold int `json:"unhealthy_threshold,omitempty"`
+	// Specifies the time when information about the health check was updated.
 	UpdateTime string `json:"update_time"`
-
-	// create_time
+	// Specifies the time when the health check was created.
 	CreateTime string `json:"create_time"`
-
-	// healthcheck_connect_port
-	HealthcheckConnectPort int `json:"healthcheck_connect_port"`
-
-	// healthcheck_timeout
-	HealthcheckTimeout int `json:"healthcheck_timeout"`
-
-	// healthcheck_uri
-	HealthcheckUri string `json:"healthcheck_uri" `
-
-	// healthy_threshold
-	HealthyThreshold int `json:"healthy_threshold"`
-
-	// The administrative state of the health monitor, which is up (true) or down (false).
-	//AdminStateUp bool `json:"admin_state_up"`
-}
-
-// MonitorPage is the page returned by a pager when traversing over a
-// collection of health monitors.
-type HealthPage struct {
-	pagination.LinkedPageBase
-}
-
-// NextPageURL is invoked when a paginated collection of monitors has reached
-// the end of a page and the pager seeks to traverse over a new one. In order
-// to do this, it needs to construct the next page's URL.
-func (r HealthPage) NextPageURL() (string, error) {
-	var s struct {
-		Links []gophercloud.Link `json:"healthcheck_links"`
-	}
-
-	err := r.ExtractInto(&s)
-	if err != nil {
-		return "", err
-	}
-
-	return gophercloud.ExtractNextURL(s.Links)
-}
-
-// IsEmpty checks whether a MonitorPage struct is empty.
-func (r HealthPage) IsEmpty() (bool, error) {
-	is, err := ExtractHealth(r)
-	return len(is) == 0, err
-}
-
-// ExtractMonitors accepts a Page struct, specifically a MonitorPage struct,
-// and extracts the elements into a slice of Monitor structs. In other words,
-// a generic collection is mapped into a relevant slice.
-func ExtractHealth(r pagination.Page) ([]Health, error) {
-	var s struct {
-		Healths []Health `json:"healthcheck"`
-	}
-	err := (r.(HealthPage)).ExtractInto(&s)
-	return s.Healths, err
+	// Specifies the port used for the health check.  The value ranges from 1 to 65535.
+	HealthcheckConnectPort int `json:"healthcheck_connect_port,omitempty"`
+	// Specifies the maximum timeout duration (s) for the health check.
+	HealthcheckTimeout int `json:"healthcheck_timeout,omitempty"`
+	// Specifies the URI for health check.
+	HealthcheckUri string `json:"healthcheck_uri,omitempty"`
+	// Specifies the threshold at which the health check result is success, that is, the number of consecutive successful
+	// health checks when the health check result of the backend server changes from fail to success.
+	HealthyThreshold int `json:"healthy_threshold,omitempty"`
 }
 
 type commonResult struct {
