@@ -37,7 +37,7 @@ func TestAccELBBackend_basic(t *testing.T) {
 
 func testAccCheckELBBackendDestroy(s *terraform.State) error {
 	config := testAccProvider.Meta().(*Config)
-	_, err := config.networkingV1Client(OS_REGION_NAME)
+	_, err := config.otcV1Client(OS_REGION_NAME)
 	if err != nil {
 		return fmt.Errorf("Error creating OpenTelekomCloud networking client: %s", err)
 	}
@@ -64,7 +64,7 @@ func testAccCheckELBBackendExists(n string) resource.TestCheckFunc {
 		}
 
 		config := testAccProvider.Meta().(*Config)
-		_ /*networkingClient*/, err := config.networkingV1Client(OS_REGION_NAME)
+		_ /*networkingClient*/, err := config.otcV1Client(OS_REGION_NAME)
 		if err != nil {
 			return fmt.Errorf("Error creating OpenTelekomCloud networking client: %s", err)
 		}

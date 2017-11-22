@@ -35,9 +35,6 @@ func TestAccELBLoadBalancer_basic(t *testing.T) {
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr(
 						"opentelekomcloud_elb_loadbalancer.loadbalancer_1", "name", "loadbalancer_1_updated"),
-					resource.TestMatchResourceAttr(
-						"opentelekomcloud_elb_loadbalancer.loadbalancer_1", "vip_port_id",
-						regexp.MustCompile("^[a-f0-9-]+")),
 				),
 			},
 		},
@@ -95,7 +92,7 @@ func TestAccELBLoadBalancer_secGroup(t *testing.T) {
 
 func testAccCheckELBLoadBalancerDestroy(s *terraform.State) error {
 	config := testAccProvider.Meta().(*Config)
-	networkingClient, err := config.networkingV1Client(OS_REGION_NAME)
+	networkingClient, err := config.otcV1Client(OS_REGION_NAME)
 	if err != nil {
 		fmt.Printf("@@@@@@@@@@@@@@@@ testAccCheckELBLoadBalancerDestroy OpenTelekomCloud networking client: %s", err)
 
@@ -135,7 +132,7 @@ func testAccCheckELBLoadBalancerExists(
 		}
 
 		config := testAccProvider.Meta().(*Config)
-		networkingClient, err := config.networkingV1Client(OS_REGION_NAME)
+		networkingClient, err := config.otcV1Client(OS_REGION_NAME)
 		if err != nil {
 			fmt.Printf("@@@@@@@@@@@@@@@@ testAccCheckELBLoadBalancerExists Error creating OpenTelekomCloud networking client: %s", err)
 			return fmt.Errorf("Error creating OpenTelekomCloud networking client: %s", err)
@@ -165,7 +162,7 @@ func testAccCheckELBLoadBalancerHasSecGroup(
 	lb *loadbalancer_elbs.LoadBalancer, sg *groups.SecGroup) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
 		config := testAccProvider.Meta().(*Config)
-		_ /*networkingClient,*/, err := config.networkingV1Client(OS_REGION_NAME)
+		_ /*networkingClient,*/, err := config.otcV1Client(OS_REGION_NAME)
 		if err != nil {
 			return fmt.Errorf("Error creating OpenTelekomCloud networking client: %s", err)
 		}
@@ -177,8 +174,6 @@ func testAccCheckELBLoadBalancerHasSecGroup(
 var testAccELBLoadBalancerConfig_basic = fmt.Sprintf(`
 resource "opentelekomcloud_elb_loadbalancer" "loadbalancer_1" {
   name = "loadbalancer_1"
-  #vip_subnet_id = "${opentelekomcloud_networking_subnet_v2.subnet_1.id}"
-
   vpc_id = "%s"
   type = "External"
   bandwidth = 5

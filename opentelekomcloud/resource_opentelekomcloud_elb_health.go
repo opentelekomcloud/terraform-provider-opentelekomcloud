@@ -137,7 +137,7 @@ func resourceHealthCreate(d *schema.ResourceData, meta interface{}) error {
 
 func resourceHealthRead(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*Config)
-	networkingClient, err := config.networkingV1Client(GetRegion(d, config))
+	networkingClient, err := config.otcV1Client(GetRegion(d, config))
 	if err != nil {
 		return fmt.Errorf("Error creating OpenTelekomCloud networking client: %s", err)
 	}
@@ -166,7 +166,7 @@ func resourceHealthRead(d *schema.ResourceData, meta interface{}) error {
 
 func resourceHealthUpdate(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*Config)
-	networkingClient, err := config.networkingV1Client(GetRegion(d, config))
+	networkingClient, err := config.otcV1Client(GetRegion(d, config))
 	if err != nil {
 		return fmt.Errorf("Error creating OpenTelekomCloud networking client: %s", err)
 	}
@@ -221,7 +221,7 @@ func resourceHealthUpdate(d *schema.ResourceData, meta interface{}) error {
 
 func resourceHealthDelete(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*Config)
-	networkingClient, err := config.networkingV1Client(GetRegion(d, config))
+	networkingClient, err := config.otcV1Client(GetRegion(d, config))
 	if err != nil {
 		return fmt.Errorf("Error creating OpenTelekomCloud networking client: %s", err)
 	}
