@@ -67,13 +67,13 @@ func resourceBackend() *schema.Resource {
 
 func resourceBackendCreate(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*Config)
-	networkingClient, err := config.networkingV1Client(GetRegion(d, config))
+	networkingClient, err := config.otcV1Client(GetRegion(d, config))
 	if err != nil {
 		return fmt.Errorf("Error creating OpenTelekomCloud networking client: %s", err)
 	}
 
 	//adminStateUp := d.Get("admin_state_up").(bool)
-	createOpts := backendmember.CreateOpts{
+	addOpts := backendmember.AddOpts{
 		ListenerId: d.Get("listener_id").(string),
 		ServerId:   d.Get("server_id").(string),
 		Address:    d.Get("address").(string),
@@ -116,11 +116,26 @@ func resourceBackendRead(d *schema.ResourceData, meta interface{}) error {
 
 func resourceBackendDelete(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*Config)
-	networkingClient, err := config.networkingV1Client(GetRegion(d, config))
+	client, err := config.otcV1Client(GetRegion(d, config))
 	if err != nil {
 		return fmt.Errorf("Error creating OpenTelekomCloud networking client: %s", err)
 	}
 
+	log.Printf("[DEBUG] Attempting to delete backend member %s", id)
+	listener_id := d.Get("listener_id").(string)
+
+	job, err := backendmember.Remove(client, listener_id, id).ExtractJobResponse()
+	if err != nil {
+		t.Fatalf("Unable to delete backend: %v", err)
+	}
+
+	t.Logf("Waiting for backend member %s to delete", id)
+
+	if err := gophercloud.WaitForJobSuccess(client, job.URI, loadbalancerActiveTimeoutSeconds); err != nil {
+		t.Fatalf("backend member did not delete in time.")
+	}
+
+	t.Logf("Successfully deleted backend member %s", id)
 	log.Printf("[DEBUG] Attempting to delete backend member %s", d.Id())
 	// ??
 

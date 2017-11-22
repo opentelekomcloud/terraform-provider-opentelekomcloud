@@ -71,7 +71,6 @@ func resourceEListener() *schema.Resource {
 			"protocol_port": &schema.Schema{
 				Type:     schema.TypeInt,
 				Required: true,
-				ForceNew: true,
 			},
 
 			"backend_protocol": &schema.Schema{
@@ -83,128 +82,155 @@ func resourceEListener() *schema.Resource {
 			"backend_port": &schema.Schema{
 				Type:     schema.TypeInt,
 				Required: true,
-				ForceNew: true,
 			},
 
-			"default_tls_container_ref": &schema.Schema{
-				Type:     schema.TypeString,
+			"lb_algorithm": &schema.Schema{
+				Type:	   schema.TypeString,
+				Required:  true,
+			},
+
+			"session_sticky": &schema.Schema{
+				Type:	  schema.TypeBool,
 				Optional: true,
 				ForceNew: true,
 			},
 
-			"sni_container_refs": &schema.Schema{
-				Type:     schema.TypeList,
-				Optional: true,
-				Elem:     &schema.Schema{Type: schema.TypeString},
-				ForceNew: true,
-			},
-
-			"admin_state_up": &schema.Schema{
-				Type:     schema.TypeBool,
-				Default:  true,
+			"session_sticky_type": &schema.Schema{
+				Type:	  schema.TypeString,
 				Optional: true,
 				ForceNew: true,
 			},
 
-			"id": &schema.Schema{
-				Type:     schema.TypeString,
+			"cookie_timeout": &schema.Schema{
+				Type: schema.TypeInt,
 				Optional: true,
-				Computed: true,
+				ForceNew: true,
 			},
+
+			"tcp_timeout": &schema.Schema{
+				Type: schema.TypeInt,
+				Optional: true,
+			},
+
+			"tcp_draining": &schema.Schema{
+				Type: schema.TypeBool,
+				Optional: true,
+			},
+
+			"tcp_draining_timeout": &schema.Schema{
+				Type: schema.TypeInt,
+				Optional: true,
+			},
+
+			"certificate_id": &schema.Schema{
+				Type: schema.TypeString,
+				Optional: true,
+				ForceNew: true,
+			},
+
+			"certificates": &schema.Schema{
+				Type: schema.TypeSet,
+				Optional: true,
+				ForceNew: true,
+			},
+
+			"udp_timeout": &schema.Schema{
+				Type: schema.TypeInt,
+				Optional: true,
+			},
+
+			"ssl_protocols": &schema.Schema{
+				Type: schema.TypeString,
+				Optional: true,
+				ForceNew: true,
+			},
+
+			"ssl_ciphers": &schema.Schema{
+				Type: schema.TypeString,
+				Optional: true,
+			},
+
 		},
 	}
 }
 
 func resourceEListenerCreate(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*Config)
-	networkingClient, err := config.networkingV2Client(GetRegion(d, config))
+	client, err := config.networkingV2Client(GetRegion(d, config))
 	if err != nil {
 		return fmt.Errorf("Error creating OpenTelekomCloud networking client: %s", err)
 	}
 
-	adminStateUp := d.Get("admin_state_up").(bool)
-	var sniContainerRefs []string
-	if raw, ok := d.GetOk("sni_container_refs"); ok {
-		for _, v := range raw.([]interface{}) {
-			sniContainerRefs = append(sniContainerRefs, v.(string))
-		}
-	}
 	createOpts := listeners.CreateOpts{
+		Name:					d.Get("name").(string),
+		Description:            d.Get("description").(string),
+		LoadbalancerID:         d.Get("loadbalancer_id").(string),
 		Protocol:               listeners.Protocol(d.Get("protocol").(string)),
 		ProtocolPort:           d.Get("protocol_port").(int),
-		LoadbalancerID:         d.Get("loadbalancer_id").(string),
-		Name:                   d.Get("name").(string),
-		DefaultPoolID:          d.Get("default_pool_id").(string),
-		Description:            d.Get("description").(string),
-		DefaultTlsContainerRef: d.Get("default_tls_container_ref").(string),
-		SniContainerRefs:       sniContainerRefs,
-		AdminStateUp:           &adminStateUp,
+		BackendProtocol:		listeners.Protocol(d.Get("backend_protocol").(string)),
+		BackendProtocolPort: 	d.Get("backend_protocol_port").(int),
+		Algorithm: 				d.Get("lb_algorithm").(string),
+		SessionSticky:			d.Get("session_sticky").(bool),
+		StickySessionType: 		d.Get("session_sticky_type").(string),
+		CookieTimeout: 			d.Get("cookie_timeout").(int),
+		TcpTimeout: 			d.Get("tcp_timeout").(int),
+		TcpDraining: 			d.Get("tcp_draining").(bool),
+		TcpDrainingTimeout: 	d.Get("tcp_draining_timeout").(int),
+		CertificateID: 			d.Get("certificate_id").(string),
+		//Certificates: 			d.Get("certificates")
+		UDPTimeout: 			d.Get("udp_timeout").(int),
+		SSLProtocols: 			d.Get("ssl_protocols").(string),
+		SSLCiphers: 			d.Get("ssl_ciphers").(string),
 	}
-
-	/*if v, ok := d.GetOk("connection_limit"); ok {
-		connectionLimit := v.(int)
-		createOpts.ConnLimit = &connectionLimit
-	} */
 
 	log.Printf("[DEBUG] Create Options: %#v", createOpts)
 
-	// Wait for LoadBalancer to become active before continuing
-	lbID := createOpts.LoadbalancerID
-	timeout := d.Timeout(schema.TimeoutCreate)
-	err = waitForELBLoadBalancer(networkingClient, lbID, "ACTIVE", nil, timeout)
+	listener, err := listeners.Create(client, createOpts).Extract()
 	if err != nil {
 		return err
 	}
-
-	log.Printf("[DEBUG] Attempting to create listener")
-	var listener *listeners.Listener
-	err = resource.Retry(timeout, func() *resource.RetryError {
-		listener, err = listeners.Create(networkingClient, createOpts).Extract()
-		if err != nil {
-			return checkForRetryableError(err)
-		}
-		return nil
-	})
-	if err != nil {
-		return fmt.Errorf("Error creating listener: %s", err)
-	}
-
-	// Wait for LoadBalancer to become active again before continuing
-	err = waitForELBLoadBalancer(networkingClient, lbID, "ACTIVE", nil, timeout)
-	if err != nil {
-		return err
-	}
-
 	d.SetId(listener.ID)
+
+	log.Printf("[DEBUG] Successfully created listener %s", listener.ID)
 
 	return resourceEListenerRead(d, meta)
 }
 
 func resourceEListenerRead(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*Config)
-	networkingClient, err := config.networkingV2Client(GetRegion(d, config))
+	client, err := config.networkingV2Client(GetRegion(d, config))
 	if err != nil {
 		return fmt.Errorf("Error creating OpenTelekomCloud networking client: %s", err)
 	}
 
-	listener, err := listeners.Get(networkingClient, d.Id()).Extract()
+	listener, err := listeners.Get(client, d.Id()).Extract()
 	if err != nil {
 		return CheckDeleted(d, err, "listener")
 	}
 
 	log.Printf("[DEBUG] Retrieved listener %s: %#v", d.Id(), listener)
 
-	d.Set("id", listener.ID)
-	d.Set("name", listener.Name)
-	d.Set("protocol", listener.Protocol)
-	d.Set("tenant_id", listener.TenantID)
+	d.Set("backend_port", listener.BackendProtocolPort)
+	d.Set("backend_protocol", listener.BackendProtocol)
+	d.Set("sticky_session_type", listener.StickySessionType)
 	d.Set("description", listener.Description)
+	d.Set("load_balancer_id", listener.LoadbalancerID)
+	d.Set("protocol", listener.Protocol)
 	d.Set("protocol_port", listener.ProtocolPort)
+	d.Set("cookie_timeout", listener.CookieTimeout)
 	d.Set("admin_state_up", listener.AdminStateUp)
-	d.Set("default_pool_id", listener.DefaultPoolID)
-	//d.Set("connection_limit", listener.ConnLimit)
-	d.Set("sni_container_refs", listener.SniContainerRefs)
-	d.Set("default_tls_container_ref", listener.DefaultTlsContainerRef)
+	d.Set("session_sticky", listener.SessionSticky)
+	d.Set("lb_algorithm", listener.Algorithm)
+	d.Set("name", listener.Name)
+	d.Set("certificate_id", listener.CertificateID)
+	d.Set("certificates", listener.Certificates)
+	d.Set("tcp_timeout", listener.TcpTimeout)
+	d.Set("udp_timeout", listener.UDPTimeout)
+	d.Set("ssl_protocols", listener.SSLProtocols)
+	d.Set("ssl_ciphers", listener.SSLCiphers)
+	d.Set("tcp_draining", listener.TcpDraining)
+	d.Set("tcp_draining_timeout", listener.TcpDrainingTimeout)
+
 	d.Set("region", GetRegion(d, config))
 
 	return nil
@@ -212,7 +238,7 @@ func resourceEListenerRead(d *schema.ResourceData, meta interface{}) error {
 
 func resourceEListenerUpdate(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*Config)
-	networkingClient, err := config.networkingV2Client(GetRegion(d, config))
+	client, err := config.networkingV2Client(GetRegion(d, config))
 	if err != nil {
 		return fmt.Errorf("Error creating OpenTelekomCloud networking client: %s", err)
 	}
@@ -224,50 +250,39 @@ func resourceEListenerUpdate(d *schema.ResourceData, meta interface{}) error {
 	if d.HasChange("description") {
 		updateOpts.Description = d.Get("description").(string)
 	}
-	/*if d.HasChange("connection_limit") {
-		connLimit := d.Get("connection_limit").(int)
-		updateOpts.ConnLimit = &connLimit
-	} */
-	if d.HasChange("default_tls_container_ref") {
-		updateOpts.DefaultTlsContainerRef = d.Get("default_tls_container_ref").(string)
-	}
-	if d.HasChange("sni_container_refs") {
-		var sniContainerRefs []string
-		if raw, ok := d.GetOk("sni_container_refs"); ok {
-			for _, v := range raw.([]interface{}) {
-				sniContainerRefs = append(sniContainerRefs, v.(string))
-			}
-		}
-		updateOpts.SniContainerRefs = sniContainerRefs
-	}
 	if d.HasChange("admin_state_up") {
 		asu := d.Get("admin_state_up").(bool)
 		updateOpts.AdminStateUp = &asu
 	}
-
-	// Wait for LoadBalancer to become active before continuing
-	lbID := d.Get("loadbalancer_id").(string)
-	timeout := d.Timeout(schema.TimeoutUpdate)
-	err = waitForLBV2LoadBalancer(networkingClient, lbID, "ACTIVE", nil, timeout)
-	if err != nil {
-		return err
+	if d.HasChange("protocol_port") {
+		updateOpts.ProtocolPort = d.Get("protocol_port").(int)
+	}
+	if d.HasChange("backend_protocol_port") {
+		updateOpts.ProtocolPort = d.Get("backend_protocol_port").(int)
+	}
+	if d.HasChange("lb_algorithm") {
+		updateOpts.Algorithm = d.Get("lb_algorithm").(string)
+	}
+	if d.HasChange("tcp_timeout") {
+		updateOpts.TcpTimeout = d.Get("tcp_timeout").(int)
+	}
+	if d.HasChange("tcp_draining") {
+		updateOpts.TcpDraining = d.Get("tcp_draining").(bool)
+	}
+	if d.HasChange("tcp_draining_timeout") {
+		updateOpts.TcpDrainingTimeout = d.Get("tcp_draining_timeout").(int)
+	}
+	if d.HasChange("udp_timeout") {
+		updateOpts.UDPTimeout = d.Get("udp_timeout").(int)
+	}
+	if d.HasChange("ssl_protocols") {
+		updateOpts.SSLProtocols = d.Get("ssl_protocols").(string)
+	}
+	if d.HasChange("ssl_ciphers") {
+		updateOpts.SSLCiphers = d.Get("ssl_ciphers").(string)
 	}
 
-	log.Printf("[DEBUG] Updating listener %s with options: %#v", d.Id(), updateOpts)
-	err = resource.Retry(timeout, func() *resource.RetryError {
-		_, err = listeners.Update(networkingClient, d.Id(), updateOpts).Extract()
-		if err != nil {
-			return checkForRetryableError(err)
-		}
-		return nil
-	})
-
-	if err != nil {
-		return fmt.Errorf("Error updating listener %s: %s", d.Id(), err)
-	}
-
-	// Wait for LoadBalancer to become active again before continuing
-	err = waitForLBV2LoadBalancer(networkingClient, lbID, "ACTIVE", nil, timeout)
+	_, err = listeners.Update(client, d.Id(), updateOpts).Extract()
 	if err != nil {
 		return err
 	}
@@ -278,40 +293,15 @@ func resourceEListenerUpdate(d *schema.ResourceData, meta interface{}) error {
 
 func resourceEListenerDelete(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*Config)
-	networkingClient, err := config.networkingV2Client(GetRegion(d, config))
+	client, err := config.networkingV2Client(GetRegion(d, config))
 	if err != nil {
 		return fmt.Errorf("Error creating OpenTelekomCloud networking client: %s", err)
 	}
 
-	// Wait for LoadBalancer to become active before continuing
-	lbID := d.Get("loadbalancer_id").(string)
-	timeout := d.Timeout(schema.TimeoutDelete)
-	err = waitForLBV2LoadBalancer(networkingClient, lbID, "ACTIVE", nil, timeout)
-	if err != nil {
-		return err
-	}
+	id := d.Id()
+	log.Printf("[DEBUG] Deleting listener %s", id)
 
-	log.Printf("[DEBUG] Deleting listener %s", d.Id())
-	err = resource.Retry(timeout, func() *resource.RetryError {
-		err = listeners.Delete(networkingClient, d.Id()).ExtractErr()
-		if err != nil {
-			return checkForRetryableError(err)
-		}
-		return nil
-	})
-
-	if err != nil {
-		return fmt.Errorf("Error deleting listener %s: %s", d.Id(), err)
-	}
-
-	// Wait for LoadBalancer to become active again before continuing
-	err = waitForELBLoadBalancer(networkingClient, lbID, "ACTIVE", nil, timeout)
-	if err != nil {
-		return err
-	}
-
-	// Wait for Listener to delete
-	err = waitForELBListener(networkingClient, d.Id(), "DELETED", nil, timeout)
+	err = listeners.Delete(client, id).ExtractErr()
 	if err != nil {
 		return err
 	}
