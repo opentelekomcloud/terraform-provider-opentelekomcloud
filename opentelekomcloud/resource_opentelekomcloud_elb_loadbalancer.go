@@ -5,7 +5,6 @@ import (
 	"log"
 	"time"
 
-	"github.com/hashicorp/terraform/helper/resource"
 	"github.com/hashicorp/terraform/helper/schema"
 
 	"github.com/gophercloud/gophercloud"
@@ -113,7 +112,7 @@ func resourceELoadBalancerCreate(d *schema.ResourceData, meta interface{}) error
 		VipSubnetID:     d.Get("vip_subnet_id").(string),
 		AZ:              d.Get("az").(string),
 		SecurityGroupID: d.Get("security_group_id").(string),
-		VipAddress:   	 d.Get("vip_address").(string),
+		VipAddress:      d.Get("vip_address").(string),
 	}
 
 	log.Printf("[DEBUG] Create Options: %#v", createOpts)
@@ -127,7 +126,7 @@ func resourceELoadBalancerCreate(d *schema.ResourceData, meta interface{}) error
 		return err
 	}
 
-	entity, err := gophercloud.GetJobEntity(client, job.URI,"elb")
+	entity, err := gophercloud.GetJobEntity(client, job.URI, "elb")
 
 	if mlb, ok := entity.(map[string]interface{}); ok {
 		if vid, ok := mlb["id"]; ok {
@@ -199,7 +198,10 @@ func resourceELoadBalancerUpdate(d *schema.ResourceData, meta interface{}) error
 	}
 
 	log.Printf("[DEBUG] Updating loadbalancer %s with options: %#v", d.Id(), updateOpts)
-	_, err = loadbalancer_elbs.Update(client, d.Id(), updateOpts).Extract()
+	job, err := loadbalancer_elbs.Update(client, d.Id(), updateOpts).ExtractJobResponse()
+	if err := gophercloud.WaitForJobSuccess(client, job.URI, loadbalancerActiveTimeoutSeconds); err != nil {
+		return err
+	}
 
 	return resourceELoadBalancerRead(d, meta)
 }

@@ -93,7 +93,7 @@ func resourceHealth() *schema.Resource {
 
 func resourceHealthCreate(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*Config)
-	networkingClient, err := config.networkingV2Client(GetRegion(d, config))
+	client, err := config.otcV1Client(GetRegion(d, config))
 	if err != nil {
 		return fmt.Errorf("Error creating OpenTelekomCloud networking client: %s", err)
 	}
@@ -110,27 +110,12 @@ func resourceHealthCreate(d *schema.ResourceData, meta interface{}) error {
 		HealthcheckInterval:    d.Get("healthcheck_interval").(int),
 	}
 
-	timeout := d.Timeout(schema.TimeoutCreate)
-	// Wait for LoadBalancer to become active before continuing
-	lbID := d.Get("loadbalancer_id").(string)
-	err = waitForELBLoadBalancer(networkingClient, lbID, "ACTIVE", nil, timeout)
+	health, err := healthcheck.Create(client, createOpts).Extract()
 	if err != nil {
 		return err
 	}
 
-	log.Printf("[DEBUG] Create Options: %#v", createOpts)
-	log.Printf("[DEBUG] Attempting to create monitor")
-	var health *healthcheck.Health
-	err = resource.Retry(timeout, func() *resource.RetryError {
-		health, err = healthcheck.Create(networkingClient, createOpts).Extract()
-		if err != nil {
-			return checkForRetryableError(err)
-		}
-		return nil
-	})
-
-	//err = waitForLBV2viaPool(networkingClient, poolID, "ACTIVE", timeout)
-	//d.SetId(monitor.ID)
+	log.Printf("Successfully created healthcheck %s.", health.ID)
 
 	return resourceHealthRead(d, meta)
 }
@@ -221,28 +206,18 @@ func resourceHealthUpdate(d *schema.ResourceData, meta interface{}) error {
 
 func resourceHealthDelete(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*Config)
-	networkingClient, err := config.otcV1Client(GetRegion(d, config))
+	client, err := config.otcV1Client(GetRegion(d, config))
 	if err != nil {
 		return fmt.Errorf("Error creating OpenTelekomCloud networking client: %s", err)
 	}
 
-	log.Printf("[DEBUG] Deleting health %s", d.Id())
-	timeout := d.Timeout(schema.TimeoutUpdate)
-	//err = waitForLBV2viaPool(networkingClient, poolID, "ACTIVE", timeout)
+	id := d.Id()
+	log.Printf("[DEBUG] Deleting health %s", id)
 
-	err = resource.Retry(timeout, func() *resource.RetryError {
-		err = healthcheck.Delete(networkingClient, d.Id()).ExtractErr()
-		if err != nil {
-			return checkForRetryableError(err)
-		}
-		return nil
-	})
-
-	if err != nil {
-		return fmt.Errorf("Unable to delete health %s: %s", d.Id(), err)
+	if err := healthcheck.Delete(client, id).ExtractErr(); err != nil {
+		return err
 	}
 
-	//err = waitForLBV2viaPool(networkingClient, poolID, "ACTIVE", timeout)
-
+	log.Printf("Successfully deleted health %s", id)
 	return nil
 }

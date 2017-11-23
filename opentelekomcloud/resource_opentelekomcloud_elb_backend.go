@@ -8,8 +8,12 @@ import (
 	// "github.com/hashicorp/terraform/helper/resource"
 	"github.com/hashicorp/terraform/helper/schema"
 
+	"github.com/gophercloud/gophercloud"
 	"github.com/gophercloud/gophercloud/openstack/networking/v2/extensions/elbaas/backendmember"
 )
+
+const loadbalancerActiveTimeoutSeconds = 300
+const loadbalancerDeleteTimeoutSeconds = 300
 
 func resourceBackend() *schema.Resource {
 	return &schema.Resource{
@@ -67,38 +71,44 @@ func resourceBackend() *schema.Resource {
 
 func resourceBackendCreate(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*Config)
-	networkingClient, err := config.otcV1Client(GetRegion(d, config))
+	client, err := config.otcV1Client(GetRegion(d, config))
 	if err != nil {
 		return fmt.Errorf("Error creating OpenTelekomCloud networking client: %s", err)
 	}
 
-	//adminStateUp := d.Get("admin_state_up").(bool)
 	addOpts := backendmember.AddOpts{
-		ListenerId: d.Get("listener_id").(string),
-		ServerId:   d.Get("server_id").(string),
-		Address:    d.Get("address").(string),
+		ServerId: d.Get("server_id").(string),
+		Address:  d.Get("address").(string),
 	}
+	log.Printf("[DEBUG] Create Options: %#v", addOpts)
 
-	log.Printf("[DEBUG] Create Options: %#v", createOpts)
-
-	// Wait for backend  to become active before continuing
-	timeout := d.Timeout(schema.TimeoutCreate)
-	err = waitForELBBackend(networkingClient, createOpts.ServerId, "ACTIVE", nil, timeout)
+	listener_id := d.Get("listener_id").(string)
+	job, err := backendmember.Add(client, listener_id, addOpts).ExtractJobResponse()
 	if err != nil {
 		return err
 	}
 
-	// Wait for LB to become ACTIVE again
-	// Wait for LoadBalancer to become active again before continuing
-	lbID := d.Get("loadbalancer_id").(string)
-	err = waitForELBLoadBalancer(networkingClient, lbID, "ACTIVE", nil, timeout)
-	if err != nil {
+	log.Printf("Waiting for backend to become active")
+	if err := gophercloud.WaitForJobSuccess(client, job.URI, loadbalancerActiveTimeoutSeconds); err != nil {
 		return err
 	}
 
-	// ? d.SetId(member.ID)
+	entity, err := gophercloud.GetJobEntity(client, job.URI, "members")
 
-	return resourceBackendRead(d, meta)
+	if members, ok := entity.([]interface{}); ok {
+		if len(members) > 0 {
+			vmember := members[0]
+			if member, ok := vmember.(map[string]interface{}); ok {
+				if vid, ok := member["id"]; ok {
+					if id, ok := vid.(string); ok {
+						d.SetId(id)
+						return resourceBackendRead(d, meta)
+					}
+				}
+			}
+		}
+	}
+	return fmt.Errorf("Unexpected conversion error in resourceBackendCreate.")
 }
 
 func resourceBackendRead(d *schema.ResourceData, meta interface{}) error {
@@ -121,32 +131,20 @@ func resourceBackendDelete(d *schema.ResourceData, meta interface{}) error {
 		return fmt.Errorf("Error creating OpenTelekomCloud networking client: %s", err)
 	}
 
-	log.Printf("[DEBUG] Attempting to delete backend member %s", id)
+	log.Printf("[DEBUG] Deleting backend member %s", d.Id())
 	listener_id := d.Get("listener_id").(string)
-
+	id := d.Id()
 	job, err := backendmember.Remove(client, listener_id, id).ExtractJobResponse()
-	if err != nil {
-		t.Fatalf("Unable to delete backend: %v", err)
-	}
-
-	t.Logf("Waiting for backend member %s to delete", id)
-
-	if err := gophercloud.WaitForJobSuccess(client, job.URI, loadbalancerActiveTimeoutSeconds); err != nil {
-		t.Fatalf("backend member did not delete in time.")
-	}
-
-	t.Logf("Successfully deleted backend member %s", id)
-	log.Printf("[DEBUG] Attempting to delete backend member %s", d.Id())
-	// ??
-
-	// Wait for LB to become ACTIVE
-	lbID := d.Get("loadbalancer_id").(string)
-	// Wait for backend  to become active before continuing
-	timeout := d.Timeout(schema.TimeoutDelete)
-	err = waitForELBLoadBalancer(networkingClient, lbID, "ACTIVE", nil, timeout)
 	if err != nil {
 		return err
 	}
 
+	log.Printf("Waiting for backend member %s to delete", id)
+
+	if err := gophercloud.WaitForJobSuccess(client, job.URI, loadbalancerActiveTimeoutSeconds); err != nil {
+		return err
+	}
+
+	log.Printf("Successfully deleted backend member %s", id)
 	return nil
 }
