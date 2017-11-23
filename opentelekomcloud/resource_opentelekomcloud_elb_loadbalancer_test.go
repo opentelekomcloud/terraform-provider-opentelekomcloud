@@ -11,7 +11,7 @@ import (
 	"github.com/gophercloud/gophercloud/openstack/networking/v2/extensions/elbaas/loadbalancer_elbs"
 	"github.com/gophercloud/gophercloud/openstack/networking/v2/extensions/security/groups"
 	//"github.com/gophercloud/gophercloud/openstack/networking/v2/ports"
-	"regexp"
+	//"regexp"
 )
 
 // PASS
