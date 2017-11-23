@@ -109,6 +109,7 @@ func resourceEListener() *schema.Resource {
 			"tcp_timeout": &schema.Schema{
 				Type:     schema.TypeInt,
 				Optional: true,
+				Computed: true,
 			},
 
 			"tcp_draining": &schema.Schema{
@@ -154,7 +155,7 @@ func resourceEListener() *schema.Resource {
 
 func resourceEListenerCreate(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*Config)
-	client, err := config.networkingV2Client(GetRegion(d, config))
+	client, err := config.otcV1Client(GetRegion(d, config))
 	if err != nil {
 		return fmt.Errorf("Error creating OpenTelekomCloud networking client: %s", err)
 	}
@@ -166,7 +167,7 @@ func resourceEListenerCreate(d *schema.ResourceData, meta interface{}) error {
 		Protocol:            listeners.Protocol(d.Get("protocol").(string)),
 		ProtocolPort:        d.Get("protocol_port").(int),
 		BackendProtocol:     listeners.Protocol(d.Get("backend_protocol").(string)),
-		BackendProtocolPort: d.Get("backend_protocol_port").(int),
+		BackendProtocolPort: d.Get("backend_port").(int),
 		Algorithm:           d.Get("lb_algorithm").(string),
 		SessionSticky:       d.Get("session_sticky").(bool),
 		StickySessionType:   d.Get("session_sticky_type").(string),
@@ -196,7 +197,7 @@ func resourceEListenerCreate(d *schema.ResourceData, meta interface{}) error {
 
 func resourceEListenerRead(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*Config)
-	client, err := config.networkingV2Client(GetRegion(d, config))
+	client, err := config.otcV1Client(GetRegion(d, config))
 	if err != nil {
 		return fmt.Errorf("Error creating OpenTelekomCloud networking client: %s", err)
 	}
@@ -236,7 +237,7 @@ func resourceEListenerRead(d *schema.ResourceData, meta interface{}) error {
 
 func resourceEListenerUpdate(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*Config)
-	client, err := config.networkingV2Client(GetRegion(d, config))
+	client, err := config.otcV1Client(GetRegion(d, config))
 	if err != nil {
 		return fmt.Errorf("Error creating OpenTelekomCloud networking client: %s", err)
 	}
@@ -281,13 +282,13 @@ func resourceEListenerUpdate(d *schema.ResourceData, meta interface{}) error {
 		return err
 	}
 
-	return resourceListenerV2Read(d, meta)
+	return resourceEListenerRead(d, meta)
 
 }
 
 func resourceEListenerDelete(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*Config)
-	client, err := config.networkingV2Client(GetRegion(d, config))
+	client, err := config.otcV1Client(GetRegion(d, config))
 	if err != nil {
 		return fmt.Errorf("Error creating OpenTelekomCloud networking client: %s", err)
 	}

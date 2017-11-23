@@ -43,7 +43,7 @@ type Listener struct {
 	// Specifies the quantity of backend ECSs.
 	MemberNumber int `json:"member_number"`
 	// Specifies the health check task ID.
-	HealthCheckID int `json:"healthcheck_id"`
+	HealthCheckID string `json:"healthcheck_id"`
 	// Specifies whether to enable sticky session.
 	SessionSticky bool `json:"session_sticky,omitempty"`
 	// Specifies the load balancing algorithm for the listener.
