@@ -55,6 +55,7 @@ func resourceHealth() *schema.Resource {
 			"unhealthy_threshold": &schema.Schema{
 				Type:     schema.TypeInt,
 				Optional: true,
+				Computed: true,
 			},
 			"healthcheck_timeout": &schema.Schema{
 				Type:     schema.TypeInt,
@@ -91,6 +92,7 @@ func resourceHealthCreate(d *schema.ResourceData, meta interface{}) error {
 	if err != nil {
 		return err
 	}
+	d.SetId(health.ID)
 
 	log.Printf("Successfully created healthcheck %s.", health.ID)
 

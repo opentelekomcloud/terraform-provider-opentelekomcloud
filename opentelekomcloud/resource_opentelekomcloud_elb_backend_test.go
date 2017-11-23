@@ -74,18 +74,6 @@ func testAccCheckELBBackendExists(n string) resource.TestCheckFunc {
 }
 
 var TestAccELBBackendConfig_basic = fmt.Sprintf(`
-resource "opentelekomcloud_networking_network_v2" "network_1" {
-  name = "network_1"
-  admin_state_up = "true"
-}
-
-resource "opentelekomcloud_networking_subnet_v2" "subnet_1" {
-  name = "subnet_1"
-  network_id = "${opentelekomcloud_networking_network_v2.network_1.id}"
-  cidr = "192.168.199.0/24"
-  ip_version = 4
-}
-
 resource "opentelekomcloud_elb_loadbalancer" "loadbalancer_1" {
   name = "loadbalancer_1"
   // vip_subnet_id = "${opentelekomcloud_networking_subnet_v2.subnet_1.id}"

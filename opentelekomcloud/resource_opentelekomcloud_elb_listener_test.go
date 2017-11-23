@@ -22,8 +22,6 @@ func TestAccELBListener_basic(t *testing.T) {
 				Config: TestAccELBListenerConfig_basic,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckELBListenerExists("opentelekomcloud_elb_listener.listener_1", &listener),
-					/* resource.TestCheckResourceAttr(
-					"opentelekomcloud_lb_listener_v2.listener_1", "connection_limit", "-1"), */
 				),
 			},
 			resource.TestStep{
@@ -31,8 +29,6 @@ func TestAccELBListener_basic(t *testing.T) {
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr(
 						"opentelekomcloud_elb_listener.listener_1", "name", "listener_1_updated"),
-					/* resource.TestCheckResourceAttr(
-					"opentelekomcloud_lb_listener_v2.listener_1", "connection_limit", "100"), */
 				),
 			},
 		},
@@ -72,12 +68,12 @@ func testAccCheckELBListenerExists(n string, listener *listeners.Listener) resou
 		}
 
 		config := testAccProvider.Meta().(*Config)
-		networkingClient, err := config.networkingV2Client(OS_REGION_NAME)
+		client, err := config.otcV1Client(OS_REGION_NAME)
 		if err != nil {
 			return fmt.Errorf("Error creating OpenTelekomCloud networking client: %s", err)
 		}
 
-		found, err := listeners.Get(networkingClient, rs.Primary.ID).Extract()
+		found, err := listeners.Get(client, rs.Primary.ID).Extract()
 		if err != nil {
 			return err
 		}
@@ -93,28 +89,20 @@ func testAccCheckELBListenerExists(n string, listener *listeners.Listener) resou
 }
 
 var TestAccELBListenerConfig_basic = fmt.Sprintf(`
-resource "opentelekomcloud_networking_network_v2" "network_1" {
-  name = "network_1"
-  admin_state_up = "true"
-}
-
-resource "opentelekomcloud_networking_subnet_v2" "subnet_1" {
-  name = "subnet_1"
-  cidr = "192.168.199.0/24"
-  ip_version = 4
-  network_id = "${opentelekomcloud_networking_network_v2.network_1.id}"
-}
-
 resource "opentelekomcloud_elb_loadbalancer" "loadbalancer_1" {
   name = "loadbalancer_1"
   vpc_id = "%s"
   type = "External"
+  bandwidth = 5
 }
 
 resource "opentelekomcloud_elb_listener" "listener_1" {
   name = "listener_1"
-  protocol = "HTTP"
+  protocol = "TCP"
   protocol_port = 8080
+  backend_protocol = "TCP"
+  backend_port = 8080
+  lb_algorithm = "roundrobin"
   loadbalancer_id = "${opentelekomcloud_elb_loadbalancer.loadbalancer_1.id}"
 
 	timeouts {
@@ -125,30 +113,21 @@ resource "opentelekomcloud_elb_listener" "listener_1" {
 }
 `, OS_VPC_ID)
 
-const TestAccELBListenerConfig_update = `
-resource "opentelekomcloud_networking_network_v2" "network_1" {
-  name = "network_1"
-  admin_state_up = "true"
-}
-
-resource "opentelekomcloud_networking_subnet_v2" "subnet_1" {
-  name = "subnet_1"
-  cidr = "192.168.199.0/24"
-  ip_version = 4
-  network_id = "${opentelekomcloud_networking_network_v2.network_1.id}"
-}
-
+var TestAccELBListenerConfig_update = fmt.Sprintf(`
 resource "opentelekomcloud_elb_loadbalancer" "loadbalancer_1" {
   name = "loadbalancer_1"
-  vip_subnet_id = "${opentelekomcloud_networking_subnet_v2.subnet_1.id}"
+  vpc_id = "%s"
+  type = "External"
+  bandwidth = 5
 }
 
 resource "opentelekomcloud_elb_listener" "listener_1" {
   name = "listener_1_updated"
-  protocol = "HTTP"
+  protocol = "TCP"
   protocol_port = 8080
-  #connection_limit = 100
-  admin_state_up = "true"
+  backend_protocol = "TCP"
+  backend_port = 8080
+  lb_algorithm = "roundrobin"
   loadbalancer_id = "${opentelekomcloud_elb_loadbalancer.loadbalancer_1.id}"
 
 	timeouts {
@@ -157,4 +136,4 @@ resource "opentelekomcloud_elb_listener" "listener_1" {
 		delete = "5m"
 	}
 }
-`
+`, OS_VPC_ID)

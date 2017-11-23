@@ -7,6 +7,7 @@ import (
 	"github.com/gophercloud/gophercloud/openstack/networking/v2/extensions/elbaas/healthcheck"
 	"github.com/hashicorp/terraform/helper/resource"
 	"github.com/hashicorp/terraform/terraform"
+	"log"
 )
 
 func TestAccELBHealth_basic(t *testing.T) {
@@ -15,21 +16,21 @@ func TestAccELBHealth_basic(t *testing.T) {
 	resource.Test(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
 		Providers:    testAccProviders,
-		CheckDestroy: testAccCheckLBV2MonitorDestroy,
+		CheckDestroy: testAccCheckELBHealthDestroy,
 		Steps: []resource.TestStep{
 			resource.TestStep{
 				Config: TestAccELBHealthConfig_basic,
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckELBHealthExists(t, "opentelekomcloud_elb_healthcheck.health_1", &health),
+					testAccCheckELBHealthExists(t, "opentelekomcloud_elb_health.health_1", &health),
+					resource.TestCheckResourceAttr("opentelekomcloud_elb_health.health_1", "healthy_threshold", "3"),
+					resource.TestCheckResourceAttr("opentelekomcloud_elb_health.health_1", "healthcheck_timeout", "10"),
 				),
 			},
 			resource.TestStep{
-				Config: TestAccLBV2MonitorConfig_update,
+				Config: TestAccELBHealthConfig_update,
 				Check: resource.ComposeTestCheckFunc(
-					resource.TestCheckResourceAttr(
-						"opentelekomcloud_elb_healthcheck.health_1", "name", "health1_updated"),
-					resource.TestCheckResourceAttr("opentelekomcloud_elb_healthcheck.health_1", "delay", "30"),
-					resource.TestCheckResourceAttr("opentelekomcloud_elb_healthcheck.health_1", "timeout", "15"),
+					resource.TestCheckResourceAttr("opentelekomcloud_elb_health.health_1", "healthy_threshold", "5"),
+					resource.TestCheckResourceAttr("opentelekomcloud_elb_health.health_1", "healthcheck_timeout", "15"),
 				),
 			},
 		},
@@ -59,6 +60,7 @@ func testAccCheckELBHealthDestroy(s *terraform.State) error {
 
 func testAccCheckELBHealthExists(t *testing.T, n string, health *healthcheck.Health) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
+		log.Printf("[DEBUG] testAccCheckELBHealthExists resources %+v.\n", s.RootModule().Resources)
 		rs, ok := s.RootModule().Resources[n]
 		if !ok {
 			return fmt.Errorf("Not found: %s", n)
@@ -69,15 +71,16 @@ func testAccCheckELBHealthExists(t *testing.T, n string, health *healthcheck.Hea
 		}
 
 		config := testAccProvider.Meta().(*Config)
-		networkingClient, err := config.otcV1Client(OS_REGION_NAME)
+		client, err := config.otcV1Client(OS_REGION_NAME)
 		if err != nil {
 			return fmt.Errorf("Error creating OpenTelekomCloud networking client: %s", err)
 		}
 
-		found, err := healthcheck.Get(networkingClient, rs.Primary.ID).Extract()
+		found, err := healthcheck.Get(client, rs.Primary.ID).Extract()
 		if err != nil {
 			return err
 		}
+		log.Printf("[DEBUG] testAccCheckELBHealthExists found %+v.\n", found)
 
 		if found.ID != rs.Primary.ID {
 			return fmt.Errorf("Health not found")
@@ -90,40 +93,30 @@ func testAccCheckELBHealthExists(t *testing.T, n string, health *healthcheck.Hea
 }
 
 var TestAccELBHealthConfig_basic = fmt.Sprintf(`
-resource "opentelekomcloud_networking_network_v2" "network_1" {
-  name = "network_1"
-  admin_state_up = "true"
-}
-
-resource "opentelekomcloud_networking_subnet_v2" "subnet_1" {
-  name = "subnet_1"
-  cidr = "192.168.199.0/24"
-  ip_version = 4
-  network_id = "${opentelekomcloud_networking_network_v2.network_1.id}"
-}
-
 resource "opentelekomcloud_elb_loadbalancer" "loadbalancer_1" {
   name = "loadbalancer_1"
-  //vip_subnet_id = "${opentelekomcloud_networking_subnet_v2.subnet_1.id}"
   vpc_id = "%s"
   type = "External"
+  bandwidth = 5
 }
 
 resource "opentelekomcloud_elb_listener" "listener_1" {
   name = "listener_1"
-  protocol = "HTTP"
+  protocol = "TCP"
   protocol_port = 8080
+  backend_protocol = "TCP"
+  backend_port = 8080
+  lb_algorithm = "roundrobin"
   loadbalancer_id = "${opentelekomcloud_elb_loadbalancer.loadbalancer_1.id}"
 }
 
 
 resource "opentelekomcloud_elb_health" "health_1" {
-  name = "health_1"
-  type = "PING"
-  delay = 20
-  timeout = 10
-  max_retries = 5
-  // pool_id = "${opentelekomcloud_lb_pool_v2.pool_1.id}"
+  listener_id = "${opentelekomcloud_elb_listener.listener_1.id}"
+  healthcheck_protocol = "HTTP"
+  healthy_threshold = 3
+  healthcheck_timeout = 10
+  healthcheck_interval = 5
 
   timeouts {
     create = "5m"
@@ -133,40 +126,31 @@ resource "opentelekomcloud_elb_health" "health_1" {
 }
 `, OS_VPC_ID)
 
-const TestAccELBHealthConfig_update = `
-resource "opentelekomcloud_networking_network_v2" "network_1" {
-  name = "network_1"
-  admin_state_up = "true"
-}
-
-resource "opentelekomcloud_networking_subnet_v2" "subnet_1" {
-  name = "subnet_1"
-  cidr = "192.168.199.0/24"
-  ip_version = 4
-  network_id = "${opentelekomcloud_networking_network_v2.network_1.id}"
-}
-
+var TestAccELBHealthConfig_update = fmt.Sprintf(`
 resource "opentelekomcloud_elb_loadbalancer" "loadbalancer_1" {
   name = "loadbalancer_1"
-  vip_subnet_id = "${opentelekomcloud_networking_subnet_v2.subnet_1.id}"
+  vpc_id = "%s"
+  type = "External"
+  bandwidth = 5
 }
 
 resource "opentelekomcloud_elb_listener" "listener_1" {
   name = "listener_1"
-  protocol = "HTTP"
+  protocol = "TCP"
   protocol_port = 8080
+  backend_protocol = "TCP"
+  backend_port = 8080
+  lb_algorithm = "roundrobin"
   loadbalancer_id = "${opentelekomcloud_elb_loadbalancer.loadbalancer_1.id}"
 }
 
 
 resource "opentelekomcloud_elb_health" "health_1" {
-  name = "health_1_updated"
-  type = "PING"
-  delay = 30
-  timeout = 15
-  max_retries = 10
-  admin_state_up = "true"
-  //pool_id = "${opentelekomcloud_lb_pool_v2.pool_1.id}"
+  listener_id = "${opentelekomcloud_elb_listener.listener_1.id}"
+  healthcheck_protocol = "HTTP"
+  healthy_threshold = 5
+  healthcheck_timeout = 15
+  healthcheck_interval = 3
 
   timeouts {
     create = "5m"
@@ -174,4 +158,4 @@ resource "opentelekomcloud_elb_health" "health_1" {
     delete = "5m"
   }
 }
-`
+`, OS_VPC_ID)
