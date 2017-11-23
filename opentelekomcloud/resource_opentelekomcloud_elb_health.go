@@ -5,7 +5,6 @@ import (
 	"log"
 	"time"
 
-	"github.com/hashicorp/terraform/helper/resource"
 	"github.com/hashicorp/terraform/helper/schema"
 
 	"github.com/gophercloud/gophercloud/openstack/networking/v2/extensions/elbaas/healthcheck"
@@ -32,60 +31,38 @@ func resourceHealth() *schema.Resource {
 				ForceNew: true,
 			},
 
-			"name": &schema.Schema{
-				Type:     schema.TypeString,
-				Optional: true,
-			},
-
-			"tenant_id": &schema.Schema{
-				Type:     schema.TypeString,
-				Optional: true,
-				Computed: true,
-				ForceNew: true,
-			},
-
-			"type": &schema.Schema{
+			"listener_id": &schema.Schema{
 				Type:     schema.TypeString,
 				Required: true,
 				ForceNew: true,
 			},
-			"delay": &schema.Schema{
+			"healthcheck_protocol": &schema.Schema{
+				Type:     schema.TypeString,
+				Optional: true,
+			},
+			"healthcheck_uri": &schema.Schema{
+				Type:     schema.TypeString,
+				Optional: true,
+			},
+			"healthcheck_connect_port": &schema.Schema{
 				Type:     schema.TypeInt,
-				Required: true,
+				Optional: true,
 			},
-			"timeout": &schema.Schema{
+			"healthy_threshold": &schema.Schema{
 				Type:     schema.TypeInt,
-				Required: true,
+				Optional: true,
 			},
-			"max_retries": &schema.Schema{
+			"unhealthy_threshold": &schema.Schema{
 				Type:     schema.TypeInt,
-				Required: true,
-			},
-			"url_path": &schema.Schema{
-				Type:     schema.TypeString,
-				Optional: true,
-				Computed: true,
-			},
-			"http_method": &schema.Schema{
-				Type:     schema.TypeString,
-				Optional: true,
-				Computed: true,
-			},
-			"expected_codes": &schema.Schema{
-				Type:     schema.TypeString,
-				Optional: true,
-				Computed: true,
-			},
-			"admin_state_up": &schema.Schema{
-				Type:     schema.TypeBool,
-				Default:  true,
 				Optional: true,
 			},
-
-			"id": &schema.Schema{
-				Type:     schema.TypeString,
+			"healthcheck_timeout": &schema.Schema{
+				Type:     schema.TypeInt,
 				Optional: true,
-				Computed: true,
+			},
+			"healthcheck_interval": &schema.Schema{
+				Type:     schema.TypeInt,
+				Optional: true,
 			},
 		},
 	}
@@ -135,15 +112,15 @@ func resourceHealthRead(d *schema.ResourceData, meta interface{}) error {
 	log.Printf("[DEBUG] Retrieved health %s: %#v", d.Id(), health)
 
 	d.Set("id", health.ID)
-	//d.Set("type", health.Type)
-	//d.Set("delay", health.Delay)
-	//d.Set("timeout", health.Timeout)
-	//d.Set("max_retries", health.MaxRetries)
-	//d.Set("url_path", health.URLPath)
-	//d.Set("http_method", health.HTTPMethod)
-	//d.Set("expected_codes", health.ExpectedCodes)
-	//d.Set("admin_state_up", health.AdminStateUp)
-	//d.Set("name", health.Name)
+	d.Set("listener_id", health.ListenerID)
+	d.Set("healthcheck_protocol", health.HealthcheckProtocol)
+	d.Set("healthcheck_uri", health.HealthcheckUri)
+	d.Set("healtcheck_connect_port", health.HealthcheckConnectPort)
+	d.Set("healthy_threshold", health.HealthyThreshold)
+	d.Set("unhealthy_threshold", health.UnhealthyThreshold)
+	d.Set("healthcheck_timeout", health.HealthcheckTimeout)
+	d.Set("healthcheck_interval", health.HealthcheckInterval)
+
 	d.Set("region", GetRegion(d, config))
 
 	return nil
@@ -180,26 +157,11 @@ func resourceHealthUpdate(d *schema.ResourceData, meta interface{}) error {
 	}
 
 	log.Printf("[DEBUG] Updating health %s with options: %#v", d.Id(), updateOpts)
-	timeout := d.Timeout(schema.TimeoutUpdate)
-	poolID := d.Get("pool_id").(string)
-	err = waitForLBV2viaPool(networkingClient, poolID, "ACTIVE", timeout)
+
+	_, err = healthcheck.Update(networkingClient, d.Id(), updateOpts).Extract()
 	if err != nil {
 		return err
 	}
-
-	err = resource.Retry(timeout, func() *resource.RetryError {
-		_, err = healthcheck.Update(networkingClient, d.Id(), updateOpts).Extract()
-		if err != nil {
-			return checkForRetryableError(err)
-		}
-		return nil
-	})
-
-	if err != nil {
-		return fmt.Errorf("Unable to update monitor %s: %s", d.Id(), err)
-	}
-
-	// Wait for LB to become active before continuing
 
 	return resourceHealthRead(d, meta)
 }

@@ -27,12 +27,6 @@ func resourceBackend() *schema.Resource {
 		},
 
 		Schema: map[string]*schema.Schema{
-			"name": &schema.Schema{
-				Type:     schema.TypeString,
-				Optional: true,
-				ForceNew: true,
-			},
-
 			"listener_id": &schema.Schema{
 				Type:     schema.TypeString,
 				Required: true,
@@ -48,21 +42,6 @@ func resourceBackend() *schema.Resource {
 			"address": &schema.Schema{
 				Type:     schema.TypeString,
 				Required: true,
-				ForceNew: true,
-				ValidateFunc: func(v interface{}, k string) (ws []string, errors []error) {
-					value := v.(int)
-					if value < 1 {
-						errors = append(errors, fmt.Errorf(
-							"Only numbers greater than 0 are supported values for 'weight'"))
-					}
-					return
-				},
-			},
-
-			"admin_state_up": &schema.Schema{
-				Type:     schema.TypeBool,
-				Default:  true,
-				Optional: true,
 				ForceNew: true,
 			},
 		},
