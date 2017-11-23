@@ -248,10 +248,6 @@ func resourceEListenerUpdate(d *schema.ResourceData, meta interface{}) error {
 	if d.HasChange("description") {
 		updateOpts.Description = d.Get("description").(string)
 	}
-	/*if d.HasChange("admin_state_up") {
-		asu := d.Get("admin_state_up").(bool)
-		updateOpts.AdminStateUp = &asu
-	} */
 	if d.HasChange("protocol_port") {
 		updateOpts.ProtocolPort = d.Get("protocol_port").(int)
 	}
