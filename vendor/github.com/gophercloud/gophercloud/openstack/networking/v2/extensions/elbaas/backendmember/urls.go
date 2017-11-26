@@ -12,9 +12,9 @@ func addURL(c *gophercloud.ServiceClient, listener_id string) string {
 }
 
 func removeURL(c *gophercloud.ServiceClient, listener_id string) string {
-	return c.ServiceURL(rootPath, resourcePath, listener_id, "members", "removeMember")
+	return c.ServiceURL(rootPath, resourcePath, listener_id, "members", "action")
 }
 
 func resourceURL(c *gophercloud.ServiceClient, listener_id string, id string) string {
-	return c.ServiceURL(rootPath, resourcePath, listener_id, "members", id)
+	return c.ServiceURL(rootPath, resourcePath, listener_id, "members?id=" + id)
 }

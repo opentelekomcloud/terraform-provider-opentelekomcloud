@@ -111,9 +111,8 @@ func resourceHealthRead(d *schema.ResourceData, meta interface{}) error {
 		return CheckDeleted(d, err, "health")
 	}
 
-	log.Printf("[DEBUG] Retrieved health %s: %#v", d.Id(), health)
+	log.Printf("[DEBUG] Retrieved health %s: %+v", d.Id(), health)
 
-	d.Set("id", health.ID)
 	d.Set("listener_id", health.ListenerID)
 	d.Set("healthcheck_protocol", health.HealthcheckProtocol)
 	d.Set("healthcheck_uri", health.HealthcheckUri)
