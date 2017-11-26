@@ -1,6 +1,7 @@
 package backendmember
 
 import (
+	"fmt"
 	"github.com/gophercloud/gophercloud"
 	//"github.com/gophercloud/gophercloud/pagination"
 )
@@ -57,28 +58,44 @@ type RemoveOptsBuilder interface {
 	ToBackendRemoveMap() (map[string]interface{}, error)
 }
 
+type LoadBalancerID struct {
+	// backend member id to remove
+	ID string `json:"id", required:"true"`
+}
+
 // RemoveOpts is the common options struct used in this package's Remove
 // operation.
 type RemoveOpts struct {
-	// backend member id to remove
-	ID string `json:"id" required:"true"`
+	removeMember []LoadBalancerID `json:"removeMember", required:"true"`
 }
 
 // ToBackendCreateMap casts a CreateOpts struct to a map.
 func (opts RemoveOpts) ToBackendRemoveMap() (map[string]interface{}, error) {
-	return gophercloud.BuildRequestBody(opts, "removeMember")
+	return gophercloud.BuildRequestBody(opts, "")
 }
 
 // Remove will permanently remove a particular backend based on its unique ID.
 func Remove(c *gophercloud.ServiceClient, listener_id string, id string) (r RemoveResult) {
-	removeOpts := RemoveOpts{
+	/*lbid := LoadBalancerID{
 		ID: id,
 	}
-	b, err := removeOpts.ToBackendRemoveMap()
-	if err != nil {
+	lbids := []LoadBalancerID{lbid}
+	removeOpts := RemoveOpts{
+		removeMember: lbids,
+	}
+	fmt.Printf("removeOpts=%+v.\n", removeOpts)
+	b, err := removeOpts.ToBackendRemoveMap() */
+	lbid := make(map[string]interface{})
+	lbid["id"] = id
+	lbids := make([]map[string]interface{}, 1)
+	lbids[0] = lbid
+	b := make(map[string]interface{})
+	b["removeMember"] = lbids
+	fmt.Printf("b=%+v.\n", b)
+	/* if err != nil {
 		r.Err = err
 		return
-	}
+	} */
 	_, r.Err = c.Post(removeURL(c, listener_id), b, &r.Body, &gophercloud.RequestOpts{
 		OkCodes: []int{200},
 	})

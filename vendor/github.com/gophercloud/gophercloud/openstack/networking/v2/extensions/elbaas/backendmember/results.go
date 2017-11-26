@@ -6,10 +6,6 @@ import (
 	"fmt"
 )
 
-type LoadBalancerID struct {
-	ID string `json:"id"`
-}
-
 // Backend is the primary load balancing configuration object that specifies
 // the loadbalancer and port on which client traffic is received, as well
 // as other details such as the load balancing method to be use, protocol, etc.
@@ -71,14 +67,16 @@ type commonResult struct {
 // Extract is a function that accepts a result and extracts a router.
 func (r commonResult) Extract() (*Backend, error) {
 	fmt.Printf("Extracting Backend...\n")
-	l := new(Backend)
-	err := r.ExtractInto(l)
+	var Backends []Backend
+	err := r.ExtractInto(&Backends)
 	if err != nil {
 		fmt.Printf("Error: %s.\n", err.Error())
 		return nil, err
 	} else {
-		fmt.Printf("Returning extract: %+v.\n", l)
-		return l, nil
+		if len(Backends) == 0 {
+			return nil, nil
+		}
+		return &Backends[0], nil
 	}
 }
 

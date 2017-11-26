@@ -91,14 +91,25 @@ func resourceBackendCreate(d *schema.ResourceData, meta interface{}) error {
 }
 
 func resourceBackendRead(d *schema.ResourceData, meta interface{}) error {
-	// config := meta.(*Config)
+	config := meta.(*Config)
+	client, err := config.otcV1Client(GetRegion(d, config))
+	if err != nil {
+		return fmt.Errorf("Error creating OpenTelekomCloud networking client: %s", err)
+	}
 
-	uri := d.Get("uri").(string)
-	job_id := d.Get("job_id").(string)
+	listener_id := d.Get("listener_id").(string)
+	id := d.Id()
+	backend, err := backendmember.Get(client, listener_id, id).Extract()
+	if err != nil {
+		return CheckDeleted(d, err, "backend member")
+	}
 
-	log.Printf("[DEBUG] Retrieved uri %s: job_id %#v", uri, job_id)
+	log.Printf("[DEBUG] Retrieved backend member %s: %#v", id, backend)
 
-	//d.Set("region", GetRegion(d, config))
+	d.Set("server_id", backend.ServerID)
+	d.Set("address", backend.Address)
+
+	d.Set("region", GetRegion(d, config))
 
 	return nil
 }
