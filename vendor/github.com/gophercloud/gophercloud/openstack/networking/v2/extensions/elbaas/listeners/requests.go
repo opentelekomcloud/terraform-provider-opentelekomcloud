@@ -263,7 +263,7 @@ func Update(c *gophercloud.ServiceClient, id string, opts UpdateOpts) (r UpdateR
 func Delete(c *gophercloud.ServiceClient, id string) (r DeleteResult) {
 	url := resourceURL(c, id)
 	fmt.Printf("Delete listener url: %s.\n", url)
-	_, r.Err = c.Delete1(url, &gophercloud.RequestOpts{
+	_, r.Err = c.Delete(url, &gophercloud.RequestOpts{
 		OkCodes: []int{204},
 	})
 	return

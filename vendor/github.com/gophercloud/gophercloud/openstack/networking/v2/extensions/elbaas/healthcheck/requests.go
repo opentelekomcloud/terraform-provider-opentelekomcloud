@@ -169,7 +169,7 @@ func Update(c *gophercloud.ServiceClient, id string, opts UpdateOptsBuilder) (r 
 
 // Delete will permanently delete a particular Health based on its unique ID.
 func Delete(c *gophercloud.ServiceClient, id string) (r DeleteResult) {
-	_, r.Err = c.Delete1(resourceURL(c, id), &gophercloud.RequestOpts{
+	_, r.Err = c.Delete(resourceURL(c, id), &gophercloud.RequestOpts{
 		OkCodes: []int{204},
 	})
 	return
