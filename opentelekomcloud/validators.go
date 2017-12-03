@@ -17,6 +17,7 @@ func ValidateStringList(v interface{}, k string, l []string) (ws []string, error
 	return
 }
 
+// Not currently used.
 func ValidateInsensitiveStringList(v interface{}, k string, l []string) (ws []string, errors []error) {
 	value := v.(string)
 	for i := range l {
