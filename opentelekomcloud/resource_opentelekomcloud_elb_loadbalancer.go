@@ -51,12 +51,18 @@ func resourceELoadBalancer() *schema.Resource {
 			"bandwidth": &schema.Schema{
 				Type:     schema.TypeInt,
 				Optional: true,
+				ValidateFunc: func(v interface{}, k string) (ws []string, errors []error) {
+					return ValidateIntRange(v, k, 1, 300)
+				},
 			},
 
 			"type": &schema.Schema{
 				Type:     schema.TypeString,
 				Required: true,
 				ForceNew: true,
+				ValidateFunc: func(v interface{}, k string) (ws []string, errors []error) {
+					return ValidateStringList(v, k, []string{"Internal", "External"})
+				},
 			},
 
 			"admin_state_up": &schema.Schema{

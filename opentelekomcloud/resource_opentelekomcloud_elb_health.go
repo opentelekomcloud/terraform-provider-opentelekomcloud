@@ -39,6 +39,10 @@ func resourceHealth() *schema.Resource {
 			"healthcheck_protocol": &schema.Schema{
 				Type:     schema.TypeString,
 				Optional: true,
+				Computed: true,
+				ValidateFunc: func(v interface{}, k string) (ws []string, errors []error) {
+					return ValidateStringList(v, k, []string{"HTTP", "TCP"})
+				},
 			},
 			"healthcheck_uri": &schema.Schema{
 				Type:     schema.TypeString,
@@ -47,23 +51,42 @@ func resourceHealth() *schema.Resource {
 			"healthcheck_connect_port": &schema.Schema{
 				Type:     schema.TypeInt,
 				Optional: true,
+				Computed: true,
+				ValidateFunc: func(v interface{}, k string) (ws []string, errors []error) {
+					return ValidateIntRange(v, k, 1, 65535)
+				},
 			},
 			"healthy_threshold": &schema.Schema{
 				Type:     schema.TypeInt,
 				Optional: true,
+				Computed: true,
+				ValidateFunc: func(v interface{}, k string) (ws []string, errors []error) {
+					return ValidateIntRange(v, k, 1, 10)
+				},
 			},
 			"unhealthy_threshold": &schema.Schema{
 				Type:     schema.TypeInt,
 				Optional: true,
 				Computed: true,
+				ValidateFunc: func(v interface{}, k string) (ws []string, errors []error) {
+					return ValidateIntRange(v, k, 1, 10)
+				},
 			},
 			"healthcheck_timeout": &schema.Schema{
 				Type:     schema.TypeInt,
 				Optional: true,
+				Computed: true,
+				ValidateFunc: func(v interface{}, k string) (ws []string, errors []error) {
+					return ValidateIntRange(v, k, 1, 50)
+				},
 			},
 			"healthcheck_interval": &schema.Schema{
 				Type:     schema.TypeInt,
 				Optional: true,
+				Computed: true,
+				ValidateFunc: func(v interface{}, k string) (ws []string, errors []error) {
+					return ValidateIntRange(v, k, 1, 5)
+				},
 			},
 		},
 	}

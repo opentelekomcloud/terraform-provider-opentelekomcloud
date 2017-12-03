@@ -176,7 +176,7 @@ resource "opentelekomcloud_elb_loadbalancer" "loadbalancer_1" {
   name = "loadbalancer_1"
   vpc_id = "%s"
   type = "External"
-  bandwidth = 5
+  bandwidth = "5"
 
   timeouts {
     create = "5m"
