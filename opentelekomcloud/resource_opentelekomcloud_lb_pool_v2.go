@@ -251,7 +251,9 @@ func resourcePoolV2Read(d *schema.ResourceData, meta interface{}) error {
 	d.Set("admin_state_up", pool.AdminStateUp)
 	d.Set("name", pool.Name)
 	d.Set("id", pool.ID)
-	d.Set("persistence", pool.Persistence)
+	if err := d.Set("persistence", pool.Persistence); err != nil {
+		return fmt.Errorf("[DEBUG] Error saving persistence to state for OpenTelekomCloud pool (%s): %s", d.Id(), err)
+	}
 	d.Set("region", GetRegion(d, config))
 
 	return nil

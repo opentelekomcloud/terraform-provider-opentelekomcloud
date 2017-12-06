@@ -153,7 +153,9 @@ func resourceDNSRecordSetV2Read(d *schema.ResourceData, meta interface{}) error 
 	d.Set("description", n.Description)
 	d.Set("ttl", n.TTL)
 	d.Set("type", n.Type)
-	d.Set("records", n.Records)
+	if err := d.Set("records", n.Records); err != nil {
+		return fmt.Errorf("[DEBUG] Error saving records to state for OpenTelekomCloud DNS record set (%s): %s", d.Id(), err)
+	}
 	d.Set("region", GetRegion(d, config))
 	d.Set("zone_id", zoneID)
 

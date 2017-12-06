@@ -506,7 +506,9 @@ func resourceComputeInstanceV2Read(d *schema.ResourceData, meta interface{}) err
 		hostv6 = server.AccessIPv6
 	}
 
-	d.Set("network", networks)
+	if err := d.Set("network", networks); err != nil {
+		return fmt.Errorf("[DEBUG] Error saving network to state for OpenTelekomCloud server (%s): %s", d.Id(), err)
+	}
 	d.Set("access_ip_v4", hostv4)
 	d.Set("access_ip_v6", hostv6)
 
@@ -527,13 +529,17 @@ func resourceComputeInstanceV2Read(d *schema.ResourceData, meta interface{}) err
 		})
 	}
 
-	d.Set("all_metadata", server.Metadata)
+	if err := d.Set("all_metadata", server.Metadata); err != nil {
+		return fmt.Errorf("[DEBUG] Error saving all_metadata to state for OpenTelekomCloud server (%s): %s", d.Id(), err)
+	}
 
 	secGrpNames := []string{}
 	for _, sg := range server.SecurityGroups {
 		secGrpNames = append(secGrpNames, sg["name"].(string))
 	}
-	d.Set("security_groups", secGrpNames)
+	if err := d.Set("security_groups", secGrpNames); err != nil {
+		return fmt.Errorf("[DEBUG] Error saving security_groups to state for OpenTelekomCloud server (%s): %s", d.Id(), err)
+	}
 
 	flavorId, ok := server.Flavor["id"].(string)
 	if !ok {

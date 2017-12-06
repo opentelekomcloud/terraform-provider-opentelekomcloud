@@ -99,14 +99,18 @@ func resourceComputeServerGroupV2Read(d *schema.ResourceData, meta interface{}) 
 	for _, p := range sg.Policies {
 		policies = append(policies, p)
 	}
-	d.Set("policies", policies)
+	if err := d.Set("policies", policies); err != nil {
+		return fmt.Errorf("[DEBUG] Error saving policies to state for OpenTelekomCloud server group (%s): %s", d.Id(), err)
+	}
 
 	// Set the members
 	members := []string{}
 	for _, m := range sg.Members {
 		members = append(members, m)
 	}
-	d.Set("members", members)
+	if err := d.Set("members", members); err != nil {
+		return fmt.Errorf("[DEBUG] Error saving members to state for OpenTelekomCloud server group (%s): %s", d.Id(), err)
+	}
 
 	d.Set("region", GetRegion(d, config))
 

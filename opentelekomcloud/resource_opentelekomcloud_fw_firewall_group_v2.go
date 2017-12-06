@@ -165,7 +165,9 @@ func resourceFWFirewallGroupV2Read(d *schema.ResourceData, meta interface{}) err
 	d.Set("egress_policy_id", firewall_group.EgressPolicyID)
 	d.Set("admin_state_up", firewall_group.AdminStateUp)
 	d.Set("tenant_id", firewall_group.TenantID)
-	d.Set("ports", firewall_group.PortIDs)
+	if err := d.Set("ports", firewall_group.PortIDs); err != nil {
+		return fmt.Errorf("[DEBUG] Error saving ports to state for OpenTelekomCloud firewall group (%s): %s", d.Id(), err)
+	}
 	d.Set("region", GetRegion(d, config))
 
 	return nil

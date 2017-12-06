@@ -204,7 +204,9 @@ func resourceBlockStorageVolumeV2Read(d *schema.ResourceData, meta interface{}) 
 	d.Set("snapshot_id", v.SnapshotID)
 	d.Set("source_vol_id", v.SourceVolID)
 	d.Set("volume_type", v.VolumeType)
-	d.Set("metadata", v.Metadata)
+	if err := d.Set("metadata", v.Metadata); err != nil {
+		return fmt.Errorf("[DEBUG] Error saving metadata to state for OpenTelekomCloud block storage (%s): %s", d.Id(), err)
+	}
 	d.Set("region", GetRegion(d, config))
 
 	attachments := make([]map[string]interface{}, len(v.Attachments))
@@ -215,7 +217,9 @@ func resourceBlockStorageVolumeV2Read(d *schema.ResourceData, meta interface{}) 
 		attachments[i]["device"] = attachment.Device
 		log.Printf("[DEBUG] attachment: %v", attachment)
 	}
-	d.Set("attachment", attachments)
+	if err := d.Set("attachment", attachments); err != nil {
+		return fmt.Errorf("[DEBUG] Error saving attachment to state for OpenTelekomCloud block storage (%s): %s", d.Id(), err)
+	}
 
 	return nil
 }
