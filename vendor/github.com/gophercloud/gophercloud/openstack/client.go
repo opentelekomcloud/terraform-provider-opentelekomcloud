@@ -2,14 +2,16 @@ package openstack
 
 import (
 	"fmt"
+	"log"
 	"net/url"
 	"reflect"
+
+	"strings"
 
 	"github.com/gophercloud/gophercloud"
 	tokens2 "github.com/gophercloud/gophercloud/openstack/identity/v2/tokens"
 	tokens3 "github.com/gophercloud/gophercloud/openstack/identity/v3/tokens"
 	"github.com/gophercloud/gophercloud/openstack/utils"
-	"strings"
 )
 
 const (
@@ -165,6 +167,7 @@ func v3auth(client *gophercloud.ProviderClient, endpoint string, opts tokens3.Au
 		return err
 	}
 
+	log.Printf("[DEBUG] catalog = %#v\n", catalog)
 	client.TokenID = token.ID
 
 	if opts.CanReauth() {
@@ -303,5 +306,14 @@ func NewDNSV2(client *gophercloud.ProviderClient, eo gophercloud.EndpointOpts) (
 func NewImageServiceV2(client *gophercloud.ProviderClient, eo gophercloud.EndpointOpts) (*gophercloud.ServiceClient, error) {
 	sc, err := initClientOpts(client, eo, "image")
 	sc.ResourceBase = sc.Endpoint + "v2/"
+	return sc, err
+}
+
+func NewCESClient(client *gophercloud.ProviderClient, eo gophercloud.EndpointOpts) (*gophercloud.ServiceClient, error) {
+	sc, err := initClientOpts(client, eo, "ces")
+	e := strings.Replace(sc.Endpoint, "v2", "V1.0", 1)
+	sc.Endpoint = e
+	sc.ResourceBase = e
+	//sc.ResourceBase = sc.Endpoint
 	return sc, err
 }
