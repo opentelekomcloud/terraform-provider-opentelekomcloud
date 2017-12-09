@@ -16,6 +16,7 @@ import (
 	"github.com/gophercloud/gophercloud/openstack/compute/v2/extensions/schedulerhints"
 	"github.com/gophercloud/gophercloud/openstack/compute/v2/extensions/secgroups"
 	"github.com/gophercloud/gophercloud/openstack/compute/v2/extensions/startstop"
+	"github.com/gophercloud/gophercloud/openstack/compute/v2/extensions/tags"
 	"github.com/gophercloud/gophercloud/openstack/compute/v2/flavors"
 	"github.com/gophercloud/gophercloud/openstack/compute/v2/images"
 	"github.com/gophercloud/gophercloud/openstack/compute/v2/servers"
@@ -330,6 +331,12 @@ func resourceComputeInstanceV2() *schema.Resource {
 				Optional: true,
 				Default:  false,
 			},
+			"tags": &schema.Schema{
+				Type:     schema.TypeSet,
+				Optional: true,
+				Elem:     &schema.Schema{Type: schema.TypeString},
+				Set:      schema.HashString,
+			},
 			/* "force_delete": &schema.Schema{
 				Type:     schema.TypeBool,
 				Optional: true,
@@ -468,6 +475,14 @@ func resourceComputeInstanceV2Create(d *schema.ResourceData, meta interface{}) e
 			server.ID, err)
 	}
 
+	taglist := resourceBuildTags(d.Get("tags").(*schema.Set).List())
+	if len(taglist) > 0 {
+		_, err := CreateServerTags(computeClient, d.Id(), taglist)
+		if err != nil {
+			return fmt.Errorf("Error creating tags for instance (%s): %s", d.Id(), err)
+		}
+	}
+
 	return resourceComputeInstanceV2Read(d, meta)
 }
 
@@ -570,7 +585,33 @@ func resourceComputeInstanceV2Read(d *schema.ResourceData, meta interface{}) err
 	// Set the region
 	d.Set("region", GetRegion(d, config))
 
+	taglist, err := GetServerTags(computeClient, d.Id())
+	if err != nil {
+		return err
+	}
+	d.Set("tags", taglist)
+
 	return nil
+}
+
+func CreateServerTags(client *gophercloud.ServiceClient, server_id string, taglist []string) (*tags.Tags, error) {
+	createOpts := tags.CreateOpts{
+		Tags: taglist,
+	}
+	return tags.Create(client, server_id, createOpts).Extract()
+}
+
+func GetServerTags(client *gophercloud.ServiceClient, server_id string) (*tags.Tags, error) {
+	return tags.Get(client, server_id).Extract()
+}
+
+func resourceBuildTags(v []interface{}) []string {
+	var tags []string
+	for _, tag := range v {
+		tags = append(tags, tag.(string))
+	}
+
+	return tags
 }
 
 func resourceComputeInstanceV2Update(d *schema.ResourceData, meta interface{}) error {
@@ -730,6 +771,14 @@ func resourceComputeInstanceV2Update(d *schema.ResourceData, meta interface{}) e
 		_, err = stateConf.WaitForState()
 		if err != nil {
 			return fmt.Errorf("Error waiting for instance (%s) to confirm resize: %s", d.Id(), err)
+		}
+	}
+
+	if d.HasChange("tags") {
+		taglist := resourceBuildTags(d.Get("tags").(*schema.Set).List())
+		_, err := CreateServerTags(computeClient, d.Id(), taglist)
+		if err != nil {
+			return fmt.Errorf("Error creating tags for instance (%s): %s", d.Id(), err)
 		}
 	}
 

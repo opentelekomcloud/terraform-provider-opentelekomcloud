@@ -3,12 +3,10 @@ package gophercloud
 import (
 	"bytes"
 	"encoding/json"
-	//"fmt"
 	"io"
 	"io/ioutil"
 	"net/http"
 	"strings"
-	//"reflect"
 	//"fmt"
 	//"reflect"
 )

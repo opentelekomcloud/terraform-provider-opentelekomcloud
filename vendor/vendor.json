@@ -300,10 +300,10 @@
 			"revisionTime": "2017-10-18T18:43:25Z"
 		},
 		{
-			"checksumSHA1": "BinPv6F3LvGM50jGsoxOZCeGyEk=",
+			"checksumSHA1": "6PqwA1boTJFClUjc9cMXmLLSJTs=",
 			"path": "github.com/gophercloud/gophercloud",
-			"revision": "e3b1ae5d101bf568be17e0c60e3f6f594cfb3bc6",
-			"revisionTime": "2017-11-25T22:50:13Z"
+			"revision": "5a00c1c742bc7e3d29c4e49318e821289fd97623",
+			"revisionTime": "2017-12-08T04:44:24Z"
 		},
 		{
 			"checksumSHA1": "b7g9TcU1OmW7e2UySYeOAmcfHpY=",
@@ -370,6 +370,12 @@
 			"path": "github.com/gophercloud/gophercloud/openstack/compute/v2/extensions/startstop",
 			"revision": "f8ec1b3d8dea084885975d404872b37be20b3984",
 			"revisionTime": "2017-10-04T00:41:52Z"
+		},
+		{
+			"checksumSHA1": "ws4GttIj+hgSXmRk31qUjc9nBdA=",
+			"path": "github.com/gophercloud/gophercloud/openstack/compute/v2/extensions/tags",
+			"revision": "5a00c1c742bc7e3d29c4e49318e821289fd97623",
+			"revisionTime": "2017-12-08T04:44:24Z"
 		},
 		{
 			"checksumSHA1": "5JuziAp9BSRA/z+8pTjVLTWeTw4=",
@@ -1014,5 +1020,5 @@
 			"versionExact": "v1.6.1"
 		}
 	],
-	"rootPath": "github.com/khdegraaf/terraform-provider-opentelekomcloud"
+	"rootPath": "github.com/gator1/terraform-provider-opentelekomcloud"
 }
