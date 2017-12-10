@@ -14,7 +14,7 @@ type CreateOptsBuilder interface {
 // CreateOpts implements CreateOptsBuilder
 type CreateOpts struct {
 	// Tags is a set of tags.
-	Tags []string `json:"tags,omitempty"`
+	Tags []string `json:"tags" required:"true"`
 }
 
 // ToImageCreateMap assembles a request body based on the contents of
@@ -35,7 +35,7 @@ func Create(client *gophercloud.ServiceClient, server_id string, opts CreateOpts
 		r.Err = err
 		return r
 	}
-	_, r.Err = client.Put(createURL(client, server_id), b, &r.Body, &gophercloud.RequestOpts{OkCodes: []int{201}})
+	_, r.Err = client.Put(createURL(client, server_id), b, &r.Body, &gophercloud.RequestOpts{OkCodes: []int{200}})
 	return
 }
 

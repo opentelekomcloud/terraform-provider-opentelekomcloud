@@ -41,6 +41,39 @@ func TestAccComputeV2Instance_basic(t *testing.T) {
 	})
 }
 
+func TestAccComputeV2Instance_tags(t *testing.T) {
+	var instance servers.Server
+
+	resource.Test(t, resource.TestCase{
+		PreCheck:     func() { testAccPreCheck(t) },
+		Providers:    testAccProviders,
+		CheckDestroy: testAccCheckComputeV2InstanceDestroy,
+		Steps: []resource.TestStep{
+			resource.TestStep{
+				Config: testAccComputeV2Instance_tags,
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckComputeV2InstanceExists("opentelekomcloud_compute_instance_v2.instance_1", &instance),
+					testAccCheckComputeV2InstanceTags(&instance, "foo.bar", "key.value"),
+				),
+			},
+			resource.TestStep{
+				Config: testAccComputeV2Instance_tags2,
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckComputeV2InstanceExists("opentelekomcloud_compute_instance_v2.instance_1", &instance),
+					testAccCheckComputeV2InstanceTags(&instance, "foo2.bar2", "key2.value2"),
+				),
+			},
+			resource.TestStep{
+				Config: testAccComputeV2Instance_notags,
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckComputeV2InstanceExists("opentelekomcloud_compute_instance_v2.instance_1", &instance),
+					testAccCheckComputeV2InstanceNoTags(&instance),
+				),
+			},
+		},
+	})
+}
+
 // PASS
 func TestAccComputeV2Instance_secgroupMulti(t *testing.T) {
 	var instance_1 servers.Server
@@ -388,7 +421,7 @@ func testAccCheckComputeV2InstanceMetadata(
 func testAccCheckComputeV2InstanceNoMetadataKey(
 	instance *servers.Server, k string) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
-		if instance.Metadata == nil {
+		if instance == nil {
 			return nil
 		}
 
@@ -399,6 +432,61 @@ func testAccCheckComputeV2InstanceNoMetadataKey(
 		}
 
 		return nil
+	}
+}
+
+func testAccCheckComputeV2InstanceTags(
+	instance *servers.Server, tag1, tag2 string) resource.TestCheckFunc {
+	return func(s *terraform.State) error {
+		config := testAccProvider.Meta().(*Config)
+		computeClient, err := config.computeV2Client(OS_REGION_NAME)
+		if err != nil {
+			return err
+		}
+
+		taglist2, err := GetServerTags(computeClient, instance.ID)
+		if err != nil {
+			return err
+		}
+
+		if len(taglist2.Tags) != 2 {
+			return fmt.Errorf("Tags length not correct: %d, expected 2", len(taglist2.Tags))
+		}
+		if taglist2.Tags[0] != tag1 {
+			return fmt.Errorf("Unexpected tag: %s, expected %s", taglist2.Tags[0], tag1)
+
+		}
+		if taglist2.Tags[1] != tag2 {
+			return fmt.Errorf("Unexpected tag: %s, expected %s", taglist2.Tags[1], tag2)
+
+		}
+
+		return nil
+	}
+}
+
+func testAccCheckComputeV2InstanceNoTags(
+	instance *servers.Server) resource.TestCheckFunc {
+	return func(s *terraform.State) error {
+		config := testAccProvider.Meta().(*Config)
+		computeClient, err := config.computeV2Client(OS_REGION_NAME)
+		if err != nil {
+			return err
+		}
+
+		taglist2, err := GetServerTags(computeClient, instance.ID)
+		if err != nil {
+			return err
+		}
+
+		if taglist2.Tags == nil {
+			return nil
+		}
+		if len(taglist2.Tags) == 0 {
+			return nil
+		}
+
+		return fmt.Errorf("Expected no tags, but found %v", taglist2.Tags)
 	}
 }
 
@@ -445,6 +533,50 @@ func testAccCheckComputeV2InstanceInstanceIDsDoNotMatch(
 }
 
 var testAccComputeV2Instance_basic = fmt.Sprintf(`
+resource "opentelekomcloud_compute_instance_v2" "instance_1" {
+  name = "instance_1"
+  security_groups = ["default"]
+  availability_zone = "%s"
+  metadata {
+    foo = "bar"
+  }
+  network {
+    uuid = "%s"
+  }
+}
+`, OS_AVAILABILITY_ZONE, OS_NETWORK_ID)
+
+var testAccComputeV2Instance_tags = fmt.Sprintf(`
+resource "opentelekomcloud_compute_instance_v2" "instance_1" {
+  name = "instance_1"
+  security_groups = ["default"]
+  availability_zone = "%s"
+  metadata {
+    foo = "bar"
+  }
+  network {
+    uuid = "%s"
+  }
+  tags = ["foo.bar", "key.value"]
+}
+`, OS_AVAILABILITY_ZONE, OS_NETWORK_ID)
+
+var testAccComputeV2Instance_tags2 = fmt.Sprintf(`
+resource "opentelekomcloud_compute_instance_v2" "instance_1" {
+  name = "instance_1"
+  security_groups = ["default"]
+  availability_zone = "%s"
+  metadata {
+    foo = "bar"
+  }
+  network {
+    uuid = "%s"
+  }
+  tags = ["foo2.bar2", "key2.value2"]
+}
+`, OS_AVAILABILITY_ZONE, OS_NETWORK_ID)
+
+var testAccComputeV2Instance_notags = fmt.Sprintf(`
 resource "opentelekomcloud_compute_instance_v2" "instance_1" {
   name = "instance_1"
   security_groups = ["default"]

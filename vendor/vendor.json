@@ -372,10 +372,10 @@
 			"revisionTime": "2017-10-04T00:41:52Z"
 		},
 		{
-			"checksumSHA1": "ws4GttIj+hgSXmRk31qUjc9nBdA=",
+			"checksumSHA1": "BLDvfkgs1wCouMzMDzdr1bPpH/4=",
 			"path": "github.com/gophercloud/gophercloud/openstack/compute/v2/extensions/tags",
-			"revision": "5a00c1c742bc7e3d29c4e49318e821289fd97623",
-			"revisionTime": "2017-12-08T04:44:24Z"
+			"revision": "19e3c0004e7056daf7509a160a019e7c2e5d99c5",
+			"revisionTime": "2017-12-09T23:33:19Z"
 		},
 		{
 			"checksumSHA1": "5JuziAp9BSRA/z+8pTjVLTWeTw4=",

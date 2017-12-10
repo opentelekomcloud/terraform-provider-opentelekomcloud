@@ -589,7 +589,7 @@ func resourceComputeInstanceV2Read(d *schema.ResourceData, meta interface{}) err
 	if err != nil {
 		return err
 	}
-	d.Set("tags", taglist)
+	d.Set("tags", taglist.Tags)
 
 	return nil
 }
@@ -603,6 +603,10 @@ func CreateServerTags(client *gophercloud.ServiceClient, server_id string, tagli
 
 func GetServerTags(client *gophercloud.ServiceClient, server_id string) (*tags.Tags, error) {
 	return tags.Get(client, server_id).Extract()
+}
+
+func DeleteServerTags(client *gophercloud.ServiceClient, server_id string) error {
+	return tags.Delete(client, server_id).ExtractErr()
 }
 
 func resourceBuildTags(v []interface{}) []string {
@@ -776,9 +780,17 @@ func resourceComputeInstanceV2Update(d *schema.ResourceData, meta interface{}) e
 
 	if d.HasChange("tags") {
 		taglist := resourceBuildTags(d.Get("tags").(*schema.Set).List())
-		_, err := CreateServerTags(computeClient, d.Id(), taglist)
-		if err != nil {
-			return fmt.Errorf("Error creating tags for instance (%s): %s", d.Id(), err)
+		log.Printf("[DEBUG] Setting tags to %v", taglist)
+		if len(taglist) == 0 {
+			err := DeleteServerTags(computeClient, d.Id())
+			if err != nil {
+				return fmt.Errorf("Error deleting tags for instance (%s): %s", d.Id(), err)
+			}
+		} else {
+			_, err := CreateServerTags(computeClient, d.Id(), taglist)
+			if err != nil {
+				return fmt.Errorf("Error creating tags for instance (%s): %s", d.Id(), err)
+			}
 		}
 	}
 
