@@ -1,6 +1,7 @@
 package alarmrule
 
 import (
+	"fmt"
 	"log"
 
 	"github.com/gophercloud/gophercloud"
@@ -49,12 +50,12 @@ type CreateOpts struct {
 	AlarmActions            []ActionOpts  `json:"alarm_actions,omitempty"`
 	InsufficientdataActions []ActionOpts  `json:"insufficientdata_actions,omitempty"`
 	OkActions               []ActionOpts  `json:"ok_actions,omitempty"`
-	AlarmEnabled            bool          `json:"alarm_enabled,omitempty"`
-	AlarmActionEnabled      bool          `json:"alarm_action_enabled,omitempty"`
+	AlarmEnabled            bool          `json:"alarm_enabled"`
+	AlarmActionEnabled      bool          `json:"alarm_action_enabled"`
 }
 
 func (opts CreateOpts) ToAlarmRuleCreateMap() (map[string]interface{}, error) {
-	return gophercloud.BuildRequestBody(opts, "")
+	return nil, fmt.Errorf("no need implement")
 }
 
 type realActionOpts struct {
@@ -155,6 +156,10 @@ func Update(c *gophercloud.ServiceClient, id string, opts UpdateOpts) (r UpdateR
 	b, err := opts.ToAlarmRuleUpdateMap()
 	if err != nil {
 		r.Err = err
+		return
+	}
+	if len(b) == 0 {
+		log.Printf("[DEBUG] nothing to update")
 		return
 	}
 	_, r.Err = c.Put(actionURL(c, id), b, nil, &gophercloud.RequestOpts{
