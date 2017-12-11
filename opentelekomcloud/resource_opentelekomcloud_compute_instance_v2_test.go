@@ -421,7 +421,7 @@ func testAccCheckComputeV2InstanceMetadata(
 func testAccCheckComputeV2InstanceNoMetadataKey(
 	instance *servers.Server, k string) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
-		if instance == nil {
+		if instance.Metadata == nil {
 			return nil
 		}
 
