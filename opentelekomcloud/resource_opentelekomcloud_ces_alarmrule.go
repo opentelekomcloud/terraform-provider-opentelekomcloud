@@ -7,6 +7,7 @@ import (
 	"time"
 
 	"github.com/gophercloud/gophercloud/openstack/cloudeyeservice/alarmrule"
+	"github.com/hashicorp/terraform/helper/resource"
 	"github.com/hashicorp/terraform/helper/schema"
 )
 
@@ -31,7 +32,7 @@ func resourceAlarmRule() *schema.Resource {
 				Required: true,
 				ValidateFunc: func(v interface{}, k string) (ws []string, errors []error) {
 					value := v.(string)
-					vv := regexp.MustCompile("[a-zA-Z0-9_]{1,128}")
+					vv := regexp.MustCompile("^[a-zA-Z0-9_]{1,128}$")
 					if !vv.MatchString(value) {
 						errors = append(errors, fmt.Errorf("%s must be string of 1 to 128 characters that consists of uppercase/lowercae letters, digits and underscores(_)", k))
 					}
@@ -61,7 +62,7 @@ func resourceAlarmRule() *schema.Resource {
 							Required: true,
 							ValidateFunc: func(v interface{}, k string) (ws []string, errors []error) {
 								value := v.(string)
-								vv := regexp.MustCompile("^[a-zA-Z][a-zA-Z0-9_]{2,31}\\.[a-zA-Z][a-zA-Z0-9_]{2,31}")
+								vv := regexp.MustCompile("^[a-zA-Z][a-zA-Z0-9_]{2,31}\\.[a-zA-Z][a-zA-Z0-9_]{2,31}$")
 								if !vv.MatchString(value) {
 									errors = append(errors, fmt.Errorf("%s is in service.item format. service and item must be a string of 3 to 32 characters that starts with a letter and consists of uppercase/lowercae letters, digits and underscores(_)", k))
 								}
@@ -74,7 +75,7 @@ func resourceAlarmRule() *schema.Resource {
 							Required: true,
 							ValidateFunc: func(v interface{}, k string) (ws []string, errors []error) {
 								value := v.(string)
-								vv := regexp.MustCompile("^[a-zA-Z][a-zA-Z0-9_]{0,63}")
+								vv := regexp.MustCompile("^[a-zA-Z][a-zA-Z0-9_]{0,63}$")
 								if !vv.MatchString(value) {
 									errors = append(errors, fmt.Errorf("%s must be a string of 1 to 64 characters that starts with a letter and consists of uppercase/lowercae letters, digits and underscores(_)", k))
 								}
@@ -100,7 +101,7 @@ func resourceAlarmRule() *schema.Resource {
 										Required: true,
 										ValidateFunc: func(v interface{}, k string) (ws []string, errors []error) {
 											value := v.(string)
-											vv := regexp.MustCompile("^[a-zA-Z][a-zA-Z0-9_]{0,31}")
+											vv := regexp.MustCompile("^[a-zA-Z][a-zA-Z0-9_]{0,31}$")
 											if !vv.MatchString(value) {
 												errors = append(errors, fmt.Errorf("%s must be a string of 1 to 32 characters that starts with a letter and consists of uppercase/lowercae letters, digits and underscores(_)", k))
 											}
@@ -111,15 +112,14 @@ func resourceAlarmRule() *schema.Resource {
 									"value": &schema.Schema{
 										Type:     schema.TypeString,
 										Required: true,
-										/*
-											ValidateFunc: func(v interface{}, k string) (ws []string, errors []error) {
-												value := v.(string)
-												vv := regexp.MustCompile("^[a-zA-Z][a-zA-Z0-9_]{0,63}")
-												if !vv.MatchString(value) {
-													errors = append(errors, fmt.Errorf("%s must be a string of 1 to 64 characters that starts with a letter and consists of uppercase/lowercae letters, digits and underscores(_)", k))
-												}
-												return
-											},*/
+										ValidateFunc: func(v interface{}, k string) (ws []string, errors []error) {
+											value := v.(string)
+											vv := regexp.MustCompile("^[a-zA-Z0-9][a-zA-Z0-9-]{0,63}$")
+											if !vv.MatchString(value) {
+												errors = append(errors, fmt.Errorf("%s must be a string of 1 to 64 characters that starts with a letter or digit and consists of uppercase/lowercae letters, digits and hyphens(-)", k))
+											}
+											return
+										},
 									},
 								},
 							},
@@ -160,11 +160,11 @@ func resourceAlarmRule() *schema.Resource {
 								switch value {
 								case "Max":
 								case "Min":
-								case "Avg":
+								case "average":
 								case "Sum":
 								case "Variance":
 								default:
-									errors = append(errors, fmt.Errorf("%s can be Max, Min, Avg, Sum, Variance", k))
+									errors = append(errors, fmt.Errorf("%s can be Max, Min, average, Sum, Variance", k))
 								}
 								return
 							},
@@ -399,82 +399,65 @@ func resourceAlarmRuleRead(d *schema.ResourceData, meta interface{}) error {
 	}
 	log.Printf("[DEBUG] Retrieved %s %s: %#v", nameCESAR, d.Id(), r)
 
-	//d.Set("ssl_ciphers", l.SslCiphers)
-
-	return nil
+	return refreshResourceData(r, d)
 }
 
 func resourceAlarmRuleUpdate(d *schema.ResourceData, meta interface{}) error {
-	return nil
-	/*
-		config := meta.(*Config)
-		client, err := chooseCESClient(d, config)
+	config := meta.(*Config)
+	client, err := chooseCESClient(d, config)
+	if err != nil {
+		return fmt.Errorf("Error creating Cloud Eye Service client: %s", err)
+	}
+
+	arId := d.Id()
+
+	var updateOpts alarmrule.UpdateOpts
+	err = buildCESUpdateParam(&updateOpts, d)
+	if err != nil {
+		return fmt.Errorf("Error updating %s %s: building parameter failed:%s", nameCESAR, arId, err)
+	}
+	log.Printf("[DEBUG] Updating %s %s with options: %#v", nameCESAR, arId, updateOpts)
+
+	timeout := d.Timeout(schema.TimeoutUpdate)
+	err = resource.Retry(timeout, func() *resource.RetryError {
+		err := alarmrule.Update(client, arId, updateOpts).ExtractErr()
 		if err != nil {
-			return fmt.Errorf("Error creating Cloud Eye Service client: %s", err)
+			return checkForRetryableError(err)
 		}
+		return nil
+	})
+	if err != nil {
+		return fmt.Errorf("Error updating %s %s: %s", nameCESAR, arId, err)
+	}
 
-		lId := d.Id()
-
-		var updateOpts alarmrule.UpdateOpts
-		err = buildELBUpdateParam(&updateOpts, d)
-		if err != nil {
-			return fmt.Errorf("Error updating %s %s: building parameter failed:%s", nameCESAR, lId, err)
-		}
-		if reflect.DeepEqual(&updateOpts, &(alarmrule.UpdateOpts{})) {
-			log.Printf("[INFO] Updating %s %s with no changes", nameCESAR, lId)
-			return nil
-		}
-
-		// Wait for Listener to become active before continuing
-		timeout := d.Timeout(schema.TimeoutUpdate)
-		err = waitForELBListenerActive(client, lId, timeout)
-		if err != nil {
-			return err
-		}
-
-		log.Printf("[DEBUG] Updating %s %s with options: %#v", nameCESAR, lId, updateOpts)
-		err = resource.Retry(timeout, func() *resource.RetryError {
-			_, err := alarmrule.Update(client, lId, updateOpts).Extract()
-			if err != nil {
-				return checkForRetryableError(err)
-			}
-			return nil
-		})
-		if err != nil {
-			return fmt.Errorf("Error updating %s %s: %s", nameCESAR, lId, err)
-		}
-
-		return resourceAlarmRuleRead(d, meta)
-	*/
+	return resourceAlarmRuleRead(d, meta)
 }
 
 func resourceAlarmRuleDelete(d *schema.ResourceData, meta interface{}) error {
-	/*
-		config := meta.(*Config)
-		client, err := chooseCESClient(d, config)
+	config := meta.(*Config)
+	client, err := chooseCESClient(d, config)
+	if err != nil {
+		return fmt.Errorf("Error creating Cloud Eye Service client: %s", err)
+	}
+
+	arId := d.Id()
+	log.Printf("[DEBUG] Deleting %s %s", nameCESAR, arId)
+
+	timeout := d.Timeout(schema.TimeoutDelete)
+	err = resource.Retry(timeout, func() *resource.RetryError {
+		err := alarmrule.Delete(client, arId).ExtractErr()
 		if err != nil {
-			return fmt.Errorf("Error creating Cloud Eye Service client: %s", err)
+			return checkForRetryableError(err)
 		}
-
-		lId := d.Id()
-		log.Printf("[DEBUG] Deleting %s %s", nameCESAR, lId)
-
-		timeout := d.Timeout(schema.TimeoutDelete)
-		err = resource.Retry(timeout, func() *resource.RetryError {
-			err := alarmrule.Delete(client, lId).ExtractErr()
-			if err != nil {
-				return checkForRetryableError(err)
-			}
+		return nil
+	})
+	if err != nil {
+		if isCESResourceNotFound(err) {
+			log.Printf("[INFO] deleting an unavailable %s: %s", nameCESAR, arId)
 			return nil
-		})
-		if err != nil {
-			if isELBResourceNotFound(err) {
-				log.Printf("[INFO] deleting an unavailable %s: %s", nameCESAR, lId)
-				return nil
-			}
-			return fmt.Errorf("Error deleting %s %s: %s", nameCESAR, lId, err)
 		}
+		return fmt.Errorf("Error deleting %s %s: %s", nameCESAR, arId, err)
+	}
 
-	*/
 	return nil
 }

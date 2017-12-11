@@ -15,3 +15,7 @@ func rootURL(c *gophercloud.ServiceClient) string {
 func resourceURL(c *gophercloud.ServiceClient, id string) string {
 	return c.ServiceURL(rootPath, resourcePath, id)
 }
+
+func actionURL(c *gophercloud.ServiceClient, id string) string {
+	return c.ServiceURL(rootPath, resourcePath, id, "action")
+}

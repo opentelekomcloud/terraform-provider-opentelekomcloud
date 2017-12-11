@@ -14,18 +14,18 @@ type CreateOptsBuilder interface {
 	ToAlarmRuleCreateMap() (map[string]interface{}, error)
 }
 
-type dimensionOpts struct {
+type DimensionOpts struct {
 	Name  string `json:"name" required:"true"`
 	Value string `json:"value" required:"true"`
 }
 
-type metricOpts struct {
+type MetricOpts struct {
 	Namespace  string          `json:"namespace" required:"true"`
 	MetricName string          `json:"metric_name" required:"true"`
-	Dimensions []dimensionOpts `json:"dimensions" required:"true"`
+	Dimensions []DimensionOpts `json:"dimensions" required:"true"`
 }
 
-type conditionOpts struct {
+type ConditionOpts struct {
 	Period             int    `json:"period" required:"true"`
 	Filter             string `json:"filter" required:"true"`
 	ComparisonOperator string `json:"comparison_operator" required:"true"`
@@ -34,7 +34,7 @@ type conditionOpts struct {
 	Count              int    `json:"count" required:"true"`
 }
 
-type actionOpts struct {
+type ActionOpts struct {
 	Type             string   `json:"type" required:"true"`
 	NotificationList []string `json:"notification_list" required:"true"`
 }
@@ -44,11 +44,11 @@ type actionOpts struct {
 type CreateOpts struct {
 	AlarmName               string        `json:"alarm_name" required:"true"`
 	AlarmDescription        string        `json:"alarm_description,omitempty"`
-	Metric                  metricOpts    `json:"metric" required:"true"`
-	Condition               conditionOpts `json:"condition" required:"true"`
-	AlarmActions            []actionOpts  `json:"alarm_actions,omitempty"`
-	InsufficientdataActions []actionOpts  `json:"insufficientdata_actions,omitempty"`
-	OkActions               []actionOpts  `json:"ok_actions,omitempty"`
+	Metric                  MetricOpts    `json:"metric" required:"true"`
+	Condition               ConditionOpts `json:"condition" required:"true"`
+	AlarmActions            []ActionOpts  `json:"alarm_actions,omitempty"`
+	InsufficientdataActions []ActionOpts  `json:"insufficientdata_actions,omitempty"`
+	OkActions               []ActionOpts  `json:"ok_actions,omitempty"`
 	AlarmEnabled            bool          `json:"alarm_enabled,omitempty"`
 	AlarmActionEnabled      bool          `json:"alarm_action_enabled,omitempty"`
 }
@@ -65,13 +65,13 @@ type realActionOpts struct {
 type createOpts struct {
 	AlarmName               string           `json:"alarm_name" required:"true"`
 	AlarmDescription        string           `json:"alarm_description,omitempty"`
-	Metric                  metricOpts       `json:"metric" required:"true"`
-	Condition               conditionOpts    `json:"condition" required:"true"`
+	Metric                  MetricOpts       `json:"metric" required:"true"`
+	Condition               ConditionOpts    `json:"condition" required:"true"`
 	AlarmActions            []realActionOpts `json:"alarm_actions,omitempty"`
 	InsufficientdataActions []realActionOpts `json:"insufficientdata_actions,omitempty"`
 	OkActions               []realActionOpts `json:"ok_actions,omitempty"`
-	AlarmEnabled            bool             `json:"alarm_enabled,omitempty"`
-	AlarmActionEnabled      bool             `json:"alarm_action_enabled,omitempty"`
+	AlarmEnabled            bool             `json:"alarm_enabled"`
+	AlarmActionEnabled      bool             `json:"alarm_action_enabled"`
 }
 
 // ToAlarmRuleCreateMap casts a CreateOpts struct to a map.
@@ -79,7 +79,7 @@ func (opts createOpts) ToAlarmRuleCreateMap() (map[string]interface{}, error) {
 	return gophercloud.BuildRequestBody(opts, "")
 }
 
-func copyActionOpts(src []actionOpts) []realActionOpts {
+func copyActionOpts(src []ActionOpts) []realActionOpts {
 	if len(src) == 0 {
 		return nil
 	}
@@ -142,15 +142,7 @@ type UpdateOptsBuilder interface {
 // UpdateOpts is the common options struct used in this package's Update
 // operation.
 type UpdateOpts struct {
-	// Optional. Human-readable name for the Loadbalancer. Does not have to be unique.
-	Name string `json:"name,omitempty"`
-	// Optional. Human-readable description for the Loadbalancer.
-	Description string `json:"description,omitempty"`
-
-	BandWidth int `json:"bandwidth,omitempty"`
-	// Optional. The administrative state of the Loadbalancer. A valid value is true (UP)
-	// or false (DOWN).
-	AdminStateUp bool `json:"admin_state_up,omitempty"`
+	AlarmEnabled bool `json:"alarm_enabled"`
 }
 
 // ToAlarmRuleUpdateMap casts a UpdateOpts struct to a map.
@@ -158,24 +150,22 @@ func (opts UpdateOpts) ToAlarmRuleUpdateMap() (map[string]interface{}, error) {
 	return gophercloud.BuildRequestBody(opts, "")
 }
 
-/*
 // Update is an operation which modifies the attributes of the specified AlarmRule.
-func Update(c *gophercloud.ServiceClient, id string, opts UpdateOpts) (r elb.JobResult) {
+func Update(c *gophercloud.ServiceClient, id string, opts UpdateOpts) (r UpdateResult) {
 	b, err := opts.ToAlarmRuleUpdateMap()
 	if err != nil {
 		r.Err = err
 		return
 	}
-	_, r.Err = c.Put(resourceURL(c, id), b, &r.Body, &gophercloud.RequestOpts{
-		OkCodes: []int{200},
+	_, r.Err = c.Put(actionURL(c, id), b, nil, &gophercloud.RequestOpts{
+		OkCodes: []int{204},
 	})
 	return
 }
 
 // Delete will permanently delete a particular AlarmRule based on its unique ID.
-func Delete(c *gophercloud.ServiceClient, id string) (r elb.JobResult) {
-	reqOpt := &gophercloud.RequestOpts{OkCodes: []int{200}}
-	_, r.Err = c.DeleteAndGetResponse(resourceURL(c, id), &r.Body, reqOpt)
+func Delete(c *gophercloud.ServiceClient, id string) (r DeleteResult) {
+	reqOpt := &gophercloud.RequestOpts{OkCodes: []int{204}}
+	_, r.Err = c.Delete(resourceURL(c, id), reqOpt)
 	return
 }
-*/
