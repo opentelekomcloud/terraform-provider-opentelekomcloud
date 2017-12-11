@@ -158,11 +158,11 @@ func resourceAlarmRule() *schema.Resource {
 							ValidateFunc: func(v interface{}, k string) (ws []string, errors []error) {
 								value := v.(string)
 								switch value {
-								case "Max":
-								case "Min":
+								case "max":
+								case "min":
 								case "average":
-								case "Sum":
-								case "Variance":
+								case "sum":
+								case "variance":
 								default:
 									errors = append(errors, fmt.Errorf("%s can be Max, Min, average, Sum, Variance", k))
 								}
