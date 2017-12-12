@@ -476,10 +476,17 @@ func resourceComputeInstanceV2Create(d *schema.ResourceData, meta interface{}) e
 	}
 
 	taglist := resourceBuildTags(d.Get("tags").(*schema.Set).List())
+	log.Printf("[DEBUG] Setting taglist: %v", taglist)
 	if len(taglist) > 0 {
 		_, err := CreateServerTags(computeClient, d.Id(), taglist)
 		if err != nil {
 			return fmt.Errorf("Error creating tags for instance (%s): %s", d.Id(), err)
+		}
+	} else {
+		log.Printf("[DEBUG] Ensuring deleted initial taglist for instance (%s)", d.Id())
+		err := DeleteServerTags(computeClient, d.Id())
+		if err != nil {
+			return fmt.Errorf("Error deleting tags for instance (%s): %s", d.Id(), err)
 		}
 	}
 
