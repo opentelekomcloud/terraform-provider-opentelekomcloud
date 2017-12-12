@@ -311,7 +311,7 @@ func NewImageServiceV2(client *gophercloud.ProviderClient, eo gophercloud.Endpoi
 
 func NewCESClient(client *gophercloud.ProviderClient, eo gophercloud.EndpointOpts) (*gophercloud.ServiceClient, error) {
 	sc, err := initClientOpts(client, eo, "ces")
-	e := strings.Replace(sc.Endpoint, "v2", "V1.0", 1)
+	e := strings.Replace(sc.Endpoint, "v1", "V1.0", 1)
 	sc.Endpoint = e
 	sc.ResourceBase = e
 	//sc.ResourceBase = sc.Endpoint
