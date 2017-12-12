@@ -7,10 +7,6 @@ import (
 	"github.com/gophercloud/gophercloud"
 )
 
-// CreateOptsBuilder is the interface options structs have to satisfy in order
-// to be used in the main Create operation in this package. Since many
-// extensions decorate or modify the common logic, it is useful for them to
-// satisfy a basic interface in order for them to be used.
 type CreateOptsBuilder interface {
 	ToAlarmRuleCreateMap() (map[string]interface{}, error)
 }
@@ -40,8 +36,6 @@ type ActionOpts struct {
 	NotificationList []string `json:"notification_list" required:"true"`
 }
 
-// CreateOpts is the common options struct used in this package's Create
-// operation.
 type CreateOpts struct {
 	AlarmName               string        `json:"alarm_name" required:"true"`
 	AlarmDescription        string        `json:"alarm_description,omitempty"`
@@ -75,7 +69,6 @@ type createOpts struct {
 	AlarmActionEnabled      bool             `json:"alarm_action_enabled"`
 }
 
-// ToAlarmRuleCreateMap casts a CreateOpts struct to a map.
 func (opts createOpts) ToAlarmRuleCreateMap() (map[string]interface{}, error) {
 	return gophercloud.BuildRequestBody(opts, "")
 }
@@ -95,13 +88,6 @@ func copyActionOpts(src []ActionOpts) []realActionOpts {
 	return dest
 }
 
-// Create is an operation which provisions a new loadbalancer based on the
-// configuration defined in the CreateOpts struct. Once the request is
-// validated and progress has started on the provisioning process, a
-// CreateResult will be returned.
-//
-// Users with an admin role can create loadbalancers on behalf of other tenants by
-// specifying a TenantID attribute different than their own.
 func Create(c *gophercloud.ServiceClient, opts CreateOptsBuilder) (r CreateResult) {
 	opt := opts.(CreateOpts)
 	opts1 := createOpts{
@@ -126,40 +112,27 @@ func Create(c *gophercloud.ServiceClient, opts CreateOptsBuilder) (r CreateResul
 	return
 }
 
-// Get retrieves a particular Loadbalancer based on its unique ID.
 func Get(c *gophercloud.ServiceClient, id string) (r GetResult) {
 	_, r.Err = c.Get(resourceURL(c, id), &r.Body, nil)
 	return
 }
 
-// UpdateOptsBuilder is the interface options structs have to satisfy in order
-// to be used in the main Update operation in this package. Since many
-// extensions decorate or modify the common logic, it is useful for them to
-// satisfy a basic interface in order for them to be used.
 type UpdateOptsBuilder interface {
 	ToAlarmRuleUpdateMap() (map[string]interface{}, error)
 }
 
-// UpdateOpts is the common options struct used in this package's Update
-// operation.
 type UpdateOpts struct {
 	AlarmEnabled bool `json:"alarm_enabled"`
 }
 
-// ToAlarmRuleUpdateMap casts a UpdateOpts struct to a map.
 func (opts UpdateOpts) ToAlarmRuleUpdateMap() (map[string]interface{}, error) {
 	return gophercloud.BuildRequestBody(opts, "")
 }
 
-// Update is an operation which modifies the attributes of the specified AlarmRule.
 func Update(c *gophercloud.ServiceClient, id string, opts UpdateOpts) (r UpdateResult) {
 	b, err := opts.ToAlarmRuleUpdateMap()
 	if err != nil {
 		r.Err = err
-		return
-	}
-	if len(b) == 0 {
-		log.Printf("[DEBUG] nothing to update")
 		return
 	}
 	_, r.Err = c.Put(actionURL(c, id), b, nil, &gophercloud.RequestOpts{
@@ -168,7 +141,6 @@ func Update(c *gophercloud.ServiceClient, id string, opts UpdateOpts) (r UpdateR
 	return
 }
 
-// Delete will permanently delete a particular AlarmRule based on its unique ID.
 func Delete(c *gophercloud.ServiceClient, id string) (r DeleteResult) {
 	reqOpt := &gophercloud.RequestOpts{OkCodes: []int{204}}
 	_, r.Err = c.Delete(resourceURL(c, id), reqOpt)

@@ -55,6 +55,7 @@ func resourceAlarmRule() *schema.Resource {
 			"metric": &schema.Schema{
 				Type:     schema.TypeList,
 				Required: true,
+				MaxItems: 1,
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
 						"namespace": &schema.Schema{
@@ -86,14 +87,7 @@ func resourceAlarmRule() *schema.Resource {
 						"dimensions": &schema.Schema{
 							Type:     schema.TypeList,
 							Required: true,
-							/*
-								ValidateFunc: func(v interface{}, k string) (ws []string, errors []error) {
-									value := v.([]interface{})
-									if len(value) > 3 {
-										errors = append(errors, fmt.Errorf("The max number of %s is 3", k))
-									}
-									return
-								},*/
+							MaxItems: 3,
 							Elem: &schema.Resource{
 								Schema: map[string]*schema.Schema{
 									"name": &schema.Schema{
@@ -131,6 +125,7 @@ func resourceAlarmRule() *schema.Resource {
 			"condition": &schema.Schema{
 				Type:     schema.TypeList,
 				Required: true,
+				MaxItems: 1,
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
 						"period": &schema.Schema{
@@ -243,15 +238,8 @@ func resourceAlarmRule() *schema.Resource {
 						"notification_list": &schema.Schema{
 							Type:     schema.TypeList,
 							Required: true,
-							/*
-								ValidateFunc: func(v interface{}, k string) (ws []string, errors []error) {
-									value := v.([]string)
-									if len(value) > 5 {
-										errors = append(errors, fmt.Errorf("The max number of %s is 5", k))
-									}
-									return
-								},*/
-							Elem: &schema.Schema{Type: schema.TypeString},
+							MaxItems: 5,
+							Elem:     &schema.Schema{Type: schema.TypeString},
 						},
 					},
 				},
@@ -280,15 +268,8 @@ func resourceAlarmRule() *schema.Resource {
 						"notification_list": &schema.Schema{
 							Type:     schema.TypeList,
 							Required: true,
-							/*
-								ValidateFunc: func(v interface{}, k string) (ws []string, errors []error) {
-									value := v.([]string)
-									if len(value) > 5 {
-										errors = append(errors, fmt.Errorf("The max number of %s is 5", k))
-									}
-									return
-								},*/
-							Elem: &schema.Schema{Type: schema.TypeString},
+							MaxItems: 5,
+							Elem:     &schema.Schema{Type: schema.TypeString},
 						},
 					},
 				},
@@ -317,15 +298,8 @@ func resourceAlarmRule() *schema.Resource {
 						"notification_list": &schema.Schema{
 							Type:     schema.TypeList,
 							Required: true,
-							/*
-								ValidateFunc: func(v interface{}, k string) (ws []string, errors []error) {
-									value := v.([]string)
-									if len(value) > 5 {
-										errors = append(errors, fmt.Errorf("The max number of %s is 5", k))
-									}
-									return
-								},*/
-							Elem: &schema.Schema{Type: schema.TypeString},
+							MaxItems: 5,
+							Elem:     &schema.Schema{Type: schema.TypeString},
 						},
 					},
 				},
@@ -380,7 +354,6 @@ func resourceAlarmRuleCreate(d *schema.ResourceData, meta interface{}) error {
 	}
 	log.Printf("[DEBUG] Create %s: %#v", nameCESAR, *r)
 
-	// If all has been successful, set the ID on the resource
 	d.SetId(r.AlarmID)
 
 	return resourceAlarmRuleRead(d, meta)

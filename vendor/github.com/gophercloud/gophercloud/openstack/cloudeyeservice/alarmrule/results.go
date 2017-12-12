@@ -15,7 +15,6 @@ type CreateResult struct {
 	gophercloud.Result
 }
 
-// Extract is a function that accepts a result and extracts a router.
 func (c CreateResult) Extract() (*CreateResponse, error) {
 	r := &CreateResponse{}
 	return r, c.ExtractInto(r)
@@ -99,7 +98,6 @@ type GetResult struct {
 	gophercloud.Result
 }
 
-// Extract is a function that accepts a result and extracts a router.
 func (g GetResult) Extract() (*AlarmRule, error) {
 	var r struct {
 		MetricAlarms []alarmRule `json:"metric_alarms"`

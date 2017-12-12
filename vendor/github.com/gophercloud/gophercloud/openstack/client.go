@@ -2,7 +2,6 @@ package openstack
 
 import (
 	"fmt"
-	"log"
 	"net/url"
 	"reflect"
 
@@ -173,7 +172,6 @@ func v3auth(client *gophercloud.ProviderClient, endpoint string, opts tokens3.Au
 		return err
 	}
 
-	log.Printf("[DEBUG] catalog = %#v\n", catalog)
 	client.TokenID = token.ID
 	client.ProjectID = project.ID
 
