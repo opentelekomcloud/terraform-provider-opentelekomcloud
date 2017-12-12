@@ -310,6 +310,13 @@ func (c *Config) otcV1Client(region string) (*gophercloud.ServiceClient, error) 
 	}, "elb")
 }
 
+func (c *Config) otcSmnV2Client(region string) (*gophercloud.ServiceClient, error) {
+	return openstack.NewSmnServiceV2(c.OsClient, gophercloud.EndpointOpts{
+		Region:       c.determineRegion(region),
+		Availability: c.getEndpointType(),
+	})
+}
+
 func (c *Config) getEndpointType() gophercloud.Availability {
 	if c.EndpointType == "internal" || c.EndpointType == "internalURL" {
 		return gophercloud.AvailabilityInternal
