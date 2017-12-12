@@ -132,6 +132,7 @@ func v2auth(client *gophercloud.ProviderClient, endpoint string, options gopherc
 		}
 	}
 	client.TokenID = token.ID
+	client.ProjectID = token.Tenant.ID
 	client.EndpointLocator = func(opts gophercloud.EndpointOpts) (string, error) {
 		return V2EndpointURL(catalog, opts)
 	}
@@ -162,6 +163,11 @@ func v3auth(client *gophercloud.ProviderClient, endpoint string, opts tokens3.Au
 		return err
 	}
 
+	project, err := result.ExtractProject()
+	if err != nil {
+		return err
+	}
+
 	catalog, err := result.ExtractServiceCatalog()
 	if err != nil {
 		return err
@@ -169,6 +175,7 @@ func v3auth(client *gophercloud.ProviderClient, endpoint string, opts tokens3.Au
 
 	log.Printf("[DEBUG] catalog = %#v\n", catalog)
 	client.TokenID = token.ID
+	client.ProjectID = project.ID
 
 	if opts.CanReauth() {
 		client.ReauthFunc = func() error {
@@ -311,9 +318,6 @@ func NewImageServiceV2(client *gophercloud.ProviderClient, eo gophercloud.Endpoi
 
 func NewCESClient(client *gophercloud.ProviderClient, eo gophercloud.EndpointOpts) (*gophercloud.ServiceClient, error) {
 	sc, err := initClientOpts(client, eo, "ces")
-	e := strings.Replace(sc.Endpoint, "v1", "V1.0", 1)
-	sc.Endpoint = e
-	sc.ResourceBase = e
-	//sc.ResourceBase = sc.Endpoint
+	sc.ResourceBase = sc.Endpoint
 	return sc, err
 }
