@@ -198,6 +198,8 @@ func Provider() terraform.ResourceProvider {
 			"opentelekomcloud_elb_listener":                    resourceEListener(),
 			"opentelekomcloud_elb_backend":                     resourceBackend(),
 			"opentelekomcloud_elb_health":                      resourceHealth(),
+			"opentelekomcloud_smn_topic_v2":                    resourceTopic(),
+			"opentelekomcloud_smn_subscription_v2":             resourceSubscription(),
 		},
 
 		ConfigureFunc: configureProvider,
