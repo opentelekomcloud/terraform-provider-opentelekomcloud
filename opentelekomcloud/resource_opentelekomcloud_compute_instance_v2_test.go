@@ -449,16 +449,20 @@ func testAccCheckComputeV2InstanceTags(
 			return err
 		}
 
-		if len(taglist2.Tags) != 2 {
-			return fmt.Errorf("Tags length not correct: %d, expected 2", len(taglist2.Tags))
+		// Hack check for tags, need to do set equality and filter out network name...
+		tagmap := map[string]bool{}
+		for _, tag := range taglist2.Tags {
+			tagmap[tag] = true
 		}
-		if taglist2.Tags[0] != tag1 {
-			return fmt.Errorf("Unexpected tag: %s, expected %s", taglist2.Tags[0], tag1)
 
+		if !tagmap[tag1] {
+			return fmt.Errorf("Missing tag %s", tag1)
 		}
-		if taglist2.Tags[1] != tag2 {
-			return fmt.Errorf("Unexpected tag: %s, expected %s", taglist2.Tags[1], tag2)
-
+		if !tagmap[tag2] {
+			return fmt.Errorf("Missing tag %s", tag1)
+		}
+		if len(taglist2.Tags) < 2 || len(taglist2.Tags) > 3 {
+			return fmt.Errorf("Tags length not correct: %d", len(taglist2.Tags))
 		}
 
 		return nil

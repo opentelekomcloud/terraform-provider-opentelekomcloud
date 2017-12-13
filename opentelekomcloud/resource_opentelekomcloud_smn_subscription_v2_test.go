@@ -29,7 +29,7 @@ func TestAccSMNV2Subscription_basic(t *testing.T) {
 						"mailtest@gmail.com"),
 					resource.TestCheckResourceAttr(
 						"opentelekomcloud_smn_subscription_v2.subscription_2", "endpoint",
-						"13655714847"),
+						"13600000000"),
 				),
 			},
 		},

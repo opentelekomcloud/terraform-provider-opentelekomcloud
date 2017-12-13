@@ -475,18 +475,12 @@ func resourceComputeInstanceV2Create(d *schema.ResourceData, meta interface{}) e
 			server.ID, err)
 	}
 
-	taglist := resourceBuildTags(d.Get("tags").(*schema.Set).List())
+	taglist := resourceBuildTags(d)
 	log.Printf("[DEBUG] Setting taglist: %v", taglist)
 	if len(taglist) > 0 {
 		_, err := CreateServerTags(computeClient, d.Id(), taglist)
 		if err != nil {
 			return fmt.Errorf("Error creating tags for instance (%s): %s", d.Id(), err)
-		}
-	} else {
-		log.Printf("[DEBUG] Ensuring deleted initial taglist for instance (%s)", d.Id())
-		err := DeleteServerTags(computeClient, d.Id())
-		if err != nil {
-			return fmt.Errorf("Error deleting tags for instance (%s): %s", d.Id(), err)
 		}
 	}
 
@@ -597,6 +591,13 @@ func resourceComputeInstanceV2Read(d *schema.ResourceData, meta interface{}) err
 		return err
 	}
 	d.Set("tags", taglist.Tags)
+	// Filter out network name if it is in the list
+	tagset := d.Get("tags").(*schema.Set)
+	name := GetNetworkName(d)
+	if name != "" {
+		tagset.Remove(name)
+	}
+	d.Set("tags", tagset.List())
 
 	return nil
 }
@@ -616,13 +617,44 @@ func DeleteServerTags(client *gophercloud.ServiceClient, server_id string) error
 	return tags.Delete(client, server_id).ExtractErr()
 }
 
-func resourceBuildTags(v []interface{}) []string {
+func resourceBuildTags(d *schema.ResourceData) []string {
+	v := d.Get("tags").(*schema.Set).List()
 	var tags []string
+	/* name := GetNetworkName(d)
+	if name != "" {
+		tags = append(tags, name)
+	} */
 	for _, tag := range v {
 		tags = append(tags, tag.(string))
 	}
 
 	return tags
+}
+
+func GetNetworkName(d *schema.ResourceData) string {
+	//log.Printf("[DEBUG] GetNetworkName starting.")
+	if v, ok := d.GetOk("network"); ok {
+		//log.Printf("[DEBUG] GetNetworkName step 1.")
+		if networks, ok := v.([]interface{}); ok {
+			//log.Printf("[DEBUG] GetNetworkName step 2.")
+			if len(networks) > 0 {
+				//log.Printf("[DEBUG] GetNetworkName step 3.")
+				network := networks[0]
+				if network_map, ok := network.(map[string]interface{}); ok {
+					//log.Printf("[DEBUG] GetNetworkName step 4.")
+					if name, ok := network_map["name"]; ok {
+						//log.Printf("[DEBUG] GetNetworkName step 5.")
+						if sname, ok := name.(string); ok {
+							log.Printf("[DEBUG] GetNetworkName: %v", sname)
+							return sname
+						}
+					}
+				}
+			}
+		}
+	}
+	log.Printf("[DEBUG] GetNetworkName missing.")
+	return ""
 }
 
 func resourceComputeInstanceV2Update(d *schema.ResourceData, meta interface{}) error {
@@ -786,8 +818,9 @@ func resourceComputeInstanceV2Update(d *schema.ResourceData, meta interface{}) e
 	}
 
 	if d.HasChange("tags") {
-		taglist := resourceBuildTags(d.Get("tags").(*schema.Set).List())
+		taglist := resourceBuildTags(d)
 		log.Printf("[DEBUG] Setting tags to %v", taglist)
+
 		if len(taglist) == 0 {
 			err := DeleteServerTags(computeClient, d.Id())
 			if err != nil {
