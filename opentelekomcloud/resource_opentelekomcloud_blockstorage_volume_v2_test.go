@@ -42,6 +42,30 @@ func TestAccBlockStorageV2Volume_basic(t *testing.T) {
 	})
 }
 
+func TestAccBlockStorageV2Volume_tags(t *testing.T) {
+	resource.Test(t, resource.TestCase{
+		PreCheck:     func() { testAccPreCheck(t) },
+		Providers:    testAccProviders,
+		CheckDestroy: testAccCheckBlockStorageV2VolumeDestroy,
+		Steps: []resource.TestStep{
+			resource.TestStep{
+				Config: testAccBlockStorageV2Volume_tags,
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckBlockStorageV2VolumeTags("opentelekomcloud_blockstorage_volume_v2.volume_1", "foo", "bar"),
+					testAccCheckBlockStorageV2VolumeTags("opentelekomcloud_blockstorage_volume_v2.volume_1", "key", "value"),
+				),
+			},
+			resource.TestStep{
+				Config: testAccBlockStorageV2Volume_tags_update,
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckBlockStorageV2VolumeTags("opentelekomcloud_blockstorage_volume_v2.volume_1", "foo2", "bar2"),
+					testAccCheckBlockStorageV2VolumeTags("opentelekomcloud_blockstorage_volume_v2.volume_1", "key2", "value2"),
+				),
+			},
+		},
+	})
+}
+
 // PASS
 func TestAccBlockStorageV2Volume_image(t *testing.T) {
 	var volume volumes.Volume
@@ -178,6 +202,49 @@ func testAccCheckBlockStorageV2VolumeMetadata(
 	}
 }
 
+func testAccCheckBlockStorageV2VolumeTags(n string, k string, v string) resource.TestCheckFunc {
+	return func(s *terraform.State) error {
+		rs, ok := s.RootModule().Resources[n]
+		if !ok {
+			return fmt.Errorf("Not found: %s", n)
+		}
+
+		if rs.Primary.ID == "" {
+			return fmt.Errorf("No ID is set")
+		}
+
+		config := testAccProvider.Meta().(*Config)
+		blockStorageClient, err := config.blockStorageV2Client(OS_REGION_NAME)
+		if err != nil {
+			return fmt.Errorf("Error creating OpenTelekomCloud block storage client: %s", err)
+		}
+
+		found, err := volumes.Get(blockStorageClient, rs.Primary.ID).Extract()
+		if err != nil {
+			return err
+		}
+
+		if found.ID != rs.Primary.ID {
+			return fmt.Errorf("Volume not found")
+		}
+
+		taglist, err := GetVolumeTags(blockStorageClient, "volumes", found.ID)
+		for key, value := range taglist.Tags {
+			if k != key {
+				continue
+			}
+
+			if v == value {
+				return nil
+			}
+
+			return fmt.Errorf("Bad value for %s: %s", k, value)
+		}
+
+		return fmt.Errorf("Tag not found: %s", k)
+	}
+}
+
 const testAccBlockStorageV2Volume_basic = `
 resource "opentelekomcloud_blockstorage_volume_v2" "volume_1" {
   name = "volume_1"
@@ -195,6 +262,36 @@ resource "opentelekomcloud_blockstorage_volume_v2" "volume_1" {
   description = "first test volume"
   metadata {
     foo = "bar"
+  }
+  size = 1
+}
+`
+
+const testAccBlockStorageV2Volume_tags = `
+resource "opentelekomcloud_blockstorage_volume_v2" "volume_1" {
+  name = "volume_1"
+  description = "first test volume"
+  metadata {
+    foo = "bar"
+  }
+  tags {
+    foo = "bar"
+	key = "value"
+  }
+  size = 1
+}
+`
+
+const testAccBlockStorageV2Volume_tags_update = `
+resource "opentelekomcloud_blockstorage_volume_v2" "volume_1" {
+  name = "volume_1-updated"
+  description = "first test volume"
+  metadata {
+    foo = "bar"
+  }
+  tags {
+    foo2 = "bar2"
+	key2 = "value2"
   }
   size = 1
 }
