@@ -3,11 +3,11 @@ package gophercloud
 import (
 	"bytes"
 	"encoding/json"
-	//"fmt"
 	"io"
 	"io/ioutil"
 	"net/http"
 	"strings"
+	//"fmt"
 	//"reflect"
 )
 
@@ -54,6 +54,9 @@ type ProviderClient struct {
 
 	// TokenID is the ID of the most recently issued valid token.
 	TokenID string
+
+	// ProjectID is the ID of project to which User is authorized.
+	ProjectID string
 
 	// EndpointLocator describes how this provider discovers the endpoints for
 	// its constituent services.
@@ -117,6 +120,7 @@ func (client *ProviderClient) Request(method, url string, options *RequestOpts) 
 	//fmt.Printf("Request method: %s, url: %s, options=%+v.\n", method, url, options)
 	// Derive the content body by either encoding an arbitrary object as JSON, or by taking a provided
 	// io.ReadSeeker as-is. Default the content-type to application/json.
+	//fmt.Printf("Request: %s, %s, %+v.\n", method, url, options)
 	if options.JSONBody != nil {
 		if options.RawBody != nil {
 			panic("Please provide only one of JSONBody or RawBody to gophercloud.Request().")
@@ -137,6 +141,7 @@ func (client *ProviderClient) Request(method, url string, options *RequestOpts) 
 	}
 
 	// Construct the http.Request.
+	//fmt.Printf("Request NewRequest...\n")
 	req, err := http.NewRequest(method, url, body)
 	if err != nil {
 		return nil, err
@@ -170,6 +175,7 @@ func (client *ProviderClient) Request(method, url string, options *RequestOpts) 
 	req.Close = true
 
 	// Issue the request.
+	//fmt.Printf("Request Do...\n")
 	resp, err := client.HTTPClient.Do(req)
 	if err != nil {
 		return nil, err
@@ -192,6 +198,7 @@ func (client *ProviderClient) Request(method, url string, options *RequestOpts) 
 	if !ok {
 		body, _ := ioutil.ReadAll(resp.Body)
 		resp.Body.Close()
+		//fmt.Printf("Error body: %s.\n", body)
 		//pc := make([]uintptr, 1)
 		//runtime.Callers(2, pc)
 		//f := runtime.FuncForPC(pc[0])
@@ -292,7 +299,7 @@ func (client *ProviderClient) Request(method, url string, options *RequestOpts) 
 			return nil, err
 		}
 		//rv := reflect.ValueOf(options.JSONResponse)
-		//fmt.Printf("JSON OK: JSONResponse=%+v.\n", reflect.Indirect(rv))
+		//fmt.Printf("JSON OK: JSONResponse=%+v, body=%s.\n", reflect.Indirect(rv), body)
 	}
 
 	//body2, _ := ioutil.ReadAll(resp.Body)

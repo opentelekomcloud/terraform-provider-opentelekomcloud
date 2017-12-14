@@ -108,6 +108,25 @@ func (client *ServiceClient) Delete(url string, opts *RequestOpts) (*http.Respon
 	return client.Request("DELETE", url, opts)
 }
 
+// Delete calls `Request` with the "DELETE" HTTP verb.
+func (client *ServiceClient) Delete0(url string, opts *RequestOpts) (*http.Response, error) {
+	if opts == nil {
+		opts = new(RequestOpts)
+	}
+	JSONResponse := new(interface{})
+	client.initReqOpts(url, nil, JSONResponse, opts)
+	return client.Request("DELETE", url, opts)
+}
+
+// Delete calls `Request` with the "DELETE" HTTP verb.
+func (client *ServiceClient) Delete2(url string, JSONResponse interface{}, opts *RequestOpts) (*http.Response, error) {
+	if opts == nil {
+		opts = new(RequestOpts)
+	}
+	client.initReqOpts(url, nil, JSONResponse, opts)
+	return client.Request("DELETE", url, opts)
+}
+
 func (client *ServiceClient) setMicroversionHeader(opts *RequestOpts) {
 	switch client.Type {
 	case "compute":

@@ -65,3 +65,11 @@ variable "flavor_name" {
 variable "image_name" {
   default = "Standard_CentOS_7_latest"
 }
+
+variable "endpoint_email" {
+  default = "mailtest@gmail.com"
+}
+
+variable "endpoint_sms" {
+  default = "+8613600000000"
+}

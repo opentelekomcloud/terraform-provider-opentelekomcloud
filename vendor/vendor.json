@@ -213,12 +213,6 @@
 			"versionExact": "v1.8.34"
 		},
 		{
-			"checksumSHA1": "ghbxjcdNkRhKk9lpsV2VHUrbXRk=",
-			"path": "github.com/aws/aws-sdk-go/private/protocol/restjson",
-			"revision": "f93b927be230712e3587ed606bba8f43e340c4ca",
-			"revisionTime": "2017-09-25T21:39:39Z"
-		},
-		{
 			"checksumSHA1": "ODo+ko8D6unAxZuN1jGzMcN4QCc=",
 			"path": "github.com/aws/aws-sdk-go/private/protocol/restxml",
 			"revision": "be4fa13e47938e4801fada8c8ca3d1867ad3dcb3",
@@ -241,48 +235,6 @@
 			"versionExact": "v1.8.34"
 		},
 		{
-			"checksumSHA1": "+ip/THT7ngOZ1S7RxeBOIhQt7sA=",
-			"path": "github.com/aws/aws-sdk-go/service/apigateway",
-			"revision": "f93b927be230712e3587ed606bba8f43e340c4ca",
-			"revisionTime": "2017-09-25T21:39:39Z"
-		},
-		{
-			"checksumSHA1": "eudoAl5P0HqsQrzytWyb9uhUGU0=",
-			"path": "github.com/aws/aws-sdk-go/service/autoscaling",
-			"revision": "f93b927be230712e3587ed606bba8f43e340c4ca",
-			"revisionTime": "2017-09-25T21:39:39Z"
-		},
-		{
-			"checksumSHA1": "Z6mv349IWcg2A8ib0BuOiCJ6X8Q=",
-			"path": "github.com/aws/aws-sdk-go/service/cloudformation",
-			"revision": "f93b927be230712e3587ed606bba8f43e340c4ca",
-			"revisionTime": "2017-09-25T21:39:39Z"
-		},
-		{
-			"checksumSHA1": "SGbv4ySdQtVIE7WJ+5HcNyWkbNY=",
-			"path": "github.com/aws/aws-sdk-go/service/cloudwatchlogs",
-			"revision": "f93b927be230712e3587ed606bba8f43e340c4ca",
-			"revisionTime": "2017-09-25T21:39:39Z"
-		},
-		{
-			"checksumSHA1": "7bm1eOY2oKYSesmEOd1qXvTRH2s=",
-			"path": "github.com/aws/aws-sdk-go/service/cognitoidentity",
-			"revision": "f93b927be230712e3587ed606bba8f43e340c4ca",
-			"revisionTime": "2017-09-25T21:39:39Z"
-		},
-		{
-			"checksumSHA1": "Ryg2zV9xVlpTF1GVbP5GlYbynOc=",
-			"path": "github.com/aws/aws-sdk-go/service/configservice",
-			"revision": "f93b927be230712e3587ed606bba8f43e340c4ca",
-			"revisionTime": "2017-09-25T21:39:39Z"
-		},
-		{
-			"checksumSHA1": "1O8BtYGfkXglIqgl/uxunrq3Djs=",
-			"path": "github.com/aws/aws-sdk-go/service/directoryservice",
-			"revision": "f93b927be230712e3587ed606bba8f43e340c4ca",
-			"revisionTime": "2017-09-25T21:39:39Z"
-		},
-		{
 			"checksumSHA1": "ycd0mxQjtWfbtlk+W2N7N6QdxFw=",
 			"path": "github.com/aws/aws-sdk-go/service/dynamodb",
 			"revision": "f93b927be230712e3587ed606bba8f43e340c4ca",
@@ -295,76 +247,10 @@
 			"revisionTime": "2017-09-25T21:39:39Z"
 		},
 		{
-			"checksumSHA1": "+Jyy6T5h4fYRUmU9EgV+ZtLNM80=",
-			"path": "github.com/aws/aws-sdk-go/service/ecs",
-			"revision": "f93b927be230712e3587ed606bba8f43e340c4ca",
-			"revisionTime": "2017-09-25T21:39:39Z"
-		},
-		{
-			"checksumSHA1": "4a4FO9D6RQluAwyYEW5H6p0Nz7I=",
-			"path": "github.com/aws/aws-sdk-go/service/elasticache",
-			"revision": "f93b927be230712e3587ed606bba8f43e340c4ca",
-			"revisionTime": "2017-09-25T21:39:39Z"
-		},
-		{
-			"checksumSHA1": "RzBRmfKefl+oBHDzrtsuxv8ycKE=",
-			"path": "github.com/aws/aws-sdk-go/service/elasticbeanstalk",
-			"revision": "f93b927be230712e3587ed606bba8f43e340c4ca",
-			"revisionTime": "2017-09-25T21:39:39Z"
-		},
-		{
-			"checksumSHA1": "OmI4Z8g4Z3HhVKXrXir69uRYb0Y=",
-			"path": "github.com/aws/aws-sdk-go/service/elasticsearchservice",
-			"revision": "f93b927be230712e3587ed606bba8f43e340c4ca",
-			"revisionTime": "2017-09-25T21:39:39Z"
-		},
-		{
-			"checksumSHA1": "sp5ZmzFBI5z1+kLkRoFjfm2GWuY=",
-			"path": "github.com/aws/aws-sdk-go/service/elb",
-			"revision": "f93b927be230712e3587ed606bba8f43e340c4ca",
-			"revisionTime": "2017-09-25T21:39:39Z"
-		},
-		{
-			"checksumSHA1": "Q3WXHwjJ0v6TWofDBLGN901nfi4=",
-			"path": "github.com/aws/aws-sdk-go/service/elbv2",
-			"revision": "f93b927be230712e3587ed606bba8f43e340c4ca",
-			"revisionTime": "2017-09-25T21:39:39Z"
-		},
-		{
 			"checksumSHA1": "a+tKLYUEM3ZftY52P2ywtIxlCxE=",
 			"path": "github.com/aws/aws-sdk-go/service/iam",
 			"revision": "a28db88bdcd87b7023011ebc987b155d6d52411b",
 			"revisionTime": "2017-10-17T21:13:06Z"
-		},
-		{
-			"checksumSHA1": "fE6Lygzxvif/yfo9bncKyRUCqs8=",
-			"path": "github.com/aws/aws-sdk-go/service/kinesis",
-			"revision": "f93b927be230712e3587ed606bba8f43e340c4ca",
-			"revisionTime": "2017-09-25T21:39:39Z"
-		},
-		{
-			"checksumSHA1": "FgTJtpUQGSjeh48IYaAiVfEdPCE=",
-			"path": "github.com/aws/aws-sdk-go/service/lambda",
-			"revision": "f93b927be230712e3587ed606bba8f43e340c4ca",
-			"revisionTime": "2017-09-25T21:39:39Z"
-		},
-		{
-			"checksumSHA1": "xzvIMHbwgPpK4IdmzG07rZvb5x8=",
-			"path": "github.com/aws/aws-sdk-go/service/rds",
-			"revision": "f93b927be230712e3587ed606bba8f43e340c4ca",
-			"revisionTime": "2017-09-25T21:39:39Z"
-		},
-		{
-			"checksumSHA1": "QTc65yhur4smpQrn9Zq2c0UboIo=",
-			"path": "github.com/aws/aws-sdk-go/service/redshift",
-			"revision": "f93b927be230712e3587ed606bba8f43e340c4ca",
-			"revisionTime": "2017-09-25T21:39:39Z"
-		},
-		{
-			"checksumSHA1": "NPzx/l1itzScNXXaxwxPM/TVqAs=",
-			"path": "github.com/aws/aws-sdk-go/service/route53",
-			"revision": "f93b927be230712e3587ed606bba8f43e340c4ca",
-			"revisionTime": "2017-09-25T21:39:39Z"
 		},
 		{
 			"checksumSHA1": "krqUUMDYRN2ohYcumxZl8BTR5EQ=",
@@ -375,24 +261,12 @@
 			"versionExact": "v1.8.34"
 		},
 		{
-			"checksumSHA1": "jCWrivRK+K+oW2ZW3sJSuBIBNjQ=",
-			"path": "github.com/aws/aws-sdk-go/service/ssm",
-			"revision": "f93b927be230712e3587ed606bba8f43e340c4ca",
-			"revisionTime": "2017-09-25T21:39:39Z"
-		},
-		{
 			"checksumSHA1": "VH5y62f+SDyEIqnTibiPtQ687i8=",
 			"path": "github.com/aws/aws-sdk-go/service/sts",
 			"revision": "be4fa13e47938e4801fada8c8ca3d1867ad3dcb3",
 			"revisionTime": "2017-06-02T18:54:01Z",
 			"version": "v1.8.34",
 			"versionExact": "v1.8.34"
-		},
-		{
-			"checksumSHA1": "vFinPalK+r0kaIbPMaHhFbTi2QQ=",
-			"path": "github.com/aws/aws-sdk-go/service/waf",
-			"revision": "f93b927be230712e3587ed606bba8f43e340c4ca",
-			"revisionTime": "2017-09-25T21:39:39Z"
 		},
 		{
 			"checksumSHA1": "nqw2Qn5xUklssHTubS5HDvEL9L4=",
@@ -426,10 +300,10 @@
 			"revisionTime": "2017-10-18T18:43:25Z"
 		},
 		{
-			"checksumSHA1": "TQ8kDcngYTatY8vUAPMc3xnALLg=",
+			"checksumSHA1": "6PqwA1boTJFClUjc9cMXmLLSJTs=",
 			"path": "github.com/gophercloud/gophercloud",
-			"revision": "f8ec1b3d8dea084885975d404872b37be20b3984",
-			"revisionTime": "2017-10-04T00:41:52Z"
+			"revision": "5a00c1c742bc7e3d29c4e49318e821289fd97623",
+			"revisionTime": "2017-12-08T04:44:24Z"
 		},
 		{
 			"checksumSHA1": "b7g9TcU1OmW7e2UySYeOAmcfHpY=",
@@ -442,6 +316,12 @@
 			"path": "github.com/gophercloud/gophercloud/openstack",
 			"revision": "f8ec1b3d8dea084885975d404872b37be20b3984",
 			"revisionTime": "2017-10-04T00:41:52Z"
+		},
+		{
+			"checksumSHA1": "Qvow3lLvRJ3AFMbixW7GZk7X19k=",
+			"path": "github.com/gophercloud/gophercloud/openstack/blockstorage/v2/tags",
+			"revision": "2903ee0dfbca98393c762d824d1bda66031f1247",
+			"revisionTime": "2017-12-13T04:15:48Z"
 		},
 		{
 			"checksumSHA1": "B4IXSmq364HcBruvvV0QjDFxZgc=",
@@ -498,6 +378,12 @@
 			"revisionTime": "2017-10-04T00:41:52Z"
 		},
 		{
+			"checksumSHA1": "BLDvfkgs1wCouMzMDzdr1bPpH/4=",
+			"path": "github.com/gophercloud/gophercloud/openstack/compute/v2/extensions/tags",
+			"revision": "19e3c0004e7056daf7509a160a019e7c2e5d99c5",
+			"revisionTime": "2017-12-09T23:33:19Z"
+		},
+		{
 			"checksumSHA1": "5JuziAp9BSRA/z+8pTjVLTWeTw4=",
 			"path": "github.com/gophercloud/gophercloud/openstack/compute/v2/extensions/tenantnetworks",
 			"revision": "f8ec1b3d8dea084885975d404872b37be20b3984",
@@ -552,20 +438,8 @@
 			"revisionTime": "2017-10-04T00:41:52Z"
 		},
 		{
-			"checksumSHA1": "3W2lBfZVEu3kf9Nq3KFnBwG76nw=",
-			"path": "github.com/gophercloud/gophercloud/openstack/identity/v3/projects",
-			"revision": "f8ec1b3d8dea084885975d404872b37be20b3984",
-			"revisionTime": "2017-10-04T00:41:52Z"
-		},
-		{
 			"checksumSHA1": "rqE0NwmQ9qhXADXxg3DcuZ4A3wk=",
 			"path": "github.com/gophercloud/gophercloud/openstack/identity/v3/tokens",
-			"revision": "f8ec1b3d8dea084885975d404872b37be20b3984",
-			"revisionTime": "2017-10-04T00:41:52Z"
-		},
-		{
-			"checksumSHA1": "2yPV4LFUX7BnrHUwOKPcRoH4X3A=",
-			"path": "github.com/gophercloud/gophercloud/openstack/identity/v3/users",
 			"revision": "f8ec1b3d8dea084885975d404872b37be20b3984",
 			"revisionTime": "2017-10-04T00:41:52Z"
 		},
@@ -1152,5 +1026,5 @@
 			"versionExact": "v1.6.1"
 		}
 	],
-	"rootPath": "github.com/khdegraaf/terraform-provider-opentelekomcloud"
+	"rootPath": "github.com/gator1/terraform-provider-opentelekomcloud"
 }

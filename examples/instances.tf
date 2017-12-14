@@ -11,6 +11,7 @@ resource "opentelekomcloud_compute_instance_v2" "webserver" {
   network {
     uuid           = "${opentelekomcloud_networking_network_v2.network.id}"
   }
+  tags = ["foo.bar", "tag.value"]
 }
 
 resource "opentelekomcloud_compute_volume_attach_v2" "volume_attach" {
