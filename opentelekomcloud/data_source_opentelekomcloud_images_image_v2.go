@@ -212,7 +212,9 @@ func dataSourceImagesImageV2Attributes(d *schema.ResourceData, image *images.Ima
 	d.Set("visibility", image.Visibility)
 	d.Set("checksum", image.Checksum)
 	d.Set("size_bytes", image.SizeBytes)
-	d.Set("metadata", image.Metadata)
+	if err := d.Set("metadata", image.Metadata); err != nil {
+		return fmt.Errorf("[DEBUG] Error saving metadata to state for OpenTelekomCloud image (%s): %s", d.Id(), err)
+	}
 	d.Set("created_at", image.CreatedAt)
 	d.Set("updated_at", image.UpdatedAt)
 	d.Set("file", image.File)

@@ -152,7 +152,9 @@ func dataSourceS3BucketObjectRead(d *schema.ResourceData, meta interface{}) erro
 	d.Set("expiration", out.Expiration)
 	d.Set("expires", out.Expires)
 	d.Set("last_modified", out.LastModified.Format(time.RFC1123))
-	d.Set("metadata", pointersMapToStringList(out.Metadata))
+	if err := d.Set("metadata", pointersMapToStringList(out.Metadata)); err != nil {
+		return fmt.Errorf("[DEBUG] Error saving metadata to state for OpenTelekomCloud S3 object (%s): %s", d.Id(), err)
+	}
 	d.Set("server_side_encryption", out.ServerSideEncryption)
 	d.Set("sse_kms_key_id", out.SSEKMSKeyId)
 	d.Set("version_id", out.VersionId)

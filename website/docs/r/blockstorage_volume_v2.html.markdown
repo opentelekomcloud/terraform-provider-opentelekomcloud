@@ -47,6 +47,9 @@ The following arguments are supported:
 * `metadata` - (Optional) Metadata key/value pairs to associate with the volume.
     Changing this updates the existing volume metadata.
 
+* `tags` - (Optional) Tags key/value pairs to associate with the volume.
+    Changing this updates the existing volume tags.
+
 * `name` - (Optional) A unique name for the volume. Changing this updates the
     volume's name.
 

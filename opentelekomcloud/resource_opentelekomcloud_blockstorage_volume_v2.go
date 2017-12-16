@@ -7,6 +7,7 @@ import (
 	"time"
 
 	"github.com/gophercloud/gophercloud"
+	"github.com/gophercloud/gophercloud/openstack/blockstorage/v2/tags"
 	"github.com/gophercloud/gophercloud/openstack/blockstorage/v2/volumes"
 	"github.com/gophercloud/gophercloud/openstack/compute/v2/extensions/volumeattach"
 	"github.com/hashicorp/terraform/helper/hashcode"
@@ -95,6 +96,10 @@ func resourceBlockStorageVolumeV2() *schema.Resource {
 				Optional: true,
 				ForceNew: true,
 			},
+			"tags": &schema.Schema{
+				Type:     schema.TypeMap,
+				Optional: true,
+			},
 			"attachment": &schema.Schema{
 				Type:     schema.TypeSet,
 				Computed: true,
@@ -126,6 +131,29 @@ func resourceContainerMetadataV2(d *schema.ResourceData) map[string]string {
 		m[key] = val.(string)
 	}
 	return m
+}
+
+func resourceContainerTags(d *schema.ResourceData) map[string]string {
+	m := make(map[string]string)
+	for key, val := range d.Get("tags").(map[string]interface{}) {
+		m[key] = val.(string)
+	}
+	return m
+}
+
+func CreateVolumeTags(client *gophercloud.ServiceClient, resource_type, resource_id string, tagmap map[string]string) (*tags.Tags, error) {
+	createOpts := tags.CreateOpts{
+		Tags: tagmap,
+	}
+	return tags.Create(client, resource_type, resource_id, createOpts).Extract()
+}
+
+func DeleteVolumeTags(client *gophercloud.ServiceClient, resource_type, resource_id string) error {
+	return tags.Delete(client, resource_type, resource_id).ExtractErr()
+}
+
+func GetVolumeTags(client *gophercloud.ServiceClient, resource_type, resource_id string) (*tags.Tags, error) {
+	return tags.Get(client, resource_type, resource_id).Extract()
 }
 
 func resourceBlockStorageVolumeV2Create(d *schema.ResourceData, meta interface{}) error {
@@ -176,6 +204,10 @@ func resourceBlockStorageVolumeV2Create(d *schema.ResourceData, meta interface{}
 			"Error waiting for volume (%s) to become ready: %s",
 			v.ID, err)
 	}
+	_, err = CreateVolumeTags(blockStorageClient, "volumes", v.ID, resourceContainerTags(d))
+	if err != nil {
+		return fmt.Errorf("Error creating tags for volume (%s): %s", v.ID, err)
+	}
 
 	// Store the ID now
 	d.SetId(v.ID)
@@ -204,7 +236,9 @@ func resourceBlockStorageVolumeV2Read(d *schema.ResourceData, meta interface{}) 
 	d.Set("snapshot_id", v.SnapshotID)
 	d.Set("source_vol_id", v.SourceVolID)
 	d.Set("volume_type", v.VolumeType)
-	d.Set("metadata", v.Metadata)
+	if err := d.Set("metadata", v.Metadata); err != nil {
+		return fmt.Errorf("[DEBUG] Error saving metadata to state for OpenTelekomCloud block storage (%s): %s", d.Id(), err)
+	}
 	d.Set("region", GetRegion(d, config))
 
 	attachments := make([]map[string]interface{}, len(v.Attachments))
@@ -215,7 +249,14 @@ func resourceBlockStorageVolumeV2Read(d *schema.ResourceData, meta interface{}) 
 		attachments[i]["device"] = attachment.Device
 		log.Printf("[DEBUG] attachment: %v", attachment)
 	}
-	d.Set("attachment", attachments)
+	if err := d.Set("attachment", attachments); err != nil {
+		return fmt.Errorf("[DEBUG] Error saving attachment to state for OpenTelekomCloud block storage (%s): %s", d.Id(), err)
+	}
+	taglist, err := GetVolumeTags(blockStorageClient, "volumes", v.ID)
+	if err != nil {
+		return fmt.Errorf("Error fetching tags for volume (%s): %s", v.ID, err)
+	}
+	d.Set("tags", taglist)
 
 	return nil
 }
@@ -239,6 +280,9 @@ func resourceBlockStorageVolumeV2Update(d *schema.ResourceData, meta interface{}
 	_, err = volumes.Update(blockStorageClient, d.Id(), updateOpts).Extract()
 	if err != nil {
 		return fmt.Errorf("Error updating OpenTelekomCloud volume: %s", err)
+	}
+	if d.HasChange("tags") {
+		_, err = CreateVolumeTags(blockStorageClient, "volumes", d.Id(), resourceContainerTags(d))
 	}
 
 	return resourceBlockStorageVolumeV2Read(d, meta)

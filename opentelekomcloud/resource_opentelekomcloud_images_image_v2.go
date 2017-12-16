@@ -266,7 +266,9 @@ func resourceImagesImageV2Read(d *schema.ResourceData, meta interface{}) error {
 	d.Set("schema", img.Schema)
 	d.Set("checksum", img.Checksum)
 	d.Set("size_bytes", img.SizeBytes)
-	d.Set("metadata", img.Metadata)
+	if err := d.Set("metadata", img.Metadata); err != nil {
+		return fmt.Errorf("[DEBUG] Error saving metadata to state for OpenTelekomCloud image (%s): %s", d.Id(), err)
+	}
 	d.Set("created_at", img.CreatedAt)
 	d.Set("update_at", img.UpdatedAt)
 	d.Set("container_format", img.ContainerFormat)
@@ -277,7 +279,9 @@ func resourceImagesImageV2Read(d *schema.ResourceData, meta interface{}) error {
 	d.Set("name", img.Name)
 	d.Set("protected", img.Protected)
 	d.Set("size_bytes", img.SizeBytes)
-	d.Set("tags", img.Tags)
+	if err := d.Set("tags", img.Tags); err != nil {
+		return fmt.Errorf("[DEBUG] Error saving tags to state for OpenTelekomCloud image (%s): %s", d.Id(), err)
+	}
 	d.Set("visibility", img.Visibility)
 	d.Set("region", GetRegion(d, config))
 

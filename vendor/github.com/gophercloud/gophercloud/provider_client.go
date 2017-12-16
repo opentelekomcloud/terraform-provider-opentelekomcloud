@@ -3,12 +3,10 @@ package gophercloud
 import (
 	"bytes"
 	"encoding/json"
-	//"fmt"
 	"io"
 	"io/ioutil"
 	"net/http"
 	"strings"
-	//"reflect"
 	//"fmt"
 	//"reflect"
 )
@@ -56,6 +54,9 @@ type ProviderClient struct {
 
 	// TokenID is the ID of the most recently issued valid token.
 	TokenID string
+
+	// ProjectID is the ID of project to which User is authorized.
+	ProjectID string
 
 	// EndpointLocator describes how this provider discovers the endpoints for
 	// its constituent services.

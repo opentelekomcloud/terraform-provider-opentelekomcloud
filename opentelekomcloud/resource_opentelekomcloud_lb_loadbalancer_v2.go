@@ -180,7 +180,9 @@ func resourceLoadBalancerV2Read(d *schema.ResourceData, meta interface{}) error 
 			return err
 		}
 
-		d.Set("security_group_ids", port.SecurityGroups)
+		if err := d.Set("security_group_ids", port.SecurityGroups); err != nil {
+			return fmt.Errorf("[DEBUG] Error saving security_group_ids to state for OpenTelekomCloud loadbalancer (%s): %s", d.Id(), err)
+		}
 	}
 
 	return nil

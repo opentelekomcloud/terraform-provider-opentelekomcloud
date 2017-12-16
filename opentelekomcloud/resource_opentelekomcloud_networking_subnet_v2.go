@@ -226,7 +226,9 @@ func resourceNetworkingSubnetV2Read(d *schema.ResourceData, meta interface{}) er
 	d.Set("tenant_id", s.TenantID)
 	d.Set("gateway_ip", s.GatewayIP)
 	d.Set("dns_nameservers", s.DNSNameservers)
-	d.Set("host_routes", s.HostRoutes)
+	if err := d.Set("host_routes", s.HostRoutes); err != nil {
+		return fmt.Errorf("[DEBUG] Error saving host_routes to state for OpenTelekomCloud subnet (%s): %s", d.Id(), err)
+	}
 	d.Set("enable_dhcp", s.EnableDHCP)
 	d.Set("network_id", s.NetworkID)
 
@@ -239,7 +241,9 @@ func resourceNetworkingSubnetV2Read(d *schema.ResourceData, meta interface{}) er
 
 		allocationPools = append(allocationPools, pool)
 	}
-	d.Set("allocation_pools", allocationPools)
+	if err := d.Set("allocation_pools", allocationPools); err != nil {
+		return fmt.Errorf("[DEBUG] Error saving allocation_pools to state for OpenTelekomCloud subnet (%s): %s", d.Id(), err)
+	}
 
 	d.Set("region", GetRegion(d, config))
 

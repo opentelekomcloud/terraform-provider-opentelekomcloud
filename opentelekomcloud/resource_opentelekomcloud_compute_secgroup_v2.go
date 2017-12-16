@@ -156,7 +156,9 @@ func resourceComputeSecGroupV2Read(d *schema.ResourceData, meta interface{}) err
 		return err
 	}
 	log.Printf("[DEBUG] rulesToMap(sg.Rules): %+v", rtm)
-	d.Set("rule", rtm)
+	if err := d.Set("rule", rtm); err != nil {
+		return fmt.Errorf("[DEBUG] Error saving rule to state for OpenTelekomCloud server (%s): %s", d.Id(), err)
+	}
 
 	d.Set("region", GetRegion(d, config))
 

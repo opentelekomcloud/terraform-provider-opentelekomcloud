@@ -16,6 +16,7 @@ import (
 	"github.com/gophercloud/gophercloud/openstack/compute/v2/extensions/schedulerhints"
 	"github.com/gophercloud/gophercloud/openstack/compute/v2/extensions/secgroups"
 	"github.com/gophercloud/gophercloud/openstack/compute/v2/extensions/startstop"
+	"github.com/gophercloud/gophercloud/openstack/compute/v2/extensions/tags"
 	"github.com/gophercloud/gophercloud/openstack/compute/v2/flavors"
 	"github.com/gophercloud/gophercloud/openstack/compute/v2/images"
 	"github.com/gophercloud/gophercloud/openstack/compute/v2/servers"
@@ -330,6 +331,12 @@ func resourceComputeInstanceV2() *schema.Resource {
 				Optional: true,
 				Default:  false,
 			},
+			"tags": &schema.Schema{
+				Type:     schema.TypeSet,
+				Optional: true,
+				Elem:     &schema.Schema{Type: schema.TypeString},
+				Set:      schema.HashString,
+			},
 			/* "force_delete": &schema.Schema{
 				Type:     schema.TypeBool,
 				Optional: true,
@@ -468,6 +475,15 @@ func resourceComputeInstanceV2Create(d *schema.ResourceData, meta interface{}) e
 			server.ID, err)
 	}
 
+	taglist := resourceBuildTags(d)
+	log.Printf("[DEBUG] Setting taglist: %v", taglist)
+	if len(taglist) > 0 {
+		_, err := CreateServerTags(computeClient, d.Id(), taglist)
+		if err != nil {
+			return fmt.Errorf("Error creating tags for instance (%s): %s", d.Id(), err)
+		}
+	}
+
 	return resourceComputeInstanceV2Read(d, meta)
 }
 
@@ -506,7 +522,9 @@ func resourceComputeInstanceV2Read(d *schema.ResourceData, meta interface{}) err
 		hostv6 = server.AccessIPv6
 	}
 
-	d.Set("network", networks)
+	if err := d.Set("network", networks); err != nil {
+		return fmt.Errorf("[DEBUG] Error saving network to state for OpenTelekomCloud server (%s): %s", d.Id(), err)
+	}
 	d.Set("access_ip_v4", hostv4)
 	d.Set("access_ip_v6", hostv6)
 
@@ -527,13 +545,17 @@ func resourceComputeInstanceV2Read(d *schema.ResourceData, meta interface{}) err
 		})
 	}
 
-	d.Set("all_metadata", server.Metadata)
+	if err := d.Set("all_metadata", server.Metadata); err != nil {
+		return fmt.Errorf("[DEBUG] Error saving all_metadata to state for OpenTelekomCloud server (%s): %s", d.Id(), err)
+	}
 
 	secGrpNames := []string{}
 	for _, sg := range server.SecurityGroups {
 		secGrpNames = append(secGrpNames, sg["name"].(string))
 	}
-	d.Set("security_groups", secGrpNames)
+	if err := d.Set("security_groups", secGrpNames); err != nil {
+		return fmt.Errorf("[DEBUG] Error saving security_groups to state for OpenTelekomCloud server (%s): %s", d.Id(), err)
+	}
 
 	flavorId, ok := server.Flavor["id"].(string)
 	if !ok {
@@ -570,7 +592,75 @@ func resourceComputeInstanceV2Read(d *schema.ResourceData, meta interface{}) err
 	// Set the region
 	d.Set("region", GetRegion(d, config))
 
+	taglist, err := GetServerTags(computeClient, d.Id())
+	if err != nil {
+		return err
+	}
+	d.Set("tags", taglist.Tags)
+	// Filter out network name if it is in the list
+	tagset := d.Get("tags").(*schema.Set)
+	name := GetNetworkName(d)
+	if name != "" {
+		tagset.Remove(name)
+	}
+	d.Set("tags", tagset.List())
+
 	return nil
+}
+
+func CreateServerTags(client *gophercloud.ServiceClient, server_id string, taglist []string) (*tags.Tags, error) {
+	createOpts := tags.CreateOpts{
+		Tags: taglist,
+	}
+	return tags.Create(client, server_id, createOpts).Extract()
+}
+
+func GetServerTags(client *gophercloud.ServiceClient, server_id string) (*tags.Tags, error) {
+	return tags.Get(client, server_id).Extract()
+}
+
+func DeleteServerTags(client *gophercloud.ServiceClient, server_id string) error {
+	return tags.Delete(client, server_id).ExtractErr()
+}
+
+func resourceBuildTags(d *schema.ResourceData) []string {
+	v := d.Get("tags").(*schema.Set).List()
+	var tags []string
+	/* name := GetNetworkName(d)
+	if name != "" {
+		tags = append(tags, name)
+	} */
+	for _, tag := range v {
+		tags = append(tags, tag.(string))
+	}
+
+	return tags
+}
+
+func GetNetworkName(d *schema.ResourceData) string {
+	//log.Printf("[DEBUG] GetNetworkName starting.")
+	if v, ok := d.GetOk("network"); ok {
+		//log.Printf("[DEBUG] GetNetworkName step 1.")
+		if networks, ok := v.([]interface{}); ok {
+			//log.Printf("[DEBUG] GetNetworkName step 2.")
+			if len(networks) > 0 {
+				//log.Printf("[DEBUG] GetNetworkName step 3.")
+				network := networks[0]
+				if network_map, ok := network.(map[string]interface{}); ok {
+					//log.Printf("[DEBUG] GetNetworkName step 4.")
+					if name, ok := network_map["name"]; ok {
+						//log.Printf("[DEBUG] GetNetworkName step 5.")
+						if sname, ok := name.(string); ok {
+							log.Printf("[DEBUG] GetNetworkName: %v", sname)
+							return sname
+						}
+					}
+				}
+			}
+		}
+	}
+	log.Printf("[DEBUG] GetNetworkName missing.")
+	return ""
 }
 
 func resourceComputeInstanceV2Update(d *schema.ResourceData, meta interface{}) error {
@@ -730,6 +820,23 @@ func resourceComputeInstanceV2Update(d *schema.ResourceData, meta interface{}) e
 		_, err = stateConf.WaitForState()
 		if err != nil {
 			return fmt.Errorf("Error waiting for instance (%s) to confirm resize: %s", d.Id(), err)
+		}
+	}
+
+	if d.HasChange("tags") {
+		taglist := resourceBuildTags(d)
+		log.Printf("[DEBUG] Setting tags to %v", taglist)
+
+		if len(taglist) == 0 {
+			err := DeleteServerTags(computeClient, d.Id())
+			if err != nil {
+				return fmt.Errorf("Error deleting tags for instance (%s): %s", d.Id(), err)
+			}
+		} else {
+			_, err := CreateServerTags(computeClient, d.Id(), taglist)
+			if err != nil {
+				return fmt.Errorf("Error creating tags for instance (%s): %s", d.Id(), err)
+			}
 		}
 	}
 

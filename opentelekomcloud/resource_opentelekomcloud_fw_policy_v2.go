@@ -139,7 +139,9 @@ func resourceFWPolicyV2Read(d *schema.ResourceData, meta interface{}) error {
 	d.Set("shared", policy.Shared)
 	d.Set("audited", policy.Audited)
 	d.Set("tenant_id", policy.TenantID)
-	d.Set("rules", policy.Rules)
+	if err := d.Set("rules", policy.Rules); err != nil {
+		return fmt.Errorf("[DEBUG] Error saving rules to state for OpenTelekomCloud firewall policy (%s): %s", d.Id(), err)
+	}
 	d.Set("region", GetRegion(d, config))
 
 	return nil
