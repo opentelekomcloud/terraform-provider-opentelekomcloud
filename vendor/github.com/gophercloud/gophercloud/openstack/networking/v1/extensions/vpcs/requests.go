@@ -3,6 +3,7 @@ package vpcs
 import (
 	"github.com/gophercloud/gophercloud"
 	"github.com/gophercloud/gophercloud/pagination"
+	"reflect"
 )
 
 // ListOpts allows the filtering and sorting of paginated collections through
@@ -10,6 +11,7 @@ import (
 // the floating IP attributes you want to see returned. SortKey allows you to
 // sort by a particular network attribute. SortDir sets the direction, and is
 // either `asc' or `desc'. Marker and Limit are used for pagination.
+
 type ListOpts struct {
 	// ID is the unique identifier for the vpc.
 	ID string `json:"id"`
@@ -24,19 +26,79 @@ type ListOpts struct {
 	// Status indicates whether or not a vpc is currently operational.
 	Status string `json:"status"`
 
-	// Routes are a collection of static routes that the vpc will host.
-	Routes []Route `json:"routes"`
-
-	TenantID     string `q:"tenant_id"`
 }
 
-// List returns a Pager which allows you to iterate over a collection of
+// List returns collection of
 // vpcs. It accepts a ListOpts struct, which allows you to filter and sort
 // the returned collection for greater efficiency.
 //
 // Default policy settings return only those vpcs that are owned by the
 // tenant who submits the request, unless an admin user submits the request.
-func List(c *gophercloud.ServiceClient, opts ListOpts) pagination.Pager {
+func List(c *gophercloud.ServiceClient, opts ListOpts) ([]Vpc, error) {
+	u := rootURL(c)
+	pages,err := pagination.NewPager(c, u, func(r pagination.PageResult) pagination.Page {
+		return VpcPage{pagination.LinkedPageBase{PageResult: r}}
+	}).AllPages()
+
+	allVpcs, err := ExtractVpcs(pages)
+	if err != nil {
+		return nil, err
+	}
+
+	return FilterVPCs(allVpcs, opts)
+}
+
+func FilterVPCs(vpcs []Vpc, opts ListOpts) ([]Vpc, error){
+
+	var refinedVPCs []Vpc
+	var matched bool
+	m := map[string]interface{}{}
+
+	if opts.ID != ""{
+		m["ID"] = opts.ID
+	}
+	if opts.Name != ""{
+		m["Name"] = opts.Name
+	}
+	if opts.Status != ""{
+		m["Status"] = opts.Status
+	}
+	if opts.CIDR != ""{
+		m["CIDR"] = opts.CIDR
+	}
+
+	if len(m) > 0 && len(vpcs) > 0  {
+		for _, vpc := range vpcs {
+			matched = true
+
+			for key, value := range m {
+				if sVal := getStructField(&vpc, key); !(sVal == value) {
+					matched =false
+				}
+			}
+
+			if matched {
+				refinedVPCs = append(refinedVPCs, vpc)
+			}
+		}
+
+	} else {
+		refinedVPCs = vpcs
+	}
+
+
+	return refinedVPCs, nil
+}
+
+
+func getStructField(v *Vpc, field string) string {
+	r := reflect.ValueOf(v)
+	f := reflect.Indirect(r).FieldByName(field)
+	return string(f.String())
+}
+
+//TODO: Remove after filtered list implementation
+/*func List(c *gophercloud.ServiceClient, opts ListOpts) pagination.Pager {
 	q, err := gophercloud.BuildQueryString(&opts)
 	if err != nil {
 		return pagination.Pager{Err: err}
@@ -45,7 +107,7 @@ func List(c *gophercloud.ServiceClient, opts ListOpts) pagination.Pager {
 	return pagination.NewPager(c, u, func(r pagination.PageResult) pagination.Page {
 		return VpcPage{pagination.LinkedPageBase{PageResult: r}}
 	})
-}
+}*/
 
 // CreateOptsBuilder allows extensions to add additional parameters to the
 // Create request.

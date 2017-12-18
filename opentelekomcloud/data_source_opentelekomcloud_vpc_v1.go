@@ -55,19 +55,23 @@ func dataSourceVirtualPrivateCloudV1Read(d *schema.ResourceData, meta interface{
 		CIDR:     d.Get("cidr").(string),
 	}
 
-	vpcdict, err := vpcs.List(vpcClient, listOpts).AllPages()
-	log.Printf("[DEBUG] Value of vpc response : %#v", vpcdict)
-	allVpcs, err := vpcs.ExtractVpcs(vpcdict)
-	log.Printf("[DEBUG] Value of allVpcs: %#v", allVpcs)
+	refinedVpcs, err := vpcs.List(vpcClient, listOpts)
+	log.Printf("[DEBUG] Value of allVpcs: %#v", refinedVpcs)
 	if err != nil {
 		return fmt.Errorf("Unable to retrieve vpcs: %s", err)
 	}
 
-	if len(allVpcs) < 1 {
-		return fmt.Errorf("No Vpc found with name: %s", d.Get("name"))
+	if len(refinedVpcs) < 1 {
+		return fmt.Errorf("Your query returned no results. " +
+			"Please change your search criteria and try again.")
 	}
 
-	Vpc := allVpcs[0]
+	if len(refinedVpcs) > 1 {
+		return fmt.Errorf("Your query returned more than one result." +
+			" Please try a more specific search criteria")
+	}
+
+	Vpc := refinedVpcs[0]
 
 	log.Printf("[DEBUG] Retrieved Vpcs using given filter %s: %+v", Vpc.ID, Vpc)
 	d.SetId(Vpc.ID)
