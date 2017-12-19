@@ -189,7 +189,7 @@ func resourceVirtualPrivateCloudV1Delete(d *schema.ResourceData, meta interface{
 	}
 
 	d.SetId("")
-	return err
+	return nil
 }
 
 
