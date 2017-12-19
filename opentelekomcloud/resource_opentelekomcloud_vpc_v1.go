@@ -28,12 +28,6 @@ func resourceVirtualPrivateCloudV1() *schema.Resource {
 
 		Schema: map[string]*schema.Schema{					//request and response parameters
 			"region": &schema.Schema{
-				Type:        schema.TypeString,
-				Required:    true,
-				ForceNew:    true,
-				DefaultFunc: schema.EnvDefaultFunc("OS_REGION_NAME", ""),
-			},
-			"tenant_id": &schema.Schema{
 				Type:     schema.TypeString,
 				Optional: true,
 				ForceNew: true,
@@ -41,7 +35,7 @@ func resourceVirtualPrivateCloudV1() *schema.Resource {
 			},
 			"name": &schema.Schema{
 				Type:     schema.TypeString,
-				Optional: true,
+				Required: true,
 				ForceNew: false,
 				ValidateFunc: validateName,
 
@@ -57,27 +51,10 @@ func resourceVirtualPrivateCloudV1() *schema.Resource {
 				ForceNew: false,
 				Computed: true,
 			},
-			"enable_shared_snat": &schema.Schema{
+			"shared": &schema.Schema{
 				Type:     schema.TypeBool,
 				ForceNew: false,
 				Computed: true,
-			},
-			"host_routes": &schema.Schema{
-				Type:     schema.TypeList,
-				Optional: true,
-				ForceNew: false,
-				Elem: &schema.Resource{
-					Schema: map[string]*schema.Schema{
-						"destination": &schema.Schema{
-							Type:     schema.TypeString,
-							Required: true,
-						},
-						"nexthop": &schema.Schema{
-							Type:     schema.TypeString,
-							Required: true,
-						},
-					},
-				},
 			},
 		},
 	}
@@ -101,10 +78,26 @@ func resourceVirtualPrivateCloudV1Create(d *schema.ResourceData, meta interface{
 
 	log.Printf("[DEBUG] Create Options: %#v", createOpts)
 	n, err := vpcs.Create(vpcClient, createOpts).Extract()
-	log.Printf("[INFO] Vpc ID all : %#v", n)
+
+	if err != nil {
+		return fmt.Errorf("Error creating OpenTelekomCloud VPC: %s", err)
+	}
+	d.SetId(n.ID)
+
 	log.Printf("[INFO] Vpc ID: %s", n.ID)
 
 	log.Printf("[DEBUG] Waiting for OpenTelekomCloud Vpc (%s) to become available", n.ID)
+
+	stateConf := &resource.StateChangeConf{
+		Pending:    []string{"CREATING"},
+		Target:     []string{"ACTIVE"},
+		Refresh:    waitForVpcActive(vpcClient, n.ID),
+		Timeout:    d.Timeout(schema.TimeoutCreate),
+		Delay:      5 * time.Second,
+		MinTimeout: 3 * time.Second,
+	}
+
+	_, err = stateConf.WaitForState()
 	d.SetId(n.ID)
 
 	return resourceVirtualPrivateCloudV1Read(d, meta)
@@ -134,8 +127,7 @@ func resourceVirtualPrivateCloudV1Read(d *schema.ResourceData, meta interface{})
 	d.Set("name", n.Name)
 	d.Set("cidr", n.CIDR)
 	d.Set("status", n.Status)
-	d.Set("enable_shared_snat", n.EnableSharedSnat)
-	d.Set("routes", n.Routes)
+	d.Set("shared", n.EnableSharedSnat)
 	d.Set("region", GetRegion(d, config))
 
 	return nil
@@ -199,6 +191,24 @@ func resourceVirtualPrivateCloudV1Delete(d *schema.ResourceData, meta interface{
 	d.SetId("")
 	return err
 }
+
+
+func waitForVpcActive(vpcClient *gophercloud.ServiceClient, vpcId string) resource.StateRefreshFunc {
+	return func() (interface{}, string, error) {
+		n, err := vpcs.Get(vpcClient, vpcId).Extract()
+		if err != nil {
+			return nil, "", err
+		}
+
+		log.Printf("[DEBUG] OpenTelekomCloud VPC Client: %+v", n)
+		if n.Status == "DOWN" || n.Status == "OK" {
+			return n, "ACTIVE", nil
+		}
+
+		return n, n.Status, nil
+	}
+}
+
 
 func waitForVpcDelete(vpcClient *gophercloud.ServiceClient, vpcId string) resource.StateRefreshFunc {
 	return func() (interface{}, string, error) {
