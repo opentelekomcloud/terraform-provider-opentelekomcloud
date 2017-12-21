@@ -8,15 +8,15 @@ import (
 
 // PASS
 func TestAccNetworkingV1Vpc_importBasic(t *testing.T) {
-	resourceName := "opentelekomcloud_vpc_v1.networking_vpc_v1"
+	resourceName := "opentelekomcloud_vpc_v1.vpc_v1"
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
 		Providers:    testAccProviders,
-		CheckDestroy: testAccCheckNetworkingV1VpcDestroy,
+		CheckDestroy: testAccCheckVpcV1Destroy,
 		Steps: []resource.TestStep{
 			resource.TestStep{
-				Config: testAccNetworkingV1Vpc_basic,
+				Config: testAccVpcV1_basic,
 			},
 
 			resource.TestStep{

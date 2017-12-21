@@ -11,98 +11,71 @@ import (
 )
 
 // PASS
-func TestAccNetworkingV1Vpc_basic(t *testing.T) {
-	var vpc_group vpcs.Vpc
+func TestAccVpcV1_basic(t *testing.T) {
+	var vpc vpcs.Vpc
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
 		Providers:    testAccProviders,
-		CheckDestroy: testAccCheckNetworkingV1VpcDestroy,
+		CheckDestroy: testAccCheckVpcV1Destroy,
 		Steps: []resource.TestStep{
 			resource.TestStep{
-				Config: testAccNetworkingV1Vpc_basic,
+				Config: testAccVpcV1_basic,
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckNetworkingV1VpcExists(
-						"opentelekomcloud_networking_vpc_v1.networking_vpc_v1", &vpc_group),
-					testAccCheckNetworkingV1VpcCount(&vpc_group, 2),
+					testAccCheckVpcV1Exists("opentelekomcloud_vpc_v1.vpc_1", &vpc),
 				),
 			},
 			resource.TestStep{
-				Config: testAccNetworkingV1Vpc_update,
+				Config: testAccVpcV1_update,
 				Check: resource.ComposeTestCheckFunc(
-					resource.TestCheckResourceAttrPtr(
-						"opentelekomcloud_networking_vpc_v1.networking_vpc_v1", "id", &vpc_group.ID),
 					resource.TestCheckResourceAttr(
-						"opentelekomcloud_networking_vpc_v1.networking_vpc_v1", "name", "modifyVpc"),
+						"opentelekomcloud_vpc_v1.vpc_1", "name", "terraform_provider_test1"),
 				),
 			},
 		},
 	})
 }
-
 // PASS
-func TestAccNetworkingV1Vpc_noDefaultRules(t *testing.T) {
-	var vpc_group vpcs.Vpc
+func TestAccVpcV1_timeout(t *testing.T) {
+	var vpc vpcs.Vpc
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
 		Providers:    testAccProviders,
-		CheckDestroy: testAccCheckNetworkingV1VpcDestroy,
+		CheckDestroy: testAccCheckVpcV1Destroy,
 		Steps: []resource.TestStep{
 			resource.TestStep{
-				Config: testAccNetworkingV1Vpc_noDefaultRules,
+				Config: testAccVpcV1_timeout,
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckNetworkingV1VpcExists(
-						"opentelekomcloud_networking_vpc_v1.networking_vpc_v1", &vpc_group),
-					testAccCheckNetworkingV1VpcCount(&vpc_group, 0),
+					testAccCheckVpcV1Exists("opentelekomcloud_vpc_v1.vpc_1", &vpc),
 				),
 			},
 		},
 	})
 }
 
-// PASS
-func TestAccNetworkingV1Vpc_timeout(t *testing.T) {
-	var vpc_group vpcs.Vpc
-
-	resource.Test(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
-		CheckDestroy: testAccCheckNetworkingV1VpcDestroy,
-		Steps: []resource.TestStep{
-			resource.TestStep{
-				Config: testAccNetworkingV1Vpc_timeout,
-				Check: resource.ComposeTestCheckFunc(
-					testAccCheckNetworkingV1VpcExists(
-						"opentelekomcloud_networking_vpc_v1.networking_vpc_v1", &vpc_group),
-				),
-			},
-		},
-	})
-}
-
-func testAccCheckNetworkingV1VpcDestroy(s *terraform.State) error {
+func testAccCheckVpcV1Destroy(s *terraform.State) error {
 	config := testAccProvider.Meta().(*Config)
 	vpcClient, err := config.vpcV1Client(OS_REGION_NAME)
 	if err != nil {
-		return fmt.Errorf("Error creating OpenTelekomCloud networking client: %s", err)
+		return fmt.Errorf("Error creating OpenTelekomCloud vpc client: %s", err)
 	}
 
 	for _, rs := range s.RootModule().Resources {
-		if rs.Type != "opentelekomcloud_networking_secgroup_v2" {
+		if rs.Type != "opentelekomcloud_vpc_v1" {
 			continue
 		}
 
 		_, err := vpcs.Get(vpcClient, rs.Primary.ID).Extract()
 		if err == nil {
-			return fmt.Errorf("Security group still exists")
+			return fmt.Errorf("Vpc still exists")
 		}
 	}
 
 	return nil
 }
 
-func testAccCheckNetworkingV1VpcExists(n string, vpc *vpcs.Vpc) resource.TestCheckFunc {
+func testAccCheckVpcV1Exists(n string, router *vpcs.Vpc) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
 		rs, ok := s.RootModule().Resources[n]
 		if !ok {
@@ -116,7 +89,7 @@ func testAccCheckNetworkingV1VpcExists(n string, vpc *vpcs.Vpc) resource.TestChe
 		config := testAccProvider.Meta().(*Config)
 		vpcClient, err := config.vpcV1Client(OS_REGION_NAME)
 		if err != nil {
-			return fmt.Errorf("Error creating OpenTelekomCloud networking client: %s", err)
+			return fmt.Errorf("Error creating OpenTelekomCloud vpc client: %s", err)
 		}
 
 		found, err := vpcs.Get(vpcClient, rs.Primary.ID).Extract()
@@ -125,55 +98,35 @@ func testAccCheckNetworkingV1VpcExists(n string, vpc *vpcs.Vpc) resource.TestChe
 		}
 
 		if found.ID != rs.Primary.ID {
-			return fmt.Errorf("Security group not found")
+			return fmt.Errorf("vpc not found")
 		}
 
-		*vpc = *found
+		*router = *found
 
 		return nil
 	}
 }
 
-func testAccCheckNetworkingV1VpcCount(
-	sg *vpcs.Vpc, count int) resource.TestCheckFunc {
-	return func(s *terraform.State) error {
-		/*if len(sg.Rules) == count {
-			return nil
-		}*/
-
-		return fmt.Errorf("Unexpected number of rules in group %s. Expected %d, got %d",
-			sg.ID, count/*, len(sg.Rules)*/)
-	}
-}
-
-const testAccNetworkingV1Vpc_basic = `
-resource "opentelekomcloud_networking_secgroup_v2" "secgroup_1" {
-  name = "testVpc"
-
+const testAccVpcV1_basic = `
+resource "opentelekomcloud_vpc_v1" "vpc_1" {
+	name = "terraform_provider_test"
+	cidr="192.168.0.0/16"
 }
 `
 
-const testAccNetworkingV1Vpc_update = `
-resource "opentelekomcloud_networking_secgroup_v2" "secgroup_1" {
-  name = "modifyVpc"
-
+const testAccVpcV1_update = `
+resource "opentelekomcloud_vpc_v1" "vpc_1" {
+    name = "terraform_provider_test1"
+	cidr="192.168.0.0/16"
 }
 `
-
-const testAccNetworkingV1Vpc_noDefaultRules = `
-resource "opentelekomcloud_networking_secgroup_v2" "secgroup_1" {
-	name = "security_group_1"
-
-	delete_default_rules = true
-}
-`
-
-const testAccNetworkingV1Vpc_timeout = `
-resource "opentelekomcloud_networking_secgroup_v2" "secgroup_1" {
-  name = "testVpc"
-
+const testAccVpcV1_timeout = `
+resource "opentelekomcloud_vpc_v1" "vpc_1" {
+	name = "terraform_provider_test"
+	cidr="192.168.0.0/16"
 
   timeouts {
+    create = "5m"
     delete = "5m"
   }
 }
