@@ -37,7 +37,7 @@ The following arguments are supported:
 
 * `region` - (Optional) The region in which to obtain the V1 VPC client. A VPC client is needed to create a VPC. If omitted, the region argument of the provider is used. Changing this creates a new VPC.
 
-* `name` - (Required) The name of the VPC. The name must be unique for a tenant. Changing this updates the name of the existing VPC.
+* `name` - (Required) The name of the VPC. The name must be unique for a tenant. The value is a string of no more than 64 characters and can contain digits, letters, underscores (_), and hyphens (-). Changing this updates the name of the existing VPC.
 
 
 
