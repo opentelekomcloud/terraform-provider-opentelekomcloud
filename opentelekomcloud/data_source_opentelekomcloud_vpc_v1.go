@@ -35,9 +35,25 @@ func dataSourceVirtualPrivateCloudVpcV1() *schema.Resource {
 				Type:     schema.TypeString,
 				Optional: true,
 			},
-			"enable_shared_snat": &schema.Schema{
-				Type:     schema.TypeString,
+			"shared": &schema.Schema{
+				Type:     schema.TypeBool,
 				Optional: true,
+			},
+			"routes": &schema.Schema{
+				Type:     schema.TypeList,
+				Computed: true,
+				Elem: &schema.Resource{
+					Schema: map[string]*schema.Schema{
+						"destination": &schema.Schema{
+							Type:     schema.TypeString,
+							Computed: true,
+						},
+						"nexthop": &schema.Schema{
+							Type:     schema.TypeString,
+							Computed: true,
+						},
+					},
+				},
 			},
 		},
 	}
@@ -73,6 +89,15 @@ func dataSourceVirtualPrivateCloudV1Read(d *schema.ResourceData, meta interface{
 
 	Vpc := refinedVpcs[0]
 
+	var s []map[string]interface{}
+	for _, route := range Vpc.Routes {
+		mapping := map[string]interface{}{
+			"destination":	route.DestinationCIDR,
+			"nexthop":		route.NextHop,
+		}
+		s = append(s, mapping)
+	}
+
 	log.Printf("[DEBUG] Retrieved Vpcs using given filter %s: %+v", Vpc.ID, Vpc)
 	d.SetId(Vpc.ID)
 
@@ -80,8 +105,11 @@ func dataSourceVirtualPrivateCloudV1Read(d *schema.ResourceData, meta interface{
 	d.Set("cidr", Vpc.CIDR)
 	d.Set("status", Vpc.Status)
 	d.Set("id", Vpc.ID)
-	d.Set("enable_shared_snat", Vpc.EnableSharedSnat)
+	d.Set("shared", Vpc.EnableSharedSnat)
 	d.Set("region", GetRegion(d, config))
+	if err := d.Set("routes", s); err != nil {
+		return err
+	}
 
 	return nil
 }

@@ -36,6 +36,10 @@ variable "subnet_cidr" {
   default = "192.168.10.0/24"
 }
 
+variable "vpc_cidr" {
+  default = "192.168.0.0/16"
+}
+
 variable "ssh_pub_key" {
   default = "~/.ssh/id_rsa.pub"
 }
