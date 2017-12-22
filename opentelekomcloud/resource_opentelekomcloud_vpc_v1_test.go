@@ -11,23 +11,52 @@ import (
 )
 
 // PASS
-func TestAccVpcV1_basic(t *testing.T) {
+func TestAccOTCVpcV1_basic(t *testing.T) {
 	var vpc vpcs.Vpc
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
 		Providers:    testAccProviders,
-		CheckDestroy: testAccCheckVpcV1Destroy,
+		CheckDestroy: testAccCheckOTCVpcV1Destroy,
 		Steps: []resource.TestStep{
 			resource.TestStep{
 				Config: testAccVpcV1_basic,
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckVpcV1Exists("opentelekomcloud_vpc_v1.vpc_1", &vpc),
+					testAccCheckOTCVpcV1Exists("opentelekomcloud_vpc_v1.vpc_1", &vpc),
+					resource.TestCheckResourceAttr(
+						"opentelekomcloud_vpc_v1.vpc_1", "name", "terraform_provider_test"),
+					resource.TestCheckResourceAttr(
+						"opentelekomcloud_vpc_v1.vpc_1", "cidr", "192.168.0.0/16"),
+					resource.TestCheckResourceAttr(
+						"opentelekomcloud_vpc_v1.vpc_1", "status", "OK"),
+					resource.TestCheckResourceAttr(
+						"opentelekomcloud_vpc_v1.vpc_1", "shared", "false"),
+				),
+			},
+		},
+	})
+}
+
+func TestAccOTCVpcV1_update(t *testing.T) {
+	var vpc vpcs.Vpc
+
+	resource.Test(t, resource.TestCase{
+		PreCheck:     func() { testAccPreCheck(t) },
+		Providers:    testAccProviders,
+		CheckDestroy: testAccCheckOTCVpcV1Destroy,
+		Steps: []resource.TestStep{
+			resource.TestStep{
+				Config: testAccVpcV1_basic,
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckOTCVpcV1Exists("opentelekomcloud_vpc_v1.vpc_1", &vpc),
+					resource.TestCheckResourceAttr(
+						"opentelekomcloud_vpc_v1.vpc_1", "name", "terraform_provider_test"),
 				),
 			},
 			resource.TestStep{
 				Config: testAccVpcV1_update,
 				Check: resource.ComposeTestCheckFunc(
+					testAccCheckOTCVpcV1Exists("opentelekomcloud_vpc_v1.vpc_1", &vpc),
 					resource.TestCheckResourceAttr(
 						"opentelekomcloud_vpc_v1.vpc_1", "name", "terraform_provider_test1"),
 				),
@@ -35,26 +64,27 @@ func TestAccVpcV1_basic(t *testing.T) {
 		},
 	})
 }
+
 // PASS
-func TestAccVpcV1_timeout(t *testing.T) {
+func TestAccOTCVpcV1_timeout(t *testing.T) {
 	var vpc vpcs.Vpc
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
 		Providers:    testAccProviders,
-		CheckDestroy: testAccCheckVpcV1Destroy,
+		CheckDestroy: testAccCheckOTCVpcV1Destroy,
 		Steps: []resource.TestStep{
 			resource.TestStep{
 				Config: testAccVpcV1_timeout,
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckVpcV1Exists("opentelekomcloud_vpc_v1.vpc_1", &vpc),
+					testAccCheckOTCVpcV1Exists("opentelekomcloud_vpc_v1.vpc_1", &vpc),
 				),
 			},
 		},
 	})
 }
 
-func testAccCheckVpcV1Destroy(s *terraform.State) error {
+func testAccCheckOTCVpcV1Destroy(s *terraform.State) error {
 	config := testAccProvider.Meta().(*Config)
 	vpcClient, err := config.vpcV1Client(OS_REGION_NAME)
 	if err != nil {
@@ -75,7 +105,7 @@ func testAccCheckVpcV1Destroy(s *terraform.State) error {
 	return nil
 }
 
-func testAccCheckVpcV1Exists(n string, router *vpcs.Vpc) resource.TestCheckFunc {
+func testAccCheckOTCVpcV1Exists(n string, vpc *vpcs.Vpc) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
 		rs, ok := s.RootModule().Resources[n]
 		if !ok {
@@ -101,7 +131,7 @@ func testAccCheckVpcV1Exists(n string, router *vpcs.Vpc) resource.TestCheckFunc 
 			return fmt.Errorf("vpc not found")
 		}
 
-		*router = *found
+		*vpc = *found
 
 		return nil
 	}
