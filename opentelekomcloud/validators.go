@@ -2,10 +2,10 @@ package opentelekomcloud
 
 import (
 	"fmt"
+	"net"
+	"regexp"
 	"strings"
 	"time"
-	"regexp"
-	"net"
 )
 
 func ValidateStringList(v interface{}, k string, l []string) (ws []string, errors []error) {
@@ -97,7 +97,6 @@ func validateName(v interface{}, k string) (ws []string, errors []error) {
 		errors = append(errors, fmt.Errorf(
 			"%q cannot be longer than 64 characters: %q", k, value))
 	}
-
 
 	pattern := `^[\.\-_A-Za-z0-9]+$`
 	if !regexp.MustCompile(pattern).MatchString(value) {

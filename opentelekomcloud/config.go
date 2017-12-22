@@ -260,7 +260,7 @@ func (c *Config) computeV2Client(region string) (*gophercloud.ServiceClient, err
 	})
 }
 
-func (c *Config) vpcV1Client(region string ) (*gophercloud.ServiceClient, error) {
+func (c *Config) vpcV1Client(region string) (*gophercloud.ServiceClient, error) {
 	return openstack.NewVpcV1(c.OsClient, gophercloud.EndpointOpts{
 		Region:       c.determineRegion(region),
 		Availability: c.getEndpointType()})

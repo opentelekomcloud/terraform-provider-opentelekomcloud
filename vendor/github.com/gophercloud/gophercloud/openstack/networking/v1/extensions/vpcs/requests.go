@@ -25,7 +25,6 @@ type ListOpts struct {
 
 	// Status indicates whether or not a vpc is currently operational.
 	Status string `json:"status"`
-
 }
 
 // List returns collection of
@@ -36,7 +35,7 @@ type ListOpts struct {
 // tenant who submits the request, unless an admin user submits the request.
 func List(c *gophercloud.ServiceClient, opts ListOpts) ([]Vpc, error) {
 	u := rootURL(c)
-	pages,err := pagination.NewPager(c, u, func(r pagination.PageResult) pagination.Page {
+	pages, err := pagination.NewPager(c, u, func(r pagination.PageResult) pagination.Page {
 		return VpcPage{pagination.LinkedPageBase{PageResult: r}}
 	}).AllPages()
 
@@ -48,32 +47,32 @@ func List(c *gophercloud.ServiceClient, opts ListOpts) ([]Vpc, error) {
 	return FilterVPCs(allVpcs, opts)
 }
 
-func FilterVPCs(vpcs []Vpc, opts ListOpts) ([]Vpc, error){
+func FilterVPCs(vpcs []Vpc, opts ListOpts) ([]Vpc, error) {
 
 	var refinedVPCs []Vpc
 	var matched bool
 	m := map[string]interface{}{}
 
-	if opts.ID != ""{
+	if opts.ID != "" {
 		m["ID"] = opts.ID
 	}
-	if opts.Name != ""{
+	if opts.Name != "" {
 		m["Name"] = opts.Name
 	}
-	if opts.Status != ""{
+	if opts.Status != "" {
 		m["Status"] = opts.Status
 	}
-	if opts.CIDR != ""{
+	if opts.CIDR != "" {
 		m["CIDR"] = opts.CIDR
 	}
 
-	if len(m) > 0 && len(vpcs) > 0  {
+	if len(m) > 0 && len(vpcs) > 0 {
 		for _, vpc := range vpcs {
 			matched = true
 
 			for key, value := range m {
 				if sVal := getStructField(&vpc, key); !(sVal == value) {
-					matched =false
+					matched = false
 				}
 			}
 
@@ -86,28 +85,14 @@ func FilterVPCs(vpcs []Vpc, opts ListOpts) ([]Vpc, error){
 		refinedVPCs = vpcs
 	}
 
-
 	return refinedVPCs, nil
 }
-
 
 func getStructField(v *Vpc, field string) string {
 	r := reflect.ValueOf(v)
 	f := reflect.Indirect(r).FieldByName(field)
 	return string(f.String())
 }
-
-//TODO: Remove after filtered list implementation
-/*func List(c *gophercloud.ServiceClient, opts ListOpts) pagination.Pager {
-	q, err := gophercloud.BuildQueryString(&opts)
-	if err != nil {
-		return pagination.Pager{Err: err}
-	}
-	u := rootURL(c) + q.String()
-	return pagination.NewPager(c, u, func(r pagination.PageResult) pagination.Page {
-		return VpcPage{pagination.LinkedPageBase{PageResult: r}}
-	})
-}*/
 
 // CreateOptsBuilder allows extensions to add additional parameters to the
 // Create request.
@@ -118,7 +103,6 @@ type CreateOptsBuilder interface {
 // CreateOpts contains all the values needed to create a new vpc. There are
 // no required values.
 type CreateOpts struct {
-
 	Name string `json:"name,omitempty"`
 	CIDR string `json:"cidr,omitempty"`
 }
@@ -185,10 +169,9 @@ func Update(c *gophercloud.ServiceClient, id string, opts UpdateOptsBuilder) (r 
 	})
 	return
 }
+
 // Delete will permanently delete a particular vpc based on its unique ID.
 func Delete(c *gophercloud.ServiceClient, id string) (r DeleteResult) {
 	_, r.Err = c.Delete(resourceURL(c, id), nil)
 	return
 }
-
-

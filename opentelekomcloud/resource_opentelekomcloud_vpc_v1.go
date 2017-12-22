@@ -1,19 +1,19 @@
 package opentelekomcloud
 
 import (
-	"github.com/hashicorp/terraform/helper/schema"
-	"time"
 	"fmt"
-	"log"
 	"github.com/gophercloud/gophercloud/openstack/networking/v1/extensions/vpcs"
+	"github.com/hashicorp/terraform/helper/schema"
+	"log"
+	"time"
 
-	"github.com/hashicorp/terraform/helper/resource"
 	"github.com/gophercloud/gophercloud"
+	"github.com/hashicorp/terraform/helper/resource"
 )
 
 func resourceVirtualPrivateCloudV1() *schema.Resource {
 	return &schema.Resource{
-		Create: resourceVirtualPrivateCloudV1Create,		//providers.go
+		Create: resourceVirtualPrivateCloudV1Create, //providers.go
 		Read:   resourceVirtualPrivateCloudV1Read,
 		Update: resourceVirtualPrivateCloudV1Update,
 		Delete: resourceVirtualPrivateCloudV1Delete,
@@ -26,7 +26,7 @@ func resourceVirtualPrivateCloudV1() *schema.Resource {
 			Delete: schema.DefaultTimeout(10 * time.Minute),
 		},
 
-		Schema: map[string]*schema.Schema{					//request and response parameters
+		Schema: map[string]*schema.Schema{ //request and response parameters
 			"region": &schema.Schema{
 				Type:     schema.TypeString,
 				Optional: true,
@@ -34,17 +34,16 @@ func resourceVirtualPrivateCloudV1() *schema.Resource {
 				Computed: true,
 			},
 			"name": &schema.Schema{
-				Type:     schema.TypeString,
-				Required: true,
-				ForceNew: false,
+				Type:         schema.TypeString,
+				Required:     true,
+				ForceNew:     false,
 				ValidateFunc: validateName,
-
 			},
 			"cidr": &schema.Schema{
-				Type:     schema.TypeString,
-				Required:    true,
-				ForceNew: false,
-				ValidateFunc:validateCIDR,
+				Type:         schema.TypeString,
+				Required:     true,
+				ForceNew:     false,
+				ValidateFunc: validateCIDR,
 			},
 			"status": &schema.Schema{
 				Type:     schema.TypeString,
@@ -62,7 +61,7 @@ func resourceVirtualPrivateCloudV1() *schema.Resource {
 
 func resourceVirtualPrivateCloudV1Create(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*Config)
-	vpcClient, err := config.vpcV1Client(GetRegion(d, config) )
+	vpcClient, err := config.vpcV1Client(GetRegion(d, config))
 
 	log.Printf("[DEBUG] Value of vpcClient: %#v", vpcClient)
 
@@ -71,10 +70,9 @@ func resourceVirtualPrivateCloudV1Create(d *schema.ResourceData, meta interface{
 	}
 
 	createOpts := vpcs.CreateOpts{
-			Name:     d.Get("name").(string),
-			CIDR: 	  d.Get("cidr").(string),
-		}
-
+		Name: d.Get("name").(string),
+		CIDR: d.Get("cidr").(string),
+	}
 
 	log.Printf("[DEBUG] Create Options: %#v", createOpts)
 	n, err := vpcs.Create(vpcClient, createOpts).Extract()
@@ -152,7 +150,6 @@ func resourceVirtualPrivateCloudV1Update(d *schema.ResourceData, meta interface{
 		updateOpts.CIDR = d.Get("cidr").(string)
 	}
 
-
 	log.Printf("[DEBUG] Updating Vpc %s with options: %+v", d.Id(), updateOpts)
 
 	if update {
@@ -192,7 +189,6 @@ func resourceVirtualPrivateCloudV1Delete(d *schema.ResourceData, meta interface{
 	return nil
 }
 
-
 func waitForVpcActive(vpcClient *gophercloud.ServiceClient, vpcId string) resource.StateRefreshFunc {
 	return func() (interface{}, string, error) {
 		n, err := vpcs.Get(vpcClient, vpcId).Extract()
@@ -208,7 +204,6 @@ func waitForVpcActive(vpcClient *gophercloud.ServiceClient, vpcId string) resour
 		return n, n.Status, nil
 	}
 }
-
 
 func waitForVpcDelete(vpcClient *gophercloud.ServiceClient, vpcId string) resource.StateRefreshFunc {
 	return func() (interface{}, string, error) {

@@ -9,5 +9,5 @@ func rootURL(c *gophercloud.ServiceClient) string {
 }
 
 func resourceURL(c *gophercloud.ServiceClient, id string) string {
-	return c.ServiceURL(c.ProjectID,resourcePath, id)
+	return c.ServiceURL(c.ProjectID, resourcePath, id)
 }

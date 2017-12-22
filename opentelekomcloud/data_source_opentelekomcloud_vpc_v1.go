@@ -1,11 +1,12 @@
 package opentelekomcloud
+
 import (
-"fmt"
-"log"
+	"fmt"
+	"log"
 
-"github.com/gophercloud/gophercloud/openstack/networking/v1/extensions/vpcs"
+	"github.com/gophercloud/gophercloud/openstack/networking/v1/extensions/vpcs"
 
-"github.com/hashicorp/terraform/helper/schema"
+	"github.com/hashicorp/terraform/helper/schema"
 )
 
 func dataSourceVirtualPrivateCloudVpcV1() *schema.Resource {
@@ -59,16 +60,15 @@ func dataSourceVirtualPrivateCloudVpcV1() *schema.Resource {
 	}
 }
 
-
 func dataSourceVirtualPrivateCloudV1Read(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*Config)
 	vpcClient, err := config.vpcV1Client(GetRegion(d, config))
 
 	listOpts := vpcs.ListOpts{
-		ID:       d.Get("id").(string),
-		Name:     d.Get("name").(string),
-		Status:   d.Get("status").(string),
-		CIDR:     d.Get("cidr").(string),
+		ID:     d.Get("id").(string),
+		Name:   d.Get("name").(string),
+		Status: d.Get("status").(string),
+		CIDR:   d.Get("cidr").(string),
 	}
 
 	refinedVpcs, err := vpcs.List(vpcClient, listOpts)
@@ -92,8 +92,8 @@ func dataSourceVirtualPrivateCloudV1Read(d *schema.ResourceData, meta interface{
 	var s []map[string]interface{}
 	for _, route := range Vpc.Routes {
 		mapping := map[string]interface{}{
-			"destination":	route.DestinationCIDR,
-			"nexthop":		route.NextHop,
+			"destination": route.DestinationCIDR,
+			"nexthop":     route.NextHop,
 		}
 		s = append(s, mapping)
 	}

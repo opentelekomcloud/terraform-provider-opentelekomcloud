@@ -5,7 +5,6 @@ import (
 	"github.com/gophercloud/gophercloud/pagination"
 )
 
-
 // Route is a possible route in a vpc.
 type Route struct {
 	NextHop         string `json:"nexthop"`
@@ -21,7 +20,7 @@ type Route struct {
 // whenever a vpc is associated with a subnet, a port for that vpc
 // interface is added to the subnet's network.
 type Vpc struct {
-   // ID is the unique identifier for the vpc.
+	// ID is the unique identifier for the vpc.
 	ID string `json:"id"`
 
 	// Name is the human readable name for the vpc. It does not have to be
@@ -37,7 +36,7 @@ type Vpc struct {
 	// Routes are a collection of static routes that the vpc will host.
 	Routes []Route `json:"routes"`
 
-   //Provides informaion about shared snat
+	//Provides informaion about shared snat
 	EnableSharedSnat bool `json:"enable_shared_snat"`
 }
 
