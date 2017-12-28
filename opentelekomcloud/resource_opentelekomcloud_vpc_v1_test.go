@@ -7,7 +7,7 @@ import (
 	"github.com/hashicorp/terraform/helper/resource"
 	"github.com/hashicorp/terraform/terraform"
 
-	"github.com/gophercloud/gophercloud/openstack/networking/v1/extensions/vpcs"
+	"github.com/gophercloud/gophercloud/openstack/networking/v1/vpcs"
 )
 
 // PASS
