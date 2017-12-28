@@ -56,3 +56,11 @@ The following attributes are exported:
 * `shared` - Specifies whether the cross-tenant sharing is supported.
 
 * `region` - See Argument Reference above.
+
+## Import
+
+VPCs can be imported using the `id`, e.g.
+
+```
+$ terraform import opentelekomcloud_vpc_v1.vpc_v1 7117d38e-4c8f-4624-a505-bd96b97d024c
+```
