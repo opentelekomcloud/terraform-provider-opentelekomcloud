@@ -252,6 +252,7 @@ func resourceBlockStorageVolumeV2Read(d *schema.ResourceData, meta interface{}) 
 	if err := d.Set("attachment", attachments); err != nil {
 		return fmt.Errorf("[DEBUG] Error saving attachment to state for OpenTelekomCloud block storage (%s): %s", d.Id(), err)
 	}
+	time.Sleep(2 * time.Second)
 	taglist, err := GetVolumeTags(blockStorageClient, "volumes", v.ID)
 	if err != nil {
 		return fmt.Errorf("Error fetching tags for volume (%s): %s", v.ID, err)

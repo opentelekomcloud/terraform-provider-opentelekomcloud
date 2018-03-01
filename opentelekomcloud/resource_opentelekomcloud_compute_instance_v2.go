@@ -494,6 +494,7 @@ func resourceComputeInstanceV2Read(d *schema.ResourceData, meta interface{}) err
 		return fmt.Errorf("Error creating OpenTelekomCloud compute client: %s", err)
 	}
 
+	time.Sleep(2 * time.Second)
 	server, err := servers.Get(computeClient, d.Id()).Extract()
 	if err != nil {
 		return CheckDeleted(d, err, "server")
@@ -592,6 +593,7 @@ func resourceComputeInstanceV2Read(d *schema.ResourceData, meta interface{}) err
 	// Set the region
 	d.Set("region", GetRegion(d, config))
 
+	time.Sleep(2 * time.Second)
 	taglist, err := GetServerTags(computeClient, d.Id())
 	if err != nil {
 		return err
