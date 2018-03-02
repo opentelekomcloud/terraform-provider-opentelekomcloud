@@ -8,6 +8,8 @@ import (
 	"net/http"
 	"os"
 
+	"strings"
+
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/awserr"
 	"github.com/aws/aws-sdk-go/aws/session"
@@ -19,7 +21,8 @@ import (
 	"github.com/hashicorp/go-cleanhttp"
 	"github.com/hashicorp/terraform/helper/pathorcontents"
 	"github.com/hashicorp/terraform/terraform"
-	"strings"
+	"github.com/huaweicloud/golangsdk"
+	huaweisdk "github.com/huaweicloud/golangsdk/openstack"
 )
 
 type Config struct {
@@ -43,6 +46,7 @@ type Config struct {
 	UserID           string
 
 	OsClient *gophercloud.ProviderClient
+	HwClient *golangsdk.ProviderClient
 	s3sess   *session.Session
 }
 
@@ -64,7 +68,16 @@ func (c *Config) LoadAndValidate() error {
 	if !validEndpoint {
 		return fmt.Errorf("Invalid endpoint type provided")
 	}
+	err := newopenstackClient(c)
+	if err != nil {
+		return err
+	}
 
+	return newhwClient(c)
+
+}
+
+func newopenstackClient(c *Config) error {
 	ao := gophercloud.AuthOptions{
 		DomainID:         c.DomainID,
 		DomainName:       c.DomainName,
@@ -194,6 +207,90 @@ func (c *Config) LoadAndValidate() error {
 			return errwrap.Wrapf("Error creating Swift S3 session: {{err}}", err)
 		}
 	}
+
+	return nil
+}
+
+func newhwClient(c *Config) error {
+	ao := golangsdk.AuthOptions{
+		DomainID:         c.DomainID,
+		DomainName:       c.DomainName,
+		IdentityEndpoint: c.IdentityEndpoint,
+		Password:         c.Password,
+		TenantID:         c.TenantID,
+		TenantName:       c.TenantName,
+		TokenID:          c.Token,
+		Username:         c.Username,
+		UserID:           c.UserID,
+	}
+
+	client, err := huaweisdk.NewClient(ao.IdentityEndpoint)
+	if err != nil {
+		return err
+	}
+
+	// Set UserAgent
+	client.UserAgent.Prepend(terraform.UserAgentString())
+
+	config := &tls.Config{}
+	if c.CACertFile != "" {
+		caCert, _, err := pathorcontents.Read(c.CACertFile)
+		if err != nil {
+			return fmt.Errorf("Error reading CA Cert: %s", err)
+		}
+
+		caCertPool := x509.NewCertPool()
+		caCertPool.AppendCertsFromPEM([]byte(caCert))
+		config.RootCAs = caCertPool
+	}
+
+	if c.Insecure {
+		config.InsecureSkipVerify = true
+	}
+
+	if c.ClientCertFile != "" && c.ClientKeyFile != "" {
+		clientCert, _, err := pathorcontents.Read(c.ClientCertFile)
+		if err != nil {
+			return fmt.Errorf("Error reading Client Cert: %s", err)
+		}
+		clientKey, _, err := pathorcontents.Read(c.ClientKeyFile)
+		if err != nil {
+			return fmt.Errorf("Error reading Client Key: %s", err)
+		}
+
+		cert, err := tls.X509KeyPair([]byte(clientCert), []byte(clientKey))
+		if err != nil {
+			return err
+		}
+
+		config.Certificates = []tls.Certificate{cert}
+		config.BuildNameToCertificate()
+	}
+
+	// if OS_DEBUG is set, log the requests and responses
+	var osDebug bool
+	if os.Getenv("OS_DEBUG") != "" {
+		osDebug = true
+	}
+
+	transport := &http.Transport{Proxy: http.ProxyFromEnvironment, TLSClientConfig: config}
+	client.HTTPClient = http.Client{
+		Transport: &LogRoundTripper{
+			Rt:      transport,
+			OsDebug: osDebug,
+		},
+	}
+
+	// If using Swift Authentication, there's no need to validate authentication normally.
+	if !c.Swauth {
+		err = huaweisdk.Authenticate(client, ao)
+		if err != nil {
+			return err
+		}
+	}
+
+	c.HwClient = client
+	//fmt.Printf("[DEBUG] Region: %s.\n", c.Region)
 
 	return nil
 }
@@ -332,4 +429,14 @@ func (c *Config) loadCESClient(region string) (*gophercloud.ServiceClient, error
 		Region:       c.determineRegion(region),
 		Availability: c.getEndpointType(),
 	})
+}
+
+func (c *Config) getHwEndpointType() golangsdk.Availability {
+	if c.EndpointType == "internal" || c.EndpointType == "internalURL" {
+		return golangsdk.AvailabilityInternal
+	}
+	if c.EndpointType == "admin" || c.EndpointType == "adminURL" {
+		return golangsdk.AvailabilityAdmin
+	}
+	return golangsdk.AvailabilityPublic
 }
