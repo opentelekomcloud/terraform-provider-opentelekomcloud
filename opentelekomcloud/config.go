@@ -327,10 +327,10 @@ func (c *Config) computeV2Client(region string) (*gophercloud.ServiceClient, err
 	})
 }
 
-func (c *Config) dnsV2Client(region string) (*gophercloud.ServiceClient, error) {
-	return openstack.NewDNSV2(c.OsClient, gophercloud.EndpointOpts{
+func (c *Config) dnsV2Client(region string) (*golangsdk.ServiceClient, error) {
+	return huaweisdk.NewDNSV2(c.HwClient, golangsdk.EndpointOpts{
 		Region:       c.determineRegion(region),
-		Availability: c.getEndpointType(),
+		Availability: c.getHwEndpointType(),
 	})
 }
 
