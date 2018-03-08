@@ -317,7 +317,7 @@ The following arguments are supported:
     the server. Changing this creates a new server.
 
 * `network` - (Optional) An array of one or more networks to attach to the
-    instance. Required when there are multiple networks difined for the tenant
+    instance. Required when there are multiple networks defined for the tenant. 
     The network object structure is documented below. Changing this creates a 
     new server.
 
