@@ -410,3 +410,10 @@ func (c *Config) getHwEndpointType() golangsdk.Availability {
 	}
 	return golangsdk.AvailabilityPublic
 }
+
+func (c *Config) loadECSV1Client(region string) (*golangsdk.ServiceClient, error) {
+	return huaweisdk.NewComputeV1(c.HwClient, golangsdk.EndpointOpts{
+		Region:       c.determineRegion(region),
+		Availability: c.getHwEndpointType(),
+	})
+}

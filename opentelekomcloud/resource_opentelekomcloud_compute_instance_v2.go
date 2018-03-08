@@ -346,6 +346,11 @@ func resourceComputeInstanceV2() *schema.Resource {
 				Type:     schema.TypeMap,
 				Computed: true,
 			},
+			"auto_recovery": &schema.Schema{
+				Type:     schema.TypeBool,
+				Optional: true,
+				Computed: true,
+			},
 		},
 	}
 }
@@ -484,6 +489,14 @@ func resourceComputeInstanceV2Create(d *schema.ResourceData, meta interface{}) e
 		}
 	}
 
+	if hasFilledOpt(d, "auto_recovery") {
+		ar := d.Get("auto_recovery").(bool)
+		log.Printf("[DEBUG] Set auto recovery of instance to %t", ar)
+		err = setAutoRecoveryForInstance(d, meta, server.ID, ar)
+		if err != nil {
+			log.Printf("[WARN] Error setting auto recovery of instance:%s, err=%s", server.ID, err)
+		}
+	}
 	return resourceComputeInstanceV2Read(d, meta)
 }
 
@@ -604,6 +617,12 @@ func resourceComputeInstanceV2Read(d *schema.ResourceData, meta interface{}) err
 		tagset.Remove(name)
 	}
 	d.Set("tags", tagset.List())
+
+	ar, err := resourceECSAutoRecoveryV1Read(d, meta, d.Id())
+	if err != nil {
+		return fmt.Errorf("Error reading auto recovery of instance:%s, err=%s", d.Id(), err)
+	}
+	d.Set("auto_recovery", ar)
 
 	return nil
 }
@@ -837,6 +856,15 @@ func resourceComputeInstanceV2Update(d *schema.ResourceData, meta interface{}) e
 			if err != nil {
 				return fmt.Errorf("Error creating tags for instance (%s): %s", d.Id(), err)
 			}
+		}
+	}
+
+	if d.HasChange("auto_recovery") {
+		ar := d.Get("auto_recovery").(bool)
+		log.Printf("[DEBUG] Update auto recovery of instance to %t", ar)
+		err = setAutoRecoveryForInstance(d, meta, d.Id(), ar)
+		if err != nil {
+			return fmt.Errorf("Error updating auto recovery of instance:%s, err:%s", d.Id(), err)
 		}
 	}
 

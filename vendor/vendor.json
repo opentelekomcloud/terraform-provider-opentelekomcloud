@@ -868,10 +868,10 @@
 			"revisionTime": "2018-02-26T07:57:01Z"
 		},
 		{
-			"checksumSHA1": "l7k3D1MR0PFMNGMkCaRCvEr4Yp8=",
+			"checksumSHA1": "9wStskuAkyPfyAeHDua8VLDzm2o=",
 			"path": "github.com/huaweicloud/golangsdk/openstack",
-			"revision": "98f31e4f21bec892b331ee55c5a5fff72d407abc",
-			"revisionTime": "2018-02-26T07:57:01Z"
+			"revision": "6c216c0dcd5ac8138897f0a14b1b1f1004394dfd",
+			"revisionTime": "2018-03-08T08:40:13Z"
 		},
 		{
 			"checksumSHA1": "plsG8kyRJhFGnhGfO0scQk5kRLw=",
@@ -884,6 +884,12 @@
 			"path": "github.com/huaweicloud/golangsdk/openstack/dns/v2/zones",
 			"revision": "98f31e4f21bec892b331ee55c5a5fff72d407abc",
 			"revisionTime": "2018-02-26T07:57:01Z"
+		},
+		{
+			"checksumSHA1": "/GtDTHl+01QKRmNPxxdWXfuJ/nw=",
+			"path": "github.com/huaweicloud/golangsdk/openstack/ecs/v1/auto_recovery",
+			"revision": "c2811194004bd21b96bbd4cb3e0129661041011f",
+			"revisionTime": "2018-03-15T04:07:47Z"
 		},
 		{
 			"checksumSHA1": "6cxgVwctlHbqIqO9rHVTwmDtxhk=",
