@@ -7,7 +7,6 @@ import (
 	"log"
 	"net/http"
 	"os"
-
 	"strings"
 
 	"github.com/aws/aws-sdk-go/aws"
@@ -68,41 +67,38 @@ func (c *Config) LoadAndValidate() error {
 	if !validEndpoint {
 		return fmt.Errorf("Invalid endpoint type provided")
 	}
-	err := newopenstackClient(c)
+
+	config, err := generateTLSConfig(c)
+	if err != nil {
+		return err
+	}
+	transport := &http.Transport{Proxy: http.ProxyFromEnvironment, TLSClientConfig: config}
+
+	// if OS_DEBUG is set, log the requests and responses
+	var osDebug bool
+	if os.Getenv("OS_DEBUG") != "" {
+		osDebug = true
+	}
+
+	err = c.newopenstackClient(transport, osDebug)
 	if err != nil {
 		return err
 	}
 
-	return newhwClient(c)
+	err = c.newhwClient(transport, osDebug)
+	if err != nil {
+		return err
+	}
 
+	return c.newS3Session(osDebug)
 }
 
-func newopenstackClient(c *Config) error {
-	ao := gophercloud.AuthOptions{
-		DomainID:         c.DomainID,
-		DomainName:       c.DomainName,
-		IdentityEndpoint: c.IdentityEndpoint,
-		Password:         c.Password,
-		TenantID:         c.TenantID,
-		TenantName:       c.TenantName,
-		TokenID:          c.Token,
-		Username:         c.Username,
-		UserID:           c.UserID,
-	}
-
-	client, err := openstack.NewClient(ao.IdentityEndpoint)
-	if err != nil {
-		return err
-	}
-
-	// Set UserAgent
-	client.UserAgent.Prepend(terraform.UserAgentString())
-
+func generateTLSConfig(c *Config) (*tls.Config, error) {
 	config := &tls.Config{}
 	if c.CACertFile != "" {
 		caCert, _, err := pathorcontents.Read(c.CACertFile)
 		if err != nil {
-			return fmt.Errorf("Error reading CA Cert: %s", err)
+			return nil, fmt.Errorf("Error reading CA Cert: %s", err)
 		}
 
 		caCertPool := x509.NewCertPool()
@@ -117,47 +113,26 @@ func newopenstackClient(c *Config) error {
 	if c.ClientCertFile != "" && c.ClientKeyFile != "" {
 		clientCert, _, err := pathorcontents.Read(c.ClientCertFile)
 		if err != nil {
-			return fmt.Errorf("Error reading Client Cert: %s", err)
+			return nil, fmt.Errorf("Error reading Client Cert: %s", err)
 		}
 		clientKey, _, err := pathorcontents.Read(c.ClientKeyFile)
 		if err != nil {
-			return fmt.Errorf("Error reading Client Key: %s", err)
+			return nil, fmt.Errorf("Error reading Client Key: %s", err)
 		}
 
 		cert, err := tls.X509KeyPair([]byte(clientCert), []byte(clientKey))
 		if err != nil {
-			return err
+			return nil, err
 		}
 
 		config.Certificates = []tls.Certificate{cert}
 		config.BuildNameToCertificate()
 	}
 
-	// if OS_DEBUG is set, log the requests and responses
-	var osDebug bool
-	if os.Getenv("OS_DEBUG") != "" {
-		osDebug = true
-	}
+	return config, nil
+}
 
-	transport := &http.Transport{Proxy: http.ProxyFromEnvironment, TLSClientConfig: config}
-	client.HTTPClient = http.Client{
-		Transport: &LogRoundTripper{
-			Rt:      transport,
-			OsDebug: osDebug,
-		},
-	}
-
-	// If using Swift Authentication, there's no need to validate authentication normally.
-	if !c.Swauth {
-		err = openstack.Authenticate(client, ao)
-		if err != nil {
-			return err
-		}
-	}
-
-	c.OsClient = client
-	//fmt.Printf("[DEBUG] Region: %s.\n", c.Region)
-
+func (c *Config) newS3Session(osDebug bool) error {
 	// Don't get AWS session unless we need it for Accesskey, SecretKey.
 	if c.AccessKey != "" && c.SecretKey != "" {
 		// Setup AWS/S3 client/config information for Swift S3 buckets
@@ -207,11 +182,50 @@ func newopenstackClient(c *Config) error {
 			return errwrap.Wrapf("Error creating Swift S3 session: {{err}}", err)
 		}
 	}
-
 	return nil
 }
 
-func newhwClient(c *Config) error {
+func (c *Config) newopenstackClient(transport *http.Transport, osDebug bool) error {
+	ao := gophercloud.AuthOptions{
+		DomainID:         c.DomainID,
+		DomainName:       c.DomainName,
+		IdentityEndpoint: c.IdentityEndpoint,
+		Password:         c.Password,
+		TenantID:         c.TenantID,
+		TenantName:       c.TenantName,
+		TokenID:          c.Token,
+		Username:         c.Username,
+		UserID:           c.UserID,
+	}
+
+	client, err := openstack.NewClient(ao.IdentityEndpoint)
+	if err != nil {
+		return err
+	}
+
+	// Set UserAgent
+	client.UserAgent.Prepend(terraform.UserAgentString())
+
+	client.HTTPClient = http.Client{
+		Transport: &LogRoundTripper{
+			Rt:      transport,
+			OsDebug: osDebug,
+		},
+	}
+
+	// If using Swift Authentication, there's no need to validate authentication normally.
+	if !c.Swauth {
+		err = openstack.Authenticate(client, ao)
+		if err != nil {
+			return err
+		}
+	}
+
+	c.OsClient = client
+	return nil
+}
+
+func (c *Config) newhwClient(transport *http.Transport, osDebug bool) error {
 	ao := golangsdk.AuthOptions{
 		DomainID:         c.DomainID,
 		DomainName:       c.DomainName,
@@ -232,48 +246,6 @@ func newhwClient(c *Config) error {
 	// Set UserAgent
 	client.UserAgent.Prepend(terraform.UserAgentString())
 
-	config := &tls.Config{}
-	if c.CACertFile != "" {
-		caCert, _, err := pathorcontents.Read(c.CACertFile)
-		if err != nil {
-			return fmt.Errorf("Error reading CA Cert: %s", err)
-		}
-
-		caCertPool := x509.NewCertPool()
-		caCertPool.AppendCertsFromPEM([]byte(caCert))
-		config.RootCAs = caCertPool
-	}
-
-	if c.Insecure {
-		config.InsecureSkipVerify = true
-	}
-
-	if c.ClientCertFile != "" && c.ClientKeyFile != "" {
-		clientCert, _, err := pathorcontents.Read(c.ClientCertFile)
-		if err != nil {
-			return fmt.Errorf("Error reading Client Cert: %s", err)
-		}
-		clientKey, _, err := pathorcontents.Read(c.ClientKeyFile)
-		if err != nil {
-			return fmt.Errorf("Error reading Client Key: %s", err)
-		}
-
-		cert, err := tls.X509KeyPair([]byte(clientCert), []byte(clientKey))
-		if err != nil {
-			return err
-		}
-
-		config.Certificates = []tls.Certificate{cert}
-		config.BuildNameToCertificate()
-	}
-
-	// if OS_DEBUG is set, log the requests and responses
-	var osDebug bool
-	if os.Getenv("OS_DEBUG") != "" {
-		osDebug = true
-	}
-
-	transport := &http.Transport{Proxy: http.ProxyFromEnvironment, TLSClientConfig: config}
 	client.HTTPClient = http.Client{
 		Transport: &LogRoundTripper{
 			Rt:      transport,
@@ -290,8 +262,6 @@ func newhwClient(c *Config) error {
 	}
 
 	c.HwClient = client
-	//fmt.Printf("[DEBUG] Region: %s.\n", c.Region)
-
 	return nil
 }
 
