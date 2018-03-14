@@ -826,6 +826,12 @@
 			"versionExact": "v0.10.0"
 		},
 		{
+			"checksumSHA1": "Fzbv+N7hFXOtrR6E7ZcHT3jEE9s=",
+			"path": "github.com/hashicorp/terraform/helper/structure",
+			"revision": "ecec59f0f0ad69350dfc8beb76c2d95cfd92f476",
+			"revisionTime": "2018-03-15T21:06:57Z"
+		},
+		{
 			"checksumSHA1": "JL8eJjRMxGI2zz2fMYXhXQpRtPk=",
 			"path": "github.com/hashicorp/terraform/helper/validation",
 			"revision": "ecec59f0f0ad69350dfc8beb76c2d95cfd92f476",

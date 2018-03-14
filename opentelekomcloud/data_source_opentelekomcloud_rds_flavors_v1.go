@@ -5,7 +5,6 @@ import (
 	"log"
 
 	"github.com/hashicorp/terraform/helper/schema"
-
 	"github.com/huaweicloud/golangsdk/openstack/rds/v1/datastores"
 	"github.com/huaweicloud/golangsdk/openstack/rds/v1/flavors"
 )
@@ -55,11 +54,8 @@ func dataSourceRdsFlavorV1() *schema.Resource {
 
 func dataSourcedataSourceRdsFlavorV1Read(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*Config)
-	//log.Printf("[DEBUG] dataSourcedataSourceRdsFlavorV1Read config.OsClient %+v ", config.OsClient)
-	//log.Printf("[DEBUG] dataSourcedataSourceRdsFlavorV1Read config %+v ", config)
-	//log.Printf("[DEBUG] dataSourcedataSourceRdsFlavorV1Read d %+v ", d)
 
-	rdsClient, err := config.RdsV1Client(GetRegion(d, config))
+	rdsClient, err := config.rdsV1Client(GetRegion(d, config))
 	if err != nil {
 		return fmt.Errorf("Error creating OpenTelekomCloud rds client: %s", err)
 	}
@@ -76,6 +72,7 @@ func dataSourcedataSourceRdsFlavorV1Read(d *schema.ResourceData, meta interface{
 	for _, datastore := range datastoresList {
 		if datastore.Name == d.Get("datastore_version").(string) {
 			datastoreId = datastore.ID
+			break
 		}
 	}
 	if datastoreId == "" {
@@ -98,6 +95,7 @@ func dataSourcedataSourceRdsFlavorV1Read(d *schema.ResourceData, meta interface{
 		for _, flavor := range flavorsList {
 			if flavor.SpecCode == d.Get("speccode").(string) {
 				rdsFlavor = flavor
+				break
 			}
 		}
 	}
@@ -108,7 +106,6 @@ func dataSourcedataSourceRdsFlavorV1Read(d *schema.ResourceData, meta interface{
 
 	d.SetId(rdsFlavor.ID)
 
-	d.Set("id", rdsFlavor.ID)
 	d.Set("name", rdsFlavor.Name)
 	d.Set("ram", rdsFlavor.Ram)
 	d.Set("speccode", rdsFlavor.SpecCode)

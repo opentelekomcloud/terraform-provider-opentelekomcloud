@@ -9,7 +9,6 @@ import (
 	"github.com/huaweicloud/golangsdk/openstack/rds/v1/instances"
 )
 
-// PASS
 func TestAccRDSV1Instance_basic(t *testing.T) {
 	var instance instances.Instance
 
@@ -19,11 +18,15 @@ func TestAccRDSV1Instance_basic(t *testing.T) {
 		CheckDestroy: testAccCheckRDSV1InstanceDestroy,
 		Steps: []resource.TestStep{
 			resource.TestStep{
-				Config: TestAccSInstanceV1Config_basic,
+				Config: testAccSInstanceV1Config_basic,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckRDSV1InstanceExists("opentelekomcloud_rds_instance_v1.instance", &instance),
 					resource.TestCheckResourceAttr(
 						"opentelekomcloud_rds_instance_v1.instance", "status", "ACTIVE"),
+					resource.TestCheckResourceAttr(
+						"opentelekomcloud_rds_instance_v1.instance", "region", "eu-de"),
+					resource.TestCheckResourceAttr(
+						"opentelekomcloud_rds_instance_v1.instance", "availabilityzone", "eu-de-01"),
 				),
 			},
 		},
@@ -32,7 +35,7 @@ func TestAccRDSV1Instance_basic(t *testing.T) {
 
 func testAccCheckRDSV1InstanceDestroy(s *terraform.State) error {
 	config := testAccProvider.Meta().(*Config)
-	rdsClient, err := config.RdsV1Client(OS_REGION_NAME)
+	rdsClient, err := config.rdsV1Client(OS_REGION_NAME)
 	if err != nil {
 		return fmt.Errorf("Error creating OpenTelekomCloud rds: %s", err)
 	}
@@ -63,7 +66,7 @@ func testAccCheckRDSV1InstanceExists(n string, instance *instances.Instance) res
 		}
 
 		config := testAccProvider.Meta().(*Config)
-		rdsClient, err := config.RdsV1Client(OS_REGION_NAME)
+		rdsClient, err := config.rdsV1Client(OS_REGION_NAME)
 		if err != nil {
 			return fmt.Errorf("Error creating OpenTelekomCloud rds client: %s ", err)
 		}
@@ -83,7 +86,7 @@ func testAccCheckRDSV1InstanceExists(n string, instance *instances.Instance) res
 	}
 }
 
-var TestAccSInstanceV1Config_basic = fmt.Sprintf(`
+var testAccSInstanceV1Config_basic = fmt.Sprintf(`
 data "opentelekomcloud_rds_flavors_v1" "flavor" {
     region = "eu-de"
     datastore_name = "PostgreSQL"

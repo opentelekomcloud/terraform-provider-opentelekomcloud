@@ -3,13 +3,14 @@ package opentelekomcloud
 import (
 	"fmt"
 	"log"
+	"strings"
+	"time"
 
 	"github.com/hashicorp/terraform/helper/resource"
 	"github.com/hashicorp/terraform/helper/schema"
+	"github.com/hashicorp/terraform/helper/validation"
 	"github.com/huaweicloud/golangsdk"
 	"github.com/huaweicloud/golangsdk/openstack/rds/v1/instances"
-	"strings"
-	"time"
 )
 
 func resourceRdsInstance() *schema.Resource {
@@ -50,12 +51,10 @@ func resourceRdsInstance() *schema.Resource {
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
 						"type": &schema.Schema{
-							Type:     schema.TypeString,
-							Required: true,
-							ForceNew: true,
-							ValidateFunc: func(v interface{}, k string) (ws []string, errors []error) {
-								return ValidateStringList(v, k, []string{"PostgreSQL", "SQLServer", "MySQL"})
-							},
+							Type:         schema.TypeString,
+							Required:     true,
+							ForceNew:     true,
+							ValidateFunc: validation.StringInSlice([]string{"PostgreSQL", "SQLServer", "MySQL"}, true),
 						},
 						"version": &schema.Schema{
 							Type:     schema.TypeString,
@@ -174,11 +173,9 @@ func resourceRdsInstance() *schema.Resource {
 							Optional: true,
 						},
 						"replicationmode": &schema.Schema{
-							Type:     schema.TypeString,
-							Optional: true,
-							ValidateFunc: func(v interface{}, k string) (ws []string, errors []error) {
-								return ValidateStringList(v, k, []string{"async", "sync", "semisync"})
-							},
+							Type:         schema.TypeString,
+							Optional:     true,
+							ValidateFunc: validation.StringInSlice([]string{"async", "sync", "semisync"}, true),
 						},
 					}},
 			},
@@ -310,7 +307,7 @@ func InstanceStateRefreshFunc(client *golangsdk.ServiceClient, instanceID string
 
 func resourceInstanceCreate(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*Config)
-	client, err := config.RdsV1Client(GetRegion(d, config))
+	client, err := config.rdsV1Client(GetRegion(d, config))
 	if err != nil {
 		return fmt.Errorf("Error creating OpenTelekomCloud rds client: %s ", err)
 	}
@@ -363,7 +360,7 @@ func resourceInstanceCreate(d *schema.ResourceData, meta interface{}) error {
 
 func resourceInstanceRead(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*Config)
-	client, err := config.RdsV1Client(GetRegion(d, config))
+	client, err := config.rdsV1Client(GetRegion(d, config))
 	if err != nil {
 		return fmt.Errorf("Error creating OpenTelekomCloud rds client: %s", err)
 	}
@@ -437,17 +434,6 @@ func resourceInstanceRead(d *schema.ResourceData, meta interface{}) error {
 			"[DEBUG] Error saving datastore to Rds instance (%s): %s", d.Id(), err)
 	}
 
-	//haList := make([]map[string]interface{}, 0, 1)
-	//ha := map[string]interface{}{
-	//	"enable":          instance.Ha.Enable,
-	//	"replicationmode": instance.Ha.ReplicationMode,
-	//}
-	//haList = append(haList, ha)
-	//if err := d.Set("ha", haList); err != nil {
-	//	return fmt.Errorf(
-	//		"[DEBUG] Error saving haSet to Rds instance (%s): %s", d.Id(), err)
-	//}
-
 	d.Set("updated", instance.Updated)
 	d.Set("created", instance.Created)
 	return nil
@@ -455,7 +441,7 @@ func resourceInstanceRead(d *schema.ResourceData, meta interface{}) error {
 
 func resourceInstanceDelete(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*Config)
-	client, err := config.RdsV1Client(GetRegion(d, config))
+	client, err := config.rdsV1Client(GetRegion(d, config))
 	if err != nil {
 		return fmt.Errorf("Error creating OpenTelekomCloud rds client: %s ", err)
 	}
@@ -487,7 +473,7 @@ func resourceInstanceDelete(d *schema.ResourceData, meta interface{}) error {
 	return nil
 }
 
-func InstanceStateUpdateRefreshFunc(client *golangsdk.ServiceClient, instanceID string, size int) resource.StateRefreshFunc {
+func instanceStateUpdateRefreshFunc(client *golangsdk.ServiceClient, instanceID string, size int) resource.StateRefreshFunc {
 	return func() (interface{}, string, error) {
 		instance, err := instances.Get(client, instanceID).Extract()
 		if err != nil {
@@ -505,7 +491,7 @@ func InstanceStateUpdateRefreshFunc(client *golangsdk.ServiceClient, instanceID 
 	}
 }
 
-func InstanceStateFlavorUpdateRefreshFunc(client *golangsdk.ServiceClient, instanceID string, flavorID string) resource.StateRefreshFunc {
+func instanceStateFlavorUpdateRefreshFunc(client *golangsdk.ServiceClient, instanceID string, flavorID string) resource.StateRefreshFunc {
 	return func() (interface{}, string, error) {
 		instance, err := instances.Get(client, instanceID).Extract()
 		if err != nil {
@@ -514,10 +500,6 @@ func InstanceStateFlavorUpdateRefreshFunc(client *golangsdk.ServiceClient, insta
 			}
 			return nil, "", err
 		}
-		//log.Printf("[DEBUG] Updating instance.Flavor : %+v", instance.Flavor)
-		//if instance.Flavor.Id == flavorID {
-		//    return instance, "FLAVOR_UPDATED", nil
-		//}
 
 		return instance, instance.Status, nil
 	}
@@ -525,7 +507,7 @@ func InstanceStateFlavorUpdateRefreshFunc(client *golangsdk.ServiceClient, insta
 
 func resourceInstanceUpdate(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*Config)
-	client, err := config.RdsV1Client(GetRegion(d, config))
+	client, err := config.rdsV1Client(GetRegion(d, config))
 	if err != nil {
 		return fmt.Errorf("Error Updating OpenTelekomCloud rds client: %s ", err)
 	}
@@ -539,7 +521,9 @@ func resourceInstanceUpdate(d *schema.ResourceData, meta interface{}) error {
 		volumeRaw := d.Get("volume").([]interface{})
 		log.Printf("[DEBUG] volumeRaw: %+v", volumeRaw)
 		if len(volumeRaw) == 1 {
-			volume["size"] = volumeRaw[0].(map[string]interface{})["size"].(int)
+			if m, ok := volumeRaw[0].(map[string]interface{}); ok {
+				volume["size"] = m["size"].(int)
+			}
 		}
 		log.Printf("[DEBUG] volume: %+v", volume)
 		updateOpts.Volume = volume
@@ -551,7 +535,7 @@ func resourceInstanceUpdate(d *schema.ResourceData, meta interface{}) error {
 		stateConf := &resource.StateChangeConf{
 			Pending:    []string{"ACTIVE"},
 			Target:     []string{"UPDATED"},
-			Refresh:    InstanceStateUpdateRefreshFunc(client, id, updateOpts.Volume["size"].(int)),
+			Refresh:    instanceStateUpdateRefreshFunc(client, id, updateOpts.Volume["size"].(int)),
 			Timeout:    d.Timeout(schema.TimeoutCreate),
 			Delay:      15 * time.Second,
 			MinTimeout: 3 * time.Second,
@@ -580,7 +564,7 @@ func resourceInstanceUpdate(d *schema.ResourceData, meta interface{}) error {
 		stateConf := &resource.StateChangeConf{
 			Pending:    []string{"MODIFYING"},
 			Target:     []string{"ACTIVE"},
-			Refresh:    InstanceStateFlavorUpdateRefreshFunc(client, id, d.Get("flavorref").(string)),
+			Refresh:    instanceStateFlavorUpdateRefreshFunc(client, id, d.Get("flavorref").(string)),
 			Timeout:    d.Timeout(schema.TimeoutCreate),
 			Delay:      15 * time.Second,
 			MinTimeout: 3 * time.Second,
@@ -600,8 +584,11 @@ func resourceInstanceUpdate(d *schema.ResourceData, meta interface{}) error {
 		backupstrategyRaw := d.Get("backupstrategy").([]interface{})
 		log.Printf("[DEBUG] backupstrategyRaw: %+v", backupstrategyRaw)
 		if len(backupstrategyRaw) == 1 {
-			updatepolicyOpts.StartTime = backupstrategyRaw[0].(map[string]interface{})["starttime"].(string)
-			updatepolicyOpts.KeepDays = backupstrategyRaw[0].(map[string]interface{})["keepdays"].(int)
+			if m, ok := backupstrategyRaw[0].(map[string]interface{}); ok {
+				updatepolicyOpts.StartTime = m["starttime"].(string)
+				updatepolicyOpts.KeepDays = m["keepdays"].(int)
+			}
+
 		}
 		log.Printf("[DEBUG] updatepolicyOpts: %+v", updatepolicyOpts)
 		_, err = instances.UpdatePolicy(client, updatepolicyOpts, id).Extract()
