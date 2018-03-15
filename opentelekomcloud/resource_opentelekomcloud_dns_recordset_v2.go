@@ -53,20 +53,20 @@ func resourceDNSRecordSetV2() *schema.Resource {
 			},
 			"records": &schema.Schema{
 				Type:     schema.TypeList,
-				Optional: true,
+				Required: true,
 				ForceNew: false,
 				Elem:     &schema.Schema{Type: schema.TypeString},
+				MinItems: 1,
 			},
 			"ttl": &schema.Schema{
 				Type:     schema.TypeInt,
 				Optional: true,
-				Computed: true,
 				ForceNew: false,
+				Default:  300,
 			},
 			"type": &schema.Schema{
 				Type:     schema.TypeString,
-				Optional: true,
-				Computed: true,
+				Required: true,
 				ForceNew: true,
 			},
 			"value_specs": &schema.Schema{
@@ -121,6 +121,11 @@ func resourceDNSRecordSetV2Create(d *schema.ResourceData, meta interface{}) erro
 	}
 
 	_, err = stateConf.WaitForState()
+	if err != nil {
+		return fmt.Errorf(
+			"Error waiting for record set (%s) to become ACTIVE for creation: %s",
+			n.ID, err)
+	}
 
 	id := fmt.Sprintf("%s/%s", zoneID, n.ID)
 	d.SetId(id)
@@ -211,6 +216,11 @@ func resourceDNSRecordSetV2Update(d *schema.ResourceData, meta interface{}) erro
 	}
 
 	_, err = stateConf.WaitForState()
+	if err != nil {
+		return fmt.Errorf(
+			"Error waiting for record set (%s) to become ACTIVE for updation: %s",
+			recordsetID, err)
+	}
 
 	return resourceDNSRecordSetV2Read(d, meta)
 }
@@ -230,13 +240,13 @@ func resourceDNSRecordSetV2Delete(d *schema.ResourceData, meta interface{}) erro
 
 	err = recordsets.Delete(dnsClient, zoneID, recordsetID).ExtractErr()
 	if err != nil {
-		return fmt.Errorf("Error deleting OpenTelekomCloud DNS  record set: %s", err)
+		return fmt.Errorf("Error deleting OpenTelekomCloud DNS record set: %s", err)
 	}
 
 	log.Printf("[DEBUG] Waiting for DNS record set (%s) to be deleted", recordsetID)
 	stateConf := &resource.StateChangeConf{
 		Target:     []string{"DELETED"},
-		Pending:    []string{"ACTIVE", "PENDING"},
+		Pending:    []string{"ACTIVE", "PENDING", "ERROR"},
 		Refresh:    waitForDNSRecordSet(dnsClient, zoneID, recordsetID),
 		Timeout:    d.Timeout(schema.TimeoutDelete),
 		Delay:      5 * time.Second,
@@ -244,6 +254,11 @@ func resourceDNSRecordSetV2Delete(d *schema.ResourceData, meta interface{}) erro
 	}
 
 	_, err = stateConf.WaitForState()
+	if err != nil {
+		return fmt.Errorf(
+			"Error waiting for record set (%s) to become DELETED for deletion: %s",
+			recordsetID, err)
+	}
 
 	d.SetId("")
 	return nil
@@ -261,7 +276,7 @@ func waitForDNSRecordSet(dnsClient *golangsdk.ServiceClient, zoneID, recordsetId
 		}
 
 		log.Printf("[DEBUG] OpenTelekomCloud DNS record set (%s) current status: %s", recordset.ID, recordset.Status)
-		return recordset, recordset.Status, nil
+		return recordset, parseStatus(recordset.Status), nil
 	}
 }
 
