@@ -60,6 +60,23 @@ func resourceDNSZoneV2() *schema.Resource {
 				Type:     schema.TypeString,
 				Optional: true,
 			},
+			"router": {
+				Type:     schema.TypeSet,
+				Optional: true,
+				ForceNew: true,
+				Elem: &schema.Resource{
+					Schema: map[string]*schema.Schema{
+						"router_id": {
+							Type:     schema.TypeString,
+							Required: true,
+						},
+						"router_region": {
+							Type:     schema.TypeString,
+							Required: true,
+						},
+					},
+				},
+			},
 			"masters": &schema.Schema{
 				Type:     schema.TypeSet,
 				Computed: true,
@@ -74,6 +91,24 @@ func resourceDNSZoneV2() *schema.Resource {
 	}
 }
 
+func resourceDNSRouter(d *schema.ResourceData) map[string]string {
+	router := d.Get("router").(*schema.Set).List()
+
+	if len(router) > 0 {
+		mp := make(map[string]string)
+		c := router[0].(map[string]interface{})
+
+		if val, ok := c["router_id"]; ok {
+			mp["router_id"] = val.(string)
+		}
+		if val, ok := c["router_region"]; ok {
+			mp["router_region"] = val.(string)
+		}
+		return mp
+	}
+	return nil
+}
+
 func resourceDNSZoneV2Create(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*Config)
 	dnsClient, err := config.dnsV2Client(GetRegion(d, config))
@@ -82,9 +117,18 @@ func resourceDNSZoneV2Create(d *schema.ResourceData, meta interface{}) error {
 	}
 
 	zone_type := d.Get("type").(string)
+	router := d.Get("router").(*schema.Set).List()
+
+	// router is required when creating private zone
+	if zone_type == "private" {
+		if len(router) < 1 {
+			return fmt.Errorf("The argument (router) is required when creating OpenTelekomCloud DNS private zone")
+		}
+	}
 	vs := MapResourceProp(d, "value_specs")
 	// Add zone_type to the list.  We do this to keep GopherCloud OpenStack standard.
 	vs["zone_type"] = zone_type
+	vs["router"] = resourceDNSRouter(d)
 
 	createOpts := ZoneCreateOpts{
 		zones.CreateOpts{

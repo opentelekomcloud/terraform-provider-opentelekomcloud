@@ -47,6 +47,31 @@ func TestAccDNSV2Zone_basic(t *testing.T) {
 	})
 }
 
+func TestAccDNSV2Zone_private(t *testing.T) {
+	var zone zones.Zone
+	// TODO: Why does it lowercase names in back-end?
+	var zoneName = fmt.Sprintf("acpttest%s.com.", acctest.RandString(5))
+
+	resource.Test(t, resource.TestCase{
+		PreCheck:     func() { testAccPreCheckDNS(t) },
+		Providers:    testAccProviders,
+		CheckDestroy: testAccCheckDNSV2ZoneDestroy,
+		Steps: []resource.TestStep{
+			resource.TestStep{
+				Config: testAccDNSV2Zone_private(zoneName),
+				//ExpectNonEmptyPlan: true,
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckDNSV2ZoneExists("opentelekomcloud_dns_zone_v2.zone_1", &zone),
+					resource.TestCheckResourceAttr(
+						"opentelekomcloud_dns_zone_v2.zone_1", "description", "a zone"),
+					resource.TestCheckResourceAttr(
+						"opentelekomcloud_dns_zone_v2.zone_1", "type", "private"),
+				),
+			},
+		},
+	})
+}
+
 // PASS, but normally skip
 func TestAccDNSV2Zone_readTTL(t *testing.T) {
 	var zone zones.Zone
@@ -155,6 +180,22 @@ func testAccDNSV2Zone_basic(zoneName string) string {
 			type = "public"
 		}
 	`, zoneName)
+}
+
+func testAccDNSV2Zone_private(zoneName string) string {
+	return fmt.Sprintf(`
+		resource "opentelekomcloud_dns_zone_v2" "zone_1" {
+			name = "%s"
+			email = "email1@example.com"
+			description = "a zone"
+			ttl = 3000
+			type = "private"
+			router = {
+				router_id = "%s"
+				router_region = "%s"
+			}
+		}
+	`, zoneName, OS_VPC_ID, OS_REGION_NAME)
 }
 
 func testAccDNSV2Zone_update(zoneName string) string {
