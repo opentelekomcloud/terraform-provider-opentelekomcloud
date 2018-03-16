@@ -113,6 +113,13 @@ func NewElasticLoadBalancer(client *golangsdk.ProviderClient, eo golangsdk.Endpo
 	return sc, err
 }
 
+//NewVpcServiceV1 creates the a ServiceClient that may be used to access the v1
+//vpc service which is a service of public ip management of huawei cloud
+func NewVpcServiceV1(client *golangsdk.ProviderClient, eo golangsdk.EndpointOpts) (*golangsdk.ServiceClient, error) {
+	sc, err := initClientOpts(client, eo, "network")
+	return sc, err
+}
+
 // NewNatV2 creates a ServiceClient that may be used with the v2 nat package.
 func NewNatV2(client *golangsdk.ProviderClient, eo golangsdk.EndpointOpts) (*golangsdk.ServiceClient, error) {
 	sc, err := initClientOpts(client, eo, "network")
