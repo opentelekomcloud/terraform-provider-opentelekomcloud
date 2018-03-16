@@ -4,9 +4,9 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/gophercloud/gophercloud/openstack/cloudeyeservice/alarmrule"
 	"github.com/hashicorp/terraform/helper/resource"
 	"github.com/hashicorp/terraform/terraform"
+	"github.com/huaweicloud/golangsdk/openstack/cloudeyeservice/alarmrule"
 )
 
 // PASS
@@ -94,6 +94,11 @@ resource "opentelekomcloud_compute_instance_v2" "vm_1" {
   }
 }
 
+resource "opentelekomcloud_smn_topic_v2" "topic_1" {
+  name		  = "topic_1"
+  display_name    = "The display name of topic_1"
+}
+
 resource "opentelekomcloud_ces_alarmrule" "alarmrule_1" {
   "alarm_name" = "alarm_rule1"
 
@@ -102,7 +107,7 @@ resource "opentelekomcloud_ces_alarmrule" "alarmrule_1" {
     "metric_name" = "network_outgoing_bytes_rate_inband"
     "dimensions" {
         "name" = "instance_id"
-        "value" = "12232415-6cc9-4c80-83ff-55a6613d14c3"
+        "value" = "${opentelekomcloud_compute_instance_v2.vm_1.id}"
     }
   }
   "condition"  {
@@ -114,10 +119,29 @@ resource "opentelekomcloud_ces_alarmrule" "alarmrule_1" {
     "count" = 1
   }
   "alarm_action_enabled" = false
+
+  "alarm_actions" {
+    "type" = "notification"
+    "notification_list" = [
+      "${opentelekomcloud_smn_topic_v2.topic_1.topic_urn}"
+    ]
+  }
 }
 `, OS_NETWORK_ID)
 
-const testCESAlarmRule_update = `
+var testCESAlarmRule_update = fmt.Sprintf(`
+resource "opentelekomcloud_compute_instance_v2" "vm_1" {
+  name = "instance_1"
+  network {
+    uuid = "%s"
+  }
+}
+
+resource "opentelekomcloud_smn_topic_v2" "topic_1" {
+  name		  = "topic_1"
+  display_name    = "The display name of topic_1"
+}
+
 resource "opentelekomcloud_ces_alarmrule" "alarmrule_1" {
   "alarm_name" = "alarm_rule1"
 
@@ -126,7 +150,7 @@ resource "opentelekomcloud_ces_alarmrule" "alarmrule_1" {
     "metric_name" = "network_outgoing_bytes_rate_inband"
     "dimensions" {
         "name" = "instance_id"
-        "value" = "12232415-6cc9-4c80-83ff-55a6613d14c3"
+        "value" = "${opentelekomcloud_compute_instance_v2.vm_1.id}"
     }
   }
   "condition"  {
@@ -139,5 +163,12 @@ resource "opentelekomcloud_ces_alarmrule" "alarmrule_1" {
   }
   "alarm_action_enabled" = false
   "alarm_enabled" = false
+
+  "alarm_actions" {
+    "type" = "notification"
+    "notification_list" = [
+      "${opentelekomcloud_smn_topic_v2.topic_1.topic_urn}"
+    ]
+  }
 }
-`
+`, OS_NETWORK_ID)

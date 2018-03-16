@@ -6,9 +6,9 @@ import (
 	"regexp"
 	"time"
 
-	"github.com/gophercloud/gophercloud/openstack/cloudeyeservice/alarmrule"
 	"github.com/hashicorp/terraform/helper/resource"
 	"github.com/hashicorp/terraform/helper/schema"
+	"github.com/huaweicloud/golangsdk/openstack/cloudeyeservice/alarmrule"
 )
 
 const nameCESAR = "CES-AlarmRule"
@@ -334,6 +334,52 @@ func resourceAlarmRule() *schema.Resource {
 	}
 }
 
+func getMetricOpts(d *schema.ResourceData) (alarmrule.MetricOpts, error) {
+	mos, ok := d.Get("metric").([]interface{})
+	if !ok {
+		return alarmrule.MetricOpts{}, fmt.Errorf("Error converting opt of metric:%v", d.Get("metric"))
+	}
+	mo := mos[0].(map[string]interface{})
+
+	mod := mo["dimensions"].([]interface{})
+	dopts := make([]alarmrule.DimensionOpts, len(mod))
+	for i, v := range mod {
+		v1 := v.(map[string]interface{})
+		dopts[i] = alarmrule.DimensionOpts{
+			Name:  v1["name"].(string),
+			Value: v1["value"].(string),
+		}
+	}
+	return alarmrule.MetricOpts{
+		Namespace:  mo["namespace"].(string),
+		MetricName: mo["metric_name"].(string),
+		Dimensions: dopts,
+	}, nil
+}
+
+func getAlarmAction(d *schema.ResourceData, name string) []alarmrule.ActionOpts {
+	aos := d.Get(name).([]interface{})
+	if len(aos) == 0 {
+		return nil
+	}
+	opts := make([]alarmrule.ActionOpts, len(aos))
+	for i, v := range aos {
+		v1 := v.(map[string]interface{})
+
+		v2 := v1["notification_list"].([]interface{})
+		nl := make([]string, len(v2))
+		for j, v3 := range v2 {
+			nl[j] = v3.(string)
+		}
+
+		opts[i] = alarmrule.ActionOpts{
+			Type:             v1["type"].(string),
+			NotificationList: nl,
+		}
+	}
+	return opts
+}
+
 func resourceAlarmRuleCreate(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*Config)
 	client, err := chooseCESClient(d, config)
@@ -341,10 +387,29 @@ func resourceAlarmRuleCreate(d *schema.ResourceData, meta interface{}) error {
 		return fmt.Errorf("Error creating Cloud Eye Service client: %s", err)
 	}
 
-	var createOpts alarmrule.CreateOpts
-	err = buildCESCreateParam(&createOpts, d)
+	metric, err := getMetricOpts(d)
 	if err != nil {
-		return fmt.Errorf("Error creating %s: building parameter failed:%s", nameCESAR, err)
+		return err
+	}
+	cos := d.Get("condition").([]interface{})
+	co := cos[0].(map[string]interface{})
+	createOpts := alarmrule.CreateOpts{
+		AlarmName:        d.Get("alarm_name").(string),
+		AlarmDescription: d.Get("alarm_description").(string),
+		Metric:           metric,
+		Condition: alarmrule.ConditionOpts{
+			Period:             co["period"].(int),
+			Filter:             co["filter"].(string),
+			ComparisonOperator: co["comparison_operator"].(string),
+			Value:              co["value"].(int),
+			Unit:               co["unit"].(string),
+			Count:              co["count"].(int),
+		},
+		AlarmActions:            getAlarmAction(d, "alarm_actions"),
+		InsufficientdataActions: getAlarmAction(d, "insufficientdata_actions"),
+		OkActions:               getAlarmAction(d, "ok_actions"),
+		AlarmEnabled:            d.Get("alarm_enabled").(bool),
+		AlarmActionEnabled:      d.Get("alarm_action_enabled").(bool),
 	}
 	log.Printf("[DEBUG] Create %s Options: %#v", nameCESAR, createOpts)
 
@@ -372,7 +437,22 @@ func resourceAlarmRuleRead(d *schema.ResourceData, meta interface{}) error {
 	}
 	log.Printf("[DEBUG] Retrieved %s %s: %#v", nameCESAR, d.Id(), r)
 
-	return refreshResourceData(r, d)
+	m, err := convertStructToMap(r, map[string]string{"notificationList": "notification_list"})
+	if err != nil {
+		return err
+	}
+	d.Set("alarm_name", m["alarm_name"])
+	d.Set("alarm_description", m["alarm_description"])
+	d.Set("metric", m["metric"])
+	d.Set("condition", m["condition"])
+	d.Set("alarm_actions", m["alarm_actions"])
+	d.Set("insufficientdata_actions", m["insufficientdata_actions"])
+	d.Set("ok_actions", m["ok_actions"])
+	d.Set("alarm_enabled", m["alarm_enabled"])
+	d.Set("alarm_action_enabled", m["alarm_action_enabled"])
+	d.Set("update_time", m["update_time"])
+	d.Set("alarm_state", m["alarm_state"])
+	return nil
 }
 
 func resourceAlarmRuleUpdate(d *schema.ResourceData, meta interface{}) error {
@@ -384,11 +464,11 @@ func resourceAlarmRuleUpdate(d *schema.ResourceData, meta interface{}) error {
 
 	arId := d.Id()
 
-	var updateOpts alarmrule.UpdateOpts
-	err = buildCESUpdateParam(&updateOpts, d)
-	if err != nil {
-		return fmt.Errorf("Error updating %s %s: building parameter failed:%s", nameCESAR, arId, err)
+	if !d.HasChange("alarm_enabled") {
+		log.Printf("[WARN] %s Nothing will be updated", nameCESAR)
+		return nil
 	}
+	updateOpts := alarmrule.UpdateOpts{AlarmEnabled: d.Get("alarm_enabled").(bool)}
 	log.Printf("[DEBUG] Updating %s %s with options: %#v", nameCESAR, arId, updateOpts)
 
 	timeout := d.Timeout(schema.TimeoutUpdate)

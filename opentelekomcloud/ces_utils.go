@@ -7,7 +7,6 @@ import (
 	"reflect"
 	"strings"
 
-	"github.com/gophercloud/gophercloud"
 	"github.com/hashicorp/terraform/helper/schema"
 	"github.com/huaweicloud/golangsdk"
 )
@@ -16,7 +15,7 @@ func chooseECSV1Client(d *schema.ResourceData, config *Config) (*golangsdk.Servi
 	return config.loadECSV1Client(GetRegion(d, config))
 }
 
-func chooseCESClient(d *schema.ResourceData, config *Config) (*gophercloud.ServiceClient, error) {
+func chooseCESClient(d *schema.ResourceData, config *Config) (*golangsdk.ServiceClient, error) {
 	return config.loadCESClient(GetRegion(d, config))
 }
 
@@ -24,7 +23,7 @@ func isCESResourceNotFound(err error) bool {
 	if err == nil {
 		return false
 	}
-	_, ok := err.(gophercloud.ErrDefault404)
+	_, ok := err.(golangsdk.ErrDefault404)
 	return ok
 }
 
