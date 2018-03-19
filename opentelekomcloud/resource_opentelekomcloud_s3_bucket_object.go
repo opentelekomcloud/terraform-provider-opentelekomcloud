@@ -91,6 +91,12 @@ func resourceS3BucketObject() *schema.Resource {
 				Computed:     true,
 			},
 
+			"sse_kms_key_id": {
+				Type:     schema.TypeString,
+				Optional: true,
+				Computed: true,
+			},
+
 			"etag": {
 				Type: schema.TypeString,
 				// This will conflict with SSE-C and SSE-KMS encryption and multi-part upload
@@ -180,6 +186,10 @@ func resourceS3BucketObjectPut(d *schema.ResourceData, meta interface{}) error {
 		putInput.WebsiteRedirectLocation = aws.String(v.(string))
 	}
 
+	if v, ok := d.GetOk("sse_kms_key_id"); ok {
+		putInput.SSEKMSKeyId = aws.String(v.(string))
+	}
+
 	resp, err := s3conn.PutObject(putInput)
 	if err != nil {
 		return fmt.Errorf("Error putting object in S3 bucket (%s): %s", bucket, err)
@@ -230,6 +240,7 @@ func resourceS3BucketObjectRead(d *schema.ResourceData, meta interface{}) error 
 	d.Set("version_id", resp.VersionId)
 	d.Set("server_side_encryption", resp.ServerSideEncryption)
 	d.Set("website_redirect", resp.WebsiteRedirectLocation)
+	d.Set("sse_kms_key_id", resp.SSEKMSKeyId)
 
 	d.Set("etag", strings.Trim(*resp.ETag, `"`))
 

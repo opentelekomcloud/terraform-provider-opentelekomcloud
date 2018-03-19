@@ -329,3 +329,4 @@ func NewSmnServiceV2(client *gophercloud.ProviderClient, eo gophercloud.Endpoint
 	sc.Type = "smn"
 	return sc, err
 }
+

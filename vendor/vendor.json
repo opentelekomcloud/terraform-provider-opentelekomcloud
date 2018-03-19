@@ -826,6 +826,12 @@
 			"versionExact": "v0.10.0"
 		},
 		{
+			"checksumSHA1": "JL8eJjRMxGI2zz2fMYXhXQpRtPk=",
+			"path": "github.com/hashicorp/terraform/helper/validation",
+			"revision": "ecec59f0f0ad69350dfc8beb76c2d95cfd92f476",
+			"revisionTime": "2018-03-15T21:06:57Z"
+		},
+		{
 			"checksumSHA1": "yFWmdS6yEJZpRJzUqd/mULqCYGk=",
 			"path": "github.com/hashicorp/terraform/moduledeps",
 			"revision": "5bcc1bae5925f44208a83279b6d4d250da01597b",
@@ -908,6 +914,12 @@
 			"path": "github.com/huaweicloud/golangsdk/openstack/identity/v3/tokens",
 			"revision": "98f31e4f21bec892b331ee55c5a5fff72d407abc",
 			"revisionTime": "2018-02-26T07:57:01Z"
+		},
+		{
+			"checksumSHA1": "JRRYtYkrco9209oThCcF5MEPIII=",
+			"path": "github.com/huaweicloud/golangsdk/openstack/kms/v1/keys",
+			"revision": "c2811194004bd21b96bbd4cb3e0129661041011f",
+			"revisionTime": "2018-03-15T04:07:47Z"
 		},
 		{
 			"checksumSHA1": "O9n6p7B1QqU6ryYgc8hD9sxIq+A=",
