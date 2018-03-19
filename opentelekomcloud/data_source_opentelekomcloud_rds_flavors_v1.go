@@ -28,19 +28,12 @@ func dataSourceRdsFlavorV1() *schema.Resource {
 				Type:     schema.TypeString,
 				Required: true,
 			},
-			"id": &schema.Schema{
-				Type:     schema.TypeString,
-				Optional: true,
-				Computed: true,
-			},
 			"name": &schema.Schema{
 				Type:     schema.TypeString,
-				Optional: true,
 				Computed: true,
 			},
 			"ram": &schema.Schema{
 				Type:     schema.TypeInt,
-				Optional: true,
 				Computed: true,
 			},
 			"speccode": &schema.Schema{
