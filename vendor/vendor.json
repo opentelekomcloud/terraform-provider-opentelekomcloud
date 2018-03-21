@@ -826,6 +826,12 @@
 			"versionExact": "v0.10.0"
 		},
 		{
+			"checksumSHA1": "Fzbv+N7hFXOtrR6E7ZcHT3jEE9s=",
+			"path": "github.com/hashicorp/terraform/helper/structure",
+			"revision": "ecec59f0f0ad69350dfc8beb76c2d95cfd92f476",
+			"revisionTime": "2018-03-15T21:06:57Z"
+		},
+		{
 			"checksumSHA1": "JL8eJjRMxGI2zz2fMYXhXQpRtPk=",
 			"path": "github.com/hashicorp/terraform/helper/validation",
 			"revision": "ecec59f0f0ad69350dfc8beb76c2d95cfd92f476",
@@ -920,6 +926,24 @@
 			"path": "github.com/huaweicloud/golangsdk/openstack/kms/v1/keys",
 			"revision": "c2811194004bd21b96bbd4cb3e0129661041011f",
 			"revisionTime": "2018-03-15T04:07:47Z"
+		},
+		{
+			"checksumSHA1": "ia3iK8E8dcap5Eyps4Ijl/7Aj/k=",
+			"path": "github.com/huaweicloud/golangsdk/openstack/rds/v1/datastores",
+			"revision": "f751fd90605bf71b96f3e7a5ae5f994a7f98984c",
+			"revisionTime": "2018-03-12T11:45:12Z"
+		},
+		{
+			"checksumSHA1": "KPoYmsQ/zLox78WMao84UsAjf2k=",
+			"path": "github.com/huaweicloud/golangsdk/openstack/rds/v1/flavors",
+			"revision": "f751fd90605bf71b96f3e7a5ae5f994a7f98984c",
+			"revisionTime": "2018-03-12T11:45:12Z"
+		},
+		{
+			"checksumSHA1": "PJaibWgXgcR6frtmFILnqKtxAbs=",
+			"path": "github.com/huaweicloud/golangsdk/openstack/rds/v1/instances",
+			"revision": "f751fd90605bf71b96f3e7a5ae5f994a7f98984c",
+			"revisionTime": "2018-03-12T11:45:12Z"
 		},
 		{
 			"checksumSHA1": "O9n6p7B1QqU6ryYgc8hD9sxIq+A=",

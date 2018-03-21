@@ -162,6 +162,7 @@ func Provider() terraform.ResourceProvider {
 			"opentelekomcloud_s3_bucket_object":       dataSourceS3BucketObject(),
 			"opentelekomcloud_kms_key_v1":             dataSourceKmsKeyV1(),
 			"opentelekomcloud_kms_data_key_v1":        dataSourceKmsDataKeyV1(),
+			"opentelekomcloud_rds_flavors_v1":         dataSourceRdsFlavorV1(),
 		},
 
 		ResourcesMap: map[string]*schema.Resource{
@@ -204,6 +205,7 @@ func Provider() terraform.ResourceProvider {
 			"opentelekomcloud_ces_alarmrule":                   resourceAlarmRule(),
 			"opentelekomcloud_smn_topic_v2":                    resourceTopic(),
 			"opentelekomcloud_smn_subscription_v2":             resourceSubscription(),
+			"opentelekomcloud_rds_instance_v1":                 resourceRdsInstance(),
 		},
 
 		ConfigureFunc: configureProvider,
