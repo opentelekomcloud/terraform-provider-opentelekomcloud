@@ -78,7 +78,7 @@ resource "opentelekomcloud_compute_instance_v2" "test-server" {
 
 ### Full Example
 ----------------------
-Please see full example at https://github.com/gator1/terraform-provider-opentelekomcloud/tree/master/examples, 
+Please see full example at https://github.com/terraform-providers/terraform-provider-opentelekomcloud/tree/master/examples, 
 you must fill in the required variables in variables.tf.
 
 Using the provider
