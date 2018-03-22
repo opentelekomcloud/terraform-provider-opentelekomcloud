@@ -18,6 +18,11 @@ resource "opentelekomcloud_blockstorage_volume_v2" "volume_1" {
   name        = "volume_1"
   description = "first test volume"
   size        = 3
+  metadata {
+    __system__encrypted = "1"
+    __system__cmkid     = "kms_id"
+    region              = "Region"
+  }
 }
 ```
 
@@ -46,6 +51,14 @@ The following arguments are supported:
 
 * `metadata` - (Optional) Metadata key/value pairs to associate with the volume.
     Changing this updates the existing volume metadata.
+    The key/value include the following parameters:
+    `__system__cmkid` - (Optional) The ID of the kms key.
+
+    `region` - (Optional) The region of the kms key.
+
+    '__system__encrypted' - The default value is set to '0', it means
+      the volume is not encrypted, the value '1' means volume is
+      encrypted.
 
 * `tags` - (Optional) Tags key/value pairs to associate with the volume.
     Changing this updates the existing volume tags.
