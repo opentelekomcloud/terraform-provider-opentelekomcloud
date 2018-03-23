@@ -1,6 +1,6 @@
 ---
 layout: "opentelekomcloud"
-page_title: "OpenStack: opentelekomcloud_rds_instance_v1"
+page_title: "OpenTelekomCloud: opentelekomcloud_rds_instance_v1"
 sidebar_current: "docs-opentelekomcloud-resource-rds-instance-v1"
 description: |-
   Manages rds instance resource within OpenTelekomCloud
