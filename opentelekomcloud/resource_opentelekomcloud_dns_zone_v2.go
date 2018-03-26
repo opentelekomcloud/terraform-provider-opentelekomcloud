@@ -289,9 +289,8 @@ func resourceDNSZoneV2ValidType(v interface{}, k string) (ws []string, errors []
 }
 
 func parseStatus(rawStatus string) string {
-	log.Printf("[DEBUG] OpenTelekomCloud DNS Zone (%s) raw status: %s", rawStatus)
-	splits := strings.Split(rawStatus, "_")
 	// rawStatus maybe one of PENDING_CREATE, PENDING_UPDATE, PENDING_DELETE, ACTIVE, or ERROR
+	splits := strings.Split(rawStatus, "_")
 	return splits[0]
 }
 
