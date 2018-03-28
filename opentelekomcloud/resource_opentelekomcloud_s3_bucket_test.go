@@ -1217,11 +1217,11 @@ func testAccS3BucketConfigWithLogging(randInt int) string {
 resource "opentelekomcloud_s3_bucket" "log_bucket" {
 	bucket = "tf-test-log-bucket-%d"
 	acl = "log-delivery-write"
+	force_destroy = "true"
 }
 resource "opentelekomcloud_s3_bucket" "bucket" {
 	bucket = "tf-test-bucket-%d"
 	acl = "private"
-	force_destroy = "true"
 	logging {
 		target_bucket = "${opentelekomcloud_s3_bucket.log_bucket.id}"
 		target_prefix = "log/"
