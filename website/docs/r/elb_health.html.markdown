@@ -62,7 +62,7 @@ The following arguments are supported:
     creates a new elb health.
 
 * `listener_id` - (Required) Specifies the ID of the listener to which the health
-    check task belongs.
+    check task belongs. Changing this creates a new elb health.
 
 * `healthcheck_protocol` - (Optional) Specifies the protocol used for the health
     check. The value can be HTTP or TCP (case-insensitive).

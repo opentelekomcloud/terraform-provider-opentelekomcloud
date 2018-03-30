@@ -49,11 +49,14 @@ resource "opentelekomcloud_elb_backend" "backend" {
 
 The following arguments are supported:
 
-* `listener_id` - (Required) Specifies the listener ID.
+* `listener_id` - (Required) Specifies the listener ID. Changing this creates a new
+    elb backend.
 
-* `server_id` - (Required) Specifies the backend member ID.
+* `server_id` - (Required) Specifies the backend member ID. Changing this creates a
+     new elb backend.
 
-* `address` - (Required) Specifies the private IP address of the backend member.
+* `address` - (Required) Specifies the private IP address of the backend member. 
+    Changing this creates a new elb backend.
 
 ## Attributes Reference
 

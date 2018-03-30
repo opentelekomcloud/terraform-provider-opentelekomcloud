@@ -38,14 +38,15 @@ The following arguments are supported:
 * `description` - (Optional) Provides supplementary information about the
     listener. The value is a string of 0 to 128 characters and cannot be <>.
 
-* `vpc_id` - (Required) Specifies the VPC ID.
+* `vpc_id` - (Required) Specifies the VPC ID. Changing this creates a new
+    elb loadbalancer.
 
 * `bandwidth` - (Optional) Specifies the bandwidth (Mbit/s). This parameter
     is mandatory when type is set to External, and it is invalid when type
     is set to Internal. The value ranges from 1 to 300.
 
 * `type` - (Required) Specifies the load balancer type. The value can be
-    Internal or External.
+    Internal or External. Changing this creates a new elb loadbalancer.
 
 * `admin_state_up` - (Required) Specifies the status of the load balancer.
     Value range: 0 or false: indicates that the load balancer is stopped. Only
@@ -55,23 +56,26 @@ The following arguments are supported:
 
 * `vip_subnet_id` - (Optional) Specifies the ID of the private network
     to be added. This parameter is mandatory when type is set to Internal,
-    and it is invalid when type is set to External.
+    and it is invalid when type is set to External. Changing this creates a
+    new elb loadbalancer.
 
 * `az` - (Optional) Specifies the ID of the availability zone (AZ). This
     parameter is mandatory when type is set to Internal, and it is invalid
-    when type is set to External.
+    when type is set to External. Changing this creates a new elb
+    loadbalancer.
 
 * `security_group_id` - (Optional) Specifies the security group ID. The
     value is a string of 1 to 200 characters that consists of uppercase and
     lowercase letters, digits, and hyphens (-). This parameter is mandatory
-    only when type is set to Internal.
+    only when type is set to Internal. Changing this creates a new elb
+    loadbalancer.
 
 * `vip_address` - (Optional) Specifies the IP address provided by ELB.
     When type is set to External, the value of this parameter is the elastic
     IP address. When type is set to Internal, the value of this parameter is
     the private network IP address. You can select an existing elastic IP address
     and create a public network load balancer. When this parameter is configured,
-    parameter bandwidth is invalid.
+    parameter bandwidth is invalid. Changing this creates a new elb loadbalancer.
 
 * `tenantid` - (Optional) Specifies the tenant ID. This parameter is mandatory
     only when type is set to Internal.
