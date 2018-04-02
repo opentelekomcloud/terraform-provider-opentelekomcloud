@@ -377,10 +377,10 @@ func (c *Config) objectStorageV1Client(region string) (*gophercloud.ServiceClien
 	})
 }
 
-func (c *Config) otcV1Client(region string) (*gophercloud.ServiceClient, error) {
-	return openstack.NewOtcV1(c.OsClient, gophercloud.EndpointOpts{
+func (c *Config) otcV1Client(region string) (*golangsdk.ServiceClient, error) {
+	return huaweisdk.NewElbV1(c.HwClient, golangsdk.EndpointOpts{
 		Region:       c.determineRegion(region),
-		Availability: c.getEndpointType(),
+		Availability: c.getHwEndpointType(),
 	}, "elb")
 }
 

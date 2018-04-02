@@ -5,8 +5,8 @@ import (
 	"log"
 	"time"
 
-	"github.com/gophercloud/gophercloud/openstack/networking/v2/extensions/elbaas/listeners"
 	"github.com/hashicorp/terraform/helper/schema"
+	"github.com/huaweicloud/golangsdk/openstack/networking/v2/extensions/elbaas/listeners"
 )
 
 var ProtocolFormats = []string{"HTTP", "TCP", "HTTPS", "SSL", "UDP"}
