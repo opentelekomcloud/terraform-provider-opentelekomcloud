@@ -946,6 +946,36 @@
 			"revisionTime": "2018-04-09T05:07:25Z"
 		},
 		{
+			"checksumSHA1": "8ch4okLGCkDFEflL/xpG0OCp25U=",
+			"path": "github.com/huaweicloud/golangsdk/openstack/networking/v2/extensions/elbaas",
+			"revision": "904d4b2ece4379bc48a4469453d913c005d67d50",
+			"revisionTime": "2018-03-29T08:22:40Z"
+		},
+		{
+			"checksumSHA1": "PgoAsiXV8mqc/kwodX35za2gGro=",
+			"path": "github.com/huaweicloud/golangsdk/openstack/networking/v2/extensions/elbaas/backendmember",
+			"revision": "904d4b2ece4379bc48a4469453d913c005d67d50",
+			"revisionTime": "2018-03-29T08:22:40Z"
+		},
+		{
+			"checksumSHA1": "wcXYZNACmOnC8VPW6eBPt2iNMyc=",
+			"path": "github.com/huaweicloud/golangsdk/openstack/networking/v2/extensions/elbaas/healthcheck",
+			"revision": "904d4b2ece4379bc48a4469453d913c005d67d50",
+			"revisionTime": "2018-03-29T08:22:40Z"
+		},
+		{
+			"checksumSHA1": "7rDvAjmv4OT/2antqSp1JtNH2Lw=",
+			"path": "github.com/huaweicloud/golangsdk/openstack/networking/v2/extensions/elbaas/listeners",
+			"revision": "904d4b2ece4379bc48a4469453d913c005d67d50",
+			"revisionTime": "2018-03-29T08:22:40Z"
+		},
+		{
+			"checksumSHA1": "b80RVjscR2P6wG3v1nR+hsTpnqw=",
+			"path": "github.com/huaweicloud/golangsdk/openstack/networking/v2/extensions/elbaas/loadbalancer_elbs",
+			"revision": "904d4b2ece4379bc48a4469453d913c005d67d50",
+			"revisionTime": "2018-03-29T08:22:40Z"
+		},
+		{
 			"checksumSHA1": "ia3iK8E8dcap5Eyps4Ijl/7Aj/k=",
 			"path": "github.com/huaweicloud/golangsdk/openstack/rds/v1/datastores",
 			"revision": "f751fd90605bf71b96f3e7a5ae5f994a7f98984c",
