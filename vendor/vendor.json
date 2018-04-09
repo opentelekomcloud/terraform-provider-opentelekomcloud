@@ -408,18 +408,6 @@
 			"revisionTime": "2017-10-04T00:41:52Z"
 		},
 		{
-			"checksumSHA1": "CmUBDSj7l85N82a7el3sY1QZsJg=",
-			"path": "github.com/gophercloud/gophercloud/openstack/dns/v2/recordsets",
-			"revision": "f8ec1b3d8dea084885975d404872b37be20b3984",
-			"revisionTime": "2017-10-04T00:41:52Z"
-		},
-		{
-			"checksumSHA1": "otGdEUIFcxFSZ2ieGzn9SXDil8Q=",
-			"path": "github.com/gophercloud/gophercloud/openstack/dns/v2/zones",
-			"revision": "f8ec1b3d8dea084885975d404872b37be20b3984",
-			"revisionTime": "2017-10-04T00:41:52Z"
-		},
-		{
 			"checksumSHA1": "S8bHmOP+NjtlYioJC89zIBVvhYc=",
 			"path": "github.com/gophercloud/gophercloud/openstack/identity/v2/tenants",
 			"revision": "f8ec1b3d8dea084885975d404872b37be20b3984",
