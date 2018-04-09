@@ -994,6 +994,18 @@
 			"revisionTime": "2018-03-12T11:45:12Z"
 		},
 		{
+			"checksumSHA1": "RV9GKwWK04J4e9L2kbfZnyO+0+U=",
+			"path": "github.com/huaweicloud/golangsdk/openstack/smn/v2/subscriptions",
+			"revision": "3d7b1d2294e4d5e8180d6a18a9c4c7b6e2cec804",
+			"revisionTime": "2018-04-08T07:35:28Z"
+		},
+		{
+			"checksumSHA1": "LgRHkUhyZrzVv6Abw1pbvRl1ZHY=",
+			"path": "github.com/huaweicloud/golangsdk/openstack/smn/v2/topics",
+			"revision": "3d7b1d2294e4d5e8180d6a18a9c4c7b6e2cec804",
+			"revisionTime": "2018-04-08T07:35:28Z"
+		},
+		{
 			"checksumSHA1": "O9n6p7B1QqU6ryYgc8hD9sxIq+A=",
 			"path": "github.com/huaweicloud/golangsdk/openstack/utils",
 			"revision": "98f31e4f21bec892b331ee55c5a5fff72d407abc",
