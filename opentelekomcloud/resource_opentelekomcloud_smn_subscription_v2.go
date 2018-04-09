@@ -6,7 +6,7 @@ import (
 
 	"github.com/hashicorp/terraform/helper/schema"
 
-	"github.com/gophercloud/gophercloud/openstack/smn/v2/subscriptions"
+	"github.com/huaweicloud/golangsdk/openstack/smn/v2/subscriptions"
 )
 
 func resourceSubscription() *schema.Resource {
@@ -63,7 +63,7 @@ func resourceSubscription() *schema.Resource {
 
 func resourceSubscriptionCreate(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*Config)
-	client, err := config.otcSmnV2Client(GetRegion(d, config))
+	client, err := config.SmnV2Client(GetRegion(d, config))
 	if err != nil {
 		return fmt.Errorf("Error creating OpenTelekomCloud smn client: %s", err)
 	}
@@ -91,7 +91,7 @@ func resourceSubscriptionCreate(d *schema.ResourceData, meta interface{}) error 
 
 func resourceSubscriptionDelete(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*Config)
-	client, err := config.otcSmnV2Client(GetRegion(d, config))
+	client, err := config.SmnV2Client(GetRegion(d, config))
 	if err != nil {
 		return fmt.Errorf("Error creating OpenTelekomCloud smn client: %s", err)
 	}
@@ -110,7 +110,7 @@ func resourceSubscriptionDelete(d *schema.ResourceData, meta interface{}) error 
 
 func resourceSubscriptionRead(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*Config)
-	client, err := config.otcSmnV2Client(GetRegion(d, config))
+	client, err := config.SmnV2Client(GetRegion(d, config))
 	if err != nil {
 		return fmt.Errorf("Error creating OpenTelekomCloud smn client: %s", err)
 	}
