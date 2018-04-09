@@ -294,12 +294,6 @@
 			"tree": true
 		},
 		{
-			"checksumSHA1": "27/S5dceTewu04JZnNfpbUnwuZk=",
-			"path": "github.com/gator1/terraform-provider-opentelekomcloud/opentelekomcloud",
-			"revision": "42161ac9e6c1770a481775bbb7e952a64566b761",
-			"revisionTime": "2017-10-18T18:43:25Z"
-		},
-		{
 			"checksumSHA1": "6PqwA1boTJFClUjc9cMXmLLSJTs=",
 			"path": "github.com/gophercloud/gophercloud",
 			"revision": "5a00c1c742bc7e3d29c4e49318e821289fd97623",
