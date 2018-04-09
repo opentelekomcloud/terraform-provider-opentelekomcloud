@@ -5,8 +5,6 @@ import (
 	"net/url"
 	"reflect"
 
-	"strings"
-
 	"github.com/gophercloud/gophercloud"
 	tokens2 "github.com/gophercloud/gophercloud/openstack/identity/v2/tokens"
 	tokens3 "github.com/gophercloud/gophercloud/openstack/identity/v3/tokens"
@@ -258,17 +256,6 @@ func NewNetworkV2(client *gophercloud.ProviderClient, eo gophercloud.EndpointOpt
 	return sc, err
 }
 
-// NewOtcV1 creates a ServiceClient that may be used with the v1 network package.
-func NewOtcV1(client *gophercloud.ProviderClient, eo gophercloud.EndpointOpts, otctype string) (*gophercloud.ServiceClient, error) {
-	sc, err := initClientOpts(client, eo, "compute")
-	//fmt.Printf("client=%+v.\n", sc)
-	sc.Endpoint = strings.Replace(strings.Replace(sc.Endpoint, "ecs", otctype, 1), "/v2/", "/v1.0/", 1)
-	//fmt.Printf("url=%s.\n", sc.Endpoint)
-	sc.ResourceBase = sc.Endpoint
-	sc.Type = otctype
-	return sc, err
-}
-
 // NewBlockStorageV1 creates a ServiceClient that may be used to access the v1 block storage service.
 func NewBlockStorageV1(client *gophercloud.ProviderClient, eo gophercloud.EndpointOpts) (*gophercloud.ServiceClient, error) {
 	return initClientOpts(client, eo, "volume")
@@ -311,11 +298,5 @@ func NewDNSV2(client *gophercloud.ProviderClient, eo gophercloud.EndpointOpts) (
 func NewImageServiceV2(client *gophercloud.ProviderClient, eo gophercloud.EndpointOpts) (*gophercloud.ServiceClient, error) {
 	sc, err := initClientOpts(client, eo, "image")
 	sc.ResourceBase = sc.Endpoint + "v2/"
-	return sc, err
-}
-
-func NewCESClient(client *gophercloud.ProviderClient, eo gophercloud.EndpointOpts) (*gophercloud.ServiceClient, error) {
-	sc, err := initClientOpts(client, eo, "ces")
-	sc.ResourceBase = sc.Endpoint
 	return sc, err
 }
