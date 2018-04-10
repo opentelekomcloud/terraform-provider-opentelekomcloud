@@ -294,10 +294,10 @@
 			"tree": true
 		},
 		{
-			"checksumSHA1": "6PqwA1boTJFClUjc9cMXmLLSJTs=",
+			"checksumSHA1": "QTqcF26Y2e0SHe2Z+2wj+fedud4=",
 			"path": "github.com/gophercloud/gophercloud",
-			"revision": "5a00c1c742bc7e3d29c4e49318e821289fd97623",
-			"revisionTime": "2017-12-08T04:44:24Z"
+			"revision": "742711cc8de71a9a3206c5742a51d3a1e747ed4f",
+			"revisionTime": "2017-06-11T02:26:12Z"
 		},
 		{
 			"checksumSHA1": "b7g9TcU1OmW7e2UySYeOAmcfHpY=",
