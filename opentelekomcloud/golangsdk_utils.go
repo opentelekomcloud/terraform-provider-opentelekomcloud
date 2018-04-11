@@ -12,3 +12,7 @@ func chooseECSV1Client(d *schema.ResourceData, config *Config) (*golangsdk.Servi
 func chooseCESClient(d *schema.ResourceData, config *Config) (*golangsdk.ServiceClient, error) {
 	return config.loadCESClient(GetRegion(d, config))
 }
+
+func chooseEVSV2Client(d *schema.ResourceData, config *Config) (*golangsdk.ServiceClient, error) {
+	return config.loadEVSV2Client(GetRegion(d, config))
+}
