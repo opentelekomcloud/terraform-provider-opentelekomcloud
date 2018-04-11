@@ -886,6 +886,12 @@
 			"revisionTime": "2018-03-15T04:07:47Z"
 		},
 		{
+			"checksumSHA1": "Me7ZhJdaWfn1xBIBY0YDHnFqtZk=",
+			"path": "github.com/huaweicloud/golangsdk/openstack/evs/v2/tags",
+			"revision": "f90d95674ead542ccda9ac986a4f1be02d87556d",
+			"revisionTime": "2018-04-11T06:15:22Z"
+		},
+		{
 			"checksumSHA1": "6cxgVwctlHbqIqO9rHVTwmDtxhk=",
 			"path": "github.com/huaweicloud/golangsdk/openstack/identity/v2/tenants",
 			"revision": "98f31e4f21bec892b331ee55c5a5fff72d407abc",
