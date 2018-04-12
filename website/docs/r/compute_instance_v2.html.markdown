@@ -358,6 +358,7 @@ The following arguments are supported:
     forcefully deleted. This is useful for environments that have reclaim / soft
     deletion enabled.
 
+* `auto_recovery` - (Optional) Configures or deletes automatic recovery of an instance
 
 The `network` block supports:
 
@@ -451,6 +452,7 @@ The following attributes are exported:
 * `network/mac` - The MAC address of the NIC on that network.
 * `all_metadata` - Contains all instance metadata, even metadata not set
     by Terraform.
+* `auto_recovery` - See Argument Reference above.
 
 ## Notes
 
