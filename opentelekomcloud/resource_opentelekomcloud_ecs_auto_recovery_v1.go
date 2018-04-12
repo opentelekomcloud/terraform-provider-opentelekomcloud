@@ -21,7 +21,7 @@ func resourceECSAutoRecoveryV1Read(d *schema.ResourceData, meta interface{}, ins
 
 	r, err := auto_recovery.Get(client, rId).Extract()
 	if err != nil {
-		return false, CheckDeleted(d, err, "ECS-AutoRecovery")
+		return false, err
 	}
 	log.Printf("[DEBUG] Retrieved ECS-AutoRecovery:%#v of instance:%s", rId, r)
 	return strconv.ParseBool(r.SupportAutoRecovery)

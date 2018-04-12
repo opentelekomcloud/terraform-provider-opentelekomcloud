@@ -619,7 +619,7 @@ func resourceComputeInstanceV2Read(d *schema.ResourceData, meta interface{}) err
 	d.Set("tags", tagset.List())
 
 	ar, err := resourceECSAutoRecoveryV1Read(d, meta, d.Id())
-	if err != nil {
+	if err != nil && !isResourceNotFound(err) {
 		return fmt.Errorf("Error reading auto recovery of instance:%s, err=%s", d.Id(), err)
 	}
 	d.Set("auto_recovery", ar)
