@@ -107,7 +107,7 @@ func resourceBackendRead(d *schema.ResourceData, meta interface{}) error {
 	log.Printf("[DEBUG] Retrieved backend member %s: %#v", id, backend)
 
 	d.Set("server_id", backend.ServerID)
-	d.Set("address", backend.Address)
+	d.Set("address", backend.ServerAddress)
 
 	d.Set("region", GetRegion(d, config))
 
