@@ -23,6 +23,7 @@ import (
 	"github.com/gophercloud/gophercloud/openstack/networking/v2/subnets"
 	"github.com/huaweicloud/golangsdk/openstack/dns/v2/recordsets"
 	"github.com/huaweicloud/golangsdk/openstack/dns/v2/zones"
+	"github.com/huaweicloud/golangsdk/openstack/networking/v1/eips"
 )
 
 // LogRoundTripper satisfies the http.RoundTripper interface and is used to
@@ -350,4 +351,10 @@ func (opts ZoneCreateOpts) ToZoneCreateMap() (map[string]interface{}, error) {
 	}
 
 	return nil, fmt.Errorf("Expected map but got %T", b[""])
+}
+
+// EIPCreateOpts represents the attributes used when creating a new eip.
+type EIPCreateOpts struct {
+	eips.ApplyOpts
+	ValueSpecs map[string]string `json:"value_specs,omitempty"`
 }

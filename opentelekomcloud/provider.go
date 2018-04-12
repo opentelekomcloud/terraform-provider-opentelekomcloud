@@ -206,6 +206,7 @@ func Provider() terraform.ResourceProvider {
 			"opentelekomcloud_smn_topic_v2":                    resourceTopic(),
 			"opentelekomcloud_smn_subscription_v2":             resourceSubscription(),
 			"opentelekomcloud_rds_instance_v1":                 resourceRdsInstance(),
+			"opentelekomcloud_vpc_eip_v1":                      resourceVpcEIPV1(),
 		},
 
 		ConfigureFunc: configureProvider,
