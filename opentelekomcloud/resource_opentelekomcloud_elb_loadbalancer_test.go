@@ -5,9 +5,9 @@ import (
 	"log"
 	"testing"
 
-	"github.com/gophercloud/gophercloud/openstack/networking/v2/extensions/elbaas/loadbalancer_elbs"
 	"github.com/hashicorp/terraform/helper/resource"
 	"github.com/hashicorp/terraform/terraform"
+	"github.com/huaweicloud/golangsdk/openstack/networking/v2/extensions/elbaas/loadbalancer_elbs"
 )
 
 // PASS
@@ -39,7 +39,7 @@ func TestAccELBLoadBalancer_basic(t *testing.T) {
 
 func testAccCheckELBLoadBalancerDestroy(s *terraform.State) error {
 	config := testAccProvider.Meta().(*Config)
-	networkingClient, err := config.otcV1Client(OS_REGION_NAME)
+	networkingClient, err := config.loadELBClient(OS_REGION_NAME)
 	if err != nil {
 		return fmt.Errorf("Error creating OpenTelekomCloud networking client: %s", err)
 	}
@@ -72,7 +72,7 @@ func testAccCheckELBLoadBalancerExists(
 		}
 
 		config := testAccProvider.Meta().(*Config)
-		networkingClient, err := config.otcV1Client(OS_REGION_NAME)
+		networkingClient, err := config.loadELBClient(OS_REGION_NAME)
 		if err != nil {
 			return fmt.Errorf("Error creating OpenTelekomCloud networking client: %s", err)
 		}

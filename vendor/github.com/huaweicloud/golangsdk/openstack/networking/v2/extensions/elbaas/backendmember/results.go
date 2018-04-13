@@ -1,9 +1,8 @@
 package backendmember
 
 import (
-	"github.com/gophercloud/gophercloud"
-	"github.com/gophercloud/gophercloud/pagination"
-	"fmt"
+	"github.com/huaweicloud/golangsdk"
+	"github.com/huaweicloud/golangsdk/pagination"
 )
 
 // Backend is the primary load balancing configuration object that specifies
@@ -55,22 +54,22 @@ func (r BackendPage) IsEmpty() (bool, error) {
 // and extracts the elements into a slice of Listener structs. In other words,
 // a generic collection is mapped into a relevant slice.
 func ExtractBackend(r pagination.Page) ([]Backend, error) {
-	var Backends []Backend 
+	var Backends []Backend
 	err := (r.(BackendPage)).ExtractInto(&Backends)
 	return Backends, err
 }
 
 type commonResult struct {
-	gophercloud.Result
+	golangsdk.Result
 }
 
 // Extract is a function that accepts a result and extracts a router.
 func (r commonResult) Extract() (*Backend, error) {
-	fmt.Printf("Extracting Backend...\n")
+	//fmt.Printf("Extracting Backend...\n")
 	var Backends []Backend
 	err := r.ExtractInto(&Backends)
 	if err != nil {
-		fmt.Printf("Error: %s.\n", err.Error())
+		//fmt.Printf("Error: %s.\n", err.Error())
 		return nil, err
 	} else {
 		if len(Backends) == 0 {
@@ -79,7 +78,6 @@ func (r commonResult) Extract() (*Backend, error) {
 		return &Backends[0], nil
 	}
 }
-
 
 // AddResult represents the result of a create operation.
 type AddResult struct {
@@ -91,7 +89,13 @@ type GetResult struct {
 	commonResult
 }
 
+func (r GetResult) Extract() ([]Backend, error) {
+	var b []Backend
+	err := r.ExtractInto(&b)
+	return b, err
+}
+
 // RemoveResult represents the result of a delete operation.
 type RemoveResult struct {
-	gophercloud.ErrResult
+	golangsdk.ErrResult
 }

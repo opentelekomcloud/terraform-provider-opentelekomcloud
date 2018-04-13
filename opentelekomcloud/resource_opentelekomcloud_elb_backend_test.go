@@ -5,9 +5,9 @@ import (
 	"log"
 	"testing"
 
-	"github.com/gophercloud/gophercloud/openstack/networking/v2/extensions/elbaas/backendmember"
 	"github.com/hashicorp/terraform/helper/resource"
 	"github.com/hashicorp/terraform/terraform"
+	"github.com/huaweicloud/golangsdk/openstack/networking/v2/extensions/elbaas/backendmember"
 )
 
 // PASS with diff
@@ -31,7 +31,7 @@ func TestAccELBBackend_basic(t *testing.T) {
 
 func testAccCheckELBBackendDestroy(s *terraform.State) error {
 	config := testAccProvider.Meta().(*Config)
-	client, err := config.otcV1Client(OS_REGION_NAME)
+	client, err := config.loadELBClient(OS_REGION_NAME)
 	if err != nil {
 		return fmt.Errorf("Error creating OpenTelekomCloud networking client: %s", err)
 	}
@@ -62,7 +62,7 @@ func testAccCheckELBBackendExists(n string, backend *backendmember.Backend) reso
 		}
 
 		config := testAccProvider.Meta().(*Config)
-		client, err := config.otcV1Client(OS_REGION_NAME)
+		client, err := config.loadELBClient(OS_REGION_NAME)
 		if err != nil {
 			return fmt.Errorf("Error creating OpenTelekomCloud networking client: %s", err)
 		}
@@ -71,13 +71,14 @@ func testAccCheckELBBackendExists(n string, backend *backendmember.Backend) reso
 		if err != nil {
 			return err
 		}
+		f := found[0]
 		log.Printf("[DEBUG] testAccCheckELBBackendExists found %+v.\n", found)
 
-		if found.ID != rs.Primary.ID {
+		if f.ID != rs.Primary.ID {
 			return fmt.Errorf("Backend member not found")
 		}
 
-		*backend = *found
+		*backend = f
 
 		return nil
 	}

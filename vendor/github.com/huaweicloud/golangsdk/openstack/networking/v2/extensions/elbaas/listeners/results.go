@@ -1,9 +1,9 @@
 package listeners
 
 import (
-	"github.com/gophercloud/gophercloud"
-	"github.com/gophercloud/gophercloud/pagination"
-	"fmt"
+	"github.com/huaweicloud/golangsdk"
+	"github.com/huaweicloud/golangsdk/pagination"
+	//"fmt"
 )
 
 type LoadBalancerID struct {
@@ -91,29 +91,28 @@ func (r ListenerPage) IsEmpty() (bool, error) {
 // and extracts the elements into a slice of Listener structs. In other words,
 // a generic collection is mapped into a relevant slice.
 func ExtractListeners(r pagination.Page) ([]Listener, error) {
-	var Listeners []Listener 
+	var Listeners []Listener
 	err := (r.(ListenerPage)).ExtractInto(&Listeners)
 	return Listeners, err
 }
 
 type commonResult struct {
-	gophercloud.Result
+	golangsdk.Result
 }
 
 // Extract is a function that accepts a result and extracts a router.
 func (r commonResult) Extract() (*Listener, error) {
-	fmt.Printf("Extracting Listener...\n")
+	//fmt.Printf("Extracting Listener...\n")
 	l := new(Listener)
 	err := r.ExtractInto(l)
 	if err != nil {
-		fmt.Printf("Error: %s.\n", err.Error())
+		//fmt.Printf("Error: %s.\n", err.Error())
 		return nil, err
 	} else {
-		fmt.Printf("Returning extract: %+v.\n", l)
+		//fmt.Printf("Returning extract: %+v.\n", l)
 		return l, nil
 	}
 }
-
 
 // CreateResult represents the result of a create operation.
 type CreateResult struct {
@@ -132,5 +131,5 @@ type UpdateResult struct {
 
 // DeleteResult represents the result of a delete operation.
 type DeleteResult struct {
-	gophercloud.ErrResult
+	golangsdk.ErrResult
 }

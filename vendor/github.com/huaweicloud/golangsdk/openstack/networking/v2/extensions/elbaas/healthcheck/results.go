@@ -1,9 +1,9 @@
 package healthcheck
 
 import (
-	"github.com/gophercloud/gophercloud"
-	//"github.com/gophercloud/gophercloud/pagination"
-    "fmt"
+	"github.com/huaweicloud/golangsdk"
+	//"github.com/huaweicloud/golangsdk/pagination"
+	//"fmt"
 )
 
 // Health represents a load balancer health check. A health monitor is used
@@ -49,24 +49,22 @@ type Health struct {
 }
 
 type commonResult struct {
-	gophercloud.Result
+	golangsdk.Result
 }
 
 // Extract is a function that accepts a result and extracts a monitor.
 func (r commonResult) Extract() (*Health, error) {
-	fmt.Printf("Extracting Health...\n")
+	//fmt.Printf("Extracting Health...\n")
 	l := new(Health)
 	err := r.ExtractInto(l)
 	if err != nil {
-		fmt.Printf("Error: %s.\n", err.Error())
+		//fmt.Printf("Error: %s.\n", err.Error())
 		return nil, err
 	} else {
-		fmt.Printf("Returning extract: %+v.\n", l)
+		//fmt.Printf("Returning extract: %+v.\n", l)
 		return l, nil
 	}
 }
-
-
 
 // CreateResult represents the result of a create operation.
 type CreateResult struct {
@@ -85,5 +83,5 @@ type UpdateResult struct {
 
 // DeleteResult represents the result of a delete operation.
 type DeleteResult struct {
-	gophercloud.ErrResult
+	golangsdk.ErrResult
 }
