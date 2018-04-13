@@ -377,11 +377,11 @@ func (c *Config) objectStorageV1Client(region string) (*gophercloud.ServiceClien
 	})
 }
 
-func (c *Config) otcV1Client(region string) (*golangsdk.ServiceClient, error) {
-	return huaweisdk.NewElbV1(c.HwClient, golangsdk.EndpointOpts{
+func (c *Config) loadELBClient(region string) (*golangsdk.ServiceClient, error) {
+	return huaweisdk.NewElasticLoadBalancer(c.HwClient, golangsdk.EndpointOpts{
 		Region:       c.determineRegion(region),
 		Availability: c.getHwEndpointType(),
-	}, "elb")
+	})
 }
 
 func (c *Config) otcSmnV2Client(region string) (*gophercloud.ServiceClient, error) {

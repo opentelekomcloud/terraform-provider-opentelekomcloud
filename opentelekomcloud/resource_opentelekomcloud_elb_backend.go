@@ -50,7 +50,7 @@ func resourceBackend() *schema.Resource {
 
 func resourceBackendCreate(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*Config)
-	client, err := config.otcV1Client(GetRegion(d, config))
+	client, err := config.loadELBClient(GetRegion(d, config))
 	if err != nil {
 		return fmt.Errorf("Error creating OpenTelekomCloud networking client: %s", err)
 	}
@@ -92,7 +92,7 @@ func resourceBackendCreate(d *schema.ResourceData, meta interface{}) error {
 
 func resourceBackendRead(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*Config)
-	client, err := config.otcV1Client(GetRegion(d, config))
+	client, err := config.loadELBClient(GetRegion(d, config))
 	if err != nil {
 		return fmt.Errorf("Error creating OpenTelekomCloud networking client: %s", err)
 	}
@@ -117,7 +117,7 @@ func resourceBackendRead(d *schema.ResourceData, meta interface{}) error {
 
 func resourceBackendDelete(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*Config)
-	client, err := config.otcV1Client(GetRegion(d, config))
+	client, err := config.loadELBClient(GetRegion(d, config))
 	if err != nil {
 		return fmt.Errorf("Error creating OpenTelekomCloud networking client: %s", err)
 	}
