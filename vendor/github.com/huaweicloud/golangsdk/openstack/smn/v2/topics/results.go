@@ -1,24 +1,22 @@
 package topics
 
 import (
-	"github.com/gophercloud/gophercloud"
+	"github.com/huaweicloud/golangsdk"
 )
 
 type Topic struct {
-	RequestId        string        `json:"request_id"`
-	TopicUrn         string        `json:"topic_urn"`
+	RequestId string `json:"request_id"`
+	TopicUrn  string `json:"topic_urn"`
 }
-
 
 type TopicGet struct {
-	TopicUrn         string         `json:"topic_urn"`
-	DisplayName      string         `json:"display_name"`
-	Name             string         `json:"name"`
-	PushPolicy       int            `json:"push_policy"`
-	UpdateTime       string         `json:"update_time"`
-	CreateTime       string         `json:"create_time"`
+	TopicUrn    string `json:"topic_urn"`
+	DisplayName string `json:"display_name"`
+	Name        string `json:"name"`
+	PushPolicy  int    `json:"push_policy"`
+	UpdateTime  string `json:"update_time"`
+	CreateTime  string `json:"create_time"`
 }
-
 
 // Extract will get the topic object out of the commonResult object.
 func (r commonResult) Extract() (*Topic, error) {
@@ -38,7 +36,7 @@ func (r commonResult) ExtractInto(v interface{}) error {
 }
 
 type commonResult struct {
-	gophercloud.Result
+	golangsdk.Result
 }
 
 // CreateResult contains the response body and error from a Create request.
@@ -47,7 +45,7 @@ type CreateResult struct {
 }
 
 type DeleteResult struct {
-	gophercloud.ErrResult
+	golangsdk.ErrResult
 }
 
 type GetResult struct {
@@ -59,7 +57,7 @@ type UpdateResult struct {
 }
 
 type ListResult struct {
-	gophercloud.Result
+	golangsdk.Result
 }
 
 func (lr ListResult) Extract() ([]TopicGet, error) {

@@ -4,9 +4,9 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/gophercloud/gophercloud/openstack/smn/v2/topics"
 	"github.com/hashicorp/terraform/helper/resource"
 	"github.com/hashicorp/terraform/terraform"
+	"github.com/huaweicloud/golangsdk/openstack/smn/v2/topics"
 )
 
 // PASS
@@ -45,7 +45,7 @@ func TestAccSMNV2Topic_basic(t *testing.T) {
 
 func testAccCheckSMNTopicV2Destroy(s *terraform.State) error {
 	config := testAccProvider.Meta().(*Config)
-	smnClient, err := config.otcSmnV2Client(OS_REGION_NAME)
+	smnClient, err := config.SmnV2Client(OS_REGION_NAME)
 	if err != nil {
 		return fmt.Errorf("Error creating OpenTelekomCloud smn: %s", err)
 	}
@@ -76,7 +76,7 @@ func testAccCheckSMNV2TopicExists(n string, topic *topics.TopicGet) resource.Tes
 		}
 
 		config := testAccProvider.Meta().(*Config)
-		smnClient, err := config.otcSmnV2Client(OS_REGION_NAME)
+		smnClient, err := config.SmnV2Client(OS_REGION_NAME)
 		if err != nil {
 			return fmt.Errorf("Error creating OpenTelekomCloud smn client: %s", err)
 		}

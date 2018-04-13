@@ -384,10 +384,10 @@ func (c *Config) loadELBClient(region string) (*golangsdk.ServiceClient, error) 
 	})
 }
 
-func (c *Config) otcSmnV2Client(region string) (*gophercloud.ServiceClient, error) {
-	return openstack.NewSmnServiceV2(c.OsClient, gophercloud.EndpointOpts{
+func (c *Config) SmnV2Client(region string) (*golangsdk.ServiceClient, error) {
+	return huaweisdk.NewSmnServiceV2(c.HwClient, golangsdk.EndpointOpts{
 		Region:       c.determineRegion(region),
-		Availability: c.getEndpointType(),
+		Availability: c.getHwEndpointType(),
 	})
 }
 
