@@ -1,8 +1,8 @@
 package firewall_groups
 
 import (
-	"github.com/gophercloud/gophercloud"
-	"github.com/gophercloud/gophercloud/pagination"
+	"github.com/huaweicloud/golangsdk"
+	"github.com/huaweicloud/golangsdk/pagination"
 	//"fmt"
 )
 
@@ -18,23 +18,23 @@ type ListOptsBuilder interface {
 // by a particular firewall attribute. SortDir sets the direction, and is either
 // `asc' or `desc'. Marker and Limit are used for pagination.
 type ListOpts struct {
-	TenantID     	string `q:"tenant_id"`
-	Name         	string `q:"name"`
-	Description  	string `q:"description"`
-	AdminStateUp 	bool   `q:"admin_state_up"`
-	Shared       	bool   `q:"public"`
-	IngressPolicyID	string `q:"ingress_firewall_policy_id"`
+	TenantID        string `q:"tenant_id"`
+	Name            string `q:"name"`
+	Description     string `q:"description"`
+	AdminStateUp    bool   `q:"admin_state_up"`
+	Shared          bool   `q:"public"`
+	IngressPolicyID string `q:"ingress_firewall_policy_id"`
 	EgressPolicyID  string `q:"egress_firewall_policy_id"`
-	ID           	string `q:"id"`
-	Limit        	int    `q:"limit"`
-	Marker       	string `q:"marker"`
-	SortKey      	string `q:"sort_key"`
-	SortDir      	string `q:"sort_dir"`
+	ID              string `q:"id"`
+	Limit           int    `q:"limit"`
+	Marker          string `q:"marker"`
+	SortKey         string `q:"sort_key"`
+	SortDir         string `q:"sort_dir"`
 }
 
 // ToFirewallListQuery formats a ListOpts into a query string.
 func (opts ListOpts) ToFirewallGroupListQuery() (string, error) {
-	q, err := gophercloud.BuildQueryString(opts)
+	q, err := golangsdk.BuildQueryString(opts)
 	return q.String(), err
 }
 
@@ -44,7 +44,7 @@ func (opts ListOpts) ToFirewallGroupListQuery() (string, error) {
 //
 // Default policy settings return only those firewall_groups that are owned by the
 // tenant who submits the request, unless an admin user submits the request.
-func List(c *gophercloud.ServiceClient, opts ListOptsBuilder) pagination.Pager {
+func List(c *golangsdk.ServiceClient, opts ListOptsBuilder) pagination.Pager {
 	url := rootURL(c)
 	if opts != nil {
 		query, err := opts.ToFirewallGroupListQuery()
@@ -68,24 +68,24 @@ type CreateOptsBuilder interface {
 
 // CreateOpts contains all the values needed to create a new firewall_group.
 type CreateOpts struct {
-	IngressPolicyID	string `json:"ingress_firewall_policy_id,omitempty"`
-	EgressPolicyID	string `json:"egress_firewall_policy_id,omitempty"`
+	IngressPolicyID string `json:"ingress_firewall_policy_id,omitempty"`
+	EgressPolicyID  string `json:"egress_firewall_policy_id,omitempty"`
 	// Only required if the caller has an admin role and wants to create a firewall
 	// for another tenant.
-	TenantID     	string `json:"tenant_id,omitempty"`
-	Name         	string `json:"name,omitempty"`
-	Description  	string `json:"description,omitempty"`
-	AdminStateUp 	*bool  `json:"admin_state_up,omitempty"`
-	Shared       	*bool  `json:"public,omitempty"`
+	TenantID     string `json:"tenant_id,omitempty"`
+	Name         string `json:"name,omitempty"`
+	Description  string `json:"description,omitempty"`
+	AdminStateUp *bool  `json:"admin_state_up,omitempty"`
+	Shared       *bool  `json:"public,omitempty"`
 }
 
 // ToFirewallGroupCreateMap casts a CreateOpts struct to a map.
 func (opts CreateOpts) ToFirewallGroupCreateMap() (map[string]interface{}, error) {
-	return gophercloud.BuildRequestBody(opts, "firewall_group")
+	return golangsdk.BuildRequestBody(opts, "firewall_group")
 }
 
 // Create accepts a CreateOpts struct and uses the values to create a new firewall group
-func Create(c *gophercloud.ServiceClient, opts CreateOptsBuilder) (r CreateResult) {
+func Create(c *golangsdk.ServiceClient, opts CreateOptsBuilder) (r CreateResult) {
 	b, err := opts.ToFirewallGroupCreateMap()
 	if err != nil {
 		r.Err = err
@@ -98,7 +98,7 @@ func Create(c *gophercloud.ServiceClient, opts CreateOptsBuilder) (r CreateResul
 }
 
 // Get retrieves a particular firewall based on its unique ID.
-func Get(c *gophercloud.ServiceClient, id string) (r GetResult) {
+func Get(c *golangsdk.ServiceClient, id string) (r GetResult) {
 	_, r.Err = c.Get(resourceURL(c, id), &r.Body, nil)
 	return
 }
@@ -113,34 +113,34 @@ type UpdateOptsBuilder interface {
 
 // UpdateOpts contains the values used when updating a firewall.
 type UpdateOpts struct {
-	IngressPolicyID	string `json:"ingress_firewall_policy_id,omitempty"`
+	IngressPolicyID string `json:"ingress_firewall_policy_id,omitempty"`
 	EgressPolicyID  string `json:"egress_firewall_policy_id,omitempty"`
-	Name         	string `json:"name,omitempty"`
-	Description  	string `json:"description,omitempty"`
-	AdminStateUp 	*bool  `json:"admin_state_up,omitempty"`
-	Shared       	*bool  `json:"public,omitempty"`
+	Name            string `json:"name,omitempty"`
+	Description     string `json:"description,omitempty"`
+	AdminStateUp    *bool  `json:"admin_state_up,omitempty"`
+	Shared          *bool  `json:"public,omitempty"`
 }
 
 // ToFirewallGroupUpdateMap casts a CreateOpts struct to a map.
 func (opts UpdateOpts) ToFirewallGroupUpdateMap() (map[string]interface{}, error) {
-	return gophercloud.BuildRequestBody(opts, "firewall_group")
+	return golangsdk.BuildRequestBody(opts, "firewall_group")
 }
 
 // Update allows firewall_groups to be updated.
-func Update(c *gophercloud.ServiceClient, id string, opts UpdateOptsBuilder) (r UpdateResult) {
+func Update(c *golangsdk.ServiceClient, id string, opts UpdateOptsBuilder) (r UpdateResult) {
 	b, err := opts.ToFirewallGroupUpdateMap()
 	if err != nil {
 		r.Err = err
 		return
 	}
-	_, r.Err = c.Put(resourceURL(c, id), b, &r.Body, &gophercloud.RequestOpts{
+	_, r.Err = c.Put(resourceURL(c, id), b, &r.Body, &golangsdk.RequestOpts{
 		OkCodes: []int{200},
 	})
 	return
 }
 
 // Delete will permanently delete a particular firewall based on its unique ID.
-func Delete(c *gophercloud.ServiceClient, id string) (r DeleteResult) {
+func Delete(c *golangsdk.ServiceClient, id string) (r DeleteResult) {
 	_, r.Err = c.Delete(resourceURL(c, id), nil)
 	return
 }

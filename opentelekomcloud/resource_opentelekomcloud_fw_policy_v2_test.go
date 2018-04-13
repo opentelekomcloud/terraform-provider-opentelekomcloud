@@ -5,10 +5,10 @@ import (
 	"testing"
 	"time"
 
-	"github.com/gophercloud/gophercloud"
-	"github.com/gophercloud/gophercloud/openstack/networking/v2/extensions/fwaas_v2/policies"
 	"github.com/hashicorp/terraform/helper/resource"
 	"github.com/hashicorp/terraform/terraform"
+	"github.com/huaweicloud/golangsdk"
+	"github.com/huaweicloud/golangsdk/openstack/networking/v2/extensions/fwaas_v2/policies"
 )
 
 func TestAccFWPolicyV2_basic(t *testing.T) {
@@ -81,7 +81,7 @@ func TestAccFWPolicyV2_timeout(t *testing.T) {
 
 func testAccCheckFWPolicyV2Destroy(s *terraform.State) error {
 	config := testAccProvider.Meta().(*Config)
-	networkingClient, err := config.networkingV2Client(OS_REGION_NAME)
+	networkingClient, err := config.hwNetworkV2Client(OS_REGION_NAME)
 	if err != nil {
 		return fmt.Errorf("Error creating OpenTelekomCloud networking client: %s", err)
 	}
@@ -93,7 +93,7 @@ func testAccCheckFWPolicyV2Destroy(s *terraform.State) error {
 		if err == nil {
 			return fmt.Errorf("Firewall policy (%s) still exists.", rs.Primary.ID)
 		}
-		if _, ok := err.(gophercloud.ErrDefault404); !ok {
+		if _, ok := err.(golangsdk.ErrDefault404); !ok {
 			return err
 		}
 	}
@@ -112,7 +112,7 @@ func testAccCheckFWPolicyV2Exists(n, name, description string, ruleCount int) re
 		}
 
 		config := testAccProvider.Meta().(*Config)
-		networkingClient, err := config.networkingV2Client(OS_REGION_NAME)
+		networkingClient, err := config.hwNetworkV2Client(OS_REGION_NAME)
 		if err != nil {
 			return fmt.Errorf("Error creating OpenTelekomCloud networking client: %s", err)
 		}
@@ -123,7 +123,7 @@ func testAccCheckFWPolicyV2Exists(n, name, description string, ruleCount int) re
 			// if we get a 404 error. Fail on any other error.
 			found, err = policies.Get(networkingClient, rs.Primary.ID).Extract()
 			if err != nil {
-				if _, ok := err.(gophercloud.ErrDefault404); ok {
+				if _, ok := err.(golangsdk.ErrDefault404); ok {
 					time.Sleep(time.Second)
 					continue
 				}

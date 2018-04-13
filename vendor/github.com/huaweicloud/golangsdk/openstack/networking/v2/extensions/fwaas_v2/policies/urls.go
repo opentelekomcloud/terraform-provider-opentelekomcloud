@@ -1,6 +1,6 @@
 package policies
 
-import "github.com/gophercloud/gophercloud"
+import "github.com/huaweicloud/golangsdk"
 
 const (
 	rootPath     = "fwaas"
@@ -9,18 +9,18 @@ const (
 	removePath   = "remove_rule"
 )
 
-func rootURL(c *gophercloud.ServiceClient) string {
+func rootURL(c *golangsdk.ServiceClient) string {
 	return c.ServiceURL(rootPath, resourcePath)
 }
 
-func resourceURL(c *gophercloud.ServiceClient, id string) string {
+func resourceURL(c *golangsdk.ServiceClient, id string) string {
 	return c.ServiceURL(rootPath, resourcePath, id)
 }
 
-func insertURL(c *gophercloud.ServiceClient, id string) string {
+func insertURL(c *golangsdk.ServiceClient, id string) string {
 	return c.ServiceURL(rootPath, resourcePath, id, insertPath)
 }
 
-func removeURL(c *gophercloud.ServiceClient, id string) string {
+func removeURL(c *golangsdk.ServiceClient, id string) string {
 	return c.ServiceURL(rootPath, resourcePath, id, removePath)
 }

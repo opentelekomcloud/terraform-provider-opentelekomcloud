@@ -5,10 +5,10 @@ import (
 	"testing"
 	"time"
 
-	"github.com/gophercloud/gophercloud"
-	"github.com/gophercloud/gophercloud/openstack/networking/v2/extensions/fwaas_v2/firewall_groups"
 	"github.com/hashicorp/terraform/helper/resource"
 	"github.com/hashicorp/terraform/terraform"
+	"github.com/huaweicloud/golangsdk"
+	"github.com/huaweicloud/golangsdk/openstack/networking/v2/extensions/fwaas_v2/firewall_groups"
 )
 
 func TestAccFWFirewallGroupV2_basic(t *testing.T) {
@@ -130,7 +130,7 @@ func TestAccFWFirewallGroupV2_port_remove(t *testing.T) {
 
 func testAccCheckFWFirewallGroupV2Destroy(s *terraform.State) error {
 	config := testAccProvider.Meta().(*Config)
-	networkingClient, err := config.networkingV2Client(OS_REGION_NAME)
+	networkingClient, err := config.hwNetworkV2Client(OS_REGION_NAME)
 	if err != nil {
 		return fmt.Errorf("Error creating OpenTelekomCloud networking client: %s", err)
 	}
@@ -143,7 +143,7 @@ func testAccCheckFWFirewallGroupV2Destroy(s *terraform.State) error {
 		if err == nil {
 			return fmt.Errorf("Firewall group (%s) still exists.", rs.Primary.ID)
 		}
-		if _, ok := err.(gophercloud.ErrDefault404); !ok {
+		if _, ok := err.(golangsdk.ErrDefault404); !ok {
 			return err
 		}
 	}
@@ -162,7 +162,7 @@ func testAccCheckFWFirewallGroupV2Exists(n string, firewall_group *FirewallGroup
 		}
 
 		config := testAccProvider.Meta().(*Config)
-		networkingClient, err := config.networkingV2Client(OS_REGION_NAME)
+		networkingClient, err := config.hwNetworkV2Client(OS_REGION_NAME)
 		if err != nil {
 			return fmt.Errorf("Exists) Error creating OpenTelekomCloud networking client: %s", err)
 		}
@@ -205,7 +205,7 @@ func testAccCheckFWFirewallGroupV2(n, expectedName, expectedDescription string, 
 		}
 
 		config := testAccProvider.Meta().(*Config)
-		networkingClient, err := config.networkingV2Client(OS_REGION_NAME)
+		networkingClient, err := config.hwNetworkV2Client(OS_REGION_NAME)
 		if err != nil {
 			return fmt.Errorf("Exists) Error creating OpenTelekomCloud networking client: %s", err)
 		}
@@ -216,7 +216,7 @@ func testAccCheckFWFirewallGroupV2(n, expectedName, expectedDescription string, 
 			// if we get a 404 error. Fail on any other error.
 			found, err = firewall_groups.Get(networkingClient, rs.Primary.ID).Extract()
 			if err != nil {
-				if _, ok := err.(gophercloud.ErrDefault404); ok {
+				if _, ok := err.(golangsdk.ErrDefault404); ok {
 					time.Sleep(time.Second)
 					continue
 				}

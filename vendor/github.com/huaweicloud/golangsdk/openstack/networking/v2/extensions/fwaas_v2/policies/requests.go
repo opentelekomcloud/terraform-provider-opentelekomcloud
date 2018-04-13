@@ -1,8 +1,8 @@
 package policies
 
 import (
-	"github.com/gophercloud/gophercloud"
-	"github.com/gophercloud/gophercloud/pagination"
+	"github.com/huaweicloud/golangsdk"
+	"github.com/huaweicloud/golangsdk/pagination"
 )
 
 // ListOptsBuilder allows extensions to add additional parameters to the
@@ -31,7 +31,7 @@ type ListOpts struct {
 
 // ToPolicyListQuery formats a ListOpts into a query string.
 func (opts ListOpts) ToPolicyListQuery() (string, error) {
-	q, err := gophercloud.BuildQueryString(opts)
+	q, err := golangsdk.BuildQueryString(opts)
 	return q.String(), err
 }
 
@@ -41,7 +41,7 @@ func (opts ListOpts) ToPolicyListQuery() (string, error) {
 //
 // Default policy settings return only those firewall policies that are owned by the
 // tenant who submits the request, unless an admin user submits the request.
-func List(c *gophercloud.ServiceClient, opts ListOptsBuilder) pagination.Pager {
+func List(c *golangsdk.ServiceClient, opts ListOptsBuilder) pagination.Pager {
 	url := rootURL(c)
 	if opts != nil {
 		query, err := opts.ToPolicyListQuery()
@@ -77,11 +77,11 @@ type CreateOpts struct {
 
 // ToFirewallPolicyCreateMap casts a CreateOpts struct to a map.
 func (opts CreateOpts) ToFirewallPolicyCreateMap() (map[string]interface{}, error) {
-	return gophercloud.BuildRequestBody(opts, "firewall_policy")
+	return golangsdk.BuildRequestBody(opts, "firewall_policy")
 }
 
 // Create accepts a CreateOpts struct and uses the values to create a new firewall policy
-func Create(c *gophercloud.ServiceClient, opts CreateOptsBuilder) (r CreateResult) {
+func Create(c *golangsdk.ServiceClient, opts CreateOptsBuilder) (r CreateResult) {
 	b, err := opts.ToFirewallPolicyCreateMap()
 	if err != nil {
 		r.Err = err
@@ -92,7 +92,7 @@ func Create(c *gophercloud.ServiceClient, opts CreateOptsBuilder) (r CreateResul
 }
 
 // Get retrieves a particular firewall policy based on its unique ID.
-func Get(c *gophercloud.ServiceClient, id string) (r GetResult) {
+func Get(c *golangsdk.ServiceClient, id string) (r GetResult) {
 	_, r.Err = c.Get(resourceURL(c, id), &r.Body, nil)
 	return
 }
@@ -116,24 +116,24 @@ type UpdateOpts struct {
 
 // ToFirewallPolicyUpdateMap casts a CreateOpts struct to a map.
 func (opts UpdateOpts) ToFirewallPolicyUpdateMap() (map[string]interface{}, error) {
-	return gophercloud.BuildRequestBody(opts, "firewall_policy")
+	return golangsdk.BuildRequestBody(opts, "firewall_policy")
 }
 
 // Update allows firewall policies to be updated.
-func Update(c *gophercloud.ServiceClient, id string, opts UpdateOptsBuilder) (r UpdateResult) {
+func Update(c *golangsdk.ServiceClient, id string, opts UpdateOptsBuilder) (r UpdateResult) {
 	b, err := opts.ToFirewallPolicyUpdateMap()
 	if err != nil {
 		r.Err = err
 		return
 	}
-	_, r.Err = c.Put(resourceURL(c, id), b, &r.Body, &gophercloud.RequestOpts{
+	_, r.Err = c.Put(resourceURL(c, id), b, &r.Body, &golangsdk.RequestOpts{
 		OkCodes: []int{200},
 	})
 	return
 }
 
 // Delete will permanently delete a particular firewall policy based on its unique ID.
-func Delete(c *gophercloud.ServiceClient, id string) (r DeleteResult) {
+func Delete(c *golangsdk.ServiceClient, id string) (r DeleteResult) {
 	_, r.Err = c.Delete(resourceURL(c, id), nil)
 	return
 }
@@ -149,24 +149,24 @@ type InsertRuleOpts struct {
 }
 
 func (opts InsertRuleOpts) ToFirewallPolicyInsertRuleMap() (map[string]interface{}, error) {
-	return gophercloud.BuildRequestBody(opts, "")
+	return golangsdk.BuildRequestBody(opts, "")
 }
 
-func AddRule(c *gophercloud.ServiceClient, id string, opts InsertRuleOptsBuilder) (r InsertRuleResult) {
+func AddRule(c *golangsdk.ServiceClient, id string, opts InsertRuleOptsBuilder) (r InsertRuleResult) {
 	b, err := opts.ToFirewallPolicyInsertRuleMap()
 	if err != nil {
 		r.Err = err
 		return
 	}
-	_, r.Err = c.Put(insertURL(c, id), b, &r.Body, &gophercloud.RequestOpts{
+	_, r.Err = c.Put(insertURL(c, id), b, &r.Body, &golangsdk.RequestOpts{
 		OkCodes: []int{200},
 	})
 	return
 }
 
-func RemoveRule(c *gophercloud.ServiceClient, id, ruleID string) (r RemoveRuleResult) {
+func RemoveRule(c *golangsdk.ServiceClient, id, ruleID string) (r RemoveRuleResult) {
 	b := map[string]interface{}{"firewall_rule_id": ruleID}
-	_, r.Err = c.Put(removeURL(c, id), b, &r.Body, &gophercloud.RequestOpts{
+	_, r.Err = c.Put(removeURL(c, id), b, &r.Body, &golangsdk.RequestOpts{
 		OkCodes: []int{200},
 	})
 	return

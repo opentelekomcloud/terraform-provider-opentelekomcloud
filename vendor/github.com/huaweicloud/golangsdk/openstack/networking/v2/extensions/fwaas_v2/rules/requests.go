@@ -1,8 +1,8 @@
 package rules
 
 import (
-	"github.com/gophercloud/gophercloud"
-	"github.com/gophercloud/gophercloud/pagination"
+	"github.com/huaweicloud/golangsdk"
+	"github.com/huaweicloud/golangsdk/pagination"
 )
 
 type (
@@ -56,7 +56,7 @@ type ListOpts struct {
 
 // ToRuleListQuery formats a ListOpts into a query string.
 func (opts ListOpts) ToRuleListQuery() (string, error) {
-	q, err := gophercloud.BuildQueryString(opts)
+	q, err := golangsdk.BuildQueryString(opts)
 	if err != nil {
 		return "", err
 	}
@@ -69,7 +69,7 @@ func (opts ListOpts) ToRuleListQuery() (string, error) {
 //
 // Default policy settings return only those firewall rules that are owned by the
 // tenant who submits the request, unless an admin user submits the request.
-func List(c *gophercloud.ServiceClient, opts ListOptsBuilder) pagination.Pager {
+func List(c *golangsdk.ServiceClient, opts ListOptsBuilder) pagination.Pager {
 	url := rootURL(c)
 
 	if opts != nil {
@@ -95,23 +95,23 @@ type CreateOptsBuilder interface {
 
 // CreateOpts contains all the values needed to create a new firewall rule.
 type CreateOpts struct {
-	Protocol             Protocol              `json:"protocol" required:"true"`
-	Action               string                `json:"action" required:"true"`
-	TenantID             string                `json:"tenant_id,omitempty"`
-	Name                 string                `json:"name,omitempty"`
-	Description          string                `json:"description,omitempty"`
-	IPVersion            gophercloud.IPVersion `json:"ip_version,omitempty"`
-	SourceIPAddress      string                `json:"source_ip_address,omitempty"`
-	DestinationIPAddress string                `json:"destination_ip_address,omitempty"`
-	SourcePort           string                `json:"source_port,omitempty"`
-	DestinationPort      string                `json:"destination_port,omitempty"`
-	Shared               *bool                 `json:"shared,omitempty"`
-	Enabled              *bool                 `json:"enabled,omitempty"`
+	Protocol             Protocol            `json:"protocol" required:"true"`
+	Action               string              `json:"action" required:"true"`
+	TenantID             string              `json:"tenant_id,omitempty"`
+	Name                 string              `json:"name,omitempty"`
+	Description          string              `json:"description,omitempty"`
+	IPVersion            golangsdk.IPVersion `json:"ip_version,omitempty"`
+	SourceIPAddress      string              `json:"source_ip_address,omitempty"`
+	DestinationIPAddress string              `json:"destination_ip_address,omitempty"`
+	SourcePort           string              `json:"source_port,omitempty"`
+	DestinationPort      string              `json:"destination_port,omitempty"`
+	Shared               *bool               `json:"shared,omitempty"`
+	Enabled              *bool               `json:"enabled,omitempty"`
 }
 
 // ToRuleCreateMap casts a CreateOpts struct to a map.
 func (opts CreateOpts) ToRuleCreateMap() (map[string]interface{}, error) {
-	b, err := gophercloud.BuildRequestBody(opts, "firewall_rule")
+	b, err := golangsdk.BuildRequestBody(opts, "firewall_rule")
 	if err != nil {
 		return nil, err
 	}
@@ -124,7 +124,7 @@ func (opts CreateOpts) ToRuleCreateMap() (map[string]interface{}, error) {
 }
 
 // Create accepts a CreateOpts struct and uses the values to create a new firewall rule
-func Create(c *gophercloud.ServiceClient, opts CreateOptsBuilder) (r CreateResult) {
+func Create(c *golangsdk.ServiceClient, opts CreateOptsBuilder) (r CreateResult) {
 	b, err := opts.ToRuleCreateMap()
 	if err != nil {
 		r.Err = err
@@ -135,7 +135,7 @@ func Create(c *gophercloud.ServiceClient, opts CreateOptsBuilder) (r CreateResul
 }
 
 // Get retrieves a particular firewall rule based on its unique ID.
-func Get(c *gophercloud.ServiceClient, id string) (r GetResult) {
+func Get(c *golangsdk.ServiceClient, id string) (r GetResult) {
 	_, r.Err = c.Get(resourceURL(c, id), &r.Body, nil)
 	return
 }
@@ -150,39 +150,39 @@ type UpdateOptsBuilder interface {
 
 // UpdateOpts contains the values used when updating a firewall rule.
 type UpdateOpts struct {
-	Protocol             *string                `json:"protocol,omitempty"`
-	Action               *string                `json:"action,omitempty"`
-	Name                 *string                `json:"name,omitempty"`
-	Description          *string                `json:"description,omitempty"`
-	IPVersion            *gophercloud.IPVersion `json:"ip_version,omitempty"`
-	SourceIPAddress      *string                `json:"source_ip_address,omitempty"`
-	DestinationIPAddress *string                `json:"destination_ip_address,omitempty"`
-	SourcePort           *string                `json:"source_port,omitempty"`
-	DestinationPort      *string                `json:"destination_port,omitempty"`
-	Shared               *bool                  `json:"shared,omitempty"`
-	Enabled              *bool                  `json:"enabled,omitempty"`
+	Protocol             *string              `json:"protocol,omitempty"`
+	Action               *string              `json:"action,omitempty"`
+	Name                 *string              `json:"name,omitempty"`
+	Description          *string              `json:"description,omitempty"`
+	IPVersion            *golangsdk.IPVersion `json:"ip_version,omitempty"`
+	SourceIPAddress      *string              `json:"source_ip_address,omitempty"`
+	DestinationIPAddress *string              `json:"destination_ip_address,omitempty"`
+	SourcePort           *string              `json:"source_port,omitempty"`
+	DestinationPort      *string              `json:"destination_port,omitempty"`
+	Shared               *bool                `json:"shared,omitempty"`
+	Enabled              *bool                `json:"enabled,omitempty"`
 }
 
 // ToRuleUpdateMap casts a UpdateOpts struct to a map.
 func (opts UpdateOpts) ToRuleUpdateMap() (map[string]interface{}, error) {
-	return gophercloud.BuildRequestBody(opts, "firewall_rule")
+	return golangsdk.BuildRequestBody(opts, "firewall_rule")
 }
 
 // Update allows firewall policies to be updated.
-func Update(c *gophercloud.ServiceClient, id string, opts UpdateOptsBuilder) (r UpdateResult) {
+func Update(c *golangsdk.ServiceClient, id string, opts UpdateOptsBuilder) (r UpdateResult) {
 	b, err := opts.ToRuleUpdateMap()
 	if err != nil {
 		r.Err = err
 		return
 	}
-	_, r.Err = c.Put(resourceURL(c, id), b, &r.Body, &gophercloud.RequestOpts{
+	_, r.Err = c.Put(resourceURL(c, id), b, &r.Body, &golangsdk.RequestOpts{
 		OkCodes: []int{200},
 	})
 	return
 }
 
 // Delete will permanently delete a particular firewall rule based on its unique ID.
-func Delete(c *gophercloud.ServiceClient, id string) (r DeleteResult) {
+func Delete(c *golangsdk.ServiceClient, id string) (r DeleteResult) {
 	_, r.Err = c.Delete(resourceURL(c, id), nil)
 	return
 }

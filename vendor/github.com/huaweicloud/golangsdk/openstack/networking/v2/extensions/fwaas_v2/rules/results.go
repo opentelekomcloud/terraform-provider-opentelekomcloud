@@ -1,8 +1,8 @@
 package rules
 
 import (
-	"github.com/gophercloud/gophercloud"
-	"github.com/gophercloud/gophercloud/pagination"
+	"github.com/huaweicloud/golangsdk"
+	"github.com/huaweicloud/golangsdk/pagination"
 )
 
 // Rule represents a firewall rule
@@ -35,13 +35,13 @@ type RulePage struct {
 // In order to do this, it needs to construct the next page's URL.
 func (r RulePage) NextPageURL() (string, error) {
 	var s struct {
-		Links []gophercloud.Link `json:"firewall_rules_links"`
+		Links []golangsdk.Link `json:"firewall_rules_links"`
 	}
 	err := r.ExtractInto(&s)
 	if err != nil {
 		return "", err
 	}
-	return gophercloud.ExtractNextURL(s.Links)
+	return golangsdk.ExtractNextURL(s.Links)
 }
 
 // IsEmpty checks whether a RulePage struct is empty.
@@ -62,7 +62,7 @@ func ExtractRules(r pagination.Page) ([]Rule, error) {
 }
 
 type commonResult struct {
-	gophercloud.Result
+	golangsdk.Result
 }
 
 // Extract is a function that accepts a result and extracts a firewall rule.
@@ -86,7 +86,7 @@ type UpdateResult struct {
 
 // DeleteResult represents the result of a delete operation.
 type DeleteResult struct {
-	gophercloud.ErrResult
+	golangsdk.ErrResult
 }
 
 // CreateResult represents the result of a create operation.
