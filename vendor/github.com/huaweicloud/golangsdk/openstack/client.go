@@ -470,3 +470,26 @@ func NewNatV2(client *golangsdk.ProviderClient, eo golangsdk.EndpointOpts) (*gol
 	sc.ResourceBase = sc.Endpoint + "v2.0/"
 	return sc, err
 }
+
+// NewMapReduceV1 creates a ServiceClient that may be used with the v1 MapReduce service.
+func NewMapReduceV1(client *golangsdk.ProviderClient, eo golangsdk.EndpointOpts) (*golangsdk.ServiceClient, error) {
+	sc, err := initClientOpts(client, eo, "mrs")
+	sc.ResourceBase = sc.Endpoint + client.ProjectID + "/"
+	return sc, err
+}
+
+// NewAntiDDoSV1 creates a ServiceClient that may be used with the v1 Anti DDoS Service
+// package.
+func NewAntiDDoSV1(client *golangsdk.ProviderClient, eo golangsdk.EndpointOpts) (*golangsdk.ServiceClient, error) {
+	sc, err := initClientOpts(client, eo, "antiddos")
+	sc.ResourceBase = sc.Endpoint + "v1/" + client.ProjectID + "/"
+	return sc, err
+}
+
+// NewAntiDDoSV2 creates a ServiceClient that may be used with the v2 Anti DDoS Service
+// package.
+func NewAntiDDoSV2(client *golangsdk.ProviderClient, eo golangsdk.EndpointOpts) (*golangsdk.ServiceClient, error) {
+	sc, err := initClientOpts(client, eo, "antiddos")
+	sc.ResourceBase = sc.Endpoint + "v2/" + client.ProjectID + "/"
+	return sc, err
+}
