@@ -9,6 +9,7 @@ import (
 
 	"github.com/gophercloud/gophercloud"
 	"github.com/gophercloud/gophercloud/openstack/blockstorage/v2/volumes"
+	"github.com/huaweicloud/golangsdk/openstack/evs/v2/tags"
 )
 
 // PASS
@@ -228,7 +229,11 @@ func testAccCheckBlockStorageV2VolumeTags(n string, k string, v string) resource
 			return fmt.Errorf("Volume not found")
 		}
 
-		taglist, err := GetVolumeTags(blockStorageClient, "volumes", found.ID)
+		client, err := config.loadEVSV2Client(OS_REGION_NAME)
+		if err != nil {
+			return fmt.Errorf("Error creating OpenTelekomCloud block storage client: %s", err)
+		}
+		taglist, err := tags.Get(client, "volumes", found.ID).Extract()
 		for key, value := range taglist.Tags {
 			if k != key {
 				continue

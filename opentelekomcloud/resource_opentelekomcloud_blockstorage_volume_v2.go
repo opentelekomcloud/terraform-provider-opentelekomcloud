@@ -7,7 +7,6 @@ import (
 	"time"
 
 	"github.com/gophercloud/gophercloud"
-	"github.com/gophercloud/gophercloud/openstack/blockstorage/v2/tags"
 	"github.com/gophercloud/gophercloud/openstack/blockstorage/v2/volumes"
 	"github.com/gophercloud/gophercloud/openstack/compute/v2/extensions/volumeattach"
 	"github.com/hashicorp/terraform/helper/hashcode"
@@ -141,21 +140,6 @@ func resourceContainerTags(d *schema.ResourceData) map[string]string {
 	return m
 }
 
-func CreateVolumeTags(client *gophercloud.ServiceClient, resource_type, resource_id string, tagmap map[string]string) (*tags.Tags, error) {
-	createOpts := tags.CreateOpts{
-		Tags: tagmap,
-	}
-	return tags.Create(client, resource_type, resource_id, createOpts).Extract()
-}
-
-func DeleteVolumeTags(client *gophercloud.ServiceClient, resource_type, resource_id string) error {
-	return tags.Delete(client, resource_type, resource_id).ExtractErr()
-}
-
-func GetVolumeTags(client *gophercloud.ServiceClient, resource_type, resource_id string) (*tags.Tags, error) {
-	return tags.Get(client, resource_type, resource_id).Extract()
-}
-
 func resourceBlockStorageVolumeV2Create(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*Config)
 	blockStorageClient, err := config.blockStorageV2Client(GetRegion(d, config))
@@ -204,7 +188,7 @@ func resourceBlockStorageVolumeV2Create(d *schema.ResourceData, meta interface{}
 			"Error waiting for volume (%s) to become ready: %s",
 			v.ID, err)
 	}
-	_, err = CreateVolumeTags(blockStorageClient, "volumes", v.ID, resourceContainerTags(d))
+	_, err = resourceEVSTagV2Create(d, meta, "volumes", v.ID, resourceContainerTags(d))
 	if err != nil {
 		return fmt.Errorf("Error creating tags for volume (%s): %s", v.ID, err)
 	}
@@ -252,7 +236,7 @@ func resourceBlockStorageVolumeV2Read(d *schema.ResourceData, meta interface{}) 
 	if err := d.Set("attachment", attachments); err != nil {
 		return fmt.Errorf("[DEBUG] Error saving attachment to state for OpenTelekomCloud block storage (%s): %s", d.Id(), err)
 	}
-	taglist, err := GetVolumeTags(blockStorageClient, "volumes", v.ID)
+	taglist, err := resourceEVSTagV2Get(d, meta, "volumes", v.ID)
 	if err != nil {
 		return fmt.Errorf("Error fetching tags for volume (%s): %s", v.ID, err)
 	}
@@ -282,7 +266,7 @@ func resourceBlockStorageVolumeV2Update(d *schema.ResourceData, meta interface{}
 		return fmt.Errorf("Error updating OpenTelekomCloud volume: %s", err)
 	}
 	if d.HasChange("tags") {
-		_, err = CreateVolumeTags(blockStorageClient, "volumes", d.Id(), resourceContainerTags(d))
+		_, err = resourceEVSTagV2Create(d, meta, "volumes", d.Id(), resourceContainerTags(d))
 	}
 
 	return resourceBlockStorageVolumeV2Read(d, meta)

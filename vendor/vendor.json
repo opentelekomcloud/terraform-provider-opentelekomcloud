@@ -318,12 +318,6 @@
 			"revisionTime": "2017-10-04T00:41:52Z"
 		},
 		{
-			"checksumSHA1": "Qvow3lLvRJ3AFMbixW7GZk7X19k=",
-			"path": "github.com/gophercloud/gophercloud/openstack/blockstorage/v2/tags",
-			"revision": "2903ee0dfbca98393c762d824d1bda66031f1247",
-			"revisionTime": "2017-12-13T04:15:48Z"
-		},
-		{
 			"checksumSHA1": "B4IXSmq364HcBruvvV0QjDFxZgc=",
 			"path": "github.com/gophercloud/gophercloud/openstack/blockstorage/v2/volumes",
 			"revision": "f8ec1b3d8dea084885975d404872b37be20b3984",
@@ -884,6 +878,12 @@
 			"path": "github.com/huaweicloud/golangsdk/openstack/ecs/v1/auto_recovery",
 			"revision": "c2811194004bd21b96bbd4cb3e0129661041011f",
 			"revisionTime": "2018-03-15T04:07:47Z"
+		},
+		{
+			"checksumSHA1": "Me7ZhJdaWfn1xBIBY0YDHnFqtZk=",
+			"path": "github.com/huaweicloud/golangsdk/openstack/evs/v2/tags",
+			"revision": "f90d95674ead542ccda9ac986a4f1be02d87556d",
+			"revisionTime": "2018-04-11T06:15:22Z"
 		},
 		{
 			"checksumSHA1": "6cxgVwctlHbqIqO9rHVTwmDtxhk=",
