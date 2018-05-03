@@ -444,3 +444,10 @@ func (c *Config) hwNetworkV2Client(region string) (*golangsdk.ServiceClient, err
 		Availability: c.getHwEndpointType(),
 	})
 }
+
+func (c *Config) loadEVSV2Client(region string) (*golangsdk.ServiceClient, error) {
+	return huaweisdk.NewBlockStorageV2(c.HwClient, golangsdk.EndpointOpts{
+		Region:       c.determineRegion(region),
+		Availability: c.getHwEndpointType(),
+	})
+}

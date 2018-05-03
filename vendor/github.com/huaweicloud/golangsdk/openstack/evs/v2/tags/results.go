@@ -1,11 +1,11 @@
 package tags
 
 import (
-	"github.com/gophercloud/gophercloud"
+	"github.com/huaweicloud/golangsdk"
 )
 
 type commonResult struct {
-	gophercloud.Result
+	golangsdk.Result
 }
 
 // Tags model
@@ -34,7 +34,5 @@ type GetResult struct {
 
 //DeleteResult model
 type DeleteResult struct {
-	gophercloud.ErrResult
+	golangsdk.ErrResult
 }
-
-
