@@ -438,10 +438,10 @@
 			"revisionTime": "2017-07-18T08:44:09Z"
 		},
 		{
-			"checksumSHA1": "Mjt7GwFygyqPxygY8xZZnUasHmk=",
+			"checksumSHA1": "tvOf0FGjKmpz9vZD0ZBHtcMFpwI=",
 			"path": "github.com/gophercloud/gophercloud/openstack/networking/v2/extensions/layer3/routers",
-			"revision": "c8f12c6e39d96d0e07f0976e184ea0308cb6aaf0",
-			"revisionTime": "2016-10-11T16:29:10Z"
+			"revision": "e25975f29734719dc6071b3683ca40dbb1937cc1",
+			"revisionTime": "2018-04-25T00:11:59Z"
 		},
 		{
 			"checksumSHA1": "mhpwj5tPv7Uw5aUfC55fhLPBcKo=",

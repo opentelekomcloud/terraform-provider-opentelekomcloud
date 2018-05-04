@@ -54,6 +54,12 @@ func resourceNetworkingRouterV2() *schema.Resource {
 				ForceNew:         false,
 				DiffSuppressFunc: suppressExternalGateway,
 			},
+			"enable_snat": &schema.Schema{
+				Type:     schema.TypeBool,
+				Optional: true,
+				ForceNew: false,
+				Computed: true,
+			},
 			"tenant_id": &schema.Schema{
 				Type:     schema.TypeString,
 				Optional: true,
@@ -100,6 +106,14 @@ func resourceNetworkingRouterV2Create(d *schema.ResourceData, meta interface{}) 
 			NetworkID: externalGateway,
 		}
 		createOpts.GatewayInfo = &gatewayInfo
+	}
+
+	if esRaw, ok := d.GetOk("enable_snat"); ok {
+		if externalGateway == "" {
+			return fmt.Errorf("setting enable_snat requires external_gateway to be set")
+		}
+		es := esRaw.(bool)
+		createOpts.GatewayInfo.EnableSNAT = &es
 	}
 
 	log.Printf("[DEBUG] Create Options: %#v", createOpts)
@@ -150,6 +164,7 @@ func resourceNetworkingRouterV2Read(d *schema.ResourceData, meta interface{}) er
 	d.Set("distributed", n.Distributed)
 	d.Set("tenant_id", n.TenantID)
 	d.Set("external_gateway", n.GatewayInfo.NetworkID)
+	d.Set("enable_snat", n.GatewayInfo.EnableSNAT)
 	d.Set("region", GetRegion(d, config))
 
 	return nil
@@ -174,14 +189,35 @@ func resourceNetworkingRouterV2Update(d *schema.ResourceData, meta interface{}) 
 		asu := d.Get("admin_state_up").(bool)
 		updateOpts.AdminStateUp = &asu
 	}
+
+	// Gateway settings
+	var updateGatewaySettings bool
+	var externalGateway string
+	gatewayInfo := routers.GatewayInfo{}
+
+	if v := d.Get("external_gateway").(string); v != "" {
+		externalGateway = v
+	}
+
+	if externalGateway != "" {
+		gatewayInfo.NetworkID = externalGateway
+	}
 	if d.HasChange("external_gateway") {
-		externalGateway := d.Get("external_gateway").(string)
-		if externalGateway != "" {
-			gatewayInfo := routers.GatewayInfo{
-				NetworkID: externalGateway,
-			}
-			updateOpts.GatewayInfo = &gatewayInfo
+		updateGatewaySettings = true
+	}
+
+	if d.HasChange("enable_snat") {
+		updateGatewaySettings = true
+		if externalGateway == "" {
+			return fmt.Errorf("setting enable_snat requires external_gateway to be set")
 		}
+
+		enableSNAT := d.Get("enable_snat").(bool)
+		gatewayInfo.EnableSNAT = &enableSNAT
+	}
+
+	if updateGatewaySettings {
+		updateOpts.GatewayInfo = &gatewayInfo
 	}
 
 	log.Printf("[DEBUG] Updating Router %s with options: %+v", d.Id(), updateOpts)
