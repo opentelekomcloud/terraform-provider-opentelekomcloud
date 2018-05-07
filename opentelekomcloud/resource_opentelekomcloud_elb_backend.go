@@ -12,7 +12,7 @@ import (
 	"github.com/huaweicloud/golangsdk/openstack/networking/v2/extensions/elbaas/backendmember"
 )
 
-const loadbalancerActiveTimeoutSeconds = 300
+const loadbalancerActiveTimeoutSeconds = 600
 const loadbalancerDeleteTimeoutSeconds = 300
 
 func resourceBackend() *schema.Resource {
