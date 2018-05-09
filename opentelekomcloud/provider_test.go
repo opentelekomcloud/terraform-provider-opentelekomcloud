@@ -28,6 +28,7 @@ var (
 	OS_SWIFT_ENVIRONMENT      = os.Getenv("OS_SWIFT_ENVIRONMENT")
 	OS_AVAILABILITY_ZONE      = os.Getenv("OS_AVAILABILITY_ZONE")
 	OS_VPC_ID                 = os.Getenv("OS_VPC_ID")
+	OS_SUBNET_ID              = os.Getenv("OS_SUBNET_ID")
 	OS_TENANT_ID              = os.Getenv("OS_TENANT_ID")
 )
 
@@ -85,6 +86,9 @@ func testAccPreCheckRequiredEnvVars(t *testing.T) {
 
 	if OS_AVAILABILITY_ZONE == "" {
 		t.Fatal("OS_AVAILABILITY_ZONE must be set for acceptance tests")
+
+	if OS_SUBNET_ID == "" {
+		t.Fatal("OS_SUBNET_ID must be set for acceptance tests")
 	}
 
 	if OS_EXTGW_ID == "" {

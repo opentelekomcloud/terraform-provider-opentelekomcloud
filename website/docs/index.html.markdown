@@ -119,48 +119,6 @@ $ OS_DEBUG=1 TF_LOG=DEBUG terraform apply
 If you submit these logs with a bug report, please ensure any sensitive
 information has been scrubbed first!
 
-## Rackspace Compatibility
-
-Using this OpenTelekomCloud provider with Rackspace is not supported and not
-guaranteed to work; however, users have reported success with the
-following notes in mind:
-
-* Interacting with instances has been seen to work. Interacting with
-all other resources is either untested or known to not work.
-
-* Use your _password_ instead of your Rackspace API KEY.
-
-* Explicitly define the public and private networks in your
-instances as shown below:
-
-```
-resource "opentelekomcloud_compute_instance_v2" "my_instance" {
-  name      = "my_instance"
-  region    = "DFW"
-  image_id  = "fabe045f-43f8-4991-9e6c-5cabd617538c"
-  flavor_id = "general1-4"
-  key_pair  = "provisioning_key"
-
-  network {
-    uuid = "00000000-0000-0000-0000-000000000000"
-    name = "public"
-  }
-
-  network {
-    uuid = "11111111-1111-1111-1111-111111111111"
-    name = "private"
-  }
-}
-```
-
-If you try using this provider with Rackspace and run into bugs, you
-are welcomed to open a bug report / issue on Github, but please keep
-in mind that this is unsupported and the reported bug may not be
-able to be fixed.
-
-If you have successfully used this provider with Rackspace and can
-add any additional comments, please let us know.
-
 ## Testing and Development
 
 In order to run the Acceptance Tests for development, the following environment
