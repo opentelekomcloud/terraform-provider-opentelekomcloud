@@ -79,6 +79,14 @@ func testAccPreCheckRequiredEnvVars(t *testing.T) {
 		t.Fatal("OS_NETWORK_ID must be set for acceptance tests")
 	}
 
+	if OS_VPC_ID == "" {
+		t.Fatal("OS_VPC_ID must be set for acceptance tests")
+	}
+
+	if OS_AVAILABILITY_ZONE == "" {
+		t.Fatal("OS_AVAILABILITY_ZONE must be set for acceptance tests")
+	}
+
 	if OS_EXTGW_ID == "" {
 		t.Fatal("OS_EXTGW_ID must be set for acceptance tests")
 	}
