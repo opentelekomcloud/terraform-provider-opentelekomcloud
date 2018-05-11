@@ -28,6 +28,7 @@ func TestAccRDSV1Instance_basic(t *testing.T) {
 					resource.TestCheckResourceAttr(
 						"opentelekomcloud_rds_instance_v1.instance", "availabilityzone", "eu-de-01"),
 				),
+				ExpectNonEmptyPlan: true,
 			},
 		},
 	})
@@ -91,7 +92,7 @@ data "opentelekomcloud_rds_flavors_v1" "flavor" {
     region = "eu-de"
     datastore_name = "PostgreSQL"
     datastore_version = "9.5.5"
-    speccode = "rds.pg.s1.medium"
+    speccode = "rds.pg.s1.medium.ha"
 }
 
 resource "opentelekomcloud_compute_secgroup_v2" "secgrp_rds" {
