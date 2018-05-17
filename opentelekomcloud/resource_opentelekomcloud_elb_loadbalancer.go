@@ -128,7 +128,7 @@ func resourceELoadBalancerCreate(d *schema.ResourceData, meta interface{}) error
 		return err
 	}
 
-	if err := golangsdk.WaitForJobSuccess(client, job.URI, loadbalancerActiveTimeoutSeconds); err != nil {
+	if err := golangsdk.WaitForJobSuccess(client, job.URI, int(d.Timeout(schema.TimeoutCreate)/time.Second)); err != nil {
 		return err
 	}
 
@@ -205,7 +205,7 @@ func resourceELoadBalancerUpdate(d *schema.ResourceData, meta interface{}) error
 
 	log.Printf("[DEBUG] Updating loadbalancer %s with options: %#v", d.Id(), updateOpts)
 	job, err := loadbalancer_elbs.Update(client, d.Id(), updateOpts).ExtractJobResponse()
-	if err := golangsdk.WaitForJobSuccess(client, job.URI, loadbalancerActiveTimeoutSeconds); err != nil {
+	if err := golangsdk.WaitForJobSuccess(client, job.URI, int(d.Timeout(schema.TimeoutUpdate)/time.Second)); err != nil {
 		return err
 	}
 
@@ -228,7 +228,7 @@ func resourceELoadBalancerDelete(d *schema.ResourceData, meta interface{}) error
 
 	log.Printf("Waiting for loadbalancer %s to delete", id)
 
-	if err := golangsdk.WaitForJobSuccess(client, job.URI, loadbalancerActiveTimeoutSeconds); err != nil {
+	if err := golangsdk.WaitForJobSuccess(client, job.URI, int(d.Timeout(schema.TimeoutDelete)/time.Second)); err != nil {
 		return err
 	}
 

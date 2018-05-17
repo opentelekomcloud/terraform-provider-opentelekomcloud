@@ -301,7 +301,7 @@ func resourceBlockStorageVolumeV2Delete(d *schema.ResourceData, meta interface{}
 				Pending:    []string{"in-use", "attaching", "detaching"},
 				Target:     []string{"available"},
 				Refresh:    VolumeV2StateRefreshFunc(blockStorageClient, d.Id()),
-				Timeout:    10 * time.Minute,
+				Timeout:    d.Timeout(schema.TimeoutDelete),
 				Delay:      10 * time.Second,
 				MinTimeout: 3 * time.Second,
 			}
