@@ -882,20 +882,6 @@ func resourceComputeInstanceV2Delete(d *schema.ResourceData, meta interface{}) e
 		err = startstop.Stop(computeClient, d.Id()).ExtractErr()
 		if err != nil {
 			log.Printf("[WARN] Error stopping OpenTelekomCloud instance: %s", err)
-		} else {
-			stopStateConf := &resource.StateChangeConf{
-				Pending:    []string{"ACTIVE"},
-				Target:     []string{"SHUTOFF"},
-				Refresh:    ServerV2StateRefreshFunc(computeClient, d.Id()),
-				Timeout:    d.Timeout(schema.TimeoutDelete),
-				Delay:      10 * time.Second,
-				MinTimeout: 3 * time.Second,
-			}
-			log.Printf("[DEBUG] Waiting for instance (%s) to stop", d.Id())
-			_, err = stopStateConf.WaitForState()
-			if err != nil {
-				log.Printf("[WARN] Error waiting for instance (%s) to stop: %s, proceeding to delete", d.Id(), err)
-			}
 		}
 	}
 
