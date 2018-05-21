@@ -7,8 +7,8 @@ import (
 
 	"github.com/hashicorp/terraform/helper/schema"
 
-	"github.com/gophercloud/gophercloud"
-	"github.com/gophercloud/gophercloud/openstack/networking/v2/extensions/elbaas/loadbalancer_elbs"
+	"github.com/huaweicloud/golangsdk"
+	"github.com/huaweicloud/golangsdk/openstack/networking/v2/extensions/elbaas/loadbalancer_elbs"
 )
 
 func resourceELoadBalancer() *schema.Resource {
@@ -102,7 +102,7 @@ func resourceELoadBalancer() *schema.Resource {
 
 func resourceELoadBalancerCreate(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*Config)
-	client, err := config.otcV1Client(GetRegion(d, config))
+	client, err := config.loadELBClient(GetRegion(d, config))
 	if err != nil {
 		return fmt.Errorf("Error creating OpenTelekomCloud networking client: %s", err)
 	}
@@ -128,11 +128,11 @@ func resourceELoadBalancerCreate(d *schema.ResourceData, meta interface{}) error
 		return err
 	}
 
-	if err := gophercloud.WaitForJobSuccess(client, job.URI, loadbalancerActiveTimeoutSeconds); err != nil {
+	if err := golangsdk.WaitForJobSuccess(client, job.URI, int(d.Timeout(schema.TimeoutCreate)/time.Second)); err != nil {
 		return err
 	}
 
-	entity, err := gophercloud.GetJobEntity(client, job.URI, "elb")
+	entity, err := golangsdk.GetJobEntity(client, job.URI, "elb")
 
 	if mlb, ok := entity.(map[string]interface{}); ok {
 		if vid, ok := mlb["id"]; ok {
@@ -149,7 +149,7 @@ func resourceELoadBalancerCreate(d *schema.ResourceData, meta interface{}) error
 
 func resourceELoadBalancerRead(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*Config)
-	networkingClient, err := config.otcV1Client(GetRegion(d, config))
+	networkingClient, err := config.loadELBClient(GetRegion(d, config))
 	if err != nil {
 		return fmt.Errorf("Error creating OpenTelekomCloud networking client: %s", err)
 	}
@@ -183,7 +183,7 @@ func resourceELoadBalancerRead(d *schema.ResourceData, meta interface{}) error {
 
 func resourceELoadBalancerUpdate(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*Config)
-	client, err := config.otcV1Client(GetRegion(d, config))
+	client, err := config.loadELBClient(GetRegion(d, config))
 	if err != nil {
 		return fmt.Errorf("Error creating OpenTelekomCloud networking client: %s", err)
 	}
@@ -205,7 +205,7 @@ func resourceELoadBalancerUpdate(d *schema.ResourceData, meta interface{}) error
 
 	log.Printf("[DEBUG] Updating loadbalancer %s with options: %#v", d.Id(), updateOpts)
 	job, err := loadbalancer_elbs.Update(client, d.Id(), updateOpts).ExtractJobResponse()
-	if err := gophercloud.WaitForJobSuccess(client, job.URI, loadbalancerActiveTimeoutSeconds); err != nil {
+	if err := golangsdk.WaitForJobSuccess(client, job.URI, int(d.Timeout(schema.TimeoutUpdate)/time.Second)); err != nil {
 		return err
 	}
 
@@ -214,7 +214,7 @@ func resourceELoadBalancerUpdate(d *schema.ResourceData, meta interface{}) error
 
 func resourceELoadBalancerDelete(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*Config)
-	client, err := config.otcV1Client(GetRegion(d, config))
+	client, err := config.loadELBClient(GetRegion(d, config))
 	if err != nil {
 		return fmt.Errorf("Error creating OpenTelekomCloud networking client: %s", err)
 	}
@@ -228,7 +228,7 @@ func resourceELoadBalancerDelete(d *schema.ResourceData, meta interface{}) error
 
 	log.Printf("Waiting for loadbalancer %s to delete", id)
 
-	if err := gophercloud.WaitForJobSuccess(client, job.URI, loadbalancerActiveTimeoutSeconds); err != nil {
+	if err := golangsdk.WaitForJobSuccess(client, job.URI, int(d.Timeout(schema.TimeoutDelete)/time.Second)); err != nil {
 		return err
 	}
 

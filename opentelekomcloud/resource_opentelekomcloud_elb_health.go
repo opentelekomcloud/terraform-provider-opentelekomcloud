@@ -7,7 +7,7 @@ import (
 
 	"github.com/hashicorp/terraform/helper/schema"
 
-	"github.com/gophercloud/gophercloud/openstack/networking/v2/extensions/elbaas/healthcheck"
+	"github.com/huaweicloud/golangsdk/openstack/networking/v2/extensions/elbaas/healthcheck"
 )
 
 func resourceHealth() *schema.Resource {
@@ -94,7 +94,7 @@ func resourceHealth() *schema.Resource {
 
 func resourceHealthCreate(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*Config)
-	client, err := config.otcV1Client(GetRegion(d, config))
+	client, err := config.loadELBClient(GetRegion(d, config))
 	if err != nil {
 		return fmt.Errorf("Error creating OpenTelekomCloud networking client: %s", err)
 	}
@@ -124,7 +124,7 @@ func resourceHealthCreate(d *schema.ResourceData, meta interface{}) error {
 
 func resourceHealthRead(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*Config)
-	networkingClient, err := config.otcV1Client(GetRegion(d, config))
+	networkingClient, err := config.loadELBClient(GetRegion(d, config))
 	if err != nil {
 		return fmt.Errorf("Error creating OpenTelekomCloud networking client: %s", err)
 	}
@@ -152,7 +152,7 @@ func resourceHealthRead(d *schema.ResourceData, meta interface{}) error {
 
 func resourceHealthUpdate(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*Config)
-	networkingClient, err := config.otcV1Client(GetRegion(d, config))
+	networkingClient, err := config.loadELBClient(GetRegion(d, config))
 	if err != nil {
 		return fmt.Errorf("Error creating OpenTelekomCloud networking client: %s", err)
 	}
@@ -192,7 +192,7 @@ func resourceHealthUpdate(d *schema.ResourceData, meta interface{}) error {
 
 func resourceHealthDelete(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*Config)
-	client, err := config.otcV1Client(GetRegion(d, config))
+	client, err := config.loadELBClient(GetRegion(d, config))
 	if err != nil {
 		return fmt.Errorf("Error creating OpenTelekomCloud networking client: %s", err)
 	}

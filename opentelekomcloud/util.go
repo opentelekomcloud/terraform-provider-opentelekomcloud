@@ -10,6 +10,7 @@ import (
 	"github.com/gophercloud/gophercloud"
 	"github.com/hashicorp/terraform/helper/resource"
 	"github.com/hashicorp/terraform/helper/schema"
+	"github.com/huaweicloud/golangsdk"
 )
 
 // BuildRequest takes an opts struct and builds a request body for
@@ -28,7 +29,9 @@ func BuildRequest(opts interface{}, parent string) (map[string]interface{}, erro
 // CheckDeleted checks the error to see if it's a 404 (Not Found) and, if so,
 // sets the resource ID to the empty string instead of throwing an error.
 func CheckDeleted(d *schema.ResourceData, err error, msg string) error {
-	if _, ok := err.(gophercloud.ErrDefault404); ok {
+	_, ok := err.(gophercloud.ErrDefault404)
+	_, ok1 := err.(golangsdk.ErrDefault404)
+	if ok || ok1 {
 		d.SetId("")
 		return nil
 	}
@@ -64,6 +67,15 @@ func AddValueSpecs(body map[string]interface{}) map[string]interface{} {
 func MapValueSpecs(d *schema.ResourceData) map[string]string {
 	m := make(map[string]string)
 	for key, val := range d.Get("value_specs").(map[string]interface{}) {
+		m[key] = val.(string)
+	}
+	return m
+}
+
+// MapResourceProp converts ResourceData property into a map
+func MapResourceProp(d *schema.ResourceData, prop string) map[string]interface{} {
+	m := make(map[string]interface{})
+	for key, val := range d.Get(prop).(map[string]interface{}) {
 		m[key] = val.(string)
 	}
 	return m
@@ -108,7 +120,25 @@ func checkForRetryableError(err error) *resource.RetryError {
 		default:
 			return resource.NonRetryableError(err)
 		}
+	case golangsdk.ErrDefault500:
+		return resource.RetryableError(err)
+	case golangsdk.ErrUnexpectedResponseCode:
+		switch errCode.Actual {
+		case 409, 503:
+			return resource.RetryableError(err)
+		default:
+			return resource.NonRetryableError(err)
+		}
 	default:
 		return resource.NonRetryableError(err)
 	}
+}
+
+func isResourceNotFound(err error) bool {
+	if err == nil {
+		return false
+	}
+	_, ok := err.(golangsdk.ErrDefault404)
+	_, ok1 := err.(gophercloud.ErrDefault404)
+	return ok || ok1
 }

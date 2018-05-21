@@ -4,9 +4,9 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/gophercloud/gophercloud/openstack/networking/v2/extensions/elbaas/listeners"
 	"github.com/hashicorp/terraform/helper/resource"
 	"github.com/hashicorp/terraform/terraform"
+	"github.com/huaweicloud/golangsdk/openstack/networking/v2/extensions/elbaas/listeners"
 )
 
 // PASS
@@ -37,7 +37,7 @@ func TestAccELBListener_basic(t *testing.T) {
 
 func testAccCheckELBListenerDestroy(s *terraform.State) error {
 	config := testAccProvider.Meta().(*Config)
-	networkingClient, err := config.otcV1Client(OS_REGION_NAME)
+	networkingClient, err := config.loadELBClient(OS_REGION_NAME)
 	if err != nil {
 		return fmt.Errorf("Error creating OpenTelekomCloud networking client: %s", err)
 	}
@@ -68,7 +68,7 @@ func testAccCheckELBListenerExists(n string, listener *listeners.Listener) resou
 		}
 
 		config := testAccProvider.Meta().(*Config)
-		client, err := config.otcV1Client(OS_REGION_NAME)
+		client, err := config.loadELBClient(OS_REGION_NAME)
 		if err != nil {
 			return fmt.Errorf("Error creating OpenTelekomCloud networking client: %s", err)
 		}

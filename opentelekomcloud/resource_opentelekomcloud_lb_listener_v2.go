@@ -208,7 +208,9 @@ func resourceListenerV2Read(d *schema.ResourceData, meta interface{}) error {
 	d.Set("admin_state_up", listener.AdminStateUp)
 	d.Set("default_pool_id", listener.DefaultPoolID)
 	//d.Set("connection_limit", listener.ConnLimit)
-	d.Set("sni_container_refs", listener.SniContainerRefs)
+	if err := d.Set("sni_container_refs", listener.SniContainerRefs); err != nil {
+		return fmt.Errorf("[DEBUG] Error saving sni_container_refs to state for OpenTelekomCloud listener (%s): %s", d.Id(), err)
+	}
 	d.Set("default_tls_container_ref", listener.DefaultTlsContainerRef)
 	d.Set("region", GetRegion(d, config))
 

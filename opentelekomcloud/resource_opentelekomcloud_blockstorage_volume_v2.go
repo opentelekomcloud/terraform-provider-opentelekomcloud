@@ -95,6 +95,10 @@ func resourceBlockStorageVolumeV2() *schema.Resource {
 				Optional: true,
 				ForceNew: true,
 			},
+			"tags": &schema.Schema{
+				Type:     schema.TypeMap,
+				Optional: true,
+			},
 			"attachment": &schema.Schema{
 				Type:     schema.TypeSet,
 				Computed: true,
@@ -123,6 +127,14 @@ func resourceBlockStorageVolumeV2() *schema.Resource {
 func resourceContainerMetadataV2(d *schema.ResourceData) map[string]string {
 	m := make(map[string]string)
 	for key, val := range d.Get("metadata").(map[string]interface{}) {
+		m[key] = val.(string)
+	}
+	return m
+}
+
+func resourceContainerTags(d *schema.ResourceData) map[string]string {
+	m := make(map[string]string)
+	for key, val := range d.Get("tags").(map[string]interface{}) {
 		m[key] = val.(string)
 	}
 	return m
@@ -176,6 +188,10 @@ func resourceBlockStorageVolumeV2Create(d *schema.ResourceData, meta interface{}
 			"Error waiting for volume (%s) to become ready: %s",
 			v.ID, err)
 	}
+	_, err = resourceEVSTagV2Create(d, meta, "volumes", v.ID, resourceContainerTags(d))
+	if err != nil {
+		return fmt.Errorf("Error creating tags for volume (%s): %s", v.ID, err)
+	}
 
 	// Store the ID now
 	d.SetId(v.ID)
@@ -204,7 +220,9 @@ func resourceBlockStorageVolumeV2Read(d *schema.ResourceData, meta interface{}) 
 	d.Set("snapshot_id", v.SnapshotID)
 	d.Set("source_vol_id", v.SourceVolID)
 	d.Set("volume_type", v.VolumeType)
-	d.Set("metadata", v.Metadata)
+	if err := d.Set("metadata", v.Metadata); err != nil {
+		return fmt.Errorf("[DEBUG] Error saving metadata to state for OpenTelekomCloud block storage (%s): %s", d.Id(), err)
+	}
 	d.Set("region", GetRegion(d, config))
 
 	attachments := make([]map[string]interface{}, len(v.Attachments))
@@ -215,7 +233,14 @@ func resourceBlockStorageVolumeV2Read(d *schema.ResourceData, meta interface{}) 
 		attachments[i]["device"] = attachment.Device
 		log.Printf("[DEBUG] attachment: %v", attachment)
 	}
-	d.Set("attachment", attachments)
+	if err := d.Set("attachment", attachments); err != nil {
+		return fmt.Errorf("[DEBUG] Error saving attachment to state for OpenTelekomCloud block storage (%s): %s", d.Id(), err)
+	}
+	taglist, err := resourceEVSTagV2Get(d, meta, "volumes", v.ID)
+	if err != nil {
+		return fmt.Errorf("Error fetching tags for volume (%s): %s", v.ID, err)
+	}
+	d.Set("tags", taglist)
 
 	return nil
 }
@@ -239,6 +264,9 @@ func resourceBlockStorageVolumeV2Update(d *schema.ResourceData, meta interface{}
 	_, err = volumes.Update(blockStorageClient, d.Id(), updateOpts).Extract()
 	if err != nil {
 		return fmt.Errorf("Error updating OpenTelekomCloud volume: %s", err)
+	}
+	if d.HasChange("tags") {
+		_, err = resourceEVSTagV2Create(d, meta, "volumes", d.Id(), resourceContainerTags(d))
 	}
 
 	return resourceBlockStorageVolumeV2Read(d, meta)
@@ -273,7 +301,7 @@ func resourceBlockStorageVolumeV2Delete(d *schema.ResourceData, meta interface{}
 				Pending:    []string{"in-use", "attaching", "detaching"},
 				Target:     []string{"available"},
 				Refresh:    VolumeV2StateRefreshFunc(blockStorageClient, d.Id()),
-				Timeout:    10 * time.Minute,
+				Timeout:    d.Timeout(schema.TimeoutDelete),
 				Delay:      10 * time.Second,
 				MinTimeout: 3 * time.Second,
 			}

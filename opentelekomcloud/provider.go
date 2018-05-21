@@ -160,6 +160,9 @@ func Provider() terraform.ResourceProvider {
 			"opentelekomcloud_networking_network_v2":  dataSourceNetworkingNetworkV2(),
 			"opentelekomcloud_networking_secgroup_v2": dataSourceNetworkingSecGroupV2(),
 			"opentelekomcloud_s3_bucket_object":       dataSourceS3BucketObject(),
+			"opentelekomcloud_kms_key_v1":             dataSourceKmsKeyV1(),
+			"opentelekomcloud_kms_data_key_v1":        dataSourceKmsDataKeyV1(),
+			"opentelekomcloud_rds_flavors_v1":         dataSourceRdsFlavorV1(),
 		},
 
 		ResourcesMap: map[string]*schema.Resource{
@@ -177,6 +180,7 @@ func Provider() terraform.ResourceProvider {
 			"opentelekomcloud_fw_policy_v2":                    resourceFWPolicyV2(),
 			"opentelekomcloud_fw_rule_v2":                      resourceFWRuleV2(),
 			"opentelekomcloud_images_image_v2":                 resourceImagesImageV2(),
+			"opentelekomcloud_kms_key_v1":                      resourceKmsKeyV1(),
 			"opentelekomcloud_lb_loadbalancer_v2":              resourceLoadBalancerV2(),
 			"opentelekomcloud_lb_listener_v2":                  resourceListenerV2(),
 			"opentelekomcloud_lb_pool_v2":                      resourcePoolV2(),
@@ -198,6 +202,11 @@ func Provider() terraform.ResourceProvider {
 			"opentelekomcloud_elb_listener":                    resourceEListener(),
 			"opentelekomcloud_elb_backend":                     resourceBackend(),
 			"opentelekomcloud_elb_health":                      resourceHealth(),
+			"opentelekomcloud_ces_alarmrule":                   resourceAlarmRule(),
+			"opentelekomcloud_smn_topic_v2":                    resourceTopic(),
+			"opentelekomcloud_smn_subscription_v2":             resourceSubscription(),
+			"opentelekomcloud_rds_instance_v1":                 resourceRdsInstance(),
+			"opentelekomcloud_vpc_eip_v1":                      resourceVpcEIPV1(),
 		},
 
 		ConfigureFunc: configureProvider,

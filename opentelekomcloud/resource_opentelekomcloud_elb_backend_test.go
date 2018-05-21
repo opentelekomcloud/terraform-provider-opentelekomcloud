@@ -2,13 +2,12 @@ package opentelekomcloud
 
 import (
 	"fmt"
+	"log"
 	"testing"
 
-	//"github.com/gophercloud/gophercloud/openstack/networking/v2/extensions/elbaas/backendmember"
-	"github.com/gophercloud/gophercloud/openstack/networking/v2/extensions/elbaas/backendmember"
 	"github.com/hashicorp/terraform/helper/resource"
 	"github.com/hashicorp/terraform/terraform"
-	"log"
+	"github.com/huaweicloud/golangsdk/openstack/networking/v2/extensions/elbaas/backendmember"
 )
 
 // PASS with diff
@@ -21,8 +20,7 @@ func TestAccELBBackend_basic(t *testing.T) {
 		CheckDestroy: testAccCheckELBBackendDestroy,
 		Steps: []resource.TestStep{
 			resource.TestStep{
-				Config:             TestAccELBBackendConfig_basic,
-				ExpectNonEmptyPlan: true, // Because admin_state_up remains false, unfinished elb?
+				Config: TestAccELBBackendConfig_basic,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckELBBackendExists("opentelekomcloud_elb_backend.backend_1", &backend),
 				),
@@ -33,7 +31,7 @@ func TestAccELBBackend_basic(t *testing.T) {
 
 func testAccCheckELBBackendDestroy(s *terraform.State) error {
 	config := testAccProvider.Meta().(*Config)
-	client, err := config.otcV1Client(OS_REGION_NAME)
+	client, err := config.loadELBClient(OS_REGION_NAME)
 	if err != nil {
 		return fmt.Errorf("Error creating OpenTelekomCloud networking client: %s", err)
 	}
@@ -64,7 +62,7 @@ func testAccCheckELBBackendExists(n string, backend *backendmember.Backend) reso
 		}
 
 		config := testAccProvider.Meta().(*Config)
-		client, err := config.otcV1Client(OS_REGION_NAME)
+		client, err := config.loadELBClient(OS_REGION_NAME)
 		if err != nil {
 			return fmt.Errorf("Error creating OpenTelekomCloud networking client: %s", err)
 		}
@@ -73,24 +71,34 @@ func testAccCheckELBBackendExists(n string, backend *backendmember.Backend) reso
 		if err != nil {
 			return err
 		}
+		f := found[0]
 		log.Printf("[DEBUG] testAccCheckELBBackendExists found %+v.\n", found)
 
-		if found.ID != rs.Primary.ID {
+		if f.ID != rs.Primary.ID {
 			return fmt.Errorf("Backend member not found")
 		}
 
-		*backend = *found
+		*backend = f
 
 		return nil
 	}
 }
 
 var TestAccELBBackendConfig_basic = fmt.Sprintf(`
+resource "opentelekomcloud_compute_instance_v2" "vm_1" {
+  name = "instance_1"
+  availability_zone = "%s"
+  network {
+    uuid = "%s"
+  }
+}
+
 resource "opentelekomcloud_elb_loadbalancer" "loadbalancer_1" {
   name = "loadbalancer_1"
   vpc_id = "%s"
   type = "External"
   bandwidth = 5
+  admin_state_up = true
 }
 
 resource "opentelekomcloud_elb_listener" "listener_1" {
@@ -102,7 +110,6 @@ resource "opentelekomcloud_elb_listener" "listener_1" {
   lb_algorithm = "roundrobin"
   loadbalancer_id = "${opentelekomcloud_elb_loadbalancer.loadbalancer_1.id}"
 }
-
 
 resource "opentelekomcloud_elb_health" "health_1" {
   listener_id = "${opentelekomcloud_elb_listener.listener_1.id}"
@@ -118,12 +125,12 @@ resource "opentelekomcloud_elb_health" "health_1" {
 }
 
 resource "opentelekomcloud_elb_backend" "backend_1" {
-  address = "%s"
+  address = "${opentelekomcloud_compute_instance_v2.vm_1.network.0.fixed_ip_v4}"
   listener_id = "${opentelekomcloud_elb_listener.listener_1.id}"
-  server_id = "%s"
+  server_id = "${opentelekomcloud_compute_instance_v2.vm_1.id}"
   timeouts {
     create = "5m"
     delete = "5m"
   }
 }
-`, OS_VPC_ID, OS_SERVER_ADDRESS, OS_SERVER_ID)
+`, OS_AVAILABILITY_ZONE, OS_NETWORK_ID, OS_VPC_ID)

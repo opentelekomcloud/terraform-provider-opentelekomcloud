@@ -4,10 +4,10 @@ import (
 	"fmt"
 	"log"
 
-	"github.com/gophercloud/gophercloud"
-	"github.com/gophercloud/gophercloud/openstack/networking/v2/extensions/fwaas_v2/policies"
-	"github.com/gophercloud/gophercloud/openstack/networking/v2/extensions/fwaas_v2/rules"
 	"github.com/hashicorp/terraform/helper/schema"
+	"github.com/huaweicloud/golangsdk"
+	"github.com/huaweicloud/golangsdk/openstack/networking/v2/extensions/fwaas_v2/policies"
+	"github.com/huaweicloud/golangsdk/openstack/networking/v2/extensions/fwaas_v2/rules"
 )
 
 func resourceFWRuleV2() *schema.Resource {
@@ -86,7 +86,7 @@ func resourceFWRuleV2() *schema.Resource {
 func resourceFWRuleV2Create(d *schema.ResourceData, meta interface{}) error {
 
 	config := meta.(*Config)
-	networkingClient, err := config.networkingV2Client(GetRegion(d, config))
+	networkingClient, err := config.hwNetworkV2Client(GetRegion(d, config))
 	if err != nil {
 		return fmt.Errorf("Error creating OpenTelekomCloud networking client: %s", err)
 	}
@@ -131,7 +131,7 @@ func resourceFWRuleV2Read(d *schema.ResourceData, meta interface{}) error {
 	log.Printf("[DEBUG] Retrieve information about firewall rule: %s", d.Id())
 
 	config := meta.(*Config)
-	networkingClient, err := config.networkingV2Client(GetRegion(d, config))
+	networkingClient, err := config.hwNetworkV2Client(GetRegion(d, config))
 	if err != nil {
 		return fmt.Errorf("Error creating OpenTelekomCloud networking client: %s", err)
 	}
@@ -166,37 +166,55 @@ func resourceFWRuleV2Read(d *schema.ResourceData, meta interface{}) error {
 
 func resourceFWRuleV2Update(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*Config)
-	networkingClient, err := config.networkingV2Client(GetRegion(d, config))
+	networkingClient, err := config.hwNetworkV2Client(GetRegion(d, config))
 	if err != nil {
 		return fmt.Errorf("Error creating OpenTelekomCloud networking client: %s", err)
 	}
 
-	name := d.Get("name").(string)
-	description := d.Get("description").(string)
-	protocol := d.Get("protocol").(string)
-	action := d.Get("action").(string)
-	ipVersion := resourceFWRuleV2DetermineIPVersion(d.Get("ip_version").(int))
-	sourceIPAddress := d.Get("source_ip_address").(string)
-	sourcePort := d.Get("source_port").(string)
-	destinationIPAddress := d.Get("destination_ip_address").(string)
-	destinationPort := d.Get("destination_port").(string)
-	enabled := d.Get("enabled").(bool)
-
-	opts := rules.UpdateOpts{
-		Name:                 &name,
-		Description:          &description,
-		Protocol:             &protocol,
-		Action:               &action,
-		IPVersion:            &ipVersion,
-		SourceIPAddress:      &sourceIPAddress,
-		DestinationIPAddress: &destinationIPAddress,
-		SourcePort:           &sourcePort,
-		DestinationPort:      &destinationPort,
-		Enabled:              &enabled,
+	var updateOpts rules.UpdateOpts
+	if d.HasChange("name") {
+		name := d.Get("name").(string)
+		updateOpts.Name = &name
+	}
+	if d.HasChange("description") {
+		description := d.Get("description").(string)
+		updateOpts.Description = &description
+	}
+	if d.HasChange("protocol") {
+		protocol := d.Get("protocol").(string)
+		updateOpts.Protocol = &protocol
+	}
+	if d.HasChange("action") {
+		action := d.Get("action").(string)
+		updateOpts.Action = &action
+	}
+	if d.HasChange("ip_version") {
+		ipVersion := resourceFWRuleV2DetermineIPVersion(d.Get("ip_version").(int))
+		updateOpts.IPVersion = &ipVersion
+	}
+	if d.HasChange("source_ip_address") {
+		sourceIPAddress := d.Get("source_ip_address").(string)
+		updateOpts.SourceIPAddress = &sourceIPAddress
+	}
+	if d.HasChange("source_port") {
+		sourcePort := d.Get("source_port").(string)
+		updateOpts.SourcePort = &sourcePort
+	}
+	if d.HasChange("destination_ip_address") {
+		destinationIPAddress := d.Get("destination_ip_address").(string)
+		updateOpts.DestinationIPAddress = &destinationIPAddress
+	}
+	if d.HasChange("destination_port") {
+		destinationPort := d.Get("destination_port").(string)
+		updateOpts.DestinationPort = &destinationPort
+	}
+	if d.HasChange("enabled") {
+		enabled := d.Get("enabled").(bool)
+		updateOpts.Enabled = &enabled
 	}
 
-	log.Printf("[DEBUG] Updating firewall rules: %#v", opts)
-	err = rules.Update(networkingClient, d.Id(), opts).Err
+	log.Printf("[DEBUG] Updating firewall rules: %#v", updateOpts)
+	err = rules.Update(networkingClient, d.Id(), updateOpts).Err
 	if err != nil {
 		return err
 	}
@@ -208,7 +226,7 @@ func resourceFWRuleV2Delete(d *schema.ResourceData, meta interface{}) error {
 	log.Printf("[DEBUG] Destroy firewall rule: %s", d.Id())
 
 	config := meta.(*Config)
-	networkingClient, err := config.networkingV2Client(GetRegion(d, config))
+	networkingClient, err := config.hwNetworkV2Client(GetRegion(d, config))
 	if err != nil {
 		return fmt.Errorf("Error creating OpenTelekomCloud networking client: %s", err)
 	}
@@ -228,14 +246,14 @@ func resourceFWRuleV2Delete(d *schema.ResourceData, meta interface{}) error {
 	return rules.Delete(networkingClient, d.Id()).Err
 }
 
-func resourceFWRuleV2DetermineIPVersion(ipv int) gophercloud.IPVersion {
+func resourceFWRuleV2DetermineIPVersion(ipv int) golangsdk.IPVersion {
 	// Determine the IP Version
-	var ipVersion gophercloud.IPVersion
+	var ipVersion golangsdk.IPVersion
 	switch ipv {
 	case 4:
-		ipVersion = gophercloud.IPv4
+		ipVersion = golangsdk.IPv4
 	case 6:
-		ipVersion = gophercloud.IPv6
+		ipVersion = golangsdk.IPv6
 	}
 
 	return ipVersion

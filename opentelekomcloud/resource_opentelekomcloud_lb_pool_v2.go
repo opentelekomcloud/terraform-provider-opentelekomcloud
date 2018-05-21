@@ -251,7 +251,9 @@ func resourcePoolV2Read(d *schema.ResourceData, meta interface{}) error {
 	d.Set("admin_state_up", pool.AdminStateUp)
 	d.Set("name", pool.Name)
 	d.Set("id", pool.ID)
-	d.Set("persistence", pool.Persistence)
+	log.Printf("[DEBUG] pool persistence: %+v", pool.Persistence)
+	// UNDONE: This needs to check for failure, and it currently fails...
+	//d.Set("persistence", pool.Persistence);
 	d.Set("region", GetRegion(d, config))
 
 	return nil

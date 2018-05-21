@@ -9,7 +9,7 @@ import (
 	"github.com/hashicorp/terraform/helper/resource"
 	"github.com/hashicorp/terraform/terraform"
 
-	"github.com/gophercloud/gophercloud/openstack/dns/v2/recordsets"
+	"github.com/huaweicloud/golangsdk/openstack/dns/v2/recordsets"
 )
 
 func randomZoneName() string {
@@ -28,8 +28,7 @@ func TestAccDNSV2RecordSet_basic(t *testing.T) {
 		CheckDestroy: testAccCheckDNSV2RecordSetDestroy,
 		Steps: []resource.TestStep{
 			resource.TestStep{
-				Config:             testAccDNSV2RecordSet_basic(zoneName),
-				ExpectNonEmptyPlan: true,
+				Config: testAccDNSV2RecordSet_basic(zoneName),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckDNSV2RecordSetExists("opentelekomcloud_dns_recordset_v2.recordset_1", &recordset),
 					resource.TestCheckResourceAttr(
@@ -39,8 +38,7 @@ func TestAccDNSV2RecordSet_basic(t *testing.T) {
 				),
 			},
 			resource.TestStep{
-				Config:             testAccDNSV2RecordSet_update(zoneName),
-				ExpectNonEmptyPlan: true,
+				Config: testAccDNSV2RecordSet_update(zoneName),
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr("opentelekomcloud_dns_recordset_v2.recordset_1", "name", zoneName),
 					resource.TestCheckResourceAttr("opentelekomcloud_dns_recordset_v2.recordset_1", "ttl", "6000"),
@@ -66,8 +64,7 @@ func TestAccDNSV2RecordSet_readTTL(t *testing.T) {
 		CheckDestroy: testAccCheckDNSV2RecordSetDestroy,
 		Steps: []resource.TestStep{
 			resource.TestStep{
-				Config:             testAccDNSV2RecordSet_readTTL(zoneName),
-				ExpectNonEmptyPlan: true,
+				Config: testAccDNSV2RecordSet_readTTL(zoneName),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckDNSV2RecordSetExists("opentelekomcloud_dns_recordset_v2.recordset_1", &recordset),
 					resource.TestMatchResourceAttr(
@@ -89,8 +86,7 @@ func TestAccDNSV2RecordSet_timeout(t *testing.T) {
 		CheckDestroy: testAccCheckDNSV2RecordSetDestroy,
 		Steps: []resource.TestStep{
 			resource.TestStep{
-				Config:             testAccDNSV2RecordSet_timeout(zoneName),
-				ExpectNonEmptyPlan: true,
+				Config: testAccDNSV2RecordSet_timeout(zoneName),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckDNSV2RecordSetExists("opentelekomcloud_dns_recordset_v2.recordset_1", &recordset),
 				),
@@ -169,7 +165,6 @@ func testAccDNSV2RecordSet_basic(zoneName string) string {
 			email = "email2@example.com"
 			description = "a zone"
 			ttl = 6000
-			type = "PRIMARY"
 		}
 
 		resource "opentelekomcloud_dns_recordset_v2" "recordset_1" {
@@ -190,7 +185,6 @@ func testAccDNSV2RecordSet_update(zoneName string) string {
 			email = "email2@example.com"
 			description = "an updated zone"
 			ttl = 6000
-			type = "PRIMARY"
 		}
 
 		resource "opentelekomcloud_dns_recordset_v2" "recordset_1" {
@@ -211,7 +205,6 @@ func testAccDNSV2RecordSet_readTTL(zoneName string) string {
 			email = "email2@example.com"
 			description = "an updated zone"
 			ttl = 6000
-			type = "PRIMARY"
 		}
 
 		resource "opentelekomcloud_dns_recordset_v2" "recordset_1" {
@@ -230,7 +223,6 @@ func testAccDNSV2RecordSet_timeout(zoneName string) string {
 			email = "email2@example.com"
 			description = "an updated zone"
 			ttl = 6000
-			type = "PRIMARY"
 		}
 
 		resource "opentelekomcloud_dns_recordset_v2" "recordset_1" {

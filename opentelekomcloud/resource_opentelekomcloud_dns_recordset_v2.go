@@ -6,8 +6,8 @@ import (
 	"strings"
 	"time"
 
-	"github.com/gophercloud/gophercloud"
-	"github.com/gophercloud/gophercloud/openstack/dns/v2/recordsets"
+	"github.com/huaweicloud/golangsdk"
+	"github.com/huaweicloud/golangsdk/openstack/dns/v2/recordsets"
 
 	"github.com/hashicorp/terraform/helper/resource"
 	"github.com/hashicorp/terraform/helper/schema"
@@ -53,20 +53,20 @@ func resourceDNSRecordSetV2() *schema.Resource {
 			},
 			"records": &schema.Schema{
 				Type:     schema.TypeList,
-				Optional: true,
+				Required: true,
 				ForceNew: false,
 				Elem:     &schema.Schema{Type: schema.TypeString},
+				MinItems: 1,
 			},
 			"ttl": &schema.Schema{
 				Type:     schema.TypeInt,
 				Optional: true,
-				Computed: true,
 				ForceNew: false,
+				Default:  300,
 			},
 			"type": &schema.Schema{
 				Type:     schema.TypeString,
-				Optional: true,
-				Computed: true,
+				Required: true,
 				ForceNew: true,
 			},
 			"value_specs": &schema.Schema{
@@ -121,6 +121,11 @@ func resourceDNSRecordSetV2Create(d *schema.ResourceData, meta interface{}) erro
 	}
 
 	_, err = stateConf.WaitForState()
+	if err != nil {
+		return fmt.Errorf(
+			"Error waiting for record set (%s) to become ACTIVE for creation: %s",
+			n.ID, err)
+	}
 
 	id := fmt.Sprintf("%s/%s", zoneID, n.ID)
 	d.SetId(id)
@@ -153,7 +158,9 @@ func resourceDNSRecordSetV2Read(d *schema.ResourceData, meta interface{}) error 
 	d.Set("description", n.Description)
 	d.Set("ttl", n.TTL)
 	d.Set("type", n.Type)
-	d.Set("records", n.Records)
+	if err := d.Set("records", n.Records); err != nil {
+		return fmt.Errorf("[DEBUG] Error saving records to state for OpenTelekomCloud DNS record set (%s): %s", d.Id(), err)
+	}
 	d.Set("region", GetRegion(d, config))
 	d.Set("zone_id", zoneID)
 
@@ -209,6 +216,11 @@ func resourceDNSRecordSetV2Update(d *schema.ResourceData, meta interface{}) erro
 	}
 
 	_, err = stateConf.WaitForState()
+	if err != nil {
+		return fmt.Errorf(
+			"Error waiting for record set (%s) to become ACTIVE for updation: %s",
+			recordsetID, err)
+	}
 
 	return resourceDNSRecordSetV2Read(d, meta)
 }
@@ -228,13 +240,13 @@ func resourceDNSRecordSetV2Delete(d *schema.ResourceData, meta interface{}) erro
 
 	err = recordsets.Delete(dnsClient, zoneID, recordsetID).ExtractErr()
 	if err != nil {
-		return fmt.Errorf("Error deleting OpenTelekomCloud DNS  record set: %s", err)
+		return fmt.Errorf("Error deleting OpenTelekomCloud DNS record set: %s", err)
 	}
 
 	log.Printf("[DEBUG] Waiting for DNS record set (%s) to be deleted", recordsetID)
 	stateConf := &resource.StateChangeConf{
 		Target:     []string{"DELETED"},
-		Pending:    []string{"ACTIVE", "PENDING"},
+		Pending:    []string{"ACTIVE", "PENDING", "ERROR"},
 		Refresh:    waitForDNSRecordSet(dnsClient, zoneID, recordsetID),
 		Timeout:    d.Timeout(schema.TimeoutDelete),
 		Delay:      5 * time.Second,
@@ -242,16 +254,21 @@ func resourceDNSRecordSetV2Delete(d *schema.ResourceData, meta interface{}) erro
 	}
 
 	_, err = stateConf.WaitForState()
+	if err != nil {
+		return fmt.Errorf(
+			"Error waiting for record set (%s) to become DELETED for deletion: %s",
+			recordsetID, err)
+	}
 
 	d.SetId("")
 	return nil
 }
 
-func waitForDNSRecordSet(dnsClient *gophercloud.ServiceClient, zoneID, recordsetId string) resource.StateRefreshFunc {
+func waitForDNSRecordSet(dnsClient *golangsdk.ServiceClient, zoneID, recordsetId string) resource.StateRefreshFunc {
 	return func() (interface{}, string, error) {
 		recordset, err := recordsets.Get(dnsClient, zoneID, recordsetId).Extract()
 		if err != nil {
-			if _, ok := err.(gophercloud.ErrDefault404); ok {
+			if _, ok := err.(golangsdk.ErrDefault404); ok {
 				return recordset, "DELETED", nil
 			}
 
@@ -259,7 +276,7 @@ func waitForDNSRecordSet(dnsClient *gophercloud.ServiceClient, zoneID, recordset
 		}
 
 		log.Printf("[DEBUG] OpenTelekomCloud DNS record set (%s) current status: %s", recordset.ID, recordset.Status)
-		return recordset, recordset.Status, nil
+		return recordset, parseStatus(recordset.Status), nil
 	}
 }
 

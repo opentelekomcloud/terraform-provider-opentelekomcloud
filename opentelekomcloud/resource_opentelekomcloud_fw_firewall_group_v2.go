@@ -5,11 +5,11 @@ import (
 	"log"
 	"time"
 
-	"github.com/gophercloud/gophercloud"
-	"github.com/gophercloud/gophercloud/openstack/networking/v2/extensions/fwaas_v2/firewall_groups"
-	"github.com/gophercloud/gophercloud/openstack/networking/v2/extensions/fwaas_v2/routerinsertion"
 	"github.com/hashicorp/terraform/helper/resource"
 	"github.com/hashicorp/terraform/helper/schema"
+	"github.com/huaweicloud/golangsdk"
+	"github.com/huaweicloud/golangsdk/openstack/networking/v2/extensions/fwaas_v2/firewall_groups"
+	"github.com/huaweicloud/golangsdk/openstack/networking/v2/extensions/fwaas_v2/routerinsertion"
 )
 
 func resourceFWFirewallGroupV2() *schema.Resource {
@@ -81,7 +81,7 @@ func resourceFWFirewallGroupV2() *schema.Resource {
 func resourceFWFirewallGroupV2Create(d *schema.ResourceData, meta interface{}) error {
 
 	config := meta.(*Config)
-	networkingClient, err := config.networkingV2Client(GetRegion(d, config))
+	networkingClient, err := config.hwNetworkV2Client(GetRegion(d, config))
 	if err != nil {
 		return fmt.Errorf("Error creating OpenTelekomCloud networking client: %s", err)
 	}
@@ -146,7 +146,7 @@ func resourceFWFirewallGroupV2Read(d *schema.ResourceData, meta interface{}) err
 	log.Printf("[DEBUG] Retrieve information about firewall: %s", d.Id())
 
 	config := meta.(*Config)
-	networkingClient, err := config.networkingV2Client(GetRegion(d, config))
+	networkingClient, err := config.hwNetworkV2Client(GetRegion(d, config))
 	if err != nil {
 		return fmt.Errorf("Error creating OpenTelekomCloud networking client: %s", err)
 	}
@@ -165,7 +165,9 @@ func resourceFWFirewallGroupV2Read(d *schema.ResourceData, meta interface{}) err
 	d.Set("egress_policy_id", firewall_group.EgressPolicyID)
 	d.Set("admin_state_up", firewall_group.AdminStateUp)
 	d.Set("tenant_id", firewall_group.TenantID)
-	d.Set("ports", firewall_group.PortIDs)
+	if err := d.Set("ports", firewall_group.PortIDs); err != nil {
+		return fmt.Errorf("[DEBUG] Error saving ports to state for OpenTelekomCloud firewall group (%s): %s", d.Id(), err)
+	}
 	d.Set("region", GetRegion(d, config))
 
 	return nil
@@ -174,7 +176,7 @@ func resourceFWFirewallGroupV2Read(d *schema.ResourceData, meta interface{}) err
 func resourceFWFirewallGroupV2Update(d *schema.ResourceData, meta interface{}) error {
 
 	config := meta.(*Config)
-	networkingClient, err := config.networkingV2Client(GetRegion(d, config))
+	networkingClient, err := config.hwNetworkV2Client(GetRegion(d, config))
 	if err != nil {
 		return fmt.Errorf("Error creating OpenTelekomCloud networking client: %s", err)
 	}
@@ -240,7 +242,7 @@ func resourceFWFirewallGroupV2Delete(d *schema.ResourceData, meta interface{}) e
 	log.Printf("[DEBUG] Destroy firewall group: %s", d.Id())
 
 	config := meta.(*Config)
-	networkingClient, err := config.networkingV2Client(GetRegion(d, config))
+	networkingClient, err := config.hwNetworkV2Client(GetRegion(d, config))
 	if err != nil {
 		return fmt.Errorf("Error creating OpenTelekomCloud networking client: %s", err)
 	}
@@ -277,7 +279,7 @@ func resourceFWFirewallGroupV2Delete(d *schema.ResourceData, meta interface{}) e
 	return err
 }
 
-func waitForFirewallGroupActive(networkingClient *gophercloud.ServiceClient, id string) resource.StateRefreshFunc {
+func waitForFirewallGroupActive(networkingClient *golangsdk.ServiceClient, id string) resource.StateRefreshFunc {
 
 	return func() (interface{}, string, error) {
 		var fw FirewallGroup
@@ -290,14 +292,14 @@ func waitForFirewallGroupActive(networkingClient *gophercloud.ServiceClient, id 
 	}
 }
 
-func waitForFirewallGroupDeletion(networkingClient *gophercloud.ServiceClient, id string) resource.StateRefreshFunc {
+func waitForFirewallGroupDeletion(networkingClient *golangsdk.ServiceClient, id string) resource.StateRefreshFunc {
 
 	return func() (interface{}, string, error) {
 		fw, err := firewall_groups.Get(networkingClient, id).Extract()
 		log.Printf("[DEBUG] Got firewall group %s => %#v", id, fw)
 
 		if err != nil {
-			if _, ok := err.(gophercloud.ErrDefault404); ok {
+			if _, ok := err.(golangsdk.ErrDefault404); ok {
 				log.Printf("[DEBUG] Firewall group %s is actually deleted", id)
 				return "", "DELETED", nil
 			}

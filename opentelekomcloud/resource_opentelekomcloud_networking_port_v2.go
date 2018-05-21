@@ -209,7 +209,9 @@ func resourceNetworkingPortV2Read(d *schema.ResourceData, meta interface{}) erro
 	d.Set("mac_address", p.MACAddress)
 	d.Set("tenant_id", p.TenantID)
 	d.Set("device_owner", p.DeviceOwner)
-	d.Set("security_group_ids", p.SecurityGroups)
+	if err := d.Set("security_group_ids", p.SecurityGroups); err != nil {
+		return fmt.Errorf("[DEBUG] Error saving security_group_ids to state for OpenTelekomCloud port (%s): %s", d.Id(), err)
+	}
 	d.Set("device_id", p.DeviceID)
 
 	// Create a slice of all returned Fixed IPs.
@@ -219,7 +221,9 @@ func resourceNetworkingPortV2Read(d *schema.ResourceData, meta interface{}) erro
 	for _, ipObject := range p.FixedIPs {
 		ips = append(ips, ipObject.IPAddress)
 	}
-	d.Set("all_fixed_ips", ips)
+	if err := d.Set("all_fixed_ips", ips); err != nil {
+		return fmt.Errorf("[DEBUG] Error saving all_fixed_ips to state for OpenTelekomCloud port (%s): %s", d.Id(), err)
+	}
 
 	// Convert AllowedAddressPairs to list of map
 	var pairs []map[string]interface{}
@@ -229,7 +233,9 @@ func resourceNetworkingPortV2Read(d *schema.ResourceData, meta interface{}) erro
 		pair["mac_address"] = pairObject.MACAddress
 		pairs = append(pairs, pair)
 	}
-	d.Set("allowed_address_pairs", pairs)
+	if err := d.Set("allowed_address_pairs", pairs); err != nil {
+		return fmt.Errorf("[DEBUG] Error saving allowed_address_pairs to state for OpenTelekomCloud port (%s): %s", d.Id(), err)
+	}
 
 	d.Set("region", GetRegion(d, config))
 

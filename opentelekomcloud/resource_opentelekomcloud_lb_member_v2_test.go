@@ -94,22 +94,10 @@ func testAccCheckLBV2MemberExists(n string, member *pools.Member) resource.TestC
 	}
 }
 
-const TestAccLBV2MemberConfig_basic = `
-resource "opentelekomcloud_networking_network_v2" "network_1" {
-  name = "network_1"
-  admin_state_up = "true"
-}
-
-resource "opentelekomcloud_networking_subnet_v2" "subnet_1" {
-  name = "subnet_1"
-  network_id = "${opentelekomcloud_networking_network_v2.network_1.id}"
-  cidr = "192.168.199.0/24"
-  ip_version = 4
-}
-
+var TestAccLBV2MemberConfig_basic = fmt.Sprintf(`
 resource "opentelekomcloud_lb_loadbalancer_v2" "loadbalancer_1" {
   name = "loadbalancer_1"
-  vip_subnet_id = "${opentelekomcloud_networking_subnet_v2.subnet_1.id}"
+  vip_subnet_id = "%s"
 }
 
 resource "opentelekomcloud_lb_listener_v2" "listener_1" {
@@ -127,10 +115,10 @@ resource "opentelekomcloud_lb_pool_v2" "pool_1" {
 }
 
 resource "opentelekomcloud_lb_member_v2" "member_1" {
-  address = "192.168.199.10"
+  address = "10.0.0.10"
   protocol_port = 8080
   pool_id = "${opentelekomcloud_lb_pool_v2.pool_1.id}"
-  subnet_id = "${opentelekomcloud_networking_subnet_v2.subnet_1.id}"
+  subnet_id = "%s"
 
   timeouts {
     create = "5m"
@@ -140,10 +128,11 @@ resource "opentelekomcloud_lb_member_v2" "member_1" {
 }
 
 resource "opentelekomcloud_lb_member_v2" "member_2" {
-  address = "192.168.199.11"
+  address = "10.0.0.11"
   protocol_port = 8080
   pool_id = "${opentelekomcloud_lb_pool_v2.pool_1.id}"
   subnet_id = "${opentelekomcloud_networking_subnet_v2.subnet_1.id}"
+  subnet_id = "%s"
 
   timeouts {
     create = "5m"
@@ -151,24 +140,12 @@ resource "opentelekomcloud_lb_member_v2" "member_2" {
     delete = "5m"
   }
 }
-`
+`, OS_SUBNET_ID, OS_SUBNET_ID, OS_SUBNET_ID)
 
-const TestAccLBV2MemberConfig_update = `
-resource "opentelekomcloud_networking_network_v2" "network_1" {
-  name = "network_1"
-  admin_state_up = "true"
-}
-
-resource "opentelekomcloud_networking_subnet_v2" "subnet_1" {
-  name = "subnet_1"
-  cidr = "192.168.199.0/24"
-  ip_version = 4
-  network_id = "${opentelekomcloud_networking_network_v2.network_1.id}"
-}
-
+var TestAccLBV2MemberConfig_update = fmt.Sprintf(`
 resource "opentelekomcloud_lb_loadbalancer_v2" "loadbalancer_1" {
   name = "loadbalancer_1"
-  vip_subnet_id = "${opentelekomcloud_networking_subnet_v2.subnet_1.id}"
+  vip_subnet_id = "%s"
 }
 
 resource "opentelekomcloud_lb_listener_v2" "listener_1" {
@@ -186,12 +163,12 @@ resource "opentelekomcloud_lb_pool_v2" "pool_1" {
 }
 
 resource "opentelekomcloud_lb_member_v2" "member_1" {
-  address = "192.168.199.10"
+  address = "10.0.0.10"
   protocol_port = 8080
   weight = 10
   admin_state_up = "true"
   pool_id = "${opentelekomcloud_lb_pool_v2.pool_1.id}"
-  subnet_id = "${opentelekomcloud_networking_subnet_v2.subnet_1.id}"
+  subnet_id = "%s"
 
   timeouts {
     create = "5m"
@@ -201,12 +178,12 @@ resource "opentelekomcloud_lb_member_v2" "member_1" {
 }
 
 resource "opentelekomcloud_lb_member_v2" "member_2" {
-  address = "192.168.199.11"
+  address = "10.0.0.11"
   protocol_port = 8080
   weight = 15
   admin_state_up = "true"
   pool_id = "${opentelekomcloud_lb_pool_v2.pool_1.id}"
-  subnet_id = "${opentelekomcloud_networking_subnet_v2.subnet_1.id}"
+  subnet_id = "%s"
 
   timeouts {
     create = "5m"
@@ -214,4 +191,4 @@ resource "opentelekomcloud_lb_member_v2" "member_2" {
     delete = "5m"
   }
 }
-`
+`, OS_SUBNET_ID, OS_SUBNET_ID, OS_SUBNET_ID)

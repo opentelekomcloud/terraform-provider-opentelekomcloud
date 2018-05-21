@@ -12,17 +12,18 @@ import (
 
 	"github.com/gophercloud/gophercloud/openstack/compute/v2/extensions/keypairs"
 	"github.com/gophercloud/gophercloud/openstack/compute/v2/extensions/servergroups"
-	"github.com/gophercloud/gophercloud/openstack/dns/v2/recordsets"
-	"github.com/gophercloud/gophercloud/openstack/dns/v2/zones"
-	"github.com/gophercloud/gophercloud/openstack/networking/v2/extensions/fwaas_v2/firewall_groups"
-	"github.com/gophercloud/gophercloud/openstack/networking/v2/extensions/fwaas_v2/policies"
-	"github.com/gophercloud/gophercloud/openstack/networking/v2/extensions/fwaas_v2/routerinsertion"
-	"github.com/gophercloud/gophercloud/openstack/networking/v2/extensions/fwaas_v2/rules"
 	"github.com/gophercloud/gophercloud/openstack/networking/v2/extensions/layer3/floatingips"
 	"github.com/gophercloud/gophercloud/openstack/networking/v2/extensions/layer3/routers"
 	"github.com/gophercloud/gophercloud/openstack/networking/v2/networks"
 	"github.com/gophercloud/gophercloud/openstack/networking/v2/ports"
 	"github.com/gophercloud/gophercloud/openstack/networking/v2/subnets"
+	"github.com/huaweicloud/golangsdk/openstack/dns/v2/recordsets"
+	"github.com/huaweicloud/golangsdk/openstack/dns/v2/zones"
+	"github.com/huaweicloud/golangsdk/openstack/networking/v1/eips"
+	"github.com/huaweicloud/golangsdk/openstack/networking/v2/extensions/fwaas_v2/firewall_groups"
+	"github.com/huaweicloud/golangsdk/openstack/networking/v2/extensions/fwaas_v2/policies"
+	"github.com/huaweicloud/golangsdk/openstack/networking/v2/extensions/fwaas_v2/routerinsertion"
+	"github.com/huaweicloud/golangsdk/openstack/networking/v2/extensions/fwaas_v2/rules"
 )
 
 // LogRoundTripper satisfies the http.RoundTripper interface and is used to
@@ -330,7 +331,7 @@ func (opts SubnetCreateOpts) ToSubnetCreateMap() (map[string]interface{}, error)
 // ZoneCreateOpts represents the attributes used when creating a new DNS zone.
 type ZoneCreateOpts struct {
 	zones.CreateOpts
-	ValueSpecs map[string]string `json:"value_specs,omitempty"`
+	ValueSpecs map[string]interface{} `json:"value_specs,omitempty"`
 }
 
 // ToZoneCreateMap casts a CreateOpts struct to a map.
@@ -350,4 +351,10 @@ func (opts ZoneCreateOpts) ToZoneCreateMap() (map[string]interface{}, error) {
 	}
 
 	return nil, fmt.Errorf("Expected map but got %T", b[""])
+}
+
+// EIPCreateOpts represents the attributes used when creating a new eip.
+type EIPCreateOpts struct {
+	eips.ApplyOpts
+	ValueSpecs map[string]string `json:"value_specs,omitempty"`
 }

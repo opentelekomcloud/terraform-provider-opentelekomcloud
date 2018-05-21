@@ -21,6 +21,7 @@ resource "opentelekomcloud_compute_instance_v2" "basic" {
   flavor_id       = "3"
   key_pair        = "my_key_pair_name"
   security_groups = ["default"]
+  tags = ["foo.bar", "tag.value"]
 
   metadata {
     this = "that"
@@ -316,8 +317,9 @@ The following arguments are supported:
     the server. Changing this creates a new server.
 
 * `network` - (Optional) An array of one or more networks to attach to the
-    instance. The network object structure is documented below. Changing this
-    creates a new server.
+    instance. Required when there are multiple networks defined for the tenant. 
+    The network object structure is documented below. Changing this creates a 
+    new server.
 
 * `metadata` - (Optional) Metadata key/value pairs to make available from
     within the instance. Changing this updates the existing server metadata.
@@ -346,6 +348,8 @@ The following arguments are supported:
     defining one or more files and their contents. The personality structure
     is described below.
 
+* `tags` - (Optional) The tags of the image. It must be a list of strings.
+
 * `stop_before_destroy` - (Optional) Whether to try stop instance gracefully
     before destroying it, thus giving chance for guest OS daemons to stop correctly.
     If instance doesn't stop within timeout, it will be destroyed anyway.
@@ -354,6 +358,7 @@ The following arguments are supported:
     forcefully deleted. This is useful for environments that have reclaim / soft
     deletion enabled.
 
+* `auto_recovery` - (Optional) Configures or deletes automatic recovery of an instance
 
 The `network` block supports:
 
@@ -447,6 +452,7 @@ The following attributes are exported:
 * `network/mac` - The MAC address of the NIC on that network.
 * `all_metadata` - Contains all instance metadata, even metadata not set
     by Terraform.
+* `auto_recovery` - See Argument Reference above.
 
 ## Notes
 
