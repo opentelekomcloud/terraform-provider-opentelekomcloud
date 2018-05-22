@@ -1,28 +1,28 @@
 ---
-layout: "huaweicloud"
-page_title: "HuaweiCloud: huaweicloud_kms_data_key_v1"
-sidebar_current: "docs-huaweicloud-datasource-kms-data-key-v1"
+layout: "opentelekomcloud"
+page_title: "OpenTelekomCloud: opentelekomcloud_kms_data_key_v1"
+sidebar_current: "docs-opentelekomcloud-datasource-kms-data-key-v1"
 description: |-
-  Get information on an HuaweiCloud KMS data encryption key.
+  Get information on an OpenTelekomCloud KMS data encryption key.
 ---
 
-# huaweicloud\_kms\_data_key_v1
+# opentelekomcloud\_kms\_data_key_v1
 
 Use this data source to get the plaintext and the ciphertext of an available
-HuaweiCloud KMS DEK (data encryption key).
+OpenTelekomCloud KMS DEK (data encryption key).
 
 ## Example Usage
 
 ```hcl
 
-resource "huaweicloud_kms_key_v1" "key1" {
+resource "opentelekomcloud_kms_key_v1" "key1" {
   key_alias       = "key_1"
   pending_days    = "7"
   key_description = "first test key"
 }
 
-data "huaweicloud_kms_data_key_v1" "kms_datakey1" {
-  key_id         = "${huaweicloud_kms_key_v1.key1.id}"
+data "opentelekomcloud_kms_data_key_v1" "kms_datakey1" {
+  key_id         = "${opentelekomcloud_kms_key_v1.key1.id}"
   datakey_length = "512"
 }
 
