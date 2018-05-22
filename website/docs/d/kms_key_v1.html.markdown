@@ -1,20 +1,20 @@
 ---
-layout: "huaweicloud"
-page_title: "HuaweiCloud: huaweicloud_kms_key_v1"
-sidebar_current: "docs-huaweicloud-datasource-kms-key-v1"
+layout: "opentelekomcloud"
+page_title: "OpenTelekomCloud: opentelekomcloud_kms_key_v1"
+sidebar_current: "docs-opentelekomcloud-datasource-kms-key-v1"
 description: |-
-  Get information on an HuaweiCloud KMS Key.
+  Get information on an OpenTelekomCloud KMS Key.
 ---
 
-# huaweicloud\_kms\_key_v1
+# opentelekomcloud\_kms\_key_v1
 
-Use this data source to get the ID of an available HuaweiCloud KMS key.
+Use this data source to get the ID of an available OpenTelekomCloud KMS key.
 
 ## Example Usage
 
 ```hcl
 
-data "huaweicloud_kms_key_v1" "key_1" {
+data "opentelekomcloud_kms_key_v1" "key_1" {
   key_alias        = "test_key"
   key_description  = "test key description"
   key_state        = "2"
@@ -31,7 +31,7 @@ data "huaweicloud_kms_key_v1" "key_1" {
 * `key_alias` - (Optional) The alias in which to create the key. It is required when
     we create a new key. Changing this gets the new key.
 
-* `key_description` - (Optional) The description of the key as viewed in Huawei console.
+* `key_description` - (Optional) The description of the key as viewed in OpenTelekomCloud console.
     Changing this gets a new key.
 
 * `realm` - (Optional) Region where a key resides. Changing this gets a new key.
