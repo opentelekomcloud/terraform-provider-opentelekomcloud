@@ -1,19 +1,19 @@
 ---
-layout: "huaweicloud"
-page_title: "HuaweiCloud: huaweicloud_kms-key-v1"
-sidebar_current: "docs-huaweicloud-resource-kms-key-v1"
+layout: "opentelekomcloud"
+page_title: "OpenTelekomCloud: opentelekomcloud_kms-key-v1"
+sidebar_current: "docs-opentelekomcloud-resource-kms-key-v1"
 description: |-
   Manages a V1 key resource within KMS.
 ---
 
-# huaweicloud\_kms\_key_v1
+# opentelekomcloud\_kms\_key_v1
 
 Manages a V1 key resource within KMS.
 
 ## Example Usage
 
 ```hcl
-resource "huaweicloud_kms_key_v1" "key_1" {
+resource "opentelekomcloud_kms_key_v1" "key_1" {
   key_alias       = "key_1"
   pending_days    = "7"
   key_description = "first test key"
@@ -29,7 +29,7 @@ The following arguments are supported:
 * `key_alias` - (Required) The alias in which to create the key. It is required when
     we create a new key. Changing this updates the alias of key.
 
-* `key_description` - (Optional) The description of the key as viewed in Huawei console.
+* `key_description` - (Optional) The description of the key as viewed in OpenTelekomCloud console.
     Changing this updates the description of key.
 
 * `realm` - (Optional) Region where a key resides. Changing this creates a new key.
@@ -65,5 +65,5 @@ The following attributes are exported:
 KMS Keys can be imported using the `id`, e.g.
 
 ```
-$ terraform import huaweicloud_kms_key_v1.key_1 7056d636-ac60-4663-8a6c-82d3c32c1c64
+$ terraform import opentelekomcloud_kms_key_v1.key_1 7056d636-ac60-4663-8a6c-82d3c32c1c64
 ```
