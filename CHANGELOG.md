@@ -1,17 +1,17 @@
-## 1.1.0 (Unreleased)
+## 1.1.0 (May 26, 2018)
 
 FEATURES:
 
-* **New Data Source:** `opentelekomcloud_kms_key_v1` [GH-14]
-* **New Data Source:** `opentelekomcloud_kms_data_key_v1` [GH-14]
-* **New Data Source:** `opentelekomcloud_rds_flavors_v1` [GH-15]
-* **New Resource:** `opentelekomcloud_kms_key_v1` [GH-14]
-* **New Resource:** `opentelekomcloud_rds_instance_v1` [GH-15]
-* **New Resource:** `opentelekomcloud_vpc_eip_v1` [GH-48]
+* **New Data Source:** `opentelekomcloud_kms_key_v1` ([#14](https://github.com/terraform-providers/terraform-provider-opentelekomcloud/issues/14))
+* **New Data Source:** `opentelekomcloud_kms_data_key_v1` ([#14](https://github.com/terraform-providers/terraform-provider-opentelekomcloud/issues/14))
+* **New Data Source:** `opentelekomcloud_rds_flavors_v1` ([#15](https://github.com/terraform-providers/terraform-provider-opentelekomcloud/issues/15))
+* **New Resource:** `opentelekomcloud_kms_key_v1` ([#14](https://github.com/terraform-providers/terraform-provider-opentelekomcloud/issues/14))
+* **New Resource:** `opentelekomcloud_rds_instance_v1` ([#15](https://github.com/terraform-providers/terraform-provider-opentelekomcloud/issues/15))
+* **New Resource:** `opentelekomcloud_vpc_eip_v1` ([#48](https://github.com/terraform-providers/terraform-provider-opentelekomcloud/issues/48))
 
 ENHANCEMENTS:
-* resource/opentelekomcloud_compute_instance_v2: Add `auto_recovery` argument [GH-20]
-* resource/opentelekomcloud_networking_router_v2: Add `enable_snat` argument [GH-53]
+* resource/opentelekomcloud_compute_instance_v2: Add `auto_recovery` argument ([#20](https://github.com/terraform-providers/terraform-provider-opentelekomcloud/issues/20))
+* resource/opentelekomcloud_networking_router_v2: Add `enable_snat` argument ([#53](https://github.com/terraform-providers/terraform-provider-opentelekomcloud/issues/53))
 
 ## 1.0.0 (December 08, 2017)
 
