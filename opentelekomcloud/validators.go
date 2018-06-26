@@ -2,10 +2,10 @@ package opentelekomcloud
 
 import (
 	"fmt"
-	"strings"
-	"time"
 	"net"
 	"regexp"
+	"strings"
+	"time"
 )
 
 func ValidateStringList(v interface{}, k string, l []string) (ws []string, errors []error) {
@@ -135,5 +135,3 @@ func validateCIDR(v interface{}, k string) (ws []string, errors []error) {
 
 	return
 }
-
-
