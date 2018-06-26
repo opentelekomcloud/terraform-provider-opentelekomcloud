@@ -970,6 +970,12 @@
 			"revisionTime": "2018-04-09T03:56:52Z"
 		},
 		{
+			"checksumSHA1": "Ku1+9CNsnXoFfpccOlw9hlb3VYA=",
+			"path": "github.com/huaweicloud/golangsdk/openstack/networking/v2/routes",
+			"revision": "1f996b54aca766257d0159d923d0e5a2b82d0d3f",
+			"revisionTime": "2018-06-14T09:40:51Z"
+		},
+		{
 			"checksumSHA1": "ia3iK8E8dcap5Eyps4Ijl/7Aj/k=",
 			"path": "github.com/huaweicloud/golangsdk/openstack/rds/v1/datastores",
 			"revision": "f751fd90605bf71b96f3e7a5ae5f994a7f98984c",

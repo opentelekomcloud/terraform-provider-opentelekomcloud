@@ -166,6 +166,8 @@ func Provider() terraform.ResourceProvider {
 			"opentelekomcloud_vpc_v1":                 dataSourceVirtualPrivateCloudVpcV1(),
 			"opentelekomcloud_vpc_subnet_v1":          dataSourceVpcSubnetV1(),
 			"opentelekomcloud_vpc_subnet_ids_v1":      dataSourceVpcSubnetIdsV1(),
+			"opentelekomcloud_vpc_route_v2":           dataSourceVPCRouteV2(),
+			"opentelekomcloud_vpc_route_ids_v2":       dataSourceVPCRouteIdsV2(),
 		},
 
 		ResourcesMap: map[string]*schema.Resource{
@@ -212,6 +214,7 @@ func Provider() terraform.ResourceProvider {
 			"opentelekomcloud_vpc_eip_v1":                      resourceVpcEIPV1(),
 			"opentelekomcloud_vpc_v1":                          resourceVirtualPrivateCloudV1(),
 			"opentelekomcloud_vpc_subnet_v1":                   resourceVpcSubnetV1(),
+			"opentelekomcloud_vpc_route_v2":                    resourceVPCRouteV2(),
 		},
 
 		ConfigureFunc: configureProvider,
