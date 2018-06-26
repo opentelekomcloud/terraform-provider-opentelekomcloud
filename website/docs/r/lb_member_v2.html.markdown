@@ -16,6 +16,8 @@ Manages a V2 member resource within OpenTelekomCloud.
 resource "opentelekomcloud_lb_member_v2" "member_1" {
   address       = "192.168.199.23"
   protocol_port = 8080
+  pool_id       = POOL_ID
+  subnet_id     = SUBNET_ID
 }
 ```
 
