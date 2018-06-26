@@ -22,6 +22,18 @@
             <li<%= sidebar_current("docs-opentelekomcloud-datasource-networking-secgroup-v2") %>>
               <a href="/docs/providers/opentelekomcloud/d/networking_secgroup_v2.html">opentelekomcloud_networking_secgroup_v2</a>
             </li>
+            <li<%= sidebar_current("docs-opentelekomcloud-datasource-kms-key-v1") %>>
+              <a href="/docs/providers/opentelekomcloud/d/kms_key_v1.html">opentelekomcloud_kms_key_v1</a>
+            </li>
+            <li<%= sidebar_current("docs-opentelekomcloud-datasource-kms-data-key-v1") %>>
+              <a href="/docs/providers/opentelekomcloud/d/kms_data_key_v1.html">opentelekomcloud_kms_data_key_v1</a>
+            </li>
+             <li<%= sidebar_current("docs-opentelekomcloud-datasource-rds-flavor-v1") %>>
+              <a href="/docs/providers/opentelekomcloud/d/rds_flavors_v1.html">opentelekomcloud_rds_flavor_v1</a>
+            </li>
+             <li<%= sidebar_current("docs-opentelekomcloud-datasource-s3-bucket-object") %>>
+              <a href="/docs/providers/opentelekomcloud/d/s3_bucket_object.html">opentelekomcloud_s3_bucket_object</a>
+            </li>
             <li<%= sidebar_current("docs-opentelekomcloud-datasource-vpc-v1") %>>
               <a href="/docs/providers/opentelekomcloud/d/vpc_v1.html">opentelekomcloud_vpc_v1</a>
             </li>
@@ -43,11 +55,11 @@
           </ul>
         </li>
 
-	<li<%= sidebar_current("docs-opentelekomcloud-ces-alarm") %>>
+    <li<%= sidebar_current("docs-opentelekomcloud-ces-alarm") %>>
           <a href="#">Ces Alarm</a>
           <ul class="nav nav-visible">
-            <li<%= sidebar_current("docs-opentelekomcloud-cesalarm-rule") %>>
-              <a href="/docs/providers/opentelekomcloud/d/cesalarm-rule.html">opentelekomcloud_cesalarm-rule</a>
+            <li<%= sidebar_current("docs-opentelekomcloud-ces-alarmrule") %>>
+              <a href="/docs/providers/opentelekomcloud/r/ces_alarmrule.html">opentelekomcloud_ces_alarmrule</a>
             </li>
           </ul>
         </li>
@@ -96,6 +108,24 @@
             </li>
             <li<%= sidebar_current("docs-opentelekomcloud-resource-dns-zone-v2") %>>
               <a href="/docs/providers/opentelekomcloud/r/dns_zone_v2.html">opentelekomcloud_dns_zone_v2</a>
+            </li>
+          </ul>
+        </li>
+
+        <li<%= sidebar_current("docs-opentelekomcloud-resource-elb") %>>
+          <a href="#">Elastic Load Balancer Resources</a>
+          <ul class="nav nav-visible">
+            <li<%= sidebar_current("docs-opentelekomcloud-resource-elb-loadbalancer") %>>
+              <a href="/docs/providers/opentelekomcloud/r/elb_loadbalancer.html">opentelekomcloud_elb_loadbalancer</a>
+            </li>
+            <li<%= sidebar_current("docs-opentelekomcloud-resource-elb-listener") %>>
+              <a href="/docs/providers/opentelekomcloud/r/elb_listener.html">opentelekomcloud_elb_listener</a>
+            </li>
+            <li<%= sidebar_current("docs-opentelekomcloud-resource-elb-health") %>>
+              <a href="/docs/providers/opentelekomcloud/r/elb_health.html">opentelekomcloud_elb_health</a>
+            </li>
+            <li<%= sidebar_current("docs-opentelekomcloud-resource-elb-backend") %>>
+              <a href="/docs/providers/opentelekomcloud/r/elb_backend.html">opentelekomcloud_elb_backend</a>
             </li>
           </ul>
         </li>
@@ -178,24 +208,6 @@
           </ul>
         </li>
 
-	<li<%= sidebar_current("docs-opentelekomcloud-resource-elb") %>>
-          <a href="#">Elastic Load Balancer Resources</a>
-          <ul class="nav nav-visible">
-            <li<%= sidebar_current("docs-opentelekomcloud-resource-elb-loadbalancer") %>>
-              <a href="/docs/providers/opentelekomcloud/d/elb_loadbalancer.html">opentelekomcloud_elb_loadbalancer</a>
-            </li>
-            <li<%= sidebar_current("docs-opentelekomcloud-resource-elb-listener") %>>
-              <a href="/docs/providers/opentelekomcloud/d/elb_listener.html">opentelekomcloud_elb_listener</a>
-            </li>
-            <li<%= sidebar_current("docs-opentelekomcloud-resource-elb-backend") %>>
-              <a href="/docs/providers/opentelekomcloud/d/lb_backend.html">opentelekomcloud_elb_backend</a>
-            </li>
-            <li<%= sidebar_current("docs-opentelekomcloud-resource-elb-health") %>>
-              <a href="/docs/providers/opentelekomcloud/d/elb_health.html">opentelekomcloud_elb_health</a>
-            </li>
-          </ul>
-        </li>
-
         <li<%= sidebar_current("docs-opentelekomcloud-resource-fw") %>>
           <a href="#">Firewall Resources</a>
           <ul class="nav nav-visible">
@@ -207,6 +219,15 @@
             </li>
             <li<%= sidebar_current("docs-opentelekomcloud-resource-fw-rule-v2") %>>
               <a href="/docs/providers/opentelekomcloud/r/fw_rule_v2.html">opentelekomcloud_fw_rule_v2</a>
+            </li>
+          </ul>
+        </li>
+
+        <li<%= sidebar_current("docs-opentelekomcloud-resource-rds") %>>
+          <a href="#">DB Instance Resources</a>
+          <ul class="nav nav-visible">
+            <li<%= sidebar_current("docs-opentelekomcloud-rds-instance-v1") %>>
+              <a href="/docs/providers/opentelekomcloud/r/rds_instance_v1.html">opentelekomcloud_rds_instance_v1</a>
             </li>
           </ul>
         </li>
@@ -226,6 +247,15 @@
           </ul>
         </li>
 
+        <li<%= sidebar_current("docs-opentelekomcloud-resource-kms") %>>
+          <a href="#">Kms Resources</a>
+          <ul class="nav nav-visible">
+            <li<%= sidebar_current("docs-opentelekomcloud-resource-kms-key-v1") %>>
+              <a href="/docs/providers/opentelekomcloud/r/kms_key_v1.html">opentelekomcloud_kms_key_v1</a>
+            </li>
+          </ul>
+        </li>
+
         <li<%= sidebar_current("docs-opentelekomcloud-smn") %>>
           <a href="#">SMN Resource</a>
           <ul class="nav nav-visible">
@@ -234,6 +264,15 @@
             </li>
             <li<%= sidebar_current("docs-opentelekomcloud-smn-topic-v2") %>>
               <a href="/docs/providers/opentelekomcloud/r/smn_topic_v2.html">opentelekomcloud_smn_topic_v2</a>
+            </li>
+          </ul>
+        </li>
+
+        <li<%= sidebar_current("docs-opentelekomcloud-resource-eip") %>>
+          <a href="#">EIP Resources</a>
+          <ul class="nav nav-visible">
+            <li<%= sidebar_current("docs-opentelekomcloud-resource-vpc-eip-v1") %>>
+              <a href="/docs/providers/opentelekomcloud/r/vpc_eip_v1.html">opentelekomcloud_vpc_eip_v1</a>
             </li>
           </ul>
         </li>
