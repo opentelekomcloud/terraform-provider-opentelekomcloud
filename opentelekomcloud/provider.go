@@ -165,6 +165,8 @@ func Provider() terraform.ResourceProvider {
 			"opentelekomcloud_rds_flavors_v1":            dataSourceRdsFlavorV1(),
 			"opentelekomcloud_vpc_v1":                    dataSourceVirtualPrivateCloudVpcV1(),
 			"opentelekomcloud_vpc_peering_connection_v2": dataSourceVpcPeeringConnectionV2(),
+			"opentelekomcloud_vpc_route_v2":              dataSourceVPCRouteV2(),
+			"opentelekomcloud_vpc_route_ids_v2":          dataSourceVPCRouteIdsV2(),
 		},
 
 		ResourcesMap: map[string]*schema.Resource{
@@ -212,6 +214,7 @@ func Provider() terraform.ResourceProvider {
 			"opentelekomcloud_vpc_v1":                             resourceVirtualPrivateCloudV1(),
 			"opentelekomcloud_vpc_peering_connection_v2":          resourceVpcPeeringConnectionV2(),
 			"opentelekomcloud_vpc_peering_connection_accepter_v2": resourceVpcPeeringConnectionAccepterV2(),
+			"opentelekomcloud_vpc_route_v2":                       resourceVPCRouteV2(),
 		},
 
 		ConfigureFunc: configureProvider,
