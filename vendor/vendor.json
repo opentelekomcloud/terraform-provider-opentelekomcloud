@@ -904,18 +904,6 @@
 			"revisionTime": "2018-04-20T04:29:59Z"
 		},
 		{
-			"checksumSHA1": "GYl/VaIbV0/GPFSKdwwmN6whqAY=",
-			"path": "github.com/huaweicloud/golangsdk/openstack/networking/v1/subnets",
-			"revision": "1eb907b02fe25ac81cbdbf93bbc9317497ceb1d3",
-			"revisionTime": "2018-06-28T07:19:30Z"
-		},
-		{
-			"checksumSHA1": "BeVcL4FNVGe8c5Vxha/xFyz6dlA=",
-			"path": "github.com/huaweicloud/golangsdk/openstack/networking/v1/vpcs",
-			"revision": "1eb907b02fe25ac81cbdbf93bbc9317497ceb1d3",
-			"revisionTime": "2018-06-28T07:19:30Z"
-		},
-		{
 			"checksumSHA1": "8ch4okLGCkDFEflL/xpG0OCp25U=",
 			"path": "github.com/huaweicloud/golangsdk/openstack/networking/v2/extensions/elbaas",
 			"revision": "904d4b2ece4379bc48a4469453d913c005d67d50",
@@ -968,18 +956,6 @@
 			"path": "github.com/huaweicloud/golangsdk/openstack/networking/v2/extensions/fwaas_v2/rules",
 			"revision": "9065742a051843ccea04fda340e985439d90d6c6",
 			"revisionTime": "2018-04-09T03:56:52Z"
-		},
-		{
-			"checksumSHA1": "ZjwgH1I3HXcTbqwlvjOGCcVWW/w=",
-			"path": "github.com/huaweicloud/golangsdk/openstack/networking/v2/peerings",
-			"revision": "1eb907b02fe25ac81cbdbf93bbc9317497ceb1d3",
-			"revisionTime": "2018-06-28T07:19:30Z"
-		},
-		{
-			"checksumSHA1": "Ku1+9CNsnXoFfpccOlw9hlb3VYA=",
-			"path": "github.com/huaweicloud/golangsdk/openstack/networking/v2/routes",
-			"revision": "1eb907b02fe25ac81cbdbf93bbc9317497ceb1d3",
-			"revisionTime": "2018-06-28T07:19:30Z"
 		},
 		{
 			"checksumSHA1": "ia3iK8E8dcap5Eyps4Ijl/7Aj/k=",
