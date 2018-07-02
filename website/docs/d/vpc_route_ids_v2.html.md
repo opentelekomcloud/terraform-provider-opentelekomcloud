@@ -1,14 +1,14 @@
 ---
 layout: "opentelekomcloud"
-page_title: "OpenTelekomCloud: opentelekcomcloud_vpc_route_ids_v2"
+page_title: "OpenTelekomCloud: opentelekomcloud_vpc_route_ids_v2"
 sidebar_current: "docs-opentelekomcloud-datasource-vpc-route-ids-v2"
 description: |-
   Provides a list of route Ids for a VPC
 ---
 
-# Data Source: opentelekcomcloud_vpc_route_ids_v2
+# Data Source: opentelekomcloud_vpc_route_ids_v2
 
-`opentelekcomcloud_vpc_route_ids_v2` provides a list of route ids for a vpc_id.
+`opentelekomcloud_vpc_route_ids_v2` provides a list of route ids for a vpc_id.
 
 This resource can be useful for getting back a list of route ids for a vpc.
 
