@@ -1,14 +1,14 @@
 ---
 layout: "opentelekomcloud"
-page_title: "OpenTelekomCloud: opentelekcomcloud_vpc_route_v2"
+page_title: "OpenTelekomCloud: opentelekomcloud_vpc_route_v2"
 sidebar_current: "docs-opentelekomcloud-datasource-vpc-route-v2"
 description: |-
   Provides details about a specific VPC Route.
 ---
 
-# Data Source: opentelekcomcloud_vpc_route_v2
+# Data Source: opentelekomcloud_vpc_route_v2
 
-`opentelekcomcloud_vpc_route_v2` provides details about a specific VPC route.
+`opentelekomcloud_vpc_route_v2` provides details about a specific VPC route.
 
 ## Example Usage
 

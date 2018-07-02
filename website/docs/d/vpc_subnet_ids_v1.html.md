@@ -1,6 +1,6 @@
 ---
 layout: "opentelekomcloud"
-page_title: "OpenTelekomCloud: opentelekcomcloud_subnet_ids_v1"
+page_title: "OpenTelekomCloud: opentelekomcloud_subnet_ids_v1"
 sidebar_current: "docs-opentelekomcloud-datasource-subnet-ids-v1"
 description: |-
   Provides a list of subnet Ids for a VPC
