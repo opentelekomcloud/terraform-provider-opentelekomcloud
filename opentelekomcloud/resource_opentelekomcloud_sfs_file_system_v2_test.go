@@ -9,7 +9,7 @@ import (
 )
 
 //PASS
-func TestAccSFSFileSystemV2_basic(t *testing.T) {
+func TestAccOTCSFSFileSystemV2_basic(t *testing.T) {
 	var share shares.Share
 
 	resource.Test(t, resource.TestCase{
@@ -62,7 +62,7 @@ func TestAccSFSFileSystemV2_basic(t *testing.T) {
 }
 
 // PASS
-func TestAccSFSFileSystemV2_timeout(t *testing.T) {
+func TestAccOTCSFSFileSystemV2_timeout(t *testing.T) {
 	var share shares.Share
 
 	resource.Test(t, resource.TestCase{

@@ -7,7 +7,7 @@ import (
 )
 
 // PASS
-func TestAccSFSFileSystemV2_importBasic(t *testing.T) {
+func TestAccOTCSFSFileSystemV2_importBasic(t *testing.T) {
 	resourceName := "opentelekomcloud_sfs_file_system_v2.sfs_1"
 
 	resource.Test(t, resource.TestCase{

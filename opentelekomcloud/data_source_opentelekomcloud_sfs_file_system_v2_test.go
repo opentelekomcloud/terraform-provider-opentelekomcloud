@@ -7,7 +7,7 @@ import (
 	"testing"
 )
 
-func TestAccSFSFileSystemV2DataSource_basic(t *testing.T) {
+func TestAccOTCSFSFileSystemV2DataSource_basic(t *testing.T) {
 	resource.Test(t, resource.TestCase{
 		PreCheck:  func() { testAccPreCheck(t) },
 		Providers: testAccProviders,
