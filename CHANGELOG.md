@@ -1,3 +1,10 @@
+## 1.3.0 (Unreleased)
+
+FEATURES:
+
+* **New Data Source:** `opentelekomcloud_sfs_file_system_v2` ([#92](https://github.com/terraform-providers/terraform-provider-opentelekomcloud/pull/92))
+* **New Resource:** `opentelekomcloud_sfs_file_system_v2` ([#92](https://github.com/terraform-providers/terraform-provider-opentelekomcloud/pull/92))
+
 ## 1.2.0 (Unreleased)
 
 FEATURES:
