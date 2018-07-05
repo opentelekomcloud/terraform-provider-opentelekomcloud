@@ -1,6 +1,6 @@
 ---
 layout: "opentelekomcloud"
-page_title: "opentelekomcloud: opentelekomcloud_sfs_file_system_v2"
+page_title: "OpenTelekomCloud: opentelekomcloud_sfs_file_system_v2"
 sidebar_current: "docs-opentelekomcloud-datasource-sfs-file-system-v2"
 description: |-
   Get information on an OpenTelekomCloud shared file system.
