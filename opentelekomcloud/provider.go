@@ -156,13 +156,14 @@ func Provider() terraform.ResourceProvider {
 		},
 
 		DataSourcesMap: map[string]*schema.Resource{
-			"opentelekomcloud_images_image_v2":        dataSourceImagesImageV2(),
-			"opentelekomcloud_networking_network_v2":  dataSourceNetworkingNetworkV2(),
-			"opentelekomcloud_networking_secgroup_v2": dataSourceNetworkingSecGroupV2(),
-			"opentelekomcloud_s3_bucket_object":       dataSourceS3BucketObject(),
-			"opentelekomcloud_kms_key_v1":             dataSourceKmsKeyV1(),
-			"opentelekomcloud_kms_data_key_v1":        dataSourceKmsDataKeyV1(),
-			"opentelekomcloud_rds_flavors_v1":         dataSourceRdsFlavorV1(),
+			"opentelekomcloud_images_image_v2":            dataSourceImagesImageV2(),
+			"opentelekomcloud_networking_network_v2":      dataSourceNetworkingNetworkV2(),
+			"opentelekomcloud_networking_secgroup_v2":     dataSourceNetworkingSecGroupV2(),
+			"opentelekomcloud_s3_bucket_object":           dataSourceS3BucketObject(),
+			"opentelekomcloud_kms_key_v1":                 dataSourceKmsKeyV1(),
+			"opentelekomcloud_kms_data_key_v1":            dataSourceKmsDataKeyV1(),
+			"opentelekomcloud_rds_flavors_v1":             dataSourceRdsFlavorV1(),
+			"opentelekomcloud_rts_software_deployment_v1": dataSourceRtsSoftwareDeploymentV1(),
 		},
 
 		ResourcesMap: map[string]*schema.Resource{
@@ -207,7 +208,7 @@ func Provider() terraform.ResourceProvider {
 			"opentelekomcloud_smn_subscription_v2":             resourceSubscription(),
 			"opentelekomcloud_rds_instance_v1":                 resourceRdsInstance(),
 			"opentelekomcloud_vpc_eip_v1":                      resourceVpcEIPV1(),
-			"opentelekomcloud_rts_software_deployment_v1":      resourceRTSSoftwareDeploymentV1(),
+			"opentelekomcloud_rts_software_deployment_v1":      resourceRtsSoftwareDeploymentV1(),
 		},
 
 		ConfigureFunc: configureProvider,

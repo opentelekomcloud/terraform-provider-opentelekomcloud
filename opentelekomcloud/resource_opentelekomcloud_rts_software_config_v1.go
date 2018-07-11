@@ -156,7 +156,7 @@ func resourceOutputsV1(d *schema.ResourceData)[]softwareconfig.Outputs {
 		outputs[i] = softwareconfig.Outputs{
 			Type:        rawMap["type"].(string),
 			Name:        rawMap["name"].(string),
-			ErrorOutput: rawMap["error_output"].(string),
+			ErrorOutput: rawMap["error_output"].(bool),
 			Description: rawMap["description"].(string),
 		}
 	}
