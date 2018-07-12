@@ -106,7 +106,7 @@ func resourceSoftwareConfigV1() *schema.Resource {
 							Computed: true,
 						},
 						"error_output": &schema.Schema{
-							Type:     schema.TypeString,
+							Type:     schema.TypeBool,
 							Optional: true,
 							ForceNew: true,
 							Computed: true,
@@ -132,6 +132,7 @@ func resourceOptionsV1(d *schema.ResourceData) map[string]interface{} {
 
 	return m
 }
+
 func resourceInputsV1(d *schema.ResourceData) []softwareconfig.Inputs {
 	rawInputs := d.Get("inputs").([]interface{})
 	inputs := make([]softwareconfig.Inputs, len(rawInputs))
@@ -144,7 +145,6 @@ func resourceInputsV1(d *schema.ResourceData) []softwareconfig.Inputs {
 			Description:rawMap["description"].(string),
 		}
 	}
-	log.Printf("[DEBUG] input %s", inputs)
 	return inputs
 }
 
@@ -160,9 +160,9 @@ func resourceOutputsV1(d *schema.ResourceData)[]softwareconfig.Outputs {
 			Description: rawMap["description"].(string),
 		}
 	}
-	log.Printf("[DEBUG] output %s", outputs)
 	return outputs
 }
+
 func resourceSoftwareConfigV1Create(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*Config)
 	orchastrationClient, err := config.orchestrationV1Client(GetRegion(d, config))
@@ -187,9 +187,7 @@ func resourceSoftwareConfigV1Create(d *schema.ResourceData, meta interface{}) er
 	}
 	d.SetId(n.Id)
 
-
 	return resourceSoftwareConfigV1Read(d, meta)
-
 }
 
 func resourceSoftwareConfigV1Read(d *schema.ResourceData, meta interface{}) error {
@@ -209,20 +207,45 @@ func resourceSoftwareConfigV1Read(d *schema.ResourceData, meta interface{}) erro
 		return fmt.Errorf("Error retrieving OpenTelekomCloud Vpc: %s", err)
 	}
 
+	var inputvalues []map[string]interface{}
+	for _, input := range n.Inputs{
+		mapping := map[string]interface{}{
+			"description": input.Description,
+			"default":     input.Default,
+			"type":        input.Type,
+			"name":        input.Name,
+		}
+		inputvalues = append(inputvalues, mapping)
+	}
+
+	var outputvalues []map[string]interface{}
+	for _, output := range n.Outputs{
+		mapping := map[string]interface{}{
+			"description":  output.Description,
+			"error_output": output.ErrorOutput,
+			"type":         output.Type,
+			"name":         output.Name,
+		}
+		outputvalues = append(outputvalues, mapping)
+	}
+
 	d.Set("id", n.Id)
 	d.Set("name", n.Name)
 	d.Set("config", n.Config)
 	d.Set("group", n.Group)
-	d.Set("inputs", n.Inputs)
-	d.Set("outputs", n.Outputs)
 	d.Set("options", n.Options)
 	d.Set("region", GetRegion(d, config))
+	if err := d.Set("inputs", inputvalues); err != nil {
+		return err
+	}
+	if err := d.Set("outputs", outputvalues); err != nil {
+		return err
+	}
 
 	return nil
 }
 
 func resourceSoftwareConfigV1Delete(d *schema.ResourceData, meta interface{}) error {
-
 	config := meta.(*Config)
 	orchastrationClient, err := config.orchestrationV1Client(GetRegion(d, config))
 	if err != nil {

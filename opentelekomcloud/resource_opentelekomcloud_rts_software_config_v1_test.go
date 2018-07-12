@@ -34,7 +34,7 @@ func TestAccOTCRtsSoftwareConfigV1_basic(t *testing.T) {
 }
 
 // PASS
-func TestAccRtsSoftwareConfigV1_timeout(t *testing.T) {
+func TestAccOTCRtsSoftwareConfigV1_timeout(t *testing.T) {
 	var config softwareconfig.SoftwareConfig
 
 	resource.Test(t, resource.TestCase{
