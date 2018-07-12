@@ -43,13 +43,13 @@ func testAccCheckRtsSoftwareConfigV1DataSourceID(n string) resource.TestCheckFun
 var testAccRtsSoftwareConfigV1DataSource_basic = `
 resource "opentelekomcloud_rts_software_config_v1" "config_1" {
   name = "opentelekomcloud-config"
-  outputs = [{
+  output_values = [{
     type = "String"
     name = "result"
     error_output = "false"
     description = "value1"
   }]
-  inputs=[{
+  input_values = [{
     default = "0"
     type = "String"
     name = "foo"

@@ -13,9 +13,20 @@ Example to List Software Configs
 		fmt.Printf("%+v\n", config)
 	}
 
+Example to Get Software Deployment
+
+	configID:="bd7d48a5-6e33-4b95-aa28-d0d3af46c635"
+
+ 	configs,err:=softwareconfig.Get(client,configID).Extract()
+
+	if err != nil {
+		panic(err)
+	}
+
+
 Example to Create a Software Configs
 
-	createOpts := vsoftwareconfig.CreateOpts{
+	createOpts := softwareconfig.CreateOpts{
 		Name:         "config_test",
 	}
 
@@ -23,7 +34,6 @@ Example to Create a Software Configs
 	if err != nil {
 		panic(err)
 	}
-
 
 Example to Delete a Software Configs
 

@@ -1,3 +1,4 @@
+
 package opentelekomcloud
 
 import (
@@ -31,53 +32,15 @@ func dataSourceRtsSoftwareConfigV1() *schema.Resource {
 				Type:     schema.TypeString,
 				Computed: true,
 			},
-			"inputs": &schema.Schema{
+			"input_values": &schema.Schema{
 				Type:     schema.TypeList,
 				Computed: true,
-				Elem: &schema.Resource{
-					Schema: map[string]*schema.Schema{
-						"default": &schema.Schema{
-							Type:     schema.TypeString,
-							Computed: true,
-						},
-						"type": &schema.Schema{
-							Type:     schema.TypeString,
-							Computed: true,
-						},
-						"name": &schema.Schema{
-							Type:     schema.TypeString,
-							Computed: true,
-						},
-						"description": &schema.Schema{
-							Type:     schema.TypeString,
-							Computed: true,
-						},
-					},
-				},
+				Elem:     &schema.Schema{Type: schema.TypeMap},
 			},
-			"outputs": &schema.Schema{
+			"output_values": &schema.Schema{
 				Type:     schema.TypeList,
 				Computed: true,
-				Elem: &schema.Resource{
-					Schema: map[string]*schema.Schema{
-						"type": &schema.Schema{
-							Type:     schema.TypeString,
-							Computed: true,
-						},
-						"name": &schema.Schema{
-							Type:     schema.TypeString,
-							Computed: true,
-						},
-						"error_output": &schema.Schema{
-							Type:     schema.TypeBool,
-							Computed: true,
-						},
-						"description": &schema.Schema{
-							Type:     schema.TypeString,
-							Computed: true,
-						},
-					},
-				},
+				Elem:     &schema.Schema{Type: schema.TypeMap},
 			},
 			"config": &schema.Schema{
 				Type:         schema.TypeString,
@@ -129,36 +92,16 @@ func dataSourceRtsSoftwareConfigV1Read(d *schema.ResourceData, meta interface{})
 		return fmt.Errorf("Unable to retrieve RTS Software Config: %s", err)
 	}
 
-	var inputvalues []map[string]interface{}
-	for _, input := range n.Inputs{
-		mapping := map[string]interface{}{
-			"description": input.Description,
-			"default":     input.Default,
-			"type":        input.Type,
-			"name":        input.Name,
-		}
-		inputvalues = append(inputvalues, mapping)
-	}
-
-	var outputvalues []map[string]interface{}
-	for _, output := range n.Outputs{
-		mapping := map[string]interface{}{
-			"description":  output.Description,
-			"error_output": output.ErrorOutput,
-			"type":         output.Type,
-			"name":         output.Name,
-		}
-		outputvalues = append(outputvalues, mapping)
-	}
 
 	d.Set("config", n.Config)
 	d.Set("options", n.Options)
-	if err := d.Set("inputs", inputvalues); err != nil {
-		return err
+	if err := d.Set("input_values", n.Inputs); err != nil {
+		return fmt.Errorf("[DEBUG] Error saving inputs to state for OpenTelekomCloud RTS Software Config (%s): %s", d.Id(), err)
 	}
-	if err := d.Set("outputs", outputvalues); err != nil {
-		return err
+	if err := d.Set("output_values", n.Outputs); err != nil {
+		return fmt.Errorf("[DEBUG] Error saving inputs to state for OpenTelekomCloud RTS Software Config (%s): %s", d.Id(), err)
 	}
 
 	return nil
 }
+

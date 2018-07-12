@@ -1,40 +1,27 @@
 package softwareconfig
 
 import (
-"github.com/huaweicloud/golangsdk"
-"github.com/huaweicloud/golangsdk/pagination"
+	"github.com/huaweicloud/golangsdk"
+	"github.com/huaweicloud/golangsdk/pagination"
 )
-
-type Inputs struct {
-	Default 		string `json:"default, omitempty"`
-	Type	 		string `json:"type, omitempty"`
-	Name 			string `json:"name, omitempty"`
-	Description 	string `json:"description, omitempty"`
-}
-type Outputs struct {
-	Type	 		string `json:"type, omitempty"`
-	Name 			string `json:"name, omitempty"`
-	ErrorOutput 	bool `json:"error_output, omitempty"`
-	Description 	string `json:"description, omitempty"`
-}
 
 type SoftwareConfig struct {
 	// Specifies the software configuration input.
-	Inputs 			[]Inputs 	`json:"inputs"`
+	Inputs []map[string]interface{} `json:"inputs"`
 	//Specifies the name of the software configuration.
-	Name 			string 		`json:"name"`
+	Name string `json:"name"`
 	//Specifies the software configuration output.
-	Outputs 		[]Outputs 	`json:"outputs"`
+	Outputs []map[string]interface{} `json:"outputs"`
 	//Specifies the time when a configuration is created.
-	CreationTime 	golangsdk.JSONRFC3339NoZ 	`json:"creation_time"`
+	CreationTime golangsdk.JSONRFC3339NoZ `json:"creation_time"`
 	//Specifies the name of the software configuration group.
-	Group 			string `json:"group"`
+	Group string `json:"group"`
 	//Specifies the configuration code.
-	Config 			string 	`json:"config"`
+	Config string `json:"config"`
 	//Specifies configuration options.
-	Options 		map[string]interface{} 	`json:"options"`
+	Options map[string]interface{} `json:"options"`
 	//Specifies the software configuration ID.
-	Id 				string 	`json:"id"`
+	Id string `json:"id"`
 }
 
 // SoftwareConfigPage is the page returned by a pager when traversing over a
@@ -42,7 +29,6 @@ type SoftwareConfig struct {
 type SoftwareConfigPage struct {
 	pagination.LinkedPageBase
 }
-
 
 // NextPageURL is invoked when a paginated collection of Software Configs has reached
 // the end of a page and the pager seeks to traverse over a new one. In order
