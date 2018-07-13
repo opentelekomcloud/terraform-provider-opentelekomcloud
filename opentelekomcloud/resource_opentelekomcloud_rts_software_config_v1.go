@@ -54,71 +54,17 @@ func resourceSoftwareConfigV1() *schema.Resource {
 				Type:     schema.TypeString,
 				Computed: true,
 			},
-			"inputs": &schema.Schema{
+			"input_values": &schema.Schema{
 				Type:     schema.TypeList,
 				Optional: true,
 				ForceNew: true,
-				Elem: &schema.Resource{
-					Schema: map[string]*schema.Schema{
-						"default": &schema.Schema{
-							Type:     schema.TypeString,
-							Optional: true,
-							ForceNew: true,
-							Computed: true,
-						},
-						"type": &schema.Schema{
-							Type:     schema.TypeString,
-							Optional: true,
-							ForceNew: true,
-							Computed: true,
-						},
-						"name": &schema.Schema{
-							Type:     schema.TypeString,
-							Optional: true,
-							ForceNew: false,
-							Computed: true,
-						},
-						"description": &schema.Schema{
-							Type:     schema.TypeString,
-							Optional: true,
-							ForceNew: false,
-							Computed: true,
-						},
-					},
-				},
+				Elem:     &schema.Schema{Type: schema.TypeMap},
 			},
-			"outputs": &schema.Schema{
+			"output_values": &schema.Schema{
 				Type:     schema.TypeList,
 				Optional: true,
 				ForceNew: true,
-				Elem: &schema.Resource{
-					Schema: map[string]*schema.Schema{
-						"type": &schema.Schema{
-							Type:     schema.TypeString,
-							Optional: true,
-							ForceNew: true,
-							Computed: true,
-						},
-						"name": &schema.Schema{
-							Type:     schema.TypeString,
-							Optional: true,
-							ForceNew: false,
-							Computed: true,
-						},
-						"error_output": &schema.Schema{
-							Type:     schema.TypeBool,
-							Optional: true,
-							ForceNew: true,
-							Computed: true,
-						},
-						"description": &schema.Schema{
-							Type:     schema.TypeString,
-							Optional: true,
-							ForceNew: false,
-							Computed: true,
-						},
-					},
-				},
+				Elem:     &schema.Schema{Type: schema.TypeMap},
 			},
 		},
 	}
@@ -133,36 +79,6 @@ func resourceOptionsV1(d *schema.ResourceData) map[string]interface{} {
 	return m
 }
 
-func resourceInputsV1(d *schema.ResourceData) []softwareconfig.Inputs {
-	rawInputs := d.Get("inputs").([]interface{})
-	inputs := make([]softwareconfig.Inputs, len(rawInputs))
-	for i, raw := range rawInputs {
-		rawMap := raw.(map[string]interface{})
-		inputs[i] = softwareconfig.Inputs{
-			Default:rawMap["default"].(string),
-			Type:   rawMap["type"].(string),
-			Name:   rawMap["name"].(string),
-			Description:rawMap["description"].(string),
-		}
-	}
-	return inputs
-}
-
-func resourceOutputsV1(d *schema.ResourceData)[]softwareconfig.Outputs {
-	rawOutputs := d.Get("outputs").([]interface{})
-	outputs := make([]softwareconfig.Outputs, len(rawOutputs))
-	for i, raw := range rawOutputs {
-		rawMap := raw.(map[string]interface{})
-		outputs[i] = softwareconfig.Outputs{
-			Type:        rawMap["type"].(string),
-			Name:        rawMap["name"].(string),
-			ErrorOutput: rawMap["error_output"].(bool),
-			Description: rawMap["description"].(string),
-		}
-	}
-	return outputs
-}
-
 func resourceSoftwareConfigV1Create(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*Config)
 	orchastrationClient, err := config.orchestrationV1Client(GetRegion(d, config))
@@ -170,13 +86,25 @@ func resourceSoftwareConfigV1Create(d *schema.ResourceData, meta interface{}) er
 	if err != nil {
 		return fmt.Errorf("Error creating OpenTelekomCloud RTS client: %s", err)
 	}
+	input := d.Get("input_values").([]interface{})
 
+	inputs := make([]map[string]interface{}, len(input))
+	for i, v := range input {
+		inputs[i] = v.(map[string]interface{})
+	}
+
+	output := d.Get("output_values").([]interface{})
+
+	outputs := make([]map[string]interface{}, len(output))
+	for i, v := range output {
+		outputs[i] = v.(map[string]interface{})
+	}
 	createOpts := softwareconfig.CreateOpts{
 		Name:		d.Get("name").(string),
 		Config:		d.Get("config").(string),
 		Group:		d.Get("group").(string),
-		Inputs:		resourceInputsV1(d),
-		Outputs:	resourceOutputsV1(d),
+		Inputs:		inputs,
+		Outputs:	outputs,
 		Options:	resourceOptionsV1(d),
 	}
 
@@ -207,41 +135,18 @@ func resourceSoftwareConfigV1Read(d *schema.ResourceData, meta interface{}) erro
 		return fmt.Errorf("Error retrieving OpenTelekomCloud Vpc: %s", err)
 	}
 
-	var inputvalues []map[string]interface{}
-	for _, input := range n.Inputs{
-		mapping := map[string]interface{}{
-			"description": input.Description,
-			"default":     input.Default,
-			"type":        input.Type,
-			"name":        input.Name,
-		}
-		inputvalues = append(inputvalues, mapping)
-	}
-
-	var outputvalues []map[string]interface{}
-	for _, output := range n.Outputs{
-		mapping := map[string]interface{}{
-			"description":  output.Description,
-			"error_output": output.ErrorOutput,
-			"type":         output.Type,
-			"name":         output.Name,
-		}
-		outputvalues = append(outputvalues, mapping)
-	}
-
 	d.Set("id", n.Id)
 	d.Set("name", n.Name)
 	d.Set("config", n.Config)
 	d.Set("group", n.Group)
 	d.Set("options", n.Options)
 	d.Set("region", GetRegion(d, config))
-	if err := d.Set("inputs", inputvalues); err != nil {
-		return err
+	if err := d.Set("input_values", n.Inputs); err != nil {
+		return fmt.Errorf("[DEBUG] Error saving inputs to state for OpenTelekomCloud RTS Software Config (%s): %s", d.Id(), err)
 	}
-	if err := d.Set("outputs", outputvalues); err != nil {
-		return err
+	if err := d.Set("output_values", n.Outputs); err != nil {
+		return fmt.Errorf("[DEBUG] Error saving inputs to state for OpenTelekomCloud RTS Software Config (%s): %s", d.Id(), err)
 	}
-
 	return nil
 }
 

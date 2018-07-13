@@ -108,13 +108,13 @@ func testAccCheckRtsSoftwareConfigV1Exists(n string, configs *softwareconfig.Sof
 const testAccRtsSoftwareConfigV1_basic = `
 resource "opentelekomcloud_rts_software_config_v1" "config_1" {
   name = "opentelekomcloud-config"
-  outputs = [{
+  output_values = [{
     type = "String"
     name = "result"
     error_output = "false"
     description = "value1"
   }]
-  inputs=[{
+  input_values=[{
     default = "0"
     type = "String"
     name = "foo"
@@ -127,13 +127,13 @@ resource "opentelekomcloud_rts_software_config_v1" "config_1" {
 const testAccRtsSoftwareConfigV1_timeout = `
 resource "opentelekomcloud_rts_software_config_v1" "config_1" {
   name = "opentelekomcloud-config"
-  outputs = [{
+  output_values = [{
     type = "String"
     name = "result"
     error_output = "false"
     description = "value1"
   }]
-  inputs=[{
+  input_values=[{
     default = "0"
     type = "String"
     name = "foo"

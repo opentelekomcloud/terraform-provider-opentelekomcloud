@@ -11,4 +11,3 @@ func rootURL(c *golangsdk.ServiceClient) string {
 func resourceURL(c *golangsdk.ServiceClient, id string) string {
 	return c.ServiceURL(resourcePath, id)
 }
-

@@ -1,28 +1,21 @@
 package softwareconfig
 
 import (
+	"reflect"
+
 	"github.com/huaweicloud/golangsdk"
 	"github.com/huaweicloud/golangsdk/pagination"
-	"reflect"
 )
 
-
-// ListOptsBuilder allows extensions to add additional parameters to the
-// List request.
-type ListOptsBuilder interface {
-	ToSoftwareConfigListQuery() (string, error)
-}
-
 // ListOpts allows the filtering and sorting of paginated collections through
-// the API. Marker and Limit are used for pagination.
+// the API. Filtering is achieved by passing in struct field values that map to
+// the software config attributes you want to see returned. Marker and Limit are used for pagination.
 type ListOpts struct {
 	Id     string
 	Name   string
 	Marker string `q:"marker"`
 	Limit  int    `q:"limit"`
 }
-
-
 
 // List returns collection of
 // Software Config. It accepts a ListOpts struct, which allows you to filter and sort
@@ -97,17 +90,17 @@ type CreateOptsBuilder interface {
 // no required values.
 type CreateOpts struct {
 	// Specifies the script used for defining the configuration.
-	Config 		string 						`json:"config, omitempty"`
+	Config string `json:"config, omitempty"`
 	//Specifies the name of the software configuration group.
-	Group 		string 						`json:"group, omitempty"`
+	Group string `json:"group, omitempty"`
 	//Specifies the name of the software configuration.
-	Name 		string 						`json:"name"`
+	Name string `json:"name" required:"true"`
 	//Specifies the software configuration input.
-	Inputs 		[]Inputs 					`json:"inputs, omitempty"`
+	Inputs []map[string]interface{} `json:"inputs, omitempty"`
 	//Specifies the software configuration output.
-	Outputs 	[]Outputs 					`json:"outputs, omitempty"`
+	Outputs []map[string]interface{} `json:"outputs, omitempty"`
 	//Specifies options used by a software configuration management tool.
-	Options 	map[string]interface{} 		`json:"options, omitempty"`
+	Options map[string]interface{} `json:"options, omitempty"`
 }
 
 // ToSoftwareConfigCreateMap builds a create request body from CreateOpts.
