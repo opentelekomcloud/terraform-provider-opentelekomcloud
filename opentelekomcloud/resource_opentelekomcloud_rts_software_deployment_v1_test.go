@@ -123,7 +123,7 @@ func testAccCheckOTCRtsSoftwareDeploymentV1Exists(n string, stack *softwaredeplo
 	}
 }
 
-var testAccRtsSoftwareDeploymentV1_basic  =  fmt.Sprintf(`
+var testAccRtsSoftwareDeploymentV1_basic = fmt.Sprintf(`
 resource "opentelekomcloud_compute_instance_v2" "vm_1" {
   name = "instance_1"
   image_id = "%s"
@@ -143,9 +143,9 @@ resource "opentelekomcloud_rts_software_deployment_v1" "deployment_1" {
   action= "CREATE"
   status_reason= "Deploy data"
 }
-`,OS_IMAGE_ID,OS_FLAVOR_ID,OS_NETWORK_ID)
+`, OS_IMAGE_ID, OS_FLAVOR_ID, OS_NETWORK_ID)
 
-var testAccRtsSoftwareDeploymentV1_update  = fmt.Sprintf( `
+var testAccRtsSoftwareDeploymentV1_update = fmt.Sprintf(`
 resource "opentelekomcloud_compute_instance_v2" "vm_1" {
   name = "instance_1"
   image_id = "%s"
@@ -168,9 +168,9 @@ resource "opentelekomcloud_rts_software_deployment_v1" "deployment_1" {
   action= "CREATE"
   status_reason= "Outputs received"
 }
-`,OS_IMAGE_ID,OS_FLAVOR_ID,OS_NETWORK_ID)
+`, OS_IMAGE_ID, OS_FLAVOR_ID, OS_NETWORK_ID)
 
-var testAccRtsSoftwareDeploymentV1_timeout = fmt.Sprintf( `
+var testAccRtsSoftwareDeploymentV1_timeout = fmt.Sprintf(`
 resource "opentelekomcloud_compute_instance_v2" "vm_1" {
   name = "instance_1"
   image_id = "%s"
@@ -195,4 +195,4 @@ resource "opentelekomcloud_rts_software_deployment_v1" "deployment_1" {
     delete = "10m"
   }
 }
-`,OS_IMAGE_ID,OS_FLAVOR_ID,OS_NETWORK_ID)
+`, OS_IMAGE_ID, OS_FLAVOR_ID, OS_NETWORK_ID)

@@ -2,10 +2,11 @@ package opentelekomcloud
 
 import (
 	"fmt"
-	"github.com/hashicorp/terraform/helper/schema"
-	"github.com/huaweicloud/golangsdk/openstack/rts/v1/softwaredeployment"
 	"log"
 	"time"
+
+	"github.com/hashicorp/terraform/helper/schema"
+	"github.com/huaweicloud/golangsdk/openstack/rts/v1/softwaredeployment"
 
 	"github.com/huaweicloud/golangsdk"
 )
@@ -33,14 +34,14 @@ func resourceRtsSoftwareDeploymentV1() *schema.Resource {
 				Computed: true,
 			},
 			"config_id": &schema.Schema{
-				Type:         schema.TypeString,
-				Required:     true,
-				ForceNew:     false,
+				Type:     schema.TypeString,
+				Required: true,
+				ForceNew: false,
 			},
 			"server_id": &schema.Schema{
-				Type:         schema.TypeString,
-				Required:     true,
-				ForceNew:     false,
+				Type:     schema.TypeString,
+				Required: true,
+				ForceNew: false,
 			},
 			"tenant_id": &schema.Schema{
 				Type:     schema.TypeString,
@@ -102,13 +103,13 @@ func resourceRtsSoftwareDeploymentV1Create(d *schema.ResourceData, meta interfac
 	}
 
 	createOpts := softwaredeployment.CreateOpts{
-		Action: d.Get("action").(string),
-		ConfigId: d.Get("config_id").(string),
-		ServerId: d.Get("server_id").(string),
+		Action:       d.Get("action").(string),
+		ConfigId:     d.Get("config_id").(string),
+		ServerId:     d.Get("server_id").(string),
 		StatusReason: d.Get("status_reason").(string),
-		Status: d.Get("status").(string),
-		TenantId: d.Get("tenant_id").(string),
-		InputValues:resourceInputValuesV1(d),
+		Status:       d.Get("status").(string),
+		TenantId:     d.Get("tenant_id").(string),
+		InputValues:  resourceInputValuesV1(d),
 	}
 
 	n, err := softwaredeployment.Create(orchestrationClient, createOpts).Extract()

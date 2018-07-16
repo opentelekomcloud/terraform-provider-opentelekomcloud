@@ -1,12 +1,11 @@
-
 package opentelekomcloud
 
 import (
 	"fmt"
 	"log"
 
-	"github.com/huaweicloud/golangsdk/openstack/rts/v1/softwareconfig"
 	"github.com/hashicorp/terraform/helper/schema"
+	"github.com/huaweicloud/golangsdk/openstack/rts/v1/softwareconfig"
 )
 
 func dataSourceRtsSoftwareConfigV1() *schema.Resource {
@@ -43,7 +42,7 @@ func dataSourceRtsSoftwareConfigV1() *schema.Resource {
 				Elem:     &schema.Schema{Type: schema.TypeMap},
 			},
 			"config": &schema.Schema{
-				Type:         schema.TypeString,
+				Type:     schema.TypeString,
 				Computed: true,
 			},
 			"options": &schema.Schema{
@@ -87,7 +86,7 @@ func dataSourceRtsSoftwareConfigV1Read(d *schema.ResourceData, meta interface{})
 	d.Set("group", Config.Group)
 	d.Set("region", GetRegion(d, config))
 
-	n, err := softwareconfig.Get(orchestrationClient,Config.Id).Extract()
+	n, err := softwareconfig.Get(orchestrationClient, Config.Id).Extract()
 	if err != nil {
 		return fmt.Errorf("Unable to retrieve RTS Software Config: %s", err)
 	}
@@ -103,4 +102,3 @@ func dataSourceRtsSoftwareConfigV1Read(d *schema.ResourceData, meta interface{})
 
 	return nil
 }
-

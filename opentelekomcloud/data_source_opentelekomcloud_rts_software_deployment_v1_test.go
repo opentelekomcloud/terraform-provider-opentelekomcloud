@@ -1,11 +1,13 @@
 package opentelekomcloud
 
 import (
-	"github.com/hashicorp/terraform/helper/resource"
-	"testing"
-	"github.com/hashicorp/terraform/terraform"
 	"fmt"
+	"testing"
+
+	"github.com/hashicorp/terraform/helper/resource"
+	"github.com/hashicorp/terraform/terraform"
 )
+
 // PASS
 func TestAccOTCRtsSoftwareDeploymentV1DataSource_basic(t *testing.T) {
 	resource.Test(t, resource.TestCase{
@@ -64,4 +66,4 @@ resource "opentelekomcloud_rts_software_deployment_v1" "deployment_1" {
 data "opentelekomcloud_rts_software_deployment_v1" "deployment_1" {
   id = "${opentelekomcloud_rts_software_deployment_v1.deployment_1.id}"
  }
-`,OS_IMAGE_ID,OS_FLAVOR_ID,OS_NETWORK_ID)
+`, OS_IMAGE_ID, OS_FLAVOR_ID, OS_NETWORK_ID)

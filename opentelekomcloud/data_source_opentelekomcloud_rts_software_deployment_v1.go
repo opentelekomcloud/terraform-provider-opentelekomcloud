@@ -1,14 +1,15 @@
 package opentelekomcloud
 
 import (
+	"fmt"
+
 	"github.com/hashicorp/terraform/helper/schema"
 	"github.com/huaweicloud/golangsdk/openstack/rts/v1/softwaredeployment"
-	"fmt"
 )
 
 func dataSourceRtsSoftwareDeploymentV1() *schema.Resource {
 	return &schema.Resource{
-		Read:   dataSourceRTSSoftwareDeploymentV1Read,
+		Read: dataSourceRTSSoftwareDeploymentV1Read,
 
 		Schema: map[string]*schema.Schema{ //request and response parameters
 			"region": &schema.Schema{
@@ -18,12 +19,12 @@ func dataSourceRtsSoftwareDeploymentV1() *schema.Resource {
 				Computed: true,
 			},
 			"config_id": &schema.Schema{
-				Type:         schema.TypeString,
-				Optional:     true,
+				Type:     schema.TypeString,
+				Optional: true,
 			},
 			"server_id": &schema.Schema{
-				Type:         schema.TypeString,
-				Optional:     true,
+				Type:     schema.TypeString,
+				Optional: true,
 			},
 			"status": &schema.Schema{
 				Type:     schema.TypeString,

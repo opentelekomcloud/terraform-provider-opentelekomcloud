@@ -1,12 +1,13 @@
 package opentelekomcloud
 
 import (
-	"github.com/hashicorp/terraform/helper/schema"
-	"time"
 	"fmt"
 	"log"
-	"github.com/huaweicloud/golangsdk/openstack/rts/v1/softwareconfig"
+	"time"
+
+	"github.com/hashicorp/terraform/helper/schema"
 	"github.com/huaweicloud/golangsdk"
+	"github.com/huaweicloud/golangsdk/openstack/rts/v1/softwareconfig"
 )
 
 func resourceSoftwareConfigV1() *schema.Resource {
@@ -31,24 +32,24 @@ func resourceSoftwareConfigV1() *schema.Resource {
 				Computed: true,
 			},
 			"name": &schema.Schema{
-				Type:         schema.TypeString,
-				Required:     true,
-				ForceNew:     true,
+				Type:     schema.TypeString,
+				Required: true,
+				ForceNew: true,
 			},
 			"config": &schema.Schema{
-				Type:         schema.TypeString,
-				Optional:     true,
-				ForceNew:     true,
+				Type:     schema.TypeString,
+				Optional: true,
+				ForceNew: true,
 			},
 			"group": &schema.Schema{
 				Type:     schema.TypeString,
 				Optional: true,
-				ForceNew:true,
+				ForceNew: true,
 			},
 			"options": &schema.Schema{
 				Type:     schema.TypeMap,
 				Optional: true,
-				ForceNew:true,
+				ForceNew: true,
 			},
 			"id": &schema.Schema{
 				Type:     schema.TypeString,
@@ -100,12 +101,12 @@ func resourceSoftwareConfigV1Create(d *schema.ResourceData, meta interface{}) er
 		outputs[i] = v.(map[string]interface{})
 	}
 	createOpts := softwareconfig.CreateOpts{
-		Name:		d.Get("name").(string),
-		Config:		d.Get("config").(string),
-		Group:		d.Get("group").(string),
-		Inputs:		inputs,
-		Outputs:	outputs,
-		Options:	resourceOptionsV1(d),
+		Name:    d.Get("name").(string),
+		Config:  d.Get("config").(string),
+		Group:   d.Get("group").(string),
+		Inputs:  inputs,
+		Outputs: outputs,
+		Options: resourceOptionsV1(d),
 	}
 
 	n, err := softwareconfig.Create(orchastrationClient, createOpts).Extract()
@@ -174,6 +175,3 @@ func resourceSoftwareConfigV1Delete(d *schema.ResourceData, meta interface{}) er
 	d.SetId("")
 	return nil
 }
-
-
-

@@ -27,4 +27,3 @@ func TestAccOTCRtsSoftwareDeploymentV1_importBasic(t *testing.T) {
 		},
 	})
 }
-
