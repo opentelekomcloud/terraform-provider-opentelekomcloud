@@ -74,9 +74,6 @@ resource "opentelekomcloud_rts_stack_v1" "mystack" {
     }
 }
 STACK
-
-  
-
  }
  ```
 ## Argument Reference
