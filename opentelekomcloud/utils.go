@@ -58,3 +58,7 @@ func convertStructToMap(obj interface{}, nameMap map[string]string) (map[string]
 	log.Printf("[DEBUG]convertStructToMap:: map= %#v\n", p)
 	return p, nil
 }
+
+func looksLikeJsonString(s interface{}) bool {
+	return regexp.MustCompile(`^\s*{`).MatchString(s.(string))
+}
