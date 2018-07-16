@@ -145,7 +145,7 @@ func resourceSoftwareConfigV1Read(d *schema.ResourceData, meta interface{}) erro
 		return fmt.Errorf("[DEBUG] Error saving inputs to state for OpenTelekomCloud RTS Software Config (%s): %s", d.Id(), err)
 	}
 	if err := d.Set("output_values", n.Outputs); err != nil {
-		return fmt.Errorf("[DEBUG] Error saving inputs to state for OpenTelekomCloud RTS Software Config (%s): %s", d.Id(), err)
+		return fmt.Errorf("[DEBUG] Error saving outputs to state for OpenTelekomCloud RTS Software Config (%s): %s", d.Id(), err)
 	}
 	return nil
 }

@@ -92,14 +92,13 @@ func dataSourceRtsSoftwareConfigV1Read(d *schema.ResourceData, meta interface{})
 		return fmt.Errorf("Unable to retrieve RTS Software Config: %s", err)
 	}
 
-
 	d.Set("config", n.Config)
 	d.Set("options", n.Options)
 	if err := d.Set("input_values", n.Inputs); err != nil {
 		return fmt.Errorf("[DEBUG] Error saving inputs to state for OpenTelekomCloud RTS Software Config (%s): %s", d.Id(), err)
 	}
 	if err := d.Set("output_values", n.Outputs); err != nil {
-		return fmt.Errorf("[DEBUG] Error saving inputs to state for OpenTelekomCloud RTS Software Config (%s): %s", d.Id(), err)
+		return fmt.Errorf("[DEBUG] Error saving outputs to state for OpenTelekomCloud RTS Software Config (%s): %s", d.Id(), err)
 	}
 
 	return nil
