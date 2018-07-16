@@ -53,5 +53,6 @@ In addition to all arguments above, the following attributes are exported:
 # Import
 
 Software deployment can be imported using the `deployment id`, e.g.
-
-> $ terraform import opentelekomcloud_rts_software_deployment_v1 4779ab1c-7c1a-44b1-a02e-93dfc361b32d
+```
+ $ terraform import opentelekomcloud_rts_software_deployment_v1 4779ab1c-7c1a-44b1-a02e-93dfc361b32d
+ ```

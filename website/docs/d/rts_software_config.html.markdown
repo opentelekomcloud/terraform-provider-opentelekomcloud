@@ -14,16 +14,16 @@ The RTS Software Config data source provides details about a specific RTS Softwa
 
 
 ```hcl
-variable "config_id" {}
+variable "config_name" {}
 
 variable "server_id" {}
 
 data "opentelekomcloud_rts_software_config_v1" "myconfig" {
-  id = "${var.config_id}"
+  id = "${var.config_name}"
 }
 
 resource "opentelekomcloud_rts_software_deployment_v1" "mydeployment" {
-  config_id = "${var.config_id}"
+  config_id = "${data.opentelekomcloud_rts_software_config_v1.myconfig.id}"
   server_id = "${var.server_id}"
 }
 ```
