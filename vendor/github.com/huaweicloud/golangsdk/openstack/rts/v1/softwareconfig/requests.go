@@ -90,17 +90,17 @@ type CreateOptsBuilder interface {
 // no required values.
 type CreateOpts struct {
 	// Specifies the script used for defining the configuration.
-	Config string `json:"config, omitempty"`
+	Config string `json:"config,omitempty"`
 	//Specifies the name of the software configuration group.
-	Group string `json:"group, omitempty"`
+	Group string `json:"group,omitempty"`
 	//Specifies the name of the software configuration.
 	Name string `json:"name" required:"true"`
 	//Specifies the software configuration input.
-	Inputs []map[string]interface{} `json:"inputs, omitempty"`
+	Inputs []map[string]interface{} `json:"inputs,omitempty"`
 	//Specifies the software configuration output.
-	Outputs []map[string]interface{} `json:"outputs, omitempty"`
+	Outputs []map[string]interface{} `json:"outputs,omitempty"`
 	//Specifies options used by a software configuration management tool.
-	Options map[string]interface{} `json:"options, omitempty"`
+	Options map[string]interface{} `json:"options,omitempty"`
 }
 
 // ToSoftwareConfigCreateMap builds a create request body from CreateOpts.
