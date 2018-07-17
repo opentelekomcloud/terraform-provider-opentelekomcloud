@@ -8,7 +8,6 @@ import (
 	"testing"
 )
 
-//PASS
 func TestAccOTCSFSFileSystemV2_basic(t *testing.T) {
 	var share shares.Share
 
@@ -61,7 +60,6 @@ func TestAccOTCSFSFileSystemV2_basic(t *testing.T) {
 	})
 }
 
-// PASS
 func TestAccOTCSFSFileSystemV2_timeout(t *testing.T) {
 	var share shares.Share
 

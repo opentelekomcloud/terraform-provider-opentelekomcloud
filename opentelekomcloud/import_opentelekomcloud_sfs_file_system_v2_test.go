@@ -6,7 +6,6 @@ import (
 	"github.com/hashicorp/terraform/helper/resource"
 )
 
-// PASS
 func TestAccOTCSFSFileSystemV2_importBasic(t *testing.T) {
 	resourceName := "opentelekomcloud_sfs_file_system_v2.sfs_1"
 
