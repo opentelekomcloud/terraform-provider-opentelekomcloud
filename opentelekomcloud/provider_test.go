@@ -30,6 +30,8 @@ var (
 	OS_VPC_ID                 = os.Getenv("OS_VPC_ID")
 	OS_SUBNET_ID              = os.Getenv("OS_SUBNET_ID")
 	OS_TENANT_ID              = os.Getenv("OS_TENANT_ID")
+	OS_SERVER_ID              = os.Getenv("OS_SERVER_ID")
+	OS_DEH_HOST_ID            = os.Getenv("OS_DEH_HOST_ID")
 )
 
 var testAccProviders map[string]terraform.ResourceProvider
@@ -95,6 +97,7 @@ func testAccPreCheckRequiredEnvVars(t *testing.T) {
 	if OS_EXTGW_ID == "" {
 		t.Fatal("OS_EXTGW_ID must be set for acceptance tests")
 	}
+
 }
 
 func testAccPreCheck(t *testing.T) {
@@ -315,4 +318,17 @@ func envVarFile(varName string) (string, error) {
 		return "", fmt.Errorf("Error closing temp file: %s", err)
 	}
 	return tmpFile.Name(), nil
+}
+
+func testAccDehServerPreCheck(t *testing.T) {
+	testAccPreCheckRequiredEnvVars(t)
+
+	if OS_DEH_HOST_ID == "" {
+		t.Fatalf("OS_DEH_HOST_ID must be set for acceptance tests")
+	}
+
+	if OS_SERVER_ID == "" {
+		t.Fatalf("OS_SERVER_ID must be set for acceptance tests ,Provide Server Id binded with DeH Id")
+	}
+
 }

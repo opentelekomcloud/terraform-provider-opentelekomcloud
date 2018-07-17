@@ -196,6 +196,21 @@ func v3auth(client *golangsdk.ProviderClient, endpoint string, opts tokens3.Auth
 		return err
 	}
 
+	opts1, ok := opts.(*golangsdk.AuthOptions)
+	if ok && opts1.AgencyDomainName != "" && opts1.AgencyName != "" {
+		opts2 := golangsdk.AgencyAuthOptions{
+			TokenID:           token.ID,
+			AgencyName:        opts1.AgencyName,
+			AgencyDomainName:  opts1.AgencyDomainName,
+			AgencyProjectName: opts1.AgencyProjectName,
+		}
+		result = tokens3.Create(v3Client, &opts2)
+		token, err = result.ExtractToken()
+		if err != nil {
+			return err
+		}
+	}
+
 	project, err := result.ExtractProject()
 	if err != nil {
 		return err
@@ -207,7 +222,9 @@ func v3auth(client *golangsdk.ProviderClient, endpoint string, opts tokens3.Auth
 	}
 
 	client.TokenID = token.ID
-	client.ProjectID = project.ID
+	if project != nil {
+		client.ProjectID = project.ID
+	}
 
 	if opts.CanReauth() {
 		client.ReauthFunc = func() error {
@@ -521,5 +538,11 @@ func NewOBSService(client *golangsdk.ProviderClient, eo golangsdk.EndpointOpts) 
 func NewHwSFSV2(client *golangsdk.ProviderClient, eo golangsdk.EndpointOpts) (*golangsdk.ServiceClient, error) {
 	sc, err := initClientOpts(client, eo, "evs")
 	sc.Endpoint = strings.Replace(sc.Endpoint, "evs", "sfs", 1)
+	return sc, err
+}
+
+// NewDeHServiceV1 creates a ServiceClient that may be used to access the v1 Dedicated Hosts service.
+func NewDeHServiceV1(client *golangsdk.ProviderClient, eo golangsdk.EndpointOpts) (*golangsdk.ServiceClient, error) {
+	sc, err := initClientOpts(client, eo, "deh")
 	return sc, err
 }

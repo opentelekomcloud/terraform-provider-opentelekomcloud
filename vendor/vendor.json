@@ -826,22 +826,28 @@
 			"revisionTime": "2016-07-20T23:31:40Z"
 		},
 		{
-			"checksumSHA1": "IA4E+nb1/qO+x5aqVFAekCf9ESQ=",
+			"checksumSHA1": "0yaBxYK+HHfEgIPfeeUq6r6rurk=",
 			"path": "github.com/huaweicloud/golangsdk",
-			"revision": "98f31e4f21bec892b331ee55c5a5fff72d407abc",
-			"revisionTime": "2018-02-26T07:57:01Z"
+			"revision": "1aef9d9e0f186bc37dc82d81fa28a0889da8bd21",
+			"revisionTime": "2018-07-13T09:57:10Z"
 		},
 		{
-			"checksumSHA1": "WwyEGPVVy8a6RTRh+Tp+57PCjyY=",
+			"checksumSHA1": "UjsK8xl0T+T2yCaQELdN4n3qKe0=",
 			"path": "github.com/huaweicloud/golangsdk/openstack",
-			"revision": "c023b3603a43ad65c9c920f3b502477956a1fc4e",
-			"revisionTime": "2018-07-04T09:30:24Z"
+			"revision": "1aef9d9e0f186bc37dc82d81fa28a0889da8bd21",
+			"revisionTime": "2018-07-13T09:57:10Z"
 		},
 		{
 			"checksumSHA1": "lpp6hBnX9xBhrnxXc0i/5fHHoWY=",
 			"path": "github.com/huaweicloud/golangsdk/openstack/cloudeyeservice/alarmrule",
 			"revision": "b30e33595f46378156035bfec5b52b350c4b2b72",
 			"revisionTime": "2018-03-15T11:09:47Z"
+		},
+		{
+			"checksumSHA1": "sobrvaUz3EalfkbKll4oh3ZqhGk=",
+			"path": "github.com/huaweicloud/golangsdk/openstack/deh/v1/hosts",
+			"revision": "64ddba7a45f21278b5ca0a0b389868a66f8e6ae1",
+			"revisionTime": "2018-07-03T11:20:33Z"
 		},
 		{
 			"checksumSHA1": "plsG8kyRJhFGnhGfO0scQk5kRLw=",
