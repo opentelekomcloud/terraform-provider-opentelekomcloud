@@ -493,3 +493,33 @@ func NewAntiDDoSV2(client *golangsdk.ProviderClient, eo golangsdk.EndpointOpts) 
 	sc.ResourceBase = sc.Endpoint + "v2/" + client.ProjectID + "/"
 	return sc, err
 }
+
+// NewDMSServiceV1 creates a ServiceClient that may be used to access the v1 Distributed Message Service.
+func NewDMSServiceV1(client *golangsdk.ProviderClient, eo golangsdk.EndpointOpts) (*golangsdk.ServiceClient, error) {
+	sc, err := initClientOpts(client, eo, "network")
+	sc.Endpoint = strings.Replace(sc.Endpoint, "vpc", "dms", 1)
+	sc.ResourceBase = sc.Endpoint + "v1.0/" + client.ProjectID + "/"
+	return sc, err
+}
+
+// NewDCSServiceV1 creates a ServiceClient that may be used to access the v1 Distributed Cache Service.
+func NewDCSServiceV1(client *golangsdk.ProviderClient, eo golangsdk.EndpointOpts) (*golangsdk.ServiceClient, error) {
+	sc, err := initClientOpts(client, eo, "network")
+	sc.Endpoint = strings.Replace(sc.Endpoint, "vpc", "dcs", 1)
+	sc.ResourceBase = sc.Endpoint + "v1.0/" + client.ProjectID + "/"
+	return sc, err
+}
+
+// NewOBSService creates a ServiceClient that may be used to access the Object Storage Service.
+func NewOBSService(client *golangsdk.ProviderClient, eo golangsdk.EndpointOpts) (*golangsdk.ServiceClient, error) {
+	sc, err := initClientOpts(client, eo, "object")
+	return sc, err
+}
+
+//TODO: Need to change to sfs client type from evs once available
+//NewSFSV2 creates a service client that is used for Huawei cloud  for SFS , it replaces the EVS type.
+func NewHwSFSV2(client *golangsdk.ProviderClient, eo golangsdk.EndpointOpts) (*golangsdk.ServiceClient, error) {
+	sc, err := initClientOpts(client, eo, "evs")
+	sc.Endpoint = strings.Replace(sc.Endpoint, "evs", "sfs", 1)
+	return sc, err
+}
