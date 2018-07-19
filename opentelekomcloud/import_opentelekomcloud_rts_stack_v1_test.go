@@ -6,7 +6,6 @@ import (
 	"github.com/hashicorp/terraform/helper/resource"
 )
 
-// PASS
 func TestAccOTCRTSStackV1_importBasic(t *testing.T) {
 	resourceName := "opentelekomcloud_rts_stack_v1.stack_1"
 
