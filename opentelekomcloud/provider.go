@@ -169,6 +169,8 @@ func Provider() terraform.ResourceProvider {
 			"opentelekomcloud_vpc_route_ids_v2":          dataSourceVPCRouteIdsV2(),
 			"opentelekomcloud_vpc_subnet_v1":             dataSourceVpcSubnetV1(),
 			"opentelekomcloud_vpc_subnet_ids_v1":         dataSourceVpcSubnetIdsV1(),
+			"opentelekomcloud_rts_stack_v1":              dataSourceRTSStackV1(),
+			"opentelekomcloud_rts_stack_resource_v1":     dataSourceRTSStackResourcesV1(),
 			"opentelekomcloud_sfs_file_system_v2":        dataSourceSFSFileSystemV2(),
 		},
 
@@ -219,6 +221,7 @@ func Provider() terraform.ResourceProvider {
 			"opentelekomcloud_vpc_peering_connection_accepter_v2": resourceVpcPeeringConnectionAccepterV2(),
 			"opentelekomcloud_vpc_route_v2":                       resourceVPCRouteV2(),
 			"opentelekomcloud_vpc_subnet_v1":                      resourceVpcSubnetV1(),
+			"opentelekomcloud_rts_stack_v1":                       resourceRTSStackV1(),
 			"opentelekomcloud_sfs_file_system_v2":                 resourceSFSFileSystemV2(),
 		},
 
