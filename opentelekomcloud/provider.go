@@ -171,7 +171,9 @@ func Provider() terraform.ResourceProvider {
 			"opentelekomcloud_vpc_subnet_ids_v1":          dataSourceVpcSubnetIdsV1(),
 			"opentelekomcloud_rts_software_deployment_v1": dataSourceRtsSoftwareDeploymentV1(),
 			"opentelekomcloud_rts_software_config_v1":     dataSourceRtsSoftwareConfigV1(),
-			"opentelekomcloud_sfs_file_system_v2":         dataSourceSFSFileSystemV2(),
+			"opentelekomcloud_rts_stack_v1":              dataSourceRTSStackV1(),
+			"opentelekomcloud_rts_stack_resource_v1":     dataSourceRTSStackResourcesV1(),
+			"opentelekomcloud_sfs_file_system_v2":        dataSourceSFSFileSystemV2(),
 		},
 
 		ResourcesMap: map[string]*schema.Resource{
@@ -223,6 +225,7 @@ func Provider() terraform.ResourceProvider {
 			"opentelekomcloud_vpc_subnet_v1":                      resourceVpcSubnetV1(),
 			"opentelekomcloud_rts_software_deployment_v1":         resourceRtsSoftwareDeploymentV1(),
 			"opentelekomcloud_rts_software_config_v1":             resourceSoftwareConfigV1(),
+			"opentelekomcloud_rts_stack_v1":                       resourceRTSStackV1(),
 			"opentelekomcloud_sfs_file_system_v2":                 resourceSFSFileSystemV2(),
 		},
 
