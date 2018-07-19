@@ -10,7 +10,6 @@ import (
 	"github.com/huaweicloud/golangsdk/openstack/rts/v1/softwareconfig"
 )
 
-// PASS
 func TestAccOTCRtsSoftwareConfigV1_basic(t *testing.T) {
 	var config softwareconfig.SoftwareConfig
 
@@ -33,7 +32,6 @@ func TestAccOTCRtsSoftwareConfigV1_basic(t *testing.T) {
 	})
 }
 
-// PASS
 func TestAccOTCRtsSoftwareConfigV1_timeout(t *testing.T) {
 	var config softwareconfig.SoftwareConfig
 

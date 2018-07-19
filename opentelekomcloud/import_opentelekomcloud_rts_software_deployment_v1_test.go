@@ -6,7 +6,6 @@ import (
 	"github.com/hashicorp/terraform/helper/resource"
 )
 
-// PASS
 func TestAccOTCRtsSoftwareDeploymentV1_importBasic(t *testing.T) {
 	resourceName := "opentelekomcloud_rts_software_deployment_v1.deployment_1"
 

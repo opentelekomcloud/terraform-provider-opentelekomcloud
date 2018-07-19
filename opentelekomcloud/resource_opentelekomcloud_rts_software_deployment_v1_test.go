@@ -48,7 +48,6 @@ func TestAccOTCRtsSoftwareDeploymentV1_basic(t *testing.T) {
 	})
 }
 
-// PASS
 func TestAccOTCRtsSoftwareDeploymentV1_timeout(t *testing.T) {
 	var deployments softwaredeployment.Deployment
 
