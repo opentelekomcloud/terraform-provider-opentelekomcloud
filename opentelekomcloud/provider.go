@@ -174,8 +174,8 @@ func Provider() terraform.ResourceProvider {
 			"opentelekomcloud_rts_stack_v1":               dataSourceRTSStackV1(),
 			"opentelekomcloud_rts_stack_resource_v1":      dataSourceRTSStackResourcesV1(),
 			"opentelekomcloud_sfs_file_system_v2":         dataSourceSFSFileSystemV2(),
-			"opentelekomcloud_deh_host_v1":               dataSourceDEHHostV1(),
-			"opentelekomcloud_deh_server_v1":             dataSourceDEHServersV1(),
+			"opentelekomcloud_deh_host_v1":                dataSourceDEHHostV1(),
+			"opentelekomcloud_deh_server_v1":              dataSourceDEHServersV1(),
 		},
 
 		ResourcesMap: map[string]*schema.Resource{
