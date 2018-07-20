@@ -108,6 +108,19 @@ func validateName(v interface{}, k string) (ws []string, errors []error) {
 	return
 }
 
+func validateStackTemplate(v interface{}, k string) (ws []string, errors []error) {
+	if looksLikeJsonString(v) {
+		if _, err := normalizeJsonString(v); err != nil {
+			errors = append(errors, fmt.Errorf("%q contains an invalid JSON: %s", k, err))
+		}
+	} else {
+		if _, err := checkYamlString(v); err != nil {
+			errors = append(errors, fmt.Errorf("%q contains an invalid YAML: %s", k, err))
+		}
+	}
+	return
+}
+
 func validateIP(v interface{}, k string) (ws []string, errors []error) {
 	value := v.(string)
 	ipnet := net.ParseIP(value)
