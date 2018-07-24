@@ -196,6 +196,21 @@ func v3auth(client *golangsdk.ProviderClient, endpoint string, opts tokens3.Auth
 		return err
 	}
 
+	opts1, ok := opts.(*golangsdk.AuthOptions)
+	if ok && opts1.AgencyDomainName != "" && opts1.AgencyName != "" {
+		opts2 := golangsdk.AgencyAuthOptions{
+			TokenID:          token.ID,
+			AgencyName:       opts1.AgencyName,
+			AgencyDomainName: opts1.AgencyDomainName,
+			DelegatedProject: opts1.DelegatedProject,
+		}
+		result = tokens3.Create(v3Client, &opts2)
+		token, err = result.ExtractToken()
+		if err != nil {
+			return err
+		}
+	}
+
 	project, err := result.ExtractProject()
 	if err != nil {
 		return err
@@ -207,7 +222,9 @@ func v3auth(client *golangsdk.ProviderClient, endpoint string, opts tokens3.Auth
 	}
 
 	client.TokenID = token.ID
-	client.ProjectID = project.ID
+	if project != nil {
+		client.ProjectID = project.ID
+	}
 
 	if opts.CanReauth() {
 		client.ReauthFunc = func() error {
@@ -494,6 +511,16 @@ func NewAntiDDoSV2(client *golangsdk.ProviderClient, eo golangsdk.EndpointOpts) 
 	return sc, err
 }
 
+func NewCCEV3(client *golangsdk.ProviderClient, eo golangsdk.EndpointOpts) (*golangsdk.ServiceClient, error) {
+	sc, err := initClientOpts(client, eo, "compute")
+	sc.Endpoint = strings.Replace(sc.Endpoint, "ecs", "cce", 1)
+	sc.Endpoint = strings.Replace(sc.Endpoint, "v2", "api/v3/projects", 1)
+	sc.Endpoint = strings.Replace(sc.Endpoint, "myhwclouds", "myhuaweicloud", 1)
+	sc.ResourceBase = sc.Endpoint
+	sc.Type = "cce"
+	return sc, err
+}
+
 // NewDMSServiceV1 creates a ServiceClient that may be used to access the v1 Distributed Message Service.
 func NewDMSServiceV1(client *golangsdk.ProviderClient, eo golangsdk.EndpointOpts) (*golangsdk.ServiceClient, error) {
 	sc, err := initClientOpts(client, eo, "network")
@@ -529,5 +556,11 @@ func NewBMSV2(client *golangsdk.ProviderClient, eo golangsdk.EndpointOpts) (*gol
 	e := strings.Replace(sc.Endpoint, "v2", "v2.1", 1)
 	sc.Endpoint = e
 	sc.ResourceBase = e
+	return sc, err
+}
+
+// NewDeHServiceV1 creates a ServiceClient that may be used to access the v1 Dedicated Hosts service.
+func NewDeHServiceV1(client *golangsdk.ProviderClient, eo golangsdk.EndpointOpts) (*golangsdk.ServiceClient, error) {
+	sc, err := initClientOpts(client, eo, "deh")
 	return sc, err
 }
