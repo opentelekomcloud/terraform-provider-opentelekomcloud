@@ -6,7 +6,6 @@ import (
 	"github.com/hashicorp/terraform/helper/resource"
 )
 
-// PASS
 func TestAccOTCBMSTagsV2_importBasic(t *testing.T) {
 	resourceName := "opentelekomcloud_compute_bms_tags_v2.tags_1"
 
