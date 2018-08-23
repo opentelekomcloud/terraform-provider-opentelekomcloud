@@ -148,11 +148,8 @@ func testAccPreCheckSwift(t *testing.T) {
 func testAccPreCheckBMSNic(t *testing.T) {
 	testAccPreCheckRequiredEnvVars(t)
 
-	if OS_SERVER_ID == "" {
-		t.Fatal("OS_SERVER_ID must be set for NIC acceptance tests")
-	}
 	if OS_NIC_ID == "" {
-		t.Fatal("OS_NIC_ID must be set for NIC acceptance tests")
+		t.Skip("OS_NIC_ID must be set for NIC acceptance tests")
 	}
 }
 
@@ -335,20 +332,20 @@ func envVarFile(varName string) (string, error) {
 func testAccBmsKeyPairPreCheck(t *testing.T) {
 	testAccPreCheckRequiredEnvVars(t)
 	if OS_KEYPAIR_NAME == "" {
-		t.Fatalf("Provide the key pair name")
+		t.Skip("Provide the key pair name")
 	}
 }
 
 func testAccBmsFlavorPreCheck(t *testing.T) {
 	testAccPreCheckRequiredEnvVars(t)
 	if OS_BMS_FLAVOR_NAME == "" {
-		t.Fatalf("Provide the bms name starting with 'physical'")
+		t.Skip("Provide the bms name starting with 'physical'")
 	}
 }
 
 func testAccPreCheckBMSServer(t *testing.T) {
 	testAccPreCheckRequiredEnvVars(t)
 	if OS_SERVER_ID == "" {
-		t.Fatalf("Provide the BMS Server ID")
+		t.Skip("Provide the BMS Server ID")
 	}
 }
