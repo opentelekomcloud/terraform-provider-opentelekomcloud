@@ -32,7 +32,6 @@ var (
 	OS_TENANT_ID              = os.Getenv("OS_TENANT_ID")
 	OS_KEYPAIR_NAME           = os.Getenv("OS_KEYPAIR_NAME")
 	OS_BMS_FLAVOR_NAME        = os.Getenv("OS_BMS_FLAVOR_NAME")
-	OS_SERVER_ID              = os.Getenv("OS_SERVER_ID")
 	OS_NIC_ID                 = os.Getenv("OS_NIC_ID")
 )
 
@@ -340,12 +339,5 @@ func testAccBmsFlavorPreCheck(t *testing.T) {
 	testAccPreCheckRequiredEnvVars(t)
 	if OS_BMS_FLAVOR_NAME == "" {
 		t.Skip("Provide the bms name starting with 'physical'")
-	}
-}
-
-func testAccPreCheckBMSServer(t *testing.T) {
-	testAccPreCheckRequiredEnvVars(t)
-	if OS_SERVER_ID == "" {
-		t.Skip("Provide the BMS Server ID")
 	}
 }

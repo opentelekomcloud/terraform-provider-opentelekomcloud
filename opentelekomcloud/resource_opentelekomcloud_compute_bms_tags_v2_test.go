@@ -14,7 +14,7 @@ func TestAccOTCBMSTagsV2_basic(t *testing.T) {
 	var tags tags.Tags
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheckBMSServer(t) },
+		PreCheck:     func() { testAccPreCheckRequiredEnvVars(t) },
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckOTCBMSTagsV2Destroy,
 		Steps: []resource.TestStep{
@@ -23,18 +23,19 @@ func TestAccOTCBMSTagsV2_basic(t *testing.T) {
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckOTCBMSTagsV2Exists("opentelekomcloud_compute_bms_tags_v2.tags_1", &tags),
 					resource.TestCheckResourceAttr(
-						"opentelekomcloud_compute_bms_tags_v2.tags_1", "tags.#", "1"),
+						"opentelekomcloud_compute_bms_tags_v2.tags_1", "tags.#", "2"),
 				),
 			},
 		},
 	})
 }
 
+// PASS
 func TestAccOTCBMSTagsV2_timeout(t *testing.T) {
 	var tags tags.Tags
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheckBMSServer(t) },
+		PreCheck:     func() { testAccPreCheckRequiredEnvVars(t) },
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckOTCBMSTagsV2Destroy,
 		Steps: []resource.TestStep{
@@ -61,7 +62,7 @@ func testAccCheckOTCBMSTagsV2Destroy(s *terraform.State) error {
 		}
 
 		_, err := tags.Get(bmsClient, rs.Primary.ID).Extract()
-		if err != nil {
+		if err == nil {
 			return fmt.Errorf("tags still exists")
 		}
 	}
@@ -91,10 +92,6 @@ func testAccCheckOTCBMSTagsV2Exists(n string, tag *tags.Tags) resource.TestCheck
 			return err
 		}
 
-		if OS_SERVER_ID != rs.Primary.ID {
-			return fmt.Errorf("tags not found")
-		}
-
 		*tag = *found
 
 		return nil
@@ -102,18 +99,68 @@ func testAccCheckOTCBMSTagsV2Exists(n string, tag *tags.Tags) resource.TestCheck
 }
 
 var testAccBMSTagsV2_basic = fmt.Sprintf(`
+resource "opentelekomcloud_vpc_v1" "vpc_1" {
+  name = "vpc_otc12391"
+  cidr = "192.168.0.0/16"
+}
+resource "opentelekomcloud_vpc_subnet_v1" "subnet_1" {
+  name = "sub_otc12391"
+  cidr = "192.168.0.0/16"
+  gateway_ip = "192.168.0.1"
+  vpc_id = "${opentelekomcloud_vpc_v1.vpc_1.id}"
+  availability_zone = "%s"
+}
+resource "opentelekomcloud_compute_instance_v2" "instance_1" {
+  name = "BMSinstance_1"
+  image_id = "%s"
+  security_groups = ["default"]
+  availability_zone = "%s"
+  flavor_id = "physical.o2.medium"
+  tags = ["foo","bar"]
+  metadata {
+    foo = "bar"
+  }
+  network {
+    uuid = "${opentelekomcloud_vpc_subnet_v1.subnet_1.id}"
+  }
+}
 resource "opentelekomcloud_compute_bms_tags_v2" "tags_1" {
-  server_id = "%s"
-  tags = ["__type_baremetal"]
-}`, OS_SERVER_ID)
+  server_id = "${opentelekomcloud_compute_instance_v2.instance_1.id}"
+  tags = ["foo","bar"]
+}`, OS_AVAILABILITY_ZONE, OS_IMAGE_ID, OS_AVAILABILITY_ZONE)
 
 var testAccBMSTagsV2_timeout = fmt.Sprintf(`
+resource "opentelekomcloud_vpc_v1" "vpc_1" {
+  name = "vpc_otc12391"
+  cidr = "192.168.0.0/16"
+}
+resource "opentelekomcloud_vpc_subnet_v1" "subnet_1" {
+  name = "sub_otc12391"
+  cidr = "192.168.0.0/16"
+  gateway_ip = "192.168.0.1"
+  vpc_id = "${opentelekomcloud_vpc_v1.vpc_1.id}"
+  availability_zone = "%s"
+}
+resource "opentelekomcloud_compute_instance_v2" "instance_1" {
+  name = "BMSinstance_1"
+  image_id = "%s"
+  security_groups = ["default"]
+  availability_zone = "%s"
+  flavor_id = "physical.o2.medium"
+  tags = ["foo","bar"]
+  metadata {
+    foo = "bar"
+  }
+  network {
+    uuid = "${opentelekomcloud_vpc_subnet_v1.subnet_1.id}"
+  }
+}
 resource "opentelekomcloud_compute_bms_tags_v2" "tags_1" {
-  server_id = "%s"
-  tags = ["__type_baremetal"]
+  server_id = "${opentelekomcloud_compute_instance_v2.instance_1.id}"
+  tags = ["foo","bar"]
   timeouts {
     create = "5m"
     delete = "5m"
   }
 }
-`, OS_SERVER_ID)
+`, OS_AVAILABILITY_ZONE, OS_IMAGE_ID, OS_AVAILABILITY_ZONE)
