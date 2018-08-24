@@ -30,7 +30,6 @@ func TestAccOTCBMSTagsV2_basic(t *testing.T) {
 	})
 }
 
-// PASS
 func TestAccOTCBMSTagsV2_timeout(t *testing.T) {
 	var tags tags.Tags
 
