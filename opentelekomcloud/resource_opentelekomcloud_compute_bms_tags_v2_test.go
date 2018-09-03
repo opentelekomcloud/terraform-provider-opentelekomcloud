@@ -104,6 +104,7 @@ resource "opentelekomcloud_compute_instance_v2" "instance_1" {
   security_groups = ["default"]
   availability_zone = "%s"
   flavor_id = "physical.o2.medium"
+  flavor_name = "physical.o2.medium"
   tags = ["foo","bar"]
   metadata {
     foo = "bar"
@@ -124,6 +125,7 @@ resource "opentelekomcloud_compute_instance_v2" "instance_1" {
   security_groups = ["default"]
   availability_zone = "%s"
   flavor_id = "physical.o2.medium"
+  flavor_name = "physical.o2.medium"
   tags = ["foo","bar"]
   metadata {
     foo = "bar"
