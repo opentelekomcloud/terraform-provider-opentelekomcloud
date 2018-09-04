@@ -30,6 +30,9 @@ var (
 	OS_VPC_ID                 = os.Getenv("OS_VPC_ID")
 	OS_SUBNET_ID              = os.Getenv("OS_SUBNET_ID")
 	OS_TENANT_ID              = os.Getenv("OS_TENANT_ID")
+	OS_KEYPAIR_NAME           = os.Getenv("OS_KEYPAIR_NAME")
+	OS_BMS_FLAVOR_NAME        = os.Getenv("OS_BMS_FLAVOR_NAME")
+	OS_NIC_ID                 = os.Getenv("OS_NIC_ID")
 )
 
 var testAccProviders map[string]terraform.ResourceProvider
@@ -138,6 +141,14 @@ func testAccPreCheckSwift(t *testing.T) {
 
 	if OS_SWIFT_ENVIRONMENT == "" {
 		t.Skip("This environment does not support Swift tests")
+	}
+}
+
+func testAccPreCheckBMSNic(t *testing.T) {
+	testAccPreCheckRequiredEnvVars(t)
+
+	if OS_NIC_ID == "" {
+		t.Skip("OS_NIC_ID must be set for NIC acceptance tests")
 	}
 }
 
@@ -315,4 +326,18 @@ func envVarFile(varName string) (string, error) {
 		return "", fmt.Errorf("Error closing temp file: %s", err)
 	}
 	return tmpFile.Name(), nil
+}
+
+func testAccBmsKeyPairPreCheck(t *testing.T) {
+	testAccPreCheckRequiredEnvVars(t)
+	if OS_KEYPAIR_NAME == "" {
+		t.Skip("Provide the key pair name")
+	}
+}
+
+func testAccBmsFlavorPreCheck(t *testing.T) {
+	testAccPreCheckRequiredEnvVars(t)
+	if OS_BMS_FLAVOR_NAME == "" {
+		t.Skip("Provide the bms name starting with 'physical'")
+	}
 }
