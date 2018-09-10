@@ -994,6 +994,18 @@
 			"revisionTime": "2018-04-09T03:56:52Z"
 		},
 		{
+			"checksumSHA1": "iIyMq76Jzg/JVWZf/qfgJYz8e+k=",
+			"path": "github.com/huaweicloud/golangsdk/openstack/networking/v2/extensions/natgateways",
+			"revision": "1ef4c250ce2ea6c28095385c1800ac8a74492ca9",
+			"revisionTime": "2018-09-05T09:58:59Z"
+		},
+		{
+			"checksumSHA1": "8FUSH2A+RQyNj1T04/uGshpRCVA=",
+			"path": "github.com/huaweicloud/golangsdk/openstack/networking/v2/extensions/snatrules",
+			"revision": "1ef4c250ce2ea6c28095385c1800ac8a74492ca9",
+			"revisionTime": "2018-09-05T09:58:59Z"
+		},
+		{
 			"checksumSHA1": "0gorI5xHfJjwGQrtrx8B31CvEIA=",
 			"path": "github.com/huaweicloud/golangsdk/openstack/networking/v2/peerings",
 			"revision": "1f996b54aca766257d0159d923d0e5a2b82d0d3f",
