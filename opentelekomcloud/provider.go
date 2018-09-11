@@ -234,6 +234,7 @@ func Provider() terraform.ResourceProvider {
 			"opentelekomcloud_rts_stack_v1":                       resourceRTSStackV1(),
 			"opentelekomcloud_sfs_file_system_v2":                 resourceSFSFileSystemV2(),
 			"opentelekomcloud_compute_bms_tags_v2":                resourceBMSTagsV2(),
+			"opentelekomcloud_as_configuration_v1":                resourceASConfiguration(),
 		},
 
 		ConfigureFunc: configureProvider,
