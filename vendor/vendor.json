@@ -862,6 +862,12 @@
 			"revisionTime": "2018-09-11T07:04:38Z"
 		},
 		{
+			"checksumSHA1": "MrZDbuuLO9MlZmtSqPkmwDTNA90=",
+			"path": "github.com/huaweicloud/golangsdk/openstack/autoscaling/v1/policies",
+			"revision": "75837c0e32c3577a74950b521e3ad3aaec05b34b",
+			"revisionTime": "2018-09-11T07:04:38Z"
+		},
+		{
 			"checksumSHA1": "WN/dwJ8WzlLFnp31TdnmVDgpjAY=",
 			"path": "github.com/huaweicloud/golangsdk/openstack/bms/v2/flavors",
 			"revision": "6aa721c497760e91ad31b27f843c2a4451e9de51",

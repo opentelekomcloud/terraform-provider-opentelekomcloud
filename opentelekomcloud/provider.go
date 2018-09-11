@@ -236,6 +236,7 @@ func Provider() terraform.ResourceProvider {
 			"opentelekomcloud_compute_bms_tags_v2":                resourceBMSTagsV2(),
 			"opentelekomcloud_as_configuration_v1":                resourceASConfiguration(),
 			"opentelekomcloud_as_group_v1":                        resourceASGroup(),
+			"opentelekomcloud_as_policy_v1":                       resourceASPolicy(),
 		},
 
 		ConfigureFunc: configureProvider,
