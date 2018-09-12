@@ -341,3 +341,10 @@ func testAccBmsFlavorPreCheck(t *testing.T) {
 		t.Skip("Provide the bms name starting with 'physical'")
 	}
 }
+
+func testAccAsConfigPreCheck(t *testing.T) {
+	testAccPreCheckRequiredEnvVars(t)
+	if OS_FLAVOR_ID == "" {
+		t.Skip("OS_FLAVOR_ID must be set for acceptance tests")
+	}
+}
