@@ -69,7 +69,7 @@ The following arguments are supported:
 * `value_specs` - (Optional) Map of additional options. Changing this creates a
   new zone.
 
-The `router` block suppots:
+The `router` block supports:
 
 * `router_id` (Required) The Router(VPC) ID. which VPC network will assicate with.
 
