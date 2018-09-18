@@ -892,10 +892,10 @@
 			"revisionTime": "2018-07-04T07:38:21Z"
 		},
 		{
-			"checksumSHA1": "lpp6hBnX9xBhrnxXc0i/5fHHoWY=",
+			"checksumSHA1": "q1aqMo0piceUY8M6d6xzbL1mgdo=",
 			"path": "github.com/huaweicloud/golangsdk/openstack/cloudeyeservice/alarmrule",
-			"revision": "b30e33595f46378156035bfec5b52b350c4b2b72",
-			"revisionTime": "2018-03-15T11:09:47Z"
+			"revision": "c609899b5aa5a7b71be1cd13e80b8a40ac1cae82",
+			"revisionTime": "2018-09-15T01:19:22Z"
 		},
 		{
 			"checksumSHA1": "plsG8kyRJhFGnhGfO0scQk5kRLw=",
