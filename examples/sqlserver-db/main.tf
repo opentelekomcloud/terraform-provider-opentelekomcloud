@@ -1,51 +1,51 @@
-resource "opentelekomcloud_networking_secgroup_v2" "secgroup_mysqlrds" {
+resource "opentelekomcloud_networking_secgroup_v2" "secgroup_mssqlrds" {
   name        = "${var.secgroup_name}"
   description = "My neutron security group"
 }
 
-resource "opentelekomcloud_networking_secgroup_rule_v2" "secgroup_rule_mysqlrds_ssh" {
+resource "opentelekomcloud_networking_secgroup_rule_v2" "secgroup_rule_mssqlrds_ssh" {
   direction         = "ingress"
   ethertype         = "IPv4"
   protocol          = "tcp"
   port_range_min    = 22
   port_range_max    = 22
   remote_ip_prefix  = "0.0.0.0/0"
-  security_group_id = "${opentelekomcloud_networking_secgroup_v2.secgroup_mysqlrds.id}"
+  security_group_id = "${opentelekomcloud_networking_secgroup_v2.secgroup_mssqlrds.id}"
 }
 
-resource "opentelekomcloud_networking_secgroup_rule_v2" "secgroup_rule_mysqlrds_dbport" {
+resource "opentelekomcloud_networking_secgroup_rule_v2" "secgroup_rule_mssqlrds_dbport" {
   direction         = "ingress"
   ethertype         = "IPv4"
   protocol          = "tcp"
   port_range_min    = "${var.db_port}"
   port_range_max    = "${var.db_port}"
   remote_ip_prefix  = "0.0.0.0/0"
-  security_group_id = "${opentelekomcloud_networking_secgroup_v2.secgroup_mysqlrds.id}"
+  security_group_id = "${opentelekomcloud_networking_secgroup_v2.secgroup_mssqlrds.id}"
 }
 
-resource "opentelekomcloud_networking_secgroup_rule_v2" "secgroup_rule_mysqlrds_icmp" {
+resource "opentelekomcloud_networking_secgroup_rule_v2" "secgroup_rule_mssqlrds_icmp" {
   direction         = "ingress"
   ethertype         = "IPv4"
   protocol          = "icmp"
   remote_ip_prefix  = "0.0.0.0/0"
-  security_group_id = "${opentelekomcloud_networking_secgroup_v2.secgroup_mysqlrds.id}"
+  security_group_id = "${opentelekomcloud_networking_secgroup_v2.secgroup_mssqlrds.id}"
 }
 
 
-data "opentelekomcloud_rds_flavors_v1" "flavor_mysqlrds" {
+data "opentelekomcloud_rds_flavors_v1" "flavor_mssqlrds" {
   region = "${var.region}"
   datastore_name = "${var.db_type}"
   datastore_version = "${var.db_version}"
   speccode = "${var.db_flavor}"
 }
 
-resource "opentelekomcloud_rds_instance_v1" "instance_mysqlrds" {
+resource "opentelekomcloud_rds_instance_v1" "instance_mssqlrds" {
   name = "${var.db_name}-instance"
   datastore {
     type = "${var.db_type}"
     version = "${var.db_version}"
   }
-  flavorref = "${data.opentelekomcloud_rds_flavors_v1.flavor_mysqlrds.id}"
+  flavorref = "${data.opentelekomcloud_rds_flavors_v1.flavor_mssqlrds.id}"
   volume {
     type = "COMMON"
     size = 100
@@ -57,7 +57,7 @@ resource "opentelekomcloud_rds_instance_v1" "instance_mysqlrds" {
     subnetid = "${var.existing_private_net_id}"
   }
   securitygroup {
-    id = "${opentelekomcloud_networking_secgroup_v2.secgroup_mysqlrds.id}"
+    id = "${opentelekomcloud_networking_secgroup_v2.secgroup_mssqlrds.id}"
   }
   dbport = "${var.db_port}"
   backupstrategy = {
@@ -65,9 +65,5 @@ resource "opentelekomcloud_rds_instance_v1" "instance_mysqlrds" {
     keepdays = 0
   }
   dbrtpd = "${var.db_passwd}"
-  ha = {
-    enable = true
-    replicationmode = "async"
-  }
-  depends_on = ["opentelekomcloud_networking_secgroup_v2.secgroup_mysqlrds"]
+  depends_on = ["opentelekomcloud_networking_secgroup_v2.secgroup_mssqlrds"]
 }
