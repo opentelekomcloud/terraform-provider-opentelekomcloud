@@ -12,15 +12,31 @@ Manages a DNS zone in the OpenTelekomCloud DNS Service.
 
 ## Example Usage
 
-### Automatically detect the correct network
+### Public Zone Configuration
 
 ```hcl
-resource "opentelekomcloud_dns_zone_v2" "example.com" {
-  name = "example.com."
-  email = "jdoe@example.com"
-  description = "An example zone"
+resource "opentelekomcloud_dns_zone_v2" "public_example_com" {
+  name = "public.example.com."
+  email = "public@example.com"
+  description = "An example for public zone"
   ttl = 3000
-  type = "PRIMARY"
+  type = "public"
+}
+```
+
+### Private Zone Configuration
+
+```hcl
+resource "opentelekomcloud_dns_zone_v2" "private_example_com" {
+  name = "private.example.com."
+  email = "private@example.com"
+  description = "An example for private zone"
+  ttl = 3000
+  type = "private"
+  router = {
+     router_id = "${var.vpc_id}"
+     router_region = "${var.region}"
+  }
 }
 ```
 
@@ -38,21 +54,26 @@ The following arguments are supported:
 
 * `email` - (Optional) The email contact for the zone record.
 
-* `type` - (Optional) The type of zone. Can either be `PRIMARY` or `SECONDARY`.
-  Changing this creates a new zone.
-
-* `attributes` - (Optional) Attributes for the DNS Service scheduler.
+* `type` - (Optional) The type of zone. Can either be `public` or `private`.
   Changing this creates a new zone.
 
 * `ttl` - (Optional) The time to live (TTL) of the zone.
 
 * `description` - (Optional) A description of the zone.
 
-* `masters` - (Optional) An array of master DNS servers. For when `type` is
-  `SECONDARY`.
+* `router` (Optional) The Router(VPC) configuration for the private zone.
+    it is required when type is `private`. Changing this creates a new zone.
+
+* `masters` - (Optional) An array of master DNS servers. 
 
 * `value_specs` - (Optional) Map of additional options. Changing this creates a
   new zone.
+
+The `router` block supports:
+
+* `router_id` (Required) The Router(VPC) ID. which VPC network will assicate with.
+
+* `router_region` (Required) The Region name for this private zone.
 
 ## Attributes Reference
 
@@ -62,7 +83,6 @@ The following attributes are exported:
 * `name` - See Argument Reference above.
 * `email` - See Argument Reference above.
 * `type` - See Argument Reference above.
-* `attributes` - See Argument Reference above.
 * `ttl` - See Argument Reference above.
 * `description` - See Argument Reference above.
 * `masters` - See Argument Reference above.
