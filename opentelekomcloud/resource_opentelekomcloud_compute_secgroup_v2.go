@@ -7,11 +7,11 @@ import (
 	"strings"
 	"time"
 
-	"github.com/gophercloud/gophercloud"
-	"github.com/gophercloud/gophercloud/openstack/compute/v2/extensions/secgroups"
 	"github.com/hashicorp/terraform/helper/hashcode"
 	"github.com/hashicorp/terraform/helper/resource"
 	"github.com/hashicorp/terraform/helper/schema"
+	"github.com/huaweicloud/golangsdk"
+	"github.com/huaweicloud/golangsdk/openstack/compute/v2/extensions/secgroups"
 )
 
 func resourceComputeSecGroupV2() *schema.Resource {
@@ -100,7 +100,7 @@ func resourceComputeSecGroupV2() *schema.Resource {
 
 func resourceComputeSecGroupV2Create(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*Config)
-	computeClient, err := config.computeV2Client(GetRegion(d, config))
+	computeClient, err := config.computeV2HWClient(GetRegion(d, config))
 	if err != nil {
 		return fmt.Errorf("Error creating OpenTelekomCloud compute client: %s", err)
 	}
@@ -138,7 +138,7 @@ func resourceComputeSecGroupV2Create(d *schema.ResourceData, meta interface{}) e
 
 func resourceComputeSecGroupV2Read(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*Config)
-	computeClient, err := config.computeV2Client(GetRegion(d, config))
+	computeClient, err := config.computeV2HWClient(GetRegion(d, config))
 	if err != nil {
 		return fmt.Errorf("Error creating OpenTelekomCloud compute client: %s", err)
 	}
@@ -167,7 +167,7 @@ func resourceComputeSecGroupV2Read(d *schema.ResourceData, meta interface{}) err
 
 func resourceComputeSecGroupV2Update(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*Config)
-	computeClient, err := config.computeV2Client(GetRegion(d, config))
+	computeClient, err := config.computeV2HWClient(GetRegion(d, config))
 	if err != nil {
 		return fmt.Errorf("Error creating OpenTelekomCloud compute client: %s", err)
 	}
@@ -206,7 +206,7 @@ func resourceComputeSecGroupV2Update(d *schema.ResourceData, meta interface{}) e
 			rule := resourceSecGroupRuleV2(d, r)
 			err := secgroups.DeleteRule(computeClient, rule.ID).ExtractErr()
 			if err != nil {
-				if _, ok := err.(gophercloud.ErrDefault404); ok {
+				if _, ok := err.(golangsdk.ErrDefault404); ok {
 					continue
 				}
 
@@ -222,7 +222,7 @@ func resourceComputeSecGroupV2Update(d *schema.ResourceData, meta interface{}) e
 
 func resourceComputeSecGroupV2Delete(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*Config)
-	computeClient, err := config.computeV2Client(GetRegion(d, config))
+	computeClient, err := config.computeV2HWClient(GetRegion(d, config))
 	if err != nil {
 		return fmt.Errorf("Error creating OpenTelekomCloud compute client: %s", err)
 	}
@@ -318,7 +318,7 @@ func resourceSecGroupRuleV2(d *schema.ResourceData, rawRule interface{}) secgrou
 	}
 }
 
-func rulesToMap(computeClient *gophercloud.ServiceClient, d *schema.ResourceData, sgrs []secgroups.Rule) ([]map[string]interface{}, error) {
+func rulesToMap(computeClient *golangsdk.ServiceClient, d *schema.ResourceData, sgrs []secgroups.Rule) ([]map[string]interface{}, error) {
 	sgrMap := make([]map[string]interface{}, len(sgrs))
 	for i, sgr := range sgrs {
 		groupId := ""
@@ -374,7 +374,7 @@ func secgroupRuleV2Hash(v interface{}) int {
 	return hashcode.String(buf.String())
 }
 
-func SecGroupV2StateRefreshFunc(computeClient *gophercloud.ServiceClient, d *schema.ResourceData) resource.StateRefreshFunc {
+func SecGroupV2StateRefreshFunc(computeClient *golangsdk.ServiceClient, d *schema.ResourceData) resource.StateRefreshFunc {
 	return func() (interface{}, string, error) {
 		log.Printf("[DEBUG] Attempting to delete Security Group %s.\n", d.Id())
 
