@@ -178,6 +178,8 @@ func Provider() terraform.ResourceProvider {
 			"opentelekomcloud_compute_bms_keypairs_v2":    dataSourceBMSKeyPairV2(),
 			"opentelekomcloud_compute_bms_flavors_v2":     dataSourceBMSFlavorV2(),
 			"opentelekomcloud_compute_bms_server_v2":      dataSourceBMSServersV2(),
+			"opentelekomcloud_csbs_backup_v1":             dataSourceCSBSBackupV1(),
+			"opentelekomcloud_csbs_backup_policy_v1":      dataSourceCSBSBackupPolicyV1(),
 		},
 
 		ResourcesMap: map[string]*schema.Resource{
@@ -237,6 +239,8 @@ func Provider() terraform.ResourceProvider {
 			"opentelekomcloud_as_configuration_v1":                resourceASConfiguration(),
 			"opentelekomcloud_as_group_v1":                        resourceASGroup(),
 			"opentelekomcloud_as_policy_v1":                       resourceASPolicy(),
+			"opentelekomcloud_csbs_backup_v1":                     resourceCSBSBackupV1(),
+			"opentelekomcloud_csbs_backup_policy_v1":              resourceCSBSBackupPolicyV1(),
 		},
 
 		ConfigureFunc: configureProvider,
