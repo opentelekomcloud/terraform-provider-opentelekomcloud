@@ -242,6 +242,8 @@ func Provider() terraform.ResourceProvider {
 			"opentelekomcloud_deh_host_v1":                        resourceDeHHostV1(),
 			"opentelekomcloud_networking_vip_v2":                  resourceNetworkingVIPV2(),
 			"opentelekomcloud_networking_vip_associate_v2":        resourceNetworkingVIPAssociateV2(),
+			"opentelekomcloud_dms_queue_v1":                       resourceDmsQueuesV1(),
+			"opentelekomcloud_dms_group_v1":                       resourceDmsGroupsV1(),
 		},
 
 		ConfigureFunc: configureProvider,
