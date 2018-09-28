@@ -8,7 +8,7 @@ import (
 	"github.com/hashicorp/terraform/terraform"
 
 	"github.com/gophercloud/gophercloud/openstack/compute/v2/extensions/servergroups"
-	"github.com/gophercloud/gophercloud/openstack/compute/v2/servers"
+	"github.com/huaweicloud/golangsdk/openstack/compute/v2/servers"
 )
 
 // PASS
