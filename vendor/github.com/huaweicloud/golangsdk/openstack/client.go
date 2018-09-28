@@ -667,9 +667,3 @@ func NewDeHServiceV1(client *golangsdk.ProviderClient, eo golangsdk.EndpointOpts
 	sc, err := initClientOpts(client, eo, "deh")
 	return sc, err
 }
-
-// NewDeHServiceV1 creates a ServiceClient that may be used to access the v1 Dedicated Hosts service.
-func NewDeHServiceV1(client *golangsdk.ProviderClient, eo golangsdk.EndpointOpts) (*golangsdk.ServiceClient, error) {
-	sc, err := initClientOpts(client, eo, "deh")
-	return sc, err
-}
