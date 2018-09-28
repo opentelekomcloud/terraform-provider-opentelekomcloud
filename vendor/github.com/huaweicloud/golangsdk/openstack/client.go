@@ -10,6 +10,7 @@ import (
 	"github.com/huaweicloud/golangsdk"
 	tokens2 "github.com/huaweicloud/golangsdk/openstack/identity/v2/tokens"
 	"github.com/huaweicloud/golangsdk/openstack/identity/v3/endpoints"
+	"github.com/huaweicloud/golangsdk/openstack/identity/v3/projects"
 	"github.com/huaweicloud/golangsdk/openstack/identity/v3/services"
 	tokens3 "github.com/huaweicloud/golangsdk/openstack/identity/v3/tokens"
 	"github.com/huaweicloud/golangsdk/openstack/utils"
@@ -134,6 +135,7 @@ func Authenticate(client *golangsdk.ProviderClient, options golangsdk.AuthOption
 			return fmt.Errorf("Unrecognized auth options provider: %s", reflect.TypeOf(options))
 		}
 	}
+
 }
 
 // AuthenticateV2 explicitly authenticates against the identity v2 endpoint.
@@ -268,6 +270,28 @@ func getEntryByServiceId(entries []tokens3.CatalogEntry, serviceId string) *toke
 	return nil
 }
 
+func getProjectID(client *golangsdk.ServiceClient, name string) (string, error) {
+	opts := projects.ListOpts{
+		Name: name,
+	}
+	allPages, err := projects.List(client, opts).AllPages()
+	if err != nil {
+		return "", err
+	}
+
+	projects, err := projects.ExtractProjects(allPages)
+
+	if err != nil {
+		return "", err
+	}
+
+	if len(projects) < 1 {
+		return "", fmt.Errorf("[DEBUG] cannot find the tenant: %s", name)
+	}
+
+	return projects[0].ID, nil
+}
+
 func v3AKSKAuth(client *golangsdk.ProviderClient, endpoint string, options golangsdk.AKSKAuthOptions, eo golangsdk.EndpointOpts) error {
 	v3Client, err := NewIdentityV3(client, eo)
 	if err != nil {
@@ -279,10 +303,20 @@ func v3AKSKAuth(client *golangsdk.ProviderClient, endpoint string, options golan
 	}
 
 	v3Client.AKSKAuthOptions = options
+
+	if options.ProjectId == "" && options.ProjectName != "" {
+		id, err := getProjectID(v3Client, options.ProjectName)
+		if err != nil {
+			return err
+		}
+		options.ProjectId = id
+	}
+
+	client.ProjectID = options.ProjectId
 	v3Client.ProjectID = options.ProjectId
 
 	var entries = make([]tokens3.CatalogEntry, 0, 1)
-	services.List(v3Client, services.ListOpts{}).EachPage(func(page pagination.Page) (bool, error) {
+	err = services.List(v3Client, services.ListOpts{}).EachPage(func(page pagination.Page) (bool, error) {
 		serviceLst, err := services.ExtractServices(page)
 		if err != nil {
 			return false, err
@@ -300,7 +334,11 @@ func v3AKSKAuth(client *golangsdk.ProviderClient, endpoint string, options golan
 		return true, nil
 	})
 
-	endpoints.List(v3Client, endpoints.ListOpts{}).EachPage(func(page pagination.Page) (bool, error) {
+	if err != nil {
+		return err
+	}
+
+	err = endpoints.List(v3Client, endpoints.ListOpts{}).EachPage(func(page pagination.Page) (bool, error) {
 		endpoints, err := endpoints.ExtractEndpoints(page)
 		if err != nil {
 			return false, err
@@ -320,9 +358,6 @@ func v3AKSKAuth(client *golangsdk.ProviderClient, endpoint string, options golan
 		}
 
 		client.EndpointLocator = func(opts golangsdk.EndpointOpts) (string, error) {
-			if opts.Region == "" {
-				opts.Region = options.Region
-			}
 			return V3EndpointURL(&tokens3.ServiceCatalog{
 				Entries: entries,
 			}, opts)
@@ -330,6 +365,10 @@ func v3AKSKAuth(client *golangsdk.ProviderClient, endpoint string, options golan
 
 		return true, nil
 	})
+
+	if err != nil {
+		return err
+	}
 
 	return nil
 }
@@ -665,5 +704,56 @@ func NewBMSV2(client *golangsdk.ProviderClient, eo golangsdk.EndpointOpts) (*gol
 // NewDeHServiceV1 creates a ServiceClient that may be used to access the v1 Dedicated Hosts service.
 func NewDeHServiceV1(client *golangsdk.ProviderClient, eo golangsdk.EndpointOpts) (*golangsdk.ServiceClient, error) {
 	sc, err := initClientOpts(client, eo, "deh")
+	return sc, err
+}
+
+// NewCSBSService creates a ServiceClient that can be used to access the Cloud Server Backup service.
+func NewCSBSService(client *golangsdk.ProviderClient, eo golangsdk.EndpointOpts) (*golangsdk.ServiceClient, error) {
+	sc, err := initClientOpts(client, eo, "data-protect")
+	return sc, err
+}
+
+// NewHwCSBSServiceV1 creates a ServiceClient that may be used to access the Huawei Cloud Server Backup service.
+func NewHwCSBSServiceV1(client *golangsdk.ProviderClient, eo golangsdk.EndpointOpts) (*golangsdk.ServiceClient, error) {
+	sc, err := initClientOpts(client, eo, "compute")
+	sc.Endpoint = strings.Replace(sc.Endpoint, "ecs", "csbs", 1)
+	e := strings.Replace(sc.Endpoint, "v2", "v1", 1)
+	sc.Endpoint = e
+	sc.ResourceBase = e
+	return sc, err
+}
+
+func NewMLSV1(client *golangsdk.ProviderClient, eo golangsdk.EndpointOpts) (*golangsdk.ServiceClient, error) {
+	sc, err := initClientOpts(client, eo, "network")
+	sc.Endpoint = strings.Replace(sc.Endpoint, "vpc", "mls", 1)
+	sc.ResourceBase = sc.Endpoint + "v1.0/" + client.ProjectID + "/"
+	return sc, err
+}
+
+func NewDWSClient(client *golangsdk.ProviderClient, eo golangsdk.EndpointOpts) (*golangsdk.ServiceClient, error) {
+	sc, err := initClientOpts(client, eo, "volumev2")
+	if err != nil {
+		return nil, err
+	}
+	e := strings.Replace(sc.Endpoint, "v2", "v1.0", 1)
+	sc.Endpoint = strings.Replace(e, "evs", "dws", 1)
+	sc.ResourceBase = sc.Endpoint
+	return sc, err
+}
+
+// NewVBSV2 creates a ServiceClient that may be used to access the VBS service for Orange and Telefonica Cloud.
+func NewVBSV2(client *golangsdk.ProviderClient, eo golangsdk.EndpointOpts) (*golangsdk.ServiceClient, error) {
+	sc, err := initClientOpts(client, eo, "vbsv2")
+	return sc, err
+}
+
+// NewVBS creates a service client that is used for VBS.
+func NewVBS(client *golangsdk.ProviderClient, eo golangsdk.EndpointOpts) (*golangsdk.ServiceClient, error) {
+	sc, err := initClientOpts(client, eo, "volumev2")
+	if err != nil {
+		return nil, err
+	}
+	sc.Endpoint = strings.Replace(sc.Endpoint, "evs", "vbs", 1)
+	sc.ResourceBase = sc.Endpoint
 	return sc, err
 }
