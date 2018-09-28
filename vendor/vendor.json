@@ -868,6 +868,12 @@
 			"revisionTime": "2018-09-11T07:04:38Z"
 		},
 		{
+			"checksumSHA1": "u9yB68Ng1RAaedOTBtHe6gRZB64=",
+			"path": "github.com/huaweicloud/golangsdk/openstack/blockstorage/v2/volumes",
+			"revision": "824aea0ed0decd7a36623f49b1610e7af6c58c3c",
+			"revisionTime": "2018-09-28T03:11:13Z"
+		},
+		{
 			"checksumSHA1": "WN/dwJ8WzlLFnp31TdnmVDgpjAY=",
 			"path": "github.com/huaweicloud/golangsdk/openstack/bms/v2/flavors",
 			"revision": "6aa721c497760e91ad31b27f843c2a4451e9de51",
@@ -894,8 +900,14 @@
 		{
 			"checksumSHA1": "q1aqMo0piceUY8M6d6xzbL1mgdo=",
 			"path": "github.com/huaweicloud/golangsdk/openstack/cloudeyeservice/alarmrule",
-			"revision": "c609899b5aa5a7b71be1cd13e80b8a40ac1cae82",
-			"revisionTime": "2018-09-15T01:19:22Z"
+			"revision": "824aea0ed0decd7a36623f49b1610e7af6c58c3c",
+			"revisionTime": "2018-09-28T03:11:13Z"
+		},
+		{
+			"checksumSHA1": "lFfoFNfeKUZq6XMuZEEZ490gndU=",
+			"path": "github.com/huaweicloud/golangsdk/openstack/compute/v2/extensions/volumeattach",
+			"revision": "824aea0ed0decd7a36623f49b1610e7af6c58c3c",
+			"revisionTime": "2018-09-28T03:11:13Z"
 		},
 		{
 			"checksumSHA1": "plsG8kyRJhFGnhGfO0scQk5kRLw=",
