@@ -83,13 +83,13 @@ type AuthOptions struct {
 	TokenID string `json:"-"`
 
 	// AgencyNmae is the name of agnecy
-	AgencyName string `json:"xrole_name,omitempty"`
+	AgencyName string `json:"-"`
 
-	// AgencyDomainName is the domain name who created the agency
-	AgencyDomainName string `json:"domain_name,omitempty"`
+	// AgencyDomainName is the name of domain who created the agency
+	AgencyDomainName string `json:"-"`
 
-	// AgencyProjectName is the project name of agency
-	AgencyProjectName string
+	// DelegatedProject is the name of delegated project
+	DelegatedProject string `json:"-"`
 }
 
 // ToTokenV2CreateMap allows AuthOptions to satisfy the AuthOptionsBuilder
@@ -298,6 +298,11 @@ func (opts *AuthOptions) AuthTokenID() string {
 	return ""
 }
 
+// Implements the method of AuthOptionsProvider
+func (opts AuthOptions) GetIdentityEndpoint() string {
+	return opts.IdentityEndpoint
+}
+
 type scopeInfo struct {
 	ProjectID   string
 	ProjectName string
@@ -375,10 +380,10 @@ func (scope *scopeInfo) BuildTokenV3ScopeMap() (map[string]interface{}, error) {
 }
 
 type AgencyAuthOptions struct {
-	TokenID           string
-	AgencyName        string
-	AgencyDomainName  string
-	AgencyProjectName string
+	TokenID          string
+	AgencyName       string
+	AgencyDomainName string
+	DelegatedProject string
 }
 
 func (opts *AgencyAuthOptions) CanReauth() bool {
@@ -391,7 +396,7 @@ func (opts *AgencyAuthOptions) AuthTokenID() string {
 
 func (opts *AgencyAuthOptions) ToTokenV3ScopeMap() (map[string]interface{}, error) {
 	scope := scopeInfo{
-		ProjectName: opts.AgencyProjectName,
+		ProjectName: opts.DelegatedProject,
 		DomainName:  opts.AgencyDomainName,
 	}
 

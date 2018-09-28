@@ -7,7 +7,7 @@ import (
 	"github.com/hashicorp/terraform/helper/resource"
 	"github.com/hashicorp/terraform/terraform"
 
-	"github.com/gophercloud/gophercloud/openstack/compute/v2/extensions/secgroups"
+	"github.com/huaweicloud/golangsdk/openstack/compute/v2/extensions/secgroups"
 )
 
 // PASS
@@ -150,7 +150,7 @@ func TestAccComputeV2SecGroup_timeout(t *testing.T) {
 
 func testAccCheckComputeV2SecGroupDestroy(s *terraform.State) error {
 	config := testAccProvider.Meta().(*Config)
-	computeClient, err := config.computeV2Client(OS_REGION_NAME)
+	computeClient, err := config.computeV2HWClient(OS_REGION_NAME)
 	if err != nil {
 		return fmt.Errorf("Error creating OpenTelekomCloud compute client: %s", err)
 	}
@@ -181,7 +181,7 @@ func testAccCheckComputeV2SecGroupExists(n string, secgroup *secgroups.SecurityG
 		}
 
 		config := testAccProvider.Meta().(*Config)
-		computeClient, err := config.computeV2Client(OS_REGION_NAME)
+		computeClient, err := config.computeV2HWClient(OS_REGION_NAME)
 		if err != nil {
 			return fmt.Errorf("Error creating OpenTelekomCloud compute client: %s", err)
 		}

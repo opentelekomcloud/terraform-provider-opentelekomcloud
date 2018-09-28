@@ -105,6 +105,7 @@ func resourceEListener() *schema.Resource {
 				Type:     schema.TypeInt,
 				Optional: true,
 				ForceNew: true,
+				Computed: true,
 				ValidateFunc: func(v interface{}, k string) (ws []string, errors []error) {
 					return ValidateIntRange(v, k, 1, 1440)
 				},
@@ -157,6 +158,7 @@ func resourceEListener() *schema.Resource {
 				Type:     schema.TypeString,
 				Optional: true,
 				ForceNew: true,
+				Computed: true,
 				ValidateFunc: func(v interface{}, k string) (ws []string, errors []error) {
 					return ValidateStringList(v, k, []string{"TLSv1.2", "TLSv1.2 TLSv1.1 TLSv1"})
 				},
@@ -165,6 +167,7 @@ func resourceEListener() *schema.Resource {
 			"ssl_ciphers": &schema.Schema{
 				Type:     schema.TypeString,
 				Optional: true,
+				Computed: true,
 				ValidateFunc: func(v interface{}, k string) (ws []string, errors []error) {
 					return ValidateStringList(v, k, []string{"Default", "Extended", "Strict"})
 				},

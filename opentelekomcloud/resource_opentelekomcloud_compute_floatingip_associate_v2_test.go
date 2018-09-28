@@ -4,9 +4,10 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/gophercloud/gophercloud"
-	"github.com/gophercloud/gophercloud/openstack/compute/v2/servers"
+	"github.com/huaweicloud/golangsdk"
+
 	"github.com/gophercloud/gophercloud/openstack/networking/v2/extensions/layer3/floatingips"
+	"github.com/huaweicloud/golangsdk/openstack/compute/v2/servers"
 
 	"github.com/hashicorp/terraform/helper/resource"
 	"github.com/hashicorp/terraform/terraform"
@@ -137,7 +138,7 @@ func TestAccComputeV2FloatingIPAssociate_attachNew(t *testing.T) {
 
 func testAccCheckComputeV2FloatingIPAssociateDestroy(s *terraform.State) error {
 	config := testAccProvider.Meta().(*Config)
-	computeClient, err := config.computeV2Client(OS_REGION_NAME)
+	computeClient, err := config.computeV2HWClient(OS_REGION_NAME)
 	if err != nil {
 		return fmt.Errorf("Error creating OpenTelekomCloud compute client: %s", err)
 	}
@@ -156,7 +157,7 @@ func testAccCheckComputeV2FloatingIPAssociateDestroy(s *terraform.State) error {
 		if err != nil {
 			// If the error is a 404, then the instance does not exist,
 			// and therefore the floating IP cannot be associated to it.
-			if _, ok := err.(gophercloud.ErrDefault404); ok {
+			if _, ok := err.(golangsdk.ErrDefault404); ok {
 				return nil
 			}
 			return err
@@ -181,7 +182,7 @@ func testAccCheckComputeV2FloatingIPAssociateAssociated(
 	fip *floatingips.FloatingIP, instance *servers.Server, n int) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
 		config := testAccProvider.Meta().(*Config)
-		computeClient, err := config.computeV2Client(OS_REGION_NAME)
+		computeClient, err := config.computeV2HWClient(OS_REGION_NAME)
 
 		newInstance, err := servers.Get(computeClient, instance.ID).Extract()
 		if err != nil {

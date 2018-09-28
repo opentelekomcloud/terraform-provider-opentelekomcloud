@@ -7,14 +7,15 @@ import (
 	"github.com/hashicorp/terraform/helper/resource"
 	"github.com/hashicorp/terraform/terraform"
 
-	"github.com/gophercloud/gophercloud"
+	"github.com/huaweicloud/golangsdk"
 	//"github.com/gophercloud/gophercloud/openstack/blockstorage/v2/volumes"
-	"github.com/gophercloud/gophercloud/openstack/compute/v2/extensions/secgroups"
-	"github.com/gophercloud/gophercloud/openstack/compute/v2/extensions/volumeattach"
-	"github.com/gophercloud/gophercloud/openstack/compute/v2/servers"
+	"github.com/huaweicloud/golangsdk/openstack/compute/v2/extensions/secgroups"
+	"github.com/huaweicloud/golangsdk/openstack/compute/v2/extensions/volumeattach"
+	"github.com/huaweicloud/golangsdk/openstack/compute/v2/servers"
+
 	//"github.com/gophercloud/gophercloud/openstack/networking/v2/networks"
 	//"github.com/gophercloud/gophercloud/openstack/networking/v2/ports"
-	"github.com/gophercloud/gophercloud/pagination"
+	"github.com/huaweicloud/golangsdk/pagination"
 )
 
 // PASS
@@ -349,7 +350,7 @@ func TestAccComputeV2Instance_auto_recovery(t *testing.T) {
 }
 func testAccCheckComputeV2InstanceDestroy(s *terraform.State) error {
 	config := testAccProvider.Meta().(*Config)
-	computeClient, err := config.computeV2Client(OS_REGION_NAME)
+	computeClient, err := config.computeV2HWClient(OS_REGION_NAME)
 	if err != nil {
 		return fmt.Errorf("Error creating OpenTelekomCloud compute client: %s", err)
 	}
@@ -382,7 +383,7 @@ func testAccCheckComputeV2InstanceExists(n string, instance *servers.Server) res
 		}
 
 		config := testAccProvider.Meta().(*Config)
-		computeClient, err := config.computeV2Client(OS_REGION_NAME)
+		computeClient, err := config.computeV2HWClient(OS_REGION_NAME)
 		if err != nil {
 			return fmt.Errorf("Error creating OpenTelekomCloud compute client: %s", err)
 		}
@@ -405,14 +406,14 @@ func testAccCheckComputeV2InstanceExists(n string, instance *servers.Server) res
 func testAccCheckComputeV2InstanceDoesNotExist(n string, instance *servers.Server) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
 		config := testAccProvider.Meta().(*Config)
-		computeClient, err := config.computeV2Client(OS_REGION_NAME)
+		computeClient, err := config.computeV2HWClient(OS_REGION_NAME)
 		if err != nil {
 			return fmt.Errorf("Error creating OpenTelekomCloud compute client: %s", err)
 		}
 
 		_, err = servers.Get(computeClient, instance.ID).Extract()
 		if err != nil {
-			if _, ok := err.(gophercloud.ErrDefault404); ok {
+			if _, ok := err.(golangsdk.ErrDefault404); ok {
 				return nil
 			}
 			return err
@@ -466,7 +467,7 @@ func testAccCheckComputeV2InstanceTags(
 	instance *servers.Server, tag1, tag2 string) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
 		config := testAccProvider.Meta().(*Config)
-		computeClient, err := config.computeV2Client(OS_REGION_NAME)
+		computeClient, err := config.computeV2HWClient(OS_REGION_NAME)
 		if err != nil {
 			return err
 		}
@@ -500,7 +501,7 @@ func testAccCheckComputeV2InstanceNoTags(
 	instance *servers.Server) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
 		config := testAccProvider.Meta().(*Config)
-		computeClient, err := config.computeV2Client(OS_REGION_NAME)
+		computeClient, err := config.computeV2HWClient(OS_REGION_NAME)
 		if err != nil {
 			return err
 		}
@@ -527,7 +528,7 @@ func testAccCheckComputeV2InstanceBootVolumeAttachment(
 		var attachments []volumeattach.VolumeAttachment
 
 		config := testAccProvider.Meta().(*Config)
-		computeClient, err := config.computeV2Client(OS_REGION_NAME)
+		computeClient, err := config.computeV2HWClient(OS_REGION_NAME)
 		if err != nil {
 			return err
 		}

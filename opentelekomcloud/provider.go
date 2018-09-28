@@ -176,6 +176,10 @@ func Provider() terraform.ResourceProvider {
 			"opentelekomcloud_sfs_file_system_v2":         dataSourceSFSFileSystemV2(),
 			"opentelekomcloud_deh_host_v1":                dataSourceDEHHostV1(),
 			"opentelekomcloud_deh_server_v1":              dataSourceDEHServersV1(),
+			"opentelekomcloud_compute_bms_nic_v2":         dataSourceBMSNicV2(),
+			"opentelekomcloud_compute_bms_keypairs_v2":    dataSourceBMSKeyPairV2(),
+			"opentelekomcloud_compute_bms_flavors_v2":     dataSourceBMSFlavorV2(),
+			"opentelekomcloud_compute_bms_server_v2":      dataSourceBMSServersV2(),
 		},
 
 		ResourcesMap: map[string]*schema.Resource{
@@ -199,6 +203,8 @@ func Provider() terraform.ResourceProvider {
 			"opentelekomcloud_lb_pool_v2":                         resourcePoolV2(),
 			"opentelekomcloud_lb_member_v2":                       resourceMemberV2(),
 			"opentelekomcloud_lb_monitor_v2":                      resourceMonitorV2(),
+			"opentelekomcloud_nat_gateway_v2":                     resourceNatGatewayV2(),
+			"opentelekomcloud_nat_snat_rule_v2":                   resourceNatSnatRuleV2(),
 			"opentelekomcloud_networking_network_v2":              resourceNetworkingNetworkV2(),
 			"opentelekomcloud_networking_subnet_v2":               resourceNetworkingSubnetV2(),
 			"opentelekomcloud_networking_floatingip_v2":           resourceNetworkingFloatingIPV2(),
@@ -229,6 +235,10 @@ func Provider() terraform.ResourceProvider {
 			"opentelekomcloud_rts_software_config_v1":             resourceSoftwareConfigV1(),
 			"opentelekomcloud_rts_stack_v1":                       resourceRTSStackV1(),
 			"opentelekomcloud_sfs_file_system_v2":                 resourceSFSFileSystemV2(),
+			"opentelekomcloud_compute_bms_tags_v2":                resourceBMSTagsV2(),
+			"opentelekomcloud_as_configuration_v1":                resourceASConfiguration(),
+			"opentelekomcloud_as_group_v1":                        resourceASGroup(),
+			"opentelekomcloud_as_policy_v1":                       resourceASPolicy(),
 			"opentelekomcloud_deh_host_v1":                        resourceDeHHostV1(),
 		},
 
