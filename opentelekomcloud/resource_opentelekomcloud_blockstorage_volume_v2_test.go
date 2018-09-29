@@ -7,8 +7,8 @@ import (
 	"github.com/hashicorp/terraform/helper/resource"
 	"github.com/hashicorp/terraform/terraform"
 
-	"github.com/gophercloud/gophercloud"
-	"github.com/gophercloud/gophercloud/openstack/blockstorage/v2/volumes"
+	"github.com/huaweicloud/golangsdk"
+	"github.com/huaweicloud/golangsdk/openstack/blockstorage/v2/volumes"
 	"github.com/huaweicloud/golangsdk/openstack/evs/v2/tags"
 )
 
@@ -109,7 +109,7 @@ func TestAccBlockStorageV2Volume_timeout(t *testing.T) {
 
 func testAccCheckBlockStorageV2VolumeDestroy(s *terraform.State) error {
 	config := testAccProvider.Meta().(*Config)
-	blockStorageClient, err := config.blockStorageV2Client(OS_REGION_NAME)
+	blockStorageClient, err := config.loadEVSV2Client(OS_REGION_NAME)
 	if err != nil {
 		return fmt.Errorf("Error creating OpenTelekomCloud block storage client: %s", err)
 	}
@@ -140,7 +140,7 @@ func testAccCheckBlockStorageV2VolumeExists(n string, volume *volumes.Volume) re
 		}
 
 		config := testAccProvider.Meta().(*Config)
-		blockStorageClient, err := config.blockStorageV2Client(OS_REGION_NAME)
+		blockStorageClient, err := config.loadEVSV2Client(OS_REGION_NAME)
 		if err != nil {
 			return fmt.Errorf("Error creating OpenTelekomCloud block storage client: %s", err)
 		}
@@ -163,14 +163,14 @@ func testAccCheckBlockStorageV2VolumeExists(n string, volume *volumes.Volume) re
 func testAccCheckBlockStorageV2VolumeDoesNotExist(t *testing.T, n string, volume *volumes.Volume) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
 		config := testAccProvider.Meta().(*Config)
-		blockStorageClient, err := config.blockStorageV2Client(OS_REGION_NAME)
+		blockStorageClient, err := config.loadEVSV2Client(OS_REGION_NAME)
 		if err != nil {
 			return fmt.Errorf("Error creating OpenTelekomCloud block storage client: %s", err)
 		}
 
 		_, err = volumes.Get(blockStorageClient, volume.ID).Extract()
 		if err != nil {
-			if _, ok := err.(gophercloud.ErrDefault404); ok {
+			if _, ok := err.(golangsdk.ErrDefault404); ok {
 				return nil
 			}
 			return err
@@ -215,7 +215,7 @@ func testAccCheckBlockStorageV2VolumeTags(n string, k string, v string) resource
 		}
 
 		config := testAccProvider.Meta().(*Config)
-		blockStorageClient, err := config.blockStorageV2Client(OS_REGION_NAME)
+		blockStorageClient, err := config.loadEVSV2Client(OS_REGION_NAME)
 		if err != nil {
 			return fmt.Errorf("Error creating OpenTelekomCloud block storage client: %s", err)
 		}
