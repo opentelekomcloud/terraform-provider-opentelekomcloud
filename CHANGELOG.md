@@ -2,6 +2,8 @@
 
 FEATURES:
 
+* **New Data Source:** `opentelekomcloud_deh_host_v1` [GH-98]
+* **New Data Source:** `opentelekomcloud_deh_server_v1` [GH-98]
 * **New Data Source:** `opentelekomcloud_rts_software_config_v1` [GH-97]
 * **New Data Source:** `opentelekomcloud_rts_software_deployment_v1` [GH-97]
 * **New Data Source:** `opentelekomcloud_vpc_v1` ([#87](https://github.com/terraform-providers/terraform-provider-opentelekomcloud/issues/87))
@@ -10,6 +12,7 @@ FEATURES:
 * **New Data Source:** `opentelekomcloud_vpc_route_v2` ([#87](https://github.com/terraform-providers/terraform-provider-opentelekomcloud/issues/87))
 * **New Data Source:** `opentelekomcloud_vpc_route_ids_v2` ([#87](https://github.com/terraform-providers/terraform-provider-opentelekomcloud/issues/87))
 * **New Data Source:** `opentelekomcloud_vpc_peering_connection_v2` ([#87](https://github.com/terraform-providers/terraform-provider-opentelekomcloud/issues/87))
+* **New Resource:** `opentelekomcloud_deh_host_v1` [GH-98]
 * **New Resource:** `opentelekomcloud_rts_software_config_v1` [GH-97]
 * **New Resource:** `opentelekomcloud_rts_software_deployment_v1` [GH-97]
 * **New Resource:** `opentelekomcloud_vpc_v1` ([#87](https://github.com/terraform-providers/terraform-provider-opentelekomcloud/issues/87))

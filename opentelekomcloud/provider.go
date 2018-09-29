@@ -174,6 +174,8 @@ func Provider() terraform.ResourceProvider {
 			"opentelekomcloud_rts_stack_v1":               dataSourceRTSStackV1(),
 			"opentelekomcloud_rts_stack_resource_v1":      dataSourceRTSStackResourcesV1(),
 			"opentelekomcloud_sfs_file_system_v2":         dataSourceSFSFileSystemV2(),
+			"opentelekomcloud_deh_host_v1":                dataSourceDEHHostV1(),
+			"opentelekomcloud_deh_server_v1":              dataSourceDEHServersV1(),
 			"opentelekomcloud_compute_bms_nic_v2":         dataSourceBMSNicV2(),
 			"opentelekomcloud_compute_bms_keypairs_v2":    dataSourceBMSKeyPairV2(),
 			"opentelekomcloud_compute_bms_flavors_v2":     dataSourceBMSFlavorV2(),
@@ -237,6 +239,7 @@ func Provider() terraform.ResourceProvider {
 			"opentelekomcloud_as_configuration_v1":                resourceASConfiguration(),
 			"opentelekomcloud_as_group_v1":                        resourceASGroup(),
 			"opentelekomcloud_as_policy_v1":                       resourceASPolicy(),
+			"opentelekomcloud_deh_host_v1":                        resourceDeHHostV1(),
 		},
 
 		ConfigureFunc: configureProvider,
