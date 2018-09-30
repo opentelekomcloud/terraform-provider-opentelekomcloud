@@ -240,6 +240,8 @@ func Provider() terraform.ResourceProvider {
 			"opentelekomcloud_as_group_v1":                        resourceASGroup(),
 			"opentelekomcloud_as_policy_v1":                       resourceASPolicy(),
 			"opentelekomcloud_deh_host_v1":                        resourceDeHHostV1(),
+			"opentelekomcloud_networking_vip_v2":                  resourceNetworkingVIPV2(),
+			"opentelekomcloud_networking_vip_associate_v2":        resourceNetworkingVIPAssociateV2(),
 		},
 
 		ConfigureFunc: configureProvider,
