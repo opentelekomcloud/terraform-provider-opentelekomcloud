@@ -1,31 +1,25 @@
 package opentelekomcloud
 
 import (
-	"testing"
-
 	"github.com/hashicorp/terraform/helper/resource"
+	"testing"
 )
 
-// PASS
-func TestAccBlockStorageV2Volume_importBasic(t *testing.T) {
-	resourceName := "opentelekomcloud_blockstorage_volume_v2.volume_1"
+func TestAccOTCDedicatedHostV1_importBasic(t *testing.T) {
+	resourceName := "opentelekomcloud_deh_host_v1.deh1"
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
 		Providers:    testAccProviders,
-		CheckDestroy: testAccCheckBlockStorageV2VolumeDestroy,
+		CheckDestroy: testAccCheckOTCDeHV1Destroy,
 		Steps: []resource.TestStep{
 			resource.TestStep{
-				Config: testAccBlockStorageV2Volume_basic,
+				Config: testAccDeHV1_basic,
 			},
-
 			resource.TestStep{
 				ResourceName:      resourceName,
 				ImportState:       true,
 				ImportStateVerify: true,
-				ImportStateVerifyIgnore: []string{
-					"cascade",
-				},
 			},
 		},
 	})
