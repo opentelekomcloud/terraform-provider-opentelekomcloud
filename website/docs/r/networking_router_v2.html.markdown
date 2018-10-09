@@ -3,12 +3,12 @@ layout: "opentelekomcloud"
 page_title: "OpenTelekomCloud: opentelekomcloud_networking_router_v2"
 sidebar_current: "docs-opentelekomcloud-resource-networking-router-v2"
 description: |-
-  Manages a V2 router resource within OpenTelekomCloud.
+  Manages a V2 router resource within OpenTelekomCloud. The router is the top-level resource for the VPC within OpenTelekomCloud.
 ---
 
 # opentelekomcloud\_networking\_router_v2
 
-Manages a V2 router resource within OpenTelekomCloud.
+Manages a V2 router resource within OpenTelekomCloud. The router is the top-level resource for the VPC within OpenTelekomCloud.
 
 ## Example Usage
 
