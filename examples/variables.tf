@@ -73,3 +73,8 @@ variable "endpoint_email" {
 variable "endpoint_sms" {
   default = "+8613600000000"
 }
+
+variable "to_project_id" {
+  # If you don't fill this in, you will be prompted for it
+  #default = ["your_ToProjectId"]
+}

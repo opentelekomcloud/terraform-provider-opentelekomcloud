@@ -473,6 +473,13 @@ func (c *Config) sfsV2Client(region string) (*golangsdk.ServiceClient, error) {
 	})
 }
 
+func (c *Config) vbsV2Client(region string) (*golangsdk.ServiceClient, error) {
+	return huaweisdk.NewVBS(c.HwClient, golangsdk.EndpointOpts{
+		Region:       c.determineRegion(region),
+		Availability: c.getHwEndpointType(),
+	})
+}
+
 //computeV2HWClient used to access the v2 bms Services i.e. flavor, nic, keypair.
 func (c *Config) computeV2HWClient(region string) (*golangsdk.ServiceClient, error) {
 	return huaweisdk.NewComputeV2(c.HwClient, golangsdk.EndpointOpts{

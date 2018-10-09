@@ -176,6 +176,8 @@ func Provider() terraform.ResourceProvider {
 			"opentelekomcloud_sfs_file_system_v2":         dataSourceSFSFileSystemV2(),
 			"opentelekomcloud_deh_host_v1":                dataSourceDEHHostV1(),
 			"opentelekomcloud_deh_server_v1":              dataSourceDEHServersV1(),
+			"opentelekomcloud_vbs_backup_policy_v2":       dataSourceVBSBackupPolicyV2(),
+			"opentelekomcloud_vbs_backup_v2":              dataSourceVBSBackupV2(),
 			"opentelekomcloud_compute_bms_nic_v2":         dataSourceBMSNicV2(),
 			"opentelekomcloud_compute_bms_keypairs_v2":    dataSourceBMSKeyPairV2(),
 			"opentelekomcloud_compute_bms_flavors_v2":     dataSourceBMSFlavorV2(),
@@ -248,6 +250,9 @@ func Provider() terraform.ResourceProvider {
 			"opentelekomcloud_networking_vip_associate_v2":        resourceNetworkingVIPAssociateV2(),
 			"opentelekomcloud_dms_queue_v1":                       resourceDmsQueuesV1(),
 			"opentelekomcloud_dms_group_v1":                       resourceDmsGroupsV1(),
+			"opentelekomcloud_vbs_backup_policy_v2":               resourceVBSBackupPolicyV2(),
+			"opentelekomcloud_vbs_backup_v2":                      resourceVBSBackupV2(),
+			"opentelekomcloud_vbs_backup_share_v2":                resourceVBSBackupShareV2(),
 		},
 
 		ConfigureFunc: configureProvider,
