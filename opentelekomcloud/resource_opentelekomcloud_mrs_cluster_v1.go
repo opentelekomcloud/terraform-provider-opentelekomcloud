@@ -24,7 +24,7 @@ func resourceMRSClusterV1() *schema.Resource {
 		},
 
 		Timeouts: &schema.ResourceTimeout{
-			Create: schema.DefaultTimeout(20 * time.Minute),
+			Create: schema.DefaultTimeout(30 * time.Minute),
 			Delete: schema.DefaultTimeout(5 * time.Minute),
 		},
 
@@ -389,8 +389,8 @@ func getAllClusterJobs(d *schema.ResourceData) []cluster.JobOpts {
 			ShutdownCluster:         job["shutdown_cluster"].(bool),
 			FileAction:              job["file_action"].(string),
 			SubmitJobOnceClusterRun: job["submit_job_once_cluster_run"].(bool),
-			Hql:            job["hql"].(string),
-			HiveScriptPath: job["hive_script_path"].(string),
+			Hql:                     job["hql"].(string),
+			HiveScriptPath:          job["hive_script_path"].(string),
 		}
 		jobOpts = append(jobOpts, v)
 	}
