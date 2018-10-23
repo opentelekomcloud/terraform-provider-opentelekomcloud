@@ -1072,6 +1072,18 @@
 			"revisionTime": "2018-03-15T04:07:47Z"
 		},
 		{
+			"checksumSHA1": "tygtE2L8EFD/6t9LzeJAKj3bKR4=",
+			"path": "github.com/huaweicloud/golangsdk/openstack/mrs/v1/cluster",
+			"revision": "02234c041f693ec39067f110661bb38680003a7c",
+			"revisionTime": "2018-09-28T08:16:35Z"
+		},
+		{
+			"checksumSHA1": "k2AkFhzGVeTEMOLzm2v03qELRDI=",
+			"path": "github.com/huaweicloud/golangsdk/openstack/mrs/v1/job",
+			"revision": "02234c041f693ec39067f110661bb38680003a7c",
+			"revisionTime": "2018-09-28T08:16:35Z"
+		},
+		{
 			"checksumSHA1": "S03meuz/zX857hIqfpgyCUfrcFs=",
 			"path": "github.com/huaweicloud/golangsdk/openstack/networking/v1/bandwidths",
 			"revision": "2b39b60199b765fd646f6035933aa6dc47e83945",
