@@ -523,3 +523,10 @@ func (c *Config) dmsV1Client(region string) (*golangsdk.ServiceClient, error) {
 		Availability: c.getHwEndpointType(),
 	})
 }
+
+func (c *Config) MrsV1Client(region string) (*golangsdk.ServiceClient, error) {
+	return huaweisdk.NewMapReduceV1(c.HwClient, golangsdk.EndpointOpts{
+		Region:       c.determineRegion(region),
+		Availability: c.getHwEndpointType(),
+	})
+}
