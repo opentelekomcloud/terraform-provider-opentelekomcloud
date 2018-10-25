@@ -48,6 +48,9 @@ func testAccCheckMRSV1JobDestroy(s *terraform.State) error {
 			if _, ok := err.(golangsdk.ErrDefault400); ok {
 				return nil
 			}
+			if _, ok := err.(golangsdk.ErrDefault500); ok {
+				continue
+			}
 			return fmt.Errorf("job still exists. err : %s", err)
 		}
 	}
@@ -82,7 +85,7 @@ func testAccCheckMRSV1JobExists(n string, jobGet *job.Job) resource.TestCheckFun
 		}
 
 		*jobGet = *found
-		time.Sleep(5 * time.Second)
+		time.Sleep(15 * time.Second)
 
 		return nil
 	}
