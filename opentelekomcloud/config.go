@@ -377,13 +377,6 @@ func (c *Config) objectStorageV1Client(region string) (*gophercloud.ServiceClien
 	})
 }
 
-func (c *Config) loadELBClient(region string) (*golangsdk.ServiceClient, error) {
-	return huaweisdk.NewElbV1(c.HwClient, golangsdk.EndpointOpts{
-		Region:       c.determineRegion(region),
-		Availability: c.getHwEndpointType(),
-	}, "elb")
-}
-
 func (c *Config) SmnV2Client(region string) (*golangsdk.ServiceClient, error) {
 	return huaweisdk.NewSmnServiceV2(c.HwClient, golangsdk.EndpointOpts{
 		Region:       c.determineRegion(region),
@@ -526,6 +519,13 @@ func (c *Config) dmsV1Client(region string) (*golangsdk.ServiceClient, error) {
 
 func (c *Config) MrsV1Client(region string) (*golangsdk.ServiceClient, error) {
 	return huaweisdk.NewMapReduceV1(c.HwClient, golangsdk.EndpointOpts{
+		Region:       c.determineRegion(region),
+		Availability: c.getHwEndpointType(),
+	})
+}
+
+func (c *Config) elbV1Client(region string) (*golangsdk.ServiceClient, error) {
+	return huaweisdk.NewELBV1(c.HwClient, golangsdk.EndpointOpts{
 		Region:       c.determineRegion(region),
 		Availability: c.getHwEndpointType(),
 	})
