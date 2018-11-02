@@ -178,7 +178,7 @@ func resourceEListener() *schema.Resource {
 
 func resourceEListenerCreate(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*Config)
-	client, err := config.loadELBClient(GetRegion(d, config))
+	client, err := config.elbV1Client(GetRegion(d, config))
 	if err != nil {
 		return fmt.Errorf("Error creating OpenTelekomCloud networking client: %s", err)
 	}
@@ -226,7 +226,7 @@ func resourceEListenerCreate(d *schema.ResourceData, meta interface{}) error {
 
 func resourceEListenerRead(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*Config)
-	client, err := config.loadELBClient(GetRegion(d, config))
+	client, err := config.elbV1Client(GetRegion(d, config))
 	if err != nil {
 		return fmt.Errorf("Error creating OpenTelekomCloud networking client: %s", err)
 	}
@@ -266,7 +266,7 @@ func resourceEListenerRead(d *schema.ResourceData, meta interface{}) error {
 
 func resourceEListenerUpdate(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*Config)
-	client, err := config.loadELBClient(GetRegion(d, config))
+	client, err := config.elbV1Client(GetRegion(d, config))
 	if err != nil {
 		return fmt.Errorf("Error creating OpenTelekomCloud networking client: %s", err)
 	}
@@ -317,7 +317,7 @@ func resourceEListenerUpdate(d *schema.ResourceData, meta interface{}) error {
 
 func resourceEListenerDelete(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*Config)
-	client, err := config.loadELBClient(GetRegion(d, config))
+	client, err := config.elbV1Client(GetRegion(d, config))
 	if err != nil {
 		return fmt.Errorf("Error creating OpenTelekomCloud networking client: %s", err)
 	}

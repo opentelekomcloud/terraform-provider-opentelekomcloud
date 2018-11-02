@@ -94,7 +94,7 @@ func resourceHealth() *schema.Resource {
 
 func resourceHealthCreate(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*Config)
-	client, err := config.loadELBClient(GetRegion(d, config))
+	client, err := config.elbV1Client(GetRegion(d, config))
 	if err != nil {
 		return fmt.Errorf("Error creating OpenTelekomCloud networking client: %s", err)
 	}
@@ -124,7 +124,7 @@ func resourceHealthCreate(d *schema.ResourceData, meta interface{}) error {
 
 func resourceHealthRead(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*Config)
-	networkingClient, err := config.loadELBClient(GetRegion(d, config))
+	networkingClient, err := config.elbV1Client(GetRegion(d, config))
 	if err != nil {
 		return fmt.Errorf("Error creating OpenTelekomCloud networking client: %s", err)
 	}
@@ -152,7 +152,7 @@ func resourceHealthRead(d *schema.ResourceData, meta interface{}) error {
 
 func resourceHealthUpdate(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*Config)
-	networkingClient, err := config.loadELBClient(GetRegion(d, config))
+	networkingClient, err := config.elbV1Client(GetRegion(d, config))
 	if err != nil {
 		return fmt.Errorf("Error creating OpenTelekomCloud networking client: %s", err)
 	}
@@ -192,7 +192,7 @@ func resourceHealthUpdate(d *schema.ResourceData, meta interface{}) error {
 
 func resourceHealthDelete(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*Config)
-	client, err := config.loadELBClient(GetRegion(d, config))
+	client, err := config.elbV1Client(GetRegion(d, config))
 	if err != nil {
 		return fmt.Errorf("Error creating OpenTelekomCloud networking client: %s", err)
 	}
