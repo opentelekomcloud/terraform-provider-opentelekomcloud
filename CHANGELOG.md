@@ -1,18 +1,18 @@
-## 1.3.0 (Unreleased)
+## 1.3.0 (November 05, 2018)
 
 FEATURES:
 
-* **New Data Source:** `opentelekomcloud_vbs_backup_policy_v2` [GH-121]
-* **New Data Source:** `opentelekomcloud_vbs_backup_v2` [GH-121]
-* **New Resource:** `opentelekomcloud_vbs_backup_policy_v2` [GH-121]
-* **New Resource:** `opentelekomcloud_vbs_backup_v2` [GH-121]
-* **New Resource:** `opentelekomcloud_vbs_backup_share_v2` [GH-121]
-* **New Resource:** `opentelekomcloud_mrs_cluster_v1` [GH-126]
-* **New Resource:** `opentelekomcloud_mrs_job_v1` [GH-126]
+* **New Data Source:** `opentelekomcloud_vbs_backup_policy_v2` ([#121](https://github.com/terraform-providers/terraform-provider-opentelekomcloud/issues/121))
+* **New Data Source:** `opentelekomcloud_vbs_backup_v2` ([#121](https://github.com/terraform-providers/terraform-provider-opentelekomcloud/issues/121))
+* **New Resource:** `opentelekomcloud_vbs_backup_policy_v2` ([#121](https://github.com/terraform-providers/terraform-provider-opentelekomcloud/issues/121))
+* **New Resource:** `opentelekomcloud_vbs_backup_v2` ([#121](https://github.com/terraform-providers/terraform-provider-opentelekomcloud/issues/121))
+* **New Resource:** `opentelekomcloud_vbs_backup_share_v2` ([#121](https://github.com/terraform-providers/terraform-provider-opentelekomcloud/issues/121))
+* **New Resource:** `opentelekomcloud_mrs_cluster_v1` ([#126](https://github.com/terraform-providers/terraform-provider-opentelekomcloud/issues/126))
+* **New Resource:** `opentelekomcloud_mrs_job_v1` ([#126](https://github.com/terraform-providers/terraform-provider-opentelekomcloud/issues/126))
 
 BUG FIXES:
 
-* `resource/opentelekomcloud_elb_loadbalancer`: Fix ELB client error [GH-129]
+* `resource/opentelekomcloud_elb_loadbalancer`: Fix ELB client error ([#129](https://github.com/terraform-providers/terraform-provider-opentelekomcloud/issues/129))
 
 ## 1.2.0 (October 01, 2018)
 
