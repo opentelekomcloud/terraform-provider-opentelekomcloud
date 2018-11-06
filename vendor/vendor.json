@@ -910,10 +910,10 @@
 			"revisionTime": "2018-09-21T09:37:12Z"
 		},
 		{
-			"checksumSHA1": "ZEHpHlp6ky+VALhGAkYsn60P+Zw=",
+			"checksumSHA1": "sAFxIo3Pdgy9PBf9yIMIWIll/7I=",
 			"path": "github.com/huaweicloud/golangsdk/openstack/compute/v2/extensions/bootfromvolume",
-			"revision": "1d8a2d2776a596972047b59404b2e898847fbaea",
-			"revisionTime": "2018-09-21T09:37:12Z"
+			"revision": "36f47a72fa74b062075743f8baacbd59312a9c05",
+			"revisionTime": "2018-11-06T08:57:43Z"
 		},
 		{
 			"checksumSHA1": "DKXl+ZjfQJSOJoBty46iJ0skmnk=",
@@ -1494,5 +1494,5 @@
 			"versionExact": "v1.6.1"
 		}
 	],
-	"rootPath": "github.com/terraform-providers/elb/terraform-provider-opentelekomcloud"
+	"rootPath": "github.com/terraform-providers/terraform-provider-opentelekomcloud"
 }
