@@ -37,6 +37,26 @@ func TestAccComputeV2BmsInstance_basic(t *testing.T) {
 	})
 }
 
+func TestAccComputeV2BmsInstance_bootFromVolumeImage(t *testing.T) {
+	var instance servers.Server
+
+	resource.Test(t, resource.TestCase{
+		PreCheck:     func() { testAccBmsFlavorPreCheck(t) },
+		Providers:    testAccProviders,
+		CheckDestroy: testAccCheckComputeV2BmsInstanceDestroy,
+		Steps: []resource.TestStep{
+			resource.TestStep{
+				Config: testAccComputeV2BmsInstance_bootFromVolumeImage,
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckComputeV2BmsInstanceExists("opentelekomcloud_compute_bms_server_v2.instance_1", &instance),
+					resource.TestCheckResourceAttr(
+						"opentelekomcloud_compute_bms_server_v2.instance_1", "name", "instance_1"),
+				),
+			},
+		},
+	})
+}
+
 func TestAccComputeV2BmsInstance_timeout(t *testing.T) {
 	var instance servers.Server
 	resource.Test(t, resource.TestCase{
@@ -157,3 +177,30 @@ resource "opentelekomcloud_compute_bms_server_v2" "instance_1" {
   }
 }
 `, OS_AVAILABILITY_ZONE, OS_NETWORK_ID)
+
+var testAccComputeV2BmsInstance_bootFromVolumeImage = fmt.Sprintf(`
+resource "opentelekomcloud_compute_bms_server_v2" "instance_1" {
+  name = "instance_1"
+  flavor_id = "physical.h2.large"
+  flavor_name = "physical.h2.large"
+  security_groups = ["default"]
+  availability_zone = "%s"
+  network {
+    uuid = "%s"
+  }
+
+  block_device {
+	uuid = "%s"
+	source_type = "image"
+	volume_type = "SATA"
+	volume_size = 100
+	boot_index = 0
+	destination_type = "volume"
+	delete_on_termination = true
+	device_name = "/dev/sda"
+  }
+  timeouts {
+    create = "20m"
+  }
+}
+`, OS_AVAILABILITY_ZONE, OS_NETWORK_ID, OS_IMAGE_ID)
