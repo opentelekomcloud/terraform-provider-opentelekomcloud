@@ -389,7 +389,7 @@ func resourceComputeBMSInstanceV2Create(d *schema.ResourceData, meta interface{}
 			server.ID, err)
 	}
 
-	return resourceComputeInstanceV2Read(d, meta)
+	return resourceComputeBMSInstanceV2Read(d, meta)
 }
 
 func resourceComputeBMSInstanceV2Read(d *schema.ResourceData, meta interface{}) error {
@@ -633,7 +633,7 @@ func resourceComputeBMSInstanceV2Update(d *schema.ResourceData, meta interface{}
 		}
 	}
 
-	return resourceComputeInstanceV2Read(d, meta)
+	return resourceComputeBMSInstanceV2Read(d, meta)
 }
 
 func resourceComputeBMSInstanceV2Delete(d *schema.ResourceData, meta interface{}) error {
