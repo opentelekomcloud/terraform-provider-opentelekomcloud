@@ -960,8 +960,8 @@
 		{
 			"checksumSHA1": "SYr7On5J8EzR7s+ow6P43SD3XFE=",
 			"path": "github.com/huaweicloud/golangsdk/openstack/compute/v2/images",
-			"revision": "1d8a2d2776a596972047b59404b2e898847fbaea",
-			"revisionTime": "2018-09-21T09:37:12Z"
+			"revision": "638d88c676a714b1c5c56706f8c481a6ab4a872d",
+			"revisionTime": "2018-11-06T10:11:40Z"
 		},
 		{
 			"checksumSHA1": "gO5pUieovYgj/11Tg6EY3VER5mE=",
@@ -1494,5 +1494,5 @@
 			"versionExact": "v1.6.1"
 		}
 	],
-	"rootPath": "github.com/terraform-providers/elb/terraform-provider-opentelekomcloud"
+	"rootPath": "github.com/terraform-providers/terraform-provider-opentelekomcloud"
 }
