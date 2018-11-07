@@ -183,6 +183,7 @@ resource "opentelekomcloud_compute_bms_server_v2" "instance_1" {
   name = "instance_1"
   flavor_id = "physical.h2.large"
   flavor_name = "physical.h2.large"
+  image_id = "d50b4060-92cc-4d38-ae88-bd91bc3df00f"
   security_groups = ["default"]
   availability_zone = "%s"
   network {
@@ -190,7 +191,7 @@ resource "opentelekomcloud_compute_bms_server_v2" "instance_1" {
   }
 
   block_device {
-	uuid = "%s"
+	uuid = "d50b4060-92cc-4d38-ae88-bd91bc3df00f"
 	source_type = "image"
 	volume_type = "SATA"
 	volume_size = 100
@@ -203,4 +204,4 @@ resource "opentelekomcloud_compute_bms_server_v2" "instance_1" {
     create = "20m"
   }
 }
-`, OS_AVAILABILITY_ZONE, OS_NETWORK_ID, OS_IMAGE_ID)
+`, OS_AVAILABILITY_ZONE, OS_NETWORK_ID)
