@@ -75,7 +75,7 @@ func dataSourceBMSServersV2() *schema.Resource {
 				Type:     schema.TypeString,
 				Computed: true,
 			},
-			"addresses": &schema.Schema{
+			"network": &schema.Schema{
 				Type:     schema.TypeList,
 				Computed: true,
 				Elem: &schema.Resource{
@@ -201,7 +201,7 @@ func dataSourceBMSServersV2Read(d *schema.ResourceData, meta interface{}) error 
 	d.Set("host_status", server.HostStatus)
 	d.Set("host_id", server.HostID)
 	d.Set("flavor_id", server.Flavor.ID)
-	d.Set("addresses", server.Addresses)
+	d.Set("network", server.Addresses)
 	d.Set("metadata", server.Metadata)
 	d.Set("tenant_id", server.TenantID)
 	d.Set("image_id", server.Image.ID)
@@ -223,7 +223,7 @@ func dataSourceBMSServersV2Read(d *schema.ResourceData, meta interface{}) error 
 	if err != nil {
 		return err
 	}
-	if err := d.Set("addresses", networks); err != nil {
+	if err := d.Set("network", networks); err != nil {
 		return fmt.Errorf("[DEBUG] Error saving network to state for OpenTelekomCloud server (%s): %s", d.Id(), err)
 	}
 
