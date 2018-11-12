@@ -384,12 +384,6 @@ func (c *Config) SmnV2Client(region string) (*golangsdk.ServiceClient, error) {
 	})
 }
 
-func (c *Config) rdsV1Client(region string) (*golangsdk.ServiceClient, error) {
-	return huaweisdk.NewRdsServiceV1(c.HwClient, golangsdk.EndpointOpts{
-		Region:       c.determineRegion(region),
-		Availability: c.getHwEndpointType(),
-	})
-}
 func (c *Config) getEndpointType() gophercloud.Availability {
 	if c.EndpointType == "internal" || c.EndpointType == "internalURL" {
 		return gophercloud.AvailabilityInternal
@@ -526,6 +520,13 @@ func (c *Config) MrsV1Client(region string) (*golangsdk.ServiceClient, error) {
 
 func (c *Config) elbV1Client(region string) (*golangsdk.ServiceClient, error) {
 	return huaweisdk.NewELBV1(c.HwClient, golangsdk.EndpointOpts{
+		Region:       c.determineRegion(region),
+		Availability: c.getHwEndpointType(),
+	})
+}
+
+func (c *Config) rdsV1Client(region string) (*golangsdk.ServiceClient, error) {
+	return huaweisdk.NewRDSV1(c.HwClient, golangsdk.EndpointOpts{
 		Region:       c.determineRegion(region),
 		Availability: c.getHwEndpointType(),
 	})
