@@ -240,6 +240,16 @@ func resourceComputeInstanceV2() *schema.Resource {
 							Optional: true,
 							ForceNew: true,
 						},
+						"device_name": &schema.Schema{
+							Type:     schema.TypeString,
+							Optional: true,
+							ForceNew: true,
+						},
+						"volume_type": &schema.Schema{
+							Type:     schema.TypeString,
+							Optional: true,
+							ForceNew: true,
+						},
 					},
 				},
 			},
@@ -975,6 +985,8 @@ func resourceInstanceBlockDevicesV2(d *schema.ResourceData, bds []interface{}) (
 			BootIndex:           bdM["boot_index"].(int),
 			DeleteOnTermination: bdM["delete_on_termination"].(bool),
 			GuestFormat:         bdM["guest_format"].(string),
+			VolumeType:          bdM["volume_type"].(string),
+			DeviceName:          bdM["device_name"].(string),
 		}
 
 		sourceType := bdM["source_type"].(string)
