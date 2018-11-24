@@ -195,8 +195,8 @@ func Update(c *golangsdk.ServiceClient, id string, opts UpdateOpts) (r UpdateRes
 }
 
 // Delete will permanently delete a particular LoadBalancer based on its unique ID.
-func Delete(c *golangsdk.ServiceClient, id string) (r DeleteResult) {
-	_, r.Err = c.Delete2(resourceURL(c, id), &r.Body, &golangsdk.RequestOpts{
+func Delete(c *golangsdk.ServiceClient, id string, keepEIP bool) (r DeleteResult) {
+	_, r.Err = c.Delete2(deleteURL(c, id, keepEIP), &r.Body, &golangsdk.RequestOpts{
 		OkCodes: []int{200},
 	})
 	return

@@ -7,7 +7,6 @@ import (
 	"strings"
 
 	"github.com/Unknwon/com"
-	"github.com/huaweicloud/golangsdk"
 	"github.com/hashicorp/terraform/helper/resource"
 	"github.com/hashicorp/terraform/helper/schema"
 	"github.com/huaweicloud/golangsdk"
@@ -111,15 +110,6 @@ func FormatHeaders(headers http.Header, seperator string) string {
 
 func checkForRetryableError(err error) *resource.RetryError {
 	switch errCode := err.(type) {
-	case golangsdk.ErrDefault500:
-		return resource.RetryableError(err)
-	case golangsdk.ErrUnexpectedResponseCode:
-		switch errCode.Actual {
-		case 409, 503:
-			return resource.RetryableError(err)
-		default:
-			return resource.NonRetryableError(err)
-		}
 	case golangsdk.ErrDefault500:
 		return resource.RetryableError(err)
 	case golangsdk.ErrUnexpectedResponseCode:

@@ -270,8 +270,9 @@ func resourceLoadBalancerV2Delete(d *schema.ResourceData, meta interface{}) erro
 func resourceLoadBalancerV2SecurityGroups(networkingClient *golangsdk.ServiceClient, vipPortID string, d *schema.ResourceData) error {
 	if vipPortID != "" {
 		if _, ok := d.GetOk("security_group_ids"); ok {
+			securityGroups := resourcePortSecurityGroupsV2(d)
 			updateOpts := ports.UpdateOpts{
-				SecurityGroups: resourcePortSecurityGroupsV2(d),
+				SecurityGroups: &securityGroups,
 			}
 
 			log.Printf("[DEBUG] Adding security groups to loadbalancer "+

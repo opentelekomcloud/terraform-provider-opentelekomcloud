@@ -205,7 +205,7 @@ func (c *Config) newhwClient(transport *http.Transport, osDebug bool) error {
 		}
 	}
 
-	client, err := huaweisdk.NewClient(ao.IdentityEndpoint)
+	client, err := huaweisdk.NewClient(ao.GetIdentityEndpoint())
 	if err != nil {
 		return err
 	}
@@ -260,9 +260,9 @@ func (c *Config) computeS3conn(region string) (*s3.S3, error) {
 		return nil, fmt.Errorf("Missing credentials for Swift S3 Provider, need access_key and secret_key values for provider.")
 	}
 
-	client, err := openstack.NewImageServiceV2(c.OsClient, golangsdk.EndpointOpts{
+	client, err := huaweisdk.NewImageServiceV2(c.HwClient, golangsdk.EndpointOpts{
 		Region:       c.determineRegion(region),
-		Availability: c.getEndpointType(),
+		Availability: c.getHwEndpointType(),
 	})
 	// Bit of a hack, seems the only way to compute this.
 	endpoint := strings.Replace(client.Endpoint, "//ims", "//obs", 1)
