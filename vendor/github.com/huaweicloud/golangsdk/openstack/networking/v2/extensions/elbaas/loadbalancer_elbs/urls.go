@@ -14,3 +14,10 @@ func rootURL(c *golangsdk.ServiceClient) string {
 func resourceURL(c *golangsdk.ServiceClient, id string) string {
 	return c.ServiceURL(rootPath, resourcePath, id)
 }
+
+func deleteURL(c *golangsdk.ServiceClient, id string, keepEIP bool) string {
+	if keepEIP {
+		return c.ServiceURL(rootPath, resourcePath, id, "keep-eip")
+	}
+	return c.ServiceURL(rootPath, resourcePath, id)
+}

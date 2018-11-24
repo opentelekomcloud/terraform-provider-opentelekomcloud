@@ -221,7 +221,7 @@ func resourceELoadBalancerDelete(d *schema.ResourceData, meta interface{}) error
 
 	id := d.Id()
 	log.Printf("[DEBUG] Deleting loadbalancer %s", d.Id())
-	job, err := loadbalancer_elbs.Delete(client, id).ExtractJobResponse()
+	job, err := loadbalancer_elbs.Delete(client, id, false).ExtractJobResponse()
 	if err != nil {
 		return err
 	}
