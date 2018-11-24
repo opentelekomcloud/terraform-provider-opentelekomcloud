@@ -11,7 +11,7 @@ package opentelekomcloud
 
 import (
 	"fmt"
-	"github.com/gophercloud/gophercloud/openstack/compute/v2/servers"
+	"github.com/huaweicloud/golangsdk/openstack/compute/v2/servers"
 	"github.com/hashicorp/terraform/helper/schema"
 	"log"
 )

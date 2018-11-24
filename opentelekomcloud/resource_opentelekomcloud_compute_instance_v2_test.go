@@ -8,13 +8,13 @@ import (
 	"github.com/hashicorp/terraform/terraform"
 
 	"github.com/huaweicloud/golangsdk"
-	//"github.com/gophercloud/gophercloud/openstack/blockstorage/v2/volumes"
+	//"github.com/huaweicloud/golangsdk/openstack/blockstorage/v2/volumes"
 	"github.com/huaweicloud/golangsdk/openstack/compute/v2/extensions/secgroups"
 	"github.com/huaweicloud/golangsdk/openstack/compute/v2/extensions/volumeattach"
 	"github.com/huaweicloud/golangsdk/openstack/compute/v2/servers"
 
-	//"github.com/gophercloud/gophercloud/openstack/networking/v2/networks"
-	//"github.com/gophercloud/gophercloud/openstack/networking/v2/ports"
+	//"github.com/huaweicloud/golangsdk/openstack/networking/v2/networks"
+	//"github.com/huaweicloud/golangsdk/openstack/networking/v2/ports"
 	"github.com/huaweicloud/golangsdk/pagination"
 )
 
