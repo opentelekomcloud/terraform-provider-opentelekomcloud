@@ -9,9 +9,9 @@ import (
 
 	"github.com/huaweicloud/golangsdk/openstack/networking/v2/extensions/layer3/floatingips"
 	"github.com/huaweicloud/golangsdk/openstack/networking/v2/extensions/layer3/routers"
+	"github.com/huaweicloud/golangsdk/openstack/networking/v2/extensions/snatrules"
 	"github.com/huaweicloud/golangsdk/openstack/networking/v2/networks"
 	"github.com/huaweicloud/golangsdk/openstack/networking/v2/subnets"
-	"github.com/huaweicloud/golangsdk/openstack/networking/v2/extensions/snatrules"
 )
 
 func TestAccNatSnatRule_basic(t *testing.T) {

@@ -11,8 +11,8 @@ package opentelekomcloud
 
 import (
 	"fmt"
-	"github.com/huaweicloud/golangsdk/openstack/compute/v2/servers"
 	"github.com/hashicorp/terraform/helper/schema"
+	"github.com/huaweicloud/golangsdk/openstack/compute/v2/servers"
 	"log"
 )
 

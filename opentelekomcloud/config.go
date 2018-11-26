@@ -13,13 +13,13 @@ import (
 	"github.com/aws/aws-sdk-go/aws/awserr"
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/s3"
-	"github.com/huaweicloud/golangsdk/openstack/objectstorage/v1/swauth"
 	"github.com/hashicorp/errwrap"
 	"github.com/hashicorp/go-cleanhttp"
 	"github.com/hashicorp/terraform/helper/pathorcontents"
 	"github.com/hashicorp/terraform/terraform"
 	"github.com/huaweicloud/golangsdk"
 	huaweisdk "github.com/huaweicloud/golangsdk/openstack"
+	"github.com/huaweicloud/golangsdk/openstack/objectstorage/v1/swauth"
 )
 
 type Config struct {
@@ -177,9 +177,8 @@ func (c *Config) newS3Session(osDebug bool) error {
 	return nil
 }
 
-
 func (c *Config) newhwClient(transport *http.Transport, osDebug bool) error {
-        var ao golangsdk.AuthOptionsProvider
+	var ao golangsdk.AuthOptionsProvider
 
 	if c.AccessKey != "" && c.SecretKey != "" {
 		ao = golangsdk.AKSKAuthOptions{
@@ -350,7 +349,6 @@ func (c *Config) SmnV2Client(region string) (*golangsdk.ServiceClient, error) {
 		Availability: c.getHwEndpointType(),
 	})
 }
-
 
 func (c *Config) loadCESClient(region string) (*golangsdk.ServiceClient, error) {
 	return huaweisdk.NewCESClient(c.HwClient, golangsdk.EndpointOpts{

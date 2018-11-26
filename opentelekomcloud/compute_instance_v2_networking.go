@@ -14,12 +14,12 @@ import (
 	"log"
 	"os"
 
+	"github.com/hashicorp/terraform/helper/schema"
 	"github.com/huaweicloud/golangsdk"
 	"github.com/huaweicloud/golangsdk/openstack/compute/v2/extensions/tenantnetworks"
+	"github.com/huaweicloud/golangsdk/openstack/compute/v2/servers"
 	"github.com/huaweicloud/golangsdk/openstack/networking/v2/networks"
 	"github.com/huaweicloud/golangsdk/openstack/networking/v2/ports"
-	"github.com/hashicorp/terraform/helper/schema"
-	"github.com/huaweicloud/golangsdk/openstack/compute/v2/servers"
 )
 
 // InstanceNIC is a structured representation of a Gophercloud servers.Server
