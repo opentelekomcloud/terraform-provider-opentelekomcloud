@@ -152,9 +152,9 @@ func resourceNetworkingPortV2Create(d *schema.ResourceData, meta interface{}) er
 	if !asu {
 		pAsu = &asu
 	}
-	
+
 	var securityGroups []string
-        securityGroups = resourcePortSecurityGroupsV2(d)
+	securityGroups = resourcePortSecurityGroupsV2(d)
 	noSecurityGroups := d.Get("no_security_groups").(bool)
 
 	// Check and make sure an invalid security group configuration wasn't given.
@@ -176,7 +176,7 @@ func resourceNetworkingPortV2Create(d *schema.ResourceData, meta interface{}) er
 		},
 		MapValueSpecs(d),
 	}
-	
+
 	if noSecurityGroups {
 		securityGroups = []string{}
 		createOpts.SecurityGroups = &securityGroups
@@ -187,7 +187,7 @@ func resourceNetworkingPortV2Create(d *schema.ResourceData, meta interface{}) er
 	if len(securityGroups) > 0 {
 		createOpts.SecurityGroups = &securityGroups
 	}
-	
+
 	log.Printf("[DEBUG] Create Options: %#v", createOpts)
 	p, err := ports.Create(networkingClient, createOpts).Extract()
 	if err != nil {
@@ -273,10 +273,10 @@ func resourceNetworkingPortV2Update(d *schema.ResourceData, meta interface{}) er
 	if err != nil {
 		return fmt.Errorf("Error creating OpenTelekomCloud networking client: %s", err)
 	}
-	
+
 	noSecurityGroups := d.Get("no_security_groups").(bool)
 	var hasChange bool
-	
+
 	// security_group_ids and allowed_address_pairs are able to send empty arrays
 	// to denote the removal of each. But their default zero-value is translated
 	// to "null", which has been reported to cause problems in vendor-modified
@@ -288,8 +288,7 @@ func resourceNetworkingPortV2Update(d *schema.ResourceData, meta interface{}) er
 		aap := resourceAllowedAddressPairsV2(d)
 		updateOpts.AllowedAddressPairs = &aap
 	}
-       
- 
+
 	if d.HasChange("no_security_groups") {
 		if noSecurityGroups {
 			hasChange = true
@@ -309,7 +308,7 @@ func resourceNetworkingPortV2Update(d *schema.ResourceData, meta interface{}) er
 		updateOpts.Name = d.Get("name").(string)
 	}
 
-	if d.HasChange("admin_state_up") {	
+	if d.HasChange("admin_state_up") {
 		hasChange = true
 		asu, _ := ExtractValFromNid(d.Get("network_id").(string))
 		pAsu := resourcePortAdminStateUpV2(d)
@@ -333,7 +332,7 @@ func resourceNetworkingPortV2Update(d *schema.ResourceData, meta interface{}) er
 		hasChange = true
 		updateOpts.FixedIPs = resourcePortFixedIpsV2(d)
 	}
-	
+
 	if hasChange {
 		log.Printf("[DEBUG] Updating Port %s with options: %+v", d.Id(), updateOpts)
 

@@ -8,9 +8,9 @@ import (
 	"github.com/hashicorp/terraform/terraform"
 
 	"github.com/huaweicloud/golangsdk/openstack/networking/v2/extensions/layer3/routers"
+	"github.com/huaweicloud/golangsdk/openstack/networking/v2/extensions/natgateways"
 	"github.com/huaweicloud/golangsdk/openstack/networking/v2/networks"
 	"github.com/huaweicloud/golangsdk/openstack/networking/v2/subnets"
-	"github.com/huaweicloud/golangsdk/openstack/networking/v2/extensions/natgateways"
 )
 
 func TestAccNatGateway_basic(t *testing.T) {
