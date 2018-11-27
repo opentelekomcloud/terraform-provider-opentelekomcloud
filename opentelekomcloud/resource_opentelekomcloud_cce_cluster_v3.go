@@ -300,9 +300,6 @@ func waitForCCEClusterActive(cceClient *golangsdk.ServiceClient, clusterId strin
 		if err != nil {
 			return nil, "", err
 		}
-		if n.Status.Phase != "Creating" {
-			return n, "Creating", nil
-		}
 
 		return n, n.Status.Phase, nil
 	}
