@@ -133,7 +133,7 @@ var testAccCCEClusterV3_update = fmt.Sprintf(`
 resource "opentelekomcloud_cce_cluster_v3" "cluster_1" {
   name = "opentelekomcloud-cce"
   cluster_type="VirtualMachine"
-  flavor="cce.s1.small"
+  flavor_id="cce.s1.small"
   cluster_version = "v1.9.2-r2"
   vpc_id="%s"
   subnet_id="%s"
@@ -145,7 +145,7 @@ var testAccCCEClusterV3_timeout = fmt.Sprintf(`
 resource "opentelekomcloud_cce_cluster_v3" "cluster_1" {
   name = "opentelekomcloud-cce"
   cluster_type="VirtualMachine"
-  flavor="cce.s1.small"
+  flavor_id="cce.s1.small"
   cluster_version = "v1.9.2-r2"
   vpc_id="%s"
   subnet_id="%s"
