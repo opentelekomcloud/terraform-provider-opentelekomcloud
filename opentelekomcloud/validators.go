@@ -272,3 +272,39 @@ func validateVBSBackupDescription(v interface{}, k string) (ws []string, errors 
 	}
 	return
 }
+
+func validateAntiDdosTrafficPosID(v interface{}, k string) (ws []string, errors []error) {
+	value := v.(int)
+	if value < 1 || value > 9 {
+		errors = append(errors, fmt.Errorf(
+			"%q should be in the range of 1-9: %d", k, value))
+	}
+	return
+}
+
+func validateAntiDdosHttpRequestPosID(v interface{}, k string) (ws []string, errors []error) {
+	value := v.(int)
+	if value < 1 || value > 15 {
+		errors = append(errors, fmt.Errorf(
+			"%q should be in the range of 1-15: %d", k, value))
+	}
+	return
+}
+
+func validateAntiDdosCleaningAccessPosID(v interface{}, k string) (ws []string, errors []error) {
+	value := v.(int)
+	if value < 1 || value > 8 {
+		errors = append(errors, fmt.Errorf(
+			"%q should be in the range of 1-8: %d", k, value))
+	}
+	return
+}
+
+func validateAntiDdosAppTypeID(v interface{}, k string) (ws []string, errors []error) {
+	value := v.(int)
+	if value < 0 || value > 1 {
+		errors = append(errors, fmt.Errorf(
+			"%q should be 0 or 1: %d", k, value))
+	}
+	return
+}

@@ -532,6 +532,20 @@ func (c *Config) rdsV1Client(region string) (*golangsdk.ServiceClient, error) {
 	})
 }
 
+func (c *Config) antiddosV1Client(region string) (*golangsdk.ServiceClient, error) {
+	return huaweisdk.NewAntiDDoSV1(c.HwClient, golangsdk.EndpointOpts{
+		Region:       c.determineRegion(region),
+		Availability: c.getHwEndpointType(),
+	})
+}
+
+func (c *Config) ctsV1Client(region string) (*golangsdk.ServiceClient, error) {
+	return huaweisdk.NewCTSService(c.HwClient, golangsdk.EndpointOpts{
+		Region:       c.determineRegion(region),
+		Availability: c.getHwEndpointType(),
+	})
+}
+
 func (c *Config) cceV3Client(region string) (*golangsdk.ServiceClient, error) {
 	return huaweisdk.NewCCEV3(c.HwClient, golangsdk.EndpointOpts{
 		Region:       c.determineRegion(region),
