@@ -215,10 +215,11 @@ func resourceMaasTaskV1Create(d *schema.ResourceData, meta interface{}) error {
 		return fmt.Errorf("Error creating maas client: %s", err)
 	}
 
+	enableKMS := d.Get("enable_kms").(bool)
 	createOpts := task.CreateOpts{
 		SrcNode:     getSrcNode(d),
 		DstNode:     getDstNode(d),
-		EnableKMS:   d.Get("enable_kms").(bool),
+		EnableKMS:   &enableKMS,
 		ThreadNum:   d.Get("thread_num").(int),
 		Description: d.Get("description").(string),
 	}

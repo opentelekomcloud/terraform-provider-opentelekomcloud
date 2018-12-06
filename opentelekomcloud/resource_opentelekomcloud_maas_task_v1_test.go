@@ -13,7 +13,7 @@ import (
 
 func TestAccMaasTask_basic(t *testing.T) {
 	resource.Test(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
+		PreCheck:     func() { testAccPreCheckMaas(t) },
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckMaasTaskV1Destroy,
 		Steps: []resource.TestStep{
@@ -79,20 +79,24 @@ func testAccCheckMaasTaskV1Exists(n string) resource.TestCheckFunc {
 	}
 }
 
-const testAccMaasTaskV1_basic = `
+var testAccMaasTaskV1_basic = fmt.Sprintf(`
 resource "opentelekomcloud_maas_task_v1" "task_1" {
   description = "migration task"
-  enable_kms = true
+  enable_kms = false
   thread_num = 1
   src_node {
     region = "ap-northeast-1"
-    object_key = "123.txt",
-    bucket = "tommy-bucket",
+	ak = "%s"
+	sk = "%s"
+    object_key = "123.txt"
+    bucket = "tommy-bucket"
   }
   dst_node {
-    region = "eu-de",
-    object_key = "maas/",
-    bucket = "test-maas",
+    region = "eu-de"
+	ak = "%s"
+	sk = "%s"
+    object_key = "maas/"
+    bucket = "test-maas"
   }
 }
-`
+`, OS_SRC_ACCESS_KEY, OS_SRC_SECRET_KEY, OS_ACCESS_KEY, OS_SECRET_KEY)

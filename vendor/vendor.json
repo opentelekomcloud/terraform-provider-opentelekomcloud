@@ -1084,10 +1084,10 @@
 			"revisionTime": "2018-03-15T04:07:47Z"
 		},
 		{
-			"checksumSHA1": "W8JtbOUa/uke1kN0M46n3tMomAQ=",
+			"checksumSHA1": "NCQj+lmYqH/AALWqW5b8Kp/t01Q=",
 			"path": "github.com/huaweicloud/golangsdk/openstack/maas/v1/task",
-			"revision": "5d0031938fd105e9a05559839acc98eaf8921adb",
-			"revisionTime": "2018-12-05T08:10:28Z"
+			"revision": "2d51db23e14c845ab7b9c40cc6961e637835b44d",
+			"revisionTime": "2018-12-06T09:49:01Z"
 		},
 		{
 			"checksumSHA1": "tygtE2L8EFD/6t9LzeJAKj3bKR4=",

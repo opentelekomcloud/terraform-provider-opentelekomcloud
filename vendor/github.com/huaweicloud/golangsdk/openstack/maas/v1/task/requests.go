@@ -11,7 +11,7 @@ var RequestOpts golangsdk.RequestOpts = golangsdk.RequestOpts{
 type CreateOpts struct {
 	SrcNode     SrcNodeOpts  `json:"src_node" required:"true"`
 	DstNode     DstNodeOpts  `json:"dst_node" required:"true"`
-	EnableKMS   bool         `json:"enableKMS" required:"true"`
+	EnableKMS   *bool        `json:"enableKMS" required:"true"`
 	ThreadNum   int          `json:"thread_num" required:"true"`
 	Description string       `json:"description,omitempty"`
 	SmnInfo     *SmnInfoOpts `json:"smnInfo,omitempty"`
