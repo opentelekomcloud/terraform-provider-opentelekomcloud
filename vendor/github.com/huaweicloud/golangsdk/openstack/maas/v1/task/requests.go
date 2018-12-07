@@ -36,7 +36,7 @@ type DstNodeOpts struct {
 
 type SmnInfoOpts struct {
 	TopicUrn          string   `json:"topicUrn" required:"true"`
-	Language          string   `json:"language" required:"true"`
+	Language          string   `json:"language,omitempty"`
 	TriggerConditions []string `json:"triggerConditions" required:"true"`
 }
 
