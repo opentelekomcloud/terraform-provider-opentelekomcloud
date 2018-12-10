@@ -50,9 +50,6 @@ The following arguments are supported:
 
 * `description` - (Optional) Human-readable description for the Listener.
 
-* `connection_limit` - (Optional) The maximum number of connections allowed
-    for the Listener.
-
 * `default_tls_container_ref` - (Optional) A reference to a Barbican Secrets
     container which stores TLS information. This is required if the protocol
     is `TERMINATED_HTTPS`. See
@@ -78,7 +75,6 @@ The following attributes are exported:
 * `name` - See Argument Reference above.
 * `default_port_id` - See Argument Reference above.
 * `description` - See Argument Reference above.
-* `connection_limit` - See Argument Reference above.
 * `default_tls_container_ref` - See Argument Reference above.
 * `sni_container_refs` - See Argument Reference above.
 * `admin_state_up` - See Argument Reference above.
