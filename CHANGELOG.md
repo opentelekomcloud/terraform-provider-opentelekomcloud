@@ -1,17 +1,17 @@
-## 1.4.0 (Unreleased)
+## 1.4.0 (December 10, 2018)
 
 FEATURES:
 
-* **New Data Source:** `opentelekomcloud_cts_tracker_v1` [GH-135]
-* **New Data Source:** `opentelekomcloud_antiddos_v1` [GH-138]
-* **New Data Source:** `opentelekomcloud_cce_node_v3` [GH-140]
-* **New Data Source:** `opentelekomcloud_cce_cluster_v3` [GH-140]
-* **New Resource:** `opentelekomcloud_compute_bms_server_v2` [GH-132]
-* **New Resource:** `opentelekomcloud_cts_tracker_v1` [GH-135]
-* **New Resource:** `opentelekomcloud_antiddos_v1` [GH-138]
-* **New Resource:** `opentelekomcloud_cce_node_v3` [GH-140]
-* **New Resource:** `opentelekomcloud_cce_cluster_v3` [GH-140]
-* **New Resource:** `opentelekomcloud_maas_task_v1` [GH-142]
+* **New Data Source:** `opentelekomcloud_cts_tracker_v1` ([#135](https://github.com/terraform-providers/terraform-provider-opentelekomcloud/issues/135))
+* **New Data Source:** `opentelekomcloud_antiddos_v1` ([#138](https://github.com/terraform-providers/terraform-provider-opentelekomcloud/issues/138))
+* **New Data Source:** `opentelekomcloud_cce_node_v3` ([#140](https://github.com/terraform-providers/terraform-provider-opentelekomcloud/issues/140))
+* **New Data Source:** `opentelekomcloud_cce_cluster_v3` ([#140](https://github.com/terraform-providers/terraform-provider-opentelekomcloud/issues/140))
+* **New Resource:** `opentelekomcloud_compute_bms_server_v2` ([#132](https://github.com/terraform-providers/terraform-provider-opentelekomcloud/issues/132))
+* **New Resource:** `opentelekomcloud_cts_tracker_v1` ([#135](https://github.com/terraform-providers/terraform-provider-opentelekomcloud/issues/135))
+* **New Resource:** `opentelekomcloud_antiddos_v1` ([#138](https://github.com/terraform-providers/terraform-provider-opentelekomcloud/issues/138))
+* **New Resource:** `opentelekomcloud_cce_node_v3` ([#140](https://github.com/terraform-providers/terraform-provider-opentelekomcloud/issues/140))
+* **New Resource:** `opentelekomcloud_cce_cluster_v3` ([#140](https://github.com/terraform-providers/terraform-provider-opentelekomcloud/issues/140))
+* **New Resource:** `opentelekomcloud_maas_task_v1` ([#142](https://github.com/terraform-providers/terraform-provider-opentelekomcloud/issues/142))
 
 ## 1.3.0 (November 05, 2018)
 
