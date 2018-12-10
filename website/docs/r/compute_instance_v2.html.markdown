@@ -86,7 +86,7 @@ resource "opentelekomcloud_compute_instance_v2" "boot-from-volume" {
 ### Boot From an Existing Volume
 
 ```hcl
-resource "opentelekomcloud_blockstorage_volume_v1" "myvol" {
+resource "opentelekomcloud_blockstorage_volume_v2" "myvol" {
   name     = "myvol"
   size     = 5
   image_id = "<image-id>"
@@ -99,7 +99,7 @@ resource "opentelekomcloud_compute_instance_v2" "boot-from-volume" {
   security_groups = ["default"]
 
   block_device {
-    uuid                  = "${opentelekomcloud_blockstorage_volume_v1.myvol.id}"
+    uuid                  = "${opentelekomcloud_blockstorage_volume_v2.myvol.id}"
     source_type           = "volume"
     boot_index            = 0
     destination_type      = "volume"
@@ -125,7 +125,7 @@ resource "opentelekomcloud_compute_instance_v2" "instance_1" {
   block_device {
     uuid                  = "<image-id>"
     source_type           = "image"
-    destination_type      = "local"
+    destination_type      = "volume"
     boot_index            = 0
     delete_on_termination = true
   }
