@@ -186,6 +186,8 @@ func Provider() terraform.ResourceProvider {
 			"opentelekomcloud_csbs_backup_policy_v1":      dataSourceCSBSBackupPolicyV1(),
 			"opentelekomcloud_antiddos_v1":                dataSourceAntiDdosV1(),
 			"opentelekomcloud_cts_tracker_v1":             dataSourceCTSTrackerV1(),
+			"opentelekomcloud_cce_node_v3":                dataSourceCceNodesV3(),
+			"opentelekomcloud_cce_cluster_v3":             dataSourceCCEClusterV3(),
 		},
 
 		ResourcesMap: map[string]*schema.Resource{
@@ -260,6 +262,8 @@ func Provider() terraform.ResourceProvider {
 			"opentelekomcloud_vbs_backup_share_v2":                resourceVBSBackupShareV2(),
 			"opentelekomcloud_antiddos_v1":                        resourceAntiDdosV1(),
 			"opentelekomcloud_cts_tracker_v1":                     resourceCTSTrackerV1(),
+			"opentelekomcloud_cce_node_v3":                        resourceCCENodeV3(),
+			"opentelekomcloud_cce_cluster_v3":                     resourceCCEClusterV3(),
 			"opentelekomcloud_maas_task_v1":                       resourceMaasTaskV1(),
 		},
 
