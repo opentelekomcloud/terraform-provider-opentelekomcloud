@@ -1,4 +1,18 @@
 ## 1.4.0 (Unreleased)
+
+FEATURES:
+
+* **New Data Source:** `opentelekomcloud_cts_tracker_v1` [GH-135]
+* **New Data Source:** `opentelekomcloud_antiddos_v1` [GH-138]
+* **New Data Source:** `opentelekomcloud_cce_node_v3` [GH-140]
+* **New Data Source:** `opentelekomcloud_cce_cluster_v3` [GH-140]
+* **New Resource:** `opentelekomcloud_compute_bms_server_v2` [GH-132]
+* **New Resource:** `opentelekomcloud_cts_tracker_v1` [GH-135]
+* **New Resource:** `opentelekomcloud_antiddos_v1` [GH-138]
+* **New Resource:** `opentelekomcloud_cce_node_v3` [GH-140]
+* **New Resource:** `opentelekomcloud_cce_cluster_v3` [GH-140]
+* **New Resource:** `opentelekomcloud_maas_task_v1` [GH-142]
+
 ## 1.3.0 (November 05, 2018)
 
 FEATURES:
