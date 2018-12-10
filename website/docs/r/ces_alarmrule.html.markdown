@@ -128,7 +128,7 @@ the `alarm_actions` block supports:
     notification: indicates that a notification will be sent to the user.
     autoscaling: indicates that a scaling action will be triggered.
 
-* `notification_list` - (Optional) specifies the topic urn list of the target
+* `notification_list` - (Required) specifies the topic urn list of the target
     notification objects. the maximum length is 5. the topic urn list can be
     obtained from simple message notification (smn) and in the following format:
     urn: smn:([a-z]|[a-z]|[0-9]|\-){1,32}:([a-z]|[a-z]|[0-9]){32}:([a-z]|[a-z]|[0-9]|\-|\_){1,256}.
