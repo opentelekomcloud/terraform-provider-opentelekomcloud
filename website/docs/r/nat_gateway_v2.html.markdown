@@ -43,7 +43,7 @@ The following arguments are supported:
 * `router_id` - (Required) ID of the router this nat gateway belongs to. Changing
     this creates a new nat gateway.
 
-* `internal_network_id` - (Optional) ID of the network this nat gateway connects to.
+* `internal_network_id` - (Required) ID of the network this nat gateway connects to.
     Changing this creates a new nat gateway.
 
 ## Attributes Reference
