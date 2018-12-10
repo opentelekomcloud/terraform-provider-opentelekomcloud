@@ -41,7 +41,7 @@ resource "opentelekomcloud_elb_listener" "listener" {
 resource "opentelekomcloud_elb_health" "healthcheck" {
   listener_id = "${opentelekomcloud_elb_listener.listener.id}"
   healthcheck_protocol = "TCP"
-  healthcheck_connect_porta = 22
+  healthcheck_connect_port = 22
   healthy_threshold = 5
   healthcheck_timeout = 25
   healthcheck_interval = 3
