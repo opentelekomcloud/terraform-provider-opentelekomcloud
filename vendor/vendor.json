@@ -838,10 +838,10 @@
 			"revisionTime": "2018-09-11T07:04:38Z"
 		},
 		{
-			"checksumSHA1": "24vSF/3TbGcb2u0jfuIN0YlJbw8=",
+			"checksumSHA1": "K40lHdiz0bpqgVnoCHdtb8EAVpo=",
 			"path": "github.com/huaweicloud/golangsdk/openstack",
-			"revision": "5d0031938fd105e9a05559839acc98eaf8921adb",
-			"revisionTime": "2018-12-05T08:10:28Z"
+			"revision": "c78909b67a2bd5ba98cb5b747c224abe916b7ff9",
+			"revisionTime": "2018-12-11T07:16:19Z"
 		},
 		{
 			"checksumSHA1": "HVR9NEEAzULt23DLXM3jXxEN4AI=",

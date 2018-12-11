@@ -568,10 +568,10 @@ func NewDRSServiceV2(client *golangsdk.ProviderClient, eo golangsdk.EndpointOpts
 }
 
 func NewComputeV1(client *golangsdk.ProviderClient, eo golangsdk.EndpointOpts) (*golangsdk.ServiceClient, error) {
-	sc, err := initClientOpts(client, eo, "compute")
-	e := strings.Replace(sc.Endpoint, "v2", "v1", 1)
-	sc.Endpoint = e
-	sc.ResourceBase = e
+	sc, err := initClientOpts(client, eo, "network")
+	sc.Endpoint = strings.Replace(sc.Endpoint, "vpc", "ecs", 1)
+	sc.Endpoint = sc.Endpoint + "v1/"
+	sc.ResourceBase = sc.Endpoint + client.ProjectID + "/"
 	return sc, err
 }
 
