@@ -389,8 +389,8 @@ func getAllClusterJobs(d *schema.ResourceData) []cluster.JobOpts {
 			ShutdownCluster:         job["shutdown_cluster"].(bool),
 			FileAction:              job["file_action"].(string),
 			SubmitJobOnceClusterRun: job["submit_job_once_cluster_run"].(bool),
-			Hql:            job["hql"].(string),
-			HiveScriptPath: job["hive_script_path"].(string),
+			Hql:                     job["hql"].(string),
+			HiveScriptPath:          job["hive_script_path"].(string),
 		}
 		jobOpts = append(jobOpts, v)
 	}
