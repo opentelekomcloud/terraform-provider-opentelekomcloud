@@ -218,6 +218,7 @@ func Provider() terraform.ResourceProvider {
 			"opentelekomcloud_networking_network_v2":              resourceNetworkingNetworkV2(),
 			"opentelekomcloud_networking_subnet_v2":               resourceNetworkingSubnetV2(),
 			"opentelekomcloud_networking_floatingip_v2":           resourceNetworkingFloatingIPV2(),
+			"opentelekomcloud_networking_floatingip_associate_v2": resourceNetworkingFloatingIPAssociateV2(),
 			"opentelekomcloud_networking_port_v2":                 resourceNetworkingPortV2(),
 			"opentelekomcloud_networking_router_v2":               resourceNetworkingRouterV2(),
 			"opentelekomcloud_networking_router_interface_v2":     resourceNetworkingRouterInterfaceV2(),
