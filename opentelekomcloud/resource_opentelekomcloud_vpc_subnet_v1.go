@@ -264,7 +264,7 @@ func waitForVpcSubnetActive(subnetClient *golangsdk.ServiceClient, vpcId string)
 		}
 
 		//If subnet status is other than Active, send error
-		if n.Status == "DOWN" || n.Status == "ERROR" || n.Status == "UNKNOWN" {
+		if n.Status == "DOWN" || n.Status == "ERROR" {
 			return nil, "", fmt.Errorf("Subnet status: '%s'", n.Status)
 		}
 
