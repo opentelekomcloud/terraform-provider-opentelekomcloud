@@ -10,7 +10,6 @@ import (
 	"github.com/gophercloud/gophercloud/openstack/networking/v2/subnets"
 )
 
-// PASS
 func TestAccNetworkingV2Subnet_basic(t *testing.T) {
 	var subnet subnets.Subnet
 
@@ -44,7 +43,6 @@ func TestAccNetworkingV2Subnet_basic(t *testing.T) {
 	})
 }
 
-// PASS
 func TestAccNetworkingV2Subnet_enableDHCP(t *testing.T) {
 	var subnet subnets.Subnet
 
@@ -65,7 +63,6 @@ func TestAccNetworkingV2Subnet_enableDHCP(t *testing.T) {
 	})
 }
 
-// PASS
 func TestAccNetworkingV2Subnet_noGateway(t *testing.T) {
 	var subnet subnets.Subnet
 
@@ -86,7 +83,6 @@ func TestAccNetworkingV2Subnet_noGateway(t *testing.T) {
 	})
 }
 
-// PASS
 func TestAccNetworkingV2Subnet_impliedGateway(t *testing.T) {
 	var subnet subnets.Subnet
 
@@ -107,7 +103,6 @@ func TestAccNetworkingV2Subnet_impliedGateway(t *testing.T) {
 	})
 }
 
-// PASS
 func TestAccNetworkingV2Subnet_timeout(t *testing.T) {
 	var subnet subnets.Subnet
 

@@ -9,7 +9,6 @@ import (
 	"github.com/huaweicloud/golangsdk/openstack/cloudeyeservice/alarmrule"
 )
 
-// PASS
 func TestCESAlarmRule_basic(t *testing.T) {
 	var ar alarmrule.AlarmRule
 

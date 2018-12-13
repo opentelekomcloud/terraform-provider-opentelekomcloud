@@ -12,7 +12,6 @@ import (
 	"github.com/huaweicloud/golangsdk/openstack/dns/v2/zones"
 )
 
-// PASS, but normally skip
 func TestAccDNSV2Zone_basic(t *testing.T) {
 	var zone zones.Zone
 	// TODO: Why does it lowercase names in back-end?
@@ -72,7 +71,6 @@ func TestAccDNSV2Zone_private(t *testing.T) {
 	})
 }
 
-// PASS, but normally skip
 func TestAccDNSV2Zone_readTTL(t *testing.T) {
 	var zone zones.Zone
 	var zoneName = fmt.Sprintf("ACPTTEST%s.com.", acctest.RandString(5))
@@ -96,7 +94,6 @@ func TestAccDNSV2Zone_readTTL(t *testing.T) {
 	})
 }
 
-// PASS, but normally skip
 func TestAccDNSV2Zone_timeout(t *testing.T) {
 	var zone zones.Zone
 	var zoneName = fmt.Sprintf("ACPTTEST%s.com.", acctest.RandString(5))

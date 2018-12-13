@@ -43,7 +43,6 @@ func TestAccOTCVpcSubnetV1_basic(t *testing.T) {
 	})
 }
 
-// PASS
 func TestAccOTCVpcSubnetV1_timeout(t *testing.T) {
 	var subnet subnets.Subnet
 

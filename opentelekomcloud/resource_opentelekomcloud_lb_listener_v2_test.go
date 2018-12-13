@@ -9,7 +9,6 @@ import (
 	"github.com/hashicorp/terraform/terraform"
 )
 
-// PASS
 func TestAccLBV2Listener_basic(t *testing.T) {
 	var listener listeners.Listener
 

@@ -6,7 +6,6 @@ import (
 	"github.com/hashicorp/terraform/helper/resource"
 )
 
-// PASS
 func TestAccNetworkingV2FloatingIP_importBasic(t *testing.T) {
 	resourceName := "opentelekomcloud_networking_floatingip_v2.fip_1"
 

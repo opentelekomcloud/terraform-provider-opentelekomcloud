@@ -10,7 +10,6 @@ import (
 	"github.com/huaweicloud/golangsdk/openstack/networking/v2/extensions/elbaas/loadbalancer_elbs"
 )
 
-// PASS
 func TestAccELBLoadBalancer_basic(t *testing.T) {
 
 	var lb loadbalancer_elbs.LoadBalancer

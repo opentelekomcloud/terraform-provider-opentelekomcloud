@@ -11,7 +11,6 @@ import (
 	"github.com/gophercloud/gophercloud/openstack/networking/v2/extensions/layer3/floatingips"
 )
 
-// PASS
 func TestAccNetworkingV2FloatingIP_basic(t *testing.T) {
 	var fip floatingips.FloatingIP
 
@@ -30,7 +29,6 @@ func TestAccNetworkingV2FloatingIP_basic(t *testing.T) {
 	})
 }
 
-// PASS
 func TestAccNetworkingV2FloatingIP_timeout(t *testing.T) {
 	var fip floatingips.FloatingIP
 

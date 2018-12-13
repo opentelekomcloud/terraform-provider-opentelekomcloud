@@ -9,7 +9,6 @@ import (
 	"github.com/hashicorp/terraform/terraform"
 )
 
-// PASS
 func TestAccLBV2Pool_basic(t *testing.T) {
 	var pool pools.Pool
 

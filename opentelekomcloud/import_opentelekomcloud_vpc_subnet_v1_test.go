@@ -6,7 +6,6 @@ import (
 	"github.com/hashicorp/terraform/helper/resource"
 )
 
-// PASS
 func TestAccOTCVpcSubnetV1_importBasic(t *testing.T) {
 	resourceName := "opentelekomcloud_vpc_subnet_v1.subnet_1"
 

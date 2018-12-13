@@ -6,7 +6,6 @@ import (
 	"github.com/hashicorp/terraform/helper/resource"
 )
 
-// PASS
 func TestAccComputeV2ServerGroup_importBasic(t *testing.T) {
 	resourceName := "opentelekomcloud_compute_servergroup_v2.sg_1"
 

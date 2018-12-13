@@ -13,7 +13,6 @@ import (
 	"github.com/gophercloud/gophercloud/openstack/networking/v2/subnets"
 )
 
-// PASS
 func TestAccNetworkingV2Port_basic(t *testing.T) {
 	var network networks.Network
 	var port ports.Port
@@ -36,7 +35,6 @@ func TestAccNetworkingV2Port_basic(t *testing.T) {
 	})
 }
 
-// PASS
 func TestAccNetworkingV2Port_noip(t *testing.T) {
 	var network networks.Network
 	var port ports.Port
@@ -60,7 +58,6 @@ func TestAccNetworkingV2Port_noip(t *testing.T) {
 	})
 }
 
-// PASS
 func TestAccNetworkingV2Port_allowedAddressPairs(t *testing.T) {
 	var network networks.Network
 	var subnet subnets.Subnet
@@ -85,7 +82,6 @@ func TestAccNetworkingV2Port_allowedAddressPairs(t *testing.T) {
 	})
 }
 
-// PASS
 func TestAccNetworkingV2Port_timeout(t *testing.T) {
 	var network networks.Network
 	var port ports.Port

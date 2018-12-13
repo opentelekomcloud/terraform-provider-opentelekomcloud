@@ -38,7 +38,6 @@ func TestAccOTCVpcPeeringConnectionV2_basic(t *testing.T) {
 	})
 }
 
-// PASS
 func TestAccOTCVpcPeeringConnectionV2_timeout(t *testing.T) {
 	var peering peerings.Peering
 

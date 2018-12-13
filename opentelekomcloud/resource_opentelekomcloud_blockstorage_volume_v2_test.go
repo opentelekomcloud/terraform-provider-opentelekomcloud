@@ -12,7 +12,6 @@ import (
 	"github.com/huaweicloud/golangsdk/openstack/evs/v2/tags"
 )
 
-// PASS
 func TestAccBlockStorageV2Volume_basic(t *testing.T) {
 	var volume volumes.Volume
 
@@ -67,7 +66,6 @@ func TestAccBlockStorageV2Volume_tags(t *testing.T) {
 	})
 }
 
-// PASS
 func TestAccBlockStorageV2Volume_image(t *testing.T) {
 	var volume volumes.Volume
 
@@ -88,7 +86,6 @@ func TestAccBlockStorageV2Volume_image(t *testing.T) {
 	})
 }
 
-// PASS
 func TestAccBlockStorageV2Volume_timeout(t *testing.T) {
 	var volume volumes.Volume
 

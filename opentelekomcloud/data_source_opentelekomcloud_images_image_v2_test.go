@@ -8,7 +8,6 @@ import (
 	"github.com/hashicorp/terraform/terraform"
 )
 
-// PASS
 func TestAccOpenTelekomCloudImagesV2ImageDataSource_basic(t *testing.T) {
 	resource.Test(t, resource.TestCase{
 		PreCheck:  func() { testAccPreCheck(t) },
@@ -41,7 +40,6 @@ func TestAccOpenTelekomCloudImagesV2ImageDataSource_basic(t *testing.T) {
 	})
 }
 
-// PASS
 func TestAccOpenTelekomCloudImagesV2ImageDataSource_testQueries(t *testing.T) {
 	resource.Test(t, resource.TestCase{
 		PreCheck:  func() { testAccPreCheck(t) },

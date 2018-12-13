@@ -10,7 +10,6 @@ import (
 	"github.com/gophercloud/gophercloud/openstack/networking/v2/extensions/layer3/routers"
 )
 
-// PASS
 func TestAccNetworkingV2Router_basic(t *testing.T) {
 	var router routers.Router
 
@@ -36,7 +35,6 @@ func TestAccNetworkingV2Router_basic(t *testing.T) {
 	})
 }
 
-// PASS
 func TestAccNetworkingV2Router_update_external_gw(t *testing.T) {
 	var router routers.Router
 
@@ -62,7 +60,6 @@ func TestAccNetworkingV2Router_update_external_gw(t *testing.T) {
 	})
 }
 
-// PASS
 func TestAccNetworkingV2Router_timeout(t *testing.T) {
 	var router routers.Router
 

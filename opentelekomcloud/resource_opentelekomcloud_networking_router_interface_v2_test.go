@@ -13,7 +13,6 @@ import (
 	"github.com/gophercloud/gophercloud/openstack/networking/v2/subnets"
 )
 
-// PASS
 func TestAccNetworkingV2RouterInterface_basic_subnet(t *testing.T) {
 	var network networks.Network
 	var router routers.Router
@@ -37,7 +36,6 @@ func TestAccNetworkingV2RouterInterface_basic_subnet(t *testing.T) {
 	})
 }
 
-// PASS
 func TestAccNetworkingV2RouterInterface_basic_port(t *testing.T) {
 	var network networks.Network
 	var port ports.Port
@@ -63,7 +61,6 @@ func TestAccNetworkingV2RouterInterface_basic_port(t *testing.T) {
 	})
 }
 
-// PASS
 func TestAccNetworkingV2RouterInterface_timeout(t *testing.T) {
 	var network networks.Network
 	var router routers.Router

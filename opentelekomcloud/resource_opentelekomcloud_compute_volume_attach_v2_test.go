@@ -10,7 +10,6 @@ import (
 	"github.com/gophercloud/gophercloud/openstack/compute/v2/extensions/volumeattach"
 )
 
-// PASS
 func TestAccComputeV2VolumeAttach_basic(t *testing.T) {
 	var va volumeattach.VolumeAttachment
 
@@ -29,7 +28,6 @@ func TestAccComputeV2VolumeAttach_basic(t *testing.T) {
 	})
 }
 
-// PASS
 func TestAccComputeV2VolumeAttach_device(t *testing.T) {
 	var va volumeattach.VolumeAttachment
 
@@ -49,7 +47,6 @@ func TestAccComputeV2VolumeAttach_device(t *testing.T) {
 	})
 }
 
-// PASS
 func TestAccComputeV2VolumeAttach_timeout(t *testing.T) {
 	var va volumeattach.VolumeAttachment
 

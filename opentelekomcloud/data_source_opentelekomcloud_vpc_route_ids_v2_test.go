@@ -8,7 +8,6 @@ import (
 	"github.com/hashicorp/terraform/terraform"
 )
 
-// PASS
 func TestAccOTCVpcRouteIdsV2DataSource_basic(t *testing.T) {
 	resource.Test(t, resource.TestCase{
 		PreCheck:  func() { testAccPreCheck(t) },
@@ -27,6 +26,7 @@ func TestAccOTCVpcRouteIdsV2DataSource_basic(t *testing.T) {
 		},
 	})
 }
+
 func testAccOTCRouteIdV2DataSourceID(n string) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
 		rs, ok := s.RootModule().Resources[n]

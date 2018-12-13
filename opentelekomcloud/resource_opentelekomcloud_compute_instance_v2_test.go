@@ -18,7 +18,6 @@ import (
 	"github.com/huaweicloud/golangsdk/pagination"
 )
 
-// PASS
 func TestAccComputeV2Instance_basic(t *testing.T) {
 	var instance servers.Server
 
@@ -75,7 +74,6 @@ func TestAccComputeV2Instance_tags(t *testing.T) {
 	})
 }
 
-// PASS
 func TestAccComputeV2Instance_secgroupMulti(t *testing.T) {
 	var instance_1 servers.Server
 	var secgroup_1 secgroups.SecurityGroup
@@ -98,7 +96,6 @@ func TestAccComputeV2Instance_secgroupMulti(t *testing.T) {
 	})
 }
 
-// PASS
 func TestAccComputeV2Instance_secgroupMultiUpdate(t *testing.T) {
 	var instance_1 servers.Server
 	var secgroup_1, secgroup_2 secgroups.SecurityGroup
@@ -134,7 +131,6 @@ func TestAccComputeV2Instance_secgroupMultiUpdate(t *testing.T) {
 	})
 }
 
-// PASS
 func TestAccComputeV2Instance_bootFromVolumeImage(t *testing.T) {
 	var instance servers.Server
 
@@ -154,7 +150,6 @@ func TestAccComputeV2Instance_bootFromVolumeImage(t *testing.T) {
 	})
 }
 
-// PASS
 func TestAccComputeV2Instance_bootFromVolumeVolume(t *testing.T) {
 	var instance servers.Server
 
@@ -174,7 +169,6 @@ func TestAccComputeV2Instance_bootFromVolumeVolume(t *testing.T) {
 	})
 }
 
-// PASS
 func TestAccComputeV2Instance_bootFromVolumeForceNew(t *testing.T) {
 	var instance1_1 servers.Server
 	var instance1_2 servers.Server

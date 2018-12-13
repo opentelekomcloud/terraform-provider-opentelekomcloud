@@ -13,7 +13,6 @@ import (
 	"github.com/hashicorp/terraform/terraform"
 )
 
-// PASS
 func TestAccComputeV2FloatingIPAssociate_basic(t *testing.T) {
 	var instance servers.Server
 	var fip floatingips.FloatingIP
@@ -35,7 +34,6 @@ func TestAccComputeV2FloatingIPAssociate_basic(t *testing.T) {
 	})
 }
 
-// PASS
 func TestAccComputeV2FloatingIPAssociate_fixedIP(t *testing.T) {
 	var instance servers.Server
 	var fip floatingips.FloatingIP
@@ -57,7 +55,6 @@ func TestAccComputeV2FloatingIPAssociate_fixedIP(t *testing.T) {
 	})
 }
 
-// PASS
 func TestAccComputeV2FloatingIPAssociate_attachToFirstNetwork(t *testing.T) {
 	var instance servers.Server
 	var fip floatingips.FloatingIP
@@ -103,7 +100,6 @@ func TestAccComputeV2FloatingIPAssociate_attachToSecondNetwork(t *testing.T) {
 }
 */
 
-// PASS
 func TestAccComputeV2FloatingIPAssociate_attachNew(t *testing.T) {
 	var instance servers.Server
 	var fip_1 floatingips.FloatingIP

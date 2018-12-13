@@ -6,7 +6,6 @@ import (
 	"github.com/hashicorp/terraform/helper/resource"
 )
 
-// PASS
 func TestAccComputeV2VolumeAttach_importBasic(t *testing.T) {
 	resourceName := "opentelekomcloud_compute_volume_attach_v2.va_1"
 

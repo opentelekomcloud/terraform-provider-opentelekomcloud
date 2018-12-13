@@ -6,7 +6,6 @@ import (
 	"github.com/hashicorp/terraform/helper/resource"
 )
 
-// PASS
 func TestAccNetworkingV2Subnet_importBasic(t *testing.T) {
 	resourceName := "opentelekomcloud_networking_subnet_v2.subnet_1"
 

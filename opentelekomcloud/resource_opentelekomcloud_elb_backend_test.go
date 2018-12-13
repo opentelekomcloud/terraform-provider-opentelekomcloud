@@ -10,7 +10,6 @@ import (
 	"github.com/huaweicloud/golangsdk/openstack/networking/v2/extensions/elbaas/backendmember"
 )
 
-// PASS with diff
 func TestAccELBBackend_basic(t *testing.T) {
 	var backend backendmember.Backend
 

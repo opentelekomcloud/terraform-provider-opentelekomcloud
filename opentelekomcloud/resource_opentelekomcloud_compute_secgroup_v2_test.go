@@ -10,7 +10,6 @@ import (
 	"github.com/huaweicloud/golangsdk/openstack/compute/v2/extensions/secgroups"
 )
 
-// PASS
 func TestAccComputeV2SecGroup_basic(t *testing.T) {
 	var secgroup secgroups.SecurityGroup
 
@@ -29,7 +28,6 @@ func TestAccComputeV2SecGroup_basic(t *testing.T) {
 	})
 }
 
-// PASS
 func TestAccComputeV2SecGroup_update(t *testing.T) {
 	var secgroup secgroups.SecurityGroup
 
@@ -55,7 +53,6 @@ func TestAccComputeV2SecGroup_update(t *testing.T) {
 	})
 }
 
-// PASS
 func TestAccComputeV2SecGroup_groupID(t *testing.T) {
 	var secgroup1, secgroup2, secgroup3 secgroups.SecurityGroup
 
@@ -86,7 +83,6 @@ func TestAccComputeV2SecGroup_groupID(t *testing.T) {
 	})
 }
 
-// PASS
 func TestAccComputeV2SecGroup_self(t *testing.T) {
 	var secgroup secgroups.SecurityGroup
 
@@ -110,7 +106,6 @@ func TestAccComputeV2SecGroup_self(t *testing.T) {
 	})
 }
 
-// PASS
 func TestAccComputeV2SecGroup_icmpZero(t *testing.T) {
 	var secgroup secgroups.SecurityGroup
 
@@ -129,7 +124,6 @@ func TestAccComputeV2SecGroup_icmpZero(t *testing.T) {
 	})
 }
 
-// PASS
 func TestAccComputeV2SecGroup_timeout(t *testing.T) {
 	var secgroup secgroups.SecurityGroup
 

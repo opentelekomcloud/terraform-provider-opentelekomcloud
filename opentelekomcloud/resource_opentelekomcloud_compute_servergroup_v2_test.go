@@ -11,7 +11,6 @@ import (
 	"github.com/huaweicloud/golangsdk/openstack/compute/v2/servers"
 )
 
-// PASS
 func TestAccComputeV2ServerGroup_basic(t *testing.T) {
 	var sg servergroups.ServerGroup
 
@@ -30,7 +29,6 @@ func TestAccComputeV2ServerGroup_basic(t *testing.T) {
 	})
 }
 
-// PASS
 func TestAccComputeV2ServerGroup_affinity(t *testing.T) {
 	var instance servers.Server
 	var sg servergroups.ServerGroup

@@ -10,7 +10,6 @@ import (
 	"github.com/hashicorp/terraform/terraform"
 )
 
-// PASS
 func TestAccImagesImageV2_basic(t *testing.T) {
 	var image images.Image
 
@@ -37,7 +36,6 @@ func TestAccImagesImageV2_basic(t *testing.T) {
 	})
 }
 
-// PASS
 func TestAccImagesImageV2_name(t *testing.T) {
 	var image images.Image
 
@@ -66,7 +64,6 @@ func TestAccImagesImageV2_name(t *testing.T) {
 	})
 }
 
-// PASS
 func TestAccImagesImageV2_tags(t *testing.T) {
 	var image images.Image
 
