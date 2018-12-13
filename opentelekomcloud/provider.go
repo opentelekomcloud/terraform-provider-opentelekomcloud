@@ -188,6 +188,9 @@ func Provider() terraform.ResourceProvider {
 			"opentelekomcloud_cts_tracker_v1":             dataSourceCTSTrackerV1(),
 			"opentelekomcloud_cce_node_v3":                dataSourceCceNodesV3(),
 			"opentelekomcloud_cce_cluster_v3":             dataSourceCCEClusterV3(),
+			"opentelekomcloud_dcs_az_v1":                  dataSourceDcsAZV1(),
+			"opentelekomcloud_dcs_maintainwindow_v1":      dataSourceDcsMaintainWindowV1(),
+			"opentelekomcloud_dcs_product_v1":             dataSourceDcsProductV1(),
 		},
 
 		ResourcesMap: map[string]*schema.Resource{
@@ -201,6 +204,7 @@ func Provider() terraform.ResourceProvider {
 			"opentelekomcloud_compute_volume_attach_v2":           resourceComputeVolumeAttachV2(),
 			"opentelekomcloud_dns_recordset_v2":                   resourceDNSRecordSetV2(),
 			"opentelekomcloud_dns_zone_v2":                        resourceDNSZoneV2(),
+			"opentelekomcloud_dcs_instance_v1":                    resourceDcsInstanceV1(),
 			"opentelekomcloud_fw_firewall_group_v2":               resourceFWFirewallGroupV2(),
 			"opentelekomcloud_fw_policy_v2":                       resourceFWPolicyV2(),
 			"opentelekomcloud_fw_rule_v2":                         resourceFWRuleV2(),
