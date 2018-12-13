@@ -12,7 +12,7 @@ func TestAccDNSV2RecordSet_importBasic(t *testing.T) {
 	resourceName := "opentelekomcloud_dns_recordset_v2.recordset_1"
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheckDNS(t) },
+		PreCheck:     func() { testAccPreCheck(t) },
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckDNSV2RecordSetDestroy,
 		Steps: []resource.TestStep{
