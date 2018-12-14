@@ -65,10 +65,6 @@ func testAccPreCheckRequiredEnvVars(t *testing.T) {
 		t.Fatal("OS_REGION_NAME must be set for acceptance tests")
 	}
 
-	if OS_REGION_NAME == "" {
-		t.Fatal("OS_REGION_NAME must be set for acceptance tests")
-	}
-
 	if OS_FLAVOR_ID == "" && OS_FLAVOR_NAME == "" {
 		t.Fatal("OS_FLAVOR_ID or OS_FLAVOR_NAME must be set for acceptance tests")
 	}
