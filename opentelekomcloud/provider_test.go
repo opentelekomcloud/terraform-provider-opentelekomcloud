@@ -65,14 +65,6 @@ func testAccPreCheckRequiredEnvVars(t *testing.T) {
 		t.Fatal("OS_REGION_NAME must be set for acceptance tests")
 	}
 
-	if OS_ACCESS_KEY == "" {
-		t.Fatal("OS_ACCESS_KEY must be set for acceptance tests")
-	}
-
-	if OS_SECRET_KEY == "" {
-		t.Fatal("OS_SECRET_KEY must be set for acceptance tests")
-	}
-
 	if OS_REGION_NAME == "" {
 		t.Fatal("OS_REGION_NAME must be set for acceptance tests")
 	}
@@ -150,6 +142,14 @@ func testAccPreCheckMaas(t *testing.T) {
 
 	if OS_ACCESS_KEY == "" || OS_SECRET_KEY == "" || OS_SRC_ACCESS_KEY == "" || OS_SRC_SECRET_KEY == "" {
 		t.Skip("OS_ACCESS_KEY, OS_SECRET_KEY, OS_SRC_ACCESS_KEY, and OS_SRC_SECRET_KEY  must be set for MAAS acceptance tests")
+	}
+}
+
+func testAccPreCheckS3(t *testing.T) {
+	testAccPreCheckRequiredEnvVars(t)
+
+	if OS_ACCESS_KEY == "" || OS_SECRET_KEY == "" {
+		t.Skip("OS_ACCESS_KEY and OS_SECRET_KEY must be set for S3 acceptance tests")
 	}
 }
 
