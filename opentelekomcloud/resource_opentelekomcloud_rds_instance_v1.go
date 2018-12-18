@@ -37,10 +37,10 @@ func resourceRdsInstance() *schema.Resource {
 			},
 
 			"name": &schema.Schema{
-				Type:     schema.TypeString,
-				Optional: true,
-				Computed: true,
-				ForceNew: false,
+				Type:             schema.TypeString,
+				Optional:         true,
+				Computed:         true,
+				ForceNew:         false,
 				DiffSuppressFunc: suppressDiffAll,
 			},
 
