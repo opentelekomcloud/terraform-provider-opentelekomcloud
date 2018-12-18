@@ -156,7 +156,7 @@ The following arguments are supported:
 
 * `name` - (Required) Specifies the DB instance name. The DB instance name of
     the same type is unique in the same tenant. The changes of the instance name
-	will be suppressed now.
+	will be suppressed in HA scenario.
 
 * `datastore` - (Required) Specifies database information. The structure is
     described below.
