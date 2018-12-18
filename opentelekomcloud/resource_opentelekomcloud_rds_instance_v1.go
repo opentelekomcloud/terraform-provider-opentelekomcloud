@@ -41,7 +41,7 @@ func resourceRdsInstance() *schema.Resource {
 				Optional:         true,
 				Computed:         true,
 				ForceNew:         false,
-				DiffSuppressFunc: suppressDiffAll,
+				DiffSuppressFunc: suppressRdsNameDiffs,
 			},
 
 			"datastore": &schema.Schema{

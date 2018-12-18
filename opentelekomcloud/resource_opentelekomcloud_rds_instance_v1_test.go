@@ -28,7 +28,6 @@ func TestAccRDSV1Instance_basic(t *testing.T) {
 					resource.TestCheckResourceAttr(
 						"opentelekomcloud_rds_instance_v1.instance", "availabilityzone", "eu-de-01"),
 				),
-				ExpectNonEmptyPlan: true,
 			},
 		},
 	})

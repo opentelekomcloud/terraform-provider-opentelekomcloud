@@ -118,3 +118,10 @@ func suppressAutoscalingGroupAvailabilityZoneDiffs(k, old, new string, d *schema
 
 	return false
 }
+
+func suppressRdsNameDiffs(k, old, new string, d *schema.ResourceData) bool {
+	if strings.HasPrefix(old, new) && strings.HasSuffix(old, "_node0") {
+		return true
+	}
+	return false
+}
