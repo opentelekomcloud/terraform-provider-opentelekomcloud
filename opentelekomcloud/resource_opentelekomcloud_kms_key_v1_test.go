@@ -145,7 +145,6 @@ func testAccKmsV1Key_basic(keyAlias string) string {
 	return fmt.Sprintf(`
 		resource "opentelekomcloud_kms_key_v1" "key_2" {
 			key_alias = "%s"
-			pending_days = "7"
 		}
 	`, keyAlias)
 }
@@ -155,7 +154,6 @@ func testAccKmsV1Key_update(keyAliasUpdate string) string {
 		resource "opentelekomcloud_kms_key_v1" "key_2" {
            key_alias       = "%s"
            key_description = "key update description"
-           pending_days = "7"
 		}
 	`, keyAliasUpdate)
 }
