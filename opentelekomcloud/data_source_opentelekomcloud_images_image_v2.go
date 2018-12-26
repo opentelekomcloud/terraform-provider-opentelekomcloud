@@ -80,6 +80,12 @@ func dataSourceImagesImageV2() *schema.Resource {
 				ForceNew: true,
 			},
 
+			"properties": {
+				Type:     schema.TypeMap,
+				Optional: true,
+				ForceNew: true,
+			},
+
 			// Computed values
 			"container_format": {
 				Type:     schema.TypeString,
@@ -172,6 +178,34 @@ func dataSourceImagesImageV2Read(d *schema.ResourceData, meta interface{}) error
 	allImages, err := images.ExtractImages(allPages)
 	if err != nil {
 		return fmt.Errorf("Unable to retrieve images: %s", err)
+	}
+
+	properties := d.Get("properties").(map[string]interface{})
+	imageProperties := resourceImagesImageV2ExpandProperties(properties)
+	if len(allImages) > 1 && len(imageProperties) > 0 {
+		var filteredImages []images.Image
+		for _, image := range allImages {
+			if len(image.Properties) > 0 {
+				match := true
+				for searchKey, searchValue := range imageProperties {
+					imageValue, ok := image.Properties[searchKey]
+					if !ok {
+						match = false
+						break
+					}
+
+					if searchValue != imageValue {
+						match = false
+						break
+					}
+				}
+
+				if match {
+					filteredImages = append(filteredImages, image)
+				}
+			}
+		}
+		allImages = filteredImages
 	}
 
 	if len(allImages) < 1 {
