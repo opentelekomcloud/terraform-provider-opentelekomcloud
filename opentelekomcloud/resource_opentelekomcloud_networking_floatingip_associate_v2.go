@@ -6,8 +6,8 @@ import (
 
 	"github.com/hashicorp/terraform/helper/schema"
 
-	"github.com/gophercloud/gophercloud"
-	"github.com/gophercloud/gophercloud/openstack/networking/v2/extensions/layer3/floatingips"
+	"github.com/huaweicloud/golangsdk"
+	"github.com/huaweicloud/golangsdk/openstack/networking/v2/extensions/layer3/floatingips"
 )
 
 func resourceNetworkingFloatingIPAssociateV2() *schema.Resource {
@@ -116,7 +116,7 @@ func resourceNetworkingFloatingIPAssociateV2Delete(d *schema.ResourceData, meta 
 	return nil
 }
 
-func resourceNetworkingFloatingIPAssociateV2IP2ID(client *gophercloud.ServiceClient, floatingIP string) (string, error) {
+func resourceNetworkingFloatingIPAssociateV2IP2ID(client *golangsdk.ServiceClient, floatingIP string) (string, error) {
 	listOpts := floatingips.ListOpts{
 		FloatingIP: floatingIP,
 	}

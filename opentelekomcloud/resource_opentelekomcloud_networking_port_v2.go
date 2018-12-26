@@ -10,8 +10,8 @@ import (
 	"github.com/hashicorp/terraform/helper/resource"
 	"github.com/hashicorp/terraform/helper/schema"
 
-	"github.com/gophercloud/gophercloud"
-	"github.com/gophercloud/gophercloud/openstack/networking/v2/ports"
+	"github.com/huaweicloud/golangsdk"
+	"github.com/huaweicloud/golangsdk/openstack/networking/v2/ports"
 )
 
 func resourceNetworkingPortV2() *schema.Resource {
@@ -77,6 +77,11 @@ func resourceNetworkingPortV2() *schema.Resource {
 				Computed: true,
 				Elem:     &schema.Schema{Type: schema.TypeString},
 				Set:      schema.HashString,
+			},
+			"no_security_groups": &schema.Schema{
+				Type:     schema.TypeBool,
+				Optional: true,
+				ForceNew: false,
 			},
 			"device_id": &schema.Schema{
 				Type:     schema.TypeString,
@@ -147,6 +152,16 @@ func resourceNetworkingPortV2Create(d *schema.ResourceData, meta interface{}) er
 	if !asu {
 		pAsu = &asu
 	}
+
+	var securityGroups []string
+	securityGroups = resourcePortSecurityGroupsV2(d)
+	noSecurityGroups := d.Get("no_security_groups").(bool)
+
+	// Check and make sure an invalid security group configuration wasn't given.
+	if noSecurityGroups && len(securityGroups) > 0 {
+		return fmt.Errorf("Cannot have both no_security_groups and security_group_ids set")
+	}
+
 	createOpts := PortCreateOpts{
 		ports.CreateOpts{
 			Name:                d.Get("name").(string),
@@ -155,12 +170,22 @@ func resourceNetworkingPortV2Create(d *schema.ResourceData, meta interface{}) er
 			MACAddress:          d.Get("mac_address").(string),
 			TenantID:            d.Get("tenant_id").(string),
 			DeviceOwner:         d.Get("device_owner").(string),
-			SecurityGroups:      resourcePortSecurityGroupsV2(d),
 			DeviceID:            d.Get("device_id").(string),
 			FixedIPs:            resourcePortFixedIpsV2(d),
 			AllowedAddressPairs: resourceAllowedAddressPairsV2(d),
 		},
 		MapValueSpecs(d),
+	}
+
+	if noSecurityGroups {
+		securityGroups = []string{}
+		createOpts.SecurityGroups = &securityGroups
+	}
+
+	// Only set SecurityGroups if one was specified.
+	// Otherwise this would mimic the no_security_groups action.
+	if len(securityGroups) > 0 {
+		createOpts.SecurityGroups = &securityGroups
 	}
 
 	log.Printf("[DEBUG] Create Options: %#v", createOpts)
@@ -249,20 +274,42 @@ func resourceNetworkingPortV2Update(d *schema.ResourceData, meta interface{}) er
 		return fmt.Errorf("Error creating OpenTelekomCloud networking client: %s", err)
 	}
 
+	noSecurityGroups := d.Get("no_security_groups").(bool)
+	var hasChange bool
+
 	// security_group_ids and allowed_address_pairs are able to send empty arrays
 	// to denote the removal of each. But their default zero-value is translated
 	// to "null", which has been reported to cause problems in vendor-modified
 	// OpenTelekomCloud clouds. Therefore, we must set them in each request update.
-	updateOpts := ports.UpdateOpts{
-		AllowedAddressPairs: resourceAllowedAddressPairsV2(d),
-		SecurityGroups:      resourcePortSecurityGroupsV2(d),
+	var updateOpts ports.UpdateOpts
+
+	if d.HasChange("allowed_address_pairs") {
+		hasChange = true
+		aap := resourceAllowedAddressPairsV2(d)
+		updateOpts.AllowedAddressPairs = &aap
+	}
+
+	if d.HasChange("no_security_groups") {
+		if noSecurityGroups {
+			hasChange = true
+			v := []string{}
+			updateOpts.SecurityGroups = &v
+		}
+	}
+
+	if d.HasChange("security_group_ids") {
+		hasChange = true
+		securityGroups := resourcePortSecurityGroupsV2(d)
+		updateOpts.SecurityGroups = &securityGroups
 	}
 
 	if d.HasChange("name") {
+		hasChange = true
 		updateOpts.Name = d.Get("name").(string)
 	}
 
 	if d.HasChange("admin_state_up") {
+		hasChange = true
 		asu, _ := ExtractValFromNid(d.Get("network_id").(string))
 		pAsu := resourcePortAdminStateUpV2(d)
 		if !asu {
@@ -272,24 +319,28 @@ func resourceNetworkingPortV2Update(d *schema.ResourceData, meta interface{}) er
 	}
 
 	if d.HasChange("device_owner") {
+		hasChange = true
 		updateOpts.DeviceOwner = d.Get("device_owner").(string)
 	}
 
 	if d.HasChange("device_id") {
+		hasChange = true
 		updateOpts.DeviceID = d.Get("device_id").(string)
 	}
 
 	if d.HasChange("fixed_ip") {
+		hasChange = true
 		updateOpts.FixedIPs = resourcePortFixedIpsV2(d)
 	}
 
-	log.Printf("[DEBUG] Updating Port %s with options: %+v", d.Id(), updateOpts)
+	if hasChange {
+		log.Printf("[DEBUG] Updating Port %s with options: %+v", d.Id(), updateOpts)
 
-	_, err = ports.Update(networkingClient, d.Id(), updateOpts).Extract()
-	if err != nil {
-		return fmt.Errorf("Error updating OpenTelekomCloud Neutron Network: %s", err)
+		_, err = ports.Update(networkingClient, d.Id(), updateOpts).Extract()
+		if err != nil {
+			return fmt.Errorf("Error updating OpenTelekomCloud Neutron Network: %s", err)
+		}
 	}
-
 	return resourceNetworkingPortV2Read(d, meta)
 }
 
@@ -378,7 +429,7 @@ func allowedAddressPairsHash(v interface{}) int {
 	return hashcode.String(buf.String())
 }
 
-func waitForNetworkPortActive(networkingClient *gophercloud.ServiceClient, portId string) resource.StateRefreshFunc {
+func waitForNetworkPortActive(networkingClient *golangsdk.ServiceClient, portId string) resource.StateRefreshFunc {
 	return func() (interface{}, string, error) {
 		p, err := ports.Get(networkingClient, portId).Extract()
 		if err != nil {
@@ -394,13 +445,13 @@ func waitForNetworkPortActive(networkingClient *gophercloud.ServiceClient, portI
 	}
 }
 
-func waitForNetworkPortDelete(networkingClient *gophercloud.ServiceClient, portId string) resource.StateRefreshFunc {
+func waitForNetworkPortDelete(networkingClient *golangsdk.ServiceClient, portId string) resource.StateRefreshFunc {
 	return func() (interface{}, string, error) {
 		log.Printf("[DEBUG] Attempting to delete OpenTelekomCloud Neutron Port %s", portId)
 
 		p, err := ports.Get(networkingClient, portId).Extract()
 		if err != nil {
-			if _, ok := err.(gophercloud.ErrDefault404); ok {
+			if _, ok := err.(golangsdk.ErrDefault404); ok {
 				log.Printf("[DEBUG] Successfully deleted OpenTelekomCloud Port %s", portId)
 				return p, "DELETED", nil
 			}
@@ -409,7 +460,7 @@ func waitForNetworkPortDelete(networkingClient *gophercloud.ServiceClient, portI
 
 		err = ports.Delete(networkingClient, portId).ExtractErr()
 		if err != nil {
-			if _, ok := err.(gophercloud.ErrDefault404); ok {
+			if _, ok := err.(golangsdk.ErrDefault404); ok {
 				log.Printf("[DEBUG] Successfully deleted OpenTelekomCloud Port %s", portId)
 				return p, "DELETED", nil
 			}

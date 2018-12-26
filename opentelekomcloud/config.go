@@ -13,15 +13,13 @@ import (
 	"github.com/aws/aws-sdk-go/aws/awserr"
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/s3"
-	"github.com/gophercloud/gophercloud"
-	"github.com/gophercloud/gophercloud/openstack"
-	"github.com/gophercloud/gophercloud/openstack/objectstorage/v1/swauth"
 	"github.com/hashicorp/errwrap"
 	"github.com/hashicorp/go-cleanhttp"
 	"github.com/hashicorp/terraform/helper/pathorcontents"
 	"github.com/hashicorp/terraform/terraform"
 	"github.com/huaweicloud/golangsdk"
 	huaweisdk "github.com/huaweicloud/golangsdk/openstack"
+	"github.com/huaweicloud/golangsdk/openstack/objectstorage/v1/swauth"
 )
 
 type Config struct {
@@ -44,7 +42,6 @@ type Config struct {
 	Username         string
 	UserID           string
 
-	OsClient *gophercloud.ProviderClient
 	HwClient *golangsdk.ProviderClient
 	s3sess   *session.Session
 }
@@ -78,11 +75,6 @@ func (c *Config) LoadAndValidate() error {
 	var osDebug bool
 	if os.Getenv("OS_DEBUG") != "" {
 		osDebug = true
-	}
-
-	err = c.newopenstackClient(transport, osDebug)
-	if err != nil {
-		return err
 	}
 
 	err = c.newhwClient(transport, osDebug)
@@ -185,60 +177,34 @@ func (c *Config) newS3Session(osDebug bool) error {
 	return nil
 }
 
-func (c *Config) newopenstackClient(transport *http.Transport, osDebug bool) error {
-	ao := gophercloud.AuthOptions{
-		DomainID:         c.DomainID,
-		DomainName:       c.DomainName,
-		IdentityEndpoint: c.IdentityEndpoint,
-		Password:         c.Password,
-		TenantID:         c.TenantID,
-		TenantName:       c.TenantName,
-		TokenID:          c.Token,
-		Username:         c.Username,
-		UserID:           c.UserID,
-	}
+func (c *Config) newhwClient(transport *http.Transport, osDebug bool) error {
+	var ao golangsdk.AuthOptionsProvider
 
-	client, err := openstack.NewClient(ao.IdentityEndpoint)
-	if err != nil {
-		return err
-	}
-
-	// Set UserAgent
-	client.UserAgent.Prepend(terraform.UserAgentString())
-
-	client.HTTPClient = http.Client{
-		Transport: &LogRoundTripper{
-			Rt:      transport,
-			OsDebug: osDebug,
-		},
-	}
-
-	// If using Swift Authentication, there's no need to validate authentication normally.
-	if !c.Swauth {
-		err = openstack.Authenticate(client, ao)
-		if err != nil {
-			return err
+	if c.AccessKey != "" && c.SecretKey != "" {
+		ao = golangsdk.AKSKAuthOptions{
+			IdentityEndpoint: c.IdentityEndpoint,
+			ProjectName:      c.TenantName,
+			ProjectId:        c.TenantID,
+			Region:           c.Region,
+			//			Domain:           c.DomainName,
+			AccessKey: c.AccessKey,
+			SecretKey: c.SecretKey,
+		}
+	} else {
+		ao = golangsdk.AuthOptions{
+			DomainID:         c.DomainID,
+			DomainName:       c.DomainName,
+			IdentityEndpoint: c.IdentityEndpoint,
+			Password:         c.Password,
+			TenantID:         c.TenantID,
+			TenantName:       c.TenantName,
+			TokenID:          c.Token,
+			Username:         c.Username,
+			UserID:           c.UserID,
 		}
 	}
 
-	c.OsClient = client
-	return nil
-}
-
-func (c *Config) newhwClient(transport *http.Transport, osDebug bool) error {
-	ao := golangsdk.AuthOptions{
-		DomainID:         c.DomainID,
-		DomainName:       c.DomainName,
-		IdentityEndpoint: c.IdentityEndpoint,
-		Password:         c.Password,
-		TenantID:         c.TenantID,
-		TenantName:       c.TenantName,
-		TokenID:          c.Token,
-		Username:         c.Username,
-		UserID:           c.UserID,
-	}
-
-	client, err := huaweisdk.NewClient(ao.IdentityEndpoint)
+	client, err := huaweisdk.NewClient(ao.GetIdentityEndpoint())
 	if err != nil {
 		return err
 	}
@@ -293,9 +259,9 @@ func (c *Config) computeS3conn(region string) (*s3.S3, error) {
 		return nil, fmt.Errorf("Missing credentials for Swift S3 Provider, need access_key and secret_key values for provider.")
 	}
 
-	client, err := openstack.NewImageServiceV2(c.OsClient, gophercloud.EndpointOpts{
+	client, err := huaweisdk.NewImageServiceV2(c.HwClient, golangsdk.EndpointOpts{
 		Region:       c.determineRegion(region),
-		Availability: c.getEndpointType(),
+		Availability: c.getHwEndpointType(),
 	})
 	// Bit of a hack, seems the only way to compute this.
 	endpoint := strings.Replace(client.Endpoint, "//ims", "//obs", 1)
@@ -306,24 +272,24 @@ func (c *Config) computeS3conn(region string) (*s3.S3, error) {
 	return s3conn, err
 }
 
-func (c *Config) blockStorageV1Client(region string) (*gophercloud.ServiceClient, error) {
-	return openstack.NewBlockStorageV1(c.OsClient, gophercloud.EndpointOpts{
+func (c *Config) blockStorageV1Client(region string) (*golangsdk.ServiceClient, error) {
+	return huaweisdk.NewBlockStorageV1(c.HwClient, golangsdk.EndpointOpts{
 		Region:       c.determineRegion(region),
-		Availability: c.getEndpointType(),
+		Availability: c.getHwEndpointType(),
 	})
 }
 
-func (c *Config) blockStorageV2Client(region string) (*gophercloud.ServiceClient, error) {
-	return openstack.NewBlockStorageV2(c.OsClient, gophercloud.EndpointOpts{
+func (c *Config) blockStorageV2Client(region string) (*golangsdk.ServiceClient, error) {
+	return huaweisdk.NewBlockStorageV2(c.HwClient, golangsdk.EndpointOpts{
 		Region:       c.determineRegion(region),
-		Availability: c.getEndpointType(),
+		Availability: c.getHwEndpointType(),
 	})
 }
 
-func (c *Config) computeV2Client(region string) (*gophercloud.ServiceClient, error) {
-	return openstack.NewComputeV2(c.OsClient, gophercloud.EndpointOpts{
+func (c *Config) computeV2Client(region string) (*golangsdk.ServiceClient, error) {
+	return huaweisdk.NewComputeV2(c.HwClient, golangsdk.EndpointOpts{
 		Region:       c.determineRegion(region),
-		Availability: c.getEndpointType(),
+		Availability: c.getHwEndpointType(),
 	})
 }
 
@@ -334,17 +300,17 @@ func (c *Config) dnsV2Client(region string) (*golangsdk.ServiceClient, error) {
 	})
 }
 
-func (c *Config) identityV3Client(region string) (*gophercloud.ServiceClient, error) {
-	return openstack.NewIdentityV3(c.OsClient, gophercloud.EndpointOpts{
+func (c *Config) identityV3Client(region string) (*golangsdk.ServiceClient, error) {
+	return huaweisdk.NewIdentityV3(c.HwClient, golangsdk.EndpointOpts{
 		Region:       c.determineRegion(region),
-		Availability: c.getEndpointType(),
+		Availability: c.getHwEndpointType(),
 	})
 }
 
-func (c *Config) imageV2Client(region string) (*gophercloud.ServiceClient, error) {
-	return openstack.NewImageServiceV2(c.OsClient, gophercloud.EndpointOpts{
+func (c *Config) imageV2Client(region string) (*golangsdk.ServiceClient, error) {
+	return huaweisdk.NewImageServiceV2(c.HwClient, golangsdk.EndpointOpts{
 		Region:       c.determineRegion(region),
-		Availability: c.getEndpointType(),
+		Availability: c.getHwEndpointType(),
 	})
 }
 
@@ -355,25 +321,25 @@ func (c *Config) networkingV1Client(region string) (*golangsdk.ServiceClient, er
 	})
 }
 
-func (c *Config) networkingV2Client(region string) (*gophercloud.ServiceClient, error) {
-	return openstack.NewNetworkV2(c.OsClient, gophercloud.EndpointOpts{
+func (c *Config) networkingV2Client(region string) (*golangsdk.ServiceClient, error) {
+	return huaweisdk.NewNetworkV2(c.HwClient, golangsdk.EndpointOpts{
 		Region:       c.determineRegion(region),
-		Availability: c.getEndpointType(),
+		Availability: c.getHwEndpointType(),
 	})
 }
 
-func (c *Config) objectStorageV1Client(region string) (*gophercloud.ServiceClient, error) {
+func (c *Config) objectStorageV1Client(region string) (*golangsdk.ServiceClient, error) {
 	// If Swift Authentication is being used, return a swauth client.
 	if c.Swauth {
-		return swauth.NewObjectStorageV1(c.OsClient, swauth.AuthOpts{
+		return swauth.NewObjectStorageV1(c.HwClient, swauth.AuthOpts{
 			User: c.Username,
 			Key:  c.Password,
 		})
 	}
 
-	return openstack.NewObjectStorageV1(c.OsClient, gophercloud.EndpointOpts{
+	return huaweisdk.NewObjectStorageV1(c.HwClient, golangsdk.EndpointOpts{
 		Region:       c.determineRegion(region),
-		Availability: c.getEndpointType(),
+		Availability: c.getHwEndpointType(),
 	})
 }
 
@@ -382,16 +348,6 @@ func (c *Config) SmnV2Client(region string) (*golangsdk.ServiceClient, error) {
 		Region:       c.determineRegion(region),
 		Availability: c.getHwEndpointType(),
 	})
-}
-
-func (c *Config) getEndpointType() gophercloud.Availability {
-	if c.EndpointType == "internal" || c.EndpointType == "internalURL" {
-		return gophercloud.AvailabilityInternal
-	}
-	if c.EndpointType == "admin" || c.EndpointType == "adminURL" {
-		return gophercloud.AvailabilityAdmin
-	}
-	return gophercloud.AvailabilityPublic
 }
 
 func (c *Config) loadCESClient(region string) (*golangsdk.ServiceClient, error) {
