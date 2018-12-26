@@ -509,3 +509,14 @@ func resourceImagesImageV2BuildTags(v []interface{}) []string {
 
 	return tags
 }
+
+func resourceImagesImageV2ExpandProperties(v map[string]interface{}) map[string]string {
+	properties := map[string]string{}
+	for key, value := range v {
+		if v, ok := value.(string); ok {
+			properties[key] = v
+		}
+	}
+
+	return properties
+}
