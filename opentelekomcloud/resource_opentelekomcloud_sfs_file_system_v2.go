@@ -2,12 +2,14 @@ package opentelekomcloud
 
 import (
 	"fmt"
+	"log"
+	"strings"
+	"time"
+
 	"github.com/hashicorp/terraform/helper/resource"
 	"github.com/hashicorp/terraform/helper/schema"
 	"github.com/huaweicloud/golangsdk"
 	"github.com/huaweicloud/golangsdk/openstack/sfs/v2/shares"
-	"log"
-	"time"
 )
 
 func resourceSFSFileSystemV2() *schema.Resource {
