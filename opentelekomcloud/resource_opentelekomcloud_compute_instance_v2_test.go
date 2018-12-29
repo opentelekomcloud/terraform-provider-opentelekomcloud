@@ -12,6 +12,7 @@ import (
 	"github.com/huaweicloud/golangsdk/openstack/compute/v2/extensions/secgroups"
 	"github.com/huaweicloud/golangsdk/openstack/compute/v2/extensions/volumeattach"
 	"github.com/huaweicloud/golangsdk/openstack/compute/v2/servers"
+	"github.com/huaweicloud/golangsdk/openstack/ecs/v1/tags"
 
 	//"github.com/huaweicloud/golangsdk/openstack/networking/v2/networks"
 	//"github.com/huaweicloud/golangsdk/openstack/networking/v2/ports"
@@ -68,6 +69,26 @@ func TestAccComputeV2Instance_tags(t *testing.T) {
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckComputeV2InstanceExists("opentelekomcloud_compute_instance_v2.instance_1", &instance),
 					testAccCheckComputeV2InstanceNoTags(&instance),
+				),
+			},
+		},
+	})
+}
+
+func TestAccComputeV2Instance_key_value_tags(t *testing.T) {
+	var instance servers.Server
+
+	resource.Test(t, resource.TestCase{
+		PreCheck:     func() { testAccPreCheck(t) },
+		Providers:    testAccProviders,
+		CheckDestroy: testAccCheckComputeV2InstanceDestroy,
+		Steps: []resource.TestStep{
+			resource.TestStep{
+				Config: testAccComputeV2Instance_key_value_tag,
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckComputeV2InstanceExists("opentelekomcloud_compute_instance_v2.instance_1", &instance),
+					testAccCheckComputeV2InstanceTagV1(&instance, "foo", "bar"),
+					testAccCheckComputeV2InstanceTagV1(&instance, "key", "value"),
 				),
 			},
 		},
@@ -457,6 +478,32 @@ func testAccCheckComputeV2InstanceNoMetadataKey(
 	}
 }
 
+func testAccCheckComputeV2InstanceTagV1(
+	instance *servers.Server, k, v string) resource.TestCheckFunc {
+	return func(s *terraform.State) error {
+		config := testAccProvider.Meta().(*Config)
+		client, err := config.loadECSV1Client(OS_REGION_NAME)
+		if err != nil {
+			return fmt.Errorf("Error creating OpenTelekomCloud compute v1 client: %s", err)
+		}
+
+		taglist, err := tags.Get(client, instance.ID).Extract()
+		for _, val := range taglist.Tags {
+			if k != val.Key {
+				continue
+			}
+
+			if v == val.Value {
+				return nil
+			}
+
+			return fmt.Errorf("Bad value for %s: %s", k, val.Value)
+		}
+
+		return fmt.Errorf("Tag not found: %s", k)
+	}
+}
+
 func testAccCheckComputeV2InstanceTags(
 	instance *servers.Server, tag1, tag2 string) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
@@ -612,6 +659,24 @@ resource "opentelekomcloud_compute_instance_v2" "instance_1" {
   }
   network {
     uuid = "%s"
+  }
+}
+`, OS_AVAILABILITY_ZONE, OS_NETWORK_ID)
+
+var testAccComputeV2Instance_key_value_tag = fmt.Sprintf(`
+resource "opentelekomcloud_compute_instance_v2" "instance_1" {
+  name = "instance_1"
+  security_groups = ["default"]
+  availability_zone = "%s"
+  metadata {
+    foo = "bar"
+  }
+  network {
+    uuid = "%s"
+  }
+  tag {
+    foo = "bar"
+    key = "value"
   }
 }
 `, OS_AVAILABILITY_ZONE, OS_NETWORK_ID)

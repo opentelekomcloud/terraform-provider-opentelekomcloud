@@ -23,6 +23,7 @@ import (
 	"github.com/huaweicloud/golangsdk/openstack/compute/v2/flavors"
 	"github.com/huaweicloud/golangsdk/openstack/compute/v2/images"
 	"github.com/huaweicloud/golangsdk/openstack/compute/v2/servers"
+	ecstags "github.com/huaweicloud/golangsdk/openstack/ecs/v1/tags"
 )
 
 func resourceComputeInstanceV2() *schema.Resource {
@@ -352,10 +353,17 @@ func resourceComputeInstanceV2() *schema.Resource {
 				Default:  false,
 			},
 			"tags": &schema.Schema{
-				Type:     schema.TypeSet,
-				Optional: true,
-				Elem:     &schema.Schema{Type: schema.TypeString},
-				Set:      schema.HashString,
+				Type:          schema.TypeSet,
+				Optional:      true,
+				Elem:          &schema.Schema{Type: schema.TypeString},
+				Set:           schema.HashString,
+				ConflictsWith: []string{"tag"},
+				Deprecated:    "Use field tag instead",
+			},
+			"tag": &schema.Schema{
+				Type:          schema.TypeMap,
+				Optional:      true,
+				ConflictsWith: []string{"tags"},
 			},
 			/* "force_delete": &schema.Schema{
 				Type:     schema.TypeBool,
@@ -373,6 +381,14 @@ func resourceComputeInstanceV2() *schema.Resource {
 			},
 		},
 	}
+}
+
+func resourceComputeTags(d *schema.ResourceData) map[string]string {
+	m := make(map[string]string)
+	for key, val := range d.Get("tags").(map[string]interface{}) {
+		m[key] = val.(string)
+	}
+	return m
 }
 
 func resourceComputeInstanceV2Create(d *schema.ResourceData, meta interface{}) error {
@@ -517,6 +533,15 @@ func resourceComputeInstanceV2Create(d *schema.ResourceData, meta interface{}) e
 			log.Printf("[WARN] Error setting auto recovery of instance:%s, err=%s", server.ID, err)
 		}
 	}
+
+	if hasFilledOpt(d, "tag") {
+		tagmap := d.Get("tag").(map[string]interface{})
+		log.Printf("[DEBUG] Setting tag(key/value): %v", tagmap)
+		err = setTagForInstance(d, meta, server.ID, tagmap)
+		if err != nil {
+			log.Printf("[WARN] Error setting tag(key/value) of instance:%s, err=%s", server.ID, err)
+		}
+	}
 	return resourceComputeInstanceV2Read(d, meta)
 }
 
@@ -625,24 +650,44 @@ func resourceComputeInstanceV2Read(d *schema.ResourceData, meta interface{}) err
 	// Set the region
 	d.Set("region", GetRegion(d, config))
 
-	taglist, err := GetServerTags(computeClient, d.Id())
-	if err != nil {
-		return err
-	}
-	d.Set("tags", taglist.Tags)
-	// Filter out network name if it is in the list
-	tagset := d.Get("tags").(*schema.Set)
-	name := GetNetworkName(d)
-	if name != "" {
-		tagset.Remove(name)
-	}
-	d.Set("tags", tagset.List())
-
 	ar, err := resourceECSAutoRecoveryV1Read(d, meta, d.Id())
 	if err != nil && !isResourceNotFound(err) {
 		return fmt.Errorf("Error reading auto recovery of instance:%s, err=%s", d.Id(), err)
 	}
 	d.Set("auto_recovery", ar)
+
+	// set instance tag
+	if _, ok := d.GetOk("tag"); ok {
+		ecsv1client, err := chooseECSV1Client(d, config)
+		if err != nil {
+			return fmt.Errorf("Error creating OpenTelekomCloud compute v1 client: %s", err)
+		}
+		ecsTaglist, err := ecstags.Get(ecsv1client, d.Id()).Extract()
+		if err != nil {
+			return fmt.Errorf("Error fetching OpenTelekomCloud instance tags: %s", err)
+		}
+
+		tagmap := make(map[string]string)
+		for _, val := range ecsTaglist.Tags {
+			tagmap[val.Key] = val.Value
+		}
+		if err := d.Set("tag", tagmap); err != nil {
+			return fmt.Errorf("[DEBUG] Error saving tag to state for OpenTelekomCloud instance (%s): %s", d.Id(), err)
+		}
+	} else if _, ok := d.GetOk("tags"); ok {
+		taglist, err := GetServerTags(computeClient, d.Id())
+		if err != nil {
+			return err
+		}
+		d.Set("tags", taglist.Tags)
+		// Filter out network name if it is in the list
+		tagset := d.Get("tags").(*schema.Set)
+		name := GetNetworkName(d)
+		if name != "" {
+			tagset.Remove(name)
+		}
+		d.Set("tags", tagset.List())
+	}
 
 	return nil
 }
