@@ -91,6 +91,21 @@ func TestAccComputeV2Instance_key_value_tags(t *testing.T) {
 					testAccCheckComputeV2InstanceTagV1(&instance, "key", "value"),
 				),
 			},
+			resource.TestStep{
+				Config: testAccComputeV2Instance_key_value_tag2,
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckComputeV2InstanceExists("opentelekomcloud_compute_instance_v2.instance_1", &instance),
+					testAccCheckComputeV2InstanceTagV1(&instance, "foo2", "bar2"),
+					testAccCheckComputeV2InstanceTagV1(&instance, "key", "value2"),
+				),
+			},
+			resource.TestStep{
+				Config: testAccComputeV2Instance_notags,
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckComputeV2InstanceExists("opentelekomcloud_compute_instance_v2.instance_1", &instance),
+					testAccCheckComputeV2InstanceNoTagV1(&instance),
+				),
+			},
 		},
 	})
 }
@@ -504,6 +519,28 @@ func testAccCheckComputeV2InstanceTagV1(
 	}
 }
 
+func testAccCheckComputeV2InstanceNoTagV1(
+	instance *servers.Server) resource.TestCheckFunc {
+	return func(s *terraform.State) error {
+		config := testAccProvider.Meta().(*Config)
+		client, err := config.loadECSV1Client(OS_REGION_NAME)
+		if err != nil {
+			return fmt.Errorf("Error creating OpenTelekomCloud compute v1 client: %s", err)
+		}
+
+		taglist, err := tags.Get(client, instance.ID).Extract()
+
+		if taglist.Tags == nil {
+			return nil
+		}
+		if len(taglist.Tags) == 0 {
+			return nil
+		}
+
+		return fmt.Errorf("Expected no tags, but found %v", taglist.Tags)
+	}
+}
+
 func testAccCheckComputeV2InstanceTags(
 	instance *servers.Server, tag1, tag2 string) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
@@ -677,6 +714,24 @@ resource "opentelekomcloud_compute_instance_v2" "instance_1" {
   tag {
     foo = "bar"
     key = "value"
+  }
+}
+`, OS_AVAILABILITY_ZONE, OS_NETWORK_ID)
+
+var testAccComputeV2Instance_key_value_tag2 = fmt.Sprintf(`
+resource "opentelekomcloud_compute_instance_v2" "instance_1" {
+  name = "instance_1"
+  security_groups = ["default"]
+  availability_zone = "%s"
+  metadata {
+    foo = "bar"
+  }
+  network {
+    uuid = "%s"
+  }
+  tag {
+    foo2 = "bar2"
+    key = "value2"
   }
 }
 `, OS_AVAILABILITY_ZONE, OS_NETWORK_ID)

@@ -383,14 +383,6 @@ func resourceComputeInstanceV2() *schema.Resource {
 	}
 }
 
-func resourceComputeTags(d *schema.ResourceData) map[string]string {
-	m := make(map[string]string)
-	for key, val := range d.Get("tags").(map[string]interface{}) {
-		m[key] = val.(string)
-	}
-	return m
-}
-
 func resourceComputeInstanceV2Create(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*Config)
 	computeClient, err := config.computeV2HWClient(GetRegion(d, config))
@@ -920,6 +912,31 @@ func resourceComputeInstanceV2Update(d *schema.ResourceData, meta interface{}) e
 			_, err := CreateServerTags(computeClient, d.Id(), taglist)
 			if err != nil {
 				return fmt.Errorf("Error creating tags for instance (%s): %s", d.Id(), err)
+			}
+		}
+	}
+
+	if d.HasChange("tag") {
+		ecsv1Client, err := chooseECSV1Client(d, config)
+		if err != nil {
+			return fmt.Errorf("Error creating OpenTelekomCloud compute v1 client: %s", err)
+		}
+		oldTags, err := ecstags.Get(ecsv1Client, d.Id()).Extract()
+		if err != nil {
+			return fmt.Errorf("Error fetching OpenTelekomCloud instance tags: %s", err)
+		}
+		deleteopts := ecstags.BatchOpts{Action: ecstags.ActionDelete, Tags: oldTags.Tags}
+		deleteTags := ecstags.BatchAction(ecsv1Client, d.Id(), deleteopts)
+		if deleteTags.Err != nil {
+			return fmt.Errorf("Error updating OpenTelekomCloud instance tags: %s", deleteTags.Err)
+		}
+
+		if hasFilledOpt(d, "tag") {
+			tagmap := d.Get("tag").(map[string]interface{})
+			log.Printf("[DEBUG] Setting tag(key/value): %v", tagmap)
+			err = setTagForInstance(d, meta, d.Id(), tagmap)
+			if err != nil {
+				log.Printf("[WARN] Error setting tag(key/value) of instance:%s, err=%s", d.Id(), err)
 			}
 		}
 	}
