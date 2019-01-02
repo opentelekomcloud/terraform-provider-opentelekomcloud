@@ -283,6 +283,9 @@ function, or the `template_cloudinit_config` resource.
 
 ## Argument Reference
 
+~> **NOTE:** The `tags` attribute has been deprecated and might
+be removed in future releases, please use `tag` instead.
+
 The following arguments are supported:
 
 * `region` - (Optional) The region in which to create the server instance. If
@@ -349,7 +352,9 @@ The following arguments are supported:
     defining one or more files and their contents. The personality structure
     is described below.
 
-* `tags` - (Optional) The tags of the image. It must be a list of strings.
+* `tags` - **DEPRECATED** (Optional) The tags of the image. It must be a list of strings.
+
+* `tag` - (Optional) Tags key/value pairs to associate with the instance.
 
 * `stop_before_destroy` - (Optional) Whether to try stop instance gracefully
     before destroying it, thus giving chance for guest OS daemons to stop correctly.
