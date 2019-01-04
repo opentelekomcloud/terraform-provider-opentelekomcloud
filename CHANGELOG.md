@@ -1,4 +1,28 @@
 ## 1.5.0 (Unreleased)
+
+FEATURES:
+
+* **New Data Source:** `opentelekomcloud_dcs_az_v1` [GH-154]
+* **New Data Source:** `opentelekomcloud_dcs_maintainwindow_v1` [GH-154]
+* **New Data Source:** `opentelekomcloud_dcs_product_v1` [GH-154]
+* **New Resource:** `opentelekomcloud_networking_floatingip_associate_v2` [GH-153]
+* **New Resource:** `opentelekomcloud_dcs_instance_v1` [GH-154]
+
+BUG FIXES:
+
+* `resource/opentelekomcloud_vpc_subnet_v1`: Remove UNKNOWN status to avoid error [GH-158]
+* `resource/opentelekomcloud_rds_instance_v1`: Suppress rds name change [GH-161]
+* `resource/opentelekomcloud_kms_key_v1`: Add default value of pending_days [GH-163]
+* `all resources`: Expose real error message of BadRequest error [GH-164]
+* `resource/opentelekomcloud_sfs_file_system_v2`: Suppress sfs system metadata [GH-168]
+
+ENHANCEMENTS:
+
+* Add AKSK authentication support [GH-157]
+* `data/opentelekomcloud_images_image_v2`: Add properties filter support for images data source [GH-165]
+* `resource/opentelekomcloud_compute_instance_v2`: Add key/value tag support [GH-169]
+* `data/opentelekomcloud_vpc_subnet_v1`: Sort vpc subnet ids by network ip availabilities [GH-171]
+
 ## 1.4.0 (December 10, 2018)
 
 FEATURES:
