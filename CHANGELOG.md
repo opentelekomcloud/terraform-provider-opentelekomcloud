@@ -1,27 +1,27 @@
-## 1.5.0 (Unreleased)
+## 1.5.0 (January 07, 2019)
 
 FEATURES:
 
-* **New Data Source:** `opentelekomcloud_dcs_az_v1` [GH-154]
-* **New Data Source:** `opentelekomcloud_dcs_maintainwindow_v1` [GH-154]
-* **New Data Source:** `opentelekomcloud_dcs_product_v1` [GH-154]
-* **New Resource:** `opentelekomcloud_networking_floatingip_associate_v2` [GH-153]
-* **New Resource:** `opentelekomcloud_dcs_instance_v1` [GH-154]
+* **New Data Source:** `opentelekomcloud_dcs_az_v1` ([#154](https://github.com/terraform-providers/terraform-provider-opentelekomcloud/issues/154))
+* **New Data Source:** `opentelekomcloud_dcs_maintainwindow_v1` ([#154](https://github.com/terraform-providers/terraform-provider-opentelekomcloud/issues/154))
+* **New Data Source:** `opentelekomcloud_dcs_product_v1` ([#154](https://github.com/terraform-providers/terraform-provider-opentelekomcloud/issues/154))
+* **New Resource:** `opentelekomcloud_networking_floatingip_associate_v2` ([#153](https://github.com/terraform-providers/terraform-provider-opentelekomcloud/issues/153))
+* **New Resource:** `opentelekomcloud_dcs_instance_v1` ([#154](https://github.com/terraform-providers/terraform-provider-opentelekomcloud/issues/154))
 
 BUG FIXES:
 
-* `resource/opentelekomcloud_vpc_subnet_v1`: Remove UNKNOWN status to avoid error [GH-158]
-* `resource/opentelekomcloud_rds_instance_v1`: Suppress rds name change [GH-161]
-* `resource/opentelekomcloud_kms_key_v1`: Add default value of pending_days [GH-163]
-* `all resources`: Expose real error message of BadRequest error [GH-164]
-* `resource/opentelekomcloud_sfs_file_system_v2`: Suppress sfs system metadata [GH-168]
+* `resource/opentelekomcloud_vpc_subnet_v1`: Remove UNKNOWN status to avoid error ([#158](https://github.com/terraform-providers/terraform-provider-opentelekomcloud/issues/158))
+* `resource/opentelekomcloud_rds_instance_v1`: Suppress rds name change ([#161](https://github.com/terraform-providers/terraform-provider-opentelekomcloud/issues/161))
+* `resource/opentelekomcloud_kms_key_v1`: Add default value of pending_days ([#163](https://github.com/terraform-providers/terraform-provider-opentelekomcloud/issues/163))
+* `all resources`: Expose real error message of BadRequest error ([#164](https://github.com/terraform-providers/terraform-provider-opentelekomcloud/issues/164))
+* `resource/opentelekomcloud_sfs_file_system_v2`: Suppress sfs system metadata ([#168](https://github.com/terraform-providers/terraform-provider-opentelekomcloud/issues/168))
 
 ENHANCEMENTS:
 
-* Add AKSK authentication support [GH-157]
-* `data/opentelekomcloud_images_image_v2`: Add properties filter support for images data source [GH-165]
-* `resource/opentelekomcloud_compute_instance_v2`: Add key/value tag support [GH-169]
-* `data/opentelekomcloud_vpc_subnet_v1`: Sort vpc subnet ids by network ip availabilities [GH-171]
+* Add AKSK authentication support ([#157](https://github.com/terraform-providers/terraform-provider-opentelekomcloud/issues/157))
+* `data/opentelekomcloud_images_image_v2`: Add properties filter support for images data source ([#165](https://github.com/terraform-providers/terraform-provider-opentelekomcloud/issues/165))
+* `resource/opentelekomcloud_compute_instance_v2`: Add key/value tag support ([#169](https://github.com/terraform-providers/terraform-provider-opentelekomcloud/issues/169))
+* `data/opentelekomcloud_vpc_subnet_v1`: Sort vpc subnet ids by network ip availabilities ([#171](https://github.com/terraform-providers/terraform-provider-opentelekomcloud/issues/171))
 
 ## 1.4.0 (December 10, 2018)
 
