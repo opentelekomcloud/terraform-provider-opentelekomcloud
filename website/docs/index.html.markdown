@@ -121,7 +121,8 @@ information has been scrubbed first!
 
 ## Creating an issue
 
-Issues can be used to keep track of bugs, enhancements, or other requests.
+[Issues](https://github.com/terraform-providers/terraform-provider-opentelekomcloud/issues)
+can be used to keep track of bugs, enhancements, or other requests.
 See the github help [here](https://help.github.com/articles/creating-an-issue/)
 
 ## Testing and Development
