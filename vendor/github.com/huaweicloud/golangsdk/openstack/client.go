@@ -9,6 +9,7 @@ import (
 
 	"github.com/huaweicloud/golangsdk"
 	tokens2 "github.com/huaweicloud/golangsdk/openstack/identity/v2/tokens"
+	"github.com/huaweicloud/golangsdk/openstack/identity/v3/domains"
 	"github.com/huaweicloud/golangsdk/openstack/identity/v3/endpoints"
 	"github.com/huaweicloud/golangsdk/openstack/identity/v3/projects"
 	"github.com/huaweicloud/golangsdk/openstack/identity/v3/services"
@@ -130,7 +131,12 @@ func Authenticate(client *golangsdk.ProviderClient, options golangsdk.AuthOption
 		akskAuthOptions, isAkSkOptions := options.(golangsdk.AKSKAuthOptions)
 
 		if isAkSkOptions {
-			return v3AKSKAuth(client, endpoint, akskAuthOptions, golangsdk.EndpointOpts{})
+			if akskAuthOptions.AgencyDomainName != "" && akskAuthOptions.AgencyName != "" {
+				return authWithAgencyByAKSK(client, endpoint, akskAuthOptions, golangsdk.EndpointOpts{})
+			} else {
+				return v3AKSKAuth(client, endpoint, akskAuthOptions, golangsdk.EndpointOpts{})
+			}
+
 		} else {
 			return fmt.Errorf("Unrecognized auth options provider: %s", reflect.TypeOf(options))
 		}
@@ -302,7 +308,11 @@ func v3AKSKAuth(client *golangsdk.ProviderClient, endpoint string, options golan
 		v3Client.Endpoint = endpoint
 	}
 
+	defer func() {
+		v3Client.AKSKAuthOptions.ProjectId = options.ProjectId
+	}()
 	v3Client.AKSKAuthOptions = options
+	v3Client.AKSKAuthOptions.ProjectId = ""
 
 	if options.ProjectId == "" && options.ProjectName != "" {
 		id, err := getProjectID(v3Client, options.ProjectName)
@@ -371,6 +381,136 @@ func v3AKSKAuth(client *golangsdk.ProviderClient, endpoint string, options golan
 	}
 
 	return nil
+}
+
+func authWithAgencyByAKSK(client *golangsdk.ProviderClient, endpoint string, opts golangsdk.AKSKAuthOptions, eo golangsdk.EndpointOpts) error {
+
+	err := v3AKSKAuth(client, endpoint, opts, eo)
+	if err != nil {
+		return err
+	}
+
+	v3Client, err := NewIdentityV3(client, eo)
+	if err != nil {
+		return err
+	}
+
+	domainID, err := getDomainID(opts.Domain, v3Client)
+	if err != nil {
+		return err
+	}
+
+	opts2 := golangsdk.AgencyAuthOptions{
+		DomainID:         domainID,
+		AgencyName:       opts.AgencyName,
+		AgencyDomainName: opts.AgencyDomainName,
+		DelegatedProject: opts.DelegatedProject,
+	}
+	result := tokens3.Create(v3Client, &opts2)
+	token, err := result.ExtractToken()
+	if err != nil {
+		return err
+	}
+
+	project, err := result.ExtractProject()
+	if err != nil {
+		return err
+	}
+
+	catalog, err := result.ExtractServiceCatalog()
+	if err != nil {
+		return err
+	}
+
+	client.TokenID = token.ID
+	if project != nil {
+		client.ProjectID = project.ID
+	}
+
+	client.ReauthFunc = func() error {
+		client.TokenID = ""
+		return authWithAgencyByAKSK(client, endpoint, opts, eo)
+	}
+
+	client.EndpointLocator = func(opts golangsdk.EndpointOpts) (string, error) {
+		return V3EndpointURL(catalog, opts)
+	}
+
+	client.AKSKAuthOptions.AccessKey = ""
+	return nil
+}
+
+func getDomainID(name string, client *golangsdk.ServiceClient) (string, error) {
+	old := client.Endpoint
+	defer func() { client.Endpoint = old }()
+
+	endpoint, err := client.EndpointLocator(
+		golangsdk.EndpointOpts{
+			Type:         "identity",
+			Availability: golangsdk.AvailabilityPublic,
+		})
+	if err != nil {
+		if v, ok := err.(ErrMultipleMatchingEndpointsV3); ok {
+			e := ""
+			for _, i := range v.Endpoints {
+				if i.Region == "" {
+					e = golangsdk.NormalizeURL(i.URL) + "auth/"
+					break
+				}
+			}
+
+			if e == "" {
+				return "", err
+			}
+			client.Endpoint = e
+		} else {
+			return "", err
+		}
+	} else {
+		client.Endpoint = endpoint + "auth/"
+	}
+
+	opts := domains.ListOpts{
+		Name: name,
+	}
+	allPages, err := domains.List(client, &opts).AllPages()
+	if err != nil {
+		return "", fmt.Errorf("List domains failed, err=%s", err)
+	}
+
+	all, err := domains.ExtractDomains(allPages)
+	if err != nil {
+		return "", fmt.Errorf("Extract domains failed, err=%s", err)
+	}
+
+	count := len(all)
+	switch count {
+	case 0:
+		err := &golangsdk.ErrResourceNotFound{}
+		err.ResourceType = "iam"
+		err.Name = name
+		return "", err
+	case 1:
+		return all[0].ID, nil
+	default:
+		err := &golangsdk.ErrMultipleResourcesFound{}
+		err.ResourceType = "iam"
+		err.Name = name
+		err.Count = count
+		return "", err
+	}
+}
+
+func HeaderForAdminToken(c *golangsdk.ServiceClient) (map[string]string, error) {
+	if c.AKSKAuthOptions.AccessKey != "" {
+		i, err := getDomainID(c.AKSKAuthOptions.Domain, c)
+		if err != nil {
+			return nil, err
+		}
+
+		return map[string]string{"X-Domain-Id": i}, nil
+	}
+	return nil, nil
 }
 
 // NewIdentityV2 creates a ServiceClient that may be used to interact with the
@@ -636,6 +776,15 @@ func NewNatV2(client *golangsdk.ProviderClient, eo golangsdk.EndpointOpts) (*gol
 	return sc, err
 }
 
+// MapReduceV1 creates a ServiceClient that may be used with the v1 MapReduce service.
+func MapReduceV1(client *golangsdk.ProviderClient, eo golangsdk.EndpointOpts) (*golangsdk.ServiceClient, error) {
+	sc, err := initClientOpts(client, eo, "network")
+	sc.Endpoint = strings.Replace(sc.Endpoint, "vpc", "mrs", 1)
+	sc.Endpoint = sc.Endpoint + "v1.1/"
+	sc.ResourceBase = sc.Endpoint + client.ProjectID + "/"
+	return sc, err
+}
+
 // NewMapReduceV1 creates a ServiceClient that may be used with the v1 MapReduce service.
 func NewMapReduceV1(client *golangsdk.ProviderClient, eo golangsdk.EndpointOpts) (*golangsdk.ServiceClient, error) {
 	sc, err := initClientOpts(client, eo, "mrs")
@@ -768,6 +917,14 @@ func NewMAASV1(client *golangsdk.ProviderClient, eo golangsdk.EndpointOpts) (*go
 	return sc, err
 }
 
+// MAASV1 creates a ServiceClient that may be used with the v1 MAAS service.
+func MAASV1(client *golangsdk.ProviderClient, eo golangsdk.EndpointOpts) (*golangsdk.ServiceClient, error) {
+	sc, err := initClientOpts(client, eo, "network")
+	sc.Endpoint = "https://oms.myhuaweicloud.com/v1/"
+	sc.ResourceBase = sc.Endpoint + client.ProjectID + "/"
+	return sc, err
+}
+
 func NewHwAntiDDoSV1(client *golangsdk.ProviderClient, eo golangsdk.EndpointOpts) (*golangsdk.ServiceClient, error) {
 	sc, err := initClientOpts(client, eo, "volumev2")
 	if err != nil {
@@ -795,4 +952,15 @@ func NewELBV1(client *golangsdk.ProviderClient, eo golangsdk.EndpointOpts) (*gol
 func NewRDSV1(client *golangsdk.ProviderClient, eo golangsdk.EndpointOpts) (*golangsdk.ServiceClient, error) {
 	sc, err := initClientOpts(client, eo, "rdsv1")
 	return sc, err
+}
+
+func NewSDKClient(c *golangsdk.ProviderClient, eo golangsdk.EndpointOpts, serviceType string) (*golangsdk.ServiceClient, error) {
+	switch serviceType {
+	case "mls":
+		return NewMLSV1(c, eo)
+	case "dws":
+		return NewDWSClient(c, eo)
+	}
+
+	return initClientOpts(c, eo, serviceType)
 }
