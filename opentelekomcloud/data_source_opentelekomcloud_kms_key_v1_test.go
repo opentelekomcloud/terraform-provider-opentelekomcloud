@@ -16,10 +16,10 @@ func TestAccKmsKeyV1DataSource_basic(t *testing.T) {
 		PreCheck:  func() { testAccPreCheck(t) },
 		Providers: testAccProviders,
 		Steps: []resource.TestStep{
-			resource.TestStep{
+			{
 				Config: testAccKmsKeyV1DataSource_key,
 			},
-			resource.TestStep{
+			{
 				Config: testAccKmsKeyV1DataSource_basic,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckKmsKeyV1DataSourceID("data.opentelekomcloud_kms_key_v1.key1"),

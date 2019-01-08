@@ -13,139 +13,139 @@ func dataSourceBMSServersV2() *schema.Resource {
 		Read: dataSourceBMSServersV2Read,
 
 		Schema: map[string]*schema.Schema{
-			"region": &schema.Schema{
+			"region": {
 				Type:     schema.TypeString,
 				Optional: true,
 				Computed: true,
 				ForceNew: true,
 			},
-			"id": &schema.Schema{
+			"id": {
 				Type:     schema.TypeString,
 				Optional: true,
 			},
-			"user_id": &schema.Schema{
+			"user_id": {
 				Type:     schema.TypeString,
 				Optional: true,
 			},
-			"name": &schema.Schema{
+			"name": {
 				Type:     schema.TypeString,
 				Optional: true,
 			},
-			"status": &schema.Schema{
+			"status": {
 				Type:     schema.TypeString,
 				Optional: true,
 			},
-			"tenant_id": &schema.Schema{
+			"tenant_id": {
 				Type:     schema.TypeString,
 				Computed: true,
 			},
-			"host_status": &schema.Schema{
+			"host_status": {
 				Type:     schema.TypeString,
 				Optional: true,
 			},
-			"host_id": &schema.Schema{
+			"host_id": {
 				Type:     schema.TypeString,
 				Computed: true,
 			},
-			"progress": &schema.Schema{
+			"progress": {
 				Type:     schema.TypeInt,
 				Computed: true,
 			},
-			"key_name": &schema.Schema{
+			"key_name": {
 				Type:     schema.TypeString,
 				Optional: true,
 			},
-			"flavor_id": &schema.Schema{
+			"flavor_id": {
 				Type:     schema.TypeString,
 				Optional: true,
 			},
-			"metadata": &schema.Schema{
+			"metadata": {
 				Type:     schema.TypeMap,
 				Computed: true,
 			},
-			"image_id": &schema.Schema{
+			"image_id": {
 				Type:     schema.TypeString,
 				Optional: true,
 			},
-			"access_ip_v4": &schema.Schema{
+			"access_ip_v4": {
 				Type:     schema.TypeString,
 				Computed: true,
 			},
-			"access_ip_v6": &schema.Schema{
+			"access_ip_v6": {
 				Type:     schema.TypeString,
 				Computed: true,
 			},
-			"network": &schema.Schema{
+			"network": {
 				Type:     schema.TypeList,
 				Computed: true,
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
-						"name": &schema.Schema{
+						"name": {
 							Type:     schema.TypeString,
 							Computed: true,
 						},
-						"ip": &schema.Schema{
+						"ip": {
 							Type:     schema.TypeString,
 							Computed: true,
 						},
-						"mac": &schema.Schema{
+						"mac": {
 							Type:     schema.TypeString,
 							Computed: true,
 						},
-						"type": &schema.Schema{
+						"type": {
 							Type:     schema.TypeString,
 							Computed: true,
 						},
-						"version": &schema.Schema{
+						"version": {
 							Type:     schema.TypeFloat,
 							Computed: true,
 						},
 					},
 				},
 			},
-			"security_groups": &schema.Schema{
+			"security_groups": {
 				Type:     schema.TypeList,
 				Computed: true,
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
-						"name": &schema.Schema{
+						"name": {
 							Type:     schema.TypeString,
 							Computed: true,
 						},
 					},
 				},
 			},
-			"tags": &schema.Schema{
+			"tags": {
 				Type:     schema.TypeSet,
 				Computed: true,
 				Elem:     &schema.Schema{Type: schema.TypeString},
 				Set:      schema.HashString,
 			},
-			"locked": &schema.Schema{
+			"locked": {
 				Type:     schema.TypeBool,
 				Computed: true,
 			},
-			"config_drive": &schema.Schema{
+			"config_drive": {
 				Type:     schema.TypeString,
 				Computed: true,
 			},
-			"availability_zone": &schema.Schema{
+			"availability_zone": {
 				Type:     schema.TypeString,
 				Computed: true,
 			},
-			"description": &schema.Schema{
+			"description": {
 				Type:     schema.TypeString,
 				Computed: true,
 			},
-			"kernel_id": &schema.Schema{
+			"kernel_id": {
 				Type:     schema.TypeString,
 				Computed: true,
 			},
-			"hypervisor_hostname": &schema.Schema{
+			"hypervisor_hostname": {
 				Type:     schema.TypeString,
 				Computed: true,
 			},
-			"instance_name": &schema.Schema{
+			"instance_name": {
 				Type:     schema.TypeString,
 				Computed: true,
 			},

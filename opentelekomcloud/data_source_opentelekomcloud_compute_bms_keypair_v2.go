@@ -14,23 +14,23 @@ func dataSourceBMSKeyPairV2() *schema.Resource {
 		Read: dataSourceBMSKeyPairV2Read,
 
 		Schema: map[string]*schema.Schema{
-			"region": &schema.Schema{
+			"region": {
 				Type:     schema.TypeString,
 				Optional: true,
 				Computed: true,
 			},
 
-			"name": &schema.Schema{
+			"name": {
 				Type:     schema.TypeString,
 				Required: true,
 			},
 
-			"public_key": &schema.Schema{
+			"public_key": {
 				Type:     schema.TypeString,
 				Computed: true,
 			},
 
-			"fingerprint": &schema.Schema{
+			"fingerprint": {
 				Type:     schema.TypeString,
 				Computed: true,
 			},

@@ -19,7 +19,7 @@ func TestAccNetworkingV2VIP_basic(t *testing.T) {
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckNetworkingV2VIPDestroy,
 		Steps: []resource.TestStep{
-			resource.TestStep{
+			{
 				Config: TestAccNetworkingV2VIPConfig_basic,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckNetworkingV2VIPExists("opentelekomcloud_networking_vip_v2.vip_1", &vip),

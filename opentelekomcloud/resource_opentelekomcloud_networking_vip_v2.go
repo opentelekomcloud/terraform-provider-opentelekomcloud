@@ -18,39 +18,39 @@ func resourceNetworkingVIPV2() *schema.Resource {
 		Delete: resourceNetworkingVIPV2Delete,
 
 		Schema: map[string]*schema.Schema{
-			"network_id": &schema.Schema{
+			"network_id": {
 				Type:     schema.TypeString,
 				Required: true,
 				ForceNew: true,
 			},
-			"subnet_id": &schema.Schema{
+			"subnet_id": {
 				Type:     schema.TypeString,
 				Required: true,
 				ForceNew: true,
 			},
-			"ip_address": &schema.Schema{
+			"ip_address": {
 				Type:     schema.TypeString,
 				Optional: true,
 				Computed: true,
 			},
-			"name": &schema.Schema{
+			"name": {
 				Type:     schema.TypeString,
 				Optional: true,
 				Computed: true,
 			},
-			"status": &schema.Schema{
+			"status": {
 				Type:     schema.TypeString,
 				Computed: true,
 			},
-			"id": &schema.Schema{
+			"id": {
 				Type:     schema.TypeString,
 				Computed: true,
 			},
-			"tenant_id": &schema.Schema{
+			"tenant_id": {
 				Type:     schema.TypeString,
 				Computed: true,
 			},
-			"device_owner": &schema.Schema{
+			"device_owner": {
 				Type:     schema.TypeString,
 				Computed: true,
 			},

@@ -12,58 +12,58 @@ func dataSourceDEHServersV1() *schema.Resource {
 		Read: dataSourceDEHServersV1Read,
 
 		Schema: map[string]*schema.Schema{
-			"region": &schema.Schema{
+			"region": {
 				Type:     schema.TypeString,
 				Optional: true,
 				Computed: true,
 				ForceNew: true,
 			},
-			"dedicated_host_id": &schema.Schema{
+			"dedicated_host_id": {
 				Type:     schema.TypeString,
 				Optional: true,
 			},
-			"server_id": &schema.Schema{
+			"server_id": {
 				Type:     schema.TypeString,
 				Optional: true,
 			},
-			"user_id": &schema.Schema{
+			"user_id": {
 				Type:     schema.TypeString,
 				Computed: true,
 			},
-			"name": &schema.Schema{
+			"name": {
 				Type:     schema.TypeString,
 				Computed: true,
 			},
-			"flavor": &schema.Schema{
+			"flavor": {
 				Type:     schema.TypeMap,
 				Computed: true,
 			},
-			"metadata": &schema.Schema{
+			"metadata": {
 				Type:     schema.TypeMap,
 				Computed: true,
 			},
-			"status": &schema.Schema{
+			"status": {
 				Type:     schema.TypeString,
 				Computed: true,
 			},
-			"tenant_id": &schema.Schema{
+			"tenant_id": {
 				Type:     schema.TypeString,
 				Computed: true,
 			},
-			"addresses": &schema.Schema{
+			"addresses": {
 				Type:     schema.TypeList,
 				Optional: true,
 				ForceNew: true,
 				Computed: true,
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
-						"name": &schema.Schema{
+						"name": {
 							Type:     schema.TypeString,
 							Optional: true,
 							ForceNew: true,
 							Computed: true,
 						},
-						"fixed_ip_v4": &schema.Schema{
+						"fixed_ip_v4": {
 							Type:     schema.TypeString,
 							Optional: true,
 							ForceNew: true,

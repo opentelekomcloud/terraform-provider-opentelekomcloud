@@ -11,88 +11,88 @@ func dataSourceDEHHostV1() *schema.Resource {
 	return &schema.Resource{
 		Read: dataSourceDEHHostV1Read,
 		Schema: map[string]*schema.Schema{
-			"region": &schema.Schema{
+			"region": {
 				Type:     schema.TypeString,
 				Optional: true,
 				Computed: true,
 				ForceNew: true,
 			},
-			"id": &schema.Schema{
+			"id": {
 				Type:     schema.TypeString,
 				Optional: true,
 			},
-			"name": &schema.Schema{
+			"name": {
 				Type:     schema.TypeString,
 				Optional: true,
 			},
-			"host_type": &schema.Schema{
+			"host_type": {
 				Type:     schema.TypeString,
 				Computed: true,
 			},
-			"host_type_name": &schema.Schema{
+			"host_type_name": {
 				Type:     schema.TypeString,
 				Computed: true,
 			},
-			"available_instance_capacities": &schema.Schema{
+			"available_instance_capacities": {
 				Type:     schema.TypeList,
 				Computed: true,
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
-						"flavor": &schema.Schema{
+						"flavor": {
 							Type:     schema.TypeString,
 							Computed: true,
 						},
 					},
 				},
 			},
-			"status": &schema.Schema{
+			"status": {
 				Type:     schema.TypeString,
 				Optional: true,
 			},
-			"availability_zone": &schema.Schema{
+			"availability_zone": {
 				Type:     schema.TypeString,
 				Optional: true,
 			},
-			"tenant_id": &schema.Schema{
+			"tenant_id": {
 				Type:     schema.TypeString,
 				Computed: true,
 			},
-			"auto_placement": &schema.Schema{
+			"auto_placement": {
 				Type:     schema.TypeString,
 				Computed: true,
 			},
-			"available_vcpus": &schema.Schema{
+			"available_vcpus": {
 				Type:     schema.TypeInt,
 				Computed: true,
 			},
-			"available_memory": &schema.Schema{
+			"available_memory": {
 				Type:     schema.TypeInt,
 				Computed: true,
 			},
-			"cores": &schema.Schema{
+			"cores": {
 				Type:     schema.TypeInt,
 				Computed: true,
 			},
-			"sockets": &schema.Schema{
+			"sockets": {
 				Type:     schema.TypeInt,
 				Computed: true,
 			},
-			"instance_total": &schema.Schema{
+			"instance_total": {
 				Type:     schema.TypeInt,
 				Computed: true,
 			},
-			"instance_uuids": &schema.Schema{
+			"instance_uuids": {
 				Type:     schema.TypeList,
 				Computed: true,
 				Elem: &schema.Schema{
 					Type: schema.TypeString,
 				},
 			},
-			"vcpus": &schema.Schema{
+			"vcpus": {
 				Type:     schema.TypeInt,
 				Computed: true,
 			},
-			"memory": &schema.Schema{
+			"memory": {
 				Type:     schema.TypeInt,
 				Computed: true,
 			},

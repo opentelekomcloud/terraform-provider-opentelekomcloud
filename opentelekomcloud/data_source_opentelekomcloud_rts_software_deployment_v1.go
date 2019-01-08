@@ -12,41 +12,41 @@ func dataSourceRtsSoftwareDeploymentV1() *schema.Resource {
 		Read: dataSourceRTSSoftwareDeploymentV1Read,
 
 		Schema: map[string]*schema.Schema{ //request and response parameters
-			"region": &schema.Schema{
+			"region": {
 				Type:     schema.TypeString,
 				Optional: true,
 				ForceNew: true,
 				Computed: true,
 			},
-			"config_id": &schema.Schema{
+			"config_id": {
 				Type:     schema.TypeString,
 				Optional: true,
 			},
-			"server_id": &schema.Schema{
+			"server_id": {
 				Type:     schema.TypeString,
 				Optional: true,
 			},
-			"status": &schema.Schema{
+			"status": {
 				Type:     schema.TypeString,
 				Optional: true,
 			},
-			"action": &schema.Schema{
+			"action": {
 				Type:     schema.TypeString,
 				Optional: true,
 			},
-			"input_values": &schema.Schema{
+			"input_values": {
 				Type:     schema.TypeMap,
 				Computed: true,
 			},
-			"status_reason": &schema.Schema{
+			"status_reason": {
 				Type:     schema.TypeString,
 				Computed: true,
 			},
-			"output_values": &schema.Schema{
+			"output_values": {
 				Type:     schema.TypeMap,
 				Computed: true,
 			},
-			"id": &schema.Schema{
+			"id": {
 				Type:     schema.TypeString,
 				Optional: true,
 			},

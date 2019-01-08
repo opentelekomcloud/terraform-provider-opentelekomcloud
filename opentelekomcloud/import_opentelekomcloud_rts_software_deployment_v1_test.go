@@ -14,11 +14,11 @@ func TestAccOTCRtsSoftwareDeploymentV1_importBasic(t *testing.T) {
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckOTCRtsSoftwareDeploymentV1Destroy,
 		Steps: []resource.TestStep{
-			resource.TestStep{
+			{
 				Config: testAccRtsSoftwareDeploymentV1_basic,
 			},
 
-			resource.TestStep{
+			{
 				ResourceName:      resourceName,
 				ImportState:       true,
 				ImportStateVerify: true,

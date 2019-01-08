@@ -13,10 +13,10 @@ func TestAccOpenTelekomCloudImagesV2ImageDataSource_basic(t *testing.T) {
 		PreCheck:  func() { testAccPreCheck(t) },
 		Providers: testAccProviders,
 		Steps: []resource.TestStep{
-			resource.TestStep{
+			{
 				Config: testAccOpenTelekomCloudImagesV2ImageDataSource_cirros,
 			},
-			resource.TestStep{
+			{
 				Config: testAccOpenTelekomCloudImagesV2ImageDataSource_basic,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckImagesV2DataSourceID("data.opentelekomcloud_images_image_v2.image_1"),
@@ -41,28 +41,28 @@ func TestAccOpenTelekomCloudImagesV2ImageDataSource_testQueries(t *testing.T) {
 		PreCheck:  func() { testAccPreCheck(t) },
 		Providers: testAccProviders,
 		Steps: []resource.TestStep{
-			resource.TestStep{
+			{
 				Config: testAccOpenTelekomCloudImagesV2ImageDataSource_cirros,
 			},
-			resource.TestStep{
+			{
 				Config: testAccOpenTelekomCloudImagesV2ImageDataSource_queryTag,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckImagesV2DataSourceID("data.opentelekomcloud_images_image_v2.image_1"),
 				),
 			},
-			resource.TestStep{
+			{
 				Config: testAccOpenTelekomCloudImagesV2ImageDataSource_querySizeMin,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckImagesV2DataSourceID("data.opentelekomcloud_images_image_v2.image_1"),
 				),
 			},
-			resource.TestStep{
+			{
 				Config: testAccOpenTelekomCloudImagesV2ImageDataSource_querySizeMax,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckImagesV2DataSourceID("data.opentelekomcloud_images_image_v2.image_1"),
 				),
 			},
-			resource.TestStep{
+			{
 				Config: testAccOpenTelekomCloudImagesV2ImageDataSource_cirros,
 			},
 		},

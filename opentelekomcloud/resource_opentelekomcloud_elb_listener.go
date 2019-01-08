@@ -29,43 +29,43 @@ func resourceEListener() *schema.Resource {
 		},
 
 		Schema: map[string]*schema.Schema{
-			"region": &schema.Schema{
+			"region": {
 				Type:     schema.TypeString,
 				Optional: true,
 				Computed: true,
 				ForceNew: true,
 			},
 
-			"name": &schema.Schema{
+			"name": {
 				Type:     schema.TypeString,
 				Optional: true,
 				Computed: true,
 			},
 
-			"description": &schema.Schema{
+			"description": {
 				Type:     schema.TypeString,
 				Optional: true,
 			},
 
-			"loadbalancer_id": &schema.Schema{
+			"loadbalancer_id": {
 				Type:     schema.TypeString,
 				Required: true,
 				ForceNew: true,
 			},
 
-			"protocol": &schema.Schema{
+			"protocol": {
 				Type:         schema.TypeString,
 				Required:     true,
 				ForceNew:     true,
 				ValidateFunc: ValidateProtocolFormat,
 			},
 
-			"protocol_port": &schema.Schema{
+			"protocol_port": {
 				Type:     schema.TypeInt,
 				Required: true,
 			},
 
-			"backend_protocol": &schema.Schema{
+			"backend_protocol": {
 				Type:     schema.TypeString,
 				Required: true,
 				ForceNew: true,
@@ -73,7 +73,7 @@ func resourceEListener() *schema.Resource {
 					return ValidateStringList(v, k, []string{"HTTP", "TCP", "UDP"})
 				},
 			},
-			"backend_port": &schema.Schema{
+			"backend_port": {
 				Type:     schema.TypeInt,
 				Required: true,
 				ValidateFunc: func(v interface{}, k string) (ws []string, errors []error) {
@@ -81,7 +81,7 @@ func resourceEListener() *schema.Resource {
 				},
 			},
 
-			"lb_algorithm": &schema.Schema{
+			"lb_algorithm": {
 				Type:     schema.TypeString,
 				Required: true,
 				ValidateFunc: func(v interface{}, k string) (ws []string, errors []error) {
@@ -89,19 +89,19 @@ func resourceEListener() *schema.Resource {
 				},
 			},
 
-			"session_sticky": &schema.Schema{
+			"session_sticky": {
 				Type:     schema.TypeBool,
 				Optional: true,
 				ForceNew: true,
 			},
 
-			"session_sticky_type": &schema.Schema{
+			"session_sticky_type": {
 				Type:     schema.TypeString,
 				Optional: true,
 				ForceNew: true,
 			},
 
-			"cookie_timeout": &schema.Schema{
+			"cookie_timeout": {
 				Type:     schema.TypeInt,
 				Optional: true,
 				ForceNew: true,
@@ -111,7 +111,7 @@ func resourceEListener() *schema.Resource {
 				},
 			},
 
-			"tcp_timeout": &schema.Schema{
+			"tcp_timeout": {
 				Type:     schema.TypeInt,
 				Optional: true,
 				Computed: true,
@@ -120,12 +120,12 @@ func resourceEListener() *schema.Resource {
 				},
 			},
 
-			"tcp_draining": &schema.Schema{
+			"tcp_draining": {
 				Type:     schema.TypeBool,
 				Optional: true,
 			},
 
-			"tcp_draining_timeout": &schema.Schema{
+			"tcp_draining_timeout": {
 				Type:     schema.TypeInt,
 				Optional: true,
 				ValidateFunc: func(v interface{}, k string) (ws []string, errors []error) {
@@ -133,20 +133,20 @@ func resourceEListener() *schema.Resource {
 				},
 			},
 
-			"certificate_id": &schema.Schema{
+			"certificate_id": {
 				Type:     schema.TypeString,
 				Optional: true,
 				ForceNew: true,
 			},
 
-			"certificates": &schema.Schema{
+			"certificates": {
 				Type:     schema.TypeList,
 				Optional: true,
 				Elem:     &schema.Schema{Type: schema.TypeString},
 				ForceNew: true,
 			},
 
-			"udp_timeout": &schema.Schema{
+			"udp_timeout": {
 				Type:     schema.TypeInt,
 				Optional: true,
 				ValidateFunc: func(v interface{}, k string) (ws []string, errors []error) {
@@ -154,7 +154,7 @@ func resourceEListener() *schema.Resource {
 				},
 			},
 
-			"ssl_protocols": &schema.Schema{
+			"ssl_protocols": {
 				Type:     schema.TypeString,
 				Optional: true,
 				ForceNew: true,
@@ -164,7 +164,7 @@ func resourceEListener() *schema.Resource {
 				},
 			},
 
-			"ssl_ciphers": &schema.Schema{
+			"ssl_ciphers": {
 				Type:     schema.TypeString,
 				Optional: true,
 				Computed: true,

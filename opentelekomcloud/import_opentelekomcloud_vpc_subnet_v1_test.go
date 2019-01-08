@@ -14,11 +14,11 @@ func TestAccOTCVpcSubnetV1_importBasic(t *testing.T) {
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckOTCVpcSubnetV1Destroy,
 		Steps: []resource.TestStep{
-			resource.TestStep{
+			{
 				Config: testAccOTCVpcSubnetV1_basic,
 			},
 
-			resource.TestStep{
+			{
 				ResourceName:      resourceName,
 				ImportState:       true,
 				ImportStateVerify: true,

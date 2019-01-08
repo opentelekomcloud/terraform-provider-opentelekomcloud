@@ -22,7 +22,7 @@ func TestAccComputeV2FloatingIPAssociate_basic(t *testing.T) {
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckComputeV2FloatingIPAssociateDestroy,
 		Steps: []resource.TestStep{
-			resource.TestStep{
+			{
 				Config: testAccComputeV2FloatingIPAssociate_basic,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckComputeV2InstanceExists("opentelekomcloud_compute_instance_v2.instance_1", &instance),
@@ -43,7 +43,7 @@ func TestAccComputeV2FloatingIPAssociate_fixedIP(t *testing.T) {
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckComputeV2FloatingIPAssociateDestroy,
 		Steps: []resource.TestStep{
-			resource.TestStep{
+			{
 				Config: testAccComputeV2FloatingIPAssociate_fixedIP,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckComputeV2InstanceExists("opentelekomcloud_compute_instance_v2.instance_1", &instance),
@@ -64,7 +64,7 @@ func TestAccComputeV2FloatingIPAssociate_attachToFirstNetwork(t *testing.T) {
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckComputeV2FloatingIPAssociateDestroy,
 		Steps: []resource.TestStep{
-			resource.TestStep{
+			{
 				Config: testAccComputeV2FloatingIPAssociate_attachToFirstNetwork,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckComputeV2InstanceExists("opentelekomcloud_compute_instance_v2.instance_1", &instance),
@@ -110,7 +110,7 @@ func TestAccComputeV2FloatingIPAssociate_attachNew(t *testing.T) {
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckComputeV2FloatingIPAssociateDestroy,
 		Steps: []resource.TestStep{
-			resource.TestStep{
+			{
 				Config: testAccComputeV2FloatingIPAssociate_attachNew_1,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckComputeV2InstanceExists("opentelekomcloud_compute_instance_v2.instance_1", &instance),
@@ -119,7 +119,7 @@ func TestAccComputeV2FloatingIPAssociate_attachNew(t *testing.T) {
 					testAccCheckComputeV2FloatingIPAssociateAssociated(&fip_1, &instance, 1),
 				),
 			},
-			resource.TestStep{
+			{
 				Config: testAccComputeV2FloatingIPAssociate_attachNew_2,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckComputeV2InstanceExists("opentelekomcloud_compute_instance_v2.instance_1", &instance),

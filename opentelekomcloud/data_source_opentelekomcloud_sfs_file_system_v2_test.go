@@ -12,7 +12,7 @@ func TestAccOTCSFSFileSystemV2DataSource_basic(t *testing.T) {
 		PreCheck:  func() { testAccPreCheck(t) },
 		Providers: testAccProviders,
 		Steps: []resource.TestStep{
-			resource.TestStep{
+			{
 				Config: testAccSFSFileSystemV2DataSource_basic,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckSFSFileSystemV2DataSourceID("data.opentelekomcloud_sfs_file_system_v2.shares"),

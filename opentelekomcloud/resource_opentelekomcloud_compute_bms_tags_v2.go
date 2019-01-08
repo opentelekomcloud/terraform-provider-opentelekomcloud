@@ -25,18 +25,18 @@ func resourceBMSTagsV2() *schema.Resource {
 		},
 
 		Schema: map[string]*schema.Schema{
-			"region": &schema.Schema{
+			"region": {
 				Type:     schema.TypeString,
 				Optional: true,
 				Computed: true,
 				ForceNew: true,
 			},
-			"server_id": &schema.Schema{
+			"server_id": {
 				Type:     schema.TypeString,
 				Required: true,
 				ForceNew: true,
 			},
-			"tags": &schema.Schema{
+			"tags": {
 				Type:     schema.TypeSet,
 				Required: true,
 				ForceNew: true,

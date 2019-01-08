@@ -17,13 +17,13 @@ func TestCESAlarmRule_basic(t *testing.T) {
 		Providers:    testAccProviders,
 		CheckDestroy: testCESAlarmRuleDestroy,
 		Steps: []resource.TestStep{
-			resource.TestStep{
+			{
 				Config: testCESAlarmRule_basic,
 				Check: resource.ComposeTestCheckFunc(
 					testCESAlarmRuleExists("opentelekomcloud_ces_alarmrule.alarmrule_1", &ar),
 				),
 			},
-			resource.TestStep{
+			{
 				Config: testCESAlarmRule_update,
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr(

@@ -26,7 +26,7 @@ func resourceCSBSBackupV1() *schema.Resource {
 		},
 
 		Schema: map[string]*schema.Schema{
-			"region": &schema.Schema{
+			"region": {
 				Type:     schema.TypeString,
 				Optional: true,
 				ForceNew: true,
@@ -36,42 +36,42 @@ func resourceCSBSBackupV1() *schema.Resource {
 				Type:     schema.TypeString,
 				Computed: true,
 			},
-			"resource_id": &schema.Schema{
+			"resource_id": {
 				Type:     schema.TypeString,
 				Required: true,
 				ForceNew: true,
 			},
-			"backup_name": &schema.Schema{
+			"backup_name": {
 				Type:     schema.TypeString,
 				Optional: true,
 				ForceNew: true,
 				Computed: true,
 			},
-			"description": &schema.Schema{
+			"description": {
 				Type:     schema.TypeString,
 				Optional: true,
 				ForceNew: true,
 				Computed: true,
 			},
-			"resource_type": &schema.Schema{
+			"resource_type": {
 				Type:     schema.TypeString,
 				Optional: true,
 				Default:  "OS::Nova::Server",
 				ForceNew: true,
 			},
-			"tags": &schema.Schema{
+			"tags": {
 				Type:     schema.TypeSet,
 				Optional: true,
 				Computed: true,
 				ForceNew: true,
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
-						"key": &schema.Schema{
+						"key": {
 							Type:     schema.TypeString,
 							Required: true,
 							ForceNew: true,
 						},
-						"value": &schema.Schema{
+						"value": {
 							Type:     schema.TypeString,
 							Required: true,
 							ForceNew: true,
@@ -79,11 +79,11 @@ func resourceCSBSBackupV1() *schema.Resource {
 					},
 				},
 			},
-			"status": &schema.Schema{
+			"status": {
 				Type:     schema.TypeString,
 				Computed: true,
 			},
-			"volume_backups": &schema.Schema{
+			"volume_backups": {
 				Type:     schema.TypeSet,
 				Computed: true,
 				Elem: &schema.Resource{
@@ -143,7 +143,7 @@ func resourceCSBSBackupV1() *schema.Resource {
 					},
 				},
 			},
-			"vm_metadata": &schema.Schema{
+			"vm_metadata": {
 				Type:     schema.TypeSet,
 				Computed: true,
 				Elem: &schema.Resource{

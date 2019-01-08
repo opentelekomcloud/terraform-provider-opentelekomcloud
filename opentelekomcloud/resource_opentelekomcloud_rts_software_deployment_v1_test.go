@@ -18,7 +18,7 @@ func TestAccOTCRtsSoftwareDeploymentV1_basic(t *testing.T) {
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckOTCRtsSoftwareDeploymentV1Destroy,
 		Steps: []resource.TestStep{
-			resource.TestStep{
+			{
 				Config: testAccRtsSoftwareDeploymentV1_basic,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckOTCRtsSoftwareDeploymentV1Exists("opentelekomcloud_rts_software_deployment_v1.deployment_1", &deployments),
@@ -30,7 +30,7 @@ func TestAccOTCRtsSoftwareDeploymentV1_basic(t *testing.T) {
 						"opentelekomcloud_rts_software_deployment_v1.deployment_1", "action", "CREATE"),
 				),
 			},
-			resource.TestStep{
+			{
 				Config: testAccRtsSoftwareDeploymentV1_update,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckOTCRtsSoftwareDeploymentV1Exists("opentelekomcloud_rts_software_deployment_v1.deployment_1", &deployments),
@@ -56,7 +56,7 @@ func TestAccOTCRtsSoftwareDeploymentV1_timeout(t *testing.T) {
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckOTCRtsSoftwareDeploymentV1Destroy,
 		Steps: []resource.TestStep{
-			resource.TestStep{
+			{
 				Config: testAccRtsSoftwareDeploymentV1_timeout,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckOTCRtsSoftwareDeploymentV1Exists("opentelekomcloud_rts_software_deployment_v1.deployment_1", &deployments),

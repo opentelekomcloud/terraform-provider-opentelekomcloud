@@ -26,51 +26,51 @@ func resourceDeHHostV1() *schema.Resource {
 		},
 
 		Schema: map[string]*schema.Schema{
-			"region": &schema.Schema{
+			"region": {
 				Type:     schema.TypeString,
 				Optional: true,
 				Computed: true,
 				ForceNew: true,
 			},
-			"name": &schema.Schema{
+			"name": {
 				Type:     schema.TypeString,
 				Required: true,
 			},
-			"auto_placement": &schema.Schema{
+			"auto_placement": {
 				Type:     schema.TypeString,
 				Optional: true,
 			},
-			"availability_zone": &schema.Schema{
-				Type:     schema.TypeString,
-				Required: true,
-				ForceNew: true,
-			},
-			"host_type": &schema.Schema{
+			"availability_zone": {
 				Type:     schema.TypeString,
 				Required: true,
 				ForceNew: true,
 			},
-			"status": &schema.Schema{
+			"host_type": {
+				Type:     schema.TypeString,
+				Required: true,
+				ForceNew: true,
+			},
+			"status": {
 				Type:     schema.TypeString,
 				Optional: true,
 				Computed: true,
 			},
-			"available_vcpus": &schema.Schema{
+			"available_vcpus": {
 				Type:     schema.TypeString,
 				Optional: true,
 				Computed: true,
 			},
-			"available_memory": &schema.Schema{
+			"available_memory": {
 				Type:     schema.TypeString,
 				Optional: true,
 				Computed: true,
 			},
-			"instance_total": &schema.Schema{
+			"instance_total": {
 				Type:     schema.TypeString,
 				Optional: true,
 				Computed: true,
 			},
-			"instance_uuids": &schema.Schema{
+			"instance_uuids": {
 				Type:     schema.TypeList,
 				Optional: true,
 				Computed: true,
@@ -78,38 +78,38 @@ func resourceDeHHostV1() *schema.Resource {
 					Type: schema.TypeString,
 				},
 			},
-			"host_type_name": &schema.Schema{
+			"host_type_name": {
 				Type:     schema.TypeString,
 				Optional: true,
 				Computed: true,
 			},
-			"vcpus": &schema.Schema{
+			"vcpus": {
 				Type:     schema.TypeString,
 				Optional: true,
 				Computed: true,
 			},
-			"cores": &schema.Schema{
+			"cores": {
 				Type:     schema.TypeString,
 				Optional: true,
 				Computed: true,
 			},
-			"sockets": &schema.Schema{
+			"sockets": {
 				Type:     schema.TypeString,
 				Optional: true,
 				Computed: true,
 			},
-			"memory": &schema.Schema{
+			"memory": {
 				Type:     schema.TypeString,
 				Optional: true,
 				Computed: true,
 			},
-			"available_instance_capacities": &schema.Schema{
+			"available_instance_capacities": {
 				Type:     schema.TypeList,
 				Optional: true,
 				Computed: true,
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
-						"flavor": &schema.Schema{
+						"flavor": {
 							Type:     schema.TypeString,
 							Computed: true,
 						},

@@ -19,13 +19,13 @@ func TestAccELBLoadBalancer_basic(t *testing.T) {
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckELBLoadBalancerDestroy,
 		Steps: []resource.TestStep{
-			resource.TestStep{
+			{
 				Config: testAccELBLoadBalancerConfig_basic,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckELBLoadBalancerExists("opentelekomcloud_elb_loadbalancer.loadbalancer_1", &lb),
 				),
 			},
-			resource.TestStep{
+			{
 				Config: testAccELBLoadBalancerConfig_update,
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr(

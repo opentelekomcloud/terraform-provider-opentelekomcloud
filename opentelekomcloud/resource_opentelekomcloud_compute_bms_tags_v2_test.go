@@ -18,7 +18,7 @@ func TestAccOTCBMSTagsV2_basic(t *testing.T) {
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckOTCBMSTagsV2Destroy,
 		Steps: []resource.TestStep{
-			resource.TestStep{
+			{
 				Config: testAccBMSTagsV2_basic,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckOTCBMSTagsV2Exists("opentelekomcloud_compute_bms_tags_v2.tags_1", &tags),
@@ -38,7 +38,7 @@ func TestAccOTCBMSTagsV2_timeout(t *testing.T) {
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckOTCBMSTagsV2Destroy,
 		Steps: []resource.TestStep{
-			resource.TestStep{
+			{
 				Config: testAccBMSTagsV2_timeout,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckOTCBMSTagsV2Exists("opentelekomcloud_compute_bms_tags_v2.tags_1", &tags),

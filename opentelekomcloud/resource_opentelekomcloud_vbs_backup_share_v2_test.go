@@ -19,7 +19,7 @@ func TestAccVBSBackupShareV2_basic(t *testing.T) {
 		Providers:    testAccProviders,
 		CheckDestroy: testAccVBSBackupShareV2Destroy,
 		Steps: []resource.TestStep{
-			resource.TestStep{
+			{
 				Config: testAccVBSBackupShareV2_basic,
 				Check: resource.ComposeTestCheckFunc(
 					testAccVBSBackupShareV2Exists("opentelekomcloud_vbs_backup_share_v2.share", &share),
@@ -39,7 +39,7 @@ func TestAccVBSBackupShareV2_timeout(t *testing.T) {
 		Providers:    testAccProviders,
 		CheckDestroy: testAccVBSBackupShareV2Destroy,
 		Steps: []resource.TestStep{
-			resource.TestStep{
+			{
 				Config: testAccVBSBackupShareV2_timeout,
 				Check: resource.ComposeTestCheckFunc(
 					testAccVBSBackupShareV2Exists("opentelekomcloud_vbs_backup_share_v2.share", &share),

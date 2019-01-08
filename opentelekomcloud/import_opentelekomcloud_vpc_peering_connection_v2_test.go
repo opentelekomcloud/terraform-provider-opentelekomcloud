@@ -14,11 +14,11 @@ func TestAccOTCVpcPeeringConnectionV1_importBasic(t *testing.T) {
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckOTCVpcPeeringConnectionV2Destroy,
 		Steps: []resource.TestStep{
-			resource.TestStep{
+			{
 				Config: testAccOTCVpcPeeringConnectionV2_basic,
 			},
 
-			resource.TestStep{
+			{
 				ResourceName:      resourceName,
 				ImportState:       true,
 				ImportStateVerify: true,

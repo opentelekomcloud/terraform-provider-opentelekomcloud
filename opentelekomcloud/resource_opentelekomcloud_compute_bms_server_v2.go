@@ -36,38 +36,38 @@ func resourceComputeBMSInstanceV2() *schema.Resource {
 		},
 
 		Schema: map[string]*schema.Schema{
-			"region": &schema.Schema{
+			"region": {
 				Type:     schema.TypeString,
 				Optional: true,
 				Computed: true,
 				ForceNew: true,
 			},
 
-			"name": &schema.Schema{
+			"name": {
 				Type:     schema.TypeString,
 				Required: true,
 				ForceNew: false,
 			},
-			"image_id": &schema.Schema{
+			"image_id": {
 				Type:     schema.TypeString,
 				Optional: true,
 				ForceNew: true,
 				Computed: true,
 			},
-			"image_name": &schema.Schema{
+			"image_name": {
 				Type:     schema.TypeString,
 				Optional: true,
 				ForceNew: true,
 				Computed: true,
 			},
-			"flavor_id": &schema.Schema{
+			"flavor_id": {
 				Type:        schema.TypeString,
 				Optional:    true,
 				ForceNew:    false,
 				Computed:    true,
 				DefaultFunc: schema.EnvDefaultFunc("OS_BMS_FLAVOR_NAME", nil),
 			},
-			"flavor_name": &schema.Schema{
+			"flavor_name": {
 				Type:        schema.TypeString,
 				Optional:    true,
 				ForceNew:    false,
@@ -75,7 +75,7 @@ func resourceComputeBMSInstanceV2() *schema.Resource {
 				DefaultFunc: schema.EnvDefaultFunc("OS_BMS_FLAVOR_NAME", nil),
 			},
 
-			"user_data": &schema.Schema{
+			"user_data": {
 				Type:     schema.TypeString,
 				Optional: true,
 				ForceNew: true,
@@ -90,7 +90,7 @@ func resourceComputeBMSInstanceV2() *schema.Resource {
 					}
 				},
 			},
-			"security_groups": &schema.Schema{
+			"security_groups": {
 				Type:     schema.TypeSet,
 				Optional: true,
 				ForceNew: false,
@@ -98,53 +98,53 @@ func resourceComputeBMSInstanceV2() *schema.Resource {
 				Elem:     &schema.Schema{Type: schema.TypeString},
 				Set:      schema.HashString,
 			},
-			"availability_zone": &schema.Schema{
+			"availability_zone": {
 				Type:     schema.TypeString,
 				Required: true,
 				ForceNew: true,
 			},
-			"network": &schema.Schema{
+			"network": {
 				Type:     schema.TypeList,
 				Optional: true,
 				ForceNew: true,
 				Computed: true,
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
-						"uuid": &schema.Schema{
+						"uuid": {
 							Type:     schema.TypeString,
 							Optional: true,
 							ForceNew: true,
 							Computed: true,
 						},
-						"name": &schema.Schema{
+						"name": {
 							Type:     schema.TypeString,
 							Optional: true,
 							ForceNew: true,
 							Computed: true,
 						},
-						"port": &schema.Schema{
+						"port": {
 							Type:     schema.TypeString,
 							Optional: true,
 							ForceNew: true,
 							Computed: true,
 						},
-						"fixed_ip_v4": &schema.Schema{
+						"fixed_ip_v4": {
 							Type:     schema.TypeString,
 							Optional: true,
 							ForceNew: true,
 							Computed: true,
 						},
-						"fixed_ip_v6": &schema.Schema{
+						"fixed_ip_v6": {
 							Type:     schema.TypeString,
 							Optional: true,
 							ForceNew: true,
 							Computed: true,
 						},
-						"mac": &schema.Schema{
+						"mac": {
 							Type:     schema.TypeString,
 							Computed: true,
 						},
-						"access_network": &schema.Schema{
+						"access_network": {
 							Type:     schema.TypeBool,
 							Optional: true,
 							Default:  false,
@@ -152,107 +152,107 @@ func resourceComputeBMSInstanceV2() *schema.Resource {
 					},
 				},
 			},
-			"metadata": &schema.Schema{
+			"metadata": {
 				Type:     schema.TypeMap,
 				Optional: true,
 				ForceNew: false,
 			},
-			"config_drive": &schema.Schema{
+			"config_drive": {
 				Type:     schema.TypeBool,
 				Computed: true,
 			},
-			"admin_pass": &schema.Schema{
+			"admin_pass": {
 				Type:     schema.TypeString,
 				Optional: true,
 				ForceNew: false,
 				Computed: true,
 			},
-			"access_ip_v4": &schema.Schema{
+			"access_ip_v4": {
 				Type:     schema.TypeString,
 				Computed: true,
 			},
-			"access_ip_v6": &schema.Schema{
+			"access_ip_v6": {
 				Type:     schema.TypeString,
 				Computed: true,
 			},
-			"key_pair": &schema.Schema{
+			"key_pair": {
 				Type:     schema.TypeString,
 				Optional: true,
 				ForceNew: true,
 				Computed: true,
 			},
-			"stop_before_destroy": &schema.Schema{
+			"stop_before_destroy": {
 				Type:     schema.TypeBool,
 				Optional: true,
 				Default:  false,
 			},
-			"tenant_id": &schema.Schema{
+			"tenant_id": {
 				Type:     schema.TypeString,
 				Computed: true,
 			},
-			"host_status": &schema.Schema{
+			"host_status": {
 				Type:     schema.TypeString,
 				Computed: true,
 			},
-			"host_id": &schema.Schema{
+			"host_id": {
 				Type:     schema.TypeString,
 				Computed: true,
 			},
-			"kernel_id": &schema.Schema{
+			"kernel_id": {
 				Type:     schema.TypeString,
 				Computed: true,
 			},
-			"user_id": &schema.Schema{
+			"user_id": {
 				Type:     schema.TypeString,
 				Computed: true,
 			},
-			"block_device": &schema.Schema{
+			"block_device": {
 				Type:     schema.TypeList,
 				Optional: true,
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
-						"source_type": &schema.Schema{
+						"source_type": {
 							Type:     schema.TypeString,
 							Required: true,
 							ForceNew: true,
 						},
-						"uuid": &schema.Schema{
+						"uuid": {
 							Type:     schema.TypeString,
 							Optional: true,
 							ForceNew: true,
 						},
-						"volume_size": &schema.Schema{
+						"volume_size": {
 							Type:     schema.TypeInt,
 							Optional: true,
 							ForceNew: true,
 						},
-						"destination_type": &schema.Schema{
+						"destination_type": {
 							Type:     schema.TypeString,
 							Optional: true,
 							ForceNew: true,
 						},
-						"boot_index": &schema.Schema{
+						"boot_index": {
 							Type:     schema.TypeInt,
 							Optional: true,
 							ForceNew: true,
 						},
-						"delete_on_termination": &schema.Schema{
+						"delete_on_termination": {
 							Type:     schema.TypeBool,
 							Optional: true,
 							Default:  false,
 							ForceNew: true,
 						},
-						"guest_format": &schema.Schema{
+						"guest_format": {
 							Type:     schema.TypeString,
 							Optional: true,
 							ForceNew: true,
 						},
-						"device_name": &schema.Schema{
+						"device_name": {
 							Type:     schema.TypeString,
 							Optional: true,
 							ForceNew: true,
 						},
-						"volume_type": &schema.Schema{
+						"volume_type": {
 							Type:     schema.TypeString,
 							Optional: true,
 							ForceNew: true,
@@ -498,9 +498,9 @@ func resourceComputeBMSInstanceV2Update(d *schema.ResourceData, meta interface{}
 
 		// Determine if any metadata keys were removed from the configuration.
 		// Then request those keys to be deleted.
-		for oldKey, _ := range oldMetadata.(map[string]interface{}) {
+		for oldKey := range oldMetadata.(map[string]interface{}) {
 			var found bool
-			for newKey, _ := range newMetadata.(map[string]interface{}) {
+			for newKey := range newMetadata.(map[string]interface{}) {
 				if oldKey == newKey {
 					found = true
 				}

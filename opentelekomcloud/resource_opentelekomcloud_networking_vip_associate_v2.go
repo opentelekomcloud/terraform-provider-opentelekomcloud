@@ -16,23 +16,23 @@ func resourceNetworkingVIPAssociateV2() *schema.Resource {
 		Delete: resourceNetworkingVIPAssociateV2Delete,
 
 		Schema: map[string]*schema.Schema{
-			"vip_id": &schema.Schema{
+			"vip_id": {
 				Type:     schema.TypeString,
 				Required: true,
 				ForceNew: true,
 			},
-			"port_ids": &schema.Schema{
+			"port_ids": {
 				Type:     schema.TypeSet,
 				Required: true,
 				ForceNew: true,
 				Elem:     &schema.Schema{Type: schema.TypeString},
 				Set:      schema.HashString,
 			},
-			"vip_subnet_id": &schema.Schema{
+			"vip_subnet_id": {
 				Type:     schema.TypeString,
 				Computed: true,
 			},
-			"vip_ip_address": &schema.Schema{
+			"vip_ip_address": {
 				Type:     schema.TypeString,
 				Computed: true,
 			},

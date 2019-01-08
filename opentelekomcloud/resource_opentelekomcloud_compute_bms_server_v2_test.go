@@ -17,7 +17,7 @@ func TestAccComputeV2BmsInstance_basic(t *testing.T) {
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckComputeV2BmsInstanceDestroy,
 		Steps: []resource.TestStep{
-			resource.TestStep{
+			{
 				Config: testAccComputeV2BmsInstance_basic,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckComputeV2BmsInstanceExists("opentelekomcloud_compute_bms_server_v2.instance_1", &instance),
@@ -25,7 +25,7 @@ func TestAccComputeV2BmsInstance_basic(t *testing.T) {
 						"opentelekomcloud_compute_bms_server_v2.instance_1", "availability_zone", OS_AVAILABILITY_ZONE),
 				),
 			},
-			resource.TestStep{
+			{
 				Config: testAccComputeV2BmsInstance_update,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckComputeV2BmsInstanceExists("opentelekomcloud_compute_bms_server_v2.instance_1", &instance),
@@ -45,7 +45,7 @@ func TestAccComputeV2BmsInstance_bootFromVolumeImage(t *testing.T) {
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckComputeV2BmsInstanceDestroy,
 		Steps: []resource.TestStep{
-			resource.TestStep{
+			{
 				Config: testAccComputeV2BmsInstance_bootFromVolumeImage,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckComputeV2BmsInstanceExists("opentelekomcloud_compute_bms_server_v2.instance_1", &instance),
@@ -64,7 +64,7 @@ func TestAccComputeV2BmsInstance_timeout(t *testing.T) {
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckComputeV2InstanceDestroy,
 		Steps: []resource.TestStep{
-			resource.TestStep{
+			{
 				Config: testAccComputeV2BmsInstance_timeout,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckComputeV2BmsInstanceExists("opentelekomcloud_compute_bms_server_v2.instance_1", &instance),

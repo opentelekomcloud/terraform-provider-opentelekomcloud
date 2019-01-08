@@ -13,10 +13,10 @@ func TestAccOTCVpcRouteIdsV2DataSource_basic(t *testing.T) {
 		PreCheck:  func() { testAccPreCheck(t) },
 		Providers: testAccProviders,
 		Steps: []resource.TestStep{
-			resource.TestStep{
+			{
 				Config: testAccOTCRouteIdV2DataSource_vpcroute,
 			},
-			resource.TestStep{
+			{
 				Config: testAccOTCRouteIdV2DataSource_basic,
 				Check: resource.ComposeTestCheckFunc(
 					testAccOTCRouteIdV2DataSourceID("data.opentelekomcloud_vpc_route_ids_v2.route_ids"),

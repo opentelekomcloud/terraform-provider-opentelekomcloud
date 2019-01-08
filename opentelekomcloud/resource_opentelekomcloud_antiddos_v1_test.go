@@ -18,7 +18,7 @@ func TestAccAntiDdosV1_basic(t *testing.T) {
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckAntiDdosV1Destroy,
 		Steps: []resource.TestStep{
-			resource.TestStep{
+			{
 				Config: testAccAntiDdosV1_basic,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckAntiDdosV1Exists("opentelekomcloud_antiddos_v1.antiddos_1", &antiddos),
@@ -34,7 +34,7 @@ func TestAccAntiDdosV1_basic(t *testing.T) {
 						"opentelekomcloud_antiddos_v1.antiddos_1", "app_type_id", "0"),
 				),
 			},
-			resource.TestStep{
+			{
 				Config: testAccAntiDdosV1_update,
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr(
@@ -59,7 +59,7 @@ func TestAccAntiDdosV1_timeout(t *testing.T) {
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckAntiDdosV1Destroy,
 		Steps: []resource.TestStep{
-			resource.TestStep{
+			{
 				Config: testAccAntiDdosV1_timeout,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckAntiDdosV1Exists("opentelekomcloud_antiddos_v1.antiddos_1", &antiddos),

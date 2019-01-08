@@ -15,33 +15,33 @@ func dataSourceKmsKeyV1() *schema.Resource {
 		Read: dataSourceKmsKeyV1Read,
 
 		Schema: map[string]*schema.Schema{
-			"key_alias": &schema.Schema{
+			"key_alias": {
 				Type:     schema.TypeString,
 				Optional: true,
 				ForceNew: true,
 			},
-			"key_id": &schema.Schema{
+			"key_id": {
 				Type:     schema.TypeString,
 				Optional: true,
 				ForceNew: true,
 			},
-			"key_description": &schema.Schema{
+			"key_description": {
 				Type:     schema.TypeString,
 				Optional: true,
 				ForceNew: true,
 			},
-			"realm": &schema.Schema{
+			"realm": {
 				Type:     schema.TypeString,
 				Optional: true,
 				Computed: true,
 				ForceNew: true,
 			},
-			"domain_id": &schema.Schema{
+			"domain_id": {
 				Type:     schema.TypeString,
 				Optional: true,
 				Computed: true,
 			},
-			"key_state": &schema.Schema{
+			"key_state": {
 				Type:     schema.TypeString,
 				Optional: true,
 				Computed: true,
@@ -52,23 +52,23 @@ func dataSourceKmsKeyV1() *schema.Resource {
 					string(PendingDeletionState),
 				}, true),
 			},
-			"default_key_flag": &schema.Schema{
+			"default_key_flag": {
 				Type:     schema.TypeString,
 				Optional: true,
 				Computed: true,
 				ForceNew: true,
 			},
-			"origin": &schema.Schema{
+			"origin": {
 				Type:     schema.TypeString,
 				Optional: true,
 				Computed: true,
 				ForceNew: true,
 			},
-			"creation_date": &schema.Schema{
+			"creation_date": {
 				Type:     schema.TypeString,
 				Computed: true,
 			},
-			"scheduled_deletion_date": &schema.Schema{
+			"scheduled_deletion_date": {
 				Type:     schema.TypeString,
 				Computed: true,
 			},

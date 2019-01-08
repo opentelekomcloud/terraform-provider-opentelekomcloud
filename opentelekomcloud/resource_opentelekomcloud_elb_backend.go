@@ -24,19 +24,19 @@ func resourceBackend() *schema.Resource {
 		},
 
 		Schema: map[string]*schema.Schema{
-			"listener_id": &schema.Schema{
+			"listener_id": {
 				Type:     schema.TypeString,
 				Required: true,
 				ForceNew: true,
 			},
 
-			"server_id": &schema.Schema{
+			"server_id": {
 				Type:     schema.TypeString,
 				Required: true,
 				ForceNew: true,
 			},
 
-			"address": &schema.Schema{
+			"address": {
 				Type:     schema.TypeString,
 				Required: true,
 				ForceNew: true,
