@@ -13,10 +13,10 @@ func TestAccOTCVpcSubnetIdsV2DataSource_basic(t *testing.T) {
 		PreCheck:  func() { testAccPreCheck(t) },
 		Providers: testAccProviders,
 		Steps: []resource.TestStep{
-			resource.TestStep{
+			{
 				Config: testAccOTCSubnetIdV2DataSource_vpcsubnet,
 			},
-			resource.TestStep{
+			{
 				Config: testAccOTCSubnetIdV2DataSource_basic,
 				Check: resource.ComposeTestCheckFunc(
 					testAccOTCSubnetIdV2DataSourceID("data.opentelekomcloud_vpc_subnet_ids_v1.subnet_ids"),

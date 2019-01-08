@@ -17,7 +17,7 @@ func TestAccOTCDedicatedHostV1_basic(t *testing.T) {
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckOTCDeHV1Destroy,
 		Steps: []resource.TestStep{
-			resource.TestStep{
+			{
 				Config: testAccDeHV1_basic,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckOTCDeHV1Exists("opentelekomcloud_deh_host_v1.deh1", &host),
@@ -40,7 +40,7 @@ func TestAccOTCDedicatedHostV1_update(t *testing.T) {
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckOTCDeHV1Destroy,
 		Steps: []resource.TestStep{
-			resource.TestStep{
+			{
 				Config: testAccDeHV1_basic,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckOTCDeHV1Exists("opentelekomcloud_deh_host_v1.deh1", &host),
@@ -52,7 +52,7 @@ func TestAccOTCDedicatedHostV1_update(t *testing.T) {
 						"opentelekomcloud_deh_host_v1.deh1", "host_type", "h1"),
 				),
 			},
-			resource.TestStep{
+			{
 				Config: testAccDeHV1_update,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckOTCDeHV1Exists("opentelekomcloud_deh_host_v1.deh1", &host),
@@ -76,7 +76,7 @@ func TestAccOTCDedicatedHostV1_timeout(t *testing.T) {
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckOTCDeHV1Destroy,
 		Steps: []resource.TestStep{
-			resource.TestStep{
+			{
 				Config: testAccDeHV1_timeout,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckOTCDeHV1Exists("opentelekomcloud_deh_host_v1.deh1", &host),

@@ -18,7 +18,7 @@ func TestAccOTCVpcV1_basic(t *testing.T) {
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckOTCVpcV1Destroy,
 		Steps: []resource.TestStep{
-			resource.TestStep{
+			{
 				Config: testAccVpcV1_basic,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckOTCVpcV1Exists("opentelekomcloud_vpc_v1.vpc_1", &vpc),
@@ -44,7 +44,7 @@ func TestAccOTCVpcV1_update(t *testing.T) {
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckOTCVpcV1Destroy,
 		Steps: []resource.TestStep{
-			resource.TestStep{
+			{
 				Config: testAccVpcV1_basic,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckOTCVpcV1Exists("opentelekomcloud_vpc_v1.vpc_1", &vpc),
@@ -52,7 +52,7 @@ func TestAccOTCVpcV1_update(t *testing.T) {
 						"opentelekomcloud_vpc_v1.vpc_1", "name", "terraform_provider_test"),
 				),
 			},
-			resource.TestStep{
+			{
 				Config: testAccVpcV1_update,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckOTCVpcV1Exists("opentelekomcloud_vpc_v1.vpc_1", &vpc),
@@ -72,7 +72,7 @@ func TestAccOTCVpcV1_timeout(t *testing.T) {
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckOTCVpcV1Destroy,
 		Steps: []resource.TestStep{
-			resource.TestStep{
+			{
 				Config: testAccVpcV1_timeout,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckOTCVpcV1Exists("opentelekomcloud_vpc_v1.vpc_1", &vpc),

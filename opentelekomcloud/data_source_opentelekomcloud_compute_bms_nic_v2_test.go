@@ -13,7 +13,7 @@ func TestAccOTCBMSNicV2DataSource_basic(t *testing.T) {
 		PreCheck:  func() { testAccPreCheckBMSNic(t) },
 		Providers: testAccProviders,
 		Steps: []resource.TestStep{
-			resource.TestStep{
+			{
 				Config: testAccOpenTelekomCloudBMSNicV2DataSource_basic,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckBMSNicV2DataSourceID("data.opentelekomcloud_compute_bms_nic_v2.nic_1"),

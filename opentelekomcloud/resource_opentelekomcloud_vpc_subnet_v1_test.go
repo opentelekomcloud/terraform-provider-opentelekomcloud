@@ -18,7 +18,7 @@ func TestAccOTCVpcSubnetV1_basic(t *testing.T) {
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckOTCVpcSubnetV1Destroy,
 		Steps: []resource.TestStep{
-			resource.TestStep{
+			{
 				Config: testAccOTCVpcSubnetV1_basic,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckOTCVpcSubnetV1Exists("opentelekomcloud_vpc_subnet_v1.subnet_1", &subnet),
@@ -32,7 +32,7 @@ func TestAccOTCVpcSubnetV1_basic(t *testing.T) {
 						"opentelekomcloud_vpc_subnet_v1.subnet_1", "availability_zone", "eu-de-02"),
 				),
 			},
-			resource.TestStep{
+			{
 				Config: testAccOTCVpcSubnetV1_update,
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr(
@@ -51,7 +51,7 @@ func TestAccOTCVpcSubnetV1_timeout(t *testing.T) {
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckOTCVpcSubnetV1Destroy,
 		Steps: []resource.TestStep{
-			resource.TestStep{
+			{
 				Config: testAccOTCVpcSubnetV1_timeout,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckOTCVpcSubnetV1Exists("opentelekomcloud_vpc_subnet_v1.subnet_1", &subnet),

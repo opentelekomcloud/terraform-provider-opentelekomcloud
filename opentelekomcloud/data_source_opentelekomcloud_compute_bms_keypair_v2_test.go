@@ -13,7 +13,7 @@ func TestAccOTCBMSV2KeyPairDataSource_basic(t *testing.T) {
 		PreCheck:  func() { testAccBmsKeyPairPreCheck(t) },
 		Providers: testAccProviders,
 		Steps: []resource.TestStep{
-			resource.TestStep{
+			{
 				Config: testAccBMSV2KeyPairDataSource_basic,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckBMSV2KeyPairDataSourceID("data.opentelekomcloud_compute_bms_keypairs_v2.keypair"),

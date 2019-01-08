@@ -13,7 +13,7 @@ func TestAccOTCRtsSoftwareDeploymentV1DataSource_basic(t *testing.T) {
 		PreCheck:  func() { testAccPreCheck(t) },
 		Providers: testAccProviders,
 		Steps: []resource.TestStep{
-			resource.TestStep{
+			{
 				Config: testAccOTCRtsSoftwareDeploymentV1DataSource_basic,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckOTCRtsSoftwareDeploymentV1DataSourceID("data.opentelekomcloud_rts_software_deployment_v1.deployment_1"),

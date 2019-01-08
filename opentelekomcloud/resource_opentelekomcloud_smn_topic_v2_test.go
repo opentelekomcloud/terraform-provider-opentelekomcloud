@@ -17,7 +17,7 @@ func TestAccSMNV2Topic_basic(t *testing.T) {
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckSMNTopicV2Destroy,
 		Steps: []resource.TestStep{
-			resource.TestStep{
+			{
 				Config: TestAccSMNV2TopicConfig_basic,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckSMNV2TopicExists("opentelekomcloud_smn_topic_v2.topic_1", &topic),
@@ -28,7 +28,7 @@ func TestAccSMNV2Topic_basic(t *testing.T) {
 						"The display name of topic_1"),
 				),
 			},
-			resource.TestStep{
+			{
 				Config: TestAccSMNV2TopicConfig_update,
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr(

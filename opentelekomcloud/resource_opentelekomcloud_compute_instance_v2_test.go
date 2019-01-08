@@ -27,7 +27,7 @@ func TestAccComputeV2Instance_basic(t *testing.T) {
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckComputeV2InstanceDestroy,
 		Steps: []resource.TestStep{
-			resource.TestStep{
+			{
 				Config: testAccComputeV2Instance_basic,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckComputeV2InstanceExists("opentelekomcloud_compute_instance_v2.instance_1", &instance),
@@ -50,21 +50,21 @@ func TestAccComputeV2Instance_tags(t *testing.T) {
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckComputeV2InstanceDestroy,
 		Steps: []resource.TestStep{
-			resource.TestStep{
+			{
 				Config: testAccComputeV2Instance_tags,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckComputeV2InstanceExists("opentelekomcloud_compute_instance_v2.instance_1", &instance),
 					testAccCheckComputeV2InstanceTags(&instance, "foo.bar", "key.value"),
 				),
 			},
-			resource.TestStep{
+			{
 				Config: testAccComputeV2Instance_tags2,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckComputeV2InstanceExists("opentelekomcloud_compute_instance_v2.instance_1", &instance),
 					testAccCheckComputeV2InstanceTags(&instance, "foo2.bar2", "key2.value2"),
 				),
 			},
-			resource.TestStep{
+			{
 				Config: testAccComputeV2Instance_notags,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckComputeV2InstanceExists("opentelekomcloud_compute_instance_v2.instance_1", &instance),
@@ -83,7 +83,7 @@ func TestAccComputeV2Instance_key_value_tags(t *testing.T) {
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckComputeV2InstanceDestroy,
 		Steps: []resource.TestStep{
-			resource.TestStep{
+			{
 				Config: testAccComputeV2Instance_key_value_tag,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckComputeV2InstanceExists("opentelekomcloud_compute_instance_v2.instance_1", &instance),
@@ -91,7 +91,7 @@ func TestAccComputeV2Instance_key_value_tags(t *testing.T) {
 					testAccCheckComputeV2InstanceTagV1(&instance, "key", "value"),
 				),
 			},
-			resource.TestStep{
+			{
 				Config: testAccComputeV2Instance_key_value_tag2,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckComputeV2InstanceExists("opentelekomcloud_compute_instance_v2.instance_1", &instance),
@@ -99,7 +99,7 @@ func TestAccComputeV2Instance_key_value_tags(t *testing.T) {
 					testAccCheckComputeV2InstanceTagV1(&instance, "key", "value2"),
 				),
 			},
-			resource.TestStep{
+			{
 				Config: testAccComputeV2Instance_notags,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckComputeV2InstanceExists("opentelekomcloud_compute_instance_v2.instance_1", &instance),
@@ -119,7 +119,7 @@ func TestAccComputeV2Instance_secgroupMulti(t *testing.T) {
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckComputeV2InstanceDestroy,
 		Steps: []resource.TestStep{
-			resource.TestStep{
+			{
 				Config: testAccComputeV2Instance_secgroupMulti,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckComputeV2SecGroupExists(
@@ -141,7 +141,7 @@ func TestAccComputeV2Instance_secgroupMultiUpdate(t *testing.T) {
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckComputeV2InstanceDestroy,
 		Steps: []resource.TestStep{
-			resource.TestStep{
+			{
 				Config: testAccComputeV2Instance_secgroupMultiUpdate_1,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckComputeV2SecGroupExists(
@@ -152,7 +152,7 @@ func TestAccComputeV2Instance_secgroupMultiUpdate(t *testing.T) {
 						"opentelekomcloud_compute_instance_v2.instance_1", &instance_1),
 				),
 			},
-			resource.TestStep{
+			{
 				Config: testAccComputeV2Instance_secgroupMultiUpdate_2,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckComputeV2SecGroupExists(
@@ -175,7 +175,7 @@ func TestAccComputeV2Instance_bootFromVolumeImage(t *testing.T) {
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckComputeV2InstanceDestroy,
 		Steps: []resource.TestStep{
-			resource.TestStep{
+			{
 				Config: testAccComputeV2Instance_bootFromVolumeImage,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckComputeV2InstanceExists("opentelekomcloud_compute_instance_v2.instance_1", &instance),
@@ -194,7 +194,7 @@ func TestAccComputeV2Instance_bootFromVolumeVolume(t *testing.T) {
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckComputeV2InstanceDestroy,
 		Steps: []resource.TestStep{
-			resource.TestStep{
+			{
 				Config: testAccComputeV2Instance_bootFromVolumeVolume,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckComputeV2InstanceExists("opentelekomcloud_compute_instance_v2.instance_1", &instance),
@@ -214,14 +214,14 @@ func TestAccComputeV2Instance_bootFromVolumeForceNew(t *testing.T) {
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckComputeV2InstanceDestroy,
 		Steps: []resource.TestStep{
-			resource.TestStep{
+			{
 				Config: testAccComputeV2Instance_bootFromVolumeForceNew_1,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckComputeV2InstanceExists(
 						"opentelekomcloud_compute_instance_v2.instance_1", &instance1_1),
 				),
 			},
-			resource.TestStep{
+			{
 				Config: testAccComputeV2Instance_bootFromVolumeForceNew_2,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckComputeV2InstanceExists(
@@ -242,7 +242,7 @@ func TestAccComputeV2Instance_personality(t *testing.T) {
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckComputeV2InstanceDestroy,
 		Steps: []resource.TestStep{
-			resource.TestStep{
+			{
 				Config: testAccComputeV2Instance_personality,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckComputeV2InstanceExists("opentelekomcloud_compute_instance_v2.instance_1", &instance),
@@ -261,14 +261,14 @@ func TestAccComputeV2Instance_changeFixedIP(t *testing.T) {
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckComputeV2InstanceDestroy,
 		Steps: []resource.TestStep{
-			resource.TestStep{
+			{
 				Config: testAccComputeV2Instance_changeFixedIP_1,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckComputeV2InstanceExists(
 						"opentelekomcloud_compute_instance_v2.instance_1", &instance1_1),
 				),
 			},
-			resource.TestStep{
+			{
 				Config: testAccComputeV2Instance_changeFixedIP_2,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckComputeV2InstanceExists(
@@ -287,7 +287,7 @@ func TestAccComputeV2Instance_stopBeforeDestroy(t *testing.T) {
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckComputeV2InstanceDestroy,
 		Steps: []resource.TestStep{
-			resource.TestStep{
+			{
 				Config: testAccComputeV2Instance_stopBeforeDestroy,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckComputeV2InstanceExists("opentelekomcloud_compute_instance_v2.instance_1", &instance),
@@ -305,7 +305,7 @@ func TestAccComputeV2Instance_metadataRemove(t *testing.T) {
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckComputeV2InstanceDestroy,
 		Steps: []resource.TestStep{
-			resource.TestStep{
+			{
 				Config: testAccComputeV2Instance_metadataRemove_1,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckComputeV2InstanceExists("opentelekomcloud_compute_instance_v2.instance_1", &instance),
@@ -317,7 +317,7 @@ func TestAccComputeV2Instance_metadataRemove(t *testing.T) {
 						"opentelekomcloud_compute_instance_v2.instance_1", "all_metadata.abc", "def"),
 				),
 			},
-			resource.TestStep{
+			{
 				Config: testAccComputeV2Instance_metadataRemove_2,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckComputeV2InstanceExists("opentelekomcloud_compute_instance_v2.instance_1", &instance),
@@ -341,7 +341,7 @@ func TestAccComputeV2Instance_timeout(t *testing.T) {
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckComputeV2InstanceDestroy,
 		Steps: []resource.TestStep{
-			resource.TestStep{
+			{
 				Config: testAccComputeV2Instance_timeout,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckComputeV2InstanceExists("opentelekomcloud_compute_instance_v2.instance_1", &instance),
@@ -359,7 +359,7 @@ func TestAccComputeV2Instance_auto_recovery(t *testing.T) {
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckComputeV2InstanceDestroy,
 		Steps: []resource.TestStep{
-			resource.TestStep{
+			{
 				Config: testAccComputeV2Instance_basic,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckComputeV2InstanceExists("opentelekomcloud_compute_instance_v2.instance_1", &instance),
@@ -367,7 +367,7 @@ func TestAccComputeV2Instance_auto_recovery(t *testing.T) {
 						"opentelekomcloud_compute_instance_v2.instance_1", "auto_recovery", "false"),
 				),
 			},
-			resource.TestStep{
+			{
 				Config: testAccComputeV2Instance_auto_recovery,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckComputeV2InstanceExists("opentelekomcloud_compute_instance_v2.instance_1", &instance),
@@ -483,7 +483,7 @@ func testAccCheckComputeV2InstanceNoMetadataKey(
 			return nil
 		}
 
-		for key, _ := range instance.Metadata {
+		for key := range instance.Metadata {
 			if k == key {
 				return fmt.Errorf("Metadata found: %s", k)
 			}

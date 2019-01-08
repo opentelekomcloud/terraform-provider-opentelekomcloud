@@ -13,7 +13,7 @@ func dataSourceBMSFlavorV2() *schema.Resource {
 		Read: dataSourceBMSFlavorV2Read,
 
 		Schema: map[string]*schema.Schema{
-			"region": &schema.Schema{
+			"region": {
 				Type:     schema.TypeString,
 				Optional: true,
 				Computed: true,

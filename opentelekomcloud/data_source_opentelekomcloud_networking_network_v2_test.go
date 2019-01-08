@@ -13,10 +13,10 @@ func TestAccOpenTelekomCloudNetworkingNetworkV2DataSource_basic(t *testing.T) {
 		PreCheck:  func() { testAccPreCheck(t) },
 		Providers: testAccProviders,
 		Steps: []resource.TestStep{
-			resource.TestStep{
+			{
 				Config: testAccOpenTelekomCloudNetworkingNetworkV2DataSource_network,
 			},
-			resource.TestStep{
+			{
 				Config: testAccOpenTelekomCloudNetworkingNetworkV2DataSource_basic,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckNetworkingNetworkV2DataSourceID("data.opentelekomcloud_networking_network_v2.net"),
@@ -35,10 +35,10 @@ func TestAccOpenTelekomCloudNetworkingNetworkV2DataSource_subnet(t *testing.T) {
 		PreCheck:  func() { testAccPreCheck(t) },
 		Providers: testAccProviders,
 		Steps: []resource.TestStep{
-			resource.TestStep{
+			{
 				Config: testAccOpenTelekomCloudNetworkingNetworkV2DataSource_network,
 			},
-			resource.TestStep{
+			{
 				Config: testAccOpenTelekomCloudNetworkingNetworkV2DataSource_subnet,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckNetworkingNetworkV2DataSourceID("data.opentelekomcloud_networking_network_v2.net"),
@@ -57,10 +57,10 @@ func TestAccOpenTelekomCloudNetworkingNetworkV2DataSource_networkID(t *testing.T
 		PreCheck:  func() { testAccPreCheck(t) },
 		Providers: testAccProviders,
 		Steps: []resource.TestStep{
-			resource.TestStep{
+			{
 				Config: testAccOpenTelekomCloudNetworkingNetworkV2DataSource_network,
 			},
-			resource.TestStep{
+			{
 				Config: testAccOpenTelekomCloudNetworkingNetworkV2DataSource_networkID,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckNetworkingNetworkV2DataSourceID("data.opentelekomcloud_networking_network_v2.net"),

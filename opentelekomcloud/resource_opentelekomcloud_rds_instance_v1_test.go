@@ -17,7 +17,7 @@ func TestAccRDSV1Instance_basic(t *testing.T) {
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckRDSV1InstanceDestroy,
 		Steps: []resource.TestStep{
-			resource.TestStep{
+			{
 				Config: testAccSInstanceV1Config_basic,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckRDSV1InstanceExists("opentelekomcloud_rds_instance_v1.instance", &instance),

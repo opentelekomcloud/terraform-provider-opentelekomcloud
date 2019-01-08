@@ -14,29 +14,29 @@ func dataSourceRdsFlavorV1() *schema.Resource {
 		Read: dataSourcedataSourceRdsFlavorV1Read,
 
 		Schema: map[string]*schema.Schema{
-			"region": &schema.Schema{
+			"region": {
 				Type:     schema.TypeString,
 				Optional: true,
 				Computed: true,
 				ForceNew: true,
 			},
-			"datastore_name": &schema.Schema{
+			"datastore_name": {
 				Type:     schema.TypeString,
 				Required: true,
 			},
-			"datastore_version": &schema.Schema{
+			"datastore_version": {
 				Type:     schema.TypeString,
 				Required: true,
 			},
-			"name": &schema.Schema{
+			"name": {
 				Type:     schema.TypeString,
 				Computed: true,
 			},
-			"ram": &schema.Schema{
+			"ram": {
 				Type:     schema.TypeInt,
 				Computed: true,
 			},
-			"speccode": &schema.Schema{
+			"speccode": {
 				Type:     schema.TypeString,
 				Optional: true,
 				Computed: true,

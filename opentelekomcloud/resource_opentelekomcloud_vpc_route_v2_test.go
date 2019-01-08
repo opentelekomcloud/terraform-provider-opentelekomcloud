@@ -18,7 +18,7 @@ func TestAccOTCVpcRouteV2_basic(t *testing.T) {
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckOTCRouteV2Destroy,
 		Steps: []resource.TestStep{
-			resource.TestStep{
+			{
 				Config: testAccRouteV2_basic,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckOTCRouteV2Exists("opentelekomcloud_vpc_route_v2.route_1", &route),
@@ -40,7 +40,7 @@ func TestAccOTCVpcRouteV2_timeout(t *testing.T) {
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckOTCRouteV2Destroy,
 		Steps: []resource.TestStep{
-			resource.TestStep{
+			{
 				Config: testAccRouteV2_timeout,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckOTCRouteV2Exists("opentelekomcloud_vpc_route_v2.route_1", &route),

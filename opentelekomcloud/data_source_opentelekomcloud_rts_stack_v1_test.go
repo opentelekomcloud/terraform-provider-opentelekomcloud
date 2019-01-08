@@ -13,7 +13,7 @@ func TestAccOTCRTSStackV1DataSource_basic(t *testing.T) {
 		PreCheck:  func() { testAccPreCheck(t) },
 		Providers: testAccProviders,
 		Steps: []resource.TestStep{
-			resource.TestStep{
+			{
 				Config: testAccOTCRTSStackV1DataSource_basic,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckOTCRTSStackV1DataSourceID("data.opentelekomcloud_rts_stack_v1.stacks"),

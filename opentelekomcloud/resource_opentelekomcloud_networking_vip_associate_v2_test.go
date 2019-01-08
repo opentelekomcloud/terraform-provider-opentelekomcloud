@@ -22,7 +22,7 @@ func TestAccNetworkingV2VIPAssociate_basic(t *testing.T) {
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckNetworkingV2VIPAssociateDestroy,
 		Steps: []resource.TestStep{
-			resource.TestStep{
+			{
 				Config: TestAccNetworkingV2VIPAssociateConfig_basic,
 				Check: resource.ComposeTestCheckFunc(
 					//testAccCheckNetworkingV2PortExists("opentelekomcloud_networking_port_v2.port_1", &port1),

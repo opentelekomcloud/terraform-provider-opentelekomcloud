@@ -22,7 +22,7 @@ func TestAccDNSV2Zone_basic(t *testing.T) {
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckDNSV2ZoneDestroy,
 		Steps: []resource.TestStep{
-			resource.TestStep{
+			{
 				Config: testAccDNSV2Zone_basic(zoneName),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckDNSV2ZoneExists("opentelekomcloud_dns_zone_v2.zone_1", &zone),
@@ -30,7 +30,7 @@ func TestAccDNSV2Zone_basic(t *testing.T) {
 						"opentelekomcloud_dns_zone_v2.zone_1", "description", "a zone"),
 				),
 			},
-			resource.TestStep{
+			{
 				Config: testAccDNSV2Zone_update(zoneName),
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr("opentelekomcloud_dns_zone_v2.zone_1", "name", zoneName),
@@ -56,7 +56,7 @@ func TestAccDNSV2Zone_private(t *testing.T) {
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckDNSV2ZoneDestroy,
 		Steps: []resource.TestStep{
-			resource.TestStep{
+			{
 				Config: testAccDNSV2Zone_private(zoneName),
 				//ExpectNonEmptyPlan: true,
 				Check: resource.ComposeTestCheckFunc(
@@ -80,7 +80,7 @@ func TestAccDNSV2Zone_readTTL(t *testing.T) {
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckDNSV2ZoneDestroy,
 		Steps: []resource.TestStep{
-			resource.TestStep{
+			{
 				Config:             testAccDNSV2Zone_readTTL(zoneName),
 				ExpectNonEmptyPlan: true,
 				Check: resource.ComposeTestCheckFunc(
@@ -103,7 +103,7 @@ func TestAccDNSV2Zone_timeout(t *testing.T) {
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckDNSV2ZoneDestroy,
 		Steps: []resource.TestStep{
-			resource.TestStep{
+			{
 				Config:             testAccDNSV2Zone_timeout(zoneName),
 				ExpectNonEmptyPlan: true,
 				Check: resource.ComposeTestCheckFunc(

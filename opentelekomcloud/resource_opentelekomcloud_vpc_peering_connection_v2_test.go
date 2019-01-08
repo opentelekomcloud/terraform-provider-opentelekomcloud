@@ -17,7 +17,7 @@ func TestAccOTCVpcPeeringConnectionV2_basic(t *testing.T) {
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckOTCVpcPeeringConnectionV2Destroy,
 		Steps: []resource.TestStep{
-			resource.TestStep{
+			{
 				Config: testAccOTCVpcPeeringConnectionV2_basic,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckOTCVpcPeeringConnectionV2Exists("opentelekomcloud_vpc_peering_connection_v2.peering_1", &peering),
@@ -27,7 +27,7 @@ func TestAccOTCVpcPeeringConnectionV2_basic(t *testing.T) {
 						"opentelekomcloud_vpc_peering_connection_v2.peering_1", "status", "ACTIVE"),
 				),
 			},
-			resource.TestStep{
+			{
 				Config: testAccOTCVpcPeeringConnectionV2_update,
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr(
@@ -46,7 +46,7 @@ func TestAccOTCVpcPeeringConnectionV2_timeout(t *testing.T) {
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckOTCVpcPeeringConnectionV2Destroy,
 		Steps: []resource.TestStep{
-			resource.TestStep{
+			{
 				Config: testAccOTCVpcPeeringConnectionV2_timeout,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckOTCVpcPeeringConnectionV2Exists("opentelekomcloud_vpc_peering_connection_v2.peering_1", &peering),

@@ -29,37 +29,37 @@ func resourceAntiDdosV1() *schema.Resource {
 		},
 
 		Schema: map[string]*schema.Schema{
-			"region": &schema.Schema{
+			"region": {
 				Type:     schema.TypeString,
 				Optional: true,
 				ForceNew: true,
 				Computed: true,
 			},
-			"enable_l7": &schema.Schema{
+			"enable_l7": {
 				Type:     schema.TypeBool,
 				Required: true,
 			},
-			"traffic_pos_id": &schema.Schema{
+			"traffic_pos_id": {
 				Type:         schema.TypeInt,
 				Required:     true,
 				ValidateFunc: validateAntiDdosTrafficPosID,
 			},
-			"http_request_pos_id": &schema.Schema{
+			"http_request_pos_id": {
 				Type:         schema.TypeInt,
 				Required:     true,
 				ValidateFunc: validateAntiDdosHttpRequestPosID,
 			},
-			"cleaning_access_pos_id": &schema.Schema{
+			"cleaning_access_pos_id": {
 				Type:         schema.TypeInt,
 				Required:     true,
 				ValidateFunc: validateAntiDdosCleaningAccessPosID,
 			},
-			"app_type_id": &schema.Schema{
+			"app_type_id": {
 				Type:         schema.TypeInt,
 				Required:     true,
 				ValidateFunc: validateAntiDdosAppTypeID,
 			},
-			"floating_ip_id": &schema.Schema{
+			"floating_ip_id": {
 				Type:     schema.TypeString,
 				Required: true,
 			},

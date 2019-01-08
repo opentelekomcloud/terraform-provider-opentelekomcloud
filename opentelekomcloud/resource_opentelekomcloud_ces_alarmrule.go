@@ -27,7 +27,7 @@ func resourceAlarmRule() *schema.Resource {
 		},
 
 		Schema: map[string]*schema.Schema{
-			"alarm_name": &schema.Schema{
+			"alarm_name": {
 				Type:     schema.TypeString,
 				Required: true,
 				ValidateFunc: func(v interface{}, k string) (ws []string, errors []error) {
@@ -40,7 +40,7 @@ func resourceAlarmRule() *schema.Resource {
 				},
 			},
 
-			"alarm_description": &schema.Schema{
+			"alarm_description": {
 				Type:     schema.TypeString,
 				Optional: true,
 				ValidateFunc: func(v interface{}, k string) (ws []string, errors []error) {
@@ -52,13 +52,13 @@ func resourceAlarmRule() *schema.Resource {
 				},
 			},
 
-			"metric": &schema.Schema{
+			"metric": {
 				Type:     schema.TypeList,
 				Required: true,
 				MaxItems: 1,
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
-						"namespace": &schema.Schema{
+						"namespace": {
 							Type:     schema.TypeString,
 							Required: true,
 							ValidateFunc: func(v interface{}, k string) (ws []string, errors []error) {
@@ -71,7 +71,7 @@ func resourceAlarmRule() *schema.Resource {
 							},
 						},
 
-						"metric_name": &schema.Schema{
+						"metric_name": {
 							Type:     schema.TypeString,
 							Required: true,
 							ValidateFunc: func(v interface{}, k string) (ws []string, errors []error) {
@@ -84,13 +84,13 @@ func resourceAlarmRule() *schema.Resource {
 							},
 						},
 
-						"dimensions": &schema.Schema{
+						"dimensions": {
 							Type:     schema.TypeList,
 							Required: true,
 							MaxItems: 3,
 							Elem: &schema.Resource{
 								Schema: map[string]*schema.Schema{
-									"name": &schema.Schema{
+									"name": {
 										Type:     schema.TypeString,
 										Required: true,
 										ValidateFunc: func(v interface{}, k string) (ws []string, errors []error) {
@@ -103,7 +103,7 @@ func resourceAlarmRule() *schema.Resource {
 										},
 									},
 
-									"value": &schema.Schema{
+									"value": {
 										Type:     schema.TypeString,
 										Required: true,
 										ValidateFunc: func(v interface{}, k string) (ws []string, errors []error) {
@@ -122,13 +122,13 @@ func resourceAlarmRule() *schema.Resource {
 				},
 			},
 
-			"condition": &schema.Schema{
+			"condition": {
 				Type:     schema.TypeList,
 				Required: true,
 				MaxItems: 1,
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
-						"period": &schema.Schema{
+						"period": {
 							Type:     schema.TypeInt,
 							Required: true,
 							ValidateFunc: func(v interface{}, k string) (ws []string, errors []error) {
@@ -147,7 +147,7 @@ func resourceAlarmRule() *schema.Resource {
 							},
 						},
 
-						"filter": &schema.Schema{
+						"filter": {
 							Type:     schema.TypeString,
 							Required: true,
 							ValidateFunc: func(v interface{}, k string) (ws []string, errors []error) {
@@ -165,7 +165,7 @@ func resourceAlarmRule() *schema.Resource {
 							},
 						},
 
-						"comparison_operator": &schema.Schema{
+						"comparison_operator": {
 							Type:     schema.TypeString,
 							Required: true,
 							ValidateFunc: func(v interface{}, k string) (ws []string, errors []error) {
@@ -183,7 +183,7 @@ func resourceAlarmRule() *schema.Resource {
 							},
 						},
 
-						"value": &schema.Schema{
+						"value": {
 							Type:     schema.TypeInt,
 							Required: true,
 							ValidateFunc: func(v interface{}, k string) (ws []string, errors []error) {
@@ -195,12 +195,12 @@ func resourceAlarmRule() *schema.Resource {
 							},
 						},
 
-						"unit": &schema.Schema{
+						"unit": {
 							Type:     schema.TypeString,
 							Optional: true,
 						},
 
-						"count": &schema.Schema{
+						"count": {
 							Type:     schema.TypeInt,
 							Required: true,
 							ValidateFunc: func(v interface{}, k string) (ws []string, errors []error) {
@@ -215,12 +215,12 @@ func resourceAlarmRule() *schema.Resource {
 				},
 			},
 
-			"alarm_actions": &schema.Schema{
+			"alarm_actions": {
 				Type:     schema.TypeList,
 				Optional: true,
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
-						"type": &schema.Schema{
+						"type": {
 							Type:     schema.TypeString,
 							Required: true,
 							ValidateFunc: func(v interface{}, k string) (ws []string, errors []error) {
@@ -235,7 +235,7 @@ func resourceAlarmRule() *schema.Resource {
 							},
 						},
 
-						"notification_list": &schema.Schema{
+						"notification_list": {
 							Type:     schema.TypeList,
 							Required: true,
 							MaxItems: 5,
@@ -245,12 +245,12 @@ func resourceAlarmRule() *schema.Resource {
 				},
 			},
 
-			"insufficientdata_actions": &schema.Schema{
+			"insufficientdata_actions": {
 				Type:     schema.TypeList,
 				Optional: true,
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
-						"type": &schema.Schema{
+						"type": {
 							Type:     schema.TypeString,
 							Required: true,
 							ValidateFunc: func(v interface{}, k string) (ws []string, errors []error) {
@@ -265,7 +265,7 @@ func resourceAlarmRule() *schema.Resource {
 							},
 						},
 
-						"notification_list": &schema.Schema{
+						"notification_list": {
 							Type:     schema.TypeList,
 							Required: true,
 							MaxItems: 5,
@@ -275,12 +275,12 @@ func resourceAlarmRule() *schema.Resource {
 				},
 			},
 
-			"ok_actions": &schema.Schema{
+			"ok_actions": {
 				Type:     schema.TypeList,
 				Optional: true,
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
-						"type": &schema.Schema{
+						"type": {
 							Type:     schema.TypeString,
 							Required: true,
 							ValidateFunc: func(v interface{}, k string) (ws []string, errors []error) {
@@ -295,7 +295,7 @@ func resourceAlarmRule() *schema.Resource {
 							},
 						},
 
-						"notification_list": &schema.Schema{
+						"notification_list": {
 							Type:     schema.TypeList,
 							Required: true,
 							MaxItems: 5,
@@ -305,26 +305,26 @@ func resourceAlarmRule() *schema.Resource {
 				},
 			},
 
-			"alarm_enabled": &schema.Schema{
+			"alarm_enabled": {
 				Type:     schema.TypeBool,
 				Optional: true,
 				Default:  true,
 			},
 
-			"alarm_action_enabled": &schema.Schema{
+			"alarm_action_enabled": {
 				Type:     schema.TypeBool,
 				Optional: true,
 				Default:  true,
 			},
 
-			"update_time": &schema.Schema{
+			"update_time": {
 				Type:     schema.TypeInt,
 				Optional: true,
 				ForceNew: true,
 				Computed: true,
 			},
 
-			"alarm_state": &schema.Schema{
+			"alarm_state": {
 				Type:     schema.TypeString,
 				Optional: true,
 				ForceNew: true,

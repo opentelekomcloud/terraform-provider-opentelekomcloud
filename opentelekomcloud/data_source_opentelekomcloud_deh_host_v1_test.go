@@ -12,7 +12,7 @@ func TestAccOTCDedicatedHostV1DataSource_basic(t *testing.T) {
 		PreCheck:  func() { testAccPreCheck(t) },
 		Providers: testAccProviders,
 		Steps: []resource.TestStep{
-			resource.TestStep{
+			{
 				Config: testAccOTCDedicatedHostV1DataSource_basic,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckDedicatedHostV1DataSourceID("data.opentelekomcloud_deh_host_v1.hosts"),

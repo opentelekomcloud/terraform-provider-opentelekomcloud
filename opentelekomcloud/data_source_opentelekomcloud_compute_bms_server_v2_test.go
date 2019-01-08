@@ -13,7 +13,7 @@ func TestAccOTCBMSServerV2DataSource_basic(t *testing.T) {
 		PreCheck:  func() { testAccPreCheckRequiredEnvVars(t) },
 		Providers: testAccProviders,
 		Steps: []resource.TestStep{
-			resource.TestStep{
+			{
 				Config: testAccOTCBMSServerV2DataSource_basic,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckBMSServerV2DataSourceID("data.opentelekomcloud_compute_bms_server_v2.server1"),
