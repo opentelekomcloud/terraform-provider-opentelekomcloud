@@ -119,6 +119,11 @@ $ OS_DEBUG=1 TF_LOG=DEBUG terraform apply
 If you submit these logs with a bug report, please ensure any sensitive
 information has been scrubbed first!
 
+## Creating an issue
+
+Issues can be used to keep track of bugs, enhancements, or other requests.
+See the github help [here](https://help.github.com/articles/creating-an-issue/)
+
 ## Testing and Development
 
 In order to run the Acceptance Tests for development, the following environment
