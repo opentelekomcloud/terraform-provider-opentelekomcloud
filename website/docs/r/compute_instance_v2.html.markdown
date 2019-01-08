@@ -21,7 +21,10 @@ resource "opentelekomcloud_compute_instance_v2" "basic" {
   flavor_id       = "3"
   key_pair        = "my_key_pair_name"
   security_groups = ["default"]
-  tags = ["foo.bar", "tag.value"]
+  tag {
+    foo = "bar"
+    key = "value"
+  }
 
   metadata {
     this = "that"
