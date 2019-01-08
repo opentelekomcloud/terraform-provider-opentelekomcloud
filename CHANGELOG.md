@@ -1,8 +1,8 @@
-## 1.5.1 (Unreleased)
+## 1.5.1 (January 08, 2019)
 
 BUG FIXES:
 
-* Fix ak/sk authentication issue [GH-176]
+* Fix ak/sk authentication issue ([#176](https://github.com/terraform-providers/terraform-provider-opentelekomcloud/issues/176))
 
 ## 1.5.0 (January 07, 2019)
 
