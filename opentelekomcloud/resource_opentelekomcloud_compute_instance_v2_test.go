@@ -106,6 +106,14 @@ func TestAccComputeV2Instance_key_value_tags(t *testing.T) {
 					testAccCheckComputeV2InstanceNoTagV1(&instance),
 				),
 			},
+			{
+				Config: testAccComputeV2Instance_key_value_tag,
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckComputeV2InstanceExists("opentelekomcloud_compute_instance_v2.instance_1", &instance),
+					testAccCheckComputeV2InstanceTagV1(&instance, "foo", "bar"),
+					testAccCheckComputeV2InstanceTagV1(&instance, "key", "value"),
+				),
+			},
 		},
 	})
 }
