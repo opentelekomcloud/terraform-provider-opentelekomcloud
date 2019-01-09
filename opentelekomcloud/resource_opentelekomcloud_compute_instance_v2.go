@@ -920,18 +920,22 @@ func resourceComputeInstanceV2Update(d *schema.ResourceData, meta interface{}) e
 		if err != nil {
 			return fmt.Errorf("Error fetching OpenTelekomCloud instance tags: %s", err)
 		}
-		deleteopts := ecstags.BatchOpts{Action: ecstags.ActionDelete, Tags: oldTags.Tags}
-		deleteTags := ecstags.BatchAction(ecsv1Client, d.Id(), deleteopts)
-		if deleteTags.Err != nil {
-			return fmt.Errorf("Error updating OpenTelekomCloud instance tags: %s", deleteTags.Err)
+		if len(oldTags.Tags) > 0 {
+			deleteopts := ecstags.BatchOpts{Action: ecstags.ActionDelete, Tags: oldTags.Tags}
+			deleteTags := ecstags.BatchAction(ecsv1Client, d.Id(), deleteopts)
+			if deleteTags.Err != nil {
+				return fmt.Errorf("Error updating OpenTelekomCloud instance tags: %s", deleteTags.Err)
+			}
 		}
 
 		if hasFilledOpt(d, "tag") {
 			tagmap := d.Get("tag").(map[string]interface{})
-			log.Printf("[DEBUG] Setting tag(key/value): %v", tagmap)
-			err = setTagForInstance(d, meta, d.Id(), tagmap)
-			if err != nil {
-				log.Printf("[WARN] Error setting tag(key/value) of instance:%s, err=%s", d.Id(), err)
+			if len(tagmap) > 0 {
+				log.Printf("[DEBUG] Setting tag(key/value): %v", tagmap)
+				err = setTagForInstance(d, meta, d.Id(), tagmap)
+				if err != nil {
+					log.Printf("[WARN] Error setting tag(key/value) of instance:%s, err=%s", d.Id(), err)
+				}
 			}
 		}
 	}
