@@ -35,8 +35,8 @@ The following arguments are supported:
 * `realm` - (Optional) Region where a key resides. Changing this creates a new key.
 
 * `pending_days` - (Optional) Duration in days after which the key is deleted
-    after destruction of the resource, must be between 7 and 1096 days. It doesn't
-    have default value. It only be used when delete a key.
+    after destruction of the resource, must be between 7 and 1096 days. Defaults to 7.
+    It only be used when delete a key.
 
 * `is_enabled` - (Optional) Specifies whether the key is enabled. Defaults to true.
     Changing this updates the state of existing key.
