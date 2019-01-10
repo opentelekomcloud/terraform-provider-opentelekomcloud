@@ -162,7 +162,7 @@ resource "opentelekomcloud_compute_instance_v2" "instance_1" {
   block_device {
     uuid                  = "<image-id>"
     source_type           = "image"
-    destination_type      = "local"
+    destination_type      = "volume"
     boot_index            = 0
     delete_on_termination = true
   }
@@ -241,7 +241,7 @@ resource "opentelekomcloud_compute_instance_v2" "multi-eph" {
   block_device {
     boot_index            = 0
     delete_on_termination = true
-    destination_type      = "local"
+    destination_type      = "volume"
     source_type           = "image"
     uuid                  = "<image-id>"
   }
@@ -249,7 +249,7 @@ resource "opentelekomcloud_compute_instance_v2" "multi-eph" {
   block_device {
     boot_index            = -1
     delete_on_termination = true
-    destination_type      = "local"
+    destination_type      = "volume"
     source_type           = "blank"
     volume_size           = 1
   }
@@ -257,7 +257,7 @@ resource "opentelekomcloud_compute_instance_v2" "multi-eph" {
   block_device {
     boot_index            = -1
     delete_on_termination = true
-    destination_type      = "local"
+    destination_type      = "volume"
     source_type           = "blank"
     volume_size           = 1
   }
@@ -400,8 +400,7 @@ The `block_device` block supports:
 
 * `volume_size` - The size of the volume to create (in gigabytes). Required
     in the following combinations: source=image and destination=volume,
-    source=blank and destination=local, and source=blank and destination=volume.
-    Changing this creates a new server.
+    and source=blank and destination=volume. Changing this creates a new server.
 
 * `volume_type` - (Optional) Currently, the value can be `SSD` (ultra-I/O disk type), `SAS` (high I/O disk type), or `SATA` (common I/O disk type)
     [OTC-API](https://docs.otc.t-systems.com/en-us/api/ecs/en-us_topic_0065817708.html)
@@ -409,8 +408,8 @@ The `block_device` block supports:
 * `boot_index` - (Optional) The boot index of the volume. It defaults to 0.
     Changing this creates a new server.
 
-* `destination_type` - (Optional) The type that gets created. Possible values
-    are "volume" and "local". Changing this creates a new server.
+* `destination_type` - (Optional) The type that gets created. Currently only
+    support "volume". Changing this creates a new server.
 
 * `delete_on_termination` - (Optional) Delete the volume / block device upon
     termination of the instance. Defaults to false. Changing this creates a
@@ -492,7 +491,7 @@ resource "opentelekomcloud_compute_instance_v2" "foo" {
   block_device {
     boot_index            = 0
     delete_on_termination = true
-    destination_type      = "local"
+    destination_type      = "volume"
     source_type           = "image"
     uuid                  = "<image uuid>"
   }
@@ -500,7 +499,7 @@ resource "opentelekomcloud_compute_instance_v2" "foo" {
   block_device {
     boot_index            = -1
     delete_on_termination = true
-    destination_type      = "local"
+    destination_type      = "volume"
     source_type           = "blank"
     volume_size           = 1
   }
@@ -508,7 +507,7 @@ resource "opentelekomcloud_compute_instance_v2" "foo" {
   block_device {
     boot_index            = -1
     delete_on_termination = true
-    destination_type      = "local"
+    destination_type      = "volume"
     source_type           = "blank"
     volume_size           = 1
   }
