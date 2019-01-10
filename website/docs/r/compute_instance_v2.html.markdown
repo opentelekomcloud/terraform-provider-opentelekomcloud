@@ -306,10 +306,10 @@ The following arguments are supported:
     desired image for the server. Changing this creates a new server.
 
 * `flavor_id` - (Optional; Required if `flavor_name` is empty) The flavor ID of
-    the desired flavor for the server. Changing this resizes the existing server.
+    the desired flavor for the server. Changing this creates a new server.
 
 * `flavor_name` - (Optional; Required if `flavor_id` is empty) The name of the
-    desired flavor for the server. Changing this resizes the existing server.
+    desired flavor for the server. Changing this creates a new server.
 
 * `user_data` - (Optional) The user data to provide when launching the instance.
     Changing this creates a new server.

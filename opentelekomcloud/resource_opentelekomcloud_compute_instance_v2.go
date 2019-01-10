@@ -67,14 +67,14 @@ func resourceComputeInstanceV2() *schema.Resource {
 			"flavor_id": {
 				Type:        schema.TypeString,
 				Optional:    true,
-				ForceNew:    false,
+				ForceNew:    true,
 				Computed:    true,
 				DefaultFunc: schema.EnvDefaultFunc("OS_FLAVOR_ID", nil),
 			},
 			"flavor_name": {
 				Type:        schema.TypeString,
 				Optional:    true,
-				ForceNew:    false,
+				ForceNew:    true,
 				Computed:    true,
 				DefaultFunc: schema.EnvDefaultFunc("OS_FLAVOR_NAME", nil),
 			},
