@@ -55,10 +55,32 @@ $ terraform apply # Should all work if everything is correct.
 
 ## Quick Start
 
+1. AK/SK Configuration
+
+```hcl
+# Configure the OpenTelekomCloud Provider with AK/SK
+# This will work with a single defined/default network, otherwise you need to specify network to fix errors about multiple networks found.
+provider "opentelekomcloud" {
+  tenant_name = "tenant name"
+  access_key  = "access key"
+  secret_key  = "secret key"
+  auth_url    = "https://iam.eu-de.otc.t-systems.com/v3"
+  region      = "eu-de"
+}
+
+# Create a web server
+resource "opentelekomcloud_compute_instance_v2" "test-server" {
+  name		  = "test-server"
+  image_name  = "Standard_CentOS_7_latest"
+  flavor_name = "s1.medium"
+}
+```
+
+2. Username/Password Configuration
+
 ```hcl
 # Configure the OpenTelekomCloud Provider
-# This will work with a single defined/default network, otherwise you need to specify network
-# to fix errrors about multiple networks found.
+# This will work with a single defined/default network, otherwise you need to specify network to fix errrors about multiple networks found.
 provider "opentelekomcloud" {
   user_name   = "user"
   tenant_name = "tenant"
