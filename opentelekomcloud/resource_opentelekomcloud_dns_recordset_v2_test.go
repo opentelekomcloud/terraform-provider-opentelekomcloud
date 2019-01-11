@@ -227,7 +227,7 @@ func testAccDNSV2RecordSet_timeout(zoneName string) string {
 			name = "%s"
 			type = "A"
 			ttl = 3000
-			records = ["10.1.0.3"]
+			records = ["10.1.0.3", "10.1.0.2"]
 
 			timeouts {
 				create = "5m"

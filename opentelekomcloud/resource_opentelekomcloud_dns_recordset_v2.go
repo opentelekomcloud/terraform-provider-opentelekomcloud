@@ -52,7 +52,7 @@ func resourceDNSRecordSetV2() *schema.Resource {
 				ForceNew: false,
 			},
 			"records": {
-				Type:     schema.TypeList,
+				Type:     schema.TypeSet,
 				Required: true,
 				ForceNew: false,
 				Elem:     &schema.Schema{Type: schema.TypeString},
@@ -85,7 +85,7 @@ func resourceDNSRecordSetV2Create(d *schema.ResourceData, meta interface{}) erro
 		return fmt.Errorf("Error creating OpenTelekomCloud DNS client: %s", err)
 	}
 
-	recordsraw := d.Get("records").([]interface{})
+	recordsraw := d.Get("records").(*schema.Set).List()
 	records := make([]string, len(recordsraw))
 	for i, recordraw := range recordsraw {
 		records[i] = recordraw.(string)
@@ -180,7 +180,7 @@ func resourceDNSRecordSetV2Update(d *schema.ResourceData, meta interface{}) erro
 	}
 
 	if d.HasChange("records") {
-		recordsraw := d.Get("records").([]interface{})
+		recordsraw := d.Get("records").(*schema.Set).List()
 		records := make([]string, len(recordsraw))
 		for i, recordraw := range recordsraw {
 			records[i] = recordraw.(string)
