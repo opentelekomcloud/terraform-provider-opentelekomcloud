@@ -113,11 +113,6 @@ resource "opentelekomcloud_s3_bucket" "bucket" {
     enabled = true
 
     prefix  = "log/"
-    tags {
-      "rule"      = "log"
-      "autoclean" = "true"
-    }
-
     expiration {
       days = 90
     }
@@ -197,7 +192,6 @@ The `lifecycle_rule` object supports the following:
 
 * `id` - (Optional) Unique identifier for the rule.
 * `prefix` - (Optional) Object key prefix identifying one or more objects to which the rule applies.
-* `tags` - (Optional) Specifies object tags key and value.
 * `enabled` - (Required) Specifies lifecycle rule status.
 * `abort_incomplete_multipart_upload_days` (Optional) Specifies the number of days after initiating a multipart upload when the multipart upload must be completed.
 * `expiration` - (Optional) Specifies a period in the object's expire (documented below).

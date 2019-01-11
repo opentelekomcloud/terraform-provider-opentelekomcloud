@@ -315,10 +315,7 @@ The following arguments are supported:
     Changing this creates a new server.
 
 * `security_groups` - (Optional) An array of one or more security group names
-    to associate with the server. Changing this results in adding/removing
-    security groups from the existing server. *Note*: When attaching the
-    instance to networks using Ports, place the security groups on the Port
-    and not the instance.
+    to associate with the server. Changing this creates a new server.
 
 * `availability_zone` - (Optional) The availability zone in which to create
     the server. Changing this creates a new server.
