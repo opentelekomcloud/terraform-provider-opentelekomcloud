@@ -1,4 +1,11 @@
-## 1.6.0 (Unreleased)
+## 1.5.2 (Unreleased)
+
+BUG FIXES:
+
+* `resource/opentelekomcloud_compute_instance_v2`: Fix instance tag update error [GH-178]
+* `resource/opentelekomcloud_dns_recordset_v2`: Fix dns records update error [GH-179]
+* `resource/opentelekomcloud_dns_recordset_v2`: Fix dns entries re-sort issue [GH-185]
+
 ## 1.5.1 (January 08, 2019)
 
 BUG FIXES:
