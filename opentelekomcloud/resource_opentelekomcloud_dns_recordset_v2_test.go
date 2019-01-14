@@ -32,8 +32,6 @@ func TestAccDNSV2RecordSet_basic(t *testing.T) {
 					testAccCheckDNSV2RecordSetExists("opentelekomcloud_dns_recordset_v2.recordset_1", &recordset),
 					resource.TestCheckResourceAttr(
 						"opentelekomcloud_dns_recordset_v2.recordset_1", "description", "a record set"),
-					resource.TestCheckResourceAttr(
-						"opentelekomcloud_dns_recordset_v2.recordset_1", "records.0", "10.1.0.0"),
 				),
 			},
 			{
@@ -44,8 +42,6 @@ func TestAccDNSV2RecordSet_basic(t *testing.T) {
 					resource.TestCheckResourceAttr("opentelekomcloud_dns_recordset_v2.recordset_1", "type", "A"),
 					resource.TestCheckResourceAttr(
 						"opentelekomcloud_dns_recordset_v2.recordset_1", "description", "an updated record set"),
-					resource.TestCheckResourceAttr(
-						"opentelekomcloud_dns_recordset_v2.recordset_1", "records.0", "10.1.0.1"),
 				),
 			},
 		},
