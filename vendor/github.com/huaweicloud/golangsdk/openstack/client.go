@@ -960,6 +960,12 @@ func NewKMSV1(client *golangsdk.ProviderClient, eo golangsdk.EndpointOpts) (*gol
 	return sc, err
 }
 
+// NewSMNV2 creates a ServiceClient that may be used to access the SMN service.
+func NewSMNV2(client *golangsdk.ProviderClient, eo golangsdk.EndpointOpts) (*golangsdk.ServiceClient, error) {
+	sc, err := initClientOpts(client, eo, "smnv2")
+	return sc, err
+}
+
 func NewSDKClient(c *golangsdk.ProviderClient, eo golangsdk.EndpointOpts, serviceType string) (*golangsdk.ServiceClient, error) {
 	switch serviceType {
 	case "mls":
