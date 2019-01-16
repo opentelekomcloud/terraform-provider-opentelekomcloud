@@ -61,14 +61,6 @@ func resourceAlarmRule() *schema.Resource {
 						"namespace": {
 							Type:     schema.TypeString,
 							Required: true,
-							ValidateFunc: func(v interface{}, k string) (ws []string, errors []error) {
-								value := v.(string)
-								vv := regexp.MustCompile("^[a-zA-Z][a-zA-Z0-9_]{2,31}\\.[a-zA-Z][a-zA-Z0-9_]{2,31}$")
-								if !vv.MatchString(value) {
-									errors = append(errors, fmt.Errorf("%s is in service.item format. service and item must be a string of 3 to 32 characters that starts with a letter and consists of uppercase/lowercae letters, digits and underscores(_)", k))
-								}
-								return
-							},
 						},
 
 						"metric_name": {
