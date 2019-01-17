@@ -55,21 +55,14 @@ The following arguments are supported:
 * `description` - (Optional) Indicates the description of an instance. It is a character
     string containing not more than 1024 characters.
 
-* `engine` - (Optional) Indicates a message engine. Options: rabbitmq and kafka.
+* `engine` - (Required) Indicates a cache engine. Only Redis is supported.
 
-* `engine_version` - (Optional) Indicates the version of a message engine.
+* `engine_version` - (Optional) Indicates the version of a cache engine, which is 3.0.7.
 
 * `capacity` - (Required) Indicates the Cache capacity. Unit: GB.
     For a DCS Redis or Memcached instance in single-node or master/standby mode, the cache
     capacity can be 2 GB, 4 GB, 8 GB, 16 GB, 32 GB, or 64 GB.
-    For a DCS Redis instance in cluster mode, the cache capacity can be 64, 128, 256, 512,
-    or 1024 GB.
-
-* `partition_num` - (Optional) This parameter is mandatory when a Kafka instance is created.
-    Indicates the maximum number of topics in a Kafka instance.
-    When specification is 300 MB: 900
-    When specification is 600 MB: 1800
-    When specification is 1200 MB: 1800
+    For a DCS Redis instance in cluster mode, the cache capacity can be 64, 128, 256, 512GB.
 
 * `access_user` - (Optional) Username used for accessing a DCS instance after password
     authentication. A username starts with a letter, consists of 1 to 64 characters,
@@ -111,19 +104,19 @@ The following arguments are supported:
 	blank, parameter maintain_begin is also blank. In this case, the system automatically allocates
 	the default end time 06:00.
 
-* `save_days` - (Optional) Retention time. Unit: day. Range: 1–7.
+* `save_days` - (Required) Retention time. Unit: day. Range: 1–7.
 
-* `backup_type` - (Optional) Backup type. Options:
+* `backup_type` - (Required) Backup type. Options:
     auto: automatic backup.
     manual: manual backup.
 
-* `begin_at` - (Optional) Time at which backup starts. "00:00-01:00" indicates that backup
+* `begin_at` - (Required) Time at which backup starts. "00:00-01:00" indicates that backup
     starts at 00:00:00.
 
-* `period_type` - (Optional) Interval at which backup is performed. Currently, only weekly
+* `period_type` - (Required) Interval at which backup is performed. Currently, only weekly
     backup is supported.
 
-* `backup_at` - (Optional) Day in a week on which backup starts. Range: 1–7. Where: 1
+* `backup_at` - (Required) Day in a week on which backup starts. Range: 1–7. Where: 1
     indicates Monday; 7 indicates Sunday.
 
 ## Attributes Reference
