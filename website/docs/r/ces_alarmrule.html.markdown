@@ -37,6 +37,12 @@ resource "opentelekomcloud_ces_alarmrule" "alarm_rule" {
       "${opentelekomcloud_smn_topic_v2.topic.id}"
     ]
   }
+  "alarm_actions" {
+    "type" = "notification"
+    "notification_list" = [
+      "${opentelekomcloud_smn_topic_v2.topic_2.id}"
+    ]
+  }
 }
 ```
 
@@ -56,13 +62,13 @@ The following arguments are supported:
 * `condition` - (Required) Specifies the alarm triggering condition. The structure
     is described below.
 
-* `alarm_actions` - (Optional) Specifies the action triggered by an alarm. The
+* `alarm_actions` - (Optional) Specifies the actions list triggered by an alarm. The
     structure is described below.
 
-* `insufficientdata_actions` - (Optional) Specifies the action triggered by
+* `insufficientdata_actions` - (Optional) Specifies the actions list triggered by
     data insufficiency. The structure is described below.
 
-* `ok_actions` - (Optional) Specifies the action triggered by the clearing of
+* `ok_actions` - (Optional) Specifies the actions list triggered by the clearing of
     an alarm. The structure is described below.
 
 * `alarm_enabled` - (Optional) Specifies whether to enable the alarm. The default
