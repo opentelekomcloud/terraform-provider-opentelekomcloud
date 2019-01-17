@@ -1,3 +1,4 @@
+---
 layout: "opentelekomcloud"
 page_title: "OpenTelekomCloud: opentelekomcloud_mrs_job_v1"
 sidebar_current: "docs-opentelekomcloud-resource-mrs-job-v1"
