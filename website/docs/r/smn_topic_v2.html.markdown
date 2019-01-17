@@ -1,35 +1,21 @@
 ---
 layout: "opentelekomcloud"
-page_title: "OpenTelekomCloud: opentelekomcloud_smn_subscription_v2"
-sidebar_current: "docs-opentelekomcloud-resource-smn-subscription-v2"
+page_title: "OpenTelekomCloud: opentelekomcloud_smn_topic_v2"
+sidebar_current: "docs-opentelekomcloud-resource-smn-topic-v2"
 description: |-
-  Manages a V2 subscription resource within OpenTelekomCloud.
+  Manages a V2 topic resource within OpenTelekomCloud.
 ---
 
-# opentelekomcloud\_smn\_subscription\_v2
+# opentelekomcloud\_smn\_topic\_v2
 
-Manages a V2 subscription resource within OpenTelekomCloud.
+Manages a V2 topic resource within OpenTelekomCloud.
 
 ## Example Usage
 
 ```hcl
 resource "opentelekomcloud_smn_topic_v2" "topic_1" {
-  name		  = "topic_1"
+  name            = "topic_1"
   display_name    = "The display name of topic_1"
-}
-
-resource "opentelekomcloud_smn_subscription_v2" "subscription_1" {
-  topic_urn       = "${opentelekomcloud_smn_topic_v2.topic_1.id}"
-  endpoint        = "mailtest@gmail.com"
-  protocol        = "email"
-  remark          = "O&M"
-}
-
-resource "opentelekomcloud_smn_subscription_v2" "subscription_2" {
-  topic_urn       = "${opentelekomcloud_smn_topic_v2.topic_1.id}"
-  endpoint        = "13600000000"
-  protocol        = "sms"
-  remark          = "O&M"
 }
 ```
 
@@ -37,39 +23,28 @@ resource "opentelekomcloud_smn_subscription_v2" "subscription_2" {
 
 The following arguments are supported:
 
-* `topic_urn` - (Required) Resource identifier of a topic, which is unique.
+* `name` - (Required) The name of the topic to be created.
 
-* `endpoint` - (Required) Message endpoint.
-     For an HTTP subscription, the endpoint starts with http\://.
-     For an HTTPS subscription, the endpoint starts with https\://.
-     For an email subscription, the endpoint is a mail address.
-     For an SMS message subscription, the endpoint is a phone number.
+* `display_name` - (Optional) Topic display name, which is presented as the
+    name of the email sender in an email message.
 
-* `protocol` - (Required) Protocol of the message endpoint. Currently, email,
-     sms, http, and https are supported.
+* `topic_urn` - (Optional) Resource identifier of a topic, which is unique.
 
-* `remark` - (Optional) Remark information. The remarks must be a UTF-8-coded
-     character string containing 128 bytes.
+* `push_policy` - (Optional) Message pushing policy. 0 indicates that the message
+    sending fails and the message is cached in the queue. 1 indicates that the
+    failed message is discarded.
 
-* `subscription_urn` - (Optional) Resource identifier of a subscription, which
-     is unique.
+* `create_time` - (Optional) Time when the topic was created.
 
-* `owner` - (Optional) Project ID of the topic creator.
-
-* `status` - (Optional) Subscription status.
-     0 indicates that the subscription is not confirmed.
-     1 indicates that the subscription is confirmed.
-     3 indicates that the subscription is canceled.
-
+* `update_time` - (Optional) Time when the topic was updated.
 
 ## Attributes Reference
 
 The following attributes are exported:
 
+* `name` - See Argument Reference above.
+* `display_name` - See Argument Reference above.
 * `topic_urn` - See Argument Reference above.
-* `endpoint` - See Argument Reference above.
-* `protocol` - See Argument Reference above.
-* `remark` - See Argument Reference above.
-* `subscription_urn` - See Argument Reference above.
-* `owner` - See Argument Reference above.
-* `status` - See Argument Reference above.
+* `push_policy` - See Argument Reference above.
+* `create_time` - See Argument Reference above.
+* `update_time` - See Argument Reference above.
