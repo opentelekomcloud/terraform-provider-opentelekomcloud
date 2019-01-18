@@ -364,6 +364,7 @@ func resourceComputeInstanceV2() *schema.Resource {
 				Type:          schema.TypeMap,
 				Optional:      true,
 				ConflictsWith: []string{"tags"},
+				ValidateFunc:  validateECSTagValue,
 			},
 			"all_metadata": {
 				Type:     schema.TypeMap,
@@ -934,7 +935,7 @@ func resourceComputeInstanceV2Update(d *schema.ResourceData, meta interface{}) e
 				log.Printf("[DEBUG] Setting tag(key/value): %v", tagmap)
 				err = setTagForInstance(d, meta, d.Id(), tagmap)
 				if err != nil {
-					log.Printf("[WARN] Error setting tag(key/value) of instance:%s, err=%s", d.Id(), err)
+					return fmt.Errorf("Error updating tag(key/value) of instance:%s, err:%s", d.Id(), err)
 				}
 			}
 		}
