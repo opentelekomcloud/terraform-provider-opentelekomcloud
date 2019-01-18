@@ -314,12 +314,8 @@ func validateECSTagValue(v interface{}, k string) (ws []string, errors []error) 
 	vv := regexp.MustCompile(`^[0-9a-zA-Z-_]+$`)
 	for k, v := range tagmap {
 		value := v.(string)
-		if !vv.MatchString(k) {
-			errors = append(errors, fmt.Errorf("Tag key/value must be string only contains digits, letters, underscores(_) and hyphens(-), but got %s=%s", k, value))
-			break
-		}
 		if !vv.MatchString(value) {
-			errors = append(errors, fmt.Errorf("Tag key/value must be string only contains digits, letters, underscores(_) and hyphens(-), but got %s=%s", k, value))
+			errors = append(errors, fmt.Errorf("Tag value must be string only contains digits, letters, underscores(_) and hyphens(-), but got %s=%s", k, value))
 			break
 		}
 	}
