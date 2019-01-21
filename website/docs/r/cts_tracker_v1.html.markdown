@@ -44,12 +44,12 @@ The following arguments are supported:
 
 * `need_notify_user_list` - (Optional) The users using the login function. When these users log in, notifications will be sent.
 
+* `status` - (Optional) The status of a tracker. The value should be **enabled** when creating a tracker, and when updating the value can be enabled or disabled.
+
 
 
 ## Attributes Reference
 In addition to all arguments above, the following attributes are exported:
-
-* `status` - The status of a tracker. The value is **enabled**.
 
 * `tracker_name` - The tracker name. Currently, only tracker **system** is available.
 
