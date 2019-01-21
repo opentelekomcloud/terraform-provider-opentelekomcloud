@@ -41,7 +41,8 @@ The following arguments are supported:
 
 * `flavor_id` - (Required) Cluster specifications. Changing this parameter will create a new cluster resource.
 
-* `cluster_version` - (Optional) For the cluster version, possible values are v1.7.3-r10 or v1.9.2-r1.
+* `cluster_version` - (Optional) For the cluster version, possible values are v1.9.2-r2 or v1.11.3-r1. Changing this parameter will create a new cluster resource.
+    [OTC-API](https://docs.otc.t-systems.com/en-us/api2/cce/cce_02_0236.html)
 
 * `cluster_type` - (Required) Cluster Type, Changing this parameter will create a new cluster resource.
 
