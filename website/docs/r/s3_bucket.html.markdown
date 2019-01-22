@@ -170,7 +170,7 @@ The `website` object supports the following:
 * `routing_rules` - (Optional) A json array containing [routing rules](https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-properties-s3-websiteconfiguration-routingrules.html)
 describing redirect behavior and when redirects are applied.
 
-The `CORS` object supports the following:
+The `cors_rule` object supports the following:
 
 * `allowed_headers` (Optional) Specifies which headers are allowed.
 * `allowed_methods` (Required) Specifies which methods are allowed. Can be `GET`, `PUT`, `POST`, `DELETE` or `HEAD`.
@@ -208,18 +208,6 @@ The `expiration` object supports the following
 The `noncurrent_version_expiration` object supports the following
 
 * `days` (Required) Specifies the number of days an object is noncurrent object versions expire.
-
-The `rules` object supports the following:
-
-* `id` - (Optional) Unique identifier for the rule.
-* `destination` - (Required) Specifies the destination for the rule (documented below).
-* `prefix` - (Required) Object keyname prefix identifying one or more objects to which the rule applies. Set as an empty string to replicate the whole bucket.
-* `status` - (Required) The status of the rule. Either `Enabled` or `Disabled`. The rule is ignored if status is not Enabled.
-
-The `destination` object supports the following:
-
-* `bucket` - (Required) The ARN of the S3 bucket where you want Amazon S3 to store replicas of the object identified by the rule.
-* `storage_class` - (Optional) The class of storage used to store the object.
 
 ## Attributes Reference
 
