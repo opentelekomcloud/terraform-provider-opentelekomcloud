@@ -17,7 +17,7 @@ import (
 
 func TestAccIdentityV3RoleAssignment_basic(t *testing.T) {
 	var role roles.Role
-	var group group.Group
+	var group groups.Group
 	var project projects.Project
 	resource.Test(t, resource.TestCase{
 		PreCheck: func() {

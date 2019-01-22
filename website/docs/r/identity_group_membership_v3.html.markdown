@@ -1,7 +1,7 @@
 ---
 layout: "opentelekomcloud"
 page_title: "OpentelekomCloud: opentelekomcloud_identity_group_membership_v3"
-sidebar_current: "docs-opentelekomcloud-resource-identity-group-mermbership-v3"
+sidebar_current: "docs-opentelekomcloud-resource-identity-group-membership-v3"
 description: |-
   Manages the membership combine User Group resource and User resource  within
   OpentelekomCloud IAM service.
