@@ -11,13 +11,13 @@ import (
 	"github.com/hashicorp/terraform/helper/resource"
 	"github.com/hashicorp/terraform/terraform"
 
+	"github.com/huaweicloud/golangsdk/openstack/identity/v3/groups"
 	"github.com/huaweicloud/golangsdk/openstack/identity/v3/roles"
-	"github.com/huaweicloud/golangsdk/openstack/identity/v3/users"
 )
 
 func TestAccIdentityV3RoleAssignment_basic(t *testing.T) {
 	var role roles.Role
-	var user users.User
+	var group group.Group
 	var project projects.Project
 	resource.Test(t, resource.TestCase{
 		PreCheck: func() {
@@ -30,11 +30,11 @@ func TestAccIdentityV3RoleAssignment_basic(t *testing.T) {
 			resource.TestStep{
 				Config: testAccIdentityV3RoleAssignment_basic,
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckIdentityV3RoleAssignmentExists("opentelekomcloud_identity_role_assignment_v3.role_assignment_1", &role, &user, &project),
+					testAccCheckIdentityV3RoleAssignmentExists("opentelekomcloud_identity_role_assignment_v3.role_assignment_1", &role, &group, &project),
 					resource.TestCheckResourceAttrPtr(
 						"opentelekomcloud_identity_role_assignment_v3.role_assignment_1", "project_id", &project.ID),
 					resource.TestCheckResourceAttrPtr(
-						"opentelekomcloud_identity_role_assignment_v3.role_assignment_1", "user_id", &user.ID),
+						"opentelekomcloud_identity_role_assignment_v3.role_assignment_1", "group_id", &group.ID),
 					resource.TestCheckResourceAttrPtr(
 						"opentelekomcloud_identity_role_assignment_v3.role_assignment_1", "role_id", &role.ID),
 				),
@@ -47,7 +47,7 @@ func testAccCheckIdentityV3RoleAssignmentDestroy(s *terraform.State) error {
 	config := testAccProvider.Meta().(*Config)
 	identityClient, err := config.identityV3Client(OS_REGION_NAME)
 	if err != nil {
-		return fmt.Errorf("Error creating OpenStack identity client: %s", err)
+		return fmt.Errorf("Error creating OpentelekomCloud identity client: %s", err)
 	}
 
 	for _, rs := range s.RootModule().Resources {
@@ -64,7 +64,7 @@ func testAccCheckIdentityV3RoleAssignmentDestroy(s *terraform.State) error {
 	return nil
 }
 
-func testAccCheckIdentityV3RoleAssignmentExists(n string, role *roles.Role, user *users.User, project *projects.Project) resource.TestCheckFunc {
+func testAccCheckIdentityV3RoleAssignmentExists(n string, role *roles.Role, group *groups.Group, project *projects.Project) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
 		rs, ok := s.RootModule().Resources[n]
 		if !ok {
@@ -78,7 +78,7 @@ func testAccCheckIdentityV3RoleAssignmentExists(n string, role *roles.Role, user
 		config := testAccProvider.Meta().(*Config)
 		identityClient, err := config.identityV3Client(OS_REGION_NAME)
 		if err != nil {
-			return fmt.Errorf("Error creating OpenStack identity client: %s", err)
+			return fmt.Errorf("Error creating OpentelekomCloud identity client: %s", err)
 		}
 
 		domainID, projectID, groupID, userID, roleID := extractRoleAssignmentID(rs.Primary.ID)
@@ -118,11 +118,11 @@ func testAccCheckIdentityV3RoleAssignmentExists(n string, role *roles.Role, user
 			return fmt.Errorf("Project not found")
 		}
 		*project = *p
-		u, err := users.Get(identityClient, assignment.User.ID).Extract()
+		g, err := groups.Get(identityClient, assignment.Group.ID).Extract()
 		if err != nil {
-			return fmt.Errorf("User not found")
+			return fmt.Errorf("Group not found")
 		}
-		*user = *u
+		*group = *g
 		r, err := roles.Get(identityClient, assignment.Role.ID).Extract()
 		if err != nil {
 			return fmt.Errorf("Role not found")
@@ -138,9 +138,8 @@ resource "opentelekomcloud_identity_project_v3" "project_1" {
   name = "project_1"
 }
 
-resource "opentelekomcloud_identity_user_v3" "user_1" {
+resource "opentelekomcloud_identity_group_v3" "group_1" {
   name = "user_1"
-  default_project_id = "${opentelekomcloud_identity_project_v3.project_1.id}"
 }
 
 resource "opentelekomcloud_identity_role_v3" "role_1" {
@@ -148,7 +147,7 @@ resource "opentelekomcloud_identity_role_v3" "role_1" {
 }
 
 resource "opentelekomcloud_identity_role_assignment_v3" "role_assignment_1" {
-  user_id = "${opentelekomcloud_identity_user_v3.user_1.id}"
+  group_id = "${opentelekomcloud_identity_group_v3.group_1.id}"
   project_id = "${opentelekomcloud_identity_project_v3.project_1.id}"
   role_id = "${opentelekomcloud_identity_role_v3.role_1.id}"
 }

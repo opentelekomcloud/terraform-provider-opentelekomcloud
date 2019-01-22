@@ -112,8 +112,15 @@ func (lrt *LogRoundTripper) logResponse(original io.ReadCloser, contentType stri
 		return ioutil.NopCloser(strings.NewReader(bs.String())), nil
 	}
 
+	var buf bytes.Buffer
+	defer original.Close()
+	if _, err := io.Copy(&buf, original); err != nil {
+		return nil, err
+	}
+	log.Printf("[DEBUG] the response is: %s", buf.String())
 	log.Printf("[DEBUG] Not logging because OpenTelekomCloud response body isn't JSON")
-	return original, nil
+	return ioutil.NopCloser(strings.NewReader(buf.String())), nil
+
 }
 
 // formatJSON will try to pretty-format a JSON body.

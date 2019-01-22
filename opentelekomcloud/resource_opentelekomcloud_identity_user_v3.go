@@ -32,11 +32,6 @@ func resourceIdentityUserV3() *schema.Resource {
 				Computed: true,
 			},
 
-			"description": &schema.Schema{
-				Type:     schema.TypeString,
-				Optional: true,
-			},
-
 			"domain_id": &schema.Schema{
 				Type:     schema.TypeString,
 				Optional: true,
@@ -47,11 +42,6 @@ func resourceIdentityUserV3() *schema.Resource {
 				Type:     schema.TypeBool,
 				Optional: true,
 				Default:  true,
-			},
-
-			"extra": &schema.Schema{
-				Type:     schema.TypeMap,
-				Optional: true,
 			},
 
 			"name": &schema.Schema{
@@ -71,43 +61,6 @@ func resourceIdentityUserV3() *schema.Resource {
 				Computed: true,
 				ForceNew: true,
 			},
-
-			// The following are all specific options that must
-			// be bundled into user.Options
-			"ignore_change_password_upon_first_use": &schema.Schema{
-				Type:     schema.TypeBool,
-				Optional: true,
-			},
-
-			"ignore_password_expiry": &schema.Schema{
-				Type:     schema.TypeBool,
-				Optional: true,
-			},
-
-			"ignore_lockout_failure_attempts": &schema.Schema{
-				Type:     schema.TypeBool,
-				Optional: true,
-			},
-
-			"multi_factor_auth_enabled": &schema.Schema{
-				Type:     schema.TypeBool,
-				Optional: true,
-			},
-
-			"multi_factor_auth_rule": &schema.Schema{
-				Type:     schema.TypeList,
-				Optional: true,
-				Elem: &schema.Resource{
-					Schema: map[string]*schema.Schema{
-						"rule": &schema.Schema{
-							Type:     schema.TypeList,
-							MinItems: 1,
-							Required: true,
-							Elem:     &schema.Schema{Type: schema.TypeString},
-						},
-					},
-				},
-			},
 		},
 	}
 }
@@ -122,28 +75,10 @@ func resourceIdentityUserV3Create(d *schema.ResourceData, meta interface{}) erro
 	enabled := d.Get("enabled").(bool)
 	createOpts := users.CreateOpts{
 		DefaultProjectID: d.Get("default_project_id").(string),
-		Description:      d.Get("description").(string),
 		DomainID:         d.Get("domain_id").(string),
 		Enabled:          &enabled,
-		Extra:            d.Get("extra").(map[string]interface{}),
 		Name:             d.Get("name").(string),
 	}
-
-	// Build the user options
-	options := map[users.Option]interface{}{}
-	for optionType, option := range userOptions {
-		if v, ok := d.GetOk(option); ok {
-			options[optionType] = v.(bool)
-		}
-	}
-
-	// Build the MFA rules
-	mfaRules := resourceIdentityUserV3BuildMFARules(d.Get("multi_factor_auth_rule").([]interface{}))
-	if len(mfaRules) > 0 {
-		options[users.MultiFactorAuthRules] = mfaRules
-	}
-
-	createOpts.Options = options
 
 	log.Printf("[DEBUG] Create Options: %#v", createOpts)
 
@@ -175,31 +110,10 @@ func resourceIdentityUserV3Read(d *schema.ResourceData, meta interface{}) error 
 	log.Printf("[DEBUG] Retrieved OpenStack user: %#v", user)
 
 	d.Set("default_project_id", user.DefaultProjectID)
-	d.Set("description", user.Description)
 	d.Set("domain_id", user.DomainID)
 	d.Set("enabled", user.Enabled)
-	d.Set("extra", user.Extra)
 	d.Set("name", user.Name)
 	d.Set("region", GetRegion(d, config))
-
-	options := user.Options
-	for _, option := range userOptions {
-		if v, ok := options[option]; ok {
-			d.Set(option, v.(bool))
-		}
-	}
-
-	mfaRules := []map[string]interface{}{}
-	if v, ok := options["multi_factor_auth_rules"].([]interface{}); ok {
-		for _, v := range v {
-			mfaRule := map[string]interface{}{
-				"rule": v,
-			}
-			mfaRules = append(mfaRules, mfaRule)
-		}
-
-		d.Set("multi_factor_auth_rule", mfaRules)
-	}
 
 	return nil
 }
@@ -219,12 +133,6 @@ func resourceIdentityUserV3Update(d *schema.ResourceData, meta interface{}) erro
 		updateOpts.DefaultProjectID = d.Get("default_project_id").(string)
 	}
 
-	if d.HasChange("description") {
-		hasChange = true
-		description := d.Get("description").(string)
-		updateOpts.Description = description
-	}
-
 	if d.HasChange("domain_id") {
 		hasChange = true
 		updateOpts.DomainID = d.Get("domain_id").(string)
@@ -236,34 +144,10 @@ func resourceIdentityUserV3Update(d *schema.ResourceData, meta interface{}) erro
 		updateOpts.Enabled = &enabled
 	}
 
-	if d.HasChange("extra") {
-		hasChange = true
-		updateOpts.Extra = d.Get("extra").(map[string]interface{})
-	}
-
 	if d.HasChange("name") {
 		hasChange = true
 		updateOpts.Name = d.Get("name").(string)
 	}
-
-	// Determine if the options have changed
-	options := map[users.Option]interface{}{}
-	for optionType, option := range userOptions {
-		if d.HasChange(option) {
-			hasChange = true
-			options[optionType] = d.Get(option).(bool)
-		}
-	}
-
-	// Build the MFA rules
-	if d.HasChange("multi_factor_auth_rule") {
-		mfaRules := resourceIdentityUserV3BuildMFARules(d.Get("multi_factor_auth_rule").([]interface{}))
-		if len(mfaRules) > 0 {
-			options[users.MultiFactorAuthRules] = mfaRules
-		}
-	}
-
-	updateOpts.Options = options
 
 	if hasChange {
 		log.Printf("[DEBUG] Update Options: %#v", updateOpts)
@@ -297,16 +181,4 @@ func resourceIdentityUserV3Delete(d *schema.ResourceData, meta interface{}) erro
 	}
 
 	return nil
-}
-
-func resourceIdentityUserV3BuildMFARules(rules []interface{}) []interface{} {
-	var mfaRules []interface{}
-
-	for _, rule := range rules {
-		ruleMap := rule.(map[string]interface{})
-		ruleList := ruleMap["rule"].([]interface{})
-		mfaRules = append(mfaRules, ruleList)
-	}
-
-	return mfaRules
 }

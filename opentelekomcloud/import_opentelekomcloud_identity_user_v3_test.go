@@ -11,7 +11,6 @@ import (
 func TestAccIdentityV3User_importBasic(t *testing.T) {
 	resourceName := "opentelekomcloud_identity_user_v3.user_1"
 	var userName = fmt.Sprintf("ACCPTTEST-%s", acctest.RandString(5))
-	var projectName = fmt.Sprintf("ACCPTTEST-%s", acctest.RandString(5))
 
 	resource.Test(t, resource.TestCase{
 		PreCheck: func() {
@@ -22,7 +21,7 @@ func TestAccIdentityV3User_importBasic(t *testing.T) {
 		CheckDestroy: testAccCheckIdentityV3UserDestroy,
 		Steps: []resource.TestStep{
 			resource.TestStep{
-				Config: testAccIdentityV3User_basic(projectName, userName),
+				Config: testAccIdentityV3User_basic(userName),
 			},
 
 			resource.TestStep{

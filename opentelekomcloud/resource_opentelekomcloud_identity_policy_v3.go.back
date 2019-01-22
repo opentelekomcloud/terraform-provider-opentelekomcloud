@@ -1,0 +1,158 @@
+package opentelekomcloud
+
+import (
+	"fmt"
+	"log"
+
+	"github.com/hashicorp/terraform/helper/schema"
+	"github.com/huaweicloud/golangsdk/openstack/identity/v3/roles"
+)
+
+func resourceIdentityPolicyV3() *schema.Resource {
+	return &schema.Resource{
+		Create: resourceIdentityPolicyV3Create,
+		Read:   resourceIdentityPolicyV3Read,
+		Update: resourceIdentityPolicyV3Update,
+		Delete: resourceIdentityPolicyV3Delete,
+		Importer: &schema.ResourceImporter{
+			State: schema.ImportStatePassthrough,
+		},
+
+		Schema: map[string]*schema.Schema{
+			"domain_id": &schema.Schema{
+				Type:     schema.TypeString,
+				Optional: true,
+				Computed: true,
+			},
+
+			"name": &schema.Schema{
+				Type:     schema.TypeString,
+				Required: true,
+			},
+                        
+                        "scope": &schema.Schema{
+                                Type:     scheme.TypeString,
+                                Required: true,
+                        },
+
+                        "description": &schema.Schema{
+                                Type:     schema.TypeString,
+                                Optional: true,
+                        }, 
+           
+                        "policy": &schema.Schema{
+                                Type:     schema.TypeSet,
+                                Required: true,
+                                Elem:     &schema.Resource{
+                                        Schema:  map[string]*schema.Schema{
+                                                "Version": &schema.Schema{
+                                                        Type:     schema.TypeString,
+                                                        Required: true,
+                                                 },
+                                                 "Statement":  &schema.Schema{
+                                                        Type:     schema.TypeSet,
+                                                        Required: true,
+                                                        Elem:     &schema.Resource{
+                                                                Schema:   map[string]*schema.Schema{
+                                                                        "Effect":    &schema.Schema{
+                                                                                Type:     schema.TypeString,
+                                                                                Required: true,
+                                                                         },
+                                                                         "Action":   &schema.Schema{
+                                                                                Type:      schema.TypeSet,
+                                                                                Required:  true,
+                                                                                Elem:      &schema.Schema{Type: schema.TypeString}
+                                                                         },
+                                                                },
+                                                        },
+                                                 },
+                                         },
+                                 },
+                         },
+		},
+	}
+}
+
+func resourceIdentityPolicyV3Create(d *schema.ResourceData, meta interface{}) error {
+	config := meta.(*Config)
+	identityClient, err := config.identityV3Client(GetRegion(d, config))
+	if err != nil {
+		return fmt.Errorf("Error creating OpenStack identity client: %s", err)
+	}
+
+	createOpts := roles.CreateOpts{
+		DomainID: d.Get("domain_id").(string),
+		Name:     d.Get("name").(string),
+	}
+
+	log.Printf("[DEBUG] Create Options: %#v", createOpts)
+	role, err := roles.Create(identityClient, createOpts).Extract()
+	if err != nil {
+		return fmt.Errorf("Error creating OpenStack role: %s", err)
+	}
+
+	d.SetId(role.ID)
+
+	return resourceIdentityPolicyV3Read(d, meta)
+}
+
+func resourceIdentityPolicyV3Read(d *schema.ResourceData, meta interface{}) error {
+	config := meta.(*Config)
+	identityClient, err := config.identityV3Client(GetRegion(d, config))
+	if err != nil {
+		return fmt.Errorf("Error creating OpenStack identity client: %s", err)
+	}
+
+	role, err := roles.Get(identityClient, d.Id()).Extract()
+	if err != nil {
+		return CheckDeleted(d, err, "role")
+	}
+
+	log.Printf("[DEBUG] Retrieved OpenStack role: %#v", role)
+
+	d.Set("domain_id", role.DomainID)
+	d.Set("name", role.Name)
+	d.Set("region", GetRegion(d, config))
+
+	return nil
+}
+
+func resourceIdentityPolicyV3Update(d *schema.ResourceData, meta interface{}) error {
+	config := meta.(*Config)
+	identityClient, err := config.identityV3Client(GetRegion(d, config))
+	if err != nil {
+		return fmt.Errorf("Error creating OpenStack identity client: %s", err)
+	}
+
+	var hasChange bool
+	var updateOpts roles.UpdateOpts
+
+	if d.HasChange("name") {
+		hasChange = true
+		updateOpts.Name = d.Get("name").(string)
+	}
+
+	if hasChange {
+		_, err := roles.Update(identityClient, d.Id(), updateOpts).Extract()
+		if err != nil {
+			return fmt.Errorf("Error updating OpenStack role: %s", err)
+		}
+	}
+
+	return resourceIdentityPolicyV3Read(d, meta)
+}
+
+func resourceIdentityPolicyV3Delete(d *schema.ResourceData, meta interface{}) error {
+	config := meta.(*Config)
+	identityClient, err := config.identityV3Client(GetRegion(d, config))
+	if err != nil {
+		return fmt.Errorf("Error creating OpenStack identity client: %s", err)
+	}
+
+	err = roles.Delete(identityClient, d.Id()).ExtractErr()
+	if err != nil {
+		return fmt.Errorf("Error deleting OpenStack role: %s", err)
+	}
+
+	return nil
+}

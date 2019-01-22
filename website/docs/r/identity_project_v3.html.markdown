@@ -8,17 +8,34 @@ description: |-
 
 # opentelekomcloud\_identity\_project_v3
 
-Manages a Project resource within OpentelekomCloud Keystone.
+Manages a Project resource within OpentelekomCloud Identity And Access 
+Management service.
 
-Note: You _must_ have admin privileges in your OpentelekomCloud cloud to use
-this resource.
+Note: You _must_ have security admin privileges in your OpentelekomCloud 
+cloud to use this resource. please refer to [User Management Model](
+https://docs.otc.t-systems.com/en-us/usermanual/iam/iam_01_0034.html)
+
+Note: Please authentication on domain level via configuration
+provider as following example:
+
+```hcl
+provider "opentelekomcloud" {
+  user_name   = "<username>"
+  password    = "<password>"
+  domain_name = "<domain name>"
+  auth_url    = "https://iam.eu-de.otc.t-systems.com/v3"
+  region      = "eu-de"
+  insecure    = "true"
+}
+```
+Donot configuration either ```tenant_name``` nor ```tenant_id```.
 
 ## Example Usage
 
 ```hcl
 resource "opentelekomcloud_identity_project_v3" "project_1" {
-  name = "project_1"
-  description = "A project"
+  name = "eu-de_project1"
+  description = "This is a test project"
 }
 ```
 
@@ -26,23 +43,21 @@ resource "opentelekomcloud_identity_project_v3" "project_1" {
 
 The following arguments are supported:
 
+* `name` - (Required) The name of the project. it must start with 
+    ID of an existing region_ and be less than or equal to 64 characters.
+    Example: eu-de_project1.
+
 * `description` - (Optional) A description of the project.
 
-* `domain_id` - (Optional) The domain this project belongs to.
+* `domain_id` - (Optional) The domain this project belongs to. Changing this
+    creates a new Project.
 
-* `enabled` - (Optional) Whether the project is enabled or disabled. Valid
-  values are `true` and `false`.
-
-* `is_domain` - (Optional) Whether this project is a domain. Valid values
-  are `true` and `false`.
-
-* `name` - (Optional) The name of the project.
-
-* `parent_id` - (Optional) The parent of this project.
+* `parent_id` - (Optional) The parent of this project. Changing this creates
+    a new Project.
 
 * `region` - (Optional) The region in which to obtain the IAM client.
     If omitted, the `region` argument of the provider is used. Changing this
-    creates a new User.
+    creates a new Project.
 
 ## Attributes Reference
 

@@ -5,7 +5,6 @@ import (
 	"time"
 
 	"github.com/huaweicloud/golangsdk"
-	"github.com/huaweicloud/golangsdk/internal"
 	"github.com/huaweicloud/golangsdk/pagination"
 )
 
@@ -14,17 +13,11 @@ type User struct {
 	// DefaultProjectID is the ID of the default project of the user.
 	DefaultProjectID string `json:"default_project_id"`
 
-	// Description is the description of the user.
-	Description string `json:"description"`
-
 	// DomainID is the domain ID the user belongs to.
 	DomainID string `json:"domain_id"`
 
 	// Enabled is whether or not the user is enabled.
 	Enabled bool `json:"enabled"`
-
-	// Extra is a collection of miscellaneous key/values.
-	Extra map[string]interface{} `json:"-"`
 
 	// ID is the unique ID of the user.
 	ID string `json:"id"`
@@ -35,9 +28,6 @@ type User struct {
 	// Name is the name of the user.
 	Name string `json:"name"`
 
-	// Options are a set of defined options of the user.
-	Options map[string]interface{} `json:"options"`
-
 	// PasswordExpiresAt is the timestamp when the user's password expires.
 	PasswordExpiresAt time.Time `json:"-"`
 }
@@ -46,7 +36,6 @@ func (r *User) UnmarshalJSON(b []byte) error {
 	type tmp User
 	var s struct {
 		tmp
-		Extra             map[string]interface{}        `json:"extra"`
 		PasswordExpiresAt golangsdk.JSONRFC3339MilliNoZ `json:"password_expires_at"`
 	}
 	err := json.Unmarshal(b, &s)
@@ -56,22 +45,6 @@ func (r *User) UnmarshalJSON(b []byte) error {
 	*r = User(s.tmp)
 
 	r.PasswordExpiresAt = time.Time(s.PasswordExpiresAt)
-
-	// Collect other fields and bundle them into Extra
-	// but only if a field titled "extra" wasn't sent.
-	if s.Extra != nil {
-		r.Extra = s.Extra
-	} else {
-		var result interface{}
-		err := json.Unmarshal(b, &result)
-		if err != nil {
-			return err
-		}
-		if resultMap, ok := result.(map[string]interface{}); ok {
-			delete(resultMap, "password_expires_at")
-			r.Extra = internal.RemainingKeys(User{}, resultMap)
-		}
-	}
 
 	return err
 }
@@ -146,4 +119,8 @@ func (r userResult) Extract() (*User, error) {
 	}
 	err := r.ExtractInto(&s)
 	return s.User, err
+}
+
+type AddMembershipResult struct {
+	golangsdk.ErrResult
 }

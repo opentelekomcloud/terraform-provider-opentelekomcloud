@@ -30,20 +30,9 @@ func resourceIdentityProjectV3() *schema.Resource {
 				Computed: true,
 			},
 
-			"enabled": &schema.Schema{
-				Type:     schema.TypeBool,
-				Optional: true,
-				Default:  true,
-			},
-
-			"is_domain": &schema.Schema{
-				Type:     schema.TypeBool,
-				Optional: true,
-			},
-
 			"name": &schema.Schema{
 				Type:     schema.TypeString,
-				Optional: true,
+				Required: true,
 			},
 
 			"parent_id": &schema.Schema{
@@ -69,13 +58,9 @@ func resourceIdentityProjectV3Create(d *schema.ResourceData, meta interface{}) e
 		return fmt.Errorf("Error creating OpenStack identity client: %s", err)
 	}
 
-	enabled := d.Get("enabled").(bool)
-	isDomain := d.Get("is_domain").(bool)
 	createOpts := projects.CreateOpts{
 		Description: d.Get("description").(string),
 		DomainID:    d.Get("domain_id").(string),
-		Enabled:     &enabled,
-		IsDomain:    &isDomain,
 		Name:        d.Get("name").(string),
 		ParentID:    d.Get("parent_id").(string),
 	}
@@ -126,31 +111,9 @@ func resourceIdentityProjectV3Update(d *schema.ResourceData, meta interface{}) e
 	var hasChange bool
 	var updateOpts projects.UpdateOpts
 
-	if d.HasChange("domain_id") {
-		hasChange = true
-		updateOpts.DomainID = d.Get("domain_id").(string)
-	}
-
-	if d.HasChange("enabled") {
-		hasChange = true
-		enabled := d.Get("enabled").(bool)
-		updateOpts.Enabled = &enabled
-	}
-
-	if d.HasChange("is_domain") {
-		hasChange = true
-		isDomain := d.Get("is_domain").(bool)
-		updateOpts.IsDomain = &isDomain
-	}
-
 	if d.HasChange("name") {
 		hasChange = true
 		updateOpts.Name = d.Get("name").(string)
-	}
-
-	if d.HasChange("parent_id") {
-		hasChange = true
-		updateOpts.ParentID = d.Get("parent_id").(string)
 	}
 
 	if d.HasChange("description") {

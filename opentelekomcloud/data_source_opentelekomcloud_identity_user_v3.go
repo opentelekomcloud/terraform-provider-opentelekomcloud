@@ -15,10 +15,6 @@ func dataSourceIdentityUserV3() *schema.Resource {
 		Read: dataSourceIdentityUserV3Read,
 
 		Schema: map[string]*schema.Schema{
-			"default_project_id": &schema.Schema{
-				Type:     schema.TypeString,
-				Computed: true,
-			},
 			"domain_id": &schema.Schema{
 				Type:     schema.TypeString,
 				Optional: true,
@@ -31,23 +27,7 @@ func dataSourceIdentityUserV3() *schema.Resource {
 				Default:  true,
 			},
 
-			"idp_id": &schema.Schema{
-				Type:     schema.TypeString,
-				Optional: true,
-			},
-
 			"name": &schema.Schema{
-				Type:     schema.TypeString,
-				Optional: true,
-			},
-
-			"password_expires_at": &schema.Schema{
-				Type:         schema.TypeString,
-				Optional:     true,
-				ValidateFunc: validatePasswordExpiresAtQuery,
-			},
-
-			"protocol_id": &schema.Schema{
 				Type:     schema.TypeString,
 				Optional: true,
 			},
@@ -57,11 +37,6 @@ func dataSourceIdentityUserV3() *schema.Resource {
 				Optional: true,
 				Computed: true,
 				ForceNew: true,
-			},
-
-			"unique_id": &schema.Schema{
-				Type:     schema.TypeString,
-				Optional: true,
 			},
 		},
 	}
@@ -77,13 +52,9 @@ func dataSourceIdentityUserV3Read(d *schema.ResourceData, meta interface{}) erro
 
 	enabled := d.Get("enabled").(bool)
 	listOpts := users.ListOpts{
-		DomainID:          d.Get("domain_id").(string),
-		Enabled:           &enabled,
-		IdPID:             d.Get("idp_id").(string),
-		Name:              d.Get("name").(string),
-		PasswordExpiresAt: d.Get("password_expires_at").(string),
-		ProtocolID:        d.Get("protocol_id").(string),
-		UniqueID:          d.Get("unique_id").(string),
+		DomainID: d.Get("domain_id").(string),
+		Enabled:  &enabled,
+		Name:     d.Get("name").(string),
 	}
 
 	log.Printf("[DEBUG] List Options: %#v", listOpts)
@@ -120,7 +91,6 @@ func dataSourceIdentityUserV3Attributes(d *schema.ResourceData, user *users.User
 
 	d.SetId(user.ID)
 	d.Set("default_project_id", user.DefaultProjectID)
-	d.Set("description", user.Description)
 	d.Set("domain_id", user.DomainID)
 	d.Set("enabled", user.Enabled)
 	d.Set("name", user.Name)

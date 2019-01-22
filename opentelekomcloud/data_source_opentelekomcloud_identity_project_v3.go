@@ -23,18 +23,6 @@ func dataSourceIdentityProjectV3() *schema.Resource {
 				Computed: true,
 			},
 
-			"enabled": &schema.Schema{
-				Type:     schema.TypeBool,
-				Optional: true,
-				Default:  true,
-			},
-
-			"is_domain": &schema.Schema{
-				Type:     schema.TypeBool,
-				Optional: true,
-				Default:  false,
-			},
-
 			"name": &schema.Schema{
 				Type:     schema.TypeString,
 				Optional: true,
@@ -63,12 +51,8 @@ func dataSourceIdentityProjectV3Read(d *schema.ResourceData, meta interface{}) e
 		return fmt.Errorf("Error creating OpenStack identity client: %s", err)
 	}
 
-	enabled := d.Get("enabled").(bool)
-	isDomain := d.Get("is_domain").(bool)
 	listOpts := projects.ListOpts{
 		DomainID: d.Get("domain_id").(string),
-		Enabled:  &enabled,
-		IsDomain: &isDomain,
 		Name:     d.Get("name").(string),
 		ParentID: d.Get("parent_id").(string),
 	}

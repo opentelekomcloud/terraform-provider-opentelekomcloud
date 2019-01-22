@@ -64,7 +64,6 @@ type CreateOpts struct {
 	// DomainID is the ID of the domain the group belongs to.
 	DomainID string `json:"domain_id,omitempty"`
 
-	// Extra is free-form extra key/value pairs to describe the group.
 	Extra map[string]interface{} `json:"-"`
 }
 
@@ -94,7 +93,7 @@ func Create(client *golangsdk.ServiceClient, opts CreateOptsBuilder) (r CreateRe
 		return
 	}
 	_, r.Err = client.Post(createURL(client), &b, &r.Body, &golangsdk.RequestOpts{
-		OkCodes: []int{201},
+		OkCodes: []int{200},
 	})
 	return
 }

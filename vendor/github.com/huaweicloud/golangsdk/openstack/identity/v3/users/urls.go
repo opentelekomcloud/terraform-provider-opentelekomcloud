@@ -33,3 +33,7 @@ func listProjectsURL(client *golangsdk.ServiceClient, userID string) string {
 func listInGroupURL(client *golangsdk.ServiceClient, groupID string) string {
 	return client.ServiceURL("groups", groupID, "users")
 }
+
+func membershipURL(client *golangsdk.ServiceClient, groupID string, userID string) string {
+	return client.ServiceURL("groups", groupID, "users", userID)
+}

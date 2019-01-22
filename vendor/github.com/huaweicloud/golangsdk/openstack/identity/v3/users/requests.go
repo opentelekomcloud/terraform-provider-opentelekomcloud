@@ -33,20 +33,8 @@ type ListOpts struct {
 	// Enabled filters the response by enabled users.
 	Enabled *bool `q:"enabled"`
 
-	// IdpID filters the response by an Identity Provider ID.
-	IdPID string `q:"idp_id"`
-
 	// Name filters the response by username.
 	Name string `q:"name"`
-
-	// PasswordExpiresAt filters the response based on expiring passwords.
-	PasswordExpiresAt string `q:"password_expires_at"`
-
-	// ProtocolID filters the response by protocol ID.
-	ProtocolID string `q:"protocol_id"`
-
-	// UniqueID filters the response by unique ID.
-	UniqueID string `q:"unique_id"`
 }
 
 // ToUserListQuery formats a ListOpts into a query string.
@@ -90,20 +78,11 @@ type CreateOpts struct {
 	// DefaultProjectID is the ID of the default project of the user.
 	DefaultProjectID string `json:"default_project_id,omitempty"`
 
-	// Description is a description of the user.
-	Description string `json:"description,omitempty"`
-
 	// DomainID is the ID of the domain the user belongs to.
 	DomainID string `json:"domain_id,omitempty"`
 
 	// Enabled sets the user status to enabled or disabled.
 	Enabled *bool `json:"enabled,omitempty"`
-
-	// Extra is free-form extra key/value pairs to describe the user.
-	Extra map[string]interface{} `json:"-"`
-
-	// Options are defined options in the API to enable certain features.
-	Options map[Option]interface{} `json:"options,omitempty"`
 
 	// Password is the password of the new user.
 	Password string `json:"password,omitempty"`
@@ -114,14 +93,6 @@ func (opts CreateOpts) ToUserCreateMap() (map[string]interface{}, error) {
 	b, err := golangsdk.BuildRequestBody(opts, "user")
 	if err != nil {
 		return nil, err
-	}
-
-	if opts.Extra != nil {
-		if v, ok := b["user"].(map[string]interface{}); ok {
-			for key, value := range opts.Extra {
-				v[key] = value
-			}
-		}
 	}
 
 	return b, nil
@@ -154,20 +125,11 @@ type UpdateOpts struct {
 	// DefaultProjectID is the ID of the default project of the user.
 	DefaultProjectID string `json:"default_project_id,omitempty"`
 
-	// Description is a description of the user.
-	Description string `json:"description,omitempty"`
-
 	// DomainID is the ID of the domain the user belongs to.
 	DomainID string `json:"domain_id,omitempty"`
 
 	// Enabled sets the user status to enabled or disabled.
 	Enabled *bool `json:"enabled,omitempty"`
-
-	// Extra is free-form extra key/value pairs to describe the user.
-	Extra map[string]interface{} `json:"-"`
-
-	// Options are defined options in the API to enable certain features.
-	Options map[Option]interface{} `json:"options,omitempty"`
 
 	// Password is the password of the new user.
 	Password string `json:"password,omitempty"`
@@ -178,14 +140,6 @@ func (opts UpdateOpts) ToUserUpdateMap() (map[string]interface{}, error) {
 	b, err := golangsdk.BuildRequestBody(opts, "user")
 	if err != nil {
 		return nil, err
-	}
-
-	if opts.Extra != nil {
-		if v, ok := b["user"].(map[string]interface{}); ok {
-			for key, value := range opts.Extra {
-				v[key] = value
-			}
-		}
 	}
 
 	return b, nil
@@ -239,4 +193,18 @@ func ListInGroup(client *golangsdk.ServiceClient, groupID string, opts ListOptsB
 	return pagination.NewPager(client, url, func(r pagination.PageResult) pagination.Page {
 		return UserPage{pagination.LinkedPageBase{PageResult: r}}
 	})
+}
+
+// Add a user into one group
+func AddToGroup(client *golangsdk.ServiceClient, groupID string, userID string) (r AddMembershipResult) {
+	_, r.Err = client.Put(membershipURL(client, groupID, userID), nil, nil, &golangsdk.RequestOpts{
+		OkCodes: []int{204},
+	})
+	return
+}
+
+// Remove user from group
+func RemoveFromGroup(client *golangsdk.ServiceClient, groupID string, userID string) (r DeleteResult) {
+	_, r.Err = client.Delete(membershipURL(client, groupID, userID), nil)
+	return
 }
