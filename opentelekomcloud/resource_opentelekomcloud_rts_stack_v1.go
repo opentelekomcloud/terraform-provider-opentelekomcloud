@@ -151,6 +151,12 @@ func resourceRTSStackV1Create(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*Config)
 
 	stackName := d.Get("name").(string)
+	_, body_ok := d.GetOk("template_body")
+	_, url_ok := d.GetOk("template_url")
+
+	if !body_ok && !url_ok {
+		return fmt.Errorf("Both template_body and template_url are empty, must specify one of them.")
+	}
 
 	orchestrationClient, err := config.orchestrationV1Client(GetRegion(d, config))
 	if err != nil {
@@ -264,6 +270,12 @@ func resourceRTSStackV1Update(d *schema.ResourceData, meta interface{}) error {
 	orchestrationClient, err := config.orchestrationV1Client(GetRegion(d, config))
 	if err != nil {
 		return fmt.Errorf("Error creating RTS Client: %s", err)
+	}
+	_, body_ok := d.GetOk("template_body")
+	_, url_ok := d.GetOk("template_url")
+
+	if !body_ok && !url_ok {
+		return fmt.Errorf("Both template_body and template_url are empty, must specify one of them.")
 	}
 
 	var updateOpts stacks.UpdateOpts
