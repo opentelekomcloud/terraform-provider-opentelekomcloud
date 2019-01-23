@@ -70,15 +70,10 @@ func resourceLoadBalancerV2() *schema.Resource {
 			},
 
 			"admin_state_up": {
-				Type:     schema.TypeBool,
-				Default:  true,
-				Optional: true,
-			},
-
-			"flavor": {
-				Type:     schema.TypeString,
-				Optional: true,
-				ForceNew: true,
+				Type:         schema.TypeBool,
+				Default:      true,
+				Optional:     true,
+				ValidateFunc: validateTrueOnly,
 			},
 
 			"loadbalancer_provider": {
@@ -119,7 +114,6 @@ func resourceLoadBalancerV2Create(d *schema.ResourceData, meta interface{}) erro
 		TenantID:     d.Get("tenant_id").(string),
 		VipAddress:   d.Get("vip_address").(string),
 		AdminStateUp: &adminStateUp,
-		Flavor:       d.Get("flavor").(string),
 		Provider:     lbProvider,
 	}
 
@@ -169,7 +163,6 @@ func resourceLoadBalancerV2Read(d *schema.ResourceData, meta interface{}) error 
 	d.Set("vip_address", lb.VipAddress)
 	d.Set("vip_port_id", lb.VipPortID)
 	d.Set("admin_state_up", lb.AdminStateUp)
-	d.Set("flavor", lb.Flavor)
 	d.Set("loadbalancer_provider", lb.Provider)
 	d.Set("region", GetRegion(d, config))
 

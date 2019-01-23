@@ -2,7 +2,6 @@ package opentelekomcloud
 
 import (
 	"fmt"
-	//"regexp"
 	"testing"
 
 	"github.com/hashicorp/terraform/helper/resource"
