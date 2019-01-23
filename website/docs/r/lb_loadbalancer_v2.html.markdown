@@ -23,9 +23,9 @@ resource "opentelekomcloud_lb_loadbalancer_v2" "lb_1" {
 The following arguments are supported:
 
 * `region` - (Optional) The region in which to obtain the V2 Networking client.
-    A Networking client is needed to create an LB member. If omitted, the
+    A Networking client is needed to create a loadbalancer. If omitted, the
     `region` argument of the provider is used. Changing this creates a new
-    LB member.
+    loadbalancer.
 
 * `vip_subnet_id` - (Required) The network on which to allocate the
     Loadbalancer's address. A tenant can only create Loadbalancers on networks
@@ -45,10 +45,7 @@ The following arguments are supported:
     Changing this creates a new loadbalancer.
 
 * `admin_state_up` - (Optional) The administrative state of the Loadbalancer.
-    A valid value is true (UP) or false (DOWN).
-
-* `flavor` - (Optional) The UUID of a flavor. Changing this creates a new
-    loadbalancer.
+    A valid value is only true (UP).
 
 * `loadbalancer_provider` - (Optional) The name of the provider. Changing this
   creates a new loadbalancer.
@@ -68,7 +65,6 @@ The following attributes are exported:
 * `tenant_id` - See Argument Reference above.
 * `vip_address` - See Argument Reference above.
 * `admin_state_up` - See Argument Reference above.
-* `flavor` - See Argument Reference above.
 * `loadbalancer_provider` - See Argument Reference above.
 * `security_group_ids` - See Argument Reference above.
 * `vip_port_id` - The Port ID of the Load Balancer IP.
