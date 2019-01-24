@@ -1030,10 +1030,10 @@
 			"revisionTime": "2018-09-27T09:20:51Z"
 		},
 		{
-			"checksumSHA1": "lYq6dAQ/Qp8Z7eqW5djoltE5Hbg=",
+			"checksumSHA1": "9Mf7ZYk9oBhYPDHzwvIXADTel78=",
 			"path": "github.com/huaweicloud/golangsdk/openstack/identity/v3/groups",
-			"revision": "b523c4dfcafd5c83306d15e618181a07c6215005",
-			"revisionTime": "2019-01-22T08:18:27Z"
+			"revision": "a692be34951c6020e37b70294bed86f9787ebea3",
+			"revisionTime": "2019-01-24T06:14:46Z"
 		},
 		{
 			"checksumSHA1": "qgLSiiT+3uMW/7JTmrVM5LsZlGI=",

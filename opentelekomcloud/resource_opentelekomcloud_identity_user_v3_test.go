@@ -104,8 +104,7 @@ func testAccIdentityV3User_basic(userName string) string {
 	return fmt.Sprintf(`
     resource "opentelekomcloud_identity_user_v3" "user_1" {
       name = "%s"
-      description = "A user"
-      password = "password123"
+      password = "password123@!"
       enabled = true
     }  
   `, userName)
@@ -115,9 +114,8 @@ func testAccIdentityV3User_update(userName string) string {
 	return fmt.Sprintf(`
     resource "opentelekomcloud_identity_user_v3" "user_1" {
       name = "%s"
-      description = "Some user"
       enabled = false
-      password = "password123"
+      password = "password123@!"
     }
   `, userName)
 }
