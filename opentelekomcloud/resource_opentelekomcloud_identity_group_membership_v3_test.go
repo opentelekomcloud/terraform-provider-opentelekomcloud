@@ -102,7 +102,7 @@ func testAccCheckIdentityV3GroupMembershipExists(n string, us []string) resource
 		uc := len(us)
 		for _, u := range us {
 			for _, f := range founds {
-				if f.ID == u {
+				if f.Name == u {
 					uc--
 				}
 			}
