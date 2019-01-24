@@ -24,19 +24,19 @@ func TestAccIdentityV3GroupMembership_basic(t *testing.T) {
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckIdentityV3GroupMembershipDestroy,
 		Steps: []resource.TestStep{
-			resource.TestStep{
+			{
 				Config: testAccIdentityV3GroupMembership_basic(groupName, userName),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckIdentityV3GroupMembershipExists("opentelekomcloud_identity_group_membership_v3.membership_1", []string{userName}),
 				),
 			},
-			resource.TestStep{
+			{
 				Config: testAccIdentityV3GroupMembership_update(groupName, userName, userName2),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckIdentityV3GroupMembershipExists("opentelekomcloud_identity_group_membership_v3.membership_1", []string{userName, userName2}),
 				),
 			},
-			resource.TestStep{
+			{
 				Config: testAccIdentityV3GroupMembership_updatedown(groupName, userName2),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckIdentityV3GroupMembershipExists("opentelekomcloud_identity_group_membership_v3.membership_1", []string{userName2}),
@@ -149,7 +149,6 @@ func testAccIdentityV3GroupMembership_update(groupName, userName string, userNam
 
     resource "opentelekomcloud_identity_user_v3" "user_2" {
       name = "%s"
-      description = "A test user2"
       password = "password123@#"
       enabled = true
     }
@@ -158,7 +157,7 @@ func testAccIdentityV3GroupMembership_update(groupName, userName string, userNam
     resource "opentelekomcloud_identity_group_membership_v3" "membership_1" {
         group = "${opentelekomcloud_identity_group_v3.group_1.id}"
         users = ["${opentelekomcloud_identity_user_v3.user_1.id}",
-                "${opentelekomcloud_identity_user_v3.user_2.id}"]]
+                "${opentelekomcloud_identity_user_v3.user_2.id}"]
     }
   `, groupName, userName, userName2)
 }
@@ -171,7 +170,6 @@ func testAccIdentityV3GroupMembership_updatedown(groupName, userName string) str
 
     resource "opentelekomcloud_identity_user_v3" "user_2" {
       name = "%s"
-      description = "A test user2"
       password = "password123@#"
       enabled = true
     }
@@ -179,7 +177,7 @@ func testAccIdentityV3GroupMembership_updatedown(groupName, userName string) str
    
     resource "opentelekomcloud_identity_group_membership_v3" "membership_1" {
         group = "${opentelekomcloud_identity_group_v3.group_1.id}"
-        users = ["${opentelekomcloud_identity_user_v3.user_2.id}"]]
+        users = ["${opentelekomcloud_identity_user_v3.user_2.id}"]
     }
   `, groupName, userName)
 }
