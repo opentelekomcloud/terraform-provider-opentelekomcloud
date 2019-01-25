@@ -184,7 +184,7 @@ func resourceRTSStackV1Create(d *schema.ResourceData, meta interface{}) error {
 	stateConf := &resource.StateChangeConf{
 		Pending:    []string{"CREATE_IN_PROGRESS"},
 		Target:     []string{"CREATE_COMPLETE"},
-		Refresh:    waitForRTSStackActive(orchestrationClient, stackName),
+		Refresh:    waitForRTSStackActive(orchestrationClient, stackName, d.Id()),
 		Timeout:    d.Timeout(schema.TimeoutCreate),
 		Delay:      5 * time.Second,
 		MinTimeout: 3 * time.Second,
@@ -209,7 +209,7 @@ func resourceRTSStackV1Read(d *schema.ResourceData, meta interface{}) error {
 		return fmt.Errorf("Error creating RTS Client: %s", err)
 	}
 
-	stack, err := stacks.Get(orchestrationClient, d.Id()).Extract()
+	stack, err := stacks.Get(orchestrationClient, d.Get("name").(string), d.Id()).Extract()
 	if err != nil {
 
 		if _, ok := err.(golangsdk.ErrDefault404); ok {
@@ -303,7 +303,7 @@ func resourceRTSStackV1Update(d *schema.ResourceData, meta interface{}) error {
 			"CREATE_COMPLETE",
 			"ROLLBACK_IN_PROGRESS"},
 		Target:     []string{"UPDATE_COMPLETE"},
-		Refresh:    waitForRTSStackUpdate(orchestrationClient, d.Get("name").(string)),
+		Refresh:    waitForRTSStackUpdate(orchestrationClient, d.Get("name").(string), d.Id()),
 		Timeout:    d.Timeout(schema.TimeoutDelete),
 		Delay:      5 * time.Second,
 		MinTimeout: 3 * time.Second,
@@ -355,9 +355,9 @@ func resourceRTSStackV1Delete(d *schema.ResourceData, meta interface{}) error {
 	return nil
 }
 
-func waitForRTSStackActive(orchestrationClient *golangsdk.ServiceClient, stackName string) resource.StateRefreshFunc {
+func waitForRTSStackActive(orchestrationClient *golangsdk.ServiceClient, stackName, stackId string) resource.StateRefreshFunc {
 	return func() (interface{}, string, error) {
-		n, err := stacks.Get(orchestrationClient, stackName).Extract()
+		n, err := stacks.Get(orchestrationClient, stackName, stackId).Extract()
 		if err != nil {
 			return nil, "", err
 		}
@@ -375,7 +375,7 @@ func waitForRTSStackActive(orchestrationClient *golangsdk.ServiceClient, stackNa
 
 func waitForRTSStackDelete(orchestrationClient *golangsdk.ServiceClient, stackName string, stackId string) resource.StateRefreshFunc {
 	return func() (interface{}, string, error) {
-		r, err := stacks.Get(orchestrationClient, stackName).Extract()
+		r, err := stacks.Get(orchestrationClient, stackName, stackId).Extract()
 
 		if err != nil {
 			if _, ok := err.(golangsdk.ErrDefault404); ok {
@@ -412,9 +412,9 @@ func waitForRTSStackDelete(orchestrationClient *golangsdk.ServiceClient, stackNa
 	}
 }
 
-func waitForRTSStackUpdate(orchestrationClient *golangsdk.ServiceClient, stackName string) resource.StateRefreshFunc {
+func waitForRTSStackUpdate(orchestrationClient *golangsdk.ServiceClient, stackName, stackId string) resource.StateRefreshFunc {
 	return func() (interface{}, string, error) {
-		n, err := stacks.Get(orchestrationClient, stackName).Extract()
+		n, err := stacks.Get(orchestrationClient, stackName, stackId).Extract()
 		if err != nil {
 			return nil, "", err
 		}

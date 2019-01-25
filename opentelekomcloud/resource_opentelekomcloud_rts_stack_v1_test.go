@@ -78,7 +78,7 @@ func testAccCheckOTCRTSStackV1Destroy(s *terraform.State) error {
 			continue
 		}
 
-		stack, err := stacks.Get(orchestrationClient, "terraform_provider_stack").Extract()
+		stack, err := stacks.Get(orchestrationClient, "terraform_provider_stack", rs.Primary.ID).Extract()
 
 		if err == nil {
 			if stack.Status != "DELETE_COMPLETE" {
@@ -107,7 +107,7 @@ func testAccCheckOTCRTSStackV1Exists(n string, stack *stacks.RetrievedStack) res
 			return fmt.Errorf("Error creating RTS Client : %s", err)
 		}
 
-		found, err := stacks.Get(orchestrationClient, "terraform_provider_stack").Extract()
+		found, err := stacks.Get(orchestrationClient, "terraform_provider_stack", rs.Primary.ID).Extract()
 		if err != nil {
 			return err
 		}

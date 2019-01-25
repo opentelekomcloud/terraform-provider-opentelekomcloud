@@ -1594,10 +1594,10 @@
 			"revisionTime": "2018-06-19T09:43:38Z"
 		},
 		{
-			"checksumSHA1": "SWBjA8iuoGEkIV34ZAbSRxKAr9o=",
+			"checksumSHA1": "+90WBAlvS6KEtRzgU/ErKJY4tDo=",
 			"path": "github.com/huaweicloud/golangsdk/openstack/rts/v1/stacks",
-			"revision": "ebdc87ac4e0d106a5bc7b4516ae9be5c6982a20f",
-			"revisionTime": "2018-06-19T09:43:38Z"
+			"revision": "fe19c45f5483604656ea164db3c4d9f09048854d",
+			"revisionTime": "2019-01-25T02:08:37Z"
 		},
 		{
 			"checksumSHA1": "SWBjA8iuoGEkIV34ZAbSRxKAr9o=",

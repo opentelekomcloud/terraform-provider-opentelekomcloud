@@ -79,7 +79,7 @@ func dataSourceRTSStackV1Read(d *schema.ResourceData, meta interface{}) error {
 	}
 	stackName := d.Get("name").(string)
 
-	stack, err := stacks.Get(orchestrationClient, stackName).Extract()
+	stack, err := stacks.Get(orchestrationClient, stackName, d.Id()).Extract()
 	if err != nil {
 		return fmt.Errorf("Unable to retrieve stack %s: %s", stackName, err)
 	}
