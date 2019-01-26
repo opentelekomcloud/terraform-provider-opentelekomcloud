@@ -127,9 +127,9 @@ func testAccPreCheckBMSNic(t *testing.T) {
 }
 
 func testAccPreCheckAdminOnly(t *testing.T) {
-	v := os.Getenv("OS_USERNAME")
-	if v != "admin" {
-		t.Skip("Skipping test because it requires the admin user")
+	v := os.Getenv("OS_TENANT_ADMIN")
+	if v == "" {
+		t.Skip("Skipping test because it requires set OS_TENANT_ADMIN")
 	}
 }
 

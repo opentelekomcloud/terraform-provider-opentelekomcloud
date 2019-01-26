@@ -302,7 +302,7 @@ func (c *Config) dnsV2Client(region string) (*golangsdk.ServiceClient, error) {
 
 func (c *Config) identityV3Client(region string) (*golangsdk.ServiceClient, error) {
 	return huaweisdk.NewIdentityV3(c.HwClient, golangsdk.EndpointOpts{
-		Region:       c.determineRegion(region),
+		//Region:       c.determineRegion(region),
 		Availability: c.getHwEndpointType(),
 	})
 }

@@ -191,6 +191,10 @@ func Provider() terraform.ResourceProvider {
 			"opentelekomcloud_dcs_az_v1":                  dataSourceDcsAZV1(),
 			"opentelekomcloud_dcs_maintainwindow_v1":      dataSourceDcsMaintainWindowV1(),
 			"opentelekomcloud_dcs_product_v1":             dataSourceDcsProductV1(),
+			"opentelekomcloud_identity_role_v3":           dataSourceIdentityRoleV3(),
+			"opentelekomcloud_identity_project_v3":        dataSourceIdentityProjectV3(),
+			"opentelekomcloud_identity_user_v3":           dataSourceIdentityUserV3(),
+			"opentelekomcloud_identity_group_v3":          dataSourceIdentityGroupV3(),
 		},
 
 		ResourcesMap: map[string]*schema.Resource{
@@ -208,6 +212,12 @@ func Provider() terraform.ResourceProvider {
 			"opentelekomcloud_fw_firewall_group_v2":               resourceFWFirewallGroupV2(),
 			"opentelekomcloud_fw_policy_v2":                       resourceFWPolicyV2(),
 			"opentelekomcloud_fw_rule_v2":                         resourceFWRuleV2(),
+			"opentelekomcloud_identity_project_v3":                resourceIdentityProjectV3(),
+			"opentelekomcloud_identity_role_v3":                   resourceIdentityRoleV3(),
+			"opentelekomcloud_identity_role_assignment_v3":        resourceIdentityRoleAssignmentV3(),
+			"opentelekomcloud_identity_user_v3":                   resourceIdentityUserV3(),
+			"opentelekomcloud_identity_group_v3":                  resourceIdentityGroupV3(),
+			"opentelekomcloud_identity_group_membership_v3":       resourceIdentityGroupMembershipV3(),
 			"opentelekomcloud_images_image_v2":                    resourceImagesImageV2(),
 			"opentelekomcloud_kms_key_v1":                         resourceKmsKeyV1(),
 			"opentelekomcloud_lb_loadbalancer_v2":                 resourceLoadBalancerV2(),
