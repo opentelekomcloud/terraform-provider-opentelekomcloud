@@ -80,7 +80,7 @@ The following arguments are supported:
     HTTP, HTTPS, or TCP, and the value of lb_algorithm is not roundrobin, the value
     of this parameter can only be false.  Changing this creates a new elb listener.
 
-* `sticky_session_type` - (Optional) Specifies the cookie processing method.
+* `session_sticky_type` - (Optional) Specifies the cookie processing method.
     The value is insert. insert indicates that the cookie is inserted by the load
     balancer. This parameter is valid when protocol is set to HTTP, and session_sticky
     to true. The default value is insert. This parameter is invalid when protocol
@@ -89,7 +89,7 @@ The following arguments are supported:
 
 * `cookie_timeout` - (Optional) Specifies the cookie timeout period (minutes).
     This parameter is valid when protocol is set to HTTP, session_sticky to true,
-    and sticky_session_type to insert. This parameter is invalid when protocol is
+    and session_sticky_type to insert. This parameter is invalid when protocol is
     set to TCP or UDP. The value ranges from 1 to 1440.  Changing this creates a
     new elb listener.
 
@@ -140,7 +140,7 @@ The following attributes are exported:
 * `backend_port` - See Argument Reference above.
 * `lb_algorithm` - See Argument Reference above.
 * `session_sticky` - See Argument Reference above.
-* `sticky_session_type` - See Argument Reference above.
+* `session_sticky_type` - See Argument Reference above.
 * `cookie_timeout` - See Argument Reference above.
 * `tcp_timeout` - See Argument Reference above.
 * `tcp_draining` - See Argument Reference above.
