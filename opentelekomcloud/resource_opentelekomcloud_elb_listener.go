@@ -240,7 +240,7 @@ func resourceEListenerRead(d *schema.ResourceData, meta interface{}) error {
 
 	d.Set("backend_port", listener.BackendProtocolPort)
 	d.Set("backend_protocol", listener.BackendProtocol)
-	d.Set("sticky_session_type", listener.StickySessionType)
+	d.Set("session_sticky_type", listener.StickySessionType)
 	d.Set("description", listener.Description)
 	d.Set("load_balancer_id", listener.LoadbalancerID)
 	d.Set("protocol", listener.Protocol)
