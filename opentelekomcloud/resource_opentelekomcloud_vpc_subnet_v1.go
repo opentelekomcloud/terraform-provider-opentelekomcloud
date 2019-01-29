@@ -292,7 +292,7 @@ func waitForVpcSubnetDelete(subnetClient *golangsdk.ServiceClient, vpcId string,
 				return r, "DELETED", nil
 			}
 			if errCode, ok := err.(golangsdk.ErrUnexpectedResponseCode); ok {
-				if errCode.Actual == 409 {
+				if errCode.Actual == 409 || errCode.Actual == 500 {
 					return r, "ACTIVE", nil
 				}
 			}
