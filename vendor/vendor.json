@@ -604,10 +604,10 @@
 			"revisionTime": "2016-07-20T23:31:40Z"
 		},
 		{
-			"checksumSHA1": "IpX/Sm8f6MV9cTjusdQKeF6ZUrk=",
+			"checksumSHA1": "aTlskzGjY6+jRCB5rFYNE2+Y3BM=",
 			"path": "github.com/huaweicloud/golangsdk",
-			"revision": "17736f0982b169046fb8edc13d4a423cbebab9f6",
-			"revisionTime": "2019-01-08T11:12:32Z"
+			"revision": "f81d0e5385bd0cbffd21897f049c5857ed28980a",
+			"revisionTime": "2019-01-28T09:35:43Z"
 		},
 		{
 			"checksumSHA1": "5CrERxD5a4GySU7WD2JukNddc9s=",

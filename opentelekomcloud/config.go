@@ -217,6 +217,15 @@ func (c *Config) newhwClient(transport *http.Transport, osDebug bool) error {
 			Rt:      transport,
 			OsDebug: osDebug,
 		},
+		CheckRedirect: func(req *http.Request, via []*http.Request) error {
+			if client.AKSKAuthOptions.AccessKey != "" {
+				golangsdk.ReSign(req, golangsdk.SignOptions{
+					AccessKey: client.AKSKAuthOptions.AccessKey,
+					SecretKey: client.AKSKAuthOptions.SecretKey,
+				})
+			}
+			return nil
+		},
 	}
 
 	// If using Swift Authentication, there's no need to validate authentication normally.
