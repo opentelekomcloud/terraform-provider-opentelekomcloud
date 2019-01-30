@@ -28,6 +28,8 @@ func TestAccELBListener_basic(t *testing.T) {
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr(
 						"opentelekomcloud_elb_listener.listener_1", "name", "listener_1_updated"),
+					resource.TestCheckResourceAttr(
+						"opentelekomcloud_elb_listener.listener_1", "backend_port", "8088"),
 				),
 			},
 		},
@@ -125,7 +127,7 @@ resource "opentelekomcloud_elb_listener" "listener_1" {
   protocol = "TCP"
   protocol_port = 8080
   backend_protocol = "TCP"
-  backend_port = 8080
+  backend_port = 8088
   lb_algorithm = "roundrobin"
   loadbalancer_id = "${opentelekomcloud_elb_loadbalancer.loadbalancer_1.id}"
 
