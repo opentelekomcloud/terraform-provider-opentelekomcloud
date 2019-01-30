@@ -89,7 +89,9 @@ func Create(client *golangsdk.ServiceClient, opts CreateOptsBuilder) (r CreateRe
 
 // Delete deletes a project.
 func Delete(client *golangsdk.ServiceClient, projectID string) (r DeleteResult) {
-	_, r.Err = client.Delete(deleteURL(client, projectID), nil)
+	_, r.Err = client.Delete(deleteURL(client, projectID), &golangsdk.RequestOpts{
+		OkCodes: []int{200},
+	})
 	return
 }
 
