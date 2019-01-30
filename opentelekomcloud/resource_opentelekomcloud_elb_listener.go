@@ -281,8 +281,8 @@ func resourceEListenerUpdate(d *schema.ResourceData, meta interface{}) error {
 	if d.HasChange("protocol_port") {
 		updateOpts.ProtocolPort = d.Get("protocol_port").(int)
 	}
-	if d.HasChange("backend_protocol_port") {
-		updateOpts.ProtocolPort = d.Get("backend_protocol_port").(int)
+	if d.HasChange("backend_port") {
+		updateOpts.BackendProtocolPort = d.Get("backend_port").(int)
 	}
 	if d.HasChange("lb_algorithm") {
 		updateOpts.Algorithm = d.Get("lb_algorithm").(string)
