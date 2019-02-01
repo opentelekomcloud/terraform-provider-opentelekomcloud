@@ -1,4 +1,23 @@
-## 1.5.3 (Unreleased)
+## 1.6 (Unreleased)
+
+FEATURES:
+
+* **New Data Source:** `opentelekomcloud_identity_role_v3` [GH-167]
+* **New Data Source:** `opentelekomcloud_identity_project_v3` [GH-167]
+* **New Data Source:** `opentelekomcloud_identity_user_v3` [GH-167]
+* **New Data Source:** `opentelekomcloud_identity_group_v3` [GH-167]
+* **New Resource:** `opentelekomcloud_identity_project_v3` [GH-167]
+* **New Resource:** `opentelekomcloud_identity_role_v3` [GH-167]
+* **New Resource:** `opentelekomcloud_identity_role_assignment_v3` [GH-167]
+* **New Resource:** `opentelekomcloud_identity_user_v3` [GH-167]
+* **New Resource:** `opentelekomcloud_identity_group_v3` [GH-167]
+* **New Resource:** `opentelekomcloud_identity_group_membership_v3` [GH-167]
+
+BUG FIXES:
+
+* `resource/opentelekomcloud_rts_stack_v1`: Re-sign for 302 redirect in ak/sk scenario [GH-204]
+* `resource/opentelekomcloud_elb_listener`: Fix elb listener update error for backend_port [GH-209]
+
 ## 1.5.2 (January 11, 2019)
 
 BUG FIXES:
