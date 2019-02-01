@@ -1,4 +1,4 @@
-## 1.6 (Unreleased)
+## 1.6.0 (Unreleased)
 
 FEATURES:
 
