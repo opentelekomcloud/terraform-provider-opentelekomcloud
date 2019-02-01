@@ -1,22 +1,22 @@
-## 1.6.0 (Unreleased)
+## 1.6.0 (February 01, 2019)
 
 FEATURES:
 
-* **New Data Source:** `opentelekomcloud_identity_role_v3` [GH-167]
-* **New Data Source:** `opentelekomcloud_identity_project_v3` [GH-167]
-* **New Data Source:** `opentelekomcloud_identity_user_v3` [GH-167]
-* **New Data Source:** `opentelekomcloud_identity_group_v3` [GH-167]
-* **New Resource:** `opentelekomcloud_identity_project_v3` [GH-167]
-* **New Resource:** `opentelekomcloud_identity_role_v3` [GH-167]
-* **New Resource:** `opentelekomcloud_identity_role_assignment_v3` [GH-167]
-* **New Resource:** `opentelekomcloud_identity_user_v3` [GH-167]
-* **New Resource:** `opentelekomcloud_identity_group_v3` [GH-167]
-* **New Resource:** `opentelekomcloud_identity_group_membership_v3` [GH-167]
+* **New Data Source:** `opentelekomcloud_identity_role_v3` ([#167](https://github.com/terraform-providers/terraform-provider-opentelekomcloud/issues/167))
+* **New Data Source:** `opentelekomcloud_identity_project_v3` ([#167](https://github.com/terraform-providers/terraform-provider-opentelekomcloud/issues/167))
+* **New Data Source:** `opentelekomcloud_identity_user_v3` ([#167](https://github.com/terraform-providers/terraform-provider-opentelekomcloud/issues/167))
+* **New Data Source:** `opentelekomcloud_identity_group_v3` ([#167](https://github.com/terraform-providers/terraform-provider-opentelekomcloud/issues/167))
+* **New Resource:** `opentelekomcloud_identity_project_v3` ([#167](https://github.com/terraform-providers/terraform-provider-opentelekomcloud/issues/167))
+* **New Resource:** `opentelekomcloud_identity_role_v3` ([#167](https://github.com/terraform-providers/terraform-provider-opentelekomcloud/issues/167))
+* **New Resource:** `opentelekomcloud_identity_role_assignment_v3` ([#167](https://github.com/terraform-providers/terraform-provider-opentelekomcloud/issues/167))
+* **New Resource:** `opentelekomcloud_identity_user_v3` ([#167](https://github.com/terraform-providers/terraform-provider-opentelekomcloud/issues/167))
+* **New Resource:** `opentelekomcloud_identity_group_v3` ([#167](https://github.com/terraform-providers/terraform-provider-opentelekomcloud/issues/167))
+* **New Resource:** `opentelekomcloud_identity_group_membership_v3` ([#167](https://github.com/terraform-providers/terraform-provider-opentelekomcloud/issues/167))
 
 BUG FIXES:
 
-* `resource/opentelekomcloud_rts_stack_v1`: Re-sign for 302 redirect in ak/sk scenario [GH-204]
-* `resource/opentelekomcloud_elb_listener`: Fix elb listener update error for backend_port [GH-209]
+* `resource/opentelekomcloud_rts_stack_v1`: Re-sign for 302 redirect in ak/sk scenario ([#204](https://github.com/terraform-providers/terraform-provider-opentelekomcloud/issues/204))
+* `resource/opentelekomcloud_elb_listener`: Fix elb listener update error for backend_port ([#209](https://github.com/terraform-providers/terraform-provider-opentelekomcloud/issues/209))
 
 ## 1.5.2 (January 11, 2019)
 
