@@ -22,6 +22,11 @@ import (
 	"github.com/huaweicloud/golangsdk/openstack/objectstorage/v1/swauth"
 )
 
+const (
+	serviceProjectLevel string = "project"
+	serviceDomainLevel  string = "domain"
+)
+
 type Config struct {
 	AccessKey        string
 	SecretKey        string
@@ -662,7 +667,7 @@ func (c *Config) dcsV1Client(region string) (*golangsdk.ServiceClient, error) {
 
 func (c *Config) sdkClient(region, serviceType, level string) (*golangsdk.ServiceClient, error) {
 	client := c.HwClient
-	if level == "domain" {
+	if level == serviceDomainLevel {
 		client = c.DomainClient
 	}
 	return huaweisdk.NewSDKClient(
