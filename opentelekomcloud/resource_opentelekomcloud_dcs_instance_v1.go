@@ -38,7 +38,7 @@ func resourceDcsInstanceV1() *schema.Resource {
 			},
 			"engine_version": {
 				Type:     schema.TypeString,
-				Optional: true,
+				Required: true,
 				ForceNew: true,
 			},
 			"capacity": {
@@ -48,7 +48,7 @@ func resourceDcsInstanceV1() *schema.Resource {
 			},
 			"password": {
 				Type:     schema.TypeString,
-				Optional: true,
+				Required: true,
 				ForceNew: true,
 			},
 			"access_user": {

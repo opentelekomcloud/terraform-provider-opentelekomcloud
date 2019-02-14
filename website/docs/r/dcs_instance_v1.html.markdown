@@ -58,7 +58,7 @@ The following arguments are supported:
 * `engine` - (Required) Indicates a cache engine. Only Redis is supported. Changing this
     creates a new instance.
 
-* `engine_version` - (Optional) Indicates the version of a cache engine, which is 3.0.7.
+* `engine_version` - (Required) Indicates the version of a cache engine, which is 3.0.7.
     Changing this creates a new instance.
 
 * `capacity` - (Required) Indicates the Cache capacity. Unit: GB.
@@ -72,7 +72,7 @@ The following arguments are supported:
     and supports only letters, digits, and hyphens (-).
     Changing this creates a new instance.
 
-* `password` - (Optional) Password of a DCS instance.
+* `password` - (Required) Password of a DCS instance.
     The password of a DCS Redis instance must meet the following complexity requirements:
     Changing this creates a new instance.
 
