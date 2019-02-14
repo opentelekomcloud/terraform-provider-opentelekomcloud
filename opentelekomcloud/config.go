@@ -51,8 +51,6 @@ type Config struct {
 	s3sess   *session.Session
 
 	DomainClient *golangsdk.ProviderClient
-	ProjectToken string
-	DomainToken  string
 }
 
 func (c *Config) LoadAndValidate() error {
@@ -251,14 +249,14 @@ func buildProjectClient(c *Config) error {
 
 	var ao golangsdk.AuthOptionsProvider
 
-	if c.ProjectToken != "" {
+	if c.Token != "" {
 		ao = golangsdk.AuthOptions{
 			IdentityEndpoint: c.IdentityEndpoint,
 			DomainID:         c.DomainID,
 			DomainName:       c.DomainName,
 			TenantID:         c.TenantID,
 			TenantName:       c.TenantName,
-			TokenID:          c.ProjectToken,
+			TokenID:          c.Token,
 		}
 	} else if c.AccessKey != "" && c.SecretKey != "" {
 		ao = golangsdk.AKSKAuthOptions{
@@ -294,14 +292,22 @@ func buildDomainClient(c *Config) error {
 
 	var ao golangsdk.AuthOptionsProvider
 
-	if c.DomainToken != "" {
+	if c.Token != "" {
 		ao = golangsdk.AuthOptions{
 			IdentityEndpoint: c.IdentityEndpoint,
 			DomainID:         c.DomainID,
 			DomainName:       c.DomainName,
-			TokenID:          c.DomainToken,
+			TokenID:          c.Token,
 		}
-	} else if c.Password != "" && (c.Username != "" || c.UserID != "") {
+	} else if c.AccessKey != "" && c.SecretKey != "" {
+		ao = golangsdk.AKSKAuthOptions{
+			IdentityEndpoint: c.IdentityEndpoint,
+			DomainID:         c.DomainID,
+			Domain:           c.DomainName,
+			AccessKey:        c.AccessKey,
+			SecretKey:        c.SecretKey,
+		}
+	} else {
 		ao = golangsdk.AuthOptions{
 			IdentityEndpoint: c.IdentityEndpoint,
 			DomainID:         c.DomainID,
@@ -309,12 +315,6 @@ func buildDomainClient(c *Config) error {
 			Username:         c.Username,
 			UserID:           c.UserID,
 			Password:         c.Password,
-		}
-	} else if c.AccessKey != "" && c.SecretKey != "" {
-		ao = golangsdk.AKSKAuthOptions{
-			IdentityEndpoint: c.IdentityEndpoint,
-			AccessKey:        c.AccessKey,
-			SecretKey:        c.SecretKey,
 		}
 	}
 
