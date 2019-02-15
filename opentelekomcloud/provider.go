@@ -153,6 +153,25 @@ func Provider() terraform.ResourceProvider {
 				DefaultFunc: schema.EnvDefaultFunc("OS_SWAUTH", ""),
 				Description: descriptions["swauth"],
 			},
+			"agency_name": {
+				Type:        schema.TypeString,
+				Optional:    true,
+				DefaultFunc: schema.EnvDefaultFunc("OS_AGENCY_NAME", ""),
+				Description: descriptions["agency_name"],
+			},
+
+			"agency_domain_name": {
+				Type:        schema.TypeString,
+				Optional:    true,
+				DefaultFunc: schema.EnvDefaultFunc("OS_AGENCY_DOMAIN_NAME", ""),
+				Description: descriptions["agency_domain_name"],
+			},
+			"delegated_project": {
+				Type:        schema.TypeString,
+				Optional:    true,
+				DefaultFunc: schema.EnvDefaultFunc("OS_DELEGATED_PROJECT", ""),
+				Description: descriptions["delegated_project"],
+			},
 		},
 
 		DataSourcesMap: map[string]*schema.Resource{
@@ -331,6 +350,12 @@ func init() {
 
 		"swauth": "Use Swift's authentication system instead of Keystone. Only used for\n" +
 			"interaction with Swift.",
+
+		"agency_name": "The name of agency",
+
+		"agency_domain_name": "The name of domain who created the agency (Identity v3).",
+
+		"delegated_project": "The name of delegated project (Identity v3).",
 	}
 }
 
@@ -354,6 +379,9 @@ func configureProvider(d *schema.ResourceData) (interface{}, error) {
 		TenantName:       d.Get("tenant_name").(string),
 		Username:         d.Get("user_name").(string),
 		UserID:           d.Get("user_id").(string),
+		AgencyName:       d.Get("agency_name").(string),
+		AgencyDomainName: d.Get("agency_domain_name").(string),
+		DelegatedProject: d.Get("delegated_project").(string),
 	}
 
 	if err := config.LoadAndValidate(); err != nil {
