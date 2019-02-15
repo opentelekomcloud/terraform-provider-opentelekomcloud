@@ -72,12 +72,17 @@ func (c *Config) LoadAndValidate() error {
 		return fmt.Errorf("Invalid endpoint type provided")
 	}
 
-	err := buildProjectClient(c)
-	if err != nil {
-		return err
-	}
+	err := fmt.Errorf("Must config token or aksk or username password to be authorized")
 
-	err = buildDomainClient(c)
+	if c.Token != "" {
+		err = buildClientByToken(c)
+
+	} else if c.AccessKey != "" && c.SecretKey != "" {
+		err = buildClientByAKSK(c)
+
+	} else if c.Password != "" && (c.Username != "" || c.UserID != "") {
+		err = buildClientByPassword(c)
+	}
 	if err != nil {
 		return err
 	}
@@ -244,81 +249,82 @@ func (c *Config) newhwClient(transport *http.Transport, osDebug bool) error {
 	return nil
 }
 
-func buildProjectClient(c *Config) error {
-	log.Printf("[DEBUG] build project client")
+func buildClientByToken(c *Config) error {
+	var pao, dao golangsdk.AuthOptions
 
-	var ao golangsdk.AuthOptionsProvider
-
-	if c.Token != "" {
-		ao = golangsdk.AuthOptions{
-			IdentityEndpoint: c.IdentityEndpoint,
-			DomainID:         c.DomainID,
-			DomainName:       c.DomainName,
-			TenantID:         c.TenantID,
-			TenantName:       c.TenantName,
-			TokenID:          c.Token,
-		}
-	} else if c.AccessKey != "" && c.SecretKey != "" {
-		ao = golangsdk.AKSKAuthOptions{
-			IdentityEndpoint: c.IdentityEndpoint,
-			ProjectName:      c.TenantName,
-			ProjectId:        c.TenantID,
-			AccessKey:        c.AccessKey,
-			SecretKey:        c.SecretKey,
-		}
-	} else {
-		ao = golangsdk.AuthOptions{
-			IdentityEndpoint: c.IdentityEndpoint,
-			DomainID:         c.DomainID,
-			DomainName:       c.DomainName,
-			TenantID:         c.TenantID,
-			TenantName:       c.TenantName,
-			Username:         c.Username,
-			UserID:           c.UserID,
-			Password:         c.Password,
-		}
+	pao = golangsdk.AuthOptions{
+		DomainID:   c.DomainID,
+		DomainName: c.DomainName,
+		TenantID:   c.TenantID,
+		TenantName: c.TenantName,
 	}
 
-	client, err := genClient(c, ao)
-	if err == nil {
-		c.HwClient = client
+	dao = golangsdk.AuthOptions{
+		DomainID:   c.DomainID,
+		DomainName: c.DomainName,
 	}
-	return err
 
+	for _, ao := range []*golangsdk.AuthOptions{&pao, &dao} {
+		ao.IdentityEndpoint = c.IdentityEndpoint
+		ao.TokenID = c.Token
+
+	}
+	return genClients(c, pao, dao)
 }
 
-func buildDomainClient(c *Config) error {
-	log.Printf("[DEBUG] build domain client")
+func buildClientByAKSK(c *Config) error {
+	var pao, dao golangsdk.AKSKAuthOptions
 
-	var ao golangsdk.AuthOptionsProvider
-
-	if c.Token != "" {
-		ao = golangsdk.AuthOptions{
-			IdentityEndpoint: c.IdentityEndpoint,
-			DomainID:         c.DomainID,
-			DomainName:       c.DomainName,
-			TokenID:          c.Token,
-		}
-	} else if c.AccessKey != "" && c.SecretKey != "" {
-		ao = golangsdk.AKSKAuthOptions{
-			IdentityEndpoint: c.IdentityEndpoint,
-			DomainID:         c.DomainID,
-			Domain:           c.DomainName,
-			AccessKey:        c.AccessKey,
-			SecretKey:        c.SecretKey,
-		}
-	} else {
-		ao = golangsdk.AuthOptions{
-			IdentityEndpoint: c.IdentityEndpoint,
-			DomainID:         c.DomainID,
-			DomainName:       c.DomainName,
-			Username:         c.Username,
-			UserID:           c.UserID,
-			Password:         c.Password,
-		}
+	pao = golangsdk.AKSKAuthOptions{
+		ProjectName: c.TenantName,
+		ProjectId:   c.TenantID,
 	}
 
-	client, err := genClient(c, ao)
+	dao = golangsdk.AKSKAuthOptions{
+		DomainID: c.DomainID,
+		Domain:   c.DomainName,
+	}
+
+	for _, ao := range []*golangsdk.AKSKAuthOptions{&pao, &dao} {
+		ao.IdentityEndpoint = c.IdentityEndpoint
+		ao.AccessKey = c.AccessKey
+		ao.SecretKey = c.SecretKey
+	}
+	return genClients(c, pao, dao)
+}
+
+func buildClientByPassword(c *Config) error {
+	var pao, dao golangsdk.AuthOptions
+
+	pao = golangsdk.AuthOptions{
+		DomainID:   c.DomainID,
+		DomainName: c.DomainName,
+		TenantID:   c.TenantID,
+		TenantName: c.TenantName,
+	}
+
+	dao = golangsdk.AuthOptions{
+		DomainID:   c.DomainID,
+		DomainName: c.DomainName,
+	}
+
+	for _, ao := range []*golangsdk.AuthOptions{&pao, &dao} {
+		ao.IdentityEndpoint = c.IdentityEndpoint
+		ao.Password = c.Password
+		ao.Username = c.Username
+		ao.UserID = c.UserID
+	}
+	return genClients(c, pao, dao)
+}
+
+func genClients(c *Config, pao, dao golangsdk.AuthOptionsProvider) error {
+	client, err := genClient(c, pao)
+	if err != nil {
+		return err
+	}
+	c.HwClient = client
+
+	client, err = genClient(c, dao)
 	if err == nil {
 		c.DomainClient = client
 	}
