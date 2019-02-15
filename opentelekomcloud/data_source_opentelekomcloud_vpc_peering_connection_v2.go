@@ -51,6 +51,9 @@ func dataSourceVpcPeeringConnectionV2() *schema.Resource {
 func dataSourceVpcPeeringConnectionV2Read(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*Config)
 	peeringClient, err := config.hwNetworkV2Client(GetRegion(d, config))
+	if err != nil {
+		return err
+	}
 
 	listOpts := peerings.ListOpts{
 		ID:         d.Get("id").(string),

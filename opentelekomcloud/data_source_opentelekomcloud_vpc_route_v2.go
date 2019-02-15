@@ -50,6 +50,10 @@ func dataSourceVPCRouteV2() *schema.Resource {
 func dataSourceVpcRouteV2Read(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*Config)
 	vpcRouteClient, err := config.hwNetworkV2Client(GetRegion(d, config))
+	if err != nil {
+		return err
+	}
+
 	listOpts := routes.ListOpts{
 		Type:        d.Get("type").(string),
 		Destination: d.Get("destination").(string),

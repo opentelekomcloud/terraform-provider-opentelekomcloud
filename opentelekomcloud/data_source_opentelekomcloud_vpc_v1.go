@@ -63,6 +63,9 @@ func dataSourceVirtualPrivateCloudVpcV1() *schema.Resource {
 func dataSourceVirtualPrivateCloudV1Read(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*Config)
 	vpcClient, err := config.networkingV1Client(GetRegion(d, config))
+	if err != nil {
+		return err
+	}
 
 	listOpts := vpcs.ListOpts{
 		ID:     d.Get("id").(string),
