@@ -22,6 +22,11 @@ import (
 	"github.com/huaweicloud/golangsdk/openstack/objectstorage/v1/swauth"
 )
 
+const (
+	serviceProjectLevel string = "project"
+	serviceDomainLevel  string = "domain"
+)
+
 type Config struct {
 	AccessKey        string
 	SecretKey        string
@@ -44,6 +49,8 @@ type Config struct {
 
 	HwClient *golangsdk.ProviderClient
 	s3sess   *session.Session
+
+	DomainClient *golangsdk.ProviderClient
 }
 
 func (c *Config) LoadAndValidate() error {
@@ -65,23 +72,25 @@ func (c *Config) LoadAndValidate() error {
 		return fmt.Errorf("Invalid endpoint type provided")
 	}
 
-	config, err := generateTLSConfig(c)
+	err := fmt.Errorf("Must config token or aksk or username password to be authorized")
+
+	if c.Token != "" {
+		err = buildClientByToken(c)
+
+	} else if c.AccessKey != "" && c.SecretKey != "" {
+		err = buildClientByAKSK(c)
+
+	} else if c.Password != "" && (c.Username != "" || c.UserID != "") {
+		err = buildClientByPassword(c)
+	}
 	if err != nil {
 		return err
 	}
-	transport := &http.Transport{Proxy: http.ProxyFromEnvironment, TLSClientConfig: config}
 
-	// if OS_DEBUG is set, log the requests and responses
 	var osDebug bool
 	if os.Getenv("OS_DEBUG") != "" {
 		osDebug = true
 	}
-
-	err = c.newhwClient(transport, osDebug)
-	if err != nil {
-		return err
-	}
-
 	return c.newS3Session(osDebug)
 }
 
@@ -240,6 +249,136 @@ func (c *Config) newhwClient(transport *http.Transport, osDebug bool) error {
 	return nil
 }
 
+func buildClientByToken(c *Config) error {
+	var pao, dao golangsdk.AuthOptions
+
+	pao = golangsdk.AuthOptions{
+		DomainID:   c.DomainID,
+		DomainName: c.DomainName,
+		TenantID:   c.TenantID,
+		TenantName: c.TenantName,
+	}
+
+	dao = golangsdk.AuthOptions{
+		DomainID:   c.DomainID,
+		DomainName: c.DomainName,
+	}
+
+	for _, ao := range []*golangsdk.AuthOptions{&pao, &dao} {
+		ao.IdentityEndpoint = c.IdentityEndpoint
+		ao.TokenID = c.Token
+
+	}
+	return genClients(c, pao, dao)
+}
+
+func buildClientByAKSK(c *Config) error {
+	var pao, dao golangsdk.AKSKAuthOptions
+
+	pao = golangsdk.AKSKAuthOptions{
+		ProjectName: c.TenantName,
+		ProjectId:   c.TenantID,
+	}
+
+	dao = golangsdk.AKSKAuthOptions{
+		DomainID: c.DomainID,
+		Domain:   c.DomainName,
+	}
+
+	for _, ao := range []*golangsdk.AKSKAuthOptions{&pao, &dao} {
+		ao.IdentityEndpoint = c.IdentityEndpoint
+		ao.AccessKey = c.AccessKey
+		ao.SecretKey = c.SecretKey
+	}
+	return genClients(c, pao, dao)
+}
+
+func buildClientByPassword(c *Config) error {
+	var pao, dao golangsdk.AuthOptions
+
+	pao = golangsdk.AuthOptions{
+		DomainID:   c.DomainID,
+		DomainName: c.DomainName,
+		TenantID:   c.TenantID,
+		TenantName: c.TenantName,
+	}
+
+	dao = golangsdk.AuthOptions{
+		DomainID:   c.DomainID,
+		DomainName: c.DomainName,
+	}
+
+	for _, ao := range []*golangsdk.AuthOptions{&pao, &dao} {
+		ao.IdentityEndpoint = c.IdentityEndpoint
+		ao.Password = c.Password
+		ao.Username = c.Username
+		ao.UserID = c.UserID
+	}
+	return genClients(c, pao, dao)
+}
+
+func genClients(c *Config, pao, dao golangsdk.AuthOptionsProvider) error {
+	client, err := genClient(c, pao)
+	if err != nil {
+		return err
+	}
+	c.HwClient = client
+
+	client, err = genClient(c, dao)
+	if err == nil {
+		c.DomainClient = client
+	}
+	return err
+}
+
+func genClient(c *Config, ao golangsdk.AuthOptionsProvider) (*golangsdk.ProviderClient, error) {
+	client, err := huaweisdk.NewClient(ao.GetIdentityEndpoint())
+	if err != nil {
+		return nil, err
+	}
+
+	// Set UserAgent
+	client.UserAgent.Prepend(terraform.UserAgentString())
+
+	config, err := generateTLSConfig(c)
+	if err != nil {
+		return nil, err
+	}
+	transport := &http.Transport{Proxy: http.ProxyFromEnvironment, TLSClientConfig: config}
+
+	// if OS_DEBUG is set, log the requests and responses
+	var osDebug bool
+	if os.Getenv("OS_DEBUG") != "" {
+		osDebug = true
+	}
+
+	client.HTTPClient = http.Client{
+		Transport: &LogRoundTripper{
+			Rt:      transport,
+			OsDebug: osDebug,
+		},
+		CheckRedirect: func(req *http.Request, via []*http.Request) error {
+			if client.AKSKAuthOptions.AccessKey != "" {
+				golangsdk.ReSign(req, golangsdk.SignOptions{
+					AccessKey: client.AKSKAuthOptions.AccessKey,
+					SecretKey: client.AKSKAuthOptions.SecretKey,
+				})
+			}
+			return nil
+		},
+	}
+
+	// If using Swift Authentication, there's no need to validate authentication normally.
+	if !c.Swauth {
+		err = huaweisdk.Authenticate(client, ao)
+		if err != nil {
+			return nil, err
+		}
+	}
+
+	return client, nil
+}
+
 type awsLogger struct{}
 
 func (l awsLogger) Log(args ...interface{}) {
@@ -310,7 +449,7 @@ func (c *Config) dnsV2Client(region string) (*golangsdk.ServiceClient, error) {
 }
 
 func (c *Config) identityV3Client(region string) (*golangsdk.ServiceClient, error) {
-	return huaweisdk.NewIdentityV3(c.HwClient, golangsdk.EndpointOpts{
+	return huaweisdk.NewIdentityV3(c.DomainClient, golangsdk.EndpointOpts{
 		//Region:       c.determineRegion(region),
 		Availability: c.getHwEndpointType(),
 	})
@@ -530,4 +669,18 @@ func (c *Config) dcsV1Client(region string) (*golangsdk.ServiceClient, error) {
 		Region:       c.determineRegion(region),
 		Availability: c.getHwEndpointType(),
 	})
+}
+
+func (c *Config) sdkClient(region, serviceType, level string) (*golangsdk.ServiceClient, error) {
+	client := c.HwClient
+	if level == serviceDomainLevel {
+		client = c.DomainClient
+	}
+	return huaweisdk.NewSDKClient(
+		client,
+		golangsdk.EndpointOpts{
+			Region:       region,
+			Availability: c.getHwEndpointType(),
+		},
+		serviceType)
 }
