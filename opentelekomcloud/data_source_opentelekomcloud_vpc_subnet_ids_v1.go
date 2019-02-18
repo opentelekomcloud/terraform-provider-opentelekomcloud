@@ -38,6 +38,9 @@ func dataSourceVpcSubnetIdsV1() *schema.Resource {
 func dataSourceVpcSubnetIdsV1Read(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*Config)
 	subnetClient, err := config.networkingV1Client(GetRegion(d, config))
+	if err != nil {
+		return err
+	}
 
 	listOpts := subnets.ListOpts{
 		VPC_ID: d.Get("vpc_id").(string),
