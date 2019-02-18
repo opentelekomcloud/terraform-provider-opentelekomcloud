@@ -3,6 +3,8 @@
 BUG FIXES:
 
 * `provider authentication`: Fix authentication with tenant [GH-216]
+* `resource/opentelekomcloud_dcs_instance_v1`: Update `password` and `engine_version` of dcs instance from Option to Required [GH-217]
+* `resource/opentelekomcloud_smn_topic_v2`: Fix some smn topic parameters issue [GH-218]
 
 ## 1.6.0 (February 01, 2019)
 
