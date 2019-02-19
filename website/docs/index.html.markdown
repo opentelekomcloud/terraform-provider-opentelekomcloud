@@ -89,8 +89,8 @@ provider "opentelekomcloud" {
   user_name          = "${var.user_name}"
   password           = "${var.password}"
   domain_name        = "${var.domain_name}"
-  auth_url           = "http://myauthurl:5000/v2.0"
-  region             = "RegionOne"
+  auth_url           = "https://iam.eu-de.otc.t-systems.com/v3"
+  region             = "${var.region}"
 }
 ```
 
@@ -104,8 +104,8 @@ provider "opentelekomcloud" {
   access_key         = "${var.access_key}"
   secret_key         = "${var.secret_key}"
   domain_name        = "${var.domain_name}"
-  auth_url           = "http://myauthurl:5000/v2.0"
-  region             = "RegionOne"
+  auth_url           = "https://iam.eu-de.otc.t-systems.com/v3"
+  region             = "${var.region}"
 }
 ```
 
@@ -117,8 +117,8 @@ provider "opentelekomcloud" {
   agency_domain_name = "${var.agency_domain_name}"
   delegated_project  = "${var.delegated_project}"
   token              = "${var.token}"
-  auth_url           = "http://myauthurl:5000/v2.0"
-  region             = "RegionOne"
+  auth_url           = "https://iam.eu-de.otc.t-systems.com/v3"
+  region             = "${var.region}"
 }
 ```
 ```token``` specified is not the normal token, but must have the authority of 'Agent Operator'
