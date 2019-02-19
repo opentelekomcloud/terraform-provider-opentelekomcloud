@@ -109,7 +109,7 @@ func resourceIdentityRole() *schema.Resource {
 
 func resourceIdentityRoleCreate(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*Config)
-	client, err := config.sdkClient(GetRegion(d, config), "identity")
+	client, err := config.sdkClient("", "identity", serviceDomainLevel)
 	if err != nil {
 		return fmt.Errorf("Error creating sdk client, err=%s", err)
 	}
@@ -162,7 +162,7 @@ func resourceIdentityRoleCreate(d *schema.ResourceData, meta interface{}) error 
 
 func resourceIdentityRoleRead(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*Config)
-	client, err := config.sdkClient(GetRegion(d, config), "identity")
+	client, err := config.sdkClient("", "identity", serviceDomainLevel)
 	if err != nil {
 		return fmt.Errorf("Error creating sdk client, err=%s", err)
 	}
@@ -215,7 +215,7 @@ func resourceIdentityRoleRead(d *schema.ResourceData, meta interface{}) error {
 
 func resourceIdentityRoleUpdate(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*Config)
-	client, err := config.sdkClient(GetRegion(d, config), "identity")
+	client, err := config.sdkClient("", "identity", serviceDomainLevel)
 	if err != nil {
 		return fmt.Errorf("Error creating sdk client, err=%s", err)
 	}
@@ -262,7 +262,7 @@ func resourceIdentityRoleUpdate(d *schema.ResourceData, meta interface{}) error 
 
 func resourceIdentityRoleDelete(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*Config)
-	client, err := config.sdkClient(GetRegion(d, config), "identity")
+	client, err := config.sdkClient("", "identity", serviceDomainLevel)
 	if err != nil {
 		return fmt.Errorf("Error creating sdk client, err=%s", err)
 	}
