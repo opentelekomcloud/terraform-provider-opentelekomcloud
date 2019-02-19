@@ -28,9 +28,9 @@ The following arguments are supported:
 
 * `group` - (Optional) The namespace that groups this software configuration by when it is delivered to a server.
 
-* `inputs` - (Optional) A list of software configuration inputs.
+* `input_values` - (Optional) A list of software configuration inputs.
 
-* `outputs` - (Optional) A list of software configuration outputs.
+* `output_values` - (Optional) A list of software configuration outputs.
 
 * `config` - (Optional) The software configuration code.
 
