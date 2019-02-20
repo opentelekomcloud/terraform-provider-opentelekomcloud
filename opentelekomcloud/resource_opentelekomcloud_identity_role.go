@@ -81,10 +81,6 @@ func resourceIdentityRole() *schema.Resource {
 								},
 							},
 						},
-						"version": &schema.Schema{
-							Type:     schema.TypeString,
-							Required: true,
-						},
 					},
 				},
 			},
@@ -366,17 +362,7 @@ func expandIdentityRoleCreateRolePolicy(d interface{}, arrayIndex map[string]int
 		req["Statement"] = statementProp
 	}
 
-	versionProp, err := navigateValue(d, []string{"policy", "version"}, arrayIndex)
-	if err != nil {
-		return nil, err
-	}
-	e, err = isEmptyValue(reflect.ValueOf(versionProp))
-	if err != nil {
-		return nil, err
-	}
-	if !e {
-		req["Version"] = versionProp
-	}
+	req["Version"] = "1.1"
 
 	return req, nil
 }
@@ -521,17 +507,7 @@ func expandIdentityRoleUpdateRolePolicy(d interface{}, arrayIndex map[string]int
 		req["Statement"] = statementProp
 	}
 
-	versionProp, err := navigateValue(d, []string{"policy", "version"}, arrayIndex)
-	if err != nil {
-		return nil, err
-	}
-	e, err = isEmptyValue(reflect.ValueOf(versionProp))
-	if err != nil {
-		return nil, err
-	}
-	if !e {
-		req["Version"] = versionProp
-	}
+	req["Version"] = "1.1"
 
 	return req, nil
 }
