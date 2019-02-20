@@ -1,23 +1,33 @@
 ---
 layout: "opentelekomcloud"
-page_title: "OpentelekomCloud: opentelekomcloud_identity_role_v3"
+page_title: "OpenTelekomCloud: opentelekomcloud_identity_role_v3"
 sidebar_current: "docs-opentelekomcloud-resource-identity-role-v3"
 description: |-
-  Manages a V3 Role resource within OpentelekomCloud Keystone.
+  custom role management
 ---
 
-# opentelekomcloud\_identity\_role_v3
+# opentelekomcloud\_identity\_role\_v3
 
-Manages a V3 Role resource within OpentelekomCloud Keystone.
-
-Note: You _must_ have admin privileges in your OpentelekomCloud cloud to use
-this resource.
+custom role management
 
 ## Example Usage
 
+### Role
+
 ```hcl
-resource "opentelekomcloud_identity_role_v3" "role_1" {
-  name = "role_1"
+resource "opentelekomcloud_identity_role_v3" "role" {
+  description = "role"
+  display_name = "custom_role"
+  display_layer = "domain"
+  policy = {
+    version  = "1.1"
+    statement = [
+      {
+        effect = "Allow"
+        action = ["ecs:*:list*"]
+      }
+    ]
+  }
 }
 ```
 
@@ -25,21 +35,72 @@ resource "opentelekomcloud_identity_role_v3" "role_1" {
 
 The following arguments are supported:
 
-* `name` - The name of the role.
+* `description` -
+  (Required)
+  Description of a role. The value cannot exceed 256 characters.
 
-* `domain_id` - (Optional) The domain the role belongs to.
+* `display_layer` -
+  (Required)
+  Display layer of a role.\ndomain - A role is displayed at the domain
+  layer.\nproject - A role is displayed at the project layer.
+
+* `display_name` -
+  (Required)
+  Displayed name of a role. The value cannot exceed 64 characters.
+
+* `policy` -
+  (Required)
+  Permission policy of a role. Structure is documented below.
+
+The `policy` block supports:
+
+* `statement` -
+  (Required)
+  Statement: The Statement field contains the Effect and Action
+  elements. Effect indicates whether the policy allows or denies
+  access. Action indicates authorization items. The number of
+  statements cannot exceed 8. Structure is documented below.
+
+The `statement` block supports:
+
+* `action` -
+  (Required)
+  Permission set, which specifies the operation permissions
+  on resources. The number of permission sets cannot exceed
+  100.  Format:  The value format is Service name:Resource
+  type:Action, for example, vpc:ports:create.  Service name:
+  indicates the product name, such as ecs, evs, or vpc. Only
+  lowercase letters are allowed.  Resource type and Action:
+  The values are case-insensitive, and the wildcard (*) are
+  allowed. A wildcard (*) can represent all or part of
+  information about resource types and actions for the
+  specific service.
+
+* `effect` -
+  (Required)
+  The value can be Allow and Deny. If both Allow and Deny are
+  found in statements, the policy evaluation starts with
+  Deny.
+
+- - -
 
 ## Attributes Reference
 
-The following attributes are exported:
+In addition to the arguments listed above, the following computed attributes are exported:
 
-* `name` - See Argument Reference above.
-* `domain_id` - See Argument Reference above.
+* `catalog` -
+  Directory where a role locates
+
+* `domain_id` -
+  ID of the domain to which a role belongs
+
+* `name` -
+  Name of a role
 
 ## Import
 
-Roles can be imported using the `id`, e.g.
+Role can be imported using the following format:
 
 ```
-$ terraform import opentelekomcloud_identity_role_v3.role_1 89c60255-9bd6-460c-822a-e2b959ede9d2
+$ terraform import opentelekomcloud_identity_role_v3.default {{ resource id}}
 ```
