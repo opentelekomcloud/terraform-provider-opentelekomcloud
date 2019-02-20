@@ -1042,10 +1042,10 @@
 			"revisionTime": "2019-01-30T02:50:16Z"
 		},
 		{
-			"checksumSHA1": "eGSteHlTmwj7rFwkLNWXgBLTk3s=",
+			"checksumSHA1": "vD8xujmRDWbm134OS8nAifZJDLc=",
 			"path": "github.com/huaweicloud/golangsdk/openstack/identity/v3/roles",
-			"revision": "b523c4dfcafd5c83306d15e618181a07c6215005",
-			"revisionTime": "2019-01-22T08:18:27Z"
+			"revision": "00d5197f85d18457ff628d2ed3d37de8034518c2",
+			"revisionTime": "2019-02-20T07:01:17Z"
 		},
 		{
 			"checksumSHA1": "7z4nHFWIrD6H9FcUBM8poKx69do=",
@@ -1872,5 +1872,5 @@
 			"versionExact": "v1.6.1"
 		}
 	],
-	"rootPath": "github.com/terraform-providers/terraform-provider-opentelekomcloud"
+	"rootPath": "github.com/freesky-edward/terraform-provider-opentelekomcloud-1"
 }
