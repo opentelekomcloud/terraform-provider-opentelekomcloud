@@ -70,6 +70,8 @@ The following arguments are supported:
 
 * `project_id` - (Optional; Required if `domain_id` is empty) The project to assign the role in.
 
+* `user_id` - (Optional; Required if `group_id` is empty) The user to assign the role in.
+
 * `role_id` - (Required) The role to assign.
 
 ## Attributes Reference
@@ -79,4 +81,5 @@ The following attributes are exported:
 * `domain_id` - See Argument Reference above.
 * `project_id` - See Argument Reference above.
 * `group_id` - See Argument Reference above.
+* `user_id` - See Argument Reference above.
 * `role_id` - See Argument Reference above.

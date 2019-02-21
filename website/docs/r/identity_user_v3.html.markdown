@@ -18,7 +18,6 @@ this resource.
 ```hcl
 resource "opentelekomcloud_identity_user_v3" "user_1" {
   name = "user_1"
-  description = "A user"
   password = "password123!"
 
 }
@@ -31,8 +30,6 @@ The following arguments are supported:
 * `name` - (Required) The name of the user. The user name consists of 5 to 32
      characters. It can contain only uppercase letters, lowercase letters, 
      digits, spaces, and special characters (-_) and cannot start with a digit.
-
-* `description` - (Optional) A description of the user.
 
 * `default_project_id` - (Optional) The default project this user belongs to.
 
