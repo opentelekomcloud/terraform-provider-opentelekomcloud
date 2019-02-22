@@ -15,7 +15,6 @@ Manages resource cluster within OpenTelekomCloud MRS.
 ```hcl
 resource "opentelekomcloud_mrs_cluster_v1" "cluster1" {
   cluster_name = "mrs-cluster"
-  region = "eu-de"
   billing_type = 12
   master_node_num = 2
   core_node_num = 3
@@ -48,9 +47,6 @@ resource "opentelekomcloud_mrs_cluster_v1" "cluster1" {
 The following arguments are supported:
 
 * `billing_type` - (Required) The value is 12, indicating on-demand payment.
-
-* `region` - (Required) Cluster region information. Obtain the value from
-    Regions and Endpoints.
 
 * `master_node_num` - (Required) Number of Master nodes The value is 2.
 

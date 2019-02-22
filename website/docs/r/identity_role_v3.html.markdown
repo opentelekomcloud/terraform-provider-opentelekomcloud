@@ -29,17 +29,12 @@ The following arguments are supported:
 
 * `domain_id` - (Optional) The domain the role belongs to.
 
-* `region` - (Optional) The region in which to obtain the IAM client.
-    If omitted, the `region` argument of the provider is used. Changing this
-    creates a new Role.
-
 ## Attributes Reference
 
 The following attributes are exported:
 
 * `name` - See Argument Reference above.
 * `domain_id` - See Argument Reference above.
-* `region` - See Argument Reference above.
 
 ## Import
 

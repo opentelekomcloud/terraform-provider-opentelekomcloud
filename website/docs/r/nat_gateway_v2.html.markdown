@@ -26,10 +26,6 @@ resource "opentelekomcloud_nat_gateway_v2" "nat_1" {
 
 The following arguments are supported:
 
-* `region` - (Optional) The region in which to obtain the V2 nat client.
-    If omitted, the `region` argument of the provider is used. Changing this
-    creates a new nat gateway.
-
 * `name` - (Required) The name of the nat gateway.
 
 * `description` - (Optional) The description of the nat gateway.
@@ -50,7 +46,6 @@ The following arguments are supported:
 
 The following attributes are exported:
 
-* `region` - See Argument Reference above.
 * `name` - See Argument Reference above.
 * `description` - See Argument Reference above.
 * `spec` - See Argument Reference above.

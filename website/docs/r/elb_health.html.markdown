@@ -57,10 +57,6 @@ resource "opentelekomcloud_elb_health" "healthcheck" {
 
 The following arguments are supported:
 
-* `region` - (Optional) The region in which to create the elb health. If
-    omitted, the `region` argument of the provider is used. Changing this
-    creates a new elb health.
-
 * `listener_id` - (Required) Specifies the ID of the listener to which the health
     check task belongs. Changing this creates a new elb health.
 
@@ -95,7 +91,6 @@ The following arguments are supported:
 
 The following attributes are exported:
 
-* `region` - See Argument Reference above.
 * `listener_id` - See Argument Reference above.
 * `healthcheck_protocol` - See Argument Reference above.
 * `healthcheck_uri` - See Argument Reference above.

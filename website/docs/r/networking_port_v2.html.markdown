@@ -29,11 +29,6 @@ resource "opentelekomcloud_networking_port_v2" "port_1" {
 
 The following arguments are supported:
 
-* `region` - (Optional) The region in which to obtain the V2 networking client.
-    A networking client is needed to create a port. If omitted, the
-    `region` argument of the provider is used. Changing this creates a new
-    port.
-
 * `name` - (Optional) A unique name for the port. Changing this
     updates the `name` of an existing port.
 
@@ -88,7 +83,6 @@ The `allowed_address_pairs` block supports:
 
 The following attributes are exported:
 
-* `region` - See Argument Reference above.
 * `admin_state_up` - See Argument Reference above.
 * `mac_address` - See Argument Reference above.
 * `tenant_id` - See Argument Reference above.

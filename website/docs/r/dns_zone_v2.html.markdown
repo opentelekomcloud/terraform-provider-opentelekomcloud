@@ -44,11 +44,6 @@ resource "opentelekomcloud_dns_zone_v2" "private_example_com" {
 
 The following arguments are supported:
 
-* `region` - (Optional) The region in which to obtain the V2 Compute client.
-    Keypairs are associated with accounts, but a Compute client is needed to
-    create one. If omitted, the `region` argument of the provider is used.
-    Changing this creates a new DNS zone.
-
 * `name` - (Required) The name of the zone. Note the `.` at the end of the name.
   Changing this creates a new DNS zone.
 
@@ -79,7 +74,6 @@ The `router` block supports:
 
 The following attributes are exported:
 
-* `region` - See Argument Reference above.
 * `name` - See Argument Reference above.
 * `email` - See Argument Reference above.
 * `type` - See Argument Reference above.

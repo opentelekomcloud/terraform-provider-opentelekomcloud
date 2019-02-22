@@ -25,12 +25,6 @@ resource "opentelekomcloud_networking_floatingip_v2" "floatip_1" {
 
 The following arguments are supported:
 
-* `region` - (Optional) The region in which to obtain the V2 Networking client.
-    A Networking client is needed to create a floating IP that can be used with
-    another networking resource, such as a load balancer. If omitted, the
-    `region` argument of the provider is used. Changing this creates a new
-    floating IP (which may or may not have a different address).
-
 * `pool` - (Required) The name of the pool from which to obtain the floating
     IP. Changing this creates a new floating IP.
 
@@ -51,7 +45,6 @@ the port has multiple fixed IPs.
 
 The following attributes are exported:
 
-* `region` - See Argument Reference above.
 * `pool` - See Argument Reference above.
 * `address` - The actual floating IP address itself.
 * `port_id` - ID of associated port.

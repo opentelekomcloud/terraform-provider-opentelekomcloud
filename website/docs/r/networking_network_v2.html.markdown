@@ -63,11 +63,6 @@ resource "opentelekomcloud_compute_instance_v2" "instance_1" {
 
 The following arguments are supported:
 
-* `region` - (Optional) The region in which to obtain the V2 Networking client.
-    A Networking client is needed to create a Neutron network. If omitted, the
-    `region` argument of the provider is used. Changing this creates a new
-    network.
-
 * `name` - (Optional) The name of the network. Changing this updates the name of
     the existing network.
 
@@ -96,7 +91,6 @@ The `segments` block supports:
 
 The following attributes are exported:
 
-* `region` - See Argument Reference above.
 * `name` - See Argument Reference above.
 * `shared` - See Argument Reference above.
 * `tenant_id` - See Argument Reference above.

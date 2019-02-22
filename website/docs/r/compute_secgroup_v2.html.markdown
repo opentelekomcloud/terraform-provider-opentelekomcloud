@@ -37,11 +37,6 @@ resource "opentelekomcloud_compute_secgroup_v2" "secgroup_1" {
 
 The following arguments are supported:
 
-* `region` - (Optional) The region in which to obtain the V2 Compute client.
-    A Compute client is needed to create a security group. If omitted, the
-    `region` argument of the provider is used. Changing this creates a new
-    security group.
-
 * `name` - (Required) A unique name for the security group. Changing this
     updates the `name` of an existing security group.
 
@@ -81,7 +76,6 @@ be combined with `cidr` or `from_group_id`.
 
 The following attributes are exported:
 
-* `region` - See Argument Reference above.
 * `name` - See Argument Reference above.
 * `description` - See Argument Reference above.
 * `rule` - See Argument Reference above.

@@ -28,11 +28,6 @@ resource "opentelekomcloud_networking_subnet_v2" "subnet_1" {
 
 The following arguments are supported:
 
-* `region` - (Optional) The region in which to obtain the V2 Networking client.
-    A Networking client is needed to create a Neutron subnet. If omitted, the
-    `region` argument of the provider is used. Changing this creates a new
-    subnet.
-
 * `network_id` - (Required) The UUID of the parent network. Changing this
     creates a new subnet.
 
@@ -91,7 +86,6 @@ The `host_routes` block supports:
 
 The following attributes are exported:
 
-* `region` - See Argument Reference above.
 * `network_id` - See Argument Reference above.
 * `cidr` - See Argument Reference above.
 * `ip_version` - See Argument Reference above.

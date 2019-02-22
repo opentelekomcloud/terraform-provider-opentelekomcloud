@@ -23,10 +23,6 @@ resource "opentelekomcloud_compute_servergroup_v2" "test-sg" {
 
 The following arguments are supported:
 
-* `region` - (Optional) The region in which to obtain the V2 Compute client.
-    If omitted, the `region` argument of the provider is used. Changing
-    this creates a new server group.
-
 * `name` - (Required) A unique name for the server group. Changing this creates
     a new server group.
 
@@ -49,7 +45,6 @@ The following arguments are supported:
 
 The following attributes are exported:
 
-* `region` - See Argument Reference above.
 * `name` - See Argument Reference above.
 * `policies` - See Argument Reference above.
 * `members` - The instances that are part of this server group.
