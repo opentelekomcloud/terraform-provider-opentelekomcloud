@@ -92,14 +92,7 @@ The following arguments are supported:
 * `user_name` - (Optional) The Username to login with. If omitted, the
   `OS_USERNAME` environment variable is used.
 
-* `user_id` - (Optional) The User ID to login with. If omitted, the
-  `OS_USER_ID` environment variable is used.
-
-* `tenant_id` - (Optional) The ID of the Tenant (Identity v2) or Project
-  (Identity v3) to login with. If omitted, the `OS_TENANT_ID` or
-  `OS_PROJECT_ID` environment variables are used.
-
-* `tenant_name` - (Optional) The Name of the Tenant (Identity v2) or Project
+* `tenant_name` - (Required) The Name of the Tenant (Identity v2) or Project
   (Identity v3) to login with. If omitted, the `OS_TENANT_NAME` or
   `OS_PROJECT_NAME` environment variable are used.
 
@@ -112,11 +105,7 @@ The following arguments are supported:
   combination, since the token was already created by a username/password out of
   band of Terraform. If omitted, the `OS_AUTH_TOKEN` environment variable is used.
 
-* `domain_id` - (Optional) The ID of the Domain to scope to (Identity v3). If
-  If omitted, the following environment variables are checked (in this order):
-  `OS_USER_DOMAIN_ID`, `OS_PROJECT_DOMAIN_ID`, `OS_DOMAIN_ID`.
-
-* `domain_name` - (Optional) The Name of the Domain to scope to (Identity v3).
+* `domain_name` - (Required) The Name of the Domain to scope to (Identity v3).
   If omitted, the following environment variables are checked (in this order):
   `OS_USER_DOMAIN_NAME`, `OS_PROJECT_DOMAIN_NAME`, `OS_DOMAIN_NAME`,
   `DEFAULT_DOMAIN`.
