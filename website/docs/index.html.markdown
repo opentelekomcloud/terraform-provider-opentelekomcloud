@@ -23,8 +23,7 @@ provider "opentelekomcloud" {
   password    = "${var.password}"
   domain_name = "${var.domain_name}"
   tenant_name = "${var.tenant_name}"
-  auth_url    = "http://myauthurl:5000/v2.0"
-  region      = "RegionOne"
+  auth_url    = "https://iam.eu-de.otc.t-systems.com/v3"
 }
 
 # Create a web server
@@ -49,8 +48,7 @@ provider "opentelekomcloud" {
   password    = "${var.password}"
   domain_name = "${var.domain_name}"
   tenant_name = "${var.tenant_name}"
-  auth_url    = "http://myauthurl:5000/v2.0"
-  region      = "RegionOne"
+  auth_url    = "https://iam.eu-de.otc.t-systems.com/v3"
 }
 ```
 
@@ -62,8 +60,7 @@ provider "opentelekomcloud" {
   secret_key  = "${var.secret_key}"
   domain_name = "${var.domain_name}"
   tenant_name = "${var.tenant_name}"
-  auth_url    = "http://myauthurl:5000/v2.0"
-  region      = "RegionOne"
+  auth_url    = "https://iam.eu-de.otc.t-systems.com/v3"
 }
 ```
 
@@ -74,10 +71,10 @@ provider "opentelekomcloud" {
   token       = "${var.token}"
   domain_name = "${var.domain_name}"
   tenant_name = "${var.tenant_name}"
-  auth_url    = "http://myauthurl:5000/v2.0"
-  region      = "RegionOne"
+  auth_url    = "https://iam.eu-de.otc.t-systems.com/v3"
 }
 ```
+Note: if token, aksk and password are set simultaneously, then it will authenticate in the order of Token, AKSK and Password.
 
 ## Configuration Reference
 
@@ -91,12 +88,6 @@ The following arguments are supported:
 
 * `auth_url` - (Required) The Identity authentication URL. If omitted, the
   `OS_AUTH_URL` environment variable is used.
-
-* `region` - (Optional) The region of the OpenTelekomCloud cloud to use. If omitted,
-  the `OS_REGION_NAME` environment variable is used. If `OS_REGION_NAME` is
-  not set, then no region will be used. It should be possible to omit the
-  region in single-region OpenTelekomCloud environments, but this behavior may vary
-  depending on the OpenTelekomCloud environment being used.
 
 * `user_name` - (Optional) The Username to login with. If omitted, the
   `OS_USERNAME` environment variable is used.
@@ -182,8 +173,6 @@ See the github help [here](https://help.github.com/articles/creating-an-issue/)
 
 In order to run the Acceptance Tests for development, the following environment
 variables must also be set:
-
-* `OS_REGION_NAME` - The region in which to create the server instance.
 
 * `OS_IMAGE_ID` or `OS_IMAGE_NAME` - a UUID or name of an existing image in
     Glance.
