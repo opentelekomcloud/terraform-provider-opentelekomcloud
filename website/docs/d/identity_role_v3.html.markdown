@@ -80,4 +80,3 @@ are exported:
 
 * `name` - See Argument Reference above.
 * `domain_id` - See Argument Reference above.
-* `region` - See Argument Reference above.

@@ -14,7 +14,6 @@ Use this data source to get the ID of an available OpenTelekomCloud rds flavor.
 
 ```hcl
 data "opentelekomcloud_rds_flavors_v1" "flavor" {
-    region = "eu-de"
     datastore_name = "PostgreSQL"
     datastore_version = "9.5.5"
     speccode = "rds.pg.s1.medium"
@@ -22,8 +21,6 @@ data "opentelekomcloud_rds_flavors_v1" "flavor" {
 ```
 
 ## Argument Reference
-
-* `region` - (Required) The region in which to obtain the V1 rds client.
 
 * `datastore_name` - (Required) The datastore name of the rds.
 
@@ -45,7 +42,6 @@ SQLServer| 2014 SP2 SE | rds.mssql.s1.xlarge rds.mssql.m1.2xlarge rds.mssql.c2.x
 `id` is set to the ID of the found rds flavor. In addition, the following attributes
 are exported:
 
-* `region` - See Argument Reference above.
 * `datastore_name` - See Argument Reference above.
 * `datastore_version` - See Argument Reference above.
 * `speccode` - See Argument Reference above.

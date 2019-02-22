@@ -20,10 +20,6 @@ data "opentelekomcloud_networking_secgroup_v2" "secgroup" {
 
 ## Argument Reference
 
-* `region` - (Optional) The region in which to obtain the V2 Neutron client.
-  A Neutron client is needed to retrieve security groups ids. If omitted, the
-  `region` argument of the provider is used.
-
 * `secgroup_id` - (Optional) The ID of the security group.
 
 * `name` - (Optional) The name of the security group.
@@ -37,4 +33,3 @@ attributes are exported:
 
 * `name` - See Argument Reference above.
 * `description`- The description of the security group.
-* `region` - See Argument Reference above.

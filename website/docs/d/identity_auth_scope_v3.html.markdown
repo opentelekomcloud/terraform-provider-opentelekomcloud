@@ -25,10 +25,6 @@ data "opentelekomcloud_identity_auth_scope_v3" "scope" {
 * `name` - (Required) The name of the scope. This is an arbitrary name which is
   only used as a unique identifier so an actual token isn't used as the ID.
 
-* `region` - (Optional) The region in which to obtain the V3 Identity client.
-  A Identity client is needed to retrieve tokens IDs. If omitted, the
-  `region` argument of the provider is used.
-
 ## Attributes Reference
 
 `id` is set to the name given to the scope. In addition, the following attributes

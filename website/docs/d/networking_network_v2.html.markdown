@@ -20,10 +20,6 @@ data "opentelekomcloud_networking_network_v2" "network" {
 
 ## Argument Reference
 
-* `region` - (Optional) The region in which to obtain the V2 Neutron client.
-  A Neutron client is needed to retrieve networks ids. If omitted, the
-  `region` argument of the provider is used.
-
 * `network_id` - (Optional) The ID of the network.
 
 * `name` - (Optional) The name of the network.
@@ -39,6 +35,5 @@ are exported:
 
 * `admin_state_up` - (Optional) The administrative state of the network.
 * `name` - See Argument Reference above.
-* `region` - See Argument Reference above.
 * `shared` - (Optional)  Specifies whether the network resource can be accessed
     by any tenant or not.
