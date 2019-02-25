@@ -111,9 +111,13 @@ func resourceIdentityRoleV3Create(d *schema.ResourceData, meta interface{}) erro
 	opts["display_name"] = d.Get("display_name")
 	opts["policy"] = d.Get("policy")
 
+	arrayIndex := map[string]int{
+		"policy": 0,
+	}
+
 	params := make(map[string]interface{})
 
-	roleProp, err := expandIdentityRoleV3CreateRole(opts, nil)
+	roleProp, err := expandIdentityRoleV3CreateRole(opts, arrayIndex)
 	if err != nil {
 		return err
 	}
@@ -217,9 +221,13 @@ func resourceIdentityRoleV3Update(d *schema.ResourceData, meta interface{}) erro
 	opts["display_name"] = d.Get("display_name")
 	opts["policy"] = d.Get("policy")
 
+	arrayIndex := map[string]int{
+		"policy": 0,
+	}
+
 	params := make(map[string]interface{})
 
-	roleProp, err := expandIdentityRoleV3UpdateRole(opts, nil)
+	roleProp, err := expandIdentityRoleV3UpdateRole(opts, arrayIndex)
 	if err != nil {
 		return err
 	}
@@ -305,16 +313,7 @@ func expandIdentityRoleV3CreateRole(d interface{}, arrayIndex map[string]int) (i
 		req["display_name"] = displayNameProp
 	}
 
-	var localArrayIndex = make(map[string]int)
-
-	if arrayIndex != nil {
-		for k, v := range arrayIndex {
-			localArrayIndex[k] = v
-		}
-	}
-	localArrayIndex["policy"] = 0
-
-	policyProp, err := expandIdentityRoleV3CreateRolePolicy(d, localArrayIndex)
+	policyProp, err := expandIdentityRoleV3CreateRolePolicy(d, arrayIndex)
 	if err != nil {
 		return nil, err
 	}
@@ -377,7 +376,7 @@ func expandIdentityRoleV3CreateRolePolicyStatement(d interface{}, arrayIndex map
 	n := len(v.([]interface{}))
 	req := make([]interface{}, 0, n)
 	for i := 0; i < n; i++ {
-		newArrayIndex["statement"] = i
+		newArrayIndex["policy.statement"] = i
 		transformed := make(map[string]interface{})
 
 		actionProp, err := navigateValue(d, []string{"policy", "statement", "action"}, newArrayIndex)
@@ -450,16 +449,7 @@ func expandIdentityRoleV3UpdateRole(d interface{}, arrayIndex map[string]int) (i
 		req["display_name"] = displayNameProp
 	}
 
-	var localArrayIndex = make(map[string]int)
-
-	if arrayIndex != nil {
-		for k, v := range arrayIndex {
-			localArrayIndex[k] = v
-		}
-	}
-	localArrayIndex["policy"] = 0
-
-	policyProp, err := expandIdentityRoleV3UpdateRolePolicy(d, localArrayIndex)
+	policyProp, err := expandIdentityRoleV3UpdateRolePolicy(d, arrayIndex)
 	if err != nil {
 		return nil, err
 	}
@@ -522,7 +512,7 @@ func expandIdentityRoleV3UpdateRolePolicyStatement(d interface{}, arrayIndex map
 	n := len(v.([]interface{}))
 	req := make([]interface{}, 0, n)
 	for i := 0; i < n; i++ {
-		newArrayIndex["statement"] = i
+		newArrayIndex["policy.statement"] = i
 		transformed := make(map[string]interface{})
 
 		actionProp, err := navigateValue(d, []string{"policy", "statement", "action"}, newArrayIndex)

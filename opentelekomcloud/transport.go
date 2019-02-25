@@ -117,7 +117,7 @@ func navigateMap(d interface{}, index []string) (interface{}, error) {
 }
 
 func navigateValue(d interface{}, index []string, arrayIndex map[string]int) (interface{}, error) {
-	for _, i := range index {
+	for n, i := range index {
 		if d1, ok := d.(map[string]interface{}); ok {
 			d, ok = d1[i]
 			if !ok {
@@ -128,7 +128,7 @@ func navigateValue(d interface{}, index []string, arrayIndex map[string]int) (in
 		}
 
 		if arrayIndex != nil {
-			if j, ok := arrayIndex[i]; ok {
+			if j, ok := arrayIndex[strings.Join(index[:n+1], ".")]; ok {
 				if d2, ok := d.([]interface{}); ok {
 					if j >= len(d2) {
 						return nil, fmt.Errorf("navigate:: The index is out of array")
@@ -146,21 +146,17 @@ func navigateValue(d interface{}, index []string, arrayIndex map[string]int) (in
 }
 
 func isUserInput(d *schema.ResourceData, index []string, arrayIndex map[string]int) bool {
-	n := len(index)
-	if arrayIndex != nil {
-		n = n + len(arrayIndex)
-	}
-	var ni = make([]string, 0, n)
-	for _, i := range index {
-		ni = append(ni, i)
+	var r = make([]string, 0, len(index)*2)
+	for n, i := range index {
+		r = append(r, i)
 
 		if arrayIndex != nil {
-			if j, ok := arrayIndex[i]; ok {
-				ni = append(ni, strconv.Itoa(j))
+			if j, ok := arrayIndex[strings.Join(index[:n+1], ".")]; ok {
+				r = append(r, strconv.Itoa(j))
 			}
 		}
 	}
-	_, e := d.GetOkExists(strings.Join(ni, "."))
+	_, e := d.GetOkExists(strings.Join(r[:len(r)], "."))
 	return e
 }
 
