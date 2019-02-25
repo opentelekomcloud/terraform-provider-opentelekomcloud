@@ -294,6 +294,12 @@
 			"tree": true
 		},
 		{
+			"checksumSHA1": "NBuELkZqPlbJKP2/AmN7UOEHC00=",
+			"path": "github.com/gophercloud/gophercloud",
+			"revision": "239b98b295da175b9e38cca4363af37d291c8b83",
+			"revisionTime": "2018-12-19T02:54:29Z"
+		},
+		{
 			"checksumSHA1": "BLDvfkgs1wCouMzMDzdr1bPpH/4=",
 			"path": "github.com/gophercloud/gophercloud/openstack/compute/v2/extensions/tags",
 			"revision": "19e3c0004e7056daf7509a160a019e7c2e5d99c5",
@@ -1016,6 +1022,12 @@
 			"path": "github.com/huaweicloud/golangsdk/openstack/identity/v2/tokens",
 			"revision": "98f31e4f21bec892b331ee55c5a5fff72d407abc",
 			"revisionTime": "2018-02-26T07:57:01Z"
+		},
+		{
+			"checksumSHA1": "w0vckaYSiSq4Fz5asqE9IvfIsGc=",
+			"path": "github.com/huaweicloud/golangsdk/openstack/identity/v3/agency",
+			"revision": "00d5197f85d18457ff628d2ed3d37de8034518c2",
+			"revisionTime": "2019-02-20T07:01:17Z"
 		},
 		{
 			"checksumSHA1": "n6c7rdu8j7f74VwgbpfLu01yG4A=",
