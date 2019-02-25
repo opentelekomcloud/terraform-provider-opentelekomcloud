@@ -13,7 +13,7 @@ import (
 
 func TestAccIdentityV3Project_basic(t *testing.T) {
 	var project projects.Project
-	var projectName = fmt.Sprintf("ACCPTTEST-%s", acctest.RandString(5))
+	var projectName = fmt.Sprintf("%s_%s", OS_REGION_NAME, acctest.RandString(5))
 
 	resource.Test(t, resource.TestCase{
 		PreCheck: func() {
@@ -32,8 +32,6 @@ func TestAccIdentityV3Project_basic(t *testing.T) {
 					resource.TestCheckResourceAttrPtr(
 						"opentelekomcloud_identity_project_v3.project_1", "description", &project.Description),
 					resource.TestCheckResourceAttr(
-						"opentelekomcloud_identity_project_v3.project_1", "domain_id", "default"),
-					resource.TestCheckResourceAttr(
 						"opentelekomcloud_identity_project_v3.project_1", "enabled", "true"),
 					resource.TestCheckResourceAttr(
 						"opentelekomcloud_identity_project_v3.project_1", "is_domain", "false"),
@@ -48,9 +46,7 @@ func TestAccIdentityV3Project_basic(t *testing.T) {
 					resource.TestCheckResourceAttrPtr(
 						"opentelekomcloud_identity_project_v3.project_1", "description", &project.Description),
 					resource.TestCheckResourceAttr(
-						"opentelekomcloud_identity_project_v3.project_1", "domain_id", "default"),
-					resource.TestCheckResourceAttr(
-						"opentelekomcloud_identity_project_v3.project_1", "enabled", "false"),
+						"opentelekomcloud_identity_project_v3.project_1", "enabled", "true"),
 					resource.TestCheckResourceAttr(
 						"opentelekomcloud_identity_project_v3.project_1", "is_domain", "false"),
 				),
@@ -102,7 +98,7 @@ func testAccCheckIdentityV3ProjectExists(n string, project *projects.Project) re
 			return err
 		}
 
-		if found.ID != rs.Primary.ID {
+		if (found.ID != rs.Primary.ID) || (found.Enabled == false) {
 			return fmt.Errorf("Project not found")
 		}
 
@@ -126,7 +122,6 @@ func testAccIdentityV3Project_update(projectName string) string {
     resource "opentelekomcloud_identity_project_v3" "project_1" {
       name = "%s"
       description = "Some project"
-      enabled = false
     }
   `, projectName)
 }

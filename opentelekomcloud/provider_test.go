@@ -35,6 +35,7 @@ var (
 	OS_BMS_FLAVOR_NAME        = os.Getenv("OS_BMS_FLAVOR_NAME")
 	OS_NIC_ID                 = os.Getenv("OS_NIC_ID")
 	OS_TO_TENANT_ID           = os.Getenv("OS_TO_TENANT_ID")
+	OS_TENANT_NAME            = getTenantName()
 )
 
 var testAccProviders map[string]terraform.ResourceProvider
@@ -45,6 +46,14 @@ func init() {
 	testAccProviders = map[string]terraform.ResourceProvider{
 		"opentelekomcloud": testAccProvider,
 	}
+}
+
+func getTenantName() string {
+	tn := os.Getenv("OS_TENANT_NAME")
+	if tn == "" {
+		tn = os.Getenv("OS_PROJECT_NAME")
+	}
+	return tn
 }
 
 func testAccPreCheckRequiredEnvVars(t *testing.T) {
@@ -351,5 +360,11 @@ func testAccCCEKeyPairPreCheck(t *testing.T) {
 	testAccPreCheckRequiredEnvVars(t)
 	if OS_KEYPAIR_NAME == "" {
 		t.Skip("OS_KEYPAIR_NAME must be set for acceptance tests")
+	}
+}
+
+func testAccIdentityV3AgencyPreCheck(t *testing.T) {
+	if OS_TENANT_NAME == "" {
+		t.Skip("OS_TENANT_NAME must be set for acceptance tests")
 	}
 }

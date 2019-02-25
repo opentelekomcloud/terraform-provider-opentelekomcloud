@@ -47,6 +47,16 @@ func resourceIdentityProjectV3() *schema.Resource {
 				Computed: true,
 				ForceNew: true,
 			},
+
+			"enabled": &schema.Schema{
+				Type:     schema.TypeBool,
+				Computed: true,
+			},
+
+			"is_domain": &schema.Schema{
+				Type:     schema.TypeBool,
+				Computed: true,
+			},
 		},
 	}
 }
