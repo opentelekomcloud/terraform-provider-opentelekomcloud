@@ -212,6 +212,7 @@ func Provider() terraform.ResourceProvider {
 			"opentelekomcloud_fw_firewall_group_v2":               resourceFWFirewallGroupV2(),
 			"opentelekomcloud_fw_policy_v2":                       resourceFWPolicyV2(),
 			"opentelekomcloud_fw_rule_v2":                         resourceFWRuleV2(),
+			"opentelekomcloud_identity_agency_v3":                 resourceIdentityAgencyV3(),
 			"opentelekomcloud_identity_project_v3":                resourceIdentityProjectV3(),
 			"opentelekomcloud_identity_role_v3":                   resourceIdentityRoleV3(),
 			"opentelekomcloud_identity_role_assignment_v3":        resourceIdentityRoleAssignmentV3(),
