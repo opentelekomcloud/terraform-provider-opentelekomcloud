@@ -49,11 +49,6 @@ resource "opentelekomcloud_fw_firewall_group_v2" "firewall_group_1" {
 
 The following arguments are supported:
 
-* `region` - (Optional) The region in which to obtain the v1 networking client.
-    A networking client is needed to create a firewall group. If omitted, the
-    `region` argument of the provider is used. Changing this creates a new
-    firewall group.
-
 * `ingress_policy_id` - The ingress policy resource id for the firewall group. Changing
     this updates the `ingress_policy_id` of an existing firewall group.
 
@@ -84,7 +79,6 @@ The following arguments are supported:
 
 The following attributes are exported:
 
-* `region` - See Argument Reference above.
 * `policy_id` - See Argument Reference above.
 * `name` - See Argument Reference above.
 * `description` - See Argument Reference above.

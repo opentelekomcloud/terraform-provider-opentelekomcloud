@@ -46,11 +46,6 @@ resource "opentelekomcloud_networking_router_route_v2" "router_route_1" {
 
 The following arguments are supported:
 
-* `region` - (Optional) The region in which to obtain the V2 networking client.
-    A networking client is needed to configure a routing entry on a router. If omitted, the
-    `region` argument of the provider is used. Changing this creates a new
-    routing entry.
-
 * `router_id` - (Required) ID of the router this routing entry belongs to. Changing
     this creates a new routing entry.
 
@@ -64,7 +59,6 @@ The following arguments are supported:
 
 The following attributes are exported:
 
-* `region` - See Argument Reference above.
 * `router_id` - See Argument Reference above.
 * `destination_cidr` - See Argument Reference above.
 * `next_hop` - See Argument Reference above.

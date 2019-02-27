@@ -30,9 +30,6 @@ resource "opentelekomcloud_vpc_eip_v1" "eip_1" {
 
 The following arguments are supported:
 
-* `region` - (Optional) The region in which to create the eip. If omitted,
-    the `region` argument of the provider is used. Changing this creates a new eip.
-
 * `publicip` - (Required) The elastic IP address object.
 
 * `bandwidth` - (Required) The bandwidth object.
@@ -68,7 +65,6 @@ The `bandwidth` block supports:
 
 The following attributes are exported:
 
-* `region` - See Argument Reference above.
 * `publicip/type` - See Argument Reference above.
 * `publicip/ip_address` - See Argument Reference above.
 * `publicip/port_id` - See Argument Reference above.

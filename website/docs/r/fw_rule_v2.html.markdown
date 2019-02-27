@@ -27,11 +27,6 @@ resource "opentelekomcloud_fw_rule_v2" "rule_1" {
 
 The following arguments are supported:
 
-* `region` - (Optional) The region in which to obtain the v1 Compute client.
-    A Compute client is needed to create a firewall rule. If omitted, the
-    `region` argument of the provider is used. Changing this creates a new
-    firewall rule.
-
 * `name` - (Optional) A unique name for the firewall rule. Changing this
     updates the `name` of an existing firewall rule.
 
@@ -79,7 +74,6 @@ The following arguments are supported:
 
 The following attributes are exported:
 
-* `region` - See Argument Reference above.
 * `name` - See Argument Reference above.
 * `description` - See Argument Reference above.
 * `protocol` - See Argument Reference above.

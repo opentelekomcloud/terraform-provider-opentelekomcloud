@@ -18,14 +18,12 @@ resource "opentelekomcloud_maas_task_v1" "task_1" {
   enable_kms = true
   thread_num = 1
   src_node {
-    region = "ap-northeast-1"
     ak = "AK",
 	sk = "SK",
     object_key = "123.txt",
     bucket = "tommy-bucket",
   }
   dst_node {
-    region = "eu-de",
     ak = "AK",
     sk = "SK",
     object_key = "maas/",
@@ -56,7 +54,6 @@ The following arguments are supported:
 
 The `src_node` block supports:
 
-* `region` - (Required) Specifies the region where the source bucket locates.
 * `ak` - (Required) Specifies the source bucket Access Key.
 * `sk` - (Required) Specifies the source bucket Secret Key.
 * `object_key` - (Required) Specifies the name of the object to be selected in the
@@ -67,7 +64,6 @@ The `src_node` block supports:
 
 The `dst_node` block supports:
 
-* `region` - (Required) Specifies the region where the destination bucket locates.
 * `ak` - (Required) Specifies the destination bucket Access Key.
 * `sk` - (Required) Specifies the destination bucket Secret Key.
 * `object_key` - (Optional) Specifies the name of the object to be selected in the

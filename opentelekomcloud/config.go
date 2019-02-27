@@ -159,7 +159,7 @@ func (c *Config) newS3Session(osDebug bool) error {
 
 		awsConfig := &aws.Config{
 			Credentials: creds,
-			Region:      aws.String(c.Region),
+			Region:      aws.String(GetRegion(nil, c)),
 			//MaxRetries:       aws.Int(c.MaxRetries),
 			HTTPClient: cleanhttp.DefaultClient(),
 			//S3ForcePathStyle: aws.Bool(c.S3ForcePathStyle),
@@ -408,7 +408,7 @@ func (c *Config) computeS3conn(region string) (*s3.S3, error) {
 	}
 
 	client, err := huaweisdk.NewImageServiceV2(c.HwClient, golangsdk.EndpointOpts{
-		Region:       c.determineRegion(region),
+		Region:       region,
 		Availability: c.getHwEndpointType(),
 	})
 	// Bit of a hack, seems the only way to compute this.
@@ -422,56 +422,56 @@ func (c *Config) computeS3conn(region string) (*s3.S3, error) {
 
 func (c *Config) blockStorageV1Client(region string) (*golangsdk.ServiceClient, error) {
 	return huaweisdk.NewBlockStorageV1(c.HwClient, golangsdk.EndpointOpts{
-		Region:       c.determineRegion(region),
+		Region:       region,
 		Availability: c.getHwEndpointType(),
 	})
 }
 
 func (c *Config) blockStorageV2Client(region string) (*golangsdk.ServiceClient, error) {
 	return huaweisdk.NewBlockStorageV2(c.HwClient, golangsdk.EndpointOpts{
-		Region:       c.determineRegion(region),
+		Region:       region,
 		Availability: c.getHwEndpointType(),
 	})
 }
 
 func (c *Config) computeV2Client(region string) (*golangsdk.ServiceClient, error) {
 	return huaweisdk.NewComputeV2(c.HwClient, golangsdk.EndpointOpts{
-		Region:       c.determineRegion(region),
+		Region:       region,
 		Availability: c.getHwEndpointType(),
 	})
 }
 
 func (c *Config) dnsV2Client(region string) (*golangsdk.ServiceClient, error) {
 	return huaweisdk.NewDNSV2(c.HwClient, golangsdk.EndpointOpts{
-		Region:       c.determineRegion(region),
+		Region:       region,
 		Availability: c.getHwEndpointType(),
 	})
 }
 
 func (c *Config) identityV3Client(region string) (*golangsdk.ServiceClient, error) {
 	return huaweisdk.NewIdentityV3(c.DomainClient, golangsdk.EndpointOpts{
-		//Region:       c.determineRegion(region),
+		//Region:       region,
 		Availability: c.getHwEndpointType(),
 	})
 }
 
 func (c *Config) imageV2Client(region string) (*golangsdk.ServiceClient, error) {
 	return huaweisdk.NewImageServiceV2(c.HwClient, golangsdk.EndpointOpts{
-		Region:       c.determineRegion(region),
+		Region:       region,
 		Availability: c.getHwEndpointType(),
 	})
 }
 
 func (c *Config) networkingV1Client(region string) (*golangsdk.ServiceClient, error) {
 	return huaweisdk.NewNetworkV1(c.HwClient, golangsdk.EndpointOpts{
-		Region:       c.determineRegion(region),
+		Region:       region,
 		Availability: c.getHwEndpointType(),
 	})
 }
 
 func (c *Config) networkingV2Client(region string) (*golangsdk.ServiceClient, error) {
 	return huaweisdk.NewNetworkV2(c.HwClient, golangsdk.EndpointOpts{
-		Region:       c.determineRegion(region),
+		Region:       region,
 		Availability: c.getHwEndpointType(),
 	})
 }
@@ -486,21 +486,21 @@ func (c *Config) objectStorageV1Client(region string) (*golangsdk.ServiceClient,
 	}
 
 	return huaweisdk.NewObjectStorageV1(c.HwClient, golangsdk.EndpointOpts{
-		Region:       c.determineRegion(region),
+		Region:       region,
 		Availability: c.getHwEndpointType(),
 	})
 }
 
 func (c *Config) SmnV2Client(region string) (*golangsdk.ServiceClient, error) {
 	return huaweisdk.NewSMNV2(c.HwClient, golangsdk.EndpointOpts{
-		Region:       c.determineRegion(region),
+		Region:       region,
 		Availability: c.getHwEndpointType(),
 	})
 }
 
 func (c *Config) loadCESClient(region string) (*golangsdk.ServiceClient, error) {
 	return huaweisdk.NewCESClient(c.HwClient, golangsdk.EndpointOpts{
-		Region:       c.determineRegion(region),
+		Region:       region,
 		Availability: c.getHwEndpointType(),
 	})
 }
@@ -517,56 +517,56 @@ func (c *Config) getHwEndpointType() golangsdk.Availability {
 
 func (c *Config) loadECSV1Client(region string) (*golangsdk.ServiceClient, error) {
 	return huaweisdk.NewComputeV1(c.HwClient, golangsdk.EndpointOpts{
-		Region:       c.determineRegion(region),
+		Region:       region,
 		Availability: c.getHwEndpointType(),
 	})
 }
 
 func (c *Config) kmsKeyV1Client(region string) (*golangsdk.ServiceClient, error) {
 	return huaweisdk.NewKMSV1(c.HwClient, golangsdk.EndpointOpts{
-		Region:       c.determineRegion(region),
+		Region:       region,
 		Availability: c.getHwEndpointType(),
 	})
 }
 
 func (c *Config) hwNetworkV2Client(region string) (*golangsdk.ServiceClient, error) {
 	return huaweisdk.NewNetworkV2(c.HwClient, golangsdk.EndpointOpts{
-		Region:       c.determineRegion(region),
+		Region:       region,
 		Availability: c.getHwEndpointType(),
 	})
 }
 
 func (c *Config) loadEVSV2Client(region string) (*golangsdk.ServiceClient, error) {
 	return huaweisdk.NewBlockStorageV2(c.HwClient, golangsdk.EndpointOpts{
-		Region:       c.determineRegion(region),
+		Region:       region,
 		Availability: c.getHwEndpointType(),
 	})
 }
 
 func (c *Config) natV2Client(region string) (*golangsdk.ServiceClient, error) {
 	return huaweisdk.NewNatV2(c.HwClient, golangsdk.EndpointOpts{
-		Region:       c.determineRegion(region),
+		Region:       region,
 		Availability: c.getHwEndpointType(),
 	})
 }
 
 func (c *Config) orchestrationV1Client(region string) (*golangsdk.ServiceClient, error) {
 	return huaweisdk.NewOrchestrationV1(c.HwClient, golangsdk.EndpointOpts{
-		Region:       c.determineRegion(region),
+		Region:       region,
 		Availability: c.getHwEndpointType(),
 	})
 }
 
 func (c *Config) sfsV2Client(region string) (*golangsdk.ServiceClient, error) {
 	return huaweisdk.NewSharedFileSystemV2(c.HwClient, golangsdk.EndpointOpts{
-		Region:       c.determineRegion(region),
+		Region:       region,
 		Availability: c.getHwEndpointType(),
 	})
 }
 
 func (c *Config) vbsV2Client(region string) (*golangsdk.ServiceClient, error) {
 	return huaweisdk.NewVBS(c.HwClient, golangsdk.EndpointOpts{
-		Region:       c.determineRegion(region),
+		Region:       region,
 		Availability: c.getHwEndpointType(),
 	})
 }
@@ -574,7 +574,7 @@ func (c *Config) vbsV2Client(region string) (*golangsdk.ServiceClient, error) {
 //computeV2HWClient used to access the v2 bms Services i.e. flavor, nic, keypair.
 func (c *Config) computeV2HWClient(region string) (*golangsdk.ServiceClient, error) {
 	return huaweisdk.NewComputeV2(c.HwClient, golangsdk.EndpointOpts{
-		Region:       c.determineRegion(region),
+		Region:       region,
 		Availability: c.getHwEndpointType(),
 	})
 }
@@ -582,91 +582,91 @@ func (c *Config) computeV2HWClient(region string) (*golangsdk.ServiceClient, err
 //bmsClient used to access the v2.1 bms Services i.e. servers, tags.
 func (c *Config) bmsClient(region string) (*golangsdk.ServiceClient, error) {
 	return huaweisdk.NewBMSV2(c.HwClient, golangsdk.EndpointOpts{
-		Region:       c.determineRegion(region),
+		Region:       region,
 		Availability: c.getHwEndpointType(),
 	})
 }
 
 func (c *Config) autoscalingV1Client(region string) (*golangsdk.ServiceClient, error) {
 	return huaweisdk.NewAutoScalingService(c.HwClient, golangsdk.EndpointOpts{
-		Region:       c.determineRegion(region),
+		Region:       region,
 		Availability: c.getHwEndpointType(),
 	})
 }
 
 func (c *Config) csbsV1Client(region string) (*golangsdk.ServiceClient, error) {
 	return huaweisdk.NewCSBSService(c.HwClient, golangsdk.EndpointOpts{
-		Region:       c.determineRegion(region),
+		Region:       region,
 		Availability: c.getHwEndpointType(),
 	})
 }
 
 func (c *Config) dehV1Client(region string) (*golangsdk.ServiceClient, error) {
 	return huaweisdk.NewDeHServiceV1(c.HwClient, golangsdk.EndpointOpts{
-		Region:       c.determineRegion(region),
+		Region:       region,
 		Availability: c.getHwEndpointType(),
 	})
 }
 
 func (c *Config) dmsV1Client(region string) (*golangsdk.ServiceClient, error) {
 	return huaweisdk.NewDMSServiceV1(c.HwClient, golangsdk.EndpointOpts{
-		Region:       c.determineRegion(region),
+		Region:       region,
 		Availability: c.getHwEndpointType(),
 	})
 }
 
 func (c *Config) MrsV1Client(region string) (*golangsdk.ServiceClient, error) {
 	return huaweisdk.NewMapReduceV1(c.HwClient, golangsdk.EndpointOpts{
-		Region:       c.determineRegion(region),
+		Region:       region,
 		Availability: c.getHwEndpointType(),
 	})
 }
 
 func (c *Config) elbV1Client(region string) (*golangsdk.ServiceClient, error) {
 	return huaweisdk.NewELBV1(c.HwClient, golangsdk.EndpointOpts{
-		Region:       c.determineRegion(region),
+		Region:       region,
 		Availability: c.getHwEndpointType(),
 	})
 }
 
 func (c *Config) rdsV1Client(region string) (*golangsdk.ServiceClient, error) {
 	return huaweisdk.NewRDSV1(c.HwClient, golangsdk.EndpointOpts{
-		Region:       c.determineRegion(region),
+		Region:       region,
 		Availability: c.getHwEndpointType(),
 	})
 }
 
 func (c *Config) antiddosV1Client(region string) (*golangsdk.ServiceClient, error) {
 	return huaweisdk.NewAntiDDoSV1(c.HwClient, golangsdk.EndpointOpts{
-		Region:       c.determineRegion(region),
+		Region:       region,
 		Availability: c.getHwEndpointType(),
 	})
 }
 
 func (c *Config) ctsV1Client(region string) (*golangsdk.ServiceClient, error) {
 	return huaweisdk.NewCTSService(c.HwClient, golangsdk.EndpointOpts{
-		Region:       c.determineRegion(region),
+		Region:       region,
 		Availability: c.getHwEndpointType(),
 	})
 }
 
 func (c *Config) cceV3Client(region string) (*golangsdk.ServiceClient, error) {
 	return huaweisdk.NewCCE(c.HwClient, golangsdk.EndpointOpts{
-		Region:       c.determineRegion(region),
+		Region:       region,
 		Availability: c.getHwEndpointType(),
 	})
 }
 
 func (c *Config) maasV1Client(region string) (*golangsdk.ServiceClient, error) {
 	return huaweisdk.NewMAASV1(c.HwClient, golangsdk.EndpointOpts{
-		Region:       c.determineRegion(region),
+		Region:       region,
 		Availability: c.getHwEndpointType(),
 	})
 }
 
 func (c *Config) dcsV1Client(region string) (*golangsdk.ServiceClient, error) {
 	return huaweisdk.NewDCSServiceV1(c.HwClient, golangsdk.EndpointOpts{
-		Region:       c.determineRegion(region),
+		Region:       region,
 		Availability: c.getHwEndpointType(),
 	})
 }

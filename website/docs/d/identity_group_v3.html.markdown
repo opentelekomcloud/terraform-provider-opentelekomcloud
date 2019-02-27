@@ -26,9 +26,6 @@ data "opentelekomcloud_identity_group_v3" "admins" {
 
 * `domain_id` - (Optional) The domain the group belongs to.
 
-* `region` - (Optional) The region in which to obtain the IAM client.
-    If omitted, the `region` argument of the provider is used.
-
 
 ## Attributes Reference
 
@@ -37,4 +34,3 @@ are exported:
 
 * `name` - See Argument Reference above.
 * `domain_id` - See Argument Reference above.
-* `region` - See Argument Reference above.

@@ -68,11 +68,6 @@ resource "opentelekomcloud_compute_floatingip_associate_v2" "fip_1" {
 
 The following arguments are supported:
 
-* `region` - (Optional) The region in which to obtain the V2 Compute client.
-    Keypairs are associated with accounts, but a Compute client is needed to
-    create one. If omitted, the `region` argument of the provider is used.
-    Changing this creates a new floatingip_associate.
-
 * `floating_ip` - (Required) The floating IP to associate.
 
 * `instance_id` - (Required) The instance to associte the floating IP with.
@@ -83,7 +78,6 @@ The following arguments are supported:
 
 The following attributes are exported:
 
-* `region` - See Argument Reference above.
 * `floating_ip` - See Argument Reference above.
 * `instance_id` - See Argument Reference above.
 * `fixed_ip` - See Argument Reference above.

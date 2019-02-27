@@ -23,11 +23,6 @@ resource "opentelekomcloud_compute_keypair_v2" "test-keypair" {
 
 The following arguments are supported:
 
-* `region` - (Optional) The region in which to obtain the V2 Compute client.
-    Keypairs are associated with accounts, but a Compute client is needed to
-    create one. If omitted, the `region` argument of the provider is used.
-    Changing this creates a new keypair.
-
 * `name` - (Required) A unique name for the keypair. Changing this creates a new
     keypair.
 
@@ -40,7 +35,6 @@ The following arguments are supported:
 
 The following attributes are exported:
 
-* `region` - See Argument Reference above.
 * `name` - See Argument Reference above.
 * `public_key` - See Argument Reference above.
 

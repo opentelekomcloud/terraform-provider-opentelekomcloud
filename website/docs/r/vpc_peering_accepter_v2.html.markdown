@@ -25,7 +25,6 @@ connection into management.
     domain_name = "${var.domain_name}"
     password    = "${var.password}"
     auth_url    = "${var.auth_url}"
-    region      = "${var.region}"
     tenant_id   = "${var.tenant_id}"
 }
 
@@ -35,7 +34,6 @@ provider "opentelekomcloud"  {
     domain_name = "${var.peer_domain_name}"
     password    = "${var.peer_password}"
     auth_url    = "${var.peer_auth_url}"
-    region      = "${var.peer_region}"
     tenant_id   = "${var.peer_tenant_id}"
 }
 

@@ -61,11 +61,6 @@ output "volume devices" {
 
 The following arguments are supported:
 
-* `region` - (Optional) The region in which to obtain the V2 Compute client.
-    A Compute client is needed to create a volume attachment. If omitted, the
-    `region` argument of the provider is used. Changing this creates a
-    new volume attachment.
-
 * `instance_id` - (Required) The ID of the Instance to attach the Volume to.
 
 * `volume_id` - (Required) The ID of the Volume to attach to an Instance.
@@ -81,7 +76,6 @@ The following arguments are supported:
 
 The following attributes are exported:
 
-* `region` - See Argument Reference above.
 * `instance_id` - See Argument Reference above.
 * `volume_id` - See Argument Reference above.
 * `device` - See Argument Reference above. _NOTE_: The correctness of this

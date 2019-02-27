@@ -85,10 +85,6 @@ resource "opentelekomcloud_elb_listener" "my_listener" {
 
 The following arguments are supported:
 
-* `region` - (Optional) The region in which to create the AS group. If
-    omitted, the `region` argument of the provider is used. Changing this
-    creates a new AS group.
-
 * `scaling_group_name` - (Required) The name of the scaling group. The name can contain letters,
     digits, underscores(_), and hyphens(-),and cannot exceed 64 characters.
 
@@ -157,7 +153,6 @@ The `security_groups` block supports:
 
 The following attributes are exported:
 
-* `region` - See Argument Reference above.
 * `scaling_group_name` - See Argument Reference above.
 * `desire_instance_number` - See Argument Reference above.
 * `min_instance_number` - See Argument Reference above.

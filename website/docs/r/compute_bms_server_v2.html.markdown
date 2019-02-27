@@ -81,10 +81,6 @@ resource "opentelekomcloud_compute_bms_server_v2" "basic" {
 
 The following arguments are supported:
 
-* `region` - (Optional) The region in which to create the bms server instance. If
-    omitted, the `region` argument of the provider is used. Changing this
-    creates a new bms server.
-
 * `name` - (Required) The name of the BMS.
 
 * `image_id` - (Optional; Required if `image_name` is empty.) Changing this creates a new bms server.

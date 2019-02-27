@@ -14,7 +14,6 @@ Manages rds instance resource within OpenTelekomCloud
 
 ```hcl
 data "opentelekomcloud_rds_flavors_v1" "flavor" {
-    region = "eu-de"
     datastore_name = "PostgreSQL"
     datastore_version = "9.5.5"
     speccode = "rds.pg.s1.large.ha"
@@ -36,7 +35,6 @@ resource "opentelekomcloud_rds_instance_v1" "instance" {
     type = "COMMON"
     size = 200
   }
-  region = "eu-de"
   availabilityzone = "eu-de-01"
   vpc = "c1095fe7-03df-4205-ad2d-6f4c181d436e"
   nics {
@@ -62,7 +60,6 @@ resource "opentelekomcloud_rds_instance_v1" "instance" {
 ## Example Usage:  Creating a SQLServer RDS instance
 ```hcl
 data "opentelekomcloud_rds_flavors_v1" "flavor" {
-    region = "eu-de"
     datastore_name = "SQLServer"
     datastore_version = "2014 SP2 SE"
     speccode = "rds.mssql.s1.2xlarge"
@@ -84,7 +81,6 @@ resource "opentelekomcloud_rds_instance_v1" "instance" {
     type = "COMMON"
     size = 200
   }
-  region = "eu-de"
   availabilityzone = "eu-de-01"
   vpc = "c1095fe7-03df-4205-ad2d-6f4c181d436e"
   nics {
@@ -106,7 +102,6 @@ resource "opentelekomcloud_rds_instance_v1" "instance" {
 ## Example Usage:  Creating a MySQL RDS instance
 ```hcl
 data "opentelekomcloud_rds_flavors_v1" "flavor" {
-    region = "eu-de"
     datastore_name = "MySQL"
     datastore_version = "5.6.33"
     speccode = "rds.mysql.s1.medium"
@@ -128,7 +123,6 @@ resource "opentelekomcloud_rds_instance_v1" "instance" {
     type = "COMMON"
     size = 200
   }
-  region = "eu-de"
   availabilityzone = "eu-de-01"
   vpc = "c1095fe7-03df-4205-ad2d-6f4c181d436e"
   nics {
@@ -167,8 +161,6 @@ The following arguments are supported:
 
 * `volume` - (Required) Specifies the volume information. The structure is described
     below.
-
-* `region` - (Required) Specifies the region ID.
 
 * `availabilityzone` - (Required) Specifies the ID of the AZ.
 
@@ -254,7 +246,6 @@ The `ha` block supports:
 
 The following attributes are exported:
 
-* `region` - See Argument Reference above.
 * `name` - See Argument Reference above.
 * `flavorref` - See Argument Reference above.
 * `volume` - See Argument Reference above.

@@ -45,4 +45,3 @@ are exported:
 * `is_domain` - See Argument Reference above.
 * `name` - See Argument Reference above.
 * `parent_id` - See Argument Reference above.
-* `region` - The region the project is located in.

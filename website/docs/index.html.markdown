@@ -23,8 +23,7 @@ provider "opentelekomcloud" {
   password    = "${var.password}"
   domain_name = "${var.domain_name}"
   tenant_name = "${var.tenant_name}"
-  auth_url    = "http://myauthurl:5000/v2.0"
-  region      = "RegionOne"
+  auth_url    = "https://iam.eu-de.otc.t-systems.com/v3"
 }
 
 # Create a web server
@@ -49,8 +48,7 @@ provider "opentelekomcloud" {
   password    = "${var.password}"
   domain_name = "${var.domain_name}"
   tenant_name = "${var.tenant_name}"
-  auth_url    = "http://myauthurl:5000/v2.0"
-  region      = "RegionOne"
+  auth_url    = "https://iam.eu-de.otc.t-systems.com/v3"
 }
 ```
 
@@ -62,8 +60,7 @@ provider "opentelekomcloud" {
   secret_key  = "${var.secret_key}"
   domain_name = "${var.domain_name}"
   tenant_name = "${var.tenant_name}"
-  auth_url    = "http://myauthurl:5000/v2.0"
-  region      = "RegionOne"
+  auth_url    = "https://iam.eu-de.otc.t-systems.com/v3"
 }
 ```
 
@@ -74,10 +71,10 @@ provider "opentelekomcloud" {
   token       = "${var.token}"
   domain_name = "${var.domain_name}"
   tenant_name = "${var.tenant_name}"
-  auth_url    = "http://myauthurl:5000/v2.0"
-  region      = "RegionOne"
+  auth_url    = "https://iam.eu-de.otc.t-systems.com/v3"
 }
 ```
+Note: if token, aksk and password are set simultaneously, then it will authenticate in the order of Token, AKSK and Password.
 
 ## Configuration Reference
 
@@ -92,23 +89,10 @@ The following arguments are supported:
 * `auth_url` - (Required) The Identity authentication URL. If omitted, the
   `OS_AUTH_URL` environment variable is used.
 
-* `region` - (Optional) The region of the OpenTelekomCloud cloud to use. If omitted,
-  the `OS_REGION_NAME` environment variable is used. If `OS_REGION_NAME` is
-  not set, then no region will be used. It should be possible to omit the
-  region in single-region OpenTelekomCloud environments, but this behavior may vary
-  depending on the OpenTelekomCloud environment being used.
-
 * `user_name` - (Optional) The Username to login with. If omitted, the
   `OS_USERNAME` environment variable is used.
 
-* `user_id` - (Optional) The User ID to login with. If omitted, the
-  `OS_USER_ID` environment variable is used.
-
-* `tenant_id` - (Optional) The ID of the Tenant (Identity v2) or Project
-  (Identity v3) to login with. If omitted, the `OS_TENANT_ID` or
-  `OS_PROJECT_ID` environment variables are used.
-
-* `tenant_name` - (Optional) The Name of the Tenant (Identity v2) or Project
+* `tenant_name` - (Required) The Name of the Tenant (Identity v2) or Project
   (Identity v3) to login with. If omitted, the `OS_TENANT_NAME` or
   `OS_PROJECT_NAME` environment variable are used.
 
@@ -121,11 +105,7 @@ The following arguments are supported:
   combination, since the token was already created by a username/password out of
   band of Terraform. If omitted, the `OS_AUTH_TOKEN` environment variable is used.
 
-* `domain_id` - (Optional) The ID of the Domain to scope to (Identity v3). If
-  If omitted, the following environment variables are checked (in this order):
-  `OS_USER_DOMAIN_ID`, `OS_PROJECT_DOMAIN_ID`, `OS_DOMAIN_ID`.
-
-* `domain_name` - (Optional) The Name of the Domain to scope to (Identity v3).
+* `domain_name` - (Required) The Name of the Domain to scope to (Identity v3).
   If omitted, the following environment variables are checked (in this order):
   `OS_USER_DOMAIN_NAME`, `OS_PROJECT_DOMAIN_NAME`, `OS_DOMAIN_NAME`,
   `DEFAULT_DOMAIN`.
@@ -182,8 +162,6 @@ See the github help [here](https://help.github.com/articles/creating-an-issue/)
 
 In order to run the Acceptance Tests for development, the following environment
 variables must also be set:
-
-* `OS_REGION_NAME` - The region in which to create the server instance.
 
 * `OS_IMAGE_ID` or `OS_IMAGE_NAME` - a UUID or name of an existing image in
     Glance.

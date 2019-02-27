@@ -21,7 +21,7 @@ var (
 	OS_IMAGE_NAME             = os.Getenv("OS_IMAGE_NAME")
 	OS_NETWORK_ID             = os.Getenv("OS_NETWORK_ID")
 	OS_POOL_NAME              = os.Getenv("OS_POOL_NAME")
-	OS_REGION_NAME            = os.Getenv("OS_REGION_NAME")
+	OS_REGION_NAME            string
 	OS_ACCESS_KEY             = os.Getenv("OS_ACCESS_KEY")
 	OS_SECRET_KEY             = os.Getenv("OS_SECRET_KEY")
 	OS_SRC_ACCESS_KEY         = os.Getenv("OS_SRC_ACCESS_KEY")
@@ -45,6 +45,12 @@ func init() {
 	testAccProviders = map[string]terraform.ResourceProvider{
 		"opentelekomcloud": testAccProvider,
 	}
+	tn := os.Getenv("OS_TENANT_NAME")
+	if tn == "" {
+		tn = os.Getenv("OS_PROJECT_NAME")
+	}
+	OS_REGION_NAME = GetRegion(nil, &Config{TenantName: tn})
+
 }
 
 func testAccPreCheckRequiredEnvVars(t *testing.T) {
@@ -62,7 +68,7 @@ func testAccPreCheckRequiredEnvVars(t *testing.T) {
 	}
 
 	if OS_REGION_NAME == "" {
-		t.Fatal("OS_REGION_NAME must be set for acceptance tests")
+		t.Fatal("OS_TENANT_NAME or OS_PROJECT_NAME must be set for acceptance tests")
 	}
 
 	if OS_FLAVOR_ID == "" && OS_FLAVOR_NAME == "" {
@@ -88,6 +94,7 @@ func testAccPreCheckRequiredEnvVars(t *testing.T) {
 	if OS_EXTGW_ID == "" {
 		t.Fatal("OS_EXTGW_ID must be set for acceptance tests")
 	}
+
 }
 
 func testAccPreCheck(t *testing.T) {

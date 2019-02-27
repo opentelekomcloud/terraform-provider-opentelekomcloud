@@ -27,10 +27,6 @@ resource "opentelekomcloud_elb_loadbalancer" "elb" {
 
 The following arguments are supported:
 
-* `region` - (Optional) The region in which to create the loadbalancer. If
-    omitted, the `region` argument of the provider is used. Changing this
-    creates a new loadbalancer.
-
 * `name` - (Required) Specifies the load balancer name. The name is a string
     of 1 to 64 characters that consist of letters, digits, underscores (_),
     and hyphens (-).
@@ -84,7 +80,6 @@ The following arguments are supported:
 
 The following attributes are exported:
 
-* `region` - See Argument Reference above.
 * `name` - See Argument Reference above.
 * `description` - See Argument Reference above.
 * `vpc_id` - See Argument Reference above.

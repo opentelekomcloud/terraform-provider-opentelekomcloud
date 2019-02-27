@@ -29,11 +29,6 @@ resource "opentelekomcloud_lb_pool_v2" "pool_1" {
 
 The following arguments are supported:
 
-* `region` - (Optional) The region in which to obtain the V2 Networking client.
-    A Networking client is needed to create an . If omitted, the
-    `region` argument of the provider is used. Changing this creates a new
-    pool.
-
 * `tenant_id` - (Optional) Required for admins. The UUID of the tenant who owns
     the pool.  Only administrative users can specify a tenant UUID
     other than their own. Changing this creates a new pool.

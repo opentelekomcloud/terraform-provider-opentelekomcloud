@@ -48,4 +48,3 @@ The following attributes are exported:
 * `idp_id` - See Argument Reference above.
 * `name` - See Argument Reference above.
 * `password_expires_at` - See Argument Reference above.
-* `region` - The region the user is located in.

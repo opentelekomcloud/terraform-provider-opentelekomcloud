@@ -24,11 +24,6 @@ resource "opentelekomcloud_lb_listener_v2" "listener_1" {
 
 The following arguments are supported:
 
-* `region` - (Optional) The region in which to obtain the V2 Networking client.
-    A Networking client is needed to create an . If omitted, the
-    `region` argument of the provider is used. Changing this creates a new
-    Listener.
-
 * `protocol` - (Required) The protocol - can either be TCP, HTTP, HTTPS or TERMINATED_HTTPS.
     Changing this creates a new Listener.
 

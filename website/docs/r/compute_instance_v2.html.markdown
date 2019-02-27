@@ -291,10 +291,6 @@ be removed in future releases, please use `tag` instead.
 
 The following arguments are supported:
 
-* `region` - (Optional) The region in which to create the server instance. If
-    omitted, the `region` argument of the provider is used. Changing this
-    creates a new server.
-
 * `name` - (Required) A unique name for the resource.
 
 * `image_id` - (Optional; Required if `image_name` is empty and not booting
@@ -447,7 +443,6 @@ The `personality` block supports:
 
 The following attributes are exported:
 
-* `region` - See Argument Reference above.
 * `name` - See Argument Reference above.
 * `access_ip_v4` - The first detected Fixed IPv4 address _or_ the
     Floating IP.

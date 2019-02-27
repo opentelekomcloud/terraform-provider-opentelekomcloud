@@ -22,11 +22,6 @@ resource "opentelekomcloud_lb_loadbalancer_v2" "lb_1" {
 
 The following arguments are supported:
 
-* `region` - (Optional) The region in which to obtain the V2 Networking client.
-    A Networking client is needed to create a loadbalancer. If omitted, the
-    `region` argument of the provider is used. Changing this creates a new
-    loadbalancer.
-
 * `vip_subnet_id` - (Required) The network on which to allocate the
     Loadbalancer's address. A tenant can only create Loadbalancers on networks
     authorized by policy (e.g. networks that belong to them or networks that
@@ -58,7 +53,6 @@ The following arguments are supported:
 
 The following attributes are exported:
 
-* `region` - See Argument Reference above.
 * `vip_subnet_id` - See Argument Reference above.
 * `name` - See Argument Reference above.
 * `description` - See Argument Reference above.

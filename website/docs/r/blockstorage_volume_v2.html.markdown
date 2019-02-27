@@ -14,7 +14,6 @@ Manages a V2 volume resource within OpenTelekomCloud.
 
 ```hcl
 resource "opentelekomcloud_blockstorage_volume_v2" "volume_1" {
-  region      = "RegionOne"
   name        = "volume_1"
   description = "first test volume"
   size        = 3
@@ -25,7 +24,6 @@ resource "opentelekomcloud_blockstorage_volume_v2" "volume_1" {
   metadata {
     __system__encrypted = "1"
     __system__cmkid     = "kms_id"
-    region              = "Region"
   }
 }
 ```
@@ -33,10 +31,6 @@ resource "opentelekomcloud_blockstorage_volume_v2" "volume_1" {
 ## Argument Reference
 
 The following arguments are supported:
-
-* `region` - (Optional) The region in which to create the volume. If
-    omitted, the `region` argument of the provider is used. Changing this
-    creates a new volume.
 
 * `size` - (Required) The size of the volume to create (in gigabytes). Changing
     this creates a new volume.
@@ -57,8 +51,6 @@ The following arguments are supported:
     Changing this updates the existing volume metadata.
     The key/value include the following parameters:
     `__system__cmkid` - (Optional) The ID of the kms key.
-
-    `region` - (Optional) The region of the kms key.
 
     '__system__encrypted' - The default value is set to '0', it means
       the volume is not encrypted, the value '1' means volume is
@@ -87,7 +79,6 @@ The following arguments are supported:
 
 The following attributes are exported:
 
-* `region` - See Argument Reference above.
 * `size` - See Argument Reference above.
 * `name` - See Argument Reference above.
 * `description` - See Argument Reference above.

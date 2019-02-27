@@ -39,11 +39,6 @@ resource "opentelekomcloud_networking_router_interface_v2" "router_interface_1" 
 
 The following arguments are supported:
 
-* `region` - (Optional) The region in which to obtain the V2 networking client.
-    A networking client is needed to create a router. If omitted, the
-    `region` argument of the provider is used. Changing this creates a new
-    router interface.
-
 * `router_id` - (Required) ID of the router this interface belongs to. Changing
     this creates a new router interface.
 
@@ -57,7 +52,6 @@ The following arguments are supported:
 
 The following attributes are exported:
 
-* `region` - See Argument Reference above.
 * `router_id` - See Argument Reference above.
 * `subnet_id` - See Argument Reference above.
 * `port_id` - See Argument Reference above.

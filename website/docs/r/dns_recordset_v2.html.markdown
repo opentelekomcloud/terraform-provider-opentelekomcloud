@@ -37,10 +37,6 @@ resource "opentelekomcloud_dns_recordset_v2" "rs_example_com" {
 
 The following arguments are supported:
 
-* `region` - (Optional) The region in which to obtain the V2 DNS client.
-    If omitted, the `region` argument of the provider is used.
-    Changing this creates a new DNS  record set.
-
 * `zone_id` - (Required) The ID of the zone in which to create the record set.
   Changing this creates a new DNS  record set.
 
@@ -63,7 +59,6 @@ The following arguments are supported:
 
 The following attributes are exported:
 
-* `region` - See Argument Reference above.
 * `name` - See Argument Reference above.
 * `type` - See Argument Reference above.
 * `ttl` - See Argument Reference above.
