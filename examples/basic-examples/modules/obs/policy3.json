@@ -1,0 +1,25 @@
+
+{
+
+"Version": "2008-10-17",
+  "Statement": [
+    {  
+      "Effect": "Allow",
+      "Principal": {
+	      "AWS":["*"]	  
+	  },
+      "Action": [
+	   "s3:DeleteBucket",
+	   "s3:ListBucket",
+	   "s3:ListBucketVersions"	  
+	  ],
+     "Resource": [
+	    "arn:aws:s3:::s3-website-test-bucket3.hashicorp.com",
+	      "arn:aws:s3:::s3-website-test-bucket3.hashicorp.com/*"		  
+	  ]
+
+     }
+
+	 ] 
+}
+
