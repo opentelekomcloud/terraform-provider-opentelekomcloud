@@ -16,6 +16,8 @@ type CreateOpts struct {
 	NatGatewayID string `json:"nat_gateway_id" required:"true"`
 	NetworkID    string `json:"network_id" required:"true"`
 	FloatingIPID string `json:"floating_ip_id" required:"true"`
+	Cidr         string `json:"cidr,omitempty"`
+	SourceType   int    `json:"source_type,omitempty"`
 }
 
 // ToSnatRuleCreateMap allows CreateOpts to satisfy the CreateOptsBuilder
