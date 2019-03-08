@@ -49,3 +49,5 @@ The following attributes are exported:
 * `nat_gateway_id` - See Argument Reference above.
 * `network_id` - See Argument Reference above.
 * `floating_ip_id` - See Argument Reference above.
+* `source_type` - See Argument Reference above.
+* `cidr` - See Argument Reference above.

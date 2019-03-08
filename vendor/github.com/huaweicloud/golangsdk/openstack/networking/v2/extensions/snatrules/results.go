@@ -15,7 +15,7 @@ type SnatRule struct {
 	Status            string `json:"status"`
 	AdminStateUp      bool   `json:"admin_state_up"`
 	Cidr              string `json:"cidr"`
-	SourceType        int    `json:"source_type"`
+	SourceType        string `json:"source_type"`
 }
 
 // GetResult is a return struct of get method
