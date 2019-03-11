@@ -37,7 +37,18 @@ func resourceNatSnatRuleV2() *schema.Resource {
 			},
 			"network_id": {
 				Type:     schema.TypeString,
-				Required: true,
+				Optional: true,
+				ForceNew: true,
+			},
+			"cidr": {
+				Type:         schema.TypeString,
+				Optional:     true,
+				ForceNew:     true,
+				ValidateFunc: validateCIDR,
+			},
+			"source_type": {
+				Type:     schema.TypeInt,
+				Optional: true,
 				ForceNew: true,
 			},
 			"floating_ip_id": {
@@ -51,6 +62,12 @@ func resourceNatSnatRuleV2() *schema.Resource {
 
 func resourceNatSnatRuleV2Create(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*Config)
+	_, net_ok := d.GetOk("network_id")
+	_, cidr_ok := d.GetOk("cidr")
+
+	if !net_ok && !cidr_ok {
+		return fmt.Errorf("Both network_id and cidr are empty, must specify one of them.")
+	}
 	natV2Client, err := config.natV2Client(GetRegion(d, config))
 	if err != nil {
 		return fmt.Errorf("Error creating OpenTelekomCloud nat client: %s", err)
@@ -60,6 +77,8 @@ func resourceNatSnatRuleV2Create(d *schema.ResourceData, meta interface{}) error
 		NatGatewayID: d.Get("nat_gateway_id").(string),
 		NetworkID:    d.Get("network_id").(string),
 		FloatingIPID: d.Get("floating_ip_id").(string),
+		SourceType:   d.Get("source_type").(int),
+		Cidr:         d.Get("cidr").(string),
 	}
 
 	log.Printf("[DEBUG] Create Options: %#v", createOpts)
@@ -103,6 +122,8 @@ func resourceNatSnatRuleV2Read(d *schema.ResourceData, meta interface{}) error {
 	d.Set("nat_gateway_id", snatRule.NatGatewayID)
 	d.Set("network_id", snatRule.NetworkID)
 	d.Set("floating_ip_id", snatRule.FloatingIPID)
+	d.Set("source_type", snatRule.SourceType)
+	d.Set("cidr", snatRule.Cidr)
 
 	d.Set("region", GetRegion(d, config))
 

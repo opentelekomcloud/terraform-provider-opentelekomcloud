@@ -1462,10 +1462,10 @@
 			"revisionTime": "2018-11-21T09:50:57Z"
 		},
 		{
-			"checksumSHA1": "8FUSH2A+RQyNj1T04/uGshpRCVA=",
+			"checksumSHA1": "RHoKnT2ahMeOhnUPFyHYbySqqPI=",
 			"path": "github.com/huaweicloud/golangsdk/openstack/networking/v2/extensions/snatrules",
-			"revision": "02e7852735ad4221d578e677bba347e0200e8553",
-			"revisionTime": "2018-11-21T09:50:57Z"
+			"revision": "a77002dce7df86510b2dc67fea2e4ebb55935856",
+			"revisionTime": "2019-03-08T08:48:39Z"
 		},
 		{
 			"checksumSHA1": "fCgJrALtrHKio2Bk084GoG1uMr8=",
