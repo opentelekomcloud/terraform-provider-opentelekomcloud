@@ -90,7 +90,6 @@ provider "opentelekomcloud" {
   password           = "${var.password}"
   domain_name        = "${var.domain_name}"
   auth_url           = "https://iam.eu-de.otc.t-systems.com/v3"
-  region             = "${var.region}"
 }
 ```
 
@@ -105,7 +104,6 @@ provider "opentelekomcloud" {
   secret_key         = "${var.secret_key}"
   domain_name        = "${var.domain_name}"
   auth_url           = "https://iam.eu-de.otc.t-systems.com/v3"
-  region             = "${var.region}"
 }
 ```
 
@@ -118,7 +116,6 @@ provider "opentelekomcloud" {
   delegated_project  = "${var.delegated_project}"
   token              = "${var.token}"
   auth_url           = "https://iam.eu-de.otc.t-systems.com/v3"
-  region             = "${var.region}"
 }
 ```
 ```token``` specified is not the normal token, but must have the authority of 'Agent Operator'
