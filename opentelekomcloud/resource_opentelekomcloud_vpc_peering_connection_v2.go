@@ -2,12 +2,13 @@ package opentelekomcloud
 
 import (
 	"fmt"
+	"log"
+	"time"
+
 	"github.com/hashicorp/terraform/helper/resource"
 	"github.com/hashicorp/terraform/helper/schema"
 	"github.com/huaweicloud/golangsdk"
 	"github.com/huaweicloud/golangsdk/openstack/networking/v2/peerings"
-	"log"
-	"time"
 )
 
 func resourceVpcPeeringConnectionV2() *schema.Resource {
@@ -30,10 +31,6 @@ func resourceVpcPeeringConnectionV2() *schema.Resource {
 				Optional: true,
 				Computed: true,
 				ForceNew: true,
-			},
-			"id": {
-				Type:     schema.TypeString,
-				Computed: true,
 			},
 			"name": {
 				Type:         schema.TypeString,

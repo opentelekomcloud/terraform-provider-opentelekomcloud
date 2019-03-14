@@ -109,12 +109,6 @@ func resourceListenerV2() *schema.Resource {
 				Optional: true,
 				ForceNew: true,
 			},
-
-			"id": {
-				Type:     schema.TypeString,
-				Optional: true,
-				Computed: true,
-			},
 		},
 	}
 }
