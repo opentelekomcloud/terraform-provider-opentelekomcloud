@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"testing"
 
+	"github.com/hashicorp/terraform/helper/acctest"
 	"github.com/hashicorp/terraform/helper/resource"
 	"github.com/hashicorp/terraform/terraform"
 	"github.com/huaweicloud/golangsdk"
@@ -12,6 +13,7 @@ import (
 
 func TestAccCTSTrackerV1_basic(t *testing.T) {
 	var tracker tracker.Tracker
+	var bucketName = fmt.Sprintf("terra-test-%s", acctest.RandString(5))
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
@@ -19,17 +21,17 @@ func TestAccCTSTrackerV1_basic(t *testing.T) {
 		CheckDestroy: testAccCheckCTSTrackerV1Destroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccCTSTrackerV1_basic,
+				Config: testAccCTSTrackerV1_basic(bucketName),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckCTSTrackerV1Exists("opentelekomcloud_cts_tracker_v1.tracker_v1", &tracker),
 					resource.TestCheckResourceAttr(
-						"opentelekomcloud_cts_tracker_v1.tracker_v1", "bucket_name", "tf-test-bucket"),
+						"opentelekomcloud_cts_tracker_v1.tracker_v1", "bucket_name", bucketName),
 					resource.TestCheckResourceAttr(
 						"opentelekomcloud_cts_tracker_v1.tracker_v1", "file_prefix_name", "yO8Q"),
 				),
 			},
 			{
-				Config: testAccCTSTrackerV1_update,
+				Config: testAccCTSTrackerV1_update(bucketName),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckCTSTrackerV1Exists("opentelekomcloud_cts_tracker_v1.tracker_v1", &tracker),
 					resource.TestCheckResourceAttr(
@@ -42,6 +44,7 @@ func TestAccCTSTrackerV1_basic(t *testing.T) {
 
 func TestAccCTSTrackerV1_timeout(t *testing.T) {
 	var tracker tracker.Tracker
+	var bucketName = fmt.Sprintf("terra-test-%s", acctest.RandString(5))
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
@@ -49,7 +52,7 @@ func TestAccCTSTrackerV1_timeout(t *testing.T) {
 		CheckDestroy: testAccCheckCTSTrackerV1Destroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccCTSTrackerV1_timeout,
+				Config: testAccCTSTrackerV1_timeout(bucketName),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckCTSTrackerV1Exists("opentelekomcloud_cts_tracker_v1.tracker_v1", &tracker),
 				),
@@ -114,9 +117,10 @@ func testAccCheckCTSTrackerV1Exists(n string, trackers *tracker.Tracker) resourc
 	}
 }
 
-const testAccCTSTrackerV1_basic = `
+func testAccCTSTrackerV1_basic(bucketName string) string {
+	return fmt.Sprintf(`
 resource "opentelekomcloud_s3_bucket" "bucket" {
-  bucket = "tf-test-bucket"
+  bucket = "%s"
   acl = "public-read"
   force_destroy = true
 }
@@ -135,11 +139,13 @@ resource "opentelekomcloud_cts_tracker_v1" "tracker_v1" {
   operations = ["login"]
   need_notify_user_list = ["user1"]
 }
-`
+`, bucketName)
+}
 
-const testAccCTSTrackerV1_update = `
+func testAccCTSTrackerV1_update(bucketName string) string {
+	return fmt.Sprintf(`
 resource "opentelekomcloud_s3_bucket" "bucket" {
-  bucket = "tf-test-bucket"
+  bucket = "%s"
   acl = "public-read"
   force_destroy = true
 }
@@ -156,11 +162,13 @@ resource "opentelekomcloud_cts_tracker_v1" "tracker_v1" {
   operations = ["login"]
   need_notify_user_list = ["user1"]
 }
-`
+`, bucketName)
+}
 
-const testAccCTSTrackerV1_timeout = `
+func testAccCTSTrackerV1_timeout(bucketName string) string {
+	return fmt.Sprintf(`
 resource "opentelekomcloud_s3_bucket" "bucket" {
-  bucket = "tf-test-bucket"
+  bucket = "%s"
   acl = "public-read"
   force_destroy = true
 }
@@ -184,4 +192,5 @@ timeouts {
     delete = "5m"
   }
 }
-`
+`, bucketName)
+}
