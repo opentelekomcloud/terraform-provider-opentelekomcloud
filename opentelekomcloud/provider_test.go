@@ -344,7 +344,7 @@ func testAccBmsKeyPairPreCheck(t *testing.T) {
 func testAccBmsFlavorPreCheck(t *testing.T) {
 	testAccPreCheckRequiredEnvVars(t)
 	if OS_BMS_FLAVOR_NAME == "" {
-		t.Skip("Provide the bms name starting with 'physical'")
+		t.Skip("Provide the bms flavor name starting with 'physical'")
 	}
 }
 
