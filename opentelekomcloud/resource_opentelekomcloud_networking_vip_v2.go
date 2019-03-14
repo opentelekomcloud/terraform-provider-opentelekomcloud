@@ -42,10 +42,6 @@ func resourceNetworkingVIPV2() *schema.Resource {
 				Type:     schema.TypeString,
 				Computed: true,
 			},
-			"id": {
-				Type:     schema.TypeString,
-				Computed: true,
-			},
 			"tenant_id": {
 				Type:     schema.TypeString,
 				Computed: true,

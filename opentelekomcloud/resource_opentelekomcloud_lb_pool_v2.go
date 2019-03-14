@@ -124,12 +124,6 @@ func resourcePoolV2() *schema.Resource {
 				Default:  true,
 				Optional: true,
 			},
-
-			"id": {
-				Type:     schema.TypeString,
-				Optional: true,
-				Computed: true,
-			},
 		},
 	}
 }
