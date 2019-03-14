@@ -1,10 +1,11 @@
 package stacks
 
 import (
-	"github.com/huaweicloud/golangsdk"
-	"github.com/huaweicloud/golangsdk/pagination"
 	"reflect"
 	"strings"
+
+	"github.com/huaweicloud/golangsdk"
+	"github.com/huaweicloud/golangsdk/pagination"
 )
 
 // CreateOptsBuilder is the interface options structs have to satisfy in order

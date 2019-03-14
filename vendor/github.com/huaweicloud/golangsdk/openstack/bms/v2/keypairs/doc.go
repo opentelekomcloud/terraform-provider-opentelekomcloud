@@ -11,7 +11,5 @@ Example to List Key Pairs
 	}
 
 	fmt.Println(allkeypair)
-
-
 */
 package keypairs
