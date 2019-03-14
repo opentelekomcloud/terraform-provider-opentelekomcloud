@@ -2,12 +2,13 @@ package opentelekomcloud
 
 import (
 	"fmt"
+	"log"
+	"time"
+
 	"github.com/hashicorp/terraform/helper/resource"
 	"github.com/hashicorp/terraform/helper/schema"
 	"github.com/huaweicloud/golangsdk"
 	"github.com/huaweicloud/golangsdk/openstack/deh/v1/hosts"
-	"log"
-	"time"
 )
 
 func resourceDeHHostV1() *schema.Resource {
@@ -288,7 +289,7 @@ func waitForDeHDelete(dehClient *golangsdk.ServiceClient, dehID string) resource
 }
 func getInstanceProperties(n *hosts.Host) []map[string]interface{} {
 	var v []map[string]interface{}
-	for _, val := range n.HostProperties.AvailableInstanceCapacities {
+	for _, val := range n.HostProperties.InstanceCapacities {
 		mapping := map[string]interface{}{
 			"flavor": val.Flavor,
 		}
