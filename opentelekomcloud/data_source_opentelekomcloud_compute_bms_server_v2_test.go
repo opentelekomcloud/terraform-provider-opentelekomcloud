@@ -10,7 +10,7 @@ import (
 
 func TestAccOTCBMSServerV2DataSource_basic(t *testing.T) {
 	resource.Test(t, resource.TestCase{
-		PreCheck:  func() { testAccPreCheckRequiredEnvVars(t) },
+		PreCheck:  func() { testAccBmsFlavorPreCheck(t) },
 		Providers: testAccProviders,
 		Steps: []resource.TestStep{
 			{

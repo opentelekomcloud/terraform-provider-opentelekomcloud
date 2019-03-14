@@ -14,7 +14,7 @@ func TestAccOTCBMSTagsV2_basic(t *testing.T) {
 	var tags tags.Tags
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheckRequiredEnvVars(t) },
+		PreCheck:     func() { testAccBmsFlavorPreCheck(t) },
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckOTCBMSTagsV2Destroy,
 		Steps: []resource.TestStep{
@@ -34,7 +34,7 @@ func TestAccOTCBMSTagsV2_timeout(t *testing.T) {
 	var tags tags.Tags
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheckRequiredEnvVars(t) },
+		PreCheck:     func() { testAccBmsFlavorPreCheck(t) },
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckOTCBMSTagsV2Destroy,
 		Steps: []resource.TestStep{
