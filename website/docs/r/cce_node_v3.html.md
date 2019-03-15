@@ -1,12 +1,12 @@
 ---
 layout: "opentelekomcloud"
-page_title: "OpenTelekomCloud: opentelekomcloud_cce_nodes_v3"
-sidebar_current: "docs-opentelekomcloud-resource-cce-nodes-v3"
+page_title: "OpenTelekomCloud: opentelekomcloud_cce_node_v3"
+sidebar_current: "docs-opentelekomcloud-resource-cce-node-v3"
 description: |-
   Add a node to a container cluster. 
 ---
 
-# opentelekomcloud_cce_nodes_v3
+# opentelekomcloud_cce_node_v3
 Add a node to a container cluster. 
 
 ## Example Usage

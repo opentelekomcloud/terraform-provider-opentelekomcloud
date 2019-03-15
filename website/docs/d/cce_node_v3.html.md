@@ -1,13 +1,13 @@
 ---
 layout: "opentelekomcloud"
-page_title: "OpenTelekomCloud: opentelekomcloud_cce_nodes_v3"
-sidebar_current: "docs-opentelekomcloud-datasource-cce-nodes-v3"
+page_title: "OpenTelekomCloud: opentelekomcloud_cce_node_v3"
+sidebar_current: "docs-opentelekomcloud-datasource-cce-node-v3"
 description: |-
   To get the specified node in a cluster.
 ---
 
 
-# opentelekomcloud_cce_nodes_v3
+# opentelekomcloud_cce_node_v3
 
 To get the specified node in a cluster.
 
