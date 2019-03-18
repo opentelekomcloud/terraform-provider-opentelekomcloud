@@ -23,7 +23,7 @@ func TestAccIdentityV3Agency_basic(t *testing.T) {
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckIdentityV3AgencyDestroy,
 		Steps: []resource.TestStep{
-			resource.TestStep{
+			{
 				Config: testAccIdentityV3Agency_basic,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckIdentityV3AgencyExists("opentelekomcloud_identity_agency_v3.agency_1", &a),
