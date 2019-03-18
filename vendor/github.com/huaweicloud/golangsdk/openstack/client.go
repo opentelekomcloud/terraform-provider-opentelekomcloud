@@ -954,6 +954,8 @@ func NewSDKClient(c *golangsdk.ProviderClient, eo golangsdk.EndpointOpts, servic
 		return NewMLSV1(c, eo)
 	case "dws":
 		return NewDWSClient(c, eo)
+	case "nat":
+		return NewNatV2(c, eo)
 	}
 
 	return initClientOpts(c, eo, serviceType)

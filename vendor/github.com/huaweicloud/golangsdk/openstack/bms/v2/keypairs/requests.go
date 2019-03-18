@@ -28,6 +28,7 @@ func List(c *golangsdk.ServiceClient, opts ListOpts) ([]KeyPair, error) {
 	return FilterKeyPairs(allkeypairs, opts)
 }
 
+//FilterKeyPairs used to filter keypairs using name
 func FilterKeyPairs(keypairs []KeyPair, opts ListOpts) ([]KeyPair, error) {
 
 	var refinedKeypairs []KeyPair
