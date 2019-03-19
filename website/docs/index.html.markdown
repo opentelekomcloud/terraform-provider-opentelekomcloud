@@ -34,11 +34,12 @@ resource "opentelekomcloud_compute_instance_v2" "test-server" {
 
 ## Authentication
 
-This provider offers 3 means for authentication.
+This provider offers 4 means for authentication.
 
 - User name + Password
 - AKSK
 - Token
+- Assume Role
 
 ### User name + Password
 
@@ -75,6 +76,49 @@ provider "opentelekomcloud" {
 }
 ```
 Note: if token, aksk and password are set simultaneously, then it will authenticate in the order of Token, AKSK and Password.
+
+### Assume Role
+
+#### User name + Password
+
+```hcl
+provider "opentelekomcloud" {
+  agency_name        = "${var.agency_name}"
+  agency_domain_name = "${var.agency_domain_name}"
+  delegated_project  = "${var.delegated_project}"
+  user_name          = "${var.user_name}"
+  password           = "${var.password}"
+  domain_name        = "${var.domain_name}"
+  auth_url           = "https://iam.eu-de.otc.t-systems.com/v3"
+}
+```
+
+#### AKSK
+
+```hcl
+provider "opentelekomcloud" {
+  agency_name        = "${var.agency_name}"
+  agency_domain_name = "${var.agency_domain_name}"
+  delegated_project  = "${var.delegated_project}"
+  access_key         = "${var.access_key}"
+  secret_key         = "${var.secret_key}"
+  domain_name        = "${var.domain_name}"
+  auth_url           = "https://iam.eu-de.otc.t-systems.com/v3"
+}
+```
+
+#### Token
+
+```hcl
+provider "opentelekomcloud" {
+  agency_name        = "${var.agency_name}"
+  agency_domain_name = "${var.agency_domain_name}"
+  delegated_project  = "${var.delegated_project}"
+  token              = "${var.token}"
+  auth_url           = "https://iam.eu-de.otc.t-systems.com/v3"
+}
+```
+```token``` specified is not the normal token, but must have the authority of 'Agent Operator'
 
 ## Configuration Reference
 
@@ -135,6 +179,14 @@ The following arguments are supported:
   such as `username:project`. Set the `password` to the Swauth/Swift key.
   Finally, set `auth_url` as the location of the Swift service. Note that this
   will only work when used with the OpenTelekomCloud Object Storage resources.
+
+* `agency_name` - (Optional) if authorized by assume role, it must be set. The
+  name of agency.
+
+* `agency_domain_name` - (Optional) if authorized by assume role, it must be set.
+  The name of domain who created the agency (Identity v3).
+
+* `delegated_project` - (Optional) The name of delegated project (Identity v3).
 
 ## Additional Logging
 

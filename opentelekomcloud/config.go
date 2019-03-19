@@ -46,6 +46,9 @@ type Config struct {
 	Token            string
 	Username         string
 	UserID           string
+	AgencyName       string
+	AgencyDomainName string
+	DelegatedProject string
 
 	HwClient *golangsdk.ProviderClient
 	s3sess   *session.Session
@@ -252,16 +255,29 @@ func (c *Config) newhwClient(transport *http.Transport, osDebug bool) error {
 func buildClientByToken(c *Config) error {
 	var pao, dao golangsdk.AuthOptions
 
-	pao = golangsdk.AuthOptions{
-		DomainID:   c.DomainID,
-		DomainName: c.DomainName,
-		TenantID:   c.TenantID,
-		TenantName: c.TenantName,
-	}
+	if c.AgencyDomainName != "" && c.AgencyName != "" {
+		pao = golangsdk.AuthOptions{
+			AgencyName:       c.AgencyName,
+			AgencyDomainName: c.AgencyDomainName,
+			DelegatedProject: c.DelegatedProject,
+		}
 
-	dao = golangsdk.AuthOptions{
-		DomainID:   c.DomainID,
-		DomainName: c.DomainName,
+		dao = golangsdk.AuthOptions{
+			AgencyName:       c.AgencyName,
+			AgencyDomainName: c.AgencyDomainName,
+		}
+	} else {
+		pao = golangsdk.AuthOptions{
+			DomainID:   c.DomainID,
+			DomainName: c.DomainName,
+			TenantID:   c.TenantID,
+			TenantName: c.TenantName,
+		}
+
+		dao = golangsdk.AuthOptions{
+			DomainID:   c.DomainID,
+			DomainName: c.DomainName,
+		}
 	}
 
 	for _, ao := range []*golangsdk.AuthOptions{&pao, &dao} {
@@ -275,14 +291,31 @@ func buildClientByToken(c *Config) error {
 func buildClientByAKSK(c *Config) error {
 	var pao, dao golangsdk.AKSKAuthOptions
 
-	pao = golangsdk.AKSKAuthOptions{
-		ProjectName: c.TenantName,
-		ProjectId:   c.TenantID,
-	}
+	if c.AgencyDomainName != "" && c.AgencyName != "" {
+		pao = golangsdk.AKSKAuthOptions{
+			DomainID:         c.DomainID,
+			Domain:           c.DomainName,
+			AgencyName:       c.AgencyName,
+			AgencyDomainName: c.AgencyDomainName,
+			DelegatedProject: c.DelegatedProject,
+		}
 
-	dao = golangsdk.AKSKAuthOptions{
-		DomainID: c.DomainID,
-		Domain:   c.DomainName,
+		dao = golangsdk.AKSKAuthOptions{
+			DomainID:         c.DomainID,
+			Domain:           c.DomainName,
+			AgencyName:       c.AgencyName,
+			AgencyDomainName: c.AgencyDomainName,
+		}
+	} else {
+		pao = golangsdk.AKSKAuthOptions{
+			ProjectName: c.TenantName,
+			ProjectId:   c.TenantID,
+		}
+
+		dao = golangsdk.AKSKAuthOptions{
+			DomainID: c.DomainID,
+			Domain:   c.DomainName,
+		}
 	}
 
 	for _, ao := range []*golangsdk.AKSKAuthOptions{&pao, &dao} {
@@ -296,16 +329,33 @@ func buildClientByAKSK(c *Config) error {
 func buildClientByPassword(c *Config) error {
 	var pao, dao golangsdk.AuthOptions
 
-	pao = golangsdk.AuthOptions{
-		DomainID:   c.DomainID,
-		DomainName: c.DomainName,
-		TenantID:   c.TenantID,
-		TenantName: c.TenantName,
-	}
+	if c.AgencyDomainName != "" && c.AgencyName != "" {
+		pao = golangsdk.AuthOptions{
+			DomainID:         c.DomainID,
+			DomainName:       c.DomainName,
+			AgencyName:       c.AgencyName,
+			AgencyDomainName: c.AgencyDomainName,
+			DelegatedProject: c.DelegatedProject,
+		}
 
-	dao = golangsdk.AuthOptions{
-		DomainID:   c.DomainID,
-		DomainName: c.DomainName,
+		dao = golangsdk.AuthOptions{
+			DomainID:         c.DomainID,
+			DomainName:       c.DomainName,
+			AgencyName:       c.AgencyName,
+			AgencyDomainName: c.AgencyDomainName,
+		}
+	} else {
+		pao = golangsdk.AuthOptions{
+			DomainID:   c.DomainID,
+			DomainName: c.DomainName,
+			TenantID:   c.TenantID,
+			TenantName: c.TenantName,
+		}
+
+		dao = golangsdk.AuthOptions{
+			DomainID:   c.DomainID,
+			DomainName: c.DomainName,
+		}
 	}
 
 	for _, ao := range []*golangsdk.AuthOptions{&pao, &dao} {

@@ -42,7 +42,11 @@ func CheckDeleted(d *schema.ResourceData, err error, msg string) error {
 // region was not set, the provider-level region is checked. The provider-level
 // region can either be set by the region argument or by OS_REGION_NAME.
 func GetRegion(d *schema.ResourceData, config *Config) string {
-	return strings.Split(config.TenantName, "_")[0]
+	n := config.TenantName
+	if n == "" {
+		n = config.DelegatedProject
+	}
+	return strings.Split(n, "_")[0]
 }
 
 // AddValueSpecs expands the 'value_specs' object and removes 'value_specs'
