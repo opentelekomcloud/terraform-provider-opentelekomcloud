@@ -27,6 +27,7 @@ var (
 	OS_SRC_ACCESS_KEY         = os.Getenv("OS_SRC_ACCESS_KEY")
 	OS_SRC_SECRET_KEY         = os.Getenv("OS_SRC_SECRET_KEY")
 	OS_SWIFT_ENVIRONMENT      = os.Getenv("OS_SWIFT_ENVIRONMENT")
+	OS_MRS_ENVIRONMENT        = os.Getenv("OS_MRS_ENVIRONMENT")
 	OS_AVAILABILITY_ZONE      = os.Getenv("OS_AVAILABILITY_ZONE")
 	OS_VPC_ID                 = os.Getenv("OS_VPC_ID")
 	OS_SUBNET_ID              = os.Getenv("OS_SUBNET_ID")
@@ -131,6 +132,14 @@ func testAccPreCheckSwift(t *testing.T) {
 
 	if OS_SWIFT_ENVIRONMENT == "" {
 		t.Skip("This environment does not support Swift tests")
+	}
+}
+
+func testAccPreCheckMrs(t *testing.T) {
+	testAccPreCheckRequiredEnvVars(t)
+
+	if OS_MRS_ENVIRONMENT == "" {
+		t.Skip("This environment does not support MRS tests")
 	}
 }
 

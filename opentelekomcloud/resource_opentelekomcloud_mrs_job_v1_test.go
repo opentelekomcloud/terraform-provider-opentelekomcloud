@@ -15,7 +15,7 @@ func TestAccMRSV1Job_basic(t *testing.T) {
 	var jobGet job.Job
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
+		PreCheck:     func() { testAccPreCheckMrs(t) },
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckMRSV1JobDestroy,
 		Steps: []resource.TestStep{
@@ -94,11 +94,11 @@ func testAccCheckMRSV1JobExists(n string, jobGet *job.Job) resource.TestCheckFun
 var TestAccMRSV1JobConfig_basic = fmt.Sprintf(`
 resource "opentelekomcloud_mrs_cluster_v1" "cluster1" {
   cluster_name = "mrs-cluster-acc"
-  region = "%s"
+  region = "eu-de"
   billing_type = 12
   master_node_num = 2
   core_node_num = 3
-  master_node_size = "s1.4xlarge.linux.mrs"
+  master_node_size = "h1.2xlarge.4.linux.mrs"
   core_node_size = "s1.xlarge.linux.mrs"
   available_zone_id = "bf84aba586ce4e948da0b97d9a7d62fb"
   vpc_id = "%s"
@@ -125,9 +125,9 @@ resource "opentelekomcloud_mrs_job_v1" "job1" {
   job_type = 1
   job_name = "test_mapreduce_job1"
   cluster_id = "${opentelekomcloud_mrs_cluster_v1.cluster1.id}"
-  jar_path = "s3a://tf-mrs/program/hadoop-mapreduce-examples-2.7.5.jar"
-  input = "s3a://tf-mrs/input/"
-  output = "s3a://tf-mrs/output/"
-  job_log = "s3a://tf-mrs/joblog/"
+  jar_path = "s3a://tf-mrs-test/program/hadoop-mapreduce-examples-2.7.5.jar"
+  input = "s3a://tf-mrs-test/input/"
+  output = "s3a://tf-mrs-test/output/"
+  job_log = "s3a://tf-mrs-test/joblog/"
   arguments = "wordcount"
-}`, OS_REGION_NAME, OS_VPC_ID, OS_NETWORK_ID)
+}`, OS_VPC_ID, OS_NETWORK_ID)
