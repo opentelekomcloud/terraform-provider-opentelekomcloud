@@ -122,6 +122,8 @@ provider "opentelekomcloud" {
 
 ## Configuration Reference
 
+~> **NOTE:** The `region`, `tenant_id`, `domain_id`, `user_id` arguments has been deprecated and `tenant_name`, `domain_name` changed to be `required`. Please update your configurations as it migth be removed in the future releases.
+
 The following arguments are supported:
 
 * `access_key` - (Optional) The access key of the OpenTelekomCloud cloud to use.
