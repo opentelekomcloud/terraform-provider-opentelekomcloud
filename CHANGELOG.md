@@ -1,4 +1,4 @@
-## 1.7.0 (Unreleased)
+## 1.7.0 (March 20, 2019)
 
 NOTES/DEPRECATIONS:
 
@@ -6,18 +6,18 @@ NOTES/DEPRECATIONS:
 
 FEATURES:
 
-* **New Resource:** `opentelekomcloud_identity_agency_v3` [GH-232]
+* **New Resource:** `opentelekomcloud_identity_agency_v3` ([#232](https://github.com/terraform-providers/terraform-provider-opentelekomcloud/issues/232))
 
 ENHANCEMENTS:
 
-* `provider`: Remove region, tenant_id, domain_id, user_id parameters [GH-230]
-* `resource/opentelekomcloud_compute_instance_v2`: Add support of security_groups update [GH-234]
-* `resource/opentelekomcloud_nat_snat_rule_v2`: Add `cidr` and `source_type` parameters support [GH-237]
+* `provider`: Remove region, tenant_id, domain_id, user_id parameters ([#230](https://github.com/terraform-providers/terraform-provider-opentelekomcloud/issues/230))
+* `resource/opentelekomcloud_compute_instance_v2`: Add support of security_groups update ([#234](https://github.com/terraform-providers/terraform-provider-opentelekomcloud/issues/234))
+* `resource/opentelekomcloud_nat_snat_rule_v2`: Add `cidr` and `source_type` parameters support ([#237](https://github.com/terraform-providers/terraform-provider-opentelekomcloud/issues/237))
 
 BUG FIXES:
 
-* `resource/opentelekomcloud_identity_role_assignment_v3`: Fix attributes set issue [GH-226]
-* `resource/opentelekomcloud_csbs_backup_policy_v1`: Fix csbs policies parameters issue [GH-244]
+* `resource/opentelekomcloud_identity_role_assignment_v3`: Fix attributes set issue ([#226](https://github.com/terraform-providers/terraform-provider-opentelekomcloud/issues/226))
+* `resource/opentelekomcloud_csbs_backup_policy_v1`: Fix csbs policies parameters issue ([#244](https://github.com/terraform-providers/terraform-provider-opentelekomcloud/issues/244))
 
 ## 1.6.1 (February 18, 2019)
 
