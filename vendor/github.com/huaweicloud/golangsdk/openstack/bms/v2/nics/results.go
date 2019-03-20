@@ -10,8 +10,7 @@ type FixedIP struct {
 	IPAddress string `json:"ip_address"`
 }
 
-//Nic Manage and perform other operations on Nic,
-//including querying Nics as well as
+//Nic Manage and perform other operations on Nic, including querying Nics as well as
 //querying Nic.
 type Nic struct {
 	// ID is the unique identifier for the nic.
