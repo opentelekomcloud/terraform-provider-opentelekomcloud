@@ -1,5 +1,9 @@
 ## 1.7.0 (Unreleased)
 
+NOTES/DEPRECATIONS:
+
+* provider: The `region`, `tenant_id`, `domain_id`, `user_id` arguments have been deprecated and `tenant_name`, `domain_name` changed to be `required`. Please update your configurations as it might be removed in the future releases.
+
 FEATURES:
 
 * **New Resource:** `opentelekomcloud_identity_agency_v3` [GH-232]
