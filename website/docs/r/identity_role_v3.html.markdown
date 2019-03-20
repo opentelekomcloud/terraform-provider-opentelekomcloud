@@ -19,15 +19,12 @@ resource "opentelekomcloud_identity_role_v3" "role" {
   description = "role"
   display_name = "custom_role"
   display_layer = "domain"
-  policy = {
-    version  = "1.1"
-    statement = [
-      {
-        effect = "Allow"
-        action = ["ecs:*:list*"]
-      }
-    ]
-  }
+  statement = [
+    {
+      effect = "Allow"
+      action = ["ecs:*:list*"]
+    }
+  ]
 }
 ```
 
@@ -48,12 +45,6 @@ The following arguments are supported:
   (Required)
   Displayed name of a role. The value cannot exceed 64 characters.
 
-* `policy` -
-  (Required)
-  Permission policy of a role. Structure is documented below.
-
-The `policy` block supports:
-
 * `statement` -
   (Required)
   Statement: The Statement field contains the Effect and Action
@@ -65,22 +56,20 @@ The `statement` block supports:
 
 * `action` -
   (Required)
-  Permission set, which specifies the operation permissions
-  on resources. The number of permission sets cannot exceed
-  100.  Format:  The value format is Service name:Resource
-  type:Action, for example, vpc:ports:create.  Service name:
-  indicates the product name, such as ecs, evs, or vpc. Only
-  lowercase letters are allowed.  Resource type and Action:
-  The values are case-insensitive, and the wildcard (*) are
-  allowed. A wildcard (*) can represent all or part of
-  information about resource types and actions for the
-  specific service.
+  Permission set, which specifies the operation permissions on
+  resources. The number of permission sets cannot exceed 100.
+  Format:  The value format is Service name:Resource type:Action,
+  for example, vpc:ports:create.  Service name: indicates the
+  product name, such as ecs, evs, or vpc. Only lowercase letters
+  are allowed.  Resource type and Action: The values are
+  case-insensitive, and the wildcard (*) are allowed. A wildcard
+  (*) can represent all or part of information about resource
+  types and actions for the specific service.
 
 * `effect` -
   (Required)
   The value can be Allow and Deny. If both Allow and Deny are
-  found in statements, the policy evaluation starts with
-  Deny.
+  found in statements, the policy evaluation starts with Deny.
 
 - - -
 

@@ -35,65 +35,65 @@ func resourceIdentityRoleV3() *schema.Resource {
 		},
 
 		Schema: map[string]*schema.Schema{
-			"description": &schema.Schema{
+			"description": {
 				Type:     schema.TypeString,
 				Required: true,
 			},
 
-			"display_layer": &schema.Schema{
+			"display_layer": {
 				Type:     schema.TypeString,
 				Required: true,
 			},
 
-			"display_name": &schema.Schema{
+			"display_name": {
 				Type:     schema.TypeString,
 				Required: true,
 			},
 
-			"policy": &schema.Schema{
+			"statement": {
 				Type:     schema.TypeList,
 				Required: true,
-				MaxItems: 1,
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
-						"statement": &schema.Schema{
+						"action": {
 							Type:     schema.TypeList,
 							Required: true,
-							Elem: &schema.Resource{
-								Schema: map[string]*schema.Schema{
-									"action": &schema.Schema{
-										Type:     schema.TypeList,
-										Required: true,
-										Elem: &schema.Schema{
-											Type: schema.TypeString,
-										},
-									},
-									"effect": &schema.Schema{
-										Type:     schema.TypeString,
-										Required: true,
-									},
-								},
+							Elem: &schema.Schema{
+								Type: schema.TypeString,
 							},
+						},
+						"effect": {
+							Type:     schema.TypeString,
+							Required: true,
 						},
 					},
 				},
 			},
 
-			"catalog": &schema.Schema{
+			"catalog": {
 				Type:     schema.TypeString,
 				Computed: true,
 			},
 
-			"domain_id": &schema.Schema{
+			"domain_id": {
 				Type:     schema.TypeString,
 				Computed: true,
 			},
 
-			"name": &schema.Schema{
+			"name": {
 				Type:     schema.TypeString,
 				Computed: true,
 			},
 		},
+	}
+}
+
+func resourceIdentityRoleV3UserInputParams(d *schema.ResourceData) map[string]interface{} {
+	return map[string]interface{}{
+		"description":   d.Get("description"),
+		"display_layer": d.Get("display_layer"),
+		"display_name":  d.Get("display_name"),
+		"statement":     d.Get("statement"),
 	}
 }
 
@@ -105,47 +105,14 @@ func resourceIdentityRoleV3Create(d *schema.ResourceData, meta interface{}) erro
 	}
 	client.Endpoint = "https://iam.eu-de.otc.t-systems.com/v3.0/"
 
-	opts := make(map[string]interface{})
-	opts["description"] = d.Get("description")
-	opts["display_layer"] = d.Get("display_layer")
-	opts["display_name"] = d.Get("display_name")
-	opts["policy"] = d.Get("policy")
+	opts := resourceIdentityRoleV3UserInputParams(d)
 
-	arrayIndex := map[string]int{
-		"policy": 0,
-	}
-
-	params := make(map[string]interface{})
-
-	roleProp, err := expandIdentityRoleV3CreateRole(opts, arrayIndex)
+	r, err := sendIdentityRoleV3CreateRequest(d, opts, nil, client)
 	if err != nil {
-		return err
-	}
-	e, err := isEmptyValue(reflect.ValueOf(roleProp))
-	if err != nil {
-		return err
-	}
-	if !e {
-		params["role"] = roleProp
+		return fmt.Errorf("Error creating IdentityRoleV3: %s", err)
 	}
 
-	log.Printf("[DEBUG] Creating new Role: %#v", params)
-
-	url, err := replaceVars(d, "OS-ROLE/roles", nil)
-	if err != nil {
-		return err
-	}
-	url = client.ServiceURL(url)
-
-	r := golangsdk.Result{}
-	_, r.Err = client.Post(url, &params, &r.Body, &golangsdk.RequestOpts{
-		OkCodes: successHTTPCodes,
-	})
-	if r.Err != nil {
-		return fmt.Errorf("Error creating Role: %s", r.Err)
-	}
-
-	id, err := navigateValue(r.Body, []string{"role", "id"}, nil)
+	id, err := navigateValue(r, []string{"role", "id"}, nil)
 	if err != nil {
 		return fmt.Errorf("Error constructing id: %s", err)
 	}
@@ -162,49 +129,14 @@ func resourceIdentityRoleV3Read(d *schema.ResourceData, meta interface{}) error 
 	}
 	client.Endpoint = "https://iam.eu-de.otc.t-systems.com/v3.0/"
 
-	url, err := replaceVars(d, "OS-ROLE/roles/{id}", nil)
+	res := make(map[string]interface{})
+
+	err = readIdentityRoleV3Read(d, client, res)
 	if err != nil {
 		return err
 	}
-	url = client.ServiceURL(url)
 
-	r := golangsdk.Result{}
-	_, r.Err = client.Get(
-		url, &r.Body,
-		&golangsdk.RequestOpts{MoreHeaders: map[string]string{"Content-Type": "application/json"}})
-	if r.Err != nil {
-		return fmt.Errorf("Error reading %s: %s", fmt.Sprintf("IdentityRoleV3 %q", d.Id()), r.Err)
-	}
-	res, ok := r.Body.(map[string]interface{})
-	if !ok {
-		return fmt.Errorf("Error reading %s: the result is not map", fmt.Sprintf("IdentityRoleV3 %q", d.Id()))
-	}
-
-	catalogProp, err := navigateValue(res, []string{"role", "catalog"}, nil)
-	if err != nil {
-		return fmt.Errorf("Error reading Role:catalog, err: %s", err)
-	}
-	if err := d.Set("catalog", catalogProp); err != nil {
-		return fmt.Errorf("Error setting Role:catalog, err: %s", err)
-	}
-
-	domainIDProp, err := navigateValue(res, []string{"role", "domain_id"}, nil)
-	if err != nil {
-		return fmt.Errorf("Error reading Role:domain_id, err: %s", err)
-	}
-	if err := d.Set("domain_id", domainIDProp); err != nil {
-		return fmt.Errorf("Error setting Role:domain_id, err: %s", err)
-	}
-
-	nameProp, err := navigateValue(res, []string{"role", "name"}, nil)
-	if err != nil {
-		return fmt.Errorf("Error reading Role:name, err: %s", err)
-	}
-	if err := d.Set("name", nameProp); err != nil {
-		return fmt.Errorf("Error setting Role:name, err: %s", err)
-	}
-
-	return nil
+	return setIdentityRoleV3Properties(d, res)
 }
 
 func resourceIdentityRoleV3Update(d *schema.ResourceData, meta interface{}) error {
@@ -215,44 +147,11 @@ func resourceIdentityRoleV3Update(d *schema.ResourceData, meta interface{}) erro
 	}
 	client.Endpoint = "https://iam.eu-de.otc.t-systems.com/v3.0/"
 
-	opts := make(map[string]interface{})
-	opts["description"] = d.Get("description")
-	opts["display_layer"] = d.Get("display_layer")
-	opts["display_name"] = d.Get("display_name")
-	opts["policy"] = d.Get("policy")
+	opts := resourceIdentityRoleV3UserInputParams(d)
 
-	arrayIndex := map[string]int{
-		"policy": 0,
-	}
-
-	params := make(map[string]interface{})
-
-	roleProp, err := expandIdentityRoleV3UpdateRole(opts, arrayIndex)
+	_, err = sendIdentityRoleV3UpdateRequest(d, opts, nil, client)
 	if err != nil {
-		return err
-	}
-	e, err := isEmptyValue(reflect.ValueOf(roleProp))
-	if err != nil {
-		return err
-	}
-	if !e {
-		params["role"] = roleProp
-	}
-
-	log.Printf("[DEBUG] Updating Role %q: %#v", d.Id(), params)
-
-	url, err := replaceVars(d, "OS-ROLE/roles/{id}", nil)
-	if err != nil {
-		return err
-	}
-	url = client.ServiceURL(url)
-
-	r := golangsdk.Result{}
-	_, r.Err = client.Patch(url, &params, &r.Body, &golangsdk.RequestOpts{
-		OkCodes: successHTTPCodes,
-	})
-	if r.Err != nil {
-		return fmt.Errorf("Error updating Role %q: %s", d.Id(), r.Err)
+		return fmt.Errorf("Error updating (IdentityRoleV3: %v): %s", d.Id(), err)
 	}
 
 	return resourceIdentityRoleV3Read(d, meta)
@@ -286,10 +185,29 @@ func resourceIdentityRoleV3Delete(d *schema.ResourceData, meta interface{}) erro
 	return nil
 }
 
-func expandIdentityRoleV3CreateRole(d interface{}, arrayIndex map[string]int) (interface{}, error) {
-	req := make(map[string]interface{})
+func sendIdentityRoleV3CreateRequest(d *schema.ResourceData, opts map[string]interface{},
+	arrayIndex map[string]int, client *golangsdk.ServiceClient) (interface{}, error) {
+	url := client.ServiceURL("OS-ROLE/roles")
 
-	descriptionProp, err := navigateValue(d, []string{"description"}, arrayIndex)
+	params, err := buildIdentityRoleV3CreateParameters(opts, arrayIndex)
+	if err != nil {
+		return nil, fmt.Errorf("Error building the request body of api(create)")
+	}
+
+	r := golangsdk.Result{}
+	_, r.Err = client.Post(url, params, &r.Body, &golangsdk.RequestOpts{
+		OkCodes: successHTTPCodes,
+	})
+	if r.Err != nil {
+		return nil, fmt.Errorf("Error run api(create): %s", r.Err)
+	}
+	return r.Body, nil
+}
+
+func buildIdentityRoleV3CreateParameters(opts map[string]interface{}, arrayIndex map[string]int) (interface{}, error) {
+	params := make(map[string]interface{})
+
+	descriptionProp, err := navigateValue(opts, []string{"description"}, arrayIndex)
 	if err != nil {
 		return nil, err
 	}
@@ -298,10 +216,10 @@ func expandIdentityRoleV3CreateRole(d interface{}, arrayIndex map[string]int) (i
 		return nil, err
 	}
 	if !e {
-		req["description"] = descriptionProp
+		params["description"] = descriptionProp
 	}
 
-	displayNameProp, err := navigateValue(d, []string{"display_name"}, arrayIndex)
+	displayNameProp, err := navigateValue(opts, []string{"display_name"}, arrayIndex)
 	if err != nil {
 		return nil, err
 	}
@@ -310,10 +228,10 @@ func expandIdentityRoleV3CreateRole(d interface{}, arrayIndex map[string]int) (i
 		return nil, err
 	}
 	if !e {
-		req["display_name"] = displayNameProp
+		params["display_name"] = displayNameProp
 	}
 
-	policyProp, err := expandIdentityRoleV3CreateRolePolicy(d, arrayIndex)
+	policyProp, err := expandIdentityRoleV3CreatePolicy(opts, arrayIndex)
 	if err != nil {
 		return nil, err
 	}
@@ -322,10 +240,10 @@ func expandIdentityRoleV3CreateRole(d interface{}, arrayIndex map[string]int) (i
 		return nil, err
 	}
 	if !e {
-		req["policy"] = policyProp
+		params["policy"] = policyProp
 	}
 
-	typeProp, err := expandIdentityRoleV3CreateRoleType(d, arrayIndex)
+	typeProp, err := expandIdentityRoleV3CreateType(opts, arrayIndex)
 	if err != nil {
 		return nil, err
 	}
@@ -334,16 +252,18 @@ func expandIdentityRoleV3CreateRole(d interface{}, arrayIndex map[string]int) (i
 		return nil, err
 	}
 	if !e {
-		req["type"] = typeProp
+		params["type"] = typeProp
 	}
 
-	return req, nil
+	params = map[string]interface{}{"role": params}
+
+	return params, nil
 }
 
-func expandIdentityRoleV3CreateRolePolicy(d interface{}, arrayIndex map[string]int) (interface{}, error) {
+func expandIdentityRoleV3CreatePolicy(d interface{}, arrayIndex map[string]int) (interface{}, error) {
 	req := make(map[string]interface{})
 
-	statementProp, err := expandIdentityRoleV3CreateRolePolicyStatement(d, arrayIndex)
+	statementProp, err := expandIdentityRoleV3CreatePolicyStatement(d, arrayIndex)
 	if err != nil {
 		return nil, err
 	}
@@ -360,7 +280,7 @@ func expandIdentityRoleV3CreateRolePolicy(d interface{}, arrayIndex map[string]i
 	return req, nil
 }
 
-func expandIdentityRoleV3CreateRolePolicyStatement(d interface{}, arrayIndex map[string]int) (interface{}, error) {
+func expandIdentityRoleV3CreatePolicyStatement(d interface{}, arrayIndex map[string]int) (interface{}, error) {
 	newArrayIndex := make(map[string]int)
 	if arrayIndex != nil {
 		for k, v := range arrayIndex {
@@ -368,7 +288,7 @@ func expandIdentityRoleV3CreateRolePolicyStatement(d interface{}, arrayIndex map
 		}
 	}
 
-	v, err := navigateValue(d, []string{"policy", "statement"}, newArrayIndex)
+	v, err := navigateValue(d, []string{"statement"}, newArrayIndex)
 	if err != nil {
 		return nil, err
 	}
@@ -376,10 +296,10 @@ func expandIdentityRoleV3CreateRolePolicyStatement(d interface{}, arrayIndex map
 	n := len(v.([]interface{}))
 	req := make([]interface{}, 0, n)
 	for i := 0; i < n; i++ {
-		newArrayIndex["policy.statement"] = i
+		newArrayIndex["statement"] = i
 		transformed := make(map[string]interface{})
 
-		actionProp, err := navigateValue(d, []string{"policy", "statement", "action"}, newArrayIndex)
+		actionProp, err := navigateValue(d, []string{"statement", "action"}, newArrayIndex)
 		if err != nil {
 			return nil, err
 		}
@@ -391,7 +311,7 @@ func expandIdentityRoleV3CreateRolePolicyStatement(d interface{}, arrayIndex map
 			transformed["Action"] = actionProp
 		}
 
-		effectProp, err := navigateValue(d, []string{"policy", "statement", "effect"}, newArrayIndex)
+		effectProp, err := navigateValue(d, []string{"statement", "effect"}, newArrayIndex)
 		if err != nil {
 			return nil, err
 		}
@@ -409,7 +329,7 @@ func expandIdentityRoleV3CreateRolePolicyStatement(d interface{}, arrayIndex map
 	return req, nil
 }
 
-func expandIdentityRoleV3CreateRoleType(d interface{}, arrayIndex map[string]int) (interface{}, error) {
+func expandIdentityRoleV3CreateType(d interface{}, arrayIndex map[string]int) (interface{}, error) {
 	v, err := navigateValue(d, []string{"display_layer"}, arrayIndex)
 	if err != nil {
 		return nil, err
@@ -422,10 +342,33 @@ func expandIdentityRoleV3CreateRoleType(d interface{}, arrayIndex map[string]int
 	return nil, fmt.Errorf("unknown display layer:%v", v)
 }
 
-func expandIdentityRoleV3UpdateRole(d interface{}, arrayIndex map[string]int) (interface{}, error) {
-	req := make(map[string]interface{})
+func sendIdentityRoleV3UpdateRequest(d *schema.ResourceData, opts map[string]interface{},
+	arrayIndex map[string]int, client *golangsdk.ServiceClient) (interface{}, error) {
+	url, err := replaceVars(d, "OS-ROLE/roles/{id}", nil)
+	if err != nil {
+		return nil, err
+	}
+	url = client.ServiceURL(url)
 
-	descriptionProp, err := navigateValue(d, []string{"description"}, arrayIndex)
+	params, err := buildIdentityRoleV3UpdateParameters(opts, arrayIndex)
+	if err != nil {
+		return nil, fmt.Errorf("Error building the request body of api(update)")
+	}
+
+	r := golangsdk.Result{}
+	_, r.Err = client.Patch(url, params, &r.Body, &golangsdk.RequestOpts{
+		OkCodes: successHTTPCodes,
+	})
+	if r.Err != nil {
+		return nil, fmt.Errorf("Error run api(update): %s", r.Err)
+	}
+	return r.Body, nil
+}
+
+func buildIdentityRoleV3UpdateParameters(opts map[string]interface{}, arrayIndex map[string]int) (interface{}, error) {
+	params := make(map[string]interface{})
+
+	descriptionProp, err := navigateValue(opts, []string{"description"}, arrayIndex)
 	if err != nil {
 		return nil, err
 	}
@@ -434,10 +377,10 @@ func expandIdentityRoleV3UpdateRole(d interface{}, arrayIndex map[string]int) (i
 		return nil, err
 	}
 	if !e {
-		req["description"] = descriptionProp
+		params["description"] = descriptionProp
 	}
 
-	displayNameProp, err := navigateValue(d, []string{"display_name"}, arrayIndex)
+	displayNameProp, err := navigateValue(opts, []string{"display_name"}, arrayIndex)
 	if err != nil {
 		return nil, err
 	}
@@ -446,10 +389,10 @@ func expandIdentityRoleV3UpdateRole(d interface{}, arrayIndex map[string]int) (i
 		return nil, err
 	}
 	if !e {
-		req["display_name"] = displayNameProp
+		params["display_name"] = displayNameProp
 	}
 
-	policyProp, err := expandIdentityRoleV3UpdateRolePolicy(d, arrayIndex)
+	policyProp, err := expandIdentityRoleV3UpdatePolicy(opts, arrayIndex)
 	if err != nil {
 		return nil, err
 	}
@@ -458,10 +401,10 @@ func expandIdentityRoleV3UpdateRole(d interface{}, arrayIndex map[string]int) (i
 		return nil, err
 	}
 	if !e {
-		req["policy"] = policyProp
+		params["policy"] = policyProp
 	}
 
-	typeProp, err := expandIdentityRoleV3UpdateRoleType(d, arrayIndex)
+	typeProp, err := expandIdentityRoleV3UpdateType(opts, arrayIndex)
 	if err != nil {
 		return nil, err
 	}
@@ -470,16 +413,18 @@ func expandIdentityRoleV3UpdateRole(d interface{}, arrayIndex map[string]int) (i
 		return nil, err
 	}
 	if !e {
-		req["type"] = typeProp
+		params["type"] = typeProp
 	}
 
-	return req, nil
+	params = map[string]interface{}{"role": params}
+
+	return params, nil
 }
 
-func expandIdentityRoleV3UpdateRolePolicy(d interface{}, arrayIndex map[string]int) (interface{}, error) {
+func expandIdentityRoleV3UpdatePolicy(d interface{}, arrayIndex map[string]int) (interface{}, error) {
 	req := make(map[string]interface{})
 
-	statementProp, err := expandIdentityRoleV3UpdateRolePolicyStatement(d, arrayIndex)
+	statementProp, err := expandIdentityRoleV3UpdatePolicyStatement(d, arrayIndex)
 	if err != nil {
 		return nil, err
 	}
@@ -496,7 +441,7 @@ func expandIdentityRoleV3UpdateRolePolicy(d interface{}, arrayIndex map[string]i
 	return req, nil
 }
 
-func expandIdentityRoleV3UpdateRolePolicyStatement(d interface{}, arrayIndex map[string]int) (interface{}, error) {
+func expandIdentityRoleV3UpdatePolicyStatement(d interface{}, arrayIndex map[string]int) (interface{}, error) {
 	newArrayIndex := make(map[string]int)
 	if arrayIndex != nil {
 		for k, v := range arrayIndex {
@@ -504,7 +449,7 @@ func expandIdentityRoleV3UpdateRolePolicyStatement(d interface{}, arrayIndex map
 		}
 	}
 
-	v, err := navigateValue(d, []string{"policy", "statement"}, newArrayIndex)
+	v, err := navigateValue(d, []string{"statement"}, newArrayIndex)
 	if err != nil {
 		return nil, err
 	}
@@ -512,10 +457,10 @@ func expandIdentityRoleV3UpdateRolePolicyStatement(d interface{}, arrayIndex map
 	n := len(v.([]interface{}))
 	req := make([]interface{}, 0, n)
 	for i := 0; i < n; i++ {
-		newArrayIndex["policy.statement"] = i
+		newArrayIndex["statement"] = i
 		transformed := make(map[string]interface{})
 
-		actionProp, err := navigateValue(d, []string{"policy", "statement", "action"}, newArrayIndex)
+		actionProp, err := navigateValue(d, []string{"statement", "action"}, newArrayIndex)
 		if err != nil {
 			return nil, err
 		}
@@ -527,7 +472,7 @@ func expandIdentityRoleV3UpdateRolePolicyStatement(d interface{}, arrayIndex map
 			transformed["Action"] = actionProp
 		}
 
-		effectProp, err := navigateValue(d, []string{"policy", "statement", "effect"}, newArrayIndex)
+		effectProp, err := navigateValue(d, []string{"statement", "effect"}, newArrayIndex)
 		if err != nil {
 			return nil, err
 		}
@@ -545,7 +490,7 @@ func expandIdentityRoleV3UpdateRolePolicyStatement(d interface{}, arrayIndex map
 	return req, nil
 }
 
-func expandIdentityRoleV3UpdateRoleType(d interface{}, arrayIndex map[string]int) (interface{}, error) {
+func expandIdentityRoleV3UpdateType(d interface{}, arrayIndex map[string]int) (interface{}, error) {
 	v, err := navigateValue(d, []string{"display_layer"}, arrayIndex)
 	if err != nil {
 		return nil, err
@@ -556,4 +501,174 @@ func expandIdentityRoleV3UpdateRoleType(d interface{}, arrayIndex map[string]int
 		return "XA", nil
 	}
 	return nil, fmt.Errorf("unknown display layer:%v", v)
+}
+
+func readIdentityRoleV3Read(d *schema.ResourceData, client *golangsdk.ServiceClient, result map[string]interface{}) error {
+	url, err := replaceVars(d, "OS-ROLE/roles/{id}", nil)
+	if err != nil {
+		return err
+	}
+	url = client.ServiceURL(url)
+
+	r := golangsdk.Result{}
+	_, r.Err = client.Get(
+		url, &r.Body,
+		&golangsdk.RequestOpts{MoreHeaders: map[string]string{"Content-Type": "application/json"}})
+	if r.Err != nil {
+		return fmt.Errorf("Error running api(read) for resource(IdentityRoleV3: %v), error: %s", d.Id(), r.Err)
+	}
+
+	v, err := navigateValue(r.Body, []string{"role"}, nil)
+	if err != nil {
+		return err
+	}
+	result["read"] = v
+
+	return nil
+}
+
+func setIdentityRoleV3Properties(d *schema.ResourceData, response map[string]interface{}) error {
+	opts := resourceIdentityRoleV3UserInputParams(d)
+
+	statementProp, _ := opts["statement"]
+	statementProp, err := flattenIdentityRoleV3Statement(response, nil, statementProp)
+	if err != nil {
+		return fmt.Errorf("Error reading Role:statement, err: %s", err)
+	}
+	if err = d.Set("statement", statementProp); err != nil {
+		return fmt.Errorf("Error setting Role:statement, err: %s", err)
+	}
+
+	catalogProp, err := navigateValue(response, []string{"read", "catalog"}, nil)
+	if err != nil {
+		return fmt.Errorf("Error reading Role:catalog, err: %s", err)
+	}
+	if err = d.Set("catalog", catalogProp); err != nil {
+		return fmt.Errorf("Error setting Role:catalog, err: %s", err)
+	}
+
+	descriptionProp, ok := opts["description"]
+	if descriptionProp != nil {
+		ok, _ = isEmptyValue(reflect.ValueOf(descriptionProp))
+		ok = !ok
+	}
+	if !ok {
+		descriptionProp, err = navigateValue(response, []string{"read", "description"}, nil)
+		if err != nil {
+			return fmt.Errorf("Error reading Role:description, err: %s", err)
+		}
+		if err = d.Set("description", descriptionProp); err != nil {
+			return fmt.Errorf("Error setting Role:description, err: %s", err)
+		}
+	}
+
+	displayLayerProp, _ := opts["display_layer"]
+	displayLayerProp, err = flattenIdentityRoleV3DisplayLayer(response, nil, displayLayerProp)
+	if err != nil {
+		return fmt.Errorf("Error reading Role:display_layer, err: %s", err)
+	}
+	if err = d.Set("display_layer", displayLayerProp); err != nil {
+		return fmt.Errorf("Error setting Role:display_layer, err: %s", err)
+	}
+
+	displayNameProp, ok := opts["display_name"]
+	if displayNameProp != nil {
+		ok, _ = isEmptyValue(reflect.ValueOf(displayNameProp))
+		ok = !ok
+	}
+	if !ok {
+		displayNameProp, err = navigateValue(response, []string{"read", "display_name"}, nil)
+		if err != nil {
+			return fmt.Errorf("Error reading Role:display_name, err: %s", err)
+		}
+		if err = d.Set("display_name", displayNameProp); err != nil {
+			return fmt.Errorf("Error setting Role:display_name, err: %s", err)
+		}
+	}
+
+	domainIDProp, err := navigateValue(response, []string{"read", "domain_id"}, nil)
+	if err != nil {
+		return fmt.Errorf("Error reading Role:domain_id, err: %s", err)
+	}
+	if err = d.Set("domain_id", domainIDProp); err != nil {
+		return fmt.Errorf("Error setting Role:domain_id, err: %s", err)
+	}
+
+	nameProp, err := navigateValue(response, []string{"read", "name"}, nil)
+	if err != nil {
+		return fmt.Errorf("Error reading Role:name, err: %s", err)
+	}
+	if err = d.Set("name", nameProp); err != nil {
+		return fmt.Errorf("Error setting Role:name, err: %s", err)
+	}
+
+	return nil
+}
+
+func flattenIdentityRoleV3Statement(d interface{}, arrayIndex map[string]int, currentValue interface{}) (interface{}, error) {
+	result, ok := currentValue.([]interface{})
+	if !ok || len(result) == 0 {
+		v, err := navigateValue(d, []string{"read", "policy", "Statement"}, arrayIndex)
+		if err != nil {
+			return nil, err
+		}
+		n := len(v.([]interface{}))
+		result = make([]interface{}, n, n)
+	}
+
+	newArrayIndex := make(map[string]int)
+	if arrayIndex != nil {
+		for k, v := range arrayIndex {
+			newArrayIndex[k] = v
+		}
+	}
+
+	for i := 0; i < len(result); i++ {
+		newArrayIndex["read.policy.Statement"] = i
+		if result[i] == nil {
+			result[i] = make(map[string]interface{})
+		}
+		r := result[i].(map[string]interface{})
+
+		actionProp, ok := r["action"]
+		if actionProp != nil {
+			ok, _ = isEmptyValue(reflect.ValueOf(actionProp))
+			ok = !ok
+		}
+		if !ok {
+			actionProp, err := navigateValue(d, []string{"read", "policy", "Statement", "Action"}, newArrayIndex)
+			if err != nil {
+				return nil, fmt.Errorf("Error reading Role:action, err: %s", err)
+			}
+			r["action"] = actionProp
+		}
+
+		effectProp, ok := r["effect"]
+		if effectProp != nil {
+			ok, _ = isEmptyValue(reflect.ValueOf(effectProp))
+			ok = !ok
+		}
+		if !ok {
+			effectProp, err := navigateValue(d, []string{"read", "policy", "Statement", "Effect"}, newArrayIndex)
+			if err != nil {
+				return nil, fmt.Errorf("Error reading Role:effect, err: %s", err)
+			}
+			r["effect"] = effectProp
+		}
+	}
+
+	return result, nil
+}
+
+func flattenIdentityRoleV3DisplayLayer(d interface{}, arrayIndex map[string]int, currentValue interface{}) (interface{}, error) {
+	v, err := navigateValue(d, []string{"read", "type"}, arrayIndex)
+	if err != nil {
+		return nil, err
+	}
+	if v == "AX" {
+		return "domain", nil
+	} else if v == "XA" {
+		return "project", nil
+	}
+	return nil, fmt.Errorf("unknown display type:%v", v)
 }
