@@ -44,15 +44,14 @@ var testAccOTCDedicatedHostServerV1DataSource_basic = fmt.Sprintf(`
 resource "opentelekomcloud_deh_host_v1" "deh1" {
 	 availability_zone= "%s"
      auto_placement= "on"
-     host_type= "s2"
+     host_type= "s2-medium"
 	name = "deh-test-1"
 }
 
 resource "opentelekomcloud_compute_instance_v2" "instance_1" {
   name = "ecs-instance-1"
-  image_id = "%s"
-  flavor_name = "%s"
   security_groups = ["default"]
+  flavor_name = "s2.medium.1"
   availability_zone = "%s"
   metadata {
     foo = "bar"
@@ -70,4 +69,4 @@ data "opentelekomcloud_deh_server_v1" "servers" {
   dedicated_host_id  = "${opentelekomcloud_deh_host_v1.deh1.id}"
   server_id = "${opentelekomcloud_compute_instance_v2.instance_1.id}"
 }
-`, OS_AVAILABILITY_ZONE, OS_IMAGE_ID, OS_FLAVOR_NAME, OS_AVAILABILITY_ZONE, OS_NETWORK_ID)
+`, OS_AVAILABILITY_ZONE, OS_AVAILABILITY_ZONE, OS_NETWORK_ID)
