@@ -1047,7 +1047,7 @@ resource "opentelekomcloud_compute_instance_v2" "instance_1" {
   security_groups = ["default"]
   network {
     uuid = "%s"
-    fixed_ip_v4 = "10.0.0.24"
+    fixed_ip_v4 = "192.168.0.24"
   }
 }
 `, OS_NETWORK_ID)
@@ -1058,7 +1058,7 @@ resource "opentelekomcloud_compute_instance_v2" "instance_1" {
   security_groups = ["default"]
   network {
     uuid = "%s"
-    fixed_ip_v4 = "10.0.0.25"
+    fixed_ip_v4 = "192.168.0.25"
   }
 }
 `, OS_NETWORK_ID)

@@ -114,7 +114,7 @@ resource "opentelekomcloud_lb_pool_v2" "pool_1" {
 }
 
 resource "opentelekomcloud_lb_member_v2" "member_1" {
-  address = "10.0.0.10"
+  address = "192.168.0.10"
   protocol_port = 8080
   pool_id = "${opentelekomcloud_lb_pool_v2.pool_1.id}"
   subnet_id = "%s"
@@ -127,7 +127,7 @@ resource "opentelekomcloud_lb_member_v2" "member_1" {
 }
 
 resource "opentelekomcloud_lb_member_v2" "member_2" {
-  address = "10.0.0.11"
+  address = "192.168.0.11"
   protocol_port = 8080
   pool_id = "${opentelekomcloud_lb_pool_v2.pool_1.id}"
   subnet_id = "${opentelekomcloud_networking_subnet_v2.subnet_1.id}"
@@ -162,7 +162,7 @@ resource "opentelekomcloud_lb_pool_v2" "pool_1" {
 }
 
 resource "opentelekomcloud_lb_member_v2" "member_1" {
-  address = "10.0.0.10"
+  address = "192.168.0.10"
   protocol_port = 8080
   weight = 10
   admin_state_up = "true"
@@ -177,7 +177,7 @@ resource "opentelekomcloud_lb_member_v2" "member_1" {
 }
 
 resource "opentelekomcloud_lb_member_v2" "member_2" {
-  address = "10.0.0.11"
+  address = "192.168.0.11"
   protocol_port = 8080
   weight = 15
   admin_state_up = "true"
