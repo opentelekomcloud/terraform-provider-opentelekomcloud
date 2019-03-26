@@ -175,6 +175,7 @@ func resourceIdentityRoleV3Delete(d *schema.ResourceData, meta interface{}) erro
 	r := golangsdk.Result{}
 	_, r.Err = client.Delete(url, &golangsdk.RequestOpts{
 		OkCodes:      successHTTPCodes,
+		JSONBody:     nil,
 		JSONResponse: &r.Body,
 		MoreHeaders:  map[string]string{"Content-Type": "application/json"},
 	})
@@ -547,19 +548,12 @@ func setIdentityRoleV3Properties(d *schema.ResourceData, response map[string]int
 		return fmt.Errorf("Error setting Role:catalog, err: %s", err)
 	}
 
-	descriptionProp, ok := opts["description"]
-	if descriptionProp != nil {
-		ok, _ = isEmptyValue(reflect.ValueOf(descriptionProp))
-		ok = !ok
+	descriptionProp, err := navigateValue(response, []string{"read", "description"}, nil)
+	if err != nil {
+		return fmt.Errorf("Error reading Role:description, err: %s", err)
 	}
-	if !ok {
-		descriptionProp, err = navigateValue(response, []string{"read", "description"}, nil)
-		if err != nil {
-			return fmt.Errorf("Error reading Role:description, err: %s", err)
-		}
-		if err = d.Set("description", descriptionProp); err != nil {
-			return fmt.Errorf("Error setting Role:description, err: %s", err)
-		}
+	if err = d.Set("description", descriptionProp); err != nil {
+		return fmt.Errorf("Error setting Role:description, err: %s", err)
 	}
 
 	displayLayerProp, _ := opts["display_layer"]
@@ -571,19 +565,12 @@ func setIdentityRoleV3Properties(d *schema.ResourceData, response map[string]int
 		return fmt.Errorf("Error setting Role:display_layer, err: %s", err)
 	}
 
-	displayNameProp, ok := opts["display_name"]
-	if displayNameProp != nil {
-		ok, _ = isEmptyValue(reflect.ValueOf(displayNameProp))
-		ok = !ok
+	displayNameProp, err := navigateValue(response, []string{"read", "display_name"}, nil)
+	if err != nil {
+		return fmt.Errorf("Error reading Role:display_name, err: %s", err)
 	}
-	if !ok {
-		displayNameProp, err = navigateValue(response, []string{"read", "display_name"}, nil)
-		if err != nil {
-			return fmt.Errorf("Error reading Role:display_name, err: %s", err)
-		}
-		if err = d.Set("display_name", displayNameProp); err != nil {
-			return fmt.Errorf("Error setting Role:display_name, err: %s", err)
-		}
+	if err = d.Set("display_name", displayNameProp); err != nil {
+		return fmt.Errorf("Error setting Role:display_name, err: %s", err)
 	}
 
 	domainIDProp, err := navigateValue(response, []string{"read", "domain_id"}, nil)
@@ -630,31 +617,17 @@ func flattenIdentityRoleV3Statement(d interface{}, arrayIndex map[string]int, cu
 		}
 		r := result[i].(map[string]interface{})
 
-		actionProp, ok := r["action"]
-		if actionProp != nil {
-			ok, _ = isEmptyValue(reflect.ValueOf(actionProp))
-			ok = !ok
+		actionProp, err := navigateValue(d, []string{"read", "policy", "Statement", "Action"}, newArrayIndex)
+		if err != nil {
+			return nil, fmt.Errorf("Error reading Role:action, err: %s", err)
 		}
-		if !ok {
-			actionProp, err := navigateValue(d, []string{"read", "policy", "Statement", "Action"}, newArrayIndex)
-			if err != nil {
-				return nil, fmt.Errorf("Error reading Role:action, err: %s", err)
-			}
-			r["action"] = actionProp
-		}
+		r["action"] = actionProp
 
-		effectProp, ok := r["effect"]
-		if effectProp != nil {
-			ok, _ = isEmptyValue(reflect.ValueOf(effectProp))
-			ok = !ok
+		effectProp, err := navigateValue(d, []string{"read", "policy", "Statement", "Effect"}, newArrayIndex)
+		if err != nil {
+			return nil, fmt.Errorf("Error reading Role:effect, err: %s", err)
 		}
-		if !ok {
-			effectProp, err := navigateValue(d, []string{"read", "policy", "Statement", "Effect"}, newArrayIndex)
-			if err != nil {
-				return nil, fmt.Errorf("Error reading Role:effect, err: %s", err)
-			}
-			r["effect"] = effectProp
-		}
+		r["effect"] = effectProp
 	}
 
 	return result, nil
