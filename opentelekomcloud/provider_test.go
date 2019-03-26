@@ -28,6 +28,7 @@ var (
 	OS_SRC_SECRET_KEY         = os.Getenv("OS_SRC_SECRET_KEY")
 	OS_SWIFT_ENVIRONMENT      = os.Getenv("OS_SWIFT_ENVIRONMENT")
 	OS_MRS_ENVIRONMENT        = os.Getenv("OS_MRS_ENVIRONMENT")
+	OS_DCS_ENVIRONMENT        = os.Getenv("OS_DCS_ENVIRONMENT")
 	OS_AVAILABILITY_ZONE      = os.Getenv("OS_AVAILABILITY_ZONE")
 	OS_VPC_ID                 = os.Getenv("OS_VPC_ID")
 	OS_SUBNET_ID              = os.Getenv("OS_SUBNET_ID")
@@ -140,6 +141,14 @@ func testAccPreCheckMrs(t *testing.T) {
 
 	if OS_MRS_ENVIRONMENT == "" {
 		t.Skip("This environment does not support MRS tests")
+	}
+}
+
+func testAccPreCheckDcs(t *testing.T) {
+	testAccPreCheckRequiredEnvVars(t)
+
+	if OS_DCS_ENVIRONMENT == "" {
+		t.Skip("This environment does not support DCS tests")
 	}
 }
 
