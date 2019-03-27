@@ -356,6 +356,18 @@ resource "opentelekomcloud_networking_subnet_v2" "subnet_1" {
   network_id = "${opentelekomcloud_networking_network_v2.network_1.id}"
 }
 
+resource "opentelekomcloud_networking_network_v2" "network_2" {
+  name = "network_2"
+  admin_state_up = "true"
+}
+
+resource "opentelekomcloud_networking_subnet_v2" "subnet_2" {
+  name = "subnet_2"
+  cidr = "192.168.199.0/24"
+  ip_version = 4
+  network_id = "${opentelekomcloud_networking_network_v2.network_2.id}"
+}
+
 resource "opentelekomcloud_networking_router_v2" "router_1" {
   name = "router_1"
   admin_state_up = "true"
@@ -382,10 +394,10 @@ resource "opentelekomcloud_networking_port_v2" "port_1" {
 resource "opentelekomcloud_networking_port_v2" "port_2" {
   name = "port_2"
   admin_state_up = "true"
-  network_id = "${opentelekomcloud_networking_network_v2.network_1.id}"
+  network_id = "${opentelekomcloud_networking_network_v2.network_2.id}"
 
   fixed_ip {
-    subnet_id =  "${opentelekomcloud_networking_subnet_v2.subnet_1.id}"
+    subnet_id =  "${opentelekomcloud_networking_subnet_v2.subnet_2.id}"
     #ip_address = "192.168.199.24"
   }
 }
