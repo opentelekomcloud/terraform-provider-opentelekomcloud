@@ -155,11 +155,6 @@ In addition to the arguments listed above, the following computed attributes are
 * `nodes` -
   List of node objects. Structure is documented below.
 
-* `status` -
-  Return value. 100: The operation, such as instance creation, is in
-  progress. 200: The cluster is available. 303: The cluster is
-  unavailable.
-
 * `updated` -
   Last modification time of a cluster. The format is ISO8601:
   CCYY-MM-DDThh:mm:ss.
@@ -183,12 +178,6 @@ The `nodes` block contains:
 * `name` -
   (Optional)
   Instance name.
-
-* `status` -
-  (Optional)
-  Instance status. 100: The operation, such as instance creation,
-  is in progress. 200: The instance is available. 303: The
-  instance is unavailable.
 
 * `type` -
   (Optional)

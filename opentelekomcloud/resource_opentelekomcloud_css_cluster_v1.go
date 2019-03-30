@@ -186,21 +186,12 @@ func resourceCssClusterV1() *schema.Resource {
 							Type:     schema.TypeString,
 							Computed: true,
 						},
-						"status": {
-							Type:     schema.TypeString,
-							Computed: true,
-						},
 						"type": {
 							Type:     schema.TypeString,
 							Computed: true,
 						},
 					},
 				},
-			},
-
-			"status": {
-				Type:     schema.TypeString,
-				Computed: true,
 			},
 
 			"updated": {
@@ -812,14 +803,6 @@ func setCssClusterV1Properties(d *schema.ResourceData, response map[string]inter
 		return fmt.Errorf("Error setting Cluster:nodes, err: %s", err)
 	}
 
-	statusProp, err := navigateValue(response, []string{"read", "status"}, nil)
-	if err != nil {
-		return fmt.Errorf("Error reading Cluster:status, err: %s", err)
-	}
-	if err = d.Set("status", statusProp); err != nil {
-		return fmt.Errorf("Error setting Cluster:status, err: %s", err)
-	}
-
 	updatedProp, err := navigateValue(response, []string{"read", "updated"}, nil)
 	if err != nil {
 		return fmt.Errorf("Error reading Cluster:updated, err: %s", err)
@@ -969,12 +952,6 @@ func flattenCssClusterV1Nodes(d interface{}, arrayIndex map[string]int, currentV
 			return nil, fmt.Errorf("Error reading Cluster:name, err: %s", err)
 		}
 		r["name"] = nameProp
-
-		statusProp, err := navigateValue(d, []string{"read", "instances", "status"}, newArrayIndex)
-		if err != nil {
-			return nil, fmt.Errorf("Error reading Cluster:status, err: %s", err)
-		}
-		r["status"] = statusProp
 
 		typeProp, err := navigateValue(d, []string{"read", "instances", "type"}, newArrayIndex)
 		if err != nil {

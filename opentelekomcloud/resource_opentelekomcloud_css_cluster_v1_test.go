@@ -69,7 +69,7 @@ resource "opentelekomcloud_css_cluster_v1" "cluster" {
 
 func testAccCheckCssClusterV1Destroy(s *terraform.State) error {
 	config := testAccProvider.Meta().(*Config)
-	client, err := config.sdkClient(GetRegion(d, config), "css", serviceProjectLevel)
+	client, err := config.sdkClient(OS_REGION_NAME, "css", serviceProjectLevel)
 	if err != nil {
 		return fmt.Errorf("Error creating sdk client, err=%s", err)
 	}
@@ -99,7 +99,7 @@ func testAccCheckCssClusterV1Destroy(s *terraform.State) error {
 func testAccCheckCssClusterV1Exists() resource.TestCheckFunc {
 	return func(s *terraform.State) error {
 		config := testAccProvider.Meta().(*Config)
-		client, err := config.sdkClient(GetRegion(d, config), "css", serviceProjectLevel)
+		client, err := config.sdkClient(OS_REGION_NAME, "css", serviceProjectLevel)
 		if err != nil {
 			return fmt.Errorf("Error creating sdk client, err=%s", err)
 		}
