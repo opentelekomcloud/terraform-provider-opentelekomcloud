@@ -68,7 +68,8 @@ func replaceVars(d *schema.ResourceData, linkTmpl string, kv map[string]string) 
 			}
 			v, ok := d.GetOk(m)
 			if ok {
-				return v.(string)
+				v1, _ := convertToStr(v)
+				return v1
 			}
 		}
 		return ""
@@ -166,6 +167,20 @@ func convertToInt(v interface{}) (interface{}, error) {
 		return strconv.ParseInt(strVal, 10, 64)
 	}
 	return nil, fmt.Errorf("can not convert to integer")
+}
+
+func convertToStr(v interface{}) (string, error) {
+	if s, ok := v.(string); ok {
+		return s, nil
+
+	} else if i, ok := v.(int); ok {
+		return strconv.Itoa(i), nil
+
+	} else if b, ok := v.(bool); ok {
+		return strconv.FormatBool(b), nil
+	}
+
+	return "", fmt.Errorf("can't convert to string")
 }
 
 func waitToFinish(target, pending []string, timeout, interval time.Duration, f resource.StateRefreshFunc) (interface{}, error) {
