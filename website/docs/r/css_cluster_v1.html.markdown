@@ -73,7 +73,7 @@ The `node_config` block supports:
 
 * `network_info` -
   (Required)
-  Subnet information. Structure is documented below.
+  Network information. Structure is documented below.
 
 * `volume` -
   (Required)
@@ -98,7 +98,7 @@ The `network_info` block supports:
 The `volume` block supports:
 
 * `encryption_key` -
-  (Required)
+  (Optional)
   Key ID. The Default Master Keys cannot be used to create
   grants. Specifically, you cannot use Default Master Keys
   whose aliases end with /default in KMS to create clusters.
@@ -186,8 +186,8 @@ The `nodes` block contains:
 ## Timeouts
 
 This resource provides the following timeouts configuration options:
-- `create` - Default is 10 minute.
-- `update` - Default is 10 minute.
+- `create` - Default is 15 minute.
+- `update` - Default is 30 minute.
 
 ## Import
 

@@ -36,8 +36,8 @@ func resourceCssClusterV1() *schema.Resource {
 		},
 
 		Timeouts: &schema.ResourceTimeout{
-			Create: schema.DefaultTimeout(10 * time.Minute),
-			Update: schema.DefaultTimeout(10 * time.Minute),
+			Create: schema.DefaultTimeout(15 * time.Minute),
+			Update: schema.DefaultTimeout(30 * time.Minute),
 		},
 
 		Schema: map[string]*schema.Schema{
@@ -97,12 +97,6 @@ func resourceCssClusterV1() *schema.Resource {
 							MaxItems: 1,
 							Elem: &schema.Resource{
 								Schema: map[string]*schema.Schema{
-									"encryption_key": {
-										Type:     schema.TypeString,
-										Computed: true,
-										Optional: true,
-										ForceNew: true,
-									},
 									"size": {
 										Type:     schema.TypeInt,
 										Required: true,
@@ -111,6 +105,12 @@ func resourceCssClusterV1() *schema.Resource {
 									"volume_type": {
 										Type:     schema.TypeString,
 										Required: true,
+										ForceNew: true,
+									},
+									"encryption_key": {
+										Type:     schema.TypeString,
+										Computed: true,
+										Optional: true,
 										ForceNew: true,
 									},
 								},
@@ -236,7 +236,7 @@ func resourceCssClusterV1Create(d *schema.ResourceData, meta interface{}) error 
 	if err != nil {
 		return err
 	}
-	id, err := navigateValue(obj, []string{"cluster", "id"}, nil)
+	id, err := navigateValue(obj, []string{"id"}, nil)
 	if err != nil {
 		return fmt.Errorf("Error constructing id: %s", err)
 	}
@@ -277,7 +277,11 @@ func resourceCssClusterV1Update(d *schema.ResourceData, meta interface{}) error 
 		"node_config":              0,
 	}
 
-	_, err = sendCssClusterV1ExtendClusterRequest(d, opts, arrayIndex, client)
+	v, err := sendCssClusterV1ExtendClusterRequest(d, opts, arrayIndex, client)
+	if err != nil {
+		return err
+	}
+	_, err = asyncWaitCssClusterV1ExtendCluster(d, config, v, client)
 	if err != nil {
 		return err
 	}
@@ -629,7 +633,7 @@ func asyncWaitCssClusterV1Create(d *schema.ResourceData,
 				return nil, "", nil
 			}
 
-			status, err := navigateValue(r.Body, []string{"cluster", "status"}, nil)
+			status, err := navigateValue(r.Body, []string{"status"}, nil)
 			if err != nil {
 				return nil, "", nil
 			}
@@ -691,8 +695,7 @@ func asyncWaitCssClusterV1ExtendCluster(d *schema.ResourceData,
 	url = client.ServiceURL(url)
 
 	return waitToFinish(
-		[]string{"200"},
-		[]string{"100"},
+		[]string{"Done"}, []string{"Pending"},
 		d.Timeout(schema.TimeoutUpdate),
 		1*time.Second,
 		func() (interface{}, string, error) {
@@ -704,11 +707,10 @@ func asyncWaitCssClusterV1ExtendCluster(d *schema.ResourceData,
 				return nil, "", nil
 			}
 
-			status, err := navigateValue(r.Body, []string{"cluster", "status"}, nil)
-			if err != nil {
-				return nil, "", nil
+			if checkCssClusterV1ExtendClusterFinished(r.Body) {
+				return r.Body, "Done", nil
 			}
-			return r.Body, status.(string), nil
+			return r.Body, "Pending", nil
 		},
 	)
 }
@@ -887,12 +889,6 @@ func flattenCssClusterV1NodeConfigNetworkInfo(d interface{}, arrayIndex map[stri
 		return nil, fmt.Errorf("Error reading Cluster:subnet_id, err: %s", err)
 	}
 	r["subnet_id"] = subnetIDProp
-
-	vpcIdProp, err := navigateValue(d, []string{"read", "vpcId"}, arrayIndex)
-	if err != nil {
-		return nil, fmt.Errorf("Error reading Cluster:vpc_id, err: %s", err)
-	}
-	r["vpc_id"] = vpcIdProp
 
 	return result, nil
 }
