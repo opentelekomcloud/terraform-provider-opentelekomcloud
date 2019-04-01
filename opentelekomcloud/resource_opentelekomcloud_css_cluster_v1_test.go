@@ -48,7 +48,7 @@ resource "opentelekomcloud_networking_secgroup_v2" "secgroup" {
 }
 
 resource "opentelekomcloud_css_cluster_v1" "cluster" {
-  initial_node_num = 1
+  expect_node_num = 1
   name = "terraform_test_cluster%s"
   node_config = {
     flavor = "css.medium.8"

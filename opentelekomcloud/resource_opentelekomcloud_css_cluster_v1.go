@@ -41,12 +41,6 @@ func resourceCssClusterV1() *schema.Resource {
 		},
 
 		Schema: map[string]*schema.Schema{
-			"initial_node_num": {
-				Type:     schema.TypeInt,
-				Required: true,
-				ForceNew: true,
-			},
-
 			"name": {
 				Type:     schema.TypeString,
 				Required: true,
@@ -125,16 +119,17 @@ func resourceCssClusterV1() *schema.Resource {
 				},
 			},
 
-			"add_node_num": {
-				Type:     schema.TypeInt,
-				Optional: true,
-			},
-
 			"enable_https": {
 				Type:     schema.TypeBool,
 				Computed: true,
 				Optional: true,
 				ForceNew: true,
+			},
+
+			"expect_node_num": {
+				Type:     schema.TypeInt,
+				Optional: true,
+				Default:  1,
 			},
 
 			"actions": {
@@ -204,11 +199,11 @@ func resourceCssClusterV1() *schema.Resource {
 
 func resourceCssClusterV1UserInputParams(d *schema.ResourceData) map[string]interface{} {
 	return map[string]interface{}{
-		"add_node_num":     d.Get("add_node_num"),
-		"enable_https":     d.Get("enable_https"),
-		"initial_node_num": d.Get("initial_node_num"),
-		"name":             d.Get("name"),
-		"node_config":      d.Get("node_config"),
+		"terraform_resource_data": d,
+		"enable_https":            d.Get("enable_https"),
+		"expect_node_num":         d.Get("expect_node_num"),
+		"name":                    d.Get("name"),
+		"node_config":             d.Get("node_config"),
 	}
 }
 
@@ -392,7 +387,7 @@ func buildCssClusterV1CreateParameters(opts map[string]interface{}, arrayIndex m
 		params["instance"] = instanceProp
 	}
 
-	instanceNumProp, err := navigateValue(opts, []string{"initial_node_num"}, arrayIndex)
+	instanceNumProp, err := navigateValue(opts, []string{"expect_node_num"}, arrayIndex)
 	if err != nil {
 		return nil, err
 	}
@@ -668,7 +663,7 @@ func sendCssClusterV1ExtendClusterRequest(d *schema.ResourceData, opts map[strin
 func buildCssClusterV1ExtendClusterParameters(opts map[string]interface{}, arrayIndex map[string]int) (interface{}, error) {
 	params := make(map[string]interface{})
 
-	modifySizeProp, err := navigateValue(opts, []string{"add_node_num"}, arrayIndex)
+	modifySizeProp, err := expandCssClusterV1ExtendClusterNodeNum(opts, arrayIndex)
 	if err != nil {
 		return nil, err
 	}

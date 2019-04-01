@@ -21,7 +21,7 @@ resource "opentelekomcloud_networking_secgroup_v2" "secgroup" {
 }
 
 resource "opentelekomcloud_css_cluster_v1" "cluster" {
-  initial_node_num = 1
+  expect_node_num = 1
   name = "terraform_test_cluster"
   node_config = {
     flavor = "css.medium.8"
@@ -42,10 +42,6 @@ resource "opentelekomcloud_css_cluster_v1" "cluster" {
 ## Argument Reference
 
 The following arguments are supported:
-
-* `initial_node_num` -
-  (Required)
-  Number of cluster instances. The value range is 1 to 32.
 
 * `name` -
   (Required)
@@ -117,11 +113,6 @@ The `volume` block supports:
 
 - - -
 
-* `add_node_num` -
-  (Optional)
-  Number of instances to be added. NOTE: The total number of existing
-  instances and newly added instances in a cluster cannot exceed 32.
-
 * `enable_https` -
   (Optional)
   Whether communication encryption is performed on the cluster.
@@ -129,6 +120,10 @@ The `volume` block supports:
   encryption is enabled. Value true indicates that communication
   encryption is performed on the cluster. Value false indicates that
   communication encryption is not performed on the cluster.
+
+* `expect_node_num` -
+  (Optional)
+  Number of cluster instances. The value range is 1 to 32.
 
 ## Attributes Reference
 
