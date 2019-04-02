@@ -66,12 +66,12 @@ func resourceCssClusterV1() *schema.Resource {
 							MaxItems: 1,
 							Elem: &schema.Resource{
 								Schema: map[string]*schema.Schema{
-									"security_group_id": {
+									"network_id": {
 										Type:     schema.TypeString,
 										Required: true,
 										ForceNew: true,
 									},
-									"subnet_id": {
+									"security_group_id": {
 										Type:     schema.TypeString,
 										Required: true,
 										ForceNew: true,
@@ -517,7 +517,7 @@ func expandCssClusterV1CreateInstance(d interface{}, arrayIndex map[string]int) 
 func expandCssClusterV1CreateInstanceNics(d interface{}, arrayIndex map[string]int) (interface{}, error) {
 	req := make(map[string]interface{})
 
-	netIdProp, err := navigateValue(d, []string{"node_config", "network_info", "subnet_id"}, arrayIndex)
+	netIdProp, err := navigateValue(d, []string{"node_config", "network_info", "network_id"}, arrayIndex)
 	if err != nil {
 		return nil, err
 	}
@@ -855,17 +855,17 @@ func flattenCssClusterV1NodeConfigNetworkInfo(d interface{}, arrayIndex map[stri
 	}
 	r := result[0].(map[string]interface{})
 
+	networkIDProp, err := navigateValue(d, []string{"read", "subnetId"}, arrayIndex)
+	if err != nil {
+		return nil, fmt.Errorf("Error reading Cluster:network_id, err: %s", err)
+	}
+	r["network_id"] = networkIDProp
+
 	securityGroupIdProp, err := navigateValue(d, []string{"read", "securityGroupId"}, arrayIndex)
 	if err != nil {
 		return nil, fmt.Errorf("Error reading Cluster:security_group_id, err: %s", err)
 	}
 	r["security_group_id"] = securityGroupIdProp
-
-	subnetIDProp, err := navigateValue(d, []string{"read", "subnetId"}, arrayIndex)
-	if err != nil {
-		return nil, fmt.Errorf("Error reading Cluster:subnet_id, err: %s", err)
-	}
-	r["subnet_id"] = subnetIDProp
 
 	return result, nil
 }

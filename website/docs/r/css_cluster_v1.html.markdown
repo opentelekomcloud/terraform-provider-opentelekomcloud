@@ -27,7 +27,7 @@ resource "opentelekomcloud_css_cluster_v1" "cluster" {
     flavor = "css.medium.8"
     network_info = {
       security_group_id = "${opentelekomcloud_networking_secgroup_v2.secgroup.id}"
-      subnet_id = "{{ network_id }}"
+      network_id = "{{ network_id }}"
       vpc_id = "{{ vpc_id }}"
     }
     volume = {
@@ -77,15 +77,15 @@ The `node_config` block supports:
 
 The `network_info` block supports:
 
+* `network_id` -
+  (Required)
+  Network ID. All instances in a cluster must have the same
+  networks and security groups.
+
 * `security_group_id` -
   (Required)
   Security group ID. All instances in a cluster must have the
   same subnets and security groups.
-
-* `subnet_id` -
-  (Required)
-  Subnet ID. All instances in a cluster must have the same
-  subnets and security groups.
 
 * `vpc_id` -
   (Required)
