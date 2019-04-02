@@ -132,14 +132,6 @@ func resourceCssClusterV1() *schema.Resource {
 				Default:  1,
 			},
 
-			"actions": {
-				Type:     schema.TypeList,
-				Computed: true,
-				Elem: &schema.Schema{
-					Type: schema.TypeString,
-				},
-			},
-
 			"created": {
 				Type:     schema.TypeString,
 				Computed: true,
@@ -596,7 +588,6 @@ func expandCssClusterV1CreateInstanceVolume(d interface{}, arrayIndex map[string
 
 func asyncWaitCssClusterV1Create(d *schema.ResourceData,
 	config *Config, result interface{}, client *golangsdk.ServiceClient) (interface{}, error) {
-
 	pathParameters := map[string][]string{
 		"id": []string{"cluster", "id"},
 	}
@@ -682,7 +673,6 @@ func buildCssClusterV1ExtendClusterParameters(opts map[string]interface{}, array
 
 func asyncWaitCssClusterV1ExtendCluster(d *schema.ResourceData,
 	config *Config, result interface{}, client *golangsdk.ServiceClient) (interface{}, error) {
-
 	url, err := replaceVars(d, "clusters/{id}", nil)
 	if err != nil {
 		return nil, err
@@ -732,14 +722,6 @@ func readCssClusterV1Read(d *schema.ResourceData, client *golangsdk.ServiceClien
 
 func setCssClusterV1Properties(d *schema.ResourceData, response map[string]interface{}) error {
 	opts := resourceCssClusterV1UserInputParams(d)
-
-	actionsProp, err := navigateValue(response, []string{"read", "actions"}, nil)
-	if err != nil {
-		return fmt.Errorf("Error reading Cluster:actions, err: %s", err)
-	}
-	if err = d.Set("actions", actionsProp); err != nil {
-		return fmt.Errorf("Error setting Cluster:actions, err: %s", err)
-	}
 
 	createdProp, err := navigateValue(response, []string{"read", "created"}, nil)
 	if err != nil {

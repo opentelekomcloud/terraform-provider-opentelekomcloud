@@ -129,13 +129,6 @@ The `volume` block supports:
 
 In addition to the arguments listed above, the following computed attributes are exported:
 
-* `actions` -
-  Current behavior on a cluster. Value REBOOTING indicates that the
-  cluster is being restarted, GROWING indicates that capacity expansion
-  is being performed on the cluster, RESTORING indicates that the
-  cluster is being restored, and SNAPSHOTTINGindicates that the
-  snapshot is being created.
-
 * `created` -
   Time when a cluster is created. The format is ISO8601:
   CCYY-MM-DDThh:mm:ss.
