@@ -147,7 +147,7 @@ func dataSourceCSBSBackupPolicyV1Read(d *schema.ResourceData, meta interface{}) 
 	policyClient, err := config.csbsV1Client(GetRegion(d, config))
 
 	listOpts := policies.ListOpts{
-		ID:     d.Get("id").(string),
+		ID:     d.Id(),
 		Name:   d.Get("name").(string),
 		Status: d.Get("status").(string),
 	}

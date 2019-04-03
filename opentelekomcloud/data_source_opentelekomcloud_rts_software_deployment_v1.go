@@ -59,7 +59,7 @@ func dataSourceRTSSoftwareDeploymentV1Read(d *schema.ResourceData, meta interfac
 	orchestrationClient, err := config.orchestrationV1Client(GetRegion(d, config))
 
 	listOpts := softwaredeployment.ListOpts{
-		Id:       d.Get("id").(string),
+		Id:       d.Id(),
 		ServerId: d.Get("server_id").(string),
 		ConfigId: d.Get("config_id").(string),
 		Action:   d.Get("action").(string),

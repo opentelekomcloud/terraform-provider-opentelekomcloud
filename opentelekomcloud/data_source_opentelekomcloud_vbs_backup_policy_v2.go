@@ -94,7 +94,7 @@ func dataSourceVBSPolicyV2Read(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*Config)
 	vbsClient, err := config.vbsV2Client(GetRegion(d, config))
 
-	policyID := d.Get("id").(string)
+	policyID := d.Id()
 	rawTags := d.Get("filter_tags").(*schema.Set).List()
 	if len(rawTags) > 0 {
 		tagsOpts := tags.ListOpts{Action: "filter", Tags: getVBSFilterTagsV2(d)}

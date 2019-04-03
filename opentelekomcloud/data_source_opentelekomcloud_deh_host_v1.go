@@ -105,7 +105,7 @@ func dataSourceDEHHostV1Read(d *schema.ResourceData, meta interface{}) error {
 	dehClient, err := config.dehV1Client(GetRegion(d, config))
 
 	listOpts := hosts.ListOpts{
-		ID:    d.Get("id").(string),
+		ID:    d.Id(),
 		Name:  d.Get("name").(string),
 		State: d.Get("status").(string),
 		Az:    d.Get("availability_zone").(string),

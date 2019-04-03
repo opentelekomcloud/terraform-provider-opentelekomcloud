@@ -83,7 +83,7 @@ func dataSourceVpcSubnetV1Read(d *schema.ResourceData, meta interface{}) error {
 	}
 
 	listOpts := subnets.ListOpts{
-		ID:               d.Get("id").(string),
+		ID:               d.Id(),
 		Name:             d.Get("name").(string),
 		CIDR:             d.Get("cidr").(string),
 		Status:           d.Get("status").(string),
