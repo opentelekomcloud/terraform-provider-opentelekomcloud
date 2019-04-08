@@ -49,12 +49,10 @@ The following arguments are supported:
 
 * `metadata` - (Optional) Metadata key/value pairs to associate with the volume.
     Changing this updates the existing volume metadata.
-    The key/value include the following parameters:
-    `__system__cmkid` - (Optional) The ID of the kms key.
-
-    '__system__encrypted' - The default value is set to '0', it means
-      the volume is not encrypted, the value '1' means volume is
-      encrypted.
+    The EVS encryption capability with KMS key can be set with the following parameters:
+	* `__system__encrypted` - The default value is set to '0', which means
+      the volume is not encrypted, the value '1' indicates volume is encrypted.
+	* `__system__cmkid` - (Optional) The ID of the kms key.
 
 * `tags` - (Optional) Tags key/value pairs to associate with the volume.
     Changing this updates the existing volume tags.
