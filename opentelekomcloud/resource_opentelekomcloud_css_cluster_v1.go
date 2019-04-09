@@ -214,12 +214,17 @@ func resourceCssClusterV1Create(d *schema.ResourceData, meta interface{}) error 
 		"node_config":              0,
 	}
 
-	r, err := sendCssClusterV1CreateRequest(d, opts, arrayIndex, client)
+	params, err := buildCssClusterV1CreateParameters(opts, arrayIndex)
+	if err != nil {
+		return fmt.Errorf("Error building the request body of api(create)")
+	}
+	r, err := sendCssClusterV1CreateRequest(d, params, client)
 	if err != nil {
 		return fmt.Errorf("Error creating CssClusterV1: %s", err)
 	}
 
-	obj, err := asyncWaitCssClusterV1Create(d, config, r, client)
+	timeout := d.Timeout(schema.TimeoutCreate)
+	obj, err := asyncWaitCssClusterV1Create(d, config, r, client, timeout)
 	if err != nil {
 		return err
 	}
@@ -263,14 +268,21 @@ func resourceCssClusterV1Update(d *schema.ResourceData, meta interface{}) error 
 		"node_config.volume":       0,
 		"node_config":              0,
 	}
+	timeout := d.Timeout(schema.TimeoutUpdate)
 
-	v, err := sendCssClusterV1ExtendClusterRequest(d, opts, arrayIndex, client)
+	params, err := buildCssClusterV1ExtendClusterParameters(opts, arrayIndex)
 	if err != nil {
-		return err
+		return fmt.Errorf("Error building the request body of api(extend_cluster)")
 	}
-	_, err = asyncWaitCssClusterV1ExtendCluster(d, config, v, client)
-	if err != nil {
-		return err
+	if e, _ := isEmptyValue(reflect.ValueOf(params)); !e {
+		r, err := sendCssClusterV1ExtendClusterRequest(d, params, client)
+		if err != nil {
+			return err
+		}
+		_, err = asyncWaitCssClusterV1ExtendCluster(d, config, r, client, timeout)
+		if err != nil {
+			return err
+		}
 	}
 
 	return resourceCssClusterV1Read(d, meta)
@@ -294,7 +306,7 @@ func resourceCssClusterV1Delete(d *schema.ResourceData, meta interface{}) error 
 	_, r.Err = client.Delete(url, &golangsdk.RequestOpts{
 		OkCodes:      successHTTPCodes,
 		JSONBody:     nil,
-		JSONResponse: &r.Body,
+		JSONResponse: nil,
 		MoreHeaders:  map[string]string{"Content-Type": "application/json"},
 	})
 	if r.Err != nil {
@@ -319,25 +331,6 @@ func resourceCssClusterV1Delete(d *schema.ResourceData, meta interface{}) error 
 		},
 	)
 	return err
-}
-
-func sendCssClusterV1CreateRequest(d *schema.ResourceData, opts map[string]interface{},
-	arrayIndex map[string]int, client *golangsdk.ServiceClient) (interface{}, error) {
-	url := client.ServiceURL("clusters")
-
-	params, err := buildCssClusterV1CreateParameters(opts, arrayIndex)
-	if err != nil {
-		return nil, fmt.Errorf("Error building the request body of api(create)")
-	}
-
-	r := golangsdk.Result{}
-	_, r.Err = client.Post(url, params, &r.Body, &golangsdk.RequestOpts{
-		OkCodes: successHTTPCodes,
-	})
-	if r.Err != nil {
-		return nil, fmt.Errorf("Error run api(create): %s", r.Err)
-	}
-	return r.Body, nil
 }
 
 func buildCssClusterV1CreateParameters(opts map[string]interface{}, arrayIndex map[string]int) (interface{}, error) {
@@ -401,6 +394,10 @@ func buildCssClusterV1CreateParameters(opts map[string]interface{}, arrayIndex m
 	}
 	if !e {
 		params["name"] = nameProp
+	}
+
+	if len(params) == 0 {
+		return params, nil
 	}
 
 	params = map[string]interface{}{"cluster": params}
@@ -586,8 +583,22 @@ func expandCssClusterV1CreateInstanceVolume(d interface{}, arrayIndex map[string
 	return req, nil
 }
 
-func asyncWaitCssClusterV1Create(d *schema.ResourceData,
-	config *Config, result interface{}, client *golangsdk.ServiceClient) (interface{}, error) {
+func sendCssClusterV1CreateRequest(d *schema.ResourceData, params interface{},
+	client *golangsdk.ServiceClient) (interface{}, error) {
+	url := client.ServiceURL("clusters")
+
+	r := golangsdk.Result{}
+	_, r.Err = client.Post(url, params, &r.Body, &golangsdk.RequestOpts{
+		OkCodes: successHTTPCodes,
+	})
+	if r.Err != nil {
+		return nil, fmt.Errorf("Error run api(create): %s", r.Err)
+	}
+	return r.Body, nil
+}
+
+func asyncWaitCssClusterV1Create(d *schema.ResourceData, config *Config, result interface{},
+	client *golangsdk.ServiceClient, timeout time.Duration) (interface{}, error) {
 	pathParameters := map[string][]string{
 		"id": []string{"cluster", "id"},
 	}
@@ -608,8 +619,7 @@ func asyncWaitCssClusterV1Create(d *schema.ResourceData,
 	return waitToFinish(
 		[]string{"200"},
 		[]string{"100"},
-		d.Timeout(schema.TimeoutCreate),
-		1*time.Second,
+		timeout, 1*time.Second,
 		func() (interface{}, string, error) {
 			r := golangsdk.Result{}
 			_, r.Err = client.Get(
@@ -628,29 +638,6 @@ func asyncWaitCssClusterV1Create(d *schema.ResourceData,
 	)
 }
 
-func sendCssClusterV1ExtendClusterRequest(d *schema.ResourceData, opts map[string]interface{},
-	arrayIndex map[string]int, client *golangsdk.ServiceClient) (interface{}, error) {
-	url, err := replaceVars(d, "clusters/{id}/extend", nil)
-	if err != nil {
-		return nil, err
-	}
-	url = client.ServiceURL(url)
-
-	params, err := buildCssClusterV1ExtendClusterParameters(opts, arrayIndex)
-	if err != nil {
-		return nil, fmt.Errorf("Error building the request body of api(extend_cluster)")
-	}
-
-	r := golangsdk.Result{}
-	_, r.Err = client.Post(url, params, &r.Body, &golangsdk.RequestOpts{
-		OkCodes: successHTTPCodes,
-	})
-	if r.Err != nil {
-		return nil, fmt.Errorf("Error run api(extend_cluster): %s", r.Err)
-	}
-	return r.Body, nil
-}
-
 func buildCssClusterV1ExtendClusterParameters(opts map[string]interface{}, arrayIndex map[string]int) (interface{}, error) {
 	params := make(map[string]interface{})
 
@@ -666,13 +653,35 @@ func buildCssClusterV1ExtendClusterParameters(opts map[string]interface{}, array
 		params["modifySize"] = modifySizeProp
 	}
 
+	if len(params) == 0 {
+		return params, nil
+	}
+
 	params = map[string]interface{}{"grow": params}
 
 	return params, nil
 }
 
-func asyncWaitCssClusterV1ExtendCluster(d *schema.ResourceData,
-	config *Config, result interface{}, client *golangsdk.ServiceClient) (interface{}, error) {
+func sendCssClusterV1ExtendClusterRequest(d *schema.ResourceData, params interface{},
+	client *golangsdk.ServiceClient) (interface{}, error) {
+	url, err := replaceVars(d, "clusters/{id}/extend", nil)
+	if err != nil {
+		return nil, err
+	}
+	url = client.ServiceURL(url)
+
+	r := golangsdk.Result{}
+	_, r.Err = client.Post(url, params, &r.Body, &golangsdk.RequestOpts{
+		OkCodes: successHTTPCodes,
+	})
+	if r.Err != nil {
+		return nil, fmt.Errorf("Error run api(extend_cluster): %s", r.Err)
+	}
+	return r.Body, nil
+}
+
+func asyncWaitCssClusterV1ExtendCluster(d *schema.ResourceData, config *Config, result interface{},
+	client *golangsdk.ServiceClient, timeout time.Duration) (interface{}, error) {
 	url, err := replaceVars(d, "clusters/{id}", nil)
 	if err != nil {
 		return nil, err
@@ -680,9 +689,7 @@ func asyncWaitCssClusterV1ExtendCluster(d *schema.ResourceData,
 	url = client.ServiceURL(url)
 
 	return waitToFinish(
-		[]string{"Done"}, []string{"Pending"},
-		d.Timeout(schema.TimeoutUpdate),
-		1*time.Second,
+		[]string{"Done"}, []string{"Pending"}, timeout, 1*time.Second,
 		func() (interface{}, string, error) {
 			r := golangsdk.Result{}
 			_, r.Err = client.Get(
