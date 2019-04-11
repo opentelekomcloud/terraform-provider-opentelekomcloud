@@ -246,10 +246,11 @@ func resourceCssClusterV1Read(d *schema.ResourceData, meta interface{}) error {
 
 	res := make(map[string]interface{})
 
-	err = readCssClusterV1Read(d, client, res)
+	v, err := sendCssClusterV1ReadRequest(d, client)
 	if err != nil {
 		return err
 	}
+	res["read"] = v
 
 	return setCssClusterV1Properties(d, res)
 }
@@ -707,10 +708,10 @@ func asyncWaitCssClusterV1ExtendCluster(d *schema.ResourceData, config *Config, 
 	)
 }
 
-func readCssClusterV1Read(d *schema.ResourceData, client *golangsdk.ServiceClient, result map[string]interface{}) error {
+func sendCssClusterV1ReadRequest(d *schema.ResourceData, client *golangsdk.ServiceClient) (interface{}, error) {
 	url, err := replaceVars(d, "clusters/{id}", nil)
 	if err != nil {
-		return err
+		return nil, err
 	}
 	url = client.ServiceURL(url)
 
@@ -719,12 +720,10 @@ func readCssClusterV1Read(d *schema.ResourceData, client *golangsdk.ServiceClien
 		url, &r.Body,
 		&golangsdk.RequestOpts{MoreHeaders: map[string]string{"Content-Type": "application/json"}})
 	if r.Err != nil {
-		return fmt.Errorf("Error running api(read) for resource(CssClusterV1: %v), error: %s", d.Id(), r.Err)
+		return nil, fmt.Errorf("Error running api(read) for resource(CssClusterV1: %v), error: %s", d.Id(), r.Err)
 	}
 
-	result["read"] = r.Body
-
-	return nil
+	return r.Body, nil
 }
 
 func setCssClusterV1Properties(d *schema.ResourceData, response map[string]interface{}) error {

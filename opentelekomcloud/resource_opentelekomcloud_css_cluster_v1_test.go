@@ -106,7 +106,7 @@ func testAccCheckCssClusterV1Exists() resource.TestCheckFunc {
 
 		rs, ok := s.RootModule().Resources["opentelekomcloud_css_cluster_v1.cluster"]
 		if !ok {
-			return fmt.Errorf("Error checking opentelekomcloud_css_cluster_v1.cluster exist, err=not found opentelekomcloud_css_cluster_v1.cluster")
+			return fmt.Errorf("Error checking opentelekomcloud_css_cluster_v1.cluster exist, err=not found this resource")
 		}
 
 		url, err := replaceVarsForTest(rs, "clusters/{id}")
