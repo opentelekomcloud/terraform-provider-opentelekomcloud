@@ -56,7 +56,7 @@ func resourceDmsGroupsV1Create(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*Config)
 	dmsV1Client, err := config.dmsV1Client(GetRegion(d, config))
 	if err != nil {
-		return fmt.Errorf("Error creating Telefonicaopencloud dms group client: %s", err)
+		return fmt.Errorf("Error creating OpenTelekomCloud dms group client: %s", err)
 	}
 
 	var getGroups []groups.GroupOps
@@ -74,7 +74,7 @@ func resourceDmsGroupsV1Create(d *schema.ResourceData, meta interface{}) error {
 
 	v, err := groups.Create(dmsV1Client, d.Get("queue_id").(string), createOpts).Extract()
 	if err != nil {
-		return fmt.Errorf("Error creating Telefonicaopencloud group: %s", err)
+		return fmt.Errorf("Error creating OpenTelekomCloud group: %s", err)
 	}
 	log.Printf("[INFO] group Name: %s", v[0].Name)
 
@@ -90,7 +90,7 @@ func resourceDmsGroupsV1Read(d *schema.ResourceData, meta interface{}) error {
 
 	dmsV1Client, err := config.dmsV1Client(GetRegion(d, config))
 	if err != nil {
-		return fmt.Errorf("Error creating Telefonicaopencloud dms group client: %s", err)
+		return fmt.Errorf("Error creating OpenTelekomCloud dms group client: %s", err)
 	}
 
 	queueID := d.Get("queue_id").(string)
@@ -126,12 +126,12 @@ func resourceDmsGroupsV1Delete(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*Config)
 	dmsV1Client, err := config.dmsV1Client(GetRegion(d, config))
 	if err != nil {
-		return fmt.Errorf("Error creating Telefonicaopencloud dms group client: %s", err)
+		return fmt.Errorf("Error creating OpenTelekomCloud dms group client: %s", err)
 	}
 
 	err = groups.Delete(dmsV1Client, d.Get("queue_id").(string), d.Id()).ExtractErr()
 	if err != nil {
-		return fmt.Errorf("Error deleting Telefonicaopencloud group: %s", err)
+		return fmt.Errorf("Error deleting OpenTelekomCloud group: %s", err)
 	}
 
 	log.Printf("[DEBUG] Dms group %s deactivated.", d.Id())

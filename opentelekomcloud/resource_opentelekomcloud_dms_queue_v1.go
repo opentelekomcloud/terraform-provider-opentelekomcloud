@@ -81,7 +81,7 @@ func resourceDmsQueuesV1Create(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*Config)
 	dmsV1Client, err := config.dmsV1Client(GetRegion(d, config))
 	if err != nil {
-		return fmt.Errorf("Error creating Telefonicaopencloud dms queue client: %s", err)
+		return fmt.Errorf("Error creating OpenTelekomCloud dms queue client: %s", err)
 	}
 
 	createOpts := &queues.CreateOps{
@@ -96,7 +96,7 @@ func resourceDmsQueuesV1Create(d *schema.ResourceData, meta interface{}) error {
 	log.Printf("[DEBUG] Create Options: %#v", createOpts)
 	v, err := queues.Create(dmsV1Client, createOpts).Extract()
 	if err != nil {
-		return fmt.Errorf("Error creating Telefonicaopencloud queue: %s", err)
+		return fmt.Errorf("Error creating OpenTelekomCloud queue: %s", err)
 	}
 	log.Printf("[INFO] Queue ID: %s", v.ID)
 
@@ -111,7 +111,7 @@ func resourceDmsQueuesV1Read(d *schema.ResourceData, meta interface{}) error {
 
 	dmsV1Client, err := config.dmsV1Client(GetRegion(d, config))
 	if err != nil {
-		return fmt.Errorf("Error creating Telefonicaopencloud dms queue client: %s", err)
+		return fmt.Errorf("Error creating OpenTelekomCloud dms queue client: %s", err)
 	}
 	v, err := queues.Get(dmsV1Client, d.Id(), true).Extract()
 	if err != nil {
@@ -139,7 +139,7 @@ func resourceDmsQueuesV1Delete(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*Config)
 	dmsV1Client, err := config.dmsV1Client(GetRegion(d, config))
 	if err != nil {
-		return fmt.Errorf("Error creating Telefonicaopencloud dms queue client: %s", err)
+		return fmt.Errorf("Error creating OpenTelekomCloud dms queue client: %s", err)
 	}
 
 	v, err := queues.Get(dmsV1Client, d.Id(), false).Extract()
@@ -149,7 +149,7 @@ func resourceDmsQueuesV1Delete(d *schema.ResourceData, meta interface{}) error {
 
 	err = queues.Delete(dmsV1Client, d.Id()).ExtractErr()
 	if err != nil {
-		return fmt.Errorf("Error deleting Telefonicaopencloud queue: %s", err)
+		return fmt.Errorf("Error deleting OpenTelekomCloud queue: %s", err)
 	}
 
 	log.Printf("[DEBUG] Dms queue %s: %+v deactivated.", d.Id(), v)
