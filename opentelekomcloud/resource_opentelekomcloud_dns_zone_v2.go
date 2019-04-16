@@ -240,7 +240,7 @@ func resourceDNSZoneV2Update(d *schema.ResourceData, meta interface{}) error {
 		return fmt.Errorf("Error creating OpenTelekomCloud DNS client: %s", err)
 	}
 
-	zone_type := d.Get("zone_type").(string)
+	zone_type := d.Get("type").(string)
 	router := d.Get("router").(*schema.Set).List()
 
 	// router is required when updating private zone
