@@ -982,10 +982,10 @@
 			"revisionTime": "2019-01-09T11:13:08Z"
 		},
 		{
-			"checksumSHA1": "xZtYDt64TwCA7g1yE5NbO2QQZxc=",
+			"checksumSHA1": "58ovRnFApwAp3onHjMWm/UZJvD4=",
 			"path": "github.com/huaweicloud/golangsdk/openstack/dns/v2/zones",
-			"revision": "98f31e4f21bec892b331ee55c5a5fff72d407abc",
-			"revisionTime": "2018-02-26T07:57:01Z"
+			"revision": "49551ba13819e06f9cf2273e498f59efa6dff3c4",
+			"revisionTime": "2019-04-02T09:21:00Z"
 		},
 		{
 			"checksumSHA1": "/GtDTHl+01QKRmNPxxdWXfuJ/nw=",
