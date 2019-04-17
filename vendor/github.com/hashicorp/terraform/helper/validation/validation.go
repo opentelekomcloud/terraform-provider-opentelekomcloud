@@ -1,6 +1,7 @@
 package validation
 
 import (
+	"bytes"
 	"fmt"
 	"net"
 	"reflect"
@@ -11,6 +12,39 @@ import (
 	"github.com/hashicorp/terraform/helper/schema"
 	"github.com/hashicorp/terraform/helper/structure"
 )
+
+// All returns a SchemaValidateFunc which tests if the provided value
+// passes all provided SchemaValidateFunc
+func All(validators ...schema.SchemaValidateFunc) schema.SchemaValidateFunc {
+	return func(i interface{}, k string) ([]string, []error) {
+		var allErrors []error
+		var allWarnings []string
+		for _, validator := range validators {
+			validatorWarnings, validatorErrors := validator(i, k)
+			allWarnings = append(allWarnings, validatorWarnings...)
+			allErrors = append(allErrors, validatorErrors...)
+		}
+		return allWarnings, allErrors
+	}
+}
+
+// Any returns a SchemaValidateFunc which tests if the provided value
+// passes any of the provided SchemaValidateFunc
+func Any(validators ...schema.SchemaValidateFunc) schema.SchemaValidateFunc {
+	return func(i interface{}, k string) ([]string, []error) {
+		var allErrors []error
+		var allWarnings []string
+		for _, validator := range validators {
+			validatorWarnings, validatorErrors := validator(i, k)
+			if len(validatorWarnings) == 0 && len(validatorErrors) == 0 {
+				return []string{}, []error{}
+			}
+			allWarnings = append(allWarnings, validatorWarnings...)
+			allErrors = append(allErrors, validatorErrors...)
+		}
+		return allWarnings, allErrors
+	}
+}
 
 // IntBetween returns a SchemaValidateFunc which tests if the provided value
 // is of type int and is between min and max (inclusive)
@@ -65,6 +99,27 @@ func IntAtMost(max int) schema.SchemaValidateFunc {
 			return
 		}
 
+		return
+	}
+}
+
+// IntInSlice returns a SchemaValidateFunc which tests if the provided value
+// is of type int and matches the value of an element in the valid slice
+func IntInSlice(valid []int) schema.SchemaValidateFunc {
+	return func(i interface{}, k string) (s []string, es []error) {
+		v, ok := i.(int)
+		if !ok {
+			es = append(es, fmt.Errorf("expected type of %s to be an integer", k))
+			return
+		}
+
+		for _, validInt := range valid {
+			if v == validInt {
+				return
+			}
+		}
+
+		es = append(es, fmt.Errorf("expected %s to be one of %v, got %d", k, valid, v))
 		return
 	}
 }
@@ -176,6 +231,51 @@ func CIDRNetwork(min, max int) schema.SchemaValidateFunc {
 				k, min, max, sigbits))
 		}
 
+		return
+	}
+}
+
+// SingleIP returns a SchemaValidateFunc which tests if the provided value
+// is of type string, and in valid single IP notation
+func SingleIP() schema.SchemaValidateFunc {
+	return func(i interface{}, k string) (s []string, es []error) {
+		v, ok := i.(string)
+		if !ok {
+			es = append(es, fmt.Errorf("expected type of %s to be string", k))
+			return
+		}
+
+		ip := net.ParseIP(v)
+		if ip == nil {
+			es = append(es, fmt.Errorf(
+				"expected %s to contain a valid IP, got: %s", k, v))
+		}
+		return
+	}
+}
+
+// IPRange returns a SchemaValidateFunc which tests if the provided value
+// is of type string, and in valid IP range notation
+func IPRange() schema.SchemaValidateFunc {
+	return func(i interface{}, k string) (s []string, es []error) {
+		v, ok := i.(string)
+		if !ok {
+			es = append(es, fmt.Errorf("expected type of %s to be string", k))
+			return
+		}
+
+		ips := strings.Split(v, "-")
+		if len(ips) != 2 {
+			es = append(es, fmt.Errorf(
+				"expected %s to contain a valid IP range, got: %s", k, v))
+			return
+		}
+		ip1 := net.ParseIP(ips[0])
+		ip2 := net.ParseIP(ips[1])
+		if ip1 == nil || ip2 == nil || bytes.Compare(ip1, ip2) > 0 {
+			es = append(es, fmt.Errorf(
+				"expected %s to contain a valid IP range, got: %s", k, v))
+		}
 		return
 	}
 }

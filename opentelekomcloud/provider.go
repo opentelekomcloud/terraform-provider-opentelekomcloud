@@ -177,6 +177,7 @@ func Provider() terraform.ResourceProvider {
 		DataSourcesMap: map[string]*schema.Resource{
 			"opentelekomcloud_images_image_v2":            dataSourceImagesImageV2(),
 			"opentelekomcloud_networking_network_v2":      dataSourceNetworkingNetworkV2(),
+			"opentelekomcloud_networking_port_v2":         dataSourceNetworkingPortV2(),
 			"opentelekomcloud_networking_secgroup_v2":     dataSourceNetworkingSecGroupV2(),
 			"opentelekomcloud_s3_bucket_object":           dataSourceS3BucketObject(),
 			"opentelekomcloud_kms_key_v1":                 dataSourceKmsKeyV1(),
