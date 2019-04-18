@@ -90,6 +90,12 @@ func Provider() terraform.ResourceProvider {
 				Description: descriptions["token"],
 			},
 
+			"security_token": {
+				Type:        schema.TypeString,
+				Optional:    true,
+				Description: descriptions["security_token"],
+			},
+
 			"domain_id": {
 				Type:     schema.TypeString,
 				Optional: true,
@@ -334,6 +340,8 @@ func init() {
 
 		"token": "Authentication token to use as an alternative to username/password.",
 
+		"security_token": "Security token to use for OBS federated authentication.",
+
 		"domain_id": "The ID of the Domain to scope to (Identity v3).",
 
 		"domain_name": "The name of the Domain to scope to (Identity v3).",
@@ -375,6 +383,7 @@ func configureProvider(d *schema.ResourceData) (interface{}, error) {
 		Region:           d.Get("region").(string),
 		Swauth:           d.Get("swauth").(bool),
 		Token:            d.Get("token").(string),
+		SecurityToken:    d.Get("security_token").(string),
 		TenantID:         d.Get("tenant_id").(string),
 		TenantName:       d.Get("tenant_name").(string),
 		Username:         d.Get("user_name").(string),
