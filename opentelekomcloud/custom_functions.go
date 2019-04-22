@@ -40,3 +40,7 @@ func expandCssClusterV1ExtendClusterNodeNum(d interface{}, arrayIndex map[string
 	}
 	return v, nil
 }
+
+func expandRdsInstanceV3CreateRegion(d interface{}, arrayIndex map[string]int) (interface{}, error) {
+	return navigateValue(d, []string{"region"}, arrayIndex)
+}
