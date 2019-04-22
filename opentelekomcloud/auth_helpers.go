@@ -114,7 +114,7 @@ func GetCredentials(c *Config) (*awsCredentials.Credentials, error) {
 		&awsCredentials.StaticProvider{Value: awsCredentials.Value{
 			AccessKeyID:     c.AccessKey,
 			SecretAccessKey: c.SecretKey,
-			SessionToken:    c.Token,
+			SessionToken:    c.SecurityToken,
 		}},
 		&awsCredentials.EnvProvider{},
 		&awsCredentials.SharedCredentialsProvider{
