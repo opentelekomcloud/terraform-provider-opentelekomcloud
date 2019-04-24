@@ -819,7 +819,8 @@ func setRdsInstanceV3Properties(d *schema.ResourceData, response map[string]inte
 		return fmt.Errorf("Error setting Instance:flavor, err: %s", err)
 	}
 
-	haReplicationModeProp, err := navigateValue(response, []string{"list", "ha", "replication_mode"}, nil)
+	haReplicationModeProp, _ := opts["ha_replication_mode"]
+	haReplicationModeProp, err = flattenRdsInstanceV3HAReplicationMode(response, nil, haReplicationModeProp)
 	if err != nil {
 		return fmt.Errorf("Error reading Instance:ha_replication_mode, err: %s", err)
 	}
