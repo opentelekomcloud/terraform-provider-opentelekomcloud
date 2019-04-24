@@ -31,9 +31,12 @@ func resourceRdsInstanceV3() *schema.Resource {
 		Read:   resourceRdsInstanceV3Read,
 		Delete: resourceRdsInstanceV3Delete,
 
+		Importer: &schema.ResourceImporter{
+			State: schema.ImportStatePassthrough,
+		},
+
 		Timeouts: &schema.ResourceTimeout{
 			Create: schema.DefaultTimeout(30 * time.Minute),
-			Delete: schema.DefaultTimeout(30 * time.Minute),
 		},
 
 		Schema: map[string]*schema.Schema{
@@ -50,11 +53,6 @@ func resourceRdsInstanceV3() *schema.Resource {
 				MaxItems: 1,
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
-						"flavor": {
-							Type:     schema.TypeString,
-							Required: true,
-							ForceNew: true,
-						},
 						"password": {
 							Type:     schema.TypeString,
 							Required: true,
@@ -82,6 +80,12 @@ func resourceRdsInstanceV3() *schema.Resource {
 						},
 					},
 				},
+			},
+
+			"flavor": {
+				Type:     schema.TypeString,
+				Required: true,
+				ForceNew: true,
 			},
 
 			"name": {
@@ -230,6 +234,7 @@ func resourceRdsInstanceV3UserInputParams(d *schema.ResourceData) map[string]int
 		"availability_zone":       d.Get("availability_zone"),
 		"backup_strategy":         d.Get("backup_strategy"),
 		"db":                      d.Get("db"),
+		"flavor":                  d.Get("flavor"),
 		"ha_replication_mode":     d.Get("ha_replication_mode"),
 		"name":                    d.Get("name"),
 		"network_id":              d.Get("network_id"),
@@ -271,7 +276,7 @@ func resourceRdsInstanceV3Create(d *schema.ResourceData, meta interface{}) error
 	if err != nil {
 		return err
 	}
-	id, err := navigateValue(obj, []string{"instance", "id"}, nil)
+	id, err := navigateValue(obj, []string{"job", "instance", "id"}, nil)
 	if err != nil {
 		return fmt.Errorf("Error constructing id: %s", err)
 	}
@@ -319,13 +324,30 @@ func resourceRdsInstanceV3Delete(d *schema.ResourceData, meta interface{}) error
 		OkCodes:      successHTTPCodes,
 		JSONBody:     nil,
 		JSONResponse: &r.Body,
-		MoreHeaders:  map[string]string{"Content-Type": "application/json"},
+		MoreHeaders: map[string]string{
+			"Content-Type": "application/json",
+			"X-Language":   "en-us",
+		},
 	})
 	if r.Err != nil {
 		return fmt.Errorf("Error deleting Instance %q: %s", d.Id(), r.Err)
 	}
 
-	_, err = asyncWaitRdsInstanceV3Delete(d, config, r.Body, client, d.Timeout(schema.TimeoutDelete))
+	_, err = waitToFinish(
+		[]string{"Done"}, []string{"Pending"},
+		d.Timeout(schema.TimeoutCreate),
+		1*time.Second,
+		func() (interface{}, string, error) {
+			_, err := fetchRdsInstanceV3ByList(d, client)
+			if err != nil {
+				if strings.Index(err.Error(), "Error finding the resource by list api") != -1 {
+					return true, "Done", nil
+				}
+				return nil, "", nil
+			}
+			return true, "Pending", nil
+		},
+	)
 	return err
 }
 
@@ -392,7 +414,7 @@ func buildRdsInstanceV3CreateParameters(opts map[string]interface{}, arrayIndex 
 		params["disk_encryption_id"] = diskEncryptionIDProp
 	}
 
-	flavorRefProp, err := navigateValue(opts, []string{"db", "flavor"}, arrayIndex)
+	flavorRefProp, err := navigateValue(opts, []string{"flavor"}, arrayIndex)
 	if err != nil {
 		return nil, err
 	}
@@ -653,6 +675,9 @@ func sendRdsInstanceV3CreateRequest(d *schema.ResourceData, params interface{},
 	r := golangsdk.Result{}
 	_, r.Err = client.Post(url, params, &r.Body, &golangsdk.RequestOpts{
 		OkCodes: successHTTPCodes,
+		MoreHeaders: map[string]string{
+			"X-Language": "en-us",
+		},
 	})
 	if r.Err != nil {
 		return nil, fmt.Errorf("Error running api(create): %s", r.Err)
@@ -663,7 +688,7 @@ func sendRdsInstanceV3CreateRequest(d *schema.ResourceData, params interface{},
 func asyncWaitRdsInstanceV3Create(d *schema.ResourceData, config *Config, result interface{},
 	client *golangsdk.ServiceClient, timeout time.Duration) (interface{}, error) {
 
-	var data = make(map[string]string)
+	data := make(map[string]string)
 	pathParameters := map[string][]string{
 		"id": []string{"job_id"},
 	}
@@ -687,57 +712,16 @@ func asyncWaitRdsInstanceV3Create(d *schema.ResourceData, config *Config, result
 		timeout, 1*time.Second,
 		func() (interface{}, string, error) {
 			r := golangsdk.Result{}
-			_, r.Err = client.Get(
-				url, &r.Body,
-				&golangsdk.RequestOpts{MoreHeaders: map[string]string{"Content-Type": "application/json"}})
+			_, r.Err = client.Get(url, &r.Body, &golangsdk.RequestOpts{
+				MoreHeaders: map[string]string{
+					"Content-Type": "application/json",
+					"X-Language":   "en-us",
+				}})
 			if r.Err != nil {
 				return nil, "", nil
 			}
 
-			status, err := navigateValue(r.Body, []string{"status"}, nil)
-			if err != nil {
-				return nil, "", nil
-			}
-			return r.Body, status.(string), nil
-		},
-	)
-}
-
-func asyncWaitRdsInstanceV3Delete(d *schema.ResourceData, config *Config, result interface{},
-	client *golangsdk.ServiceClient, timeout time.Duration) (interface{}, error) {
-
-	var data = make(map[string]string)
-	pathParameters := map[string][]string{
-		"id": []string{"job_id"},
-	}
-	for key, path := range pathParameters {
-		value, err := navigateValue(result, path, nil)
-		if err != nil {
-			return nil, fmt.Errorf("Error retrieving async operation path parameter: %s", err)
-		}
-		data[key] = value.(string)
-	}
-
-	url, err := replaceVars(d, "jobs?id={id}", data)
-	if err != nil {
-		return nil, err
-	}
-	url = client.ServiceURL(url)
-
-	return waitToFinish(
-		[]string{"Completed"},
-		[]string{"Running"},
-		timeout, 1*time.Second,
-		func() (interface{}, string, error) {
-			r := golangsdk.Result{}
-			_, r.Err = client.Get(
-				url, &r.Body,
-				&golangsdk.RequestOpts{MoreHeaders: map[string]string{"Content-Type": "application/json"}})
-			if r.Err != nil {
-				return nil, "", nil
-			}
-
-			status, err := navigateValue(r.Body, []string{"status"}, nil)
+			status, err := navigateValue(r.Body, []string{"job", "status"}, nil)
 			if err != nil {
 				return nil, "", nil
 			}
@@ -747,38 +731,9 @@ func asyncWaitRdsInstanceV3Delete(d *schema.ResourceData, config *Config, result
 }
 
 func fetchRdsInstanceV3ByList(d *schema.ResourceData, client *golangsdk.ServiceClient) (interface{}, error) {
-	opts := resourceRdsInstanceV3UserInputParams(d)
+	identity := map[string]interface{}{"id": d.Id()}
 
-	arrayIndex := map[string]int{
-		"backup_strategy": 0,
-		"db":              0,
-		"volume":          0,
-	}
-
-	identity := make(map[string]interface{})
-
-	if v, err := navigateValue(opts, []string{"name"}, arrayIndex); err == nil {
-		identity["name"] = v
-	} else {
-		return nil, err
-	}
-
-	identity["id"] = d.Id()
-
-	p := make([]string, 0, 2)
-
-	if v, err := convertToStr(identity["name"]); err == nil {
-		p = append(p, fmt.Sprintf("name=%v", v))
-	} else {
-		return nil, err
-	}
-
-	if v, err := convertToStr(identity["id"]); err == nil {
-		p = append(p, fmt.Sprintf("id=%v", v))
-	} else {
-		return nil, err
-	}
-	queryLink := "?" + strings.Join(p, "&")
+	queryLink := "?id=" + identity["id"].(string)
 
 	link := client.ServiceURL("instances") + queryLink
 
@@ -811,9 +766,11 @@ func findRdsInstanceV3ByList(client *golangsdk.ServiceClient, link string, ident
 
 func sendRdsInstanceV3ListRequest(client *golangsdk.ServiceClient, url string) (interface{}, error) {
 	r := golangsdk.Result{}
-	_, r.Err = client.Get(
-		url, &r.Body,
-		&golangsdk.RequestOpts{MoreHeaders: map[string]string{"Content-Type": "application/json"}})
+	_, r.Err = client.Get(url, &r.Body, &golangsdk.RequestOpts{
+		MoreHeaders: map[string]string{
+			"Content-Type": "application/json",
+			"X-Language":   "en-us",
+		}})
 	if r.Err != nil {
 		return nil, fmt.Errorf("Error running api(list) for resource(RdsInstanceV3), error: %s", r.Err)
 	}
@@ -852,6 +809,14 @@ func setRdsInstanceV3Properties(d *schema.ResourceData, response map[string]inte
 	}
 	if err = d.Set("db", dbProp); err != nil {
 		return fmt.Errorf("Error setting Instance:db, err: %s", err)
+	}
+
+	flavorProp, err := navigateValue(response, []string{"list", "flavor_ref"}, nil)
+	if err != nil {
+		return fmt.Errorf("Error reading Instance:flavor, err: %s", err)
+	}
+	if err = d.Set("flavor", flavorProp); err != nil {
+		return fmt.Errorf("Error setting Instance:flavor, err: %s", err)
 	}
 
 	haReplicationModeProp, err := navigateValue(response, []string{"list", "ha", "replication_mode"}, nil)
@@ -965,12 +930,6 @@ func flattenRdsInstanceV3Db(d interface{}, arrayIndex map[string]int, currentVal
 		result[0] = make(map[string]interface{})
 	}
 	r := result[0].(map[string]interface{})
-
-	flavorProp, err := navigateValue(d, []string{"list", "flavor_ref"}, arrayIndex)
-	if err != nil {
-		return nil, fmt.Errorf("Error reading Instance:flavor, err: %s", err)
-	}
-	r["flavor"] = flavorProp
 
 	portProp, err := navigateValue(d, []string{"list", "port"}, arrayIndex)
 	if err != nil {
