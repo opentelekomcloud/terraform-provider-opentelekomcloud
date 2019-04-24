@@ -49,25 +49,24 @@ resource "opentelekomcloud_networking_secgroup_v2" "secgroup" {
 }
 
 resource "opentelekomcloud_rds_instance_v3" "instance" {
-  availability_zone = "{%s}"
+  availability_zone = "%s"
   db = {
     password = "Huangwei!120521"
     type = "PostgreSQL"
-    version = "9.5.5"
+    version = "9.5"
     port = "8635"
-    flavor = "rds.pg.s1.medium.ha"
   }
   name = "terraform_test_rds_instance%s"
   security_group_id = "${opentelekomcloud_networking_secgroup_v2.secgroup.id}"
-  network_id = "{%s}"
-  vpc_id = "{%s}" 
+  network_id = "%s"
+  vpc_id = "%s"
   volume {
     type = "COMMON"
     size = 100
   }
-  ha_replication_mode = "async"
+  flavor = "rds.pg.c2.medium"
   backup_strategy = {
-    start_time = "01:00:00"
+    start_time = "08:00-09:00"
     keep_days = 1
   }
 }
@@ -76,10 +75,11 @@ resource "opentelekomcloud_rds_instance_v3" "instance" {
 
 func testAccCheckRdsInstanceV3Destroy(s *terraform.State) error {
 	config := testAccProvider.Meta().(*Config)
-	client, err := config.sdkClient(OS_REGION_NAME, "rds", serviceProjectLevel)
+	client, err := config.sdkClient(OS_REGION_NAME, "rdsv1", serviceProjectLevel)
 	if err != nil {
 		return fmt.Errorf("Error creating sdk client, err=%s", err)
 	}
+	client.Endpoint = strings.Replace(client.Endpoint, "/rds/v1/", "/v3/", 1)
 
 	for _, rs := range s.RootModule().Resources {
 		if rs.Type != "opentelekomcloud_rds_instance_v3" {
@@ -102,10 +102,11 @@ func testAccCheckRdsInstanceV3Destroy(s *terraform.State) error {
 func testAccCheckRdsInstanceV3Exists() resource.TestCheckFunc {
 	return func(s *terraform.State) error {
 		config := testAccProvider.Meta().(*Config)
-		client, err := config.sdkClient(OS_REGION_NAME, "rds", serviceProjectLevel)
+		client, err := config.sdkClient(OS_REGION_NAME, "rdsv1", serviceProjectLevel)
 		if err != nil {
 			return fmt.Errorf("Error creating sdk client, err=%s", err)
 		}
+		client.Endpoint = strings.Replace(client.Endpoint, "/rds/v1/", "/v3/", 1)
 
 		rs, ok := s.RootModule().Resources["opentelekomcloud_rds_instance_v3.instance"]
 		if !ok {
@@ -126,49 +127,9 @@ func testAccCheckRdsInstanceV3Exists() resource.TestCheckFunc {
 func fetchRdsInstanceV3ByListOnTest(rs *terraform.ResourceState,
 	client *golangsdk.ServiceClient) (interface{}, error) {
 
-	opts := map[string]interface{}{
-		"availability_zone":   rs.Primary.Attributes["availability_zone"],
-		"backup_strategy":     rs.Primary.Attributes["backup_strategy"],
-		"db":                  rs.Primary.Attributes["db"],
-		"ha_replication_mode": rs.Primary.Attributes["ha_replication_mode"],
-		"name":                rs.Primary.Attributes["name"],
-		"network_id":          rs.Primary.Attributes["network_id"],
-		"param_group_id":      rs.Primary.Attributes["param_group_id"],
-		"security_group_id":   rs.Primary.Attributes["security_group_id"],
-		"volume":              rs.Primary.Attributes["volume"],
-		"vpc_id":              rs.Primary.Attributes["vpc_id"],
-	}
+	identity := map[string]interface{}{"id": rs.Primary.ID}
 
-	arrayIndex := map[string]int{
-		"backup_strategy": 0,
-		"db":              0,
-		"volume":          0,
-	}
-
-	identity := make(map[string]interface{})
-
-	if v, err := navigateValue(opts, []string{"name"}, arrayIndex); err == nil {
-		identity["name"] = v
-	} else {
-		return nil, err
-	}
-
-	identity["id"] = rs.Primary.ID
-
-	p := make([]string, 0, 2)
-
-	if v, err := convertToStr(identity["name"]); err == nil {
-		p = append(p, fmt.Sprintf("name=%v", v))
-	} else {
-		return nil, err
-	}
-
-	if v, err := convertToStr(identity["id"]); err == nil {
-		p = append(p, fmt.Sprintf("id=%v", v))
-	} else {
-		return nil, err
-	}
-	queryLink := "?" + strings.Join(p, "&")
+	queryLink := "?id=" + identity["id"].(string)
 
 	link := client.ServiceURL("instances") + queryLink
 

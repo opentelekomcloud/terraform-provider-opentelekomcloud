@@ -354,184 +354,154 @@ func resourceRdsInstanceV3Delete(d *schema.ResourceData, meta interface{}) error
 func buildRdsInstanceV3CreateParameters(opts map[string]interface{}, arrayIndex map[string]int) (interface{}, error) {
 	params := make(map[string]interface{})
 
-	availabilityZoneProp, err := navigateValue(opts, []string{"availability_zone"}, arrayIndex)
+	v, err := navigateValue(opts, []string{"availability_zone"}, arrayIndex)
 	if err != nil {
 		return nil, err
 	}
-	e, err := isEmptyValue(reflect.ValueOf(availabilityZoneProp))
-	if err != nil {
+	if e, err := isEmptyValue(reflect.ValueOf(v)); err != nil {
 		return nil, err
-	}
-	if !e {
-		params["availability_zone"] = availabilityZoneProp
+	} else if !e {
+		params["availability_zone"] = v
 	}
 
-	backupStrategyProp, err := expandRdsInstanceV3CreateBackupStrategy(opts, arrayIndex)
+	v, err = expandRdsInstanceV3CreateBackupStrategy(opts, arrayIndex)
 	if err != nil {
 		return nil, err
 	}
-	e, err = isEmptyValue(reflect.ValueOf(backupStrategyProp))
-	if err != nil {
+	if e, err := isEmptyValue(reflect.ValueOf(v)); err != nil {
 		return nil, err
-	}
-	if !e {
-		params["backup_strategy"] = backupStrategyProp
+	} else if !e {
+		params["backup_strategy"] = v
 	}
 
-	configurationIDProp, err := navigateValue(opts, []string{"param_group_id"}, arrayIndex)
+	v, err = navigateValue(opts, []string{"param_group_id"}, arrayIndex)
 	if err != nil {
 		return nil, err
 	}
-	e, err = isEmptyValue(reflect.ValueOf(configurationIDProp))
-	if err != nil {
+	if e, err := isEmptyValue(reflect.ValueOf(v)); err != nil {
 		return nil, err
-	}
-	if !e {
-		params["configuration_id"] = configurationIDProp
+	} else if !e {
+		params["configuration_id"] = v
 	}
 
-	datastoreProp, err := expandRdsInstanceV3CreateDatastore(opts, arrayIndex)
+	v, err = expandRdsInstanceV3CreateDatastore(opts, arrayIndex)
 	if err != nil {
 		return nil, err
 	}
-	e, err = isEmptyValue(reflect.ValueOf(datastoreProp))
-	if err != nil {
+	if e, err := isEmptyValue(reflect.ValueOf(v)); err != nil {
 		return nil, err
-	}
-	if !e {
-		params["datastore"] = datastoreProp
+	} else if !e {
+		params["datastore"] = v
 	}
 
-	diskEncryptionIDProp, err := navigateValue(opts, []string{"volume", "disk_encryption_id"}, arrayIndex)
+	v, err = navigateValue(opts, []string{"volume", "disk_encryption_id"}, arrayIndex)
 	if err != nil {
 		return nil, err
 	}
-	e, err = isEmptyValue(reflect.ValueOf(diskEncryptionIDProp))
-	if err != nil {
+	if e, err := isEmptyValue(reflect.ValueOf(v)); err != nil {
 		return nil, err
-	}
-	if !e {
-		params["disk_encryption_id"] = diskEncryptionIDProp
+	} else if !e {
+		params["disk_encryption_id"] = v
 	}
 
-	flavorRefProp, err := navigateValue(opts, []string{"flavor"}, arrayIndex)
+	v, err = navigateValue(opts, []string{"flavor"}, arrayIndex)
 	if err != nil {
 		return nil, err
 	}
-	e, err = isEmptyValue(reflect.ValueOf(flavorRefProp))
-	if err != nil {
+	if e, err := isEmptyValue(reflect.ValueOf(v)); err != nil {
 		return nil, err
-	}
-	if !e {
-		params["flavor_ref"] = flavorRefProp
+	} else if !e {
+		params["flavor_ref"] = v
 	}
 
-	haProp, err := expandRdsInstanceV3CreateHa(opts, arrayIndex)
+	v, err = expandRdsInstanceV3CreateHa(opts, arrayIndex)
 	if err != nil {
 		return nil, err
 	}
-	e, err = isEmptyValue(reflect.ValueOf(haProp))
-	if err != nil {
+	if e, err := isEmptyValue(reflect.ValueOf(v)); err != nil {
 		return nil, err
-	}
-	if !e {
-		params["ha"] = haProp
+	} else if !e {
+		params["ha"] = v
 	}
 
-	nameProp, err := navigateValue(opts, []string{"name"}, arrayIndex)
+	v, err = navigateValue(opts, []string{"name"}, arrayIndex)
 	if err != nil {
 		return nil, err
 	}
-	e, err = isEmptyValue(reflect.ValueOf(nameProp))
-	if err != nil {
+	if e, err := isEmptyValue(reflect.ValueOf(v)); err != nil {
 		return nil, err
-	}
-	if !e {
-		params["name"] = nameProp
+	} else if !e {
+		params["name"] = v
 	}
 
-	passwordProp, err := navigateValue(opts, []string{"db", "password"}, arrayIndex)
+	v, err = navigateValue(opts, []string{"db", "password"}, arrayIndex)
 	if err != nil {
 		return nil, err
 	}
-	e, err = isEmptyValue(reflect.ValueOf(passwordProp))
-	if err != nil {
+	if e, err := isEmptyValue(reflect.ValueOf(v)); err != nil {
 		return nil, err
-	}
-	if !e {
-		params["password"] = passwordProp
+	} else if !e {
+		params["password"] = v
 	}
 
-	portProp, err := navigateValue(opts, []string{"db", "port"}, arrayIndex)
+	v, err = navigateValue(opts, []string{"db", "port"}, arrayIndex)
 	if err != nil {
 		return nil, err
 	}
-	e, err = isEmptyValue(reflect.ValueOf(portProp))
-	if err != nil {
+	if e, err := isEmptyValue(reflect.ValueOf(v)); err != nil {
 		return nil, err
-	}
-	if !e {
-		params["port"] = portProp
+	} else if !e {
+		params["port"] = v
 	}
 
-	regionProp, err := expandRdsInstanceV3CreateRegion(opts, arrayIndex)
+	v, err = expandRdsInstanceV3CreateRegion(opts, arrayIndex)
 	if err != nil {
 		return nil, err
 	}
-	e, err = isEmptyValue(reflect.ValueOf(regionProp))
-	if err != nil {
+	if e, err := isEmptyValue(reflect.ValueOf(v)); err != nil {
 		return nil, err
-	}
-	if !e {
-		params["region"] = regionProp
+	} else if !e {
+		params["region"] = v
 	}
 
-	securityGroupIDProp, err := navigateValue(opts, []string{"security_group_id"}, arrayIndex)
+	v, err = navigateValue(opts, []string{"security_group_id"}, arrayIndex)
 	if err != nil {
 		return nil, err
 	}
-	e, err = isEmptyValue(reflect.ValueOf(securityGroupIDProp))
-	if err != nil {
+	if e, err := isEmptyValue(reflect.ValueOf(v)); err != nil {
 		return nil, err
-	}
-	if !e {
-		params["security_group_id"] = securityGroupIDProp
+	} else if !e {
+		params["security_group_id"] = v
 	}
 
-	subnetIDProp, err := navigateValue(opts, []string{"network_id"}, arrayIndex)
+	v, err = navigateValue(opts, []string{"network_id"}, arrayIndex)
 	if err != nil {
 		return nil, err
 	}
-	e, err = isEmptyValue(reflect.ValueOf(subnetIDProp))
-	if err != nil {
+	if e, err := isEmptyValue(reflect.ValueOf(v)); err != nil {
 		return nil, err
-	}
-	if !e {
-		params["subnet_id"] = subnetIDProp
+	} else if !e {
+		params["subnet_id"] = v
 	}
 
-	volumeProp, err := expandRdsInstanceV3CreateVolume(opts, arrayIndex)
+	v, err = expandRdsInstanceV3CreateVolume(opts, arrayIndex)
 	if err != nil {
 		return nil, err
 	}
-	e, err = isEmptyValue(reflect.ValueOf(volumeProp))
-	if err != nil {
+	if e, err := isEmptyValue(reflect.ValueOf(v)); err != nil {
 		return nil, err
-	}
-	if !e {
-		params["volume"] = volumeProp
+	} else if !e {
+		params["volume"] = v
 	}
 
-	vpcIDProp, err := navigateValue(opts, []string{"vpc_id"}, arrayIndex)
+	v, err = navigateValue(opts, []string{"vpc_id"}, arrayIndex)
 	if err != nil {
 		return nil, err
 	}
-	e, err = isEmptyValue(reflect.ValueOf(vpcIDProp))
-	if err != nil {
+	if e, err := isEmptyValue(reflect.ValueOf(v)); err != nil {
 		return nil, err
-	}
-	if !e {
-		params["vpc_id"] = vpcIDProp
+	} else if !e {
+		params["vpc_id"] = v
 	}
 
 	return params, nil
@@ -540,28 +510,24 @@ func buildRdsInstanceV3CreateParameters(opts map[string]interface{}, arrayIndex 
 func expandRdsInstanceV3CreateBackupStrategy(d interface{}, arrayIndex map[string]int) (interface{}, error) {
 	req := make(map[string]interface{})
 
-	keepDaysProp, err := navigateValue(d, []string{"backup_strategy", "keep_days"}, arrayIndex)
+	v, err := navigateValue(d, []string{"backup_strategy", "keep_days"}, arrayIndex)
 	if err != nil {
 		return nil, err
 	}
-	e, err := isEmptyValue(reflect.ValueOf(keepDaysProp))
-	if err != nil {
+	if e, err := isEmptyValue(reflect.ValueOf(v)); err != nil {
 		return nil, err
-	}
-	if !e {
-		req["keep_days"] = keepDaysProp
+	} else if !e {
+		req["keep_days"] = v
 	}
 
-	startTimeProp, err := navigateValue(d, []string{"backup_strategy", "start_time"}, arrayIndex)
+	v, err = navigateValue(d, []string{"backup_strategy", "start_time"}, arrayIndex)
 	if err != nil {
 		return nil, err
 	}
-	e, err = isEmptyValue(reflect.ValueOf(startTimeProp))
-	if err != nil {
+	if e, err := isEmptyValue(reflect.ValueOf(v)); err != nil {
 		return nil, err
-	}
-	if !e {
-		req["start_time"] = startTimeProp
+	} else if !e {
+		req["start_time"] = v
 	}
 
 	return req, nil
@@ -570,28 +536,24 @@ func expandRdsInstanceV3CreateBackupStrategy(d interface{}, arrayIndex map[strin
 func expandRdsInstanceV3CreateDatastore(d interface{}, arrayIndex map[string]int) (interface{}, error) {
 	req := make(map[string]interface{})
 
-	typeProp, err := navigateValue(d, []string{"db", "type"}, arrayIndex)
+	v, err := navigateValue(d, []string{"db", "type"}, arrayIndex)
 	if err != nil {
 		return nil, err
 	}
-	e, err := isEmptyValue(reflect.ValueOf(typeProp))
-	if err != nil {
+	if e, err := isEmptyValue(reflect.ValueOf(v)); err != nil {
 		return nil, err
-	}
-	if !e {
-		req["type"] = typeProp
+	} else if !e {
+		req["type"] = v
 	}
 
-	versionProp, err := navigateValue(d, []string{"db", "version"}, arrayIndex)
+	v, err = navigateValue(d, []string{"db", "version"}, arrayIndex)
 	if err != nil {
 		return nil, err
 	}
-	e, err = isEmptyValue(reflect.ValueOf(versionProp))
-	if err != nil {
+	if e, err := isEmptyValue(reflect.ValueOf(v)); err != nil {
 		return nil, err
-	}
-	if !e {
-		req["version"] = versionProp
+	} else if !e {
+		req["version"] = v
 	}
 
 	return req, nil
@@ -600,28 +562,24 @@ func expandRdsInstanceV3CreateDatastore(d interface{}, arrayIndex map[string]int
 func expandRdsInstanceV3CreateHa(d interface{}, arrayIndex map[string]int) (interface{}, error) {
 	req := make(map[string]interface{})
 
-	modeProp, err := expandRdsInstanceV3CreateHaMode(d, arrayIndex)
+	v, err := expandRdsInstanceV3CreateHaMode(d, arrayIndex)
 	if err != nil {
 		return nil, err
 	}
-	e, err := isEmptyValue(reflect.ValueOf(modeProp))
-	if err != nil {
+	if e, err := isEmptyValue(reflect.ValueOf(v)); err != nil {
 		return nil, err
-	}
-	if !e {
-		req["mode"] = modeProp
+	} else if !e {
+		req["mode"] = v
 	}
 
-	replicationModeProp, err := navigateValue(d, []string{"ha_replication_mode"}, arrayIndex)
+	v, err = navigateValue(d, []string{"ha_replication_mode"}, arrayIndex)
 	if err != nil {
 		return nil, err
 	}
-	e, err = isEmptyValue(reflect.ValueOf(replicationModeProp))
-	if err != nil {
+	if e, err := isEmptyValue(reflect.ValueOf(v)); err != nil {
 		return nil, err
-	}
-	if !e {
-		req["replication_mode"] = replicationModeProp
+	} else if !e {
+		req["replication_mode"] = v
 	}
 
 	return req, nil
@@ -641,28 +599,24 @@ func expandRdsInstanceV3CreateHaMode(d interface{}, arrayIndex map[string]int) (
 func expandRdsInstanceV3CreateVolume(d interface{}, arrayIndex map[string]int) (interface{}, error) {
 	req := make(map[string]interface{})
 
-	sizeProp, err := navigateValue(d, []string{"volume", "size"}, arrayIndex)
+	v, err := navigateValue(d, []string{"volume", "size"}, arrayIndex)
 	if err != nil {
 		return nil, err
 	}
-	e, err := isEmptyValue(reflect.ValueOf(sizeProp))
-	if err != nil {
+	if e, err := isEmptyValue(reflect.ValueOf(v)); err != nil {
 		return nil, err
-	}
-	if !e {
-		req["size"] = sizeProp
+	} else if !e {
+		req["size"] = v
 	}
 
-	typeProp, err := navigateValue(d, []string{"volume", "type"}, arrayIndex)
+	v, err = navigateValue(d, []string{"volume", "type"}, arrayIndex)
 	if err != nil {
 		return nil, err
 	}
-	e, err = isEmptyValue(reflect.ValueOf(typeProp))
-	if err != nil {
+	if e, err := isEmptyValue(reflect.ValueOf(v)); err != nil {
 		return nil, err
-	}
-	if !e {
-		req["type"] = typeProp
+	} else if !e {
+		req["type"] = v
 	}
 
 	return req, nil
@@ -785,112 +739,112 @@ func sendRdsInstanceV3ListRequest(client *golangsdk.ServiceClient, url string) (
 func setRdsInstanceV3Properties(d *schema.ResourceData, response map[string]interface{}) error {
 	opts := resourceRdsInstanceV3UserInputParams(d)
 
-	backupStrategyProp, _ := opts["backup_strategy"]
-	backupStrategyProp, err := flattenRdsInstanceV3BackupStrategy(response, nil, backupStrategyProp)
+	v, _ := opts["backup_strategy"]
+	v, err := flattenRdsInstanceV3BackupStrategy(response, nil, v)
 	if err != nil {
 		return fmt.Errorf("Error reading Instance:backup_strategy, err: %s", err)
 	}
-	if err = d.Set("backup_strategy", backupStrategyProp); err != nil {
+	if err = d.Set("backup_strategy", v); err != nil {
 		return fmt.Errorf("Error setting Instance:backup_strategy, err: %s", err)
 	}
 
-	createdProp, err := navigateValue(response, []string{"list", "created"}, nil)
+	v, err = navigateValue(response, []string{"list", "created"}, nil)
 	if err != nil {
 		return fmt.Errorf("Error reading Instance:created, err: %s", err)
 	}
-	if err = d.Set("created", createdProp); err != nil {
+	if err = d.Set("created", v); err != nil {
 		return fmt.Errorf("Error setting Instance:created, err: %s", err)
 	}
 
-	dbProp, _ := opts["db"]
-	dbProp, err = flattenRdsInstanceV3Db(response, nil, dbProp)
+	v, _ = opts["db"]
+	v, err = flattenRdsInstanceV3Db(response, nil, v)
 	if err != nil {
 		return fmt.Errorf("Error reading Instance:db, err: %s", err)
 	}
-	if err = d.Set("db", dbProp); err != nil {
+	if err = d.Set("db", v); err != nil {
 		return fmt.Errorf("Error setting Instance:db, err: %s", err)
 	}
 
-	flavorProp, err := navigateValue(response, []string{"list", "flavor_ref"}, nil)
+	v, err = navigateValue(response, []string{"list", "flavor_ref"}, nil)
 	if err != nil {
 		return fmt.Errorf("Error reading Instance:flavor, err: %s", err)
 	}
-	if err = d.Set("flavor", flavorProp); err != nil {
+	if err = d.Set("flavor", v); err != nil {
 		return fmt.Errorf("Error setting Instance:flavor, err: %s", err)
 	}
 
-	haReplicationModeProp, _ := opts["ha_replication_mode"]
-	haReplicationModeProp, err = flattenRdsInstanceV3HAReplicationMode(response, nil, haReplicationModeProp)
+	v, _ = opts["ha_replication_mode"]
+	v, err = flattenRdsInstanceV3HAReplicationMode(response, nil, v)
 	if err != nil {
 		return fmt.Errorf("Error reading Instance:ha_replication_mode, err: %s", err)
 	}
-	if err = d.Set("ha_replication_mode", haReplicationModeProp); err != nil {
+	if err = d.Set("ha_replication_mode", v); err != nil {
 		return fmt.Errorf("Error setting Instance:ha_replication_mode, err: %s", err)
 	}
 
-	nameProp, err := navigateValue(response, []string{"list", "name"}, nil)
+	v, err = navigateValue(response, []string{"list", "name"}, nil)
 	if err != nil {
 		return fmt.Errorf("Error reading Instance:name, err: %s", err)
 	}
-	if err = d.Set("name", nameProp); err != nil {
+	if err = d.Set("name", v); err != nil {
 		return fmt.Errorf("Error setting Instance:name, err: %s", err)
 	}
 
-	networkIDProp, err := navigateValue(response, []string{"list", "subnet_id"}, nil)
+	v, err = navigateValue(response, []string{"list", "subnet_id"}, nil)
 	if err != nil {
 		return fmt.Errorf("Error reading Instance:network_id, err: %s", err)
 	}
-	if err = d.Set("network_id", networkIDProp); err != nil {
+	if err = d.Set("network_id", v); err != nil {
 		return fmt.Errorf("Error setting Instance:network_id, err: %s", err)
 	}
 
-	nodesProp, _ := opts["nodes"]
-	nodesProp, err = flattenRdsInstanceV3Nodes(response, nil, nodesProp)
+	v, _ = opts["nodes"]
+	v, err = flattenRdsInstanceV3Nodes(response, nil, v)
 	if err != nil {
 		return fmt.Errorf("Error reading Instance:nodes, err: %s", err)
 	}
-	if err = d.Set("nodes", nodesProp); err != nil {
+	if err = d.Set("nodes", v); err != nil {
 		return fmt.Errorf("Error setting Instance:nodes, err: %s", err)
 	}
 
-	privateIpsProp, err := navigateValue(response, []string{"list", "private_ips"}, nil)
+	v, err = navigateValue(response, []string{"list", "private_ips"}, nil)
 	if err != nil {
 		return fmt.Errorf("Error reading Instance:private_ips, err: %s", err)
 	}
-	if err = d.Set("private_ips", privateIpsProp); err != nil {
+	if err = d.Set("private_ips", v); err != nil {
 		return fmt.Errorf("Error setting Instance:private_ips, err: %s", err)
 	}
 
-	publicIpsProp, err := navigateValue(response, []string{"list", "public_ips"}, nil)
+	v, err = navigateValue(response, []string{"list", "public_ips"}, nil)
 	if err != nil {
 		return fmt.Errorf("Error reading Instance:public_ips, err: %s", err)
 	}
-	if err = d.Set("public_ips", publicIpsProp); err != nil {
+	if err = d.Set("public_ips", v); err != nil {
 		return fmt.Errorf("Error setting Instance:public_ips, err: %s", err)
 	}
 
-	securityGroupIDProp, err := navigateValue(response, []string{"list", "security_group_id"}, nil)
+	v, err = navigateValue(response, []string{"list", "security_group_id"}, nil)
 	if err != nil {
 		return fmt.Errorf("Error reading Instance:security_group_id, err: %s", err)
 	}
-	if err = d.Set("security_group_id", securityGroupIDProp); err != nil {
+	if err = d.Set("security_group_id", v); err != nil {
 		return fmt.Errorf("Error setting Instance:security_group_id, err: %s", err)
 	}
 
-	volumeProp, _ := opts["volume"]
-	volumeProp, err = flattenRdsInstanceV3Volume(response, nil, volumeProp)
+	v, _ = opts["volume"]
+	v, err = flattenRdsInstanceV3Volume(response, nil, v)
 	if err != nil {
 		return fmt.Errorf("Error reading Instance:volume, err: %s", err)
 	}
-	if err = d.Set("volume", volumeProp); err != nil {
+	if err = d.Set("volume", v); err != nil {
 		return fmt.Errorf("Error setting Instance:volume, err: %s", err)
 	}
 
-	vpcIDProp, err := navigateValue(response, []string{"list", "vpc_id"}, nil)
+	v, err = navigateValue(response, []string{"list", "vpc_id"}, nil)
 	if err != nil {
 		return fmt.Errorf("Error reading Instance:vpc_id, err: %s", err)
 	}
-	if err = d.Set("vpc_id", vpcIDProp); err != nil {
+	if err = d.Set("vpc_id", v); err != nil {
 		return fmt.Errorf("Error setting Instance:vpc_id, err: %s", err)
 	}
 
@@ -907,17 +861,17 @@ func flattenRdsInstanceV3BackupStrategy(d interface{}, arrayIndex map[string]int
 	}
 	r := result[0].(map[string]interface{})
 
-	keepDaysProp, err := navigateValue(d, []string{"list", "backup_strategy", "keep_days"}, arrayIndex)
+	v, err := navigateValue(d, []string{"list", "backup_strategy", "keep_days"}, arrayIndex)
 	if err != nil {
 		return nil, fmt.Errorf("Error reading Instance:keep_days, err: %s", err)
 	}
-	r["keep_days"] = keepDaysProp
+	r["keep_days"] = v
 
-	startTimeProp, err := navigateValue(d, []string{"list", "backup_strategy", "start_time"}, arrayIndex)
+	v, err = navigateValue(d, []string{"list", "backup_strategy", "start_time"}, arrayIndex)
 	if err != nil {
 		return nil, fmt.Errorf("Error reading Instance:start_time, err: %s", err)
 	}
-	r["start_time"] = startTimeProp
+	r["start_time"] = v
 
 	return result, nil
 }
@@ -932,29 +886,29 @@ func flattenRdsInstanceV3Db(d interface{}, arrayIndex map[string]int, currentVal
 	}
 	r := result[0].(map[string]interface{})
 
-	portProp, err := navigateValue(d, []string{"list", "port"}, arrayIndex)
+	v, err := navigateValue(d, []string{"list", "port"}, arrayIndex)
 	if err != nil {
 		return nil, fmt.Errorf("Error reading Instance:port, err: %s", err)
 	}
-	r["port"] = portProp
+	r["port"] = v
 
-	typeProp, err := navigateValue(d, []string{"list", "datastore", "type"}, arrayIndex)
+	v, err = navigateValue(d, []string{"list", "datastore", "type"}, arrayIndex)
 	if err != nil {
 		return nil, fmt.Errorf("Error reading Instance:type, err: %s", err)
 	}
-	r["type"] = typeProp
+	r["type"] = v
 
-	userNameProp, err := navigateValue(d, []string{"list", "db_user_name"}, arrayIndex)
+	v, err = navigateValue(d, []string{"list", "db_user_name"}, arrayIndex)
 	if err != nil {
 		return nil, fmt.Errorf("Error reading Instance:user_name, err: %s", err)
 	}
-	r["user_name"] = userNameProp
+	r["user_name"] = v
 
-	versionProp, err := navigateValue(d, []string{"list", "datastore", "version"}, arrayIndex)
+	v, err = navigateValue(d, []string{"list", "datastore", "version"}, arrayIndex)
 	if err != nil {
 		return nil, fmt.Errorf("Error reading Instance:version, err: %s", err)
 	}
-	r["version"] = versionProp
+	r["version"] = v
 
 	return result, nil
 }
@@ -984,35 +938,35 @@ func flattenRdsInstanceV3Nodes(d interface{}, arrayIndex map[string]int, current
 		}
 		r := result[i].(map[string]interface{})
 
-		availabilityZoneProp, err := navigateValue(d, []string{"list", "nodes", "availability_zone"}, newArrayIndex)
+		v, err := navigateValue(d, []string{"list", "nodes", "availability_zone"}, newArrayIndex)
 		if err != nil {
 			return nil, fmt.Errorf("Error reading Instance:availability_zone, err: %s", err)
 		}
-		r["availability_zone"] = availabilityZoneProp
+		r["availability_zone"] = v
 
-		idProp, err := navigateValue(d, []string{"list", "nodes", "id"}, newArrayIndex)
+		v, err = navigateValue(d, []string{"list", "nodes", "id"}, newArrayIndex)
 		if err != nil {
 			return nil, fmt.Errorf("Error reading Instance:id, err: %s", err)
 		}
-		r["id"] = idProp
+		r["id"] = v
 
-		nameProp, err := navigateValue(d, []string{"list", "nodes", "name"}, newArrayIndex)
+		v, err = navigateValue(d, []string{"list", "nodes", "name"}, newArrayIndex)
 		if err != nil {
 			return nil, fmt.Errorf("Error reading Instance:name, err: %s", err)
 		}
-		r["name"] = nameProp
+		r["name"] = v
 
-		roleProp, err := navigateValue(d, []string{"list", "nodes", "role"}, newArrayIndex)
+		v, err = navigateValue(d, []string{"list", "nodes", "role"}, newArrayIndex)
 		if err != nil {
 			return nil, fmt.Errorf("Error reading Instance:role, err: %s", err)
 		}
-		r["role"] = roleProp
+		r["role"] = v
 
-		statusProp, err := navigateValue(d, []string{"list", "nodes", "status"}, newArrayIndex)
+		v, err = navigateValue(d, []string{"list", "nodes", "status"}, newArrayIndex)
 		if err != nil {
 			return nil, fmt.Errorf("Error reading Instance:status, err: %s", err)
 		}
-		r["status"] = statusProp
+		r["status"] = v
 	}
 
 	return result, nil
@@ -1028,23 +982,23 @@ func flattenRdsInstanceV3Volume(d interface{}, arrayIndex map[string]int, curren
 	}
 	r := result[0].(map[string]interface{})
 
-	diskEncryptionIDProp, err := navigateValue(d, []string{"list", "disk_encryption_id"}, arrayIndex)
+	v, err := navigateValue(d, []string{"list", "disk_encryption_id"}, arrayIndex)
 	if err != nil {
 		return nil, fmt.Errorf("Error reading Instance:disk_encryption_id, err: %s", err)
 	}
-	r["disk_encryption_id"] = diskEncryptionIDProp
+	r["disk_encryption_id"] = v
 
-	sizeProp, err := navigateValue(d, []string{"list", "volume", "size"}, arrayIndex)
+	v, err = navigateValue(d, []string{"list", "volume", "size"}, arrayIndex)
 	if err != nil {
 		return nil, fmt.Errorf("Error reading Instance:size, err: %s", err)
 	}
-	r["size"] = sizeProp
+	r["size"] = v
 
-	typeProp, err := navigateValue(d, []string{"list", "volume", "type"}, arrayIndex)
+	v, err = navigateValue(d, []string{"list", "volume", "type"}, arrayIndex)
 	if err != nil {
 		return nil, fmt.Errorf("Error reading Instance:type, err: %s", err)
 	}
-	r["type"] = typeProp
+	r["type"] = v
 
 	return result, nil
 }
