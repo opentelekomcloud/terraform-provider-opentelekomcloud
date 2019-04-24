@@ -70,6 +70,6 @@ cluster_id = "${opentelekomcloud_cce_cluster_v3.cluster_1.id}"
 }
 data "opentelekomcloud_cce_node_v3" "nodes" {
 		cluster_id = "${opentelekomcloud_cce_cluster_v3.cluster_1.id}"
-		name = "${opentelekomcloud_cce_node_v3.node_1.name}"
+		node_id = "${opentelekomcloud_cce_node_v3.node_1.id}"
 }
 `, OS_VPC_ID, OS_NETWORK_ID, OS_AVAILABILITY_ZONE, OS_KEYPAIR_NAME)
