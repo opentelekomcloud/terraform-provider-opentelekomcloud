@@ -12,7 +12,7 @@ instance management
 
 ## Example Usage
 
-### Instance
+### create a single db instance
 
 ```hcl
 resource "opentelekomcloud_networking_secgroup_v2" "secgroup" {
@@ -21,25 +21,57 @@ resource "opentelekomcloud_networking_secgroup_v2" "secgroup" {
 }
 
 resource "opentelekomcloud_rds_instance_v3" "instance" {
-  availability_zone = "{{{ availability_zone }}}"
+  availability_zone = "{{ availability_zone }}"
   db = {
     password = "Huangwei!120521"
     type = "PostgreSQL"
-    version = "9.5.5"
+    version = "9.5"
     port = "8635"
-    flavor = "rds.pg.s1.medium.ha"
   }
   name = "terraform_test_rds_instance"
   security_group_id = "${opentelekomcloud_networking_secgroup_v2.secgroup.id}"
-  network_id = "{{{ network_id }}}"
-  vpc_id = "{{{ vpc_id }}}" 
+  network_id = "{{ network_id }}"
+  vpc_id = "{{ vpc_id }}"
   volume {
     type = "COMMON"
     size = 100
   }
+  flavor = "rds.pg.c2.medium"
+  backup_strategy = {
+    start_time = "08:00-09:00"
+    keep_days = 1
+  }
+}
+```
+
+### create a primary/standby db instance
+
+```hcl
+resource "opentelekomcloud_networking_secgroup_v2" "secgroup" {
+  name = "terraform_test_security_group"
+  description = "terraform security group acceptance test"
+}
+
+resource "opentelekomcloud_rds_instance_v3" "instance" {
+  availability_zone = "{{ availability_zone_1 }},{{ availability_zone_2 }}"
+  db = {
+    password = "Huangwei!120521"
+    type = "PostgreSQL"
+    version = "9.5"
+    port = "8635"
+  }
+  name = "terraform_test_rds_instance"
+  security_group_id = "${opentelekomcloud_networking_secgroup_v2.secgroup.id}"
+  network_id = "{{ network_id }}"
+  vpc_id = "{{ vpc_id }}" 
+  volume {
+    type = "COMMON"
+    size = 100
+  }
+  flavor = "rds.pg.s1.medium.ha"
   ha_replication_mode = "async"
   backup_strategy = {
-    start_time = "01:00:00"
+    start_time = "08:00-09:00"
     keep_days = 1
   }
 }
@@ -51,11 +83,15 @@ The following arguments are supported:
 
 * `availability_zone` -
   (Required)
-  Specifies the AZ ID. Changing this parameter will create a new resource.
+  Specifies the AZ name. Changing this parameter will create a new resource.
 
 * `db` -
   (Required)
   Specifies the database information. Structure is documented below. Changing this parameter will create a new resource.
+
+* `flavor` -
+  (Required)
+  Specifies the specification code. Changing this parameter will create a new resource.
 
 * `name` -
   (Required)
@@ -71,8 +107,8 @@ The following arguments are supported:
 
 * `security_group_id` -
   (Required)
-  Specifies the security group which the RDS DB instance belongs to. Changing
-  this parameter will create a new resource.
+  Specifies the security group which the RDS DB instance belongs to.
+  Changing this parameter will create a new resource.
 
 * `volume` -
   (Required)
@@ -84,10 +120,6 @@ The following arguments are supported:
 
 The `db` block supports:
 
-* `flavor` -
-  (Required)
-  Specifies the specification name. Changing this parameter will create a new resource.
-
 * `password` -
   (Required)
   Specifies the database password. The value cannot be
@@ -95,7 +127,7 @@ The `db` block supports:
   and lowercase letters, digits, and the following special
   characters: ~!@#%^*-_=+? You are advised to enter a strong
   password to improve security, preventing security risks such as
-  brute force cracking. Changing this parameter will create a new resource.
+  brute force cracking.  Changing this parameter will create a new resource.
 
 * `port` -
   (Optional)
@@ -121,7 +153,8 @@ The `db` block supports:
   Specifies the database version. MySQL databases support MySQL 5.6
   and 5.7. PostgreSQL databases support
   PostgreSQL 9.5 and 9.6. Microsoft SQL Server
-  databases support 2014 SE, 2016 SE, and 2016 EE. Changing this parameter will create a new resource.
+  databases support 2014 SE, 2016 SE, and 2016 EE.
+  Changing this parameter will create a new resource.
 
 The `volume` block supports:
 
@@ -138,7 +171,7 @@ The `volume` block supports:
   (Required)
   Specifies the volume type. Its value can be any of the following
   and is case-sensitive: COMMON: indicates the SATA type.  
-  ULTRAHIGH: indicates the SSD type. Changing this parameter will create a new resource.
+  ULTRAHIGH: indicates the SSD type.  Changing this parameter will create a new resource.
 
 - - -
 
@@ -167,7 +200,7 @@ The `backup_strategy` block supports:
   range is from 0 to 732. If this parameter is not specified or set
   to 0, the automated backup policy is disabled. NOTICE:
   Primary/standby DB instances of Microsoft SQL Server do not
-  support disabling the automated backup policy. Changing this parameter will create a new resource.
+  support disabling the automated backup policy.  Changing this parameter will create a new resource.
 
 * `start_time` -
   (Required)
@@ -183,13 +216,10 @@ The `backup_strategy` block supports:
 In addition to the arguments listed above, the following computed attributes are exported:
 
 * `created` -
-  Indicates the creation time in the &quot;yyyy-mm-ddThh:mm:ssZ&quot;
-  format. T is the separator between the calendar and the hourly
-  notation of time. Z indicates the time zone offset. For example, in
-  the Beijing time zone, the time zone offset is shown as +0800.
+  Indicates the creation time.
 
 * `nodes` -
-  Indicates the primary/standby DB instance information. Structure is documented below.
+  Indicates the instance nodes information. Structure is documented below.
 
 * `private_ips` -
   Indicates the private IP address list. It is a blank string until an
@@ -210,9 +240,7 @@ The `nodes` block contains:
   Indicates the node name.
 
 * `role` -
-  Indicates the node type. The value can be master, slave, or
-  readreplica, indicating the primary node, standby node, and
-  read replica node, respectively.
+  Indicates the node type. The value can be master or slave, indicating the primary node or standby node respectively.
 
 * `status` -
   Indicates the node status.
@@ -221,4 +249,11 @@ The `nodes` block contains:
 
 This resource provides the following timeouts configuration options:
 - `create` - Default is 30 minute.
-- `delete` - Default is 30 minute.
+
+## Import
+
+Instance can be imported using the following format:
+
+```
+$ terraform import opentelekomcloud_rds_instance_v3.default {{ resource id}}
+```
