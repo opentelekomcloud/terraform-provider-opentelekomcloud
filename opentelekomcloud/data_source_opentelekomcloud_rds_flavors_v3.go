@@ -21,6 +21,10 @@ func dataSourceRdsFlavorV3() *schema.Resource {
 				Type:     schema.TypeString,
 				Required: true,
 			},
+			"instance_mode": {
+				Type:     schema.TypeString,
+				Required: true,
+			},
 			"flavors": {
 				Type:     schema.TypeList,
 				Computed: true,
@@ -66,28 +70,34 @@ func dataSourceRdsFlavorV3Read(d *schema.ResourceData, meta interface{}) error {
 		return err
 	}
 
+	mode := d.Get("instance_mode").(string)
 	flavors := make([]interface{}, 0, len(r.([]interface{})))
 	for _, item := range r.([]interface{}) {
 		val := item.(map[string]interface{})
 
-		flavors = append(flavors, map[string]interface{}{
-			"vcpus":  val["vcpus"],
-			"memory": val["ram"],
-			"name":   val["spec_code"],
-			"mode":   val["instance_mode"],
-		})
+		if mode == val["instance_mode"].(string) {
+			flavors = append(flavors, map[string]interface{}{
+				"vcpus":  val["vcpus"],
+				"memory": val["ram"],
+				"name":   val["spec_code"],
+				"mode":   val["instance_mode"],
+			})
+		}
 	}
 
+	d.SetId("flavors")
 	return d.Set("flavors", flavors)
 }
 
 func sendRdsFlavorV3ListRequest(client *golangsdk.ServiceClient, url string) (interface{}, error) {
 	r := golangsdk.Result{}
-	_, r.Err = client.Get(
-		url, &r.Body,
-		&golangsdk.RequestOpts{MoreHeaders: map[string]string{"Content-Type": "application/json"}})
+	_, r.Err = client.Get(url, &r.Body, &golangsdk.RequestOpts{
+		MoreHeaders: map[string]string{
+			"Content-Type": "application/json",
+			"X-Language":   "en-us",
+		}})
 	if r.Err != nil {
-		return nil, fmt.Errorf("Error running api(list) for resource(RdsInstanceV3), error: %s", r.Err)
+		return nil, fmt.Errorf("Error fetching flavors for rds v3, error: %s", r.Err)
 	}
 
 	v, err := navigateValue(r.Body, []string{"flavors"}, nil)
