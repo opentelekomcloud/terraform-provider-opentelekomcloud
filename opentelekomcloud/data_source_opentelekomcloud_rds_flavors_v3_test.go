@@ -17,8 +17,6 @@ func TestAccOpenTelekomCloudRdsFlavorV3DataSource_basic(t *testing.T) {
 				Config: testAccOpenTelekomCloudRdsFlavorV3DataSource_basic,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckRdsFlavorV3DataSourceID("data.opentelekomcloud_rds_flavors_v3.flavor"),
-					resource.TestCheckResourceAttrSet(
-						"data.opentelekomcloud_rds_flavors_v3.flavor", "flavors"),
 				),
 			},
 		},
