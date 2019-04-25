@@ -85,9 +85,8 @@ func testAccCheckCssClusterV1Destroy(s *terraform.State) error {
 		}
 		url = client.ServiceURL(url)
 
-		_, err = client.Get(
-			url, nil,
-			&golangsdk.RequestOpts{MoreHeaders: map[string]string{"Content-Type": "application/json"}})
+		_, err = client.Get(url, nil, &golangsdk.RequestOpts{
+			MoreHeaders: map[string]string{"Content-Type": "application/json"}})
 		if err == nil {
 			return fmt.Errorf("opentelekomcloud_css_cluster_v1 still exists at %s", url)
 		}
@@ -115,9 +114,8 @@ func testAccCheckCssClusterV1Exists() resource.TestCheckFunc {
 		}
 		url = client.ServiceURL(url)
 
-		_, err = client.Get(
-			url, nil,
-			&golangsdk.RequestOpts{MoreHeaders: map[string]string{"Content-Type": "application/json"}})
+		_, err = client.Get(url, nil, &golangsdk.RequestOpts{
+			MoreHeaders: map[string]string{"Content-Type": "application/json"}})
 		if err != nil {
 			if _, ok := err.(golangsdk.ErrDefault404); ok {
 				return fmt.Errorf("opentelekomcloud_css_cluster_v1.cluster is not exist")

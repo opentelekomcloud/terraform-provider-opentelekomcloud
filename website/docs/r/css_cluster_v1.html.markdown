@@ -12,7 +12,7 @@ cluster management
 
 ## Example Usage
 
-### Cluster
+### create a cluster
 
 ```hcl
 resource "opentelekomcloud_networking_secgroup_v2" "secgroup" {
@@ -47,17 +47,17 @@ The following arguments are supported:
   (Required)
   Cluster name. It contains 4 to 32 characters. Only letters, digits,
   hyphens (-), and underscores (_) are allowed. The value must start
-  with a letter.
+  with a letter.  Changing this parameter will create a new resource.
 
 * `node_config` -
   (Required)
-  Instance object. Structure is documented below.
+  Instance object. Structure is documented below. Changing this parameter will create a new resource.
 
 The `node_config` block supports:
 
 * `availability_zone` -
   (Optional)
-  Availability zone (AZ).
+  Availability zone (AZ).  Changing this parameter will create a new resource.
 
 * `flavor` -
   (Required)
@@ -65,31 +65,31 @@ The `node_config` block supports:
   to 640 GB Value range of flavor css.large.8: 40 GB to 1280 GB
   Value range of flavor css.xlarge.8: 40 GB to 2560 GB Value range
   of flavor css.2xlarge.8: 80 GB to 5120 GB Value range of flavor
-  css.4xlarge.8: 160 GB to 10240 GB
+  css.4xlarge.8: 160 GB to 10240 GB  Changing this parameter will create a new resource.
 
 * `network_info` -
   (Required)
-  Network information. Structure is documented below.
+  Network information. Structure is documented below. Changing this parameter will create a new resource.
 
 * `volume` -
   (Required)
-  Information about the volume. Structure is documented below.
+  Information about the volume. Structure is documented below. Changing this parameter will create a new resource.
 
 The `network_info` block supports:
 
 * `network_id` -
   (Required)
   Network ID. All instances in a cluster must have the same
-  networks and security groups.
+  networks and security groups.  Changing this parameter will create a new resource.
 
 * `security_group_id` -
   (Required)
   Security group ID. All instances in a cluster must have the
-  same subnets and security groups.
+  same subnets and security groups.  Changing this parameter will create a new resource.
 
 * `vpc_id` -
   (Required)
-  VPC ID, which is used for configuring cluster network.
+  VPC ID, which is used for configuring cluster network.  Changing this parameter will create a new resource.
 
 The `volume` block supports:
 
@@ -99,17 +99,17 @@ The `volume` block supports:
   grants. Specifically, you cannot use Default Master Keys
   whose aliases end with /default in KMS to create clusters.
   After a cluster is created, do not delete the key used by the
-  cluster. Otherwise, the cluster will become unavailable.
+  cluster. Otherwise, the cluster will become unavailable.  Changing this parameter will create a new resource.
 
 * `size` -
   (Required)
-  Volume size, which must be a multiple of 4 and 10.
+  Volume size, which must be a multiple of 4 and 10.  Changing this parameter will create a new resource.
 
 * `volume_type` -
   (Required)
   COMMON: Common I/O. The SATA disk is used. HIGH: High I/O.
   The SAS disk is used. ULTRAHIGH: Ultra-high I/O. The
-  solid-state drive (SSD) is used.
+  solid-state drive (SSD) is used.  Changing this parameter will create a new resource.
 
 - - -
 
@@ -119,7 +119,7 @@ The `volume` block supports:
   Available values include true and false. By default, communication
   encryption is enabled. Value true indicates that communication
   encryption is performed on the cluster. Value false indicates that
-  communication encryption is not performed on the cluster.
+  communication encryption is not performed on the cluster.  Changing this parameter will create a new resource.
 
 * `expect_node_num` -
   (Optional)
@@ -150,25 +150,20 @@ In addition to the arguments listed above, the following computed attributes are
 The `datastore` block contains:
 
 * `type` -
-  (Optional)
   Supported type: elasticsearch
 
 * `version` -
-  (Optional)
   Engine version number.
 
 The `nodes` block contains:
 
 * `id` -
-  (Optional)
   Instance ID.
 
 * `name` -
-  (Optional)
   Instance name.
 
 * `type` -
-  (Optional)
   Supported type: ess (indicating the Elasticsearch node)
 
 ## Timeouts

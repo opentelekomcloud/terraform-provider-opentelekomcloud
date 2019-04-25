@@ -319,16 +319,15 @@ func resourceCssClusterV1Delete(d *schema.ResourceData, meta interface{}) error 
 		d.Timeout(schema.TimeoutCreate),
 		1*time.Second,
 		func() (interface{}, string, error) {
-			resp, err := client.Get(
-				url, nil,
-				&golangsdk.RequestOpts{MoreHeaders: map[string]string{"Content-Type": "application/json"}})
+			_, err := client.Get(url, nil, &golangsdk.RequestOpts{
+				MoreHeaders: map[string]string{"Content-Type": "application/json"}})
 			if err != nil {
 				if _, ok := err.(golangsdk.ErrDefault404); ok {
-					return resp, "Done", nil
+					return true, "Done", nil
 				}
 				return nil, "", nil
 			}
-			return resp, "Pending", nil
+			return true, "Pending", nil
 		},
 	)
 	return err
@@ -337,64 +336,54 @@ func resourceCssClusterV1Delete(d *schema.ResourceData, meta interface{}) error 
 func buildCssClusterV1CreateParameters(opts map[string]interface{}, arrayIndex map[string]int) (interface{}, error) {
 	params := make(map[string]interface{})
 
-	diskEncryptionProp, err := expandCssClusterV1CreateDiskEncryption(opts, arrayIndex)
+	v, err := expandCssClusterV1CreateDiskEncryption(opts, arrayIndex)
 	if err != nil {
 		return nil, err
 	}
-	e, err := isEmptyValue(reflect.ValueOf(diskEncryptionProp))
-	if err != nil {
+	if e, err := isEmptyValue(reflect.ValueOf(v)); err != nil {
 		return nil, err
-	}
-	if !e {
-		params["diskEncryption"] = diskEncryptionProp
+	} else if !e {
+		params["diskEncryption"] = v
 	}
 
-	httpsEnableProp, err := expandCssClusterV1CreateHttpsEnable(opts, arrayIndex)
+	v, err = expandCssClusterV1CreateHttpsEnable(opts, arrayIndex)
 	if err != nil {
 		return nil, err
 	}
-	e, err = isEmptyValue(reflect.ValueOf(httpsEnableProp))
-	if err != nil {
+	if e, err := isEmptyValue(reflect.ValueOf(v)); err != nil {
 		return nil, err
-	}
-	if !e {
-		params["httpsEnable"] = httpsEnableProp
+	} else if !e {
+		params["httpsEnable"] = v
 	}
 
-	instanceProp, err := expandCssClusterV1CreateInstance(opts, arrayIndex)
+	v, err = expandCssClusterV1CreateInstance(opts, arrayIndex)
 	if err != nil {
 		return nil, err
 	}
-	e, err = isEmptyValue(reflect.ValueOf(instanceProp))
-	if err != nil {
+	if e, err := isEmptyValue(reflect.ValueOf(v)); err != nil {
 		return nil, err
-	}
-	if !e {
-		params["instance"] = instanceProp
+	} else if !e {
+		params["instance"] = v
 	}
 
-	instanceNumProp, err := navigateValue(opts, []string{"expect_node_num"}, arrayIndex)
+	v, err = navigateValue(opts, []string{"expect_node_num"}, arrayIndex)
 	if err != nil {
 		return nil, err
 	}
-	e, err = isEmptyValue(reflect.ValueOf(instanceNumProp))
-	if err != nil {
+	if e, err := isEmptyValue(reflect.ValueOf(v)); err != nil {
 		return nil, err
-	}
-	if !e {
-		params["instanceNum"] = instanceNumProp
+	} else if !e {
+		params["instanceNum"] = v
 	}
 
-	nameProp, err := navigateValue(opts, []string{"name"}, arrayIndex)
+	v, err = navigateValue(opts, []string{"name"}, arrayIndex)
 	if err != nil {
 		return nil, err
 	}
-	e, err = isEmptyValue(reflect.ValueOf(nameProp))
-	if err != nil {
+	if e, err := isEmptyValue(reflect.ValueOf(v)); err != nil {
 		return nil, err
-	}
-	if !e {
-		params["name"] = nameProp
+	} else if !e {
+		params["name"] = v
 	}
 
 	if len(params) == 0 {
@@ -409,28 +398,24 @@ func buildCssClusterV1CreateParameters(opts map[string]interface{}, arrayIndex m
 func expandCssClusterV1CreateDiskEncryption(d interface{}, arrayIndex map[string]int) (interface{}, error) {
 	req := make(map[string]interface{})
 
-	systemCmkidProp, err := navigateValue(d, []string{"node_config", "volume", "encryption_key"}, arrayIndex)
+	v, err := navigateValue(d, []string{"node_config", "volume", "encryption_key"}, arrayIndex)
 	if err != nil {
 		return nil, err
 	}
-	e, err := isEmptyValue(reflect.ValueOf(systemCmkidProp))
-	if err != nil {
+	if e, err := isEmptyValue(reflect.ValueOf(v)); err != nil {
 		return nil, err
-	}
-	if !e {
-		req["systemCmkid"] = systemCmkidProp
+	} else if !e {
+		req["systemCmkid"] = v
 	}
 
-	systemEncryptedProp, err := expandCssClusterV1CreateDiskEncryptionSystemEncrypted(d, arrayIndex)
+	v, err = expandCssClusterV1CreateDiskEncryptionSystemEncrypted(d, arrayIndex)
 	if err != nil {
 		return nil, err
 	}
-	e, err = isEmptyValue(reflect.ValueOf(systemEncryptedProp))
-	if err != nil {
+	if e, err := isEmptyValue(reflect.ValueOf(v)); err != nil {
 		return nil, err
-	}
-	if !e {
-		req["systemEncrypted"] = systemEncryptedProp
+	} else if !e {
+		req["systemEncrypted"] = v
 	}
 
 	return req, nil
@@ -461,52 +446,44 @@ func expandCssClusterV1CreateHttpsEnable(d interface{}, arrayIndex map[string]in
 func expandCssClusterV1CreateInstance(d interface{}, arrayIndex map[string]int) (interface{}, error) {
 	req := make(map[string]interface{})
 
-	availabilityZoneProp, err := navigateValue(d, []string{"node_config", "availability_zone"}, arrayIndex)
+	v, err := navigateValue(d, []string{"node_config", "availability_zone"}, arrayIndex)
 	if err != nil {
 		return nil, err
 	}
-	e, err := isEmptyValue(reflect.ValueOf(availabilityZoneProp))
-	if err != nil {
+	if e, err := isEmptyValue(reflect.ValueOf(v)); err != nil {
 		return nil, err
-	}
-	if !e {
-		req["availability_zone"] = availabilityZoneProp
+	} else if !e {
+		req["availability_zone"] = v
 	}
 
-	flavorRefProp, err := navigateValue(d, []string{"node_config", "flavor"}, arrayIndex)
+	v, err = navigateValue(d, []string{"node_config", "flavor"}, arrayIndex)
 	if err != nil {
 		return nil, err
 	}
-	e, err = isEmptyValue(reflect.ValueOf(flavorRefProp))
-	if err != nil {
+	if e, err := isEmptyValue(reflect.ValueOf(v)); err != nil {
 		return nil, err
-	}
-	if !e {
-		req["flavorRef"] = flavorRefProp
+	} else if !e {
+		req["flavorRef"] = v
 	}
 
-	nicsProp, err := expandCssClusterV1CreateInstanceNics(d, arrayIndex)
+	v, err = expandCssClusterV1CreateInstanceNics(d, arrayIndex)
 	if err != nil {
 		return nil, err
 	}
-	e, err = isEmptyValue(reflect.ValueOf(nicsProp))
-	if err != nil {
+	if e, err := isEmptyValue(reflect.ValueOf(v)); err != nil {
 		return nil, err
-	}
-	if !e {
-		req["nics"] = nicsProp
+	} else if !e {
+		req["nics"] = v
 	}
 
-	volumeProp, err := expandCssClusterV1CreateInstanceVolume(d, arrayIndex)
+	v, err = expandCssClusterV1CreateInstanceVolume(d, arrayIndex)
 	if err != nil {
 		return nil, err
 	}
-	e, err = isEmptyValue(reflect.ValueOf(volumeProp))
-	if err != nil {
+	if e, err := isEmptyValue(reflect.ValueOf(v)); err != nil {
 		return nil, err
-	}
-	if !e {
-		req["volume"] = volumeProp
+	} else if !e {
+		req["volume"] = v
 	}
 
 	return req, nil
@@ -515,40 +492,34 @@ func expandCssClusterV1CreateInstance(d interface{}, arrayIndex map[string]int) 
 func expandCssClusterV1CreateInstanceNics(d interface{}, arrayIndex map[string]int) (interface{}, error) {
 	req := make(map[string]interface{})
 
-	netIdProp, err := navigateValue(d, []string{"node_config", "network_info", "network_id"}, arrayIndex)
+	v, err := navigateValue(d, []string{"node_config", "network_info", "network_id"}, arrayIndex)
 	if err != nil {
 		return nil, err
 	}
-	e, err := isEmptyValue(reflect.ValueOf(netIdProp))
-	if err != nil {
+	if e, err := isEmptyValue(reflect.ValueOf(v)); err != nil {
 		return nil, err
-	}
-	if !e {
-		req["netId"] = netIdProp
+	} else if !e {
+		req["netId"] = v
 	}
 
-	securityGroupIdProp, err := navigateValue(d, []string{"node_config", "network_info", "security_group_id"}, arrayIndex)
+	v, err = navigateValue(d, []string{"node_config", "network_info", "security_group_id"}, arrayIndex)
 	if err != nil {
 		return nil, err
 	}
-	e, err = isEmptyValue(reflect.ValueOf(securityGroupIdProp))
-	if err != nil {
+	if e, err := isEmptyValue(reflect.ValueOf(v)); err != nil {
 		return nil, err
-	}
-	if !e {
-		req["securityGroupId"] = securityGroupIdProp
+	} else if !e {
+		req["securityGroupId"] = v
 	}
 
-	vpcIdProp, err := navigateValue(d, []string{"node_config", "network_info", "vpc_id"}, arrayIndex)
+	v, err = navigateValue(d, []string{"node_config", "network_info", "vpc_id"}, arrayIndex)
 	if err != nil {
 		return nil, err
 	}
-	e, err = isEmptyValue(reflect.ValueOf(vpcIdProp))
-	if err != nil {
+	if e, err := isEmptyValue(reflect.ValueOf(v)); err != nil {
 		return nil, err
-	}
-	if !e {
-		req["vpcId"] = vpcIdProp
+	} else if !e {
+		req["vpcId"] = v
 	}
 
 	return req, nil
@@ -557,28 +528,24 @@ func expandCssClusterV1CreateInstanceNics(d interface{}, arrayIndex map[string]i
 func expandCssClusterV1CreateInstanceVolume(d interface{}, arrayIndex map[string]int) (interface{}, error) {
 	req := make(map[string]interface{})
 
-	sizeProp, err := navigateValue(d, []string{"node_config", "volume", "size"}, arrayIndex)
+	v, err := navigateValue(d, []string{"node_config", "volume", "size"}, arrayIndex)
 	if err != nil {
 		return nil, err
 	}
-	e, err := isEmptyValue(reflect.ValueOf(sizeProp))
-	if err != nil {
+	if e, err := isEmptyValue(reflect.ValueOf(v)); err != nil {
 		return nil, err
-	}
-	if !e {
-		req["size"] = sizeProp
+	} else if !e {
+		req["size"] = v
 	}
 
-	volumeTypeProp, err := navigateValue(d, []string{"node_config", "volume", "volume_type"}, arrayIndex)
+	v, err = navigateValue(d, []string{"node_config", "volume", "volume_type"}, arrayIndex)
 	if err != nil {
 		return nil, err
 	}
-	e, err = isEmptyValue(reflect.ValueOf(volumeTypeProp))
-	if err != nil {
+	if e, err := isEmptyValue(reflect.ValueOf(v)); err != nil {
 		return nil, err
-	}
-	if !e {
-		req["volume_type"] = volumeTypeProp
+	} else if !e {
+		req["volume_type"] = v
 	}
 
 	return req, nil
@@ -593,17 +560,18 @@ func sendCssClusterV1CreateRequest(d *schema.ResourceData, params interface{},
 		OkCodes: successHTTPCodes,
 	})
 	if r.Err != nil {
-		return nil, fmt.Errorf("Error run api(create): %s", r.Err)
+		return nil, fmt.Errorf("Error running api(create): %s", r.Err)
 	}
 	return r.Body, nil
 }
 
 func asyncWaitCssClusterV1Create(d *schema.ResourceData, config *Config, result interface{},
 	client *golangsdk.ServiceClient, timeout time.Duration) (interface{}, error) {
+
+	data := make(map[string]string)
 	pathParameters := map[string][]string{
 		"id": []string{"cluster", "id"},
 	}
-	var data = make(map[string]string)
 	for key, path := range pathParameters {
 		value, err := navigateValue(result, path, nil)
 		if err != nil {
@@ -611,6 +579,7 @@ func asyncWaitCssClusterV1Create(d *schema.ResourceData, config *Config, result 
 		}
 		data[key] = value.(string)
 	}
+
 	url, err := replaceVars(d, "clusters/{id}", data)
 	if err != nil {
 		return nil, err
@@ -623,9 +592,8 @@ func asyncWaitCssClusterV1Create(d *schema.ResourceData, config *Config, result 
 		timeout, 1*time.Second,
 		func() (interface{}, string, error) {
 			r := golangsdk.Result{}
-			_, r.Err = client.Get(
-				url, &r.Body,
-				&golangsdk.RequestOpts{MoreHeaders: map[string]string{"Content-Type": "application/json"}})
+			_, r.Err = client.Get(url, &r.Body, &golangsdk.RequestOpts{
+				MoreHeaders: map[string]string{"Content-Type": "application/json"}})
 			if r.Err != nil {
 				return nil, "", nil
 			}
@@ -642,16 +610,14 @@ func asyncWaitCssClusterV1Create(d *schema.ResourceData, config *Config, result 
 func buildCssClusterV1ExtendClusterParameters(opts map[string]interface{}, arrayIndex map[string]int) (interface{}, error) {
 	params := make(map[string]interface{})
 
-	modifySizeProp, err := expandCssClusterV1ExtendClusterNodeNum(opts, arrayIndex)
+	v, err := expandCssClusterV1ExtendClusterNodeNum(opts, arrayIndex)
 	if err != nil {
 		return nil, err
 	}
-	e, err := isEmptyValue(reflect.ValueOf(modifySizeProp))
-	if err != nil {
+	if e, err := isEmptyValue(reflect.ValueOf(v)); err != nil {
 		return nil, err
-	}
-	if !e {
-		params["modifySize"] = modifySizeProp
+	} else if !e {
+		params["modifySize"] = v
 	}
 
 	if len(params) == 0 {
@@ -676,13 +642,14 @@ func sendCssClusterV1ExtendClusterRequest(d *schema.ResourceData, params interfa
 		OkCodes: successHTTPCodes,
 	})
 	if r.Err != nil {
-		return nil, fmt.Errorf("Error run api(extend_cluster): %s", r.Err)
+		return nil, fmt.Errorf("Error running api(extend_cluster): %s", r.Err)
 	}
 	return r.Body, nil
 }
 
 func asyncWaitCssClusterV1ExtendCluster(d *schema.ResourceData, config *Config, result interface{},
 	client *golangsdk.ServiceClient, timeout time.Duration) (interface{}, error) {
+
 	url, err := replaceVars(d, "clusters/{id}", nil)
 	if err != nil {
 		return nil, err
@@ -693,9 +660,8 @@ func asyncWaitCssClusterV1ExtendCluster(d *schema.ResourceData, config *Config, 
 		[]string{"Done"}, []string{"Pending"}, timeout, 1*time.Second,
 		func() (interface{}, string, error) {
 			r := golangsdk.Result{}
-			_, r.Err = client.Get(
-				url, &r.Body,
-				&golangsdk.RequestOpts{MoreHeaders: map[string]string{"Content-Type": "application/json"}})
+			_, r.Err = client.Get(url, &r.Body, &golangsdk.RequestOpts{
+				MoreHeaders: map[string]string{"Content-Type": "application/json"}})
 			if r.Err != nil {
 				return nil, "", nil
 			}
@@ -716,11 +682,10 @@ func sendCssClusterV1ReadRequest(d *schema.ResourceData, client *golangsdk.Servi
 	url = client.ServiceURL(url)
 
 	r := golangsdk.Result{}
-	_, r.Err = client.Get(
-		url, &r.Body,
-		&golangsdk.RequestOpts{MoreHeaders: map[string]string{"Content-Type": "application/json"}})
+	_, r.Err = client.Get(url, &r.Body, &golangsdk.RequestOpts{
+		MoreHeaders: map[string]string{"Content-Type": "application/json"}})
 	if r.Err != nil {
-		return nil, fmt.Errorf("Error running api(read) for resource(CssClusterV1: %v), error: %s", d.Id(), r.Err)
+		return nil, fmt.Errorf("Error running api(read) for resource(CssClusterV1), error: %s", r.Err)
 	}
 
 	return r.Body, nil
@@ -729,70 +694,70 @@ func sendCssClusterV1ReadRequest(d *schema.ResourceData, client *golangsdk.Servi
 func setCssClusterV1Properties(d *schema.ResourceData, response map[string]interface{}) error {
 	opts := resourceCssClusterV1UserInputParams(d)
 
-	createdProp, err := navigateValue(response, []string{"read", "created"}, nil)
+	v, err := navigateValue(response, []string{"read", "created"}, nil)
 	if err != nil {
 		return fmt.Errorf("Error reading Cluster:created, err: %s", err)
 	}
-	if err = d.Set("created", createdProp); err != nil {
+	if err = d.Set("created", v); err != nil {
 		return fmt.Errorf("Error setting Cluster:created, err: %s", err)
 	}
 
-	datastoreProp, _ := opts["datastore"]
-	datastoreProp, err = flattenCssClusterV1Datastore(response, nil, datastoreProp)
+	v, _ = opts["datastore"]
+	v, err = flattenCssClusterV1Datastore(response, nil, v)
 	if err != nil {
 		return fmt.Errorf("Error reading Cluster:datastore, err: %s", err)
 	}
-	if err = d.Set("datastore", datastoreProp); err != nil {
+	if err = d.Set("datastore", v); err != nil {
 		return fmt.Errorf("Error setting Cluster:datastore, err: %s", err)
 	}
 
-	enableHttpsProp, err := navigateValue(response, []string{"read", "httpsEnable"}, nil)
+	v, err = navigateValue(response, []string{"read", "httpsEnable"}, nil)
 	if err != nil {
 		return fmt.Errorf("Error reading Cluster:enable_https, err: %s", err)
 	}
-	if err = d.Set("enable_https", enableHttpsProp); err != nil {
+	if err = d.Set("enable_https", v); err != nil {
 		return fmt.Errorf("Error setting Cluster:enable_https, err: %s", err)
 	}
 
-	endpointProp, err := navigateValue(response, []string{"read", "endpoint"}, nil)
+	v, err = navigateValue(response, []string{"read", "endpoint"}, nil)
 	if err != nil {
 		return fmt.Errorf("Error reading Cluster:endpoint, err: %s", err)
 	}
-	if err = d.Set("endpoint", endpointProp); err != nil {
+	if err = d.Set("endpoint", v); err != nil {
 		return fmt.Errorf("Error setting Cluster:endpoint, err: %s", err)
 	}
 
-	nameProp, err := navigateValue(response, []string{"read", "name"}, nil)
+	v, err = navigateValue(response, []string{"read", "name"}, nil)
 	if err != nil {
 		return fmt.Errorf("Error reading Cluster:name, err: %s", err)
 	}
-	if err = d.Set("name", nameProp); err != nil {
+	if err = d.Set("name", v); err != nil {
 		return fmt.Errorf("Error setting Cluster:name, err: %s", err)
 	}
 
-	nodeConfigProp, _ := opts["node_config"]
-	nodeConfigProp, err = flattenCssClusterV1NodeConfig(response, nil, nodeConfigProp)
+	v, _ = opts["node_config"]
+	v, err = flattenCssClusterV1NodeConfig(response, nil, v)
 	if err != nil {
 		return fmt.Errorf("Error reading Cluster:node_config, err: %s", err)
 	}
-	if err = d.Set("node_config", nodeConfigProp); err != nil {
+	if err = d.Set("node_config", v); err != nil {
 		return fmt.Errorf("Error setting Cluster:node_config, err: %s", err)
 	}
 
-	nodesProp, _ := opts["nodes"]
-	nodesProp, err = flattenCssClusterV1Nodes(response, nil, nodesProp)
+	v, _ = opts["nodes"]
+	v, err = flattenCssClusterV1Nodes(response, nil, v)
 	if err != nil {
 		return fmt.Errorf("Error reading Cluster:nodes, err: %s", err)
 	}
-	if err = d.Set("nodes", nodesProp); err != nil {
+	if err = d.Set("nodes", v); err != nil {
 		return fmt.Errorf("Error setting Cluster:nodes, err: %s", err)
 	}
 
-	updatedProp, err := navigateValue(response, []string{"read", "updated"}, nil)
+	v, err = navigateValue(response, []string{"read", "updated"}, nil)
 	if err != nil {
 		return fmt.Errorf("Error reading Cluster:updated, err: %s", err)
 	}
-	if err = d.Set("updated", updatedProp); err != nil {
+	if err = d.Set("updated", v); err != nil {
 		return fmt.Errorf("Error setting Cluster:updated, err: %s", err)
 	}
 
@@ -809,17 +774,17 @@ func flattenCssClusterV1Datastore(d interface{}, arrayIndex map[string]int, curr
 	}
 	r := result[0].(map[string]interface{})
 
-	typeProp, err := navigateValue(d, []string{"read", "datastore", "type"}, arrayIndex)
+	v, err := navigateValue(d, []string{"read", "datastore", "type"}, arrayIndex)
 	if err != nil {
 		return nil, fmt.Errorf("Error reading Cluster:type, err: %s", err)
 	}
-	r["type"] = typeProp
+	r["type"] = v
 
-	versionProp, err := navigateValue(d, []string{"read", "datastore", "version"}, arrayIndex)
+	v, err = navigateValue(d, []string{"read", "datastore", "version"}, arrayIndex)
 	if err != nil {
 		return nil, fmt.Errorf("Error reading Cluster:version, err: %s", err)
 	}
-	r["version"] = versionProp
+	r["version"] = v
 
 	return result, nil
 }
@@ -834,19 +799,19 @@ func flattenCssClusterV1NodeConfig(d interface{}, arrayIndex map[string]int, cur
 	}
 	r := result[0].(map[string]interface{})
 
-	networkInfoProp, _ := r["network_info"]
-	networkInfoProp, err := flattenCssClusterV1NodeConfigNetworkInfo(d, arrayIndex, networkInfoProp)
+	v, _ := r["network_info"]
+	v, err := flattenCssClusterV1NodeConfigNetworkInfo(d, arrayIndex, v)
 	if err != nil {
 		return nil, fmt.Errorf("Error reading Cluster:network_info, err: %s", err)
 	}
-	r["network_info"] = networkInfoProp
+	r["network_info"] = v
 
-	volumeProp, _ := r["volume"]
-	volumeProp, err = flattenCssClusterV1NodeConfigVolume(d, arrayIndex, volumeProp)
+	v, _ = r["volume"]
+	v, err = flattenCssClusterV1NodeConfigVolume(d, arrayIndex, v)
 	if err != nil {
 		return nil, fmt.Errorf("Error reading Cluster:volume, err: %s", err)
 	}
-	r["volume"] = volumeProp
+	r["volume"] = v
 
 	return result, nil
 }
@@ -861,17 +826,17 @@ func flattenCssClusterV1NodeConfigNetworkInfo(d interface{}, arrayIndex map[stri
 	}
 	r := result[0].(map[string]interface{})
 
-	networkIDProp, err := navigateValue(d, []string{"read", "subnetId"}, arrayIndex)
+	v, err := navigateValue(d, []string{"read", "subnetId"}, arrayIndex)
 	if err != nil {
 		return nil, fmt.Errorf("Error reading Cluster:network_id, err: %s", err)
 	}
-	r["network_id"] = networkIDProp
+	r["network_id"] = v
 
-	securityGroupIdProp, err := navigateValue(d, []string{"read", "securityGroupId"}, arrayIndex)
+	v, err = navigateValue(d, []string{"read", "securityGroupId"}, arrayIndex)
 	if err != nil {
 		return nil, fmt.Errorf("Error reading Cluster:security_group_id, err: %s", err)
 	}
-	r["security_group_id"] = securityGroupIdProp
+	r["security_group_id"] = v
 
 	return result, nil
 }
@@ -886,11 +851,11 @@ func flattenCssClusterV1NodeConfigVolume(d interface{}, arrayIndex map[string]in
 	}
 	r := result[0].(map[string]interface{})
 
-	encryptionKeyProp, err := navigateValue(d, []string{"read", "cmkId"}, arrayIndex)
+	v, err := navigateValue(d, []string{"read", "cmkId"}, arrayIndex)
 	if err != nil {
 		return nil, fmt.Errorf("Error reading Cluster:encryption_key, err: %s", err)
 	}
-	r["encryption_key"] = encryptionKeyProp
+	r["encryption_key"] = v
 
 	return result, nil
 }
@@ -920,23 +885,23 @@ func flattenCssClusterV1Nodes(d interface{}, arrayIndex map[string]int, currentV
 		}
 		r := result[i].(map[string]interface{})
 
-		idProp, err := navigateValue(d, []string{"read", "instances", "id"}, newArrayIndex)
+		v, err := navigateValue(d, []string{"read", "instances", "id"}, newArrayIndex)
 		if err != nil {
 			return nil, fmt.Errorf("Error reading Cluster:id, err: %s", err)
 		}
-		r["id"] = idProp
+		r["id"] = v
 
-		nameProp, err := navigateValue(d, []string{"read", "instances", "name"}, newArrayIndex)
+		v, err = navigateValue(d, []string{"read", "instances", "name"}, newArrayIndex)
 		if err != nil {
 			return nil, fmt.Errorf("Error reading Cluster:name, err: %s", err)
 		}
-		r["name"] = nameProp
+		r["name"] = v
 
-		typeProp, err := navigateValue(d, []string{"read", "instances", "type"}, newArrayIndex)
+		v, err = navigateValue(d, []string{"read", "instances", "type"}, newArrayIndex)
 		if err != nil {
 			return nil, fmt.Errorf("Error reading Cluster:type, err: %s", err)
 		}
-		r["type"] = typeProp
+		r["type"] = v
 	}
 
 	return result, nil
