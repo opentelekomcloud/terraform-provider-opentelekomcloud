@@ -11,6 +11,7 @@ import (
 	"github.com/hashicorp/terraform/helper/validation"
 	"github.com/huaweicloud/golangsdk"
 	"github.com/huaweicloud/golangsdk/openstack/rds/v1/instances"
+	"github.com/huaweicloud/golangsdk/openstack/rds/v1/tags"
 )
 
 func resourceRdsInstance() *schema.Resource {
@@ -180,6 +181,11 @@ func resourceRdsInstance() *schema.Resource {
 						},
 					}},
 			},
+			"tag": {
+				Type:         schema.TypeMap,
+				Optional:     true,
+				ValidateFunc: validateECSTagValue,
+			},
 
 			"status": {
 				Type:     schema.TypeString,
@@ -348,6 +354,25 @@ func resourceInstanceCreate(d *schema.ResourceData, meta interface{}) error {
 			instance.ID, err)
 	}
 
+	if hasFilledOpt(d, "tag") {
+		tagClient, err := config.rdsTagV1Client(GetRegion(d, config))
+		if err != nil {
+			return fmt.Errorf("Error creating OpenTelekomCloud rds tag client: %s ", err)
+		}
+		tagmap := d.Get("tag").(map[string]interface{})
+		log.Printf("[DEBUG] Setting tag(key/value): %v", tagmap)
+		for key, val := range tagmap {
+			tagOpts := tags.CreateOpts{
+				Key:   key,
+				Value: val.(string),
+			}
+			err = tags.Create(tagClient, instance.ID, tagOpts).ExtractErr()
+			if err != nil {
+				log.Printf("[WARN] Error setting tag(key/value) of instance:%s, err=%s", instance.ID, err)
+			}
+		}
+	}
+
 	if instance.ID != "" {
 		return resourceInstanceRead(d, meta)
 	}
@@ -432,6 +457,26 @@ func resourceInstanceRead(d *schema.ResourceData, meta interface{}) error {
 
 	d.Set("updated", instance.Updated)
 	d.Set("created", instance.Created)
+
+	// set instance tag
+	if _, ok := d.GetOk("tag"); ok {
+		tagClient, err := config.rdsTagV1Client(GetRegion(d, config))
+		if err != nil {
+			return fmt.Errorf("Error creating OpenTelekomCloud rds tag client: %#v", err)
+		}
+		taglist, err := tags.Get(tagClient, d.Id()).Extract()
+		if err != nil {
+			return fmt.Errorf("Error fetching OpenTelekomCloud rds instance tags: %s", err)
+		}
+
+		tagmap := make(map[string]string)
+		for _, val := range taglist.Tags {
+			tagmap[val.Key] = val.Value
+		}
+		if err := d.Set("tag", tagmap); err != nil {
+			return fmt.Errorf("[DEBUG] Error saving tag to state for OpenTelekomCloud rds instance (%s): %s", d.Id(), err)
+		}
+	}
 	return nil
 }
 
@@ -595,7 +640,60 @@ func resourceInstanceUpdate(d *schema.ResourceData, meta interface{}) error {
 		log.Printf("[DEBUG] Successfully updated instance %s policy: %+v", id, updatepolicyOpts)
 	}
 
+	if d.HasChange("tag") {
+		oraw, nraw := d.GetChange("tag")
+		o := oraw.(map[string]interface{})
+		n := nraw.(map[string]interface{})
+		create, remove := diffTagsRDS(o, n)
+		tagClient, err := config.rdsTagV1Client(GetRegion(d, config))
+		if err != nil {
+			return fmt.Errorf("Error creating OpenTelekomCloud rds tag client: %s ", err)
+		}
+
+		if len(remove) > 0 {
+			for _, opts := range remove {
+				err = tags.Delete(tagClient, id, opts).ExtractErr()
+				if err != nil {
+					log.Printf("[WARN] Error deleting tag(key/value) of instance:%s, err=%s", id, err)
+				}
+			}
+		}
+		if len(create) > 0 {
+			for _, opts := range create {
+				err = tags.Create(tagClient, id, opts).ExtractErr()
+				if err != nil {
+					log.Printf("[WARN] Error setting tag(key/value) of instance:%s, err=%s", id, err)
+				}
+			}
+		}
+	}
+
 	log.Printf("[DEBUG] Successfully updated instance %s", id)
 	d.SetId(id)
 	return resourceInstanceRead(d, meta)
+}
+
+func diffTagsRDS(oldTags, newTags map[string]interface{}) ([]tags.CreateOptsBuilder, []tags.DeleteOptsBuilder) {
+	var create []tags.CreateOptsBuilder
+	var remove []tags.DeleteOptsBuilder
+	for key, val := range oldTags {
+		old, ok := newTags[key]
+		if !ok || old.(string) != val.(string) {
+			tagOpts := tags.DeleteOpts{
+				Key: key,
+			}
+			remove = append(remove, tagOpts)
+		}
+	}
+	for key, val := range newTags {
+		old, ok := oldTags[key]
+		if !ok || old.(string) != val.(string) {
+			tagOpts := tags.CreateOpts{
+				Key:   key,
+				Value: val.(string),
+			}
+			create = append(create, tagOpts)
+		}
+	}
+	return create, remove
 }
