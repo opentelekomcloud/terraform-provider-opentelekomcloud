@@ -31,10 +31,6 @@ func resourceCssClusterV1() *schema.Resource {
 		Update: resourceCssClusterV1Update,
 		Delete: resourceCssClusterV1Delete,
 
-		Importer: &schema.ResourceImporter{
-			State: schema.ImportStatePassthrough,
-		},
-
 		Timeouts: &schema.ResourceTimeout{
 			Create: schema.DefaultTimeout(15 * time.Minute),
 			Update: schema.DefaultTimeout(30 * time.Minute),

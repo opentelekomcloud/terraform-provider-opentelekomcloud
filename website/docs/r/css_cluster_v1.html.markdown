@@ -171,11 +171,3 @@ The `nodes` block contains:
 This resource provides the following timeouts configuration options:
 - `create` - Default is 15 minute.
 - `update` - Default is 30 minute.
-
-## Import
-
-Cluster can be imported using the following format:
-
-```
-$ terraform import opentelekomcloud_css_cluster_v1.default {{ resource id}}
-```
