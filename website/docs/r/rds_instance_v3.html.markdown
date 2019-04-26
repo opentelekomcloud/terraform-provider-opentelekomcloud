@@ -30,7 +30,7 @@ resource "opentelekomcloud_rds_instance_v3" "instance" {
   }
   name = "terraform_test_rds_instance"
   security_group_id = "${opentelekomcloud_networking_secgroup_v2.secgroup.id}"
-  network_id = "{{ network_id }}"
+  subnet_id = "{{ subnet_id }}"
   vpc_id = "{{ vpc_id }}"
   volume {
     type = "COMMON"
@@ -62,7 +62,7 @@ resource "opentelekomcloud_rds_instance_v3" "instance" {
   }
   name = "terraform_test_rds_instance"
   security_group_id = "${opentelekomcloud_networking_secgroup_v2.secgroup.id}"
-  network_id = "{{ network_id }}"
+  subnet_id = "{{ subnet_id }}"
   vpc_id = "{{ vpc_id }}" 
   volume {
     type = "COMMON"
@@ -70,6 +70,45 @@ resource "opentelekomcloud_rds_instance_v3" "instance" {
   }
   flavor = "rds.pg.s1.medium.ha"
   ha_replication_mode = "async"
+  backup_strategy = {
+    start_time = "08:00-09:00"
+    keep_days = 1
+  }
+}
+```
+
+### create a single db instance with encrypted volume
+
+```hcl
+resource "opentelekomcloud_kms_key_v1" "key" {
+  key_alias       = "key_1"
+  key_description = "first test key"
+  is_enabled      = true
+}
+
+resource "opentelekomcloud_networking_secgroup_v2" "secgroup" {
+  name = "terraform_test_security_group"
+  description = "terraform security group acceptance test"
+}
+
+resource "opentelekomcloud_rds_instance_v3" "instance" {
+  availability_zone = "{{ availability_zone }}"
+  db = {
+    password = "Huangwei!120521"
+    type = "PostgreSQL"
+    version = "9.5"
+    port = "8635"
+  }
+  name = "terraform_test_rds_instance"
+  security_group_id = "${opentelekomcloud_networking_secgroup_v2.secgroup.id}"
+  subnet_id = "{{ subnet_id }}"
+  vpc_id = "{{ vpc_id }}"
+  volume {
+    disk_encryption_id = "${opentelekomcloud_kms_key_v1.key.id}"
+    type = "COMMON"
+    size = 100
+  }
+  flavor = "rds.pg.c2.medium"
   backup_strategy = {
     start_time = "08:00-09:00"
     keep_days = 1
@@ -101,14 +140,14 @@ The following arguments are supported:
   and can contain only letters, digits, hyphens (-), and underscores
   (_).  Changing this parameter will create a new resource.
 
-* `network_id` -
-  (Required)
-  Specifies the network id. Changing this parameter will create a new resource.
-
 * `security_group_id` -
   (Required)
   Specifies the security group which the RDS DB instance belongs to.
   Changing this parameter will create a new resource.
+
+* `subnet_id` -
+  (Required)
+  Specifies the subnet id. Changing this parameter will create a new resource.
 
 * `volume` -
   (Required)

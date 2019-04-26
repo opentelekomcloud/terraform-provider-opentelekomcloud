@@ -94,13 +94,13 @@ func resourceRdsInstanceV3() *schema.Resource {
 				ForceNew: true,
 			},
 
-			"network_id": {
+			"security_group_id": {
 				Type:     schema.TypeString,
 				Required: true,
 				ForceNew: true,
 			},
 
-			"security_group_id": {
+			"subnet_id": {
 				Type:     schema.TypeString,
 				Required: true,
 				ForceNew: true,
@@ -237,9 +237,9 @@ func resourceRdsInstanceV3UserInputParams(d *schema.ResourceData) map[string]int
 		"flavor":                  d.Get("flavor"),
 		"ha_replication_mode":     d.Get("ha_replication_mode"),
 		"name":                    d.Get("name"),
-		"network_id":              d.Get("network_id"),
 		"param_group_id":          d.Get("param_group_id"),
 		"security_group_id":       d.Get("security_group_id"),
+		"subnet_id":               d.Get("subnet_id"),
 		"volume":                  d.Get("volume"),
 		"vpc_id":                  d.Get("vpc_id"),
 	}
@@ -474,7 +474,7 @@ func buildRdsInstanceV3CreateParameters(opts map[string]interface{}, arrayIndex 
 		params["security_group_id"] = v
 	}
 
-	v, err = navigateValue(opts, []string{"network_id"}, arrayIndex)
+	v, err = navigateValue(opts, []string{"subnet_id"}, arrayIndex)
 	if err != nil {
 		return nil, err
 	}
@@ -790,14 +790,6 @@ func setRdsInstanceV3Properties(d *schema.ResourceData, response map[string]inte
 		return fmt.Errorf("Error setting Instance:name, err: %s", err)
 	}
 
-	v, err = navigateValue(response, []string{"list", "subnet_id"}, nil)
-	if err != nil {
-		return fmt.Errorf("Error reading Instance:network_id, err: %s", err)
-	}
-	if err = d.Set("network_id", v); err != nil {
-		return fmt.Errorf("Error setting Instance:network_id, err: %s", err)
-	}
-
 	v, _ = opts["nodes"]
 	v, err = flattenRdsInstanceV3Nodes(response, nil, v)
 	if err != nil {
@@ -829,6 +821,14 @@ func setRdsInstanceV3Properties(d *schema.ResourceData, response map[string]inte
 	}
 	if err = d.Set("security_group_id", v); err != nil {
 		return fmt.Errorf("Error setting Instance:security_group_id, err: %s", err)
+	}
+
+	v, err = navigateValue(response, []string{"list", "subnet_id"}, nil)
+	if err != nil {
+		return fmt.Errorf("Error reading Instance:subnet_id, err: %s", err)
+	}
+	if err = d.Set("subnet_id", v); err != nil {
+		return fmt.Errorf("Error setting Instance:subnet_id, err: %s", err)
 	}
 
 	v, _ = opts["volume"]

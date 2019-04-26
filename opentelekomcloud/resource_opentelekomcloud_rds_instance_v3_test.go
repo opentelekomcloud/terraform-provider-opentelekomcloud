@@ -58,7 +58,7 @@ resource "opentelekomcloud_rds_instance_v3" "instance" {
   }
   name = "terraform_test_rds_instance%s"
   security_group_id = "${opentelekomcloud_networking_secgroup_v2.secgroup.id}"
-  network_id = "%s"
+  subnet_id = "%s"
   vpc_id = "%s"
   volume {
     type = "COMMON"
