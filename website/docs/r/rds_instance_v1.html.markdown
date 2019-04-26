@@ -53,6 +53,10 @@ resource "opentelekomcloud_rds_instance_v1" "instance" {
     enable = true
     replicationmode = "async"
   }
+  tag {
+    foo = "bar"
+    key = "value"
+  }
   depends_on = ["opentelekomcloud_compute_secgroup_v2.secgrp_rds"]
 }
 ```
@@ -181,6 +185,8 @@ The following arguments are supported:
     is described below.
 
 * `dbrtpd` - (Required) Specifies the password for user root of the database.
+
+* `tag` - (Optional) Tags key/value pairs to associate with the instance.
 
 * `ha` - (Optional) Specifies the parameters configured on HA and is used when
     creating HA DB instances. The structure is described below. NOTICE:
