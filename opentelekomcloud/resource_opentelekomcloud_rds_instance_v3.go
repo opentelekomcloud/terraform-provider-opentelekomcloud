@@ -31,10 +31,6 @@ func resourceRdsInstanceV3() *schema.Resource {
 		Read:   resourceRdsInstanceV3Read,
 		Delete: resourceRdsInstanceV3Delete,
 
-		Importer: &schema.ResourceImporter{
-			State: schema.ImportStatePassthrough,
-		},
-
 		Timeouts: &schema.ResourceTimeout{
 			Create: schema.DefaultTimeout(30 * time.Minute),
 		},

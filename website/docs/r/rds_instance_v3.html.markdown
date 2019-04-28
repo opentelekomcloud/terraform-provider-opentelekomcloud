@@ -53,7 +53,7 @@ resource "opentelekomcloud_networking_secgroup_v2" "secgroup" {
 }
 
 resource "opentelekomcloud_rds_instance_v3" "instance" {
-  availability_zone = ["{{ availability_zone_1 }},{{ availability_zone_2 }}"]
+  availability_zone = ["{{ availability_zone_1 }}, {{ availability_zone_2 }}"]
   db = {
     password = "Huangwei!120521"
     type = "PostgreSQL"
@@ -288,11 +288,3 @@ The `nodes` block contains:
 
 This resource provides the following timeouts configuration options:
 - `create` - Default is 30 minute.
-
-## Import
-
-Instance can be imported using the following format:
-
-```
-$ terraform import opentelekomcloud_rds_instance_v3.default {{ resource id}}
-```
