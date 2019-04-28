@@ -263,11 +263,11 @@ func resourceRdsInstanceV3Create(d *schema.ResourceData, meta interface{}) error
 
 	params, err := buildRdsInstanceV3CreateParameters(opts, arrayIndex)
 	if err != nil {
-		return fmt.Errorf("Error building the request body of api(create)")
+		return fmt.Errorf("Error building the request body of api(create), err=%s", err)
 	}
 	r, err := sendRdsInstanceV3CreateRequest(d, params, client)
 	if err != nil {
-		return fmt.Errorf("Error creating RdsInstanceV3: %s", err)
+		return fmt.Errorf("Error creating RdsInstanceV3, err=%s", err)
 	}
 
 	timeout := d.Timeout(schema.TimeoutCreate)
@@ -277,7 +277,7 @@ func resourceRdsInstanceV3Create(d *schema.ResourceData, meta interface{}) error
 	}
 	id, err := navigateValue(obj, []string{"job", "instance", "id"}, nil)
 	if err != nil {
-		return fmt.Errorf("Error constructing id: %s", err)
+		return fmt.Errorf("Error constructing id, err=%s", err)
 	}
 	d.SetId(id.(string))
 
@@ -329,7 +329,7 @@ func resourceRdsInstanceV3Delete(d *schema.ResourceData, meta interface{}) error
 		},
 	})
 	if r.Err != nil {
-		return fmt.Errorf("Error deleting Instance %q: %s", d.Id(), r.Err)
+		return fmt.Errorf("Error deleting Instance %q, err=%s", d.Id(), r.Err)
 	}
 
 	_, err = waitToFinish(
@@ -657,7 +657,7 @@ func sendRdsInstanceV3CreateRequest(d *schema.ResourceData, params interface{},
 		},
 	})
 	if r.Err != nil {
-		return nil, fmt.Errorf("Error running api(create): %s", r.Err)
+		return nil, fmt.Errorf("Error running api(create), err=%s", r.Err)
 	}
 	return r.Body, nil
 }
@@ -672,7 +672,7 @@ func asyncWaitRdsInstanceV3Create(d *schema.ResourceData, config *Config, result
 	for key, path := range pathParameters {
 		value, err := navigateValue(result, path, nil)
 		if err != nil {
-			return nil, fmt.Errorf("Error retrieving async operation path parameter: %s", err)
+			return nil, fmt.Errorf("Error retrieving async operation path parameter, err=%s", err)
 		}
 		data[key] = value.(string)
 	}
@@ -749,7 +749,7 @@ func sendRdsInstanceV3ListRequest(client *golangsdk.ServiceClient, url string) (
 			"X-Language":   "en-us",
 		}})
 	if r.Err != nil {
-		return nil, fmt.Errorf("Error running api(list) for resource(RdsInstanceV3), error: %s", r.Err)
+		return nil, fmt.Errorf("Error running api(list) for resource(RdsInstanceV3), err=%s", r.Err)
 	}
 
 	v, err := navigateValue(r.Body, []string{"instances"}, nil)

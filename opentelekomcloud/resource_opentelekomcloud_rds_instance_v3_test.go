@@ -43,11 +43,6 @@ func TestAccRdsInstanceV3_basic(t *testing.T) {
 
 func testAccRdsInstanceV3_basic(val string) string {
 	return fmt.Sprintf(`
-resource "opentelekomcloud_networking_secgroup_v2" "secgroup" {
-  name = "terraform_test_security_group%s"
-  description = "terraform security group acceptance test"
-}
-
 resource "opentelekomcloud_rds_instance_v3" "instance" {
   availability_zone = ["%s"]
   db = {
@@ -57,7 +52,7 @@ resource "opentelekomcloud_rds_instance_v3" "instance" {
     port = "8635"
   }
   name = "terraform_test_rds_instance%s"
-  security_group_id = "${opentelekomcloud_networking_secgroup_v2.secgroup.id}"
+  security_group_id = "47f50ead-ce99-4b71-b814-d81dba416ac2"
   subnet_id = "%s"
   vpc_id = "%s"
   volume {
@@ -70,7 +65,7 @@ resource "opentelekomcloud_rds_instance_v3" "instance" {
     keep_days = 1
   }
 }
-	`, val, OS_AVAILABILITY_ZONE, val, OS_NETWORK_ID, OS_VPC_ID)
+	`, OS_AVAILABILITY_ZONE, val, OS_NETWORK_ID, OS_VPC_ID)
 }
 
 func testAccCheckRdsInstanceV3Destroy(s *terraform.State) error {
