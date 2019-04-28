@@ -41,9 +41,12 @@ func resourceRdsInstanceV3() *schema.Resource {
 
 		Schema: map[string]*schema.Schema{
 			"availability_zone": {
-				Type:     schema.TypeString,
+				Type:     schema.TypeList,
 				Required: true,
 				ForceNew: true,
+				Elem: &schema.Schema{
+					Type: schema.TypeString,
+				},
 			},
 
 			"db": {
@@ -354,7 +357,7 @@ func resourceRdsInstanceV3Delete(d *schema.ResourceData, meta interface{}) error
 func buildRdsInstanceV3CreateParameters(opts map[string]interface{}, arrayIndex map[string]int) (interface{}, error) {
 	params := make(map[string]interface{})
 
-	v, err := navigateValue(opts, []string{"availability_zone"}, arrayIndex)
+	v, err := expandRdsInstanceV3CreateAvailabilityZone(opts, arrayIndex)
 	if err != nil {
 		return nil, err
 	}
@@ -505,6 +508,30 @@ func buildRdsInstanceV3CreateParameters(opts map[string]interface{}, arrayIndex 
 	}
 
 	return params, nil
+}
+
+func expandRdsInstanceV3CreateAvailabilityZone(d interface{}, arrayIndex map[string]int) (interface{}, error) {
+	v, err := navigateValue(d, []string{"availability_zone"}, arrayIndex)
+	if err != nil {
+		return nil, err
+	}
+	flavor, err := navigateValue(d, []string{"flavor"}, arrayIndex)
+	if err != nil {
+		return nil, err
+	}
+	if v1, ok := v.([]interface{}); ok {
+		if strings.HasSuffix(flavor.(string), ".ha") {
+			if len(v1) != 2 {
+				return nil, fmt.Errorf("must input two available zones for primary/standby instance")
+			}
+			return v1[0].(string) + "," + v1[1].(string), nil
+		}
+		if len(v1) != 1 {
+			return nil, fmt.Errorf("must input only one available zone for single instance")
+		}
+		return v1[0].(string), nil
+	}
+	return "", fmt.Errorf("can not convert to array")
 }
 
 func expandRdsInstanceV3CreateBackupStrategy(d interface{}, arrayIndex map[string]int) (interface{}, error) {

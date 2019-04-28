@@ -21,7 +21,7 @@ resource "opentelekomcloud_networking_secgroup_v2" "secgroup" {
 }
 
 resource "opentelekomcloud_rds_instance_v3" "instance" {
-  availability_zone = "{{ availability_zone }}"
+  availability_zone = ["{{ availability_zone }}"]
   db = {
     password = "Huangwei!120521"
     type = "PostgreSQL"
@@ -53,7 +53,7 @@ resource "opentelekomcloud_networking_secgroup_v2" "secgroup" {
 }
 
 resource "opentelekomcloud_rds_instance_v3" "instance" {
-  availability_zone = "{{ availability_zone_1 }},{{ availability_zone_2 }}"
+  availability_zone = ["{{ availability_zone_1 }},{{ availability_zone_2 }}"]
   db = {
     password = "Huangwei!120521"
     type = "PostgreSQL"
@@ -92,7 +92,7 @@ resource "opentelekomcloud_networking_secgroup_v2" "secgroup" {
 }
 
 resource "opentelekomcloud_rds_instance_v3" "instance" {
-  availability_zone = "{{ availability_zone }}"
+  availability_zone = ["{{ availability_zone }}"]
   db = {
     password = "Huangwei!120521"
     type = "PostgreSQL"

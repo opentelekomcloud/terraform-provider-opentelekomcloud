@@ -49,7 +49,7 @@ resource "opentelekomcloud_networking_secgroup_v2" "secgroup" {
 }
 
 resource "opentelekomcloud_rds_instance_v3" "instance" {
-  availability_zone = "%s"
+  availability_zone = ["%s"]
   db = {
     password = "Huangwei!120521"
     type = "PostgreSQL"
