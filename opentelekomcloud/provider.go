@@ -189,6 +189,7 @@ func Provider() terraform.ResourceProvider {
 			"opentelekomcloud_kms_key_v1":                 dataSourceKmsKeyV1(),
 			"opentelekomcloud_kms_data_key_v1":            dataSourceKmsDataKeyV1(),
 			"opentelekomcloud_rds_flavors_v1":             dataSourceRdsFlavorV1(),
+			"opentelekomcloud_rds_flavors_v3":             dataSourceRdsFlavorV3(),
 			"opentelekomcloud_vpc_v1":                     dataSourceVirtualPrivateCloudVpcV1(),
 			"opentelekomcloud_vpc_peering_connection_v2":  dataSourceVpcPeeringConnectionV2(),
 			"opentelekomcloud_vpc_route_v2":               dataSourceVPCRouteV2(),
@@ -308,6 +309,7 @@ func Provider() terraform.ResourceProvider {
 			"opentelekomcloud_cce_cluster_v3":                     resourceCCEClusterV3(),
 			"opentelekomcloud_maas_task_v1":                       resourceMaasTaskV1(),
 			"opentelekomcloud_css_cluster_v1":                     resourceCssClusterV1(),
+			"opentelekomcloud_rds_instance_v3":                    resourceRdsInstanceV3(),
 		},
 
 		ConfigureFunc: configureProvider,
