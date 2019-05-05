@@ -1,4 +1,26 @@
 ## 1.8.0 (Unreleased)
+
+FEATURES:
+
+* **New Data Source:** `opentelekomcloud_networking_port_v2` [GH-263]
+* **New Data Source:** `opentelekomcloud_rds_flavors_v3` [GH-267]
+* **New Resource:** `opentelekomcloud_identity_role_v3` [GH-213]
+* **New Resource:** `opentelekomcloud_css_cluster_v1` [GH-255]
+* **New Resource:** `opentelekomcloud_rds_instance_v3` [GH-267]
+
+ENHANCEMENTS:
+
+* `resource/opentelekomcloud_dns_zone_v2`: Add support for attaching multi routers to dns zone [GH-261]
+* `resource/opentelekomcloud_cce_cluster_v3`: Add authentication mode option support for CCE cluster [GH-262]
+* `provider`: Add security_token option for OBS federated authentication [GH-264]
+* `resource/opentelekomcloud_rds_instance_v1`: Add RDS tag support [GH-268]
+
+BUG FIXES:
+
+* `resource/opentelekomcloud_dms_group_v1`: Fix wrong error message [GH-260]
+* `data_source/opentelekomcloud_cce_node_v3`: Fix node data source with node_id [GH-265]
+* `resource/opentelekomcloud_cce_node_v3`: Remove Abnormal from cce node creating target state [GH-266]
+
 ## 1.7.0 (March 20, 2019)
 
 NOTES/DEPRECATIONS:
