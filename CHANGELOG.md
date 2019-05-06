@@ -1,25 +1,25 @@
-## 1.8.0 (Unreleased)
+## 1.8.0 (May 06, 2019)
 
 FEATURES:
 
-* **New Data Source:** `opentelekomcloud_networking_port_v2` [GH-263]
-* **New Data Source:** `opentelekomcloud_rds_flavors_v3` [GH-267]
-* **New Resource:** `opentelekomcloud_identity_role_v3` [GH-213]
-* **New Resource:** `opentelekomcloud_css_cluster_v1` [GH-255]
-* **New Resource:** `opentelekomcloud_rds_instance_v3` [GH-267]
+* **New Data Source:** `opentelekomcloud_networking_port_v2` ([#263](https://github.com/terraform-providers/terraform-provider-opentelekomcloud/issues/263))
+* **New Data Source:** `opentelekomcloud_rds_flavors_v3` ([#267](https://github.com/terraform-providers/terraform-provider-opentelekomcloud/issues/267))
+* **New Resource:** `opentelekomcloud_identity_role_v3` ([#213](https://github.com/terraform-providers/terraform-provider-opentelekomcloud/issues/213))
+* **New Resource:** `opentelekomcloud_css_cluster_v1` ([#255](https://github.com/terraform-providers/terraform-provider-opentelekomcloud/issues/255))
+* **New Resource:** `opentelekomcloud_rds_instance_v3` ([#267](https://github.com/terraform-providers/terraform-provider-opentelekomcloud/issues/267))
 
 ENHANCEMENTS:
 
-* `resource/opentelekomcloud_dns_zone_v2`: Add support for attaching multi routers to dns zone [GH-261]
-* `resource/opentelekomcloud_cce_cluster_v3`: Add authentication mode option support for CCE cluster [GH-262]
-* `provider`: Add security_token option for OBS federated authentication [GH-264]
-* `resource/opentelekomcloud_rds_instance_v1`: Add RDS tag support [GH-268]
+* `resource/opentelekomcloud_dns_zone_v2`: Add support for attaching multi routers to dns zone ([#261](https://github.com/terraform-providers/terraform-provider-opentelekomcloud/issues/261))
+* `resource/opentelekomcloud_cce_cluster_v3`: Add authentication mode option support for CCE cluster ([#262](https://github.com/terraform-providers/terraform-provider-opentelekomcloud/issues/262))
+* `provider`: Add security_token option for OBS federated authentication ([#264](https://github.com/terraform-providers/terraform-provider-opentelekomcloud/issues/264))
+* `resource/opentelekomcloud_rds_instance_v1`: Add RDS tag support ([#268](https://github.com/terraform-providers/terraform-provider-opentelekomcloud/issues/268))
 
 BUG FIXES:
 
-* `resource/opentelekomcloud_dms_group_v1`: Fix wrong error message [GH-260]
-* `data_source/opentelekomcloud_cce_node_v3`: Fix node data source with node_id [GH-265]
-* `resource/opentelekomcloud_cce_node_v3`: Remove Abnormal from cce node creating target state [GH-266]
+* `resource/opentelekomcloud_dms_group_v1`: Fix wrong error message ([#260](https://github.com/terraform-providers/terraform-provider-opentelekomcloud/issues/260))
+* `data_source/opentelekomcloud_cce_node_v3`: Fix node data source with node_id ([#265](https://github.com/terraform-providers/terraform-provider-opentelekomcloud/issues/265))
+* `resource/opentelekomcloud_cce_node_v3`: Remove Abnormal from cce node creating target state ([#266](https://github.com/terraform-providers/terraform-provider-opentelekomcloud/issues/266))
 
 ## 1.7.0 (March 20, 2019)
 
