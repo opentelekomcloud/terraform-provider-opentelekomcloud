@@ -30,6 +30,9 @@ func resourceRdsInstanceV3() *schema.Resource {
 		Create: resourceRdsInstanceV3Create,
 		Read:   resourceRdsInstanceV3Read,
 		Delete: resourceRdsInstanceV3Delete,
+		Importer: &schema.ResourceImporter{
+			State: schema.ImportStatePassthrough,
+		},
 
 		Timeouts: &schema.ResourceTimeout{
 			Create: schema.DefaultTimeout(30 * time.Minute),
@@ -762,8 +765,16 @@ func sendRdsInstanceV3ListRequest(client *golangsdk.ServiceClient, url string) (
 func setRdsInstanceV3Properties(d *schema.ResourceData, response map[string]interface{}) error {
 	opts := resourceRdsInstanceV3UserInputParams(d)
 
-	v, _ := opts["backup_strategy"]
-	v, err := flattenRdsInstanceV3BackupStrategy(response, nil, v)
+	v, err := flattenRdsInstanceV3AvailabilityZone(response)
+	if err != nil {
+		return fmt.Errorf("Error reading Instance:availability_zone, err: %s", err)
+	}
+	if err = d.Set("availability_zone", v); err != nil {
+		return fmt.Errorf("Error setting Instance:availability_zone, err: %s", err)
+	}
+
+	v, _ = opts["backup_strategy"]
+	v, err = flattenRdsInstanceV3BackupStrategy(response, nil, v)
 	if err != nil {
 		return fmt.Errorf("Error reading Instance:backup_strategy, err: %s", err)
 	}
@@ -872,6 +883,41 @@ func setRdsInstanceV3Properties(d *schema.ResourceData, response map[string]inte
 	}
 
 	return nil
+}
+
+func flattenRdsInstanceV3AvailabilityZone(d interface{}) (interface{}, error) {
+	arrayIndex := make(map[string]int)
+	arrayIndex["list.nodes"] = 0
+	v, err := navigateValue(d, []string{"list", "nodes", "availability_zone"}, arrayIndex)
+	if err != nil {
+		return nil, fmt.Errorf("Error reading Instance:availability_zone, err: %s", err)
+	}
+	az1 := v.(string)
+
+	v, err = navigateValue(d, []string{"list", "flavor_ref"}, nil)
+	if err != nil {
+		return nil, fmt.Errorf("Error reading Instance:flavor, err: %s", err)
+	}
+	if strings.HasSuffix(v.(string), ".ha") {
+		arrayIndex["list.nodes"] = 1
+		v, err := navigateValue(d, []string{"list", "nodes", "availability_zone"}, arrayIndex)
+		if err != nil {
+			return nil, fmt.Errorf("Error reading Instance:availability_zone, err: %s", err)
+		}
+		az2 := v.(string)
+
+		v, err = navigateValue(d, []string{"list", "nodes", "role"}, arrayIndex)
+		if err != nil {
+			return nil, fmt.Errorf("Error reading Instance:role, err: %s", err)
+		}
+		if v.(string) == "master" {
+			return []string{az2, az1}, nil
+		} else {
+			return []string{az1, az2}, nil
+		}
+	}
+
+	return []string{az1}, nil
 }
 
 func flattenRdsInstanceV3BackupStrategy(d interface{}, arrayIndex map[string]int, currentValue interface{}) (interface{}, error) {
