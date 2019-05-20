@@ -403,7 +403,6 @@ func resourceCCENodeV3Read(d *schema.ResourceData, meta interface{}) error {
 	}
 
 	d.Set("eip_ids", s.Spec.PublicIP.Ids)
-	d.Set("eip_count", s.Spec.PublicIP.Count)
 	d.Set("region", GetRegion(d, config))
 
 	return nil
