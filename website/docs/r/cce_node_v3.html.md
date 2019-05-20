@@ -104,5 +104,7 @@ If the eip_ids parameter is configured, you do not need to configure the eip_cou
 
 All above argument parameters can be exported as attribute parameters along with attribute reference.
 
- * `status` -  Node status information.
+ * `status` - Node status information.
+
+ * `private_ip` - Private IP of the CCE node.
   
