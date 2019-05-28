@@ -310,6 +310,7 @@ func Provider() terraform.ResourceProvider {
 			"opentelekomcloud_maas_task_v1":                       resourceMaasTaskV1(),
 			"opentelekomcloud_css_cluster_v1":                     resourceCssClusterV1(),
 			"opentelekomcloud_rds_instance_v3":                    resourceRdsInstanceV3(),
+			"opentelekomcloud_waf_certificate_v1":                 resourceWafCertificateV1(),
 		},
 
 		ConfigureFunc: configureProvider,
