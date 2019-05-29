@@ -106,7 +106,7 @@ resource "opentelekomcloud_compute_instance_v2" "instance_1" {
   flavor_id = "physical.o2.medium"
   flavor_name = "physical.o2.medium"
   tags = ["foo","bar"]
-  metadata {
+  metadata = {
     foo = "bar"
   }
   network {
@@ -127,7 +127,7 @@ resource "opentelekomcloud_compute_instance_v2" "instance_1" {
   flavor_id = "physical.o2.medium"
   flavor_name = "physical.o2.medium"
   tags = ["foo","bar"]
-  metadata {
+  metadata = {
     foo = "bar"
   }
   network {

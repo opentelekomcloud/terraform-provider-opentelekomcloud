@@ -113,9 +113,6 @@ func testAccS3BucketPolicyConfig(bucketName string) string {
 	return fmt.Sprintf(`
 resource "opentelekomcloud_s3_bucket" "bucket" {
 	bucket = "%s"
-	#tags {
-	#	TestName = "TestAccAWSS3BucketPolicy_basic"
-	#}
 }
 
 resource "opentelekomcloud_s3_bucket_policy" "bucket" {
@@ -146,9 +143,6 @@ func testAccS3BucketPolicyConfig_updated(bucketName string) string {
 	return fmt.Sprintf(`
 resource "opentelekomcloud_s3_bucket" "bucket" {
 	bucket = "%s"
-	#tags {
-	#	TestName = "TestAccAWSS3BucketPolicy_basic"
-	#}
 }
 
 resource "opentelekomcloud_s3_bucket_policy" "bucket" {

@@ -17,7 +17,7 @@ data "opentelekomcloud_images_image_v2" "ubuntu" {
   name = "Ubuntu 16.04"
   most_recent = true
 
-  properties {
+  properties = {
     key = "value"
   }
 }
