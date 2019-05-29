@@ -90,6 +90,12 @@ func Provider() terraform.ResourceProvider {
 				Description: descriptions["token"],
 			},
 
+			"security_token": {
+				Type:        schema.TypeString,
+				Optional:    true,
+				Description: descriptions["security_token"],
+			},
+
 			"domain_id": {
 				Type:     schema.TypeString,
 				Optional: true,
@@ -177,11 +183,13 @@ func Provider() terraform.ResourceProvider {
 		DataSourcesMap: map[string]*schema.Resource{
 			"opentelekomcloud_images_image_v2":            dataSourceImagesImageV2(),
 			"opentelekomcloud_networking_network_v2":      dataSourceNetworkingNetworkV2(),
+			"opentelekomcloud_networking_port_v2":         dataSourceNetworkingPortV2(),
 			"opentelekomcloud_networking_secgroup_v2":     dataSourceNetworkingSecGroupV2(),
 			"opentelekomcloud_s3_bucket_object":           dataSourceS3BucketObject(),
 			"opentelekomcloud_kms_key_v1":                 dataSourceKmsKeyV1(),
 			"opentelekomcloud_kms_data_key_v1":            dataSourceKmsDataKeyV1(),
 			"opentelekomcloud_rds_flavors_v1":             dataSourceRdsFlavorV1(),
+			"opentelekomcloud_rds_flavors_v3":             dataSourceRdsFlavorV3(),
 			"opentelekomcloud_vpc_v1":                     dataSourceVirtualPrivateCloudVpcV1(),
 			"opentelekomcloud_vpc_peering_connection_v2":  dataSourceVpcPeeringConnectionV2(),
 			"opentelekomcloud_vpc_route_v2":               dataSourceVPCRouteV2(),
@@ -300,6 +308,10 @@ func Provider() terraform.ResourceProvider {
 			"opentelekomcloud_cce_node_v3":                        resourceCCENodeV3(),
 			"opentelekomcloud_cce_cluster_v3":                     resourceCCEClusterV3(),
 			"opentelekomcloud_maas_task_v1":                       resourceMaasTaskV1(),
+			"opentelekomcloud_css_cluster_v1":                     resourceCssClusterV1(),
+			"opentelekomcloud_rds_instance_v3":                    resourceRdsInstanceV3(),
+			"opentelekomcloud_waf_certificate_v1":                 resourceWafCertificateV1(),
+			"opentelekomcloud_waf_domain_v1":                      resourceWafDomainV1(),
 		},
 
 		ConfigureFunc: configureProvider,
@@ -333,6 +345,8 @@ func init() {
 		"password": "Password to login with.",
 
 		"token": "Authentication token to use as an alternative to username/password.",
+
+		"security_token": "Security token to use for OBS federated authentication.",
 
 		"domain_id": "The ID of the Domain to scope to (Identity v3).",
 
@@ -375,6 +389,7 @@ func configureProvider(d *schema.ResourceData) (interface{}, error) {
 		Region:           d.Get("region").(string),
 		Swauth:           d.Get("swauth").(bool),
 		Token:            d.Get("token").(string),
+		SecurityToken:    d.Get("security_token").(string),
 		TenantID:         d.Get("tenant_id").(string),
 		TenantName:       d.Get("tenant_name").(string),
 		Username:         d.Get("user_name").(string),

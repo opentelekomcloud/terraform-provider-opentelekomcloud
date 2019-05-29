@@ -107,6 +107,12 @@ func resourceCCEClusterV3() *schema.Resource {
 				Computed: true,
 				ForceNew: true,
 			},
+			"authentication_mode": {
+				Type:     schema.TypeString,
+				Optional: true,
+				ForceNew: true,
+				Default:  "x509",
+			},
 			"status": {
 				Type:     schema.TypeString,
 				Computed: true,
@@ -173,6 +179,8 @@ func resourceCCEClusterV3Create(d *schema.ResourceData, meta interface{}) error 
 				HighwaySubnet: d.Get("highway_subnet_id").(string)},
 			ContainerNetwork: clusters.ContainerNetworkSpec{Mode: d.Get("container_network_type").(string),
 				Cidr: d.Get("container_network_cidr").(string)},
+			Authentication: clusters.AuthenticationSpec{Mode: d.Get("authentication_mode").(string),
+				AuthenticatingProxy: make(map[string]string)},
 			BillingMode: d.Get("billing_mode").(int),
 			ExtendParam: resourceClusterExtendParamV3(d),
 		},
@@ -223,7 +231,6 @@ func resourceCCEClusterV3Read(d *schema.ResourceData, meta interface{}) error {
 	d.Set("name", n.Metadata.Name)
 	d.Set("status", n.Status.Phase)
 	d.Set("flavor_id", n.Spec.Flavor)
-	d.Set("cluster_version", n.Spec.Version)
 	d.Set("cluster_type", n.Spec.Type)
 	d.Set("description", n.Spec.Description)
 	d.Set("billing_mode", n.Spec.BillingMode)
@@ -232,6 +239,7 @@ func resourceCCEClusterV3Read(d *schema.ResourceData, meta interface{}) error {
 	d.Set("highway_subnet_id", n.Spec.HostNetwork.HighwaySubnet)
 	d.Set("container_network_type", n.Spec.ContainerNetwork.Mode)
 	d.Set("container_network_cidr", n.Spec.ContainerNetwork.Cidr)
+	d.Set("authentication_mode", n.Spec.Authentication.Mode)
 	d.Set("internal", n.Status.Endpoints[0].Internal)
 	d.Set("external", n.Status.Endpoints[0].External)
 	d.Set("external_otc", n.Status.Endpoints[0].ExternalOTC)

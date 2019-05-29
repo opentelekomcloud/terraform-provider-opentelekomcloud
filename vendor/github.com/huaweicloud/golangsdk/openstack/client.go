@@ -689,6 +689,14 @@ func NewComputeV1(client *golangsdk.ProviderClient, eo golangsdk.EndpointOpts) (
 	return sc, err
 }
 
+func NewRdsTagV1(client *golangsdk.ProviderClient, eo golangsdk.EndpointOpts) (*golangsdk.ServiceClient, error) {
+	sc, err := initClientOpts(client, eo, "network")
+	sc.Endpoint = strings.Replace(sc.Endpoint, "vpc", "rds", 1)
+	sc.Endpoint = sc.Endpoint + "v1/"
+	sc.ResourceBase = sc.Endpoint + client.ProjectID + "/rds/"
+	return sc, err
+}
+
 //NewAutoScalingService creates a ServiceClient that may be used to access the
 //auto-scaling service of huawei public cloud
 func NewAutoScalingService(client *golangsdk.ProviderClient, eo golangsdk.EndpointOpts) (*golangsdk.ServiceClient, error) {
@@ -945,6 +953,13 @@ func NewSMNV2(client *golangsdk.ProviderClient, eo golangsdk.EndpointOpts) (*gol
 func NewCCE(client *golangsdk.ProviderClient, eo golangsdk.EndpointOpts) (*golangsdk.ServiceClient, error) {
 	sc, err := initClientOpts(client, eo, "ccev2.0")
 	sc.ResourceBase = sc.Endpoint + "api/v3/projects/" + client.ProjectID + "/"
+	return sc, err
+}
+
+// NewWAF creates a ServiceClient that may be used to access the WAF service.
+func NewWAFV1(client *golangsdk.ProviderClient, eo golangsdk.EndpointOpts) (*golangsdk.ServiceClient, error) {
+	sc, err := initClientOpts(client, eo, "waf")
+	sc.ResourceBase = sc.Endpoint + "v1/" + client.ProjectID + "/waf/"
 	return sc, err
 }
 

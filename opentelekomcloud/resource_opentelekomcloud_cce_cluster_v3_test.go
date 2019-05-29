@@ -34,6 +34,8 @@ func TestAccCCEClusterV3_basic(t *testing.T) {
 						"opentelekomcloud_cce_cluster_v3.cluster_1", "cluster_version", "v1.9.2-r2"),
 					resource.TestCheckResourceAttr(
 						"opentelekomcloud_cce_cluster_v3.cluster_1", "container_network_type", "overlay_l2"),
+					resource.TestCheckResourceAttr(
+						"opentelekomcloud_cce_cluster_v3.cluster_1", "authentication_mode", "x509"),
 				),
 			},
 			{
@@ -59,6 +61,8 @@ func TestAccCCEClusterV3_timeout(t *testing.T) {
 				Config: testAccCCEClusterV3_timeout,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckCCEClusterV3Exists("opentelekomcloud_cce_cluster_v3.cluster_1", &cluster),
+					resource.TestCheckResourceAttr(
+						"opentelekomcloud_cce_cluster_v3.cluster_1", "authentication_mode", "rbac"),
 				),
 			},
 		},
@@ -150,6 +154,7 @@ resource "opentelekomcloud_cce_cluster_v3" "cluster_1" {
   vpc_id="%s"
   subnet_id="%s"
   container_network_type="overlay_l2"
+  authentication_mode = "rbac"
     timeouts {
     create = "10m"
     delete = "10m"

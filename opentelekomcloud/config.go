@@ -44,6 +44,7 @@ type Config struct {
 	TenantID         string
 	TenantName       string
 	Token            string
+	SecurityToken    string
 	Username         string
 	UserID           string
 	AgencyName       string
@@ -716,6 +717,20 @@ func (c *Config) maasV1Client(region string) (*golangsdk.ServiceClient, error) {
 
 func (c *Config) dcsV1Client(region string) (*golangsdk.ServiceClient, error) {
 	return huaweisdk.NewDCSServiceV1(c.HwClient, golangsdk.EndpointOpts{
+		Region:       region,
+		Availability: c.getHwEndpointType(),
+	})
+}
+
+func (c *Config) rdsTagV1Client(region string) (*golangsdk.ServiceClient, error) {
+	return huaweisdk.NewRdsTagV1(c.HwClient, golangsdk.EndpointOpts{
+		Region:       region,
+		Availability: c.getHwEndpointType(),
+	})
+}
+
+func (c *Config) wafV1Client(region string) (*golangsdk.ServiceClient, error) {
+	return huaweisdk.NewWAFV1(c.HwClient, golangsdk.EndpointOpts{
 		Region:       region,
 		Availability: c.getHwEndpointType(),
 	})

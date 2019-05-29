@@ -3,11 +3,12 @@ package opentelekomcloud
 import (
 	"testing"
 
+	"github.com/hashicorp/terraform/helper/acctest"
 	"github.com/hashicorp/terraform/helper/resource"
 )
 
 func TestAccIdentityV3Role_importBasic(t *testing.T) {
-	resourceName := "opentelekomcloud_identity_role_v3.role_1"
+	resourceName := "opentelekomcloud_identity_role_v3.role"
 
 	resource.Test(t, resource.TestCase{
 		PreCheck: func() {
@@ -18,7 +19,7 @@ func TestAccIdentityV3Role_importBasic(t *testing.T) {
 		CheckDestroy: testAccCheckIdentityV3UserDestroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccIdentityV3Role_basic,
+				Config: testAccIdentityRoleV3_basic(acctest.RandString(10)),
 			},
 
 			{
