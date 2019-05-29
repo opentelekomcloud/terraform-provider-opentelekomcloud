@@ -92,7 +92,7 @@ func dataSourceBMSFlavorV2Read(d *schema.ResourceData, meta interface{}) error {
 		MinDisk: d.Get("min_disk").(int),
 		MinRAM:  d.Get("min_ram").(int),
 		Name:    d.Get("name").(string),
-		ID:      d.Get("id").(string),
+		ID:      d.Id(),
 		SortKey: d.Get("sort_key").(string),
 		SortDir: d.Get("sort_dir").(string),
 	}

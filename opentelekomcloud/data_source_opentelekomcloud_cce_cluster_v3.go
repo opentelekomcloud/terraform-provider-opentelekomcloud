@@ -23,10 +23,6 @@ func dataSourceCCEClusterV3() *schema.Resource {
 				Type:     schema.TypeString,
 				Optional: true,
 			},
-			"id": {
-				Type:     schema.TypeString,
-				Optional: true,
-			},
 			"flavor_id": {
 				Type:     schema.TypeString,
 				Computed: true,
@@ -96,7 +92,7 @@ func dataSourceCCEClusterV3Read(d *schema.ResourceData, meta interface{}) error 
 	}
 
 	listOpts := clusters.ListOpts{
-		ID:    d.Get("id").(string),
+		ID:    d.Id(),
 		Name:  d.Get("name").(string),
 		Type:  d.Get("cluster_type").(string),
 		Phase: d.Get("status").(string),

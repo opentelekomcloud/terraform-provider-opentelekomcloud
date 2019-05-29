@@ -10,10 +10,22 @@ Example to List Software Deployments
 	}
 
 	for _, deployment := range allDeployments {
-		fmt.Printf("%+v\n", config)
+		fmt.Printf("%+v\n", allDeployments)
+	}
+
+Example to Get Software Deployment
+
+	deploymentID:="bd7d48a5-6e33-4b95-aa28-d0d3af46c635"
+
+ 	deployments,err:=softwaredeployment.Get(client,deploymentID).Extract()
+
+	if err != nil {
+		panic(err)
 	}
 
 Example to Create a Software Deployments
+
+	input:=map[string]interface{}{"name":"foo"}
 
 	createOpts := softwaredeployment.CreateOpts{
 		Status:"IN_PROGRESS",
@@ -24,7 +36,7 @@ Example to Create a Software Deployments
 		Action:"CREATE"
 	}
 
-	config, err := softwaredeployment.Create(client, createOpts).Extract()
+	deployment, err := softwaredeployment.Create(client, createOpts).Extract()
 	if err != nil {
 		panic(err)
 	}

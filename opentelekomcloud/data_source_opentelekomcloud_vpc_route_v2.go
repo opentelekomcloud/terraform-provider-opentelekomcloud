@@ -59,7 +59,7 @@ func dataSourceVpcRouteV2Read(d *schema.ResourceData, meta interface{}) error {
 		Destination: d.Get("destination").(string),
 		VPC_ID:      d.Get("vpc_id").(string),
 		Tenant_Id:   d.Get("tenant_id").(string),
-		RouteID:     d.Get("id").(string),
+		RouteID:     d.Id(),
 	}
 
 	pages, err := routes.List(vpcRouteClient, listOpts).AllPages()

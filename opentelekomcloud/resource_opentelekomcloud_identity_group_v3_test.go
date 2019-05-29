@@ -23,7 +23,7 @@ func TestAccIdentityV3Group_basic(t *testing.T) {
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckIdentityV3GroupDestroy,
 		Steps: []resource.TestStep{
-			resource.TestStep{
+			{
 				Config: testAccIdentityV3Group_basic(groupName),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckIdentityV3GroupExists("opentelekomcloud_identity_group_v3.group_1", &group),
@@ -35,7 +35,7 @@ func TestAccIdentityV3Group_basic(t *testing.T) {
 						"opentelekomcloud_identity_group_v3.group_1", "domain_id", &group.DomainID),
 				),
 			},
-			resource.TestStep{
+			{
 				Config: testAccIdentityV3Group_update(groupName),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckIdentityV3GroupExists("opentelekomcloud_identity_group_v3.group_1", &group),

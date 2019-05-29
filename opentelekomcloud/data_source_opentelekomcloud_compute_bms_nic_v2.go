@@ -64,7 +64,7 @@ func dataSourceBMSNicV2Read(d *schema.ResourceData, meta interface{}) error {
 	nicClient, err := config.computeV2HWClient(GetRegion(d, config))
 
 	listOpts := nics.ListOpts{
-		ID:     d.Get("id").(string),
+		ID:     d.Id(),
 		Status: d.Get("status").(string),
 	}
 

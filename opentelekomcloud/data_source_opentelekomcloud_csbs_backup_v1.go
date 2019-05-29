@@ -202,7 +202,7 @@ func dataSourceCSBSBackupV1Read(d *schema.ResourceData, meta interface{}) error 
 	backupClient, err := config.csbsV1Client(GetRegion(d, config))
 
 	listOpts := backup.ListOpts{
-		ID:           d.Get("id").(string),
+		ID:           d.Id(),
 		Name:         d.Get("backup_name").(string),
 		Status:       d.Get("status").(string),
 		ResourceName: d.Get("resource_name").(string),

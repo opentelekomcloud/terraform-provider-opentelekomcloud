@@ -87,12 +87,6 @@ func resourceMemberV2() *schema.Resource {
 				Required: true,
 				ForceNew: true,
 			},
-
-			"id": {
-				Type:     schema.TypeString,
-				Optional: true,
-				Computed: true,
-			},
 		},
 	}
 }

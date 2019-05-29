@@ -58,7 +58,7 @@ func dataSourceRtsSoftwareConfigV1Read(d *schema.ResourceData, meta interface{})
 	orchestrationClient, err := config.orchestrationV1Client(GetRegion(d, config))
 
 	listOpts := softwareconfig.ListOpts{
-		Id:   d.Get("id").(string),
+		Id:   d.Id(),
 		Name: d.Get("name").(string),
 	}
 

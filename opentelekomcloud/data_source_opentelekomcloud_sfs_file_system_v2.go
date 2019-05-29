@@ -123,7 +123,7 @@ func dataSourceSFSFileSystemV2Read(d *schema.ResourceData, meta interface{}) err
 	sfsClient, err := config.sfsV2Client(GetRegion(d, config))
 
 	listOpts := shares.ListOpts{
-		ID:     d.Get("id").(string),
+		ID:     d.Id(),
 		Name:   d.Get("name").(string),
 		Status: d.Get("status").(string),
 	}

@@ -158,7 +158,7 @@ func dataSourceBMSServersV2Read(d *schema.ResourceData, meta interface{}) error 
 	bmsClient, err := config.bmsClient(GetRegion(d, config))
 
 	listServerOpts := servers.ListOpts{
-		ID:         d.Get("id").(string),
+		ID:         d.Id(),
 		Name:       d.Get("name").(string),
 		Status:     d.Get("status").(string),
 		UserID:     d.Get("user_id").(string),

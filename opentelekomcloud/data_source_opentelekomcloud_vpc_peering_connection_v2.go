@@ -56,7 +56,7 @@ func dataSourceVpcPeeringConnectionV2Read(d *schema.ResourceData, meta interface
 	}
 
 	listOpts := peerings.ListOpts{
-		ID:         d.Get("id").(string),
+		ID:         d.Id(),
 		Name:       d.Get("name").(string),
 		Status:     d.Get("status").(string),
 		TenantId:   d.Get("peer_tenant_id").(string),

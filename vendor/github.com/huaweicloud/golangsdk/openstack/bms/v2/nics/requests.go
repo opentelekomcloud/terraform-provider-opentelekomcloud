@@ -8,8 +8,7 @@ import (
 )
 
 // ListOpts allows the filtering and sorting of paginated collections through
-// the API. Filtering is achieved by passing in struct field values that map to
-// the nic attributes you want to see returned.
+// the API.
 type ListOpts struct {
 	// ID is the unique identifier for the nic.
 	ID string `json:"port_id"`
@@ -18,12 +17,8 @@ type ListOpts struct {
 	Status string `json:"port_state"`
 }
 
-// List returns collection of
-// nics. It accepts a ListOpts struct, which allows you to filter and sort
+// List returns collection of nics. It accepts a ListOpts struct, which allows you to filter and sort
 // the returned collection for greater efficiency.
-//
-// Default policy settings return only those nics that are owned by the
-// tenant who submits the request, unless an admin user submits the request.
 func List(c *golangsdk.ServiceClient, serverId string, opts ListOpts) ([]Nic, error) {
 	u := listURL(c, serverId)
 	pages, err := pagination.NewPager(c, u, func(r pagination.PageResult) pagination.Page {
@@ -38,6 +33,7 @@ func List(c *golangsdk.ServiceClient, serverId string, opts ListOpts) ([]Nic, er
 	return FilterNICs(allNICs, opts)
 }
 
+//FilterNICs used to filter nics using id and status.
 func FilterNICs(nics []Nic, opts ListOpts) ([]Nic, error) {
 
 	var refinedNICs []Nic

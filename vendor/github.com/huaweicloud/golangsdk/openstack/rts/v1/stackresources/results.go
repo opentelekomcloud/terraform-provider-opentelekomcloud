@@ -2,9 +2,10 @@ package stackresources
 
 import (
 	"encoding/json"
+	"time"
+
 	"github.com/huaweicloud/golangsdk"
 	"github.com/huaweicloud/golangsdk/pagination"
-	"time"
 )
 
 // Resource represents a stack resource.
