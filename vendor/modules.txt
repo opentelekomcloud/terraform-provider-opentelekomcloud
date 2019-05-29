@@ -138,7 +138,7 @@ github.com/hashicorp/terraform/svchost
 github.com/hashicorp/terraform/svchost/auth
 # github.com/hashicorp/yamux v0.0.0-20160720233140-d1caa6c97c9f
 github.com/hashicorp/yamux
-# github.com/huaweicloud/golangsdk v0.0.0-20190315091853-bbe185359182
+# github.com/huaweicloud/golangsdk v0.0.0-20190528073953-e7f9bd5de6d3
 github.com/huaweicloud/golangsdk
 github.com/huaweicloud/golangsdk/openstack
 github.com/huaweicloud/golangsdk/openstack/antiddos/v1/antiddos
@@ -229,6 +229,7 @@ github.com/huaweicloud/golangsdk/openstack/objectstorage/v1/swauth
 github.com/huaweicloud/golangsdk/openstack/rds/v1/datastores
 github.com/huaweicloud/golangsdk/openstack/rds/v1/flavors
 github.com/huaweicloud/golangsdk/openstack/rds/v1/instances
+github.com/huaweicloud/golangsdk/openstack/rds/v1/tags
 github.com/huaweicloud/golangsdk/openstack/rts/v1/softwareconfig
 github.com/huaweicloud/golangsdk/openstack/rts/v1/softwaredeployment
 github.com/huaweicloud/golangsdk/openstack/rts/v1/stackresources
@@ -241,6 +242,8 @@ github.com/huaweicloud/golangsdk/openstack/vbs/v2/backups
 github.com/huaweicloud/golangsdk/openstack/vbs/v2/policies
 github.com/huaweicloud/golangsdk/openstack/vbs/v2/shares
 github.com/huaweicloud/golangsdk/openstack/vbs/v2/tags
+github.com/huaweicloud/golangsdk/openstack/waf/v1/certificates
+github.com/huaweicloud/golangsdk/openstack/waf/v1/domains
 github.com/huaweicloud/golangsdk/pagination
 github.com/huaweicloud/golangsdk/openstack/identity/v2/tokens
 github.com/huaweicloud/golangsdk/openstack/identity/v3/endpoints
