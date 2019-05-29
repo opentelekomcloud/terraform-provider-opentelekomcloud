@@ -203,7 +203,7 @@ resource "opentelekomcloud_rds_instance_v1" "instance" {
     enable = true
     replicationmode = "async"
   }
-  tag {
+  tag = {
     foo = "bar"
     key = "value"
   }
@@ -253,7 +253,7 @@ resource "opentelekomcloud_rds_instance_v1" "instance" {
     enable = true
     replicationmode = "async"
   }
-  tag {
+  tag = {
     foo2 = "bar2"
     key = "value2"
   }

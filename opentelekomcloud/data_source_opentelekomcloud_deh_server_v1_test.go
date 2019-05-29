@@ -53,7 +53,7 @@ resource "opentelekomcloud_compute_instance_v2" "instance_1" {
   security_groups = ["default"]
   flavor_name = "s2.medium.1"
   availability_zone = "%s"
-  metadata {
+  metadata = {
     foo = "bar"
   }
   network {

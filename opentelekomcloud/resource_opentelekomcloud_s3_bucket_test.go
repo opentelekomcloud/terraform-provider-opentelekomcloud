@@ -962,7 +962,7 @@ resource "opentelekomcloud_s3_bucket" "bucket1" {
 	bucket = "tf-test-bucket-1-{{.GUID}}"
 	acl = "private"
 	force_destroy = true
-	tags {
+	tags = {
 		Name = "tf-test-bucket-1-{{.GUID}}"
 		Environment = "{{.GUID}}"
 	}
@@ -972,7 +972,7 @@ resource "opentelekomcloud_s3_bucket" "bucket2" {
 	bucket = "tf-test-bucket-2-{{.GUID}}"
 	acl = "private"
 	force_destroy = true
-	tags {
+	tags = {
 		Name = "tf-test-bucket-2-{{.GUID}}"
 		Environment = "{{.GUID}}"
 	}
@@ -982,7 +982,7 @@ resource "opentelekomcloud_s3_bucket" "bucket3" {
 	bucket = "tf-test-bucket-3-{{.GUID}}"
 	acl = "private"
 	force_destroy = true
-	tags {
+	tags = {
 		Name = "tf-test-bucket-3-{{.GUID}}"
 		Environment = "{{.GUID}}"
 	}
@@ -992,7 +992,7 @@ resource "opentelekomcloud_s3_bucket" "bucket4" {
 	bucket = "tf-test-bucket-4-{{.GUID}}"
 	acl = "private"
 	force_destroy = true
-	tags {
+	tags = {
 		Name = "tf-test-bucket-4-{{.GUID}}"
 		Environment = "{{.GUID}}"
 	}
@@ -1002,7 +1002,7 @@ resource "opentelekomcloud_s3_bucket" "bucket5" {
 	bucket = "tf-test-bucket-5-{{.GUID}}"
 	acl = "private"
 	force_destroy = true
-	tags {
+	tags = {
 		Name = "tf-test-bucket-5-{{.GUID}}"
 		Environment = "{{.GUID}}"
 	}
@@ -1012,7 +1012,7 @@ resource "opentelekomcloud_s3_bucket" "bucket6" {
 	bucket = "tf-test-bucket-6-{{.GUID}}"
 	acl = "private"
 	force_destroy = true
-	tags {
+	tags = {
 		Name = "tf-test-bucket-6-{{.GUID}}"
 		Environment = "{{.GUID}}"
 	}

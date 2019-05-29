@@ -17,11 +17,11 @@ resource "opentelekomcloud_blockstorage_volume_v2" "volume_1" {
   name        = "volume_1"
   description = "first test volume"
   size        = 3
-  tags {
+  tags        = {
     foo = "bar"
     key = "value"
   }
-  metadata {
+  metadata    = {
     __system__encrypted = "1"
     __system__cmkid     = "kms_id"
   }

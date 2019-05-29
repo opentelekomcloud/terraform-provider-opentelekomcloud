@@ -251,7 +251,7 @@ const testAccBlockStorageV2Volume_basic = `
 resource "opentelekomcloud_blockstorage_volume_v2" "volume_1" {
   name = "volume_1"
   description = "first test volume"
-  metadata {
+  metadata = {
     foo = "bar"
   }
   size = 1
@@ -262,7 +262,7 @@ const testAccBlockStorageV2Volume_update = `
 resource "opentelekomcloud_blockstorage_volume_v2" "volume_1" {
   name = "volume_1-updated"
   description = "first test volume"
-  metadata {
+  metadata = {
     foo = "bar"
   }
   size = 1
@@ -273,10 +273,10 @@ const testAccBlockStorageV2Volume_tags = `
 resource "opentelekomcloud_blockstorage_volume_v2" "volume_1" {
   name = "volume_1"
   description = "first test volume"
-  metadata {
+  metadata = {
     foo = "bar"
   }
-  tags {
+  tags = {
     foo = "bar"
 	key = "value"
   }
@@ -288,10 +288,10 @@ const testAccBlockStorageV2Volume_tags_update = `
 resource "opentelekomcloud_blockstorage_volume_v2" "volume_1" {
   name = "volume_1-updated"
   description = "first test volume"
-  metadata {
+  metadata = {
     foo = "bar"
   }
-  tags {
+  tags = {
     foo2 = "bar2"
 	key2 = "value2"
   }

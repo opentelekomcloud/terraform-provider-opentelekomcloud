@@ -655,7 +655,7 @@ resource "opentelekomcloud_compute_instance_v2" "instance_1" {
   name = "instance_1"
   security_groups = ["default"]
   availability_zone = "%s"
-  metadata {
+  metadata = {
     foo = "bar"
   }
   network {
@@ -669,7 +669,7 @@ resource "opentelekomcloud_compute_instance_v2" "instance_1" {
   name = "instance_1"
   security_groups = ["default"]
   availability_zone = "%s"
-  metadata {
+  metadata = {
     foo = "bar"
   }
   network {
@@ -684,7 +684,7 @@ resource "opentelekomcloud_compute_instance_v2" "instance_1" {
   name = "instance_1"
   security_groups = ["default"]
   availability_zone = "%s"
-  metadata {
+  metadata = {
     foo = "bar"
   }
   network {
@@ -699,7 +699,7 @@ resource "opentelekomcloud_compute_instance_v2" "instance_1" {
   name = "instance_1"
   security_groups = ["default"]
   availability_zone = "%s"
-  metadata {
+  metadata = {
     foo = "bar"
   }
   network {
@@ -713,13 +713,13 @@ resource "opentelekomcloud_compute_instance_v2" "instance_1" {
   name = "instance_1"
   security_groups = ["default"]
   availability_zone = "%s"
-  metadata {
+  metadata = {
     foo = "bar"
   }
   network {
     uuid = "%s"
   }
-  tag {
+  tag = {
     foo = "bar"
     key = "value"
   }
@@ -731,13 +731,13 @@ resource "opentelekomcloud_compute_instance_v2" "instance_1" {
   name = "instance_1"
   security_groups = ["default"]
   availability_zone = "%s"
-  metadata {
+  metadata = {
     foo = "bar"
   }
   network {
     uuid = "%s"
   }
-  tag {
+  tag = {
     foo2 = "bar2"
     key = "value2"
   }
@@ -1081,7 +1081,7 @@ resource "opentelekomcloud_compute_instance_v2" "instance_1" {
   network {
     uuid = "%s"
   }
-  metadata {
+  metadata = {
     foo = "bar"
     abc = "def"
   }
@@ -1095,7 +1095,7 @@ resource "opentelekomcloud_compute_instance_v2" "instance_1" {
   network {
     uuid = "%s"
   }
-  metadata {
+  metadata = {
     foo = "bar"
     ghi = "jkl"
   }
@@ -1289,7 +1289,7 @@ resource "opentelekomcloud_compute_instance_v2" "instance_1" {
   name = "instance_1"
   security_groups = ["default"]
   availability_zone = "%s"
-  metadata {
+  metadata = {
     foo = "bar"
   }
   network {
