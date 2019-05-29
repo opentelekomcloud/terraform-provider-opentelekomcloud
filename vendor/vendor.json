@@ -1708,6 +1708,12 @@
 			"revisionTime": "2019-05-28T07:39:53Z"
 		},
 		{
+			"checksumSHA1": "sWgKYEsHQIbbNTzjSbKlVaABkgY=",
+			"path": "github.com/huaweicloud/golangsdk/openstack/waf/v1/domains",
+			"revision": "e7f9bd5de6d37611ce1ff33fd39bc9ca542012ca",
+			"revisionTime": "2019-05-28T07:39:53Z"
+		},
+		{
 			"checksumSHA1": "unuouwL0EzTLflKCDFkwzrJ81d4=",
 			"path": "github.com/huaweicloud/golangsdk/pagination",
 			"revision": "1aef9d9e0f186bc37dc82d81fa28a0889da8bd21",
