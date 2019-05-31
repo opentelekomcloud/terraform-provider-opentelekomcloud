@@ -122,11 +122,10 @@ resource "opentelekomcloud_vbs_backup_policy_v2" "vbs" {
   retain_first_backup = "N"
   rentention_num = 2
   frequency = 1
-      tags =[
-        {
-          key = "k2"
-          value = "v2"
-          }]
+  tags {
+    key = "k2"
+    value = "v2"
+  }
 }
 `)
 
@@ -138,11 +137,10 @@ resource "opentelekomcloud_vbs_backup_policy_v2" "vbs" {
   retain_first_backup = "N"
   rentention_num = 2
   frequency = 1
-      tags =[
-        {
-          key = "k2"
-          value = "v2"
-          }] 
+  tags {
+    key = "k2"
+    value = "v2"
+  }
 }
 `)
 
@@ -154,11 +152,10 @@ resource "opentelekomcloud_vbs_backup_policy_v2" "vbs" {
   retain_first_backup = "N"
   rentention_num = 2
   frequency = 1
-      tags =[
-        {
-          key = "k2"
-          value = "v2"
-          }]
+  tags {
+    key = "k2"
+    value = "v2"
+  }
 
   timeouts {
     create = "5m"

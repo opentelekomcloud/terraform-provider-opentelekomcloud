@@ -21,8 +21,12 @@ resource "opentelekomcloud_as_group_v1" "my_as_group" {
   desire_instance_number = 2
   min_instance_number = 0
   max_instance_number = 10
-  networks = [{id = "ad091b52-742f-469e-8f3c-fd81cadf0743"}]
-  security_groups = [{id = "45e4c6de-6bf0-4843-8953-2babde3d4810"}]
+  networks {
+    id = "ad091b52-742f-469e-8f3c-fd81cadf0743"
+  }
+  security_groups {
+    id = "45e4c6de-6bf0-4843-8953-2babde3d4810"
+  }
   vpc_id = "1d8f7e7c-fe04-4cf5-85ac-08b478c290e9"
   delete_publicip = true
   delete_instances = "yes"
@@ -38,8 +42,12 @@ resource "opentelekomcloud_as_group_v1" "my_as_group_only_remove_members" {
   desire_instance_number = 2
   min_instance_number = 0
   max_instance_number = 10
-  networks = [{id = "ad091b52-742f-469e-8f3c-fd81cadf0743"}]
-  security_groups = [{id = "45e4c6de-6bf0-4843-8953-2babde3d4810"}]
+  networks {
+    id = "ad091b52-742f-469e-8f3c-fd81cadf0743"
+  }
+  security_groups {
+    id = "45e4c6de-6bf0-4843-8953-2babde3d4810"
+  }
   vpc_id = "1d8f7e7c-fe04-4cf5-85ac-08b478c290e9"
   delete_publicip = true
   delete_instances = "no"
@@ -55,8 +63,12 @@ resource "opentelekomcloud_as_group_v1" "my_as_group_with_elb" {
   desire_instance_number = 2
   min_instance_number = 0
   max_instance_number = 10
-  networks = [{id = "ad091b52-742f-469e-8f3c-fd81cadf0743"}]
-  security_groups = [{id = "45e4c6de-6bf0-4843-8953-2babde3d4810"}]
+  networks {
+    id = "ad091b52-742f-469e-8f3c-fd81cadf0743"
+  }
+  security_groups {
+    id = "45e4c6de-6bf0-4843-8953-2babde3d4810"
+  }
   vpc_id = "1d8f7e7c-fe04-4cf5-85ac-08b478c290e9"
   lb_listener_id = "${opentelekomcloud_elb_listener.my_listener.id}"
   delete_publicip = true

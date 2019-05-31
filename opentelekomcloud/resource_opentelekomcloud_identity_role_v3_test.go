@@ -46,12 +46,10 @@ resource "opentelekomcloud_identity_role_v3" "role" {
   description = "role"
   display_name = "custom_role%s"
   display_layer = "domain"
-  statement = [
-    {
-      effect = "Allow"
-      action = ["ecs:*:list*"]
-    }
-  ]
+  statement {
+    effect = "Allow"
+    action = ["ecs:*:list*"]
+  }
 }
 	`, val)
 }

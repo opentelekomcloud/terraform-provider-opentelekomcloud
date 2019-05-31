@@ -194,12 +194,12 @@ resource "opentelekomcloud_rds_instance_v1" "instance" {
     id = "${opentelekomcloud_compute_secgroup_v2.secgrp_rds.id}"
   }
   dbport = "8635"
-  backupstrategy = {
+  backupstrategy {
     starttime = "01:00:00"
     keepdays = 1
   }
   dbrtpd = "Huangwei!120521"
-  ha = {
+  ha {
     enable = true
     replicationmode = "async"
   }
@@ -244,12 +244,12 @@ resource "opentelekomcloud_rds_instance_v1" "instance" {
     id = "${opentelekomcloud_compute_secgroup_v2.secgrp_rds.id}"
   }
   dbport = "8635"
-  backupstrategy = {
+  backupstrategy {
     starttime = "01:00:00"
     keepdays = 1
   }
   dbrtpd = "Huangwei!120521"
-  ha = {
+  ha {
     enable = true
     replicationmode = "async"
   }
@@ -294,12 +294,12 @@ resource "opentelekomcloud_rds_instance_v1" "instance" {
     id = "${opentelekomcloud_compute_secgroup_v2.secgrp_rds.id}"
   }
   dbport = "8635"
-  backupstrategy = {
+  backupstrategy {
     starttime = "01:00:00"
     keepdays = 1
   }
   dbrtpd = "Huangwei!120521"
-  ha = {
+  ha {
     enable = true
     replicationmode = "async"
   }

@@ -50,14 +50,14 @@ resource "opentelekomcloud_networking_secgroup_v2" "secgroup" {
 resource "opentelekomcloud_css_cluster_v1" "cluster" {
   expect_node_num = 1
   name = "terraform_test_cluster%s"
-  node_config = {
+  node_config {
     flavor = "css.medium.8"
-    network_info = {
+    network_info {
       security_group_id = "${opentelekomcloud_networking_secgroup_v2.secgroup.id}"
       network_id = "%s"
       vpc_id = "%s"
     }
-    volume = {
+    volume {
       volume_type = "COMMON"
       size = 40
     }

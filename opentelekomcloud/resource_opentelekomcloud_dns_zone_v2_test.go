@@ -187,7 +187,7 @@ func testAccDNSV2Zone_private(zoneName string) string {
 			description = "a zone"
 			ttl = 3000
 			type = "private"
-			router = {
+			router {
 				router_id = "%s"
 				router_region = "%s"
 			}

@@ -160,7 +160,7 @@ resource "opentelekomcloud_rts_software_config_v1" "config_1" {
 resource "opentelekomcloud_rts_software_deployment_v1" "deployment_1" {
   config_id = "${opentelekomcloud_rts_software_config_v1.config_1.id}"
   server_id = "${opentelekomcloud_compute_instance_v2.vm_1.id}"
-  output_values{
+  output_values = {
     deploy_stdout= "Writing to /tmp/baaaaa\nWritten to /tmp/baaaaa\n"
   }
   status= "COMPLETE"

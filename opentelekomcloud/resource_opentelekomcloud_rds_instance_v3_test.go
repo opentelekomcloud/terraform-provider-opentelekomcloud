@@ -45,7 +45,7 @@ func testAccRdsInstanceV3_basic(val string) string {
 	return fmt.Sprintf(`
 resource "opentelekomcloud_rds_instance_v3" "instance" {
   availability_zone = ["%s"]
-  db = {
+  db {
     password = "Huangwei!120521"
     type = "PostgreSQL"
     version = "9.5"
@@ -60,7 +60,7 @@ resource "opentelekomcloud_rds_instance_v3" "instance" {
     size = 100
   }
   flavor = "rds.pg.c2.medium"
-  backup_strategy = {
+  backup_strategy {
     start_time = "08:00-09:00"
     keep_days = 1
   }

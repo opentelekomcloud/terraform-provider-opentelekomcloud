@@ -22,7 +22,7 @@ resource "opentelekomcloud_networking_secgroup_v2" "secgroup" {
 
 resource "opentelekomcloud_rds_instance_v3" "instance" {
   availability_zone = ["{{ availability_zone }}"]
-  db = {
+  db {
     password = "Huangwei!120521"
     type = "PostgreSQL"
     version = "9.5"
@@ -37,7 +37,7 @@ resource "opentelekomcloud_rds_instance_v3" "instance" {
     size = 100
   }
   flavor = "rds.pg.c2.medium"
-  backup_strategy = {
+  backup_strategy {
     start_time = "08:00-09:00"
     keep_days = 1
   }
@@ -54,7 +54,7 @@ resource "opentelekomcloud_networking_secgroup_v2" "secgroup" {
 
 resource "opentelekomcloud_rds_instance_v3" "instance" {
   availability_zone = ["{{ availability_zone_1 }}", "{{ availability_zone_2 }}"]
-  db = {
+  db {
     password = "Huangwei!120521"
     type = "PostgreSQL"
     version = "9.5"
@@ -70,7 +70,7 @@ resource "opentelekomcloud_rds_instance_v3" "instance" {
   }
   flavor = "rds.pg.s1.medium.ha"
   ha_replication_mode = "async"
-  backup_strategy = {
+  backup_strategy {
     start_time = "08:00-09:00"
     keep_days = 1
   }
@@ -93,7 +93,7 @@ resource "opentelekomcloud_networking_secgroup_v2" "secgroup" {
 
 resource "opentelekomcloud_rds_instance_v3" "instance" {
   availability_zone = ["{{ availability_zone }}"]
-  db = {
+  db {
     password = "Huangwei!120521"
     type = "PostgreSQL"
     version = "9.5"
@@ -109,7 +109,7 @@ resource "opentelekomcloud_rds_instance_v3" "instance" {
     size = 100
   }
   flavor = "rds.pg.c2.medium"
-  backup_strategy = {
+  backup_strategy {
     start_time = "08:00-09:00"
     keep_days = 1
   }
