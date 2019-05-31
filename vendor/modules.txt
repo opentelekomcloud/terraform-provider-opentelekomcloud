@@ -288,6 +288,7 @@ github.com/huaweicloud/golangsdk/openstack/vbs/v2/shares
 github.com/huaweicloud/golangsdk/openstack/vbs/v2/tags
 github.com/huaweicloud/golangsdk/openstack/waf/v1/certificates
 github.com/huaweicloud/golangsdk/openstack/waf/v1/domains
+github.com/huaweicloud/golangsdk/openstack/waf/v1/policies
 github.com/huaweicloud/golangsdk/pagination
 github.com/huaweicloud/golangsdk/openstack/identity/v2/tokens
 github.com/huaweicloud/golangsdk/openstack/identity/v3/endpoints
