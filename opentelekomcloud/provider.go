@@ -313,6 +313,7 @@ func Provider() terraform.ResourceProvider {
 			"opentelekomcloud_rds_parametergroup_v3":              resourceRdsConfigurationV3(),
 			"opentelekomcloud_waf_certificate_v1":                 resourceWafCertificateV1(),
 			"opentelekomcloud_waf_domain_v1":                      resourceWafDomainV1(),
+			"opentelekomcloud_waf_policy_v1":                      resourceWafPolicyV1(),
 		},
 
 		ConfigureFunc: configureProvider,
