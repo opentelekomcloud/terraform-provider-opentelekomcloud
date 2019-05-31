@@ -130,7 +130,6 @@ resource "opentelekomcloud_lb_member_v2" "member_2" {
   address = "192.168.0.11"
   protocol_port = 8080
   pool_id = "${opentelekomcloud_lb_pool_v2.pool_1.id}"
-  subnet_id = "${opentelekomcloud_networking_subnet_v2.subnet_1.id}"
   subnet_id = "%s"
 
   timeouts {

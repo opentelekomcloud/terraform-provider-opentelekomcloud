@@ -33,7 +33,7 @@ resource "opentelekomcloud_dns_zone_v2" "private_example_com" {
   description = "An example for private zone"
   ttl = 3000
   type = "private"
-  router = {
+  router {
      router_id = "${var.vpc_id}"
      router_region = "${var.region}"
   }
