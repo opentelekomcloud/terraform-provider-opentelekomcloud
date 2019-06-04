@@ -24,13 +24,13 @@ Add a node to a container cluster.
      availability_zone= "${var.availability_zone}"
      key_pair="${var.ssh_key}"
      root_volume {
-       size= 40,
+       size= 40
        volumetype= "SATA"
      }
      sharetype= "PER"
-     bandwidth_size= 100,
+     bandwidth_size= 100
      data_volumes {
-       size= 100,
+       size= 100
        volumetype= "SATA"
      }
   }
