@@ -1,21 +1,21 @@
-## 1.9.0 (Unreleased)
+## 1.9.0 (June 06, 2019)
 
 FEATURES:
 
-* **New Resource:** `opentelekomcloud_waf_certificate_v1` [GH-285]
-* **New Resource:** `opentelekomcloud_waf_domain_v1` [GH-286]
-* **New Resource:** `opentelekomcloud_waf_policy_v1` [GH-293]
-* **New Resource:** `opentelekomcloud_rds_parametergroup_v3` [GH-290]
+* **New Resource:** `opentelekomcloud_waf_certificate_v1` ([#285](https://github.com/terraform-providers/terraform-provider-opentelekomcloud/issues/285))
+* **New Resource:** `opentelekomcloud_waf_domain_v1` ([#286](https://github.com/terraform-providers/terraform-provider-opentelekomcloud/issues/286))
+* **New Resource:** `opentelekomcloud_waf_policy_v1` ([#293](https://github.com/terraform-providers/terraform-provider-opentelekomcloud/issues/293))
+* **New Resource:** `opentelekomcloud_rds_parametergroup_v3` ([#290](https://github.com/terraform-providers/terraform-provider-opentelekomcloud/issues/290))
 
 ENHANCEMENTS:
 
 * The provider is now compatible with Terraform v0.12, while retaining compatibility with prior versions.
-* `resource/opentelekomcloud_rds_instance_v3`: Add import support [GH-274]
-* `resource/opentelekomcloud_cce_node_v3`: Add private_ip attribute [GH-280]
+* `resource/opentelekomcloud_rds_instance_v3`: Add import support ([#274](https://github.com/terraform-providers/terraform-provider-opentelekomcloud/issues/274))
+* `resource/opentelekomcloud_cce_node_v3`: Add private_ip attribute ([#280](https://github.com/terraform-providers/terraform-provider-opentelekomcloud/issues/280))
 
 BUG FIXES:
 
-* `resource/opentelekomcloud_cce_node_v3`: Fix eip_count issue [GH-279]
+* `resource/opentelekomcloud_cce_node_v3`: Fix eip_count issue ([#279](https://github.com/terraform-providers/terraform-provider-opentelekomcloud/issues/279))
 
 ## 1.8.0 (May 06, 2019)
 
