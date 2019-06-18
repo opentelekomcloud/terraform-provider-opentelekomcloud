@@ -3,6 +3,7 @@ package opentelekomcloud
 import (
 	"fmt"
 	"log"
+	"time"
 
 	"github.com/hashicorp/terraform/helper/schema"
 	"github.com/huaweicloud/golangsdk/openstack/identity/v3/projects"
@@ -82,6 +83,15 @@ func resourceIdentityProjectV3Create(d *schema.ResourceData, meta interface{}) e
 	}
 
 	d.SetId(project.ID)
+
+	// some hacks here, due to GET API may return 404 after creation.
+	for i := 0; i < 10; i++ {
+		_, err := projects.Get(identityClient, d.Id()).Extract()
+		if err != nil {
+			time.Sleep(5 * time.Second)
+		}
+		break
+	}
 
 	return resourceIdentityProjectV3Read(d, meta)
 }
