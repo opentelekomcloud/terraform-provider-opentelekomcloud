@@ -96,7 +96,7 @@ func resourceMRSClusterV1() *schema.Resource {
 			},
 			"volume_type": {
 				Type:     schema.TypeString,
-				Required: true,
+				Optional: true,
 				ForceNew: true,
 				ValidateFunc: func(v interface{}, k string) (ws []string, errors []error) {
 					return ValidateStringList(v, k, []string{"SATA", "SSD"})
@@ -104,7 +104,43 @@ func resourceMRSClusterV1() *schema.Resource {
 			},
 			"volume_size": {
 				Type:     schema.TypeInt,
-				Required: true,
+				Optional: true,
+				ForceNew: true,
+			},
+			"master_data_volume_type": {
+				Type:     schema.TypeString,
+				Optional: true,
+				ForceNew: true,
+				ValidateFunc: func(v interface{}, k string) (ws []string, errors []error) {
+					return ValidateStringList(v, k, []string{"SATA", "SSD"})
+				},
+			},
+			"master_data_volume_size": {
+				Type:     schema.TypeInt,
+				Optional: true,
+				ForceNew: true,
+			},
+			"master_data_volume_count": {
+				Type:     schema.TypeInt,
+				Optional: true,
+				ForceNew: true,
+			},
+			"core_data_volume_type": {
+				Type:     schema.TypeString,
+				Optional: true,
+				ForceNew: true,
+				ValidateFunc: func(v interface{}, k string) (ws []string, errors []error) {
+					return ValidateStringList(v, k, []string{"SATA", "SSD"})
+				},
+			},
+			"core_data_volume_size": {
+				Type:     schema.TypeInt,
+				Optional: true,
+				ForceNew: true,
+			},
+			"core_data_volume_count": {
+				Type:     schema.TypeInt,
+				Optional: true,
 				ForceNew: true,
 			},
 			"node_public_cert_name": {
@@ -436,28 +472,34 @@ func resourceClusterV1Create(d *schema.ResourceData, meta interface{}) error {
 	}
 
 	createOpts := &cluster.CreateOpts{
-		BillingType:        d.Get("billing_type").(int),
-		DataCenter:         d.Get("region").(string),
-		MasterNodeNum:      d.Get("master_node_num").(int),
-		MasterNodeSize:     d.Get("master_node_size").(string),
-		CoreNodeNum:        d.Get("core_node_num").(int),
-		CoreNodeSize:       d.Get("core_node_size").(string),
-		AvailableZoneID:    d.Get("available_zone_id").(string),
-		ClusterName:        d.Get("cluster_name").(string),
-		Vpc:                vpc.Name,
-		VpcID:              d.Get("vpc_id").(string),
-		SubnetID:           d.Get("subnet_id").(string),
-		SubnetName:         subnet.Name,
-		ClusterVersion:     d.Get("cluster_version").(string),
-		ClusterType:        d.Get("cluster_type").(int),
-		VolumeType:         d.Get("volume_type").(string),
-		VolumeSize:         d.Get("volume_size").(int),
-		NodePublicCertName: d.Get("node_public_cert_name").(string),
-		SafeMode:           d.Get("safe_mode").(int),
-		ClusterAdminSecret: d.Get("cluster_admin_secret").(string),
-		LogCollection:      d.Get("log_collection").(int),
-		ComponentList:      getAllClusterComponents(d),
-		AddJobs:            getAllClusterJobs(d),
+		BillingType:           d.Get("billing_type").(int),
+		DataCenter:            d.Get("region").(string),
+		MasterNodeNum:         d.Get("master_node_num").(int),
+		MasterNodeSize:        d.Get("master_node_size").(string),
+		CoreNodeNum:           d.Get("core_node_num").(int),
+		CoreNodeSize:          d.Get("core_node_size").(string),
+		AvailableZoneID:       d.Get("available_zone_id").(string),
+		ClusterName:           d.Get("cluster_name").(string),
+		Vpc:                   vpc.Name,
+		VpcID:                 d.Get("vpc_id").(string),
+		SubnetID:              d.Get("subnet_id").(string),
+		SubnetName:            subnet.Name,
+		ClusterVersion:        d.Get("cluster_version").(string),
+		ClusterType:           d.Get("cluster_type").(int),
+		VolumeType:            d.Get("volume_type").(string),
+		VolumeSize:            d.Get("volume_size").(int),
+		MasterDataVolumeType:  d.Get("master_data_volume_type").(string),
+		MasterDataVolumeSize:  d.Get("master_data_volume_size").(int),
+		MasterDataVolumeCount: d.Get("master_data_volume_count").(int),
+		CoreDataVolumeType:    d.Get("core_data_volume_type").(string),
+		CoreDataVolumeSize:    d.Get("core_data_volume_size").(int),
+		CoreDataVolumeCount:   d.Get("core_data_volume_count").(int),
+		NodePublicCertName:    d.Get("node_public_cert_name").(string),
+		SafeMode:              d.Get("safe_mode").(int),
+		ClusterAdminSecret:    d.Get("cluster_admin_secret").(string),
+		LogCollection:         d.Get("log_collection").(int),
+		ComponentList:         getAllClusterComponents(d),
+		AddJobs:               getAllClusterJobs(d),
 	}
 
 	log.Printf("[DEBUG] Create Options: %#v", createOpts)
@@ -520,6 +562,12 @@ func resourceClusterV1Read(d *schema.ResourceData, meta interface{}) error {
 	d.Set("cluster_name", clusterGet.Clustername)
 	d.Set("core_node_size", clusterGet.Corenodesize)
 	d.Set("volume_size", clusterGet.Volumesize)
+	d.Set("master_data_volume_type", clusterGet.MasterDataVolumeType)
+	d.Set("master_data_volume_size", clusterGet.MasterDataVolumeSize)
+	d.Set("master_data_volume_count", clusterGet.MasterDataVolumeCount)
+	d.Set("core_data_volume_type", clusterGet.CoreDataVolumeType)
+	d.Set("core_data_volume_size", clusterGet.CoreDataVolumeSize)
+	d.Set("core_data_volume_count", clusterGet.CoreDataVolumeCount)
 	d.Set("node_public_cert_name", clusterGet.Nodepubliccertname)
 	d.Set("safe_mode", clusterGet.Safemode)
 	d.Set("master_node_size", clusterGet.Masternodesize)
