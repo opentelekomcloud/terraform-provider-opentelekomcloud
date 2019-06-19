@@ -181,7 +181,7 @@ resource "opentelekomcloud_compute_instance_v2" "instance_1" {
 
 ```hcl
 resource "opentelekomcloud_networking_floatingip_v2" "myip" {
-  pool = "my_pool"
+  pool = "admin_external_net"
 }
 
 resource "opentelekomcloud_compute_instance_v2" "multi-net" {

@@ -17,7 +17,7 @@ but only networking floating IPs can be used with load balancers.
 
 ```hcl
 resource "opentelekomcloud_compute_floatingip_v2" "floatip_1" {
-  pool = "public"
+  pool = "admin_external_net"
 }
 ```
 

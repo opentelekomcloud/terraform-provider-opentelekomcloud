@@ -25,7 +25,7 @@ resource "opentelekomcloud_compute_instance_v2" "instance_1" {
 }
 
 resource "opentelekomcloud_networking_floatingip_v2" "fip_1" {
-  pool = "my_pool"
+  pool = "admin_external_net"
 }
 
 resource "opentelekomcloud_compute_floatingip_associate_v2" "fip_1" {
@@ -54,7 +54,7 @@ resource "opentelekomcloud_compute_instance_v2" "instance_1" {
 }
 
 resource "opentelekomcloud_networking_floatingip_v2" "fip_1" {
-  pool = "my_pool"
+  pool = "admin_external_net"
 }
 
 resource "opentelekomcloud_compute_floatingip_associate_v2" "fip_1" {
