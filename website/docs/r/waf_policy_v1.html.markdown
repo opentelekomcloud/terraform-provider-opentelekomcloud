@@ -46,6 +46,8 @@ The following arguments are supported:
 	* `true`: full detection, Full detection finishes all threat detections before blocking requests that meet Precise Protection specified conditions.
 	* `false`: instant detection. Instant detection immediately ends threat detection after blocking a request that meets Precise Protection specified conditions.
 
+* `hosts` - (Optional) An array of the domain IDs.
+
 The `action` block supports:
 
 * `category` - (Required) Specifies the protective action.
