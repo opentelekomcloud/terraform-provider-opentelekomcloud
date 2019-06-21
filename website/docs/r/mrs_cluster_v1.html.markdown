@@ -23,9 +23,13 @@ resource "opentelekomcloud_mrs_cluster_v1" "cluster1" {
   available_zone_id = "sa-chile-1a"
   vpc_id = "51edfb75-f9f0-4bbc-b4dc-21466b93f60d"
   subnet_id = "1d7a8646-43ee-455a-a3ab-40da87a1304c"
-  cluster_version = "MRS 1.5.0"
-  volume_type = "SATA"
-  volume_size = 100
+  cluster_version = "MRS 1.6.0"
+  master_data_volume_type = "SATA"
+  master_data_volume_size = 100
+  master_data_volume_count = 1
+  core_data_volume_type = "SATA"
+  core_data_volume_size = 100
+  core_data_volume_count = 2
   safe_mode = 0
   cluster_type = 0
   node_public_cert_name = "KeyPair-ci"
@@ -94,10 +98,10 @@ The following arguments are supported:
 * `cluster_type` - (Optional) Type of clusters 0: analysis cluster 1: streaming
     cluster The default value is 0.
 
-* `volume_type` - (Required) Type of disks SATA and SSD are supported. SATA:
+* `volume_type` - (Optional) Type of disks SATA and SSD are supported. SATA:
     common I/O SSD: super high-speed I/O
 
-* `volume_size` - (Required) Data disk storage space of a Core node Users can
+* `volume_size` - (Optional) Data disk storage space of a Core node Users can
     add disks to expand storage capacity when creating a cluster. There are the
     following scenarios: Separation of data storage and computing: Data is stored
     in the OBS system. Costs of clusters are relatively low but computing performance
@@ -107,6 +111,30 @@ The following arguments are supported:
     computing performance is good. The clusters cannot be deleted in a short term.
     It is recommended when data computing is frequently performed. Value range:
     100 GB to 32000 GB
+
+* `master_data_volume_type` - (Optional) Data disk storage type of the Master node,
+	supporting SATA, SAS and SSD. SATA: Common I/O, SAS: High I/O, SSD: Ultra-high I/O.
+	This parameter is a multi-disk parameter available for MRS 1.6.0 or later versions.
+
+* `master_data_volume_size` - (Optional) Data disk size of the Master node.
+	Value range: 100 GB to 32000 GB. This parameter is a multi-disk parameter available
+	for MRS 1.6.0 or later versions.
+
+* `master_data_volume_count` - (Optional) Number of data disks of the Master node.
+	The value can be set to 1 only. This parameter is a multi-disk parameter available
+	for MRS 1.6.0 or later versions.
+
+* `core_data_volume_type` - (Optional) Data disk storage type of the Core node,
+	supporting SATA, SAS and SSD. SATA: Common I/O, SAS: High I/O, SSD: Ultra-high I/O.
+	This parameter is a multi-disk parameter available for MRS 1.6.0 or later versions.
+
+* `core_data_volume_size` - (Optional) Data disk size of the Core node.
+	Value range: 100 GB to 32000 GB. This parameter is a multi-disk parameter available
+	for MRS 1.6.0 or later versions.
+
+* `core_data_volume_count` - (Optional) Number of data disks of the Core node.
+	Value range: 1 to 10. This parameter is a multi-disk parameter available
+	for MRS 1.6.0 or later versions.
 
 * `node_public_cert_name` - (Required) Name of a key pair You can use a key
     to log in to the Master node in the cluster.
