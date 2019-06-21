@@ -104,7 +104,7 @@ resource "opentelekomcloud_mrs_cluster_v1" "cluster1" {
   vpc_id = "%s"
   subnet_id = "%s"
   cluster_version = "MRS 1.5.0"
-  volume_type = "SATA"
+  volume_type = "SAS"
   volume_size = 100
   safe_mode = 0
   cluster_type = 0

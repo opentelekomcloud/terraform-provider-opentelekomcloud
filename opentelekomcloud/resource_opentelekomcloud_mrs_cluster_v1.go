@@ -100,7 +100,7 @@ func resourceMRSClusterV1() *schema.Resource {
 				Computed: true,
 				ForceNew: true,
 				ValidateFunc: func(v interface{}, k string) (ws []string, errors []error) {
-					return ValidateStringList(v, k, []string{"SATA", "SSD"})
+					return ValidateStringList(v, k, []string{"SATA", "SAS", "SSD"})
 				},
 			},
 			"volume_size": {
@@ -115,7 +115,7 @@ func resourceMRSClusterV1() *schema.Resource {
 				Computed: true,
 				ForceNew: true,
 				ValidateFunc: func(v interface{}, k string) (ws []string, errors []error) {
-					return ValidateStringList(v, k, []string{"SATA", "SSD"})
+					return ValidateStringList(v, k, []string{"SATA", "SAS", "SSD"})
 				},
 			},
 			"master_data_volume_size": {
@@ -136,7 +136,7 @@ func resourceMRSClusterV1() *schema.Resource {
 				Computed: true,
 				ForceNew: true,
 				ValidateFunc: func(v interface{}, k string) (ws []string, errors []error) {
-					return ValidateStringList(v, k, []string{"SATA", "SSD"})
+					return ValidateStringList(v, k, []string{"SATA", "SAS", "SSD"})
 				},
 			},
 			"core_data_volume_size": {

@@ -98,8 +98,8 @@ The following arguments are supported:
 * `cluster_type` - (Optional) Type of clusters 0: analysis cluster 1: streaming
     cluster The default value is 0.
 
-* `volume_type` - (Optional) Type of disks SATA and SSD are supported. SATA:
-    common I/O SSD: super high-speed I/O
+* `volume_type` - (Optional) Type of disks SATA, SAS and SSD are supported. SATA:
+    common I/O, SAS: High I/O, SSD: Ultra-high I/O.
 
 * `volume_size` - (Optional) Data disk storage space of a Core node Users can
     add disks to expand storage capacity when creating a cluster. There are the
