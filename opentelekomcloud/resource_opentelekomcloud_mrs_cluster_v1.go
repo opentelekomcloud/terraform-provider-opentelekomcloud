@@ -97,6 +97,7 @@ func resourceMRSClusterV1() *schema.Resource {
 			"volume_type": {
 				Type:     schema.TypeString,
 				Optional: true,
+				Computed: true,
 				ForceNew: true,
 				ValidateFunc: func(v interface{}, k string) (ws []string, errors []error) {
 					return ValidateStringList(v, k, []string{"SATA", "SSD"})
@@ -105,11 +106,13 @@ func resourceMRSClusterV1() *schema.Resource {
 			"volume_size": {
 				Type:     schema.TypeInt,
 				Optional: true,
+				Computed: true,
 				ForceNew: true,
 			},
 			"master_data_volume_type": {
 				Type:     schema.TypeString,
 				Optional: true,
+				Computed: true,
 				ForceNew: true,
 				ValidateFunc: func(v interface{}, k string) (ws []string, errors []error) {
 					return ValidateStringList(v, k, []string{"SATA", "SSD"})
@@ -118,16 +121,19 @@ func resourceMRSClusterV1() *schema.Resource {
 			"master_data_volume_size": {
 				Type:     schema.TypeInt,
 				Optional: true,
+				Computed: true,
 				ForceNew: true,
 			},
 			"master_data_volume_count": {
 				Type:     schema.TypeInt,
 				Optional: true,
+				Computed: true,
 				ForceNew: true,
 			},
 			"core_data_volume_type": {
 				Type:     schema.TypeString,
 				Optional: true,
+				Computed: true,
 				ForceNew: true,
 				ValidateFunc: func(v interface{}, k string) (ws []string, errors []error) {
 					return ValidateStringList(v, k, []string{"SATA", "SSD"})
@@ -136,11 +142,13 @@ func resourceMRSClusterV1() *schema.Resource {
 			"core_data_volume_size": {
 				Type:     schema.TypeInt,
 				Optional: true,
+				Computed: true,
 				ForceNew: true,
 			},
 			"core_data_volume_count": {
 				Type:     schema.TypeInt,
 				Optional: true,
+				Computed: true,
 				ForceNew: true,
 			},
 			"node_public_cert_name": {

@@ -103,7 +103,7 @@ resource "opentelekomcloud_mrs_cluster_v1" "cluster1" {
   available_zone_id = "bf84aba586ce4e948da0b97d9a7d62fb"
   vpc_id = "%s"
   subnet_id = "%s"
-  cluster_version = "MRS 1.5.0"
+  cluster_version = "MRS 1.6.0"
   master_data_volume_type = "SATA"
   master_data_volume_size = 100
   master_data_volume_count = 1
