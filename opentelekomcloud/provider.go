@@ -315,6 +315,7 @@ func Provider() terraform.ResourceProvider {
 			"opentelekomcloud_waf_domain_v1":                      resourceWafDomainV1(),
 			"opentelekomcloud_waf_policy_v1":                      resourceWafPolicyV1(),
 			"opentelekomcloud_waf_whiteblackip_rule_v1":           resourceWafWhiteBlackIpRuleV1(),
+			"opentelekomcloud_waf_datamasking_rule_v1":            resourceWafDataMaskingRuleV1(),
 		},
 
 		ConfigureFunc: configureProvider,
