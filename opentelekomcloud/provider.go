@@ -317,6 +317,7 @@ func Provider() terraform.ResourceProvider {
 			"opentelekomcloud_waf_whiteblackip_rule_v1":           resourceWafWhiteBlackIpRuleV1(),
 			"opentelekomcloud_waf_datamasking_rule_v1":            resourceWafDataMaskingRuleV1(),
 			"opentelekomcloud_waf_falsealarmmasking_rule_v1":      resourceWafFalseAlarmMaskingRuleV1(),
+			"opentelekomcloud_waf_ccattackprotection_rule_v1":     resourceWafCcAttackProtectionRuleV1(),
 		},
 
 		ConfigureFunc: configureProvider,
