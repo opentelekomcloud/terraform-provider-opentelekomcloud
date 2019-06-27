@@ -54,7 +54,7 @@ The following arguments are supported:
 
 * `tag_index` - (Optional) If `tag_type` is set to `cookie`, this parameter indicates cookie name. Changing this creates a new rule.
 
-* `tag_category` - (Optional) Specifies the category. The value is Referer. Changing this creates a new rule.
+* `tag_category` - (Optional) Specifies the category. The value is `referer`. Changing this creates a new rule.
 
 * `tag_contents` - (Optional) Specifies the category content. Changing this creates a new rule.
 
