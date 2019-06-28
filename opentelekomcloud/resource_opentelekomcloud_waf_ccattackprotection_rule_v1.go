@@ -139,11 +139,14 @@ func resourceWafCcAttackProtectionRuleV1Create(d *schema.ResourceData, meta inte
 		return fmt.Errorf("Error creating OpenTelekomcomCloud WAF Client: %s", err)
 	}
 
+	limit_num := d.Get("limit_num").(int)
+	limit_period := d.Get("limit_period").(int)
+	lock_time := d.Get("lock_time").(int)
 	createOpts := ccattackprotection_rules.CreateOpts{
 		Url:         d.Get("url").(string),
-		LimitNum:    d.Get("limit_num").(int),
-		LimitPeriod: d.Get("limit_period").(int),
-		LockTime:    d.Get("lock_time").(int),
+		LimitNum:    &limit_num,
+		LimitPeriod: &limit_period,
+		LockTime:    &lock_time,
 		TagType:     d.Get("tag_type").(string),
 		TagIndex:    d.Get("tag_index").(string),
 		Action:      getCcAction(d),
