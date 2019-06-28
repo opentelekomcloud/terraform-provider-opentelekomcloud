@@ -47,11 +47,20 @@ func TestAccWafDataMaskingRuleV1_basic(t *testing.T) {
 }
 
 func testAccCheckWafDataMaskingRuleV1Destroy(s *terraform.State) error {
+	config := testAccProvider.Meta().(*Config)
+	wafClient, err := config.wafV1Client(OS_REGION_NAME)
+	if err != nil {
+		return fmt.Errorf("Error creating OpenTelekomCloud WAF client: %s", err)
+	}
 	for _, rs := range s.RootModule().Resources {
-		if rs.Type != "opentelekomcloud_waf_data_masking_v1" {
+		if rs.Type != "opentelekomcloud_waf_data_masking_rule_v1" {
 			continue
 		}
-		return fmt.Errorf("Waf rule still exists")
+
+		_, err := datamasking_rules.Get(wafClient, rs.Primary.Attributes["policy_id"], rs.Primary.ID).Extract()
+		if err == nil {
+			return fmt.Errorf("Waf rule still exists")
+		}
 	}
 
 	return nil
@@ -91,7 +100,7 @@ func testAccCheckWafDataMaskingRuleV1Exists(n string, rule *datamasking_rules.Da
 
 const testAccWafDataMaskingRuleV1_basic = `
 resource "opentelekomcloud_waf_policy_v1" "policy_1" {
-	name = "policy_updated"
+	name = "policy_1"
 }
 
 resource "opentelekomcloud_waf_datamasking_rule_v1" "rule_1" {
