@@ -1,3 +1,23 @@
+## 1.10.0 (Unreleased)
+
+FEATURES:
+
+* **New Resource:** `opentelekomcloud_waf_whiteblackip_rule_v1` [GH-313]
+* **New Resource:** `opentelekomcloud_waf_datamasking_rule_v1` [GH-315]
+* **New Resource:** `opentelekomcloud_waf_falsealarmmasking_rule_v1` [GH-317]
+* **New Resource:** `opentelekomcloud_waf_ccattackprotection_rule_v1` [GH-320]
+* **New Resource:** `opentelekomcloud_waf_preciseprotection_rule_v1` [GH-322]
+* **New Resource:** `opentelekomcloud_waf_webtamperprotection_rule_v1` [GH-324]
+
+ENHANCEMENTS:
+
+* `resource/opentelekomcloud_mrs_cluster_v1`: Add master/core data volume support to MRS cluster [GH-308]
+* `resource/opentelekomcloud_mrs_cluster_v1`: Add SAS volume type support to MRS cluster [GH-310]
+
+BUG FIXES:
+
+* `resource/opentelekomcloud_identity_project_v3`: Fix project creation issue [GH-305]
+
 ## 1.9.0 (June 06, 2019)
 
 FEATURES:
