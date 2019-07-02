@@ -743,6 +743,13 @@ func (c *Config) rdsV3Client(region string) (*golangsdk.ServiceClient, error) {
 	})
 }
 
+func (c *Config) sdrsV1Client(region string) (*golangsdk.ServiceClient, error) {
+	return huaweisdk.SDRSV1(c.HwClient, golangsdk.EndpointOpts{
+		Region:       region,
+		Availability: c.getHwEndpointType(),
+	})
+}
+
 func (c *Config) sdkClient(region, serviceType, level string) (*golangsdk.ServiceClient, error) {
 	client := c.HwClient
 	if level == serviceDomainLevel {
