@@ -29,7 +29,7 @@ data "opentelekomcloud_rds_flavors_v3" "flavor" {
   Specifies the database version. MySQL databases support MySQL 5.6
   and 5.7. PostgreSQL databases support
   PostgreSQL 9.5 and 9.6. Microsoft SQL Server
-  databases support 2014 SE, 2016 SE, and 2016 EE.
+  databases support 2014_SE, 2016_SE, and 2016_EE.
 
 * `instance_mode` - (Required) The mode of instance. Value: ha(indicates primary/standby instance), single(indicates single instance)
 
