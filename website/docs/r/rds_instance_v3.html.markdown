@@ -157,6 +157,23 @@ The following arguments are supported:
   (Required)
   Specifies the VPC ID. Changing this parameter will create a new resource.
 
+* `backup_strategy` -
+  (Optional)
+  Specifies the advanced backup policy. Structure is documented below. Changing this parameter will create a new resource.
+
+* `ha_replication_mode` -
+  (Optional)
+  Specifies the replication mode for the standby DB instance. For MySQL, the value
+  is async or semisync. For PostgreSQL, the value is async or sync. For
+  Microsoft SQL Server, the value is sync. NOTE: async indicates the
+  asynchronous replication mode. semisync indicates the
+  semi-synchronous replication mode. sync indicates the synchronous
+  replication mode.  Changing this parameter will create a new resource.
+
+* `param_group_id` -
+  (Optional)
+  Specifies the parameter group ID. Changing this parameter will create a new resource.
+
 The `db` block supports:
 
 * `password` -
@@ -211,25 +228,6 @@ The `volume` block supports:
   Specifies the volume type. Its value can be any of the following
   and is case-sensitive: COMMON: indicates the SATA type.  
   ULTRAHIGH: indicates the SSD type.  Changing this parameter will create a new resource.
-
-- - -
-
-* `backup_strategy` -
-  (Optional)
-  Specifies the advanced backup policy. Structure is documented below. Changing this parameter will create a new resource.
-
-* `ha_replication_mode` -
-  (Optional)
-  Specifies the replication mode for the standby DB instance. For MySQL, the value
-  is async or semisync. For PostgreSQL, the value is async or sync. For
-  Microsoft SQL Server, the value is sync. NOTE: async indicates the
-  asynchronous replication mode. semisync indicates the
-  semi-synchronous replication mode. sync indicates the synchronous
-  replication mode.  Changing this parameter will create a new resource.
-
-* `param_group_id` -
-  (Optional)
-  Specifies the parameter group ID. Changing this parameter will create a new resource.
 
 The `backup_strategy` block supports:
 
