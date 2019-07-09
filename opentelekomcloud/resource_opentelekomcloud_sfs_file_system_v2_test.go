@@ -162,7 +162,6 @@ resource "opentelekomcloud_sfs_file_system_v2" "sfs_1" {
 	share_proto = "NFS"
 	size=1
 	name="sfs-test1"
-  	availability_zone="eu-de-01"
 	access_to="%s"
   	access_type="cert"
   	access_level="rw"
