@@ -44,7 +44,7 @@ func TestAccRdsConfigurationV3_basic(t *testing.T) {
 
 func testAccCheckRdsConfigV3Destroy(s *terraform.State) error {
 	config := testAccProvider.Meta().(*Config)
-	rdsClient, err := config.rdsV1Client(OS_REGION_NAME)
+	rdsClient, err := config.rdsV3Client(OS_REGION_NAME)
 	if err != nil {
 		return fmt.Errorf("Error creating OpenTelekomCloud RDS client: %s", err)
 	}
