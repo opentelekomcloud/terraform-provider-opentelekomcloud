@@ -37,6 +37,8 @@ The following arguments are supported:
 
 * `name` - (Required) The name of the VPC. The name must be unique for a tenant. The value is a string of no more than 64 characters and can contain digits, letters, underscores (_), and hyphens (-). Changing this updates the name of the existing VPC.
 
+* `shared` - (Optional) Specifies whether the cross-tenant sharing is supported.
+
 
 
 ## Attributes Reference
@@ -50,8 +52,6 @@ The following attributes are exported:
 * `cidr` - See Argument Reference above.
 
 * `status` - The current status of the desired VPC. Can be either CREATING, OK, DOWN, PENDING_UPDATE, PENDING_DELETE, or ERROR.
-
-* `shared` - Specifies whether the cross-tenant sharing is supported.
 
 ## Import
 

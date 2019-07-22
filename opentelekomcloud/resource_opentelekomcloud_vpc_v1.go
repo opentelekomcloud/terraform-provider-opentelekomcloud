@@ -104,7 +104,7 @@ func resourceVirtualPrivateCloudV1Create(d *schema.ResourceData, meta interface{
 		}
 		_, err = vpcs.Update(vpcClient, d.Id(), updateOpts).Extract()
 		if err != nil {
-			return fmt.Errorf("Error updating shared snat for OpenTelekomCloud Vpc: %s", err)
+			log.Printf("[WARN] Error updating shared snat for OpenTelekomCloud Vpc: %s", err)
 		}
 	}
 
