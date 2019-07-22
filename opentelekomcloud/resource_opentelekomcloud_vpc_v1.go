@@ -45,12 +45,14 @@ func resourceVirtualPrivateCloudV1() *schema.Resource {
 				ForceNew:     false,
 				ValidateFunc: validateCIDR,
 			},
-			"status": {
-				Type:     schema.TypeString,
-				Computed: true,
-			},
 			"shared": {
 				Type:     schema.TypeBool,
+				Optional: true,
+				ForceNew: false,
+				Computed: true,
+			},
+			"status": {
+				Type:     schema.TypeString,
 				Computed: true,
 			},
 		},
@@ -93,6 +95,17 @@ func resourceVirtualPrivateCloudV1Create(d *schema.ResourceData, meta interface{
 		return fmt.Errorf(
 			"Error waiting for Vpc (%s) to become ACTIVE: %s",
 			n.ID, stateErr)
+	}
+
+	if hasFilledOpt(d, "shared") {
+		snat := d.Get("shared").(bool)
+		updateOpts := vpcs.UpdateOpts{
+			EnableSharedSnat: &snat,
+		}
+		_, err = vpcs.Update(vpcClient, d.Id(), updateOpts).Extract()
+		if err != nil {
+			log.Printf("[WARN] Error updating shared snat for OpenTelekomCloud Vpc: %s", err)
+		}
 	}
 
 	return resourceVirtualPrivateCloudV1Read(d, meta)
@@ -140,6 +153,10 @@ func resourceVirtualPrivateCloudV1Update(d *schema.ResourceData, meta interface{
 	}
 	if d.HasChange("cidr") {
 		updateOpts.CIDR = d.Get("cidr").(string)
+	}
+	if d.HasChange("shared") {
+		snat := d.Get("shared").(bool)
+		updateOpts.EnableSharedSnat = &snat
 	}
 
 	_, err = vpcs.Update(vpcClient, d.Id(), updateOpts).Extract()

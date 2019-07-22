@@ -29,7 +29,7 @@ func TestAccOTCVpcV1_basic(t *testing.T) {
 					resource.TestCheckResourceAttr(
 						"opentelekomcloud_vpc_v1.vpc_1", "status", "OK"),
 					resource.TestCheckResourceAttr(
-						"opentelekomcloud_vpc_v1.vpc_1", "shared", "false"),
+						"opentelekomcloud_vpc_v1.vpc_1", "shared", "true"),
 				),
 			},
 		},
@@ -50,6 +50,8 @@ func TestAccOTCVpcV1_update(t *testing.T) {
 					testAccCheckOTCVpcV1Exists("opentelekomcloud_vpc_v1.vpc_1", &vpc),
 					resource.TestCheckResourceAttr(
 						"opentelekomcloud_vpc_v1.vpc_1", "name", "terraform_provider_test"),
+					resource.TestCheckResourceAttr(
+						"opentelekomcloud_vpc_v1.vpc_1", "shared", "true"),
 				),
 			},
 			{
@@ -58,6 +60,8 @@ func TestAccOTCVpcV1_update(t *testing.T) {
 					testAccCheckOTCVpcV1Exists("opentelekomcloud_vpc_v1.vpc_1", &vpc),
 					resource.TestCheckResourceAttr(
 						"opentelekomcloud_vpc_v1.vpc_1", "name", "terraform_provider_test1"),
+					resource.TestCheckResourceAttr(
+						"opentelekomcloud_vpc_v1.vpc_1", "shared", "false"),
 				),
 			},
 		},
@@ -137,15 +141,17 @@ func testAccCheckOTCVpcV1Exists(n string, vpc *vpcs.Vpc) resource.TestCheckFunc 
 
 const testAccVpcV1_basic = `
 resource "opentelekomcloud_vpc_v1" "vpc_1" {
-	name = "terraform_provider_test"
-	cidr="192.168.0.0/16"
+	name   = "terraform_provider_test"
+	cidr   = "192.168.0.0/16"
+	shared = true
 }
 `
 
 const testAccVpcV1_update = `
 resource "opentelekomcloud_vpc_v1" "vpc_1" {
-    name = "terraform_provider_test1"
-	cidr="192.168.0.0/16"
+    name   = "terraform_provider_test1"
+	cidr   = "192.168.0.0/16"
+	shared = false
 }
 `
 const testAccVpcV1_timeout = `
