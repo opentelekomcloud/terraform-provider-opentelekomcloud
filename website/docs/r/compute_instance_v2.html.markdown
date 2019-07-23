@@ -207,27 +207,6 @@ resource "opentelekomcloud_compute_floatingip_associate_v2" "myip" {
 }
 ```
 
-### Instance With Personality
-
-```hcl
-resource "opentelekomcloud_compute_instance_v2" "personality" {
-  name            = "personality"
-  image_id        = "ad091b52-742f-469e-8f3c-fd81cadf0743"
-  flavor_id       = "3"
-  key_pair        = "my_key_pair_name"
-  security_groups = ["default"]
-
-  personality {
-    file    = "/path/to/file/on/instance.txt"
-    content = "contents of file"
-  }
-
-  network {
-    name = "my_network"
-  }
-}
-```
-
 ### Instance with Multiple Ephemeral Disks
 
 ```hcl
@@ -347,10 +326,6 @@ The following arguments are supported:
 * `scheduler_hints` - (Optional) Provide the Nova scheduler with hints on how
     the instance should be launched. The available hints are described below.
 
-* `personality` - (Optional) Customize the personality of an instance by
-    defining one or more files and their contents. The personality structure
-    is described below.
-
 * `tags` - **DEPRECATED** (Optional) The tags of the image. It must be a list of strings.
 
 * `tag` - (Optional) Tags key/value pairs to associate with the instance.
@@ -435,12 +410,6 @@ The `scheduler_hints` block supports:
 
  * `deh_id` - (Optional) The ID of DeH. This parameter takes effect only when the value
      of tenancy is dedicated.
-
-The `personality` block supports:
-
-* `file` - (Required) The absolute path of the destination file.
-
-* `contents` - (Required) The contents of the file. Limited to 255 bytes.
 
 ## Attributes Reference
 
