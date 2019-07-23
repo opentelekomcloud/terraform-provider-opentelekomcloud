@@ -17,7 +17,6 @@ but only compute floating IPs can be used with compute instances.
 
 ```hcl
 resource "opentelekomcloud_networking_floatingip_v2" "floatip_1" {
-  pool = "admin_external_net"
 }
 ```
 
@@ -25,8 +24,8 @@ resource "opentelekomcloud_networking_floatingip_v2" "floatip_1" {
 
 The following arguments are supported:
 
-* `pool` - (Required) The name of the pool from which to obtain the floating
-    IP. Changing this creates a new floating IP.
+* `pool` - (Optional) The name of the pool from which to obtain the floating
+    IP. Default value is admin_external_net. Changing this creates a new floating IP.
 
 * `port_id` - (Optional) ID of an existing port with at least one IP address to
     associate with this floating IP.
