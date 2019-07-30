@@ -70,7 +70,10 @@ The following arguments are supported:
 
 * `volume_type` - (Optional) The type of volume to create.
     Changing this creates a new volume.
-    
+
+* `device_type` - (Optional) The device type of volume to create. Valid options are VBD and SCSI.
+	Defaults to VBD. Changing this creates a new volume.
+
 * `cascade` - (Optional, Default:false) Specifies to delete all snapshots associated with the EVS disk.
 
 ## Attributes Reference
@@ -86,6 +89,7 @@ The following attributes are exported:
 * `snapshot_id` - See Argument Reference above.
 * `metadata` - See Argument Reference above.
 * `volume_type` - See Argument Reference above.
+* `device_type` - See Argument Reference above.
 * `attachment` - If a volume is attached to an instance, this attribute will
     display the Attachment ID, Instance ID, and the Device as the Instance
     sees it.

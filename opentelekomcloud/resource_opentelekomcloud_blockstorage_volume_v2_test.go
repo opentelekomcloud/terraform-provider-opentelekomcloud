@@ -312,6 +312,7 @@ resource "opentelekomcloud_blockstorage_volume_v2" "volume_1" {
   name = "volume_1"
   description = "first test volume"
   size = 1
+  device_type = "SCSI"
 
   timeouts {
     create = "5m"

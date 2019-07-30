@@ -9,6 +9,7 @@ import (
 	"github.com/hashicorp/terraform/helper/hashcode"
 	"github.com/hashicorp/terraform/helper/resource"
 	"github.com/hashicorp/terraform/helper/schema"
+	"github.com/hashicorp/terraform/helper/validation"
 	"github.com/huaweicloud/golangsdk"
 	"github.com/huaweicloud/golangsdk/openstack/blockstorage/v2/volumes"
 	"github.com/huaweicloud/golangsdk/openstack/compute/v2/extensions/volumeattach"
@@ -85,6 +86,13 @@ func resourceBlockStorageVolumeV2() *schema.Resource {
 				ForceNew: true,
 				Computed: true,
 			},
+			"device_type": {
+				Type:         schema.TypeString,
+				Optional:     true,
+				ForceNew:     true,
+				Default:      "VBD",
+				ValidateFunc: validation.StringInSlice([]string{"VBD", "SCSI"}, true),
+			},
 			"consistency_group_id": {
 				Type:     schema.TypeString,
 				Optional: true,
@@ -151,13 +159,17 @@ func resourceBlockStorageVolumeV2Create(d *schema.ResourceData, meta interface{}
 	if err != nil {
 		return fmt.Errorf("Error creating OpenTelekomCloud block storage client: %s", err)
 	}
+	metadata := resourceContainerMetadataV2(d)
+	if d.Get("device_type").(string) == "SCSI" {
+		metadata["hw:passthrough"] = "true"
+	}
 
 	createOpts := &volumes.CreateOpts{
 		AvailabilityZone:   d.Get("availability_zone").(string),
 		ConsistencyGroupID: d.Get("consistency_group_id").(string),
 		Description:        d.Get("description").(string),
 		ImageID:            d.Get("image_id").(string),
-		Metadata:           resourceContainerMetadataV2(d),
+		Metadata:           metadata,
 		Name:               d.Get("name").(string),
 		Size:               d.Get("size").(int),
 		SnapshotID:         d.Get("snapshot_id").(string),
@@ -225,7 +237,22 @@ func resourceBlockStorageVolumeV2Read(d *schema.ResourceData, meta interface{}) 
 	d.Set("snapshot_id", v.SnapshotID)
 	d.Set("source_vol_id", v.SourceVolID)
 	d.Set("volume_type", v.VolumeType)
-	if err := d.Set("metadata", v.Metadata); err != nil {
+
+	// NOTE: This tries to remove system metadata.
+	md := make(map[string]string)
+	var sys_keys = [1]string{"hw:passthrough"}
+
+OUTER:
+	for key, val := range v.Metadata {
+		for i := range sys_keys {
+			if key == sys_keys[i] {
+				continue OUTER
+			}
+		}
+		md[key] = val
+	}
+
+	if err := d.Set("metadata", md); err != nil {
 		return fmt.Errorf("[DEBUG] Error saving metadata to state for OpenTelekomCloud block storage (%s): %s", d.Id(), err)
 	}
 	d.Set("region", GetRegion(d, config))
@@ -246,6 +273,11 @@ func resourceBlockStorageVolumeV2Read(d *schema.ResourceData, meta interface{}) 
 		return fmt.Errorf("Error fetching tags for volume (%s): %s", v.ID, err)
 	}
 	d.Set("tags", taglist)
+
+	// This is useful for import
+	if d.Get("device_type").(string) == "" {
+		d.Set("device_type", "VBD")
+	}
 
 	return nil
 }
