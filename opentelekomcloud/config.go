@@ -485,6 +485,13 @@ func (c *Config) blockStorageV2Client(region string) (*golangsdk.ServiceClient, 
 	})
 }
 
+func (c *Config) blockStorageV3Client(region string) (*golangsdk.ServiceClient, error) {
+	return huaweisdk.NewBlockStorageV3(c.HwClient, golangsdk.EndpointOpts{
+		Region:       region,
+		Availability: c.getHwEndpointType(),
+	})
+}
+
 func (c *Config) computeV2Client(region string) (*golangsdk.ServiceClient, error) {
 	return huaweisdk.NewComputeV2(c.HwClient, golangsdk.EndpointOpts{
 		Region:       region,

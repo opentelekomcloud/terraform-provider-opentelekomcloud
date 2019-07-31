@@ -13,6 +13,7 @@ import (
 	"github.com/huaweicloud/golangsdk"
 	"github.com/huaweicloud/golangsdk/openstack/blockstorage/v2/volumes"
 	"github.com/huaweicloud/golangsdk/openstack/compute/v2/extensions/volumeattach"
+	volumes_v3 "github.com/huaweicloud/golangsdk/openstack/evs/v3/volumes"
 )
 
 func resourceBlockStorageVolumeV2() *schema.Resource {
@@ -132,6 +133,10 @@ func resourceBlockStorageVolumeV2() *schema.Resource {
 				Type:     schema.TypeBool,
 				Optional: true,
 				Default:  false,
+			},
+			"wwn": {
+				Type:     schema.TypeString,
+				Computed: true,
 			},
 		},
 	}
@@ -277,6 +282,22 @@ OUTER:
 	// This is useful for import
 	if d.Get("device_type").(string) == "" {
 		d.Set("device_type", "VBD")
+	}
+
+	if d.Get("device_type").(string) == "SCSI" {
+		blockStorageClientV3, err := config.blockStorageV3Client(GetRegion(d, config))
+		if err != nil {
+			return fmt.Errorf("Error creating OpenTelekomCloud block storage client: %s", err)
+		}
+
+		v, err := volumes_v3.Get(blockStorageClientV3, d.Id()).Extract()
+		if err != nil {
+			return CheckDeleted(d, err, "volume")
+		}
+
+		log.Printf("[DEBUG] Retrieved volume %s: %+v", d.Id(), v)
+
+		d.Set("wwn", v.WWN)
 	}
 
 	return nil

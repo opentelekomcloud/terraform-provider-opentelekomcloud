@@ -93,6 +93,7 @@ The following attributes are exported:
 * `attachment` - If a volume is attached to an instance, this attribute will
     display the Attachment ID, Instance ID, and the Device as the Instance
     sees it.
+* `wwn` - Specifies the unique identifier used for mounting the EVS disk.
 
 ## Import
 
