@@ -1,21 +1,21 @@
-## 1.11.0 (Unreleased)
+## 1.11.0 (August 01, 2019)
 
 FEATURES:
 
-* **New Data Source:** `opentelekomcloud_sdrs_domain_v1` [GH-328]
-* **New Resource:** `opentelekomcloud_sdrs_protectiongroup_v1` [GH-326]
+* **New Data Source:** `opentelekomcloud_sdrs_domain_v1` ([#328](https://github.com/terraform-providers/terraform-provider-opentelekomcloud/issues/328))
+* **New Resource:** `opentelekomcloud_sdrs_protectiongroup_v1` ([#326](https://github.com/terraform-providers/terraform-provider-opentelekomcloud/issues/326))
 
 ENHANCEMENTS:
 
-* `resource/opentelekomcloud_vpc_v1`: Add enable_shared_snat support [GH-333]
-* `resource/opentelekomcloud_networking_floatingip_v2`: Add default value for floating_ip pool [GH-335]
-* `resource/opentelekomcloud_blockstorage_volume_v2`: Add device_type argument support [GH-338]
-* `resource/opentelekomcloud_blockstorage_volume_v2`: Add wwn attribute support [GH-339]
+* `resource/opentelekomcloud_vpc_v1`: Add enable_shared_snat support ([#333](https://github.com/terraform-providers/terraform-provider-opentelekomcloud/issues/333))
+* `resource/opentelekomcloud_networking_floatingip_v2`: Add default value for floating_ip pool ([#335](https://github.com/terraform-providers/terraform-provider-opentelekomcloud/issues/335))
+* `resource/opentelekomcloud_blockstorage_volume_v2`: Add device_type argument support ([#338](https://github.com/terraform-providers/terraform-provider-opentelekomcloud/issues/338))
+* `resource/opentelekomcloud_blockstorage_volume_v2`: Add wwn attribute support ([#339](https://github.com/terraform-providers/terraform-provider-opentelekomcloud/issues/339))
 
 BUG FIXES:
 
-* `resource/opentelekomcloud_sfs_file_system_v2`: Set availability_zone to Computed [GH-330]
-* `resource/opentelekomcloud_rds_configuration_v3`: Fix RDS parametergroup acc test [GH-331]
+* `resource/opentelekomcloud_sfs_file_system_v2`: Set availability_zone to Computed ([#330](https://github.com/terraform-providers/terraform-provider-opentelekomcloud/issues/330))
+* `resource/opentelekomcloud_rds_configuration_v3`: Fix RDS parametergroup acc test ([#331](https://github.com/terraform-providers/terraform-provider-opentelekomcloud/issues/331))
 
 ## 1.10.0 (July 01, 2019)
 
