@@ -237,6 +237,7 @@ func Provider() terraform.ResourceProvider {
 			"opentelekomcloud_dns_recordset_v2":                   resourceDNSRecordSetV2(),
 			"opentelekomcloud_dns_zone_v2":                        resourceDNSZoneV2(),
 			"opentelekomcloud_dcs_instance_v1":                    resourceDcsInstanceV1(),
+			"opentelekomcloud_ecs_instance_v1":                    resourceEcsInstanceV1(),
 			"opentelekomcloud_fw_firewall_group_v2":               resourceFWFirewallGroupV2(),
 			"opentelekomcloud_fw_policy_v2":                       resourceFWPolicyV2(),
 			"opentelekomcloud_fw_rule_v2":                         resourceFWRuleV2(),
