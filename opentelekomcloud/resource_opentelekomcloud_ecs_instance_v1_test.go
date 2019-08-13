@@ -101,7 +101,7 @@ var testAccEcsV1Instance_basic = fmt.Sprintf(`
 resource "opentelekomcloud_ecs_instance_v1" "instance_1" {
   name     = "server_1"
   image_id = "%s"
-  flavor   = "%s"
+  flavor   = "s2.medium.1"
   vpc_id   = "%s"
 
   nics {
@@ -130,7 +130,7 @@ resource "opentelekomcloud_ecs_instance_v1" "instance_1" {
     key = "value"
   }
 }
-`, OS_IMAGE_ID, OS_FLAVOR_NAME, OS_VPC_ID, OS_NETWORK_ID, OS_AVAILABILITY_ZONE)
+`, OS_IMAGE_ID, OS_VPC_ID, OS_NETWORK_ID, OS_AVAILABILITY_ZONE)
 
 var testAccEcsV1Instance_update = fmt.Sprintf(`
 resource "opentelekomcloud_compute_secgroup_v2" "secgroup_1" {
@@ -141,7 +141,7 @@ resource "opentelekomcloud_compute_secgroup_v2" "secgroup_1" {
 resource "opentelekomcloud_ecs_instance_v1" "instance_1" {
   name     = "server_updated"
   image_id = "%s"
-  flavor   = "%s"
+  flavor   = "s2.medium.1"
   vpc_id   = "%s"
 
   nics {
@@ -160,14 +160,15 @@ resource "opentelekomcloud_ecs_instance_v1" "instance_1" {
     size = "20"
   }
 
-  password          = "Password@123"
-  security_groups   = ["default", "${opentelekomcloud_compute_secgroup_v2.secgroup_1.name}"]
-  availability_zone = "%s"
-  auto_recovery     = false
+  password                    = "Password@123"
+  security_groups             = ["default", "${opentelekomcloud_compute_secgroup_v2.secgroup_1.name}"]
+  availability_zone           = "%s"
+  auto_recovery               = false
+  delete_disks_on_termination = true
 
   tags = {
     foo = "bar1"
     key1 = "value"
   }
 }
-`, OS_IMAGE_ID, OS_FLAVOR_NAME, OS_VPC_ID, OS_NETWORK_ID, OS_AVAILABILITY_ZONE)
+`, OS_IMAGE_ID, OS_VPC_ID, OS_NETWORK_ID, OS_AVAILABILITY_ZONE)
