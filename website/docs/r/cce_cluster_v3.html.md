@@ -90,12 +90,24 @@ All above argument parameters can be exported as attribute parameters along with
   * `id` -  Id of the cluster resource.
 
   * `status` -  Cluster status information.
-  
+
   * `internal` - The internal network address.
-  
+
   * `external` - The external network address.
-  
+
   * `external_otc` - The endpoint of the cluster to be accessed through API Gateway.
+
+  * `certificate_clusters/name` - The cluster name.
+
+  * `certificate_clusters/server` - The server IP address.
+
+  * `certificate_clusters/certificate_authority_data` - The certificate data.
+
+  * `certificate_users/name` - The user name.
+
+  * `certificate_users/client_certificate_data` - The client certificate data.
+
+  * `certificate_users/client_key_data` - The client key data.
 
 ## Import
 
