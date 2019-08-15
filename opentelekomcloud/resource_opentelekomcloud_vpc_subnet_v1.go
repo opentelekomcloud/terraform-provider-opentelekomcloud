@@ -13,9 +13,9 @@ import (
 )
 
 func resourceSubnetDNSListV1(d *schema.ResourceData) []string {
-	rawDNSN := d.Get("dns_list").(*schema.Set)
-	dnsn := make([]string, rawDNSN.Len())
-	for i, raw := range rawDNSN.List() {
+	rawDNSN := d.Get("dns_list").([]interface{})
+	dnsn := make([]string, len(rawDNSN))
+	for i, raw := range rawDNSN {
 		dnsn[i] = raw.(string)
 	}
 	return dnsn
@@ -56,11 +56,13 @@ func resourceVpcSubnetV1() *schema.Resource {
 				ValidateFunc: validateCIDR,
 			},
 			"dns_list": {
-				Type:     schema.TypeSet,
+				Type:     schema.TypeList,
 				Optional: true,
-				Elem:     &schema.Schema{Type: schema.TypeString, ValidateFunc: validateIP},
-				Set:      schema.HashString,
 				Computed: true,
+				Elem: &schema.Schema{
+					Type:         schema.TypeString,
+					ValidateFunc: validateIP,
+				},
 			},
 			"gateway_ip": {
 				Type:         schema.TypeString,
