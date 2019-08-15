@@ -149,15 +149,16 @@ var testAccCCEClusterV3_timeout = fmt.Sprintf(`
 resource "opentelekomcloud_cce_cluster_v3" "cluster_1" {
   name = "opentelekomcloud-cce"
   cluster_type="VirtualMachine"
-  flavor_id="cce.s1.small"
+  flavor_id="cce.s2.small"
   cluster_version = "v1.9.2-r2"
   vpc_id="%s"
   subnet_id="%s"
   container_network_type="overlay_l2"
   authentication_mode = "rbac"
     timeouts {
-    create = "10m"
+    create = "20m"
     delete = "10m"
   }
+  multi_az = true
 }
 `, OS_VPC_ID, OS_NETWORK_ID)

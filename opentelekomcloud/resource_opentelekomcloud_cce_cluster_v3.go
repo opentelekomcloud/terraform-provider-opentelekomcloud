@@ -22,7 +22,7 @@ func resourceCCEClusterV3() *schema.Resource {
 		},
 
 		Timeouts: &schema.ResourceTimeout{
-			Create: schema.DefaultTimeout(10 * time.Minute),
+			Create: schema.DefaultTimeout(30 * time.Minute),
 			Delete: schema.DefaultTimeout(10 * time.Minute),
 		},
 
@@ -113,6 +113,11 @@ func resourceCCEClusterV3() *schema.Resource {
 				ForceNew: true,
 				Default:  "x509",
 			},
+			"multi_az": {
+				Type:     schema.TypeBool,
+				Optional: true,
+				ForceNew: true,
+			},
 			"status": {
 				Type:     schema.TypeString,
 				Computed: true,
@@ -192,6 +197,9 @@ func resourceClusterExtendParamV3(d *schema.ResourceData) map[string]string {
 	for key, val := range d.Get("extend_param").(map[string]interface{}) {
 		m[key] = val.(string)
 	}
+	if multi_az, ok := d.GetOk("multi_az"); ok && multi_az == true {
+		m["clusterAZ"] = "multi_az"
+	}
 	return m
 }
 
@@ -244,6 +252,9 @@ func resourceCCEClusterV3Create(d *schema.ResourceData, meta interface{}) error 
 	}
 
 	_, err = stateConf.WaitForState()
+	if err != nil {
+		return fmt.Errorf("Error creating OpenTelekomCloud CCE cluster: %s", err)
+	}
 	d.SetId(create.Metadata.Id)
 
 	return resourceCCEClusterV3Read(d, meta)
