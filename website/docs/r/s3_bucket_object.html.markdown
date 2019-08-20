@@ -1,6 +1,6 @@
 ---
 layout: "opentelekomcloud"
-page_title: "AWS: opentelekomcloud_s3_bucket_object"
+page_title: "OpenTelekomCloud: opentelekomcloud_s3_bucket_object"
 sidebar_current: "docs-opentelekomcloud-resource-s3-bucket-object"
 description: |-
   Provides a S3 bucket object resource.
@@ -21,7 +21,6 @@ resource "opentelekomcloud_s3_bucket_object" "object" {
   source = "path/to/file"
   etag   = "${md5(file("path/to/file"))}"
 }
-```
 
 resource "opentelekomcloud_s3_bucket" "examplebucket" {
   bucket = "examplebuckettftest"
