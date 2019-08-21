@@ -37,7 +37,7 @@ The following arguments are supported:
 
 * `name` - (Required) The name of the VPC. The name must be unique for a tenant. The value is a string of no more than 64 characters and can contain digits, letters, underscores (_), and hyphens (-). Changing this updates the name of the existing VPC.
 
-* `shared` - (Optional) Specifies whether the cross-tenant sharing is supported.
+* `shared` - (Optional) Specifies whether the shared SNAT should be used or not. Is also required  for cross-tenant sharing.
 
 
 
