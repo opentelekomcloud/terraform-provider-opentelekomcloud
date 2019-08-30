@@ -1,21 +1,21 @@
-## 1.12.0 (Unreleased)
+## 1.12.0 (August 30, 2019)
 
 FEATURES:
 
-* **New Resource:** `opentelekomcloud_ecs_instance_v1` [GH-347]
+* **New Resource:** `opentelekomcloud_ecs_instance_v1` ([#347](https://github.com/terraform-providers/terraform-provider-opentelekomcloud/issues/347))
 
 ENHANCEMENTS:
 
-* `resource/opentelekomcloud_cce_cluster_v3`: Add CCE cluster certificates [GH-349]
-* `resource/opentelekomcloud_cce_cluster_v3`: Add multi-az support for CCE cluster [GH-350]
-Add detailed error message for 404 [GH-352]
+* `resource/opentelekomcloud_cce_cluster_v3`: Add CCE cluster certificates ([#349](https://github.com/terraform-providers/terraform-provider-opentelekomcloud/issues/349))
+* `resource/opentelekomcloud_cce_cluster_v3`: Add multi-az support for CCE cluster ([#350](https://github.com/terraform-providers/terraform-provider-opentelekomcloud/issues/350))
+Add detailed error message for 404 ([#352](https://github.com/terraform-providers/terraform-provider-opentelekomcloud/issues/352))
 
 BUG FIXES:
 
-* `resource/opentelekomcloud_vpc_subnet_v1`: Fix dns_list type issue [GH-351]
-* `resource/opentelekomcloud_cce_node_v3`: Fix data_volumes type issue [GH-354]
-Fix common user ak/sk authentication issue with domain_name [GH-362]
-* `resource/opentelekomcloud_rds_instance_v3`: Fix backup_strategy parameter issue [GH-363]
+* `resource/opentelekomcloud_vpc_subnet_v1`: Fix dns_list type issue ([#351](https://github.com/terraform-providers/terraform-provider-opentelekomcloud/issues/351))
+* `resource/opentelekomcloud_cce_node_v3`: Fix data_volumes type issue ([#354](https://github.com/terraform-providers/terraform-provider-opentelekomcloud/issues/354))
+Fix common user ak/sk authentication issue with domain_name ([#362](https://github.com/terraform-providers/terraform-provider-opentelekomcloud/issues/362))
+* `resource/opentelekomcloud_rds_instance_v3`: Fix backup_strategy parameter issue ([#363](https://github.com/terraform-providers/terraform-provider-opentelekomcloud/issues/363))
 
 
 ## 1.11.0 (August 01, 2019)
