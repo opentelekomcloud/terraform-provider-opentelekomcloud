@@ -1,4 +1,23 @@
-## 1.11.1 (Unreleased)
+## 1.12.0 (Unreleased)
+
+FEATURES:
+
+* **New Resource:** `opentelekomcloud_ecs_instance_v1` [GH-347]
+
+ENHANCEMENTS:
+
+* `resource/opentelekomcloud_cce_cluster_v3`: Add CCE cluster certificates [GH-349]
+* `resource/opentelekomcloud_cce_cluster_v3`: Add multi-az support for CCE cluster [GH-350]
+Add detailed error message for 404 [GH-352]
+
+BUG FIXES:
+
+* `resource/opentelekomcloud_vpc_subnet_v1`: Fix dns_list type issue [GH-351]
+* `resource/opentelekomcloud_cce_node_v3`: Fix data_volumes type issue [GH-354]
+Fix common user ak/sk authentication issue with domain_name [GH-362]
+* `resource/opentelekomcloud_rds_instance_v3`: Fix backup_strategy parameter issue [GH-363]
+
+
 ## 1.11.0 (August 01, 2019)
 
 FEATURES:
