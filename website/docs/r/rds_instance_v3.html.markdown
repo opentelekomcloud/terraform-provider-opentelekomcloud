@@ -159,7 +159,7 @@ The following arguments are supported:
 
 * `backup_strategy` -
   (Optional)
-  Specifies the advanced backup policy. Structure is documented below. Changing this parameter will create a new resource.
+  Specifies the advanced backup policy. Structure is documented below.
 
 * `ha_replication_mode` -
   (Optional)
@@ -237,7 +237,7 @@ The `backup_strategy` block supports:
   range is from 0 to 732. If this parameter is not specified or set
   to 0, the automated backup policy is disabled. NOTICE:
   Primary/standby DB instances of Microsoft SQL Server do not
-  support disabling the automated backup policy.  Changing this parameter will create a new resource.
+  support disabling the automated backup policy.
 
 * `start_time` -
   (Required)
@@ -246,7 +246,7 @@ The `backup_strategy` block supports:
   format. The current time is in the UTC format. The HH value must
   be 1 greater than the hh value. The values of mm and MM must be
   the same and must be set to any of the following: 00, 15, 30, or
-  45. Example value: 08:15-09:15 23:00-00:00. Changing this parameter will create a new resource.
+  45. Example value: 08:15-09:15 23:00-00:00.
 
 ## Attributes Reference
 

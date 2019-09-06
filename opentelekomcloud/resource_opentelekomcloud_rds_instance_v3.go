@@ -23,12 +23,14 @@ import (
 
 	"github.com/hashicorp/terraform/helper/schema"
 	"github.com/huaweicloud/golangsdk"
+	"github.com/huaweicloud/golangsdk/openstack/rds/v3/backups"
 )
 
 func resourceRdsInstanceV3() *schema.Resource {
 	return &schema.Resource{
 		Create: resourceRdsInstanceV3Create,
 		Read:   resourceRdsInstanceV3Read,
+		Update: resourceRdsInstanceV3Update,
 		Delete: resourceRdsInstanceV3Delete,
 		Importer: &schema.ResourceImporter{
 			State: schema.ImportStatePassthrough,
@@ -145,20 +147,20 @@ func resourceRdsInstanceV3() *schema.Resource {
 				Type:     schema.TypeList,
 				Computed: true,
 				Optional: true,
-				ForceNew: true,
+				ForceNew: false,
 				MaxItems: 1,
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
 						"start_time": {
 							Type:     schema.TypeString,
 							Required: true,
-							ForceNew: true,
+							ForceNew: false,
 						},
 						"keep_days": {
 							Type:     schema.TypeInt,
 							Computed: true,
 							Optional: true,
-							ForceNew: true,
+							ForceNew: false,
 						},
 					},
 				},
@@ -284,6 +286,32 @@ func resourceRdsInstanceV3Create(d *schema.ResourceData, meta interface{}) error
 	}
 	d.SetId(id.(string))
 
+	return resourceRdsInstanceV3Read(d, meta)
+}
+
+func resourceRdsInstanceV3Update(d *schema.ResourceData, meta interface{}) error {
+	config := meta.(*Config)
+	rdsClient, err := config.rdsV3Client(GetRegion(d, config))
+	if err != nil {
+		return fmt.Errorf("Error creating OpenTelekomCloud RDS Client: %s", err)
+	}
+	var updateOpts backups.UpdateOpts
+
+	if d.HasChange("backup_strategy") {
+		backupRaw := d.Get("backup_strategy").([]interface{})
+		rawMap := backupRaw[0].(map[string]interface{})
+		keep_days := rawMap["keep_days"].(int)
+		updateOpts.KeepDays = &keep_days
+		updateOpts.StartTime = rawMap["start_time"].(string)
+		// TODO(zhenguo): Make Period configured by users
+		updateOpts.Period = "1,2,3,4,5,6,7"
+	}
+	log.Printf("[DEBUG] updateOpts: %#v", updateOpts)
+
+	err = backups.Update(rdsClient, d.Id(), updateOpts).ExtractErr()
+	if err != nil {
+		return fmt.Errorf("Error updating OpenTelekomCloud RDS Instance: %s", err)
+	}
 	return resourceRdsInstanceV3Read(d, meta)
 }
 
