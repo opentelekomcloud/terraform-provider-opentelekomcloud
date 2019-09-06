@@ -26,13 +26,20 @@ import (
 )
 
 func TestAccRdsInstanceV3_basic(t *testing.T) {
+	name := acctest.RandString(10)
 	resource.Test(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckRdsInstanceV3Destroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccRdsInstanceV3_basic(acctest.RandString(10)),
+				Config: testAccRdsInstanceV3_basic(name),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckRdsInstanceV3Exists(),
+				),
+			},
+			{
+				Config: testAccRdsInstanceV3_update(name),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckRdsInstanceV3Exists(),
 				),
@@ -63,6 +70,33 @@ resource "opentelekomcloud_rds_instance_v3" "instance" {
   backup_strategy {
     start_time = "08:00-09:00"
     keep_days = 1
+  }
+}
+	`, OS_AVAILABILITY_ZONE, val, OS_NETWORK_ID, OS_VPC_ID)
+}
+
+func testAccRdsInstanceV3_update(val string) string {
+	return fmt.Sprintf(`
+resource "opentelekomcloud_rds_instance_v3" "instance" {
+  availability_zone = ["%s"]
+  db {
+    password = "Huangwei!120521"
+    type = "PostgreSQL"
+    version = "9.5"
+    port = "8635"
+  }
+  name = "terraform_test_rds_instance%s"
+  security_group_id = "47f50ead-ce99-4b71-b814-d81dba416ac2"
+  subnet_id = "%s"
+  vpc_id = "%s"
+  volume {
+    type = "COMMON"
+    size = 100
+  }
+  flavor = "rds.pg.c2.medium"
+  backup_strategy {
+    start_time = "09:00-10:00"
+    keep_days = 2
   }
 }
 	`, OS_AVAILABILITY_ZONE, val, OS_NETWORK_ID, OS_VPC_ID)
