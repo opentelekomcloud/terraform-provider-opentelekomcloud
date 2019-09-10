@@ -24,6 +24,7 @@ resource "opentelekomcloud_vpc_subnet_v1" "subnet_v1" {
   cidr = "${var.subnet_cidr}"
   gateway_ip = "${var.subnet_gateway_ip}"
   vpc_id = "${opentelekomcloud_vpc_v1.vpc_v1.id}"
+  ntp_addresses = "10.100.0.33,10.100.0.34"
 }
  ```
 
@@ -48,6 +49,8 @@ The following arguments are supported:
 * `dns_list` (Optional) - Specifies the DNS server address list of a subnet. This field is required if you need to use more than two DNS servers. This parameter value is the superset of both DNS server address 1 and DNS server address 2.
 
 * `availability_zone` (Optional) - Identifies the availability zone (AZ) to which the subnet belongs. The value must be an existing AZ in the system. Changing this creates a new Subnet.
+
+* `ntp_addresses` (Optional) - Specifies the NTP server address configured for the subnet.
 
 
 # Attributes Reference

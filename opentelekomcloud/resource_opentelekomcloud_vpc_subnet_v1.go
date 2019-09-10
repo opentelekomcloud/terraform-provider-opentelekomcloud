@@ -101,6 +101,10 @@ func resourceVpcSubnetV1() *schema.Resource {
 				ForceNew: true,
 				Required: true,
 			},
+			"ntp_addresses": {
+				Type:     schema.TypeString,
+				Optional: true,
+			},
 			"subnet_id": {
 				Type:     schema.TypeString,
 				Computed: true,
@@ -127,6 +131,16 @@ func resourceVpcSubnetV1Create(d *schema.ResourceData, meta interface{}) error {
 		PRIMARY_DNS:      d.Get("primary_dns").(string),
 		SECONDARY_DNS:    d.Get("secondary_dns").(string),
 		DnsList:          resourceSubnetDNSListV1(d),
+	}
+
+	if hasFilledOpt(d, "ntp_addresses") {
+		var extraDhcpRequests []subnets.ExtraDhcpOpt
+		extraDhcpReq := subnets.ExtraDhcpOpt{
+			OptName:  "ntp",
+			OptValue: d.Get("ntp_addresses").(string),
+		}
+		extraDhcpRequests = append(extraDhcpRequests, extraDhcpReq)
+		createOpts.ExtraDhcpOpts = extraDhcpRequests
 	}
 
 	n, err := subnets.Create(subnetClient, createOpts).Extract()
@@ -186,6 +200,13 @@ func resourceVpcSubnetV1Read(d *schema.ResourceData, meta interface{}) error {
 	d.Set("subnet_id", n.SubnetId)
 	d.Set("region", GetRegion(d, config))
 
+	for _, opt := range n.ExtraDhcpOpts {
+		if opt.OptName == "ntp" {
+			d.Set("ntp_addresses", opt.OptValue)
+			break
+		}
+	}
+
 	return nil
 }
 
@@ -215,6 +236,15 @@ func resourceVpcSubnetV1Update(d *schema.ResourceData, meta interface{}) error {
 
 	} else if d.Get("dhcp_enable").(bool) { //maintaining dhcp to be true if it was true earlier as default update option for dhcp bool is always going to be false in golangsdk
 		updateOpts.EnableDHCP = true
+	}
+	if d.HasChange("ntp_addresses") {
+		var extraDhcpRequests []subnets.ExtraDhcpOpt
+		extraDhcpReq := subnets.ExtraDhcpOpt{
+			OptName:  "ntp",
+			OptValue: d.Get("ntp_addresses").(string),
+		}
+		extraDhcpRequests = append(extraDhcpRequests, extraDhcpReq)
+		updateOpts.ExtraDhcpOpts = extraDhcpRequests
 	}
 
 	vpc_id := d.Get("vpc_id").(string)
