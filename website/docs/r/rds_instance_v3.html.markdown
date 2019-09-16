@@ -41,6 +41,10 @@ resource "opentelekomcloud_rds_instance_v3" "instance" {
     start_time = "08:00-09:00"
     keep_days = 1
   }
+  tag = {
+    foo = "bar"
+    key = "value"
+  }
 }
 ```
 
@@ -73,6 +77,10 @@ resource "opentelekomcloud_rds_instance_v3" "instance" {
   backup_strategy {
     start_time = "08:00-09:00"
     keep_days = 1
+  }
+  tag = {
+    foo = "bar"
+    key = "value"
   }
 }
 ```
@@ -173,6 +181,8 @@ The following arguments are supported:
 * `param_group_id` -
   (Optional)
   Specifies the parameter group ID. Changing this parameter will create a new resource.
+
+* `tag` - (Optional) Tags key/value pairs to associate with the instance.
 
 The `db` block supports:
 
