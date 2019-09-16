@@ -21,8 +21,12 @@ import (
 	"strings"
 	"time"
 
+	"github.com/hashicorp/terraform/helper/resource"
 	"github.com/hashicorp/terraform/helper/schema"
 	"github.com/huaweicloud/golangsdk"
+	"github.com/huaweicloud/golangsdk/openstack/rds/v1/datastores"
+	"github.com/huaweicloud/golangsdk/openstack/rds/v1/flavors"
+	"github.com/huaweicloud/golangsdk/openstack/rds/v1/instances"
 	"github.com/huaweicloud/golangsdk/openstack/rds/v1/tags"
 	"github.com/huaweicloud/golangsdk/openstack/rds/v3/backups"
 )
@@ -39,6 +43,7 @@ func resourceRdsInstanceV3() *schema.Resource {
 
 		Timeouts: &schema.ResourceTimeout{
 			Create: schema.DefaultTimeout(30 * time.Minute),
+			Update: schema.DefaultTimeout(30 * time.Minute),
 		},
 
 		Schema: map[string]*schema.Schema{
@@ -90,7 +95,7 @@ func resourceRdsInstanceV3() *schema.Resource {
 			"flavor": {
 				Type:     schema.TypeString,
 				Required: true,
-				ForceNew: true,
+				ForceNew: false,
 			},
 
 			"name": {
@@ -307,7 +312,7 @@ func resourceRdsInstanceV3Create(d *schema.ResourceData, meta interface{}) error
 		}
 
 		nodes := d.Get("nodes").([]interface{})
-		if len(nodes) == 1 {
+		if len(nodes) > 0 {
 			node_id = nodes[0].(map[string]interface{})["id"].(string)
 		} else {
 			log.Printf("[WARN] Error setting tag(key/value) of instance:%s", id.(string))
@@ -358,26 +363,28 @@ func resourceRdsInstanceV3Update(d *schema.ResourceData, meta interface{}) error
 		}
 	}
 
-	if d.HasChange("tag") {
-		var node_id string
-		res := make(map[string]interface{})
-		v, err := fetchRdsInstanceV3ByList(d, rdsClient)
-		if err != nil {
-			return err
-		}
-		res["list"] = v
-		err = setRdsInstanceV3Properties(d, res)
-		if err != nil {
-			return err
-		}
+	// Fetching node id
+	var node_id string
+	res := make(map[string]interface{})
+	v, err := fetchRdsInstanceV3ByList(d, rdsClient)
+	if err != nil {
+		return err
+	}
+	res["list"] = v
+	err = setRdsInstanceV3Properties(d, res)
+	if err != nil {
+		return err
+	}
 
-		nodes := d.Get("nodes").([]interface{})
-		if len(nodes) == 1 {
-			node_id = nodes[0].(map[string]interface{})["id"].(string)
-		} else {
-			log.Printf("[WARN] Error setting tag(key/value) of instance:%s", d.Id())
-			return nil
-		}
+	nodes := d.Get("nodes").([]interface{})
+	if len(nodes) > 0 {
+		node_id = nodes[0].(map[string]interface{})["id"].(string)
+	} else {
+		log.Printf("[WARN] Error setting tag(key/value) of instance:%s", d.Id())
+		return nil
+	}
+
+	if d.HasChange("tag") {
 		oraw, nraw := d.GetChange("tag")
 		o := oraw.(map[string]interface{})
 		n := nraw.(map[string]interface{})
@@ -404,6 +411,79 @@ func resourceRdsInstanceV3Update(d *schema.ResourceData, meta interface{}) error
 			}
 		}
 	}
+
+	if d.HasChange("flavor") {
+		_, nflavor := d.GetChange("flavor")
+		client, err := config.rdsV1Client(GetRegion(d, config))
+		if err != nil {
+			return fmt.Errorf("Error creating OpenTelekomCloud rds v1 client: %s ", err)
+		}
+
+		// Fetch flavor id
+		db := d.Get("db").([]interface{})
+		datastore_name := db[0].(map[string]interface{})["type"].(string)
+		datastore_version := db[0].(map[string]interface{})["version"].(string)
+		datastoresList, err := datastores.List(client, datastore_name).Extract()
+		if err != nil {
+			return fmt.Errorf("Unable to retrieve datastores: %s ", err)
+		}
+		if len(datastoresList) < 1 {
+			return fmt.Errorf("Returned no datastore result. ")
+		}
+		var datastoreId string
+		for _, datastore := range datastoresList {
+			if strings.HasPrefix(datastore.Name, datastore_version) {
+				datastoreId = datastore.ID
+				break
+			}
+		}
+		if datastoreId == "" {
+			return fmt.Errorf("Returned no datastore ID. ")
+		}
+		log.Printf("[DEBUG] Received datastore Id: %s", datastoreId)
+		flavorsList, err := flavors.List(client, datastoreId, GetRegion(d, config)).Extract()
+		if err != nil {
+			return fmt.Errorf("Unable to retrieve flavors: %s", err)
+		}
+		if len(flavorsList) < 1 {
+			return fmt.Errorf("Returned no flavor result. ")
+		}
+		var rdsFlavor flavors.Flavor
+		for _, flavor := range flavorsList {
+			if flavor.SpecCode == nflavor.(string) {
+				rdsFlavor = flavor
+				break
+			}
+		}
+
+		var updateFlavorOpts instances.UpdateFlavorOps
+
+		log.Printf("[DEBUG] Update flavor: %s", nflavor.(string))
+
+		updateFlavorOpts.FlavorRef = rdsFlavor.ID
+		_, err = instances.UpdateFlavorRef(client, updateFlavorOpts, node_id).Extract()
+		if err != nil {
+			return fmt.Errorf("Error updating instance Flavor from result: %s ", err)
+		}
+
+		stateConf := &resource.StateChangeConf{
+			Pending:    []string{"MODIFYING"},
+			Target:     []string{"ACTIVE"},
+			Refresh:    instanceStateFlavorUpdateRefreshFunc(client, node_id, d.Get("flavor").(string)),
+			Timeout:    d.Timeout(schema.TimeoutCreate),
+			Delay:      15 * time.Second,
+			MinTimeout: 3 * time.Second,
+		}
+
+		_, err = stateConf.WaitForState()
+		if err != nil {
+			return fmt.Errorf(
+				"Error waiting for instance (%s) flavor to be Updated: %s ",
+				node_id, err)
+		}
+		log.Printf("[DEBUG] Successfully updated instance %s flavor: %s", node_id, d.Get("flavor").(string))
+	}
+
 	return resourceRdsInstanceV3Read(d, meta)
 }
 
@@ -431,7 +511,7 @@ func resourceRdsInstanceV3Read(d *schema.ResourceData, meta interface{}) error {
 	// set instance tag
 	var node_id string
 	nodes := d.Get("nodes").([]interface{})
-	if len(nodes) == 1 {
+	if len(nodes) > 0 {
 		node_id = nodes[0].(map[string]interface{})["id"].(string)
 	} else {
 		log.Printf("[WARN] Error setting tag(key/value) of instance:%s", d.Id())
