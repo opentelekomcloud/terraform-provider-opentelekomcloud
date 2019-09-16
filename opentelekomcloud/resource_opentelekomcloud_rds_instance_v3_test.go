@@ -71,6 +71,10 @@ resource "opentelekomcloud_rds_instance_v3" "instance" {
     start_time = "08:00-09:00"
     keep_days = 1
   }
+  tag = {
+    foo = "bar"
+    key = "value"
+  }
 }
 	`, OS_AVAILABILITY_ZONE, val, OS_NETWORK_ID, OS_VPC_ID)
 }

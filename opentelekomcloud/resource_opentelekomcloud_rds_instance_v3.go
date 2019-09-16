@@ -23,6 +23,7 @@ import (
 
 	"github.com/hashicorp/terraform/helper/schema"
 	"github.com/huaweicloud/golangsdk"
+	"github.com/huaweicloud/golangsdk/openstack/rds/v1/tags"
 	"github.com/huaweicloud/golangsdk/openstack/rds/v3/backups"
 )
 
@@ -173,6 +174,12 @@ func resourceRdsInstanceV3() *schema.Resource {
 				ForceNew: true,
 			},
 
+			"tag": {
+				Type:         schema.TypeMap,
+				Optional:     true,
+				ValidateFunc: validateECSTagValue,
+			},
+
 			"param_group_id": {
 				Type:     schema.TypeString,
 				Optional: true,
@@ -286,6 +293,44 @@ func resourceRdsInstanceV3Create(d *schema.ResourceData, meta interface{}) error
 	}
 	d.SetId(id.(string))
 
+	if hasFilledOpt(d, "tag") {
+		var node_id string
+		res := make(map[string]interface{})
+		v, err := fetchRdsInstanceV3ByList(d, client)
+		if err != nil {
+			return err
+		}
+		res["list"] = v
+		err = setRdsInstanceV3Properties(d, res)
+		if err != nil {
+			return err
+		}
+
+		nodes := d.Get("nodes").([]interface{})
+		if len(nodes) == 1 {
+			node_id = nodes[0].(map[string]interface{})["id"].(string)
+		} else {
+			log.Printf("[WARN] Error setting tag(key/value) of instance:%s", id.(string))
+			return nil
+		}
+		tagClient, err := config.rdsTagV1Client(GetRegion(d, config))
+		if err != nil {
+			return fmt.Errorf("Error creating OpenTelekomCloud rds tag client: %s ", err)
+		}
+		tagmap := d.Get("tag").(map[string]interface{})
+		log.Printf("[DEBUG] Setting tag(key/value): %v", tagmap)
+		for key, val := range tagmap {
+			tagOpts := tags.CreateOpts{
+				Key:   key,
+				Value: val.(string),
+			}
+			err = tags.Create(tagClient, node_id, tagOpts).ExtractErr()
+			if err != nil {
+				log.Printf("[WARN] Error setting tag(key/value) of instance:%s, err=%s", id.(string), err)
+			}
+		}
+	}
+
 	return resourceRdsInstanceV3Read(d, meta)
 }
 
@@ -305,12 +350,59 @@ func resourceRdsInstanceV3Update(d *schema.ResourceData, meta interface{}) error
 		updateOpts.StartTime = rawMap["start_time"].(string)
 		// TODO(zhenguo): Make Period configured by users
 		updateOpts.Period = "1,2,3,4,5,6,7"
-	}
-	log.Printf("[DEBUG] updateOpts: %#v", updateOpts)
+		log.Printf("[DEBUG] updateOpts: %#v", updateOpts)
 
-	err = backups.Update(rdsClient, d.Id(), updateOpts).ExtractErr()
-	if err != nil {
-		return fmt.Errorf("Error updating OpenTelekomCloud RDS Instance: %s", err)
+		err = backups.Update(rdsClient, d.Id(), updateOpts).ExtractErr()
+		if err != nil {
+			return fmt.Errorf("Error updating OpenTelekomCloud RDS Instance: %s", err)
+		}
+	}
+
+	if d.HasChange("tag") {
+		var node_id string
+		res := make(map[string]interface{})
+		v, err := fetchRdsInstanceV3ByList(d, rdsClient)
+		if err != nil {
+			return err
+		}
+		res["list"] = v
+		err = setRdsInstanceV3Properties(d, res)
+		if err != nil {
+			return err
+		}
+
+		nodes := d.Get("nodes").([]interface{})
+		if len(nodes) == 1 {
+			node_id = nodes[0].(map[string]interface{})["id"].(string)
+		} else {
+			log.Printf("[WARN] Error setting tag(key/value) of instance:%s", d.Id())
+			return nil
+		}
+		oraw, nraw := d.GetChange("tag")
+		o := oraw.(map[string]interface{})
+		n := nraw.(map[string]interface{})
+		create, remove := diffTagsRDS(o, n)
+		tagClient, err := config.rdsTagV1Client(GetRegion(d, config))
+		if err != nil {
+			return fmt.Errorf("Error creating OpenTelekomCloud rds tag client: %s ", err)
+		}
+
+		if len(remove) > 0 {
+			for _, opts := range remove {
+				err = tags.Delete(tagClient, node_id, opts).ExtractErr()
+				if err != nil {
+					log.Printf("[WARN] Error deleting tag(key/value) of instance:%s, err=%s", d.Id(), err)
+				}
+			}
+		}
+		if len(create) > 0 {
+			for _, opts := range create {
+				err = tags.Create(tagClient, node_id, opts).ExtractErr()
+				if err != nil {
+					log.Printf("[WARN] Error setting tag(key/value) of instance:%s, err=%s", d.Id(), err)
+				}
+			}
+		}
 	}
 	return resourceRdsInstanceV3Read(d, meta)
 }
@@ -331,7 +423,38 @@ func resourceRdsInstanceV3Read(d *schema.ResourceData, meta interface{}) error {
 	}
 	res["list"] = v
 
-	return setRdsInstanceV3Properties(d, res)
+	err = setRdsInstanceV3Properties(d, res)
+	if err != nil {
+		return err
+	}
+
+	// set instance tag
+	var node_id string
+	nodes := d.Get("nodes").([]interface{})
+	if len(nodes) == 1 {
+		node_id = nodes[0].(map[string]interface{})["id"].(string)
+	} else {
+		log.Printf("[WARN] Error setting tag(key/value) of instance:%s", d.Id())
+		return nil
+	}
+	tagClient, err := config.rdsTagV1Client(GetRegion(d, config))
+	if err != nil {
+		return fmt.Errorf("Error creating OpenTelekomCloud rds tag client: %#v", err)
+	}
+	taglist, err := tags.Get(tagClient, node_id).Extract()
+	if err != nil {
+		return fmt.Errorf("Error fetching OpenTelekomCloud rds instance tags: %s", err)
+	}
+
+	tagmap := make(map[string]string)
+	for _, val := range taglist.Tags {
+		tagmap[val.Key] = val.Value
+	}
+	if err := d.Set("tag", tagmap); err != nil {
+		return fmt.Errorf("[DEBUG] Error saving tag to state for OpenTelekomCloud rds instance (%s): %s", d.Id(), err)
+	}
+
+	return nil
 }
 
 func resourceRdsInstanceV3Delete(d *schema.ResourceData, meta interface{}) error {
