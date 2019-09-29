@@ -138,7 +138,7 @@ The following arguments are supported:
 
 * `flavor` -
   (Required)
-  Specifies the specification code. Changing this parameter will create a new resource.
+  Specifies the specification code.
 
 * `name` -
   (Required)

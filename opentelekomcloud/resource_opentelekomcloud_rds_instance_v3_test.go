@@ -97,10 +97,14 @@ resource "opentelekomcloud_rds_instance_v3" "instance" {
     type = "COMMON"
     size = 100
   }
-  flavor = "rds.pg.c2.medium"
+  flavor = "rds.pg.c2.large"
   backup_strategy {
     start_time = "09:00-10:00"
     keep_days = 2
+  }
+  tag = {
+    foo1 = "bar1"
+    key = "value1"
   }
 }
 	`, OS_AVAILABILITY_ZONE, val, OS_NETWORK_ID, OS_VPC_ID)
