@@ -68,7 +68,7 @@ func dataSourceVirtualPrivateCloudV1Read(d *schema.ResourceData, meta interface{
 	}
 
 	listOpts := vpcs.ListOpts{
-		ID:     d.Id(),
+		ID:     d.Get("id").(string),
 		Name:   d.Get("name").(string),
 		Status: d.Get("status").(string),
 		CIDR:   d.Get("cidr").(string),
