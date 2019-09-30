@@ -227,6 +227,7 @@ func Provider() terraform.ResourceProvider {
 
 		ResourcesMap: map[string]*schema.Resource{
 			"opentelekomcloud_blockstorage_volume_v2":             resourceBlockStorageVolumeV2(),
+			"opentelekomcloud_evs_volume_v3":                      resourceEvsStorageVolumeV3(),
 			"opentelekomcloud_compute_instance_v2":                resourceComputeInstanceV2(),
 			"opentelekomcloud_compute_keypair_v2":                 resourceComputeKeypairV2(),
 			"opentelekomcloud_compute_secgroup_v2":                resourceComputeSecGroupV2(),
