@@ -119,14 +119,14 @@ func resourceRdsInstanceV3() *schema.Resource {
 			"volume": {
 				Type:     schema.TypeList,
 				Required: true,
-				ForceNew: true,
+				ForceNew: false,
 				MaxItems: 1,
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
 						"size": {
 							Type:     schema.TypeInt,
 							Required: true,
-							ForceNew: true,
+							ForceNew: false,
 						},
 						"type": {
 							Type:     schema.TypeString,
@@ -371,12 +371,14 @@ func resourceRdsInstanceV3Update(d *schema.ResourceData, meta interface{}) error
 		return err
 	}
 	res["list"] = v
-	err = setRdsInstanceV3Properties(d, res)
+	opts := resourceRdsInstanceV3UserInputParams(d)
+	v, _ = opts["nodes"]
+	v, err = flattenRdsInstanceV3Nodes(res, nil, v)
 	if err != nil {
 		return err
 	}
 
-	nodes := d.Get("nodes").([]interface{})
+	nodes := v.([]interface{})
 	if len(nodes) > 0 {
 		node_id = nodes[0].(map[string]interface{})["id"].(string)
 	} else {
@@ -482,6 +484,47 @@ func resourceRdsInstanceV3Update(d *schema.ResourceData, meta interface{}) error
 				node_id, err)
 		}
 		log.Printf("[DEBUG] Successfully updated instance %s flavor: %s", node_id, d.Get("flavor").(string))
+	}
+
+	// Update volume
+	if d.HasChange("volume") {
+		client, err := config.rdsV1Client(GetRegion(d, config))
+		if err != nil {
+			return fmt.Errorf("Error creating OpenTelekomCloud rds v1 client: %s ", err)
+		}
+		_, nvolume := d.GetChange("volume")
+		var updateOpts instances.UpdateOps
+		volume := make(map[string]interface{})
+		volumeRaw := nvolume.([]interface{})
+		log.Printf("[DEBUG] volumeRaw: %+v", volumeRaw)
+		if len(volumeRaw) == 1 {
+			if m, ok := volumeRaw[0].(map[string]interface{}); ok {
+				volume["size"] = m["size"].(int)
+			}
+		}
+		log.Printf("[DEBUG] volume: %+v", volume)
+		updateOpts.Volume = volume
+		_, err = instances.UpdateVolumeSize(client, updateOpts, node_id).Extract()
+		if err != nil {
+			return fmt.Errorf("Error updating instance volume from result: %s ", err)
+		}
+
+		stateConf := &resource.StateChangeConf{
+			Pending:    []string{"MODIFYING"},
+			Target:     []string{"UPDATED"},
+			Refresh:    instanceStateUpdateRefreshFunc(client, node_id, updateOpts.Volume["size"].(int)),
+			Timeout:    d.Timeout(schema.TimeoutCreate),
+			Delay:      15 * time.Second,
+			MinTimeout: 3 * time.Second,
+		}
+
+		_, err = stateConf.WaitForState()
+		if err != nil {
+			return fmt.Errorf(
+				"Error waiting for instance (%s) volume to be Updated: %s ",
+				node_id, err)
+		}
+		log.Printf("[DEBUG] Successfully updated instance %s volume: %+v", node_id, volume)
 	}
 
 	return resourceRdsInstanceV3Read(d, meta)
