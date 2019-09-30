@@ -95,9 +95,9 @@ resource "opentelekomcloud_rds_instance_v3" "instance" {
   vpc_id = "%s"
   volume {
     type = "COMMON"
-    size = 100
+    size = 200
   }
-  flavor = "rds.pg.c2.large"
+  flavor = "rds.pg.c2.medium"
   backup_strategy {
     start_time = "09:00-10:00"
     keep_days = 2
