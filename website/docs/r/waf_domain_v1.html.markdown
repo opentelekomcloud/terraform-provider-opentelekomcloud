@@ -48,6 +48,8 @@ The following arguments are supported:
 
 * `proxy` - (Required) Specifies whether a proxy is configured.
 
+* `policy_id` - The policy ID associate with the domain. Changing this create a new domain.
+
 * `sip_header_name` - (Optional) The type of the source IP header. This parameter is required only when proxy is set to true. The options are as follows: default, cloudflare, akamai, and custom.
 
 * `sip_header_list` - (Optional) Array of HTTP request header for identifying the real source IP address. This parameter is required only when proxy is set to true.
@@ -81,8 +83,6 @@ The following attributes are exported:
 * `txt_code` - The TXT record. This attribute is returned only when proxy is set to true.
 
 * `sub_domain` - The subdomain name. This attribute is returned only when proxy is set to true.
-
-* `policy_id` - The proxy ID.
 
 * `protect_status` - The WAF mode. -1: bypassed, 0: disabled, 1: enabled.
 

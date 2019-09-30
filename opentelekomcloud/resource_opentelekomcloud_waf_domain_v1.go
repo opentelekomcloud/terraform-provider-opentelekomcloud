@@ -10,6 +10,7 @@ import (
 	"github.com/hashicorp/terraform/helper/validation"
 	"github.com/huaweicloud/golangsdk"
 	"github.com/huaweicloud/golangsdk/openstack/waf/v1/domains"
+	"github.com/huaweicloud/golangsdk/openstack/waf/v1/policies"
 )
 
 func resourceWafDomainV1() *schema.Resource {
@@ -82,6 +83,11 @@ func resourceWafDomainV1() *schema.Resource {
 					Type: schema.TypeString,
 				},
 			},
+			"policy_id": {
+				Type:     schema.TypeString,
+				Optional: true,
+				Computed: true,
+			},
 			"access_code": {
 				Type:     schema.TypeString,
 				Computed: true,
@@ -95,10 +101,6 @@ func resourceWafDomainV1() *schema.Resource {
 				Computed: true,
 			},
 			"sub_domain": {
-				Type:     schema.TypeString,
-				Computed: true,
-			},
-			"policy_id": {
 				Type:     schema.TypeString,
 				Computed: true,
 			},
@@ -140,11 +142,20 @@ func getAllServers(d *schema.ResourceData) []domains.ServerOpts {
 
 func resourceWafDomainV1Create(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*Config)
-
 	wafClient, err := config.wafV1Client(GetRegion(d, config))
 
 	if err != nil {
 		return fmt.Errorf("Error creating OpenTelekomcomCloud WAF Client: %s", err)
+	}
+
+	hosts := []string{}
+	if hasFilledOpt(d, "policy_id") {
+		policy_id := d.Get("policy_id").(string)
+		policy, err := policies.Get(wafClient, policy_id).Extract()
+		if err != nil {
+			return fmt.Errorf("Error retrieving OpenTelekomCloud Waf Policy %s: %s", policy_id, err)
+		}
+		hosts = append(hosts, policy.Hosts...)
 	}
 
 	v := d.Get("sip_header_list").([]interface{})
@@ -171,6 +182,19 @@ func resourceWafDomainV1Create(d *schema.ResourceData, meta interface{}) error {
 
 	log.Printf("[DEBUG] Waf domain created: %#v", domain)
 	d.SetId(domain.Id)
+
+	if hasFilledOpt(d, "policy_id") {
+		var updateHostsOpts policies.UpdateHostsOpts
+		policy_id := d.Get("policy_id").(string)
+		hosts = append(hosts, d.Id())
+		updateHostsOpts.Hosts = hosts
+		log.Printf("[DEBUG] Waf policy update Hosts: %#v", hosts)
+
+		_, err = policies.UpdateHosts(wafClient, policy_id, updateHostsOpts).Extract()
+		if err != nil {
+			return fmt.Errorf("Error updating OpenTelekomCloud WAF Policy Hosts: %s", err)
+		}
+	}
 
 	return resourceWafDomainV1Read(d, meta)
 }
@@ -203,7 +227,9 @@ func resourceWafDomainV1Read(d *schema.ResourceData, meta interface{}) error {
 	d.Set("cname", n.Cname)
 	d.Set("txt_code", n.TxtCode)
 	d.Set("sub_domain", n.SubDomain)
-	d.Set("policy_id", n.PolicyID)
+	if n.PolicyID != "" {
+		d.Set("policy_id", n.PolicyID)
+	}
 	d.Set("protect_status", n.ProtectStatus)
 	d.Set("access_status", n.AccessStatus)
 	d.Set("protocol", n.Protocol)
