@@ -30,7 +30,7 @@ resource "opentelekomcloud_rds_instance_v3" "instance" {
   }
   name = "terraform_test_rds_instance"
   security_group_id = "${opentelekomcloud_networking_secgroup_v2.secgroup.id}"
-  subnet_id = "{{ subnet_id }}"
+  network_id = "{{ network_id }}"
   vpc_id = "{{ vpc_id }}"
   volume {
     type = "COMMON"
@@ -66,7 +66,7 @@ resource "opentelekomcloud_rds_instance_v3" "instance" {
   }
   name = "terraform_test_rds_instance"
   security_group_id = "${opentelekomcloud_networking_secgroup_v2.secgroup.id}"
-  subnet_id = "{{ subnet_id }}"
+  network_id = "{{ network_id }}"
   vpc_id = "{{ vpc_id }}" 
   volume {
     type = "COMMON"
@@ -109,7 +109,7 @@ resource "opentelekomcloud_rds_instance_v3" "instance" {
   }
   name = "terraform_test_rds_instance"
   security_group_id = "${opentelekomcloud_networking_secgroup_v2.secgroup.id}"
-  subnet_id = "{{ subnet_id }}"
+  network_id = "{{ network_id }}"
   vpc_id = "{{ vpc_id }}"
   volume {
     disk_encryption_id = "${opentelekomcloud_kms_key_v1.key.id}"
@@ -153,9 +153,9 @@ The following arguments are supported:
   Specifies the security group which the RDS DB instance belongs to.
   Changing this parameter will create a new resource.
 
-* `subnet_id` -
+* `network_id` -
   (Required)
-  Specifies the subnet id. Changing this parameter will create a new resource.
+  Specifies the network id. Changing this parameter will create a new resource.
 
 * `volume` -
   (Required)

@@ -110,7 +110,7 @@ func resourceRdsInstanceV3() *schema.Resource {
 				ForceNew: true,
 			},
 
-			"subnet_id": {
+			"network_id": {
 				Type:     schema.TypeString,
 				Required: true,
 				ForceNew: true,
@@ -255,7 +255,7 @@ func resourceRdsInstanceV3UserInputParams(d *schema.ResourceData) map[string]int
 		"name":                    d.Get("name"),
 		"param_group_id":          d.Get("param_group_id"),
 		"security_group_id":       d.Get("security_group_id"),
-		"subnet_id":               d.Get("subnet_id"),
+		"network_id":              d.Get("network_id"),
 		"volume":                  d.Get("volume"),
 		"vpc_id":                  d.Get("vpc_id"),
 	}
@@ -750,14 +750,14 @@ func buildRdsInstanceV3CreateParameters(opts map[string]interface{}, arrayIndex 
 		params["security_group_id"] = v
 	}
 
-	v, err = navigateValue(opts, []string{"subnet_id"}, arrayIndex)
+	v, err = navigateValue(opts, []string{"network_id"}, arrayIndex)
 	if err != nil {
 		return nil, err
 	}
 	if e, err := isEmptyValue(reflect.ValueOf(v)); err != nil {
 		return nil, err
 	} else if !e {
-		params["subnet_id"] = v
+		params["network_id"] = v
 	}
 
 	v, err = expandRdsInstanceV3CreateVolume(opts, arrayIndex)
@@ -1131,12 +1131,12 @@ func setRdsInstanceV3Properties(d *schema.ResourceData, response map[string]inte
 		return fmt.Errorf("Error setting Instance:security_group_id, err: %s", err)
 	}
 
-	v, err = navigateValue(response, []string{"list", "subnet_id"}, nil)
+	v, err = navigateValue(response, []string{"list", "network_id"}, nil)
 	if err != nil {
-		return fmt.Errorf("Error reading Instance:subnet_id, err: %s", err)
+		return fmt.Errorf("Error reading Instance:network_id, err: %s", err)
 	}
-	if err = d.Set("subnet_id", v); err != nil {
-		return fmt.Errorf("Error setting Instance:subnet_id, err: %s", err)
+	if err = d.Set("network_id", v); err != nil {
+		return fmt.Errorf("Error setting Instance:network_id, err: %s", err)
 	}
 
 	v, _ = opts["volume"]
