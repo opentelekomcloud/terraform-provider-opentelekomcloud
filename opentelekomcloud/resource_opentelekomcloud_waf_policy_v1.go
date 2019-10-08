@@ -385,12 +385,16 @@ func resourceWafPolicyV1Delete(d *schema.ResourceData, meta interface{}) error {
 	}
 
 	if hosts, ok := d.GetOk("hosts"); ok {
-		log.Printf("[DEBUG] Policie already used by domain: %#v", hosts)
+		log.Printf("[DEBUG] Policies already used by domain: %#v", hosts)
 		var updateHostsOpts policies.UpdateHostsOpts
 		updateHostsOpts.Hosts = make([]string, 0)
 
 		_, err = policies.UpdateHosts(wafClient, d.Id(), updateHostsOpts).Extract()
 		if err != nil {
+			if _, ok := err.(golangsdk.ErrDefault404); ok {
+				d.SetId("")
+				return nil
+			}
 			return fmt.Errorf("Error updating OpenTelekomCloud WAF Policy Hosts: %s", err)
 		}
 	}
