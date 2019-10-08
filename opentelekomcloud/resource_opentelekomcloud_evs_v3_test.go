@@ -91,7 +91,7 @@ func TestAccEvsStorageV3Volume_timeout(t *testing.T) {
 		CheckDestroy: testAccCheckEvsStorageV3VolumeDestroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccBlockStorageV2Volume_timeout,
+				Config: testAccEvsStorageV3Volume_timeout,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckEvsStorageV3VolumeExists("opentelekomcloud_evs_volume_v3.volume_1", &volume),
 				),
@@ -248,10 +248,12 @@ resource "opentelekomcloud_evs_volume_v3" "volume_tags" {
 var testAccEvsStorageV3Volume_image = fmt.Sprintf(`
 resource "opentelekomcloud_evs_volume_v3" "volume_1" {
   name = "volume_1"
+  availability_zone = "%s"
+  volume_type = "SATA"
   size = 12
   image_id = "%s"
 }
-`, OS_IMAGE_ID)
+`, OS_AVAILABILITY_ZONE, OS_IMAGE_ID)
 
 var testAccEvsStorageV3Volume_timeout = fmt.Sprintf(`
 resource "opentelekomcloud_evs_volume_v3" "volume_1" {
@@ -259,9 +261,9 @@ resource "opentelekomcloud_evs_volume_v3" "volume_1" {
   description = "first test volume"
   availability_zone = "%s"
   size = 12
-  volume_type = "SCSI"
+  volume_type = "SATA"
   timeouts {
-    create = "5m"
+    create = "10m"
     delete = "5m"
   }
 }
