@@ -138,7 +138,7 @@ The following arguments are supported:
 
 * `flavor` -
   (Required)
-  Specifies the specification code. Changing this parameter will create a new resource.
+  Specifies the specification code.
 
 * `name` -
   (Required)
@@ -159,7 +159,7 @@ The following arguments are supported:
 
 * `volume` -
   (Required)
-  Specifies the volume information. Structure is documented below. Changing this parameter will create a new resource.
+  Specifies the volume information. Structure is documented below.
 
 * `vpc_id` -
   (Required)
@@ -231,7 +231,7 @@ The `volume` block supports:
 * `size` -
   (Required)
   Specifies the volume size. Its value range is from 40 GB to 4000
-  GB. The value must be a multiple of 10. Changing this parameter will create a new resource.
+  GB. The value must be a multiple of 10. Changing this resize the volume.
 
 * `type` -
   (Required)

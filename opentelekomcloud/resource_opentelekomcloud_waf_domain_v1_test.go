@@ -105,6 +105,15 @@ resource "opentelekomcloud_waf_certificate_v1" "certificate_1" {
 	key = "-----BEGIN RSA PRIVATE KEY-----MIICXQIBAAKBgQDFPN9ojPndxSC4E1pqWQVKGHCFlXAAGBOxbGfSzXqzsoyacotueqMqXQbxrPSQFATeVmhZPNVEMdvcAMjYsV/mymtAwVqVA6q/OFdX/b3UHO+b/VqLo3J5SrM-----END RSA PRIVATE KEY-----"
 }
 
+resource "opentelekomcloud_waf_policy_v1" "policy_1" {
+	name = "policy_1"
+	options {
+		webattack = true
+		crawler = true
+	}
+	full_detection = false
+}
+
 resource "opentelekomcloud_waf_domain_v1" "domain_1" {
 	hostname = "www.b.com"
 	server {
@@ -114,6 +123,7 @@ resource "opentelekomcloud_waf_domain_v1" "domain_1" {
 		port = "8080"
 	}
 	certificate_id = "${opentelekomcloud_waf_certificate_v1.certificate_1.id}"
+	policy_id = "${opentelekomcloud_waf_policy_v1.policy_1.id}"
 	proxy = "true"
 	sip_header_name = "default"
 	sip_header_list = ["X-Forwarded-For"]
@@ -130,6 +140,15 @@ resource "opentelekomcloud_waf_certificate_v1" "certificate_1" {
 	key = "-----BEGIN RSA PRIVATE KEY-----MIICXQIBAAKBgQDFPN9ojPndxSC4E1pqWQVKGHCFlXAAGBOxbGfSzXqzsoyacotueqMqXQbxrPSQFATeVmhZPNVEMdvcAMjYsV/mymtAwVqVA6q/OFdX/b3UHO+b/VqLo3J5SrM-----END RSA PRIVATE KEY-----"
 }
 
+resource "opentelekomcloud_waf_policy_v1" "policy_1" {
+	name = "policy_1"
+	options {
+		webattack = true
+		crawler = true
+	}
+	full_detection = false
+}
+
 resource "opentelekomcloud_waf_domain_v1" "domain_1" {
 	hostname = "www.b.com"
 	server {
@@ -139,6 +158,7 @@ resource "opentelekomcloud_waf_domain_v1" "domain_1" {
 		port = "80"
 	}
 	certificate_id = "${opentelekomcloud_waf_certificate_v1.certificate_1.id}"
+	policy_id = "${opentelekomcloud_waf_policy_v1.policy_1.id}"
 	proxy = "false"
 }
 `
