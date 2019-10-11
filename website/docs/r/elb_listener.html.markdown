@@ -3,12 +3,12 @@ layout: "opentelekomcloud"
 page_title: "OpentelekomCloud: opentelekomcloud_elb_listener"
 sidebar_current: "docs-opentelekomcloud-resource-elb-listener"
 description: |-
-  Manages an elastic loadbalancer listener resource within OpentelekomCloud.
+  Manages a classic loadbalancer listener resource within OpentelekomCloud.
 ---
 
 # opentelekomcloud\_elb\_listener
 
-Manages an elastic loadbalancer listener resource within OpentelekomCloud.
+Manages a classic loadbalancer listener resource within OpentelekomCloud.
 
 ## Example Usage
 

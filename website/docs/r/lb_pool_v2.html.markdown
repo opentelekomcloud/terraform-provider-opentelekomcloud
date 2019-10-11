@@ -3,12 +3,12 @@ layout: "opentelekomcloud"
 page_title: "OpenTelekomCloud: opentelekomcloud_lb_pool_v2"
 sidebar_current: "docs-opentelekomcloud-resource-lb-pool-v2"
 description: |-
-  Manages a V2 pool resource within OpenTelekomCloud.
+  Manages an Enhanced LB pool resource within OpenTelekomCloud.
 ---
 
 # opentelekomcloud\_lb\_pool\_v2
 
-Manages a V2 pool resource within OpenTelekomCloud.
+Manages an Enhanced LB pool resource within OpenTelekomCloud.
 
 ## Example Usage
 
