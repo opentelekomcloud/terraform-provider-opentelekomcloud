@@ -49,6 +49,7 @@ func resourceEvsStorageVolumeV3() *schema.Resource {
 				Type:     schema.TypeInt,
 				Optional: true,
 				ForceNew: true,
+				Computed: true,
 			},
 			"name": {
 				Type:     schema.TypeString,
@@ -109,7 +110,7 @@ func resourceEvsStorageVolumeV3() *schema.Resource {
 				Type:     schema.TypeBool,
 				Optional: true,
 				ForceNew: true,
-				Default:  false,
+				Default:  true,
 			},
 		},
 	}
@@ -197,7 +198,6 @@ func resourceEvsVolumeV3Read(d *schema.ResourceData, meta interface{}) error {
 	d.Set("snapshot_id", v.SnapshotID)
 	d.Set("source_vol_id", v.SourceVolID)
 	d.Set("volume_type", v.VolumeType)
-	d.Set("backup_id", v.BackupID)
 
 	// set tags
 	tags := make(map[string]string)
