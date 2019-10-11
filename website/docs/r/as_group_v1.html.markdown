@@ -119,6 +119,11 @@ The following arguments are supported:
 * `lb_listener_id` - (Optional) The ELB listener IDs. The system supports up to
     three ELB listeners, the IDs of which are separated using a comma (,).
 
+* `lbaas_listeners` - (Optional) An array of one or more enhanced load balancer.
+    The system supports the binding of up to three load balancers. The field is
+    alternative to lb_listener_id.  The lbaas_listeners object structure is
+	documented below.
+
 * `available_zones` - (Optional) The availability zones in which to create
     the instances in the autoscaling group.
 
