@@ -18,7 +18,7 @@ resource "opentelekomcloud_elb_loadbalancer" "elb" {
   type = "External"
   description = "test elb"
   vpc_id = "e346dc4a-d9a6-46f4-90df-10153626076e"
-  admin_state_up = 1
+  admin_state_up = "true"
   bandwidth = 5
 }
 ```
@@ -45,9 +45,9 @@ The following arguments are supported:
     Internal or External. Changing this creates a new elb loadbalancer.
 
 * `admin_state_up` - (Required) Specifies the status of the load balancer.
-    Value range: 0 or false: indicates that the load balancer is stopped. Only
-    tenants are allowed to enter these two values. 1 or true: indicates that
-    the load balancer is running properly. 2 or false: indicates that the load
+    Value range: false: indicates that the load balancer is stopped. Only
+    tenants are allowed to enter these two values. true: indicates that
+    the load balancer is running properly. false: indicates that the load
     balancer is frozen. Only tenants are allowed to enter these two values.
 
 * `vip_subnet_id` - (Optional) Specifies the ID of the private network

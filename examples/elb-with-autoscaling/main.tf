@@ -5,7 +5,7 @@ resource "opentelekomcloud_elb_loadbalancer" "lb_example" {
   type = "External"
   description = "This is an example configuration for LB"
   vpc_id = "${var.vpc_id}"
-  admin_state_up = 1
+  admin_state_up = "true"
   bandwidth = 5
 }
 
