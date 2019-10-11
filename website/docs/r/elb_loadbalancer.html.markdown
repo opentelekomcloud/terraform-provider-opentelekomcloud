@@ -3,12 +3,12 @@ layout: "opentelekomcloud"
 page_title: "OpentelekomCloud: opentelekomcloud_elb_loadbalancer"
 sidebar_current: "docs-opentelekomcloud-resource-elb-loadbalancer"
 description: |-
-  Manages an elastic loadbalancer resource within OpentelekomCloud.
+  Manages a classic loadbalancer resource within OpentelekomCloud.
 ---
 
 # opentelekomcloud\_elb\_loadbalancer
 
-Manages an elastic loadbalancer resource within OpentelekomCloud.
+Manages a classic loadbalancer resource within OpentelekomCloud.
 
 ## Example Usage
 

@@ -3,12 +3,12 @@ layout: "opentelekomcloud"
 page_title: "OpentelekomCloud: opentelekomcloud_elb_backend"
 sidebar_current: "docs-opentelekomcloud-resource-elb-backend"
 description: |-
-  Manages an elastic loadbalancer backend resource within OpentelekomCloud.
+  Manages a classic loadbalancer backend resource within OpentelekomCloud.
 ---
 
 # opentelekomcloud\_elb\_backend
 
-Manages an elastic loadbalancer backend resource within OpentelekomCloud.
+Manages a classic loadbalancer backend resource within OpentelekomCloud.
 
 ## Example Usage
 

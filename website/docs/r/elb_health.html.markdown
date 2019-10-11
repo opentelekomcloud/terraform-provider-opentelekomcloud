@@ -3,12 +3,12 @@ layout: "opentelekomcloud"
 page_title: "OpentelekomCloud: opentelekomcloud_elb_health"
 sidebar_current: "docs-opentelekomcloud-resource-elb-health"
 description: |-
-  Manages an elastic loadbalancer health resource within OpentelekomCloud.
+  Manages a classic loadbalancer health resource within OpentelekomCloud.
 ---
 
 # opentelekomcloud\_elb\_health
 
-Manages an elastic loadbalancer health resource within OpentelekomCloud.
+Manages a classic loadbalancer health resource within OpentelekomCloud.
 
 ## Example Usage
 
