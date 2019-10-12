@@ -8,6 +8,7 @@ import (
 
 	"github.com/hashicorp/terraform/helper/hashcode"
 	"github.com/hashicorp/terraform/helper/schema"
+	"github.com/hashicorp/terraform/helper/validation"
 
 	volumes_v2 "github.com/huaweicloud/golangsdk/openstack/blockstorage/v2/volumes"
 	"github.com/huaweicloud/golangsdk/openstack/evs/v3/volumes"
@@ -48,6 +49,7 @@ func resourceEvsStorageVolumeV3() *schema.Resource {
 				Type:     schema.TypeInt,
 				Optional: true,
 				ForceNew: true,
+				Computed: true,
 			},
 			"name": {
 				Type:     schema.TypeString,
@@ -68,6 +70,9 @@ func resourceEvsStorageVolumeV3() *schema.Resource {
 				Type:     schema.TypeString,
 				Required: true,
 				ForceNew: true,
+				ValidateFunc: validation.StringInSlice([]string{
+					"SATA", "SAS", "SSD", "co-p1", "uh-l1",
+				}, true),
 			},
 			"tags": {
 				Type:     schema.TypeMap,
@@ -105,7 +110,7 @@ func resourceEvsStorageVolumeV3() *schema.Resource {
 				Type:     schema.TypeBool,
 				Optional: true,
 				ForceNew: true,
-				Default:  false,
+				Default:  true,
 			},
 		},
 	}
@@ -127,6 +132,9 @@ func resourceEvsVolumeV3Create(d *schema.ResourceData, meta interface{}) error {
 		return fmt.Errorf("Error creating OpenTelekomCloud EVS storage client: %s", err)
 	}
 
+	if !hasFilledOpt(d, "backup_id") && !hasFilledOpt(d, "size") {
+		return fmt.Errorf("Missing required argument: 'size' is required, but no definition was found.")
+	}
 	tags := resourceContainerTags(d)
 	createOpts := &volumes.CreateOpts{
 		BackupID:         d.Get("backup_id").(string),
@@ -190,7 +198,6 @@ func resourceEvsVolumeV3Read(d *schema.ResourceData, meta interface{}) error {
 	d.Set("snapshot_id", v.SnapshotID)
 	d.Set("source_vol_id", v.SourceVolID)
 	d.Set("volume_type", v.VolumeType)
-	d.Set("backup_id", v.BackupID)
 
 	// set tags
 	tags := make(map[string]string)
