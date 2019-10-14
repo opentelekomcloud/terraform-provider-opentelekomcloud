@@ -45,10 +45,9 @@ The following arguments are supported:
     Internal or External. Changing this creates a new elb loadbalancer.
 
 * `admin_state_up` - (Required) Specifies the status of the load balancer.
-    Value range: false: indicates that the load balancer is stopped. Only
-    tenants are allowed to enter these two values. true: indicates that
-    the load balancer is running properly. false: indicates that the load
-    balancer is frozen. Only tenants are allowed to enter these two values.
+    Value range: false: indicates that the load balancer is stopped or
+    frozen; true: indicates that the load balancer is running properly.
+    Only tenants are allowed to enter these two values.
 
 * `vip_subnet_id` - (Optional) Specifies the ID of the private network
     to be added. This parameter is mandatory when type is set to Internal,
