@@ -18,7 +18,7 @@ resource "opentelekomcloud_elb_loadbalancer" "elb" {
   type = "External"
   description = "test elb"
   vpc_id = "e346dc4a-d9a6-46f4-90df-10153626076e"
-  admin_state_up = 1
+  admin_state_up = "true"
   bandwidth = 5
 }
 

@@ -3,7 +3,7 @@ resource "opentelekomcloud_elb_loadbalancer" "elb" {
   type = "External"
   description = "${var.elb_desc}"
   vpc_id = "${var.vpc_id}"
-  admin_state_up = 1
+  admin_state_up = "true"
   bandwidth = "${var.bw_size}"  
   }
 
@@ -11,7 +11,7 @@ resource "opentelekomcloud_elb_loadbalancer" "elb" {
  # name = "${var.elb_name}_internal"
  # type = "Internal"
  # vpc_id = "${var.vpc_id}"
- # admin_state_up = 0
+ # admin_state_up = "false"
  # vip_subnet_id  = "${var.vip_subnet_id}"
  # security_group_id = "${var.security_group_id}"
  # }

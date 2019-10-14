@@ -98,7 +98,7 @@ resource "opentelekomcloud_elb_loadbalancer" "elb_as" {
   name = "elb_as"
   type = "External"
   vpc_id = "${opentelekomcloud_vpc_v1.vpc_as.id}"
-  admin_state_up = 1
+  admin_state_up = "true"
   #vip_subnet_id  = "${opentelekomcloud_vpc_subnet_v1.subnet_as.subnet_id}"
  
   security_group_id = "${opentelekomcloud_networking_secgroup_v2.secgroup_as.id}"
