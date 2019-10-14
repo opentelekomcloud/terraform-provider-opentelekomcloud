@@ -9,7 +9,7 @@ require (
 	github.com/hashicorp/go-hclog v0.8.0 // indirect
 	github.com/hashicorp/go-multierror v1.0.0
 	github.com/hashicorp/terraform v0.12.8
-	github.com/huaweicloud/golangsdk v0.0.0-20191011104902-cec16db5cd42
+	github.com/huaweicloud/golangsdk v0.0.0-20191012084755-20180b2fbf78
 	github.com/jen20/awspolicyequivalence v0.0.0-20170831201602-3d48364a137a
 	github.com/mitchellh/go-homedir v1.1.0
 	github.com/smartystreets/assertions v0.0.0-20190116191733-b6c0e53d7304 // indirect
