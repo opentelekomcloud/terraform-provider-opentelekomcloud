@@ -30,7 +30,7 @@ The following arguments are supported:
 
 * `listener_id` - (Required) The Listener ID that the whitelist will be associated with. Changing this creates a new whitelist.
 
-* `enable_whitelist` - (Optional) Specify whether to enable access control, The default value is true.
+* `enable_whitelist` - (Optional) Specify whether to enable access control.
 
 * `whitelist` - (Optional) Specifies the IP addresses in the whitelist. Use commas(,) to separate
 	the multiple IP addresses.
