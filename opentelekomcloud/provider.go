@@ -256,6 +256,7 @@ func Provider() terraform.ResourceProvider {
 			"opentelekomcloud_lb_pool_v2":                         resourcePoolV2(),
 			"opentelekomcloud_lb_member_v2":                       resourceMemberV2(),
 			"opentelekomcloud_lb_monitor_v2":                      resourceMonitorV2(),
+			"opentelekomcloud_lb_whitelist_v2":                    resourceWhitelistV2(),
 			"opentelekomcloud_mrs_cluster_v1":                     resourceMRSClusterV1(),
 			"opentelekomcloud_mrs_job_v1":                         resourceMRSJobV1(),
 			"opentelekomcloud_nat_gateway_v2":                     resourceNatGatewayV2(),
