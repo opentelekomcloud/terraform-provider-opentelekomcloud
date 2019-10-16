@@ -250,6 +250,7 @@ func Provider() terraform.ResourceProvider {
 			"opentelekomcloud_identity_group_v3":                  resourceIdentityGroupV3(),
 			"opentelekomcloud_identity_group_membership_v3":       resourceIdentityGroupMembershipV3(),
 			"opentelekomcloud_images_image_v2":                    resourceImagesImageV2(),
+			"opentelekomcloud_ims_image_v2":                       resourceImsImageV2(),
 			"opentelekomcloud_kms_key_v1":                         resourceKmsKeyV1(),
 			"opentelekomcloud_lb_loadbalancer_v2":                 resourceLoadBalancerV2(),
 			"opentelekomcloud_lb_listener_v2":                     resourceListenerV2(),
