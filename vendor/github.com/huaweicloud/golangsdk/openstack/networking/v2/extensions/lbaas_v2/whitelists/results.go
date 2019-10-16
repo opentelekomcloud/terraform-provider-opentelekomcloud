@@ -22,7 +22,7 @@ func (r commonResult) Extract() (*Whitelist, error) {
 }
 
 func (r commonResult) ExtractInto(v interface{}) error {
-    return r.Result.ExtractIntoStructPtr(v, "whitelist")
+	return r.Result.ExtractIntoStructPtr(v, "whitelist")
 }
 
 type CreateResult struct {
