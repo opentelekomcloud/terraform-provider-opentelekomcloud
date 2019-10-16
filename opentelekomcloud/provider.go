@@ -11,7 +11,7 @@ var osMutexKV = mutexkv.NewMutexKV()
 
 // Provider returns a schema.Provider for OpenTelekomCloud.
 func Provider() terraform.ResourceProvider {
-	return &schema.Provider{
+	provider := &schema.Provider{
 		Schema: map[string]*schema.Schema{
 			"access_key": {
 				Type:        schema.TypeString,
@@ -326,9 +326,19 @@ func Provider() terraform.ResourceProvider {
 			"opentelekomcloud_waf_preciseprotection_rule_v1":      resourceWafPreciseProtectionRuleV1(),
 			"opentelekomcloud_waf_webtamperprotection_rule_v1":    resourceWafWebTamperProtectionRuleV1(),
 		},
-
-		ConfigureFunc: configureProvider,
 	}
+
+	provider.ConfigureFunc = func(d *schema.ResourceData) (interface{}, error) {
+		terraformVersion := provider.TerraformVersion
+		if terraformVersion == "" {
+			// Terraform 0.12 introduced this field to the protocol
+			// We can therefore assume that if it's missing it's 0.10 or 0.11
+			terraformVersion = "0.11+compatible"
+		}
+		return configureProvider(d, terraformVersion)
+	}
+
+	return provider
 }
 
 var descriptions map[string]string
@@ -386,7 +396,7 @@ func init() {
 	}
 }
 
-func configureProvider(d *schema.ResourceData) (interface{}, error) {
+func configureProvider(d *schema.ResourceData, terraformVersion string) (interface{}, error) {
 	config := Config{
 		AccessKey:        d.Get("access_key").(string),
 		SecretKey:        d.Get("secret_key").(string),
@@ -410,6 +420,7 @@ func configureProvider(d *schema.ResourceData) (interface{}, error) {
 		AgencyName:       d.Get("agency_name").(string),
 		AgencyDomainName: d.Get("agency_domain_name").(string),
 		DelegatedProject: d.Get("delegated_project").(string),
+		terraformVersion: terraformVersion,
 	}
 
 	if err := config.LoadAndValidate(); err != nil {

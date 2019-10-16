@@ -16,7 +16,7 @@ import (
 	"github.com/hashicorp/errwrap"
 	"github.com/hashicorp/go-cleanhttp"
 	"github.com/hashicorp/terraform/helper/pathorcontents"
-	"github.com/hashicorp/terraform/terraform"
+	"github.com/hashicorp/terraform/httpclient"
 	"github.com/huaweicloud/golangsdk"
 	huaweisdk "github.com/huaweicloud/golangsdk/openstack"
 	"github.com/huaweicloud/golangsdk/openstack/objectstorage/v1/swauth"
@@ -50,6 +50,7 @@ type Config struct {
 	AgencyName       string
 	AgencyDomainName string
 	DelegatedProject string
+	terraformVersion string
 
 	HwClient *golangsdk.ProviderClient
 	s3sess   *session.Session
@@ -223,7 +224,7 @@ func (c *Config) newhwClient(transport *http.Transport, osDebug bool) error {
 	}
 
 	// Set UserAgent
-	client.UserAgent.Prepend(terraform.UserAgentString())
+	client.UserAgent.Prepend(httpclient.TerraformUserAgent(c.terraformVersion))
 
 	client.HTTPClient = http.Client{
 		Transport: &LogRoundTripper{
@@ -389,7 +390,7 @@ func genClient(c *Config, ao golangsdk.AuthOptionsProvider) (*golangsdk.Provider
 	}
 
 	// Set UserAgent
-	client.UserAgent.Prepend(terraform.UserAgentString())
+	client.UserAgent.Prepend(httpclient.TerraformUserAgent(c.terraformVersion))
 
 	config, err := generateTLSConfig(c)
 	if err != nil {
