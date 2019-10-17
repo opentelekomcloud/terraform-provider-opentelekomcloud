@@ -11,6 +11,7 @@ import (
 	"github.com/huaweicloud/golangsdk"
 	imageservice_v2 "github.com/huaweicloud/golangsdk/openstack/imageservice/v2/images"
 	"github.com/huaweicloud/golangsdk/openstack/ims/v2/cloudimages"
+	"github.com/huaweicloud/golangsdk/openstack/ims/v2/tags"
 )
 
 func resourceImsImageV2() *schema.Resource {
@@ -39,7 +40,7 @@ func resourceImsImageV2() *schema.Resource {
 				Optional: true,
 				ForceNew: true,
 			},
-			"image_tags": {
+			"tags": {
 				Type:     schema.TypeMap,
 				Optional: true,
 				ForceNew: false,
@@ -123,24 +124,12 @@ func resourceImsImageV2() *schema.Resource {
 func resourceContainerImageTags(d *schema.ResourceData) []cloudimages.ImageTag {
 	var tags []cloudimages.ImageTag
 
-	image_tags := d.Get("image_tags").(map[string]interface{})
+	image_tags := d.Get("tags").(map[string]interface{})
 	for key, val := range image_tags {
 		tagRequest := cloudimages.ImageTag{
 			Key:   key,
 			Value: val.(string),
 		}
-		tags = append(tags, tagRequest)
-	}
-	return tags
-}
-
-func getImagetagsToList(d *schema.ResourceData) []string {
-	var tags []string
-
-	image_tags := d.Get("image_tags").(map[string]interface{})
-	for key, val := range image_tags {
-		// key.value
-		tagRequest := key + "." + val.(string)
 		tags = append(tags, tagRequest)
 	}
 	return tags
@@ -266,6 +255,46 @@ func resourceImsImageV2Read(d *schema.ResourceData, meta interface{}) error {
 	d.Set("data_origin", img.DataOrigin)
 	d.Set("disk_format", img.DiskFormat)
 	d.Set("image_size", img.ImageSize)
+
+	// Set image tags
+	Taglist, err := tags.Get(ims_Client, d.Id()).Extract()
+	if err != nil {
+		return fmt.Errorf("Error fetching OpenTelekomCloud image tags: %s", err)
+	}
+
+	tagmap := make(map[string]string)
+	for _, val := range Taglist.Tags {
+		tagmap[val.Key] = val.Value
+	}
+	if err := d.Set("tags", tagmap); err != nil {
+		return fmt.Errorf("[DEBUG] Error saving tags for OpenTelekomCloud image (%s): %s", d.Id(), err)
+	}
+	return nil
+}
+
+func setTagForImage(d *schema.ResourceData, meta interface{}, imageID string, tagmap map[string]interface{}) error {
+	config := meta.(*Config)
+	client, err := config.imageV2Client(GetRegion(d, config))
+	if err != nil {
+		return fmt.Errorf("Error creating OpenTelekomCloud image client: %s", err)
+	}
+
+	rId := imageID
+	taglist := []tags.Tag{}
+	for k, v := range tagmap {
+		tag := tags.Tag{
+			Key:   k,
+			Value: v.(string),
+		}
+		taglist = append(taglist, tag)
+	}
+
+	createOpts := tags.BatchOpts{Action: tags.ActionCreate, Tags: taglist}
+	createTags := tags.BatchAction(client, rId, createOpts)
+	if createTags.Err != nil {
+		return fmt.Errorf("Error creating OpenTelekomCloud image tags: %s", createTags.Err)
+	}
+
 	return nil
 }
 
@@ -276,26 +305,41 @@ func resourceImsImageV2Update(d *schema.ResourceData, meta interface{}) error {
 		return fmt.Errorf("Error creating OpenTelekomCloud image client: %s", err)
 	}
 
-	updateOpts := make(imageservice_v2.UpdateOpts, 0)
-
 	if d.HasChange("name") {
+		updateOpts := make(imageservice_v2.UpdateOpts, 0)
 		v := imageservice_v2.ReplaceImageName{NewName: d.Get("name").(string)}
 		updateOpts = append(updateOpts, v)
-	}
 
-	if d.HasChange("image_tags") {
-		updata_tags := getImagetagsToList(d)
-		v := imageservice_v2.ReplaceImageTags{
-			NewTags: updata_tags,
+		log.Printf("[DEBUG] Update Options: %#v", updateOpts)
+		_, err = imageservice_v2.Update(ims_Client, d.Id(), updateOpts).Extract()
+		if err != nil {
+			return fmt.Errorf("Error updating image: %s", err)
 		}
-		updateOpts = append(updateOpts, v)
 	}
 
-	log.Printf("[DEBUG] Update Options: %#v", updateOpts)
+	if d.HasChange("tags") {
+		oldTags, err := tags.Get(ims_Client, d.Id()).Extract()
+		if err != nil {
+			return fmt.Errorf("Error fetching OpenTelekomCloud image tags: %s", err)
+		}
+		if len(oldTags.Tags) > 0 {
+			deleteopts := tags.BatchOpts{Action: tags.ActionDelete, Tags: oldTags.Tags}
+			deleteTags := tags.BatchAction(ims_Client, d.Id(), deleteopts)
+			if deleteTags.Err != nil {
+				return fmt.Errorf("Error deleting OpenTelekomCloud image tags: %s", deleteTags.Err)
+			}
+		}
 
-	_, err = imageservice_v2.Update(ims_Client, d.Id(), updateOpts).Extract()
-	if err != nil {
-		return fmt.Errorf("Error updating image: %s", err)
+		if hasFilledOpt(d, "tags") {
+			tagmap := d.Get("tags").(map[string]interface{})
+			if len(tagmap) > 0 {
+				log.Printf("[DEBUG] Setting tags: %v", tagmap)
+				err = setTagForImage(d, meta, d.Id(), tagmap)
+				if err != nil {
+					return fmt.Errorf("Error updating OpenTelekomCloud tags of image:%s", err)
+				}
+			}
+		}
 	}
 
 	return resourceImsImageV2Read(d, meta)

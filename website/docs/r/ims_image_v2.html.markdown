@@ -19,7 +19,7 @@ resource "opentelekomcloud_ims_image_v2" "ims_test" {
   name   = "imt_test"
   instance_id = "54a6c3a4-8511-4d01-818f-3fe5177cbb06"
   description = "Create an image using an ECS."
-  image_tags = {
+  tags = {
     foo = "bar"
     key = "value"
   }
@@ -34,7 +34,7 @@ resource "opentelekomcloud_ims_image_v2" "ims_test_file" {
   image_url = "ims-image:centos70.qcow2"
   min_disk = 40
   description = "Create an image using a file in the OBS bucket."
-  image_tags = {
+  tags = {
     foo = "bar1"
     key = "value"
   }
@@ -56,7 +56,7 @@ The following arguments are supported:
 * `max_ram` - (Optional) The maximum memory of the image in the unit of MB.
     Changing this creates a new image.
 
-* `image_tags` - (Optional) The tags of the image.
+* `tags` - (Optional) The tags of the image.
 
 * `instance_id` - (Optional) The ID of the ECS that needs to be converted into an image.
     This parameter is mandatory when you create a privete image from an ECS.
@@ -64,7 +64,8 @@ The following arguments are supported:
 
 * `image_url` - (Optional) The URL of the external image file in the OBS bucket.
     This parameter is mandatory when you create a private image from an external file
-	uploaded to an OBS bucket. Changing this creates a new image.
+	uploaded to an OBS bucket. The format is *OBS bucket name:Image file name*.
+	Changing this creates a new image.
 
 * `min_disk` - (Optional) The minimum size of the system disk in the unit of GB.
     This parameter is mandatory when you create a private image from an external file
@@ -93,7 +94,7 @@ The following attributes are exported:
 * `description` - See Argument Reference above.
 * `min_ram` - See Argument Reference above.
 * `max_ram` - See Argument Reference above.
-* `image_tags` - See Argument Reference above.
+* `tags` - See Argument Reference above.
 * `instance_id` - See Argument Reference above.
 * `image_url` - See Argument Reference above.
 * `min_disk` - See Argument Reference above.
@@ -102,7 +103,7 @@ The following attributes are exported:
 * `cmk_id` - See Argument Reference above.
 * `type` - See Argument Reference above.
 * `visibility` - Whether the image is visible to other tenants.
-* `data_origin` - The image resource. The pattern can be 'instance,*{instance_id}*' or 'file,*{image_url}*'.
+* `data_origin` - The image resource. The pattern can be 'instance,*instance_id*' or 'file,*image_url*'.
 * `disk_format` - The image file format. The value can be vhd, zvhd, raw, zvhd2, or qcow2.
 * `image_size` - The size(bytes) of the image file format.
 
