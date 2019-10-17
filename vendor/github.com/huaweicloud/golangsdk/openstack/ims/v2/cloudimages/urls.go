@@ -17,6 +17,10 @@ func createURL(c *golangsdk.ServiceClient) string {
 	return c.ServiceURL("cloudimages/action")
 }
 
+func createDataImageURL(c *golangsdk.ServiceClient) string {
+	return c.ServiceURL("cloudimages/dataimages/action")
+}
+
 // builds next page full url based on current url
 func nextPageURL(serviceURL, requestedNext string) (string, error) {
 	base, err := utils.BaseEndpoint(serviceURL)

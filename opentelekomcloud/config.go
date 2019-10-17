@@ -521,6 +521,13 @@ func (c *Config) identityV3Client(region string) (*golangsdk.ServiceClient, erro
 	})
 }
 
+func (c *Config) imageV1Client(region string) (*golangsdk.ServiceClient, error) {
+	return huaweisdk.NewImageServiceV1(c.HwClient, golangsdk.EndpointOpts{
+		Region:       region,
+		Availability: c.getHwEndpointType(),
+	})
+}
+
 func (c *Config) imageV2Client(region string) (*golangsdk.ServiceClient, error) {
 	return huaweisdk.NewImageServiceV2(c.HwClient, golangsdk.EndpointOpts{
 		Region:       region,

@@ -22,7 +22,8 @@ type JobStatus struct {
 }
 
 type JobEntity struct {
-	ImageID string `json:"image_id"`
+	ImageID     string `json:"image_id"`
+	DataImageID string `json:"__data_images"`
 }
 
 type JobResult struct {
@@ -65,7 +66,7 @@ func WaitForJobSuccess(client *golangsdk.ServiceClient, secs int, jobID string) 
 }
 
 func GetJobEntity(client *golangsdk.ServiceClient, jobId string, label string) (interface{}, error) {
-	if label != "image_id" {
+	if label != "image_id" && label != "__data_images" {
 		return nil, fmt.Errorf("Unsupported label %s in GetJobEntity.", label)
 	}
 
@@ -80,6 +81,9 @@ func GetJobEntity(client *golangsdk.ServiceClient, jobId string, label string) (
 
 	if job.Status == "SUCCESS" {
 		if e := job.Entities.ImageID; e != "" {
+			return e, nil
+		}
+		if e := job.Entities.DataImageID; e != "" {
 			return e, nil
 		}
 	}
