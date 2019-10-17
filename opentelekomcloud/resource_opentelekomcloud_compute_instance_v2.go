@@ -374,6 +374,18 @@ func resourceComputeInstanceV2() *schema.Resource {
 				Optional: true,
 				Computed: true,
 			},
+			"volume_attached": {
+				Type:     schema.TypeList,
+				Computed: true,
+				Elem: &schema.Resource{
+					Schema: map[string]*schema.Schema{
+						"id": {
+							Type:     schema.TypeString,
+							Computed: true,
+						},
+					},
+				},
+			},
 		},
 	}
 }
@@ -613,6 +625,9 @@ func resourceComputeInstanceV2Read(d *schema.ResourceData, meta interface{}) err
 		return err
 	}
 	d.Set("flavor_name", flavor.Name)
+
+	// Set instance volume attached information
+	d.Set("volume_attached", server.VolumesAttached)
 
 	// Set the instance's image information appropriately
 	if err := setImageInformation(computeClient, server, d); err != nil {

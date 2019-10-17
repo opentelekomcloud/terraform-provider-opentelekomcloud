@@ -431,6 +431,7 @@ The following attributes are exported:
 * `network/fixed_ip_v6` - The Fixed IPv6 address of the Instance on that
     network.
 * `network/mac` - The MAC address of the NIC on that network.
+* `volume_attached/id` - The volume id on that attachment.
 * `all_metadata` - Contains all instance metadata, even metadata not set
     by Terraform.
 * `auto_recovery` - See Argument Reference above.
