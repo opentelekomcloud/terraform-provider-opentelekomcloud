@@ -1,7 +1,7 @@
 package opentelekomcloud
 
 import (
-	"github.com/hashicorp/terraform/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
 )
 
 // The result may be not correct when the type of param is string and user config it to 'param=""'

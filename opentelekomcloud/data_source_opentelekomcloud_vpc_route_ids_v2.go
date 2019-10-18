@@ -4,7 +4,7 @@ import (
 	"github.com/huaweicloud/golangsdk/openstack/networking/v2/routes"
 
 	"fmt"
-	"github.com/hashicorp/terraform/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
 )
 
 func dataSourceVPCRouteIdsV2() *schema.Resource {
