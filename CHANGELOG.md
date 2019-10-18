@@ -1,26 +1,26 @@
-## 1.13.0 (Unreleased)
+## 1.13.0 (October 18, 2019)
 
 FEATURES:
 
-* **New Resource:** `opentelekomcloud_evs_volume_v3` [GH-380]
-* **New Resource:** `opentelekomcloud_lb_whitelist_v2` [GH-390]
-* **New Resource:** `opentelekomcloud_ims_image_v2` [GH-391]
-* **New Resource:** `opentelekomcloud_ims_data_image_v2` [GH-396]
+* **New Resource:** `opentelekomcloud_evs_volume_v3` ([#380](https://github.com/terraform-providers/terraform-provider-opentelekomcloud/issues/380))
+* **New Resource:** `opentelekomcloud_lb_whitelist_v2` ([#390](https://github.com/terraform-providers/terraform-provider-opentelekomcloud/issues/390))
+* **New Resource:** `opentelekomcloud_ims_image_v2` ([#391](https://github.com/terraform-providers/terraform-provider-opentelekomcloud/issues/391))
+* **New Resource:** `opentelekomcloud_ims_data_image_v2` ([#396](https://github.com/terraform-providers/terraform-provider-opentelekomcloud/issues/396))
 
 ENHANCEMENTS:
 
-* `resource/opentelekomcloud_vpc_subnet_v1`: Add NTP server addresses support [GH-369]
-* `resource/opentelekomcloud_rds_instance_v3`: Add tag support [GH-373]
-* `resource/opentelekomcloud_rds_instance_v3`: Add flavor update support [GH-377]
-* `resource/opentelekomcloud_rds_instance_v3`: Add volume resize support [GH-378]
-* `resource/opentelekomcloud_waf_domain_v1`: Add policy_id parameter support [GH-381]
-* `resource/opentelekomcloud_as_group_v1`: Add lbaas_listeners parameter support [GH-385]
-* `resource/opentelekomcloud_as_configuration_v1`: Add kms_id parameter support [GH-389]
+* `resource/opentelekomcloud_vpc_subnet_v1`: Add NTP server addresses support ([#369](https://github.com/terraform-providers/terraform-provider-opentelekomcloud/issues/369))
+* `resource/opentelekomcloud_rds_instance_v3`: Add tag support ([#373](https://github.com/terraform-providers/terraform-provider-opentelekomcloud/issues/373))
+* `resource/opentelekomcloud_rds_instance_v3`: Add flavor update support ([#377](https://github.com/terraform-providers/terraform-provider-opentelekomcloud/issues/377))
+* `resource/opentelekomcloud_rds_instance_v3`: Add volume resize support ([#378](https://github.com/terraform-providers/terraform-provider-opentelekomcloud/issues/378))
+* `resource/opentelekomcloud_waf_domain_v1`: Add policy_id parameter support ([#381](https://github.com/terraform-providers/terraform-provider-opentelekomcloud/issues/381))
+* `resource/opentelekomcloud_as_group_v1`: Add lbaas_listeners parameter support ([#385](https://github.com/terraform-providers/terraform-provider-opentelekomcloud/issues/385))
+* `resource/opentelekomcloud_as_configuration_v1`: Add kms_id parameter support ([#389](https://github.com/terraform-providers/terraform-provider-opentelekomcloud/issues/389))
 
 BUG FIXES:
 
-* `resource/opentelekomcloud_rds_instance_v3`: Fix RDS backup_strategy parameter issue [GH-367]
-* `data resource/opentelekomcloud_vpc_v1`: Fix id filter issue [GH-379]
+* `resource/opentelekomcloud_rds_instance_v3`: Fix RDS backup_strategy parameter issue ([#367](https://github.com/terraform-providers/terraform-provider-opentelekomcloud/issues/367))
+* `data resource/opentelekomcloud_vpc_v1`: Fix id filter issue ([#379](https://github.com/terraform-providers/terraform-provider-opentelekomcloud/issues/379))
 
 ## 1.12.0 (August 30, 2019)
 
