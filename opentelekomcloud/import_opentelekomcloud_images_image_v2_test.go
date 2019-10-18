@@ -3,7 +3,7 @@ package opentelekomcloud
 import (
 	"testing"
 
-	"github.com/hashicorp/terraform/helper/resource"
+	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
 )
 
 // PASS, but Taking 15m+ in time...

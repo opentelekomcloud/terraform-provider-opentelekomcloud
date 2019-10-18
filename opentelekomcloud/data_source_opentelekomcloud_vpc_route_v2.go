@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"github.com/huaweicloud/golangsdk/openstack/networking/v2/routes"
 
-	"github.com/hashicorp/terraform/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
 	"log"
 )
 

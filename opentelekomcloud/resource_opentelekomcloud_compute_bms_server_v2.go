@@ -8,8 +8,8 @@ import (
 	"os"
 	"time"
 
-	"github.com/hashicorp/terraform/helper/resource"
-	"github.com/hashicorp/terraform/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
+	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
 	"github.com/huaweicloud/golangsdk"
 	bms "github.com/huaweicloud/golangsdk/openstack/bms/v2/servers"
 	"github.com/huaweicloud/golangsdk/openstack/bms/v2/tags"
