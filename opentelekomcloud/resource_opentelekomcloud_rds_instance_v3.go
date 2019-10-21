@@ -757,7 +757,7 @@ func buildRdsInstanceV3CreateParameters(opts map[string]interface{}, arrayIndex 
 	if e, err := isEmptyValue(reflect.ValueOf(v)); err != nil {
 		return nil, err
 	} else if !e {
-		params["network_id"] = v
+		params["subnet_id"] = v
 	}
 
 	v, err = expandRdsInstanceV3CreateVolume(opts, arrayIndex)
