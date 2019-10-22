@@ -20,6 +20,7 @@ import (
 	"github.com/huaweicloud/golangsdk/openstack/compute/v2/flavors"
 	"github.com/huaweicloud/golangsdk/openstack/compute/v2/images"
 	"github.com/huaweicloud/golangsdk/openstack/compute/v2/servers"
+	ecstags "github.com/huaweicloud/golangsdk/openstack/ecs/v1/tags"
 )
 
 func resourceComputeBMSInstanceV2() *schema.Resource {
@@ -180,6 +181,11 @@ func resourceComputeBMSInstanceV2() *schema.Resource {
 				Optional: true,
 				ForceNew: true,
 				Computed: true,
+			},
+			"tags": {
+				Type:         schema.TypeMap,
+				Optional:     true,
+				ValidateFunc: validateECSTagValue,
 			},
 			"stop_before_destroy": {
 				Type:     schema.TypeBool,
@@ -389,6 +395,15 @@ func resourceComputeBMSInstanceV2Create(d *schema.ResourceData, meta interface{}
 			server.ID, err)
 	}
 
+	if hasFilledOpt(d, "tags") {
+		tagmap := d.Get("tags").(map[string]interface{})
+		log.Printf("[DEBUG] Setting tags: %v", tagmap)
+		err = setTagForInstance(d, meta, server.ID, tagmap)
+		if err != nil {
+			log.Printf("[WARN] Error setting tags of bms server:%s, err=%s", server.ID, err)
+		}
+	}
+
 	return resourceComputeBMSInstanceV2Read(d, meta)
 }
 
@@ -568,6 +583,35 @@ func resourceComputeBMSInstanceV2Update(d *schema.ResourceData, meta interface{}
 			err := servers.ChangeAdminPassword(computeClient, d.Id(), newPwd).ExtractErr()
 			if err != nil {
 				return fmt.Errorf("Error changing admin password of OpenTelekomCloud server (%s): %s", d.Id(), err)
+			}
+		}
+	}
+
+	if d.HasChange("tags") {
+		computeClient, err := config.computeV1Client(GetRegion(d, config))
+		if err != nil {
+			return fmt.Errorf("Error creating OpenTelekomCloud compute v1 client: %s", err)
+		}
+		oldTags, err := ecstags.Get(computeClient, d.Id()).Extract()
+		if err != nil {
+			return fmt.Errorf("Error fetching OpenTelekomCloud instance tags: %s", err)
+		}
+		if len(oldTags.Tags) > 0 {
+			deleteopts := ecstags.BatchOpts{Action: ecstags.ActionDelete, Tags: oldTags.Tags}
+			deleteTags := ecstags.BatchAction(computeClient, d.Id(), deleteopts)
+			if deleteTags.Err != nil {
+				return fmt.Errorf("Error updating OpenTelekomCloud instance tags: %s", deleteTags.Err)
+			}
+		}
+
+		if hasFilledOpt(d, "tags") {
+			tagmap := d.Get("tags").(map[string]interface{})
+			if len(tagmap) > 0 {
+				log.Printf("[DEBUG] Setting tags: %v", tagmap)
+				err = setTagForInstance(d, meta, d.Id(), tagmap)
+				if err != nil {
+					return fmt.Errorf("Error updating tags of instance:%s, err:%s", d.Id(), err)
+				}
 			}
 		}
 	}
