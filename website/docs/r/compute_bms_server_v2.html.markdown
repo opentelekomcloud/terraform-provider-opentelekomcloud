@@ -121,6 +121,8 @@ The following arguments are supported:
     before destroying it, thus giving chance for guest OS daemons to stop correctly.
     If instance doesn't stop within timeout, it will be destroyed anyway.
 
+* `tags` - (Optional) Tags key/value pairs to associate with the instance.
+
 The `network` block supports:
 
 * `uuid` - (Required unless `port`  or `name` is provided) The network UUID to
