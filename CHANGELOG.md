@@ -1,9 +1,9 @@
-## 1.13.1 (Unreleased)
+## 1.13.1 (October 22, 2019)
 
 ENHANCEMENTS:
 
-* `resource/opentelekomcloud_cce_cluster_v3`: Add eip parameter support [GH-400]
-* `resource/opentelekomcloud_compute_bms_server_v2`: Add tags parameter support [GH-401]
+* `resource/opentelekomcloud_cce_cluster_v3`: Add eip parameter support ([#400](https://github.com/terraform-providers/terraform-provider-opentelekomcloud/issues/400))
+* `resource/opentelekomcloud_compute_bms_server_v2`: Add tags parameter support ([#401](https://github.com/terraform-providers/terraform-provider-opentelekomcloud/issues/401))
 
 ## 1.13.0 (October 18, 2019)
 
