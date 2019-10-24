@@ -106,6 +106,11 @@ func resourceEvsStorageVolumeV3() *schema.Resource {
 				ForceNew: true,
 				Default:  false,
 			},
+			"kms_id": {
+				Type:     schema.TypeString,
+				Optional: true,
+				ForceNew: true,
+			},
 			"cascade": {
 				Type:     schema.TypeBool,
 				Optional: true,
@@ -147,6 +152,12 @@ func resourceEvsVolumeV3Create(d *schema.ResourceData, meta interface{}) error {
 		VolumeType:       d.Get("volume_type").(string),
 		Multiattach:      d.Get("multiattach").(bool),
 		Tags:             tags,
+	}
+	if v, ok := d.GetOk("kms_id"); ok {
+		m := make(map[string]string)
+		m["__system__cmkid"] = v.(string)
+		m["__system__encrypted"] = "1"
+		createOpts.Metadata = m
 	}
 
 	log.Printf("[DEBUG] Create Options: %#v", createOpts)
