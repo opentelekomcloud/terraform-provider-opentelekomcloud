@@ -26,6 +26,23 @@ resource "opentelekomcloud_evs_volume_v3" "volume_1" {
 }
 ```
 
+## Example Usage with KMS encryption
+
+```hcl
+resource "opentelekomcloud_evs_volume_v3" "volume_1" {
+  name        = "volume_1"
+  description = "first test volume"
+  availability_zone = "eu-de-01"
+  volume_type = "SATA"
+  kms_id = "${var.kms_id}"
+  size        = 20
+  tags        = {
+    foo = "bar"
+    key = "value"
+  }
+}
+```
+
 ## Argument Reference
 
 The following arguments are supported:
@@ -60,6 +77,9 @@ The following arguments are supported:
     Changing this updates the existing volume tags.
 	
 * `multiattach` - (Optional, Default:false) Specifies the shared EVS disk information.
+    Changing this creates a new volume.
+
+* `kms_id` - (Optional) The Encryption KMS ID to create the volume.
     Changing this creates a new volume.
 
 * `cascade` - (Optional, Default:false) Specifies to delete all snapshots associated with the EVS disk.
