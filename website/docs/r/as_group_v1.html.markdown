@@ -166,6 +166,15 @@ The `security_groups` block supports:
 
 * `id` - (Required) The UUID of the security group.
 
+The `lbaas_listeners` block supports:
+
+* `pool_id` - (Required) Specifies the backend ECS group ID.
+* `protocol_port` - (Required) Specifies the backend protocol, which is the port on which
+  a backend ECS listens for traffic. The number of the port ranges from 1 to 65535.
+* `weight` - (Optional) Specifies the weight, which determines the portion of requests a
+  backend ECS processes compared to other backend ECSs added to the same listener. The value
+  of this parameter ranges from 0 to 100. The default value is 1.
+
 ## Attributes Reference
 
 The following attributes are exported:
