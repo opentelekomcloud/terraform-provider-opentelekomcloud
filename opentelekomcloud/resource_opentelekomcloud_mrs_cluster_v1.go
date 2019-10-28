@@ -481,7 +481,7 @@ func resourceClusterV1Create(d *schema.ResourceData, meta interface{}) error {
 
 	createOpts := &cluster.CreateOpts{
 		BillingType:           d.Get("billing_type").(int),
-		DataCenter:            d.Get("region").(string),
+		DataCenter:            GetRegion(d, config),
 		MasterNodeNum:         d.Get("master_node_num").(int),
 		MasterNodeSize:        d.Get("master_node_size").(string),
 		CoreNodeNum:           d.Get("core_node_num").(int),
