@@ -3,12 +3,14 @@ package opentelekomcloud
 import (
 	"fmt"
 	"log"
+	"strings"
 	"time"
 
 	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
 	"github.com/huaweicloud/golangsdk"
 	"github.com/huaweicloud/golangsdk/openstack/cce/v3/clusters"
+	"github.com/huaweicloud/golangsdk/openstack/networking/v2/extensions/layer3/floatingips"
 )
 
 func resourceCCEClusterV3() *schema.Resource {
@@ -121,7 +123,6 @@ func resourceCCEClusterV3() *schema.Resource {
 			"eip": {
 				Type:         schema.TypeString,
 				Optional:     true,
-				ForceNew:     true,
 				ValidateFunc: validateIP,
 			},
 			"status": {
@@ -219,6 +220,15 @@ func resourceCCEClusterV3Create(d *schema.ResourceData, meta interface{}) error 
 	if err != nil {
 		return fmt.Errorf("Unable to create opentelekomcloud CCE client : %s", err)
 	}
+	if d.Get("eip").(string) != "" {
+		fipId, err := resourceFloatingIPV2Exists(d, meta, d.Get("eip").(string))
+		if err != nil {
+			return fmt.Errorf("Error retrieving the eip: %s", err)
+		}
+		if fipId == "" {
+			return fmt.Errorf("The specified EIP %s does not exist", d.Get("eip").(string))
+		}
+	}
 
 	createOpts := clusters.CreateOpts{
 		Kind:       "Cluster",
@@ -304,6 +314,13 @@ func resourceCCEClusterV3Read(d *schema.ResourceData, meta interface{}) error {
 	d.Set("external", n.Status.Endpoints[0].External)
 	d.Set("external_otc", n.Status.Endpoints[0].ExternalOTC)
 	d.Set("region", GetRegion(d, config))
+	if n.Status.Endpoints[0].External != "" {
+		eip := strings.Split(n.Status.Endpoints[0].External, "//")
+		eip = strings.Split(eip[1], ":")
+		d.Set("eip", eip[0])
+	} else {
+		d.Set("eip", "")
+	}
 
 	cert, err := clusters.GetCert(cceClient, d.Id()).Extract()
 	if err != nil {
@@ -346,11 +363,46 @@ func resourceCCEClusterV3Update(d *schema.ResourceData, meta interface{}) error 
 
 	if d.HasChange("description") {
 		updateOpts.Spec.Description = d.Get("description").(string)
+		_, err = clusters.Update(cceClient, d.Id(), updateOpts).Extract()
+		if err != nil {
+			return fmt.Errorf("Error updating opentelekomcloud CCE: %s", err)
+		}
 	}
-	_, err = clusters.Update(cceClient, d.Id(), updateOpts).Extract()
 
-	if err != nil {
-		return fmt.Errorf("Error updating opentelekomcloud CCE: %s", err)
+	if d.HasChange("eip") {
+		oldEip, newEip := d.GetChange("eip")
+		oldEipStr := oldEip.(string)
+		newEipStr := newEip.(string)
+		var fipId string
+		if newEipStr != "" {
+			fipId, err = resourceFloatingIPV2Exists(d, meta, newEipStr)
+			if err != nil {
+				return fmt.Errorf("Error retrieving the eip: %s", err)
+			}
+			if fipId == "" {
+				return fmt.Errorf("The specified EIP %s does not exist", newEipStr)
+			}
+		}
+		if oldEipStr != "" {
+			updateIpOpts := clusters.UpdateIpOpts{
+				Action: "unbind",
+			}
+			err = clusters.UpdateMasterIp(cceClient, d.Id(), updateIpOpts).ExtractErr()
+			if err != nil {
+				return fmt.Errorf("Error unbinding EIP to opentelekomcloud CCE: %s", err)
+			}
+		}
+		if newEipStr != "" {
+			updateIpOpts := clusters.UpdateIpOpts{
+				Action:    "bind",
+				ElasticIp: newEipStr,
+			}
+			updateIpOpts.Spec.ID = fipId
+			err = clusters.UpdateMasterIp(cceClient, d.Id(), updateIpOpts).ExtractErr()
+			if err != nil {
+				return fmt.Errorf("Error binding EIP to opentelekomcloud CCE: %s", err)
+			}
+		}
 	}
 
 	return resourceCCEClusterV3Read(d, meta)
@@ -414,4 +466,30 @@ func waitForCCEClusterDelete(cceClient *golangsdk.ServiceClient, clusterId strin
 		log.Printf("[DEBUG] opentelekomcloud CCE cluster %s still available.\n", clusterId)
 		return r, "Available", nil
 	}
+}
+
+func resourceFloatingIPV2Exists(d *schema.ResourceData, meta interface{}, floatingIP string) (string, error) {
+	config := meta.(*Config)
+	networkClient, err := config.networkingV2Client(GetRegion(d, config))
+	if err != nil {
+		return "", fmt.Errorf("Error creating opentelekomcloud networking Client: %s", err)
+	}
+	listOpts := floatingips.ListOpts{
+		FloatingIP: floatingIP,
+	}
+	allPages, err := floatingips.List(networkClient, listOpts).AllPages()
+	if err != nil {
+		return "", err
+	}
+
+	allFips, err := floatingips.ExtractFloatingIPs(allPages)
+	if err != nil {
+		return "", err
+	}
+
+	if len(allFips) == 0 {
+		return "", nil
+	}
+
+	return allFips[0].ID, nil
 }

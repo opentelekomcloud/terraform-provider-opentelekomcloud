@@ -85,7 +85,7 @@ The following arguments are supported:
 
 * `multi_az` - (Optional) Enable multiple AZs for the cluster, only when using HA flavors. Changing this parameter will create a new cluster resource.
 
-* `eip` - (Optional) EIP address of the cluster. Changing this parameter will create a new cluster resource.
+* `eip` - (Optional) EIP address of the cluster.
 
 ## Attributes Reference
 
