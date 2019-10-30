@@ -8,7 +8,7 @@ require (
 	github.com/hashicorp/go-cleanhttp v0.5.1
 	github.com/hashicorp/go-multierror v1.0.0
 	github.com/hashicorp/terraform-plugin-sdk v1.0.0
-	github.com/huaweicloud/golangsdk v0.0.0-20191017122109-7ab9cfa72af3
+	github.com/huaweicloud/golangsdk v0.0.0-20191030074624-c7ccb9d428b9
 	github.com/jen20/awspolicyequivalence v0.0.0-20170831201602-3d48364a137a
 	github.com/mitchellh/go-homedir v1.1.0
 	github.com/smartystreets/assertions v0.0.0-20190116191733-b6c0e53d7304 // indirect
