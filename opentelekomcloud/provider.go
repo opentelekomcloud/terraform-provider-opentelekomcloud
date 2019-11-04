@@ -214,6 +214,7 @@ func Provider() terraform.ResourceProvider {
 			"opentelekomcloud_antiddos_v1":                dataSourceAntiDdosV1(),
 			"opentelekomcloud_cts_tracker_v1":             dataSourceCTSTrackerV1(),
 			"opentelekomcloud_cce_node_v3":                dataSourceCceNodesV3(),
+			"opentelekomcloud_cce_node_ids_v3":            dataSourceCceNodeIdsV3(),
 			"opentelekomcloud_cce_cluster_v3":             dataSourceCCEClusterV3(),
 			"opentelekomcloud_dcs_az_v1":                  dataSourceDcsAZV1(),
 			"opentelekomcloud_dcs_maintainwindow_v1":      dataSourceDcsMaintainWindowV1(),
