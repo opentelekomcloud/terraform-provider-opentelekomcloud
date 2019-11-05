@@ -182,7 +182,7 @@ github.com/hashicorp/terraform-plugin-sdk/internal/svchost
 github.com/hashicorp/terraform-plugin-sdk/internal/svchost/auth
 # github.com/hashicorp/yamux v0.0.0-20181012175058-2f1d1f20f75d
 github.com/hashicorp/yamux
-# github.com/huaweicloud/golangsdk v0.0.0-20191030074624-c7ccb9d428b9
+# github.com/huaweicloud/golangsdk v0.0.0-20191101095004-04427fad1e00
 github.com/huaweicloud/golangsdk
 github.com/huaweicloud/golangsdk/openstack
 github.com/huaweicloud/golangsdk/openstack/antiddos/v1/antiddos
@@ -269,6 +269,11 @@ github.com/huaweicloud/golangsdk/openstack/networking/v2/extensions/provider
 github.com/huaweicloud/golangsdk/openstack/networking/v2/extensions/security/groups
 github.com/huaweicloud/golangsdk/openstack/networking/v2/extensions/security/rules
 github.com/huaweicloud/golangsdk/openstack/networking/v2/extensions/snatrules
+github.com/huaweicloud/golangsdk/openstack/networking/v2/extensions/vpnaas/endpointgroups
+github.com/huaweicloud/golangsdk/openstack/networking/v2/extensions/vpnaas/ikepolicies
+github.com/huaweicloud/golangsdk/openstack/networking/v2/extensions/vpnaas/ipsecpolicies
+github.com/huaweicloud/golangsdk/openstack/networking/v2/extensions/vpnaas/services
+github.com/huaweicloud/golangsdk/openstack/networking/v2/extensions/vpnaas/siteconnections
 github.com/huaweicloud/golangsdk/openstack/networking/v2/networks
 github.com/huaweicloud/golangsdk/openstack/networking/v2/peerings
 github.com/huaweicloud/golangsdk/openstack/networking/v2/ports
