@@ -37,7 +37,7 @@ func testAccCheckDmsV1GroupDestroy(s *terraform.State) error {
 	config := testAccProvider.Meta().(*Config)
 	dmsClient, err := config.dmsV1Client(OS_REGION_NAME)
 	if err != nil {
-		return fmt.Errorf("Error creating HuaweiCloud group client: %s", err)
+		return fmt.Errorf("Error creating OpenTelekomCloud group client: %s", err)
 	}
 
 	for _, rs := range s.RootModule().Resources {
@@ -78,7 +78,7 @@ func testAccCheckDmsV1GroupExists(n string, group groups.Group) resource.TestChe
 		config := testAccProvider.Meta().(*Config)
 		dmsClient, err := config.dmsV1Client(OS_REGION_NAME)
 		if err != nil {
-			return fmt.Errorf("Error creating HuaweiCloud group client: %s", err)
+			return fmt.Errorf("Error creating OpenTelekomCloud group client: %s", err)
 		}
 
 		queueID := rs.Primary.Attributes["queue_id"]
