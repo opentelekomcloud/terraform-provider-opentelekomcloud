@@ -37,6 +37,7 @@ var (
 	OS_NIC_ID                 = os.Getenv("OS_NIC_ID")
 	OS_TO_TENANT_ID           = os.Getenv("OS_TO_TENANT_ID")
 	OS_TENANT_NAME            = getTenantName()
+	OS_VPN_ENVIRONMENT        = os.Getenv("OS_VPN_ENVIRONMENT")
 )
 
 var testAccProviders map[string]terraform.ResourceProvider
@@ -179,6 +180,14 @@ func testAccPreCheckS3(t *testing.T) {
 
 	if OS_ACCESS_KEY == "" || OS_SECRET_KEY == "" {
 		t.Skip("OS_ACCESS_KEY and OS_SECRET_KEY must be set for S3 acceptance tests")
+	}
+}
+
+func testAccPreCheckVPN(t *testing.T) {
+	testAccPreCheckRequiredEnvVars(t)
+
+	if OS_VPN_ENVIRONMENT == "" {
+		t.Skip("This environment does not support VPN tests")
 	}
 }
 

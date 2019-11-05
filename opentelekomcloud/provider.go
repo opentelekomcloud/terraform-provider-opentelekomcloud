@@ -328,6 +328,11 @@ func Provider() terraform.ResourceProvider {
 			"opentelekomcloud_waf_ccattackprotection_rule_v1":     resourceWafCcAttackProtectionRuleV1(),
 			"opentelekomcloud_waf_preciseprotection_rule_v1":      resourceWafPreciseProtectionRuleV1(),
 			"opentelekomcloud_waf_webtamperprotection_rule_v1":    resourceWafWebTamperProtectionRuleV1(),
+			"opentelekomcloud_vpnaas_ipsec_policy_v2":             resourceVpnIPSecPolicyV2(),
+			"opentelekomcloud_vpnaas_service_v2":                  resourceVpnServiceV2(),
+			"opentelekomcloud_vpnaas_ike_policy_v2":               resourceVpnIKEPolicyV2(),
+			"opentelekomcloud_vpnaas_endpoint_group_v2":           resourceVpnEndpointGroupV2(),
+			"opentelekomcloud_vpnaas_site_connection_v2":          resourceVpnSiteConnectionV2(),
 		},
 	}
 
