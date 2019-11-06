@@ -61,7 +61,7 @@ func testAccCheckCCENodeV3Destroy(s *terraform.State) error {
 	config := testAccProvider.Meta().(*Config)
 	cceClient, err := config.cceV3Client(OS_REGION_NAME)
 	if err != nil {
-		return fmt.Errorf("Error creating HuaweiCloud CCE client: %s", err)
+		return fmt.Errorf("Error creating OpenTelekomCloud CCE client: %s", err)
 	}
 
 	var clusterId string
@@ -105,7 +105,7 @@ func testAccCheckCCENodeV3Exists(n string, cluster string, node *nodes.Nodes) re
 		config := testAccProvider.Meta().(*Config)
 		cceClient, err := config.cceV3Client(OS_REGION_NAME)
 		if err != nil {
-			return fmt.Errorf("Error creating HuaweiCloud CCE client: %s", err)
+			return fmt.Errorf("Error creating OpenTelekomCloud CCE client: %s", err)
 		}
 
 		found, err := nodes.Get(cceClient, c.Primary.ID, rs.Primary.ID).Extract()
