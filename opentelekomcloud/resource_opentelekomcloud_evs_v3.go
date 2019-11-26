@@ -74,6 +74,13 @@ func resourceEvsStorageVolumeV3() *schema.Resource {
 					"SATA", "SAS", "SSD", "co-p1", "uh-l1",
 				}, true),
 			},
+			"device_type": {
+				Type:         schema.TypeString,
+				Optional:     true,
+				ForceNew:     true,
+				Default:      "VBD",
+				ValidateFunc: validation.StringInSlice([]string{"VBD", "SCSI"}, true),
+			},
 			"tags": {
 				Type:     schema.TypeMap,
 				Optional: true,
@@ -153,10 +160,15 @@ func resourceEvsVolumeV3Create(d *schema.ResourceData, meta interface{}) error {
 		Multiattach:      d.Get("multiattach").(bool),
 		Tags:             tags,
 	}
+	m := make(map[string]string)
 	if v, ok := d.GetOk("kms_id"); ok {
-		m := make(map[string]string)
 		m["__system__cmkid"] = v.(string)
 		m["__system__encrypted"] = "1"
+	}
+	if d.Get("device_type").(string) == "SCSI" {
+		m["hw:passthrough"] = "true"
+	}
+	if len(m) > 0 {
 		createOpts.Metadata = m
 	}
 
