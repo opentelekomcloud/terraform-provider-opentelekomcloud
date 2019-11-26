@@ -124,6 +124,10 @@ func resourceEvsStorageVolumeV3() *schema.Resource {
 				ForceNew: true,
 				Default:  true,
 			},
+			"wwn": {
+				Type:     schema.TypeString,
+				Computed: true,
+			},
 		},
 	}
 }
@@ -221,6 +225,7 @@ func resourceEvsVolumeV3Read(d *schema.ResourceData, meta interface{}) error {
 	d.Set("snapshot_id", v.SnapshotID)
 	d.Set("source_vol_id", v.SourceVolID)
 	d.Set("volume_type", v.VolumeType)
+	d.Set("wwn", v.WWN)
 
 	// set tags
 	tags := make(map[string]string)
