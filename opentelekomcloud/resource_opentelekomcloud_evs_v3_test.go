@@ -262,6 +262,7 @@ resource "opentelekomcloud_evs_volume_v3" "volume_1" {
   availability_zone = "%s"
   size = 12
   volume_type = "SATA"
+  device_type = "SCSI"
   timeouts {
     create = "10m"
     delete = "5m"
