@@ -183,7 +183,6 @@ resource "opentelekomcloud_compute_bms_server_v2" "instance_1" {
   name = "instance_1"
   flavor_id = "physical.h2.large"
   flavor_name = "physical.h2.large"
-  image_id = "d50b4060-92cc-4d38-ae88-bd91bc3df00f"
   security_groups = ["default"]
   availability_zone = "%s"
   network {

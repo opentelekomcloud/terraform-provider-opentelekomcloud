@@ -70,10 +70,6 @@ func testAccPreCheckRequiredEnvVars(t *testing.T) {
 		t.Fatal("OS_AUTH_URL must be set for acceptance tests")
 	}
 
-	if OS_IMAGE_ID == "" && OS_IMAGE_NAME == "" {
-		t.Fatal("OS_IMAGE_ID or OS_IMAGE_NAME must be set for acceptance tests")
-	}
-
 	if OS_POOL_NAME == "" {
 		t.Fatal("OS_POOL_NAME must be set for acceptance tests")
 	}

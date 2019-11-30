@@ -771,6 +771,20 @@ func resourceBmsInstanceMetadataV2(d *schema.ResourceData) map[string]string {
 }
 
 func getImageId(computeClient *golangsdk.ServiceClient, d *schema.ResourceData) (string, error) {
+	// If block_device was used, an Image does not need to be specified, unless an image/local
+	// combination was used. This emulates normal boot behavior. Otherwise, ignore the image altogether.
+	if vL, ok := d.GetOk("block_device"); ok {
+		needImage := false
+		for _, v := range vL.([]interface{}) {
+			vM := v.(map[string]interface{})
+			if vM["source_type"] == "image" && vM["destination_type"] == "local" {
+				needImage = true
+			}
+		}
+		if !needImage {
+			return "", nil
+		}
+	}
 
 	if imageId := d.Get("image_id").(string); imageId != "" {
 		return imageId, nil
