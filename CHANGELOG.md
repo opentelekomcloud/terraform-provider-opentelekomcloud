@@ -1,3 +1,29 @@
+## 1.14.0 (Unreleased)
+
+FEATURES:
+
+* **New Data Source:** `opentelekomcloud_cce_node_ids_v3` [GH-411]
+* **New Resource:** `opentelekomcloud_vpnaas_endpoint_group_v2` [GH-412]
+* **New Resource:** `opentelekomcloud_vpnaas_ike_policy_v2` [GH-412]
+* **New Resource:** `opentelekomcloud_vpnaas_ipsec_policy_v2` [GH-412]
+* **New Resource:** `opentelekomcloud_vpnaas_service_v2` [GH-412]
+* **New Resource:** `opentelekomcloud_vpnaas_site_connection_v2` [GH-412]
+
+ENHANCEMENTS:
+
+* `resource/opentelekomcloud_evs_volume_v3`: Add kms_id parameter support [GH-403]
+* `resource/opentelekomcloud_cce_cluster_v3`: Add eip update support [GH-410]
+* `resource/opentelekomcloud_compute_instance_v2`: Log fault message when build compute instance failed [GH-413]
+* `resource/opentelekomcloud_evs_volume_v3`: Add device_type parameter support [GH-419]
+* `resource/opentelekomcloud_evs_volume_v3`: Add wwn attribute support [GH-420]
+
+BUG FIXES:
+
+* `resource/opentelekomcloud_cce_node_v3`: Fix cce node update issue [GH-405]
+* `resource/opentelekomcloud_dcs_instance_v1`: Fix ip/port attributes issue [GH-408]
+* `resource/opentelekomcloud_mrs_cluster_v1`: Fix MRS region issue [GH-409]
+* `resource/opentelekomcloud_compute_bms_server_v2`: Fix BMS boot from volume issue [GH-422]
+
 ## 1.13.1 (October 22, 2019)
 
 ENHANCEMENTS:
