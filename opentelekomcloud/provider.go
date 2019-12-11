@@ -29,8 +29,8 @@ func Provider() terraform.ResourceProvider {
 
 			"auth_url": {
 				Type:        schema.TypeString,
-				Required:    true,
-				DefaultFunc: schema.EnvDefaultFunc("OS_AUTH_URL", nil),
+				Optional:    true,
+				DefaultFunc: schema.EnvDefaultFunc("OS_AUTH_URL", ""),
 				Description: descriptions["auth_url"],
 			},
 
@@ -177,6 +177,12 @@ func Provider() terraform.ResourceProvider {
 				Optional:    true,
 				DefaultFunc: schema.EnvDefaultFunc("OS_DELEGATED_PROJECT", ""),
 				Description: descriptions["delegated_project"],
+			},
+			"cloud": {
+				Type:        schema.TypeString,
+				Optional:    true,
+				DefaultFunc: schema.EnvDefaultFunc("OS_CLOUD", ""),
+				Description: descriptions["cloud"],
 			},
 		},
 
@@ -404,6 +410,8 @@ func init() {
 		"agency_domain_name": "The name of domain who created the agency (Identity v3).",
 
 		"delegated_project": "The name of delegated project (Identity v3).",
+
+		"cloud": "An entry in a `clouds.yaml` file to use.",
 	}
 }
 
@@ -414,6 +422,7 @@ func configureProvider(d *schema.ResourceData, terraformVersion string) (interfa
 		CACertFile:       d.Get("cacert_file").(string),
 		ClientCertFile:   d.Get("cert").(string),
 		ClientKeyFile:    d.Get("key").(string),
+		Cloud:            d.Get("cloud").(string),
 		DomainID:         d.Get("domain_id").(string),
 		DomainName:       d.Get("domain_name").(string),
 		EndpointType:     d.Get("endpoint_type").(string),

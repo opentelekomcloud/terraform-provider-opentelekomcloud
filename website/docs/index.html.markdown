@@ -32,6 +32,14 @@ resource "opentelekomcloud_compute_instance_v2" "test-server" {
 }
 ```
 
+Or using `clouds.yaml` file:
+```hcl
+provider "opentelekomcloud" {
+  cloud = var.cloud_name
+}
+# ...
+```
+
 ## Authentication
 
 This provider offers 4 means for authentication.
@@ -147,8 +155,14 @@ The following arguments are supported:
 * `secret_key` - (Optional) The secret key of the OpenTelekomCloud cloud to use.
   If omitted, the `OS_SECRET_KEY` environment variable is used.
 
-* `auth_url` - (Required) The Identity authentication URL. If omitted, the
-  `OS_AUTH_URL` environment variable is used.
+* `auth_url` - (Optional; required if `cloud` is not specified) The Identity
+  authentication URL. If omitted, the `OS_AUTH_URL` environment variable is used.
+
+* `cloud` - (Optional; required if `auth_url` is not specified) An entry in a
+  `clouds.yaml` file. See the OpenStack `os-client-config`
+  [documentation](https://docs.openstack.org/os-client-config/latest/user/configuration.html)
+  for more information about `clouds.yaml` files. If omitted, the `OS_CLOUD`
+  environment variable is used.
 
 * `user_name` - (Optional) The Username to login with. If omitted, the
   `OS_USERNAME` environment variable is used.

@@ -13,6 +13,7 @@ import (
 	"github.com/aws/aws-sdk-go/aws/awserr"
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/s3"
+	"github.com/gophercloud/utils/openstack/clientconfig"
 	"github.com/hashicorp/errwrap"
 	"github.com/hashicorp/go-cleanhttp"
 	"github.com/hashicorp/terraform-plugin-sdk/helper/pathorcontents"
@@ -33,6 +34,7 @@ type Config struct {
 	CACertFile       string
 	ClientCertFile   string
 	ClientKeyFile    string
+	Cloud            string
 	DomainID         string
 	DomainName       string
 	EndpointType     string
@@ -59,6 +61,10 @@ type Config struct {
 }
 
 func (c *Config) LoadAndValidate() error {
+	if c.IdentityEndpoint == "" && c.Cloud == "" {
+		return fmt.Errorf("one of 'auth_url' or 'cloud' must be specified")
+	}
+
 	validEndpoint := false
 	validEndpoints := []string{
 		"internal", "internalURL",
@@ -75,6 +81,13 @@ func (c *Config) LoadAndValidate() error {
 
 	if !validEndpoint {
 		return fmt.Errorf("Invalid endpoint type provided")
+	}
+
+	if c.Cloud != "" {
+		err := readCloudsYaml(c)
+		if err != nil {
+			return err
+		}
 	}
 
 	err := fmt.Errorf("Must config token or aksk or username password to be authorized")
@@ -97,6 +110,56 @@ func (c *Config) LoadAndValidate() error {
 		osDebug = true
 	}
 	return c.newS3Session(osDebug)
+}
+
+func readCloudsYaml(c *Config) error {
+	clientOpts := &clientconfig.ClientOpts{
+		Cloud: c.Cloud,
+	}
+	cloud, err := clientconfig.GetCloudFromYAML(clientOpts)
+	if err != nil {
+		return err
+	}
+
+	ao, err := clientconfig.AuthOptions(clientOpts)
+
+	if err != nil {
+		return err
+	}
+	// Auth data
+	c.TenantName = ao.TenantName
+	c.TenantID = ao.TenantID
+	c.DomainName = ao.DomainName
+	if c.DomainName == "" {
+		c.DomainName = cloud.AuthInfo.ProjectDomainName
+	}
+	c.DomainID = ao.DomainID
+	if c.DomainID == "" {
+		c.DomainID = cloud.AuthInfo.ProjectDomainID
+	}
+	c.IdentityEndpoint = ao.IdentityEndpoint
+	c.Token = ao.TokenID
+	c.Username = ao.Username
+	c.UserID = ao.UserID
+	c.Password = ao.Password
+
+	// General cloud info
+	if c.Region == "" && cloud.RegionName != "" {
+		c.Region = cloud.RegionName
+	}
+	if c.CACertFile == "" && cloud.CACertFile != "" {
+		c.CACertFile = cloud.CACertFile
+	}
+	if c.ClientCertFile == "" && cloud.ClientCertFile != "" {
+		c.ClientCertFile = cloud.ClientCertFile
+	}
+	if c.ClientKeyFile == "" && cloud.ClientKeyFile != "" {
+		c.ClientKeyFile = cloud.ClientKeyFile
+	}
+	if cloud.Verify != nil {
+		c.Insecure = !*cloud.Verify
+	}
+	return nil
 }
 
 func generateTLSConfig(c *Config) (*tls.Config, error) {
