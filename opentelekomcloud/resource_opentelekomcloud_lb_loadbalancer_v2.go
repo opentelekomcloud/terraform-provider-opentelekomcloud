@@ -215,6 +215,9 @@ func resourceLoadBalancerV2Update(d *schema.ResourceData, meta interface{}) erro
 		}
 		return nil
 	})
+	if err != nil {
+		return fmt.Errorf("Unable to update loadbalancer %s: %s", d.Id(), err)
+	}
 
 	// Wait for LoadBalancer to become active before continuing
 	err = waitForLBV2LoadBalancer(networkingClient, d.Id(), "ACTIVE", nil, timeout)
@@ -249,6 +252,9 @@ func resourceLoadBalancerV2Delete(d *schema.ResourceData, meta interface{}) erro
 		}
 		return nil
 	})
+	if err != nil {
+		return fmt.Errorf("Unable to delete loadbalancer %s: %s", d.Id(), err)
+	}
 
 	// Wait for LoadBalancer to become delete
 	pending := []string{"PENDING_UPDATE", "PENDING_DELETE", "ACTIVE"}

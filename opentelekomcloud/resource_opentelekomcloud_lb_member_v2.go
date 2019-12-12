@@ -252,6 +252,9 @@ func resourceMemberV2Delete(d *schema.ResourceData, meta interface{}) error {
 		}
 		return nil
 	})
+	if err != nil {
+		return fmt.Errorf("Unable to delete member %s: %s", d.Id(), err)
+	}
 
 	// Wait for LB to become ACTIVE
 	err = waitForLBV2viaPool(networkingClient, poolID, "ACTIVE", timeout)

@@ -130,6 +130,9 @@ func resourceMonitorV2Create(d *schema.ResourceData, meta interface{}) error {
 		}
 		return nil
 	})
+	if err != nil {
+		return fmt.Errorf("Unable to create monitor: %s", err)
+	}
 
 	err = waitForLBV2viaPool(networkingClient, poolID, "ACTIVE", timeout)
 	if err != nil {
