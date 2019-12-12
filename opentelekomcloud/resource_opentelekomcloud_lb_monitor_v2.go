@@ -7,6 +7,7 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/helper/validation"
 
 	"github.com/huaweicloud/golangsdk/openstack/networking/v2/extensions/lbaas_v2/monitors"
 )
@@ -54,6 +55,9 @@ func resourceMonitorV2() *schema.Resource {
 				Type:     schema.TypeString,
 				Required: true,
 				ForceNew: true,
+				ValidateFunc: validation.StringInSlice([]string{
+					"TCP", "UDP-CONNECT", "HTTP",
+				}, false),
 			},
 			"delay": {
 				Type:     schema.TypeInt,
@@ -115,6 +119,7 @@ func resourceMonitorV2Create(d *schema.ResourceData, meta interface{}) error {
 
 	timeout := d.Timeout(schema.TimeoutCreate)
 	poolID := createOpts.PoolID
+	// Wait for parent pool to become active before continuing
 	err = waitForLBV2viaPool(networkingClient, poolID, "ACTIVE", timeout)
 	if err != nil {
 		return err

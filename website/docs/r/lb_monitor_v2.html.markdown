@@ -15,10 +15,11 @@ Manages an Enhanced LB monitor resource within OpenTelekomCloud.
 ```hcl
 resource "opentelekomcloud_lb_monitor_v2" "monitor_1" {
   pool_id     = "${opentelekomcloud_lb_pool_v2.pool_1.id}"
-  type        = "PING"
+  type        = "HTTP"
   delay       = 20
   timeout     = 10
   max_retries = 5
+  url_path    = "/"
 }
 ```
 
@@ -34,7 +35,7 @@ The following arguments are supported:
     the monitor.  Only administrative users can specify a tenant UUID
     other than their own. Changing this creates a new monitor.
 
-* `type` - (Required) The type of probe, which is PING, TCP, HTTP, or HTTPS,
+* `type` - (Required) The type of probe, which is TCP, UDP_CONNECT, or HTTP,
     that is sent by the load balancer to verify the member state. Changing this
     creates a new monitor.
 
@@ -46,18 +47,18 @@ The following arguments are supported:
 
 * `max_retries` - (Required) Number of permissible ping failures before
     changing the member's status to INACTIVE. Must be a number between 1
-    and 10..
+    and 10.
 
-* `url_path` - (Optional) Required for HTTP(S) types. URI path that will be
-    accessed if monitor type is HTTP or HTTPS.
+* `url_path` - (Optional) Required for HTTP types. URI path that will be
+    accessed if monitor type is HTTP.
 
-*  `http_method` - (Optional) Required for HTTP(S) types. The HTTP method used
+*  `http_method` - (Optional) Required for HTTP types. The HTTP method used
     for requests by the monitor. If this attribute is not specified, it
     defaults to "GET".
 
-* `expected_codes` - (Optional) Required for HTTP(S) types. Expected HTTP codes
-    for a passing HTTP(S) monitor. You can either specify a single status like
-    "200", or a range like "200-202".
+* `expected_codes` - (Optional) Required for HTTP types. Expected HTTP codes
+    for a passing HTTP monitor. You can either specify a single status like
+    "200", or a list like "200,202".
 
 * `admin_state_up` - (Optional) The administrative state of the monitor.
     A valid value is true (UP) or false (DOWN).
