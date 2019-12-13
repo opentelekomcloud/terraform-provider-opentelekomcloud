@@ -19,7 +19,7 @@ resource "opentelekomcloud_lb_pool_v2" "pool_1" {
   listener_id = "d9415786-5f1a-428b-b35f-2f1523e146d2"
 
   persistence {
-    type        = "HTTP_COOKIE"
+    type        = "APP_COOKIE"
     cookie_name = "testCookie"
   }
 }
@@ -37,7 +37,7 @@ The following arguments are supported:
 
 * `description` - (Optional) Human-readable description for the pool.
 
-* `protocol` = (Required) The protocol - can either be TCP, HTTP or HTTPS.
+* `protocol` = (Required) The protocol - can either be TCP, UDP or HTTP.
     Changing this creates a new pool.
 
 * `loadbalancer_id` - (Optional) The load balancer on which to provision this
@@ -52,7 +52,7 @@ The following arguments are supported:
     distribute traffic to the pool's members. Must be one of
     ROUND_ROBIN, LEAST_CONNECTIONS, or SOURCE_IP.
 
-* `persistence` - Omit this field to prevent session persistence.  Indicates
+* `persistence` - Omit this field to prevent session persistence. Indicates
     whether connections in the same session will be processed by the same Pool
     member or not. Changing this creates a new pool.
 

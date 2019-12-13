@@ -111,7 +111,7 @@ resource "opentelekomcloud_lb_pool_v2" "pool_1" {
 
 resource "opentelekomcloud_lb_monitor_v2" "monitor_1" {
   name = "monitor_1"
-  type = "PING"
+  type = "TCP"
   delay = 20
   timeout = 10
   max_retries = 5
@@ -147,7 +147,7 @@ resource "opentelekomcloud_lb_pool_v2" "pool_1" {
 
 resource "opentelekomcloud_lb_monitor_v2" "monitor_1" {
   name = "monitor_1_updated"
-  type = "PING"
+  type = "TCP"
   delay = 30
   timeout = 15
   max_retries = 10
