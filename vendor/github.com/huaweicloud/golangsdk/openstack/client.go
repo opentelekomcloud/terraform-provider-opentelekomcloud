@@ -233,6 +233,7 @@ func v3auth(client *golangsdk.ProviderClient, endpoint string, opts tokens3.Auth
 	client.TokenID = token.ID
 	if project != nil {
 		client.ProjectID = project.ID
+		client.DomainID = project.Domain.ID
 	}
 
 	if opts.CanReauth() {
@@ -338,7 +339,17 @@ func v3AKSKAuth(client *golangsdk.ProviderClient, endpoint string, options golan
 		}
 	}
 
+	if options.BssDomainID == "" && options.BssDomain != "" {
+		id, err := getDomainID(options.BssDomain, v3Client)
+		if err != nil {
+			options.BssDomainID = ""
+		} else {
+			options.BssDomainID = id
+		}
+	}
+
 	client.ProjectID = options.ProjectId
+	client.DomainID = options.BssDomainID
 	v3Client.ProjectID = options.ProjectId
 
 	var entries = make([]tokens3.CatalogEntry, 0, 1)
@@ -995,6 +1006,12 @@ func SDRSV1(client *golangsdk.ProviderClient, eo golangsdk.EndpointOpts) (*golan
 // NewSDRSV1 creates a ServiceClient that may be used to access the SDRS service.
 func NewSDRSV1(client *golangsdk.ProviderClient, eo golangsdk.EndpointOpts) (*golangsdk.ServiceClient, error) {
 	sc, err := initClientOpts(client, eo, "sdrs")
+	return sc, err
+}
+
+// NewBSSV1 creates a ServiceClient that may be used to access the BSS service.
+func NewBSSV1(client *golangsdk.ProviderClient, eo golangsdk.EndpointOpts) (*golangsdk.ServiceClient, error) {
+	sc, err := initClientOpts(client, eo, "bssv1")
 	return sc, err
 }
 
