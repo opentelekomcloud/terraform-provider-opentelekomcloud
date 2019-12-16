@@ -33,6 +33,8 @@ func TestAccNetworkingV2SecGroupRule_basic(t *testing.T) {
 						"opentelekomcloud_networking_secgroup_rule_v2.secgroup_rule_1", &secgroup_rule_1),
 					testAccCheckNetworkingV2SecGroupRuleExists(
 						"opentelekomcloud_networking_secgroup_rule_v2.secgroup_rule_2", &secgroup_rule_2),
+					resource.TestCheckResourceAttr(
+						"opentelekomcloud_networking_secgroup_rule_v2.secgroup_rule_1", "description", "test secgroup rule"),
 				),
 			},
 		},
@@ -150,6 +152,7 @@ resource "opentelekomcloud_networking_secgroup_v2" "secgroup_2" {
 }
 
 resource "opentelekomcloud_networking_secgroup_rule_v2" "secgroup_rule_1" {
+  description = "test secgroup rule"
   direction = "ingress"
   ethertype = "IPv4"
   port_range_max = 22
