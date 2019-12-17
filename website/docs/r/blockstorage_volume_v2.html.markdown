@@ -69,7 +69,7 @@ The following arguments are supported:
     Changing this creates a new volume.
 
 * `volume_type` - (Optional) The type of volume to create.
-    Changing this creates a new volume.
+    Changing this creates a new volume. Currently, the value can be SSD, SAS, SATA, co-p1, or uh-l1. Changing this creates a new volume.
 
 * `device_type` - (Optional) The device type of volume to create. Valid options are VBD and SCSI.
 	Defaults to VBD. Changing this creates a new volume.
