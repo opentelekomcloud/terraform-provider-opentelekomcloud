@@ -333,6 +333,8 @@ func Provider() terraform.ResourceProvider {
 			"opentelekomcloud_vpnaas_ike_policy_v2":               resourceVpnIKEPolicyV2(),
 			"opentelekomcloud_vpnaas_endpoint_group_v2":           resourceVpnEndpointGroupV2(),
 			"opentelekomcloud_vpnaas_site_connection_v2":          resourceVpnSiteConnectionV2(),
+			"opentelekomcloud_logtank_group_v2":                   resourceLTSGroupV2(),
+			"opentelekomcloud_logtank_topic_v2":                   resourceLTSTopicV2(),
 		},
 	}
 
