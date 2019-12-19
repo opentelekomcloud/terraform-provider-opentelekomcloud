@@ -47,10 +47,3 @@ The following attributes are exported:
 
 * `index_enabled` - Specifies the search switch. When index is enabled, the topic allows you to search for logs by keyword.
 
-## Import
-
-Log topic can be imported using the `id`, e.g.
-
-```
-$ terraform import opentelekomcloud_logtank_topic_v2.topic_1 72855918-20b1-11ea-80e0-286ed488c880
-```

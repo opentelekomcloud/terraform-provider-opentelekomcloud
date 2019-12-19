@@ -13,9 +13,6 @@ func resourceLTSTopicV2() *schema.Resource {
 		Create: resourceTopicV2Create,
 		Read:   resourceTopicV2Read,
 		Delete: resourceTopicV2Delete,
-		Importer: &schema.ResourceImporter{
-			State: schema.ImportStatePassthrough,
-		},
 
 		Schema: map[string]*schema.Schema{
 			"group_id": {
