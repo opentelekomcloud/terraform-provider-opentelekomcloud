@@ -32,23 +32,16 @@ resource "opentelekomcloud_compute_instance_v2" "test-server" {
 }
 ```
 
-Or using `clouds.yaml` file:
-```hcl
-provider "opentelekomcloud" {
-  cloud = var.cloud_name
-}
-# ...
-```
-
 ## Authentication
 
-This provider offers 4 means for authentication.
+This provider offers 5 means for authentication.
 
 - User name + Password
 - AKSK
 - Token
 - Federated
 - Assume Role
+- OpenStack configuration file
 
 ### User name + Password
 
@@ -142,6 +135,19 @@ provider "opentelekomcloud" {
 }
 ```
 ```token``` specified is not the normal token, but must have the authority of 'Agent Operator'
+
+### OpenStack configuration file
+
+```hcl
+provider "opentelekomcloud" {
+  cloud = var.cloud_name
+}
+```
+
+`cloud` should be the name of cloud in `clouds.yaml`
+
+See [OpenStack configuration documentation](https://docs.openstack.org/python-openstackclient/latest/configuration/index.html) for details
+
 
 ## Configuration Reference
 
