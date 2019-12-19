@@ -180,7 +180,7 @@ github.com/hashicorp/terraform-plugin-sdk/internal/svchost
 github.com/hashicorp/terraform-plugin-sdk/internal/svchost/auth
 # github.com/hashicorp/yamux v0.0.0-20181012175058-2f1d1f20f75d
 github.com/hashicorp/yamux
-# github.com/huaweicloud/golangsdk v0.0.0-20191216073235-34e4e66f7ddf
+# github.com/huaweicloud/golangsdk v0.0.0-20191217120816-dfca589f8b1c
 github.com/huaweicloud/golangsdk
 github.com/huaweicloud/golangsdk/openstack
 github.com/huaweicloud/golangsdk/openstack/antiddos/v1/antiddos
@@ -239,6 +239,8 @@ github.com/huaweicloud/golangsdk/openstack/imageservice/v2/images
 github.com/huaweicloud/golangsdk/openstack/ims/v2/cloudimages
 github.com/huaweicloud/golangsdk/openstack/ims/v2/tags
 github.com/huaweicloud/golangsdk/openstack/kms/v1/keys
+github.com/huaweicloud/golangsdk/openstack/lts/v2/loggroups
+github.com/huaweicloud/golangsdk/openstack/lts/v2/logtopics
 github.com/huaweicloud/golangsdk/openstack/maas/v1/task
 github.com/huaweicloud/golangsdk/openstack/mrs/v1/cluster
 github.com/huaweicloud/golangsdk/openstack/mrs/v1/job
