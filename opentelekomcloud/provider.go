@@ -254,6 +254,7 @@ func Provider() terraform.ResourceProvider {
 			"opentelekomcloud_ims_data_image_v2":                  resourceImsDataImageV2(),
 			"opentelekomcloud_ims_image_v2":                       resourceImsImageV2(),
 			"opentelekomcloud_kms_key_v1":                         resourceKmsKeyV1(),
+			"opentelekomcloud_lb_certificate_v2":                  resourceCertificateV2(),
 			"opentelekomcloud_lb_loadbalancer_v2":                 resourceLoadBalancerV2(),
 			"opentelekomcloud_lb_listener_v2":                     resourceListenerV2(),
 			"opentelekomcloud_lb_pool_v2":                         resourcePoolV2(),
