@@ -292,6 +292,7 @@ func Provider() terraform.ResourceProvider {
 			"opentelekomcloud_vpc_peering_connection_accepter_v2": resourceVpcPeeringConnectionAccepterV2(),
 			"opentelekomcloud_vpc_route_v2":                       resourceVPCRouteV2(),
 			"opentelekomcloud_vpc_subnet_v1":                      resourceVpcSubnetV1(),
+			"opentelekomcloud_vpc_flow_log_v1":                    resourceVpcFlowLogV1(),
 			"opentelekomcloud_rts_software_deployment_v1":         resourceRtsSoftwareDeploymentV1(),
 			"opentelekomcloud_rts_software_config_v1":             resourceSoftwareConfigV1(),
 			"opentelekomcloud_rts_stack_v1":                       resourceRTSStackV1(),
