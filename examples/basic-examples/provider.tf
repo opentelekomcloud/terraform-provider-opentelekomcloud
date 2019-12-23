@@ -24,3 +24,6 @@ provider "opentelekomcloud" {
     version = "1.6.0"
 }
 
+provider "opentelekomcloud" {
+    cloud = "test"  # name of cloud in clouds.yaml file
+}

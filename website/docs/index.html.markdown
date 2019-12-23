@@ -34,13 +34,14 @@ resource "opentelekomcloud_compute_instance_v2" "test-server" {
 
 ## Authentication
 
-This provider offers 4 means for authentication.
+This provider offers 5 means for authentication.
 
 - User name + Password
 - AKSK
 - Token
 - Federated
 - Assume Role
+- OpenStack configuration file
 
 ### User name + Password
 
@@ -135,6 +136,19 @@ provider "opentelekomcloud" {
 ```
 ```token``` specified is not the normal token, but must have the authority of 'Agent Operator'
 
+### OpenStack configuration file
+
+```hcl
+provider "opentelekomcloud" {
+  cloud = var.cloud_name
+}
+```
+
+`cloud` should be the name of cloud in `clouds.yaml`
+
+See [OpenStack configuration documentation](https://docs.openstack.org/python-openstackclient/latest/configuration/index.html) for details
+
+
 ## Configuration Reference
 
 ~> **NOTE:** The `region`, `tenant_id`, `domain_id`, `user_id` arguments has been deprecated and `tenant_name`, `domain_name` changed to be `required`. Please update your configurations as it might be removed in the future releases.
@@ -147,8 +161,14 @@ The following arguments are supported:
 * `secret_key` - (Optional) The secret key of the OpenTelekomCloud cloud to use.
   If omitted, the `OS_SECRET_KEY` environment variable is used.
 
-* `auth_url` - (Required) The Identity authentication URL. If omitted, the
-  `OS_AUTH_URL` environment variable is used.
+* `auth_url` - (Optional; required if `cloud` is not specified) The Identity
+  authentication URL. If omitted, the `OS_AUTH_URL` environment variable is used.
+
+* `cloud` - (Optional; required if `auth_url` is not specified) An entry in a
+  `clouds.yaml` file. See the OpenStack `os-client-config`
+  [documentation](https://docs.openstack.org/os-client-config/latest/user/configuration.html)
+  for more information about `clouds.yaml` files. If omitted, the `OS_CLOUD`
+  environment variable is used.
 
 * `user_name` - (Optional) The Username to login with. If omitted, the
   `OS_USERNAME` environment variable is used.
