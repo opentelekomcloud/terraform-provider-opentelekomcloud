@@ -41,6 +41,8 @@ The following arguments are supported:
 
 The following attributes are exported:
 
+* `id` - The log topic ID.
+
 * `group_id` - See Argument Reference above.
 
 * `topic_name` - See Argument Reference above.
@@ -49,8 +51,8 @@ The following attributes are exported:
 
 ## Import
 
-Log topic can be imported using the `id`, e.g.
+Log topic can be imported using the logtank group ID and topic ID separated by a slash, e.g.
 
 ```
-$ terraform import opentelekomcloud_logtank_topic_v2.topic_1 72855918-20b1-11ea-80e0-286ed488c880
+$ terraform import opentelekomcloud_logtank_topic_v2.topic_1 393f2bfd-2244-11ea-adb7-286ed488c87f/72855918-20b1-11ea-80e0-286ed488c880
 ```

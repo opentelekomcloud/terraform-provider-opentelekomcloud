@@ -3,8 +3,10 @@ package opentelekomcloud
 import (
 	"fmt"
 	"log"
+	"strings"
 
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
+	"github.com/huaweicloud/golangsdk/openstack/lts/v2/loggroups"
 	"github.com/huaweicloud/golangsdk/openstack/lts/v2/logtopics"
 )
 
@@ -14,7 +16,7 @@ func resourceLTSTopicV2() *schema.Resource {
 		Read:   resourceTopicV2Read,
 		Delete: resourceTopicV2Delete,
 		Importer: &schema.ResourceImporter{
-			State: schema.ImportStatePassthrough,
+			State: resourceTopicV2Import,
 		},
 
 		Schema: map[string]*schema.Schema{
@@ -98,4 +100,33 @@ func resourceTopicV2Delete(d *schema.ResourceData, meta interface{}) error {
 
 	d.SetId("")
 	return nil
+}
+
+func resourceTopicV2Import(d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
+	parts := strings.SplitN(d.Id(), "/", 2)
+	if len(parts) != 2 {
+		err := fmt.Errorf("Invalid format specified for logtank topic. Format must be <group id>/<topic id>")
+		return nil, err
+	}
+
+	config := meta.(*Config)
+	client, err := config.ltsV2Client(GetRegion(d, config))
+	if err != nil {
+		return nil, fmt.Errorf("Error creating OpenTelekomCloud LTS client: %s", err)
+	}
+
+	groupId := parts[0]
+	topicId := parts[1]
+	log.Printf("[DEBUG] Import log topic %s / %s", groupId, topicId)
+
+	// check the parent logtank group whether exists.
+	_, err = loggroups.Get(client, groupId).Extract()
+	if err != nil {
+		return nil, fmt.Errorf("Error importing OpenTelekomCloud log topic %s: %s", topicId, err)
+	}
+
+	d.SetId(topicId)
+	d.Set("group_id", groupId)
+
+	return []*schema.ResourceData{d}, nil
 }
