@@ -1,4 +1,20 @@
-## 1.14.1 (Unreleased)
+## 1.15.0 (Unreleased)
+
+FEATURES:
+
+* **New Resource:** `opentelekomcloud_logtank_group_v2` [GH-435]
+* **New Resource:** `opentelekomcloud_logtank_topic_v2` [GH-435]
+* **New Resource:** `opentelekomcloud_lb_certificate_v2` [GH-437]
+* **New Resource:** `opentelekomcloud_vpc_flow_log_v1` [GH-439]
+* **New Resource:** `opentelekomcloud_lb_l7policy_v2` [GH-441]
+* **New Resource:** `opentelekomcloud_lb_l7rule_v2` [GH-441]
+
+ENHANCEMENTS:
+
+* `resource/opentelekomcloud_networking_secgroup_v2`: Add description to secgroup_rule_v2 [GH-432]
+* `resource/opentelekomcloud_blockstorage_volume_v2`: Update list of values for volume type [GH-433]
+* Add clouds.yaml support [GH-434]
+
 ## 1.14.0 (December 02, 2019)
 
 FEATURES:
