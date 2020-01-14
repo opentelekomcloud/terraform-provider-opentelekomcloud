@@ -4,12 +4,12 @@ import (
 	"fmt"
 
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
-	"github.com/huaweicloud/golangsdk/openstack/ecs/v1/tags"
+	tags "github.com/huaweicloud/golangsdk/openstack/ecs/v1/cloudservertags"
 )
 
 func setTagForInstance(d *schema.ResourceData, meta interface{}, instanceID string, tagmap map[string]interface{}) error {
 	config := meta.(*Config)
-	client, err := chooseECSV1Client(d, config)
+	client, err := config.computeV1Client(GetRegion(d, config))
 	if err != nil {
 		return fmt.Errorf("Error creating OpenTelekomCloud compute v1 client: %s", err)
 	}
