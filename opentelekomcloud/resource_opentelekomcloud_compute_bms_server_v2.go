@@ -20,7 +20,7 @@ import (
 	"github.com/huaweicloud/golangsdk/openstack/compute/v2/flavors"
 	"github.com/huaweicloud/golangsdk/openstack/compute/v2/images"
 	"github.com/huaweicloud/golangsdk/openstack/compute/v2/servers"
-	ecstags "github.com/huaweicloud/golangsdk/openstack/ecs/v1/tags"
+	ecstags "github.com/huaweicloud/golangsdk/openstack/ecs/v1/cloudservertags"
 )
 
 func resourceComputeBMSInstanceV2() *schema.Resource {

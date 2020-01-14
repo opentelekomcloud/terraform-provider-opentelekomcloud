@@ -23,7 +23,7 @@ import (
 	"github.com/huaweicloud/golangsdk/openstack/compute/v2/flavors"
 	"github.com/huaweicloud/golangsdk/openstack/compute/v2/images"
 	"github.com/huaweicloud/golangsdk/openstack/compute/v2/servers"
-	ecstags "github.com/huaweicloud/golangsdk/openstack/ecs/v1/tags"
+	ecstags "github.com/huaweicloud/golangsdk/openstack/ecs/v1/cloudservertags"
 )
 
 func resourceComputeInstanceV2() *schema.Resource {
@@ -660,7 +660,7 @@ func resourceComputeInstanceV2Read(d *schema.ResourceData, meta interface{}) err
 
 	// set instance tag
 	if _, ok := d.GetOk("tag"); ok {
-		ecsv1client, err := chooseECSV1Client(d, config)
+		ecsv1client, err := config.computeV1Client(GetRegion(d, config))
 		if err != nil {
 			return fmt.Errorf("Error creating OpenTelekomCloud compute v1 client: %s", err)
 		}
@@ -927,7 +927,7 @@ func resourceComputeInstanceV2Update(d *schema.ResourceData, meta interface{}) e
 	}
 
 	if d.HasChange("tag") {
-		ecsv1Client, err := chooseECSV1Client(d, config)
+		ecsv1Client, err := config.computeV1Client(GetRegion(d, config))
 		if err != nil {
 			return fmt.Errorf("Error creating OpenTelekomCloud compute v1 client: %s", err)
 		}

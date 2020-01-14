@@ -732,6 +732,11 @@ func NewComputeV11(client *golangsdk.ProviderClient, eo golangsdk.EndpointOpts) 
 	return sc, err
 }
 
+func NewEcsV1(client *golangsdk.ProviderClient, eo golangsdk.EndpointOpts) (*golangsdk.ServiceClient, error) {
+	sc, err := initClientOpts(client, eo, "ecs")
+	return sc, err
+}
+
 func NewRdsTagV1(client *golangsdk.ProviderClient, eo golangsdk.EndpointOpts) (*golangsdk.ServiceClient, error) {
 	sc, err := initClientOpts(client, eo, "network")
 	sc.Endpoint = strings.Replace(sc.Endpoint, "vpc", "rds", 1)

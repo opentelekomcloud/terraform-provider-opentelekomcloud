@@ -14,7 +14,7 @@ import (
 	"github.com/huaweicloud/golangsdk/openstack/compute/v2/extensions/secgroups"
 	"github.com/huaweicloud/golangsdk/openstack/compute/v2/servers"
 	"github.com/huaweicloud/golangsdk/openstack/ecs/v1/cloudservers"
-	"github.com/huaweicloud/golangsdk/openstack/ecs/v1/tags"
+	tags "github.com/huaweicloud/golangsdk/openstack/ecs/v1/cloudservertags"
 	"github.com/huaweicloud/golangsdk/openstack/networking/v2/ports"
 )
 
