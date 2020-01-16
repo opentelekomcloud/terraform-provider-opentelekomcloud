@@ -1,19 +1,19 @@
-## 1.15.0 (Unreleased)
+## 1.15.0 (January 16, 2020)
 
 FEATURES:
 
-* **New Resource:** `opentelekomcloud_logtank_group_v2` [GH-435]
-* **New Resource:** `opentelekomcloud_logtank_topic_v2` [GH-435]
-* **New Resource:** `opentelekomcloud_lb_certificate_v2` [GH-437]
-* **New Resource:** `opentelekomcloud_vpc_flow_log_v1` [GH-439]
-* **New Resource:** `opentelekomcloud_lb_l7policy_v2` [GH-441]
-* **New Resource:** `opentelekomcloud_lb_l7rule_v2` [GH-441]
+* **New Resource:** `opentelekomcloud_logtank_group_v2` ([#435](https://github.com/terraform-providers/terraform-provider-opentelekomcloud/issues/435))
+* **New Resource:** `opentelekomcloud_logtank_topic_v2` ([#435](https://github.com/terraform-providers/terraform-provider-opentelekomcloud/issues/435))
+* **New Resource:** `opentelekomcloud_lb_certificate_v2` ([#437](https://github.com/terraform-providers/terraform-provider-opentelekomcloud/issues/437))
+* **New Resource:** `opentelekomcloud_vpc_flow_log_v1` ([#439](https://github.com/terraform-providers/terraform-provider-opentelekomcloud/issues/439))
+* **New Resource:** `opentelekomcloud_lb_l7policy_v2` ([#441](https://github.com/terraform-providers/terraform-provider-opentelekomcloud/issues/441))
+* **New Resource:** `opentelekomcloud_lb_l7rule_v2` ([#441](https://github.com/terraform-providers/terraform-provider-opentelekomcloud/issues/441))
 
 ENHANCEMENTS:
 
-* `resource/opentelekomcloud_networking_secgroup_v2`: Add description to secgroup_rule_v2 [GH-432]
-* `resource/opentelekomcloud_blockstorage_volume_v2`: Update list of values for volume type [GH-433]
-* Add clouds.yaml support [GH-434]
+* `resource/opentelekomcloud_networking_secgroup_v2`: Add description to secgroup_rule_v2 ([#432](https://github.com/terraform-providers/terraform-provider-opentelekomcloud/issues/432))
+* `resource/opentelekomcloud_blockstorage_volume_v2`: Update list of values for volume type ([#433](https://github.com/terraform-providers/terraform-provider-opentelekomcloud/issues/433))
+* Add clouds.yaml support ([#434](https://github.com/terraform-providers/terraform-provider-opentelekomcloud/issues/434))
 
 ## 1.14.0 (December 02, 2019)
 
