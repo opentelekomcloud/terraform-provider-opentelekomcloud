@@ -1,8 +1,8 @@
-## 1.15.1 (Unreleased)
+## 1.15.1 (February 11, 2020)
 
 BUG FIXES:
 
-* `resource/opentelekomcloud_rds_instance_v3`: Fix RDS instance node id issue [GH-450]
+* `resource/opentelekomcloud_rds_instance_v3`: Fix RDS instance node id issue ([#450](https://github.com/terraform-providers/terraform-provider-opentelekomcloud/issues/450))
 
 ## 1.15.0 (January 16, 2020)
 
