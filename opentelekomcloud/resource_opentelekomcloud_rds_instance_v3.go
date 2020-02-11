@@ -312,9 +312,13 @@ func resourceRdsInstanceV3Create(d *schema.ResourceData, meta interface{}) error
 		}
 
 		nodes := d.Get("nodes").([]interface{})
-		if len(nodes) > 0 {
-			node_id = nodes[0].(map[string]interface{})["id"].(string)
-		} else {
+		for _, node := range nodes {
+			name := node.(map[string]interface{})["name"].(string)
+			if strings.HasSuffix(name, "_node0") {
+				node_id = node.(map[string]interface{})["id"].(string)
+			}
+		}
+		if node_id == "" {
 			log.Printf("[WARN] Error setting tag(key/value) of instance:%s", id.(string))
 			return nil
 		}
@@ -379,10 +383,14 @@ func resourceRdsInstanceV3Update(d *schema.ResourceData, meta interface{}) error
 	}
 
 	nodes := v.([]interface{})
-	if len(nodes) > 0 {
-		node_id = nodes[0].(map[string]interface{})["id"].(string)
-	} else {
-		log.Printf("[WARN] Error setting tag(key/value) of instance:%s", d.Id())
+	for _, node := range nodes {
+		name := node.(map[string]interface{})["name"].(string)
+		if strings.HasSuffix(name, "_node0") {
+			node_id = node.(map[string]interface{})["id"].(string)
+		}
+	}
+	if node_id == "" {
+		log.Printf("[WARN] Error fetching node id of instance:%s", d.Id())
 		return nil
 	}
 
@@ -554,10 +562,14 @@ func resourceRdsInstanceV3Read(d *schema.ResourceData, meta interface{}) error {
 	// set instance tag
 	var node_id string
 	nodes := d.Get("nodes").([]interface{})
-	if len(nodes) > 0 {
-		node_id = nodes[0].(map[string]interface{})["id"].(string)
-	} else {
-		log.Printf("[WARN] Error setting tag(key/value) of instance:%s", d.Id())
+	for _, node := range nodes {
+		name := node.(map[string]interface{})["name"].(string)
+		if strings.HasSuffix(name, "_node0") {
+			node_id = node.(map[string]interface{})["id"].(string)
+		}
+	}
+	if node_id == "" {
+		log.Printf("[WARN] Error fetching node id of instance:%s", d.Id())
 		return nil
 	}
 	tagClient, err := config.rdsTagV1Client(GetRegion(d, config))
