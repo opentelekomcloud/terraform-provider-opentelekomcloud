@@ -1,4 +1,9 @@
 ## 1.15.1 (Unreleased)
+
+BUG FIXES:
+
+* `resource/opentelekomcloud_rds_instance_v3`: Fix RDS instance node id issue [GH-450]
+
 ## 1.15.0 (January 16, 2020)
 
 FEATURES:
