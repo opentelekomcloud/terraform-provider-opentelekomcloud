@@ -170,6 +170,8 @@ The following arguments are supported:
 * `add_jobs` - (Optional) You can submit a job when you create a cluster to
     save time and use MRS easily. Only one job can be added.
 
+* `tags` - (Optional) Tags key/value pairs to associate with the cluster.
+
 
 The `component_list` block supports:
 
