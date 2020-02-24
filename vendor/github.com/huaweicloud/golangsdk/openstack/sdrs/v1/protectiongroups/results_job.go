@@ -2,6 +2,7 @@ package protectiongroups
 
 import (
 	"fmt"
+	"time"
 
 	"github.com/huaweicloud/golangsdk"
 )
@@ -11,14 +12,18 @@ type JobResponse struct {
 }
 
 type JobStatus struct {
-	Status     string            `json:"status"`
-	Entities   map[string]string `json:"entities"`
-	JobID      string            `json:"job_id"`
-	JobType    string            `json:"job_type"`
-	BeginTime  string            `json:"begin_time"`
-	EndTime    string            `json:"end_time"`
-	ErrorCode  string            `json:"error_code"`
-	FailReason string            `json:"fail_reason"`
+	Status     string    `json:"status"`
+	Entities   JobEntity `json:"entities"`
+	JobID      string    `json:"job_id"`
+	JobType    string    `json:"job_type"`
+	BeginTime  string    `json:"begin_time"`
+	EndTime    string    `json:"end_time"`
+	ErrorCode  string    `json:"error_code"`
+	FailReason string    `json:"fail_reason"`
+}
+
+type JobEntity struct {
+	GroupID string `json:"server_group_id"`
 }
 
 type JobResult struct {
@@ -47,6 +52,7 @@ func WaitForJobSuccess(client *golangsdk.ServiceClient, secs int, jobID string) 
 		if err != nil {
 			return false, err
 		}
+		time.Sleep(5 * time.Second)
 
 		if job.Status == "SUCCESS" {
 			return true, nil
@@ -62,6 +68,10 @@ func WaitForJobSuccess(client *golangsdk.ServiceClient, secs int, jobID string) 
 
 func GetJobEntity(client *golangsdk.ServiceClient, jobId string, label string) (interface{}, error) {
 
+	if label != "server_group_id" {
+		return nil, fmt.Errorf("Unsupported label %s in GetJobEntity.", label)
+	}
+
 	jobClient := *client
 	jobClient.ResourceBase = jobClient.Endpoint
 	job := new(JobStatus)
@@ -71,7 +81,7 @@ func GetJobEntity(client *golangsdk.ServiceClient, jobId string, label string) (
 	}
 
 	if job.Status == "SUCCESS" {
-		if e := job.Entities[label]; e != "" {
+		if e := job.Entities.GroupID; e != "" {
 			return e, nil
 		}
 	}

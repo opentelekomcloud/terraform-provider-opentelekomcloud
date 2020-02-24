@@ -10,6 +10,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
 	"github.com/huaweicloud/golangsdk"
 	"github.com/huaweicloud/golangsdk/openstack/mrs/v1/cluster"
+	"github.com/huaweicloud/golangsdk/openstack/mrs/v1/tags"
 	"github.com/huaweicloud/golangsdk/openstack/networking/v1/subnets"
 	"github.com/huaweicloud/golangsdk/openstack/networking/v1/vpcs"
 )
@@ -17,6 +18,7 @@ import (
 func resourceMRSClusterV1() *schema.Resource {
 	return &schema.Resource{
 		Create: resourceClusterV1Create,
+		Update: resourceClusterV1Update,
 		Read:   resourceClusterV1Read,
 		Delete: resourceClusterV1Delete,
 		Importer: &schema.ResourceImporter{
@@ -276,6 +278,11 @@ func resourceMRSClusterV1() *schema.Resource {
 					},
 				},
 			},
+			"tags": {
+				Type:         schema.TypeMap,
+				Optional:     true,
+				ValidateFunc: validateECSTagValue,
+			},
 			"order_id": {
 				Type:     schema.TypeString,
 				Computed: true,
@@ -516,8 +523,8 @@ func resourceClusterV1Create(d *schema.ResourceData, meta interface{}) error {
 	if err != nil {
 		return fmt.Errorf("Error creating Cluster: %s", err)
 	}
-
 	d.SetId(clusterCreate.ClusterID)
+
 	stateConf := &resource.StateChangeConf{
 		Pending:    []string{"starting"},
 		Target:     []string{"running"},
@@ -532,6 +539,49 @@ func resourceClusterV1Create(d *schema.ResourceData, meta interface{}) error {
 		return fmt.Errorf(
 			"Error waiting for cluster (%s) to become ready: %s ",
 			clusterCreate.ClusterID, err)
+	}
+
+	// Set tags
+	if hasFilledOpt(d, "tags") {
+		tagmap := d.Get("tags").(map[string]interface{})
+		log.Printf("[DEBUG] Setting tags: %v", tagmap)
+		err = setTagForMrs(d, meta, clusterCreate.ClusterID, tagmap)
+		if err != nil {
+			log.Printf("[WARN] Error setting tags of MRS cluster:%s, err=%s", clusterCreate.ClusterID, err)
+		}
+	}
+
+	return resourceClusterV1Read(d, meta)
+}
+
+func resourceClusterV1Update(d *schema.ResourceData, meta interface{}) error {
+	config := meta.(*Config)
+	client, err := config.MrsV1Client(GetRegion(d, config))
+	if err != nil {
+		return fmt.Errorf("Error creating OpenTelekomCloud MRS client: %s", err)
+	}
+
+	oldTags, err := tags.Get(client, d.Id()).Extract()
+	if err != nil {
+		return fmt.Errorf("Error fetching OpenTelekomCloud MRS cluster tags: %s", err)
+	}
+	if len(oldTags.Tags) > 0 {
+		deleteopts := tags.BatchOpts{Action: tags.ActionDelete, Tags: oldTags.Tags}
+		deleteTags := tags.BatchAction(client, d.Id(), deleteopts)
+		if deleteTags.Err != nil {
+			return fmt.Errorf("Error updating OpenTelekomCloud MRS cluster tags: %s", deleteTags.Err)
+		}
+	}
+
+	if hasFilledOpt(d, "tags") {
+		tagmap := d.Get("tags").(map[string]interface{})
+		if len(tagmap) > 0 {
+			log.Printf("[DEBUG] Setting tags: %v", tagmap)
+			err = setTagForMrs(d, meta, d.Id(), tagmap)
+			if err != nil {
+				return fmt.Errorf("Error updating tags of MRS cluster:%s, err:%s", d.Id(), err)
+			}
+		}
 	}
 
 	return resourceClusterV1Read(d, meta)
@@ -635,6 +685,20 @@ func resourceClusterV1Read(d *schema.ResourceData, meta interface{}) error {
 	}
 
 	d.Set("component_list", components)
+
+	// Set instance tags
+	Taglist, err := tags.Get(client, d.Id()).Extract()
+	if err != nil {
+		return fmt.Errorf("Error fetching OpenTelekomCloud MRS cluster tags: %s", err)
+	}
+
+	tagmap := make(map[string]string)
+	for _, val := range Taglist.Tags {
+		tagmap[val.Key] = val.Value
+	}
+	if err := d.Set("tags", tagmap); err != nil {
+		return fmt.Errorf("[DEBUG] Error saving tag to state for OpenTelekomCloud MRS cluster (%s): %s", d.Id(), err)
+	}
 	return nil
 }
 
@@ -686,5 +750,31 @@ func resourceClusterV1Delete(d *schema.ResourceData, meta interface{}) error {
 	}
 
 	d.SetId("")
+	return nil
+}
+
+func setTagForMrs(d *schema.ResourceData, meta interface{}, instanceID string, tagmap map[string]interface{}) error {
+	config := meta.(*Config)
+	client, err := config.MrsV1Client(GetRegion(d, config))
+	if err != nil {
+		return fmt.Errorf("Error creating OpenTelekomCloud MRS v1 client: %s", err)
+	}
+
+	rId := instanceID
+	taglist := []tags.Tag{}
+	for k, v := range tagmap {
+		tag := tags.Tag{
+			Key:   k,
+			Value: v.(string),
+		}
+		taglist = append(taglist, tag)
+	}
+
+	createOpts := tags.BatchOpts{Action: tags.ActionCreate, Tags: taglist}
+	createTags := tags.BatchAction(client, rId, createOpts)
+	if createTags.Err != nil {
+		return fmt.Errorf("Error creating OpenTelekomCloud MRS cluster tags: %s", createTags.Err)
+	}
+
 	return nil
 }

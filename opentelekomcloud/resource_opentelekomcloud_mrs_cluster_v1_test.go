@@ -98,7 +98,7 @@ resource "opentelekomcloud_mrs_cluster_v1" "cluster1" {
   master_node_num = 2
   core_node_num = 3
   master_node_size = "h1.2xlarge.4.linux.mrs"
-  core_node_size = "s1.xlarge.linux.mrs"
+  core_node_size = "h1.2xlarge.4.linux.mrs"
   available_zone_id = "%s"
   vpc_id = "%s"
   subnet_id = "%s"
@@ -121,5 +121,9 @@ resource "opentelekomcloud_mrs_cluster_v1" "cluster1" {
   }
   component_list {
       component_name = "Hive"
+  }
+  tags = {
+    foo = "bar"
+    key = "value"
   }
 }`, OS_AVAILABILITY_ZONE, OS_VPC_ID, OS_NETWORK_ID)
