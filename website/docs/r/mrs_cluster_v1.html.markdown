@@ -43,6 +43,19 @@ resource "opentelekomcloud_mrs_cluster_v1" "cluster1" {
   component_list {
       component_name = "Hive"
   }
+  bootstrap_scripts {
+    name = "Modify os config"
+    uri = "s3a://bootstrap/modify_os_config.sh"
+    parameters = "param1 param2"
+    nodes = ["master", "core", "task"]
+	active_master = true
+	before_component_start = true
+    fail_action = "continue"
+  }
+  tags = {
+    foo = "bar"
+    key = "value"
+  }
 }
 ```
 
@@ -170,6 +183,9 @@ The following arguments are supported:
 * `add_jobs` - (Optional) You can submit a job when you create a cluster to
     save time and use MRS easily. Only one job can be added.
 
+* `bootstrap_scripts` - (Optional) Bootstrap action scripts. For details, see
+	bootstrap_scripts block below. MRS 1.7.2 or later supports this parameter.
+
 * `tags` - (Optional) Tags key/value pairs to associate with the cluster.
 
 
@@ -250,6 +266,28 @@ The `add_jobs` block supports:
     Contains a maximum of 1023 characters, excluding special characters such as
     ;|&><'$. The address cannot be empty or full of spaces. Starts with / or s3a://.
     Ends with .sql. sql is case-insensitive.
+
+
+The `bootstrap_scripts` block supports:
+* `name` - (Required) Name of a bootstrap action script.
+
+* `uri` - (Required) Path of the shell script. Set this parameter to an OBS bucket path
+	or a local VM path.
+
+* `parameters` - (Optional) Bootstrap action script parameters.
+
+* `nodes` - (Required) Type of a node where the bootstrap action script is executed, including master, core, and task.
+
+* `active_master` - (Optional) Whether the bootstrap action script runs only on active Master nodes.
+
+* `before_component_start` - (Optional) Time when the bootstrap action script is executed. Currently, the script
+	can be executed before and after the component is started.
+
+* `fail_action` - (Required) Whether to continue to execute subsequent scripts and create a cluster
+	after the bootstrap action script fails to be executed.
+	* `continue`: Continue to execute subsequent scripts.
+	* `errorout`: Stop the action.
+
 
 ## Attributes Reference
 

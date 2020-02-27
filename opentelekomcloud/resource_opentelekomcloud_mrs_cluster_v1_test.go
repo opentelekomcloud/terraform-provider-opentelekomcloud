@@ -102,7 +102,7 @@ resource "opentelekomcloud_mrs_cluster_v1" "cluster1" {
   available_zone_id = "%s"
   vpc_id = "%s"
   subnet_id = "%s"
-  cluster_version = "MRS 1.6.0"
+  cluster_version = "MRS 1.7.2"
   master_data_volume_type = "SAS"
   master_data_volume_size = 100
   master_data_volume_count = 1
@@ -121,6 +121,15 @@ resource "opentelekomcloud_mrs_cluster_v1" "cluster1" {
   }
   component_list {
       component_name = "Hive"
+  }
+  bootstrap_scripts {
+    name = "Modify os config"
+    uri = "s3a://bootstrap/modify_os_config.sh"
+    parameters = "param1 param2"
+    nodes = ["master", "core", "task"]
+	active_master = true
+	before_component_start = true
+    fail_action = "continue"
   }
   tags = {
     foo = "bar"

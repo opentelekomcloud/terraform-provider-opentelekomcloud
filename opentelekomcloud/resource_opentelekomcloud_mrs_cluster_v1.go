@@ -278,6 +278,56 @@ func resourceMRSClusterV1() *schema.Resource {
 					},
 				},
 			},
+			"bootstrap_scripts": {
+				Type:     schema.TypeList,
+				Optional: true,
+				ForceNew: true,
+				Elem: &schema.Resource{
+					Schema: map[string]*schema.Schema{
+						"name": {
+							Type:     schema.TypeString,
+							Required: true,
+							ForceNew: true,
+						},
+						"uri": {
+							Type:     schema.TypeString,
+							Required: true,
+							ForceNew: true,
+						},
+						"parameters": {
+							Type:     schema.TypeString,
+							Optional: true,
+							Computed: true,
+							ForceNew: true,
+						},
+						"nodes": {
+							Type:     schema.TypeList,
+							Required: true,
+							ForceNew: true,
+							Elem: &schema.Schema{
+								Type: schema.TypeString,
+							},
+						},
+						"active_master": {
+							Type:     schema.TypeBool,
+							Optional: true,
+							Computed: true,
+							ForceNew: true,
+						},
+						"before_component_start": {
+							Type:     schema.TypeBool,
+							Optional: true,
+							Computed: true,
+							ForceNew: true,
+						},
+						"fail_action": {
+							Type:     schema.TypeString,
+							Required: true,
+							ForceNew: true,
+						},
+					},
+				},
+			},
 			"tags": {
 				Type:         schema.TypeMap,
 				Optional:     true,
@@ -450,6 +500,36 @@ func getAllClusterJobs(d *schema.ResourceData) []cluster.JobOpts {
 	return jobOpts
 }
 
+func getAllClusterScripts(d *schema.ResourceData) []cluster.ScriptOpts {
+	var scriptOpts []cluster.ScriptOpts
+
+	scripts := d.Get("bootstrap_scripts").([]interface{})
+	for _, v := range scripts {
+		script := v.(map[string]interface{})
+
+		nodes := []string{}
+		if len(script["nodes"].([]interface{})) > 0 {
+			for _, n := range script["nodes"].([]interface{}) {
+				nodes = append(nodes, n.(string))
+			}
+		}
+
+		v := cluster.ScriptOpts{
+			Name:                 script["name"].(string),
+			Uri:                  script["uri"].(string),
+			Parameters:           script["parameters"].(string),
+			Nodes:                nodes,
+			ActiveMaster:         script["active_master"].(bool),
+			BeforeComponentStart: script["before_component_start"].(bool),
+			FailAction:           script["fail_action"].(string),
+		}
+		scriptOpts = append(scriptOpts, v)
+	}
+
+	log.Printf("[DEBUG] getAllClusterScripts: %#v", scriptOpts)
+	return scriptOpts
+}
+
 func ClusterStateRefreshFunc(client *golangsdk.ServiceClient, clusterID string) resource.StateRefreshFunc {
 	return func() (interface{}, string, error) {
 		clusterGet, err := cluster.Get(client, clusterID).Extract()
@@ -515,6 +595,7 @@ func resourceClusterV1Create(d *schema.ResourceData, meta interface{}) error {
 		LogCollection:         d.Get("log_collection").(int),
 		ComponentList:         getAllClusterComponents(d),
 		AddJobs:               getAllClusterJobs(d),
+		BootstrapScripts:      getAllClusterScripts(d),
 	}
 
 	log.Printf("[DEBUG] Create Options: %#v", createOpts)
@@ -683,8 +764,21 @@ func resourceClusterV1Read(d *schema.ResourceData, meta interface{}) error {
 		components[i]["component_desc"] = attachment.Componentdesc
 		log.Printf("[DEBUG] components: %v", components)
 	}
-
 	d.Set("component_list", components)
+
+	scripts := make([]map[string]interface{}, len(clusterGet.BootstrapScripts))
+	for i, script := range clusterGet.BootstrapScripts {
+		scripts[i] = make(map[string]interface{})
+		scripts[i]["name"] = script.Name
+		scripts[i]["uri"] = script.Uri
+		scripts[i]["parameters"] = script.Parameters
+		scripts[i]["nodes"] = script.Nodes
+		scripts[i]["active_master"] = script.ActiveMaster
+		scripts[i]["before_component_start"] = script.BeforeComponentStart
+		scripts[i]["fail_action"] = script.FailAction
+		log.Printf("[DEBUG] bootstrap_scripts: %v", scripts)
+	}
+	d.Set("bootstrap_scripts", scripts)
 
 	// Set instance tags
 	Taglist, err := tags.Get(client, d.Id()).Extract()
