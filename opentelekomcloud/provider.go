@@ -273,6 +273,7 @@ func Provider() terraform.ResourceProvider {
 			"opentelekomcloud_mrs_job_v1":                         resourceMRSJobV1(),
 			"opentelekomcloud_nat_gateway_v2":                     resourceNatGatewayV2(),
 			"opentelekomcloud_nat_snat_rule_v2":                   resourceNatSnatRuleV2(),
+			"opentelekomcloud_nat_dnat_rule_v2":                   resourceNatDnatRuleV2(),
 			"opentelekomcloud_networking_network_v2":              resourceNetworkingNetworkV2(),
 			"opentelekomcloud_networking_subnet_v2":               resourceNetworkingSubnetV2(),
 			"opentelekomcloud_networking_floatingip_v2":           resourceNetworkingFloatingIPV2(),
