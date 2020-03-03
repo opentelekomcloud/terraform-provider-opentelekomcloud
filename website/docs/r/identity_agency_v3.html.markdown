@@ -17,16 +17,14 @@ resource "opentelekomcloud_identity_agency_v3" "agency" {
   name = "test_agency"
   description = "test agency"
   delegated_domain_name = "***"
-  project_role = [
-    {
-      project = "eu-de"
-      roles = [
-        "KMS Administrator",
-      ]
-    }
-  ]
+  project_role {
+    project = "eu-de"
+    roles = [
+      "KMS Administrator",
+    ]
+  }
   domain_roles = [
-      "Anti-DDoS Administrator",
+    "Anti-DDoS Administrator",
   ]
 }
 ```
