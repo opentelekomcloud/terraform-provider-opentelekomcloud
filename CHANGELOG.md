@@ -1,4 +1,15 @@
 ## 1.16.0 (Unreleased)
+
+FEATURES:
+
+* **New Resource:** `opentelekomcloud_nat_dnat_rule_v2` [GH-447]
+
+ENHANCEMENTS:
+
+* `resource/opentelekomcloud_cce_node_v3`: Add preinstall/postinstall script support [GH-452]
+* `resource/opentelekomcloud_mrs_cluster_v1`: Add tags parameter support [GH-453]
+* `resource/opentelekomcloud_mrs_cluster_v1`: Add bootstrap scripts parameter support [GH-455]
+
 ## 1.15.1 (February 11, 2020)
 
 BUG FIXES:
