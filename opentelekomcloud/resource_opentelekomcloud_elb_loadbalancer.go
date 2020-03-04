@@ -52,7 +52,7 @@ func resourceELoadBalancer() *schema.Resource {
 				Type:     schema.TypeInt,
 				Optional: true,
 				ValidateFunc: func(v interface{}, k string) (ws []string, errors []error) {
-					return ValidateIntRange(v, k, 1, 500)
+					return ValidateIntRange(v, k, 1, 1000)
 				},
 			},
 

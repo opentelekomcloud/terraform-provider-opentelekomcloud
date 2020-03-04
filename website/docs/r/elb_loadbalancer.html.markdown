@@ -39,7 +39,7 @@ The following arguments are supported:
 
 * `bandwidth` - (Optional) Specifies the bandwidth (Mbit/s). This parameter
     is mandatory when type is set to External, and it is invalid when type
-    is set to Internal. The value ranges from 1 to 300.
+    is set to Internal. The value ranges from 1 to 1000.
 
 * `type` - (Required) Specifies the load balancer type. The value can be
     Internal or External. Changing this creates a new elb loadbalancer.
