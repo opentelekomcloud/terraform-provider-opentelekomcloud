@@ -79,6 +79,30 @@ func TestAccFWPolicyV2_timeout(t *testing.T) {
 	})
 }
 
+func TestAccFWPolicyV2_removeSingleRule(t *testing.T) {
+	resource.Test(t, resource.TestCase{
+		PreCheck:     func() { testAccPreCheck(t) },
+		Providers:    testAccProviders,
+		CheckDestroy: testAccCheckFWPolicyV2Destroy,
+		Steps: []resource.TestStep{
+			{
+				Config: testAccFWPolicyV2SingleRule,
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckFWPolicyV2Exists(
+						"opentelekomcloud_fw_policy_v2.policy_1", "policy_1", "", 1),
+				),
+			},
+			{
+				Config: testAccFWPolicyV2SingleRule_removeRule,
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckFWPolicyV2Exists(
+						"opentelekomcloud_fw_policy_v2.policy_1", "policy_1", "", 0),
+				),
+			},
+		},
+	})
+}
+
 func testAccCheckFWPolicyV2Destroy(s *terraform.State) error {
 	config := testAccProvider.Meta().(*Config)
 	networkingClient, err := config.hwNetworkV2Client(OS_REGION_NAME)
@@ -195,5 +219,31 @@ resource "opentelekomcloud_fw_policy_v2" "policy_1" {
   timeouts {
     create = "5m"
   }
+}
+`
+
+const testAccFWPolicyV2SingleRule = `
+resource "opentelekomcloud_fw_rule_v2" "rule_1" {
+  name = "rule_1"
+  action = "allow"
+  description = "allow-all"
+  protocol = "any"
+  source_ip_address = "0.0.0.0/0"
+  destination_ip_address = "0.0.0.0/0"
+  source_port = ""
+  destination_port = ""
+  ip_version = "4"
+}
+
+resource "opentelekomcloud_fw_policy_v2" "policy_1" {
+  name = "policy_1"
+  rules = [opentelekomcloud_fw_rule_v2.rule_1.id]
+}
+`
+
+const testAccFWPolicyV2SingleRule_removeRule = `
+resource "opentelekomcloud_fw_policy_v2" "policy_1" {
+  name = "policy_1"
+  rules = []
 }
 `
