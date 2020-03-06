@@ -1,19 +1,19 @@
-## 1.16.0 (Unreleased)
+## 1.16.0 (March 06, 2020)
 
 FEATURES:
 
-* **New Resource:** `opentelekomcloud_nat_dnat_rule_v2` [GH-447]
+* **New Resource:** `opentelekomcloud_nat_dnat_rule_v2` ([#447](https://github.com/terraform-providers/terraform-provider-opentelekomcloud/issues/447))
 
 ENHANCEMENTS:
 
-* `resource/opentelekomcloud_cce_node_v3`: Add preinstall/postinstall script support [GH-452]
-* `resource/opentelekomcloud_mrs_cluster_v1`: Add tags parameter support [GH-453]
-* `resource/opentelekomcloud_mrs_cluster_v1`: Add bootstrap scripts parameter support [GH-455]
+* `resource/opentelekomcloud_cce_node_v3`: Add preinstall/postinstall script support ([#452](https://github.com/terraform-providers/terraform-provider-opentelekomcloud/issues/452))
+* `resource/opentelekomcloud_mrs_cluster_v1`: Add tags parameter support ([#453](https://github.com/terraform-providers/terraform-provider-opentelekomcloud/issues/453))
+* `resource/opentelekomcloud_mrs_cluster_v1`: Add bootstrap scripts parameter support ([#455](https://github.com/terraform-providers/terraform-provider-opentelekomcloud/issues/455))
 
 BUG FIXES:
 
-* `resource/opentelekomcloud_elb_loadbalancer`: Increase bandwidth range to 1000 [GH-459]
-* `data source/opentelekomcloud_vpc_subnet_v1`: Fix vpc_subnet_v1 retrieval by id [GH-460]
+* `resource/opentelekomcloud_elb_loadbalancer`: Increase bandwidth range to 1000 ([#459](https://github.com/terraform-providers/terraform-provider-opentelekomcloud/issues/459))
+* `data source/opentelekomcloud_vpc_subnet_v1`: Fix vpc_subnet_v1 retrieval by id ([#460](https://github.com/terraform-providers/terraform-provider-opentelekomcloud/issues/460))
 
 ## 1.15.1 (February 11, 2020)
 
