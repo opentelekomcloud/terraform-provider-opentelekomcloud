@@ -10,6 +10,11 @@ ENHANCEMENTS:
 * `resource/opentelekomcloud_mrs_cluster_v1`: Add tags parameter support [GH-453]
 * `resource/opentelekomcloud_mrs_cluster_v1`: Add bootstrap scripts parameter support [GH-455]
 
+BUG FIXES:
+
+* `resource/opentelekomcloud_elb_loadbalancer`: Increase bandwidth range to 1000 [GH-459]
+* `data source/opentelekomcloud_vpc_subnet_v1`: Fix vpc_subnet_v1 retrieval by id [GH-460]
+
 ## 1.15.1 (February 11, 2020)
 
 BUG FIXES:
