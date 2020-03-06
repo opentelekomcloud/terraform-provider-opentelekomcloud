@@ -2,6 +2,7 @@ package opentelekomcloud
 
 import (
 	"fmt"
+	"regexp"
 	"testing"
 	"time"
 
@@ -80,6 +81,7 @@ func TestAccFWPolicyV2_timeout(t *testing.T) {
 }
 
 func TestAccFWPolicyV2_removeSingleRule(t *testing.T) {
+	notEmptyPlan, _ := regexp.Compile(".+?plan was not empty:")
 	resource.Test(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
 		Providers:    testAccProviders,
@@ -88,16 +90,17 @@ func TestAccFWPolicyV2_removeSingleRule(t *testing.T) {
 			{
 				Config: testAccFWPolicyV2SingleRule,
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckFWPolicyV2Exists(
-						"opentelekomcloud_fw_policy_v2.policy_1", "policy_1", "", 1),
+					testAccCheckFWPolicyV2Exists("opentelekomcloud_fw_policy_v2.policy_1", "policy_1", "", 1),
 				),
 			},
 			{
 				Config: testAccFWPolicyV2SingleRule_removeRule,
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckFWPolicyV2Exists(
-						"opentelekomcloud_fw_policy_v2.policy_1", "policy_1", "", 0),
+					testAccCheckFWPolicyV2Exists("opentelekomcloud_fw_policy_v2.policy_1", "policy_1", "", 0),
 				),
+				// There is non-empty plan before refresh and empty one after
+				// So `ExpectNonEmptyPlan: true` won't work
+				ExpectError: notEmptyPlan,
 			},
 		},
 	})
