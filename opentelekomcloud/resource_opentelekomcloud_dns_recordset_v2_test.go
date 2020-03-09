@@ -48,6 +48,34 @@ func TestAccDNSV2RecordSet_basic(t *testing.T) {
 	})
 }
 
+func TestAccDNSV2RecordSet_updateTTL(t *testing.T) {
+	var recordset recordsets.RecordSet
+	zoneName := randomZoneName()
+	newTTL := 1500
+
+	resource.Test(t, resource.TestCase{
+		PreCheck:     func() { testAccPreCheck(t) },
+		Providers:    testAccProviders,
+		CheckDestroy: testAccCheckDNSV2RecordSetDestroy,
+		Steps: []resource.TestStep{
+			{
+				Config: testAccDNSV2RecordSet_basic(zoneName),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckDNSV2RecordSetExists("opentelekomcloud_dns_recordset_v2.recordset_1", &recordset),
+					resource.TestCheckResourceAttr(
+						"opentelekomcloud_dns_recordset_v2.recordset_1", "description", "a record set"),
+				),
+			},
+			{
+				Config: testAccDNSV2RecordSet_updateTTL(zoneName, newTTL),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr("opentelekomcloud_dns_recordset_v2.recordset_1", "name", zoneName),
+				),
+			},
+		},
+	})
+}
+
 func TestAccDNSV2RecordSet_readTTL(t *testing.T) {
 	var recordset recordsets.RecordSet
 	zoneName := randomZoneName()
@@ -189,6 +217,26 @@ func testAccDNSV2RecordSet_update(zoneName string) string {
 			records = ["10.1.0.1"]
 		}
 	`, zoneName, zoneName)
+}
+
+func testAccDNSV2RecordSet_updateTTL(zoneName string, ttl int) string {
+	return fmt.Sprintf(`
+		resource "opentelekomcloud_dns_zone_v2" "zone_1" {
+			name = "%s"
+			email = "email2@example.com"
+			description = "a zone"
+			ttl = 6000
+		}
+
+		resource "opentelekomcloud_dns_recordset_v2" "recordset_1" {
+			zone_id = "${opentelekomcloud_dns_zone_v2.zone_1.id}"
+			name = "%s"
+			type = "A"
+			description = "a record set"
+			ttl = %d
+			records = ["10.1.0.0"]
+		}
+	`, zoneName, zoneName, ttl)
 }
 
 func testAccDNSV2RecordSet_readTTL(zoneName string) string {

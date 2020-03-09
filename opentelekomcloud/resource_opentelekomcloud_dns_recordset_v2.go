@@ -179,14 +179,13 @@ func resourceDNSRecordSetV2Update(d *schema.ResourceData, meta interface{}) erro
 		updateOpts.TTL = d.Get("ttl").(int)
 	}
 
-	if d.HasChange("records") {
-		recordsraw := d.Get("records").(*schema.Set).List()
-		records := make([]string, len(recordsraw))
-		for i, recordraw := range recordsraw {
-			records[i] = recordraw.(string)
-		}
-		updateOpts.Records = records
+	// `records` is required attribute for update request
+	recordsRaw := d.Get("records").(*schema.Set).List()
+	records := make([]string, len(recordsRaw))
+	for i, recordRaw := range recordsRaw {
+		records[i] = recordRaw.(string)
 	}
+	updateOpts.Records = records
 
 	if d.HasChange("description") {
 		updateOpts.Description = d.Get("description").(string)
