@@ -2,6 +2,7 @@ package opentelekomcloud
 
 import (
 	"fmt"
+	"regexp"
 	"testing"
 	"time"
 
@@ -74,6 +75,32 @@ func TestAccFWPolicyV2_timeout(t *testing.T) {
 					testAccCheckFWPolicyV2Exists(
 						"opentelekomcloud_fw_policy_v2.policy_1", "", "", 0),
 				),
+			},
+		},
+	})
+}
+
+func TestAccFWPolicyV2_removeSingleRule(t *testing.T) {
+	notEmptyPlan, _ := regexp.Compile(".+?plan was not empty:")
+	resource.Test(t, resource.TestCase{
+		PreCheck:     func() { testAccPreCheck(t) },
+		Providers:    testAccProviders,
+		CheckDestroy: testAccCheckFWPolicyV2Destroy,
+		Steps: []resource.TestStep{
+			{
+				Config: testAccFWPolicyV2SingleRule,
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckFWPolicyV2Exists("opentelekomcloud_fw_policy_v2.policy_1", "policy_1", "", 1),
+				),
+			},
+			{
+				Config: testAccFWPolicyV2SingleRule_removeRule,
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckFWPolicyV2Exists("opentelekomcloud_fw_policy_v2.policy_1", "policy_1", "", 0),
+				),
+				// There is non-empty plan before refresh and empty one after
+				// So `ExpectNonEmptyPlan: true` won't work
+				ExpectError: notEmptyPlan,
 			},
 		},
 	})
@@ -195,5 +222,31 @@ resource "opentelekomcloud_fw_policy_v2" "policy_1" {
   timeouts {
     create = "5m"
   }
+}
+`
+
+const testAccFWPolicyV2SingleRule = `
+resource "opentelekomcloud_fw_rule_v2" "rule_1" {
+  name = "rule_1"
+  action = "allow"
+  description = "allow-all"
+  protocol = "any"
+  source_ip_address = "0.0.0.0/0"
+  destination_ip_address = "0.0.0.0/0"
+  source_port = ""
+  destination_port = ""
+  ip_version = "4"
+}
+
+resource "opentelekomcloud_fw_policy_v2" "policy_1" {
+  name = "policy_1"
+  rules = [opentelekomcloud_fw_rule_v2.rule_1.id]
+}
+`
+
+const testAccFWPolicyV2SingleRule_removeRule = `
+resource "opentelekomcloud_fw_policy_v2" "policy_1" {
+  name = "policy_1"
+  rules = []
 }
 `
