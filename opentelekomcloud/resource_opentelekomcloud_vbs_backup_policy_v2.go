@@ -189,9 +189,6 @@ func resourceVBSBackupPolicyV2Update(d *schema.ResourceData, meta interface{}) e
 		if d.HasChange("start_time") {
 			updateOpts.ScheduledPolicy.StartTime = d.Get("start_time").(string)
 		}
-		if d.HasChange("frequency") {
-			updateOpts.ScheduledPolicy.Frequency = d.Get("frequency").(int)
-		}
 		if d.HasChange("rentention_num") {
 			updateOpts.ScheduledPolicy.RententionNum = d.Get("rentention_num").(int)
 		}
@@ -202,6 +199,7 @@ func resourceVBSBackupPolicyV2Update(d *schema.ResourceData, meta interface{}) e
 			updateOpts.ScheduledPolicy.Status = d.Get("status").(string)
 		}
 
+		updateOpts.ScheduledPolicy.Frequency = d.Get("frequency").(int)
 		_, err = policies.Update(vbsClient, d.Id(), updateOpts).Extract()
 		if err != nil {
 			return fmt.Errorf("Error updating OpenTelekomCloud backup policy: %s", err)
