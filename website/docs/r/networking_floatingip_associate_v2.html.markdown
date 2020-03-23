@@ -31,7 +31,10 @@ The following arguments are supported:
 
 * `floating_ip` - (Required) IP Address of an existing floating IP.
 
-* `port_id` - (Required) ID of an existing port with at least one IP address to
+* `port_id` - (Required unless `instance_id` is provided) ID of an existing port with at least one IP address to
+    associate with this floating IP.
+
+* `instance_id` - (Required unless `port_id` is provided) ID of an existing instance with at least one IP address to
     associate with this floating IP.
 
 ## Attributes Reference
@@ -40,6 +43,7 @@ The following attributes are exported:
 
 * `floating_ip` - See Argument Reference above.
 * `port_id` - See Argument Reference above.
+* `instance_id` - See Argument Reference above.
 
 ## Import
 
