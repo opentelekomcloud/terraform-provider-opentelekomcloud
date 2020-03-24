@@ -428,8 +428,8 @@ func resourceS3BucketRead(d *schema.ResourceData, meta interface{}) error {
 	if _, ok := d.GetOk("bucket"); !ok {
 		d.Set("bucket", d.Id())
 	}
-
-	d.Set("bucket_domain_name", bucketDomainName(d.Get("bucket").(string)))
+	domainName := bucketDomainName(d.Get("bucket").(string), GetRegion(d, config))
+	d.Set("bucket_domain_name", domainName)
 
 	// Read the policy
 	if _, ok := d.GetOk("policy"); ok {
@@ -1108,8 +1108,8 @@ func websiteEndpoint(s3conn *s3.S3, d *schema.ResourceData) (*S3Website, error) 
 	return WebsiteEndpoint(bucket, region), nil
 }
 
-func bucketDomainName(bucket string) string {
-	return fmt.Sprintf("%s.s3.amazonaws.com", bucket)
+func bucketDomainName(bucket, region string) string {
+	return fmt.Sprintf("%s.obs.%s.otc.t-systems.com", bucket, region)
 }
 
 func WebsiteEndpoint(bucket string, region string) *S3Website {
