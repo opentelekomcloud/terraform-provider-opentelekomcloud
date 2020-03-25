@@ -22,6 +22,7 @@ variable "vpc_name" {}
 
 data "opentelekomcloud_vpc_v1" "vpc" {
   name = "${var.vpc_name}"
+  shared = true
 }
 
 ```
@@ -37,6 +38,8 @@ The arguments of this data source act as filters for querying the available VPCs
 * `name` - (Optional) A unique name for the VPC. The name must be unique for a tenant. The value is a string of no more than 64 characters and can contain digits, letters, underscores (_), and hyphens (-).
 
 * `cidr` - (Optional) The cidr block of the desired VPC.
+
+* `shared` - (Optional) Enable SNAT (In order to let instances without an EIP access the internet).
 
 
 
