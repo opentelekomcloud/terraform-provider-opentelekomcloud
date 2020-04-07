@@ -126,12 +126,12 @@ func testAccCheckCCENodeV3Exists(n string, cluster string, node *nodes.Nodes) re
 var testAccCCENodeV3_basic = fmt.Sprintf(`
 resource "opentelekomcloud_cce_cluster_v3" "cluster_1" {
   name = "opentelekomcloud-cce"
-  cluster_type="VirtualMachine"
-  flavor_id="cce.s1.small"
-  cluster_version = "v1.9.2-r2"
-  vpc_id="%s"
-  subnet_id="%s"
-  container_network_type="overlay_l2"
+  cluster_type = "VirtualMachine"
+  flavor_id = "cce.s1.small"
+  vpc_id = "%s"
+  subnet_id = "%s"
+  container_network_type = "overlay_l2"
+  authentication_mode = "rbac"
 }
 
 resource "opentelekomcloud_cce_node_v3" "node_1" {
@@ -153,12 +153,12 @@ cluster_id = "${opentelekomcloud_cce_cluster_v3.cluster_1.id}"
 var testAccCCENodeV3_update = fmt.Sprintf(`
 resource "opentelekomcloud_cce_cluster_v3" "cluster_1" {
   name = "opentelekomcloud-cce"
-  cluster_type="VirtualMachine"
-  flavor_id="cce.s1.small"
-  cluster_version = "v1.9.2-r2"
-  vpc_id="%s"
-  subnet_id="%s"
-  container_network_type="overlay_l2"
+  cluster_type = "VirtualMachine"
+  flavor_id = "cce.s1.small"
+  vpc_id = "%s"
+  subnet_id = "%s"
+  container_network_type = "overlay_l2"
+  authentication_mode = "rbac"
 }
 
 resource "opentelekomcloud_cce_node_v3" "node_1" {
@@ -180,12 +180,12 @@ cluster_id = "${opentelekomcloud_cce_cluster_v3.cluster_1.id}"
 var testAccCCENodeV3_timeout = fmt.Sprintf(`
 resource "opentelekomcloud_cce_cluster_v3" "cluster_1" {
   name = "opentelekomcloud-cce"
-  cluster_type="VirtualMachine"
-  flavor_id="cce.s1.small"
-  cluster_version = "v1.9.2-r2"
-  vpc_id="%s"
-  subnet_id="%s"
-  container_network_type="overlay_l2"
+  cluster_type = "VirtualMachine"
+  flavor_id = "cce.s1.small"
+  vpc_id = "%s"
+  subnet_id = "%s"
+  container_network_type = "overlay_l2"
+  authentication_mode = "rbac"
 }
 
 resource "opentelekomcloud_cce_node_v3" "node_1" {

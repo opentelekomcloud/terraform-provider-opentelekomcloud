@@ -21,6 +21,9 @@ func resourceCCENodeV3() *schema.Resource {
 		Read:   resourceCCENodeV3Read,
 		Update: resourceCCENodeV3Update,
 		Delete: resourceCCENodeV3Delete,
+		Importer: &schema.ResourceImporter{
+			State: schema.ImportStatePassthrough,
+		},
 
 		Timeouts: &schema.ResourceTimeout{
 			Create: schema.DefaultTimeout(10 * time.Minute),
@@ -53,7 +56,6 @@ func resourceCCENodeV3() *schema.Resource {
 				Type:     schema.TypeMap,
 				Optional: true,
 				ForceNew: true,
-				Computed: true,
 			},
 			"flavor_id": {
 				Type:     schema.TypeString,

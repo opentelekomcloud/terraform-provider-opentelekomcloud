@@ -58,7 +58,8 @@ The following arguments are supported:
 * `eip_ids` - (Optional) List of existing elastic IP IDs. Changing this parameter will create a new resource.
 
 **Note:**
-If the eip_ids parameter is configured, you do not need to configure the eip_count and bandwidth parameters: iptype, charge_mode, bandwidth_size and share_type.
+If the eip_ids parameter is configured, you do not need to configure the eip_count and bandwidth parameters:
+iptype, charge_mode, bandwidth_size and share_type.
 
 * `eip_count` - (Optional) Number of elastic IPs to be dynamically created. Changing this parameter will create a new resource.
 
@@ -74,7 +75,8 @@ If the eip_ids parameter is configured, you do not need to configure the eip_cou
 
 * `ecs_performance_type` - (Optional) Classification of cloud server specifications. Changing this parameter will create a new cluster resource.
 
-* `order_id` - (Optional) Order ID, mandatory when the node payment type is the automatic payment package period type. Changing this parameter will create a new cluster resource.
+* `order_id` - (Optional) Order ID, mandatory when the node payment type is the automatic payment package period type.
+    Changing this parameter will create a new cluster resource.
 
 * `product_id` - (Optional) The Product ID. Changing this parameter will create a new cluster resource.
 
