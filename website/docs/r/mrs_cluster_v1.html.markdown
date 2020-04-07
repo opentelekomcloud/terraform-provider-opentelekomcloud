@@ -65,7 +65,7 @@ The following arguments are supported:
 
 * `billing_type` - (Required) The value is 12, indicating on-demand payment.
 
-* `master_node_num` - (Required) Number of Master nodes The value is 2.
+* `master_node_num` - (Required) Number of Master nodes.
 
 * `master_node_size` - (Required) Best match based on several years of commissioning
     experience. MRS supports specifications of hosts, and host specifications are

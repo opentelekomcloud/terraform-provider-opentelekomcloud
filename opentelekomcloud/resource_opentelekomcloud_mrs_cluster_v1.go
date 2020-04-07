@@ -54,10 +54,9 @@ func resourceMRSClusterV1() *schema.Resource {
 				ForceNew: true,
 			},
 			"core_node_num": {
-				Type:         schema.TypeInt,
-				Required:     true,
-				ValidateFunc: resourceClusterValidateCoreNodeNum,
-				ForceNew:     true,
+				Type:     schema.TypeInt,
+				Required: true,
+				ForceNew: true,
 			},
 			"core_node_size": {
 				Type:     schema.TypeString,
@@ -443,15 +442,6 @@ func resourceMRSClusterV1() *schema.Resource {
 			},
 		},
 	}
-}
-
-func resourceClusterValidateCoreNodeNum(v interface{}, k string) (ws []string, errors []error) {
-	value := v.(int)
-	if 3 <= value && value <= 100 {
-		return
-	}
-	errors = append(errors, fmt.Errorf("%q must be [3, 100]", k))
-	return
 }
 
 func getAllClusterComponents(d *schema.ResourceData) []cluster.ComponentOpts {
