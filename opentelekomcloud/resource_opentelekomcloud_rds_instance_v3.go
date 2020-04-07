@@ -550,6 +550,12 @@ func resourceRdsInstanceV3Read(d *schema.ResourceData, meta interface{}) error {
 
 	v, err := fetchRdsInstanceV3ByList(d, client)
 	if err != nil {
+		// manually bugfix for #476
+		if strings.Index(err.Error(), "Error finding the resource by list api") != -1 {
+			log.Printf("[WARN] the rds instance %s can not be found", d.Id())
+			d.SetId("")
+			return nil
+		}
 		return err
 	}
 	res["list"] = v
