@@ -10,30 +10,50 @@ description: |-
 
 Provides an VBS Backup Policy resource.
 
-# Example Usage
+## Example Usage
 
- ```hcl
-resource "opentelekomcloud_vbs_backup_policy_v2" "vbs" {
-  name = "policy_002"
+### Basic Backup Policy
+
+```hcl
+resource "opentelekomcloud_vbs_backup_policy_v2" "vbs_policy1" {
+  name   = "policy_001"
+  status = "ON"
   start_time  = "12:00"
-  status  = "ON"
   retain_first_backup = "N"
-  rentention_num = 2
+  rentention_num = 7
   frequency = 1
   tags {
     key = "k1"
     value = "v1"
   }
 }
- ```
+```
 
-# Argument Reference
+### Backup Policy with EVS Disks
+
+```hcl
+variable "volume_id" {}
+
+resource "opentelekomcloud_vbs_backup_policy_v2" "vbs_policy2" {
+  name   = "policy_002"
+  status = "ON"
+  start_time  = "12:00"
+  retain_first_backup = "N"
+  rentention_num = 5
+  frequency = 3
+  resources = [var.volume_id]
+}
+```
+
+## Argument Reference
 
 The following arguments are supported:
 
-* `name` (Required) - Specifies the policy name. The value is a string of 1 to 64 characters that can contain letters, digits, underscores (_), and hyphens (-). It cannot start with default.
+* `name` (Required) - Specifies the policy name. The value is a string of 1 to 64 characters that can contain letters, digits, underscores (_), and hyphens (-). It cannot start with **default**.
 
-* `start_time` (Required) - Specifies the start time of the backup job.The value is in the HH:mm format.                                                         
+* `start_time` (Required) - Specifies the start time(UTC) of the backup job. The value is in the
+    HH:mm format. You need to set the execution time on a full hour. You can set multiple execution
+    times, and use commas (,) to separate one time from another.
 
 * `status` (Required) - Specifies the backup policy status. The value can ON or OFF.
 
@@ -43,6 +63,9 @@ The following arguments are supported:
 
 * `frequency` (Required) - Specifies the backup interval. The value is in the range of 1 to 14 days.
 
+* `resources` (Optional) - Specifies one or more volumes associated with the backup policy.
+    Any previously associated backup policy will no longer apply.
+
 **tags** **- (Optional)** Represents the list of tags to be configured for the backup policy.
 
 * `key` - (Required) Specifies the tag key. A tag key consists of up to 36 characters, chosen from letters, digits, hyphens (-), and underscores (_).
@@ -50,16 +73,15 @@ The following arguments are supported:
 * `value` - (Required) Specifies the tag value. A tag value consists of 0 to 43 characters, chosen from letters, digits, hyphens (-), and underscores (_).
 
 
-# Attributes Reference
+## Attributes Reference
 
-All of the argument attributes are also exported as
-result attributes:
+All of the argument attributes are also exported as result attributes:
 
 * `id` - Specifies a backup policy ID.
  
 * `policy_resource_count` - Specifies the number of volumes associated with the backup policy.
 
-# Import
+## Import
 
 Backup Policy can be imported using the `id`, e.g.
 

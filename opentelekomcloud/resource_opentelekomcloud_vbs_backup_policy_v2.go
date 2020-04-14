@@ -39,6 +39,12 @@ func resourceVBSBackupPolicyV2() *schema.Resource {
 				ValidateFunc: validateVBSPolicyName,
 			},
 
+			"resources": {
+				Type:     schema.TypeList,
+				Optional: true,
+				Elem:     &schema.Schema{Type: schema.TypeString},
+			},
+
 			"start_time": {
 				Type:     schema.TypeString,
 				Required: true,
@@ -117,6 +123,21 @@ func resourceVBSBackupPolicyV2Create(d *schema.ResourceData, meta interface{}) e
 		return fmt.Errorf("Error creating OpenTelekomCloud Backup Policy: %s", err)
 	}
 	d.SetId(create.ID)
+
+	// associate volumes to backup policy
+	resources := buildAssociateResource(d.Get("resources").([]interface{}))
+	if len(resources) > 0 {
+		opts := policies.AssociateOpts{
+			PolicyID:  d.Id(),
+			Resources: resources,
+		}
+
+		_, err := policies.Associate(vbsClient, opts).ExtractResource()
+		if err != nil {
+			return fmt.Errorf("Error associate volumes to VBS backup policy %s: %s",
+				d.Id(), err)
+		}
+	}
 
 	return resourceVBSBackupPolicyV2Read(d, meta)
 
@@ -218,6 +239,40 @@ func resourceVBSBackupPolicyV2Update(d *schema.ResourceData, meta interface{}) e
 			return fmt.Errorf("Error updating OpenTelekomCloud backup policy tags: %s", createTags.Err)
 		}
 	}
+
+	if d.HasChange("resources") {
+		old, new := d.GetChange("resources")
+
+		// disassociate old volumes from backup policy
+		removeResources := buildDisassociateResource(old.([]interface{}))
+		if len(removeResources) > 0 {
+			opts := policies.DisassociateOpts{
+				Resources: removeResources,
+			}
+
+			_, err := policies.Disassociate(vbsClient, d.Id(), opts).ExtractResource()
+			if err != nil {
+				return fmt.Errorf("Error disassociate volumes from VBS backup policy %s: %s",
+					d.Id(), err)
+			}
+		}
+
+		// associate new volumes to backup policy
+		addResources := buildAssociateResource(new.([]interface{}))
+		if len(addResources) > 0 {
+			opts := policies.AssociateOpts{
+				PolicyID:  d.Id(),
+				Resources: addResources,
+			}
+
+			_, err := policies.Associate(vbsClient, opts).ExtractResource()
+			if err != nil {
+				return fmt.Errorf("Error associate volumes to VBS backup policy %s: %s",
+					d.Id(), err)
+			}
+		}
+	}
+
 	return resourceVBSBackupPolicyV2Read(d, meta)
 }
 
@@ -270,4 +325,25 @@ func resourceVBSUpdateTagsV2(d *schema.ResourceData) []tags.Tag {
 		}
 	}
 	return tagList
+}
+
+func buildAssociateResource(raw []interface{}) []policies.AssociateResource {
+	resources := make([]policies.AssociateResource, len(raw))
+	for i, v := range raw {
+		resources[i] = policies.AssociateResource{
+			ResourceID:   v.(string),
+			ResourceType: "volume",
+		}
+	}
+	return resources
+}
+
+func buildDisassociateResource(raw []interface{}) []policies.DisassociateResource {
+	resources := make([]policies.DisassociateResource, len(raw))
+	for i, v := range raw {
+		resources[i] = policies.DisassociateResource{
+			ResourceID: v.(string),
+		}
+	}
+	return resources
 }
