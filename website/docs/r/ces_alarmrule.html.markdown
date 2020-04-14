@@ -13,35 +13,31 @@ Manages a V2 topic resource within OpenTelekomCloud.
 ## Example Usage
 
 ```hcl
+variable webserver_id {}
+variable smn_topic_id {}
+
 resource "opentelekomcloud_ces_alarmrule" "alarm_rule" {
-  "alarm_name" = "alarm_rule"
-  "metric" {
-    "namespace" = "SYS.ECS"
-    "metric_name" = "network_outgoing_bytes_rate_inband"
-    "dimensions" {
-        "name" = "instance_id"
-        "value" = "${opentelekomcloud_compute_instance_v2.webserver.id}"
+  alarm_name = "alarm_rule"
+
+  metric {
+    namespace = "SYS.ECS"
+    metric_name = "network_outgoing_bytes_rate_inband"
+    dimensions {
+        name = "instance_id"
+        value = var.webserver_id
     }
   }
-  "condition"  {
-    "period" = 300
-    "filter" = "average"
-    "comparison_operator" = ">"
-    "value" = 6
-    "unit" = "B/s"
-    "count" = 1
+  condition  {
+    period = 300
+    filter = "average"
+    comparison_operator = ">"
+    value = 6
+    unit = "B/s"
+    count = 1
   }
-  "alarm_actions" {
-    "type" = "notification"
-    "notification_list" = [
-      "${opentelekomcloud_smn_topic_v2.topic.id}"
-    ]
-  }
-  "alarm_actions" {
-    "type" = "notification"
-    "notification_list" = [
-      "${opentelekomcloud_smn_topic_v2.topic_2.id}"
-    ]
+  alarm_actions {
+    type = "notification"
+    notification_list = [var.smn_topic_id]
   }
 }
 ```
@@ -55,6 +51,9 @@ The following arguments are supported:
     uppercase letters, underscores (_), or hyphens (-).
 
 * `alarm_description` - (Optional) The value can be a string of 0 to 256 characters.
+
+* `alarm_level` - (Optional) Specifies the alarm severity. The value can be 1, 2, 3 or 4,
+    which indicates critical, major, minor, and informational. The default value is 2.
 
 * `metric` - (Required) Specifies the alarm metrics. The structure is described
     below.
@@ -168,6 +167,7 @@ The following attributes are exported:
 
 * `alarm_name` - See Argument Reference above.
 * `alarm_description` - See Argument Reference above.
+* `alarm_level` - See Argument Reference above.
 * `metric` - See Argument Reference above.
 * `condition` - See Argument Reference above.
 * `alarm_actions` - See Argument Reference above.
@@ -179,7 +179,7 @@ The following attributes are exported:
 * `update_time` - Specifies the time when the alarm status changed. The value
     is a UNIX timestamp and the unit is ms.
 * `alarm_state` - Specifies the alarm status. The value can be:
-    ok: The alarm status is normal,
-    alarm: An alarm is generated,
-    insufficient_data: The required data is insufficient.
+    - ok: The alarm status is normal;
+    - alarm: An alarm is generated;
+    - insufficient_data: The required data is insufficient;
 
