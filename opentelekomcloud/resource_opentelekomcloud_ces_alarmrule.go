@@ -8,6 +8,7 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/helper/validation"
 	"github.com/huaweicloud/golangsdk/openstack/cloudeyeservice/alarmrule"
 )
 
@@ -30,6 +31,7 @@ func resourceAlarmRule() *schema.Resource {
 			"alarm_name": {
 				Type:     schema.TypeString,
 				Required: true,
+				ForceNew: true,
 				ValidateFunc: func(v interface{}, k string) (ws []string, errors []error) {
 					value := v.(string)
 					vv := regexp.MustCompile("^[a-zA-Z0-9_]{1,128}$")
@@ -43,6 +45,7 @@ func resourceAlarmRule() *schema.Resource {
 			"alarm_description": {
 				Type:     schema.TypeString,
 				Optional: true,
+				ForceNew: true,
 				ValidateFunc: func(v interface{}, k string) (ws []string, errors []error) {
 					value := v.(string)
 					if len(value) > 256 {
@@ -52,9 +55,18 @@ func resourceAlarmRule() *schema.Resource {
 				},
 			},
 
+			"alarm_level": {
+				Type:         schema.TypeInt,
+				Optional:     true,
+				ForceNew:     true,
+				Default:      2,
+				ValidateFunc: validation.IntBetween(1, 4),
+			},
+
 			"metric": {
 				Type:     schema.TypeList,
 				Required: true,
+				ForceNew: true,
 				MaxItems: 1,
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
@@ -117,6 +129,7 @@ func resourceAlarmRule() *schema.Resource {
 			"condition": {
 				Type:     schema.TypeList,
 				Required: true,
+				ForceNew: true,
 				MaxItems: 1,
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
@@ -210,6 +223,7 @@ func resourceAlarmRule() *schema.Resource {
 			"alarm_actions": {
 				Type:     schema.TypeList,
 				Optional: true,
+				ForceNew: true,
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
 						"type": {
@@ -240,6 +254,7 @@ func resourceAlarmRule() *schema.Resource {
 			"insufficientdata_actions": {
 				Type:     schema.TypeList,
 				Optional: true,
+				ForceNew: true,
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
 						"type": {
@@ -270,6 +285,7 @@ func resourceAlarmRule() *schema.Resource {
 			"ok_actions": {
 				Type:     schema.TypeList,
 				Optional: true,
+				ForceNew: true,
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
 						"type": {
@@ -307,19 +323,18 @@ func resourceAlarmRule() *schema.Resource {
 				Type:     schema.TypeBool,
 				Optional: true,
 				Default:  true,
+				ForceNew: true,
 			},
 
 			"update_time": {
 				Type:     schema.TypeInt,
 				Optional: true,
-				ForceNew: true,
 				Computed: true,
 			},
 
 			"alarm_state": {
 				Type:     schema.TypeString,
 				Optional: true,
-				ForceNew: true,
 				Computed: true,
 			},
 		},
@@ -388,6 +403,7 @@ func resourceAlarmRuleCreate(d *schema.ResourceData, meta interface{}) error {
 	createOpts := alarmrule.CreateOpts{
 		AlarmName:        d.Get("alarm_name").(string),
 		AlarmDescription: d.Get("alarm_description").(string),
+		AlarmLevel:       d.Get("alarm_level").(int),
 		Metric:           metric,
 		Condition: alarmrule.ConditionOpts{
 			Period:             co["period"].(int),
@@ -435,6 +451,7 @@ func resourceAlarmRuleRead(d *schema.ResourceData, meta interface{}) error {
 	}
 	d.Set("alarm_name", m["alarm_name"])
 	d.Set("alarm_description", m["alarm_description"])
+	d.Set("alarm_level", m["alarm_level"])
 	d.Set("metric", m["metric"])
 	d.Set("condition", m["condition"])
 	d.Set("alarm_actions", m["alarm_actions"])
