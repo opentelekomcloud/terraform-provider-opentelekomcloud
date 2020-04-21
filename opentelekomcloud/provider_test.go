@@ -28,6 +28,7 @@ var (
 	OS_SWIFT_ENVIRONMENT      = os.Getenv("OS_SWIFT_ENVIRONMENT")
 	OS_MRS_ENVIRONMENT        = os.Getenv("OS_MRS_ENVIRONMENT")
 	OS_DCS_ENVIRONMENT        = os.Getenv("OS_DCS_ENVIRONMENT")
+	OS_DMS_ENVIRONMENT        = os.Getenv("OS_DMS_ENVIRONMENT")
 	OS_AVAILABILITY_ZONE      = os.Getenv("OS_AVAILABILITY_ZONE")
 	OS_VPC_ID                 = os.Getenv("OS_VPC_ID")
 	OS_SUBNET_ID              = os.Getenv("OS_SUBNET_ID")
@@ -145,6 +146,14 @@ func testAccPreCheckDcs(t *testing.T) {
 
 	if OS_DCS_ENVIRONMENT == "" {
 		t.Skip("This environment does not support DCS tests")
+	}
+}
+
+func testAccPreCheckDms(t *testing.T) {
+	testAccPreCheckRequiredEnvVars(t)
+
+	if OS_DMS_ENVIRONMENT == "" {
+		t.Skip("This environment does not support DMS tests")
 	}
 }
 
