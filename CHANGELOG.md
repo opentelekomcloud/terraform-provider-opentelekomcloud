@@ -1,28 +1,28 @@
-## 1.17.0 (Unreleased)
+## 1.17.0 (April 26, 2020)
 
 FEATURES:
 
-* **New Data Source:** `opentelekomcloud_dms_az_v1` [GH-485]
-* **New Data Source:** `opentelekomcloud_dms_product_v1` [GH-485]
-* **New Data Source:** `opentelekomcloud_dms_maintainwindow_v1` [GH-485]
-* **New Resource:** `opentelekomcloud_obs_bucket` [GH-467]
-* **New Resource:** `opentelekomcloud_obs_bucket_object` [GH-467]
-* **New Resource:** `opentelekomcloud_dns_ptrrecord_v2` [GH-480]
-* **New Resource:** `opentelekomcloud_dms_instance_v1` [GH-485]
+* **New Data Source:** `opentelekomcloud_dms_az_v1` ([#485](https://github.com/terraform-providers/terraform-provider-opentelekomcloud/issues/485))
+* **New Data Source:** `opentelekomcloud_dms_product_v1` ([#485](https://github.com/terraform-providers/terraform-provider-opentelekomcloud/issues/485))
+* **New Data Source:** `opentelekomcloud_dms_maintainwindow_v1` ([#485](https://github.com/terraform-providers/terraform-provider-opentelekomcloud/issues/485))
+* **New Resource:** `opentelekomcloud_obs_bucket` ([#467](https://github.com/terraform-providers/terraform-provider-opentelekomcloud/issues/467))
+* **New Resource:** `opentelekomcloud_obs_bucket_object` ([#467](https://github.com/terraform-providers/terraform-provider-opentelekomcloud/issues/467))
+* **New Resource:** `opentelekomcloud_dns_ptrrecord_v2` ([#480](https://github.com/terraform-providers/terraform-provider-opentelekomcloud/issues/480))
+* **New Resource:** `opentelekomcloud_dms_instance_v1` ([#485](https://github.com/terraform-providers/terraform-provider-opentelekomcloud/issues/485))
 
 ENHANCEMENTS:
 
-* `resource/opentelekomcloud_ces_alarmrule`: Add alarm_level argument support [GH-481]
-* `resource/opentelekomcloud_vbs_backup_policy_v2`: Add associating volumes support [GH-478]
-* `resource/opentelekomcloud_rds_instance_v3`: Clean up ID if the intance couldn't be found [GH-479]
-* `resource/opentelekomcloud_vbs_backup_policy_v3`: Add week_frequency and rentention_day support [GH-489]
+* `resource/opentelekomcloud_ces_alarmrule`: Add alarm_level argument support ([#481](https://github.com/terraform-providers/terraform-provider-opentelekomcloud/issues/481))
+* `resource/opentelekomcloud_vbs_backup_policy_v2`: Add associating volumes support ([#478](https://github.com/terraform-providers/terraform-provider-opentelekomcloud/issues/478))
+* `resource/opentelekomcloud_rds_instance_v3`: Clean up ID if the intance couldn't be found ([#479](https://github.com/terraform-providers/terraform-provider-opentelekomcloud/issues/479))
+* `resource/opentelekomcloud_vbs_backup_policy_v3`: Add week_frequency and rentention_day support ([#489](https://github.com/terraform-providers/terraform-provider-opentelekomcloud/issues/489))
 
 BUG FIXES:
 
-* `resource/opentelekomcloud_fw_rule_v2`: Fix removing assigned FW rule [GH-462]
-* `resource/opentelekomcloud_dns_recordset_v2`: Fix updating only TTL value issue [GH-465]
-* `resource/opentelekomcloud_vbs_backup_policy_v2`: Fix missing required `frequency` value [GH-469]
-* `resource/opentelekomcloud_mrs_cluster_v1`: Update core nodes number validate func [GH-477]
+* `resource/opentelekomcloud_fw_rule_v2`: Fix removing assigned FW rule ([#462](https://github.com/terraform-providers/terraform-provider-opentelekomcloud/issues/462))
+* `resource/opentelekomcloud_dns_recordset_v2`: Fix updating only TTL value issue ([#465](https://github.com/terraform-providers/terraform-provider-opentelekomcloud/issues/465))
+* `resource/opentelekomcloud_vbs_backup_policy_v2`: Fix missing required `frequency` value ([#469](https://github.com/terraform-providers/terraform-provider-opentelekomcloud/issues/469))
+* `resource/opentelekomcloud_mrs_cluster_v1`: Update core nodes number validate func ([#477](https://github.com/terraform-providers/terraform-provider-opentelekomcloud/issues/477))
 
 ## 1.16.0 (March 06, 2020)
 
