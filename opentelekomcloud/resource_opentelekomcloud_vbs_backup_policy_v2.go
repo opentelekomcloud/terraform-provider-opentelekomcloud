@@ -50,13 +50,26 @@ func resourceVBSBackupPolicyV2() *schema.Resource {
 				Required: true,
 			},
 			"frequency": {
-				Type:         schema.TypeInt,
-				Required:     true,
-				ValidateFunc: validateVBSPolicyFrequency,
+				Type:          schema.TypeInt,
+				Optional:      true,
+				ConflictsWith: []string{"week_frequency"},
+				ValidateFunc:  validateVBSPolicyFrequency,
+			},
+			"week_frequency": {
+				Type:     schema.TypeList,
+				Optional: true,
+				MaxItems: 7,
+				Elem:     &schema.Schema{Type: schema.TypeString},
 			},
 			"rentention_num": {
+				Type:          schema.TypeInt,
+				Optional:      true,
+				ConflictsWith: []string{"rentention_day"},
+				ValidateFunc:  validateVBSPolicyRetentionNum,
+			},
+			"rentention_day": {
 				Type:         schema.TypeInt,
-				Required:     true,
+				Optional:     true,
 				ValidateFunc: validateVBSPolicyRetentionNum,
 			},
 			"retain_first_backup": {
@@ -66,7 +79,8 @@ func resourceVBSBackupPolicyV2() *schema.Resource {
 			},
 			"status": {
 				Type:         schema.TypeString,
-				Required:     true,
+				Optional:     true,
+				Default:      "ON",
 				ValidateFunc: validateVBSPolicyStatus,
 			},
 			"tags": {
@@ -105,12 +119,31 @@ func resourceVBSBackupPolicyV2Create(d *schema.ResourceData, meta interface{}) e
 		return fmt.Errorf("Error creating OpenTelekomCloud VBS Client: %s", err)
 	}
 
+	_, isExist1 := d.GetOk("frequency")
+	_, isExist2 := d.GetOk("week_frequency")
+	if !isExist1 && !isExist2 {
+		return fmt.Errorf("either frequency or week_frequency must be specified")
+	}
+
+	_, isExist1 = d.GetOk("rentention_num")
+	_, isExist2 = d.GetOk("rentention_day")
+	if !isExist1 && !isExist2 {
+		return fmt.Errorf("either rentention_num or rentention_day must be specified")
+	}
+
+	weeks, err := buildWeekFrequencyResource(d)
+	if err != nil {
+		return err
+	}
+
 	createOpts := policies.CreateOpts{
 		Name: d.Get("name").(string),
 		ScheduledPolicy: policies.ScheduledPolicy{
 			StartTime:         d.Get("start_time").(string),
 			Frequency:         d.Get("frequency").(int),
+			WeekFrequency:     weeks,
 			RententionNum:     d.Get("rentention_num").(int),
+			RententionDay:     d.Get("rentention_day").(int),
 			RemainFirstBackup: d.Get("retain_first_backup").(string),
 			Status:            d.Get("status").(string),
 		},
@@ -167,7 +200,9 @@ func resourceVBSBackupPolicyV2Read(d *schema.ResourceData, meta interface{}) err
 	d.Set("name", n.Name)
 	d.Set("start_time", n.ScheduledPolicy.StartTime)
 	d.Set("frequency", n.ScheduledPolicy.Frequency)
+	d.Set("week_frequency", n.ScheduledPolicy.WeekFrequency)
 	d.Set("rentention_num", n.ScheduledPolicy.RententionNum)
+	d.Set("rentention_day", n.ScheduledPolicy.RententionDay)
 	d.Set("retain_first_backup", n.ScheduledPolicy.RemainFirstBackup)
 	d.Set("status", n.ScheduledPolicy.Status)
 	d.Set("policy_resource_count", n.ResourceCount)
@@ -200,10 +235,35 @@ func resourceVBSBackupPolicyV2Update(d *schema.ResourceData, meta interface{}) e
 	if err != nil {
 		return fmt.Errorf("Error updating OpenTelekomCloud VBS client: %s", err)
 	}
-	var updateOpts policies.UpdateOpts
 
-	if d.HasChange("name") || d.HasChange("start_time") || d.HasChange("frequency") ||
-		d.HasChange("rentention_num") || d.HasChange("retain_first_backup") || d.HasChange("status") {
+	_, isExist1 := d.GetOk("frequency")
+	_, isExist2 := d.GetOk("week_frequency")
+	if !isExist1 && !isExist2 {
+		return fmt.Errorf("either frequency or week_frequency must be specified")
+	}
+
+	_, isExist1 = d.GetOk("rentention_num")
+	_, isExist2 = d.GetOk("rentention_day")
+	if !isExist1 && !isExist2 {
+		return fmt.Errorf("either rentention_num or rentention_day must be specified")
+	}
+
+	frequency := d.Get("frequency").(int)
+	weeks, err := buildWeekFrequencyResource(d)
+	if err != nil {
+		return err
+	}
+
+	var updateOpts policies.UpdateOpts
+	if frequency != 0 {
+		updateOpts.ScheduledPolicy.Frequency = frequency
+	} else {
+		updateOpts.ScheduledPolicy.WeekFrequency = weeks
+	}
+
+	if d.HasChange("name") || d.HasChange("start_time") || d.HasChange("retain_first_backup") ||
+		d.HasChange("rentention_num") || d.HasChange("rentention_day") || d.HasChange("status") ||
+		d.HasChange("frequency") || d.HasChange("week_frequency") {
 		if d.HasChange("name") {
 			updateOpts.Name = d.Get("name").(string)
 		}
@@ -213,6 +273,9 @@ func resourceVBSBackupPolicyV2Update(d *schema.ResourceData, meta interface{}) e
 		if d.HasChange("rentention_num") {
 			updateOpts.ScheduledPolicy.RententionNum = d.Get("rentention_num").(int)
 		}
+		if d.HasChange("rentention_day") {
+			updateOpts.ScheduledPolicy.RententionDay = d.Get("rentention_day").(int)
+		}
 		if d.HasChange("retain_first_backup") {
 			updateOpts.ScheduledPolicy.RemainFirstBackup = d.Get("retain_first_backup").(string)
 		}
@@ -220,7 +283,6 @@ func resourceVBSBackupPolicyV2Update(d *schema.ResourceData, meta interface{}) e
 			updateOpts.ScheduledPolicy.Status = d.Get("status").(string)
 		}
 
-		updateOpts.ScheduledPolicy.Frequency = d.Get("frequency").(int)
 		_, err = policies.Update(vbsClient, d.Id(), updateOpts).Extract()
 		if err != nil {
 			return fmt.Errorf("Error updating OpenTelekomCloud backup policy: %s", err)
@@ -346,4 +408,28 @@ func buildDisassociateResource(raw []interface{}) []policies.DisassociateResourc
 		}
 	}
 	return resources
+}
+
+func buildWeekFrequencyResource(d *schema.ResourceData) ([]string, error) {
+	validateList := []string{"SUN", "MON", "TUE", "WED", "THU", "FRI", "SAT"}
+	weeks := []string{}
+
+	weekRaws := d.Get("week_frequency").([]interface{})
+	for _, wf := range weekRaws {
+		found := false
+		for _, value := range validateList {
+			if wf.(string) == value {
+				found = true
+				break
+			}
+		}
+
+		if found {
+			weeks = append(weeks, wf.(string))
+		} else {
+			return nil, fmt.Errorf("expected item of week_frequency to be one of %v, got %s",
+				validateList, wf.(string))
+		}
+	}
+	return weeks, nil
 }
