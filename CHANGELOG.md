@@ -1,8 +1,8 @@
-## 1.17.1 (Unreleased)
+## 1.17.1 (May 07, 2020)
 
 BUG FIXES:
 
-* `resource/opentelekomcloud_vpc_subnet_v1`: Fix VPC subnet delete issue [GH-492]
+* `resource/opentelekomcloud_vpc_subnet_v1`: Fix VPC subnet delete issue ([#492](https://github.com/terraform-providers/terraform-provider-opentelekomcloud/issues/492))
 
 ## 1.17.0 (April 26, 2020)
 
