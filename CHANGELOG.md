@@ -1,4 +1,9 @@
-## 1.18.0 (Unreleased)
+## 1.17.1 (Unreleased)
+
+BUG FIXES:
+
+* `resource/opentelekomcloud_vpc_subnet_v1`: Fix VPC subnet delete issue [GH-492]
+
 ## 1.17.0 (April 26, 2020)
 
 FEATURES:
