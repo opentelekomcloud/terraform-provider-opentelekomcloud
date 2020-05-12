@@ -39,9 +39,9 @@ type Domain struct {
 
 type Server struct {
 	//Protocol type of the client
-	FrontProtocol string `json:"front_protocol" required:"true"`
+	ClientProtocol string `json:"client_protocol" required:"true"`
 	//Protocol used by WAF to forward client requests to the server
-	BackProtocol string `json:"back_protocol" required:"true"`
+	ServerProtocol string `json:"server_protocol" required:"true"`
 	//IP address or domain name of the web server that the client accesses.
 	Address string `json:"address" required:"true"`
 	//Port number used by the web server

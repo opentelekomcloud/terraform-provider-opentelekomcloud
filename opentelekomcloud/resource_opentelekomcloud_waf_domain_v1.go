@@ -237,8 +237,8 @@ func resourceWafDomainV1Read(d *schema.ResourceData, meta interface{}) error {
 	servers := make([]map[string]interface{}, len(n.Server))
 	for i, server := range n.Server {
 		servers[i] = make(map[string]interface{})
-		servers[i]["client_protocol"] = server.FrontProtocol
-		servers[i]["server_protocol"] = server.BackProtocol
+		servers[i]["client_protocol"] = server.ClientProtocol
+		servers[i]["server_protocol"] = server.ServerProtocol
 		servers[i]["address"] = server.Address
 		servers[i]["port"] = strconv.Itoa(server.Port)
 	}
