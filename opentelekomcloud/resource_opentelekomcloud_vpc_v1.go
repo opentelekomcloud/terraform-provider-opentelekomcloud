@@ -8,7 +8,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
 	"github.com/huaweicloud/golangsdk"
-	"github.com/huaweicloud/golangsdk/openstack/networking/v1/tags"
+	"github.com/huaweicloud/golangsdk/openstack/common/tags"
 	"github.com/huaweicloud/golangsdk/openstack/networking/v1/vpcs"
 )
 
@@ -52,15 +52,11 @@ func resourceVirtualPrivateCloudV1() *schema.Resource {
 				ForceNew: false,
 				Computed: true,
 			},
-			"tags": {
-				Type:     schema.TypeMap,
-				Optional: true,
-				ForceNew: false,
-			},
 			"status": {
 				Type:     schema.TypeString,
 				Computed: true,
 			},
+			"tags": tagsSchema(),
 		},
 	}
 }
@@ -122,7 +118,7 @@ func resourceVirtualPrivateCloudV1Create(d *schema.ResourceData, meta interface{
 			return fmt.Errorf("Error creating OpenTelekomCloud networking client: %s", err)
 		}
 
-		taglist := expandVirtualPrivateCloudTags(tagRaw)
+		taglist := expandResourceTags(tagRaw)
 		if tagErr := tags.Create(vpcV2Client, "vpcs", n.ID, taglist).ExtractErr(); tagErr != nil {
 			return fmt.Errorf("Error setting tags of VirtualPrivateCloud %s: %s", d.Id(), tagErr)
 		}
@@ -167,10 +163,7 @@ func resourceVirtualPrivateCloudV1Read(d *schema.ResourceData, meta interface{})
 		return fmt.Errorf("Error fetching OpenTelekomCloud VirtualPrivateCloud tags: %s", err)
 	}
 
-	tagmap := make(map[string]string)
-	for _, val := range resourceTags.Tags {
-		tagmap[val.Key] = val.Value
-	}
+	tagmap := tagsToMap(resourceTags.Tags)
 	if err := d.Set("tags", tagmap); err != nil {
 		return fmt.Errorf("Error saving tags for OpenTelekomCloud VirtualPrivateCloud %s: %s", d.Id(), err)
 	}
@@ -210,22 +203,9 @@ func resourceVirtualPrivateCloudV1Update(d *schema.ResourceData, meta interface{
 			return fmt.Errorf("Error creating OpenTelekomCloud networking client: %s", err)
 		}
 
-		//remove old tags and set new tags
-		old, new := d.GetChange("tags")
-		oldRaw := old.(map[string]interface{})
-		if len(oldRaw) > 0 {
-			taglist := expandVirtualPrivateCloudTags(oldRaw)
-			if tagErr := tags.Delete(vpcV2Client, "vpcs", d.Id(), taglist).ExtractErr(); tagErr != nil {
-				return fmt.Errorf("Error deleting tags of VirtualPrivateCloud %s: %s", d.Id(), tagErr)
-			}
-		}
-
-		newRaw := new.(map[string]interface{})
-		if len(newRaw) > 0 {
-			taglist := expandVirtualPrivateCloudTags(newRaw)
-			if tagErr := tags.Create(vpcV2Client, "vpcs", d.Id(), taglist).ExtractErr(); tagErr != nil {
-				return fmt.Errorf("Error setting tags of VirtualPrivateCloud %s: %s", d.Id(), tagErr)
-			}
+		tagErr := UpdateResourceTags(vpcV2Client, d, "vpcs")
+		if tagErr != nil {
+			return fmt.Errorf("Error updating tags of VPC %s: %s", d.Id(), tagErr)
 		}
 	}
 
@@ -307,18 +287,4 @@ func waitForVpcDelete(vpcClient *golangsdk.ServiceClient, vpcId string) resource
 
 		return r, "ACTIVE", nil
 	}
-}
-
-func expandVirtualPrivateCloudTags(tagmap map[string]interface{}) []tags.ResourceTag {
-	var taglist []tags.ResourceTag
-
-	for k, v := range tagmap {
-		tag := tags.ResourceTag{
-			Key:   k,
-			Value: v.(string),
-		}
-		taglist = append(taglist, tag)
-	}
-
-	return taglist
 }
