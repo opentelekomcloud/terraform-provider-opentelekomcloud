@@ -23,8 +23,8 @@ resource "opentelekomcloud_waf_certificate_v1" "certificate_1" {
 resource "opentelekomcloud_waf_domain_v1" "domain_1" {
 	hostname = "www.b.com"
 	server {
-		client_protocol = "HTTPS"
-		server_protocol = "HTTP"
+		front_protocol = "HTTPS"
+		back_protocol = "HTTP"
 		address = "80.158.42.162"
 		port = "8080"
 	}
@@ -42,7 +42,7 @@ The following arguments are supported:
 
 * `hostname` - (Required) The domain name. For example, www.example.com or *.example.com. Changing this creates a new domain.
 
-* `certificate_id` - (Optional) The certificate ID. This parameter is mandatory when client_protocol is set to HTTPS.
+* `certificate_id` - (Optional) The certificate ID. This parameter is mandatory when front_protocol is set to HTTPS.
 
 * `server` - (Required) Array of server object. The server object structure is documented below.
 
@@ -61,9 +61,9 @@ The following arguments are supported:
 
 The `server` block supports:
 
-* `client_protocol` - (Required) Protocol type of the client. The options are HTTP and HTTPS.
+* `front_protocol` - (Required) Protocol type of the client. The options are HTTP and HTTPS.
 
-* `server_protocol` - (Required) Protocol used by WAF to forward client requests to the server. The options are HTTP and HTTPS.
+* `back_protocol` - (Required) Protocol used by WAF to forward client requests to the server. The options are HTTP and HTTPS.
 
 * `address` - (Required) IP address or domain name of the web server that the client accesses. For example, 192.168.1.1 or www.a.com.
 

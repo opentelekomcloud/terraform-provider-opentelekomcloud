@@ -117,8 +117,8 @@ resource "opentelekomcloud_waf_policy_v1" "policy_1" {
 resource "opentelekomcloud_waf_domain_v1" "domain_1" {
 	hostname = "www.b.com"
 	server {
-		client_protocol = "HTTPS"
-		server_protocol = "HTTP"
+		front_protocol = "HTTPS"
+		back_protocol = "HTTP"
 		address = "${opentelekomcloud_networking_floatingip_v2.fip_1.address}"
 		port = "8080"
 	}
@@ -152,8 +152,8 @@ resource "opentelekomcloud_waf_policy_v1" "policy_1" {
 resource "opentelekomcloud_waf_domain_v1" "domain_1" {
 	hostname = "www.b.com"
 	server {
-		client_protocol = "HTTPS"
-		server_protocol = "HTTP"
+		front_protocol = "HTTPS"
+		back_protocol = "HTTP"
 		address = "${opentelekomcloud_networking_floatingip_v2.fip_1.address}"
 		port = "80"
 	}
