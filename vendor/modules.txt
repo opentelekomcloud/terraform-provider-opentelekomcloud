@@ -265,6 +265,7 @@ github.com/huaweicloud/golangsdk/openstack/networking/v1/bandwidths
 github.com/huaweicloud/golangsdk/openstack/networking/v1/eips
 github.com/huaweicloud/golangsdk/openstack/networking/v1/flowlogs
 github.com/huaweicloud/golangsdk/openstack/networking/v1/subnets
+github.com/huaweicloud/golangsdk/openstack/networking/v1/tags
 github.com/huaweicloud/golangsdk/openstack/networking/v1/vpcs
 github.com/huaweicloud/golangsdk/openstack/networking/v2/extensions/elbaas/backendmember
 github.com/huaweicloud/golangsdk/openstack/networking/v2/extensions/elbaas/healthcheck
