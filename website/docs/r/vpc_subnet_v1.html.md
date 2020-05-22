@@ -12,21 +12,39 @@ Provides an VPC subnet resource.
 
 # Example Usage
 
+## Basic Usage
+
  ```hcl
 resource "opentelekomcloud_vpc_v1" "vpc_v1" {
-  name = "${var.vpc_name}"
-  cidr = "${var.vpc_cidr}"
+  name = var.vpc_name
+  cidr = var.vpc_cidr
 }
 
-
 resource "opentelekomcloud_vpc_subnet_v1" "subnet_v1" {
-  name = "${var.subnet_name}"
-  cidr = "${var.subnet_cidr}"
-  gateway_ip = "${var.subnet_gateway_ip}"
-  vpc_id = "${opentelekomcloud_vpc_v1.vpc_v1.id}"
+  name   = var.subnet_name
+  cidr   = var.subnet_cidr
+  vpc_id = opentelekomcloud_vpc_v1.vpc_v1.id
+  gateway_ip    = var.subnet_gateway_ip
   ntp_addresses = "10.100.0.33,10.100.0.34"
 }
  ```
+
+## Subnet with tags
+
+```hcl
+resource "opentelekomcloud_vpc_subnet_v1" "subnet_with_tags" {
+  name   = var.subnet_name
+  cidr   = var.subnet_cidr
+  vpc_id = opentelekomcloud_vpc_v1.vpc_v1.id
+  gateway_ip    = var.subnet_gateway_ip
+  ntp_addresses = "10.100.0.33,10.100.0.34"
+
+  tags = {
+    foo = "bar"
+    key = "value"
+  }
+}
+```
 
 # Argument Reference
 
@@ -51,6 +69,8 @@ The following arguments are supported:
 * `availability_zone` (Optional) - Identifies the availability zone (AZ) to which the subnet belongs. The value must be an existing AZ in the system. Changing this creates a new Subnet.
 
 * `ntp_addresses` (Optional) - Specifies the NTP server address configured for the subnet.
+
+* `tags` - (Optional) The key/value pairs to associate with the subnet.
 
 
 # Attributes Reference

@@ -32,6 +32,10 @@ func TestAccOTCVpcSubnetV1_basic(t *testing.T) {
 						"opentelekomcloud_vpc_subnet_v1.subnet_1", "availability_zone", "eu-de-02"),
 					resource.TestCheckResourceAttr(
 						"opentelekomcloud_vpc_subnet_v1.subnet_1", "ntp_addresses", "10.100.0.33,10.100.0.34"),
+					resource.TestCheckResourceAttr(
+						"opentelekomcloud_vpc_subnet_v1.subnet_1", "tags.foo", "bar"),
+					resource.TestCheckResourceAttr(
+						"opentelekomcloud_vpc_subnet_v1.subnet_1", "tags.key", "value"),
 				),
 			},
 			{
@@ -41,6 +45,8 @@ func TestAccOTCVpcSubnetV1_basic(t *testing.T) {
 						"opentelekomcloud_vpc_subnet_v1.subnet_1", "name", "opentelekomcloud_subnet_1"),
 					resource.TestCheckResourceAttr(
 						"opentelekomcloud_vpc_subnet_v1.subnet_1", "ntp_addresses", "10.100.0.35,10.100.0.36"),
+					resource.TestCheckResourceAttr(
+						"opentelekomcloud_vpc_subnet_v1.subnet_1", "tags.key", "value_update"),
 				),
 			},
 		},
@@ -131,8 +137,13 @@ resource "opentelekomcloud_vpc_subnet_v1" "subnet_1" {
   availability_zone = "eu-de-02"
   ntp_addresses = "10.100.0.33,10.100.0.34"
 
+  tags = {
+    foo = "bar"
+    key = "value"
+  }
 }
 `
+
 const testAccOTCVpcSubnetV1_update = `
 resource "opentelekomcloud_vpc_v1" "vpc_1" {
   name = "vpc_test"
@@ -146,7 +157,12 @@ resource "opentelekomcloud_vpc_subnet_v1" "subnet_1" {
   vpc_id = "${opentelekomcloud_vpc_v1.vpc_1.id}"
   availability_zone = "eu-de-02"
   ntp_addresses = "10.100.0.35,10.100.0.36"
- }
+
+  tags = {
+    foo = "bar"
+    key = "value_update"
+  }
+}
 `
 
 const testAccOTCVpcSubnetV1_timeout = `

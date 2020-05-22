@@ -12,8 +12,9 @@ Manages a VPC resource within OpenTelekomCloud.
 
 ## Example Usage
 
-```hcl
+### Basic Usage
 
+```hcl
 variable "vpc_name" {
   default = "opentelekomcloud_vpc"
 }
@@ -23,10 +24,23 @@ variable "vpc_cidr" {
 }
 
 resource "opentelekomcloud_vpc_v1" "vpc_v1" {
-  name = "${var.vpc_name}"
-  cidr = "${var.vpc_cidr}"
+  name = var.vpc_name
+  cidr = var.vpc_cidr
 }
+```
 
+### VPC with tags
+
+```hcl
+resource "opentelekomcloud_vpc_v1" "vpc_with_tags" {
+  name = var.vpc_name
+  cidr = var.vpc_cidr
+
+  tags = {
+    foo = "bar"
+    key = "value"
+  }
+}
 ```
 
 ## Argument Reference
@@ -39,6 +53,7 @@ The following arguments are supported:
 
 * `shared` - (Optional) Specifies whether the shared SNAT should be used or not. Is also required  for cross-tenant sharing.
 
+* `tags` - (Optional) The key/value pairs to associate with the VPC.
 
 
 ## Attributes Reference
@@ -47,9 +62,11 @@ The following attributes are exported:
 
 * `id` -  ID of the VPC.
 
-* `name` -  See Argument Reference above.
+* `name` - See Argument Reference above.
 
 * `cidr` - See Argument Reference above.
+
+* `tags` - See Argument Reference above.
 
 * `status` - The current status of the desired VPC. Can be either CREATING, OK, DOWN, PENDING_UPDATE, PENDING_DELETE, or ERROR.
 

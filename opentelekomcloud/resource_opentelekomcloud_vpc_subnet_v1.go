@@ -5,11 +5,11 @@ import (
 	"log"
 	"time"
 
-	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
-	"github.com/huaweicloud/golangsdk/openstack/networking/v1/subnets"
-
 	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
+	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
 	"github.com/huaweicloud/golangsdk"
+	"github.com/huaweicloud/golangsdk/openstack/networking/v1/subnets"
+	"github.com/huaweicloud/golangsdk/openstack/networking/v1/tags"
 )
 
 func resourceSubnetDNSListV1(d *schema.ResourceData) []string {
@@ -101,6 +101,11 @@ func resourceVpcSubnetV1() *schema.Resource {
 				ForceNew: true,
 				Required: true,
 			},
+			"tags": {
+				Type:     schema.TypeMap,
+				Optional: true,
+				ForceNew: false,
+			},
 			"ntp_addresses": {
 				Type:     schema.TypeString,
 				Optional: true,
@@ -167,6 +172,20 @@ func resourceVpcSubnetV1Create(d *schema.ResourceData, meta interface{}) error {
 			n.ID, stateErr)
 	}
 
+	//set tags
+	tagRaw := d.Get("tags").(map[string]interface{})
+	if len(tagRaw) > 0 {
+		vpcSubnetV2Client, err := config.networkingV2Client(GetRegion(d, config))
+		if err != nil {
+			return fmt.Errorf("Error creating OpenTelekomCloud networking client: %s", err)
+		}
+
+		taglist := expandVpcSubnetTags(tagRaw)
+		if tagErr := tags.Create(vpcSubnetV2Client, "subnets", n.ID, taglist).ExtractErr(); tagErr != nil {
+			return fmt.Errorf("Error setting tags of VpcSubnet %s: %s", n.ID, tagErr)
+		}
+	}
+
 	return resourceVpcSubnetV1Read(d, config)
 
 }
@@ -205,6 +224,25 @@ func resourceVpcSubnetV1Read(d *schema.ResourceData, meta interface{}) error {
 			d.Set("ntp_addresses", opt.OptValue)
 			break
 		}
+	}
+
+	// save VpcSubnet tags
+	vpcSubnetV2Client, err := config.networkingV2Client(GetRegion(d, config))
+	if err != nil {
+		return fmt.Errorf("Error creating OpenTelekomCloud networking client: %s", err)
+	}
+
+	resourceTags, err := tags.Get(vpcSubnetV2Client, "subnets", d.Id()).Extract()
+	if err != nil {
+		return fmt.Errorf("Error fetching OpenTelekomCloud VpcSubnet tags: %s", err)
+	}
+
+	tagmap := make(map[string]string)
+	for _, val := range resourceTags.Tags {
+		tagmap[val.Key] = val.Value
+	}
+	if err := d.Set("tags", tagmap); err != nil {
+		return fmt.Errorf("Error saving tags for OpenTelekomCloud VpcSubnet %s: %s", d.Id(), err)
 	}
 
 	return nil
@@ -252,6 +290,32 @@ func resourceVpcSubnetV1Update(d *schema.ResourceData, meta interface{}) error {
 	_, err = subnets.Update(subnetClient, vpc_id, d.Id(), updateOpts).Extract()
 	if err != nil {
 		return fmt.Errorf("Error updating OpenTelekomCloud VPC Subnet: %s", err)
+	}
+
+	//update tags
+	if d.HasChange("tags") {
+		vpcSubnetV2Client, err := config.networkingV2Client(GetRegion(d, config))
+		if err != nil {
+			return fmt.Errorf("Error creating OpenTelekomCloud networking client: %s", err)
+		}
+
+		//remove old tags and set new tags
+		old, new := d.GetChange("tags")
+		oldRaw := old.(map[string]interface{})
+		if len(oldRaw) > 0 {
+			taglist := expandVpcSubnetTags(oldRaw)
+			if tagErr := tags.Delete(vpcSubnetV2Client, "subnets", d.Id(), taglist).ExtractErr(); tagErr != nil {
+				return fmt.Errorf("Error deleting tags of VpcSubnet %s: %s", d.Id(), tagErr)
+			}
+		}
+
+		newRaw := new.(map[string]interface{})
+		if len(newRaw) > 0 {
+			taglist := expandVpcSubnetTags(newRaw)
+			if tagErr := tags.Create(vpcSubnetV2Client, "subnets", d.Id(), taglist).ExtractErr(); tagErr != nil {
+				return fmt.Errorf("Error setting tags of VpcSubnet %s: %s", d.Id(), tagErr)
+			}
+		}
 	}
 
 	return resourceVpcSubnetV1Read(d, meta)
@@ -337,4 +401,18 @@ func waitForVpcSubnetDelete(subnetClient *golangsdk.ServiceClient, vpcId string,
 
 		return r, "ACTIVE", nil
 	}
+}
+
+func expandVpcSubnetTags(tagmap map[string]interface{}) []tags.ResourceTag {
+	var taglist []tags.ResourceTag
+
+	for k, v := range tagmap {
+		tag := tags.ResourceTag{
+			Key:   k,
+			Value: v.(string),
+		}
+		taglist = append(taglist, tag)
+	}
+
+	return taglist
 }

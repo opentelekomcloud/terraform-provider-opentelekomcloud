@@ -30,6 +30,10 @@ func TestAccOTCVpcV1_basic(t *testing.T) {
 						"opentelekomcloud_vpc_v1.vpc_1", "status", "OK"),
 					resource.TestCheckResourceAttr(
 						"opentelekomcloud_vpc_v1.vpc_1", "shared", "true"),
+					resource.TestCheckResourceAttr(
+						"opentelekomcloud_vpc_v1.vpc_1", "tags.foo", "bar"),
+					resource.TestCheckResourceAttr(
+						"opentelekomcloud_vpc_v1.vpc_1", "tags.key", "value"),
 				),
 			},
 		},
@@ -52,6 +56,8 @@ func TestAccOTCVpcV1_update(t *testing.T) {
 						"opentelekomcloud_vpc_v1.vpc_1", "name", "terraform_provider_test"),
 					resource.TestCheckResourceAttr(
 						"opentelekomcloud_vpc_v1.vpc_1", "shared", "true"),
+					resource.TestCheckResourceAttr(
+						"opentelekomcloud_vpc_v1.vpc_1", "tags.key", "value"),
 				),
 			},
 			{
@@ -62,6 +68,8 @@ func TestAccOTCVpcV1_update(t *testing.T) {
 						"opentelekomcloud_vpc_v1.vpc_1", "name", "terraform_provider_test1"),
 					resource.TestCheckResourceAttr(
 						"opentelekomcloud_vpc_v1.vpc_1", "shared", "false"),
+					resource.TestCheckResourceAttr(
+						"opentelekomcloud_vpc_v1.vpc_1", "tags.key", "value_update"),
 				),
 			},
 		},
@@ -141,23 +149,34 @@ func testAccCheckOTCVpcV1Exists(n string, vpc *vpcs.Vpc) resource.TestCheckFunc 
 
 const testAccVpcV1_basic = `
 resource "opentelekomcloud_vpc_v1" "vpc_1" {
-	name   = "terraform_provider_test"
-	cidr   = "192.168.0.0/16"
-	shared = true
+  name   = "terraform_provider_test"
+  cidr   = "192.168.0.0/16"
+  shared = true
+
+  tags = {
+    foo = "bar"
+    key = "value"
+  }
 }
 `
 
 const testAccVpcV1_update = `
 resource "opentelekomcloud_vpc_v1" "vpc_1" {
-    name   = "terraform_provider_test1"
-	cidr   = "192.168.0.0/16"
-	shared = false
+  name   = "terraform_provider_test1"
+  cidr   = "192.168.0.0/16"
+  shared = false
+
+  tags = {
+    foo = "bar"
+    key = "value_update"
+  }
 }
 `
+
 const testAccVpcV1_timeout = `
 resource "opentelekomcloud_vpc_v1" "vpc_1" {
-	name = "terraform_provider_test"
-	cidr="192.168.0.0/16"
+  name = "terraform_provider_test"
+  cidr="192.168.0.0/16"
 
   timeouts {
     create = "5m"
