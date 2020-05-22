@@ -45,11 +45,11 @@ func resourceWafDomainV1() *schema.Resource {
 				ForceNew: false,
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
-						"client_protocol": {
+						"front_protocol": {
 							Type:     schema.TypeString,
 							Required: true,
 						},
-						"server_protocol": {
+						"back_protocol": {
 							Type:     schema.TypeString,
 							Required: true,
 						},
@@ -128,8 +128,8 @@ func getAllServers(d *schema.ResourceData) []domains.ServerOpts {
 		server := v.(map[string]interface{})
 
 		v := domains.ServerOpts{
-			ClientProtocol: server["client_protocol"].(string),
-			ServerProtocol: server["server_protocol"].(string),
+			ClientProtocol: server["front_protocol"].(string),
+			ServerProtocol: server["back_protocol"].(string),
 			Address:        server["address"].(string),
 			Port:           server["port"].(string),
 		}
@@ -237,8 +237,8 @@ func resourceWafDomainV1Read(d *schema.ResourceData, meta interface{}) error {
 	servers := make([]map[string]interface{}, len(n.Server))
 	for i, server := range n.Server {
 		servers[i] = make(map[string]interface{})
-		servers[i]["client_protocol"] = server.ClientProtocol
-		servers[i]["server_protocol"] = server.ServerProtocol
+		servers[i]["front_protocol"] = server.ClientProtocol
+		servers[i]["back_protocol"] = server.ServerProtocol
 		servers[i]["address"] = server.Address
 		servers[i]["port"] = strconv.Itoa(server.Port)
 	}
