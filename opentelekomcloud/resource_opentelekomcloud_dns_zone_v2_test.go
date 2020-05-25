@@ -27,7 +27,11 @@ func TestAccDNSV2Zone_basic(t *testing.T) {
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckDNSV2ZoneExists("opentelekomcloud_dns_zone_v2.zone_1", &zone),
 					resource.TestCheckResourceAttr(
-						"opentelekomcloud_dns_zone_v2.zone_1", "description", "a zone"),
+						"opentelekomcloud_dns_zone_v2.zone_1", "description", "a public zone"),
+					resource.TestCheckResourceAttr(
+						"opentelekomcloud_dns_zone_v2.zone_1", "tags.foo", "bar"),
+					resource.TestCheckResourceAttr(
+						"opentelekomcloud_dns_zone_v2.zone_1", "tags.key", "value"),
 				),
 			},
 			{
@@ -40,6 +44,8 @@ func TestAccDNSV2Zone_basic(t *testing.T) {
 					//resource.TestCheckResourceAttr("opentelekomcloud_dns_zone_v2.zone_1", "type", "PRIMARY"),
 					resource.TestCheckResourceAttr(
 						"opentelekomcloud_dns_zone_v2.zone_1", "description", "an updated zone"),
+					resource.TestCheckResourceAttr(
+						"opentelekomcloud_dns_zone_v2.zone_1", "tags.key", "value_updated"),
 				),
 			},
 		},
@@ -62,9 +68,13 @@ func TestAccDNSV2Zone_private(t *testing.T) {
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckDNSV2ZoneExists("opentelekomcloud_dns_zone_v2.zone_1", &zone),
 					resource.TestCheckResourceAttr(
-						"opentelekomcloud_dns_zone_v2.zone_1", "description", "a zone"),
+						"opentelekomcloud_dns_zone_v2.zone_1", "description", "a private zone"),
 					resource.TestCheckResourceAttr(
 						"opentelekomcloud_dns_zone_v2.zone_1", "type", "private"),
+					resource.TestCheckResourceAttr(
+						"opentelekomcloud_dns_zone_v2.zone_1", "tags.foo", "bar"),
+					resource.TestCheckResourceAttr(
+						"opentelekomcloud_dns_zone_v2.zone_1", "tags.key", "value"),
 				),
 			},
 		},
@@ -169,65 +179,80 @@ func testAccCheckDNSV2ZoneExists(n string, zone *zones.Zone) resource.TestCheckF
 
 func testAccDNSV2Zone_basic(zoneName string) string {
 	return fmt.Sprintf(`
-		resource "opentelekomcloud_dns_zone_v2" "zone_1" {
-			name = "%s"
-			email = "email1@example.com"
-			description = "a zone"
-			ttl = 3000
-			type = "public"
-		}
-	`, zoneName)
+resource "opentelekomcloud_dns_zone_v2" "zone_1" {
+  name = "%s"
+  email = "email1@example.com"
+  description = "a public zone"
+  ttl = 3000
+  type = "public"
+
+  tags = {
+    foo = "bar"
+    key = "value"
+  }
+}
+`, zoneName)
 }
 
 func testAccDNSV2Zone_private(zoneName string) string {
 	return fmt.Sprintf(`
-		resource "opentelekomcloud_dns_zone_v2" "zone_1" {
-			name = "%s"
-			email = "email1@example.com"
-			description = "a zone"
-			ttl = 3000
-			type = "private"
-			router {
-				router_id = "%s"
-				router_region = "%s"
-			}
-		}
-	`, zoneName, OS_VPC_ID, OS_REGION_NAME)
+resource "opentelekomcloud_dns_zone_v2" "zone_1" {
+  name = "%s"
+  email = "email1@example.com"
+  description = "a privete zone"
+  ttl = 3000
+  type = "private"
+
+  router {
+    router_id = "%s"
+    router_region = "%s"
+  }
+  tags = {
+    foo = "bar"
+    key = "value"
+  }
+}
+`, zoneName, OS_VPC_ID, OS_REGION_NAME)
 }
 
 func testAccDNSV2Zone_update(zoneName string) string {
 	return fmt.Sprintf(`
-		resource "opentelekomcloud_dns_zone_v2" "zone_1" {
-			name = "%s"
-			email = "email2@example.com"
-			description = "an updated zone"
-			ttl = 6000
-			type = "public"
-		}
-	`, zoneName)
+resource "opentelekomcloud_dns_zone_v2" "zone_1" {
+  name = "%s"
+  email = "email2@example.com"
+  description = "an updated zone"
+  ttl = 6000
+  type = "public"
+
+  tags = {
+    foo = "bar"
+    key = "value_updated"
+  }
+}
+`, zoneName)
 }
 
 func testAccDNSV2Zone_readTTL(zoneName string) string {
 	return fmt.Sprintf(`
-		resource "opentelekomcloud_dns_zone_v2" "zone_1" {
-			name = "%s"
-			email = "email1@example.com"
-		}
-	`, zoneName)
+resource "opentelekomcloud_dns_zone_v2" "zone_1" {
+  name = "%s"
+  email = "email1@example.com"
+}
+`, zoneName)
 }
 
 func testAccDNSV2Zone_timeout(zoneName string) string {
 	return fmt.Sprintf(`
-		resource "opentelekomcloud_dns_zone_v2" "zone_1" {
-			name = "%s"
-			email = "email@example.com"
-			ttl = 3000
+resource "opentelekomcloud_dns_zone_v2" "zone_1" {
+  name = "%s"
+  email = "email@example.com"
+  ttl = 3000
 
-			timeouts {
-				create = "5m"
-				update = "5m"
-				delete = "5m"
-			}
-		}
-	`, zoneName)
+  timeouts {
+    create = "5m"
+    update = "5m"
+    delete = "5m"
+  }
+}
+`, zoneName)
 }

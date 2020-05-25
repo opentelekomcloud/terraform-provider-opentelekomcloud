@@ -7,11 +7,17 @@ import (
 	"time"
 
 	"github.com/huaweicloud/golangsdk"
+	"github.com/huaweicloud/golangsdk/openstack/common/tags"
 	"github.com/huaweicloud/golangsdk/openstack/dns/v2/zones"
 
 	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
 )
+
+var serviceMap = map[string]string{
+	"public":  "DNS-public_zone",
+	"private": "DNS-private_zone",
+}
 
 func resourceDNSZoneV2() *schema.Resource {
 	return &schema.Resource{
@@ -60,6 +66,7 @@ func resourceDNSZoneV2() *schema.Resource {
 				Type:     schema.TypeString,
 				Optional: true,
 			},
+			"tags": tagsSchema(),
 			"router": {
 				Type:     schema.TypeSet,
 				Optional: true,
@@ -202,6 +209,15 @@ func resourceDNSZoneV2Create(d *schema.ResourceData, meta interface{}) error {
 
 	d.SetId(n.ID)
 
+	// set tags
+	tagRaw := d.Get("tags").(map[string]interface{})
+	if len(tagRaw) > 0 {
+		taglist := expandResourceTags(tagRaw)
+		if tagErr := tags.Create(dnsClient, serviceMap[zone_type], n.ID, taglist).ExtractErr(); tagErr != nil {
+			return fmt.Errorf("Error setting tags of DNS zone %s: %s", n.ID, tagErr)
+		}
+	}
+
 	log.Printf("[DEBUG] Created OpenTelekomCloud DNS Zone %s: %#v", n.ID, n)
 	return resourceDNSZoneV2Read(d, meta)
 }
@@ -229,6 +245,17 @@ func resourceDNSZoneV2Read(d *schema.ResourceData, meta interface{}) error {
 		return fmt.Errorf("[DEBUG] Error saving masters to state for OpenTelekomCloud DNS zone (%s): %s", d.Id(), err)
 	}
 	d.Set("region", GetRegion(d, config))
+
+	// save tags
+	resourceTags, err := tags.Get(dnsClient, serviceMap[n.ZoneType], d.Id()).Extract()
+	if err != nil {
+		return fmt.Errorf("Error fetching OpenTelekomCloud DNS zone tags: %s", err)
+	}
+
+	tagmap := tagsToMap(resourceTags.Tags)
+	if err := d.Set("tags", tagmap); err != nil {
+		return fmt.Errorf("Error saving tags for OpenTelekomCloud DNS zone %s: %s", d.Id(), err)
+	}
 
 	return nil
 }
@@ -342,6 +369,12 @@ func resourceDNSZoneV2Update(d *schema.ResourceData, meta interface{}) error {
 				}
 			}
 		}
+	}
+
+	// update tags
+	tagErr := UpdateResourceTags(dnsClient, d, serviceMap[zone_type])
+	if tagErr != nil {
+		return fmt.Errorf("Error updating tags of DNS zone %s: %s", d.Id(), tagErr)
 	}
 
 	return resourceDNSZoneV2Read(d, meta)
