@@ -16,11 +16,16 @@ Manages a DNS zone in the OpenTelekomCloud DNS Service.
 
 ```hcl
 resource "opentelekomcloud_dns_zone_v2" "public_example_com" {
-  name = "public.example.com."
+  name  = "public.example.com."
   email = "public@example.com"
   description = "An example for public zone"
-  ttl = 3000
+  ttl  = 3000
   type = "public"
+
+  tags = {
+    foo = "bar"
+    key = "value"
+  }
 }
 ```
 
@@ -28,14 +33,19 @@ resource "opentelekomcloud_dns_zone_v2" "public_example_com" {
 
 ```hcl
 resource "opentelekomcloud_dns_zone_v2" "private_example_com" {
-  name = "private.example.com."
+  name  = "private.example.com."
   email = "private@example.com"
   description = "An example for private zone"
-  ttl = 3000
+  ttl  = 3000
   type = "private"
+
   router {
-     router_id = "${var.vpc_id}"
-     router_region = "${var.region}"
+     router_id     = var.vpc_id
+     router_region = var.region
+  }
+  tags = {
+    foo = "bar"
+    key = "value"
   }
 }
 ```
@@ -59,7 +69,7 @@ The following arguments are supported:
 * `router` (Optional) The Router(VPC) configuration for the private zone.
     it is required when type is `private`.
 
-* `masters` - (Optional) An array of master DNS servers. 
+* `tags` - (Optional) The key/value pairs to associate with the zone.
 
 * `value_specs` - (Optional) Map of additional options. Changing this creates a
   new zone.
@@ -79,8 +89,9 @@ The following attributes are exported:
 * `type` - See Argument Reference above.
 * `ttl` - See Argument Reference above.
 * `description` - See Argument Reference above.
-* `masters` - See Argument Reference above.
+* `tags` - See Argument Reference above.
 * `value_specs` - See Argument Reference above.
+* `masters` - An array of master DNS servers.
 
 ## Import
 
