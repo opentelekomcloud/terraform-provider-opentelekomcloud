@@ -25,6 +25,8 @@ func TestAccVpnSiteConnectionV2_basic(t *testing.T) {
 						"opentelekomcloud_vpnaas_site_connection_v2.conn_1", &conn),
 					resource.TestCheckResourceAttrPtr("opentelekomcloud_vpnaas_site_connection_v2.conn_1", "ikepolicy_id", &conn.IKEPolicyID),
 					resource.TestCheckResourceAttr("opentelekomcloud_vpnaas_site_connection_v2.conn_1", "admin_state_up", strconv.FormatBool(conn.AdminStateUp)),
+					resource.TestCheckResourceAttr("opentelekomcloud_vpnaas_site_connection_v2.conn_1", "tags.foo", "bar"),
+					resource.TestCheckResourceAttr("opentelekomcloud_vpnaas_site_connection_v2.conn_1", "tags.key", "value"),
 					resource.TestCheckResourceAttrPtr("opentelekomcloud_vpnaas_site_connection_v2.conn_1", "ipsecpolicy_id", &conn.IPSecPolicyID),
 					resource.TestCheckResourceAttrPtr("opentelekomcloud_vpnaas_site_connection_v2.conn_1", "vpnservice_id", &conn.VPNServiceID),
 					resource.TestCheckResourceAttrPtr("opentelekomcloud_vpnaas_site_connection_v2.conn_1", "local_ep_group_id", &conn.LocalEPGroupID),
@@ -139,6 +141,12 @@ var testAccSiteConnectionV2_basic = fmt.Sprintf(`
 		peer_id = "192.168.10.1"
 		local_ep_group_id = "${opentelekomcloud_vpnaas_endpoint_group_v2.group_2.id}"
 		peer_ep_group_id = "${opentelekomcloud_vpnaas_endpoint_group_v2.group_1.id}"
+
+		tags = {
+		  foo = "bar"
+		  key = "value"
+		}
+
 		depends_on = ["opentelekomcloud_networking_router_interface_v2.router_interface_1"]
 	}
 	`, OS_EXTGW_ID)

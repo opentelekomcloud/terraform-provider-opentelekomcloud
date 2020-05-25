@@ -14,14 +14,14 @@ Manages a V2 IPSec site connection resource within OpenTelekomCloud.
 
 ```hcl
 resource "opentelekomcloud_vpnaas_site_connection_v2" "conn_1" {
-	name = "connection_1"
-	ikepolicy_id = "${opentelekomcloud_vpnaas_ike_policy_v2.policy_2.id}"
-	ipsecpolicy_id = "${opentelekomcloud_vpnaas_ipsec_policy_v2.policy_1.id}"
-	vpnservice_id = "${opentelekomcloud_vpnaas_service_v2.service_1.id}"
-	psk = "secret"
-	peer_address = "192.168.10.1"
-	local_ep_group_id = "${opentelekomcloud_vpnaas_endpoint_group_v2.group_2.id}"
-	peer_ep_group_id = "${opentelekomcloud_vpnaas_endpoint_group_v2.group_1.id}"
+  name = "connection_1"
+  ikepolicy_id = "${opentelekomcloud_vpnaas_ike_policy_v2.policy_2.id}"
+  ipsecpolicy_id = "${opentelekomcloud_vpnaas_ipsec_policy_v2.policy_1.id}"
+  vpnservice_id = "${opentelekomcloud_vpnaas_service_v2.service_1.id}"
+  psk = "secret"
+  peer_address = "192.168.10.1"
+  local_ep_group_id = "${opentelekomcloud_vpnaas_endpoint_group_v2.group_2.id}"
+  peer_ep_group_id = "${opentelekomcloud_vpnaas_endpoint_group_v2.group_1.id}"
 }
 ```
 
@@ -95,6 +95,8 @@ The following arguments are supported:
 
 * `value_specs` - (Optional) Map of additional options.
 
+* `tags` - (Optional) The key/value pairs to associate with the connection.
+
 ## Attributes Reference
 
 The following attributes are exported:
@@ -117,6 +119,7 @@ The following attributes are exported:
 * `vpnservice_id` - See Argument Reference above.
 * `ikepolicy_id` - See Argument Reference above.
 * `value_specs` - See Argument Reference above.
+* `tags` - See Argument Reference above.
 
 ## Import
 
