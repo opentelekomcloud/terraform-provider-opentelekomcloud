@@ -258,6 +258,7 @@ func resourceCCENodeLabelsV2(d *schema.ResourceData) map[string]string {
 	}
 	return m
 }
+
 func resourceCCENodeAnnotationsV2(d *schema.ResourceData) map[string]string {
 	m := make(map[string]string)
 	for key, val := range d.Get("annotations").(map[string]interface{}) {
@@ -265,10 +266,12 @@ func resourceCCENodeAnnotationsV2(d *schema.ResourceData) map[string]string {
 	}
 	return m
 }
+
 func resourceCCENodeTags(d *schema.ResourceData) []tags.ResourceTag {
 	tagRaw := d.Get("tags").(map[string]interface{})
 	return expandResourceTags(tagRaw)
 }
+
 func resourceCCEDataVolume(d *schema.ResourceData) []nodes.VolumeSpec {
 	volumeRaw := d.Get("data_volumes").([]interface{})
 	volumes := make([]nodes.VolumeSpec, len(volumeRaw))
@@ -282,6 +285,7 @@ func resourceCCEDataVolume(d *schema.ResourceData) []nodes.VolumeSpec {
 	}
 	return volumes
 }
+
 func resourceCCERootVolume(d *schema.ResourceData) nodes.VolumeSpec {
 	var nics nodes.VolumeSpec
 	nicsRaw := d.Get("root_volume").([]interface{})
@@ -292,6 +296,7 @@ func resourceCCERootVolume(d *schema.ResourceData) nodes.VolumeSpec {
 	}
 	return nics
 }
+
 func resourceCCEEipIDs(d *schema.ResourceData) []string {
 	rawID := d.Get("eip_ids").(*schema.Set)
 	id := make([]string, rawID.Len())
@@ -300,6 +305,7 @@ func resourceCCEEipIDs(d *schema.ResourceData) []string {
 	}
 	return id
 }
+
 func resourceCCENodeV3Create(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*Config)
 	nodeClient, err := config.cceV3Client(GetRegion(d, config))
@@ -313,6 +319,13 @@ func resourceCCENodeV3Create(d *schema.ResourceData, meta interface{}) error {
 	}
 	if v, ok := d.GetOk("postinstall"); ok {
 		base64PostInstall = installScriptEncode(v.(string))
+	}
+
+	// eip_count and bandwidth_size parameters must be set simultaneously
+	bandwidthSize := d.Get("bandwidth_size").(int)
+	eipCount := d.Get("eip_count").(int)
+	if bandwidthSize > 0 && eipCount == 0 {
+		eipCount = 1
 	}
 
 	createOpts := nodes.CreateOpts{
@@ -331,12 +344,12 @@ func resourceCCENodeV3Create(d *schema.ResourceData, meta interface{}) error {
 			DataVolumes: resourceCCEDataVolume(d),
 			PublicIP: nodes.PublicIPSpec{
 				Ids:   resourceCCEEipIDs(d),
-				Count: d.Get("eip_count").(int),
+				Count: eipCount,
 				Eip: nodes.EipSpec{
 					IpType: d.Get("iptype").(string),
 					Bandwidth: nodes.BandwidthOpts{
 						ChargeMode: d.Get("bandwidth_charge_mode").(string),
-						Size:       d.Get("bandwidth_size").(int),
+						Size:       bandwidthSize,
 						ShareType:  d.Get("sharetype").(string),
 					},
 				},
