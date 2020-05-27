@@ -203,7 +203,7 @@ func resourceVirtualPrivateCloudV1Update(d *schema.ResourceData, meta interface{
 			return fmt.Errorf("Error creating OpenTelekomCloud networking client: %s", err)
 		}
 
-		tagErr := UpdateResourceTags(vpcV2Client, d, "vpcs")
+		tagErr := UpdateResourceTags(vpcV2Client, d, "vpcs", d.Id())
 		if tagErr != nil {
 			return fmt.Errorf("Error updating tags of VPC %s: %s", d.Id(), tagErr)
 		}

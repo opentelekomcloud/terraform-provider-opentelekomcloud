@@ -372,7 +372,7 @@ func resourceDNSZoneV2Update(d *schema.ResourceData, meta interface{}) error {
 	}
 
 	// update tags
-	tagErr := UpdateResourceTags(dnsClient, d, serviceMap[zone_type])
+	tagErr := UpdateResourceTags(dnsClient, d, serviceMap[zone_type], d.Id())
 	if tagErr != nil {
 		return fmt.Errorf("Error updating tags of DNS zone %s: %s", d.Id(), tagErr)
 	}

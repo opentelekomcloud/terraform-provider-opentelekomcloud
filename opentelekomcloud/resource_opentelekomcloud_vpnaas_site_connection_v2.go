@@ -394,7 +394,7 @@ func resourceVpnSiteConnectionV2Update(d *schema.ResourceData, meta interface{})
 	}
 
 	// update tags
-	tagErr := UpdateResourceTags(networkingClient, d, "ipsec-site-connections")
+	tagErr := UpdateResourceTags(networkingClient, d, "ipsec-site-connections", d.Id())
 	if tagErr != nil {
 		return fmt.Errorf("Error updating tags of VPN site connection %s: %s", d.Id(), tagErr)
 	}
