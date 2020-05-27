@@ -427,12 +427,7 @@ func resourceCCENodeV3Create(d *schema.ResourceData, meta interface{}) error {
 		return fmt.Errorf("Error creating opentelekomcloud CCE Node: %s", err)
 	}
 
-	node, err := nodes.Get(nodeClient, clusterid, nodeid).Extract()
-	d.SetId(node.Metadata.Id)
-	d.Set("iptype", s.Spec.PublicIP.Eip.IpType)
-	d.Set("bandwidth_charge_mode", s.Spec.PublicIP.Eip.Bandwidth.ChargeMode)
-	d.Set("bandwidth_size", s.Spec.PublicIP.Eip.Bandwidth.Size)
-	d.Set("sharetype", s.Spec.PublicIP.Eip.Bandwidth.ShareType)
+	d.SetId(nodeid)
 	return resourceCCENodeV3Read(d, meta)
 }
 
@@ -454,6 +449,7 @@ func resourceCCENodeV3Read(d *schema.ResourceData, meta interface{}) error {
 		return fmt.Errorf("Error retrieving opentelekomcloud Node: %s", err)
 	}
 
+	d.Set("region", GetRegion(d, config))
 	d.Set("name", s.Metadata.Name)
 	d.Set("flavor_id", s.Spec.Flavor)
 	d.Set("availability_zone", s.Spec.Az)
@@ -465,6 +461,17 @@ func resourceCCENodeV3Read(d *schema.ResourceData, meta interface{}) error {
 	d.Set("max_pods", s.Spec.ExtendParam.MaxPods)
 	d.Set("ecs_performance_type", s.Spec.ExtendParam.EcsPerformanceType)
 	d.Set("key_pair", s.Spec.Login.SshKey)
+
+	// Spec.PublicIP field is empty in the response body even if eip was configured,
+	// so we should not set the following attributes
+	/*
+		// set PublicIPSpec
+		d.Set("eip_ids", s.Spec.PublicIP.Ids)
+		d.Set("iptype", s.Spec.PublicIP.Eip.IpType)
+		d.Set("bandwidth_charge_mode", s.Spec.PublicIP.Eip.Bandwidth.ChargeMode)
+		d.Set("bandwidth_size", s.Spec.PublicIP.Eip.Bandwidth.Size)
+		d.Set("sharetype", s.Spec.PublicIP.Eip.Bandwidth.ShareType)
+	*/
 
 	var volumes []map[string]interface{}
 	for _, pairObject := range s.Spec.DataVolumes {
@@ -489,9 +496,6 @@ func resourceCCENodeV3Read(d *schema.ResourceData, meta interface{}) error {
 	if err := d.Set("root_volume", rootVolume); err != nil {
 		return fmt.Errorf("[DEBUG] Error saving root Volume to state for opentelekomcloud Node (%s): %s", d.Id(), err)
 	}
-
-	d.Set("eip_ids", s.Spec.PublicIP.Ids)
-	d.Set("region", GetRegion(d, config))
 
 	// set computed attributes
 	serverId := s.Status.ServerID
