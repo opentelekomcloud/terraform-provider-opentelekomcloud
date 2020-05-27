@@ -231,11 +231,19 @@ func resourceCCENodeV3() *schema.Resource {
 				ConflictsWith: []string{"labels"},
 				Optional:      true,
 			},
+			"status": {
+				Type:     schema.TypeString,
+				Computed: true,
+			},
 			"server_id": {
 				Type:     schema.TypeString,
 				Computed: true,
 			},
 			"private_ip": {
+				Type:     schema.TypeString,
+				Computed: true,
+			},
+			"public_ip": {
 				Type:     schema.TypeString,
 				Computed: true,
 			},
@@ -471,10 +479,13 @@ func resourceCCENodeV3Read(d *schema.ResourceData, meta interface{}) error {
 
 	d.Set("eip_ids", s.Spec.PublicIP.Ids)
 	d.Set("region", GetRegion(d, config))
-	d.Set("private_ip", s.Status.PrivateIP)
 
+	// set computed attributes
 	serverId := s.Status.ServerID
 	d.Set("server_id", serverId)
+	d.Set("private_ip", s.Status.PrivateIP)
+	d.Set("public_ip", s.Status.PublicIP)
+	d.Set("status", s.Status.Phase)
 
 	// fetch tags from ECS instance
 	computeClient, err := config.computeV1Client(GetRegion(d, config))
