@@ -6,12 +6,12 @@ import (
 	"strings"
 	"time"
 
-	"github.com/huaweicloud/golangsdk"
-	"github.com/huaweicloud/golangsdk/openstack/dns/v2/ptrrecords"
-
 	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/helper/validation"
+	"github.com/huaweicloud/golangsdk"
+	"github.com/huaweicloud/golangsdk/openstack/common/tags"
+	"github.com/huaweicloud/golangsdk/openstack/dns/v2/ptrrecords"
 )
 
 func resourceDNSPtrRecordV2() *schema.Resource {
@@ -52,12 +52,7 @@ func resourceDNSPtrRecordV2() *schema.Resource {
 				ForceNew:     false,
 				ValidateFunc: validation.IntBetween(300, 2147483647),
 			},
-			"tags": {
-				Type:         schema.TypeMap,
-				Optional:     true,
-				ForceNew:     false,
-				ValidateFunc: validateECSTagValue,
-			},
+			"tags": tagsSchema(),
 			"address": {
 				Type:     schema.TypeString,
 				Computed: true,
@@ -146,6 +141,17 @@ func resourceDNSPtrRecordV2Read(d *schema.ResourceData, meta interface{}) error 
 	d.Set("floatingip_id", fipID)
 	d.Set("ttl", n.TTL)
 	d.Set("address", n.Address)
+
+	// save tags
+	resourceTags, err := tags.Get(dnsClient, "DNS-ptr_record", d.Id()).Extract()
+	if err != nil {
+		return fmt.Errorf("Error fetching OpenTelekomCloud DNS ptr record tags: %s", err)
+	}
+
+	tagmap := tagsToMap(resourceTags.Tags)
+	if err := d.Set("tags", tagmap); err != nil {
+		return fmt.Errorf("Error saving tags for OpenTelekomCloud DNS ptr record %s: %s", d.Id(), err)
+	}
 
 	return nil
 }

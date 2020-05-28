@@ -38,6 +38,8 @@ func TestAccDNSV2PtrRecord_basic(t *testing.T) {
 					testAccCheckDNSV2PtrRecordExists("opentelekomcloud_dns_ptrrecord_v2.ptr_1", &ptrrecord),
 					resource.TestCheckResourceAttr(
 						"opentelekomcloud_dns_ptrrecord_v2.ptr_1", "description", "ptr record updated"),
+					resource.TestCheckResourceAttr(
+						"opentelekomcloud_dns_ptrrecord_v2.ptr_1", "foo", "bar"),
 				),
 			},
 		},
@@ -103,12 +105,12 @@ resource "opentelekomcloud_networking_floatingip_v2" "fip_1" {
 }
 
 resource "opentelekomcloud_dns_ptrrecord_v2" "ptr_1" {
-	name = "%s"
-	description = "a ptr record"
-	floatingip_id = opentelekomcloud_networking_floatingip_v2.fip_1.id
-	ttl = 6000
+  name = "%s"
+  description = "a ptr record"
+  floatingip_id = opentelekomcloud_networking_floatingip_v2.fip_1.id
+  ttl = 6000
 }
-	`, ptrName)
+`, ptrName)
 }
 
 func testAccDNSV2PtrRecord_update(ptrName string) string {
@@ -117,13 +119,13 @@ resource "opentelekomcloud_networking_floatingip_v2" "fip_1" {
 }
 
 resource "opentelekomcloud_dns_ptrrecord_v2" "ptr_1" {
-	name = "%s"
-	description = "ptr record updated"
-	floatingip_id = opentelekomcloud_networking_floatingip_v2.fip_1.id
-	ttl = 6000
-	tags = {
-		foo = "bar"
-	}
+  name = "%s"
+  description = "ptr record updated"
+  floatingip_id = opentelekomcloud_networking_floatingip_v2.fip_1.id
+  ttl = 6000
+  tags = {
+    foo = "bar"
+  }
 }
-	`, ptrName)
+`, ptrName)
 }
