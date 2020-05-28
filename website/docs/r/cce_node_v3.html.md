@@ -17,21 +17,22 @@ Add a node to a container cluster.
    variable "availability_zone" { }
 
    resource "opentelekomcloud_cce_node_v3" "node_1" {
-     cluster_id="${var.cluster_id}"
+     cluster_id = var.cluster_id
      name = "node1"
-     flavor_id="s1.medium"
-     iptype="5_bgp"
-     availability_zone= "${var.availability_zone}"
-     key_pair="${var.ssh_key}"
+     flavor_id ="s1.medium"
+     iptype = "5_bgp"
+     availability_zone = var.availability_zone
+     key_pair = var.ssh_key
+     sharetype = "PER"
+     bandwidth_size = 100
+
      root_volume {
-       size= 40
-       volumetype= "SATA"
+       size = 40
+       volumetype = "SATA"
      }
-     sharetype= "PER"
-     bandwidth_size= 100
      data_volumes {
-       size= 100
-       volumetype= "SATA"
+       size = 100
+       volumetype = "SATA"
      }
   }
  ```    
@@ -46,6 +47,8 @@ The following arguments are supported:
 * `name` - (Optional) Node Name.
 
 * `labels` - (Optional) Node tag, key/value pair format. Changing this parameter will create a new resource.
+
+* `tags` - (Optional) The field is alternative to `labels`, key/value pair format.
 
 * `annotations` - (Optional) Node annotation, key/value pair format. Changing this parameter will create a new resource.
     
@@ -113,4 +116,5 @@ All above argument parameters can be exported as attribute parameters along with
  * `status` - Node status information.
 
  * `private_ip` - Private IP of the CCE node.
-  
+
+ * `server_id` - ID of the ECS where the node resides.
