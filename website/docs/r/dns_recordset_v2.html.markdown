@@ -20,11 +20,11 @@ resource "opentelekomcloud_dns_zone_v2" "example_zone" {
   email = "email2@example.com"
   description = "a zone"
   ttl = 6000
-  type = "PRIMARY"
+  type = "public"
 }
 
 resource "opentelekomcloud_dns_recordset_v2" "rs_example_com" {
-  zone_id = "${opentelekomcloud_dns_zone_v2.example_zone.id}"
+  zone_id = opentelekomcloud_dns_zone_v2.example_zone.id
   name = "rs.example.com."
   description = "An example record set"
   ttl = 3000
@@ -52,6 +52,8 @@ The following arguments are supported:
 
 * `records` - (Optional) An array of DNS records.
 
+* `tags` - (Optional) The key/value pairs to associate with the zone.
+
 * `value_specs` - (Optional) Map of additional options. Changing this creates a
   new record set.
 
@@ -62,8 +64,9 @@ The following attributes are exported:
 * `name` - See Argument Reference above.
 * `type` - See Argument Reference above.
 * `ttl` - See Argument Reference above.
-* `description` - See Argument Reference above.
 * `records` - See Argument Reference above.
+* `description` - See Argument Reference above.
+* `tags` - See Argument Reference above.
 * `zone_id` - See Argument Reference above.
 * `value_specs` - See Argument Reference above.
 

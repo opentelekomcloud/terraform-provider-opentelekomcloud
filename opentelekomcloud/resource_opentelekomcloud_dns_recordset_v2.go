@@ -6,11 +6,12 @@ import (
 	"strings"
 	"time"
 
-	"github.com/huaweicloud/golangsdk"
-	"github.com/huaweicloud/golangsdk/openstack/dns/v2/recordsets"
-
 	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
+	"github.com/huaweicloud/golangsdk"
+	"github.com/huaweicloud/golangsdk/openstack/common/tags"
+	"github.com/huaweicloud/golangsdk/openstack/dns/v2/recordsets"
+	"github.com/huaweicloud/golangsdk/openstack/dns/v2/zones"
 )
 
 func resourceDNSRecordSetV2() *schema.Resource {
@@ -74,6 +75,7 @@ func resourceDNSRecordSetV2() *schema.Resource {
 				Optional: true,
 				ForceNew: true,
 			},
+			"tags": tagsSchema(),
 		},
 	}
 }
@@ -130,6 +132,20 @@ func resourceDNSRecordSetV2Create(d *schema.ResourceData, meta interface{}) erro
 	id := fmt.Sprintf("%s/%s", zoneID, n.ID)
 	d.SetId(id)
 
+	// set tags
+	tagRaw := d.Get("tags").(map[string]interface{})
+	if len(tagRaw) > 0 {
+		resourceType, err := getDNSRecordSetResourceType(dnsClient, zoneID)
+		if err != nil {
+			return fmt.Errorf("Error getting resource type of DNS record set %s: %s", n.ID, err)
+		}
+
+		taglist := expandResourceTags(tagRaw)
+		if tagErr := tags.Create(dnsClient, resourceType, n.ID, taglist).ExtractErr(); tagErr != nil {
+			return fmt.Errorf("Error setting tags of DNS record set %s: %s", n.ID, tagErr)
+		}
+	}
+
 	log.Printf("[DEBUG] Created OpenTelekomCloud DNS record set %s: %#v", n.ID, n)
 	return resourceDNSRecordSetV2Read(d, meta)
 }
@@ -163,6 +179,21 @@ func resourceDNSRecordSetV2Read(d *schema.ResourceData, meta interface{}) error 
 	}
 	d.Set("region", GetRegion(d, config))
 	d.Set("zone_id", zoneID)
+
+	// save tags
+	resourceType, err := getDNSRecordSetResourceType(dnsClient, zoneID)
+	if err != nil {
+		return fmt.Errorf("Error getting resource type of DNS record set %s: %s", recordsetID, err)
+	}
+	resourceTags, err := tags.Get(dnsClient, resourceType, recordsetID).Extract()
+	if err != nil {
+		return fmt.Errorf("Error fetching OpenTelekomCloud DNS record set tags: %s", err)
+	}
+
+	tagmap := tagsToMap(resourceTags.Tags)
+	if err := d.Set("tags", tagmap); err != nil {
+		return fmt.Errorf("Error saving tags for OpenTelekomCloud DNS record set %s: %s", recordsetID, err)
+	}
 
 	return nil
 }
@@ -219,6 +250,17 @@ func resourceDNSRecordSetV2Update(d *schema.ResourceData, meta interface{}) erro
 		return fmt.Errorf(
 			"Error waiting for record set (%s) to become ACTIVE for updation: %s",
 			recordsetID, err)
+	}
+
+	// update tags
+	resourceType, err := getDNSRecordSetResourceType(dnsClient, zoneID)
+	if err != nil {
+		return fmt.Errorf("Error getting resource type of DNS record set %s: %s", d.Id(), err)
+	}
+
+	tagErr := UpdateResourceTags(dnsClient, d, resourceType, recordsetID)
+	if tagErr != nil {
+		return fmt.Errorf("Error updating tags of DNS record set %s: %s", d.Id(), tagErr)
 	}
 
 	return resourceDNSRecordSetV2Read(d, meta)
@@ -289,4 +331,20 @@ func parseDNSV2RecordSetID(id string) (string, string, error) {
 	recordsetID := idParts[1]
 
 	return zoneID, recordsetID, nil
+}
+
+// get resource type of DNS record set from zone_id
+func getDNSRecordSetResourceType(client *golangsdk.ServiceClient, zone_id string) (string, error) {
+	zone, err := zones.Get(client, zone_id).Extract()
+	if err != nil {
+		return "", err
+	}
+
+	zoneType := zone.ZoneType
+	if zoneType == "public" {
+		return "DNS-public_recordset", nil
+	} else if zoneType == "private" {
+		return "DNS-private_recordset", nil
+	}
+	return "", fmt.Errorf("invalid zone type: %s", zoneType)
 }
