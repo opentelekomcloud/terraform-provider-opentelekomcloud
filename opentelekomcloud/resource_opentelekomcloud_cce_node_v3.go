@@ -231,11 +231,19 @@ func resourceCCENodeV3() *schema.Resource {
 				ConflictsWith: []string{"labels"},
 				Optional:      true,
 			},
+			"status": {
+				Type:     schema.TypeString,
+				Computed: true,
+			},
 			"server_id": {
 				Type:     schema.TypeString,
 				Computed: true,
 			},
 			"private_ip": {
+				Type:     schema.TypeString,
+				Computed: true,
+			},
+			"public_ip": {
 				Type:     schema.TypeString,
 				Computed: true,
 			},
@@ -250,6 +258,7 @@ func resourceCCENodeLabelsV2(d *schema.ResourceData) map[string]string {
 	}
 	return m
 }
+
 func resourceCCENodeAnnotationsV2(d *schema.ResourceData) map[string]string {
 	m := make(map[string]string)
 	for key, val := range d.Get("annotations").(map[string]interface{}) {
@@ -257,10 +266,12 @@ func resourceCCENodeAnnotationsV2(d *schema.ResourceData) map[string]string {
 	}
 	return m
 }
+
 func resourceCCENodeTags(d *schema.ResourceData) []tags.ResourceTag {
 	tagRaw := d.Get("tags").(map[string]interface{})
 	return expandResourceTags(tagRaw)
 }
+
 func resourceCCEDataVolume(d *schema.ResourceData) []nodes.VolumeSpec {
 	volumeRaw := d.Get("data_volumes").([]interface{})
 	volumes := make([]nodes.VolumeSpec, len(volumeRaw))
@@ -274,6 +285,7 @@ func resourceCCEDataVolume(d *schema.ResourceData) []nodes.VolumeSpec {
 	}
 	return volumes
 }
+
 func resourceCCERootVolume(d *schema.ResourceData) nodes.VolumeSpec {
 	var nics nodes.VolumeSpec
 	nicsRaw := d.Get("root_volume").([]interface{})
@@ -284,6 +296,7 @@ func resourceCCERootVolume(d *schema.ResourceData) nodes.VolumeSpec {
 	}
 	return nics
 }
+
 func resourceCCEEipIDs(d *schema.ResourceData) []string {
 	rawID := d.Get("eip_ids").(*schema.Set)
 	id := make([]string, rawID.Len())
@@ -292,6 +305,7 @@ func resourceCCEEipIDs(d *schema.ResourceData) []string {
 	}
 	return id
 }
+
 func resourceCCENodeV3Create(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*Config)
 	nodeClient, err := config.cceV3Client(GetRegion(d, config))
@@ -305,6 +319,13 @@ func resourceCCENodeV3Create(d *schema.ResourceData, meta interface{}) error {
 	}
 	if v, ok := d.GetOk("postinstall"); ok {
 		base64PostInstall = installScriptEncode(v.(string))
+	}
+
+	// eip_count and bandwidth_size parameters must be set simultaneously
+	bandwidthSize := d.Get("bandwidth_size").(int)
+	eipCount := d.Get("eip_count").(int)
+	if bandwidthSize > 0 && eipCount == 0 {
+		eipCount = 1
 	}
 
 	createOpts := nodes.CreateOpts{
@@ -323,12 +344,12 @@ func resourceCCENodeV3Create(d *schema.ResourceData, meta interface{}) error {
 			DataVolumes: resourceCCEDataVolume(d),
 			PublicIP: nodes.PublicIPSpec{
 				Ids:   resourceCCEEipIDs(d),
-				Count: d.Get("eip_count").(int),
+				Count: eipCount,
 				Eip: nodes.EipSpec{
 					IpType: d.Get("iptype").(string),
 					Bandwidth: nodes.BandwidthOpts{
 						ChargeMode: d.Get("bandwidth_charge_mode").(string),
-						Size:       d.Get("bandwidth_size").(int),
+						Size:       bandwidthSize,
 						ShareType:  d.Get("sharetype").(string),
 					},
 				},
@@ -406,12 +427,7 @@ func resourceCCENodeV3Create(d *schema.ResourceData, meta interface{}) error {
 		return fmt.Errorf("Error creating opentelekomcloud CCE Node: %s", err)
 	}
 
-	node, err := nodes.Get(nodeClient, clusterid, nodeid).Extract()
-	d.SetId(node.Metadata.Id)
-	d.Set("iptype", s.Spec.PublicIP.Eip.IpType)
-	d.Set("bandwidth_charge_mode", s.Spec.PublicIP.Eip.Bandwidth.ChargeMode)
-	d.Set("bandwidth_size", s.Spec.PublicIP.Eip.Bandwidth.Size)
-	d.Set("sharetype", s.Spec.PublicIP.Eip.Bandwidth.ShareType)
+	d.SetId(nodeid)
 	return resourceCCENodeV3Read(d, meta)
 }
 
@@ -433,6 +449,7 @@ func resourceCCENodeV3Read(d *schema.ResourceData, meta interface{}) error {
 		return fmt.Errorf("Error retrieving opentelekomcloud Node: %s", err)
 	}
 
+	d.Set("region", GetRegion(d, config))
 	d.Set("name", s.Metadata.Name)
 	d.Set("flavor_id", s.Spec.Flavor)
 	d.Set("availability_zone", s.Spec.Az)
@@ -444,6 +461,17 @@ func resourceCCENodeV3Read(d *schema.ResourceData, meta interface{}) error {
 	d.Set("max_pods", s.Spec.ExtendParam.MaxPods)
 	d.Set("ecs_performance_type", s.Spec.ExtendParam.EcsPerformanceType)
 	d.Set("key_pair", s.Spec.Login.SshKey)
+
+	// Spec.PublicIP field is empty in the response body even if eip was configured,
+	// so we should not set the following attributes
+	/*
+		// set PublicIPSpec
+		d.Set("eip_ids", s.Spec.PublicIP.Ids)
+		d.Set("iptype", s.Spec.PublicIP.Eip.IpType)
+		d.Set("bandwidth_charge_mode", s.Spec.PublicIP.Eip.Bandwidth.ChargeMode)
+		d.Set("bandwidth_size", s.Spec.PublicIP.Eip.Bandwidth.Size)
+		d.Set("sharetype", s.Spec.PublicIP.Eip.Bandwidth.ShareType)
+	*/
 
 	var volumes []map[string]interface{}
 	for _, pairObject := range s.Spec.DataVolumes {
@@ -469,12 +497,12 @@ func resourceCCENodeV3Read(d *schema.ResourceData, meta interface{}) error {
 		return fmt.Errorf("[DEBUG] Error saving root Volume to state for opentelekomcloud Node (%s): %s", d.Id(), err)
 	}
 
-	d.Set("eip_ids", s.Spec.PublicIP.Ids)
-	d.Set("region", GetRegion(d, config))
-	d.Set("private_ip", s.Status.PrivateIP)
-
+	// set computed attributes
 	serverId := s.Status.ServerID
 	d.Set("server_id", serverId)
+	d.Set("private_ip", s.Status.PrivateIP)
+	d.Set("public_ip", s.Status.PublicIP)
+	d.Set("status", s.Status.Phase)
 
 	// fetch tags from ECS instance
 	computeClient, err := config.computeV1Client(GetRegion(d, config))

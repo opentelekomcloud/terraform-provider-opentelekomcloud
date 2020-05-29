@@ -18,11 +18,11 @@ Add a node to a container cluster.
 
    resource "opentelekomcloud_cce_node_v3" "node_1" {
      cluster_id = var.cluster_id
+     availability_zone = var.availability_zone
      name = "node1"
      flavor_id ="s1.medium"
-     iptype = "5_bgp"
-     availability_zone = var.availability_zone
      key_pair = var.ssh_key
+     iptype = "5_bgp"
      sharetype = "PER"
      bandwidth_size = 100
 
@@ -66,13 +66,13 @@ iptype, charge_mode, bandwidth_size and share_type.
 
 * `eip_count` - (Optional) Number of elastic IPs to be dynamically created. Changing this parameter will create a new resource.
 
-* `iptype` - (Required) Elastic IP type. 
+* `iptype` - (Optional) Elastic IP type.
 
 * `bandwidth_charge_mode` - (Optional) Bandwidth billing type. Changing this parameter will create a new resource.
 
-* `sharetype` - (Required) Bandwidth sharing type. Changing this parameter will create a new resource.
+* `sharetype` - (Optional) Bandwidth sharing type. Changing this parameter will create a new resource.
 
-* `bandwidth_size` - (Required) Bandwidth size. Changing this parameter will create a new resource.
+* `bandwidth_size` - (Optional) Bandwidth size. Changing this parameter will create a new resource.
 
 * `extend_param_charging_mode` - (Optional) Node charging mode, 0 is on-demand charging. Changing this parameter will create a new cluster resource.
 
@@ -93,28 +93,26 @@ iptype, charge_mode, bandwidth_size and share_type.
 * `postinstall` - (Optional) Script required after installation. The input value can be a Base64 encoded string or not.
    Changing this parameter will create a new resource.
 
-**root_volume** **- (Required)** It corresponds to the system disk related configuration. Changing this parameter will create a new resource.
+* `root_volume` - (Required) It corresponds to the system disk related configuration. Changing this parameter will create a new resource.
 
-* `size` - (Required) Disk size in GB.
-    
-* `volumetype` - (Required) Disk type.
-    
-* `extend_param` - (Optional) Disk expansion parameters. 
+	* `size` - (Required) Disk size in GB.
+	* `volumetype` - (Required) Disk type.
+	* `extend_param` - (Optional) Disk expansion parameters.
 
-**data_volumes** **- (Required)** Represents the data disk to be created. Changing this parameter will create a new resource.
-    
-* `size` - (Required) Disk size in GB.
-    
-* `volumetype` - (Required) Disk type.
-    
-* `extend_param` - (Optional) Disk expansion parameters. 
-    
+* `data_volumes` - (Required) Represents the data disk to be created. Changing this parameter will create a new resource.
+
+	* `size` - (Required) Disk size in GB.
+	* `volumetype` - (Required) Disk type.
+	* `extend_param` - (Optional) Disk expansion parameters.
+
 ## Attributes Reference
 
 All above argument parameters can be exported as attribute parameters along with attribute reference.
 
  * `status` - Node status information.
 
+ * `server_id` - ID of the ECS where the node resides.
+
  * `private_ip` - Private IP of the CCE node.
 
- * `server_id` - ID of the ECS where the node resides.
+ * `public_ip` - Public IP of the CCE node.
