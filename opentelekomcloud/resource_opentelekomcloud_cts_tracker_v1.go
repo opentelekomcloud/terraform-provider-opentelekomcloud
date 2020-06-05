@@ -1,13 +1,11 @@
 package opentelekomcloud
 
 import (
-	"time"
-
 	"fmt"
 	"log"
+	"time"
 
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
-	"github.com/huaweicloud/golangsdk"
 	"github.com/huaweicloud/golangsdk/openstack/cts/v1/tracker"
 )
 
@@ -128,13 +126,13 @@ func resourceCTSTrackerRead(d *schema.ResourceData, meta interface{}) error {
 	}
 	trackers, err := tracker.List(ctsClient, listOpts)
 	if err != nil {
-		if _, ok := err.(golangsdk.ErrDefault404); ok {
-			log.Printf("[WARN] Removing cts tracker %s as it's already gone", d.Id())
-			d.SetId("")
-			return nil
-		}
-
 		return fmt.Errorf("Error retrieving cts tracker: %s", err)
+	}
+
+	if len(trackers) == 0 {
+		log.Printf("[WARN] Removing cts tracker %s as it's already gone", d.Id())
+		d.SetId("")
+		return nil
 	}
 
 	ctsTracker := trackers[0]
@@ -163,7 +161,7 @@ func resourceCTSTrackerUpdate(d *schema.ResourceData, meta interface{}) error {
 	}
 	var updateOpts tracker.UpdateOptsWithSMN
 
-	//as bucket_name is mandatory while updating tracker
+	// as bucket_name is mandatory while updating tracker
 	updateOpts.BucketName = d.Get("bucket_name").(string)
 
 	updateOpts.SimpleMessageNotification.TopicID = d.Get("topic_id").(string)
