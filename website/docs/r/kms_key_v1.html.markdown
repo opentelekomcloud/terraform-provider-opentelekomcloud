@@ -46,10 +46,10 @@ The following arguments are supported:
 
 The following attributes are exported:
 
+* `id` - The globally unique identifier for the key.
 * `key_alias` - See Argument Reference above.
 * `key_description` - See Argument Reference above.
 * `realm` - See Argument Reference above.
-* `key_id` - The globally unique identifier for the key.
 * `default_key_flag` - Identification of a Master Key. The value 1 indicates a Default
     Master Key, and the value 0 indicates a key.
 * `origin` - Origin of a key. The default value is kms.
