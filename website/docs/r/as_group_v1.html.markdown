@@ -180,6 +180,8 @@ The `lbaas_listeners` block supports:
 The following attributes are exported:
 
 * `scaling_group_name` - See Argument Reference above.
+* `status` - Indicates the status of the AS group.
+* `current_instance_number` - Indicates the number of current instances in the AS group.
 * `desire_instance_number` - See Argument Reference above.
 * `min_instance_number` - See Argument Reference above.
 * `max_instance_number` - See Argument Reference above.
