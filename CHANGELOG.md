@@ -1,19 +1,19 @@
-## 1.18.0 (Unreleased)
+## 1.18.0 (June 16, 2020)
 
 ENHANCEMENTS:
 
-* `opentelekomcloud_vpc_v1`: Add tag support [GH-508]
-* `opentelekomcloud_vpc_subnet_v1`: Add tag support [GH-508]
-* `opentelekomcloud_dns_zone_v2`: Add tag support [GH-510]
-* `opentelekomcloud_dns_recordset_v2`: Add tag support [GH-514]
-* `opentelekomcloud_cce_node_v3`: Add tag support [GH-513]
+* `opentelekomcloud_vpc_v1`: Add tag support ([#508](https://github.com/terraform-providers/terraform-provider-opentelekomcloud/issues/508))
+* `opentelekomcloud_vpc_subnet_v1`: Add tag support ([#508](https://github.com/terraform-providers/terraform-provider-opentelekomcloud/issues/508))
+* `opentelekomcloud_dns_zone_v2`: Add tag support ([#510](https://github.com/terraform-providers/terraform-provider-opentelekomcloud/issues/510))
+* `opentelekomcloud_dns_recordset_v2`: Add tag support ([#514](https://github.com/terraform-providers/terraform-provider-opentelekomcloud/issues/514))
+* `opentelekomcloud_cce_node_v3`: Add tag support ([#513](https://github.com/terraform-providers/terraform-provider-opentelekomcloud/issues/513))
 
 
 BUG FIXES:
 
-* `opentelekomcloud_waf_domain_v1`: Fix waf_domain_v1 using old waf API [GH-496]
-* `opentelekomcloud_dcs_instance_v1`, `opentelekomcloud_dms_instance_v1`, `opentelekomcloud_rds_instance_v3`: Set sensitive flag for password parameter [GH-504]
-* `opentelekomcloud_cts_tracker_v1`: Fix handling of missing tracker [GH-518]
+* `opentelekomcloud_waf_domain_v1`: Fix waf_domain_v1 using old waf API ([#496](https://github.com/terraform-providers/terraform-provider-opentelekomcloud/issues/496))
+* `opentelekomcloud_dcs_instance_v1`, `opentelekomcloud_dms_instance_v1`, `opentelekomcloud_rds_instance_v3`: Set sensitive flag for password parameter ([#504](https://github.com/terraform-providers/terraform-provider-opentelekomcloud/issues/504))
+* `opentelekomcloud_cts_tracker_v1`: Fix handling of missing tracker ([#518](https://github.com/terraform-providers/terraform-provider-opentelekomcloud/issues/518))
 
 ## 1.17.1 (May 07, 2020)
 
