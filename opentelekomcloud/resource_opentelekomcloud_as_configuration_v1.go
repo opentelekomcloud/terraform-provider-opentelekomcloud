@@ -8,6 +8,7 @@ import (
 	"os"
 	"regexp"
 
+	"github.com/hashicorp/go-multierror"
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
 	"github.com/huaweicloud/golangsdk"
 	"github.com/huaweicloud/golangsdk/openstack/autoscaling/v1/configurations"
@@ -18,7 +19,7 @@ func resourceASConfiguration() *schema.Resource {
 	return &schema.Resource{
 		Create: resourceASConfigurationCreate,
 		Read:   resourceASConfigurationRead,
-		Update: nil,
+		Update: resourceASConfigurationUpdate,
 		Delete: resourceASConfigurationDelete,
 
 		Schema: map[string]*schema.Schema{
@@ -26,19 +27,16 @@ func resourceASConfiguration() *schema.Resource {
 				Type:     schema.TypeString,
 				Optional: true,
 				Computed: true,
-				ForceNew: true,
 			},
 			"scaling_configuration_name": {
 				Type:         schema.TypeString,
 				Required:     true,
 				ValidateFunc: resourceASConfigurationValidateName,
-				ForceNew:     true,
 			},
 			"instance_config": {
 				Required: true,
 				Type:     schema.TypeList,
 				MaxItems: 1,
-				ForceNew: true,
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
 						"instance_id": {
@@ -61,7 +59,6 @@ func resourceASConfiguration() *schema.Resource {
 						"user_data": {
 							Type:     schema.TypeString,
 							Optional: true,
-							ForceNew: true,
 							// just stash the hash for state & diff comparisons
 							StateFunc: func(v interface{}) string {
 								switch v.(type) {
@@ -95,7 +92,6 @@ func resourceASConfiguration() *schema.Resource {
 									"kms_id": {
 										Type:     schema.TypeString,
 										Optional: true,
-										ForceNew: true,
 									},
 								},
 							},
@@ -335,6 +331,57 @@ func resourceASConfigurationRead(d *schema.ResourceData, meta interface{}) error
 	}
 
 	log.Printf("[DEBUG] Retrieved ASConfiguration %q: %+v", d.Id(), asConfig)
+
+	return nil
+}
+
+func reassignASGroups(client *golangsdk.ServiceClient, oldConfigID, newConfigID string) error {
+	grps, err := getASGroupsByConfiguration(client, oldConfigID)
+	if err != nil {
+		return err
+	}
+
+	if len(grps) == 0 {
+		return nil
+	}
+
+	errChan := make(chan error, len(grps))
+
+	for _, grp := range grps {
+		go func(id string) {
+			err := groups.Update(client, id, groups.UpdateOpts{ConfigurationID: newConfigID}).Err
+			errChan <- err
+		}(grp.ID)
+	}
+
+	var mErr *multierror.Error
+	for range grps {
+		mErr = multierror.Append(mErr, <-errChan)
+	}
+	return mErr.ErrorOrNil()
+}
+
+// resourceASConfigurationUpdate re-creating configuration assigning new one to all AS groups
+func resourceASConfigurationUpdate(d *schema.ResourceData, meta interface{}) error {
+	oldConfigID := d.Id()
+	if err := resourceASConfigurationCreate(d, meta); err != nil {
+		return fmt.Errorf("error re-creating AS configuration: %s", err)
+	}
+	d.MarkNewResource()
+
+	config := meta.(*Config)
+	client, err := config.autoscalingV1Client(GetRegion(d, config))
+	if err != nil {
+		return fmt.Errorf("error creating OpenTelekomCloud autoscaling client: %s", err)
+	}
+
+	if err := reassignASGroups(client, oldConfigID, d.Id()); err != nil {
+		return err
+	}
+
+	if err := configurations.Delete(client, oldConfigID).ExtractErr(); err != nil {
+		return fmt.Errorf("error deleting old AS configuration: %s", err)
+	}
 
 	return nil
 }
