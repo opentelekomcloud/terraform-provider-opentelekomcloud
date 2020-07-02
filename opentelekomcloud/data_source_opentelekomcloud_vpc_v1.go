@@ -64,7 +64,7 @@ func dataSourceVirtualPrivateCloudV1Read(d *schema.ResourceData, meta interface{
 	config := meta.(*Config)
 	vpcClient, err := config.networkingV1Client(GetRegion(d, config))
 	if err != nil {
-		return err
+		return fmt.Errorf("Error creating Huaweicloud Vpc client: %s", err)
 	}
 
 	listOpts := vpcs.ListOpts{

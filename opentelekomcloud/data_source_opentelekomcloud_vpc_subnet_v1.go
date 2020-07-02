@@ -79,7 +79,7 @@ func dataSourceVpcSubnetV1Read(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*Config)
 	subnetClient, err := config.networkingV1Client(GetRegion(d, config))
 	if err != nil {
-		return err
+		return fmt.Errorf("Error creating Huaweicloud Vpc client: %s", err)
 	}
 
 	listOpts := subnets.ListOpts{

@@ -52,7 +52,7 @@ func dataSourceVpcPeeringConnectionV2Read(d *schema.ResourceData, meta interface
 	config := meta.(*Config)
 	peeringClient, err := config.hwNetworkV2Client(GetRegion(d, config))
 	if err != nil {
-		return err
+		return fmt.Errorf("Error creating Huaweicloud Vpc client: %s", err)
 	}
 
 	listOpts := peerings.ListOpts{
