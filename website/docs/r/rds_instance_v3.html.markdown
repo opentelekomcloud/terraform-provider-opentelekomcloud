@@ -211,9 +211,6 @@ The `db` block supports:
   (Required)
   Specifies the DB engine. Value: MySQL, PostgreSQL, SQLServer. Changing this parameter will create a new resource.
 
-* `user_name` -
-  Indicates the default user name of database.
-
 * `version` -
   (Required)
   Specifies the database version. MySQL databases support MySQL 5.6
@@ -274,6 +271,10 @@ In addition to the arguments listed above, the following computed attributes are
 
 * `public_ips` -
   Indicates the public IP address list.
+
+* `db` - See Argument Reference above. The `db` block also contains:
+
+	* `user_name` - Indicates the default user name of database.
 
 The `nodes` block contains:
 
