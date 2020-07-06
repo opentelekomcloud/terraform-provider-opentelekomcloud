@@ -68,7 +68,7 @@ The following arguments are supported:
 
 * `vpc_id` - (Required) The ID of the VPC used to create the node. Changing this parameter will create a new cluster resource.
 
-* `subnet_id` - (Required) The ID of the subnet used to create the node. Changing this parameter will create a new cluster resource.
+* `subnet_id` - (Required) The Network ID of the subnet used to create the node. Changing this parameter will create a new cluster resource.
 
 * `highway_subnet_id` - (Optional) The ID of the high speed network used to create bare metal nodes. Changing this parameter will create a new cluster resource.
 
