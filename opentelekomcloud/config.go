@@ -476,8 +476,9 @@ func genClient(c *Config, ao golangsdk.AuthOptionsProvider) (*golangsdk.Provider
 
 	client.HTTPClient = http.Client{
 		Transport: &LogRoundTripper{
-			Rt:      transport,
-			OsDebug: osDebug,
+			Rt:         transport,
+			OsDebug:    osDebug,
+			MaxRetries: c.MaxRetries,
 		},
 		CheckRedirect: func(req *http.Request, via []*http.Request) error {
 			if client.AKSKAuthOptions.AccessKey != "" {
