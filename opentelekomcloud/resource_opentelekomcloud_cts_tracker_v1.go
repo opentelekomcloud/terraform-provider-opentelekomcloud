@@ -107,7 +107,7 @@ func resourceCTSTrackerCreate(d *schema.ResourceData, meta interface{}) error {
 
 	trackers, err := tracker.Create(ctsClient, createOpts).Extract()
 	if err != nil {
-		return fmt.Errorf("Error creating CTS tracker : %s", err)
+		return fmt.Errorf("Error creating CTS tracker: %s", err)
 	}
 
 	d.SetId(trackers.TrackerName)
@@ -118,7 +118,7 @@ func resourceCTSTrackerCreate(d *schema.ResourceData, meta interface{}) error {
 
 func resourceCTSTrackerRead(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*Config)
-	ctsClient, err := config.ctsV1Client(GetRegion(d, config))
+	ctsClient, err := config.ctsV1Client(GetProjectName(d, config))
 	if err != nil {
 		return fmt.Errorf("Error creating cts Client: %s", err)
 	}
@@ -153,6 +153,7 @@ func resourceCTSTrackerRead(d *schema.ResourceData, meta interface{}) error {
 	d.Set("need_notify_user_list", ctsTracker.SimpleMessageNotification.NeedNotifyUserList)
 
 	d.Set("region", GetRegion(d, config))
+	d.Set("project_name", GetProjectName(d, config))
 	time.Sleep(20 * time.Second)
 
 	return nil
@@ -160,7 +161,7 @@ func resourceCTSTrackerRead(d *schema.ResourceData, meta interface{}) error {
 
 func resourceCTSTrackerUpdate(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*Config)
-	ctsClient, err := config.ctsV1Client(GetRegion(d, config))
+	ctsClient, err := config.ctsV1Client(GetProjectName(d, config))
 	if err != nil {
 		return fmt.Errorf("Error creating cts Client: %s", err)
 	}
@@ -197,7 +198,7 @@ func resourceCTSTrackerUpdate(d *schema.ResourceData, meta interface{}) error {
 
 func resourceCTSTrackerDelete(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*Config)
-	ctsClient, err := config.ctsV1Client(GetRegion(d, config))
+	ctsClient, err := config.ctsV1Client(GetProjectName(d, config))
 	if err != nil {
 		return fmt.Errorf("Error creating cts Client: %s", err)
 	}

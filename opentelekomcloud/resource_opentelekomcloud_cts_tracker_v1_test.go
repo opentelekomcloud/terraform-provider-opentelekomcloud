@@ -63,7 +63,7 @@ func TestAccCTSTrackerV1_timeout(t *testing.T) {
 
 func testAccCheckCTSTrackerV1Destroy(s *terraform.State) error {
 	config := testAccProvider.Meta().(*Config)
-	ctsClient, err := config.ctsV1Client(OS_REGION_NAME)
+	ctsClient, err := config.ctsV1Client(OS_TENANT_NAME)
 	if err != nil {
 		return fmt.Errorf("Error creating cts client: %s", err)
 	}
@@ -97,7 +97,7 @@ func testAccCheckCTSTrackerV1Exists(n string, trackers *tracker.Tracker) resourc
 		}
 
 		config := testAccProvider.Meta().(*Config)
-		ctsClient, err := config.ctsV1Client(OS_REGION_NAME)
+		ctsClient, err := config.ctsV1Client(OS_TENANT_NAME)
 		if err != nil {
 			return fmt.Errorf("Error creating cts client: %s", err)
 		}
