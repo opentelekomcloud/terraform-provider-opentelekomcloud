@@ -49,8 +49,8 @@ func GetRegion(d *schema.ResourceData, config *Config) string {
 	return strings.Split(n, "_")[0]
 }
 
-// GetProjectName returns the project name that was specified in the resource.
-func GetProjectName(d *schema.ResourceData, config *Config) string {
+// GetProjectName returns the project name that was specified in the config.
+func GetProjectName(config *Config) string {
 	n := config.TenantName
 	if n == "" {
 		n = config.DelegatedProject
