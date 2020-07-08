@@ -227,6 +227,9 @@ The following arguments are supported:
 
 * `delegated_project` - (Optional) The name of delegated project (Identity v3).
 
+* `max_retries` - (Optional) Maximum number of retries of HTTP requests failed
+  due to connection issues.
+
 ## Additional Logging
 
 This provider has the ability to log all HTTP requests and responses between

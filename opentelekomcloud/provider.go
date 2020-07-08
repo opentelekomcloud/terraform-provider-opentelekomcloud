@@ -184,6 +184,12 @@ func Provider() terraform.ResourceProvider {
 				DefaultFunc: schema.EnvDefaultFunc("OS_CLOUD", ""),
 				Description: descriptions["cloud"],
 			},
+			"max_retries": {
+				Type:        schema.TypeInt,
+				Optional:    true,
+				Default:     1,
+				Description: descriptions["max_retries"],
+			},
 		},
 
 		DataSourcesMap: map[string]*schema.Resource{
@@ -423,6 +429,8 @@ func init() {
 		"delegated_project": "The name of delegated project (Identity v3).",
 
 		"cloud": "An entry in a `clouds.yaml` file to use.",
+
+		"max_retries": "How many times HTTP connection should be retried until giving up.",
 	}
 }
 
@@ -451,6 +459,7 @@ func configureProvider(d *schema.ResourceData, terraformVersion string) (interfa
 		AgencyName:       d.Get("agency_name").(string),
 		AgencyDomainName: d.Get("agency_domain_name").(string),
 		DelegatedProject: d.Get("delegated_project").(string),
+		MaxRetries:       d.Get("max_retries").(int),
 		terraformVersion: terraformVersion,
 	}
 
