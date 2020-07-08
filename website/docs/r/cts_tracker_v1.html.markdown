@@ -46,7 +46,7 @@ The following arguments are supported:
 
 * `status` - (Optional) The status of a tracker. The value should be **enabled** when creating a tracker, and when updating the value can be enabled or disabled.
 
-
+* `project_name` - (Optional) The project name for the tracker.
 
 ## Attributes Reference
 In addition to all arguments above, the following attributes are exported:
