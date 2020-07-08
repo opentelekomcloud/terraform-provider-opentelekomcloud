@@ -53,6 +53,7 @@ type Config struct {
 	AgencyName       string
 	AgencyDomainName string
 	DelegatedProject string
+	MaxRetries       int
 	terraformVersion string
 
 	HwClient *golangsdk.ProviderClient
@@ -62,6 +63,10 @@ type Config struct {
 }
 
 func (c *Config) LoadAndValidate() error {
+	if c.MaxRetries < 0 {
+		return fmt.Errorf("max_retries should be a positive value")
+	}
+
 	if c.IdentityEndpoint == "" && c.Cloud == "" {
 		return fmt.Errorf("one of 'auth_url' or 'cloud' must be specified")
 	}
@@ -229,9 +234,9 @@ func (c *Config) newS3Session(osDebug bool) error {
 		awsConfig := &aws.Config{
 			Credentials: creds,
 			Region:      aws.String(GetRegion(nil, c)),
-			//MaxRetries:       aws.Int(c.MaxRetries),
+			// MaxRetries:       aws.Int(c.MaxRetries),
 			HTTPClient: cleanhttp.DefaultClient(),
-			//S3ForcePathStyle: aws.Bool(c.S3ForcePathStyle),
+			// S3ForcePathStyle: aws.Bool(c.S3ForcePathStyle),
 		}
 
 		if osDebug {
@@ -292,8 +297,9 @@ func (c *Config) newhwClient(transport *http.Transport, osDebug bool) error {
 
 	client.HTTPClient = http.Client{
 		Transport: &LogRoundTripper{
-			Rt:      transport,
-			OsDebug: osDebug,
+			Rt:         transport,
+			OsDebug:    osDebug,
+			MaxRetries: c.MaxRetries,
 		},
 		CheckRedirect: func(req *http.Request, via []*http.Request) error {
 			if client.AKSKAuthOptions.AccessKey != "" {
@@ -605,7 +611,7 @@ func (c *Config) dnsV2Client(region string) (*golangsdk.ServiceClient, error) {
 
 func (c *Config) identityV3Client(region string) (*golangsdk.ServiceClient, error) {
 	return huaweisdk.NewIdentityV3(c.DomainClient, golangsdk.EndpointOpts{
-		//Region:       region,
+		// Region:       region,
 		Availability: c.getHwEndpointType(),
 	})
 }
@@ -733,7 +739,7 @@ func (c *Config) vbsV2Client(region string) (*golangsdk.ServiceClient, error) {
 	})
 }
 
-//computeV2HWClient used to access the v2 bms Services i.e. flavor, nic, keypair.
+// computeV2HWClient used to access the v2 bms Services i.e. flavor, nic, keypair.
 func (c *Config) computeV2HWClient(region string) (*golangsdk.ServiceClient, error) {
 	return huaweisdk.NewComputeV2(c.HwClient, golangsdk.EndpointOpts{
 		Region:       region,
@@ -741,7 +747,7 @@ func (c *Config) computeV2HWClient(region string) (*golangsdk.ServiceClient, err
 	})
 }
 
-//bmsClient used to access the v2.1 bms Services i.e. servers, tags.
+// bmsClient used to access the v2.1 bms Services i.e. servers, tags.
 func (c *Config) bmsClient(region string) (*golangsdk.ServiceClient, error) {
 	return huaweisdk.NewComputeV2(c.HwClient, golangsdk.EndpointOpts{
 		Region:       region,
