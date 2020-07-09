@@ -61,6 +61,28 @@ func TestAccCTSTrackerV1_timeout(t *testing.T) {
 	})
 }
 
+func TestAccCTSTrackerV1_SchemaProjectName(t *testing.T) {
+	var tracker tracker.Tracker
+	var bucketName = fmt.Sprintf("terra-test-%s", acctest.RandString(5))
+	var projectName = getTenantName()
+
+	resource.Test(t, resource.TestCase{
+		PreCheck:     func() { testAccPreCheck(t) },
+		Providers:    testAccProviders,
+		CheckDestroy: testAccCheckCTSTrackerV1Destroy,
+		Steps: []resource.TestStep{
+			{
+				Config: testAccCTSTrackerV1_projectname(bucketName, projectName),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckCTSTrackerV1Exists("opentelekomcloud_cts_tracker_v1.tracker_v1", &tracker),
+					resource.TestCheckResourceAttr(
+						"opentelekomcloud_cts_tracker_v1.tracker_v1", "project_name", projectName),
+				),
+			},
+		},
+	})
+}
+
 func testAccCheckCTSTrackerV1Destroy(s *terraform.State) error {
 	config := testAccProvider.Meta().(*Config)
 	ctsClient, err := config.ctsV1Client(OS_TENANT_NAME)
@@ -193,4 +215,35 @@ timeouts {
   }
 }
 `, bucketName)
+}
+
+func testAccCTSTrackerV1_projectname(bucketName string, projectName string) string {
+	return fmt.Sprintf(`
+resource "opentelekomcloud_s3_bucket" "bucket" {
+  bucket = "%s"
+  acl = "public-read"
+  force_destroy = true
+}
+
+resource "opentelekomcloud_smn_topic_v2" "topic_1" {
+  name		  = "topic_check-1"
+  display_name    = "The display name of topic_check"
+}
+
+resource "opentelekomcloud_cts_tracker_v1" "tracker_v1" {
+  bucket_name      = "${opentelekomcloud_s3_bucket.bucket.bucket}"
+  file_prefix_name      = "yO8Q"
+  is_support_smn = true
+  topic_id = "${opentelekomcloud_smn_topic_v2.topic_1.id}"
+  is_send_all_key_operation = false
+  operations = ["login"]
+  need_notify_user_list = ["user1"]
+  project_name = "%s"
+
+timeouts {
+    create = "5m"
+    delete = "5m"
+  }
+}
+`, bucketName, projectName)
 }

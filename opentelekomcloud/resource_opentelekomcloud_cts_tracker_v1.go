@@ -87,7 +87,7 @@ func resourceCTSTrackerV1() *schema.Resource {
 
 func resourceCTSTrackerCreate(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*Config)
-	ctsClient, err := config.ctsV1Client(GetProjectName(config))
+	ctsClient, err := config.ctsV1Client(GetProjectName(d, config))
 
 	if err != nil {
 		return fmt.Errorf("Error creating cts Client: %s", err)
@@ -118,7 +118,7 @@ func resourceCTSTrackerCreate(d *schema.ResourceData, meta interface{}) error {
 
 func resourceCTSTrackerRead(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*Config)
-	ctsClient, err := config.ctsV1Client(GetProjectName(config))
+	ctsClient, err := config.ctsV1Client(GetProjectName(d, config))
 	if err != nil {
 		return fmt.Errorf("Error creating cts Client: %s", err)
 	}
@@ -160,7 +160,7 @@ func resourceCTSTrackerRead(d *schema.ResourceData, meta interface{}) error {
 
 func resourceCTSTrackerUpdate(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*Config)
-	ctsClient, err := config.ctsV1Client(GetProjectName(config))
+	ctsClient, err := config.ctsV1Client(GetProjectName(d, config))
 	if err != nil {
 		return fmt.Errorf("Error creating cts Client: %s", err)
 	}
@@ -197,7 +197,7 @@ func resourceCTSTrackerUpdate(d *schema.ResourceData, meta interface{}) error {
 
 func resourceCTSTrackerDelete(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*Config)
-	ctsClient, err := config.ctsV1Client(GetProjectName(config))
+	ctsClient, err := config.ctsV1Client(GetProjectName(d, config))
 	if err != nil {
 		return fmt.Errorf("Error creating cts Client: %s", err)
 	}
