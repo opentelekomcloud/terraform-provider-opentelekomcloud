@@ -2,6 +2,7 @@ package opentelekomcloud
 
 import (
 	"fmt"
+	"os"
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-sdk/helper/acctest"
@@ -23,7 +24,7 @@ func TestAccCTSTrackerV1_basic(t *testing.T) {
 			{
 				Config: testAccCTSTrackerV1_basic(bucketName),
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckCTSTrackerV1Exists("opentelekomcloud_cts_tracker_v1.tracker_v1", &tracker),
+					testAccCheckCTSTrackerV1Exists("opentelekomcloud_cts_tracker_v1.tracker_v1", &tracker, OS_TENANT_NAME),
 					resource.TestCheckResourceAttr(
 						"opentelekomcloud_cts_tracker_v1.tracker_v1", "bucket_name", bucketName),
 					resource.TestCheckResourceAttr(
@@ -33,7 +34,7 @@ func TestAccCTSTrackerV1_basic(t *testing.T) {
 			{
 				Config: testAccCTSTrackerV1_update(bucketName),
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckCTSTrackerV1Exists("opentelekomcloud_cts_tracker_v1.tracker_v1", &tracker),
+					testAccCheckCTSTrackerV1Exists("opentelekomcloud_cts_tracker_v1.tracker_v1", &tracker, OS_TENANT_NAME),
 					resource.TestCheckResourceAttr(
 						"opentelekomcloud_cts_tracker_v1.tracker_v1", "file_prefix_name", "yO8Q1"),
 				),
@@ -54,17 +55,21 @@ func TestAccCTSTrackerV1_timeout(t *testing.T) {
 			{
 				Config: testAccCTSTrackerV1_timeout(bucketName),
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckCTSTrackerV1Exists("opentelekomcloud_cts_tracker_v1.tracker_v1", &tracker),
+					testAccCheckCTSTrackerV1Exists("opentelekomcloud_cts_tracker_v1.tracker_v1", &tracker, OS_TENANT_NAME),
 				),
 			},
 		},
 	})
 }
 
-func TestAccCTSTrackerV1_SchemaProjectName(t *testing.T) {
+func TestAccCTSTrackerV1_schemaProjectName(t *testing.T) {
 	var tracker tracker.Tracker
 	var bucketName = fmt.Sprintf("terra-test-%s", acctest.RandString(5))
-	var projectName = getTenantName()
+
+	var projectName2 = os.Getenv("OS_PROJECT_NAME_2")
+	if projectName2 == "" {
+		t.Error("OS_PROJECT_NAME_2 is empty")
+	}
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
@@ -72,11 +77,13 @@ func TestAccCTSTrackerV1_SchemaProjectName(t *testing.T) {
 		CheckDestroy: testAccCheckCTSTrackerV1Destroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccCTSTrackerV1_projectname(bucketName, projectName),
+				Config: testAccCTSTrackerV1_projectName(bucketName, projectName2),
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckCTSTrackerV1Exists("opentelekomcloud_cts_tracker_v1.tracker_v1", &tracker),
+					testAccCheckCTSTrackerV1Exists(
+						"opentelekomcloud_cts_tracker_v1.tracker_v1", &tracker, projectName2),
 					resource.TestCheckResourceAttr(
-						"opentelekomcloud_cts_tracker_v1.tracker_v1", "project_name", projectName),
+						"opentelekomcloud_cts_tracker_v1.tracker_v1", "project_name", projectName2),
+
 				),
 			},
 		},
@@ -85,7 +92,8 @@ func TestAccCTSTrackerV1_SchemaProjectName(t *testing.T) {
 
 func testAccCheckCTSTrackerV1Destroy(s *terraform.State) error {
 	config := testAccProvider.Meta().(*Config)
-	ctsClient, err := config.ctsV1Client(OS_TENANT_NAME)
+
+	ctsClient, err := config.ctsV1Client(OS_TENANT_NAME) 		// TODO: Fix problem with another default project
 	if err != nil {
 		return fmt.Errorf("Error creating cts client: %s", err)
 	}
@@ -107,7 +115,7 @@ func testAccCheckCTSTrackerV1Destroy(s *terraform.State) error {
 	return nil
 }
 
-func testAccCheckCTSTrackerV1Exists(n string, trackers *tracker.Tracker) resource.TestCheckFunc {
+func testAccCheckCTSTrackerV1Exists(n string, trackers *tracker.Tracker, projectName string) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
 		rs, ok := s.RootModule().Resources[n]
 		if !ok {
@@ -119,7 +127,7 @@ func testAccCheckCTSTrackerV1Exists(n string, trackers *tracker.Tracker) resourc
 		}
 
 		config := testAccProvider.Meta().(*Config)
-		ctsClient, err := config.ctsV1Client(OS_TENANT_NAME)
+		ctsClient, err := config.ctsV1Client(projectName)
 		if err != nil {
 			return fmt.Errorf("Error creating cts client: %s", err)
 		}
@@ -217,7 +225,7 @@ timeouts {
 `, bucketName)
 }
 
-func testAccCTSTrackerV1_projectname(bucketName string, projectName string) string {
+func testAccCTSTrackerV1_projectName(bucketName string, projectName string) string {
 	return fmt.Sprintf(`
 resource "opentelekomcloud_s3_bucket" "bucket" {
   bucket = "%s"
@@ -239,11 +247,6 @@ resource "opentelekomcloud_cts_tracker_v1" "tracker_v1" {
   operations = ["login"]
   need_notify_user_list = ["user1"]
   project_name = "%s"
-
-timeouts {
-    create = "5m"
-    delete = "5m"
-  }
 }
 `, bucketName, projectName)
 }
