@@ -1,4 +1,15 @@
-## 1.19.0 (Unreleased)
+## 1.18.1 (Unreleased)
+
+ENHANCEMENTS:
+
+* `resource/opentelekomcloud_as_group_v1`: Add `current_instance_number` and `status` attributes [GH-522]
+* `provider/opentelekomcloud`: Add `max_retries` argument to the provider's options [GH-537]
+
+BUG FIXES:
+
+* `resource/rds_instance_v3`: Fix argument description [GH-525]
+* `resource/cce_cluster_v3`: Update subnet_id description of CCE cluster [GH-535]
+
 ## 1.18.0 (June 16, 2020)
 
 ENHANCEMENTS:
