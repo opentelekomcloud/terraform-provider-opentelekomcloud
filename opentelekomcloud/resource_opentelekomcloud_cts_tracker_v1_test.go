@@ -83,7 +83,6 @@ func TestAccCTSTrackerV1_schemaProjectName(t *testing.T) {
 						"opentelekomcloud_cts_tracker_v1.tracker_v1", &tracker, projectName2),
 					resource.TestCheckResourceAttr(
 						"opentelekomcloud_cts_tracker_v1.tracker_v1", "project_name", projectName2),
-
 				),
 			},
 		},
@@ -93,7 +92,7 @@ func TestAccCTSTrackerV1_schemaProjectName(t *testing.T) {
 func testAccCheckCTSTrackerV1Destroy(s *terraform.State) error {
 	config := testAccProvider.Meta().(*Config)
 
-	ctsClient, err := config.ctsV1Client(OS_TENANT_NAME) 		// TODO: Fix problem with another default project
+	ctsClient, err := config.ctsV1Client(OS_TENANT_NAME) // TODO: Fix problem with another default project
 	if err != nil {
 		return fmt.Errorf("Error creating cts client: %s", err)
 	}
