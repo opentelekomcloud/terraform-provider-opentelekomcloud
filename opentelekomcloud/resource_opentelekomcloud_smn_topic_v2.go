@@ -22,7 +22,12 @@ func resourceTopic() *schema.Resource {
 				Required: true,
 				ForceNew: true,
 			},
-
+			"project_name": {
+				Type:     schema.TypeString,
+				Optional: true,
+				ForceNew: true,
+				Computed: true,
+			},
 			"display_name": {
 				Type:     schema.TypeString,
 				Optional: true,
@@ -50,7 +55,7 @@ func resourceTopic() *schema.Resource {
 
 func resourceTopicCreate(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*Config)
-	client, err := config.SmnV2Client(GetRegion(d, config))
+	client, err := config.SmnV2Client(GetProjectName(d, config))
 	if err != nil {
 		return fmt.Errorf("Error creating OpenTelekomCloud smn client: %s", err)
 	}
@@ -76,7 +81,7 @@ func resourceTopicCreate(d *schema.ResourceData, meta interface{}) error {
 
 func resourceTopicRead(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*Config)
-	client, err := config.SmnV2Client(GetRegion(d, config))
+	client, err := config.SmnV2Client(GetProjectName(d, config))
 	if err != nil {
 		return fmt.Errorf("Error creating OpenTelekomCloud smn client: %s", err)
 	}
@@ -101,7 +106,7 @@ func resourceTopicRead(d *schema.ResourceData, meta interface{}) error {
 
 func resourceTopicDelete(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*Config)
-	client, err := config.SmnV2Client(GetRegion(d, config))
+	client, err := config.SmnV2Client(GetProjectName(d, config))
 	if err != nil {
 		return fmt.Errorf("Error creating OpenTelekomCloud smn client: %s", err)
 	}
@@ -120,7 +125,7 @@ func resourceTopicDelete(d *schema.ResourceData, meta interface{}) error {
 
 func resourceTopicUpdate(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*Config)
-	client, err := config.SmnV2Client(GetRegion(d, config))
+	client, err := config.SmnV2Client(GetProjectName(d, config))
 	if err != nil {
 		return fmt.Errorf("Error creating OpenTelekomCloud smn client: %s", err)
 	}

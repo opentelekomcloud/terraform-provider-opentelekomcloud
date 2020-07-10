@@ -20,7 +20,7 @@ func TestAccSMNV2Topic_basic(t *testing.T) {
 			{
 				Config: TestAccSMNV2TopicConfig_basic,
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckSMNV2TopicExists("opentelekomcloud_smn_topic_v2.topic_1", &topic),
+					testAccCheckSMNV2TopicExists("opentelekomcloud_smn_topic_v2.topic_1", &topic, OS_TENANT_NAME),
 					resource.TestCheckResourceAttr(
 						"opentelekomcloud_smn_topic_v2.topic_1", "name", "topic_1"),
 					resource.TestCheckResourceAttr(
@@ -36,6 +36,26 @@ func TestAccSMNV2Topic_basic(t *testing.T) {
 						"The update display name of topic_1"),
 					resource.TestCheckResourceAttr(
 						"opentelekomcloud_smn_topic_v2.topic_1", "name", "topic_1"),
+				),
+			},
+		},
+	})
+}
+
+func TestAccSMNV2Topic_schemaProjectName(t *testing.T) {
+	var topic topics.TopicGet
+
+	resource.Test(t, resource.TestCase{
+		PreCheck:     func() { testAccPreCheck(t) },
+		Providers:    testAccProviders,
+		CheckDestroy: testAccCheckSMNTopicV2Destroy,
+		Steps: []resource.TestStep{
+			{
+				Config: testAccSMNV2TopicConfig_projectName(OS_TENANT_NAME),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckSMNV2TopicExists("opentelekomcloud_smn_topic_v2.topic_1", &topic, OS_TENANT_NAME),
+					resource.TestCheckResourceAttr(
+						"opentelekomcloud_smn_topic_v2.topic_1", "project_name", OS_TENANT_NAME),
 				),
 			},
 		},
@@ -63,7 +83,7 @@ func testAccCheckSMNTopicV2Destroy(s *terraform.State) error {
 	return nil
 }
 
-func testAccCheckSMNV2TopicExists(n string, topic *topics.TopicGet) resource.TestCheckFunc {
+func testAccCheckSMNV2TopicExists(n string, topic *topics.TopicGet, projectName string) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
 		rs, ok := s.RootModule().Resources[n]
 		if !ok {
@@ -75,7 +95,7 @@ func testAccCheckSMNV2TopicExists(n string, topic *topics.TopicGet) resource.Tes
 		}
 
 		config := testAccProvider.Meta().(*Config)
-		smnClient, err := config.SmnV2Client(OS_REGION_NAME)
+		smnClient, err := config.SmnV2Client(projectName)
 		if err != nil {
 			return fmt.Errorf("Error creating OpenTelekomCloud smn client: %s", err)
 		}
@@ -108,3 +128,13 @@ resource "opentelekomcloud_smn_topic_v2" "topic_1" {
   display_name    = "The update display name of topic_1"
 }
 `
+
+func testAccSMNV2TopicConfig_projectName(projectName string) string {
+	return fmt.Sprintf(`
+resource "opentelekomcloud_smn_topic_v2" "topic_1" {
+  name		  = "topic_1"
+  display_name    = "The update display name of topic_1"
+  project_name ="%s"
+}
+`, projectName)
+}
