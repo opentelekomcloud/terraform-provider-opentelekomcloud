@@ -3,7 +3,7 @@
 ENHANCEMENTS:
 
 * `resource/opentelekomcloud_as_group_v1`: Add `current_instance_number` and `status` attributes [GH-522]
-* `provider/opentelekomcloud`: Add `max_retries` argument [GH-537]
+* `provider/opentelekomcloud`: Add `max_retries` argument to the provider's options [GH-537]
 
 BUG FIXES:
 
