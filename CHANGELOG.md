@@ -1,14 +1,14 @@
-## 1.18.1 (Unreleased)
+## 1.18.1 (July 10, 2020)
 
 ENHANCEMENTS:
 
-* `resource/opentelekomcloud_as_group_v1`: Add `current_instance_number` and `status` attributes [GH-522]
-* `provider/opentelekomcloud`: Add `max_retries` argument to the provider's options [GH-537]
+* `resource/opentelekomcloud_as_group_v1`: Add `current_instance_number` and `status` attributes ([#522](https://github.com/terraform-providers/terraform-provider-opentelekomcloud/issues/522))
+* `provider/opentelekomcloud`: Add `max_retries` argument to the provider's options ([#537](https://github.com/terraform-providers/terraform-provider-opentelekomcloud/issues/537))
 
 BUG FIXES:
 
-* `resource/rds_instance_v3`: Fix argument description [GH-525]
-* `resource/cce_cluster_v3`: Update subnet_id description of CCE cluster [GH-535]
+* `resource/rds_instance_v3`: Fix argument description ([#525](https://github.com/terraform-providers/terraform-provider-opentelekomcloud/issues/525))
+* `resource/cce_cluster_v3`: Update subnet_id description of CCE cluster ([#535](https://github.com/terraform-providers/terraform-provider-opentelekomcloud/issues/535))
 
 ## 1.18.0 (June 16, 2020)
 
