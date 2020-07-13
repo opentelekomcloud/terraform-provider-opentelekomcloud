@@ -28,6 +28,8 @@ The following arguments are supported:
 * `display_name` - (Optional) Topic display name, which is presented as the
     name of the email sender in an email message.
 
+* `project_name` - (Optional) The project name for the topic.
+
 ## Attributes Reference
 
 The following attributes are exported:
