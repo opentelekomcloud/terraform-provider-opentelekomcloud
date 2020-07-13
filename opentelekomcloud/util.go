@@ -52,8 +52,8 @@ func GetRegion(d *schema.ResourceData, config *Config) string {
 // GetProjectName returns the project name that was specified in the resource.
 func GetProjectName(d *schema.ResourceData, config *Config) string {
 	projectNameField := d.Get("project_name")
-	if projectNameField != "" {
-		value := projectNameField.(string)
+	value := projectNameField.(string)
+	if value != "" {
 		return value
 	}
 	n := config.TenantName

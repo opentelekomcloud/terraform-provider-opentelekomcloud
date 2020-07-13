@@ -2,6 +2,7 @@ package opentelekomcloud
 
 import (
 	"fmt"
+	"os"
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
@@ -44,6 +45,10 @@ func TestAccSMNV2Topic_basic(t *testing.T) {
 
 func TestAccSMNV2Topic_schemaProjectName(t *testing.T) {
 	var topic topics.TopicGet
+	var projectName2 = os.Getenv("OS_PROJECT_NAME_2")
+	if projectName2 == "" {
+		t.Error("OS_PROJECT_NAME_2 is empty")
+	}
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
@@ -51,11 +56,11 @@ func TestAccSMNV2Topic_schemaProjectName(t *testing.T) {
 		CheckDestroy: testAccCheckSMNTopicV2Destroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccSMNV2TopicConfig_projectName(OS_TENANT_NAME),
+				Config: testAccSMNV2TopicConfig_projectName(projectName2),
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckSMNV2TopicExists("opentelekomcloud_smn_topic_v2.topic_1", &topic, OS_TENANT_NAME),
+					testAccCheckSMNV2TopicExists("opentelekomcloud_smn_topic_v2.topic_1", &topic, projectName2),
 					resource.TestCheckResourceAttr(
-						"opentelekomcloud_smn_topic_v2.topic_1", "project_name", OS_TENANT_NAME),
+						"opentelekomcloud_smn_topic_v2.topic_1", "project_name", projectName2),
 				),
 			},
 		},
