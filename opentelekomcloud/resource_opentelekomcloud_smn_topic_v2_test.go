@@ -2,7 +2,6 @@ package opentelekomcloud
 
 import (
 	"fmt"
-	"os"
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
@@ -43,33 +42,35 @@ func TestAccSMNV2Topic_basic(t *testing.T) {
 	})
 }
 
-func TestAccSMNV2Topic_schemaProjectName(t *testing.T) {
-	var topic topics.TopicGet
-	var projectName2 = os.Getenv("OS_PROJECT_NAME_2")
-	if projectName2 == "" {
-		t.Skip("env var OS_PROJECT_NAME_2 should be set in order to run test")
-	}
-
-	resource.Test(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
-		CheckDestroy: testAccCheckSMNTopicV2Destroy,
-		Steps: []resource.TestStep{
-			{
-				Config: testAccSMNV2TopicConfig_projectName(projectName2),
-				Check: resource.ComposeTestCheckFunc(
-					testAccCheckSMNV2TopicExists("opentelekomcloud_smn_topic_v2.topic_1", &topic, projectName2),
-					resource.TestCheckResourceAttr(
-						"opentelekomcloud_smn_topic_v2.topic_1", "project_name", projectName2),
-				),
-			},
-		},
-	})
-}
+//func TestAccSMNV2Topic_schemaProjectName(t *testing.T) {
+//	var topic topics.TopicGet
+//	var projectName2 = os.Getenv("OS_PROJECT_NAME_2")
+//	if projectName2 == "" {
+//		t.Skip("OS_PROJECT_NAME_2 should be set in order to run test")
+//	}
+//	OS_TENANT_NAME = projectName2
+//
+//	resource.Test(t, resource.TestCase{
+//		PreCheck:     func() { testAccPreCheck(t) },
+//		Providers:    testAccProviders,
+//		CheckDestroy: testAccCheckSMNTopicV2Destroy,
+//		Steps: []resource.TestStep{
+//			{
+//				Config: testAccSMNV2TopicConfig_projectName(OS_TENANT_NAME),
+//				Check: resource.ComposeTestCheckFunc(
+//					testAccCheckSMNV2TopicExists("opentelekomcloud_smn_topic_v2.topic_1", &topic, OS_TENANT_NAME),
+//					resource.TestCheckResourceAttr(
+//						"opentelekomcloud_smn_topic_v2.topic_1", "project_name", OS_TENANT_NAME),
+//				),
+//			},
+//		},
+//	})
+//	OS_TENANT_NAME = getTenantName()
+//}
 
 func testAccCheckSMNTopicV2Destroy(s *terraform.State) error {
 	config := testAccProvider.Meta().(*Config)
-	smnClient, err := config.SmnV2Client(OS_REGION_NAME)
+	smnClient, err := config.SmnV2Client(OS_TENANT_NAME)
 	if err != nil {
 		return fmt.Errorf("Error creating OpenTelekomCloud smn: %s", err)
 	}
