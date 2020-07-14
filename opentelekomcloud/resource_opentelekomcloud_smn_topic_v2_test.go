@@ -12,6 +12,10 @@ import (
 
 func TestAccSMNV2Topic_basic(t *testing.T) {
 	var topic topics.TopicGet
+	var projectName2 = os.Getenv("OS_PROJECT_NAME_2")
+	if projectName2 == "" {
+		t.Error("OS_PROJECT_NAME_2 is empty")
+	}
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
