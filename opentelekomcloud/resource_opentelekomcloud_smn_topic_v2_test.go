@@ -12,10 +12,6 @@ import (
 
 func TestAccSMNV2Topic_basic(t *testing.T) {
 	var topic topics.TopicGet
-	var projectName2 = os.Getenv("OS_PROJECT_NAME_2")
-	if projectName2 == "" {
-		t.Error("OS_PROJECT_NAME_2 is empty")
-	}
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
@@ -51,7 +47,7 @@ func TestAccSMNV2Topic_schemaProjectName(t *testing.T) {
 	var topic topics.TopicGet
 	var projectName2 = os.Getenv("OS_PROJECT_NAME_2")
 	if projectName2 == "" {
-		t.Error("OS_PROJECT_NAME_2 is empty")
+		t.Skip("env var OS_PROJECT_NAME_2 should be set in order to run test")
 	}
 
 	resource.Test(t, resource.TestCase{
