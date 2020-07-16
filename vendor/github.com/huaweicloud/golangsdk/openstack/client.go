@@ -26,6 +26,9 @@ const (
 	// v3 represents Keystone v3.
 	// The version can be anything from v3 to v3.x.
 	v3 = "v3"
+
+	// provider represents the suffix of endpoint url
+	provider = "myhuaweicloud.com"
 )
 
 /*
@@ -1106,4 +1109,48 @@ func NewLTSV2(client *golangsdk.ProviderClient, eo golangsdk.EndpointOpts) (*gol
 func NewFGSV2(client *golangsdk.ProviderClient, eo golangsdk.EndpointOpts) (*golangsdk.ServiceClient, error) {
 	sc, err := initClientOpts(client, eo, "fgsv2")
 	return sc, err
+}
+
+// NewVPCV1 creates a ServiceClient that may be used with the v1 network
+// package.
+func NewVPCV1(client *golangsdk.ProviderClient, eo golangsdk.EndpointOpts) (*golangsdk.ServiceClient, error) {
+	sc, err := initClientOpts(client, eo, "vpc")
+	return sc, err
+}
+
+// NewGeminiDBV3 creates a ServiceClient that may be used with the GeminiDB service.
+// Note: the endpoint of GeminiDB was only published in "cn-east-2" and "cn-south-1" region,
+// other regions will raise an error.
+func NewGeminiDBV3(client *golangsdk.ProviderClient, eo golangsdk.EndpointOpts) (*golangsdk.ServiceClient, error) {
+	sc := new(golangsdk.ServiceClient)
+	sc.ProviderClient = client
+	sc.Endpoint = fmt.Sprintf("https://geminidb.%s.myhuaweicloud.com", eo.Region)
+	sc.ResourceBase = fmt.Sprintf("%s/v3/%s/", sc.Endpoint, client.ProjectID)
+
+	return sc, nil
+}
+
+// InitServiceClientByName create a ServiceClient which was assembled by service and region name.
+func InitServiceClientByName(client *golangsdk.ProviderClient, eo golangsdk.EndpointOpts, apiVersion string) (*golangsdk.ServiceClient, error) {
+	if eo.Name == "" || apiVersion == "" {
+		return nil, fmt.Errorf("must specify the service name and api version.")
+	}
+
+	sc := new(golangsdk.ServiceClient)
+	sc.ProviderClient = client
+	sc.Endpoint = fmt.Sprintf("https://%s.%s.%s", eo.Name, eo.Region, provider)
+	sc.ResourceBase = fmt.Sprintf("%s/%s/%s/", sc.Endpoint, apiVersion, client.ProjectID)
+
+	return sc, nil
+
+}
+
+//SberCloud IAM client
+func NewSberIamV3(client *golangsdk.ProviderClient, eo golangsdk.EndpointOpts) (*golangsdk.ServiceClient, error) {
+	sc := new(golangsdk.ServiceClient)
+	sc.ProviderClient = client
+	sc.Endpoint = fmt.Sprintf("https://iam.%s.hc.sbercloud.ru/v3/", eo.Region)
+	sc.ResourceBase = sc.Endpoint
+
+	return sc, nil
 }

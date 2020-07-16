@@ -145,6 +145,12 @@ The following arguments are supported:
 * `health_periodic_audit_time` - (Optional) The health check period for instances.
     The period has four options: 5 minutes (default), 15 minutes, 60 minutes, and 180 minutes.
 
+* `health_periodic_audit_grace_period` - (Optional) The grace period for instance health check.
+	The unit is second and value range is 0-86400. The default value is 600. The health check grace
+	period starts after an instance is added to an AS group and is enabled. The AS group will start
+	checking the instance status only after the grace period ends. This parameter is valid only when
+	the instance health check method of the AS group is ELB_AUDIT.
+
 * `instance_terminate_policy` - (Optional) The instance removal policy. The policy has
     four options: `OLD_CONFIG_OLD_INSTANCE` (default), `OLD_CONFIG_NEW_INSTANCE`,
     `OLD_INSTANCE`, and `NEW_INSTANCE`.

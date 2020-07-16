@@ -153,6 +153,13 @@ func resourceASGroup() *schema.Resource {
 				ForceNew:     false,
 				Description:  "The health check period for instances, in minutes.",
 			},
+			"health_periodic_audit_grace_period": {
+				Type:        schema.TypeInt,
+				Optional:    true,
+				Default:     600,
+				ForceNew:    false,
+				Description: "The grace period for instance health check, in seconds.",
+			},
 			"instance_terminate_policy": {
 				Type:         schema.TypeString,
 				Optional:     true,
@@ -446,6 +453,7 @@ func resourceASGroupCreate(d *schema.ResourceData, meta interface{}) error {
 		VpcID:                     d.Get("vpc_id").(string),
 		HealthPeriodicAuditMethod: d.Get("health_periodic_audit_method").(string),
 		HealthPeriodicAuditTime:   d.Get("health_periodic_audit_time").(int),
+		HealthPeriodicAuditGrace:  d.Get("health_periodic_audit_grace_period").(int),
 		InstanceTerminatePolicy:   d.Get("instance_terminate_policy").(string),
 		Notifications:             getAllNotifications(d),
 		IsDeletePublicip:          d.Get("delete_publicip").(bool),
@@ -507,6 +515,7 @@ func resourceASGroupRead(d *schema.ResourceData, meta interface{}) error {
 	d.Set("lb_listener_id", asg.LBListenerID)
 	d.Set("health_periodic_audit_method", asg.HealthPeriodicAuditMethod)
 	d.Set("health_periodic_audit_time", asg.HealthPeriodicAuditTime)
+	d.Set("health_periodic_audit_grace_period", asg.HealthPeriodicAuditGrace)
 	d.Set("instance_terminate_policy", asg.InstanceTerminatePolicy)
 	d.Set("scaling_configuration_id", asg.ConfigurationID)
 	d.Set("delete_publicip", asg.DeletePublicip)
@@ -578,6 +587,7 @@ func resourceASGroupUpdate(d *schema.ResourceData, meta interface{}) error {
 		SecurityGroup:             asgSecGroups,
 		HealthPeriodicAuditMethod: d.Get("health_periodic_audit_method").(string),
 		HealthPeriodicAuditTime:   d.Get("health_periodic_audit_time").(int),
+		HealthPeriodicAuditGrace:  d.Get("health_periodic_audit_grace_period").(int),
 		InstanceTerminatePolicy:   d.Get("instance_terminate_policy").(string),
 		Notifications:             getAllNotifications(d),
 		IsDeletePublicip:          d.Get("delete_publicip").(bool),

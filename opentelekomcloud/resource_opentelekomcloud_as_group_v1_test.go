@@ -143,5 +143,6 @@ resource "opentelekomcloud_as_group_v1" "hth_as_group"{
     protocol_port = "${opentelekomcloud_lb_listener_v2.listener_1.protocol_port}"
   }
   vpc_id = "%s"
+  health_periodic_audit_grace_period = 700
 }
 `, OS_SUBNET_ID, OS_IMAGE_ID, OS_NETWORK_ID, OS_VPC_ID)
