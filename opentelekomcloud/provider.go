@@ -4,6 +4,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/helper/mutexkv"
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/terraform"
+	"github.com/jinzhu/copier"
 )
 
 // This is a global MutexKV for use within this plugin.
@@ -467,5 +468,18 @@ func configureProvider(d *schema.ResourceData, terraformVersion string) (interfa
 		return nil, err
 	}
 
+	return &config, nil
+}
+
+func reconfigProjectName(src Config, projectName string) (*Config, error) {
+	config := Config{}
+	err := copier.Copy(&config, &src)
+	if err != nil {
+		return nil, err
+	}
+	config.TenantName = projectName
+	if err := config.LoadAndValidate(); err != nil {
+		return nil, err
+	}
 	return &config, nil
 }
