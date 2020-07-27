@@ -108,7 +108,7 @@ func resourceCTSTrackerCreate(d *schema.ResourceData, meta interface{}) error {
 
 	trackers, err := tracker.Create(ctsClient, createOpts).Extract()
 	if err != nil {
-		return fmt.Errorf("Error creating CTS tracker : %s", err)
+		return fmt.Errorf("Error creating CTS tracker: %s", err)
 	}
 
 	d.SetId(trackers.TrackerName)
@@ -198,7 +198,7 @@ func resourceCTSTrackerUpdate(d *schema.ResourceData, meta interface{}) error {
 
 func resourceCTSTrackerDelete(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*Config)
-	ctsClient, err := config.ctsV1Client(GetRegion(d, config))
+	ctsClient, err := config.ctsV1Client(GetProjectName(d, config))
 	if err != nil {
 		return fmt.Errorf("Error creating cts Client: %s", err)
 	}

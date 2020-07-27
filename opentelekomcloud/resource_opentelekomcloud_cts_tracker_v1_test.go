@@ -65,11 +65,11 @@ func TestAccCTSTrackerV1_timeout(t *testing.T) {
 func TestAccCTSTrackerV1_schemaProjectName(t *testing.T) {
 	var tracker tracker.Tracker
 	var bucketName = fmt.Sprintf("terra-test-%s", acctest.RandString(5))
-
 	var projectName2 = os.Getenv("OS_PROJECT_NAME_2")
 	if projectName2 == "" {
 		t.Skip("OS_PROJECT_NAME_2 is empty")
 	}
+	OS_TENANT_NAME = projectName2
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
@@ -77,21 +77,22 @@ func TestAccCTSTrackerV1_schemaProjectName(t *testing.T) {
 		CheckDestroy: testAccCheckCTSTrackerV1Destroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccCTSTrackerV1_projectName(bucketName, projectName2),
+				Config: testAccCTSTrackerV1_projectName(bucketName, OS_TENANT_NAME),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckCTSTrackerV1Exists(
-						"opentelekomcloud_cts_tracker_v1.tracker_v1", &tracker, projectName2),
+						"opentelekomcloud_cts_tracker_v1.tracker_v1", &tracker, OS_TENANT_NAME),
 					resource.TestCheckResourceAttr(
-						"opentelekomcloud_cts_tracker_v1.tracker_v1", "project_name", projectName2),
+						"opentelekomcloud_cts_tracker_v1.tracker_v1", "project_name", OS_TENANT_NAME),
 				),
 			},
 		},
 	})
+	OS_TENANT_NAME = getTenantName()
 }
 
 func testAccCheckCTSTrackerV1Destroy(s *terraform.State) error {
 	config := testAccProvider.Meta().(*Config)
-	ctsClient, err := config.ctsV1Client(OS_REGION_NAME)
+	ctsClient, err := config.ctsV1Client(OS_TENANT_NAME)
 	if err != nil {
 		return fmt.Errorf("Error creating cts client: %s", err)
 	}
