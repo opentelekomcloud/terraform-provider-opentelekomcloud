@@ -31,6 +31,12 @@ func resourceCTSTrackerV1() *schema.Resource {
 				ForceNew: true,
 				Computed: true,
 			},
+			"project_name": {
+				Type:     schema.TypeString,
+				Optional: true,
+				ForceNew: true,
+				Computed: true,
+			},
 			"status": {
 				Type:     schema.TypeString,
 				Optional: true,
@@ -82,7 +88,7 @@ func resourceCTSTrackerV1() *schema.Resource {
 
 func resourceCTSTrackerCreate(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*Config)
-	ctsClient, err := config.ctsV1Client(GetRegion(d, config))
+	ctsClient, err := config.ctsV1Client(GetProjectName(d, config))
 
 	if err != nil {
 		return fmt.Errorf("Error creating cts Client: %s", err)
@@ -113,7 +119,7 @@ func resourceCTSTrackerCreate(d *schema.ResourceData, meta interface{}) error {
 
 func resourceCTSTrackerRead(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*Config)
-	ctsClient, err := config.ctsV1Client(GetRegion(d, config))
+	ctsClient, err := config.ctsV1Client(GetProjectName(d, config))
 	if err != nil {
 		return fmt.Errorf("Error creating cts Client: %s", err)
 	}
@@ -155,7 +161,7 @@ func resourceCTSTrackerRead(d *schema.ResourceData, meta interface{}) error {
 
 func resourceCTSTrackerUpdate(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*Config)
-	ctsClient, err := config.ctsV1Client(GetRegion(d, config))
+	ctsClient, err := config.ctsV1Client(GetProjectName(d, config))
 	if err != nil {
 		return fmt.Errorf("Error creating cts Client: %s", err)
 	}

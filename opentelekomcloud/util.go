@@ -63,7 +63,7 @@ func GetProjectName(d *schema.ResourceData, config *Config) string {
 }
 
 // AddValueSpecs expands the 'value_specs' object and removes 'value_specs'
-// from the reqeust body.
+// from the request body.
 func AddValueSpecs(body map[string]interface{}) map[string]interface{} {
 	if body["value_specs"] != nil {
 		for k, v := range body["value_specs"].(map[string]interface{}) {

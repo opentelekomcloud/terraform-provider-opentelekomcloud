@@ -473,8 +473,7 @@ func configureProvider(d *schema.ResourceData, terraformVersion string) (interfa
 
 func reconfigProjectName(src *Config, projectName string) (*Config, error) {
 	config := &Config{}
-	err := copier.Copy(config, src)
-	if err != nil {
+	if err := copier.Copy(config, src); err != nil {
 		return nil, err
 	}
 	config.TenantName = projectName
