@@ -49,6 +49,19 @@ func GetRegion(d *schema.ResourceData, config *Config) string {
 	return strings.Split(n, "_")[0]
 }
 
+// GetProjectName returns the project name that was specified in the resource.
+func GetProjectName(d *schema.ResourceData, config *Config) string {
+	projectName := d.Get("project_name").(string)
+	if projectName != "" {
+		return projectName
+	}
+	tenantName := config.TenantName
+	if tenantName == "" {
+		tenantName = config.DelegatedProject
+	}
+	return tenantName
+}
+
 // AddValueSpecs expands the 'value_specs' object and removes 'value_specs'
 // from the reqeust body.
 func AddValueSpecs(body map[string]interface{}) map[string]interface{} {

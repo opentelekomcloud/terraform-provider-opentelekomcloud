@@ -660,9 +660,13 @@ func (c *Config) objectStorageV1Client(region string) (*golangsdk.ServiceClient,
 	})
 }
 
-func (c *Config) SmnV2Client(region string) (*golangsdk.ServiceClient, error) {
-	return huaweisdk.NewSMNV2(c.HwClient, golangsdk.EndpointOpts{
-		Region:       region,
+func (c *Config) SmnV2Client(projectName string) (*golangsdk.ServiceClient, error) {
+	newConfig, err := reconfigProjectName(c, projectName)
+	if err != nil {
+		return nil, err
+	}
+	return huaweisdk.NewSMNV2(newConfig.HwClient, golangsdk.EndpointOpts{
+		Region:       GetRegion(nil, c),
 		Availability: c.getHwEndpointType(),
 	})
 }
