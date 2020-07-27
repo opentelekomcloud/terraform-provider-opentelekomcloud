@@ -56,11 +56,11 @@ func GetProjectName(d *schema.ResourceData, config *Config) string {
 	if value != "" {
 		return value
 	}
-	n := config.TenantName
-	if n == "" {
-		n = config.DelegatedProject
+	tenantName := config.TenantName
+	if tenantName == "" {
+		tenantName = config.DelegatedProject
 	}
-	return n
+	return tenantName
 }
 
 // AddValueSpecs expands the 'value_specs' object and removes 'value_specs'

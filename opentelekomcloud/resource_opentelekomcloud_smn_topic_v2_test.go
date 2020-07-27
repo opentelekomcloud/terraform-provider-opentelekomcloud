@@ -139,9 +139,9 @@ resource "opentelekomcloud_smn_topic_v2" "topic_1" {
 func testAccSMNV2TopicConfig_projectName(projectName string) string {
 	return fmt.Sprintf(`
 resource "opentelekomcloud_smn_topic_v2" "topic_1" {
-  name		  = "topic_1"
-  display_name    = "The update display name of topic_1"
-  project_name ="%s"
+  name		   = "topic_1"
+  display_name = "The display name of topic_1"
+  project_name = "%s"
 }
 `, projectName)
 }

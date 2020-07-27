@@ -661,7 +661,7 @@ func (c *Config) objectStorageV1Client(region string) (*golangsdk.ServiceClient,
 }
 
 func (c *Config) SmnV2Client(projectName string) (*golangsdk.ServiceClient, error) {
-	newConfig, err := reconfigProjectName(*c, projectName)
+	newConfig, err := reconfigProjectName(c, projectName)
 	if err != nil {
 		return nil, err
 	}
