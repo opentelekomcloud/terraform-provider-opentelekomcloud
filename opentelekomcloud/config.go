@@ -816,9 +816,13 @@ func (c *Config) antiddosV1Client(region string) (*golangsdk.ServiceClient, erro
 	})
 }
 
-func (c *Config) ctsV1Client(region string) (*golangsdk.ServiceClient, error) {
-	return huaweisdk.NewCTSService(c.HwClient, golangsdk.EndpointOpts{
-		Region:       region,
+func (c *Config) ctsV1Client(projectName string) (*golangsdk.ServiceClient, error) {
+	newConfig, err := reconfigProjectName(c, projectName)
+	if err != nil {
+		return nil, err
+	}
+	return huaweisdk.NewCTSService(newConfig.HwClient, golangsdk.EndpointOpts{
+		Region:       GetRegion(nil, c),
 		Availability: c.getHwEndpointType(),
 	})
 }
