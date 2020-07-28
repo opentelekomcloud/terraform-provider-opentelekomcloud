@@ -8,7 +8,6 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/helper/acctest"
 	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/terraform"
-	"github.com/huaweicloud/golangsdk"
 	"github.com/huaweicloud/golangsdk/openstack/cts/v1/tracker"
 )
 
@@ -102,12 +101,12 @@ func testAccCheckCTSTrackerV1Destroy(s *terraform.State) error {
 			continue
 		}
 
-		_, err := tracker.List(ctsClient, tracker.ListOpts{TrackerName: rs.Primary.ID})
+		list, err := tracker.List(ctsClient, tracker.ListOpts{TrackerName: rs.Primary.ID})
 		if err != nil {
-			return fmt.Errorf("cts tracker still exists.")
+			return fmt.Errorf("Failed to retrieve CTS list: %s", err)
 		}
-		if _, ok := err.(golangsdk.ErrDefault404); !ok {
-			return err
+		if len(list) != 0 {
+			return fmt.Errorf("Failed to delete CTS tracker")
 		}
 	}
 
