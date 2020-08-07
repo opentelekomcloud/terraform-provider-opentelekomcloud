@@ -22,7 +22,7 @@ import (
 	"github.com/huaweicloud/golangsdk/openstack/networking/v2/ports"
 )
 
-// InstanceNIC is a structured representation of a Gophercloud servers.Server
+// InstanceNIC is a structured representation of a golangsdk servers.Server
 // virtual NIC.
 type InstanceNIC struct {
 	FixedIPv4 string
@@ -123,11 +123,15 @@ func getAllInstanceNetworks(d *schema.ResourceData, meta interface{}) ([]Instanc
 		}
 
 		v := InstanceNetwork{
-			UUID:          networkInfo["uuid"].(string),
-			Name:          networkInfo["name"].(string),
 			Port:          portID,
 			FixedIP:       network["fixed_ip_v4"].(string),
 			AccessNetwork: network["access_network"].(bool),
+		}
+		if networkInfo["uuid"] != nil {
+			v.UUID = networkInfo["uuid"].(string)
+		}
+		if networkInfo["name"] != nil {
+			v.Name = networkInfo["name"].(string)
 		}
 
 		instanceNetworks = append(instanceNetworks, v)
@@ -191,13 +195,13 @@ func getInstanceNetworkInfoNovaNet(
 	allPages, err := tenantnetworks.List(client).AllPages()
 	if err != nil {
 		return nil, fmt.Errorf(
-			"An error occured while querying the Nova API for network information: %s", err)
+			"An error occurred while querying the Nova API for network information: %s", err)
 	}
 
 	networkList, err := tenantnetworks.ExtractNetworks(allPages)
 	if err != nil {
 		return nil, fmt.Errorf(
-			"An error occured while querying the Nova API for network information: %s", err)
+			"An error occurred while querying the Nova API for network information: %s", err)
 	}
 
 	var networkFound bool
@@ -305,7 +309,7 @@ func getInstanceNetworkInfoNeutron(
 	return v, nil
 }
 
-// getInstanceAddresses parses a Gophercloud server.Server's Address field into
+// getInstanceAddresses parses a golangsdk server.Server's Address field into
 // a structured InstanceAddresses struct.
 func getInstanceAddresses(addresses map[string]interface{}) []InstanceAddresses {
 	var allInstanceAddresses []InstanceAddresses
@@ -315,10 +319,16 @@ func getInstanceAddresses(addresses map[string]interface{}) []InstanceAddresses 
 			NetworkName: networkName,
 		}
 
-		instanceNIC := InstanceNIC{}
 		for _, v := range v.([]interface{}) {
+			instanceNIC := InstanceNIC{}
+			var exists bool
+
 			v := v.(map[string]interface{})
-			if v["OS-EXT-IPS:type"] == "fixed" {
+			if v, ok := v["OS-EXT-IPS-MAC:mac_addr"].(string); ok {
+				instanceNIC.MAC = v
+			}
+
+			if v["OS-EXT-IPS:type"] == "fixed" || v["OS-EXT-IPS:type"] == nil {
 				switch v["version"].(float64) {
 				case 6:
 					instanceNIC.FixedIPv6 = fmt.Sprintf("[%s]", v["addr"].(string))
@@ -327,11 +337,24 @@ func getInstanceAddresses(addresses map[string]interface{}) []InstanceAddresses 
 				}
 			}
 
-			if v, ok := v["OS-EXT-IPS-MAC:mac_addr"].(string); ok {
-				instanceNIC.MAC = v
+			// To associate IPv4 and IPv6 on the right NIC,
+			// key on the mac address and fill in the blanks.
+			for i, v := range instanceAddresses.InstanceNICs {
+				if v.MAC == instanceNIC.MAC {
+					exists = true
+					if instanceNIC.FixedIPv6 != "" {
+						instanceAddresses.InstanceNICs[i].FixedIPv6 = instanceNIC.FixedIPv6
+					}
+					if instanceNIC.FixedIPv4 != "" {
+						instanceAddresses.InstanceNICs[i].FixedIPv4 = instanceNIC.FixedIPv4
+					}
+				}
+			}
+
+			if !exists {
+				instanceAddresses.InstanceNICs = append(instanceAddresses.InstanceNICs, instanceNIC)
 			}
 		}
-		instanceAddresses.InstanceNICs = append(instanceAddresses.InstanceNICs, instanceNIC)
 
 		allInstanceAddresses = append(allInstanceAddresses, instanceAddresses)
 	}
@@ -343,7 +366,7 @@ func getInstanceAddresses(addresses map[string]interface{}) []InstanceAddresses 
 }
 
 // expandInstanceNetworks takes network information found in []InstanceNetwork
-// and builds a Gophercloud []servers.Network for use in creating an Instance.
+// and builds a golangsdk []servers.Network for use in creating an Instance.
 func expandInstanceNetworks(allInstanceNetworks []InstanceNetwork) []servers.Network {
 	var networks []servers.Network
 	for _, v := range allInstanceNetworks {
@@ -396,6 +419,19 @@ func flattenInstanceNetworks(
 					"fixed_ip_v6": instanceNIC.FixedIPv6,
 					"mac":         instanceNIC.MAC,
 				}
+
+				// Use the same method as getAllInstanceNetworks to get the network uuid
+				networkInfo, err := getInstanceNetworkInfo(d, meta, "name", instanceAddresses.NetworkName)
+				if err != nil {
+					log.Printf("[WARN] Error getting default network uuid: %s", err)
+				} else {
+					if v["uuid"] != nil {
+						v["uuid"] = networkInfo["uuid"].(string)
+					} else {
+						log.Printf("[WARN] Could not get default network uuid")
+					}
+				}
+
 				networks = append(networks, v)
 			}
 		}
@@ -407,6 +443,11 @@ func flattenInstanceNetworks(
 	// Loop through all networks and addresses, merge relevant address details.
 	for _, instanceNetwork := range allInstanceNetworks {
 		for _, instanceAddresses := range allInstanceAddresses {
+			// Skip if instanceAddresses has no NICs
+			if len(instanceAddresses.InstanceNICs) == 0 {
+				continue
+			}
+
 			if instanceNetwork.Name == instanceAddresses.NetworkName {
 				// Only use one NIC since it's possible the user defined another NIC
 				// on this same network in another Terraform network block.
