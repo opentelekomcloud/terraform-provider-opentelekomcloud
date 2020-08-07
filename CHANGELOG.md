@@ -1,4 +1,18 @@
 ## 1.19.0 (Unreleased)
+
+ENHANCEMENTS:
+* `resource/opentelekomcloud_as_group_v1`: Add health_periodic_audit_grace_period to as group [GH-545]
+* `resource/opentelekomcloud_smn_topic_v2`: Add project_name to SMN topic [GH-554]
+* `resource/opentelekomcloud_vpc_eip_v1`: Update documentation [GH-550]
+* `resource/opentelekomcloud_cts_tracker_v1`: Add project_name to CTS tracker [GH-555]
+* `resource/opentelekomcloud_compute_instance_v2`: Improve getting instance NICs [GH-559]
+
+BUG FIXES:
+* `resource/opentelekomcloud_rds_instance_v3`: Fix documentation [GH-549]
+
+FEATURES:
+* **New Data Source:** `compute_availability_zones_v2`[GH-558]
+
 ## 1.18.1 (July 10, 2020)
 
 ENHANCEMENTS:
