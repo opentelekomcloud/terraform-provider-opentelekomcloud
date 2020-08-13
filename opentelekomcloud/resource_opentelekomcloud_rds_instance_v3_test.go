@@ -50,6 +50,10 @@ func TestAccRdsInstanceV3_basic(t *testing.T) {
 
 func testAccRdsInstanceV3_basic(val string) string {
 	return fmt.Sprintf(`
+resource opentelekomcloud_networking_secgroup_v2 sg {
+  name = "sg-rds-test"
+}
+
 resource "opentelekomcloud_rds_instance_v3" "instance" {
   availability_zone = ["%s"]
   db {
@@ -59,7 +63,7 @@ resource "opentelekomcloud_rds_instance_v3" "instance" {
     port = "8635"
   }
   name = "terraform_test_rds_instance%s"
-  security_group_id = "47f50ead-ce99-4b71-b814-d81dba416ac2"
+  security_group_id  = opentelekomcloud_networking_secgroup_v2.sg.id
   subnet_id = "%s"
   vpc_id = "%s"
   volume {
@@ -81,6 +85,10 @@ resource "opentelekomcloud_rds_instance_v3" "instance" {
 
 func testAccRdsInstanceV3_update(val string) string {
 	return fmt.Sprintf(`
+resource opentelekomcloud_networking_secgroup_v2 sg {
+  name = "sg-rds-test"
+}
+
 resource "opentelekomcloud_rds_instance_v3" "instance" {
   availability_zone = ["%s"]
   db {
@@ -90,7 +98,7 @@ resource "opentelekomcloud_rds_instance_v3" "instance" {
     port = "8635"
   }
   name = "terraform_test_rds_instance%s"
-  security_group_id = "47f50ead-ce99-4b71-b814-d81dba416ac2"
+  security_group_id  = opentelekomcloud_networking_secgroup_v2.sg.id
   subnet_id = "%s"
   vpc_id = "%s"
   volume {
