@@ -300,7 +300,7 @@ func resourceRdsInstanceV3Create(d *schema.ResourceData, meta interface{}) error
 	d.SetId(id.(string))
 
 	if hasFilledOpt(d, "tag") {
-		var node_id string
+		var nodeID string
 		res := make(map[string]interface{})
 		v, err := fetchRdsInstanceV3ByList(d, client)
 		if err != nil {
@@ -312,14 +312,8 @@ func resourceRdsInstanceV3Create(d *schema.ResourceData, meta interface{}) error
 			return err
 		}
 
-		nodes := d.Get("nodes").([]interface{})
-		for _, node := range nodes {
-			name := node.(map[string]interface{})["name"].(string)
-			if strings.HasSuffix(name, "_node0") {
-				node_id = node.(map[string]interface{})["id"].(string)
-			}
-		}
-		if node_id == "" {
+		nodeID = getMasterID(d.Get("nodes").([]interface{}))
+		if nodeID == "" {
 			log.Printf("[WARN] Error setting tag(key/value) of instance:%s", id.(string))
 			return nil
 		}
@@ -334,7 +328,7 @@ func resourceRdsInstanceV3Create(d *schema.ResourceData, meta interface{}) error
 				Key:   key,
 				Value: val.(string),
 			}
-			err = tags.Create(tagClient, node_id, tagOpts).ExtractErr()
+			err = tags.Create(tagClient, nodeID, tagOpts).ExtractErr()
 			if err != nil {
 				log.Printf("[WARN] Error setting tag(key/value) of instance:%s, err=%s", id.(string), err)
 			}
@@ -369,7 +363,7 @@ func resourceRdsInstanceV3Update(d *schema.ResourceData, meta interface{}) error
 	}
 
 	// Fetching node id
-	var node_id string
+	var nodeID string
 	res := make(map[string]interface{})
 	v, err := fetchRdsInstanceV3ByList(d, rdsClient)
 	if err != nil {
@@ -383,14 +377,8 @@ func resourceRdsInstanceV3Update(d *schema.ResourceData, meta interface{}) error
 		return err
 	}
 
-	nodes := v.([]interface{})
-	for _, node := range nodes {
-		name := node.(map[string]interface{})["name"].(string)
-		if strings.HasSuffix(name, "_node0") {
-			node_id = node.(map[string]interface{})["id"].(string)
-		}
-	}
-	if node_id == "" {
+	nodeID = getMasterID(v.([]interface{}))
+	if nodeID == "" {
 		log.Printf("[WARN] Error fetching node id of instance:%s", d.Id())
 		return nil
 	}
@@ -407,7 +395,7 @@ func resourceRdsInstanceV3Update(d *schema.ResourceData, meta interface{}) error
 
 		if len(remove) > 0 {
 			for _, opts := range remove {
-				err = tags.Delete(tagClient, node_id, opts).ExtractErr()
+				err = tags.Delete(tagClient, nodeID, opts).ExtractErr()
 				if err != nil {
 					log.Printf("[WARN] Error deleting tag(key/value) of instance:%s, err=%s", d.Id(), err)
 				}
@@ -415,7 +403,7 @@ func resourceRdsInstanceV3Update(d *schema.ResourceData, meta interface{}) error
 		}
 		if len(create) > 0 {
 			for _, opts := range create {
-				err = tags.Create(tagClient, node_id, opts).ExtractErr()
+				err = tags.Create(tagClient, nodeID, opts).ExtractErr()
 				if err != nil {
 					log.Printf("[WARN] Error setting tag(key/value) of instance:%s, err=%s", d.Id(), err)
 				}
@@ -432,18 +420,18 @@ func resourceRdsInstanceV3Update(d *schema.ResourceData, meta interface{}) error
 
 		// Fetch flavor id
 		db := d.Get("db").([]interface{})
-		datastore_name := db[0].(map[string]interface{})["type"].(string)
-		datastore_version := db[0].(map[string]interface{})["version"].(string)
-		datastoresList, err := datastores.List(client, datastore_name).Extract()
+		datastoreName := db[0].(map[string]interface{})["type"].(string)
+		datastoreVersion := db[0].(map[string]interface{})["version"].(string)
+		datastoreList, err := datastores.List(client, datastoreName).Extract()
 		if err != nil {
 			return fmt.Errorf("Unable to retrieve datastores: %s ", err)
 		}
-		if len(datastoresList) < 1 {
+		if len(datastoreList) < 1 {
 			return fmt.Errorf("Returned no datastore result. ")
 		}
 		var datastoreId string
-		for _, datastore := range datastoresList {
-			if strings.HasPrefix(datastore.Name, datastore_version) {
+		for _, datastore := range datastoreList {
+			if strings.HasPrefix(datastore.Name, datastoreVersion) {
 				datastoreId = datastore.ID
 				break
 			}
@@ -472,7 +460,7 @@ func resourceRdsInstanceV3Update(d *schema.ResourceData, meta interface{}) error
 		log.Printf("[DEBUG] Update flavor: %s", nflavor.(string))
 
 		updateFlavorOpts.FlavorRef = rdsFlavor.ID
-		_, err = instances.UpdateFlavorRef(client, updateFlavorOpts, node_id).Extract()
+		_, err = instances.UpdateFlavorRef(client, updateFlavorOpts, nodeID).Extract()
 		if err != nil {
 			return fmt.Errorf("Error updating instance Flavor from result: %s ", err)
 		}
@@ -480,7 +468,7 @@ func resourceRdsInstanceV3Update(d *schema.ResourceData, meta interface{}) error
 		stateConf := &resource.StateChangeConf{
 			Pending:    []string{"MODIFYING"},
 			Target:     []string{"ACTIVE"},
-			Refresh:    instanceStateFlavorUpdateRefreshFunc(client, node_id, d.Get("flavor").(string)),
+			Refresh:    instanceStateFlavorUpdateRefreshFunc(client, nodeID, d.Get("flavor").(string)),
 			Timeout:    d.Timeout(schema.TimeoutCreate),
 			Delay:      15 * time.Second,
 			MinTimeout: 3 * time.Second,
@@ -490,9 +478,9 @@ func resourceRdsInstanceV3Update(d *schema.ResourceData, meta interface{}) error
 		if err != nil {
 			return fmt.Errorf(
 				"Error waiting for instance (%s) flavor to be Updated: %s ",
-				node_id, err)
+				nodeID, err)
 		}
-		log.Printf("[DEBUG] Successfully updated instance %s flavor: %s", node_id, d.Get("flavor").(string))
+		log.Printf("[DEBUG] Successfully updated instance %s flavor: %s", nodeID, d.Get("flavor").(string))
 	}
 
 	// Update volume
@@ -513,7 +501,7 @@ func resourceRdsInstanceV3Update(d *schema.ResourceData, meta interface{}) error
 		}
 		log.Printf("[DEBUG] volume: %+v", volume)
 		updateOpts.Volume = volume
-		_, err = instances.UpdateVolumeSize(client, updateOpts, node_id).Extract()
+		_, err = instances.UpdateVolumeSize(client, updateOpts, nodeID).Extract()
 		if err != nil {
 			return fmt.Errorf("Error updating instance volume from result: %s ", err)
 		}
@@ -521,7 +509,7 @@ func resourceRdsInstanceV3Update(d *schema.ResourceData, meta interface{}) error
 		stateConf := &resource.StateChangeConf{
 			Pending:    []string{"MODIFYING"},
 			Target:     []string{"UPDATED"},
-			Refresh:    instanceStateUpdateRefreshFunc(client, node_id, updateOpts.Volume["size"].(int)),
+			Refresh:    instanceStateUpdateRefreshFunc(client, nodeID, updateOpts.Volume["size"].(int)),
 			Timeout:    d.Timeout(schema.TimeoutCreate),
 			Delay:      15 * time.Second,
 			MinTimeout: 3 * time.Second,
@@ -531,12 +519,22 @@ func resourceRdsInstanceV3Update(d *schema.ResourceData, meta interface{}) error
 		if err != nil {
 			return fmt.Errorf(
 				"Error waiting for instance (%s) volume to be Updated: %s ",
-				node_id, err)
+				nodeID, err)
 		}
-		log.Printf("[DEBUG] Successfully updated instance %s volume: %+v", node_id, volume)
+		log.Printf("[DEBUG] Successfully updated instance %s volume: %+v", nodeID, volume)
 	}
 
 	return resourceRdsInstanceV3Read(d, meta)
+}
+
+func getMasterID(nodes []interface{}) (nodeID string) {
+	for _, node := range nodes {
+		nodeObj := node.(map[string]interface{})
+		if nodeObj["role"].(string) == "master" {
+			nodeID = nodeObj["id"].(string)
+		}
+	}
+	return
 }
 
 func resourceRdsInstanceV3Read(d *schema.ResourceData, meta interface{}) error {
@@ -567,15 +565,10 @@ func resourceRdsInstanceV3Read(d *schema.ResourceData, meta interface{}) error {
 	}
 
 	// set instance tag
-	var node_id string
+	var nodeID string
 	nodes := d.Get("nodes").([]interface{})
-	for _, node := range nodes {
-		name := node.(map[string]interface{})["name"].(string)
-		if strings.HasSuffix(name, "_node0") {
-			node_id = node.(map[string]interface{})["id"].(string)
-		}
-	}
-	if node_id == "" {
+	nodeID = getMasterID(nodes)
+	if nodeID == "" {
 		log.Printf("[WARN] Error fetching node id of instance:%s", d.Id())
 		return nil
 	}
@@ -583,11 +576,10 @@ func resourceRdsInstanceV3Read(d *schema.ResourceData, meta interface{}) error {
 	if err != nil {
 		return fmt.Errorf("Error creating OpenTelekomCloud rds tag client: %#v", err)
 	}
-	taglist, err := tags.Get(tagClient, node_id).Extract()
+	taglist, err := tags.Get(tagClient, nodeID).Extract()
 	if err != nil {
 		return fmt.Errorf("Error fetching OpenTelekomCloud rds instance tags: %s", err)
 	}
-
 	tagmap := make(map[string]string)
 	for _, val := range taglist.Tags {
 		tagmap[val.Key] = val.Value
