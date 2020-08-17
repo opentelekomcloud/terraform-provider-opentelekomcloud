@@ -302,6 +302,7 @@ func resourceCCEClusterV3Read(d *schema.ResourceData, meta interface{}) error {
 	d.Set("status", n.Status.Phase)
 	d.Set("flavor_id", n.Spec.Flavor)
 	d.Set("cluster_type", n.Spec.Type)
+	d.Set("cluster_version", n.Spec.Version)
 	d.Set("description", n.Spec.Description)
 	d.Set("billing_mode", n.Spec.BillingMode)
 	d.Set("vpc_id", n.Spec.HostNetwork.VpcId)
