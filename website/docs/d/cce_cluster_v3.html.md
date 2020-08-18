@@ -19,7 +19,6 @@ description: |-
 
   data "opentelekomcloud_cce_cluster_v3" "cluster" {
    name = "${var.cluster_name}"
-   id= "${var.cluster_id}"
    status= "Available"
   }
 ```
@@ -29,8 +28,6 @@ description: |-
 The following arguments are supported:
 
 * `name` -  (Optional)The Name of the cluster resource.
- 
-* `id` - (Optional) The ID of container cluster.
 
 * `status` - (Optional) The state of the cluster.
 
