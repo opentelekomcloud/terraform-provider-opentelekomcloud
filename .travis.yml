@@ -14,6 +14,7 @@ install:
 - bash scripts/gogetcookie.sh
 
 script:
+- go mod tidy
 - make test
 - make vet
 - make website-test
@@ -26,4 +27,4 @@ matrix:
   allow_failures:
   - go: tip
 env:
-  - GOFLAGS=-mod=vendor GO111MODULE=on
+  - GO111MODULE=on
