@@ -27,7 +27,7 @@ func resourceVirtualPrivateCloudV1() *schema.Resource {
 			Delete: schema.DefaultTimeout(3 * time.Minute),
 		},
 
-		Schema: map[string]*schema.Schema{ //request and response parameters
+		Schema: map[string]*schema.Schema{ // request and response parameters
 			"region": {
 				Type:     schema.TypeString,
 				Optional: true,
@@ -59,6 +59,40 @@ func resourceVirtualPrivateCloudV1() *schema.Resource {
 			"tags": tagsSchema(),
 		},
 	}
+}
+
+func addNetworkingTags(d *schema.ResourceData, config *Config, res string) error {
+	// set tags
+	tagRaw := d.Get("tags").(map[string]interface{})
+	if len(tagRaw) > 0 {
+		vpcV2Client, err := config.networkingV2Client(GetRegion(d, config))
+		if err != nil {
+			return fmt.Errorf("Error creating OpenTelekomCloud networking client: %s", err)
+		}
+
+		taglist := expandResourceTags(tagRaw)
+		if tagErr := tags.Create(vpcV2Client, res, d.Id(), taglist).ExtractErr(); tagErr != nil {
+			return fmt.Errorf("Error setting tags of VirtualPrivateCloud %s: %s", d.Id(), tagErr)
+		}
+	}
+	return nil
+}
+
+func readNetworkingTags(d *schema.ResourceData, config *Config, res string) error {
+	vpcV2Client, err := config.networkingV2Client(GetRegion(d, config))
+	if err != nil {
+		return fmt.Errorf("Error creating OpenTelekomCloud networking client: %s", err)
+	}
+	resourceTags, err := tags.Get(vpcV2Client, res, d.Id()).Extract()
+	if err != nil {
+		return fmt.Errorf("Error fetching OpenTelekomCloud VirtualPrivateCloud tags: %s", err)
+	}
+
+	tagmap := tagsToMap(resourceTags.Tags)
+	if err := d.Set("tags", tagmap); err != nil {
+		return fmt.Errorf("Error saving tags for OpenTelekomCloud VirtualPrivateCloud %s: %s", d.Id(), err)
+	}
+	return nil
 }
 
 func resourceVirtualPrivateCloudV1Create(d *schema.ResourceData, meta interface{}) error {
@@ -110,18 +144,8 @@ func resourceVirtualPrivateCloudV1Create(d *schema.ResourceData, meta interface{
 		}
 	}
 
-	//set tags
-	tagRaw := d.Get("tags").(map[string]interface{})
-	if len(tagRaw) > 0 {
-		vpcV2Client, err := config.networkingV2Client(GetRegion(d, config))
-		if err != nil {
-			return fmt.Errorf("Error creating OpenTelekomCloud networking client: %s", err)
-		}
-
-		taglist := expandResourceTags(tagRaw)
-		if tagErr := tags.Create(vpcV2Client, "vpcs", n.ID, taglist).ExtractErr(); tagErr != nil {
-			return fmt.Errorf("Error setting tags of VirtualPrivateCloud %s: %s", d.Id(), tagErr)
-		}
+	if err := addNetworkingTags(d, config, "vpcs"); err != nil {
+		return err
 	}
 
 	return resourceVirtualPrivateCloudV1Read(d, meta)
@@ -152,20 +176,8 @@ func resourceVirtualPrivateCloudV1Read(d *schema.ResourceData, meta interface{})
 	d.Set("shared", n.EnableSharedSnat)
 	d.Set("region", GetRegion(d, config))
 
-	// save VirtualPrivateCloudV2 tags
-	vpcV2Client, err := config.networkingV2Client(GetRegion(d, config))
-	if err != nil {
-		return fmt.Errorf("Error creating OpenTelekomCloud networking client: %s", err)
-	}
-
-	resourceTags, err := tags.Get(vpcV2Client, "vpcs", d.Id()).Extract()
-	if err != nil {
-		return fmt.Errorf("Error fetching OpenTelekomCloud VirtualPrivateCloud tags: %s", err)
-	}
-
-	tagmap := tagsToMap(resourceTags.Tags)
-	if err := d.Set("tags", tagmap); err != nil {
-		return fmt.Errorf("Error saving tags for OpenTelekomCloud VirtualPrivateCloud %s: %s", d.Id(), err)
+	if err := readNetworkingTags(d, config, "vpcs"); err != nil {
+		return err
 	}
 
 	return nil
@@ -196,7 +208,7 @@ func resourceVirtualPrivateCloudV1Update(d *schema.ResourceData, meta interface{
 		return fmt.Errorf("Error updating OpenTelekomCloud Vpc: %s", err)
 	}
 
-	//update tags
+	// update tags
 	if d.HasChange("tags") {
 		vpcV2Client, err := config.networkingV2Client(GetRegion(d, config))
 		if err != nil {
@@ -249,7 +261,7 @@ func waitForVpcActive(vpcClient *golangsdk.ServiceClient, vpcId string) resource
 			return n, "ACTIVE", nil
 		}
 
-		//If vpc status is other than Ok, send error
+		// If vpc status is other than Ok, send error
 		if n.Status == "DOWN" {
 			return nil, "", fmt.Errorf("Vpc status: '%s'", n.Status)
 		}

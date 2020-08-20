@@ -96,6 +96,7 @@ func resourceVpcEIPV1() *schema.Resource {
 				Optional: true,
 				ForceNew: false,
 			},
+			"tags": tagsSchema(),
 		},
 	}
 }
@@ -138,6 +139,10 @@ func resourceVpcEIPV1Create(d *schema.ResourceData, meta interface{}) error {
 
 	d.SetId(eIP.ID)
 
+	if err := addNetworkingTags(d, config, "publicips"); err != nil {
+		return err
+	}
+
 	return resourceVpcEIPV1Read(d, meta)
 }
 
@@ -178,6 +183,10 @@ func resourceVpcEIPV1Read(d *schema.ResourceData, meta interface{}) error {
 	}
 	d.Set("bandwidth", bW)
 	d.Set("region", GetRegion(d, config))
+
+	if err := readNetworkingTags(d, config, "publicips"); err != nil {
+		return err
+	}
 
 	return nil
 }
@@ -225,6 +234,19 @@ func resourceVpcEIPV1Update(d *schema.ResourceData, meta interface{}) error {
 			return fmt.Errorf("Error updating publicip: %s", err)
 		}
 
+	}
+
+	// update tags
+	if d.HasChange("tags") {
+		vpcV2Client, err := config.networkingV2Client(GetRegion(d, config))
+		if err != nil {
+			return fmt.Errorf("Error creating OpenTelekomCloud networking client: %s", err)
+		}
+
+		tagErr := UpdateResourceTags(vpcV2Client, d, "publicips", d.Id())
+		if tagErr != nil {
+			return fmt.Errorf("Error updating tags of VPC %s: %s", d.Id(), tagErr)
+		}
 	}
 
 	return resourceVpcEIPV1Read(d, meta)
