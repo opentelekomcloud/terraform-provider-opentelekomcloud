@@ -1,6 +1,5 @@
 # Visit https://goreleaser.com for documentation on how to customize this
 # behavior.
-project_name: terraform-provider-opentelekomcloud
 before:
   hooks:
     # this is just an example and not a requirement for provider building/publishing
@@ -52,5 +51,8 @@ signs:
 release:
   # Visit your project's GitHub Releases page to publish this release.
   draft: true
+  github:
+    owner: opentelekomcloud
+    name: terraform-provider-opentelekomcloud
 changelog:
   skip: true
