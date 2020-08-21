@@ -12,15 +12,14 @@
     merge-mode: squash-merge
     check:
       jobs:
-        #        - golang-make-test
-        #        - golang-make-vet
-        #        - golang-make-website-test
-        - release-goreleaser
+        - golang-make-test
+        - golang-make-vet
+        - golang-make-website-test
     gate:
       jobs:
         - golang-make-test
         - golang-make-vet
         - golang-make-website-test
-    release:
+    tag:
       jobs:
         - release-goreleaser
