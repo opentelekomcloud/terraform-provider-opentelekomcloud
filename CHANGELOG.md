@@ -1,4 +1,11 @@
 ## 1.20.0 (Unreleased)
+
+## 1.19.1 (August 21, 2020)
+
+BUG FIXES:
+* `resource/opentelekomcloud_rds_instance_v3`: Fix HTTP 415 when retrieving tags after nodes role switch ([#564](https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/564)) 
+* `resource/opentelekomcloud_cce_cluster_v3`: Add setting `cluster_version` on resource read ([#568](https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/568)) 
+
 ## 1.19.0 (August 08, 2020)
 
 ENHANCEMENTS:
