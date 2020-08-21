@@ -1,17 +1,5 @@
 ---
 - job:
-    name: golang-make-test
-    parent: golang-make
-    vars:
-      make_command: test
-
-- job:
-    name: golang-make-vet
-    parent: golang-make
-    vars:
-      make_command: vet
-
-- job:
     name: golang-make-website-test
     parent: golang-make
     pre-run: playbooks/pre.yaml
@@ -27,6 +15,7 @@
         - golang-make-test
         - golang-make-vet
         - golang-make-website-test
+        - goreleaser
     gate:
       jobs:
         - golang-make-test
