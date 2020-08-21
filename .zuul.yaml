@@ -15,9 +15,11 @@
         - golang-make-test
         - golang-make-vet
         - golang-make-website-test
-        - goreleaser
     gate:
       jobs:
         - golang-make-test
         - golang-make-vet
         - golang-make-website-test
+    release:
+      jobs:
+        - release-goreleaser
