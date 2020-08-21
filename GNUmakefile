@@ -1,3 +1,4 @@
+export PATH:=/usr/local/go/bin:$(PATH)
 TEST?=$$(go list ./... |grep -v 'vendor')
 GOFMT_FILES?=$$(find . -name '*.go' |grep -v vendor)
 WEBSITE_REPO=github.com/hashicorp/terraform-website
@@ -29,6 +30,7 @@ fmt:
 	gofmt -w $(GOFMT_FILES)
 
 fmtcheck:
+	@go mod vendor
 	@sh -c "'$(CURDIR)/scripts/gofmtcheck.sh'"
 
 errcheck:

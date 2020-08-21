@@ -1,0 +1,25 @@
+---
+- job:
+    name: golang-make-website-test
+    parent: golang-make
+    pre-run: playbooks/pre.yaml
+    vars:
+      make_command: website-test
+      make_env:
+        GOPATH: "{{ ansible_user_dir }}/go"
+
+- project:
+    merge-mode: squash-merge
+    check:
+      jobs:
+        - golang-make-test
+        - golang-make-vet
+        - golang-make-website-test
+    gate:
+      jobs:
+        - golang-make-test
+        - golang-make-vet
+        - golang-make-website-test
+    tag:
+      jobs:
+        - release-goreleaser
