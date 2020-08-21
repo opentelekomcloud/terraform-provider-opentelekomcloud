@@ -29,6 +29,7 @@ fmt:
 	gofmt -w $(GOFMT_FILES)
 
 fmtcheck:
+	@go mod vendor
 	@sh -c "'$(CURDIR)/scripts/gofmtcheck.sh'"
 
 errcheck:

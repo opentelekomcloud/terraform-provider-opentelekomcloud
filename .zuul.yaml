@@ -1,0 +1,8 @@
+---
+- project:
+    merge-mode: squash-merge
+    check:
+      jobs:
+        - golang-make:
+            vars:
+              make_command: test
