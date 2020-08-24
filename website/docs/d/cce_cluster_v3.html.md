@@ -31,7 +31,7 @@ The following arguments are supported:
 
 * `status` - (Optional) The state of the cluster.
 
-* `cluster_type` - (Optional) Type of the cluster. Possible values: VirtualMachine, BareMetal or Windows
+* `cluster_type` - (Optional) Type of the cluster. Possible values: VirtualMachine, BareMetal or Windows.
 
 ## Attributes Reference
 
@@ -62,3 +62,15 @@ All above argument parameters can be exported as attribute parameters along with
 * `external` - The external network address.
 
 * `external_otc` - The endpoint of the cluster to be accessed through API Gateway.
+
+* `certificate_clusters/name` - The cluster name.
+
+* `certificate_clusters/server` - The server IP address.
+
+* `certificate_clusters/certificate_authority_data` - The certificate data.
+
+* `certificate_users/name` - The user name.
+
+* `certificate_users/client_certificate_data` - The client certificate data.
+
+* `certificate_users/client_key_data` - The client key data.

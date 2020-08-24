@@ -79,6 +79,46 @@ func dataSourceCCEClusterV3() *schema.Resource {
 				Type:     schema.TypeString,
 				Computed: true,
 			},
+			"certificate_clusters": {
+				Type:     schema.TypeList,
+				Computed: true,
+				Elem: &schema.Resource{
+					Schema: map[string]*schema.Schema{
+						"name": {
+							Type:     schema.TypeString,
+							Computed: true,
+						},
+						"server": {
+							Type:     schema.TypeString,
+							Computed: true,
+						},
+						"certificate_authority_data": {
+							Type:     schema.TypeString,
+							Computed: true,
+						},
+					},
+				},
+			},
+			"certificate_users": {
+				Type:     schema.TypeList,
+				Computed: true,
+				Elem: &schema.Resource{
+					Schema: map[string]*schema.Schema{
+						"name": {
+							Type:     schema.TypeString,
+							Computed: true,
+						},
+						"client_certificate_data": {
+							Type:     schema.TypeString,
+							Computed: true,
+						},
+						"client_key_data": {
+							Type:     schema.TypeString,
+							Computed: true,
+						},
+					},
+				},
+			},
 		},
 	}
 }
@@ -115,28 +155,55 @@ func dataSourceCCEClusterV3Read(d *schema.ResourceData, meta interface{}) error 
 			" Please try a more specific search criteria")
 	}
 
-	Cluster := refinedClusters[0]
+	cluster := refinedClusters[0]
 
-	log.Printf("[DEBUG] Retrieved Clusters using given filter %s: %+v", Cluster.Metadata.Id, Cluster)
+	log.Printf("[DEBUG] Retrieved Clusters using given filter %s: %+v", cluster.Metadata.Id, cluster)
 
-	d.SetId(Cluster.Metadata.Id)
+	d.SetId(cluster.Metadata.Id)
 
-	d.Set("name", Cluster.Metadata.Name)
-	d.Set("flavor_id", Cluster.Spec.Flavor)
-	d.Set("description", Cluster.Spec.Description)
-	d.Set("cluster_version", Cluster.Spec.Version)
-	d.Set("cluster_type", Cluster.Spec.Type)
-	d.Set("billing_mode", Cluster.Spec.BillingMode)
-	d.Set("vpc_id", Cluster.Spec.HostNetwork.VpcId)
-	d.Set("subnet_id", Cluster.Spec.HostNetwork.SubnetId)
-	d.Set("highway_subnet_id", Cluster.Spec.HostNetwork.HighwaySubnet)
-	d.Set("container_network_cidr", Cluster.Spec.ContainerNetwork.Cidr)
-	d.Set("container_network_type", Cluster.Spec.ContainerNetwork.Mode)
-	d.Set("status", Cluster.Status.Phase)
-	d.Set("internal", Cluster.Status.Endpoints[0].Internal)
-	d.Set("external", Cluster.Status.Endpoints[0].External)
-	d.Set("external_otc", Cluster.Status.Endpoints[0].ExternalOTC)
+	d.Set("name", cluster.Metadata.Name)
+	d.Set("flavor_id", cluster.Spec.Flavor)
+	d.Set("description", cluster.Spec.Description)
+	d.Set("cluster_version", cluster.Spec.Version)
+	d.Set("cluster_type", cluster.Spec.Type)
+	d.Set("billing_mode", cluster.Spec.BillingMode)
+	d.Set("vpc_id", cluster.Spec.HostNetwork.VpcId)
+	d.Set("subnet_id", cluster.Spec.HostNetwork.SubnetId)
+	d.Set("highway_subnet_id", cluster.Spec.HostNetwork.HighwaySubnet)
+	d.Set("container_network_cidr", cluster.Spec.ContainerNetwork.Cidr)
+	d.Set("container_network_type", cluster.Spec.ContainerNetwork.Mode)
+	d.Set("status", cluster.Status.Phase)
+	d.Set("internal", cluster.Status.Endpoints[0].Internal)
+	d.Set("external", cluster.Status.Endpoints[0].External)
+	d.Set("external_otc", cluster.Status.Endpoints[0].ExternalOTC)
 	d.Set("region", GetRegion(d, config))
+
+	cert, err := clusters.GetCert(cceClient, d.Id()).Extract()
+	if err != nil {
+		log.Printf("Error retrieving opentelekomcloud CCE cluster cert: %s", err)
+	}
+
+	// Set Certificate Clusters
+	var clusterList []map[string]interface{}
+	for _, clusterObj := range cert.Clusters {
+		clusterCert := make(map[string]interface{})
+		clusterCert["name"] = clusterObj.Name
+		clusterCert["server"] = clusterObj.Cluster.Server
+		clusterCert["certificate_authority_data"] = clusterObj.Cluster.CertAuthorityData
+		clusterList = append(clusterList, clusterCert)
+	}
+	d.Set("certificate_clusters", clusterList)
+
+	// Set Certificate Users
+	var userList []map[string]interface{}
+	for _, userObj := range cert.Users {
+		userCert := make(map[string]interface{})
+		userCert["name"] = userObj.Name
+		userCert["client_certificate_data"] = userObj.User.ClientCertData
+		userCert["client_key_data"] = userObj.User.ClientKeyData
+		userList = append(userList, userCert)
+	}
+	d.Set("certificate_users", userList)
 
 	return nil
 }
