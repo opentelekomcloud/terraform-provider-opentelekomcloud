@@ -40,7 +40,6 @@ signs:
     args:
       - "--output"
       - "${signature}"
-      - "--armor"
       - "--detach-sign"
       - "${artifact}"
 release:
