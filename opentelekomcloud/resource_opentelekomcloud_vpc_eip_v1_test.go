@@ -110,6 +110,10 @@ resource "opentelekomcloud_vpc_eip_v1" "eip_1" {
     share_type = "PER"
     charge_mode = "traffic"
   }
+  tags = {
+    this = "is"
+    our = "tags"
+  }
 }
 `
 
