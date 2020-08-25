@@ -1,5 +1,11 @@
 ## 1.20.0 (Unreleased)
 
+## 1.19.2 (August 24, 2020)
+
+ENHANCEMENTS:
+* `data_source/opentelekomcloud_cce_cluster_v3`: Add certificates to cce_cluster_v3 data source ([#581](https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/581))
+* `resource/opentelekomcloud_vpc_eip_v1`: Add `tags` support ([#570](https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/570))
+
 ## 1.19.1 (August 21, 2020)
 
 BUG FIXES:
