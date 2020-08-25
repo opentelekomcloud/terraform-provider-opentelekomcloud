@@ -340,7 +340,6 @@ func Provider() terraform.ResourceProvider {
 			"opentelekomcloud_cts_tracker_v1":                     resourceCTSTrackerV1(),
 			"opentelekomcloud_cce_node_v3":                        resourceCCENodeV3(),
 			"opentelekomcloud_cce_cluster_v3":                     resourceCCEClusterV3(),
-			"opentelekomcloud_maas_task_v1":                       resourceMaasTaskV1(),
 			"opentelekomcloud_css_cluster_v1":                     resourceCssClusterV1(),
 			"opentelekomcloud_rds_instance_v3":                    resourceRdsInstanceV3(),
 			"opentelekomcloud_rds_parametergroup_v3":              resourceRdsConfigurationV3(),

@@ -834,13 +834,6 @@ func (c *Config) cceV3Client(region string) (*golangsdk.ServiceClient, error) {
 	})
 }
 
-func (c *Config) maasV1Client(region string) (*golangsdk.ServiceClient, error) {
-	return huaweisdk.NewMAASV1(c.HwClient, golangsdk.EndpointOpts{
-		Region:       region,
-		Availability: c.getHwEndpointType(),
-	})
-}
-
 func (c *Config) dcsV1Client(region string) (*golangsdk.ServiceClient, error) {
 	return huaweisdk.NewDCSServiceV1(c.HwClient, golangsdk.EndpointOpts{
 		Region:       region,
