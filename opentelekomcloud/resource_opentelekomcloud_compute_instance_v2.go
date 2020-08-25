@@ -19,10 +19,10 @@ import (
 	"github.com/huaweicloud/golangsdk/openstack/compute/v2/extensions/schedulerhints"
 	"github.com/huaweicloud/golangsdk/openstack/compute/v2/extensions/secgroups"
 	"github.com/huaweicloud/golangsdk/openstack/compute/v2/extensions/startstop"
-	"github.com/huaweicloud/golangsdk/openstack/compute/v2/extensions/tags"
 	"github.com/huaweicloud/golangsdk/openstack/compute/v2/flavors"
 	"github.com/huaweicloud/golangsdk/openstack/compute/v2/images"
 	"github.com/huaweicloud/golangsdk/openstack/compute/v2/servers"
+	ecstags "github.com/huaweicloud/golangsdk/openstack/ecs/v1/cloudservertags"
 )
 
 func resourceComputeInstanceV2() *schema.Resource {
@@ -499,21 +499,21 @@ func resourceComputeInstanceV2Create(d *schema.ResourceData, meta interface{}) e
 			server.ID, err)
 	}
 
-	taglist := resourceBuildTags(d)
-	log.Printf("[DEBUG] Setting taglist: %v", taglist)
-	if len(taglist) > 0 {
-		_, err := CreateServerTags(computeClient, d.Id(), taglist)
-		if err != nil {
-			return fmt.Errorf("Error creating tags for instance (%s): %s", d.Id(), err)
-		}
-	}
-
 	if hasFilledOpt(d, "auto_recovery") {
 		ar := d.Get("auto_recovery").(bool)
 		log.Printf("[DEBUG] Set auto recovery of instance to %t", ar)
 		err = setAutoRecoveryForInstance(d, meta, server.ID, ar)
 		if err != nil {
 			log.Printf("[WARN] Error setting auto recovery of instance:%s, err=%s", server.ID, err)
+		}
+	}
+
+	if hasFilledOpt(d, "tags") {
+		tagsMap := d.Get("tags").(map[string]interface{})
+		log.Printf("[DEBUG] Setting tag(key/value): %v", tagsMap)
+		err = setTagForInstance(d, meta, server.ID, tagsMap)
+		if err != nil {
+			log.Printf("[WARN] Error setting tag(key/value) of instance:%s, err=%s", server.ID, err)
 		}
 	}
 
@@ -636,76 +636,24 @@ func resourceComputeInstanceV2Read(d *schema.ResourceData, meta interface{}) err
 
 	// set instance tags
 	if _, ok := d.GetOk("tags"); ok {
-		tagList, err := GetServerTags(computeClient, d.Id())
+		ecsv1client, err := config.computeV1Client(GetRegion(d, config))
 		if err != nil {
-			return err
+			return fmt.Errorf("Error creating OpenTelekomCloud compute v1 client: %s", err)
 		}
-		d.Set("tags", tagList.Tags)
-		// Filter out network name if it is in the list
-		tagSet := d.Get("tags").(*schema.Set)
-		name := GetNetworkName(d)
-		if name != "" {
-			tagSet.Remove(name)
+		ecsTagsList, err := ecstags.Get(ecsv1client, d.Id()).Extract()
+		if err != nil {
+			return fmt.Errorf("Error fetching OpenTelekomCloud instance tags: %s", err)
 		}
-		d.Set("tags", tagSet.List())
+		tagsMap := make(map[string]string)
+		for _, val := range ecsTagsList.Tags {
+			tagsMap[val.Key] = val.Value
+		}
+		if err := d.Set("tags", tagsMap); err != nil {
+			return fmt.Errorf("[DEBUG] Error saving tag to state for OpenTelekomCloud instance (%s): %s", d.Id(), err)
+		}
 	}
 
 	return nil
-}
-
-func CreateServerTags(client *golangsdk.ServiceClient, serverId string, tagList []string) (*tags.Tags, error) {
-	createOpts := tags.CreateOpts{
-		Tags: tagList,
-	}
-	return tags.Create(client, serverId, createOpts).Extract()
-}
-
-func GetServerTags(client *golangsdk.ServiceClient, serverId string) (*tags.Tags, error) {
-	return tags.Get(client, serverId).Extract()
-}
-
-func DeleteServerTags(client *golangsdk.ServiceClient, serverId string) error {
-	return tags.Delete(client, serverId).ExtractErr()
-}
-
-func resourceBuildTags(d *schema.ResourceData) []string {
-	v := d.Get("tags").(*schema.Set).List()
-	var tagsList []string
-	/* name := GetNetworkName(d)
-	if name != "" {
-		tags = append(tags, name)
-	} */
-	for _, tag := range v {
-		tagsList = append(tagsList, tag.(string))
-	}
-
-	return tagsList
-}
-
-func GetNetworkName(d *schema.ResourceData) string {
-	//log.Printf("[DEBUG] GetNetworkName starting.")
-	if v, ok := d.GetOk("network"); ok {
-		//log.Printf("[DEBUG] GetNetworkName step 1.")
-		if networks, ok := v.([]interface{}); ok {
-			//log.Printf("[DEBUG] GetNetworkName step 2.")
-			if len(networks) > 0 {
-				//log.Printf("[DEBUG] GetNetworkName step 3.")
-				network := networks[0]
-				if networkMap, ok := network.(map[string]interface{}); ok {
-					//log.Printf("[DEBUG] GetNetworkName step 4.")
-					if name, ok := networkMap["name"]; ok {
-						//log.Printf("[DEBUG] GetNetworkName step 5.")
-						if sName, ok := name.(string); ok {
-							log.Printf("[DEBUG] GetNetworkName: %v", sName)
-							return sName
-						}
-					}
-				}
-			}
-		}
-	}
-	log.Printf("[DEBUG] GetNetworkName missing.")
-	return ""
 }
 
 func resourceComputeInstanceV2Update(d *schema.ResourceData, meta interface{}) error {
@@ -869,18 +817,30 @@ func resourceComputeInstanceV2Update(d *schema.ResourceData, meta interface{}) e
 	}
 
 	if d.HasChange("tags") {
-		tagList := resourceBuildTags(d)
-		log.Printf("[DEBUG] Setting tags to %v", tagList)
-
-		if len(tagList) == 0 {
-			err := DeleteServerTags(computeClient, d.Id())
-			if err != nil {
-				return fmt.Errorf("Error deleting tags for instance (%s): %s", d.Id(), err)
+		ecsv1Client, err := config.computeV1Client(GetRegion(d, config))
+		if err != nil {
+			return fmt.Errorf("Error creating OpenTelekomCloud compute v1 client: %s", err)
+		}
+		oldTags, err := ecstags.Get(ecsv1Client, d.Id()).Extract()
+		if err != nil {
+			return fmt.Errorf("Error fetching OpenTelekomCloud instance tags: %s", err)
+		}
+		if len(oldTags.Tags) > 0 {
+			deleteOpts := ecstags.BatchOpts{Action: ecstags.ActionDelete, Tags: oldTags.Tags}
+			deleteTags := ecstags.BatchAction(ecsv1Client, d.Id(), deleteOpts)
+			if deleteTags.Err != nil {
+				return fmt.Errorf("Error updating OpenTelekomCloud instance tags: %s", deleteTags.Err)
 			}
-		} else {
-			_, err := CreateServerTags(computeClient, d.Id(), tagList)
-			if err != nil {
-				return fmt.Errorf("Error creating tags for instance (%s): %s", d.Id(), err)
+		}
+
+		if hasFilledOpt(d, "tags") {
+			tagsMap := d.Get("tags").(map[string]interface{})
+			if len(tagsMap) > 0 {
+				log.Printf("[DEBUG] Setting tag(key/value): %v", tagsMap)
+				err = setTagForInstance(d, meta, d.Id(), tagsMap)
+				if err != nil {
+					return fmt.Errorf("Error updating tag(key/value) of instance:%s, err:%s", d.Id(), err)
+				}
 			}
 		}
 	}
