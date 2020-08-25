@@ -19,7 +19,6 @@ import (
 	"github.com/huaweicloud/golangsdk/openstack/compute/v2/extensions/schedulerhints"
 	"github.com/huaweicloud/golangsdk/openstack/compute/v2/extensions/secgroups"
 	"github.com/huaweicloud/golangsdk/openstack/compute/v2/extensions/startstop"
-	"github.com/huaweicloud/golangsdk/openstack/compute/v2/extensions/tags"
 	"github.com/huaweicloud/golangsdk/openstack/compute/v2/flavors"
 	"github.com/huaweicloud/golangsdk/openstack/compute/v2/images"
 	"github.com/huaweicloud/golangsdk/openstack/compute/v2/servers"
@@ -351,20 +350,7 @@ func resourceComputeInstanceV2() *schema.Resource {
 				Optional: true,
 				Default:  false,
 			},
-			"tags": {
-				Type:          schema.TypeSet,
-				Optional:      true,
-				Elem:          &schema.Schema{Type: schema.TypeString},
-				Set:           schema.HashString,
-				ConflictsWith: []string{"tag"},
-				Deprecated:    "Use field tag instead",
-			},
-			"tag": {
-				Type:          schema.TypeMap,
-				Optional:      true,
-				ConflictsWith: []string{"tags"},
-				ValidateFunc:  validateECSTagValue,
-			},
+			"tags": tagsSchema(),
 			"all_metadata": {
 				Type:     schema.TypeMap,
 				Computed: true,
@@ -476,8 +462,8 @@ func resourceComputeInstanceV2Create(d *schema.ResourceData, meta interface{}) e
 
 	log.Printf("[DEBUG] Create Options: %#v", createOpts)
 
-	// If a block_device is used, use the bootfromvolume.Create function as it allows an empty ImageRef.
-	// Otherwise, use the normal servers.Create function.
+	// If a block_device is used, use the bootfromvolume. Create function as it allows an empty ImageRef.
+	// Otherwise, use the normal servers. Create function.
 	var server *servers.Server
 	if _, ok := d.GetOk("block_device"); ok {
 		server, err = bootfromvolume.Create(computeClient, createOpts).Extract()
@@ -495,8 +481,7 @@ func resourceComputeInstanceV2Create(d *schema.ResourceData, meta interface{}) e
 
 	// Wait for the instance to become running so we can get some attributes
 	// that aren't available until later.
-	log.Printf(
-		"[DEBUG] Waiting for instance (%s) to become running",
+	log.Printf("[DEBUG] Waiting for instance (%s) to become running",
 		server.ID)
 
 	stateConf := &resource.StateChangeConf{
@@ -510,18 +495,8 @@ func resourceComputeInstanceV2Create(d *schema.ResourceData, meta interface{}) e
 
 	_, err = stateConf.WaitForState()
 	if err != nil {
-		return fmt.Errorf(
-			"Error waiting for instance (%s) to become ready: %s",
+		return fmt.Errorf("Error waiting for instance (%s) to become ready: %s",
 			server.ID, err)
-	}
-
-	taglist := resourceBuildTags(d)
-	log.Printf("[DEBUG] Setting taglist: %v", taglist)
-	if len(taglist) > 0 {
-		_, err := CreateServerTags(computeClient, d.Id(), taglist)
-		if err != nil {
-			return fmt.Errorf("Error creating tags for instance (%s): %s", d.Id(), err)
-		}
 	}
 
 	if hasFilledOpt(d, "auto_recovery") {
@@ -533,14 +508,15 @@ func resourceComputeInstanceV2Create(d *schema.ResourceData, meta interface{}) e
 		}
 	}
 
-	if hasFilledOpt(d, "tag") {
-		tagmap := d.Get("tag").(map[string]interface{})
-		log.Printf("[DEBUG] Setting tag(key/value): %v", tagmap)
-		err = setTagForInstance(d, meta, server.ID, tagmap)
+	if hasFilledOpt(d, "tags") {
+		tagsMap := d.Get("tags").(map[string]interface{})
+		log.Printf("[DEBUG] Setting tag(key/value): %v", tagsMap)
+		err = setTagForInstance(d, meta, server.ID, tagsMap)
 		if err != nil {
 			log.Printf("[WARN] Error setting tag(key/value) of instance:%s, err=%s", server.ID, err)
 		}
 	}
+
 	return resourceComputeInstanceV2Read(d, meta)
 }
 
@@ -606,7 +582,7 @@ func resourceComputeInstanceV2Read(d *schema.ResourceData, meta interface{}) err
 		return fmt.Errorf("[DEBUG] Error saving all_metadata to state for OpenTelekomCloud server (%s): %s", d.Id(), err)
 	}
 
-	secGrpNames := []string{}
+	var secGrpNames []string
 	for _, sg := range server.SecurityGroups {
 		secGrpNames = append(secGrpNames, sg["name"].(string))
 	}
@@ -658,95 +634,26 @@ func resourceComputeInstanceV2Read(d *schema.ResourceData, meta interface{}) err
 	}
 	d.Set("auto_recovery", ar)
 
-	// set instance tag
-	if _, ok := d.GetOk("tag"); ok {
+	// set instance tags
+	if _, ok := d.GetOk("tags"); ok {
 		ecsv1client, err := config.computeV1Client(GetRegion(d, config))
 		if err != nil {
 			return fmt.Errorf("Error creating OpenTelekomCloud compute v1 client: %s", err)
 		}
-		ecsTaglist, err := ecstags.Get(ecsv1client, d.Id()).Extract()
+		ecsTagsList, err := ecstags.Get(ecsv1client, d.Id()).Extract()
 		if err != nil {
 			return fmt.Errorf("Error fetching OpenTelekomCloud instance tags: %s", err)
 		}
-
-		tagmap := make(map[string]string)
-		for _, val := range ecsTaglist.Tags {
-			tagmap[val.Key] = val.Value
+		tagsMap := make(map[string]string)
+		for _, val := range ecsTagsList.Tags {
+			tagsMap[val.Key] = val.Value
 		}
-		if err := d.Set("tag", tagmap); err != nil {
+		if err := d.Set("tags", tagsMap); err != nil {
 			return fmt.Errorf("[DEBUG] Error saving tag to state for OpenTelekomCloud instance (%s): %s", d.Id(), err)
 		}
-	} else if _, ok := d.GetOk("tags"); ok {
-		taglist, err := GetServerTags(computeClient, d.Id())
-		if err != nil {
-			return err
-		}
-		d.Set("tags", taglist.Tags)
-		// Filter out network name if it is in the list
-		tagset := d.Get("tags").(*schema.Set)
-		name := GetNetworkName(d)
-		if name != "" {
-			tagset.Remove(name)
-		}
-		d.Set("tags", tagset.List())
 	}
 
 	return nil
-}
-
-func CreateServerTags(client *golangsdk.ServiceClient, server_id string, taglist []string) (*tags.Tags, error) {
-	createOpts := tags.CreateOpts{
-		Tags: taglist,
-	}
-	return tags.Create(client, server_id, createOpts).Extract()
-}
-
-func GetServerTags(client *golangsdk.ServiceClient, server_id string) (*tags.Tags, error) {
-	return tags.Get(client, server_id).Extract()
-}
-
-func DeleteServerTags(client *golangsdk.ServiceClient, server_id string) error {
-	return tags.Delete(client, server_id).ExtractErr()
-}
-
-func resourceBuildTags(d *schema.ResourceData) []string {
-	v := d.Get("tags").(*schema.Set).List()
-	var tags []string
-	/* name := GetNetworkName(d)
-	if name != "" {
-		tags = append(tags, name)
-	} */
-	for _, tag := range v {
-		tags = append(tags, tag.(string))
-	}
-
-	return tags
-}
-
-func GetNetworkName(d *schema.ResourceData) string {
-	//log.Printf("[DEBUG] GetNetworkName starting.")
-	if v, ok := d.GetOk("network"); ok {
-		//log.Printf("[DEBUG] GetNetworkName step 1.")
-		if networks, ok := v.([]interface{}); ok {
-			//log.Printf("[DEBUG] GetNetworkName step 2.")
-			if len(networks) > 0 {
-				//log.Printf("[DEBUG] GetNetworkName step 3.")
-				network := networks[0]
-				if network_map, ok := network.(map[string]interface{}); ok {
-					//log.Printf("[DEBUG] GetNetworkName step 4.")
-					if name, ok := network_map["name"]; ok {
-						//log.Printf("[DEBUG] GetNetworkName step 5.")
-						if sname, ok := name.(string); ok {
-							log.Printf("[DEBUG] GetNetworkName: %v", sname)
-							return sname
-						}
-					}
-				}
-			}
-		}
-	}
-	log.Printf("[DEBUG] GetNetworkName missing.")
-	return ""
 }
 
 func resourceComputeInstanceV2Update(d *schema.ResourceData, meta interface{}) error {
@@ -910,23 +817,6 @@ func resourceComputeInstanceV2Update(d *schema.ResourceData, meta interface{}) e
 	}
 
 	if d.HasChange("tags") {
-		taglist := resourceBuildTags(d)
-		log.Printf("[DEBUG] Setting tags to %v", taglist)
-
-		if len(taglist) == 0 {
-			err := DeleteServerTags(computeClient, d.Id())
-			if err != nil {
-				return fmt.Errorf("Error deleting tags for instance (%s): %s", d.Id(), err)
-			}
-		} else {
-			_, err := CreateServerTags(computeClient, d.Id(), taglist)
-			if err != nil {
-				return fmt.Errorf("Error creating tags for instance (%s): %s", d.Id(), err)
-			}
-		}
-	}
-
-	if d.HasChange("tag") {
 		ecsv1Client, err := config.computeV1Client(GetRegion(d, config))
 		if err != nil {
 			return fmt.Errorf("Error creating OpenTelekomCloud compute v1 client: %s", err)
@@ -936,18 +826,18 @@ func resourceComputeInstanceV2Update(d *schema.ResourceData, meta interface{}) e
 			return fmt.Errorf("Error fetching OpenTelekomCloud instance tags: %s", err)
 		}
 		if len(oldTags.Tags) > 0 {
-			deleteopts := ecstags.BatchOpts{Action: ecstags.ActionDelete, Tags: oldTags.Tags}
-			deleteTags := ecstags.BatchAction(ecsv1Client, d.Id(), deleteopts)
+			deleteOpts := ecstags.BatchOpts{Action: ecstags.ActionDelete, Tags: oldTags.Tags}
+			deleteTags := ecstags.BatchAction(ecsv1Client, d.Id(), deleteOpts)
 			if deleteTags.Err != nil {
 				return fmt.Errorf("Error updating OpenTelekomCloud instance tags: %s", deleteTags.Err)
 			}
 		}
 
-		if hasFilledOpt(d, "tag") {
-			tagmap := d.Get("tag").(map[string]interface{})
-			if len(tagmap) > 0 {
-				log.Printf("[DEBUG] Setting tag(key/value): %v", tagmap)
-				err = setTagForInstance(d, meta, d.Id(), tagmap)
+		if hasFilledOpt(d, "tags") {
+			tagsMap := d.Get("tags").(map[string]interface{})
+			if len(tagsMap) > 0 {
+				log.Printf("[DEBUG] Setting tag(key/value): %v", tagsMap)
+				err = setTagForInstance(d, meta, d.Id(), tagsMap)
 				if err != nil {
 					return fmt.Errorf("Error updating tag(key/value) of instance:%s, err:%s", d.Id(), err)
 				}
@@ -986,7 +876,6 @@ func resourceComputeInstanceV2Delete(d *schema.ResourceData, meta interface{}) e
 	if err != nil {
 		return fmt.Errorf("Error deleting OpenTelekomCloud server: %s", err)
 	}
-	//}
 
 	// Wait for the instance to delete before moving on.
 	log.Printf("[DEBUG] Waiting for instance (%s) to delete", d.Id())
@@ -1002,8 +891,7 @@ func resourceComputeInstanceV2Delete(d *schema.ResourceData, meta interface{}) e
 
 	_, err = stateConf.WaitForState()
 	if err != nil {
-		return fmt.Errorf(
-			"Error waiting for instance (%s) to delete: %s",
+		return fmt.Errorf("Error waiting for instance (%s) to delete: %s",
 			d.Id(), err)
 	}
 
@@ -1034,11 +922,11 @@ func ServerV2StateRefreshFunc(client *golangsdk.ServiceClient, instanceID string
 
 func resourceInstanceSecGroupsV2(d *schema.ResourceData) []string {
 	rawSecGroups := d.Get("security_groups").(*schema.Set).List()
-	secgroups := make([]string, len(rawSecGroups))
+	secGroups := make([]string, len(rawSecGroups))
 	for i, raw := range rawSecGroups {
-		secgroups[i] = raw.(string)
+		secGroups[i] = raw.(string)
 	}
-	return secgroups
+	return secGroups
 }
 
 func resourceInstanceMetadataV2(d *schema.ResourceData) map[string]string {
@@ -1093,14 +981,14 @@ func resourceInstanceBlockDevicesV2(d *schema.ResourceData, bds []interface{}) (
 }
 
 func resourceInstanceSchedulerHintsV2(d *schema.ResourceData, schedulerHintsRaw map[string]interface{}) schedulerhints.SchedulerHints {
-	differentHost := []string{}
+	var differentHost []string
 	if len(schedulerHintsRaw["different_host"].([]interface{})) > 0 {
 		for _, dh := range schedulerHintsRaw["different_host"].([]interface{}) {
 			differentHost = append(differentHost, dh.(string))
 		}
 	}
 
-	sameHost := []string{}
+	var sameHost []string
 	if len(schedulerHintsRaw["same_host"].([]interface{})) > 0 {
 		for _, sh := range schedulerHintsRaw["same_host"].([]interface{}) {
 			sameHost = append(sameHost, sh.(string))
