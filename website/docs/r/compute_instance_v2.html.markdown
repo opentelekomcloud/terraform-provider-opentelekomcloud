@@ -21,7 +21,7 @@ resource "opentelekomcloud_compute_instance_v2" "basic" {
   flavor_id       = "3"
   key_pair        = "my_key_pair_name"
   security_groups = ["default"]
-  tag = {
+  tags = {
     foo = "bar"
     key = "value"
   }
@@ -265,8 +265,8 @@ function, or the `template_cloudinit_config` resource.
 
 ## Argument Reference
 
-~> **NOTE:** The `tags` attribute has been deprecated and might
-be removed in future releases, please use `tag` instead.
+~> **NOTE:** The `tag` attribute has been deprecated and might
+be removed in future releases, please use `tags` instead.
 
 The following arguments are supported:
 
@@ -326,9 +326,9 @@ The following arguments are supported:
 * `scheduler_hints` - (Optional) Provide the Nova scheduler with hints on how
     the instance should be launched. The available hints are described below.
 
-* `tags` - **DEPRECATED** (Optional) The tags of the image. It must be a list of strings.
+* `tags` -  (Optional) Tags key/value pairs to associate with the instance.
 
-* `tag` - (Optional) Tags key/value pairs to associate with the instance.
+* `tag` **DEPRECATED** - (Optional) Tags key/value pairs to associate with the instance.
 
 * `stop_before_destroy` - (Optional) Whether to try stop instance gracefully
     before destroying it, thus giving chance for guest OS daemons to stop correctly.
@@ -338,7 +338,8 @@ The following arguments are supported:
     forcefully deleted. This is useful for environments that have reclaim / soft
     deletion enabled.
 
-* `auto_recovery` - (Optional) Configures or deletes automatic recovery of an instance
+* `auto_recovery` - (Optional) Configures or deletes automatic recovery of an instance. 
+    Defaults to true.
 
 The `network` block supports:
 
