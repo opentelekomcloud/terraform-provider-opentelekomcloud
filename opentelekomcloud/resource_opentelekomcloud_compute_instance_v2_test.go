@@ -379,7 +379,7 @@ func TestAccComputeV2Instance_auto_recovery(t *testing.T) {
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckComputeV2InstanceExists("opentelekomcloud_compute_instance_v2.instance_1", &instance),
 					resource.TestCheckResourceAttr(
-						"opentelekomcloud_compute_instance_v2.instance_1", "auto_recovery", "false"),
+						"opentelekomcloud_compute_instance_v2.instance_1", "auto_recovery", "true"),
 				),
 			},
 			{
@@ -387,7 +387,7 @@ func TestAccComputeV2Instance_auto_recovery(t *testing.T) {
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckComputeV2InstanceExists("opentelekomcloud_compute_instance_v2.instance_1", &instance),
 					resource.TestCheckResourceAttr(
-						"opentelekomcloud_compute_instance_v2.instance_1", "auto_recovery", "true"),
+						"opentelekomcloud_compute_instance_v2.instance_1", "auto_recovery", "false"),
 				),
 			},
 		},

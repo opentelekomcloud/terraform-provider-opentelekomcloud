@@ -45,7 +45,6 @@ func resourceComputeInstanceV2() *schema.Resource {
 				Computed: true,
 				ForceNew: true,
 			},
-
 			"name": {
 				Type:     schema.TypeString,
 				Required: true,
