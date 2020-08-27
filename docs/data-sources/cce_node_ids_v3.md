@@ -1,11 +1,3 @@
----
-layout: "opentelekomcloud"
-page_title: "OpenTelekomCloud: opentelekomcloud_cce_node_ids_v3"
-sidebar_current: "docs-opentelekomcloud-datasource-cce-node-ids-v3"
-description: |-
-  Provides a list of node Ids for a CCE cluster.
----
-
 # Data Source: opentelekomcloud_cce_node_ids_v3
 
 `opentelekomcloud_cce_node_ids_v3` provides a list of node ids for a CCE cluster. This resource can be useful for getting back a list of node ids for a CCE cluster.

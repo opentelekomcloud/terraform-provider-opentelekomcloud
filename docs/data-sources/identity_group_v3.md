@@ -1,12 +1,4 @@
----
-layout: "opentelekomcloud"
-page_title: "OpentelekomCloud: opentelekomcloud_identity_group_v3"
-sidebar_current: "docs-opentelekomcloud-datasource-identity-group-v3"
-description: |-
-  Get information on an OpentelekomCloud Group.
----
-
-# opentelekomcloud\_identity\_group\_v3
+# opentelekomcloud_identity_group_v3
 
 Use this data source to get the ID of an OpentelekomCloud group.
 

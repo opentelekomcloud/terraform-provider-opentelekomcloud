@@ -1,12 +1,3 @@
----
-layout: "opentelekomcloud"
-page_title: "OpenTelekomCloud: opentelekomcloud_deh_host_v1"
-sidebar_current: "docs-opentelekomcloud-datasource-deh-host-v1"
-description: |-
-  Provides allocated dedicated hosts.
-
----
-
 # Data Source: opentelekomcloud_deh_host_v1
 
 `opentelekomcloud_deh_host_v1` used to query allocated dedicated hosts.
@@ -14,13 +5,11 @@ description: |-
 ## Example Usage
 
 ```hcl
-    variable "deh_id" { }
+variable "deh_id" { }
 
-    data "opentelekomcloud_deh_host_v1" "deh_host" 
-    {
-        id = "${var.deh_id}"
-    }
-
+data "opentelekomcloud_deh_host_v1" "deh_host" {
+  id = "${var.deh_id}"
+}
 ```
 
 ## Argument Reference

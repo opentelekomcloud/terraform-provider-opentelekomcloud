@@ -1,11 +1,3 @@
----
-layout: "opentelekomcloud"
-page_title: "OpenTelekomCloud: opentelekomcloud_rts_stack_v1"
-sidebar_current: "docs-opentelekomcloud-datasource-rts-stack-v1"
-description: |-
-  Provides metadata of an RTS stack (e.g. outputs).
----
-
 # Data Source: opentelekomcloud_rts_stack_v1
 
 The OpenTelekomCloud RTS Stack data source allows access to stack outputs and other useful data including the template body.

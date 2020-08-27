@@ -1,12 +1,4 @@
----
-layout: "opentelekomcloud"
-page_title: "OpenTelekomCloud: opentelekomcloud_networking_network_v2"
-sidebar_current: "docs-opentelekomcloud-datasource-networking-network-v2"
-description: |-
-  Get information on an OpenTelekomCloud Network.
----
-
-# opentelekomcloud\_networking\_network\_v2
+# opentelekomcloud_networking_network_v2
 
 Use this data source to get the ID of an available OpenTelekomCloud network.
 

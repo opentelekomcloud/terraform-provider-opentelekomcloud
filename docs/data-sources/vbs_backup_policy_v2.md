@@ -1,29 +1,18 @@
----
-layout: "opentelekomcloud"
-page_title: "OpenTelekomCloud: opentelekomcloud_vbs_backup_policy_v2"
-sidebar_current: "docs-opentelekomcloud-datasource-vbs-backup-policy-v2"
-description: |-
-  Provides details about a specific VBS backup policy.
----
-
 # Data Source: opentelekomcloud_vbs_backup_policy_v2
 
 The VBS Backup Policy data source provides details about a specific VBS backup policy.
 
-
 ## Example Usage
 
- ```hcl
-
- variable "policy_name" { }
-
- variable "policy_id" { }
+```hcl
+variable "policy_name" { }
+variable "policy_id" { }
     
 data "opentelekomcloud_vbs_backup_policy_v2" "policies" {
   name = "${var.policy_name}"
-  id = "${var.policy_id}"
+  id   = "${var.policy_id}"
 }
- ```
+```
 
 
 ## Argument Reference

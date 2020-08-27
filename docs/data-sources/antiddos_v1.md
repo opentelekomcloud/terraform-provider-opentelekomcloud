@@ -1,11 +1,3 @@
----
-layout: "opentelekomcloud"
-page_title: "OpenTelekomCloud: opentelekomcloud_antiddos_v1"
-sidebar_current: "docs-opentelekomcloud-datasource-antiddos-v1"
-description: |-
-  Provides status of a specific EIP.
----
-
 # Data Source: opentelekomcloud_antiddos_v1
 
 The OpenTelekomCloud Antiddos data source allows to query the status of EIP, regardless whether an EIP has been bound to an Elastic Cloud Server (ECS) or not.
@@ -16,9 +8,8 @@ The OpenTelekomCloud Antiddos data source allows to query the status of EIP, reg
 variable "id" { }
 
 data "opentelekomcloud_antiddos_v1" "antiddos" {
-  floating_ip_id ="${var.eip_id}"
+  floating_ip_id = "${var.eip_id}"
 }
-
 ```
 
 ## Argument Reference

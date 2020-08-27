@@ -1,12 +1,4 @@
----
-layout: "opentelekomcloud"
-page_title: "OpenTelekomCloud: opentelekomcloud_kms_data_key_v1"
-sidebar_current: "docs-opentelekomcloud-datasource-kms-data-key-v1"
-description: |-
-  Get information on an OpenTelekomCloud KMS data encryption key.
----
-
-# opentelekomcloud\_kms\_data_key_v1
+# opentelekomcloud_kms_data_key_v1
 
 Use this data source to get the plaintext and the ciphertext of an available
 OpenTelekomCloud KMS DEK (data encryption key).
@@ -14,7 +6,6 @@ OpenTelekomCloud KMS DEK (data encryption key).
 ## Example Usage
 
 ```hcl
-
 resource "opentelekomcloud_kms_key_v1" "key1" {
   key_alias       = "key_1"
   pending_days    = "7"
@@ -25,7 +16,6 @@ data "opentelekomcloud_kms_data_key_v1" "kms_datakey1" {
   key_id         = "${opentelekomcloud_kms_key_v1.key1.id}"
   datakey_length = "512"
 }
-
 ```
 
 ## Argument Reference

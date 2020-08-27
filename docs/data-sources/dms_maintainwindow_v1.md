@@ -1,23 +1,13 @@
----
-layout: "opentelekomcloud"
-page_title: "OpenTelekomCloud: opentelekomcloud_dms_maintainwindow_v1"
-sidebar_current: "docs-opentelekomcloud-datasource-dms-maintainwindow-v1"
-description: |-
-  Get information on an OpenTelekomCloud dms maintainwindow.
----
-
-# opentelekomcloud\_dms\_maintainwindow_v1
+# opentelekomcloud_dms_maintainwindow_v1
 
 Use this data source to get the ID of an available OpenTelekomCloud dms maintainwindow.
 
 ## Example Usage
 
 ```hcl
-
 data "opentelekomcloud_dms_maintainwindow_v1" "maintainwindow1" {
   seq = 1
 }
-
 ```
 
 ## Argument Reference

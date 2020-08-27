@@ -1,17 +1,8 @@
----
-layout: "opentelekomcloud"
-page_title: "OpenTelekomCloud: opentelekomcloud_csbs_backup_v1"
-sidebar_current: "docs-opentelekomcloud-datasource-csbs-backup-v1"
-description: |-
-  Provides details about a specific Backup.
----
-
 # Data Source: opentelekomcloud_csbs_backup_v1
 
 The OpenTelekomCloud CSBS Backup data source allows access of backup resources.
 
 ## Example Usage
-
 
 ```hcl
 variable "backup_name" { }

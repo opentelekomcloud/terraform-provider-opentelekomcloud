@@ -1,26 +1,18 @@
----
-layout: "opentelekomcloud"
-page_title: "OpenTelekomCloud: opentelekomcloud_cce_cluster_v3  "
-sidebar_current: "docs-opentelekomcloud-datasource-cce-cluster-v3"
-description: |-
-  Get information on Cloud Container Engine Cluster (CCE).
----
-
 # opentelekomcloud_cce_cluster_v3
 
-   Provides details about all clusters and obtains certificate for accessing cluster information.
+Provides details about all clusters and obtains certificate for accessing cluster information.
 
 ## Example Usage
 
- ```hcl
-  variable "cluster_name" { }
-  variable "cluster_id" { }
-  variable "vpc_id" { }
+```hcl
+variable "cluster_name" { }
+variable "cluster_id" { }
+variable "vpc_id" { }
 
-  data "opentelekomcloud_cce_cluster_v3" "cluster" {
-   name = "${var.cluster_name}"
-   status= "Available"
-  }
+data "opentelekomcloud_cce_cluster_v3" "cluster" {
+  name   = "${var.cluster_name}"
+  status = "Available"
+}
 ```
 
 ## Argument Reference

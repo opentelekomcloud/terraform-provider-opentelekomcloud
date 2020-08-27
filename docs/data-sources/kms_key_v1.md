@@ -1,25 +1,16 @@
----
-layout: "opentelekomcloud"
-page_title: "OpenTelekomCloud: opentelekomcloud_kms_key_v1"
-sidebar_current: "docs-opentelekomcloud-datasource-kms-key-v1"
-description: |-
-  Get information on an OpenTelekomCloud KMS Key.
----
-
-# opentelekomcloud\_kms\_key_v1
+# opentelekomcloud_kms_key_v1
 
 Use this data source to get the ID of an available OpenTelekomCloud KMS key.
 
 ## Example Usage
 
 ```hcl
-
 data "opentelekomcloud_kms_key_v1" "key_1" {
   key_alias        = "test_key"
   key_description  = "test key description"
   key_state        = "2"
   key_id           = "af650527-a0ff-4527-aef3-c493df1f3012"
-  realm            = "cn-north-1"
+  realm            = "eu-de-01"
   default_key_flag = "0"
   domain_id        = "b168fe00ff56492495a7d22974df2d0b"
   origin           = "kms"

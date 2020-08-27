@@ -1,12 +1,3 @@
----
-layout: "opentelekomcloud"
-page_title: "OpenTelekomCloud: opentelekomcloud_deh_server_v1"
-sidebar_current: "docs-opentelekomcloud-datasource-deh-server-v1"
-description: |-
-  Provides servers on a specified Dedicated Host.
-
----
-
 # Data Source: opentelekomcloud_deh_server_v1
 
 `opentelekomcloud_deh_server_v1` used to query server on a specified Dedicated Host.
@@ -14,16 +5,14 @@ description: |-
 ## Example Usage
 
 ```hcl
-    variable "deh_id" { }
+variable "deh_id" { }
 
-    variable "server_id" { }
+variable "server_id" { }
 
-    data "opentelekomcloud_deh_server_v1" "deh_server" 
-    {
-        id = "${var.deh_id}",
-        server_id = "${var.server id}"
-    }
-
+data "opentelekomcloud_deh_server_v1" "deh_server" {
+  id = "${var.deh_id}",
+  server_id = "${var.server id}"
+}
 ```
 
 ## Argument Reference

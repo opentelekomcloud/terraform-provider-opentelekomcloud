@@ -1,31 +1,22 @@
----
-layout: "opentelekomcloud"
-page_title: "OpenTelekomCloud: opentelekomcloud_vpc_route_v2"
-sidebar_current: "docs-opentelekomcloud-datasource-vpc-route-v2"
-description: |-
-  Provides details about a specific VPC Route.
----
-
 # Data Source: opentelekomcloud_vpc_route_v2
 
 `opentelekomcloud_vpc_route_v2` provides details about a specific VPC route.
 
 ## Example Usage
 
- ```hcl
- variable "route_id" { }
+```hcl
+variable "route_id" { }
 
 data "opentelekomcloud_vpc_route_v2" "vpc_route" {
   id = "${var.route_id}"
 }
 
 resource "opentelekomcloud_vpc_subnet_v1" "subnet_v1" {
-  name = "test-subnet"
-  cidr = "192.168.0.0/24"
+  name       = "test-subnet"
+  cidr       = "192.168.0.0/24"
   gateway_ip = "192.168.0.1"
-  vpc_id = "${data.opentelekomcloud_vpc_route_v2.vpc_route.vpc_id}"
+  vpc_id     = "${data.opentelekomcloud_vpc_route_v2.vpc_route.vpc_id}"
 }
-
  ```
 
 ## Argument Reference

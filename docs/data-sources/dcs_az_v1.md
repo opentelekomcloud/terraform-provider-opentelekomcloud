@@ -1,19 +1,10 @@
----
-layout: "opentelekomcloud"
-page_title: "Opentelekomcloud: opentelekomcloud_dcs_az_v1"
-sidebar_current: "docs-opentelekomcloud-datasource-dcs-az-v1"
-description: |-
-  Get information on an Opentelekomcloud dcs az.
----
+# opentelekomcloud_dcs_az_v1
 
-# opentelekomcloud\_dcs\_az_v1
-
-Use this data source to get the ID of an available Opentelekomcloud dcs az.
+Use this data source to get the ID of an available Opentelekomcloud DCS AZ.
 
 ## Example Usage
 
 ```hcl
-
 data "opentelekomcloud_dcs_az_v1" "az1" {
   name = "AZ1"
   port = "8004"

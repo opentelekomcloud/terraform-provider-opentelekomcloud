@@ -1,14 +1,6 @@
----
-layout: "opentelekomcloud"
-page_title: "OpenTelekomCloud: opentelekomcloud_vpc_v1"
-sidebar_current: "docs-opentelekomcloud-datasource-vpc-v1"
-description: |-
-  Get information on an OpenTelekomCloud VPC.
----
-
 # opentelekomcloud_vpc_v1
 
-opentelekomcloud_vpc_v1 provides details about a specific VPC.
+`opentelekomcloud_vpc_v1` provides details about a specific VPC.
 
 This resource can prove useful when a module accepts a vpc id as an input variable and needs to, for example, determine the CIDR block of that VPC.
 
@@ -17,14 +9,12 @@ This resource can prove useful when a module accepts a vpc id as an input variab
 The following example shows how one might accept a VPC id as a variable and use this data source to obtain the data necessary to create a subnet within it.
 
 ```hcl
-
 variable "vpc_name" {}
 
 data "opentelekomcloud_vpc_v1" "vpc" {
-  name = "${var.vpc_name}"
+  name   = "${var.vpc_name}"
   shared = true
 }
-
 ```
 
 ## Argument Reference
@@ -58,5 +48,3 @@ The following attributes are exported:
 * `routes` - The list of route information with destination and nexthop fields.
 
 * `shared` - Specifies whether the cross-tenant sharing is supported.
-
-

@@ -1,12 +1,4 @@
----
-layout: "opentelekomcloud"
-page_title: "OpenTelekomCloud: opentelekomcloud_networking_port_v2"
-sidebar_current: "docs-opentelekomcloud-datasource-networking-port-v2"
-description: |-
-  Get information of an OpenTelekomCloud Port.
----
-
-# opentelekomcloud\_networking\_port\_v2
+# opentelekomcloud_networking_port_v2
 
 Use this data source to get the ID of an available OpenTelekomCloud port.
 

@@ -1,11 +1,3 @@
----
-layout: "opentelekomcloud"
-page_title: "OpenTelekomCloud: opentelekomcloud_rts_software_deployment_v1"
-sidebar_current: "docs-opentelekomcloud-datasource-rts-software-deployment-v1"
-description: |-
-  Provides details about a specific RTS Software Deployment.
----
-
 # Data Source: opentelekomcloud_rts_software_deployment_v1
 
 The RTS Software Deployment data source provides details about a specific RTS Software Deployment.
@@ -14,7 +6,7 @@ The RTS Software Deployment data source provides details about a specific RTS So
 
 
 ```hcl
-variable "deployment_id" {}
+variable "deployment_id" { }
 
 data "opentelekomcloud_rts_software_deployment_v1" "mydeployment" {
   id = "${var.deployment_id}"

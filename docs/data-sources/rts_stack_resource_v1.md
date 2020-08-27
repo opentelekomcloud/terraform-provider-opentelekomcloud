@@ -1,11 +1,3 @@
----
-layout: "opentelekomcloud"
-page_title: "OpenTelekomCloud: opentelekomcloud_rts_stack_resource_v1"
-sidebar_current: "docs-opentelekomcloud-datasource-rts-stack-resource-v1"
-description: |-
-  Provides metadata of an RTS stack resource
----
-
 # Data Source: opentelekomcloud_rts_stack_resource_v1
 
 The OpenTelekomCloud RTS Stack Resource data source allows access to stack resource metadata.
@@ -45,6 +37,3 @@ In addition to all arguments above, the following attributes are exported:
 * `resource_status_reason` - The resource operation reason.
  
 * `required_by` - Specifies the resource dependency.
-
-
-

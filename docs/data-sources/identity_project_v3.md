@@ -1,12 +1,4 @@
----
-layout: "opentelekomcloud"
-page_title: "OpentelekomCloud: opentelekomcloud_identity_project_v3"
-sidebar_current: "docs-opentelekomcloud-datasource-identity-project-v3"
-description: |-
-  Get information on an OpentelekomCloud Project.
----
-
-# opentelekomcloud\_identity\_project_v3
+# opentelekomcloud_identity_project_v3
 
 Use this data source to get the ID of an OpentelekomCloud project.
 

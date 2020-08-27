@@ -1,12 +1,4 @@
----
-layout: "opentelekomcloud"
-page_title: "OpenTelekomCloud: opentelekomcloud_images_image_v2"
-sidebar_current: "docs-opentelekomcloud-datasource-images-image-v2"
-description: |-
-  Get information on an OpenTelekomCloud Image.
----
-
-# opentelekomcloud\_images\_image\_v2
+# opentelekomcloud_images_image_v2
 
 Use this data source to get the ID of an available OpenTelekomCloud image.
 

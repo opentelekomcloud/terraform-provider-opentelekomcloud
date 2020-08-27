@@ -1,29 +1,17 @@
----
-layout: "opentelekomcloud"
-page_title: "OpenTelekomCloud: opentelekomcloud_compute_bms_nic_v2"
-sidebar_current: "docs-opentelekomcloud-compute-bms-nic-v2"
-description: |-
-   Used to query information about a BMS NIC based on the NIC ID.
----
-
 # Data Source: opentelekomcloud_compute_bms_nic_v2
 
 `opentelekomcloud_compute_bms_nic_v2` used to query information about a BMS NIC based on the NIC ID.
 
-
 ## Example Usage
 
 ```hcl
-    
-    variable "bms_id" {}
-    variable "nic_id" {}
+variable "bms_id" {}
+variable "nic_id" {}
 
-    data "opentelekomcloud_compute_bms_nic_v2" "Query_BMS_Nic" 
-    {
-        server_id = "${var.bms_id}",
-        id = "${var.nic_id}",
-    }
-       
+data "opentelekomcloud_compute_bms_nic_v2" "Query_BMS_Nic" {
+  server_id = "${var.bms_id}",
+  id = "${var.nic_id}",
+}       
 ```
 
 ## Argument Reference

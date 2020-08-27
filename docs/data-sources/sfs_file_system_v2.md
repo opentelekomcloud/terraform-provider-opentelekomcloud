@@ -1,11 +1,3 @@
----
-layout: "opentelekomcloud"
-page_title: "OpenTelekomCloud: opentelekomcloud_sfs_file_system_v2"
-sidebar_current: "docs-opentelekomcloud-datasource-sfs-file-system-v2"
-description: |-
-  Get information on an OpenTelekomCloud shared file system.
----
-
 # Data Source: opentelekomcloud_sfs_file_system_v2
 
 Provides information about an Shared File System (SFS).
@@ -13,15 +5,13 @@ Provides information about an Shared File System (SFS).
 ## Example Usage
 
 ```hcl
-    variable "share_name" { }
+variable "share_name" { }
+variable "share_id" { }
 
-    variable "share_id" { }
-
-    data "opentelekomcloud_sfs_file_system_v2" "shared_file"
-    {
-        name = "${var.share_name}"
-        id = "${var.share_id}"
-    }
+data "opentelekomcloud_sfs_file_system_v2" "shared_file" {
+  name = "${var.share_name}"
+  id = "${var.share_id}"
+}
 ```
 
 ## Argument Reference
@@ -73,4 +63,3 @@ The following attributes are exported:
 * `share_instance_id` - The access that the back end grants or denies.
 
 * `preferred` - Identifies which mount locations are most efficient and are used preferentially when multiple mount locations exist.
-

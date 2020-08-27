@@ -1,12 +1,4 @@
----
-layout: "opentelekomcloud"
-page_title: "OpentelekomCloud: opentelekomcloud_identity_user_v3"
-sidebar_current: "docs-opentelekomcloud-datasource-identity-user-v3"
-description: |-
-  Get information on an OpentelekomCloud User.
----
-
-# opentelekomcloud\_identity\_user_v3
+# opentelekomcloud_identity_user_v3
 
 Use this data source to get the ID of an OpentelekomCloud user.
 

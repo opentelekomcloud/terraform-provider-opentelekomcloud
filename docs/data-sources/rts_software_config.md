@@ -1,11 +1,3 @@
----
-layout: "opentelekomcloud"
-page_title: "OpenTelekomCloud: opentelekomcloud_rts_software_config_v1"
-sidebar_current: "docs-opentelekomcloud-datasource-rts-software-config-v1"
-description: |-
-  Provides details about a specific RTS Software Config.
----
-
 # Data Source: opentelekomcloud_rts_software_config_v1
 
 The RTS Software Config data source provides details about a specific RTS Software Config.

@@ -1,12 +1,4 @@
----
-layout: "opentelekomcloud"
-page_title: "OpentelekomCloud: opentelekomcloud_identity_role_v3"
-sidebar_current: "docs-opentelekomcloud-datasource-identity-role-v3"
-description: |-
-  Get information on an OpentelekomCloud Role.
----
-
-# opentelekomcloud\_identity\_role\_v3
+# opentelekomcloud_identity_role_v3
 
 Use this data source to get the ID of an OpentelekomCloud role.
 
@@ -16,7 +8,7 @@ be found on Console. please refer to the following table to configuration
 Role:
 
 Role Name | Policy Name
----- | ---
+---- | ----
 readonly | Tenant Guest
 tms_adm | TMS Administrator
 cce_adm | CCE Administrator
@@ -59,7 +51,6 @@ ims_adm | IMS Administrator
 smn_adm | SMN Administrator
 plas_adm | Config Plas Connector
 elb_adm | ELB Administrator
-
 
 ```hcl
 data "opentelekomcloud_identity_role_v3" "auth_admin" {

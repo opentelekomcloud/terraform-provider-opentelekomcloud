@@ -1,14 +1,6 @@
----
-layout: "opentelekomcloud"
-page_title: "OpenTelekomCloud: opentelekomcloud_dms_az_v1"
-sidebar_current: "docs-opentelekomcloud-datasource-dms-az-v1"
-description: |-
-  Get information on an OpenTelekomCloud dms az.
----
+# opentelekomcloud_dms_az_v1
 
-# opentelekomcloud\_dms\_az_v1
-
-Use this data source to get the ID of an available OpenTelekomCloud dms az.
+Use this data source to get the ID of an available OpenTelekomCloud DMS AZ.
 
 ## Example Usage
 

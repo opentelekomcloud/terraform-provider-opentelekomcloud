@@ -1,12 +1,4 @@
----
-layout: "opentelekomcloud"
-page_title: "OpenTelekomCloud: opentelekomcloud_networking_secgroup_v2"
-sidebar_current: "docs-opentelekomcloud-datasource-networking-secgroup-v2"
-description: |-
-  Get information on an OpenTelekomCloud Security Group.
----
-
-# opentelekomcloud\_networking\_secgroup\_v2
+# opentelekomcloud_networking_secgroup_v2
 
 Use this data source to get the ID of an available OpenTelekomCloud security group.
 

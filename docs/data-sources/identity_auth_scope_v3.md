@@ -1,12 +1,4 @@
----
-layout: "opentelekomcloud"
-page_title: "OpentelekomCloud: opentelekomcloud_identity_auth_scope_v3"
-sidebar_current: "docs-opentelekomcloud-datasource-identity-auth-scope-v3"
-description: |-
-  Get authentication information from the current authenticated scope.
----
-
-# opentelekomcloud\_identity\_auth\_scope\_v3
+# opentelekomcloud_identity_auth_scope_v3
 
 Use this data source to get authentication information about the current
 auth scope in use. This can be used as self-discovery or introspection of
@@ -28,7 +20,7 @@ data "opentelekomcloud_identity_auth_scope_v3" "scope" {
 ## Attributes Reference
 
 `id` is set to the name given to the scope. In addition, the following attributes
-are exported:
+  are exported:
 
 * `user_name` - The username of the scope.
 * `user_id` - The user ID the of the scope.

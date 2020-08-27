@@ -1,11 +1,3 @@
----
-layout: "opentelekomcloud"
-page_title: "OpenTelekomCloud: opentelekomcloud_vbs_backup_v2"
-sidebar_current: "docs-opentelekomcloud-datasource-vbs-backup-v2"
-description: |-
-  Provides details about a specific VBS Backup.
----
-
 # Data Source: opentelekomcloud_vbs_backup_v2
 
 The VBS Backup data source provides details about a specific VBS Backup.

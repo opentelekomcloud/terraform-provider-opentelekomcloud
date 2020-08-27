@@ -1,38 +1,29 @@
----
-layout: "opentelekomcloud"
-page_title: "OpenTelekomCloud: opentelekomcloud_cce_node_v3"
-sidebar_current: "docs-opentelekomcloud-datasource-cce-node-v3"
-description: |-
-  To get the specified node in a cluster.
----
-
-
 # opentelekomcloud_cce_node_v3
 
 To get the specified node in a cluster.
 
 ## Example Usage
 
- ```hcl
-    variable "cluster_id" { }
-    variable "node_id" { }
+```hcl
+variable "cluster_id" { }
+variable "node_id" { }
   
-    data "opentelekomcloud_cce_node_v3" "node" {
-     cluster_id = "${var.cluster_id}"
-     node_id= "${var.node_id}"
-    }
- ```
+data "opentelekomcloud_cce_node_v3" "node" {
+  cluster_id = "${var.cluster_id}"
+  node_id= "${var.node_id}"
+}
+```
 ## Argument Reference
 
 The following arguments are supported:
  
 * `Cluster_id` - (Required) The id of container cluster.
 
-* `name` - (Optional) - Name of the node.
+* `name` - (Optional) Name of the node.
 
-* `node_id` - (Optional) - The id of the node.
+* `node_id` - (Optional) The id of the node.
 
-* `status` - (Optional) - The state of the node.
+* `status` - (Optional) The state of the node.
 
 
 ## Attributes Reference
@@ -51,7 +42,7 @@ All above argument parameters can be exported as attribute parameters along with
 
 * `bandwidth_size` - Bandwidth (Mbit/s), in the range of [1, 2000].
 
-* `extendparam` - 	Extended parameters. 
+* `extendparam` - Extended parameters. 
 
 * `eip_ids` - List of existing elastic IP IDs.
  
@@ -82,11 +73,3 @@ Enumerated values: PER (indicates exclusive bandwidth) and WHOLE (indicates shar
 * `disk_size` - Disk size in GB.
 
 * `volumetype` - Disk type.
-
-
-
-
-
-
-
-

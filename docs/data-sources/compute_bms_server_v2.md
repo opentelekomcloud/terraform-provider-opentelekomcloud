@@ -1,11 +1,3 @@
----
-layout: "opentelekomcloud"
-page_title: "OpenTelekomCloud: opentelekomcloud_compute_bms_server_v2"
-sidebar_current: "docs-opentelekomcloud-compute-bms-server-v2"
-description: |-
-  Used to query a BMS or BMSs details.
----
-
 # Data Source: opentelekomcloud_compute_bms_server_v2
 
 `opentelekomcloud_compute_bms_server_v2` used to query a BMS or BMSs details.
@@ -13,25 +5,22 @@ description: |-
 ## Example Usage
 
 ```hcl
+variable "bms_id" {}
+variable "bms_name" {}
 
-    variable "bms_id" {}
-    variable "bms_name" {}
-
-    data "opentelekomcloud_compute_bms_server_v2" "Query_BMS" 
-    {
-        id = "${var.bms_id}",
-        name = "${var.bms_name}"     
-    }
-
+data "opentelekomcloud_compute_bms_server_v2" "Query_BMS" {
+  id = "${var.bms_id}",
+  name = "${var.bms_name}"     
+}
 ```
 
 ## Argument Reference
 
 The arguments of this data source act as filters for querying the BMSs details.
 
-* `id` - (Optional) - The unique ID of the BMS.
+* `id` - (Optional) The unique ID of the BMS.
 
-* `user_id` (Optional) - The ID of the user to which the BMS belongs.
+* `user_id` - (Optional) The ID of the user to which the BMS belongs.
 
 * `name` (Optional) - The name of BMS.
 

@@ -1,18 +1,8 @@
----
-layout: "opentelekomcloud"
-page_title: "OpenTelekomCloud: opentelekomcloud_cts_tracker_v1"
-sidebar_current: "docs-opentelekomcloud-datasource-cts-tracker-v1"
-description: |-
-  CTS tracker allows you to collect, store, and query cloud resource operation records and use these records for security analysis, compliance auditing, resource tracking, and fault locating.
----
-
 # Data Source: opentelekomcloud_cts_tracker_v1
 
 The OpenTelekomCloud CTS Tracker data source allows access of Cloud Tracker.
 
 ## Example Usage
-
-
 ```hcl
 variable "bucket_name" { }
 

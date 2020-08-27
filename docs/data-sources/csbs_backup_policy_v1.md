@@ -1,25 +1,14 @@
----
-layout: "opentelekomcloud"
-page_title: "OpenTelekomCloud: opentelekomcloud_csbs_backup_policy_v1"
-sidebar_current: "docs-opentelekomcloud-datasource-csbs-backup-policy-v1"
-description: |-
-  Provides details about a specific Backup Policy.
----
-
 # Data Source: opentelekomcloud_csbs_backup_policy_v1
 
 The OpenTelekomCloud CSBS Backup Policy data source allows access of backup Policy resources.
 
 ## Example Usage
-
-
 ```hcl
 variable "policy_id" { }
 
 data "opentelekomcloud_csbs_backup_policy_v1" "csbs_policy" {
   id = "${var.policy_id}" 
 }
-
 ```
 
 ## Argument Reference

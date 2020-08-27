@@ -1,19 +1,11 @@
----
-layout: "opentelekomcloud"
-page_title: "OpenTelekomCloud: opentelekomcloud_compute_availability_zones_v2"
-sidebar_current: "docs-opentelekomcloud-datasource-compute-availability-zones-v2"
-description: |-
-  Get a list of availability zones from OpenTelekomCloud
----
-
-# Data Source: opentelekomcloud\_compute\_availability\_zones\_v2
+# Data Source: opentelekomcloud_compute_availability_zones_v2
 
 `opentelekomcloud_compute_availability_zones_v2` is used to get a list of availability zones from OpenTelekomCloud
 
 ## Example Usage
 
 ```hcl
-data "opentelekomcloud_compute_availability_zones_v2" "zones" {}
+data "opentelekomcloud_compute_availability_zones_v2" "zones" { }
 ```
 
 ## Argument Reference

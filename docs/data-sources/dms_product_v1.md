@@ -1,12 +1,4 @@
----
-layout: "opentelekomcloud"
-page_title: "OpenTelekomCloud: opentelekomcloud_dms_product_v1"
-sidebar_current: "docs-opentelekomcloud-datasource-dms-product-v1"
-description: |-
-  Get information on an OpenTelekomCloud dms product.
----
-
-# opentelekomcloud\_dms\_product_v1
+# opentelekomcloud_dms_product_v1
 
 Use this data source to get the ID of an available OpenTelekomCloud dms product.
 

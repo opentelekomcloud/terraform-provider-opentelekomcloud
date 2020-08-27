@@ -1,11 +1,3 @@
----
-layout: "opentelekomcloud"
-page_title: "OpenTelekomCloud: opentelekomcloud_vpc_subnet_v1"
-sidebar_current: "docs-opentelekomcloud-datasource-vpc-subnet-v1"
-description: |-
-  Provides details about a specific VPC subnet
----
-
 # Data Source: opentelekomcloud_vpc_subnet_v1
 
 `opentelekomcloud_vpc_subnet_v1` provides details about a specific VPC subnet.
@@ -19,7 +11,7 @@ VPC that the subnet belongs to.
 ```hcl
 data "opentelekomcloud_vpc_subnet_v1" "subnet_v1" {
   id   = "${var.subnet_id}"
- }
+}
 
 output "subnet_vpc_id" {
   value = "${data.opentelekomcloud_vpc_subnet_v1.subnet_v1.vpc_id}"
