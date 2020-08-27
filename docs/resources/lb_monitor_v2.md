@@ -1,12 +1,4 @@
----
-layout: "opentelekomcloud"
-page_title: "OpenTelekomCloud: opentelekomcloud_lb_monitor_v2"
-sidebar_current: "docs-opentelekomcloud-resource-lb-monitor-v2"
-description: |-
-  Manages an Enhanced LB monitor resource within OpenTelekomCloud.
----
-
-# opentelekomcloud\_lb\_monitor\_v2
+# opentelekomcloud_lb_monitor_v2
 
 Manages an Enhanced LB monitor resource within OpenTelekomCloud.
 

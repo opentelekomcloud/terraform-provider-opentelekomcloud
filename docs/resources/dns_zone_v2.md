@@ -1,12 +1,4 @@
----
-layout: "opentelekomcloud"
-page_title: "OpenTelekomCloud: opentelekomcloud_dns_zone_v2"
-sidebar_current: "docs-opentelekomcloud-resource-dns-zone-v2"
-description: |-
-  Manages a DNS zone in the OpenTelekomCloud DNS Service
----
-
-# opentelekomcloud\_dns\_zone_v2
+# opentelekomcloud_dns_zone_v2
 
 Manages a DNS zone in the OpenTelekomCloud DNS Service.
 
@@ -16,11 +8,11 @@ Manages a DNS zone in the OpenTelekomCloud DNS Service.
 
 ```hcl
 resource "opentelekomcloud_dns_zone_v2" "public_example_com" {
-  name  = "public.example.com."
-  email = "public@example.com"
+  name        = "public.example.com."
+  email       = "public@example.com"
   description = "An example for public zone"
-  ttl  = 3000
-  type = "public"
+  ttl         = 3000
+  type        = "public"
 
   tags = {
     foo = "bar"
@@ -33,11 +25,11 @@ resource "opentelekomcloud_dns_zone_v2" "public_example_com" {
 
 ```hcl
 resource "opentelekomcloud_dns_zone_v2" "private_example_com" {
-  name  = "private.example.com."
-  email = "private@example.com"
+  name        = "private.example.com."
+  email       = "private@example.com"
   description = "An example for private zone"
-  ttl  = 3000
-  type = "private"
+  ttl         = 3000
+  type        = "private"
 
   router {
      router_id     = var.vpc_id

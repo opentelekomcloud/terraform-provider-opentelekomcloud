@@ -1,12 +1,4 @@
----
-layout: "opentelekomcloud"
-page_title: "OpenTelekomCloud: opentelekomcloud_networking_floatingip_v2"
-sidebar_current: "docs-opentelekomcloud-resource-networking-floatingip-v2"
-description: |-
-  Manages a V2 floating IP resource within OpenTelekomCloud Neutron (networking).
----
-
-# opentelekomcloud\_networking\_floatingip_v2
+# opentelekomcloud_networking_floatingip_v2
 
 Manages a V2 floating IP resource within OpenTelekomCloud Neutron (networking)
 that can be used for load balancers.

@@ -1,12 +1,4 @@
----
-layout: "opentelekomcloud"
-page_title: "OpenTelekomCloud: opentelekomcloud_obs_bucket_object"
-sidebar_current: "docs-opentelekomcloud-resource-obs-bucket-object"
-description: |-
-  Provides an OBS bucket object resource within OpenTelekomCloud.
----
-
-# opentelekomcloud\_obs\_bucket\_object
+# opentelekomcloud_obs_bucket_object
 
 Provides an OBS bucket object resource within OpenTelekomCloud.
 
@@ -16,9 +8,9 @@ Provides an OBS bucket object resource within OpenTelekomCloud.
 
 ```hcl
 resource "opentelekomcloud_obs_bucket_object" "object" {
-  bucket  = "your_bucket_name"
-  key     = "new_key_from_content"
-  content = "some object content"
+  bucket       = "your_bucket_name"
+  key          = "new_key_from_content"
+  content      = "some object content"
   content_type = "application/xml"
 }
 ```
@@ -88,4 +80,3 @@ The following attributes are exported
   but the unique identifier calculated through the server-side encryption.
 * `size` - the size of the object in bytes.
 * `version_id` - A unique version ID value for the object, if bucket versioning is enabled.
-

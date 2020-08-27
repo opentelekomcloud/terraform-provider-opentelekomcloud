@@ -1,12 +1,4 @@
----
-layout: "opentelekomcloud"
-page_title: "OpenTelekomCloud: opentelekomcloud_compute_keypair_v2"
-sidebar_current: "docs-opentelekomcloud-resource-compute-keypair-v2"
-description: |-
-  Manages a V2 keypair resource within OpenTelekomCloud.
----
-
-# opentelekomcloud\_compute\_keypair_v2
+# opentelekomcloud_compute_keypair_v2
 
 Manages a V2 keypair resource within OpenTelekomCloud.
 

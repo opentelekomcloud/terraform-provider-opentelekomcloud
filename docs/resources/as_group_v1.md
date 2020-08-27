@@ -1,12 +1,4 @@
----
-layout: "opentelekomcloud"
-page_title: "OpenTelekomCloud: opentelekomcloud_as_group_v1"
-sidebar_current: "docs-opentelekomcloud-resource-as-group-v1"
-description: |-
-  Manages a V1 Autoscaling Group resource within OpenTelekomCloud.
----
-
-# opentelekomcloud\_as\_group_v1
+# opentelekomcloud_as_group_v1
 
 Manages a V1 Autoscaling Group resource within OpenTelekomCloud.
 
@@ -16,19 +8,22 @@ Manages a V1 Autoscaling Group resource within OpenTelekomCloud.
 
 ```hcl
 resource "opentelekomcloud_as_group_v1" "my_as_group" {
-  scaling_group_name = "my_as_group"
+  scaling_group_name       = "my_as_group"
   scaling_configuration_id = "37e310f5-db9d-446e-9135-c625f9c2bbfc"
-  desire_instance_number = 2
-  min_instance_number = 0
-  max_instance_number = 10
+  desire_instance_number   = 2
+  min_instance_number      = 0
+  max_instance_number      = 10
+
   networks {
     id = "ad091b52-742f-469e-8f3c-fd81cadf0743"
   }
+
   security_groups {
     id = "45e4c6de-6bf0-4843-8953-2babde3d4810"
   }
-  vpc_id = "1d8f7e7c-fe04-4cf5-85ac-08b478c290e9"
-  delete_publicip = true
+
+  vpc_id           = "1d8f7e7c-fe04-4cf5-85ac-08b478c290e9"
+  delete_publicip  = true
   delete_instances = "yes"
 }
 ```
@@ -37,19 +32,21 @@ resource "opentelekomcloud_as_group_v1" "my_as_group" {
 
 ```hcl
 resource "opentelekomcloud_as_group_v1" "my_as_group_only_remove_members" {
-  scaling_group_name = "my_as_group_only_remove_members"
+  scaling_group_name       = "my_as_group_only_remove_members"
   scaling_configuration_id = "37e310f5-db9d-446e-9135-c625f9c2bbfc"
-  desire_instance_number = 2
-  min_instance_number = 0
-  max_instance_number = 10
+  desire_instance_number   = 2
+  min_instance_number      = 0
+  max_instance_number      = 10
+
   networks {
     id = "ad091b52-742f-469e-8f3c-fd81cadf0743"
   }
   security_groups {
     id = "45e4c6de-6bf0-4843-8953-2babde3d4810"
   }
-  vpc_id = "1d8f7e7c-fe04-4cf5-85ac-08b478c290e9"
-  delete_publicip = true
+
+  vpc_id           = "1d8f7e7c-fe04-4cf5-85ac-08b478c290e9"
+  delete_publicip  = true
   delete_instances = "no"
 }
 ```
@@ -58,36 +55,39 @@ resource "opentelekomcloud_as_group_v1" "my_as_group_only_remove_members" {
 
 ```hcl
 resource "opentelekomcloud_as_group_v1" "my_as_group_with_elb" {
-  scaling_group_name = "my_as_group_with_elb"
+  scaling_group_name       = "my_as_group_with_elb"
   scaling_configuration_id = "37e310f5-db9d-446e-9135-c625f9c2bbfc"
-  desire_instance_number = 2
-  min_instance_number = 0
-  max_instance_number = 10
+  desire_instance_number   = 2
+  min_instance_number      = 0
+  max_instance_number      = 10
+
   networks {
     id = "ad091b52-742f-469e-8f3c-fd81cadf0743"
   }
   security_groups {
     id = "45e4c6de-6bf0-4843-8953-2babde3d4810"
   }
-  vpc_id = "1d8f7e7c-fe04-4cf5-85ac-08b478c290e9"
-  lb_listener_id = "${opentelekomcloud_elb_listener.my_listener.id}"
-  delete_publicip = true
+
+  vpc_id           = "1d8f7e7c-fe04-4cf5-85ac-08b478c290e9"
+  lb_listener_id   = "${opentelekomcloud_elb_listener.my_listener.id}"
+  delete_publicip  = true
   delete_instances = "yes"
 }
 
 resource "opentelekomcloud_elb_listener" "my_listener" {
-  name = "my_listener"
-  description = "my test listener"
-  protocol = "TCP"
+  name             = "my_listener"
+  description      = "my test listener"
+  protocol         = "TCP"
   backend_protocol = "TCP"
-  port = 12345
-  backend_port = 21345
-  lb_algorithm = "roundrobin"
-  loadbalancer_id = "cba48790-baf5-4446-adb3-02069a916e97"
+  port             = 12345
+  backend_port     = 21345
+  lb_algorithm     = "roundrobin"
+  loadbalancer_id  = "cba48790-baf5-4446-adb3-02069a916e97"
+
   timeouts {
-        create = "5m"
-        update = "5m"
-        delete = "5m"
+    create = "5m"
+    update = "5m"
+    delete = "5m"
   }
 }
 

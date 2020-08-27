@@ -1,12 +1,4 @@
----
-layout: "opentelekomcloud"
-page_title: "OpenTelekomCloud: opentelekomcloud_networking_network_v2"
-sidebar_current: "docs-opentelekomcloud-resource-networking-network-v2"
-description: |-
-  Manages a V2 Neutron network resource within OpenTelekomCloud.
----
-
-# opentelekomcloud\_networking\_network_v2
+# opentelekomcloud_networking_network_v2
 
 Manages a V2 Neutron network resource within OpenTelekomCloud.
 

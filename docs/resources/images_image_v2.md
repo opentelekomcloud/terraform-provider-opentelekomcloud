@@ -1,12 +1,4 @@
----
-layout: "opentelekomcloud"
-page_title: "OpenTelekomCloud: opentelekomcloud_images_image_v2"
-sidebar_current: "docs-opentelekomcloud-resource-images-image-v2"
-description: |-
-  Manages a V2 Image resource within OpenTelekomCloud Glance.
----
-
-# opentelekomcloud\_images\_image_v2
+# opentelekomcloud_images_image_v2
 
 Manages a V2 Image resource within OpenTelekomCloud Glance.
 
@@ -14,10 +6,10 @@ Manages a V2 Image resource within OpenTelekomCloud Glance.
 
 ```hcl
 resource "opentelekomcloud_images_image_v2" "rancheros" {
-  name   = "RancherOS"
+  name             = "RancherOS"
   image_source_url = "https://releases.rancher.com/os/latest/rancheros-openstack.img"
   container_format = "bare"
-  disk_format = "qcow2"
+  disk_format      = "qcow2"
   tags = ["foo.bar", "tag.value"]
 }
 ```

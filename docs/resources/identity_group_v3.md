@@ -1,12 +1,4 @@
----
-layout: "opentelekomcloud"
-page_title: "OpentelekomCloud: opentelekomcloud_identity_group_v3"
-sidebar_current: "docs-opentelekomcloud-resource-identity-group-v3"
-description: |-
-  Manages a User Group resource within OpentelekomCloud IAM service.
----
-
-# opentelekomcloud\_identity\_group_v3
+# opentelekomcloud_identity_group_v3
 
 Manages a User Group resource within OpentelekomCloud IAM service.
 
@@ -17,7 +9,7 @@ this resource.
 
 ```hcl
 resource "opentelekomcloud_identity_group_v3" "group_1" {
-  name = "group_1"
+  name        = "group_1"
   description = "This is a test group"
 }
 ```
@@ -26,8 +18,7 @@ resource "opentelekomcloud_identity_group_v3" "group_1" {
 
 The following arguments are supported:
 
-* `name` - (Required) The name of the group.The length is less than or equal 
-     to 64 bytes 
+* `name` - (Required) The name of the group.The length is less than or equal to 64 bytes 
 
 * `description` - (Optional) A description of the group.
 

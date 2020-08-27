@@ -1,39 +1,33 @@
----
-layout: "opentelekomcloud"
-page_title: "OpenTelekomCloud: opentelekomcloud_mrs_cluster_v1"
-sidebar_current: "docs-opentelekomcloud-resource-mrs-cluster-v1"
-description: |-
-  Manages resource cluster within OpenTelekomCloud MRS.
----
-
-# opentelekomcloud\_mrs\_cluster\_v1
+# opentelekomcloud_mrs_cluster_v1
 
 Manages resource cluster within OpenTelekomCloud MRS.
 
-## Example Usage:  Creating a MRS cluster
+## Example Usage
 
 ```hcl
 resource "opentelekomcloud_mrs_cluster_v1" "cluster1" {
-  cluster_name = "mrs-cluster"
-  billing_type = 12
-  master_node_num = 2
-  core_node_num = 3
-  master_node_size = "h1.2xlarge.4.linux.mrs"
-  core_node_size = "s1.xlarge.linux.mrs"
+  cluster_name      = "mrs-cluster"
+  billing_type      = 12
+  master_node_num   = 2
+  core_node_num     = 3
+  master_node_size  = "h1.2xlarge.4.linux.mrs"
+  core_node_size    = "s1.xlarge.linux.mrs"
   available_zone_id = "sa-chile-1a"
-  vpc_id = "51edfb75-f9f0-4bbc-b4dc-21466b93f60d"
-  subnet_id = "1d7a8646-43ee-455a-a3ab-40da87a1304c"
-  cluster_version = "MRS 1.6.0"
-  master_data_volume_type = "SATA"
-  master_data_volume_size = 100
+  vpc_id            = "51edfb75-f9f0-4bbc-b4dc-21466b93f60d"
+  subnet_id         = "1d7a8646-43ee-455a-a3ab-40da87a1304c"
+
+  cluster_version          = "MRS 1.6.0"
+  master_data_volume_type  = "SATA"
+  master_data_volume_size  = 100
   master_data_volume_count = 1
-  core_data_volume_type = "SATA"
-  core_data_volume_size = 100
-  core_data_volume_count = 2
-  safe_mode = 0
-  cluster_type = 0
+  core_data_volume_type    = "SATA"
+  core_data_volume_size    = 100
+  core_data_volume_count   = 2
+
+  safe_mode             = 0
+  cluster_type          = 0
   node_public_cert_name = "KeyPair-ci"
-  cluster_admin_secret = ""
+  cluster_admin_secret  = ""
   component_list {
       component_name = "Hadoop"
   }

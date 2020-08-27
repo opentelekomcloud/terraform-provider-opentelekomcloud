@@ -1,14 +1,6 @@
----
-layout: "opentelekomcloud"
-page_title: "OpenTelekomCloud: opentelekomcloud_s3_bucket_policy"
-sidebar_current: "docs-opentelekomcloud-resource-s3-bucket-policy"
-description: |-
-  Attaches a policy to an S3 bucket resource.
----
+# opentelekomcloud_s3_bucket_policy
 
-# opentelekomcloud\_s3\_bucket\_policy
-
-Attaches a policy to an S3 bucket resource.
+Attaches a policy to an S3 bucket resource within OpenTelekomCloud.
 
 ## Example Usage
 

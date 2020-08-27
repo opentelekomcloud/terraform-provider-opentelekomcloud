@@ -1,14 +1,6 @@
----
-layout: "opentelekomcloud"
-page_title: "opentelekomcloud: opentelekomcloud_dms_instance_v1"
-sidebar_current: "docs-opentelekomcloud-resource-dms-instance-v1"
-description: |-
-  Manages a DMS instance in the opentelekomcloud DMS Service
----
+# opentelekomcloud_dms_instance_v1
 
-# opentelekomcloud\_dms\_instance_v1
-
-Manages a DMS instance in the opentelekomcloud DMS Service.
+Manages a DMS instance in the OpenTelekomCloud DMS Service.
 
 ## Example Usage
 

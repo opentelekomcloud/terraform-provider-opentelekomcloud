@@ -1,11 +1,3 @@
----
-layout: "opentelekomcloud"
-page_title: "OpenTelekomCloud: resource_opentelekomcloud_rts_stack_v1"
-sidebar_current: "docs-opentelekomcloud-resource-rts-stack-v1"
-description: |-
-  Provides an OpenTelekomCloud RTS Stack.
----
-
 # opentelekomcloud_rts_stack_v1
 
 Provides an OpenTelekomCloud Stack.
@@ -13,15 +5,15 @@ Provides an OpenTelekomCloud Stack.
 ## Example Usage
 
  ```hcl
- variable "name" { }
- variable "network_id" { }
- variable "instance_type" { }
- variable "image_id" { }
+variable "name" { }
+variable "network_id" { }
+variable "instance_type" { }
+variable "image_id" { }
  
 resource "opentelekomcloud_rts_stack_v1" "mystack" {
-  name = "${var.name}"
+  name             = "${var.name}"
   disable_rollback = true
-  timeout_mins=60
+  timeout_mins     = 60
   parameters = {
       "network_id" = "${var.network_id}"
       "instance_type" = "${var.instance_type}"
@@ -128,4 +120,3 @@ $ terraform import opentelekomcloud_rts_stack_v1.mystack rts-stack
 - `create` - (Default `30 minutes`) Used for Creating Stacks
 - `update` - (Default `30 minutes`) Used for Stack modifications
 - `delete` - (Default `30 minutes`) Used for destroying stacks.
-

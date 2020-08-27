@@ -1,12 +1,4 @@
----
-layout: "opentelekomcloud"
-page_title: "OpentelekomCloud: opentelekomcloud_elb_health"
-sidebar_current: "docs-opentelekomcloud-resource-elb-health"
-description: |-
-  Manages a classic loadbalancer health resource within OpentelekomCloud.
----
-
-# opentelekomcloud\_elb\_health
+# opentelekomcloud_elb_health
 
 Manages a classic loadbalancer health resource within OpentelekomCloud.
 
@@ -14,23 +6,24 @@ Manages a classic loadbalancer health resource within OpentelekomCloud.
 
 ```hcl
 resource "opentelekomcloud_elb_loadbalancer" "elb" {
-  name = "elb"
-  type = "External"
-  description = "test elb"
-  vpc_id = "e346dc4a-d9a6-46f4-90df-10153626076e"
+  name           = "elb"
+  type           = "External"
+  description    = "test elb"
+  vpc_id         = "e346dc4a-d9a6-46f4-90df-10153626076e"
   admin_state_up = "true"
-  bandwidth = 5
+  bandwidth      = 5
 }
 
 resource "opentelekomcloud_elb_listener" "listener" {
-  name = "test-elb-listener"
-  description = "great listener"
-  protocol = "TCP"
+  name             = "test-elb-listener"
+  description      = "great listener"
+  protocol         = "TCP"
   backend_protocol = "TCP"
-  protocol_port = 12345
-  backend_port = 8080
-  lb_algorithm = "roundrobin"
-  loadbalancer_id = "${opentelekomcloud_elb_loadbalancer.elb.id}"
+  protocol_port    = 12345
+  backend_port     = 8080
+  lb_algorithm     = "roundrobin"
+  loadbalancer_id  = "${opentelekomcloud_elb_loadbalancer.elb.id}"
+  
   timeouts {
 	create = "5m"
 	update = "5m"
@@ -39,12 +32,13 @@ resource "opentelekomcloud_elb_listener" "listener" {
 }
 
 resource "opentelekomcloud_elb_health" "healthcheck" {
-  listener_id = "${opentelekomcloud_elb_listener.listener.id}"
-  healthcheck_protocol = "TCP"
+  listener_id              = "${opentelekomcloud_elb_listener.listener.id}"
+  healthcheck_protocol     = "TCP"
   healthcheck_connect_port = 22
-  healthy_threshold = 5
-  healthcheck_timeout = 25
-  healthcheck_interval = 3
+  healthy_threshold        = 5
+  healthcheck_timeout      = 25
+  healthcheck_interval     = 3
+  
   timeouts {
     create = "5m"
     update = "5m"

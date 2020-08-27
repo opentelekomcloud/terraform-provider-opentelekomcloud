@@ -1,40 +1,34 @@
----
-layout: "opentelekomcloud"
-page_title: "OpenTelekomCloud: opentelekomcloud_cce_node_v3"
-sidebar_current: "docs-opentelekomcloud-resource-cce-node-v3"
-description: |-
-  Add a node to a container cluster. 
----
-
 # opentelekomcloud_cce_node_v3
 Add a node to a container cluster. 
 
 ## Example Usage
 
  ```hcl
-   variable "cluster_id" { }
-   variable "ssh_key" { }
-   variable "availability_zone" { }
+variable "cluster_id" { }
+variable "ssh_key" { }
+variable "availability_zone" { }
 
-   resource "opentelekomcloud_cce_node_v3" "node_1" {
-     cluster_id = var.cluster_id
-     availability_zone = var.availability_zone
-     name = "node1"
-     flavor_id ="s1.medium"
-     key_pair = var.ssh_key
-     iptype = "5_bgp"
-     sharetype = "PER"
-     bandwidth_size = 100
+resource "opentelekomcloud_cce_node_v3" "node_1" {
+  name              = "node1"
+  cluster_id        = var.cluster_id
+  availability_zone = var.availability_zone
 
-     root_volume {
-       size = 40
-       volumetype = "SATA"
-     }
-     data_volumes {
-       size = 100
-       volumetype = "SATA"
-     }
+  flavor_id      = "s1.medium"
+  key_pair       = var.ssh_key
+  iptype         = "5_bgp"
+  sharetype      = "PER"
+  bandwidth_size = 100
+
+  root_volume {
+    size       = 40
+    volumetype = "SATA"
   }
+
+  data_volumes {
+    size       = 100
+    volumetype = "SATA"
+  }
+}
  ```    
 
 ## Argument Reference

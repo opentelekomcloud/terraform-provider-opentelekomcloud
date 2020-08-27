@@ -1,11 +1,3 @@
----
-layout: "opentelekomcloud"
-page_title: "OpenTelekomCloud: opentelekomcloud_waf_domain_v1"
-sidebar_current: "docs-opentelekomcloud-resource-waf-domain-v1"
-description: |-
-  Manages a V1 WAF domain resource within OpenTelekomCloud.
----
-
 # opentelekomcloud_waf_domain_v1
 
 Manages a WAF domain resource within OpenTelekomCloud.
@@ -13,27 +5,25 @@ Manages a WAF domain resource within OpenTelekomCloud.
 ## Example Usage
 
 ```hcl
-
 resource "opentelekomcloud_waf_certificate_v1" "certificate_1" {
-	name = "cert_1"
+	name    = "cert_1"
 	content = "-----BEGIN CERTIFICATE-----MIIDIjCCAougAwIBAgIJALV96mEtVF4EMA0GCSqGSIb3DQEBBQUAMGoxCzAJBgNVBAYTAnh4MQswCQYDVQQIEwJ4eDELMAkGA1UEBxMCeHgxCzAJBgNVBAoTAnh4MQswCQYDVQQLEwJ-----END CERTIFICATE-----"
-	key = "-----BEGIN RSA PRIVATE KEY-----MIICXQIBAAKBgQDFPN9ojPndxSC4E1pqWQVKGHCFlXAAGBOxbGfSzXqzsoyacotueqMqXQbxrPSQFATeVmhZPNVEMdvcAMjYsV/mymtAwVqVA6q/OFdX/b3UHO+b/VqLo3J5SrM-----END RSA PRIVATE KEY-----"
+	key     = "-----BEGIN RSA PRIVATE KEY-----MIICXQIBAAKBgQDFPN9ojPndxSC4E1pqWQVKGHCFlXAAGBOxbGfSzXqzsoyacotueqMqXQbxrPSQFATeVmhZPNVEMdvcAMjYsV/mymtAwVqVA6q/OFdX/b3UHO+b/VqLo3J5SrM-----END RSA PRIVATE KEY-----"
 }
 
 resource "opentelekomcloud_waf_domain_v1" "domain_1" {
 	hostname = "www.b.com"
 	server {
 		front_protocol = "HTTPS"
-		back_protocol = "HTTP"
-		address = "80.158.42.162"
-		port = "8080"
+		back_protocol  = "HTTP"
+		address        = "80.158.42.162"
+		port           = "8080"
 	}
-	certificate_id = "${opentelekomcloud_waf_certificate_v1.certificate_1.id}"
-	proxy = "true"
+	certificate_id  = "${opentelekomcloud_waf_certificate_v1.certificate_1.id}"
+	proxy           = "true"
 	sip_header_name = "default"
 	sip_header_list = ["X-Forwarded-For"]
 }
-
 ```
 
 ## Argument Reference

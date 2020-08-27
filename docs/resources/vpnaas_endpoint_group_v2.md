@@ -1,12 +1,4 @@
----
-layout: "opentelekomcloud"
-page_title: "OpenTelekomCloud: opentelekomcloud_vpnaas_endpoint_group_v2"
-sidebar_current: "docs-opentelekomcloud-resource-vpnaas-endpoint-group-v2"
-description: |-
-  Manages a V2 Endpoint Group resource within OpenTelekomCloud.
----
-
-# opentelekomcloud\_vpnaas\_endpoint\_group_v2
+# opentelekomcloud_vpnaas_endpoint_group_v2
 
 Manages a V2 Endpoint Group resource within OpenTelekomCloud.
 
@@ -14,10 +6,9 @@ Manages a V2 Endpoint Group resource within OpenTelekomCloud.
 
 ```hcl
 resource "opentelekomcloud_vpnaas_endpoint_group_v2" "group_1" {
-  name = "Group 1"
-  type = "cidr"
-  endpoints = ["10.2.0.0/24",
-        "10.3.0.0/24",]
+  name      = "Group 1"
+  type      = "cidr"
+  endpoints = ["10.2.0.0/24", "10.3.0.0/24"]
 }
 ```
 

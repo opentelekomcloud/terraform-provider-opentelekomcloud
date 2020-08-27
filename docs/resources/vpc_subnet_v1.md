@@ -1,14 +1,6 @@
----
-layout: "opentelekomcloud"
-page_title: "OpenTelekomCloud: opentelekomcloud_vpc_subnet_v1"
-sidebar_current: "docs-opentelekomcloud-resource-vpc-subnet-v1"
-description: |-
-  Provides an VPC subnet resource.
----
-
 # opentelekomcloud_vpc_subnet_v1
 
-Provides an VPC subnet resource.
+Provides an VPC subnet resource within OpenTelekomCloud.
 
 # Example Usage
 
@@ -24,6 +16,7 @@ resource "opentelekomcloud_vpc_subnet_v1" "subnet_v1" {
   name   = var.subnet_name
   cidr   = var.subnet_cidr
   vpc_id = opentelekomcloud_vpc_v1.vpc_v1.id
+
   gateway_ip    = var.subnet_gateway_ip
   ntp_addresses = "10.100.0.33,10.100.0.34"
 }
@@ -36,6 +29,7 @@ resource "opentelekomcloud_vpc_subnet_v1" "subnet_with_tags" {
   name   = var.subnet_name
   cidr   = var.subnet_cidr
   vpc_id = opentelekomcloud_vpc_v1.vpc_v1.id
+
   gateway_ip    = var.subnet_gateway_ip
   ntp_addresses = "10.100.0.33,10.100.0.34"
 

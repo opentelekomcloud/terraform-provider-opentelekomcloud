@@ -1,12 +1,4 @@
----
-layout: "opentelekomcloud"
-page_title: "OpenTelekomCloud: opentelekomcloud_networking_floatingip_associate_v2"
-sidebar_current: "docs-opentelekomcloud-resource-networking-floatingip-associate-v2"
-description: |-
-  Associates a Floating IP to a Port
----
-
-# opentelekomcloud\_networking\_floatingip\_associate_v2
+# opentelekomcloud_networking_floatingip_associate_v2
 
 Associates a floating IP to a port. This is useful for situations
 where you have a pre-allocated floating IP or are unable to use the
@@ -21,7 +13,7 @@ resource "opentelekomcloud_networking_port_v2" "port_1" {
 
 resource "opentelekomcloud_networking_floatingip_associate_v2" "fip_1" {
   floating_ip = "1.2.3.4"
-  port_id = "${opentelekomcloud_networking_port_v2.port_1.id}"
+  port_id     = "${opentelekomcloud_networking_port_v2.port_1.id}"
 }
 ```
 

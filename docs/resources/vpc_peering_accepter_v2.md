@@ -1,14 +1,6 @@
----
-layout: "opentelekomcloud"
-page_title: "OpenTelekomCloud: resource_opentelekomcloud_vpc_peering_connection_accepter_v2"
-sidebar_current: "docs-opentelekomcloud-resource-vpc-peering-accepter-v2"
-description: |-
-  Manage the accepter's side of a VPC Peering Connection.
----
-
 # opentelekomcloud_vpc_peering_connection_accepter_v2
 
-Provides a resource to manage the accepter's side of a VPC Peering Connection.
+Provides a resource to manage the accepter's side of a VPC Peering Connection within OpenTelekomCloud.
 
 When a cross-tenant (requester's tenant differs from the accepter's tenant) VPC Peering Connection is created, a VPC Peering Connection resource is automatically created in the
 accepter's account.
@@ -19,8 +11,8 @@ connection into management.
 ## Example Usage
 
  ```hcl
- provider "opentelekomcloud"  {
-    alias = "main"
+provider "opentelekomcloud" {
+    alias       = "main"
     user_name   = "${var.username}"
     domain_name = "${var.domain_name}"
     password    = "${var.password}"
@@ -28,9 +20,9 @@ connection into management.
     tenant_id   = "${var.tenant_id}"
 }
 
-provider "opentelekomcloud"  {
-    alias = "peer"
-    user_name = "${var.peer_username}"
+provider "opentelekomcloud" {
+    alias       = "peer"
+    user_name   = "${var.peer_username}"
     domain_name = "${var.peer_domain_name}"
     password    = "${var.peer_password}"
     auth_url    = "${var.peer_auth_url}"
@@ -39,31 +31,30 @@ provider "opentelekomcloud"  {
 
 resource "opentelekomcloud_vpc_v1" "vpc_main" {
     provider = "opentelekomcloud.main"
-    name = "${var.vpc_name}"
-    cidr = "${var.vpc_cidr}"
+    name     = "${var.vpc_name}"
+    cidr     = "${var.vpc_cidr}"
 }
 
 resource "opentelekomcloud_vpc_v1" "vpc_peer" {
     provider = "opentelekomcloud.peer"
-    name = "${var.peer_vpc_name}"
-    cidr = "${var.peer_vpc_cidr}"
+    name     = "${var.peer_vpc_name}"
+    cidr     = "${var.peer_vpc_cidr}"
 }
 
 # Requester's side of the connection.
 resource "opentelekomcloud_vpc_peering_connection_v2" "peering" {
-    provider = "opentelekomcloud.main"
-    name = "${var.peer_name}"
-    vpc_id = "${opentelekomcloud_vpc_v1.vpc_main.id}"
-    peer_vpc_id = "${opentelekomcloud_vpc_v1.vpc_peer.id}"
+    provider       = "opentelekomcloud.main"
+    name           = "${var.peer_name}"
+    vpc_id         = "${opentelekomcloud_vpc_v1.vpc_main.id}"
+    peer_vpc_id    = "${opentelekomcloud_vpc_v1.vpc_peer.id}"
     peer_tenant_id =  "${var.tenant_id}"
 }
 
 # Accepter's side of the connection.
 resource "opentelekomcloud_vpc_peering_connection_accepter_v2" "peer" {
-    provider = "opentelekomcloud.peer"
+    provider                  = "opentelekomcloud.peer"
     vpc_peering_connection_id = "${opentelekomcloud_vpc_peering_connection_v2.peering.id}"
-    accept = true
-  
+    accept                    = true
 }
  ```
 
@@ -95,5 +86,3 @@ All of the argument attributes except accept are also exported as result attribu
 * `peer_vpc_id` - The VPC ID of the accepter tenant.
 
 * `peer_tenant_id` - The Tenant Id of the accepter tenant.
-
-

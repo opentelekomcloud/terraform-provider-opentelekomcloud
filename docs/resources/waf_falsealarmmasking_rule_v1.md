@@ -1,11 +1,3 @@
----
-layout: "opentelekomcloud"
-page_title: "OpenTelekomCloud: opentelekomcloud_waf_falsealarmmasking_rule_v1"
-sidebar_current: "docs-opentelekomcloud-resource-waf-falsealarmmasking-rule-v1"
-description: |-
-  Manages a V1 WAF False Alarm Masking Rule resource within OpenTelekomCloud.
----
-
 # opentelekomcloud_waf_falsealarmmasking_rule_v1
 
 Manages a WAF False Alarm Masking Rule resource within OpenTelekomCloud.
@@ -13,17 +5,15 @@ Manages a WAF False Alarm Masking Rule resource within OpenTelekomCloud.
 ## Example Usage
 
 ```hcl
-
 resource "opentelekomcloud_waf_policy_v1" "policy_1" {
 	name = "policy_1"
 }
 
 resource "opentelekomcloud_waf_falsealarmmasking_rule_v1" "rule_1" {
 	policy_id = "${opentelekomcloud_waf_policy_v1.policy_1.id}"
-	url = "/a"
-	rule = "100001"
+	url       = "/a"
+	rule      = "100001"
 }
-
 ```
 
 ## Argument Reference

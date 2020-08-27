@@ -1,11 +1,3 @@
----
-layout: "opentelekomcloud"
-page_title: "OpenTelekomCloud: opentelekomcloud_sfs_file_system_v2"
-sidebar_current: "docs-opentelekomcloud-resource-sfs-file-system-v2"
-description: |-
- Provides an Scalable File Resource (SFS) resource.
----
-
 # opentelekomcloud_sfs_file_system_v2
 
 Provides an Shared File System (SFS) resource.
@@ -13,24 +5,22 @@ Provides an Shared File System (SFS) resource.
 ## Example Usage
 
  ```hcl
-    variable "share_name" { }
+variable "share_name" { }
 
-    variable "share_description" { }
+variable "share_description" { }
 
-    variable "vpc_id" { }
+variable "vpc_id" { }
 
-    resource "opentelekomcloud_sfs_file_system_v2" "share-file"
-    {
-            size = 50
-            name = "${var.share_name}"
-            access_to = "${var.vpc_id}"
-            access_level = "rw"
-            description = "${var.share_description}"
-            metadata = {
-                "type"="nfs"
-            }
-
-    }
+resource "opentelekomcloud_sfs_file_system_v2" "share-file" {
+  name         = "${var.share_name}"
+  size         = 50
+  access_to    = "${var.vpc_id}"
+  access_level = "rw"
+  description  = "${var.share_description}"
+  metadata = {
+      "type"="nfs"
+  }
+}
  ```
 
 ## Argument Reference

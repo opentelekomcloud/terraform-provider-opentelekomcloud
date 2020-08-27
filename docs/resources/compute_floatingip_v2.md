@@ -1,12 +1,4 @@
----
-layout: "opentelekomcloud"
-page_title: "OpenTelekomCloud: opentelekomcloud_compute_floatingip_v2"
-sidebar_current: "docs-opentelekomcloud-resource-compute-floatingip-v2"
-description: |-
-  Manages a V2 floating IP resource within OpenTelekomCloud Nova (compute).
----
-
-# opentelekomcloud\_compute\_floatingip_v2
+# opentelekomcloud_compute_floatingip_v2
 
 Manages a V2 floating IP resource within OpenTelekomCloud Nova (compute)
 that can be used for compute instances.
@@ -21,7 +13,7 @@ for manually specifying the bandwidth please use the
 ## Example Usage
 
 ```hcl
-resource "opentelekomcloud_compute_floatingip_v2" "floatip_1" {
+resource "opentelekomcloud_compute_floatingip_v2" "floatip_1" { 
 }
 ```
 

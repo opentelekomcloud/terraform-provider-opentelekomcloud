@@ -1,11 +1,3 @@
----
-layout: "opentelekomcloud"
-page_title: "OpenTelekomCloud: opentelekomcloud_compute_bms_server_v2"
-sidebar_current: "docs-opentelekomcloud-resource-compute-bms-server-v2"
-description: |-
-  Manages a BMS server resource within OpenTelekomCloud.
----
-
 # opentelekomcloud_compute_bms_server_v2
 
 Manages a BMS Server resource within OpenTelekomCloud.
@@ -22,11 +14,11 @@ variable "network_id" {}
 variable "availability_zone" {}
 
 resource "opentelekomcloud_compute_bms_server_v2" "basic" {
-  name            = "basic"
-  image_id        = "${var.image_id}"
-  flavor_id       = "${var.flavor_id}"
-  key_pair        = "${var.keypair_name}"
-  security_groups = ["default"]
+  name              = "basic"
+  image_id          = "${var.image_id}"
+  flavor_id         = "${var.flavor_id}"
+  key_pair          = "${var.keypair_name}"
+  security_groups   = ["default"]
   availability_zone = "${var.availability_zone}"
 
   metadata = {
@@ -48,10 +40,10 @@ variable "network_id" {}
 variable "availability_zone" {}
 
 resource "opentelekomcloud_compute_bms_server_v2" "basic" {
-  name            = "basic"
-  flavor_id       = "${var.flavor_id}"
-  key_pair        = "${var.keypair_name}"
-  security_groups = ["default"]
+  name              = "basic"
+  flavor_id         = "${var.flavor_id}"
+  key_pair          = "${var.keypair_name}"
+  security_groups   = ["default"]
   availability_zone = "${var.availability_zone}"
 
   metadata = {
@@ -63,14 +55,14 @@ resource "opentelekomcloud_compute_bms_server_v2" "basic" {
   }
 
   block_device {
-	uuid = "${var.image_id}"
-	source_type = "image"
-	volume_type = "SATA"
-	volume_size = 100
-	boot_index = 0
-	destination_type = "volume"
+	uuid                  = "${var.image_id}"
+	source_type           = "image"
+	volume_type           = "SATA"
+	volume_size           = 100
+	boot_index            = 0
+	destination_type      = "volume"
 	delete_on_termination = true
-	device_name = "/dev/sda"
+	device_name           = "/dev/sda"
   }
 }
 ```

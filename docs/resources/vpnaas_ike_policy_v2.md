@@ -1,12 +1,4 @@
----
-layout: "opentelekomcloud"
-page_title: "OpenTelekomCloud: opentelekomcloud_vpnaas_ike_policy_v2"
-sidebar_current: "docs-opentelekomcloud-resource-vpnaas-ike-policy-v2"
-description: |-
-  Manages a V2 IKE policy resource within OpenTelekomCloud.
----
-
-# opentelekomcloud\_vpnaas\_ike\_policy_v2
+# opentelekomcloud_vpnaas_ike_policy_v2
 
 Manages a V2 IKE policy resource within OpenTelekomCloud.
 

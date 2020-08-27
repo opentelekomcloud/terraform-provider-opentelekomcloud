@@ -1,36 +1,25 @@
----
-layout: "opentelekomcloud"
-page_title: "OpenTelekomCloud: opentelekomcloud_compute_bms_tags_v2"
-sidebar_current: "docs-opentelekomcloud-compute-bms-tags-v2"
-description: |-
-  Used to add tags to a BMS.
----
-
 # Resource: opentelekomcloud_compute_bms_tags_v2
 
-Used to add tags to a BMS.
+Used to add tags to a BMS within OpenTelekomCloud.
 
 ## Example Usage
 
- ```hcl
-       variable "bms_id" { }
+```hcl
+variable "bms_id" { }
 
-       resource "opentelekomcloud_compute_bms_tags_v2" "add_tags" 
-       {
-		    server_id = "${var.bms_id}",
-		    tags = [
-                     "tags__type_baremetal"
-                   ]
-       }
- ```
+resource "opentelekomcloud_compute_bms_tags_v2" "add_tags" {
+  server_id = "${var.bms_id}",
+  tags      = [ "tags_type_baremetal" ]
+}
+```
 
 ## Argument Reference
 
 The following arguments are supported:
 
-* `server_id` (Required) -The unique id of bare metal server.
+* `server_id`- (Required) The unique id of bare metal server.
 
-* `tags` (Required) - The tags of a BMS. Changing this parameter creates a new resource.
+* `tags` - (Required) The tags of a BMS. Changing this parameter creates a new resource.
 
 ## Attributes Reference
 

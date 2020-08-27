@@ -1,12 +1,4 @@
----
-layout: "opentelekomcloud"
-page_title: "OpenTelekomCloud: opentelekomcloud_evs_volume_v3"
-sidebar_current: "docs-opentelekomcloud-resource-evs-volume-v3"
-description: |-
-  Manages a V3 volume resource within OpenTelekomCloud.
----
-
-# opentelekomcloud\_evs\_volume_v3
+# opentelekomcloud_evs_volume_v3
 
 Manages a V3 volume resource within OpenTelekomCloud.
 
@@ -14,29 +6,31 @@ Manages a V3 volume resource within OpenTelekomCloud.
 
 ```hcl
 resource "opentelekomcloud_evs_volume_v3" "volume_1" {
-  name        = "volume_1"
-  description = "first test volume"
+  name              = "volume_1"
+  description       = "first test volume"
   availability_zone = "eu-de-01"
-  volume_type = "SATA"
-  size        = 20
-  tags        = {
+  volume_type       = "SATA"
+  size              = 20
+
+  tags = {
     foo = "bar"
     key = "value"
   }
 }
 ```
 
-## Example Usage with KMS encryption
+### Use KMS encryption
 
 ```hcl
 resource "opentelekomcloud_evs_volume_v3" "volume_1" {
-  name        = "volume_1"
-  description = "first test volume"
+  name              = "volume_1"
+  description       = "first test volume"
   availability_zone = "eu-de-01"
-  volume_type = "SATA"
-  kms_id = "${var.kms_id}"
-  size        = 20
-  tags        = {
+  volume_type       = "SATA"
+  kms_id            = "${var.kms_id}"
+  size              = 20
+  
+  tags = {
     foo = "bar"
     key = "value"
   }

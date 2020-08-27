@@ -1,12 +1,4 @@
----
-layout: "opentelekomcloud"
-page_title: "OpenTelekomCloud: opentelekomcloud_as_configuration_v1"
-sidebar_current: "docs-opentelekomcloud-resource-as-configuration-v1"
-description: |-
-  Manages a V1 AS Configuration resource within OpenTelekomCloud.
----
-
-# opentelekomcloud\_as\_configuration_v1
+# opentelekomcloud_as_configuration_v1
 
 Manages a V1 AS Configuration resource within OpenTelekomCloud.
 
@@ -17,15 +9,17 @@ Manages a V1 AS Configuration resource within OpenTelekomCloud.
 ```hcl
 resource "opentelekomcloud_as_configuration_v1" "my_as_config" {
   scaling_configuration_name = "my_as_config"
+
   instance_config {
     flavor = "${var.flavor}"
-    image = "${var.image_id}"
+    image  = "${var.image_id}"
     disk {
-      size = 40
+      size        = 40
       volume_type = "SATA"
-      disk_type = "SYS"
+      disk_type   = "SYS"
     }
-    key_name = "${var.keyname}"
+
+    key_name  = "${var.keyname}"
     user_data = "${file("userdata.txt")}"
   }
 }
@@ -36,21 +30,24 @@ resource "opentelekomcloud_as_configuration_v1" "my_as_config" {
 ```hcl
 resource "opentelekomcloud_as_configuration_v1" "my_as_config" {
   scaling_configuration_name = "my_as_config"
+
   instance_config {
     flavor = "${var.flavor}"
-    image = "${var.image_id}"
+    image  = "${var.image_id}"
+    
     disk {
-      size = 40
+      size        = 40
       volume_type = "SATA"
-      disk_type = "SYS"
+      disk_type   = "SYS"
     }
     disk {
-      size = 100
+      size        = 100
       volume_type = "SATA"
-      disk_type = "DATA"
-      kms_id = "${var.kms_id}"
+      disk_type   = "DATA"
+      kms_id      = "${var.kms_id}"
     }
-    key_name = "${var.keyname}"
+
+    key_name  = "${var.keyname}"
     user_data = "${file("userdata.txt")}"
   }
 }
@@ -61,16 +58,19 @@ resource "opentelekomcloud_as_configuration_v1" "my_as_config" {
 ```hcl
 resource "opentelekomcloud_as_configuration_v1" "my_as_config" {
   scaling_configuration_name = "my_as_config"
+
   instance_config {
     flavor = "${var.flavor}"
-    image = "${var.image_id}"
+    image  = "${var.image_id}"
+
     disk {
-      size = 40
+      size        = 40
       volume_type = "SATA"
-      disk_type = "SYS"
+      disk_type   = "SYS"
     }
-    key_name = "${var.keyname}"
+    key_name  = "${var.keyname}"
     user_data = "${file("userdata.txt")}"
+    
     metadata = {
       some_key = "some_value"
     }
@@ -86,9 +86,10 @@ function, or the `template_cloudinit_config` resource.
 ```hcl
 resource "opentelekomcloud_as_configuration_v1" "my_as_config" {
   scaling_configuration_name = "my_as_config"
+  
   instance_config = {
     instance_id = "4579f2f5-cbe8-425a-8f32-53dcb9d9053a"
-    key_name = "${var.keyname}"
+    key_name    = "${var.keyname}"
   }
 }
 ```

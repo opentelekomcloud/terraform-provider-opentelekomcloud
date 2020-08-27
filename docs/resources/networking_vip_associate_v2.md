@@ -1,12 +1,4 @@
----
-layout: "opentelekomcloud"
-page_title: "OpenTelekomCloud: opentelekomcloud_networking_vip_associate_v2"
-sidebar_current: "docs-opentelekomcloud-resource-networking-vip-associate-v2"
-description: |-
-  Manages a V2 vip associate resource within OpenTelekomCloud.
----
-
-# opentelekomcloud\_networking\_vip_associate_v2
+# opentelekomcloud_networking_vip_associate_v2
 
 Manages a V2 vip associate resource within OpenTelekomCloud.
 
@@ -14,13 +6,13 @@ Manages a V2 vip associate resource within OpenTelekomCloud.
 
 ```hcl
 resource "opentelekomcloud_networking_network_v2" "network_1" {
-  name = "network_1"
+  name           = "network_1"
   admin_state_up = "true"
 }
 
 resource "opentelekomcloud_networking_subnet_v2" "subnet_1" {
-  name = "subnet_1"
-  cidr = "192.168.199.0/24"
+  name       = "subnet_1"
+  cidr       = "192.168.199.0/24"
   ip_version = 4
   network_id = "${opentelekomcloud_networking_network_v2.network_1.id}"
 }
@@ -31,14 +23,14 @@ resource "opentelekomcloud_networking_router_interface_v2" "router_interface_1" 
 }
 
 resource "opentelekomcloud_networking_router_v2" "router_1" {
-  name = "router_1"
+  name             = "router_1"
   external_gateway = "0a2228f2-7f8a-45f1-8e09-9039e1d09975"
 }
 
 resource "opentelekomcloud_networking_port_v2" "port_1" {
-  name = "port_1"
+  name           = "port_1"
   admin_state_up = "true"
-  network_id = "${opentelekomcloud_networking_network_v2.network_1.id}"
+  network_id     = "${opentelekomcloud_networking_network_v2.network_1.id}"
 
   fixed_ip {
     subnet_id =  "${opentelekomcloud_networking_subnet_v2.subnet_1.id}"
@@ -46,7 +38,7 @@ resource "opentelekomcloud_networking_port_v2" "port_1" {
 }
 
 resource "opentelekomcloud_compute_instance_v2" "instance_1" {
-  name = "instance_1"
+  name            = "instance_1"
   security_groups = ["default"]
 
   network {
@@ -55,9 +47,9 @@ resource "opentelekomcloud_compute_instance_v2" "instance_1" {
 }
 
 resource "opentelekomcloud_networking_port_v2" "port_2" {
-  name = "port_2"
+  name           = "port_2"
   admin_state_up = "true"
-  network_id = "${opentelekomcloud_networking_network_v2.network_1.id}"
+  network_id     = "${opentelekomcloud_networking_network_v2.network_1.id}"
 
   fixed_ip {
     subnet_id =  "${opentelekomcloud_networking_subnet_v2.subnet_1.id}"
@@ -65,7 +57,7 @@ resource "opentelekomcloud_networking_port_v2" "port_2" {
 }
 
 resource "opentelekomcloud_compute_instance_v2" "instance_2" {
-  name = "instance_2"
+  name            = "instance_2"
   security_groups = ["default"]
 
   network {
@@ -75,11 +67,11 @@ resource "opentelekomcloud_compute_instance_v2" "instance_2" {
 
 resource "opentelekomcloud_networking_vip_v2" "vip_1" {
   network_id = "${opentelekomcloud_networking_network_v2.network_1.id}"
-  subnet_id = "${opentelekomcloud_networking_subnet_v2.subnet_1.id}"
+  subnet_id  = "${opentelekomcloud_networking_subnet_v2.subnet_1.id}"
 }
 
 resource "opentelekomcloud_networking_vip_associate_v2" "vip_associate_1" {
-  vip_id = "${opentelekomcloud_networking_vip_v2.vip_1.id}"
+  vip_id   = "${opentelekomcloud_networking_vip_v2.vip_1.id}"
   port_ids = ["${opentelekomcloud_networking_port_v2.port_1.id}", "${opentelekomcloud_networking_port_v2.port_2.id}"]
 }
 ```

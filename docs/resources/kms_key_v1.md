@@ -1,14 +1,6 @@
----
-layout: "opentelekomcloud"
-page_title: "OpenTelekomCloud: opentelekomcloud_kms-key-v1"
-sidebar_current: "docs-opentelekomcloud-resource-kms-key-v1"
-description: |-
-  Manages a V1 key resource within KMS.
----
+# opentelekomcloud_kms_key_v1
 
-# opentelekomcloud\_kms\_key_v1
-
-Manages a V1 key resource within KMS.
+Manages a V1 key resource within OpenTelekomCloud KMS.
 
 ## Example Usage
 

@@ -1,12 +1,4 @@
----
-layout: "opentelekomcloud"
-page_title: "OpenTelekomCloud: opentelekomcloud_blockstorage_volume_attach_v2"
-sidebar_current: "docs-opentelekomcloud-resource-blockstorage-volume-attach-v2"
-description: |-
-  Creates an attachment connection to a Block Storage volume
----
-
-# opentelekomcloud\_blockstorage\_volume\_attach\_v2
+# opentelekomcloud_blockstorage_volume_attach_v2
 
 This resource is experimental and may be removed in the future! Feedback
 is requested if you find this resource useful or if you find any problems
@@ -31,13 +23,13 @@ resource "opentelekomcloud_blockstorage_volume_v2" "volume_1" {
 }
 
 resource "opentelekomcloud_blockstorage_volume_attach_v2" "va_1" {
-  volume_id = "${opentelekomcloud_blockstorage_volume_v2.volume_1.id}"
-  device = "auto"
-  host_name = "devstack"
+  volume_id  = "${opentelekomcloud_blockstorage_volume_v2.volume_1.id}"
+  device     = "auto"
+  host_name  = "devstack"
   ip_address = "192.168.255.10"
-  initiator = "iqn.1993-08.org.debian:01:e9861fb1859"
-  os_type = "linux2"
-  platform = "x86_64"
+  initiator  = "iqn.1993-08.org.debian:01:e9861fb1859"
+  os_type    = "linux2"
+  platform   = "x86_64"
 }
 ```
 
@@ -120,7 +112,3 @@ a good understanding of how the service is configured and how to make the
 appropriate final connection. However, if used correctly, this has the
 flexibility to be able to attach OpenTelekomCloud Block Storage volumes to
 non-OpenTelekomCloud resources.
-
-## Import
-
-It is not possible to import this resource.

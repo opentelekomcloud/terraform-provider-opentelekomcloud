@@ -1,23 +1,15 @@
----
-layout: "opentelekomcloud"
-page_title: "OpenTelekomCloud: opentelekomcloud_nat_gateway_v2"
-sidebar_current: "docs-opentelekomcloud-resource-nat-gateway-v2"
-description: |-
-  Manages a V2 nat gateway resource within OpenTelekomCloud Nat.
----
+# opentelekomcloud_nat_gateway_v2
 
-# opentelekomcloud\_nat\_gateway_v2
-
-Manages a V2 nat gateway resource within OpenTelekomCloud Nat
+Manages a V2 nat gateway resource within OpenTelekomCloud Nat.
 
 ## Example Usage
 
 ```hcl
 resource "opentelekomcloud_nat_gateway_v2" "nat_1" {
-  name   = "Terraform"
-  description = "test for terraform2"
-  spec = "3"
-  router_id = "2c1fe4bd-ebad-44ca-ae9d-e94e63847b75"
+  name                = "Terraform"
+  description         = "test for terraform2"
+  spec                = "3"
+  router_id           = "2c1fe4bd-ebad-44ca-ae9d-e94e63847b75"
   internal_network_id = "dc8632e2-d9ff-41b1-aa0c-d455557314a0"
 }
 ```

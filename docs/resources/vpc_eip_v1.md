@@ -1,12 +1,4 @@
----
-layout: "opentelekomcloud"
-page_title: "OpenTelekomCloud: opentelekomcloud_vpc_eip_v1"
-sidebar_current: "docs-opentelekomcloud-resource-vpc-eip-v1"
-description: |-
-  Manages a V1 EIP resource within OpenTelekomCloud VPC.
----
-
-# opentelekomcloud\_vpc\_eip_v1
+# opentelekomcloud_vpc_eip_v1
 
 Manages a V1 EIP resource within OpenTelekomCloud VPC.
 
@@ -18,9 +10,9 @@ resource "opentelekomcloud_vpc_eip_v1" "eip_1" {
     type = "5_bgp"
   }
   bandwidth {
-    name = "test"
-    size = 8
-    share_type = "PER"
+    name        = "test"
+    size        = 8
+    share_type  = "PER"
     charge_mode = "traffic"
   }
 }

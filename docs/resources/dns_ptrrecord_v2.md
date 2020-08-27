@@ -1,26 +1,18 @@
----
-layout: "opentelekomcloud"
-page_title: "OpenTelekomCloud: opentelekomcloud_dns_ptrrecord_v2"
-sidebar_current: "docs-opentelekomcloud-resource-dns-ptrrecord-v2"
-description: |-
-  Manages a DNS PTR record in the OpenTelekomCloud DNS Service
----
-
-# opentelekomcloud\_dns\_ptrrecord_v2
+# opentelekomcloud_dns_ptrrecord_v2
 
 Manages a DNS PTR record in the OpenTelekomCloud DNS Service.
 
 ## Example Usage
 
 ```hcl
-resource "opentelekomcloud_networking_floatingip_v2" "fip_1" {
-}
+resource "opentelekomcloud_networking_floatingip_v2" "fip_1" { }
 
 resource "opentelekomcloud_dns_ptrrecord_v2" "ptr_1" {
-  name        = "ptr.example.com."
-  description = "An example PTR record"
+  name          = "ptr.example.com."
+  description   = "An example PTR record"
   floatingip_id = opentelekomcloud_networking_floatingip_v2.fip_1.id
-  ttl         = 3000
+  ttl           = 3000
+
   tags = {
     foo = "bar"
   }

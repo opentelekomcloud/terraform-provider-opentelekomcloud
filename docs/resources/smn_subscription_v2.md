@@ -1,12 +1,4 @@
----
-layout: "opentelekomcloud"
-page_title: "OpenTelekomCloud: opentelekomcloud_smn_subscription_v2"
-sidebar_current: "docs-opentelekomcloud-resource-smn-subscription-v2"
-description: |-
-  Manages a V2 subscription resource within OpenTelekomCloud.
----
-
-# opentelekomcloud\_smn\_subscription\_v2
+# opentelekomcloud_smn_subscription_v2
 
 Manages a V2 subscription resource within OpenTelekomCloud.
 
@@ -14,7 +6,7 @@ Manages a V2 subscription resource within OpenTelekomCloud.
 
 ```hcl
 resource "opentelekomcloud_smn_topic_v2" "topic_1" {
-  name		= "topic_1"
+  name		   = "topic_1"
   display_name = "The display name of topic_1"
 }
 

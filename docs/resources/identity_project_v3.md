@@ -1,12 +1,4 @@
----
-layout: "opentelekomcloud"
-page_title: "OpentelekomCloud: opentelekomcloud_identity_project_v3"
-sidebar_current: "docs-opentelekomcloud-resource-identity-project-v3"
-description: |-
-  Manages a Project resource within OpentelekomCloud Keystone.
----
-
-# opentelekomcloud\_identity\_project_v3
+# opentelekomcloud_identity_project_v3
 
 Manages a Project resource within OpentelekomCloud Identity And Access 
 Management service.
@@ -19,7 +11,7 @@ https://docs.otc.t-systems.com/en-us/usermanual/iam/iam_01_0034.html)
 
 ```hcl
 resource "opentelekomcloud_identity_project_v3" "project_1" {
-  name = "eu-de_project1"
+  name        = "eu-de_project1"
   description = "This is a test project"
 }
 ```

@@ -1,11 +1,3 @@
----
-layout: "opentelekomcloud"
-page_title: "OpenTelekomCloud: opentelekomcloud_waf_policy_v1"
-sidebar_current: "docs-opentelekomcloud-resource-waf-policy-v1"
-description: |-
-  Manages a V1 WAF policy resource within OpenTelekomCloud.
----
-
 # opentelekomcloud_waf_policy_v1
 
 Manages a WAF policy resource within OpenTelekomCloud.
@@ -13,16 +5,14 @@ Manages a WAF policy resource within OpenTelekomCloud.
 ## Example Usage
 
 ```hcl
-
 resource "opentelekomcloud_waf_policy_v1" "policy_1" {
 	name = "policy_1"
 	options {
 		webattack = true
-		crawler = true
+		crawler   = true
 	}
 	full_detection = false
 }
-
 ```
 
 ## Argument Reference

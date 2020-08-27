@@ -1,11 +1,3 @@
----
-layout: "opentelekomcloud"
-page_title: "OpenTelekomCloud: opentelekomcloud_waf_ccattackprotection_rule_v1"
-sidebar_current: "docs-opentelekomcloud-resource-waf-ccattackprotection-rule-v1"
-description: |-
-  Manages a V1 WAF CC Attack Protection Rule resource within OpenTelekomCloud.
----
-
 # opentelekomcloud_waf_ccattackprotection_rule_v1
 
 Manages a WAF CC Attack Protection Rule resource within OpenTelekomCloud.
@@ -13,24 +5,23 @@ Manages a WAF CC Attack Protection Rule resource within OpenTelekomCloud.
 ## Example Usage
 
 ```hcl
-
 resource "opentelekomcloud_waf_policy_v1" "policy_1" {
 	name = "policy_1"
 }
 
 resource "opentelekomcloud_waf_ccattackprotection_rule_v1" "rule_1" {
-	policy_id = "${opentelekomcloud_waf_policy_v1.policy_1.id}"
-	url = "/abc1"
-	limit_num = 10
+	policy_id    = "${opentelekomcloud_waf_policy_v1.policy_1.id}"
+	url          = "/abc1"
+	limit_num    = 10
 	limit_period = 60
-	lock_time = 10
-	tag_type = "cookie"
-	tag_index = "sessionid"
-	action_category = "block"
-	block_content_type = "application/json"
-	block_content = "{\"error\":\"forbidden\"}"
-}
+	lock_time    = 10
+	tag_type     = "cookie"
+	tag_index    = "sessionid"
 
+	action_category    = "block"
+	block_content_type = "application/json"
+	block_content      = "{\"error\":\"forbidden\"}"
+}
 ```
 
 ## Argument Reference

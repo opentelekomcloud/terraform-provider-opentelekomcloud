@@ -1,12 +1,4 @@
----
-layout: "opentelekomcloud"
-page_title: "OpenTelekomCloud: opentelekomcloud_fw_rule_v2"
-sidebar_current: "docs-opentelekomcloud-resource-fw-rule-v1"
-description: |-
-  Manages a v1 firewall group rule resource within OpenTelekomCloud.
----
-
-# opentelekomcloud\_fw\_rule_v2
+# opentelekomcloud_fw_rule_v2
 
 Manages a v2 firewall rule resource within OpenTelekomCloud.
 

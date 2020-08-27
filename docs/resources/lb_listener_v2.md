@@ -1,12 +1,4 @@
----
-layout: "opentelekomcloud"
-page_title: "OpenTelekomCloud: opentelekomcloud_lb_listener_v2"
-sidebar_current: "docs-opentelekomcloud-resource-lb-listener-v2"
-description: |-
-  Manages an Enhanced LB listener resource within OpenTelekomCloud.
----
-
-# opentelekomcloud\_lb\_listener\_v2
+# opentelekomcloud_lb_listener_v2
 
 Manages an Enhanced LB listener resource within OpenTelekomCloud.
 

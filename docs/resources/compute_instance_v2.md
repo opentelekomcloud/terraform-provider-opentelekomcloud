@@ -1,12 +1,4 @@
----
-layout: "opentelekomcloud"
-page_title: "OpenTelekomCloud: opentelekomcloud_compute_instance_v2"
-sidebar_current: "docs-opentelekomcloud-resource-compute-instance-v2"
-description: |-
-  Manages a V2 VM instance resource within OpenTelekomCloud.
----
-
-# opentelekomcloud\_compute\_instance_v2
+# opentelekomcloud_compute_instance_v2
 
 Manages a V2 VM instance resource within OpenTelekomCloud.
 
@@ -21,6 +13,7 @@ resource "opentelekomcloud_compute_instance_v2" "basic" {
   flavor_id       = "3"
   key_pair        = "my_key_pair_name"
   security_groups = ["default"]
+
   tags = {
     foo = "bar"
     key = "value"
@@ -58,7 +51,7 @@ resource "opentelekomcloud_compute_instance_v2" "myinstance" {
 
 resource "opentelekomcloud_compute_volume_attach_v2" "attached" {
   instance_id = "${opentelekomcloud_compute_instance_v2.myinstance.id}"
-  volume_id = "${opentelekomcloud_blockstorage_volume_v2.myvol.id}"
+  volume_id   = "${opentelekomcloud_blockstorage_volume_v2.myvol.id}"
 }
 ```
 

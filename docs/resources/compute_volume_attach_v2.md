@@ -1,12 +1,4 @@
----
-layout: "opentelekomcloud"
-page_title: "OpenTelekomCloud: opentelekomcloud_compute_volume_attach_v2"
-sidebar_current: "docs-opentelekomcloud-resource-compute-volume-attach-v2"
-description: |-
-  Attaches a Block Storage Volume to an Instance.
----
-
-# opentelekomcloud\_compute\_volume_attach_v2
+# opentelekomcloud_compute_volume_attach_v2
 
 Attaches a Block Storage Volume to an Instance using the OpenTelekomCloud
 Compute (Nova) v2 API.

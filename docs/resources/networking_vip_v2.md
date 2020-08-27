@@ -1,12 +1,4 @@
----
-layout: "opentelekomcloud"
-page_title: "OpenTelekomCloud: opentelekomcloud_networking_vip_v2"
-sidebar_current: "docs-opentelekomcloud-resource-networking-vip-v2"
-description: |-
-  Manages a V2 vip resource within OpenTelekomCloud.
----
-
-# opentelekomcloud\_networking\_vip_v2
+# opentelekomcloud_networking_vip_v2
 
 Manages a V2 vip resource within OpenTelekomCloud.
 
@@ -14,13 +6,14 @@ Manages a V2 vip resource within OpenTelekomCloud.
 
 ```hcl
 resource "opentelekomcloud_networking_network_v2" "network_1" {
-  name = "network_1"
+  name           = "network_1"
   admin_state_up = "true"
 }
 
 resource "opentelekomcloud_networking_subnet_v2" "subnet_1" {
   name = "subnet_1"
   cidr = "192.168.199.0/24"
+
   ip_version = 4
   network_id = "${opentelekomcloud_networking_network_v2.network_1.id}"
 }
@@ -31,13 +24,13 @@ resource "opentelekomcloud_networking_router_interface_v2" "router_interface_1" 
 }
 
 resource "opentelekomcloud_networking_router_v2" "router_1" {
-  name = "router_1"
+  name             = "router_1"
   external_gateway = "0a2228f2-7f8a-45f1-8e09-9039e1d09975"
 }
 
 resource "opentelekomcloud_networking_vip_v2" "vip_1" {
   network_id = "${opentelekomcloud_networking_network_v2.network_1.id}"
-  subnet_id = "${opentelekomcloud_networking_subnet_v2.subnet_1.id}"
+  subnet_id  = "${opentelekomcloud_networking_subnet_v2.subnet_1.id}"
 }
 ```
 

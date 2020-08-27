@@ -1,22 +1,14 @@
----
-layout: "opentelekomcloud"
-page_title: "OpenTelekomCloud: opentelekomcloud_rds_instance_v1"
-sidebar_current: "docs-opentelekomcloud-resource-rds-instance-v1"
-description: |-
-  Manages rds instance resource within OpenTelekomCloud
----
+# opentelekomcloud_rds_instance_v1
 
-# opentelekomcloud\_rds\_instance\_v1
-
-Manages rds instance resource within OpenTelekomCloud
+Manages rds instance resource within OpenTelekomCloud.
 
 ## Example Usage:  Creating a PostgreSQL RDS instance
 
 ```hcl
 data "opentelekomcloud_rds_flavors_v1" "flavor" {
-    datastore_name = "PostgreSQL"
-    datastore_version = "9.5.5"
-    speccode = "rds.pg.s1.large.ha"
+  datastore_name    = "PostgreSQL"
+  datastore_version = "9.5.5"
+  speccode          = "rds.pg.s1.large.ha"
 }
 
 resource "opentelekomcloud_compute_secgroup_v2" "secgrp_rds" {
@@ -25,32 +17,35 @@ resource "opentelekomcloud_compute_secgroup_v2" "secgrp_rds" {
 }
 
 resource "opentelekomcloud_rds_instance_v1" "instance" {
-  name = "rds-instance"
+  name             = "rds-instance"
+  availabilityzone = "eu-de-01"
+
   datastore {
     type = "PostgreSQL"
     version = "9.5.5"
   }
+
   flavorref = "${data.opentelekomcloud_rds_flavors_v1.flavor.id}"
   volume {
     type = "COMMON"
     size = 200
   }
-  availabilityzone = "eu-de-01"
   vpc = "c1095fe7-03df-4205-ad2d-6f4c181d436e"
+  dbrtpd = "P@ssw0rd1!9851"
+  dbport = "8635"
+
   nics {
     subnetid = "b65f8d25-c533-47e2-8601-cfaa265a3e3e"
   }
   securitygroup {
     id = "${opentelekomcloud_compute_secgroup_v2.secgrp_rds.id}"
   }
-  dbport = "8635"
   backupstrategy {
     starttime = "04:00:00"
-    keepdays = 4
+    keepdays  = 4
   }
-  dbrtpd = "Huangwei!120521"
   ha {
-    enable = true
+    enable          = true
     replicationmode = "async"
   }
   tag = {
@@ -64,9 +59,9 @@ resource "opentelekomcloud_rds_instance_v1" "instance" {
 ## Example Usage:  Creating a SQLServer RDS instance
 ```hcl
 data "opentelekomcloud_rds_flavors_v1" "flavor" {
-    datastore_name = "SQLServer"
-    datastore_version = "2014 SP2 SE"
-    speccode = "rds.mssql.s1.2xlarge"
+  datastore_name    = "SQLServer"
+  datastore_version = "2014 SP2 SE"
+  speccode          = "rds.mssql.s1.2xlarge"
 }
 
 resource "opentelekomcloud_compute_secgroup_v2" "secgrp_rds" {
@@ -75,30 +70,31 @@ resource "opentelekomcloud_compute_secgroup_v2" "secgrp_rds" {
 }
 
 resource "opentelekomcloud_rds_instance_v1" "instance" {
-  name = "rds-instance"
+  name             = "rds-instance"
+  availabilityzone = "eu-de-01"
+  flavorref = "${data.opentelekomcloud_rds_flavors_v1.flavor.id}"
+  vpc = "c1095fe7-03df-4205-ad2d-6f4c181d436e"
+  dbport = "8635"
+  dbrtpd = "P@ssw0rd1!9851"
+
   datastore {
-    type = "SQLServer"
+    type    = "SQLServer"
     version = "2014 SP2 SE"
   }
-  flavorref = "${data.opentelekomcloud_rds_flavors_v1.flavor.id}"
   volume {
     type = "COMMON"
     size = 200
   }
-  availabilityzone = "eu-de-01"
-  vpc = "c1095fe7-03df-4205-ad2d-6f4c181d436e"
   nics {
     subnetid = "b65f8d25-c533-47e2-8601-cfaa265a3e3e"
   }
   securitygroup {
     id = "${opentelekomcloud_compute_secgroup_v2.secgrp_rds.id}"
   }
-  dbport = "8635"
   backupstrategy {
     starttime = "04:00:00"
-    keepdays = 4
+    keepdays  = 4
   }
-  dbrtpd = "Huangwei!120521"
   depends_on = ["opentelekomcloud_compute_secgroup_v2.secgrp_rds"]
 }
 ```
@@ -106,9 +102,9 @@ resource "opentelekomcloud_rds_instance_v1" "instance" {
 ## Example Usage:  Creating a MySQL RDS instance
 ```hcl
 data "opentelekomcloud_rds_flavors_v1" "flavor" {
-    datastore_name = "MySQL"
-    datastore_version = "5.6.33"
-    speccode = "rds.mysql.s1.medium"
+  datastore_name = "MySQL"
+  datastore_version = "5.6.33"
+  speccode = "rds.mysql.s1.medium"
 }
 
 resource "opentelekomcloud_compute_secgroup_v2" "secgrp_rds" {
@@ -117,32 +113,34 @@ resource "opentelekomcloud_compute_secgroup_v2" "secgrp_rds" {
 }
 
 resource "opentelekomcloud_rds_instance_v1" "instance" {
-  name = "rds-instance"
+  name             = "rds-instance"
+  availabilityzone = "eu-de-01"
+
+  vpc       = "c1095fe7-03df-4205-ad2d-6f4c181d436e"
+  dbport    = "8635"
+  dbrtpd    = "P@ssw0rd1!9851"
+  flavorref = "${data.opentelekomcloud_rds_flavors_v1.flavor.id}"
+  
   datastore {
-    type = "MySQL"
+    type    = "MySQL"
     version = "5.6.33"
   }
-  flavorref = "${data.opentelekomcloud_rds_flavors_v1.flavor.id}"
   volume {
     type = "COMMON"
     size = 200
   }
-  availabilityzone = "eu-de-01"
-  vpc = "c1095fe7-03df-4205-ad2d-6f4c181d436e"
   nics {
     subnetid = "b65f8d25-c533-47e2-8601-cfaa265a3e3e"
   }
   securitygroup {
     id = "${opentelekomcloud_compute_secgroup_v2.secgrp_rds.id}"
   }
-  dbport = "8635"
   backupstrategy {
     starttime = "04:00:00"
-    keepdays = 4
+    keepdays  = 4
   }
-  dbrtpd = "Huangwei!120521"
   ha {
-    enable = true
+    enable          = true
     replicationmode = "async"
   }
   depends_on = ["opentelekomcloud_compute_secgroup_v2.secgrp_rds"]

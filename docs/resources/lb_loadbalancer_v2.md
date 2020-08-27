@@ -1,12 +1,4 @@
----
-layout: "opentelekomcloud"
-page_title: "OpenTelekomCloud: opentelekomcloud_lb_loadbalancer_v2"
-sidebar_current: "docs-opentelekomcloud-resource-lb-loadbalancer-v2"
-description: |-
-  Manages an Enhanced loadbalancer resource within OpenTelekomCloud.
----
-
-# opentelekomcloud\_lb\_loadbalancer\_v2
+# opentelekomcloud_lb_loadbalancer_v2
 
 Manages an Enhanced loadbalancer resource within OpenTelekomCloud.
 

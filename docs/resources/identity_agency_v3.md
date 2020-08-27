@@ -1,12 +1,4 @@
----
-layout: "opentelekomcloud"
-page_title: "Opentelekomcloud: opentelekomcloud_identity_agency_v3"
-sidebar_current: "docs-opentelekomcloud-resource-identity-agency-v3"
-description: |-
-  Manages an agency resource within Opentelekomcloud.
----
-
-# opentelekomcloud\_identity\_agency\_v3
+# opentelekomcloud_identity_agency_v3
 
 Manages an agency resource within Opentelekomcloud.
 
@@ -14,18 +6,14 @@ Manages an agency resource within Opentelekomcloud.
 
 ```hcl
 resource "opentelekomcloud_identity_agency_v3" "agency" {
-  name = "test_agency"
-  description = "test agency"
+  name                  = "test_agency"
+  description           = "test agency"
   delegated_domain_name = "***"
   project_role {
     project = "eu-de"
-    roles = [
-      "KMS Administrator",
-    ]
+    roles = [ "KMS Administrator", ]
   }
-  domain_roles = [
-    "Anti-DDoS Administrator",
-  ]
+  domain_roles = [ "Anti-DDoS Administrator", ]
 }
 ```
 

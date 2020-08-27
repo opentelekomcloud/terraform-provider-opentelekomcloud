@@ -1,12 +1,4 @@
----
-layout: "opentelekomcloud"
-page_title: "OpentelekomCloud: opentelekomcloud_identity_user_v3"
-sidebar_current: "docs-opentelekomcloud-resource-identity-user-v3"
-description: |-
-  Manages a User resource within OpentelekomCloud IAM service.
----
-
-# opentelekomcloud\_identity\_user_v3
+# opentelekomcloud_identity_user_v3
 
 Manages a User resource within OpentelekomCloud IAM service.
 
@@ -19,7 +11,6 @@ this resource.
 resource "opentelekomcloud_identity_user_v3" "user_1" {
   name = "user_1"
   password = "password123!"
-
 }
 ```
 

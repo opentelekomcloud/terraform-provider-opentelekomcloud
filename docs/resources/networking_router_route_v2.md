@@ -1,12 +1,4 @@
----
-layout: "opentelekomcloud"
-page_title: "OpenTelekomCloud: opentelekomcloud_networking_router_route_v2"
-sidebar_current: "docs-opentelekomcloud-resource-networking-router-route-v2"
-description: |-
-  Creates a routing entry on a OpenTelekomCloud V2 router.
----
-
-# opentelekomcloud\_networking\_router_route_v2
+# opentelekomcloud_networking_router_route_v2
 
 Creates a routing entry on a OpenTelekomCloud V2 router.
 

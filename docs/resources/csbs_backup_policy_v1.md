@@ -1,37 +1,30 @@
----
-layout: "opentelekomcloud"
-page_title: "OpenTelekomCloud: resource_opentelekomcloud_csbs_backup_policy_v1"
-sidebar_current: "docs-opentelekomcloud-resource-csbs-backup-policy-v1"
-description: |-
-  Provides an OpenTelekomCloud Backup Policy of Resource.
----
-
 # opentelekomcloud_csbs_backup_policy_v1
 
 Provides an OpenTelekomCloud Backup Policy of Resources.
 
 ## Example Usage
 
- ```hcl
- variable "name" { }
- variable "id" { }
- variable "resource_name" { }
+```hcl
+variable "name" { }
+variable "id" { }
+variable "resource_name" { }
  
- resource "opentelekomcloud_csbs_backup_policy_v1" "backup_policy_v1" {
-   name            = "${var.name}"
-   resource {
-     id = "${var.id}"
-     type = "OS::Nova::Server"
-     name = "${var.resource_name}"
-   }
-   scheduled_operation {
-     enabled = true
-     operation_type ="backup"
-     trigger_pattern = "BEGIN:VCALENDAR\r\nBEGIN:VEVENT\r\nRRULE:FREQ=WEEKLY;BYDAY=TH;BYHOUR=12;BYMINUTE=27\r\nEND:VEVENT\r\nEND:VCALENDAR\r\n"
-   }
- }
+resource "opentelekomcloud_csbs_backup_policy_v1" "backup_policy_v1" {
+  name = "${var.name}"
 
- ```
+  resource {
+    id   = "${var.id}"
+    type = "OS::Nova::Server"
+    name = "${var.resource_name}"
+  }
+
+  scheduled_operation {
+    enabled         = true
+    operation_type  = "backup"
+    trigger_pattern = "BEGIN:VCALENDAR\r\nBEGIN:VEVENT\r\nRRULE:FREQ=WEEKLY;BYDAY=TH;BYHOUR=12;BYMINUTE=27\r\nEND:VEVENT\r\nEND:VCALENDAR\r\n"
+  }
+}
+```
 ## Argument Reference
 The following arguments are supported:
 
@@ -100,7 +93,3 @@ Backup Policy can be imported using  `id`, e.g.
 ```
 $ terraform import opentelekomcloud_csbs_backup_policy_v1.backup_policy_v1 7056d636-ac60-4663-8a6c-82d3c32c1c64
 ```
-
-
-
-

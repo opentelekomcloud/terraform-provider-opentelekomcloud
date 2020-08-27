@@ -1,12 +1,4 @@
----
-layout: "opentelekomcloud"
-page_title: "OpenTelekomCloud: opentelekomcloud_ecs_instance_v1"
-sidebar_current: "docs-opentelekomcloud-resource-ecs-instance-v1"
-description: |-
-  Manages a V1 ECS instance resource within OpenTelekomCloud.
----
-
-# opentelekomcloud\_ecs\_instance_v1
+# opentelekomcloud_ecs_instance_v1
 
 Manages a V1 ECS instance resource within OpenTelekomCloud.
 
@@ -57,7 +49,7 @@ resource "opentelekomcloud_ecs_instance_v1" "basic" {
   }
 
   delete_disks_on_termination = true
-  availability_zone = "cn-north-1a"
+  availability_zone = "eu-de-01"
   key_name          = "KeyPair-test"
   security_groups   = ["default"]
 }
@@ -81,7 +73,7 @@ resource "opentelekomcloud_ecs_instance_v1" "basic" {
     network_id = "55534eaa-533a-419d-9b40-ec427ea7195a"
   }
 
-  availability_zone = "cn-north-1a"
+  availability_zone = "eu-de-01"
   key_name          = "KeyPair-test"
   security_groups   = ["default"]
 }
@@ -95,8 +87,7 @@ resource "opentelekomcloud_compute_volume_attach_v2" "attached" {
 ### Instance With Multiple Networks
 
 ```hcl
-resource "opentelekomcloud_networking_floatingip_v2" "myip" {
-}
+resource "opentelekomcloud_networking_floatingip_v2" "myip" { }
 
 resource "opentelekomcloud_ecs_instance_v1" "multi-net" {
   name     = "server_1"
@@ -112,7 +103,7 @@ resource "opentelekomcloud_ecs_instance_v1" "multi-net" {
     network_id = "2c0a74a9-4395-4e62-a17b-e3e86fbf66b7"
   }
 
-  availability_zone = "cn-north-1a"
+  availability_zone = "eu-de-01"
   key_name          = "KeyPair-test"
   security_groups   = ["default"]
 }
@@ -236,3 +227,4 @@ Instances can be imported using the `id`, e.g.
 
 ```
 $ terraform import opentelekomcloud_ecs_instance_v1.instance_1 d90ce693-5ccf-4136-a0ed-152ce412b6b9
+```

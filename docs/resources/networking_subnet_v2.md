@@ -1,12 +1,4 @@
----
-layout: "opentelekomcloud"
-page_title: "OpenTelekomCloud: opentelekomcloud_networking_subnet_v2"
-sidebar_current: "docs-opentelekomcloud-resource-networking-subnet-v2"
-description: |-
-  Manages a V2 Neutron subnet resource within OpenTelekomCloud.
----
-
-# opentelekomcloud\_networking\_subnet_v2
+# opentelekomcloud_networking_subnet_v2
 
 Manages a V2 Neutron subnet resource within OpenTelekomCloud.
 

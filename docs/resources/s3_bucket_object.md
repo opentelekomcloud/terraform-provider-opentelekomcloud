@@ -1,14 +1,6 @@
----
-layout: "opentelekomcloud"
-page_title: "OpenTelekomCloud: opentelekomcloud_s3_bucket_object"
-sidebar_current: "docs-opentelekomcloud-resource-s3-bucket-object"
-description: |-
-  Provides a S3 bucket object resource.
----
+# opentelekomcloud_s3_bucket_object
 
-# opentelekomcloud\_s3\_bucket\_object
-
-Provides a S3 bucket object resource.
+Provides a S3 bucket object resource within OpenTelekomCloud.
 
 ## Example Usage
 
@@ -28,9 +20,9 @@ resource "opentelekomcloud_s3_bucket" "examplebucket" {
 }
 
 resource "opentelekomcloud_s3_bucket_object" "examplebucket_object" {
-  key        = "someobject"
-  bucket     = "${opentelekomcloud_s3_bucket.examplebucket.bucket}"
-  source     = "index.html"
+  key    = "someobject"
+  bucket = "${opentelekomcloud_s3_bucket.examplebucket.bucket}"
+  source = "index.html"
 }
 ```
 

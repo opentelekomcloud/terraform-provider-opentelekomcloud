@@ -1,14 +1,6 @@
----
-layout: "opentelekomcloud"
-page_title: "OpenTelekomCloud: opentelekomcloud_vbs_backup_v2"
-sidebar_current: "docs-opentelekomcloud-datasource-vbs-backup-v2"
-description: |-
-  Provides an VBS Backup resource.
----
-
 # opentelekomcloud_vbs_backup_v2
 
-Provides an VBS Backup resource.
+Provides an VBS Backup resource within OpenTelekomCloud.
  
 # Example Usage
 
@@ -19,7 +11,7 @@ variable "volume_id" {}
  
 resource "opentelekomcloud_vbs_backup_v2" "mybackup" {
   volume_id = "${var.volume_id}"
-  name = "${var.backup_name}"
+  name      = "${var.backup_name}"
 }
  ```
 

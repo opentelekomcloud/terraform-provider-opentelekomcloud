@@ -1,32 +1,23 @@
----
-layout: "opentelekomcloud"
-page_title: "OpenTelekomCloud: resource_opentelekomcloud_cts_tracker_v1"
-sidebar_current: "docs-opentelekomcloud-resource-cts-tracker-v1"
-description: |-
-   CTS tracker allows you to collect, store, and query cloud resource operation records and use these records for security analysis, compliance auditing, resource tracking, and fault locating.
----
-
 # opentelekomcloud_cts_tracker_v1
 
 Allows you to collect, store, and query cloud resource operation records.
 
 ## Example Usage
 
- ```hcl
- variable "bucket_name" { }
- variable "topic_id" { }
- 
- resource "opentelekomcloud_cts_tracker_v1" "tracker_v1" {
-   bucket_name      = "${var.bucket_name}"
-   file_prefix_name      = "yO8Q"
-   is_support_smn = true
-   topic_id = "${var.topic_id}"
-   is_send_all_key_operation = false
-   operations = ["login"]
-   need_notify_user_list = ["user1"]
- }
+```hcl
+variable "bucket_name" { }
+variable "topic_id" { }
 
- ```
+resource "opentelekomcloud_cts_tracker_v1" "tracker_v1" {
+  bucket_name               = "${var.bucket_name}"
+  file_prefix_name          = "yO8Q"
+  is_support_smn            = true
+  topic_id                  = "${var.topic_id}"
+  is_send_all_key_operation = false
+  operations                = ["login"]
+  need_notify_user_list     = ["user1"]
+}
+```
 ## Argument Reference
 The following arguments are supported:
 
@@ -60,7 +51,3 @@ CTS tracker can be imported using  `tracker_name`, e.g.
 ```
 $ terraform import opentelekomcloud_cts_tracker_v1.tracker system
 ```
-
-
-
-

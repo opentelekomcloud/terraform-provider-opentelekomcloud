@@ -1,12 +1,4 @@
----
-layout: "opentelekomcloud"
-page_title: "OpenTelekomCloud: opentelekomcloud_compute_servergroup_v2"
-sidebar_current: "docs-opentelekomcloud-resource-compute-servergroup-v2"
-description: |-
-  Manages a V2 Server Group resource within OpenTelekomCloud.
----
-
-# opentelekomcloud\_compute\_servergroup_v2
+# opentelekomcloud_compute_servergroup_v2
 
 Manages a V2 Server Group resource within OpenTelekomCloud.
 

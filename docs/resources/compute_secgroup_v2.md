@@ -1,12 +1,4 @@
----
-layout: "opentelekomcloud"
-page_title: "OpenTelekomCloud: opentelekomcloud_compute_secgroup_v2"
-sidebar_current: "docs-opentelekomcloud-resource-compute-secgroup-v2"
-description: |-
-  Manages a V2 security group resource within OpenTelekomCloud.
----
-
-# opentelekomcloud\_compute\_secgroup_v2
+# opentelekomcloud_compute_secgroup_v2
 
 Manages a V2 security group resource within OpenTelekomCloud.
 
@@ -88,10 +80,10 @@ When using ICMP as the `ip_protocol`, the `from_port` sets the ICMP _type_ and t
 
 ```hcl
 rule {
-  from_port = -1
-  to_port = -1
+  from_port   = -1
+  to_port     = -1
   ip_protocol = "icmp"
-  cidr = "0.0.0.0/0"
+  cidr        = "0.0.0.0/0"
 }
 ```
 

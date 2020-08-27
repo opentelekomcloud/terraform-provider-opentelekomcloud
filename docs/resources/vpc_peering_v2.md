@@ -1,14 +1,6 @@
----
-layout: "opentelekomcloud"
-page_title: "OpenTelekomCloud: opentelekomcloud_vpc_peering_connection_v2"
-sidebar_current: "docs-opentelekomcloud-resource-vpc-peering-v2"
-description: |-
-  Manage a VPC Peering Connection resource.
----
-
 # opentelekomcloud_vpc_peering_connection_v2
 
-Provides a resource to manage a VPC Peering Connection resource.
+Provides a resource to manage a VPC Peering Connection resource within OpenTelekomCloud.
 
 -> **Note:** For cross-tenant (requester's tenant differs from the accepter's tenant) VPC Peering Connections, use the `opentelekomcloud_vpc_peering_connection_v2` resource to manage the requester's side of the connection and use the `opentelekomcloud_vpc_peering_connection_accepter_v2` resource to manage the accepter's side of the connection.
 
@@ -16,8 +8,8 @@ Provides a resource to manage a VPC Peering Connection resource.
 
  ```hcl
 resource "opentelekomcloud_vpc_peering_connection_v2" "peering" {
-  name = "${var.peer_conn_name}"
-  vpc_id = "${var.vpc_id}"
+  name        = "${var.peer_conn_name}"
+  vpc_id      = "${var.vpc_id}"
   peer_vpc_id = "${var.accepter_vpc_id}"
 }
  ```

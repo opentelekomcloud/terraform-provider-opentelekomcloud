@@ -1,32 +1,25 @@
----
-layout: "opentelekomcloud"
-page_title: "OpenTelekomCloud: opentelekomcloud_cce_cluster_v3 "
-sidebar_current: "docs-opentelekomcloud-resource-cce-cluster-v3"
-description: |-
-  Provides Cloud Container Engine(CCE) resource.
----
-
 # opentelekomcloud_cce_cluster_v3
 
 Provides a cluster resource (CCE).
 
 ## Example Usage
 
- ```hcl
-    variable "flavor_id" { }
-    variable "vpc_id" { }
-    variable "subnet_id" { }
+```hcl
+variable "flavor_id" { }
+variable "vpc_id" { }
+variable "subnet_id" { }
 	
-    resource "opentelekomcloud_cce_cluster_v3" "cluster_1" {
-     name = "cluster"
-     cluster_type= "VirtualMachine"
-     flavor_id= "${var.flavor_id}"
-     vpc_id= "${var.vpc_id}"
-     subnet_id= "${var.subnet_id}"
-     container_network_type= "overlay_l2"
-     authentication_mode = "rbac"
-     description= "Create cluster"
-    }
+resource "opentelekomcloud_cce_cluster_v3" "cluster_1" {
+  name        = "cluster"
+  description = "Create cluster"
+
+  cluster_type           = "VirtualMachine"
+  flavor_id              = "${var.flavor_id}"
+  vpc_id                 = "${var.vpc_id}"
+  subnet_id              = "${var.subnet_id}"
+  container_network_type = "overlay_l2"
+  authentication_mode    = "rbac"
+}
 ```
 
 ## Argument Reference
@@ -41,7 +34,6 @@ The following arguments are supported:
 * `annotations` - (Optional) Cluster annotation, key/value pair format. Changing this parameter will create a new cluster resource.
 
 * `flavor_id` - (Required) Cluster specifications. Changing this parameter will create a new cluster resource.
-
 	* `cce.s1.small` - small-scale single cluster (up to 50 nodes).
 	* `cce.s1.medium` - medium-scale single cluster (up to 200 nodes).
 	* `cce.s1.large` - large-scale single cluster (up to 1000 nodes).
@@ -115,9 +107,9 @@ All above argument parameters can be exported as attribute parameters along with
 
 ## Import
 
- Cluster can be imported using the cluster id, e.g.
+Cluster can be imported using the cluster id, e.g.
  
- ```
+```
  $ terraform import opentelekomcloud_cce_cluster_v3.cluster_1 4779ab1c-7c1a-44b1-a02e-93dfc361b32d  
 ```
 

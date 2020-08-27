@@ -1,14 +1,6 @@
----
-layout: "opentelekomcloud"
-page_title: "OpenTelekomCloud: opentelekomcloud_vbs_backup_policy_v2"
-sidebar_current: "docs-opentelekomcloud-resource-vbs-backup-policy-v2"
-description: |-
-  Provides an VBS Backup Policy resource.
----
-
 # opentelekomcloud_vbs_backup_policy_v2
 
-Provides an VBS Backup Policy resource.
+Provides an VBS Backup Policy resource within OpenTelekomCloud.
 
 ## Example Usage
 
@@ -18,10 +10,12 @@ Provides an VBS Backup Policy resource.
 resource "opentelekomcloud_vbs_backup_policy_v2" "vbs_policy1" {
   name   = "policy_001"
   status = "ON"
-  start_time  = "12:00"
+
+  start_time          = "12:00"
   retain_first_backup = "N"
-  rentention_num = 7
-  frequency = 1
+  rentention_num      = 7
+  frequency           = 1
+  
   tags {
     key = "k1"
     value = "v1"
@@ -37,9 +31,11 @@ variable "volume_id" {}
 resource "opentelekomcloud_vbs_backup_policy_v2" "vbs_policy2" {
   name   = "policy_002"
   status = "ON"
-  start_time  = "12:00"
+
+  start_time          = "12:00"
   retain_first_backup = "N"
-  rentention_num = 5
+  rentention_num      = 5
+
   frequency = 3
   resources = [var.volume_id]
 }

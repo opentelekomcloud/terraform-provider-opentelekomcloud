@@ -1,14 +1,6 @@
----
-layout: "opentelekomcloud"
-page_title: "opentelekomcloud: opentelekomcloud_dms_queue_v1"
-sidebar_current: "docs-opentelekomcloud-resource-dms-queue-v2"
-description: |-
-  Manages a DMS queue in the opentelekomcloud DMS Service
----
+# opentelekomcloud_dms_queue_v2
 
-# opentelekomcloud\_dms\_queue_v2
-
-Manages a DMS queue in the opentelekomcloud DMS Service.
+Manages a DMS queue in the OpenTelekomCloud DMS Service.
 
 ## Example Usage
 
@@ -16,10 +8,10 @@ Manages a DMS queue in the opentelekomcloud DMS Service.
 
 ```hcl
 resource "opentelekomcloud_dms_queue_v1" "queue_1" {
-  name  = "queue_1"
-  description  = "test create dms queue"
-  queue_mode  = "FIFO"
-  redrive_policy  = "enable"
+  name              = "queue_1"
+  description       = "test create dms queue"
+  queue_mode        = "FIFO"
+  redrive_policy    = "enable"
   max_consume_count = 80
 }
 ```

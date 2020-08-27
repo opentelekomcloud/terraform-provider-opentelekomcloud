@@ -1,12 +1,4 @@
----
-layout: "opentelekomcloud"
-page_title: "OpenTelekomCloud: opentelekomcloud_fw_policy_v2"
-sidebar_current: "docs-opentelekomcloud-resource-fw-policy-v1"
-description: |-
-  Manages a v1 firewall policy resource within OpenTelekomCloud.
----
-
-# opentelekomcloud\_fw\_policy_v2
+# opentelekomcloud_fw_policy_v2
 
 Manages a v1 firewall policy resource within OpenTelekomCloud.
 
@@ -35,8 +27,7 @@ resource "opentelekomcloud_fw_policy_v2" "policy_1" {
   name = "my-policy"
 
   rules = ["${opentelekomcloud_fw_rule_v2.rule_1.id}",
-    "${opentelekomcloud_fw_rule_v2.rule_2.id}",
-  ]
+           "${opentelekomcloud_fw_rule_v2.rule_2.id}",]
 }
 ```
 

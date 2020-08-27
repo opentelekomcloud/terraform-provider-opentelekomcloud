@@ -1,11 +1,3 @@
----
-layout: "opentelekomcloud"
-page_title: "OpenTelekomCloud: opentelekomcloud_waf_certificate_v1"
-sidebar_current: "docs-opentelekomcloud-resource-waf-certificate-v1"
-description: |-
-  Manages a V1 WAF certificate resource within OpenTelekomCloud.
----
-
 # opentelekomcloud_waf_certificate_v1
 
 Manages a WAF certificate resource within OpenTelekomCloud.
@@ -13,13 +5,11 @@ Manages a WAF certificate resource within OpenTelekomCloud.
 ## Example Usage
 
 ```hcl
-
 resource "opentelekomcloud_waf_certificate_v1" "certificate_1" {
-	name = "cert_1"
+	name    = "cert_1"
 	content = "-----BEGIN CERTIFICATE-----MIIDIjCCAougAwIBAgIJALV96mEtVF4EMA0GCSqGSIb3DQEBBQUAMGoxCzAJBgNVBAYTAnh4MQswCQYDVQQIEwJ4eDELMAkGA1UEBxMCeHgxCzAJBgNVBAoTAnh4MQswCQYDVQQLEwJ-----END CERTIFICATE-----"
-	key = "-----BEGIN RSA PRIVATE KEY-----MIICXQIBAAKBgQDFPN9ojPndxSC4E1pqWQVKGHCFlXAAGBOxbGfSzXqzsoyacotueqMqXQbxrPSQFATeVmhZPNVEMdvcAMjYsV/mymtAwVqVA6q/OFdX/b3UHO+b/VqLo3J5SrM-----END RSA PRIVATE KEY-----"
+	key     = "-----BEGIN RSA PRIVATE KEY-----MIICXQIBAAKBgQDFPN9ojPndxSC4E1pqWQVKGHCFlXAAGBOxbGfSzXqzsoyacotueqMqXQbxrPSQFATeVmhZPNVEMdvcAMjYsV/mymtAwVqVA6q/OFdX/b3UHO+b/VqLo3J5SrM-----END RSA PRIVATE KEY-----"
 }
-
 ```
 
 ## Argument Reference

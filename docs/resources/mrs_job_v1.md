@@ -1,30 +1,20 @@
----
-layout: "opentelekomcloud"
-page_title: "OpenTelekomCloud: opentelekomcloud_mrs_job_v1"
-sidebar_current: "docs-opentelekomcloud-resource-mrs-job-v1"
-description: |-
-  Manages resource job within OpenTelekomCloud MRS.
----
-
-# opentelekomcloud\_mrs\_job\_v1
+# opentelekomcloud_mrs_job_v1
 
 Manages resource job within OpenTelekomCloud MRS.
 
 ## Example Usage
 
 ```hcl
-
 resource "opentelekomcloud_mrs_job_v1" "job1" {
-  job_type = 1
-  job_name = "test_mapreduce_job1"
+  job_type   = 1
+  job_name   = "test_mapreduce_job1"
   cluster_id = "ef43d2ff-1ecf-4f13-bd0c-0004c429a058"
-  jar_path = "s3a://wordcount/program/hadoop-mapreduce-examples-2.7.5.jar"
-  input = "s3a://wordcount/input/"
-  output = "s3a://wordcount/output/"
-  job_log = "s3a://wordcount/log/"
-  arguments = "wordcount"
+  jar_path   = "s3a://wordcount/program/hadoop-mapreduce-examples-2.7.5.jar"
+  input      = "s3a://wordcount/input/"
+  output     = "s3a://wordcount/output/"
+  job_log    = "s3a://wordcount/log/"
+  arguments  = "wordcount"
 }
-
 ```
 
 ## Argument Reference

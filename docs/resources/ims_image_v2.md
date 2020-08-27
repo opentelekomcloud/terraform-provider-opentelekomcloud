@@ -1,12 +1,4 @@
----
-layout: "opentelekomcloud"
-page_title: "OpenTelekomCloud: opentelekomcloud_ims_image_v2"
-sidebar_current: "docs-opentelekomcloud-resource-ims-image-v2"
-description: |-
-  Manages a V2 Image resource within OpenTelekomCloud IMS.
----
-
-# opentelekomcloud\_ims\_image_v2
+# opentelekomcloud_ims_image_v2
 
 Manages a V2 Image resource within OpenTelekomCloud IMS.
 
@@ -16,9 +8,10 @@ Manages a V2 Image resource within OpenTelekomCloud IMS.
 
 ```hcl
 resource "opentelekomcloud_ims_image_v2" "ims_test" {
-  name   = "imt_test"
+  name        = "imt_test"
   instance_id = "54a6c3a4-8511-4d01-818f-3fe5177cbb06"
   description = "Create an image using an ECS."
+  
   tags = {
     foo = "bar"
     key = "value"
@@ -30,10 +23,11 @@ resource "opentelekomcloud_ims_image_v2" "ims_test" {
 
 ```hcl
 resource "opentelekomcloud_ims_image_v2" "ims_test_file" {
-  name   = "ims_test_file"
-  image_url = "ims-image:centos70.qcow2"
-  min_disk = 40
+  name        = "ims_test_file"
+  image_url   = "ims-image:centos70.qcow2"
+  min_disk    = 40
   description = "Create an image using a file in the OBS bucket."
+  
   tags = {
     foo = "bar1"
     key = "value"

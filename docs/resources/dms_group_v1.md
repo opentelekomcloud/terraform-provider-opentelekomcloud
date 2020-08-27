@@ -1,14 +1,6 @@
----
-layout: "opentelekomcloud"
-page_title: "opentelekomcloud: opentelekomcloud_dms_group_v1"
-sidebar_current: "docs-opentelekomcloud-resource-dms-group-v2"
-description: |-
-  Manages a DMS group in the opentelekomcloud DMS Service
----
+# opentelekomcloud_dms_group_v2
 
-# opentelekomcloud\_dms\_group_v2
-
-Manages a DMS group in the opentelekomcloud DMS Service.
+Manages a DMS group in the OpenTelekomCloud DMS Service.
 
 ## Example Usage
 
@@ -16,15 +8,15 @@ Manages a DMS group in the opentelekomcloud DMS Service.
 
 ```hcl
 resource "opentelekomcloud_dms_group_v1" "queue_1" {
-  name  = "queue_1"
-  description  = "test create dms queue"
-  queue_mode  = "FIFO"
-  redrive_policy  = "enable"
+  name              = "queue_1"
+  description       = "test create dms queue"
+  queue_mode        = "FIFO"
+  redrive_policy    = "enable"
   max_consume_count = 80
 }
 
 resource "opentelekomcloud_dms_group_v1" "group_1" {
-  name = "group_1"
+  name     = "group_1"
   queue_id = "${opentelekomcloud_dms_queue_v1.queue_1.id}"
 }
 ```

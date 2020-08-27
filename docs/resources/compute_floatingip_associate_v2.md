@@ -1,12 +1,4 @@
----
-layout: "opentelekomcloud"
-page_title: "OpenTelekomCloud: opentelekomcloud_compute_floatingip_associate_v2"
-sidebar_current: "docs-opentelekomcloud-resource-compute-floatingip-associate-v2"
-description: |-
-  Associate a floating IP to an instance
----
-
-# opentelekomcloud\_compute\_floatingip_associate_v2
+# opentelekomcloud_compute_floatingip_associate_v2
 
 Associate a floating IP to an instance. This can be used instead of the
 `floating_ip` options in `opentelekomcloud_compute_instance_v2`.

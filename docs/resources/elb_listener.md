@@ -1,12 +1,4 @@
----
-layout: "opentelekomcloud"
-page_title: "OpentelekomCloud: opentelekomcloud_elb_listener"
-sidebar_current: "docs-opentelekomcloud-resource-elb-listener"
-description: |-
-  Manages a classic loadbalancer listener resource within OpentelekomCloud.
----
-
-# opentelekomcloud\_elb\_listener
+# opentelekomcloud_elb_listener
 
 Manages a classic loadbalancer listener resource within OpentelekomCloud.
 
@@ -14,23 +6,24 @@ Manages a classic loadbalancer listener resource within OpentelekomCloud.
 
 ```hcl
 resource "opentelekomcloud_elb_loadbalancer" "elb" {
-  name = "elb"
-  type = "External"
-  description = "test elb"
-  vpc_id = "e346dc4a-d9a6-46f4-90df-10153626076e"
+  name           = "elb"
+  type           = "External"
+  description    = "test elb"
+  vpc_id         = "e346dc4a-d9a6-46f4-90df-10153626076e"
   admin_state_up = "true"
-  bandwidth = 5
+  bandwidth      = 5
 }
 
 resource "opentelekomcloud_elb_listener" "listener" {
-  name = "test-elb-listener"
-  description = "great listener"
-  protocol = "TCP"
+  name             = "test-elb-listener"
+  description      = "great listener"
+  protocol         = "TCP"
   backend_protocol = "TCP"
-  protocol_port = 12345
-  backend_port = 8080
-  lb_algorithm = "roundrobin"
-  loadbalancer_id = "${opentelekomcloud_elb_loadbalancer.elb.id}"
+  protocol_port    = 12345
+  backend_port     = 8080
+  lb_algorithm     = "roundrobin"
+  loadbalancer_id  = "${opentelekomcloud_elb_loadbalancer.elb.id}"
+  
   timeouts {
 	create = "5m"
 	update = "5m"

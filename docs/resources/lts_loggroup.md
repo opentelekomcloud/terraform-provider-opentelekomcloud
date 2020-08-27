@@ -1,18 +1,8 @@
----
-layout: "opentelekomcloud"
-page_title: "OpenTelekomCloud: opentelekomcloud_logtank_group_v2"
-sidebar_current: "docs-opentelekomcloud-resource-logtank-group-v2"
-description: |-
-  log group management
----
-
-# opentelekomcloud\_logtank\_group\_v2
+# opentelekomcloud_logtank_group_v2
 
 Manages a log group resource within OpenTelekomCloud.
 
 ## Example Usage
-
-### create a log group
 
 ```hcl
 resource "opentelekomcloud_logtank_group_v2" "log_group1" {

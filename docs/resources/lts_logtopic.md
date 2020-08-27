@@ -1,18 +1,8 @@
----
-layout: "opentelekomcloud"
-page_title: "OpenTelekomCloud: opentelekomcloud_logtank_topic_v2"
-sidebar_current: "docs-opentelekomcloud-resource-logtank-topic-v2"
-description: |-
-  log topic management
----
-
-# opentelekomcloud\_logtank\_topic\_v2
+# opentelekomcloud_logtank_topic_v2
 
 Manage a log topic resource within OpenTelekomCloud.
 
 ## Example Usage
-
-### create a log topic
 
 ```hcl
 resource "opentelekomcloud_logtank_group_v2" "test_group" {
@@ -29,12 +19,10 @@ resource "opentelekomcloud_logtank_topic_v2" "test_topic" {
 
 The following arguments are supported:
 
-* `group_id` - (Required)
-  Specifies the ID of a created log group.
+* `group_id` - (Required) Specifies the ID of a created log group.
   Changing this parameter will create a new resource.
 
-* `topic_name` - (Required)
-  Specifies the log topic name.
+* `topic_name` - (Required) Specifies the log topic name.
   Changing this parameter will create a new resource.
 
 ## Attributes Reference

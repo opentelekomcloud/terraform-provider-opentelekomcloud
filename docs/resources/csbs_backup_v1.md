@@ -1,27 +1,18 @@
----
-layout: "opentelekomcloud"
-page_title: "OpenTelekomCloud: resource_opentelekomcloud_csbs_backup_v1"
-sidebar_current: "docs-opentelekomcloud-resource-csbs-backup-v1"
-description: |-
-  Provides an OpenTelekomCloud Backup of Resources.
----
-
 # opentelekomcloud_csbs_backup_v1
 
 Provides an OpenTelekomCloud Backup of Resources.
 
 ## Example Usage
 
- ```hcl
- variable "backup_name" { }
- variable "resource_id" { }
+```hcl
+variable "backup_name" { }
+variable "resource_id" { }
  
- resource "opentelekomcloud_csbs_backup_v1" "backup_v1" {
-   backup_name = "${var.backup_name}"
-   resource_id = "${var.resource_id}"
-   resource_type = "OS::Nova::Server"
- }
-
+resource "opentelekomcloud_csbs_backup_v1" "backup_v1" {
+  backup_name   = "${var.backup_name}"
+  resource_id   = "${var.resource_id}"
+  resource_type = "OS::Nova::Server"
+}
  ```
 ## Argument Reference
 The following arguments are supported:
@@ -36,9 +27,9 @@ The following arguments are supported:
 
 * `tags` - (Optional) block supports the following arguments:
 
-  * `key` - (Required) Tag key. It cannot be an empty string.Changing key creates a new backup.
+* `key` - (Required) Tag key. It cannot be an empty string.Changing key creates a new backup.
     
-  * `value` - (Required) Tag value. It can be an empty string.Changing value creates a new backup.
+* `value` - (Required) Tag value. It can be an empty string.Changing value creates a new backup.
 
 ## Attributes Reference
 In addition to all arguments above, the following attributes are exported:
@@ -93,7 +84,6 @@ In addition to all arguments above, the following attributes are exported:
 
   * `image_type` - Specifies image type.
 
-
 ## Import
 
 Backup can be imported using  `backup_record_id`, e.g.
@@ -101,6 +91,3 @@ Backup can be imported using  `backup_record_id`, e.g.
 ```
 $ terraform import opentelekomcloud_csbs_backup_v1.backup_v1.backup_v1 7056d636-ac60-4663-8a6c-82d3c32c1c64
 ```
-
-
-

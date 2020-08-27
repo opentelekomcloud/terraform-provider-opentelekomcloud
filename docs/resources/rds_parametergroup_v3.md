@@ -1,11 +1,3 @@
----
-layout: "opentelekomcloud"
-page_title: "OpenTelekomCloud: opentelekomcloud_rds_parametergroup_v3"
-sidebar_current: "docs-opentelekomcloud-resource-rds-parametergroup-v3"
-description: |-
-  Manages a V3 RDS parametergroup resource within OpenTelekomCloud.
----
-
 # opentelekomcloud_rds_parametergroup_v3
 
 Manages a V3 RDS parametergroup resource within OpenTelekomCloud.
@@ -13,20 +5,19 @@ Manages a V3 RDS parametergroup resource within OpenTelekomCloud.
 ## Example Usage
 
 ```hcl
-
 resource "opentelekomcloud_rds_parametergroup_v3" "pg_1" {
-	name = "pg_1"
-	description = "description_1"
-	values = {
-		max_connections = "10"
-		autocommit = "OFF"
-	}
-	datastore {
-		type = "mysql"
-		version = "5.6"
-	}
+  name        = "pg_1"
+  description = "description_1"
+  
+   values = {
+  	max_connections = "10"
+  	autocommit      = "OFF"
+  }
+  datastore {
+  	type    = "mysql"
+  	version = "5.6"
+  }
 }
-
 ```
 
 ## Argument Reference

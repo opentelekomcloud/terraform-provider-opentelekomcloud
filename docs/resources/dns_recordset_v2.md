@@ -1,12 +1,4 @@
----
-layout: "opentelekomcloud"
-page_title: "OpenTelekomCloud: opentelekomcloud_dns_recordset_v2"
-sidebar_current: "docs-opentelekomcloud-resource-dns-recordset-v2"
-description: |-
-  Manages a DNS record set in the OpenTelekomCloud DNS Service
----
-
-# opentelekomcloud\_dns\_recordset_v2
+# opentelekomcloud_dns_recordset_v2
 
 Manages a DNS record set in the OpenTelekomCloud DNS Service.
 
@@ -16,20 +8,20 @@ Manages a DNS record set in the OpenTelekomCloud DNS Service.
 
 ```hcl
 resource "opentelekomcloud_dns_zone_v2" "example_zone" {
-  name = "example.com."
-  email = "email2@example.com"
+  name        = "example.com."
+  email       = "email2@example.com"
   description = "a zone"
-  ttl = 6000
-  type = "public"
+  ttl         = 6000
+  type        = "public"
 }
 
 resource "opentelekomcloud_dns_recordset_v2" "rs_example_com" {
-  zone_id = opentelekomcloud_dns_zone_v2.example_zone.id
-  name = "rs.example.com."
+  zone_id     = opentelekomcloud_dns_zone_v2.example_zone.id
+  name        = "rs.example.com."
   description = "An example record set"
-  ttl = 3000
-  type = "A"
-  records = ["10.0.0.1"]
+  ttl         = 3000
+  type        = "A"
+  records     = ["10.0.0.1"]
 }
 ```
 

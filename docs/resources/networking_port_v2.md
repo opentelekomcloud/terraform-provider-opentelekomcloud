@@ -1,12 +1,4 @@
----
-layout: "opentelekomcloud"
-page_title: "OpenTelekomCloud: opentelekomcloud_networking_port_v2"
-sidebar_current: "docs-opentelekomcloud-resource-networking-port-v2"
-description: |-
-  Manages a V2 port resource within OpenTelekomCloud.
----
-
-# opentelekomcloud\_networking\_port_v2
+# opentelekomcloud_networking_port_v2
 
 Manages a V2 port resource within OpenTelekomCloud.
 

@@ -1,12 +1,4 @@
----
-layout: "opentelekomcloud"
-page_title: "OpenTelekomCloud: opentelekomcloud_obs_bucket"
-sidebar_current: "docs-opentelekomcloud-resource-obs-bucket"
-description: |-
-  Provides an OBS bucket resource within OpenTelekomCloud.
----
-
-# opentelekomcloud\_obs\_bucket
+# opentelekomcloud_obs_bucket
 
 Provides an OBS bucket resource within OpenTelekomCloud.
 
@@ -114,11 +106,11 @@ resource "opentelekomcloud_obs_bucket" "bucket" {
       days = 365
     }
     transition {
-      days = 60
+      days          = 60
       storage_class = "WARM"
     }
     transition {
-      days = 180
+      days          = 180
       storage_class = "COLD"
     }
   }
@@ -132,11 +124,11 @@ resource "opentelekomcloud_obs_bucket" "bucket" {
       days = 180
     }
     noncurrent_version_transition {
-      days = 30
+      days          = 30
       storage_class = "WARM"
     }
     noncurrent_version_transition {
-      days = 60
+      days          = 60
       storage_class = "COLD"
     }
   }

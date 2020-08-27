@@ -1,12 +1,4 @@
----
-layout: "opentelekomcloud"
-page_title: "OpenTelekomCloud: opentelekomcloud_ces-alarmrule"
-sidebar_current: "docs-opentelekomcloud-resource-ces-alarmrule"
-description: |-
-  Manages a V2 topic resource within OpenTelekomCloud.
----
-
-# opentelekomcloud\_ces\_alarmrule
+# opentelekomcloud_ces_alarmrule
 
 Manages a V2 topic resource within OpenTelekomCloud.
 
@@ -20,23 +12,24 @@ resource "opentelekomcloud_ces_alarmrule" "alarm_rule" {
   alarm_name = "alarm_rule"
 
   metric {
-    namespace = "SYS.ECS"
+    namespace   = "SYS.ECS"
     metric_name = "network_outgoing_bytes_rate_inband"
     dimensions {
         name = "instance_id"
         value = var.webserver_id
     }
   }
-  condition  {
-    period = 300
-    filter = "average"
+  condition {
+    period              = 300
+    filter              = "average"
     comparison_operator = ">"
-    value = 6
-    unit = "B/s"
-    count = 1
+    value               = 6
+    unit                = "B/s"
+    count               = 1
   }
+
   alarm_actions {
-    type = "notification"
+    type              = "notification"
     notification_list = [var.smn_topic_id]
   }
 }
@@ -182,4 +175,3 @@ The following attributes are exported:
     - ok: The alarm status is normal;
     - alarm: An alarm is generated;
     - insufficient_data: The required data is insufficient;
-

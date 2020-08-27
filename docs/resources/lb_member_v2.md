@@ -1,12 +1,4 @@
----
-layout: "opentelekomcloud"
-page_title: "OpenTelekomCloud: opentelekomcloud_lb_member_v2"
-sidebar_current: "docs-opentelekomcloud-resource-lb-member-v2"
-description: |-
-  Manages an Enhanced LB member resource within OpenTelekomCloud.
----
-
-# opentelekomcloud\_lb\_member\_v2
+# opentelekomcloud_lb_member_v2
 
 Manages an Enhanced LB member resource within OpenTelekomCloud.
 

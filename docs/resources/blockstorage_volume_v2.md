@@ -1,12 +1,4 @@
----
-layout: "opentelekomcloud"
-page_title: "OpenTelekomCloud: opentelekomcloud_blockstorage_volume_v2"
-sidebar_current: "docs-opentelekomcloud-resource-blockstorage-volume-v2"
-description: |-
-  Manages a V2 volume resource within OpenTelekomCloud.
----
-
-# opentelekomcloud\_blockstorage\_volume_v2
+# opentelekomcloud_blockstorage_volume_v2
 
 Manages a V2 volume resource within OpenTelekomCloud.
 
@@ -17,7 +9,8 @@ resource "opentelekomcloud_blockstorage_volume_v2" "volume_1" {
   name        = "volume_1"
   description = "first test volume"
   size        = 3
-  tags        = {
+
+  tags = {
     foo = "bar"
     key = "value"
   }

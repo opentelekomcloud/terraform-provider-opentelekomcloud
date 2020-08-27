@@ -1,12 +1,4 @@
----
-layout: "opentelekomcloud"
-page_title: "OpentelekomCloud: opentelekomcloud_lb_l7rule_v2"
-sidebar_current: "docs-opentelekomcloud-resource-lb-l7rule-v2"
-description: |-
-  Manages a V2 l7rule resource within OpentelekomCloud.
----
-
-# opentelekomcloud\_lb\_l7rule\_v2
+# opentelekomcloud_lb_l7rule_v2
 
 Manages a V2 L7 Rule resource within OpentelekomCloud.
 

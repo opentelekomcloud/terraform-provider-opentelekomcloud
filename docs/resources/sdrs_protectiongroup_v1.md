@@ -1,11 +1,3 @@
----
-layout: "opentelekomcloud"
-page_title: "OpenTelekomCloud: opentelekomcloud_sdrs_protectiongroup_v1"
-sidebar_current: "docs-opentelekomcloud-resource-sdrs-protectiongroup-v1"
-description: |-
-  Manages a V1 SDRS protection group resource within OpenTelekomCloud.
----
-
 # opentelekomcloud_sdrs_protectiongroup_v1
 
 Manages a SDRS protection group resource within OpenTelekomCloud.
@@ -14,15 +6,16 @@ Manages a SDRS protection group resource within OpenTelekomCloud.
 
 ```hcl
 resource "opentelekomcloud_sdrs_protectiongroup_v1" "group_1" {
-	name = "group_1"
-	description = "test description"
-	source_availability_zone = "eu-de-01"
-	target_availability_zone = "eu-de-02"
-	domain_id = "{{ domain_id }}"
-	source_vpc_id = "{{ vpc_id }}"
-	dr_type = "migration"
-}
+  name        = "group_1"
+  description = "test description"
 
+  source_availability_zone = "eu-de-01"
+  target_availability_zone = "eu-de-02"
+
+  domain_id     = "{{ domain_id }}"
+  source_vpc_id = "{{ vpc_id }}"
+  dr_type       = "migration"
+}
 ```
 
 ## Argument Reference

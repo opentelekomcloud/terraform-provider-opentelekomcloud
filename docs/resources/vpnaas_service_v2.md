@@ -1,12 +1,4 @@
----
-layout: "opentelekomcloud"
-page_title: "OpenTelekomCloud: opentelekomcloud_vpnaas_service_v2"
-sidebar_current: "docs-opentelekomcloud-resource-vpnaas-service-v2"
-description: |-
-  Manages a V2 VPN service resource within OpenTelekomCloud.
----
-
-# opentelekomcloud\_vpnaas\_service_v2
+# opentelekomcloud_vpnaas_service_v2
 
 Manages a V2 VPN service resource within OpenTelekomCloud.
 
@@ -14,8 +6,8 @@ Manages a V2 VPN service resource within OpenTelekomCloud.
 
 ```hcl
 resource "opentelekomcloud_vpnaas_service_v2" "service_1" {
-  name = "my_service"
-  router_id = "14a75700-fc03-4602-9294-26ee44f366b3"
+  name           = "my_service"
+  router_id      = "14a75700-fc03-4602-9294-26ee44f366b3"
   admin_state_up = "true"
 }
 ```

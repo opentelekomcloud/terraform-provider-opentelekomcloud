@@ -1,24 +1,16 @@
----
-layout: "opentelekomcloud"
-page_title: "OpenTelekomCloud: opentelekomcloud_rts_software_config_v1"
-sidebar_current: "docs-opentelekomcloud-resource-rts-software-config-v1"
-description: |-
-  Provides an RTS software config resource.
----
-
 # opentelekomcloud_rts_software_config_v1
 
-Provides an RTS software config resource.
+Provides an RTS software config resource within OpenTelekomCloud.
 
 # Example Usage
 
- ```hcl
+```hcl
 variable "config_name" {}
  
 resource "opentelekomcloud_rts_software_config_v1" "myconfig" {
   name = "${var.config_name}"
 }
- ```
+```
 
 # Argument Reference
 

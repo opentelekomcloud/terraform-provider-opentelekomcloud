@@ -1,11 +1,3 @@
----
-layout: "opentelekomcloud"
-page_title: "OpenTelekomCloud: opentelekomcloud_vpc_flow_log_v1"
-sidebar_current: "docs-opentelekomcloud-resource-vpc-flow-log-v1"
-description: |-
-  Manages a VPC flow log resource within OpenTelekomCloud.
----
-
 # opentelekomcloud_vpc_flow log_v1
 
 Manages a VPC flow log resource within OpenTelekomCloud.
@@ -14,11 +6,11 @@ Manages a VPC flow log resource within OpenTelekomCloud.
 
 ```hcl
 resource "opentelekomcloud_logtank_group_v2" "log_group1" {
-  group_name  = "${var.log_group_name}"
+  group_name = "${var.log_group_name}"
 }
 
 resource "opentelekomcloud_logtank_topic_v2" "log_topic1" {
-  group_id = "${opentelekomcloud_logtank_group_v2.log_group1.id}"
+  group_id   = "${opentelekomcloud_logtank_group_v2.log_group1.id}"
   topic_name = "${var.log_topic_name}"
 }
 
@@ -28,8 +20,8 @@ resource "opentelekomcloud_vpc_v1" "vpc_v1" {
 }
 
 resource "opentelekomcloud_vpc_flow_log_v1" "flowlog1" {
-  name = "${var.flow_log_name}"
-  description = "${var.flow_log_desc}"
+  name          = "${var.flow_log_name}"
+  description   = "${var.flow_log_desc}"
   resource_type = "vpc"
   resource_id   = "${opentelekomcloud_vpc_v1.vpc_v1.id}"
   traffic_type  = "all"

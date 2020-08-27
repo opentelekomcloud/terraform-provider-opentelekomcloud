@@ -1,48 +1,46 @@
----
-layout: "opentelekomcloud"
-page_title: "opentelekomcloud: opentelekomcloud_dcs_instance_v1"
-sidebar_current: "docs-opentelekomcloud-resource-dcs-instance-v1"
-description: |-
-  Manages a DCS instance in the opentelekomcloud DCS Service
----
+# opentelekomcloud_dcs_instance_v1
 
-# opentelekomcloud\_dcs\_instance_v1
-
-Manages a DCS instance in the opentelekomcloud DCS Service.
+Manages a DCS instance in the OpenTelekomCloud DCS Service.
 
 ## Example Usage
 
 ### Automatically detect the correct network
 
 ```hcl
-       resource "opentelekomcloud_networking_secgroup_v2" "secgroup_1" {
-         name = "secgroup_1"
-         description = "secgroup_1"
-       }
-       data "opentelekomcloud_dcs_az_v1" "az_1" {
-         port = "8002"
-		}
-       data "opentelekomcloud_dcs_product_v1" "product_1" {
-          spec_code = "dcs.master_standby"
-		}
-		resource "opentelekomcloud_dcs_instance_v1" "instance_1" {
-		  name  = "test_dcs_instance"
-          engine_version = "3.0.7"
-          password = "Huawei_test"
-          engine = "Redis"
-          capacity = 2
-          vpc_id = "1477393a-29c9-4de5-843f-18ef51257c7e"
-          security_group_id = "${opentelekomcloud_networking_secgroup_v2.secgroup_1.id}"
-          subnet_id = "27d99e17-42f2-4751-818f-5c8c6c03ff15"
-          available_zones = ["${data.opentelekomcloud_dcs_az_v1.az_1.id}"]
-          product_id = "${data.opentelekomcloud_dcs_product_v1.product_1.id}"
-          save_days = 1
-          backup_type = "manual"
-          begin_at = "00:00-01:00"
-          period_type = "weekly"
-          backup_at = [1]
-          depends_on = ["data.opentelekomcloud_dcs_product_v1.product_1", "opentelekomcloud_networking_secgroup_v2.secgroup_1"]
-		}
+resource "opentelekomcloud_networking_secgroup_v2" "secgroup_1" {
+  name        = "secgroup_1"
+  description = "secgroup_1"
+}
+
+data "opentelekomcloud_dcs_az_v1" "az_1" {
+  port = "8002"
+}
+
+data "opentelekomcloud_dcs_product_v1" "product_1" {
+  spec_code = "dcs.master_standby"
+}
+
+resource "opentelekomcloud_dcs_instance_v1" "instance_1" {
+  name           = "test_dcs_instance"
+  engine_version = "3.0.7"
+  password       = "0TCTestP@ssw0rd"
+  engine         = "Redis"
+  capacity       = 2
+  vpc_id         = "1477393a-29c9-4de5-843f-18ef51257c7e"
+
+  security_group_id = "${opentelekomcloud_networking_secgroup_v2.secgroup_1.id}"
+  subnet_id         = "27d99e17-42f2-4751-818f-5c8c6c03ff15"
+  available_zones   = ["${data.opentelekomcloud_dcs_az_v1.az_1.id}"]
+  product_id        = "${data.opentelekomcloud_dcs_product_v1.product_1.id}"
+
+  save_days   = 1
+  backup_type = "manual"
+  begin_at    = "00:00-01:00"
+  period_type = "weekly"
+  backup_at   = [1]
+  depends_on  = ["data.opentelekomcloud_dcs_product_v1.product_1",
+                 "opentelekomcloud_networking_secgroup_v2.secgroup_1"]
+}
 ```
 
 ## Argument Reference

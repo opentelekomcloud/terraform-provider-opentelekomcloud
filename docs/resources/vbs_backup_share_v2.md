@@ -1,14 +1,6 @@
----
-layout: "opentelekomcloud"
-page_title: "OpenTelekomCloud: opentelekomcloud_vbs_backup_share_v2"
-sidebar_current: "docs-opentelekomcloud-datasource-vbs-backup-share-v2"
-description: |-
-  Provides an VBS Backup Share resource.
----
-
 # opentelekomcloud_vbs_backup_share_v2
 
-Provides an VBS Backup Share resource.
+Provides an VBS Backup Share resource within OpenTelekomCloud.
  
 # Example Usage
 
@@ -18,7 +10,7 @@ variable "backup_id" {}
 variable "to_project_ids" {}
  
 resource "opentelekomcloud_vbs_backup_share_v2" "backupshare" {
-  backup_id = "${var.backup_id}"
+  backup_id      = "${var.backup_id}"
   to_project_ids = "${var.to_project_ids}"
 }
  ```

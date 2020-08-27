@@ -1,12 +1,4 @@
----
-layout: "opentelekomcloud"
-page_title: "OpenTelekomCloud: opentelekomcloud_lb_certificate_v2"
-sidebar_current: "docs-opentelekomcloud-resource-lb-certificate-v2"
-description: |-
-  Manages a V2 certificate resource within OpenTelekomCloud.
----
-
-# opentelekomcloud\_lb\_certificate\_v2
+# opentelekomcloud_lb_certificate_v2
 
 Manages a V2 certificate resource within OpenTelekomCloud.
 
@@ -14,9 +6,9 @@ Manages a V2 certificate resource within OpenTelekomCloud.
 
 ```hcl
 resource "opentelekomcloud_lb_certificate_v2" "certificate_1" {
-  name = "certificate_1"
+  name        = "certificate_1"
   description = "terraform test certificate"
-  domain = "www.elb.com"
+  domain      = "www.elb.com"
   private_key = <<EOT
 -----BEGIN RSA PRIVATE KEY-----
 MIIEowIBAAKCAQEAwZ5UJULAjWr7p6FVwGRQRjFN2s8tZ/6LC3X82fajpVsYqF1x

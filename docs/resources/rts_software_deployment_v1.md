@@ -1,19 +1,10 @@
----
-layout: "opentelekomcloud"
-page_title: "OpenTelekomCloud: opentelekomcloud_rts_software_deployment_v1"
-sidebar_current: "docs-opentelekomcloud-resource-rts-software-deployment-v1"
-description: |-
-  Provides an RTS software deployment resource.
----
-
 # opentelekomcloud_rts_software_deployment_v1
 
-Provides an RTS software deployment resource.
+Provides an RTS software deployment resource within OpenTelekomCloud.
 
 # Example Usage
 
  ```hcl
- 
 variable "config_id" {}
 
 variable "server_id" {}
@@ -55,4 +46,4 @@ In addition to all arguments above, the following attributes are exported:
 Software deployment can be imported using the `deployment id`, e.g.
 ```
  $ terraform import opentelekomcloud_rts_software_deployment_v1 4779ab1c-7c1a-44b1-a02e-93dfc361b32d
- ```
+```

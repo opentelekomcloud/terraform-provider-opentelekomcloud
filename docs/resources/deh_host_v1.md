@@ -1,25 +1,16 @@
----
-layout: "opentelekomcloud"
-page_title: "OpenTelekomCloud: opentelekomcloud_deh_host_v1"
-sidebar_current: "docs-opentelekomcloud-resource-deh-host-v1"
-description: |-
-  Allocates a Dedicated Host to a tenant and set minimum required parameters for this Dedicated Host.
----
-
-# Resource: opentelekomcloud_deh_host_v1
+# opentelekomcloud_deh_host_v1
 
 Allocates a Dedicated Host to a tenant and set minimum required parameters for this Dedicated Host.
 
 ## Example Usage
 
- ```hcl
-    resource "opentelekomcloud_deh_host_v1" "deh_host" 
-    {
-        name = "high_performance_deh"
-        auto_placement = "on"
-        availability_zone = "eu-de-02"
-        host_type = "h1"
-    }
+```hcl
+resource "opentelekomcloud_deh_host_v1" "deh_host" {
+  name              = "high_performance_deh"
+  auto_placement    = "on"
+  availability_zone = "eu-de-02"
+  host_type         = "h1"
+}
 ```
 
 ## Argument Reference
@@ -64,6 +55,7 @@ In addition to all arguments above, the following attributes are exported:
 ## Import
 
 DeH can be imported using the `dedicated_host_id`, e.g.
+
 ```
 $ terraform import opentelekomcloud_deh_host_v1.deh_host 4779ab1c-7c1a-44b1-a02e-93dfc361b32d
 ```

@@ -1,25 +1,15 @@
----
-layout: "opentelekomcloud"
-page_title: "OpentelekomCloud: opentelekomcloud_nat_dnat_rule_v2"
-sidebar_current: "docs-opentelekomcloud-resource-nat-dnat-rule-v2"
-description: |-
-  Manages a V2 dnat rule resource within OpentelekomCloud Nat.
----
-
-# opentelekomcloud\_nat\_dnat\_rule_v2
+# opentelekomcloud_nat_dnat_rule_v2
 
 
 ## Example Usage
 
-### Dnat
-
 ```hcl
 resource "opentelekomcloud_nat_dnat_rule_v2" "dnat_1" {
-  floating_ip_id = "2bd659ab-bbf7-43d7-928b-9ee6a10de3ef"
-  nat_gateway_id = "bf99c679-9f41-4dac-8513-9c9228e713e1"
-  private_ip = "10.0.0.12"
+  floating_ip_id        = "2bd659ab-bbf7-43d7-928b-9ee6a10de3ef"
+  nat_gateway_id        = "bf99c679-9f41-4dac-8513-9c9228e713e1"
+  private_ip            = "10.0.0.12"
   internal_service_port = 993
-  protocol = "tcp"
+  protocol              = "tcp"
   external_service_port = 242
 }
 ```

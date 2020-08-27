@@ -1,14 +1,6 @@
----
-layout: "opentelekomcloud"
-page_title: "OpenTelekomCloud: opentelekomcloud_s3_bucket"
-sidebar_current: "docs-opentelekomcloud-resource-s3-bucket"
-description: |-
-  Provides a S3 bucket resource.
----
+# opentelekomcloud_s3_bucket
 
-# opentelekomcloud\_s3\_bucket
-
-Provides a S3 bucket resource.
+Provides a S3 bucket resource within OpenTelekomCloud.
 
 ## Example Usage
 

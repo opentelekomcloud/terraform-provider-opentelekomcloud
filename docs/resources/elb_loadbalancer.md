@@ -1,12 +1,4 @@
----
-layout: "opentelekomcloud"
-page_title: "OpentelekomCloud: opentelekomcloud_elb_loadbalancer"
-sidebar_current: "docs-opentelekomcloud-resource-elb-loadbalancer"
-description: |-
-  Manages a classic loadbalancer resource within OpentelekomCloud.
----
-
-# opentelekomcloud\_elb\_loadbalancer
+# opentelekomcloud_elb_loadbalancer
 
 Manages a classic loadbalancer resource within OpentelekomCloud.
 
@@ -14,12 +6,12 @@ Manages a classic loadbalancer resource within OpentelekomCloud.
 
 ```hcl
 resource "opentelekomcloud_elb_loadbalancer" "elb" {
-  name = "elb"
-  type = "External"
-  description = "test elb"
-  vpc_id = "e346dc4a-d9a6-46f4-90df-10153626076e"
+  name           = "elb"
+  type           = "External"
+  description    = "test elb"
+  vpc_id         = "e346dc4a-d9a6-46f4-90df-10153626076e"
   admin_state_up = "true"
-  bandwidth = 5
+  bandwidth      = 5
 }
 ```
 
