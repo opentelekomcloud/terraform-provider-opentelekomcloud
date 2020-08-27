@@ -16,8 +16,6 @@ install:
 script:
   - make test
   - make vet
-#- make website-test
-#NEED TO BE FIXED: in #577, #588
 
 branches:
   only:

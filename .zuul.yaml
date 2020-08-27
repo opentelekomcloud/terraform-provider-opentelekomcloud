@@ -14,15 +14,11 @@
       jobs:
         - golang-make-test
         - golang-make-vet
-        #- golang-make-website-test
-        #NEED TO BE FIXED: in #577, #588
         - goreleaser-build
     gate:
       jobs:
         - golang-make-test
         - golang-make-vet
-        #- golang-make-website-test
-        #NEED TO BE FIXED: in #577, #588
         - goreleaser-build
     tag:
       jobs:
