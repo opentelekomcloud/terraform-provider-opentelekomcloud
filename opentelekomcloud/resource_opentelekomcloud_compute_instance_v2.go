@@ -354,6 +354,7 @@ func resourceComputeInstanceV2() *schema.Resource {
 				Type:          schema.TypeMap,
 				Optional:      true,
 				ConflictsWith: []string{"tags"},
+				ValidateFunc:  validateECSTagValue,
 				Deprecated:    "Use field tags instead",
 			},
 			"all_metadata": {
@@ -514,16 +515,12 @@ func resourceComputeInstanceV2Create(d *schema.ResourceData, meta interface{}) e
 	}
 
 	if hasFilledOpt(d, "tags") {
-		tagsMap := d.Get("tags").(map[string]interface{})
-		log.Printf("[DEBUG] Setting tag(key/value): %v", tagsMap)
-		err = setTagForInstance(d, meta, server.ID, tagsMap)
+		err = tagsCreate(d, "tags", meta)
 		if err != nil {
 			log.Printf("[WARN] Error setting tag(key/value) of instance:%s, err=%s", server.ID, err)
 		}
 	} else if hasFilledOpt(d, "tag") {
-		tagsMap := d.Get("tag").(map[string]interface{})
-		log.Printf("[DEBUG] Setting tag(key/value): %v", tagsMap)
-		err = setTagForInstance(d, meta, server.ID, tagsMap)
+		err = tagsCreate(d, "tag", meta)
 		if err != nil {
 			log.Printf("[WARN] Error setting tag(key/value) of instance:%s, err=%s", server.ID, err)
 		}
@@ -862,15 +859,12 @@ func resourceComputeInstanceV2Update(d *schema.ResourceData, meta interface{}) e
 		}
 
 		if hasFilledOpt(d, "tags") {
-			tagsMap := d.Get("tags").(map[string]interface{})
-			if len(tagsMap) > 0 {
-				log.Printf("[DEBUG] Setting tag(key/value): %v", tagsMap)
-				err = setTagForInstance(d, meta, d.Id(), tagsMap)
-				if err != nil {
-					return fmt.Errorf("Error updating tag(key/value) of instance:%s, err:%s", d.Id(), err)
-				}
+			err = tagsCreate(d, "tags", meta)
+			if err != nil {
+				return fmt.Errorf("Error updating tag(key/value) of instance:%s, err:%s", d.Id(), err)
 			}
 		}
+
 	}
 	if d.HasChange("tag") {
 		ecsv1Client, err := config.computeV1Client(GetRegion(d, config))
@@ -889,14 +883,10 @@ func resourceComputeInstanceV2Update(d *schema.ResourceData, meta interface{}) e
 			}
 		}
 
-		if hasFilledOpt(d, "tag") {
-			tagsMap := d.Get("tag").(map[string]interface{})
-			if len(tagsMap) > 0 {
-				log.Printf("[DEBUG] Setting tag(key/value): %v", tagsMap)
-				err = setTagForInstance(d, meta, d.Id(), tagsMap)
-				if err != nil {
-					return fmt.Errorf("Error updating tag(key/value) of instance:%s, err:%s", d.Id(), err)
-				}
+		if hasFilledOpt(d, "tags") {
+			err = tagsCreate(d, "tag", meta)
+			if err != nil {
+				return fmt.Errorf("Error updating tag(key/value) of instance:%s, err:%s", d.Id(), err)
 			}
 		}
 	}
@@ -953,6 +943,19 @@ func resourceComputeInstanceV2Delete(d *schema.ResourceData, meta interface{}) e
 
 	d.SetId("")
 	return nil
+}
+
+func tagsCreate(d *schema.ResourceData, param string, meta interface{}) error {
+	tagsMap := d.Get(param).(map[string]interface{})
+	if len(tagsMap) > 0 {
+		log.Printf("[DEBUG] Setting tag(key/value): %v", tagsMap)
+		return setTagForInstance(d, meta, d.Id(), tagsMap)
+	}
+	return nil
+}
+
+func fetchTags(d *schema.ResourceData) {
+
 }
 
 // ServerV2StateRefreshFunc returns a resource.StateRefreshFunc that is used to watch
