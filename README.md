@@ -106,7 +106,7 @@ you must fill in the required variables in variables.tf.
 
 Using the provider
 ----------------------
-Please see the documentation at [provider usage](website/docs/index.html.markdown).
+Please see the documentation at [provider usage](docs/index.md).
 
 Developing the Provider
 ---------------------------
