@@ -14,13 +14,11 @@
       jobs:
         - golang-make-test
         - golang-make-vet
-        - golang-make-website-test
         - goreleaser-build
     gate:
       jobs:
         - golang-make-test
         - golang-make-vet
-        - golang-make-website-test
         - goreleaser-build
     tag:
       jobs:
