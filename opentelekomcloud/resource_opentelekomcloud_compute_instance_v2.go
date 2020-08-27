@@ -515,14 +515,22 @@ func resourceComputeInstanceV2Create(d *schema.ResourceData, meta interface{}) e
 	}
 
 	if hasFilledOpt(d, "tags") {
-		err = tagsCreate(d, "tags", meta)
-		if err != nil {
-			log.Printf("[WARN] Error setting tag(key/value) of instance:%s, err=%s", server.ID, err)
+		tagsMap := d.Get("tags").(map[string]interface{})
+		if len(tagsMap) > 0 {
+			log.Printf("[DEBUG] Setting tag(key/value): %v", tagsMap)
+			err = setTagForInstance(d, meta, d.Id(), tagsMap)
+			if err != nil {
+				log.Printf("[WARN] Error setting tag(key/value) of instance:%s, err=%s", server.ID, err)
+			}
 		}
 	} else if hasFilledOpt(d, "tag") {
-		err = tagsCreate(d, "tag", meta)
-		if err != nil {
-			log.Printf("[WARN] Error setting tag(key/value) of instance:%s, err=%s", server.ID, err)
+		tagsMap := d.Get("tag").(map[string]interface{})
+		if len(tagsMap) > 0 {
+			log.Printf("[DEBUG] Setting tag(key/value): %v", tagsMap)
+			err = setTagForInstance(d, meta, d.Id(), tagsMap)
+			if err != nil {
+				log.Printf("[WARN] Error setting tag(key/value) of instance:%s, err=%s", server.ID, err)
+			}
 		}
 	}
 
@@ -643,24 +651,15 @@ func resourceComputeInstanceV2Read(d *schema.ResourceData, meta interface{}) err
 	}
 	d.Set("auto_recovery", ar)
 
+	var tagParamName string
 	// set instance tags
 	if _, ok := d.GetOk("tags"); ok {
-		ecsv1client, err := config.computeV1Client(GetRegion(d, config))
-		if err != nil {
-			return fmt.Errorf("Error creating OpenTelekomCloud compute v1 client: %s", err)
-		}
-		ecsTagsList, err := ecstags.Get(ecsv1client, d.Id()).Extract()
-		if err != nil {
-			return fmt.Errorf("Error fetching OpenTelekomCloud instance tags: %s", err)
-		}
-		tagsMap := make(map[string]string)
-		for _, val := range ecsTagsList.Tags {
-			tagsMap[val.Key] = val.Value
-		}
-		if err := d.Set("tags", tagsMap); err != nil {
-			return fmt.Errorf("[DEBUG] Error saving tag to state for OpenTelekomCloud instance (%s): %s", d.Id(), err)
-		}
+		tagParamName = "tags"
 	} else if _, ok := d.GetOk("tag"); ok {
+		tagParamName = "tag"
+	}
+
+	if tagParamName != "" {
 		ecsv1client, err := config.computeV1Client(GetRegion(d, config))
 		if err != nil {
 			return fmt.Errorf("Error creating OpenTelekomCloud compute v1 client: %s", err)
@@ -673,7 +672,7 @@ func resourceComputeInstanceV2Read(d *schema.ResourceData, meta interface{}) err
 		for _, val := range ecsTagsList.Tags {
 			tagsMap[val.Key] = val.Value
 		}
-		if err := d.Set("tag", tagsMap); err != nil {
+		if err := d.Set(tagParamName, tagsMap); err != nil {
 			return fmt.Errorf("[DEBUG] Error saving tag to state for OpenTelekomCloud instance (%s): %s", d.Id(), err)
 		}
 	}
@@ -841,32 +840,14 @@ func resourceComputeInstanceV2Update(d *schema.ResourceData, meta interface{}) e
 		}
 	}
 
+	var tagParamName string
 	if d.HasChange("tags") {
-		ecsv1Client, err := config.computeV1Client(GetRegion(d, config))
-		if err != nil {
-			return fmt.Errorf("Error creating OpenTelekomCloud compute v1 client: %s", err)
-		}
-		oldTags, err := ecstags.Get(ecsv1Client, d.Id()).Extract()
-		if err != nil {
-			return fmt.Errorf("Error fetching OpenTelekomCloud instance tags: %s", err)
-		}
-		if len(oldTags.Tags) > 0 {
-			deleteOpts := ecstags.BatchOpts{Action: ecstags.ActionDelete, Tags: oldTags.Tags}
-			deleteTags := ecstags.BatchAction(ecsv1Client, d.Id(), deleteOpts)
-			if deleteTags.Err != nil {
-				return fmt.Errorf("Error updating OpenTelekomCloud instance tags: %s", deleteTags.Err)
-			}
-		}
-
-		if hasFilledOpt(d, "tags") {
-			err = tagsCreate(d, "tags", meta)
-			if err != nil {
-				return fmt.Errorf("Error updating tag(key/value) of instance:%s, err:%s", d.Id(), err)
-			}
-		}
-
+		tagParamName = "tags"
 	}
 	if d.HasChange("tag") {
+		tagParamName = "tag"
+	}
+	if tagParamName != "" {
 		ecsv1Client, err := config.computeV1Client(GetRegion(d, config))
 		if err != nil {
 			return fmt.Errorf("Error creating OpenTelekomCloud compute v1 client: %s", err)
@@ -883,10 +864,14 @@ func resourceComputeInstanceV2Update(d *schema.ResourceData, meta interface{}) e
 			}
 		}
 
-		if hasFilledOpt(d, "tags") {
-			err = tagsCreate(d, "tag", meta)
-			if err != nil {
-				return fmt.Errorf("Error updating tag(key/value) of instance:%s, err:%s", d.Id(), err)
+		if hasFilledOpt(d, tagParamName) {
+			tagsMap := d.Get(tagParamName).(map[string]interface{})
+			if len(tagsMap) > 0 {
+				log.Printf("[DEBUG] Setting tag(key/value): %v", tagsMap)
+				err = setTagForInstance(d, meta, d.Id(), tagsMap)
+				if err != nil {
+					return fmt.Errorf("Error updating tag(key/value) of instance:%s, err:%s", d.Id(), err)
+				}
 			}
 		}
 	}
@@ -943,19 +928,6 @@ func resourceComputeInstanceV2Delete(d *schema.ResourceData, meta interface{}) e
 
 	d.SetId("")
 	return nil
-}
-
-func tagsCreate(d *schema.ResourceData, param string, meta interface{}) error {
-	tagsMap := d.Get(param).(map[string]interface{})
-	if len(tagsMap) > 0 {
-		log.Printf("[DEBUG] Setting tag(key/value): %v", tagsMap)
-		return setTagForInstance(d, meta, d.Id(), tagsMap)
-	}
-	return nil
-}
-
-func fetchTags(d *schema.ResourceData) {
-
 }
 
 // ServerV2StateRefreshFunc returns a resource.StateRefreshFunc that is used to watch
