@@ -514,17 +514,14 @@ func resourceComputeInstanceV2Create(d *schema.ResourceData, meta interface{}) e
 		}
 	}
 
+	var tagParamName string
 	if hasFilledOpt(d, "tags") {
-		tagsMap := d.Get("tags").(map[string]interface{})
-		if len(tagsMap) > 0 {
-			log.Printf("[DEBUG] Setting tag(key/value): %v", tagsMap)
-			err = setTagForInstance(d, meta, d.Id(), tagsMap)
-			if err != nil {
-				log.Printf("[WARN] Error setting tag(key/value) of instance:%s, err=%s", server.ID, err)
-			}
-		}
+		tagParamName = "tags"
 	} else if hasFilledOpt(d, "tag") {
-		tagsMap := d.Get("tag").(map[string]interface{})
+		tagParamName = "tag"
+	}
+	if tagParamName != "" {
+		tagsMap := d.Get("tags").(map[string]interface{})
 		if len(tagsMap) > 0 {
 			log.Printf("[DEBUG] Setting tag(key/value): %v", tagsMap)
 			err = setTagForInstance(d, meta, d.Id(), tagsMap)
