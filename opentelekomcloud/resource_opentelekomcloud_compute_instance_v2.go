@@ -349,7 +349,12 @@ func resourceComputeInstanceV2() *schema.Resource {
 				Optional: true,
 				Default:  false,
 			},
-			"tags": tagsSchema(),
+			"tags": {
+				Type:          schema.TypeMap,
+				Optional:      true,
+				ConflictsWith: []string{"tag"},
+				ValidateFunc:  validateECSTagValue,
+			},
 			"tag": {
 				Type:          schema.TypeMap,
 				Optional:      true,
@@ -521,7 +526,7 @@ func resourceComputeInstanceV2Create(d *schema.ResourceData, meta interface{}) e
 		tagParamName = "tag"
 	}
 	if tagParamName != "" {
-		tagsMap := d.Get("tags").(map[string]interface{})
+		tagsMap := d.Get(tagParamName).(map[string]interface{})
 		if len(tagsMap) > 0 {
 			log.Printf("[DEBUG] Setting tag(key/value): %v", tagsMap)
 			err = setTagForInstance(d, meta, d.Id(), tagsMap)
