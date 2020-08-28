@@ -1,3 +1,7 @@
+---
+subcategory: "WAF"
+---
+
 # opentelekomcloud_waf_certificate_v1
 
 Manages a WAF certificate resource within OpenTelekomCloud.
@@ -6,9 +10,9 @@ Manages a WAF certificate resource within OpenTelekomCloud.
 
 ```hcl
 resource "opentelekomcloud_waf_certificate_v1" "certificate_1" {
-	name    = "cert_1"
-	content = "-----BEGIN CERTIFICATE-----MIIDIjCCAougAwIBAgIJALV96mEtVF4EMA0GCSqGSIb3DQEBBQUAMGoxCzAJBgNVBAYTAnh4MQswCQYDVQQIEwJ4eDELMAkGA1UEBxMCeHgxCzAJBgNVBAoTAnh4MQswCQYDVQQLEwJ-----END CERTIFICATE-----"
-	key     = "-----BEGIN RSA PRIVATE KEY-----MIICXQIBAAKBgQDFPN9ojPndxSC4E1pqWQVKGHCFlXAAGBOxbGfSzXqzsoyacotueqMqXQbxrPSQFATeVmhZPNVEMdvcAMjYsV/mymtAwVqVA6q/OFdX/b3UHO+b/VqLo3J5SrM-----END RSA PRIVATE KEY-----"
+  name    = "cert_1"
+  content = "-----BEGIN CERTIFICATE-----MIIDIjCCAougAwIBAgIJALV96mEtVF4EMA0GCSqGSIb3DQEBBQUAMGoxCzAJBgNVBAYTAnh4MQswCQYDVQQIEwJ4eDELMAkGA1UEBxMCeHgxCzAJBgNVBAoTAnh4MQswCQYDVQQLEwJ-----END CERTIFICATE-----"
+  key     = "-----BEGIN RSA PRIVATE KEY-----MIICXQIBAAKBgQDFPN9ojPndxSC4E1pqWQVKGHCFlXAAGBOxbGfSzXqzsoyacotueqMqXQbxrPSQFATeVmhZPNVEMdvcAMjYsV/mymtAwVqVA6q/OFdX/b3UHO+b/VqLo3J5SrM-----END RSA PRIVATE KEY-----"
 }
 ```
 
@@ -21,7 +25,6 @@ The following arguments are supported:
 * `content` - (Optional) The certificate content. Changing this creates a new certificate.
 
 * `key` - (Optional) The private key. Changing this creates a new certificate.
-
 
 ## Attributes Reference
 
@@ -39,6 +42,6 @@ The following attributes are exported:
 
 Certificates can be imported using the `id`, e.g.
 
-```
-$ terraform import opentelekomcloud_waf_certificate_v1.cert_1 7117d38e-4c8f-4624-a505-bd96b97d024c
+```sh
+terraform import opentelekomcloud_waf_certificate_v1.cert_1 7117d38e-4c8f-4624-a505-bd96b97d024c
 ```

@@ -72,7 +72,8 @@ resource "opentelekomcloud_networking_vip_v2" "vip_1" {
 
 resource "opentelekomcloud_networking_vip_associate_v2" "vip_associate_1" {
   vip_id   = "${opentelekomcloud_networking_vip_v2.vip_1.id}"
-  port_ids = ["${opentelekomcloud_networking_port_v2.port_1.id}", "${opentelekomcloud_networking_port_v2.port_2.id}"]
+  port_ids = ["${opentelekomcloud_networking_port_v2.port_1.id}",
+              "${opentelekomcloud_networking_port_v2.port_2.id}"]
 }
 ```
 
@@ -81,16 +82,19 @@ resource "opentelekomcloud_networking_vip_associate_v2" "vip_associate_1" {
 The following arguments are supported:
 
 * `vip_id` - (Required) The ID of vip to attach the port to.
-    Changing this creates a new vip associate.
+  Changing this creates a new vip associate.
 
 * `port_ids` - (Required) An array of one or more IDs of the ports to attach the vip to.
-    Changing this creates a new vip associate.
+  Changing this creates a new vip associate.
 
 ## Attributes Reference
 
 The following attributes are exported:
 
 * `vip_id` - See Argument Reference above.
+
 * `port_ids` - See Argument Reference above.
+
 * `vip_subnet_id` - The ID of the subnet this vip connects to.
+
 * `vip_ip_address` - The IP address in the subnet for this vip.

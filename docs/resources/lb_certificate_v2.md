@@ -1,3 +1,7 @@
+---
+subcategory: "ELB"
+---
+
 # opentelekomcloud_lb_certificate_v2
 
 Manages a V2 certificate resource within OpenTelekomCloud.
@@ -77,12 +81,12 @@ EOT
 The following arguments are supported:
 
 * `region` - (Optional) The region in which to obtain the V2 Networking client.
-    A Networking client is needed to create an LB certificate. If omitted, the
-    `region` argument of the provider is used. Changing this creates a new
-    LB certificate.
+  A Networking client is needed to create an LB certificate. If omitted, the
+  `region` argument of the provider is used. Changing this creates a new
+  LB certificate.
 
 * `name` - (Optional) Human-readable name for the Certificate. Does not have
-    to be unique.
+  to be unique.
 
 * `description` - (Optional) Human-readable description for the Certificate.
 
@@ -97,10 +101,17 @@ The following arguments are supported:
 The following attributes are exported:
 
 * `region` - See Argument Reference above.
+
 * `name` - See Argument Reference above.
+
 * `description` - See Argument Reference above.
+
 * `domain` - See Argument Reference above.
+
 * `private_key` - See Argument Reference above.
+
 * `certificate` - See Argument Reference above.
+
 * `update_time` - Indicates the update time.
+
 * `create_time` - Indicates the creation time.

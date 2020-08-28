@@ -7,7 +7,7 @@ but only networking floating IPs can be used with load balancers.
 
 Floating IPs created with this module will have a bandwidth of 1000Mbit/s,
 for manually specifying the bandwidth please use the
-[`opentelekomcloud_vpc_eip_v1`](vpc_eip_v1.html) module.
+[`opentelekomcloud_vpc_eip_v1`](vpc_eip_v1.md) module.
 
 
 ## Example Usage
@@ -22,15 +22,18 @@ resource "opentelekomcloud_compute_floatingip_v2" "floatip_1" {
 The following arguments are supported:
 
 * `pool` - (Optional) The name of the pool from which to obtain the floating
-    IP. Default value is admin_external_net. Changing this creates a new floating IP.
+  IP. Default value is admin_external_net. Changing this creates a new floating IP.
 
 ## Attributes Reference
 
 The following attributes are exported:
 
 * `pool` - See Argument Reference above.
+
 * `address` - The actual floating IP address itself.
+
 * `fixed_ip` - The fixed IP address corresponding to the floating IP.
+
 * `instance_id` - UUID of the compute instance associated with the floating IP.
 
 ## Import
@@ -38,5 +41,5 @@ The following attributes are exported:
 Floating IPs can be imported using the `id`, e.g.
 
 ```
-$ terraform import opentelekomcloud_compute_floatingip_v2.floatip_1 89c60255-9bd6-460c-822a-e2b959ede9d2
+terraform import opentelekomcloud_compute_floatingip_v2.floatip_1 89c60255-9bd6-460c-822a-e2b959ede9d2
 ```

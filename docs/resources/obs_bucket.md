@@ -1,3 +1,7 @@
+---
+subcategory: "OBS"
+---
+
 # opentelekomcloud_obs_bucket
 
 Provides an OBS bucket resource within OpenTelekomCloud.
@@ -141,13 +145,14 @@ The following arguments are supported:
 
 * `bucket` - (Required) Specifies the name of the bucket. Changing this parameter will create a new resource.
   A bucket must be named according to the globally applied DNS naming regulations as follows:
-	* The name must be globally unique in OBS.
-	* The name must contain 3 to 63 characters. Only lowercase letters, digits, hyphens (-), and periods (.) are allowed.
-	* The name cannot start or end with a period (.) or hyphen (-), and cannot contain two consecutive periods (.) or contain a period (.) and a hyphen (-) adjacent to each other.
-	* The name cannot be an IP address.
-	* If the name contains any periods (.), a security certificate verification message may appear when you access the bucket or its objects by entering a domain name.
+  * The name must be globally unique in OBS.
+  * The name must contain 3 to 63 characters. Only lowercase letters, digits, hyphens (-), and periods (.) are allowed.
+  * The name cannot start or end with a period (.) or hyphen (-), and cannot contain two consecutive periods (.) or contain a period (.) and a hyphen (-) adjacent to each other.
+  * The name cannot be an IP address.
+  * If the name contains any periods (.), a security certificate verification message may appear when you access the bucket or its objects by entering a domain name.
 
-* `storage_class` - (Optional) Specifies the storage class of the bucket. OBS provides three storage classes: "STANDARD", "WARM" (Infrequent Access) and "COLD" (Archive). Defaults to `STANDARD`.
+* `storage_class` - (Optional) Specifies the storage class of the bucket. OBS provides three storage classes: 
+  `STANDARD`, `WARM` (Infrequent Access) and `COLD` (Archive). Defaults to `STANDARD`.
 
 * `acl` - (Optional) Specifies the ACL policy for a bucket. The predefined common policies are as follows: "private", "public-read", "public-read-write" and "log-delivery-write". Defaults to `private`.
 
@@ -157,8 +162,11 @@ The following arguments are supported:
   You can, however, suspend versioning on that bucket.
 
 * `logging` - (Optional) A settings of bucket logging (documented below).
+
 * `website` - (Optional) A website object (documented below).
+
 * `cors_rule` - (Optional) A rule of Cross-Origin Resource Sharing (documented below).
+
 * `lifecycle_rule` - (Optional) A configuration of object lifecycle management (documented below).
 
 * `force_destroy` - (Optional) A boolean that indicates all objects should be deleted from the bucket so that the bucket can be destroyed without error. Default to `false`.
@@ -169,6 +177,7 @@ The `logging` object supports the following:
 
 * `target_bucket` - (Required) The name of the bucket that will receive the log objects.
   The acl policy of the target bucket should be `log-delivery-write`.
+
 * `target_prefix` - (Optional) To specify a key prefix for log objects.
 
 The `website` object supports the following:
@@ -217,8 +226,11 @@ The `lifecycle_rule` object supports the following:
   The prefix cannot start or end with a slash (/), cannot have consecutive slashes (/), and cannot contain the following special characters: \:*?"<>|.
 
 * `expiration` - (Optional) Specifies a period when objects that have been last updated are automatically deleted. (documented below).
+
 * `transition` - (Optional) Specifies a period when objects that have been last updated are automatically transitioned to `WARM` or `COLD` storage class (documented below).
+
 * `noncurrent_version_expiration` - (Optional) Specifies a period when noncurrent object versions are automatically deleted. (documented below).
+
 * `noncurrent_version_transition` - (Optional) Specifies a period when noncurrent object versions are automatically transitioned to `WARM` or `COLD` storage class (documented below).
 
 At least one of `expiration`, `transition`, `noncurrent_version_expiration`, `noncurrent_version_transition` must be specified.
@@ -231,6 +243,7 @@ The `expiration` object supports the following
 The `transition` object supports the following
 
 * `days` - (Required) Specifies the number of days when objects that have been last updated are automatically transitioned to the specified storage class.
+
 * `storage_class` - (Required) The class of storage used to store the object. Only `WARM` and `COLD` are supported.
 
 The `noncurrent_version_expiration` object supports the following
@@ -240,6 +253,7 @@ The `noncurrent_version_expiration` object supports the following
 The `noncurrent_version_transition` object supports the following
 
 * `days` - (Required) Specifies the number of days when noncurrent object versions are automatically transitioned to the specified storage class.
+
 * `storage_class` - (Required) The class of storage used to store the object. Only `WARM` and `COLD` are supported.
 
 ## Attributes Reference
@@ -247,13 +261,15 @@ The `noncurrent_version_transition` object supports the following
 The following attributes are exported:
 
 * `id` - The name of the bucket.
+
 * `bucket_domain_name` - The bucket domain name. Will be of format `bucketname.obs.region.otc.t-systems.com`.
+
 * `region` - The region this bucket resides in.
 
 ## Import
 
 OBS bucket can be imported using the `bucket`, e.g.
 
-```
-$ terraform import opentelekomcloud_obs_bucket.bucket bucket-name
+```sh
+terraform import opentelekomcloud_obs_bucket.bucket bucket-name
 ```

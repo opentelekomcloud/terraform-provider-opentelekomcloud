@@ -1,3 +1,7 @@
+---
+subcategory: "SMN"
+---
+
 # opentelekomcloud_smn_topic_v2
 
 Manages a V2 topic resource within OpenTelekomCloud.
@@ -18,8 +22,8 @@ The following arguments are supported:
 * `name` - (Required) The name of the topic to be created.
 
 * `display_name` - (Optional) Topic display name, which is presented as the
-    name of the email sender in an email message.
-    
+  name of the email sender in an email message.
+
 * `project_name` - (Optional) The project name for the topic.
 
 ## Attributes Reference
@@ -27,10 +31,15 @@ The following arguments are supported:
 The following attributes are exported:
 
 * `name` - See Argument Reference above.
+
 * `display_name` - See Argument Reference above.
+
 * `topic_urn` - Resource identifier of a topic, which is unique.
+
 * `push_policy` - Message pushing policy. 0 indicates that the message
-    sending fails and the message is cached in the queue. 1 indicates that the
-    failed message is discarded.
+  sending fails and the message is cached in the queue. 1 indicates that the
+  failed message is discarded.
+
 * `create_time` - Time when the topic was created.
+
 * `update_time` - Time when the topic was updated.

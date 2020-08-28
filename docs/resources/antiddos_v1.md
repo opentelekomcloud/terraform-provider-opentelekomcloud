@@ -1,3 +1,7 @@
+---
+subcategory: "AntiDDoS"
+---
+
 # opentelekomcloud_antiddos_v1
 
 Anti-DDoS monitors the service traffic from the Internet to ECSs, ELB instances, and BMSs to detect attack traffic in real time. It then cleans attack traffic according to user-configured defense policies so that services run as normal.
@@ -5,7 +9,7 @@ Anti-DDoS monitors the service traffic from the Internet to ECSs, ELB instances,
 ## Example Usage
 
 ```hcl
-variable "eip_id" {}
+variable "eip_id" { }
   
 resource "opentelekomcloud_antiddos_v1" "myantiddos" {
   floating_ip_id         = "${var.eip_id}"
@@ -16,6 +20,7 @@ resource "opentelekomcloud_antiddos_v1" "myantiddos" {
   app_type_id            = 0
 }
 ```
+
 ## Argument Reference
 
 The following arguments are supported:
@@ -26,7 +31,7 @@ The following arguments are supported:
 
 * `http_request_pos_id` - (Required) The position ID of number of HTTP requests. The value ranges from 1 to 15.
 
-* `cleaning_access_pos_id` - (Required)The position ID of access limit during cleaning. The value ranges from 1 to 8.
+* `cleaning_access_pos_id` - (Required) The position ID of access limit during cleaning. The value ranges from 1 to 8.
 
 * `app_type_id` - (Required) The application type ID. 
 
@@ -40,6 +45,6 @@ All above argument parameters can be exported as attribute parameters.
 
 Antiddos can be imported using the floating_ip_id, e.g.
 
-```
-$ terraform import opentelekomcloud_antiddos_v1.myantiddos c1881895-cdcb-4d23-96cb-032e6a3ee667
+```sh
+terraform import opentelekomcloud_antiddos_v1.myantiddos c1881895-cdcb-4d23-96cb-032e6a3ee667
 ```

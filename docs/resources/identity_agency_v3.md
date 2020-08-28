@@ -1,3 +1,7 @@
+---
+subcategory: "IAM"
+---
+
 # opentelekomcloud_identity_agency_v3
 
 Manages an agency resource within Opentelekomcloud.
@@ -17,26 +21,25 @@ resource "opentelekomcloud_identity_agency_v3" "agency" {
 }
 ```
 
-**Note**: It can not set `tenant_name` in `provider "opentelekomcloud"` when
-   using this resource.
+-> **Note**: It can not set `tenant_name` in `provider "opentelekomcloud"` when using this resource.
 
 ## Argument Reference
 
 The following arguments are supported:
 
 * `name` - (Required) The name of agency. The name is a string of 1 to 64
-    characters.
+  characters.
 
 * `description` - (Optional) Provides supplementary information about the
-    agency. The value is a string of 0 to 255 characters.
+  agency. The value is a string of 0 to 255 characters.
 
 * `delegated_domain_name` - (Required) The name of delegated domain.
 
 * `project_role` - (Optional) An array of roles and projects which are used to
-    grant permissions to agency on project. The structure is documented below.
+  grant permissions to agency on project. The structure is documented below.
 
 * `domain_roles` - (optional) An array of role names which stand for the
-    permissionis to be granted to agency on domain.
+  permissionis to be granted to agency on domain.
 
 The `project_role` block supports:
 
@@ -44,21 +47,27 @@ The `project_role` block supports:
 
 * `roles` - (Required) An array of role names
 
-**note**:
-    one or both of `project_role` and `domain_roles` must be input when
-creating an agency.
+-> **Note**: One or both of `project_role` and `domain_roles` must be input when creating an agency.
 
 ## Attributes Reference
 
 The following attributes are exported:
 
-* `name` - See Argument Reference above.
-* `description` - See Argument Reference above.
-* `delegated_domain_name` - See Argument Reference above.
-* `project_role` - See Argument Reference above.
-* `domain_roles` - See Argument Reference above.
-* `duration` - Validity period of an agency. The default value is null,
-    indicating that the agency is permanently valid.
-* `expire_time` - The expiration time of agency
-* `create_time` - The time when the agency was created.
 * `id` - The agency ID.
+
+* `name` - See Argument Reference above.
+
+* `description` - See Argument Reference above.
+
+* `delegated_domain_name` - See Argument Reference above.
+
+* `project_role` - See Argument Reference above.
+
+* `domain_roles` - See Argument Reference above.
+
+* `duration` - Validity period of an agency. The default value is null,
+  indicating that the agency is permanently valid.
+
+* `expire_time` - The expiration time of agency
+
+* `create_time` - The time when the agency was created.

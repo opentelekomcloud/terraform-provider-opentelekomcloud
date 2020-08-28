@@ -1,5 +1,8 @@
-# opentelekomcloud_nat_dnat_rule_v2
+---
+subcategory: "NAT"
+---
 
+# opentelekomcloud_nat_dnat_rule_v2
 
 ## Example Usage
 
@@ -58,6 +61,6 @@ In addition to the arguments listed above, the following computed attributes are
 
 Dnat can be imported using the following format:
 
-```
-$ terraform import opentelekomcloud_nat_dnat_rule_v2.dnat_1 f4f783a7-b908-4215-b018-724960e5df4a
+```sh
+terraform import opentelekomcloud_nat_dnat_rule_v2.dnat_1 f4f783a7-b908-4215-b018-724960e5df4a
 ```

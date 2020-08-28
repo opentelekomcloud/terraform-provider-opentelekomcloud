@@ -1,3 +1,7 @@
+---
+subcategory: "DNS"
+---
+
 # opentelekomcloud_dns_zone_v2
 
 Manages a DNS zone in the OpenTelekomCloud DNS Service.
@@ -59,12 +63,11 @@ The following arguments are supported:
 * `description` - (Optional) A description of the zone.
 
 * `router` - (Optional) The Router(VPC) configuration for the private zone.
-    it is required when type is `private`.
+  it is required when type is `private`.
 
 * `tags` - (Optional) The key/value pairs to associate with the zone.
 
-* `value_specs` - (Optional) Map of additional options. Changing this creates a
-  new zone.
+* `value_specs` - (Optional) Map of additional options. Changing this creates a new zone.
 
 The `router` block supports:
 
@@ -77,18 +80,25 @@ The `router` block supports:
 The following attributes are exported:
 
 * `name` - See Argument Reference above.
+
 * `email` - See Argument Reference above.
+
 * `type` - See Argument Reference above.
+
 * `ttl` - See Argument Reference above.
+
 * `description` - See Argument Reference above.
+
 * `tags` - See Argument Reference above.
+
 * `value_specs` - See Argument Reference above.
+
 * `masters` - An array of master DNS servers.
 
 ## Import
 
 This resource can be imported by specifying the zone ID:
 
-```
-$ terraform import opentelekomcloud_dns_zone_v2.zone_1 <zone_id>
+```sh
+terraform import opentelekomcloud_dns_zone_v2.zone_1 <zone_id>
 ```

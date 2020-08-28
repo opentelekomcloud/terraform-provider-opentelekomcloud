@@ -13,30 +13,6 @@ resource "opentelekomcloud_networking_secgroup_v2" "secgroup_1" {
 }
 ```
 
-## Argument Reference
-
-The following arguments are supported:
-
-* `name` - (Required) A unique name for the security group.
-
-* `description` - (Optional) A unique name for the security group.
-
-* `tenant_id` - (Optional) The owner of the security group. Required if admin
-    wants to create a port for another tenant. Changing this creates a new
-    security group.
-
-* `delete_default_rules` - (Optional) Whether or not to delete the default
-    egress security rules. This is `false` by default. See the below note
-    for more information.
-
-## Attributes Reference
-
-The following attributes are exported:
-
-* `name` - See Argument Reference above.
-* `description` - See Argument Reference above.
-* `tenant_id` - See Argument Reference above.
-
 ## Default Security Group Rules
 
 In most cases, OpenTelekomCloud will create some egress security group rules for each
@@ -47,14 +23,14 @@ separate security group rules such as the following:
 
 ```hcl
 resource "opentelekomcloud_networking_secgroup_rule_v2" "secgroup_rule_v4" {
-  direction = "egress"
-  ethertype = "IPv4"
+  direction         = "egress"
+  ethertype         = "IPv4"
   security_group_id = "${opentelekomcloud_networking_secgroup_v2.secgroup.id}"
 }
 
 resource "opentelekomcloud_networking_secgroup_rule_v2" "secgroup_rule_v6" {
-  direction = "egress"
-  ethertype = "IPv6"
+  direction         = "egress"
+  ethertype         = "IPv6"
   security_group_id = "${opentelekomcloud_networking_secgroup_v2.secgroup.id}"
 }
 ```
@@ -65,10 +41,36 @@ behavior. Some OpenTelekomCloud clouds might provide additional rules and some m
 not provide any rules at all (in which case the `delete_default_rules` setting
 is moot).
 
+## Argument Reference
+
+The following arguments are supported:
+
+* `name` - (Required) A unique name for the security group.
+
+* `description` - (Optional) A unique name for the security group.
+
+* `tenant_id` - (Optional) The owner of the security group. Required if admin
+  wants to create a port for another tenant. Changing this creates a new
+  security group.
+
+* `delete_default_rules` - (Optional) Whether or not to delete the default
+  egress security rules. This is `false` by default. See the below note
+  for more information.
+
+## Attributes Reference
+
+The following attributes are exported:
+
+* `name` - See Argument Reference above.
+
+* `description` - See Argument Reference above.
+
+* `tenant_id` - See Argument Reference above.
+
 ## Import
 
 Security Groups can be imported using the `id`, e.g.
 
-```
-$ terraform import opentelekomcloud_networking_secgroup_v2.secgroup_1 38809219-5e8a-4852-9139-6f461c90e8bc
+```sh
+terraform import opentelekomcloud_networking_secgroup_v2.secgroup_1 38809219-5e8a-4852-9139-6f461c90e8bc
 ```

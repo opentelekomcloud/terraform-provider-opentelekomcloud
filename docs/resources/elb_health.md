@@ -1,3 +1,7 @@
+---
+subcategory: "ELB"
+---
+
 # opentelekomcloud_elb_health
 
 Manages a classic loadbalancer health resource within OpentelekomCloud.
@@ -52,45 +56,53 @@ resource "opentelekomcloud_elb_health" "healthcheck" {
 The following arguments are supported:
 
 * `listener_id` - (Required) Specifies the ID of the listener to which the health
-    check task belongs. Changing this creates a new elb health.
+  check task belongs. Changing this creates a new elb health.
 
 * `healthcheck_protocol` - (Optional) Specifies the protocol used for the health
-    check. The value can be HTTP or TCP (case-insensitive).
+  check. The value can be HTTP or TCP (case-insensitive).
 
 * `healthcheck_uri` - (Optional) Specifies the URI for health check. This parameter
-    is valid when healthcheck_ protocol is HTTP. The value is a string of 1 to 80
-    characters that must start with a slash (/) and can only contain letters, digits,
-    and special characters, such as -/.%?#&.
+  is valid when healthcheck_ protocol is HTTP. The value is a string of 1 to 80
+  characters that must start with a slash (/) and can only contain letters, digits,
+  and special characters, such as -/.%?#&.
 
 * `healthcheck_connect_port` - (Optional) Specifies the port used for the health
-    check. The value ranges from 1 to 65535.
+  check. The value ranges from 1 to 65535.
 
 * `healthy_threshold` - (Optional) Specifies the threshold at which the health
-    check result is success, that is, the number of consecutive successful health
-    checks when the health check result of the backend server changes from fail
-    to success. The value ranges from 1 to 10.
+  check result is success, that is, the number of consecutive successful health
+  checks when the health check result of the backend server changes from fail
+  to success. The value ranges from 1 to 10.
 
 * `unhealthy_threshold` - (Optional) Specifies the threshold at which the health
-    check result is fail, that is, the number of consecutive failed health checks
-    when the health check result of the backend server changes from success to fail.
-    The value ranges from 1 to 10.
+  check result is fail, that is, the number of consecutive failed health checks
+  when the health check result of the backend server changes from success to fail.
+  The value ranges from 1 to 10.
 
 * `healthcheck_timeout` - (Optional) Specifies the maximum timeout duration
-    (s) for the health check. The value ranges from 1 to 50.
+  (s) for the health check. The value ranges from 1 to 50.
 
 * `healthcheck_interval` - (Optional) Specifies the maximum interval (s) for
-    health check. The value ranges from 1 to 5.
+  health check. The value ranges from 1 to 5.
 
 ## Attributes Reference
 
 The following attributes are exported:
 
 * `listener_id` - See Argument Reference above.
+
 * `healthcheck_protocol` - See Argument Reference above.
+
 * `healthcheck_uri` - See Argument Reference above.
+
 * `healthcheck_connect_port` - See Argument Reference above.
+
 * `healthy_threshold` - See Argument Reference above.
+
 * `unhealthy_threshold` - See Argument Reference above.
+
 * `healthcheck_timeout` - See Argument Reference above.
+
 * `healthcheck_interval` - See Argument Reference above.
+
 * `id` - Specifies the health check task ID.

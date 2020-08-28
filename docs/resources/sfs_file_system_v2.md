@@ -4,7 +4,7 @@ Provides an Shared File System (SFS) resource.
 
 ## Example Usage
 
- ```hcl
+```hcl
 variable "share_name" { }
 
 variable "share_description" { }
@@ -21,9 +21,10 @@ resource "opentelekomcloud_sfs_file_system_v2" "share-file" {
       "type"="nfs"
   }
 }
- ```
+```
 
 ## Argument Reference
+
 The following arguments are supported:
 
 * `size` - (Required) The size (GB) of the shared file system.
@@ -47,13 +48,15 @@ The following arguments are supported:
 * `access_to` - (Required) The access that the back end grants or denies. Changing this will create a new access rule
 
 ## Attributes Reference
+
 In addition to all arguments above, the following attributes are exported:
 
 * `id` - The UUID of the shared file system.
 
 * `status` - The status of the shared file system.
 
-* `share_type` - The storage service type assigned for the shared file system, such as high-performance storage (composed of SSDs) and large-capacity storage (composed of SATA disks).
+* `share_type` - The storage service type assigned for the shared file system, such as high-performance storage (composed of SSDs)
+  and large-capacity storage (composed of SATA disks).
 
 * `volume_type` - The volume type.
 
@@ -70,6 +73,6 @@ In addition to all arguments above, the following attributes are exported:
 
 SFS can be imported using the `id`, e.g.
 
-```
-$ terraform import opentelekomcloud_sfs_file_system_v2 4779ab1c-7c1a-44b1-a02e-93dfc361b32d
+```sh
+terraform import opentelekomcloud_sfs_file_system_v2 4779ab1c-7c1a-44b1-a02e-93dfc361b32d
 ```

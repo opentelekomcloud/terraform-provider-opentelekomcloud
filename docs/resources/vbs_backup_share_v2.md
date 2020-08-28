@@ -1,21 +1,25 @@
+---
+subcategory: "VBS"
+---
+
 # opentelekomcloud_vbs_backup_share_v2
 
 Provides an VBS Backup Share resource within OpenTelekomCloud.
  
-# Example Usage
+## Example Usage
 
- ```hcl
-variable "backup_id" {}
+```hcl
+variable "backup_id" { }
 
-variable "to_project_ids" {}
+variable "to_project_ids" { }
  
 resource "opentelekomcloud_vbs_backup_share_v2" "backupshare" {
   backup_id      = "${var.backup_id}"
   to_project_ids = "${var.to_project_ids}"
 }
- ```
+```
 
-# Argument Reference
+## Argument Reference
 
 The following arguments are supported:
 
@@ -23,7 +27,7 @@ The following arguments are supported:
 
 * `to_project_ids` - (Required) The IDs of projects with which the backup is shared. Changing the parameter will create new resource.
 
-# Attributes Reference
+## Attributes Reference
 
 In addition to all arguments above, the following attributes are exported:
 
@@ -47,10 +51,10 @@ In addition to all arguments above, the following attributes are exported:
 
 * `service_metadata` - The metadata of the vbs backup.
 
-# Import
+## Import
 
 VBS Backup Share can be imported using the `backup id`, e.g.
 
-```
- $ terraform import opentelekomcloud_vbs_backup_share_v2.backupshare 4779ab1c-7c1a-44b1-a02e-93dfc361b32d
+```sh
+terraform import opentelekomcloud_vbs_backup_share_v2.backupshare 4779ab1c-7c1a-44b1-a02e-93dfc361b32d
 ```

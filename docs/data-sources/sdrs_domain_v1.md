@@ -1,3 +1,7 @@
+---
+subcategory: "SDRS"
+---
+
 # opentelekomcloud_sdrs_domain_v1
 
 Use this data source to get the ID of an available Opentelekomcloud SDRS domain.

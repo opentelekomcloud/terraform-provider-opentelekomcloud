@@ -1,12 +1,16 @@
+---
+subcategory: "VPC"
+---
+
 # opentelekomcloud_vpc_subnet_v1
 
 Provides an VPC subnet resource within OpenTelekomCloud.
 
-# Example Usage
+## Example Usage
 
-## Basic Usage
+### Basic Usage
 
- ```hcl
+```hcl
 resource "opentelekomcloud_vpc_v1" "vpc_v1" {
   name = var.vpc_name
   cidr = var.vpc_cidr
@@ -20,9 +24,9 @@ resource "opentelekomcloud_vpc_subnet_v1" "subnet_v1" {
   gateway_ip    = var.subnet_gateway_ip
   ntp_addresses = "10.100.0.33,10.100.0.34"
 }
- ```
+```
 
-## Subnet with tags
+### Subnet with tags
 
 ```hcl
 resource "opentelekomcloud_vpc_subnet_v1" "subnet_with_tags" {
@@ -40,7 +44,7 @@ resource "opentelekomcloud_vpc_subnet_v1" "subnet_with_tags" {
 }
 ```
 
-# Argument Reference
+## Argument Reference
 
 The following arguments are supported:
 
@@ -67,10 +71,9 @@ The following arguments are supported:
 * `tags` - (Optional) The key/value pairs to associate with the subnet.
 
 
-# Attributes Reference
+## Attributes Reference
 
-All of the argument attributes are also exported as
-result attributes:
+All of the argument attributes are also exported as result attributes:
 
 * `id` - Specifies a resource ID in UUID format.
  
@@ -78,10 +81,10 @@ result attributes:
 
 * `subnet_id` - Specifies the subnet (Native OpenStack API) ID.
 
-# Import
+## Import
 
 Subnets can be imported using the `subnet id`, e.g.
 
-```
-$ terraform import opentelekomcloud_vpc_subnet_v1 4779ab1c-7c1a-44b1-a02e-93dfc361b32d
+```sh
+terraform import opentelekomcloud_vpc_subnet_v1 4779ab1c-7c1a-44b1-a02e-93dfc361b32d
 ```

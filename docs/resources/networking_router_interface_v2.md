@@ -32,18 +32,20 @@ resource "opentelekomcloud_networking_router_interface_v2" "router_interface_1" 
 The following arguments are supported:
 
 * `router_id` - (Required) ID of the router this interface belongs to. Changing
-    this creates a new router interface.
+  this creates a new router interface.
 
 * `subnet_id` - ID of the subnet this interface connects to. Changing
-    this creates a new router interface.
+  this creates a new router interface.
 
 * `port_id` - ID of the port this interface connects to. Changing
-    this creates a new router interface.
+  this creates a new router interface.
 
 ## Attributes Reference
 
 The following attributes are exported:
 
 * `router_id` - See Argument Reference above.
+
 * `subnet_id` - See Argument Reference above.
+
 * `port_id` - See Argument Reference above.

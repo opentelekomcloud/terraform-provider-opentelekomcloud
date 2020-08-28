@@ -1,9 +1,14 @@
+---
+subcategory: "CCE"
+---
+
 # opentelekomcloud_cce_node_v3
-Add a node to a container cluster. 
+
+Add a node to a container cluster.
 
 ## Example Usage
 
- ```hcl
+```hcl
 variable "cluster_id" { }
 variable "ssh_key" { }
 variable "availability_zone" { }
@@ -29,7 +34,7 @@ resource "opentelekomcloud_cce_node_v3" "node_1" {
     volumetype = "SATA"
   }
 }
- ```    
+```
 
 ## Argument Reference
 The following arguments are supported:
@@ -54,8 +59,7 @@ The following arguments are supported:
 
 * `eip_ids` - (Optional) List of existing elastic IP IDs. Changing this parameter will create a new resource.
 
-**Note:**
-If the eip_ids parameter is configured, you do not need to configure the eip_count and bandwidth parameters:
+-> **Note:** If the eip_ids parameter is configured, you do not need to configure the eip_count and bandwidth parameters:
 iptype, charge_mode, bandwidth_size and share_type.
 
 * `eip_count` - (Optional) Number of elastic IPs to be dynamically created. Changing this parameter will create a new resource.
@@ -73,7 +77,7 @@ iptype, charge_mode, bandwidth_size and share_type.
 * `ecs_performance_type` - (Optional) Classification of cloud server specifications. Changing this parameter will create a new cluster resource.
 
 * `order_id` - (Optional) Order ID, mandatory when the node payment type is the automatic payment package period type.
-    Changing this parameter will create a new cluster resource.
+  Changing this parameter will create a new cluster resource.
 
 * `product_id` - (Optional) The Product ID. Changing this parameter will create a new cluster resource.
 
@@ -82,31 +86,29 @@ iptype, charge_mode, bandwidth_size and share_type.
 * `public_key` - (Optional) The Public key. Changing this parameter will create a new cluster resource.
 
 * `preinstall` - (Optional) Script required before installation. The input value can be a Base64 encoded string or not.
-    Changing this parameter will create a new resource.
+  Changing this parameter will create a new resource.
 
 * `postinstall` - (Optional) Script required after installation. The input value can be a Base64 encoded string or not.
-   Changing this parameter will create a new resource.
+  Changing this parameter will create a new resource.
 
 * `root_volume` - (Required) It corresponds to the system disk related configuration. Changing this parameter will create a new resource.
-
-	* `size` - (Required) Disk size in GB.
-	* `volumetype` - (Required) Disk type.
-	* `extend_param` - (Optional) Disk expansion parameters.
+  * `size` - (Required) Disk size in GB.
+  * `volumetype` - (Required) Disk type.
+  * `extend_param` - (Optional) Disk expansion parameters.
 
 * `data_volumes` - (Required) Represents the data disk to be created. Changing this parameter will create a new resource.
-
-	* `size` - (Required) Disk size in GB.
-	* `volumetype` - (Required) Disk type.
-	* `extend_param` - (Optional) Disk expansion parameters.
+  * `size` - (Required) Disk size in GB.
+  * `volumetype` - (Required) Disk type.
+  * `extend_param` - (Optional) Disk expansion parameters.
 
 ## Attributes Reference
 
 All above argument parameters can be exported as attribute parameters along with attribute reference.
 
- * `status` - Node status information.
+* `status` - Node status information.
 
- * `server_id` - ID of the ECS where the node resides.
+* `server_id` - ID of the ECS where the node resides.
 
- * `private_ip` - Private IP of the CCE node.
+* `private_ip` - Private IP of the CCE node.
 
- * `public_ip` - Public IP of the CCE node.
+* `public_ip` - Public IP of the CCE node.

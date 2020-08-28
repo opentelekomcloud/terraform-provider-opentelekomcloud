@@ -69,7 +69,8 @@ provider "opentelekomcloud" {
   auth_url    = "https://iam.eu-de.otc.t-systems.com/v3"
 }
 ```
-Note: if token, ak/sk and password are set simultaneously, then it will authenticate in the order of Token, AKSK and Password.
+
+-> **Note:** If token, ak/sk and password are set simultaneously, then it will authenticate in the order of Token, AKSK and Password.
 
 ### Federated
 
@@ -143,7 +144,7 @@ See [OpenStack configuration documentation](https://docs.openstack.org/python-op
 
 ## Configuration Reference
 
-~> **NOTE:** The `region`, `tenant_id`, `domain_id`, `user_id` arguments has been deprecated and `tenant_name`, `domain_name` changed to be `required`. Please update your configurations as it might be removed in the future releases.
+~> **Note:** The `region`, `tenant_id`, `domain_id`, `user_id` arguments has been deprecated and `tenant_name`, `domain_name` changed to be `required`. Please update your configurations as it might be removed in the future releases.
 
 The following arguments are supported:
 
@@ -249,8 +250,7 @@ See the github help [here](https://help.github.com/articles/creating-an-issue/)
 In order to run the Acceptance Tests for development, the following environment
 variables must also be set:
 
-* `OS_IMAGE_ID` or `OS_IMAGE_NAME` - a UUID or name of an existing image in
-  Glance.
+* `OS_IMAGE_ID` or `OS_IMAGE_NAME` - a UUID or name of an existing image in Glance.
 
 * `OS_FLAVOR_ID` or `OS_FLAVOR_NAME` - an ID or name of an existing flavor.
 

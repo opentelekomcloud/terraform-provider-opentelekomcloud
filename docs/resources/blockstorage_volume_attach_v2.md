@@ -1,3 +1,7 @@
+---
+subcategory: "EVS"
+---
+
 # opentelekomcloud_blockstorage_volume_attach_v2
 
 This resource is experimental and may be removed in the future! Feedback
@@ -97,7 +101,7 @@ data.volume_id = 2d87ed25-c312-4f42-be1d-3b36b014561d
 This information can then be fed into a provisioner or a template shell script,
 where the final result would look something like:
 
-```
+```sh
 iscsiadm -m node -T ${self.data.target_iqn} -p ${self.data.target_portal} --interface default --op new
 iscsiadm -m node -T ${self.data.target_iqn} -p ${self.data.target_portal} --op update -n node.session.auth.authmethod -v ${self.data.auth_method}
 iscsiadm -m node -T ${self.data.target_iqn} -p ${self.data.target_portal} --op update -n node.session.auth.username -v ${self.data.auth_username}

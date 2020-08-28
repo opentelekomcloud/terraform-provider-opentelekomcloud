@@ -1,3 +1,7 @@
+---
+subcategory: "DNS"
+---
+
 # opentelekomcloud_dns_ptrrecord_v2
 
 Manages a DNS PTR record in the OpenTelekomCloud DNS Service.
@@ -40,17 +44,23 @@ The following arguments are supported:
 The following attributes are exported:
 
 * `id` -  The PTR record ID, which is in {region}:{floatingip_id} format.
+
 * `name` - See Argument Reference above.
+
 * `description` - See Argument Reference above.
+
 * `floatingip_id` - See Argument Reference above.
+
 * `ttl` - See Argument Reference above.
+
 * `tags` - See Argument Reference above.
+
 * `address` - The address of the FloatingIP/EIP.
 
 ## Import
 
 PTR records can be imported using region and floatingip/eip ID, separated by a colon(:), e.g.
 
-```
-$ terraform import opentelekomcloud_dns_ptrrecord_v2.ptr_1 eu-de:d90ce693-5ccf-4136-a0ed-152ce412b6b9
+```sh
+terraform import opentelekomcloud_dns_ptrrecord_v2.ptr_1 eu-de:d90ce693-5ccf-4136-a0ed-152ce412b6b9
 ```

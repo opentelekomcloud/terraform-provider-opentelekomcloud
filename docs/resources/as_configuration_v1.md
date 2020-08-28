@@ -1,3 +1,7 @@
+---
+subcategory: "AS (Autoscaling)"
+---
+
 # opentelekomcloud_as_configuration_v1
 
 Manages a V1 AS Configuration resource within OpenTelekomCloud.

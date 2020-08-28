@@ -71,7 +71,9 @@ The following arguments are supported:
 The following attributes are exported:
 
 * `floating_ip` - See Argument Reference above.
+
 * `instance_id` - See Argument Reference above.
+
 * `fixed_ip` - See Argument Reference above.
 
 ## Import
@@ -80,5 +82,5 @@ This resource can be imported by specifying all three arguments, separated
 by a forward slash:
 
 ```
-$ terraform import opentelekomcloud_compute_floatingip_associate_v2.fip_1 <floating_ip>/<instance_id>/<fixed_ip>
+terraform import opentelekomcloud_compute_floatingip_associate_v2.fip_1 <floating_ip>/<instance_id>/<fixed_ip>
 ```

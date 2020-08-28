@@ -1,8 +1,12 @@
+---
+subcategory: "IAM"
+---
+
 # opentelekomcloud_identity_group_v3
 
 Manages a User Group resource within OpentelekomCloud IAM service.
 
-Note: You _must_ have admin privileges in your OpentelekomCloud cloud to use
+-> **Note:** You _must_ have admin privileges in your OpentelekomCloud cloud to use
 this resource.
 
 ## Example Usage
@@ -18,7 +22,7 @@ resource "opentelekomcloud_identity_group_v3" "group_1" {
 
 The following arguments are supported:
 
-* `name` - (Required) The name of the group.The length is less than or equal to 64 bytes 
+* `name` - (Required) The name of the group.The length is less than or equal to 64 bytes.
 
 * `description` - (Optional) A description of the group.
 
@@ -34,6 +38,6 @@ The following attributes are exported:
 
 Groups can be imported using the `id`, e.g.
 
-```
-$ terraform import opentelekomcloud_identity_group_v3.group_1 89c60255-9bd6-460c-822a-e2b959ede9d2
+```sh
+terraform import opentelekomcloud_identity_group_v3.group_1 89c60255-9bd6-460c-822a-e2b959ede9d2
 ```

@@ -1,3 +1,7 @@
+---
+subcategory: "SMN"
+---
+
 # opentelekomcloud_smn_subscription_v2
 
 Manages a V2 subscription resource within OpenTelekomCloud.
@@ -6,7 +10,7 @@ Manages a V2 subscription resource within OpenTelekomCloud.
 
 ```hcl
 resource "opentelekomcloud_smn_topic_v2" "topic_1" {
-  name		   = "topic_1"
+  name         = "topic_1"
   display_name = "The display name of topic_1"
 }
 
@@ -32,28 +36,34 @@ The following arguments are supported:
 * `topic_urn` - (Required) Specifies the resource identifier of a topic, which is unique.
 
 * `endpoint` - (Required) Specifies the message endpoint.
-     - For an HTTP subscription, the endpoint starts with http\://.
-     - For an HTTPS subscription, the endpoint starts with https\://.
-     - For an email subscription, the endpoint is a mail address.
-     - For an SMS message subscription, the endpoint is a phone number.
+  * For an HTTP subscription, the endpoint starts with http\://.
+  * For an HTTPS subscription, the endpoint starts with https\://.
+  * For an email subscription, the endpoint is a mail address.
+  * For an SMS message subscription, the endpoint is a phone number.
 
 * `protocol` - (Required) Specifies protocol of the message endpoint. Currently, email,
-     sms, http, and https are supported.
+  sms, http, and https are supported.
 
 * `remark` - (Optional) Specifies the remark information. The remarks must be a UTF-8-coded
-     character string containing 128 bytes.
+  character string containing 128 bytes.
 
 ## Attributes Reference
 
 The following attributes are exported:
 
 * `topic_urn` - See Argument Reference above.
+
 * `endpoint` - See Argument Reference above.
+
 * `protocol` - See Argument Reference above.
+
 * `remark` - See Argument Reference above.
+
 * `subscription_urn` - The resource identifier of a subscription.
+
 * `owner` - The project ID of the topic creator.
+
 * `status` - The subscription status.
-     - 0 indicates that the subscription is not confirmed.
-     - 1 indicates that the subscription is confirmed.
-     - 3 indicates that the subscription is canceled.
+  * 0 indicates that the subscription is not confirmed.
+  * 1 indicates that the subscription is confirmed.
+  * 3 indicates that the subscription is canceled.

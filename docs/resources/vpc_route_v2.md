@@ -1,10 +1,14 @@
+---
+subcategory: "VPC"
+---
+
 # opentelekomcloud_vpc_route_v2
 
 Provides a resource to create a route within OpenTelekomCloud.
 
 ## Example Usage
 
- ```hcl
+```hcl
 resource "opentelekomcloud_vpc_route_v2" "vpc_route" {
   type        = "peering"
   nexthop     = "${var.nexthop}"
@@ -21,7 +25,7 @@ The following arguments are supported:
 
 * `nexthop` - (Required) Specifies the next hop. If the route type is peering, enter the VPC peering connection ID. Changing this creates a new Route.
 
-* `type` - (Required) Specifies the route type. Currently, the value can only be **peering**. Changing this creates a new Route.
+* `type` - (Required) Specifies the route type. Currently, the value can only be `peering`. Changing this creates a new Route.
 
 * `vpc_id` - (Required) Specifies the VPC for which a route is to be added. Changing this creates a new Route.
 
@@ -29,7 +33,6 @@ The following arguments are supported:
 
 ## Attributes Reference
 
-All of the argument attributes are also exported as
-result attributes:
+All of the argument attributes are also exported as result attributes:
 
 * `id` - The route ID.

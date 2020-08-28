@@ -30,15 +30,15 @@ resource "opentelekomcloud_compute_secgroup_v2" "secgroup_1" {
 The following arguments are supported:
 
 * `name` - (Required) A unique name for the security group. Changing this
-    updates the `name` of an existing security group.
+  updates the `name` of an existing security group.
 
 * `description` - (Required) A description for the security group. Changing this
-    updates the `description` of an existing security group.
+  updates the `description` of an existing security group.
 
 * `rule` - (Optional) A rule describing how the security group operates. The
-    rule object structure is documented below. Changing this updates the
-    security group rules. As shown in the example above, multiple rule blocks
-    may be used.
+  rule object structure is documented below. Changing this updates the
+  security group rules. As shown in the example above, multiple rule blocks
+  may be used.
 
 The `rule` block supports:
 
@@ -69,7 +69,9 @@ be combined with `cidr` or `from_group_id`.
 The following attributes are exported:
 
 * `name` - See Argument Reference above.
+
 * `description` - See Argument Reference above.
+
 * `rule` - See Argument Reference above.
 
 ## Notes
@@ -107,6 +109,6 @@ resource "opentelekomcloud_compute_instance_v2" "test-server" {
 
 Security Groups can be imported using the `id`, e.g.
 
-```
-$ terraform import opentelekomcloud_compute_secgroup_v2.my_secgroup 1bc30ee9-9d5b-4c30-bdd5-7f1e663f5edf
+```sh
+terraform import opentelekomcloud_compute_secgroup_v2.my_secgroup 1bc30ee9-9d5b-4c30-bdd5-7f1e663f5edf
 ```

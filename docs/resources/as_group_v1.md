@@ -1,3 +1,7 @@
+---
+subcategory: "AS (Autoscaling)"
+---
+
 # opentelekomcloud_as_group_v1
 
 Manages a V1 Autoscaling Group resource within OpenTelekomCloud.

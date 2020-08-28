@@ -1,3 +1,7 @@
+---
+subcategory: "ELB"
+---
+
 # opentelekomcloud_elb_backend
 
 Manages a classic loadbalancer backend resource within OpentelekomCloud.
@@ -25,9 +29,9 @@ resource "opentelekomcloud_elb_listener" "listener" {
   loadbalancer_id  = "${opentelekomcloud_elb_loadbalancer.elb.id}"
   
   timeouts {
-	create = "5m"
-	update = "5m"
-	delete = "5m"
+    create = "5m"
+    update = "5m"
+    delete = "5m"
   }
 }
 
@@ -43,29 +47,39 @@ resource "opentelekomcloud_elb_backend" "backend" {
 The following arguments are supported:
 
 * `listener_id` - (Required) Specifies the listener ID. Changing this creates a new
-    elb backend.
+  elb backend.
 
 * `server_id` - (Required) Specifies the backend member ID. Changing this creates a
-     new elb backend.
+  new elb backend.
 
 * `address` - (Required) Specifies the private IP address of the backend member. 
-    Changing this creates a new elb backend.
+  Changing this creates a new elb backend.
 
 ## Attributes Reference
 
 The following attributes are exported:
 
 * `listener_id` - See Argument Reference above.
+
 * `server_id` - See Argument Reference above.
+
 * `address` - See Argument Reference above.
+
 * `server_address` - Specifies the floating IP address assigned to the backend member.
+
 * `id` - Specifies the backend member ID.
-* `status` - Specifies the backend ECS status. The value is ACTIVE, PENDING,
-    or ERROR.
-* `health_status` - Specifies the health check status. The value is NORMAL,
-    ABNORMAL, or UNAVAILABLE.
+
+* `status` - Specifies the backend ECS status. The value is `ACTIVE`, `PENDING`
+  or `ERROR`.
+
+* `health_status` - Specifies the health check status. The value is `NORMAL`,
+  `ABNORMAL` or `UNAVAILABLE`.
+
 * `update_time` - Specifies the time when information about the backend member
-    was updated.
+  was updated.
+
 * `create_time` - Specifies the time when the backend member was created.
+
 * `server_name` - Specifies the backend member name.
+
 * `listeners` - Specifies the listener to which the backend member belongs.

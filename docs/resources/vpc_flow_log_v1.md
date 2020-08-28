@@ -1,8 +1,12 @@
-# opentelekomcloud_vpc_flow log_v1
+---
+subcategory: "VPC"
+---
+
+# opentelekomcloud_vpc_flow_log_v1
 
 Manages a VPC flow log resource within OpenTelekomCloud.
 
-# Example Usage
+## Example Usage
 
 ```hcl
 resource "opentelekomcloud_logtank_group_v2" "log_group1" {
@@ -30,37 +34,37 @@ resource "opentelekomcloud_vpc_flow_log_v1" "flowlog1" {
 }
 ```
 
-# Argument Reference
+## Argument Reference
 
 The following arguments are supported:
 
 * `name` - (Optional) Specifies the flow log name.
-    The value is a string of 1 to 64 characters that can contain letters, digits, underscores (_), hyphens (-) and periods (.).
+  The value is a string of 1 to 64 characters that can contain letters, digits, underscores (_), hyphens (-) and periods (.).
 
 * `description` - (Optinal) Provides supplementary information about the VPC flow log.
-    The value is a string of no more than 255 characters and cannot contain angle brackets (< or >).
+  The value is a string of no more than 255 characters and cannot contain angle brackets (< or >).
 
 * `resource_type` - (Required) Specifies the type of resource on which to create the VPC flow log.
-    The value can be **port**, **vpc** and **network**.
-    Changing this creates a new VPC flow log.
+  The value can be `port`, `vpc` and `network`.
+  Changing this creates a new VPC flow log.
 
 * `resource_id` - (Required) Specifies the ID of resource type.
-    Changing this creates a new VPC flow log.
+  Changing this creates a new VPC flow log.
 
-* `traffic_type` - (Required) Specifies the type of traffic to log. The value can be **all**, **accept** and **reject**.
-    Changing this creates a new VPC flow log.
+* `traffic_type` - (Required) Specifies the type of traffic to log. The value can be `all`, `accept` and `reject`.
+  Changing this creates a new VPC flow log.
 
 * `log_group_id` - (Required) Specifies the log group ID.
-    Changing this creates a new VPC flow log.
+  Changing this creates a new VPC flow log.
 
 * `log_topic_id` - (Required) Specifies the log topic ID.
-    Changing this creates a new VPC flow log.
+  Changing this creates a new VPC flow log.
 
-# Attributes Reference
+## Attributes Reference
 
 The following attributes are exported:
 
-* `id` - The VPC flow log  ID in UUID format.
+* `id` - The VPC flow log ID in UUID format.
 
 * `name` - See Argument Reference above.
 
@@ -76,14 +80,14 @@ The following attributes are exported:
 
 * `log_topic_id` - See Argument Reference above.
 
-* `status` - The status of the flow log. The value can be ACTIVE, DOWN or ERROR.
+* `status` - The status of the flow log. The value can be `ACTIVE`, `DOWN` or `ERROR`.
 
 * `admin_state` - Whether to enable the VPC flow log function.
 
-# Import
+## Import
 
 VPC flow logs can be imported using the `id`, e.g.
 
-```
-$ terraform import opentelekomcloud_vpc_flow log_v1 ab76d479-9ef8-4034-88c4-4ab82fc87572
+```sh
+terraform import opentelekomcloud_vpc_flow log_v1 ab76d479-9ef8-4034-88c4-4ab82fc87572
 ```

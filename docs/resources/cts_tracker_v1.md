@@ -1,3 +1,7 @@
+---
+subcategory: "CTS"
+---
+
 # opentelekomcloud_cts_tracker_v1
 
 Allows you to collect, store, and query cloud resource operation records.
@@ -18,7 +22,9 @@ resource "opentelekomcloud_cts_tracker_v1" "tracker_v1" {
   need_notify_user_list     = ["user1"]
 }
 ```
+
 ## Argument Reference
+
 The following arguments are supported:
 
 * `bucket_name` - (Required) The OBS bucket name for a tracker.
@@ -40,6 +46,7 @@ The following arguments are supported:
 * `project_name` - (Optional) The project name for the tracker.
 
 ## Attributes Reference
+
 In addition to all arguments above, the following attributes are exported:
 
 * `tracker_name` - The tracker name. Currently, only tracker **system** is available.

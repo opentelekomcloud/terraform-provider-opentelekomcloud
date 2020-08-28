@@ -1,3 +1,7 @@
+---
+subcategory: "IMS"
+---
+
 # opentelekomcloud_images_image_v2
 
 Use this data source to get the ID of an available OpenTelekomCloud image.

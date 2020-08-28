@@ -15,11 +15,10 @@ resource "opentelekomcloud_compute_keypair_v2" "test-keypair" {
 
 The following arguments are supported:
 
-* `name` - (Required) A unique name for the keypair. Changing this creates a new
-    keypair.
+* `name` - (Required) A unique name for the keypair. Changing this creates a new keypair.
 
 * `public_key` - (Required) A pregenerated OpenSSH-formatted public key.
-    Changing this creates a new keypair.
+  Changing this creates a new keypair.
 
 * `value_specs` - (Optional) Map of additional options.
 
@@ -28,12 +27,13 @@ The following arguments are supported:
 The following attributes are exported:
 
 * `name` - See Argument Reference above.
+
 * `public_key` - See Argument Reference above.
 
 ## Import
 
 Keypairs can be imported using the `name`, e.g.
 
-```
-$ terraform import opentelekomcloud_compute_keypair_v2.my-keypair test-keypair
+```sh
+terraform import opentelekomcloud_compute_keypair_v2.my-keypair test-keypair
 ```

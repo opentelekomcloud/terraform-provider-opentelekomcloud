@@ -1,3 +1,7 @@
+---
+subcategory: "DNS"
+---
+
 # opentelekomcloud_dns_recordset_v2
 
 Manages a DNS record set in the OpenTelekomCloud DNS Service.
@@ -54,12 +58,19 @@ The following arguments are supported:
 The following attributes are exported:
 
 * `name` - See Argument Reference above.
+
 * `type` - See Argument Reference above.
+
 * `ttl` - See Argument Reference above.
+
 * `records` - See Argument Reference above.
+
 * `description` - See Argument Reference above.
+
 * `tags` - See Argument Reference above.
+
 * `zone_id` - See Argument Reference above.
+
 * `value_specs` - See Argument Reference above.
 
 ## Import
@@ -67,6 +78,6 @@ The following attributes are exported:
 This resource can be imported by specifying the zone ID and recordset ID,
 separated by a forward slash.
 
-```
-$ terraform import opentelekomcloud_dns_recordset_v2.recordset_1 <zone_id>/<recordset_id>
+```sh
+terraform import opentelekomcloud_dns_recordset_v2.recordset_1 <zone_id>/<recordset_id>
 ```

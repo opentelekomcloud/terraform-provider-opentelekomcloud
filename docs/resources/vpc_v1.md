@@ -1,6 +1,10 @@
+---
+subcategory: "VPC"
+---
+
 # opentelekomcloud_vpc_v1
 
-Manages a VPC resource within OpenTelekomCloud.
+Manages a VPC v1 resource within OpenTelekomCloud.
 
 ## Example Usage
 
@@ -66,6 +70,6 @@ The following attributes are exported:
 
 VPCs can be imported using the `id`, e.g.
 
-```
-$ terraform import opentelekomcloud_vpc_v1.vpc_v1 7117d38e-4c8f-4624-a505-bd96b97d024c
+```sh
+terraform import opentelekomcloud_vpc_v1.vpc_v1 7117d38e-4c8f-4624-a505-bd96b97d024c
 ```

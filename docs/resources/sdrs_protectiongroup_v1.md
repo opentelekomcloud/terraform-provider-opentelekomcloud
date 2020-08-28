@@ -1,3 +1,7 @@
+---
+subcategory: "SDRS"
+---
+
 # opentelekomcloud_sdrs_protectiongroup_v1
 
 Manages a SDRS protection group resource within OpenTelekomCloud.
@@ -35,7 +39,7 @@ The following arguments are supported:
 * `source_vpc_id` - (Required) Specifies the ID of the source VPC. Changing this creates a new group.
 
 * `dr_type` - (Optional) Specifies the deployment model. The default value is migration indicating migration within a VPC.
-	Changing this creates a new group.
+  Changing this creates a new group.
 
 
 ## Attributes Reference
@@ -48,6 +52,6 @@ The following attributes are exported:
 
 Protection groups can be imported using the `id`, e.g.
 
-```
-$ terraform import opentelekomcloud_sdrs_protectiongroup_v1.group_1 7117d38e-4c8f-4624-a505-bd96b97d024c
+```sh
+terraform import opentelekomcloud_sdrs_protectiongroup_v1.group_1 7117d38e-4c8f-4624-a505-bd96b97d024c
 ```

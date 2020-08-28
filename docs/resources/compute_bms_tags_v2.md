@@ -1,4 +1,8 @@
-# Resource: opentelekomcloud_compute_bms_tags_v2
+---
+subcategory: "BMS"
+---
+
+# opentelekomcloud_compute_bms_tags_v2
 
 Used to add tags to a BMS within OpenTelekomCloud.
 
@@ -28,6 +32,7 @@ All above argument parameters can be exported as attribute parameters.
 ## Import
 
 BMS tags can be imported using the server_id, e.g.
+
 ```
-$ terraform import opentelekomcloud_compute_bms_tags_v2.add_tags 4779ab1c-7c1a-44b1-a02e-93dfc361b32d
+terraform import opentelekomcloud_compute_bms_tags_v2.add_tags 4779ab1c-7c1a-44b1-a02e-93dfc361b32d
 ```

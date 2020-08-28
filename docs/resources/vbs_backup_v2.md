@@ -1,21 +1,24 @@
+---
+subcategory: "VBS"
+---
+
 # opentelekomcloud_vbs_backup_v2
 
 Provides an VBS Backup resource within OpenTelekomCloud.
  
-# Example Usage
+## Example Usage
 
- ```hcl
-variable "backup_name" {}
+```hcl
+variable "backup_name" { }
+variable "volume_id" { }
 
-variable "volume_id" {}
- 
 resource "opentelekomcloud_vbs_backup_v2" "mybackup" {
   volume_id = "${var.volume_id}"
   name      = "${var.backup_name}"
 }
- ```
+```
 
-# Argument Reference
+## Argument Reference
 
 The following arguments are supported:
 
@@ -27,13 +30,13 @@ The following arguments are supported:
 
 * `description` - (Optional) The description of the vbs backup. Changing the parameter will create new resource.
 
-**tags** **- (Optional)** List of tags to be configured for the backup resources. Changing the parameter will create new resource.
+* `tags` - (Optional) List of tags to be configured for the backup resources. Changing the parameter will create new resource.
 
-* `key` - (Required) Specifies the tag key.
+  * `key` - (Required) Specifies the tag key.
 
-* `value` - (Required) Specifies the tag value.
+  * `value` - (Required) Specifies the tag value.
 
-# Attributes Reference
+## Attributes Reference
 
 In addition to all arguments above, the following attributes are exported:
 
@@ -49,10 +52,10 @@ In addition to all arguments above, the following attributes are exported:
 
 * `service_metadata` - The metadata of the vbs backup.
 
-# Import
+## Import
 
 VBS Backup can be imported using the `backup id`, e.g.
 
-```
- $ terraform import opentelekomcloud_vbs_backup_v2.mybackup 4779ab1c-7c1a-44b1-a02e-93dfc361b32d
+```sh
+terraform import opentelekomcloud_vbs_backup_v2.mybackup 4779ab1c-7c1a-44b1-a02e-93dfc361b32d
 ```

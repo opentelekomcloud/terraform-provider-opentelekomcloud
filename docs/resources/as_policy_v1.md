@@ -1,3 +1,7 @@
+---
+subcategory: "AS (Autoscaling)"
+---
+
 # opentelekomcloud_as_policy_v1
 
 Manages a V1 AS Policy resource within OpenTelekomCloud.
@@ -93,26 +97,26 @@ The following arguments are supported:
 The `scheduled_policy` block supports:
 
 * `launch_time` - (Required) The time when the scaling action is triggered. If `scaling_policy_type`
-    is set to `SCHEDULED`, the time format is YYYY-MM-DDThh:mmZ. If `scaling_policy_type` is set to
-    `RECURRENCE`, the time format is hh:mm.
+  is set to `SCHEDULED`, the time format is YYYY-MM-DDThh:mmZ. If `scaling_policy_type` is set to
+  `RECURRENCE`, the time format is hh:mm.
 
 * `recurrence_type` - (Optional) The periodic triggering type. This argument is mandatory when
-    `scaling_policy_type` is set to `RECURRENCE`. The options include `Daily`, `Weekly`, and `Monthly`.
+  `scaling_policy_type` is set to `RECURRENCE`. The options include `Daily`, `Weekly`, and `Monthly`.
 
 * `recurrence_value` - (Optional) The frequency at which scaling actions are triggered.
 
 * `start_time` - (Optional) The start time of the scaling action triggered periodically.
-    The time format complies with UTC. The current time is used by default. The time
-    format is YYYY-MM-DDThh:mmZ.
+  The time format complies with UTC. The current time is used by default. The time
+  format is YYYY-MM-DDThh:mmZ.
 
 * `end_time` - (Optional) The end time of the scaling action triggered periodically.
-    The time format complies with UTC. This argument is mandatory when `scaling_policy_type`
-    is set to `RECURRENCE`. The time format is YYYY-MM-DDThh:mmZ.
+  The time format complies with UTC. This argument is mandatory when `scaling_policy_type`
+  is set to `RECURRENCE`. The time format is YYYY-MM-DDThh:mmZ.
 
 The `scaling_policy_action` block supports:
 
 * `operation` - (Optional) The operation to be performed. The options include `ADD` (default), `REMOVE`,
-    and `SET`.
+  and `SET`.
 
 * `instance_number` - (Optional) The number of instances to be operated. The default number is 1.
 
@@ -121,13 +125,23 @@ The `scaling_policy_action` block supports:
 The following attributes are exported:
 
 * `scaling_policy_name` - See Argument Reference above.
+
 * `scaling_policy_type` - See Argument Reference above.
+
 * `alarm_id` - See Argument Reference above.
+
 * `cool_down_time` - See Argument Reference above.
+
 * `scaling_policy_action/operation` - See Argument Reference above.
+
 * `scaling_policy_action/instance_number` - See Argument Reference above.
+
 * `scheduled_policy/launch_time` - See Argument Reference above.
+
 * `scheduled_policy/recurrence_type` - See Argument Reference above.
+
 * `scheduled_policy/recurrence_value` - See Argument Reference above.
+
 * `scheduled_policy/start_time` - See Argument Reference above.
+
 * `scheduled_policy/end_time` - See Argument Reference above.

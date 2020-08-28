@@ -1,8 +1,12 @@
+---
+subcategory: "IAM"
+---
+
 # opentelekomcloud_identity_role_assignment_v3
 
 Manages a V3 Role assignment within group on OpentelekomCloud IAM Service.
 
-Note: You _must_ have admin privileges in your OpentelekomCloud cloud to use
+-> **Note:** You _must_ have admin privileges in your OpentelekomCloud cloud to use
 this resource. 
 
 ## Example Usage
@@ -33,8 +37,8 @@ resource "opentelekomcloud_identity_role_assignment_v3" "role_assignment_1" {
 
 ```hcl
 variable "domain_id" {
-    default     = "01aafcf63744d988ebef2b1e04c5c34"
-    description = "this is the domain id"
+  default     = "01aafcf63744d988ebef2b1e04c5c34"
+  description = "this is the domain id"
 }
 
 resource "opentelekomcloud_identity_group_v3" "group_1" {
@@ -71,7 +75,11 @@ The following arguments are supported:
 The following attributes are exported:
 
 * `domain_id` - See Argument Reference above.
+
 * `project_id` - See Argument Reference above.
+
 * `group_id` - See Argument Reference above.
+
 * `user_id` - See Argument Reference above.
+
 * `role_id` - See Argument Reference above.

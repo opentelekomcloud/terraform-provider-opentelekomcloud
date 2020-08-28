@@ -8,8 +8,7 @@ but only compute floating IPs can be used with compute instances.
 ## Example Usage
 
 ```hcl
-resource "opentelekomcloud_networking_floatingip_v2" "floatip_1" {
-}
+resource "opentelekomcloud_networking_floatingip_v2" "floatip_1" { }
 ```
 
 ## Argument Reference
@@ -17,18 +16,18 @@ resource "opentelekomcloud_networking_floatingip_v2" "floatip_1" {
 The following arguments are supported:
 
 * `pool` - (Optional) The name of the pool from which to obtain the floating
-    IP. Default value is admin_external_net. Changing this creates a new floating IP.
+  IP. Default value is admin_external_net. Changing this creates a new floating IP.
 
 * `port_id` - (Optional) ID of an existing port with at least one IP address to
-    associate with this floating IP.
+  associate with this floating IP.
 
 * `tenant_id` - (Optional) The target tenant ID in which to allocate the floating
-    IP, if you specify this together with a port_id, make sure the target port
-    belongs to the same tenant. Changing this creates a new floating IP (which
-    may or may not have a different address)
+  IP, if you specify this together with a port_id, make sure the target port
+  belongs to the same tenant. Changing this creates a new floating IP (which
+  may or may not have a different address)
 
 * `fixed_ip` - Fixed IP of the port to associate with this floating IP. Required if
-the port has multiple fixed IPs.
+  the port has multiple fixed IPs.
 
 * `value_specs` - (Optional) Map of additional options.
 
@@ -37,15 +36,19 @@ the port has multiple fixed IPs.
 The following attributes are exported:
 
 * `pool` - See Argument Reference above.
+
 * `address` - The actual floating IP address itself.
+
 * `port_id` - ID of associated port.
+
 * `tenant_id` - the ID of the tenant in which to create the floating IP.
+
 * `fixed_ip` - The fixed IP which the floating IP maps to.
 
 ## Import
 
 Floating IPs can be imported using the `id`, e.g.
 
-```
-$ terraform import opentelekomcloud_networking_floatingip_v2.floatip_1 2c7f39f3-702b-48d1-940c-b50384177ee1
+```sh
+terraform import opentelekomcloud_networking_floatingip_v2.floatip_1 2c7f39f3-702b-48d1-940c-b50384177ee1
 ```

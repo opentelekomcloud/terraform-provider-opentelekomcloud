@@ -1,10 +1,14 @@
+---
+subcategory: "RTS"
+---
+
 # opentelekomcloud_rts_stack_v1
 
 Provides an OpenTelekomCloud Stack.
 
 ## Example Usage
 
- ```hcl
+```hcl
 variable "name" { }
 variable "network_id" { }
 variable "instance_type" { }
@@ -15,11 +19,11 @@ resource "opentelekomcloud_rts_stack_v1" "mystack" {
   disable_rollback = true
   timeout_mins     = 60
   parameters = {
-      "network_id" = "${var.network_id}"
+      "network_id"    = "${var.network_id}"
       "instance_type" = "${var.instance_type}"
-      "image_id" = "${var.image_id}"
-    }
-  template_body = <<STACK
+      "image_id"      = "${var.image_id}"
+  }
+  template_body = <<JSON
   {
     "heat_template_version": "2016-04-08",
     "description": "Simple template to deploy",
@@ -58,19 +62,20 @@ resource "opentelekomcloud_rts_stack_v1" "mystack" {
             }
         }
     },
-    "outputs":  {
-      "InstanceIP":{
+    "outputs": {
+      "InstanceIP": {
         "description": "Instance IP",
-        "value": {  "get_attr": ["my_instance", "first_address"]  }
+        "value": { "get_attr": ["my_instance", "first_address"] }
       }
     }
+  }
+JSON
 }
-STACK
- }
- ```
-## Argument Reference
-The following arguments are supported:
+```
 
+## Argument Reference
+
+The following arguments are supported:
 
 * `name` - (Required) A unique name for the stack. The value must meet the regular expression rule (`^[a-zA-Z][a-zA-Z0-9_.-]{0,254}$`). Changing this creates a new stack.
 
@@ -89,9 +94,8 @@ The following arguments are supported:
 * `timeout_mins` - (Optional) Specifies the timeout duration.
 
 ## Attributes Reference
+
 In addition to all arguments above, the following attributes are exported:
-
-
 
 * `outputs` - A map of outputs from the stack.
 
@@ -106,17 +110,6 @@ In addition to all arguments above, the following attributes are exported:
 
 RTS Stacks can be imported using the `name`, e.g.
 
+```sh
+terraform import opentelekomcloud_rts_stack_v1.mystack rts-stack
 ```
-$ terraform import opentelekomcloud_rts_stack_v1.mystack rts-stack
-```
-
-
-<a id="timeouts"></a>
-## Timeouts
-
-`opentelekomcloud_rts_stack_v1` provides the following
-[Timeouts](/docs/configuration/resources.html#timeouts) configuration options:
-
-- `create` - (Default `30 minutes`) Used for Creating Stacks
-- `update` - (Default `30 minutes`) Used for Stack modifications
-- `delete` - (Default `30 minutes`) Used for destroying stacks.

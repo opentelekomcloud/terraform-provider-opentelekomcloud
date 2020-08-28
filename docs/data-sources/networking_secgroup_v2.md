@@ -1,3 +1,7 @@
+---
+subcategory: "Networking"
+---
+
 # opentelekomcloud_networking_secgroup_v2
 
 Use this data source to get the ID of an available OpenTelekomCloud security group.

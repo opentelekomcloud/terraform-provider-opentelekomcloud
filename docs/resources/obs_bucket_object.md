@@ -1,3 +1,7 @@
+---
+subcategory: "OBS"
+---
+
 # opentelekomcloud_obs_bucket_object
 
 Provides an OBS bucket object resource within OpenTelekomCloud.
@@ -75,8 +79,11 @@ These two arguments are mutually-exclusive.
 The following attributes are exported
 
 * `id` - the `key` of the resource supplied above.
+
 * `etag` - the ETag generated for the object (an MD5 sum of the object content).
   When the object is encrypted on the server side, the ETag value is not the MD5 value of the object,
   but the unique identifier calculated through the server-side encryption.
+
 * `size` - the size of the object in bytes.
+
 * `version_id` - A unique version ID value for the object, if bucket versioning is enabled.

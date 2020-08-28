@@ -1,10 +1,14 @@
+---
+subcategory: "RDS"
+---
+
 # opentelekomcloud_rds_instance_v3
 
-instance management
+Manages RDS instance v3 resource.
 
 ## Example Usage
 
-### create a single db instance
+### Create a single db instance
 
 ```hcl
 resource "opentelekomcloud_networking_secgroup_v2" "secgroup" {
@@ -45,7 +49,7 @@ resource "opentelekomcloud_rds_instance_v3" "instance" {
 }
 ```
 
-### create a primary/standby db instance
+### Create a primary/standby db instance
 
 ```hcl
 resource "opentelekomcloud_networking_secgroup_v2" "secgroup" {
@@ -86,7 +90,7 @@ resource "opentelekomcloud_rds_instance_v3" "instance" {
 }
 ```
 
-### create a single db instance with encrypted volume
+### Create a single db instance with encrypted volume
 
 ```hcl
 resource "opentelekomcloud_kms_key_v1" "key" {
@@ -188,8 +192,7 @@ The `db` block supports:
 * `type` - (Required) Specifies the DB engine. Value: MySQL, PostgreSQL, SQLServer. Changing this parameter will create a new resource.
 
 * `version` - (Required) Specifies the database version. MySQL databases support MySQL 5.6
-  and 5.7. PostgreSQL databases support
-  PostgreSQL 9.5 and 9.6. Microsoft SQL Server
+  and 5.7. PostgreSQL databases support PostgreSQL 9.5 and 9.6. Microsoft SQL Server
   databases support 2014 SE, 2016 SE, and 2016 EE.
   Changing this parameter will create a new resource.
 
@@ -234,7 +237,7 @@ In addition to the arguments listed above, the following computed attributes are
 
 * `db` - See Argument Reference above. The `db` block also contains:
 
-	* `user_name` - Indicates the default user name of database.
+* `user_name` - Indicates the default user name of database.
 
 The `nodes` block contains:
 
@@ -257,13 +260,14 @@ This resource provides the following timeouts configuration options:
 
 RDS instance can be imported using the `id`, e.g.
 
-```
-$ terraform import opentelekomcloud_rds_instance_v3.instance_1 7117d38e-4c8f-4624-a505-bd96b97d024c
+```sh
+terraform import opentelekomcloud_rds_instance_v3.instance_1 7117d38e-4c8f-4624-a505-bd96b97d024c
 ```
 
-But due to some attrubutes missing from the API response, it's required to ignore changes as below.
 
-```
+-> **Note:** But due to some attributes missing from the API response, it's required to ignore changes as below.
+
+```hcl
 resource "opentelekomcloud_rds_instance_v3" "instance_1" {
   ...
 

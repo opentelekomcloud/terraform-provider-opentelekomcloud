@@ -24,19 +24,20 @@ The following arguments are supported:
 * `floating_ip` - (Required) IP Address of an existing floating IP.
 
 * `port_id` - (Required) ID of an existing port with at least one IP address to
-    associate with this floating IP.
+  associate with this floating IP.
 
 ## Attributes Reference
 
 The following attributes are exported:
 
 * `floating_ip` - See Argument Reference above.
+
 * `port_id` - See Argument Reference above.
 
 ## Import
 
 Floating IP associations can be imported using the `id` of the floating IP, e.g.
 
-```
-$ terraform import opentelekomcloud_networking_floatingip_associate_v2.fip 2c7f39f3-702b-48d1-940c-b50384177ee1
+```sh
+terraform import opentelekomcloud_networking_floatingip_associate_v2.fip 2c7f39f3-702b-48d1-940c-b50384177ee1
 ```

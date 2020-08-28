@@ -1,3 +1,7 @@
+---
+subcategory: "ECS"
+---
+
 # opentelekomcloud_ecs_instance_v1
 
 Manages a V1 ECS instance resource within OpenTelekomCloud.
@@ -17,7 +21,7 @@ resource "opentelekomcloud_ecs_instance_v1" "basic" {
     network_id = "55534eaa-533a-419d-9b40-ec427ea7195a"
   }
 
-  availability_zone = "cn-north-1a"
+  availability_zone = "eu-de-01"
   key_name          = "KeyPair-test"
   security_groups   = ["default"]
 }
@@ -148,38 +152,38 @@ The following arguments are supported:
 * `flavor` - (Required) The name of the desired flavor for the server. Changing this resizes the existing server.
 
 * `user_data` - (Optional) The user data to provide when launching the instance.
-    Changing this creates a new server.
+  Changing this creates a new server.
 
 * `password` - (Optional) The administrative password to assign to the server.
-    Changing this creates a new server.
+  Changing this creates a new server.
 
 * `key_name` - (Optional) The name of a key pair to put on the server. The key
-    pair must already be created and associated with the tenant's account.
-    Changing this creates a new server.
+  pair must already be created and associated with the tenant's account.
+  Changing this creates a new server.
 
 * `vpc_id` - (Required) The ID of the desired VPC for the server. Changing this creates a new server.
 
 * `nics` - (Optional) An array of one or more networks to attach to the
-    instance. The nics object structure is documented below. Changing this
-    creates a new server.
+  instance. The nics object structure is documented below. Changing this
+  creates a new server.
 
 * `system_disk_type` - (Optional) The system disk type of the server. For HANA, HL1, and HL2 ECSs use co-p1 and uh-l1 disks.
-    Changing this creates a new server. Available options are:
-	* `SATA`: common I/O disk type.
-	* `SAS`: high I/O disk type.
-	* `SSD`: ultra-high I/O disk type.
-	* `co-p1`: high I/O(performance-optimized) disk type.
-	* `uh-l1`: ultra-high I/O(latency-optimized) disk type.
+  Changing this creates a new server. Available options are:
+  * `SATA`: common I/O disk type.
+  * `SAS`: high I/O disk type.
+  * `SSD`: ultra-high I/O disk type.
+  * `co-p1`: high I/O(performance-optimized) disk type.
+  * `uh-l1`: ultra-high I/O(latency-optimized) disk type.
 
 * `system_disk_size` - (Optional) The system disk size in GB, The value range is 1 to 1024. Changing this creates a new server.
 
 * `data_disks` - (Optional) An array of one or more data disks to attach to the
-    instance. The data_disks object structure is documented below. Changing this
-    creates a new server.
+  instance. The data_disks object structure is documented below. Changing this
+  creates a new server.
 
 * `security_groups` - (Optional) An array of one or more security group names
-    to associate with the server. Changing this results in adding/removing
-    security groups from the existing server.
+  to associate with the server. Changing this results in adding/removing
+  security groups from the existing server.
 
 * `availability_zone` - (Required) The availability zone in which to create the server. Changing this creates a new server.
 
@@ -189,29 +193,28 @@ The following arguments are supported:
 
 * `tags` - (Optional) Tags key/value pairs to associate with the instance.
 
-
 The `nics` block supports:
 
 * `network_id` - (Required) The network UUID to attach to the server. Changing this creates a new server.
 
 * `ip_address` - (Optional) Specifies a fixed IPv4 address to be used on this
-    network. Changing this creates a new server.
+  network. Changing this creates a new server.
 
 The `data_disks` block supports:
 
 * `type` - (Required) The data disk type of the server. For HANA, HL1, and HL2 ECSs use co-p1 and uh-l1 disks.
-    Changing this creates a new server. Available options are:
-	* `SATA`: common I/O disk type.
-	* `SAS`: high I/O disk type.
-	* `SSD`: ultra-high I/O disk type.
-	* `co-p1`: high I/O(performance-optimized) disk type.
-	* `uh-l1`: ultra-high I/O(latency-optimized) disk type.
+  Changing this creates a new server. Available options are:
+  * `SATA`: common I/O disk type.
+  * `SAS`: high I/O disk type.
+  * `SSD`: ultra-high I/O disk type.
+  * `co-p1`: high I/O(performance-optimized) disk type.
+  * `uh-l1`: ultra-high I/O(latency-optimized) disk type.
 
 * `size` - (Required) The size of the data disk in GB. The value range is 10 to 32768.
-    Changing this creates a new server.
+  Changing this creates a new server.
 
 * `snapshot_id` - (Optional) Specifies the snapshot ID or ID of the original data disk contained in the full-ECS image.
-    Changing this creates a new server.
+  Changing this creates a new server.
 
 
 ## Attributes Reference
@@ -225,6 +228,6 @@ The following attributes are exported:
 
 Instances can be imported using the `id`, e.g.
 
-```
-$ terraform import opentelekomcloud_ecs_instance_v1.instance_1 d90ce693-5ccf-4136-a0ed-152ce412b6b9
+```sh
+terraform import opentelekomcloud_ecs_instance_v1.instance_1 d90ce693-5ccf-4136-a0ed-152ce412b6b9
 ```

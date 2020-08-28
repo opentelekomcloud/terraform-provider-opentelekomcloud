@@ -1,6 +1,10 @@
+---
+subcategory: "FW (Firewall)"
+---
+
 # opentelekomcloud_fw_firewall_group_v2
 
-Manages a v1 firewall group resource within OpenTelekomCloud.
+Manages a v2 firewall group resource within OpenTelekomCloud.
 
 ## Example Usage
 
@@ -32,7 +36,7 @@ resource "opentelekomcloud_fw_policy_v2" "policy_1" {
 }
 
 resource "opentelekomcloud_fw_firewall_group_v2" "firewall_group_1" {
-  name      = "my-firewall-group"
+  name              = "my-firewall-group"
   ingress_policy_id = "${opentelekomcloud_fw_policy_v2.policy_1.id}"
 }
 ```
@@ -42,28 +46,28 @@ resource "opentelekomcloud_fw_firewall_group_v2" "firewall_group_1" {
 The following arguments are supported:
 
 * `ingress_policy_id` - The ingress policy resource id for the firewall group. Changing
-    this updates the `ingress_policy_id` of an existing firewall group.
+  this updates the `ingress_policy_id` of an existing firewall group.
 
 * `egress_policy_id` - The egress policy resource id for the firewall group. Changing
-    this updates the `egress_policy_id` of an existing firewall group.
+  this updates the `egress_policy_id` of an existing firewall group.
 
 * `name` - (Optional) A name for the firewall group. Changing this
-    updates the `name` of an existing firewall group.
+  updates the `name` of an existing firewall group.
 
 * `description` - (Required) A description for the firewall group. Changing this
-    updates the `description` of an existing firewall group.
+  updates the `description` of an existing firewall group.
 
 * `admin_state_up` - (Optional) Administrative up/down status for the firewall group
-    (must be "true" or "false" if provided - defaults to "true").
-    Changing this updates the `admin_state_up` of an existing firewall group.
+  (must be "true" or "false" if provided - defaults to "true").
+  Changing this updates the `admin_state_up` of an existing firewall group.
 
 * `tenant_id` - (Optional) The owner of the floating IP. Required if admin wants
-    to create a firewall group for another tenant. Changing this creates a new
-    firewall group.
+  to create a firewall group for another tenant. Changing this creates a new
+  firewall group.
 
 * `ports` - (Optional) Port(s) to associate this firewall group instance
-    with. Must be a list of strings. Changing this updates the associated routers
-    of an existing firewall group.
+  with. Must be a list of strings. Changing this updates the associated routers
+  of an existing firewall group.
 
 * `value_specs` - (Optional) Map of additional options.
 
@@ -72,16 +76,21 @@ The following arguments are supported:
 The following attributes are exported:
 
 * `policy_id` - See Argument Reference above.
+
 * `name` - See Argument Reference above.
+
 * `description` - See Argument Reference above.
+
 * `admin_state_up` - See Argument Reference above.
+
 * `tenant_id` - See Argument Reference above.
+
 * `ports` - See Argument Reference above.
 
 ## Import
 
 Firewall Groups can be imported using the `id`, e.g.
 
-```
-$ terraform import opentelekomcloud_fw_firewall_group_v2.firewall_group_1 c9e39fb2-ce20-46c8-a964-25f3898c7a97
+```sh
+terraform import opentelekomcloud_fw_firewall_group_v2.firewall_group_1 c9e39fb2-ce20-46c8-a964-25f3898c7a97
 ```

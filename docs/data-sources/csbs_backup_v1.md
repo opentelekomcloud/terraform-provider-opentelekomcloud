@@ -1,3 +1,7 @@
+---
+subcategory: "CSBS"
+---
+
 # opentelekomcloud_csbs_backup_v1
 
 Use this data source to get details about backup resources from OpenTelekomCloud.

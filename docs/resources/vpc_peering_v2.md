@@ -1,3 +1,7 @@
+---
+subcategory: "VPC"
+---
+
 # opentelekomcloud_vpc_peering_connection_v2
 
 Provides a resource to manage a VPC Peering Connection resource within OpenTelekomCloud.
@@ -6,13 +10,13 @@ Provides a resource to manage a VPC Peering Connection resource within OpenTelek
 
 ## Example Usage
 
- ```hcl
+```hcl
 resource "opentelekomcloud_vpc_peering_connection_v2" "peering" {
   name        = "${var.peer_conn_name}"
   vpc_id      = "${var.vpc_id}"
   peer_vpc_id = "${var.accepter_vpc_id}"
 }
- ```
+```
 
 ## Argument Reference
 
@@ -25,22 +29,21 @@ The following arguments are supported:
 * `peer_vpc_id` - (Required) Specifies the VPC ID of the accepter tenant. Changing this creates a new VPC peering connection.
 
 * `peer_tenant_id` - (Optional) Specified the Tenant Id of the accepter tenant. Changing this creates a new VPC peering connection.
-  
+
 ## Attributes Reference
 
-All of the argument attributes are also exported as
-result attributes:
+All of the argument attributes are also exported as result attributes:
 
 * `id` - The VPC peering connection ID.
 
-* `status` - The VPC peering connection status. The value can be PENDING_ACCEPTANCE, REJECTED, EXPIRED, DELETED, or ACTIVE.
+* `status` - The VPC peering connection status. The value can be `PENDING_ACCEPTANCE`, `REJECTED`, `EXPIRED`, `DELETED`, or `ACTIVE`.
 
-## Notes
-
-If you create a VPC peering connection with another VPC of your own, the connection is created without the need for you to accept the connection.
+-> **Note:** If you create a VPC peering connection with another VPC of your own, the connection is created without the need for you to accept the connection.
 
 ## Import
 
 VPC Peering resources can be imported using the `vpc peering id`, e.g.
 
-> $ terraform import opentelekomcloud_vpc_peering_connection_v2.test_connection 22b76469-08e3-4937-8c1d-7aad34892be1
+```sh
+terraform import opentelekomcloud_vpc_peering_connection_v2.test_connection 22b76469-08e3-4937-8c1d-7aad34892be1
+```
