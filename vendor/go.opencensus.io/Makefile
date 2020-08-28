@@ -80,7 +80,7 @@ vet:
 	
 .PHONY: embedmd
 embedmd:
-	@EMBEDMDOUT=`$(EMBEDMD) -d $(README_FILES) 2>&1`; \
+	@EMBEDMDOUT=`$(EMBEDMd)d $(README_FILES) 2>&1`; \
 	if [ "$$EMBEDMDOUT" ]; then \
 		echo "$(EMBEDMD) FAILED => embedmd the following files:\n"; \
 		echo "$$EMBEDMDOUT\n"; \

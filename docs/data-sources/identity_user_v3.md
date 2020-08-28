@@ -1,3 +1,8 @@
+---
+page_title: ""
+subcategory: "IAM"
+---
+
 # opentelekomcloud_identity_user_v3
 
 Use this data source to get the ID of an OpentelekomCloud user.
@@ -20,14 +25,14 @@ The following arguments are supported:
 
 * `domain_id` - (Optional) The domain this user belongs to.
 
-* `enabled` - (Optional) Whether the user is enabled or disabled. Valid
-  values are `true` and `false`.
+* `enabled` - (Optional) Whether the user is enabled or disabled. Valid values are `true` and `false`.
 
 * `idp_id` - (Optional) The identity provider ID of the user.
 
 * `name` - (Optional) The name of the user.
 
-* `password_expires_at` - (Optional) Query for expired passwords. See the [OpentelekomCloud API docs](https://docs.otc.t-systems.com/en-us/api/iam/en-us_topic_0057845638.html) for more information on the query format.
+* `password_expires_at` - (Optional) Query for expired passwords. See the [OpentelekomCloud API docs](https://docs.otc.t-systems.com/en-us/api/iam/en-us_topic_0057845638.html)
+  for more information on the query format.
 
 
 ## Attributes Reference
@@ -35,8 +40,13 @@ The following arguments are supported:
 The following attributes are exported:
 
 * `default_project_id` - See Argument Reference above.
+
 * `domain_id` - See Argument Reference above.
+
 * `enabled` - See Argument Reference above.
+
 * `idp_id` - See Argument Reference above.
+
 * `name` - See Argument Reference above.
+
 * `password_expires_at` - See Argument Reference above.

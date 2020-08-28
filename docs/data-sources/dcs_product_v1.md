@@ -1,6 +1,11 @@
+---
+page_title: ""
+subcategory: "DCS"
+---
+
 # opentelekomcloud_dcs_product_v1
 
-Use this data source to get the ID of an available Opentelekomcloud dcs product.
+Use this data source to get the ID of an available DCS product.
 
 ## Example Usage
 
@@ -16,7 +21,6 @@ data "opentelekomcloud_dcs_product_v1" "product1" {
 
 ## Attributes Reference
 
-`id` is set to the ID of the found product. In addition, the following attributes
-are exported:
+`id` is set to the ID of the found product. In addition, the following attributes are exported:
 
 * `spec_code` - See Argument Reference above.

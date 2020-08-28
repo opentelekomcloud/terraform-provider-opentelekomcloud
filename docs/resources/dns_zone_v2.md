@@ -58,7 +58,7 @@ The following arguments are supported:
 
 * `description` - (Optional) A description of the zone.
 
-* `router` (Optional) The Router(VPC) configuration for the private zone.
+* `router` - (Optional) The Router(VPC) configuration for the private zone.
     it is required when type is `private`.
 
 * `tags` - (Optional) The key/value pairs to associate with the zone.
@@ -68,9 +68,9 @@ The following arguments are supported:
 
 The `router` block supports:
 
-* `router_id` (Required) The Router(VPC) ID. which VPC network will assicate with.
+* `router_id` - (Required) The Router(VPC) ID. which VPC network will assicate with.
 
-* `router_region` (Required) The Region name for this private zone.
+* `router_region` - (Required) The Region name for this private zone.
 
 ## Attributes Reference
 

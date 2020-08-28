@@ -34,26 +34,26 @@ resource "opentelekomcloud_vpc_flow_log_v1" "flowlog1" {
 
 The following arguments are supported:
 
-* `name` (Optional) - Specifies the flow log name.
+* `name` - (Optional) Specifies the flow log name.
     The value is a string of 1 to 64 characters that can contain letters, digits, underscores (_), hyphens (-) and periods (.).
 
-* `description` (Optinal) - Provides supplementary information about the VPC flow log.
+* `description` - (Optinal) Provides supplementary information about the VPC flow log.
     The value is a string of no more than 255 characters and cannot contain angle brackets (< or >).
 
-* `resource_type` (Required) - Specifies the type of resource on which to create the VPC flow log.
+* `resource_type` - (Required) Specifies the type of resource on which to create the VPC flow log.
     The value can be **port**, **vpc** and **network**.
     Changing this creates a new VPC flow log.
 
-* `resource_id` (Required) - Specifies the ID of resource type.
+* `resource_id` - (Required) Specifies the ID of resource type.
     Changing this creates a new VPC flow log.
 
-* `traffic_type` (Required) - Specifies the type of traffic to log. The value can be **all**, **accept** and **reject**.
+* `traffic_type` - (Required) Specifies the type of traffic to log. The value can be **all**, **accept** and **reject**.
     Changing this creates a new VPC flow log.
 
-* `log_group_id` (Required) - Specifies the log group ID.
+* `log_group_id` - (Required) Specifies the log group ID.
     Changing this creates a new VPC flow log.
 
-* `log_topic_id` (Required) - Specifies the log topic ID.
+* `log_topic_id` - (Required) Specifies the log topic ID.
     Changing this creates a new VPC flow log.
 
 # Attributes Reference

@@ -1,6 +1,6 @@
-# Data Source: opentelekomcloud_sfs_file_system_v2
+# opentelekomcloud_sfs_file_system_v2
 
-Provides information about an Shared File System (SFS).
+Use this data source to get details about an Shared File System (SFS).
 
 ## Example Usage
 
@@ -10,11 +10,12 @@ variable "share_id" { }
 
 data "opentelekomcloud_sfs_file_system_v2" "shared_file" {
   name = "${var.share_name}"
-  id = "${var.share_id}"
+  id   = "${var.share_id}"
 }
 ```
 
 ## Argument Reference
+
 The following arguments are supported:
 
 * `name` - (Optional) The name of the shared file system.

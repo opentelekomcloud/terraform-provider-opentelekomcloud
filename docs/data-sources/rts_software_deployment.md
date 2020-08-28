@@ -1,9 +1,13 @@
-# Data Source: opentelekomcloud_rts_software_deployment_v1
+---
+page_title: ""
+subcategory: "RTS"
+---
 
-The RTS Software Deployment data source provides details about a specific RTS Software Deployment.
+# opentelekomcloud_rts_software_deployment_v1
+
+Use this data source to get details about a specific RTS Software Deployment.
 
 ## Example Usage
-
 
 ```hcl
 variable "deployment_id" { }
@@ -14,6 +18,7 @@ data "opentelekomcloud_rts_software_deployment_v1" "mydeployment" {
 ```
 
 ## Argument Reference
+
 The following arguments are supported:
 
 * `id` - (Optional) The id of the software deployment.
@@ -27,6 +32,7 @@ The following arguments are supported:
 * `action` - (Optional)  The stack action that triggers this deployment resource.
 
 ## Attributes Reference
+
 In addition to all arguments above, the following attributes are exported:
 
 * `input_values` - The input data stored in the form of a key-value pair.

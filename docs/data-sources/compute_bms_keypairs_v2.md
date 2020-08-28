@@ -1,13 +1,18 @@
-# Data Source: opentelekomcloud_compute_bms_keypairs_v2
+---
+page_title: ""
+subcategory: "BMS"
+---
 
-`opentelekomcloud_compute_bms_keypairs_v2` used to query SSH key pairs.
+# opentelekomcloud_compute_bms_keypairs_v2
+
+Use this data source to get details about SSH key pairs of BMSs from OpenTelekomCloud.
 
 ## Example Usage
 
 ```hcl
-variable "keypair_name" {}
+variable "keypair_name" { }
 
-data "opentelekomcloud_compute_bms_keypairs_v2" "Query_BMS_keypair" {
+data "opentelekomcloud_compute_bms_keypairs_v2" "query_bms_keypair" {
   name = "${var.keypair_name}"
 }
 ```
@@ -20,7 +25,7 @@ The arguments of this data source act as filters for querying the BMSs details.
 
 ## Attributes Reference
 
-All of the argument attributes are also exported as result attributes. 
+All of the argument attributes are also exported as result attributes.
 
 * `public_key` - It gives the information about the public key in the key pair.
 

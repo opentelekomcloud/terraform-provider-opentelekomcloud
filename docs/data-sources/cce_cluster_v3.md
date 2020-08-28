@@ -1,6 +1,11 @@
+---
+page_title: ""
+subcategory: "CCE"
+---
+
 # opentelekomcloud_cce_cluster_v3
 
-Provides details about all clusters and obtains certificate for accessing cluster information.
+Use this data source to get details about all clusters and obtains certificate for accessing cluster information.
 
 ## Example Usage
 
@@ -19,7 +24,7 @@ data "opentelekomcloud_cce_cluster_v3" "cluster" {
 
 The following arguments are supported:
 
-* `name` -  (Optional)The Name of the cluster resource.
+* `name` -  (Optional) The Name of the cluster resource.
 
 * `status` - (Optional) The state of the cluster.
 
@@ -36,7 +41,7 @@ All above argument parameters can be exported as attribute parameters along with
 * `name` - The name of the cluster in string format.
 
 * `id` - The ID of the cluster.
-  
+
 * `flavor_id` - The cluster specification in string format.
 
 * `cluster_version` - The version of cluster in string format.

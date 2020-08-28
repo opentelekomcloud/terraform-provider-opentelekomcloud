@@ -1,6 +1,11 @@
+---
+page_title: ""
+subcategory: "CCE"
+---
+
 # opentelekomcloud_cce_node_v3
 
-To get the specified node in a cluster.
+Use this data source to get the specified node in a cluster from OpenTelekomCloud.
 
 ## Example Usage
 
@@ -10,21 +15,21 @@ variable "node_id" { }
   
 data "opentelekomcloud_cce_node_v3" "node" {
   cluster_id = "${var.cluster_id}"
-  node_id= "${var.node_id}"
+  node_id    = "${var.node_id}"
 }
 ```
+
 ## Argument Reference
 
 The following arguments are supported:
  
-* `Cluster_id` - (Required) The id of container cluster.
+* `cluster_id` - (Required) The id of container cluster.
 
 * `name` - (Optional) Name of the node.
 
 * `node_id` - (Optional) The id of the node.
 
 * `status` - (Optional) The state of the node.
-
 
 ## Attributes Reference
 
@@ -61,14 +66,13 @@ This parameter is mandatory when share_type is set to PER and is optional when s
 
 Enumerated values: PER (indicates exclusive bandwidth) and WHOLE (indicates sharing)
 
-
-**root_volumes**
+The `root_volumes` block supports the following arguments:
 
 * `disk_size` - Disk size in GB.
 
 * `volumetype` - Disk type.
 
-**data_volumes**
+The `data_volumes` block supports the following arguments:
 
 * `disk_size` - Disk size in GB.
 

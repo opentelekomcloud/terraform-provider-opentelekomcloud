@@ -1,15 +1,18 @@
+---
+page_title: ""
+subcategory: "VPC"
+---
+
 # opentelekomcloud_vpc_v1
 
-`opentelekomcloud_vpc_v1` provides details about a specific VPC.
+Use this data source to get details about a specific VPC.
 
-This resource can prove useful when a module accepts a vpc id as an input variable and needs to, for example, determine the CIDR block of that VPC.
+This data source can prove useful when a module accepts a VPC id as an input variable and needs to, for example, determine the CIDR block of that VPC.
 
 ## Example Usage
 
-The following example shows how one might accept a VPC id as a variable and use this data source to obtain the data necessary to create a subnet within it.
-
 ```hcl
-variable "vpc_name" {}
+variable "vpc_name" { }
 
 data "opentelekomcloud_vpc_v1" "vpc" {
   name   = "${var.vpc_name}"
@@ -25,7 +28,8 @@ The arguments of this data source act as filters for querying the available VPCs
 
 * `status` - (Optional) The current status of the desired VPC. Can be either CREATING, OK, DOWN, PENDING_UPDATE, PENDING_DELETE, or ERROR.
 
-* `name` - (Optional) A unique name for the VPC. The name must be unique for a tenant. The value is a string of no more than 64 characters and can contain digits, letters, underscores (_), and hyphens (-).
+* `name` - (Optional) A unique name for the VPC. The name must be unique for a tenant. The value is a string of no more than 64 characters and can contain digits, letters, 
+  underscores (_), and hyphens (-).
 
 * `cidr` - (Optional) The cidr block of the desired VPC.
 

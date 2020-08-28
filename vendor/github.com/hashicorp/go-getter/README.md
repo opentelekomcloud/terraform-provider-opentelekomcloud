@@ -328,8 +328,8 @@ be used automatically.
 ### Using S3 with Minio
  If you use go-gitter for Minio support, you must consider the following:
 
-  * `aws_access_key_id` (required) - Minio access key.
-  * `aws_access_key_secret` (required) - Minio access key secret.
+  * `aws_access_key_id` (required) Minio access key.
+  * `aws_access_key_secret` (required) Minio access key secret.
   * `region` (optional - defaults to us-east-1) - Region identifier to use.
   * `version` (optional - defaults to Minio default) - Configuration file format.
 

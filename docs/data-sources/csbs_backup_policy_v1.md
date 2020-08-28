@@ -1,13 +1,13 @@
-# Data Source: opentelekomcloud_csbs_backup_policy_v1
+# opentelekomcloud_csbs_backup_policy_v1
 
-The OpenTelekomCloud CSBS Backup Policy data source allows access of backup Policy resources.
+Use this data source to get details about backup Policy resources from OpenTelekomCloud.
 
 ## Example Usage
 ```hcl
 variable "policy_id" { }
 
 data "opentelekomcloud_csbs_backup_policy_v1" "csbs_policy" {
-  id = "${var.policy_id}" 
+  id = "${var.policy_id}"
 }
 ```
 
@@ -30,42 +30,42 @@ In addition to all arguments above, the following attributes are exported:
 
 * `parameters` - Specifies the parameters of a backup policy.
 
-* `scheduled_operation` block supports the following arguments:
+The `scheduled_operation` block supports the following arguments:
 
-    * `name` - Specifies Scheduling period name.
-    
-    * `description` - Specifies Scheduling period description.
+* `name` - Specifies Scheduling period name.
 
-    * `enabled` - Specifies whether the scheduling period is enabled.
+* `description` - Specifies Scheduling period description.
 
-    * `max_backups` - Specifies maximum number of backups that can be automatically created for a backup object.
+* `enabled` - Specifies whether the scheduling period is enabled.
 
-    * `retention_duration_days` - Specifies duration of retaining a backup, in days.
+* `max_backups` - Specifies maximum number of backups that can be automatically created for a backup object.
 
-    * `permanent` - Specifies whether backups are permanently retained.
+* `retention_duration_days` - Specifies duration of retaining a backup, in days.
 
-    * `trigger_pattern` - Specifies Scheduling policy of the scheduler.
+* `permanent` - Specifies whether backups are permanently retained.
 
-    * `operation_type` - Specifies Operation type, which can be backup.
+* `trigger_pattern` - Specifies Scheduling policy of the scheduler.
 
-    * `id` -  Specifies Scheduling period ID.
+* `operation_type` - Specifies Operation type, which can be backup.
 
-    * `trigger_id` -  Specifies Scheduler ID.
+* `id` - Specifies Scheduling period ID.
 
-    * `trigger_name` -  Specifies Scheduler name.
+* `trigger_id` - Specifies Scheduler ID.
 
-    * `trigger_type` -  Specifies Scheduler type.
+* `trigger_name` - Specifies Scheduler name.
 
-* `resource` block supports the following arguments:
+* `trigger_type` - Specifies Scheduler type.
 
-    * `id` - Specifies the ID of the object to be backed up.
-    
-    * `type` - Entity object type of the backup object. 
+The `resource` block supports the following arguments:
 
-    * `name` - Specifies backup object name.
+* `id` - Specifies the ID of the object to be backed up.
 
-* `tags` block supports the following arguments:
+* `type` - Entity object type of the backup object. 
 
-    * `key` - Tag key. It cannot be an empty string.
-    
-    * `value` - Tag value. It can be an empty string.
+* `name` - Specifies backup object name.
+
+The `tags` block supports the following arguments:
+
+* `key` - Tag key. It cannot be an empty string.
+
+* `value` - Tag value. It can be an empty string.

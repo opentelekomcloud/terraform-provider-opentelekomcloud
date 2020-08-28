@@ -40,8 +40,7 @@ data "opentelekomcloud_networking_port_v2" "port_1" {
 
 ## Attributes Reference
 
-`id` is set to the ID of the found port. In addition, the following attributes
-are exported:
+`id` is set to the ID of the found port. In addition, the following attributes are exported:
 
 * `region` - See Argument Reference above.
 

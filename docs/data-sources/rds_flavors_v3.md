@@ -1,3 +1,8 @@
+---
+page_title: ""
+subcategory: "RDS"
+---
+
 # opentelekomcloud_rds_flavors_v3
 
 Use this data source to get available OpenTelekomCloud rds flavors.
@@ -6,8 +11,8 @@ Use this data source to get available OpenTelekomCloud rds flavors.
 
 ```hcl
 data "opentelekomcloud_rds_flavors_v3" "flavor" {
-  db_type = "PostgreSQL"
-  db_version = "9.5"
+  db_type       = "PostgreSQL"
+  db_version    = "9.5"
   instance_mode = "ha"
 }
 ```
@@ -26,12 +31,14 @@ data "opentelekomcloud_rds_flavors_v3" "flavor" {
 
 In addition, the following attributes are exported:
 
-* `flavors` -
-  Indicates the flavors information. Structure is documented below.
+* `flavors` - Indicates the flavors information. Structure is documented below.
 
 The `flavors` block contains:
 
 * `name` - The name of the rds flavor.
+
 * `vcpus` - Indicates the CPU size.
+
 * `memory` - Indicates the memory size in GB.
+
 * `mode` - See 'instance_mode' above.

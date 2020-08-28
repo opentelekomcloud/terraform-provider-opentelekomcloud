@@ -1,6 +1,11 @@
-# Data Source: opentelekomcloud_rts_stack_resource_v1
+---
+page_title: ""
+subcategory: "RTS"
+---
 
-The OpenTelekomCloud RTS Stack Resource data source allows access to stack resource metadata.
+# opentelekomcloud_rts_stack_resource_v1
+
+Use this data source to get details about RTS resource metadata.
 
 ## Example Usage
 
@@ -15,6 +20,7 @@ data "opentelekomcloud_rts_stack_resource_v1" "stackresource" {
 ```
 
 ## Argument Reference
+
 The following arguments are supported:
 
 * `stack_name` - (Required) The unique stack name.

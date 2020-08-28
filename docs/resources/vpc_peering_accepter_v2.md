@@ -62,9 +62,9 @@ resource "opentelekomcloud_vpc_peering_connection_accepter_v2" "peer" {
 
 The following arguments are supported:
 
-* `vpc_peering_connection_id` (Required) - The VPC Peering Connection ID to manage. Changing this creates a new VPC peering connection accepter.
+* `vpc_peering_connection_id` - (Required) The VPC Peering Connection ID to manage. Changing this creates a new VPC peering connection accepter.
 
-* `accept` (Optional)- Whether or not to accept the peering request. Defaults to `false`.
+* `accept` - (Optional)- Whether or not to accept the peering request. Defaults to `false`.
 
 
 ## Removing opentelekomcloud_vpc_peering_connection_accepter_v2 from your configuration

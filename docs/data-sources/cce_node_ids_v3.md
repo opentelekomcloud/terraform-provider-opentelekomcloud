@@ -1,6 +1,12 @@
-# Data Source: opentelekomcloud_cce_node_ids_v3
+---
+page_title: ""
+subcategory: "CCE"
+---
 
-`opentelekomcloud_cce_node_ids_v3` provides a list of node ids for a CCE cluster. This resource can be useful for getting back a list of node ids for a CCE cluster.
+# opentelekomcloud_cce_node_ids_v3
+
+Use this data source to get a list of node ids for a CCE cluster from OpenTelekomCloud.
+This data source can be useful for getting back a list of node ids for a CCE cluster.
 
 ## Example Usage
 
@@ -14,7 +20,7 @@ data "opentelekomcloud_cce_node_ids_v3" "node_ids" {
 
 The following arguments are supported:
 
-* `cluster_id` (Required) - Specifies the CCE cluster ID used as the query filter.
+* `cluster_id` - (Required) Specifies the CCE cluster ID used as the query filter.
 
 ## Attributes Reference
 

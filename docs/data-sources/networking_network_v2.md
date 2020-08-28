@@ -22,10 +22,10 @@ data "opentelekomcloud_networking_network_v2" "network" {
 
 ## Attributes Reference
 
-`id` is set to the ID of the found network. In addition, the following attributes
-are exported:
+`id` is set to the ID of the found network. In addition, the following attributes are exported:
 
-* `admin_state_up` - (Optional) The administrative state of the network.
+* `admin_state_up` - The administrative state of the network.
+
 * `name` - See Argument Reference above.
-* `shared` - (Optional)  Specifies whether the network resource can be accessed
-    by any tenant or not.
+
+* `shared` - Specifies whether the network resource can be accessed by any tenant or not.

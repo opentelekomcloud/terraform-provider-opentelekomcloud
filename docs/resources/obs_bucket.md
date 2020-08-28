@@ -192,18 +192,18 @@ Redirect | Protocol, HostName, ReplaceKeyPrefixWith, ReplaceKeyWith, HttpRedirec
 
 The `cors_rule` object supports the following:
 
-* `allowed_origins` (Required) Requests from this origin can access the bucket. Multiple matching rules are allowed.
+* `allowed_origins` - (Required) Requests from this origin can access the bucket. Multiple matching rules are allowed.
   One rule occupies one line, and allows one wildcard character (*) at most.
 
-* `allowed_methods` (Required) Specifies the acceptable operation type of buckets and objects.
+* `allowed_methods` - (Required) Specifies the acceptable operation type of buckets and objects.
   The methods include `GET`, `PUT`, `POST`, `DELETE` or `HEAD`.
 
-* `allowed_headers` (Optional) Specifies the allowed header of cross-origin requests.
+* `allowed_headers` - (Optional) Specifies the allowed header of cross-origin requests.
   Only CORS requests matching the allowed header are valid.
 
-* `expose_headers` (Optional) Specifies the exposed header in CORS responses, providing additional information for clients.
+* `expose_headers` - (Optional) Specifies the exposed header in CORS responses, providing additional information for clients.
 
-* `max_age_seconds` (Optional) Specifies the duration that your browser can cache CORS responses, expressed in seconds.
+* `max_age_seconds` - (Optional) Specifies the duration that your browser can cache CORS responses, expressed in seconds.
   The default value is 100.
 
 The `lifecycle_rule` object supports the following:
@@ -225,21 +225,21 @@ At least one of `expiration`, `transition`, `noncurrent_version_expiration`, `no
 
 The `expiration` object supports the following
 
-* `days` (Required) Specifies the number of days when objects that have been last updated are automatically deleted.
+* `days` - (Required) Specifies the number of days when objects that have been last updated are automatically deleted.
   The expiration time must be greater than the transition times.
 
 The `transition` object supports the following
 
-* `days` (Required) Specifies the number of days when objects that have been last updated are automatically transitioned to the specified storage class.
+* `days` - (Required) Specifies the number of days when objects that have been last updated are automatically transitioned to the specified storage class.
 * `storage_class` - (Required) The class of storage used to store the object. Only `WARM` and `COLD` are supported.
 
 The `noncurrent_version_expiration` object supports the following
 
-* `days` (Required) Specifies the number of days when noncurrent object versions are automatically deleted.
+* `days` - (Required) Specifies the number of days when noncurrent object versions are automatically deleted.
 
 The `noncurrent_version_transition` object supports the following
 
-* `days` (Required) Specifies the number of days when noncurrent object versions are automatically transitioned to the specified storage class.
+* `days` - (Required) Specifies the number of days when noncurrent object versions are automatically transitioned to the specified storage class.
 * `storage_class` - (Required) The class of storage used to store the object. Only `WARM` and `COLD` are supported.
 
 ## Attributes Reference

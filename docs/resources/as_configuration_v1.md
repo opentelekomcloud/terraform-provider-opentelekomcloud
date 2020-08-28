@@ -99,50 +99,50 @@ resource "opentelekomcloud_as_configuration_v1" "my_as_config" {
 The following arguments are supported:
 
 * `scaling_configuration_name` - (Required) The name of the AS configuration. The name can contain letters,
-    digits, underscores(_), and hyphens(-), and cannot exceed 64 characters.
+  digits, underscores(_), and hyphens(-), and cannot exceed 64 characters.
 
 * `instance_config` - (Required) The information about instance configurations. The instance_config
-    dictionary data structure is documented below.
+  dictionary data structure is documented below.
 
 The `instance_config` block supports:
 
 * `instance_id` - (Optional) When using the existing instance specifications as the template to
-    create AS configurations, specify this argument. In this case, flavor, image,
-    and disk arguments do not take effect. If the instance_id argument is not specified,
-    flavor, image, and disk arguments are mandatory.
+  create AS configurations, specify this argument. In this case, flavor, image,
+  and disk arguments do not take effect. If the instance_id argument is not specified,
+  flavor, image, and disk arguments are mandatory.
 
 * `flavor` - (Optional) The flavor ID.
 
 * `image` - (Optional) The image ID.
 
 * `disk` - (Optional) The disk group information. System disks are mandatory and data disks are optional.
-    The dick structure is described below.
+  The dick structure is described below.
 
 * `key_name` - (Required) The name of the SSH key pair used to log in to the instance.
 
 * `user_data` - (Optional) The user data to provide when launching the instance.
-    The file content must be encoded with Base64.
+  The file content must be encoded with Base64.
 
 * `personality` - (Optional) Customize the personality of an instance by
-    defining one or more files and their contents. The personality structure
-    is described below.
+  defining one or more files and their contents. The personality structure
+  is described below.
 
 * `public_ip` - (Optional) The elastic IP address of the instance. The public_ip structure
-    is described below.
+  is described below.
 
 * `metadata` - (Optional) Metadata key/value pairs to make available from
-    within the instance.
+  within the instance.
 
 The `disk` block supports:
 
 * `size` - (Required) The disk size. The unit is GB. The system disk size ranges from 40 to 32768,
-    and the data disk size ranges from 10 to 32768.
+  and the data disk size ranges from 10 to 32768.
 
 * `volume_type` - (Required) The disk type, which must be the same as the disk type available in the system.
-    The options include `SATA` (common I/O disk type) and `SSD` (ultra-high I/O disk type).
+  The options include `SATA` (common I/O disk type) and `SSD` (ultra-high I/O disk type).
 
 * `disk_type` - (Required) Whether the disk is a system disk or a data disk. Option `DATA` indicates
-    a data disk. option `SYS` indicates a system disk.
+  a data disk. option `SYS` indicates a system disk.
 
 * `kms_id` - (Optional) The Encryption KMS ID of the data disk.
 
@@ -155,14 +155,13 @@ The `personality` block supports:
 The `public_ip` block supports:
 
 * `eip` - (Required) The configuration parameter for creating an elastic IP address
-    that will be automatically assigned to the instance. The eip structure is described below.
+  that will be automatically assigned to the instance. The eip structure is described below.
 
 The `eip` block supports:
 
 * `ip_type` - (Required) The IP address type. The system only supports `5_bgp` (indicates dynamic BGP).
 
 * `bandwidth` - (Required) The bandwidth information. The structure is described below.
-
 
 The `bandwidth` block supports:
 

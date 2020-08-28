@@ -1,6 +1,11 @@
+---
+page_title: ""
+subcategory: "DMS"
+---
+
 # opentelekomcloud_dms_maintainwindow_v1
 
-Use this data source to get the ID of an available OpenTelekomCloud dms maintainwindow.
+Use this data source to get the ID of an available OpenTelekomCloud DMS maintainwindow.
 
 ## Example Usage
 
@@ -22,10 +27,12 @@ data "opentelekomcloud_dms_maintainwindow_v1" "maintainwindow1" {
 
 ## Attributes Reference
 
-`id` is set to the ID of the found maintainwindow. In addition, the following attributes
-are exported:
+`id` is set to the ID of the found maintainwindow. In addition, the following attributes are exported:
 
 * `seq` - See Argument Reference above.
+
 * `begin` - See Argument Reference above.
+
 * `end` - See Argument Reference above.
+
 * `default` - See Argument Reference above.

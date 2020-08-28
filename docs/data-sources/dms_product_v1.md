@@ -1,6 +1,11 @@
+---
+page_title: ""
+subcategory: "DMS"
+---
+
 # opentelekomcloud_dms_product_v1
 
-Use this data source to get the ID of an available OpenTelekomCloud dms product.
+Use this data source to get the ID of an available DMS product within OpenTelekomCloud.
 
 ## Example Usage
 
@@ -37,18 +42,24 @@ data "opentelekomcloud_dms_product_v1" "product1" {
 
 * `node_num` - (Optional) Indicates the number of nodes in a cluster.
 
-
 ## Attributes Reference
 
-`id` is set to the ID of the found product. In addition, the following attributes
-are exported:
+`id` is set to the ID of the found product. In addition, the following attributes are exported:
 
 * `engine` - See Argument Reference above.
+
 * `version` - See Argument Reference above.
+
 * `instance_type` - See Argument Reference above.
+
 * `vm_specification` - See Argument Reference above.
+
 * `bandwidth` - See Argument Reference above.
+
 * `partition_num` - See Argument Reference above.
+
 * `storage_spec_code` - See Argument Reference above.
+
 * `io_type` - See Argument Reference above.
+
 * `node_num` - See Argument Reference above.

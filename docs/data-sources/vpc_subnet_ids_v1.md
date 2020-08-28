@@ -1,12 +1,17 @@
-# Data Source: opentelekomcloud_vpc_subnet_ids_v1
+---
+page_title: ""
+subcategory: "VPC"
+---
 
-`opentelekomcloud_vpc_subnet_ids_v1` provides a list of subnet ids for a vpc_id
+# opentelekomcloud_vpc_subnet_ids_v1
 
-This resource can be useful for getting back a list of subnet ids for a vpc.
+Use this data source to get a list of subnet ids for a vpc_id
+
+This resource can be useful for getting back a list of subnet ids for a VPC.
 
 ## Example Usage
 
-The following example shows outputing all cidr blocks for every subnet id in a vpc.
+The following example shows outputing all cidr blocks for every subnet id in a VPC.
 
 ```hcl
 data "opentelekomcloud_vpc_subnet_ids_v1" "subnet_ids" {
@@ -27,7 +32,7 @@ output "subnet_cidr_blocks" {
 
 The following arguments are supported:
 
-* `vpc_id` (Required) - Specifies the VPC ID used as the query filter.
+* `vpc_id` - (Required) Specifies the VPC ID used as the query filter.
 
 ## Attributes Reference
 

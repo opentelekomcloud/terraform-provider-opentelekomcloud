@@ -1,3 +1,8 @@
+---
+page_title: ""
+subcategory: "IAM"
+---
+
 # opentelekomcloud_identity_role_v3
 
 Use this data source to get the ID of an OpentelekomCloud role.
@@ -60,14 +65,14 @@ data "opentelekomcloud_identity_role_v3" "auth_admin" {
 
 ## Argument Reference
 
-* `name` - The name of the role.
+* `name` - (Required) The name of the role.
 
 * `domain_id` - (Optional) The domain the role belongs to.
 
 ## Attributes Reference
 
-`id` is set to the ID of the found role. In addition, the following attributes
-are exported:
+`id` is set to the ID of the found role. In addition, the following attributes are exported:
 
 * `name` - See Argument Reference above.
+
 * `domain_id` - See Argument Reference above.

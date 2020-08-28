@@ -20,8 +20,8 @@ data "opentelekomcloud_networking_secgroup_v2" "secgroup" {
 
 ## Attributes Reference
 
-`id` is set to the ID of the found security group. In addition, the following
-attributes are exported:
+`id` is set to the ID of the found security group. In addition, the following attributes are exported:
 
 * `name` - See Argument Reference above.
+
 * `description`- The description of the security group.

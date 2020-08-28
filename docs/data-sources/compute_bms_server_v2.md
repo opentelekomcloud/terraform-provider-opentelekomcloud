@@ -1,16 +1,21 @@
-# Data Source: opentelekomcloud_compute_bms_server_v2
+---
+page_title: ""
+subcategory: "BMS"
+---
 
-`opentelekomcloud_compute_bms_server_v2` used to query a BMS or BMSs details.
+# opentelekomcloud_compute_bms_server_v2
+
+Use this data source to get details about a BMS or BMSs from OpenTelekomCloud.
 
 ## Example Usage
 
 ```hcl
-variable "bms_id" {}
-variable "bms_name" {}
+variable "bms_id" { }
+variable "bms_name" { }
 
-data "opentelekomcloud_compute_bms_server_v2" "Query_BMS" {
-  id = "${var.bms_id}",
-  name = "${var.bms_name}"     
+data "opentelekomcloud_compute_bms_server_v2" "query_bms" {
+  id   = "${var.bms_id}"
+  name = "${var.bms_name}"
 }
 ```
 
@@ -22,24 +27,24 @@ The arguments of this data source act as filters for querying the BMSs details.
 
 * `user_id` - (Optional) The ID of the user to which the BMS belongs.
 
-* `name` (Optional) - The name of BMS.
+* `name` - (Optional) The name of BMS.
 
-* `status` (Optional) - The BMS status.
+* `status` - (Optional) The BMS status.
 
-* `host_status` (Optional) - The nova-compute status: **UP, UNKNOWN, DOWN, MAINTENANCE** and **Null**.
+* `host_status` - (Optional) The nova-compute status: **UP, UNKNOWN, DOWN, MAINTENANCE** and **Null**.
 
-* `key_name` (Optional) - It is the SSH key name.
+* `key_name` - (Optional) It is the SSH key name.
 
-* `flavor_id` (Optional) - It gives the BMS flavor information.
+* `flavor_id` - (Optional) It gives the BMS flavor information.
 
-* `image_id` (Optional) - The BMS image.
+* `image_id` - (Optional) The BMS image.
 
 
 ## Attributes Reference
 
-All of the argument attributes are also exported as result attributes. 
+All of the argument attributes are also exported as result attributes.
 
-* `host_id` - 	It is the host ID of the BMS.
+* `host_id` - It is the host ID of the BMS.
 
 * `progress` - This is a reserved attribute.
 
@@ -47,7 +52,7 @@ All of the argument attributes are also exported as result attributes.
 
 * `access_ip_v4` -  This is a reserved attribute.
 
-* `access_ip_v6` - This is a reserved attribute.  
+* `access_ip_v6` - This is a reserved attribute.
 
 * `addresses` - It gives the BMS network address.
 
@@ -68,4 +73,3 @@ All of the argument attributes are also exported as result attributes.
 * `hypervisor_hostname` -  It is the name of a host on the hypervisor.
 
 * `instance_name` - Instance name is specified.
-

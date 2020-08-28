@@ -2217,7 +2217,7 @@ func (rl *clientConnReadLoop) processSettings(f *SettingsFrame) error {
 			// Adjust flow control of currently-open
 			// frames by the difference of the old initial
 			// window size and this one.
-			delta := int32(s.Val) - int32(cc.initialWindowSize)
+			delta := int32(s.Val) int32(cc.initialWindowSize)
 			for _, cs := range cc.streams {
 				cs.flow.add(delta)
 			}

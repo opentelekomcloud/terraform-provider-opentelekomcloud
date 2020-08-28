@@ -17,8 +17,7 @@ data "opentelekomcloud_sdrs_domain_v1" "dom_1" {
 
 ## Attributes Reference
 
-`id` is set to the ID of the active-active domain. In addition, the following attributes
-  are exported:
+`id` is set to the ID of the active-active domain. In addition, the following attributes are exported:
 
 * `name` - See Argument Reference above.
 

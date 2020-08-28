@@ -162,11 +162,11 @@ describing redirect behavior and when redirects are applied.
 
 The `cors_rule` object supports the following:
 
-* `allowed_headers` (Optional) Specifies which headers are allowed.
-* `allowed_methods` (Required) Specifies which methods are allowed. Can be `GET`, `PUT`, `POST`, `DELETE` or `HEAD`.
-* `allowed_origins` (Required) Specifies which origins are allowed.
-* `expose_headers` (Optional) Specifies expose header in the response.
-* `max_age_seconds` (Optional) Specifies time in seconds that browser can cache the response for a preflight request.
+* `allowed_headers` - (Optional) Specifies which headers are allowed.
+* `allowed_methods` - (Required) Specifies which methods are allowed. Can be `GET`, `PUT`, `POST`, `DELETE` or `HEAD`.
+* `allowed_origins` - (Required) Specifies which origins are allowed.
+* `expose_headers` - (Optional) Specifies expose header in the response.
+* `max_age_seconds` - (Optional) Specifies time in seconds that browser can cache the response for a preflight request.
 
 The `versioning` object supports the following:
 
@@ -183,7 +183,7 @@ The `lifecycle_rule` object supports the following:
 * `id` - (Optional) Unique identifier for the rule.
 * `prefix` - (Optional) Object key prefix identifying one or more objects to which the rule applies.
 * `enabled` - (Required) Specifies lifecycle rule status.
-* `abort_incomplete_multipart_upload_days` (Optional) Specifies the number of days after initiating a multipart upload when the multipart upload must be completed.
+* `abort_incomplete_multipart_upload_days` - (Optional) Specifies the number of days after initiating a multipart upload when the multipart upload must be completed.
 * `expiration` - (Optional) Specifies a period in the object's expire (documented below).
 * `noncurrent_version_expiration` - (Optional) Specifies when noncurrent object versions expire (documented below).
 
@@ -191,13 +191,13 @@ At least one of `expiration`, `noncurrent_version_expiration` must be specified.
 
 The `expiration` object supports the following
 
-* `date` (Optional) Specifies the date after which you want the corresponding action to take effect.
-* `days` (Optional) Specifies the number of days after object creation when the specific rule action takes effect.
-* `expired_object_delete_marker` (Optional) On a versioned bucket (versioning-enabled or versioning-suspended bucket), you can add this element in the lifecycle configuration to direct Amazon S3 to delete expired object delete markers.
+* `date` - (Optional) Specifies the date after which you want the corresponding action to take effect.
+* `days` - (Optional) Specifies the number of days after object creation when the specific rule action takes effect.
+* `expired_object_delete_marker` - (Optional) On a versioned bucket (versioning-enabled or versioning-suspended bucket), you can add this element in the lifecycle configuration to direct Amazon S3 to delete expired object delete markers.
 
 The `noncurrent_version_expiration` object supports the following
 
-* `days` (Required) Specifies the number of days an object is noncurrent object versions expire.
+* `days` - (Required) Specifies the number of days an object is noncurrent object versions expire.
 
 ## Attributes Reference
 

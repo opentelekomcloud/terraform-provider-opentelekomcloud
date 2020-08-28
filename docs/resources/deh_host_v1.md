@@ -17,13 +17,13 @@ resource "opentelekomcloud_deh_host_v1" "deh_host" {
 
 The following arguments are supported:
 
-* `name` (Required) - The name of the Dedicated Host.
+* `name` - (Required) The name of the Dedicated Host.
 
-* `auto_placement` (Optional) - Allows a instance to be automatically placed onto the available Dedicated Hosts. The default value is **on**.
+* `auto_placement` - (Optional) Allows a instance to be automatically placed onto the available Dedicated Hosts. The default value is **on**.
 
-* `availability_zone` (Required) - The Availability Zone to which the Dedicated Host belongs. Changing this parameter creates a new resource.
+* `availability_zone` - (Required) The Availability Zone to which the Dedicated Host belongs. Changing this parameter creates a new resource.
 
-* `host_type` (Required) - The Dedicated Host type. Expected values are **h1, general** and **d1**. Changing this parameter creates a new resource.
+* `host_type` - (Required) The Dedicated Host type. Expected values are **h1, general** and **d1**. Changing this parameter creates a new resource.
 
 
 ## Attributes Reference

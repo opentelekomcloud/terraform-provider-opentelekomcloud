@@ -1,6 +1,11 @@
-# Data Source: opentelekomcloud_cts_tracker_v1
+---
+page_title: ""
+subcategory: "CTS"
+---
 
-The OpenTelekomCloud CTS Tracker data source allows access of Cloud Tracker.
+# opentelekomcloud_cts_tracker_v1
+
+Use this data source to get details about OpenTelekomCloud Cloud Trace Service.
 
 ## Example Usage
 ```hcl
@@ -13,29 +18,28 @@ data "opentelekomcloud_cts_tracker_v1" "tracker_v1" {
 ```
 
 ## Argument Reference
+
 The following arguments are supported:
 
-* `tracker_name` - (Optional) The tracker name. 
+* `tracker_name` - (Optional) The tracker name.
 
 * `bucket_name` - (Optional) The OBS bucket name for a tracker.
 
-* `file_prefix_name` - (Optional) The prefix of a log that needs to be stored in an OBS bucket. 
+* `file_prefix_name` - (Optional) The prefix of a log that needs to be stored in an OBS bucket.
 
-* `status` - (Optional) Status of a tracker. 
+* `status` - (Optional) Status of a tracker.
 
 
 ## Attributes Reference
 
 In addition to all arguments above, the following attributes are exported:
 
-* `is_support_smn` -Specifies SMN support.
-    
+* `is_support_smn` - Specifies SMN support.
+
 * `topic_id` - The theme of the SMN service.
 
-* `operations` -The trigger conditions for sending a notification
+* `operations` - The trigger conditions for sending a notification
 
 * `is_send_all_key_operation` - Specifies Typical or All operations for Trigger Condition.
-    
-* `need_notify_user_list` - The users using the login function.
 
-    
+* `need_notify_user_list` - The users using the login function.

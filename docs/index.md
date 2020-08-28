@@ -29,7 +29,7 @@ resource "opentelekomcloud_compute_instance_v2" "test-server" {
 This provider offers 5 means for authentication.
 
 - User name + Password
-- AKSK
+- AK/SK
 - Token
 - Federated
 - Assume Role
@@ -69,7 +69,7 @@ provider "opentelekomcloud" {
   auth_url    = "https://iam.eu-de.otc.t-systems.com/v3"
 }
 ```
-Note: if token, aksk and password are set simultaneously, then it will authenticate in the order of Token, AKSK and Password.
+Note: if token, ak/sk and password are set simultaneously, then it will authenticate in the order of Token, AKSK and Password.
 
 ### Federated
 
@@ -101,7 +101,7 @@ provider "opentelekomcloud" {
 }
 ```
 
-#### AKSK
+#### AK/SK
 
 ```hcl
 provider "opentelekomcloud" {
@@ -126,7 +126,7 @@ provider "opentelekomcloud" {
   auth_url           = "https://iam.eu-de.otc.t-systems.com/v3"
 }
 ```
-```token``` specified is not the normal token, but must have the authority of 'Agent Operator'
+`token` specified is not the normal token, but must have the authority of 'Agent Operator'.
 
 ### OpenStack configuration file
 
@@ -138,7 +138,7 @@ provider "opentelekomcloud" {
 
 `cloud` should be the name of cloud in `clouds.yaml`
 
-See [OpenStack configuration documentation](https://docs.openstack.org/python-openstackclient/latest/configuration/index.html) for details
+See [OpenStack configuration documentation](https://docs.openstack.org/python-openstackclient/latest/configuration/index.html) for details.
 
 
 ## Configuration Reference
@@ -240,7 +240,7 @@ information has been scrubbed first!
 
 ## Creating an issue
 
-[Issues](https://github.com/terraform-providers/terraform-provider-opentelekomcloud/issues)
+[Issues](https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/issues)
 can be used to keep track of bugs, enhancements, or other requests.
 See the github help [here](https://help.github.com/articles/creating-an-issue/)
 
@@ -250,7 +250,7 @@ In order to run the Acceptance Tests for development, the following environment
 variables must also be set:
 
 * `OS_IMAGE_ID` or `OS_IMAGE_NAME` - a UUID or name of an existing image in
-    Glance.
+  Glance.
 
 * `OS_FLAVOR_ID` or `OS_FLAVOR_NAME` - an ID or name of an existing flavor.
 

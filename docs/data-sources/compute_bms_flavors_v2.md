@@ -1,6 +1,11 @@
-# Data Source: opentelekomcloud_compute_bms_flavors_v2
+---
+page_title: ""
+subcategory: "BMS"
+---
 
-`opentelekomcloud_compute_bms_flavors_v2` used to query flavors of BMSs.
+# opentelekomcloud_compute_bms_flavors_v2
+
+Use this data source to get details about flavors of BMSs from OpenTelekomCloud.
 
 ## Example Usage
 
@@ -8,12 +13,12 @@
 variable "flavor_id" { }
 variable "disk_size" { }
 
-data "opentelekomcloud_compute_bms_flavors_v2" "Query_BMS_flavors" {
-  id = "${var.bms_id}",
-  min_disk = "${var.disk_size}",
-  sort_key = "id",
-  sort_dir = "desc",
-}  
+data "opentelekomcloud_compute_bms_flavors_v2" "query_bms_flavors" {
+  id       = "${var.bms_id}"
+  min_disk = "${var.disk_size}"
+  sort_key = "id"
+  sort_dir = "desc"
+}
 ```
 
 ## Argument Reference
@@ -42,6 +47,6 @@ All of the argument attributes are also exported as result attributes.
 
 * `disk` - Specifies the disk size (GB) in the BMS flavor.
 
-* `swap` -  This is a reserved attribute.
+* `swap` - This is a reserved attribute.
 
 * `rx_tx_factor` - This is a reserved attribute.

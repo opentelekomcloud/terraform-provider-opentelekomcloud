@@ -18,13 +18,13 @@ resource "opentelekomcloud_vpc_peering_connection_v2" "peering" {
 
 The following arguments are supported:
 
-* `name` (Required) - Specifies the name of the VPC peering connection. The value can contain 1 to 64 characters.
+* `name` - (Required) Specifies the name of the VPC peering connection. The value can contain 1 to 64 characters.
 
-* `vpc_id` (Required) - Specifies the ID of a VPC involved in a VPC peering connection. Changing this creates a new VPC peering connection.
+* `vpc_id` - (Required) Specifies the ID of a VPC involved in a VPC peering connection. Changing this creates a new VPC peering connection.
 
-* `peer_vpc_id` (Required) - Specifies the VPC ID of the accepter tenant. Changing this creates a new VPC peering connection.
+* `peer_vpc_id` - (Required) Specifies the VPC ID of the accepter tenant. Changing this creates a new VPC peering connection.
 
-* `peer_tenant_id` (Optional) - Specified the Tenant Id of the accepter tenant. Changing this creates a new VPC peering connection.
+* `peer_tenant_id` - (Optional) Specified the Tenant Id of the accepter tenant. Changing this creates a new VPC peering connection.
   
 ## Attributes Reference
 

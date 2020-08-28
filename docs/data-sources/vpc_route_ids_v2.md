@@ -1,6 +1,11 @@
-# Data Source: opentelekomcloud_vpc_route_ids_v2
+---
+page_title: ""
+subcategory: "VPC"
+---
 
-`opentelekomcloud_vpc_route_ids_v2` provides a list of route ids for a vpc_id.
+# opentelekomcloud_vpc_route_ids_v2
+
+Use this data source to get a list of route ids for a vpc_id.
 
 This resource can be useful for getting back a list of route ids for a vpc.
 
@@ -25,7 +30,7 @@ output "route_nexthop" {
 
 ## Argument Reference
 
-* `vpc_id` (Required) - The VPC ID that you want to filter from.
+* `vpc_id` - (Required) The VPC ID that you want to filter from.
 
 ## Attributes Reference
 

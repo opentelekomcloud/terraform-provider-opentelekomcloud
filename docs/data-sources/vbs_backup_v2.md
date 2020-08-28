@@ -1,11 +1,16 @@
-# Data Source: opentelekomcloud_vbs_backup_v2
+---
+page_title: ""
+subcategory: "VBS"
+---
 
-The VBS Backup data source provides details about a specific VBS Backup.
+# opentelekomcloud_vbs_backup_v2
+
+Use this data source to get details about a specific VBS Backup.
 
 ## Example Usage
 
 ```hcl
-variable "backup_id" {}
+variable "backup_id" { }
 
 data "opentelekomcloud_vbs_backup_v2" "mybackup" {
   id = "${var.backup_id}"
@@ -13,6 +18,7 @@ data "opentelekomcloud_vbs_backup_v2" "mybackup" {
 ```
 
 ## Argument Reference
+
 The following arguments are supported:
 
 * `id` - (Optional) The id of the vbs backup.
@@ -26,6 +32,7 @@ The following arguments are supported:
 * `status` - (Optional) The status of the VBS backup.
 
 ## Attributes Reference
+
 In addition to all arguments above, the following attributes are exported:
 
 * `description` - The description of the vbs backup.

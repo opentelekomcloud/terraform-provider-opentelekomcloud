@@ -17,6 +17,7 @@ resource "opentelekomcloud_antiddos_v1" "myantiddos" {
 }
 ```
 ## Argument Reference
+
 The following arguments are supported:
 
 * `enable_l7` - (Required) Specifies whether to enable L7 defense.
@@ -32,6 +33,7 @@ The following arguments are supported:
 * `floating_ip_id` - (Required) The ID corresponding to the Elastic IP Address (EIP) of a user.
 
 ## Attributes Reference
+
 All above argument parameters can be exported as attribute parameters.
 
 ## Import

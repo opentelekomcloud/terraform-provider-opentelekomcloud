@@ -1,6 +1,12 @@
+---
+page_title: ""
+subcategory: "DCS"
+---
+
+
 # opentelekomcloud_dcs_maintainwindow_v1
 
-Use this data source to get the ID of an available Opentelekomcloud dcs maintainwindow.
+Use this data source to get the ID of an available OpenTelekomCloud DCS maintainwindow.
 
 ## Example Usage
 
@@ -22,9 +28,10 @@ data "opentelekomcloud_dcs_maintainwindow_v1" "maintainwindow1" {
 
 ## Attributes Reference
 
-`id` is set to the ID of the found maintainwindow. In addition, the following attributes
-are exported:
+`id` is set to the ID of the found maintainwindow. In addition, the following attributes are exported:
 
 * `begin` - See Argument Reference above.
+
 * `end` - See Argument Reference above.
+
 * `default` - See Argument Reference above.

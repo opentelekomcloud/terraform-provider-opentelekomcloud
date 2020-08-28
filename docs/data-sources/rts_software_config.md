@@ -1,14 +1,19 @@
-# Data Source: opentelekomcloud_rts_software_config_v1
+---
+page_title: ""
+subcategory: "RTS"
+---
 
-The RTS Software Config data source provides details about a specific RTS Software Config.
+# opentelekomcloud_rts_software_config_v1
+
+Use this data source to get details about a specific RTS Software Config.
 
 ## Example Usage
 
 
 ```hcl
-variable "config_name" {}
+variable "config_name" { }
 
-variable "server_id" {}
+variable "server_id" { }
 
 data "opentelekomcloud_rts_software_config_v1" "myconfig" {
   id = "${var.config_name}"
@@ -21,6 +26,7 @@ resource "opentelekomcloud_rts_software_deployment_v1" "mydeployment" {
 ```
 
 ## Argument Reference
+
 The following arguments are supported:
 
 * `id` - (Optional) The id of the software configuration.
@@ -28,6 +34,7 @@ The following arguments are supported:
 * `name` - (Optional) The name of the software configuration.
 
 ## Attributes Reference
+
 In addition to all arguments above, the following attributes are exported:
 
 * `group` - The namespace that groups this software configuration by when it is delivered to a server.
@@ -39,4 +46,3 @@ In addition to all arguments above, the following attributes are exported:
 * `config` - The software configuration code.
 
 * `options` - The software configuration options.
-

@@ -1,6 +1,11 @@
-# Data Source: opentelekomcloud_deh_host_v1
+---
+page_title: ""
+subcategory: "DEH"
+---
 
-`opentelekomcloud_deh_host_v1` used to query allocated dedicated hosts.
+# opentelekomcloud_deh_host_v1
+
+Use this data source to get details about the allocated dedicated hosts from OpenTelekomCloud.
 
 ## Example Usage
 
@@ -16,10 +21,9 @@ data "opentelekomcloud_deh_host_v1" "deh_host" {
 
 The arguments of this data source act as filters for querying the allocated dedicated host.
 
-* `id` - (Optional) - The Dedicated Host ID.
+* `id` - (Optional) The Dedicated Host ID.
 
-* `name` (Optional) - The Dedicated Host name.
-
+* `name` - (Optional) The Dedicated Host name.
 
 ## Attributes Reference
 
@@ -29,7 +33,7 @@ In addition to all arguments above, the following attributes are exported:
 
 * `host_type_name` - The Dedicated Host name of type.
 
-* `status` -  The Dedicated Host status.
+* `status` - The Dedicated Host status.
 
 * `availability_zone` - The Availability Zone to which the Dedicated Host belongs.
 
@@ -53,4 +57,4 @@ In addition to all arguments above, the following attributes are exported:
 
 * `cores` - The number of hosts physical cores.
 
-* `instance_uuids` -The VMs started on the Dedicated Host.
+* `instance_uuids` - The VMs started on the Dedicated Host.

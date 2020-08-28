@@ -1,5 +1,9 @@
-# opentelekomcloud_identity_group_v3
+---
+page_title: ""
+subcategory: "IAM"
+---
 
+# opentelekomcloud_identity_group_v3
 Use this data source to get the ID of an OpentelekomCloud group.
 
 Note: This usually requires admin privileges.
@@ -14,15 +18,15 @@ data "opentelekomcloud_identity_group_v3" "admins" {
 
 ## Argument Reference
 
-* `name` - The name of the group.
+* `name` - (Required) The name of the group.
 
 * `domain_id` - (Optional) The domain the group belongs to.
 
 
 ## Attributes Reference
 
-`id` is set to the ID of the found group. In addition, the following attributes
-are exported:
+`id` is set to the ID of the found group. In addition, the following attributes are exported:
 
 * `name` - See Argument Reference above.
+
 * `domain_id` - See Argument Reference above.
