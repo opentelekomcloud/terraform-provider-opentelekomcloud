@@ -17,8 +17,7 @@ for manually specifying the bandwidth please use the
 ## Example Usage
 
 ```hcl
-resource "opentelekomcloud_compute_floatingip_v2" "floatip_1" { 
-}
+resource "opentelekomcloud_compute_floatingip_v2" "floatip_1" { }
 ```
 
 ## Argument Reference
