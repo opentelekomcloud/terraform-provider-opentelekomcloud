@@ -1,5 +1,5 @@
 ---
-subcategory: "VPC"
+subcategory: "Virtual Private Cloud (VPC)"
 ---
 
 # opentelekomcloud_vpc_peering_connection_v2

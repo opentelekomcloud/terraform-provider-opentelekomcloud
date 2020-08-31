@@ -1,5 +1,5 @@
 ---
-subcategory: "FW (Firewall)"
+subcategory: "Firewall"
 ---
 
 # opentelekomcloud_fw_firewall_group_v2

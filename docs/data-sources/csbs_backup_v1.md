@@ -1,5 +1,5 @@
 ---
-subcategory: "CSBS"
+subcategory: "Cloud Server Backup Service (CSBS)"
 ---
 
 # opentelekomcloud_csbs_backup_v1

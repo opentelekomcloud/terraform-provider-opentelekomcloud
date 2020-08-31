@@ -1,3 +1,7 @@
+---
+subcategory: "Virtual Private Network (VPN)"
+---
+
 # opentelekomcloud_vpnaas_site_connection_v2
 
 Manages a V2 IPSec site connection resource within OpenTelekomCloud.

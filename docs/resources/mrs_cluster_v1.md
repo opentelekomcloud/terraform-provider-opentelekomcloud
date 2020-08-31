@@ -1,5 +1,5 @@
 ---
-subcategory: "MRS"
+subcategory: "MapReduce Service (MRS)"
 ---
 
 # opentelekomcloud_mrs_cluster_v1
@@ -228,8 +228,9 @@ The `add_jobs` block supports:
 -> **Note:** Spark and Hive jobs can be added to only clusters including Spark and Hive components.
 
 * `job_name` - (Required) It contains only 1 to 64 letters, digits,
-  hyphens (-), and underscores (_). NOTE: Identical job names are allowed but
-  not recommended.
+  hyphens (-), and underscores (_). 
+
+-> **Note:** Identical job names are allowed but not recommended.
 
 * `jar_path` - (Required) Path of the .jar file or .sql file for program execution
   The parameter must meet the following requirements: Contains a maximum of 1023

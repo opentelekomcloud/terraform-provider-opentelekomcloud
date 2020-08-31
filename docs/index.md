@@ -70,7 +70,7 @@ provider "opentelekomcloud" {
 }
 ```
 
--> **Note:** If token, ak/sk and password are set simultaneously, then it will authenticate in the order of Token, AKSK and Password.
+-> **Note:** If token, AK/SK and password are set simultaneously, then it will authenticate in the order of Token, AKSK and Password.
 
 ### Federated
 
@@ -144,7 +144,7 @@ See [OpenStack configuration documentation](https://docs.openstack.org/python-op
 
 ## Configuration Reference
 
-~> **Note:** The `region`, `tenant_id`, `domain_id`, `user_id` arguments has been deprecated and `tenant_name`, `domain_name` changed to be `required`. Please update your configurations as it might be removed in the future releases.
+-> **Note:** The `region`, `tenant_id`, `domain_id`, `user_id` arguments has been deprecated and `tenant_name`, `domain_name` changed to be `required`. Please update your configurations as it might be removed in the future releases.
 
 The following arguments are supported:
 
@@ -209,8 +209,8 @@ The following arguments are supported:
   Swift-native authentication system. If omitted, the `OS_SWAUTH` environment
   variable is used. You must also set `username` to the Swauth/Swift username
   such as `username:project`. Set the `password` to the Swauth/Swift key.
-  Finally, set `auth_url` as the location of the Swift service. Note that this
-  will only work when used with the OpenTelekomCloud Object Storage resources.
+  Finally, set `auth_url` as the location of the Swift service. 
+-> **Note:** This will only work when used with the OpenTelekomCloud Object Storage resources.
 
 * `agency_name` - (Optional) if authorized by assume role, it must be set. The
   name of agency.

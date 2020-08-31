@@ -1,3 +1,7 @@
+---
+subcategory: "Virtual Private Cloud (VPC)"
+---
+
 # opentelekomcloud_networking_secgroup_rule_v2
 
 Manages a V2 neutron security group rule resource within OpenTelekomCloud.

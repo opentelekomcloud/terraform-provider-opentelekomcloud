@@ -1,5 +1,5 @@
 ---
-subcategory: "RDS"
+subcategory: "Relational Database Service (RDS)"
 ---
 
 # opentelekomcloud_rds_instance_v3
@@ -161,8 +161,9 @@ The following arguments are supported:
 
 * `ha_replication_mode` - (Optional) Specifies the replication mode for the standby DB instance. For MySQL, the value
   is async or semisync. For PostgreSQL, the value is async or sync. For
-  Microsoft SQL Server, the value is sync. NOTE: async indicates the
-  asynchronous replication mode. semisync indicates the
+  Microsoft SQL Server, the value is sync. 
+
+-> **Note:** Async indicates the asynchronous replication mode. semisync indicates the
   semi-synchronous replication mode. sync indicates the synchronous
   replication mode.  Changing this parameter will create a new resource.
 
@@ -264,8 +265,9 @@ RDS instance can be imported using the `id`, e.g.
 terraform import opentelekomcloud_rds_instance_v3.instance_1 7117d38e-4c8f-4624-a505-bd96b97d024c
 ```
 
+## Notes
 
--> **Note:** But due to some attributes missing from the API response, it's required to ignore changes as below.
+But due to some attributes missing from the API response, it's required to ignore changes as below.
 
 ```hcl
 resource "opentelekomcloud_rds_instance_v3" "instance_1" {

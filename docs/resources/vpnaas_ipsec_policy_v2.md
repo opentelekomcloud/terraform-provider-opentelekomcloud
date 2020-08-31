@@ -1,3 +1,7 @@
+---
+subcategory: "Virtual Private Network (VPN)"
+---
+
 # opentelekomcloud_vpnaas_ipsec_policy_v2
 
 Manages a V2 IPSec policy resource within OpenTelekomCloud.

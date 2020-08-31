@@ -1,5 +1,5 @@
 ---
-subcategory: "RDS"
+subcategory: "Relational Database Service (RDS)"
 ---
 
 # opentelekomcloud_rds_flavors_v1

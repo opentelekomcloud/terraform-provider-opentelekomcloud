@@ -1,5 +1,5 @@
 ---
-subcategory: "CES"
+subcategory: "Cloud Eye"
 ---
 
 # opentelekomcloud_ces_alarmrule

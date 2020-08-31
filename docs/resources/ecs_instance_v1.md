@@ -1,5 +1,5 @@
 ---
-subcategory: "ECS"
+subcategory: "Elastic Cloud Server (ECS)"
 ---
 
 # opentelekomcloud_ecs_instance_v1

@@ -1,5 +1,5 @@
 ---
-subcategory: "EVS"
+subcategory: "BlockStorage"
 ---
 
 # opentelekomcloud_blockstorage_volume_attach_v2

@@ -1,5 +1,5 @@
 ---
-subcategory: "ECS"
+subcategory: "Elastic Cloud Server (ECS)"
 ---
 
 # opentelekomcloud_compute_instance_v2
@@ -262,7 +262,7 @@ function, or the `template_cloudinit_config` resource.
 
 ## Argument Reference
 
-~> **Note:** The `tag` attribute has been deprecated and might
+-> **Note:** The `tag` attribute has been deprecated and might
 be removed in future releases, please use `tags` instead.
 
 The following arguments are supported:
@@ -288,9 +288,9 @@ The following arguments are supported:
 
 * `security_groups` - (Optional) An array of one or more security group names
   to associate with the server. Changing this results in adding/removing
-  security groups from the existing server. *Note*: When attaching the
-  instance to networks using Ports, place the security groups on the Port
-  and not the instance.
+  security groups from the existing server. 
+-> **Note:** When attaching the instance to networks using Ports, 
+  place the security groups on the Port and not the instance.
 
 * `availability_zone` - (Optional) The availability zone in which to create
   the server. Changing this creates a new server.

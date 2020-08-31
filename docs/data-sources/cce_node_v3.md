@@ -1,5 +1,5 @@
 ---
-subcategory: "CCE"
+subcategory: "Cloud Container Engine (CCE)"
 ---
 
 # opentelekomcloud_cce_node_v3
@@ -60,8 +60,7 @@ All above argument parameters can be exported as attribute parameters along with
 
 * `share_type` - The bandwidth sharing type.
 
-NOTE:
-This parameter is mandatory when share_type is set to PER and is optional when share_type is set to WHOLE with an ID specified.
+-> **Note:** This parameter is mandatory when share_type is set to PER and is optional when share_type is set to WHOLE with an ID specified.
 
 Enumerated values: PER (indicates exclusive bandwidth) and WHOLE (indicates sharing)
 

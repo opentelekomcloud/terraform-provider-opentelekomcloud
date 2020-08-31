@@ -1,5 +1,5 @@
 ---
-subcategory: "DEH"
+subcategory: "Dedicated Host (DEH)"
 ---
 
 # opentelekomcloud_deh_server_v1

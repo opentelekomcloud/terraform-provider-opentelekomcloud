@@ -1,5 +1,5 @@
 ---
-subcategory: "DMS"
+subcategory: "Distributed Message Service (DMS)"
 ---
 
 # opentelekomcloud_dms_instance_v1

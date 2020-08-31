@@ -1,6 +1,10 @@
+---
+subcategory: "Scalable File Service (SFS)"
+---
+
 # opentelekomcloud_sfs_file_system_v2
 
-Use this data source to get details about an Shared File System (SFS).
+Use this data source to get details about an Scalabe File Service.
 
 ## Example Usage
 

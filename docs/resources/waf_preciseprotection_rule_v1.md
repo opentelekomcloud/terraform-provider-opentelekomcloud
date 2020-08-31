@@ -1,5 +1,5 @@
 ---
-subcategory: "WAF"
+subcategory: "Web Application Firewall (WAF)"
 ---
 
 # opentelekomcloud_waf_preciseprotection_rule_v1

@@ -1,6 +1,10 @@
+---
+subcategory: "Scalable File Service (SFS)"
+---
+
 # opentelekomcloud_sfs_file_system_v2
 
-Provides an Shared File System (SFS) resource.
+Provides an Scalable File System resource.
 
 ## Example Usage
 
@@ -18,7 +22,7 @@ resource "opentelekomcloud_sfs_file_system_v2" "share-file" {
   access_level = "rw"
   description  = "${var.share_description}"
   metadata = {
-      "type"="nfs"
+      "type" = "nfs"
   }
 }
 ```

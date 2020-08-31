@@ -1,5 +1,5 @@
 ---
-subcategory: "DCS"
+subcategory: "Distributed Cache Service (DCS)"
 ---
 
 # opentelekomcloud_dcs_az_v1

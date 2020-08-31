@@ -1,3 +1,5 @@
+
+
 # opentelekomcloud_networking_floatingip_v2
 
 Manages a V2 floating IP resource within OpenTelekomCloud Neutron (networking)

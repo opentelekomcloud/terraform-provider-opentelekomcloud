@@ -1,5 +1,5 @@
 ---
-subcategory: "WAF"
+subcategory: "Web Application Firewall (WAF)"
 ---
 
 # opentelekomcloud_waf_falsealarmmasking_rule_v1

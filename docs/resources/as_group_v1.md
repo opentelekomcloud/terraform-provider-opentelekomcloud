@@ -1,5 +1,5 @@
 ---
-subcategory: "AS (Autoscaling)"
+subcategory: "Autoscaling"
 ---
 
 # opentelekomcloud_as_group_v1

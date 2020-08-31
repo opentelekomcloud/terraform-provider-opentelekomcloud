@@ -1,7 +1,6 @@
 ---
-subcategory: "DMS"
+subcategory: "Distributed Message Service (DMS)"
 ---
-
 
 # opentelekomcloud_dms_az_v1
 

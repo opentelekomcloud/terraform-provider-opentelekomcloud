@@ -1,3 +1,7 @@
+---
+subcategory: "Elastic Cloud Server (ECS)"
+---
+
 # opentelekomcloud_compute_secgroup_v2
 
 Manages a V2 security group resource within OpenTelekomCloud.

@@ -1,5 +1,5 @@
 ---
-subcategory: "AS (Autoscaling)"
+subcategory: "Autoscaling"
 ---
 
 # opentelekomcloud_as_policy_v1
@@ -51,7 +51,7 @@ resource "opentelekomcloud_as_policy_v1" "hth_aspolicy_1"{
 }
 ```
 
-Please note that the `launch_time` of the `SCHEDULED` policy cannot be earlier than the current time.
+-> **Note:** The `launch_time` of the `SCHEDULED` policy cannot be earlier than the current time.
 
 ### AS Alarm Policy
 

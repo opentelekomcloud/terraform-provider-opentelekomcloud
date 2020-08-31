@@ -1,5 +1,5 @@
 ---
-subcategory: "VPC"
+subcategory: "Virtual Private Cloud (VPC)"
 ---
 
 # opentelekomcloud_vpc_flow_log_v1

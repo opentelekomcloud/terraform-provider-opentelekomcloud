@@ -1,5 +1,5 @@
 ---
-subcategory: "RTS"
+subcategory: "Resource Template Service (RTS)"
 ---
 
 # opentelekomcloud_rts_software_config_v1

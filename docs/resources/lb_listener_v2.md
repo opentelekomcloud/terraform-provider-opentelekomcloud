@@ -1,5 +1,5 @@
 ---
-subcategory: "ELB"
+subcategory: "Elastic Load Balance (ELB)"
 ---
 
 # opentelekomcloud_lb_listener_v2

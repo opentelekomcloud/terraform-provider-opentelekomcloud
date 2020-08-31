@@ -1,5 +1,5 @@
 ---
-subcategory: "EVS"
+subcategory: "Elastic Volume Service (EVS)"
 ---
 
 # opentelekomcloud_evs_volume_v3

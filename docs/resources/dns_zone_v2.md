@@ -1,5 +1,5 @@
 ---
-subcategory: "DNS"
+subcategory: "Domain Name Service (DNS)"
 ---
 
 # opentelekomcloud_dns_zone_v2
@@ -50,8 +50,8 @@ resource "opentelekomcloud_dns_zone_v2" "private_example_com" {
 
 The following arguments are supported:
 
-* `name` - (Required) The name of the zone. Note the `.` at the end of the name.
-  Changing this creates a new DNS zone.
+* `name` - (Required) The name of the zone.   Changing this creates a new DNS zone.
+-> **Note:** The `.` at the end of the name.
 
 * `email` - (Optional) The email contact for the zone record.
 

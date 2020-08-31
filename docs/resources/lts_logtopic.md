@@ -1,5 +1,5 @@
 ---
-subcategory: "LTS"
+subcategory: "Log Tank Service (LTS)"
 ---
 
 # opentelekomcloud_logtank_topic_v2

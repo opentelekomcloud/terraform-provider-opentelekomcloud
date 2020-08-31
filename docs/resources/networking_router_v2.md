@@ -1,3 +1,7 @@
+---
+subcategory: "Virtual Private Cloud (VPC)"
+---
+
 # opentelekomcloud_networking_router_v2
 
 Manages a V2 router resource within OpenTelekomCloud. The router is the top-level resource for the VPC within OpenTelekomCloud.

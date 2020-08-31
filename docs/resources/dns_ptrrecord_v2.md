@@ -1,5 +1,5 @@
 ---
-subcategory: "DNS"
+subcategory: "Domain Name Service (DNS)"
 ---
 
 # opentelekomcloud_dns_ptrrecord_v2

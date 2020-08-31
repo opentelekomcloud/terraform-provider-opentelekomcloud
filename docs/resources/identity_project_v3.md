@@ -1,5 +1,5 @@
 ---
-subcategory: "IAM"
+subcategory: "Identity and Access Management (IAM)"
 ---
 
 # opentelekomcloud_identity_project_v3

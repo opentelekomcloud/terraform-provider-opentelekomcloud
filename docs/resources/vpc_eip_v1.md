@@ -1,5 +1,5 @@
 ---
-subcategory: "VPC"
+subcategory: "Elastic IP (EIP)"
 ---
 
 # opentelekomcloud_vpc_eip_v1

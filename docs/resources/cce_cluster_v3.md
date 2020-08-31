@@ -1,5 +1,5 @@
 ---
-subcategory: "CCE"
+subcategory: "Container Cluster Engine (CCE)"
 ---
 
 # opentelekomcloud_cce_cluster_v3

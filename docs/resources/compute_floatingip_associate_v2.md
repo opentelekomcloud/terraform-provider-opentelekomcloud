@@ -81,6 +81,6 @@ The following attributes are exported:
 This resource can be imported by specifying all three arguments, separated
 by a forward slash:
 
-```
+```sh
 terraform import opentelekomcloud_compute_floatingip_associate_v2.fip_1 <floating_ip>/<instance_id>/<fixed_ip>
 ```

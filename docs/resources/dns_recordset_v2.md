@@ -1,5 +1,5 @@
 ---
-subcategory: "DNS"
+subcategory: "Domain Name Service (DNS)"
 ---
 
 # opentelekomcloud_dns_recordset_v2
@@ -36,8 +36,9 @@ The following arguments are supported:
 * `zone_id` - (Required) The ID of the zone in which to create the record set.
   Changing this creates a new DNS  record set.
 
-* `name` - (Required) The name of the record set. Note the `.` at the end of the name.
-  Changing this creates a new DNS  record set.
+* `name` - (Required) The name of the record set. Changing this creates a new DNS  record set.
+
+-> **Note:** The `.` at the end of the name.
 
 * `type` - (Optional) The type of record set. Examples: "A", "MX".
   Changing this creates a new DNS  record set.

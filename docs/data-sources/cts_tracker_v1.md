@@ -1,5 +1,5 @@
 ---
-subcategory: "CTS"
+subcategory: "Cloud Trace Service (CTS)"
 ---
 
 # opentelekomcloud_cts_tracker_v1

@@ -1,3 +1,7 @@
+---
+subcategory: "Virtual Private Cloud (VPC)"
+---
+
 # opentelekomcloud_networking_router_route_v2
 
 Creates a routing entry on a OpenTelekomCloud V2 router.
@@ -57,8 +61,6 @@ The following attributes are exported:
 
 * `next_hop` - See Argument Reference above.
 
-## Notes
-
-The `next_hop` IP address must be directly reachable from the router at the `opentelekomcloud_networking_router_route_v2`
-resource creation time.  You can ensure that by explicitly specifying a dependency on the `opentelekomcloud_networking_router_interface_v2`
-resource that connects the next hop to the router, as in the example above.
+-> **Note:** The `next_hop` IP address must be directly reachable from the router at the `opentelekomcloud_networking_router_route_v2`
+  resource creation time.  You can ensure that by explicitly specifying a dependency on the `opentelekomcloud_networking_router_interface_v2`
+  resource that connects the next hop to the router, as in the example above.

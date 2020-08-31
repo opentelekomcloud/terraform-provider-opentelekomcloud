@@ -1,6 +1,10 @@
+---
+subcategory: "Cloud Search Service (CSS)"
+---
+
 # opentelekomcloud_css_cluster_v1
 
-cluster management
+Manages a CSS cluster resource.
 
 ## Example Usage
 

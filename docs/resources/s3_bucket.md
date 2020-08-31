@@ -147,8 +147,9 @@ The following arguments are supported:
 * `acl` - (Optional) The [canned ACL](https://docs.aws.amazon.com/AmazonS3/latest/dev/acl-overview.html#canned-acl) to apply. Defaults to "private".
 
 * `policy` - (Optional) A valid [bucket policy](https://docs.aws.amazon.com/AmazonS3/latest/dev/example-bucket-policies.html) JSON document. 
-  Note that if the policy document is not specific enough (but still valid), 
-  Terraform may view the policy as constantly changing in a `terraform plan`. In this case, please make sure you use the verbose/specific version of the policy.
+
+-> **Note:** If the policy document is not specific enough (but still valid), Terraform may view
+  the policy as constantly changing in a `terraform plan`. In this case, please make sure you use the verbose/specific version of the policy.
 
 * `tags` - (Optional) A mapping of tags to assign to the bucket.
 

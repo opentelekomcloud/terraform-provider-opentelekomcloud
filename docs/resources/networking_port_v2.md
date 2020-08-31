@@ -1,3 +1,7 @@
+---
+subcategory: "Virtual Private Cloud (VPC)"
+---
+
 # opentelekomcloud_networking_port_v2
 
 Manages a V2 port resource within OpenTelekomCloud.

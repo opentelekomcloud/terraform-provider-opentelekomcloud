@@ -1,5 +1,5 @@
 ---
-subcategory: "BMS"
+subcategory: "Bare Metal Server (BMS)"
 ---
 
 # opentelekomcloud_compute_bms_tags_v2

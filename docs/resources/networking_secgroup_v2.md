@@ -1,3 +1,7 @@
+---
+subcategory: "Virtual Private Cloud (VPC)"
+---
+
 # opentelekomcloud_networking_secgroup_v2
 
 Manages a V2 neutron security group resource within OpenTelekomCloud.
@@ -35,7 +39,7 @@ resource "opentelekomcloud_networking_secgroup_rule_v2" "secgroup_rule_v6" {
 }
 ```
 
-Please note that this behavior may differ depending on the configuration of
+-> **Note:** This behavior may differ depending on the configuration of
 the OpenTelekomCloud cloud. The above illustrates the current default Neutron
 behavior. Some OpenTelekomCloud clouds might provide additional rules and some might
 not provide any rules at all (in which case the `delete_default_rules` setting
@@ -54,8 +58,7 @@ The following arguments are supported:
   security group.
 
 * `delete_default_rules` - (Optional) Whether or not to delete the default
-  egress security rules. This is `false` by default. See the below note
-  for more information.
+  egress security rules. This is `false` by default.
 
 ## Attributes Reference
 

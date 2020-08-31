@@ -1,5 +1,5 @@
 ---
-subcategory: "VBS"
+subcategory: "Volume Backup Service (VBS)"
 ---
 
 # opentelekomcloud_vbs_backup_share_v2

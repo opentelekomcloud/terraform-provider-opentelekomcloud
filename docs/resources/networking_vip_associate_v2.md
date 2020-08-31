@@ -1,3 +1,7 @@
+---
+subcategory: "Virtual Private Cloud (VPC)"
+---
+
 # opentelekomcloud_networking_vip_associate_v2
 
 Manages a V2 vip associate resource within OpenTelekomCloud.

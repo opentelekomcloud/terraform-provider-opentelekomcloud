@@ -1,5 +1,5 @@
 ---
-subcategory: "AntiDDoS"
+subcategory: "Anti-DDoS"
 ---
 
 # opentelekomcloud_antiddos_v1

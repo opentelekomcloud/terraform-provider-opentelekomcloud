@@ -1,5 +1,5 @@
 ---
-subcategory: "IMS"
+subcategory: "Image Management Service (IMS)"
 ---
 
 # opentelekomcloud_ims_data_image_v2

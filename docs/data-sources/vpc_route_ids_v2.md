@@ -1,5 +1,5 @@
 ---
-subcategory: "VPC"
+subcategory: "Virtual Private Cloud (VPC)"
 ---
 
 # opentelekomcloud_vpc_route_ids_v2

@@ -1,3 +1,7 @@
+---
+subcategory: "Virtual Private Network (VPN)"
+---
+
 # opentelekomcloud_vpnaas_ike_policy_v2
 
 Manages a V2 IKE policy resource within OpenTelekomCloud.

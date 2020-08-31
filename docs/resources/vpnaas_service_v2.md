@@ -1,3 +1,7 @@
+---
+subcategory: "Virtual Private Network (VPN)"
+---
+
 # opentelekomcloud_vpnaas_service_v2
 
 Manages a V2 VPN service resource within OpenTelekomCloud.

@@ -1,5 +1,5 @@
 ---
-subcategory: "KMS"
+subcategory: "Key Management Service (KMS)"
 ---
 
 # opentelekomcloud_kms_data_key_v1

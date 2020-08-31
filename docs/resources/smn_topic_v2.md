@@ -1,5 +1,5 @@
 ---
-subcategory: "SMN"
+subcategory: "Simple Message Notification (SMN)"
 ---
 
 # opentelekomcloud_smn_topic_v2

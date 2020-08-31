@@ -1,3 +1,7 @@
+---
+subcategory: "Elastic Cloud Server (ECS)"
+---
+
 # opentelekomcloud_compute_keypair_v2
 
 Manages a V2 keypair resource within OpenTelekomCloud.

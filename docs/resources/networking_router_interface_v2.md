@@ -1,3 +1,7 @@
+---
+subcategory: "Virtual Private Cloud (VPC)"
+---
+
 # opentelekomcloud_networking_router_interface_v2
 
 Manages a V2 router interface resource within OpenTelekomCloud.

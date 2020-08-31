@@ -1,5 +1,5 @@
 ---
-subcategory: "NAT"
+subcategory: "NAT Gateway (NAT)"
 ---
 
 # opentelekomcloud_nat_gateway_v2
