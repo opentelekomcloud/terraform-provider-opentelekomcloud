@@ -3,7 +3,7 @@ resource "opentelekomcloud_blockstorage_volume_v2" "volume_2" {
   #name        = "${var.volume_name}"
   #availability_zone = "${var.availability_zone}"
   #description = "${var.desc}"
-  size        =  "${var.volume_size}"
+  size = "${var.volume_size}"
   #volume_type = "${var.volume_type}"
 }
 
@@ -11,12 +11,12 @@ resource "opentelekomcloud_blockstorage_volume_v2" "volume_2" {
 
 
 resource "opentelekomcloud_blockstorage_volume_v2" "volume_1" {
-  region      = "${var.region}"
-  name        = "${var.volume_name}"
+  region            = "${var.region}"
+  name              = "${var.volume_name}"
   availability_zone = "${var.availability_zone}"
-  description = "${var.desc}"
-  size        =  "${var.volume_size}"
-  volume_type = "${var.volume_type}"
+  description       = "${var.desc}"
+  size              = "${var.volume_size}"
+  volume_type       = "${var.volume_type}"
 }
 
 #attach single evs to ecs
@@ -27,10 +27,10 @@ resource "opentelekomcloud_compute_volume_attach_v2" "va_1" {
 
 #attach multiple volumes to ecs
 resource "opentelekomcloud_blockstorage_volume_v2" "volumes" {
-  count = 2
+  count             = 2
   availability_zone = "${var.availability_zone}"
-  name  = "${format("vol-%02d", count.index + 1)}"
-  size  = "${var.volume_size}" 
+  name              = "${format("vol-%02d", count.index + 1)}"
+  size              = "${var.volume_size}"
 }
 resource "opentelekomcloud_compute_volume_attach_v2" "attachments" {
   count       = 2

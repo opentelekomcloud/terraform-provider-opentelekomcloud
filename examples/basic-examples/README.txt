@@ -29,4 +29,3 @@ modules: Contains the basic examples, Currently has more than 30 resources, they
 	main.tf: resource difinitions.
 	outputs.tf: the output information difinitions.
 	var.tf: the variables, please change its value with your case.
-  	

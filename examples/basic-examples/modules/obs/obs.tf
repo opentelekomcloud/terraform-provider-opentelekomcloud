@@ -1,19 +1,19 @@
 #pass
 resource "opentelekomcloud_s3_bucket" "bucket1" {
-   region = "eu-de"
+  region = "eu-de"
 }
 #pass
 resource "opentelekomcloud_s3_bucket_object" "object" {
 
-  bucket = "${opentelekomcloud_s3_bucket.bucket1.bucket}"
-  key    = "objectTest"
-  source = "/opt/terraform/terraformTest/terraform-DT/modules/obs/file.txt"
-  etag   = "${md5(file("/opt/terraform/terraformTest/terraform-DT/modules/obs/file.txt"))}"
-  cache_control  = "1"
-  content_disposition = "attachment;filename='fname.ext'"
-  content_encoding = "encoding"
-  content_language = "en-GB"
-  website_redirect  = "/test2.txt"
+  bucket                 = "${opentelekomcloud_s3_bucket.bucket1.bucket}"
+  key                    = "objectTest"
+  source                 = "/opt/terraform/terraformTest/terraform-DT/modules/obs/file.txt"
+  etag                   = "${md5(file("/opt/terraform/terraformTest/terraform-DT/modules/obs/file.txt"))}"
+  cache_control          = "1"
+  content_disposition    = "attachment;filename='fname.ext'"
+  content_encoding       = "encoding"
+  content_language       = "en-GB"
+  website_redirect       = "/test2.txt"
   server_side_encryption = "aws:kms"
 }
 
@@ -28,23 +28,23 @@ resource "opentelekomcloud_s3_bucket_object" "object2" {
   bucket = "${opentelekomcloud_s3_bucket.bucket1.bucket}"
   key    = "new_object_key"
   #source = "./policy.json"
-   content = "/opt/terraform/terraformTest/terraform-DT/modules/obs/file.txt"
-  etag   = "${md5(file("/opt/terraform/terraformTest/terraform-DT/modules/obs/file.txt"))}"
-  cache_control  = "1"
-  content_disposition = "attachment;filename='fname.ext'"
-  content_encoding = "encoding"
-  content_language = "en-GB"
-  website_redirect  = "/test2.txt"
+  content                = "/opt/terraform/terraformTest/terraform-DT/modules/obs/file.txt"
+  etag                   = "${md5(file("/opt/terraform/terraformTest/terraform-DT/modules/obs/file.txt"))}"
+  cache_control          = "1"
+  content_disposition    = "attachment;filename='fname.ext'"
+  content_encoding       = "encoding"
+  content_language       = "en-GB"
+  website_redirect       = "/test2.txt"
   server_side_encryption = "aws:kms"
 }
 
 
 //pass
 resource "opentelekomcloud_s3_bucket" "bucket2" {
- region = "eu-de"
+  region = "eu-de"
   #bucket = "${var.bucket_name}"
-  bucket_prefix  = "test-"
-  acl    = "private"
+  bucket_prefix = "test-"
+  acl           = "private"
   #policy = "${file("/opt/terraform/terraformTest/terraform-DT/modules/obs/policy.json")}"
   tags {
     Name        = "Mybucket"
@@ -58,7 +58,7 @@ resource "opentelekomcloud_s3_bucket" "b" {
 //pass
 resource "opentelekomcloud_s3_bucket_policy" "policy" {
   bucket = "${opentelekomcloud_s3_bucket.b.bucket}"
-  policy =<<POLICY
+  policy = <<POLICY
 {
   "Version": "2008-10-17",
   "Statement": [
@@ -85,14 +85,14 @@ POLICY
 
 ##Static Website Hosting  pass
 resource "opentelekomcloud_s3_bucket" "bucket3" {
- region = "eu-de"
+  region = "eu-de"
   bucket = "s3-website-test-bucket3.hashicorp.com"
   acl    = "public-read"
   policy = "${file("/opt/terraform/terraformTest/terraform-DT/modules/obs/policy3.json")}"
   website {
     index_document = "index.html"
     error_document = "error.html"
-    routing_rules = <<EOF
+    routing_rules  = <<EOF
 	[{
     "Condition": {
         "KeyPrefixEquals": "docs/"
@@ -107,7 +107,7 @@ resource "opentelekomcloud_s3_bucket" "bucket3" {
 
 ##Using CORS pass
 resource "opentelekomcloud_s3_bucket" "bucket4" {
- region = "eu-de"
+  region = "eu-de"
   bucket = "s3-website-test-bucket4.hashicorp.com"
   acl    = "public-read"
 
@@ -121,7 +121,7 @@ resource "opentelekomcloud_s3_bucket" "bucket4" {
 }
 ##Using versioning pass
 resource "opentelekomcloud_s3_bucket" "bucket5" {
- region = "eu-de"
+  region = "eu-de"
   bucket = "my-tf-test-bucket-bucket5"
   acl    = "private"
 
@@ -156,7 +156,7 @@ resource "opentelekomcloud_s3_bucket" "bucket7" {
     id      = "log"
     enabled = true
 
-    prefix  = "log/"
+    prefix = "log/"
     #tags {
     #  rule      = "log"
     #  autoclean = "true"
@@ -179,7 +179,7 @@ resource "opentelekomcloud_s3_bucket" "bucket7" {
 }
 //pass
 resource "opentelekomcloud_s3_bucket" "versioning_bucket" {
- region = "eu-de"
+  region = "eu-de"
   bucket = "my-versioning-bucket"
   acl    = "private"
 
@@ -190,10 +190,10 @@ resource "opentelekomcloud_s3_bucket" "versioning_bucket" {
   lifecycle_rule {
     prefix  = "config/"
     enabled = true
-	expiration{
-	 days = 90
-	}
+    expiration {
+      days = 90
+    }
   }
-   
+
 }
 

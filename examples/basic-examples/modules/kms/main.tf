@@ -1,6 +1,6 @@
 #create KMS
 resource "opentelekomcloud_kms_key_v1" "key_1" {
-  key_alias       = "${var.kms_name}"
+  key_alias = "${var.kms_name}"
 }
 resource "opentelekomcloud_kms_key_v1" "key_2" {
   key_alias       = "${var.kms_name}_2"

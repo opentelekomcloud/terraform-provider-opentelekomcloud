@@ -1,10 +1,10 @@
 #define SFS variable
-variable "size" { }
+variable "size" {}
 
-variable "share_name" { }
+variable "share_name" {}
 
-variable "share_description" { }
+variable "share_description" {}
 
-variable "vpc_id" { }
+variable "vpc_id" {}
 
-variable "availability_zone" { }
+variable "availability_zone" {}

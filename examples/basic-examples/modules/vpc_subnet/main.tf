@@ -1,6 +1,6 @@
 # create random number
 resource "random_id" "vpc" {
- byte_length = 4
+  byte_length = 4
 }
 
 #create VPC
@@ -17,27 +17,27 @@ resource "opentelekomcloud_vpc_v1" "vpc_peer" {
 }
 #create subnet1
 resource "opentelekomcloud_vpc_subnet_v1" "subnet_1" {
-  name = "${var.subnet_name1}"
-  cidr = "${var.subnet_cidr1}"
+  name       = "${var.subnet_name1}"
+  cidr       = "${var.subnet_cidr1}"
   gateway_ip = "${var.subnet_gateway_ip1}"
-  vpc_id = "${opentelekomcloud_vpc_v1.vpc_1.id}"
- # primary_dns = "${var.primary_dns}"
- # secondary_dns = "${var.secondary_dns}"
+  vpc_id     = "${opentelekomcloud_vpc_v1.vpc_1.id}"
+  # primary_dns = "${var.primary_dns}"
+  # secondary_dns = "${var.secondary_dns}"
 }
 
 #create subnet2
 resource "opentelekomcloud_vpc_subnet_v1" "subnet_2" {
-  name = "${var.subnet_name2}"
-  cidr = "${var.subnet_cidr2}"
+  name       = "${var.subnet_name2}"
+  cidr       = "${var.subnet_cidr2}"
   gateway_ip = "${var.subnet_gateway_ip2}"
-  vpc_id = "${opentelekomcloud_vpc_v1.vpc_1.id}"
-#  primary_dns = "${var.primary_dns}"
-#  secondary_dns = "${var.secondary_dns}"
+  vpc_id     = "${opentelekomcloud_vpc_v1.vpc_1.id}"
+  #  primary_dns = "${var.primary_dns}"
+  #  secondary_dns = "${var.secondary_dns}"
 }
 
 resource "opentelekomcloud_vpc_peering_connection_v2" "peering" {
-  name = "peer_test"
-  vpc_id = "${opentelekomcloud_vpc_v1.vpc_1.id}"
+  name        = "peer_test"
+  vpc_id      = "${opentelekomcloud_vpc_v1.vpc_1.id}"
   peer_vpc_id = "${opentelekomcloud_vpc_v1.vpc_peer.id}"
 }
 

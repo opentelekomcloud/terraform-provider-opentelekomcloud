@@ -47,20 +47,20 @@ output "agency_id" {
 output "delegated_domain_name" {
   value = "${module.iam_agency.delegated_domain_name}"
 }
- 
+
 output "project_role" {
   value = "${module.iam_agency.project_role}"
 }
 
-output "domain_roles" {    
+output "domain_roles" {
   value = "${module.iam_agency.domain_roles}"
 }
- 
+
 output "project_role" {
   value = "${module.iam_agency.project_role}"
 }
 
-output "domain_roles" {    
+output "domain_roles" {
   value = "${module.iam_agency.domain_roles}"
 }
 
@@ -76,7 +76,7 @@ output "push_policy_1" {
   value = "${module.smn_topic.push_policy}"
 }
 #
-output "topic_urn_2" {    
+output "topic_urn_2" {
   value = "${module.smn_subscription.topic_urn}"
 }
 #

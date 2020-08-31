@@ -5,8 +5,8 @@ resource "random_id" "sg" {
 #create security group for ecs
 
 resource "opentelekomcloud_networking_secgroup_v2" "secgroup1" {
- name        = "${var.secgroup_name}-${random_id.sg.id}"
- description = "Created By Terraform."
+  name        = "${var.secgroup_name}-${random_id.sg.id}"
+  description = "Created By Terraform."
 }
 resource "opentelekomcloud_networking_secgroup_rule_v2" "secgroup_rule_1" {
   direction         = "ingress"

@@ -1,2 +1,1 @@
-
 variable "secgroup_name" {}
