@@ -12,18 +12,17 @@ resource "opentelekomcloud_networking_subnet_v2" "subnet_1" {
   network_id = "${opentelekomcloud_networking_network_v2.network_1.id}"
   cidr       = "192.168.199.0/24"
   ip_version = 4
-  name = "subnethhhaha"
   allocation_pools {
     start = "192.168.199.2"
-	end = "192.168.199.251" 
+    end   = "192.168.199.251"
   }
   gateway_ip = "192.168.199.1"
   #no_gateway = "true"
   dns_nameservers = ["8.8.8.8"]
- # host_routes= {
- #  destination_cidr = "10.0.0.0/29"  
- #  next_hop = "10.0.0.1"
- # }
+  # host_routes= {
+  #  destination_cidr = "10.0.0.0/29"  
+  #  next_hop = "10.0.0.1"
+  # }
 }
 
 
@@ -55,13 +54,13 @@ resource "opentelekomcloud_networking_port_v2" "port_1" {
   network_id         = "${opentelekomcloud_networking_network_v2.network_1.id}"
   admin_state_up     = "true"
   security_group_ids = ["${opentelekomcloud_compute_secgroup_v2.secgroup_1.id}"]
-  device_owner = "neutron:VIP_PORT"  
+  device_owner       = "neutron:VIP_PORT"
   fixed_ip {
-    "subnet_id"  = "${opentelekomcloud_networking_subnet_v2.subnet_1.id}"
-    "ip_address" = "192.168.199.10"
+    subnet_id  = "${opentelekomcloud_networking_subnet_v2.subnet_1.id}"
+    ip_address = "192.168.199.10"
   }
   allowed_address_pairs {
-    "ip_address" = "192.168.199.10"
+    ip_address = "192.168.199.10"
   }
 }
 resource "opentelekomcloud_compute_instance_v2" "instance_1" {

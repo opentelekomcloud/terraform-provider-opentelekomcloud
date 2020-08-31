@@ -20,6 +20,6 @@ output "ecs2_ip" {
 #  value = "${opentelekomcloud_compute_instance_v2.ecs_1.hostname}"
 #}
 
-output  "access_ip_v4"{
- value = "${opentelekomcloud_compute_instance_v2.ecs_1.access_ip_v4}"
+output "access_ip_v4" {
+  value = "${opentelekomcloud_compute_instance_v2.ecs_1.access_ip_v4}"
 }

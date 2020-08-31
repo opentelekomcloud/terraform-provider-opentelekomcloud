@@ -72,7 +72,7 @@ resource "opentelekomcloud_compute_instance_v2" "terraform" {
 
   provisioner "remote-exec" {
     connection {
-      user     = "${var.ssh_user_name}"
+      user        = "${var.ssh_user_name}"
       private_key = "${file(var.ssh_key_file)}"
     }
 

@@ -5,9 +5,9 @@ resource "opentelekomcloud_vpc_eip_v1" "eip_2" {
     type = "5_bgp"
   }
   bandwidth {
-    name = "${var.bw_name}_2"
-    size = "${var.bw_size}"
-    share_type = "PER" 
+    name       = "${var.bw_name}_2"
+    size       = "${var.bw_size}"
+    share_type = "PER"
   }
 }
 
@@ -17,8 +17,8 @@ resource "opentelekomcloud_vpc_eip_v1" "eip_1" {
     type = "5_bgp"
   }
   bandwidth {
-    name = "${var.bw_name}"
-    size = "${var.bw_size}"
+    name       = "${var.bw_name}"
+    size       = "${var.bw_size}"
     share_type = "PER"
     #charge_mode = "traffic"
   }
@@ -29,9 +29,9 @@ resource "opentelekomcloud_vpc_eip_v1" "eip_lb" {
     type = "5_bgp"
   }
   bandwidth {
-    name = "${var.bw_name}_lb"
-    size = "${var.bw_size}"
-    share_type = "PER"
+    name        = "${var.bw_name}_lb"
+    size        = "${var.bw_size}"
+    share_type  = "PER"
     charge_mode = "traffic"
   }
 }

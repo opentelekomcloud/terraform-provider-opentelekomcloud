@@ -119,4 +119,3 @@ resource "opentelekomcloud_rts_software_deployment_v1" "mydeployment2" {
   status_reason = "Outputs received"
   tenant_id  = "b730519ca7064da2a3233e86bee139e4"
 }
-

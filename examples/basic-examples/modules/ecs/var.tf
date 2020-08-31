@@ -1,4 +1,3 @@
-
 #define ECS variable
 variable "ecs_name" {}
 
@@ -21,4 +20,4 @@ variable "subnet_id2" {}
 
 variable "admin_pass" {}
 
-variable  "auto_recovery" {}
+variable "auto_recovery" {}

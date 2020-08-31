@@ -7,7 +7,7 @@ variable "flavor" {
 }
 
 variable "region" {
-  default="sa-chile-1"
+  default="eu-de-01"
 }
 
 variable "keyname" {

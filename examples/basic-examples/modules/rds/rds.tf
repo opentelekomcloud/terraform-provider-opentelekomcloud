@@ -1,14 +1,14 @@
 data "opentelekomcloud_rds_flavors_v1" "flavor" {
-  region = "${var.region}"
-  datastore_name = "${var.datastore_name}"
+  region            = "${var.region}"
+  datastore_name    = "${var.datastore_name}"
   datastore_version = "${var.datastore_version}"
-  speccode = "${var.flavor_name}"
+  speccode          = "${var.flavor_name}"
 }
 
 resource "opentelekomcloud_rds_instance_v1" "instance" {
   name = "${var.rds_name}"
   datastore {
-    type = "${var.datastore_name}"
+    type    = "${var.datastore_name}"
     version = "${var.datastore_version}"
   }
   #flavorref = "${data.opentelekomcloud_rds_flavors_v1.flavor.id}"
@@ -17,9 +17,9 @@ resource "opentelekomcloud_rds_instance_v1" "instance" {
     type = "${var.rds_volume_type}"
     size = "${var.rds_volume_size}"
   }
-  region = "${var.region}"
+  region           = "${var.region}"
   availabilityzone = "${var.availabilityzone}"
-  vpc = "${var.vpc_id}"
+  vpc              = "${var.vpc_id}"
   nics {
     subnetid = "${var.subnetid}"
   }
@@ -30,12 +30,10 @@ resource "opentelekomcloud_rds_instance_v1" "instance" {
   dbrtpd = "${var.passwd}"
   backupstrategy = {
     starttime = "04:00:00"
-    keepdays = 4
+    keepdays  = 4
   }
   ha = {
-    enable = true
+    enable          = true
     replicationmode = "async"
   }
-  
-
 }
