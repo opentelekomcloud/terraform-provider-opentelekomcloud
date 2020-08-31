@@ -1,4 +1,4 @@
-module github.com/terraform-providers/terraform-provider-opentelekomcloud
+module github.com/opentelekomcloud/terraform-provider-opentelekomcloud
 
 go 1.14
 
