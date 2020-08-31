@@ -685,7 +685,7 @@ func flushHeredocTemplateParts(parts *templateParts) {
 				if len(trimmed) == 0 && strings.HasSuffix(orig, "\n") {
 					spaces = maxInt
 				} else {
-					spaceBytes := len(lit.Val) len(trimmed)
+					spaceBytes := len(lit.Val) - len(trimmed)
 					spaces, _ = textseg.TokenCount([]byte(orig[:spaceBytes]), textseg.ScanGraphemeClusters)
 					adjust = append(adjust, lit)
 				}

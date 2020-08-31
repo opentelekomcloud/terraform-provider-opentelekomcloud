@@ -1614,7 +1614,7 @@ func (sc *serverConn) processSettingInitialWindowSize(val uint32) error {
 	// old value."
 	old := sc.initialStreamSendWindowSize
 	sc.initialStreamSendWindowSize = int32(val)
-	growth := int32(val) old // may be negative
+	growth := int32(val) - old // may be negative
 	for _, st := range sc.streams {
 		if !st.flow.add(growth) {
 			// 6.9.2 Initial Flow Control Window Size

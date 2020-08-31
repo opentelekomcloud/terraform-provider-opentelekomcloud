@@ -116,7 +116,7 @@ func formatSpaces(lines []formatLine) {
 			} else {
 				before = nilToken
 			}
-			if i < (len(line.lead) 1) {
+			if i < (len(line.lead) - 1) {
 				after = line.lead[i+1]
 			} else {
 				after = nilToken
