@@ -1,3 +1,7 @@
+---
+subcategory: "Virtual Private Cloud (VPC)"
+---
+
 # opentelekomcloud_networking_network_v2
 
 Manages a V2 Neutron network resource within OpenTelekomCloud.

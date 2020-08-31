@@ -1,3 +1,7 @@
+---
+subcategory: "Virtual Private Cloud (VPC)"
+---
+
 # opentelekomcloud_networking_floatingip_associate_v2
 
 Associates a floating IP to a port. This is useful for situations

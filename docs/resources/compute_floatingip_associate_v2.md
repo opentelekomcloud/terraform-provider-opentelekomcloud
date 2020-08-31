@@ -1,3 +1,7 @@
+---
+subcategory: "Elastic cloud Server (ECS)"
+---
+
 # opentelekomcloud_compute_floatingip_associate_v2
 
 Associate a floating IP to an instance. This can be used instead of the

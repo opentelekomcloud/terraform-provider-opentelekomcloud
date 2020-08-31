@@ -2,7 +2,6 @@
 subcategory: "Key Management Service (KMS)"
 ---
 
-
 # opentelekomcloud_kms_key_v1
 
 Use this data source to get the ID of an available OpenTelekomCloud KMS key.

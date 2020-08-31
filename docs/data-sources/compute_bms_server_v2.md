@@ -30,7 +30,7 @@ The arguments of this data source act as filters for querying the BMSs details.
 
 * `status` - (Optional) The BMS status.
 
-* `host_status` - (Optional) The nova-compute status: **UP, UNKNOWN, DOWN, MAINTENANCE** and **Null**.
+* `host_status` - (Optional) The nova-compute status: `UP`, `UNKNOWN`, `DOWN`, `MAINTENANCE` and `Null`.
 
 * `key_name` - (Optional) It is the SSH key name.
 

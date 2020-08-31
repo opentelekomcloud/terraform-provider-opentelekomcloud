@@ -1,4 +1,6 @@
-
+---
+subcategory: "Virtual Private Cloud (VPC)"
+---
 
 # opentelekomcloud_networking_floatingip_v2
 

@@ -1,3 +1,7 @@
+---
+subcategory: "Elastic cloud Server (ECS)"
+---
+
 # opentelekomcloud_compute_floatingip_v2
 
 Manages a V2 floating IP resource within OpenTelekomCloud Nova (compute)

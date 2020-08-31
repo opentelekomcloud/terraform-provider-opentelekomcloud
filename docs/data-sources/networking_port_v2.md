@@ -1,5 +1,5 @@
 ---
-subcategory: "Networking"
+subcategory: "Virtual Private Cloud (VPC)"
 ---
 
 # opentelekomcloud_networking_port_v2

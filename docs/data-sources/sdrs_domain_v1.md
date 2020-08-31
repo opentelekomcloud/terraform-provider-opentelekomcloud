@@ -1,5 +1,5 @@
 ---
-subcategory: "SDRS"
+subcategory: "Storage Disaster Recovery Service (SDRS)"
 ---
 
 # opentelekomcloud_sdrs_domain_v1
