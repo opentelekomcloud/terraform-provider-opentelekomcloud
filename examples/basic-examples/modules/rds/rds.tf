@@ -36,6 +36,4 @@ resource "opentelekomcloud_rds_instance_v1" "instance" {
     enable          = true
     replicationmode = "async"
   }
-
-
 }
