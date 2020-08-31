@@ -24,6 +24,9 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
 	"github.com/huaweicloud/golangsdk"
+	"github.com/huaweicloud/golangsdk/openstack/networking/v1/subnets"
+	"github.com/huaweicloud/golangsdk/openstack/networking/v2/extensions/layer3/floatingips"
+	"github.com/huaweicloud/golangsdk/openstack/networking/v2/ports"
 	"github.com/huaweicloud/golangsdk/openstack/rds/v1/datastores"
 	"github.com/huaweicloud/golangsdk/openstack/rds/v1/flavors"
 	"github.com/huaweicloud/golangsdk/openstack/rds/v1/instances"
@@ -236,9 +239,12 @@ func resourceRdsInstanceV3() *schema.Resource {
 
 			"public_ips": {
 				Type:     schema.TypeList,
+				Optional: true,
 				Computed: true,
+				MaxItems: 1,
 				Elem: &schema.Schema{
-					Type: schema.TypeString,
+					Type:         schema.TypeString,
+					ValidateFunc: validateIP,
 				},
 			},
 		},
@@ -307,7 +313,7 @@ func resourceRdsInstanceV3Create(d *schema.ResourceData, meta interface{}) error
 			return err
 		}
 		res["list"] = v
-		err = setRdsInstanceV3Properties(d, res)
+		err = setRdsInstanceV3Properties(d, res, config)
 		if err != nil {
 			return err
 		}
@@ -335,7 +341,151 @@ func resourceRdsInstanceV3Create(d *schema.ResourceData, meta interface{}) error
 		}
 	}
 
+	publicIPs := d.Get("public_ips").([]interface{})
+	if len(publicIPs) > 0 {
+		if err := resourceRdsInstanceV3Read(d, meta); err != nil {
+			return err
+		}
+		nw, err := config.networkingV2Client(GetRegion(d, config))
+		if err != nil {
+			return err
+		}
+		subnetID, err := getSubnetSubnetID(d, config)
+		if err != nil {
+			return err
+		}
+		if err := assignEipToInstance(nw, publicIPs[0].(string), getPrivateIP(d), subnetID); err != nil {
+			log.Printf("[WARN] failed to assign public IP: %s", err)
+		}
+	}
+
 	return resourceRdsInstanceV3Read(d, meta)
+}
+
+func getPrivateIP(d *schema.ResourceData) string {
+	return d.Get("private_ips").([]interface{})[0].(string)
+}
+
+func findFloatingIP(client *golangsdk.ServiceClient, address, portID string) (id string, err error) {
+	var opts = floatingips.ListOpts{}
+	if address != "" {
+		opts.FloatingIP = address
+	} else {
+		opts.PortID = portID
+	}
+	pgFIP, err := floatingips.List(client, opts).AllPages()
+	if err != nil {
+		return
+	}
+	floatingIPs, err := floatingips.ExtractFloatingIPs(pgFIP)
+	if err != nil {
+		return
+	}
+	if len(floatingIPs) == 0 {
+		return
+	}
+
+	for _, ip := range floatingIPs {
+		if portID != "" && portID != ip.PortID {
+			continue
+		}
+		if address != "" && address != ip.FloatingIP {
+			continue
+		}
+		return floatingIPs[0].ID, nil
+	}
+	return
+}
+
+func findPort(client *golangsdk.ServiceClient, privateIP string, subnetID string) (id string, err error) {
+
+	// find assigned port
+	pg, err := ports.List(client, nil).AllPages()
+
+	if err != nil {
+		return
+	}
+	portList, err := ports.ExtractPorts(pg)
+	if err != nil {
+		return
+	}
+
+	for _, port := range portList {
+		address := port.FixedIPs[0]
+		if address.IPAddress == privateIP && address.SubnetID == subnetID {
+			id = port.ID
+			return
+		}
+	}
+	return
+}
+
+func assignEipToInstance(client *golangsdk.ServiceClient, publicIP, privateIP, subnetID string) error {
+	portID, err := findPort(client, privateIP, subnetID)
+	if err != nil {
+		return err
+	}
+
+	ipID, err := findFloatingIP(client, publicIP, "")
+	if err != nil {
+		return err
+	}
+	return floatingips.Update(client, ipID, floatingips.UpdateOpts{PortID: &portID}).Err
+}
+
+func getSubnetSubnetID(d *schema.ResourceData, config *Config) (id string, err error) {
+	subnetClient, err := config.networkingV1Client(GetRegion(d, config))
+	if err != nil {
+		err = fmt.Errorf("[WARN] Failed to create VPC client")
+		return
+	}
+	sn, err := subnets.Get(subnetClient, d.Get("subnet_id").(string)).Extract()
+	if err != nil {
+		return
+	}
+	id = sn.SubnetId
+	return
+}
+
+func getAssignedEip(d *schema.ResourceData, config *Config) (ip string, err error) {
+	nw, err := config.networkingV2Client(GetRegion(d, config))
+	if err != nil {
+		err = fmt.Errorf("[WARN] Failed to create network client")
+		return
+	}
+	subnetID, err := getSubnetSubnetID(d, config)
+	if err != nil {
+		return
+	}
+	privateIP := getPrivateIP(d)
+	if privateIP == "" {
+		log.Print("[DEBUG] private IP is not yet assigned to RDS instance")
+		return
+	}
+	portID, err := findPort(nw, privateIP, subnetID)
+	if err != nil {
+		return
+	}
+
+	id, err := findFloatingIP(nw, "", portID)
+	if err != nil || id == "" {
+		return
+	}
+
+	ipObj, err := floatingips.Get(nw, id).Extract()
+	if err != nil {
+		return
+	}
+	ip = ipObj.FloatingIP
+	return
+}
+
+func unassignEipFromInstance(client *golangsdk.ServiceClient, oldPublicIP string) error {
+	ipID, err := findFloatingIP(client, oldPublicIP, "")
+	if err != nil {
+		return err
+	}
+	return floatingips.Update(client, ipID, floatingips.UpdateOpts{PortID: nil}).Err
 }
 
 func resourceRdsInstanceV3Update(d *schema.ResourceData, meta interface{}) error {
@@ -524,6 +674,34 @@ func resourceRdsInstanceV3Update(d *schema.ResourceData, meta interface{}) error
 		log.Printf("[DEBUG] Successfully updated instance %s volume: %+v", nodeID, volume)
 	}
 
+	if d.HasChange("public_ips") {
+		nw, err := config.networkingV2Client(GetRegion(d, config))
+		olds, news := d.GetChange("public_ips")
+		oldIPs := olds.([]interface{})
+		newIPs := news.([]interface{})
+		switch len(newIPs) {
+		case 0:
+			err = unassignEipFromInstance(nw, oldIPs[0].(string)) // if it become 0, it was 1 before
+			break
+		case 1:
+			if len(oldIPs) > 0 {
+				err = unassignEipFromInstance(nw, oldIPs[0].(string))
+				if err != nil {
+					return err
+				}
+			}
+			privateIP := getPrivateIP(d)
+			subnetID, err := getSubnetSubnetID(d, config)
+			if err != nil {
+				return err
+			}
+			err = assignEipToInstance(nw, newIPs[0].(string), privateIP, subnetID)
+			break
+		default:
+			return fmt.Errorf("RDS instance can't have more than one public IP")
+		}
+	}
+
 	return resourceRdsInstanceV3Read(d, meta)
 }
 
@@ -559,7 +737,7 @@ func resourceRdsInstanceV3Read(d *schema.ResourceData, meta interface{}) error {
 	}
 	res["list"] = v
 
-	err = setRdsInstanceV3Properties(d, res)
+	err = setRdsInstanceV3Properties(d, res, config)
 	if err != nil {
 		return err
 	}
@@ -1047,7 +1225,7 @@ func sendRdsInstanceV3ListRequest(client *golangsdk.ServiceClient, url string) (
 	return v, nil
 }
 
-func setRdsInstanceV3Properties(d *schema.ResourceData, response map[string]interface{}) error {
+func setRdsInstanceV3Properties(d *schema.ResourceData, response map[string]interface{}, config *Config) error {
 	opts := resourceRdsInstanceV3UserInputParams(d)
 
 	v, err := flattenRdsInstanceV3AvailabilityZone(response)
@@ -1132,6 +1310,15 @@ func setRdsInstanceV3Properties(d *schema.ResourceData, response map[string]inte
 	}
 	if err = d.Set("public_ips", v); err != nil {
 		return fmt.Errorf("Error setting Instance:public_ips, err: %s", err)
+	}
+	if len(v.([]interface{})) == 0 {
+		ip, err := getAssignedEip(d, config)
+		if err != nil {
+			return fmt.Errorf("Error setting Instance:public_ips, err: %s", err)
+		}
+		if ip != "" {
+			_ = d.Set("public_ips", []string{ip})
+		}
 	}
 
 	v, err = navigateValue(response, []string{"list", "security_group_id"}, nil)

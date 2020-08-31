@@ -90,6 +90,46 @@ resource "opentelekomcloud_rds_instance_v3" "instance" {
 }
 ```
 
+### Create a db instance with public IP
+
+```hcl
+resource "opentelekomcloud_networking_secgroup_v2" "secgroup" {
+  name = "terraform_test_security_group"
+  description = "terraform security group acceptance test"
+}
+
+resource "opentelekomcloud_compute_floatingip_v2" "ip" {}
+
+resource "opentelekomcloud_rds_instance_v3" "instance" {
+  availability_zone = ["{{ availability_zone_1 }}", "{{ availability_zone_2 }}"]
+  db {
+    password = "Telekom!120521"
+    type = "PostgreSQL"
+    version = "9.5"
+    port = "8635"
+  }
+  name = "terraform_test_rds_instance"
+  security_group_id = "${opentelekomcloud_networking_secgroup_v2.secgroup.id}"
+  subnet_id = "{{ subnet_id }}"
+  vpc_id = "{{ vpc_id }}" 
+  volume {
+    type = "COMMON"
+    size = 100
+  }
+  flavor = "rds.pg.s1.medium.ha"
+  ha_replication_mode = "async"
+  backup_strategy {
+    start_time = "08:00-09:00"
+    keep_days = 1
+  }
+  public_ips = [opentelekomcloud_compute_floatingip_v2.ip.address]
+  tag = {
+    foo = "bar"
+    key = "value"
+  }
+}
+```
+
 ### Create a single db instance with encrypted volume
 
 ```hcl
@@ -168,6 +208,14 @@ The following arguments are supported:
   replication mode.  Changing this parameter will create a new resource.
 
 * `param_group_id` - (Optional) Specifies the parameter group ID. Changing this parameter will create a new resource.
+
+* `public_ips` - (Optional) Specifies floating IP to be assigned to the instance. 
+  This should be a list with single element only.
+  
+-> **Note:** Setting public IP is done with assigning floating IP to internally
+  created port. So RDS itself doesn't know about this assignment. This assignment
+  won't show on the console.
+  This argument will be ignored in future when RDSv3 API for EIP assignment will be implemented.
 
 * `tag` - (Optional) Tags key/value pairs to associate with the instance.
 
