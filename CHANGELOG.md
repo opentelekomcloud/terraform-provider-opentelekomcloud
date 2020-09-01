@@ -1,5 +1,12 @@
 ## 1.20.0 (Unreleased)
 
+## 1.19.3 (September 1, 2020)
+
+ENHANCEMENTS:
+* **Removed Resource:** `resource/opentelekomcloud_maas_task_v1` ([#585](https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/585))
+* `resource/opentelekomcloud_compute_instance_v2`: Fix ECS tags-tag confusion ([#586](https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/586))
+* `resource/opentelekomcloud_rds_instance_v3`: Add setting public IP for RDS instance v3 ([#596](https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/596))
+
 ## 1.19.2 (August 24, 2020)
 
 ENHANCEMENTS:
@@ -9,8 +16,8 @@ ENHANCEMENTS:
 ## 1.19.1 (August 21, 2020)
 
 BUG FIXES:
-* `resource/opentelekomcloud_rds_instance_v3`: Fix HTTP 415 when retrieving tags after nodes role switch ([#564](https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/564)) 
-* `resource/opentelekomcloud_cce_cluster_v3`: Add setting `cluster_version` on resource read ([#568](https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/568)) 
+* `resource/opentelekomcloud_rds_instance_v3`: Fix HTTP 415 when retrieving tags after nodes role switch ([#564](https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/564))
+* `resource/opentelekomcloud_cce_cluster_v3`: Add setting `cluster_version` on resource read ([#568](https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/568))
 
 ## 1.19.0 (August 08, 2020)
 
