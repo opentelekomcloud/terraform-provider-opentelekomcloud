@@ -1,3 +1,7 @@
+---
+subcategory: "Object Storage Service (OBS)"
+---
+
 # opentelekomcloud_s3_bucket
 
 Provides a S3 bucket resource within OpenTelekomCloud.
@@ -146,7 +150,7 @@ The following arguments are supported:
 
 * `acl` - (Optional) The [canned ACL](https://docs.aws.amazon.com/AmazonS3/latest/dev/acl-overview.html#canned-acl) to apply. Defaults to "private".
 
-* `policy` - (Optional) A valid [bucket policy](https://docs.aws.amazon.com/AmazonS3/latest/dev/example-bucket-policies.html) JSON document. 
+* `policy` - (Optional) A valid [bucket policy](https://docs.aws.amazon.com/AmazonS3/latest/dev/example-bucket-policies.html) JSON document.
 
 -> **Note:** If the policy document is not specific enough (but still valid), Terraform may view
   the policy as constantly changing in a `terraform plan`. In this case, please make sure you use the verbose/specific version of the policy.
@@ -171,10 +175,10 @@ The following arguments are supported:
 
 * `error_document` - (Optional) An absolute path to the document to return in case of a 4XX error.
 
-* `redirect_all_requests_to` - (Optional) A hostname to redirect all website requests for this bucket to. Hostname can optionally 
+* `redirect_all_requests_to` - (Optional) A hostname to redirect all website requests for this bucket to. Hostname can optionally
   be prefixed with a protocol (`http://` or `https://`) to use when redirecting requests. The default is the protocol that is used in the original request.
 
-* `routing_rules` - (Optional) A json array containing 
+* `routing_rules` - (Optional) A json array containing
   [routing rules](https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-properties-s3-websiteconfiguration-routingrules.html)
   describing redirect behavior and when redirects are applied.
 

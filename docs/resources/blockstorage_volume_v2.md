@@ -1,5 +1,5 @@
 ---
-subcategory: "BlockStorage"
+subcategory: "Elastic Volume Service (EVS)"
 ---
 
 # opentelekomcloud_blockstorage_volume_v2

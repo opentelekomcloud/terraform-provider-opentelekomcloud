@@ -1,5 +1,5 @@
 ---
-subcategory: "NAT Gateway (NAT)"
+subcategory: "NAT"
 ---
 
 # opentelekomcloud_nat_snat_rule_v2

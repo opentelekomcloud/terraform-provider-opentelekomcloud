@@ -1,3 +1,7 @@
+---
+subcategory: "Object Storage Service (OBS)"
+---
+
 # opentelekomcloud_s3_bucket_object
 
 Provides a S3 bucket object resource within OpenTelekomCloud.

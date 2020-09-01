@@ -1,6 +1,5 @@
 ---
-subcategory: "Container Cluster Engine (CCE)
-"
+subcategory: "Cloud Container Engine (CCE)"
 ---
 
 # opentelekomcloud_cce_node_v3
@@ -51,9 +50,9 @@ The following arguments are supported:
 * `tags` - (Optional) The field is alternative to `labels`, key/value pair format.
 
 * `annotations` - (Optional) Node annotation, key/value pair format. Changing this parameter will create a new resource.
-    
+
 * `flavor_id` - (Required) Specifies the flavor id. Changing this parameter will create a new resource.
-    
+
 * `availability_zone` - (Required) specify the name of the available partition (AZ). Changing this parameter will create a new resource.
 
 * `key_pair` - (Required) Key pair name when logging in to select the key pair mode. Changing this parameter will create a new resource.
