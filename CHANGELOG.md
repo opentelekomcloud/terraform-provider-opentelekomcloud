@@ -1,5 +1,10 @@
 ## 1.20.0 (Unreleased)
 
+## 1.19.4 (September 1, 2020)
+
+BUG FIXES:
+* **Multiple resources:** Documentation fixes after migration ([#599](https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/599))
+
 ## 1.19.3 (September 1, 2020)
 
 ENHANCEMENTS:
