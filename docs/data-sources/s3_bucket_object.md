@@ -1,3 +1,7 @@
+---
+subcategory: "Object Storage Service (OBS)"
+---
+
 # opentelekomcloud_s3_bucket_object
 
 Use this data source to get details about the metadata and
@@ -45,20 +49,20 @@ The following attributes are exported:
 
 * `etag` - [ETag](https://en.wikipedia.org/wiki/HTTP_ETag) generated for the object (an MD5 sum of the object content in case it's not encrypted).
 
-* `expiration` - If the object expiration is configured 
+* `expiration` - If the object expiration is configured
   (see [object lifecycle management](http://docs.opentelekomcloud.amazon.com/AmazonS3/latest/dev/object-lifecycle-mgmt.html)), the field includes this header. It includes the expiry-date and rule-id key value pairs providing object expiration information. The value of the rule-id is URL encoded.
 
 * `expires` - The date and time at which the object is no longer cacheable.
 
-* `last_modified` - Last modified date of the object in RFC1123 format 
+* `last_modified` - Last modified date of the object in RFC1123 format
   (e.g. `Mon, 02 Jan 2006 15:04:05 MST`)
 
 * `metadata` - A map of metadata stored with the object in S3
 
-* `server_side_encryption` - If the object is stored using server-side encryption 
+* `server_side_encryption` - If the object is stored using server-side encryption
   (KMS or Amazon S3-managed encryption key), this field includes the chosen encryption and algorithm used.
 
-* `sse_kms_key_id` - If present, specifies the ID of the Key Management Service 
+* `sse_kms_key_id` - If present, specifies the ID of the Key Management Service
   (KMS) master encryption key that was used for the object.
 
 * `storage_class` - [Storage class](http://docs.aws.amazon.com/AmazonS3/latest/dev/storage-class-intro.html)
