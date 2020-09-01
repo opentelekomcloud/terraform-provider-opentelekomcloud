@@ -1,3 +1,7 @@
+---
+subcategory: "Object Storage Service (OBS)"
+---
+
 # opentelekomcloud_s3_bucket_policy
 
 Attaches a policy to an S3 bucket resource within OpenTelekomCloud.
@@ -24,8 +28,8 @@ resource "opentelekomcloud_s3_bucket_policy" "b" {
       "Resource": "arn:aws:s3:::my_tf_test_bucket/*",
       "Condition": {
          "IpAddress": {"aws:SourceIp": "8.8.8.8/32"}
-      } 
-    } 
+      }
+    }
   ]}
 POLICY
 }

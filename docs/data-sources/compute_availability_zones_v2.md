@@ -1,3 +1,7 @@
+---
+subcategory: "Elastic Cloud Server (ECS)"
+---
+
 # opentelekomcloud_compute_availability_zones_v2
 
 Use this data source to get a list of availability zones from OpenTelekomCloud.

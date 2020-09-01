@@ -1,5 +1,5 @@
 ---
-subcategory: "Container Cluster Engine (CCE)"
+subcategory: "Cloud Container Engine (CCE)"
 ---
 
 # opentelekomcloud_cce_cluster_v3
@@ -12,7 +12,7 @@ Provides a cluster resource (CCE).
 variable "flavor_id" { }
 variable "vpc_id" { }
 variable "subnet_id" { }
-	
+
 resource "opentelekomcloud_cce_cluster_v3" "cluster_1" {
   name        = "cluster"
   description = "Create cluster"
@@ -111,8 +111,8 @@ All above argument parameters can be exported as attribute parameters along with
 ## Import
 
 Cluster can be imported using the cluster id, e.g.
- 
+
 ```sh
-terraform import opentelekomcloud_cce_cluster_v3.cluster_1 4779ab1c-7c1a-44b1-a02e-93dfc361b32d  
+terraform import opentelekomcloud_cce_cluster_v3.cluster_1 4779ab1c-7c1a-44b1-a02e-93dfc361b32d
 ```
 

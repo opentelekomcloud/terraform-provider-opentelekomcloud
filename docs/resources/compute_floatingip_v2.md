@@ -1,5 +1,5 @@
 ---
-subcategory: "Elastic cloud Server (ECS)"
+subcategory: "Elastic Cloud Server (ECS)"
 ---
 
 # opentelekomcloud_compute_floatingip_v2
