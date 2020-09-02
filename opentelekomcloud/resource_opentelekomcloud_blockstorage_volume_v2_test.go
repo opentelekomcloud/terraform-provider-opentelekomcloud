@@ -2,6 +2,7 @@ package opentelekomcloud
 
 import (
 	"fmt"
+	"os"
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
@@ -40,6 +41,28 @@ func TestAccBlockStorageV2Volume_basic(t *testing.T) {
 			},
 		},
 	})
+}
+
+func TestAccBlockStorageV2Volume_policy(t *testing.T) {
+	resource.Test(t, resource.TestCase{
+		PreCheck: func() {
+			testAccPreCheck(t)
+			testPolicyPreCheck(t)
+		},
+		Providers:    testAccProviders,
+		CheckDestroy: testAccCheckBlockStorageV2VolumeDestroy,
+		Steps: []resource.TestStep{
+			{
+				Config: testAccBlockStorageV2Volume_policy(os.Getenv("OS_KMS_KEY")),
+			},
+		},
+	})
+}
+
+func testPolicyPreCheck(t *testing.T) {
+	if os.Getenv("OS_KMS_KEY") == "" {
+		t.Errorf("OS_KMS_KEY should be set for this test to existing KMS key alias")
+	}
 }
 
 func TestAccBlockStorageV2Volume_tags(t *testing.T) {
@@ -320,3 +343,89 @@ resource "opentelekomcloud_blockstorage_volume_v2" "volume_1" {
   }
 }
 `
+
+func testAccBlockStorageV2Volume_policy(kmsKeyAlias string) string {
+	return fmt.Sprintf(`
+data "opentelekomcloud_kms_key_v1" key {
+  key_alias = "%s"
+}
+
+data opentelekomcloud_compute_availability_zones_v2 available {}
+
+locals {
+  count = 1
+}
+
+resource "opentelekomcloud_blockstorage_volume_v2" "volume" {
+  count             = local.count
+  availability_zone = data.opentelekomcloud_compute_availability_zones_v2.available.names[count.index]
+  name              = "test-vol0${count.index + 1}-datadisk"
+  size              = 40
+  tags              =   {
+    generator   = "terraform"
+  }
+  metadata = {
+    __system__encrypted = "1"
+    __system__cmkid     = data.opentelekomcloud_kms_key_v1.key.id
+    attached_mode       = "rw"
+    readonly            = "False"
+  }
+}
+
+resource "opentelekomcloud_vbs_backup_policy_v2" "vbs_policy1" {
+  name   = "policy_001"
+  status = "ON"
+
+  start_time          = "12:00"
+  retain_first_backup = "N"
+  rentention_num      = 7
+  frequency           = 1
+
+  resources = opentelekomcloud_blockstorage_volume_v2.volume[*].id
+
+}
+`, kmsKeyAlias)
+}
+
+func testAccBlockStorageV2Volume_policyUpdate(kmsKeyAlias string) string {
+	return fmt.Sprintf(`
+data "opentelekomcloud_kms_key_v1" key {
+  key_alias = "%s"
+}
+
+data opentelekomcloud_compute_availability_zones_v2 available {}
+
+locals {
+  count = 1
+}
+
+resource "opentelekomcloud_blockstorage_volume_v2" "volume" {
+  count             = local.count
+  availability_zone = data.opentelekomcloud_compute_availability_zones_v2.available.names[count.index]
+  name              = "test-vol0${count.index + 1}-datadisk"
+  size              = 60
+  tags              =   {
+    generator   = "terraform"
+  }
+  metadata = {
+    __system__encrypted = "1"
+    __system__cmkid     = data.opentelekomcloud_kms_key_v1.key.id
+    attached_mode       = "rw"
+    readonly            = "False"
+  }
+}
+
+resource "opentelekomcloud_vbs_backup_policy_v2" "vbs_policy1" {
+  name   = "policy_001"
+  status = "ON"
+
+  start_time          = "12:00"
+  retain_first_backup = "N"
+  rentention_num      = 7
+  frequency           = 1
+
+  resources = opentelekomcloud_blockstorage_volume_v2.volume[*].id
+
+}
+`, kmsKeyAlias)
+}
