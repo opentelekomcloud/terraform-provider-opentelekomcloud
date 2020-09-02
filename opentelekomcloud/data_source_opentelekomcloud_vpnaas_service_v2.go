@@ -5,6 +5,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
 	"github.com/huaweicloud/golangsdk/openstack/networking/v2/extensions/vpnaas/services"
 	"github.com/huaweicloud/golangsdk/pagination"
+	"log"
 )
 
 func dataSourceVpnServiceV2() *schema.Resource {
@@ -69,7 +70,7 @@ func dataSourceVpnServiceV2Read(d *schema.ResourceData, meta interface{}) error 
 		ExternalV4IP: d.Get("external_v4_ip").(string),
 		FlavorID:     d.Get("flavor_id").(string),
 	}
-	var vpns []services.Service
+	var refinedVpns []services.Service
 
 	pager := services.List(networkingClient, listOpts)
 	err = pager.EachPage(func(page pagination.Page) (bool, error) {
@@ -78,9 +79,7 @@ func dataSourceVpnServiceV2Read(d *schema.ResourceData, meta interface{}) error 
 			return false, err
 		}
 		for _, vpn := range vpnList {
-			if vpn.ID != "" {
-				vpns = append(vpns, vpn)
-			}
+			refinedVpns = append(refinedVpns, vpn)
 		}
 		return true, nil
 	})
@@ -88,12 +87,29 @@ func dataSourceVpnServiceV2Read(d *schema.ResourceData, meta interface{}) error 
 		return err
 	}
 
-	if len(vpns) < 1 {
+	if len(refinedVpns) < 1 {
 		return fmt.Errorf("Your query returned zero results. Please change your search criteria and try again.")
 	}
 
-	d.SetId(d.Get("cluster_id").(string))
-	d.Set("ids", vpns)
+	if len(refinedVpns) > 1 {
+		return fmt.Errorf("Your query returned more than one result. Please try a more specific search criteria")
+	}
+	Vpn := refinedVpns[0]
+
+	log.Printf("[INFO] Retrieved Vpn using given filter %s: %+v", Vpn.ID, Vpn)
+	d.SetId(Vpn.ID)
+	d.Set("tenant_id", Vpn.TenantID)
+	d.Set("name", Vpn.Name)
+	d.Set("subnet_id", Vpn.SubnetID)
+	d.Set("admin_state_up", Vpn.AdminStateUp)
+	d.Set("external_v4_ip", Vpn.ExternalV4IP)
+	d.Set("external_v6_ip", Vpn.ExternalV6IP)
+	d.Set("project_id", Vpn.ProjectID)
+	d.Set("router_id", Vpn.RouterID)
+	d.Set("flavor_id", Vpn.FlavorID)
+	d.Set("status", Vpn.Status)
+	d.Set("description", Vpn.Description)
+
 	d.Set("region", GetRegion(d, config))
 	return nil
 }
