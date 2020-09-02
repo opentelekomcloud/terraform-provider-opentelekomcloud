@@ -11,7 +11,41 @@ func dataSourceVpnServiceV2() *schema.Resource {
 	return &schema.Resource{
 		Read: dataSourceVpnServiceV2Read,
 
-		Schema: map[string]*schema.Schema{},
+		Schema: map[string]*schema.Schema{
+			"tenant_id": {
+				Type: schema.TypeString,
+			},
+			"name": {
+				Type: schema.TypeString,
+			},
+			"description": {
+				Type: schema.TypeString,
+			},
+			"admin_state_up": {
+				Type: schema.TypeBool,
+			},
+			"status": {
+				Type: schema.TypeString,
+			},
+			"subnet_id": {
+				Type: schema.TypeString,
+			},
+			"router_id": {
+				Type: schema.TypeString,
+			},
+			"project_id": {
+				Type: schema.TypeString,
+			},
+			"flavor_id": {
+				Type: schema.TypeString,
+			},
+			"external_v6_ip": {
+				Type: schema.TypeString,
+			},
+			"external_v4_ip": {
+				Type: schema.TypeString,
+			},
+		},
 	}
 }
 
@@ -35,25 +69,31 @@ func dataSourceVpnServiceV2Read(d *schema.ResourceData, meta interface{}) error 
 		ExternalV4IP: d.Get("external_v4_ip").(string),
 		FlavorID:     d.Get("flavor_id").(string),
 	}
+	var vpns []services.Service
+
 	pager := services.List(networkingClient, listOpts)
 	err = pager.EachPage(func(page pagination.Page) (bool, error) {
 		vpnList, err := services.ExtractServices(page)
 		if err != nil {
 			return false, err
 		}
-		for _, policy := range policyList {
-			for _, rule := range policy.Rules {
-				if rule == ruleID {
-					policyID = policy.ID
-					return false, nil
-				}
+		for _, vpn := range vpnList {
+			if vpn.ID != "" {
+				vpns = append(vpns, vpn)
 			}
 		}
 		return true, nil
 	})
-
-	if len(refinedVpns) < 1 {
-		return fmt.Errorf("Your query returned no results. Please change your search criteria and try again.")
+	if err != nil {
+		return err
 	}
 
+	if len(vpns) < 1 {
+		return fmt.Errorf("Your query returned zero results. Please change your search criteria and try again.")
+	}
+
+	d.SetId(d.Get("cluster_id").(string))
+	d.Set("ids", vpns)
+	d.Set("region", GetRegion(d, config))
+	return nil
 }
