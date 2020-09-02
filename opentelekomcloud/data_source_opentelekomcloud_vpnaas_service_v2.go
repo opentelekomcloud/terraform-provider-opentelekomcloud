@@ -13,6 +13,16 @@ func dataSourceVpnServiceV2() *schema.Resource {
 		Read: dataSourceVpnServiceV2Read,
 
 		Schema: map[string]*schema.Schema{
+			"id": {
+				Type:     schema.TypeString,
+				Optional: true,
+			},
+			"region": {
+				Type:     schema.TypeString,
+				Optional: true,
+				Computed: true,
+				ForceNew: true,
+			},
 			"tenant_id": {
 				Type:     schema.TypeString,
 				Optional: true,
@@ -109,6 +119,8 @@ func dataSourceVpnServiceV2Read(d *schema.ResourceData, meta interface{}) error 
 
 	log.Printf("[INFO] Retrieved Vpn using given filter %s: %+v", Vpn.ID, Vpn)
 	d.SetId(Vpn.ID)
+
+	d.Set("id", Vpn.ID)
 	d.Set("tenant_id", Vpn.TenantID)
 	d.Set("name", Vpn.Name)
 	d.Set("subnet_id", Vpn.SubnetID)
