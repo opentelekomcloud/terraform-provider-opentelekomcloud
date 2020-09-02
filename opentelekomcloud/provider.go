@@ -241,6 +241,7 @@ func Provider() terraform.ResourceProvider {
 			"opentelekomcloud_identity_user_v3":              dataSourceIdentityUserV3(),
 			"opentelekomcloud_identity_group_v3":             dataSourceIdentityGroupV3(),
 			"opentelekomcloud_sdrs_domain_v1":                dataSourceSdrsDomainV1(),
+			"opentelekomcloud_vpnaas_service_v2":             dataSourceVpnServiceV2(),
 		},
 
 		ResourcesMap: map[string]*schema.Resource{

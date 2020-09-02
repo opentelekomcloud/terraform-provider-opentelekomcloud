@@ -14,37 +14,48 @@ func dataSourceVpnServiceV2() *schema.Resource {
 
 		Schema: map[string]*schema.Schema{
 			"tenant_id": {
-				Type: schema.TypeString,
+				Type:     schema.TypeString,
+				Optional: true,
 			},
 			"name": {
-				Type: schema.TypeString,
+				Type:     schema.TypeString,
+				Optional: true,
 			},
 			"description": {
-				Type: schema.TypeString,
+				Type:     schema.TypeString,
+				Optional: true,
 			},
 			"admin_state_up": {
-				Type: schema.TypeBool,
+				Type:     schema.TypeBool,
+				Optional: true,
 			},
 			"status": {
-				Type: schema.TypeString,
+				Type:     schema.TypeString,
+				Optional: true,
 			},
 			"subnet_id": {
-				Type: schema.TypeString,
+				Type:     schema.TypeString,
+				Optional: true,
 			},
 			"router_id": {
-				Type: schema.TypeString,
+				Type:     schema.TypeString,
+				Optional: true,
 			},
 			"project_id": {
-				Type: schema.TypeString,
+				Type:     schema.TypeString,
+				Optional: true,
 			},
 			"flavor_id": {
-				Type: schema.TypeString,
+				Type:     schema.TypeString,
+				Optional: true,
 			},
 			"external_v6_ip": {
-				Type: schema.TypeString,
+				Type:     schema.TypeString,
+				Optional: true,
 			},
 			"external_v4_ip": {
-				Type: schema.TypeString,
+				Type:     schema.TypeString,
+				Optional: true,
 			},
 		},
 	}
