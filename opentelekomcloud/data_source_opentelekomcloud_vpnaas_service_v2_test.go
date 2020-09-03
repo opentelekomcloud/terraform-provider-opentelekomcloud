@@ -17,7 +17,7 @@ func TestAccVpnServiceV2DataSource_byId(t *testing.T) {
 					resource.TestCheckResourceAttr(
 						"data.opentelekomcloud_vpnaas_service_v2.by_id", "name", "vpn_service_1"),
 					resource.TestCheckResourceAttr(
-						"data.opentelekomcloud_vpnaas_service_v2.by_id", "admin_state_up", "false"),
+						"data.opentelekomcloud_vpnaas_service_v2.by_id", "admin_state_up", "true"),
 				),
 			},
 		},
@@ -35,7 +35,7 @@ func TestAccVpnServiceV2DataSource_byName(t *testing.T) {
 					resource.TestCheckResourceAttr(
 						"data.opentelekomcloud_vpnaas_service_v2.by_name", "name", "vpn_service_2"),
 					resource.TestCheckResourceAttr(
-						"data.opentelekomcloud_vpnaas_service_v2.by_name", "admin_state_up", "true"),
+						"data.opentelekomcloud_vpnaas_service_v2.by_name", "admin_state_up", "false"),
 				),
 			},
 		},
@@ -67,7 +67,7 @@ resource "opentelekomcloud_networking_router_v2" "router_2" {
 }
 
 resource "opentelekomcloud_vpnaas_service_v2" "service_2" {
-  name           = "vpn_service_1"
+  name           = "vpn_service_2"
   router_id      = opentelekomcloud_networking_router_v2.router_2.id
   admin_state_up = "false"
 }
