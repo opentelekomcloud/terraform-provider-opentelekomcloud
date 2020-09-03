@@ -132,7 +132,7 @@ func dataSourceVpnServiceV2Read(d *schema.ResourceData, meta interface{}) error 
 	d.Set("flavor_id", Vpn.FlavorID)
 	d.Set("status", Vpn.Status)
 	d.Set("description", Vpn.Description)
-
 	d.Set("region", GetRegion(d, config))
+
 	return nil
 }
