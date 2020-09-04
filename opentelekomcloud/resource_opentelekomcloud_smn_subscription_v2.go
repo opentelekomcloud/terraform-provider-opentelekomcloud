@@ -51,13 +51,19 @@ func resourceSubscription() *schema.Resource {
 				Type:     schema.TypeInt,
 				Computed: true,
 			},
+			"project_name": {
+				Type:     schema.TypeString,
+				Optional: true,
+				ForceNew: true,
+				Computed: true,
+			},
 		},
 	}
 }
 
 func resourceSubscriptionCreate(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*Config)
-	client, err := config.SmnV2Client(GetRegion(d, config))
+	client, err := config.SmnV2Client(GetProjectName(d, config))
 	if err != nil {
 		return fmt.Errorf("Error creating OpenTelekomCloud smn client: %s", err)
 	}
@@ -85,7 +91,7 @@ func resourceSubscriptionCreate(d *schema.ResourceData, meta interface{}) error 
 
 func resourceSubscriptionDelete(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*Config)
-	client, err := config.SmnV2Client(GetRegion(d, config))
+	client, err := config.SmnV2Client(GetProjectName(d, config))
 	if err != nil {
 		return fmt.Errorf("Error creating OpenTelekomCloud smn client: %s", err)
 	}
@@ -104,7 +110,7 @@ func resourceSubscriptionDelete(d *schema.ResourceData, meta interface{}) error 
 
 func resourceSubscriptionRead(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*Config)
-	client, err := config.SmnV2Client(GetRegion(d, config))
+	client, err := config.SmnV2Client(GetProjectName(d, config))
 	if err != nil {
 		return fmt.Errorf("Error creating OpenTelekomCloud smn client: %s", err)
 	}
@@ -112,12 +118,12 @@ func resourceSubscriptionRead(d *schema.ResourceData, meta interface{}) error {
 	log.Printf("[DEBUG] Getting subscription %s", d.Id())
 
 	id := d.Id()
-	subscriptionslist, err := subscriptions.List(client).Extract()
+	subscriptionsList, err := subscriptions.List(client).Extract()
 	if err != nil {
-		return fmt.Errorf("Error Get subscriptionslist: %s", err)
+		return fmt.Errorf("Error Get subscriptionsList: %s", err)
 	}
-	log.Printf("[DEBUG] list : subscriptionslist %#v", subscriptionslist)
-	for _, subscription := range subscriptionslist {
+	log.Printf("[DEBUG] list : subscriptionsList %#v", subscriptionsList)
+	for _, subscription := range subscriptionsList {
 		if subscription.SubscriptionUrn == id {
 			log.Printf("[DEBUG] subscription: %#v", subscription)
 			d.Set("topic_urn", subscription.TopicUrn)
