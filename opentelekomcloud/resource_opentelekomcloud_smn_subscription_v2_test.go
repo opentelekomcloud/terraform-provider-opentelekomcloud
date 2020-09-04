@@ -149,10 +149,14 @@ resource "opentelekomcloud_smn_subscription_v2" "subscription_2" {
 
 func testAccSMNV2SubscriptionConfig_projectName(projectName ProjectName) string {
 	return fmt.Sprintf(`
+locals {
+  project_name = "%s"
+}
+
 resource "opentelekomcloud_smn_topic_v2" "topic_1" {
   name		   = "topic_1"
   display_name = "The display name of topic_1"
-  project_name = %s
+  project_name = local.project_name
 }
 
 resource "opentelekomcloud_smn_subscription_v2" "subscription_1" {
@@ -160,7 +164,7 @@ resource "opentelekomcloud_smn_subscription_v2" "subscription_1" {
   endpoint     = "mailtest@gmail.com"
   protocol     = "email"
   remark       = "O&M"
-  project_name = %s
+  project_name = local.project_name
 }
-`, projectName, projectName)
+`, projectName)
 }
