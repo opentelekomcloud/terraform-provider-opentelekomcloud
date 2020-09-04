@@ -57,12 +57,12 @@ func init() {
 
 }
 
-func getTenantName() string {
+func getTenantName() ProjectName {
 	tn := os.Getenv("OS_TENANT_NAME")
 	if tn == "" {
 		tn = os.Getenv("OS_PROJECT_NAME")
 	}
-	return tn
+	return ProjectName(tn)
 }
 
 func testAccPreCheckRequiredEnvVars(t *testing.T) {

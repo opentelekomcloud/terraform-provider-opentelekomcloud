@@ -49,7 +49,7 @@ func TestAccSMNV2Topic_schemaProjectName(t *testing.T) {
 	if projectName2 == "" {
 		t.Skip("OS_PROJECT_NAME_2 should be set in order to run test")
 	}
-	OS_TENANT_NAME = projectName2
+	OS_TENANT_NAME = ProjectName(projectName2)
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
@@ -61,7 +61,7 @@ func TestAccSMNV2Topic_schemaProjectName(t *testing.T) {
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckSMNV2TopicExists("opentelekomcloud_smn_topic_v2.topic_1", &topic, OS_TENANT_NAME),
 					resource.TestCheckResourceAttr(
-						"opentelekomcloud_smn_topic_v2.topic_1", "project_name", OS_TENANT_NAME),
+						"opentelekomcloud_smn_topic_v2.topic_1", "project_name", string(OS_TENANT_NAME)),
 				),
 			},
 		},
@@ -90,7 +90,7 @@ func testAccCheckSMNTopicV2Destroy(s *terraform.State) error {
 	return nil
 }
 
-func testAccCheckSMNV2TopicExists(n string, topic *topics.TopicGet, projectName string) resource.TestCheckFunc {
+func testAccCheckSMNV2TopicExists(n string, topic *topics.TopicGet, projectName ProjectName) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
 		rs, ok := s.RootModule().Resources[n]
 		if !ok {
@@ -136,7 +136,7 @@ resource "opentelekomcloud_smn_topic_v2" "topic_1" {
 }
 `
 
-func testAccSMNV2TopicConfig_projectName(projectName string) string {
+func testAccSMNV2TopicConfig_projectName(projectName ProjectName) string {
 	return fmt.Sprintf(`
 resource "opentelekomcloud_smn_topic_v2" "topic_1" {
   name		   = "topic_1"

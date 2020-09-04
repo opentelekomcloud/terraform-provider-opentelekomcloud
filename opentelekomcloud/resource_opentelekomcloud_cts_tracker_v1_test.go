@@ -62,13 +62,13 @@ func TestAccCTSTrackerV1_timeout(t *testing.T) {
 }
 
 func TestAccCTSTrackerV1_schemaProjectName(t *testing.T) {
-	var tracker tracker.Tracker
+	var ctsTracker tracker.Tracker
 	var bucketName = fmt.Sprintf("terra-test-%s", acctest.RandString(5))
 	var projectName2 = os.Getenv("OS_PROJECT_NAME_2")
 	if projectName2 == "" {
 		t.Skip("OS_PROJECT_NAME_2 is empty")
 	}
-	OS_TENANT_NAME = projectName2
+	OS_TENANT_NAME = ProjectName(projectName2)
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
@@ -79,9 +79,9 @@ func TestAccCTSTrackerV1_schemaProjectName(t *testing.T) {
 				Config: testAccCTSTrackerV1_projectName(bucketName, OS_TENANT_NAME),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckCTSTrackerV1Exists(
-						"opentelekomcloud_cts_tracker_v1.tracker_v1", &tracker, OS_TENANT_NAME),
+						"opentelekomcloud_cts_tracker_v1.tracker_v1", &ctsTracker, OS_TENANT_NAME),
 					resource.TestCheckResourceAttr(
-						"opentelekomcloud_cts_tracker_v1.tracker_v1", "project_name", OS_TENANT_NAME),
+						"opentelekomcloud_cts_tracker_v1.tracker_v1", "project_name", string(OS_TENANT_NAME)),
 				),
 			},
 		},
@@ -113,7 +113,7 @@ func testAccCheckCTSTrackerV1Destroy(s *terraform.State) error {
 	return nil
 }
 
-func testAccCheckCTSTrackerV1Exists(n string, trackers *tracker.Tracker, projectName string) resource.TestCheckFunc {
+func testAccCheckCTSTrackerV1Exists(n string, trackers *tracker.Tracker, projectName ProjectName) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
 		rs, ok := s.RootModule().Resources[n]
 		if !ok {
@@ -223,8 +223,12 @@ timeouts {
 `, bucketName)
 }
 
-func testAccCTSTrackerV1_projectName(bucketName string, projectName string) string {
+func testAccCTSTrackerV1_projectName(bucketName string, projectName ProjectName) string {
 	return fmt.Sprintf(`
+locals {
+  project_name = "%s"
+}
+
 resource "opentelekomcloud_s3_bucket" "bucket" {
   bucket = "%s"
   acl = "public-read"
@@ -233,7 +237,7 @@ resource "opentelekomcloud_s3_bucket" "bucket" {
 resource "opentelekomcloud_smn_topic_v2" "topic_1" {
   name		   = "topic_check-1"
   display_name = "The display name of topic_check"
-  project_name = "%s"
+  project_name = local.project_name
 }
 resource "opentelekomcloud_cts_tracker_v1" "tracker_v1" {
   bucket_name      = "${opentelekomcloud_s3_bucket.bucket.bucket}"
@@ -243,7 +247,7 @@ resource "opentelekomcloud_cts_tracker_v1" "tracker_v1" {
   is_send_all_key_operation = false
   operations = ["login"]
   need_notify_user_list = ["user1"]
-  project_name = "%s"
+  project_name = local.project_name
 }
-`, bucketName, projectName, projectName)
+`, projectName, bucketName)
 }
