@@ -69,7 +69,7 @@ func dataSourceCTSTrackerV1() *schema.Resource {
 
 func dataSourceCTSTrackerV1Read(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*Config)
-	trackerClient, err := config.ctsV1Client(GetRegion(d, config))
+	trackerClient, err := config.ctsV1Client(GetProjectName(d, config))
 
 	listOpts := tracker.ListOpts{
 		TrackerName:    d.Get("tracker_name").(string),

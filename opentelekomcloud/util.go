@@ -41,7 +41,7 @@ func CheckDeleted(d *schema.ResourceData, err error, msg string) error {
 // GetRegion returns the region that was specified in the resource. If a
 // region was not set, the provider-level region is checked. The provider-level
 // region can either be set by the region argument or by OS_REGION_NAME.
-func GetRegion(d *schema.ResourceData, config *Config) string {
+func GetRegion(_ *schema.ResourceData, config *Config) string {
 	n := config.TenantName
 	if n == "" {
 		n = config.DelegatedProject
@@ -49,17 +49,19 @@ func GetRegion(d *schema.ResourceData, config *Config) string {
 	return strings.Split(n, "_")[0]
 }
 
+type ProjectName string
+
 // GetProjectName returns the project name that was specified in the resource.
-func GetProjectName(d *schema.ResourceData, config *Config) string {
+func GetProjectName(d *schema.ResourceData, config *Config) ProjectName {
 	projectName := d.Get("project_name").(string)
 	if projectName != "" {
-		return projectName
+		return ProjectName(projectName)
 	}
 	tenantName := config.TenantName
 	if tenantName == "" {
 		tenantName = config.DelegatedProject
 	}
-	return tenantName
+	return ProjectName(tenantName)
 }
 
 // AddValueSpecs expands the 'value_specs' object and removes 'value_specs'

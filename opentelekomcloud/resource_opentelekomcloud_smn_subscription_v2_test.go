@@ -43,7 +43,7 @@ func TestAccSMNV2Subscription_schemaProjectName(t *testing.T) {
 	if projectName2 == "" {
 		t.Skip("OS_PROJECT_NAME_2 should be set in order to run test")
 	}
-	OS_TENANT_NAME = projectName2
+	OS_TENANT_NAME = ProjectName(projectName2)
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
@@ -56,7 +56,7 @@ func TestAccSMNV2Subscription_schemaProjectName(t *testing.T) {
 					testAccCheckSMNV2SubscriptionExists(
 						"opentelekomcloud_smn_subscription_v2.subscription_1", &subscription1, OS_TENANT_NAME),
 					resource.TestCheckResourceAttr(
-						"opentelekomcloud_smn_subscription_v2.subscription_1", "project_name", OS_TENANT_NAME),
+						"opentelekomcloud_smn_subscription_v2.subscription_1", "project_name", string(OS_TENANT_NAME)),
 				),
 			},
 		},
@@ -92,7 +92,7 @@ func testAccCheckSMNSubscriptionV2Destroy(s *terraform.State) error {
 	return nil
 }
 
-func testAccCheckSMNV2SubscriptionExists(n string, subscription *subscriptions.SubscriptionGet, projectName string) resource.TestCheckFunc {
+func testAccCheckSMNV2SubscriptionExists(n string, subscription *subscriptions.SubscriptionGet, projectName ProjectName) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
 		rs, ok := s.RootModule().Resources[n]
 		if !ok {
@@ -147,7 +147,7 @@ resource "opentelekomcloud_smn_subscription_v2" "subscription_2" {
 }
 `
 
-func testAccSMNV2SubscriptionConfig_projectName(projectName string) string {
+func testAccSMNV2SubscriptionConfig_projectName(projectName ProjectName) string {
 	return fmt.Sprintf(`
 resource "opentelekomcloud_smn_topic_v2" "topic_1" {
   name		   = "topic_1"

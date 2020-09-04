@@ -472,12 +472,12 @@ func configureProvider(d *schema.ResourceData, terraformVersion string) (interfa
 	return &config, nil
 }
 
-func reconfigProjectName(src *Config, projectName string) (*Config, error) {
+func reconfigProjectName(src *Config, projectName ProjectName) (*Config, error) {
 	config := &Config{}
 	if err := copier.Copy(config, src); err != nil {
 		return nil, err
 	}
-	config.TenantName = projectName
+	config.TenantName = string(projectName)
 	if err := config.LoadAndValidate(); err != nil {
 		return nil, err
 	}

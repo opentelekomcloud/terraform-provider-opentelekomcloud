@@ -660,7 +660,7 @@ func (c *Config) objectStorageV1Client(region string) (*golangsdk.ServiceClient,
 	})
 }
 
-func (c *Config) SmnV2Client(projectName string) (*golangsdk.ServiceClient, error) {
+func (c *Config) SmnV2Client(projectName ProjectName) (*golangsdk.ServiceClient, error) {
 	newConfig, err := reconfigProjectName(c, projectName)
 	if err != nil {
 		return nil, err
@@ -816,7 +816,7 @@ func (c *Config) antiddosV1Client(region string) (*golangsdk.ServiceClient, erro
 	})
 }
 
-func (c *Config) ctsV1Client(projectName string) (*golangsdk.ServiceClient, error) {
+func (c *Config) ctsV1Client(projectName ProjectName) (*golangsdk.ServiceClient, error) {
 	newConfig, err := reconfigProjectName(c, projectName)
 	if err != nil {
 		return nil, err
