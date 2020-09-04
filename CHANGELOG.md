@@ -1,5 +1,15 @@
 ## 1.20.0 (Unreleased)
 
+## 1.19.5 (September 4, 2020)
+
+BUG FIXES:
+* `resource/opentelekomcloud_blockstorage_volume_v2`: Ignore metadata.policy changes in blockstorage_volume_v2 ([#604](https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/604))
+* `resource/opentelekomcloud_smn_subscription_v2`: Fix r/smn_subscription_v2 and d/cts_tracker_v1 ([608](https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/608))
+* `data_source/opentelekomcloud_cts_tracker_v1`: Fix r/smn_subscription_v2 and d/cts_tracker_v1 ([608](https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/608))
+
+ENHANCEMENTS:
+* **New data source:**: `data_source/opentelekomcloud_vpnaas_service_v2` ([#605](https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/605))
+
 ## 1.19.4 (September 1, 2020)
 
 BUG FIXES:
