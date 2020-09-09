@@ -43,6 +43,39 @@ func TestAccSMNV2Topic_basic(t *testing.T) {
 	})
 }
 
+func TestAccSMNV2Topic_reCreate(t *testing.T) {
+	var topic topics.TopicGet
+
+	resource.Test(t, resource.TestCase{
+		PreCheck:     func() { testAccPreCheck(t) },
+		Providers:    testAccProviders,
+		CheckDestroy: testAccCheckSMNTopicV2Destroy,
+		Steps: []resource.TestStep{
+			{
+				Config: TestAccSMNV2TopicConfig_basic,
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckSMNV2TopicExists("opentelekomcloud_smn_topic_v2.topic_1", &topic, OS_TENANT_NAME),
+					resource.TestCheckResourceAttr(
+						"opentelekomcloud_smn_topic_v2.topic_1", "name", "topic_1"),
+					resource.TestCheckResourceAttr(
+						"opentelekomcloud_smn_topic_v2.topic_1", "display_name",
+						"The display name of topic_1"),
+				),
+			},
+			{
+				Config: TestAccSMNV2TopicConfig_updateName,
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr(
+						"opentelekomcloud_smn_topic_v2.topic_1", "display_name",
+						"The display name of topic_1"),
+					resource.TestCheckResourceAttr(
+						"opentelekomcloud_smn_topic_v2.topic_1", "name", "topic_1-update"),
+				),
+			},
+		},
+	})
+}
+
 func TestAccSMNV2Topic_schemaProjectName(t *testing.T) {
 	var topic topics.TopicGet
 	var projectName2 = os.Getenv("OS_PROJECT_NAME_2")
@@ -133,6 +166,13 @@ var TestAccSMNV2TopicConfig_update = `
 resource "opentelekomcloud_smn_topic_v2" "topic_1" {
   name		  = "topic_1"
   display_name    = "The update display name of topic_1"
+}
+`
+
+var TestAccSMNV2TopicConfig_updateName = `
+resource "opentelekomcloud_smn_topic_v2" "topic_1" {
+  name		  = "topic_1-update"
+  display_name    = "The display name of topic_1"
 }
 `
 

@@ -28,3 +28,5 @@ localrc
 !command/test-fixtures/**/.terraform/
 
 dist
+
+/*.tf
