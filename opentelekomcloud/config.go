@@ -617,6 +617,18 @@ func (c *Config) identityV3Client(region string) (*golangsdk.ServiceClient, erro
 	})
 }
 
+// This client is used in obtaining AK/SK
+func (c *Config) identityV30Client() (*golangsdk.ServiceClient, error) {
+	service, err := huaweisdk.NewIdentityV3(c.DomainClient, golangsdk.EndpointOpts{
+		Availability: c.getHwEndpointType(),
+	})
+	if err != nil {
+		return nil, err
+	}
+	service.Endpoint = strings.Replace(service.IdentityEndpoint, "v3/", "v3.0/", 1)
+	return service, nil
+}
+
 func (c *Config) imageV1Client(region string) (*golangsdk.ServiceClient, error) {
 	return huaweisdk.NewImageServiceV1(c.HwClient, golangsdk.EndpointOpts{
 		Region:       region,
