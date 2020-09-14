@@ -4,7 +4,7 @@ subcategory: "Cloud Container Engine (CCE)"
 
 # opentelekomcloud_cce_cluster_v3
 
-Use this data source to get details about all clusters and obtains certificate for accessing cluster information.
+Use this data source to get details about all clusters and obtains the certificate for accessing cluster information.
 
 ## Example Usage
 
@@ -27,7 +27,7 @@ The following arguments are supported:
 
 * `status` - (Optional) The state of the cluster.
 
-* `cluster_type` - (Optional) Type of the cluster. Possible values: VirtualMachine, BareMetal or Windows.
+* `cluster_type` - (Optional) Type of the cluster. Possible values: `VirtualMachine`, `BareMetal` or `Windows`.
 
 ## Attributes Reference
 
@@ -48,7 +48,7 @@ All above argument parameters can be exported as attribute parameters along with
 * `container_network_cidr` - The container network segment.
 
 * `container_network_type` - The container network type: overlay_l2 , underlay_ipvlan or vpc-router.
-  
+
 * `subnet_id` - The ID of the subnet used to create the node.
 
 * `highway_subnet_id` - The ID of the high speed network used to create bare metal nodes.

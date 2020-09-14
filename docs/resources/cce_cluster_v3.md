@@ -4,7 +4,7 @@ subcategory: "Cloud Container Engine (CCE)"
 
 # opentelekomcloud_cce_cluster_v3
 
-Provides a cluster resource (CCE).
+Provides a cluster_v3 resource management.
 
 ## Example Usage
 
@@ -30,7 +30,6 @@ resource "opentelekomcloud_cce_cluster_v3" "cluster_1" {
 
 The following arguments are supported:
 
-
 * `name` - (Required) Cluster name. Changing this parameter will create a new cluster resource.
 
 * `labels` - (Optional) Cluster tag, key/value pair format. Changing this parameter will create a new cluster resource.
@@ -51,10 +50,10 @@ The following arguments are supported:
   * `cce.t2.medium` - medium-scale HA physical machine cluster (up to 100 nodes).
   * `cce.t2.large` - large-scale HA physical machine cluster (up to 500 nodes).
 
-* `cluster_version` - (Optional) For the cluster version, possible values are v1.9.2-r2 or v1.11.3-r1. Changing this parameter will create a new cluster resource.
-  [OTC-API](https://docs.otc.t-systems.com/en-us/api2/cce/cce_02_0236.html)
+* `cluster_version` - (Optional) For the cluster version, possible values are `v1.13.10-r0`, `v1.15.6-r1`.
+  Changing this parameter will create a new cluster resource. [OTC-API](https://docs.otc.t-systems.com/en-us/api2/cce/cce_02_0236.html)
 
-* `cluster_type` - (Required) Cluster Type, possible values are VirtualMachine and BareMetal. Changing this parameter will create a new cluster resource.
+* `cluster_type` - (Required) Cluster Type, possible values are `VirtualMachine` and `BareMetal`. Changing this parameter will create a new cluster resource.
 
 * `description` - (Optional) Cluster description.
 
@@ -75,8 +74,8 @@ The following arguments are supported:
 
 * `container_network_cidr` - (Optional) Container network segment. Changing this parameter will create a new cluster resource.
 
-* `authentication_mode` - (Optional) Authentication mode of the cluster, possible values are x509 and rbac. Defaults to x509.
-  Changing this parameter will create a new cluster resource.
+* `authentication_mode` - (Optional) Authentication mode of the cluster, possible values are `rbac` and `authenticating_proxy`.
+  Defaults to `rbac`. Changing this parameter will create a new cluster resource.
 
 * `multi_az` - (Optional) Enable multiple AZs for the cluster, only when using HA flavors. Changing this parameter will create a new cluster resource.
 
@@ -86,9 +85,9 @@ The following arguments are supported:
 
 All above argument parameters can be exported as attribute parameters along with attribute reference.
 
-* `id` -  Id of the cluster resource.
+* `id` - ID of the cluster resource.
 
-* `status` -  Cluster status information.
+* `status` - Cluster status information.
 
 * `internal` - The internal network address.
 
@@ -115,4 +114,3 @@ Cluster can be imported using the cluster id, e.g.
 ```sh
 terraform import opentelekomcloud_cce_cluster_v3.cluster_1 4779ab1c-7c1a-44b1-a02e-93dfc361b32d
 ```
-
