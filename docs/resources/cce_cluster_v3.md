@@ -4,7 +4,7 @@ subcategory: "Cloud Container Engine (CCE)"
 
 # opentelekomcloud_cce_cluster_v3
 
-Provides a cluster_v3 resource management.
+Provides a cluster resource management.
 
 ## Example Usage
 
