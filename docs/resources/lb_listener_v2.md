@@ -20,7 +20,7 @@ resource "opentelekomcloud_lb_listener_v2" "listener_1" {
 
 The following arguments are supported:
 
-* `protocol` - (Required) The protocol - can either be TCP, HTTP, HTTPS or TERMINATED_HTTPS.
+* `protocol` - (Required) The protocol - can either be `TCP`, `HTTP`, `HTTPS` or `TERMINATED_HTTPS`.
   Changing this creates a new Listener.
 
 * `protocol_port` - (Required) The port on which to listen for client traffic.
@@ -41,18 +41,18 @@ The following arguments are supported:
 
 * `description` - (Optional) Human-readable description for the Listener.
 
-* `default_tls_container_ref` - (Optional) A reference to a Barbican Secrets
-  container which stores TLS information. This is required if the protocol
-  is `TERMINATED_HTTPS`. See [here](https://wiki.openstack.org/wiki/Network/LBaaS/docs/how-to-create-tls-loadbalancer)
+* `default_tls_container_ref` - (Optional) Specifies the ID of the server certificate used by the listener.
+  The value contains a maximum of 128 characters. The default value is `null`.
+  This parameter is **required** when protocol is set to `TERMINATED_HTTPS`.
+  See [here](https://wiki.openstack.org/wiki/Network/LBaaS/docs/how-to-create-tls-loadbalancer)
   for more information.
 
-* `sni_container_refs` - (Optional) A list of references to Barbican Secrets
-  containers which store SNI information. See
-  [here](https://wiki.openstack.org/wiki/Network/LBaaS/docs/how-to-create-tls-loadbalancer)
-  for more information.
+* `sni_container_refs` - (Optional) Lists the IDs of SNI certificates (server certificates with a domain name) used
+  by the listener. If the parameter value is an empty list, the SNI feature is disabled.
+  The default value is `[]`. This is **required** if the protocol is `TERMINATED_HTTPS`.
 
 * `admin_state_up` - (Optional) The administrative state of the Listener.
-  A valid value is true (UP) or false (DOWN).
+  A valid value is `true` (UP) or `false` (DOWN).
 
 ## Attributes Reference
 
