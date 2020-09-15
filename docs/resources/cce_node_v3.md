@@ -59,16 +59,16 @@ The following arguments are supported:
 
 * `eip_ids` - (Optional) List of existing elastic IP IDs. Changing this parameter will create a new resource.
 
--> **Note:** If the eip_ids parameter is configured, you do not need to configure the eip_count and bandwidth parameters:
-iptype, charge_mode, bandwidth_size and share_type.
+-> **Note:** If the `eip_ids` parameter is configured, you do not need to configure the `eip_count` and `bandwidth` parameters:
+`iptype`, `charge_mode`, `bandwidth_size` and `share_type`.
 
 * `eip_count` - (Optional) Number of elastic IPs to be dynamically created. Changing this parameter will create a new resource.
 
-* `iptype` - (Optional) Elastic IP type.
+* `iptype` - (Optional) Elastic IP type. Default value is `5_bgp`.
 
-* `bandwidth_charge_mode` - (Optional) Bandwidth billing type. Changing this parameter will create a new resource.
+* `bandwidth_charge_mode` - (Optional) Bandwidth billing type. Default value is `traffic`. Changing this parameter will create a new resource.
 
-* `sharetype` - (Optional) Bandwidth sharing type. Changing this parameter will create a new resource.
+* `sharetype` - (Optional) Bandwidth sharing type. Default value is `PER` Changing this parameter will create a new resource.
 
 * `bandwidth_size` - (Optional) Bandwidth size. Changing this parameter will create a new resource.
 

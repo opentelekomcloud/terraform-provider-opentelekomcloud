@@ -139,18 +139,21 @@ func resourceCCENodeV3() *schema.Resource {
 				Optional: true,
 				ForceNew: true,
 				Computed: true,
+				Default:  "5_bgp",
 			},
 			"bandwidth_charge_mode": {
 				Type:     schema.TypeString,
 				Optional: true,
 				ForceNew: true,
 				Computed: true,
+				Default:  "traffic",
 			},
 			"sharetype": {
 				Type:     schema.TypeString,
 				Optional: true,
 				ForceNew: true,
 				Computed: true,
+				Default:  "PER",
 			},
 			"bandwidth_size": {
 				Type:     schema.TypeInt,
@@ -324,17 +327,8 @@ func resourceCCENodeV3Create(d *schema.ResourceData, meta interface{}) error {
 	// eip_count and bandwidth_size parameters must be set simultaneously
 	bandwidthSize := d.Get("bandwidth_size").(int)
 	eipCount := d.Get("eip_count").(int)
-	ipType := d.Get("iptype").(string)
-	shareType := d.Get("sharetype").(string)
-	chargeMode := d.Get("bandwidth_charge_mode").(string)
 	if bandwidthSize > 0 && eipCount == 0 {
 		eipCount = 1
-	}
-
-	if eipCount == 1 && (ipType == "" || shareType == "" || chargeMode == "") {
-		ipType = "5_bgp"
-		shareType = "PER"
-		chargeMode = "traffic"
 	}
 
 	createOpts := nodes.CreateOpts{
@@ -355,11 +349,11 @@ func resourceCCENodeV3Create(d *schema.ResourceData, meta interface{}) error {
 				Ids:   resourceCCEEipIDs(d),
 				Count: eipCount,
 				Eip: nodes.EipSpec{
-					IpType: ipType,
+					IpType: d.Get("iptype").(string),
 					Bandwidth: nodes.BandwidthOpts{
-						ChargeMode: chargeMode,
+						ChargeMode: d.Get("bandwidth_charge_mode").(string),
 						Size:       bandwidthSize,
-						ShareType:  shareType,
+						ShareType:  d.Get("sharetype").(string),
 					},
 				},
 			},
@@ -379,10 +373,10 @@ func resourceCCENodeV3Create(d *schema.ResourceData, meta interface{}) error {
 		},
 	}
 
-	clusterid := d.Get("cluster_id").(string)
+	clusterId := d.Get("cluster_id").(string)
 	stateCluster := &resource.StateChangeConf{
 		Target:     []string{"Available"},
-		Refresh:    waitForClusterAvailable(nodeClient, clusterid),
+		Refresh:    waitForClusterAvailable(nodeClient, clusterId),
 		Timeout:    15 * time.Minute,
 		Delay:      15 * time.Second,
 		MinTimeout: 3 * time.Second,
@@ -390,10 +384,10 @@ func resourceCCENodeV3Create(d *schema.ResourceData, meta interface{}) error {
 	_, err = stateCluster.WaitForState()
 
 	log.Printf("[DEBUG] Create Options: %#v", createOpts)
-	s, err := nodes.Create(nodeClient, clusterid, createOpts).Extract()
+	s, err := nodes.Create(nodeClient, clusterId, createOpts).Extract()
 	if err != nil {
 		if _, ok := err.(golangsdk.ErrDefault403); ok {
-			retryNode, err := recursiveCreate(nodeClient, createOpts, clusterid, 403)
+			retryNode, err := recursiveCreate(nodeClient, createOpts, clusterId, 403)
 			if err == "fail" {
 				return fmt.Errorf("Error creating opentelekomcloud Node")
 			}
@@ -407,17 +401,17 @@ func resourceCCENodeV3Create(d *schema.ResourceData, meta interface{}) error {
 	if err != nil {
 		return fmt.Errorf("Error fetching opentelekomcloud Job Details: %s", err)
 	}
-	jobResorceId := job.Spec.SubJobs[0].Metadata.ID
+	jobResourceId := job.Spec.SubJobs[0].Metadata.ID
 
-	subjob, err := nodes.GetJobDetails(nodeClient, jobResorceId).ExtractJob()
+	subJob, err := nodes.GetJobDetails(nodeClient, jobResourceId).ExtractJob()
 	if err != nil {
 		return fmt.Errorf("Error fetching opentelekomcloud Job Details: %s", err)
 	}
 
-	var nodeid string
-	for _, s := range subjob.Spec.SubJobs {
+	var nodeId string
+	for _, s := range subJob.Spec.SubJobs {
 		if s.Spec.Type == "CreateNodeVM" {
-			nodeid = s.Spec.ResourceID
+			nodeId = s.Spec.ResourceID
 			break
 		}
 	}
@@ -426,7 +420,7 @@ func resourceCCENodeV3Create(d *schema.ResourceData, meta interface{}) error {
 	stateConf := &resource.StateChangeConf{
 		Pending:    []string{"Build", "Installing"},
 		Target:     []string{"Active"},
-		Refresh:    waitForCceNodeActive(nodeClient, clusterid, nodeid),
+		Refresh:    waitForCceNodeActive(nodeClient, clusterId, nodeId),
 		Timeout:    d.Timeout(schema.TimeoutCreate),
 		Delay:      5 * time.Second,
 		MinTimeout: 3 * time.Second,
@@ -436,7 +430,7 @@ func resourceCCENodeV3Create(d *schema.ResourceData, meta interface{}) error {
 		return fmt.Errorf("Error creating opentelekomcloud CCE Node: %s", err)
 	}
 
-	d.SetId(nodeid)
+	d.SetId(nodeId)
 	return resourceCCENodeV3Read(d, meta)
 }
 
@@ -446,8 +440,8 @@ func resourceCCENodeV3Read(d *schema.ResourceData, meta interface{}) error {
 	if err != nil {
 		return fmt.Errorf("Error creating opentelekomcloud CCE Node client: %s", err)
 	}
-	clusterid := d.Get("cluster_id").(string)
-	s, err := nodes.Get(nodeClient, clusterid, d.Id()).Extract()
+	clusterId := d.Get("cluster_id").(string)
+	s, err := nodes.Get(nodeClient, clusterId, d.Id()).Extract()
 
 	if err != nil {
 		if _, ok := err.(golangsdk.ErrDefault404); ok {
@@ -524,10 +518,10 @@ func resourceCCENodeV3Read(d *schema.ResourceData, meta interface{}) error {
 		return fmt.Errorf("Error fetching OpenTelekomCloud instance tags: %s", err)
 	}
 
-	tagmap := tagsToMap(resourceTags.Tags)
+	tagMap := tagsToMap(resourceTags.Tags)
 	// ignore "CCE-Dynamic-Provisioning-Node"
-	delete(tagmap, "CCE-Dynamic-Provisioning-Node")
-	if err := d.Set("tags", tagmap); err != nil {
+	delete(tagMap, "CCE-Dynamic-Provisioning-Node")
+	if err := d.Set("tags", tagMap); err != nil {
 		return fmt.Errorf("Error saving tags of cce node: %s", err)
 	}
 
@@ -546,8 +540,8 @@ func resourceCCENodeV3Update(d *schema.ResourceData, meta interface{}) error {
 	if d.HasChange("name") {
 		updateOpts.Metadata.Name = d.Get("name").(string)
 
-		clusterid := d.Get("cluster_id").(string)
-		_, err = nodes.Update(nodeClient, clusterid, d.Id(), updateOpts).Extract()
+		clusterId := d.Get("cluster_id").(string)
+		_, err = nodes.Update(nodeClient, clusterId, d.Id(), updateOpts).Extract()
 		if err != nil {
 			return fmt.Errorf("Error updating opentelekomcloud cce node: %s", err)
 		}
@@ -576,15 +570,15 @@ func resourceCCENodeV3Delete(d *schema.ResourceData, meta interface{}) error {
 	if err != nil {
 		return fmt.Errorf("Error creating opentelekomcloud CCE client: %s", err)
 	}
-	clusterid := d.Get("cluster_id").(string)
-	err = nodes.Delete(nodeClient, clusterid, d.Id()).ExtractErr()
+	clusterId := d.Get("cluster_id").(string)
+	err = nodes.Delete(nodeClient, clusterId, d.Id()).ExtractErr()
 	if err != nil {
 		return fmt.Errorf("Error deleting opentelekomcloud CCE Cluster: %s", err)
 	}
 	stateConf := &resource.StateChangeConf{
 		Pending:    []string{"Deleting"},
 		Target:     []string{"Deleted"},
-		Refresh:    waitForCceNodeDelete(nodeClient, clusterid, d.Id()),
+		Refresh:    waitForCceNodeDelete(nodeClient, clusterId, d.Id()),
 		Timeout:    d.Timeout(schema.TimeoutDelete),
 		Delay:      5 * time.Second,
 		MinTimeout: 3 * time.Second,
@@ -649,7 +643,7 @@ func recursiveCreate(cceClient *golangsdk.ServiceClient, opts nodes.CreateOptsBu
 			Refresh:    waitForClusterAvailable(cceClient, ClusterID),
 			Timeout:    15 * time.Minute,
 			Delay:      15 * time.Second,
-			MinTimeout: 3 * time.Second,
+			MinTimeout: 10 * time.Second,
 		}
 		_, stateErr := stateCluster.WaitForState()
 		if stateErr != nil {

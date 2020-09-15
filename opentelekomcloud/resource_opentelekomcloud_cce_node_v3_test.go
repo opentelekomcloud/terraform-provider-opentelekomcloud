@@ -22,17 +22,14 @@ func TestAccCCENodesV3_basic(t *testing.T) {
 				Config: testAccCCENodeV3_basic,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckCCENodeV3Exists("opentelekomcloud_cce_node_v3.node_1", "opentelekomcloud_cce_cluster_v3.cluster_1", &node),
-					resource.TestCheckResourceAttr(
-						"opentelekomcloud_cce_node_v3.node_1", "name", "test-node"),
-					resource.TestCheckResourceAttr(
-						"opentelekomcloud_cce_node_v3.node_1", "flavor_id", "s1.medium"),
+					resource.TestCheckResourceAttr("opentelekomcloud_cce_node_v3.node_1", "name", "test-node"),
+					resource.TestCheckResourceAttr("opentelekomcloud_cce_node_v3.node_1", "flavor_id", "s1.medium"),
 				),
 			},
 			{
 				Config: testAccCCENodeV3_update,
 				Check: resource.ComposeTestCheckFunc(
-					resource.TestCheckResourceAttr(
-						"opentelekomcloud_cce_node_v3.node_1", "name", "test-node2"),
+					resource.TestCheckResourceAttr("opentelekomcloud_cce_node_v3.node_1", "name", "test-node2"),
 				),
 			},
 		},
@@ -69,6 +66,9 @@ func TestAccCCENodesV3_ip(t *testing.T) {
 				Config: testAccCCENodeV3_ip,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckCCENodeV3Exists("opentelekomcloud_cce_node_v3.node_1", "opentelekomcloud_cce_cluster_v3.cluster_1", &node),
+					resource.TestCheckResourceAttr("opentelekomcloud_cce_node_v3.node_1", "iptype", "5_bgp"),
+					resource.TestCheckResourceAttr("opentelekomcloud_cce_node_v3.node_1", "sharetype", "PER"),
+					resource.TestCheckResourceAttr("opentelekomcloud_cce_node_v3.node_1", "bandwidth_charge_mode", "traffic"),
 				),
 			},
 		},
@@ -143,102 +143,112 @@ func testAccCheckCCENodeV3Exists(n string, cluster string, node *nodes.Nodes) re
 
 var testAccCCENodeV3_basic = fmt.Sprintf(`
 resource "opentelekomcloud_cce_cluster_v3" "cluster_1" {
-  name = "opentelekomcloud-cce"
+  name         = "opentelekomcloud-cce"
   cluster_type = "VirtualMachine"
-  flavor_id = "cce.s1.small"
-  vpc_id = "%s"
-  subnet_id = "%s"
+  flavor_id    = "cce.s1.small"
+  vpc_id       = "%s"
+  subnet_id    = "%s"
+
   container_network_type = "overlay_l2"
-  authentication_mode = "rbac"
+  authentication_mode    = "rbac"
 }
 
 resource "opentelekomcloud_cce_node_v3" "node_1" {
-cluster_id = "${opentelekomcloud_cce_cluster_v3.cluster_1.id}"
-  name = "test-node"
-  flavor_id="s1.medium"
-  availability_zone= "%s"
-  key_pair="%s"
+  cluster_id = opentelekomcloud_cce_cluster_v3.cluster_1.id
+  name       = "test-node"
+  flavor_id  = "s1.medium"
+
+  availability_zone = "%s"
+  key_pair          = "%s"
+
   root_volume {
-    size= 40
-    volumetype= "SATA"
+    size       = 40
+    volumetype = "SATA"
   }
+
   data_volumes {
-    size= 100
-    volumetype= "SATA"
+    size       = 100
+    volumetype = "SATA"
   }
 }`, OS_VPC_ID, OS_NETWORK_ID, OS_AVAILABILITY_ZONE, OS_KEYPAIR_NAME)
 
 var testAccCCENodeV3_update = fmt.Sprintf(`
 resource "opentelekomcloud_cce_cluster_v3" "cluster_1" {
-  name = "opentelekomcloud-cce"
+  name         = "opentelekomcloud-cce"
   cluster_type = "VirtualMachine"
-  flavor_id = "cce.s1.small"
-  vpc_id = "%s"
-  subnet_id = "%s"
+  flavor_id    = "cce.s1.small"
+  vpc_id       = "%s"
+  subnet_id    = "%s"
+
   container_network_type = "overlay_l2"
-  authentication_mode = "rbac"
+  authentication_mode    = "rbac"
 }
 
 resource "opentelekomcloud_cce_node_v3" "node_1" {
-cluster_id = "${opentelekomcloud_cce_cluster_v3.cluster_1.id}"
-  name = "test-node2"
-  flavor_id="s1.medium"
-  availability_zone= "%s"
-  key_pair="%s"
+  cluster_id = opentelekomcloud_cce_cluster_v3.cluster_1.id
+  name       = "test-node2"
+  flavor_id  ="s1.medium"
+
+  availability_zone = "%s"
+  key_pair          ="%s"
+
   root_volume {
-    size= 40
-    volumetype= "SATA"
+    size       = 40
+    volumetype = "SATA"
   }
   data_volumes {
-    size= 100
-    volumetype= "SATA"
+    size       = 100
+    volumetype = "SATA"
   }
 }`, OS_VPC_ID, OS_NETWORK_ID, OS_AVAILABILITY_ZONE, OS_KEYPAIR_NAME)
 
 var testAccCCENodeV3_timeout = fmt.Sprintf(`
 resource "opentelekomcloud_cce_cluster_v3" "cluster_1" {
-  name = "opentelekomcloud-cce"
+  name         = "opentelekomcloud-cce"
   cluster_type = "VirtualMachine"
-  flavor_id = "cce.s1.small"
-  vpc_id = "%s"
-  subnet_id = "%s"
+  flavor_id    = "cce.s1.small"
+  vpc_id       = "%s"
+  subnet_id    = "%s"
+
   container_network_type = "overlay_l2"
-  authentication_mode = "rbac"
+  authentication_mode    = "rbac"
 }
 
 resource "opentelekomcloud_cce_node_v3" "node_1" {
-  cluster_id = "${opentelekomcloud_cce_cluster_v3.cluster_1.id}"
-  name = "test-node2"
-  flavor_id="s1.medium"
-  availability_zone= "%s"
-  key_pair="%s"
+  cluster_id        = opentelekomcloud_cce_cluster_v3.cluster_1.id
+  name              = "test-node2"
+  flavor_id         = "s1.medium"
+  availability_zone = "%s"
+  key_pair          = "%s"
+
   root_volume {
-    size= 40
-    volumetype= "SATA"
+    size       = 40
+    volumetype = "SATA"
   }
   data_volumes {
-    size= 100
-    volumetype= "SATA"
+    size       = 100
+    volumetype = "SATA"
   }
-timeouts {
-create = "10m"
-delete = "10m"
-}
+  timeouts {
+    create = "10m"
+    delete = "10m"
+  }
 }
 `, OS_VPC_ID, OS_NETWORK_ID, OS_AVAILABILITY_ZONE, OS_KEYPAIR_NAME)
 
 var testAccCCENodeV3_ip = fmt.Sprintf(`
 resource "opentelekomcloud_cce_cluster_v3" "cluster_1" {
-  name = "opentelekomcloud-cce"
+  name         = "opentelekomcloud-cce"
   cluster_type = "VirtualMachine"
-  flavor_id = "cce.s1.small"
-  vpc_id = "%s"
-  subnet_id = "%s"
+  flavor_id    = "cce.s1.small"
+  vpc_id       = "%s"
+  subnet_id    = "%s"
+
   container_network_type = "overlay_l2"
-  authentication_mode = "rbac"
+  authentication_mode    = "rbac"
 }
 
-resource "opentelekomcloud_cce_node_v3" "dev-cce-node-1" {
+resource "opentelekomcloud_cce_node_v3" "node_1" {
   cluster_id        = opentelekomcloud_cce_cluster_v3.cluster_1.id
   name              = "cce-node-1"
   flavor_id         = "s2.xlarge.2"
