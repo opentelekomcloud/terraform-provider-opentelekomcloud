@@ -57,6 +57,24 @@ func TestAccCCENodesV3_timeout(t *testing.T) {
 	})
 }
 
+func TestAccCCENodesV3_ip(t *testing.T) {
+	var node nodes.Nodes
+
+	resource.Test(t, resource.TestCase{
+		PreCheck:     func() { testAccCCEKeyPairPreCheck(t) },
+		Providers:    testAccProviders,
+		CheckDestroy: testAccCheckCCENodeV3Destroy,
+		Steps: []resource.TestStep{
+			{
+				Config: testAccCCENodeV3_ip,
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckCCENodeV3Exists("opentelekomcloud_cce_node_v3.node_1", "opentelekomcloud_cce_cluster_v3.cluster_1", &node),
+				),
+			},
+		},
+	})
+}
+
 func testAccCheckCCENodeV3Destroy(s *terraform.State) error {
 	config := testAccProvider.Meta().(*Config)
 	cceClient, err := config.cceV3Client(OS_REGION_NAME)
