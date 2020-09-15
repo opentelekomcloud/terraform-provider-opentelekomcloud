@@ -324,8 +324,17 @@ func resourceCCENodeV3Create(d *schema.ResourceData, meta interface{}) error {
 	// eip_count and bandwidth_size parameters must be set simultaneously
 	bandwidthSize := d.Get("bandwidth_size").(int)
 	eipCount := d.Get("eip_count").(int)
+	ipType := d.Get("iptype").(string)
+	shareType := d.Get("sharetype").(string)
+	chargeMode := d.Get("bandwidth_charge_mode").(string)
 	if bandwidthSize > 0 && eipCount == 0 {
 		eipCount = 1
+	}
+
+	if eipCount == 1 && (ipType == "" || shareType == "" || chargeMode == "") {
+		ipType = "5_bgp"
+		shareType = "PER"
+		chargeMode = "traffic"
 	}
 
 	createOpts := nodes.CreateOpts{
@@ -346,11 +355,11 @@ func resourceCCENodeV3Create(d *schema.ResourceData, meta interface{}) error {
 				Ids:   resourceCCEEipIDs(d),
 				Count: eipCount,
 				Eip: nodes.EipSpec{
-					IpType: d.Get("iptype").(string),
+					IpType: ipType,
 					Bandwidth: nodes.BandwidthOpts{
-						ChargeMode: d.Get("bandwidth_charge_mode").(string),
+						ChargeMode: chargeMode,
 						Size:       bandwidthSize,
-						ShareType:  d.Get("sharetype").(string),
+						ShareType:  shareType,
 					},
 				},
 			},
