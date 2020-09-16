@@ -3,12 +3,12 @@
 ## 1.20.0 (September 16, 2020)
 
 BUG FIXES:
-* `resource/cce_cluster_v3` and `data_source/cce_cluster_v3`: Update outdated docs ([#614](https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/614))
-* `resource/lb_listener_v2`: Update outdated docs ([#615](https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/615))
+* `resource/opentelekomcloud_cce_cluster_v3` and `data_source/opentelekomcloud_cce_cluster_v3`: Update outdated docs ([#614](https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/614))
+* `resource/opentelekomcloud_lb_listener_v2`: Update outdated docs ([#615](https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/615))
 
 ENHANCEMENTS:
-* **New data source:** `data_source/opentelekomcloud_identity_credential_v3` Add identity_credential_v3 (permanent AK/SK) ([#613](https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/613))
-* **New resource:** `resource/opentelekomcloud_identity_credential_v3` Add identity_credential_v3 (permanent AK/SK) ([#613](https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/613))
+* **New data source:** `data_source/opentelekomcloud_identity_credential_v3` ([#613](https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/613))
+* **New resource:** `resource/opentelekomcloud_identity_credential_v3` ([#613](https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/613))
 
 ## 1.19.5 (September 4, 2020)
 
