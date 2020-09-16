@@ -138,21 +138,18 @@ func resourceCCENodeV3() *schema.Resource {
 				Type:     schema.TypeString,
 				Optional: true,
 				ForceNew: true,
-				Computed: true,
 				Default:  "5_bgp",
 			},
 			"bandwidth_charge_mode": {
 				Type:     schema.TypeString,
 				Optional: true,
 				ForceNew: true,
-				Computed: true,
 				Default:  "traffic",
 			},
 			"sharetype": {
 				Type:     schema.TypeString,
 				Optional: true,
 				ForceNew: true,
-				Computed: true,
 				Default:  "PER",
 			},
 			"bandwidth_size": {
