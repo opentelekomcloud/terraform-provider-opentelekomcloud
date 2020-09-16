@@ -3,7 +3,8 @@
 ## 1.20.0 (September 16, 2020)
 
 BUG FIXES:
-* `resource/opentelekomcloud_cce_cluster_v3` and `data_source/opentelekomcloud_cce_cluster_v3`: Update outdated docs ([#614](https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/614))
+* `data_source/opentelekomcloud_cce_cluster_v3`: Update outdated docs ([#614](https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/614))
+* `resource/opentelekomcloud_cce_cluster_v3`: Update outdated docs ([#614](https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/614))
 * `resource/opentelekomcloud_lb_listener_v2`: Update outdated docs ([#615](https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/615))
 
 ENHANCEMENTS:
