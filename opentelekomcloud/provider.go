@@ -236,6 +236,7 @@ func Provider() terraform.ResourceProvider {
 			"opentelekomcloud_dms_az_v1":                     dataSourceDmsAZV1(),
 			"opentelekomcloud_dms_product_v1":                dataSourceDmsProductV1(),
 			"opentelekomcloud_dms_maintainwindow_v1":         dataSourceDmsMaintainWindowV1(),
+			"opentelekomcloud_dns_zone_v2":                   dataSourceDNSZoneV2(),
 			"opentelekomcloud_identity_credential_v3":        dataSourceIdentityCredentialV3(),
 			"opentelekomcloud_identity_role_v3":              dataSourceIdentityRoleV3(),
 			"opentelekomcloud_identity_project_v3":           dataSourceIdentityProjectV3(),
