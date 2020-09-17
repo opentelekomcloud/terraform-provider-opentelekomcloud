@@ -15,5 +15,6 @@ require (
 	github.com/mitchellh/go-homedir v1.1.0
 	github.com/smartystreets/goconvey v0.0.0-20190306220146-200a235640ff // indirect
 	github.com/unknwon/com v1.0.1
-	gopkg.in/yaml.v2 v2.2.2
+	golang.org/x/crypto v0.0.0-20200820211705-5c72a883971a // indirect
+	gopkg.in/yaml.v2 v2.3.0
 )
