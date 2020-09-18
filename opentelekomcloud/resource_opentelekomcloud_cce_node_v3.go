@@ -53,6 +53,7 @@ func resourceCCENodeV3() *schema.Resource {
 				ConflictsWith: []string{"tags"},
 				Optional:      true,
 				ForceNew:      true,
+				Elem:          &schema.Schema{Type: schema.TypeString},
 			},
 			"annotations": {
 				Type:     schema.TypeMap,
@@ -126,7 +127,18 @@ func resourceCCENodeV3() *schema.Resource {
 				ForceNew: true,
 				Elem:     &schema.Schema{Type: schema.TypeString},
 				Set:      schema.HashString,
-				Computed: true,
+				ConflictsWith: []string{
+					"eip_id", "iptype", "bandwidth_charge_mode", "bandwidth_size", "sharetype",
+				},
+				Deprecated: "Use eip_id instead",
+			},
+			"eip_id": {
+				Type:     schema.TypeString,
+				Optional: true,
+				ForceNew: true,
+				ConflictsWith: []string{
+					"eip_ids", "iptype", "bandwidth_charge_mode", "bandwidth_size", "sharetype",
+				},
 			},
 			"eip_count": {
 				Type:     schema.TypeInt,
@@ -138,25 +150,31 @@ func resourceCCENodeV3() *schema.Resource {
 				Type:     schema.TypeString,
 				Optional: true,
 				ForceNew: true,
-				Default:  "5_bgp",
+				RequiredWith: []string{
+					"iptype", "bandwidth_size", "sharetype",
+				},
 			},
 			"bandwidth_charge_mode": {
-				Type:     schema.TypeString,
-				Optional: true,
-				ForceNew: true,
-				Default:  "traffic",
+				Type:          schema.TypeString,
+				Optional:      true,
+				ForceNew:      true,
+				ConflictsWith: []string{"eip_ids", "eip_id"},
 			},
 			"sharetype": {
 				Type:     schema.TypeString,
 				Optional: true,
 				ForceNew: true,
-				Default:  "PER",
+				RequiredWith: []string{
+					"iptype", "bandwidth_size", "sharetype",
+				},
 			},
 			"bandwidth_size": {
 				Type:     schema.TypeInt,
 				Optional: true,
 				ForceNew: true,
-				Computed: true,
+				RequiredWith: []string{
+					"iptype", "bandwidth_size", "sharetype",
+				},
 			},
 			"billing_mode": {
 				Type:     schema.TypeInt,
@@ -298,6 +316,9 @@ func resourceCCERootVolume(d *schema.ResourceData) nodes.VolumeSpec {
 }
 
 func resourceCCEEipIDs(d *schema.ResourceData) []string {
+	if v, ok := d.GetOk("eip_id"); ok {
+		return []string{v.(string)}
+	}
 	rawID := d.Get("eip_ids").(*schema.Set)
 	id := make([]string, rawID.Len())
 	for i, raw := range rawID.List() {
