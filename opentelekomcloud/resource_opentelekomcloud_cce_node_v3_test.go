@@ -258,7 +258,11 @@ resource "opentelekomcloud_cce_node_v3" "node_1" {
     size       = 40
     volumetype = "SATA"
   }
-  bandwidth_size = 100
+  eip_count             = 2
+  bandwidth_size        = 100
+  iptype                = "5_bgp"
+  sharetype             = "PER"
+  bandwidth_charge_mode = "traffic"
   data_volumes {
     size       = 100
     volumetype = "SATA"

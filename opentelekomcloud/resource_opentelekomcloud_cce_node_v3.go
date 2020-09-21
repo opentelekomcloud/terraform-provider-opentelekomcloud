@@ -5,6 +5,7 @@ import (
 	"encoding/base64"
 	"encoding/hex"
 	"fmt"
+	"github.com/hashicorp/terraform-plugin-sdk/helper/validation"
 	"log"
 	"time"
 
@@ -59,6 +60,7 @@ func resourceCCENodeV3() *schema.Resource {
 				Type:     schema.TypeMap,
 				Optional: true,
 				ForceNew: true,
+				Elem:     &schema.Schema{Type: schema.TypeString},
 			},
 			"flavor_id": {
 				Type:     schema.TypeString,
@@ -79,22 +81,20 @@ func resourceCCENodeV3() *schema.Resource {
 				Type:     schema.TypeList,
 				Required: true,
 				ForceNew: true,
+				MaxItems: 1,
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
 						"size": {
 							Type:     schema.TypeInt,
 							Required: true,
-							ForceNew: true,
 						},
 						"volumetype": {
 							Type:     schema.TypeString,
 							Required: true,
-							ForceNew: true,
 						},
 						"extend_param": {
 							Type:     schema.TypeString,
 							Optional: true,
-							ForceNew: true,
 						},
 					}},
 			},
@@ -107,17 +107,14 @@ func resourceCCENodeV3() *schema.Resource {
 						"size": {
 							Type:     schema.TypeInt,
 							Required: true,
-							ForceNew: true,
 						},
 						"volumetype": {
 							Type:     schema.TypeString,
 							Required: true,
-							ForceNew: true,
 						},
 						"extend_param": {
 							Type:     schema.TypeString,
 							Optional: true,
-							ForceNew: true,
 						},
 					}},
 			},
@@ -128,52 +125,59 @@ func resourceCCENodeV3() *schema.Resource {
 				Elem:     &schema.Schema{Type: schema.TypeString},
 				Set:      schema.HashString,
 				ConflictsWith: []string{
-					"eip_id", "iptype", "bandwidth_charge_mode", "bandwidth_size", "sharetype",
-				},
-				Deprecated: "Use eip_id instead",
-			},
-			"eip_id": {
-				Type:     schema.TypeString,
-				Optional: true,
-				ForceNew: true,
-				ConflictsWith: []string{
-					"eip_ids", "iptype", "bandwidth_charge_mode", "bandwidth_size", "sharetype",
+					"iptype", "bandwidth_charge_mode", "bandwidth_size", "sharetype",
 				},
 			},
 			"eip_count": {
-				Type:     schema.TypeInt,
-				Optional: true,
-				ForceNew: true,
-				Computed: true,
+				Type:          schema.TypeInt,
+				Optional:      true,
+				ForceNew:      true,
+				Computed:      true,
+				ConflictsWith: []string{"eip_ids"},
 			},
 			"iptype": {
 				Type:     schema.TypeString,
 				Optional: true,
 				ForceNew: true,
+				ValidateFunc: validation.StringInSlice([]string{
+					"5_bgp",
+				}, true),
+				ConflictsWith: []string{"eip_ids"},
 				RequiredWith: []string{
-					"iptype", "bandwidth_size", "sharetype",
+					"iptype", "bandwidth_size", "sharetype", "bandwidth_charge_mode",
 				},
 			},
 			"bandwidth_charge_mode": {
-				Type:          schema.TypeString,
-				Optional:      true,
-				ForceNew:      true,
-				ConflictsWith: []string{"eip_ids", "eip_id"},
+				Type:     schema.TypeString,
+				Optional: true,
+				ForceNew: true,
+				ValidateFunc: validation.StringInSlice([]string{
+					"traffic",
+				}, true),
+				ConflictsWith: []string{"eip_ids"},
+				RequiredWith: []string{
+					"iptype", "bandwidth_size", "sharetype", "bandwidth_charge_mode",
+				},
 			},
 			"sharetype": {
 				Type:     schema.TypeString,
 				Optional: true,
 				ForceNew: true,
+				ValidateFunc: validation.StringInSlice([]string{
+					"PER",
+				}, true),
+				ConflictsWith: []string{"eip_ids"},
 				RequiredWith: []string{
-					"iptype", "bandwidth_size", "sharetype",
+					"iptype", "bandwidth_size", "sharetype", "bandwidth_charge_mode",
 				},
 			},
 			"bandwidth_size": {
-				Type:     schema.TypeInt,
-				Optional: true,
-				ForceNew: true,
+				Type:          schema.TypeInt,
+				Optional:      true,
+				ForceNew:      true,
+				ConflictsWith: []string{"eip_ids"},
 				RequiredWith: []string{
-					"iptype", "bandwidth_size", "sharetype",
+					"iptype", "bandwidth_size", "sharetype", "bandwidth_charge_mode",
 				},
 			},
 			"billing_mode": {
@@ -316,9 +320,6 @@ func resourceCCERootVolume(d *schema.ResourceData) nodes.VolumeSpec {
 }
 
 func resourceCCEEipIDs(d *schema.ResourceData) []string {
-	if v, ok := d.GetOk("eip_id"); ok {
-		return []string{v.(string)}
-	}
 	rawID := d.Get("eip_ids").(*schema.Set)
 	id := make([]string, rawID.Len())
 	for i, raw := range rawID.List() {
@@ -331,7 +332,7 @@ func resourceCCENodeV3Create(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*Config)
 	nodeClient, err := config.cceV3Client(GetRegion(d, config))
 	if err != nil {
-		return fmt.Errorf("Error creating opentelekomcloud CCE Node client: %s", err)
+		return fmt.Errorf("Error creating OpenTelekomCloud CCE Node client: %s", err)
 	}
 
 	var base64PreInstall, base64PostInstall string
@@ -370,7 +371,7 @@ func resourceCCENodeV3Create(d *schema.ResourceData, meta interface{}) error {
 					IpType: d.Get("iptype").(string),
 					Bandwidth: nodes.BandwidthOpts{
 						ChargeMode: d.Get("bandwidth_charge_mode").(string),
-						Size:       bandwidthSize,
+						Size:       d.Get("bandwidth_size").(int),
 						ShareType:  d.Get("sharetype").(string),
 					},
 				},
@@ -407,23 +408,23 @@ func resourceCCENodeV3Create(d *schema.ResourceData, meta interface{}) error {
 		if _, ok := err.(golangsdk.ErrDefault403); ok {
 			retryNode, err := recursiveCreate(nodeClient, createOpts, clusterId, 403)
 			if err == "fail" {
-				return fmt.Errorf("Error creating opentelekomcloud Node")
+				return fmt.Errorf("Error creating OpenTelekomCloud Node")
 			}
 			s = retryNode
 		} else {
-			return fmt.Errorf("Error creating opentelekomcloud Node: %s", err)
+			return fmt.Errorf("Error creating OpenTelekomCloud Node: %s", err)
 		}
 	}
 
 	job, err := nodes.GetJobDetails(nodeClient, s.Status.JobID).ExtractJob()
 	if err != nil {
-		return fmt.Errorf("Error fetching opentelekomcloud Job Details: %s", err)
+		return fmt.Errorf("Error fetching OpenTelekomCloud Job Details: %s", err)
 	}
 	jobResourceId := job.Spec.SubJobs[0].Metadata.ID
 
 	subJob, err := nodes.GetJobDetails(nodeClient, jobResourceId).ExtractJob()
 	if err != nil {
-		return fmt.Errorf("Error fetching opentelekomcloud Job Details: %s", err)
+		return fmt.Errorf("Error fetching OpenTelekomCloud Job Details: %s", err)
 	}
 
 	var nodeId string
@@ -445,7 +446,7 @@ func resourceCCENodeV3Create(d *schema.ResourceData, meta interface{}) error {
 	}
 	_, err = stateConf.WaitForState()
 	if err != nil {
-		return fmt.Errorf("Error creating opentelekomcloud CCE Node: %s", err)
+		return fmt.Errorf("Error creating OpenTelekomCloud CCE Node: %s", err)
 	}
 
 	d.SetId(nodeId)
@@ -456,7 +457,7 @@ func resourceCCENodeV3Read(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*Config)
 	nodeClient, err := config.cceV3Client(GetRegion(d, config))
 	if err != nil {
-		return fmt.Errorf("Error creating opentelekomcloud CCE Node client: %s", err)
+		return fmt.Errorf("Error creating OpenTelekomCloud CCE Node client: %s", err)
 	}
 	clusterId := d.Get("cluster_id").(string)
 	s, err := nodes.Get(nodeClient, clusterId, d.Id()).Extract()
@@ -467,7 +468,7 @@ func resourceCCENodeV3Read(d *schema.ResourceData, meta interface{}) error {
 			return nil
 		}
 
-		return fmt.Errorf("Error retrieving opentelekomcloud Node: %s", err)
+		return fmt.Errorf("Error retrieving OpenTelekomCloud Node: %s", err)
 	}
 
 	d.Set("region", GetRegion(d, config))
@@ -503,7 +504,7 @@ func resourceCCENodeV3Read(d *schema.ResourceData, meta interface{}) error {
 		volumes = append(volumes, volume)
 	}
 	if err := d.Set("data_volumes", volumes); err != nil {
-		return fmt.Errorf("[DEBUG] Error saving dataVolumes to state for opentelekomcloud Node (%s): %s", d.Id(), err)
+		return fmt.Errorf("[DEBUG] Error saving dataVolumes to state for OpenTelekomCloud Node (%s): %s", d.Id(), err)
 	}
 
 	rootVolume := []map[string]interface{}{
@@ -515,7 +516,7 @@ func resourceCCENodeV3Read(d *schema.ResourceData, meta interface{}) error {
 	}
 	d.Set("root_volume", rootVolume)
 	if err := d.Set("root_volume", rootVolume); err != nil {
-		return fmt.Errorf("[DEBUG] Error saving root Volume to state for opentelekomcloud Node (%s): %s", d.Id(), err)
+		return fmt.Errorf("[DEBUG] Error saving root Volume to state for OpenTelekomCloud Node (%s): %s", d.Id(), err)
 	}
 
 	// set computed attributes
@@ -550,7 +551,7 @@ func resourceCCENodeV3Update(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*Config)
 	nodeClient, err := config.cceV3Client(GetRegion(d, config))
 	if err != nil {
-		return fmt.Errorf("Error creating opentelekomcloud CCE client: %s", err)
+		return fmt.Errorf("Error creating OpenTelekomCloud CCE client: %s", err)
 	}
 
 	var updateOpts nodes.UpdateOpts
@@ -561,7 +562,7 @@ func resourceCCENodeV3Update(d *schema.ResourceData, meta interface{}) error {
 		clusterId := d.Get("cluster_id").(string)
 		_, err = nodes.Update(nodeClient, clusterId, d.Id(), updateOpts).Extract()
 		if err != nil {
-			return fmt.Errorf("Error updating opentelekomcloud cce node: %s", err)
+			return fmt.Errorf("Error updating OpenTelekomCloud cce node: %s", err)
 		}
 	}
 
@@ -575,7 +576,7 @@ func resourceCCENodeV3Update(d *schema.ResourceData, meta interface{}) error {
 		serverId := d.Get("server_id").(string)
 		tagErr := UpdateResourceTags(computeClient, d, "cloudservers", serverId)
 		if tagErr != nil {
-			return fmt.Errorf("Error updating tags of cce node %s: %s", d.Id(), tagErr)
+			return fmt.Errorf("Error updating tags of CCE node %s: %s", d.Id(), tagErr)
 		}
 	}
 
@@ -586,12 +587,12 @@ func resourceCCENodeV3Delete(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*Config)
 	nodeClient, err := config.cceV3Client(GetRegion(d, config))
 	if err != nil {
-		return fmt.Errorf("Error creating opentelekomcloud CCE client: %s", err)
+		return fmt.Errorf("Error creating OpenTelekomCloud CCE client: %s", err)
 	}
 	clusterId := d.Get("cluster_id").(string)
 	err = nodes.Delete(nodeClient, clusterId, d.Id()).ExtractErr()
 	if err != nil {
-		return fmt.Errorf("Error deleting opentelekomcloud CCE Cluster: %s", err)
+		return fmt.Errorf("Error deleting OpenTelekomCloud CCE Cluster: %s", err)
 	}
 	stateConf := &resource.StateChangeConf{
 		Pending:    []string{"Deleting"},
@@ -604,7 +605,7 @@ func resourceCCENodeV3Delete(d *schema.ResourceData, meta interface{}) error {
 
 	_, err = stateConf.WaitForState()
 	if err != nil {
-		return fmt.Errorf("Error deleting opentelekomcloud CCE Node: %s", err)
+		return fmt.Errorf("Error deleting OpenTelekomCloud CCE Node: %s", err)
 	}
 
 	d.SetId("")
@@ -624,26 +625,26 @@ func waitForCceNodeActive(cceClient *golangsdk.ServiceClient, clusterId, nodeId 
 
 func waitForCceNodeDelete(cceClient *golangsdk.ServiceClient, clusterId, nodeId string) resource.StateRefreshFunc {
 	return func() (interface{}, string, error) {
-		log.Printf("[DEBUG] Attempting to delete opentelekomcloud CCE Node %s.\n", nodeId)
+		log.Printf("[DEBUG] Attempting to delete OpenTelekomCloud CCE Node %s.\n", nodeId)
 
 		r, err := nodes.Get(cceClient, clusterId, nodeId).Extract()
 
 		if err != nil {
 			if _, ok := err.(golangsdk.ErrDefault404); ok {
-				log.Printf("[DEBUG] Successfully deleted opentelekomcloud CCE Node %s", nodeId)
+				log.Printf("[DEBUG] Successfully deleted OpenTelekomCloud CCE Node %s", nodeId)
 				return r, "Deleted", nil
 			}
 			return r, "Deleting", err
 		}
 
-		log.Printf("[DEBUG] opentelekomcloud CCE Node %s still available.\n", nodeId)
+		log.Printf("[DEBUG] OpenTelekomCloud CCE Node %s still available.\n", nodeId)
 		return r, r.Status.Phase, nil
 	}
 }
 
 func waitForClusterAvailable(cceClient *golangsdk.ServiceClient, clusterId string) resource.StateRefreshFunc {
 	return func() (interface{}, string, error) {
-		log.Printf("[INFO] Waiting for opentelekomcloud Cluster to be available %s.\n", clusterId)
+		log.Printf("[INFO] Waiting for OpenTelekomCloud Cluster to be available %s.\n", clusterId)
 		n, err := clusters.Get(cceClient, clusterId).Extract()
 
 		if err != nil {
