@@ -5,9 +5,10 @@ import (
 	"encoding/base64"
 	"encoding/hex"
 	"fmt"
-	"github.com/hashicorp/go-multierror"
 	"log"
 	"time"
+
+	"github.com/hashicorp/go-multierror"
 
 	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
@@ -254,6 +255,11 @@ func resourceCCENodeV3() *schema.Resource {
 				Type:     schema.TypeString,
 				Computed: true,
 			},
+			"k8s_tags": {
+				Type:     schema.TypeMap,
+				Optional: true,
+				ForceNew: true,
+			},
 		},
 	}
 }
@@ -277,6 +283,14 @@ func resourceCCENodeAnnotationsV2(d *schema.ResourceData) map[string]string {
 func resourceCCENodeTags(d *schema.ResourceData) []tags.ResourceTag {
 	tagRaw := d.Get("tags").(map[string]interface{})
 	return expandResourceTags(tagRaw)
+}
+
+func resourceCCENodeK8sTags(d *schema.ResourceData) map[string]string {
+	m := make(map[string]string)
+	for key, val := range d.Get("k8s_tags").(map[string]interface{}) {
+		m[key] = val.(string)
+	}
+	return m
 }
 
 func resourceCCEDataVolume(d *schema.ResourceData) []nodes.VolumeSpec {
@@ -377,6 +391,7 @@ func resourceCCENodeV3Create(d *schema.ResourceData, meta interface{}) error {
 				PostInstall:        base64PostInstall,
 			},
 			UserTags: resourceCCENodeTags(d),
+			K8sTags:  resourceCCENodeK8sTags(d),
 		},
 	}
 
@@ -472,6 +487,7 @@ func resourceCCENodeV3Read(d *schema.ResourceData, meta interface{}) error {
 		d.Set("max_pods", s.Spec.ExtendParam.MaxPods),
 		d.Set("ecs_performance_type", s.Spec.ExtendParam.EcsPerformanceType),
 		d.Set("key_pair", s.Spec.Login.SshKey),
+		d.Set("k8s_tags", s.Spec.K8sTags),
 	)
 	if err := me.ErrorOrNil(); err != nil {
 		return fmt.Errorf("[DEBUG] Error saving main conf to state for OpenTelekomCloud Node (%s): %s", d.Id(), err)
