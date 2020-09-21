@@ -87,14 +87,17 @@ func resourceCCENodeV3() *schema.Resource {
 						"size": {
 							Type:     schema.TypeInt,
 							Required: true,
+							ForceNew: true,
 						},
 						"volumetype": {
 							Type:     schema.TypeString,
 							Required: true,
+							ForceNew: true,
 						},
 						"extend_param": {
 							Type:     schema.TypeString,
 							Optional: true,
+							ForceNew: true,
 						},
 					}},
 			},
@@ -107,14 +110,17 @@ func resourceCCENodeV3() *schema.Resource {
 						"size": {
 							Type:     schema.TypeInt,
 							Required: true,
+							ForceNew: true,
 						},
 						"volumetype": {
 							Type:     schema.TypeString,
 							Required: true,
+							ForceNew: true,
 						},
 						"extend_param": {
 							Type:     schema.TypeString,
 							Optional: true,
+							ForceNew: true,
 						},
 					}},
 			},
