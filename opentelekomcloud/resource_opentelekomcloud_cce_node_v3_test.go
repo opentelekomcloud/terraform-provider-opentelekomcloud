@@ -23,7 +23,7 @@ func TestAccCCENodesV3_basic(t *testing.T) {
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckCCENodeV3Exists("opentelekomcloud_cce_node_v3.node_1", "opentelekomcloud_cce_cluster_v3.cluster_1", &node),
 					resource.TestCheckResourceAttr("opentelekomcloud_cce_node_v3.node_1", "name", "test-node"),
-					resource.TestCheckResourceAttr("opentelekomcloud_cce_node_v3.node_1", "flavor_id", "s1.medium"),
+					resource.TestCheckResourceAttr("opentelekomcloud_cce_node_v3.node_1", "flavor_id", "s2.xlarge.2"),
 				),
 			},
 			{
@@ -156,7 +156,7 @@ resource "opentelekomcloud_cce_cluster_v3" "cluster_1" {
 resource "opentelekomcloud_cce_node_v3" "node_1" {
   cluster_id = opentelekomcloud_cce_cluster_v3.cluster_1.id
   name       = "test-node"
-  flavor_id  = "s1.medium"
+  flavor_id  = "s2.xlarge.2"
 
   availability_zone = "%s"
   key_pair          = "%s"
@@ -187,7 +187,7 @@ resource "opentelekomcloud_cce_cluster_v3" "cluster_1" {
 resource "opentelekomcloud_cce_node_v3" "node_1" {
   cluster_id = opentelekomcloud_cce_cluster_v3.cluster_1.id
   name       = "test-node2"
-  flavor_id  ="s1.medium"
+  flavor_id  = "s2.xlarge.2"
 
   availability_zone = "%s"
   key_pair          ="%s"
@@ -216,8 +216,8 @@ resource "opentelekomcloud_cce_cluster_v3" "cluster_1" {
 
 resource "opentelekomcloud_cce_node_v3" "node_1" {
   cluster_id        = opentelekomcloud_cce_cluster_v3.cluster_1.id
-  name              = "test-node2"
-  flavor_id         = "s1.medium"
+  name              = "test-node1"
+  flavor_id         = "s2.xlarge.2"
   availability_zone = "%s"
   key_pair          = "%s"
 

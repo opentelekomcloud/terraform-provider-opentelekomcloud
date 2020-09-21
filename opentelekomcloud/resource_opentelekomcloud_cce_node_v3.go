@@ -668,7 +668,7 @@ func recursiveCreate(cceClient *golangsdk.ServiceClient, opts nodes.CreateOptsBu
 			Refresh:    waitForClusterAvailable(cceClient, ClusterID),
 			Timeout:    15 * time.Minute,
 			Delay:      15 * time.Second,
-			MinTimeout: 10 * time.Second,
+			MinTimeout: 3 * time.Second,
 		}
 		_, stateErr := stateCluster.WaitForState()
 		if stateErr != nil {
