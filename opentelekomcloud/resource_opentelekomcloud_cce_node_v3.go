@@ -5,6 +5,7 @@ import (
 	"encoding/base64"
 	"encoding/hex"
 	"fmt"
+	"github.com/hashicorp/go-multierror"
 	"log"
 	"time"
 
@@ -436,7 +437,6 @@ func resourceCCENodeV3Create(d *schema.ResourceData, meta interface{}) error {
 		return fmt.Errorf("error creating OpenTelekomCloud CCE Node: %s", err)
 	}
 
-	d.SetId(nodeId)
 	return resourceCCENodeV3Read(d, meta)
 }
 
@@ -456,20 +456,26 @@ func resourceCCENodeV3Read(d *schema.ResourceData, meta interface{}) error {
 		}
 		return fmt.Errorf("error retrieving OpenTelekomCloud Node: %s", err)
 	}
-
 	d.SetId(s.Metadata.Id)
-	d.Set("region", GetRegion(d, config))
-	d.Set("name", s.Metadata.Name)
-	d.Set("flavor_id", s.Spec.Flavor)
-	d.Set("availability_zone", s.Spec.Az)
-	d.Set("billing_mode", s.Spec.BillingMode)
-	d.Set("extend_param_charging_mode", s.Spec.ExtendParam.ChargingMode)
-	d.Set("public_key", s.Spec.ExtendParam.PublicKey)
-	d.Set("order_id", s.Spec.ExtendParam.OrderID)
-	d.Set("product_id", s.Spec.ExtendParam.ProductID)
-	d.Set("max_pods", s.Spec.ExtendParam.MaxPods)
-	d.Set("ecs_performance_type", s.Spec.ExtendParam.EcsPerformanceType)
-	d.Set("key_pair", s.Spec.Login.SshKey)
+
+	me := &multierror.Error{}
+	me = multierror.Append(me,
+		d.Set("region", GetRegion(d, config)),
+		d.Set("name", s.Metadata.Name),
+		d.Set("flavor_id", s.Spec.Flavor),
+		d.Set("availability_zone", s.Spec.Az),
+		d.Set("billing_mode", s.Spec.BillingMode),
+		d.Set("extend_param_charging_mode", s.Spec.ExtendParam.ChargingMode),
+		d.Set("public_key", s.Spec.ExtendParam.PublicKey),
+		d.Set("order_id", s.Spec.ExtendParam.OrderID),
+		d.Set("product_id", s.Spec.ExtendParam.ProductID),
+		d.Set("max_pods", s.Spec.ExtendParam.MaxPods),
+		d.Set("ecs_performance_type", s.Spec.ExtendParam.EcsPerformanceType),
+		d.Set("key_pair", s.Spec.Login.SshKey),
+	)
+	if err := me.ErrorOrNil(); err != nil {
+		return fmt.Errorf("[DEBUG] Error saving main conf to state for OpenTelekomCloud Node (%s): %s", d.Id(), err)
+	}
 
 	// Spec.PublicIP field is empty in the response body even if eip was configured,
 	// so we should not set the following attributes
@@ -501,17 +507,22 @@ func resourceCCENodeV3Read(d *schema.ResourceData, meta interface{}) error {
 			"extend_param": s.Spec.RootVolume.ExtendParam,
 		},
 	}
-	d.Set("root_volume", rootVolume)
+
 	if err := d.Set("root_volume", rootVolume); err != nil {
 		return fmt.Errorf("[DEBUG] Error saving root Volume to state for OpenTelekomCloud Node (%s): %s", d.Id(), err)
 	}
 
 	// set computed attributes
 	serverId := s.Status.ServerID
-	d.Set("server_id", serverId)
-	d.Set("private_ip", s.Status.PrivateIP)
-	d.Set("public_ip", s.Status.PublicIP)
-	d.Set("status", s.Status.Phase)
+	me = multierror.Append(me,
+		d.Set("server_id", serverId),
+		d.Set("private_ip", s.Status.PrivateIP),
+		d.Set("public_ip", s.Status.PublicIP),
+		d.Set("status", s.Status.Phase),
+	)
+	if err := me.ErrorOrNil(); err != nil {
+		return fmt.Errorf("[DEBUG] Error saving IP conf to state for OpenTelekomCloud Node (%s): %s", d.Id(), err)
+	}
 
 	// fetch tags from ECS instance
 	computeClient, err := config.computeV1Client(GetRegion(d, config))
