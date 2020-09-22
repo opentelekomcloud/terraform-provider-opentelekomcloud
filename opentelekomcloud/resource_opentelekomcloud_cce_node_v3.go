@@ -5,7 +5,6 @@ import (
 	"encoding/base64"
 	"encoding/hex"
 	"fmt"
-	"github.com/hashicorp/terraform-plugin-sdk/helper/validation"
 	"log"
 	"time"
 
@@ -142,39 +141,30 @@ func resourceCCENodeV3() *schema.Resource {
 				ConflictsWith: []string{"eip_ids"},
 			},
 			"iptype": {
-				Type:     schema.TypeString,
-				Optional: true,
-				ForceNew: true,
-				ValidateFunc: validation.StringInSlice([]string{
-					"5_bgp",
-				}, true),
+				Type:          schema.TypeString,
+				ForceNew:      true,
+				Computed:      true,
 				ConflictsWith: []string{"eip_ids"},
 				RequiredWith: []string{
-					"iptype", "bandwidth_size", "sharetype", "bandwidth_charge_mode",
+					"iptype", "sharetype", "bandwidth_charge_mode",
 				},
 			},
 			"bandwidth_charge_mode": {
-				Type:     schema.TypeString,
-				Optional: true,
-				ForceNew: true,
-				ValidateFunc: validation.StringInSlice([]string{
-					"traffic",
-				}, true),
+				Type:          schema.TypeString,
+				ForceNew:      true,
+				Computed:      true,
 				ConflictsWith: []string{"eip_ids"},
 				RequiredWith: []string{
-					"iptype", "bandwidth_size", "sharetype", "bandwidth_charge_mode",
+					"iptype", "sharetype", "bandwidth_charge_mode",
 				},
 			},
 			"sharetype": {
-				Type:     schema.TypeString,
-				Optional: true,
-				ForceNew: true,
-				ValidateFunc: validation.StringInSlice([]string{
-					"PER",
-				}, true),
+				Type:          schema.TypeString,
+				ForceNew:      true,
+				Computed:      true,
 				ConflictsWith: []string{"eip_ids"},
 				RequiredWith: []string{
-					"iptype", "bandwidth_size", "sharetype", "bandwidth_charge_mode",
+					"iptype", "sharetype", "bandwidth_charge_mode",
 				},
 			},
 			"bandwidth_size": {
@@ -182,9 +172,6 @@ func resourceCCENodeV3() *schema.Resource {
 				Optional:      true,
 				ForceNew:      true,
 				ConflictsWith: []string{"eip_ids"},
-				RequiredWith: []string{
-					"iptype", "bandwidth_size", "sharetype", "bandwidth_charge_mode",
-				},
 			},
 			"billing_mode": {
 				Type:     schema.TypeInt,
@@ -354,6 +341,9 @@ func resourceCCENodeV3Create(d *schema.ResourceData, meta interface{}) error {
 	eipCount := d.Get("eip_count").(int)
 	if bandwidthSize > 0 && eipCount == 0 {
 		eipCount = 1
+		_ = d.Set("bandwidth_charge_mode", "traffic")
+		_ = d.Set("sharetype", "PER")
+		_ = d.Set("iptype", "5_bgp")
 	}
 
 	createOpts := nodes.CreateOpts{
