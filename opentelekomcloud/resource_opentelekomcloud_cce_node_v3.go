@@ -325,7 +325,7 @@ func resourceCCENodeV3Create(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*Config)
 	nodeClient, err := config.cceV3Client(GetRegion(d, config))
 	if err != nil {
-		return fmt.Errorf("Error creating OpenTelekomCloud CCE Node client: %s", err)
+		return fmt.Errorf("error creating OpenTelekomCloud CCE Node client: %s", err)
 	}
 
 	var base64PreInstall, base64PostInstall string
@@ -404,23 +404,23 @@ func resourceCCENodeV3Create(d *schema.ResourceData, meta interface{}) error {
 		if _, ok := err.(golangsdk.ErrDefault403); ok {
 			retryNode, err := recursiveCreate(nodeClient, createOpts, clusterId, 403)
 			if err == "fail" {
-				return fmt.Errorf("Error creating OpenTelekomCloud Node")
+				return fmt.Errorf("error creating OpenTelekomCloud Node")
 			}
 			s = retryNode
 		} else {
-			return fmt.Errorf("Error creating OpenTelekomCloud Node: %s", err)
+			return fmt.Errorf("error creating OpenTelekomCloud Node: %s", err)
 		}
 	}
 
 	job, err := nodes.GetJobDetails(nodeClient, s.Status.JobID).ExtractJob()
 	if err != nil {
-		return fmt.Errorf("Error fetching OpenTelekomCloud Job Details: %s", err)
+		return fmt.Errorf("error fetching OpenTelekomCloud Job Details: %s", err)
 	}
 	jobResourceId := job.Spec.SubJobs[0].Metadata.ID
 
 	subJob, err := nodes.GetJobDetails(nodeClient, jobResourceId).ExtractJob()
 	if err != nil {
-		return fmt.Errorf("Error fetching OpenTelekomCloud Job Details: %s", err)
+		return fmt.Errorf("error fetching OpenTelekomCloud Job Details: %s", err)
 	}
 
 	var nodeId string
@@ -442,7 +442,7 @@ func resourceCCENodeV3Create(d *schema.ResourceData, meta interface{}) error {
 	}
 	_, err = stateConf.WaitForState()
 	if err != nil {
-		return fmt.Errorf("Error creating OpenTelekomCloud CCE Node: %s", err)
+		return fmt.Errorf("error creating OpenTelekomCloud CCE Node: %s", err)
 	}
 
 	d.SetId(nodeId)
@@ -453,7 +453,7 @@ func resourceCCENodeV3Read(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*Config)
 	nodeClient, err := config.cceV3Client(GetRegion(d, config))
 	if err != nil {
-		return fmt.Errorf("Error creating OpenTelekomCloud CCE Node client: %s", err)
+		return fmt.Errorf("error creating OpenTelekomCloud CCE Node client: %s", err)
 	}
 	clusterId := d.Get("cluster_id").(string)
 	s, err := nodes.Get(nodeClient, clusterId, d.Id()).Extract()
@@ -463,17 +463,17 @@ func resourceCCENodeV3Read(d *schema.ResourceData, meta interface{}) error {
 			d.SetId("")
 			return nil
 		}
-
-		return fmt.Errorf("Error retrieving OpenTelekomCloud Node: %s", err)
+		return fmt.Errorf("error retrieving OpenTelekomCloud Node: %s", err)
 	}
 
+	d.SetId(s.Metadata.Id)
 	d.Set("region", GetRegion(d, config))
 	d.Set("name", s.Metadata.Name)
 	d.Set("flavor_id", s.Spec.Flavor)
 	d.Set("availability_zone", s.Spec.Az)
 	d.Set("billing_mode", s.Spec.BillingMode)
 	d.Set("extend_param_charging_mode", s.Spec.ExtendParam.ChargingMode)
-	d.Set("ecs:performance_type", s.Spec.ExtendParam.PublicKey)
+	d.Set("public_key", s.Spec.ExtendParam.PublicKey)
 	d.Set("order_id", s.Spec.ExtendParam.OrderID)
 	d.Set("product_id", s.Spec.ExtendParam.ProductID)
 	d.Set("max_pods", s.Spec.ExtendParam.MaxPods)
@@ -525,19 +525,19 @@ func resourceCCENodeV3Read(d *schema.ResourceData, meta interface{}) error {
 	// fetch tags from ECS instance
 	computeClient, err := config.computeV1Client(GetRegion(d, config))
 	if err != nil {
-		return fmt.Errorf("Error creating OpenTelekomCloud compute client: %s", err)
+		return fmt.Errorf("error creating OpenTelekomCloud compute client: %s", err)
 	}
 
 	resourceTags, err := tags.Get(computeClient, "cloudservers", serverId).Extract()
 	if err != nil {
-		return fmt.Errorf("Error fetching OpenTelekomCloud instance tags: %s", err)
+		return fmt.Errorf("error fetching OpenTelekomCloud instance tags: %s", err)
 	}
 
 	tagMap := tagsToMap(resourceTags.Tags)
 	// ignore "CCE-Dynamic-Provisioning-Node"
 	delete(tagMap, "CCE-Dynamic-Provisioning-Node")
 	if err := d.Set("tags", tagMap); err != nil {
-		return fmt.Errorf("Error saving tags of cce node: %s", err)
+		return fmt.Errorf("error saving tags of CCE node: %s", err)
 	}
 
 	return nil
@@ -547,7 +547,7 @@ func resourceCCENodeV3Update(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*Config)
 	nodeClient, err := config.cceV3Client(GetRegion(d, config))
 	if err != nil {
-		return fmt.Errorf("Error creating OpenTelekomCloud CCE client: %s", err)
+		return fmt.Errorf("error creating OpenTelekomCloud CCE client: %s", err)
 	}
 
 	var updateOpts nodes.UpdateOpts
@@ -558,7 +558,7 @@ func resourceCCENodeV3Update(d *schema.ResourceData, meta interface{}) error {
 		clusterId := d.Get("cluster_id").(string)
 		_, err = nodes.Update(nodeClient, clusterId, d.Id(), updateOpts).Extract()
 		if err != nil {
-			return fmt.Errorf("Error updating OpenTelekomCloud cce node: %s", err)
+			return fmt.Errorf("error updating OpenTelekomCloud CCE node: %s", err)
 		}
 	}
 
@@ -566,13 +566,13 @@ func resourceCCENodeV3Update(d *schema.ResourceData, meta interface{}) error {
 	if d.HasChange("tags") {
 		computeClient, err := config.computeV1Client(GetRegion(d, config))
 		if err != nil {
-			return fmt.Errorf("Error creating OpenTelekomCloud compute client: %s", err)
+			return fmt.Errorf("error creating OpenTelekomCloud compute client: %s", err)
 		}
 
 		serverId := d.Get("server_id").(string)
 		tagErr := UpdateResourceTags(computeClient, d, "cloudservers", serverId)
 		if tagErr != nil {
-			return fmt.Errorf("Error updating tags of CCE node %s: %s", d.Id(), tagErr)
+			return fmt.Errorf("error updating tags of CCE node %s: %s", d.Id(), tagErr)
 		}
 	}
 
@@ -583,12 +583,12 @@ func resourceCCENodeV3Delete(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*Config)
 	nodeClient, err := config.cceV3Client(GetRegion(d, config))
 	if err != nil {
-		return fmt.Errorf("Error creating OpenTelekomCloud CCE client: %s", err)
+		return fmt.Errorf("error creating OpenTelekomCloud CCE client: %s", err)
 	}
 	clusterId := d.Get("cluster_id").(string)
 	err = nodes.Delete(nodeClient, clusterId, d.Id()).ExtractErr()
 	if err != nil {
-		return fmt.Errorf("Error deleting OpenTelekomCloud CCE Cluster: %s", err)
+		return fmt.Errorf("error deleting OpenTelekomCloud CCE Cluster: %s", err)
 	}
 	stateConf := &resource.StateChangeConf{
 		Pending:    []string{"Deleting"},
@@ -601,7 +601,7 @@ func resourceCCENodeV3Delete(d *schema.ResourceData, meta interface{}) error {
 
 	_, err = stateConf.WaitForState()
 	if err != nil {
-		return fmt.Errorf("Error deleting OpenTelekomCloud CCE Node: %s", err)
+		return fmt.Errorf("error deleting OpenTelekomCloud CCE Node: %s", err)
 	}
 
 	d.SetId("")
