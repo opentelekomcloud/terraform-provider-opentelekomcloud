@@ -79,7 +79,7 @@ func testAccCheckCCENodeV3Destroy(s *terraform.State) error {
 	config := testAccProvider.Meta().(*Config)
 	cceClient, err := config.cceV3Client(OS_REGION_NAME)
 	if err != nil {
-		return fmt.Errorf("Error creating OpenTelekomCloud CCE client: %s", err)
+		return fmt.Errorf("error creating OpenTelekomCloud CCE client: %s", err)
 	}
 
 	var clusterId string
@@ -95,7 +95,7 @@ func testAccCheckCCENodeV3Destroy(s *terraform.State) error {
 
 		_, err := nodes.Get(cceClient, clusterId, rs.Primary.ID).Extract()
 		if err == nil {
-			return fmt.Errorf("Node still exists")
+			return fmt.Errorf("node still exists")
 		}
 	}
 
@@ -106,24 +106,24 @@ func testAccCheckCCENodeV3Exists(n string, cluster string, node *nodes.Nodes) re
 	return func(s *terraform.State) error {
 		rs, ok := s.RootModule().Resources[n]
 		if !ok {
-			return fmt.Errorf("Not found: %s", n)
+			return fmt.Errorf("not found: %s", n)
 		}
 		c, ok := s.RootModule().Resources[cluster]
 		if !ok {
-			return fmt.Errorf("Cluster not found: %s", c)
+			return fmt.Errorf("cluster not found: %s", c)
 		}
 
 		if rs.Primary.ID == "" {
-			return fmt.Errorf("No ID is set")
+			return fmt.Errorf("no ID is set")
 		}
 		if c.Primary.ID == "" {
-			return fmt.Errorf("Cluster id is not set")
+			return fmt.Errorf("cluster id is not set")
 		}
 
 		config := testAccProvider.Meta().(*Config)
 		cceClient, err := config.cceV3Client(OS_REGION_NAME)
 		if err != nil {
-			return fmt.Errorf("Error creating OpenTelekomCloud CCE client: %s", err)
+			return fmt.Errorf("error creating OpenTelekomCloud CCE client: %s", err)
 		}
 
 		found, err := nodes.Get(cceClient, c.Primary.ID, rs.Primary.ID).Extract()
@@ -132,7 +132,7 @@ func testAccCheckCCENodeV3Exists(n string, cluster string, node *nodes.Nodes) re
 		}
 
 		if found.Metadata.Id != rs.Primary.ID {
-			return fmt.Errorf("Node not found")
+			return fmt.Errorf("node not found")
 		}
 
 		*node = *found
