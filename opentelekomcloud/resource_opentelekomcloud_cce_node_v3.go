@@ -145,27 +145,18 @@ func resourceCCENodeV3() *schema.Resource {
 				ForceNew:      true,
 				Computed:      true,
 				ConflictsWith: []string{"eip_ids"},
-				RequiredWith: []string{
-					"iptype", "sharetype", "bandwidth_charge_mode",
-				},
 			},
 			"bandwidth_charge_mode": {
 				Type:          schema.TypeString,
 				ForceNew:      true,
 				Computed:      true,
 				ConflictsWith: []string{"eip_ids"},
-				RequiredWith: []string{
-					"iptype", "sharetype", "bandwidth_charge_mode",
-				},
 			},
 			"sharetype": {
 				Type:          schema.TypeString,
 				ForceNew:      true,
 				Computed:      true,
 				ConflictsWith: []string{"eip_ids"},
-				RequiredWith: []string{
-					"iptype", "sharetype", "bandwidth_charge_mode",
-				},
 			},
 			"bandwidth_size": {
 				Type:          schema.TypeInt,
