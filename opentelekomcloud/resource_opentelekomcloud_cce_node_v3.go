@@ -437,6 +437,7 @@ func resourceCCENodeV3Create(d *schema.ResourceData, meta interface{}) error {
 		return fmt.Errorf("error creating OpenTelekomCloud CCE Node: %s", err)
 	}
 
+	d.SetId(nodeId)
 	return resourceCCENodeV3Read(d, meta)
 }
 
@@ -456,7 +457,6 @@ func resourceCCENodeV3Read(d *schema.ResourceData, meta interface{}) error {
 		}
 		return fmt.Errorf("error retrieving OpenTelekomCloud Node: %s", err)
 	}
-	d.SetId(s.Metadata.Id)
 
 	me := &multierror.Error{}
 	me = multierror.Append(me,
