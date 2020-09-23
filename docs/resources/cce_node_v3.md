@@ -20,8 +20,7 @@ resource "opentelekomcloud_cce_node_v3" "node_1" {
 
   flavor_id      = "s1.medium"
   key_pair       = var.ssh_key
-  iptype         = "5_bgp"
-  sharetype      = "PER"
+
   bandwidth_size = 100
 
   root_volume {
@@ -59,18 +58,21 @@ The following arguments are supported:
 
 * `eip_ids` - (Optional) List of existing elastic IP IDs. Changing this parameter will create a new resource.
 
--> **Note:** If the eip_ids parameter is configured, you do not need to configure the eip_count and bandwidth parameters:
-iptype, charge_mode, bandwidth_size and share_type.
+-> **Note:** If the `eip_ids` parameter is configured, you do not need to configure the `eip_count` and `bandwidth` parameters:
+`iptype`, `bandwidth_charge_mode`, `bandwidth_size` and `share_type`.
 
 * `eip_count` - (Optional) Number of elastic IPs to be dynamically created. Changing this parameter will create a new resource.
 
 * `iptype` - (Optional) Elastic IP type.
 
+* `bandwidth_size` - (Optional) Bandwidth size. Changing this parameter will create a new resource.
+
+-> **Note:** If the `bandwidth_size` parameter is configured, you do not need to configure the
+  `eip_count`, `bandwidth_charge_mode`, `sharetype` and `iptype` parameters.
+
 * `bandwidth_charge_mode` - (Optional) Bandwidth billing type. Changing this parameter will create a new resource.
 
 * `sharetype` - (Optional) Bandwidth sharing type. Changing this parameter will create a new resource.
-
-* `bandwidth_size` - (Optional) Bandwidth size. Changing this parameter will create a new resource.
 
 * `extend_param_charging_mode` - (Optional) Node charging mode, 0 is on-demand charging. Changing this parameter will create a new cluster resource.
 
