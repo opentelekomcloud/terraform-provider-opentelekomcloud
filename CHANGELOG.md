@@ -1,5 +1,14 @@
 ## 1.21.0 (Unreleased)
 
+## 1.20.1 (September 24, 2020)
+
+BUG FIXES:
+* `resource/opentelekomcloud_cce_node_v3`: `public_key` attribute not setting ([#616](https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/616))
+
+ENHANCEMENTS:
+* `resource/opentelekomcloud_cce_node_v3`: Only `bandwidth_charge_mode` is now required for EIP creation ([#616](https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/616))
+* **New data source:** `data_source/opentelekomcloud_dns_zone_v2` ([#620](https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/620))
+
 ## 1.20.0 (September 16, 2020)
 
 BUG FIXES:
