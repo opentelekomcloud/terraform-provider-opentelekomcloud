@@ -4,7 +4,7 @@
 ## PR Checklist
 
 * [ ] Refers to: #xxx
-* [ ] Tests added/passed
+* [ ] Tests added/passed.
 * [ ] Documentation updated.
 * [ ] Schema updated.
 
