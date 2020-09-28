@@ -12,6 +12,8 @@ import (
 	"github.com/huaweicloud/golangsdk/openstack/csbs/v1/policies"
 )
 
+const errorSaveMsg = "[DEBUG] Error saving %s to state for OpenTelekomCloud CSBS backup policy (%s): %s"
+
 func resourceCSBSBackupPolicyV1() *schema.Resource {
 	return &schema.Resource{
 		Create: resourceCSBSBackupPolicyCreate,
@@ -226,19 +228,18 @@ func resourceCSBSBackupPolicyRead(d *schema.ResourceData, meta interface{}) erro
 	}
 
 	if err := d.Set("resource", flattenCSBSPolicyResources(*backupPolicy)); err != nil {
-		return fmt.Errorf("[DEBUG] Error saving resource to state for OpenTelekomCloud CSBS backup policy (%s): %s", d.Id(), err)
+		return fmt.Errorf(errorSaveMsg, "resource", d.Id(), err)
 	}
 
 	if err := d.Set("scheduled_operation", flattenCSBSScheduledOperations(*backupPolicy)); err != nil {
-		return fmt.Errorf("[DEBUG] Error saving scheduled_operation to state for OpenTelekomCloud CSBS backup policy (%s): %s", d.Id(), err)
+		return fmt.Errorf(errorSaveMsg, "scheduler_operation", d.Id(), err)
 	}
 
 	if err := d.Set("tags", flattenCSBSPolicyTags(*backupPolicy)); err != nil {
-		return fmt.Errorf("[DEBUG] Error saving policy tags to state for OpenTelekomCloud CSBS backup policy (%s): %s", d.Id(), err)
+		return fmt.Errorf(errorSaveMsg, "policy tags", d.Id(), err)
 	}
 
-	me := &multierror.Error{}
-	me = multierror.Append(me,
+	me := multierror.Append(nil,
 		d.Set("name", backupPolicy.Name),
 		d.Set("common", backupPolicy.Parameters.Common),
 		d.Set("status", backupPolicy.Status),
@@ -249,7 +250,7 @@ func resourceCSBSBackupPolicyRead(d *schema.ResourceData, meta interface{}) erro
 	)
 
 	if err = me.ErrorOrNil(); err != nil {
-		return fmt.Errorf("[DEBUG] Error saving main conf to state for OpenTelekomCloud CSBS backup policy (%s): %s", d.Id(), err)
+		return fmt.Errorf(errorSaveMsg, "main conf", d.Id(), err)
 	}
 
 	return nil
