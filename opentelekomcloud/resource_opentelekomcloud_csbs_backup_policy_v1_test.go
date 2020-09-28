@@ -61,7 +61,7 @@ func testAccCheckCSBSBackupPolicyV1Destroy(s *terraform.State) error {
 	config := testAccProvider.Meta().(*Config)
 	policyClient, err := config.csbsV1Client(OS_REGION_NAME)
 	if err != nil {
-		return fmt.Errorf("Error creating csbs client: %s", err)
+		return fmt.Errorf("error creating csbs client: %s", err)
 	}
 
 	for _, rs := range s.RootModule().Resources {
@@ -82,17 +82,17 @@ func testAccCheckCSBSBackupPolicyV1Exists(n string, policy *policies.BackupPolic
 	return func(s *terraform.State) error {
 		rs, ok := s.RootModule().Resources[n]
 		if !ok {
-			return fmt.Errorf("Not found: %s", n)
+			return fmt.Errorf("not found: %s", n)
 		}
 
 		if rs.Primary.ID == "" {
-			return fmt.Errorf("No ID is set")
+			return fmt.Errorf("no ID is set")
 		}
 
 		config := testAccProvider.Meta().(*Config)
 		policyClient, err := config.csbsV1Client(OS_REGION_NAME)
 		if err != nil {
-			return fmt.Errorf("Error creating csbs client: %s", err)
+			return fmt.Errorf("error creating CSBS client: %s", err)
 		}
 
 		found, err := policies.Get(policyClient, rs.Primary.ID).Extract()
@@ -112,11 +112,12 @@ func testAccCheckCSBSBackupPolicyV1Exists(n string, policy *policies.BackupPolic
 
 var testAccCSBSBackupPolicyV1_basic = fmt.Sprintf(`
 resource "opentelekomcloud_compute_instance_v2" "instance_1" {
-  name = "instance_1"
-  image_id = "%s"
-  security_groups = ["default"]
+  name              = "instance_1"
+  image_id          = "%s"
+  security_groups   = ["default"]
   availability_zone = "%s"
-  flavor_id = "%s"
+  flavor_id         = "%s"
+
   metadata = {
     foo = "bar"
   }
@@ -125,29 +126,31 @@ resource "opentelekomcloud_compute_instance_v2" "instance_1" {
   }
 }
 resource "opentelekomcloud_csbs_backup_policy_v1" "backup_policy_v1" {
-	name            = "backup-policy"
-  	resource {
-      id = "${opentelekomcloud_compute_instance_v2.instance_1.id}"
-      type = "OS::Nova::Server"
-      name = "resource4"
-  	}
-  	scheduled_operation {
-      name ="mybackup"
-      enabled = true
-      operation_type ="backup"
-      max_backups = "2"
-      trigger_pattern = "BEGIN:VCALENDAR\r\nBEGIN:VEVENT\r\nRRULE:FREQ=WEEKLY;BYDAY=TH;BYHOUR=12;BYMINUTE=27\r\nEND:VEVENT\r\nEND:VCALENDAR\r\n"
-  	}
+  name = "backup-policy"
+
+  resource {
+    id   = opentelekomcloud_compute_instance_v2.instance_1.id
+    type = "OS::Nova::Server"
+    name = "resource4"
+  }
+  scheduled_operation {
+    name            = "mybackup"
+    enabled         = true
+    operation_type  = "backup"
+    max_backups     = "2"
+    trigger_pattern = "BEGIN:VCALENDAR\r\nBEGIN:VEVENT\r\nRRULE:FREQ=WEEKLY;BYDAY=TH;BYHOUR=12;BYMINUTE=27\r\nEND:VEVENT\r\nEND:VCALENDAR\r\n"
+  }
 }
 `, OS_IMAGE_ID, OS_AVAILABILITY_ZONE, OS_FLAVOR_ID, OS_NETWORK_ID)
 
 var testAccCSBSBackupPolicyV1_update = fmt.Sprintf(`
 resource "opentelekomcloud_compute_instance_v2" "instance_1" {
-  name = "instance_1"
-  image_id = "%s"
-  security_groups = ["default"]
+  name              = "instance_1"
+  image_id          = "%s"
+  security_groups   = ["default"]
   availability_zone = "%s"
-  flavor_id = "%s"
+  flavor_id         = "%s"
+
   metadata = {
     foo = "bar"
   }
@@ -155,30 +158,33 @@ resource "opentelekomcloud_compute_instance_v2" "instance_1" {
     uuid = "%s"
   }
 }
+
 resource "opentelekomcloud_csbs_backup_policy_v1" "backup_policy_v1" {
-	name            = "backup-policy-update"
-  	resource {
-      id = "${opentelekomcloud_compute_instance_v2.instance_1.id}"
-      type = "OS::Nova::Server"
-      name = "resource4"
-  	}
-  	scheduled_operation {
-      name ="mybackup"
-      enabled = true
-      operation_type ="backup"
-      max_backups = "2"
-      trigger_pattern = "BEGIN:VCALENDAR\r\nBEGIN:VEVENT\r\nRRULE:FREQ=WEEKLY;BYDAY=TH;BYHOUR=12;BYMINUTE=27\r\nEND:VEVENT\r\nEND:VCALENDAR\r\n"
-  	}
+  name = "backup-policy-update"
+
+  resource {
+    id   = opentelekomcloud_compute_instance_v2.instance_1.id
+    type = "OS::Nova::Server"
+    name = "resource4"
+  }
+  scheduled_operation {
+    name            = "mybackup"
+    enabled         = true
+    operation_type  = "backup"
+    max_backups     = "2"
+    trigger_pattern = "BEGIN:VCALENDAR\r\nBEGIN:VEVENT\r\nRRULE:FREQ=WEEKLY;BYDAY=TH;BYHOUR=12;BYMINUTE=27\r\nEND:VEVENT\r\nEND:VCALENDAR\r\n"
+  }
 }
 `, OS_IMAGE_ID, OS_AVAILABILITY_ZONE, OS_FLAVOR_ID, OS_NETWORK_ID)
 
 var testAccCSBSBackupPolicyV1_timeout = fmt.Sprintf(`
 resource "opentelekomcloud_compute_instance_v2" "instance_1" {
-  name = "instance_1"
-  image_id = "%s"
-  security_groups = ["default"]
+  name              = "instance_1"
+  image_id          = "%s"
+  security_groups   = ["default"]
   availability_zone = "%s"
-  flavor_id = "%s"
+  flavor_id         = "%s"
+
   metadata = {
     foo = "bar"
   }
@@ -187,21 +193,22 @@ resource "opentelekomcloud_compute_instance_v2" "instance_1" {
   }
 }
 resource "opentelekomcloud_csbs_backup_policy_v1" "backup_policy_v1" {
-	name            = "backup-policy"
-  	resource {
-      id = "${opentelekomcloud_compute_instance_v2.instance_1.id}"
-      type = "OS::Nova::Server"
-      name = "resource4"
-  	}
-  	scheduled_operation {
-      name ="mybackup"
-      enabled = true
-      operation_type ="backup"
-      max_backups = "2"
-      trigger_pattern = "BEGIN:VCALENDAR\r\nBEGIN:VEVENT\r\nRRULE:FREQ=WEEKLY;BYDAY=TH;BYHOUR=12;BYMINUTE=27\r\nEND:VEVENT\r\nEND:VCALENDAR\r\n"
-  	}
+  name = "backup-policy"
 
-	timeouts {
+  resource {
+    id   = opentelekomcloud_compute_instance_v2.instance_1.id
+    type = "OS::Nova::Server"
+    name = "resource4"
+  }
+
+  scheduled_operation {
+    name            = "mybackup"
+    enabled         = true
+    operation_type  = "backup"
+    max_backups     = "2"
+    trigger_pattern = "BEGIN:VCALENDAR\r\nBEGIN:VEVENT\r\nRRULE:FREQ=WEEKLY;BYDAY=TH;BYHOUR=12;BYMINUTE=27\r\nEND:VEVENT\r\nEND:VCALENDAR\r\n"
+  }
+  timeouts {
     create = "5m"
     delete = "5m"
   }

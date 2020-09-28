@@ -12,14 +12,14 @@ Provides an OpenTelekomCloud Backup Policy of Resources.
 variable "name" { }
 variable "id" { }
 variable "resource_name" { }
- 
+
 resource "opentelekomcloud_csbs_backup_policy_v1" "backup_policy_v1" {
-  name = "${var.name}"
+  name = var.name
 
   resource {
-    id   = "${var.id}"
+    id   = var.id
     type = "OS::Nova::Server"
-    name = "${var.resource_name}"
+    name = var.resource_name
   }
 
   scheduled_operation {
@@ -63,7 +63,7 @@ The `scheduled_operation` block supports the following arguments:
 The `resource` block supports the following arguments:
 
 * `id` - (Required) Specifies the ID of the object to be backed up.
-    
+
 * `type` - (Required) Entity object type of the backup object. If the type is VMs, the value is **OS::Nova::Server**.
 
 * `name` - (Required) Specifies backup object name.
@@ -81,6 +81,8 @@ In addition to all arguments above, the following attributes are exported:
 * `status` - Status of Backup Policy.
 
 * `id` - Backup Policy ID.
+
+* `created_at` - Backup creation time.
 
 * `scheduled_operation` - Backup plan information
 

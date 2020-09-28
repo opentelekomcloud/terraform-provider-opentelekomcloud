@@ -5,9 +5,11 @@ import (
 	"encoding/base64"
 	"encoding/hex"
 	"fmt"
-	"github.com/hashicorp/go-multierror"
 	"log"
+	"regexp"
 	"time"
+
+	"github.com/hashicorp/go-multierror"
 
 	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
@@ -16,6 +18,48 @@ import (
 	"github.com/huaweicloud/golangsdk/openstack/cce/v3/nodes"
 	"github.com/huaweicloud/golangsdk/openstack/common/tags"
 )
+
+func validateK8sTagsMap(v interface{}, k string) (ws []string, errors []error) {
+	values := v.(map[string]interface{})
+	pattern := regexp.MustCompile(`^[\.\-_A-Za-z0-9]+$`)
+
+	for key, value := range values {
+		valueString := value.(string)
+		if len(key) < 1 {
+			errors = append(errors, fmt.Errorf(
+				"key %q cannot be shorter than 1 characters: %q", k, key))
+		}
+
+		if len(valueString) < 1 {
+			errors = append(errors, fmt.Errorf(
+				"value %q cannot be shorter than 1 characters: %q", k, value))
+		}
+
+		if len(key) > 63 {
+			errors = append(errors, fmt.Errorf(
+				"key %q cannot be longer than 63 characters: %q", k, key))
+		}
+
+		if len(valueString) > 63 {
+			errors = append(errors, fmt.Errorf(
+				"value %q cannot be longer than 63 characters: %q", k, value))
+		}
+
+		if !pattern.MatchString(key) {
+			errors = append(errors, fmt.Errorf(
+				"key %q doesn't comply with restrictions (%q): %q",
+				k, pattern, key))
+		}
+
+		if !pattern.MatchString(valueString) {
+			errors = append(errors, fmt.Errorf(
+				"value %q doesn't comply with restrictions (%q): %q",
+				k, pattern, valueString))
+		}
+	}
+
+	return
+}
 
 func resourceCCENodeV3() *schema.Resource {
 	return &schema.Resource{
@@ -254,6 +298,15 @@ func resourceCCENodeV3() *schema.Resource {
 				Type:     schema.TypeString,
 				Computed: true,
 			},
+			"k8s_tags": {
+				Type:         schema.TypeMap,
+				Optional:     true,
+				ForceNew:     true,
+				ValidateFunc: validateK8sTagsMap,
+				Elem: &schema.Schema{
+					Type: schema.TypeString,
+				},
+			},
 		},
 	}
 }
@@ -277,6 +330,14 @@ func resourceCCENodeAnnotationsV2(d *schema.ResourceData) map[string]string {
 func resourceCCENodeTags(d *schema.ResourceData) []tags.ResourceTag {
 	tagRaw := d.Get("tags").(map[string]interface{})
 	return expandResourceTags(tagRaw)
+}
+
+func resourceCCENodeK8sTags(d *schema.ResourceData) map[string]string {
+	m := make(map[string]string)
+	for key, val := range d.Get("k8s_tags").(map[string]interface{}) {
+		m[key] = val.(string)
+	}
+	return m
 }
 
 func resourceCCEDataVolume(d *schema.ResourceData) []nodes.VolumeSpec {
@@ -377,6 +438,7 @@ func resourceCCENodeV3Create(d *schema.ResourceData, meta interface{}) error {
 				PostInstall:        base64PostInstall,
 			},
 			UserTags: resourceCCENodeTags(d),
+			K8sTags:  resourceCCENodeK8sTags(d),
 		},
 	}
 
@@ -472,6 +534,7 @@ func resourceCCENodeV3Read(d *schema.ResourceData, meta interface{}) error {
 		d.Set("max_pods", s.Spec.ExtendParam.MaxPods),
 		d.Set("ecs_performance_type", s.Spec.ExtendParam.EcsPerformanceType),
 		d.Set("key_pair", s.Spec.Login.SshKey),
+		d.Set("k8s_tags", s.Spec.K8sTags),
 	)
 	if err := me.ErrorOrNil(); err != nil {
 		return fmt.Errorf("[DEBUG] Error saving main conf to state for OpenTelekomCloud Node (%s): %s", d.Id(), err)

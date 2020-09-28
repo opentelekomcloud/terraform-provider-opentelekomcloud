@@ -2,6 +2,7 @@ package opentelekomcloud
 
 import (
 	"fmt"
+	"github.com/hashicorp/go-multierror"
 	"log"
 	"time"
 
@@ -11,12 +12,15 @@ import (
 	"github.com/huaweicloud/golangsdk/openstack/csbs/v1/policies"
 )
 
+const errorSaveMsg = "[DEBUG] Error saving %s to state for OpenTelekomCloud CSBS backup policy (%s): %s"
+
 func resourceCSBSBackupPolicyV1() *schema.Resource {
 	return &schema.Resource{
 		Create: resourceCSBSBackupPolicyCreate,
 		Read:   resourceCSBSBackupPolicyRead,
 		Update: resourceCSBSBackupPolicyUpdate,
 		Delete: resourceCSBSBackupPolicyDelete,
+
 		Importer: &schema.ResourceImporter{
 			State: schema.ImportStatePassthrough,
 		},
@@ -54,6 +58,10 @@ func resourceCSBSBackupPolicyV1() *schema.Resource {
 			"common": {
 				Type:     schema.TypeMap,
 				Optional: true,
+			},
+			"created_at": {
+				Type:     schema.TypeString,
+				Computed: true,
 			},
 			"scheduled_operation": {
 				Type:     schema.TypeSet,
@@ -161,9 +169,8 @@ func resourceCSBSBackupPolicyV1() *schema.Resource {
 func resourceCSBSBackupPolicyCreate(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*Config)
 	policyClient, err := config.csbsV1Client(GetRegion(d, config))
-
 	if err != nil {
-		return fmt.Errorf("Error creating backup policy Client: %s", err)
+		return fmt.Errorf("error creating backup policy client: %s", err)
 	}
 
 	createOpts := policies.CreateOpts{
@@ -180,12 +187,9 @@ func resourceCSBSBackupPolicyCreate(d *schema.ResourceData, meta interface{}) er
 	}
 
 	backupPolicy, err := policies.Create(policyClient, createOpts).Extract()
-
 	if err != nil {
-		return fmt.Errorf("Error creating Backup Policy : %s", err)
+		return fmt.Errorf("error creating Backup Policy : %s", err)
 	}
-
-	d.SetId(backupPolicy.ID)
 
 	stateConf := &resource.StateChangeConf{
 		Pending:    []string{"creating"},
@@ -196,21 +200,20 @@ func resourceCSBSBackupPolicyCreate(d *schema.ResourceData, meta interface{}) er
 		MinTimeout: 3 * time.Second,
 	}
 
-	_, StateErr := stateConf.WaitForState()
-	if StateErr != nil {
-		return fmt.Errorf("Error waiting for Backup Policy (%s) to become available: %s", backupPolicy.ID, StateErr)
+	_, err = stateConf.WaitForState()
+	if err != nil {
+		return fmt.Errorf("error waiting for Backup Policy (%s) to become available: %s", backupPolicy.ID, err)
 	}
 
+	d.SetId(backupPolicy.ID)
 	return resourceCSBSBackupPolicyRead(d, meta)
-
 }
 
 func resourceCSBSBackupPolicyRead(d *schema.ResourceData, meta interface{}) error {
-
 	config := meta.(*Config)
 	policyClient, err := config.csbsV1Client(GetRegion(d, config))
 	if err != nil {
-		return fmt.Errorf("Error creating csbs client: %s", err)
+		return fmt.Errorf("error creating CSBS client: %s", err)
 	}
 
 	backupPolicy, err := policies.Get(policyClient, d.Id()).Extract()
@@ -221,28 +224,34 @@ func resourceCSBSBackupPolicyRead(d *schema.ResourceData, meta interface{}) erro
 			return nil
 		}
 
-		return fmt.Errorf("Error retrieving backup policy: %s", err)
+		return fmt.Errorf("error retrieving backup policy: %s", err)
 	}
 
 	if err := d.Set("resource", flattenCSBSPolicyResources(*backupPolicy)); err != nil {
-		return err
+		return fmt.Errorf(errorSaveMsg, "resource", d.Id(), err)
 	}
 
 	if err := d.Set("scheduled_operation", flattenCSBSScheduledOperations(*backupPolicy)); err != nil {
-		return err
+		return fmt.Errorf(errorSaveMsg, "scheduler_operation", d.Id(), err)
 	}
 
 	if err := d.Set("tags", flattenCSBSPolicyTags(*backupPolicy)); err != nil {
-		return err
+		return fmt.Errorf(errorSaveMsg, "policy tags", d.Id(), err)
 	}
 
-	d.Set("name", backupPolicy.Name)
-	d.Set("common", backupPolicy.Parameters.Common)
-	d.Set("status", backupPolicy.Status)
-	d.Set("description", backupPolicy.Description)
-	d.Set("provider_id", backupPolicy.ProviderId)
+	me := multierror.Append(nil,
+		d.Set("name", backupPolicy.Name),
+		d.Set("common", backupPolicy.Parameters.Common),
+		d.Set("status", backupPolicy.Status),
+		d.Set("description", backupPolicy.Description),
+		d.Set("provider_id", backupPolicy.ProviderId),
+		d.Set("created_at", backupPolicy.CreatedAt.Format(time.RFC3339)),
+		d.Set("region", GetRegion(d, config)),
+	)
 
-	d.Set("region", GetRegion(d, config))
+	if err = me.ErrorOrNil(); err != nil {
+		return fmt.Errorf(errorSaveMsg, "main conf", d.Id(), err)
+	}
 
 	return nil
 }
@@ -251,7 +260,7 @@ func resourceCSBSBackupPolicyUpdate(d *schema.ResourceData, meta interface{}) er
 	config := meta.(*Config)
 	policyClient, err := config.csbsV1Client(GetRegion(d, config))
 	if err != nil {
-		return fmt.Errorf("Error creating csbs client: %s", err)
+		return fmt.Errorf("error creating CSBS client: %s", err)
 	}
 	var updateOpts policies.UpdateOpts
 	if d.HasChange("name") {
@@ -272,7 +281,7 @@ func resourceCSBSBackupPolicyUpdate(d *schema.ResourceData, meta interface{}) er
 
 	_, err = policies.Update(policyClient, d.Id(), updateOpts).Extract()
 	if err != nil {
-		return fmt.Errorf("Error updating Backup Policy: %s", err)
+		return fmt.Errorf("error updating Backup Policy: %s", err)
 	}
 
 	return resourceCSBSBackupPolicyRead(d, meta)
@@ -282,7 +291,7 @@ func resourceCSBSBackupPolicyDelete(d *schema.ResourceData, meta interface{}) er
 	config := meta.(*Config)
 	policyClient, err := config.csbsV1Client(GetRegion(d, config))
 	if err != nil {
-		return fmt.Errorf("Error creating csbs client: %s", err)
+		return fmt.Errorf("error creating CSBS client: %s", err)
 	}
 
 	stateConf := &resource.StateChangeConf{
@@ -296,7 +305,7 @@ func resourceCSBSBackupPolicyDelete(d *schema.ResourceData, meta interface{}) er
 
 	_, err = stateConf.WaitForState()
 	if err != nil {
-		return fmt.Errorf("Error deleting Backup Policy: %s", err)
+		return fmt.Errorf("error deleting Backup Policy: %s", err)
 	}
 
 	d.SetId("")
@@ -403,7 +412,6 @@ func resourceCSBSPolicyTagsV1(d *schema.ResourceData) []policies.ResourceTag {
 }
 
 func resourceCSBScheduleUpdateV1(d *schema.ResourceData) []policies.ScheduledOperationToUpdate {
-
 	oldSORaw, newSORaw := d.GetChange("scheduled_operation")
 	oldSOList := oldSORaw.(*schema.Set).List()
 	newSOSetList := newSORaw.(*schema.Set).List()
