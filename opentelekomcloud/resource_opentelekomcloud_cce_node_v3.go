@@ -595,6 +595,10 @@ func resourceCCENodeV3Read(d *schema.ResourceData, meta interface{}) error {
 
 	resourceTags, err := tags.Get(computeClient, "cloudservers", serverId).Extract()
 	if err != nil {
+		if _, ok := err.(golangsdk.ErrDefault404); ok {
+			d.SetId("")
+			return nil
+		}
 		return fmt.Errorf("error fetching OpenTelekomCloud instance tags: %s", err)
 	}
 
@@ -627,7 +631,7 @@ func resourceCCENodeV3Update(d *schema.ResourceData, meta interface{}) error {
 		}
 	}
 
-	//update tags
+	// update tags
 	if d.HasChange("tags") {
 		computeClient, err := config.computeV1Client(GetRegion(d, config))
 		if err != nil {
@@ -731,7 +735,7 @@ func recursiveCreate(cceClient *golangsdk.ServiceClient, opts nodes.CreateOptsBu
 		}
 		s, err := nodes.Create(cceClient, ClusterID, opts).Extract()
 		if err != nil {
-			//if err.(golangsdk.ErrUnexpectedResponseCode).Actual == 403 {
+			// if err.(golangsdk.ErrUnexpectedResponseCode).Actual == 403 {
 			if _, ok := err.(golangsdk.ErrDefault403); ok {
 				return recursiveCreate(cceClient, opts, ClusterID, 403)
 			} else {
