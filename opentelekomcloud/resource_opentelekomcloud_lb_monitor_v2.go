@@ -56,7 +56,7 @@ func resourceMonitorV2() *schema.Resource {
 				Required: true,
 				ForceNew: true,
 				ValidateFunc: validation.StringInSlice([]string{
-					"TCP", "UDP-CONNECT", "HTTP",
+					"TCP", "UDP_CONNECT", "HTTP",
 				}, false),
 			},
 			"delay": {
