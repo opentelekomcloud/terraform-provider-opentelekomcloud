@@ -544,8 +544,8 @@ func (c *Config) computeS3conn(region string) (*s3.S3, error) {
 }
 
 func (c *Config) newObjectStorageClient(region string) (*obs.ObsClient, error) {
-	if c.AccessKey == "" || c.SecretKey == "" {
-		return nil, fmt.Errorf("Missing credentials for OBS, need access_key and secret_key values for provider.")
+	if (c.AccessKey == "" || c.SecretKey == "") && c.SecurityToken == "" {
+		return nil, fmt.Errorf("missing credentials for OBS, need access_key and secret_key or security_token values for provider")
 	}
 
 	client, err := huaweisdk.NewOBSService(c.HwClient, golangsdk.EndpointOpts{
@@ -565,7 +565,7 @@ func (c *Config) newObjectStorageClient(region string) (*obs.ObsClient, error) {
 		}
 	}
 
-	return obs.New(c.AccessKey, c.SecretKey, client.Endpoint)
+	return obs.New(c.AccessKey, c.SecretKey, client.Endpoint, obs.WithSecurityToken(c.SecurityToken))
 }
 
 func (c *Config) blockStorageV1Client(region string) (*golangsdk.ServiceClient, error) {
