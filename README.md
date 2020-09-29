@@ -100,19 +100,8 @@ resource "opentelekomcloud_compute_instance_v2" "test-server" {
 
 ### Full Example
 ----------------------
-Please see full example at https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/tree/master/examples, 
+Please see full example at https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/tree/master/examples,
 you must fill in the required variables in variables.tf.
-
-Using the provider
-----------------------
-Please see the documentation at [provider usage](docs/index.md).
-
-Developing the Provider
-----------------------
-
-If you wish to work on the provider, you'll first need [Go](http://www.golang.org) installed on your machine (version 1.11+ is *required*). You'll also need to correctly setup a [GOPATH](http://golang.org/doc/code.html#GOPATH), as well as adding `$GOPATH/bin` to your `$PATH`.
-
-To compile the provider, run `make build`. This will build the provider and put the provider binary in the `$GOPATH/bin` directory.
 
 ```sh
 make build
