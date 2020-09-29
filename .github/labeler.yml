@@ -2,7 +2,5 @@ dependencies:
   - any: ['go.mod', 'go.sum']
 documentation:
   - any: ['docs/**/*', 'README.md']
-enhancement:
-  - opentelekomcloud/*
 changelog:
   - CHANGELOG.md
