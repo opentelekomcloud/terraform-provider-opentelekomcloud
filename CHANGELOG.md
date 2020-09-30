@@ -1,5 +1,18 @@
 ## 1.21.0 (Unreleased)
 
+## 1.20.2 (September 30, 2020)
+
+BUG FIXES:
+* `resource/opentelekomcloud_lb_monitor_v2`: Fix `UDP-CONNECT` in type validation ([#634](https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/634))
+* `resource/opentelekomcloud_cce_node_v3`: Handle 404 during reading tags for CCE node ([#635](https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/635))
+* `resource/opentelekomcloud_obs_bucket`: Fix not creating OBS bucket with `security_token` ([#636](https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/636))
+
+ENHANCEMENTS:
+* `resource/opentelekomcloud_cce_node_v3`: Add k8sTags to CCE node resource ([#621](https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/621))
+* `resource/opentelekomcloud_csbs_backup_policy_v1`: Add `created_at` attribute ([#628](https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/628))
+* `provider/opentelekomcloud`: Allow setting security token by env variable ([#627](https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/627))
+
+
 ## 1.20.1 (September 24, 2020)
 
 BUG FIXES:
