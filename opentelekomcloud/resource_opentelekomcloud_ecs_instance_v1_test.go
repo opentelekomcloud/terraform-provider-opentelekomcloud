@@ -46,7 +46,7 @@ func testAccCheckEcsV1InstanceDestroy(s *terraform.State) error {
 	config := testAccProvider.Meta().(*Config)
 	computeClient, err := config.computeV1Client(OS_REGION_NAME)
 	if err != nil {
-		return fmt.Errorf("Error creating OpenTelekomCloud compute client: %s", err)
+		return fmt.Errorf("error creating OpenTelekomCloud compute client: %s", err)
 	}
 
 	for _, rs := range s.RootModule().Resources {
@@ -57,7 +57,7 @@ func testAccCheckEcsV1InstanceDestroy(s *terraform.State) error {
 		server, err := cloudservers.Get(computeClient, rs.Primary.ID).Extract()
 		if err == nil {
 			if server.Status != "DELETED" {
-				return fmt.Errorf("Instance still exists")
+				return fmt.Errorf("instance still exists")
 			}
 		}
 	}
@@ -69,17 +69,17 @@ func testAccCheckEcsV1InstanceExists(n string, instance *cloudservers.CloudServe
 	return func(s *terraform.State) error {
 		rs, ok := s.RootModule().Resources[n]
 		if !ok {
-			return fmt.Errorf("Not found: %s", n)
+			return fmt.Errorf("not found: %s", n)
 		}
 
 		if rs.Primary.ID == "" {
-			return fmt.Errorf("No ID is set")
+			return fmt.Errorf("no ID is set")
 		}
 
 		config := testAccProvider.Meta().(*Config)
 		computeClient, err := config.computeV1Client(OS_REGION_NAME)
 		if err != nil {
-			return fmt.Errorf("Error creating OpenTelekomCloud compute client: %s", err)
+			return fmt.Errorf("error creating OpenTelekomCloud compute client: %s", err)
 		}
 
 		found, err := cloudservers.Get(computeClient, rs.Primary.ID).Extract()
@@ -88,9 +88,8 @@ func testAccCheckEcsV1InstanceExists(n string, instance *cloudservers.CloudServe
 		}
 
 		if found.ID != rs.Primary.ID {
-			return fmt.Errorf("Instance not found")
+			return fmt.Errorf("instance not found")
 		}
-
 		*instance = *found
 
 		return nil
@@ -137,13 +136,13 @@ resource "opentelekomcloud_ecs_instance_v1" "instance_1" {
   }
 
   password                    = "Password@123"
-  security_groups             = ["default", "${opentelekomcloud_compute_secgroup_v2.secgroup_1.name}"]
+  security_groups             = ["default", opentelekomcloud_compute_secgroup_v2.secgroup_1.name]
   availability_zone           = "%s"
   auto_recovery               = false
   delete_disks_on_termination = true
 
   tags = {
-    foo = "bar1"
+    foo  = "bar1"
     key1 = "value"
   }
 }
