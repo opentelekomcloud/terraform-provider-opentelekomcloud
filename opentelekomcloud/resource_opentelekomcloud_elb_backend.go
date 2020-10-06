@@ -49,7 +49,7 @@ func resourceBackendCreate(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*Config)
 	client, err := config.elbV1Client(GetRegion(d, config))
 	if err != nil {
-		return fmt.Errorf("Error creating OpenTelekomCloud networking client: %s", err)
+		return fmt.Errorf("error creating OpenTelekomCloud networking client: %s", err)
 	}
 
 	addOpts := backendmember.AddOpts{
@@ -58,8 +58,8 @@ func resourceBackendCreate(d *schema.ResourceData, meta interface{}) error {
 	}
 	log.Printf("[DEBUG] Create Options: %#v", addOpts)
 
-	listener_id := d.Get("listener_id").(string)
-	job, err := backendmember.Add(client, listener_id, addOpts).ExtractJobResponse()
+	listenerId := d.Get("listener_id").(string)
+	job, err := backendmember.Add(client, listenerId, addOpts).ExtractJobResponse()
 	if err != nil {
 		return err
 	}
@@ -84,19 +84,19 @@ func resourceBackendCreate(d *schema.ResourceData, meta interface{}) error {
 			}
 		}
 	}
-	return fmt.Errorf("Unexpected conversion error in resourceBackendCreate.")
+	return fmt.Errorf("unexpected conversion error in resourceBackendCreate")
 }
 
 func resourceBackendRead(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*Config)
 	client, err := config.elbV1Client(GetRegion(d, config))
 	if err != nil {
-		return fmt.Errorf("Error creating OpenTelekomCloud networking client: %s", err)
+		return fmt.Errorf("error creating OpenTelekomCloud networking client: %s", err)
 	}
 
-	listener_id := d.Get("listener_id").(string)
+	listenerId := d.Get("listener_id").(string)
 	id := d.Id()
-	backend, err := backendmember.Get(client, listener_id, id).Extract()
+	backend, err := backendmember.Get(client, listenerId, id).Extract()
 	if err != nil {
 		return CheckDeleted(d, err, "backend member")
 	}
@@ -116,13 +116,13 @@ func resourceBackendDelete(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*Config)
 	client, err := config.elbV1Client(GetRegion(d, config))
 	if err != nil {
-		return fmt.Errorf("Error creating OpenTelekomCloud networking client: %s", err)
+		return fmt.Errorf("error creating OpenTelekomCloud networking client: %s", err)
 	}
 
 	log.Printf("[DEBUG] Deleting backend member %s", d.Id())
-	listener_id := d.Get("listener_id").(string)
+	listenerId := d.Get("listener_id").(string)
 	id := d.Id()
-	job, err := backendmember.Remove(client, listener_id, id).ExtractJobResponse()
+	job, err := backendmember.Remove(client, listenerId, id).ExtractJobResponse()
 	if err != nil {
 		return err
 	}

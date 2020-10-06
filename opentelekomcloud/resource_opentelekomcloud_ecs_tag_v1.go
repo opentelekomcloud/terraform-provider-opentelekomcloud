@@ -11,7 +11,7 @@ func setTagForInstance(d *schema.ResourceData, meta interface{}, instanceID stri
 	config := meta.(*Config)
 	client, err := config.computeV1Client(GetRegion(d, config))
 	if err != nil {
-		return fmt.Errorf("Error creating OpenTelekomCloud compute v1 client: %s", err)
+		return fmt.Errorf("error creating OpenTelekomCloud compute v1 client: %s", err)
 	}
 
 	rId := instanceID
@@ -27,7 +27,7 @@ func setTagForInstance(d *schema.ResourceData, meta interface{}, instanceID stri
 	createOpts := tags.BatchOpts{Action: tags.ActionCreate, Tags: tagsList}
 	createTags := tags.BatchAction(client, rId, createOpts)
 	if createTags.Err != nil {
-		return fmt.Errorf("Error creating OpenTelekomCloud instance tags: %s", createTags.Err)
+		return fmt.Errorf("error creating OpenTelekomCloud instance tags: %s", createTags.Err)
 	}
 
 	return nil
