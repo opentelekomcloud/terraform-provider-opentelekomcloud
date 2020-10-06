@@ -9,9 +9,9 @@ import (
 	"regexp"
 
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
-	"github.com/huaweicloud/golangsdk"
-	"github.com/huaweicloud/golangsdk/openstack/autoscaling/v1/configurations"
-	"github.com/huaweicloud/golangsdk/openstack/autoscaling/v1/groups"
+	"github.com/opentelekomcloud/gophertelekomcloud"
+	"github.com/opentelekomcloud/gophertelekomcloud/openstack/autoscaling/v1/configurations"
+	"github.com/opentelekomcloud/gophertelekomcloud/openstack/autoscaling/v1/groups"
 )
 
 func resourceASConfiguration() *schema.Resource {

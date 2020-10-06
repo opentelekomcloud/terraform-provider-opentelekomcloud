@@ -5,9 +5,9 @@ import (
 	"log"
 	"time"
 
-	"github.com/huaweicloud/golangsdk"
-	"github.com/huaweicloud/golangsdk/openstack/networking/v1/bandwidths"
-	"github.com/huaweicloud/golangsdk/openstack/networking/v1/eips"
+	"github.com/opentelekomcloud/gophertelekomcloud"
+	"github.com/opentelekomcloud/gophertelekomcloud/openstack/networking/v1/bandwidths"
+	"github.com/opentelekomcloud/gophertelekomcloud/openstack/networking/v1/eips"
 
 	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"

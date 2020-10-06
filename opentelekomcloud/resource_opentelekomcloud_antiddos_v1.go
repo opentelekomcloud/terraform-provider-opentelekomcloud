@@ -6,10 +6,10 @@ import (
 	"time"
 
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
-	"github.com/huaweicloud/golangsdk/openstack/antiddos/v1/antiddos"
+	"github.com/opentelekomcloud/gophertelekomcloud/openstack/antiddos/v1/antiddos"
 
 	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
-	"github.com/huaweicloud/golangsdk"
+	"github.com/opentelekomcloud/gophertelekomcloud"
 )
 
 func resourceAntiDdosV1() *schema.Resource {

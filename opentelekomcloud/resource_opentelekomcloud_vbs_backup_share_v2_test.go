@@ -8,7 +8,7 @@ import (
 
 	"testing"
 
-	"github.com/huaweicloud/golangsdk/openstack/vbs/v2/shares"
+	"github.com/opentelekomcloud/gophertelekomcloud/openstack/vbs/v2/shares"
 )
 
 func TestAccVBSBackupShareV2_basic(t *testing.T) {

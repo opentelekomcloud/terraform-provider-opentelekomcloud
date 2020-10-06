@@ -7,7 +7,7 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/helper/validation"
-	"github.com/huaweicloud/golangsdk/openstack/kms/v1/keys"
+	"github.com/opentelekomcloud/gophertelekomcloud/openstack/kms/v1/keys"
 )
 
 func dataSourceKmsKeyV1() *schema.Resource {

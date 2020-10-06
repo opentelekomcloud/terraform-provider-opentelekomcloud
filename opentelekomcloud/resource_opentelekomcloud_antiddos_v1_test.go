@@ -7,7 +7,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/terraform"
 
-	"github.com/huaweicloud/golangsdk/openstack/antiddos/v1/antiddos"
+	"github.com/opentelekomcloud/gophertelekomcloud/openstack/antiddos/v1/antiddos"
 )
 
 func TestAccAntiDdosV1_basic(t *testing.T) {

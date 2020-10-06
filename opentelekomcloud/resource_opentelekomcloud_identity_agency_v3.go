@@ -10,11 +10,11 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/helper/hashcode"
 	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
-	"github.com/huaweicloud/golangsdk"
-	"github.com/huaweicloud/golangsdk/openstack/identity/v3/agency"
-	"github.com/huaweicloud/golangsdk/openstack/identity/v3/domains"
-	sdkprojects "github.com/huaweicloud/golangsdk/openstack/identity/v3/projects"
-	sdkroles "github.com/huaweicloud/golangsdk/openstack/identity/v3/roles"
+	"github.com/opentelekomcloud/gophertelekomcloud"
+	"github.com/opentelekomcloud/gophertelekomcloud/openstack/identity/v3/agency"
+	"github.com/opentelekomcloud/gophertelekomcloud/openstack/identity/v3/domains"
+	sdkprojects "github.com/opentelekomcloud/gophertelekomcloud/openstack/identity/v3/projects"
+	sdkroles "github.com/opentelekomcloud/gophertelekomcloud/openstack/identity/v3/roles"
 )
 
 func resourceIdentityAgencyV3() *schema.Resource {

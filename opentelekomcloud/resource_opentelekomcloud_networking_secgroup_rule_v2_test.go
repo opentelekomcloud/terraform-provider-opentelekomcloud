@@ -7,8 +7,8 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/terraform"
 
-	"github.com/huaweicloud/golangsdk/openstack/networking/v2/extensions/security/groups"
-	"github.com/huaweicloud/golangsdk/openstack/networking/v2/extensions/security/rules"
+	"github.com/opentelekomcloud/gophertelekomcloud/openstack/networking/v2/extensions/security/groups"
+	"github.com/opentelekomcloud/gophertelekomcloud/openstack/networking/v2/extensions/security/rules"
 )
 
 func TestAccNetworkingV2SecGroupRule_basic(t *testing.T) {

@@ -8,7 +8,7 @@ import (
 
 	"testing"
 
-	"github.com/huaweicloud/golangsdk/openstack/vbs/v2/policies"
+	"github.com/opentelekomcloud/gophertelekomcloud/openstack/vbs/v2/policies"
 )
 
 func TestAccVBSBackupPolicyV2_basic(t *testing.T) {

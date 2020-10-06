@@ -8,7 +8,7 @@ import (
 	"time"
 
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
-	"github.com/huaweicloud/golangsdk/openstack/autoscaling/v1/policies"
+	"github.com/opentelekomcloud/gophertelekomcloud/openstack/autoscaling/v1/policies"
 )
 
 func resourceASPolicy() *schema.Resource {

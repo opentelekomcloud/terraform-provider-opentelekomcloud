@@ -4,11 +4,12 @@ import (
 	"fmt"
 	"testing"
 
+	"time"
+
 	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/terraform"
-	"github.com/huaweicloud/golangsdk"
-	"github.com/huaweicloud/golangsdk/openstack/mrs/v1/job"
-	"time"
+	golangsdk "github.com/opentelekomcloud/gophertelekomcloud"
+	"github.com/opentelekomcloud/gophertelekomcloud/openstack/mrs/v1/job"
 )
 
 func TestAccMRSV1Job_basic(t *testing.T) {

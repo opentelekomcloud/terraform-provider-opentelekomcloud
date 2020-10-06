@@ -2,14 +2,15 @@ package opentelekomcloud
 
 import (
 	"fmt"
-	"github.com/hashicorp/go-multierror"
 	"log"
 	"time"
 
+	"github.com/hashicorp/go-multierror"
+	"github.com/opentelekomcloud/gophertelekomcloud"
+
 	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
-	"github.com/huaweicloud/golangsdk"
-	"github.com/huaweicloud/golangsdk/openstack/csbs/v1/policies"
+	"github.com/opentelekomcloud/gophertelekomcloud/openstack/csbs/v1/policies"
 )
 
 const errorSaveMsg = "[DEBUG] Error saving %s to state for OpenTelekomCloud CSBS backup policy (%s): %s"

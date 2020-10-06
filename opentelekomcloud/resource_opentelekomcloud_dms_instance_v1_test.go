@@ -6,7 +6,7 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/terraform"
-	"github.com/huaweicloud/golangsdk/openstack/dms/v1/instances"
+	"github.com/opentelekomcloud/gophertelekomcloud/openstack/dms/v1/instances"
 
 	"github.com/hashicorp/terraform-plugin-sdk/helper/acctest"
 )

@@ -6,8 +6,8 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/terraform"
-	"github.com/huaweicloud/golangsdk"
-	"github.com/huaweicloud/golangsdk/openstack/networking/v2/extensions/vpnaas/siteconnections"
+	"github.com/opentelekomcloud/gophertelekomcloud"
+	"github.com/opentelekomcloud/gophertelekomcloud/openstack/networking/v2/extensions/vpnaas/siteconnections"
 	"strconv"
 )
 
@@ -110,7 +110,7 @@ var testAccSiteConnectionV2_basic = fmt.Sprintf(`
   		router_id = "${opentelekomcloud_networking_router_v2.router_1.id}"
   		subnet_id = "${opentelekomcloud_networking_subnet_v2.subnet_1.id}"
 	}
-	
+
 	resource "opentelekomcloud_vpnaas_service_v2" "service_1" {
 		router_id = "${opentelekomcloud_networking_router_v2.router_1.id}"
 		admin_state_up = "false"

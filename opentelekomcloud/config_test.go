@@ -10,8 +10,8 @@ import (
 	"testing"
 	"text/template"
 
-	"github.com/huaweicloud/golangsdk"
-	th "github.com/huaweicloud/golangsdk/testhelper"
+	"github.com/opentelekomcloud/gophertelekomcloud"
+	th "github.com/opentelekomcloud/gophertelekomcloud/testhelper"
 )
 
 func writeYamlTemplate(tmpl string, filename string, data *Config) error {

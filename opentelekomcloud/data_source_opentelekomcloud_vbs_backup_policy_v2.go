@@ -5,8 +5,8 @@ import (
 	"log"
 
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
-	"github.com/huaweicloud/golangsdk/openstack/vbs/v2/policies"
-	"github.com/huaweicloud/golangsdk/openstack/vbs/v2/tags"
+	"github.com/opentelekomcloud/gophertelekomcloud/openstack/vbs/v2/policies"
+	"github.com/opentelekomcloud/gophertelekomcloud/openstack/vbs/v2/tags"
 )
 
 func dataSourceVBSBackupPolicyV2() *schema.Resource {

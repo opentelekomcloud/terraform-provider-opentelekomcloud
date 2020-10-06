@@ -5,7 +5,7 @@ import (
 	"log"
 
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
-	"github.com/huaweicloud/golangsdk/openstack/csbs/v1/policies"
+	"github.com/opentelekomcloud/gophertelekomcloud/openstack/csbs/v1/policies"
 )
 
 func dataSourceCSBSBackupPolicyV1() *schema.Resource {

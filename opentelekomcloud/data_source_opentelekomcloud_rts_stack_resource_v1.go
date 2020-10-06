@@ -4,7 +4,7 @@ import (
 	"fmt"
 
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
-	"github.com/huaweicloud/golangsdk/openstack/rts/v1/stackresources"
+	"github.com/opentelekomcloud/gophertelekomcloud/openstack/rts/v1/stackresources"
 )
 
 func dataSourceRTSStackResourcesV1() *schema.Resource {

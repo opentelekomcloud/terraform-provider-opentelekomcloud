@@ -6,7 +6,7 @@ import (
 	"time"
 
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
-	"github.com/huaweicloud/golangsdk/openstack/cts/v1/tracker"
+	"github.com/opentelekomcloud/gophertelekomcloud/openstack/cts/v1/tracker"
 )
 
 func resourceCTSTrackerV1() *schema.Resource {

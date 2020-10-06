@@ -5,7 +5,7 @@ import (
 	"log"
 
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
-	"github.com/huaweicloud/golangsdk/openstack/antiddos/v1/antiddos"
+	"github.com/opentelekomcloud/gophertelekomcloud/openstack/antiddos/v1/antiddos"
 )
 
 func dataSourceAntiDdosV1() *schema.Resource {

@@ -1,9 +1,10 @@
 package opentelekomcloud
 
 import (
-	"github.com/huaweicloud/golangsdk/openstack/networking/v2/routes"
+	"github.com/opentelekomcloud/gophertelekomcloud/openstack/networking/v2/routes"
 
 	"fmt"
+
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
 )
 

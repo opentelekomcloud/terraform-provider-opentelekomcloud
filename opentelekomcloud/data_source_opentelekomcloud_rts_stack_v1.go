@@ -8,8 +8,8 @@ import (
 
 	"github.com/hashicorp/errwrap"
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
-	"github.com/huaweicloud/golangsdk/openstack/rts/v1/stacks"
-	"github.com/huaweicloud/golangsdk/openstack/rts/v1/stacktemplates"
+	"github.com/opentelekomcloud/gophertelekomcloud/openstack/rts/v1/stacks"
+	"github.com/opentelekomcloud/gophertelekomcloud/openstack/rts/v1/stacktemplates"
 )
 
 func dataSourceRTSStackV1() *schema.Resource {

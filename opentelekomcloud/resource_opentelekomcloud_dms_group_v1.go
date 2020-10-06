@@ -5,7 +5,7 @@ import (
 	"log"
 
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
-	"github.com/huaweicloud/golangsdk/openstack/dms/v1/groups"
+	"github.com/opentelekomcloud/gophertelekomcloud/openstack/dms/v1/groups"
 )
 
 func resourceDmsGroupsV1() *schema.Resource {

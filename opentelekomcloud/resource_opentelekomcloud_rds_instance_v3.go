@@ -23,15 +23,15 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
-	"github.com/huaweicloud/golangsdk"
-	"github.com/huaweicloud/golangsdk/openstack/networking/v1/subnets"
-	"github.com/huaweicloud/golangsdk/openstack/networking/v2/extensions/layer3/floatingips"
-	"github.com/huaweicloud/golangsdk/openstack/networking/v2/ports"
-	"github.com/huaweicloud/golangsdk/openstack/rds/v1/datastores"
-	"github.com/huaweicloud/golangsdk/openstack/rds/v1/flavors"
-	"github.com/huaweicloud/golangsdk/openstack/rds/v1/instances"
-	"github.com/huaweicloud/golangsdk/openstack/rds/v1/tags"
-	"github.com/huaweicloud/golangsdk/openstack/rds/v3/backups"
+	"github.com/opentelekomcloud/gophertelekomcloud"
+	"github.com/opentelekomcloud/gophertelekomcloud/openstack/networking/v1/subnets"
+	"github.com/opentelekomcloud/gophertelekomcloud/openstack/networking/v2/extensions/layer3/floatingips"
+	"github.com/opentelekomcloud/gophertelekomcloud/openstack/networking/v2/ports"
+	"github.com/opentelekomcloud/gophertelekomcloud/openstack/rds/v1/datastores"
+	"github.com/opentelekomcloud/gophertelekomcloud/openstack/rds/v1/flavors"
+	"github.com/opentelekomcloud/gophertelekomcloud/openstack/rds/v1/instances"
+	"github.com/opentelekomcloud/gophertelekomcloud/openstack/rds/v1/tags"
+	"github.com/opentelekomcloud/gophertelekomcloud/openstack/rds/v3/backups"
 )
 
 func resourceRdsInstanceV3() *schema.Resource {

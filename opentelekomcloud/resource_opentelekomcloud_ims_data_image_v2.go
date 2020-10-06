@@ -8,9 +8,9 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/helper/validation"
 
-	imageservice_v2 "github.com/huaweicloud/golangsdk/openstack/imageservice/v2/images"
-	"github.com/huaweicloud/golangsdk/openstack/ims/v2/cloudimages"
-	"github.com/huaweicloud/golangsdk/openstack/ims/v2/tags"
+	imageservice_v2 "github.com/opentelekomcloud/gophertelekomcloud/openstack/imageservice/v2/images"
+	"github.com/opentelekomcloud/gophertelekomcloud/openstack/ims/v2/cloudimages"
+	"github.com/opentelekomcloud/gophertelekomcloud/openstack/ims/v2/tags"
 )
 
 func resourceImsDataImageV2() *schema.Resource {

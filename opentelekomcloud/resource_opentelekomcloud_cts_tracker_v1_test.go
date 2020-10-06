@@ -8,7 +8,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/helper/acctest"
 	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/terraform"
-	"github.com/huaweicloud/golangsdk/openstack/cts/v1/tracker"
+	"github.com/opentelekomcloud/gophertelekomcloud/openstack/cts/v1/tracker"
 )
 
 func TestAccCTSTrackerV1_basic(t *testing.T) {

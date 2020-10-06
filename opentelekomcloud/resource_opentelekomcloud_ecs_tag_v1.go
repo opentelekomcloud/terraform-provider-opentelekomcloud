@@ -4,7 +4,7 @@ import (
 	"fmt"
 
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
-	tags "github.com/huaweicloud/golangsdk/openstack/ecs/v1/cloudservertags"
+	tags "github.com/opentelekomcloud/gophertelekomcloud/openstack/ecs/v1/cloudservertags"
 )
 
 func setTagForInstance(d *schema.ResourceData, meta interface{}, instanceID string, tagsMap map[string]interface{}) error {

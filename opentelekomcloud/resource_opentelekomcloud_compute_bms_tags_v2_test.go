@@ -7,7 +7,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/terraform"
 
-	"github.com/huaweicloud/golangsdk/openstack/bms/v2/tags"
+	"github.com/opentelekomcloud/gophertelekomcloud/openstack/bms/v2/tags"
 )
 
 func TestAccOTCBMSTagsV2_basic(t *testing.T) {

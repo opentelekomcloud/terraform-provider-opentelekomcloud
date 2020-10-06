@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"reflect"
 
-	"github.com/huaweicloud/golangsdk/openstack/rts/v1/stacks"
+	"github.com/opentelekomcloud/gophertelekomcloud/openstack/rts/v1/stacks"
 	"gopkg.in/yaml.v2"
 )
 

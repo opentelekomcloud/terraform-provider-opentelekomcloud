@@ -7,7 +7,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/terraform"
 
-	"github.com/huaweicloud/golangsdk/openstack/evs/v3/volumes"
+	"github.com/opentelekomcloud/gophertelekomcloud/openstack/evs/v3/volumes"
 )
 
 func TestAccEvsStorageV3Volume_basic(t *testing.T) {

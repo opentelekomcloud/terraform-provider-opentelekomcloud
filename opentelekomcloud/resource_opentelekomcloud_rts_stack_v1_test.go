@@ -7,7 +7,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/terraform"
 
-	"github.com/huaweicloud/golangsdk/openstack/rts/v1/stacks"
+	"github.com/opentelekomcloud/gophertelekomcloud/openstack/rts/v1/stacks"
 )
 
 func TestAccOTCRTSStackV1_basic(t *testing.T) {

@@ -8,7 +8,7 @@ import (
 
 	"github.com/hashicorp/go-multierror"
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
-	"github.com/huaweicloud/golangsdk/openstack/dns/v2/zones"
+	"github.com/opentelekomcloud/gophertelekomcloud/openstack/dns/v2/zones"
 )
 
 func dataSourceDNSZoneV2() *schema.Resource {

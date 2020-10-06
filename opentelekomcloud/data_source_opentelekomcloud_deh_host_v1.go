@@ -3,7 +3,7 @@ package opentelekomcloud
 import (
 	"fmt"
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
-	"github.com/huaweicloud/golangsdk/openstack/deh/v1/hosts"
+	"github.com/opentelekomcloud/gophertelekomcloud/openstack/deh/v1/hosts"
 	"log"
 )
 

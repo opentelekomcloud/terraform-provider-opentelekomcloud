@@ -7,7 +7,7 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/terraform"
-	"github.com/huaweicloud/golangsdk/openstack/smn/v2/subscriptions"
+	"github.com/opentelekomcloud/gophertelekomcloud/openstack/smn/v2/subscriptions"
 )
 
 func TestAccSMNV2Subscription_basic(t *testing.T) {

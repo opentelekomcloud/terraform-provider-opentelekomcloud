@@ -8,11 +8,12 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
+	"github.com/opentelekomcloud/gophertelekomcloud"
 
-	"github.com/huaweicloud/golangsdk"
-	"github.com/huaweicloud/golangsdk/openstack/networking/v2/extensions/provider"
-	"github.com/huaweicloud/golangsdk/openstack/networking/v2/networks"
 	"strings"
+
+	"github.com/opentelekomcloud/gophertelekomcloud/openstack/networking/v2/extensions/provider"
+	"github.com/opentelekomcloud/gophertelekomcloud/openstack/networking/v2/networks"
 )
 
 func suppressBooleanDiffs(k, old, new string, d *schema.ResourceData) bool {

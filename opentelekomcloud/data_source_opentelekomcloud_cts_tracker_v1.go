@@ -5,7 +5,7 @@ import (
 	"log"
 
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
-	"github.com/huaweicloud/golangsdk/openstack/cts/v1/tracker"
+	"github.com/opentelekomcloud/gophertelekomcloud/openstack/cts/v1/tracker"
 )
 
 func dataSourceCTSTrackerV1() *schema.Resource {
