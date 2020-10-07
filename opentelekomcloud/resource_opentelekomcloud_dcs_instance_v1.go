@@ -5,6 +5,7 @@ import (
 	"log"
 	"time"
 
+	"github.com/hashicorp/go-multierror"
 	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
 	"github.com/huaweicloud/golangsdk"
@@ -77,6 +78,10 @@ func resourceDcsInstanceV1() *schema.Resource {
 				ForceNew: true,
 				Elem:     &schema.Schema{Type: schema.TypeString},
 			},
+			"created_at": {
+				Type:     schema.TypeString,
+				Computed: true,
+			},
 			"product_id": {
 				Type:     schema.TypeString,
 				Required: true,
@@ -93,30 +98,75 @@ func resourceDcsInstanceV1() *schema.Resource {
 				Computed: true,
 			},
 			"save_days": {
-				Type:     schema.TypeInt,
-				Required: true,
-				ForceNew: true,
+				Type:       schema.TypeInt,
+				Optional:   true,
+				Deprecated: "Please use `backup_policy` instead",
+				ForceNew:   true,
 			},
 			"backup_type": {
-				Type:     schema.TypeString,
-				Required: true,
-				ForceNew: true,
+				Type:       schema.TypeString,
+				Optional:   true,
+				Deprecated: "Please use `backup_policy` instead",
+				ForceNew:   true,
 			},
 			"begin_at": {
-				Type:     schema.TypeString,
-				Required: true,
-				ForceNew: true,
+				Type:         schema.TypeString,
+				Optional:     true,
+				RequiredWith: []string{"period_type", "backup_at", "save_days", "backup_type"},
+				Deprecated:   "Please use `backup_policy` instead",
+				ForceNew:     true,
 			},
 			"period_type": {
-				Type:     schema.TypeString,
-				Required: true,
-				ForceNew: true,
+				Type:         schema.TypeString,
+				Optional:     true,
+				RequiredWith: []string{"begin_at", "backup_at", "save_days", "backup_type"},
+				Deprecated:   "Please use `backup_policy` instead",
+				ForceNew:     true,
 			},
 			"backup_at": {
-				Type:     schema.TypeList,
-				Required: true,
-				ForceNew: true,
-				Elem:     &schema.Schema{Type: schema.TypeInt},
+				Type:         schema.TypeList,
+				Optional:     true,
+				RequiredWith: []string{"period_type", "begin_at", "save_days", "backup_type"},
+				Deprecated:   "Please use `backup_policy` instead",
+				ForceNew:     true,
+				Elem:         &schema.Schema{Type: schema.TypeInt},
+			},
+			"backup_policy": {
+				Type:          schema.TypeList,
+				Optional:      true,
+				ForceNew:      true,
+				ConflictsWith: []string{"backup_type", "begin_at", "period_type", "backup_at", "save_days"},
+				MaxItems:      1,
+				Elem: &schema.Resource{
+					Schema: map[string]*schema.Schema{
+						"save_days": {
+							Type:     schema.TypeInt,
+							Optional: true,
+						},
+						"backup_type": {
+							Type:     schema.TypeString,
+							Optional: true,
+							Default:  "manual",
+						},
+						"begin_at": {
+							Type:     schema.TypeString,
+							Required: true,
+						},
+						"period_type": {
+							Type:     schema.TypeString,
+							Required: true,
+						},
+						"backup_at": {
+							Type:     schema.TypeList,
+							Required: true,
+							Elem:     &schema.Schema{Type: schema.TypeInt},
+						},
+						"timezone_offset": {
+							Type:     schema.TypeString,
+							Optional: true,
+						},
+					},
+				},
 			},
 			"order_id": {
 				Type:     schema.TypeString,
@@ -138,6 +188,10 @@ func resourceDcsInstanceV1() *schema.Resource {
 				Type:     schema.TypeInt,
 				Computed: true,
 			},
+			"status": {
+				Type:     schema.TypeString,
+				Computed: true,
+			},
 			"resource_spec_code": {
 				Type:     schema.TypeString,
 				Computed: true,
@@ -151,10 +205,14 @@ func resourceDcsInstanceV1() *schema.Resource {
 				Computed: true,
 			},
 			"max_memory": {
-				Type:     schema.TypeString,
+				Type:     schema.TypeInt,
 				Computed: true,
 			},
 			"user_id": {
+				Type:     schema.TypeString,
+				Computed: true,
+			},
+			"user_name": {
 				Type:     schema.TypeString,
 				Computed: true,
 			},
@@ -166,23 +224,44 @@ func resourceDcsInstanceV1() *schema.Resource {
 	}
 }
 
+func formatAts(src []interface{}) []int {
+	res := make([]int, len(src))
+	for i, at := range src {
+		res[i] = at.(int)
+	}
+	return res
+}
+
 func getInstanceBackupPolicy(d *schema.ResourceData) *instances.InstanceBackupPolicy {
-	backupAts := d.Get("backup_at").([]interface{})
-	ats := make([]int, len(backupAts))
-	for i, at := range backupAts {
-		ats[i] = at.(int)
+	var instanceBackupPolicy *instances.InstanceBackupPolicy
+	if _, ok := d.GetOk("backup_policy"); !ok { // deprecated branch
+		backupAts := d.Get("backup_at").([]interface{})
+		periodicalBackupPlan := instances.PeriodicalBackupPlan{
+			BeginAt:    d.Get("begin_at").(string),
+			PeriodType: d.Get("period_type").(string),
+			BackupAt:   formatAts(backupAts),
+		}
+		instanceBackupPolicy = &instances.InstanceBackupPolicy{
+			SaveDays:             d.Get("save_days").(int),
+			BackupType:           d.Get("backup_type").(string),
+			PeriodicalBackupPlan: periodicalBackupPlan,
+		}
 	}
 
-	periodicalBackupPlan := instances.PeriodicalBackupPlan{
-		BeginAt:    d.Get("begin_at").(string),
-		PeriodType: d.Get("period_type").(string),
-		BackupAt:   ats,
+	backupPolicyList := d.Get("backup_policy").([]interface{})
+	if len(backupPolicyList) == 0 {
+		return nil
 	}
-
-	instanceBackupPolicy := &instances.InstanceBackupPolicy{
-		SaveDays:             d.Get("save_days").(int),
-		BackupType:           d.Get("backup_type").(string),
-		PeriodicalBackupPlan: periodicalBackupPlan,
+	backupPolicy := backupPolicyList[0].(map[string]interface{})
+	backupAts := backupPolicy["backup_at"].([]interface{})
+	instanceBackupPolicy = &instances.InstanceBackupPolicy{
+		SaveDays:   backupPolicy["save_days"].(int),
+		BackupType: backupPolicy["backup_type"].(string),
+		PeriodicalBackupPlan: instances.PeriodicalBackupPlan{
+			BeginAt:    backupPolicy["begin_at"].(string),
+			PeriodType: backupPolicy["period_type"].(string),
+			BackupAt:   formatAts(backupAts),
+		},
 	}
 
 	return instanceBackupPolicy
@@ -195,9 +274,9 @@ func resourceDcsInstancesV1Create(d *schema.ResourceData, meta interface{}) erro
 		return fmt.Errorf("Error creating dcs instance client: %s", err)
 	}
 
-	no_password_access := "true"
+	noPasswordAccess := "true"
 	if d.Get("access_user").(string) != "" || d.Get("password").(string) != "" {
-		no_password_access = "false"
+		noPasswordAccess = "false"
 	}
 	createOpts := &instances.CreateOps{
 		Name:                 d.Get("name").(string),
@@ -205,7 +284,7 @@ func resourceDcsInstancesV1Create(d *schema.ResourceData, meta interface{}) erro
 		Engine:               d.Get("engine").(string),
 		EngineVersion:        d.Get("engine_version").(string),
 		Capacity:             d.Get("capacity").(int),
-		NoPasswordAccess:     no_password_access,
+		NoPasswordAccess:     noPasswordAccess,
 		Password:             d.Get("password").(string),
 		AccessUser:           d.Get("access_user").(string),
 		VPCID:                d.Get("vpc_id").(string),
@@ -261,34 +340,34 @@ func resourceDcsInstancesV1Read(d *schema.ResourceData, meta interface{}) error 
 	log.Printf("[DEBUG] Dcs instance %s: %+v", d.Id(), v)
 
 	d.SetId(v.InstanceID)
-	d.Set("name", v.Name)
-	d.Set("engine", v.Engine)
-	d.Set("engine_version", v.EngineVersion)
-	d.Set("capacity", v.Capacity)
-	d.Set("used_memory", v.UsedMemory)
-	d.Set("max_memory", v.MaxMemory)
-	d.Set("port", v.Port)
-	d.Set("status", v.Status)
-	d.Set("description", v.Description)
-	d.Set("resource_spec_code", v.ResourceSpecCode)
-	d.Set("internal_version", v.InternalVersion)
-	d.Set("vpc_id", v.VPCID)
-	d.Set("vpc_name", v.VPCName)
-	d.Set("created_at", v.CreatedAt)
-	d.Set("product_id", v.ProductID)
-	d.Set("security_group_id", v.SecurityGroupID)
-	d.Set("security_group_name", v.SecurityGroupName)
-	d.Set("subnet_id", v.SubnetID)
-	d.Set("subnet_name", v.SubnetName)
-	d.Set("user_id", v.UserID)
-	d.Set("user_name", v.UserName)
-	d.Set("order_id", v.OrderID)
-	d.Set("maintain_begin", v.MaintainBegin)
-	d.Set("maintain_end", v.MaintainEnd)
-	d.Set("access_user", v.AccessUser)
-	d.Set("ip", v.IP)
-
-	return nil
+	mErr := multierror.Append(nil,
+		d.Set("name", v.Name),
+		d.Set("engine", v.Engine),
+		d.Set("capacity", v.Capacity),
+		d.Set("used_memory", v.UsedMemory),
+		d.Set("max_memory", v.MaxMemory),
+		d.Set("port", v.Port),
+		d.Set("status", v.Status),
+		d.Set("description", v.Description),
+		d.Set("resource_spec_code", v.ResourceSpecCode),
+		d.Set("internal_version", v.InternalVersion),
+		d.Set("vpc_id", v.VPCID),
+		d.Set("vpc_name", v.VPCName),
+		d.Set("created_at", v.CreatedAt),
+		d.Set("product_id", v.ProductID),
+		d.Set("security_group_id", v.SecurityGroupID),
+		d.Set("security_group_name", v.SecurityGroupName),
+		d.Set("subnet_id", v.SubnetID),
+		d.Set("subnet_name", v.SubnetName),
+		d.Set("user_id", v.UserID),
+		d.Set("user_name", v.UserName),
+		d.Set("order_id", v.OrderID),
+		d.Set("maintain_begin", v.MaintainBegin),
+		d.Set("maintain_end", v.MaintainEnd),
+		d.Set("access_user", v.AccessUser),
+		d.Set("ip", v.IP),
+	)
+	return mErr.ErrorOrNil()
 }
 
 func resourceDcsInstancesV1Update(d *schema.ResourceData, meta interface{}) error {
