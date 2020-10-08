@@ -101,40 +101,34 @@ func resourceDcsInstanceV1() *schema.Resource {
 				Type:       schema.TypeInt,
 				Optional:   true,
 				Deprecated: "Please use `backup_policy` instead",
-				ForceNew:   true,
 			},
 			"backup_type": {
 				Type:       schema.TypeString,
 				Optional:   true,
 				Deprecated: "Please use `backup_policy` instead",
-				ForceNew:   true,
 			},
 			"begin_at": {
 				Type:         schema.TypeString,
 				Optional:     true,
 				RequiredWith: []string{"period_type", "backup_at", "save_days", "backup_type"},
 				Deprecated:   "Please use `backup_policy` instead",
-				ForceNew:     true,
 			},
 			"period_type": {
 				Type:         schema.TypeString,
 				Optional:     true,
 				RequiredWith: []string{"begin_at", "backup_at", "save_days", "backup_type"},
 				Deprecated:   "Please use `backup_policy` instead",
-				ForceNew:     true,
 			},
 			"backup_at": {
 				Type:         schema.TypeList,
 				Optional:     true,
 				RequiredWith: []string{"period_type", "begin_at", "save_days", "backup_type"},
 				Deprecated:   "Please use `backup_policy` instead",
-				ForceNew:     true,
 				Elem:         &schema.Schema{Type: schema.TypeInt},
 			},
 			"backup_policy": {
 				Type:          schema.TypeList,
 				Optional:      true,
-				ForceNew:      true,
 				ConflictsWith: []string{"backup_type", "begin_at", "period_type", "backup_at", "save_days"},
 				MaxItems:      1,
 				Elem: &schema.Resource{
@@ -160,10 +154,6 @@ func resourceDcsInstanceV1() *schema.Resource {
 							Type:     schema.TypeList,
 							Required: true,
 							Elem:     &schema.Schema{Type: schema.TypeInt},
-						},
-						"timezone_offset": {
-							Type:     schema.TypeString,
-							Optional: true,
 						},
 					},
 				},
@@ -385,16 +375,16 @@ func resourceDcsInstancesV1Update(d *schema.ResourceData, meta interface{}) erro
 		updateOpts.Description = &description
 	}
 	if d.HasChange("maintain_begin") {
-		maintain_begin := d.Get("maintain_begin").(string)
-		updateOpts.MaintainBegin = maintain_begin
+		updateOpts.MaintainBegin = d.Get("maintain_begin").(string)
 	}
 	if d.HasChange("maintain_end") {
-		maintain_end := d.Get("maintain_end").(string)
-		updateOpts.MaintainEnd = maintain_end
+		updateOpts.MaintainEnd = d.Get("maintain_end").(string)
 	}
 	if d.HasChange("security_group_id") {
-		security_group_id := d.Get("security_group_id").(string)
-		updateOpts.SecurityGroupID = security_group_id
+		updateOpts.SecurityGroupID = d.Get("security_group_id").(string)
+	}
+	if d.HasChange("backup_policy") {
+		updateOpts.InstanceBackupPolicy = getInstanceBackupPolicy(d)
 	}
 
 	err = instances.Update(dcsV1Client, d.Id(), updateOpts).Err

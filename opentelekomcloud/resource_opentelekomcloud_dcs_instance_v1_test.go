@@ -146,7 +146,7 @@ data "opentelekomcloud_dcs_product_v1" "product_1" {
 resource "opentelekomcloud_dcs_instance_v1" "instance_1" {
   name              = "%s"
   engine_version    = "3.0.7"
-  password          = "Huawei_test"
+  password          = "Hungarian_rapsody"
   engine            = "Redis"
   capacity          = 2
   vpc_id            = "%s"
@@ -182,7 +182,7 @@ data "opentelekomcloud_dcs_product_v1" "product_1" {
 resource "opentelekomcloud_dcs_instance_v1" "instance_1" {
   name              = "%s"
   engine_version    = "3.0.7"
-  password          = "Huawei_test"
+  password          = "Hungarian_rapsody"
   engine            = "Redis"
   capacity          = 2
   vpc_id            = "%s"
@@ -219,7 +219,7 @@ data "opentelekomcloud_dcs_product_v1" "product_1" {
 resource "opentelekomcloud_dcs_instance_v1" "instance_1" {
   name              = "%s"
   engine_version    = "3.0.7"
-  password          = "Huawei_test"
+  password          = "Hungarian_rapsody"
   engine            = "Redis"
   capacity          = 2
   vpc_id            = "%s"
