@@ -137,34 +137,27 @@ func resourceDcsInstanceV1() *schema.Resource {
 				Optional:      true,
 				ConflictsWith: []string{"backup_type", "begin_at", "period_type", "backup_at", "save_days"},
 				MaxItems:      1,
-				ForceNew:      true,
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
 						"save_days": {
 							Type:     schema.TypeInt,
 							Optional: true,
-							ForceNew: true,
 						},
 						"backup_type": {
 							Type:     schema.TypeString,
 							Optional: true,
-							ForceNew: true,
-							Default:  "manual",
 						},
 						"begin_at": {
 							Type:     schema.TypeString,
 							Required: true,
-							ForceNew: true,
 						},
 						"period_type": {
 							Type:     schema.TypeString,
 							Required: true,
-							ForceNew: true,
 						},
 						"backup_at": {
 							Type:     schema.TypeList,
 							Required: true,
-							ForceNew: true,
 							Elem:     &schema.Schema{Type: schema.TypeInt},
 						},
 					},
@@ -238,15 +231,14 @@ func getInstanceBackupPolicy(d *schema.ResourceData) *instances.InstanceBackupPo
 	var instanceBackupPolicy *instances.InstanceBackupPolicy
 	if _, ok := d.GetOk("backup_policy"); !ok { // deprecated branch
 		backupAts := d.Get("backup_at").([]interface{})
-		periodicalBackupPlan := instances.PeriodicalBackupPlan{
-			BeginAt:    d.Get("begin_at").(string),
-			PeriodType: d.Get("period_type").(string),
-			BackupAt:   formatAts(backupAts),
-		}
 		instanceBackupPolicy = &instances.InstanceBackupPolicy{
-			SaveDays:             d.Get("save_days").(int),
-			BackupType:           d.Get("backup_type").(string),
-			PeriodicalBackupPlan: periodicalBackupPlan,
+			SaveDays:   d.Get("save_days").(int),
+			BackupType: d.Get("backup_type").(string),
+			PeriodicalBackupPlan: instances.PeriodicalBackupPlan{
+				BeginAt:    d.Get("begin_at").(string),
+				PeriodType: d.Get("period_type").(string),
+				BackupAt:   formatAts(backupAts),
+			},
 		}
 	}
 
@@ -394,6 +386,9 @@ func resourceDcsInstancesV1Update(d *schema.ResourceData, meta interface{}) erro
 	}
 	if d.HasChange("security_group_id") {
 		updateOpts.SecurityGroupID = d.Get("security_group_id").(string)
+	}
+	if d.HasChange("backup_policy") {
+		updateOpts.InstanceBackupPolicy = getInstanceBackupPolicy(d)
 	}
 
 	err = instances.Update(dcsV1Client, d.Id(), updateOpts).Err

@@ -56,18 +56,18 @@ func TestAccDcsInstancesV1_basic(t *testing.T) {
 			{
 				Config: testAccDcsV1Instance_updated(instanceName),
 				Check: resource.ComposeTestCheckFunc(
-					resource.TestCheckResourceAttr("opentelekomcloud_dcs_instance_v1.instance_1", "backup_policy.begin_at", "00:01-02:00"),
-					resource.TestCheckResourceAttr("opentelekomcloud_dcs_instance_v1.instance_1", "backup_policy.save_days", "2"),
+					resource.TestCheckResourceAttr("opentelekomcloud_dcs_instance_v1.instance_1", "backup_policy.0.begin_at", "01:00-02:00"),
+					resource.TestCheckResourceAttr("opentelekomcloud_dcs_instance_v1.instance_1", "backup_policy.0.save_days", "2"),
+					resource.TestCheckResourceAttr("opentelekomcloud_dcs_instance_v1.instance_1", "backup_policy.0.backup_at.#", "3"),
 				),
 			},
 			{
 				Config: testAccDcsV1Instance_single(instanceName),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckDcsV1InstanceExists("opentelekomcloud_dcs_instance_v1.instance_1", instance),
-					resource.TestCheckResourceAttr(
-						"opentelekomcloud_dcs_instance_v1.instance_1", "name", instanceName),
-					resource.TestCheckResourceAttr(
-						"opentelekomcloud_dcs_instance_v1.instance_1", "engine", "Redis"),
+					resource.TestCheckResourceAttr("opentelekomcloud_dcs_instance_v1.instance_1", "name", instanceName),
+					resource.TestCheckResourceAttr("opentelekomcloud_dcs_instance_v1.instance_1", "engine", "Redis"),
+					resource.TestCheckResourceAttr("opentelekomcloud_dcs_instance_v1.instance_1", "resource_spec_code", "dcs.single_node"),
 				),
 			},
 		},
@@ -185,6 +185,7 @@ resource "opentelekomcloud_dcs_instance_v1" "instance_1" {
   available_zones = [data.opentelekomcloud_dcs_az_v1.az_1.id]
   product_id  = data.opentelekomcloud_dcs_product_v1.product_1.id
   backup_policy {
+    backup_type = "manual"
     begin_at    = "00:00-01:00"
     period_type = "weekly"
     backup_at = [4]
@@ -214,17 +215,18 @@ resource "opentelekomcloud_dcs_instance_v1" "instance_1" {
   engine_version    = "3.0"
   password          = "Hungarian_rapsody"
   engine            = "Redis"
-  capacity          = 4
+  capacity          = 2
   vpc_id            = "%s"
   security_group_id = opentelekomcloud_networking_secgroup_v2.secgroup_1.id
   subnet_id         = "%s"
   available_zones = [data.opentelekomcloud_dcs_az_v1.az_1.id]
   product_id  = data.opentelekomcloud_dcs_product_v1.product_1.id
   backup_policy {
-    begin_at    = "00:00-01:00"
+    backup_type = "manual"
+    begin_at    = "01:00-02:00"
     period_type = "weekly"
-    backup_at = [4]
-    save_days = 1
+    backup_at = [1, 2, 4]
+    save_days = 2
   }
   depends_on = [
     "data.opentelekomcloud_dcs_product_v1.product_1",
