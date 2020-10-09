@@ -56,6 +56,7 @@ func resourceDcsInstanceV1() *schema.Resource {
 			"access_user": {
 				Type:     schema.TypeString,
 				Optional: true,
+				Computed: true,
 				ForceNew: true,
 			},
 			"vpc_id": {
@@ -100,28 +101,33 @@ func resourceDcsInstanceV1() *schema.Resource {
 			"save_days": {
 				Type:       schema.TypeInt,
 				Optional:   true,
+				ForceNew:   true,
 				Deprecated: "Please use `backup_policy` instead",
 			},
 			"backup_type": {
 				Type:       schema.TypeString,
 				Optional:   true,
+				ForceNew:   true,
 				Deprecated: "Please use `backup_policy` instead",
 			},
 			"begin_at": {
 				Type:         schema.TypeString,
 				Optional:     true,
+				ForceNew:     true,
 				RequiredWith: []string{"period_type", "backup_at", "save_days", "backup_type"},
 				Deprecated:   "Please use `backup_policy` instead",
 			},
 			"period_type": {
 				Type:         schema.TypeString,
 				Optional:     true,
+				ForceNew:     true,
 				RequiredWith: []string{"begin_at", "backup_at", "save_days", "backup_type"},
 				Deprecated:   "Please use `backup_policy` instead",
 			},
 			"backup_at": {
 				Type:         schema.TypeList,
 				Optional:     true,
+				ForceNew:     true,
 				RequiredWith: []string{"period_type", "begin_at", "save_days", "backup_type"},
 				Deprecated:   "Please use `backup_policy` instead",
 				Elem:         &schema.Schema{Type: schema.TypeInt},
@@ -131,28 +137,34 @@ func resourceDcsInstanceV1() *schema.Resource {
 				Optional:      true,
 				ConflictsWith: []string{"backup_type", "begin_at", "period_type", "backup_at", "save_days"},
 				MaxItems:      1,
+				ForceNew:      true,
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
 						"save_days": {
 							Type:     schema.TypeInt,
 							Optional: true,
+							ForceNew: true,
 						},
 						"backup_type": {
 							Type:     schema.TypeString,
 							Optional: true,
+							ForceNew: true,
 							Default:  "manual",
 						},
 						"begin_at": {
 							Type:     schema.TypeString,
 							Required: true,
+							ForceNew: true,
 						},
 						"period_type": {
 							Type:     schema.TypeString,
 							Required: true,
+							ForceNew: true,
 						},
 						"backup_at": {
 							Type:     schema.TypeList,
 							Required: true,
+							ForceNew: true,
 							Elem:     &schema.Schema{Type: schema.TypeInt},
 						},
 					},
@@ -382,9 +394,6 @@ func resourceDcsInstancesV1Update(d *schema.ResourceData, meta interface{}) erro
 	}
 	if d.HasChange("security_group_id") {
 		updateOpts.SecurityGroupID = d.Get("security_group_id").(string)
-	}
-	if d.HasChange("backup_policy") {
-		updateOpts.InstanceBackupPolicy = getInstanceBackupPolicy(d)
 	}
 
 	err = instances.Update(dcsV1Client, d.Id(), updateOpts).Err

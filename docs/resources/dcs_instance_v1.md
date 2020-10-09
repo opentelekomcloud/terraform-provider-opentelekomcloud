@@ -117,6 +117,8 @@ The following arguments are supported:
 
 * `backup_policy` - (Optional) Describes the backup configuration to be used with the instance.
 
+  Changing this creates a new instance.
+
     * `save_days` - (Optional) Retention time. Unit: day. Range: 1–7.
 
     * `backup_type` - (Optional) Backup type.
