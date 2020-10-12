@@ -5,12 +5,14 @@
       jobs:
         - golang-make-test
         - golang-make-vet
-        - goreleaser-build
+        - goreleaser-build:
+            voting: false
     gate:
       jobs:
         - golang-make-test
         - golang-make-vet
-        - goreleaser-build
+        - goreleaser-build:
+            voting: false
     tag:
       jobs:
         - release-goreleaser
