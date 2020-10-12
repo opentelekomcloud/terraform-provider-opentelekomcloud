@@ -32,19 +32,19 @@ resource "opentelekomcloud_dcs_instance_v1" "instance_1" {
   capacity       = 2
   vpc_id         = "1477393a-29c9-4de5-843f-18ef51257c7e"
 
-  security_group_id = "${opentelekomcloud_networking_secgroup_v2.secgroup_1.id}"
+  security_group_id = opentelekomcloud_networking_secgroup_v2.secgroup_1.id
   subnet_id         = "27d99e17-42f2-4751-818f-5c8c6c03ff15"
-  available_zones   = ["${data.opentelekomcloud_dcs_az_v1.az_1.id}"]
-  product_id        = "${data.opentelekomcloud_dcs_product_v1.product_1.id}"
+  available_zones   = [data.opentelekomcloud_dcs_az_v1.az_1.id]
+  product_id        = data.opentelekomcloud_dcs_product_v1.product_1.id
   backup_policy {
     save_days   = 1
     backup_type = "manual"
     begin_at    = "00:00-01:00"
     period_type = "weekly"
-    backup_at   = [1]
+    backup_at   = [1, 2, 4, 6]
   }
-  depends_on  = ["data.opentelekomcloud_dcs_product_v1.product_1",
-                 "opentelekomcloud_networking_secgroup_v2.secgroup_1"]
+  depends_on  = [data.opentelekomcloud_dcs_product_v1.product_1,
+                 opentelekomcloud_networking_secgroup_v2.secgroup_1]
 }
 ```
 
@@ -117,8 +117,6 @@ The following arguments are supported:
 
 * `backup_policy` - (Optional) Describes the backup configuration to be used with the instance.
 
-  Changing this creates a new instance.
-
     * `save_days` - (Optional) Retention time. Unit: day. Range: 1–7.
 
     * `backup_type` - (Optional) Backup type.
@@ -184,6 +182,8 @@ The following attributes are exported:
 
 * `backup_at` - See Argument Reference above.
 
+* `backup_policy` - See Argument Reference above.
+
 * `order_id` - An order ID is generated only in the monthly or yearly billing mode.
   In other billing modes, no value is returned for this parameter.
 
@@ -202,4 +202,11 @@ The following attributes are exported:
 
 * `user_id` - Indicates a user ID.
 
-* `ip` - Cache node's IP address in tenant's VPC.
+* `user_name` - Username.
+
+* `ip` - Cache node's IP address in the tenant's VPC.
+
+* `status` - Cache instance status. One of `CREATING`, `CREATEFAILED`, `RUNNING`, `ERROR`,
+  `RESTARTING`, `EXTENDING`, `RESTORING`
+
+* `created_at` - Time at which the DCS instance is created. For example, `2017-03-31T12:24:46.297Z`.
