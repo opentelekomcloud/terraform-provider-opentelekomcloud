@@ -2,9 +2,10 @@ package opentelekomcloud
 
 import (
 	"fmt"
+	"log"
+
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/deh/v1/hosts"
-	"log"
 )
 
 func dataSourceDEHHostV1() *schema.Resource {

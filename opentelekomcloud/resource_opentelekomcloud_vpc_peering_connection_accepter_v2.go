@@ -2,13 +2,14 @@ package opentelekomcloud
 
 import (
 	"fmt"
+	"log"
+	"time"
+
 	"github.com/hashicorp/errwrap"
 	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
 	"github.com/opentelekomcloud/gophertelekomcloud"
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/networking/v2/peerings"
-	"log"
-	"time"
 )
 
 func resourceVpcPeeringConnectionAccepterV2() *schema.Resource {

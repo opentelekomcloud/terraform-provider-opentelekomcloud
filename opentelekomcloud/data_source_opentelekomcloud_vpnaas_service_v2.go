@@ -2,10 +2,11 @@ package opentelekomcloud
 
 import (
 	"fmt"
+	"log"
+
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/networking/v2/extensions/vpnaas/services"
 	"github.com/opentelekomcloud/gophertelekomcloud/pagination"
-	"log"
 )
 
 func dataSourceVpnServiceV2() *schema.Resource {

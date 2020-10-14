@@ -11,9 +11,10 @@ package opentelekomcloud
 
 import (
 	"fmt"
+	"log"
+
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/compute/v2/servers"
-	"log"
 )
 
 // InstanceNICS is a structured representation of a Gophercloud servers.Server

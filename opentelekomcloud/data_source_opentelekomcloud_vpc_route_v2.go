@@ -2,10 +2,9 @@ package opentelekomcloud
 
 import (
 	"fmt"
+	"log"
 
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/networking/v2/routes"
-
-	"log"
 
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
 )

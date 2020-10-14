@@ -3,7 +3,6 @@ package opentelekomcloud
 import (
 	"fmt"
 	"log"
-
 	"strings"
 
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"

@@ -2,8 +2,9 @@ package opentelekomcloud
 
 import (
 	"fmt"
-	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
 	"testing"
+
+	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
 )
 
 func TestAccVpnServiceV2DataSource_byId(t *testing.T) {

@@ -3,7 +3,6 @@ package opentelekomcloud
 import (
 	"fmt"
 	"testing"
-
 	"time"
 
 	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"

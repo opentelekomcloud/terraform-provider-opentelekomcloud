@@ -2,11 +2,10 @@ package opentelekomcloud
 
 import (
 	"fmt"
+	"testing"
 
 	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/terraform"
-
-	"testing"
 
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/vbs/v2/shares"
 )

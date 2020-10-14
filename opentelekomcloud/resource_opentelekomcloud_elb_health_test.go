@@ -2,9 +2,8 @@ package opentelekomcloud
 
 import (
 	"fmt"
-	"testing"
-
 	"log"
+	"testing"
 
 	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/terraform"

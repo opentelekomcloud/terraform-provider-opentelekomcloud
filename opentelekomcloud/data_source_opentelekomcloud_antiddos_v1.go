@@ -2,8 +2,9 @@ package opentelekomcloud
 
 import (
 	"fmt"
-	"github.com/hashicorp/go-multierror"
 	"log"
+
+	"github.com/hashicorp/go-multierror"
 
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/antiddos/v1/antiddos"
