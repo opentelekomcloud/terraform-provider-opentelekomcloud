@@ -113,7 +113,7 @@ func (e *env) cloudFromEnv() *Cloud {
 	cloud := &Cloud{
 		Cloud:   e.GetEnv("CLOUD"),
 		Profile: e.GetEnv("PROFILE"),
-		AuthInfo: authInfo{
+		AuthInfo: AuthInfo{
 			AuthURL:           authOpts.IdentityEndpoint,
 			Token:             authOpts.TokenID,
 			Username:          authOpts.Username,
@@ -176,8 +176,8 @@ type Config struct {
 // AuthType represents a valid method of authentication: `password`, `token`, `aksk` or `agency`
 type AuthType string
 
-// authInfo represents the auth section of a cloud entry
-type authInfo struct {
+// AuthInfo represents the auth section of a cloud entry
+type AuthInfo struct {
 	// AuthURL is the keystone/identity endpoint URL.
 	AuthURL string `yaml:"auth_url,omitempty" json:"auth_url,omitempty"`
 
@@ -259,7 +259,7 @@ type Cloud struct {
 	Cloud      string        `yaml:"cloud,omitempty" json:"cloud,omitempty"`
 	Profile    string        `yaml:"profile,omitempty" json:"profile,omitempty"`
 	AuthType   AuthType      `yaml:"auth_type,omitempty" json:"auth_type,omitempty"`
-	AuthInfo   authInfo      `yaml:"auth,omitempty" json:"auth,omitempty"`
+	AuthInfo   AuthInfo      `yaml:"auth,omitempty" json:"auth,omitempty"`
 	RegionName string        `yaml:"region_name,omitempty" json:"region_name,omitempty"`
 	Regions    []interface{} `yaml:"regions,omitempty" json:"regions,omitempty"`
 
@@ -374,7 +374,7 @@ func selectExisting(files []string) string {
 	return ""
 }
 
-// mergeClouds merges two Config recursively (the authInfo also gets merged).
+// mergeClouds merges two Config recursively (the AuthInfo also gets merged).
 // In case both Config define a value, the value in the 'override' cloud takes precedence
 func mergeClouds(cloud, override interface{}) (*Cloud, error) {
 	overrideJson, err := json.Marshal(override)
@@ -525,7 +525,7 @@ func (e *env) loadOpenstackConfig() (*Config, error) {
 	return cloudConfig, nil
 }
 
-func info2opts(authInfo *authInfo, authType AuthType) (golangsdk.AuthOptionsProvider, error) {
+func AuthOptionsFromInfo(authInfo *AuthInfo, authType AuthType) (golangsdk.AuthOptionsProvider, error) {
 	// project scope
 	if authInfo.ProjectID != "" || authInfo.ProjectName != "" {
 		if authInfo.ProjectDomainName != "" {
@@ -599,9 +599,14 @@ func (e *env) AuthenticatedClient() (*golangsdk.ProviderClient, error) {
 	if err != nil {
 		return nil, err
 	}
-	opts, err := info2opts(&cloud.AuthInfo, cloud.AuthType)
+	return AuthenticatedClientFromCloud(cloud)
+}
+
+// AuthenticatedClientFromCloud create new authenticated client for given cloud config
+func AuthenticatedClientFromCloud(cloud *Cloud) (*golangsdk.ProviderClient, error) {
+	opts, err := AuthOptionsFromInfo(&cloud.AuthInfo, cloud.AuthType)
 	if err != nil {
-		return nil, fmt.Errorf("failed to convert authInfo to AuthOptsBuilder with env vars: %s", err)
+		return nil, fmt.Errorf("failed to convert AuthInfo to AuthOptsBuilder with env vars: %s", err)
 	}
 	client, err := AuthenticatedClient(opts)
 	if err != nil {

@@ -236,7 +236,7 @@ github.com/mitchellh/mapstructure
 github.com/mitchellh/reflectwalk
 # github.com/oklog/run v1.0.0
 github.com/oklog/run
-# github.com/opentelekomcloud/gophertelekomcloud v0.0.8
+# github.com/opentelekomcloud/gophertelekomcloud v0.0.9
 ## explicit
 github.com/opentelekomcloud/gophertelekomcloud
 github.com/opentelekomcloud/gophertelekomcloud/internal
