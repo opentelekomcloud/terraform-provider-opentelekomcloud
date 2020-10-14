@@ -11,7 +11,7 @@ import (
 )
 
 func TestAccAntiDdosV1_basic(t *testing.T) {
-	var antiddos antiddos.GetResponse
+	var antiddosElement antiddos.GetResponse
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
@@ -21,7 +21,7 @@ func TestAccAntiDdosV1_basic(t *testing.T) {
 			{
 				Config: testAccAntiDdosV1_basic,
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckAntiDdosV1Exists("opentelekomcloud_antiddos_v1.antiddos_1", &antiddos),
+					testAccCheckAntiDdosV1Exists("opentelekomcloud_antiddos_v1.antiddos_1", &antiddosElement),
 					resource.TestCheckResourceAttr(
 						"opentelekomcloud_antiddos_v1.antiddos_1", "enable_l7", "true"),
 					resource.TestCheckResourceAttr(
@@ -52,7 +52,7 @@ func TestAccAntiDdosV1_basic(t *testing.T) {
 }
 
 func TestAccAntiDdosV1_timeout(t *testing.T) {
-	var antiddos antiddos.GetResponse
+	var antiddosElement antiddos.GetResponse
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
@@ -62,7 +62,7 @@ func TestAccAntiDdosV1_timeout(t *testing.T) {
 			{
 				Config: testAccAntiDdosV1_timeout,
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckAntiDdosV1Exists("opentelekomcloud_antiddos_v1.antiddos_1", &antiddos),
+					testAccCheckAntiDdosV1Exists("opentelekomcloud_antiddos_v1.antiddos_1", &antiddosElement),
 				),
 			},
 		},
@@ -73,7 +73,7 @@ func testAccCheckAntiDdosV1Destroy(s *terraform.State) error {
 	config := testAccProvider.Meta().(*Config)
 	antiddosClient, err := config.antiddosV1Client(OS_REGION_NAME)
 	if err != nil {
-		return fmt.Errorf("Error creating antiddos client: %s", err)
+		return fmt.Errorf("error creating antiddos client: %s", err)
 	}
 
 	for _, rs := range s.RootModule().Resources {
@@ -94,17 +94,17 @@ func testAccCheckAntiDdosV1Exists(n string, ddos *antiddos.GetResponse) resource
 	return func(s *terraform.State) error {
 		rs, ok := s.RootModule().Resources[n]
 		if !ok {
-			return fmt.Errorf("Not found: %s", n)
+			return fmt.Errorf("not found: %s", n)
 		}
 
 		if rs.Primary.ID == "" {
-			return fmt.Errorf("No ID is set")
+			return fmt.Errorf("no ID is set")
 		}
 
 		config := testAccProvider.Meta().(*Config)
 		antiddosClient, err := config.antiddosV1Client(OS_REGION_NAME)
 		if err != nil {
-			return fmt.Errorf("Error creating antiddos client: %s", err)
+			return fmt.Errorf("error creating antiddos client: %s", err)
 		}
 
 		found, err := antiddos.Get(antiddosClient, rs.Primary.ID).Extract()
@@ -124,20 +124,20 @@ resource "opentelekomcloud_vpc_eip_v1" "eip_1" {
     type = "5_bgp"
   }
   bandwidth {
-    name = "test"
-    size = 8
-    share_type = "PER"
+    name        = "test"
+    size        = 8
+    share_type  = "PER"
     charge_mode = "traffic"
   }
 }
 
 resource "opentelekomcloud_antiddos_v1" "antiddos_1" {
-  floating_ip_id = "${opentelekomcloud_vpc_eip_v1.eip_1.id}"
-  enable_l7 = true
-  traffic_pos_id = 1
-  http_request_pos_id = 2
+  floating_ip_id         = opentelekomcloud_vpc_eip_v1.eip_1.id
+  enable_l7              = true
+  traffic_pos_id         = 1
+  http_request_pos_id    = 2
   cleaning_access_pos_id = 1
-  app_type_id = 0
+  app_type_id            = 0
 }
 `
 const testAccAntiDdosV1_update = `
@@ -146,20 +146,20 @@ resource "opentelekomcloud_vpc_eip_v1" "eip_1" {
     type = "5_bgp"
   }
   bandwidth {
-    name = "test"
-    size = 8
-    share_type = "PER"
+    name        = "test"
+    size        = 8
+    share_type  = "PER"
     charge_mode = "traffic"
   }
 }
 
 resource "opentelekomcloud_antiddos_v1" "antiddos_1" {
-  floating_ip_id = "${opentelekomcloud_vpc_eip_v1.eip_1.id}"
-  enable_l7 = true
-  traffic_pos_id = 2
-  http_request_pos_id = 1
+  floating_ip_id         = opentelekomcloud_vpc_eip_v1.eip_1.id
+  enable_l7              = true
+  traffic_pos_id         = 2
+  http_request_pos_id    = 1
   cleaning_access_pos_id = 2
-  app_type_id = 1
+  app_type_id            = 1
 }
 `
 
@@ -169,20 +169,20 @@ resource "opentelekomcloud_vpc_eip_v1" "eip_1" {
     type = "5_bgp"
   }
   bandwidth {
-    name = "test"
-    size = 8
-    share_type = "PER"
+    name        = "test"
+    size        = 8
+    share_type  = "PER"
     charge_mode = "traffic"
   }
 }
 
 resource "opentelekomcloud_antiddos_v1" "antiddos_1" {
-  floating_ip_id = "${opentelekomcloud_vpc_eip_v1.eip_1.id}"
-  enable_l7 = true
-  traffic_pos_id = 1
-  http_request_pos_id = 2
+  floating_ip_id         = opentelekomcloud_vpc_eip_v1.eip_1.id
+  enable_l7              = true
+  traffic_pos_id         = 1
+  http_request_pos_id    = 2
   cleaning_access_pos_id = 1
-  app_type_id = 0
+  app_type_id            = 0
 
   timeouts {
     create = "5m"

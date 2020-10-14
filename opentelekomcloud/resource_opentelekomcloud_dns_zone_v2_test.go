@@ -199,7 +199,7 @@ func testAccDNSV2Zone_private(zoneName string) string {
 resource "opentelekomcloud_dns_zone_v2" "zone_1" {
   name = "%s"
   email = "email1@example.com"
-  description = "a privete zone"
+  description = "a private zone"
   ttl = 3000
   type = "private"
 

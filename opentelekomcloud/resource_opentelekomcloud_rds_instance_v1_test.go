@@ -168,9 +168,8 @@ data "opentelekomcloud_rds_flavors_v1" "flavor" {
     speccode = "rds.pg.s1.medium.ha"
 }
 
-resource "opentelekomcloud_compute_secgroup_v2" "secgrp_rds" {
-  name        = "secgrp-rds-instance"
-  description = "Rds Security Group"
+resource opentelekomcloud_networking_secgroup_v2 sg {
+  name = "sg-rds-test"
 }
 
 resource "opentelekomcloud_rds_instance_v1" "instance" {
@@ -191,7 +190,7 @@ resource "opentelekomcloud_rds_instance_v1" "instance" {
     subnetid = "%s"
   }
   securitygroup {
-    id = "${opentelekomcloud_compute_secgroup_v2.secgrp_rds.id}"
+    id = "${opentelekomcloud_networking_secgroup_v2.sg.id}"
   }
   dbport = "8635"
   backupstrategy {
@@ -207,7 +206,7 @@ resource "opentelekomcloud_rds_instance_v1" "instance" {
     foo = "bar"
     key = "value"
   }
-  depends_on = ["opentelekomcloud_compute_secgroup_v2.secgrp_rds"]
+  depends_on = ["opentelekomcloud_networking_secgroup_v2.sg"]
 }`, OS_VPC_ID, OS_NETWORK_ID)
 
 var testAccSInstanceV1Config_updatetag = fmt.Sprintf(`
@@ -218,9 +217,8 @@ data "opentelekomcloud_rds_flavors_v1" "flavor" {
     speccode = "rds.pg.s1.medium.ha"
 }
 
-resource "opentelekomcloud_compute_secgroup_v2" "secgrp_rds" {
-  name        = "secgrp-rds-instance"
-  description = "Rds Security Group"
+resource opentelekomcloud_networking_secgroup_v2 sg {
+  name = "sg-rds-test"
 }
 
 resource "opentelekomcloud_rds_instance_v1" "instance" {
@@ -241,7 +239,7 @@ resource "opentelekomcloud_rds_instance_v1" "instance" {
     subnetid = "%s"
   }
   securitygroup {
-    id = "${opentelekomcloud_compute_secgroup_v2.secgrp_rds.id}"
+    id = "${opentelekomcloud_networking_secgroup_v2.sg.id}"
   }
   dbport = "8635"
   backupstrategy {
@@ -257,7 +255,7 @@ resource "opentelekomcloud_rds_instance_v1" "instance" {
     foo2 = "bar2"
     key = "value2"
   }
-  depends_on = ["opentelekomcloud_compute_secgroup_v2.secgrp_rds"]
+  depends_on = ["opentelekomcloud_networking_secgroup_v2.sg"]
 }`, OS_VPC_ID, OS_NETWORK_ID)
 
 var testAccSInstanceV1Config_notags = fmt.Sprintf(`
@@ -268,9 +266,8 @@ data "opentelekomcloud_rds_flavors_v1" "flavor" {
     speccode = "rds.pg.s1.medium.ha"
 }
 
-resource "opentelekomcloud_compute_secgroup_v2" "secgrp_rds" {
-  name        = "secgrp-rds-instance"
-  description = "Rds Security Group"
+resource opentelekomcloud_networking_secgroup_v2 sg {
+  name = "sg-rds-test"
 }
 
 resource "opentelekomcloud_rds_instance_v1" "instance" {
@@ -291,7 +288,7 @@ resource "opentelekomcloud_rds_instance_v1" "instance" {
     subnetid = "%s"
   }
   securitygroup {
-    id = "${opentelekomcloud_compute_secgroup_v2.secgrp_rds.id}"
+    id = "${opentelekomcloud_networking_secgroup_v2.sg.id}"
   }
   dbport = "8635"
   backupstrategy {
@@ -303,5 +300,5 @@ resource "opentelekomcloud_rds_instance_v1" "instance" {
     enable = true
     replicationmode = "async"
   }
-  depends_on = ["opentelekomcloud_compute_secgroup_v2.secgrp_rds"]
+  depends_on = ["opentelekomcloud_networking_secgroup_v2.sg"]
 }`, OS_VPC_ID, OS_NETWORK_ID)

@@ -69,7 +69,10 @@ func dataSourceCTSTrackerV1() *schema.Resource {
 
 func dataSourceCTSTrackerV1Read(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*Config)
-	trackerClient, err := config.ctsV1Client(GetProjectName(d, config))
+	ctsClient, err := config.ctsV1Client(GetProjectName(d, config))
+	if err != nil {
+		return fmt.Errorf("Error creating cts v1 client: %s", err)
+	}
 
 	listOpts := tracker.ListOpts{
 		TrackerName:    d.Get("tracker_name").(string),
@@ -78,8 +81,7 @@ func dataSourceCTSTrackerV1Read(d *schema.ResourceData, meta interface{}) error 
 		Status:         d.Get("status").(string),
 	}
 
-	refinedTrackers, err := tracker.List(trackerClient, listOpts)
-
+	refinedTrackers, err := tracker.List(ctsClient, listOpts)
 	if err != nil {
 		return fmt.Errorf("Unable to retrieve cts tracker: %s", err)
 	}

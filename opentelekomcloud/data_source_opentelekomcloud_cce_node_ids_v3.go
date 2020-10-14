@@ -36,18 +36,17 @@ func dataSourceCceNodeIdsV3Read(d *schema.ResourceData, meta interface{}) error 
 	config := meta.(*Config)
 	cceClient, err := config.cceV3Client(GetRegion(d, config))
 	if err != nil {
-		return fmt.Errorf("Unable to create opentelekomcloud CCE client : %s", err)
+		return fmt.Errorf("unable to create opentelekomcloud CCE client : %s", err)
 	}
 
 	var listOpts nodes.ListOpts
 	refinedNodes, err := nodes.List(cceClient, d.Get("cluster_id").(string), listOpts)
 	if err != nil {
-		return fmt.Errorf("Unable to retrieve Nodes: %s", err)
+		return fmt.Errorf("unable to retrieve Nodes: %s", err)
 	}
 
 	if len(refinedNodes) < 1 {
-		return fmt.Errorf("Your query returned no results. " +
-			"Please change your search criteria and try again.")
+		return fmt.Errorf("your query returned no results. Please change your search criteria and try again")
 	}
 
 	Nodes := make([]string, 0)
