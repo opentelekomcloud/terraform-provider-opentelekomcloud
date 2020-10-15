@@ -1,4 +1,11 @@
-## 1.21.0 (Unreleased)
+## 1.22.0 (Unreleased)
+
+
+## 1.21.0
+
+ENHANCEMENTS:
+* Migrate to `opentelekomcloud/gophertelekomcloud` from `huaweicloud/golangsdk`: ([#641](https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/641))
+
 
 ## 1.20.3 (October 14, 2020)
 
