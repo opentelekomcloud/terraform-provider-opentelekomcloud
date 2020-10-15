@@ -12,7 +12,7 @@ import (
 )
 
 func TestAccCTSTrackerV1_basic(t *testing.T) {
-	var tracker tracker.Tracker
+	var ctsTracker tracker.Tracker
 	var bucketName = fmt.Sprintf("terra-test-%s", acctest.RandString(5))
 
 	resource.Test(t, resource.TestCase{
@@ -23,7 +23,7 @@ func TestAccCTSTrackerV1_basic(t *testing.T) {
 			{
 				Config: testAccCTSTrackerV1_basic(bucketName),
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckCTSTrackerV1Exists("opentelekomcloud_cts_tracker_v1.tracker_v1", &tracker, OS_TENANT_NAME),
+					testAccCheckCTSTrackerV1Exists("opentelekomcloud_cts_tracker_v1.tracker_v1", &ctsTracker, OS_TENANT_NAME),
 					resource.TestCheckResourceAttr(
 						"opentelekomcloud_cts_tracker_v1.tracker_v1", "bucket_name", bucketName),
 					resource.TestCheckResourceAttr(
@@ -33,7 +33,7 @@ func TestAccCTSTrackerV1_basic(t *testing.T) {
 			{
 				Config: testAccCTSTrackerV1_update(bucketName),
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckCTSTrackerV1Exists("opentelekomcloud_cts_tracker_v1.tracker_v1", &tracker, OS_TENANT_NAME),
+					testAccCheckCTSTrackerV1Exists("opentelekomcloud_cts_tracker_v1.tracker_v1", &ctsTracker, OS_TENANT_NAME),
 					resource.TestCheckResourceAttr(
 						"opentelekomcloud_cts_tracker_v1.tracker_v1", "file_prefix_name", "yO8Q1"),
 				),

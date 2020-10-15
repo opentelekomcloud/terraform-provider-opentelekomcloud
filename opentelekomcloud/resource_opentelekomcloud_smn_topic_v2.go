@@ -2,9 +2,8 @@ package opentelekomcloud
 
 import (
 	"fmt"
-	"log"
-
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
+	"log"
 
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/smn/v2/topics"
 )
@@ -118,7 +117,6 @@ func resourceTopicDelete(d *schema.ResourceData, meta interface{}) error {
 	if result.Err != nil {
 		return err
 	}
-
 	log.Printf("[DEBUG] Successfully deleted topic %s", id)
 	return nil
 }

@@ -19,6 +19,12 @@ func dataSourceCTSTrackerV1() *schema.Resource {
 				Computed: true,
 				ForceNew: true,
 			},
+			"project_name": {
+				Type:     schema.TypeString,
+				Optional: true,
+				Computed: true,
+				ForceNew: true,
+			},
 			"status": {
 				Type:     schema.TypeString,
 				Optional: true,

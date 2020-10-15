@@ -89,7 +89,6 @@ func resourceCTSTrackerV1() *schema.Resource {
 func resourceCTSTrackerCreate(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*Config)
 	ctsClient, err := config.ctsV1Client(GetProjectName(d, config))
-
 	if err != nil {
 		return fmt.Errorf("Error creating cts Client: %s", err)
 	}
