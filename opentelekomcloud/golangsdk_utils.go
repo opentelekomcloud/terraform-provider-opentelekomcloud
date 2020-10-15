@@ -2,7 +2,7 @@ package opentelekomcloud
 
 import (
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
-	"github.com/huaweicloud/golangsdk"
+	"github.com/opentelekomcloud/gophertelekomcloud"
 )
 
 func chooseECSV1Client(d *schema.ResourceData, config *Config) (*golangsdk.ServiceClient, error) {

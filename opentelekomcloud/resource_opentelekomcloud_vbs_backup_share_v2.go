@@ -6,9 +6,8 @@ import (
 	"time"
 
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
-	"github.com/huaweicloud/golangsdk/openstack/vbs/v2/shares"
-
-	"github.com/huaweicloud/golangsdk"
+	"github.com/opentelekomcloud/gophertelekomcloud"
+	"github.com/opentelekomcloud/gophertelekomcloud/openstack/vbs/v2/shares"
 )
 
 func resourceVBSBackupShareV2() *schema.Resource {

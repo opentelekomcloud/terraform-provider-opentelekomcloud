@@ -6,8 +6,8 @@ import (
 	"time"
 
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
-	"github.com/huaweicloud/golangsdk"
-	"github.com/huaweicloud/golangsdk/openstack/waf/v1/ccattackprotection_rules"
+	"github.com/opentelekomcloud/gophertelekomcloud"
+	"github.com/opentelekomcloud/gophertelekomcloud/openstack/waf/v1/ccattackprotection_rules"
 )
 
 func resourceWafCcAttackProtectionRuleV1() *schema.Resource {

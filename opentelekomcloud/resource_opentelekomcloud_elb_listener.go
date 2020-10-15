@@ -6,7 +6,7 @@ import (
 	"time"
 
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
-	"github.com/huaweicloud/golangsdk/openstack/networking/v2/extensions/elbaas/listeners"
+	"github.com/opentelekomcloud/gophertelekomcloud/openstack/networking/v2/extensions/elbaas/listeners"
 )
 
 var ProtocolFormats = []string{"HTTP", "TCP", "HTTPS", "SSL", "UDP"}

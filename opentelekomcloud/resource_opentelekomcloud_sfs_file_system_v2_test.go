@@ -2,10 +2,11 @@ package opentelekomcloud
 
 import (
 	"fmt"
+	"testing"
+
 	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/terraform"
-	"github.com/huaweicloud/golangsdk/openstack/sfs/v2/shares"
-	"testing"
+	"github.com/opentelekomcloud/gophertelekomcloud/openstack/sfs/v2/shares"
 )
 
 func TestAccOTCSFSFileSystemV2_basic(t *testing.T) {

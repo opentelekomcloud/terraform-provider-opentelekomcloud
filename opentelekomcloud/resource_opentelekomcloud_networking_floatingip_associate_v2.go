@@ -5,9 +5,9 @@ import (
 	"log"
 
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
+	"github.com/opentelekomcloud/gophertelekomcloud"
 
-	"github.com/huaweicloud/golangsdk"
-	"github.com/huaweicloud/golangsdk/openstack/networking/v2/extensions/layer3/floatingips"
+	"github.com/opentelekomcloud/gophertelekomcloud/openstack/networking/v2/extensions/layer3/floatingips"
 )
 
 func resourceNetworkingFloatingIPAssociateV2() *schema.Resource {

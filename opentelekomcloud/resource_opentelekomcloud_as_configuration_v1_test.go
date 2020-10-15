@@ -8,7 +8,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/terraform"
 
-	"github.com/huaweicloud/golangsdk/openstack/autoscaling/v1/configurations"
+	"github.com/opentelekomcloud/gophertelekomcloud/openstack/autoscaling/v1/configurations"
 )
 
 func TestAccASV1Configuration_basic(t *testing.T) {

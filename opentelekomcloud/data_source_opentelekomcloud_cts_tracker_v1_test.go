@@ -18,9 +18,9 @@ func TestAccCTSTrackerV1DataSource_basic(t *testing.T) {
 			{
 				Config: testAccCTSTrackerV1DataSource_basic(bucketName),
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckCTSTrackerV1DataSourceID("data.opentelekomcloud_cts_tracker_v1.tracker_v1"),
-					resource.TestCheckResourceAttr("data.opentelekomcloud_cts_tracker_v1.tracker_v1", "bucket_name", bucketName),
-					resource.TestCheckResourceAttr("data.opentelekomcloud_cts_tracker_v1.tracker_v1", "status", "enabled"),
+					testAccCheckCTSTrackerV1DataSourceID("data.opentelekomcloud_cts_tracker_v1.d_tracker"),
+					resource.TestCheckResourceAttr("data.opentelekomcloud_cts_tracker_v1.d_tracker", "bucket_name", bucketName),
+					resource.TestCheckResourceAttr("data.opentelekomcloud_cts_tracker_v1.d_tracker", "status", "enabled"),
 				),
 			},
 		},
@@ -55,17 +55,17 @@ resource "opentelekomcloud_smn_topic_v2" "topic_1" {
 }
 
 resource "opentelekomcloud_cts_tracker_v1" "tracker_v1" {
-  bucket_name		= "${opentelekomcloud_s3_bucket.bucket.bucket}"
+  bucket_name		= opentelekomcloud_s3_bucket.bucket.bucket
   file_prefix_name  = "yO8Q"
   is_support_smn 	= true
-  topic_id 			= "${opentelekomcloud_smn_topic_v2.topic_1.id}"
+  topic_id 			= opentelekomcloud_smn_topic_v2.topic_1.id
   is_send_all_key_operation = false
   operations 		= ["login"]
   need_notify_user_list = ["user1"]
 }
 
-data "opentelekomcloud_cts_tracker_v1" "tracker_v1" {  
-  tracker_name = "${opentelekomcloud_cts_tracker_v1.tracker_v1.id}"
+data "opentelekomcloud_cts_tracker_v1" "d_tracker" {
+  tracker_name = opentelekomcloud_cts_tracker_v1.tracker_v1.id
 }
 `, bucketName)
 }

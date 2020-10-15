@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/huaweicloud/golangsdk/openstack/ims/v2/cloudimages"
+	"github.com/opentelekomcloud/gophertelekomcloud/openstack/ims/v2/cloudimages"
 
 	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/terraform"

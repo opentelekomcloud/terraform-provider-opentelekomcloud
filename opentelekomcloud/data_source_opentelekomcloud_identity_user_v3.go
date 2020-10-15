@@ -7,7 +7,7 @@ import (
 	"time"
 
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
-	"github.com/huaweicloud/golangsdk/openstack/identity/v3/users"
+	"github.com/opentelekomcloud/gophertelekomcloud/openstack/identity/v3/users"
 )
 
 func dataSourceIdentityUserV3() *schema.Resource {

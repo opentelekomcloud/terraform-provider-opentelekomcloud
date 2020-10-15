@@ -5,7 +5,7 @@ import (
 	"log"
 
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
-	"github.com/huaweicloud/golangsdk/openstack/bms/v2/nics"
+	"github.com/opentelekomcloud/gophertelekomcloud/openstack/bms/v2/nics"
 )
 
 func dataSourceBMSNicV2() *schema.Resource {

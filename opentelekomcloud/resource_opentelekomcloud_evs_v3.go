@@ -10,8 +10,8 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/helper/validation"
 
-	volumes_v2 "github.com/huaweicloud/golangsdk/openstack/blockstorage/v2/volumes"
-	"github.com/huaweicloud/golangsdk/openstack/evs/v3/volumes"
+	volumes_v2 "github.com/opentelekomcloud/gophertelekomcloud/openstack/blockstorage/v2/volumes"
+	"github.com/opentelekomcloud/gophertelekomcloud/openstack/evs/v3/volumes"
 )
 
 func resourceEvsStorageVolumeV3() *schema.Resource {

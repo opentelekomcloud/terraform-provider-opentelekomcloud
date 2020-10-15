@@ -19,9 +19,9 @@ import (
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-sdk/terraform"
+	"github.com/opentelekomcloud/gophertelekomcloud"
 
 	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
-	"github.com/huaweicloud/golangsdk"
 )
 
 func TestAccNatDnat_basic(t *testing.T) {

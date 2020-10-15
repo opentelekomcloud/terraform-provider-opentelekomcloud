@@ -15,11 +15,11 @@ import (
 	"os"
 
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
-	"github.com/huaweicloud/golangsdk"
-	"github.com/huaweicloud/golangsdk/openstack/compute/v2/extensions/tenantnetworks"
-	"github.com/huaweicloud/golangsdk/openstack/compute/v2/servers"
-	"github.com/huaweicloud/golangsdk/openstack/networking/v2/networks"
-	"github.com/huaweicloud/golangsdk/openstack/networking/v2/ports"
+	"github.com/opentelekomcloud/gophertelekomcloud"
+	"github.com/opentelekomcloud/gophertelekomcloud/openstack/compute/v2/extensions/tenantnetworks"
+	"github.com/opentelekomcloud/gophertelekomcloud/openstack/compute/v2/servers"
+	"github.com/opentelekomcloud/gophertelekomcloud/openstack/networking/v2/networks"
+	"github.com/opentelekomcloud/gophertelekomcloud/openstack/networking/v2/ports"
 )
 
 // InstanceNIC is a structured representation of a golangsdk servers.Server

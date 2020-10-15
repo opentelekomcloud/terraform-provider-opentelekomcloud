@@ -5,7 +5,7 @@ import (
 	"strings"
 
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
-	"github.com/huaweicloud/golangsdk"
+	"github.com/opentelekomcloud/gophertelekomcloud"
 )
 
 func dataSourceRdsFlavorV3() *schema.Resource {

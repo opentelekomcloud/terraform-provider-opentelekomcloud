@@ -5,7 +5,7 @@ import (
 	"log"
 
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
-	"github.com/huaweicloud/golangsdk/openstack/dms/v1/queues"
+	"github.com/opentelekomcloud/gophertelekomcloud/openstack/dms/v1/queues"
 )
 
 func resourceDmsQueuesV1() *schema.Resource {

@@ -2,10 +2,11 @@ package opentelekomcloud
 
 import (
 	"fmt"
-	"github.com/huaweicloud/golangsdk/openstack/networking/v2/routes"
+	"log"
+
+	"github.com/opentelekomcloud/gophertelekomcloud/openstack/networking/v2/routes"
 
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
-	"log"
 )
 
 func dataSourceVPCRouteV2() *schema.Resource {

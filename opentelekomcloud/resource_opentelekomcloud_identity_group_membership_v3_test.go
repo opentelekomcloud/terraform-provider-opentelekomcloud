@@ -8,7 +8,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/terraform"
 
-	"github.com/huaweicloud/golangsdk/openstack/identity/v3/users"
+	"github.com/opentelekomcloud/gophertelekomcloud/openstack/identity/v3/users"
 )
 
 func TestAccIdentityV3GroupMembership_basic(t *testing.T) {
@@ -127,7 +127,7 @@ func testAccIdentityV3GroupMembership_basic(groupName, userName string) string {
       password = "password123@#"
       enabled = true
     }
-   
+
     resource "opentelekomcloud_identity_group_membership_v3" "membership_1" {
         group = "${opentelekomcloud_identity_group_v3.group_1.id}"
         users = ["${opentelekomcloud_identity_user_v3.user_1.id}"]
@@ -153,7 +153,7 @@ func testAccIdentityV3GroupMembership_update(groupName, userName string, userNam
       enabled = true
     }
 
-   
+
     resource "opentelekomcloud_identity_group_membership_v3" "membership_1" {
         group = "${opentelekomcloud_identity_group_v3.group_1.id}"
         users = ["${opentelekomcloud_identity_user_v3.user_1.id}",
@@ -174,7 +174,7 @@ func testAccIdentityV3GroupMembership_updatedown(groupName, userName string) str
       enabled = true
     }
 
-   
+
     resource "opentelekomcloud_identity_group_membership_v3" "membership_1" {
         group = "${opentelekomcloud_identity_group_v3.group_1.id}"
         users = ["${opentelekomcloud_identity_user_v3.user_2.id}"]

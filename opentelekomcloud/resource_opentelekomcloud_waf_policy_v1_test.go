@@ -7,7 +7,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/terraform"
 
-	"github.com/huaweicloud/golangsdk/openstack/waf/v1/policies"
+	"github.com/opentelekomcloud/gophertelekomcloud/openstack/waf/v1/policies"
 )
 
 func TestAccWafPolicyV1_basic(t *testing.T) {

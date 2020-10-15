@@ -1,11 +1,11 @@
 package opentelekomcloud
 
 import (
+	"regexp"
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/terraform"
-	"regexp"
 )
 
 func TestAccOTCVpcPeeringConnectionAccepterV2_basic(t *testing.T) {

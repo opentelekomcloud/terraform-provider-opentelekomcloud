@@ -4,15 +4,15 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/huaweicloud/golangsdk/openstack/identity/v3/projects"
+	"github.com/opentelekomcloud/gophertelekomcloud/openstack/identity/v3/projects"
 
-	"github.com/huaweicloud/golangsdk/pagination"
+	"github.com/opentelekomcloud/gophertelekomcloud/pagination"
 
 	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/terraform"
 
-	"github.com/huaweicloud/golangsdk/openstack/identity/v3/groups"
-	"github.com/huaweicloud/golangsdk/openstack/identity/v3/roles"
+	"github.com/opentelekomcloud/gophertelekomcloud/openstack/identity/v3/groups"
+	"github.com/opentelekomcloud/gophertelekomcloud/openstack/identity/v3/roles"
 )
 
 func TestAccIdentityV3RoleAssignment_basic(t *testing.T) {

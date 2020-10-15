@@ -7,7 +7,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/helper/validation"
 
-	"github.com/huaweicloud/golangsdk/openstack/networking/v2/ports"
+	"github.com/opentelekomcloud/gophertelekomcloud/openstack/networking/v2/ports"
 )
 
 func dataSourceNetworkingPortV2() *schema.Resource {

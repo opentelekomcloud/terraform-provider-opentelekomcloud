@@ -5,7 +5,7 @@ import (
 	"log"
 
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
-	"github.com/huaweicloud/golangsdk/openstack/rts/v1/softwareconfig"
+	"github.com/opentelekomcloud/gophertelekomcloud/openstack/rts/v1/softwareconfig"
 )
 
 func dataSourceRtsSoftwareConfigV1() *schema.Resource {

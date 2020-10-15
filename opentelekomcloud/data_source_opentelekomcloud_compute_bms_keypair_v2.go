@@ -2,11 +2,10 @@ package opentelekomcloud
 
 import (
 	"fmt"
-
 	"log"
 
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
-	"github.com/huaweicloud/golangsdk/openstack/bms/v2/keypairs"
+	"github.com/opentelekomcloud/gophertelekomcloud/openstack/bms/v2/keypairs"
 )
 
 func dataSourceBMSKeyPairV2() *schema.Resource {

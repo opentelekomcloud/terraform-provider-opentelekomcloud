@@ -9,7 +9,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/helper/acctest"
 	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/terraform"
-	"github.com/huaweicloud/golangsdk/openstack/obs"
+	"github.com/opentelekomcloud/gophertelekomcloud/openstack/obs"
 )
 
 func TestAccObsBucketObject_source(t *testing.T) {

@@ -7,7 +7,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/terraform"
 
-	"github.com/huaweicloud/golangsdk/openstack/rds/v3/configurations"
+	"github.com/opentelekomcloud/gophertelekomcloud/openstack/rds/v3/configurations"
 )
 
 func TestAccRdsConfigurationV3_basic(t *testing.T) {

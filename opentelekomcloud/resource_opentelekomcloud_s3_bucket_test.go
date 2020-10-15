@@ -1,12 +1,13 @@
 package opentelekomcloud
 
 import (
-	//"bytes"
+	"bytes"
 	"encoding/json"
 	"fmt"
 	"reflect"
 	"regexp"
 	"strconv"
+	"strings"
 	"testing"
 	"text/template"
 
@@ -14,12 +15,9 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/terraform"
 
-	"strings"
-
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/awserr"
-	//"github.com/aws/aws-sdk-go/service/ec2"
-	"bytes"
+
 	"github.com/aws/aws-sdk-go/service/s3"
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
 )
@@ -935,7 +933,7 @@ func testAccBucketName(randInt int) string {
 }
 
 func testAccBucketDomainName(randInt int) string {
-	return fmt.Sprintf("tf-test-bucket-%d.s3.amazonaws.com", randInt)
+	return fmt.Sprintf("tf-test-bucket-%d.obs.eu-de.otc.t-systems.com", randInt)
 }
 
 func testAccWebsiteEndpoint(randInt int) string {
