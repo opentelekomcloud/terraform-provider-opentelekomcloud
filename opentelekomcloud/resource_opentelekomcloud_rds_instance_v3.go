@@ -13,11 +13,11 @@ import (
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/networking/v1/subnets"
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/networking/v2/extensions/layer3/floatingips"
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/networking/v2/ports"
-	"github.com/opentelekomcloud/gophertelekomcloud/openstack/rds/v1/datastores"
-	"github.com/opentelekomcloud/gophertelekomcloud/openstack/rds/v1/flavors"
-	"github.com/opentelekomcloud/gophertelekomcloud/openstack/rds/v1/instances"
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/rds/v1/tags"
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/rds/v3/backups"
+	"github.com/opentelekomcloud/gophertelekomcloud/openstack/rds/v3/datastores"
+	"github.com/opentelekomcloud/gophertelekomcloud/openstack/rds/v3/flavors"
+	"github.com/opentelekomcloud/gophertelekomcloud/openstack/rds/v3/instances"
 )
 
 func resourceRdsInstanceV3() *schema.Resource {
@@ -44,7 +44,6 @@ func resourceRdsInstanceV3() *schema.Resource {
 					Type: schema.TypeString,
 				},
 			},
-
 			"db": {
 				Type:     schema.TypeList,
 				Required: true,
@@ -81,31 +80,26 @@ func resourceRdsInstanceV3() *schema.Resource {
 					},
 				},
 			},
-
 			"flavor": {
 				Type:     schema.TypeString,
 				Required: true,
 				ForceNew: false,
 			},
-
 			"name": {
 				Type:     schema.TypeString,
 				Required: true,
 				ForceNew: true,
 			},
-
 			"security_group_id": {
 				Type:     schema.TypeString,
 				Required: true,
 				ForceNew: true,
 			},
-
 			"subnet_id": {
 				Type:     schema.TypeString,
 				Required: true,
 				ForceNew: true,
 			},
-
 			"volume": {
 				Type:     schema.TypeList,
 				Required: true,
@@ -132,13 +126,11 @@ func resourceRdsInstanceV3() *schema.Resource {
 					},
 				},
 			},
-
 			"vpc_id": {
 				Type:     schema.TypeString,
 				Required: true,
 				ForceNew: true,
 			},
-
 			"backup_strategy": {
 				Type:     schema.TypeList,
 				Computed: true,
@@ -161,31 +153,26 @@ func resourceRdsInstanceV3() *schema.Resource {
 					},
 				},
 			},
-
 			"ha_replication_mode": {
 				Type:     schema.TypeString,
 				Computed: true,
 				Optional: true,
 				ForceNew: true,
 			},
-
 			"tag": {
 				Type:         schema.TypeMap,
 				Optional:     true,
 				ValidateFunc: validateECSTagValue,
 			},
-
 			"param_group_id": {
 				Type:     schema.TypeString,
 				Optional: true,
 				ForceNew: true,
 			},
-
 			"created": {
 				Type:     schema.TypeString,
 				Computed: true,
 			},
-
 			"nodes": {
 				Type:     schema.TypeList,
 				Computed: true,
@@ -214,7 +201,6 @@ func resourceRdsInstanceV3() *schema.Resource {
 					},
 				},
 			},
-
 			"private_ips": {
 				Type:     schema.TypeList,
 				Computed: true,
@@ -222,11 +208,9 @@ func resourceRdsInstanceV3() *schema.Resource {
 					Type: schema.TypeString,
 				},
 			},
-
 			"public_ips": {
 				Type:     schema.TypeList,
 				Optional: true,
-				Computed: true,
 				MaxItems: 1,
 				Elem: &schema.Schema{
 					Type:         schema.TypeString,
@@ -237,46 +221,95 @@ func resourceRdsInstanceV3() *schema.Resource {
 	}
 }
 
-func resourceRdsInstanceV3UserInputParams(d *schema.ResourceData) map[string]interface{} {
-	return map[string]interface{}{
-		"terraform_resource_data": d,
-		"availability_zone":       d.Get("availability_zone"),
-		"backup_strategy":         d.Get("backup_strategy"),
-		"db":                      d.Get("db"),
-		"flavor":                  d.Get("flavor"),
-		"ha_replication_mode":     d.Get("ha_replication_mode"),
-		"name":                    d.Get("name"),
-		"param_group_id":          d.Get("param_group_id"),
-		"security_group_id":       d.Get("security_group_id"),
-		"subnet_id":               d.Get("subnet_id"),
-		"volume":                  d.Get("volume"),
-		"vpc_id":                  d.Get("vpc_id"),
+func resourceRDSDataStore(d *schema.ResourceData) *instances.Datastore {
+	dataStoreRaw := d.Get("db").(map[string]interface{})
+	dataStore := instances.Datastore{
+		Type:    dataStoreRaw["type"].(string),
+		Version: dataStoreRaw["version"].(string),
 	}
+	return &dataStore
+}
+
+func resourceRDSVolume(d *schema.ResourceData) *instances.Volume {
+	volumeRaw := d.Get("volume").(map[string]interface{})
+	volume := instances.Volume{
+		Type: volumeRaw["type"].(string),
+		Size: volumeRaw["size"].(int),
+	}
+	return &volume
+}
+
+func resourceRDSBackupStrategy(d *schema.ResourceData) *instances.BackupStrategy {
+	backupStrategyRaw := d.Get("backup_strategy").(map[string]interface{})
+	backupStrategy := instances.BackupStrategy{
+		StartTime: backupStrategyRaw["start_time"].(string),
+		KeepDays:  backupStrategyRaw["keep_days"].(int),
+	}
+	return &backupStrategy
+}
+
+func resourceRDSHA(d *schema.ResourceData) *instances.Ha {
+	ha := instances.Ha{
+		Mode:            "Ha",
+		ReplicationMode: d.Get("ha_replication_mode").(string),
+	}
+	return &ha
+}
+
+func resourceRDSChangeMode() *instances.ChargeInfo {
+	chargeInfo := instances.ChargeInfo{
+		ChargeMode: "postPaid",
+	}
+	return &chargeInfo
+}
+
+func resourceRDSDbInfo(d *schema.ResourceData) {
+	dbRaw := d.Get("db").
+
+	return dbRaw
 }
 
 func resourceRdsInstanceV3Create(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*Config)
 	client, err := config.rdsV3Client(GetRegion(d, config))
 	if err != nil {
-		return fmt.Errorf("Error creating sdk client, err=%s", err)
+		return fmt.Errorf("error creating RDSv3 client: %s", err)
 	}
-	opts := resourceRdsInstanceV3UserInputParams(d)
-	opts["region"] = GetRegion(d, config)
 
-	arrayIndex := map[string]int{
-		"backup_strategy": 0,
-		"db":              0,
-		"volume":          0,
+	publicIPs := d.Get("public_ips").([]interface{})
+	if len(publicIPs) > 0 {
+		publicIP := publicIPs[0].(string)
+	}
+
+	createOpts := instances.CreateRdsOpts{
+		Name:                d.Get("name").(string),
+		Datastore:           resourceRDSDataStore(d),
+		Ha:                  resourceRDSHA(d),
+		ConfigurationId:     "",
+		Port:                "",
+		Password:            "",
+		BackupStrategy:      resourceRDSBackupStrategy(d),
+		EnterpriseProjectId: "",
+		DiskEncryptionId:    "",
+		FlavorRef:           "",
+		Volume:              resourceRDSVolume(d),
+		Region:              GetRegion(d, config),
+		AvailabilityZone:    "",
+		VpcId:               "",
+		SubnetId:            "",
+		SecurityGroupId:     d.Get("security_group_id").(string),
+		ChargeInfo:          resourceRDSChangeMode(),
+		TimeZone:            "",
 	}
 	publicIPs := d.Get("public_ips").([]interface{})
 
 	params, err := buildRdsInstanceV3CreateParameters(opts, arrayIndex)
 	if err != nil {
-		return fmt.Errorf("Error building the request body of api(create), err=%s", err)
+		return fmt.Errorf("error building the request body of API (create): %s", err)
 	}
 	r, err := sendRdsInstanceV3CreateRequest(d, params, client)
 	if err != nil {
-		return fmt.Errorf("Error creating RdsInstanceV3, err=%s", err)
+		return fmt.Errorf("error creating RdsInstanceV3: %s", err)
 	}
 
 	timeout := d.Timeout(schema.TimeoutCreate)
@@ -286,7 +319,7 @@ func resourceRdsInstanceV3Create(d *schema.ResourceData, meta interface{}) error
 	}
 	id, err := navigateValue(obj, []string{"job", "instance", "id"}, nil)
 	if err != nil {
-		return fmt.Errorf("Error constructing id, err=%s", err)
+		return fmt.Errorf("error constructing id: %s", err)
 	}
 	d.SetId(id.(string))
 
@@ -305,16 +338,16 @@ func resourceRdsInstanceV3Create(d *schema.ResourceData, meta interface{}) error
 
 		nodeID = getMasterID(d.Get("nodes").([]interface{}))
 		if nodeID == "" {
-			log.Printf("[WARN] Error setting tag(key/value) of instance:%s", id.(string))
+			log.Printf("[WARN] Error setting tag(key/value) of instance: %s", id.(string))
 			return nil
 		}
 		tagClient, err := config.rdsTagV1Client(GetRegion(d, config))
 		if err != nil {
 			return fmt.Errorf("Error creating OpenTelekomCloud rds tag client: %s ", err)
 		}
-		tagmap := d.Get("tag").(map[string]interface{})
-		log.Printf("[DEBUG] Setting tag(key/value): %v", tagmap)
-		for key, val := range tagmap {
+		tagMap := d.Get("tag").(map[string]interface{})
+		log.Printf("[DEBUG] Setting tag(key/value): %v", tagMap)
+		for key, val := range tagMap {
 			tagOpts := tags.CreateOpts{
 				Key:   key,
 				Value: val.(string),
@@ -464,7 +497,7 @@ func getAssignedEip(d *schema.ResourceData, config *Config) (ip string, err erro
 	return
 }
 
-func unassignEipFromInstance(client *golangsdk.ServiceClient, oldPublicIP string) error {
+func unAssignEipFromInstance(client *golangsdk.ServiceClient, oldPublicIP string) error {
 	ipID, err := findFloatingIP(client, oldPublicIP, "")
 	if err != nil {
 		return err
@@ -476,15 +509,15 @@ func resourceRdsInstanceV3Update(d *schema.ResourceData, meta interface{}) error
 	config := meta.(*Config)
 	rdsClient, err := config.rdsV3Client(GetRegion(d, config))
 	if err != nil {
-		return fmt.Errorf("Error creating OpenTelekomCloud RDS Client: %s", err)
+		return fmt.Errorf("error creating OpenTelekomCloud RDSv3 Client: %s", err)
 	}
 	var updateOpts backups.UpdateOpts
 
 	if d.HasChange("backup_strategy") {
 		backupRaw := d.Get("backup_strategy").([]interface{})
 		rawMap := backupRaw[0].(map[string]interface{})
-		keep_days := rawMap["keep_days"].(int)
-		updateOpts.KeepDays = &keep_days
+		keepDays := rawMap["keep_days"].(int)
+		updateOpts.KeepDays = &keepDays
 		updateOpts.StartTime = rawMap["start_time"].(string)
 		// TODO(zhenguo): Make Period configured by users
 		updateOpts.Period = "1,2,3,4,5,6,7"
@@ -492,7 +525,7 @@ func resourceRdsInstanceV3Update(d *schema.ResourceData, meta interface{}) error
 
 		err = backups.Update(rdsClient, d.Id(), updateOpts).ExtractErr()
 		if err != nil {
-			return fmt.Errorf("Error updating OpenTelekomCloud RDS Instance: %s", err)
+			return fmt.Errorf("error updating OpenTelekomCloud RDS Instance: %s", err)
 		}
 	}
 
@@ -576,7 +609,7 @@ func resourceRdsInstanceV3Update(d *schema.ResourceData, meta interface{}) error
 		log.Printf("[DEBUG] Received datastore Id: %s", datastoreId)
 		flavorsList, err := flavors.List(client, datastoreId, GetRegion(d, config)).Extract()
 		if err != nil {
-			return fmt.Errorf("Unable to retrieve flavors: %s", err)
+			return fmt.Errorf("unable to retrieve flavors: %s", err)
 		}
 		if len(flavorsList) < 1 {
 			return fmt.Errorf("Returned no flavor result. ")
@@ -665,11 +698,11 @@ func resourceRdsInstanceV3Update(d *schema.ResourceData, meta interface{}) error
 		newIPs := news.([]interface{})
 		switch len(newIPs) {
 		case 0:
-			err = unassignEipFromInstance(nw, oldIPs[0].(string)) // if it become 0, it was 1 before
+			err = unAssignEipFromInstance(nw, oldIPs[0].(string)) // if it become 0, it was 1 before
 			break
 		case 1:
 			if len(oldIPs) > 0 {
-				err = unassignEipFromInstance(nw, oldIPs[0].(string))
+				err = unAssignEipFromInstance(nw, oldIPs[0].(string))
 				if err != nil {
 					return err
 				}
@@ -703,7 +736,7 @@ func resourceRdsInstanceV3Read(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*Config)
 	client, err := config.rdsV3Client(GetRegion(d, config))
 	if err != nil {
-		return fmt.Errorf("Error creating sdk client, err=%s", err)
+		return fmt.Errorf("error creating sdk client: %s", err)
 	}
 
 	res := make(map[string]interface{})
@@ -735,17 +768,17 @@ func resourceRdsInstanceV3Read(d *schema.ResourceData, meta interface{}) error {
 	}
 	tagClient, err := config.rdsTagV1Client(GetRegion(d, config))
 	if err != nil {
-		return fmt.Errorf("Error creating OpenTelekomCloud rds tag client: %#v", err)
+		return fmt.Errorf("error creating OpenTelekomCloud rds tag client: %#v", err)
 	}
-	taglist, err := tags.Get(tagClient, nodeID).Extract()
+	tagList, err := tags.Get(tagClient, nodeID).Extract()
 	if err != nil {
-		return fmt.Errorf("Error fetching OpenTelekomCloud rds instance tags: %s", err)
+		return fmt.Errorf("error fetching OpenTelekomCloud rds instance tags: %s", err)
 	}
-	tagmap := make(map[string]string)
-	for _, val := range taglist.Tags {
-		tagmap[val.Key] = val.Value
+	tagMap := make(map[string]string)
+	for _, val := range tagList.Tags {
+		tagMap[val.Key] = val.Value
 	}
-	if err := d.Set("tag", tagmap); err != nil {
+	if err := d.Set("tag", tagMap); err != nil {
 		return fmt.Errorf("[DEBUG] Error saving tag to state for OpenTelekomCloud rds instance (%s): %s", d.Id(), err)
 	}
 
@@ -756,7 +789,7 @@ func resourceRdsInstanceV3Delete(d *schema.ResourceData, meta interface{}) error
 	config := meta.(*Config)
 	client, err := config.rdsV3Client(GetRegion(d, config))
 	if err != nil {
-		return fmt.Errorf("Error creating sdk client, err=%s", err)
+		return fmt.Errorf("error creating RDSv3 client: %s", err)
 	}
 
 	url, err := replaceVars(d, "instances/{id}", nil)
@@ -777,7 +810,7 @@ func resourceRdsInstanceV3Delete(d *schema.ResourceData, meta interface{}) error
 		},
 	})
 	if r.Err != nil {
-		return fmt.Errorf("Error deleting Instance %q, err=%s", d.Id(), r.Err)
+		return fmt.Errorf("error deleting Instance %q, err=%s", d.Id(), r.Err)
 	}
 
 	_, err = waitToFinish(
@@ -1093,8 +1126,7 @@ func expandRdsInstanceV3CreateVolume(d interface{}, arrayIndex map[string]int) (
 	return req, nil
 }
 
-func sendRdsInstanceV3CreateRequest(d *schema.ResourceData, params interface{},
-	client *golangsdk.ServiceClient) (interface{}, error) {
+func sendRdsInstanceV3CreateRequest(d *schema.ResourceData, params interface{}, client *golangsdk.ServiceClient) (interface{}, error) {
 	url := client.ServiceURL("instances")
 
 	r := golangsdk.Result{}
@@ -1105,7 +1137,7 @@ func sendRdsInstanceV3CreateRequest(d *schema.ResourceData, params interface{},
 		},
 	})
 	if r.Err != nil {
-		return nil, fmt.Errorf("Error running api(create), err=%s", r.Err)
+		return nil, fmt.Errorf("error running API (create): %s", r.Err)
 	}
 	return r.Body, nil
 }
@@ -1120,7 +1152,7 @@ func asyncWaitRdsInstanceV3Create(d *schema.ResourceData, config *Config, result
 	for key, path := range pathParameters {
 		value, err := navigateValue(result, path, nil)
 		if err != nil {
-			return nil, fmt.Errorf("Error retrieving async operation path parameter, err=%s", err)
+			return nil, fmt.Errorf("error retrieving async operation path parameter: %s", err)
 		}
 		data[key] = value.(string)
 	}
@@ -1186,7 +1218,7 @@ func findRdsInstanceV3ByList(client *golangsdk.ServiceClient, link string, ident
 		}
 	}
 
-	return nil, fmt.Errorf("Error finding the resource by list api")
+	return nil, fmt.Errorf("error finding the resource by list api")
 }
 
 func sendRdsInstanceV3ListRequest(client *golangsdk.ServiceClient, url string) (interface{}, error) {
@@ -1197,7 +1229,7 @@ func sendRdsInstanceV3ListRequest(client *golangsdk.ServiceClient, url string) (
 			"X-Language":   "en-us",
 		}})
 	if r.Err != nil {
-		return nil, fmt.Errorf("Error running api(list) for resource(RdsInstanceV3), err=%s", r.Err)
+		return nil, fmt.Errorf("error running api(list) for resource(RdsInstanceV3): %s", r.Err)
 	}
 
 	v, err := navigateValue(r.Body, []string{"instances"}, nil)
@@ -1212,91 +1244,91 @@ func setRdsInstanceV3Properties(d *schema.ResourceData, response map[string]inte
 
 	v, err := flattenRdsInstanceV3AvailabilityZone(response)
 	if err != nil {
-		return fmt.Errorf("Error reading Instance:availability_zone, err: %s", err)
+		return fmt.Errorf("error reading Instance:availability_zone: %s", err)
 	}
 	if err = d.Set("availability_zone", v); err != nil {
-		return fmt.Errorf("Error setting Instance:availability_zone, err: %s", err)
+		return fmt.Errorf("error setting Instance:availability_zone: %s", err)
 	}
 
 	v, _ = opts["backup_strategy"]
 	v, err = flattenRdsInstanceV3BackupStrategy(response, nil, v)
 	if err != nil {
-		return fmt.Errorf("Error reading Instance:backup_strategy, err: %s", err)
+		return fmt.Errorf("error reading Instance:backup_strategy: %s", err)
 	}
 	if err = d.Set("backup_strategy", v); err != nil {
-		return fmt.Errorf("Error setting Instance:backup_strategy, err: %s", err)
+		return fmt.Errorf("error setting Instance:backup_strategy: %s", err)
 	}
 
 	v, err = navigateValue(response, []string{"list", "created"}, nil)
 	if err != nil {
-		return fmt.Errorf("Error reading Instance:created, err: %s", err)
+		return fmt.Errorf("error reading Instance:created: %s", err)
 	}
 	if err = d.Set("created", v); err != nil {
-		return fmt.Errorf("Error setting Instance:created, err: %s", err)
+		return fmt.Errorf("error setting Instance:created: %s", err)
 	}
 
 	v, _ = opts["db"]
 	v, err = flattenRdsInstanceV3Db(response, nil, v)
 	if err != nil {
-		return fmt.Errorf("Error reading Instance:db, err: %s", err)
+		return fmt.Errorf("error reading Instance:db: %s", err)
 	}
 	if err = d.Set("db", v); err != nil {
-		return fmt.Errorf("Error setting Instance:db, err: %s", err)
+		return fmt.Errorf("error setting Instance:db: %s", err)
 	}
 
 	v, err = navigateValue(response, []string{"list", "flavor_ref"}, nil)
 	if err != nil {
-		return fmt.Errorf("Error reading Instance:flavor, err: %s", err)
+		return fmt.Errorf("error reading Instance:flavor: %s", err)
 	}
 	if err = d.Set("flavor", v); err != nil {
-		return fmt.Errorf("Error setting Instance:flavor, err: %s", err)
+		return fmt.Errorf("error setting Instance:flavor: %s", err)
 	}
 
 	v, _ = opts["ha_replication_mode"]
 	v, err = flattenRdsInstanceV3HAReplicationMode(response, nil, v)
 	if err != nil {
-		return fmt.Errorf("Error reading Instance:ha_replication_mode, err: %s", err)
+		return fmt.Errorf("error reading Instance:ha_replication_mode: %s", err)
 	}
 	if err = d.Set("ha_replication_mode", v); err != nil {
-		return fmt.Errorf("Error setting Instance:ha_replication_mode, err: %s", err)
+		return fmt.Errorf("error setting Instance:ha_replication_mode: %s", err)
 	}
 
 	v, err = navigateValue(response, []string{"list", "name"}, nil)
 	if err != nil {
-		return fmt.Errorf("Error reading Instance:name, err: %s", err)
+		return fmt.Errorf("error reading Instance:name: %s", err)
 	}
 	if err = d.Set("name", v); err != nil {
-		return fmt.Errorf("Error setting Instance:name, err: %s", err)
+		return fmt.Errorf("error setting Instance:name: %s", err)
 	}
 
 	v, _ = opts["nodes"]
 	v, err = flattenRdsInstanceV3Nodes(response, nil, v)
 	if err != nil {
-		return fmt.Errorf("Error reading Instance:nodes, err: %s", err)
+		return fmt.Errorf("error reading Instance:nodes: %s", err)
 	}
 	if err = d.Set("nodes", v); err != nil {
-		return fmt.Errorf("Error setting Instance:nodes, err: %s", err)
+		return fmt.Errorf("error setting Instance:nodes: %s", err)
 	}
 
 	v, err = navigateValue(response, []string{"list", "private_ips"}, nil)
 	if err != nil {
-		return fmt.Errorf("Error reading Instance:private_ips, err: %s", err)
+		return fmt.Errorf("error reading Instance:private_ips: %s", err)
 	}
 	if err = d.Set("private_ips", v); err != nil {
-		return fmt.Errorf("Error setting Instance:private_ips, err: %s", err)
+		return fmt.Errorf("error setting Instance:private_ips: %s", err)
 	}
 
 	v, err = navigateValue(response, []string{"list", "public_ips"}, nil)
 	if err != nil {
-		return fmt.Errorf("Error reading Instance:public_ips, err: %s", err)
+		return fmt.Errorf("error reading Instance:public_ips: %s", err)
 	}
 	if err = d.Set("public_ips", v); err != nil {
-		return fmt.Errorf("Error setting Instance:public_ips, err: %s", err)
+		return fmt.Errorf("error setting Instance:public_ips: %s", err)
 	}
 	if len(v.([]interface{})) == 0 {
 		ip, err := getAssignedEip(d, config)
 		if err != nil {
-			return fmt.Errorf("Error setting Instance:public_ips, err: %s", err)
+			return fmt.Errorf("error setting Instance:public_ips: %s", err)
 		}
 		if ip != "" {
 			_ = d.Set("public_ips", []string{ip})
@@ -1305,35 +1337,35 @@ func setRdsInstanceV3Properties(d *schema.ResourceData, response map[string]inte
 
 	v, err = navigateValue(response, []string{"list", "security_group_id"}, nil)
 	if err != nil {
-		return fmt.Errorf("Error reading Instance:security_group_id, err: %s", err)
+		return fmt.Errorf("error reading Instance:security_group_id: %s", err)
 	}
 	if err = d.Set("security_group_id", v); err != nil {
-		return fmt.Errorf("Error setting Instance:security_group_id, err: %s", err)
+		return fmt.Errorf("error setting Instance:security_group_id: %s", err)
 	}
 
 	v, err = navigateValue(response, []string{"list", "subnet_id"}, nil)
 	if err != nil {
-		return fmt.Errorf("Error reading Instance:subnet_id, err: %s", err)
+		return fmt.Errorf("error reading Instance:subnet_id: %s", err)
 	}
 	if err = d.Set("subnet_id", v); err != nil {
-		return fmt.Errorf("Error setting Instance:subnet_id, err: %s", err)
+		return fmt.Errorf("error setting Instance:subnet_id: %s", err)
 	}
 
 	v, _ = opts["volume"]
 	v, err = flattenRdsInstanceV3Volume(response, nil, v)
 	if err != nil {
-		return fmt.Errorf("Error reading Instance:volume, err: %s", err)
+		return fmt.Errorf("error reading Instance:volume: %s", err)
 	}
 	if err = d.Set("volume", v); err != nil {
-		return fmt.Errorf("Error setting Instance:volume, err: %s", err)
+		return fmt.Errorf("error setting Instance:volume: %s", err)
 	}
 
 	v, err = navigateValue(response, []string{"list", "vpc_id"}, nil)
 	if err != nil {
-		return fmt.Errorf("Error reading Instance:vpc_id, err: %s", err)
+		return fmt.Errorf("error reading Instance:vpc_id: %s", err)
 	}
 	if err = d.Set("vpc_id", v); err != nil {
-		return fmt.Errorf("Error setting Instance:vpc_id, err: %s", err)
+		return fmt.Errorf("error setting Instance:vpc_id: %s", err)
 	}
 
 	return nil
@@ -1344,25 +1376,25 @@ func flattenRdsInstanceV3AvailabilityZone(d interface{}) (interface{}, error) {
 	arrayIndex["list.nodes"] = 0
 	v, err := navigateValue(d, []string{"list", "nodes", "availability_zone"}, arrayIndex)
 	if err != nil {
-		return nil, fmt.Errorf("Error reading Instance:availability_zone, err: %s", err)
+		return nil, fmt.Errorf("error reading Instance:availability_zone: %s", err)
 	}
 	az1 := v.(string)
 
 	v, err = navigateValue(d, []string{"list", "flavor_ref"}, nil)
 	if err != nil {
-		return nil, fmt.Errorf("Error reading Instance:flavor, err: %s", err)
+		return nil, fmt.Errorf("error reading Instance:flavor: %s", err)
 	}
 	if strings.HasSuffix(v.(string), ".ha") {
 		arrayIndex["list.nodes"] = 1
 		v, err := navigateValue(d, []string{"list", "nodes", "availability_zone"}, arrayIndex)
 		if err != nil {
-			return nil, fmt.Errorf("Error reading Instance:availability_zone, err: %s", err)
+			return nil, fmt.Errorf("error reading Instance:availability_zone: %s", err)
 		}
 		az2 := v.(string)
 
 		v, err = navigateValue(d, []string{"list", "nodes", "role"}, arrayIndex)
 		if err != nil {
-			return nil, fmt.Errorf("Error reading Instance:role, err: %s", err)
+			return nil, fmt.Errorf("error reading Instance:role: %s", err)
 		}
 		if v.(string) == "master" {
 			return []string{az2, az1}, nil
@@ -1386,13 +1418,13 @@ func flattenRdsInstanceV3BackupStrategy(d interface{}, arrayIndex map[string]int
 
 	v, err := navigateValue(d, []string{"list", "backup_strategy", "keep_days"}, arrayIndex)
 	if err != nil {
-		return nil, fmt.Errorf("Error reading Instance:keep_days, err: %s", err)
+		return nil, fmt.Errorf("error reading Instance:keep_days: %s", err)
 	}
 	r["keep_days"] = v
 
 	v, err = navigateValue(d, []string{"list", "backup_strategy", "start_time"}, arrayIndex)
 	if err != nil {
-		return nil, fmt.Errorf("Error reading Instance:start_time, err: %s", err)
+		return nil, fmt.Errorf("error reading Instance:start_time: %s", err)
 	}
 	r["start_time"] = v
 
@@ -1411,25 +1443,25 @@ func flattenRdsInstanceV3Db(d interface{}, arrayIndex map[string]int, currentVal
 
 	v, err := navigateValue(d, []string{"list", "port"}, arrayIndex)
 	if err != nil {
-		return nil, fmt.Errorf("Error reading Instance:port, err: %s", err)
+		return nil, fmt.Errorf("error reading Instance:port: %s", err)
 	}
 	r["port"] = v
 
 	v, err = navigateValue(d, []string{"list", "datastore", "type"}, arrayIndex)
 	if err != nil {
-		return nil, fmt.Errorf("Error reading Instance:type, err: %s", err)
+		return nil, fmt.Errorf("error reading Instance:type: %s", err)
 	}
 	r["type"] = v
 
 	v, err = navigateValue(d, []string{"list", "db_user_name"}, arrayIndex)
 	if err != nil {
-		return nil, fmt.Errorf("Error reading Instance:user_name, err: %s", err)
+		return nil, fmt.Errorf("error reading Instance:user_name: %s", err)
 	}
 	r["user_name"] = v
 
 	v, err = navigateValue(d, []string{"list", "datastore", "version"}, arrayIndex)
 	if err != nil {
-		return nil, fmt.Errorf("Error reading Instance:version, err: %s", err)
+		return nil, fmt.Errorf("error reading Instance:version: %s", err)
 	}
 	r["version"] = v
 
@@ -1463,31 +1495,31 @@ func flattenRdsInstanceV3Nodes(d interface{}, arrayIndex map[string]int, current
 
 		v, err := navigateValue(d, []string{"list", "nodes", "availability_zone"}, newArrayIndex)
 		if err != nil {
-			return nil, fmt.Errorf("Error reading Instance:availability_zone, err: %s", err)
+			return nil, fmt.Errorf("error reading Instance:availability_zone: %s", err)
 		}
 		r["availability_zone"] = v
 
 		v, err = navigateValue(d, []string{"list", "nodes", "id"}, newArrayIndex)
 		if err != nil {
-			return nil, fmt.Errorf("Error reading Instance:id, err: %s", err)
+			return nil, fmt.Errorf("error reading Instance:id: %s", err)
 		}
 		r["id"] = v
 
 		v, err = navigateValue(d, []string{"list", "nodes", "name"}, newArrayIndex)
 		if err != nil {
-			return nil, fmt.Errorf("Error reading Instance:name, err: %s", err)
+			return nil, fmt.Errorf("error reading Instance:name: %s", err)
 		}
 		r["name"] = v
 
 		v, err = navigateValue(d, []string{"list", "nodes", "role"}, newArrayIndex)
 		if err != nil {
-			return nil, fmt.Errorf("Error reading Instance:role, err: %s", err)
+			return nil, fmt.Errorf("error reading Instance:role: %s", err)
 		}
 		r["role"] = v
 
 		v, err = navigateValue(d, []string{"list", "nodes", "status"}, newArrayIndex)
 		if err != nil {
-			return nil, fmt.Errorf("Error reading Instance:status, err: %s", err)
+			return nil, fmt.Errorf("error reading Instance:status: %s", err)
 		}
 		r["status"] = v
 	}
@@ -1507,19 +1539,19 @@ func flattenRdsInstanceV3Volume(d interface{}, arrayIndex map[string]int, curren
 
 	v, err := navigateValue(d, []string{"list", "disk_encryption_id"}, arrayIndex)
 	if err != nil {
-		return nil, fmt.Errorf("Error reading Instance:disk_encryption_id, err: %s", err)
+		return nil, fmt.Errorf("error reading Instance:disk_encryption_id: %s", err)
 	}
 	r["disk_encryption_id"] = v
 
 	v, err = navigateValue(d, []string{"list", "volume", "size"}, arrayIndex)
 	if err != nil {
-		return nil, fmt.Errorf("Error reading Instance:size, err: %s", err)
+		return nil, fmt.Errorf("error reading Instance:size: %s", err)
 	}
 	r["size"] = v
 
 	v, err = navigateValue(d, []string{"list", "volume", "type"}, arrayIndex)
 	if err != nil {
-		return nil, fmt.Errorf("Error reading Instance:type, err: %s", err)
+		return nil, fmt.Errorf("error reading Instance:type: %s", err)
 	}
 	r["type"] = v
 
