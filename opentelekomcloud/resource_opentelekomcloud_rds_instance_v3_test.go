@@ -18,12 +18,12 @@ func TestAccRdsInstanceV3_basic(t *testing.T) {
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckRdsInstanceV3Destroy,
 		Steps: []resource.TestStep{
-			//{
-			//	Config: testAccRdsInstanceV3_basic(name),
-			//	Check: resource.ComposeTestCheckFunc(
-			//		testAccCheckRdsInstanceV3Exists(),
-			//	),
-			//},
+			{
+				Config: testAccRdsInstanceV3_basic(name),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckRdsInstanceV3Exists(),
+				),
+			},
 			{
 				Config: testAccRdsInstanceV3_eip(name),
 				Check: resource.ComposeTestCheckFunc(

@@ -2,8 +2,10 @@ package opentelekomcloud
 
 import (
 	"fmt"
+	"github.com/opentelekomcloud/gophertelekomcloud/openstack/rds/v3/backups"
 	"log"
 	"reflect"
+	"strconv"
 	"strings"
 	"time"
 
@@ -24,7 +26,7 @@ func resourceRdsInstanceV3() *schema.Resource {
 	return &schema.Resource{
 		Create: resourceRdsInstanceV3Create,
 		Read:   resourceRdsInstanceV3Read,
-		//Update: resourceRdsInstanceV3Update,
+		Update: resourceRdsInstanceV3Update,
 		Delete: resourceRdsInstanceV3Delete,
 		Importer: &schema.ResourceImporter{
 			State: schema.ImportStatePassthrough,
@@ -222,7 +224,7 @@ func resourceRdsInstanceV3() *schema.Resource {
 }
 
 func resourceRDSDataStore(d *schema.ResourceData) *instances.Datastore {
-	dataStoreRaw := d.Get("db").(map[string]interface{})
+	dataStoreRaw := d.Get("db").([]interface{})[0].(map[string]interface{})
 	dataStore := instances.Datastore{
 		Type:    dataStoreRaw["type"].(string),
 		Version: dataStoreRaw["version"].(string),
@@ -231,7 +233,7 @@ func resourceRDSDataStore(d *schema.ResourceData) *instances.Datastore {
 }
 
 func resourceRDSVolume(d *schema.ResourceData) *instances.Volume {
-	volumeRaw := d.Get("volume").(map[string]interface{})
+	volumeRaw := d.Get("volume").([]interface{})[0].(map[string]interface{})
 	volume := instances.Volume{
 		Type: volumeRaw["type"].(string),
 		Size: volumeRaw["size"].(int),
@@ -240,7 +242,7 @@ func resourceRDSVolume(d *schema.ResourceData) *instances.Volume {
 }
 
 func resourceRDSBackupStrategy(d *schema.ResourceData) *instances.BackupStrategy {
-	backupStrategyRaw := d.Get("backup_strategy").(map[string]interface{})
+	backupStrategyRaw := d.Get("backup_strategy").([]interface{})[0].(map[string]interface{})
 	backupStrategy := instances.BackupStrategy{
 		StartTime: backupStrategyRaw["start_time"].(string),
 		KeepDays:  backupStrategyRaw["keep_days"].(int),
@@ -249,9 +251,13 @@ func resourceRDSBackupStrategy(d *schema.ResourceData) *instances.BackupStrategy
 }
 
 func resourceRDSHA(d *schema.ResourceData) *instances.Ha {
+	replicationMode := d.Get("ha_replication_mode").(string)
+	if replicationMode == "" {
+		return nil
+	}
 	ha := instances.Ha{
 		Mode:            "Ha",
-		ReplicationMode: d.Get("ha_replication_mode").(string),
+		ReplicationMode: replicationMode,
 	}
 	return &ha
 }
@@ -264,14 +270,18 @@ func resourceRDSChangeMode() *instances.ChargeInfo {
 }
 
 func resourceRDSDbInfo(d *schema.ResourceData) map[string]interface{} {
-	dbRaw := d.Get("db").(map[string]interface{})
+	dbRaw := d.Get("db").([]interface{})[0].(map[string]interface{})
 	return dbRaw
 }
 
 func resourceRDSAvailabilityZones(d *schema.ResourceData) string {
-	azRaw := d.Get("availability_zone").([]string)
-	azs := strings.Join(azRaw, ",")
-	return azs
+	azRaw := d.Get("availability_zone").([]interface{})
+	zones := make([]string, 0)
+	for _, v := range azRaw {
+		zones = append(zones, v.(string))
+	}
+	zone := strings.Join(zones, ",")
+	return zone
 }
 
 func resourceRdsInstanceV3Create(d *schema.ResourceData, meta interface{}) error {
@@ -284,13 +294,13 @@ func resourceRdsInstanceV3Create(d *schema.ResourceData, meta interface{}) error
 	publicIPs := d.Get("public_ips").([]interface{})
 
 	dbInfo := resourceRDSDbInfo(d)
-	volumeInfo := d.Get("volume").(map[string]interface{})
+	volumeInfo := d.Get("volume").([]interface{})[0].(map[string]interface{})
 
 	createOpts := instances.CreateRdsOpts{
 		Name:             d.Get("name").(string),
 		Datastore:        resourceRDSDataStore(d),
 		Ha:               resourceRDSHA(d),
-		Port:             dbInfo["port"].(string),
+		Port:             strconv.Itoa(dbInfo["port"].(int)),
 		Password:         dbInfo["password"].(string),
 		BackupStrategy:   resourceRDSBackupStrategy(d),
 		DiskEncryptionId: volumeInfo["disk_encryption_id"].(string),
@@ -309,9 +319,13 @@ func resourceRdsInstanceV3Create(d *schema.ResourceData, meta interface{}) error
 	}
 
 	stateConf := &resource.StateChangeConf{
-		Pending: []string{"Creating"},
-		Refresh: waitForRdsAvailable(client, r.Instance.Id),
-		Target:  []string{"Available"},
+		Delay:        30 * time.Second,
+		Pending:      []string{"BUILD"},
+		Refresh:      waitForRdsAvailable(client, r.Instance.Id),
+		Target:       []string{"ACTIVE"},
+		Timeout:      10 * time.Minute,
+		MinTimeout:   5 * time.Second,
+		PollInterval: 30 * time.Second,
 	}
 
 	_, err = stateConf.WaitForState()
@@ -385,7 +399,6 @@ func waitForRdsAvailable(rdsClient *golangsdk.ServiceClient, rdsId string) resou
 			return nil, "", err
 		}
 		return n.Instances[0], n.Instances[0].Status, nil
-
 	}
 }
 
@@ -515,221 +528,221 @@ func unAssignEipFromInstance(client *golangsdk.ServiceClient, oldPublicIP string
 	return floatingips.Update(client, ipID, floatingips.UpdateOpts{PortID: nil}).Err
 }
 
-//func resourceRdsInstanceV3Update(d *schema.ResourceData, meta interface{}) error {
-//	config := meta.(*Config)
-//	rdsClient, err := config.rdsV3Client(GetRegion(d, config))
-//	if err != nil {
-//		return fmt.Errorf("error creating OpenTelekomCloud RDSv3 Client: %s", err)
-//	}
-//	var updateOpts backups.UpdateOpts
-//
-//	if d.HasChange("backup_strategy") {
-//		backupRaw := d.Get("backup_strategy").([]interface{})
-//		rawMap := backupRaw[0].(map[string]interface{})
-//		keepDays := rawMap["keep_days"].(int)
-//		updateOpts.KeepDays = &keepDays
-//		updateOpts.StartTime = rawMap["start_time"].(string)
-//		// TODO(zhenguo): Make Period configured by users
-//		updateOpts.Period = "1,2,3,4,5,6,7"
-//		log.Printf("[DEBUG] updateOpts: %#v", updateOpts)
-//
-//		err = backups.Update(rdsClient, d.Id(), updateOpts).ExtractErr()
-//		if err != nil {
-//			return fmt.Errorf("error updating OpenTelekomCloud RDS Instance: %s", err)
-//		}
-//	}
-//
-//	// Fetching node id
-//	var nodeID string
-//	res := make(map[string]interface{})
-//	v, err := fetchRdsInstanceV3ByList(d, rdsClient)
-//	if err != nil {
-//		return err
-//	}
-//	res["list"] = v
-//
-//	v, err = flattenRdsInstanceV3Nodes(res, nil, v)
-//	if err != nil {
-//		return err
-//	}
-//
-//	nodeID = getMasterID(v.([]interface{}))
-//	if nodeID == "" {
-//		log.Printf("[WARN] Error fetching node id of instance:%s", d.Id())
-//		return nil
-//	}
-//
-//	if d.HasChange("tag") {
-//		oraw, nraw := d.GetChange("tag")
-//		o := oraw.(map[string]interface{})
-//		n := nraw.(map[string]interface{})
-//		create, remove := diffTagsRDS(o, n)
-//		tagClient, err := config.rdsTagV1Client(GetRegion(d, config))
-//		if err != nil {
-//			return fmt.Errorf("Error creating OpenTelekomCloud rds tag client: %s ", err)
-//		}
-//
-//		if len(remove) > 0 {
-//			for _, opts := range remove {
-//				err = tags.Delete(tagClient, nodeID, opts).ExtractErr()
-//				if err != nil {
-//					log.Printf("[WARN] Error deleting tag(key/value) of instance:%s, err=%s", d.Id(), err)
-//				}
-//			}
-//		}
-//		if len(create) > 0 {
-//			for _, opts := range create {
-//				err = tags.Create(tagClient, nodeID, opts).ExtractErr()
-//				if err != nil {
-//					log.Printf("[WARN] Error setting tag(key/value) of instance:%s, err=%s", d.Id(), err)
-//				}
-//			}
-//		}
-//	}
-//
-//	if d.HasChange("flavor") {
-//		_, nflavor := d.GetChange("flavor")
-//		client, err := config.rdsV1Client(GetRegion(d, config))
-//		if err != nil {
-//			return fmt.Errorf("Error creating OpenTelekomCloud rds v1 client: %s ", err)
-//		}
-//
-//		// Fetch flavor id
-//		db := d.Get("db").([]interface{})
-//		datastoreName := db[0].(map[string]interface{})["type"].(string)
-//		datastoreVersion := db[0].(map[string]interface{})["version"].(string)
-//		datastoreList, err := datastores.List(client, datastoreName).Extract()
-//		if err != nil {
-//			return fmt.Errorf("Unable to retrieve datastores: %s ", err)
-//		}
-//		if len(datastoreList) < 1 {
-//			return fmt.Errorf("Returned no datastore result. ")
-//		}
-//		var datastoreId string
-//		for _, datastore := range datastoreList {
-//			if strings.HasPrefix(datastore.Name, datastoreVersion) {
-//				datastoreId = datastore.ID
-//				break
-//			}
-//		}
-//		if datastoreId == "" {
-//			return fmt.Errorf("Returned no datastore ID. ")
-//		}
-//		log.Printf("[DEBUG] Received datastore Id: %s", datastoreId)
-//		flavorsList, err := flavors.List(client, datastoreId, GetRegion(d, config)).Extract()
-//		if err != nil {
-//			return fmt.Errorf("unable to retrieve flavors: %s", err)
-//		}
-//		if len(flavorsList) < 1 {
-//			return fmt.Errorf("Returned no flavor result. ")
-//		}
-//		var rdsFlavor flavors.Flavor
-//		for _, flavor := range flavorsList {
-//			if flavor.SpecCode == nflavor.(string) {
-//				rdsFlavor = flavor
-//				break
-//			}
-//		}
-//
-//		var updateFlavorOpts instances.UpdateFlavorOps
-//
-//		log.Printf("[DEBUG] Update flavor: %s", nflavor.(string))
-//
-//		updateFlavorOpts.FlavorRef = rdsFlavor.ID
-//		_, err = instances.UpdateFlavorRef(client, updateFlavorOpts, nodeID).Extract()
-//		if err != nil {
-//			return fmt.Errorf("Error updating instance Flavor from result: %s ", err)
-//		}
-//
-//		stateConf := &resource.StateChangeConf{
-//			Pending:    []string{"MODIFYING"},
-//			Target:     []string{"ACTIVE"},
-//			Refresh:    instanceStateFlavorUpdateRefreshFunc(client, nodeID, d.Get("flavor").(string)),
-//			Timeout:    d.Timeout(schema.TimeoutCreate),
-//			Delay:      15 * time.Second,
-//			MinTimeout: 3 * time.Second,
-//		}
-//
-//		_, err = stateConf.WaitForState()
-//		if err != nil {
-//			return fmt.Errorf(
-//				"Error waiting for instance (%s) flavor to be Updated: %s ",
-//				nodeID, err)
-//		}
-//		log.Printf("[DEBUG] Successfully updated instance %s flavor: %s", nodeID, d.Get("flavor").(string))
-//	}
-//
-//	// Update volume
-//	if d.HasChange("volume") {
-//		client, err := config.rdsV1Client(GetRegion(d, config))
-//		if err != nil {
-//			return fmt.Errorf("Error creating OpenTelekomCloud rds v1 client: %s ", err)
-//		}
-//		_, nvolume := d.GetChange("volume")
-//		var updateOpts instances.UpdateOps
-//		volume := make(map[string]interface{})
-//		volumeRaw := nvolume.([]interface{})
-//		log.Printf("[DEBUG] volumeRaw: %+v", volumeRaw)
-//		if len(volumeRaw) == 1 {
-//			if m, ok := volumeRaw[0].(map[string]interface{}); ok {
-//				volume["size"] = m["size"].(int)
-//			}
-//		}
-//		log.Printf("[DEBUG] volume: %+v", volume)
-//		updateOpts.Volume = volume
-//		_, err = instances.UpdateVolumeSize(client, updateOpts, nodeID).Extract()
-//		if err != nil {
-//			return fmt.Errorf("Error updating instance volume from result: %s ", err)
-//		}
-//
-//		stateConf := &resource.StateChangeConf{
-//			Pending:    []string{"MODIFYING"},
-//			Target:     []string{"UPDATED"},
-//			Refresh:    instanceStateUpdateRefreshFunc(client, nodeID, updateOpts.Volume["size"].(int)),
-//			Timeout:    d.Timeout(schema.TimeoutCreate),
-//			Delay:      15 * time.Second,
-//			MinTimeout: 3 * time.Second,
-//		}
-//
-//		_, err = stateConf.WaitForState()
-//		if err != nil {
-//			return fmt.Errorf(
-//				"Error waiting for instance (%s) volume to be Updated: %s ",
-//				nodeID, err)
-//		}
-//		log.Printf("[DEBUG] Successfully updated instance %s volume: %+v", nodeID, volume)
-//	}
-//
-//	if d.HasChange("public_ips") {
-//		nw, err := config.networkingV2Client(GetRegion(d, config))
-//		olds, news := d.GetChange("public_ips")
-//		oldIPs := olds.([]interface{})
-//		newIPs := news.([]interface{})
-//		switch len(newIPs) {
-//		case 0:
-//			err = unAssignEipFromInstance(nw, oldIPs[0].(string)) // if it become 0, it was 1 before
-//			break
-//		case 1:
-//			if len(oldIPs) > 0 {
-//				err = unAssignEipFromInstance(nw, oldIPs[0].(string))
-//				if err != nil {
-//					return err
-//				}
-//			}
-//			privateIP := getPrivateIP(d)
-//			subnetID, err := getSubnetSubnetID(d, config)
-//			if err != nil {
-//				return err
-//			}
-//			err = assignEipToInstance(nw, newIPs[0].(string), privateIP, subnetID)
-//			break
-//		default:
-//			return fmt.Errorf("RDS instance can't have more than one public IP")
-//		}
-//	}
-//
-//	return resourceRdsInstanceV3Read(d, meta)
-//}
+func resourceRdsInstanceV3Update(d *schema.ResourceData, meta interface{}) error {
+	config := meta.(*Config)
+	rdsClient, err := config.rdsV3Client(GetRegion(d, config))
+	if err != nil {
+		return fmt.Errorf("error creating OpenTelekomCloud RDSv3 Client: %s", err)
+	}
+	var updateOpts backups.UpdateOpts
+
+	if d.HasChange("backup_strategy") {
+		backupRaw := d.Get("backup_strategy").([]interface{})
+		rawMap := backupRaw[0].(map[string]interface{})
+		keepDays := rawMap["keep_days"].(int)
+		updateOpts.KeepDays = &keepDays
+		updateOpts.StartTime = rawMap["start_time"].(string)
+		// TODO(zhenguo): Make Period configured by users
+		updateOpts.Period = "1,2,3,4,5,6,7"
+		log.Printf("[DEBUG] updateOpts: %#v", updateOpts)
+
+		err = backups.Update(rdsClient, d.Id(), updateOpts).ExtractErr()
+		if err != nil {
+			return fmt.Errorf("error updating OpenTelekomCloud RDS Instance: %s", err)
+		}
+	}
+
+	// Fetching node id
+	var nodeID string
+	res := make(map[string]interface{})
+	v, err := fetchRdsInstanceV3ByList(d, rdsClient)
+	if err != nil {
+		return err
+	}
+	res["list"] = v
+
+	v, err = flattenRdsInstanceV3Nodes(res, nil, v)
+	if err != nil {
+		return err
+	}
+
+	nodeID = getMasterID(v.([]interface{}))
+	if nodeID == "" {
+		log.Printf("[WARN] Error fetching node id of instance:%s", d.Id())
+		return nil
+	}
+
+	if d.HasChange("tag") {
+		oraw, nraw := d.GetChange("tag")
+		o := oraw.(map[string]interface{})
+		n := nraw.(map[string]interface{})
+		create, remove := diffTagsRDS(o, n)
+		tagClient, err := config.rdsTagV1Client(GetRegion(d, config))
+		if err != nil {
+			return fmt.Errorf("Error creating OpenTelekomCloud rds tag client: %s ", err)
+		}
+
+		if len(remove) > 0 {
+			for _, opts := range remove {
+				err = tags.Delete(tagClient, nodeID, opts).ExtractErr()
+				if err != nil {
+					log.Printf("[WARN] Error deleting tag(key/value) of instance:%s, err=%s", d.Id(), err)
+				}
+			}
+		}
+		if len(create) > 0 {
+			for _, opts := range create {
+				err = tags.Create(tagClient, nodeID, opts).ExtractErr()
+				if err != nil {
+					log.Printf("[WARN] Error setting tag(key/value) of instance:%s, err=%s", d.Id(), err)
+				}
+			}
+		}
+	}
+
+	//if d.HasChange("flavor") {
+	//	_, nflavor := d.GetChange("flavor")
+	//	client, err := config.rdsV1Client(GetRegion(d, config))
+	//	if err != nil {
+	//		return fmt.Errorf("Error creating OpenTelekomCloud rds v1 client: %s ", err)
+	//	}
+	//
+	//	// Fetch flavor id
+	//	db := d.Get("db").([]interface{})
+	//	datastoreName := db[0].(map[string]interface{})["type"].(string)
+	//	datastoreVersion := db[0].(map[string]interface{})["version"].(string)
+	//	datastoreList, err := datastores.List(client, datastoreName).Extract()
+	//	if err != nil {
+	//		return fmt.Errorf("Unable to retrieve datastores: %s ", err)
+	//	}
+	//	if len(datastoreList) < 1 {
+	//		return fmt.Errorf("Returned no datastore result. ")
+	//	}
+	//	var datastoreId string
+	//	for _, datastore := range datastoreList {
+	//		if strings.HasPrefix(datastore.Name, datastoreVersion) {
+	//			datastoreId = datastore.ID
+	//			break
+	//		}
+	//	}
+	//	if datastoreId == "" {
+	//		return fmt.Errorf("Returned no datastore ID. ")
+	//	}
+	//	log.Printf("[DEBUG] Received datastore Id: %s", datastoreId)
+	//	flavorsList, err := flavors.List(client, datastoreId, GetRegion(d, config)).Extract()
+	//	if err != nil {
+	//		return fmt.Errorf("unable to retrieve flavors: %s", err)
+	//	}
+	//	if len(flavorsList) < 1 {
+	//		return fmt.Errorf("Returned no flavor result. ")
+	//	}
+	//	var rdsFlavor flavors.Flavor
+	//	for _, flavor := range flavorsList {
+	//		if flavor.SpecCode == nflavor.(string) {
+	//			rdsFlavor = flavor
+	//			break
+	//		}
+	//	}
+	//
+	//	var updateFlavorOpts instances.UpdateFlavorOps
+	//
+	//	log.Printf("[DEBUG] Update flavor: %s", nflavor.(string))
+	//
+	//	updateFlavorOpts.FlavorRef = rdsFlavor.ID
+	//	_, err = instances.UpdateFlavorRef(client, updateFlavorOpts, nodeID).Extract()
+	//	if err != nil {
+	//		return fmt.Errorf("Error updating instance Flavor from result: %s ", err)
+	//	}
+	//
+	//	stateConf := &resource.StateChangeConf{
+	//		Pending:    []string{"MODIFYING"},
+	//		Target:     []string{"ACTIVE"},
+	//		Refresh:    instanceStateFlavorUpdateRefreshFunc(client, nodeID, d.Get("flavor").(string)),
+	//		Timeout:    d.Timeout(schema.TimeoutCreate),
+	//		Delay:      15 * time.Second,
+	//		MinTimeout: 3 * time.Second,
+	//	}
+	//
+	//	_, err = stateConf.WaitForState()
+	//	if err != nil {
+	//		return fmt.Errorf(
+	//			"Error waiting for instance (%s) flavor to be Updated: %s ",
+	//			nodeID, err)
+	//	}
+	//	log.Printf("[DEBUG] Successfully updated instance %s flavor: %s", nodeID, d.Get("flavor").(string))
+	//}
+
+	// Update volume
+	//if d.HasChange("volume") {
+	//	client, err := config.rdsV1Client(GetRegion(d, config))
+	//	if err != nil {
+	//		return fmt.Errorf("Error creating OpenTelekomCloud rds v1 client: %s ", err)
+	//	}
+	//	_, nvolume := d.GetChange("volume")
+	//	var updateOpts instances.UpdateOps
+	//	volume := make(map[string]interface{})
+	//	volumeRaw := nvolume.([]interface{})
+	//	log.Printf("[DEBUG] volumeRaw: %+v", volumeRaw)
+	//	if len(volumeRaw) == 1 {
+	//		if m, ok := volumeRaw[0].(map[string]interface{}); ok {
+	//			volume["size"] = m["size"].(int)
+	//		}
+	//	}
+	//	log.Printf("[DEBUG] volume: %+v", volume)
+	//	updateOpts.Volume = volume
+	//	_, err = instances.UpdateVolumeSize(client, updateOpts, nodeID).Extract()
+	//	if err != nil {
+	//		return fmt.Errorf("Error updating instance volume from result: %s ", err)
+	//	}
+	//
+	//	stateConf := &resource.StateChangeConf{
+	//		Pending:    []string{"MODIFYING"},
+	//		Target:     []string{"UPDATED"},
+	//		Refresh:    instanceStateUpdateRefreshFunc(client, nodeID, updateOpts.Volume["size"].(int)),
+	//		Timeout:    d.Timeout(schema.TimeoutCreate),
+	//		Delay:      15 * time.Second,
+	//		MinTimeout: 3 * time.Second,
+	//	}
+	//
+	//	_, err = stateConf.WaitForState()
+	//	if err != nil {
+	//		return fmt.Errorf(
+	//			"Error waiting for instance (%s) volume to be Updated: %s ",
+	//			nodeID, err)
+	//	}
+	//	log.Printf("[DEBUG] Successfully updated instance %s volume: %+v", nodeID, volume)
+	//}
+
+	if d.HasChange("public_ips") {
+		nw, err := config.networkingV2Client(GetRegion(d, config))
+		olds, news := d.GetChange("public_ips")
+		oldIPs := olds.([]interface{})
+		newIPs := news.([]interface{})
+		switch len(newIPs) {
+		case 0:
+			err = unAssignEipFromInstance(nw, oldIPs[0].(string)) // if it become 0, it was 1 before
+			break
+		case 1:
+			if len(oldIPs) > 0 {
+				err = unAssignEipFromInstance(nw, oldIPs[0].(string))
+				if err != nil {
+					return err
+				}
+			}
+			privateIP := getPrivateIP(d)
+			subnetID, err := getSubnetSubnetID(d, config)
+			if err != nil {
+				return err
+			}
+			err = assignEipToInstance(nw, newIPs[0].(string), privateIP, subnetID)
+			break
+		default:
+			return fmt.Errorf("RDS instance can't have more than one public IP")
+		}
+	}
+
+	return resourceRdsInstanceV3Read(d, meta)
+}
 
 func getMasterID(nodes []interface{}) (nodeID string) {
 	for _, node := range nodes {
@@ -743,14 +756,12 @@ func getMasterID(nodes []interface{}) (nodeID string) {
 
 func resourceRdsInstanceV3Read(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*Config)
-	client, err := config.rdsV3Client(GetRegion(d, config))
+	_, err := config.rdsV3Client(GetRegion(d, config))
 	if err != nil {
 		return fmt.Errorf("error creating sdk client: %s", err)
 	}
 
-	res := make(map[string]interface{})
-
-	v, err := fetchRdsInstanceV3ByList(d, client)
+	//v, err := fetchRdsInstanceV3ByList(d, client)
 	if err != nil {
 		// manually bugfix for #476
 		if strings.Index(err.Error(), "Error finding the resource by list api") != -1 {
@@ -760,9 +771,7 @@ func resourceRdsInstanceV3Read(d *schema.ResourceData, meta interface{}) error {
 		}
 		return err
 	}
-	res["list"] = v
 
-	//err = setRdsInstanceV3Properties(d, res, config)
 	if err != nil {
 		return err
 	}
