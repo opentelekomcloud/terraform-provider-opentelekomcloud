@@ -2,7 +2,6 @@ package opentelekomcloud
 
 import (
 	"fmt"
-	"github.com/aws/aws-sdk-go/service/rds"
 	"github.com/hashicorp/go-multierror"
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/rds/v3/backups"
 	"log"
@@ -30,6 +29,7 @@ func resourceRdsInstanceV3() *schema.Resource {
 		Read:   resourceRdsInstanceV3Read,
 		Update: resourceRdsInstanceV3Update,
 		Delete: resourceRdsInstanceV3Delete,
+
 		Importer: &schema.ResourceImporter{
 			State: schema.ImportStatePassthrough,
 		},
@@ -163,6 +163,22 @@ func resourceRdsInstanceV3() *schema.Resource {
 				Optional: true,
 				ForceNew: true,
 			},
+			"switch_strategy": {
+				Type:     schema.TypeString,
+				Computed: true,
+			},
+			"maintenance_window": {
+				Type:     schema.TypeString,
+				Computed: true,
+			},
+			"type": {
+				Type:     schema.TypeString,
+				Computed: true,
+			},
+			"time_zone": {
+				Type:     schema.TypeString,
+				Computed: true,
+			},
 			"tag": {
 				Type:         schema.TypeMap,
 				Optional:     true,
@@ -174,6 +190,14 @@ func resourceRdsInstanceV3() *schema.Resource {
 				ForceNew: true,
 			},
 			"created": {
+				Type:     schema.TypeString,
+				Computed: true,
+			},
+			"updated": {
+				Type:     schema.TypeString,
+				Computed: true,
+			},
+			"region": {
 				Type:     schema.TypeString,
 				Computed: true,
 			},
@@ -452,7 +476,6 @@ func findFloatingIP(client *golangsdk.ServiceClient, address, portID string) (id
 }
 
 func findPort(client *golangsdk.ServiceClient, privateIP string, subnetID string) (id string, err error) {
-
 	// find assigned port
 	pg, err := ports.List(client, nil).AllPages()
 
@@ -775,7 +798,7 @@ func resourceRdsInstanceV3Read(d *schema.ResourceData, meta interface{}) error {
 		return fmt.Errorf("error creating RDSv3 client: %s", err)
 	}
 
-	rdsInstanceResponce, err := getRdsInstance(client, d.Id())
+	rdsInstance, err := getRdsInstance(client, d.Id())
 	if err != nil {
 		if _, ok := err.(golangsdk.ErrDefault404); ok {
 			d.SetId("")
@@ -785,17 +808,66 @@ func resourceRdsInstanceV3Read(d *schema.ResourceData, meta interface{}) error {
 	}
 
 	me := multierror.Append(nil,
-		d.Set("availability_zone", rdsInstanceResponce.Nodes[0].AvailabilityZone),
-		d.Set("flavor", rdsInstanceResponce.FlavorRef),
-		d.Set("name", rdsInstanceResponce.Name),
-		d.Set("security_group_id", rdsInstanceResponce.SecurityGroupId),
-		d.Set("subnet_id", rdsInstanceResponce.SubnetId),
-		d.Set("vpc_id", rdsInstanceResponce.VpcId),
-		d.Set("port", rdsInstanceResponce.Port),
-		d.Set("created", rdsInstanceResponce.Created),
+		d.Set("flavor", rdsInstance.FlavorRef),
+		d.Set("name", rdsInstance.Name),
+		d.Set("security_group_id", rdsInstance.SecurityGroupId),
+		d.Set("subnet_id", rdsInstance.SubnetId),
+		d.Set("vpc_id", rdsInstance.VpcId),
+		d.Set("created", rdsInstance.Created),
+		d.Set("time_zone", rdsInstance.TimeZone),
+		d.Set("maintenance_window", rdsInstance.MaintenanceWindow),
+		d.Set("switch_strategy", rdsInstance.SwitchStrategy),
+		d.Set("updated", rdsInstance.Updated),
+		d.Set("region", rdsInstance.Region),
+		d.Set("ha_replication_mode", rdsInstance.Ha.ReplicationMode),
+		d.Set("type", rdsInstance.Type),
 	)
 
 	if me.ErrorOrNil() != nil {
+		return err
+	}
+
+	var nodesList []map[string]interface{}
+	for _, nodeObj := range rdsInstance.Nodes {
+		node := make(map[string]interface{})
+		node["id"] = nodeObj.Id
+		node["role"] = nodeObj.Role
+		node["name"] = nodeObj.Name
+		node["availability_zone"] = nodeObj.AvailabilityZone
+		nodesList = append(nodesList, node)
+	}
+	if err = d.Set("nodes", nodesList); err != nil {
+		return err
+	}
+
+	backupStrategy := make(map[string]interface{})
+	backupStrategy["start_time"] = rdsInstance.BackupStrategy.StartTime
+	backupStrategy["keep_days"] = rdsInstance.BackupStrategy.KeepDays
+	if err = d.Set("backup_strategy", backupStrategy); err != nil {
+		return err
+	}
+
+	volume := make(map[string]interface{})
+	volume["size"] = rdsInstance.Volume.Size
+	volume["type"] = rdsInstance.Volume.Type
+	volume["disk_encryption_id"] = rdsInstance.DiskEncryptionId
+	if err = d.Set("volume", volume); err != nil {
+		return err
+	}
+
+	db := make(map[string]interface{})
+	db["type"] = rdsInstance.DataStore.Type
+	db["version"] = rdsInstance.DataStore.Version
+	db["port"] = rdsInstance.Port
+	if err = d.Set("db", db); err != nil {
+		return err
+	}
+
+	if err = d.Set("private_ips", rdsInstance.PrivateIps); err != nil {
+		return err
+	}
+
+	if err = d.Set("public_ips", rdsInstance.PublicIps); err != nil {
 		return err
 	}
 
