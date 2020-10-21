@@ -840,26 +840,32 @@ func resourceRdsInstanceV3Read(d *schema.ResourceData, meta interface{}) error {
 		return err
 	}
 
+	var backupStrategyList []map[string]interface{}
 	backupStrategy := make(map[string]interface{})
 	backupStrategy["start_time"] = rdsInstance.BackupStrategy.StartTime
 	backupStrategy["keep_days"] = rdsInstance.BackupStrategy.KeepDays
-	if err = d.Set("backup_strategy", backupStrategy); err != nil {
+	backupStrategyList = append(backupStrategyList, backupStrategy)
+	if err = d.Set("backup_strategy", backupStrategyList); err != nil {
 		return err
 	}
 
+	var volumeList []map[string]interface{}
 	volume := make(map[string]interface{})
 	volume["size"] = rdsInstance.Volume.Size
 	volume["type"] = rdsInstance.Volume.Type
 	volume["disk_encryption_id"] = rdsInstance.DiskEncryptionId
-	if err = d.Set("volume", volume); err != nil {
+	volumeList = append(volumeList, volume)
+	if err = d.Set("volume", volumeList); err != nil {
 		return err
 	}
 
+	var dbList []map[string]interface{}
 	db := make(map[string]interface{})
 	db["type"] = rdsInstance.DataStore.Type
 	db["version"] = rdsInstance.DataStore.Version
 	db["port"] = rdsInstance.Port
-	if err = d.Set("db", db); err != nil {
+	dbList = append(dbList, db)
+	if err = d.Set("db", dbList); err != nil {
 		return err
 	}
 
