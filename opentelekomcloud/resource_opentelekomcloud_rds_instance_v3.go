@@ -2,6 +2,8 @@ package opentelekomcloud
 
 import (
 	"fmt"
+	"github.com/aws/aws-sdk-go/service/rds"
+	"github.com/hashicorp/go-multierror"
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/rds/v3/backups"
 	"log"
 	"reflect"
@@ -322,33 +324,37 @@ func resourceRdsInstanceV3Create(d *schema.ResourceData, meta interface{}) error
 		Delay:        30 * time.Second,
 		Pending:      []string{"BUILD"},
 		Refresh:      waitForRdsAvailable(client, r.Instance.Id),
-		Target:       []string{"ACTIVE"},
+		Target:       []string{"ACTIVE", "BACKING UP"},
 		Timeout:      10 * time.Minute,
-		MinTimeout:   5 * time.Second,
-		PollInterval: 30 * time.Second,
+		MinTimeout:   10 * time.Second,
+		PollInterval: 15 * time.Second,
 	}
 
 	_, err = stateConf.WaitForState()
+	if err != nil {
+		return err
+	}
 
 	d.SetId(r.Instance.Id)
 
 	if hasFilledOpt(d, "tag") {
-		var nodeID string
-		res := make(map[string]interface{})
-		v, err := fetchRdsInstanceV3ByList(d, client)
+		rdsInstanceResponse, err := getRdsInstance(client, r.Instance.Id)
 		if err != nil {
 			return err
 		}
-		res["list"] = v
-
-		nodeID = getMasterID(d.Get("nodes").([]interface{}))
+		var nodeID string
+		for _, v := range rdsInstanceResponse.Nodes {
+			if v.Role == "master" {
+				nodeID = v.Id
+			}
+		}
 		if nodeID == "" {
 			log.Printf("[WARN] Error setting tag(key/value) of instance: %s", r.Instance.Id)
 			return nil
 		}
 		tagClient, err := config.rdsTagV1Client(GetRegion(d, config))
 		if err != nil {
-			return fmt.Errorf("Error creating OpenTelekomCloud rds tag client: %s ", err)
+			return fmt.Errorf("error creating OpenTelekomCloud RDSv1 tag client: %s", err)
 		}
 		tagMap := d.Get("tag").(map[string]interface{})
 		log.Printf("[DEBUG] Setting tag(key/value): %v", tagMap)
@@ -387,19 +393,27 @@ func resourceRdsInstanceV3Create(d *schema.ResourceData, meta interface{}) error
 func waitForRdsAvailable(rdsClient *golangsdk.ServiceClient, rdsId string) resource.StateRefreshFunc {
 	return func() (interface{}, string, error) {
 		log.Printf("[INFO] Waiting for OpenTelekomCloud RDSv3 to be available %s.\n", rdsId)
-		listOpts := instances.ListRdsInstanceOpts{
-			Id: rdsId,
-		}
-		allPages, err := instances.List(rdsClient, listOpts).AllPages()
+		rdsInstance, err := getRdsInstance(rdsClient, rdsId)
 		if err != nil {
 			return nil, "", err
 		}
-		n, err := instances.ExtractRdsInstances(allPages)
-		if err != nil {
-			return nil, "", err
-		}
-		return n.Instances[0], n.Instances[0].Status, nil
+		return rdsInstance, rdsInstance.Status, nil
 	}
+}
+
+func getRdsInstance(rdsClient *golangsdk.ServiceClient, rdsId string) (*instances.RdsInstanceResponse, error) {
+	listOpts := instances.ListRdsInstanceOpts{
+		Id: rdsId,
+	}
+	allPages, err := instances.List(rdsClient, listOpts).AllPages()
+	if err != nil {
+		return nil, err
+	}
+	n, err := instances.ExtractRdsInstances(allPages)
+	if err != nil {
+		return nil, err
+	}
+	return &n.Instances[0], nil
 }
 
 func getPrivateIP(d *schema.ResourceData) string {
@@ -756,23 +770,32 @@ func getMasterID(nodes []interface{}) (nodeID string) {
 
 func resourceRdsInstanceV3Read(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*Config)
-	_, err := config.rdsV3Client(GetRegion(d, config))
+	client, err := config.rdsV3Client(GetRegion(d, config))
 	if err != nil {
-		return fmt.Errorf("error creating sdk client: %s", err)
+		return fmt.Errorf("error creating RDSv3 client: %s", err)
 	}
 
-	//v, err := fetchRdsInstanceV3ByList(d, client)
+	rdsInstanceResponce, err := getRdsInstance(client, d.Id())
 	if err != nil {
-		// manually bugfix for #476
-		if strings.Index(err.Error(), "Error finding the resource by list api") != -1 {
-			log.Printf("[WARN] the rds instance %s can not be found", d.Id())
+		if _, ok := err.(golangsdk.ErrDefault404); ok {
 			d.SetId("")
 			return nil
 		}
 		return err
 	}
 
-	if err != nil {
+	me := multierror.Append(nil,
+		d.Set("availability_zone", rdsInstanceResponce.Nodes[0].AvailabilityZone),
+		d.Set("flavor", rdsInstanceResponce.FlavorRef),
+		d.Set("name", rdsInstanceResponce.Name),
+		d.Set("security_group_id", rdsInstanceResponce.SecurityGroupId),
+		d.Set("subnet_id", rdsInstanceResponce.SubnetId),
+		d.Set("vpc_id", rdsInstanceResponce.VpcId),
+		d.Set("port", rdsInstanceResponce.Port),
+		d.Set("created", rdsInstanceResponce.Created),
+	)
+
+	if me.ErrorOrNil() != nil {
 		return err
 	}
 

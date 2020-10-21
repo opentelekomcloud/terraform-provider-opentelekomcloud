@@ -24,13 +24,13 @@ func TestAccRdsInstanceV3_basic(t *testing.T) {
 					testAccCheckRdsInstanceV3Exists(),
 				),
 			},
-			{
-				Config: testAccRdsInstanceV3_eip(name),
-				Check: resource.ComposeTestCheckFunc(
-					testAccCheckRdsInstanceV3Exists(),
-					resource.TestCheckResourceAttr("opentelekomcloud_rds_instance_v3.instance", "public_ips.#", "1"),
-				),
-			},
+			//{
+			//	Config: testAccRdsInstanceV3_eip(name),
+			//	Check: resource.ComposeTestCheckFunc(
+			//		testAccCheckRdsInstanceV3Exists(),
+			//		resource.TestCheckResourceAttr("opentelekomcloud_rds_instance_v3.instance", "public_ips.#", "1"),
+			//	),
+			//},
 			//{
 			//	Config: testAccRdsInstanceV3_update(name),
 			//	Check: resource.ComposeTestCheckFunc(
