@@ -268,6 +268,7 @@ func resourceRdsInstanceV3Create(d *schema.ResourceData, meta interface{}) error
 		"db":              0,
 		"volume":          0,
 	}
+	publicIPs := d.Get("public_ips").([]interface{})
 
 	params, err := buildRdsInstanceV3CreateParameters(opts, arrayIndex)
 	if err != nil {
@@ -325,7 +326,6 @@ func resourceRdsInstanceV3Create(d *schema.ResourceData, meta interface{}) error
 		}
 	}
 
-	publicIPs := d.Get("public_ips").([]interface{})
 	if len(publicIPs) > 0 {
 		if err := resourceRdsInstanceV3Read(d, meta); err != nil {
 			return err
@@ -1115,7 +1115,7 @@ func asyncWaitRdsInstanceV3Create(d *schema.ResourceData, config *Config, result
 
 	data := make(map[string]string)
 	pathParameters := map[string][]string{
-		"id": []string{"job_id"},
+		"id": {"job_id"},
 	}
 	for key, path := range pathParameters {
 		value, err := navigateValue(result, path, nil)
