@@ -6,7 +6,7 @@ subcategory: "Cloud Eye (CES)"
 
 Manages a V2 topic resource within OpenTelekomCloud.
 
-## Example Usage
+## Example
 
 ```hcl
 variable webserver_id { }

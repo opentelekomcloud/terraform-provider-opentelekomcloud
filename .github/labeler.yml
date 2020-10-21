@@ -1,6 +1,9 @@
 dependencies:
-  - any: ['go.mod', 'go.sum']
+  - go.mod
+  - go.sum
+  - vendor/**/*
 documentation:
-  - any: ['docs/**/*', 'README.md']
+  - docs/**/*
+  - README.md
 changelog:
   - CHANGELOG.md
