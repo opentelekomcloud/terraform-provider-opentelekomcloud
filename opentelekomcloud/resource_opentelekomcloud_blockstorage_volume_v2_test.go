@@ -43,6 +43,30 @@ func TestAccBlockStorageV2Volume_basic(t *testing.T) {
 	})
 }
 
+func TestAccBlockStorageV2Volume_upscaleDownScale(t *testing.T) {
+	var volume volumes.Volume
+
+	resource.Test(t, resource.TestCase{
+		PreCheck:     func() { testAccPreCheck(t) },
+		Providers:    testAccProviders,
+		CheckDestroy: testAccCheckBlockStorageV2VolumeDestroy,
+		Steps: []resource.TestStep{
+			{
+				Config: testAccBlockStorageV2Volume_basic,
+				Check:  testAccCheckBlockStorageV2VolumeExists("opentelekomcloud_blockstorage_volume_v2.volume_1", &volume),
+			},
+			{
+				Config: testAccBlockStorageV2Volume_bigger,
+				Check:  testAccCheckBlockStorageV2VolumeSame("opentelekomcloud_blockstorage_volume_v2.volume_1", &volume),
+			},
+			{
+				Config: testAccBlockStorageV2Volume_basic,
+				Check:  testAccCheckBlockStorageV2VolumeNew("opentelekomcloud_blockstorage_volume_v2.volume_1", &volume),
+			},
+		},
+	})
+}
+
 func TestAccBlockStorageV2Volume_policy(t *testing.T) {
 	resource.Test(t, resource.TestCase{
 		PreCheck: func() {
@@ -270,14 +294,45 @@ func testAccCheckBlockStorageV2VolumeTags(n string, k string, v string) resource
 	}
 }
 
+func testAccCheckBlockStorageV2VolumeSame(n string, volume *volumes.Volume) resource.TestCheckFunc {
+	return func(s *terraform.State) error {
+		rs, ok := s.RootModule().Resources[n]
+		if !ok {
+			return fmt.Errorf("not found: %s", n)
+		}
+		if rs.Primary.ID != volume.ID {
+			return fmt.Errorf("volume ID changed")
+		}
+		return nil
+	}
+}
+
+func testAccCheckBlockStorageV2VolumeNew(n string, volume *volumes.Volume) resource.TestCheckFunc {
+	return func(s *terraform.State) error {
+		err := testAccCheckBlockStorageV2VolumeSame(n, volume)(s)
+		if err == nil {
+			return fmt.Errorf("volume ID not changed")
+		}
+		return nil
+	}
+}
+
 const testAccBlockStorageV2Volume_basic = `
+resource "opentelekomcloud_blockstorage_volume_v2" "volume_1" {
+  name = "volume_1"
+  description = "first test volume"
+  size = 1
+}
+`
+
+const testAccBlockStorageV2Volume_bigger = `
 resource "opentelekomcloud_blockstorage_volume_v2" "volume_1" {
   name = "volume_1"
   description = "first test volume"
   metadata = {
     foo = "bar"
   }
-  size = 1
+  size = 2
 }
 `
 
