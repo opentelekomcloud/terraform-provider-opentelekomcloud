@@ -152,6 +152,7 @@ github.com/hashicorp/terraform-json
 ## explicit
 github.com/hashicorp/terraform-plugin-sdk/acctest
 github.com/hashicorp/terraform-plugin-sdk/helper/acctest
+github.com/hashicorp/terraform-plugin-sdk/helper/customdiff
 github.com/hashicorp/terraform-plugin-sdk/helper/hashcode
 github.com/hashicorp/terraform-plugin-sdk/helper/logging
 github.com/hashicorp/terraform-plugin-sdk/helper/mutexkv
@@ -246,6 +247,7 @@ github.com/opentelekomcloud/gophertelekomcloud/openstack/autoscaling/v1/configur
 github.com/opentelekomcloud/gophertelekomcloud/openstack/autoscaling/v1/groups
 github.com/opentelekomcloud/gophertelekomcloud/openstack/autoscaling/v1/instances
 github.com/opentelekomcloud/gophertelekomcloud/openstack/autoscaling/v1/policies
+github.com/opentelekomcloud/gophertelekomcloud/openstack/blockstorage/extensions/volumeactions
 github.com/opentelekomcloud/gophertelekomcloud/openstack/blockstorage/v2/volumes
 github.com/opentelekomcloud/gophertelekomcloud/openstack/bms/v2/flavors
 github.com/opentelekomcloud/gophertelekomcloud/openstack/bms/v2/keypairs

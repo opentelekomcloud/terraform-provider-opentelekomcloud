@@ -6,11 +6,14 @@ import (
 	"log"
 	"time"
 
+	"github.com/hashicorp/go-multierror"
+	"github.com/hashicorp/terraform-plugin-sdk/helper/customdiff"
 	"github.com/hashicorp/terraform-plugin-sdk/helper/hashcode"
 	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/helper/validation"
 	"github.com/opentelekomcloud/gophertelekomcloud"
+	"github.com/opentelekomcloud/gophertelekomcloud/openstack/blockstorage/extensions/volumeactions"
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/blockstorage/v2/volumes"
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/compute/v2/extensions/volumeattach"
 	volumes_v3 "github.com/opentelekomcloud/gophertelekomcloud/openstack/evs/v3/volumes"
@@ -31,6 +34,8 @@ func resourceBlockStorageVolumeV2() *schema.Resource {
 			Delete: schema.DefaultTimeout(10 * time.Minute),
 		},
 
+		CustomizeDiff: customdiff.ForceNewIfChange("size", isDownScale),
+
 		Schema: map[string]*schema.Schema{
 			"region": {
 				Type:     schema.TypeString,
@@ -42,7 +47,6 @@ func resourceBlockStorageVolumeV2() *schema.Resource {
 			"size": {
 				Type:     schema.TypeInt,
 				Required: true,
-				ForceNew: true,
 			},
 			"name": {
 				Type:     schema.TypeString,
@@ -235,15 +239,18 @@ func resourceBlockStorageVolumeV2Read(d *schema.ResourceData, meta interface{}) 
 	}
 
 	log.Printf("[DEBUG] Retrieved volume %s: %+v", d.Id(), v)
-
-	d.Set("size", v.Size)
-	d.Set("description", v.Description)
-	d.Set("availability_zone", v.AvailabilityZone)
-	d.Set("name", v.Name)
-	d.Set("snapshot_id", v.SnapshotID)
-	d.Set("source_vol_id", v.SourceVolID)
-	d.Set("volume_type", v.VolumeType)
-
+	mErr := multierror.Append(nil,
+		d.Set("size", v.Size),
+		d.Set("description", v.Description),
+		d.Set("availability_zone", v.AvailabilityZone),
+		d.Set("name", v.Name),
+		d.Set("snapshot_id", v.SnapshotID),
+		d.Set("source_vol_id", v.SourceVolID),
+		d.Set("volume_type", v.VolumeType),
+	)
+	if mErr.ErrorOrNil() != nil {
+		return mErr
+	}
 	// NOTE: This tries to remove system metadata.
 	md := make(map[string]string)
 	var sys_keys = [1]string{"hw:passthrough"}
@@ -326,6 +333,32 @@ func resourceBlockStorageVolumeV2Update(d *schema.ResourceData, meta interface{}
 	}
 	if d.HasChange("tags") {
 		_, err = resourceEVSTagV2Create(d, meta, "volumes", d.Id(), resourceContainerTags(d))
+	}
+
+	if d.HasChange("size") {
+		oldSize, newSize := d.GetChange("size")
+		newSizeInt := newSize.(int)
+		if oldSize.(int) > newSizeInt {
+			return fmt.Errorf("can't decrease volume size. This is internal provider error, this point should never be reached")
+		}
+		result := volumeactions.ExtendSize(blockStorageClient, d.Id(), volumeactions.ExtendSizeOpts{NewSize: newSizeInt})
+		if result.ExtractErr() != nil {
+			return fmt.Errorf("failed to extend disk size: %s", err)
+		}
+
+		stateConf := &resource.StateChangeConf{
+			Pending:    []string{"extending"},
+			Target:     []string{"available", "in-use"},
+			Refresh:    VolumeV2StateRefreshFunc(blockStorageClient, d.Id()),
+			Timeout:    d.Timeout(schema.TimeoutDelete),
+			Delay:      10 * time.Second,
+			MinTimeout: 3 * time.Second,
+		}
+
+		_, err = stateConf.WaitForState()
+		if err != nil {
+			return fmt.Errorf("error waiting for volume (%s) to become ready after resize: %s", d.Id(), err)
+		}
 	}
 
 	return resourceBlockStorageVolumeV2Read(d, meta)
@@ -454,4 +487,8 @@ func suppressMetadataPolicy(k, old, new string, _ *schema.ResourceData) bool {
 		return true
 	}
 	return old == new
+}
+
+func isDownScale(old, new, _ interface{}) bool {
+	return old.(int) > new.(int)
 }

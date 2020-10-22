@@ -43,6 +43,53 @@ func TestAccBlockStorageV2Volume_basic(t *testing.T) {
 	})
 }
 
+func TestAccBlockStorageV2Volume_upscaleDownScale(t *testing.T) {
+	var volume volumes.Volume
+
+	resource.Test(t, resource.TestCase{
+		PreCheck:     func() { testAccPreCheck(t) },
+		Providers:    testAccProviders,
+		CheckDestroy: testAccCheckBlockStorageV2VolumeDestroy,
+		Steps: []resource.TestStep{
+			{
+				Config: testAccBlockStorageV2Volume_basic,
+				Check:  testAccCheckBlockStorageV2VolumeExists("opentelekomcloud_blockstorage_volume_v2.volume_1", &volume),
+			},
+			{
+				Config: testAccBlockStorageV2Volume_bigger,
+				Check:  testAccCheckBlockStorageV2VolumeSame("opentelekomcloud_blockstorage_volume_v2.volume_1", &volume),
+			},
+			{
+				Config: testAccBlockStorageV2Volume_basic,
+				Check:  testAccCheckBlockStorageV2VolumeNew("opentelekomcloud_blockstorage_volume_v2.volume_1", &volume),
+			},
+		},
+	})
+}
+func TestAccBlockStorageV2Volume_upscaleDownScaleAssigned(t *testing.T) {
+	var volume volumes.Volume
+
+	resource.Test(t, resource.TestCase{
+		PreCheck:     func() { testAccPreCheck(t) },
+		Providers:    testAccProviders,
+		CheckDestroy: testAccCheckBlockStorageV2VolumeDestroy,
+		Steps: []resource.TestStep{
+			{
+				Config: testAccBlockStorageV2Volume_assigned(10),
+				Check:  testAccCheckBlockStorageV2VolumeExists("opentelekomcloud_blockstorage_volume_v2.volume_1", &volume),
+			},
+			{
+				Config: testAccBlockStorageV2Volume_assigned(12),
+				Check:  testAccCheckBlockStorageV2VolumeSame("opentelekomcloud_blockstorage_volume_v2.volume_1", &volume),
+			},
+			{
+				Config: testAccBlockStorageV2Volume_assigned(10),
+				Check:  testAccCheckBlockStorageV2VolumeNew("opentelekomcloud_blockstorage_volume_v2.volume_1", &volume),
+			},
+		},
+	})
+}
+
 func TestAccBlockStorageV2Volume_policy(t *testing.T) {
 	resource.Test(t, resource.TestCase{
 		PreCheck: func() {
@@ -270,6 +317,29 @@ func testAccCheckBlockStorageV2VolumeTags(n string, k string, v string) resource
 	}
 }
 
+func testAccCheckBlockStorageV2VolumeSame(n string, volume *volumes.Volume) resource.TestCheckFunc {
+	return func(s *terraform.State) error {
+		rs, ok := s.RootModule().Resources[n]
+		if !ok {
+			return fmt.Errorf("not found: %s", n)
+		}
+		if rs.Primary.ID != volume.ID {
+			return fmt.Errorf("volume ID changed")
+		}
+		return nil
+	}
+}
+
+func testAccCheckBlockStorageV2VolumeNew(n string, volume *volumes.Volume) resource.TestCheckFunc {
+	return func(s *terraform.State) error {
+		err := testAccCheckBlockStorageV2VolumeSame(n, volume)(s)
+		if err == nil {
+			return fmt.Errorf("volume ID not changed")
+		}
+		return nil
+	}
+}
+
 const testAccBlockStorageV2Volume_basic = `
 resource "opentelekomcloud_blockstorage_volume_v2" "volume_1" {
   name = "volume_1"
@@ -280,6 +350,42 @@ resource "opentelekomcloud_blockstorage_volume_v2" "volume_1" {
   size = 1
 }
 `
+
+const testAccBlockStorageV2Volume_bigger = `
+resource "opentelekomcloud_blockstorage_volume_v2" "volume_1" {
+  name = "volume_1"
+  description = "first test volume"
+  metadata = {
+    foo = "bar"
+  }
+  size = 2
+}
+`
+
+func testAccBlockStorageV2Volume_assigned(size int) string {
+	return fmt.Sprintf(`
+resource "opentelekomcloud_blockstorage_volume_v2" "volume_1" {
+  name = "volume_1"
+  size = %d
+  image_id = "%s"
+}
+
+resource "opentelekomcloud_compute_instance_v2" "instance_1" {
+  name = "instance_1"
+  security_groups = ["default"]
+  network {
+	uuid = "%s"
+  }
+  block_device {
+	uuid = opentelekomcloud_blockstorage_volume_v2.volume_1.id
+	source_type = "volume"
+	boot_index = 0
+	destination_type = "volume"
+	delete_on_termination = true
+  }
+}
+`, size, OS_IMAGE_ID, OS_NETWORK_ID)
+}
 
 const testAccBlockStorageV2Volume_update = `
 resource "opentelekomcloud_blockstorage_volume_v2" "volume_1" {
