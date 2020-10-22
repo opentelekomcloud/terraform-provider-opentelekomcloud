@@ -31,12 +31,12 @@ func TestAccRdsInstanceV3_basic(t *testing.T) {
 					resource.TestCheckResourceAttr("opentelekomcloud_rds_instance_v3.instance", "backup_strategy.0.keep_days", "1"),
 				),
 			},
-			//{
-			//	Config: testAccRdsInstanceV3_update(postfix),
-			//	Check: resource.ComposeTestCheckFunc(
-			//		resource.TestCheckResourceAttr("opentelekomcloud_rds_instance_v3.instance", "flavor", "rds.pg.c2.large"),
-			//	),
-			//},
+			{
+				Config: testAccRdsInstanceV3_update(postfix),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr("opentelekomcloud_rds_instance_v3.instance", "flavor", "rds.pg.c2.large"),
+				),
+			},
 		},
 	})
 }
