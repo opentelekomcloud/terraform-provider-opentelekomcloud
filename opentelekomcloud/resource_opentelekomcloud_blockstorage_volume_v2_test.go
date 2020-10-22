@@ -377,7 +377,7 @@ resource "opentelekomcloud_compute_instance_v2" "instance_1" {
 	uuid = "%s"
   }
   block_device {
-	uuid = "${opentelekomcloud_blockstorage_volume_v2.volume_1.id}"
+	uuid = opentelekomcloud_blockstorage_volume_v2.volume_1.id
 	source_type = "volume"
 	boot_index = 0
 	destination_type = "volume"
