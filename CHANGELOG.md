@@ -1,7 +1,14 @@
 ## 1.22.0 (Unreleased)
 
+## 1.21.1 (October 23, 2020)
 
-## 1.21.0
+BUG FIXES:
+* `resource/opentelekomcloud_rds_instance_v3`: Fix not assigning public IP ([#658](https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/658))
+
+ENHANCEMENTS:
+* `resource/opentelekomcloud_blockstorage_volume_v2`: Allow expanding volume without re-creation ([#661](https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/661))
+
+## 1.21.0 (October 15, 2020)
 
 ENHANCEMENTS:
 * Migrate to `opentelekomcloud/gophertelekomcloud` from `huaweicloud/golangsdk`: ([#641](https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/641))
