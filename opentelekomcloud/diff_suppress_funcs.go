@@ -139,3 +139,10 @@ func suppressLBWhitelistDiffs(k, old, new string, d *schema.ResourceData) bool {
 
 	return reflect.DeepEqual(old_array, new_array)
 }
+
+func suppressSchemaDiff(k, old, new string, d *schema.ResourceData) bool {
+	if strings.ToLower(old) == strings.ToLower(new) {
+		return true
+	}
+	return false
+}
