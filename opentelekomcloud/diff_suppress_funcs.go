@@ -6,6 +6,7 @@ import (
 	"log"
 	"net/url"
 	"reflect"
+	"regexp"
 	"sort"
 	"strings"
 
@@ -140,8 +141,12 @@ func suppressLBWhitelistDiffs(k, old, new string, d *schema.ResourceData) bool {
 	return reflect.DeepEqual(old_array, new_array)
 }
 
-func suppressSchemaDiff(k, old, new string, d *schema.ResourceData) bool {
-	if strings.ToLower(old) == strings.ToLower(new) {
+func suppressCceMinorVersionDiff(k, old, new string, d *schema.ResourceData) bool {
+	compiled_ver := regexp.MustCompile(`v(\d+\.)?(\d+\.)?(\*|\d+)`)
+	compiled_patch := regexp.MustCompile(`(-\w+)`)
+
+	if strings.ToLower(compiled_ver.FindString(old)) == strings.ToLower(compiled_ver.FindString(new)) &&
+		strings.ToLower(compiled_patch.FindString(old)) == strings.ToLower(compiled_patch.FindString(new)) {
 		return true
 	}
 	return false
