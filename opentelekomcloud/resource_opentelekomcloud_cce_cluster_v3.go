@@ -60,7 +60,7 @@ func resourceCCEClusterV3() *schema.Resource {
 				Optional:         true,
 				Computed:         true,
 				ForceNew:         true,
-				DiffSuppressFunc: suppressCceMinorVersionDiff,
+				DiffSuppressFunc: suppressSmartVersionDiff,
 			},
 			"cluster_type": {
 				Type:     schema.TypeString,

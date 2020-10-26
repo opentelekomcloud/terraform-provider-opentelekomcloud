@@ -141,13 +141,9 @@ func suppressLBWhitelistDiffs(k, old, new string, d *schema.ResourceData) bool {
 	return reflect.DeepEqual(old_array, new_array)
 }
 
-func suppressCceMinorVersionDiff(k, old, new string, d *schema.ResourceData) bool {
-	compiled_ver := regexp.MustCompile(`v(\d+\.)?(\d+\.)?(\*|\d+)`)
-	compiled_patch := regexp.MustCompile(`(-\w+)`)
-
-	if strings.ToLower(compiled_ver.FindString(old)) == strings.ToLower(compiled_ver.FindString(new)) &&
-		strings.ToLower(compiled_patch.FindString(old)) == strings.ToLower(compiled_patch.FindString(new)) {
-		return true
-	}
-	return false
+func suppressSmartVersionDiff(k, old, new string, d *schema.ResourceData) bool {
+	compiled_ver := regexp.MustCompile(`(\d+)\.(\d+)`)
+	old_array := compiled_ver.FindStringSubmatch(old)
+	new_array := compiled_ver.FindStringSubmatch(new)
+	return reflect.DeepEqual(old_array, new_array)
 }
