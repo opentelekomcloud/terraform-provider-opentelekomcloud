@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"log"
 
+	"github.com/hashicorp/go-multierror"
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/identity/v3/users"
 )
@@ -61,6 +62,11 @@ func resourceIdentityUserV3() *schema.Resource {
 				Computed: true,
 				ForceNew: true,
 			},
+
+			"email": {
+				Type:     schema.TypeString,
+				Optional: true,
+			},
 		},
 	}
 }
@@ -92,7 +98,7 @@ func resourceIdentityUserV3Create(d *schema.ResourceData, meta interface{}) erro
 
 	d.SetId(user.ID)
 
-	return resourceIdentityUserV3Read(d, meta)
+	return setExtendedOpts(d, meta)
 }
 
 func resourceIdentityUserV3Read(d *schema.ResourceData, meta interface{}) error {
@@ -109,13 +115,40 @@ func resourceIdentityUserV3Read(d *schema.ResourceData, meta interface{}) error 
 
 	log.Printf("[DEBUG] Retrieved OpenStack user: %#v", user)
 
-	d.Set("default_project_id", user.DefaultProjectID)
-	d.Set("domain_id", user.DomainID)
-	d.Set("enabled", user.Enabled)
-	d.Set("name", user.Name)
-	d.Set("region", GetRegion(d, config))
+	mErr := multierror.Append(nil,
+		d.Set("default_project_id", user.DefaultProjectID),
+		d.Set("domain_id", user.DomainID),
+		d.Set("enabled", user.Enabled),
+		d.Set("name", user.Name),
+		d.Set("region", GetRegion(d, config)),
+	)
 
-	return nil
+	return mErr.ErrorOrNil()
+}
+
+func setExtendedOpts(d *schema.ResourceData, meta interface{}) error {
+	config := meta.(*Config)
+	identityClient, err := config.identityV3Client(GetRegion(d, config))
+	if err != nil {
+		return fmt.Errorf("Error creating OpenStack identity client: %s", err)
+	}
+
+	var hasChange bool
+	var updateOpts users.ExtendedUpdateOpts
+
+	if d.HasChange("email") {
+		hasChange = true
+		updateOpts.Email = d.Get("email").(string)
+	}
+
+	if hasChange {
+		_, err := users.ExtendedUpdate(identityClient, d.Id(), updateOpts).Extract()
+		if err != nil {
+			return fmt.Errorf("Error updating OpenStack user: %s", err)
+		}
+	}
+
+	return resourceIdentityUserV3Read(d, meta)
 }
 
 func resourceIdentityUserV3Update(d *schema.ResourceData, meta interface{}) error {
@@ -165,7 +198,7 @@ func resourceIdentityUserV3Update(d *schema.ResourceData, meta interface{}) erro
 		}
 	}
 
-	return resourceIdentityUserV3Read(d, meta)
+	return setExtendedOpts(d, meta)
 }
 
 func resourceIdentityUserV3Delete(d *schema.ResourceData, meta interface{}) error {

@@ -1,6 +1,10 @@
 package users
 
-import "github.com/opentelekomcloud/gophertelekomcloud"
+import (
+	"strings"
+
+	"github.com/opentelekomcloud/gophertelekomcloud"
+)
 
 func listURL(client *golangsdk.ServiceClient) string {
 	return client.ServiceURL("users")
@@ -16,6 +20,11 @@ func createURL(client *golangsdk.ServiceClient) string {
 
 func updateURL(client *golangsdk.ServiceClient, userID string) string {
 	return client.ServiceURL("users", userID)
+}
+
+func updateExtendedURL(client *golangsdk.ServiceClient, userID string) string {
+	url := client.ServiceURL("OS-USER", "users", userID)
+	return strings.Replace(url, "/v3/", "/v3.0/", 1)
 }
 
 func deleteURL(client *golangsdk.ServiceClient, userID string) string {

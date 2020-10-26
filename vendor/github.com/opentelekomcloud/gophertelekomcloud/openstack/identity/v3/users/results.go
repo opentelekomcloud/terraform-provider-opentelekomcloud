@@ -33,6 +33,25 @@ type User struct {
 
 	// PasswordExpiresAt is the timestamp when the user's password expires.
 	PasswordExpiresAt time.Time `json:"-"`
+
+	// Email is the email of the user
+	Email string `json:"email,omitempty"`
+
+	// AreaCode is country code
+	AreaCode string `json:"areacode,omitempty"`
+
+	// Phone is mobile number, which can contain a maximum of 32 digits.
+	// The mobile number must be used together with a country code.
+	Phone string `json:"phone,omitempty"`
+
+	// Whether password reset is required at first login
+	PwdResetRequired bool `json:"pwd_status,omitempty"`
+
+	// XUserType is Type of the IAM user in the external system.
+	XUserType string `json:"xuser_type,omitempty"`
+
+	// XUserID is ID of the IAM user in the external system.
+	XUserID string `json:"xuser_id,omitempty"`
 }
 
 func (r *User) UnmarshalJSON(b []byte) error {
@@ -71,6 +90,12 @@ type CreateResult struct {
 // UpdateResult is the response from an Update operation. Call its Extract
 // method to interpret it as a User.
 type UpdateResult struct {
+	userResult
+}
+
+// UpdateExtendedResult is the response from an UpdateExtended operation. Call its Extract
+// method to interpret it as a User.
+type UpdateExtendedResult struct {
 	userResult
 }
 

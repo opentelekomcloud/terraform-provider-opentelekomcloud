@@ -31,6 +31,8 @@ func TestAccIdentityV3User_basic(t *testing.T) {
 						"opentelekomcloud_identity_user_v3.user_1", "name", &user.Name),
 					resource.TestCheckResourceAttr(
 						"opentelekomcloud_identity_user_v3.user_1", "enabled", "true"),
+					resource.TestCheckResourceAttr(
+						"opentelekomcloud_identity_user_v3.user_1", "email", "test@acme.org"),
 				),
 			},
 			{
@@ -41,6 +43,8 @@ func TestAccIdentityV3User_basic(t *testing.T) {
 						"opentelekomcloud_identity_user_v3.user_1", "name", &user.Name),
 					resource.TestCheckResourceAttr(
 						"opentelekomcloud_identity_user_v3.user_1", "enabled", "false"),
+					resource.TestCheckResourceAttr(
+						"opentelekomcloud_identity_user_v3.user_1", "email", "test2@acme.org"),
 				),
 			},
 		},
@@ -106,6 +110,7 @@ func testAccIdentityV3User_basic(userName string) string {
       name = "%s"
       password = "password123@!"
       enabled = true
+      email = "test@acme.org"
     }
   `, userName)
 }
@@ -116,6 +121,7 @@ func testAccIdentityV3User_update(userName string) string {
       name = "%s"
       enabled = false
       password = "password123@!"
+      email = "test2@acme.org"
     }
   `, userName)
 }
