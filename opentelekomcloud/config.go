@@ -610,9 +610,8 @@ func (c *Config) dnsV2Client(region string) (*golangsdk.ServiceClient, error) {
 	})
 }
 
-func (c *Config) identityV3Client(region string) (*golangsdk.ServiceClient, error) {
+func (c *Config) identityV3Client(_ string) (*golangsdk.ServiceClient, error) {
 	return openstack.NewIdentityV3(c.DomainClient, golangsdk.EndpointOpts{
-		// Region:       region,
 		Availability: c.getHwEndpointType(),
 	})
 }
