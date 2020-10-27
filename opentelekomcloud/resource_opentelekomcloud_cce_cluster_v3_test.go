@@ -131,11 +131,11 @@ func TestAccCCEClusterV3_update_with_version_diff(t *testing.T) {
 		CheckDestroy: testAccCheckCCEClusterV3Destroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccCCEClusterV3_updateWithInvalidVersion,
+				Config: testAccCCEClusterV3_withInvalidVersion,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckCCEClusterV3Exists("opentelekomcloud_cce_cluster_v3.cluster_1", &cluster),
 					resource.TestCheckResourceAttr(
-						"opentelekomcloud_cce_cluster_v3.cluster_1", "name", "opentelekomcloud-cce"),
+						"opentelekomcloud_cce_cluster_v3.cluster_1", "name", "opentelekomcloud-cce-ver"),
 				),
 			},
 		},
@@ -187,9 +187,9 @@ resource "opentelekomcloud_cce_cluster_v3" "cluster_1" {
 }
 `, OS_VPC_ID, OS_NETWORK_ID)
 
-var testAccCCEClusterV3_updateWithInvalidVersion = fmt.Sprintf(`
+var testAccCCEClusterV3_withInvalidVersion = fmt.Sprintf(`
 resource "opentelekomcloud_cce_cluster_v3" "cluster_1" {
-  name = "opentelekomcloud-cce"
+  name = "opentelekomcloud-cce-ver"
   cluster_type="VirtualMachine"
   flavor_id="cce.s1.small"
   cluster_version = "v1.9.2"
