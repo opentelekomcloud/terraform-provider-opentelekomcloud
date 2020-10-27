@@ -148,8 +148,11 @@ func suppressSmartVersionDiff(k, old, new string, d *schema.ResourceData) bool {
 		return false
 	}
 	for i := 1; i < len(newArray); i++ {
-		if oldArray[i] != newArray[i] {
+		if oldArray[i] == "" || newArray[i] == "" {
 			return true
+		}
+		if oldArray[i] != newArray[i] {
+			return false
 		}
 	}
 	return false
