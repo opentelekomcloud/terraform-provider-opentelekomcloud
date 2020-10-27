@@ -142,8 +142,8 @@ func suppressLBWhitelistDiffs(k, old, new string, d *schema.ResourceData) bool {
 }
 
 func suppressSmartVersionDiff(k, old, new string, d *schema.ResourceData) bool {
-	compiled_ver := regexp.MustCompile(`(\d+)\.(\d+)`)
-	old_array := compiled_ver.FindStringSubmatch(old)
-	new_array := compiled_ver.FindStringSubmatch(new)
-	return reflect.DeepEqual(old_array, new_array)
+	compiledVer := regexp.MustCompile(`(\d+)\.(\d+)`)
+	oldArray := compiledVer.FindStringSubmatch(old)
+	newArray := compiledVer.FindStringSubmatch(new)
+	return reflect.DeepEqual(oldArray, newArray)
 }
