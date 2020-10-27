@@ -1,8 +1,9 @@
 package opentelekomcloud
 
 import (
-	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
 	"testing"
+
+	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
 )
 
 func TestAccOTCDedicatedHostV1_importBasic(t *testing.T) {

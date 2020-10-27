@@ -29,8 +29,8 @@ resource "opentelekomcloud_blockstorage_volume_v2" "volume_1" {
 
 The following arguments are supported:
 
-* `size` - (Required) The size of the volume to create (in gigabytes). Changing
-  this creates a new volume.
+* `size` - (Required) The size of the volume to create (in gigabytes). Decreasing
+  this parameter creates a new volume.
 
 * `availability_zone` - (Optional) The availability zone for the volume.
   Changing this creates a new volume.

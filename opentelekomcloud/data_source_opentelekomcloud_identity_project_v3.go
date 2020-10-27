@@ -5,7 +5,7 @@ import (
 	"log"
 
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
-	"github.com/huaweicloud/golangsdk/openstack/identity/v3/projects"
+	"github.com/opentelekomcloud/gophertelekomcloud/openstack/identity/v3/projects"
 )
 
 func dataSourceIdentityProjectV3() *schema.Resource {

@@ -6,7 +6,7 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/terraform"
-	"github.com/huaweicloud/golangsdk/openstack/deh/v1/hosts"
+	"github.com/opentelekomcloud/gophertelekomcloud/openstack/deh/v1/hosts"
 )
 
 func TestAccOTCDedicatedHostV1_basic(t *testing.T) {
@@ -141,16 +141,16 @@ func testAccCheckOTCDeHV1Exists(n string, host *hosts.Host) resource.TestCheckFu
 
 var testAccDeHV1_basic = fmt.Sprintf(`
 resource "opentelekomcloud_deh_host_v1" "deh1" {
-	 availability_zone= "%s"     
+	 availability_zone= "%s"
      auto_placement= "off"
-     host_type= "h1"   
+     host_type= "h1"
 	name = "test-deh-1"
 }
 `, OS_AVAILABILITY_ZONE)
 
 var testAccDeHV1_update = fmt.Sprintf(`
 resource "opentelekomcloud_deh_host_v1" "deh1" {
-	 availability_zone= "%s"     
+	 availability_zone= "%s"
      auto_placement= "on"
      host_type= "h1"
 	name = "test-deh-2"
@@ -159,7 +159,7 @@ resource "opentelekomcloud_deh_host_v1" "deh1" {
 
 var testAccDeHV1_timeout = fmt.Sprintf(`
 resource "opentelekomcloud_deh_host_v1" "deh1" {
-	 availability_zone= "%s"     
+	 availability_zone= "%s"
      auto_placement= "off"
      host_type= "h1"
 	name = "test-deh-1"

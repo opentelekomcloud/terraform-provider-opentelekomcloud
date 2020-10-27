@@ -6,10 +6,10 @@ import (
 	"strings"
 
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
-	"github.com/huaweicloud/golangsdk"
-	"github.com/huaweicloud/golangsdk/openstack/compute/v2/extensions/floatingips"
-	"github.com/huaweicloud/golangsdk/openstack/compute/v2/servers"
-	nfloatingips "github.com/huaweicloud/golangsdk/openstack/networking/v2/extensions/layer3/floatingips"
+	"github.com/opentelekomcloud/gophertelekomcloud"
+	"github.com/opentelekomcloud/gophertelekomcloud/openstack/compute/v2/extensions/floatingips"
+	"github.com/opentelekomcloud/gophertelekomcloud/openstack/compute/v2/servers"
+	nfloatingips "github.com/opentelekomcloud/gophertelekomcloud/openstack/networking/v2/extensions/layer3/floatingips"
 )
 
 func resourceComputeFloatingIPAssociateV2() *schema.Resource {

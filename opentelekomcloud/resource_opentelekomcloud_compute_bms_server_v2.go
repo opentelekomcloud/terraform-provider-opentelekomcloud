@@ -10,17 +10,17 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
-	"github.com/huaweicloud/golangsdk"
-	bms "github.com/huaweicloud/golangsdk/openstack/bms/v2/servers"
-	"github.com/huaweicloud/golangsdk/openstack/bms/v2/tags"
-	"github.com/huaweicloud/golangsdk/openstack/compute/v2/extensions/bootfromvolume"
-	"github.com/huaweicloud/golangsdk/openstack/compute/v2/extensions/keypairs"
-	"github.com/huaweicloud/golangsdk/openstack/compute/v2/extensions/secgroups"
-	"github.com/huaweicloud/golangsdk/openstack/compute/v2/extensions/startstop"
-	"github.com/huaweicloud/golangsdk/openstack/compute/v2/flavors"
-	"github.com/huaweicloud/golangsdk/openstack/compute/v2/images"
-	"github.com/huaweicloud/golangsdk/openstack/compute/v2/servers"
-	ecstags "github.com/huaweicloud/golangsdk/openstack/ecs/v1/cloudservertags"
+	"github.com/opentelekomcloud/gophertelekomcloud"
+	bms "github.com/opentelekomcloud/gophertelekomcloud/openstack/bms/v2/servers"
+	"github.com/opentelekomcloud/gophertelekomcloud/openstack/bms/v2/tags"
+	"github.com/opentelekomcloud/gophertelekomcloud/openstack/compute/v2/extensions/bootfromvolume"
+	"github.com/opentelekomcloud/gophertelekomcloud/openstack/compute/v2/extensions/keypairs"
+	"github.com/opentelekomcloud/gophertelekomcloud/openstack/compute/v2/extensions/secgroups"
+	"github.com/opentelekomcloud/gophertelekomcloud/openstack/compute/v2/extensions/startstop"
+	"github.com/opentelekomcloud/gophertelekomcloud/openstack/compute/v2/flavors"
+	"github.com/opentelekomcloud/gophertelekomcloud/openstack/compute/v2/images"
+	"github.com/opentelekomcloud/gophertelekomcloud/openstack/compute/v2/servers"
+	ecstags "github.com/opentelekomcloud/gophertelekomcloud/openstack/ecs/v1/cloudservertags"
 )
 
 func resourceComputeBMSInstanceV2() *schema.Resource {

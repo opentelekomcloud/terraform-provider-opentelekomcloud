@@ -6,7 +6,7 @@ import (
 	"strconv"
 
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
-	"github.com/huaweicloud/golangsdk/openstack/dms/v1/maintainwindows"
+	"github.com/opentelekomcloud/gophertelekomcloud/openstack/dms/v1/maintainwindows"
 )
 
 func dataSourceDmsMaintainWindowV1() *schema.Resource {

@@ -4,8 +4,8 @@ import (
 	"fmt"
 	"sort"
 
-	"github.com/huaweicloud/golangsdk/openstack/networking/v1/subnets"
-	"github.com/huaweicloud/golangsdk/openstack/networking/v2/extensions/networkipavailabilities"
+	"github.com/opentelekomcloud/gophertelekomcloud/openstack/networking/v1/subnets"
+	"github.com/opentelekomcloud/gophertelekomcloud/openstack/networking/v2/extensions/networkipavailabilities"
 
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
 )

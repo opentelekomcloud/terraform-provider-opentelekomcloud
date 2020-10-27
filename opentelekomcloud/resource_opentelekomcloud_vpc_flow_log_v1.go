@@ -7,9 +7,9 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/helper/validation"
+	"github.com/opentelekomcloud/gophertelekomcloud"
 
-	"github.com/huaweicloud/golangsdk"
-	"github.com/huaweicloud/golangsdk/openstack/networking/v1/flowlogs"
+	"github.com/opentelekomcloud/gophertelekomcloud/openstack/networking/v1/flowlogs"
 )
 
 func resourceVpcFlowLogV1() *schema.Resource {

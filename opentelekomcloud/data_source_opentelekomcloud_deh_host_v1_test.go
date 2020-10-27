@@ -2,9 +2,10 @@ package opentelekomcloud
 
 import (
 	"fmt"
+	"testing"
+
 	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/terraform"
-	"testing"
 )
 
 func TestAccOTCDedicatedHostV1DataSource_basic(t *testing.T) {
@@ -41,7 +42,7 @@ func testAccCheckDedicatedHostV1DataSourceID(n string) resource.TestCheckFunc {
 
 var testAccOTCDedicatedHostV1DataSource_basic = fmt.Sprintf(`
 resource "opentelekomcloud_deh_host_v1" "deh1" {
-	 availability_zone= "%s"     
+	 availability_zone= "%s"
      auto_placement= "on"
      host_type= "h1"
 	 name = "test-deh-1"

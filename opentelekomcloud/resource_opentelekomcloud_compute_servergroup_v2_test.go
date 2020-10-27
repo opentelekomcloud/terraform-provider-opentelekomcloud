@@ -7,8 +7,8 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/terraform"
 
-	"github.com/huaweicloud/golangsdk/openstack/compute/v2/extensions/servergroups"
-	"github.com/huaweicloud/golangsdk/openstack/compute/v2/servers"
+	"github.com/opentelekomcloud/gophertelekomcloud/openstack/compute/v2/extensions/servergroups"
+	"github.com/opentelekomcloud/gophertelekomcloud/openstack/compute/v2/servers"
 )
 
 func TestAccComputeV2ServerGroup_basic(t *testing.T) {

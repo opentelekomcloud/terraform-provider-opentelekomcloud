@@ -7,7 +7,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/terraform"
 
-	"github.com/huaweicloud/golangsdk/openstack/networking/v1/flowlogs"
+	"github.com/opentelekomcloud/gophertelekomcloud/openstack/networking/v1/flowlogs"
 )
 
 const (

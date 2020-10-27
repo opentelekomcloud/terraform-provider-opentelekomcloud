@@ -6,8 +6,8 @@ import (
 	"strings"
 
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
-	"github.com/huaweicloud/golangsdk/openstack/lts/v2/loggroups"
-	"github.com/huaweicloud/golangsdk/openstack/lts/v2/logtopics"
+	"github.com/opentelekomcloud/gophertelekomcloud/openstack/lts/v2/loggroups"
+	"github.com/opentelekomcloud/gophertelekomcloud/openstack/lts/v2/logtopics"
 )
 
 func resourceLTSTopicV2() *schema.Resource {

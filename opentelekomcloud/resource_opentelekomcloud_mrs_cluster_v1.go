@@ -8,11 +8,11 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
-	"github.com/huaweicloud/golangsdk"
-	"github.com/huaweicloud/golangsdk/openstack/mrs/v1/cluster"
-	"github.com/huaweicloud/golangsdk/openstack/mrs/v1/tags"
-	"github.com/huaweicloud/golangsdk/openstack/networking/v1/subnets"
-	"github.com/huaweicloud/golangsdk/openstack/networking/v1/vpcs"
+	"github.com/opentelekomcloud/gophertelekomcloud"
+	"github.com/opentelekomcloud/gophertelekomcloud/openstack/mrs/v1/cluster"
+	"github.com/opentelekomcloud/gophertelekomcloud/openstack/mrs/v1/tags"
+	"github.com/opentelekomcloud/gophertelekomcloud/openstack/networking/v1/subnets"
+	"github.com/opentelekomcloud/gophertelekomcloud/openstack/networking/v1/vpcs"
 )
 
 func resourceMRSClusterV1() *schema.Resource {

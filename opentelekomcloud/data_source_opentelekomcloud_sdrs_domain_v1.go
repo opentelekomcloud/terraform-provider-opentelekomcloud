@@ -5,7 +5,7 @@ import (
 	"log"
 
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
-	"github.com/huaweicloud/golangsdk/openstack/sdrs/v1/domains"
+	"github.com/opentelekomcloud/gophertelekomcloud/openstack/sdrs/v1/domains"
 )
 
 func dataSourceSdrsDomainV1() *schema.Resource {

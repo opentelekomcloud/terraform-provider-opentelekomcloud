@@ -8,7 +8,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/terraform"
 
-	"github.com/huaweicloud/golangsdk/openstack/identity/v3/users"
+	"github.com/opentelekomcloud/gophertelekomcloud/openstack/identity/v3/users"
 )
 
 func TestAccIdentityV3User_basic(t *testing.T) {
@@ -106,7 +106,7 @@ func testAccIdentityV3User_basic(userName string) string {
       name = "%s"
       password = "password123@!"
       enabled = true
-    }  
+    }
   `, userName)
 }
 

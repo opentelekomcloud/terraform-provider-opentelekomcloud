@@ -7,12 +7,9 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/terraform"
 
-	//"github.com/huaweicloud/golangsdk/openstack/compute/v2/extensions/secgroups"
-	//"github.com/huaweicloud/golangsdk/openstack/compute/v2/servers"
-	"github.com/huaweicloud/golangsdk/openstack/networking/v2/extensions/layer3/routers"
-	"github.com/huaweicloud/golangsdk/openstack/networking/v2/networks"
-	//"github.com/huaweicloud/golangsdk/openstack/networking/v2/ports"
-	"github.com/huaweicloud/golangsdk/openstack/networking/v2/subnets"
+	"github.com/opentelekomcloud/gophertelekomcloud/openstack/networking/v2/extensions/layer3/routers"
+	"github.com/opentelekomcloud/gophertelekomcloud/openstack/networking/v2/networks"
+	"github.com/opentelekomcloud/gophertelekomcloud/openstack/networking/v2/subnets"
 )
 
 func TestAccNetworkingV2Network_basic(t *testing.T) {

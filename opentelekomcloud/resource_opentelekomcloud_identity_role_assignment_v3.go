@@ -3,13 +3,12 @@ package opentelekomcloud
 import (
 	"fmt"
 	"log"
-
 	"strings"
 
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
-	"github.com/huaweicloud/golangsdk"
-	"github.com/huaweicloud/golangsdk/openstack/identity/v3/roles"
-	"github.com/huaweicloud/golangsdk/pagination"
+	"github.com/opentelekomcloud/gophertelekomcloud"
+	"github.com/opentelekomcloud/gophertelekomcloud/openstack/identity/v3/roles"
+	"github.com/opentelekomcloud/gophertelekomcloud/pagination"
 )
 
 func resourceIdentityRoleAssignmentV3() *schema.Resource {

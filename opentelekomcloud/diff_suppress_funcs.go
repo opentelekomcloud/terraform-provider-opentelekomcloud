@@ -10,7 +10,6 @@ import (
 	"sort"
 	"strings"
 
-	//"fmt"
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
 	"github.com/jen20/awspolicyequivalence"
 )

@@ -6,9 +6,8 @@ import (
 	"time"
 
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
-	"github.com/huaweicloud/golangsdk/openstack/rts/v1/softwaredeployment"
-
-	"github.com/huaweicloud/golangsdk"
+	"github.com/opentelekomcloud/gophertelekomcloud"
+	"github.com/opentelekomcloud/gophertelekomcloud/openstack/rts/v1/softwaredeployment"
 )
 
 func resourceRtsSoftwareDeploymentV1() *schema.Resource {

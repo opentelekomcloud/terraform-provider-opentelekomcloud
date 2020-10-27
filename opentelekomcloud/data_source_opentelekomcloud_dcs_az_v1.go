@@ -5,7 +5,7 @@ import (
 	"log"
 
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
-	"github.com/huaweicloud/golangsdk/openstack/dcs/v1/availablezones"
+	"github.com/opentelekomcloud/gophertelekomcloud/openstack/dcs/v1/availablezones"
 )
 
 func dataSourceDcsAZV1() *schema.Resource {

@@ -4,7 +4,7 @@ import (
 	"fmt"
 
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
-	"github.com/huaweicloud/golangsdk/openstack/evs/v2/tags"
+	"github.com/opentelekomcloud/gophertelekomcloud/openstack/evs/v2/tags"
 )
 
 func resourceEVSTagV2Create(d *schema.ResourceData, meta interface{}, resourceType, resourceID string, tag map[string]string) (*tags.Tags, error) {

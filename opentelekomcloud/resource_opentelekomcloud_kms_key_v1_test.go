@@ -7,7 +7,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/helper/acctest"
 	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/terraform"
-	"github.com/huaweicloud/golangsdk/openstack/kms/v1/keys"
+	"github.com/opentelekomcloud/gophertelekomcloud/openstack/kms/v1/keys"
 )
 
 func TestAccKmsKeyV1_basic(t *testing.T) {

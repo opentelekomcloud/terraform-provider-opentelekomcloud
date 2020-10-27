@@ -6,7 +6,7 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/terraform"
-	"github.com/huaweicloud/golangsdk/openstack/csbs/v1/policies"
+	"github.com/opentelekomcloud/gophertelekomcloud/openstack/csbs/v1/policies"
 )
 
 func TestAccCSBSBackupPolicyV1_basic(t *testing.T) {

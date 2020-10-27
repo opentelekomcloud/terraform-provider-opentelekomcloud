@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"io"
 	"log"
-	//"net/url"
 	"os"
 	"sort"
 	"strings"
@@ -15,7 +14,7 @@ import (
 
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/awserr"
-	//"github.com/aws/aws-sdk-go/service/kms"
+	// "github.com/aws/aws-sdk-go/service/kms"
 	"github.com/aws/aws-sdk-go/service/s3"
 )
 

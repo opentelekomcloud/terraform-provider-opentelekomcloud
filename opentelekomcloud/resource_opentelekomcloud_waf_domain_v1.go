@@ -8,9 +8,9 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/helper/validation"
-	"github.com/huaweicloud/golangsdk"
-	"github.com/huaweicloud/golangsdk/openstack/waf/v1/domains"
-	"github.com/huaweicloud/golangsdk/openstack/waf/v1/policies"
+	"github.com/opentelekomcloud/gophertelekomcloud"
+	"github.com/opentelekomcloud/gophertelekomcloud/openstack/waf/v1/domains"
+	"github.com/opentelekomcloud/gophertelekomcloud/openstack/waf/v1/policies"
 )
 
 func resourceWafDomainV1() *schema.Resource {

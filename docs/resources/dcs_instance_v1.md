@@ -32,18 +32,19 @@ resource "opentelekomcloud_dcs_instance_v1" "instance_1" {
   capacity       = 2
   vpc_id         = "1477393a-29c9-4de5-843f-18ef51257c7e"
 
-  security_group_id = "${opentelekomcloud_networking_secgroup_v2.secgroup_1.id}"
+  security_group_id = opentelekomcloud_networking_secgroup_v2.secgroup_1.id
   subnet_id         = "27d99e17-42f2-4751-818f-5c8c6c03ff15"
-  available_zones   = ["${data.opentelekomcloud_dcs_az_v1.az_1.id}"]
-  product_id        = "${data.opentelekomcloud_dcs_product_v1.product_1.id}"
-
-  save_days   = 1
-  backup_type = "manual"
-  begin_at    = "00:00-01:00"
-  period_type = "weekly"
-  backup_at   = [1]
-  depends_on  = ["data.opentelekomcloud_dcs_product_v1.product_1",
-                 "opentelekomcloud_networking_secgroup_v2.secgroup_1"]
+  available_zones   = [data.opentelekomcloud_dcs_az_v1.az_1.id]
+  product_id        = data.opentelekomcloud_dcs_product_v1.product_1.id
+  backup_policy {
+    save_days   = 1
+    backup_type = "manual"
+    begin_at    = "00:00-01:00"
+    period_type = "weekly"
+    backup_at   = [1, 2, 4, 6]
+  }
+  depends_on  = [data.opentelekomcloud_dcs_product_v1.product_1,
+                 opentelekomcloud_networking_secgroup_v2.secgroup_1]
 }
 ```
 
@@ -114,22 +115,24 @@ The following arguments are supported:
   blank, parameter maintain_begin is also blank. In this case, the system automatically allocates
   the default end time 06:00.
 
-* `save_days` - (Required) Retention time. Unit: day. Range: 1–7.
-  Changing this creates a new instance.
+* `backup_policy` - (Optional) Describes the backup configuration to be used with the instance.
 
-* `backup_type` - (Required) Backup type. Options:
-  auto: automatic backup.
-  manual: manual backup.
-  Changing this creates a new instance.
+    * `save_days` - (Optional) Retention time. Unit: day. Range: 1–7.
 
-* `begin_at` - (Required) Time at which backup starts. "00:00-01:00" indicates that backup
-  starts at 00:00:00. Changing this creates a new instance.
+    * `backup_type` - (Optional) Backup type.
 
-* `period_type` - (Required) Interval at which backup is performed. Currently, only weekly
-  backup is supported. Changing this creates a new instance.
+      Options:
+      * `auto`: automatic backup
+      * `manual`: manual backup (default)
 
-* `backup_at` - (Required) Day in a week on which backup starts. Range: 1–7. Where: 1
-  indicates Monday; 7 indicates Sunday. Changing this creates a new instance.
+    * `begin_at` - (Required) Time at which backup starts. "00:00-01:00" indicates that backup
+      starts at `00:00:00`.
+
+    * `period_type` - (Required) Interval at which backup is performed.
+      Currently, only weekly backup is supported.
+
+    * `backup_at` - (Required) Day in a week on which backup starts. Range: 1–7. Where: 1
+      indicates Monday; 7 indicates Sunday.
 
 ## Attributes Reference
 
@@ -179,12 +182,14 @@ The following attributes are exported:
 
 * `backup_at` - See Argument Reference above.
 
+* `backup_policy` - See Argument Reference above.
+
 * `order_id` - An order ID is generated only in the monthly or yearly billing mode.
   In other billing modes, no value is returned for this parameter.
 
 * `port` - Port of the cache node.
 
-* `resource_spec_code` - Resource specifications. 
+* `resource_spec_code` - Resource specifications.
   * `dcs.single_node`: indicates a DCS instance in single-node mode.
   * `dcs.master_standby`: indicates a DCS instance in master/standby mode.
   * `dcs.cluster`: indicates a DCS instance in cluster mode.
@@ -197,4 +202,11 @@ The following attributes are exported:
 
 * `user_id` - Indicates a user ID.
 
-* `ip` - Cache node's IP address in tenant's VPC.
+* `user_name` - Username.
+
+* `ip` - Cache node's IP address in the tenant's VPC.
+
+* `status` - Cache instance status. One of `CREATING`, `CREATEFAILED`, `RUNNING`, `ERROR`,
+  `RESTARTING`, `EXTENDING`, `RESTORING`
+
+* `created_at` - Time at which the DCS instance is created. For example, `2017-03-31T12:24:46.297Z`.
