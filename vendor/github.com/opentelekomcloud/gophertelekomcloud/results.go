@@ -38,6 +38,17 @@ type Result struct {
 	Err error
 }
 
+type JsonRDSInstanceStatus struct {
+	Instances  []JsonRDSInstanceField `json:"instances"`
+	TotalCount int                    `json:"total_count"`
+}
+
+type JsonRDSInstanceField struct {
+	Id     string `json:"id"`
+	Name   string `json:"name"`
+	Status string `json:"status"`
+}
+
 // ExtractInto allows users to provide an object into which `Extract` will extract
 // the `Result.Body`. This would be useful for OpenStack providers that have
 // different fields in the response object than OpenStack proper.

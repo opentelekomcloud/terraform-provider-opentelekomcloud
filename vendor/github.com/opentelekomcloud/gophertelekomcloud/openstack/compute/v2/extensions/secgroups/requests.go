@@ -1,6 +1,8 @@
 package secgroups
 
 import (
+	"time"
+
 	"github.com/opentelekomcloud/gophertelekomcloud"
 	"github.com/opentelekomcloud/gophertelekomcloud/pagination"
 )
@@ -100,6 +102,22 @@ func Delete(client *golangsdk.ServiceClient, id string) (r DeleteResult) {
 	return
 }
 
+// DeleteWithRetry will try to permanently delete a particular security
+// group based on its unique ID and RetryTimeout.
+func DeleteWithRetry(c *golangsdk.ServiceClient, id string, timeout int) error {
+	return golangsdk.WaitFor(timeout, func() (bool, error) {
+		_, err := c.Delete(resourceURL(c, id), nil)
+		if err != nil {
+			if _, ok := err.(golangsdk.ErrDefault409); ok {
+				time.Sleep(10 * time.Second)
+				return false, nil
+			}
+			return false, err
+		}
+		return true, nil
+	})
+}
+
 // CreateRuleOpts represents the configuration for adding a new rule to an
 // existing security group.
 type CreateRuleOpts struct {
@@ -165,7 +183,7 @@ func DeleteRule(client *golangsdk.ServiceClient, id string) (r DeleteRuleResult)
 
 func actionMap(prefix, groupName string) map[string]map[string]string {
 	return map[string]map[string]string{
-		prefix + "SecurityGroup": map[string]string{"name": groupName},
+		prefix + "SecurityGroup": {"name": groupName},
 	}
 }
 

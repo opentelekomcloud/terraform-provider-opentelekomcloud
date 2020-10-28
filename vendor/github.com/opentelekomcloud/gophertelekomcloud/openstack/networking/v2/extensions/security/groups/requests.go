@@ -1,6 +1,8 @@
 package groups
 
 import (
+	"time"
+
 	"github.com/opentelekomcloud/gophertelekomcloud"
 	"github.com/opentelekomcloud/gophertelekomcloud/pagination"
 )
@@ -121,6 +123,22 @@ func Get(c *golangsdk.ServiceClient, id string) (r GetResult) {
 func Delete(c *golangsdk.ServiceClient, id string) (r DeleteResult) {
 	_, r.Err = c.Delete(resourceURL(c, id), nil)
 	return
+}
+
+// DeleteWithRetry will try to permanently delete a particular security
+// group based on its unique ID and RetryTimeout.
+func DeleteWithRetry(c *golangsdk.ServiceClient, id string, timeout int) error {
+	return golangsdk.WaitFor(timeout, func() (bool, error) {
+		_, err := c.Delete(resourceURL(c, id), nil)
+		if err != nil {
+			if _, ok := err.(golangsdk.ErrDefault409); ok {
+				time.Sleep(10 * time.Second)
+				return false, nil
+			}
+			return false, err
+		}
+		return true, nil
+	})
 }
 
 // IDFromName is a convenience function that returns a security group's ID,
