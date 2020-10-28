@@ -157,3 +157,7 @@ func suppressSmartVersionDiff(k, old, new string, d *schema.ResourceData) bool {
 	}
 	return false
 }
+
+func suppressCaseInsensitive(_, old, new string, _ *schema.ResourceData) bool {
+	return strings.ToLower(old) == strings.ToLower(new)
+}

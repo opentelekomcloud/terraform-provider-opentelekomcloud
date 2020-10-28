@@ -4,9 +4,9 @@ subcategory: "Identity and Access Management (IAM)"
 
 # opentelekomcloud_identity_user_v3
 
-Manages a User resource within OpentelekomCloud IAM service.
+Manages a User resource within OpenTelekomCloud IAM service.
 
--> **Note:** You _must_ have admin privileges in your OpentelekomCloud cloud to use
+-> **Note:** You need to have admin privileges in your OpenTelekomCloud cloud to use
 this resource.
 
 ## Example Usage
@@ -23,7 +23,7 @@ resource "opentelekomcloud_identity_user_v3" "user_1" {
 The following arguments are supported:
 
 * `name` - (Required) The name of the user. The user name consists of 5 to 32
-  characters. It can contain only uppercase letters, lowercase letters, 
+  characters. It can contain only uppercase letters, lowercase letters,
   digits, spaces, and special characters (-_) and cannot start with a digit.
 
 * `default_project_id` - (Optional) The default project this user belongs to.
@@ -33,9 +33,11 @@ The following arguments are supported:
 * `enabled` - (Optional) Whether the user is enabled or disabled. Valid
   values are `true` and `false`.
 
-* `password` - (Optional) The password for the user. It must contain at least 
-  two of the following character types: uppercase letters, lowercase letters, 
+* `password` - (Optional) The password for the user. It must contain at least
+  two of the following character types: uppercase letters, lowercase letters,
   digits, and special characters.
+
+* `email` - (Optional) The email associated with user.
 
 ## Attributes Reference
 
