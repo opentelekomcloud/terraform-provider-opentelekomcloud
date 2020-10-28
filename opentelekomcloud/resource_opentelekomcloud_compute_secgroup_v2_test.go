@@ -11,7 +11,7 @@ import (
 )
 
 func TestAccComputeV2SecGroup_basic(t *testing.T) {
-	var secgroup secgroups.SecurityGroup
+	var secGroup secgroups.SecurityGroup
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
@@ -21,7 +21,7 @@ func TestAccComputeV2SecGroup_basic(t *testing.T) {
 			{
 				Config: testAccComputeV2SecGroup_basic_orig,
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckComputeV2SecGroupExists("opentelekomcloud_compute_secgroup_v2.sg_1", &secgroup),
+					testAccCheckComputeV2SecGroupExists("opentelekomcloud_compute_secgroup_v2.sg_1", &secGroup),
 				),
 			},
 		},
@@ -29,7 +29,7 @@ func TestAccComputeV2SecGroup_basic(t *testing.T) {
 }
 
 func TestAccComputeV2SecGroup_update(t *testing.T) {
-	var secgroup secgroups.SecurityGroup
+	var secGroup secgroups.SecurityGroup
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
@@ -39,14 +39,14 @@ func TestAccComputeV2SecGroup_update(t *testing.T) {
 			{
 				Config: testAccComputeV2SecGroup_basic_orig,
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckComputeV2SecGroupExists("opentelekomcloud_compute_secgroup_v2.sg_1", &secgroup),
+					testAccCheckComputeV2SecGroupExists("opentelekomcloud_compute_secgroup_v2.sg_1", &secGroup),
 				),
 			},
 			{
 				Config: testAccComputeV2SecGroup_basic_update,
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckComputeV2SecGroupExists("opentelekomcloud_compute_secgroup_v2.sg_1", &secgroup),
-					testAccCheckComputeV2SecGroupRuleCount(&secgroup, 2),
+					testAccCheckComputeV2SecGroupExists("opentelekomcloud_compute_secgroup_v2.sg_1", &secGroup),
+					testAccCheckComputeV2SecGroupRuleCount(&secGroup, 2),
 				),
 			},
 		},
@@ -54,7 +54,7 @@ func TestAccComputeV2SecGroup_update(t *testing.T) {
 }
 
 func TestAccComputeV2SecGroup_groupID(t *testing.T) {
-	var secgroup1, secgroup2, secgroup3 secgroups.SecurityGroup
+	var secgroup1, secGroup2, secgroup3 secgroups.SecurityGroup
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
@@ -65,7 +65,7 @@ func TestAccComputeV2SecGroup_groupID(t *testing.T) {
 				Config: testAccComputeV2SecGroup_groupID_orig,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckComputeV2SecGroupExists("opentelekomcloud_compute_secgroup_v2.sg_1", &secgroup1),
-					testAccCheckComputeV2SecGroupExists("opentelekomcloud_compute_secgroup_v2.sg_2", &secgroup2),
+					testAccCheckComputeV2SecGroupExists("opentelekomcloud_compute_secgroup_v2.sg_2", &secGroup2),
 					testAccCheckComputeV2SecGroupExists("opentelekomcloud_compute_secgroup_v2.sg_3", &secgroup3),
 					testAccCheckComputeV2SecGroupGroupIDMatch(&secgroup1, &secgroup3),
 				),
@@ -74,9 +74,9 @@ func TestAccComputeV2SecGroup_groupID(t *testing.T) {
 				Config: testAccComputeV2SecGroup_groupID_update,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckComputeV2SecGroupExists("opentelekomcloud_compute_secgroup_v2.sg_1", &secgroup1),
-					testAccCheckComputeV2SecGroupExists("opentelekomcloud_compute_secgroup_v2.sg_2", &secgroup2),
+					testAccCheckComputeV2SecGroupExists("opentelekomcloud_compute_secgroup_v2.sg_2", &secGroup2),
 					testAccCheckComputeV2SecGroupExists("opentelekomcloud_compute_secgroup_v2.sg_3", &secgroup3),
-					testAccCheckComputeV2SecGroupGroupIDMatch(&secgroup2, &secgroup3),
+					testAccCheckComputeV2SecGroupGroupIDMatch(&secGroup2, &secgroup3),
 				),
 			},
 		},
@@ -84,7 +84,7 @@ func TestAccComputeV2SecGroup_groupID(t *testing.T) {
 }
 
 func TestAccComputeV2SecGroup_self(t *testing.T) {
-	var secgroup secgroups.SecurityGroup
+	var secGroup secgroups.SecurityGroup
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
@@ -94,8 +94,8 @@ func TestAccComputeV2SecGroup_self(t *testing.T) {
 			{
 				Config: testAccComputeV2SecGroup_self,
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckComputeV2SecGroupExists("opentelekomcloud_compute_secgroup_v2.sg_1", &secgroup),
-					testAccCheckComputeV2SecGroupGroupIDMatch(&secgroup, &secgroup),
+					testAccCheckComputeV2SecGroupExists("opentelekomcloud_compute_secgroup_v2.sg_1", &secGroup),
+					testAccCheckComputeV2SecGroupGroupIDMatch(&secGroup, &secGroup),
 					resource.TestCheckResourceAttr(
 						"opentelekomcloud_compute_secgroup_v2.sg_1", "rule.3170486100.self", "true"),
 					resource.TestCheckResourceAttr(
@@ -107,7 +107,7 @@ func TestAccComputeV2SecGroup_self(t *testing.T) {
 }
 
 func TestAccComputeV2SecGroup_icmpZero(t *testing.T) {
-	var secgroup secgroups.SecurityGroup
+	var secGroup secgroups.SecurityGroup
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
@@ -117,7 +117,7 @@ func TestAccComputeV2SecGroup_icmpZero(t *testing.T) {
 			{
 				Config: testAccComputeV2SecGroup_icmpZero,
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckComputeV2SecGroupExists("opentelekomcloud_compute_secgroup_v2.sg_1", &secgroup),
+					testAccCheckComputeV2SecGroupExists("opentelekomcloud_compute_secgroup_v2.sg_1", &secGroup),
 				),
 			},
 		},
@@ -125,7 +125,7 @@ func TestAccComputeV2SecGroup_icmpZero(t *testing.T) {
 }
 
 func TestAccComputeV2SecGroup_timeout(t *testing.T) {
-	var secgroup secgroups.SecurityGroup
+	var secGroup secgroups.SecurityGroup
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
@@ -135,7 +135,7 @@ func TestAccComputeV2SecGroup_timeout(t *testing.T) {
 			{
 				Config: testAccComputeV2SecGroup_timeout,
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckComputeV2SecGroupExists("opentelekomcloud_compute_secgroup_v2.sg_1", &secgroup),
+					testAccCheckComputeV2SecGroupExists("opentelekomcloud_compute_secgroup_v2.sg_1", &secGroup),
 				),
 			},
 		},
@@ -144,9 +144,9 @@ func TestAccComputeV2SecGroup_timeout(t *testing.T) {
 
 func testAccCheckComputeV2SecGroupDestroy(s *terraform.State) error {
 	config := testAccProvider.Meta().(*Config)
-	computeClient, err := config.computeV2HWClient(OS_REGION_NAME)
+	computeClient, err := config.computeV2Client(OS_REGION_NAME)
 	if err != nil {
-		return fmt.Errorf("Error creating OpenTelekomCloud compute client: %s", err)
+		return fmt.Errorf("error creating OpenTelekomCloud compute client: %s", err)
 	}
 
 	for _, rs := range s.RootModule().Resources {
@@ -156,7 +156,7 @@ func testAccCheckComputeV2SecGroupDestroy(s *terraform.State) error {
 
 		_, err := secgroups.Get(computeClient, rs.Primary.ID).Extract()
 		if err == nil {
-			return fmt.Errorf("Security group still exists")
+			return fmt.Errorf("security group still exists")
 		}
 	}
 
@@ -167,17 +167,17 @@ func testAccCheckComputeV2SecGroupExists(n string, secgroup *secgroups.SecurityG
 	return func(s *terraform.State) error {
 		rs, ok := s.RootModule().Resources[n]
 		if !ok {
-			return fmt.Errorf("Not found: %s", n)
+			return fmt.Errorf("not found: %s", n)
 		}
 
 		if rs.Primary.ID == "" {
-			return fmt.Errorf("No ID is set")
+			return fmt.Errorf("no ID is set")
 		}
 
 		config := testAccProvider.Meta().(*Config)
-		computeClient, err := config.computeV2HWClient(OS_REGION_NAME)
+		computeClient, err := config.computeV2Client(OS_REGION_NAME)
 		if err != nil {
-			return fmt.Errorf("Error creating OpenTelekomCloud compute client: %s", err)
+			return fmt.Errorf("error creating OpenTelekomCloud compute client: %s", err)
 		}
 
 		found, err := secgroups.Get(computeClient, rs.Primary.ID).Extract()
@@ -186,7 +186,7 @@ func testAccCheckComputeV2SecGroupExists(n string, secgroup *secgroups.SecurityG
 		}
 
 		if found.ID != rs.Primary.ID {
-			return fmt.Errorf("Security group not found")
+			return fmt.Errorf("security group not found")
 		}
 
 		*secgroup = *found
@@ -198,7 +198,7 @@ func testAccCheckComputeV2SecGroupExists(n string, secgroup *secgroups.SecurityG
 func testAccCheckComputeV2SecGroupRuleCount(secgroup *secgroups.SecurityGroup, count int) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
 		if len(secgroup.Rules) != count {
-			return fmt.Errorf("Security group rule count does not match. Expected %d, got %d", count, len(secgroup.Rules))
+			return fmt.Errorf("security group rule count does not match. Expected %d, got %d", count, len(secgroup.Rules))
 		}
 
 		return nil
@@ -221,166 +221,166 @@ func testAccCheckComputeV2SecGroupGroupIDMatch(sg1, sg2 *secgroups.SecurityGroup
 
 const testAccComputeV2SecGroup_basic_orig = `
 resource "opentelekomcloud_compute_secgroup_v2" "sg_1" {
-  name = "sg_1"
+  name        = "sg_1"
   description = "first test security group"
   rule {
-    from_port = 22
-    to_port = 22
+    from_port   = 22
+    to_port     = 22
     ip_protocol = "tcp"
-    cidr = "0.0.0.0/0"
+    cidr        = "0.0.0.0/0"
   }
   rule {
-    from_port = 1
-    to_port = 65535
+    from_port   = 1
+    to_port     = 65535
     ip_protocol = "udp"
-    cidr = "0.0.0.0/0"
+    cidr        = "0.0.0.0/0"
   }
   rule {
-    from_port = -1
-    to_port = -1
+    from_port   = -1
+    to_port     = -1
     ip_protocol = "icmp"
-    cidr = "0.0.0.0/0"
+    cidr        = "0.0.0.0/0"
   }
 }
 `
 
 const testAccComputeV2SecGroup_basic_update = `
 resource "opentelekomcloud_compute_secgroup_v2" "sg_1" {
-  name = "sg_1"
+  name        = "sg_1"
   description = "first test security group"
   rule {
-    from_port = 2200
-    to_port = 2200
+    from_port   = 2200
+    to_port     = 2200
     ip_protocol = "tcp"
-    cidr = "0.0.0.0/0"
+    cidr        = "0.0.0.0/0"
   }
   rule {
-    from_port = -1
-    to_port = -1
+    from_port   = -1
+    to_port     = -1
     ip_protocol = "icmp"
-    cidr = "0.0.0.0/0"
+    cidr        = "0.0.0.0/0"
   }
 }
 `
 
 const testAccComputeV2SecGroup_groupID_orig = `
 resource "opentelekomcloud_compute_secgroup_v2" "sg_1" {
-  name = "sg_1"
+  name        = "sg_1"
   description = "first test security group"
   rule {
-    from_port = 22
-    to_port = 22
+    from_port   = 22
+    to_port     = 22
     ip_protocol = "tcp"
-    cidr = "0.0.0.0/0"
+    cidr        = "0.0.0.0/0"
   }
 }
 
 resource "opentelekomcloud_compute_secgroup_v2" "sg_2" {
-  name = "sg_2"
+  name        = "sg_2"
   description = "second test security group"
   rule {
-    from_port = -1
-    to_port = -1
+    from_port   = -1
+    to_port     = -1
     ip_protocol = "icmp"
-    cidr = "0.0.0.0/0"
+    cidr        = "0.0.0.0/0"
   }
 }
 
 resource "opentelekomcloud_compute_secgroup_v2" "sg_3" {
-  name = "sg_3"
+  name        = "sg_3"
   description = "third test security group"
   rule {
-    from_port = 80
-    to_port = 80
-    ip_protocol = "tcp"
-    from_group_id = "${opentelekomcloud_compute_secgroup_v2.sg_1.id}"
+    from_port     = 80
+    to_port       = 80
+    ip_protocol   = "tcp"
+    from_group_id = opentelekomcloud_compute_secgroup_v2.sg_1.id
   }
 }
 `
 
 const testAccComputeV2SecGroup_groupID_update = `
 resource "opentelekomcloud_compute_secgroup_v2" "sg_1" {
-  name = "sg_1"
+  name        = "sg_1"
   description = "first test security group"
   rule {
-    from_port = 22
-    to_port = 22
+    from_port   = 22
+    to_port     = 22
     ip_protocol = "tcp"
-    cidr = "0.0.0.0/0"
+    cidr        = "0.0.0.0/0"
   }
 }
 
 resource "opentelekomcloud_compute_secgroup_v2" "sg_2" {
-  name = "sg_2"
+  name        = "sg_2"
   description = "second test security group"
   rule {
-    from_port = -1
-    to_port = -1
+    from_port   = -1
+    to_port     = -1
     ip_protocol = "icmp"
-    cidr = "0.0.0.0/0"
+    cidr        = "0.0.0.0/0"
   }
 }
 
 resource "opentelekomcloud_compute_secgroup_v2" "sg_3" {
-  name = "sg_3"
+  name        = "sg_3"
   description = "third test security group"
   rule {
-    from_port = 80
-    to_port = 80
-    ip_protocol = "tcp"
-    from_group_id = "${opentelekomcloud_compute_secgroup_v2.sg_2.id}"
+    from_port     = 80
+    to_port       = 80
+    ip_protocol   = "tcp"
+    from_group_id = opentelekomcloud_compute_secgroup_v2.sg_2.id
   }
 }
 `
 
 const testAccComputeV2SecGroup_self = `
 resource "opentelekomcloud_compute_secgroup_v2" "sg_1" {
-  name = "sg_1"
+  name        = "sg_1"
   description = "first test security group"
   rule {
-    from_port = 22
-    to_port = 22
+    from_port   = 22
+    to_port     = 22
     ip_protocol = "tcp"
-    self = true
+    self        = true
   }
 }
 `
 
 const testAccComputeV2SecGroup_icmpZero = `
 resource "opentelekomcloud_compute_secgroup_v2" "sg_1" {
-  name = "sg_1"
+  name        = "sg_1"
   description = "first test security group"
   rule {
-    from_port = 0
-    to_port = 0
+    from_port   = 0
+    to_port     = 0
     ip_protocol = "icmp"
-    cidr = "0.0.0.0/0"
+    cidr        = "0.0.0.0/0"
   }
 }
 `
 
 const testAccComputeV2SecGroup_lowerCaseCIDR = `
 resource "opentelekomcloud_compute_secgroup_v2" "sg_1" {
-  name = "sg_1"
+  name        = "sg_1"
   description = "first test security group"
   rule {
-    from_port = 0
-    to_port = 0
+    from_port   = 0
+    to_port     = 0
     ip_protocol = "icmp"
-    cidr = "2001:558:FC00:0::/39"
+    cidr        = "2001:558:FC00:0::/39"
   }
 }
 `
 
 const testAccComputeV2SecGroup_timeout = `
 resource "opentelekomcloud_compute_secgroup_v2" "sg_1" {
-  name = "sg_1"
+  name        = "sg_1"
   description = "first test security group"
   rule {
-    from_port = 0
-    to_port = 0
+    from_port   = 0
+    to_port     = 0
     ip_protocol = "icmp"
-    cidr = "0.0.0.0/0"
+    cidr        = "0.0.0.0/0"
   }
 
   timeouts {

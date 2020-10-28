@@ -7,6 +7,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/hashicorp/go-multierror"
 	"github.com/hashicorp/terraform-plugin-sdk/helper/hashcode"
 	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
@@ -20,6 +21,7 @@ func resourceComputeSecGroupV2() *schema.Resource {
 		Read:   resourceComputeSecGroupV2Read,
 		Update: resourceComputeSecGroupV2Update,
 		Delete: resourceComputeSecGroupV2Delete,
+
 		Importer: &schema.ResourceImporter{
 			State: schema.ImportStatePassthrough,
 		},
@@ -35,7 +37,6 @@ func resourceComputeSecGroupV2() *schema.Resource {
 				Computed: true,
 				ForceNew: true,
 			},
-
 			"name": {
 				Type:     schema.TypeString,
 				Required: true,
@@ -100,9 +101,9 @@ func resourceComputeSecGroupV2() *schema.Resource {
 
 func resourceComputeSecGroupV2Create(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*Config)
-	computeClient, err := config.computeV2HWClient(GetRegion(d, config))
+	computeClient, err := config.computeV2Client(GetRegion(d, config))
 	if err != nil {
-		return fmt.Errorf("Error creating OpenTelekomCloud compute client: %s", err)
+		return fmt.Errorf("error creating OpenTelekomCloud compute client: %s", err)
 	}
 
 	// Before creating the security group, make sure all rules are valid.
@@ -119,7 +120,7 @@ func resourceComputeSecGroupV2Create(d *schema.ResourceData, meta interface{}) e
 	log.Printf("[DEBUG] Create Options: %#v", createOpts)
 	sg, err := secgroups.Create(computeClient, createOpts).Extract()
 	if err != nil {
-		return fmt.Errorf("Error creating OpenTelekomCloud security group: %s", err)
+		return fmt.Errorf("error creating OpenTelekomCloud security group: %s", err)
 	}
 
 	d.SetId(sg.ID)
@@ -129,7 +130,7 @@ func resourceComputeSecGroupV2Create(d *schema.ResourceData, meta interface{}) e
 	for _, createRuleOpts := range createRuleOptsList {
 		_, err := secgroups.CreateRule(computeClient, createRuleOpts).Extract()
 		if err != nil {
-			return fmt.Errorf("Error creating OpenTelekomCloud security group rule: %s", err)
+			return fmt.Errorf("error creating OpenTelekomCloud security group rule: %s", err)
 		}
 	}
 
@@ -138,38 +139,38 @@ func resourceComputeSecGroupV2Create(d *schema.ResourceData, meta interface{}) e
 
 func resourceComputeSecGroupV2Read(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*Config)
-	computeClient, err := config.computeV2HWClient(GetRegion(d, config))
+	computeClient, err := config.computeV2Client(GetRegion(d, config))
 	if err != nil {
-		return fmt.Errorf("Error creating OpenTelekomCloud compute client: %s", err)
+		return fmt.Errorf("error creating OpenTelekomCloud compute client: %s", err)
 	}
 
 	sg, err := secgroups.Get(computeClient, d.Id()).Extract()
 	if err != nil {
 		return CheckDeleted(d, err, "security group")
 	}
+	me := multierror.Append(nil,
+		d.Set("name", sg.Name),
+		d.Set("description", sg.Description),
+		d.Set("region", GetRegion(d, config)),
+	)
 
-	d.Set("name", sg.Name)
-	d.Set("description", sg.Description)
-
-	rtm, err := rulesToMap(computeClient, d, sg.Rules)
+	rulesMap, err := rulesToMap(computeClient, d, sg.Rules)
 	if err != nil {
 		return err
 	}
-	log.Printf("[DEBUG] rulesToMap(sg.Rules): %+v", rtm)
-	if err := d.Set("rule", rtm); err != nil {
+	log.Printf("[DEBUG] rulesToMap(sg.Rules): %+v", rulesMap)
+	if err := d.Set("rule", rulesMap); err != nil {
 		return fmt.Errorf("[DEBUG] Error saving rule to state for OpenTelekomCloud server (%s): %s", d.Id(), err)
 	}
 
-	d.Set("region", GetRegion(d, config))
-
-	return nil
+	return me.ErrorOrNil()
 }
 
 func resourceComputeSecGroupV2Update(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*Config)
-	computeClient, err := config.computeV2HWClient(GetRegion(d, config))
+	computeClient, err := config.computeV2Client(GetRegion(d, config))
 	if err != nil {
-		return fmt.Errorf("Error creating OpenTelekomCloud compute client: %s", err)
+		return fmt.Errorf("error creating OpenTelekomCloud compute client: %s", err)
 	}
 
 	updateOpts := secgroups.UpdateOpts{
@@ -181,36 +182,35 @@ func resourceComputeSecGroupV2Update(d *schema.ResourceData, meta interface{}) e
 
 	_, err = secgroups.Update(computeClient, d.Id(), updateOpts).Extract()
 	if err != nil {
-		return fmt.Errorf("Error updating OpenTelekomCloud security group (%s): %s", d.Id(), err)
+		return fmt.Errorf("error updating OpenTelekomCloud security group (%s): %s", d.Id(), err)
 	}
 
 	if d.HasChange("rule") {
 		oldSGRaw, newSGRaw := d.GetChange("rule")
 		oldSGRSet, newSGRSet := oldSGRaw.(*schema.Set), newSGRaw.(*schema.Set)
-		secgrouprulesToAdd := newSGRSet.Difference(oldSGRSet)
-		secgrouprulesToRemove := oldSGRSet.Difference(newSGRSet)
+		secGroupRulesToAdd := newSGRSet.Difference(oldSGRSet)
+		secGroupRulesToRemove := oldSGRSet.Difference(newSGRSet)
 
-		log.Printf("[DEBUG] Security group rules to add: %v", secgrouprulesToAdd)
-		log.Printf("[DEBUG] Security groups rules to remove: %v", secgrouprulesToRemove)
+		log.Printf("[DEBUG] Security group rules to add: %v", secGroupRulesToAdd)
+		log.Printf("[DEBUG] Security groups rules to remove: %v", secGroupRulesToRemove)
 
-		for _, rawRule := range secgrouprulesToAdd.List() {
+		for _, rawRule := range secGroupRulesToAdd.List() {
 			createRuleOpts := resourceSecGroupRuleCreateOptsV2(d, rawRule)
 			rule, err := secgroups.CreateRule(computeClient, createRuleOpts).Extract()
 			if err != nil {
-				return fmt.Errorf("Error adding rule to OpenTelekomCloud security group (%s): %s", d.Id(), err)
+				return fmt.Errorf("error adding rule to OpenTelekomCloud security group (%s): %s", d.Id(), err)
 			}
 			log.Printf("[DEBUG] Added rule (%s) to OpenTelekomCloud security group (%s) ", rule.ID, d.Id())
 		}
 
-		for _, r := range secgrouprulesToRemove.List() {
+		for _, r := range secGroupRulesToRemove.List() {
 			rule := resourceSecGroupRuleV2(d, r)
 			err := secgroups.DeleteRule(computeClient, rule.ID).ExtractErr()
 			if err != nil {
 				if _, ok := err.(golangsdk.ErrDefault404); ok {
 					continue
 				}
-
-				return fmt.Errorf("Error removing rule (%s) from OpenTelekomCloud security group (%s)", rule.ID, d.Id())
+				return fmt.Errorf("error removing rule (%s) from OpenTelekomCloud security group (%s)", rule.ID, d.Id())
 			} else {
 				log.Printf("[DEBUG] Removed rule (%s) from OpenTelekomCloud security group (%s): %s", rule.ID, d.Id(), err)
 			}
@@ -222,15 +222,15 @@ func resourceComputeSecGroupV2Update(d *schema.ResourceData, meta interface{}) e
 
 func resourceComputeSecGroupV2Delete(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*Config)
-	computeClient, err := config.computeV2HWClient(GetRegion(d, config))
+	computeClient, err := config.computeV2Client(GetRegion(d, config))
 	if err != nil {
-		return fmt.Errorf("Error creating OpenTelekomCloud compute client: %s", err)
+		return fmt.Errorf("error creating OpenTelekomCloud compute client: %s", err)
 	}
 
 	stateConf := &resource.StateChangeConf{
 		Pending:    []string{"ACTIVE"},
 		Target:     []string{"DELETED"},
-		Refresh:    SecGroupV2StateRefreshFunc(computeClient, d),
+		Refresh:    SecGroupV2StateRefreshFunc(computeClient, d.Id()),
 		Timeout:    d.Timeout(schema.TimeoutDelete),
 		Delay:      10 * time.Second,
 		MinTimeout: 3 * time.Second,
@@ -238,7 +238,7 @@ func resourceComputeSecGroupV2Delete(d *schema.ResourceData, meta interface{}) e
 
 	_, err = stateConf.WaitForState()
 	if err != nil {
-		return fmt.Errorf("Error deleting OpenTelekomCloud security group: %s", err)
+		return fmt.Errorf("error deleting OpenTelekomCloud security group: %s", err)
 	}
 
 	d.SetId("")
@@ -279,7 +279,7 @@ func checkSecGroupV2RulesForErrors(d *schema.ResourceData) error {
 		cidr := rawRuleMap["cidr"].(string)
 		groupId := rawRuleMap["from_group_id"].(string)
 		self := rawRuleMap["self"].(bool)
-		errorMessage := fmt.Errorf("Only one of cidr, from_group_id, or self can be set.")
+		errorMessage := fmt.Errorf("only one of cidr, from_group_id, or self can be set")
 
 		// if cidr is set, from_group_id and self cannot be set
 		if cidr != "" {
@@ -374,27 +374,32 @@ func secgroupRuleV2Hash(v interface{}) int {
 	return hashcode.String(buf.String())
 }
 
-func SecGroupV2StateRefreshFunc(computeClient *golangsdk.ServiceClient, d *schema.ResourceData) resource.StateRefreshFunc {
+func SecGroupV2StateRefreshFunc(computeClient *golangsdk.ServiceClient, secGroupId string) resource.StateRefreshFunc {
 	return func() (interface{}, string, error) {
-		log.Printf("[DEBUG] Attempting to delete Security Group %s.\n", d.Id())
+		log.Printf("[DEBUG] Attempting to delete Security Group %s.\n", secGroupId)
 
-		err := secgroups.Delete(computeClient, d.Id()).ExtractErr()
+		s, err := secgroups.Get(computeClient, secGroupId).Extract()
 		if err != nil {
-			return nil, "", err
-		}
-
-		s, err := secgroups.Get(computeClient, d.Id()).Extract()
-		if err != nil {
-			err = CheckDeleted(d, err, "Security Group")
-			if err != nil {
-				return s, "", err
-			} else {
-				log.Printf("[DEBUG] Successfully deleted Security Group %s", d.Id())
+			if _, ok := err.(golangsdk.ErrDefault404); ok {
+				log.Printf("[DEBUG] Successfully deleted OpenTelekomCloud Neutron Security Group %s", secGroupId)
 				return s, "DELETED", nil
 			}
+			return s, "ACTIVE", err
 		}
 
-		log.Printf("[DEBUG] Security Group %s still active.\n", d.Id())
+		err = secgroups.Delete(computeClient, secGroupId).ExtractErr()
+		if err != nil {
+			if _, ok := err.(golangsdk.ErrDefault404); ok {
+				log.Printf("[DEBUG] Successfully deleted OpenTelekomCloud Security Group %s", secGroupId)
+				return s, "DELETED", nil
+			}
+			if _, ok := err.(golangsdk.ErrDefault409); ok {
+				return s, "ACTIVE", nil
+			}
+			return s, "ACTIVE", err
+		}
+
+		log.Printf("[DEBUG] Security Group %s still active.\n", secGroupId)
 		return s, "ACTIVE", nil
 	}
 }
