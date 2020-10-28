@@ -393,7 +393,7 @@ func SecGroupV2StateRefreshFunc(computeClient *golangsdk.ServiceClient, secGroup
 				log.Printf("[DEBUG] Successfully deleted OpenTelekomCloud Security Group %s", secGroupId)
 				return s, "DELETED", nil
 			}
-			if _, ok := err.(golangsdk.ErrDefault409); ok {
+			if _, ok := err.(golangsdk.ErrDefault400); ok {
 				return s, "ACTIVE", nil
 			}
 			return s, "ACTIVE", err
