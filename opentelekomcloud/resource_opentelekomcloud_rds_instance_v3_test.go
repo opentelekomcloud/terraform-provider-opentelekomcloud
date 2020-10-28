@@ -54,7 +54,7 @@ func testAccCheckRdsInstanceV3Destroy(s *terraform.State) error {
 			continue
 		}
 		instance, _ := getRdsInstance(client, rs.Primary.ID)
-		if instance == nil {
+		if instance != nil {
 			return fmt.Errorf("relational Database still exists")
 		}
 	}
