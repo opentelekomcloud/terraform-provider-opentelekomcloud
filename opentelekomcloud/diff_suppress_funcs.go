@@ -6,6 +6,7 @@ import (
 	"log"
 	"net/url"
 	"reflect"
+	"regexp"
 	"sort"
 	"strings"
 
@@ -137,4 +138,22 @@ func suppressLBWhitelistDiffs(k, old, new string, d *schema.ResourceData) bool {
 	sort.Strings(new_array)
 
 	return reflect.DeepEqual(old_array, new_array)
+}
+
+func suppressSmartVersionDiff(k, old, new string, d *schema.ResourceData) bool {
+	compiledVer := regexp.MustCompile(`v(\d+)(?:\.(\d+))?(?:\.(\d+))?(?:-(\w+))?$`)
+	oldArray := compiledVer.FindStringSubmatch(old)
+	newArray := compiledVer.FindStringSubmatch(new)
+	if oldArray == nil {
+		return false
+	}
+	for i := 1; i < len(newArray); i++ {
+		if oldArray[i] == "" || newArray[i] == "" {
+			return true
+		}
+		if oldArray[i] != newArray[i] {
+			return false
+		}
+	}
+	return false
 }
