@@ -5,6 +5,7 @@ import (
 	"log"
 	"time"
 
+	"github.com/hashicorp/go-multierror"
 	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
 	"github.com/opentelekomcloud/gophertelekomcloud"
@@ -19,6 +20,7 @@ func resourceNetworkingSecGroupV2() *schema.Resource {
 		Read:   resourceNetworkingSecGroupV2Read,
 		Update: resourceNetworkingSecGroupV2Update,
 		Delete: resourceNetworkingSecGroupV2Delete,
+
 		Importer: &schema.ResourceImporter{
 			State: schema.ImportStatePassthrough,
 		},
@@ -59,11 +61,10 @@ func resourceNetworkingSecGroupV2() *schema.Resource {
 }
 
 func resourceNetworkingSecGroupV2Create(d *schema.ResourceData, meta interface{}) error {
-
 	config := meta.(*Config)
 	networkingClient, err := config.networkingV2Client(GetRegion(d, config))
 	if err != nil {
-		return fmt.Errorf("Error creating OpenTelekomCloud networking client: %s", err)
+		return fmt.Errorf("error creating OpenTelekomCloud NetworkingV2 client: %s", err)
 	}
 
 	opts := groups.CreateOpts{
@@ -74,7 +75,7 @@ func resourceNetworkingSecGroupV2Create(d *schema.ResourceData, meta interface{}
 
 	log.Printf("[DEBUG] Create OpenTelekomCloud Neutron Security Group: %#v", opts)
 
-	security_group, err := groups.Create(networkingClient, opts).Extract()
+	securityGroup, err := groups.Create(networkingClient, opts).Extract()
 	if err != nil {
 		return err
 	}
@@ -82,21 +83,19 @@ func resourceNetworkingSecGroupV2Create(d *schema.ResourceData, meta interface{}
 	// Delete the default security group rules if it has been requested.
 	deleteDefaultRules := d.Get("delete_default_rules").(bool)
 	if deleteDefaultRules {
-		security_group, err := groups.Get(networkingClient, security_group.ID).Extract()
+		securityGroup, err := groups.Get(networkingClient, securityGroup.ID).Extract()
 		if err != nil {
 			return err
 		}
-		for _, rule := range security_group.Rules {
+		for _, rule := range securityGroup.Rules {
 			if err := rules.Delete(networkingClient, rule.ID).ExtractErr(); err != nil {
-				return fmt.Errorf(
-					"There was a problem deleting a default security group rule: %s", err)
+				return fmt.Errorf("there was a problem deleting a default security group rule: %s", err)
 			}
 		}
 	}
+	log.Printf("[DEBUG] OpenTelekomCloud Neutron Security Group created: %#v", securityGroup)
 
-	log.Printf("[DEBUG] OpenTelekomCloud Neutron Security Group created: %#v", security_group)
-
-	d.SetId(security_group.ID)
+	d.SetId(securityGroup.ID)
 
 	return resourceNetworkingSecGroupV2Read(d, meta)
 }
@@ -107,49 +106,44 @@ func resourceNetworkingSecGroupV2Read(d *schema.ResourceData, meta interface{}) 
 	config := meta.(*Config)
 	networkingClient, err := config.networkingV2Client(GetRegion(d, config))
 	if err != nil {
-		return fmt.Errorf("Error creating OpenTelekomCloud networking client: %s", err)
+		return fmt.Errorf("error creating OpenTelekomCloud NetworkingV2 client: %s", err)
 	}
 
-	security_group, err := groups.Get(networkingClient, d.Id()).Extract()
-
+	securityGroup, err := groups.Get(networkingClient, d.Id()).Extract()
 	if err != nil {
 		return CheckDeleted(d, err, "OpenTelekomCloud Neutron Security group")
 	}
 
-	d.Set("description", security_group.Description)
-	d.Set("tenant_id", security_group.TenantID)
-	d.Set("name", security_group.Name)
-	d.Set("region", GetRegion(d, config))
+	me := multierror.Append(nil,
+		d.Set("description", securityGroup.Description),
+		d.Set("tenant_id", securityGroup.TenantID),
+		d.Set("name", securityGroup.Name),
+		d.Set("region", GetRegion(d, config)),
+	)
 
-	return nil
+	return me.ErrorOrNil()
 }
 
 func resourceNetworkingSecGroupV2Update(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*Config)
 	networkingClient, err := config.networkingV2Client(GetRegion(d, config))
 	if err != nil {
-		return fmt.Errorf("Error creating OpenTelekomCloud networking client: %s", err)
+		return fmt.Errorf("error creating OpenTelekomCloud Networkingv2 client: %s", err)
 	}
-
-	var update bool
 	var updateOpts groups.UpdateOpts
 
 	if d.HasChange("name") {
-		update = true
 		updateOpts.Name = d.Get("name").(string)
 	}
 
 	if d.HasChange("description") {
-		update = true
 		updateOpts.Description = d.Get("description").(string)
 	}
 
-	if update {
-		log.Printf("[DEBUG] Updating SecGroup %s with options: %#v", d.Id(), updateOpts)
-		_, err = groups.Update(networkingClient, d.Id(), updateOpts).Extract()
-		if err != nil {
-			return fmt.Errorf("Error updating OpenTelekomCloud SecGroup: %s", err)
-		}
+	log.Printf("[DEBUG] Updating SecGroup %s with options: %#v", d.Id(), updateOpts)
+	_, err = groups.Update(networkingClient, d.Id(), updateOpts).Extract()
+	if err != nil {
+		return fmt.Errorf("error updating OpenTelekomCloud networking SecGroup: %s", err)
 	}
 
 	return resourceNetworkingSecGroupV2Read(d, meta)
@@ -161,7 +155,7 @@ func resourceNetworkingSecGroupV2Delete(d *schema.ResourceData, meta interface{}
 	config := meta.(*Config)
 	networkingClient, err := config.networkingV2Client(GetRegion(d, config))
 	if err != nil {
-		return fmt.Errorf("Error creating OpenTelekomCloud networking client: %s", err)
+		return fmt.Errorf("error creating OpenTelekomCloud NetworkingV2 client: %s", err)
 	}
 
 	stateConf := &resource.StateChangeConf{
@@ -175,7 +169,7 @@ func resourceNetworkingSecGroupV2Delete(d *schema.ResourceData, meta interface{}
 
 	_, err = stateConf.WaitForState()
 	if err != nil {
-		return fmt.Errorf("Error deleting OpenTelekomCloud Neutron Security Group: %s", err)
+		return fmt.Errorf("error deleting OpenTelekomCloud Neutron Security Group: %s", err)
 	}
 
 	d.SetId("")
@@ -201,10 +195,8 @@ func waitForSecGroupDelete(networkingClient *golangsdk.ServiceClient, secGroupId
 				log.Printf("[DEBUG] Successfully deleted OpenTelekomCloud Neutron Security Group %s", secGroupId)
 				return r, "DELETED", nil
 			}
-			if errCode, ok := err.(golangsdk.ErrUnexpectedResponseCode); ok {
-				if errCode.Actual == 409 {
-					return r, "ACTIVE", nil
-				}
+			if _, ok := err.(golangsdk.ErrDefault409); ok {
+				return r, "ACTIVE", nil
 			}
 			return r, "ACTIVE", err
 		}
