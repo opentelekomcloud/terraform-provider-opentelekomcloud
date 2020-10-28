@@ -25,7 +25,7 @@ func resourceCCEClusterV3() *schema.Resource {
 
 		Timeouts: &schema.ResourceTimeout{
 			Create: schema.DefaultTimeout(30 * time.Minute),
-			Delete: schema.DefaultTimeout(10 * time.Minute),
+			Delete: schema.DefaultTimeout(30 * time.Minute),
 		},
 
 		Schema: map[string]*schema.Schema{
@@ -56,10 +56,11 @@ func resourceCCEClusterV3() *schema.Resource {
 				ForceNew: true,
 			},
 			"cluster_version": {
-				Type:     schema.TypeString,
-				Optional: true,
-				Computed: true,
-				ForceNew: true,
+				Type:             schema.TypeString,
+				Optional:         true,
+				Computed:         true,
+				ForceNew:         true,
+				DiffSuppressFunc: suppressSmartVersionDiff,
 			},
 			"cluster_type": {
 				Type:     schema.TypeString,

@@ -122,6 +122,26 @@ func testAccCheckCCEClusterV3Exists(n string, cluster *clusters.Clusters) resour
 	}
 }
 
+func TestAccCCEClusterV3_withVersionDiff(t *testing.T) {
+	var cluster clusters.Clusters
+
+	resource.Test(t, resource.TestCase{
+		PreCheck:     func() { testAccPreCheck(t) },
+		Providers:    testAccProviders,
+		CheckDestroy: testAccCheckCCEClusterV3Destroy,
+		Steps: []resource.TestStep{
+			{
+				Config: testAccCCEClusterV3_withInvalidVersion,
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckCCEClusterV3Exists("opentelekomcloud_cce_cluster_v3.cluster_1", &cluster),
+					resource.TestCheckResourceAttr(
+						"opentelekomcloud_cce_cluster_v3.cluster_1", "name", "opentelekomcloud-cce"),
+				),
+			},
+		},
+	})
+}
+
 var testAccCCEClusterV3_basic = fmt.Sprintf(`
 resource "opentelekomcloud_cce_cluster_v3" "cluster_1" {
   name = "opentelekomcloud-cce"
@@ -166,3 +186,15 @@ resource "opentelekomcloud_cce_cluster_v3" "cluster_1" {
   multi_az = true
 }
 `, OS_VPC_ID, OS_NETWORK_ID)
+
+var testAccCCEClusterV3_withInvalidVersion = fmt.Sprintf(`
+resource "opentelekomcloud_cce_cluster_v3" "cluster_1" {
+  name = "opentelekomcloud-cce"
+  cluster_type="VirtualMachine"
+  flavor_id="cce.s1.small"
+  cluster_version = "v1.9.2"
+  vpc_id="%s"
+  subnet_id="%s"
+  container_network_type="overlay_l2"
+  description="new description"
+}`, OS_VPC_ID, OS_NETWORK_ID)
