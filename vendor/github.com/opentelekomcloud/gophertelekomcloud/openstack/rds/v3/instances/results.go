@@ -46,12 +46,6 @@ type Instance struct {
 	ChargeInfo          ChargeInfo     `json:"charge_info"`
 }
 
-type CreateRds struct {
-	Instance Instance `json:"instance"`
-	JobId    string   `json:"job_id"`
-	OrderId  string   `json:"order_id"`
-}
-
 func (r CreateResult) Extract() (*CreateRds, error) {
 	var response CreateRds
 	err := r.ExtractInto(&response)
@@ -62,18 +56,10 @@ type DeleteInstanceRdsResult struct {
 	commonResult
 }
 
-type DeleteInstanceRdsResponse struct {
-	JobId string `json:"job_id"`
-}
-
 func (r DeleteInstanceRdsResult) Extract() (*DeleteInstanceRdsResponse, error) {
 	var response DeleteInstanceRdsResponse
 	err := r.ExtractInto(&response)
 	return &response, err
-}
-
-type RestartRdsResponse struct {
-	JobId string `json:"job_id"`
 }
 
 func (r RestartRdsInstanceResult) Extract() (*RestartRdsResponse, error) {
@@ -82,18 +68,10 @@ func (r RestartRdsInstanceResult) Extract() (*RestartRdsResponse, error) {
 	return &response, err
 }
 
-type SingleToHaResponse struct {
-	JobId string `json:"job_id"`
-}
-
 func (r SingleToHaRdsInstanceResult) Extract() (*SingleToHaResponse, error) {
 	var response SingleToHaResponse
 	err := r.ExtractInto(&response)
 	return &response, err
-}
-
-type ResizeFlavor struct {
-	JobId string `json:"job_id"`
 }
 
 func (r ResizeFlavorResult) Extract() (*ResizeFlavor, error) {
@@ -104,10 +82,6 @@ func (r ResizeFlavorResult) Extract() (*ResizeFlavor, error) {
 
 type EnlargeVolumeResult struct {
 	commonResult
-}
-
-type EnlargeVolumeResp struct {
-	JobId string `json:"job_id"`
 }
 
 func (r EnlargeVolumeResult) Extract() (*EnlargeVolumeResp, error) {

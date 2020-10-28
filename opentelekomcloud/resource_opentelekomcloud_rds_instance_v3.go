@@ -2,14 +2,13 @@ package opentelekomcloud
 
 import (
 	"fmt"
-	"github.com/hashicorp/go-multierror"
-	"github.com/opentelekomcloud/gophertelekomcloud/openstack/sdrs/v1/protectiongroups"
 	"log"
 	"strconv"
 	"strings"
 	"time"
 
-	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
+	"github.com/hashicorp/go-multierror"
+
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
 	"github.com/opentelekomcloud/gophertelekomcloud"
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/networking/v1/subnets"
@@ -17,7 +16,6 @@ import (
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/networking/v2/ports"
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/rds/v1/tags"
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/rds/v3/backups"
-	//"github.com/opentelekomcloud/gophertelekomcloud/openstack/rds/v3/datastores"
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/rds/v3/flavors"
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/rds/v3/instances"
 )
@@ -338,23 +336,18 @@ func resourceRdsInstanceV3Create(d *schema.ResourceData, meta interface{}) error
 		SecurityGroupId:  d.Get("security_group_id").(string),
 		ChargeInfo:       resourceRDSChangeMode(),
 	}
-	r, err := instances.Create(client, createOpts).Extract()
+	createResult := instances.Create(client, createOpts)
+	r, err := createResult.Extract()
+	if err != nil {
+		return err
+	}
+	jobResponse, err := createResult.ExtractJobResponse()
 	if err != nil {
 		return err
 	}
 
-	stateConf := &resource.StateChangeConf{
-		Delay:        30 * time.Second,
-		Pending:      []string{"BUILD"},
-		Refresh:      waitForRdsAvailable(client, r.Instance.Id),
-		Target:       []string{"ACTIVE", "BACKING UP"},
-		Timeout:      10 * time.Minute,
-		MinTimeout:   10 * time.Second,
-		PollInterval: 10 * time.Second,
-	}
-
-	_, err = stateConf.WaitForState()
-	if err != nil {
+	timeout := d.Timeout(schema.TimeoutCreate)
+	if err := instances.WaitForJobCompleted(client, int(timeout.Seconds()), jobResponse.JobID); err != nil {
 		return err
 	}
 
@@ -409,17 +402,6 @@ func resourceRdsInstanceV3Create(d *schema.ResourceData, meta interface{}) error
 	return resourceRdsInstanceV3Read(d, meta)
 }
 
-func waitForRdsAvailable(client *golangsdk.ServiceClient, rdsID string) resource.StateRefreshFunc {
-	return func() (interface{}, string, error) {
-		log.Printf("[INFO] Waiting for OpenTelekomCloud RDSv3 to be available %s\n", rdsID)
-		rdsInstance, err := getRdsInstance(client, rdsID)
-		if err != nil {
-			return nil, "", err
-		}
-		return rdsInstance, rdsInstance.Status, nil
-	}
-}
-
 func getRdsInstance(rdsClient *golangsdk.ServiceClient, rdsId string) (*instances.RdsInstanceResponse, error) {
 	listOpts := instances.ListRdsInstanceOpts{
 		Id: rdsId,
@@ -428,9 +410,13 @@ func getRdsInstance(rdsClient *golangsdk.ServiceClient, rdsId string) (*instance
 	if err != nil {
 		return nil, err
 	}
+
 	n, err := instances.ExtractRdsInstances(allPages)
 	if err != nil {
 		return nil, err
+	}
+	if len(n.Instances) == 0 {
+		return nil, nil
 	}
 	return &n.Instances[0], nil
 }
@@ -620,31 +606,29 @@ func resourceRdsInstanceV3Update(d *schema.ResourceData, meta interface{}) error
 				break
 			}
 		}
+		updateFlavorOpts := instances.ResizeFlavorOpts{
+			ResizeFlavor: &instances.SpecCode{
+				Speccode: rdsFlavor.Speccode,
+			},
+		}
 
-		var updateFlavorOpts instances.ResizeFlavorOpts
+		log.Printf("Update flavor could be done only in status `available`")
+		if err := instances.WaitForStateAvailable(client, 600, d.Id()); err != nil {
+			log.Printf("Status available wasn't present")
+		}
+
 		log.Printf("[DEBUG] Update flavor: %s", newFlavor.(string))
-
-		updateFlavorOpts.ResizeFlavor.Speccode = rdsFlavor.Speccode
-		_, err = instances.Resize(client, updateFlavorOpts, nodeID).Extract()
+		_, err = instances.Resize(client, updateFlavorOpts, d.Id()).Extract()
 		if err != nil {
 			return fmt.Errorf("error updating instance Flavor from result: %s", err)
 		}
 
-		stateConf := &resource.StateChangeConf{
-			Delay:        30 * time.Second,
-			Pending:      []string{"MODIFYING"},
-			Target:       []string{"ACTIVE"},
-			Refresh:      waitForRdsAvailable(client, nodeID),
-			Timeout:      10 * time.Minute,
-			MinTimeout:   10 * time.Second,
-			PollInterval: 10 * time.Second,
+		log.Printf("Waiting for RDSv3 become in status `available`")
+		if err := instances.WaitForStateAvailable(client, 1200, d.Id()); err != nil {
+			log.Printf("Status available wasn't present")
 		}
 
-		_, err = stateConf.WaitForState()
-		if err != nil {
-			return fmt.Errorf("error waiting for instance (%s) flavor to be updated: %s", nodeID, err)
-		}
-		log.Printf("[DEBUG] Successfully updated instance %s flavor: %s", nodeID, d.Get("flavor").(string))
+		log.Printf("[DEBUG] Successfully updated instance %s flavor: %s", d.Id(), d.Get("flavor").(string))
 	}
 
 	if d.HasChange("volume") {
@@ -653,7 +637,6 @@ func resourceRdsInstanceV3Update(d *schema.ResourceData, meta interface{}) error
 			return fmt.Errorf("error creating OpenTelekomCloud RDSve client: %s", err)
 		}
 		_, newVolume := d.GetChange("volume")
-		var updateOpts instances.EnlargeVolumeRdsOpts
 		volume := make(map[string]interface{})
 		volumeRaw := newVolume.([]interface{})
 		log.Printf("[DEBUG] volumeRaw: %+v", volumeRaw)
@@ -663,26 +646,25 @@ func resourceRdsInstanceV3Update(d *schema.ResourceData, meta interface{}) error
 			}
 		}
 		log.Printf("[DEBUG] volume: %+v", volume)
-		updateOpts.EnlargeVolume.Size = volume["size"].(int)
-		_, err = instances.EnlargeVolume(client, updateOpts, nodeID).Extract()
+		updateOpts := instances.EnlargeVolumeRdsOpts{
+			EnlargeVolume: &instances.EnlargeVolumeSize{
+				Size: volume["size"].(int),
+			},
+		}
+
+		log.Printf("Update volume size could be done only in status `available`")
+		if err := instances.WaitForStateAvailable(client, 1200, d.Id()); err != nil {
+			log.Printf("Status available wasn't present")
+		}
+
+		updateResult, err := instances.EnlargeVolume(client, updateOpts, nodeID).ExtractJobResponse()
 		if err != nil {
 			return fmt.Errorf("error updating instance volume from result: %s", err)
 		}
-
-		stateConf := &resource.StateChangeConf{
-			Delay:        30 * time.Second,
-			Pending:      []string{"MODIFYING"},
-			Target:       []string{"ACTIVE"},
-			Refresh:      waitForRdsAvailable(client, nodeID),
-			Timeout:      10 * time.Minute,
-			MinTimeout:   10 * time.Second,
-			PollInterval: 10 * time.Second,
+		if err := instances.WaitForJobCompleted(client, 1200, updateResult.JobID); err != nil {
+			return err
 		}
 
-		_, err = stateConf.WaitForState()
-		if err != nil {
-			return fmt.Errorf("error waiting for instance (%s) volume to be updated: %s", nodeID, err)
-		}
 		log.Printf("[DEBUG] Successfully updated instance %s volume: %+v", nodeID, volume)
 	}
 
@@ -769,6 +751,7 @@ func resourceRdsInstanceV3Read(d *schema.ResourceData, meta interface{}) error {
 		node["role"] = nodeObj.Role
 		node["name"] = nodeObj.Name
 		node["availability_zone"] = nodeObj.AvailabilityZone
+		node["status"] = nodeObj.Status
 		nodesList = append(nodesList, node)
 	}
 	if err = d.Set("nodes", nodesList); err != nil {
@@ -795,11 +778,15 @@ func resourceRdsInstanceV3Read(d *schema.ResourceData, meta interface{}) error {
 	}
 
 	var dbList []map[string]interface{}
-	db := make(map[string]interface{})
-	db["type"] = rdsInstance.DataStore.Type
-	db["version"] = rdsInstance.DataStore.Version
-	db["port"] = rdsInstance.Port
-	dbList = append(dbList, db)
+	db := d.Get("db")
+	dbasd := db.([]interface{})
+	dbasfasf := dbasd[0].(map[string]interface{})
+	dbasfasf["type"] = rdsInstance.DataStore.Type
+	dbasfasf["version"] = rdsInstance.DataStore.Version
+	dbasfasf["port"] = rdsInstance.Port
+	dbasfasf["user_name"] = rdsInstance.DbUserName
+	dbList = append(dbList, dbasfasf)
+
 	if err = d.Set("db", dbList); err != nil {
 		return err
 	}
@@ -854,14 +841,15 @@ func resourceRdsInstanceV3Delete(d *schema.ResourceData, meta interface{}) error
 
 	log.Printf("[DEBUG] Deleting Instance %s", d.Id())
 
-	jobResponse := instances.Delete(client, d.Id()).Extract()
-	jobResponse.JobId
-
+	_, err = instances.Delete(client, d.Id()).Extract()
 	if err != nil {
 		return fmt.Errorf("eror deleting OpenTelekomCloud RDSv3 instance: %s", err)
 	}
 
 	d.SetId("")
 	return nil
+}
+
+func flattenRdsInstanceV3BackupStrategy(d interface{}, arraIndex map[string]int, currentValue interface{}) {
 
 }

@@ -2,8 +2,9 @@ package opentelekomcloud
 
 import (
 	"fmt"
-	"github.com/opentelekomcloud/gophertelekomcloud/openstack/rds/v3/instances"
 	"testing"
+
+	"github.com/opentelekomcloud/gophertelekomcloud/openstack/rds/v3/instances"
 
 	"github.com/hashicorp/terraform-plugin-sdk/helper/acctest"
 	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
@@ -52,8 +53,8 @@ func testAccCheckRdsInstanceV3Destroy(s *terraform.State) error {
 		if rs.Type != "opentelekomcloud_rds_instance_v3" {
 			continue
 		}
-		_, err = getRdsInstance(client, rs.Primary.ID)
-		if err == nil {
+		instance, _ := getRdsInstance(client, rs.Primary.ID)
+		if instance == nil {
 			return fmt.Errorf("relational Database still exists")
 		}
 	}
@@ -93,7 +94,7 @@ func testAccCheckRdsInstanceV3Exists(n string, rdsInstance *instances.RdsInstanc
 
 func testAccRdsInstanceV3_basic(postfix string) string {
 	return fmt.Sprintf(`
-resource opentelekomcloud_networking_secgroup_v2 sg {
+resource "opentelekomcloud_networking_secgroup_v2" "sg" {
   name = "sg-rds-test"
 }
 

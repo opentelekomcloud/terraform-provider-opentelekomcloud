@@ -358,7 +358,6 @@ github.com/opentelekomcloud/gophertelekomcloud/openstack/rds/v1/instances
 github.com/opentelekomcloud/gophertelekomcloud/openstack/rds/v1/tags
 github.com/opentelekomcloud/gophertelekomcloud/openstack/rds/v3/backups
 github.com/opentelekomcloud/gophertelekomcloud/openstack/rds/v3/configurations
-github.com/opentelekomcloud/gophertelekomcloud/openstack/rds/v3/datastores
 github.com/opentelekomcloud/gophertelekomcloud/openstack/rds/v3/flavors
 github.com/opentelekomcloud/gophertelekomcloud/openstack/rds/v3/instances
 github.com/opentelekomcloud/gophertelekomcloud/openstack/rts/v1/softwareconfig
