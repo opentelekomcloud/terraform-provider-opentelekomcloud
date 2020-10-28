@@ -40,7 +40,10 @@ type ListOpts struct {
 // ToUserListQuery formats a ListOpts into a query string.
 func (opts ListOpts) ToUserListQuery() (string, error) {
 	q, err := golangsdk.BuildQueryString(opts)
-	return q.String(), err
+	if err != nil {
+		return "", err
+	}
+	return q.String(), nil
 }
 
 // List enumerates the Users to which the current token has access.
@@ -159,6 +162,72 @@ func Update(client *golangsdk.ServiceClient, userID string, opts UpdateOptsBuild
 		return
 	}
 	_, r.Err = client.Patch(updateURL(client, userID), &b, &r.Body, &golangsdk.RequestOpts{
+		OkCodes: []int{200},
+	})
+	return
+}
+
+// ExtendedUpdateOptsBuilder allows extensions to add additional parameters to
+// the ExtendedUpdate request.
+type ExtendedUpdateOptsBuilder interface {
+	ToUserUpdateMap() (map[string]interface{}, error)
+}
+
+// ExtendedUpdateOpts allows modifying User information (including e-mail address and mobile number)
+type ExtendedUpdateOpts struct {
+
+	// Name is the name of the user.
+	Name string `json:"name,omitempty"`
+
+	/*Password of the user. The password must meet the following requirements:
+	  - Can contain 6 to 32 characters. The default minimum password length is 6 characters.
+	  - Must contain at least two of the following character types: uppercase letters, lowercase letters, digits, and special characters.
+	  - Must meet the requirements of the password policy configured on the account settings page.
+	  - Must be different from the old password.
+	*/
+	Password string `json:"password,omitempty"`
+
+	// Enabled is whether or not the user is enabled.
+	Enabled *bool `json:"enabled,omitempty"`
+
+	// Description is a description of the user.
+	Description string `json:"description,omitempty"`
+
+	// Email is the email of the user
+	Email string `json:"email,omitempty"`
+
+	// AreaCode is country code
+	AreaCode string `json:"areacode,omitempty"`
+
+	// Phone is mobile number, which can contain a maximum of 32 digits.
+	// The mobile number must be used together with a country code.
+	Phone string `json:"phone,omitempty"`
+
+	// Whether password reset is required at first login
+	PwdResetRequired *bool `json:"pwd_status,omitempty"`
+
+	// XUserType is Type of the IAM user in the external system.
+	XUserType string `json:"xuser_type,omitempty"`
+
+	// XUserID is ID of the IAM user in the external system.
+	XUserID string `json:"xuser_id,omitempty"`
+}
+
+func (opts ExtendedUpdateOpts) ToUserUpdateMap() (map[string]interface{}, error) {
+	b, err := golangsdk.BuildRequestBody(opts, "user")
+	if err != nil {
+		return nil, err
+	}
+	return b, nil
+}
+
+func ExtendedUpdate(client *golangsdk.ServiceClient, userID string, opts ExtendedUpdateOpts) (r UpdateExtendedResult) {
+	b, err := opts.ToUserUpdateMap()
+	if err != nil {
+		r.Err = err
+		return
+	}
+	_, r.Err = client.Put(updateExtendedURL(client, userID), &b, &r.Body, &golangsdk.RequestOpts{
 		OkCodes: []int{200},
 	})
 	return

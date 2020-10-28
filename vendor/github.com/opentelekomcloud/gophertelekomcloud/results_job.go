@@ -19,6 +19,24 @@ type JobStatus struct {
 	FailReason string                 `json:"fail_reason"`
 }
 
+type RDSJobStatus struct {
+	Job Job `json:"job"`
+}
+
+type Job struct {
+	Id       string         `json:"id"`
+	Name     string         `json:"name"`
+	Status   string         `json:"status"`
+	Created  string         `json:"created"`
+	Process  string         `json:"process"`
+	Instance RDSJobInstance `json:"instance"`
+}
+
+type RDSJobInstance struct {
+	Id   string `json:"id"`
+	Name string `json:"name"`
+}
+
 func (r Result) ExtractJobResponse() (*JobResponse, error) {
 	job := new(JobResponse)
 	err := r.ExtractInto(job)
@@ -32,7 +50,7 @@ func (r Result) ExtractJobStatus() (*JobStatus, error) {
 }
 
 func GetJobEndpoint(endpoint string) string {
-	n := strings.Index(endpoint[8:len(endpoint)], "/")
+	n := strings.Index(endpoint[8:], "/")
 	if n == -1 {
 		return endpoint
 	}
