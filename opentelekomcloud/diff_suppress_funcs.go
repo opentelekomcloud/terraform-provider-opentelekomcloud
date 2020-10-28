@@ -138,3 +138,7 @@ func suppressLBWhitelistDiffs(k, old, new string, d *schema.ResourceData) bool {
 
 	return reflect.DeepEqual(old_array, new_array)
 }
+
+func suppressCaseInsensitive(_, old, new string, _ *schema.ResourceData) bool {
+	return strings.ToLower(old) == strings.ToLower(new)
+}

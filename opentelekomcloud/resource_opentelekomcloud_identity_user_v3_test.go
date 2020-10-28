@@ -121,7 +121,7 @@ func testAccIdentityV3User_update(userName string) string {
       name = "%s"
       enabled = false
       password = "password123@!"
-      email = "test2@acme.org"
+      email = "tEst2@acme.org"
     }
   `, userName)
 }

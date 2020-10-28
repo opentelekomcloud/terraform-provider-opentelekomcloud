@@ -64,8 +64,9 @@ func resourceIdentityUserV3() *schema.Resource {
 			},
 
 			"email": {
-				Type:     schema.TypeString,
-				Optional: true,
+				Type:             schema.TypeString,
+				Optional:         true,
+				DiffSuppressFunc: suppressCaseInsensitive,
 			},
 		},
 	}
@@ -93,7 +94,7 @@ func resourceIdentityUserV3Create(d *schema.ResourceData, meta interface{}) erro
 
 	user, err := users.Create(identityClient, createOpts).Extract()
 	if err != nil {
-		return fmt.Errorf("Error creating OpenStack user: %s", err)
+		return fmt.Errorf("error creating OpenTelekomCloud user: %s", err)
 	}
 
 	d.SetId(user.ID)
@@ -121,6 +122,15 @@ func resourceIdentityUserV3Read(d *schema.ResourceData, meta interface{}) error 
 		d.Set("enabled", user.Enabled),
 		d.Set("name", user.Name),
 		d.Set("region", GetRegion(d, config)),
+	)
+
+	// Read extended options
+	user, err = users.ExtendedUpdate(identityClient, d.Id(), users.ExtendedUpdateOpts{}).Extract()
+	if err != nil {
+		return err
+	}
+	mErr = multierror.Append(mErr,
+		d.Set("email", user.Email),
 	)
 
 	return mErr.ErrorOrNil()
