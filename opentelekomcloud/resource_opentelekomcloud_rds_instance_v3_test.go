@@ -57,7 +57,7 @@ func TestAccRdsInstanceV3_ip(t *testing.T) {
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckRdsInstanceV3Exists("opentelekomcloud_rds_instance_v3.instance", &rdsInstance),
 					resource.TestCheckResourceAttr("opentelekomcloud_rds_instance_v3.instance", "name", "tf_rds_instance_"+postfix),
-					resource.TestCheckResourceAttr("opentelekomcloud_rds_instance_v3.instance", "db.0.version", "9.5"),
+					resource.TestCheckResourceAttr("opentelekomcloud_rds_instance_v3.instance", "db.0.version", "10"),
 					resource.TestCheckResourceAttr("opentelekomcloud_rds_instance_v3.instance", "public_ips.#", "1"),
 				),
 			},
