@@ -52,7 +52,7 @@ func resourceNetworkingRouterV2() *schema.Resource {
 				Type:             schema.TypeString,
 				Optional:         true,
 				ForceNew:         false,
-				DiffSuppressFunc: suppressEmpty,
+				DiffSuppressFunc: suppressExternalGateway,
 			},
 			"enable_snat": {
 				Type:     schema.TypeBool,

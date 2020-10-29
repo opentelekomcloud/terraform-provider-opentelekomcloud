@@ -42,8 +42,8 @@ func suppressMinDisk(k, old, new string, d *schema.ResourceData) bool {
 	return new == "0" || old == new
 }
 
-// Suppress changes if we don't specify it, but one is specified for us
-func suppressEmpty(k, old, new string, d *schema.ResourceData) bool {
+// Suppress changes if we don't specify an external gateway, but one is specified for us
+func suppressExternalGateway(k, old, new string, d *schema.ResourceData) bool {
 	return new == "" || old == new
 }
 
