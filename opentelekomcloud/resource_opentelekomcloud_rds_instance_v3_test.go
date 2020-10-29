@@ -91,8 +91,9 @@ func TestAccRdsInstanceV3_ha(t *testing.T) {
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckRdsInstanceV3Exists("opentelekomcloud_rds_instance_v3.instance", &rdsInstance),
 					resource.TestCheckResourceAttr("opentelekomcloud_rds_instance_v3.instance", "name", "tf_rds_instance_"+postfix),
-					resource.TestCheckResourceAttr("opentelekomcloud_rds_instance_v3.instance", "db.0.version", "9.5"),
-					resource.TestCheckResourceAttr("opentelekomcloud_rds_instance_v3.instance", "public_ips.#", "1"),
+					resource.TestCheckResourceAttr("opentelekomcloud_rds_instance_v3.instance", "ha_replication_mode", "semisync"),
+					resource.TestCheckResourceAttr("opentelekomcloud_rds_instance_v3.instance", "volume.0.type", "ULTRAHIGH"),
+					resource.TestCheckResourceAttr("opentelekomcloud_rds_instance_v3.instance", "db.0.type", "MySQL"),
 				),
 			},
 		},
@@ -233,7 +234,7 @@ resource "opentelekomcloud_rds_instance_v3" "instance" {
   db {
     password = "Postgres!120521"
     type     = "PostgreSQL"
-    version  = "9.5"
+    version  = "10"
     port     = "8635"
   }
   security_group_id  = opentelekomcloud_networking_secgroup_v2.sg.id
@@ -262,7 +263,7 @@ resource "opentelekomcloud_networking_secgroup_v2" "sg" {
 
 resource "opentelekomcloud_rds_instance_v3" "instance" {
   name              = "tf_rds_instance_%s"
-  availability_zone = ["%s, %s"]
+  availability_zone = ["%s", "%s"]
   db {
     password = "MySql!120521"
     type     = "MySQL"

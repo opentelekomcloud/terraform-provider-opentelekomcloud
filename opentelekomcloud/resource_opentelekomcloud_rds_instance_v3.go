@@ -314,8 +314,6 @@ func resourceRdsInstanceV3Create(d *schema.ResourceData, meta interface{}) error
 		return fmt.Errorf("error creating RDSv3 client: %s", err)
 	}
 
-	publicIPs := d.Get("public_ips").([]interface{})
-
 	dbInfo := resourceRDSDbInfo(d)
 	volumeInfo := d.Get("volume").([]interface{})[0].(map[string]interface{})
 
@@ -377,13 +375,14 @@ func resourceRdsInstanceV3Create(d *schema.ResourceData, meta interface{}) error
 			}
 			err = tags.Create(tagClient, nodeID, tagOpts).ExtractErr()
 			if err != nil {
-				log.Printf("[WARN] Error setting tag(key/value) of instance:%s, err=%s", r.Instance.Id, err)
+				log.Printf("[WARN] Error setting tag(key/value) of instance %s, err: %s", r.Instance.Id, err)
 			}
 		}
 	}
 
-	if len(publicIPs) > 0 {
-		if err := resourceRdsInstanceV3Read(d, meta); err != nil {
+	ip := getPublicIP(d)
+	if ip != "" {
+		if err = resourceRdsInstanceV3Read(d, meta); err != nil {
 			return err
 		}
 		nw, err := config.networkingV2Client(GetRegion(d, config))
@@ -394,7 +393,7 @@ func resourceRdsInstanceV3Create(d *schema.ResourceData, meta interface{}) error
 		if err != nil {
 			return err
 		}
-		if err := assignEipToInstance(nw, publicIPs[0].(string), getPrivateIP(d), subnetID); err != nil {
+		if err := assignEipToInstance(nw, ip, getPrivateIP(d), subnetID); err != nil {
 			log.Printf("[WARN] failed to assign public IP: %s", err)
 		}
 	}
@@ -423,6 +422,14 @@ func getRdsInstance(rdsClient *golangsdk.ServiceClient, rdsId string) (*instance
 
 func getPrivateIP(d *schema.ResourceData) string {
 	return d.Get("private_ips").([]interface{})[0].(string)
+}
+
+func getPublicIP(d *schema.ResourceData) string {
+	publicIpRaw := d.Get("public_ips").([]interface{})
+	if len(publicIpRaw) > 0 {
+		return publicIpRaw[0].(string)
+	}
+	return ""
 }
 
 func findFloatingIP(client *golangsdk.ServiceClient, address string) (id string, err error) {
@@ -786,8 +793,11 @@ func resourceRdsInstanceV3Read(d *schema.ResourceData, meta interface{}) error {
 		return err
 	}
 
-	if err = d.Set("public_ips", rdsInstance.PublicIps); err != nil {
-		return err
+	publicIp := getPublicIP(d)
+	if publicIp != "" {
+		if err = d.Set("public_ips", []string{publicIp}); err != nil {
+			return err
+		}
 	}
 
 	// set instance tag
