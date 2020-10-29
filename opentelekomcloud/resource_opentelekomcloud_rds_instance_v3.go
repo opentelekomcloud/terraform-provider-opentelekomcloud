@@ -273,7 +273,7 @@ func resourceRDSBackupStrategy(d *schema.ResourceData) *instances.BackupStrategy
 	return &backupStrategy
 }
 
-func resourceRDSHA(d *schema.ResourceData) *instances.Ha {
+func resourceRDSHa(d *schema.ResourceData) *instances.Ha {
 	replicationMode := d.Get("ha_replication_mode").(string)
 	if replicationMode == "" {
 		return nil
@@ -322,7 +322,7 @@ func resourceRdsInstanceV3Create(d *schema.ResourceData, meta interface{}) error
 	createOpts := instances.CreateRdsOpts{
 		Name:             d.Get("name").(string),
 		Datastore:        resourceRDSDataStore(d),
-		Ha:               resourceRDSHA(d),
+		Ha:               resourceRDSHa(d),
 		Port:             strconv.Itoa(dbInfo["port"].(int)),
 		Password:         dbInfo["password"].(string),
 		BackupStrategy:   resourceRDSBackupStrategy(d),
@@ -425,13 +425,9 @@ func getPrivateIP(d *schema.ResourceData) string {
 	return d.Get("private_ips").([]interface{})[0].(string)
 }
 
-func findFloatingIP(client *golangsdk.ServiceClient, address, portID string) (id string, err error) {
-	var opts = floatingips.ListOpts{}
-	if address != "" {
-		opts.FloatingIP = address
-	} else {
-		opts.PortID = portID
-	}
+func findFloatingIP(client *golangsdk.ServiceClient, address string) (id string, err error) {
+	var opts = floatingips.ListOpts{FloatingIP: address}
+
 	pgFIP, err := floatingips.List(client, opts).AllPages()
 	if err != nil {
 		return
@@ -445,10 +441,7 @@ func findFloatingIP(client *golangsdk.ServiceClient, address, portID string) (id
 	}
 
 	for _, ip := range floatingIPs {
-		if portID != "" && portID != ip.PortID {
-			continue
-		}
-		if address != "" && address != ip.FloatingIP {
+		if address != ip.FloatingIP {
 			continue
 		}
 		return floatingIPs[0].ID, nil
@@ -456,13 +449,13 @@ func findFloatingIP(client *golangsdk.ServiceClient, address, portID string) (id
 	return
 }
 
+// find assigned port
 func findPort(client *golangsdk.ServiceClient, privateIP string, subnetID string) (id string, err error) {
-	// find assigned port
 	pg, err := ports.List(client, nil).AllPages()
-
 	if err != nil {
 		return
 	}
+
 	portList, err := ports.ExtractPorts(pg)
 	if err != nil {
 		return
@@ -484,7 +477,7 @@ func assignEipToInstance(client *golangsdk.ServiceClient, publicIP, privateIP, s
 		return err
 	}
 
-	ipID, err := findFloatingIP(client, publicIP, "")
+	ipID, err := findFloatingIP(client, publicIP)
 	if err != nil {
 		return err
 	}
@@ -506,7 +499,7 @@ func getSubnetSubnetID(d *schema.ResourceData, config *Config) (id string, err e
 }
 
 func unAssignEipFromInstance(client *golangsdk.ServiceClient, oldPublicIP string) error {
-	ipID, err := findFloatingIP(client, oldPublicIP, "")
+	ipID, err := findFloatingIP(client, oldPublicIP)
 	if err != nil {
 		return err
 	}
@@ -778,15 +771,13 @@ func resourceRdsInstanceV3Read(d *schema.ResourceData, meta interface{}) error {
 	}
 
 	var dbList []map[string]interface{}
-	db := d.Get("db")
-	dbasd := db.([]interface{})
-	dbasfasf := dbasd[0].(map[string]interface{})
-	dbasfasf["type"] = rdsInstance.DataStore.Type
-	dbasfasf["version"] = rdsInstance.DataStore.Version
-	dbasfasf["port"] = rdsInstance.Port
-	dbasfasf["user_name"] = rdsInstance.DbUserName
-	dbList = append(dbList, dbasfasf)
-
+	dbRaw := d.Get("db").([]interface{})
+	dbInfo := dbRaw[0].(map[string]interface{})
+	dbInfo["type"] = rdsInstance.DataStore.Type
+	dbInfo["version"] = rdsInstance.DataStore.Version
+	dbInfo["port"] = rdsInstance.Port
+	dbInfo["user_name"] = rdsInstance.DbUserName
+	dbList = append(dbList, dbInfo)
 	if err = d.Set("db", dbList); err != nil {
 		return err
 	}
@@ -848,8 +839,4 @@ func resourceRdsInstanceV3Delete(d *schema.ResourceData, meta interface{}) error
 
 	d.SetId("")
 	return nil
-}
-
-func flattenRdsInstanceV3BackupStrategy(d interface{}, arraIndex map[string]int, currentValue interface{}) {
-
 }

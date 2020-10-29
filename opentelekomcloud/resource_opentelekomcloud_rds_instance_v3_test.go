@@ -2,6 +2,7 @@ package opentelekomcloud
 
 import (
 	"fmt"
+	"os"
 	"testing"
 
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/rds/v3/instances"
@@ -42,6 +43,62 @@ func TestAccRdsInstanceV3_basic(t *testing.T) {
 	})
 }
 
+func TestAccRdsInstanceV3_ip(t *testing.T) {
+	postfix := acctest.RandString(3)
+	var rdsInstance instances.RdsInstanceResponse
+
+	resource.Test(t, resource.TestCase{
+		PreCheck:     func() { testAccPreCheck(t) },
+		Providers:    testAccProviders,
+		CheckDestroy: testAccCheckRdsInstanceV3Destroy,
+		Steps: []resource.TestStep{
+			{
+				Config: testAccRdsInstanceV3_eip(postfix),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckRdsInstanceV3Exists("opentelekomcloud_rds_instance_v3.instance", &rdsInstance),
+					resource.TestCheckResourceAttr("opentelekomcloud_rds_instance_v3.instance", "name", "tf_rds_instance_"+postfix),
+					resource.TestCheckResourceAttr("opentelekomcloud_rds_instance_v3.instance", "db.0.version", "9.5"),
+					resource.TestCheckResourceAttr("opentelekomcloud_rds_instance_v3.instance", "public_ips.#", "1"),
+				),
+			},
+			{
+				Config: testAccRdsInstanceV3_basic(postfix),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr("opentelekomcloud_rds_instance_v3.instance", "db.0.version", "10"),
+					resource.TestCheckResourceAttr("opentelekomcloud_rds_instance_v3.instance", "public_ips.#", "0"),
+				),
+			},
+		},
+	})
+}
+
+func TestAccRdsInstanceV3_ha(t *testing.T) {
+	postfix := acctest.RandString(3)
+	var rdsInstance instances.RdsInstanceResponse
+
+	var availabilityZone2 = os.Getenv("OS_AVAILABILITY_ZONE_2")
+	if availabilityZone2 == "" {
+		t.Skip("OS_AVAILABILITY_ZONE_2 is empty")
+	}
+
+	resource.Test(t, resource.TestCase{
+		PreCheck:     func() { testAccPreCheck(t) },
+		Providers:    testAccProviders,
+		CheckDestroy: testAccCheckRdsInstanceV3Destroy,
+		Steps: []resource.TestStep{
+			{
+				Config: testAccRdsInstanceV3_ha(postfix, availabilityZone2),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckRdsInstanceV3Exists("opentelekomcloud_rds_instance_v3.instance", &rdsInstance),
+					resource.TestCheckResourceAttr("opentelekomcloud_rds_instance_v3.instance", "name", "tf_rds_instance_"+postfix),
+					resource.TestCheckResourceAttr("opentelekomcloud_rds_instance_v3.instance", "db.0.version", "9.5"),
+					resource.TestCheckResourceAttr("opentelekomcloud_rds_instance_v3.instance", "public_ips.#", "1"),
+				),
+			},
+		},
+	})
+}
+
 func testAccCheckRdsInstanceV3Destroy(s *terraform.State) error {
 	config := testAccProvider.Meta().(*Config)
 	client, err := config.rdsV3Client(OS_REGION_NAME)
@@ -55,7 +112,7 @@ func testAccCheckRdsInstanceV3Destroy(s *terraform.State) error {
 		}
 		instance, _ := getRdsInstance(client, rs.Primary.ID)
 		if instance != nil {
-			return fmt.Errorf("relational Database still exists")
+			return fmt.Errorf("RDSv3 instance still exists")
 		}
 	}
 
@@ -155,33 +212,33 @@ resource "opentelekomcloud_rds_instance_v3" "instance" {
     keep_days  = 1
   }
   tag = {
-    foo = "bar"
-    key = "value"
+    foo = "bar1"
+    value = "key"
   }
 }
 `, postfix, OS_AVAILABILITY_ZONE, OS_NETWORK_ID, OS_VPC_ID)
 }
 
-func testAccRdsInstanceV3_eip(val string) string {
+func testAccRdsInstanceV3_eip(postfix string) string {
 	return fmt.Sprintf(`
 resource "opentelekomcloud_networking_floatingip_v2" "fip_1" {}
 
-resource opentelekomcloud_networking_secgroup_v2 sg {
+resource "opentelekomcloud_networking_secgroup_v2" "sg" {
   name = "sg-rds-test"
 }
 
 resource "opentelekomcloud_rds_instance_v3" "instance" {
+  name              = "tf_rds_instance_%s"
   availability_zone = ["%s"]
   db {
     password = "Postgres!120521"
-    type = "PostgreSQL"
-    version = "9.5"
-    port = "8635"
+    type     = "PostgreSQL"
+    version  = "9.5"
+    port     = "8635"
   }
-  name = "tf_rds_instance_%s"
   security_group_id  = opentelekomcloud_networking_secgroup_v2.sg.id
-  subnet_id = "%s"
-  vpc_id = "%s"
+  subnet_id          = "%s"
+  vpc_id             = "%s"
   volume {
     type = "COMMON"
     size = 100
@@ -189,13 +246,42 @@ resource "opentelekomcloud_rds_instance_v3" "instance" {
   flavor = "rds.pg.c2.medium"
   backup_strategy {
     start_time = "08:00-09:00"
-    keep_days = 1
+    keep_days  = 1
   }
-  tag = {
-    foo = "bar"
-    key = "value"
-  }
+
   public_ips = [opentelekomcloud_networking_floatingip_v2.fip_1.address]
 }
-`, OS_AVAILABILITY_ZONE, val, OS_NETWORK_ID, OS_VPC_ID)
+`, postfix, OS_AVAILABILITY_ZONE, OS_NETWORK_ID, OS_VPC_ID)
+}
+
+func testAccRdsInstanceV3_ha(postfix string, az2 string) string {
+	return fmt.Sprintf(`
+resource "opentelekomcloud_networking_secgroup_v2" "sg" {
+  name = "sg-rds-test"
+}
+
+resource "opentelekomcloud_rds_instance_v3" "instance" {
+  name              = "tf_rds_instance_%s"
+  availability_zone = ["%s, %s"]
+  db {
+    password = "MySql!120521"
+    type     = "MySQL"
+    version  = "5.6"
+    port     = "8635"
+  }
+  security_group_id  = opentelekomcloud_networking_secgroup_v2.sg.id
+  subnet_id          = "%s"
+  vpc_id             = "%s"
+  volume {
+    type = "ULTRAHIGH"
+    size = 100
+  }
+  flavor = "rds.mysql.s1.large.ha"
+  backup_strategy {
+    start_time = "08:00-09:00"
+    keep_days  = 1
+  }
+  ha_replication_mode = "semisync"
+}
+`, postfix, OS_AVAILABILITY_ZONE, az2, OS_NETWORK_ID, OS_VPC_ID)
 }
