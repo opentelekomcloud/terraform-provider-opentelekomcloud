@@ -1,5 +1,19 @@
 ## 1.22.0 (Unreleased)
 
+
+## 1.21.2 (October 29, 2020)
+
+BUG FIXES:
+* `resource/opentelekomcloud_cce_cluster_v3`: Suppress schema diff in CCE version ([#666](https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/666))
+* `resource/opentelekomcloud_cce_cluster_v3`: Increase delete timeout to 30m ([#674](https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/674))
+* `resource/opentelekomcloud_compute_secgroup_v2`: Fix delete group if it's used ([#677](https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/677))
+* `resource/opentelekomcloud_networking_secgroup_v2`: Fix delete group if it's used ([#676](https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/676))
+
+ENHANCEMENTS:
+* `resource/opentelekomcloud_identity_user_v3`: Add email field to schema ([668](https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/668))
+* **New data source:** `opentelekomcloud_identity_auth_scope_v3` ([#669](https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/669))
+
+
 ## 1.21.1 (October 23, 2020)
 
 BUG FIXES:
