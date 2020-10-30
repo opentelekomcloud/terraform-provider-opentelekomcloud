@@ -18,9 +18,9 @@ resource "opentelekomcloud_cce_cluster_v3" "cluster_1" {
   description = "Create cluster"
 
   cluster_type           = "VirtualMachine"
-  flavor_id              = "${var.flavor_id}"
-  vpc_id                 = "${var.vpc_id}"
-  subnet_id              = "${var.subnet_id}"
+  flavor_id              = var.flavor_id
+  vpc_id                 = var.vpc_id
+  subnet_id              = var.subnet_id
   container_network_type = "overlay_l2"
   authentication_mode    = "rbac"
 }
