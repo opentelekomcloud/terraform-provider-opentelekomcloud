@@ -589,7 +589,7 @@ func resourceRdsInstanceV3Update(d *schema.ResourceData, meta interface{}) error
 		}
 
 		log.Printf("Update flavor could be done only in status `available`")
-		if err := instances.WaitForStateAvailable(client, 600, d.Id()); err != nil {
+		if err := instances.WaitForStateAvailable(client, 1200, d.Id()); err != nil {
 			log.Printf("Status available wasn't present")
 		}
 
@@ -637,7 +637,8 @@ func resourceRdsInstanceV3Update(d *schema.ResourceData, meta interface{}) error
 		if err != nil {
 			return fmt.Errorf("error updating instance volume from result: %s", err)
 		}
-		if err := instances.WaitForJobCompleted(client, 1200, updateResult.JobID); err != nil {
+		timeout := d.Timeout(schema.TimeoutCreate)
+		if err := instances.WaitForJobCompleted(client, int(timeout.Seconds()), updateResult.JobID); err != nil {
 			return err
 		}
 
