@@ -160,22 +160,6 @@ func resourceRdsInstanceV3() *schema.Resource {
 				Optional: true,
 				ForceNew: true,
 			},
-			"switch_strategy": {
-				Type:     schema.TypeString,
-				Computed: true,
-			},
-			"maintenance_window": {
-				Type:     schema.TypeString,
-				Computed: true,
-			},
-			"type": {
-				Type:     schema.TypeString,
-				Computed: true,
-			},
-			"time_zone": {
-				Type:     schema.TypeString,
-				Computed: true,
-			},
 			"tag": {
 				Type:         schema.TypeMap,
 				Optional:     true,
@@ -187,14 +171,6 @@ func resourceRdsInstanceV3() *schema.Resource {
 				ForceNew: true,
 			},
 			"created": {
-				Type:     schema.TypeString,
-				Computed: true,
-			},
-			"updated": {
-				Type:     schema.TypeString,
-				Computed: true,
-			},
-			"region": {
 				Type:     schema.TypeString,
 				Computed: true,
 			},
@@ -731,11 +707,6 @@ func resourceRdsInstanceV3Read(d *schema.ResourceData, meta interface{}) error {
 		d.Set("subnet_id", rdsInstance.SubnetId),
 		d.Set("vpc_id", rdsInstance.VpcId),
 		d.Set("created", rdsInstance.Created),
-		d.Set("time_zone", rdsInstance.TimeZone),
-		d.Set("maintenance_window", rdsInstance.MaintenanceWindow),
-		d.Set("switch_strategy", rdsInstance.SwitchStrategy),
-		d.Set("updated", rdsInstance.Updated),
-		d.Set("region", rdsInstance.Region),
 		d.Set("ha_replication_mode", rdsInstance.Ha.ReplicationMode),
 		d.Set("type", rdsInstance.Type),
 	)
