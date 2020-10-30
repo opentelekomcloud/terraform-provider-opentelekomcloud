@@ -2,6 +2,7 @@ package opentelekomcloud
 
 import (
 	"fmt"
+	"github.com/hashicorp/go-multierror"
 	"log"
 	"time"
 
@@ -28,24 +29,20 @@ func resourceComputeFloatingIPV2() *schema.Resource {
 				Computed: true,
 				ForceNew: true,
 			},
-
 			"pool": {
 				Type:     schema.TypeString,
 				Optional: true,
 				ForceNew: true,
 				Default:  "admin_external_net",
 			},
-
 			"address": {
 				Type:     schema.TypeString,
 				Computed: true,
 			},
-
 			"fixed_ip": {
 				Type:     schema.TypeString,
 				Computed: true,
 			},
-
 			"instance_id": {
 				Type:     schema.TypeString,
 				Computed: true,
@@ -58,7 +55,7 @@ func resourceComputeFloatingIPV2Create(d *schema.ResourceData, meta interface{})
 	config := meta.(*Config)
 	computeClient, err := config.computeV2Client(GetRegion(d, config))
 	if err != nil {
-		return fmt.Errorf("Error creating OpenTelekomCloud compute client: %s", err)
+		return fmt.Errorf("error creating OpenTelekomCloud ComputeV2 client: %s", err)
 	}
 
 	createOpts := &floatingips.CreateOpts{
@@ -67,7 +64,7 @@ func resourceComputeFloatingIPV2Create(d *schema.ResourceData, meta interface{})
 	log.Printf("[DEBUG] Create Options: %#v", createOpts)
 	newFip, err := floatingips.Create(computeClient, createOpts).Extract()
 	if err != nil {
-		return fmt.Errorf("Error creating Floating IP: %s", err)
+		return fmt.Errorf("error creating Floating IP: %s", err)
 	}
 
 	d.SetId(newFip.ID)
@@ -79,7 +76,7 @@ func resourceComputeFloatingIPV2Read(d *schema.ResourceData, meta interface{}) e
 	config := meta.(*Config)
 	computeClient, err := config.computeV2Client(GetRegion(d, config))
 	if err != nil {
-		return fmt.Errorf("Error creating OpenTelekomCloud compute client: %s", err)
+		return fmt.Errorf("error creating OpenTelekomCloud compute client: %s", err)
 	}
 
 	fip, err := floatingips.Get(computeClient, d.Id()).Extract()
@@ -89,13 +86,15 @@ func resourceComputeFloatingIPV2Read(d *schema.ResourceData, meta interface{}) e
 
 	log.Printf("[DEBUG] Retrieved Floating IP %s: %+v", d.Id(), fip)
 
-	d.Set("pool", fip.Pool)
-	d.Set("instance_id", fip.InstanceID)
-	d.Set("address", fip.IP)
-	d.Set("fixed_ip", fip.FixedIP)
-	d.Set("region", GetRegion(d, config))
+	me := multierror.Append(
+		d.Set("pool", fip.Pool),
+		d.Set("instance_id", fip.InstanceID),
+		d.Set("address", fip.IP),
+		d.Set("fixed_ip", fip.FixedIP),
+		d.Set("region", GetRegion(d, config)),
+	)
 
-	return nil
+	return me.ErrorOrNil()
 }
 
 func FloatingIPV2StateRefreshFunc(computeClient *golangsdk.ServiceClient, d *schema.ResourceData) resource.StateRefreshFunc {

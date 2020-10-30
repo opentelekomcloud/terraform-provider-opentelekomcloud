@@ -82,6 +82,5 @@ func testAccCheckComputeV2FloatingIPExists(n string, kp *floatingips.FloatingIP)
 }
 
 const testAccComputeV2FloatingIP_basic = `
-resource "opentelekomcloud_compute_floatingip_v2" "fip_1" {
-}
+resource "opentelekomcloud_compute_floatingip_v2" "fip_1" {}
 `
