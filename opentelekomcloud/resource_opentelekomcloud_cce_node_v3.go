@@ -187,21 +187,24 @@ func resourceCCENodeV3() *schema.Resource {
 			},
 			"iptype": {
 				Type:          schema.TypeString,
+				Optional:      true,
 				ForceNew:      true,
-				Computed:      true,
 				ConflictsWith: []string{"eip_ids"},
+				Computed:      true,
 			},
 			"bandwidth_charge_mode": {
 				Type:          schema.TypeString,
+				Optional:      true,
 				ForceNew:      true,
-				Computed:      true,
 				ConflictsWith: []string{"eip_ids"},
+				Computed:      true,
 			},
 			"sharetype": {
 				Type:          schema.TypeString,
+				Optional:      true,
 				ForceNew:      true,
-				Computed:      true,
 				ConflictsWith: []string{"eip_ids"},
+				Computed:      true,
 			},
 			"bandwidth_size": {
 				Type:          schema.TypeInt,
@@ -394,9 +397,15 @@ func resourceCCENodeV3Create(d *schema.ResourceData, meta interface{}) error {
 	eipCount := d.Get("eip_count").(int)
 	if bandwidthSize > 0 && eipCount == 0 {
 		eipCount = 1
-		_ = d.Set("bandwidth_charge_mode", "traffic")
-		_ = d.Set("sharetype", "PER")
-		_ = d.Set("iptype", "5_bgp")
+		if d.Get("bandwidth_charge_mode").(string) == "" {
+			_ = d.Set("bandwidth_charge_mode", "traffic")
+		}
+		if d.Get("sharetype").(string) == "" {
+			_ = d.Set("sharetype", "PER")
+		}
+		if d.Get("iptype").(string) == "" {
+			_ = d.Set("iptype", "5_bgp")
+		}
 	}
 
 	createOpts := nodes.CreateOpts{
