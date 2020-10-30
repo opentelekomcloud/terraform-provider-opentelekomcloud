@@ -18,7 +18,7 @@ resource "opentelekomcloud_cce_node_v3" "node_1" {
   cluster_id        = var.cluster_id
   availability_zone = var.availability_zone
 
-  flavor_id      = "s1.medium"
+  flavor_id      = "s2.large.2"
   key_pair       = var.ssh_key
 
   bandwidth_size = 100
