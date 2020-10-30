@@ -708,7 +708,6 @@ func resourceRdsInstanceV3Read(d *schema.ResourceData, meta interface{}) error {
 		d.Set("vpc_id", rdsInstance.VpcId),
 		d.Set("created", rdsInstance.Created),
 		d.Set("ha_replication_mode", rdsInstance.Ha.ReplicationMode),
-		d.Set("type", rdsInstance.Type),
 	)
 
 	if me.ErrorOrNil() != nil {
