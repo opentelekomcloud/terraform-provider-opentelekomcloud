@@ -49,7 +49,11 @@ func resourceCertificateV2() *schema.Resource {
 
 			"private_key": {
 				Type:     schema.TypeString,
+<<<<<<< HEAD
+				Optional: true,
+=======
 				Required: true,
+>>>>>>> 008429af9a081276dff9ca7b37ae893165e85d52
 			},
 
 			"certificate": {
@@ -57,7 +61,24 @@ func resourceCertificateV2() *schema.Resource {
 				Required: true,
 			},
 
+<<<<<<< HEAD
+			"type": {
+				Type:     schema.TypeString,
+				Optional: true,
+				ValidateFunc: func(v interface{}, k string) (ws []string, errors []error) {
+					value := v.(string)
+					if value != "server" && value != "client" {
+						errors = append(errors, fmt.Errorf(
+							"Only 'server' and 'client' are supported certificate 'type' values yet"))
+					}
+					return
+				},
+			},
+
+			/* "update_time": {
+=======
 			"update_time": {
+>>>>>>> 008429af9a081276dff9ca7b37ae893165e85d52
 				Type:     schema.TypeString,
 				Computed: true,
 			},
@@ -65,7 +86,11 @@ func resourceCertificateV2() *schema.Resource {
 			"create_time": {
 				Type:     schema.TypeString,
 				Computed: true,
+<<<<<<< HEAD
+			}, */
+=======
 			},
+>>>>>>> 008429af9a081276dff9ca7b37ae893165e85d52
 		},
 	}
 }
@@ -77,12 +102,20 @@ func resourceCertificateV2Create(d *schema.ResourceData, meta interface{}) error
 		return fmt.Errorf("Error creating OpenTelekomCloud networking client: %s", err)
 	}
 
+<<<<<<< HEAD
+	// trims are needed because OTC implicitly returns trimmed certs on GET
+=======
+>>>>>>> 008429af9a081276dff9ca7b37ae893165e85d52
 	createOpts := certificates.CreateOpts{
 		Name:        d.Get("name").(string),
 		Description: d.Get("description").(string),
 		Domain:      d.Get("domain").(string),
 		PrivateKey:  d.Get("private_key").(string),
 		Certificate: d.Get("certificate").(string),
+<<<<<<< HEAD
+		Type:        d.Get("type").(string),
+=======
+>>>>>>> 008429af9a081276dff9ca7b37ae893165e85d52
 	}
 
 	log.Printf("[DEBUG] Create Options: %#v", createOpts)
@@ -115,8 +148,14 @@ func resourceCertificateV2Read(d *schema.ResourceData, meta interface{}) error {
 	d.Set("domain", c.Domain)
 	d.Set("certificate", c.Certificate)
 	d.Set("private_key", c.PrivateKey)
+<<<<<<< HEAD
+	d.Set("type", c.Type)
+	//d.Set("create_time", c.CreateTime)
+	//d.Set("update_time", c.UpdateTime)
+=======
 	d.Set("create_time", c.CreateTime)
 	d.Set("update_time", c.UpdateTime)
+>>>>>>> 008429af9a081276dff9ca7b37ae893165e85d52
 
 	d.Set("region", GetRegion(d, config))
 
@@ -146,6 +185,10 @@ func resourceCertificateV2Update(d *schema.ResourceData, meta interface{}) error
 	if d.HasChange("certificate") {
 		updateOpts.Certificate = d.Get("certificate").(string)
 	}
+<<<<<<< HEAD
+	// type is not changeable on update
+=======
+>>>>>>> 008429af9a081276dff9ca7b37ae893165e85d52
 
 	log.Printf("[DEBUG] Updating certificate %s with options: %#v", d.Id(), updateOpts)
 
