@@ -75,12 +75,13 @@ func resourceListenerV2() *schema.Resource {
 				Type:     schema.TypeString,
 				Optional: true,
 				Computed: true,
-				ForceNew: true,
+				ForceNew: true, // could be updated duo to docs, but gopher doen´t define it
 			},
 
 			"description": {
 				Type:     schema.TypeString,
 				Optional: true,
+				ForceNew: false, // could be updated
 			},
 
 			/*"connection_limit": &schema.Schema{
@@ -90,25 +91,69 @@ func resourceListenerV2() *schema.Resource {
 				ForceNew: true,
 			}, */
 
+<<<<<<< HEAD
+			// new feature 2020 to support https2
+			"http2_enable": {
+				Type:     schema.TypeBool,
+				Optional: true,
+				ForceNew: false, // could be updated
+			},
+
+=======
+>>>>>>> 008429af9a081276dff9ca7b37ae893165e85d52
 			"default_tls_container_ref": {
 				Type:     schema.TypeString,
 				Optional: true,
-				ForceNew: true,
+				ForceNew: false, // could be updated
 			},
 
+<<<<<<< HEAD
+			// new feature 2020 to handle Client certificates
+			"client_ca_tls_container_ref": {
+				Type:     schema.TypeString,
+				Optional: true,
+				ForceNew: false, // could be updated
+			},
+
+=======
+>>>>>>> 008429af9a081276dff9ca7b37ae893165e85d52
 			"sni_container_refs": {
 				Type:     schema.TypeList,
 				Optional: true,
 				Elem:     &schema.Schema{Type: schema.TypeString},
-				ForceNew: true,
+				ForceNew: false, // could be updated
 			},
+
+<<<<<<< HEAD
+			// new feature 2020 to give a choice of the http standard on https termiination
+			"tls_ciphers_policy": {
+				Type:     schema.TypeString,
+=======
+			"admin_state_up": {
+				Type:     schema.TypeBool,
+				Default:  true,
+>>>>>>> 008429af9a081276dff9ca7b37ae893165e85d52
+				Optional: true,
+				ValidateFunc: func(v interface{}, k string) (ws []string, errors []error) {
+					value := v.(string)
+					if value != "tls-1-0" && value != "tls-1-1" && value != "tls-1-2" && value != "tls-1-2-strict" {
+						errors = append(errors, fmt.Errorf(
+							"Only 'tls-1-0', 'tls-1-1', 'tls-1-2', and 'tls-1-2-strict' are supported 'tls-ciphersuite-policiy' values yet'"))
+					}
+					return
+				},
+				ForceNew: false, // could be updated
+			},
+<<<<<<< HEAD
 
 			"admin_state_up": {
 				Type:     schema.TypeBool,
 				Default:  true,
 				Optional: true,
-				ForceNew: true,
+				ForceNew: false, // could and should be updateable
 			},
+=======
+>>>>>>> 008429af9a081276dff9ca7b37ae893165e85d52
 		},
 	}
 }
@@ -120,6 +165,7 @@ func resourceListenerV2Create(d *schema.ResourceData, meta interface{}) error {
 		return fmt.Errorf("Error creating OpenTelekomCloud networking client: %s", err)
 	}
 
+	http2Enable := d.Get("http2_enable").(bool) // would prefer a fix in the gopher...
 	adminStateUp := d.Get("admin_state_up").(bool)
 	var sniContainerRefs []string
 	if raw, ok := d.GetOk("sni_container_refs"); ok {
@@ -135,8 +181,11 @@ func resourceListenerV2Create(d *schema.ResourceData, meta interface{}) error {
 		Name:                   d.Get("name").(string),
 		DefaultPoolID:          d.Get("default_pool_id").(string),
 		Description:            d.Get("description").(string),
+		Http2Enable:            &http2Enable,
 		DefaultTlsContainerRef: d.Get("default_tls_container_ref").(string),
+		CAContainerRef:         d.Get("client_ca_tls_container_ref").(string),
 		SniContainerRefs:       sniContainerRefs,
+		TlsCiphersPolicy:       d.Get("tls_ciphers_policy").(string),
 		AdminStateUp:           &adminStateUp,
 	}
 
@@ -193,20 +242,30 @@ func resourceListenerV2Read(d *schema.ResourceData, meta interface{}) error {
 
 	log.Printf("[DEBUG] Retrieved listener %s: %#v", d.Id(), listener)
 
+	d.Set("region", GetRegion(d, config))
+	d.Set("protocol", listener.Protocol)
+	d.Set("protocol_port", listener.ProtocolPort)
+	d.Set("tenant_id", listener.TenantID)
 	d.Set("id", listener.ID)
 	d.Set("name", listener.Name)
-	d.Set("protocol", listener.Protocol)
-	d.Set("tenant_id", listener.TenantID)
-	d.Set("description", listener.Description)
-	d.Set("protocol_port", listener.ProtocolPort)
-	d.Set("admin_state_up", listener.AdminStateUp)
 	d.Set("default_pool_id", listener.DefaultPoolID)
+<<<<<<< HEAD
+	d.Set("description", listener.Description)
+	d.Set("http2_enable", listener.Http2Enable)
+=======
 	//d.Set("connection_limit", listener.ConnLimit)
 	if err := d.Set("sni_container_refs", listener.SniContainerRefs); err != nil {
 		return fmt.Errorf("[DEBUG] Error saving sni_container_refs to state for OpenTelekomCloud listener (%s): %s", d.Id(), err)
 	}
+>>>>>>> 008429af9a081276dff9ca7b37ae893165e85d52
 	d.Set("default_tls_container_ref", listener.DefaultTlsContainerRef)
-	d.Set("region", GetRegion(d, config))
+	d.Set("client_ca_tls_container_ref", listener.CAContainerRef)
+	//d.Set("connection_limit", listener.ConnLimit)
+	if err := d.Set("sni_container_refs", listener.SniContainerRefs); err != nil {
+		return fmt.Errorf("[DEBUG] Error saving sni_container_refs to state for OpenTelekomCloud listener (%s): %s", d.Id(), err)
+	}
+	d.Set("tls_ciphers_policy", listener.TlsCiphersPolicy)
+	d.Set("admin_state_up", listener.AdminStateUp)
 
 	return nil
 }
@@ -229,8 +288,15 @@ func resourceListenerV2Update(d *schema.ResourceData, meta interface{}) error {
 		connLimit := d.Get("connection_limit").(int)
 		updateOpts.ConnLimit = &connLimit
 	} */
+	if d.HasChange("http2_enable") {
+		http2Enable := d.Get("http2_enable").(bool)
+		updateOpts.Http2Enable = &http2Enable
+	}
 	if d.HasChange("default_tls_container_ref") {
 		updateOpts.DefaultTlsContainerRef = d.Get("default_tls_container_ref").(string)
+	}
+	if d.HasChange("client_ca_tls_container_ref") {
+		updateOpts.CAContainerRef = d.Get("client_ca_tls_container_ref").(string)
 	}
 	if d.HasChange("sni_container_refs") {
 		var sniContainerRefs []string
@@ -244,6 +310,9 @@ func resourceListenerV2Update(d *schema.ResourceData, meta interface{}) error {
 	if d.HasChange("admin_state_up") {
 		asu := d.Get("admin_state_up").(bool)
 		updateOpts.AdminStateUp = &asu
+	}
+	if d.HasChange("tls_ciphers_policy") {
+		updateOpts.TlsCiphersPolicy = d.Get("tls_ciphers_policy").(string)
 	}
 
 	// Wait for LoadBalancer to become active before continuing
