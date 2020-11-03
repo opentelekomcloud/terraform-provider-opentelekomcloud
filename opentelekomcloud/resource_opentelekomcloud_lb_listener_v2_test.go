@@ -161,7 +161,6 @@ resource "opentelekomcloud_lb_listener_v2" "listener_1" {
 	}
 }
 `, OS_SUBNET_ID)
-<<<<<<< HEAD
 
 var TestAccLBV2ListenerConfig_http2 = fmt.Sprintf(`
 resource "opentelekomcloud_lb_certificate_v2" "certificate_tls" {
@@ -395,5 +394,3 @@ resource "opentelekomcloud_lb_listener_v2" "listener_tls" {
 	}
 }
 `, OS_SUBNET_ID)
-=======
->>>>>>> 008429af9a081276dff9ca7b37ae893165e85d52

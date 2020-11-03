@@ -91,7 +91,6 @@ func resourceListenerV2() *schema.Resource {
 				ForceNew: true,
 			}, */
 
-<<<<<<< HEAD
 			// new feature 2020 to support https2
 			"http2_enable": {
 				Type:     schema.TypeBool,
@@ -99,15 +98,12 @@ func resourceListenerV2() *schema.Resource {
 				ForceNew: false, // could be updated
 			},
 
-=======
->>>>>>> 008429af9a081276dff9ca7b37ae893165e85d52
 			"default_tls_container_ref": {
 				Type:     schema.TypeString,
 				Optional: true,
 				ForceNew: false, // could be updated
 			},
 
-<<<<<<< HEAD
 			// new feature 2020 to handle Client certificates
 			"client_ca_tls_container_ref": {
 				Type:     schema.TypeString,
@@ -115,8 +111,6 @@ func resourceListenerV2() *schema.Resource {
 				ForceNew: false, // could be updated
 			},
 
-=======
->>>>>>> 008429af9a081276dff9ca7b37ae893165e85d52
 			"sni_container_refs": {
 				Type:     schema.TypeList,
 				Optional: true,
@@ -124,15 +118,9 @@ func resourceListenerV2() *schema.Resource {
 				ForceNew: false, // could be updated
 			},
 
-<<<<<<< HEAD
 			// new feature 2020 to give a choice of the http standard on https termiination
 			"tls_ciphers_policy": {
 				Type:     schema.TypeString,
-=======
-			"admin_state_up": {
-				Type:     schema.TypeBool,
-				Default:  true,
->>>>>>> 008429af9a081276dff9ca7b37ae893165e85d52
 				Optional: true,
 				ValidateFunc: func(v interface{}, k string) (ws []string, errors []error) {
 					value := v.(string)
@@ -144,7 +132,6 @@ func resourceListenerV2() *schema.Resource {
 				},
 				ForceNew: false, // could be updated
 			},
-<<<<<<< HEAD
 
 			"admin_state_up": {
 				Type:     schema.TypeBool,
@@ -152,8 +139,6 @@ func resourceListenerV2() *schema.Resource {
 				Optional: true,
 				ForceNew: false, // could and should be updateable
 			},
-=======
->>>>>>> 008429af9a081276dff9ca7b37ae893165e85d52
 		},
 	}
 }
@@ -249,15 +234,8 @@ func resourceListenerV2Read(d *schema.ResourceData, meta interface{}) error {
 	d.Set("id", listener.ID)
 	d.Set("name", listener.Name)
 	d.Set("default_pool_id", listener.DefaultPoolID)
-<<<<<<< HEAD
 	d.Set("description", listener.Description)
 	d.Set("http2_enable", listener.Http2Enable)
-=======
-	//d.Set("connection_limit", listener.ConnLimit)
-	if err := d.Set("sni_container_refs", listener.SniContainerRefs); err != nil {
-		return fmt.Errorf("[DEBUG] Error saving sni_container_refs to state for OpenTelekomCloud listener (%s): %s", d.Id(), err)
-	}
->>>>>>> 008429af9a081276dff9ca7b37ae893165e85d52
 	d.Set("default_tls_container_ref", listener.DefaultTlsContainerRef)
 	d.Set("client_ca_tls_container_ref", listener.CAContainerRef)
 	//d.Set("connection_limit", listener.ConnLimit)
