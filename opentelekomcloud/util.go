@@ -8,7 +8,7 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
-	"github.com/opentelekomcloud/gophertelekomcloud"
+	golangsdk "github.com/opentelekomcloud/gophertelekomcloud"
 	"github.com/unknwon/com"
 )
 
@@ -124,16 +124,9 @@ func FormatHeaders(headers http.Header, seperator string) string {
 }
 
 func checkForRetryableError(err error) *resource.RetryError {
-	switch errCode := err.(type) {
-	case golangsdk.ErrDefault500:
+	switch err.(type) {
+	case golangsdk.ErrDefault409, golangsdk.ErrDefault500, golangsdk.ErrDefault503:
 		return resource.RetryableError(err)
-	case golangsdk.ErrUnexpectedResponseCode:
-		switch errCode.Actual {
-		case 409, 503:
-			return resource.RetryableError(err)
-		default:
-			return resource.NonRetryableError(err)
-		}
 	default:
 		return resource.NonRetryableError(err)
 	}
