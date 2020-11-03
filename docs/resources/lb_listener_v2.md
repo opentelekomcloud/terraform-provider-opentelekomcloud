@@ -41,15 +41,29 @@ The following arguments are supported:
 
 * `description` - (Optional) Human-readable description for the Listener.
 
-* `default_tls_container_ref` - (Optional) Specifies the ID of the server certificate used by the listener.
-  The value contains a maximum of 128 characters. The default value is `null`.
+* `http2_enable`- (Optional) `true` to enable HTTP/2 mode of ELB.
+  HTTP/2 is disabled by default if not set. 
+
+* `default_tls_container_ref` - (Optional) Specifies the ID of a certificate container of type `server`
+  used by the listener. The value contains a maximum of 128 characters. The default value is `null`.
   This parameter is **required** when protocol is set to `TERMINATED_HTTPS`.
   See [here](https://wiki.openstack.org/wiki/Network/LBaaS/docs/how-to-create-tls-loadbalancer)
   for more information.
 
+* `client_ca_tls_container_ref`  (Optional) Specifies the ID of a certificate container of type `client`
+  used by the listener. The value contains a maximum of 128 characters. The default value is `null`.
+  The loadbalancer only establishes a TLS connection if the client presents a certificate delivered by
+  the client CA whose certificate is registered in the referenced certificate container. The option is
+  effective only in conjunction with `TERMINATED_HTTPS`.
+
 * `sni_container_refs` - (Optional) Lists the IDs of SNI certificates (server certificates with a domain name) used
   by the listener. If the parameter value is an empty list, the SNI feature is disabled.
-  The default value is `[]`. This is **required** if the protocol is `TERMINATED_HTTPS`.
+  The default value is `[]`. It only works in conjunction with `TERMINATED_HTTPS`.
+
+* `tls_ciphers_policy`- (Optional) Controls the TLS version used. Supported values are `tls-1-0`, `tls-1-1`,
+  `tls-1-2` and `tls-1-2-strict`. If not set, the loadbalancer uses `tls-1-0`. See 
+  [here](https://docs.otc.t-systems.com/api/elb/elb_zq_jt_0001.html) for details about the supported cipher
+  suites. The option is effective only in conjunction with `TERMINATED_HTTPS`.
 
 * `admin_state_up` - (Optional) The administrative state of the Listener.
   A valid value is `true` (UP) or `false` (DOWN).
@@ -72,8 +86,14 @@ The following attributes are exported:
 
 * `description` - See Argument Reference above.
 
+* `http2_enable` - See Argument Reference above.
+
 * `default_tls_container_ref` - See Argument Reference above.
 
+* `client_ca_tls_container_ref` - See Argument Reference above.
+
 * `sni_container_refs` - See Argument Reference above.
+
+* `tls_ciphers_policy` - See Argument Reference above.
 
 * `admin_state_up` - See Argument Reference above.

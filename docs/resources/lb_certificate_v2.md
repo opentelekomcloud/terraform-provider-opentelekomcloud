@@ -92,9 +92,13 @@ The following arguments are supported:
 
 * `domain` - (Optional) The domain of the Certificate.
 
-* `private_key` - (Required) The private encrypted key of the Certificate, PEM format.
+* `private_key` - (Optional) The private encrypted key of the Certificate, PEM format.
+  Required for certifcates of type `server`.
 
 * `certificate` - (Required) The public encrypted key of the Certificate, PEM format.
+
+* `type`- (Optional) The type of certificate the container holds. Either `server` or `client`.
+  Defaults to `server` if not set.
 
 ## Attributes Reference
 
@@ -111,6 +115,8 @@ The following attributes are exported:
 * `private_key` - See Argument Reference above.
 
 * `certificate` - See Argument Reference above.
+
+* `type` - See Argument Reference above.
 
 * `update_time` - Indicates the update time.
 
