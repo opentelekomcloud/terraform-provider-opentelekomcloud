@@ -14,7 +14,7 @@ Manages a V1 ECS instance resource within OpenTelekomCloud.
 resource "opentelekomcloud_ecs_instance_v1" "basic" {
   name     = "server_1"
   image_id = "ad091b52-742f-469e-8f3c-fd81cadf0743"
-  flavor   = "s1.medium"
+  flavor   = "s2.large.2"
   vpc_id   = "8eed4fc7-e5e5-44a2-b5f2-23b3e5d46235"
 
   nics {
@@ -33,7 +33,7 @@ resource "opentelekomcloud_ecs_instance_v1" "basic" {
 resource "opentelekomcloud_ecs_instance_v1" "basic" {
   name     = "server_1"
   image_id = "ad091b52-742f-469e-8f3c-fd81cadf0743"
-  flavor   = "s1.medium"
+  flavor   = "s2.large.2"
   vpc_id   = "8eed4fc7-e5e5-44a2-b5f2-23b3e5d46235"
 
   nics {
@@ -70,7 +70,7 @@ resource "opentelekomcloud_blockstorage_volume_v2" "myvol" {
 resource "opentelekomcloud_ecs_instance_v1" "basic" {
   name     = "server_1"
   image_id = "ad091b52-742f-469e-8f3c-fd81cadf0743"
-  flavor   = "s1.medium"
+  flavor   = "s2.large.2"
   vpc_id   = "8eed4fc7-e5e5-44a2-b5f2-23b3e5d46235"
 
   nics {
@@ -96,7 +96,7 @@ resource "opentelekomcloud_networking_floatingip_v2" "myip" { }
 resource "opentelekomcloud_ecs_instance_v1" "multi-net" {
   name     = "server_1"
   image_id = "ad091b52-742f-469e-8f3c-fd81cadf0743"
-  flavor   = "s1.medium"
+  flavor   = "s2.large.2"
   vpc_id   = "8eed4fc7-e5e5-44a2-b5f2-23b3e5d46235"
 
   nics {
@@ -125,7 +125,7 @@ resource "opentelekomcloud_compute_floatingip_associate_v2" "myip" {
 resource "opentelekomcloud_ecs_instance_v1" "basic" {
   name     = "server_1"
   image_id = "ad091b52-742f-469e-8f3c-fd81cadf0743"
-  flavor   = "s1.medium"
+  flavor   = "s2.large.2"
   vpc_id   = "8eed4fc7-e5e5-44a2-b5f2-23b3e5d46235"
 
   nics {
