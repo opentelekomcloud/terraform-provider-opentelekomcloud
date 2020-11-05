@@ -10,14 +10,13 @@ Attaches a policy to an S3 bucket resource within OpenTelekomCloud.
 
 ```hcl
 resource "opentelekomcloud_s3_bucket" "b" {
-  bucket = "my_tf_test_bucket"
+  bucket = "my-tf-test-bucket"
 }
 
 resource "opentelekomcloud_s3_bucket_policy" "b" {
-  bucket = "${opentelekomcloud_s3_bucket.b.id}"
+  bucket = opentelekomcloud_s3_bucket.b.id
   policy = <<POLICY
   {
-  "Version": "2012-10-17",
   "Id": "MYBUCKETPOLICY",
   "Statement": [
     {
@@ -25,7 +24,7 @@ resource "opentelekomcloud_s3_bucket_policy" "b" {
       "Effect": "Deny",
       "Principal": "*",
       "Action": "s3:*",
-      "Resource": "arn:aws:s3:::my_tf_test_bucket/*",
+      "Resource": "arn:aws:s3:::${opentelekomcloud_s3_bucket.b.bucket}/*",
       "Condition": {
          "IpAddress": {"aws:SourceIp": "8.8.8.8/32"}
       }
