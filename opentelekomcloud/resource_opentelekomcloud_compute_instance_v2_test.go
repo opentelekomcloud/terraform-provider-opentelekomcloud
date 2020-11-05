@@ -707,7 +707,7 @@ resource "opentelekomcloud_compute_secgroup_v2" "secgroup_1" {
 
 resource "opentelekomcloud_compute_instance_v2" "instance_1" {
   name = "instance_1"
-  security_groups = ["default", "${opentelekomcloud_compute_secgroup_v2.secgroup_1.name}"]
+  security_groups = ["default", opentelekomcloud_compute_secgroup_v2.secgroup_1.id]
   network {
     uuid = "%s"
   }
@@ -739,7 +739,7 @@ resource "opentelekomcloud_compute_secgroup_v2" "secgroup_2" {
 
 resource "opentelekomcloud_compute_instance_v2" "instance_1" {
   name = "instance_1"
-  security_groups = ["default"]
+  security_groups = ["default", opentelekomcloud_compute_secgroup_v2.secgroup_2.id]
   network {
     uuid = "%s"
   }
@@ -771,7 +771,7 @@ resource "opentelekomcloud_compute_secgroup_v2" "secgroup_2" {
 
 resource "opentelekomcloud_compute_instance_v2" "instance_1" {
   name = "instance_1"
-  security_groups = ["default", "${opentelekomcloud_compute_secgroup_v2.secgroup_1.name}", "${opentelekomcloud_compute_secgroup_v2.secgroup_2.name}"]
+  security_groups = ["default", opentelekomcloud_compute_secgroup_v2.secgroup_1.id, opentelekomcloud_compute_secgroup_v2.secgroup_2.id]
   network {
     uuid = "%s"
   }
