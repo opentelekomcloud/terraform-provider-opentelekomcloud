@@ -5,8 +5,10 @@ import (
 	"log"
 	"time"
 
+	"github.com/hashicorp/go-multierror"
 	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/helper/validation"
 
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/networking/v2/extensions/lbaas_v2/certificates"
 )
@@ -58,19 +60,12 @@ func resourceCertificateV2() *schema.Resource {
 			},
 
 			"type": {
-				Type:     schema.TypeString,
-				Optional: true,
-				ValidateFunc: func(v interface{}, k string) (ws []string, errors []error) {
-					value := v.(string)
-					if value != "server" && value != "client" {
-						errors = append(errors, fmt.Errorf(
-							"Only 'server' and 'client' are supported certificate 'type' values yet"))
-					}
-					return
-				},
+				Type:         schema.TypeString,
+				Optional:     true,
+				ValidateFunc: validation.StringInSlice([]string{"server", "client"}, false),
 			},
 
-			/* "update_time": {
+			"update_time": {
 				Type:     schema.TypeString,
 				Computed: true,
 			},
@@ -78,7 +73,7 @@ func resourceCertificateV2() *schema.Resource {
 			"create_time": {
 				Type:     schema.TypeString,
 				Computed: true,
-			}, */
+			},
 		},
 	}
 }
@@ -124,18 +119,18 @@ func resourceCertificateV2Read(d *schema.ResourceData, meta interface{}) error {
 	}
 	log.Printf("[DEBUG] Retrieved certificate %s: %#v", d.Id(), c)
 
-	d.Set("name", c.Name)
-	d.Set("description", c.Description)
-	d.Set("domain", c.Domain)
-	d.Set("certificate", c.Certificate)
-	d.Set("private_key", c.PrivateKey)
-	d.Set("type", c.Type)
-	//d.Set("create_time", c.CreateTime)
-	//d.Set("update_time", c.UpdateTime)
-
-	d.Set("region", GetRegion(d, config))
-
-	return nil
+	mErr := multierror.Append(nil,
+		d.Set("name", c.Name),
+		d.Set("description", c.Description),
+		d.Set("domain", c.Domain),
+		d.Set("certificate", c.Certificate),
+		d.Set("private_key", c.PrivateKey),
+		d.Set("type", c.Type),
+		d.Set("create_time", c.CreateTime),
+		d.Set("update_time", c.UpdateTime),
+		d.Set("region", GetRegion(d, config)),
+	)
+	return mErr.ErrorOrNil()
 }
 
 func resourceCertificateV2Update(d *schema.ResourceData, meta interface{}) error {

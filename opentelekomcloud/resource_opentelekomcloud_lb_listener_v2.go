@@ -5,8 +5,10 @@ import (
 	"log"
 	"time"
 
+	"github.com/hashicorp/go-multierror"
 	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/helper/validation"
 
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/networking/v2/extensions/lbaas_v2/listeners"
 )
@@ -36,14 +38,8 @@ func resourceListenerV2() *schema.Resource {
 				Type:     schema.TypeString,
 				Required: true,
 				ForceNew: true,
-				ValidateFunc: func(v interface{}, k string) (ws []string, errors []error) {
-					value := v.(string)
-					if value != "TCP" && value != "HTTP" && value != "HTTPS" && value != "TERMINATED_HTTPS" {
-						errors = append(errors, fmt.Errorf(
-							"Only 'TCP', 'HTTP', 'HTTPS' and 'TERMINATED_HTTPS' are supported values for 'protocol'"))
-					}
-					return
-				},
+				ValidateFunc: validation.StringInSlice([]string{
+					"TCP", "UDP", "HTTP", "TERMINATED_HTTPS"}, false),
 			},
 
 			"protocol_port": {
@@ -75,13 +71,12 @@ func resourceListenerV2() *schema.Resource {
 				Type:     schema.TypeString,
 				Optional: true,
 				Computed: true,
-				ForceNew: true, // could be updated duo to docs, but gopher doen´t define it
+				ForceNew: true, // could be updated due to docs, but gopher doesn´t define it
 			},
 
 			"description": {
 				Type:     schema.TypeString,
 				Optional: true,
-				ForceNew: false, // could be updated
 			},
 
 			/*"connection_limit": &schema.Schema{
@@ -95,49 +90,37 @@ func resourceListenerV2() *schema.Resource {
 			"http2_enable": {
 				Type:     schema.TypeBool,
 				Optional: true,
-				ForceNew: false, // could be updated
 			},
 
 			"default_tls_container_ref": {
 				Type:     schema.TypeString,
 				Optional: true,
-				ForceNew: false, // could be updated
 			},
 
 			// new feature 2020 to handle Client certificates
 			"client_ca_tls_container_ref": {
 				Type:     schema.TypeString,
 				Optional: true,
-				ForceNew: false, // could be updated
 			},
 
 			"sni_container_refs": {
 				Type:     schema.TypeList,
 				Optional: true,
 				Elem:     &schema.Schema{Type: schema.TypeString},
-				ForceNew: false, // could be updated
 			},
 
 			// new feature 2020 to give a choice of the http standard on https termiination
 			"tls_ciphers_policy": {
 				Type:     schema.TypeString,
 				Optional: true,
-				ValidateFunc: func(v interface{}, k string) (ws []string, errors []error) {
-					value := v.(string)
-					if value != "tls-1-0" && value != "tls-1-1" && value != "tls-1-2" && value != "tls-1-2-strict" {
-						errors = append(errors, fmt.Errorf(
-							"Only 'tls-1-0', 'tls-1-1', 'tls-1-2', and 'tls-1-2-strict' are supported 'tls-ciphersuite-policiy' values yet'"))
-					}
-					return
-				},
-				ForceNew: false, // could be updated
+				ValidateFunc: validation.StringInSlice([]string{
+					"tls-1-0", "tls-1-1", "tls-1-2", "tls-1-2-strict"}, false),
 			},
 
 			"admin_state_up": {
 				Type:     schema.TypeBool,
 				Default:  true,
 				Optional: true,
-				ForceNew: false, // could and should be updateable
 			},
 		},
 	}
@@ -227,25 +210,24 @@ func resourceListenerV2Read(d *schema.ResourceData, meta interface{}) error {
 
 	log.Printf("[DEBUG] Retrieved listener %s: %#v", d.Id(), listener)
 
-	d.Set("region", GetRegion(d, config))
-	d.Set("protocol", listener.Protocol)
-	d.Set("protocol_port", listener.ProtocolPort)
-	d.Set("tenant_id", listener.TenantID)
-	d.Set("id", listener.ID)
-	d.Set("name", listener.Name)
-	d.Set("default_pool_id", listener.DefaultPoolID)
-	d.Set("description", listener.Description)
-	d.Set("http2_enable", listener.Http2Enable)
-	d.Set("default_tls_container_ref", listener.DefaultTlsContainerRef)
-	d.Set("client_ca_tls_container_ref", listener.CAContainerRef)
-	//d.Set("connection_limit", listener.ConnLimit)
-	if err := d.Set("sni_container_refs", listener.SniContainerRefs); err != nil {
-		return fmt.Errorf("[DEBUG] Error saving sni_container_refs to state for OpenTelekomCloud listener (%s): %s", d.Id(), err)
-	}
-	d.Set("tls_ciphers_policy", listener.TlsCiphersPolicy)
-	d.Set("admin_state_up", listener.AdminStateUp)
-
-	return nil
+	d.SetId(listener.ID)
+	mErr := multierror.Append(nil,
+		d.Set("region", GetRegion(d, config)),
+		d.Set("protocol", listener.Protocol),
+		d.Set("protocol_port", listener.ProtocolPort),
+		d.Set("tenant_id", listener.TenantID),
+		d.Set("name", listener.Name),
+		d.Set("default_pool_id", listener.DefaultPoolID),
+		d.Set("description", listener.Description),
+		d.Set("http2_enable", listener.Http2Enable),
+		d.Set("default_tls_container_ref", listener.DefaultTlsContainerRef),
+		d.Set("client_ca_tls_container_ref", listener.CAContainerRef),
+		//d.Set("connection_limit", listener.ConnLimit),
+		d.Set("sni_container_refs", listener.SniContainerRefs),
+		d.Set("tls_ciphers_policy", listener.TlsCiphersPolicy),
+		d.Set("admin_state_up", listener.AdminStateUp),
+	)
+	return mErr.ErrorOrNil()
 }
 
 func resourceListenerV2Update(d *schema.ResourceData, meta interface{}) error {
