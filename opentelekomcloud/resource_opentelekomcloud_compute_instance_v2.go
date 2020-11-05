@@ -40,7 +40,7 @@ func resourceComputeInstanceV2() *schema.Resource {
 			Delete: schema.DefaultTimeout(30 * time.Minute),
 		},
 
-		CustomizeDiff: securityGroupsByIDs, // Potentially causes `Error: Provider produced inconsistent final plan`
+		CustomizeDiff: securityGroupsByIDs,
 
 		Schema: map[string]*schema.Schema{
 			"region": {

@@ -286,10 +286,10 @@ The following arguments are supported:
 * `user_data` - (Optional) The user data to provide when launching the instance.
   Changing this creates a new server.
 
-* `security_groups` - (Optional) An array of one or more security group names
+* `security_groups` - (Optional) An array of one or more security group names/IDs
   to associate with the server. Changing this results in adding/removing
-  security groups from the existing server. 
--> **Note:** When attaching the instance to networks using Ports, 
+  security groups from the existing server.
+-> **Note:** When attaching the instance to networks using Ports,
   place the security groups on the Port and not the instance.
 
 * `availability_zone` - (Optional) The availability zone in which to create
@@ -335,7 +335,7 @@ The following arguments are supported:
   forcefully deleted. This is useful for environments that have reclaim / soft
   deletion enabled.
 
-* `auto_recovery` - (Optional) Configures or deletes automatic recovery of an instance. 
+* `auto_recovery` - (Optional) Configures or deletes automatic recovery of an instance.
   Defaults to true.
 
 The `network` block supports:
