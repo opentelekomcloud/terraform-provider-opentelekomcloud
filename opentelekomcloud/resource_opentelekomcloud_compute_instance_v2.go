@@ -434,11 +434,11 @@ func resourceComputeInstanceV2Create(d *schema.ResourceData, meta interface{}) e
 
 	rawSecGroups := d.Get("security_groups").(*schema.Set).List()
 	sgIDs, err := resourceInstanceSecGroupsV2(rawSecGroups, computeClient)
-	if err := d.Set("security_groups", sgIDs); err != nil {
-		return fmt.Errorf("failed to set IDs into security_groups")
-	}
 	if err != nil {
 		return fmt.Errorf("error resolving sec group IDs")
+	}
+	if err := d.Set("security_groups", sgIDs); err != nil {
+		return fmt.Errorf("error setting IDs into security_groups")
 	}
 
 	createOpts = &servers.CreateOpts{
