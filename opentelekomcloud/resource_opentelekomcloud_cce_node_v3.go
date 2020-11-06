@@ -780,7 +780,6 @@ func recursiveCreate(cceClient *golangsdk.ServiceClient, opts nodes.CreateOptsBu
 		}
 		s, err := nodes.Create(cceClient, ClusterID, opts).Extract()
 		if err != nil {
-			// if err.(golangsdk.ErrUnexpectedResponseCode).Actual == 403 {
 			if _, ok := err.(golangsdk.ErrDefault403); ok {
 				return recursiveCreate(cceClient, opts, ClusterID, 403)
 			} else {
