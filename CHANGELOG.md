@@ -1,5 +1,15 @@
 ## 1.22.0 (Unreleased)
 
+## 1.21.3 (November 6, 2020)
+
+BUG FIXES:
+* `resource/opentelekomcloud_compute_instance_v2`: Fix diff on every apply when using security group IDs instead of names ([#686](https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/686))
+* `resource/opentelekomcloud_s3_bucket_policy`: Fix not working policy example in documentation ([#692](https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/692))
+
+ENHANCEMENTS:
+* `resource_opentelekomcloud_cce_node_v3`: Make `iptype`, `bandwidth_charge_mode`, `sharetype` settable ([#681](https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/681)) 
+* `resource/opentelekomcloud_cce_node_v3`: Fix not existing flavor in documentation ([#684](https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/684))
+* `resource/opentelekomcloud_ecs_instance_v1`: Fix not existing flavor in documentation ([#689](https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/689)) 
 
 ## 1.21.2 (October 29, 2020)
 
