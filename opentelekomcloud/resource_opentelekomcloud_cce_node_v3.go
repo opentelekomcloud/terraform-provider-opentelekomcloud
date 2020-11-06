@@ -10,51 +10,43 @@ import (
 	"time"
 
 	"github.com/hashicorp/go-multierror"
-
 	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
 	"github.com/opentelekomcloud/gophertelekomcloud"
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/cce/v3/clusters"
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/cce/v3/nodes"
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/common/tags"
+	"github.com/opentelekomcloud/gophertelekomcloud/openstack/compute/v2/extensions/floatingips"
 )
 
 func validateK8sTagsMap(v interface{}, k string) (ws []string, errors []error) {
 	values := v.(map[string]interface{})
-	pattern := regexp.MustCompile(`^[\.\-_A-Za-z0-9]+$`)
+	pattern := regexp.MustCompile(`^[.\-_A-Za-z0-9]+$`)
 
 	for key, value := range values {
 		valueString := value.(string)
 		if len(key) < 1 {
-			errors = append(errors, fmt.Errorf(
-				"key %q cannot be shorter than 1 characters: %q", k, key))
+			errors = append(errors, fmt.Errorf("key %q cannot be shorter than 1 characters: %q", k, key))
 		}
 
 		if len(valueString) < 1 {
-			errors = append(errors, fmt.Errorf(
-				"value %q cannot be shorter than 1 characters: %q", k, value))
+			errors = append(errors, fmt.Errorf("value %q cannot be shorter than 1 characters: %q", k, value))
 		}
 
 		if len(key) > 63 {
-			errors = append(errors, fmt.Errorf(
-				"key %q cannot be longer than 63 characters: %q", k, key))
+			errors = append(errors, fmt.Errorf("key %q cannot be longer than 63 characters: %q", k, key))
 		}
 
 		if len(valueString) > 63 {
-			errors = append(errors, fmt.Errorf(
-				"value %q cannot be longer than 63 characters: %q", k, value))
+			errors = append(errors, fmt.Errorf("value %q cannot be longer than 63 characters: %q", k, value))
 		}
 
 		if !pattern.MatchString(key) {
-			errors = append(errors, fmt.Errorf(
-				"key %q doesn't comply with restrictions (%q): %q",
-				k, pattern, key))
+			errors = append(errors, fmt.Errorf("key %q doesn't comply with restrictions (%q): %q", k, pattern, key))
 		}
 
 		if !pattern.MatchString(valueString) {
-			errors = append(errors, fmt.Errorf(
-				"value %q doesn't comply with restrictions (%q): %q",
-				k, pattern, valueString))
+			errors = append(errors, fmt.Errorf("value %q doesn't comply with restrictions (%q): %q", k, pattern, valueString))
 		}
 	}
 
@@ -67,13 +59,14 @@ func resourceCCENodeV3() *schema.Resource {
 		Read:   resourceCCENodeV3Read,
 		Update: resourceCCENodeV3Update,
 		Delete: resourceCCENodeV3Delete,
+
 		Importer: &schema.ResourceImporter{
 			State: schema.ImportStatePassthrough,
 		},
 
 		Timeouts: &schema.ResourceTimeout{
 			Create: schema.DefaultTimeout(10 * time.Minute),
-			Delete: schema.DefaultTimeout(5 * time.Minute),
+			Delete: schema.DefaultTimeout(10 * time.Minute),
 		},
 
 		Schema: map[string]*schema.Schema{
@@ -171,7 +164,6 @@ func resourceCCENodeV3() *schema.Resource {
 			"eip_ids": {
 				Type:     schema.TypeSet,
 				Optional: true,
-				ForceNew: true,
 				Elem:     &schema.Schema{Type: schema.TypeString},
 				Set:      schema.HashString,
 				ConflictsWith: []string{
@@ -181,35 +173,30 @@ func resourceCCENodeV3() *schema.Resource {
 			"eip_count": {
 				Type:          schema.TypeInt,
 				Optional:      true,
-				ForceNew:      true,
 				Computed:      true,
 				ConflictsWith: []string{"eip_ids"},
 			},
 			"iptype": {
 				Type:          schema.TypeString,
 				Optional:      true,
-				ForceNew:      true,
 				ConflictsWith: []string{"eip_ids"},
 				Computed:      true,
 			},
 			"bandwidth_charge_mode": {
 				Type:          schema.TypeString,
 				Optional:      true,
-				ForceNew:      true,
 				ConflictsWith: []string{"eip_ids"},
 				Computed:      true,
 			},
 			"sharetype": {
 				Type:          schema.TypeString,
 				Optional:      true,
-				ForceNew:      true,
 				ConflictsWith: []string{"eip_ids"},
 				Computed:      true,
 			},
 			"bandwidth_size": {
 				Type:          schema.TypeInt,
 				Optional:      true,
-				ForceNew:      true,
 				ConflictsWith: []string{"eip_ids"},
 			},
 			"billing_mode": {
@@ -520,7 +507,6 @@ func resourceCCENodeV3Read(d *schema.ResourceData, meta interface{}) error {
 	}
 	clusterId := d.Get("cluster_id").(string)
 	s, err := nodes.Get(nodeClient, clusterId, d.Id()).Extract()
-
 	if err != nil {
 		if _, ok := err.(golangsdk.ErrDefault404); ok {
 			d.SetId("")
@@ -654,6 +640,19 @@ func resourceCCENodeV3Update(d *schema.ResourceData, meta interface{}) error {
 		}
 	}
 
+	// release or assign ip
+	if d.HasChange("bandwidth_size") {
+		_, newBandWidthSize := d.GetChange("bandwidth_size")
+		newBandWidth := newBandWidthSize.(int)
+
+		if newBandWidth == 0 {
+			err := resourceCCENodeV3DeleteAssociateIP(d, config)
+			if err != nil {
+				return err
+			}
+		}
+	}
+
 	return resourceCCENodeV3Read(d, meta)
 }
 
@@ -683,6 +682,43 @@ func resourceCCENodeV3Delete(d *schema.ResourceData, meta interface{}) error {
 	}
 
 	d.SetId("")
+	return nil
+}
+
+func resourceCCENodeV3DeleteAssociateIP(d *schema.ResourceData, meta interface{}) error {
+	config := meta.(*Config)
+	computeClient, err := config.computeV2Client(GetRegion(d, config))
+	if err != nil {
+		return fmt.Errorf("error creating OpenTelekomCloud ComputeV2 client: %s", err)
+	}
+	serverId := d.Get("server_id").(string)
+	fipPages, err := floatingips.List(computeClient).AllPages()
+	if err != nil {
+		return fmt.Errorf("error get all floatigips pages")
+	}
+	fips, err := floatingips.ExtractFloatingIPs(fipPages)
+	if err != nil {
+		return fmt.Errorf("error extrace floatigips pages")
+	}
+	var floatingIp floatingips.FloatingIP
+	for _, ip := range fips {
+		if ip.InstanceID == serverId {
+			floatingIp = ip
+		}
+	}
+
+	disassociateOpts := floatingips.DisassociateOpts{
+		FloatingIP: floatingIp.IP,
+	}
+
+	err = floatingips.DisassociateInstance(computeClient, serverId, disassociateOpts).ExtractErr()
+	if err != nil {
+		return fmt.Errorf("error during unassign floating IP from CCE Node")
+	}
+	err = floatingips.Delete(computeClient, floatingIp.ID).ExtractErr()
+	if err != nil {
+		return fmt.Errorf("error during delete floatingip")
+	}
 	return nil
 }
 
