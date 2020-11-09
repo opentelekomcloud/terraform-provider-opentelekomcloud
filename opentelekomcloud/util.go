@@ -38,24 +38,34 @@ func CheckDeleted(d *schema.ResourceData, err error, msg string) error {
 	return fmt.Errorf("%s: %s", msg, err)
 }
 
+type schemaOrDiff interface {
+	GetOk(key string) (interface{}, bool)
+}
+
 // GetRegion returns the region that was specified in the resource. If a
 // region was not set, the provider-level region is checked. The provider-level
 // region can either be set by the region argument or by OS_REGION_NAME.
-func GetRegion(_ *schema.ResourceData, config *Config) string {
-	n := config.TenantName
-	if n == "" {
-		n = config.DelegatedProject
+func GetRegion(d schemaOrDiff, config *Config) string {
+	if d != nil {
+		if v, ok := d.GetOk("region"); ok {
+			return v.(string)
+		}
 	}
-	return strings.Split(n, "_")[0]
+	if v := config.Region; v != "" {
+		return v
+	}
+	tenantName := string(GetProjectName(d, config))
+	return strings.Split(tenantName, "_")[0]
 }
 
 type ProjectName string
 
 // GetProjectName returns the project name that was specified in the resource.
-func GetProjectName(d *schema.ResourceData, config *Config) ProjectName {
-	projectName := d.Get("project_name").(string)
-	if projectName != "" {
-		return ProjectName(projectName)
+func GetProjectName(d schemaOrDiff, config *Config) ProjectName {
+	if d != nil {
+		if v, ok := d.GetOk("project_name"); ok {
+			return ProjectName(v.(string))
+		}
 	}
 	tenantName := config.TenantName
 	if tenantName == "" {

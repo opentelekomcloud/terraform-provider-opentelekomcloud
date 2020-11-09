@@ -1299,7 +1299,7 @@ func securityGroupsByIDs(diff *schema.ResourceDiff, meta interface{}) error {
 
 	// resolve IDs
 	config := meta.(*Config)
-	computeClient, err := config.computeV2HWClient(GetRegion(nil, config))
+	computeClient, err := config.computeV2HWClient(GetRegion(diff, config))
 	if err != nil {
 		return fmt.Errorf("error creating OpenTelekomCloud compute client: %s", err)
 	}
