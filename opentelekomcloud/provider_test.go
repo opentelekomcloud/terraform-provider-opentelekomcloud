@@ -51,8 +51,10 @@ func init() {
 		"opentelekomcloud": testAccProvider,
 	}
 
-	testAccProvider.Configure(terraform.NewResourceConfigRaw(nil))
-	OS_REGION_NAME = GetRegion(nil, testAccProvider.Meta().(*Config))
+	err := testAccProvider.Configure(terraform.NewResourceConfigRaw(nil))
+	if err == nil {
+		OS_REGION_NAME = GetRegion(nil, testAccProvider.Meta().(*Config))
+	}
 }
 
 func getTenantName() ProjectName {
