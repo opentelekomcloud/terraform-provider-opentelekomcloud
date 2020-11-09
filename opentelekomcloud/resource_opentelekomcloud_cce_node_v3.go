@@ -17,6 +17,7 @@ import (
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/cce/v3/nodes"
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/common/tags"
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/compute/v2/extensions/floatingips"
+	"github.com/opentelekomcloud/gophertelekomcloud/openstack/networking/v1/eips"
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/vpc/v1/bandwidths"
 )
 
@@ -180,21 +181,18 @@ func resourceCCENodeV3() *schema.Resource {
 			"iptype": {
 				Type:          schema.TypeString,
 				Optional:      true,
-				ForceNew:      true,
 				ConflictsWith: []string{"eip_ids"},
 				Computed:      true,
 			},
 			"bandwidth_charge_mode": {
 				Type:          schema.TypeString,
 				Optional:      true,
-				ForceNew:      true,
 				ConflictsWith: []string{"eip_ids"},
 				Computed:      true,
 			},
 			"sharetype": {
 				Type:          schema.TypeString,
 				Optional:      true,
-				ForceNew:      true,
 				ConflictsWith: []string{"eip_ids"},
 				Computed:      true,
 			},
@@ -644,17 +642,26 @@ func resourceCCENodeV3Update(d *schema.ResourceData, meta interface{}) error {
 		}
 	}
 
-	// release ip if assigned
+	// release, change bandwidth size or create and assign ip
 	if d.HasChange("bandwidth_size") {
-		_, newBandWidthSize := d.GetChange("bandwidth_size")
+		oldBandwidthSize, newBandWidthSize := d.GetChange("bandwidth_size")
 		newBandWidth := newBandWidthSize.(int)
+		oldBandwidth := oldBandwidthSize.(int)
 		serverId := d.Get("server_id").(string)
-		if newBandWidth == 0 {
-			if err := resourceCCENodeV3DeleteAssociateIP(d, config, serverId); err != nil {
+		floatingIp, err := getCCENodeV3FloatingIp(d, meta, serverId)
+		if err != nil {
+			return err
+		}
+		if newBandWidth == 0 && oldBandwidth > 0 {
+			if err := resourceCCENodeV3DeleteAssociateIP(d, config, serverId, floatingIp); err != nil {
 				return err
 			}
-		} else if newBandWidth > 0 {
-			if err := resourceCCENodeV3ResizeBandwidth(d, config, serverId, newBandWidth); err != nil {
+		} else if newBandWidth > 0 && oldBandwidth > 0 {
+			if err := resourceCCENodeV3ResizeBandwidth(d, config, floatingIp.ID, newBandWidth); err != nil {
+				return err
+			}
+		} else if newBandWidth > 0 && floatingIp == nil {
+			if err := resourceCCENodeV3CreateAndAssociateFloatingIp(d, config, newBandWidth, serverId); err != nil {
 				return err
 			}
 		}
@@ -692,16 +699,11 @@ func resourceCCENodeV3Delete(d *schema.ResourceData, meta interface{}) error {
 	return nil
 }
 
-func resourceCCENodeV3DeleteAssociateIP(d *schema.ResourceData, meta interface{}, serverId string) error {
+func resourceCCENodeV3DeleteAssociateIP(d *schema.ResourceData, meta interface{}, serverId string, floatingIp *floatingips.FloatingIP) error {
 	config := meta.(*Config)
 	computeClient, err := config.computeV2Client(GetRegion(d, config))
 	if err != nil {
 		return fmt.Errorf("error creating OpenTelekomCloud ComputeV2 client: %s", err)
-	}
-
-	floatingIp, err := getCCENodeV3FloatingIp(computeClient, serverId)
-	if err != nil {
-		return err
 	}
 
 	disassociateOpts := floatingips.DisassociateOpts{
@@ -734,7 +736,56 @@ func resourceCCENodeV3ResizeBandwidth(d *schema.ResourceData, meta interface{}, 
 	return nil
 }
 
-func getCCENodeV3FloatingIp(computeClient *golangsdk.ServiceClient, serverId string) (*floatingips.FloatingIP, error) {
+func resourceCCENodeV3CreateAndAssociateFloatingIp(d *schema.ResourceData, meta interface{}, size int, serverId string) error {
+	config := meta.(*Config)
+	networkingClient, err := config.networkingV1Client(GetRegion(d, config))
+	if err != nil {
+		return fmt.Errorf("error creating OpenTelekomCloud NetworkingV1 client: %s", err)
+	}
+	createEipOpts := EIPCreateOpts{
+		ApplyOpts: eips.ApplyOpts{
+			IP: eips.PublicIpOpts{
+				Type: "5_bgp",
+			},
+			Bandwidth: eips.BandwidthOpts{
+				Name:       "cce-node-1",
+				Size:       size,
+				ShareType:  "PER",
+				ChargeMode: "traffic",
+			},
+		},
+	}
+
+	eip, err := eips.Apply(networkingClient, createEipOpts).Extract()
+	if err != nil {
+		return fmt.Errorf("error updating bandwidth size: %s", err)
+	}
+
+	err = waitForEIPActive(networkingClient, eip.ID, time.Minute*10)
+	if err != nil {
+		return fmt.Errorf("error waiting for EIP (%s) to become ready: %s", eip.ID, err)
+	}
+
+	networkingV2Client, err := config.networkingV2Client(GetRegion(d, config))
+	if err != nil {
+		return fmt.Errorf("error creating OpenTelekomCloud NetworkingV2 client: %s", err)
+	}
+	associateOpts := floatingips.AssociateOpts{
+		FloatingIP: eip.PublicAddress,
+	}
+	if err := floatingips.AssociateInstance(networkingV2Client, serverId, associateOpts).ExtractErr(); err != nil {
+		return fmt.Errorf("error associating CCE Node to publicIp: %s", err)
+	}
+
+	return nil
+}
+
+func getCCENodeV3FloatingIp(d *schema.ResourceData, meta interface{}, serverId string) (*floatingips.FloatingIP, error) {
+	config := meta.(*Config)
+	computeClient, err := config.computeV2Client(GetRegion(d, config))
+	if err != nil {
+		return nil, fmt.Errorf("error creating OpenTelekomCloud ComputeV2 client: %s", err)
+	}
 	fipPages, err := floatingips.List(computeClient).AllPages()
 	if err != nil {
 		return nil, err
