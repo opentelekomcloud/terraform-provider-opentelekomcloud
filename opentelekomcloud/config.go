@@ -530,14 +530,15 @@ func (c *Config) computeS3conn(region string) (*s3.S3, error) {
 		return nil, fmt.Errorf("Missing credentials for Swift S3 Provider, need access_key and secret_key values for provider.")
 	}
 
-	client, err := openstack.NewImageServiceV2(c.HwClient, golangsdk.EndpointOpts{
+	client, err := openstack.NewOBSService(c.HwClient, golangsdk.EndpointOpts{
 		Region:       region,
 		Availability: c.getHwEndpointType(),
 	})
-	// Bit of a hack, seems the only way to compute this.
-	endpoint := strings.Replace(client.Endpoint, "//ims", "//obs", 1)
+	if err != nil {
+		return nil, err
+	}
 
-	awsS3Sess := c.s3sess.Copy(&aws.Config{Endpoint: aws.String(endpoint)})
+	awsS3Sess := c.s3sess.Copy(&aws.Config{Endpoint: aws.String(client.Endpoint)})
 	s3conn := s3.New(awsS3Sess)
 
 	return s3conn, err
