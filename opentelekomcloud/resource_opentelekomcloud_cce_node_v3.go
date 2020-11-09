@@ -660,8 +660,24 @@ func resourceCCENodeV3Update(d *schema.ResourceData, meta interface{}) error {
 			if err := resourceCCENodeV3ResizeBandwidth(d, config, floatingIp.ID, newBandWidth); err != nil {
 				return err
 			}
-		} else if newBandWidth > 0 && floatingIp == nil {
+		} else if newBandWidth > 0 && oldBandwidth == 0 {
 			if err := resourceCCENodeV3CreateAndAssociateFloatingIp(d, config, newBandWidth, serverId); err != nil {
+				return err
+			}
+		}
+	}
+
+	if d.HasChange("eip_ids") {
+		oldEipIdsRaw, newEipIdsRaw := d.GetChange("eip_ids")
+		oldEipIds := oldEipIdsRaw.(*schema.Set).List()
+		newEipIds := newEipIdsRaw.(*schema.Set).List()
+		serverId := d.Get("server_id").(string)
+		floatingIp, err := getCCENodeV3FloatingIp(d, meta, serverId)
+		if err != nil {
+			return err
+		}
+		if len(newEipIds) == 0 && len(oldEipIds) > 0 {
+			if err := resourceCCENodeV3DeleteAssociateIP(d, config, serverId, floatingIp); err != nil {
 				return err
 			}
 		}
