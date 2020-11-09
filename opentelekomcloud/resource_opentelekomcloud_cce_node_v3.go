@@ -640,7 +640,7 @@ func resourceCCENodeV3Update(d *schema.ResourceData, meta interface{}) error {
 		}
 	}
 
-	// release or assign ip
+	// release ip if assigned
 	if d.HasChange("bandwidth_size") {
 		_, newBandWidthSize := d.GetChange("bandwidth_size")
 		newBandWidth := newBandWidthSize.(int)
@@ -692,19 +692,10 @@ func resourceCCENodeV3DeleteAssociateIP(d *schema.ResourceData, meta interface{}
 		return fmt.Errorf("error creating OpenTelekomCloud ComputeV2 client: %s", err)
 	}
 	serverId := d.Get("server_id").(string)
-	fipPages, err := floatingips.List(computeClient).AllPages()
+
+	floatingIp, err := getCCENodeV3FloatingIp(computeClient, serverId)
 	if err != nil {
-		return fmt.Errorf("error get all floatigips pages")
-	}
-	fips, err := floatingips.ExtractFloatingIPs(fipPages)
-	if err != nil {
-		return fmt.Errorf("error extrace floatigips pages")
-	}
-	var floatingIp floatingips.FloatingIP
-	for _, ip := range fips {
-		if ip.InstanceID == serverId {
-			floatingIp = ip
-		}
+		return err
 	}
 
 	disassociateOpts := floatingips.DisassociateOpts{
@@ -720,6 +711,24 @@ func resourceCCENodeV3DeleteAssociateIP(d *schema.ResourceData, meta interface{}
 		return fmt.Errorf("error during delete floatingip")
 	}
 	return nil
+}
+
+func getCCENodeV3FloatingIp(computeClient *golangsdk.ServiceClient, serverId string) (*floatingips.FloatingIP, error) {
+	fipPages, err := floatingips.List(computeClient).AllPages()
+	if err != nil {
+		return nil, err
+	}
+	fips, err := floatingips.ExtractFloatingIPs(fipPages)
+	if err != nil {
+		return nil, err
+	}
+	var floatingIp floatingips.FloatingIP
+	for _, ip := range fips {
+		if ip.InstanceID == serverId {
+			floatingIp = ip
+		}
+	}
+	return &floatingIp, nil
 }
 
 func waitForCceNodeActive(cceClient *golangsdk.ServiceClient, clusterId, nodeId string) resource.StateRefreshFunc {
