@@ -163,7 +163,7 @@ i1YhgnQbn5E0hz55OLu5jvOkKQjPCW+8Kg==
 EOT
 
   lifecycle {
-	ignore_changes = [certificate, , private_key]
+	ignore_changes = [certificate, private_key]
   }
 
   timeouts {
