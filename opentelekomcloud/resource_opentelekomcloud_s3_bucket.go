@@ -283,7 +283,8 @@ func resourceS3Bucket() *schema.Resource {
 
 func resourceS3BucketCreate(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*Config)
-	s3conn, err := config.computeS3conn(GetRegion(d, config))
+	region := GetRegion(d, config)
+	s3conn, err := config.computeS3conn(region)
 	if err != nil {
 		return fmt.Errorf("Error creating OpenTelekomCloud s3 client: %s", err)
 	}
@@ -307,15 +308,9 @@ func resourceS3BucketCreate(d *schema.ResourceData, meta interface{}) error {
 		ACL:    aws.String(acl),
 	}
 
-	var awsRegion string
-	if region, ok := d.GetOk("region"); ok {
-		awsRegion = region.(string)
-	} else {
-		awsRegion = meta.(*Config).Region
-	}
-	log.Printf("[DEBUG] S3 bucket create: %s, using region: %s", bucket, awsRegion)
+	log.Printf("[DEBUG] S3 bucket create: %s, using region: %s", bucket, region)
 
-	if err := validateS3BucketName(bucket, awsRegion); err != nil {
+	if err := validateS3BucketName(bucket, region); err != nil {
 		return fmt.Errorf("Error validating S3 bucket name: %s", err)
 	}
 
@@ -690,7 +685,7 @@ func resourceS3BucketRead(d *schema.ResourceData, meta interface{}) error {
 				}
 				rule["noncurrent_version_expiration"] = schema.NewSet(expirationHash, []interface{}{e})
 			}
-			//// transition
+			// transition
 			if len(lifecycleRule.Transitions) > 0 {
 				transitions := make([]interface{}, 0, len(lifecycleRule.Transitions))
 				for _, v := range lifecycleRule.Transitions {
@@ -787,7 +782,7 @@ func resourceS3BucketRead(d *schema.ResourceData, meta interface{}) error {
 	}
 
 	// UNUSED?
-	//d.Set("arn", fmt.Sprintf("arn:%s:s3:::%s", meta.(*Config).partition, d.Id()))
+	// d.Set("arn", fmt.Sprintf("arn:%s:s3:::%s", meta.(*Config).partition, d.Id()))
 
 	return nil
 }
@@ -1224,7 +1219,7 @@ func resourceAwsS3BucketLifecycleUpdate(s3conn *s3.S3, d *schema.ResourceData) e
 
 	lifecycleRules := d.Get("lifecycle_rule").([]interface{})
 
-	//fmt.Printf("lifecycleRules=%+v.\n", lifecycleRules)
+	// fmt.Printf("lifecycleRules=%+v.\n", lifecycleRules)
 	if len(lifecycleRules) == 0 {
 		i := &s3.DeleteBucketLifecycleInput{
 			Bucket: aws.String(bucket),
@@ -1308,14 +1303,14 @@ func resourceAwsS3BucketLifecycleUpdate(s3conn *s3.S3, d *schema.ResourceData) e
 		rules = append(rules, rule)
 	}
 
-	//fmt.Printf("Rules=%+v.\n", rules)
+	// fmt.Printf("Rules=%+v.\n", rules)
 	i := &s3.PutBucketLifecycleConfigurationInput{
 		Bucket: aws.String(bucket),
 		LifecycleConfiguration: &s3.BucketLifecycleConfiguration{
 			Rules: rules,
 		},
 	}
-	//fmt.Printf("PutBucketLifecycleConfigurationInput=%+v.\n", i)
+	// fmt.Printf("PutBucketLifecycleConfigurationInput=%+v.\n", i)
 
 	err := resource.Retry(1*time.Minute, func() *resource.RetryError {
 		if _, err := s3conn.PutBucketLifecycleConfiguration(i); err != nil {
