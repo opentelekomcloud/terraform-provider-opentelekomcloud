@@ -144,8 +144,6 @@ See [OpenStack configuration documentation](https://docs.openstack.org/python-op
 
 ## Configuration Reference
 
--> **Note:** The `region`, `tenant_id`, `domain_id`, `user_id` arguments has been deprecated and `tenant_name`, `domain_name` changed to be `required`. Please update your configurations as it might be removed in the future releases.
-
 The following arguments are supported:
 
 * `access_key` - (Optional) The access key of the OpenTelekomCloud cloud to use.
@@ -166,9 +164,13 @@ The following arguments are supported:
 * `user_name` - (Optional) The Username to login with. If omitted, the
   `OS_USERNAME` environment variable is used.
 
-* `tenant_name` - (Required) The Name of the Tenant (Identity v2) or Project
+* `tenant_name` - (Optional) The Name of the Tenant (Identity v2) or Project
   (Identity v3) to login with. If omitted, the `OS_TENANT_NAME` or
   `OS_PROJECT_NAME` environment variable are used.
+
+* `region` - (Optional) The name of the region to be used. Required for some resources
+  (e.g. `s3_bucket`) in case no tenant name provided and no region is defined in the
+  resource. If omitted, the `OS_REGION` or `OS_REGION_NAME` environment variables are used.
 
 * `password` - (Optional) The Password to login with. If omitted, the
   `OS_PASSWORD` environment variable is used.
@@ -181,7 +183,7 @@ The following arguments are supported:
 
 * `security_token` - (Optional) Security token to use for OBS federated authentication.
 
-* `domain_name` - (Required) The Name of the Domain to scope to (Identity v3).
+* `domain_name` - (Optional) The Name of the Domain to scope to (Identity v3).
   If omitted, the following environment variables are checked (in this order):
   `OS_USER_DOMAIN_NAME`, `OS_PROJECT_DOMAIN_NAME`, `OS_DOMAIN_NAME`,
   `DEFAULT_DOMAIN`.
@@ -209,7 +211,7 @@ The following arguments are supported:
   Swift-native authentication system. If omitted, the `OS_SWAUTH` environment
   variable is used. You must also set `username` to the Swauth/Swift username
   such as `username:project`. Set the `password` to the Swauth/Swift key.
-  Finally, set `auth_url` as the location of the Swift service. 
+  Finally, set `auth_url` as the location of the Swift service.
 -> **Note:** This will only work when used with the OpenTelekomCloud Object Storage resources.
 
 * `agency_name` - (Optional) if authorized by assume role, it must be set. The
