@@ -163,9 +163,8 @@ i1YhgnQbn5E0hz55OLu5jvOkKQjPCW+8Kg==
 EOT
 
   lifecycle {
-	ignore_changes = [certificate, private_key, type]
+	ignore_changes = [certificate, , private_key]
   }
-
 
   timeouts {
     create = "5m"
@@ -206,9 +205,9 @@ i1YhgnQbn5E0hz55OLu5jvOkKQjPCW+9Aa==
 EOT
 
     lifecycle {
-	    ignore_changes = [certificate]
-	}
-	
+	  ignore_changes = [certificate]
+    }
+
 	timeouts {
 		create = "5m"
 		update = "5m"
@@ -278,7 +277,7 @@ i1YhgnQbn5E0hz55OLu5jvOkKQjPCW+9Aa==
 EOT
 
   lifecycle {
-	ignore_changes = [certificate, private_key, type]
+	ignore_changes = [certificate, private_key]
   }
 
   timeouts {
