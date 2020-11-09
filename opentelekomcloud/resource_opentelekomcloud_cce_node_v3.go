@@ -164,7 +164,6 @@ func resourceCCENodeV3() *schema.Resource {
 			},
 			"eip_ids": {
 				Type:     schema.TypeSet,
-				MaxItems: 1,
 				Optional: true,
 				Elem:     &schema.Schema{Type: schema.TypeString},
 				Set:      schema.HashString,
