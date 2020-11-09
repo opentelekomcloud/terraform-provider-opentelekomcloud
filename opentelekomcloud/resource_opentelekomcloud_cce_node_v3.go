@@ -164,6 +164,7 @@ func resourceCCENodeV3() *schema.Resource {
 			},
 			"eip_ids": {
 				Type:     schema.TypeSet,
+				MaxItems: 1,
 				Optional: true,
 				Elem:     &schema.Schema{Type: schema.TypeString},
 				Set:      schema.HashString,
@@ -180,18 +181,21 @@ func resourceCCENodeV3() *schema.Resource {
 			"iptype": {
 				Type:          schema.TypeString,
 				Optional:      true,
+				ForceNew:      true,
 				ConflictsWith: []string{"eip_ids"},
 				Computed:      true,
 			},
 			"bandwidth_charge_mode": {
 				Type:          schema.TypeString,
 				Optional:      true,
+				ForceNew:      true,
 				ConflictsWith: []string{"eip_ids"},
 				Computed:      true,
 			},
 			"sharetype": {
 				Type:          schema.TypeString,
 				Optional:      true,
+				ForceNew:      true,
 				ConflictsWith: []string{"eip_ids"},
 				Computed:      true,
 			},
