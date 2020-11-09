@@ -648,7 +648,7 @@ func resourceCCENodeV3Update(d *schema.ResourceData, meta interface{}) error {
 	if d.HasChange("bandwidth_size") {
 		_, newBandWidthSize := d.GetChange("bandwidth_size")
 		newBandWidth := newBandWidthSize.(int)
-		serverId := d.Get("server").(string)
+		serverId := d.Get("server_id").(string)
 		if newBandWidth == 0 {
 			if err := resourceCCENodeV3DeleteAssociateIP(d, config, serverId); err != nil {
 				return err
