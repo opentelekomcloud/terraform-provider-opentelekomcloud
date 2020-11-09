@@ -17,6 +17,7 @@ import (
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/cce/v3/nodes"
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/common/tags"
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/compute/v2/extensions/floatingips"
+	"github.com/opentelekomcloud/gophertelekomcloud/openstack/vpc/v1/bandwidths"
 )
 
 func validateK8sTagsMap(v interface{}, k string) (ws []string, errors []error) {
@@ -644,10 +645,13 @@ func resourceCCENodeV3Update(d *schema.ResourceData, meta interface{}) error {
 	if d.HasChange("bandwidth_size") {
 		_, newBandWidthSize := d.GetChange("bandwidth_size")
 		newBandWidth := newBandWidthSize.(int)
-
+		serverId := d.Get("server").(string)
 		if newBandWidth == 0 {
-			err := resourceCCENodeV3DeleteAssociateIP(d, config)
-			if err != nil {
+			if err := resourceCCENodeV3DeleteAssociateIP(d, config, serverId); err != nil {
+				return err
+			}
+		} else if newBandWidth > 0 {
+			if err := resourceCCENodeV3ResizeBandwidth(d, config, serverId, newBandWidth); err != nil {
 				return err
 			}
 		}
@@ -685,13 +689,12 @@ func resourceCCENodeV3Delete(d *schema.ResourceData, meta interface{}) error {
 	return nil
 }
 
-func resourceCCENodeV3DeleteAssociateIP(d *schema.ResourceData, meta interface{}) error {
+func resourceCCENodeV3DeleteAssociateIP(d *schema.ResourceData, meta interface{}, serverId string) error {
 	config := meta.(*Config)
 	computeClient, err := config.computeV2Client(GetRegion(d, config))
 	if err != nil {
 		return fmt.Errorf("error creating OpenTelekomCloud ComputeV2 client: %s", err)
 	}
-	serverId := d.Get("server_id").(string)
 
 	floatingIp, err := getCCENodeV3FloatingIp(computeClient, serverId)
 	if err != nil {
@@ -709,6 +712,21 @@ func resourceCCENodeV3DeleteAssociateIP(d *schema.ResourceData, meta interface{}
 	err = floatingips.Delete(computeClient, floatingIp.ID).ExtractErr()
 	if err != nil {
 		return fmt.Errorf("error during delete floatingip")
+	}
+	return nil
+}
+
+func resourceCCENodeV3ResizeBandwidth(d *schema.ResourceData, meta interface{}, eipId string, newSize int) error {
+	config := meta.(*Config)
+	networkingClient, err := config.networkingV1Client(GetRegion(d, config))
+	if err != nil {
+		return fmt.Errorf("error creating OpenTelekomCloud NetworkingV1 client: %s", err)
+	}
+	updateOpts := bandwidths.UpdateOpts{Size: newSize}
+
+	_, err = bandwidths.Update(networkingClient, eipId, updateOpts).Extract()
+	if err != nil {
+		return fmt.Errorf("error updating bandwidth size: %s", err)
 	}
 	return nil
 }
