@@ -241,10 +241,14 @@ func resourceRDSVolume(d *schema.ResourceData) *instances.Volume {
 }
 
 func resourceRDSBackupStrategy(d *schema.ResourceData) *instances.BackupStrategy {
-	backupStrategyRaw := d.Get("backup_strategy").([]interface{})[0].(map[string]interface{})
+	backupStrategyRaw := d.Get("backup_strategy").([]interface{})
+	if len(backupStrategyRaw) == 0 {
+		return nil
+	}
+	backupStrategyInfo := backupStrategyRaw[0].(map[string]interface{})
 	backupStrategy := instances.BackupStrategy{
-		StartTime: backupStrategyRaw["start_time"].(string),
-		KeepDays:  backupStrategyRaw["keep_days"].(int),
+		StartTime: backupStrategyInfo["start_time"].(string),
+		KeepDays:  backupStrategyInfo["keep_days"].(int),
 	}
 	return &backupStrategy
 }
@@ -292,12 +296,19 @@ func resourceRdsInstanceV3Create(d *schema.ResourceData, meta interface{}) error
 
 	dbInfo := resourceRDSDbInfo(d)
 	volumeInfo := d.Get("volume").([]interface{})[0].(map[string]interface{})
+	dbPort := dbInfo["port"].(int)
+	var dbPortString string
+	if dbPort != 0 {
+		dbPortString = strconv.Itoa(dbInfo["port"].(int))
+	} else {
+		dbPortString = ""
+	}
 
 	createOpts := instances.CreateRdsOpts{
 		Name:             d.Get("name").(string),
 		Datastore:        resourceRDSDataStore(d),
 		Ha:               resourceRDSHa(d),
-		Port:             strconv.Itoa(dbInfo["port"].(int)),
+		Port:             dbPortString,
 		Password:         dbInfo["password"].(string),
 		BackupStrategy:   resourceRDSBackupStrategy(d),
 		DiskEncryptionId: volumeInfo["disk_encryption_id"].(string),
