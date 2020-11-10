@@ -81,6 +81,18 @@ The following arguments are supported:
 
 * `eip` - (Optional) EIP address of the cluster.
 
+* `kubernetes_svc_ip_range` - (Optional) Service CIDR block, or the IP address range which the kubernetes
+  clusterIp must fall within. This parameter is available only for clusters of v1.11.7 and later.
+
+* `kube_proxy_mode` - (Optional) Service forwarding mode. Two modes are available:
+  * `iptables`: Traditional kube-proxy uses iptables rules to implement service load balancing.
+  In this mode, too many iptables rules will be generated when many services are deployed.
+  In addition, non-incremental updates will cause a latency and even obvious performance issues
+  in the case of heavy service traffic.
+  * `ipvs`: Optimized kube-proxy mode with higher throughput and faster speed.
+  This mode supports incremental updates and can keep connections uninterrupted during service updates.
+  It is suitable for large-sized clusters.
+
 ## Attributes Reference
 
 All above argument parameters can be exported as attribute parameters along with attribute reference.
