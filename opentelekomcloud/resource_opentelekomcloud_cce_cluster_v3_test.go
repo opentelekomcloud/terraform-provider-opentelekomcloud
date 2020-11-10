@@ -184,7 +184,7 @@ resource opentelekomcloud_cce_cluster_v3 cluster_1 {
   subnet_id="%s"
   container_network_type="overlay_l2"
   description="new description"
-  kubernetes_svc_ip_range = "192.168.0.0/20"
+  kubernetes_svc_ip_range = "192.168.0.0/24"
   kube_proxy_mode = "ipvs"
 }`, clusterName, OS_VPC_ID, OS_NETWORK_ID)
 

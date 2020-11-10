@@ -9,6 +9,7 @@ import (
 	"github.com/hashicorp/go-multierror"
 	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/helper/validation"
 	"github.com/opentelekomcloud/gophertelekomcloud"
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/cce/v3/clusters"
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/networking/v2/extensions/layer3/floatingips"
@@ -129,9 +130,10 @@ func resourceCCEClusterV3() *schema.Resource {
 				Optional: true,
 				Computed: true,
 				ForceNew: true,
-				ValidateFunc: func(v interface{}, k string) (ws []string, errors []error) {
-					return ValidateStringList(v, k, []string{"iptables", "ipvs"})
-				},
+				ValidateFunc: validation.StringInSlice([]string{
+					"iptables",
+					"ipvs",
+				}, false),
 			},
 			"multi_az": {
 				Type:     schema.TypeBool,
@@ -304,7 +306,7 @@ func resourceCCEClusterV3Read(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*Config)
 	cceClient, err := config.cceV3Client(GetRegion(d, config))
 	if err != nil {
-		return fmt.Errorf("Error creating opentelekomcloud CCE client: %s", err)
+		return fmt.Errorf("error creating opentelekomcloud CCE client: %s", err)
 	}
 
 	n, err := clusters.Get(cceClient, d.Id()).Extract()
@@ -314,10 +316,9 @@ func resourceCCEClusterV3Read(d *schema.ResourceData, meta interface{}) error {
 			return nil
 		}
 
-		return fmt.Errorf("Error retrieving opentelekomcloud CCE: %s", err)
+		return fmt.Errorf("error retrieving opentelekomcloud CCE: %s", err)
 	}
 
-	d.SetId(n.Metadata.Id)
 	mErr := multierror.Append(nil,
 		d.Set("name", n.Metadata.Name),
 		d.Set("status", n.Status.Phase),
@@ -352,7 +353,7 @@ func resourceCCEClusterV3Read(d *schema.ResourceData, meta interface{}) error {
 
 	cert, err := clusters.GetCert(cceClient, d.Id()).Extract()
 	if err != nil {
-		log.Printf("Error retrieving opentelekomcloud CCE cluster cert: %s", err)
+		log.Printf("error retrieving opentelekomcloud CCE cluster cert: %s", err)
 	}
 
 	// Set Certificate Clusters
