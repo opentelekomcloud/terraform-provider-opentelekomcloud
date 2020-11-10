@@ -377,6 +377,7 @@ resource "opentelekomcloud_rds_instance_v3" "instance" {
   flavor = "rds.pg.c2.medium"
   backup_strategy {
     start_time = "10:00-11:00"
+    keep_days  = 5
   }
 
 }
