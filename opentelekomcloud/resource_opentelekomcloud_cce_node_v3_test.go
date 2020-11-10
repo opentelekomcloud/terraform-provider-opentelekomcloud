@@ -69,12 +69,14 @@ func TestAccCCENodesV3_bandWidthResize(t *testing.T) {
 					resource.TestCheckResourceAttr("opentelekomcloud_cce_node_v3.node_1", "iptype", "5_bgp"),
 					resource.TestCheckResourceAttr("opentelekomcloud_cce_node_v3.node_1", "sharetype", "PER"),
 					resource.TestCheckResourceAttr("opentelekomcloud_cce_node_v3.node_1", "bandwidth_charge_mode", "traffic"),
+					resource.TestCheckResourceAttr("opentelekomcloud_cce_node_v3.node_1", "bandwidth_size", "100"),
 				),
 			},
 			{
 				Config: testAccCCENodeV3_bandWidthResize,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckCCENodeV3Exists("opentelekomcloud_cce_node_v3.node_1", "opentelekomcloud_cce_cluster_v3.cluster_1", &node),
+					resource.TestCheckResourceAttr("opentelekomcloud_cce_node_v3.node_1", "bandwidth_size", "10"),
 				),
 			},
 		},
