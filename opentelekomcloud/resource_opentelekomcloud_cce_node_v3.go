@@ -743,9 +743,14 @@ func resourceCCENodeV3ResizeBandwidth(d *schema.ResourceData, meta interface{}, 
 	if err != nil {
 		return fmt.Errorf("error creating OpenTelekomCloud NetworkingV1 client: %s", err)
 	}
+	elasticIp, err := eips.Get(networkingClient, eipId).Extract()
+	if err != nil {
+		return err
+	}
+
 	updateOpts := bandwidths.UpdateOpts{Size: newSize}
 
-	_, err = bandwidths.Update(networkingClient, eipId, updateOpts).Extract()
+	_, err = bandwidths.Update(networkingClient, elasticIp.BandwidthID, updateOpts).Extract()
 	if err != nil {
 		return fmt.Errorf("error updating bandwidth size: %s", err)
 	}
@@ -764,10 +769,8 @@ func resourceCCENodeV3CreateAndAssociateFloatingIp(d *schema.ResourceData, meta 
 				Type: "5_bgp",
 			},
 			Bandwidth: eips.BandwidthOpts{
-				Name:       "cce-node-1",
-				Size:       size,
-				ShareType:  "PER",
-				ChargeMode: "traffic",
+				Size:      size,
+				ShareType: "PER",
 			},
 		},
 	}

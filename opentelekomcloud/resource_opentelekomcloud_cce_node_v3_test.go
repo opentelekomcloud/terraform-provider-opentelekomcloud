@@ -99,7 +99,31 @@ func TestAccCCENodesV3_ipSetNull(t *testing.T) {
 				),
 			},
 			{
-				Config: testAccCCENodeV3_ipUnsetNull,
+				Config: testAccCCENodeV3_ipUnset,
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckCCENodeV3Exists("opentelekomcloud_cce_node_v3.node_1", "opentelekomcloud_cce_cluster_v3.cluster_1", &node),
+				),
+			},
+		},
+	})
+}
+
+func TestAccCCENodesV3_ipCreate(t *testing.T) {
+	var node nodes.Nodes
+
+	resource.Test(t, resource.TestCase{
+		PreCheck:     func() { testAccCCEKeyPairPreCheck(t) },
+		Providers:    testAccProviders,
+		CheckDestroy: testAccCheckCCENodeV3Destroy,
+		Steps: []resource.TestStep{
+			{
+				Config: testAccCCENodeV3_ipUnset,
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckCCENodeV3Exists("opentelekomcloud_cce_node_v3.node_1", "opentelekomcloud_cce_cluster_v3.cluster_1", &node),
+				),
+			},
+			{
+				Config: testAccCCENodeV3_ip,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckCCENodeV3Exists("opentelekomcloud_cce_node_v3.node_1", "opentelekomcloud_cce_cluster_v3.cluster_1", &node),
 				),
@@ -372,7 +396,7 @@ resource "opentelekomcloud_cce_node_v3" "node_1" {
 }
 `, OS_VPC_ID, OS_NETWORK_ID, OS_AVAILABILITY_ZONE, OS_KEYPAIR_NAME)
 
-var testAccCCENodeV3_ipUnsetNull = fmt.Sprintf(`
+var testAccCCENodeV3_ipUnset = fmt.Sprintf(`
 resource "opentelekomcloud_cce_cluster_v3" "cluster_1" {
   name         = "opentelekomcloud-cce"
   cluster_type = "VirtualMachine"
@@ -394,8 +418,6 @@ resource "opentelekomcloud_cce_node_v3" "node_1" {
     size       = 40
     volumetype = "SATA"
   }
-
-  bandwidth_size = null
 
   data_volumes {
     size       = 100
