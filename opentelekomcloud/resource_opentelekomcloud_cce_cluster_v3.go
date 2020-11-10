@@ -6,6 +6,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/hashicorp/go-multierror"
 	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
 	"github.com/opentelekomcloud/gophertelekomcloud"
@@ -115,6 +116,16 @@ func resourceCCEClusterV3() *schema.Resource {
 				Optional: true,
 				ForceNew: true,
 				Default:  "x509",
+			},
+			"kubernetes_svc_ip_range": {
+				Type:     schema.TypeString,
+				Optional: true,
+				Computed: true,
+				ForceNew: true,
+			},
+			"kube_proxy_mode": { // can't be set via API currently
+				Type:     schema.TypeString,
+				Computed: true,
 			},
 			"multi_az": {
 				Type:     schema.TypeBool,
@@ -249,8 +260,10 @@ func resourceCCEClusterV3Create(d *schema.ResourceData, meta interface{}) error 
 				Cidr: d.Get("container_network_cidr").(string)},
 			Authentication: clusters.AuthenticationSpec{Mode: d.Get("authentication_mode").(string),
 				AuthenticatingProxy: make(map[string]string)},
-			BillingMode: d.Get("billing_mode").(int),
-			ExtendParam: resourceClusterExtendParamV3(d),
+			BillingMode:          d.Get("billing_mode").(int),
+			ExtendParam:          resourceClusterExtendParamV3(d),
+			KubernetesSvcIpRange: d.Get("kubernetes_svc_ip_range").(string),
+			KubeProxyMode:        d.Get("kube_proxy_mode").(string),
 		},
 	}
 
@@ -278,14 +291,13 @@ func resourceCCEClusterV3Create(d *schema.ResourceData, meta interface{}) error 
 	d.SetId(create.Metadata.Id)
 
 	return resourceCCEClusterV3Read(d, meta)
-
 }
 
 func resourceCCEClusterV3Read(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*Config)
 	cceClient, err := config.cceV3Client(GetRegion(d, config))
 	if err != nil {
-		return fmt.Errorf("Error creating opentelekomcloud CCE client: %s", err)
+		return fmt.Errorf("error creating opentelekomcloud CCE client: %s", err)
 	}
 
 	n, err := clusters.Get(cceClient, d.Id()).Extract()
@@ -295,41 +307,47 @@ func resourceCCEClusterV3Read(d *schema.ResourceData, meta interface{}) error {
 			return nil
 		}
 
-		return fmt.Errorf("Error retrieving opentelekomcloud CCE: %s", err)
+		return fmt.Errorf("error retrieving opentelekomcloud CCE: %s", err)
 	}
 
-	d.Set("id", n.Metadata.Id)
-	d.Set("name", n.Metadata.Name)
-	d.Set("status", n.Status.Phase)
-	d.Set("flavor_id", n.Spec.Flavor)
-	d.Set("cluster_type", n.Spec.Type)
-	d.Set("cluster_version", n.Spec.Version)
-	d.Set("description", n.Spec.Description)
-	d.Set("billing_mode", n.Spec.BillingMode)
-	d.Set("vpc_id", n.Spec.HostNetwork.VpcId)
-	d.Set("subnet_id", n.Spec.HostNetwork.SubnetId)
-	d.Set("highway_subnet_id", n.Spec.HostNetwork.HighwaySubnet)
-	d.Set("container_network_type", n.Spec.ContainerNetwork.Mode)
-	d.Set("container_network_cidr", n.Spec.ContainerNetwork.Cidr)
-	d.Set("authentication_mode", n.Spec.Authentication.Mode)
-	d.Set("internal", n.Status.Endpoints[0].Internal)
-	d.Set("external", n.Status.Endpoints[0].External)
-	d.Set("external_otc", n.Status.Endpoints[0].ExternalOTC)
-	d.Set("region", GetRegion(d, config))
+	mErr := multierror.Append(nil,
+		d.Set("name", n.Metadata.Name),
+		d.Set("status", n.Status.Phase),
+		d.Set("flavor_id", n.Spec.Flavor),
+		d.Set("cluster_type", n.Spec.Type),
+		d.Set("cluster_version", n.Spec.Version),
+		d.Set("description", n.Spec.Description),
+		d.Set("billing_mode", n.Spec.BillingMode),
+		d.Set("vpc_id", n.Spec.HostNetwork.VpcId),
+		d.Set("subnet_id", n.Spec.HostNetwork.SubnetId),
+		d.Set("highway_subnet_id", n.Spec.HostNetwork.HighwaySubnet),
+		d.Set("container_network_type", n.Spec.ContainerNetwork.Mode),
+		d.Set("container_network_cidr", n.Spec.ContainerNetwork.Cidr),
+		d.Set("authentication_mode", n.Spec.Authentication.Mode),
+		d.Set("kubernetes_svc_ip_range", n.Spec.KubernetesSvcIpRange),
+		d.Set("kube_proxy_mode", n.Spec.KubeProxyMode),
+		d.Set("internal", n.Status.Endpoints[0].Internal),
+		d.Set("external", n.Status.Endpoints[0].External),
+		d.Set("external_otc", n.Status.Endpoints[0].ExternalOTC),
+		d.Set("region", GetRegion(d, config)),
+	)
 	if n.Status.Endpoints[0].External != "" {
 		eip := strings.Split(n.Status.Endpoints[0].External, "//")
 		eip = strings.Split(eip[1], ":")
-		d.Set("eip", eip[0])
+		mErr = multierror.Append(mErr, d.Set("eip", eip[0]))
 	} else {
-		d.Set("eip", "")
+		mErr = multierror.Append(mErr, d.Set("eip", ""))
+	}
+	if err := mErr.ErrorOrNil(); err != nil {
+		return fmt.Errorf("error setting cce cluster fields: %s", err)
 	}
 
 	cert, err := clusters.GetCert(cceClient, d.Id()).Extract()
 	if err != nil {
-		log.Printf("Error retrieving opentelekomcloud CCE cluster cert: %s", err)
+		log.Printf("error retrieving opentelekomcloud CCE cluster cert: %s", err)
 	}
 
-	//Set Certificate Clusters
+	// Set Certificate Clusters
 	var clusterList []map[string]interface{}
 	for _, clusterObj := range cert.Clusters {
 		clusterCert := make(map[string]interface{})
@@ -338,9 +356,11 @@ func resourceCCEClusterV3Read(d *schema.ResourceData, meta interface{}) error {
 		clusterCert["certificate_authority_data"] = clusterObj.Cluster.CertAuthorityData
 		clusterList = append(clusterList, clusterCert)
 	}
-	d.Set("certificate_clusters", clusterList)
+	if err := d.Set("certificate_clusters", clusterList); err != nil {
+		return err
+	}
 
-	//Set Certificate Users
+	// Set Certificate Users
 	var userList []map[string]interface{}
 	for _, userObj := range cert.Users {
 		userCert := make(map[string]interface{})
@@ -349,7 +369,9 @@ func resourceCCEClusterV3Read(d *schema.ResourceData, meta interface{}) error {
 		userCert["client_key_data"] = userObj.User.ClientKeyData
 		userList = append(userList, userCert)
 	}
-	d.Set("certificate_users", userList)
+	if err := d.Set("certificate_users", userList); err != nil {
+		return err
+	}
 
 	return nil
 }

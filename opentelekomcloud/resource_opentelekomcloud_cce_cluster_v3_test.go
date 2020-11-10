@@ -4,11 +4,14 @@ import (
 	"fmt"
 	"testing"
 
+	"github.com/hashicorp/terraform-plugin-sdk/helper/acctest"
 	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/terraform"
 
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/cce/v3/clusters"
 )
+
+var clusterName = fmt.Sprintf("cce-%s", acctest.RandString(5))
 
 func TestAccCCEClusterV3_basic(t *testing.T) {
 	var cluster clusters.Clusters
@@ -23,7 +26,7 @@ func TestAccCCEClusterV3_basic(t *testing.T) {
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckCCEClusterV3Exists("opentelekomcloud_cce_cluster_v3.cluster_1", &cluster),
 					resource.TestCheckResourceAttr(
-						"opentelekomcloud_cce_cluster_v3.cluster_1", "name", "opentelekomcloud-cce"),
+						"opentelekomcloud_cce_cluster_v3.cluster_1", "name", clusterName),
 					resource.TestCheckResourceAttr(
 						"opentelekomcloud_cce_cluster_v3.cluster_1", "status", "Available"),
 					resource.TestCheckResourceAttr(
@@ -31,11 +34,13 @@ func TestAccCCEClusterV3_basic(t *testing.T) {
 					resource.TestCheckResourceAttr(
 						"opentelekomcloud_cce_cluster_v3.cluster_1", "flavor_id", "cce.s1.small"),
 					resource.TestCheckResourceAttr(
-						"opentelekomcloud_cce_cluster_v3.cluster_1", "cluster_version", "v1.9.2-r2"),
-					resource.TestCheckResourceAttr(
 						"opentelekomcloud_cce_cluster_v3.cluster_1", "container_network_type", "overlay_l2"),
 					resource.TestCheckResourceAttr(
 						"opentelekomcloud_cce_cluster_v3.cluster_1", "authentication_mode", "x509"),
+					resource.TestCheckResourceAttr(
+						"opentelekomcloud_cce_cluster_v3.cluster_1", "kube_proxy_mode", "iptables"),
+					resource.TestCheckResourceAttr(
+						"opentelekomcloud_cce_cluster_v3.cluster_1", "kubernetes_svc_ip_range", "10.247.0.0/16"),
 				),
 			},
 			{
@@ -144,33 +149,33 @@ func TestAccCCEClusterV3_withVersionDiff(t *testing.T) {
 
 var testAccCCEClusterV3_basic = fmt.Sprintf(`
 resource "opentelekomcloud_cce_cluster_v3" "cluster_1" {
-  name = "opentelekomcloud-cce"
+  name = "%s"
   cluster_type="VirtualMachine"
   flavor_id="cce.s1.small"
-  cluster_version = "v1.9.2-r2"
   vpc_id="%s"
   subnet_id="%s"
   container_network_type="overlay_l2"
-}`, OS_VPC_ID, OS_NETWORK_ID)
+  kubernetes_svc_ip_range = "10.247.0.0/16"
+}`, clusterName, OS_VPC_ID, OS_NETWORK_ID)
 
 var testAccCCEClusterV3_update = fmt.Sprintf(`
 resource "opentelekomcloud_cce_cluster_v3" "cluster_1" {
-  name = "opentelekomcloud-cce"
+  name = "%s"
   cluster_type="VirtualMachine"
   flavor_id="cce.s1.small"
-  cluster_version = "v1.9.2-r2"
   vpc_id="%s"
   subnet_id="%s"
   container_network_type="overlay_l2"
   description="new description"
-}`, OS_VPC_ID, OS_NETWORK_ID)
+  kubernetes_svc_ip_range = "10.247.0.0/16"
+}`, clusterName, OS_VPC_ID, OS_NETWORK_ID)
 
 var testAccCCEClusterV3_timeout = fmt.Sprintf(`
 resource "opentelekomcloud_networking_floatingip_v2" "fip_1" {
 }
 
 resource "opentelekomcloud_cce_cluster_v3" "cluster_1" {
-  name = "opentelekomcloud-cce"
+  name = "%s"
   cluster_type="VirtualMachine"
   flavor_id="cce.s2.small"
   cluster_version = "v1.9.2-r2"
@@ -185,11 +190,11 @@ resource "opentelekomcloud_cce_cluster_v3" "cluster_1" {
   }
   multi_az = true
 }
-`, OS_VPC_ID, OS_NETWORK_ID)
+}`, clusterName, OS_VPC_ID, OS_NETWORK_ID)
 
 var testAccCCEClusterV3_withInvalidVersion = fmt.Sprintf(`
 resource "opentelekomcloud_cce_cluster_v3" "cluster_1" {
-  name = "opentelekomcloud-cce"
+  name = "%s"
   cluster_type="VirtualMachine"
   flavor_id="cce.s1.small"
   cluster_version = "v1.9.2"
@@ -197,4 +202,4 @@ resource "opentelekomcloud_cce_cluster_v3" "cluster_1" {
   subnet_id="%s"
   container_network_type="overlay_l2"
   description="new description"
-}`, OS_VPC_ID, OS_NETWORK_ID)
+}`, clusterName, OS_VPC_ID, OS_NETWORK_ID)
