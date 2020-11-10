@@ -9,7 +9,6 @@ import (
 	"os"
 	"time"
 
-	"github.com/hashicorp/go-multierror"
 	"github.com/hashicorp/terraform-plugin-sdk/helper/hashcode"
 	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
@@ -24,7 +23,6 @@ import (
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/compute/v2/images"
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/compute/v2/servers"
 	ecstags "github.com/opentelekomcloud/gophertelekomcloud/openstack/ecs/v1/cloudservertags"
-	"github.com/opentelekomcloud/gophertelekomcloud/pagination"
 )
 
 func resourceComputeInstanceV2() *schema.Resource {
@@ -39,8 +37,6 @@ func resourceComputeInstanceV2() *schema.Resource {
 			Update: schema.DefaultTimeout(30 * time.Minute),
 			Delete: schema.DefaultTimeout(30 * time.Minute),
 		},
-
-		CustomizeDiff: securityGroupsByIDs,
 
 		Schema: map[string]*schema.Schema{
 			"region": {
@@ -432,20 +428,11 @@ func resourceComputeInstanceV2Create(d *schema.ResourceData, meta interface{}) e
 
 	configDrive := d.Get("config_drive").(bool)
 
-	rawSecGroups := d.Get("security_groups").(*schema.Set).List()
-	sgIDs, err := resourceInstanceSecGroupsV2(rawSecGroups, computeClient)
-	if err != nil {
-		return fmt.Errorf("error resolving sec group IDs")
-	}
-	if err := d.Set("security_groups", sgIDs); err != nil {
-		return fmt.Errorf("error setting IDs into security_groups")
-	}
-
 	createOpts = &servers.CreateOpts{
 		Name:             d.Get("name").(string),
 		ImageRef:         imageId,
 		FlavorRef:        flavorId,
-		SecurityGroups:   sgIDs,
+		SecurityGroups:   resourceInstanceSecGroupsV2(d),
 		AvailabilityZone: d.Get("availability_zone").(string),
 		Networks:         networks,
 		Metadata:         resourceInstanceMetadataV2(d),
@@ -614,19 +601,11 @@ func resourceComputeInstanceV2Read(d *schema.ResourceData, meta interface{}) err
 		return fmt.Errorf("[DEBUG] Error saving all_metadata to state for OpenTelekomCloud server (%s): %s", d.Id(), err)
 	}
 
-	var secGrps []string
-	page, err := secgroups.ListByServer(computeClient, d.Id()).AllPages()
-	if err != nil {
-		return fmt.Errorf("error finding security groups for server %s", d.Id())
+	var secGrpNames []string
+	for _, sg := range server.SecurityGroups {
+		secGrpNames = append(secGrpNames, sg["name"].(string))
 	}
-	groups, err := secgroups.ExtractSecurityGroups(page)
-	if err != nil {
-		return fmt.Errorf("error extracting security groups for server %s", d.Id())
-	}
-	for _, group := range groups {
-		secGrps = append(secGrps, group.ID)
-	}
-	if err := d.Set("security_groups", secGrps); err != nil {
+	if err := d.Set("security_groups", secGrpNames); err != nil {
 		return fmt.Errorf("[DEBUG] Error saving security_groups to state for OpenTelekomCloud server (%s): %s", d.Id(), err)
 	}
 
@@ -974,42 +953,13 @@ func ServerV2StateRefreshFunc(client *golangsdk.ServiceClient, instanceID string
 	}
 }
 
-func findID(a string, grps []secgroups.SecurityGroup) string {
-	for _, g := range grps {
-		if a == g.ID || a == g.Name {
-			return g.ID
-		}
-	}
-	return ""
-}
-
-func resourceInstanceSecGroupsV2(rawSecGroups []interface{}, client *golangsdk.ServiceClient) ([]string, error) {
-	groupIDs := make([]string, len(rawSecGroups))
+func resourceInstanceSecGroupsV2(d *schema.ResourceData) []string {
+	rawSecGroups := d.Get("security_groups").(*schema.Set).List()
+	secGroups := make([]string, len(rawSecGroups))
 	for i, raw := range rawSecGroups {
-		groupIDs[i] = raw.(string)
+		secGroups[i] = raw.(string)
 	}
-	// resolve sec group IDs
-	found := 0
-	err := secgroups.List(client).EachPage(func(page pagination.Page) (bool, error) {
-		groups, err := secgroups.ExtractSecurityGroups(page)
-		if err != nil {
-			return false, err
-		}
-		for i, name := range groupIDs {
-			if id := findID(name, groups); id != "" {
-				groupIDs[i] = id
-				found += 1
-			}
-			if found == len(groupIDs) {
-				return false, nil
-			}
-		}
-		return true, nil
-	})
-	if err != nil {
-		return nil, err
-	}
-	return groupIDs, nil
+	return secGroups
 }
 
 func resourceInstanceMetadataV2(d *schema.ResourceData) map[string]string {
@@ -1277,77 +1227,4 @@ func resourceInstancePersonalityV2(d *schema.ResourceData) servers.Personality {
 	}
 
 	return personalities
-}
-
-func asInterfaceSlice(src []string) []interface{} {
-	res := make([]interface{}, len(src))
-	for i, s := range src {
-		res[i] = s
-	}
-	return res
-}
-
-func securityGroupsByIDs(diff *schema.ResourceDiff, meta interface{}) error {
-	if !diff.HasChange("security_groups") {
-		return nil
-	}
-	old, new := diff.GetChange("security_groups")
-	oldSet := old.(*schema.Set)
-	newSet := new.(*schema.Set)
-
-	diffSet := newSet.Difference(oldSet) // added sec groups
-
-	// resolve IDs
-	config := meta.(*Config)
-	computeClient, err := config.computeV2HWClient(GetRegion(diff, config))
-	if err != nil {
-		return fmt.Errorf("error creating OpenTelekomCloud compute client: %s", err)
-	}
-	// make it parallel
-	oldIDChan := make(chan []string, 1)
-	diffIDChan := make(chan []string, 1)
-	errChan := make(chan error, 2)
-
-	// resolve old sec group IDs
-	go func() {
-		v, err := resourceInstanceSecGroupsV2(oldSet.List(), computeClient)
-		errChan <- err
-		oldIDChan <- v
-	}()
-	go func() {
-		v, err := resourceInstanceSecGroupsV2(diffSet.List(), computeClient)
-		errChan <- err
-		diffIDChan <- v
-	}()
-
-	mErr := multierror.Append(nil, <-errChan, <-errChan)
-	if err := mErr.ErrorOrNil(); err != nil {
-		return fmt.Errorf("error resolving security group IDs: %s", err)
-	}
-
-	diffIDSet := schema.NewSet(oldSet.F, asInterfaceSlice(<-diffIDChan))
-	oldIDSet := schema.NewSet(oldSet.F, asInterfaceSlice(<-oldIDChan))
-
-	var resultSgs []string
-
-	// don't touch not changed groups
-	for _, id := range oldIDSet.Difference(diffIDSet).List() {
-		resultSgs = append(resultSgs, id.(string))
-	}
-	// name replaced with IDs or vice-versa
-	diffNameToID := diffIDSet.Difference(diffSet) // names -> IDs
-	// changes which were names
-	for _, id := range diffNameToID.List() {
-		resultSgs = append(resultSgs, id.(string))
-	}
-	diffIDs := diffIDSet.Intersection(diffSet) // new IDs
-	// changes which were IDs
-	for _, id := range diffIDs.Difference(oldIDSet).List() {
-		resultSgs = append(resultSgs, id.(string))
-	}
-
-	if err := diff.SetNew("security_groups", resultSgs); err != nil {
-		return fmt.Errorf("failed to set IDs into security_groups")
-	}
-	return nil
 }

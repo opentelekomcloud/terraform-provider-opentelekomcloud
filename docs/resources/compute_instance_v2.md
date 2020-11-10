@@ -286,7 +286,7 @@ The following arguments are supported:
 * `user_data` - (Optional) The user data to provide when launching the instance.
   Changing this creates a new server.
 
-* `security_groups` - (Optional) An array of one or more security group names/IDs
+* `security_groups` - (Optional) An array of one or more security group names
   to associate with the server. Changing this results in adding/removing
   security groups from the existing server.
 -> **Note:** When attaching the instance to networks using Ports,
