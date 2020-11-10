@@ -17,8 +17,8 @@ import (
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/cce/v3/nodes"
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/common/tags"
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/compute/v2/extensions/floatingips"
+	"github.com/opentelekomcloud/gophertelekomcloud/openstack/networking/v1/bandwidths"
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/networking/v1/eips"
-	"github.com/opentelekomcloud/gophertelekomcloud/openstack/vpc/v1/bandwidths"
 )
 
 func validateK8sTagsMap(v interface{}, k string) (ws []string, errors []error) {
@@ -386,15 +386,7 @@ func resourceCCENodeV3Create(d *schema.ResourceData, meta interface{}) error {
 	eipCount := d.Get("eip_count").(int)
 	if bandwidthSize > 0 && eipCount == 0 {
 		eipCount = 1
-		if d.Get("bandwidth_charge_mode").(string) == "" {
-			_ = d.Set("bandwidth_charge_mode", "traffic")
-		}
-		if d.Get("sharetype").(string) == "" {
-			_ = d.Set("sharetype", "PER")
-		}
-		if d.Get("iptype").(string) == "" {
-			_ = d.Set("iptype", "5_bgp")
-		}
+		checkCCENodeV3PublicIpParams(d)
 	}
 
 	createOpts := nodes.CreateOpts{
@@ -653,17 +645,15 @@ func resourceCCENodeV3Update(d *schema.ResourceData, meta interface{}) error {
 			return err
 		}
 		if newBandWidth == 0 && oldBandwidth > 0 {
-			if err := resourceCCENodeV3DeleteAssociateIP(d, config, serverId, floatingIp); err != nil {
-				return err
-			}
+			err = resourceCCENodeV3DeleteAssociateIP(d, config, serverId, floatingIp)
 		} else if newBandWidth > 0 && oldBandwidth > 0 {
-			if err := resourceCCENodeV3ResizeBandwidth(d, config, floatingIp.ID, newBandWidth); err != nil {
-				return err
-			}
+			err = resourceCCENodeV3ResizeBandwidth(d, config, floatingIp.ID, newBandWidth)
 		} else if newBandWidth > 0 && oldBandwidth == 0 {
-			if err := resourceCCENodeV3CreateAndAssociateFloatingIp(d, config, newBandWidth, serverId); err != nil {
-				return err
-			}
+			checkCCENodeV3PublicIpParams(d)
+			err = resourceCCENodeV3CreateAndAssociateFloatingIp(d, config, newBandWidth, serverId)
+		}
+		if err != nil {
+			return err
 		}
 	}
 
@@ -766,11 +756,13 @@ func resourceCCENodeV3CreateAndAssociateFloatingIp(d *schema.ResourceData, meta 
 	createEipOpts := EIPCreateOpts{
 		ApplyOpts: eips.ApplyOpts{
 			IP: eips.PublicIpOpts{
-				Type: "5_bgp",
+				Type: d.Get("iptype").(string),
 			},
 			Bandwidth: eips.BandwidthOpts{
-				Size:      size,
-				ShareType: "PER",
+				Name:       "bandwidth-cce-node-1",
+				Size:       size,
+				ShareType:  d.Get("sharetype").(string),
+				ChargeMode: d.Get("bandwidth_charge_mode").(string),
 			},
 		},
 	}
@@ -785,14 +777,14 @@ func resourceCCENodeV3CreateAndAssociateFloatingIp(d *schema.ResourceData, meta 
 		return fmt.Errorf("error waiting for EIP (%s) to become ready: %s", eip.ID, err)
 	}
 
-	networkingV2Client, err := config.networkingV2Client(GetRegion(d, config))
+	computeClient, err := config.computeV2Client(GetRegion(d, config))
 	if err != nil {
-		return fmt.Errorf("error creating OpenTelekomCloud NetworkingV2 client: %s", err)
+		return fmt.Errorf("error creating OpenTelekomCloud ComputeV2 client: %s", err)
 	}
 	associateOpts := floatingips.AssociateOpts{
 		FloatingIP: eip.PublicAddress,
 	}
-	if err := floatingips.AssociateInstance(networkingV2Client, serverId, associateOpts).ExtractErr(); err != nil {
+	if err := floatingips.AssociateInstance(computeClient, serverId, associateOpts).ExtractErr(); err != nil {
 		return fmt.Errorf("error associating CCE Node to publicIp: %s", err)
 	}
 
@@ -820,6 +812,18 @@ func getCCENodeV3FloatingIp(d *schema.ResourceData, meta interface{}, serverId s
 		}
 	}
 	return &floatingIp, nil
+}
+
+func checkCCENodeV3PublicIpParams(d *schema.ResourceData) {
+	if d.Get("bandwidth_charge_mode").(string) == "" {
+		_ = d.Set("bandwidth_charge_mode", "traffic")
+	}
+	if d.Get("sharetype").(string) == "" {
+		_ = d.Set("sharetype", "PER")
+	}
+	if d.Get("iptype").(string) == "" {
+		_ = d.Set("iptype", "5_bgp")
+	}
 }
 
 func waitForCceNodeActive(cceClient *golangsdk.ServiceClient, clusterId, nodeId string) resource.StateRefreshFunc {
