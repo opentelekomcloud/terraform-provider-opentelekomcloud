@@ -39,6 +39,8 @@ func TestAccCCEClusterV3_basic(t *testing.T) {
 						"opentelekomcloud_cce_cluster_v3.cluster_1", "authentication_mode", "x509"),
 					resource.TestCheckResourceAttr(
 						"opentelekomcloud_cce_cluster_v3.cluster_1", "kube_proxy_mode", "iptables"),
+					resource.TestCheckResourceAttr(
+						"opentelekomcloud_cce_cluster_v3.cluster_1", "kubernetes_svc_ip_range", "10.247.0.0/16"),
 				),
 			},
 			{
@@ -46,15 +48,6 @@ func TestAccCCEClusterV3_basic(t *testing.T) {
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr(
 						"opentelekomcloud_cce_cluster_v3.cluster_1", "description", "new description"),
-				),
-			},
-			{
-				Config: testAccCCEClusterV3_reCreate,
-				Check: resource.ComposeTestCheckFunc(
-					resource.TestCheckResourceAttr(
-						"opentelekomcloud_cce_cluster_v3.cluster_1", "kubernetes_svc_ip_range", "192.168.0.0/20"),
-					resource.TestCheckResourceAttr(
-						"opentelekomcloud_cce_cluster_v3.cluster_1", "kube_proxy_mode", "ipvs"),
 				),
 			},
 		},
@@ -162,6 +155,7 @@ resource "opentelekomcloud_cce_cluster_v3" "cluster_1" {
   vpc_id="%s"
   subnet_id="%s"
   container_network_type="overlay_l2"
+  kubernetes_svc_ip_range = "10.247.0.0/16"
 }`, clusterName, OS_VPC_ID, OS_NETWORK_ID)
 
 var testAccCCEClusterV3_update = fmt.Sprintf(`
@@ -173,19 +167,7 @@ resource "opentelekomcloud_cce_cluster_v3" "cluster_1" {
   subnet_id="%s"
   container_network_type="overlay_l2"
   description="new description"
-}`, clusterName, OS_VPC_ID, OS_NETWORK_ID)
-
-var testAccCCEClusterV3_reCreate = fmt.Sprintf(`
-resource opentelekomcloud_cce_cluster_v3 cluster_1 {
-  name = "%s"
-  cluster_type="VirtualMachine"
-  flavor_id="cce.s1.small"
-  vpc_id="%s"
-  subnet_id="%s"
-  container_network_type="overlay_l2"
-  description="new description"
-  kubernetes_svc_ip_range = "192.168.0.0/24"
-  kube_proxy_mode = "ipvs"
+  kubernetes_svc_ip_range = "10.247.0.0/16"
 }`, clusterName, OS_VPC_ID, OS_NETWORK_ID)
 
 var testAccCCEClusterV3_timeout = fmt.Sprintf(`

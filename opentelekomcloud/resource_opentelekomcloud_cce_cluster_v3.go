@@ -9,7 +9,6 @@ import (
 	"github.com/hashicorp/go-multierror"
 	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
-	"github.com/hashicorp/terraform-plugin-sdk/helper/validation"
 	"github.com/opentelekomcloud/gophertelekomcloud"
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/cce/v3/clusters"
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/networking/v2/extensions/layer3/floatingips"
@@ -119,21 +118,14 @@ func resourceCCEClusterV3() *schema.Resource {
 				Default:  "x509",
 			},
 			"kubernetes_svc_ip_range": {
-				Type:         schema.TypeString,
-				Optional:     true,
-				Computed:     true,
-				ForceNew:     true,
-				ValidateFunc: validateCIDR,
-			},
-			"kube_proxy_mode": {
 				Type:     schema.TypeString,
 				Optional: true,
 				Computed: true,
 				ForceNew: true,
-				ValidateFunc: validation.StringInSlice([]string{
-					"iptables",
-					"ipvs",
-				}, false),
+			},
+			"kube_proxy_mode": { // can't be set via API currently
+				Type:     schema.TypeString,
+				Computed: true,
 			},
 			"multi_az": {
 				Type:     schema.TypeBool,
@@ -299,7 +291,6 @@ func resourceCCEClusterV3Create(d *schema.ResourceData, meta interface{}) error 
 	d.SetId(create.Metadata.Id)
 
 	return resourceCCEClusterV3Read(d, meta)
-
 }
 
 func resourceCCEClusterV3Read(d *schema.ResourceData, meta interface{}) error {
