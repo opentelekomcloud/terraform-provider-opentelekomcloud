@@ -5,8 +5,10 @@ import (
 	"log"
 	"time"
 
+	"github.com/hashicorp/go-multierror"
 	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/helper/validation"
 
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/networking/v2/extensions/lbaas_v2/certificates"
 )
@@ -49,12 +51,19 @@ func resourceCertificateV2() *schema.Resource {
 
 			"private_key": {
 				Type:     schema.TypeString,
-				Required: true,
+				Optional: true,
 			},
 
 			"certificate": {
 				Type:     schema.TypeString,
 				Required: true,
+			},
+
+			"type": {
+				Type:         schema.TypeString,
+				Optional:     true,
+				Computed:     true,
+				ValidateFunc: validation.StringInSlice([]string{"server", "client"}, false),
 			},
 
 			"update_time": {
@@ -83,6 +92,7 @@ func resourceCertificateV2Create(d *schema.ResourceData, meta interface{}) error
 		Domain:      d.Get("domain").(string),
 		PrivateKey:  d.Get("private_key").(string),
 		Certificate: d.Get("certificate").(string),
+		Type:        d.Get("type").(string),
 	}
 
 	log.Printf("[DEBUG] Create Options: %#v", createOpts)
@@ -110,17 +120,18 @@ func resourceCertificateV2Read(d *schema.ResourceData, meta interface{}) error {
 	}
 	log.Printf("[DEBUG] Retrieved certificate %s: %#v", d.Id(), c)
 
-	d.Set("name", c.Name)
-	d.Set("description", c.Description)
-	d.Set("domain", c.Domain)
-	d.Set("certificate", c.Certificate)
-	d.Set("private_key", c.PrivateKey)
-	d.Set("create_time", c.CreateTime)
-	d.Set("update_time", c.UpdateTime)
-
-	d.Set("region", GetRegion(d, config))
-
-	return nil
+	mErr := multierror.Append(nil,
+		d.Set("name", c.Name),
+		d.Set("description", c.Description),
+		d.Set("domain", c.Domain),
+		d.Set("certificate", c.Certificate),
+		d.Set("private_key", c.PrivateKey),
+		d.Set("type", c.Type),
+		d.Set("create_time", c.CreateTime),
+		d.Set("update_time", c.UpdateTime),
+		d.Set("region", GetRegion(d, config)),
+	)
+	return mErr.ErrorOrNil()
 }
 
 func resourceCertificateV2Update(d *schema.ResourceData, meta interface{}) error {
