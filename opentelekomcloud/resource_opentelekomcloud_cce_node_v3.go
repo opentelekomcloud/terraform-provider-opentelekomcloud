@@ -6,7 +6,6 @@ import (
 	"encoding/hex"
 	"fmt"
 	"log"
-	"regexp"
 	"time"
 
 	"github.com/hashicorp/go-multierror"
@@ -20,40 +19,6 @@ import (
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/networking/v1/bandwidths"
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/networking/v1/eips"
 )
-
-func validateK8sTagsMap(v interface{}, k string) (ws []string, errors []error) {
-	values := v.(map[string]interface{})
-	pattern := regexp.MustCompile(`^[.\-_A-Za-z0-9]+$`)
-
-	for key, value := range values {
-		valueString := value.(string)
-		if len(key) < 1 {
-			errors = append(errors, fmt.Errorf("key %q cannot be shorter than 1 characters: %q", k, key))
-		}
-
-		if len(valueString) < 1 {
-			errors = append(errors, fmt.Errorf("value %q cannot be shorter than 1 characters: %q", k, value))
-		}
-
-		if len(key) > 63 {
-			errors = append(errors, fmt.Errorf("key %q cannot be longer than 63 characters: %q", k, key))
-		}
-
-		if len(valueString) > 63 {
-			errors = append(errors, fmt.Errorf("value %q cannot be longer than 63 characters: %q", k, value))
-		}
-
-		if !pattern.MatchString(key) {
-			errors = append(errors, fmt.Errorf("key %q doesn't comply with restrictions (%q): %q", k, pattern, key))
-		}
-
-		if !pattern.MatchString(valueString) {
-			errors = append(errors, fmt.Errorf("value %q doesn't comply with restrictions (%q): %q", k, pattern, valueString))
-		}
-	}
-
-	return
-}
 
 func resourceCCENodeV3() *schema.Resource {
 	return &schema.Resource{
@@ -168,6 +133,7 @@ func resourceCCENodeV3() *schema.Resource {
 				Optional: true,
 				Elem:     &schema.Schema{Type: schema.TypeString},
 				Set:      schema.HashString,
+				ForceNew: true,
 				ConflictsWith: []string{
 					"iptype", "bandwidth_charge_mode", "bandwidth_size", "sharetype",
 				},
