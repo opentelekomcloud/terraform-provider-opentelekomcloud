@@ -660,24 +660,6 @@ func resourceCCENodeV3Update(d *schema.ResourceData, meta interface{}) error {
 		}
 	}
 
-	if d.HasChange("eip_ids") {
-		oldEipIdsRaw, newEipIdsRaw := d.GetChange("eip_ids")
-		oldEipIds := oldEipIdsRaw.(*schema.Set).List()
-		newEipIds := newEipIdsRaw.(*schema.Set).List()
-		serverId := d.Get("server_id").(string)
-		if len(newEipIds) == 0 {
-			if err := deleteCCENodeV3AssociatedIP(d, config, serverId, oldEipIds[0].(string)); err != nil {
-				return err
-			}
-		} else if len(oldEipIds) > 0 {
-			err = reassignCCENodeV3Eip(d, meta, oldEipIds[0].(string), newEipIds[0].(string), serverId)
-		}
-
-		if err != nil {
-			return err
-		}
-	}
-
 	return resourceCCENodeV3Read(d, meta)
 }
 
