@@ -645,14 +645,17 @@ func resourceCCENodeV3Update(d *schema.ResourceData, meta interface{}) error {
 		if err != nil {
 			return err
 		}
-		if newBandWidth == 0 && oldBandwidth > 0 {
+		if newBandWidth == 0 {
 			err = resourceCCENodeV3DeleteAssociateIP(d, config, serverId, floatingIp)
-		} else if oldBandwidth > 0 {
-			err = resourceCCENodeV3ResizeBandwidth(d, config, floatingIp.ID, newBandWidth)
-		} else if oldBandwidth == 0 {
+		} else {
 			checkCCENodeV3PublicIpParams(d)
-			err = resourceCCENodeV3CreateAndAssociateFloatingIp(d, config, newBandWidth, serverId)
+			if oldBandwidth > 0 {
+				err = resourceCCENodeV3ResizeBandwidth(d, config, floatingIp.ID, newBandWidth)
+			} else {
+				err = resourceCCENodeV3CreateAndAssociateFloatingIp(d, config, newBandWidth, serverId)
+			}
 		}
+
 		if err != nil {
 			return err
 		}
