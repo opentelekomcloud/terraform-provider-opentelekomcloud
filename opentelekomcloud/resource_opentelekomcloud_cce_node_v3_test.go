@@ -83,6 +83,30 @@ func TestAccCCENodesV3_bandWidthResize(t *testing.T) {
 	})
 }
 
+func TestAccCCENodesV3_eipIds(t *testing.T) {
+	var node nodes.Nodes
+
+	resource.Test(t, resource.TestCase{
+		PreCheck:     func() { testAccCCEKeyPairPreCheck(t) },
+		Providers:    testAccProviders,
+		CheckDestroy: testAccCheckCCENodeV3Destroy,
+		Steps: []resource.TestStep{
+			{
+				Config: testAccCCENodeV3_ipIds,
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckCCENodeV3Exists("opentelekomcloud_cce_node_v3.node_1", "opentelekomcloud_cce_cluster_v3.cluster_1", &node),
+				),
+			},
+			{
+				Config: testAccCCENodeV3_ipUnset,
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckCCENodeV3Exists("opentelekomcloud_cce_node_v3.node_1", "opentelekomcloud_cce_cluster_v3.cluster_1", &node),
+				),
+			},
+		},
+	})
+}
+
 func TestAccCCENodesV3_ipSetNull(t *testing.T) {
 	var node nodes.Nodes
 
@@ -488,6 +512,40 @@ resource "opentelekomcloud_cce_node_v3" "node_1" {
   bandwidth_size = null
   sharetype      = null
   iptype         = null
+
+  data_volumes {
+    size       = 100
+    volumetype = "SATA"
+  }
+}
+`, OS_VPC_ID, OS_NETWORK_ID, OS_AVAILABILITY_ZONE, OS_KEYPAIR_NAME)
+
+var testAccCCENodeV3_ipIds = fmt.Sprintf(`
+resource "opentelekomcloud_networking_floatingip_v2" "fip_1" {}
+
+resource "opentelekomcloud_cce_cluster_v3" "cluster_1" {
+  name         = "opentelekomcloud-cce"
+  cluster_type = "VirtualMachine"
+  flavor_id    = "cce.s1.small"
+  vpc_id       = "%s"
+  subnet_id    = "%s"
+
+  container_network_type = "overlay_l2"
+  authentication_mode    = "rbac"
+}
+
+resource "opentelekomcloud_cce_node_v3" "node_1" {
+  cluster_id        = opentelekomcloud_cce_cluster_v3.cluster_1.id
+  name              = "cce-node-1"
+  flavor_id         = "s2.xlarge.2"
+  availability_zone = "%s"
+  key_pair          = "%s"
+  root_volume {
+    size       = 40
+    volumetype = "SATA"
+  }
+
+  eip_ids = [opentelekomcloud_networking_floatingip_v2.fip_1.id]
 
   data_volumes {
     size       = 100

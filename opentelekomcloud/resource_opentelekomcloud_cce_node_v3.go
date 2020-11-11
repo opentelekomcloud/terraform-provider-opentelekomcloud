@@ -646,16 +646,15 @@ func resourceCCENodeV3Update(d *schema.ResourceData, meta interface{}) error {
 			return err
 		}
 		if newBandWidth == 0 {
-			err = resourceCCENodeV3DeleteAssociateIP(d, config, serverId, floatingIp)
+			err = deleteCCENodeV3AssociatedIP(d, config, serverId, floatingIp.ID)
 		} else {
 			checkCCENodeV3PublicIpParams(d)
 			if oldBandwidth > 0 {
-				err = resourceCCENodeV3ResizeBandwidth(d, config, floatingIp.ID, newBandWidth)
+				err = resizeCCENodeV3IpBandwidth(d, config, floatingIp.ID, newBandWidth)
 			} else {
-				err = resourceCCENodeV3CreateAndAssociateFloatingIp(d, config, newBandWidth, serverId)
+				err = createAndAssociateCCENodeV3FloatingIp(d, config, newBandWidth, serverId)
 			}
 		}
-
 		if err != nil {
 			return err
 		}
@@ -666,14 +665,16 @@ func resourceCCENodeV3Update(d *schema.ResourceData, meta interface{}) error {
 		oldEipIds := oldEipIdsRaw.(*schema.Set).List()
 		newEipIds := newEipIdsRaw.(*schema.Set).List()
 		serverId := d.Get("server_id").(string)
-		floatingIp, err := getCCENodeV3FloatingIp(d, meta, serverId)
-		if err != nil {
-			return err
-		}
-		if len(newEipIds) == 0 && len(oldEipIds) > 0 {
-			if err := resourceCCENodeV3DeleteAssociateIP(d, config, serverId, floatingIp); err != nil {
+		if len(newEipIds) == 0 {
+			if err := deleteCCENodeV3AssociatedIP(d, config, serverId, oldEipIds[0].(string)); err != nil {
 				return err
 			}
+		} else if len(oldEipIds) > 0 {
+			err = reassignCCENodeV3Eip(d, meta, oldEipIds[0].(string), newEipIds[0].(string), serverId)
+		}
+
+		if err != nil {
+			return err
 		}
 	}
 
@@ -709,51 +710,56 @@ func resourceCCENodeV3Delete(d *schema.ResourceData, meta interface{}) error {
 	return nil
 }
 
-func resourceCCENodeV3DeleteAssociateIP(d *schema.ResourceData, meta interface{}, serverId string, floatingIp *floatingips.FloatingIP) error {
+func deleteCCENodeV3AssociatedIP(d *schema.ResourceData, meta interface{}, serverId string, floatingIpId string) error {
 	config := meta.(*Config)
-	computeClient, err := config.computeV2Client(GetRegion(d, config))
+	client, err := config.computeV2Client(GetRegion(d, config))
 	if err != nil {
 		return fmt.Errorf("error creating OpenTelekomCloud ComputeV2 client: %s", err)
 	}
 
-	disassociateOpts := floatingips.DisassociateOpts{
-		FloatingIP: floatingIp.IP,
+	eip, err := floatingips.Get(client, floatingIpId).Extract()
+	if err != nil {
+		return fmt.Errorf("error get eip by id: %s", err)
 	}
 
-	err = floatingips.DisassociateInstance(computeClient, serverId, disassociateOpts).ExtractErr()
-	if err != nil {
-		return fmt.Errorf("error during unassign floating IP from CCE Node")
+	disassociateOpts := floatingips.DisassociateOpts{
+		FloatingIP: eip.IP,
 	}
-	err = floatingips.Delete(computeClient, floatingIp.ID).ExtractErr()
+
+	err = floatingips.DisassociateInstance(client, serverId, disassociateOpts).ExtractErr()
 	if err != nil {
-		return fmt.Errorf("error during delete floatingip")
+		return fmt.Errorf("error unassign floating IP from CCE Node")
+	}
+	err = floatingips.Delete(client, floatingIpId).ExtractErr()
+	if err != nil {
+		return fmt.Errorf("error delete floatingip")
 	}
 	return nil
 }
 
-func resourceCCENodeV3ResizeBandwidth(d *schema.ResourceData, meta interface{}, eipId string, newSize int) error {
+func resizeCCENodeV3IpBandwidth(d *schema.ResourceData, meta interface{}, eipId string, newSize int) error {
 	config := meta.(*Config)
-	networkingClient, err := config.networkingV1Client(GetRegion(d, config))
+	nwClient, err := config.networkingV1Client(GetRegion(d, config))
 	if err != nil {
 		return fmt.Errorf("error creating OpenTelekomCloud NetworkingV1 client: %s", err)
 	}
-	elasticIp, err := eips.Get(networkingClient, eipId).Extract()
+	elasticIp, err := eips.Get(nwClient, eipId).Extract()
 	if err != nil {
 		return err
 	}
 
 	updateOpts := bandwidths.UpdateOpts{Size: newSize}
 
-	_, err = bandwidths.Update(networkingClient, elasticIp.BandwidthID, updateOpts).Extract()
+	_, err = bandwidths.Update(nwClient, elasticIp.BandwidthID, updateOpts).Extract()
 	if err != nil {
 		return fmt.Errorf("error updating bandwidth size: %s", err)
 	}
 	return nil
 }
 
-func resourceCCENodeV3CreateAndAssociateFloatingIp(d *schema.ResourceData, meta interface{}, size int, serverId string) error {
+func createAndAssociateCCENodeV3FloatingIp(d *schema.ResourceData, meta interface{}, size int, serverId string) error {
 	config := meta.(*Config)
-	networkingClient, err := config.networkingV1Client(GetRegion(d, config))
+	nwClient, err := config.networkingV1Client(GetRegion(d, config))
 	if err != nil {
 		return fmt.Errorf("error creating OpenTelekomCloud NetworkingV1 client: %s", err)
 	}
@@ -771,12 +777,12 @@ func resourceCCENodeV3CreateAndAssociateFloatingIp(d *schema.ResourceData, meta 
 		},
 	}
 
-	eip, err := eips.Apply(networkingClient, createEipOpts).Extract()
+	eip, err := eips.Apply(nwClient, createEipOpts).Extract()
 	if err != nil {
 		return fmt.Errorf("error updating bandwidth size: %s", err)
 	}
 
-	err = waitForEIPActive(networkingClient, eip.ID, time.Minute*10)
+	err = waitForEIPActive(nwClient, eip.ID, time.Minute*10)
 	if err != nil {
 		return fmt.Errorf("error waiting for EIP (%s) to become ready: %s", eip.ID, err)
 	}
@@ -792,6 +798,39 @@ func resourceCCENodeV3CreateAndAssociateFloatingIp(d *schema.ResourceData, meta 
 		return fmt.Errorf("error associating CCE Node to publicIp: %s", err)
 	}
 
+	return nil
+}
+
+func reassignCCENodeV3Eip(d *schema.ResourceData, meta interface{}, oldEipId string, newEipId string, serverId string) error {
+	config := meta.(*Config)
+	client, err := config.computeV2Client(GetRegion(d, config))
+	if err != nil {
+		return fmt.Errorf("error creating OpenTelekomCloud ComputeV2 client: %s", err)
+	}
+	oldEip, err := floatingips.Get(client, oldEipId).Extract()
+	if err != nil {
+		return fmt.Errorf("error get eip by id: %s", err)
+	}
+	newEip, err := floatingips.Get(client, newEipId).Extract()
+	if err != nil {
+		return fmt.Errorf("error get eip by id: %s", err)
+	}
+
+	disassociateOpts := floatingips.DisassociateOpts{
+		FloatingIP: oldEip.IP,
+	}
+	err = floatingips.DisassociateInstance(client, serverId, disassociateOpts).ExtractErr()
+	if err != nil {
+		return fmt.Errorf("error unassign floating IP from CCE Node")
+	}
+
+	associateOpts := floatingips.AssociateOpts{
+		FloatingIP: newEip.IP,
+	}
+	err = floatingips.AssociateInstance(client, serverId, associateOpts).ExtractErr()
+	if err != nil {
+		return fmt.Errorf("error assign floating IP to CCE Node")
+	}
 	return nil
 }
 
