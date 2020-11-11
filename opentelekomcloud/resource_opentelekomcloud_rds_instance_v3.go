@@ -705,11 +705,11 @@ func resourceRdsInstanceV3Read(d *schema.ResourceData, meta interface{}) error {
 
 	rdsInstance, err := getRdsInstance(client, d.Id())
 	if err != nil {
-		if _, ok := err.(golangsdk.ErrDefault404); ok {
-			d.SetId("")
-			return nil
-		}
-		return err
+		return fmt.Errorf("error fetching RDS instance: %s", err)
+	}
+	if rdsInstance == nil {
+		d.SetId("")
+		return nil
 	}
 
 	me := multierror.Append(nil,
@@ -736,8 +736,8 @@ func resourceRdsInstanceV3Read(d *schema.ResourceData, meta interface{}) error {
 		node["status"] = nodeObj.Status
 		nodesList = append(nodesList, node)
 	}
-	if err = d.Set("nodes", nodesList); err != nil {
-		return err
+	if err := d.Set("nodes", nodesList); err != nil {
+		return fmt.Errorf("error setting node list: %s", err)
 	}
 
 	var backupStrategyList []map[string]interface{}
@@ -745,8 +745,8 @@ func resourceRdsInstanceV3Read(d *schema.ResourceData, meta interface{}) error {
 	backupStrategy["start_time"] = rdsInstance.BackupStrategy.StartTime
 	backupStrategy["keep_days"] = rdsInstance.BackupStrategy.KeepDays
 	backupStrategyList = append(backupStrategyList, backupStrategy)
-	if err = d.Set("backup_strategy", backupStrategyList); err != nil {
-		return err
+	if err := d.Set("backup_strategy", backupStrategyList); err != nil {
+		return fmt.Errorf("error setting backup strategy: %s", err)
 	}
 
 	var volumeList []map[string]interface{}
@@ -759,14 +759,16 @@ func resourceRdsInstanceV3Read(d *schema.ResourceData, meta interface{}) error {
 		return err
 	}
 
-	var dbList []map[string]interface{}
 	dbRaw := d.Get("db").([]interface{})
-	dbInfo := dbRaw[0].(map[string]interface{})
+	dbInfo := make(map[string]interface{})
+	if len(dbRaw) != 0 {
+		dbInfo = dbRaw[0].(map[string]interface{})
+	}
 	dbInfo["type"] = rdsInstance.DataStore.Type
 	dbInfo["version"] = rdsInstance.DataStore.Version
 	dbInfo["port"] = rdsInstance.Port
 	dbInfo["user_name"] = rdsInstance.DbUserName
-	dbList = append(dbList, dbInfo)
+	dbList := []interface{}{dbInfo}
 	if err = d.Set("db", dbList); err != nil {
 		return err
 	}
