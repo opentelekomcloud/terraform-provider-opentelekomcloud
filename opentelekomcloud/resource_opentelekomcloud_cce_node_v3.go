@@ -200,6 +200,7 @@ func resourceCCENodeV3() *schema.Resource {
 				Type:          schema.TypeInt,
 				Optional:      true,
 				ConflictsWith: []string{"eip_ids"},
+				ValidateFunc:  validatePositiveInt,
 			},
 			"billing_mode": {
 				Type:     schema.TypeInt,
@@ -646,9 +647,9 @@ func resourceCCENodeV3Update(d *schema.ResourceData, meta interface{}) error {
 		}
 		if newBandWidth == 0 && oldBandwidth > 0 {
 			err = resourceCCENodeV3DeleteAssociateIP(d, config, serverId, floatingIp)
-		} else if newBandWidth > 0 && oldBandwidth > 0 {
+		} else if oldBandwidth > 0 {
 			err = resourceCCENodeV3ResizeBandwidth(d, config, floatingIp.ID, newBandWidth)
-		} else if newBandWidth > 0 && oldBandwidth == 0 {
+		} else if oldBandwidth == 0 {
 			checkCCENodeV3PublicIpParams(d)
 			err = resourceCCENodeV3CreateAndAssociateFloatingIp(d, config, newBandWidth, serverId)
 		}
