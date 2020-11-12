@@ -4,14 +4,16 @@
 ## 1.21.4 (November 12, 2020)
 
 BUG FIXES:
-* `resource/opentelekomcloud_s3_bucket`: Fix panic creating `s3_bucket` without `tenant_name` in provider config ([#698](https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/698))
 * `resource/opentelekomcloud_compute_instance_v2`: Revert changes from [#686](https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/686) ([#701](https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/701))
-* `resource/opentelekomcloud_rds_instance_v3`: Fix reading nonexistent RDS instance ([#704](https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/704))
 * `opentelekomcloud_provider`: Fix region handling ([#697](https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/697))
+* `resource/opentelekomcloud_s3_bucket`: Fix panic creating `s3_bucket` without `tenant_name` in provider config ([#698](https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/698))
+* `resource/opentelekomcloud_rds_instance_v3`: Fix RDSv3 instance import ([#704](https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/704))
 
 ENHANCEMENTS:
-* `resource/opentelekomcloud_cce_cluster_v3`: Add new fields `kubernetes_svc_ip_range` and `kube_proxy_mode` ([#699](https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/699))
+* `resource/opentelekomcloud_lb_listener_v2`: Add new field `type` and make `private_key` as Optional ([#688](https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/688))
 * `resource/opentelekomcloud_lb_certificate_v2`: Add new fields `http2_enable`, `client_ca_tls_container_ref` and `tls_ciphers_policy` ([#688](https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/688))
+* `opentelekomcloud_provider`: Fix retries for 409 and 503 error codes ([#688](https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/688))
+* `resource/opentelekomcloud_cce_cluster_v3`: Add new fields `kubernetes_svc_ip_range` and `kube_proxy_mode` ([#699](https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/699))
 
 
 ## 1.21.3 (November 6, 2020)
