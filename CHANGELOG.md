@@ -5,10 +5,10 @@
 
 BUG FIXES:
 * `resource/opentelekomcloud_compute_instance_v2`: Revert changes from [#686](https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/686) ([#701](https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/701))
+* `opentelekomcloud_provider`: Fix retries for 409 and 503 error codes ([#688](https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/688))
 * `opentelekomcloud_provider`: Fix region handling ([#697](https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/697))
 * `resource/opentelekomcloud_s3_bucket`: Fix panic creating `s3_bucket` without `tenant_name` in provider config ([#698](https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/698))
 * `resource/opentelekomcloud_rds_instance_v3`: Fix RDSv3 instance import ([#704](https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/704))
-* `opentelekomcloud_provider`: Fix retries for 409 and 503 error codes ([#688](https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/688))
 
 ENHANCEMENTS:
 * `resource/opentelekomcloud_lb_listener_v2`: Add new field `type` and make `private_key` as Optional ([#688](https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/688))
