@@ -179,7 +179,8 @@ The following arguments are supported:
   A token is an expiring, temporary means of access issued via the Keystone
   service. By specifying a token, you do not have to specify a username/password
   combination, since the token was already created by a username/password out of
-  band of Terraform. If omitted, the `OS_AUTH_TOKEN` environment variable is used.
+  band of Terraform. If omitted, the `OS_AUTH_TOKEN` or `OS_TOKEN` environment
+  variable is used.
 
 * `security_token` - (Optional) Security token to use for OBS federated authentication.
 
