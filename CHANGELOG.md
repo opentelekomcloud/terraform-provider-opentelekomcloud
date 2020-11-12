@@ -1,5 +1,19 @@
 ## 1.22.0 (Unreleased)
 
+
+## 1.21.4 (November 12, 2020)
+
+BUG FIXES:
+* `resource/opentelekomcloud_s3_bucket`: Fix panic creating `s3_bucket` without `tenant_name` in provider config ([#698](https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/698))
+* `resource/opentelekomcloud_compute_instance_v2`: Revert changes from [#686](https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/686) ([#701](https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/701))
+* `resource/opentelekomcloud_rds_instance_v3`: Fix reading nonexistent RDS instance ([#704](https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/704))
+* `opentelekomcloud_provider`: Fix region handling ([#697](https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/697))
+
+ENHANCEMENTS:
+* `resource/opentelekomcloud_cce_cluster_v3`: Add new fields `kubernetes_svc_ip_range` and `kube_proxy_mode` ([#699](https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/699))
+* `resource/opentelekomcloud_lb_certificate_v2`: Add new fields `http2_enable`, `client_ca_tls_container_ref` and `tls_ciphers_policy` ([#688](https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/688))
+
+
 ## 1.21.3 (November 6, 2020)
 
 BUG FIXES:
@@ -7,9 +21,9 @@ BUG FIXES:
 * `resource/opentelekomcloud_s3_bucket_policy`: Fix not working policy example in documentation ([#692](https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/692))
 
 ENHANCEMENTS:
-* `resource_opentelekomcloud_cce_node_v3`: Make `iptype`, `bandwidth_charge_mode`, `sharetype` settable ([#681](https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/681)) 
+* `resource/opentelekomcloud_cce_node_v3`: Make `iptype`, `bandwidth_charge_mode`, `sharetype` settable ([#681](https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/681))
 * `resource/opentelekomcloud_cce_node_v3`: Fix not existing flavor in documentation ([#684](https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/684))
-* `resource/opentelekomcloud_ecs_instance_v1`: Fix not existing flavor in documentation ([#689](https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/689)) 
+* `resource/opentelekomcloud_ecs_instance_v1`: Fix not existing flavor in documentation ([#689](https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/689))
 
 ## 1.21.2 (October 29, 2020)
 
