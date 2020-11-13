@@ -18,13 +18,13 @@ resource "opentelekomcloud_waf_certificate_v1" "certificate_1" {
 resource "opentelekomcloud_waf_domain_v1" "domain_1" {
   hostname = "www.b.com"
   server {
-    front_protocol = "HTTPS"
-    back_protocol  = "HTTP"
+    client_protocol = "HTTPS"
+    server_protocol  = "HTTP"
     address        = "80.158.42.162"
     port           = "8080"
   }
-  certificate_id  = "${opentelekomcloud_waf_certificate_v1.certificate_1.id}"
-  proxy           = "true"
+  certificate_id  = opentelekomcloud_waf_certificate_v1.certificate_1.id
+  proxy           = true
   sip_header_name = "default"
   sip_header_list = ["X-Forwarded-For"]
 }
@@ -54,9 +54,16 @@ The following arguments are supported:
 
 The `server` block supports:
 
-* `front_protocol` - (Required) Protocol type of the client. The options are HTTP and HTTPS.
 
-* `back_protocol` - (Required) Protocol used by WAF to forward client requests to the server. The options are HTTP and HTTPS.
+* `client_protocol` - (Optional) Protocol type of the client. The options are HTTP and HTTPS.
+  Required if `front_protocol` is not set
+
+* `front_protocol` **DEPRECATED** - (Optional)  Same as `client_protocol`. Required if `client_protocol` is not set
+
+* `server_protocol` - (Optional) Protocol used by WAF to forward client requests to the server.
+  The options are HTTP and HTTPS. Required if `back_protocol_` is not set.
+
+* `back_protocol` **DEPRECATED** - (Optional) Same as `server_protocol`. Required if `server_protocol` is not set
 
 * `address` - (Required) IP address or domain name of the web server that the client accesses. For example, 192.168.1.1 or www.a.com.
 
