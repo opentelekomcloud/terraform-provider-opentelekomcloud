@@ -56,3 +56,16 @@ func flattenRdsInstanceV3HAReplicationMode(d interface{}, arrayIndex map[string]
 	}
 	return "", nil
 }
+
+// firstOneSet select first nonempty string or returns error if both are empty
+func firstOneSet(res map[string]interface{}, k1, k2 string) (interface{}, error) {
+	v1 := res[k1]
+	v2 := res[k2]
+	if v1 == "" && v2 == "" {
+		return nil, fmt.Errorf("none of %s and %s are set", k1, k2)
+	}
+	if v1 != "" {
+		return v1, nil
+	}
+	return v2, nil
+}

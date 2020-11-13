@@ -47,7 +47,7 @@ func fileList(name string) []string {
 	suffixes = append(suffixes, yamlSuffixes...)
 	suffixes = append(suffixes, jsonSuffixes...)
 	size := len(suffixes) * len(paths)
-	files := make([]string, size, size)
+	files := make([]string, size)
 	i := 0
 	for _, path := range paths {
 		for _, suffix := range suffixes {
@@ -110,6 +110,11 @@ func (e *env) cloudFromEnv() *Cloud {
 	if secret == "" {
 		secret = e.GetEnv("SECRET_KEY", "ACCESS_KEY_SECRET", "SK")
 	}
+	region := e.GetEnv("REGION_NAME", "REGION_ID")
+	if region == "" {
+		region = utils.GetRegion(authOpts)
+	}
+
 	cloud := &Cloud{
 		Cloud:   e.GetEnv("CLOUD"),
 		Profile: e.GetEnv("PROFILE"),
@@ -135,7 +140,7 @@ func (e *env) cloudFromEnv() *Cloud {
 			DelegatedProject:  authOpts.DelegatedProject,
 		},
 		AuthType:           AuthType(e.GetEnv("AUTH_TYPE")),
-		RegionName:         e.GetEnv("REGION_NAME", "REGION_ID"),
+		RegionName:         region,
 		EndpointType:       e.GetEnv("ENDPOINT_TYPE"),
 		Interface:          e.GetEnv("INTERFACE"),
 		IdentityAPIVersion: e.GetEnv("IDENTITY_API_VERSION"),
@@ -470,11 +475,13 @@ func (e *env) loadOpenstackConfig() (*Config, error) {
 	if c := e.GetEnv("CLIENT_CONFIG_FILE"); c != "" {
 		configs = utils.PrependString(c, configs)
 	}
-	configPath := selectExisting(configFiles)
+	configPath := selectExisting(configs)
+
 	if s := e.GetEnv("CLIENT_SECURE_FILE"); s != "" {
 		secure = utils.PrependString(s, secure)
 	}
-	securePath := selectExisting(secureFiles)
+	securePath := selectExisting(secure)
+
 	if v := e.GetEnv("CLIENT_VENDOR_FILE"); v != "" {
 		vendors = utils.PrependString(v, vendors)
 	}

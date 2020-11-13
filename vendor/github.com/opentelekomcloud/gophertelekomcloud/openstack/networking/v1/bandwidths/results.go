@@ -4,13 +4,13 @@ import (
 	"github.com/opentelekomcloud/gophertelekomcloud"
 )
 
-//BandWidth is a struct that represents a bandwidth
+// BandWidth is a struct that represents a bandwidth
 type BandWidth struct {
 	ID        string `json:"id"`
 	Name      string `json:"name"`
 	Size      int    `json:"size"`
 	ShareType string `json:"share_type"`
-	//PublicIPInfo  string `json:"publicip_info"`
+	// PublicIPInfo  string `json:"publicip_info"`
 	TenantID      string `json:"tenant_id"`
 	BandwidthType string `json:"bandwidth_type"`
 	ChargeMode    string `json:"charge_mode"`
@@ -45,7 +45,7 @@ type PublicIpinfo struct {
 	PublicipType string `json:"publicip_type"`
 }
 
-//GetResult is a return struct of get method
+// GetResult is a return struct of get method
 type GetResult struct {
 	golangsdk.Result
 }
@@ -58,7 +58,7 @@ func (r GetResult) Extract() (BandWidth, error) {
 	return BW.BW, err
 }
 
-//UpdateResult is a struct which contains the result of update method
+// UpdateResult is a struct which contains the result of update method
 type UpdateResult struct {
 	golangsdk.Result
 }

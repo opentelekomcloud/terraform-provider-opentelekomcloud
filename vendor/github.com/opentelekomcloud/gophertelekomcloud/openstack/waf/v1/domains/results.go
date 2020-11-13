@@ -5,46 +5,46 @@ import (
 )
 
 type Domain struct {
-	//Domain ID
+	// Domain ID
 	Id string `json:"id"`
-	//Domain name
+	// Domain name
 	HostName string `json:"hostname"`
-	//Access Code
+	// Access Code
 	AccessCode string `json:"access_code"`
-	//CNAME value
+	// CNAME value
 	Cname string `json:"cname"`
-	//TXT record
+	// TXT record
 	TxtCode string `json:"txt_code"`
-	//Sub Domain name
+	// Sub Domain name
 	SubDomain string `json:"sub_domain"`
-	//Policy ID
+	// Policy ID
 	PolicyID string `json:"policy_id"`
-	//WAF mode
+	// WAF mode
 	ProtectStatus int `json:"protect_status"`
-	//Whether a domain name is connected to WAF
+	// Whether a domain name is connected to WAF
 	AccessStatus int `json:"access_status"`
-	//Protocol type
+	// Protocol type
 	Protocol string `json:"protocol"`
-	//Certificate ID
-	CertificateId string `json:"certificateid"`
-	//The original server information
+	// Certificate ID
+	CertificateId string `json:"certificate_id"`
+	// The original server information
 	Server []Server `json:"server"`
-	//Whether proxy is configured
+	// Whether proxy is configured
 	Proxy bool `json:"proxy"`
-	//The type of the source IP header
+	// The type of the source IP header
 	SipHeaderName string `json:"sip_header_name"`
-	//The HTTP request header for identifying the real source IP.
+	// The HTTP request header for identifying the real source IP.
 	SipHeaderList []string `json:"sip_header_list"`
 }
 
 type Server struct {
-	//Protocol type of the client
+	// Protocol type of the client
 	ClientProtocol string `json:"client_protocol" required:"true"`
-	//Protocol used by WAF to forward client requests to the server
+	// Protocol used by WAF to forward client requests to the server
 	ServerProtocol string `json:"server_protocol" required:"true"`
-	//IP address or domain name of the web server that the client accesses.
+	// IP address or domain name of the web server that the client accesses.
 	Address string `json:"address" required:"true"`
-	//Port number used by the web server
+	// Port number used by the web server
 	Port int `json:"port" required:"true"`
 }
 
