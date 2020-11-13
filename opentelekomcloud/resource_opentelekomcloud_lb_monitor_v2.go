@@ -171,7 +171,6 @@ func resourceMonitorV2Read(d *schema.ResourceData, meta interface{}) error {
 	log.Printf("[DEBUG] Retrieved monitor %s: %#v", d.Id(), monitor)
 
 	mErr := multierror.Append(nil,
-		d.Set("id", monitor.ID),
 		d.Set("tenant_id", monitor.TenantID),
 		d.Set("type", monitor.Type),
 		d.Set("delay", monitor.Delay),
