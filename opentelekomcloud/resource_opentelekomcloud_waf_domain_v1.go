@@ -161,11 +161,15 @@ func getAllServers(d *schema.ResourceData) ([]domains.ServerOpts, error) {
 		if err != nil {
 			return nil, err
 		}
+		port, err := strconv.Atoi(server["port"].(string))
+		if err != nil {
+			return nil, fmt.Errorf("invalid WAF domain server port: %s", err)
+		}
 		v := domains.ServerOpts{
 			ClientProtocol: cProtocol.(string),
 			ServerProtocol: sProtocol.(string),
 			Address:        server["address"].(string),
-			Port:           server["port"].(string),
+			Port:           port,
 		}
 		serverOpts = append(serverOpts, v)
 	}

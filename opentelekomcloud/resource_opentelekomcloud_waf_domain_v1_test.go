@@ -27,9 +27,9 @@ func TestAccWafDomainV1_basic(t *testing.T) {
 					resource.TestCheckResourceAttr(
 						"opentelekomcloud_waf_domain_v1.domain_1", "sip_header_name", "default"),
 					resource.TestCheckResourceAttr(
-						"opentelekomcloud_waf_domain_v1.domain_1", "server_protocol", "HTTPS"),
+						"opentelekomcloud_waf_domain_v1.domain_1", "server.0.server_protocol", "HTTP"),
 					resource.TestCheckResourceAttr(
-						"opentelekomcloud_waf_domain_v1.domain_1", "client_protocol", "HTTP"),
+						"opentelekomcloud_waf_domain_v1.domain_1", "server.0.client_protocol", "HTTPS"),
 				),
 			},
 			{
@@ -156,8 +156,8 @@ resource "opentelekomcloud_waf_policy_v1" "policy_1" {
 resource "opentelekomcloud_waf_domain_v1" "domain_1" {
 	hostname = "www.b.com"
 	server {
-		server_protocol = "HTTPS"
-		client_protocol = "HTTP"
+		client_protocol = "HTTPS"
+		server_protocol = "HTTP"
 		address = opentelekomcloud_networking_floatingip_v2.fip_1.address
 		port = 80
 	}
