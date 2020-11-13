@@ -19,9 +19,9 @@ resource "opentelekomcloud_waf_domain_v1" "domain_1" {
   hostname = "www.b.com"
   server {
     client_protocol = "HTTPS"
-    server_protocol  = "HTTP"
-    address        = "80.158.42.162"
-    port           = "8080"
+    server_protocol = "HTTP"
+    address         = "80.158.42.162"
+    port            = "8080"
   }
   certificate_id  = opentelekomcloud_waf_certificate_v1.certificate_1.id
   proxy           = true
