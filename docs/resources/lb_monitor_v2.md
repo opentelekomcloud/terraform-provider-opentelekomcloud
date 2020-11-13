@@ -10,7 +10,7 @@ Manages an Enhanced LB monitor resource within OpenTelekomCloud.
 
 ```hcl
 resource "opentelekomcloud_lb_monitor_v2" "monitor_1" {
-  pool_id     = "${opentelekomcloud_lb_pool_v2.pool_1.id}"
+  pool_id     = opentelekomcloud_lb_pool_v2.pool_1.id
   type        = "HTTP"
   delay       = 20
   timeout     = 10
@@ -28,10 +28,10 @@ The following arguments are supported:
 * `name` - (Optional) The Name of the Monitor.
 
 * `tenant_id` - (Optional) Required for admins. The UUID of the tenant who owns
-  the monitor.  Only administrative users can specify a tenant UUID
+  the monitor. Only administrative users can specify a tenant UUID
   other than their own. Changing this creates a new monitor.
 
-* `type` - (Required) The type of probe, which is TCP, UDP_CONNECT, or HTTP,
+* `type` - (Required) The type of probe, which is `TCP`, `UDP_CONNECT`, or `HTTP`,
   that is sent by the load balancer to verify the member state. Changing this
   creates a new monitor.
 
@@ -43,19 +43,27 @@ The following arguments are supported:
 * `max_retries` - (Required) Number of permissible ping failures before
   changing the member's status to INACTIVE. Must be a number between 1 and 10.
 
-* `url_path` - (Optional) Required for HTTP types. URI path that will be
-  accessed if monitor type is HTTP.
+* `admin_state_up` - (Optional) The administrative state of the monitor.
+  A valid value is true (UP) or false (DOWN).
 
 * `http_method` - (Optional) Required for HTTP types. The HTTP method used
   for requests by the monitor. If this attribute is not specified, it
-  defaults to "GET".
+  defaults to `GET`. The value can be `GET`, `HEAD`, `POST`, `PUT`, `DELETE`,
+  `TRACE`, `OPTIONS`, `CONNECT`, and `PATCH`.
+
+-> **Note:** These parameters `url_path`, `expected_codes` and `monitor_port`
+  are valid when the value of `type` is set to `HTTP`
+
+* `url_path` - (Optional) Required for HTTP types. URI path that will be
+  accessed if monitor type is `HTTP`.
 
 * `expected_codes` - (Optional) Required for HTTP types. Expected HTTP codes
   for a passing HTTP monitor. You can either specify a single status like
   "200", or a list like "200,202".
 
-* `admin_state_up` - (Optional) The administrative state of the monitor.
-  A valid value is true (UP) or false (DOWN).
+* `monitor_port` - (Optional) Specifies the health check port. The port number
+  ranges from 1 to 65535. The value is left blank by default, indicating that
+  the port of the backend server is used as the health check port.
 
 
 ## Attributes Reference
@@ -81,3 +89,5 @@ The following attributes are exported:
 * `expected_codes` - See Argument Reference above.
 
 * `admin_state_up` - See Argument Reference above.
+
+* `monitor_port` - See Argument Reference above.
