@@ -254,6 +254,7 @@ github.com/opentelekomcloud/gophertelekomcloud/openstack/bms/v2/keypairs
 github.com/opentelekomcloud/gophertelekomcloud/openstack/bms/v2/nics
 github.com/opentelekomcloud/gophertelekomcloud/openstack/bms/v2/servers
 github.com/opentelekomcloud/gophertelekomcloud/openstack/bms/v2/tags
+github.com/opentelekomcloud/gophertelekomcloud/openstack/cce/v3/addons
 github.com/opentelekomcloud/gophertelekomcloud/openstack/cce/v3/clusters
 github.com/opentelekomcloud/gophertelekomcloud/openstack/cce/v3/nodes
 github.com/opentelekomcloud/gophertelekomcloud/openstack/cloudeyeservice/alarmrule

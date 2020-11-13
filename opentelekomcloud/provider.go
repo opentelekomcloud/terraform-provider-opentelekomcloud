@@ -351,6 +351,7 @@ func Provider() terraform.ResourceProvider {
 			"opentelekomcloud_antiddos_v1":                        resourceAntiDdosV1(),
 			"opentelekomcloud_cts_tracker_v1":                     resourceCTSTrackerV1(),
 			"opentelekomcloud_cce_node_v3":                        resourceCCENodeV3(),
+			"opentelekomcloud_cce_addon_v3":                       resourceCCEAddonV3(),
 			"opentelekomcloud_cce_cluster_v3":                     resourceCCEClusterV3(),
 			"opentelekomcloud_css_cluster_v1":                     resourceCssClusterV1(),
 			"opentelekomcloud_rds_instance_v3":                    resourceRdsInstanceV3(),
