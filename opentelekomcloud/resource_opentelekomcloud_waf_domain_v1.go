@@ -135,18 +135,6 @@ func resourceWafDomainV1() *schema.Resource {
 	}
 }
 
-func firstOneSet(res map[string]interface{}, k1, k2 string) (interface{}, error) {
-	v1 := res[k1]
-	v2 := res[k2]
-	if v1 == "" && v2 == "" {
-		return nil, fmt.Errorf("none of %s and %s are set", k1, k2)
-	}
-	if v1 != "" {
-		return v1, nil
-	}
-	return v2, nil
-}
-
 func getAllServers(d *schema.ResourceData) ([]domains.ServerOpts, error) {
 	var serverOpts []domains.ServerOpts
 
