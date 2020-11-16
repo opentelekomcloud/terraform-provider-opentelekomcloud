@@ -27,10 +27,10 @@ type CreateOpts struct {
 }
 
 type CreateMetadata struct {
-	Annotations Annotations `json:"annotations" required:"true"`
+	Annotations CreateAnnotations `json:"annotations" required:"true"`
 }
 
-type Annotations struct {
+type CreateAnnotations struct {
 	AddonInstallType string `json:"addon.install/type" required:"true"`
 }
 
@@ -72,8 +72,52 @@ func Create(c *golangsdk.ServiceClient, opts CreateOptsBuilder, clusterId string
 // Get retrieves a particular addon based on its unique ID.
 func Get(c *golangsdk.ServiceClient, id, clusterId string) (r GetResult) {
 	_, r.Err = c.Get(resourceURL(c, id, clusterId), &r.Body, &golangsdk.RequestOpts{
-		OkCodes:     []int{200},
-		MoreHeaders: RequestOpts.MoreHeaders, JSONBody: nil,
+		OkCodes: []int{200},
+	})
+	return
+}
+
+// CreateOptsBuilder allows extensions to add additional parameters to the
+// Create request.
+type UpdateOptsBuilder interface {
+	ToAddonUpdateMap() (map[string]interface{}, error)
+}
+
+type UpdateMetadata struct {
+	// Add-on annotations in the format of key-value pairs.
+	// For add-on upgrade, the value is fixed at {"addon.upgrade/type":"upgrade"}.
+	Annotations UpdateAnnotations `json:"annotations" required:"true"`
+	// Add-on labels in the format of key-value pairs.
+	Labels map[string]string `json:"metadata,omitempty"`
+}
+
+type UpdateAnnotations struct {
+	AddonUpdateType string `json:"addon.update/type" required:"true"`
+}
+
+type UpdateOpts struct {
+	// API type, fixed value Addon
+	Kind string `json:"kind" required:"true"`
+	// API version, fixed value v3
+	ApiVersion string `json:"apiVersion" required:"true"`
+	// Metadata required to create an addon
+	Metadata UpdateMetadata `json:"metadata" required:"true"`
+	// specifications to create an addon
+	Spec RequestSpec `json:"spec" required:"true"`
+}
+
+func (opts UpdateOpts) ToAddonUpdateMap() (map[string]interface{}, error) {
+	return golangsdk.BuildRequestBody(opts, "")
+}
+
+func Update(c *golangsdk.ServiceClient, id, clusterId string, opts UpdateOpts) (r UpdateResult) {
+	b, err := opts.ToAddonUpdateMap()
+	if err != nil {
+		r.Err = err
+		return
+	}
+	_, r.Err = c.Put(resourceURL(c, id, clusterId), b, &r.Body, &golangsdk.RequestOpts{
+		OkCodes: []int{200},
 	})
 	return
 }

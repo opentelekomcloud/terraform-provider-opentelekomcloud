@@ -12,10 +12,8 @@ func resourceCCEAddonV3() *schema.Resource {
 	return &schema.Resource{
 		Create: resourceCCEAddonV3Create,
 		Read:   resourceCCEAddonV3Read,
+		Update: resourceCCEAddonV3Update,
 		Delete: resourceCCEAddonV3Delete,
-		Importer: &schema.ResourceImporter{
-			State: schema.ImportStatePassthrough,
-		},
 
 		Schema: map[string]*schema.Schema{
 			"template_version": {
@@ -96,7 +94,7 @@ func resourceCCEAddonV3Create(d *schema.ResourceData, meta interface{}) error {
 		Kind:       "Addon",
 		ApiVersion: "v3",
 		Metadata: addons.CreateMetadata{
-			Annotations: addons.Annotations{
+			Annotations: addons.CreateAnnotations{
 				AddonInstallType: "install",
 			},
 		},
@@ -142,6 +140,44 @@ func resourceCCEAddonV3Read(d *schema.ResourceData, meta interface{}) error {
 
 	return mErr.ErrorOrNil()
 }
+func resourceCCEAddonV3Update(d *schema.ResourceData, meta interface{}) error {
+	config := meta.(*Config)
+	client, err := config.cceV3Client(GetRegion(d, config))
+	if err != nil {
+		return fmt.Errorf("error creating CCE client: %s", err)
+	}
+	clusterID := d.Get("cluster_id").(string)
+	basic, custom, err := getValuesValues(d)
+	if err != nil {
+		return fmt.Errorf("error getting values for CCE addon: %s", err)
+	}
+
+	_, err = addons.Update(client, d.Id(), clusterID, addons.UpdateOpts{
+		Kind:       "Addon",
+		ApiVersion: "v3",
+		Metadata: addons.UpdateMetadata{
+			Annotations: addons.UpdateAnnotations{
+				AddonUpdateType: "upgrade",
+			},
+		},
+		Spec: addons.RequestSpec{
+			Version:           d.Get("template_version").(string),
+			ClusterID:         clusterID,
+			AddonTemplateName: d.Get("template_name").(string),
+			Values: addons.Values{
+				Basic:    basic,
+				Advanced: custom,
+			},
+		},
+	}).Extract()
+
+	if err != nil {
+		return fmt.Errorf("error updating CCE addon instance: %s", err)
+	}
+
+	return resourceCCEAddonV3Read(d, meta)
+}
+
 func resourceCCEAddonV3Delete(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*Config)
 	client, err := config.cceV3Client(GetRegion(d, config))

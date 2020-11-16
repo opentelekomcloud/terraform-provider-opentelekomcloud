@@ -83,7 +83,7 @@ type GetResult struct {
 
 // UpdateResult represents the result of an update operation. Call its Extract
 // method to interpret it as an Addon.
-type UpdataResult struct {
+type UpdateResult struct {
 	commonResult
 }
 
