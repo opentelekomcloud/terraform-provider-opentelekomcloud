@@ -58,7 +58,7 @@ The following arguments are supported:
 
 * `key_pair` - (Required) Key pair name when logging in to select the key pair mode. Changing this parameter will create a new resource.
 
-* `eip_ids` - (Optional) List of existing elastic IP IDs. Changing this parameter will create a new resource.
+* `eip_ids` - (Optional) List of existing elastic IP IDs.
 
 -> **Note:** If the `eip_ids` parameter is configured, you do not need to configure the `eip_count` and `bandwidth` parameters:
 `iptype`, `bandwidth_charge_mode`, `bandwidth_size` and `share_type`.
