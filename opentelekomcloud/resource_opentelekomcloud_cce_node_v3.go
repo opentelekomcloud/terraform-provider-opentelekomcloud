@@ -606,12 +606,17 @@ func resourceCCENodeV3Update(d *schema.ResourceData, meta interface{}) error {
 		newBandWidth := newBandWidthSize.(int)
 		oldBandwidth := oldBandwidthSize.(int)
 		serverId := d.Get("server_id").(string)
-		floatingIp, err := getCCENodeV3FloatingIp(d, meta, serverId)
+		config := meta.(*Config)
+		client, err := config.computeV2Client(GetRegion(d, config))
+		if err != nil {
+			return fmt.Errorf("error creating OpenTelekomCloud ComputeV2 client: %s", err)
+		}
+		floatingIp, err := getCCENodeV3FloatingIp(client, serverId)
 		if err != nil {
 			return err
 		}
 		if newBandWidth == 0 {
-			err = unbindCCENodeV3FloatingIP(d, config, serverId, floatingIp.ID)
+			err = deleteCCENodeV3FloatingIP(client, serverId, floatingIp.ID)
 		} else {
 			checkCCENodeV3PublicIpParams(d)
 			if oldBandwidth > 0 {
@@ -630,12 +635,16 @@ func resourceCCENodeV3Update(d *schema.ResourceData, meta interface{}) error {
 		oldEipIds := oldEipIdsRaw.(*schema.Set).List()
 		newEipIds := newEipIdsRaw.(*schema.Set).List()
 		serverId := d.Get("server_id").(string)
+		computeV2Client, err := config.computeV2Client(GetRegion(d, config))
+		if err != nil {
+			return fmt.Errorf("error creating OpenTelekomCloud ComputeV2 client: %s", err)
+		}
 		if len(newEipIds) == 0 {
-			if err := unbindCCENodeV3FloatingIP(d, config, serverId, oldEipIds[0].(string)); err != nil {
+			if err := unbindCCENodeV3FloatingIP(computeV2Client, serverId, oldEipIds[0].(string)); err != nil {
 				return err
 			}
 		} else if len(oldEipIds) > 0 {
-			err = reassignCCENodeV3Eip(d, meta, oldEipIds[0].(string), newEipIds[0].(string), serverId)
+			err = reassignCCENodeV3Eip(computeV2Client, oldEipIds[0].(string), newEipIds[0].(string), serverId)
 		}
 
 		if err != nil {
@@ -675,13 +684,19 @@ func resourceCCENodeV3Delete(d *schema.ResourceData, meta interface{}) error {
 	return nil
 }
 
-func unbindCCENodeV3FloatingIP(d *schema.ResourceData, meta interface{}, serverId string, floatingIpId string) error {
-	config := meta.(*Config)
-	client, err := config.computeV2Client(GetRegion(d, config))
+func deleteCCENodeV3FloatingIP(client *golangsdk.ServiceClient, serverId string, floatingIpId string) error {
+	err := unbindCCENodeV3FloatingIP(client, serverId, floatingIpId)
 	if err != nil {
-		return fmt.Errorf("error creating OpenTelekomCloud ComputeV2 client: %s", err)
+		return fmt.Errorf("error unbind floatingip from the node: %s", err)
 	}
+	err = floatingips.Delete(client, floatingIpId).ExtractErr()
+	if err != nil {
+		return fmt.Errorf("error delete floatingip: %s", err)
+	}
+	return nil
+}
 
+func unbindCCENodeV3FloatingIP(client *golangsdk.ServiceClient, serverId string, floatingIpId string) error {
 	eip, err := floatingips.Get(client, floatingIpId).Extract()
 	if err != nil {
 		return fmt.Errorf("error get eip by id: %s", err)
@@ -762,12 +777,7 @@ func createAndAssociateCCENodeV3FloatingIp(d *schema.ResourceData, meta interfac
 	return nil
 }
 
-func reassignCCENodeV3Eip(d *schema.ResourceData, meta interface{}, oldEipId string, newEipId string, serverId string) error {
-	config := meta.(*Config)
-	client, err := config.computeV2Client(GetRegion(d, config))
-	if err != nil {
-		return fmt.Errorf("error creating OpenTelekomCloud ComputeV2 client: %s", err)
-	}
+func reassignCCENodeV3Eip(client *golangsdk.ServiceClient, oldEipId string, newEipId string, serverId string) error {
 	oldEip, err := floatingips.Get(client, oldEipId).Extract()
 	if err != nil {
 		return fmt.Errorf("error get eip by id: %s", err)
@@ -795,13 +805,8 @@ func reassignCCENodeV3Eip(d *schema.ResourceData, meta interface{}, oldEipId str
 	return nil
 }
 
-func getCCENodeV3FloatingIp(d *schema.ResourceData, meta interface{}, serverId string) (*floatingips.FloatingIP, error) {
-	config := meta.(*Config)
-	computeClient, err := config.computeV2Client(GetRegion(d, config))
-	if err != nil {
-		return nil, fmt.Errorf("error creating OpenTelekomCloud ComputeV2 client: %s", err)
-	}
-	fipPages, err := floatingips.List(computeClient).AllPages()
+func getCCENodeV3FloatingIp(client *golangsdk.ServiceClient, serverId string) (*floatingips.FloatingIP, error) {
+	fipPages, err := floatingips.List(client).AllPages()
 	if err != nil {
 		return nil, err
 	}
