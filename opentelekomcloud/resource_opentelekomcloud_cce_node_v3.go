@@ -6,60 +6,19 @@ import (
 	"encoding/hex"
 	"fmt"
 	"log"
-	"regexp"
 	"time"
 
 	"github.com/hashicorp/go-multierror"
-
 	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
 	"github.com/opentelekomcloud/gophertelekomcloud"
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/cce/v3/clusters"
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/cce/v3/nodes"
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/common/tags"
+	"github.com/opentelekomcloud/gophertelekomcloud/openstack/compute/v2/extensions/floatingips"
+	"github.com/opentelekomcloud/gophertelekomcloud/openstack/networking/v1/bandwidths"
+	"github.com/opentelekomcloud/gophertelekomcloud/openstack/networking/v1/eips"
 )
-
-func validateK8sTagsMap(v interface{}, k string) (ws []string, errors []error) {
-	values := v.(map[string]interface{})
-	pattern := regexp.MustCompile(`^[\.\-_A-Za-z0-9]+$`)
-
-	for key, value := range values {
-		valueString := value.(string)
-		if len(key) < 1 {
-			errors = append(errors, fmt.Errorf(
-				"key %q cannot be shorter than 1 characters: %q", k, key))
-		}
-
-		if len(valueString) < 1 {
-			errors = append(errors, fmt.Errorf(
-				"value %q cannot be shorter than 1 characters: %q", k, value))
-		}
-
-		if len(key) > 63 {
-			errors = append(errors, fmt.Errorf(
-				"key %q cannot be longer than 63 characters: %q", k, key))
-		}
-
-		if len(valueString) > 63 {
-			errors = append(errors, fmt.Errorf(
-				"value %q cannot be longer than 63 characters: %q", k, value))
-		}
-
-		if !pattern.MatchString(key) {
-			errors = append(errors, fmt.Errorf(
-				"key %q doesn't comply with restrictions (%q): %q",
-				k, pattern, key))
-		}
-
-		if !pattern.MatchString(valueString) {
-			errors = append(errors, fmt.Errorf(
-				"value %q doesn't comply with restrictions (%q): %q",
-				k, pattern, valueString))
-		}
-	}
-
-	return
-}
 
 func resourceCCENodeV3() *schema.Resource {
 	return &schema.Resource{
@@ -67,13 +26,14 @@ func resourceCCENodeV3() *schema.Resource {
 		Read:   resourceCCENodeV3Read,
 		Update: resourceCCENodeV3Update,
 		Delete: resourceCCENodeV3Delete,
+
 		Importer: &schema.ResourceImporter{
 			State: schema.ImportStatePassthrough,
 		},
 
 		Timeouts: &schema.ResourceTimeout{
 			Create: schema.DefaultTimeout(10 * time.Minute),
-			Delete: schema.DefaultTimeout(5 * time.Minute),
+			Delete: schema.DefaultTimeout(10 * time.Minute),
 		},
 
 		Schema: map[string]*schema.Schema{
@@ -171,7 +131,6 @@ func resourceCCENodeV3() *schema.Resource {
 			"eip_ids": {
 				Type:     schema.TypeSet,
 				Optional: true,
-				ForceNew: true,
 				Elem:     &schema.Schema{Type: schema.TypeString},
 				Set:      schema.HashString,
 				ConflictsWith: []string{
@@ -181,36 +140,32 @@ func resourceCCENodeV3() *schema.Resource {
 			"eip_count": {
 				Type:          schema.TypeInt,
 				Optional:      true,
-				ForceNew:      true,
 				Computed:      true,
 				ConflictsWith: []string{"eip_ids"},
 			},
 			"iptype": {
 				Type:          schema.TypeString,
 				Optional:      true,
-				ForceNew:      true,
 				ConflictsWith: []string{"eip_ids"},
 				Computed:      true,
 			},
 			"bandwidth_charge_mode": {
 				Type:          schema.TypeString,
 				Optional:      true,
-				ForceNew:      true,
 				ConflictsWith: []string{"eip_ids"},
 				Computed:      true,
 			},
 			"sharetype": {
 				Type:          schema.TypeString,
 				Optional:      true,
-				ForceNew:      true,
 				ConflictsWith: []string{"eip_ids"},
 				Computed:      true,
 			},
 			"bandwidth_size": {
 				Type:          schema.TypeInt,
 				Optional:      true,
-				ForceNew:      true,
 				ConflictsWith: []string{"eip_ids"},
+				ValidateFunc:  validatePositiveInt,
 			},
 			"billing_mode": {
 				Type:     schema.TypeInt,
@@ -397,15 +352,7 @@ func resourceCCENodeV3Create(d *schema.ResourceData, meta interface{}) error {
 	eipCount := d.Get("eip_count").(int)
 	if bandwidthSize > 0 && eipCount == 0 {
 		eipCount = 1
-		if d.Get("bandwidth_charge_mode").(string) == "" {
-			_ = d.Set("bandwidth_charge_mode", "traffic")
-		}
-		if d.Get("sharetype").(string) == "" {
-			_ = d.Set("sharetype", "PER")
-		}
-		if d.Get("iptype").(string) == "" {
-			_ = d.Set("iptype", "5_bgp")
-		}
+		checkCCENodeV3PublicIpParams(d)
 	}
 
 	createOpts := nodes.CreateOpts{
@@ -520,7 +467,6 @@ func resourceCCENodeV3Read(d *schema.ResourceData, meta interface{}) error {
 	}
 	clusterId := d.Get("cluster_id").(string)
 	s, err := nodes.Get(nodeClient, clusterId, d.Id()).Extract()
-
 	if err != nil {
 		if _, ok := err.(golangsdk.ErrDefault404); ok {
 			d.SetId("")
@@ -654,6 +600,58 @@ func resourceCCENodeV3Update(d *schema.ResourceData, meta interface{}) error {
 		}
 	}
 
+	// release, change bandwidth size or create and assign ip
+	if d.HasChange("bandwidth_size") {
+		oldBandwidthSize, newBandWidthSize := d.GetChange("bandwidth_size")
+		newBandWidth := newBandWidthSize.(int)
+		oldBandwidth := oldBandwidthSize.(int)
+		serverId := d.Get("server_id").(string)
+		config := meta.(*Config)
+		client, err := config.computeV2Client(GetRegion(d, config))
+		if err != nil {
+			return fmt.Errorf("error creating OpenTelekomCloud ComputeV2 client: %s", err)
+		}
+		floatingIp, err := getCCENodeV3FloatingIp(client, serverId)
+		if err != nil {
+			return err
+		}
+		if newBandWidth == 0 {
+			err = deleteCCENodeV3FloatingIP(client, serverId, floatingIp.ID)
+		} else {
+			checkCCENodeV3PublicIpParams(d)
+			if oldBandwidth > 0 {
+				err = resizeCCENodeV3IpBandwidth(d, config, floatingIp.ID, newBandWidth)
+			} else {
+				err = createAndAssociateCCENodeV3FloatingIp(d, config, newBandWidth, serverId)
+			}
+		}
+		if err != nil {
+			return err
+		}
+	}
+
+	if d.HasChange("eip_ids") {
+		oldEipIdsRaw, newEipIdsRaw := d.GetChange("eip_ids")
+		oldEipIds := oldEipIdsRaw.(*schema.Set).List()
+		newEipIds := newEipIdsRaw.(*schema.Set).List()
+		serverId := d.Get("server_id").(string)
+		computeV2Client, err := config.computeV2Client(GetRegion(d, config))
+		if err != nil {
+			return fmt.Errorf("error creating OpenTelekomCloud ComputeV2 client: %s", err)
+		}
+		if len(newEipIds) == 0 {
+			if err := unbindCCENodeV3FloatingIP(computeV2Client, serverId, oldEipIds[0].(string)); err != nil {
+				return err
+			}
+		} else if len(oldEipIds) > 0 {
+			err = reassignCCENodeV3Eip(computeV2Client, oldEipIds[0].(string), newEipIds[0].(string), serverId)
+		}
+
+		if err != nil {
+			return err
+		}
+	}
+
 	return resourceCCENodeV3Read(d, meta)
 }
 
@@ -684,6 +682,157 @@ func resourceCCENodeV3Delete(d *schema.ResourceData, meta interface{}) error {
 
 	d.SetId("")
 	return nil
+}
+
+func deleteCCENodeV3FloatingIP(client *golangsdk.ServiceClient, serverId string, floatingIpId string) error {
+	err := unbindCCENodeV3FloatingIP(client, serverId, floatingIpId)
+	if err != nil {
+		return fmt.Errorf("error unbind floatingip from the node: %s", err)
+	}
+	err = floatingips.Delete(client, floatingIpId).ExtractErr()
+	if err != nil {
+		return fmt.Errorf("error delete floatingip: %s", err)
+	}
+	return nil
+}
+
+func unbindCCENodeV3FloatingIP(client *golangsdk.ServiceClient, serverId string, floatingIpId string) error {
+	eip, err := floatingips.Get(client, floatingIpId).Extract()
+	if err != nil {
+		return fmt.Errorf("error get eip by id: %s", err)
+	}
+
+	disassociateOpts := floatingips.DisassociateOpts{
+		FloatingIP: eip.IP,
+	}
+
+	err = floatingips.DisassociateInstance(client, serverId, disassociateOpts).ExtractErr()
+	if err != nil {
+		return fmt.Errorf("error unassign floating IP from CCE Node")
+	}
+	return nil
+}
+
+func resizeCCENodeV3IpBandwidth(d *schema.ResourceData, meta interface{}, eipId string, newSize int) error {
+	config := meta.(*Config)
+	nwClient, err := config.networkingV1Client(GetRegion(d, config))
+	if err != nil {
+		return fmt.Errorf("error creating OpenTelekomCloud NetworkingV1 client: %s", err)
+	}
+	elasticIp, err := eips.Get(nwClient, eipId).Extract()
+	if err != nil {
+		return err
+	}
+
+	updateOpts := bandwidths.UpdateOpts{Size: newSize}
+
+	_, err = bandwidths.Update(nwClient, elasticIp.BandwidthID, updateOpts).Extract()
+	if err != nil {
+		return fmt.Errorf("error updating bandwidth size: %s", err)
+	}
+	return nil
+}
+
+func createAndAssociateCCENodeV3FloatingIp(d *schema.ResourceData, meta interface{}, size int, serverId string) error {
+	config := meta.(*Config)
+	nwClient, err := config.networkingV1Client(GetRegion(d, config))
+	if err != nil {
+		return fmt.Errorf("error creating OpenTelekomCloud NetworkingV1 client: %s", err)
+	}
+	createEipOpts := EIPCreateOpts{
+		ApplyOpts: eips.ApplyOpts{
+			IP: eips.PublicIpOpts{
+				Type: d.Get("iptype").(string),
+			},
+			Bandwidth: eips.BandwidthOpts{
+				Name:       "bandwidth-cce-node-1",
+				Size:       size,
+				ShareType:  d.Get("sharetype").(string),
+				ChargeMode: d.Get("bandwidth_charge_mode").(string),
+			},
+		},
+	}
+
+	eip, err := eips.Apply(nwClient, createEipOpts).Extract()
+	if err != nil {
+		return fmt.Errorf("error updating bandwidth size: %s", err)
+	}
+
+	err = waitForEIPActive(nwClient, eip.ID, time.Minute*10)
+	if err != nil {
+		return fmt.Errorf("error waiting for EIP (%s) to become ready: %s", eip.ID, err)
+	}
+
+	computeClient, err := config.computeV2Client(GetRegion(d, config))
+	if err != nil {
+		return fmt.Errorf("error creating OpenTelekomCloud ComputeV2 client: %s", err)
+	}
+	associateOpts := floatingips.AssociateOpts{
+		FloatingIP: eip.PublicAddress,
+	}
+	if err := floatingips.AssociateInstance(computeClient, serverId, associateOpts).ExtractErr(); err != nil {
+		return fmt.Errorf("error associating CCE Node to publicIp: %s", err)
+	}
+
+	return nil
+}
+
+func reassignCCENodeV3Eip(client *golangsdk.ServiceClient, oldEipId string, newEipId string, serverId string) error {
+	oldEip, err := floatingips.Get(client, oldEipId).Extract()
+	if err != nil {
+		return fmt.Errorf("error get eip by id: %s", err)
+	}
+	newEip, err := floatingips.Get(client, newEipId).Extract()
+	if err != nil {
+		return fmt.Errorf("error get eip by id: %s", err)
+	}
+
+	disassociateOpts := floatingips.DisassociateOpts{
+		FloatingIP: oldEip.IP,
+	}
+	err = floatingips.DisassociateInstance(client, serverId, disassociateOpts).ExtractErr()
+	if err != nil {
+		return fmt.Errorf("error unassign floating IP from CCE Node")
+	}
+
+	associateOpts := floatingips.AssociateOpts{
+		FloatingIP: newEip.IP,
+	}
+	err = floatingips.AssociateInstance(client, serverId, associateOpts).ExtractErr()
+	if err != nil {
+		return fmt.Errorf("error assign floating IP to CCE Node")
+	}
+	return nil
+}
+
+func getCCENodeV3FloatingIp(client *golangsdk.ServiceClient, serverId string) (*floatingips.FloatingIP, error) {
+	fipPages, err := floatingips.List(client).AllPages()
+	if err != nil {
+		return nil, err
+	}
+	fips, err := floatingips.ExtractFloatingIPs(fipPages)
+	if err != nil {
+		return nil, err
+	}
+	var floatingIp floatingips.FloatingIP
+	for _, ip := range fips {
+		if ip.InstanceID == serverId {
+			floatingIp = ip
+		}
+	}
+	return &floatingIp, nil
+}
+
+func checkCCENodeV3PublicIpParams(d *schema.ResourceData) {
+	if d.Get("bandwidth_charge_mode").(string) == "" {
+		_ = d.Set("bandwidth_charge_mode", "traffic")
+	}
+	if d.Get("sharetype").(string) == "" {
+		_ = d.Set("sharetype", "PER")
+	}
+	if d.Get("iptype").(string) == "" {
+		_ = d.Set("iptype", "5_bgp")
+	}
 }
 
 func waitForCceNodeActive(cceClient *golangsdk.ServiceClient, clusterId, nodeId string) resource.StateRefreshFunc {
@@ -744,7 +893,6 @@ func recursiveCreate(cceClient *golangsdk.ServiceClient, opts nodes.CreateOptsBu
 		}
 		s, err := nodes.Create(cceClient, ClusterID, opts).Extract()
 		if err != nil {
-			// if err.(golangsdk.ErrUnexpectedResponseCode).Actual == 403 {
 			if _, ok := err.(golangsdk.ErrDefault403); ok {
 				return recursiveCreate(cceClient, opts, ClusterID, 403)
 			} else {
