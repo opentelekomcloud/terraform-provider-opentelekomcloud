@@ -133,7 +133,6 @@ func resourceCCENodeV3() *schema.Resource {
 				Optional: true,
 				Elem:     &schema.Schema{Type: schema.TypeString},
 				Set:      schema.HashString,
-				ForceNew: true,
 				ConflictsWith: []string{
 					"iptype", "bandwidth_charge_mode", "bandwidth_size", "sharetype",
 				},
@@ -612,7 +611,7 @@ func resourceCCENodeV3Update(d *schema.ResourceData, meta interface{}) error {
 			return err
 		}
 		if newBandWidth == 0 {
-			err = deleteCCENodeV3AssociatedIP(d, config, serverId, floatingIp.ID)
+			err = unbindCCENodeV3FloatingIP(d, config, serverId, floatingIp.ID)
 		} else {
 			checkCCENodeV3PublicIpParams(d)
 			if oldBandwidth > 0 {
@@ -621,6 +620,24 @@ func resourceCCENodeV3Update(d *schema.ResourceData, meta interface{}) error {
 				err = createAndAssociateCCENodeV3FloatingIp(d, config, newBandWidth, serverId)
 			}
 		}
+		if err != nil {
+			return err
+		}
+	}
+
+	if d.HasChange("eip_ids") {
+		oldEipIdsRaw, newEipIdsRaw := d.GetChange("eip_ids")
+		oldEipIds := oldEipIdsRaw.(*schema.Set).List()
+		newEipIds := newEipIdsRaw.(*schema.Set).List()
+		serverId := d.Get("server_id").(string)
+		if len(newEipIds) == 0 {
+			if err := unbindCCENodeV3FloatingIP(d, config, serverId, oldEipIds[0].(string)); err != nil {
+				return err
+			}
+		} else if len(oldEipIds) > 0 {
+			err = reassignCCENodeV3Eip(d, meta, oldEipIds[0].(string), newEipIds[0].(string), serverId)
+		}
+
 		if err != nil {
 			return err
 		}
@@ -658,7 +675,7 @@ func resourceCCENodeV3Delete(d *schema.ResourceData, meta interface{}) error {
 	return nil
 }
 
-func deleteCCENodeV3AssociatedIP(d *schema.ResourceData, meta interface{}, serverId string, floatingIpId string) error {
+func unbindCCENodeV3FloatingIP(d *schema.ResourceData, meta interface{}, serverId string, floatingIpId string) error {
 	config := meta.(*Config)
 	client, err := config.computeV2Client(GetRegion(d, config))
 	if err != nil {
@@ -677,10 +694,6 @@ func deleteCCENodeV3AssociatedIP(d *schema.ResourceData, meta interface{}, serve
 	err = floatingips.DisassociateInstance(client, serverId, disassociateOpts).ExtractErr()
 	if err != nil {
 		return fmt.Errorf("error unassign floating IP from CCE Node")
-	}
-	err = floatingips.Delete(client, floatingIpId).ExtractErr()
-	if err != nil {
-		return fmt.Errorf("error delete floatingip")
 	}
 	return nil
 }
