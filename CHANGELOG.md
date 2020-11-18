@@ -3,10 +3,10 @@
 ## 1.21.5 (November 19, 2020)
 
 ENHANCEMENTS:
-* `provider/opentelekomcloud`: Add `OS_TOKEN` as alternative env var for provider `token` ([#706](https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/706))
-* `resource/opentelekomcloud_lb_monitor_v2`: Add monitor_port to lb_monitor_v2 ([#709](https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/709))
+* `provider/opentelekomcloud`: Add `OS_TOKEN` as alternative env var for `token` ([#706](https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/706))
+* `resource/opentelekomcloud_lb_monitor_v2`: Add `monitor_port` argument ([#709](https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/709))
 * `resource/opentelekomcloud_waf_domain_v1`: Rename WAF domain server attributes ([#710](https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/710))
-* `resource/opentelekomcloud_csbs_backup_policy_v1`: Add fields to CSBSv1 policy ([#714](https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/714))
+* `resource/opentelekomcloud_csbs_backup_policy_v1`: Add fields to CSBS policy ([#714](https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/714))
 
 
 ## 1.21.4 (November 12, 2020)
