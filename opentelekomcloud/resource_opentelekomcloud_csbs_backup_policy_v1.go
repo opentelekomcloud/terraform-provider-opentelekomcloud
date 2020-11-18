@@ -184,14 +184,13 @@ func resourceCSBSBackupPolicyV1() *schema.Resource {
 			},
 		},
 	}
-
 }
 
 func resourceCSBSBackupPolicyCreate(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*Config)
 	policyClient, err := config.csbsV1Client(GetRegion(d, config))
 	if err != nil {
-		return fmt.Errorf("error creating backup policy client: %s", err)
+		return fmt.Errorf("error creating CSBSv1 client: %s", err)
 	}
 
 	createOpts := policies.CreateOpts{
@@ -199,13 +198,13 @@ func resourceCSBSBackupPolicyCreate(d *schema.ResourceData, meta interface{}) er
 		Description: d.Get("description").(string),
 		ProviderId:  d.Get("provider_id").(string),
 		Parameters: policies.PolicyParam{
-			Common: resourceCSBSCommonParamsV1(d),
+			Common: resourceCSBSv1CommonParams(d),
 		},
 
-		ScheduledOperations: resourceCSBSScheduleV1(d),
+		ScheduledOperations: resourceCSBSv1Schedule(d),
 
-		Resources: resourceCSBSResourceV1(d),
-		Tags:      resourceCSBSPolicyTagsV1(d),
+		Resources: resourceCSBSv1Resource(d),
+		Tags:      resourceCSBSv1PolicyTags(d),
 	}
 
 	backupPolicy, err := policies.Create(policyClient, createOpts).Extract()
@@ -235,7 +234,7 @@ func resourceCSBSBackupPolicyRead(d *schema.ResourceData, meta interface{}) erro
 	config := meta.(*Config)
 	policyClient, err := config.csbsV1Client(GetRegion(d, config))
 	if err != nil {
-		return fmt.Errorf("error creating CSBS client: %s", err)
+		return fmt.Errorf("error creating CSBSv1 client: %s", err)
 	}
 
 	backupPolicy, err := policies.Get(policyClient, d.Id()).Extract()
@@ -271,18 +270,14 @@ func resourceCSBSBackupPolicyRead(d *schema.ResourceData, meta interface{}) erro
 		d.Set("region", GetRegion(d, config)),
 	)
 
-	if err = me.ErrorOrNil(); err != nil {
-		return fmt.Errorf(errorSaveMsg, "main conf", d.Id(), err)
-	}
-
-	return nil
+	return me.ErrorOrNil()
 }
 
 func resourceCSBSBackupPolicyUpdate(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*Config)
 	policyClient, err := config.csbsV1Client(GetRegion(d, config))
 	if err != nil {
-		return fmt.Errorf("error creating CSBS client: %s", err)
+		return fmt.Errorf("error creating CSBSv1 client: %s", err)
 	}
 	var updateOpts policies.UpdateOpts
 	if d.HasChange("name") {
@@ -292,13 +287,13 @@ func resourceCSBSBackupPolicyUpdate(d *schema.ResourceData, meta interface{}) er
 		updateOpts.Description = d.Get("description").(string)
 	}
 
-	updateOpts.Parameters.Common = resourceCSBSCommonParamsV1(d)
+	updateOpts.Parameters.Common = resourceCSBSv1CommonParams(d)
 
 	if d.HasChange("resource") {
-		updateOpts.Resources = resourceCSBSResourceV1(d)
+		updateOpts.Resources = resourceCSBSv1Resource(d)
 	}
 	if d.HasChange("scheduled_operation") {
-		updateOpts.ScheduledOperations = resourceCSBScheduleUpdateV1(d)
+		updateOpts.ScheduledOperations = resourceCSBSv1ScheduleUpdate(d)
 	}
 
 	_, err = policies.Update(policyClient, d.Id(), updateOpts).Extract()
@@ -316,10 +311,15 @@ func resourceCSBSBackupPolicyDelete(d *schema.ResourceData, meta interface{}) er
 		return fmt.Errorf("error creating CSBS client: %s", err)
 	}
 
+	err = policies.Delete(policyClient, d.Id()).Err
+	if err != nil {
+		return fmt.Errorf("error delete CSBSv1 policy; %s", err)
+	}
+
 	stateConf := &resource.StateChangeConf{
 		Pending:    []string{"available"},
 		Target:     []string{"deleted"},
-		Refresh:    waitForVBSPolicyDelete(policyClient, d.Id()),
+		Refresh:    waitForCSBSPolicyDelete(policyClient, d.Id()),
 		Timeout:    d.Timeout(schema.TimeoutDelete),
 		Delay:      5 * time.Second,
 		MinTimeout: 3 * time.Second,
@@ -327,7 +327,7 @@ func resourceCSBSBackupPolicyDelete(d *schema.ResourceData, meta interface{}) er
 
 	_, err = stateConf.WaitForState()
 	if err != nil {
-		return fmt.Errorf("error deleting Backup Policy: %s", err)
+		return fmt.Errorf("error waiting for delete backup Policy: %s", err)
 	}
 
 	d.SetId("")
@@ -336,56 +336,39 @@ func resourceCSBSBackupPolicyDelete(d *schema.ResourceData, meta interface{}) er
 
 func waitForCSBSBackupPolicyActive(policyClient *golangsdk.ServiceClient, policyID string) resource.StateRefreshFunc {
 	return func() (interface{}, string, error) {
-		n, err := policies.Get(policyClient, policyID).Extract()
+		policy, err := policies.Get(policyClient, policyID).Extract()
 		if err != nil {
 			return nil, "", err
 		}
 
-		if n.Status == "error" {
-			return n, n.Status, nil
+		if policy.Status == "error" {
+			return policy, policy.Status, nil
 		}
-		return n, n.Status, nil
+		return policy, policy.Status, nil
 	}
 }
 
-func waitForVBSPolicyDelete(policyClient *golangsdk.ServiceClient, policyID string) resource.StateRefreshFunc {
+func waitForCSBSPolicyDelete(policyClient *golangsdk.ServiceClient, policyID string) resource.StateRefreshFunc {
 	return func() (interface{}, string, error) {
-
-		r, err := policies.Get(policyClient, policyID).Extract()
-
+		policy, err := policies.Get(policyClient, policyID).Extract()
 		if err != nil {
 			if _, ok := err.(golangsdk.ErrDefault404); ok {
 				log.Printf("[INFO] Successfully deleted Backup Policy %s", policyID)
-				return r, "deleted", nil
+				return policy, "deleted", nil
 			}
-			return r, "available", err
+			return policy, "available", err
 		}
 
-		policy := policies.Delete(policyClient, policyID)
-		err = policy.Err
-		if err != nil {
-			if _, ok := err.(golangsdk.ErrDefault404); ok {
-				log.Printf("[INFO] Successfully deleted Backup Policy %s", policyID)
-				return r, "deleted", nil
-			}
-			if errCode, ok := err.(golangsdk.ErrUnexpectedResponseCode); ok {
-				if errCode.Actual == 409 {
-					return r, "available", nil
-				}
-			}
-			return r, "available", err
-		}
-
-		return r, "deleted", nil
+		return policy, policy.Status, nil
 	}
 }
 
-func resourceCSBSScheduleV1(d *schema.ResourceData) []policies.ScheduledOperation {
+func resourceCSBSv1Schedule(d *schema.ResourceData) []policies.ScheduledOperation {
 	scheduledOperations := d.Get("scheduled_operation").(*schema.Set).List()
-	so := make([]policies.ScheduledOperation, len(scheduledOperations))
+	scheduledOperation := make([]policies.ScheduledOperation, len(scheduledOperations))
 	for i, raw := range scheduledOperations {
 		rawMap := raw.(map[string]interface{})
-		so[i] = policies.ScheduledOperation{
+		scheduledOperation[i] = policies.ScheduledOperation{
 			Name:          rawMap["name"].(string),
 			Description:   rawMap["description"].(string),
 			Enabled:       rawMap["enabled"].(bool),
@@ -409,10 +392,10 @@ func resourceCSBSScheduleV1(d *schema.ResourceData) []policies.ScheduledOperatio
 		}
 	}
 
-	return so
+	return scheduledOperation
 }
 
-func resourceCSBSResourceV1(d *schema.ResourceData) []policies.Resource {
+func resourceCSBSv1Resource(d *schema.ResourceData) []policies.Resource {
 	resources := d.Get("resource").(*schema.Set).List()
 	res := make([]policies.Resource, len(resources))
 	for i, raw := range resources {
@@ -426,7 +409,7 @@ func resourceCSBSResourceV1(d *schema.ResourceData) []policies.Resource {
 	return res
 }
 
-func resourceCSBSPolicyTagsV1(d *schema.ResourceData) []policies.ResourceTag {
+func resourceCSBSv1PolicyTags(d *schema.ResourceData) []policies.ResourceTag {
 	rawTags := d.Get("tags").(*schema.Set).List()
 	tags := make([]policies.ResourceTag, len(rawTags))
 	for i, raw := range rawTags {
@@ -439,7 +422,7 @@ func resourceCSBSPolicyTagsV1(d *schema.ResourceData) []policies.ResourceTag {
 	return tags
 }
 
-func resourceCSBScheduleUpdateV1(d *schema.ResourceData) []policies.ScheduledOperationToUpdate {
+func resourceCSBSv1ScheduleUpdate(d *schema.ResourceData) []policies.ScheduledOperationToUpdate {
 	oldSORaw, newSORaw := d.GetChange("scheduled_operation")
 	oldSOList := oldSORaw.(*schema.Set).List()
 	newSOSetList := newSORaw.(*schema.Set).List()
@@ -470,7 +453,7 @@ func resourceCSBScheduleUpdateV1(d *schema.ResourceData) []policies.ScheduledOpe
 	return schedule
 }
 
-func resourceCSBSCommonParamsV1(d *schema.ResourceData) map[string]string {
+func resourceCSBSv1CommonParams(d *schema.ResourceData) map[string]string {
 	m := make(map[string]string)
 	for key, val := range d.Get("common").(map[string]interface{}) {
 		m[key] = val.(string)
