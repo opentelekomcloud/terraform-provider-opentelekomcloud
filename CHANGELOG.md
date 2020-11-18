@@ -1,11 +1,19 @@
 ## 1.22.0 (Unreleased)
 
+## 1.21.5 (November 19, 2020)
+
+ENHANCEMENTS:
+* `provider/opentelekomcloud`: Add `OS_TOKEN` as alternative env var for provider `token` ([#706](https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/706))
+* `resource/opentelekomcloud_lb_monitor_v2`: Add monitor_port to lb_monitor_v2 ([#709](https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/709))
+* `resource/opentelekomcloud_waf_domain_v1`: Rename WAF domain server attributes ([#710](https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/710))
+* `resource/opentelekomcloud_csbs_backup_policy_v1`: Add fields to CSBSv1 policy ([#714](https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/714))
+
 
 ## 1.21.4 (November 12, 2020)
 
 BUG FIXES:
-* `opentelekomcloud_provider`: Fix retries for 409 and 503 error codes ([#688](https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/688))
-* `opentelekomcloud_provider`: Fix region handling ([#697](https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/697))
+* `provider/opentelekomcloud`: Fix retries for 409 and 503 error codes ([#688](https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/688))
+* `provider/opentelekomcloud`: Fix region handling ([#697](https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/697))
 * `resource/opentelekomcloud_s3_bucket`: Fix panic creating `s3_bucket` without `tenant_name` in provider config ([#698](https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/698))
 * `resource/opentelekomcloud_compute_instance_v2`: Revert changes from [#686](https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/686) ([#701](https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/701))
 * `resource/opentelekomcloud_rds_instance_v3`: Fix RDSv3 instance import ([#704](https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/704))
@@ -26,6 +34,7 @@ ENHANCEMENTS:
 * `resource/opentelekomcloud_cce_node_v3`: Make `iptype`, `bandwidth_charge_mode`, `sharetype` settable ([#681](https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/681))
 * `resource/opentelekomcloud_cce_node_v3`: Fix not existing flavor in documentation ([#684](https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/684))
 * `resource/opentelekomcloud_ecs_instance_v1`: Fix not existing flavor in documentation ([#689](https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/689))
+
 
 ## 1.21.2 (October 29, 2020)
 
