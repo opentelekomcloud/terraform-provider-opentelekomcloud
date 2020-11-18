@@ -8,6 +8,6 @@ func rootURL(c *golangsdk.ServiceClient) string {
 	return c.ServiceURL(rootPath)
 }
 
-func resourceURL(c *golangsdk.ServiceClient, policyid string) string {
-	return c.ServiceURL(rootPath, policyid)
+func resourceURL(c *golangsdk.ServiceClient, policyId string) string {
+	return c.ServiceURL(rootPath, policyId)
 }

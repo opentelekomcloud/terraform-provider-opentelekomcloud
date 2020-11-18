@@ -3,7 +3,6 @@ package policies
 import (
 	"encoding/json"
 	"strconv"
-
 	"time"
 
 	"github.com/opentelekomcloud/gophertelekomcloud"
@@ -138,7 +137,7 @@ func (r *CreateOperationDefinitionResp) UnmarshalJSON(b []byte) error {
 
 	if err != nil {
 		switch err.(type) {
-		case *json.UnmarshalTypeError: //check if type error occurred (handles if no type conversion is required for cloud like Huawei)
+		case *json.UnmarshalTypeError: // check if type error occurred (handles if no type conversion is required for cloud)
 
 			var s struct {
 				tmp

@@ -92,6 +92,26 @@ func resourceCSBSBackupPolicyV1() *schema.Resource {
 							Type:     schema.TypeInt,
 							Optional: true,
 						},
+						"day_backups": {
+							Type:     schema.TypeInt,
+							Optional: true,
+						},
+						"week_backups": {
+							Type:     schema.TypeInt,
+							Optional: true,
+						},
+						"month_backups": {
+							Type:     schema.TypeInt,
+							Optional: true,
+						},
+						"year_backups": {
+							Type:     schema.TypeInt,
+							Optional: true,
+						},
+						"timezone": {
+							Type:     schema.TypeString,
+							Computed: true,
+						},
 						"permanent": {
 							Type:     schema.TypeBool,
 							Optional: true,
@@ -181,6 +201,7 @@ func resourceCSBSBackupPolicyCreate(d *schema.ResourceData, meta interface{}) er
 		Parameters: policies.PolicyParam{
 			Common: resourceCSBSCommonParamsV1(d),
 		},
+
 		ScheduledOperations: resourceCSBSScheduleV1(d),
 
 		Resources: resourceCSBSResourceV1(d),
@@ -374,10 +395,17 @@ func resourceCSBSScheduleV1(d *schema.ResourceData) []policies.ScheduledOperatio
 					Pattern: rawMap["trigger_pattern"].(string),
 				},
 			},
+
 			OperationDefinition: policies.OperationDefinition{
 				MaxBackups:            rawMap["max_backups"].(int),
 				RetentionDurationDays: rawMap["retention_duration_days"].(int),
 				Permanent:             rawMap["permanent"].(bool),
+				PlanId:                "",
+				ProviderId:            "",
+				DayBackups:            rawMap["day_backups"].(int),
+				WeekBackups:           rawMap["week_backups"].(int),
+				MonthBackups:          rawMap["month_backups"].(int),
+				YearBackups:           rawMap["year_backups"].(int),
 			},
 		}
 	}
@@ -417,7 +445,7 @@ func resourceCSBScheduleUpdateV1(d *schema.ResourceData) []policies.ScheduledOpe
 	oldSOList := oldSORaw.(*schema.Set).List()
 	newSOSetList := newSORaw.(*schema.Set).List()
 
-	//scheduledOperations := d.Get("scheduled_operation").(*schema.Set).List()
+	// scheduledOperations := d.Get("scheduled_operation").(*schema.Set).List()
 	schedule := make([]policies.ScheduledOperationToUpdate, len(newSOSetList))
 	for i, raw := range newSOSetList {
 		rawNewMap := raw.(map[string]interface{})
