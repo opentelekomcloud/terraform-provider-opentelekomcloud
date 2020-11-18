@@ -110,7 +110,7 @@ func resourceCSBSBackupPolicyV1() *schema.Resource {
 						},
 						"timezone": {
 							Type:     schema.TypeString,
-							Computed: true,
+							Optional: true,
 						},
 						"permanent": {
 							Type:     schema.TypeBool,
@@ -400,12 +400,11 @@ func resourceCSBSScheduleV1(d *schema.ResourceData) []policies.ScheduledOperatio
 				MaxBackups:            rawMap["max_backups"].(int),
 				RetentionDurationDays: rawMap["retention_duration_days"].(int),
 				Permanent:             rawMap["permanent"].(bool),
-				PlanId:                "",
-				ProviderId:            "",
 				DayBackups:            rawMap["day_backups"].(int),
 				WeekBackups:           rawMap["week_backups"].(int),
 				MonthBackups:          rawMap["month_backups"].(int),
 				YearBackups:           rawMap["year_backups"].(int),
+				TimeZone:              rawMap["timezone"].(string),
 			},
 		}
 	}

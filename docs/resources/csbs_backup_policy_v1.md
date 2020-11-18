@@ -54,6 +54,27 @@ The `scheduled_operation` block supports the following arguments:
 
 * `retention_duration_days` - (Optional) Specifies duration of retaining a backup, in days.
 
+-> **Note:** If `day_backups`, `week_backups`, `month_backups` or `year_backups` is configured
+  `timezone` is mandatory.
+
+* `day_backups` - (Optional) Specifies the maximum number of retained daily backups.
+  The latest backup of each day is saved in the long term. This parameter can be effective
+  together with the maximum number of retained backups specified by `max_backups`.
+
+* `week_backups` - (Optional) Specifies the maximum number of retained weekly backups.
+  The latest backup of each week is saved in the long term. This parameter can be effective
+  together with the maximum number of retained backups specified by `max_backups`.
+
+* `month_backups` - (Optional) Specifies the maximum number of retained monthly backups.
+  The latest backup of each month is saved in the long term. This parameter can be effective
+  together with the maximum number of retained backups specified by `max_backups`.
+
+* `year_backups` - (Optional) Specifies the maximum number of retained yearly backups.
+  The latest backup of each year is saved in the long term. This parameter can be effective
+  together with the maximum number of retained backups specified by `max_backups`.
+
+* `timezone` - (Optional) Time zone where the user is located, for example, `UTC+08:00`.
+
 * `permanent` - (Optional) Specifies whether backups are permanently retained.
 
 * `trigger_pattern` - (Required) Specifies Scheduling policy of the scheduler.
