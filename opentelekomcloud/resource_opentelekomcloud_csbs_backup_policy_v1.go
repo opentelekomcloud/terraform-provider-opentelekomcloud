@@ -198,13 +198,13 @@ func resourceCSBSBackupPolicyCreate(d *schema.ResourceData, meta interface{}) er
 		Description: d.Get("description").(string),
 		ProviderId:  d.Get("provider_id").(string),
 		Parameters: policies.PolicyParam{
-			Common: resourceCSBSv1CommonParams(d),
+			Common: resourceCSBSCommonParamsV1(d),
 		},
 
-		ScheduledOperations: resourceCSBSv1Schedule(d),
+		ScheduledOperations: resourceCSBSScheduleV1(d),
 
-		Resources: resourceCSBSv1Resource(d),
-		Tags:      resourceCSBSv1PolicyTags(d),
+		Resources: resourceCSBSResourceV1(d),
+		Tags:      resourceCSBSPolicyTagsV1(d),
 	}
 
 	backupPolicy, err := policies.Create(policyClient, createOpts).Extract()
@@ -287,13 +287,13 @@ func resourceCSBSBackupPolicyUpdate(d *schema.ResourceData, meta interface{}) er
 		updateOpts.Description = d.Get("description").(string)
 	}
 
-	updateOpts.Parameters.Common = resourceCSBSv1CommonParams(d)
+	updateOpts.Parameters.Common = resourceCSBSCommonParamsV1(d)
 
 	if d.HasChange("resource") {
-		updateOpts.Resources = resourceCSBSv1Resource(d)
+		updateOpts.Resources = resourceCSBSResourceV1(d)
 	}
 	if d.HasChange("scheduled_operation") {
-		updateOpts.ScheduledOperations = resourceCSBSv1ScheduleUpdate(d)
+		updateOpts.ScheduledOperations = resourceCSBSScheduleUpdateV1(d)
 	}
 
 	_, err = policies.Update(policyClient, d.Id(), updateOpts).Extract()
@@ -363,7 +363,7 @@ func waitForCSBSPolicyDelete(policyClient *golangsdk.ServiceClient, policyID str
 	}
 }
 
-func resourceCSBSv1Schedule(d *schema.ResourceData) []policies.ScheduledOperation {
+func resourceCSBSScheduleV1(d *schema.ResourceData) []policies.ScheduledOperation {
 	scheduledOperations := d.Get("scheduled_operation").(*schema.Set).List()
 	scheduledOperation := make([]policies.ScheduledOperation, len(scheduledOperations))
 	for i, raw := range scheduledOperations {
@@ -395,7 +395,7 @@ func resourceCSBSv1Schedule(d *schema.ResourceData) []policies.ScheduledOperatio
 	return scheduledOperation
 }
 
-func resourceCSBSv1Resource(d *schema.ResourceData) []policies.Resource {
+func resourceCSBSResourceV1(d *schema.ResourceData) []policies.Resource {
 	resources := d.Get("resource").(*schema.Set).List()
 	res := make([]policies.Resource, len(resources))
 	for i, raw := range resources {
@@ -409,7 +409,7 @@ func resourceCSBSv1Resource(d *schema.ResourceData) []policies.Resource {
 	return res
 }
 
-func resourceCSBSv1PolicyTags(d *schema.ResourceData) []policies.ResourceTag {
+func resourceCSBSPolicyTagsV1(d *schema.ResourceData) []policies.ResourceTag {
 	rawTags := d.Get("tags").(*schema.Set).List()
 	tags := make([]policies.ResourceTag, len(rawTags))
 	for i, raw := range rawTags {
@@ -422,7 +422,7 @@ func resourceCSBSv1PolicyTags(d *schema.ResourceData) []policies.ResourceTag {
 	return tags
 }
 
-func resourceCSBSv1ScheduleUpdate(d *schema.ResourceData) []policies.ScheduledOperationToUpdate {
+func resourceCSBSScheduleUpdateV1(d *schema.ResourceData) []policies.ScheduledOperationToUpdate {
 	oldSORaw, newSORaw := d.GetChange("scheduled_operation")
 	oldSOList := oldSORaw.(*schema.Set).List()
 	newSOSetList := newSORaw.(*schema.Set).List()
@@ -458,7 +458,7 @@ func resourceCSBSv1ScheduleUpdate(d *schema.ResourceData) []policies.ScheduledOp
 	return schedule
 }
 
-func resourceCSBSv1CommonParams(d *schema.ResourceData) map[string]string {
+func resourceCSBSCommonParamsV1(d *schema.ResourceData) map[string]string {
 	m := make(map[string]string)
 	for key, val := range d.Get("common").(map[string]interface{}) {
 		m[key] = val.(string)
