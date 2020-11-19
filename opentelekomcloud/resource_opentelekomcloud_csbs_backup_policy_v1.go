@@ -252,7 +252,15 @@ func resourceCSBSBackupPolicyRead(d *schema.ResourceData, meta interface{}) erro
 		return fmt.Errorf(errorSaveMsg, "resource", d.Id(), err)
 	}
 
-	if err := d.Set("scheduled_operation", flattenCSBSScheduledOperations(*backupPolicy)); err != nil {
+	scheduledOperations := flattenCSBSScheduledOperations(*backupPolicy)
+	scheduledOperationsRaw := d.Get("scheduled_operation").(*schema.Set).List()
+	operationDefinitionZero := scheduledOperationsRaw[0].(map[string]interface{})
+	scheduledOperations[0]["day_backups"] = operationDefinitionZero["day_backups"]
+	scheduledOperations[0]["week_backups"] = operationDefinitionZero["week_backups"]
+	scheduledOperations[0]["month_backups"] = operationDefinitionZero["month_backups"]
+	scheduledOperations[0]["year_backups"] = operationDefinitionZero["year_backups"]
+	scheduledOperations[0]["timezone"] = operationDefinitionZero["timezone"]
+	if err := d.Set("scheduled_operation", scheduledOperations); err != nil {
 		return fmt.Errorf(errorSaveMsg, "scheduler_operation", d.Id(), err)
 	}
 
