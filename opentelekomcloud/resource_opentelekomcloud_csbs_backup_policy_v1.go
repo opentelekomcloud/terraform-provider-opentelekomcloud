@@ -446,6 +446,11 @@ func resourceCSBSv1ScheduleUpdate(d *schema.ResourceData) []policies.ScheduledOp
 				MaxBackups:            rawNewMap["max_backups"].(int),
 				RetentionDurationDays: rawNewMap["retention_duration_days"].(int),
 				Permanent:             rawNewMap["permanent"].(bool),
+				DayBackups:            rawNewMap["day_backups"].(int),
+				WeekBackups:           rawNewMap["week_backups"].(int),
+				MonthBackups:          rawNewMap["month_backups"].(int),
+				YearBackups:           rawNewMap["year_backups"].(int),
+				TimeZone:              rawNewMap["timezone"].(string),
 			},
 		}
 	}
