@@ -8,6 +8,8 @@ Provides an OpenTelekomCloud Backup Policy of Resources.
 
 ## Example Usage
 
+### Basic example
+
 ```hcl
 variable "name" { }
 variable "id" { }
@@ -26,6 +28,35 @@ resource "opentelekomcloud_csbs_backup_policy_v1" "backup_policy_v1" {
     enabled         = true
     operation_type  = "backup"
     trigger_pattern = "BEGIN:VCALENDAR\r\nBEGIN:VEVENT\r\nRRULE:FREQ=WEEKLY;BYDAY=TH;BYHOUR=12;BYMINUTE=27\r\nEND:VEVENT\r\nEND:VCALENDAR\r\n"
+  }
+}
+```
+
+### Basic example with configured the week and month backups
+
+```
+variable "name" { }
+variable "id" { }
+variable "resource_name" { }
+var "scheduled_operation_name" { }
+
+resource "opentelekomcloud_csbs_backup_policy_v1" "backup_policy_v1" {
+  name = var.name
+
+  resource {
+    id   = var.id
+    type = "OS::Nova::Server"
+    name = var.resource_name
+  }
+  scheduled_operation {
+    name            = var.scheduled_operation_name
+    enabled         = true
+    operation_type  = "backup"
+    max_backups     = "6"
+    trigger_pattern = "BEGIN:VCALENDAR\r\nBEGIN:VEVENT\r\nRRULE:FREQ=WEEKLY;BYDAY=TH;BYHOUR=12;BYMINUTE=27\r\nEND:VEVENT\r\nEND:VCALENDAR\r\n"
+    week_backups    = "4"
+    month_backups   = "2"
+    timezone        = "UTC+03:00"
   }
 }
 ```
@@ -53,6 +84,27 @@ The `scheduled_operation` block supports the following arguments:
 * `max_backups` - (Optional) Specifies maximum number of backups that can be automatically created for a backup object.
 
 * `retention_duration_days` - (Optional) Specifies duration of retaining a backup, in days.
+
+-> **Note:** If `day_backups`, `week_backups`, `month_backups` or `year_backups` is configured
+  `timezone` is mandatory.
+
+* `day_backups` - (Optional) Specifies the maximum number of retained daily backups.
+  The latest backup of each day is saved in the long term. This parameter can be effective
+  together with the maximum number of retained backups specified by `max_backups`.
+
+* `week_backups` - (Optional) Specifies the maximum number of retained weekly backups.
+  The latest backup of each week is saved in the long term. This parameter can be effective
+  together with the maximum number of retained backups specified by `max_backups`.
+
+* `month_backups` - (Optional) Specifies the maximum number of retained monthly backups.
+  The latest backup of each month is saved in the long term. This parameter can be effective
+  together with the maximum number of retained backups specified by `max_backups`.
+
+* `year_backups` - (Optional) Specifies the maximum number of retained yearly backups.
+  The latest backup of each year is saved in the long term. This parameter can be effective
+  together with the maximum number of retained backups specified by `max_backups`.
+
+* `timezone` - (Optional) Time zone where the user is located, for example, `UTC+08:00`.
 
 * `permanent` - (Optional) Specifies whether backups are permanently retained.
 
