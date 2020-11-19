@@ -254,7 +254,7 @@ func resourceCSBSBackupPolicyRead(d *schema.ResourceData, meta interface{}) erro
 
 	scheduledOperations := flattenCSBSScheduledOperations(*backupPolicy)
 	scheduledOperationsRaw := d.Get("scheduled_operation").(*schema.Set).List()
-	if len(scheduledOperationsRaw) != 0 {
+	if len(scheduledOperationsRaw) == 1 {
 		operationDefinitionZero := scheduledOperationsRaw[0].(map[string]interface{})
 		scheduledOperations[0]["day_backups"] = operationDefinitionZero["day_backups"]
 		scheduledOperations[0]["week_backups"] = operationDefinitionZero["week_backups"]

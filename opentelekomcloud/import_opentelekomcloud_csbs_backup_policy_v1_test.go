@@ -41,6 +41,18 @@ func TestAccCSBSBackupPolicyV1_importWeekMonth(t *testing.T) {
 				ResourceName:      resourceName,
 				ImportState:       true,
 				ImportStateVerify: true,
+				ImportStateVerifyIgnore: []string{
+					"scheduled_operation.1795253542.day_backups",
+					"scheduled_operation.1795253542.week_backups",
+					"scheduled_operation.1795253542.month_backups",
+					"scheduled_operation.1795253542.year_backups",
+					"scheduled_operation.1795253542.timezone",
+					"scheduled_operation.2772519308.day_backups",
+					"scheduled_operation.2772519308.week_backups",
+					"scheduled_operation.2772519308.month_backups",
+					"scheduled_operation.2772519308.year_backups",
+					"scheduled_operation.2772519308.timezone",
+				},
 			},
 		},
 	})
