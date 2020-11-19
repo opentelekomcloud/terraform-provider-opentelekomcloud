@@ -846,6 +846,15 @@ func (c *Config) cceV3Client(region string) (*golangsdk.ServiceClient, error) {
 	})
 }
 
+func (c *Config) cceV3AddonClient(region string) (*golangsdk.ServiceClient, error) {
+	client, err := c.cceV3Client(region)
+	if err != nil {
+		return nil, err
+	}
+	client.ResourceBase = fmt.Sprintf("%sapi/v3/addons/", client.Endpoint)
+	return client, nil
+}
+
 func (c *Config) dcsV1Client(region string) (*golangsdk.ServiceClient, error) {
 	return openstack.NewDCSServiceV1(c.HwClient, golangsdk.EndpointOpts{
 		Region:       region,

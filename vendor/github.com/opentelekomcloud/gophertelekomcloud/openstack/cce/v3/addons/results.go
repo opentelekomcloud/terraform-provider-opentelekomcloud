@@ -92,3 +92,74 @@ type UpdateResult struct {
 type DeleteResult struct {
 	golangsdk.ErrResult
 }
+
+type ListTemplateResult struct {
+	golangsdk.Result
+}
+
+type SupportVersion struct {
+	// Cluster type that supports the add-on template
+	ClusterType string `json:"clusterType"`
+	// Cluster versions that support the add-on template,
+	// the parameter value is a regular expression
+	ClusterVersion []string `json:"clusterVersion"`
+}
+
+type Version struct {
+	// Add-on version
+	Version string `json:"version"`
+	// Add-on installation parameters
+	Input map[string]interface{} `json:"input"`
+	// Whether the add-on version is a stable release
+	Stable bool `json:"stable"`
+	// Cluster versions that support the add-on template
+	SupportVersions []SupportVersion `json:"supportVersions"`
+	// Creation time of the add-on instance
+	CreationTimestamp string `json:"creationTimestamp"`
+	// Time when the add-on instance was updated
+	UpdateTimestamp string `json:"updateTimestamp"`
+}
+
+type AddonSpec struct {
+	// Template type (helm or static).
+	Type string `json:"type" required:"true"`
+	// Whether the add-on is installed by default
+	Require bool `json:"require" required:"true"`
+	// Group to which the template belongs
+	Labels []string `json:"labels" required:"true"`
+	// URL of the logo image
+	LogoURL string `json:"logoURL" required:"true"`
+	// URL of the readme file
+	ReadmeURL string `json:"readmeURL" required:"true"`
+	// Template description
+	Description string `json:"description" required:"true"`
+	// Template version details
+	Versions []Version `json:"versions" required:"true"`
+}
+
+type AddonTemplate struct {
+	// API type, fixed value Addon
+	Kind string `json:"kind" required:"true"`
+	// API version, fixed value v3
+	ApiVersion string `json:"apiVersion" required:"true"`
+	// Metadata of an Addon
+	Metadata MetaData `json:"metadata" required:"true"`
+	// Specifications of an Addon
+	Spec AddonSpec `json:"spec" required:"true"`
+}
+
+type AddonTemplateList struct {
+	// API type, fixed value Addon
+	Kind string `json:"kind" required:"true"`
+	// API version, fixed value v3
+	ApiVersion string `json:"apiVersion" required:"true"`
+	// Add-on template list
+	Items []AddonTemplate `json:"items" required:"true"`
+}
+
+// Extract is a function that accepts a result and extracts an Addon.
+func (r ListTemplateResult) Extract() (*AddonTemplateList, error) {
+	var s AddonTemplateList
+	err := r.ExtractInto(&s)
+	return &s, err
+}

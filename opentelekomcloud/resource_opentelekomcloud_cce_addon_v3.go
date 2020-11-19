@@ -1,10 +1,12 @@
 package opentelekomcloud
 
 import (
+	"encoding/json"
 	"fmt"
 
 	"github.com/hashicorp/go-multierror"
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
+	golangsdk "github.com/opentelekomcloud/gophertelekomcloud"
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/cce/v3/addons"
 )
 
@@ -79,7 +81,7 @@ func getValuesValues(d *schema.ResourceData) (basic, custom map[string]interface
 
 func resourceCCEAddonV3Create(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*Config)
-	client, err := config.cceV3Client(GetRegion(d, config))
+	client, err := config.cceV3AddonClient(GetRegion(d, config))
 	if err != nil {
 		return fmt.Errorf("error creating CCE client: %s", err)
 	}
@@ -90,6 +92,7 @@ func resourceCCEAddonV3Create(d *schema.ResourceData, meta interface{}) error {
 		return fmt.Errorf("error getting values for CCE addon: %s", err)
 	}
 
+	templateName := d.Get("template_name").(string)
 	addon, err := addons.Create(client, addons.CreateOpts{
 		Kind:       "Addon",
 		ApiVersion: "v3",
@@ -101,7 +104,7 @@ func resourceCCEAddonV3Create(d *schema.ResourceData, meta interface{}) error {
 		Spec: addons.RequestSpec{
 			Version:           d.Get("template_version").(string),
 			ClusterID:         clusterID,
-			AddonTemplateName: d.Get("template_name").(string),
+			AddonTemplateName: templateName,
 			Values: addons.Values{
 				Basic:    basic,
 				Advanced: custom,
@@ -110,7 +113,12 @@ func resourceCCEAddonV3Create(d *schema.ResourceData, meta interface{}) error {
 	}, clusterID).Extract()
 
 	if err != nil {
-		return fmt.Errorf("error creating CCE addon instance: %s", err)
+		errMsg := logHttpError(err)
+		addonSpec, aErr := getAddonTemplateSpec(client, clusterID, templateName)
+		if aErr != nil {
+			errMsg = fmt.Errorf("\nAddon template spec: %s", addonSpec)
+		}
+		return fmt.Errorf("error creating CCE addon instance: %s", errMsg)
 	}
 
 	d.SetId(addon.Metadata.Id)
@@ -119,7 +127,7 @@ func resourceCCEAddonV3Create(d *schema.ResourceData, meta interface{}) error {
 }
 func resourceCCEAddonV3Read(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*Config)
-	client, err := config.cceV3Client(GetRegion(d, config))
+	client, err := config.cceV3AddonClient(GetRegion(d, config))
 	if err != nil {
 		return fmt.Errorf("error creating CCE client: %s", err)
 	}
@@ -142,7 +150,7 @@ func resourceCCEAddonV3Read(d *schema.ResourceData, meta interface{}) error {
 }
 func resourceCCEAddonV3Update(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*Config)
-	client, err := config.cceV3Client(GetRegion(d, config))
+	client, err := config.cceV3AddonClient(GetRegion(d, config))
 	if err != nil {
 		return fmt.Errorf("error creating CCE client: %s", err)
 	}
@@ -151,6 +159,9 @@ func resourceCCEAddonV3Update(d *schema.ResourceData, meta interface{}) error {
 	if err != nil {
 		return fmt.Errorf("error getting values for CCE addon: %s", err)
 	}
+
+	templateVersion := d.Get("template_version").(string)
+	templateName := d.Get("template_name").(string)
 
 	_, err = addons.Update(client, d.Id(), clusterID, addons.UpdateOpts{
 		Kind:       "Addon",
@@ -161,9 +172,9 @@ func resourceCCEAddonV3Update(d *schema.ResourceData, meta interface{}) error {
 			},
 		},
 		Spec: addons.RequestSpec{
-			Version:           d.Get("template_version").(string),
+			Version:           templateVersion,
 			ClusterID:         clusterID,
-			AddonTemplateName: d.Get("template_name").(string),
+			AddonTemplateName: templateName,
 			Values: addons.Values{
 				Basic:    basic,
 				Advanced: custom,
@@ -172,7 +183,12 @@ func resourceCCEAddonV3Update(d *schema.ResourceData, meta interface{}) error {
 	}).Extract()
 
 	if err != nil {
-		return fmt.Errorf("error updating CCE addon instance: %s", err)
+		errMsg := logHttpError(err)
+		addonSpec, aErr := getAddonTemplateSpec(client, clusterID, templateName)
+		if aErr == nil {
+			errMsg = fmt.Errorf("\nSomething got wrong installing CCE addon\nAddon template spec:\n%s\nError: %s", addonSpec, errMsg)
+		}
+		return fmt.Errorf("error updating CCE addon instance: %s", errMsg)
 	}
 
 	return resourceCCEAddonV3Read(d, meta)
@@ -180,7 +196,7 @@ func resourceCCEAddonV3Update(d *schema.ResourceData, meta interface{}) error {
 
 func resourceCCEAddonV3Delete(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*Config)
-	client, err := config.cceV3Client(GetRegion(d, config))
+	client, err := config.cceV3AddonClient(GetRegion(d, config))
 	if err != nil {
 		return fmt.Errorf("error creating CCE client: %s", err)
 	}
@@ -191,4 +207,20 @@ func resourceCCEAddonV3Delete(d *schema.ResourceData, meta interface{}) error {
 	}
 	d.SetId("")
 	return nil
+}
+
+func getAddonTemplateSpec(client *golangsdk.ServiceClient, clusterID, templateName string) (string, error) {
+	templates, err := addons.ListTemplates(client, clusterID, addons.ListOpts{Name: templateName}).Extract()
+	if err != nil {
+		return "", err
+	}
+	jsonTemplate, _ := json.Marshal(templates)
+	return string(jsonTemplate), nil
+}
+
+func logHttpError(err error) error {
+	if httpErr, ok := err.(golangsdk.ErrUnexpectedResponseCode); ok {
+		return fmt.Errorf("response: %s\n %s", httpErr.Error(), httpErr.Body)
+	}
+	return err
 }

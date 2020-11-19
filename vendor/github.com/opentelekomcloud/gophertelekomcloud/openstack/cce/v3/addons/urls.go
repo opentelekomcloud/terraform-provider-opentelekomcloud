@@ -1,24 +1,30 @@
 package addons
 
 import (
+	"fmt"
 	"strings"
 
 	"github.com/opentelekomcloud/gophertelekomcloud"
 )
 
 const (
-	rootPath = "addons"
+	rootPath      = "addons"
+	templatesPath = "addontemplates"
 )
 
-func rootURL(client *golangsdk.ServiceClient, cluster_id string) string {
-	return CCEServiceURL(client, cluster_id, rootPath)
+func rootURL(client *golangsdk.ServiceClient, clusterID string) string {
+	return CCEServiceURL(client, clusterID, rootPath)
 }
 
-func resourceURL(client *golangsdk.ServiceClient, id, cluster_id string) string {
-	return CCEServiceURL(client, cluster_id, rootPath, id+"?cluster_id="+cluster_id)
+func resourceURL(client *golangsdk.ServiceClient, id, clusterID string) string {
+	return CCEServiceURL(client, clusterID, rootPath, id+"?clusterID="+clusterID)
 }
 
-func CCEServiceURL(client *golangsdk.ServiceClient, cluster_id string, parts ...string) string {
-	rbUrl := "https://" + cluster_id + "." + client.ResourceBaseURL()[8:]
+func CCEServiceURL(client *golangsdk.ServiceClient, clusterID string, parts ...string) string {
+	rbUrl := fmt.Sprintf("https://%s.%s", clusterID, client.ResourceBaseURL()[8:])
 	return rbUrl + strings.Join(parts, "/")
+}
+
+func templatesURL(client *golangsdk.ServiceClient, clusterID string) string {
+	return CCEServiceURL(client, clusterID, templatesPath)
 }
