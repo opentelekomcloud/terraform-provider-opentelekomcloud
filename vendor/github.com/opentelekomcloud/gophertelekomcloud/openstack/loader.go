@@ -532,6 +532,17 @@ func (e *env) loadOpenstackConfig() (*Config, error) {
 	return cloudConfig, nil
 }
 
+func getAuthType(val AuthType) AuthType {
+	explicitTypes := []string{"token", "password", "aksk"}
+	for _, opt := range explicitTypes {
+		if strings.Contains(string(val), opt) {
+			return AuthType(opt)
+		}
+	}
+	return ""
+}
+
+// AuthOptionsFromInfo builds auth options from auth info and type. Returns either AuthOptions or AKSKAuthOptions
 func AuthOptionsFromInfo(authInfo *AuthInfo, authType AuthType) (golangsdk.AuthOptionsProvider, error) {
 	// project scope
 	if authInfo.ProjectID != "" || authInfo.ProjectName != "" {
@@ -564,12 +575,14 @@ func AuthOptionsFromInfo(authInfo *AuthInfo, authType AuthType) (golangsdk.AuthO
 		TenantName:       authInfo.ProjectName,
 	}
 
+	explicitAuthType := getAuthType(authType)
+
 	// If an auth_type of "token" was specified, then make sure
 	// Gophercloud properly authenticates with a token. This involves
 	// unsetting a few other auth options. The reason this is done
 	// here is to wait until all auth settings (both in clouds.yaml
 	// and via environment variables) are set and then unset them.
-	if strings.Contains(string(authType), "token") || strings.Contains(string(authType), "aksk") {
+	if explicitAuthType == "token" || explicitAuthType == "aksk" {
 		ao.Username = ""
 		ao.Password = ""
 		ao.UserID = ""
@@ -582,7 +595,7 @@ func AuthOptionsFromInfo(authInfo *AuthInfo, authType AuthType) (golangsdk.AuthO
 		err := golangsdk.ErrMissingInput{Argument: "auth_url"}
 		return nil, err
 	}
-	if authInfo.AccessKey == "" {
+	if explicitAuthType == "token" || explicitAuthType == "password" || authInfo.AccessKey == "" {
 		return ao, nil
 	}
 	return golangsdk.AKSKAuthOptions{

@@ -888,6 +888,10 @@ func (c *Config) ltsV2Client(region string) (*golangsdk.ServiceClient, error) {
 	})
 }
 
+func (c *Config) ddsV3Client(region string) (*golangsdk.ServiceClient, error) {
+	return openstack.dds
+}
+
 func (c *Config) sdkClient(region, serviceType, level string) (*golangsdk.ServiceClient, error) {
 	client := c.HwClient
 	if level == serviceDomainLevel {
