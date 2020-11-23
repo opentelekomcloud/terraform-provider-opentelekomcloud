@@ -372,9 +372,9 @@ func validateDDSStartTime(v interface{}, k string) (ws []string, errors []error)
 	if err != nil {
 		errors = append(errors, fmt.Errorf("%q must be int convertable: %s", paramsMap["hh"], err))
 	}
-	endHour, err := strconv.Atoi(paramsMap["hh"])
+	endHour, err := strconv.Atoi(paramsMap["HH"])
 	if err != nil {
-		errors = append(errors, fmt.Errorf("%q must be int convertable: %s", paramsMap["hh"], err))
+		errors = append(errors, fmt.Errorf("%q must be int convertable: %s", paramsMap["HH"], err))
 	}
 	startMinutes, err := strconv.Atoi(paramsMap["mm"])
 	if err != nil {
