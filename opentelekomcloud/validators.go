@@ -364,18 +364,22 @@ func validateDDSStartTime(v interface{}, k string) (ws []string, errors []error)
 	startHour, err := strconv.Atoi(startTime[0])
 	if err != nil {
 		errors = append(errors, fmt.Errorf("%q must be int convertable: %s", v, err))
+		return
 	}
 	endHour, err := strconv.Atoi(endTime[0])
 	if err != nil {
 		errors = append(errors, fmt.Errorf("%q must be int convertable: %s", v, err))
+		return
 	}
 	startMinutes, err := strconv.Atoi(startTime[1])
 	if err != nil {
 		errors = append(errors, fmt.Errorf("%q must be int convertable: %s", v, err))
+		return
 	}
 	endMinutes, err := strconv.Atoi(endTime[1])
 	if err != nil {
 		errors = append(errors, fmt.Errorf("%q must be int convertable: %s", v, err))
+		return
 	}
 	if startHour+1 != endHour {
 		errors = append(errors, fmt.Errorf("the `HH` value must be 1 greater than the `hh` value: %s", v))
@@ -383,9 +387,7 @@ func validateDDSStartTime(v interface{}, k string) (ws []string, errors []error)
 	if startMinutes != endMinutes {
 		errors = append(errors, fmt.Errorf("the values from `mm` and `MM` must be the same: %s", v))
 	}
-	if startTime[1] == "00" || startTime[1] == "15" || startTime[1] == "30" || startTime[1] == "45" {
-		return
-	} else {
+	if startMinutes%15 != 0 {
 		errors = append(errors, fmt.Errorf("the values from `mm` and `MM` must be set to any of the following 00, 15, 30, or 45: %s", v))
 	}
 
