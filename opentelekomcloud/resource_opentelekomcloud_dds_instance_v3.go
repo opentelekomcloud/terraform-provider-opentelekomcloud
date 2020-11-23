@@ -154,8 +154,9 @@ func resourceDdsInstanceV3() *schema.Resource {
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
 						"start_time": {
-							Type:     schema.TypeString,
-							Required: true,
+							Type:         schema.TypeString,
+							Required:     true,
+							ValidateFunc: validateDDSStartTime,
 						},
 						"keep_days": {
 							Type:         schema.TypeInt,

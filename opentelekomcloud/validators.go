@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"net"
 	"regexp"
+	"strconv"
 	"strings"
 	"time"
 )
@@ -350,6 +351,49 @@ func validateK8sTagsMap(v interface{}, k string) (ws []string, errors []error) {
 		if !pattern.MatchString(valueString) {
 			errors = append(errors, fmt.Errorf("value %q doesn't comply with restrictions (%q): %q", k, pattern, valueString))
 		}
+	}
+
+	return
+}
+
+func validateDDSStartTime(v interface{}, k string) (ws []string, errors []error) {
+	value := v.(string)
+	timeRange := strings.Split(value, "-")
+	startTime := strings.Split(timeRange[0], ":")
+	endTime := strings.Split(timeRange[1], ":")
+	startHour, err := strconv.Atoi(startTime[0])
+	if err != nil {
+		errors = append(errors, fmt.Errorf("%q must be int convertable: %s", v, err))
+		return
+	}
+	endHour, err := strconv.Atoi(endTime[0])
+	if err != nil {
+		errors = append(errors, fmt.Errorf("%q must be int convertable: %s", v, err))
+		return
+	}
+	startMinutes, err := strconv.Atoi(startTime[1])
+	if err != nil {
+		errors = append(errors, fmt.Errorf("%q must be int convertable: %s", v, err))
+		return
+	}
+	endMinutes, err := strconv.Atoi(endTime[1])
+	if err != nil {
+		errors = append(errors, fmt.Errorf("%q must be int convertable: %s", v, err))
+		return
+	}
+	if startHour != endHour+1 {
+		errors = append(errors, fmt.Errorf("the `HH` value must be 1 greater than the `hh` value: %s", err))
+		return
+	}
+	if startMinutes != endMinutes {
+		errors = append(errors, fmt.Errorf("the values from `mm` and `MM` must be the same: %s", err))
+		return
+	}
+	if startTime[1] == "00" || startTime[1] == "15" || startTime[1] == "30" || startTime[1] == "45" {
+		return
+	} else {
+		errors = append(errors, fmt.Errorf("the values from `mm` and `MM` must be set to any of the following 00, 15, 30, or 45: %s", err))
+		return
 	}
 
 	return
