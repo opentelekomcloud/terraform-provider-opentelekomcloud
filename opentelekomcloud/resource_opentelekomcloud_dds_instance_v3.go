@@ -47,9 +47,6 @@ func resourceDdsInstanceV3() *schema.Resource {
 							Type:     schema.TypeString,
 							Required: true,
 							ForceNew: true,
-							ValidateFunc: validation.StringInSlice([]string{
-								"DDS-Community",
-							}, true),
 						},
 						"version": {
 							Type:     schema.TypeString,
