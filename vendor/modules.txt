@@ -237,7 +237,7 @@ github.com/mitchellh/mapstructure
 github.com/mitchellh/reflectwalk
 # github.com/oklog/run v1.0.0
 github.com/oklog/run
-# github.com/opentelekomcloud/gophertelekomcloud v0.1.1-0.20201118145110-1b1027315738
+# github.com/opentelekomcloud/gophertelekomcloud v0.1.1-0.20201123083107-c6d70fc711c6
 ## explicit
 github.com/opentelekomcloud/gophertelekomcloud
 github.com/opentelekomcloud/gophertelekomcloud/internal
@@ -278,6 +278,7 @@ github.com/opentelekomcloud/gophertelekomcloud/openstack/dcs/v1/availablezones
 github.com/opentelekomcloud/gophertelekomcloud/openstack/dcs/v1/instances
 github.com/opentelekomcloud/gophertelekomcloud/openstack/dcs/v1/maintainwindows
 github.com/opentelekomcloud/gophertelekomcloud/openstack/dcs/v1/products
+github.com/opentelekomcloud/gophertelekomcloud/openstack/dds/v3/instances
 github.com/opentelekomcloud/gophertelekomcloud/openstack/deh/v1/hosts
 github.com/opentelekomcloud/gophertelekomcloud/openstack/dms/v1/availablezones
 github.com/opentelekomcloud/gophertelekomcloud/openstack/dms/v1/groups
