@@ -11,7 +11,7 @@ import (
 
 func dataSourceDDSFlavorV3() *schema.Resource {
 	return &schema.Resource{
-		Read: dataSourceDDSFlavorV3Read,
+		Read: dataSourceDdsFlavorV3Read,
 
 		Schema: map[string]*schema.Schema{
 			"region": {
@@ -70,7 +70,7 @@ func dataSourceDDSFlavorV3() *schema.Resource {
 	}
 }
 
-func dataSourceDDSFlavorV3Read(d *schema.ResourceData, meta interface{}) error {
+func dataSourceDdsFlavorV3Read(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*Config)
 	ddsClient, err := config.ddsV3Client(GetRegion(d, config))
 	if err != nil {
