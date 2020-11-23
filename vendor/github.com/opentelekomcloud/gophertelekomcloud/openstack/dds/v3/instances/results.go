@@ -82,7 +82,7 @@ type InstanceResponse struct {
 	Id                string         `json:"id"`
 	Name              string         `json:"name"`
 	Status            string         `json:"status"`
-	Port              string         `json:"port"`
+	Port              int            `json:"port,string"`
 	Mode              string         `json:"mode"`
 	Region            string         `json:"region"`
 	DataStore         DataStore      `json:"datastore"`
@@ -100,6 +100,7 @@ type InstanceResponse struct {
 	DiskEncryptionId  string         `json:"disk_encryption_id"`
 	TimeZone          string         `json:"time_zone"`
 	Actions           []string       `json:"actions"`
+	PayMode           string         `json:"pay_mode"`
 }
 
 type Group struct {

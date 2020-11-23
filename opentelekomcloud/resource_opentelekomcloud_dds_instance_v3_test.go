@@ -19,11 +19,10 @@ func TestAccDDSV3Instance_basic(t *testing.T) {
 			{
 				Config: TestAccDDSInstanceV3Config_basic,
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckDDSV3InstanceExists("opentelekomcloud_dds_instance.instance"),
-					resource.TestCheckResourceAttr("opentelekomcloud_dds_instance.instance", "name", "dds-instance"),
-					resource.TestCheckResourceAttr("opentelekomcloud_dds_instance.instance", "ssl", "true"),
-					resource.TestCheckResourceAttr("opentelekomcloud_dds_instance.instance", "tags.foo", "bar"),
-					resource.TestCheckResourceAttr("opentelekomcloud_dds_instance.instance", "tags.owner", "terraform"),
+					testAccCheckDDSV3InstanceExists("opentelekomcloud_dds_instance_v3.instance"),
+					resource.TestCheckResourceAttr("opentelekomcloud_dds_instance_v3.instance", "name", "dds-instance"),
+					resource.TestCheckResourceAttr("opentelekomcloud_dds_instance_v3.instance", "mode", "ReplicaSet"),
+					resource.TestCheckResourceAttr("opentelekomcloud_dds_instance_v3.instance", "ssl", "true"),
 				),
 			},
 		},
@@ -38,7 +37,7 @@ func testAccCheckDDSV3InstanceDestroy(s *terraform.State) error {
 	}
 
 	for _, rs := range s.RootModule().Resources {
-		if rs.Type != "opentelekomcloud_dds_instance" {
+		if rs.Type != "opentelekomcloud_dds_instance_v3" {
 			continue
 		}
 
@@ -98,48 +97,32 @@ func testAccCheckDDSV3InstanceExists(n string) resource.TestCheckFunc {
 }
 
 var TestAccDDSInstanceV3Config_basic = fmt.Sprintf(`
-resource "huaweicloud_networking_secgroup" "secgroup_acc" {
+resource "opentelekomcloud_networking_secgroup_v2" "sg_acc" {
   name = "secgroup_acc"
 }
-resource "huaweicloud_dds_instance" "instance" {
-  name = "dds-instance"
+resource "opentelekomcloud_dds_instance_v3" "instance" {
+  name              = "dds-instance"
+  availability_zone = "%s"
+  region            = "%s"
   datastore {
-    type = "DDS-Community"
-    version = "3.4"
+    type           = "DDS-Community"
+    version        = "3.4"
     storage_engine = "wiredTiger"
   }
-  region = "%s"
-  availability_zone = "%s"
-  vpc_id = "%s"
-  subnet_id = "%s"
-  security_group_id = huaweicloud_networking_secgroup.secgroup_acc.id
-  password = "Test@123"
-  mode = "Sharding"
+  vpc_id            = "%s"
+  subnet_id         = "%s"
+  security_group_id = opentelekomcloud_networking_secgroup_v2.sg_acc.id
+  password          = "5ecuredPa55w0rd@"
+  mode              = "ReplicaSet"
   flavor {
-    type = "mongos"
-    num = 2
-    spec_code = "dds.mongodb.c3.medium.4.mongos"
-  }
-  flavor {
-    type = "shard"
-    num = 2
-    storage = "ULTRAHIGH"
-    size = 20
-    spec_code = "dds.mongodb.c3.medium.4.shard"
-  }
-  flavor {
-    type = "config"
+    type = "replica"
     num = 1
     storage = "ULTRAHIGH"
     size = 20
-    spec_code = "dds.mongodb.c3.large.2.config"
+    spec_code = "dds.mongodb.s2.medium.4.repset"
   }
   backup_strategy {
     start_time = "08:00-09:00"
-    keep_days = "8"
+    keep_days = "1"
   }
-  tags = {
-	foo = "bar"
-    owner = "terraform"
-  }
-}`, OS_REGION_NAME, OS_AVAILABILITY_ZONE, OS_VPC_ID, OS_NETWORK_ID)
+}`, OS_AVAILABILITY_ZONE, OS_REGION_NAME, OS_VPC_ID, OS_NETWORK_ID)

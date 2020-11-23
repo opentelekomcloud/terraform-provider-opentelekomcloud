@@ -9,7 +9,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/helper/validation"
-	golangsdk "github.com/opentelekomcloud/gophertelekomcloud"
+	"github.com/opentelekomcloud/gophertelekomcloud"
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/dds/v3/instances"
 )
 
@@ -182,6 +182,10 @@ func resourceDdsInstanceV3() *schema.Resource {
 			},
 			"port": {
 				Type:     schema.TypeInt,
+				Computed: true,
+			},
+			"pay_mode": {
+				Type:     schema.TypeString,
 				Computed: true,
 			},
 			"nodes": {
@@ -392,6 +396,7 @@ func resourceDdsInstanceV3Read(d *schema.ResourceData, meta interface{}) error {
 		d.Set("db_username", instance.DbUserName),
 		d.Set("status", instance.Status),
 		d.Set("port", instance.Port),
+		d.Set("pay_mode", instance.PayMode),
 	)
 
 	sslEnable := true
