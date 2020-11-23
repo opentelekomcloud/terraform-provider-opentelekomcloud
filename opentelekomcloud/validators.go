@@ -358,27 +358,33 @@ func validateK8sTagsMap(v interface{}, k string) (ws []string, errors []error) {
 
 func validateDDSStartTime(v interface{}, k string) (ws []string, errors []error) {
 	value := v.(string)
-	timeRange := strings.Split(value, "-")
-	startTime := strings.Split(timeRange[0], ":")
-	endTime := strings.Split(timeRange[1], ":")
-	startHour, err := strconv.Atoi(startTime[0])
-	if err != nil {
-		errors = append(errors, fmt.Errorf("%q must be int convertable: %s", v, err))
-		return
+	re := regexp.MustCompile(`(?P<hh>\d{2}):(?P<mm>\d{2})-(?P<HH>\d{2}):(?P<MM>\d{2})`)
+	timeRange := re.FindStringSubmatch(value)
+
+	paramsMap := make(map[string]string)
+	for i, name := range re.SubexpNames() {
+		if i > 0 && i <= len(timeRange) {
+			paramsMap[name] = timeRange[i]
+		}
 	}
-	endHour, err := strconv.Atoi(endTime[0])
+
+	startHour, err := strconv.Atoi(paramsMap["hh"])
 	if err != nil {
-		errors = append(errors, fmt.Errorf("%q must be int convertable: %s", v, err))
-		return
+		errors = append(errors, fmt.Errorf("%q must be int convertable: %s", paramsMap["hh"], err))
 	}
-	startMinutes, err := strconv.Atoi(startTime[1])
+	endHour, err := strconv.Atoi(paramsMap["hh"])
 	if err != nil {
-		errors = append(errors, fmt.Errorf("%q must be int convertable: %s", v, err))
-		return
+		errors = append(errors, fmt.Errorf("%q must be int convertable: %s", paramsMap["hh"], err))
 	}
-	endMinutes, err := strconv.Atoi(endTime[1])
+	startMinutes, err := strconv.Atoi(paramsMap["mm"])
 	if err != nil {
-		errors = append(errors, fmt.Errorf("%q must be int convertable: %s", v, err))
+		errors = append(errors, fmt.Errorf("%q must be int convertable: %s", paramsMap["mm"], err))
+	}
+	endMinutes, err := strconv.Atoi(paramsMap["MM"])
+	if err != nil {
+		errors = append(errors, fmt.Errorf("%q must be int convertable: %s", paramsMap["MM"], err))
+	}
+	if len(errors) != 0 {
 		return
 	}
 	if startHour+1 != endHour {
@@ -388,7 +394,7 @@ func validateDDSStartTime(v interface{}, k string) (ws []string, errors []error)
 		errors = append(errors, fmt.Errorf("the values from `mm` and `MM` must be the same: %s", v))
 	}
 	if startMinutes%15 != 0 {
-		errors = append(errors, fmt.Errorf("the values from `mm` and `MM` must be set to any of the following 00, 15, 30, or 45: %s", v))
+		errors = append(errors, fmt.Errorf("the values from `mm` and `MM` must be set to any of the 00, 15, 30, or 45: %s", v))
 	}
 
 	return
