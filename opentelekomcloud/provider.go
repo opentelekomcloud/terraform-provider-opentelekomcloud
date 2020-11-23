@@ -240,6 +240,7 @@ func Provider() terraform.ResourceProvider {
 			"opentelekomcloud_dcs_az_v1":                     dataSourceDcsAZV1(),
 			"opentelekomcloud_dcs_maintainwindow_v1":         dataSourceDcsMaintainWindowV1(),
 			"opentelekomcloud_dcs_product_v1":                dataSourceDcsProductV1(),
+			"opentelekomcloud_dds_flavors_v3":                dataSourceDDSFlavorV3(),
 			"opentelekomcloud_dms_az_v1":                     dataSourceDmsAZV1(),
 			"opentelekomcloud_dms_product_v1":                dataSourceDmsProductV1(),
 			"opentelekomcloud_dms_maintainwindow_v1":         dataSourceDmsMaintainWindowV1(),
