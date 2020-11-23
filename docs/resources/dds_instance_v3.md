@@ -159,11 +159,7 @@ The `flavor` block supports:
 -> **Note:** This parameter is mandatory for all nodes except `mongos`. This parameter is invalid
   for the `mongos` nodes.
 
-* `spec_code` - (Required) Specifies the resource specification code. In a cluster instance,
-  multiple specifications need to be specified. All specifications must be of the same series,
-  that is, general-purpose (s6), enhanced (c3), or enhanced II (c6). For example:
-  * dds.mongodb.s6.large.4.mongos and dds.mongodb.s6.large.4.config have the same specifications.
-  * dds.mongodb.s6.large.4.mongos and dds.mongodb.c3.large.4.config are not of the same specifications.
+* `spec_code` - (Required) Specifies the resource specification code.
 
 The `backup_strategy ` block supports:
 

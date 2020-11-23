@@ -268,6 +268,7 @@ func Provider() terraform.ResourceProvider {
 			"opentelekomcloud_dns_zone_v2":                        resourceDNSZoneV2(),
 			"opentelekomcloud_dns_ptrrecord_v2":                   resourceDNSPtrRecordV2(),
 			"opentelekomcloud_dcs_instance_v1":                    resourceDcsInstanceV1(),
+			"opentelekomcloud_dds_instance_v3":                    resourceDdsInstanceV3(),
 			"opentelekomcloud_ecs_instance_v1":                    resourceEcsInstanceV1(),
 			"opentelekomcloud_fw_firewall_group_v2":               resourceFWFirewallGroupV2(),
 			"opentelekomcloud_fw_policy_v2":                       resourceFWPolicyV2(),
@@ -372,7 +373,6 @@ func Provider() terraform.ResourceProvider {
 			"opentelekomcloud_vpnaas_site_connection_v2":          resourceVpnSiteConnectionV2(),
 			"opentelekomcloud_logtank_group_v2":                   resourceLTSGroupV2(),
 			"opentelekomcloud_logtank_topic_v2":                   resourceLTSTopicV2(),
-			"opentelekomcloud_dds_instance_v3":                    resourceDdsInstanceV3(),
 		},
 	}
 

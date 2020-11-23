@@ -55,9 +55,6 @@ func resourceDdsInstanceV3() *schema.Resource {
 							Type:     schema.TypeString,
 							Required: true,
 							ForceNew: true,
-							ValidateFunc: validation.StringInSlice([]string{
-								"3.4", "3.2",
-							}, true),
 						},
 						"storage_engine": {
 							Type:     schema.TypeString,
@@ -161,8 +158,9 @@ func resourceDdsInstanceV3() *schema.Resource {
 							Required: true,
 						},
 						"keep_days": {
-							Type:     schema.TypeInt,
-							Required: true,
+							Type:         schema.TypeInt,
+							Required:     true,
+							ValidateFunc: validation.IntBetween(0, 732),
 						},
 					},
 				},

@@ -10,8 +10,7 @@ import (
 )
 
 func TestAccDDSV3Instance_basic(t *testing.T) {
-
-	resource.ParallelTest(t, resource.TestCase{
+	resource.Test(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckDDSV3InstanceDestroy,
@@ -23,6 +22,22 @@ func TestAccDDSV3Instance_basic(t *testing.T) {
 					resource.TestCheckResourceAttr("opentelekomcloud_dds_instance_v3.instance", "name", "dds-instance"),
 					resource.TestCheckResourceAttr("opentelekomcloud_dds_instance_v3.instance", "mode", "ReplicaSet"),
 					resource.TestCheckResourceAttr("opentelekomcloud_dds_instance_v3.instance", "ssl", "true"),
+				),
+			},
+		},
+	})
+}
+
+func TestAccDDSV3Instance_minConfig(t *testing.T) {
+	resource.Test(t, resource.TestCase{
+		PreCheck:     func() { testAccPreCheck(t) },
+		Providers:    testAccProviders,
+		CheckDestroy: testAccCheckDDSV3InstanceDestroy,
+		Steps: []resource.TestStep{
+			{
+				Config: TestAccDDSInstanceV3Config_minConfig,
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckDDSV3InstanceExists("opentelekomcloud_dds_instance_v3.instance"),
 				),
 			},
 		},
@@ -126,3 +141,28 @@ resource "opentelekomcloud_dds_instance_v3" "instance" {
     keep_days = "1"
   }
 }`, OS_AVAILABILITY_ZONE, OS_REGION_NAME, OS_VPC_ID, OS_NETWORK_ID)
+
+var TestAccDDSInstanceV3Config_minConfig = fmt.Sprintf(`
+resource "opentelekomcloud_networking_secgroup_v2" "sg_acc" {
+  name = "secgroup_acc"
+}
+resource "opentelekomcloud_dds_instance_v3" "instance" {
+  name              = "dds-instance"
+  availability_zone = "%s"
+  datastore {
+    type           = "DDS-Community"
+    version        = "3.4"
+    storage_engine = "wiredTiger"
+  }
+  vpc_id            = "%s"
+  subnet_id         = "%s"
+  security_group_id = opentelekomcloud_networking_secgroup_v2.sg_acc.id
+  password          = "5ecuredPa55w0rd@"
+  mode              = "ReplicaSet"
+  flavor {
+    type = "replica"
+    num = 1
+    size = 20
+    spec_code = "dds.mongodb.s2.medium.4.repset"
+  }
+}`, OS_AVAILABILITY_ZONE, OS_VPC_ID, OS_NETWORK_ID)
