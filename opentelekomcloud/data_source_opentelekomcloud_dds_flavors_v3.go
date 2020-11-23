@@ -2,7 +2,6 @@ package opentelekomcloud
 
 import (
 	"fmt"
-	"log"
 
 	"github.com/hashicorp/go-multierror"
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
@@ -113,7 +112,6 @@ func dataSourceDDSFlavorV3Read(d *schema.ResourceData, meta interface{}) error {
 		flavorList = append(flavorList, flavor)
 	}
 
-	log.Printf("Extract %d/%d flavors by filters.", len(flavorList), len(flavorsList))
 	if len(flavorList) < 1 {
 		return fmt.Errorf("your query returned no results. Please change your search criteria and try again")
 	}
