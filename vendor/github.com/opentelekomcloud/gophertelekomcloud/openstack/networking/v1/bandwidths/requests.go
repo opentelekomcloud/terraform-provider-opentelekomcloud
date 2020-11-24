@@ -38,3 +38,38 @@ func Update(client *golangsdk.ServiceClient, id string, opts UpdateOptsBuilder) 
 	})
 	return
 }
+
+// ListOptsBuilder allows extensions to add additional parameters to the
+// List request.
+type ListOptsBuilder interface {
+	ToBandwidthListQuery() (string, error)
+}
+
+// ListOpts allows extensions to add additional parameters to the API.
+type ListOpts struct {
+	ShareType           string `q:"share_type"`
+	EnterpriseProjectID string `q:"enterprise_project_id"`
+}
+
+// ToBWListQuery formats a ListOpts into a query string.
+func (opts ListOpts) ToBandwidthListQuery() (string, error) {
+	q, err := golangsdk.BuildQueryString(opts)
+	if err != nil {
+		return "", err
+	}
+	return q.String(), err
+}
+
+// List is a method by which can get the detailed information of all bandwidths
+func List(client *golangsdk.ServiceClient, opts ListOptsBuilder) (r ListResult) {
+	url := listURL(client)
+	query, err := opts.ToBandwidthListQuery()
+	if err != nil {
+		r.Err = err
+		return
+	}
+	url += query
+
+	_, r.Err = client.Get(url, &r.Body, nil)
+	return
+}
