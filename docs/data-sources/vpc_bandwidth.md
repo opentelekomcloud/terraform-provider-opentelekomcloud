@@ -2,7 +2,7 @@
 subcategory: "Virtual Private Cloud (VPC)"
 ---
 
-# opentelekomloud_vpc_bandwidth
+# opentelekomcloud_vpc_bandwidth
 
 Provides details about a specific shared bandwidth.
 
@@ -11,7 +11,7 @@ Provides details about a specific shared bandwidth.
 ```hcl
 variable "bandwidth_name" {}
 
-data "opentelekomloud_vpc_bandwidth" "bandwidth_1" {
+data "opentelekomcloud_vpc_bandwidth" "bandwidth_1" {
   name = var.bandwidth_name
 }
 ```
