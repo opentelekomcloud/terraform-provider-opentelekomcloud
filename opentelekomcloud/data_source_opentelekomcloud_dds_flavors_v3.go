@@ -9,7 +9,7 @@ import (
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/dds/v3/flavors"
 )
 
-func dataSourceDDSFlavorV3() *schema.Resource {
+func dataSourceDdsFlavorV3() *schema.Resource {
 	return &schema.Resource{
 		Read: dataSourceDdsFlavorV3Read,
 
