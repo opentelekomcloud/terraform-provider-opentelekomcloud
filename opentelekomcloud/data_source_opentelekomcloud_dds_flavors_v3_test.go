@@ -17,6 +17,7 @@ func TestAccDDSFlavorV3DataSource_basic(t *testing.T) {
 				Config: testAccDDSFlavorV3DataSource_basic,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckDDSFlavorV3DataSourceID("data.opentelekomcloud_dds_flavors_v3.flavor"),
+					resource.TestCheckResourceAttrSet("data.opentelekomcloud_dds_flavors_v3.flavor", "flavors.#"),
 				),
 			},
 		},
