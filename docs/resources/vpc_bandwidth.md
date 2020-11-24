@@ -1,0 +1,63 @@
+---
+subcategory: "Virtual Private Cloud (VPC)"
+---
+
+# opentelekomcloud\_vpc\_bandwidth
+
+Manages a Shared Bandwidth resource within OpenTelekomCloud.
+This is an alternative to `opentelekomcloud_vpc_bandwidth_v2`
+
+## Example Usage
+
+```hcl
+resource "opentelekomcloud_vpc_bandwidth" "bandwidth_1" {
+  name = "bandwidth_1"
+  size = 5
+}
+
+```
+
+## Argument Reference
+
+The following arguments are supported:
+
+* `region` - (Optional) The region in which to create the Shared Bandwidth.
+  If omitted, the provider-level region will be used. Changing this creates a new Shared Bandwidth resource.
+
+* `name` - (Required) The name of the Shared Bandwidth.
+
+* `size` - (Required) The size of the Shared Bandwidth. The value ranges from 5 MBit/s to 2000 MBit/s.
+
+## Attributes Reference
+
+The following attributes are exported:
+
+* `id` -  ID of the Shared Bandwidth.
+
+* `name` -  See Argument Reference above.
+
+* `size` - See Argument Reference above.
+
+* `enterprise_project_id` - See Argument Reference above.
+
+* `share_type` - Indicates whether the bandwidth is shared or dedicated.
+
+* `bandwidth_type` - Indicates the bandwidth type.
+
+* `charge_mode` - Indicates that the billing is based on traffic.
+
+* `status` - Indicates the bandwidth status.
+
+## Timeouts
+This resource provides the following timeouts configuration options:
+- `create` - Default is 10 minute.
+- `update` - Default is 10 minute.
+- `delete` - Default is 10 minute.
+
+## Import
+
+Shared Bandwidths can be imported using the `id`, e.g.
+
+```
+$ terraform import opentelekomcloud_vpc_bandwidth.bandwidth_1 7117d38e-4c8f-4624-a505-bd96b97d024c
+```
