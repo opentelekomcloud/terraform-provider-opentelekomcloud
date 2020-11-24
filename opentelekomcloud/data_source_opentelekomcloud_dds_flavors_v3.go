@@ -87,51 +87,51 @@ func dataSourceDdsFlavorV3Read(d *schema.ResourceData, meta interface{}) error {
 		return fmt.Errorf("unable to all flavor pages: %s", err)
 	}
 
-	flavorsList, err := flavors.ExtractFlavors(pages)
+	extractedFlavors, err := flavors.ExtractFlavors(pages)
 	if err != nil {
 		return fmt.Errorf("unable to extract flavors: %s", err)
 	}
 
-	flavorList := make([]map[string]interface{}, 0)
-	filterType := d.Get("type").(string)
-	filterVCPUs := d.Get("vcpus").(string)
-	filterMemory := d.Get("memory").(string)
+	matchFlavorList := make([]map[string]interface{}, 0)
+	expectedType := d.Get("type").(string)
+	expectedVcpus := d.Get("vcpus").(string)
+	expectedMemory := d.Get("memory").(string)
 
-	for _, item := range flavorsList {
-		if filterFlavor(item, filterType, filterVCPUs, filterMemory) {
+	for _, item := range extractedFlavors {
+		if matchesFilters(item, expectedType, expectedVcpus, expectedMemory) {
 			continue
 		}
 
-		flavor := map[string]interface{}{
+		matchFlavor := map[string]interface{}{
 			"spec_code": item.SpecCode,
 			"type":      item.Type,
 			"vcpus":     item.Vcpus,
 			"memory":    item.Ram,
 			"az_status": item.AZStatus,
 		}
-		flavorList = append(flavorList, flavor)
+		matchFlavorList = append(matchFlavorList, matchFlavor)
 	}
 
-	if len(flavorList) < 1 {
+	if len(matchFlavorList) < 1 {
 		return fmt.Errorf("your query returned no results. Please change your search criteria and try again")
 	}
 
 	d.SetId("flavors")
 	mErr := multierror.Append(nil,
-		d.Set("flavors", flavorList),
+		d.Set("flavors", matchFlavorList),
 		d.Set("region", GetRegion(d, config)),
 	)
 	return mErr.ErrorOrNil()
 }
 
-func filterFlavor(item flavors.Flavor, flavorType, vCpus, memory string) bool {
+func matchesFilters(item flavors.Flavor, flavorType, flavorVcpus, flavorMemory string) bool {
 	if flavorType != "" && flavorType != item.Type {
 		return true
 	}
-	if vCpus != "" && vCpus != item.Vcpus {
+	if flavorVcpus != "" && flavorVcpus != item.Vcpus {
 		return true
 	}
-	if memory != "" && memory != item.Ram {
+	if flavorMemory != "" && flavorMemory != item.Ram {
 		return true
 	}
 
