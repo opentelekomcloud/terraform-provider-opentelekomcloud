@@ -12,7 +12,7 @@ require (
 	github.com/jen20/awspolicyequivalence v0.0.0-20170831201602-3d48364a137a
 	github.com/jinzhu/copier v0.0.0-20190924061706-b57f9002281a
 	github.com/mitchellh/go-homedir v1.1.0
-	github.com/opentelekomcloud/gophertelekomcloud v0.1.1-0.20201123151835-69b68b69bcd8
+	github.com/opentelekomcloud/gophertelekomcloud v0.1.1-0.20201124100523-37ff2b5e2da8
 	github.com/smartystreets/goconvey v0.0.0-20190306220146-200a235640ff // indirect
 	github.com/unknwon/com v1.0.1
 	gopkg.in/yaml.v2 v2.3.0
