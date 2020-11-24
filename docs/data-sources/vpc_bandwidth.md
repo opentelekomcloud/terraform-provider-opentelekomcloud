@@ -4,7 +4,7 @@ subcategory: "Virtual Private Cloud (VPC)"
 
 # opentelekomloud_vpc_bandwidth
 
-Provides details about a specific bandwidth.
+Provides details about a specific shared bandwidth.
 
 ## Example Usage
 
