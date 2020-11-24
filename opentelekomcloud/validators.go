@@ -7,8 +7,6 @@ import (
 	"strconv"
 	"strings"
 	"time"
-
-	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
 )
 
 func ValidateStringList(v interface{}, k string, l []string) (ws []string, errors []error) {
@@ -45,12 +43,6 @@ func ValidateIntRange(v interface{}, k string, l int, h int) (ws []string, error
 		return
 	}
 	return
-}
-
-func validateIntegerInRange(l, h int) schema.SchemaValidateFunc {
-	return func(v interface{}, k string) ([]string, []error) {
-		return ValidateIntRange(v, k, l, h)
-	}
 }
 
 func validateTrueOnly(v interface{}, k string) (ws []string, errors []error) {
