@@ -3,8 +3,6 @@ package opentelekomcloud
 import (
 	"fmt"
 	"log"
-	"regexp"
-	"strings"
 	"time"
 
 	"github.com/hashicorp/go-multierror"
@@ -39,7 +37,7 @@ func resourceASGroup() *schema.Resource {
 			"scaling_group_name": {
 				Type:         schema.TypeString,
 				Required:     true,
-				ValidateFunc: resourceASGroupValidateGroupName,
+				ValidateFunc: validateName,
 			},
 			"scaling_configuration_id": {
 				Type:     schema.TypeString,
@@ -70,9 +68,6 @@ func resourceASGroup() *schema.Resource {
 				Type:         schema.TypeString,
 				Optional:     true,
 				ValidateFunc: resourceASGroupValidateListenerId,
-				ConflictsWith: []string{
-					"lbaas_listeners",
-				},
 			},
 			"lbaas_listeners": {
 				Type:     schema.TypeList,
@@ -93,9 +88,6 @@ func resourceASGroup() *schema.Resource {
 							Default:  1,
 						},
 					},
-				},
-				ConflictsWith: []string{
-					"lb_listener_id",
 				},
 			},
 			"available_zones": {
@@ -146,7 +138,7 @@ func resourceASGroup() *schema.Resource {
 				Optional: true,
 				Default:  5,
 				ValidateFunc: validation.IntInSlice([]int{
-					0, 1, 15, 60, 180,
+					0, 1, 5, 15, 60, 180,
 				}),
 			},
 			"health_periodic_audit_grace_period": {
@@ -194,38 +186,6 @@ func resourceASGroup() *schema.Resource {
 	}
 }
 
-type Network struct {
-	ID string
-}
-
-type Group struct {
-	ID string
-}
-
-func expandNetworks(Networks []Network) []groups.NetworkOpts {
-	var networks []groups.NetworkOpts
-	for _, v := range Networks {
-		n := groups.NetworkOpts{
-			ID: v.ID,
-		}
-		networks = append(networks, n)
-	}
-
-	return networks
-}
-
-func expandGroups(Groups []Group) []groups.SecurityGroupOpts {
-	var asGroups []groups.SecurityGroupOpts
-	for _, v := range Groups {
-		n := groups.SecurityGroupOpts{
-			ID: v.ID,
-		}
-		asGroups = append(asGroups, n)
-	}
-
-	return asGroups
-}
-
 func getAllAvailableZones(d *schema.ResourceData) []string {
 	rawZones := d.Get("available_zones").([]interface{})
 	zones := make([]string, len(rawZones))
@@ -248,37 +208,36 @@ func getAllNotifications(d *schema.ResourceData) []string {
 	return notifications
 }
 
-func getAllNetworks(d *schema.ResourceData) []Network {
-	var Networks []Network
-
+func getAllNetworks(d *schema.ResourceData) []groups.NetworkOpts {
+	var networkOptsList []groups.NetworkOpts
 	networks := d.Get("networks").([]interface{})
 	for _, v := range networks {
 		network := v.(map[string]interface{})
 		networkID := network["id"].(string)
-		v := Network{
+		val := groups.NetworkOpts{
 			ID: networkID,
 		}
-		Networks = append(Networks, v)
+		networkOptsList = append(networkOptsList, val)
 	}
 
-	log.Printf("[DEBUG] getNetworks: %#v", Networks)
-	return Networks
+	log.Printf("[DEBUG] Got Networks Opts: %#v", networkOptsList)
+	return networkOptsList
 }
 
-func getAllSecurityGroups(d *schema.ResourceData) []Group {
-	var Groups []Group
+func getAllSecurityGroups(d *schema.ResourceData) []groups.SecurityGroupOpts {
+	var Groups []groups.SecurityGroupOpts
 
 	asGroups := d.Get("security_groups").([]interface{})
 	for _, v := range asGroups {
 		group := v.(map[string]interface{})
 		groupID := group["id"].(string)
-		v := Group{
+		v := groups.SecurityGroupOpts{
 			ID: groupID,
 		}
 		Groups = append(Groups, v)
 	}
 
-	log.Printf("[DEBUG] getGroups: %#v", Groups)
+	log.Printf("[DEBUG] Got Security Groups Opts: %#v", Groups)
 	return Groups
 }
 
@@ -354,7 +313,7 @@ func refreshInstancesLifeStates(asClient *golangsdk.ServiceClient, groupID strin
 			}
 			// check for removal
 			if !checkInService {
-				if lifeStatus == "REMOVING" || lifeStatus != "INSERVICE" {
+				if lifeStatus != "INSERVICE" {
 					return allIns, lifeStatus, err
 				}
 			}
@@ -399,7 +358,7 @@ func resourceASGroupCreate(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*Config)
 	asClient, err := config.autoscalingV1Client(GetRegion(d, config))
 	if err != nil {
-		return fmt.Errorf("error creating OpenTelekomCloud autoscaling client: %s", err)
+		return fmt.Errorf("error creating OpenTelekomCloud AutoScaling client: %s", err)
 	}
 
 	minNum := d.Get("min_instance_number").(int)
@@ -409,7 +368,7 @@ func resourceASGroupCreate(d *schema.ResourceData, meta interface{}) error {
 	log.Printf("[DEBUG] Max instance number is: %#v", maxNum)
 	log.Printf("[DEBUG] Desire instance number is: %#v", desireNum)
 	if desireNum < minNum || desireNum > maxNum {
-		return fmt.Errorf("invalid parameters: it should be min_instance_number<=desire_instance_number<=max_instance_number")
+		return fmt.Errorf("invalid parameters: it should be `min_instance_number`<=`desire_instance_number`<=`max_instance_number`")
 	}
 	var initNum int
 	if desireNum > 0 {
@@ -419,10 +378,8 @@ func resourceASGroupCreate(d *schema.ResourceData, meta interface{}) error {
 	}
 	log.Printf("[DEBUG] Init instance number is: %#v", initNum)
 	networks := getAllNetworks(d)
-	asgNetworks := expandNetworks(networks)
 
 	secGroups := getAllSecurityGroups(d)
-	asgSecGroups := expandGroups(secGroups)
 
 	asgLBaaSListeners := getAllLBaaSListeners(d)
 
@@ -437,8 +394,8 @@ func resourceASGroupCreate(d *schema.ResourceData, meta interface{}) error {
 		LBListenerID:              d.Get("lb_listener_id").(string),
 		LBaaSListeners:            asgLBaaSListeners,
 		AvailableZones:            getAllAvailableZones(d),
-		Networks:                  asgNetworks,
-		SecurityGroup:             asgSecGroups,
+		Networks:                  networks,
+		SecurityGroup:             secGroups,
 		VpcID:                     d.Get("vpc_id").(string),
 		HealthPeriodicAuditMethod: d.Get("health_periodic_audit_method").(string),
 		HealthPeriodicAuditTime:   d.Get("health_periodic_audit_time").(int),
@@ -563,10 +520,8 @@ func resourceASGroupUpdate(d *schema.ResourceData, meta interface{}) error {
 	}
 
 	networks := getAllNetworks(d)
-	asgNetworks := expandNetworks(networks)
 
 	secGroups := getAllSecurityGroups(d)
-	asgSecGroups := expandGroups(secGroups)
 
 	asgLBaaSListeners := getAllLBaaSListeners(d)
 	updateOpts := groups.UpdateOpts{
@@ -579,8 +534,8 @@ func resourceASGroupUpdate(d *schema.ResourceData, meta interface{}) error {
 		LBListenerID:              d.Get("lb_listener_id").(string),
 		LBaaSListeners:            asgLBaaSListeners,
 		AvailableZones:            getAllAvailableZones(d),
-		Networks:                  asgNetworks,
-		SecurityGroup:             asgSecGroups,
+		Networks:                  networks,
+		SecurityGroup:             secGroups,
 		HealthPeriodicAuditMethod: d.Get("health_periodic_audit_method").(string),
 		HealthPeriodicAuditTime:   d.Get("health_periodic_audit_time").(int),
 		HealthPeriodicAuditGrace:  d.Get("health_periodic_audit_grace_period").(int),
@@ -641,36 +596,14 @@ func resourceASGroupDelete(d *schema.ResourceData, meta interface{}) error {
 		timeout := d.Timeout(schema.TimeoutDelete)
 		err = checkASGroupInstancesRemoved(asClient, d.Id(), timeout)
 		if err != nil {
-			return fmt.Errorf(
-				"[DEBUG] Error removing instances from ASGroup %q: %s", d.Id(), err)
+			return fmt.Errorf("[DEBUG] Error removing instances from ASGroup %q: %s", d.Id(), err)
 		}
 	}
 
 	log.Printf("[DEBUG] Begin to delete ASGroup %q", d.Id())
-	if delErr := groups.Delete(asClient, d.Id()).ExtractErr(); delErr != nil {
-		return fmt.Errorf("error deleting ASGroup: %s", delErr)
+	if err = groups.Delete(asClient, d.Id()).ExtractErr(); err != nil {
+		return fmt.Errorf("error deleting ASGroup: %s", err)
 	}
 
 	return nil
-}
-
-func resourceASGroupValidateListenerId(v interface{}, k string) (ws []string, errors []error) {
-	value := v.(string)
-	split := strings.Split(value, ",")
-	if len(split) <= 3 {
-		return
-	}
-	errors = append(errors, fmt.Errorf("%q supports binding up to 3 ELB listeners which are separated by a comma", k))
-	return
-}
-
-func resourceASGroupValidateGroupName(v interface{}, k string) (ws []string, errors []error) {
-	value := v.(string)
-	if len(value) > 64 || len(value) < 1 {
-		errors = append(errors, fmt.Errorf("%q must contain more than 1 and less than 64 characters", k))
-	}
-	if !regexp.MustCompile(`^[0-9a-zA-Z-_]+$`).MatchString(value) {
-		errors = append(errors, fmt.Errorf("only alphanumeric characters, hyphens, and underscores allowed in %q", k))
-	}
-	return
 }
