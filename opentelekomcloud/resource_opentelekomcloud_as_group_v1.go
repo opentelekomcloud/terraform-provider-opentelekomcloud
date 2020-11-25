@@ -10,6 +10,7 @@ import (
 	"github.com/hashicorp/go-multierror"
 	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/helper/validation"
 	"github.com/opentelekomcloud/gophertelekomcloud"
 
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/autoscaling/v1/groups"
@@ -63,12 +64,15 @@ func resourceASGroup() *schema.Resource {
 				Type:         schema.TypeInt,
 				Optional:     true,
 				Default:      300,
-				ValidateFunc: resourceASGroupValidateCoolDownTime,
+				ValidateFunc: validation.IntBetween(0, 86400),
 			},
 			"lb_listener_id": {
 				Type:         schema.TypeString,
 				Optional:     true,
 				ValidateFunc: resourceASGroupValidateListenerId,
+				ConflictsWith: []string{
+					"lbaas_listeners",
+				},
 			},
 			"lbaas_listeners": {
 				Type:     schema.TypeList,
@@ -89,6 +93,9 @@ func resourceASGroup() *schema.Resource {
 							Default:  1,
 						},
 					},
+				},
+				ConflictsWith: []string{
+					"lb_listener_id",
 				},
 			},
 			"available_zones": {
@@ -126,17 +133,21 @@ func resourceASGroup() *schema.Resource {
 				Required: true,
 				ForceNew: true,
 			},
-			"health_periodic_audit_method": { // TODO: CHECK default
-				Type:         schema.TypeString,
-				Optional:     true,
-				ValidateFunc: resourceASGroupValidateHealthAuditMethod,
-				Default:      "NOVA_AUDIT",
+			"health_periodic_audit_method": {
+				Type:     schema.TypeString,
+				Optional: true,
+				ValidateFunc: validation.StringInSlice([]string{
+					"ELB_AUDIT", "NOVA_AUDIT",
+				}, true),
+				Default: "NOVA_AUDIT",
 			},
 			"health_periodic_audit_time": {
-				Type:         schema.TypeInt,
-				Optional:     true,
-				Default:      5,
-				ValidateFunc: resourceASGroupValidateHealthAuditTime,
+				Type:     schema.TypeInt,
+				Optional: true,
+				Default:  5,
+				ValidateFunc: validation.IntInSlice([]int{
+					0, 1, 15, 60, 180,
+				}),
 			},
 			"health_periodic_audit_grace_period": {
 				Type:     schema.TypeInt,
@@ -144,10 +155,12 @@ func resourceASGroup() *schema.Resource {
 				Default:  600,
 			},
 			"instance_terminate_policy": {
-				Type:         schema.TypeString,
-				Optional:     true,
-				Default:      "OLD_CONFIG_OLD_INSTANCE",
-				ValidateFunc: resourceASGroupValidateTerminatePolicy,
+				Type:     schema.TypeString,
+				Optional: true,
+				Default:  "OLD_CONFIG_OLD_INSTANCE",
+				ValidateFunc: validation.StringInSlice([]string{
+					"OLD_CONFIG_OLD_INSTANCE ", "OLD_CONFIG_NEW_INSTANCE", "OLD_INSTANCE", "NEW_INSTANCE",
+				}, true),
 			},
 			"notifications": {
 				Type:     schema.TypeList,
@@ -641,28 +654,6 @@ func resourceASGroupDelete(d *schema.ResourceData, meta interface{}) error {
 	return nil
 }
 
-var TerminatePolices = [4]string{"OLD_CONFIG_OLD_INSTANCE", "OLD_CONFIG_NEW_INSTANCE", "OLD_INSTANCE", "NEW_INSTANCE"}
-
-func resourceASGroupValidateTerminatePolicy(v interface{}, k string) (ws []string, errors []error) {
-	value := v.(string)
-	for i := range TerminatePolices {
-		if value == TerminatePolices[i] {
-			return
-		}
-	}
-	errors = append(errors, fmt.Errorf("%q must be one of %v", k, TerminatePolices))
-	return
-}
-
-func resourceASGroupValidateCoolDownTime(v interface{}, k string) (ws []string, errors []error) {
-	value := v.(int)
-	if 0 <= value && value <= 86400 {
-		return
-	}
-	errors = append(errors, fmt.Errorf("%q must be [0, 86400]", k))
-	return
-}
-
 func resourceASGroupValidateListenerId(v interface{}, k string) (ws []string, errors []error) {
 	value := v.(string)
 	split := strings.Split(value, ",")
@@ -670,32 +661,6 @@ func resourceASGroupValidateListenerId(v interface{}, k string) (ws []string, er
 		return
 	}
 	errors = append(errors, fmt.Errorf("%q supports binding up to 3 ELB listeners which are separated by a comma", k))
-	return
-}
-
-var HealthAuditMethods = [2]string{"ELB_AUDIT", "NOVA_AUDIT"}
-
-func resourceASGroupValidateHealthAuditMethod(v interface{}, k string) (ws []string, errors []error) {
-	value := v.(string)
-	for i := range HealthAuditMethods {
-		if value == HealthAuditMethods[i] {
-			return
-		}
-	}
-	errors = append(errors, fmt.Errorf("%q must be one of %v", k, HealthAuditMethods))
-	return
-}
-
-var HealthAuditTime = [4]int{5, 15, 60, 180}
-
-func resourceASGroupValidateHealthAuditTime(v interface{}, k string) (ws []string, errors []error) {
-	value := v.(int)
-	for i := range HealthAuditTime {
-		if value == HealthAuditTime[i] {
-			return
-		}
-	}
-	errors = append(errors, fmt.Errorf("%q must be one of %v", k, HealthAuditTime))
 	return
 }
 
