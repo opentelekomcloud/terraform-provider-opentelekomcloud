@@ -335,7 +335,7 @@ func refreshInstancesLifeStates(asClient *golangsdk.ServiceClient, groupID strin
 func checkASGroupInstancesInService(asClient *golangsdk.ServiceClient, groupID string, insNum int, timeout time.Duration) error {
 	stateConf := &resource.StateChangeConf{
 		Pending: []string{"PENDING"},
-		Target:  []string{"INSERVICE"}, // if there is no LifeCycle status, meaning no instances in asg
+		Target:  []string{"INSERVICE"}, // if there is no lifecycle status, meaning no instances in asg
 		Refresh: refreshInstancesLifeStates(asClient, groupID, insNum, true),
 		Timeout: timeout,
 		Delay:   10 * time.Second,
@@ -349,7 +349,7 @@ func checkASGroupInstancesInService(asClient *golangsdk.ServiceClient, groupID s
 func checkASGroupInstancesRemoved(asClient *golangsdk.ServiceClient, groupID string, timeout time.Duration) error {
 	stateConf := &resource.StateChangeConf{
 		Pending: []string{"REMOVING"},
-		Target:  []string{""}, // if there is no LifeCycle status, meaning no instances in asg
+		Target:  []string{""}, // if there is no lifecycle status, meaning no instances in asg
 		Refresh: refreshInstancesLifeStates(asClient, groupID, 0, false),
 		Timeout: timeout,
 		Delay:   10 * time.Second,
