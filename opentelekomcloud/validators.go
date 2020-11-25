@@ -94,16 +94,13 @@ func validateJsonString(v interface{}, k string) (ws []string, errors []error) {
 
 func validateName(v interface{}, k string) (ws []string, errors []error) {
 	value := v.(string)
-	if len(value) > 64 {
-		errors = append(errors, fmt.Errorf(
-			"%q cannot be longer than 64 characters: %q", k, value))
+	if len(value) > 64 || len(value) < 1 {
+		errors = append(errors, fmt.Errorf("%q must contain more than 1 and less than 64 characters", k))
 	}
 
 	pattern := `^[\.\-_A-Za-z0-9]+$`
 	if !regexp.MustCompile(pattern).MatchString(value) {
-		errors = append(errors, fmt.Errorf(
-			"%q doesn't comply with restrictions (%q): %q",
-			k, pattern, value))
+		errors = append(errors, fmt.Errorf("only alphanumeric characters, hyphens, and underscores allowed in %q", k))
 	}
 
 	return
@@ -397,5 +394,15 @@ func validateDDSStartTime(v interface{}, k string) (ws []string, errors []error)
 		errors = append(errors, fmt.Errorf("the values from `mm` and `MM` must be set to any of the 00, 15, 30, or 45: %s", v))
 	}
 
+	return
+}
+
+func resourceASGroupValidateListenerId(v interface{}, k string) (ws []string, errors []error) {
+	value := v.(string)
+	listenerIds := strings.Split(value, ",")
+	if len(listenerIds) <= 3 {
+		return
+	}
+	errors = append(errors, fmt.Errorf("%q supports binding up to 3 ELB listeners which are separated by a comma", k))
 	return
 }
