@@ -63,11 +63,13 @@ func resourceASGroup() *schema.Resource {
 				Optional:     true,
 				Default:      300,
 				ValidateFunc: validation.IntBetween(0, 86400),
+				Description:  "The cooling duration, in seconds.",
 			},
 			"lb_listener_id": {
 				Type:         schema.TypeString,
 				Optional:     true,
 				ValidateFunc: resourceASGroupValidateListenerId,
+				Description:  "The system supports the binding of up to three ELB listeners, the IDs of which are separated using a comma.",
 			},
 			"lbaas_listeners": {
 				Type:     schema.TypeList,
@@ -140,11 +142,13 @@ func resourceASGroup() *schema.Resource {
 				ValidateFunc: validation.IntInSlice([]int{
 					0, 1, 5, 15, 60, 180,
 				}),
+				Description: "The health check period for instances, in minutes.",
 			},
 			"health_periodic_audit_grace_period": {
-				Type:     schema.TypeInt,
-				Optional: true,
-				Default:  600,
+				Type:        schema.TypeInt,
+				Optional:    true,
+				Default:     600,
+				Description: "The grace period for instance health check, in seconds.",
 			},
 			"instance_terminate_policy": {
 				Type:     schema.TypeString,
@@ -164,15 +168,17 @@ func resourceASGroup() *schema.Resource {
 				Optional: true,
 				Default:  false,
 			},
-			"delete_instances": { // TODO: CHECK THIS ONE STRING and BOOL issues
-				Type:     schema.TypeString,
-				Optional: true,
-				Default:  "no",
+			"delete_instances": {
+				Type:        schema.TypeString,
+				Optional:    true,
+				Default:     "no",
+				Description: "Whether to delete instances when they are removed from the AS group.",
 			},
 			"instances": {
-				Type:     schema.TypeList,
-				Computed: true,
-				Elem:     &schema.Schema{Type: schema.TypeString},
+				Type:        schema.TypeList,
+				Computed:    true,
+				Elem:        &schema.Schema{Type: schema.TypeString},
+				Description: "The instances id list in the as group.",
 			},
 			"current_instance_number": {
 				Type:     schema.TypeInt,
