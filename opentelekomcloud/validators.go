@@ -399,7 +399,8 @@ func validateDDSStartTime(v interface{}, k string) (ws []string, errors []error)
 
 func resourceASGroupValidateListenerId(v interface{}, k string) (ws []string, errors []error) {
 	value := v.(string)
-	if strings.Count(value, ",") <= 2 {
+	listenerIds := strings.Split(value, ",")
+	if len(listenerIds) <= 3 {
 		return
 	}
 	errors = append(errors, fmt.Errorf("%q supports binding up to 3 ELB listeners which are separated by a comma", k))
