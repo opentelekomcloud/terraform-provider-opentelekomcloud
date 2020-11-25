@@ -31,6 +31,24 @@ func TestAccASV1Group_basic(t *testing.T) {
 	})
 }
 
+func TestAccASV1Group_Fix(t *testing.T) {
+	var asGroup groups.Group
+
+	resource.Test(t, resource.TestCase{
+		PreCheck:     func() { testAccAsConfigPreCheck(t) },
+		Providers:    testAccProviders,
+		CheckDestroy: testAccCheckASV1GroupDestroy,
+		Steps: []resource.TestStep{
+			{
+				Config: testASV1Group_Fix,
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckASV1GroupExists("opentelekomcloud_as_group_v1.proxy_group", &asGroup),
+				),
+			},
+		},
+	})
+}
+
 func testAccCheckASV1GroupDestroy(s *terraform.State) error {
 	config := testAccProvider.Meta().(*Config)
 	asClient, err := config.autoscalingV1Client(OS_REGION_NAME)
@@ -88,8 +106,7 @@ func testAccCheckASV1GroupExists(n string, group *groups.Group) resource.TestChe
 
 var testASV1Group_basic = fmt.Sprintf(`
 resource "opentelekomcloud_networking_secgroup_v2" "secgroup" {
-  name        = "terraform"
-  description = "This is a terraform test security group"
+  name = "test-acc"
 }
 
 resource "opentelekomcloud_compute_keypair_v2" "hth_key" {
@@ -146,3 +163,58 @@ resource "opentelekomcloud_as_group_v1" "hth_as_group"{
   health_periodic_audit_grace_period = 700
 }
 `, OS_SUBNET_ID, OS_IMAGE_ID, OS_NETWORK_ID, OS_VPC_ID)
+
+var testASV1Group_Fix = fmt.Sprintf(`
+resource "opentelekomcloud_compute_secgroup_v2" "secgroup" {
+  description = "Presudo SG"
+  name        = "pseudo-sg"
+}
+
+# Proxy AS configuration
+resource "opentelekomcloud_as_configuration_v1" "proxy_config" {
+  scaling_configuration_name = "proxy-test-asg"
+  instance_config {
+    image     = "%s"
+    key_name  = "%s"
+    disk {
+      size        = 40
+      volume_type = "SATA"
+      disk_type   = "SYS"
+    }
+
+    metadata  = {
+      environment  = "otc-test"
+      generator    = "terraform"
+      puppetmaster = "pseudo-puppet"
+      role         = "pseudo-role"
+      autoscaling  = "proxy_ASG"
+    }
+  }
+}
+
+resource "opentelekomcloud_as_group_v1" "proxy_group" {
+  scaling_group_name           = "proxy-test-asg"
+  scaling_configuration_id     = opentelekomcloud_as_configuration_v1.proxy_config.id
+  available_zones              = ["%s"]
+  desire_instance_number       = 3
+  min_instance_number          = 1
+  max_instance_number          = 10
+  vpc_id                       = "%s"
+  delete_publicip              = true
+  delete_instances             = "yes"
+
+  networks {
+    id = "%s"
+  }
+  security_groups {
+    id = opentelekomcloud_compute_secgroup_v2.secgroup.id
+  }
+
+  lifecycle {
+    ignore_changes = [
+      instances
+    ]
+  }
+
+}
+`, OS_IMAGE_ID, OS_KEYPAIR_NAME, OS_AVAILABILITY_ZONE, OS_VPC_ID, OS_NETWORK_ID)
