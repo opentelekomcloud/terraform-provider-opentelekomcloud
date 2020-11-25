@@ -117,17 +117,20 @@ The following arguments are supported:
   The default value is 0.
 
 * `cool_down_time` - (Optional) The cooling duration (in seconds). The value ranges
-  from 0 to 86400, and is 900 by default.
+  from 0 to 86400, and is 300 by default.
 
 * `lb_listener_id` - (Optional) The ELB listener IDs. The system supports up to
   three ELB listeners, the IDs of which are separated using a comma (,).
+  This parameter is alternative to `lbaas_listeners`.
 
 * `lbaas_listeners` - (Optional) An array of one or more enhanced load balancer.
   The system supports the binding of up to three load balancers. The field is
-  alternative to lb_listener_id.  The lbaas_listeners object structure is documented below.
+  alternative to `lb_listener_id`. The `lbaas_listeners` object structure is
+  documented below.
 
-* `available_zones` - (Optional) The availability zones in which to create
-  the instances in the autoscaling group.
+* `available_zones` - (Optional) Specifies the AZ information. The ECS
+  associated with a scaling action will be created in a specified AZ.
+  If you do not specify an AZ, the system automatically specifies one.
 
 * `networks` - (Required) An array of one or more network IDs.
   The system supports up to five networks. The networks object structure
@@ -145,7 +148,9 @@ The following arguments are supported:
   Otherwise, the default value is `NOVA_AUDIT`.
 
 * `health_periodic_audit_time` - (Optional) The health check period for instances.
-  The period has four options: 5 minutes (default), 15 minutes, 60 minutes, and 180 minutes.
+  The value can be 1, 5, 15, 60, or 180 in the unit of minutes. If this parameter
+  is not specified, the default value is 5. If the value is set to 0, health check
+  is performed every 10 seconds.
 
 * `health_periodic_audit_grace_period` - (Optional) The grace period for instance health check.
   The unit is second and value range is 0-86400. The default value is 600. The health check grace
