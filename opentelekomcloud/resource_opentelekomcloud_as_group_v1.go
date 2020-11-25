@@ -61,7 +61,7 @@ func resourceASGroup() *schema.Resource {
 			"cool_down_time": {
 				Type:         schema.TypeInt,
 				Optional:     true,
-				Default:      300,
+				Default:      900,
 				ValidateFunc: validation.IntBetween(0, 86400),
 				Description:  "The cooling duration, in seconds.",
 			},
