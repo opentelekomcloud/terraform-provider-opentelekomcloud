@@ -1,9 +1,10 @@
 package opentelekomcloud
 
 import (
+	"encoding/base64"
 	"fmt"
 	"log"
-	"strings"
+	"net/url"
 	"time"
 
 	"github.com/hashicorp/go-multierror"
@@ -117,6 +118,13 @@ func resourceCCEClusterV3() *schema.Resource {
 				ForceNew: true,
 				Default:  "x509",
 			},
+			"authenticating_proxy_ca": {
+				Type:             schema.TypeString,
+				Optional:         true,
+				Computed:         true,
+				ForceNew:         true,
+				DiffSuppressFunc: suppressEquivalentBase64,
+			},
 			"kubernetes_svc_ip_range": {
 				Type:     schema.TypeString,
 				Optional: true,
@@ -216,7 +224,7 @@ func resourceClusterExtendParamV3(d *schema.ResourceData) map[string]string {
 	for key, val := range d.Get("extend_param").(map[string]interface{}) {
 		m[key] = val.(string)
 	}
-	if multi_az, ok := d.GetOk("multi_az"); ok && multi_az == true {
+	if multiAZ, ok := d.GetOk("multi_az"); ok && multiAZ == true {
 		m["clusterAZ"] = "multi_az"
 	}
 	if eip, ok := d.GetOk("eip"); ok {
@@ -230,36 +238,49 @@ func resourceCCEClusterV3Create(d *schema.ResourceData, meta interface{}) error 
 	cceClient, err := config.cceV3Client(GetRegion(d, config))
 
 	if err != nil {
-		return fmt.Errorf("Unable to create opentelekomcloud CCE client : %s", err)
+		return fmt.Errorf("unable to create opentelekomcloud CCE client : %s", err)
 	}
 	if d.Get("eip").(string) != "" {
 		fipId, err := resourceFloatingIPV2Exists(d, meta, d.Get("eip").(string))
 		if err != nil {
-			return fmt.Errorf("Error retrieving the eip: %s", err)
+			return fmt.Errorf("error retrieving the eip: %s", err)
 		}
 		if fipId == "" {
-			return fmt.Errorf("The specified EIP %s does not exist", d.Get("eip").(string))
+			return fmt.Errorf("the specified EIP %s does not exist", d.Get("eip").(string))
 		}
+	}
+
+	authProxy := make(map[string]string)
+	if ca, ok := d.GetOk("authenticating_proxy_ca"); ok {
+		authProxy["ca"] = base64IfNot(ca.(string))
 	}
 
 	createOpts := clusters.CreateOpts{
 		Kind:       "Cluster",
 		ApiVersion: "v3",
-		Metadata: clusters.CreateMetaData{Name: d.Get("name").(string),
+		Metadata: clusters.CreateMetaData{
+			Name:        d.Get("name").(string),
 			Labels:      resourceClusterLabelsV3(d),
-			Annotations: resourceClusterAnnotationsV3(d)},
+			Annotations: resourceClusterAnnotationsV3(d),
+		},
 		Spec: clusters.Spec{
 			Type:        d.Get("cluster_type").(string),
 			Flavor:      d.Get("flavor_id").(string),
 			Version:     d.Get("cluster_version").(string),
 			Description: d.Get("description").(string),
-			HostNetwork: clusters.HostNetworkSpec{VpcId: d.Get("vpc_id").(string),
+			HostNetwork: clusters.HostNetworkSpec{
+				VpcId:         d.Get("vpc_id").(string),
 				SubnetId:      d.Get("subnet_id").(string),
-				HighwaySubnet: d.Get("highway_subnet_id").(string)},
-			ContainerNetwork: clusters.ContainerNetworkSpec{Mode: d.Get("container_network_type").(string),
-				Cidr: d.Get("container_network_cidr").(string)},
-			Authentication: clusters.AuthenticationSpec{Mode: d.Get("authentication_mode").(string),
-				AuthenticatingProxy: make(map[string]string)},
+				HighwaySubnet: d.Get("highway_subnet_id").(string),
+			},
+			ContainerNetwork: clusters.ContainerNetworkSpec{
+				Mode: d.Get("container_network_type").(string),
+				Cidr: d.Get("container_network_cidr").(string),
+			},
+			Authentication: clusters.AuthenticationSpec{
+				Mode:                d.Get("authentication_mode").(string),
+				AuthenticatingProxy: authProxy,
+			},
 			BillingMode:          d.Get("billing_mode").(int),
 			ExtendParam:          resourceClusterExtendParamV3(d),
 			KubernetesSvcIpRange: d.Get("kubernetes_svc_ip_range").(string),
@@ -270,7 +291,7 @@ func resourceCCEClusterV3Create(d *schema.ResourceData, meta interface{}) error 
 	create, err := clusters.Create(cceClient, createOpts).Extract()
 
 	if err != nil {
-		return fmt.Errorf("Error creating opentelekomcloud Cluster: %s", err)
+		return fmt.Errorf("error creating opentelekomcloud Cluster: %s", err)
 	}
 
 	log.Printf("[DEBUG] Waiting for opentelekomcloud CCE cluster (%s) to become available", create.Metadata.Id)
@@ -286,7 +307,7 @@ func resourceCCEClusterV3Create(d *schema.ResourceData, meta interface{}) error 
 
 	_, err = stateConf.WaitForState()
 	if err != nil {
-		return fmt.Errorf("Error creating OpenTelekomCloud CCE cluster: %s", err)
+		return fmt.Errorf("error creating OpenTelekomCloud CCE cluster: %s", err)
 	}
 	d.SetId(create.Metadata.Id)
 
@@ -300,60 +321,74 @@ func resourceCCEClusterV3Read(d *schema.ResourceData, meta interface{}) error {
 		return fmt.Errorf("error creating opentelekomcloud CCE client: %s", err)
 	}
 
-	n, err := clusters.Get(cceClient, d.Id()).Extract()
+	cluster, err := clusters.Get(cceClient, d.Id()).Extract()
 	if err != nil {
 		if _, ok := err.(golangsdk.ErrDefault404); ok {
 			d.SetId("")
 			return nil
 		}
-
 		return fmt.Errorf("error retrieving opentelekomcloud CCE: %s", err)
 	}
 
-	mErr := multierror.Append(nil,
-		d.Set("name", n.Metadata.Name),
-		d.Set("status", n.Status.Phase),
-		d.Set("flavor_id", n.Spec.Flavor),
-		d.Set("cluster_type", n.Spec.Type),
-		d.Set("cluster_version", n.Spec.Version),
-		d.Set("description", n.Spec.Description),
-		d.Set("billing_mode", n.Spec.BillingMode),
-		d.Set("vpc_id", n.Spec.HostNetwork.VpcId),
-		d.Set("subnet_id", n.Spec.HostNetwork.SubnetId),
-		d.Set("highway_subnet_id", n.Spec.HostNetwork.HighwaySubnet),
-		d.Set("container_network_type", n.Spec.ContainerNetwork.Mode),
-		d.Set("container_network_cidr", n.Spec.ContainerNetwork.Cidr),
-		d.Set("authentication_mode", n.Spec.Authentication.Mode),
-		d.Set("kubernetes_svc_ip_range", n.Spec.KubernetesSvcIpRange),
-		d.Set("kube_proxy_mode", n.Spec.KubeProxyMode),
-		d.Set("internal", n.Status.Endpoints[0].Internal),
-		d.Set("external", n.Status.Endpoints[0].External),
-		d.Set("external_otc", n.Status.Endpoints[0].ExternalOTC),
-		d.Set("region", GetRegion(d, config)),
-	)
-	if n.Status.Endpoints[0].External != "" {
-		eip := strings.Split(n.Status.Endpoints[0].External, "//")
-		eip = strings.Split(eip[1], ":")
-		mErr = multierror.Append(mErr, d.Set("eip", eip[0]))
-	} else {
-		mErr = multierror.Append(mErr, d.Set("eip", ""))
+	authProxyCA, ok := cluster.Spec.Authentication.AuthenticatingProxy["ca"]
+	if !ok {
+		return fmt.Errorf("error reading authenticating proxy CA property")
 	}
+	b64decodedCA, err := base64.StdEncoding.DecodeString(authProxyCA)
+	if err != nil {
+		return fmt.Errorf("error decoding auth proxy CA: %s", err)
+	}
+	authProxyCA = string(b64decodedCA)
+
+	eip := ""
+	if cluster.Status.Endpoints[0].External != "" {
+		endpointURL, err := url.Parse(cluster.Status.Endpoints[0].External)
+		if err != nil {
+			return fmt.Errorf("error parsing endpoint URL: %s", err)
+		}
+		eip = endpointURL.Hostname()
+	}
+
+	mErr := multierror.Append(nil,
+		d.Set("name", cluster.Metadata.Name),
+		d.Set("status", cluster.Status.Phase),
+		d.Set("flavor_id", cluster.Spec.Flavor),
+		d.Set("cluster_type", cluster.Spec.Type),
+		d.Set("cluster_version", cluster.Spec.Version),
+		d.Set("description", cluster.Spec.Description),
+		d.Set("billing_mode", cluster.Spec.BillingMode),
+		d.Set("vpc_id", cluster.Spec.HostNetwork.VpcId),
+		d.Set("subnet_id", cluster.Spec.HostNetwork.SubnetId),
+		d.Set("highway_subnet_id", cluster.Spec.HostNetwork.HighwaySubnet),
+		d.Set("container_network_type", cluster.Spec.ContainerNetwork.Mode),
+		d.Set("container_network_cidr", cluster.Spec.ContainerNetwork.Cidr),
+		d.Set("authentication_mode", cluster.Spec.Authentication.Mode),
+		d.Set("authenticating_proxy_ca", authProxyCA),
+		d.Set("kubernetes_svc_ip_range", cluster.Spec.KubernetesSvcIpRange),
+		d.Set("kube_proxy_mode", cluster.Spec.KubeProxyMode),
+		d.Set("internal", cluster.Status.Endpoints[0].Internal),
+		d.Set("external", cluster.Status.Endpoints[0].External),
+		d.Set("external_otc", cluster.Status.Endpoints[0].ExternalOTC),
+		d.Set("region", GetRegion(d, config)),
+		d.Set("eip", eip),
+	)
 	if err := mErr.ErrorOrNil(); err != nil {
 		return fmt.Errorf("error setting cce cluster fields: %s", err)
 	}
 
 	cert, err := clusters.GetCert(cceClient, d.Id()).Extract()
 	if err != nil {
-		log.Printf("error retrieving opentelekomcloud CCE cluster cert: %s", err)
+		return fmt.Errorf("error retrieving opentelekomcloud CCE cluster cert: %s", err)
 	}
 
 	// Set Certificate Clusters
 	var clusterList []map[string]interface{}
 	for _, clusterObj := range cert.Clusters {
-		clusterCert := make(map[string]interface{})
-		clusterCert["name"] = clusterObj.Name
-		clusterCert["server"] = clusterObj.Cluster.Server
-		clusterCert["certificate_authority_data"] = clusterObj.Cluster.CertAuthorityData
+		clusterCert := map[string]interface{}{
+			"name":                       clusterObj.Name,
+			"server":                     clusterObj.Cluster.Server,
+			"certificate_authority_data": clusterObj.Cluster.CertAuthorityData,
+		}
 		clusterList = append(clusterList, clusterCert)
 	}
 	if err := d.Set("certificate_clusters", clusterList); err != nil {
@@ -363,10 +398,11 @@ func resourceCCEClusterV3Read(d *schema.ResourceData, meta interface{}) error {
 	// Set Certificate Users
 	var userList []map[string]interface{}
 	for _, userObj := range cert.Users {
-		userCert := make(map[string]interface{})
-		userCert["name"] = userObj.Name
-		userCert["client_certificate_data"] = userObj.User.ClientCertData
-		userCert["client_key_data"] = userObj.User.ClientKeyData
+		userCert := map[string]interface{}{
+			"name":                    userObj.Name,
+			"client_certificate_data": userObj.User.ClientCertData,
+			"client_key_data":         userObj.User.ClientKeyData,
+		}
 		userList = append(userList, userCert)
 	}
 	if err := d.Set("certificate_users", userList); err != nil {
@@ -380,7 +416,7 @@ func resourceCCEClusterV3Update(d *schema.ResourceData, meta interface{}) error 
 	config := meta.(*Config)
 	cceClient, err := config.cceV3Client(GetRegion(d, config))
 	if err != nil {
-		return fmt.Errorf("Error creating opentelekomcloud CCE Client: %s", err)
+		return fmt.Errorf("error creating opentelekomcloud CCE Client: %s", err)
 	}
 
 	var updateOpts clusters.UpdateOpts
@@ -389,7 +425,7 @@ func resourceCCEClusterV3Update(d *schema.ResourceData, meta interface{}) error 
 		updateOpts.Spec.Description = d.Get("description").(string)
 		_, err = clusters.Update(cceClient, d.Id(), updateOpts).Extract()
 		if err != nil {
-			return fmt.Errorf("Error updating opentelekomcloud CCE: %s", err)
+			return fmt.Errorf("error updating opentelekomcloud CCE: %s", err)
 		}
 	}
 
@@ -401,10 +437,10 @@ func resourceCCEClusterV3Update(d *schema.ResourceData, meta interface{}) error 
 		if newEipStr != "" {
 			fipId, err = resourceFloatingIPV2Exists(d, meta, newEipStr)
 			if err != nil {
-				return fmt.Errorf("Error retrieving the eip: %s", err)
+				return fmt.Errorf("error retrieving the eip: %s", err)
 			}
 			if fipId == "" {
-				return fmt.Errorf("The specified EIP %s does not exist", newEipStr)
+				return fmt.Errorf("the specified EIP %s does not exist", newEipStr)
 			}
 		}
 		if oldEipStr != "" {
@@ -413,7 +449,7 @@ func resourceCCEClusterV3Update(d *schema.ResourceData, meta interface{}) error 
 			}
 			err = clusters.UpdateMasterIp(cceClient, d.Id(), updateIpOpts).ExtractErr()
 			if err != nil {
-				return fmt.Errorf("Error unbinding EIP to opentelekomcloud CCE: %s", err)
+				return fmt.Errorf("error unbinding EIP to opentelekomcloud CCE: %s", err)
 			}
 		}
 		if newEipStr != "" {
@@ -424,7 +460,7 @@ func resourceCCEClusterV3Update(d *schema.ResourceData, meta interface{}) error 
 			updateIpOpts.Spec.ID = fipId
 			err = clusters.UpdateMasterIp(cceClient, d.Id(), updateIpOpts).ExtractErr()
 			if err != nil {
-				return fmt.Errorf("Error binding EIP to opentelekomcloud CCE: %s", err)
+				return fmt.Errorf("error binding EIP to opentelekomcloud CCE: %s", err)
 			}
 		}
 	}
@@ -436,11 +472,11 @@ func resourceCCEClusterV3Delete(d *schema.ResourceData, meta interface{}) error 
 	config := meta.(*Config)
 	cceClient, err := config.cceV3Client(GetRegion(d, config))
 	if err != nil {
-		return fmt.Errorf("Error creating opentelekomcloud CCE Client: %s", err)
+		return fmt.Errorf("error creating opentelekomcloud CCE Client: %s", err)
 	}
 	err = clusters.Delete(cceClient, d.Id()).ExtractErr()
 	if err != nil {
-		return fmt.Errorf("Error deleting opentelekomcloud CCE Cluster: %s", err)
+		return fmt.Errorf("error deleting opentelekomcloud CCE Cluster: %s", err)
 	}
 	stateConf := &resource.StateChangeConf{
 		Pending:    []string{"Deleting", "Available", "Unavailable"},
@@ -454,7 +490,7 @@ func resourceCCEClusterV3Delete(d *schema.ResourceData, meta interface{}) error 
 	_, err = stateConf.WaitForState()
 
 	if err != nil {
-		return fmt.Errorf("Error deleting opentelekomcloud CCE cluster: %s", err)
+		return fmt.Errorf("error deleting opentelekomcloud CCE cluster: %s", err)
 	}
 
 	d.SetId("")
@@ -465,7 +501,7 @@ func waitForCCEClusterActive(cceClient *golangsdk.ServiceClient, clusterId strin
 	return func() (interface{}, string, error) {
 		n, err := clusters.Get(cceClient, clusterId).Extract()
 		if err != nil {
-			return nil, "", err
+			return nil, "", fmt.Errorf("error waiting for CCE cluster to become active: %s", err)
 		}
 
 		return n, n.Status.Phase, nil
@@ -483,6 +519,7 @@ func waitForCCEClusterDelete(cceClient *golangsdk.ServiceClient, clusterId strin
 				log.Printf("[DEBUG] Successfully deleted opentelekomcloud CCE cluster %s", clusterId)
 				return r, "Deleted", nil
 			}
+			return nil, "", fmt.Errorf("error waiting CCE cluster to become deleted: %s", err)
 		}
 		if r.Status.Phase == "Deleting" {
 			return r, "Deleting", nil
@@ -496,19 +533,19 @@ func resourceFloatingIPV2Exists(d *schema.ResourceData, meta interface{}, floati
 	config := meta.(*Config)
 	networkClient, err := config.networkingV2Client(GetRegion(d, config))
 	if err != nil {
-		return "", fmt.Errorf("Error creating opentelekomcloud networking Client: %s", err)
+		return "", fmt.Errorf("error creating opentelekomcloud networking Client: %s", err)
 	}
 	listOpts := floatingips.ListOpts{
 		FloatingIP: floatingIP,
 	}
 	allPages, err := floatingips.List(networkClient, listOpts).AllPages()
 	if err != nil {
-		return "", err
+		return "", fmt.Errorf("error listing floating IPs: %s", err)
 	}
 
 	allFips, err := floatingips.ExtractFloatingIPs(allPages)
 	if err != nil {
-		return "", err
+		return "", fmt.Errorf("error extracting floating IPs: %s", err)
 	}
 
 	if len(allFips) == 0 {

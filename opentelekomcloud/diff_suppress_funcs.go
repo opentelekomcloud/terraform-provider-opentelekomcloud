@@ -161,3 +161,10 @@ func suppressSmartVersionDiff(k, old, new string, d *schema.ResourceData) bool {
 func suppressCaseInsensitive(_, old, new string, _ *schema.ResourceData) bool {
 	return strings.ToLower(old) == strings.ToLower(new)
 }
+
+func suppressEquivalentBase64(_, old, new string, _ *schema.ResourceData) bool {
+	if base64IfNot(old) == base64IfNot(new) {
+		return true
+	}
+	return false
+}

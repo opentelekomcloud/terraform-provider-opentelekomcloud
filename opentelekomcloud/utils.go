@@ -1,6 +1,7 @@
 package opentelekomcloud
 
 import (
+	"encoding/base64"
 	"encoding/json"
 	"fmt"
 	"log"
@@ -61,4 +62,15 @@ func convertStructToMap(obj interface{}, nameMap map[string]string) (map[string]
 
 func looksLikeJsonString(s interface{}) bool {
 	return regexp.MustCompile(`^\s*{`).MatchString(s.(string))
+}
+
+func base64IfNot(src string) string {
+	_, err := base64.StdEncoding.DecodeString(src)
+	if err == nil {
+		return src
+	}
+	srcBytes := []byte(src)
+	var dest []byte
+	base64.StdEncoding.Encode(dest, srcBytes)
+	return string(dest)
 }
