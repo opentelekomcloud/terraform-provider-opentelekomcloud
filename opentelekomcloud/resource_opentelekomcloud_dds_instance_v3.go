@@ -430,7 +430,7 @@ func resourceDdsInstanceV3Read(d *schema.ResourceData, meta interface{}) error {
 	}
 
 	// save nodes attribute
-	err = d.Set("nodes", FlattenDdsInstanceV3Nodes(instance))
+	err = d.Set("nodes", flattenDdsInstanceV3Nodes(instance))
 	if err != nil {
 		return fmt.Errorf("error setting nodes of DDSv3 instance: %s", err)
 	}
@@ -540,7 +540,7 @@ func resourceDdsInstanceV3Delete(d *schema.ResourceData, meta interface{}) error
 	return nil
 }
 
-func FlattenDdsInstanceV3Nodes(dds instances.InstanceResponse) interface{} {
+func flattenDdsInstanceV3Nodes(dds instances.InstanceResponse) interface{} {
 	nodesList := make([]map[string]interface{}, 0)
 	for _, group := range dds.Groups {
 		groupType := group.Type

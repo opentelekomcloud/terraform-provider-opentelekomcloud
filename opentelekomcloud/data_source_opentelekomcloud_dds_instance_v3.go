@@ -49,10 +49,6 @@ func dataSourceDdsInstanceV3() *schema.Resource {
 					},
 				},
 			},
-			"availability_zone": {
-				Type:     schema.TypeString,
-				Computed: true,
-			},
 			"vpc_id": {
 				Type:     schema.TypeString,
 				Optional: true,
@@ -65,11 +61,6 @@ func dataSourceDdsInstanceV3() *schema.Resource {
 				Type:     schema.TypeString,
 				Computed: true,
 			},
-			// "password": {
-			// 	Type:      schema.TypeString,
-			// 	Sensitive: true,
-			// 	Computed:  true,
-			// },
 			"disk_encryption_id": {
 				Type:     schema.TypeString,
 				Computed: true,
@@ -77,34 +68,6 @@ func dataSourceDdsInstanceV3() *schema.Resource {
 			"mode": {
 				Type:     schema.TypeString,
 				Computed: true,
-			},
-			"flavor": {
-				Type:     schema.TypeList,
-				Computed: true,
-				Elem: &schema.Resource{
-					Schema: map[string]*schema.Schema{
-						"type": {
-							Type:     schema.TypeString,
-							Computed: true,
-						},
-						"num": {
-							Type:     schema.TypeInt,
-							Computed: true,
-						},
-						"storage": {
-							Type:     schema.TypeString,
-							Computed: true,
-						},
-						"size": {
-							Type:     schema.TypeInt,
-							Computed: true,
-						},
-						"spec_code": {
-							Type:     schema.TypeString,
-							Computed: true,
-						},
-					},
-				},
 			},
 			"backup_strategy": {
 				Type:     schema.TypeList,
@@ -261,7 +224,7 @@ func dataSourceDdsInstanceV3Read(d *schema.ResourceData, meta interface{}) error
 		return fmt.Errorf("error setting DDSv3 backup_strategy opts: %s", err)
 	}
 
-	err = d.Set("nodes", FlattenDdsInstanceV3Nodes(ddsInstance))
+	err = d.Set("nodes", flattenDdsInstanceV3Nodes(ddsInstance))
 	if err != nil {
 		return fmt.Errorf("error setting nodes of DDSv3 instance: %s", err)
 	}
