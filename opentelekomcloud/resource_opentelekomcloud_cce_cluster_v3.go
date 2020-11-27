@@ -1,7 +1,6 @@
 package opentelekomcloud
 
 import (
-	"encoding/base64"
 	"fmt"
 	"log"
 	"net/url"
@@ -119,11 +118,9 @@ func resourceCCEClusterV3() *schema.Resource {
 				Default:  "x509",
 			},
 			"authenticating_proxy_ca": {
-				Type:             schema.TypeString,
-				Optional:         true,
-				Computed:         true,
-				ForceNew:         true,
-				DiffSuppressFunc: suppressEquivalentBase64,
+				Type:     schema.TypeString,
+				Optional: true,
+				ForceNew: true,
 			},
 			"kubernetes_svc_ip_range": {
 				Type:     schema.TypeString,
@@ -330,16 +327,6 @@ func resourceCCEClusterV3Read(d *schema.ResourceData, meta interface{}) error {
 		return fmt.Errorf("error retrieving opentelekomcloud CCE: %s", err)
 	}
 
-	authProxyCA, ok := cluster.Spec.Authentication.AuthenticatingProxy["ca"]
-	if !ok {
-		return fmt.Errorf("error reading authenticating proxy CA property")
-	}
-	b64decodedCA, err := base64.StdEncoding.DecodeString(authProxyCA)
-	if err != nil {
-		return fmt.Errorf("error decoding auth proxy CA: %s", err)
-	}
-	authProxyCA = string(b64decodedCA)
-
 	eip := ""
 	if cluster.Status.Endpoints[0].External != "" {
 		endpointURL, err := url.Parse(cluster.Status.Endpoints[0].External)
@@ -363,7 +350,6 @@ func resourceCCEClusterV3Read(d *schema.ResourceData, meta interface{}) error {
 		d.Set("container_network_type", cluster.Spec.ContainerNetwork.Mode),
 		d.Set("container_network_cidr", cluster.Spec.ContainerNetwork.Cidr),
 		d.Set("authentication_mode", cluster.Spec.Authentication.Mode),
-		d.Set("authenticating_proxy_ca", authProxyCA),
 		d.Set("kubernetes_svc_ip_range", cluster.Spec.KubernetesSvcIpRange),
 		d.Set("kube_proxy_mode", cluster.Spec.KubeProxyMode),
 		d.Set("internal", cluster.Status.Endpoints[0].Internal),

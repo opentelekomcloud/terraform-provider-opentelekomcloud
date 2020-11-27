@@ -1,7 +1,6 @@
 package opentelekomcloud
 
 import (
-	"encoding/base64"
 	"fmt"
 	"log"
 
@@ -66,10 +65,6 @@ func dataSourceCCEClusterV3() *schema.Resource {
 				Computed: true,
 			},
 			"authentication_mode": {
-				Type:     schema.TypeString,
-				Computed: true,
-			},
-			"authenticating_proxy_ca": {
 				Type:     schema.TypeString,
 				Computed: true,
 			},
@@ -171,16 +166,6 @@ func dataSourceCCEClusterV3Read(d *schema.ResourceData, meta interface{}) error 
 
 	d.SetId(cluster.Metadata.Id)
 
-	authProxyCA, ok := cluster.Spec.Authentication.AuthenticatingProxy["ca"]
-	if !ok {
-		return fmt.Errorf("error reading authenticating proxy CA property")
-	}
-	b64decodedCA, err := base64.StdEncoding.DecodeString(authProxyCA)
-	if err != nil {
-		return fmt.Errorf("error decoding auth proxy CA: %s", err)
-	}
-	authProxyCA = string(b64decodedCA)
-
 	mErr := multierror.Append(nil,
 		d.Set("name", cluster.Metadata.Name),
 		d.Set("flavor_id", cluster.Spec.Flavor),
@@ -194,7 +179,6 @@ func dataSourceCCEClusterV3Read(d *schema.ResourceData, meta interface{}) error 
 		d.Set("container_network_cidr", cluster.Spec.ContainerNetwork.Cidr),
 		d.Set("container_network_type", cluster.Spec.ContainerNetwork.Mode),
 		d.Set("authentication_mode", cluster.Spec.Authentication.Mode),
-		d.Set("authenticating_proxy_ca", authProxyCA),
 		d.Set("status", cluster.Status.Phase),
 		d.Set("internal", cluster.Status.Endpoints[0].Internal),
 		d.Set("external", cluster.Status.Endpoints[0].External),

@@ -69,8 +69,5 @@ func base64IfNot(src string) string {
 	if err == nil {
 		return src
 	}
-	srcBytes := []byte(src)
-	var dest []byte
-	base64.StdEncoding.Encode(dest, srcBytes)
-	return string(dest)
+	return base64.StdEncoding.EncodeToString([]byte(src))
 }
