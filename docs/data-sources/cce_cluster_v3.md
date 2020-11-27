@@ -49,6 +49,8 @@ All above argument parameters can be exported as attribute parameters along with
 
 * `container_network_type` - The container network type: overlay_l2 , underlay_ipvlan or vpc-router.
 
+* `authentication_mode` - (Optional) Authentication mode of the cluster, possible values are `rbac` and `authenticating_proxy`.
+
 * `subnet_id` - The ID of the subnet used to create the node.
 
 * `highway_subnet_id` - The ID of the high speed network used to create bare metal nodes.
