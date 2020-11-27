@@ -9,7 +9,7 @@ Use this data source to get info of available OpenTelekomCloud DDS flavors.
 ## Example Usage
 
 ```hcl
-data "opentelekomcloud_dds_flavors" "flavor" {
+data "opentelekomcloud_dds_flavors_v3" "flavor" {
   engine_name = "DDS-Community"
   vcpus       = 8
 }
