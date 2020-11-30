@@ -323,18 +323,16 @@ resource "opentelekomcloud_obs_bucket" "bucket" {
 }
 func testAccObsBucket_aksk(randInt int) string {
 	return fmt.Sprintf(`
-resource "opentelekomcloud_identity_credential_v3" "credential" {}
-
 resource "opentelekomcloud_obs_bucket" "bucket" {
   bucket        = "tf-test-bucket-%d"
   storage_class = "STANDARD"
   acl           = "private"
   credentials {
-    access_key = opentelekomcloud_identity_credential_v3.credential.access
-    secret_key = opentelekomcloud_identity_credential_v3.credential.secret
+    access_key = "%s"
+    secret_key = "%s"
   }
 }
-`, randInt)
+`, randInt, OS_ACCESS_KEY, OS_SECRET_KEY)
 }
 
 func testAccObsBucket_basic_update(randInt int) string {
