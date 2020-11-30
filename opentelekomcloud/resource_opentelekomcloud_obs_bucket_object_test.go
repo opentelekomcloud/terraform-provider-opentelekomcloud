@@ -78,6 +78,25 @@ func TestAccObsBucketObject_content(t *testing.T) {
 	})
 }
 
+func TestAccObsBucketObject_contentAKSK(t *testing.T) {
+	rInt := acctest.RandInt()
+
+	resource.Test(t, resource.TestCase{
+		PreCheck:     func() { testAccPreCheckS3(t) },
+		Providers:    testAccProviders,
+		CheckDestroy: testAccCheckObsBucketObjectDestroy,
+		Steps: []resource.TestStep{
+			{
+				PreConfig: func() {},
+				Config:    testAccObsBucketObjectConfigContent_aksk(rInt),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckObsBucketObjectExists("opentelekomcloud_obs_bucket_object.object"),
+				),
+			},
+		},
+	})
+}
+
 func testAccCheckObsBucketObjectDestroy(s *terraform.State) error {
 	config := testAccProvider.Meta().(*Config)
 	obsClient, err := config.newObjectStorageClient(OS_REGION_NAME)
@@ -162,16 +181,41 @@ func testAccCheckObsBucketObjectExists(n string) resource.TestCheckFunc {
 	}
 }
 
+func testAccObsBucketObjectConfigContent_aksk(randInt int) string {
+	return fmt.Sprintf(`
+resource "opentelekomcloud_obs_bucket" "object_bucket" {
+  bucket        = "tf-test-bucket-%d"
+  storage_class = "STANDARD"
+  acl           = "private"
+  credentials {
+    access_key = "%[2]s"
+    secret_key = "%[3]s"
+  }
+}
+
+resource "opentelekomcloud_obs_bucket_object" "object" {
+  bucket  = opentelekomcloud_obs_bucket.object_bucket.bucket
+  key     = "test-key"
+  content = "some_bucket_content"
+  credentials {
+    access_key = "%[2]s"
+    secret_key = "%[3]s"
+  }
+}
+
+`, randInt, OS_ACCESS_KEY, OS_SECRET_KEY)
+}
+
 func testAccObsBucketObjectConfigSource(randInt int, source string) string {
 	return fmt.Sprintf(`
 resource "opentelekomcloud_obs_bucket" "object_bucket" {
-    bucket = "tf-object-test-bucket-%d"
+  bucket = "tf-object-test-bucket-%d"
 }
 resource "opentelekomcloud_obs_bucket_object" "object" {
-	bucket = opentelekomcloud_obs_bucket.object_bucket.bucket
-	key = "test-key"
-	source = "%s"
-	content_type = "binary/octet-stream"
+  bucket       = opentelekomcloud_obs_bucket.object_bucket.bucket
+  key          = "test-key"
+  source       = "%s"
+  content_type = "binary/octet-stream"
 }
 `, randInt, source)
 }
@@ -179,12 +223,12 @@ resource "opentelekomcloud_obs_bucket_object" "object" {
 func testAccObsBucketObjectConfigContent(randInt int) string {
 	return fmt.Sprintf(`
 resource "opentelekomcloud_obs_bucket" "object_bucket" {
-        bucket = "tf-object-test-bucket-%d"
+  bucket = "tf-object-test-bucket-%d"
 }
 resource "opentelekomcloud_obs_bucket_object" "object" {
-        bucket = opentelekomcloud_obs_bucket.object_bucket.bucket
-        key = "test-key"
-        content = "some_bucket_content"
+  bucket  = opentelekomcloud_obs_bucket.object_bucket.bucket
+  key     = "test-key"
+  content = "some_bucket_content"
 }
 `, randInt)
 }
@@ -192,15 +236,15 @@ resource "opentelekomcloud_obs_bucket_object" "object" {
 func testAccObsBucketObjectConfig_withSSE(randInt int, source string) string {
 	return fmt.Sprintf(`
 resource "opentelekomcloud_obs_bucket" "object_bucket" {
-	bucket = "tf-object-test-bucket-%d"
+  bucket = "tf-object-test-bucket-%d"
 }
 
 resource "opentelekomcloud_obs_bucket_object" "object" {
-	bucket = opentelekomcloud_obs_bucket.object_bucket.bucket
-	key = "test-key"
-	source = "%s"
-	content_type = "binary/octet-stream"
-	encryption = true
+  bucket       = opentelekomcloud_obs_bucket.object_bucket.bucket
+  key          = "test-key"
+  source       = "%s"
+  content_type = "binary/octet-stream"
+  encryption   = true
 }
 `, randInt, source)
 }

@@ -544,6 +544,17 @@ func (c *Config) computeS3conn(region string) (*s3.S3, error) {
 	return s3conn, err
 }
 
+func setUpOBSLogging() {
+	// init log
+	if os.Getenv("OS_DEBUG") != "" {
+		var logfile = "./.obs-sdk.log"
+		// maxLogSize:10M, backups:10
+		if err := obs.InitLog(logfile, 1024*1024*10, 10, obs.LEVEL_DEBUG, false); err != nil {
+			log.Printf("[WARN] initial obs sdk log failed: %s", err)
+		}
+	}
+}
+
 func (c *Config) newObjectStorageClient(region string) (*obs.ObsClient, error) {
 	if (c.AccessKey == "" || c.SecretKey == "") && c.SecurityToken == "" {
 		return nil, fmt.Errorf("missing credentials for OBS, need access_key and secret_key or security_token values for provider")
@@ -557,14 +568,7 @@ func (c *Config) newObjectStorageClient(region string) (*obs.ObsClient, error) {
 		return nil, err
 	}
 
-	// init log
-	if os.Getenv("OS_DEBUG") != "" {
-		var logfile = "./.obs-sdk.log"
-		// maxLogSize:10M, backups:10
-		if err = obs.InitLog(logfile, 1024*1024*10, 10, obs.LEVEL_DEBUG, false); err != nil {
-			log.Printf("[WARN] initial obs sdk log failed: %s", err)
-		}
-	}
+	setUpOBSLogging()
 
 	return obs.New(c.AccessKey, c.SecretKey, client.Endpoint, obs.WithSecurityToken(c.SecurityToken))
 }

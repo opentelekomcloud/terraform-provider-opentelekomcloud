@@ -139,6 +139,23 @@ resource "opentelekomcloud_obs_bucket" "bucket" {
 }
 ```
 
+### Using ak/sk defined in the resource
+
+```hcl
+variable ak {}
+variable sk {}
+
+resource "opentelekomcloud_obs_bucket" "bucket" {
+  bucket        = "my-bucket"
+  storage_class = "STANDARD"
+  acl           = "private"
+  credentials {
+    access_key = var.ak
+    secret_key = var.sk
+  }
+}
+```
+
 ## Argument Reference
 
 The following arguments are supported:
@@ -151,7 +168,7 @@ The following arguments are supported:
   * The name cannot be an IP address.
   * If the name contains any periods (.), a security certificate verification message may appear when you access the bucket or its objects by entering a domain name.
 
-* `storage_class` - (Optional) Specifies the storage class of the bucket. OBS provides three storage classes: 
+* `storage_class` - (Optional) Specifies the storage class of the bucket. OBS provides three storage classes:
   `STANDARD`, `WARM` (Infrequent Access) and `COLD` (Archive). Defaults to `STANDARD`.
 
 * `acl` - (Optional) Specifies the ACL policy for a bucket. The predefined common policies are as follows: "private", "public-read", "public-read-write" and "log-delivery-write". Defaults to `private`.
@@ -172,6 +189,8 @@ The following arguments are supported:
 * `force_destroy` - (Optional) A boolean that indicates all objects should be deleted from the bucket so that the bucket can be destroyed without error. Default to `false`.
 
 * `region` - (Optional) If specified, the region this bucket should reside in. Otherwise, the region used by the provider.
+
+* `credentials` - (Optional) Access key information for a single bucket only.
 
 The `logging` object supports the following:
 
@@ -255,6 +274,12 @@ The `noncurrent_version_transition` object supports the following
 * `days` - (Required) Specifies the number of days when noncurrent object versions are automatically transitioned to the specified storage class.
 
 * `storage_class` - (Required) The class of storage used to store the object. Only `WARM` and `COLD` are supported.
+
+The `credentials` object supports the following:
+
+* `access_key` - (Required) Access key ID.
+
+* `secret_key` - (Required) Access key secret.
 
 ## Attributes Reference
 

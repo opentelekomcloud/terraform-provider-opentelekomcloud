@@ -7,6 +7,7 @@ import (
 	"os"
 	"strings"
 
+	"github.com/hashicorp/go-multierror"
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/helper/validation"
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/obs"
@@ -92,6 +93,25 @@ func resourceObsBucketObject() *schema.Resource {
 				Type:     schema.TypeInt,
 				Computed: true,
 			},
+
+			"credentials": {
+				Type:     schema.TypeList,
+				Optional: true,
+				MaxItems: 1,
+				Elem: &schema.Resource{
+					Schema: map[string]*schema.Schema{
+						"access_key": {
+							Type:     schema.TypeString,
+							Required: true,
+						},
+						"secret_key": {
+							Type:      schema.TypeString,
+							Required:  true,
+							Sensitive: true,
+						},
+					},
+				},
+			},
 		},
 	}
 }
@@ -101,15 +121,15 @@ func resourceObsBucketObjectPut(d *schema.ResourceData, meta interface{}) error 
 	var err error
 
 	config := meta.(*Config)
-	obsClient, err := config.newObjectStorageClient(GetRegion(d, config))
+	client, err := obsClient(d, config)
 	if err != nil {
-		return fmt.Errorf("Error creating OpenTelekomCloud OBS client: %s", err)
+		return err
 	}
 
 	source := d.Get("source").(string)
 	content := d.Get("content").(string)
 	if source == "" && content == "" {
-		return fmt.Errorf("Must specify \"source\" or \"content\" field")
+		return fmt.Errorf("must specify \"source\" or \"content\" field")
 	}
 
 	if source != "" {
@@ -123,26 +143,30 @@ func resourceObsBucketObjectPut(d *schema.ResourceData, meta interface{}) error 
 		}
 
 		// put source file
-		resp, err = putFileToObject(obsClient, d)
+		resp, err = putFileToObject(client, d)
 	}
 
 	if content != "" {
 		// put content
-		resp, err = putContentToObject(obsClient, d)
+		resp, err = putContentToObject(client, d)
 	}
 
 	bucket := d.Get("bucket").(string)
 	key := d.Get("key").(string)
 	if err != nil {
-		return getObsError("Error putting object to OBS bucket", bucket, err)
+		return getObsError("error putting object to OBS bucket", bucket, err)
 	}
 
 	log.Printf("[DEBUG] Response of putting %s to OBS Bucket %s: %#v", key, bucket, resp)
 	if resp.VersionId != "null" {
-		d.Set("version_id", resp.VersionId)
+		err = d.Set("version_id", resp.VersionId)
 	} else {
-		d.Set("version_id", "")
+		err = d.Set("version_id", "")
 	}
+	if err != nil {
+		return fmt.Errorf("error setting version_id: %s", err)
+	}
+
 	d.SetId(key)
 
 	return resourceObsBucketObjectRead(d, meta)
@@ -214,9 +238,9 @@ func putFileToObject(obsClient *obs.ObsClient, d *schema.ResourceData) (*obs.Put
 
 func resourceObsBucketObjectRead(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*Config)
-	obsClient, err := config.newObjectStorageClient(GetRegion(d, config))
+	client, err := obsClient(d, config)
 	if err != nil {
-		return fmt.Errorf("Error creating OpenTelekomCloud OBS client: %s", err)
+		return err
 	}
 
 	bucket := d.Get("bucket").(string)
@@ -225,7 +249,7 @@ func resourceObsBucketObjectRead(d *schema.ResourceData, meta interface{}) error
 	input.Bucket = bucket
 	input.Prefix = key
 
-	resp, err := obsClient.ListObjects(input)
+	resp, err := client.ListObjects(input)
 	if err != nil {
 		return getObsError("Error listing objects of OBS bucket", bucket, err)
 	}
@@ -247,21 +271,27 @@ func resourceObsBucketObjectRead(d *schema.ResourceData, meta interface{}) error
 
 	class := string(object.StorageClass)
 	if class == "" {
-		d.Set("storage_class", "STANDARD")
+		err = d.Set("storage_class", "STANDARD")
 	} else {
-		d.Set("storage_class", normalizeStorageClass(class))
+		err = d.Set("storage_class", normalizeStorageClass(class))
 	}
-	d.Set("size", object.Size)
-	d.Set("etag", strings.Trim(object.ETag, `"`))
+	mErr := multierror.Append(err,
+		d.Set("size", object.Size),
+		d.Set("etag", strings.Trim(object.ETag, `"`)),
+	)
+
+	if err := mErr.ErrorOrNil(); err != nil {
+		return fmt.Errorf("error setting OBS bucket attributes: %s", err)
+	}
 
 	return nil
 }
 
 func resourceObsBucketObjectDelete(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*Config)
-	obsClient, err := config.newObjectStorageClient(GetRegion(d, config))
+	client, err := obsClient(d, config)
 	if err != nil {
-		return fmt.Errorf("Error creating OpenTelekomCloud OBS client: %s", err)
+		return err
 	}
 
 	bucket := d.Get("bucket").(string)
@@ -272,7 +302,7 @@ func resourceObsBucketObjectDelete(d *schema.ResourceData, meta interface{}) err
 	}
 
 	log.Printf("[DEBUG] Object %s will be deleted with all versions", key)
-	_, err = obsClient.DeleteObject(input)
+	_, err = client.DeleteObject(input)
 	if err != nil {
 		return getObsError("Error deleting object of OBS bucket", bucket, err)
 	}
