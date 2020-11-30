@@ -45,6 +45,33 @@ resource "opentelekomcloud_obs_bucket_object" "examplebucket_object" {
 }
 ```
 
+### Using ak/sk defined in the resource
+
+```hcl
+variable ak {}
+variable sk {}
+
+resource "opentelekomcloud_obs_bucket" "object_bucket" {
+  bucket        = "my-bucket"
+  storage_class = "STANDARD"
+  acl           = "private"
+  credentials {
+    access_key = var.ak
+    secret_key = var.sk
+  }
+}
+
+resource "opentelekomcloud_obs_bucket_object" "object" {
+  bucket  = opentelekomcloud_obs_bucket.object_bucket.bucket
+  key     = "test-key"
+  content = "some_bucket_content"
+  credentials {
+    access_key = var.ak
+    secret_key = var.sk
+  }
+}
+```
+
 ## Argument Reference
 
 The following arguments are supported:
