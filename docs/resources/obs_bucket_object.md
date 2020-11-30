@@ -71,6 +71,12 @@ The following arguments are supported:
 * `etag` - (Optional) Specifies the unique identifier of the object content. It can be used to trigger updates.
   The only meaningful value is `md5(file("path_to_file"))`.
 
+* `credentials` - (Optional) Access key information for a single bucket only.
+
+    * `access_key` - (Required) Access key ID.
+
+    * `secret_key` - (Required) Access key secret.
+
 Either `source` or `content` must be provided to specify the bucket content.
 These two arguments are mutually-exclusive.
 
