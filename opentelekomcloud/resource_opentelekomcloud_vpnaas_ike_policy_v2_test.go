@@ -75,7 +75,7 @@ func TestAccVpnIKEPolicyV2_withNewParams(t *testing.T) {
 					testAccCheckIKEPolicyV2Exists("opentelekomcloud_vpnaas_ike_policy_v2.policy_1", &policy),
 					resource.TestCheckResourceAttr("opentelekomcloud_vpnaas_ike_policy_v2.policy_1", "ike_version", "v2"),
 					resource.TestCheckResourceAttr("opentelekomcloud_vpnaas_ike_policy_v2.policy_1", "phase1_negotiation_mode", "aggressive"),
-					resource.TestCheckResourceAttr("opentelekomcloud_vpnaas_ike_policy_v2.policy_1", "pfs", "group12"),
+					resource.TestCheckResourceAttr("opentelekomcloud_vpnaas_ike_policy_v2.policy_1", "pfs", "group16"),
 				),
 			},
 		},
@@ -165,7 +165,7 @@ resource "opentelekomcloud_vpnaas_ike_policy_v2" "policy_1" {
 const testAccIKEPolicyV2_withNewParams = `
 resource "opentelekomcloud_vpnaas_ike_policy_v2" "policy_1" {
   auth_algorithm = "sha2-256"
-  pfs            = "group12"
+  pfs            = "group16"
   ike_version    = "v2"
 
   phase1_negotiation_mode = "aggressive"
