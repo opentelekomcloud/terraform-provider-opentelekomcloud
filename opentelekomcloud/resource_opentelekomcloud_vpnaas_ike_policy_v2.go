@@ -8,6 +8,7 @@ import (
 	"github.com/hashicorp/go-multierror"
 	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/helper/validation"
 	"github.com/opentelekomcloud/gophertelekomcloud"
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/networking/v2/extensions/vpnaas/ikepolicies"
 )
@@ -35,8 +36,9 @@ func resourceVpnIKEPolicyV2() *schema.Resource {
 				ForceNew: true,
 			},
 			"name": {
-				Type:     schema.TypeString,
-				Optional: true,
+				Type:         schema.TypeString,
+				Optional:     true,
+				ValidateFunc: validateName,
 			},
 			"description": {
 				Type:     schema.TypeString,
@@ -46,26 +48,41 @@ func resourceVpnIKEPolicyV2() *schema.Resource {
 				Type:     schema.TypeString,
 				Optional: true,
 				Default:  "sha1",
+				ValidateFunc: validation.StringInSlice([]string{
+					"md5", "sha1", "sha2-256", "sha2-384", "sha2-512",
+				}, false),
 			},
 			"encryption_algorithm": {
 				Type:     schema.TypeString,
 				Optional: true,
 				Default:  "aes-128",
+				ValidateFunc: validation.StringInSlice([]string{
+					"3des", "aes-128", "aes-192", "aes-256",
+				}, false),
 			},
 			"pfs": {
 				Type:     schema.TypeString,
 				Optional: true,
 				Default:  "group5",
+				ValidateFunc: validation.StringInSlice([]string{
+					"group1", "group2", "group5", "group14", "group15", "group16", "group19", "group20", "group21",
+				}, false),
 			},
 			"phase1_negotiation_mode": {
 				Type:     schema.TypeString,
 				Optional: true,
 				Default:  "main",
+				ValidateFunc: validation.StringInSlice([]string{
+					"main", "aggressive",
+				}, false),
 			},
 			"ike_version": {
 				Type:     schema.TypeString,
 				Optional: true,
 				Default:  "v1",
+				ValidateFunc: validation.StringInSlice([]string{
+					"v1", "v2",
+				}, false),
 			},
 			"lifetime": {
 				Type:     schema.TypeSet,
@@ -79,9 +96,10 @@ func resourceVpnIKEPolicyV2() *schema.Resource {
 							Optional: true,
 						},
 						"value": {
-							Type:     schema.TypeInt,
-							Computed: true,
-							Optional: true,
+							Type:         schema.TypeInt,
+							Computed:     true,
+							Optional:     true,
+							ValidateFunc: validation.IntBetween(60, 604800),
 						},
 					},
 				},
@@ -111,9 +129,10 @@ func resourceVpnIKEPolicyV2Create(d *schema.ResourceData, meta interface{}) erro
 	lifetimeRaw := d.Get("lifetime").(*schema.Set).List()
 	var lifetime *ikepolicies.LifetimeCreateOpts
 	if len(lifetimeRaw) == 1 {
+		lifetimeInfo := lifetimeRaw[0].(map[string]interface{})
 		lifetime = &ikepolicies.LifetimeCreateOpts{
-			Units: lifetimeRaw[0].(ikepolicies.Unit),
-			Value: lifetimeRaw[0].(int),
+			Units: ikepolicies.Unit(lifetimeInfo["units"].(string)),
+			Value: lifetimeInfo["value"].(int),
 		}
 	}
 
@@ -123,11 +142,11 @@ func resourceVpnIKEPolicyV2Create(d *schema.ResourceData, meta interface{}) erro
 			Description:           d.Get("description").(string),
 			TenantID:              d.Get("tenant_id").(string),
 			Lifetime:              lifetime,
-			AuthAlgorithm:         d.Get("auth_algorithm").(ikepolicies.AuthAlgorithm),
-			EncryptionAlgorithm:   d.Get("encryption_algorithm").(ikepolicies.EncryptionAlgorithm),
-			PFS:                   d.Get("pfs").(ikepolicies.PFS),
-			IKEVersion:            d.Get("ike_version").(ikepolicies.IKEVersion),
-			Phase1NegotiationMode: d.Get("phase1_negotiation_mode").(ikepolicies.Phase1NegotiationMode),
+			AuthAlgorithm:         ikepolicies.AuthAlgorithm(d.Get("auth_algorithm").(string)),
+			EncryptionAlgorithm:   ikepolicies.EncryptionAlgorithm(d.Get("encryption_algorithm").(string)),
+			PFS:                   ikepolicies.PFS(d.Get("pfs").(string)),
+			IKEVersion:            ikepolicies.IKEVersion(d.Get("ike_version").(string)),
+			Phase1NegotiationMode: ikepolicies.Phase1NegotiationMode(d.Get("phase1_negotiation_mode").(string)),
 		},
 		MapValueSpecs(d),
 	}
@@ -202,7 +221,7 @@ func resourceVpnIKEPolicyV2Update(d *schema.ResourceData, meta interface{}) erro
 	config := meta.(*Config)
 	networkingClient, err := config.networkingV2Client(GetRegion(d, config))
 	if err != nil {
-		return fmt.Errorf("error creating OpenTelekomCloud networking client: %s", err)
+		return fmt.Errorf("error creating OpenTelekomCloud NetworkingV2 client: %s", err)
 	}
 
 	opts := ikepolicies.UpdateOpts{}
@@ -219,23 +238,23 @@ func resourceVpnIKEPolicyV2Update(d *schema.ResourceData, meta interface{}) erro
 		hasChange = true
 	}
 	if d.HasChange("pfs") {
-		opts.PFS = d.Get("pfs").(ikepolicies.PFS)
+		opts.PFS = ikepolicies.PFS(d.Get("pfs").(string))
 		hasChange = true
 	}
 	if d.HasChange("auth_algorithm") {
-		opts.AuthAlgorithm = d.Get("auth_algorithm").(ikepolicies.AuthAlgorithm)
+		opts.AuthAlgorithm = ikepolicies.AuthAlgorithm(d.Get("auth_algorithm").(string))
 		hasChange = true
 	}
 	if d.HasChange("encryption_algorithm") {
-		opts.EncryptionAlgorithm = d.Get("encryption_algorithm").(ikepolicies.EncryptionAlgorithm)
+		opts.EncryptionAlgorithm = ikepolicies.EncryptionAlgorithm(d.Get("encryption_algorithm").(string))
 		hasChange = true
 	}
 	if d.HasChange("phase_1_negotiation_mode") {
-		opts.Phase1NegotiationMode = d.Get("phase_1_negotiation_mode").(ikepolicies.Phase1NegotiationMode)
+		opts.Phase1NegotiationMode = ikepolicies.Phase1NegotiationMode(d.Get("phase_1_negotiation_mode").(string))
 		hasChange = true
 	}
 	if d.HasChange("ike_version") {
-		opts.IKEVersion = d.Get("ike_version").(ikepolicies.IKEVersion)
+		opts.IKEVersion = ikepolicies.IKEVersion(d.Get("ike_version").(string))
 		hasChange = true
 	}
 
@@ -243,9 +262,10 @@ func resourceVpnIKEPolicyV2Update(d *schema.ResourceData, meta interface{}) erro
 		lifetimeRaw := d.Get("lifetime").(*schema.Set).List()
 		var lifetime *ikepolicies.LifetimeUpdateOpts
 		if len(lifetimeRaw) == 1 {
+			lifetimeInfo := lifetimeRaw[0].(map[string]interface{})
 			lifetime = &ikepolicies.LifetimeUpdateOpts{
-				Units: lifetimeRaw[0].(ikepolicies.Unit),
-				Value: lifetimeRaw[0].(int),
+				Units: ikepolicies.Unit(lifetimeInfo["units"].(string)),
+				Value: lifetimeInfo["value"].(int),
 			}
 		}
 		opts.Lifetime = lifetime
