@@ -6,6 +6,7 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/terraform"
+	"github.com/opentelekomcloud/gophertelekomcloud/openstack/identity/v3/credentials"
 )
 
 func TestAccIdentityV3Credential_basic(t *testing.T) {
@@ -59,7 +60,7 @@ func testAccIdentityV3CredentialDestroy(s *terraform.State) error {
 			continue
 		}
 
-		_, err := CredentialGet(client, rs.Primary.ID).Extract()
+		_, err := credentials.Get(client, rs.Primary.ID).Extract()
 
 		if err == nil {
 			return fmt.Errorf("AK/SK still exists")
