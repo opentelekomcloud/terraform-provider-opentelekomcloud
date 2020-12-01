@@ -11,15 +11,12 @@ import (
 
 func TestAccIdentityV3Credential_basic(t *testing.T) {
 	resource.Test(t, resource.TestCase{
-		PreCheck: func() {
-			testAccPreCheck(t)
-			testIdentityCredentialPrecheck(t)
-		},
+		PreCheck:     func() { testAccPreCheck(t) },
 		Providers:    testAccProviders,
 		CheckDestroy: testAccIdentityV3CredentialDestroy,
 		Steps: []resource.TestStep{
 			{
-				Config: fmt.Sprintf(testAccIdentityV3CredentialBasic, OS_USER_ID),
+				Config: testAccIdentityV3CredentialBasic,
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttrSet("opentelekomcloud_identity_credential_v3.aksk", "user_id"),
 					resource.TestCheckResourceAttrSet("opentelekomcloud_identity_credential_v3.aksk", "description"),
@@ -40,12 +37,6 @@ func TestAccIdentityV3Credential_basic(t *testing.T) {
 			},
 		},
 	})
-}
-
-func testIdentityCredentialPrecheck(t *testing.T) {
-	if OS_USER_ID == "" {
-		t.Error("OS_USER_ID is required for credentials test")
-	}
 }
 
 func testAccIdentityV3CredentialDestroy(s *terraform.State) error {
@@ -72,9 +63,7 @@ func testAccIdentityV3CredentialDestroy(s *terraform.State) error {
 
 const (
 	testAccIdentityV3CredentialBasic = `
-
 resource opentelekomcloud_identity_credential_v3 aksk {
-  user_id = "%s"
   description = "This is one and unique test AK/SK"
 }
 `
