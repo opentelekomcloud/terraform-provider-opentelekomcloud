@@ -59,6 +59,9 @@ type ProviderClient struct {
 	// ProjectID is the ID of project to which User is authorized.
 	ProjectID string
 
+	// UserID is the ID of the authorized user
+	UserID string
+
 	// DomainID is the ID of project to which User is authorized.
 	DomainID string
 
@@ -267,7 +270,7 @@ func (client *ProviderClient) Request(method, url string, options *RequestOpts) 
 
 	if !ok {
 		body, _ := ioutil.ReadAll(resp.Body)
-		resp.Body.Close()
+		_ = resp.Body.Close()
 		respErr := ErrUnexpectedResponseCode{
 			URL:      url,
 			Method:   method,
@@ -307,21 +310,17 @@ func (client *ProviderClient) Request(method, url string, options *RequestOpts) 
 				}
 				if options.RawBody != nil {
 					if seeker, ok := options.RawBody.(io.Seeker); ok {
-						seeker.Seek(0, 0)
+						_, e := seeker.Seek(0, 0)
+						if e != nil {
+							return nil, e
+						}
 					}
 				}
 				resp, err = client.Request(method, url, options)
 				if err != nil {
-					switch err.(type) {
-					case *ErrUnexpectedResponseCode:
-						e := &ErrErrorAfterReauthentication{}
-						e.ErrOriginal = err.(*ErrUnexpectedResponseCode)
-						return nil, e
-					default:
-						e := &ErrErrorAfterReauthentication{}
-						e.ErrOriginal = err
-						return nil, e
-					}
+					e := &ErrErrorAfterReauthentication{}
+					e.ErrOriginal = err
+					return nil, e
 				}
 				return resp, nil
 			}
@@ -380,7 +379,7 @@ func (client *ProviderClient) Request(method, url string, options *RequestOpts) 
 
 	// Parse the response body as JSON, if requested to do so.
 	if options.JSONResponse != nil {
-		defer resp.Body.Close()
+		defer func() { _ = resp.Body.Close() }()
 		if err := json.NewDecoder(resp.Body).Decode(options.JSONResponse); err != nil {
 			return nil, err
 		}
@@ -390,18 +389,17 @@ func (client *ProviderClient) Request(method, url string, options *RequestOpts) 
 }
 
 func defaultOkCodes(method string) []int {
-	switch {
-	case method == "GET":
+	switch method {
+	case "GET":
 		return []int{200}
-	case method == "POST":
+	case "POST":
 		return []int{201, 202}
-	case method == "PUT":
+	case "PUT":
 		return []int{201, 202}
-	case method == "PATCH":
+	case "PATCH":
 		return []int{200, 204}
-	case method == "DELETE":
+	case "DELETE":
 		return []int{202, 204}
 	}
-
 	return []int{}
 }

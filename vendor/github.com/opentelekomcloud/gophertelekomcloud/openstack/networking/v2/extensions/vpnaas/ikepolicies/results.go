@@ -44,6 +44,7 @@ type Policy struct {
 type commonResult struct {
 	golangsdk.Result
 }
+
 type Lifetime struct {
 	// Units is the unit for the lifetime
 	// Default is seconds

@@ -63,7 +63,7 @@ type CreateOpts struct {
 	EncryptionAlgorithm EncryptionAlgorithm `json:"encryption_algorithm,omitempty"`
 
 	// PFS is the Perfect forward secrecy mode.
-	// A valid value is Group2, Group5, Group14, and so on.
+	// A valid value is Group1, Group2, Group5, Group14, and so on.
 	// Default is Group5.
 	PFS PFS `json:"pfs,omitempty"`
 
@@ -72,11 +72,11 @@ type CreateOpts struct {
 	Phase1NegotiationMode Phase1NegotiationMode `json:"phase1_negotiation_mode,omitempty"`
 
 	// The IKE version.
-	// A valid value is v1 or v2.
+	// A valid values are v1 v2.
 	// Default is v1.
 	IKEVersion IKEVersion `json:"ike_version,omitempty"`
 
-	//Lifetime is the lifetime of the security association
+	// Lifetime is the lifetime of the security association
 	Lifetime *LifetimeCreateOpts `json:"lifetime,omitempty"`
 }
 
@@ -148,6 +148,9 @@ type ListOpts struct {
 // ToPolicyListQuery formats a ListOpts into a query string.
 func (opts ListOpts) ToPolicyListQuery() (string, error) {
 	q, err := golangsdk.BuildQueryString(opts)
+	if err != nil {
+		return "", err
+	}
 	return q.String(), err
 }
 
@@ -181,8 +184,8 @@ type LifetimeUpdateOpts struct {
 
 // UpdateOpts contains the values used when updating an IKE policy
 type UpdateOpts struct {
-	Description           *string               `json:"description,omitempty"`
-	Name                  *string               `json:"name,omitempty"`
+	Description           string                `json:"description,omitempty"`
+	Name                  string                `json:"name,omitempty"`
 	AuthAlgorithm         AuthAlgorithm         `json:"auth_algorithm,omitempty"`
 	EncryptionAlgorithm   EncryptionAlgorithm   `json:"encryption_algorithm,omitempty"`
 	PFS                   PFS                   `json:"pfs,omitempty"`

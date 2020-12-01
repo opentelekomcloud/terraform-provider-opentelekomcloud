@@ -171,23 +171,31 @@ func v3auth(client *golangsdk.ProviderClient, endpoint string, opts tokens3.Auth
 
 	token, err := result.ExtractToken()
 	if err != nil {
-		return err
+		return fmt.Errorf("error extracting token: %s", err)
 	}
 
 	project, err := result.ExtractProject()
 	if err != nil {
-		return err
+		return fmt.Errorf("error extracting project info: %s", err)
+	}
+
+	user, err := result.ExtractUser()
+	if err != nil {
+		return fmt.Errorf("error extracting user info: %s", err)
 	}
 
 	serviceCatalog, err := result.ExtractServiceCatalog()
 	if err != nil {
-		return err
+		return fmt.Errorf("error extracting service catalog info: %s", err)
 	}
 
 	client.TokenID = token.ID
 	if project != nil {
 		client.ProjectID = project.ID
 		client.DomainID = project.Domain.ID
+	}
+	if user != nil {
+		client.UserID = user.ID
 	}
 
 	if opts.CanReauth() {
@@ -196,7 +204,20 @@ func v3auth(client *golangsdk.ProviderClient, endpoint string, opts tokens3.Auth
 			return v3auth(client, endpoint, opts, eo)
 		}
 	}
+
+	clientRegion := ""
+	if aOpts, ok := opts.(*golangsdk.AuthOptions); ok {
+		if aOpts.TenantName == "" && project != nil {
+			aOpts.TenantName = project.Name
+		}
+		clientRegion = utils.GetRegion(*aOpts)
+	}
+
 	client.EndpointLocator = func(opts golangsdk.EndpointOpts) (string, error) {
+		// use client region as default one
+		if opts.Region == "" && clientRegion != "" {
+			opts.Region = clientRegion
+		}
 		return V3EndpointURL(serviceCatalog, opts)
 	}
 
@@ -347,7 +368,12 @@ func authWithAgencyByAKSK(client *golangsdk.ProviderClient, endpoint string, opt
 
 	project, err := result.ExtractProject()
 	if err != nil {
-		return err
+		return fmt.Errorf("error extracting project info: %s", err)
+	}
+
+	user, err := result.ExtractUser()
+	if err != nil {
+		return fmt.Errorf("error extracting user info: %s", err)
 	}
 
 	serviceCatalog, err := result.ExtractServiceCatalog()
@@ -358,6 +384,9 @@ func authWithAgencyByAKSK(client *golangsdk.ProviderClient, endpoint string, opt
 	client.TokenID = token.ID
 	if project != nil {
 		client.ProjectID = project.ID
+	}
+	if user != nil {
+		client.UserID = user.ID
 	}
 
 	client.ReauthFunc = func() error {

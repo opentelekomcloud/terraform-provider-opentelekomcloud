@@ -22,33 +22,29 @@ The following arguments are supported:
   A Networking client is needed to create a VPN service. If omitted, the
   `region` argument of the provider is used. Changing this creates a new service.
 
-* `name` - (Optional) The name of the policy. Changing this updates the name of
-  the existing policy.
+* `name` - (Optional) The name of the policy.
 
 * `tenant_id` - (Optional) The owner of the policy. Required if admin wants to
   create a service for another policy. Changing this creates a new policy.
 
 * `description` - (Optional) The human-readable description for the policy.
-  Changing this updates the description of the existing policy.
 
-* `auth_algorithm` - (Optional) The authentication hash algorithm. Valid values are `md5`, `sha1`, `sha2-256`, `sha2-384`, `sha2-512`.
-  Default is sha1. Changing this updates the algorithm of the existing policy.
+* `auth_algorithm` - (Optional) The authentication hash algorithm. Valid values are `md5`,
+  `sha1`, `sha2-256`, `sha2-384`, `sha2-512`. Default is `sha1`.
 
 * `encryption_algorithm` - (Optional) The encryption algorithm. Valid values are `3des`, `aes-128`, `aes-192` and so on.
-  The default value is aes-128. Changing this updates the existing policy.
+  The default value is `aes-128`.
 
-* `pfs` - (Optional) The perfect forward secrecy mode. Valid values are Group2, Group5 and Group14. Default is Group5.
-  Changing this updates the existing policy.
+* `pfs` - (Optional) The perfect forward secrecy mode. Valid values are `group1`, `group2`, `group5` and so on.
+  Default is `group5`.
 
-* `phase1_negotiation_mode` - (Optional) The IKE mode. A valid value is main, which is the default.
-  Changing this updates the existing policy.
+* `phase1_negotiation_mode` - (Optional) The IKE mode. Valid values are `main` and `aggressive`. Default is `main`.
 
-* `ike_version` - (Optional) The IKE mode. A valid value is v1 or v2. Default is v1.
-  Changing this updates the existing policy.
+* `ike_version` - (Optional) The IKE mode. Valid values are `v1` and `v2`. Default is `v1`.
 
 * `lifetime` - (Optional) The lifetime of the security association. Consists of Unit and Value.
-  * `unit` - (Optional) The units for the lifetime of the security association. Can be either seconds or kilobytes. Default is seconds.
-  * `value` - (Optional) The value for the lifetime of the security association. Must be a positive integer. Default is 3600.
+  * `unit` - (Optional) The units for the lifetime of the security association. A valid value is `seconds`. Default is `seconds`.
+  * `value` - (Optional) The value for the lifetime of the security association. Default is `3600`.
 
 * `value_specs` - (Optional) Map of additional options.
 
