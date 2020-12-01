@@ -109,9 +109,9 @@ func resourceVpnIKEPolicyV2Create(d *schema.ResourceData, meta interface{}) erro
 	}
 
 	lifetimeRaw := d.Get("lifetime").(*schema.Set).List()
-	var lifetime ikepolicies.LifetimeCreateOpts
+	var lifetime *ikepolicies.LifetimeCreateOpts
 	if len(lifetimeRaw) == 1 {
-		lifetime = ikepolicies.LifetimeCreateOpts{
+		lifetime = &ikepolicies.LifetimeCreateOpts{
 			Units: lifetimeRaw[0].(ikepolicies.Unit),
 			Value: lifetimeRaw[0].(int),
 		}
@@ -122,7 +122,7 @@ func resourceVpnIKEPolicyV2Create(d *schema.ResourceData, meta interface{}) erro
 			Name:                  d.Get("name").(string),
 			Description:           d.Get("description").(string),
 			TenantID:              d.Get("tenant_id").(string),
-			Lifetime:              &lifetime,
+			Lifetime:              lifetime,
 			AuthAlgorithm:         d.Get("auth_algorithm").(ikepolicies.AuthAlgorithm),
 			EncryptionAlgorithm:   d.Get("encryption_algorithm").(ikepolicies.EncryptionAlgorithm),
 			PFS:                   d.Get("pfs").(ikepolicies.PFS),
@@ -183,17 +183,19 @@ func resourceVpnIKEPolicyV2Read(d *schema.ResourceData, meta interface{}) error 
 	)
 
 	// Set the lifetime
-	var lifetimeMap map[string]interface{}
-	lifetimeMap = make(map[string]interface{})
-	lifetimeMap["units"] = policy.Lifetime.Units
-	lifetimeMap["value"] = policy.Lifetime.Value
-	var lifetime []map[string]interface{}
-	lifetime = append(lifetime, lifetimeMap)
-	if err := d.Set("lifetime", &lifetime); err != nil {
-		log.Printf("[WARN] unable to set IKE policy lifetime")
+	lifetime := []map[string]interface{}{
+		{
+			"units": policy.Lifetime.Units,
+			"value": policy.Lifetime.Value,
+		},
+	}
+	mErr = multierror.Append(mErr, d.Set("lifetime", lifetime))
+
+	if err := mErr.ErrorOrNil(); err != nil {
+		return fmt.Errorf("error setting IKE policy fields: %s", err)
 	}
 
-	return mErr.ErrorOrNil()
+	return nil
 }
 
 func resourceVpnIKEPolicyV2Update(d *schema.ResourceData, meta interface{}) error {
@@ -239,14 +241,14 @@ func resourceVpnIKEPolicyV2Update(d *schema.ResourceData, meta interface{}) erro
 
 	if d.HasChange("lifetime") {
 		lifetimeRaw := d.Get("lifetime").(*schema.Set).List()
-		var lifetime ikepolicies.LifetimeUpdateOpts
+		var lifetime *ikepolicies.LifetimeUpdateOpts
 		if len(lifetimeRaw) == 1 {
-			lifetime = ikepolicies.LifetimeUpdateOpts{
+			lifetime = &ikepolicies.LifetimeUpdateOpts{
 				Units: lifetimeRaw[0].(ikepolicies.Unit),
 				Value: lifetimeRaw[0].(int),
 			}
 		}
-		opts.Lifetime = &lifetime
+		opts.Lifetime = lifetime
 		hasChange = true
 	}
 
