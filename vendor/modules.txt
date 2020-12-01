@@ -298,6 +298,7 @@ github.com/opentelekomcloud/gophertelekomcloud/openstack/evs/v2/tags
 github.com/opentelekomcloud/gophertelekomcloud/openstack/evs/v3/volumes
 github.com/opentelekomcloud/gophertelekomcloud/openstack/identity/v3/agency
 github.com/opentelekomcloud/gophertelekomcloud/openstack/identity/v3/catalog
+github.com/opentelekomcloud/gophertelekomcloud/openstack/identity/v3/credentials
 github.com/opentelekomcloud/gophertelekomcloud/openstack/identity/v3/domains
 github.com/opentelekomcloud/gophertelekomcloud/openstack/identity/v3/groups
 github.com/opentelekomcloud/gophertelekomcloud/openstack/identity/v3/projects
