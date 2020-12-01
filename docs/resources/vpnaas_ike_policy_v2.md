@@ -38,9 +38,9 @@ The following arguments are supported:
 * `pfs` - (Optional) The perfect forward secrecy mode. Valid values are `group1`, `group2`, `group5` and so on.
   Default is `group5`.
 
-* `phase1_negotiation_mode` - (Optional) The IKE mode. A valid value is `main` and `aggressive`, which is the default.
+* `phase1_negotiation_mode` - (Optional) The IKE mode. Valid values are `main` and `aggressive`. Default is `main`.
 
-* `ike_version` - (Optional) The IKE mode. A valid value is `v1` or `v2`. Default is `v1`.
+* `ike_version` - (Optional) The IKE mode. Valid values are `v1` and `v2`. Default is `v1`.
 
 * `lifetime` - (Optional) The lifetime of the security association. Consists of Unit and Value.
   * `unit` - (Optional) The units for the lifetime of the security association. A valid value is `seconds`. Default is `seconds`.
