@@ -8,13 +8,9 @@ Manages permanent access key for an OpenTelekomCloud user.
 
 ## Example Usage
 
-#### Create AK/SK for exact user
+#### Create AK/SK for yourself
 ```hcl
-variable user_id {}
-
-resource opentelekomcloud_identity_credential_v3 aksk {
-  user_id = var.user_id
-}
+resource opentelekomcloud_identity_credential_v3 aksk {}
 ```
 
 #### Create user with AK/SK
@@ -35,7 +31,7 @@ resource opentelekomcloud_identity_credential_v3 aksk {
 
 The following arguments are supported:
 
-* `user_id` - (Required) IAM user ID.
+* `user_id` - (Optional) IAM user ID. If not set, will create AK/SK for yourself.
 
 * `description` - (Optional) Description of the access key.
 

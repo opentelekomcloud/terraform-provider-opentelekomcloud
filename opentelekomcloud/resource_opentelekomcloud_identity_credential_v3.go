@@ -20,7 +20,8 @@ func resourceIdentityCredentialV3() *schema.Resource {
 		Schema: map[string]*schema.Schema{
 			"user_id": {
 				Type:     schema.TypeString,
-				Required: true,
+				Optional: true,
+				Computed: true,
 			},
 			"description": {
 				Type:     schema.TypeString,
@@ -58,8 +59,18 @@ func resourceIdentityCredentialV3Create(d *schema.ResourceData, meta interface{}
 		return fmt.Errorf("error creating OpenStack identity client: %s", err)
 	}
 
+	userID, ok := d.GetOk("user_id")
+	if !ok {
+		userID = client.UserID
+	}
+
+	if userID == "" {
+		return fmt.Errorf("error defining current user ID, please either provide " +
+			"`user_id` or authenticate with token auth (not using AK/SK)")
+	}
+
 	credential, err := credentials.Create(client, credentials.CreateOpts{
-		UserID:      d.Get("user_id").(string),
+		UserID:      userID.(string),
 		Description: d.Get("description").(string),
 	}).Extract()
 	if err != nil {

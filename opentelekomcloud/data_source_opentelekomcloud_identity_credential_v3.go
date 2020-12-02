@@ -52,7 +52,7 @@ func dataSourceIdentityCredentialV3Read(d *schema.ResourceData, meta interface{}
 	config := meta.(*Config)
 	client, err := config.identityV30Client()
 	if err != nil {
-		return fmt.Errorf("error creating OpenStack identity client: %s", err)
+		return fmt.Errorf("error creating identity v3.0 client: %s", err)
 	}
 	userID := d.Get("user_id").(string)
 	credentialList, err := credentials.List(client, credentials.ListOpts{UserID: userID}).Extract()

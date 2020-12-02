@@ -196,6 +196,7 @@ func v3auth(client *golangsdk.ProviderClient, endpoint string, opts tokens3.Auth
 	}
 	if user != nil {
 		client.UserID = user.ID
+		client.DomainID = user.Domain.ID
 	}
 
 	if opts.CanReauth() {
