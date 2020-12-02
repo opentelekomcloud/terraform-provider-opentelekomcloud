@@ -103,7 +103,7 @@ func resourceIdentityCredentialV3Update(d *schema.ResourceData, meta interface{}
 		opts.Status = d.Get("status").(string)
 	}
 	if d.HasChange("description") {
-		opts.Status = d.Get("description").(string)
+		opts.Description = d.Get("description").(string)
 	}
 	_, err = credentials.Update(client, d.Id(), opts).Extract()
 	if err != nil {
