@@ -31,11 +31,17 @@ func TestAccIdentityV3Credential_basic(t *testing.T) {
 				),
 			},
 			{
-				Config: fmt.Sprintf(testAccIdentityV3CredentialUpdate, OS_USER_ID),
+				Config: testAccIdentityV3CredentialUpdateStatus,
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttrSet("opentelekomcloud_identity_credential_v3.aksk", "access"),
 					resource.TestCheckResourceAttrSet("opentelekomcloud_identity_credential_v3.aksk", "secret"),
 					resource.TestCheckResourceAttr("opentelekomcloud_identity_credential_v3.aksk", "status", "inactive"),
+				),
+			},
+			{
+				Config: testAccIdentityV3CredentialUpdateDescription,
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr("opentelekomcloud_identity_credential_v3.aksk", "description", "This is one and unique test AK/SK 2"),
 				),
 			},
 		},
@@ -76,10 +82,15 @@ resource opentelekomcloud_identity_credential_v3 aksk {
   description = "This is one and unique test AK/SK"
 }
 `
-	testAccIdentityV3CredentialUpdate = `
+	testAccIdentityV3CredentialUpdateStatus = `
 resource opentelekomcloud_identity_credential_v3 aksk {
-  user_id = "%s"
   description = "This is one and unique test AK/SK"
+  status  = "inactive"
+}
+`
+	testAccIdentityV3CredentialUpdateDescription = `
+resource opentelekomcloud_identity_credential_v3 aksk {
+  description = "This is one and unique test AK/SK 2"
   status  = "inactive"
 }
 `

@@ -39,7 +39,6 @@ var (
 	OS_TO_TENANT_ID           = os.Getenv("OS_TO_TENANT_ID")
 	OS_TENANT_NAME            = getTenantName()
 	OS_VPN_ENVIRONMENT        = os.Getenv("OS_VPN_ENVIRONMENT")
-	OS_USER_ID                = os.Getenv("OS_USER_ID")
 )
 
 var testAccProviders map[string]terraform.ResourceProvider

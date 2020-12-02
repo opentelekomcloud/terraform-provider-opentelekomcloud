@@ -21,6 +21,7 @@ func resourceIdentityCredentialV3() *schema.Resource {
 			"user_id": {
 				Type:     schema.TypeString,
 				Optional: true,
+				Computed: true,
 			},
 			"description": {
 				Type:     schema.TypeString,
