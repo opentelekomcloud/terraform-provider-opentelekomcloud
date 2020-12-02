@@ -11,7 +11,10 @@ import (
 
 func TestAccIdentityV3Credential_basic(t *testing.T) {
 	resource.Test(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
+		PreCheck: func() {
+			testAccPreCheck(t)
+			checkAKSKUnset(t)
+		},
 		Providers:    testAccProviders,
 		CheckDestroy: testAccIdentityV3CredentialDestroy,
 		Steps: []resource.TestStep{
@@ -43,7 +46,7 @@ func testAccIdentityV3CredentialDestroy(s *terraform.State) error {
 	config := testAccProvider.Meta().(*Config)
 	client, err := config.identityV3Client(OS_REGION_NAME)
 	if err != nil {
-		return fmt.Errorf("error creating OpenStack identity client: %s", err)
+		return fmt.Errorf("error creating identity v3 client: %s", err)
 	}
 
 	for _, rs := range s.RootModule().Resources {
@@ -59,6 +62,12 @@ func testAccIdentityV3CredentialDestroy(s *terraform.State) error {
 	}
 
 	return nil
+}
+
+func checkAKSKUnset(t *testing.T) {
+	if OS_SECRET_KEY != "" && OS_ACCESS_KEY != "" {
+		t.Error("AK/SK should not be set for AK/SK creation test")
+	}
 }
 
 const (

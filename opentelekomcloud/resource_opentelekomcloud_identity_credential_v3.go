@@ -63,6 +63,11 @@ func resourceIdentityCredentialV3Create(d *schema.ResourceData, meta interface{}
 		userID = client.UserID
 	}
 
+	if userID == "" {
+		return fmt.Errorf("error defining current user ID, please either provide " +
+			"`user_id` or authenticate with token auth (not using AK/SK)")
+	}
+
 	credential, err := credentials.Create(client, credentials.CreateOpts{
 		UserID:      userID.(string),
 		Description: d.Get("description").(string),
