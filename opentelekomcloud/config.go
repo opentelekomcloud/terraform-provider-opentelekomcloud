@@ -704,13 +704,6 @@ func (c *Config) getHwEndpointType() golangsdk.Availability {
 	return golangsdk.AvailabilityPublic
 }
 
-func (c *Config) loadECSV1Client(region string) (*golangsdk.ServiceClient, error) {
-	return openstack.NewComputeV1(c.HwClient, golangsdk.EndpointOpts{
-		Region:       region,
-		Availability: c.getHwEndpointType(),
-	})
-}
-
 func (c *Config) kmsKeyV1Client(region string) (*golangsdk.ServiceClient, error) {
 	return openstack.NewKMSV1(c.HwClient, golangsdk.EndpointOpts{
 		Region:       region,

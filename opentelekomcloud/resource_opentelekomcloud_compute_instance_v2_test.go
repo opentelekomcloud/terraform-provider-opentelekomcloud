@@ -510,7 +510,7 @@ func testAccCheckComputeV2InstanceNoMetadataKey(instance *servers.Server, k stri
 func testAccCheckComputeV2InstanceTagsV1(instance *servers.Server, k, v string) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
 		config := testAccProvider.Meta().(*Config)
-		client, err := config.loadECSV1Client(OS_REGION_NAME)
+		client, err := config.computeV1Client(OS_REGION_NAME)
 		if err != nil {
 			return fmt.Errorf("Error creating OpenTelekomCloud compute v1 client: %s", err)
 		}
@@ -535,7 +535,7 @@ func testAccCheckComputeV2InstanceTagsV1(instance *servers.Server, k, v string) 
 func testAccCheckComputeV2InstanceNoTagV1(instance *servers.Server) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
 		config := testAccProvider.Meta().(*Config)
-		client, err := config.loadECSV1Client(OS_REGION_NAME)
+		client, err := config.computeV1Client(OS_REGION_NAME)
 		if err != nil {
 			return fmt.Errorf("Error creating OpenTelekomCloud compute v1 client: %s", err)
 		}
