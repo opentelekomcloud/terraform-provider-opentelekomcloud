@@ -7,13 +7,12 @@ ENHANCEMENTS:
 * **New Data Source:** `opetelekomcloud_dds_instance_v3` ([#725](https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/725))
 * `resource/opentelekomcloud_cce_cluster_v3`: Add new argument `authenticating_proxy_ca` ([#727](https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/727))
 * `data_source/opentelekomcloud_cce_cluster_v3`: Add new argument `authentication_mode` ([#727](https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/727))
-* `resource/opentelekomcloud_obs_bucket`: Add new argument `credentials` for AK/SK pair ([#732](https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/732/files))
-* `resource/opentelekomcloud_obs_bucket_object`: Add new argument `credentials` for AK/SK pair ([#732](https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/732/files))
+* `resource/opentelekomcloud_obs_bucket`: Allow defining resource-specific AK/SK with `credentials` argument ([#732](https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/732/files))
+* `resource/opentelekomcloud_obs_bucket_object`: Allow defining resource-specific AK/SK with `credentials` argument ([#732](https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/732/files))
 
 BUG FIXES:
 * `resource/opentelekomcloud_identity_credential_v3`: Add the missing documentation ([#731](https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/731))
 * `resource/opentelekomcloud_vpnaas_ike_policy_v2`: Fix hardcoded values for `PFS` and `phase1_negotiation_mode` ([#733](https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/733))
-* `resource/opentelekomcloud_identity_credential_v3`: Fix changing AK/SK description ([#736](https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/736))
 * `resource/opentelekomcloud_identity_credential_v3`: Make `user_id` as Optional ([#737](https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/737))
 
 
