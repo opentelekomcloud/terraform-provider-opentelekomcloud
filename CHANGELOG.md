@@ -7,8 +7,8 @@ ENHANCEMENTS:
 * **New Data Source:** `opetelekomcloud_dds_instance_v3` ([#725](https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/725))
 * `resource/opentelekomcloud_cce_cluster_v3`: Add new argument `authenticating_proxy_ca` ([#727](https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/727))
 * `data_source/opentelekomcloud_cce_cluster_v3`: Add new argument `authentication_mode` ([#727](https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/727))
-* `resource/opentelekomcloud_obs_bucket`: Allow defining resource-specific AK/SK with `credentials` argument ([#732](https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/732/files))
-* `resource/opentelekomcloud_obs_bucket_object`: Allow defining resource-specific AK/SK with `credentials` argument ([#732](https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/732/files))
+* `resource/opentelekomcloud_obs_bucket`: Setting up AK/SK is not required anymore ([#745](https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/745))
+* `resource/opentelekomcloud_obs_bucket_object`: Setting up AK/SK is not required anymore ([#745](https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/745))
 
 BUG FIXES:
 * `resource/opentelekomcloud_identity_credential_v3`: Add the missing documentation ([#731](https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/731))
