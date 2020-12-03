@@ -50,7 +50,7 @@ func TestAccOTCBMSTagsV2_timeout(t *testing.T) {
 
 func testAccCheckOTCBMSTagsV2Destroy(s *terraform.State) error {
 	config := testAccProvider.Meta().(*Config)
-	bmsClient, err := config.bmsClient(OS_REGION_NAME)
+	bmsClient, err := config.computeV2Client(OS_REGION_NAME)
 	if err != nil {
 		return fmt.Errorf("Error creating OpenTelekomCloud bms client: %s", err)
 	}
@@ -81,7 +81,7 @@ func testAccCheckOTCBMSTagsV2Exists(n string, tag *tags.Tags) resource.TestCheck
 		}
 
 		config := testAccProvider.Meta().(*Config)
-		bmsClient, err := config.bmsClient(OS_REGION_NAME)
+		bmsClient, err := config.computeV2Client(OS_REGION_NAME)
 		if err != nil {
 			return fmt.Errorf("Error creating OpenTelekomCloud bms client: %s", err)
 		}

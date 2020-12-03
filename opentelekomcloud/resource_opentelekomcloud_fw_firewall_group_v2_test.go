@@ -130,7 +130,7 @@ func TestAccFWFirewallGroupV2_port_remove(t *testing.T) {
 
 func testAccCheckFWFirewallGroupV2Destroy(s *terraform.State) error {
 	config := testAccProvider.Meta().(*Config)
-	networkingClient, err := config.hwNetworkV2Client(OS_REGION_NAME)
+	networkingClient, err := config.networkingV2Client(OS_REGION_NAME)
 	if err != nil {
 		return fmt.Errorf("Error creating OpenTelekomCloud networking client: %s", err)
 	}
@@ -162,7 +162,7 @@ func testAccCheckFWFirewallGroupV2Exists(n string, firewall_group *FirewallGroup
 		}
 
 		config := testAccProvider.Meta().(*Config)
-		networkingClient, err := config.hwNetworkV2Client(OS_REGION_NAME)
+		networkingClient, err := config.networkingV2Client(OS_REGION_NAME)
 		if err != nil {
 			return fmt.Errorf("Exists) Error creating OpenTelekomCloud networking client: %s", err)
 		}
@@ -205,7 +205,7 @@ func testAccCheckFWFirewallGroupV2(n, expectedName, expectedDescription string, 
 		}
 
 		config := testAccProvider.Meta().(*Config)
-		networkingClient, err := config.hwNetworkV2Client(OS_REGION_NAME)
+		networkingClient, err := config.networkingV2Client(OS_REGION_NAME)
 		if err != nil {
 			return fmt.Errorf("Exists) Error creating OpenTelekomCloud networking client: %s", err)
 		}

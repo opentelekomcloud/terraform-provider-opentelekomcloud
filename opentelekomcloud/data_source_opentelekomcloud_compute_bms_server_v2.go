@@ -155,7 +155,7 @@ func dataSourceBMSServersV2() *schema.Resource {
 
 func dataSourceBMSServersV2Read(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*Config)
-	bmsClient, err := config.bmsClient(GetRegion(d, config))
+	bmsClient, err := config.computeV2Client(GetRegion(d, config))
 
 	listServerOpts := servers.ListOpts{
 		ID:         d.Id(),
