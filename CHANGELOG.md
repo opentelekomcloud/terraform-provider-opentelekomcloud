@@ -13,7 +13,7 @@ ENHANCEMENTS:
 BUG FIXES:
 * `resource/opentelekomcloud_identity_credential_v3`: Add the missing documentation ([#731](https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/731))
 * `resource/opentelekomcloud_vpnaas_ike_policy_v2`: Fix hardcoded values for `PFS` and `phase1_negotiation_mode` ([#733](https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/733))
-* `resource/opentelekomcloud_identity_credential_v3`: Make `user_id` as Optional ([#737](https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/737))
+* `resource/opentelekomcloud_identity_credential_v3`: Make `user_id` Optional ([#737](https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/737))
 
 
 ## 1.21.6 (November 25, 2020)
