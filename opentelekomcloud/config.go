@@ -20,6 +20,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/httpclient"
 	"github.com/opentelekomcloud/gophertelekomcloud"
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack"
+	"github.com/opentelekomcloud/gophertelekomcloud/openstack/identity/v3/credentials"
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/objectstorage/v1/swauth"
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/obs"
 )
@@ -86,7 +87,7 @@ func (c *Config) LoadAndValidate() error {
 	}
 
 	if !validEndpoint {
-		return fmt.Errorf("Invalid endpoint type provided")
+		return fmt.Errorf("invalid endpoint type provided")
 	}
 
 	if c.Cloud != "" {
@@ -96,7 +97,7 @@ func (c *Config) LoadAndValidate() error {
 		}
 	}
 
-	err := fmt.Errorf("Must config token or aksk or username password to be authorized")
+	err := fmt.Errorf("must config token or aksk or username password to be authorized")
 
 	if c.Token != "" {
 		err = buildClientByToken(c)
@@ -173,7 +174,7 @@ func generateTLSConfig(c *Config) (*tls.Config, error) {
 	if c.CACertFile != "" {
 		caCert, _, err := pathorcontents.Read(c.CACertFile)
 		if err != nil {
-			return nil, fmt.Errorf("Error reading CA Cert: %s", err)
+			return nil, fmt.Errorf("error reading CA Cert: %s", err)
 		}
 
 		caCertPool := x509.NewCertPool()
@@ -188,11 +189,11 @@ func generateTLSConfig(c *Config) (*tls.Config, error) {
 	if c.ClientCertFile != "" && c.ClientKeyFile != "" {
 		clientCert, _, err := pathorcontents.Read(c.ClientCertFile)
 		if err != nil {
-			return nil, fmt.Errorf("Error reading Client Cert: %s", err)
+			return nil, fmt.Errorf("error reading Client Cert: %s", err)
 		}
 		clientKey, _, err := pathorcontents.Read(c.ClientKeyFile)
 		if err != nil {
-			return nil, fmt.Errorf("Error reading Client Key: %s", err)
+			return nil, fmt.Errorf("error reading Client Key: %s", err)
 		}
 
 		cert, err := tls.X509KeyPair([]byte(clientCert), []byte(clientKey))
@@ -226,7 +227,7 @@ func (c *Config) newS3Session(osDebug bool) error {
   providing credentials for the S3 Provider`)
 			}
 
-			return fmt.Errorf("Error loading credentials for Swift S3 Provider: %s", err)
+			return fmt.Errorf("error loading credentials for Swift S3 Provider: %s", err)
 		}
 
 		log.Printf("[INFO] Swift S3 Auth provider used: %q", cp.ProviderName)
@@ -527,7 +528,7 @@ func (c *Config) determineRegion(region string) string {
 
 func (c *Config) computeS3conn(region string) (*s3.S3, error) {
 	if c.s3sess == nil {
-		return nil, fmt.Errorf("Missing credentials for Swift S3 Provider, need access_key and secret_key values for provider.")
+		return nil, fmt.Errorf("missing credentials for Swift S3 Provider, need access_key and secret_key values for provider")
 	}
 
 	client, err := openstack.NewOBSService(c.HwClient, golangsdk.EndpointOpts{
@@ -555,9 +556,31 @@ func setUpOBSLogging() {
 	}
 }
 
+// setupTemporaryCredentials creates temporary AK/SK, which can be used to auth in OBS when AK/SK is not provided
+func (c *Config) setupTemporaryCredentials() error {
+	if c.SecurityToken != "" || (c.AccessKey != "" && c.SecretKey != "") {
+		return nil
+	}
+	client, err := c.identityV3Client()
+	if err != nil {
+		return fmt.Errorf("error creating identity v3 domain client: %s", err)
+	}
+	credential, err := credentials.CreateTemporary(client, credentials.CreateTemporaryOpts{
+		Methods: []string{"token"},
+		Token:   client.Token(),
+	}).Extract()
+	if err != nil {
+		return fmt.Errorf("error creating temporary AK/SK: %s", err)
+	}
+	c.AccessKey = credential.AccessKey
+	c.SecretKey = credential.SecretKey
+	c.SecurityToken = credential.SecurityToken
+	return nil
+}
+
 func (c *Config) newObjectStorageClient(region string) (*obs.ObsClient, error) {
-	if (c.AccessKey == "" || c.SecretKey == "") && c.SecurityToken == "" {
-		return nil, fmt.Errorf("missing credentials for OBS, need access_key and secret_key or security_token values for provider")
+	if err := c.setupTemporaryCredentials(); err != nil {
+		return nil, fmt.Errorf("failed to construct OBS client without AK/SK: %s", err)
 	}
 
 	client, err := openstack.NewOBSService(c.HwClient, golangsdk.EndpointOpts{
@@ -615,13 +638,15 @@ func (c *Config) dnsV2Client(region string) (*golangsdk.ServiceClient, error) {
 	})
 }
 
-func (c *Config) identityV3Client(_ string) (*golangsdk.ServiceClient, error) {
+func (c *Config) identityV3Client(_ ...string) (*golangsdk.ServiceClient, error) {
 	return openstack.NewIdentityV3(c.DomainClient, golangsdk.EndpointOpts{
 		Availability: c.getHwEndpointType(),
 	})
 }
 
-// This client is used in obtaining AK/SK
+// identityV30Client - provides client is used for obtaining AK/SK
+//
+// Deprecated, `credentials` package replacing v3 with v3.0 in URL itself
 func (c *Config) identityV30Client() (*golangsdk.ServiceClient, error) {
 	service, err := openstack.NewIdentityV3(c.DomainClient, golangsdk.EndpointOpts{
 		Availability: c.getHwEndpointType(),
