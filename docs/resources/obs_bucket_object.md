@@ -45,33 +45,6 @@ resource "opentelekomcloud_obs_bucket_object" "examplebucket_object" {
 }
 ```
 
-### Using ak/sk defined in the resource
-
-```hcl
-variable ak {}
-variable sk {}
-
-resource "opentelekomcloud_obs_bucket" "object_bucket" {
-  bucket        = "my-bucket"
-  storage_class = "STANDARD"
-  acl           = "private"
-  credentials {
-    access_key = var.ak
-    secret_key = var.sk
-  }
-}
-
-resource "opentelekomcloud_obs_bucket_object" "object" {
-  bucket  = opentelekomcloud_obs_bucket.object_bucket.bucket
-  key     = "test-key"
-  content = "some_bucket_content"
-  credentials {
-    access_key = var.ak
-    secret_key = var.sk
-  }
-}
-```
-
 ## Argument Reference
 
 The following arguments are supported:
@@ -97,12 +70,6 @@ The following arguments are supported:
 
 * `etag` - (Optional) Specifies the unique identifier of the object content. It can be used to trigger updates.
   The only meaningful value is `md5(file("path_to_file"))`.
-
-* `credentials` - (Optional) Access key information for a single bucket object.
-
-    * `access_key` - (Required) Access key ID.
-
-    * `secret_key` - (Required) Access key secret.
 
 Either `source` or `content` must be provided to specify the bucket content.
 These two arguments are mutually-exclusive.
