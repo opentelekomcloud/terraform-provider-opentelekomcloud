@@ -1,4 +1,20 @@
-## 1.22.0 (Unreleased)
+## 1.23.0 (Unreleased)
+
+
+## 1.22.0 (December 03, 2020)
+
+ENHANCEMENTS:
+* **New Data Source:** `opetelekomcloud_dds_instance_v3` ([#725](https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/725))
+* `resource/opentelekomcloud_cce_cluster_v3`: Add new argument `authenticating_proxy_ca` ([#727](https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/727))
+* `data_source/opentelekomcloud_cce_cluster_v3`: Add new argument `authentication_mode` ([#727](https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/727))
+* `resource/opentelekomcloud_obs_bucket`: Setting up AK/SK is not required anymore ([#745](https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/745))
+* `resource/opentelekomcloud_obs_bucket_object`: Setting up AK/SK is not required anymore ([#745](https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/745))
+
+BUG FIXES:
+* `resource/opentelekomcloud_identity_credential_v3`: Add the missing documentation ([#731](https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/731))
+* `resource/opentelekomcloud_vpnaas_ike_policy_v2`: Fix hardcoded values for `PFS` and `phase1_negotiation_mode` ([#733](https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/733))
+* `resource/opentelekomcloud_identity_credential_v3`: Make `user_id` Optional ([#737](https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/737))
+
 
 ## 1.21.6 (November 25, 2020)
 
@@ -8,7 +24,7 @@ ENHANCEMENTS:
 * **New Data Source:** `opentelekomcloud_vpc_bandwidth` ([#719](https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/719))
 
 BUG FIXES:
-* `resource/opentelekomcloud_as_group_v1`: Fix failing autoscaling group deletion  ([#722](https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/722))
+* `resource/opentelekomcloud_as_group_v1`: Fix failing autoscaling group deletion ([#722](https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/722))
 
 
 ## 1.21.5 (November 19, 2020)
