@@ -48,21 +48,6 @@ func TestAccObsBucket_basic(t *testing.T) {
 	})
 }
 
-func TestAccObsBucket_aksk(t *testing.T) {
-	rInt := acctest.RandInt()
-
-	resource.Test(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheckS3(t) },
-		Providers:    testAccProviders,
-		CheckDestroy: testAccCheckObsBucketDestroy,
-		Steps: []resource.TestStep{
-			{
-				Config: testAccObsBucket_aksk(rInt),
-			},
-		},
-	})
-}
-
 func TestAccObsBucket_tags(t *testing.T) {
 	rInt := acctest.RandInt()
 	resourceName := "opentelekomcloud_obs_bucket.bucket"
@@ -320,19 +305,6 @@ resource "opentelekomcloud_obs_bucket" "bucket" {
   acl           = "private"
 }
 `, randInt)
-}
-func testAccObsBucket_aksk(randInt int) string {
-	return fmt.Sprintf(`
-resource "opentelekomcloud_obs_bucket" "bucket" {
-  bucket        = "tf-test-bucket-%d"
-  storage_class = "STANDARD"
-  acl           = "private"
-  credentials {
-    access_key = "%s"
-    secret_key = "%s"
-  }
-}
-`, randInt, OS_ACCESS_KEY, OS_SECRET_KEY)
 }
 
 func testAccObsBucket_basic_update(randInt int) string {

@@ -121,11 +121,10 @@ func resourceObsBucketObjectPut(d *schema.ResourceData, meta interface{}) error 
 	var err error
 
 	config := meta.(*Config)
-	client, err := obsClient(d, config)
+	client, err := config.newObjectStorageClient(GetRegion(d, config))
 	if err != nil {
-		return err
+		return fmt.Errorf("error creating OBS client: %s", err)
 	}
-
 	source := d.Get("source").(string)
 	content := d.Get("content").(string)
 	if source == "" && content == "" {
@@ -238,9 +237,9 @@ func putFileToObject(obsClient *obs.ObsClient, d *schema.ResourceData) (*obs.Put
 
 func resourceObsBucketObjectRead(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*Config)
-	client, err := obsClient(d, config)
+	client, err := config.newObjectStorageClient(GetRegion(d, config))
 	if err != nil {
-		return err
+		return fmt.Errorf("error creating OBS client: %s", err)
 	}
 
 	bucket := d.Get("bucket").(string)
@@ -289,9 +288,9 @@ func resourceObsBucketObjectRead(d *schema.ResourceData, meta interface{}) error
 
 func resourceObsBucketObjectDelete(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*Config)
-	client, err := obsClient(d, config)
+	client, err := config.newObjectStorageClient(GetRegion(d, config))
 	if err != nil {
-		return err
+		return fmt.Errorf("error creating OBS client: %s", err)
 	}
 
 	bucket := d.Get("bucket").(string)

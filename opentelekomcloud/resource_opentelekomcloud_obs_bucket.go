@@ -10,8 +10,6 @@ import (
 	"github.com/hashicorp/go-multierror"
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/helper/validation"
-	golangsdk "github.com/opentelekomcloud/gophertelekomcloud"
-	"github.com/opentelekomcloud/gophertelekomcloud/openstack"
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/obs"
 )
 
@@ -251,71 +249,15 @@ func resourceObsBucket() *schema.Resource {
 				Type:     schema.TypeString,
 				Computed: true,
 			},
-
-			"credentials": {
-				Type:     schema.TypeList,
-				Optional: true,
-				MaxItems: 1,
-				Elem: &schema.Resource{
-					Schema: map[string]*schema.Schema{
-						"access_key": {
-							Type:     schema.TypeString,
-							Required: true,
-						},
-						"secret_key": {
-							Type:      schema.TypeString,
-							Required:  true,
-							Sensitive: true,
-						},
-					},
-				},
-			},
 		},
 	}
 }
 
-func obsClient(d *schema.ResourceData, config *Config) (*obs.ObsClient, error) {
-	errMsg := "error creating OpenTelekomCloud OBS client: %s"
-
-	credentials, ok := d.GetOk("credentials")
-	if !ok {
-		client, err := config.newObjectStorageClient(GetRegion(d, config))
-		if err != nil {
-			err = fmt.Errorf(errMsg, err)
-		}
-		return client, err
-	}
-
-	// if credentials are set in the resource, mimics config.newObjectStorageClient
-
-	c, err := openstack.NewOBSService(config.HwClient, golangsdk.EndpointOpts{
-		Region:       GetRegion(d, config),
-		Availability: config.getHwEndpointType(),
-	})
-	if err != nil {
-		return nil, err
-	}
-
-	// init log
-	setUpOBSLogging()
-
-	credentialsSlice := credentials.([]interface{})
-	if len(credentialsSlice) == 0 {
-		return nil, fmt.Errorf("credentials are missing")
-	}
-	credMap := credentialsSlice[0].(map[string]interface{})
-	client, err := obs.New(credMap["access_key"].(string), credMap["secret_key"].(string), c.Endpoint)
-	if err != nil {
-		return nil, fmt.Errorf(errMsg, err)
-	}
-	return client, nil
-}
-
 func resourceObsBucketCreate(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*Config)
-	client, err := obsClient(d, config)
+	client, err := config.newObjectStorageClient(GetRegion(d, config))
 	if err != nil {
-		return err
+		return fmt.Errorf("error creating OBS client: %s", err)
 	}
 
 	bucket := d.Get("bucket").(string)
@@ -341,9 +283,9 @@ func resourceObsBucketCreate(d *schema.ResourceData, meta interface{}) error {
 
 func resourceObsBucketUpdate(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*Config)
-	obsClient, err := obsClient(d, config)
+	obsClient, err := config.newObjectStorageClient(GetRegion(d, config))
 	if err != nil {
-		return err
+		return fmt.Errorf("error creating OBS client: %s", err)
 	}
 
 	log.Printf("[DEBUG] Update OBS bucket %s", d.Id())
@@ -401,9 +343,9 @@ func resourceObsBucketUpdate(d *schema.ResourceData, meta interface{}) error {
 func resourceObsBucketRead(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*Config)
 	region := GetRegion(d, config)
-	obsClient, err := obsClient(d, config)
+	obsClient, err := config.newObjectStorageClient(GetRegion(d, config))
 	if err != nil {
-		return err
+		return fmt.Errorf("error creating OBS client: %s", err)
 	}
 
 	log.Printf("[DEBUG] Read OBS bucket: %s", d.Id())
@@ -473,9 +415,9 @@ func resourceObsBucketRead(d *schema.ResourceData, meta interface{}) error {
 
 func resourceObsBucketDelete(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*Config)
-	obsClient, err := obsClient(d, config)
+	obsClient, err := config.newObjectStorageClient(GetRegion(d, config))
 	if err != nil {
-		return err
+		return fmt.Errorf("error creating OBS client: %s", err)
 	}
 
 	bucket := d.Id()
@@ -1177,7 +1119,7 @@ func deleteAllBucketObjects(obsClient *obs.ObsClient, bucket string) error {
 	log.Printf("[DEBUG] objects of %s will be deleted: %v", bucket, objects)
 	output, err := obsClient.DeleteObjects(deleteOpts)
 	if err != nil {
-		return getObsError("Error deleting all objects of OBS bucket", bucket, err)
+		return getObsError("error deleting all objects of OBS bucket", bucket, err)
 	} else {
 		if len(output.Errors) > 0 {
 			return fmt.Errorf("error some objects are still exist in %s: %#v", bucket, output.Errors)
@@ -1189,9 +1131,8 @@ func deleteAllBucketObjects(obsClient *obs.ObsClient, bucket string) error {
 func getObsError(action string, bucket string, err error) error {
 	if obsError, ok := err.(obs.ObsError); ok {
 		return fmt.Errorf("%s %s: %s,\n Reason: %s", action, bucket, obsError.Code, obsError.Message)
-	} else {
-		return err
 	}
+	return err
 }
 
 // normalize format of storage class
