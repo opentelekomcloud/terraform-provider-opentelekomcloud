@@ -48,6 +48,6 @@ resource "opentelekomcloud_deh_host_v1" "deh1" {
 	 name = "test-deh-1"
 }
 data "opentelekomcloud_deh_host_v1" "hosts" {
-  id = "${opentelekomcloud_deh_host_v1.deh1.id}"
+  id = opentelekomcloud_deh_host_v1.deh1.id
 }
 `, OS_AVAILABILITY_ZONE)

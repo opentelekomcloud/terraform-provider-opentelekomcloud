@@ -11,9 +11,9 @@ Provides a resource to create a route within OpenTelekomCloud.
 ```hcl
 resource "opentelekomcloud_vpc_route_v2" "vpc_route" {
   type        = "peering"
-  nexthop     = "${var.nexthop}"
+  nexthop     = var.nexthop
   destination = "192.168.0.0/16"
-  vpc_id      = "${var.vpc_id}"
+  vpc_id      = var.vpc_id
  }
 ```
 

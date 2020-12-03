@@ -171,7 +171,7 @@ func testAccDNSV2RecordSet_basic(zoneName string) string {
 		}
 
 		resource "opentelekomcloud_dns_recordset_v2" "recordset_1" {
-			zone_id = "${opentelekomcloud_dns_zone_v2.zone_1.id}"
+			zone_id = opentelekomcloud_dns_zone_v2.zone_1.id
 			name = "%s"
 			type = "A"
 			description = "a record set"
@@ -196,7 +196,7 @@ func testAccDNSV2RecordSet_update(zoneName string) string {
 		}
 
 		resource "opentelekomcloud_dns_recordset_v2" "recordset_1" {
-			zone_id = "${opentelekomcloud_dns_zone_v2.zone_1.id}"
+			zone_id = opentelekomcloud_dns_zone_v2.zone_1.id
 			name = "%s"
 			type = "A"
 			description = "an updated record set"
@@ -221,7 +221,7 @@ func testAccDNSV2RecordSet_readTTL(zoneName string) string {
 		}
 
 		resource "opentelekomcloud_dns_recordset_v2" "recordset_1" {
-			zone_id = "${opentelekomcloud_dns_zone_v2.zone_1.id}"
+			zone_id = opentelekomcloud_dns_zone_v2.zone_1.id
 			name = "%s"
 			type = "A"
 			records = ["10.1.0.2"]
@@ -239,7 +239,7 @@ func testAccDNSV2RecordSet_timeout(zoneName string) string {
 		}
 
 		resource "opentelekomcloud_dns_recordset_v2" "recordset_1" {
-			zone_id = "${opentelekomcloud_dns_zone_v2.zone_1.id}"
+			zone_id = opentelekomcloud_dns_zone_v2.zone_1.id
 			name = "%s"
 			type = "A"
 			ttl = 3000

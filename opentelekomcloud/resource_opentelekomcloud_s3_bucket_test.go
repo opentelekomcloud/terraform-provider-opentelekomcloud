@@ -1207,7 +1207,7 @@ resource "opentelekomcloud_s3_bucket" "bucket" {
 	bucket = "tf-test-bucket-%d"
 	acl = "private"
 	logging {
-		target_bucket = "${opentelekomcloud_s3_bucket.log_bucket.id}"
+		target_bucket = opentelekomcloud_s3_bucket.log_bucket.id
 		target_prefix = "log/"
 	}
 }

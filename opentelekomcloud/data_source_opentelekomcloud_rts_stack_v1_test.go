@@ -80,7 +80,7 @@ JSON
 
 data "opentelekomcloud_rts_stack_v1" "stacks" {
 
-        name = "${opentelekomcloud_rts_stack_v1.stack_1.name}"
-       
+        name = opentelekomcloud_rts_stack_v1.stack_1.name
+
 }
 `

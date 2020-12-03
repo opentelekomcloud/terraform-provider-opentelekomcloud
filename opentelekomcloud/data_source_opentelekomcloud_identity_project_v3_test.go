@@ -70,7 +70,7 @@ func testAccOpenStackIdentityProjectV3DataSource_basic(name, description string)
 	%s
 
 	data "opentelekomcloud_identity_project_v3" "project_1" {
-      name = "${opentelekomcloud_identity_project_v3.project_1.name}"
+      name = opentelekomcloud_identity_project_v3.project_1.name
 	}
 `, testAccOpenStackIdentityProjectV3DataSource_project(name, description))
 }

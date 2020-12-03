@@ -464,7 +464,7 @@ resource "opentelekomcloud_s3_bucket" "object_bucket" {
     bucket = "tf-object-test-bucket-%d"
 }
 resource "opentelekomcloud_s3_bucket_object" "object" {
-	bucket = "${opentelekomcloud_s3_bucket.object_bucket.bucket}"
+	bucket = opentelekomcloud_s3_bucket.object_bucket.bucket
 	key = "test-key"
 	source = "%s"
 	content_type = "binary/octet-stream"
@@ -479,7 +479,7 @@ resource "opentelekomcloud_s3_bucket" "object_bucket_2" {
 }
 
 resource "opentelekomcloud_s3_bucket_object" "object" {
-	bucket = "${opentelekomcloud_s3_bucket.object_bucket_2.bucket}"
+	bucket = opentelekomcloud_s3_bucket.object_bucket_2.bucket
 	key = "test-key"
 	source = "%s"
 	content_language = "en"
@@ -495,7 +495,7 @@ resource "opentelekomcloud_s3_bucket" "object_bucket" {
         bucket = "tf-object-test-bucket-%d"
 }
 resource "opentelekomcloud_s3_bucket_object" "object" {
-        bucket = "${opentelekomcloud_s3_bucket.object_bucket.bucket}"
+        bucket = opentelekomcloud_s3_bucket.object_bucket.bucket
         key = "test-key"
         content = "some_bucket_content"
 }
@@ -509,10 +509,10 @@ resource "opentelekomcloud_s3_bucket" "object_bucket_3" {
 }
 
 resource "opentelekomcloud_s3_bucket_object" "object" {
-	bucket = "${opentelekomcloud_s3_bucket.object_bucket_3.bucket}"
+	bucket = opentelekomcloud_s3_bucket.object_bucket_3.bucket
 	key = "updateable-key"
 	source = "%s"
-	etag = "${md5(file("%s"))}"
+	etag = md5(file("%s"))
 }
 `, randInt, source, source)
 }
@@ -527,10 +527,10 @@ resource "opentelekomcloud_s3_bucket" "object_bucket_3" {
 }
 
 resource "opentelekomcloud_s3_bucket_object" "object" {
-	bucket = "${opentelekomcloud_s3_bucket.object_bucket_3.bucket}"
+	bucket = opentelekomcloud_s3_bucket.object_bucket_3.bucket
 	key = "updateable-key"
 	source = "%s"
-	etag = "${md5(file("%s"))}"
+	etag = md5(file("%s"))
 }
 `, randInt, source, source)
 }
@@ -542,7 +542,7 @@ resource "opentelekomcloud_s3_bucket" "object_bucket" {
 }
 
 resource "opentelekomcloud_s3_bucket_object" "object" {
-	bucket = "${opentelekomcloud_s3_bucket.object_bucket.bucket}"
+	bucket = opentelekomcloud_s3_bucket.object_bucket.bucket
 	key = "test-key"
 	source = "%s"
 	server_side_encryption = "aws:kms"
@@ -556,7 +556,7 @@ resource "opentelekomcloud_s3_bucket" "object_bucket" {
         bucket = "tf-object-test-bucket-%d"
 }
 resource "opentelekomcloud_s3_bucket_object" "object" {
-        bucket = "${opentelekomcloud_s3_bucket.object_bucket.bucket}"
+        bucket = opentelekomcloud_s3_bucket.object_bucket.bucket
         key = "test-key"
         content = "some_bucket_content"
         acl = "%s"

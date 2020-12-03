@@ -11,7 +11,7 @@ Use this data source to get details about OpenTelekomCloud Cloud Trace Service.
 variable "bucket_name" { }
 
 data "opentelekomcloud_cts_tracker_v1" "tracker_v1" {
-  bucket_name = "${var.bucket_name}"
+  bucket_name = var.bucket_name
 }
 
 ```

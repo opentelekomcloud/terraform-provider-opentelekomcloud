@@ -164,7 +164,7 @@ resource "opentelekomcloud_s3_bucket" "object_bucket" {
 	bucket = "tf-object-test-bucket-%d"
 }
 resource "opentelekomcloud_s3_bucket_object" "object" {
-	bucket = "${opentelekomcloud_s3_bucket.object_bucket.bucket}"
+	bucket = opentelekomcloud_s3_bucket.object_bucket.bucket
 	key = "tf-testing-obj-%d"
 	content = "Hello World"
 }
@@ -185,7 +185,7 @@ resource "opentelekomcloud_s3_bucket" "object_bucket" {
 	bucket = "tf-object-test-bucket-%d"
 }
 resource "opentelekomcloud_s3_bucket_object" "object" {
-	bucket = "${opentelekomcloud_s3_bucket.object_bucket.bucket}"
+	bucket = opentelekomcloud_s3_bucket.object_bucket.bucket
 	key = "tf-testing-obj-%d-readable"
 	content = "yes"
 	content_type = "text/plain"
@@ -211,7 +211,7 @@ resource "opentelekomcloud_s3_bucket" "object_bucket" {
 }
 
 resource "opentelekomcloud_s3_bucket_object" "object" {
-	bucket = "${opentelekomcloud_s3_bucket.object_bucket.bucket}"
+	bucket = opentelekomcloud_s3_bucket.object_bucket.bucket
 	key = "tf-testing-obj-%d-all-params"
 	content = <<CONTENT
 {"msg": "Hi there!"}

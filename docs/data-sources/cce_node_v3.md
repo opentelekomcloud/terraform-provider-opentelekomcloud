@@ -11,17 +11,17 @@ Use this data source to get the specified node in a cluster from OpenTelekomClou
 ```hcl
 variable "cluster_id" { }
 variable "node_id" { }
-  
+
 data "opentelekomcloud_cce_node_v3" "node" {
-  cluster_id = "${var.cluster_id}"
-  node_id    = "${var.node_id}"
+  cluster_id = var.cluster_id
+  node_id    = var.node_id
 }
 ```
 
 ## Argument Reference
 
 The following arguments are supported:
- 
+
 * `cluster_id` - (Required) The id of container cluster.
 
 * `name` - (Optional) Name of the node.
@@ -34,9 +34,9 @@ The following arguments are supported:
 
 All above argument parameters can be exported as attribute parameters along with attribute reference:
 
-* `flavor_id` - The flavor id to be used. 
+* `flavor_id` - The flavor id to be used.
 
-* `availability_zone` - Available partitions where the node is located. 
+* `availability_zone` - Available partitions where the node is located.
 
 * `key_pair` - Key pair name when logging in to select the key pair mode.
 
@@ -46,10 +46,10 @@ All above argument parameters can be exported as attribute parameters along with
 
 * `bandwidth_size` - Bandwidth (Mbit/s), in the range of [1, 2000].
 
-* `extendparam` - Extended parameters. 
+* `extendparam` - Extended parameters.
 
 * `eip_ids` - List of existing elastic IP IDs.
- 
+
 * `server_id` - The node's virtual machine ID in ECS.
 
 * `public_ip` - Elastic IP parameters of the node.

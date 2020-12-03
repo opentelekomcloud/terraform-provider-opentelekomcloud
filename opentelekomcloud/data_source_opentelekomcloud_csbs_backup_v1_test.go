@@ -57,10 +57,10 @@ resource "opentelekomcloud_compute_instance_v2" "instance_1" {
 resource "opentelekomcloud_csbs_backup_v1" "csbs" {
   backup_name      = "csbs-test"
   description      = "test-code"
-  resource_id = "${opentelekomcloud_compute_instance_v2.instance_1.id}"
+  resource_id = opentelekomcloud_compute_instance_v2.instance_1.id
   resource_type = "OS::Nova::Server"
 }
 data "opentelekomcloud_csbs_backup_v1" "csbs" {
-  id = "${opentelekomcloud_csbs_backup_v1.csbs.id}"
+  id = opentelekomcloud_csbs_backup_v1.csbs.id
 }
 `, OS_IMAGE_ID, OS_AVAILABILITY_ZONE, OS_FLAVOR_ID, OS_NETWORK_ID)

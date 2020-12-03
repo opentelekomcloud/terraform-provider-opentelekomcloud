@@ -178,7 +178,7 @@ resource "opentelekomcloud_rds_instance_v1" "instance" {
     type = "PostgreSQL"
     version = "9.5.5"
   }
-  flavorref = "${data.opentelekomcloud_rds_flavors_v1.flavor.id}"
+  flavorref = data.opentelekomcloud_rds_flavors_v1.flavor.id
   volume {
     type = "COMMON"
     size = 100
@@ -190,7 +190,7 @@ resource "opentelekomcloud_rds_instance_v1" "instance" {
     subnetid = "%s"
   }
   securitygroup {
-    id = "${opentelekomcloud_networking_secgroup_v2.sg.id}"
+    id = opentelekomcloud_networking_secgroup_v2.sg.id
   }
   dbport = "8635"
   backupstrategy {
@@ -227,7 +227,7 @@ resource "opentelekomcloud_rds_instance_v1" "instance" {
     type = "PostgreSQL"
     version = "9.5.5"
   }
-  flavorref = "${data.opentelekomcloud_rds_flavors_v1.flavor.id}"
+  flavorref = data.opentelekomcloud_rds_flavors_v1.flavor.id
   volume {
     type = "COMMON"
     size = 100
@@ -239,7 +239,7 @@ resource "opentelekomcloud_rds_instance_v1" "instance" {
     subnetid = "%s"
   }
   securitygroup {
-    id = "${opentelekomcloud_networking_secgroup_v2.sg.id}"
+    id = opentelekomcloud_networking_secgroup_v2.sg.id
   }
   dbport = "8635"
   backupstrategy {
@@ -276,7 +276,7 @@ resource "opentelekomcloud_rds_instance_v1" "instance" {
     type = "PostgreSQL"
     version = "9.5.5"
   }
-  flavorref = "${data.opentelekomcloud_rds_flavors_v1.flavor.id}"
+  flavorref = data.opentelekomcloud_rds_flavors_v1.flavor.id
   volume {
     type = "COMMON"
     size = 100
@@ -288,7 +288,7 @@ resource "opentelekomcloud_rds_instance_v1" "instance" {
     subnetid = "%s"
   }
   securitygroup {
-    id = "${opentelekomcloud_networking_secgroup_v2.sg.id}"
+    id = opentelekomcloud_networking_secgroup_v2.sg.id
   }
   dbport = "8635"
   backupstrategy {

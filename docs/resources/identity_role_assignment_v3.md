@@ -7,10 +7,10 @@ subcategory: "Identity and Access Management (IAM)"
 Manages a V3 Role assignment within group on OpentelekomCloud IAM Service.
 
 -> **Note:** You _must_ have admin privileges in your OpentelekomCloud cloud to use
-this resource. 
+this resource.
 
 ## Example Usage
- 
+
 ### Assign Role On Project Level
 
 ```hcl
@@ -27,9 +27,9 @@ data "opentelekomcloud_identity_role_v3" "role_1" {
 }
 
 resource "opentelekomcloud_identity_role_assignment_v3" "role_assignment_1" {
-  group_id   = "${opentelekomcloud_identity_group_v3.group_1.id}"
-  project_id = "${opentelekomcloud_identity_project_v3.project_1.id}"
-  role_id    = "${data.opentelekomcloud_identity_role_v3.role_1.id}"
+  group_id   = opentelekomcloud_identity_group_v3.group_1.id
+  project_id = opentelekomcloud_identity_project_v3.project_1.id
+  role_id    = data.opentelekomcloud_identity_role_v3.role_1.id
 }
 ```
 
@@ -50,10 +50,10 @@ data "opentelekomcloud_identity_role_v3" "role_1" {
 }
 
 resource "opentelekomcloud_identity_role_assignment_v3" "role_assignment_1" {
-  group_id  ="${opentelekomcloud_identity_group_v3.group_1.id}"
-  domain_id = "${var.domain_id}"
-  role_id   = "${data.opentelekomcloud_identity_role_v3.role_1.id}"
-} 
+  group_id  =opentelekomcloud_identity_group_v3.group_1.id
+  domain_id = var.domain_id
+  role_id   = data.opentelekomcloud_identity_role_v3.role_1.id
+}
 ```
 
 ## Argument Reference

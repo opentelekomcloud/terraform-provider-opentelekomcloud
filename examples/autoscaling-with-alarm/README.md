@@ -12,15 +12,15 @@ Three steps will guide you to achieve this configuration. first configuration an
 resource "opentelekomcloud_as_configuration_v1" "as_configuration"{
   scaling_configuration_name = "terraform"
   instance_config = {
-    flavor = "${var.flavor}"
-    image = "${var.image}"
+    flavor = var.flavor
+    image = var.image
     disk = [
       {size = 40
       volume_type = "SATA"
       disk_type = "SYS"}
     ]
-    key_name = "${var.keyname}"
-    user_data = "${file("userdata.txt")}"
+    key_name = var.keyname
+    user_data = file("userdata.txt")
   }
 }
 ```
@@ -28,20 +28,20 @@ resource "opentelekomcloud_as_configuration_v1" "as_configuration"{
 ```hcl
 resource "opentelekomcloud_as_group_v1" "as_group"{
   scaling_group_name = "terraform"
-  scaling_configuration_id = "${opentelekomcloud_as_configuration_v1.as_configuration.id}"
+  scaling_configuration_id = opentelekomcloud_as_configuration_v1.as_configuration.id
   desire_instance_number = 2
   min_instance_number = 0
   max_instance_number = 3
   networks = [
-    {id = "${opentelekomcloud_networking_network_v2.network.id}"},
+    {id = opentelekomcloud_networking_network_v2.network.id},
   ]
   security_groups = [
-    {id = "${opentelekomcloud_compute_secgroup_v2.secgroup.id}"},
+    {id = opentelekomcloud_compute_secgroup_v2.secgroup.id},
   ]
-  vpc_id = "${opentelekomcloud_networking_router_v2.router.id}"
+  vpc_id = opentelekomcloud_networking_router_v2.router.id
   delete_publicip = true
-  delete_instances = "yes" 
-  depends_on = ["opentelekomcloud_networking_router_interface_v2.int_01"]
+  delete_instances = "yes"
+  depends_on = [opentelekomcloud_networking_router_interface_v2.int_01]
 }
 ```
 
@@ -49,41 +49,41 @@ Second, setup the alarm rule upon this Auto-scaling group, for more detail [alar
 
 ```hcl
 resource "opentelekomcloud_ces_alarmrule" "alarm_rule" {
-  "alarm_action_enabled" = "false" 
-  "alarm_name" = "terraform"
-  "metric" {
-    "namespace" = "SYS.AS"
-    "metric_name" = "cpu_util"
-    "dimensions" {
-        "name" = "AutoScalingGroup"
-        "value" = "${opentelekomcloud_as_group_v1.as_group.id}"
+  alarm_action_enabled = "false"
+  alarm_name = "terraform"
+  metric {
+    namespace = "SYS.AS"
+    metric_name = "cpu_util"
+    dimensions {
+        name = "AutoScalingGroup"
+        value = opentelekomcloud_as_group_v1.as_group.id
     }
   }
-  "condition"  {
-    "period" = 300
-    "filter" = "average"
-    "comparison_operator" = ">"
-    "value" = 80
-    "unit" = "%"
-    "count" = 2
+  condition  {
+    period = 300
+    filter = "average"
+    comparison_operator = ">"
+    value = 80
+    unit = "%"
+    count = 2
   }
 }
 ```
 
 To classify this is a rule for Auto-scaling group, first we should configure the "namesapce" as SYS.AS and "dimensions.name" as AutoScalingGroup. second we should define which group you would like to set up via setting "value" parameter with Auto-scaling group id.
 
-Lastly. Configure the Auto-scaling policy with alarm type. 
+Lastly. Configure the Auto-scaling policy with alarm type.
 
 ```hcl
 resource "opentelekomcloud_as_policy_v1" "as_policy"{
   scaling_policy_name = "terraform"
-  scaling_group_id = "${opentelekomcloud_as_group_v1.as_group.id}"
+  scaling_group_id = opentelekomcloud_as_group_v1.as_group.id
   scaling_policy_type= "ALARM"
   scaling_policy_action = {
     operation = "ADD"
     instance_number = 1
   }
-  alarm_id="${opentelekomcloud_ces_alarmrule.alarm_rule.id}"
+  alarm_id=opentelekomcloud_ces_alarmrule.alarm_rule.id
 }
 ```
 

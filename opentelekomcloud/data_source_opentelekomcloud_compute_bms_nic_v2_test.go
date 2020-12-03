@@ -55,6 +55,6 @@ resource "opentelekomcloud_compute_instance_v2" "instance_1" {
   }
 }
 data "opentelekomcloud_compute_bms_nic_v2" "nic_1" {
-  server_id = "${opentelekomcloud_compute_instance_v2.instance_1.id}"
+  server_id = opentelekomcloud_compute_instance_v2.instance_1.id
 }
 `, OS_IMAGE_ID, OS_AVAILABILITY_ZONE, OS_NETWORK_ID)

@@ -132,15 +132,15 @@ func testAccDmsV1Instance_basic(instanceName string) string {
 		resource "opentelekomcloud_dms_instance_v1" "instance_1" {
 		  name  = "%s"
           engine = "rabbitmq"
-          storage_space = "${data.opentelekomcloud_dms_product_v1.product_1.storage}"
+          storage_space = data.opentelekomcloud_dms_product_v1.product_1.storage
           access_user = "user"
           password = "Dmstest@123"
           vpc_id = "%s"
-          security_group_id = "${opentelekomcloud_networking_secgroup_v2.secgroup_1.id}"
+          security_group_id = opentelekomcloud_networking_secgroup_v2.secgroup_1.id
           subnet_id = "%s"
-          available_zones = ["${data.opentelekomcloud_dms_az_v1.az_1.id}"]
-          product_id = "${data.opentelekomcloud_dms_product_v1.product_1.id}"
-          engine_version = "${data.opentelekomcloud_dms_product_v1.product_1.version}"
+          available_zones = [data.opentelekomcloud_dms_az_v1.az_1.id]
+          product_id = data.opentelekomcloud_dms_product_v1.product_1.id
+          engine_version = data.opentelekomcloud_dms_product_v1.product_1.version
           depends_on      = ["data.opentelekomcloud_dms_product_v1.product_1", "opentelekomcloud_networking_secgroup_v2.secgroup_1"]
 		}
 	`, instanceName, OS_VPC_ID, OS_NETWORK_ID)
@@ -163,15 +163,15 @@ func testAccDmsV1Instance_update(instanceUpdate string) string {
 		  name  = "%s"
           description = "instance update description"
           engine = "rabbitmq"
-          storage_space = "${data.opentelekomcloud_dms_product_v1.product_1.storage}"
+          storage_space = data.opentelekomcloud_dms_product_v1.product_1.storage
           access_user = "user"
           password = "Dmstest@123"
           vpc_id = "%s"
-          security_group_id = "${opentelekomcloud_networking_secgroup_v2.secgroup_1.id}"
+          security_group_id = opentelekomcloud_networking_secgroup_v2.secgroup_1.id
           subnet_id = "%s"
-          available_zones = ["${data.opentelekomcloud_dms_az_v1.az_1.id}"]
-          product_id = "${data.opentelekomcloud_dms_product_v1.product_1.id}"
-          engine_version = "${data.opentelekomcloud_dms_product_v1.product_1.version}"
+          available_zones = [data.opentelekomcloud_dms_az_v1.az_1.id]
+          product_id = data.opentelekomcloud_dms_product_v1.product_1.id
+          engine_version = data.opentelekomcloud_dms_product_v1.product_1.version
           depends_on      = ["data.opentelekomcloud_dms_product_v1.product_1", "opentelekomcloud_networking_secgroup_v2.secgroup_1"]
 		}
 	`, instanceUpdate, OS_VPC_ID, OS_NETWORK_ID)
@@ -193,14 +193,14 @@ func testAccDmsV1Instance_KafkaInstance(instanceName string) string {
 		resource "opentelekomcloud_dms_instance_v1" "instance_1" {
 		  name  = "%s"
 		  engine = "kafka"
-		  product_id = "${data.opentelekomcloud_dms_product_v1.product_1.id}"
-		  engine_version = "${data.opentelekomcloud_dms_product_v1.product_1.version}"
-		  specification = "${data.opentelekomcloud_dms_product_v1.product_1.bandwidth}"
-		  partition_num = "${data.opentelekomcloud_dms_product_v1.product_1.partition_num}"
-		  storage_spec_code = "${data.opentelekomcloud_dms_product_v1.product_1.storage_spec_code}"
-		  storage_space = "${data.opentelekomcloud_dms_product_v1.product_1.storage}"
-		  available_zones = ["${data.opentelekomcloud_dms_az_v1.az_1.id}"]
-		  security_group_id = "${opentelekomcloud_networking_secgroup_v2.secgroup_1.id}"
+		  product_id = data.opentelekomcloud_dms_product_v1.product_1.id
+		  engine_version = data.opentelekomcloud_dms_product_v1.product_1.version
+		  specification = data.opentelekomcloud_dms_product_v1.product_1.bandwidth
+		  partition_num = data.opentelekomcloud_dms_product_v1.product_1.partition_num
+		  storage_spec_code = data.opentelekomcloud_dms_product_v1.product_1.storage_spec_code
+		  storage_space = data.opentelekomcloud_dms_product_v1.product_1.storage
+		  available_zones = [data.opentelekomcloud_dms_az_v1.az_1.id]
+		  security_group_id = opentelekomcloud_networking_secgroup_v2.secgroup_1.id
 		  vpc_id = "%s"
           subnet_id = "%s"
 

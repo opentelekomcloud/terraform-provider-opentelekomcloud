@@ -217,8 +217,8 @@ resource "opentelekomcloud_networking_floatingip_v2" "fip_1" {
 }
 
 resource "opentelekomcloud_compute_floatingip_associate_v2" "fip_1" {
-  floating_ip = "${opentelekomcloud_networking_floatingip_v2.fip_1.address}"
-  instance_id = "${opentelekomcloud_compute_instance_v2.instance_1.id}"
+  floating_ip = opentelekomcloud_networking_floatingip_v2.fip_1.address
+  instance_id = opentelekomcloud_compute_instance_v2.instance_1.id
 }
 `, OS_NETWORK_ID)
 
@@ -235,9 +235,9 @@ resource "opentelekomcloud_networking_floatingip_v2" "fip_1" {
 }
 
 resource "opentelekomcloud_compute_floatingip_associate_v2" "fip_1" {
-  floating_ip = "${opentelekomcloud_networking_floatingip_v2.fip_1.address}"
-  instance_id = "${opentelekomcloud_compute_instance_v2.instance_1.id}"
-  fixed_ip = "${opentelekomcloud_compute_instance_v2.instance_1.access_ip_v4}"
+  floating_ip = opentelekomcloud_networking_floatingip_v2.fip_1.address
+  instance_id = opentelekomcloud_compute_instance_v2.instance_1.id
+  fixed_ip = opentelekomcloud_compute_instance_v2.instance_1.access_ip_v4
 }
 `, OS_NETWORK_ID)
 
@@ -255,9 +255,9 @@ resource "opentelekomcloud_networking_floatingip_v2" "fip_1" {
 }
 
 resource "opentelekomcloud_compute_floatingip_associate_v2" "fip_1" {
-  floating_ip = "${opentelekomcloud_networking_floatingip_v2.fip_1.address}"
-  instance_id = "${opentelekomcloud_compute_instance_v2.instance_1.id}"
-  fixed_ip = "${opentelekomcloud_compute_instance_v2.instance_1.network.0.fixed_ip_v4}"
+  floating_ip = opentelekomcloud_networking_floatingip_v2.fip_1.address
+  instance_id = opentelekomcloud_compute_instance_v2.instance_1.id
+  fixed_ip = opentelekomcloud_compute_instance_v2.instance_1.network.0.fixed_ip_v4
 }
 `, OS_NETWORK_ID)
 
@@ -268,7 +268,7 @@ resource "opentelekomcloud_networking_network_v2" "network_1" {
 
 resource "opentelekomcloud_networking_subnet_v2" "subnet_1" {
   name = "subnet_1"
-  network_id = "${opentelekomcloud_networking_network_v2.network_1.id}"
+  network_id = opentelekomcloud_networking_network_v2.network_1.id
   cidr = "192.168.1.0/24"
   ip_version = 4
   enable_dhcp = true
@@ -280,7 +280,7 @@ resource "opentelekomcloud_compute_instance_v2" "instance_1" {
   security_groups = ["default"]
 
   network {
-    uuid = "${opentelekomcloud_networking_network_v2.network_1.id}"
+    uuid = opentelekomcloud_networking_network_v2.network_1.id
   }
 
   network {
@@ -292,9 +292,9 @@ resource "opentelekomcloud_networking_floatingip_v2" "fip_1" {
 }
 
 resource "opentelekomcloud_compute_floatingip_associate_v2" "fip_1" {
-  floating_ip = "${opentelekomcloud_networking_floatingip_v2.fip_1.address}"
-  instance_id = "${opentelekomcloud_compute_instance_v2.instance_1.id}"
-  fixed_ip = "${opentelekomcloud_compute_instance_v2.instance_1.network.1.fixed_ip_v4}"
+  floating_ip = opentelekomcloud_networking_floatingip_v2.fip_1.address
+  instance_id = opentelekomcloud_compute_instance_v2.instance_1.id
+  fixed_ip = opentelekomcloud_compute_instance_v2.instance_1.network.1.fixed_ip_v4
 }
 `, OS_NETWORK_ID)
 
@@ -314,8 +314,8 @@ resource "opentelekomcloud_networking_floatingip_v2" "fip_2" {
 }
 
 resource "opentelekomcloud_compute_floatingip_associate_v2" "fip_1" {
-  floating_ip = "${opentelekomcloud_networking_floatingip_v2.fip_1.address}"
-  instance_id = "${opentelekomcloud_compute_instance_v2.instance_1.id}"
+  floating_ip = opentelekomcloud_networking_floatingip_v2.fip_1.address
+  instance_id = opentelekomcloud_compute_instance_v2.instance_1.id
 }
 `, OS_NETWORK_ID)
 
@@ -335,7 +335,7 @@ resource "opentelekomcloud_networking_floatingip_v2" "fip_2" {
 }
 
 resource "opentelekomcloud_compute_floatingip_associate_v2" "fip_1" {
-  floating_ip = "${opentelekomcloud_networking_floatingip_v2.fip_2.address}"
-  instance_id = "${opentelekomcloud_compute_instance_v2.instance_1.id}"
+  floating_ip = opentelekomcloud_networking_floatingip_v2.fip_2.address
+  instance_id = opentelekomcloud_compute_instance_v2.instance_1.id
 }
 `, OS_NETWORK_ID)

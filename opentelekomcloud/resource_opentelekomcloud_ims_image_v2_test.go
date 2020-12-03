@@ -147,7 +147,7 @@ resource "opentelekomcloud_compute_instance_v2" "instance_1" {
 
 resource "opentelekomcloud_ims_image_v2" "image_1" {
   name   = "TFTest_image"
-  instance_id = "${opentelekomcloud_compute_instance_v2.instance_1.id}"
+  instance_id = opentelekomcloud_compute_instance_v2.instance_1.id
   description = "created by TerraformAccTest"
   tags = {
     foo = "bar"
@@ -171,7 +171,7 @@ resource "opentelekomcloud_compute_instance_v2" "instance_1" {
 
 resource "opentelekomcloud_ims_image_v2" "image_1" {
   name   = "TFTest_image_update"
-  instance_id = "${opentelekomcloud_compute_instance_v2.instance_1.id}"
+  instance_id = opentelekomcloud_compute_instance_v2.instance_1.id
   description = "created by TerraformAccTest"
   tags = {
     foo  = "bar"

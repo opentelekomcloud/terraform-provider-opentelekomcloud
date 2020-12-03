@@ -137,7 +137,7 @@ resource "opentelekomcloud_compute_instance_v2" "instance_1" {
     uuid = "%s"
   }
   scheduler_hints {
-    group = "${opentelekomcloud_compute_servergroup_v2.sg_1.id}"
+    group = opentelekomcloud_compute_servergroup_v2.sg_1.id
   }
 }
 `, OS_NETWORK_ID)

@@ -5,7 +5,7 @@ resource "opentelekomcloud_ces_alarmrule" "alarm_rule" {
     "metric_name" = "network_outgoing_bytes_rate_inband"
     "dimensions" {
         "name" = "instance_id"
-        "value" = "${opentelekomcloud_compute_instance_v2.webserver.id}"
+        "value" = opentelekomcloud_compute_instance_v2.webserver.id
     }
   }
   "condition"  {
@@ -19,7 +19,7 @@ resource "opentelekomcloud_ces_alarmrule" "alarm_rule" {
   "alarm_actions" {
     "type" = "notification"
     "notification_list" = [
-      "${opentelekomcloud_smn_topic_v2.topic.id}"
+      opentelekomcloud_smn_topic_v2.topic.id
     ]
   }
 }

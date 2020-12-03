@@ -2,7 +2,7 @@
 
 This example will show you a simple configuration of DNS resource.
 which includes a public dns zone and a private dns zone.
-for more detailed information, please refer to 
+for more detailed information, please refer to
 [doc](https://www.terraform.io/docs/providers/opentelekomcloud/index.html)
 
 The ```main.tf``` contains the major resource scripts.
@@ -23,14 +23,14 @@ resource "opentelekomcloud_dns_zone_v2" "private_example_com" {
   ttl = 3000
   type = "private"
   router = {
-     router_id = "${var.vpc_id}"
-     router_region = "${var.region}"
+     router_id = var.vpc_id
+     router_region = var.region
   }
 }
 
 
 resource "opentelekomcloud_dns_recordset_v2" "rs_example_com" {
-  zone_id = "${opentelekomcloud_dns_zone_v2.public_example_com.id}"
+  zone_id = opentelekomcloud_dns_zone_v2.public_example_com.id
   name = "example.com."
   description = "An example record set"
   ttl = 3000

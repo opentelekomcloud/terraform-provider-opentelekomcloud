@@ -76,15 +76,15 @@ resource "opentelekomcloud_vpc_v1" "vpc_1" {
 }
 
 data "opentelekomcloud_vpc_v1" "by_id" {
-  id = "${opentelekomcloud_vpc_v1.vpc_1.id}"
+  id = opentelekomcloud_vpc_v1.vpc_1.id
 }
 
 data "opentelekomcloud_vpc_v1" "by_cidr" {
-  cidr = "${opentelekomcloud_vpc_v1.vpc_1.cidr}"
+  cidr = opentelekomcloud_vpc_v1.vpc_1.cidr
 }
 
 data "opentelekomcloud_vpc_v1" "by_name" {
-	name = "${opentelekomcloud_vpc_v1.vpc_1.name}"
+	name = opentelekomcloud_vpc_v1.vpc_1.name
 }
 `, name, cidr)
 }

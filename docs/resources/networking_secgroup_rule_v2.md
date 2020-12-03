@@ -23,7 +23,7 @@ resource "opentelekomcloud_networking_secgroup_rule_v2" "secgroup_rule_1" {
   port_range_min    = 22
   port_range_max    = 22
   remote_ip_prefix  = "0.0.0.0/0"
-  security_group_id = "${opentelekomcloud_networking_secgroup_v2.secgroup_1.id}"
+  security_group_id = opentelekomcloud_networking_secgroup_v2.secgroup_1.id
 }
 ```
 
@@ -39,9 +39,9 @@ The following arguments are supported:
 * `ethertype` - (Required) The layer 3 protocol type, valid values are `IPv4`
   or `IPv6`. Changing this creates a new security group rule.
 
-* `protocol` - (Optional) The layer 4 protocol type, valid values are following. Changing this creates a new security group rule. 
-  This is required if you want to specify a port range. 
-  * `tcp`, `udp`, `icmp`, `ah`, `dccp`, `egp`, `esp`, `gre`, `igmp`, `ipv6-encap`, 
+* `protocol` - (Optional) The layer 4 protocol type, valid values are following. Changing this creates a new security group rule.
+  This is required if you want to specify a port range.
+  * `tcp`, `udp`, `icmp`, `ah`, `dccp`, `egp`, `esp`, `gre`, `igmp`, `ipv6-encap`,
   `ipv6-frag`, `ipv6-icmp`, `ipv6-nonxt`, `ipv6-opts`, `ipv6-route`, `ospf`,
   `pgm`, `rsvp`, `sctp`, `udplite`, `vrrp`
 

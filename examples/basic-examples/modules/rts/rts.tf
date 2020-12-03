@@ -4,10 +4,10 @@ name = "${var.rts_name}_new"
 disable_rollback = true
  timeout_mins=60
   parameters = {
-     "network_id" = "${var.subnet_id}"
-      "instance_type" = "${var.instance_type}"
-      "image_id" = "${var.image_id}"	  
-	   "availability_zone" = "${var.availability_zone}"
+     "network_id" = var.subnet_id
+      "instance_type" = var.instance_type
+      "image_id" = var.image_id
+	   "availability_zone" = var.availability_zone
     }
   template_body = <<STACK
   {
@@ -48,7 +48,7 @@ disable_rollback = true
                 "networks": [{
                     "network": {
                         "get_param": "network_id"
-                    }			    
+                    }
               }],
 			  "availability_zone": {
 				     "get_param": "availability_zone"
@@ -96,13 +96,13 @@ resource "opentelekomcloud_rts_software_config_v1" "myconfig2" {
 }
 
 resource "opentelekomcloud_rts_software_deployment_v1" "mydeployment1" {
-  config_id = "${opentelekomcloud_rts_software_config_v1.myconfig.id}"
+  config_id = opentelekomcloud_rts_software_config_v1.myconfig.id
   server_id = "6ff183f8-a210-42ef-b6dd-2af0aaabc451"
 }
 
 
 resource "opentelekomcloud_rts_software_deployment_v1" "mydeployment2" {
-  config_id = "${opentelekomcloud_rts_software_config_v1.myconfig2.id}"
+  config_id = opentelekomcloud_rts_software_config_v1.myconfig2.id
   server_id = "e387232b-c8fb-4b05-9cb5-02d18c3ea939"
   status = "COMPLETE"
   action = "UPDATE"
@@ -114,7 +114,7 @@ resource "opentelekomcloud_rts_software_deployment_v1" "mydeployment2" {
         "deploy_stderr"= "+ echo Writing to /tmp/baaaaa\n+ echo fooooo\n+ cat /tmp/baaaaa\n+ echo -n The file /tmp/baaaaa contains fooooo for server ec14c864-096e-4e27-bb8a-2c2b4dc6f3f5 during CREATE\n+ echo Written to /tmp/baaaaa\n+ echo Output to stderr\nOutput to stderr\n",
         "deploy_status_code" =0,
         "result" = "The file /tmp/baaaaa contains fooooo for server ec14c864-096e-4e27-bb8a-2c2b4dc6f3f5 during CREATE"
-  
+
   }
   status_reason = "Outputs received"
   tenant_id  = "b730519ca7064da2a3233e86bee139e4"

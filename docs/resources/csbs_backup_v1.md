@@ -11,10 +11,10 @@ Provides an OpenTelekomCloud Backup of Resources.
 ```hcl
 variable "backup_name" { }
 variable "resource_id" { }
- 
+
 resource "opentelekomcloud_csbs_backup_v1" "backup_v1" {
-  backup_name   = "${var.backup_name}"
-  resource_id   = "${var.resource_id}"
+  backup_name   = var.backup_name
+  resource_id   = var.resource_id
   resource_type = "OS::Nova::Server"
 }
 ```
@@ -34,7 +34,7 @@ The following arguments are supported:
 * `tags` - (Optional) block supports the following arguments:
 
 * `key` - (Required) Tag key. It cannot be an empty string.Changing key creates a new backup.
-    
+
 * `value` - (Required) Tag value. It can be an empty string.Changing value creates a new backup.
 
 ## Attributes Reference

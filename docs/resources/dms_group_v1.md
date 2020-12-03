@@ -21,7 +21,7 @@ resource "opentelekomcloud_dms_group_v1" "queue_1" {
 
 resource "opentelekomcloud_dms_group_v1" "group_1" {
   name     = "group_1"
-  queue_id = "${opentelekomcloud_dms_queue_v1.queue_1.id}"
+  queue_id = opentelekomcloud_dms_queue_v1.queue_1.id
 }
 ```
 

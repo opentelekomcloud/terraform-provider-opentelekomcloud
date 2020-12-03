@@ -5,10 +5,10 @@ resource "opentelekomcloud_s3_bucket" "bucket1" {
 #pass
 resource "opentelekomcloud_s3_bucket_object" "object" {
 
-  bucket                 = "${opentelekomcloud_s3_bucket.bucket1.bucket}"
+  bucket                 = opentelekomcloud_s3_bucket.bucket1.bucket
   key                    = "objectTest"
   source                 = "/opt/terraform/terraformTest/terraform-DT/modules/obs/file.txt"
-  etag                   = "${md5(file("/opt/terraform/terraformTest/terraform-DT/modules/obs/file.txt"))}"
+  etag                   = md5(file("/opt/terraform/terraformTest/terraform-DT/modules/obs/file.txt"))
   cache_control          = "1"
   content_disposition    = "attachment;filename='fname.ext'"
   content_encoding       = "encoding"
@@ -25,11 +25,11 @@ data "opentelekomcloud_s3_bucket_object" "b" {
 #pass
 resource "opentelekomcloud_s3_bucket_object" "object2" {
 
-  bucket = "${opentelekomcloud_s3_bucket.bucket1.bucket}"
+  bucket = opentelekomcloud_s3_bucket.bucket1.bucket
   key    = "new_object_key"
   #source = "./policy.json"
   content                = "/opt/terraform/terraformTest/terraform-DT/modules/obs/file.txt"
-  etag                   = "${md5(file("/opt/terraform/terraformTest/terraform-DT/modules/obs/file.txt"))}"
+  etag                   = md5(file("/opt/terraform/terraformTest/terraform-DT/modules/obs/file.txt"))
   cache_control          = "1"
   content_disposition    = "attachment;filename='fname.ext'"
   content_encoding       = "encoding"
@@ -42,10 +42,10 @@ resource "opentelekomcloud_s3_bucket_object" "object2" {
 //pass
 resource "opentelekomcloud_s3_bucket" "bucket2" {
   region = "eu-de"
-  #bucket = "${var.bucket_name}"
+  #bucket = var.bucket_name
   bucket_prefix = "test-"
   acl           = "private"
-  #policy = "${file("/opt/terraform/terraformTest/terraform-DT/modules/obs/policy.json")}"
+  #policy = file("/opt/terraform/terraformTest/terraform-DT/modules/obs/policy.json")
   tags {
     Name        = "Mybucket"
     Environment = "Dev"
@@ -57,26 +57,26 @@ resource "opentelekomcloud_s3_bucket" "b" {
 }
 //pass
 resource "opentelekomcloud_s3_bucket_policy" "policy" {
-  bucket = "${opentelekomcloud_s3_bucket.b.bucket}"
+  bucket = opentelekomcloud_s3_bucket.b.bucket
   policy = <<POLICY
 {
   "Version": "2008-10-17",
   "Statement": [
-    {  
+    {
       "Effect": "Allow",
       "Principal": {
-	      "AWS":["*"]	  
+	      "AWS":["*"]
 	  },
       "Action": [
 	   "s3:DeleteBucket",
 	   "s3:ListBucket",
-	   "s3:ListBucketVersions"	  
+	   "s3:ListBucketVersions"
 	  ],
      "Resource": [
 	    "arn:aws:s3:::my-tf-test-bucket",
-	      "arn:aws:s3:::my-tf-test-bucket/*"		  
+	      "arn:aws:s3:::my-tf-test-bucket/*"
 	  ]
-    } 
+    }
   ]
 }
 POLICY
@@ -88,7 +88,7 @@ resource "opentelekomcloud_s3_bucket" "bucket3" {
   region = "eu-de"
   bucket = "s3-website-test-bucket3.hashicorp.com"
   acl    = "public-read"
-  policy = "${file("/opt/terraform/terraformTest/terraform-DT/modules/obs/policy3.json")}"
+  policy = file("/opt/terraform/terraformTest/terraform-DT/modules/obs/policy3.json")
   website {
     index_document = "index.html"
     error_document = "error.html"
@@ -141,7 +141,7 @@ resource "opentelekomcloud_s3_bucket" "bucket5" {
 #  bucket = "my-tf-test-bucket-bucket6"
 #  acl    = "private"
 #  logging {
-#    target_bucket = "${opentelekomcloud_s3_bucket.log_bucket.id}"
+#    target_bucket = opentelekomcloud_s3_bucket.log_bucket.id
 #    target_prefix = "log/"
 #  }
 #}

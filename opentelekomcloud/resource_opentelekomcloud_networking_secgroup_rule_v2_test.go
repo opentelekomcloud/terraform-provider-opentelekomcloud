@@ -159,7 +159,7 @@ resource "opentelekomcloud_networking_secgroup_rule_v2" "secgroup_rule_1" {
   port_range_min = 22
   protocol = "tcp"
   remote_ip_prefix = "0.0.0.0/0"
-  security_group_id = "${opentelekomcloud_networking_secgroup_v2.secgroup_1.id}"
+  security_group_id = opentelekomcloud_networking_secgroup_v2.secgroup_1.id
 }
 
 resource "opentelekomcloud_networking_secgroup_rule_v2" "secgroup_rule_2" {
@@ -168,8 +168,8 @@ resource "opentelekomcloud_networking_secgroup_rule_v2" "secgroup_rule_2" {
   port_range_max = 80
   port_range_min = 80
   protocol = "tcp"
-  remote_group_id = "${opentelekomcloud_networking_secgroup_v2.secgroup_1.id}"
-  security_group_id = "${opentelekomcloud_networking_secgroup_v2.secgroup_2.id}"
+  remote_group_id = opentelekomcloud_networking_secgroup_v2.secgroup_1.id
+  security_group_id = opentelekomcloud_networking_secgroup_v2.secgroup_2.id
 }
 `
 
@@ -186,7 +186,7 @@ resource "opentelekomcloud_networking_secgroup_rule_v2" "secgroup_rule_1" {
   port_range_min = 22
   protocol = "tcp"
   remote_ip_prefix = "2001:558:FC00::/39"
-  security_group_id = "${opentelekomcloud_networking_secgroup_v2.secgroup_1.id}"
+  security_group_id = opentelekomcloud_networking_secgroup_v2.secgroup_1.id
 }
 `
 
@@ -208,7 +208,7 @@ resource "opentelekomcloud_networking_secgroup_rule_v2" "secgroup_rule_1" {
   port_range_min = 22
   protocol = "tcp"
   remote_ip_prefix = "0.0.0.0/0"
-  security_group_id = "${opentelekomcloud_networking_secgroup_v2.secgroup_1.id}"
+  security_group_id = opentelekomcloud_networking_secgroup_v2.secgroup_1.id
 
   timeouts {
     delete = "5m"
@@ -221,8 +221,8 @@ resource "opentelekomcloud_networking_secgroup_rule_v2" "secgroup_rule_2" {
   port_range_max = 80
   port_range_min = 80
   protocol = "tcp"
-  remote_group_id = "${opentelekomcloud_networking_secgroup_v2.secgroup_1.id}"
-  security_group_id = "${opentelekomcloud_networking_secgroup_v2.secgroup_2.id}"
+  remote_group_id = opentelekomcloud_networking_secgroup_v2.secgroup_1.id
+  security_group_id = opentelekomcloud_networking_secgroup_v2.secgroup_2.id
 
   timeouts {
     delete = "5m"
@@ -242,7 +242,7 @@ resource "opentelekomcloud_networking_secgroup_v2" "secgroup_1" {
 #  ethertype = "IPv4"
 #  protocol = "ah"
 #  remote_ip_prefix = "0.0.0.0/0"
-#  security_group_id = "${opentelekomcloud_networking_secgroup_v2.secgroup_1.id}"
+#  security_group_id = opentelekomcloud_networking_secgroup_v2.secgroup_1.id
 #}
 
 # NOT SUPPORTED
@@ -251,7 +251,7 @@ resource "opentelekomcloud_networking_secgroup_v2" "secgroup_1" {
 #  ethertype = "IPv4"
 #  protocol = "dccp"
 #  remote_ip_prefix = "0.0.0.0/0"
-#  security_group_id = "${opentelekomcloud_networking_secgroup_v2.secgroup_1.id}"
+#  security_group_id = opentelekomcloud_networking_secgroup_v2.secgroup_1.id
 #}
 
 # NOT SUPPORTED
@@ -260,7 +260,7 @@ resource "opentelekomcloud_networking_secgroup_v2" "secgroup_1" {
 #  ethertype = "IPv4"
 #  protocol = "egp"
 #  remote_ip_prefix = "0.0.0.0/0"
-#  security_group_id = "${opentelekomcloud_networking_secgroup_v2.secgroup_1.id}"
+#  security_group_id = opentelekomcloud_networking_secgroup_v2.secgroup_1.id
 #}
 
 # NOT SUPPORTED
@@ -269,7 +269,7 @@ resource "opentelekomcloud_networking_secgroup_v2" "secgroup_1" {
 #  ethertype = "IPv4"
 #  protocol = "esp"
 #  remote_ip_prefix = "0.0.0.0/0"
-#  security_group_id = "${opentelekomcloud_networking_secgroup_v2.secgroup_1.id}"
+#  security_group_id = opentelekomcloud_networking_secgroup_v2.secgroup_1.id
 #}
 
 # NOT SUPPORTED
@@ -278,7 +278,7 @@ resource "opentelekomcloud_networking_secgroup_v2" "secgroup_1" {
 #  ethertype = "IPv4"
 #  protocol = "gre"
 #  remote_ip_prefix = "0.0.0.0/0"
-#  security_group_id = "${opentelekomcloud_networking_secgroup_v2.secgroup_1.id}"
+#  security_group_id = opentelekomcloud_networking_secgroup_v2.secgroup_1.id
 #}
 
 # NOT SUPPORTED
@@ -287,7 +287,7 @@ resource "opentelekomcloud_networking_secgroup_v2" "secgroup_1" {
 #  ethertype = "IPv4"
 #  protocol = "igmp"
 #  remote_ip_prefix = "0.0.0.0/0"
-#  security_group_id = "${opentelekomcloud_networking_secgroup_v2.secgroup_1.id}"
+#  security_group_id = opentelekomcloud_networking_secgroup_v2.secgroup_1.id
 #}
 
 # NOT SUPPORTED
@@ -296,7 +296,7 @@ resource "opentelekomcloud_networking_secgroup_v2" "secgroup_1" {
 #  ethertype = "IPv6"
 #  protocol = "ipv6-encap"
 #  remote_ip_prefix = "::/0"
-#  security_group_id = "${opentelekomcloud_networking_secgroup_v2.secgroup_1.id}"
+#  security_group_id = opentelekomcloud_networking_secgroup_v2.secgroup_1.id
 #}
 
 # NOT SUPPORTED
@@ -305,7 +305,7 @@ resource "opentelekomcloud_networking_secgroup_v2" "secgroup_1" {
 #  ethertype = "IPv6"
 #  protocol = "ipv6-frag"
 #  remote_ip_prefix = "::/0"
-#  security_group_id = "${opentelekomcloud_networking_secgroup_v2.secgroup_1.id}"
+#  security_group_id = opentelekomcloud_networking_secgroup_v2.secgroup_1.id
 #}
 
 # NOT SUPPORTED
@@ -314,7 +314,7 @@ resource "opentelekomcloud_networking_secgroup_v2" "secgroup_1" {
 #  ethertype = "IPv6"
 #  protocol = "ipv6-icmp"
 #  remote_ip_prefix = "::/0"
-#  security_group_id = "${opentelekomcloud_networking_secgroup_v2.secgroup_1.id}"
+#  security_group_id = opentelekomcloud_networking_secgroup_v2.secgroup_1.id
 #}
 
 # NOT SUPPORTED
@@ -323,7 +323,7 @@ resource "opentelekomcloud_networking_secgroup_v2" "secgroup_1" {
 #  ethertype = "IPv6"
 #  protocol = "ipv6-nonxt"
 #  remote_ip_prefix = "::/0"
-#  security_group_id = "${opentelekomcloud_networking_secgroup_v2.secgroup_1.id}"
+#  security_group_id = opentelekomcloud_networking_secgroup_v2.secgroup_1.id
 #}
 
 # NOT SUPPORTED
@@ -332,7 +332,7 @@ resource "opentelekomcloud_networking_secgroup_v2" "secgroup_1" {
 #  ethertype = "IPv6"
 #  protocol = "ipv6-opts"
 #  remote_ip_prefix = "::/0"
-#  security_group_id = "${opentelekomcloud_networking_secgroup_v2.secgroup_1.id}"
+#  security_group_id = opentelekomcloud_networking_secgroup_v2.secgroup_1.id
 #}
 
 # NOT SUPPORTED
@@ -341,7 +341,7 @@ resource "opentelekomcloud_networking_secgroup_v2" "secgroup_1" {
 #  ethertype = "IPv6"
 #  protocol = "ipv6-route"
 #  remote_ip_prefix = "::/0"
-#  security_group_id = "${opentelekomcloud_networking_secgroup_v2.secgroup_1.id}"
+#  security_group_id = opentelekomcloud_networking_secgroup_v2.secgroup_1.id
 #}
 
 # NOT SUPPORTED
@@ -350,7 +350,7 @@ resource "opentelekomcloud_networking_secgroup_v2" "secgroup_1" {
 #  ethertype = "IPv4"
 #  protocol = "ospf"
 #  remote_ip_prefix = "0.0.0.0/0"
-#  security_group_id = "${opentelekomcloud_networking_secgroup_v2.secgroup_1.id}"
+#  security_group_id = opentelekomcloud_networking_secgroup_v2.secgroup_1.id
 #}
 
 # NOT SUPPORTED
@@ -359,7 +359,7 @@ resource "opentelekomcloud_networking_secgroup_v2" "secgroup_1" {
 #  ethertype = "IPv4"
 #  protocol = "pgm"
 #  remote_ip_prefix = "0.0.0.0/0"
-#  security_group_id = "${opentelekomcloud_networking_secgroup_v2.secgroup_1.id}"
+#  security_group_id = opentelekomcloud_networking_secgroup_v2.secgroup_1.id
 #}
 
 # NOT SUPPORTED
@@ -368,7 +368,7 @@ resource "opentelekomcloud_networking_secgroup_v2" "secgroup_1" {
 #  ethertype = "IPv4"
 #  protocol = "rsvp"
 #  remote_ip_prefix = "0.0.0.0/0"
-#  security_group_id = "${opentelekomcloud_networking_secgroup_v2.secgroup_1.id}"
+#  security_group_id = opentelekomcloud_networking_secgroup_v2.secgroup_1.id
 #}
 
 # NOT SUPPORTED
@@ -377,7 +377,7 @@ resource "opentelekomcloud_networking_secgroup_v2" "secgroup_1" {
 #  ethertype = "IPv4"
 #  protocol = "sctp"
 #  remote_ip_prefix = "0.0.0.0/0"
-#  security_group_id = "${opentelekomcloud_networking_secgroup_v2.secgroup_1.id}"
+#  security_group_id = opentelekomcloud_networking_secgroup_v2.secgroup_1.id
 #}
 
 # NOT SUPPORTED
@@ -386,7 +386,7 @@ resource "opentelekomcloud_networking_secgroup_v2" "secgroup_1" {
 #  ethertype = "IPv4"
 #  protocol = "udplite"
 #  remote_ip_prefix = "0.0.0.0/0"
-#  security_group_id = "${opentelekomcloud_networking_secgroup_v2.secgroup_1.id}"
+#  security_group_id = opentelekomcloud_networking_secgroup_v2.secgroup_1.id
 #}
 
 # NOT SUPPORTED
@@ -395,7 +395,7 @@ resource "opentelekomcloud_networking_secgroup_v2" "secgroup_1" {
 #  ethertype = "IPv4"
 #  protocol = "vrrp"
 #  remote_ip_prefix = "0.0.0.0/0"
-#  security_group_id = "${opentelekomcloud_networking_secgroup_v2.secgroup_1.id}"
+#  security_group_id = opentelekomcloud_networking_secgroup_v2.secgroup_1.id
 #}
 `
 
@@ -412,6 +412,6 @@ resource "opentelekomcloud_networking_secgroup_rule_v2" "secgroup_rule_1" {
   port_range_min = 22
   protocol = "115"
   remote_ip_prefix = "0.0.0.0/0"
-  security_group_id = "${opentelekomcloud_networking_secgroup_v2.secgroup_1.id}"
+  security_group_id = opentelekomcloud_networking_secgroup_v2.secgroup_1.id
 }
 `

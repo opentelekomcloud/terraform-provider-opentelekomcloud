@@ -13,7 +13,7 @@ variable "deh_id" { }
 variable "server_id" { }
 
 data "opentelekomcloud_deh_server_v1" "deh_server" {
-  id        = "${var.deh_id}",
+  id        = var.deh_id,
   server_id = "${var.server id}"
 }
 ```

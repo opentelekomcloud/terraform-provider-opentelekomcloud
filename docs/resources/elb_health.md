@@ -26,8 +26,7 @@ resource "opentelekomcloud_elb_listener" "listener" {
   protocol_port    = 12345
   backend_port     = 8080
   lb_algorithm     = "roundrobin"
-  loadbalancer_id  = "${opentelekomcloud_elb_loadbalancer.elb.id}"
-  
+  loadbalancer_id  = opentelekomcloud_elb_loadbalancer.elb.id
   timeouts {
 	create = "5m"
 	update = "5m"
@@ -36,13 +35,13 @@ resource "opentelekomcloud_elb_listener" "listener" {
 }
 
 resource "opentelekomcloud_elb_health" "healthcheck" {
-  listener_id              = "${opentelekomcloud_elb_listener.listener.id}"
+  listener_id              = opentelekomcloud_elb_listener.listener.id
   healthcheck_protocol     = "TCP"
   healthcheck_connect_port = 22
   healthy_threshold        = 5
   healthcheck_timeout      = 25
   healthcheck_interval     = 3
-  
+
   timeouts {
     create = "5m"
     update = "5m"

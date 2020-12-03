@@ -11,7 +11,7 @@ resource "opentelekomcloud_vpc_eip_v1" "eip_1" {
 }
 
 resource "opentelekomcloud_antiddos_v1" "antiddos_1" {
-  floating_ip_id = "${opentelekomcloud_vpc_eip_v1.eip_1.id}"
+  floating_ip_id = opentelekomcloud_vpc_eip_v1.eip_1.id
   enable_l7 = true
   traffic_pos_id = 1
   http_request_pos_id = 2

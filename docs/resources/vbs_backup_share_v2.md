@@ -5,17 +5,17 @@ subcategory: "Volume Backup Service (VBS)"
 # opentelekomcloud_vbs_backup_share_v2
 
 Provides an VBS Backup Share resource within OpenTelekomCloud.
- 
+
 ## Example Usage
 
 ```hcl
 variable "backup_id" { }
 
 variable "to_project_ids" { }
- 
+
 resource "opentelekomcloud_vbs_backup_share_v2" "backupshare" {
-  backup_id      = "${var.backup_id}"
-  to_project_ids = "${var.to_project_ids}"
+  backup_id      = var.backup_id
+  to_project_ids = var.to_project_ids
 }
 ```
 

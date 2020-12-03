@@ -51,13 +51,13 @@ resource "opentelekomcloud_vpc_subnet_v1" "subnet_1" {
   name = "opentelekomcloud_subnet"
   cidr = "192.168.0.0/24"
   gateway_ip = "192.168.0.1"
-  vpc_id = "${opentelekomcloud_vpc_v1.vpc_1.id}"
+  vpc_id = opentelekomcloud_vpc_v1.vpc_1.id
 }
 `
 
 var testAccOTCSubnetIdV2DataSource_basic = fmt.Sprintf(`
 %s
 data "opentelekomcloud_vpc_subnet_ids_v1" "subnet_ids" {
-  vpc_id = "${opentelekomcloud_vpc_v1.vpc_1.id}"
+  vpc_id = opentelekomcloud_vpc_v1.vpc_1.id
 }
 `, testAccOTCSubnetIdV2DataSource_vpcsubnet)

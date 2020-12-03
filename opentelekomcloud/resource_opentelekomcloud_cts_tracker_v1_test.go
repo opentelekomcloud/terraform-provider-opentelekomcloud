@@ -159,10 +159,10 @@ resource "opentelekomcloud_smn_topic_v2" "topic_1" {
 }
 
 resource "opentelekomcloud_cts_tracker_v1" "tracker_v1" {
-  bucket_name      = "${opentelekomcloud_s3_bucket.bucket.bucket}"
+  bucket_name      = opentelekomcloud_s3_bucket.bucket.bucket
   file_prefix_name      = "yO8Q"
   is_support_smn = true
-  topic_id = "${opentelekomcloud_smn_topic_v2.topic_1.id}"
+  topic_id = opentelekomcloud_smn_topic_v2.topic_1.id
   is_send_all_key_operation = false
   operations = ["login"]
   need_notify_user_list = ["user1"]
@@ -182,10 +182,10 @@ resource "opentelekomcloud_smn_topic_v2" "topic_1" {
   display_name    = "The display name of topic_check"
 }
 resource "opentelekomcloud_cts_tracker_v1" "tracker_v1" {
-  bucket_name      = "${opentelekomcloud_s3_bucket.bucket.bucket}"
+  bucket_name      = opentelekomcloud_s3_bucket.bucket.bucket
   file_prefix_name      = "yO8Q1"
   is_support_smn = true
-  topic_id = "${opentelekomcloud_smn_topic_v2.topic_1.id}"
+  topic_id = opentelekomcloud_smn_topic_v2.topic_1.id
   is_send_all_key_operation = false
   operations = ["login"]
   need_notify_user_list = ["user1"]
@@ -207,10 +207,10 @@ resource "opentelekomcloud_smn_topic_v2" "topic_1" {
 }
 
 resource "opentelekomcloud_cts_tracker_v1" "tracker_v1" {
-  bucket_name      = "${opentelekomcloud_s3_bucket.bucket.bucket}"
+  bucket_name      = opentelekomcloud_s3_bucket.bucket.bucket
   file_prefix_name      = "yO8Q"
   is_support_smn = true
-  topic_id = "${opentelekomcloud_smn_topic_v2.topic_1.id}"
+  topic_id = opentelekomcloud_smn_topic_v2.topic_1.id
   is_send_all_key_operation = false
   operations = ["login"]
   need_notify_user_list = ["user1"]
@@ -240,10 +240,10 @@ resource "opentelekomcloud_smn_topic_v2" "topic_1" {
   project_name = local.project_name
 }
 resource "opentelekomcloud_cts_tracker_v1" "tracker_v1" {
-  bucket_name      = "${opentelekomcloud_s3_bucket.bucket.bucket}"
+  bucket_name      = opentelekomcloud_s3_bucket.bucket.bucket
   file_prefix_name      = "yO8Q"
   is_support_smn = true
-  topic_id = "${opentelekomcloud_smn_topic_v2.topic_1.id}"
+  topic_id = opentelekomcloud_smn_topic_v2.topic_1.id
   is_send_all_key_operation = false
   operations = ["login"]
   need_notify_user_list = ["user1"]

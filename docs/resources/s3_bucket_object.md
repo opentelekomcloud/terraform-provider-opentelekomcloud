@@ -15,7 +15,7 @@ resource "opentelekomcloud_s3_bucket_object" "object" {
   bucket = "your_bucket_name"
   key    = "new_object_key"
   source = "path/to/file"
-  etag   = "${md5(file("path/to/file"))}"
+  etag   = md5(file("path/to/file"))
 }
 
 resource "opentelekomcloud_s3_bucket" "examplebucket" {
@@ -25,7 +25,7 @@ resource "opentelekomcloud_s3_bucket" "examplebucket" {
 
 resource "opentelekomcloud_s3_bucket_object" "examplebucket_object" {
   key    = "someobject"
-  bucket = "${opentelekomcloud_s3_bucket.examplebucket.bucket}"
+  bucket = opentelekomcloud_s3_bucket.examplebucket.bucket
   source = "index.html"
 }
 ```
@@ -40,7 +40,7 @@ resource "opentelekomcloud_s3_bucket" "examplebucket" {
 
 resource "opentelekomcloud_s3_bucket_object" "examplebucket_object" {
   key                    = "someobject"
-  bucket                 = "${opentelekomcloud_s3_bucket.examplebucket.bucket}"
+  bucket                 = opentelekomcloud_s3_bucket.examplebucket.bucket
   source                 = "index.html"
   server_side_encryption = "aws:kms"
 }

@@ -1,13 +1,13 @@
 
 #resource "opentelekomcloud_vbs_backup_v2" "mybackup" {
-#  volume_id = "${var.volume_id}"
+#  volume_id = var.volume_id
 #  name = "${var.backup_name}_required"
 #}
 
 resource "opentelekomcloud_vbs_backup_v2" "mybackup2" {
-  volume_id   = "${var.volume_id}"
+  volume_id   = var.volume_id
   name        = "${var.backup_name}_test"
-  description = "${var.backup_desc}"
+  description = var.backup_desc
   tags = [
     {
       key   = "k1"
@@ -32,6 +32,6 @@ resource "opentelekomcloud_vbs_backup_policy_v2" "policy1" {
 }
 
 resource "opentelekomcloud_vbs_backup_share_v2" "backupshare" {
-  backup_id      = "${opentelekomcloud_vbs_backup_v2.mybackup2.id}"
-  to_project_ids = ["${var.to_project_ids}"]
+  backup_id      = opentelekomcloud_vbs_backup_v2.mybackup2.id
+  to_project_ids = [var.to_project_ids]
 }

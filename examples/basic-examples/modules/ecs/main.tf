@@ -2,23 +2,23 @@
 resource "random_id" "ecs" {
   byte_length = 4
 }
-# create ECS with Required params 
+# create ECS with Required params
 resource "opentelekomcloud_compute_instance_v2" "ecs_1" {
-  region            = "${var.region}"
-  availability_zone = "${var.availability_zone}"
+  region            = var.region
+  availability_zone = var.availability_zone
   name              = "${var.ecs_name}-notags"
-  image_id          = "${var.image_id}"
-  flavor_id         = "${var.flavor_id}"
-  #key_pair        = "${var.key_name}"
-  # security_groups = ["${var.security_groups}"]
+  image_id          = var.image_id
+  flavor_id         = var.flavor_id
+  #key_pair        = var.key_name
+  # security_groups = [var.security_groups]
 
   network {
-    uuid = "${var.subnet_id}"
+    uuid = var.subnet_id
   }
-  #tag = {   
+  #tag = {
   #   key1 = "value1"
   #   key2 = "value2"
-  #  } 
+  #  }
 }
 
 
@@ -26,22 +26,22 @@ resource "opentelekomcloud_compute_instance_v2" "ecs_1" {
 
 # create ECS with required and  optional params
 resource "opentelekomcloud_compute_instance_v2" "ecs_2" {
-  region            = "${var.region}"
-  availability_zone = "${var.availability_zone}"
-  name              = "${var.ecs_name}-${random_id.ecs.id}"
-  image_id          = "${var.image_id}"
-  flavor_id         = "${var.flavor_id}"
-  key_pair          = "${var.key_name}"
-  security_groups   = ["${var.security_groups}"]
+  region            = var.region
+  availability_zone = var.availability_zone
+  name              = var.ecs_name}-${random_id.ecs.id
+  image_id          = var.image_id
+  flavor_id         = var.flavor_id
+  key_pair          = var.key_name
+  security_groups   = [var.security_groups]
   user_data         = "#cloud-config\nhostname: instance_1.example.com\nfqdn: instance_1.example.com"
   config_drive      = "true"
   network {
-    uuid = "${var.subnet_id}"
+    uuid = var.subnet_id
   }
   network {
-    uuid = "${var.subnet_id2}"
+    uuid = var.subnet_id2
   }
-  admin_pass = "${var.admin_pass}"
+  admin_pass = var.admin_pass
   personality {
     file    = "./instance.txt"
     content = "contents of file"
@@ -51,7 +51,7 @@ resource "opentelekomcloud_compute_instance_v2" "ecs_2" {
     key  = "value"
     key2 = "value2"
   }
-  auto_recovery = "${var.auto_recovery}"
+  auto_recovery = var.auto_recovery
 }
 
 
@@ -60,22 +60,22 @@ resource "opentelekomcloud_networking_floatingip_v2" "floatip_1" {
 }
 
 resource "opentelekomcloud_compute_floatingip_associate_v2" "fip_2" {
-  floating_ip = "${opentelekomcloud_networking_floatingip_v2.floatip_1.address}"
-  instance_id = "${opentelekomcloud_compute_instance_v2.ecs_2.id}"
+  floating_ip = opentelekomcloud_networking_floatingip_v2.floatip_1.address
+  instance_id = opentelekomcloud_compute_instance_v2.ecs_2.id
 }
 
 # boot from volume
 resource "opentelekomcloud_compute_instance_v2" "boot-from-volume" {
-  region            = "${var.region}"
-  availability_zone = "${var.availability_zone}"
-  name              = "${var.ecs_name}-${random_id.ecs.id}"
-  #image_id         = "${var.image_id}"
-  flavor_id       = "${var.flavor_id}"
-  key_pair        = "${var.key_name}"
-  security_groups = ["${var.security_groups}"]
+  region            = var.region
+  availability_zone = var.availability_zone
+  name              = var.ecs_name}-${random_id.ecs.id
+  #image_id         = var.image_id
+  flavor_id       = var.flavor_id
+  key_pair        = var.key_name
+  security_groups = [var.security_groups]
 
   block_device {
-    uuid                  = "${var.image_id}"
+    uuid                  = var.image_id
     source_type           = "image"
     volume_size           = 1000
     boot_index            = 0
@@ -84,7 +84,7 @@ resource "opentelekomcloud_compute_instance_v2" "boot-from-volume" {
   }
 
   network {
-    uuid = "${var.subnet_id}"
+    uuid = var.subnet_id
   }
   tag = {
     tag = "test"
@@ -98,17 +98,17 @@ resource "opentelekomcloud_blockstorage_volume_v2" "myvol" {
   size = 10
 }
 resource "opentelekomcloud_compute_instance_v2" "instance" {
-  region            = "${var.region}"
-  availability_zone = "${var.availability_zone}"
-  name              = "${var.ecs_name}-${random_id.ecs.id}"
-  #image_id         = "${var.image_id}"
-  
-  flavor_id       = "${var.flavor_id}"
-  key_pair        = "${var.key_name}"
-  security_groups = ["${var.security_groups}"]
+  region            = var.region
+  availability_zone = var.availability_zone
+  name              = var.ecs_name}-${random_id.ecs.id
+  #image_id         = var.image_id
+
+  flavor_id       = var.flavor_id
+  key_pair        = var.key_name
+  security_groups = [var.security_groups]
 
   block_device {
-    uuid                  = "${var.image_id}"
+    uuid                  = var.image_id
     source_type           = "image"
     boot_index            = 0
     destination_type      = "volume"
@@ -117,7 +117,7 @@ resource "opentelekomcloud_compute_instance_v2" "instance" {
   }
 
   #block_device {
-  #  uuid                  = "${opentelekomcloud_blockstorage_volume_v2.myvol.id}"
+  #  uuid                  = opentelekomcloud_blockstorage_volume_v2.myvol.id
   #  source_type           = "volume"
   #  boot_index            = 1
   #  destination_type      = "volume"
@@ -125,22 +125,22 @@ resource "opentelekomcloud_compute_instance_v2" "instance" {
   #}
 
   network {
-    uuid = "${var.subnet_id}"
+    uuid = var.subnet_id
   }
 }
 
-##Boot Instance, Create Volume, and Attach Volume as a Block Device 
+##Boot Instance, Create Volume, and Attach Volume as a Block Device
 #resource "opentelekomcloud_compute_instance_v2" "instance_1" {
-#  region = "${var.region}"
-#  availability_zone = "${var.availability_zone}"
-#  name            = "${var.ecs_name}-${random_id.ecs.id}"
-#  image_id       = "${var.image_id}"
-#  flavor_id       = "${var.flavor_id}"
-#  key_pair        = "${var.key_name}"
-#  security_groups = ["${var.security_groups}"]
-#  
+#  region = var.region
+#  availability_zone = var.availability_zone
+#  name            = var.ecs_name}-${random_id.ecs.id
+#  image_id       = var.image_id
+#  flavor_id       = var.flavor_id
+#  key_pair        = var.key_name
+#  security_groups = [var.security_groups]
+#
 #  block_device {
-#    uuid                  = "${var.image_id}"
+#    uuid                  = var.image_id
 #    source_type           = "image"
 #    boot_index            = 0
 #    destination_type      = "local"
@@ -153,9 +153,9 @@ resource "opentelekomcloud_compute_instance_v2" "instance" {
 #    volume_size           = 10
 #    delete_on_termination = true
 #  }
-#  
+#
 #  network {
-#    uuid = "${var.subnet_id}"
+#    uuid = var.subnet_id
 #  }
 #}
 

@@ -39,7 +39,7 @@ resource "opentelekomcloud_css_cluster_v1" "cluster" {
   node_config {
     flavor = "css.medium.8"
     network_info {
-      security_group_id = "${opentelekomcloud_networking_secgroup_v2.secgroup.id}"
+      security_group_id = opentelekomcloud_networking_secgroup_v2.secgroup.id
       network_id = "%s"
       vpc_id = "%s"
     }

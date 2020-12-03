@@ -133,7 +133,7 @@ resource "opentelekomcloud_vpc_subnet_v1" "subnet_1" {
   name = "opentelekomcloud_subnet"
   cidr = "192.168.0.0/16"
   gateway_ip = "192.168.0.1"
-  vpc_id = "${opentelekomcloud_vpc_v1.vpc_1.id}"
+  vpc_id = opentelekomcloud_vpc_v1.vpc_1.id
   availability_zone = "eu-de-02"
   ntp_addresses = "10.100.0.33,10.100.0.34"
 
@@ -154,7 +154,7 @@ resource "opentelekomcloud_vpc_subnet_v1" "subnet_1" {
   name = "opentelekomcloud_subnet_1"
   cidr = "192.168.0.0/16"
   gateway_ip = "192.168.0.1"
-  vpc_id = "${opentelekomcloud_vpc_v1.vpc_1.id}"
+  vpc_id = opentelekomcloud_vpc_v1.vpc_1.id
   availability_zone = "eu-de-02"
   ntp_addresses = "10.100.0.35,10.100.0.36"
 
@@ -175,7 +175,7 @@ resource "opentelekomcloud_vpc_subnet_v1" "subnet_1" {
   name = "opentelekomcloud_subnet"
   cidr = "192.168.0.0/16"
   gateway_ip = "192.168.0.1"
-  vpc_id = "${opentelekomcloud_vpc_v1.vpc_1.id}"
+  vpc_id = opentelekomcloud_vpc_v1.vpc_1.id
   availability_zone = "eu-de-02"
 
   timeouts {

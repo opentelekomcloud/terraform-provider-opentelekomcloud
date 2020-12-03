@@ -129,8 +129,8 @@ func testAccIdentityV3GroupMembership_basic(groupName, userName string) string {
     }
 
     resource "opentelekomcloud_identity_group_membership_v3" "membership_1" {
-        group = "${opentelekomcloud_identity_group_v3.group_1.id}"
-        users = ["${opentelekomcloud_identity_user_v3.user_1.id}"]
+        group = opentelekomcloud_identity_group_v3.group_1.id
+        users = [opentelekomcloud_identity_user_v3.user_1.id]
     }
   `, groupName, userName)
 }
@@ -155,9 +155,9 @@ func testAccIdentityV3GroupMembership_update(groupName, userName string, userNam
 
 
     resource "opentelekomcloud_identity_group_membership_v3" "membership_1" {
-        group = "${opentelekomcloud_identity_group_v3.group_1.id}"
-        users = ["${opentelekomcloud_identity_user_v3.user_1.id}",
-                "${opentelekomcloud_identity_user_v3.user_2.id}"]
+        group = opentelekomcloud_identity_group_v3.group_1.id
+        users = [opentelekomcloud_identity_user_v3.user_1.id,
+                opentelekomcloud_identity_user_v3.user_2.id]
     }
   `, groupName, userName, userName2)
 }
@@ -176,8 +176,8 @@ func testAccIdentityV3GroupMembership_updatedown(groupName, userName string) str
 
 
     resource "opentelekomcloud_identity_group_membership_v3" "membership_1" {
-        group = "${opentelekomcloud_identity_group_v3.group_1.id}"
-        users = ["${opentelekomcloud_identity_user_v3.user_2.id}"]
+        group = opentelekomcloud_identity_group_v3.group_1.id
+        users = [opentelekomcloud_identity_user_v3.user_2.id]
     }
   `, groupName, userName)
 }

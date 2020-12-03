@@ -57,7 +57,7 @@ resource "opentelekomcloud_compute_instance_v2" "instance_1" {
 resource "opentelekomcloud_csbs_backup_policy_v1" "backup_policy_v1" {
 	name            = "backup-policy"
   	resource {
-      id = "${opentelekomcloud_compute_instance_v2.instance_1.id}"
+      id = opentelekomcloud_compute_instance_v2.instance_1.id
       type = "OS::Nova::Server"
       name = "resource4"
   	}
@@ -70,7 +70,7 @@ resource "opentelekomcloud_csbs_backup_policy_v1" "backup_policy_v1" {
   	}
 }
 
-data "opentelekomcloud_csbs_backup_policy_v1" "csbs_policy" {  
-  id = "${opentelekomcloud_csbs_backup_policy_v1.backup_policy_v1.id}"
+data "opentelekomcloud_csbs_backup_policy_v1" "csbs_policy" {
+  id = opentelekomcloud_csbs_backup_policy_v1.backup_policy_v1.id
 }
 `, OS_IMAGE_ID, OS_AVAILABILITY_ZONE, OS_FLAVOR_ID, OS_NETWORK_ID)

@@ -1,14 +1,14 @@
 provider "opentelekomcloud" {
   #please follow the documentation to change options
-  user_name   = "${var.user_name}"
-  tenant_name = "${var.tenant_name}"
-  domain_name = "${var.domain_name}"
-  password    = "${var.password}"
+  user_name   = var.user_name
+  tenant_name = var.tenant_name
+  domain_name = var.domain_name
+  password    = var.password
   access_key  = "your ak"
   secret_key  = "your sk"
   insecure    = "true"
   region      = "eu-de"
-  auth_url    = "${var.auth_url}"
+  auth_url    = var.auth_url
   version     = "1.6.0"
 }
 

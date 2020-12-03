@@ -14,7 +14,7 @@ resource "opentelekomcloud_waf_policy_v1" "policy_1" {
 }
 
 resource "opentelekomcloud_waf_whiteblackip_rule_v1" "rule_1" {
-  policy_id = "${opentelekomcloud_waf_policy_v1.policy_1.id}"
+  policy_id = opentelekomcloud_waf_policy_v1.policy_1.id
   addr      = "192.168.0.0/24"
   white     = 1
 }

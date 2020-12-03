@@ -16,7 +16,7 @@ resource "opentelekomcloud_networking_network_v2" "network_1" {
 
 resource "opentelekomcloud_networking_port_v2" "port_1" {
   name           = "port_1"
-  network_id     = "${opentelekomcloud_networking_network_v2.network_1.id}"
+  network_id     = opentelekomcloud_networking_network_v2.network_1.id
   admin_state_up = "true"
 }
 ```

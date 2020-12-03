@@ -55,12 +55,12 @@ resource "opentelekomcloud_networking_network_v2" "network_1" {
 resource "opentelekomcloud_networking_subnet_v2" "subnet_1" {
   cidr = "192.168.199.0/24"
   ip_version = 4
-  network_id = "${opentelekomcloud_networking_network_v2.network_1.id}"
+  network_id = opentelekomcloud_networking_network_v2.network_1.id
 }
 
 resource "opentelekomcloud_networking_router_interface_v2" "int_1" {
-  subnet_id = "${opentelekomcloud_networking_subnet_v2.subnet_1.id}"
-  router_id = "${opentelekomcloud_networking_router_v2.router_1.id}"
+  subnet_id = opentelekomcloud_networking_subnet_v2.subnet_1.id
+  router_id = opentelekomcloud_networking_router_v2.router_1.id
 }
 
 resource "opentelekomcloud_networking_floatingip_v2" "fip_1" {
@@ -70,8 +70,8 @@ resource "opentelekomcloud_nat_gateway_v2" "nat_gw" {
   name   = "nat_gw"
   description = "test for terraform"
   spec = "1"
-  internal_network_id = "${opentelekomcloud_networking_network_v2.network_1.id}"
-  router_id = "${opentelekomcloud_networking_router_v2.router_1.id}"
+  internal_network_id = opentelekomcloud_networking_network_v2.network_1.id
+  router_id = opentelekomcloud_networking_router_v2.router_1.id
   depends_on = [opentelekomcloud_networking_router_interface_v2.int_1]
 }
 
@@ -83,15 +83,15 @@ resource "opentelekomcloud_compute_instance_v2" "instance_1" {
     foo = "bar"
   }
   network {
-    uuid = "${opentelekomcloud_networking_network_v2.network_1.id}"
+    uuid = opentelekomcloud_networking_network_v2.network_1.id
   }
  depends_on = [opentelekomcloud_networking_router_interface_v2.int_1]
 }
 
 resource "opentelekomcloud_nat_dnat_rule_v2" "dnat" {
-  floating_ip_id = "${opentelekomcloud_networking_floatingip_v2.fip_1.id}"
-  nat_gateway_id = "${opentelekomcloud_nat_gateway_v2.nat_gw.id}"
-  private_ip = "${opentelekomcloud_compute_instance_v2.instance_1.network.0.fixed_ip_v4}"
+  floating_ip_id = opentelekomcloud_networking_floatingip_v2.fip_1.id
+  nat_gateway_id = opentelekomcloud_nat_gateway_v2.nat_gw.id
+  private_ip = opentelekomcloud_compute_instance_v2.instance_1.network.0.fixed_ip_v4
   internal_service_port = 993
   protocol = "tcp"
   external_service_port = 242

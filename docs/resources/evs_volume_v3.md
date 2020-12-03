@@ -31,9 +31,9 @@ resource "opentelekomcloud_evs_volume_v3" "volume_1" {
   description       = "first test volume"
   availability_zone = "eu-de-01"
   volume_type       = "SATA"
-  kms_id            = "${var.kms_id}"
+  kms_id            = var.kms_id
   size              = 20
-  
+
   tags = {
     foo = "bar"
     key = "value"
@@ -73,7 +73,7 @@ The following arguments are supported:
 
 * `tags` - (Optional) Tags key/value pairs to associate with the volume.
   Changing this updates the existing volume tags.
- 
+
 * `multiattach` - (Optional, Default:false) Specifies the shared EVS disk information.
   Changing this creates a new volume.
 

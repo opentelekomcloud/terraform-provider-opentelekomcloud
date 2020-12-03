@@ -155,8 +155,8 @@ resource "opentelekomcloud_compute_instance_v2" "instance_1" {
 }
 
 resource "opentelekomcloud_compute_volume_attach_v2" "va_1" {
-  instance_id = "${opentelekomcloud_compute_instance_v2.instance_1.id}"
-  volume_id = "${opentelekomcloud_blockstorage_volume_v2.volume_1.id}"
+  instance_id = opentelekomcloud_compute_instance_v2.instance_1.id
+  volume_id = opentelekomcloud_blockstorage_volume_v2.volume_1.id
 }
 `, OS_NETWORK_ID)
 
@@ -175,8 +175,8 @@ resource "opentelekomcloud_compute_instance_v2" "instance_1" {
 }
 
 resource "opentelekomcloud_compute_volume_attach_v2" "va_1" {
-  instance_id = "${opentelekomcloud_compute_instance_v2.instance_1.id}"
-  volume_id = "${opentelekomcloud_blockstorage_volume_v2.volume_1.id}"
+  instance_id = opentelekomcloud_compute_instance_v2.instance_1.id
+  volume_id = opentelekomcloud_blockstorage_volume_v2.volume_1.id
   device = "/dev/vdc"
 }
 `, OS_NETWORK_ID)
@@ -196,8 +196,8 @@ resource "opentelekomcloud_compute_instance_v2" "instance_1" {
 }
 
 resource "opentelekomcloud_compute_volume_attach_v2" "va_1" {
-  instance_id = "${opentelekomcloud_compute_instance_v2.instance_1.id}"
-  volume_id = "${opentelekomcloud_blockstorage_volume_v2.volume_1.id}"
+  instance_id = opentelekomcloud_compute_instance_v2.instance_1.id
+  volume_id = opentelekomcloud_blockstorage_volume_v2.volume_1.id
 
   timeouts {
     create = "5m"

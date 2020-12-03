@@ -15,12 +15,12 @@ variable "config_name" { }
 variable "server_id" { }
 
 data "opentelekomcloud_rts_software_config_v1" "myconfig" {
-  id = "${var.config_name}"
+  id = var.config_name
 }
 
 resource "opentelekomcloud_rts_software_deployment_v1" "mydeployment" {
-  config_id = "${data.opentelekomcloud_rts_software_config_v1.myconfig.id}"
-  server_id = "${var.server_id}"
+  config_id = data.opentelekomcloud_rts_software_config_v1.myconfig.id
+  server_id = var.server_id
 }
 ```
 

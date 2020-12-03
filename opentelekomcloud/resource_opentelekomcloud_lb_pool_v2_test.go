@@ -96,14 +96,14 @@ resource "opentelekomcloud_lb_listener_v2" "listener_1" {
   name = "listener_1"
   protocol = "HTTP"
   protocol_port = 8080
-  loadbalancer_id = "${opentelekomcloud_lb_loadbalancer_v2.loadbalancer_1.id}"
+  loadbalancer_id = opentelekomcloud_lb_loadbalancer_v2.loadbalancer_1.id
 }
 
 resource "opentelekomcloud_lb_pool_v2" "pool_1" {
   name = "pool_1"
   protocol = "HTTP"
   lb_method = "ROUND_ROBIN"
-  listener_id = "${opentelekomcloud_lb_listener_v2.listener_1.id}"
+  listener_id = opentelekomcloud_lb_listener_v2.listener_1.id
 
   timeouts {
     create = "5m"
@@ -123,7 +123,7 @@ resource "opentelekomcloud_lb_listener_v2" "listener_1" {
   name = "listener_1"
   protocol = "HTTP"
   protocol_port = 8080
-  loadbalancer_id = "${opentelekomcloud_lb_loadbalancer_v2.loadbalancer_1.id}"
+  loadbalancer_id = opentelekomcloud_lb_loadbalancer_v2.loadbalancer_1.id
 }
 
 resource "opentelekomcloud_lb_pool_v2" "pool_1" {
@@ -131,7 +131,7 @@ resource "opentelekomcloud_lb_pool_v2" "pool_1" {
   protocol = "HTTP"
   lb_method = "LEAST_CONNECTIONS"
   admin_state_up = "true"
-  listener_id = "${opentelekomcloud_lb_listener_v2.listener_1.id}"
+  listener_id = opentelekomcloud_lb_listener_v2.listener_1.id
 
   timeouts {
     create = "5m"

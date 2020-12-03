@@ -83,8 +83,8 @@ resource "opentelekomcloud_ecs_instance_v1" "basic" {
 }
 
 resource "opentelekomcloud_compute_volume_attach_v2" "attached" {
-  instance_id = "${opentelekomcloud_ecs_instance_v1.basic.id}"
-  volume_id   = "${opentelekomcloud_blockstorage_volume_v2.myvol.id}"
+  instance_id = opentelekomcloud_ecs_instance_v1.basic.id
+  volume_id   = opentelekomcloud_blockstorage_volume_v2.myvol.id
 }
 ```
 
@@ -113,9 +113,9 @@ resource "opentelekomcloud_ecs_instance_v1" "multi-net" {
 }
 
 resource "opentelekomcloud_compute_floatingip_associate_v2" "myip" {
-  floating_ip = "${opentelekomcloud_networking_floatingip_v2.myip.address}"
-  instance_id = "${opentelekomcloud_ecs_instance_v1.multi-net.id}"
-  fixed_ip    = "${opentelekomcloud_ecs_instance_v1.multi-net.nics.0.ip_address}"
+  floating_ip = opentelekomcloud_networking_floatingip_v2.myip.address
+  instance_id = opentelekomcloud_ecs_instance_v1.multi-net.id
+  fixed_ip    = opentelekomcloud_ecs_instance_v1.multi-net.nics.0.ip_address
 }
 ```
 

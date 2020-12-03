@@ -1,7 +1,7 @@
 resource "opentelekomcloud_csbs_backup_policy_v1" "backup_policy_v1" {
   name                = "${var.project}-policy"
   resource {
-    id       = "${opentelekomcloud_compute_instance_v2.webserver.id}"
+    id       = opentelekomcloud_compute_instance_v2.webserver.id
     type     = "OS::Nova::Server"
     name     = "resource1"
   }
