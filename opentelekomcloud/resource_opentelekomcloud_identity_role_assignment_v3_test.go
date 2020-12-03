@@ -147,8 +147,8 @@ data "opentelekomcloud_identity_role_v3" "role_1" {
 }
 
 resource "opentelekomcloud_identity_role_assignment_v3" "role_assignment_1" {
-  group_id = opentelekomcloud_identity_group_v3.group_1.id
+  group_id   = opentelekomcloud_identity_group_v3.group_1.id
   project_id = opentelekomcloud_identity_project_v3.project_1.id
-  role_id = data.opentelekomcloud_identity_role_v3.role_1.id
+  role_id    = data.opentelekomcloud_identity_role_v3.role_1.id
 }
 `

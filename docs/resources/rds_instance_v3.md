@@ -94,36 +94,41 @@ resource "opentelekomcloud_rds_instance_v3" "instance" {
 
 ```hcl
 resource "opentelekomcloud_networking_secgroup_v2" "secgroup" {
-  name = "terraform_test_security_group"
+  name        = "terraform_test_security_group"
   description = "terraform security group acceptance test"
 }
 
 resource "opentelekomcloud_compute_floatingip_v2" "ip" {}
 
 resource "opentelekomcloud_rds_instance_v3" "instance" {
-  availability_zone = ["{{ availability_zone_1 }}", "{{ availability_zone_2 }}"]
+  availability_zone   = [
+    "{{ availability_zone_1 }}",
+    "{{ availability_zone_2 }}"
+  ]
   db {
     password = "Telekom!120521"
-    type = "PostgreSQL"
-    version = "9.5"
-    port = "8635"
+    type     = "PostgreSQL"
+    version  = "9.5"
+    port     = "8635"
   }
-  name = "terraform_test_rds_instance"
-  security_group_id = opentelekomcloud_networking_secgroup_v2.secgroup.id
-  subnet_id = "{{ subnet_id }}"
-  vpc_id = "{{ vpc_id }}"
+  name                = "terraform_test_rds_instance"
+  security_group_id   = opentelekomcloud_networking_secgroup_v2.secgroup.id
+  subnet_id           = "{{ subnet_id }}"
+  vpc_id              = "{{ vpc_id }}"
   volume {
     type = "COMMON"
     size = 100
   }
-  flavor = "rds.pg.s1.medium.ha"
+  flavor              = "rds.pg.s1.medium.ha"
   ha_replication_mode = "async"
   backup_strategy {
     start_time = "08:00-09:00"
-    keep_days = 1
+    keep_days  = 1
   }
-  public_ips = [opentelekomcloud_compute_floatingip_v2.ip.address]
-  tag = {
+  public_ips          = [
+    opentelekomcloud_compute_floatingip_v2.ip.address
+  ]
+  tag                 = {
     foo = "bar"
     key = "value"
   }

@@ -9,11 +9,11 @@ Use this data source to get details about RTS resource metadata.
 ## Example Usage
 
 ```hcl
-variable "stack_name" { }
-variable "resource_name" { }
+variable "stack_name" {}
+variable "resource_name" {}
 
 data "opentelekomcloud_rts_stack_resource_v1" "stackresource" {
-  stack_name = var.stack_name
+  stack_name    = var.stack_name
   resource_name = var.resource_name
 }
 ```
