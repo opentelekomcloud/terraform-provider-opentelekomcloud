@@ -4,7 +4,7 @@ subcategory: "Elastic Load Balance (ELB)"
 
 # opentelekomcloud_lb_l7rule_v2
 
-Manages a V2 L7 Rule resource within OpentelekomCloud.
+Manages a V2 L7 Rule resource within OpenTelekomCloud.
 
 ## Example Usage
 

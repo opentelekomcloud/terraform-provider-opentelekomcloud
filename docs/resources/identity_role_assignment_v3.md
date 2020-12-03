@@ -4,10 +4,9 @@ subcategory: "Identity and Access Management (IAM)"
 
 # opentelekomcloud_identity_role_assignment_v3
 
-Manages a V3 Role assignment within group on OpentelekomCloud IAM Service.
+Manages a V3 Role assignment within group on OpenTelekomCloud IAM Service.
 
--> **Note:** You _must_ have admin privileges in your OpentelekomCloud cloud to use
-this resource.
+-> **Note:** You _must_ have admin privileges in your OpenTelekomCloud cloud to use this resource.
 
 ## Example Usage
 

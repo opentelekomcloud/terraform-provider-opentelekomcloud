@@ -40,10 +40,10 @@ resource "opentelekomcloud_dms_instance_v1" "instance_1" {
   storage_space     = data.opentelekomcloud_dms_product_v1.product_1.storage
   available_zones   = [data.opentelekomcloud_dms_az_v1.az_1.id]
   security_group_id = opentelekomcloud_networking_secgroup_v2.secgroup_1.id
-  vpc_id            = "{{ your vpc id }}"
-  subnet_id         = "{{ your suebent id }}"
-  access_user       = "{{ the access user }}"
-  password          = "{{ your password }}"
+  vpc_id            = var.your_vpc_id
+  subnet_id         = var.your_subnet_id
+  access_user       = var.the_access_user
+  password          = var.your_password
 
   depends_on        = [data.opentelekomcloud_dms_product_v1.product_1,
     opentelekomcloud_networking_secgroup_v2.secgroup_1]

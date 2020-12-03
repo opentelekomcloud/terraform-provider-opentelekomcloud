@@ -46,7 +46,7 @@ resource "opentelekomcloud_s3_bucket" "bucket2" {
   bucket_prefix = "test-"
   acl           = "private"
   #policy = file("/opt/terraform/terraformTest/terraform-DT/modules/obs/policy.json")
-  tags {
+  tags = {
     Name        = "Mybucket"
     Environment = "Dev"
   }

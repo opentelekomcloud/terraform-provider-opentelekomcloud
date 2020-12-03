@@ -1,4 +1,3 @@
-
 # create random number
 resource "random_id" "project" {
   byte_length = 4
@@ -6,7 +5,7 @@ resource "random_id" "project" {
 
 resource "opentelekomcloud_identity_project_v3" "project_1" {
   provider = "opentelekomcloud.iam"
-  name     = var.project_name}_${random_id.project.id
+  name     = "${var.project_name}_${random_id.project.id}"
 }
 
 data "opentelekomcloud_identity_project_v3" "project_3" {
@@ -31,7 +30,7 @@ resource "opentelekomcloud_identity_user_v3" "user_1" {
 resource "opentelekomcloud_identity_user_v3" "user_2" {
   provider = "opentelekomcloud.iam"
   name     = "${var.user_name}_2"
-  #description  = var.user_desc
+  #description        = var.user_desc
   password           = var.user_passd
   default_project_id = opentelekomcloud_identity_project_v3.project_1.id
   domain_id          = var.domain_id
@@ -71,7 +70,8 @@ resource "opentelekomcloud_identity_group_membership_v3" "membership_1" {
 
 data "opentelekomcloud_identity_role_v3" "role_1" {
   provider = "opentelekomcloud.iam"
-  name     = var.role_name #security admin
+  name     = var.role_name
+  #security admin
 }
 
 resource "opentelekomcloud_identity_role_assignment_v3" "role_assignment_1" {

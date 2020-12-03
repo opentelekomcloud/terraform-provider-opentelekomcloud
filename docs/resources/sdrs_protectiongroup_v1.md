@@ -16,8 +16,8 @@ resource "opentelekomcloud_sdrs_protectiongroup_v1" "group_1" {
   source_availability_zone = "eu-de-01"
   target_availability_zone = "eu-de-02"
 
-  domain_id     = "{{ domain_id }}"
-  source_vpc_id = "{{ vpc_id }}"
+  domain_id     = var.domain_id
+  source_vpc_id = var.vpc_id
   dr_type       = "migration"
 }
 ```

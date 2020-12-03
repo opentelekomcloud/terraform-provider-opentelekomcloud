@@ -4,7 +4,7 @@ subcategory: "Identity and Access Management (IAM)"
 
 # opentelekomcloud_identity_agency_v3
 
-Manages an agency resource within Opentelekomcloud.
+Manages an agency resource within OpenTelekomcloud.
 
 ## Example Usage
 

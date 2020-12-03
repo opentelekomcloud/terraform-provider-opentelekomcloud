@@ -4,7 +4,7 @@ subcategory: "Elastic Load Balance (ELB)"
 
 # opentelekomcloud_lb_l7policy_v2
 
-Manages a Load Balancer L7 Policy resource within OpentelekomCloud.
+Manages a Load Balancer L7 Policy resource within OpenTelekomCloud.
 
 ## Example Usage
 

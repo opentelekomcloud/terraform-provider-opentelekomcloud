@@ -29,11 +29,11 @@ resource "opentelekomcloud_compute_volume_attach_v2" "va_1" {
 resource "opentelekomcloud_blockstorage_volume_v2" "volumes" {
   count             = 2
   availability_zone = var.availability_zone
-  name              = "${format("vol-%02d", count.index + 1)}"
+  name              = format("vol-%02d", count.index + 1)
   size              = var.volume_size
 }
 resource "opentelekomcloud_compute_volume_attach_v2" "attachments" {
   count       = 2
   instance_id = var.ecs_id
-  volume_id   = "${element(opentelekomcloud_blockstorage_volume_v2.volumes.*.id, count.index)}"
+  volume_id   = element(opentelekomcloud_blockstorage_volume_v2.volumes.*.id, count.index)
 }

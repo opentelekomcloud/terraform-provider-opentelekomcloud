@@ -44,6 +44,6 @@ func testAccCheckDcsMaintainWindowV1DataSourceID(n string) resource.TestCheckFun
 
 var testAccDcsMaintainWindowV1DataSource_basic = fmt.Sprintf(`
 data "opentelekomcloud_dcs_maintainwindow_v1" "maintainwindow1" {
-seq = 1
+  seq = 1
 }
 `)

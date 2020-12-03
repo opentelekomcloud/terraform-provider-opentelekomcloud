@@ -47,7 +47,7 @@ func testAccCheckIdentityV3RoleAssignmentDestroy(s *terraform.State) error {
 	config := testAccProvider.Meta().(*Config)
 	identityClient, err := config.identityV3Client(OS_REGION_NAME)
 	if err != nil {
-		return fmt.Errorf("Error creating OpentelekomCloud identity client: %s", err)
+		return fmt.Errorf("Error creating OpenTelekomCloud identity client: %s", err)
 	}
 
 	for _, rs := range s.RootModule().Resources {
@@ -78,7 +78,7 @@ func testAccCheckIdentityV3RoleAssignmentExists(n string, role *roles.Role, grou
 		config := testAccProvider.Meta().(*Config)
 		identityClient, err := config.identityV3Client(OS_REGION_NAME)
 		if err != nil {
-			return fmt.Errorf("Error creating OpentelekomCloud identity client: %s", err)
+			return fmt.Errorf("Error creating OpenTelekomCloud identity client: %s", err)
 		}
 
 		domainID, projectID, groupID, userID, roleID := extractRoleAssignmentID(rs.Primary.ID)

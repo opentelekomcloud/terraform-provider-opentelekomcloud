@@ -5,7 +5,7 @@ resource "random_id" "as" {
 }
 ### create keypair
 resource "opentelekomcloud_compute_keypair_v2" "as-keypair" {
-  name       = var.key_name_as}-${random_id.as.id
+  name       = "${var.key_name_as}-${random_id.as.id}"
   public_key = file("public-2048.txt")
 }
 
@@ -69,7 +69,7 @@ resource "opentelekomcloud_as_configuration_v1" "as_config_1" {
 ### create vpc
 
 resource "opentelekomcloud_vpc_v1" "vpc_as" {
-  name = var.vpc_name_as}-${random_id.as.id
+  name = "${var.vpc_name_as}-${random_id.as.id}"
   cidr = var.vpc_cidr_as
 }
 #create subnet1
@@ -84,7 +84,7 @@ resource "opentelekomcloud_vpc_subnet_v1" "subnet_as" {
 
 ### create secuirty group
 resource "opentelekomcloud_networking_secgroup_v2" "secgroup_as" {
-  name        = var.secgroup_name_as}-${random_id.as.id
+  name        = "${var.secgroup_name_as}-${random_id.as.id}"
   description = "Created By Terraform."
 }
 resource "opentelekomcloud_networking_secgroup_rule_v2" "secgroup_rule_as" {

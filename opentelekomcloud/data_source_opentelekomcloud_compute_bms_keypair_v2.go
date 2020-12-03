@@ -41,7 +41,7 @@ func dataSourceBMSKeyPairV2Read(d *schema.ResourceData, meta interface{}) error 
 	config := meta.(*Config)
 	bmsClient, err := config.computeV2HWClient(GetRegion(d, config))
 	if err != nil {
-		return fmt.Errorf("Error creating Opentelekom bms client: %s", err)
+		return fmt.Errorf("Error creating OpenTelekom bms client: %s", err)
 	}
 
 	listOpts := keypairs.ListOpts{

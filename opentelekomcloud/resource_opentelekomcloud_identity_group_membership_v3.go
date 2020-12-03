@@ -39,7 +39,7 @@ func resourceIdentityGroupMembershipV3Create(d *schema.ResourceData, meta interf
 	config := meta.(*Config)
 	identityClient, err := config.identityV3Client(GetRegion(d, config))
 	if err != nil {
-		return fmt.Errorf("Error creating Opentelekomcloud identity client: %s", err)
+		return fmt.Errorf("Error creating OpenTelekomcloud identity client: %s", err)
 	}
 
 	group := d.Get("group").(string)
@@ -58,7 +58,7 @@ func resourceIdentityGroupMembershipV3Read(d *schema.ResourceData, meta interfac
 	config := meta.(*Config)
 	identityClient, err := config.identityV3Client(GetRegion(d, config))
 	if err != nil {
-		return fmt.Errorf("Error creating Opentelekomcloud identity client: %s", err)
+		return fmt.Errorf("Error creating OpenTelekomcloud identity client: %s", err)
 	}
 	group := d.Get("group").(string)
 	userList := d.Get("users").(*schema.Set)
@@ -96,7 +96,7 @@ func resourceIdentityGroupMembershipV3Update(d *schema.ResourceData, meta interf
 	config := meta.(*Config)
 	identityClient, err := config.identityV3Client(GetRegion(d, config))
 	if err != nil {
-		return fmt.Errorf("Error creating OpentelekomCloud identity client: %s", err)
+		return fmt.Errorf("Error creating OpenTelekomCloud identity client: %s", err)
 	}
 
 	if d.HasChange("users") {

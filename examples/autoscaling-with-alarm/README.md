@@ -1,47 +1,51 @@
 # Configure an Auto-scaling Group with Alarm
 
-As you may know, there are many kinds of configurations for auto-scaling, one of the most important kind is to configure one group of servers which is able to scale via their status. the scenario
+As you may know, there are many kinds of configurations for auto-scaling, one of the most important kind is to
+configure one group of servers which is able to scale via their status. The scenario
 
 > End user want a server group, this group will contain several servers which number can increase or decrease according to current workload.
 
-This example will show you how to finish the configuration combining Auto-scaling service and Cloud Eye service. to simplify this example, we recommend you to read the [docs](https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/tree/master/docs/resources) first.
+This example will show you how to finish the configuration combining Auto-scaling service and Cloud Eye service.
+To simplify this example, we recommend you to read the [docs](https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/tree/master/docs/resources) first.
 
-Three steps will guide you to achieve this configuration. first configuration an Auto-scaling group. because Auto-scaling group depends on Auto-scaling configuration resource, configuration creation need to finish before group. please refer to the docs [configuration](https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/blob/master/docs/resources/as_configuration_v1.md), [group](https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/blob/master/docs/resources/as_group_v1.md) for more detailed information
+Three steps will guide you to achieve this configuration. first configuration an Auto-scaling group.
+Because Auto-scaling group depends on Auto-scaling configuration resource, configuration creation need to finish before group. please refer to the docs [configuration](https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/blob/master/docs/resources/as_configuration_v1.md), [group](https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/blob/master/docs/resources/as_group_v1.md) for more detailed information
 
 ```hcl
-resource "opentelekomcloud_as_configuration_v1" "as_configuration"{
+resource "opentelekomcloud_as_configuration_v1" "as_configuration" {
   scaling_configuration_name = "terraform"
-  instance_config = {
+  instance_config {
     flavor = var.flavor
-    image = var.image
-    disk = [
-      {size = 40
+    image  = var.image
+    disk {
+      size        = 40
       volume_type = "SATA"
-      disk_type = "SYS"}
-    ]
-    key_name = var.keyname
+      disk_type   = "SYS"
+    }
+
+    key_name  = var.keyname
     user_data = file("userdata.txt")
   }
 }
 ```
 
 ```hcl
-resource "opentelekomcloud_as_group_v1" "as_group"{
-  scaling_group_name = "terraform"
+resource "opentelekomcloud_as_group_v1" "as_group" {
+  scaling_group_name       = "terraform"
   scaling_configuration_id = opentelekomcloud_as_configuration_v1.as_configuration.id
-  desire_instance_number = 2
-  min_instance_number = 0
-  max_instance_number = 3
-  networks = [
-    {id = opentelekomcloud_networking_network_v2.network.id},
-  ]
-  security_groups = [
-    {id = opentelekomcloud_compute_secgroup_v2.secgroup.id},
-  ]
-  vpc_id = opentelekomcloud_networking_router_v2.router.id
-  delete_publicip = true
-  delete_instances = "yes"
-  depends_on = [opentelekomcloud_networking_router_interface_v2.int_01]
+  desire_instance_number   = 2
+  min_instance_number      = 0
+  max_instance_number      = 3
+  networks {
+    id = opentelekomcloud_networking_network_v2.network.id
+  }
+  security_groups {
+    id = opentelekomcloud_compute_secgroup_v2.secgroup.id
+  }
+  vpc_id                   = opentelekomcloud_networking_router_v2.router.id
+  delete_publicip          = true
+  delete_instances         = "yes"
+  depends_on               = [opentelekomcloud_networking_router_interface_v2.int_01]
 }
 ```
 
@@ -50,22 +54,22 @@ Second, setup the alarm rule upon this Auto-scaling group, for more detail [alar
 ```hcl
 resource "opentelekomcloud_ces_alarmrule" "alarm_rule" {
   alarm_action_enabled = "false"
-  alarm_name = "terraform"
+  alarm_name           = "terraform"
   metric {
-    namespace = "SYS.AS"
+    namespace   = "SYS.AS"
     metric_name = "cpu_util"
     dimensions {
-        name = "AutoScalingGroup"
-        value = opentelekomcloud_as_group_v1.as_group.id
+      name  = "AutoScalingGroup"
+      value = opentelekomcloud_as_group_v1.as_group.id
     }
   }
-  condition  {
-    period = 300
-    filter = "average"
+  condition {
+    period              = 300
+    filter              = "average"
     comparison_operator = ">"
-    value = 80
-    unit = "%"
-    count = 2
+    value               = 80
+    unit                = "%"
+    count               = 2
   }
 }
 ```
@@ -75,15 +79,15 @@ To classify this is a rule for Auto-scaling group, first we should configure the
 Lastly. Configure the Auto-scaling policy with alarm type.
 
 ```hcl
-resource "opentelekomcloud_as_policy_v1" "as_policy"{
+resource "opentelekomcloud_as_policy_v1" "as_policy" {
   scaling_policy_name = "terraform"
-  scaling_group_id = opentelekomcloud_as_group_v1.as_group.id
-  scaling_policy_type= "ALARM"
-  scaling_policy_action = {
-    operation = "ADD"
+  scaling_group_id    = opentelekomcloud_as_group_v1.as_group.id
+  scaling_policy_type = "ALARM"
+  scaling_policy_action {
+    operation       = "ADD"
     instance_number = 1
   }
-  alarm_id=opentelekomcloud_ces_alarmrule.alarm_rule.id
+  alarm_id            = opentelekomcloud_ces_alarmrule.alarm_rule.id
 }
 ```
 

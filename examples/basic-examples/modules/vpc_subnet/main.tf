@@ -5,7 +5,7 @@ resource "random_id" "vpc" {
 
 #create VPC
 resource "opentelekomcloud_vpc_v1" "vpc_1" {
-  name = var.vpc_name}-${random_id.vpc.id
+  name = "${var.vpc_name}-${random_id.vpc.id}"
   cidr = var.vpc_cidr
 }
 

@@ -41,13 +41,13 @@ func testAccCheckBMSNicV2DataSourceID(n string) resource.TestCheckFunc {
 
 var testAccOpenTelekomCloudBMSNicV2DataSource_basic = fmt.Sprintf(`
 resource "opentelekomcloud_compute_instance_v2" "instance_1" {
-  name = "BMSinstance_1"
-  image_id = "%s"
-  security_groups = ["default"]
+  name              = "BMSinstance_1"
+  image_id          = "%s"
+  security_groups   = ["default"]
   availability_zone = "%s"
-  flavor_id = "physical.o2.medium"
-  flavor_name = "physical.o2.medium"
-  metadata = {
+  flavor_id         = "physical.o2.medium"
+  flavor_name       = "physical.o2.medium"
+  metadata          = {
     foo = "bar"
   }
   network {

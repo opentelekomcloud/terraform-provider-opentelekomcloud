@@ -18,7 +18,7 @@ resource "opentelekomcloud_networking_secgroup_v2" "secgroup" {
 
 resource "opentelekomcloud_rds_instance_v3" "instance" {
   name              = "terraform_test_rds_instance"
-  availability_zone = ["{{ availability_zone }}"]
+  availability_zone = [var.availability_zone]
 
   db {
     password = "P@ssw0rd1!9851"
@@ -28,8 +28,8 @@ resource "opentelekomcloud_rds_instance_v3" "instance" {
   }
 
   security_group_id = opentelekomcloud_networking_secgroup_v2.secgroup.id
-  subnet_id         = "{{ subnet_id }}"
-  vpc_id            = "{{ vpc_id }}"
+  subnet_id         = var.subnet_id
+  vpc_id            = var.vpc_id
   flavor            = "rds.pg.c2.medium"
 
   volume {
@@ -59,7 +59,7 @@ resource "opentelekomcloud_networking_secgroup_v2" "secgroup" {
 
 resource "opentelekomcloud_rds_instance_v3" "instance" {
   name              = "terraform_test_rds_instance"
-  availability_zone = ["{{ availability_zone_1 }}", "{{ availability_zone_2 }}"]
+  availability_zone = [var.availability_zone_1, var.availability_zone_2]
 
   db {
     password = "P@ssw0rd1!9851"
@@ -68,8 +68,8 @@ resource "opentelekomcloud_rds_instance_v3" "instance" {
     port     = "8635"
   }
   security_group_id   = opentelekomcloud_networking_secgroup_v2.secgroup.id
-  subnet_id           = "{{ subnet_id }}"
-  vpc_id              = "{{ vpc_id }}"
+  subnet_id           = var.subnet_id
+  vpc_id              = var.vpc_id
   flavor              = "rds.pg.s1.medium.ha"
   ha_replication_mode = "async"
 
@@ -102,8 +102,8 @@ resource "opentelekomcloud_compute_floatingip_v2" "ip" {}
 
 resource "opentelekomcloud_rds_instance_v3" "instance" {
   availability_zone   = [
-    "{{ availability_zone_1 }}",
-    "{{ availability_zone_2 }}"
+    var.availability_zone_1,
+    var.availability_zone_2
   ]
   db {
     password = "Telekom!120521"
@@ -113,8 +113,8 @@ resource "opentelekomcloud_rds_instance_v3" "instance" {
   }
   name                = "terraform_test_rds_instance"
   security_group_id   = opentelekomcloud_networking_secgroup_v2.secgroup.id
-  subnet_id           = "{{ subnet_id }}"
-  vpc_id              = "{{ vpc_id }}"
+  subnet_id           = var.subnet_id
+  vpc_id              = var.vpc_id
   volume {
     type = "COMMON"
     size = 100
@@ -151,11 +151,11 @@ resource "opentelekomcloud_networking_secgroup_v2" "secgroup" {
 
 resource "opentelekomcloud_rds_instance_v3" "instance" {
   name              = "terraform_test_rds_instance"
-  availability_zone = ["{{ availability_zone }}"]
+  availability_zone = [var.availability_zone]
 
   security_group_id = opentelekomcloud_networking_secgroup_v2.secgroup.id
-  subnet_id         = "{{ subnet_id }}"
-  vpc_id            = "{{ vpc_id }}"
+  subnet_id         = var.subnet_id
+  vpc_id            = var.vpc_id
   flavor            = "rds.pg.c2.medium"
 
   db {
@@ -205,8 +205,7 @@ The following arguments are supported:
 * `backup_strategy` - (Optional) Specifies the advanced backup policy. Structure is documented below.
 
 * `ha_replication_mode` - (Optional) Specifies the replication mode for the standby DB instance. For MySQL, the value
-  is async or semisync. For PostgreSQL, the value is async or sync. For
-  Microsoft SQL Server, the value is sync.
+  is async or semisync. For PostgreSQL, the value is async or sync. For Microsoft SQL Server, the value is sync.
 
 -> **Note:** Async indicates the asynchronous replication mode. semisync indicates the
   semi-synchronous replication mode. sync indicates the synchronous

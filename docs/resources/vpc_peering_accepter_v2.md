@@ -51,7 +51,7 @@ resource "opentelekomcloud_vpc_peering_connection_v2" "peering" {
   name           = var.peer_name
   vpc_id         = opentelekomcloud_vpc_v1.vpc_main.id
   peer_vpc_id    = opentelekomcloud_vpc_v1.vpc_peer.id
-  peer_tenant_id =  var.tenant_id
+  peer_tenant_id = var.tenant_id
 }
 
 # Accepter's side of the connection.

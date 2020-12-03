@@ -4,7 +4,7 @@ subcategory: "Elastic Load Balance (ELB)"
 
 # opentelekomcloud_elb_loadbalancer
 
-Manages a classic loadbalancer resource within OpentelekomCloud.
+Manages a classic loadbalancer resource within OpenTelekomCloud.
 
 ## Example Usage
 

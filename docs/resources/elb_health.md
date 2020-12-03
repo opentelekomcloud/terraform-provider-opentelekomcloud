@@ -4,7 +4,7 @@ subcategory: "Elastic Load Balance (ELB)"
 
 # opentelekomcloud_elb_health
 
-Manages a classic loadbalancer health resource within OpentelekomCloud.
+Manages a classic loadbalancer health resource within OpenTelekomCloud.
 
 ## Example Usage
 

@@ -40,8 +40,8 @@ resource "opentelekomcloud_networking_port_v2" "port_1" {
   security_group_ids = [opentelekomcloud_compute_secgroup_v2.secgroup_1.id]
 
   fixed_ip {
-    "subnet_id"  = opentelekomcloud_networking_subnet_v2.subnet_1.id
-    "ip_address" = "192.168.199.10"
+    subnet_id  = opentelekomcloud_networking_subnet_v2.subnet_1.id
+    ip_address = "192.168.199.10"
   }
 }
 

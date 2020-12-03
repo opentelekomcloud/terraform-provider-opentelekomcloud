@@ -28,7 +28,7 @@ resource "opentelekomcloud_compute_instance_v2" "ecs_1" {
 resource "opentelekomcloud_compute_instance_v2" "ecs_2" {
   region            = var.region
   availability_zone = var.availability_zone
-  name              = var.ecs_name}-${random_id.ecs.id
+  name              = "${var.ecs_name}-${random_id.ecs.id}"
   image_id          = var.image_id
   flavor_id         = var.flavor_id
   key_pair          = var.key_name
@@ -68,7 +68,7 @@ resource "opentelekomcloud_compute_floatingip_associate_v2" "fip_2" {
 resource "opentelekomcloud_compute_instance_v2" "boot-from-volume" {
   region            = var.region
   availability_zone = var.availability_zone
-  name              = var.ecs_name}-${random_id.ecs.id
+  name              = "${var.ecs_name}-${random_id.ecs.id}"
   #image_id         = var.image_id
   flavor_id       = var.flavor_id
   key_pair        = var.key_name
@@ -100,7 +100,7 @@ resource "opentelekomcloud_blockstorage_volume_v2" "myvol" {
 resource "opentelekomcloud_compute_instance_v2" "instance" {
   region            = var.region
   availability_zone = var.availability_zone
-  name              = var.ecs_name}-${random_id.ecs.id
+  name              = "${var.ecs_name}-${random_id.ecs.id}"
   #image_id         = var.image_id
 
   flavor_id       = var.flavor_id

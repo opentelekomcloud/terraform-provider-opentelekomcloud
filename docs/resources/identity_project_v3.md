@@ -4,10 +4,10 @@ subcategory: "Identity and Access Management (IAM)"
 
 # opentelekomcloud_identity_project_v3
 
-Manages a Project resource within OpentelekomCloud Identity And Access 
+Manages a Project resource within OpenTelekomCloud Identity And Access
 Management service.
 
--> **Note:** You _must_ have security admin privileges in your OpentelekomCloud 
+-> **Note:** You _must_ have security admin privileges in your OpenTelekomCloud
 cloud to use this resource. Please refer to [User Management Model](https://docs.otc.t-systems.com/en-us/usermanual/iam/iam_01_0034.html).
 
 ## Example Usage
@@ -23,7 +23,7 @@ resource "opentelekomcloud_identity_project_v3" "project_1" {
 
 The following arguments are supported:
 
-* `name` - (Required) The name of the project. it must start with 
+* `name` - (Required) The name of the project. it must start with
   ID of an existing region and be less than or equal to 64 characters.
   Example: eu-de_project1.
 
