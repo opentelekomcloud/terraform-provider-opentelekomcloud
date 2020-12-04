@@ -767,6 +767,13 @@ func (c *Config) ctsV1Client(projectName ProjectName) (*golangsdk.ServiceClient,
 	})
 }
 
+func (c *Config) cssV1Client(region string) (*golangsdk.ServiceClient, error) {
+	return openstack.NewCSSService(c.HwClient, golangsdk.EndpointOpts{
+		Region:       region,
+		Availability: c.getEndpointType(),
+	})
+}
+
 func (c *Config) cceV3Client(region string) (*golangsdk.ServiceClient, error) {
 	return openstack.NewCCE(c.HwClient, golangsdk.EndpointOpts{
 		Region:       region,
