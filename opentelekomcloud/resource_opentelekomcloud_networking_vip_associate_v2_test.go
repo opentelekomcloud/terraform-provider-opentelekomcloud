@@ -39,7 +39,7 @@ func TestAccNetworkingV2VIPAssociate_basic(t *testing.T) {
 // testAccCheckNetworkingV2VIPAssociateDestroy checks destory.
 func testAccCheckNetworkingV2VIPAssociateDestroy(s *terraform.State) error {
 	config := testAccProvider.Meta().(*Config)
-	networkingClient, err := config.hwNetworkV2Client(OS_REGION_NAME)
+	networkingClient, err := config.networkingV2Client(OS_REGION_NAME)
 	if err != nil {
 		return fmt.Errorf("Error creating OpenTelekomCloud networking client: %s", err)
 	}
@@ -94,7 +94,7 @@ func testAccCheckNetworkingV2VIPAssociateDestroy(s *terraform.State) error {
 func testAccCheckNetworkingV2VIPAssociateAssociated(p *ports.Port, vip *ports.Port) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
 		config := testAccProvider.Meta().(*Config)
-		networkingClient, err := config.hwNetworkV2Client(OS_REGION_NAME)
+		networkingClient, err := config.networkingV2Client(OS_REGION_NAME)
 		if err != nil {
 			return fmt.Errorf("Error creating OpenTelekomCloud networking client: %s", err)
 		}
@@ -160,7 +160,7 @@ resource "opentelekomcloud_networking_port_v2" "port_1" {
   name = "port_1"
   admin_state_up = "true"
   network_id = "${opentelekomcloud_networking_network_v2.network_1.id}"
-  
+
   fixed_ip {
     subnet_id =  "${opentelekomcloud_networking_subnet_v2.subnet_1.id}"
   }
@@ -169,7 +169,7 @@ resource "opentelekomcloud_networking_port_v2" "port_1" {
 resource "opentelekomcloud_compute_instance_v2" "instance_1" {
   name = "instance_1"
   security_groups = ["default"]
-	  
+
   network {
     port = "${opentelekomcloud_networking_port_v2.port_1.id}"
   }
@@ -179,7 +179,7 @@ resource "opentelekomcloud_networking_port_v2" "port_2" {
   name = "port_2"
   admin_state_up = "true"
   network_id = "${opentelekomcloud_networking_network_v2.network_1.id}"
-  
+
   fixed_ip {
     subnet_id =  "${opentelekomcloud_networking_subnet_v2.subnet_1.id}"
   }
@@ -188,7 +188,7 @@ resource "opentelekomcloud_networking_port_v2" "port_2" {
 resource "opentelekomcloud_compute_instance_v2" "instance_2" {
   name = "instance_2"
   security_groups = ["default"]
-	  
+
   network {
     port = "${opentelekomcloud_networking_port_v2.port_2.id}"
   }

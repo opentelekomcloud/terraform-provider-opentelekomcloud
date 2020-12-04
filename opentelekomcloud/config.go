@@ -261,70 +261,6 @@ func (c *Config) newS3Session(osDebug bool) error {
 	return nil
 }
 
-func (c *Config) newhwClient(transport *http.Transport, osDebug bool) error {
-	var ao golangsdk.AuthOptionsProvider
-
-	if c.AccessKey != "" && c.SecretKey != "" {
-		ao = golangsdk.AKSKAuthOptions{
-			IdentityEndpoint: c.IdentityEndpoint,
-			ProjectName:      c.TenantName,
-			ProjectId:        c.TenantID,
-			Region:           c.Region,
-			//			Domain:           c.DomainName,
-			AccessKey: c.AccessKey,
-			SecretKey: c.SecretKey,
-		}
-	} else {
-		ao = golangsdk.AuthOptions{
-			DomainID:         c.DomainID,
-			DomainName:       c.DomainName,
-			IdentityEndpoint: c.IdentityEndpoint,
-			Password:         c.Password,
-			TenantID:         c.TenantID,
-			TenantName:       c.TenantName,
-			TokenID:          c.Token,
-			Username:         c.Username,
-			UserID:           c.UserID,
-		}
-	}
-
-	client, err := openstack.NewClient(ao.GetIdentityEndpoint())
-	if err != nil {
-		return err
-	}
-
-	// Set UserAgent
-	client.UserAgent.Prepend(httpclient.TerraformUserAgent(c.terraformVersion))
-
-	client.HTTPClient = http.Client{
-		Transport: &LogRoundTripper{
-			Rt:         transport,
-			OsDebug:    osDebug,
-			MaxRetries: c.MaxRetries,
-		},
-		CheckRedirect: func(req *http.Request, via []*http.Request) error {
-			if client.AKSKAuthOptions.AccessKey != "" {
-				golangsdk.ReSign(req, golangsdk.SignOptions{
-					AccessKey: client.AKSKAuthOptions.AccessKey,
-					SecretKey: client.AKSKAuthOptions.SecretKey,
-				})
-			}
-			return nil
-		},
-	}
-
-	// If using Swift Authentication, there's no need to validate authentication normally.
-	if !c.Swauth {
-		err = openstack.Authenticate(client, ao)
-		if err != nil {
-			return err
-		}
-	}
-
-	c.HwClient = client
-	return nil
-}
-
 func buildClientByToken(c *Config) error {
 	var pao, dao golangsdk.AuthOptions
 
@@ -533,7 +469,7 @@ func (c *Config) computeS3conn(region string) (*s3.S3, error) {
 
 	client, err := openstack.NewOBSService(c.HwClient, golangsdk.EndpointOpts{
 		Region:       region,
-		Availability: c.getHwEndpointType(),
+		Availability: c.getEndpointType(),
 	})
 	if err != nil {
 		return nil, err
@@ -585,7 +521,7 @@ func (c *Config) newObjectStorageClient(region string) (*obs.ObsClient, error) {
 
 	client, err := openstack.NewOBSService(c.HwClient, golangsdk.EndpointOpts{
 		Region:       c.determineRegion(region),
-		Availability: c.getHwEndpointType(),
+		Availability: c.getEndpointType(),
 	})
 	if err != nil {
 		return nil, err
@@ -599,48 +535,48 @@ func (c *Config) newObjectStorageClient(region string) (*obs.ObsClient, error) {
 func (c *Config) blockStorageV1Client(region string) (*golangsdk.ServiceClient, error) {
 	return openstack.NewBlockStorageV1(c.HwClient, golangsdk.EndpointOpts{
 		Region:       region,
-		Availability: c.getHwEndpointType(),
+		Availability: c.getEndpointType(),
 	})
 }
 
 func (c *Config) blockStorageV2Client(region string) (*golangsdk.ServiceClient, error) {
 	return openstack.NewBlockStorageV2(c.HwClient, golangsdk.EndpointOpts{
 		Region:       region,
-		Availability: c.getHwEndpointType(),
+		Availability: c.getEndpointType(),
 	})
 }
 
 func (c *Config) blockStorageV3Client(region string) (*golangsdk.ServiceClient, error) {
 	return openstack.NewBlockStorageV3(c.HwClient, golangsdk.EndpointOpts{
 		Region:       region,
-		Availability: c.getHwEndpointType(),
+		Availability: c.getEndpointType(),
 	})
 }
 
 func (c *Config) computeV1Client(region string) (*golangsdk.ServiceClient, error) {
 	return openstack.NewComputeV1(c.HwClient, golangsdk.EndpointOpts{
 		Region:       c.determineRegion(region),
-		Availability: c.getHwEndpointType(),
+		Availability: c.getEndpointType(),
 	})
 }
 
 func (c *Config) computeV2Client(region string) (*golangsdk.ServiceClient, error) {
 	return openstack.NewComputeV2(c.HwClient, golangsdk.EndpointOpts{
 		Region:       region,
-		Availability: c.getHwEndpointType(),
+		Availability: c.getEndpointType(),
 	})
 }
 
 func (c *Config) dnsV2Client(region string) (*golangsdk.ServiceClient, error) {
 	return openstack.NewDNSV2(c.HwClient, golangsdk.EndpointOpts{
 		Region:       region,
-		Availability: c.getHwEndpointType(),
+		Availability: c.getEndpointType(),
 	})
 }
 
 func (c *Config) identityV3Client(_ ...string) (*golangsdk.ServiceClient, error) {
 	return openstack.NewIdentityV3(c.DomainClient, golangsdk.EndpointOpts{
-		Availability: c.getHwEndpointType(),
+		Availability: c.getEndpointType(),
 	})
 }
 
@@ -649,7 +585,7 @@ func (c *Config) identityV3Client(_ ...string) (*golangsdk.ServiceClient, error)
 // Deprecated, `credentials` package replacing v3 with v3.0 in URL itself
 func (c *Config) identityV30Client() (*golangsdk.ServiceClient, error) {
 	service, err := openstack.NewIdentityV3(c.DomainClient, golangsdk.EndpointOpts{
-		Availability: c.getHwEndpointType(),
+		Availability: c.getEndpointType(),
 	})
 	if err != nil {
 		return nil, err
@@ -661,28 +597,28 @@ func (c *Config) identityV30Client() (*golangsdk.ServiceClient, error) {
 func (c *Config) imageV1Client(region string) (*golangsdk.ServiceClient, error) {
 	return openstack.NewImageServiceV1(c.HwClient, golangsdk.EndpointOpts{
 		Region:       region,
-		Availability: c.getHwEndpointType(),
+		Availability: c.getEndpointType(),
 	})
 }
 
 func (c *Config) imageV2Client(region string) (*golangsdk.ServiceClient, error) {
 	return openstack.NewImageServiceV2(c.HwClient, golangsdk.EndpointOpts{
 		Region:       region,
-		Availability: c.getHwEndpointType(),
+		Availability: c.getEndpointType(),
 	})
 }
 
 func (c *Config) networkingV1Client(region string) (*golangsdk.ServiceClient, error) {
 	return openstack.NewNetworkV1(c.HwClient, golangsdk.EndpointOpts{
 		Region:       region,
-		Availability: c.getHwEndpointType(),
+		Availability: c.getEndpointType(),
 	})
 }
 
 func (c *Config) networkingV2Client(region string) (*golangsdk.ServiceClient, error) {
 	return openstack.NewNetworkV2(c.HwClient, golangsdk.EndpointOpts{
 		Region:       region,
-		Availability: c.getHwEndpointType(),
+		Availability: c.getEndpointType(),
 	})
 }
 
@@ -697,29 +633,29 @@ func (c *Config) objectStorageV1Client(region string) (*golangsdk.ServiceClient,
 
 	return openstack.NewObjectStorageV1(c.HwClient, golangsdk.EndpointOpts{
 		Region:       region,
-		Availability: c.getHwEndpointType(),
+		Availability: c.getEndpointType(),
 	})
 }
 
-func (c *Config) SmnV2Client(projectName ProjectName) (*golangsdk.ServiceClient, error) {
+func (c *Config) smnV2Client(projectName ProjectName) (*golangsdk.ServiceClient, error) {
 	newConfig, err := reconfigProjectName(c, projectName)
 	if err != nil {
 		return nil, err
 	}
 	return openstack.NewSMNV2(newConfig.HwClient, golangsdk.EndpointOpts{
 		Region:       GetRegion(nil, c),
-		Availability: c.getHwEndpointType(),
+		Availability: c.getEndpointType(),
 	})
 }
 
-func (c *Config) loadCESClient(region string) (*golangsdk.ServiceClient, error) {
+func (c *Config) cesV1Client(region string) (*golangsdk.ServiceClient, error) {
 	return openstack.NewCESClient(c.HwClient, golangsdk.EndpointOpts{
 		Region:       region,
-		Availability: c.getHwEndpointType(),
+		Availability: c.getEndpointType(),
 	})
 }
 
-func (c *Config) getHwEndpointType() golangsdk.Availability {
+func (c *Config) getEndpointType() golangsdk.Availability {
 	if c.EndpointType == "internal" || c.EndpointType == "internalURL" {
 		return golangsdk.AvailabilityInternal
 	}
@@ -732,121 +668,91 @@ func (c *Config) getHwEndpointType() golangsdk.Availability {
 func (c *Config) kmsKeyV1Client(region string) (*golangsdk.ServiceClient, error) {
 	return openstack.NewKMSV1(c.HwClient, golangsdk.EndpointOpts{
 		Region:       region,
-		Availability: c.getHwEndpointType(),
-	})
-}
-
-func (c *Config) hwNetworkV2Client(region string) (*golangsdk.ServiceClient, error) {
-	return openstack.NewNetworkV2(c.HwClient, golangsdk.EndpointOpts{
-		Region:       region,
-		Availability: c.getHwEndpointType(),
-	})
-}
-
-func (c *Config) loadEVSV2Client(region string) (*golangsdk.ServiceClient, error) {
-	return openstack.NewBlockStorageV2(c.HwClient, golangsdk.EndpointOpts{
-		Region:       region,
-		Availability: c.getHwEndpointType(),
+		Availability: c.getEndpointType(),
 	})
 }
 
 func (c *Config) natV2Client(region string) (*golangsdk.ServiceClient, error) {
 	return openstack.NewNatV2(c.HwClient, golangsdk.EndpointOpts{
 		Region:       region,
-		Availability: c.getHwEndpointType(),
+		Availability: c.getEndpointType(),
 	})
 }
 
 func (c *Config) orchestrationV1Client(region string) (*golangsdk.ServiceClient, error) {
 	return openstack.NewOrchestrationV1(c.HwClient, golangsdk.EndpointOpts{
 		Region:       region,
-		Availability: c.getHwEndpointType(),
+		Availability: c.getEndpointType(),
 	})
 }
 
 func (c *Config) sfsV2Client(region string) (*golangsdk.ServiceClient, error) {
 	return openstack.NewSharedFileSystemV2(c.HwClient, golangsdk.EndpointOpts{
 		Region:       region,
-		Availability: c.getHwEndpointType(),
+		Availability: c.getEndpointType(),
 	})
 }
 
 func (c *Config) vbsV2Client(region string) (*golangsdk.ServiceClient, error) {
 	return openstack.NewVBS(c.HwClient, golangsdk.EndpointOpts{
 		Region:       region,
-		Availability: c.getHwEndpointType(),
-	})
-}
-
-// computeV2HWClient used to access the v2 bms Services i.e. flavor, nic, keypair.
-func (c *Config) computeV2HWClient(region string) (*golangsdk.ServiceClient, error) {
-	return openstack.NewComputeV2(c.HwClient, golangsdk.EndpointOpts{
-		Region:       region,
-		Availability: c.getHwEndpointType(),
-	})
-}
-
-// bmsClient used to access the v2.1 bms Services i.e. servers, tags.
-func (c *Config) bmsClient(region string) (*golangsdk.ServiceClient, error) {
-	return openstack.NewComputeV2(c.HwClient, golangsdk.EndpointOpts{
-		Region:       region,
-		Availability: c.getHwEndpointType(),
+		Availability: c.getEndpointType(),
 	})
 }
 
 func (c *Config) autoscalingV1Client(region string) (*golangsdk.ServiceClient, error) {
 	return openstack.NewAutoScalingService(c.HwClient, golangsdk.EndpointOpts{
 		Region:       region,
-		Availability: c.getHwEndpointType(),
+		Availability: c.getEndpointType(),
 	})
 }
 
 func (c *Config) csbsV1Client(region string) (*golangsdk.ServiceClient, error) {
 	return openstack.NewCSBSService(c.HwClient, golangsdk.EndpointOpts{
 		Region:       region,
-		Availability: c.getHwEndpointType(),
+		Availability: c.getEndpointType(),
 	})
 }
 
 func (c *Config) dehV1Client(region string) (*golangsdk.ServiceClient, error) {
 	return openstack.NewDeHServiceV1(c.HwClient, golangsdk.EndpointOpts{
 		Region:       region,
-		Availability: c.getHwEndpointType(),
+		Availability: c.getEndpointType(),
 	})
 }
 
 func (c *Config) dmsV1Client(region string) (*golangsdk.ServiceClient, error) {
 	return openstack.NewDMSServiceV1(c.HwClient, golangsdk.EndpointOpts{
 		Region:       region,
-		Availability: c.getHwEndpointType(),
+		Availability: c.getEndpointType(),
 	})
 }
 
 func (c *Config) MrsV1Client(region string) (*golangsdk.ServiceClient, error) {
 	return openstack.NewMapReduceV1(c.HwClient, golangsdk.EndpointOpts{
 		Region:       region,
-		Availability: c.getHwEndpointType(),
+		Availability: c.getEndpointType(),
 	})
 }
 
 func (c *Config) elbV1Client(region string) (*golangsdk.ServiceClient, error) {
 	return openstack.NewELBV1(c.HwClient, golangsdk.EndpointOpts{
 		Region:       region,
-		Availability: c.getHwEndpointType(),
+		Availability: c.getEndpointType(),
 	})
 }
 
 func (c *Config) rdsV1Client(region string) (*golangsdk.ServiceClient, error) {
 	return openstack.NewRDSV1(c.HwClient, golangsdk.EndpointOpts{
 		Region:       region,
-		Availability: c.getHwEndpointType(),
+		Availability: c.getEndpointType(),
 	})
 }
 
 func (c *Config) antiddosV1Client(region string) (*golangsdk.ServiceClient, error) {
 	return openstack.NewAntiDDoSV1(c.HwClient, golangsdk.EndpointOpts{
 		Region:       region,
-		Availability: c.getHwEndpointType(),
+		Availability: c.getEndpointType(),
 	})
 }
 
@@ -857,63 +763,70 @@ func (c *Config) ctsV1Client(projectName ProjectName) (*golangsdk.ServiceClient,
 	}
 	return openstack.NewCTSService(newConfig.HwClient, golangsdk.EndpointOpts{
 		Region:       GetRegion(nil, c),
-		Availability: c.getHwEndpointType(),
+		Availability: c.getEndpointType(),
+	})
+}
+
+func (c *Config) cssV1Client(region string) (*golangsdk.ServiceClient, error) {
+	return openstack.NewCSSService(c.HwClient, golangsdk.EndpointOpts{
+		Region:       region,
+		Availability: c.getEndpointType(),
 	})
 }
 
 func (c *Config) cceV3Client(region string) (*golangsdk.ServiceClient, error) {
 	return openstack.NewCCE(c.HwClient, golangsdk.EndpointOpts{
 		Region:       region,
-		Availability: c.getHwEndpointType(),
+		Availability: c.getEndpointType(),
 	})
 }
 
 func (c *Config) dcsV1Client(region string) (*golangsdk.ServiceClient, error) {
 	return openstack.NewDCSServiceV1(c.HwClient, golangsdk.EndpointOpts{
 		Region:       region,
-		Availability: c.getHwEndpointType(),
+		Availability: c.getEndpointType(),
 	})
 }
 
 func (c *Config) rdsTagV1Client(region string) (*golangsdk.ServiceClient, error) {
 	return openstack.NewRdsTagV1(c.HwClient, golangsdk.EndpointOpts{
 		Region:       region,
-		Availability: c.getHwEndpointType(),
+		Availability: c.getEndpointType(),
 	})
 }
 
 func (c *Config) wafV1Client(region string) (*golangsdk.ServiceClient, error) {
 	return openstack.NewWAFV1(c.HwClient, golangsdk.EndpointOpts{
 		Region:       region,
-		Availability: c.getHwEndpointType(),
+		Availability: c.getEndpointType(),
 	})
 }
 
 func (c *Config) rdsV3Client(region string) (*golangsdk.ServiceClient, error) {
 	return openstack.NewRDSV3(c.HwClient, golangsdk.EndpointOpts{
 		Region:       region,
-		Availability: c.getHwEndpointType(),
+		Availability: c.getEndpointType(),
 	})
 }
 
 func (c *Config) sdrsV1Client(region string) (*golangsdk.ServiceClient, error) {
 	return openstack.SDRSV1(c.HwClient, golangsdk.EndpointOpts{
 		Region:       region,
-		Availability: c.getHwEndpointType(),
+		Availability: c.getEndpointType(),
 	})
 }
 
 func (c *Config) ltsV2Client(region string) (*golangsdk.ServiceClient, error) {
 	return openstack.NewLTSV2(c.HwClient, golangsdk.EndpointOpts{
 		Region:       region,
-		Availability: c.getHwEndpointType(),
+		Availability: c.getEndpointType(),
 	})
 }
 
 func (c *Config) ddsV3Client(region string) (*golangsdk.ServiceClient, error) {
 	return openstack.NewDDSServiceV3(c.HwClient, golangsdk.EndpointOpts{
 		Region:       region,
-		Availability: c.getHwEndpointType(),
+		Availability: c.getEndpointType(),
 	})
 }
 
@@ -926,7 +839,7 @@ func (c *Config) sdkClient(region, serviceType, level string) (*golangsdk.Servic
 		client,
 		golangsdk.EndpointOpts{
 			Region:       region,
-			Availability: c.getHwEndpointType(),
+			Availability: c.getEndpointType(),
 		},
 		serviceType)
 }
