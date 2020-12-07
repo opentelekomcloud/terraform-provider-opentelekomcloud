@@ -52,7 +52,7 @@ func dataSourceNetworkingSecGroupV2Read(d *schema.ResourceData, meta interface{}
 	if err != nil {
 		return fmt.Errorf("Unable to list security groups: %s", err)
 	}
-	
+
 	allSecGroups, err := groups.ExtractGroups(pages)
 	if err != nil {
 		return fmt.Errorf("Unable to retrieve security groups: %s", err)
