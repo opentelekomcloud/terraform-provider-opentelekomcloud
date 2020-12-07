@@ -29,7 +29,7 @@ func TestAccRdsInstanceV3_basic(t *testing.T) {
 					resource.TestCheckResourceAttr("opentelekomcloud_rds_instance_v3.instance", "db.0.port", "8635"),
 					resource.TestCheckResourceAttr("opentelekomcloud_rds_instance_v3.instance", "name", "tf_rds_instance_"+postfix),
 					resource.TestCheckResourceAttr("opentelekomcloud_rds_instance_v3.instance", "db.0.type", "PostgreSQL"),
-					resource.TestCheckResourceAttr("opentelekomcloud_rds_instance_v3.instance", "volume.0.size", "100"),
+					resource.TestCheckResourceAttr("opentelekomcloud_rds_instance_v3.instance", "volume.0.size", "40"),
 					resource.TestCheckResourceAttr("opentelekomcloud_rds_instance_v3.instance", "backup_strategy.0.keep_days", "1"),
 				),
 			},
@@ -37,6 +37,7 @@ func TestAccRdsInstanceV3_basic(t *testing.T) {
 				Config: testAccRdsInstanceV3_update(postfix),
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr("opentelekomcloud_rds_instance_v3.instance", "flavor", "rds.pg.c2.large"),
+					resource.TestCheckResourceAttr("opentelekomcloud_rds_instance_v3.instance", "volume.0.size", "100"),
 				),
 			},
 		},
@@ -210,7 +211,7 @@ resource "opentelekomcloud_rds_instance_v3" "instance" {
   vpc_id    = "%s"
   volume {
     type = "COMMON"
-    size = 100
+    size = 40
   }
   flavor = "rds.pg.c2.medium"
   backup_strategy {
