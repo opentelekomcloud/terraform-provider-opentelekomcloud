@@ -38,9 +38,9 @@ The following arguments are supported:
 
 -> **Note:** When a pool is added to a specific listener, the relationships between the load balancer protocol
   and the pool protocol are as follows.
-  * When the load balancer protocol is `UDP`, the pool protocol must be `UDP`.
-  * When the load balancer protocol is `TCP`, the pool protocol must be `TCP`.
-  * When the load balancer protocol is `HTTP` or `TERMINATED_HTTPS`, the pool protocol must be `HTTP`.
+  When the load balancer protocol is `UDP`, the pool protocol must be `UDP`.
+  When the load balancer protocol is `TCP`, the pool protocol must be `TCP`.
+  When the load balancer protocol is `HTTP` or `TERMINATED_HTTPS`, the pool protocol must be `HTTP`.
 
 * `loadbalancer_id` - (Optional) The load balancer on which to provision this
   pool. Changing this creates a new pool.
