@@ -54,7 +54,7 @@ func resourceIdentityCredentialV3() *schema.Resource {
 
 func resourceIdentityCredentialV3Create(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*Config)
-	client, err := config.identityV30Client()
+	client, err := config.identityV3Client()
 	if err != nil {
 		return fmt.Errorf("error creating OpenStack identity client: %s", err)
 	}
@@ -85,27 +85,35 @@ func resourceIdentityCredentialV3Create(d *schema.ResourceData, meta interface{}
 
 func resourceIdentityCredentialV3Read(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*Config)
-	client, err := config.identityV30Client()
+	client, err := config.identityV3Client()
 	if err != nil {
 		return fmt.Errorf("error creating OpenStack identity client: %s", err)
 	}
 	credential, err := credentials.Get(client, d.Id()).Extract()
 	if err != nil {
+		if isResourceNotFound(err) {
+			d.SetId("")
+			return nil
+		}
 		return fmt.Errorf("error retrieving AK/SK information: %s", err)
 	}
-	return multierror.Append(nil,
+	mErr := multierror.Append(nil,
 		d.Set("user_id", credential.UserID),
 		d.Set("access", credential.AccessKey),
 		d.Set("status", credential.Status),
 		d.Set("create_time", credential.CreateTime),
 		d.Set("last_use_time", credential.LastUseTime),
 		d.Set("description", credential.Description),
-	).ErrorOrNil()
+	)
+	if err := mErr.ErrorOrNil(); err != nil {
+		return fmt.Errorf("error setting AK/SK attributes: %s", err)
+	}
+	return nil
 }
 
 func resourceIdentityCredentialV3Update(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*Config)
-	client, err := config.identityV30Client()
+	client, err := config.identityV3Client()
 	if err != nil {
 		return fmt.Errorf("error creating OpenStack identity client: %s", err)
 	}
@@ -125,7 +133,7 @@ func resourceIdentityCredentialV3Update(d *schema.ResourceData, meta interface{}
 
 func resourceIdentityCredentialV3Delete(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*Config)
-	client, err := config.identityV30Client()
+	client, err := config.identityV3Client()
 	if err != nil {
 		return fmt.Errorf("error creating OpenStack identity client: %s", err)
 	}

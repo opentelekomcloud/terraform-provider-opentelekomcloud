@@ -147,8 +147,7 @@ func isResourceNotFound(err error) bool {
 		return false
 	}
 	_, ok := err.(golangsdk.ErrDefault404)
-	_, ok1 := err.(golangsdk.ErrDefault404)
-	return ok || ok1
+	return ok
 }
 
 func expandToStringSlice(v []interface{}) []string {
