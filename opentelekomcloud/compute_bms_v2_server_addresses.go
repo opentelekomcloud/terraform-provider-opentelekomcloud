@@ -193,7 +193,7 @@ func expandBmsInstanceNetworks(allInstanceNetworks []ServerNetwork) []servers.Ne
 func flattenServerNetwork(d *schema.ResourceData, meta interface{}) ([]map[string]interface{}, error) {
 
 	config := meta.(*Config)
-	computeClient, err := config.computeV2HWClient(GetRegion(d, config))
+	computeClient, err := config.computeV2Client(GetRegion(d, config))
 	if err != nil {
 		return nil, fmt.Errorf("Error creating OpenTelekomCloud compute client: %s", err)
 	}

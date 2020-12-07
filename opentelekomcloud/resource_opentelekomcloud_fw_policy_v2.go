@@ -71,7 +71,7 @@ func resourceFWPolicyV2() *schema.Resource {
 
 func resourceFWPolicyV2Create(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*Config)
-	networkingClient, err := config.hwNetworkV2Client(GetRegion(d, config))
+	networkingClient, err := config.networkingV2Client(GetRegion(d, config))
 	if err != nil {
 		return fmt.Errorf("Error creating OpenTelekomCloud networking client: %s", err)
 	}
@@ -122,7 +122,7 @@ func resourceFWPolicyV2Read(d *schema.ResourceData, meta interface{}) error {
 	log.Printf("[DEBUG] Retrieve information about firewall policy: %s", d.Id())
 
 	config := meta.(*Config)
-	networkingClient, err := config.hwNetworkV2Client(GetRegion(d, config))
+	networkingClient, err := config.networkingV2Client(GetRegion(d, config))
 	if err != nil {
 		return fmt.Errorf("Error creating OpenTelekomCloud networking client: %s", err)
 	}
@@ -149,7 +149,7 @@ func resourceFWPolicyV2Read(d *schema.ResourceData, meta interface{}) error {
 
 func resourceFWPolicyV2Update(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*Config)
-	networkingClient, err := config.hwNetworkV2Client(GetRegion(d, config))
+	networkingClient, err := config.networkingV2Client(GetRegion(d, config))
 	if err != nil {
 		return fmt.Errorf("Error creating OpenTelekomCloud networking client: %s", err)
 	}
@@ -191,7 +191,7 @@ func resourceFWPolicyV2Delete(d *schema.ResourceData, meta interface{}) error {
 	log.Printf("[DEBUG] Destroy firewall policy: %s", d.Id())
 
 	config := meta.(*Config)
-	networkingClient, err := config.hwNetworkV2Client(GetRegion(d, config))
+	networkingClient, err := config.networkingV2Client(GetRegion(d, config))
 	if err != nil {
 		return fmt.Errorf("Error creating OpenTelekomCloud networking client: %s", err)
 	}

@@ -36,7 +36,7 @@ func TestCESAlarmRule_basic(t *testing.T) {
 
 func testCESAlarmRuleDestroy(s *terraform.State) error {
 	config := testAccProvider.Meta().(*Config)
-	networkingClient, err := config.loadCESClient(OS_REGION_NAME)
+	networkingClient, err := config.cesV1Client(OS_REGION_NAME)
 	if err != nil {
 		return fmt.Errorf("Error creating OpenTelekomCloud ces client: %s", err)
 	}
@@ -68,7 +68,7 @@ func testCESAlarmRuleExists(n string, ar *alarmrule.AlarmRule) resource.TestChec
 		}
 
 		config := testAccProvider.Meta().(*Config)
-		networkingClient, err := config.loadCESClient(OS_REGION_NAME)
+		networkingClient, err := config.cesV1Client(OS_REGION_NAME)
 		if err != nil {
 			return fmt.Errorf("Error creating OpenTelekomCloud ces client: %s", err)
 		}

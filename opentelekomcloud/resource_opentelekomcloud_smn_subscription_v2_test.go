@@ -66,7 +66,7 @@ func TestAccSMNV2Subscription_schemaProjectName(t *testing.T) {
 
 func testAccCheckSMNSubscriptionV2Destroy(s *terraform.State) error {
 	config := testAccProvider.Meta().(*Config)
-	smnClient, err := config.SmnV2Client(OS_TENANT_NAME)
+	smnClient, err := config.smnV2Client(OS_TENANT_NAME)
 	if err != nil {
 		return fmt.Errorf("Error creating OpenTelekomCloud smn: %s", err)
 	}
@@ -104,7 +104,7 @@ func testAccCheckSMNV2SubscriptionExists(n string, subscription *subscriptions.S
 		}
 
 		config := testAccProvider.Meta().(*Config)
-		smnClient, err := config.SmnV2Client(projectName)
+		smnClient, err := config.smnV2Client(projectName)
 		if err != nil {
 			return fmt.Errorf("Error creating OpenTelekomCloud smn client: %s", err)
 		}

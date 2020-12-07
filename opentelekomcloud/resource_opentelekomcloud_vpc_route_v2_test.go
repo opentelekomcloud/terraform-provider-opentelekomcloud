@@ -52,7 +52,7 @@ func TestAccOTCVpcRouteV2_timeout(t *testing.T) {
 
 func testAccCheckOTCRouteV2Destroy(s *terraform.State) error {
 	config := testAccProvider.Meta().(*Config)
-	routeClient, err := config.hwNetworkV2Client(OS_REGION_NAME)
+	routeClient, err := config.networkingV2Client(OS_REGION_NAME)
 	if err != nil {
 		return fmt.Errorf("Error creating OpenTelekomCloud route client: %s", err)
 	}
@@ -83,7 +83,7 @@ func testAccCheckOTCRouteV2Exists(n string, route *routes.Route) resource.TestCh
 		}
 
 		config := testAccProvider.Meta().(*Config)
-		routeClient, err := config.hwNetworkV2Client(OS_REGION_NAME)
+		routeClient, err := config.networkingV2Client(OS_REGION_NAME)
 		if err != nil {
 			return fmt.Errorf("Error creating OpenTelekomCloud route client: %s", err)
 		}

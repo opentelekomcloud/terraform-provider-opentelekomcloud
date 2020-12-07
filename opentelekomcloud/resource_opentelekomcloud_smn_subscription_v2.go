@@ -63,7 +63,7 @@ func resourceSubscription() *schema.Resource {
 
 func resourceSubscriptionCreate(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*Config)
-	client, err := config.SmnV2Client(GetProjectName(d, config))
+	client, err := config.smnV2Client(GetProjectName(d, config))
 	if err != nil {
 		return fmt.Errorf("Error creating OpenTelekomCloud smn client: %s", err)
 	}
@@ -91,7 +91,7 @@ func resourceSubscriptionCreate(d *schema.ResourceData, meta interface{}) error 
 
 func resourceSubscriptionDelete(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*Config)
-	client, err := config.SmnV2Client(GetProjectName(d, config))
+	client, err := config.smnV2Client(GetProjectName(d, config))
 	if err != nil {
 		return fmt.Errorf("Error creating OpenTelekomCloud smn client: %s", err)
 	}
@@ -110,7 +110,7 @@ func resourceSubscriptionDelete(d *schema.ResourceData, meta interface{}) error 
 
 func resourceSubscriptionRead(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*Config)
-	client, err := config.SmnV2Client(GetProjectName(d, config))
+	client, err := config.smnV2Client(GetProjectName(d, config))
 	if err != nil {
 		return fmt.Errorf("Error creating OpenTelekomCloud smn client: %s", err)
 	}

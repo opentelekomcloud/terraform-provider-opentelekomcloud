@@ -64,7 +64,7 @@ func resourceVpcPeeringConnectionV2() *schema.Resource {
 
 func resourceVPCPeeringV2Create(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*Config)
-	peeringClient, err := config.hwNetworkV2Client(GetRegion(d, config))
+	peeringClient, err := config.networkingV2Client(GetRegion(d, config))
 
 	if err != nil {
 		return fmt.Errorf("Error creating OpenTelekomCloud Vpc Peering Connection Client: %s", err)
@@ -113,7 +113,7 @@ func resourceVPCPeeringV2Create(d *schema.ResourceData, meta interface{}) error 
 
 func resourceVPCPeeringV2Read(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*Config)
-	peeringClient, err := config.hwNetworkV2Client(GetRegion(d, config))
+	peeringClient, err := config.networkingV2Client(GetRegion(d, config))
 	if err != nil {
 		return fmt.Errorf("Error creating OpenTelekomCloud   Vpc Peering Connection Client: %s", err)
 	}
@@ -141,7 +141,7 @@ func resourceVPCPeeringV2Read(d *schema.ResourceData, meta interface{}) error {
 
 func resourceVPCPeeringV2Update(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*Config)
-	peeringClient, err := config.hwNetworkV2Client(GetRegion(d, config))
+	peeringClient, err := config.networkingV2Client(GetRegion(d, config))
 	if err != nil {
 		return fmt.Errorf("Error creating OpenTelekomCloud  Vpc Peering Connection Client: %s", err)
 	}
@@ -161,7 +161,7 @@ func resourceVPCPeeringV2Update(d *schema.ResourceData, meta interface{}) error 
 func resourceVPCPeeringV2Delete(d *schema.ResourceData, meta interface{}) error {
 
 	config := meta.(*Config)
-	peeringClient, err := config.hwNetworkV2Client(GetRegion(d, config))
+	peeringClient, err := config.networkingV2Client(GetRegion(d, config))
 	if err != nil {
 		return fmt.Errorf("Error creating OpenTelekomCloud  Vpc Peering Connection Client: %s", err)
 	}

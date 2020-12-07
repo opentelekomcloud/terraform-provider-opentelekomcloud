@@ -83,7 +83,7 @@ func dataSourceBMSFlavorV2() *schema.Resource {
 
 func dataSourceBMSFlavorV2Read(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*Config)
-	flavorClient, err := config.computeV2HWClient(GetRegion(d, config))
+	flavorClient, err := config.computeV2Client(GetRegion(d, config))
 	if err != nil {
 		return fmt.Errorf("Error creating OpenTelekom bms client: %s", err)
 	}
