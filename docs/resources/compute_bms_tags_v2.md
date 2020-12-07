@@ -12,7 +12,7 @@ Used to add tags to a BMS within OpenTelekomCloud.
 variable "bms_id" { }
 
 resource "opentelekomcloud_compute_bms_tags_v2" "add_tags" {
-  server_id = "${var.bms_id}",
+  server_id = var.bms_id,
   tags      = [ "tags_type_baremetal" ]
 }
 ```

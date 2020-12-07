@@ -10,9 +10,9 @@ Provides an RTS software config resource within OpenTelekomCloud.
 
 ```hcl
 variable "config_name" { }
- 
+
 resource "opentelekomcloud_rts_software_config_v1" "myconfig" {
-  name = "${var.config_name}"
+  name = var.config_name
 }
 ```
 
@@ -38,7 +38,7 @@ The following arguments are supported:
 In addition to all arguments above, the following attributes are exported:
 
 * `id` - The id of the software config.
- 
+
 ## Import
 
 Software Config can be imported using the `config id`, e.g.

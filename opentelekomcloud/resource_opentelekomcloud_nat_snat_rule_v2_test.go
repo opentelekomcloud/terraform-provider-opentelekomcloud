@@ -106,12 +106,12 @@ resource "opentelekomcloud_networking_network_v2" "network_1" {
 resource "opentelekomcloud_networking_subnet_v2" "subnet_1" {
   cidr = "192.168.0.0/16"
   ip_version = 4
-  network_id = "${opentelekomcloud_networking_network_v2.network_1.id}"
+  network_id = opentelekomcloud_networking_network_v2.network_1.id
 }
 
 resource "opentelekomcloud_networking_router_interface_v2" "int_1" {
-  subnet_id = "${opentelekomcloud_networking_subnet_v2.subnet_1.id}"
-  router_id = "${opentelekomcloud_networking_router_v2.router_1.id}"
+  subnet_id = opentelekomcloud_networking_subnet_v2.subnet_1.id
+  router_id = opentelekomcloud_networking_router_v2.router_1.id
 }
 
 resource "opentelekomcloud_networking_floatingip_v2" "fip_1" {
@@ -121,14 +121,14 @@ resource "opentelekomcloud_nat_gateway_v2" "nat_1" {
   name   = "nat_1"
   description = "test for terraform"
   spec = "1"
-  internal_network_id = "${opentelekomcloud_networking_network_v2.network_1.id}"
-  router_id = "${opentelekomcloud_networking_router_v2.router_1.id}"
+  internal_network_id = opentelekomcloud_networking_network_v2.network_1.id
+  router_id = opentelekomcloud_networking_router_v2.router_1.id
   depends_on = ["opentelekomcloud_networking_router_interface_v2.int_1"]
 }
 
 resource "opentelekomcloud_nat_snat_rule_v2" "snat_1" {
-  nat_gateway_id = "${opentelekomcloud_nat_gateway_v2.nat_1.id}"
-  floating_ip_id = "${opentelekomcloud_networking_floatingip_v2.fip_1.id}"
+  nat_gateway_id = opentelekomcloud_nat_gateway_v2.nat_1.id
+  floating_ip_id = opentelekomcloud_networking_floatingip_v2.fip_1.id
   cidr = "192.168.0.0/24"
   source_type = 0
 }

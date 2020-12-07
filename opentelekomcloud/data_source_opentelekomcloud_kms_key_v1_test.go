@@ -57,8 +57,8 @@ resource "opentelekomcloud_kms_key_v1" "key1" {
 var testAccKmsKeyV1DataSource_basic = fmt.Sprintf(`
 %s
 data "opentelekomcloud_kms_key_v1" "key1" {
-  key_alias       = "${opentelekomcloud_kms_key_v1.key1.key_alias}"
-  key_id          = "${opentelekomcloud_kms_key_v1.key1.id}"
+  key_alias       = opentelekomcloud_kms_key_v1.key1.key_alias
+  key_id          = opentelekomcloud_kms_key_v1.key1.id
   key_description = "test description"
   key_state       = "2"
 }

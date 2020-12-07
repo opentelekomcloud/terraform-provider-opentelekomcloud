@@ -41,13 +41,13 @@ func testAccCheckBMSServerV2DataSourceID(n string) resource.TestCheckFunc {
 
 var testAccOTCBMSServerV2DataSource_basic = fmt.Sprintf(`
 resource "opentelekomcloud_compute_instance_v2" "instance_1" {
-  name = "BMSinstance_1"
-  image_id = "%s"
-  security_groups = ["default"]
+  name              = "BMSinstance_1"
+  image_id          = "%s"
+  security_groups   = ["default"]
   availability_zone = "%s"
-  flavor_id = "physical.o2.medium"
-  flavor_name = "physical.o2.medium"
-  metadata = {
+  flavor_id         = "physical.o2.medium"
+  flavor_name       = "physical.o2.medium"
+  metadata          = {
     foo = "bar"
   }
   network {
@@ -56,6 +56,6 @@ resource "opentelekomcloud_compute_instance_v2" "instance_1" {
 }
 
 data "opentelekomcloud_compute_bms_server_v2" "server1" {
-  id = "${opentelekomcloud_compute_instance_v2.instance_1.id}"
+  id = opentelekomcloud_compute_instance_v2.instance_1.id
 }
 `, OS_IMAGE_ID, OS_AVAILABILITY_ZONE, OS_NETWORK_ID)

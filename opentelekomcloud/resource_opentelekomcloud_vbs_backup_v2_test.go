@@ -114,7 +114,7 @@ resource "opentelekomcloud_blockstorage_volume_v2" "volume_1" {
 }
 
 resource "opentelekomcloud_vbs_backup_v2" "backup_1" {
-  volume_id = "${opentelekomcloud_blockstorage_volume_v2.volume_1.id}"
+  volume_id = opentelekomcloud_blockstorage_volume_v2.volume_1.id
   name = "vbs-backup"
   description = "Backup_Demo"
 }
@@ -129,7 +129,7 @@ resource "opentelekomcloud_blockstorage_volume_v2" "volume_1" {
 }
 
 resource "opentelekomcloud_vbs_backup_v2" "backup_1" {
-  volume_id = "${opentelekomcloud_blockstorage_volume_v2.volume_1.id}"
+  volume_id = opentelekomcloud_blockstorage_volume_v2.volume_1.id
   name = "vbs-backup"
   description = "Backup_Demo"
 

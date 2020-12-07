@@ -105,7 +105,7 @@ resource "opentelekomcloud_logtank_group_v2" "log_group1" {
 }
 
 resource "opentelekomcloud_logtank_topic_v2" "log_topic1" {
-  group_id = "${opentelekomcloud_logtank_group_v2.log_group1.id}"
+  group_id = opentelekomcloud_logtank_group_v2.log_group1.id
   topic_name = "vpc_topic"
 }
 
@@ -118,10 +118,10 @@ resource "opentelekomcloud_vpc_flow_log_v1" "flow_logl" {
   name = "%s"
   description   = "this is a flow log from testacc"
   resource_type = "vpc"
-  resource_id   = "${opentelekomcloud_vpc_v1.vpc_1.id}"
+  resource_id   = opentelekomcloud_vpc_v1.vpc_1.id
   traffic_type  = "all"
-  log_group_id  = "${opentelekomcloud_logtank_group_v2.log_group1.id}"
-  log_topic_id  = "${opentelekomcloud_logtank_topic_v2.log_topic1.id}"
+  log_group_id  = opentelekomcloud_logtank_group_v2.log_group1.id
+  log_topic_id  = opentelekomcloud_logtank_topic_v2.log_topic1.id
 }
 `, fl_name)
 
@@ -131,7 +131,7 @@ resource "opentelekomcloud_logtank_group_v2" "log_group1" {
 }
 
 resource "opentelekomcloud_logtank_topic_v2" "log_topic1" {
-  group_id = "${opentelekomcloud_logtank_group_v2.log_group1.id}"
+  group_id = opentelekomcloud_logtank_group_v2.log_group1.id
   topic_name = "vpc_topic"
 }
 
@@ -144,9 +144,9 @@ resource "opentelekomcloud_vpc_flow_log_v1" "flow_logl" {
   name = "%s"
   description   = "this is a flow log from testacc update"
   resource_type = "vpc"
-  resource_id   = "${opentelekomcloud_vpc_v1.vpc_1.id}"
+  resource_id   = opentelekomcloud_vpc_v1.vpc_1.id
   traffic_type  = "all"
-  log_group_id  = "${opentelekomcloud_logtank_group_v2.log_group1.id}"
-  log_topic_id  = "${opentelekomcloud_logtank_topic_v2.log_topic1.id}"
+  log_group_id  = opentelekomcloud_logtank_group_v2.log_group1.id
+  log_topic_id  = opentelekomcloud_logtank_topic_v2.log_topic1.id
 }
 `, fl_update_name)

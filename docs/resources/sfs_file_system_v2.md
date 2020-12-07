@@ -16,11 +16,11 @@ variable "share_description" { }
 variable "vpc_id" { }
 
 resource "opentelekomcloud_sfs_file_system_v2" "share-file" {
-  name         = "${var.share_name}"
+  name         = var.share_name
   size         = 50
-  access_to    = "${var.vpc_id}"
+  access_to    = var.vpc_id
   access_level = "rw"
-  description  = "${var.share_description}"
+  description  = var.share_description
   metadata = {
       "type" = "nfs"
   }

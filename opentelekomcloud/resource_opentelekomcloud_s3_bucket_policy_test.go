@@ -116,7 +116,7 @@ resource "opentelekomcloud_s3_bucket" "bucket" {
 }
 
 resource "opentelekomcloud_s3_bucket_policy" "bucket" {
-	bucket = "${opentelekomcloud_s3_bucket.bucket.bucket}"
+	bucket = opentelekomcloud_s3_bucket.bucket.bucket
 	policy =<<POLICY
 {
 	"Version": "2008-10-17",
@@ -146,7 +146,7 @@ resource "opentelekomcloud_s3_bucket" "bucket" {
 }
 
 resource "opentelekomcloud_s3_bucket_policy" "bucket" {
-	bucket = "${opentelekomcloud_s3_bucket.bucket.bucket}"
+	bucket = opentelekomcloud_s3_bucket.bucket.bucket
 	policy =<<POLICY
 {
 	"Version": "2008-10-17",

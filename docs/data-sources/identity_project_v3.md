@@ -4,7 +4,7 @@ subcategory: "Identity and Access Management (IAM)"
 
 # opentelekomcloud_identity_project_v3
 
-Use this data source to get the ID of an OpentelekomCloud project.
+Use this data source to get the ID of an OpenTelekomCloud project.
 
 ## Example Usage
 

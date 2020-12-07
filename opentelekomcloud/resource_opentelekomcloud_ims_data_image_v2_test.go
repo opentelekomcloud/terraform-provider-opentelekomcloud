@@ -122,7 +122,7 @@ resource "opentelekomcloud_compute_instance_v2" "instance_1" {
 resource "opentelekomcloud_ims_data_image_v2" "image_1" {
   name   = "TFTest_data_image"
   description = "created by TerraformAccTest"
-  volume_id = "${opentelekomcloud_compute_instance_v2.instance_1.volume_attached.1.id}"
+  volume_id = opentelekomcloud_compute_instance_v2.instance_1.volume_attached.1.id
   tags = {
     foo = "bar"
     key = "value"
@@ -161,7 +161,7 @@ resource "opentelekomcloud_compute_instance_v2" "instance_1" {
 resource "opentelekomcloud_ims_data_image_v2" "image_1" {
   name   = "TFTest_data_image_update"
   description = "created by TerraformAccTest"
-  volume_id = "${opentelekomcloud_compute_instance_v2.instance_1.volume_attached.1.id}"
+  volume_id = opentelekomcloud_compute_instance_v2.instance_1.volume_attached.1.id
   tags = {
     foo  = "bar"
     key  = "value1"

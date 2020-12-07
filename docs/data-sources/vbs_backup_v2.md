@@ -12,7 +12,7 @@ Use this data source to get details about a specific VBS Backup.
 variable "backup_id" { }
 
 data "opentelekomcloud_vbs_backup_v2" "mybackup" {
-  id = "${var.backup_id}"
+  id = var.backup_id
 }
 ```
 

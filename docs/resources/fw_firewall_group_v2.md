@@ -30,14 +30,14 @@ resource "opentelekomcloud_fw_rule_v2" "rule_2" {
 resource "opentelekomcloud_fw_policy_v2" "policy_1" {
   name = "my-policy"
 
-  rules = ["${opentelekomcloud_fw_rule_v2.rule_1.id}",
-    "${opentelekomcloud_fw_rule_v2.rule_2.id}",
+  rules = [opentelekomcloud_fw_rule_v2.rule_1.id,
+    opentelekomcloud_fw_rule_v2.rule_2.id,
   ]
 }
 
 resource "opentelekomcloud_fw_firewall_group_v2" "firewall_group_1" {
   name              = "my-firewall-group"
-  ingress_policy_id = "${opentelekomcloud_fw_policy_v2.policy_1.id}"
+  ingress_policy_id = opentelekomcloud_fw_policy_v2.policy_1.id
 }
 ```
 

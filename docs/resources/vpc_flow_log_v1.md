@@ -10,27 +10,27 @@ Manages a VPC flow log resource within OpenTelekomCloud.
 
 ```hcl
 resource "opentelekomcloud_logtank_group_v2" "log_group1" {
-  group_name = "${var.log_group_name}"
+  group_name = var.log_group_name
 }
 
 resource "opentelekomcloud_logtank_topic_v2" "log_topic1" {
-  group_id   = "${opentelekomcloud_logtank_group_v2.log_group1.id}"
-  topic_name = "${var.log_topic_name}"
+  group_id   = opentelekomcloud_logtank_group_v2.log_group1.id
+  topic_name = var.log_topic_name
 }
 
 resource "opentelekomcloud_vpc_v1" "vpc_v1" {
-  name = "${var.vpc_name}"
-  cidr = "${var.vpc_cidr}"
+  name = var.vpc_name
+  cidr = var.vpc_cidr
 }
 
 resource "opentelekomcloud_vpc_flow_log_v1" "flowlog1" {
-  name          = "${var.flow_log_name}"
-  description   = "${var.flow_log_desc}"
+  name          = var.flow_log_name
+  description   = var.flow_log_desc
   resource_type = "vpc"
-  resource_id   = "${opentelekomcloud_vpc_v1.vpc_v1.id}"
+  resource_id   = opentelekomcloud_vpc_v1.vpc_v1.id
   traffic_type  = "all"
-  log_group_id  = "${opentelekomcloud_logtank_group_v2.log_group1.id}"
-  log_topic_id  = "${opentelekomcloud_logtank_topic_v2.log_topic1.id}"
+  log_group_id  = opentelekomcloud_logtank_group_v2.log_group1.id
+  log_topic_id  = opentelekomcloud_logtank_topic_v2.log_topic1.id
 }
 ```
 

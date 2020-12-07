@@ -23,8 +23,8 @@ resource "opentelekomcloud_compute_instance_v2" "instance_1" {
 }
 
 resource "opentelekomcloud_compute_volume_attach_v2" "va_1" {
-  instance_id = "${opentelekomcloud_compute_instance_v2.instance_1.id}"
-  volume_id   = "${opentelekomcloud_blockstorage_volume_v2.volume_1.id}"
+  instance_id = opentelekomcloud_compute_instance_v2.instance_1.id
+  volume_id   = opentelekomcloud_blockstorage_volume_v2.volume_1.id
 }
 ```
 
@@ -33,7 +33,7 @@ resource "opentelekomcloud_compute_volume_attach_v2" "va_1" {
 ```hcl
 resource "opentelekomcloud_blockstorage_volume_v2" "volumes" {
   count = 2
-  name  = "${format("vol-%02d", count.index + 1)}"
+  name  = format("vol-%02d", count.index + 1)
   size  = 1
 }
 
@@ -44,12 +44,12 @@ resource "opentelekomcloud_compute_instance_v2" "instance_1" {
 
 resource "opentelekomcloud_compute_volume_attach_v2" "attachments" {
   count       = 2
-  instance_id = "${opentelekomcloud_compute_instance_v2.instance_1.id}"
-  volume_id   = "${element(opentelekomcloud_blockstorage_volume_v2.volumes.*.id, count.index)}"
+  instance_id = opentelekomcloud_compute_instance_v2.instance_1.id
+  volume_id   = opentelekomcloud_blockstorage_volume_v2.volumes[count.index].id
 }
 
 output "volume devices" {
-  value = "${opentelekomcloud_compute_volume_attach_v2.attachments.*.device}"
+  value = opentelekomcloud_compute_volume_attach_v2.attachments.*.device
 }
 ```
 
@@ -77,7 +77,7 @@ The following attributes are exported:
 
 * `volume_id` - See Argument Reference above.
 
-* `device` - See Argument Reference above. 
+* `device` - See Argument Reference above.
 -> **Note:** The correctness of this information is dependent upon the hypervisor in use.
   In some cases, this should not be used as an authoritative piece of information.
 

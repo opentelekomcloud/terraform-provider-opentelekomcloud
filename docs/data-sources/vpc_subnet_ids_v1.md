@@ -14,16 +14,16 @@ The following example shows outputing all cidr blocks for every subnet id in a V
 
 ```hcl
 data "opentelekomcloud_vpc_subnet_ids_v1" "subnet_ids" {
-  vpc_id = "${var.vpc_id}" 
+  vpc_id = var.vpc_id
 }
 
 data "opentelekomcloud_vpc_subnet_v1" "subnet" {
-  count = "${length(data.opentelekomcloud_vpc_subnet_ids_v1.subnet_ids.ids)}"
-  id    = "${data.opentelekomcloud_vpc_subnet_ids_v1.subnet_ids.ids[count.index]}"
+  count = length(data.opentelekomcloud_vpc_subnet_ids_v1.subnet_ids.ids)
+  id    = data.opentelekomcloud_vpc_subnet_ids_v1.subnet_ids.ids[count.index]
 }
 
 output "subnet_cidr_blocks" {
-  value = "${data.opentelekomcloud_vpc_subnet_v1.subnet.*.cidr}"
+  value = data.opentelekomcloud_vpc_subnet_v1.subnet.*.cidr
 }
 ```
 

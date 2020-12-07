@@ -42,11 +42,11 @@ func testAccCheckCSBSBackupV1DataSourceID(n string) resource.TestCheckFunc {
 
 var testAccCSBSBackupV1DataSource_basic = fmt.Sprintf(`
 resource "opentelekomcloud_compute_instance_v2" "instance_1" {
-  name = "instance_1"
-  image_id = "%s"
-  security_groups = ["default"]
+  name              = "instance_1"
+  image_id          = "%s"
+  security_groups   = ["default"]
   availability_zone = "%s"
-  flavor_id = "%s"
+  flavor_id         = "%s"
   metadata = {
     foo = "bar"
   }
@@ -55,12 +55,12 @@ resource "opentelekomcloud_compute_instance_v2" "instance_1" {
   }
 }
 resource "opentelekomcloud_csbs_backup_v1" "csbs" {
-  backup_name      = "csbs-test"
-  description      = "test-code"
-  resource_id = "${opentelekomcloud_compute_instance_v2.instance_1.id}"
+  backup_name   = "csbs-test"
+  description   = "test-code"
+  resource_id   = opentelekomcloud_compute_instance_v2.instance_1.id
   resource_type = "OS::Nova::Server"
 }
 data "opentelekomcloud_csbs_backup_v1" "csbs" {
-  id = "${opentelekomcloud_csbs_backup_v1.csbs.id}"
+  id = opentelekomcloud_csbs_backup_v1.csbs.id
 }
 `, OS_IMAGE_ID, OS_AVAILABILITY_ZONE, OS_FLAVOR_ID, OS_NETWORK_ID)

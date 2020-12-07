@@ -12,7 +12,7 @@ Use this data source to get details about backup resources from OpenTelekomCloud
 variable "backup_name" { }
 
 data "opentelekomcloud_csbs_backup_v1" "csbs" {
-  backup_name = "${var.backup_name}"
+  backup_name = var.backup_name
 }
 ```
 
@@ -100,6 +100,6 @@ The `vm_metadata` block supports the following arguments:
 
 The `tags` block supports the following arguments:
 
-* `key` - Specifies tag key. 
+* `key` - Specifies tag key.
 
-* `value` - Specifies tag value. 
+* `value` - Specifies tag value.

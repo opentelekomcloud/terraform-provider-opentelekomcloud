@@ -96,13 +96,13 @@ resource "opentelekomcloud_lb_listener_v2" "listener_1" {
   name = "listener_1"
   protocol = "HTTP"
   protocol_port = 8080
-  loadbalancer_id = "${opentelekomcloud_lb_loadbalancer_v2.loadbalancer_1.id}"
+  loadbalancer_id = opentelekomcloud_lb_loadbalancer_v2.loadbalancer_1.id
 }
 
 resource "opentelekomcloud_lb_whitelist_v2" "whitelist_1" {
   enable_whitelist = true
   whitelist = "192.168.11.1,192.168.0.1/24"
-  listener_id = "${opentelekomcloud_lb_listener_v2.listener_1.id}"
+  listener_id = opentelekomcloud_lb_listener_v2.listener_1.id
 }
 `, OS_SUBNET_ID)
 
@@ -116,12 +116,12 @@ resource "opentelekomcloud_lb_listener_v2" "listener_1" {
   name = "listener_1"
   protocol = "HTTP"
   protocol_port = 8080
-  loadbalancer_id = "${opentelekomcloud_lb_loadbalancer_v2.loadbalancer_1.id}"
+  loadbalancer_id = opentelekomcloud_lb_loadbalancer_v2.loadbalancer_1.id
 }
 
 resource "opentelekomcloud_lb_whitelist_v2" "whitelist_1" {
   enable_whitelist = true
   whitelist = "192.168.11.1,192.168.0.1/24,192.168.201.18/8"
-  listener_id = "${opentelekomcloud_lb_listener_v2.listener_1.id}"
+  listener_id = opentelekomcloud_lb_listener_v2.listener_1.id
 }
 `, OS_SUBNET_ID)

@@ -4,7 +4,7 @@ subcategory: "Storage Disaster Recovery Service (SDRS)"
 
 # opentelekomcloud_sdrs_domain_v1
 
-Use this data source to get the ID of an available Opentelekomcloud SDRS domain.
+Use this data source to get the ID of an available OpenTelekomcloud SDRS domain.
 
 ## Example Usage
 

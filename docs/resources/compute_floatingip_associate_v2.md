@@ -25,8 +25,8 @@ resource "opentelekomcloud_networking_floatingip_v2" "fip_1" {
 }
 
 resource "opentelekomcloud_compute_floatingip_associate_v2" "fip_1" {
-  floating_ip = "${opentelekomcloud_networking_floatingip_v2.fip_1.address}"
-  instance_id = "${opentelekomcloud_compute_instance_v2.instance_1.id}"
+  floating_ip = opentelekomcloud_networking_floatingip_v2.fip_1.address
+  instance_id = opentelekomcloud_compute_instance_v2.instance_1.id
 }
 ```
 
@@ -54,9 +54,9 @@ resource "opentelekomcloud_networking_floatingip_v2" "fip_1" {
 }
 
 resource "opentelekomcloud_compute_floatingip_associate_v2" "fip_1" {
-  floating_ip = "${opentelekomcloud_networking_floatingip_v2.fip_1.address}"
-  instance_id = "${opentelekomcloud_compute_instance_v2.instance_1.id}"
-  fixed_ip    = "${opentelekomcloud_compute_instance_v2.instance_1.network.1.fixed_ip_v4}"
+  floating_ip = opentelekomcloud_networking_floatingip_v2.fip_1.address
+  instance_id = opentelekomcloud_compute_instance_v2.instance_1.id
+  fixed_ip    = opentelekomcloud_compute_instance_v2.instance_1.network.1.fixed_ip_v4
 }
 ```
 

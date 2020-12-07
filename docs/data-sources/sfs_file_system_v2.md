@@ -13,8 +13,8 @@ variable "share_name" { }
 variable "share_id" { }
 
 data "opentelekomcloud_sfs_file_system_v2" "shared_file" {
-  name = "${var.share_name}"
-  id   = "${var.share_id}"
+  name = var.share_name
+  id   = var.share_id
 }
 ```
 
@@ -44,9 +44,9 @@ The following attributes are exported:
 * `host` - The host name of the shared file system.
 
 * `is_public` - The level of visibility for the shared file system.
- 
+
 * `share_proto` - The protocol for sharing file systems.
- 
+
 * `volume_type` - The volume type.
 
 * `metadata` - Metadata key and value pairs as a dictionary of strings.

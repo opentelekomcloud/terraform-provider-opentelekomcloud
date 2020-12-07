@@ -18,7 +18,7 @@ resource "opentelekomcloud_networking_secgroup_v2" "secgroup" {
 
 resource "opentelekomcloud_rds_instance_v3" "instance" {
   name              = "terraform_test_rds_instance"
-  availability_zone = ["{{ availability_zone }}"]
+  availability_zone = [var.availability_zone]
 
   db {
     password = "P@ssw0rd1!9851"
@@ -27,11 +27,11 @@ resource "opentelekomcloud_rds_instance_v3" "instance" {
     port     = "8635"
   }
 
-  security_group_id = "${opentelekomcloud_networking_secgroup_v2.secgroup.id}"
-  subnet_id         = "{{ subnet_id }}"
-  vpc_id            = "{{ vpc_id }}"
+  security_group_id = opentelekomcloud_networking_secgroup_v2.secgroup.id
+  subnet_id         = var.subnet_id
+  vpc_id            = var.vpc_id
   flavor            = "rds.pg.c2.medium"
-  
+
   volume {
     type = "COMMON"
     size = 100
@@ -59,20 +59,20 @@ resource "opentelekomcloud_networking_secgroup_v2" "secgroup" {
 
 resource "opentelekomcloud_rds_instance_v3" "instance" {
   name              = "terraform_test_rds_instance"
-  availability_zone = ["{{ availability_zone_1 }}", "{{ availability_zone_2 }}"]
-  
+  availability_zone = [var.availability_zone_1, var.availability_zone_2]
+
   db {
     password = "P@ssw0rd1!9851"
     type     = "PostgreSQL"
     version  = "9.5"
     port     = "8635"
   }
-  security_group_id   = "${opentelekomcloud_networking_secgroup_v2.secgroup.id}"
-  subnet_id           = "{{ subnet_id }}"
-  vpc_id              = "{{ vpc_id }}" 
+  security_group_id   = opentelekomcloud_networking_secgroup_v2.secgroup.id
+  subnet_id           = var.subnet_id
+  vpc_id              = var.vpc_id
   flavor              = "rds.pg.s1.medium.ha"
   ha_replication_mode = "async"
-  
+
   volume {
     type = "COMMON"
     size = 100
@@ -94,36 +94,41 @@ resource "opentelekomcloud_rds_instance_v3" "instance" {
 
 ```hcl
 resource "opentelekomcloud_networking_secgroup_v2" "secgroup" {
-  name = "terraform_test_security_group"
+  name        = "terraform_test_security_group"
   description = "terraform security group acceptance test"
 }
 
 resource "opentelekomcloud_compute_floatingip_v2" "ip" {}
 
 resource "opentelekomcloud_rds_instance_v3" "instance" {
-  availability_zone = ["{{ availability_zone_1 }}", "{{ availability_zone_2 }}"]
+  availability_zone   = [
+    var.availability_zone_1,
+    var.availability_zone_2
+  ]
   db {
     password = "Telekom!120521"
-    type = "PostgreSQL"
-    version = "9.5"
-    port = "8635"
+    type     = "PostgreSQL"
+    version  = "9.5"
+    port     = "8635"
   }
-  name = "terraform_test_rds_instance"
-  security_group_id = "${opentelekomcloud_networking_secgroup_v2.secgroup.id}"
-  subnet_id = "{{ subnet_id }}"
-  vpc_id = "{{ vpc_id }}" 
+  name                = "terraform_test_rds_instance"
+  security_group_id   = opentelekomcloud_networking_secgroup_v2.secgroup.id
+  subnet_id           = var.subnet_id
+  vpc_id              = var.vpc_id
   volume {
     type = "COMMON"
     size = 100
   }
-  flavor = "rds.pg.s1.medium.ha"
+  flavor              = "rds.pg.s1.medium.ha"
   ha_replication_mode = "async"
   backup_strategy {
     start_time = "08:00-09:00"
-    keep_days = 1
+    keep_days  = 1
   }
-  public_ips = [opentelekomcloud_compute_floatingip_v2.ip.address]
-  tag = {
+  public_ips          = [
+    opentelekomcloud_compute_floatingip_v2.ip.address
+  ]
+  tag                 = {
     foo = "bar"
     key = "value"
   }
@@ -146,11 +151,11 @@ resource "opentelekomcloud_networking_secgroup_v2" "secgroup" {
 
 resource "opentelekomcloud_rds_instance_v3" "instance" {
   name              = "terraform_test_rds_instance"
-  availability_zone = ["{{ availability_zone }}"]
-  
-  security_group_id = "${opentelekomcloud_networking_secgroup_v2.secgroup.id}"
-  subnet_id         = "{{ subnet_id }}"
-  vpc_id            = "{{ vpc_id }}"
+  availability_zone = [var.availability_zone]
+
+  security_group_id = opentelekomcloud_networking_secgroup_v2.secgroup.id
+  subnet_id         = var.subnet_id
+  vpc_id            = var.vpc_id
   flavor            = "rds.pg.c2.medium"
 
   db {
@@ -161,7 +166,7 @@ resource "opentelekomcloud_rds_instance_v3" "instance" {
   }
 
   volume {
-    disk_encryption_id = "${opentelekomcloud_kms_key_v1.key.id}"
+    disk_encryption_id = opentelekomcloud_kms_key_v1.key.id
     type               = "COMMON"
     size               = 100
   }
@@ -200,8 +205,7 @@ The following arguments are supported:
 * `backup_strategy` - (Optional) Specifies the advanced backup policy. Structure is documented below.
 
 * `ha_replication_mode` - (Optional) Specifies the replication mode for the standby DB instance. For MySQL, the value
-  is async or semisync. For PostgreSQL, the value is async or sync. For
-  Microsoft SQL Server, the value is sync. 
+  is async or semisync. For PostgreSQL, the value is async or sync. For Microsoft SQL Server, the value is sync.
 
 -> **Note:** Async indicates the asynchronous replication mode. semisync indicates the
   semi-synchronous replication mode. sync indicates the synchronous
@@ -209,9 +213,9 @@ The following arguments are supported:
 
 * `param_group_id` - (Optional) Specifies the parameter group ID. Changing this parameter will create a new resource.
 
-* `public_ips` - (Optional) Specifies floating IP to be assigned to the instance. 
+* `public_ips` - (Optional) Specifies floating IP to be assigned to the instance.
   This should be a list with single element only.
-  
+
 -> **Note:** Setting public IP is done with assigning floating IP to internally
   created port. So RDS itself doesn't know about this assignment. This assignment
   won't show on the console.
@@ -253,7 +257,7 @@ The `volume` block supports:
   GB. The value must be a multiple of 10. Changing this resize the volume.
 
 * `type` - (Required) Specifies the volume type. Its value can be any of the following
-  and is case-sensitive: COMMON: indicates the SATA type.  
+  and is case-sensitive: COMMON: indicates the SATA type.
   ULTRAHIGH: indicates the SSD type.  Changing this parameter will create a new resource.
 
 The `backup_strategy` block supports:

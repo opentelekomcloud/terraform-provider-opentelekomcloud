@@ -13,8 +13,8 @@ variable "bms_id" { }
 variable "nic_id" { }
 
 data "opentelekomcloud_compute_bms_nic_v2" "query_bms_nic" {
-  server_id = "${var.bms_id}"
-  id        = "${var.nic_id}"
+  server_id = var.bms_id
+  id        = var.nic_id
 }
 ```
 
@@ -30,7 +30,7 @@ The arguments of this data source act as filters for querying the BMSs details.
 
 ## Attributes Reference
 
-All of the argument attributes are also exported as result attributes. 
+All of the argument attributes are also exported as result attributes.
 
 * `mac_address` - It is NIC's mac address.
 

@@ -71,24 +71,24 @@ resource "opentelekomcloud_vpc_v1" "vpc_2" {
 
 resource "opentelekomcloud_vpc_peering_connection_v2" "peering_1" {
 		name = "opentelekomcloud_peering"
-		vpc_id = "${opentelekomcloud_vpc_v1.vpc_1.id}"
-		peer_vpc_id = "${opentelekomcloud_vpc_v1.vpc_2.id}"
+		vpc_id = opentelekomcloud_vpc_v1.vpc_1.id
+		peer_vpc_id = opentelekomcloud_vpc_v1.vpc_2.id
 }
 
 data "opentelekomcloud_vpc_peering_connection_v2" "by_id" {
-		id = "${opentelekomcloud_vpc_peering_connection_v2.peering_1.id}"
+		id = opentelekomcloud_vpc_peering_connection_v2.peering_1.id
 }
 
 data "opentelekomcloud_vpc_peering_connection_v2" "by_vpc_id" {
-		vpc_id = "${opentelekomcloud_vpc_peering_connection_v2.peering_1.vpc_id}"
+		vpc_id = opentelekomcloud_vpc_peering_connection_v2.peering_1.vpc_id
 }
 
 data "opentelekomcloud_vpc_peering_connection_v2" "by_peer_vpc_id" {
-		peer_vpc_id = "${opentelekomcloud_vpc_peering_connection_v2.peering_1.peer_vpc_id}"
+		peer_vpc_id = opentelekomcloud_vpc_peering_connection_v2.peering_1.peer_vpc_id
 }
 
 data "opentelekomcloud_vpc_peering_connection_v2" "by_vpc_ids" {
-		vpc_id = "${opentelekomcloud_vpc_peering_connection_v2.peering_1.vpc_id}"
-		peer_vpc_id = "${opentelekomcloud_vpc_peering_connection_v2.peering_1.peer_vpc_id}"
+		vpc_id = opentelekomcloud_vpc_peering_connection_v2.peering_1.vpc_id
+		peer_vpc_id = opentelekomcloud_vpc_peering_connection_v2.peering_1.peer_vpc_id
 }
 `

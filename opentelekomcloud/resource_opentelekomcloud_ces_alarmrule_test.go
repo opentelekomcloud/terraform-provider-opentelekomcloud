@@ -106,7 +106,7 @@ resource "opentelekomcloud_ces_alarmrule" "alarmrule_1" {
     metric_name = "network_outgoing_bytes_rate_inband"
     dimensions {
         name = "instance_id"
-        value = "${opentelekomcloud_compute_instance_v2.vm_1.id}"
+        value = opentelekomcloud_compute_instance_v2.vm_1.id
     }
   }
   condition  {
@@ -122,7 +122,7 @@ resource "opentelekomcloud_ces_alarmrule" "alarmrule_1" {
   alarm_actions {
     type = "notification"
     notification_list = [
-      "${opentelekomcloud_smn_topic_v2.topic_1.topic_urn}"
+      opentelekomcloud_smn_topic_v2.topic_1.topic_urn
     ]
   }
 }
@@ -149,7 +149,7 @@ resource "opentelekomcloud_ces_alarmrule" "alarmrule_1" {
     metric_name = "network_outgoing_bytes_rate_inband"
     dimensions {
         name = "instance_id"
-        value = "${opentelekomcloud_compute_instance_v2.vm_1.id}"
+        value = opentelekomcloud_compute_instance_v2.vm_1.id
     }
   }
   condition  {
@@ -166,7 +166,7 @@ resource "opentelekomcloud_ces_alarmrule" "alarmrule_1" {
   alarm_actions {
     type = "notification"
     notification_list = [
-      "${opentelekomcloud_smn_topic_v2.topic_1.topic_urn}"
+      opentelekomcloud_smn_topic_v2.topic_1.topic_urn
     ]
   }
 }

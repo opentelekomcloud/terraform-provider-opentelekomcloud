@@ -197,7 +197,7 @@ resource "opentelekomcloud_cce_cluster_v3" "cluster_1" {
   cluster_version = "v1.9.2-r2"
   vpc_id="%s"
   subnet_id="%s"
-  eip="${opentelekomcloud_networking_floatingip_v2.fip_1.address}"
+  eip=opentelekomcloud_networking_floatingip_v2.fip_1.address
   container_network_type="overlay_l2"
   authentication_mode = "rbac"
     timeouts {

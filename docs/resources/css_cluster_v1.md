@@ -20,16 +20,16 @@ resource "opentelekomcloud_css_cluster_v1" "cluster" {
   node_config {
     flavor = "css.medium.8"
     network_info {
-      security_group_id = "${opentelekomcloud_networking_secgroup_v2.secgroup.id}"
-      network_id        = "{{ network_id }}"
-      vpc_id            = "{{ vpc_id }}"
+      security_group_id = opentelekomcloud_networking_secgroup_v2.secgroup.id
+      network_id        = var.network_id
+      vpc_id            = var.vpc_id
     }
     volume {
       volume_type = "COMMON"
       size        = 40
     }
 
-    availability_zone = "{{ availability_zone }}"
+    availability_zone = var.availability_zone
   }
 }
 ```

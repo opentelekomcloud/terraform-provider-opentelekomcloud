@@ -14,11 +14,11 @@ VPC that the subnet belongs to.
 
 ```hcl
 data "opentelekomcloud_vpc_subnet_v1" "subnet_v1" {
-  id = "${var.subnet_id}"
+  id = var.subnet_id
 }
 
 output "subnet_vpc_id" {
-  value = "${data.opentelekomcloud_vpc_subnet_v1.subnet_v1.vpc_id}"
+  value = data.opentelekomcloud_vpc_subnet_v1.subnet_v1.vpc_id
 }
 ```
 

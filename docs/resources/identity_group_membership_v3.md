@@ -4,10 +4,9 @@ subcategory: "Identity and Access Management (IAM)"
 
 # opentelekomcloud_identity_group_membership_v3
 
-Manages a User Group Membership resource within OpentelekomCloud IAM service.
+Manages a User Group Membership resource within OpenTelekomCloud IAM service.
 
--> **Note:** You _must_ have admin privileges in your OpentelekomCloud cloud to use
-this resource.
+-> **Note:** You _must_ have admin privileges in your OpenTelekomCloud cloud to use this resource.
 
 ## Example Usage
 
@@ -30,9 +29,9 @@ resource "opentelekomcloud_identity_user_v3" "user_2" {
 }
 
 resource "opentelekomcloud_identity_group_membership_v3" "membership_1" {
-  group = "${opentelekomcloud_identity_group_v3.group_1.id}"
-  users = ["${opentelekomcloud_identity_user_v3.user_1.id}",
-           "${opentelekomcloud_identity_user_v3.user_2.id}"]
+  group = opentelekomcloud_identity_group_v3.group_1.id
+  users = [opentelekomcloud_identity_user_v3.user_1.id,
+           opentelekomcloud_identity_user_v3.user_2.id]
 }
 ```
 
@@ -40,7 +39,7 @@ resource "opentelekomcloud_identity_group_membership_v3" "membership_1" {
 
 The following arguments are supported:
 
-* `group` - (Required) The group ID of this membership. 
+* `group` - (Required) The group ID of this membership.
 
 * `users` - (Required) A List of user IDs to associate to the group.
 

@@ -14,7 +14,7 @@ variable "cluster_id" { }
 variable "vpc_id" { }
 
 data "opentelekomcloud_cce_cluster_v3" "cluster" {
-  name   = "${var.cluster_name}"
+  name   = var.cluster_name
   status = "Available"
 }
 ```

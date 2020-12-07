@@ -31,7 +31,7 @@ resource "opentelekomcloud_rds_instance_v1" "instance" {
     version = "9.5.5"
   }
 
-  flavorref = "${data.opentelekomcloud_rds_flavors_v1.flavor.id}"
+  flavorref = data.opentelekomcloud_rds_flavors_v1.flavor.id
   volume {
     type = "COMMON"
     size = 200
@@ -44,7 +44,7 @@ resource "opentelekomcloud_rds_instance_v1" "instance" {
     subnetid = "b65f8d25-c533-47e2-8601-cfaa265a3e3e"
   }
   securitygroup {
-    id = "${opentelekomcloud_compute_secgroup_v2.secgrp_rds.id}"
+    id = opentelekomcloud_compute_secgroup_v2.secgrp_rds.id
   }
   backupstrategy {
     starttime = "04:00:00"
@@ -78,7 +78,7 @@ resource "opentelekomcloud_compute_secgroup_v2" "secgrp_rds" {
 resource "opentelekomcloud_rds_instance_v1" "instance" {
   name             = "rds-instance"
   availabilityzone = "eu-de-01"
-  flavorref = "${data.opentelekomcloud_rds_flavors_v1.flavor.id}"
+  flavorref = data.opentelekomcloud_rds_flavors_v1.flavor.id
   vpc = "c1095fe7-03df-4205-ad2d-6f4c181d436e"
   dbport = "8635"
   dbrtpd = "P@ssw0rd1!9851"
@@ -95,7 +95,7 @@ resource "opentelekomcloud_rds_instance_v1" "instance" {
     subnetid = "b65f8d25-c533-47e2-8601-cfaa265a3e3e"
   }
   securitygroup {
-    id = "${opentelekomcloud_compute_secgroup_v2.secgrp_rds.id}"
+    id = opentelekomcloud_compute_secgroup_v2.secgrp_rds.id
   }
   backupstrategy {
     starttime = "04:00:00"
@@ -125,8 +125,7 @@ resource "opentelekomcloud_rds_instance_v1" "instance" {
   vpc       = "c1095fe7-03df-4205-ad2d-6f4c181d436e"
   dbport    = "8635"
   dbrtpd    = "P@ssw0rd1!9851"
-  flavorref = "${data.opentelekomcloud_rds_flavors_v1.flavor.id}"
-  
+  flavorref = data.opentelekomcloud_rds_flavors_v1.flavor.id
   datastore {
     type    = "MySQL"
     version = "5.6.33"
@@ -139,7 +138,7 @@ resource "opentelekomcloud_rds_instance_v1" "instance" {
     subnetid = "b65f8d25-c533-47e2-8601-cfaa265a3e3e"
   }
   securitygroup {
-    id = "${opentelekomcloud_compute_secgroup_v2.secgrp_rds.id}"
+    id = opentelekomcloud_compute_secgroup_v2.secgrp_rds.id
   }
   backupstrategy {
     starttime = "04:00:00"

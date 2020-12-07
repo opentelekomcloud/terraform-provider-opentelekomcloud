@@ -1,19 +1,19 @@
 resource "opentelekomcloud_elb_loadbalancer" "elb" {
   name           = "${var.elb_name}_external"
   type           = "External"
-  description    = "${var.elb_desc}"
-  vpc_id         = "${var.vpc_id}"
+  description    = var.elb_desc
+  vpc_id         = var.vpc_id
   admin_state_up = "true"
-  bandwidth      = "${var.bw_size}"
+  bandwidth      = var.bw_size
 }
 
 #resource "opentelekomcloud_elb_loadbalancer" "elb2" {
 # name = "${var.elb_name}_internal"
 # type = "Internal"
-# vpc_id = "${var.vpc_id}"
+# vpc_id = var.vpc_id
 # admin_state_up = "false"
-# vip_subnet_id  = "${var.vip_subnet_id}"
-# security_group_id = "${var.security_group_id}"
+# vip_subnet_id  = var.vip_subnet_id
+# security_group_id = var.security_group_id
 # }
 
 resource "opentelekomcloud_elb_listener" "listener" {
@@ -24,7 +24,7 @@ resource "opentelekomcloud_elb_listener" "listener" {
   protocol_port        = 12345
   backend_port         = 8080
   lb_algorithm         = "roundrobin"
-  loadbalancer_id      = "${opentelekomcloud_elb_loadbalancer.elb.id}"
+  loadbalancer_id      = opentelekomcloud_elb_loadbalancer.elb.id
   tcp_timeout          = 4
   tcp_draining         = "true"
   tcp_draining_timeout = 30
@@ -42,7 +42,7 @@ resource "opentelekomcloud_elb_listener" "listener2" {
   protocol_port        = 4444
   backend_port         = 8080
   lb_algorithm         = "roundrobin"
-  loadbalancer_id      = "${opentelekomcloud_elb_loadbalancer.elb.id}"
+  loadbalancer_id      = opentelekomcloud_elb_loadbalancer.elb.id
   tcp_timeout          = 4
   tcp_draining         = "true"
   tcp_draining_timeout = 30
@@ -59,7 +59,7 @@ resource "opentelekomcloud_elb_listener" "listener2" {
 
 
 resource "opentelekomcloud_elb_health" "healthcheck" {
-  listener_id              = "${opentelekomcloud_elb_listener.listener.id}"
+  listener_id              = opentelekomcloud_elb_listener.listener.id
   healthcheck_protocol     = "TCP"
   healthcheck_connect_port = 22
   healthy_threshold        = 5
@@ -73,11 +73,11 @@ resource "opentelekomcloud_elb_health" "healthcheck" {
 }
 
 #resource "opentelekomcloud_elb_health" "healthcheck2" {
-#  listener_id = "${opentelekomcloud_elb_listener.listener.id}"
+#  listener_id = opentelekomcloud_elb_listener.listener.id
 #}
 
 resource "opentelekomcloud_elb_backend" "backend" {
-  address     = "${var.ecs_ip}"
-  listener_id = "${opentelekomcloud_elb_listener.listener2.id}"
-  server_id   = "${var.ecs_id}"
+  address     = var.ecs_ip
+  listener_id = opentelekomcloud_elb_listener.listener2.id
+  server_id   = var.ecs_id
 }

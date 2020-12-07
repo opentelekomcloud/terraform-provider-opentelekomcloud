@@ -49,7 +49,7 @@ func resourceIdentityGroupV3Create(d *schema.ResourceData, meta interface{}) err
 	config := meta.(*Config)
 	identityClient, err := config.identityV3Client(GetRegion(d, config))
 	if err != nil {
-		return fmt.Errorf("Error creating OpentelekomCloud identity client: %s", err)
+		return fmt.Errorf("Error creating OpenTelekomCloud identity client: %s", err)
 	}
 
 	createOpts := groups.CreateOpts{
@@ -62,7 +62,7 @@ func resourceIdentityGroupV3Create(d *schema.ResourceData, meta interface{}) err
 
 	group, err := groups.Create(identityClient, createOpts).Extract()
 	if err != nil {
-		return fmt.Errorf("Error creating OpentelekomCloud Group: %s", err)
+		return fmt.Errorf("Error creating OpenTelekomCloud Group: %s", err)
 	}
 
 	d.SetId(group.ID)
@@ -74,7 +74,7 @@ func resourceIdentityGroupV3Read(d *schema.ResourceData, meta interface{}) error
 	config := meta.(*Config)
 	identityClient, err := config.identityV3Client(GetRegion(d, config))
 	if err != nil {
-		return fmt.Errorf("Error creating OpentelekomCloud identity client: %s", err)
+		return fmt.Errorf("Error creating OpenTelekomCloud identity client: %s", err)
 	}
 
 	group, err := groups.Get(identityClient, d.Id()).Extract()
@@ -82,7 +82,7 @@ func resourceIdentityGroupV3Read(d *schema.ResourceData, meta interface{}) error
 		return CheckDeleted(d, err, "group")
 	}
 
-	log.Printf("[DEBUG] Retrieved OpentelekomCloud Group: %#v", group)
+	log.Printf("[DEBUG] Retrieved OpenTelekomCloud Group: %#v", group)
 
 	d.Set("domain_id", group.DomainID)
 	d.Set("description", group.Description)
@@ -96,7 +96,7 @@ func resourceIdentityGroupV3Update(d *schema.ResourceData, meta interface{}) err
 	config := meta.(*Config)
 	identityClient, err := config.identityV3Client(GetRegion(d, config))
 	if err != nil {
-		return fmt.Errorf("Error creating OpentelekomCloud identity client: %s", err)
+		return fmt.Errorf("Error creating OpenTelekomCloud identity client: %s", err)
 	}
 
 	var hasChange bool
@@ -124,7 +124,7 @@ func resourceIdentityGroupV3Update(d *schema.ResourceData, meta interface{}) err
 	if hasChange {
 		_, err := groups.Update(identityClient, d.Id(), updateOpts).Extract()
 		if err != nil {
-			return fmt.Errorf("Error updating OpentelekomCloud group: %s", err)
+			return fmt.Errorf("Error updating OpenTelekomCloud group: %s", err)
 		}
 	}
 
@@ -135,12 +135,12 @@ func resourceIdentityGroupV3Delete(d *schema.ResourceData, meta interface{}) err
 	config := meta.(*Config)
 	identityClient, err := config.identityV3Client(GetRegion(d, config))
 	if err != nil {
-		return fmt.Errorf("Error creating OpentelekomCloud identity client: %s", err)
+		return fmt.Errorf("Error creating OpenTelekomCloud identity client: %s", err)
 	}
 
 	err = groups.Delete(identityClient, d.Id()).ExtractErr()
 	if err != nil {
-		return fmt.Errorf("Error deleting OpentelekomCloud group: %s", err)
+		return fmt.Errorf("Error deleting OpenTelekomCloud group: %s", err)
 	}
 
 	return nil

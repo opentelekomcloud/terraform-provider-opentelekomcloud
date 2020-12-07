@@ -11,7 +11,7 @@ Use this data source to get details about backup Policy resources from OpenTelek
 variable "policy_id" { }
 
 data "opentelekomcloud_csbs_backup_policy_v1" "csbs_policy" {
-  id = "${var.policy_id}"
+  id = var.policy_id
 }
 ```
 
@@ -64,7 +64,7 @@ The `resource` block supports the following arguments:
 
 * `id` - Specifies the ID of the object to be backed up.
 
-* `type` - Entity object type of the backup object. 
+* `type` - Entity object type of the backup object.
 
 * `name` - Specifies backup object name.
 

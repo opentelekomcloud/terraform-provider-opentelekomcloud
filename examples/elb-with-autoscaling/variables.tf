@@ -1,9 +1,9 @@
-variable "vpc_id"{
+variable "vpc_id" {
   default = "<YOUR_VPC>"
 }
 
 
-variable "subnet_id"{
+variable "subnet_id" {
   default = "<YOUR_SUBNET_ID>"
 }
 

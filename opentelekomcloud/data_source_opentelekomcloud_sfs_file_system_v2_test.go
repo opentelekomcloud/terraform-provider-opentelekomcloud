@@ -53,6 +53,6 @@ resource "opentelekomcloud_sfs_file_system_v2" "sfs_1" {
 	description="sfs_c2c_test-file"
 }
 data "opentelekomcloud_sfs_file_system_v2" "shares" {
-  id = "${opentelekomcloud_sfs_file_system_v2.sfs_1.id}"
+  id = opentelekomcloud_sfs_file_system_v2.sfs_1.id
 }
 `

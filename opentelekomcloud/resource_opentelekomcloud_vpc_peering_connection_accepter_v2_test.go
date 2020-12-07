@@ -39,11 +39,11 @@ resource "opentelekomcloud_vpc_v1" "vpc_2" {
 }
 resource "opentelekomcloud_vpc_peering_connection_v2" "peering_1" {
     name = "opentelekomcloud"
-    vpc_id = "${opentelekomcloud_vpc_v1.vpc_1.id}"
-    peer_vpc_id = "${opentelekomcloud_vpc_v1.vpc_2.id}"
+    vpc_id = opentelekomcloud_vpc_v1.vpc_1.id
+    peer_vpc_id = opentelekomcloud_vpc_v1.vpc_2.id
   }
 resource "opentelekomcloud_vpc_peering_connection_accepter_v2" "peer" {
-  vpc_peering_connection_id = "${opentelekomcloud_vpc_peering_connection_v2.peering_1.id}"
+  vpc_peering_connection_id = opentelekomcloud_vpc_peering_connection_v2.peering_1.id
   accept = true
 
 }

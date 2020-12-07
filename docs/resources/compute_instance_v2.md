@@ -54,8 +54,8 @@ resource "opentelekomcloud_compute_instance_v2" "myinstance" {
 }
 
 resource "opentelekomcloud_compute_volume_attach_v2" "attached" {
-  instance_id = "${opentelekomcloud_compute_instance_v2.myinstance.id}"
-  volume_id   = "${opentelekomcloud_blockstorage_volume_v2.myvol.id}"
+  instance_id = opentelekomcloud_compute_instance_v2.myinstance.id
+  volume_id   = opentelekomcloud_blockstorage_volume_v2.myvol.id
 }
 ```
 
@@ -100,7 +100,7 @@ resource "opentelekomcloud_compute_instance_v2" "boot-from-volume" {
   security_groups = ["default"]
 
   block_device {
-    uuid                  = "${opentelekomcloud_blockstorage_volume_v2.myvol.id}"
+    uuid                  = opentelekomcloud_blockstorage_volume_v2.myvol.id
     source_type           = "volume"
     boot_index            = 0
     destination_type      = "volume"
@@ -165,7 +165,7 @@ resource "opentelekomcloud_compute_instance_v2" "instance_1" {
   }
 
   block_device {
-    uuid                  = "${opentelekomcloud_blockstorage_volume_v2.volume_1.id}"
+    uuid                  = opentelekomcloud_blockstorage_volume_v2.volume_1.id
     source_type           = "volume"
     destination_type      = "volume"
     boot_index            = 1
@@ -186,7 +186,9 @@ resource "opentelekomcloud_compute_instance_v2" "multi-net" {
   image_id        = "ad091b52-742f-469e-8f3c-fd81cadf0743"
   flavor_id       = "3"
   key_pair        = "my_key_pair_name"
-  security_groups = ["default"]
+  security_groups = [
+    "default"
+  ]
 
   network {
     name = "my_first_network"
@@ -198,9 +200,9 @@ resource "opentelekomcloud_compute_instance_v2" "multi-net" {
 }
 
 resource "opentelekomcloud_compute_floatingip_associate_v2" "myip" {
-  floating_ip = "${opentelekomcloud_networking_floatingip_v2.myip.address}"
-  instance_id = "${opentelekomcloud_compute_instance_v2.multi-net.id}"
-  fixed_ip = "${opentelekomcloud_compute_instance_v2.multi-net.network.1.fixed_ip_v4}"
+  floating_ip = opentelekomcloud_networking_floatingip_v2.myip.address
+  instance_id = opentelekomcloud_compute_instance_v2.multi-net.id
+  fixed_ip    = opentelekomcloud_compute_instance_v2.multi-net.network.1.fixed_ip_v4
 }
 ```
 
@@ -527,12 +529,12 @@ resource "opentelekomcloud_compute_instance_v2" "instance_1" {
   name = "instance_1"
 
   network {
-    port = "${opentelekomcloud_networking_port_v2.port_1.id}"
+    port = opentelekomcloud_networking_port_v2.port_1.id
   }
 
   connection {
     user        = "root"
-    host        = "${opentelekomcloud_networking_port_v2.port_1.fixed_ip.0.ip_address}"
+    host        = opentelekomcloud_networking_port_v2.port_1.fixed_ip.0.ip_address
     private_key = "~/path/to/key"
   }
 
