@@ -50,7 +50,7 @@ func resourceCBRPolicyV3() *schema.Resource {
 							Type:         schema.TypeInt,
 							Optional:     true,
 							Computed:     true,
-							ValidateFunc: validation.IntBetween(1, 99999),
+							ValidateFunc: validation.IntBetween(-1, 99999),
 						},
 						"month_backups": {
 							Type:         schema.TypeInt,
@@ -62,7 +62,7 @@ func resourceCBRPolicyV3() *schema.Resource {
 							Type:         schema.TypeInt,
 							Optional:     true,
 							Computed:     true,
-							ValidateFunc: validation.IntBetween(1, 99999),
+							ValidateFunc: validation.IntBetween(-1, 99999),
 						},
 						"timezone": {
 							Type:     schema.TypeString,
