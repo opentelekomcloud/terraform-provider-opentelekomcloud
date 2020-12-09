@@ -553,6 +553,13 @@ func (c *Config) blockStorageV3Client(region string) (*golangsdk.ServiceClient, 
 	})
 }
 
+func (c *Config) cbrV3Client(region string) (*golangsdk.ServiceClient, error) {
+	return openstack.NewCBRService(c.HwClient, golangsdk.EndpointOpts{
+		Region:       region,
+		Availability: c.getEndpointType(),
+	})
+}
+
 func (c *Config) computeV1Client(region string) (*golangsdk.ServiceClient, error) {
 	return openstack.NewComputeV1(c.HwClient, golangsdk.EndpointOpts{
 		Region:       c.determineRegion(region),
