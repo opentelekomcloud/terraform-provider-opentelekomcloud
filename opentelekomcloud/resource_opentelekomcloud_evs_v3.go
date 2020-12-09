@@ -19,7 +19,7 @@ func resourceEvsStorageVolumeV3() *schema.Resource {
 		Create: resourceEvsVolumeV3Create,
 		Read:   resourceEvsVolumeV3Read,
 		Update: resourceEvsVolumeV3Update,
-		Delete: resourceBlockStorageVolumeV2Delete,
+		Delete: resourceCBRPolicyV3Delete,
 		Importer: &schema.ResourceImporter{
 			State: schema.ImportStatePassthrough,
 		},
