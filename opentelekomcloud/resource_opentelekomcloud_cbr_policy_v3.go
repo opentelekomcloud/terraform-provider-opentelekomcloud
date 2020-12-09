@@ -37,43 +37,48 @@ func resourceCBRPolicyV3() *schema.Resource {
 				Type:     schema.TypeList,
 				Optional: true,
 				MaxItems: 1,
+				Computed: true,
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
 						"day_backups": {
 							Type:         schema.TypeInt,
 							Optional:     true,
+							Computed:     true,
 							ValidateFunc: validation.IntBetween(0, 100),
 						},
 						"max_backups": {
 							Type:         schema.TypeInt,
 							Optional:     true,
+							Computed:     true,
 							ValidateFunc: validation.IntBetween(1, 99999),
-							Default:      -1,
 						},
 						"month_backups": {
 							Type:         schema.TypeInt,
 							Optional:     true,
+							Computed:     true,
 							ValidateFunc: validation.IntBetween(0, 100),
 						},
 						"retention_duration_days": {
 							Type:         schema.TypeInt,
 							Optional:     true,
+							Computed:     true,
 							ValidateFunc: validation.IntBetween(1, 99999),
-							Default:      -1,
 						},
 						"timezone": {
 							Type:     schema.TypeString,
 							Optional: true,
-							Default:  "UTC+00:00",
+							Computed: true,
 						},
 						"week_backups": {
 							Type:         schema.TypeInt,
 							Optional:     true,
+							Computed:     true,
 							ValidateFunc: validation.IntBetween(0, 100),
 						},
 						"year_backups": {
 							Type:         schema.TypeInt,
 							Optional:     true,
+							Computed:     true,
 							ValidateFunc: validation.IntBetween(0, 100),
 						},
 					},
@@ -112,7 +117,9 @@ func resourceCBRPolicyV3OpDefinition(d *schema.ResourceData) *policies.PolicyODC
 			Timezone:              opDefinition["timezone"].(string),
 		}
 	}
-	return &policies.PolicyODCreate{}
+	return &policies.PolicyODCreate{
+		Timezone: "UTC+00:00",
+	}
 }
 
 func resourceCBRPolicyV3TriggerPattern(d *schema.ResourceData) []string {
