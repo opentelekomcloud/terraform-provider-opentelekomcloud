@@ -1,11 +1,16 @@
 ## 1.23.0 (Unreleased)
 
 
-## 1.22.1 (December 06, 2020)
+## 1.22.1 (December 10, 2020)
 
 ENHANCEMENTS:
-* **New Resource:** `opentelekomcloud_cbr_policy_v3`()
+* **New Resource:** `opentelekomcloud_cbr_policy_v3`([#758](https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/758))
 
+BUG FIXES:
+* `resource/opentelekomcloud_identity_credential_v3`: Remove non-existing credential instead returning error ([#753](https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/753))
+* `resource/opentelekomcloud_lb_pool_v2`: Fix LB protocol to pool protocol mapping description ([#754](https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/754))
+* `resource/opentelekomcloud_rds_instance_v3`: Fix issue with update volume size ([#755](https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/755))
+* `data_source/opentelekomcloud_networking_secgroup_v2`: Prevent panic due to unhandled error ([#756](https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/756))
 
 
 ## 1.22.0 (December 03, 2020)
