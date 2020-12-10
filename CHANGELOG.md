@@ -1,6 +1,13 @@
 ## 1.23.0 (Unreleased)
 
 
+## 1.22.1 (December 06, 2020)
+
+ENHANCEMENTS:
+* **New Resource:** `opentelekomcloud_cbr_policy_v3`()
+
+
+
 ## 1.22.0 (December 03, 2020)
 
 ENHANCEMENTS:
