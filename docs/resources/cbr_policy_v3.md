@@ -10,20 +10,21 @@ Manages a V3 CBR policy resource within OpenTelekomCloud.
 
 ```hcl
 resource "opentelekomcloud_cbr_policy_v3" "policy" {
-  name = "some-policy"
+  name           = "some-policy"
   operation_type = "backup"
 
   trigger_pattern = [
     "FREQ=WEEKLY;BYDAY=MO,TU,WE,TH,FR,SA,SU;BYHOUR=14;BYMINUTE=00"
   ]
   operation_definition {
-    day_backups = 1
-    week_backups = 2
-    year_backups = 3
+    day_backups   = 1
+    week_backups  = 2
+    year_backups  = 3
     month_backups = 4
-    max_backups = 10
-    timezone = "UTC+03:00"
+    max_backups   = 10
+    timezone      = "UTC+03:00"
   }
+
   enabled = "false"
 }
 ```
