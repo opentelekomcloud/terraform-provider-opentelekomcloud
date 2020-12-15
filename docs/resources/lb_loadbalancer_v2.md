@@ -8,25 +8,55 @@ Manages an Enhanced loadbalancer resource within OpenTelekomCloud.
 
 ## Example Usage
 
+### Basic usage
+
 ```hcl
 resource "opentelekomcloud_lb_loadbalancer_v2" "lb_1" {
   vip_subnet_id = "d9415786-5f1a-428b-b35f-2f1523e146d2"
 }
 ```
 
+### Usage with `vpc_subnet_v1`
+
+```hcl
+resource "opentelekomcloud_vpc_v1" "main" {
+  cidr = "192.168.0.0/16"
+  name = "test-vpc-1"
+}
+
+resource "opentelekomcloud_vpc_subnet_v1" "private" {
+  name       = "${opentelekomcloud_vpc_v1.main.name}-private"
+  cidr       = cidrsubnet(opentelekomcloud_vpc_v1.main.cidr, 8, 0)
+  vpc_id     = opentelekomcloud_vpc_v1.main.id
+  gateway_ip = cidrhost(cidrsubnet(opentelekomcloud_vpc_v1.main.cidr, 8, 0), 1)
+  dns_list   = [
+    "1.1.1.1",
+    "8.8.8.8",
+  ]
+}
+
+resource "opentelekomcloud_lb_loadbalancer_v2" "lb_1" {
+  vip_subnet_id = opentelekomcloud_vpc_subnet_v1.private.subnet_id
+}
+```
+
+
 ## Argument Reference
 
 The following arguments are supported:
 
 * `vip_subnet_id` - (Required) The network on which to allocate the
-  Loadbalancer's address. A tenant can only create Loadbalancers on networks
+  loadbalancer's address. A tenant can only create loadalancers on networks
   authorized by policy (e.g. networks that belong to them or networks that
   are shared). Changing this creates a new loadbalancer.
 
-* `name` - (Optional) Human-readable name for the Loadbalancer. Does not have
+-> **Note:** When used with `opentelekomcloud_vpc_subnet_v1`, not `id` but
+`subnet_id`needs to be used
+
+* `name` - (Optional) Human-readable name for the loadbalancer. Does not have
   to be unique.
 
-* `description` - (Optional) Human-readable description for the Loadbalancer.
+* `description` - (Optional) Human-readable description for the loadbalancer.
 
 * `tenant_id` - (Optional) Required for admins. The UUID of the tenant who owns
   the Loadbalancer.  Only administrative users can specify a tenant UUID
@@ -35,7 +65,7 @@ The following arguments are supported:
 * `vip_address` - (Optional) The ip address of the load balancer.
   Changing this creates a new loadbalancer.
 
-* `admin_state_up` - (Optional) The administrative state of the Loadbalancer.
+* `admin_state_up` - (Optional) The administrative state of the loadbalancer.
   A valid value is only true (UP).
 
 * `loadbalancer_provider` - (Optional) The name of the provider. Changing this
