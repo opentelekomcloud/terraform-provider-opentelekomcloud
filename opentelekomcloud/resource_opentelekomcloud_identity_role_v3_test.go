@@ -33,7 +33,7 @@ func TestAccIdentityRoleV3_basic(t *testing.T) {
 			{
 				Config: testAccIdentityRoleV3_basic(acctest.RandString(10)),
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckIdentityRoleV3Exists(),
+					testAccCheckIdentityRoleV3Exists,
 				),
 			},
 		},
@@ -56,12 +56,10 @@ resource "opentelekomcloud_identity_role_v3" "role" {
 
 func testAccCheckIdentityRoleV3Destroy(s *terraform.State) error {
 	config := testAccProvider.Meta().(*Config)
-	client, err := config.sdkClient("", "identity", serviceDomainLevel)
+	client, err := config.identityV30Client()
 	if err != nil {
-		return fmt.Errorf("Error creating sdk client, err=%s", err)
+		return fmt.Errorf("error creating sdk client, err=%s", err)
 	}
-	client.Endpoint = "https://iam.eu-de.otc.t-systems.com/v3.0/"
-
 	for _, rs := range s.RootModule().Resources {
 		if rs.Type != "opentelekomcloud_identity_role_v3" {
 			continue
@@ -84,35 +82,32 @@ func testAccCheckIdentityRoleV3Destroy(s *terraform.State) error {
 	return nil
 }
 
-func testAccCheckIdentityRoleV3Exists() resource.TestCheckFunc {
-	return func(s *terraform.State) error {
-		config := testAccProvider.Meta().(*Config)
-		client, err := config.sdkClient("", "identity", serviceDomainLevel)
-		if err != nil {
-			return fmt.Errorf("Error creating sdk client, err=%s", err)
-		}
-		client.Endpoint = "https://iam.eu-de.otc.t-systems.com/v3.0/"
-
-		rs, ok := s.RootModule().Resources["opentelekomcloud_identity_role_v3.role"]
-		if !ok {
-			return fmt.Errorf("Error checking opentelekomcloud_identity_role_v3.role exist, err=not found opentelekomcloud_identity_role_v3.role")
-		}
-
-		url, err := replaceVarsForTest(rs, "OS-ROLE/roles/{id}")
-		if err != nil {
-			return fmt.Errorf("Error checking opentelekomcloud_identity_role_v3.role exist, err=building url failed: %s", err)
-		}
-		url = client.ServiceURL(url)
-
-		_, err = client.Get(
-			url, nil,
-			&golangsdk.RequestOpts{MoreHeaders: map[string]string{"Content-Type": "application/json"}})
-		if err != nil {
-			if _, ok := err.(golangsdk.ErrDefault404); ok {
-				return fmt.Errorf("opentelekomcloud_identity_role_v3.role is not exist")
-			}
-			return fmt.Errorf("Error checking opentelekomcloud_identity_role_v3.role exist, err=send request failed: %s", err)
-		}
-		return nil
+func testAccCheckIdentityRoleV3Exists(s *terraform.State) error {
+	config := testAccProvider.Meta().(*Config)
+	client, err := config.identityV30Client()
+	if err != nil {
+		return fmt.Errorf("error creating sdk client, err=%s", err)
 	}
+
+	rs, ok := s.RootModule().Resources["opentelekomcloud_identity_role_v3.role"]
+	if !ok {
+		return fmt.Errorf("error checking opentelekomcloud_identity_role_v3.role exist, err=not found opentelekomcloud_identity_role_v3.role")
+	}
+
+	url, err := replaceVarsForTest(rs, "OS-ROLE/roles/{id}")
+	if err != nil {
+		return fmt.Errorf("Error checking opentelekomcloud_identity_role_v3.role exist, err=building url failed: %s", err)
+	}
+	url = client.ServiceURL(url)
+
+	_, err = client.Get(
+		url, nil,
+		&golangsdk.RequestOpts{MoreHeaders: map[string]string{"Content-Type": "application/json"}})
+	if err != nil {
+		if _, ok := err.(golangsdk.ErrDefault404); ok {
+			return fmt.Errorf("opentelekomcloud_identity_role_v3.role is not exist")
+		}
+		return fmt.Errorf("error checking opentelekomcloud_identity_role_v3.role exist, err=send request failed: %s", err)
+	}
+	return nil
 }

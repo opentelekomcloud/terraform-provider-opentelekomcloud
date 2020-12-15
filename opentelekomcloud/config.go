@@ -587,9 +587,7 @@ func (c *Config) identityV3Client(_ ...string) (*golangsdk.ServiceClient, error)
 	})
 }
 
-// identityV30Client - provides client is used for obtaining AK/SK
-//
-// Deprecated, `credentials` package replacing v3 with v3.0 in URL itself
+// identityV30Client - provides client is used for use with endpoints with invalid "v3.0" URLs
 func (c *Config) identityV30Client() (*golangsdk.ServiceClient, error) {
 	service, err := openstack.NewIdentityV3(c.DomainClient, golangsdk.EndpointOpts{
 		Availability: c.getEndpointType(),
@@ -835,18 +833,4 @@ func (c *Config) ddsV3Client(region string) (*golangsdk.ServiceClient, error) {
 		Region:       region,
 		Availability: c.getEndpointType(),
 	})
-}
-
-func (c *Config) sdkClient(region, serviceType, level string) (*golangsdk.ServiceClient, error) {
-	client := c.HwClient
-	if level == serviceDomainLevel {
-		client = c.DomainClient
-	}
-	return openstack.NewSDKClient(
-		client,
-		golangsdk.EndpointOpts{
-			Region:       region,
-			Availability: c.getEndpointType(),
-		},
-		serviceType)
 }
