@@ -59,26 +59,6 @@ func resourceCCEAddonV3() *schema.Resource {
 	}
 }
 
-func getValuesValues(d *schema.ResourceData) (basic, custom map[string]interface{}, err error) {
-	values := d.Get("values").([]interface{})
-	if len(values) == 0 {
-		err = fmt.Errorf("no values are set for CCE addon") // should be impossible, as Required: true
-		return
-	}
-	valuesMap := values[0].(map[string]interface{})
-
-	basicRaw, ok := valuesMap["basic"]
-	if !ok {
-		err = fmt.Errorf("no basic values are set for CCE addon") // should be impossible, as Required: true
-		return
-	}
-	if customRaw, ok := valuesMap["custom"]; ok {
-		custom = customRaw.(map[string]interface{})
-	}
-	basic = basicRaw.(map[string]interface{})
-	return
-}
-
 func resourceCCEAddonV3Create(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*Config)
 	client, err := config.cceV3AddonClient(GetRegion(d, config))
@@ -87,7 +67,7 @@ func resourceCCEAddonV3Create(d *schema.ResourceData, meta interface{}) error {
 	}
 
 	clusterID := d.Get("cluster_id").(string)
-	basic, custom, err := getValuesValues(d)
+	basic, custom, err := getAddonValues(d)
 	if err != nil {
 		return fmt.Errorf("error getting values for CCE addon: %s", err)
 	}
@@ -115,8 +95,8 @@ func resourceCCEAddonV3Create(d *schema.ResourceData, meta interface{}) error {
 	if err != nil {
 		errMsg := logHttpError(err)
 		addonSpec, aErr := getAddonTemplateSpec(client, clusterID, templateName)
-		if aErr != nil {
-			errMsg = fmt.Errorf("\nAddon template spec: %s", addonSpec)
+		if aErr == nil {
+			errMsg = fmt.Errorf("\nAddon template spec: %s\n%s", addonSpec, errMsg)
 		}
 		return fmt.Errorf("error creating CCE addon instance: %s", errMsg)
 	}
@@ -129,25 +109,48 @@ func resourceCCEAddonV3Read(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*Config)
 	client, err := config.cceV3AddonClient(GetRegion(d, config))
 	if err != nil {
-		return fmt.Errorf("error creating CCE client: %s", err)
+		return fmt.Errorf("error creating CCE client: %s", logHttpError(err))
 	}
 
 	clusterID := d.Get("cluster_id").(string)
 	addon, err := addons.Get(client, d.Id(), clusterID).Extract()
 	if err != nil {
-		return fmt.Errorf("error reading CCE addon instance: %s", err)
+		return fmt.Errorf("error reading CCE addon instance: %s", logHttpError(err))
 	}
 
 	mErr := multierror.Append(nil,
 		d.Set("name", addon.Metadata.Name),
 		d.Set("template_version", addon.Spec.Version),
 		d.Set("template_name", addon.Spec.AddonTemplateName),
-		d.Set("values", addon.Spec.Values),
 		d.Set("description", addon.Spec.Description),
 	)
+	if err := mErr.ErrorOrNil(); err != nil {
+		return fmt.Errorf("error setting addon attributes: %s", err)
+	}
 
-	return mErr.ErrorOrNil()
+	return nil
 }
+
+func getAddonValues(d *schema.ResourceData) (basic, custom map[string]interface{}, err error) {
+	values := d.Get("values").([]interface{})
+	if len(values) == 0 {
+		err = fmt.Errorf("no values are set for CCE addon") // should be impossible, as Required: true
+		return
+	}
+	valuesMap := values[0].(map[string]interface{})
+
+	basicRaw, ok := valuesMap["basic"]
+	if !ok {
+		err = fmt.Errorf("no basic values are set for CCE addon") // should be impossible, as Required: true
+		return
+	}
+	if customRaw, ok := valuesMap["custom"]; ok {
+		custom = customRaw.(map[string]interface{})
+	}
+	basic = basicRaw.(map[string]interface{})
+	return
+}
+
 func resourceCCEAddonV3Update(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*Config)
 	client, err := config.cceV3AddonClient(GetRegion(d, config))
@@ -155,7 +158,7 @@ func resourceCCEAddonV3Update(d *schema.ResourceData, meta interface{}) error {
 		return fmt.Errorf("error creating CCE client: %s", err)
 	}
 	clusterID := d.Get("cluster_id").(string)
-	basic, custom, err := getValuesValues(d)
+	basic, custom, err := getAddonValues(d)
 	if err != nil {
 		return fmt.Errorf("error getting values for CCE addon: %s", err)
 	}

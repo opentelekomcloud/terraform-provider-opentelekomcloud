@@ -793,7 +793,7 @@ func (c *Config) cceV3AddonClient(region string) (*golangsdk.ServiceClient, erro
 	if err != nil {
 		return nil, err
 	}
-	client.ResourceBase = fmt.Sprintf("%sapi/v3/addons/", client.Endpoint)
+	client.ResourceBase = fmt.Sprintf("%sapi/v3/", client.Endpoint)
 	return client, nil
 }
 
