@@ -9,12 +9,12 @@ Use this data source to get details about RTS resource metadata.
 ## Example Usage
 
 ```hcl
-variable "stack_name" { }
-variable "resource_name" { }
+variable "stack_name" {}
+variable "resource_name" {}
 
 data "opentelekomcloud_rts_stack_resource_v1" "stackresource" {
-  stack_name = "${var.stack_name}"
-  resource_name = "${var.resource_name}"  
+  stack_name    = var.stack_name
+  resource_name = var.resource_name
 }
 ```
 
@@ -40,5 +40,5 @@ In addition to all arguments above, the following attributes are exported:
 * `resource_status` - The status of the resource.
 
 * `resource_status_reason` - The resource operation reason.
- 
+
 * `required_by` - Specifies the resource dependency.

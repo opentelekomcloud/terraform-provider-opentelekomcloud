@@ -151,7 +151,7 @@ The following arguments are supported:
   * The name cannot be an IP address.
   * If the name contains any periods (.), a security certificate verification message may appear when you access the bucket or its objects by entering a domain name.
 
-* `storage_class` - (Optional) Specifies the storage class of the bucket. OBS provides three storage classes: 
+* `storage_class` - (Optional) Specifies the storage class of the bucket. OBS provides three storage classes:
   `STANDARD`, `WARM` (Infrequent Access) and `COLD` (Archive). Defaults to `STANDARD`.
 
 * `acl` - (Optional) Specifies the ACL policy for a bucket. The predefined common policies are as follows: "private", "public-read", "public-read-write" and "log-delivery-write". Defaults to `private`.

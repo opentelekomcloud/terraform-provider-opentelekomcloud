@@ -32,7 +32,7 @@ func TestAccNetworkingV2VIP_basic(t *testing.T) {
 // testAccCheckNetworkingV2VIPDestroy checks destory.
 func testAccCheckNetworkingV2VIPDestroy(s *terraform.State) error {
 	config := testAccProvider.Meta().(*Config)
-	networkingClient, err := config.hwNetworkV2Client(OS_REGION_NAME)
+	networkingClient, err := config.networkingV2Client(OS_REGION_NAME)
 	if err != nil {
 		return fmt.Errorf("Error creating OpenTelekomCloud networking client: %s", err)
 	}
@@ -66,7 +66,7 @@ func testAccCheckNetworkingV2VIPExists(n string, vip *ports.Port) resource.TestC
 		}
 
 		config := testAccProvider.Meta().(*Config)
-		networkingClient, err := config.hwNetworkV2Client(OS_REGION_NAME)
+		networkingClient, err := config.networkingV2Client(OS_REGION_NAME)
 		if err != nil {
 			return fmt.Errorf("Error creating OpenTelekomCloud networking client: %s", err)
 		}
@@ -97,12 +97,12 @@ resource "opentelekomcloud_networking_subnet_v2" "subnet_1" {
   name = "subnet_1"
   cidr = "192.168.199.0/24"
   ip_version = 4
-  network_id = "${opentelekomcloud_networking_network_v2.network_1.id}"
+  network_id = opentelekomcloud_networking_network_v2.network_1.id
 }
 
 resource "opentelekomcloud_networking_router_interface_v2" "router_interface_1" {
-  router_id = "${opentelekomcloud_networking_router_v2.router_1.id}"
-  subnet_id = "${opentelekomcloud_networking_subnet_v2.subnet_1.id}"
+  router_id = opentelekomcloud_networking_router_v2.router_1.id
+  subnet_id = opentelekomcloud_networking_subnet_v2.subnet_1.id
 }
 
 resource "opentelekomcloud_networking_router_v2" "router_1" {
@@ -111,7 +111,7 @@ resource "opentelekomcloud_networking_router_v2" "router_1" {
 }
 
 resource "opentelekomcloud_networking_vip_v2" "vip_1" {
-  network_id = "${opentelekomcloud_networking_network_v2.network_1.id}"
-  subnet_id = "${opentelekomcloud_networking_subnet_v2.subnet_1.id}"
+  network_id = opentelekomcloud_networking_network_v2.network_1.id
+  subnet_id = opentelekomcloud_networking_subnet_v2.subnet_1.id
 }
 `, OS_EXTGW_ID)

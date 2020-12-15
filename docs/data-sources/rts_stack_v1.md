@@ -12,7 +12,7 @@ Use this data source to get details about RTS outputs and other useful data incl
 variable "stack_name" { }
 
 data "opentelekomcloud_rts_stack_v1" "mystack" {
-  name = "${var.stack_name}"  
+  name = var.stack_name
 }
 ```
 

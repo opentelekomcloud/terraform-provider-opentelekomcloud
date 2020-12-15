@@ -108,7 +108,7 @@ func TestAccFWPolicyV2_removeSingleRule(t *testing.T) {
 
 func testAccCheckFWPolicyV2Destroy(s *terraform.State) error {
 	config := testAccProvider.Meta().(*Config)
-	networkingClient, err := config.hwNetworkV2Client(OS_REGION_NAME)
+	networkingClient, err := config.networkingV2Client(OS_REGION_NAME)
 	if err != nil {
 		return fmt.Errorf("Error creating OpenTelekomCloud networking client: %s", err)
 	}
@@ -139,7 +139,7 @@ func testAccCheckFWPolicyV2Exists(n, name, description string, ruleCount int) re
 		}
 
 		config := testAccProvider.Meta().(*Config)
-		networkingClient, err := config.hwNetworkV2Client(OS_REGION_NAME)
+		networkingClient, err := config.networkingV2Client(OS_REGION_NAME)
 		if err != nil {
 			return fmt.Errorf("Error creating OpenTelekomCloud networking client: %s", err)
 		}
@@ -186,8 +186,8 @@ resource "opentelekomcloud_fw_policy_v2" "policy_1" {
   name = "policy_1"
   description =  "terraform acceptance test"
   rules = [
-    "${opentelekomcloud_fw_rule_v2.udp_deny.id}",
-    "${opentelekomcloud_fw_rule_v2.tcp_allow.id}"
+    opentelekomcloud_fw_rule_v2.udp_deny.id,
+    opentelekomcloud_fw_rule_v2.tcp_allow.id
   ]
 }
 
@@ -207,7 +207,7 @@ resource "opentelekomcloud_fw_policy_v2" "policy_1" {
   name = "policy_1"
   description =  "terraform acceptance test"
   rules = [
-    "${opentelekomcloud_fw_rule_v2.udp_deny.id}"
+    opentelekomcloud_fw_rule_v2.udp_deny.id
   ]
 }
 

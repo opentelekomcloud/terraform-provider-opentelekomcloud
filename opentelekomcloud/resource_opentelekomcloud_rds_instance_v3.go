@@ -562,10 +562,6 @@ func resourceRdsInstanceV3Update(d *schema.ResourceData, meta interface{}) error
 
 	if d.HasChange("flavor") {
 		_, newFlavor := d.GetChange("flavor")
-		client, err := config.rdsV3Client(GetRegion(d, config))
-		if err != nil {
-			return fmt.Errorf("Error creating OpenTelekomCloud RDSv3 client: %s ", err)
-		}
 
 		// Fetch flavor id
 		db := resourceRDSDbInfo(d)
@@ -619,10 +615,6 @@ func resourceRdsInstanceV3Update(d *schema.ResourceData, meta interface{}) error
 	}
 
 	if d.HasChange("volume") {
-		client, err := config.rdsV3Client(GetRegion(d, config))
-		if err != nil {
-			return fmt.Errorf("error creating OpenTelekomCloud RDSve client: %s", err)
-		}
 		_, newVolume := d.GetChange("volume")
 		volume := make(map[string]interface{})
 		volumeRaw := newVolume.([]interface{})
@@ -644,7 +636,7 @@ func resourceRdsInstanceV3Update(d *schema.ResourceData, meta interface{}) error
 			log.Printf("Status available wasn't present")
 		}
 
-		updateResult, err := instances.EnlargeVolume(client, updateOpts, nodeID).ExtractJobResponse()
+		updateResult, err := instances.EnlargeVolume(client, updateOpts, d.Id()).ExtractJobResponse()
 		if err != nil {
 			return fmt.Errorf("error updating instance volume from result: %s", err)
 		}
@@ -653,7 +645,7 @@ func resourceRdsInstanceV3Update(d *schema.ResourceData, meta interface{}) error
 			return err
 		}
 
-		log.Printf("[DEBUG] Successfully updated instance %s volume: %+v", nodeID, volume)
+		log.Printf("[DEBUG] Successfully updated instance %s volume: %+v", d.Id(), volume)
 	}
 
 	if d.HasChange("public_ips") {

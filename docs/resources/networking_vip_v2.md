@@ -19,12 +19,12 @@ resource "opentelekomcloud_networking_subnet_v2" "subnet_1" {
   cidr = "192.168.199.0/24"
 
   ip_version = 4
-  network_id = "${opentelekomcloud_networking_network_v2.network_1.id}"
+  network_id = opentelekomcloud_networking_network_v2.network_1.id
 }
 
 resource "opentelekomcloud_networking_router_interface_v2" "router_interface_1" {
-  router_id = "${opentelekomcloud_networking_router_v2.router_1.id}"
-  subnet_id = "${opentelekomcloud_networking_subnet_v2.subnet_1.id}"
+  router_id = opentelekomcloud_networking_router_v2.router_1.id
+  subnet_id = opentelekomcloud_networking_subnet_v2.subnet_1.id
 }
 
 resource "opentelekomcloud_networking_router_v2" "router_1" {
@@ -33,8 +33,8 @@ resource "opentelekomcloud_networking_router_v2" "router_1" {
 }
 
 resource "opentelekomcloud_networking_vip_v2" "vip_1" {
-  network_id = "${opentelekomcloud_networking_network_v2.network_1.id}"
-  subnet_id  = "${opentelekomcloud_networking_subnet_v2.subnet_1.id}"
+  network_id = opentelekomcloud_networking_network_v2.network_1.id
+  subnet_id  = opentelekomcloud_networking_subnet_v2.subnet_1.id
 }
 ```
 

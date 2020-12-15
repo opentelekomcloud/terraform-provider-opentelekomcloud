@@ -91,7 +91,7 @@ func testAccOpenStackIdentityUserV3DataSource_user(name, password string) string
 	resource "opentelekomcloud_identity_user_v3" "user_1" {
 	  name = "%s"
 	  password = "%s"
-	  default_project_id = "${opentelekomcloud_identity_project_v3.project_1.id}"
+	  default_project_id = opentelekomcloud_identity_project_v3.project_1.id
 	}
 `, testAccOpenStackIdentityProjectV3DataSource_project(fmt.Sprintf("%s_project", name), acctest.RandString(20)), name, password)
 }
@@ -101,7 +101,7 @@ func testAccOpenStackIdentityUserV3DataSource_basic(name, password string) strin
 	%s
 
 	data "opentelekomcloud_identity_user_v3" "user_1" {
-      name = "${opentelekomcloud_identity_user_v3.user_1.name}"
+      name = opentelekomcloud_identity_user_v3.user_1.name
 	}
 `, testAccOpenStackIdentityUserV3DataSource_user(name, password))
 }

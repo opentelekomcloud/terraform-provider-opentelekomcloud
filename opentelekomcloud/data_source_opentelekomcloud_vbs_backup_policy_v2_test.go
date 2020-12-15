@@ -54,6 +54,6 @@ resource "opentelekomcloud_vbs_backup_policy_v2" "vbs_1" {
   }
 }
 data "opentelekomcloud_vbs_backup_policy_v2" "policies" {
-  id = "${opentelekomcloud_vbs_backup_policy_v2.vbs_1.id}"
+  id = opentelekomcloud_vbs_backup_policy_v2.vbs_1.id
 }
 `

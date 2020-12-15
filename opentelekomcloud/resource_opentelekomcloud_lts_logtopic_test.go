@@ -89,7 +89,7 @@ resource "opentelekomcloud_logtank_group_v2" "testacc_group" {
     group_name  = "testacc_group"
 }
 resource "opentelekomcloud_logtank_topic_v2" "testacc_topic" {
-  group_id = "${opentelekomcloud_logtank_group_v2.testacc_group.id}"
+  group_id = opentelekomcloud_logtank_group_v2.testacc_group.id
   topic_name = "testacc_topic"
 }
 `

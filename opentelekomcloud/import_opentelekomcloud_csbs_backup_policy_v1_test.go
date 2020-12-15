@@ -6,7 +6,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
 )
 
-func TestAccCSBSBackupPolicyV1_importBasic(t *testing.T) {
+func TestAccCSBSBackupPolicyV1_importWeekMonth(t *testing.T) {
 	resourceName := "opentelekomcloud_csbs_backup_policy_v1.backup_policy_v1"
 
 	resource.Test(t, resource.TestCase{
@@ -15,13 +15,15 @@ func TestAccCSBSBackupPolicyV1_importBasic(t *testing.T) {
 		CheckDestroy: testAccCheckCSBSBackupPolicyV1Destroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccCSBSBackupPolicyV1_basic,
+				Config: testAccCSBSBackupPolicyV1_weekMonth,
 			},
-
 			{
 				ResourceName:      resourceName,
 				ImportState:       true,
 				ImportStateVerify: true,
+				ImportStateVerifyIgnore: []string{
+					"scheduled_operation",
+				},
 			},
 		},
 	})

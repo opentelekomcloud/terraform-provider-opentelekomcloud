@@ -5,8 +5,10 @@ import (
 	"log"
 	"time"
 
+	"github.com/hashicorp/go-multierror"
 	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/helper/validation"
 	"github.com/opentelekomcloud/gophertelekomcloud"
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/networking/v2/extensions/vpnaas/ikepolicies"
 )
@@ -17,6 +19,7 @@ func resourceVpnIKEPolicyV2() *schema.Resource {
 		Read:   resourceVpnIKEPolicyV2Read,
 		Update: resourceVpnIKEPolicyV2Update,
 		Delete: resourceVpnIKEPolicyV2Delete,
+
 		Importer: &schema.ResourceImporter{
 			State: schema.ImportStatePassthrough,
 		},
@@ -33,8 +36,9 @@ func resourceVpnIKEPolicyV2() *schema.Resource {
 				ForceNew: true,
 			},
 			"name": {
-				Type:     schema.TypeString,
-				Optional: true,
+				Type:         schema.TypeString,
+				Optional:     true,
+				ValidateFunc: validateName,
 			},
 			"description": {
 				Type:     schema.TypeString,
@@ -44,26 +48,41 @@ func resourceVpnIKEPolicyV2() *schema.Resource {
 				Type:     schema.TypeString,
 				Optional: true,
 				Default:  "sha1",
+				ValidateFunc: validation.StringInSlice([]string{
+					"md5", "sha1", "sha2-256", "sha2-384", "sha2-512",
+				}, false),
 			},
 			"encryption_algorithm": {
 				Type:     schema.TypeString,
 				Optional: true,
 				Default:  "aes-128",
+				ValidateFunc: validation.StringInSlice([]string{
+					"3des", "aes-128", "aes-192", "aes-256",
+				}, false),
 			},
 			"pfs": {
 				Type:     schema.TypeString,
 				Optional: true,
 				Default:  "group5",
+				ValidateFunc: validation.StringInSlice([]string{
+					"group1", "group2", "group5", "group14", "group15", "group16", "group19", "group20", "group21",
+				}, false),
 			},
 			"phase1_negotiation_mode": {
 				Type:     schema.TypeString,
 				Optional: true,
 				Default:  "main",
+				ValidateFunc: validation.StringInSlice([]string{
+					"main", "aggressive",
+				}, false),
 			},
 			"ike_version": {
 				Type:     schema.TypeString,
 				Optional: true,
 				Default:  "v1",
+				ValidateFunc: validation.StringInSlice([]string{
+					"v1", "v2",
+				}, false),
 			},
 			"lifetime": {
 				Type:     schema.TypeSet,
@@ -77,9 +96,10 @@ func resourceVpnIKEPolicyV2() *schema.Resource {
 							Optional: true,
 						},
 						"value": {
-							Type:     schema.TypeInt,
-							Computed: true,
-							Optional: true,
+							Type:         schema.TypeInt,
+							Computed:     true,
+							Optional:     true,
+							ValidateFunc: validation.IntBetween(60, 604800),
 						},
 					},
 				},
@@ -103,27 +123,30 @@ func resourceVpnIKEPolicyV2Create(d *schema.ResourceData, meta interface{}) erro
 	config := meta.(*Config)
 	networkingClient, err := config.networkingV2Client(GetRegion(d, config))
 	if err != nil {
-		return fmt.Errorf("Error creating OpenTelekomCloud networking client: %s", err)
+		return fmt.Errorf("error creating OpenTelekomCloud NetworkingV2 client: %s", err)
 	}
 
-	lifetime := resourceIKEPolicyV2LifetimeCreateOpts(d.Get("lifetime").(*schema.Set))
-	authAlgorithm := resourceIKEPolicyV2AuthAlgorithm(d.Get("auth_algorithm").(string))
-	encryptionAlgorithm := resourceIKEPolicyV2EncryptionAlgorithm(d.Get("encryption_algorithm").(string))
-	pfs := resourceIKEPolicyV2PFS(d.Get("pfs").(string))
-	ikeVersion := resourceIKEPolicyV2IKEVersion(d.Get("ike_version").(string))
-	phase1NegotationMode := resourceIKEPolicyV2Phase1NegotiationMode(d.Get("phase1_negotiation_mode").(string))
+	lifetimeRaw := d.Get("lifetime").(*schema.Set).List()
+	var lifetime *ikepolicies.LifetimeCreateOpts
+	if len(lifetimeRaw) == 1 {
+		lifetimeInfo := lifetimeRaw[0].(map[string]interface{})
+		lifetime = &ikepolicies.LifetimeCreateOpts{
+			Units: ikepolicies.Unit(lifetimeInfo["units"].(string)),
+			Value: lifetimeInfo["value"].(int),
+		}
+	}
 
 	opts := VpnIKEPolicyCreateOpts{
 		ikepolicies.CreateOpts{
 			Name:                  d.Get("name").(string),
 			Description:           d.Get("description").(string),
 			TenantID:              d.Get("tenant_id").(string),
-			Lifetime:              &lifetime,
-			AuthAlgorithm:         authAlgorithm,
-			EncryptionAlgorithm:   encryptionAlgorithm,
-			PFS:                   pfs,
-			IKEVersion:            ikeVersion,
-			Phase1NegotiationMode: phase1NegotationMode,
+			Lifetime:              lifetime,
+			AuthAlgorithm:         ikepolicies.AuthAlgorithm(d.Get("auth_algorithm").(string)),
+			EncryptionAlgorithm:   ikepolicies.EncryptionAlgorithm(d.Get("encryption_algorithm").(string)),
+			PFS:                   ikepolicies.PFS(d.Get("pfs").(string)),
+			IKEVersion:            ikepolicies.IKEVersion(d.Get("ike_version").(string)),
+			Phase1NegotiationMode: ikepolicies.Phase1NegotiationMode(d.Get("phase1_negotiation_mode").(string)),
 		},
 		MapValueSpecs(d),
 	}
@@ -137,9 +160,8 @@ func resourceVpnIKEPolicyV2Create(d *schema.ResourceData, meta interface{}) erro
 	stateConf := &resource.StateChangeConf{
 		Pending:    []string{"PENDING_CREATE"},
 		Target:     []string{"ACTIVE"},
-		Refresh:    waitForIKEPolicyCreation(networkingClient, policy.ID),
+		Refresh:    waitForIKEPolicyCreate(networkingClient, policy.ID),
 		Timeout:    d.Timeout(schema.TimeoutCreate),
-		Delay:      0,
 		MinTimeout: 2 * time.Second,
 	}
 	_, err = stateConf.WaitForState()
@@ -157,7 +179,7 @@ func resourceVpnIKEPolicyV2Read(d *schema.ResourceData, meta interface{}) error 
 	config := meta.(*Config)
 	networkingClient, err := config.networkingV2Client(GetRegion(d, config))
 	if err != nil {
-		return fmt.Errorf("Error creating OpenTelekomCloud networking client: %s", err)
+		return fmt.Errorf("error creating OpenTelekomCloud NetworkingV2 client: %s", err)
 	}
 
 	policy, err := ikepolicies.Get(networkingClient, d.Id()).Extract()
@@ -167,25 +189,29 @@ func resourceVpnIKEPolicyV2Read(d *schema.ResourceData, meta interface{}) error 
 
 	log.Printf("[DEBUG] Read OpenTelekomCloud IKE Policy %s: %#v", d.Id(), policy)
 
-	d.Set("name", policy.Name)
-	d.Set("description", policy.Description)
-	d.Set("auth_algorithm", policy.AuthAlgorithm)
-	d.Set("encryption_algorithm", policy.EncryptionAlgorithm)
-	d.Set("tenant_id", policy.TenantID)
-	d.Set("pfs", policy.PFS)
-	d.Set("phase1_negotiation_mode", policy.Phase1NegotiationMode)
-	d.Set("ike_version", policy.IKEVersion)
-	d.Set("region", GetRegion(d, config))
+	mErr := multierror.Append(nil,
+		d.Set("name", policy.Name),
+		d.Set("description", policy.Description),
+		d.Set("auth_algorithm", policy.AuthAlgorithm),
+		d.Set("encryption_algorithm", policy.EncryptionAlgorithm),
+		d.Set("tenant_id", policy.TenantID),
+		d.Set("pfs", policy.PFS),
+		d.Set("phase1_negotiation_mode", policy.Phase1NegotiationMode),
+		d.Set("ike_version", policy.IKEVersion),
+		d.Set("region", GetRegion(d, config)),
+	)
 
 	// Set the lifetime
-	var lifetimeMap map[string]interface{}
-	lifetimeMap = make(map[string]interface{})
-	lifetimeMap["units"] = policy.Lifetime.Units
-	lifetimeMap["value"] = policy.Lifetime.Value
-	var lifetime []map[string]interface{}
-	lifetime = append(lifetime, lifetimeMap)
-	if err := d.Set("lifetime", &lifetime); err != nil {
-		log.Printf("[WARN] unable to set IKE policy lifetime")
+	lifetime := []map[string]interface{}{
+		{
+			"units": policy.Lifetime.Units,
+			"value": policy.Lifetime.Value,
+		},
+	}
+	mErr = multierror.Append(mErr, d.Set("lifetime", lifetime))
+
+	if err := mErr.ErrorOrNil(); err != nil {
+		return fmt.Errorf("error setting IKE policy fields: %s", err)
 	}
 
 	return nil
@@ -195,49 +221,54 @@ func resourceVpnIKEPolicyV2Update(d *schema.ResourceData, meta interface{}) erro
 	config := meta.(*Config)
 	networkingClient, err := config.networkingV2Client(GetRegion(d, config))
 	if err != nil {
-		return fmt.Errorf("Error creating OpenTelekomCloud networking client: %s", err)
+		return fmt.Errorf("error creating OpenTelekomCloud NetworkingV2 client: %s", err)
 	}
 
 	opts := ikepolicies.UpdateOpts{}
-
 	var hasChange bool
 
 	if d.HasChange("name") {
 		name := d.Get("name").(string)
-		opts.Name = &name
+		opts.Name = name
 		hasChange = true
 	}
-
 	if d.HasChange("description") {
 		description := d.Get("description").(string)
-		opts.Description = &description
+		opts.Description = description
 		hasChange = true
 	}
-
 	if d.HasChange("pfs") {
-		opts.PFS = resourceIKEPolicyV2PFS(d.Get("pfs").(string))
+		opts.PFS = ikepolicies.PFS(d.Get("pfs").(string))
 		hasChange = true
 	}
 	if d.HasChange("auth_algorithm") {
-		opts.AuthAlgorithm = resourceIKEPolicyV2AuthAlgorithm(d.Get("auth_algorithm").(string))
+		opts.AuthAlgorithm = ikepolicies.AuthAlgorithm(d.Get("auth_algorithm").(string))
 		hasChange = true
 	}
 	if d.HasChange("encryption_algorithm") {
-		opts.EncryptionAlgorithm = resourceIKEPolicyV2EncryptionAlgorithm(d.Get("encryption_algorithm").(string))
+		opts.EncryptionAlgorithm = ikepolicies.EncryptionAlgorithm(d.Get("encryption_algorithm").(string))
 		hasChange = true
 	}
 	if d.HasChange("phase_1_negotiation_mode") {
-		opts.Phase1NegotiationMode = resourceIKEPolicyV2Phase1NegotiationMode(d.Get("phase_1_negotiation_mode").(string))
+		opts.Phase1NegotiationMode = ikepolicies.Phase1NegotiationMode(d.Get("phase_1_negotiation_mode").(string))
 		hasChange = true
 	}
 	if d.HasChange("ike_version") {
-		opts.IKEVersion = resourceIKEPolicyV2IKEVersion(d.Get("ike_version").(string))
+		opts.IKEVersion = ikepolicies.IKEVersion(d.Get("ike_version").(string))
 		hasChange = true
 	}
 
 	if d.HasChange("lifetime") {
-		lifetime := resourceIKEPolicyV2LifetimeUpdateOpts(d.Get("lifetime").(*schema.Set))
-		opts.Lifetime = &lifetime
+		lifetimeRaw := d.Get("lifetime").(*schema.Set).List()
+		var lifetime *ikepolicies.LifetimeUpdateOpts
+		if len(lifetimeRaw) == 1 {
+			lifetimeInfo := lifetimeRaw[0].(map[string]interface{})
+			lifetime = &ikepolicies.LifetimeUpdateOpts{
+				Units: ikepolicies.Unit(lifetimeInfo["units"].(string)),
+				Value: lifetimeInfo["value"].(int),
+			}
+		}
+		opts.Lifetime = lifetime
 		hasChange = true
 	}
 
@@ -253,7 +284,6 @@ func resourceVpnIKEPolicyV2Update(d *schema.ResourceData, meta interface{}) erro
 			Target:     []string{"ACTIVE"},
 			Refresh:    waitForIKEPolicyUpdate(networkingClient, d.Id()),
 			Timeout:    d.Timeout(schema.TimeoutCreate),
-			Delay:      0,
 			MinTimeout: 2 * time.Second,
 		}
 		if _, err = stateConf.WaitForState(); err != nil {
@@ -270,15 +300,14 @@ func resourceVpnIKEPolicyV2Delete(d *schema.ResourceData, meta interface{}) erro
 	config := meta.(*Config)
 	networkingClient, err := config.networkingV2Client(GetRegion(d, config))
 	if err != nil {
-		return fmt.Errorf("Error creating OpenTelekomCloud networking client: %s", err)
+		return fmt.Errorf("error creating OpenTelekomCloud networking client: %s", err)
 	}
 
 	stateConf := &resource.StateChangeConf{
 		Pending:    []string{"ACTIVE"},
 		Target:     []string{"DELETED"},
-		Refresh:    waitForIKEPolicyDeletion(networkingClient, d.Id()),
+		Refresh:    waitForIKEPolicyDelete(networkingClient, d.Id()),
 		Timeout:    d.Timeout(schema.TimeoutCreate),
-		Delay:      0,
 		MinTimeout: 2 * time.Second,
 	}
 
@@ -289,7 +318,7 @@ func resourceVpnIKEPolicyV2Delete(d *schema.ResourceData, meta interface{}) erro
 	return nil
 }
 
-func waitForIKEPolicyDeletion(networkingClient *golangsdk.ServiceClient, id string) resource.StateRefreshFunc {
+func waitForIKEPolicyDelete(networkingClient *golangsdk.ServiceClient, id string) resource.StateRefreshFunc {
 	return func() (interface{}, string, error) {
 		err := ikepolicies.Delete(networkingClient, id).Err
 		if err == nil {
@@ -300,7 +329,7 @@ func waitForIKEPolicyDeletion(networkingClient *golangsdk.ServiceClient, id stri
 	}
 }
 
-func waitForIKEPolicyCreation(networkingClient *golangsdk.ServiceClient, id string) resource.StateRefreshFunc {
+func waitForIKEPolicyCreate(networkingClient *golangsdk.ServiceClient, id string) resource.StateRefreshFunc {
 	return func() (interface{}, string, error) {
 		policy, err := ikepolicies.Get(networkingClient, id).Extract()
 		if err != nil {
@@ -318,112 +347,4 @@ func waitForIKEPolicyUpdate(networkingClient *golangsdk.ServiceClient, id string
 		}
 		return policy, "ACTIVE", nil
 	}
-}
-
-func resourceIKEPolicyV2AuthAlgorithm(v string) ikepolicies.AuthAlgorithm {
-	var authAlgorithm ikepolicies.AuthAlgorithm
-	switch v {
-	case "md5":
-		authAlgorithm = ikepolicies.AuthAlgorithmMD5
-	case "sha1":
-		authAlgorithm = ikepolicies.AuthAlgorithmSHA1
-	case "sha2-256":
-		authAlgorithm = ikepolicies.AuthAlgorithmSHA256
-	case "sha2-384":
-		authAlgorithm = ikepolicies.AuthAlgorithmSHA384
-	case "sha2-512":
-		authAlgorithm = ikepolicies.AuthAlgorithmSHA512
-	}
-
-	return authAlgorithm
-}
-
-func resourceIKEPolicyV2EncryptionAlgorithm(v string) ikepolicies.EncryptionAlgorithm {
-	var encryptionAlgorithm ikepolicies.EncryptionAlgorithm
-	switch v {
-	case "3des":
-		encryptionAlgorithm = ikepolicies.EncryptionAlgorithm3DES
-	case "aes-128":
-		encryptionAlgorithm = ikepolicies.EncryptionAlgorithmAES128
-	case "aes-192":
-		encryptionAlgorithm = ikepolicies.EncryptionAlgorithmAES192
-	case "aes-256":
-		encryptionAlgorithm = ikepolicies.EncryptionAlgorithmAES256
-	}
-
-	return encryptionAlgorithm
-}
-
-func resourceIKEPolicyV2PFS(v string) ikepolicies.PFS {
-	var pfs ikepolicies.PFS
-	switch v {
-	case "group5":
-		pfs = ikepolicies.PFSGroup5
-	case "group2":
-		pfs = ikepolicies.PFSGroup2
-	case "group14":
-		pfs = ikepolicies.PFSGroup14
-	}
-	return pfs
-}
-
-func resourceIKEPolicyV2IKEVersion(v string) ikepolicies.IKEVersion {
-	var ikeVersion ikepolicies.IKEVersion
-	switch v {
-	case "v1":
-		ikeVersion = ikepolicies.IKEVersionv1
-	case "v2":
-		ikeVersion = ikepolicies.IKEVersionv2
-	}
-	return ikeVersion
-}
-
-func resourceIKEPolicyV2Phase1NegotiationMode(v string) ikepolicies.Phase1NegotiationMode {
-	var phase1NegotiationMode ikepolicies.Phase1NegotiationMode
-	switch v {
-	case "main":
-		phase1NegotiationMode = ikepolicies.Phase1NegotiationModeMain
-	}
-	return phase1NegotiationMode
-}
-
-func resourceIKEPolicyV2Unit(v string) ikepolicies.Unit {
-	var unit ikepolicies.Unit
-	switch v {
-	case "kilobytes":
-		unit = ikepolicies.UnitKilobytes
-	case "seconds":
-		unit = ikepolicies.UnitSeconds
-	}
-	return unit
-}
-
-func resourceIKEPolicyV2LifetimeCreateOpts(d *schema.Set) ikepolicies.LifetimeCreateOpts {
-	lifetimeCreateOpts := ikepolicies.LifetimeCreateOpts{}
-
-	rawPairs := d.List()
-	for _, raw := range rawPairs {
-		rawMap := raw.(map[string]interface{})
-		lifetimeCreateOpts.Units = resourceIKEPolicyV2Unit(rawMap["units"].(string))
-
-		value := rawMap["value"].(int)
-		lifetimeCreateOpts.Value = value
-	}
-	return lifetimeCreateOpts
-
-}
-
-func resourceIKEPolicyV2LifetimeUpdateOpts(d *schema.Set) ikepolicies.LifetimeUpdateOpts {
-	lifetimeUpdateOpts := ikepolicies.LifetimeUpdateOpts{}
-
-	rawPairs := d.List()
-	for _, raw := range rawPairs {
-		rawMap := raw.(map[string]interface{})
-		lifetimeUpdateOpts.Units = resourceIKEPolicyV2Unit(rawMap["units"].(string))
-
-		value := rawMap["value"].(int)
-		lifetimeUpdateOpts.Value = value
-	}
-	return lifetimeUpdateOpts
-
 }

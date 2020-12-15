@@ -12,14 +12,14 @@ Use this data source to get details about a specific VPC route.
 variable "route_id" { }
 
 data "opentelekomcloud_vpc_route_v2" "vpc_route" {
-  id = "${var.route_id}"
+  id = var.route_id
 }
 
 resource "opentelekomcloud_vpc_subnet_v1" "subnet_v1" {
   name       = "test-subnet"
   cidr       = "192.168.0.0/24"
   gateway_ip = "192.168.0.1"
-  vpc_id     = "${data.opentelekomcloud_vpc_route_v2.vpc_route.vpc_id}"
+  vpc_id     = data.opentelekomcloud_vpc_route_v2.vpc_route.vpc_id
 }
 ```
 

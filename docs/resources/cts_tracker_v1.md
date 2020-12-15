@@ -13,10 +13,10 @@ variable "bucket_name" { }
 variable "topic_id" { }
 
 resource "opentelekomcloud_cts_tracker_v1" "tracker_v1" {
-  bucket_name               = "${var.bucket_name}"
+  bucket_name               = var.bucket_name
   file_prefix_name          = "yO8Q"
   is_support_smn            = true
-  topic_id                  = "${var.topic_id}"
+  topic_id                  = var.topic_id
   is_send_all_key_operation = false
   operations                = ["login"]
   need_notify_user_list     = ["user1"]
@@ -29,7 +29,7 @@ The following arguments are supported:
 
 * `bucket_name` - (Required) The OBS bucket name for a tracker.
 
-* `file_prefix_name` - (Optional) The prefix of a log that needs to be stored in an OBS bucket. 
+* `file_prefix_name` - (Optional) The prefix of a log that needs to be stored in an OBS bucket.
 
 * `is_support_smn` - (Required) Specifies whether SMN is supported. When the value is false, topic_id and operations can be left empty.
 

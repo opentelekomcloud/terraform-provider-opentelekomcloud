@@ -5,16 +5,16 @@
 #}
 
 resource "opentelekomcloud_ces_alarmrule" "alarm_rule" {
-  alarm_name        = "${var.alarm_name}"
-  alarm_description = "${var.alarm_desc}"
+  alarm_name        = var.alarm_name
+  alarm_description = var.alarm_desc
   metric {
     #"namespace" = "SYS.ECS"
     namespace   = "SYS.AS"
     metric_name = "as"
     dimensions {
       name = "AutoScalingGroup"
-      #"value" = "${opentelekomcloud_compute_instance_v2.webserver.id}"
-      value = "${var.as_group_id}"
+      #"value" = opentelekomcloud_compute_instance_v2.webserver.id
+      value = var.as_group_id
     }
 
   }
@@ -56,7 +56,7 @@ resource "opentelekomcloud_ces_alarmrule" "alarm_rule2" {
     metric_name = "network_outgoing_bytes_rate_inband"
     dimensions {
       name  = "instance_id"
-      value = "${var.ecs_id}"
+      value = var.ecs_id
     }
   }
   condition {

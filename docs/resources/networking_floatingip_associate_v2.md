@@ -17,7 +17,7 @@ resource "opentelekomcloud_networking_port_v2" "port_1" {
 
 resource "opentelekomcloud_networking_floatingip_associate_v2" "fip_1" {
   floating_ip = "1.2.3.4"
-  port_id     = "${opentelekomcloud_networking_port_v2.port_1.id}"
+  port_id     = opentelekomcloud_networking_port_v2.port_1.id
 }
 ```
 

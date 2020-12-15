@@ -28,8 +28,7 @@ resource "opentelekomcloud_s3_bucket" "b" {
 resource "opentelekomcloud_s3_bucket" "b" {
   bucket = "s3-website-test.hashicorp.com"
   acl    = "public-read"
-  policy = "${file("policy.json")}"
-
+  policy = file("policy.json")
   website {
     index_document = "index.html"
     error_document = "error.html"
@@ -91,7 +90,7 @@ resource "opentelekomcloud_s3_bucket" "b" {
   acl    = "private"
 
   logging {
-    target_bucket = "${opentelekomcloud_s3_bucket.log_bucket.id}"
+    target_bucket = opentelekomcloud_s3_bucket.log_bucket.id
     target_prefix = "log/"
   }
 }

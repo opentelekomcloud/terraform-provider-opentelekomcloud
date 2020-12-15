@@ -77,6 +77,8 @@ The following arguments are supported:
 * `authentication_mode` - (Optional) Authentication mode of the cluster, possible values are `rbac` and `authenticating_proxy`.
   Defaults to `rbac`. Changing this parameter will create a new cluster resource.
 
+* `authenticating_proxy_ca` - (Optional) CA root certificate provided in the `authenticating_proxy` mode.
+
 * `multi_az` - (Optional) Enable multiple AZs for the cluster, only when using HA flavors. Changing this parameter will create a new cluster resource.
 
 * `eip` - (Optional) EIP address of the cluster.

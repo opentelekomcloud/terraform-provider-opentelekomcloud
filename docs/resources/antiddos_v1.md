@@ -10,9 +10,9 @@ Anti-DDoS monitors the service traffic from the Internet to ECSs, ELB instances,
 
 ```hcl
 variable "eip_id" { }
-  
+
 resource "opentelekomcloud_antiddos_v1" "myantiddos" {
-  floating_ip_id         = "${var.eip_id}"
+  floating_ip_id         = var.eip_id
   enable_l7              = true
   traffic_pos_id         = 1
   http_request_pos_id    = 3
@@ -33,7 +33,7 @@ The following arguments are supported:
 
 * `cleaning_access_pos_id` - (Required) The position ID of access limit during cleaning. The value ranges from 1 to 8.
 
-* `app_type_id` - (Required) The application type ID. 
+* `app_type_id` - (Required) The application type ID.
 
 * `floating_ip_id` - (Required) The ID corresponding to the Elastic IP Address (EIP) of a user.
 

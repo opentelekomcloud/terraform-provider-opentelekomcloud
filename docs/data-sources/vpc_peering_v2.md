@@ -10,16 +10,16 @@ Use this data source to get details about a specific VPC peering connection.
 
 ```hcl
 data "opentelekomcloud_vpc_peering_connection_v2" "peering" {
-   vpc_id      = "${opentelekomcloud_vpc_v1.vpc.id}"
-   peer_vpc_id = "${opentelekomcloud_vpc_v1.peer_vpc.id}"
+   vpc_id      = opentelekomcloud_vpc_v1.vpc.id
+   peer_vpc_id = opentelekomcloud_vpc_v1.peer_vpc.id
 }
 
 
 resource "opentelekomcloud_vpc_route_v2" "vpc_route" {
   type        = "peering"
-  nexthop     = "${data.opentelekomcloud_vpc_peering_connection_v2.peering.id}"
+  nexthop     = data.opentelekomcloud_vpc_peering_connection_v2.peering.id
   destination = "192.168.0.0/16"
-  vpc_id      = "${opentelekomcloud_vpc_v1.vpc.id}"
+  vpc_id      = opentelekomcloud_vpc_v1.vpc.id
 }
 ```
 

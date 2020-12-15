@@ -84,23 +84,23 @@ resource "opentelekomcloud_vpc_subnet_v1" "subnet_1" {
   name = "opentelekomcloud_subnet"
   cidr = "192.168.0.0/16"
   gateway_ip = "192.168.0.1"
-  vpc_id = "${opentelekomcloud_vpc_v1.vpc_1.id}"
+  vpc_id = opentelekomcloud_vpc_v1.vpc_1.id
   availability_zone = "eu-de-02"
  }
 
 data "opentelekomcloud_vpc_subnet_v1" "by_id" {
-  id = "${opentelekomcloud_vpc_subnet_v1.subnet_1.id}"
+  id = opentelekomcloud_vpc_subnet_v1.subnet_1.id
 }
 
 data "opentelekomcloud_vpc_subnet_v1" "by_cidr" {
-  cidr = "${opentelekomcloud_vpc_subnet_v1.subnet_1.cidr}"
+  cidr = opentelekomcloud_vpc_subnet_v1.subnet_1.cidr
 }
 
 data "opentelekomcloud_vpc_subnet_v1" "by_name" {
-	name = "${opentelekomcloud_vpc_subnet_v1.subnet_1.name}"
+	name = opentelekomcloud_vpc_subnet_v1.subnet_1.name
 }
 
 data "opentelekomcloud_vpc_subnet_v1" "by_vpc_id" {
-	vpc_id = "${opentelekomcloud_vpc_subnet_v1.subnet_1.vpc_id}"
+	vpc_id = opentelekomcloud_vpc_subnet_v1.subnet_1.vpc_id
 }
 `

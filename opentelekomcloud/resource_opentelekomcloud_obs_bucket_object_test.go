@@ -27,7 +27,7 @@ func TestAccObsBucketObject_source(t *testing.T) {
 	}
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheckS3(t) },
+		PreCheck:     func() { testAccPreCheck(t) },
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckObsBucketObjectDestroy,
 		Steps: []resource.TestStep{
@@ -59,7 +59,7 @@ func TestAccObsBucketObject_content(t *testing.T) {
 	rInt := acctest.RandInt()
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheckS3(t) },
+		PreCheck:     func() { testAccPreCheck(t) },
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckObsBucketObjectDestroy,
 		Steps: []resource.TestStep{
@@ -82,7 +82,7 @@ func testAccCheckObsBucketObjectDestroy(s *terraform.State) error {
 	config := testAccProvider.Meta().(*Config)
 	obsClient, err := config.newObjectStorageClient(OS_REGION_NAME)
 	if err != nil {
-		return fmt.Errorf("Error creating OpenTelekomCloud OBS client: %s", err)
+		return fmt.Errorf("error creating OpenTelekomCloud OBS client: %s", err)
 	}
 
 	for _, rs := range s.RootModule().Resources {
@@ -101,7 +101,7 @@ func testAccCheckObsBucketObjectDestroy(s *terraform.State) error {
 			if obsError, ok := err.(obs.ObsError); ok && obsError.Code == "NoSuchBucket" {
 				return nil
 			}
-			return fmt.Errorf("Error listing objects of OBS bucket %s: %s", bucket, err)
+			return fmt.Errorf("error listing objects of OBS bucket %s: %s", bucket, err)
 		}
 
 		var exist bool
@@ -112,7 +112,7 @@ func testAccCheckObsBucketObjectDestroy(s *terraform.State) error {
 			}
 		}
 		if exist {
-			return fmt.Errorf("Resource %s still exists in bucket %s", rs.Primary.ID, bucket)
+			return fmt.Errorf("resource %s still exists in bucket %s", rs.Primary.ID, bucket)
 		}
 	}
 
@@ -123,17 +123,17 @@ func testAccCheckObsBucketObjectExists(n string) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
 		rs, ok := s.RootModule().Resources[n]
 		if !ok {
-			return fmt.Errorf("Not Found: %s", n)
+			return fmt.Errorf("not Found: %s", n)
 		}
 
 		if rs.Primary.ID == "" {
-			return fmt.Errorf("No OBS Bucket Object ID is set")
+			return fmt.Errorf("no OBS Bucket Object ID is set")
 		}
 
 		config := testAccProvider.Meta().(*Config)
 		obsClient, err := config.newObjectStorageClient(OS_REGION_NAME)
 		if err != nil {
-			return fmt.Errorf("Error creating OpenTelekomCloud OBS client: %s", err)
+			return fmt.Errorf("error creating OpenTelekomCloud OBS client: %s", err)
 		}
 
 		bucket := rs.Primary.Attributes["bucket"]
@@ -144,7 +144,7 @@ func testAccCheckObsBucketObjectExists(n string) resource.TestCheckFunc {
 
 		resp, err := obsClient.ListObjects(input)
 		if err != nil {
-			return getObsError("Error listing objects of OBS bucket", bucket, err)
+			return getObsError("error listing objects of OBS bucket", bucket, err)
 		}
 
 		var exist bool
@@ -155,7 +155,7 @@ func testAccCheckObsBucketObjectExists(n string) resource.TestCheckFunc {
 			}
 		}
 		if !exist {
-			return fmt.Errorf("Resource %s not found in bucket %s", rs.Primary.ID, bucket)
+			return fmt.Errorf("resource %s not found in bucket %s", rs.Primary.ID, bucket)
 		}
 
 		return nil
@@ -165,13 +165,13 @@ func testAccCheckObsBucketObjectExists(n string) resource.TestCheckFunc {
 func testAccObsBucketObjectConfigSource(randInt int, source string) string {
 	return fmt.Sprintf(`
 resource "opentelekomcloud_obs_bucket" "object_bucket" {
-    bucket = "tf-object-test-bucket-%d"
+  bucket = "tf-object-test-bucket-%d"
 }
 resource "opentelekomcloud_obs_bucket_object" "object" {
-	bucket = opentelekomcloud_obs_bucket.object_bucket.bucket
-	key = "test-key"
-	source = "%s"
-	content_type = "binary/octet-stream"
+  bucket       = opentelekomcloud_obs_bucket.object_bucket.bucket
+  key          = "test-key"
+  source       = "%s"
+  content_type = "binary/octet-stream"
 }
 `, randInt, source)
 }
@@ -179,12 +179,12 @@ resource "opentelekomcloud_obs_bucket_object" "object" {
 func testAccObsBucketObjectConfigContent(randInt int) string {
 	return fmt.Sprintf(`
 resource "opentelekomcloud_obs_bucket" "object_bucket" {
-        bucket = "tf-object-test-bucket-%d"
+  bucket = "tf-object-test-bucket-%d"
 }
 resource "opentelekomcloud_obs_bucket_object" "object" {
-        bucket = opentelekomcloud_obs_bucket.object_bucket.bucket
-        key = "test-key"
-        content = "some_bucket_content"
+  bucket  = opentelekomcloud_obs_bucket.object_bucket.bucket
+  key     = "test-key"
+  content = "some_bucket_content"
 }
 `, randInt)
 }
@@ -192,15 +192,15 @@ resource "opentelekomcloud_obs_bucket_object" "object" {
 func testAccObsBucketObjectConfig_withSSE(randInt int, source string) string {
 	return fmt.Sprintf(`
 resource "opentelekomcloud_obs_bucket" "object_bucket" {
-	bucket = "tf-object-test-bucket-%d"
+  bucket = "tf-object-test-bucket-%d"
 }
 
 resource "opentelekomcloud_obs_bucket_object" "object" {
-	bucket = opentelekomcloud_obs_bucket.object_bucket.bucket
-	key = "test-key"
-	source = "%s"
-	content_type = "binary/octet-stream"
-	encryption = true
+  bucket       = opentelekomcloud_obs_bucket.object_bucket.bucket
+  key          = "test-key"
+  source       = "%s"
+  content_type = "binary/octet-stream"
+  encryption   = true
 }
 `, randInt, source)
 }

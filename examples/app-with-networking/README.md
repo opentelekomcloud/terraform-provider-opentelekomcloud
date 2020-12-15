@@ -1,6 +1,6 @@
-# Basic OpentelekomCloud architecture with networking
+# Basic OpenTelekomCloud architecture with networking
 
-This provides a template for running a simple architecture on an OpentelekomCloud
+This provides a template for running a simple architecture on an OpenTelekomCloud
 cloud.
 
 To simplify the example, this intentionally ignores deploying and
@@ -13,7 +13,7 @@ After you run `terraform apply` on this configuration, it will output the
 floating IP address assigned to the instance. After your instance started,
 this should respond with the default nginx web page.
 
-First set the required environment variables for the OpentelekomCloud provider by
+First set the required environment variables for the OpenTelekomCloud provider by
 sourcing the [credentials file](http://docs.opentelekomcloud.org/cli-reference/content/cli_openrc.html).
 
 ```

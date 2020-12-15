@@ -130,7 +130,7 @@ resource "opentelekomcloud_lb_listener_v2" "listener_1" {
   name = "listener_1"
   protocol = "HTTP"
   protocol_port = 8080
-  loadbalancer_id = "${opentelekomcloud_lb_loadbalancer_v2.loadbalancer_1.id}"
+  loadbalancer_id = opentelekomcloud_lb_loadbalancer_v2.loadbalancer_1.id
 
 	timeouts {
 		create = "5m"
@@ -152,7 +152,7 @@ resource "opentelekomcloud_lb_listener_v2" "listener_1" {
   protocol_port = 8080
   #connection_limit = 100
   admin_state_up = "true"
-  loadbalancer_id = "${opentelekomcloud_lb_loadbalancer_v2.loadbalancer_1.id}"
+  loadbalancer_id = opentelekomcloud_lb_loadbalancer_v2.loadbalancer_1.id
 
 	timeouts {
 		create = "5m"
@@ -197,7 +197,7 @@ ep++LKUi9D0VGXY8bqvfJjbECoCeu85vl8NpCXwe/LoVoIn+7KaVIZMwqoGMfgNl
 nEqm7HWkNxHhf8A6En/IjleuddS1sf9e/x+TJN1Xhnt9W6pe7Fk1
 -----END RSA PRIVATE KEY-----
 EOT
-  
+
 certificate = <<EOT
 -----BEGIN CERTIFICATE-----
 MIIDpTCCAo2gAwIBAgIJAKdmmOBYnFvoMA0GCSqGSIb3DQEBCwUAMGkxCzAJBgNV
@@ -265,7 +265,7 @@ EOT
     lifecycle {
 	    ignore_changes = [certificate]
 	}
-	
+
 	timeouts {
 		create = "5m"
 		update = "5m"
@@ -282,11 +282,11 @@ resource "opentelekomcloud_lb_listener_v2" "listener_tls" {
   name = "listener_tls"
   protocol = "TERMINATED_HTTPS"
   protocol_port = 443
-  loadbalancer_id = "${opentelekomcloud_lb_loadbalancer_v2.loadbalancer_tls.id}"
+  loadbalancer_id = opentelekomcloud_lb_loadbalancer_v2.loadbalancer_tls.id
   tls_ciphers_policy = "tls-1-1"
   http2_enable = true
-  default_tls_container_ref = "${opentelekomcloud_lb_certificate_v2.certificate_tls.id}"
-  client_ca_tls_container_ref = "${opentelekomcloud_lb_certificate_v2.certificate_ca.id}"
+  default_tls_container_ref = opentelekomcloud_lb_certificate_v2.certificate_tls.id
+  client_ca_tls_container_ref = opentelekomcloud_lb_certificate_v2.certificate_ca.id
 
     timeouts {
 		create = "5m"
@@ -362,21 +362,21 @@ i34R7EQDtFeiSvBdeKRsPp8c0KT8H1B4lXNkkCQs2WX5p4lm99+ZtLD4glw8x6Ic
 i1YhgnQbn5E0hz55OLu5jvOkKQjPCW+9Aa==
 -----END CERTIFICATE-----
 EOT
-	
+
 		lifecycle {
 			ignore_changes = [certificate, type, description, domain]
 		}
-	
+
 }
 
 resource "opentelekomcloud_lb_listener_v2" "listener_tls" {
   name = "listener_tls_updated"
   protocol = "TERMINATED_HTTPS"
-  protocol_port = 443  
-  loadbalancer_id = "${opentelekomcloud_lb_loadbalancer_v2.loadbalancer_tls.id}"
+  protocol_port = 443
+  loadbalancer_id = opentelekomcloud_lb_loadbalancer_v2.loadbalancer_tls.id
   tls_ciphers_policy = "tls-1-2-strict"
   http2_enable = false
-  
+
   # needed for housekeeping of terraform on update statements like here
   # itself does not have the dependency to the certificate
   # which blocks final destruction of certificates

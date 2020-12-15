@@ -55,14 +55,14 @@ resource "opentelekomcloud_rts_software_config_v1" "config_1" {
 }
 
 resource "opentelekomcloud_rts_software_deployment_v1" "deployment_1" {
-  config_id = "${opentelekomcloud_rts_software_config_v1.config_1.id}"
-  server_id = "${opentelekomcloud_compute_instance_v2.vm_1.id}"
+  config_id = opentelekomcloud_rts_software_config_v1.config_1.id
+  server_id = opentelekomcloud_compute_instance_v2.vm_1.id
   status= "COMPLETE"
   action= "CREATE"
   status_reason= "Deploy data"
 }
 
 data "opentelekomcloud_rts_software_deployment_v1" "deployment_1" {
-  id = "${opentelekomcloud_rts_software_deployment_v1.deployment_1.id}"
+  id = opentelekomcloud_rts_software_deployment_v1.deployment_1.id
  }
 `, OS_IMAGE_ID, OS_FLAVOR_ID, OS_NETWORK_ID)

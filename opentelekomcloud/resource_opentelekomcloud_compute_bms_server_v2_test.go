@@ -76,7 +76,7 @@ func TestAccComputeV2BmsInstance_timeout(t *testing.T) {
 
 func testAccCheckComputeV2BmsInstanceDestroy(s *terraform.State) error {
 	config := testAccProvider.Meta().(*Config)
-	computeClient, err := config.computeV2HWClient(OS_REGION_NAME)
+	computeClient, err := config.computeV2Client(OS_REGION_NAME)
 	if err != nil {
 		return fmt.Errorf("Error creating OpenTelekomCloud compute client: %s", err)
 	}
@@ -109,7 +109,7 @@ func testAccCheckComputeV2BmsInstanceExists(n string, instance *servers.Server) 
 		}
 
 		config := testAccProvider.Meta().(*Config)
-		computeClient, err := config.computeV2HWClient(OS_REGION_NAME)
+		computeClient, err := config.computeV2Client(OS_REGION_NAME)
 		if err != nil {
 			return fmt.Errorf("Error creating OpenTelekomCloud compute client: %s", err)
 		}

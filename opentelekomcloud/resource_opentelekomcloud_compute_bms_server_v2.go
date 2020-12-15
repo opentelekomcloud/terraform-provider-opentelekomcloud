@@ -286,7 +286,7 @@ func bmsTagsCreate(client *golangsdk.ServiceClient, server_id string) error {
 
 func resourceComputeBMSInstanceV2Create(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*Config)
-	computeClient, err := config.computeV2HWClient(GetRegion(d, config))
+	computeClient, err := config.computeV2Client(GetRegion(d, config))
 	if err != nil {
 		return fmt.Errorf("Error creating OpenTelekomCloud compute client: %s", err)
 	}
@@ -364,7 +364,7 @@ func resourceComputeBMSInstanceV2Create(d *schema.ResourceData, meta interface{}
 	d.SetId(server.ID)
 
 	// Set bms sepcific tag
-	bmsClient, err := config.bmsClient(GetRegion(d, config))
+	bmsClient, err := config.computeV2Client(GetRegion(d, config))
 	if err != nil {
 		return fmt.Errorf("Error creating OpenTelekomCloud bms client: %s", err)
 	}
@@ -409,7 +409,7 @@ func resourceComputeBMSInstanceV2Create(d *schema.ResourceData, meta interface{}
 
 func resourceComputeBMSInstanceV2Read(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*Config)
-	computeClient, err := config.computeV2HWClient(GetRegion(d, config))
+	computeClient, err := config.computeV2Client(GetRegion(d, config))
 	if err != nil {
 		return fmt.Errorf("Error creating OpenTelekomCloud compute client: %s", err)
 	}
@@ -490,7 +490,7 @@ func resourceComputeBMSInstanceV2Read(d *schema.ResourceData, meta interface{}) 
 
 func resourceComputeBMSInstanceV2Update(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*Config)
-	computeClient, err := config.computeV2HWClient(GetRegion(d, config))
+	computeClient, err := config.computeV2Client(GetRegion(d, config))
 	if err != nil {
 		return fmt.Errorf("Error creating OpenTelekomCloud compute client: %s", err)
 	}
@@ -682,7 +682,7 @@ func resourceComputeBMSInstanceV2Update(d *schema.ResourceData, meta interface{}
 
 func resourceComputeBMSInstanceV2Delete(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*Config)
-	computeClient, err := config.computeV2HWClient(GetRegion(d, config))
+	computeClient, err := config.computeV2Client(GetRegion(d, config))
 	if err != nil {
 		return fmt.Errorf("Error creating OpenTelekomCloud compute client: %s", err)
 	}

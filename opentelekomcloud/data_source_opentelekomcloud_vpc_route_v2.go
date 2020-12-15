@@ -50,7 +50,7 @@ func dataSourceVPCRouteV2() *schema.Resource {
 
 func dataSourceVpcRouteV2Read(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*Config)
-	vpcRouteClient, err := config.hwNetworkV2Client(GetRegion(d, config))
+	vpcRouteClient, err := config.networkingV2Client(GetRegion(d, config))
 	if err != nil {
 		return err
 	}

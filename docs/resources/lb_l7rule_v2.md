@@ -4,7 +4,7 @@ subcategory: "Elastic Load Balance (ELB)"
 
 # opentelekomcloud_lb_l7rule_v2
 
-Manages a V2 L7 Rule resource within OpentelekomCloud.
+Manages a V2 L7 Rule resource within OpenTelekomCloud.
 
 ## Example Usage
 
@@ -18,14 +18,14 @@ resource "opentelekomcloud_lb_listener_v2" "listener_1" {
   name            = "listener_1"
   protocol        = "HTTP"
   protocol_port   = 8080
-  loadbalancer_id = "${opentelekomcloud_lb_loadbalancer_v2.loadbalancer_1.id}"
+  loadbalancer_id = opentelekomcloud_lb_loadbalancer_v2.loadbalancer_1.id
 }
 
 resource "opentelekomcloud_lb_pool_v2" "pool_1" {
   name            = "pool_1"
   protocol        = "HTTP"
   lb_method       = "ROUND_ROBIN"
-  loadbalancer_id = "${opentelekomcloud_lb_loadbalancer_v2.loadbalancer_1.id}"
+  loadbalancer_id = opentelekomcloud_lb_loadbalancer_v2.loadbalancer_1.id
 }
 
 resource "opentelekomcloud_lb_l7policy_v2" "l7policy_1" {
@@ -33,12 +33,12 @@ resource "opentelekomcloud_lb_l7policy_v2" "l7policy_1" {
   action       = "REDIRECT_TO_URL"
   description  = "test description"
   position     = 1
-  listener_id  = "${opentelekomcloud_lb_listener_v2.listener_1.id}"
+  listener_id  = opentelekomcloud_lb_listener_v2.listener_1.id
   redirect_url = "http://www.example.com"
 }
 
 resource "opentelekomcloud_lb_l7rule_v2" "l7rule_1" {
-  l7policy_id  = "${opentelekomcloud_lb_l7policy_v2.l7policy_1.id}"
+  l7policy_id  = opentelekomcloud_lb_l7policy_v2.l7policy_1.id
   type         = "PATH"
   compare_type = "EQUAL_TO"
   value        = "/api"

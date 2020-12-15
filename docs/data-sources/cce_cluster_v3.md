@@ -14,7 +14,7 @@ variable "cluster_id" { }
 variable "vpc_id" { }
 
 data "opentelekomcloud_cce_cluster_v3" "cluster" {
-  name   = "${var.cluster_name}"
+  name   = var.cluster_name
   status = "Available"
 }
 ```
@@ -48,6 +48,8 @@ All above argument parameters can be exported as attribute parameters along with
 * `container_network_cidr` - The container network segment.
 
 * `container_network_type` - The container network type: overlay_l2 , underlay_ipvlan or vpc-router.
+
+* `authentication_mode` - (Optional) Authentication mode of the cluster, possible values are `rbac` and `authenticating_proxy`.
 
 * `subnet_id` - The ID of the subnet used to create the node.
 

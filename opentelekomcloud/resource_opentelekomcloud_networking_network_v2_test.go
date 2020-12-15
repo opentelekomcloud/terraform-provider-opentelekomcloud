@@ -181,7 +181,7 @@ resource "opentelekomcloud_networking_subnet_v2" "subnet_1" {
   name = "subnet_1"
   cidr = "192.168.10.0/24"
   ip_version = 4
-  network_id = "${opentelekomcloud_networking_network_v2.network_1.id}"
+  network_id = opentelekomcloud_networking_network_v2.network_1.id
 }
 
 resource "opentelekomcloud_networking_router_v2" "router_1" {
@@ -189,8 +189,8 @@ resource "opentelekomcloud_networking_router_v2" "router_1" {
 }
 
 resource "opentelekomcloud_networking_router_interface_v2" "ri_1" {
-  router_id = "${opentelekomcloud_networking_router_v2.router_1.id}"
-  subnet_id = "${opentelekomcloud_networking_subnet_v2.subnet_1.id}"
+  router_id = opentelekomcloud_networking_router_v2.router_1.id
+  subnet_id = opentelekomcloud_networking_subnet_v2.subnet_1.id
 }
 `
 
@@ -204,7 +204,7 @@ resource "opentelekomcloud_networking_subnet_v2" "subnet_1" {
   name = "subnet_1"
   cidr = "192.168.199.0/24"
   ip_version = 4
-  network_id = "${opentelekomcloud_networking_network_v2.network_1.id}"
+  network_id = opentelekomcloud_networking_network_v2.network_1.id
 }
 
 resource "opentelekomcloud_compute_secgroup_v2" "secgroup_1" {
@@ -221,21 +221,21 @@ resource "opentelekomcloud_compute_secgroup_v2" "secgroup_1" {
 resource "opentelekomcloud_networking_port_v2" "port_1" {
   name = "port_1"
   admin_state_up = "true"
-  security_group_ids = ["${opentelekomcloud_compute_secgroup_v2.secgroup_1.id}"]
-  network_id = "${opentelekomcloud_networking_network_v2.network_1.id}"
+  security_group_ids = [opentelekomcloud_compute_secgroup_v2.secgroup_1.id]
+  network_id = opentelekomcloud_networking_network_v2.network_1.id
 
   fixed_ip {
-    "subnet_id" =  "${opentelekomcloud_networking_subnet_v2.subnet_1.id}"
+    "subnet_id" =  opentelekomcloud_networking_subnet_v2.subnet_1.id
     "ip_address" =  "192.168.199.23"
   }
 }
 
 resource "opentelekomcloud_compute_instance_v2" "instance_1" {
   name = "instance_1"
-  security_groups = ["${opentelekomcloud_compute_secgroup_v2.secgroup_1.name}"]
+  security_groups = [opentelekomcloud_compute_secgroup_v2.secgroup_1.name]
 
   network {
-    port = "${opentelekomcloud_networking_port_v2.port_1.id}"
+    port = opentelekomcloud_networking_port_v2.port_1.id
   }
 }
 `

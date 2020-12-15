@@ -14,16 +14,16 @@ This resource can be useful for getting back a list of route ids for a vpc.
 variable "vpc_id" { }
 
 data "opentelekomcloud_vpc_route_ids_v2" "example" {
-  vpc_id = "${var.vpc_id}"
+  vpc_id = var.vpc_id
 }
 
 data "opentelekomcloud_vpc_route_v2" "vpc_route" {
-  count = "${length(data.opentelekomcloud_vpc_route_ids_v2.example.ids)}"
-  id    = "${data.opentelekomcloud_vpc_route_ids_v2.example.ids[count.index]}"
+  count = length(data.opentelekomcloud_vpc_route_ids_v2.example.ids)
+  id    = data.opentelekomcloud_vpc_route_ids_v2.example.ids[count.index]
 }
 
 output "route_nexthop" {
-  value = ["${data.opentelekomcloud_vpc_route_v2.vpc_route.*.nexthop}"]
+  value = [data.opentelekomcloud_vpc_route_v2.vpc_route.*.nexthop]
 }
 ```
 

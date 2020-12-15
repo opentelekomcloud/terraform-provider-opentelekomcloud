@@ -4,7 +4,7 @@ subcategory: "Elastic Load Balance (ELB)"
 
 # opentelekomcloud_elb_backend
 
-Manages a classic loadbalancer backend resource within OpentelekomCloud.
+Manages a classic loadbalancer backend resource within OpenTelekomCloud.
 
 ## Example Usage
 
@@ -26,8 +26,7 @@ resource "opentelekomcloud_elb_listener" "listener" {
   protocol_port    = 12345
   backend_port     = 8080
   lb_algorithm     = "roundrobin"
-  loadbalancer_id  = "${opentelekomcloud_elb_loadbalancer.elb.id}"
-  
+  loadbalancer_id  = opentelekomcloud_elb_loadbalancer.elb.id
   timeouts {
     create = "5m"
     update = "5m"
@@ -37,7 +36,7 @@ resource "opentelekomcloud_elb_listener" "listener" {
 
 resource "opentelekomcloud_elb_backend" "backend" {
   address     = "192.168.0.211"
-  listener_id = "${opentelekomcloud_elb_listener.listener.id}"
+  listener_id = opentelekomcloud_elb_listener.listener.id
   server_id   = "8f7a32f1-f66c-4d13-9b17-3a13f9f0bb8d"
 }
 ```
@@ -52,7 +51,7 @@ The following arguments are supported:
 * `server_id` - (Required) Specifies the backend member ID. Changing this creates a
   new elb backend.
 
-* `address` - (Required) Specifies the private IP address of the backend member. 
+* `address` - (Required) Specifies the private IP address of the backend member.
   Changing this creates a new elb backend.
 
 ## Attributes Reference

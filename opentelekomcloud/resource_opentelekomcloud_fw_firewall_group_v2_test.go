@@ -130,7 +130,7 @@ func TestAccFWFirewallGroupV2_port_remove(t *testing.T) {
 
 func testAccCheckFWFirewallGroupV2Destroy(s *terraform.State) error {
 	config := testAccProvider.Meta().(*Config)
-	networkingClient, err := config.hwNetworkV2Client(OS_REGION_NAME)
+	networkingClient, err := config.networkingV2Client(OS_REGION_NAME)
 	if err != nil {
 		return fmt.Errorf("Error creating OpenTelekomCloud networking client: %s", err)
 	}
@@ -162,7 +162,7 @@ func testAccCheckFWFirewallGroupV2Exists(n string, firewall_group *FirewallGroup
 		}
 
 		config := testAccProvider.Meta().(*Config)
-		networkingClient, err := config.hwNetworkV2Client(OS_REGION_NAME)
+		networkingClient, err := config.networkingV2Client(OS_REGION_NAME)
 		if err != nil {
 			return fmt.Errorf("Exists) Error creating OpenTelekomCloud networking client: %s", err)
 		}
@@ -205,7 +205,7 @@ func testAccCheckFWFirewallGroupV2(n, expectedName, expectedDescription string, 
 		}
 
 		config := testAccProvider.Meta().(*Config)
-		networkingClient, err := config.hwNetworkV2Client(OS_REGION_NAME)
+		networkingClient, err := config.networkingV2Client(OS_REGION_NAME)
 		if err != nil {
 			return fmt.Errorf("Exists) Error creating OpenTelekomCloud networking client: %s", err)
 		}
@@ -256,8 +256,8 @@ func testAccCheckFWFirewallGroupV2(n, expectedName, expectedDescription string, 
 
 const testAccFWFirewallGroupV2_basic_1 = `
 resource "opentelekomcloud_fw_firewall_group_v2" "fw_1" {
-  ingress_policy_id = "${opentelekomcloud_fw_policy_v2.policy_1.id}"
-  egress_policy_id = "${opentelekomcloud_fw_policy_v2.policy_1.id}"
+  ingress_policy_id = opentelekomcloud_fw_policy_v2.policy_1.id
+  egress_policy_id = opentelekomcloud_fw_policy_v2.policy_1.id
 
   timeouts {
     create = "5m"
@@ -275,8 +275,8 @@ const testAccFWFirewallGroupV2_basic_2 = `
 resource "opentelekomcloud_fw_firewall_group_v2" "fw_1" {
   name = "fw_1"
   description = "terraform acceptance test"
-  ingress_policy_id = "${opentelekomcloud_fw_policy_v2.policy_2.id}"
-  egress_policy_id = "${opentelekomcloud_fw_policy_v2.policy_2.id}"
+  ingress_policy_id = opentelekomcloud_fw_policy_v2.policy_2.id
+  egress_policy_id = opentelekomcloud_fw_policy_v2.policy_2.id
   admin_state_up = true
 
   timeouts {
@@ -302,7 +302,7 @@ resource "opentelekomcloud_networking_subnet_v2" "subnet_1" {
   cidr = "192.168.199.0/24"
   ip_version = 4
   enable_dhcp = true
-  network_id = "${opentelekomcloud_networking_network_v2.network_1.id}"
+  network_id = opentelekomcloud_networking_network_v2.network_1.id
 }
 
 resource "opentelekomcloud_networking_router_v2" "router_1" {
@@ -314,17 +314,17 @@ resource "opentelekomcloud_networking_router_v2" "router_1" {
 resource "opentelekomcloud_networking_port_v2" "port_1" {
   name = "port_1"
   admin_state_up = "true"
-  network_id = "${opentelekomcloud_networking_network_v2.network_1.id}"
+  network_id = opentelekomcloud_networking_network_v2.network_1.id
 
   fixed_ip {
-    subnet_id =  "${opentelekomcloud_networking_subnet_v2.subnet_1.id}"
+    subnet_id =  opentelekomcloud_networking_subnet_v2.subnet_1.id
     #ip_address = "192.168.199.23"
   }
 }
 
 resource "opentelekomcloud_networking_router_interface_v2" "router_interface_1" {
-  router_id = "${opentelekomcloud_networking_router_v2.router_1.id}"
-  port_id = "${opentelekomcloud_networking_port_v2.port_1.id}"
+  router_id = opentelekomcloud_networking_router_v2.router_1.id
+  port_id = opentelekomcloud_networking_port_v2.port_1.id
 }
 
 resource "opentelekomcloud_fw_policy_v2" "policy_1" {
@@ -334,10 +334,10 @@ resource "opentelekomcloud_fw_policy_v2" "policy_1" {
 resource "opentelekomcloud_fw_firewall_group_v2" "fw_1" {
   name = "firewall_1"
   description = "firewall router test"
-  ingress_policy_id = "${opentelekomcloud_fw_policy_v2.policy_1.id}"
-  #egress_policy_id = "${opentelekomcloud_fw_policy_v2.policy_1.id}"
+  ingress_policy_id = opentelekomcloud_fw_policy_v2.policy_1.id
+  #egress_policy_id = opentelekomcloud_fw_policy_v2.policy_1.id
   ports = [
-	"${opentelekomcloud_networking_port_v2.port_1.id}"
+	opentelekomcloud_networking_port_v2.port_1.id
   ]
   depends_on = ["opentelekomcloud_networking_router_interface_v2.router_interface_1"]
 }
@@ -353,7 +353,7 @@ resource "opentelekomcloud_networking_subnet_v2" "subnet_1" {
   name = "subnet_1"
   cidr = "192.168.199.0/24"
   ip_version = 4
-  network_id = "${opentelekomcloud_networking_network_v2.network_1.id}"
+  network_id = opentelekomcloud_networking_network_v2.network_1.id
 }
 
 resource "opentelekomcloud_networking_network_v2" "network_2" {
@@ -365,7 +365,7 @@ resource "opentelekomcloud_networking_subnet_v2" "subnet_2" {
   name = "subnet_2"
   cidr = "192.168.199.0/24"
   ip_version = 4
-  network_id = "${opentelekomcloud_networking_network_v2.network_2.id}"
+  network_id = opentelekomcloud_networking_network_v2.network_2.id
 }
 
 resource "opentelekomcloud_networking_router_v2" "router_1" {
@@ -383,10 +383,10 @@ resource "opentelekomcloud_networking_router_v2" "router_2" {
 resource "opentelekomcloud_networking_port_v2" "port_1" {
   name = "port_1"
   admin_state_up = "true"
-  network_id = "${opentelekomcloud_networking_network_v2.network_1.id}"
+  network_id = opentelekomcloud_networking_network_v2.network_1.id
 
   fixed_ip {
-    subnet_id =  "${opentelekomcloud_networking_subnet_v2.subnet_1.id}"
+    subnet_id =  opentelekomcloud_networking_subnet_v2.subnet_1.id
     #ip_address = "192.168.199.23"
   }
 }
@@ -394,22 +394,22 @@ resource "opentelekomcloud_networking_port_v2" "port_1" {
 resource "opentelekomcloud_networking_port_v2" "port_2" {
   name = "port_2"
   admin_state_up = "true"
-  network_id = "${opentelekomcloud_networking_network_v2.network_2.id}"
+  network_id = opentelekomcloud_networking_network_v2.network_2.id
 
   fixed_ip {
-    subnet_id =  "${opentelekomcloud_networking_subnet_v2.subnet_2.id}"
+    subnet_id =  opentelekomcloud_networking_subnet_v2.subnet_2.id
     #ip_address = "192.168.199.24"
   }
 }
 
 resource "opentelekomcloud_networking_router_interface_v2" "router_interface_1" {
-  router_id = "${opentelekomcloud_networking_router_v2.router_1.id}"
-  port_id = "${opentelekomcloud_networking_port_v2.port_1.id}"
+  router_id = opentelekomcloud_networking_router_v2.router_1.id
+  port_id = opentelekomcloud_networking_port_v2.port_1.id
 }
 
 resource "opentelekomcloud_networking_router_interface_v2" "router_interface_2" {
-  router_id = "${opentelekomcloud_networking_router_v2.router_2.id}"
-  port_id = "${opentelekomcloud_networking_port_v2.port_2.id}"
+  router_id = opentelekomcloud_networking_router_v2.router_2.id
+  port_id = opentelekomcloud_networking_port_v2.port_2.id
 }
 
 resource "opentelekomcloud_fw_policy_v2" "policy_1" {
@@ -419,11 +419,11 @@ resource "opentelekomcloud_fw_policy_v2" "policy_1" {
 resource "opentelekomcloud_fw_firewall_group_v2" "fw_1" {
   name = "firewall_1"
   description = "firewall router test"
-  ingress_policy_id = "${opentelekomcloud_fw_policy_v2.policy_1.id}"
-  egress_policy_id = "${opentelekomcloud_fw_policy_v2.policy_1.id}"
+  ingress_policy_id = opentelekomcloud_fw_policy_v2.policy_1.id
+  egress_policy_id = opentelekomcloud_fw_policy_v2.policy_1.id
   ports = [
-	"${opentelekomcloud_networking_port_v2.port_1.id}",
-	"${opentelekomcloud_networking_port_v2.port_2.id}"
+	opentelekomcloud_networking_port_v2.port_1.id,
+	opentelekomcloud_networking_port_v2.port_2.id
   ]
   depends_on = ["opentelekomcloud_networking_router_interface_v2.router_interface_1", "opentelekomcloud_networking_router_interface_v2.router_interface_2"]
 }
@@ -437,8 +437,8 @@ resource "opentelekomcloud_fw_policy_v2" "policy_1" {
 resource "opentelekomcloud_fw_firewall_group_v2" "fw_1" {
   name = "firewall_1"
   description = "firewall router test"
-  ingress_policy_id = "${opentelekomcloud_fw_policy_v2.policy_1.id}"
-  egress_policy_id = "${opentelekomcloud_fw_policy_v2.policy_1.id}"
+  ingress_policy_id = opentelekomcloud_fw_policy_v2.policy_1.id
+  egress_policy_id = opentelekomcloud_fw_policy_v2.policy_1.id
 }
 `
 
@@ -450,7 +450,7 @@ resource "opentelekomcloud_fw_policy_v2" "policy_1" {
 resource "opentelekomcloud_fw_firewall_group_v2" "fw_1" {
   name = "firewall_1"
   description = "firewall router test"
-  ingress_policy_id = "${opentelekomcloud_fw_policy_v2.policy_1.id}"
-  egress_policy_id = "${opentelekomcloud_fw_policy_v2.policy_1.id}"
+  ingress_policy_id = opentelekomcloud_fw_policy_v2.policy_1.id
+  egress_policy_id = opentelekomcloud_fw_policy_v2.policy_1.id
 }
 `

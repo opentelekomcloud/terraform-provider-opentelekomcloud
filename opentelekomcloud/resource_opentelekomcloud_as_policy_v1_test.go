@@ -101,25 +101,25 @@ resource "opentelekomcloud_as_configuration_v1" "hth_as_config"{
       volume_type = "SATA"
       disk_type = "SYS"
     }
-    key_name = "${opentelekomcloud_compute_keypair_v2.hth_key.id}"
+    key_name = opentelekomcloud_compute_keypair_v2.hth_key.id
   }
 }
 
 resource "opentelekomcloud_as_group_v1" "hth_as_group"{
   scaling_group_name = "hth_as_group"
-  scaling_configuration_id = "${opentelekomcloud_as_configuration_v1.hth_as_config.id}"
+  scaling_configuration_id = opentelekomcloud_as_configuration_v1.hth_as_config.id
   networks {
     id = "%s"
   }
   security_groups {
-    id = "${opentelekomcloud_networking_secgroup_v2.secgroup.id}"
+    id = opentelekomcloud_networking_secgroup_v2.secgroup.id
   }
   vpc_id = "%s"
 }
 
 resource "opentelekomcloud_as_policy_v1" "hth_as_policy"{
   scaling_policy_name = "terraform"
-  scaling_group_id = "${opentelekomcloud_as_group_v1.hth_as_group.id}"
+  scaling_group_id = opentelekomcloud_as_group_v1.hth_as_group.id
   scaling_policy_type = "SCHEDULED"
   scaling_policy_action {
     operation = "ADD"

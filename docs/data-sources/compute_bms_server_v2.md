@@ -13,8 +13,8 @@ variable "bms_id" { }
 variable "bms_name" { }
 
 data "opentelekomcloud_compute_bms_server_v2" "query_bms" {
-  id   = "${var.bms_id}"
-  name = "${var.bms_name}"
+  id   = var.bms_id
+  name = var.bms_name
 }
 ```
 

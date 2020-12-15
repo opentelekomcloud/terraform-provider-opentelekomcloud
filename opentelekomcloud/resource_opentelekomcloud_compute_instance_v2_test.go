@@ -396,7 +396,7 @@ func TestAccComputeV2Instance_auto_recovery(t *testing.T) {
 
 func testAccCheckComputeV2InstanceDestroy(s *terraform.State) error {
 	config := testAccProvider.Meta().(*Config)
-	computeClient, err := config.computeV2HWClient(OS_REGION_NAME)
+	computeClient, err := config.computeV2Client(OS_REGION_NAME)
 	if err != nil {
 		return fmt.Errorf("Error creating OpenTelekomCloud compute client: %s", err)
 	}
@@ -429,7 +429,7 @@ func testAccCheckComputeV2InstanceExists(n string, instance *servers.Server) res
 		}
 
 		config := testAccProvider.Meta().(*Config)
-		computeClient, err := config.computeV2HWClient(OS_REGION_NAME)
+		computeClient, err := config.computeV2Client(OS_REGION_NAME)
 		if err != nil {
 			return fmt.Errorf("Error creating OpenTelekomCloud compute client: %s", err)
 		}
@@ -452,7 +452,7 @@ func testAccCheckComputeV2InstanceExists(n string, instance *servers.Server) res
 func testAccCheckComputeV2InstanceDoesNotExist(n string, instance *servers.Server) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
 		config := testAccProvider.Meta().(*Config)
-		computeClient, err := config.computeV2HWClient(OS_REGION_NAME)
+		computeClient, err := config.computeV2Client(OS_REGION_NAME)
 		if err != nil {
 			return fmt.Errorf("Error creating OpenTelekomCloud compute client: %s", err)
 		}
@@ -510,7 +510,7 @@ func testAccCheckComputeV2InstanceNoMetadataKey(instance *servers.Server, k stri
 func testAccCheckComputeV2InstanceTagsV1(instance *servers.Server, k, v string) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
 		config := testAccProvider.Meta().(*Config)
-		client, err := config.loadECSV1Client(OS_REGION_NAME)
+		client, err := config.computeV1Client(OS_REGION_NAME)
 		if err != nil {
 			return fmt.Errorf("Error creating OpenTelekomCloud compute v1 client: %s", err)
 		}
@@ -535,7 +535,7 @@ func testAccCheckComputeV2InstanceTagsV1(instance *servers.Server, k, v string) 
 func testAccCheckComputeV2InstanceNoTagV1(instance *servers.Server) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
 		config := testAccProvider.Meta().(*Config)
-		client, err := config.loadECSV1Client(OS_REGION_NAME)
+		client, err := config.computeV1Client(OS_REGION_NAME)
 		if err != nil {
 			return fmt.Errorf("Error creating OpenTelekomCloud compute v1 client: %s", err)
 		}
@@ -558,7 +558,7 @@ func testAccCheckComputeV2InstanceBootVolumeAttachment(instance *servers.Server)
 		var attachments []volumeattach.VolumeAttachment
 
 		config := testAccProvider.Meta().(*Config)
-		computeClient, err := config.computeV2HWClient(OS_REGION_NAME)
+		computeClient, err := config.computeV2Client(OS_REGION_NAME)
 		if err != nil {
 			return err
 		}
@@ -811,7 +811,7 @@ resource "opentelekomcloud_compute_instance_v2" "instance_1" {
     uuid = "%s"
   }
   block_device {
-    uuid = "${opentelekomcloud_blockstorage_volume_v2.vol_1.id}"
+    uuid = opentelekomcloud_blockstorage_volume_v2.vol_1.id
     source_type = "volume"
     boot_index = 0
     destination_type = "volume"
@@ -900,7 +900,7 @@ resource "opentelekomcloud_compute_instance_v2" "instance_1" {
     delete_on_termination = true
   }
   block_device {
-    uuid = "${opentelekomcloud_blockstorage_volume_v2.volume_1.id}"
+    uuid = opentelekomcloud_blockstorage_volume_v2.volume_1.id
     source_type = "volume"
     destination_type = "volume"
     boot_index = 1
@@ -965,7 +965,7 @@ resource "opentelekomcloud_networking_network_v2" "network_1" {
 
 resource "opentelekomcloud_networking_subnet_v2" "subnet_1" {
   name = "subnet_1"
-  network_id = "${opentelekomcloud_networking_network_v2.network_1.id}"
+  network_id = opentelekomcloud_networking_network_v2.network_1.id
   cidr = "192.168.1.0/24"
   ip_version = 4
   enable_dhcp = true
@@ -983,7 +983,7 @@ resource "opentelekomcloud_compute_instance_v2" "instance_1" {
   }
 
   network {
-    uuid = "${opentelekomcloud_networking_network_v2.network_1.id}"
+    uuid = opentelekomcloud_networking_network_v2.network_1.id
     fixed_ip_v4 = "192.168.1.100"
     access_network = true
   }
@@ -1085,7 +1085,7 @@ resource "opentelekomcloud_networking_network_v2" "network_1" {
 
 resource "opentelekomcloud_networking_subnet_v2" "subnet_1" {
   name = "subnet_1"
-  network_id = "${opentelekomcloud_networking_network_v2.network_1.id}"
+  network_id = opentelekomcloud_networking_network_v2.network_1.id
   cidr = "192.168.1.0/24"
   ip_version = 4
   enable_dhcp = true
@@ -1103,7 +1103,7 @@ resource "opentelekomcloud_compute_instance_v2" "instance_1" {
   }
 
   network {
-    name = "${opentelekomcloud_networking_network_v2.network_1.name}"
+    name = opentelekomcloud_networking_network_v2.network_1.name
   }
 
 }
@@ -1116,7 +1116,7 @@ resource "opentelekomcloud_networking_network_v2" "network_1" {
 
 resource "opentelekomcloud_networking_subnet_v2" "subnet_1" {
   name = "subnet_1"
-  network_id = "${opentelekomcloud_networking_network_v2.network_1.id}"
+  network_id = opentelekomcloud_networking_network_v2.network_1.id
   cidr = "192.168.1.0/24"
   ip_version = 4
   enable_dhcp = true
@@ -1129,7 +1129,7 @@ resource "opentelekomcloud_networking_network_v2" "network_2" {
 
 resource "opentelekomcloud_networking_subnet_v2" "subnet_2" {
   name = "subnet_2"
-  network_id = "${opentelekomcloud_networking_network_v2.network_2.id}"
+  network_id = opentelekomcloud_networking_network_v2.network_2.id
   cidr = "192.168.2.0/24"
   ip_version = 4
   enable_dhcp = true
@@ -1138,44 +1138,44 @@ resource "opentelekomcloud_networking_subnet_v2" "subnet_2" {
 
 resource "opentelekomcloud_networking_port_v2" "port_1" {
   name = "port_1"
-  network_id = "${opentelekomcloud_networking_network_v2.network_1.id}"
+  network_id = opentelekomcloud_networking_network_v2.network_1.id
   admin_state_up = "true"
 
   fixed_ip {
-    subnet_id = "${opentelekomcloud_networking_subnet_v2.subnet_1.id}"
+    subnet_id = opentelekomcloud_networking_subnet_v2.subnet_1.id
     ip_address = "192.168.1.103"
   }
 }
 
 resource "opentelekomcloud_networking_port_v2" "port_2" {
   name = "port_2"
-  network_id = "${opentelekomcloud_networking_network_v2.network_2.id}"
+  network_id = opentelekomcloud_networking_network_v2.network_2.id
   admin_state_up = "true"
 
   fixed_ip {
-    subnet_id = "${opentelekomcloud_networking_subnet_v2.subnet_2.id}"
+    subnet_id = opentelekomcloud_networking_subnet_v2.subnet_2.id
     ip_address = "192.168.2.103"
   }
 }
 
 resource "opentelekomcloud_networking_port_v2" "port_3" {
   name = "port_3"
-  network_id = "${opentelekomcloud_networking_network_v2.network_1.id}"
+  network_id = opentelekomcloud_networking_network_v2.network_1.id
   admin_state_up = "true"
 
   fixed_ip {
-    subnet_id = "${opentelekomcloud_networking_subnet_v2.subnet_1.id}"
+    subnet_id = opentelekomcloud_networking_subnet_v2.subnet_1.id
     ip_address = "192.168.1.104"
   }
 }
 
 resource "opentelekomcloud_networking_port_v2" "port_4" {
   name = "port_4"
-  network_id = "${opentelekomcloud_networking_network_v2.network_2.id}"
+  network_id = opentelekomcloud_networking_network_v2.network_2.id
   admin_state_up = "true"
 
   fixed_ip {
-    subnet_id = "${opentelekomcloud_networking_subnet_v2.subnet_2.id}"
+    subnet_id = opentelekomcloud_networking_subnet_v2.subnet_2.id
     ip_address = "192.168.2.104"
   }
 }
@@ -1196,39 +1196,39 @@ resource "opentelekomcloud_compute_instance_v2" "instance_1" {
   }
 
   network {
-    uuid = "${opentelekomcloud_networking_network_v2.network_1.id}"
+    uuid = opentelekomcloud_networking_network_v2.network_1.id
     fixed_ip_v4 = "192.168.1.100"
   }
 
   network {
-    uuid = "${opentelekomcloud_networking_network_v2.network_2.id}"
+    uuid = opentelekomcloud_networking_network_v2.network_2.id
     fixed_ip_v4 = "192.168.2.100"
   }
 
   network {
-    uuid = "${opentelekomcloud_networking_network_v2.network_1.id}"
+    uuid = opentelekomcloud_networking_network_v2.network_1.id
     fixed_ip_v4 = "192.168.1.101"
   }
 
   network {
-    uuid = "${opentelekomcloud_networking_network_v2.network_2.id}"
+    uuid = opentelekomcloud_networking_network_v2.network_2.id
     fixed_ip_v4 = "192.168.2.101"
   }
 
   network {
-    port = "${opentelekomcloud_networking_port_v2.port_1.id}"
+    port = opentelekomcloud_networking_port_v2.port_1.id
   }
 
   network {
-    port = "${opentelekomcloud_networking_port_v2.port_2.id}"
+    port = opentelekomcloud_networking_port_v2.port_2.id
   }
 
   network {
-    port = "${opentelekomcloud_networking_port_v2.port_3.id}"
+    port = opentelekomcloud_networking_port_v2.port_3.id
   }
 
   network {
-    port = "${opentelekomcloud_networking_port_v2.port_4.id}"
+    port = opentelekomcloud_networking_port_v2.port_4.id
   }
 }
 `, OS_NETWORK_ID)

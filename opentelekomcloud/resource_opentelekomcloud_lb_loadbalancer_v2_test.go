@@ -217,7 +217,7 @@ resource "opentelekomcloud_lb_loadbalancer_v2" "loadbalancer_1" {
     name = "loadbalancer_1"
     vip_subnet_id = "%s"
     security_group_ids = [
-      "${opentelekomcloud_networking_secgroup_v2.secgroup_1.id}"
+      opentelekomcloud_networking_secgroup_v2.secgroup_1.id
     ]
 }
 `, OS_SUBNET_ID)
@@ -237,8 +237,8 @@ resource "opentelekomcloud_lb_loadbalancer_v2" "loadbalancer_1" {
     name = "loadbalancer_1"
     vip_subnet_id = "%s"
     security_group_ids = [
-      "${opentelekomcloud_networking_secgroup_v2.secgroup_1.id}",
-      "${opentelekomcloud_networking_secgroup_v2.secgroup_2.id}"
+      opentelekomcloud_networking_secgroup_v2.secgroup_1.id,
+      opentelekomcloud_networking_secgroup_v2.secgroup_2.id
     ]
 }
 `, OS_SUBNET_ID)
@@ -258,7 +258,7 @@ resource "opentelekomcloud_lb_loadbalancer_v2" "loadbalancer_1" {
     name = "loadbalancer_1"
     vip_subnet_id = "%s"
     security_group_ids = [
-      "${opentelekomcloud_networking_secgroup_v2.secgroup_2.id}"
+      opentelekomcloud_networking_secgroup_v2.secgroup_2.id
     ]
     depends_on = ["opentelekomcloud_networking_secgroup_v2.secgroup_1"]
 }

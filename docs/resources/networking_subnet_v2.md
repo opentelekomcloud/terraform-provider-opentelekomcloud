@@ -15,7 +15,7 @@ resource "opentelekomcloud_networking_network_v2" "network_1" {
 }
 
 resource "opentelekomcloud_networking_subnet_v2" "subnet_1" {
-  network_id = "${opentelekomcloud_networking_network_v2.network_1.id}"
+  network_id = opentelekomcloud_networking_network_v2.network_1.id
   cidr       = "192.168.199.0/24"
 }
 ```

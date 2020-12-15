@@ -36,7 +36,7 @@ func TestCESAlarmRule_basic(t *testing.T) {
 
 func testCESAlarmRuleDestroy(s *terraform.State) error {
 	config := testAccProvider.Meta().(*Config)
-	networkingClient, err := config.loadCESClient(OS_REGION_NAME)
+	networkingClient, err := config.cesV1Client(OS_REGION_NAME)
 	if err != nil {
 		return fmt.Errorf("Error creating OpenTelekomCloud ces client: %s", err)
 	}
@@ -68,7 +68,7 @@ func testCESAlarmRuleExists(n string, ar *alarmrule.AlarmRule) resource.TestChec
 		}
 
 		config := testAccProvider.Meta().(*Config)
-		networkingClient, err := config.loadCESClient(OS_REGION_NAME)
+		networkingClient, err := config.cesV1Client(OS_REGION_NAME)
 		if err != nil {
 			return fmt.Errorf("Error creating OpenTelekomCloud ces client: %s", err)
 		}
@@ -106,7 +106,7 @@ resource "opentelekomcloud_ces_alarmrule" "alarmrule_1" {
     metric_name = "network_outgoing_bytes_rate_inband"
     dimensions {
         name = "instance_id"
-        value = "${opentelekomcloud_compute_instance_v2.vm_1.id}"
+        value = opentelekomcloud_compute_instance_v2.vm_1.id
     }
   }
   condition  {
@@ -122,7 +122,7 @@ resource "opentelekomcloud_ces_alarmrule" "alarmrule_1" {
   alarm_actions {
     type = "notification"
     notification_list = [
-      "${opentelekomcloud_smn_topic_v2.topic_1.topic_urn}"
+      opentelekomcloud_smn_topic_v2.topic_1.topic_urn
     ]
   }
 }
@@ -149,7 +149,7 @@ resource "opentelekomcloud_ces_alarmrule" "alarmrule_1" {
     metric_name = "network_outgoing_bytes_rate_inband"
     dimensions {
         name = "instance_id"
-        value = "${opentelekomcloud_compute_instance_v2.vm_1.id}"
+        value = opentelekomcloud_compute_instance_v2.vm_1.id
     }
   }
   condition  {
@@ -166,7 +166,7 @@ resource "opentelekomcloud_ces_alarmrule" "alarmrule_1" {
   alarm_actions {
     type = "notification"
     notification_list = [
-      "${opentelekomcloud_smn_topic_v2.topic_1.topic_urn}"
+      opentelekomcloud_smn_topic_v2.topic_1.topic_urn
     ]
   }
 }

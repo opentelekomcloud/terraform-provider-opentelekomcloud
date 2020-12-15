@@ -45,23 +45,23 @@ func testAccCheckCTSTrackerV1DataSourceID(n string) resource.TestCheckFunc {
 func testAccCTSTrackerV1DataSource_basic(bucketName string) string {
 	return fmt.Sprintf(`
 resource "opentelekomcloud_s3_bucket" "bucket" {
-  bucket		= "%s"
-  acl			= "public-read"
+  bucket        = "%s"
+  acl           = "public-read"
   force_destroy = true
 }
 resource "opentelekomcloud_smn_topic_v2" "topic_1" {
-  name			= "tf-test-topic"
-  display_name	= "The display name of tf-test-topic"
+  name         = "tf-test-topic"
+  display_name = "The display name of tf-test-topic"
 }
 
 resource "opentelekomcloud_cts_tracker_v1" "tracker_v1" {
-  bucket_name		= opentelekomcloud_s3_bucket.bucket.bucket
-  file_prefix_name  = "yO8Q"
-  is_support_smn 	= true
-  topic_id 			= opentelekomcloud_smn_topic_v2.topic_1.id
+  bucket_name               = opentelekomcloud_s3_bucket.bucket.bucket
+  file_prefix_name          = "yO8Q"
+  is_support_smn            = true
+  topic_id                  = opentelekomcloud_smn_topic_v2.topic_1.id
   is_send_all_key_operation = false
-  operations 		= ["login"]
-  need_notify_user_list = ["user1"]
+  operations                = ["login"]
+  need_notify_user_list     = ["user1"]
 }
 
 data "opentelekomcloud_cts_tracker_v1" "d_tracker" {

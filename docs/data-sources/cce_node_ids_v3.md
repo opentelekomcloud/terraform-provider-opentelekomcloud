@@ -11,7 +11,7 @@ This data source can be useful for getting back a list of node ids for a CCE clu
 
 ```hcl
 data "opentelekomcloud_cce_node_ids_v3" "node_ids" {
-  cluster_id = "${var.cluster_id}"
+  cluster_id = var.cluster_id
 }
 ```
 

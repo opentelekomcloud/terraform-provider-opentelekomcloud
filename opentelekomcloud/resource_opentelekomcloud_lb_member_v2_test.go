@@ -103,20 +103,20 @@ resource "opentelekomcloud_lb_listener_v2" "listener_1" {
   name = "listener_1"
   protocol = "HTTP"
   protocol_port = 8080
-  loadbalancer_id = "${opentelekomcloud_lb_loadbalancer_v2.loadbalancer_1.id}"
+  loadbalancer_id = opentelekomcloud_lb_loadbalancer_v2.loadbalancer_1.id
 }
 
 resource "opentelekomcloud_lb_pool_v2" "pool_1" {
   name = "pool_1"
   protocol = "HTTP"
   lb_method = "ROUND_ROBIN"
-  listener_id = "${opentelekomcloud_lb_listener_v2.listener_1.id}"
+  listener_id = opentelekomcloud_lb_listener_v2.listener_1.id
 }
 
 resource "opentelekomcloud_lb_member_v2" "member_1" {
   address = "192.168.0.10"
   protocol_port = 8080
-  pool_id = "${opentelekomcloud_lb_pool_v2.pool_1.id}"
+  pool_id = opentelekomcloud_lb_pool_v2.pool_1.id
   subnet_id = "%s"
 
   timeouts {
@@ -129,7 +129,7 @@ resource "opentelekomcloud_lb_member_v2" "member_1" {
 resource "opentelekomcloud_lb_member_v2" "member_2" {
   address = "192.168.0.11"
   protocol_port = 8080
-  pool_id = "${opentelekomcloud_lb_pool_v2.pool_1.id}"
+  pool_id = opentelekomcloud_lb_pool_v2.pool_1.id
   subnet_id = "%s"
 
   timeouts {
@@ -150,14 +150,14 @@ resource "opentelekomcloud_lb_listener_v2" "listener_1" {
   name = "listener_1"
   protocol = "HTTP"
   protocol_port = 8080
-  loadbalancer_id = "${opentelekomcloud_lb_loadbalancer_v2.loadbalancer_1.id}"
+  loadbalancer_id = opentelekomcloud_lb_loadbalancer_v2.loadbalancer_1.id
 }
 
 resource "opentelekomcloud_lb_pool_v2" "pool_1" {
   name = "pool_1"
   protocol = "HTTP"
   lb_method = "ROUND_ROBIN"
-  listener_id = "${opentelekomcloud_lb_listener_v2.listener_1.id}"
+  listener_id = opentelekomcloud_lb_listener_v2.listener_1.id
 }
 
 resource "opentelekomcloud_lb_member_v2" "member_1" {
@@ -165,7 +165,7 @@ resource "opentelekomcloud_lb_member_v2" "member_1" {
   protocol_port = 8080
   weight = 10
   admin_state_up = "true"
-  pool_id = "${opentelekomcloud_lb_pool_v2.pool_1.id}"
+  pool_id = opentelekomcloud_lb_pool_v2.pool_1.id
   subnet_id = "%s"
 
   timeouts {
@@ -180,7 +180,7 @@ resource "opentelekomcloud_lb_member_v2" "member_2" {
   protocol_port = 8080
   weight = 15
   admin_state_up = "true"
-  pool_id = "${opentelekomcloud_lb_pool_v2.pool_1.id}"
+  pool_id = opentelekomcloud_lb_pool_v2.pool_1.id
   subnet_id = "%s"
 
   timeouts {

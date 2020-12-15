@@ -12,7 +12,7 @@ Use this data source to get details about SSH key pairs of BMSs from OpenTelekom
 variable "keypair_name" { }
 
 data "opentelekomcloud_compute_bms_keypairs_v2" "query_bms_keypair" {
-  name = "${var.keypair_name}"
+  name = var.keypair_name
 }
 ```
 

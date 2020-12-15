@@ -14,7 +14,7 @@ func TestAccObsBucket_basic(t *testing.T) {
 	resourceName := "opentelekomcloud_obs_bucket.bucket"
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheckS3(t) },
+		PreCheck:     func() { testAccPreCheck(t) },
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckObsBucketDestroy,
 		Steps: []resource.TestStep{
@@ -53,7 +53,7 @@ func TestAccObsBucket_tags(t *testing.T) {
 	resourceName := "opentelekomcloud_obs_bucket.bucket"
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:  func() { testAccPreCheckS3(t) },
+		PreCheck:  func() { testAccPreCheck(t) },
 		Providers: testAccProviders,
 		Steps: []resource.TestStep{
 			{
@@ -76,7 +76,7 @@ func TestAccObsBucket_versioning(t *testing.T) {
 	resourceName := "opentelekomcloud_obs_bucket.bucket"
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheckS3(t) },
+		PreCheck:     func() { testAccPreCheck(t) },
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckObsBucketDestroy,
 		Steps: []resource.TestStep{
@@ -102,11 +102,11 @@ func TestAccObsBucket_versioning(t *testing.T) {
 
 func TestAccObsBucket_logging(t *testing.T) {
 	rInt := acctest.RandInt()
-	target_bucket := fmt.Sprintf("tf-test-log-bucket-%d", rInt)
+	targetBucket := fmt.Sprintf("tf-test-log-bucket-%d", rInt)
 	resourceName := "opentelekomcloud_obs_bucket.bucket"
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheckS3(t) },
+		PreCheck:     func() { testAccPreCheck(t) },
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckObsBucketDestroy,
 		Steps: []resource.TestStep{
@@ -114,7 +114,7 @@ func TestAccObsBucket_logging(t *testing.T) {
 				Config: testAccObsBucketConfigWithLogging(rInt),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckObsBucketExists(resourceName),
-					testAccCheckObsBucketLogging(resourceName, target_bucket, "log/"),
+					testAccCheckObsBucketLogging(resourceName, targetBucket, "log/"),
 				),
 			},
 		},
@@ -126,7 +126,7 @@ func TestAccObsBucket_lifecycle(t *testing.T) {
 	resourceName := "opentelekomcloud_obs_bucket.bucket"
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheckS3(t) },
+		PreCheck:     func() { testAccPreCheck(t) },
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckObsBucketDestroy,
 		Steps: []resource.TestStep{
@@ -154,14 +154,6 @@ func TestAccObsBucket_lifecycle(t *testing.T) {
 						resourceName, "lifecycle_rule.2.noncurrent_version_transition.0.days", "60"),
 					resource.TestCheckResourceAttr(
 						resourceName, "lifecycle_rule.2.noncurrent_version_transition.1.days", "180"),
-					/*
-						resource.TestCheckResourceAttr(
-							resourceName, "lifecycle_rule.0.expiration.days", "365"),
-						resource.TestCheckResourceAttr(
-							resourceName, "lifecycle_rule.1.expiration.days", "365"),
-						resource.TestCheckResourceAttr(
-							resourceName, "lifecycle_rule.2.noncurrent_version_expiration.days", "365"),
-					*/
 				),
 			},
 		},
@@ -173,7 +165,7 @@ func TestAccObsBucket_website(t *testing.T) {
 	resourceName := "opentelekomcloud_obs_bucket.bucket"
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheckS3(t) },
+		PreCheck:     func() { testAccPreCheck(t) },
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckObsBucketDestroy,
 		Steps: []resource.TestStep{
@@ -196,7 +188,7 @@ func TestAccObsBucket_cors(t *testing.T) {
 	resourceName := "opentelekomcloud_obs_bucket.bucket"
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheckS3(t) },
+		PreCheck:     func() { testAccPreCheck(t) },
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckObsBucketDestroy,
 		Steps: []resource.TestStep{
@@ -224,7 +216,7 @@ func testAccCheckObsBucketDestroy(s *terraform.State) error {
 	config := testAccProvider.Meta().(*Config)
 	obsClient, err := config.newObjectStorageClient(OS_REGION_NAME)
 	if err != nil {
-		return fmt.Errorf("Error creating OpenTelekomCloud OBS client: %s", err)
+		return fmt.Errorf("error creating OpenTelekomCloud OBS client: %s", err)
 	}
 
 	for _, rs := range s.RootModule().Resources {
@@ -244,17 +236,17 @@ func testAccCheckObsBucketExists(n string) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
 		rs, ok := s.RootModule().Resources[n]
 		if !ok {
-			return fmt.Errorf("Not found: %s", n)
+			return fmt.Errorf("not found: %s", n)
 		}
 
 		if rs.Primary.ID == "" {
-			return fmt.Errorf("No ID is set")
+			return fmt.Errorf("no ID is set")
 		}
 
 		config := testAccProvider.Meta().(*Config)
 		obsClient, err := config.newObjectStorageClient(OS_REGION_NAME)
 		if err != nil {
-			return fmt.Errorf("Error creating OpenTelekomCloud OBS client: %s", err)
+			return fmt.Errorf("error creating OpenTelekomCloud OBS client: %s", err)
 		}
 
 		_, err = obsClient.HeadBucket(rs.Primary.ID)
@@ -269,18 +261,18 @@ func testAccCheckObsBucketLogging(name, target, prefix string) resource.TestChec
 	return func(s *terraform.State) error {
 		rs, ok := s.RootModule().Resources[name]
 		if !ok {
-			return fmt.Errorf("Not found: %s", name)
+			return fmt.Errorf("not found: %s", name)
 		}
 
 		config := testAccProvider.Meta().(*Config)
 		obsClient, err := config.newObjectStorageClient(OS_REGION_NAME)
 		if err != nil {
-			return fmt.Errorf("Error creating OpenTelekomCloud OBS client: %s", err)
+			return fmt.Errorf("error creating OpenTelekomCloud OBS client: %s", err)
 		}
 
 		output, err := obsClient.GetBucketLoggingConfiguration(rs.Primary.ID)
 		if err != nil {
-			return fmt.Errorf("Error getting logging configuration of OBS bucket: %s", err)
+			return fmt.Errorf("error getting logging configuration of OBS bucket: %s", err)
 		}
 
 		if output.TargetBucket != target {
@@ -308,9 +300,9 @@ func testAccObsBucketDomainName(randInt int) string {
 func testAccObsBucket_basic(randInt int) string {
 	return fmt.Sprintf(`
 resource "opentelekomcloud_obs_bucket" "bucket" {
-	bucket = "tf-test-bucket-%d"
-    storage_class = "STANDARD"
-	acl = "private"
+  bucket        = "tf-test-bucket-%d"
+  storage_class = "STANDARD"
+  acl           = "private"
 }
 `, randInt)
 }
@@ -318,9 +310,9 @@ resource "opentelekomcloud_obs_bucket" "bucket" {
 func testAccObsBucket_basic_update(randInt int) string {
 	return fmt.Sprintf(`
 resource "opentelekomcloud_obs_bucket" "bucket" {
-	bucket = "tf-test-bucket-%d"
-    storage_class = "WARM"
-	acl = "public-read"
+  bucket        = "tf-test-bucket-%d"
+  storage_class = "WARM"
+  acl           = "public-read"
 }
 `, randInt)
 }
@@ -328,14 +320,14 @@ resource "opentelekomcloud_obs_bucket" "bucket" {
 func testAccObsBucketConfigWithTags(randInt int) string {
 	return fmt.Sprintf(`
 resource "opentelekomcloud_obs_bucket" "bucket" {
-	bucket = "tf-test-bucket-%d"
-	acl = "private"
+  bucket = "tf-test-bucket-%d"
+  acl    = "private"
 
-	tags = {
-		name = "tf-test-bucket-%d"
-        foo = "bar"
-        key1 = "value1"
-	}
+  tags = {
+    name = "tf-test-bucket-%d"
+    foo  = "bar"
+    key1 = "value1"
+  }
 }
 `, randInt, randInt)
 }
@@ -343,9 +335,9 @@ resource "opentelekomcloud_obs_bucket" "bucket" {
 func testAccObsBucketConfigWithVersioning(randInt int) string {
 	return fmt.Sprintf(`
 resource "opentelekomcloud_obs_bucket" "bucket" {
-	bucket = "tf-test-bucket-%d"
-	acl = "private"
-	versioning = true
+  bucket     = "tf-test-bucket-%d"
+  acl        = "private"
+  versioning = true
 }
 `, randInt)
 }
@@ -353,9 +345,9 @@ resource "opentelekomcloud_obs_bucket" "bucket" {
 func testAccObsBucketConfigWithDisableVersioning(randInt int) string {
 	return fmt.Sprintf(`
 resource "opentelekomcloud_obs_bucket" "bucket" {
-	bucket = "tf-test-bucket-%d"
-	acl = "private"
-	versioning = false
+  bucket     = "tf-test-bucket-%d"
+  acl        = "private"
+  versioning = false
 }
 `, randInt)
 }
@@ -363,18 +355,18 @@ resource "opentelekomcloud_obs_bucket" "bucket" {
 func testAccObsBucketConfigWithLogging(randInt int) string {
 	return fmt.Sprintf(`
 resource "opentelekomcloud_obs_bucket" "log_bucket" {
-	bucket = "tf-test-log-bucket-%d"
-	acl = "log-delivery-write"
-    force_destroy = "true"
+  bucket        = "tf-test-log-bucket-%d"
+  acl           = "log-delivery-write"
+  force_destroy = "true"
 }
 resource "opentelekomcloud_obs_bucket" "bucket" {
-	bucket = "tf-test-bucket-%d"
-	acl = "private"
+  bucket = "tf-test-bucket-%d"
+  acl    = "private"
 
-	logging {
-		target_bucket = opentelekomcloud_obs_bucket.log_bucket.id
-		target_prefix = "log/"
-	}
+  logging {
+    target_bucket = opentelekomcloud_obs_bucket.log_bucket.id
+    target_prefix = "log/"
+  }
 }
 `, randInt, randInt)
 }
@@ -382,55 +374,55 @@ resource "opentelekomcloud_obs_bucket" "bucket" {
 func testAccObsBucketConfigWithLifecycle(randInt int) string {
 	return fmt.Sprintf(`
 resource "opentelekomcloud_obs_bucket" "bucket" {
-	bucket = "tf-test-bucket-%d"
-	acl = "private"
-	versioning = true
+  bucket     = "tf-test-bucket-%d"
+  acl        = "private"
+  versioning = true
 
-	lifecycle_rule {
-		name = "rule1"
-		prefix = "path1/"
-		enabled = true
+  lifecycle_rule {
+    name    = "rule1"
+    prefix  = "path1/"
+    enabled = true
 
-		expiration {
-			days = 365
-		}
-	}
-	lifecycle_rule {
-		name = "rule2"
-		prefix = "path2/"
-		enabled = true
+    expiration {
+      days = 365
+    }
+  }
+  lifecycle_rule {
+    name    = "rule2"
+    prefix  = "path2/"
+    enabled = true
 
-		expiration {
-			days = 365
-		}
+    expiration {
+      days = 365
+    }
 
-		transition {
-			days = 30
-			storage_class = "WARM"
-		}
-		transition {
-			days = 180
-			storage_class = "COLD"
-		}
-	}
-	lifecycle_rule {
-		name = "rule3"
-		prefix = "path3/"
-		enabled = true
+    transition {
+      days          = 30
+      storage_class = "WARM"
+    }
+    transition {
+      days          = 180
+      storage_class = "COLD"
+    }
+  }
+  lifecycle_rule {
+    name    = "rule3"
+    prefix  = "path3/"
+    enabled = true
 
-		noncurrent_version_expiration {
-			days = 365
-		}
+    noncurrent_version_expiration {
+      days = 365
+    }
 
-		noncurrent_version_transition {
-			days = 60
-			storage_class = "WARM"
-		}
-		noncurrent_version_transition {
-			days = 180
-			storage_class = "COLD"
-		}
-	}
+    noncurrent_version_transition {
+      days          = 60
+      storage_class = "WARM"
+    }
+    noncurrent_version_transition {
+      days          = 180
+      storage_class = "COLD"
+    }
+  }
 }
 `, randInt)
 }
@@ -438,13 +430,13 @@ resource "opentelekomcloud_obs_bucket" "bucket" {
 func testAccObsBucketWebsiteConfigWithRoutingRules(randInt int) string {
 	return fmt.Sprintf(`
 resource "opentelekomcloud_obs_bucket" "bucket" {
-	bucket = "tf-test-bucket-%d"
-	acl = "public-read"
+  bucket = "tf-test-bucket-%d"
+  acl    = "public-read"
 
-	website {
-		index_document = "index.html"
-		error_document = "error.html"
-		routing_rules = <<EOF
+  website {
+    index_document = "index.html"
+    error_document = "error.html"
+    routing_rules  = <<EOF
 [{
 	"Condition": {
 		"KeyPrefixEquals": "docs/"
@@ -454,7 +446,7 @@ resource "opentelekomcloud_obs_bucket" "bucket" {
 	}
 }]
 EOF
-	}
+  }
 }
 `, randInt)
 }
@@ -462,16 +454,16 @@ EOF
 func testAccObsBucketConfigWithCORS(randInt int) string {
 	return fmt.Sprintf(`
 resource "opentelekomcloud_obs_bucket" "bucket" {
-	bucket = "tf-test-bucket-%d"
-	acl = "public-read"
+  bucket = "tf-test-bucket-%d"
+  acl    = "public-read"
 
-	cors_rule {
-		allowed_headers = ["*"]
-		allowed_methods = ["PUT","POST"]
-		allowed_origins = ["https://www.example.com"]
-		expose_headers  = ["x-amz-server-side-encryption","ETag"]
-		max_age_seconds = 3000
-	}
+  cors_rule {
+    allowed_headers = ["*"]
+    allowed_methods = ["PUT", "POST"]
+    allowed_origins = ["https://www.example.com"]
+    expose_headers  = ["x-amz-server-side-encryption", "ETag"]
+    max_age_seconds = 3000
+  }
 }
 `, randInt)
 }

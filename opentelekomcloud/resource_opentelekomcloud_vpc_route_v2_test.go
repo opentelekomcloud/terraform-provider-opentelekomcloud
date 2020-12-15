@@ -52,7 +52,7 @@ func TestAccOTCVpcRouteV2_timeout(t *testing.T) {
 
 func testAccCheckOTCRouteV2Destroy(s *terraform.State) error {
 	config := testAccProvider.Meta().(*Config)
-	routeClient, err := config.hwNetworkV2Client(OS_REGION_NAME)
+	routeClient, err := config.networkingV2Client(OS_REGION_NAME)
 	if err != nil {
 		return fmt.Errorf("Error creating OpenTelekomCloud route client: %s", err)
 	}
@@ -83,7 +83,7 @@ func testAccCheckOTCRouteV2Exists(n string, route *routes.Route) resource.TestCh
 		}
 
 		config := testAccProvider.Meta().(*Config)
-		routeClient, err := config.hwNetworkV2Client(OS_REGION_NAME)
+		routeClient, err := config.networkingV2Client(OS_REGION_NAME)
 		if err != nil {
 			return fmt.Errorf("Error creating OpenTelekomCloud route client: %s", err)
 		}
@@ -115,14 +115,14 @@ resource "opentelekomcloud_vpc_v1" "vpc_2" {
 }
 resource "opentelekomcloud_vpc_peering_connection_v2" "peering_1" {
   name = "opentelekomcloud_peering"
-  vpc_id = "${opentelekomcloud_vpc_v1.vpc_1.id}"
-  peer_vpc_id = "${opentelekomcloud_vpc_v1.vpc_2.id}"
+  vpc_id = opentelekomcloud_vpc_v1.vpc_1.id
+  peer_vpc_id = opentelekomcloud_vpc_v1.vpc_2.id
 }
 resource "opentelekomcloud_vpc_route_v2" "route_1" {
   type = "peering"
-  nexthop = "${opentelekomcloud_vpc_peering_connection_v2.peering_1.id}"
+  nexthop = opentelekomcloud_vpc_peering_connection_v2.peering_1.id
   destination = "192.168.0.0/16"
-  vpc_id ="${opentelekomcloud_vpc_v1.vpc_1.id}"
+  vpc_id =opentelekomcloud_vpc_v1.vpc_1.id
 
 }
 `
@@ -140,15 +140,15 @@ resource "opentelekomcloud_vpc_v1" "vpc_2" {
 
 resource "opentelekomcloud_vpc_peering_connection_v2" "peering_1" {
   name = "opentelekomcloud_peering"
-  vpc_id = "${opentelekomcloud_vpc_v1.vpc_1.id}"
-  peer_vpc_id = "${opentelekomcloud_vpc_v1.vpc_2.id}"
+  vpc_id = opentelekomcloud_vpc_v1.vpc_1.id
+  peer_vpc_id = opentelekomcloud_vpc_v1.vpc_2.id
 }
 
 resource "opentelekomcloud_vpc_route_v2" "route_1" {
    type = "peering"
-  nexthop = "${opentelekomcloud_vpc_peering_connection_v2.peering_1.id}"
+  nexthop = opentelekomcloud_vpc_peering_connection_v2.peering_1.id
   destination = "192.168.0.0/16"
-  vpc_id ="${opentelekomcloud_vpc_v1.vpc_1.id}"
+  vpc_id =opentelekomcloud_vpc_v1.vpc_1.id
 
   timeouts {
     create = "5m"

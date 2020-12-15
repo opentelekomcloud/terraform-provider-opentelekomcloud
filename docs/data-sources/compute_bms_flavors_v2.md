@@ -13,8 +13,8 @@ variable "flavor_id" { }
 variable "disk_size" { }
 
 data "opentelekomcloud_compute_bms_flavors_v2" "query_bms_flavors" {
-  id       = "${var.bms_id}"
-  min_disk = "${var.disk_size}"
+  id       = var.bms_id
+  min_disk = var.disk_size
   sort_key = "id"
   sort_dir = "desc"
 }
@@ -38,7 +38,7 @@ The arguments of this data source act as filters for querying the BMSs details.
 
 ## Attributes Reference
 
-All of the argument attributes are also exported as result attributes. 
+All of the argument attributes are also exported as result attributes.
 
 * `ram` - It is the memory size (in MB) of the flavor.
 

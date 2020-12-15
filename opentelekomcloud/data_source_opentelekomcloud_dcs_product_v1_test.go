@@ -42,6 +42,6 @@ func testAccCheckDcsProductV1DataSourceID(n string) resource.TestCheckFunc {
 
 var testAccDcsProductV1DataSource_basic = fmt.Sprintf(`
 data "opentelekomcloud_dcs_product_v1" "product1" {
-spec_code = "dcs.single_node"
+  spec_code = "dcs.single_node"
 }
 `)

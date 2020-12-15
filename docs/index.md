@@ -1,6 +1,6 @@
-# OpenTelekomCloud Provider
+# Open Telekom Cloud Provider
 
-The OpenTelekomCloud provider is used to interact with the
+The Open Telekom Cloud provider is used to interact with the
 many resources supported by OpenTelekomCloud. The provider needs to be configured
 with the proper credentials before it can be used.
 
@@ -11,10 +11,10 @@ Use the navigation to the left to read about the available resources.
 ```hcl
 # Configure the OpenTelekomCloud Provider
 provider "opentelekomcloud" {
-  user_name   = "${var.user_name}"
-  password    = "${var.password}"
-  domain_name = "${var.domain_name}"
-  tenant_name = "${var.tenant_name}"
+  user_name   = var.user_name
+  password    = var.password
+  domain_name = var.domain_name
+  tenant_name = var.tenant_name
   auth_url    = "https://iam.eu-de.otc.t-systems.com/v3"
 }
 
@@ -39,10 +39,10 @@ This provider offers 5 means for authentication.
 
 ```hcl
 provider "opentelekomcloud" {
-  user_name   = "${var.user_name}"
-  password    = "${var.password}"
-  domain_name = "${var.domain_name}"
-  tenant_name = "${var.tenant_name}"
+  user_name   = var.user_name
+  password    = var.password
+  domain_name = var.domain_name
+  tenant_name = var.tenant_name
   auth_url    = "https://iam.eu-de.otc.t-systems.com/v3"
 }
 ```
@@ -51,10 +51,10 @@ provider "opentelekomcloud" {
 
 ```hcl
 provider "opentelekomcloud" {
-  access_key  = "${var.access_key}"
-  secret_key  = "${var.secret_key}"
-  domain_name = "${var.domain_name}"
-  tenant_name = "${var.tenant_name}"
+  access_key  = var.access_key
+  secret_key  = var.secret_key
+  domain_name = var.domain_name
+  tenant_name = var.tenant_name
   auth_url    = "https://iam.eu-de.otc.t-systems.com/v3"
 }
 ```
@@ -63,9 +63,9 @@ provider "opentelekomcloud" {
 
 ```hcl
 provider "opentelekomcloud" {
-  token       = "${var.token}"
-  domain_name = "${var.domain_name}"
-  tenant_name = "${var.tenant_name}"
+  token       = var.token
+  domain_name = var.domain_name
+  tenant_name = var.tenant_name
   auth_url    = "https://iam.eu-de.otc.t-systems.com/v3"
 }
 ```
@@ -76,12 +76,12 @@ provider "opentelekomcloud" {
 
 ```hcl
 provider "opentelekomcloud" {
-  token          = "${var.token}"
-  security_token = "${var.security_token}"
-  access_key     = "${var.access_key}"
-  secret_key     = "${var.secret_key}"
-  domain_name    = "${var.domain_name}"
-  tenant_name    = "${var.tenant_name}"
+  token          = var.token
+  security_token = var.security_token
+  access_key     = var.access_key
+  secret_key     = var.secret_key
+  domain_name    = var.domain_name
+  tenant_name    = var.tenant_name
   auth_url       = "https://iam.eu-de.otc.t-systems.com/v3"
 }
 ```
@@ -92,12 +92,12 @@ provider "opentelekomcloud" {
 
 ```hcl
 provider "opentelekomcloud" {
-  agency_name        = "${var.agency_name}"
-  agency_domain_name = "${var.agency_domain_name}"
-  delegated_project  = "${var.delegated_project}"
-  user_name          = "${var.user_name}"
-  password           = "${var.password}"
-  domain_name        = "${var.domain_name}"
+  agency_name        = var.agency_name
+  agency_domain_name = var.agency_domain_name
+  delegated_project  = var.delegated_project
+  user_name          = var.user_name
+  password           = var.password
+  domain_name        = var.domain_name
   auth_url           = "https://iam.eu-de.otc.t-systems.com/v3"
 }
 ```
@@ -106,12 +106,12 @@ provider "opentelekomcloud" {
 
 ```hcl
 provider "opentelekomcloud" {
-  agency_name        = "${var.agency_name}"
-  agency_domain_name = "${var.agency_domain_name}"
-  delegated_project  = "${var.delegated_project}"
-  access_key         = "${var.access_key}"
-  secret_key         = "${var.secret_key}"
-  domain_name        = "${var.domain_name}"
+  agency_name        = var.agency_name
+  agency_domain_name = var.agency_domain_name
+  delegated_project  = var.delegated_project
+  access_key         = var.access_key
+  secret_key         = var.secret_key
+  domain_name        = var.domain_name
   auth_url           = "https://iam.eu-de.otc.t-systems.com/v3"
 }
 ```
@@ -120,10 +120,10 @@ provider "opentelekomcloud" {
 
 ```hcl
 provider "opentelekomcloud" {
-  agency_name        = "${var.agency_name}"
-  agency_domain_name = "${var.agency_domain_name}"
-  delegated_project  = "${var.delegated_project}"
-  token              = "${var.token}"
+  agency_name        = var.agency_name
+  agency_domain_name = var.agency_domain_name
+  delegated_project  = var.delegated_project
+  token              = var.token
   auth_url           = "https://iam.eu-de.otc.t-systems.com/v3"
 }
 ```

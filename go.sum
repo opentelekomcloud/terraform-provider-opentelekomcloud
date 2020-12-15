@@ -200,8 +200,8 @@ github.com/mitchellh/reflectwalk v1.0.1 h1:FVzMWA5RllMAKIdUSC8mdWo3XtwoecrH79BY7
 github.com/mitchellh/reflectwalk v1.0.1/go.mod h1:mSTlrgnPZtwu0c4WaC2kGObEpuNDbx0jmZXqmk4esnw=
 github.com/oklog/run v1.0.0 h1:Ru7dDtJNOyC66gQ5dQmaCa0qIsAUFY3sFpK1Xk8igrw=
 github.com/oklog/run v1.0.0/go.mod h1:dlhp/R75TPv97u0XWUtDeV/lRKWPKSdTuV0TZvrmrQA=
-github.com/opentelekomcloud/gophertelekomcloud v0.1.1-0.20201117142225-6ab44f9a293e h1:e63fPcj+QVWUsiiqs/1mG2yGbYPRTMZLmrUuhlHT7uU=
-github.com/opentelekomcloud/gophertelekomcloud v0.1.1-0.20201117142225-6ab44f9a293e/go.mod h1:Xb8wlPYSv1ieZvGyMCE1XwHllda6CyzyiJ2QrkGLv2g=
+github.com/opentelekomcloud/gophertelekomcloud v0.2.1-0.20201204075617-5d982f982481 h1:zlWPQnaFPQHRaoKeN+PAcvFGxa0rLXMLEDi85iU5elw=
+github.com/opentelekomcloud/gophertelekomcloud v0.2.1-0.20201204075617-5d982f982481/go.mod h1:2VmHKlpPMgw4mBsmmwaEeBo0xXqAVCjHmIOomsTD4TU=
 github.com/pierrec/lz4 v2.0.5+incompatible/go.mod h1:pdkljMzZIN41W+lC3N2tnIh5sFi+IEE17M5jbnwPHcY=
 github.com/pmezard/go-difflib v1.0.0 h1:4DBwDE0NGyQoBHbLQYPwSUPoCMWR5BEzIk/f1lZbAQM=
 github.com/pmezard/go-difflib v1.0.0/go.mod h1:iKH77koFhYxTK1pcRnkKkqfTogsbg7gZNVY4sRDYZ/4=

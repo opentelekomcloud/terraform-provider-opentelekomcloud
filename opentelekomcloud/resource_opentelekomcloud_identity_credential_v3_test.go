@@ -6,19 +6,20 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/terraform"
+	"github.com/opentelekomcloud/gophertelekomcloud/openstack/identity/v3/credentials"
 )
 
 func TestAccIdentityV3Credential_basic(t *testing.T) {
 	resource.Test(t, resource.TestCase{
 		PreCheck: func() {
 			testAccPreCheck(t)
-			testIdentityCredentialPrecheck(t)
+			checkAKSKUnset(t)
 		},
 		Providers:    testAccProviders,
 		CheckDestroy: testAccIdentityV3CredentialDestroy,
 		Steps: []resource.TestStep{
 			{
-				Config: fmt.Sprintf(testAccIdentityV3CredentialBasic, OS_USER_ID),
+				Config: testAccIdentityV3CredentialBasic,
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttrSet("opentelekomcloud_identity_credential_v3.aksk", "user_id"),
 					resource.TestCheckResourceAttrSet("opentelekomcloud_identity_credential_v3.aksk", "description"),
@@ -30,28 +31,28 @@ func TestAccIdentityV3Credential_basic(t *testing.T) {
 				),
 			},
 			{
-				Config: fmt.Sprintf(testAccIdentityV3CredentialUpdate, OS_USER_ID),
+				Config: testAccIdentityV3CredentialUpdateStatus,
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttrSet("opentelekomcloud_identity_credential_v3.aksk", "access"),
 					resource.TestCheckResourceAttrSet("opentelekomcloud_identity_credential_v3.aksk", "secret"),
 					resource.TestCheckResourceAttr("opentelekomcloud_identity_credential_v3.aksk", "status", "inactive"),
 				),
 			},
+			{
+				Config: testAccIdentityV3CredentialUpdateDescription,
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr("opentelekomcloud_identity_credential_v3.aksk", "description", "This is one and unique test AK/SK 2"),
+				),
+			},
 		},
 	})
-}
-
-func testIdentityCredentialPrecheck(t *testing.T) {
-	if OS_USER_ID == "" {
-		t.Error("OS_USER_ID is required for credentials test")
-	}
 }
 
 func testAccIdentityV3CredentialDestroy(s *terraform.State) error {
 	config := testAccProvider.Meta().(*Config)
 	client, err := config.identityV3Client(OS_REGION_NAME)
 	if err != nil {
-		return fmt.Errorf("error creating OpenStack identity client: %s", err)
+		return fmt.Errorf("error creating identity v3 client: %s", err)
 	}
 
 	for _, rs := range s.RootModule().Resources {
@@ -59,7 +60,7 @@ func testAccIdentityV3CredentialDestroy(s *terraform.State) error {
 			continue
 		}
 
-		_, err := CredentialGet(client, rs.Primary.ID).Extract()
+		_, err := credentials.Get(client, rs.Primary.ID).Extract()
 
 		if err == nil {
 			return fmt.Errorf("AK/SK still exists")
@@ -69,18 +70,27 @@ func testAccIdentityV3CredentialDestroy(s *terraform.State) error {
 	return nil
 }
 
+func checkAKSKUnset(t *testing.T) {
+	if OS_SECRET_KEY != "" && OS_ACCESS_KEY != "" {
+		t.Error("AK/SK should not be set for AK/SK creation test")
+	}
+}
+
 const (
 	testAccIdentityV3CredentialBasic = `
-
 resource opentelekomcloud_identity_credential_v3 aksk {
-  user_id = "%s"
   description = "This is one and unique test AK/SK"
 }
 `
-	testAccIdentityV3CredentialUpdate = `
+	testAccIdentityV3CredentialUpdateStatus = `
 resource opentelekomcloud_identity_credential_v3 aksk {
-  user_id = "%s"
   description = "This is one and unique test AK/SK"
+  status  = "inactive"
+}
+`
+	testAccIdentityV3CredentialUpdateDescription = `
+resource opentelekomcloud_identity_credential_v3 aksk {
+  description = "This is one and unique test AK/SK 2"
   status  = "inactive"
 }
 `

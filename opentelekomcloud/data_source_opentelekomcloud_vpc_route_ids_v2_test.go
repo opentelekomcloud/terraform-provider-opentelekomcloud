@@ -55,21 +55,21 @@ resource "opentelekomcloud_vpc_v1" "vpc_2" {
 
 resource "opentelekomcloud_vpc_peering_connection_v2" "peering_1" {
 		name = "opentelekomcloud_peering"
-		vpc_id = "${opentelekomcloud_vpc_v1.vpc_1.id}"
-		peer_vpc_id = "${opentelekomcloud_vpc_v1.vpc_2.id}"
+		vpc_id = opentelekomcloud_vpc_v1.vpc_1.id
+		peer_vpc_id = opentelekomcloud_vpc_v1.vpc_2.id
 }
 
 resource "opentelekomcloud_vpc_route_v2" "route_1" {
    type = "peering"
-  nexthop = "${opentelekomcloud_vpc_peering_connection_v2.peering_1.id}"
+  nexthop = opentelekomcloud_vpc_peering_connection_v2.peering_1.id
   destination = "192.168.0.0/16"
-  vpc_id ="${opentelekomcloud_vpc_v1.vpc_1.id}"
+  vpc_id =opentelekomcloud_vpc_v1.vpc_1.id
 }
 `
 
 var testAccOTCRouteIdV2DataSource_basic = fmt.Sprintf(`
 %s
 data "opentelekomcloud_vpc_route_ids_v2" "route_ids" {
-  vpc_id = "${opentelekomcloud_vpc_route_v2.route_1.vpc_id}"
+  vpc_id = opentelekomcloud_vpc_route_v2.route_1.vpc_id
 }
 `, testAccOTCRouteIdV2DataSource_vpcroute)

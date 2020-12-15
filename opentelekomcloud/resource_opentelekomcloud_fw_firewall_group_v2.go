@@ -81,7 +81,7 @@ func resourceFWFirewallGroupV2() *schema.Resource {
 func resourceFWFirewallGroupV2Create(d *schema.ResourceData, meta interface{}) error {
 
 	config := meta.(*Config)
-	networkingClient, err := config.hwNetworkV2Client(GetRegion(d, config))
+	networkingClient, err := config.networkingV2Client(GetRegion(d, config))
 	if err != nil {
 		return fmt.Errorf("Error creating OpenTelekomCloud networking client: %s", err)
 	}
@@ -146,7 +146,7 @@ func resourceFWFirewallGroupV2Read(d *schema.ResourceData, meta interface{}) err
 	log.Printf("[DEBUG] Retrieve information about firewall: %s", d.Id())
 
 	config := meta.(*Config)
-	networkingClient, err := config.hwNetworkV2Client(GetRegion(d, config))
+	networkingClient, err := config.networkingV2Client(GetRegion(d, config))
 	if err != nil {
 		return fmt.Errorf("Error creating OpenTelekomCloud networking client: %s", err)
 	}
@@ -176,7 +176,7 @@ func resourceFWFirewallGroupV2Read(d *schema.ResourceData, meta interface{}) err
 func resourceFWFirewallGroupV2Update(d *schema.ResourceData, meta interface{}) error {
 
 	config := meta.(*Config)
-	networkingClient, err := config.hwNetworkV2Client(GetRegion(d, config))
+	networkingClient, err := config.networkingV2Client(GetRegion(d, config))
 	if err != nil {
 		return fmt.Errorf("Error creating OpenTelekomCloud networking client: %s", err)
 	}
@@ -242,7 +242,7 @@ func resourceFWFirewallGroupV2Delete(d *schema.ResourceData, meta interface{}) e
 	log.Printf("[DEBUG] Destroy firewall group: %s", d.Id())
 
 	config := meta.(*Config)
-	networkingClient, err := config.hwNetworkV2Client(GetRegion(d, config))
+	networkingClient, err := config.networkingV2Client(GetRegion(d, config))
 	if err != nil {
 		return fmt.Errorf("Error creating OpenTelekomCloud networking client: %s", err)
 	}

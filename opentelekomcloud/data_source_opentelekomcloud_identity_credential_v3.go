@@ -5,6 +5,7 @@ import (
 
 	"github.com/hashicorp/go-multierror"
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
+	"github.com/opentelekomcloud/gophertelekomcloud/openstack/identity/v3/credentials"
 )
 
 func dataSourceIdentityCredentialV3() *schema.Resource {
@@ -51,16 +52,16 @@ func dataSourceIdentityCredentialV3Read(d *schema.ResourceData, meta interface{}
 	config := meta.(*Config)
 	client, err := config.identityV30Client()
 	if err != nil {
-		return fmt.Errorf("error creating OpenStack identity client: %s", err)
+		return fmt.Errorf("error creating identity v3.0 client: %s", err)
 	}
 	userID := d.Get("user_id").(string)
-	credentials, err := CredentialList(client, CredentialListOpts{UserID: userID}).Extract()
+	credentialList, err := credentials.List(client, credentials.ListOpts{UserID: userID}).Extract()
 	if err != nil {
 		return fmt.Errorf("error retrieving AK/SK information: %s", err)
 	}
 
 	me := new(multierror.Error)
-	for i, credential := range credentials {
+	for i, credential := range credentialList {
 		credKey := fmt.Sprintf("credentials.%d.", i)
 		me = multierror.Append(me,
 			d.Set(credKey+"used_id", credential.UserID),

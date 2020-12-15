@@ -58,7 +58,7 @@ func resourceTagsV2(d *schema.ResourceData) []string {
 
 func resourceBMSTagsV2Create(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*Config)
-	bmsClient, err := config.bmsClient(GetRegion(d, config))
+	bmsClient, err := config.computeV2Client(GetRegion(d, config))
 
 	if err != nil {
 		return fmt.Errorf("Error creating OpenTelekomCloud bms client: %s", err)
@@ -83,7 +83,7 @@ func resourceBMSTagsV2Create(d *schema.ResourceData, meta interface{}) error {
 
 func resourceBMSTagsV2Read(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*Config)
-	bmsClient, err := config.bmsClient(GetRegion(d, config))
+	bmsClient, err := config.computeV2Client(GetRegion(d, config))
 	if err != nil {
 		return fmt.Errorf("Error creating OpenTelekomCloud bms client: %s", err)
 	}
@@ -107,7 +107,7 @@ func resourceBMSTagsV2Read(d *schema.ResourceData, meta interface{}) error {
 
 func resourceBMSTagsV2Delete(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*Config)
-	bmsClient, err := config.bmsClient(GetRegion(d, config))
+	bmsClient, err := config.computeV2Client(GetRegion(d, config))
 	if err != nil {
 		return fmt.Errorf("Error creating OpenTelekomCloud bms client: %s", err)
 	}

@@ -4,7 +4,7 @@ subcategory: "Identity and Access Management (IAM)"
 
 # opentelekomcloud_identity_user_v3
 
-Use this data source to get the ID of an OpentelekomCloud user.
+Use this data source to get the ID of an OpenTelekomCloud user.
 
 ## Example Usage
 
@@ -30,7 +30,7 @@ The following arguments are supported:
 
 * `name` - (Optional) The name of the user.
 
-* `password_expires_at` - (Optional) Query for expired passwords. See the [OpentelekomCloud API docs](https://docs.otc.t-systems.com/en-us/api/iam/en-us_topic_0057845638.html)
+* `password_expires_at` - (Optional) Query for expired passwords. See the [OpenTelekomCloud API docs](https://docs.otc.t-systems.com/en-us/api/iam/en-us_topic_0057845638.html)
   for more information on the query format.
 
 

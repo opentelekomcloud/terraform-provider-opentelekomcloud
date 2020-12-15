@@ -40,7 +40,7 @@ resource "opentelekomcloud_networking_network_v2" "network_1" {
 
 resource "opentelekomcloud_networking_subnet_v2" "subnet_1" {
   name       = "subnet_1"
-  network_id = "${opentelekomcloud_networking_network_v2.network_1.id}"
+  network_id = opentelekomcloud_networking_network_v2.network_1.id
   cidr       = "10.0.0.0/24"
   ip_version = 4
 }
@@ -51,25 +51,25 @@ data "opentelekomcloud_networking_secgroup_v2" "default" {
 
 resource "opentelekomcloud_networking_port_v2" "port_1" {
   name           = "port_1"
-  network_id     = "${opentelekomcloud_networking_network_v2.network_1.id}"
+  network_id     = opentelekomcloud_networking_network_v2.network_1.id
   admin_state_up = "true"
 
   security_group_ids = [
-    "${data.opentelekomcloud_networking_secgroup_v2.default.id}",
+    data.opentelekomcloud_networking_secgroup_v2.default.id,
   ]
 
   fixed_ip {
-    subnet_id = "${opentelekomcloud_networking_subnet_v2.subnet_1.id}"
+    subnet_id = opentelekomcloud_networking_subnet_v2.subnet_1.id
   }
 }
 
 resource "opentelekomcloud_networking_port_v2" "port_2" {
   name               = "port_2"
-  network_id         = "${opentelekomcloud_networking_network_v2.network_1.id}"
+  network_id         = opentelekomcloud_networking_network_v2.network_1.id
   admin_state_up = "true"
 
   security_group_ids = [
-    "${data.opentelekomcloud_networking_secgroup_v2.default.id}",
+    data.opentelekomcloud_networking_secgroup_v2.default.id,
   ]
 
   allowed_address_pairs {
@@ -84,20 +84,20 @@ resource "opentelekomcloud_networking_port_v2" "port_2" {
 }
 
 data "opentelekomcloud_networking_port_v2" "port_1" {
-  name           = "${opentelekomcloud_networking_port_v2.port_1.name}"
-  admin_state_up = "${opentelekomcloud_networking_port_v2.port_1.admin_state_up}"
+  name           = opentelekomcloud_networking_port_v2.port_1.name
+  admin_state_up = opentelekomcloud_networking_port_v2.port_1.admin_state_up
 
   security_group_ids = [
-    "${data.opentelekomcloud_networking_secgroup_v2.default.id}",
+    data.opentelekomcloud_networking_secgroup_v2.default.id,
   ]
 }
 
 data "opentelekomcloud_networking_port_v2" "port_2" {
-  name           = "${opentelekomcloud_networking_port_v2.port_2.name}"
-  admin_state_up = "${opentelekomcloud_networking_port_v2.port_2.admin_state_up}"
+  name           = opentelekomcloud_networking_port_v2.port_2.name
+  admin_state_up = opentelekomcloud_networking_port_v2.port_2.admin_state_up
 }
 
 data "opentelekomcloud_networking_port_v2" "port_3" {
-  fixed_ip = "${opentelekomcloud_networking_port_v2.port_1.all_fixed_ips.0}"
+  fixed_ip = opentelekomcloud_networking_port_v2.port_1.all_fixed_ips.0
 }
 `

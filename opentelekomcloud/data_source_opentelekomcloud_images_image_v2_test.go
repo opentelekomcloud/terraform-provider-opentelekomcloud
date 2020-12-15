@@ -100,7 +100,7 @@ var testAccOpenTelekomCloudImagesV2ImageDataSource_basic = fmt.Sprintf(`
 
 data "opentelekomcloud_images_image_v2" "image_1" {
 	most_recent = true
-	name = "${opentelekomcloud_images_image_v2.image_1.name}"
+	name = opentelekomcloud_images_image_v2.image_1.name
 }
 `, testAccOpenTelekomCloudImagesV2ImageDataSource_cirros)
 

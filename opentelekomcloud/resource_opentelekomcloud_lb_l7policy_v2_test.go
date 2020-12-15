@@ -44,7 +44,7 @@ func testAccCheckLBV2L7PolicyDestroy(s *terraform.State) error {
 	config := testAccProvider.Meta().(*Config)
 	lbClient, err := config.networkingV2Client(OS_REGION_NAME)
 	if err != nil {
-		return fmt.Errorf("Error creating OpentelekomCloud load balancing client: %s", err)
+		return fmt.Errorf("Error creating OpenTelekomCloud load balancing client: %s", err)
 	}
 
 	for _, rs := range s.RootModule().Resources {
@@ -75,7 +75,7 @@ func testAccCheckLBV2L7PolicyExists(n string, l7Policy *l7policies.L7Policy) res
 		config := testAccProvider.Meta().(*Config)
 		lbClient, err := config.networkingV2Client(OS_REGION_NAME)
 		if err != nil {
-			return fmt.Errorf("Error creating OpentelekomCloud load balancing client: %s", err)
+			return fmt.Errorf("Error creating OpenTelekomCloud load balancing client: %s", err)
 		}
 
 		found, err := l7policies.Get(lbClient, rs.Primary.ID).Extract()
@@ -103,14 +103,14 @@ resource "opentelekomcloud_lb_listener_v2" "listener_1" {
   name = "listener_1"
   protocol = "HTTP"
   protocol_port = 8080
-  loadbalancer_id = "${opentelekomcloud_lb_loadbalancer_v2.loadbalancer_1.id}"
+  loadbalancer_id = opentelekomcloud_lb_loadbalancer_v2.loadbalancer_1.id
 }
 
 resource "opentelekomcloud_lb_pool_v2" "pool_1" {
   name            = "pool_1"
   protocol        = "HTTP"
   lb_method       = "ROUND_ROBIN"
-  loadbalancer_id = "${opentelekomcloud_lb_loadbalancer_v2.loadbalancer_1.id}"
+  loadbalancer_id = opentelekomcloud_lb_loadbalancer_v2.loadbalancer_1.id
 }
 
 resource "opentelekomcloud_lb_l7policy_v2" "l7policy_1" {
@@ -118,7 +118,7 @@ resource "opentelekomcloud_lb_l7policy_v2" "l7policy_1" {
   action       = "REDIRECT_TO_POOL"
   description  = "test description"
   position     = 1
-  listener_id  = "${opentelekomcloud_lb_listener_v2.listener_1.id}"
-  redirect_pool_id = "${opentelekomcloud_lb_pool_v2.pool_1.id}"
+  listener_id  = opentelekomcloud_lb_listener_v2.listener_1.id
+  redirect_pool_id = opentelekomcloud_lb_pool_v2.pool_1.id
 }
 `, OS_SUBNET_ID)

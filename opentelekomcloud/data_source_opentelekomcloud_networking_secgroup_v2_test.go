@@ -74,7 +74,7 @@ var testAccOpenTelekomCloudNetworkingSecGroupV2DataSource_basic = fmt.Sprintf(`
 %s
 
 data "opentelekomcloud_networking_secgroup_v2" "secgroup_1" {
-	name = "${opentelekomcloud_networking_secgroup_v2.secgroup_1.name}"
+	name = opentelekomcloud_networking_secgroup_v2.secgroup_1.name
 }
 `, testAccOpenTelekomCloudNetworkingSecGroupV2DataSource_group)
 
@@ -82,6 +82,6 @@ var testAccOpenTelekomCloudNetworkingSecGroupV2DataSource_secGroupID = fmt.Sprin
 %s
 
 data "opentelekomcloud_networking_secgroup_v2" "secgroup_1" {
-	secgroup_id = "${opentelekomcloud_networking_secgroup_v2.secgroup_1.id}"
+	secgroup_id = opentelekomcloud_networking_secgroup_v2.secgroup_1.id
 }
 `, testAccOpenTelekomCloudNetworkingSecGroupV2DataSource_group)

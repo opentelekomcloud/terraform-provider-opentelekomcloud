@@ -55,7 +55,7 @@ func testAccCheckIdentityV3GroupDestroy(s *terraform.State) error {
 	config := testAccProvider.Meta().(*Config)
 	identityClient, err := config.identityV3Client(OS_REGION_NAME)
 	if err != nil {
-		return fmt.Errorf("Error creating Opentelekomcloud identity client: %s", err)
+		return fmt.Errorf("Error creating OpenTelekomcloud identity client: %s", err)
 	}
 
 	for _, rs := range s.RootModule().Resources {
@@ -86,7 +86,7 @@ func testAccCheckIdentityV3GroupExists(n string, group *groups.Group) resource.T
 		config := testAccProvider.Meta().(*Config)
 		identityClient, err := config.identityV3Client(OS_REGION_NAME)
 		if err != nil {
-			return fmt.Errorf("Error creating OpentelekomCloud identity client: %s", err)
+			return fmt.Errorf("Error creating OpenTelekomCloud identity client: %s", err)
 		}
 
 		found, err := groups.Get(identityClient, rs.Primary.ID).Extract()

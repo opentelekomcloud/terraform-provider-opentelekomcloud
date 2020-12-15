@@ -165,7 +165,7 @@ func resourceContainerTags(d *schema.ResourceData) map[string]string {
 
 func resourceBlockStorageVolumeV2Create(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*Config)
-	blockStorageClient, err := config.loadEVSV2Client(GetRegion(d, config))
+	blockStorageClient, err := config.blockStorageV2Client(GetRegion(d, config))
 	if err != nil {
 		return fmt.Errorf("Error creating OpenTelekomCloud block storage client: %s", err)
 	}
@@ -228,7 +228,7 @@ func resourceBlockStorageVolumeV2Create(d *schema.ResourceData, meta interface{}
 
 func resourceBlockStorageVolumeV2Read(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*Config)
-	blockStorageClient, err := config.loadEVSV2Client(GetRegion(d, config))
+	blockStorageClient, err := config.blockStorageV2Client(GetRegion(d, config))
 	if err != nil {
 		return fmt.Errorf("Error creating OpenTelekomCloud block storage client: %s", err)
 	}
@@ -313,7 +313,7 @@ OUTER:
 
 func resourceBlockStorageVolumeV2Update(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*Config)
-	blockStorageClient, err := config.loadEVSV2Client(GetRegion(d, config))
+	blockStorageClient, err := config.blockStorageV2Client(GetRegion(d, config))
 	if err != nil {
 		return fmt.Errorf("Error creating OpenTelekomCloud block storage client: %s", err)
 	}
@@ -366,7 +366,7 @@ func resourceBlockStorageVolumeV2Update(d *schema.ResourceData, meta interface{}
 
 func resourceBlockStorageVolumeV2Delete(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*Config)
-	blockStorageClient, err := config.loadEVSV2Client(GetRegion(d, config))
+	blockStorageClient, err := config.blockStorageV2Client(GetRegion(d, config))
 	if err != nil {
 		return fmt.Errorf("Error creating OpenTelekomCloud block storage client: %s", err)
 	}
@@ -379,7 +379,7 @@ func resourceBlockStorageVolumeV2Delete(d *schema.ResourceData, meta interface{}
 	// make sure this volume is detached from all instances before deleting
 	if len(v.Attachments) > 0 {
 		log.Printf("[DEBUG] detaching volumes")
-		if computeClient, err := config.computeV2HWClient(GetRegion(d, config)); err != nil {
+		if computeClient, err := config.computeV2Client(GetRegion(d, config)); err != nil {
 			return err
 		} else {
 			for _, volumeAttachment := range v.Attachments {

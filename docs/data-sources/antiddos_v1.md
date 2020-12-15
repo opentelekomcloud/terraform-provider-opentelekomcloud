@@ -12,7 +12,7 @@ Use this data source to query the status of EIP, regardless whether an EIP has b
 variable "id" { }
 
 data "opentelekomcloud_antiddos_v1" "antiddos" {
-  floating_ip_id = "${var.eip_id}"
+  floating_ip_id = var.eip_id
 }
 ```
 

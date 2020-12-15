@@ -3,7 +3,7 @@ subcategory: "Identity and Access Management (IAM)"
 ---
 
 # opentelekomcloud_identity_group_v3
-Use this data source to get the ID of an OpentelekomCloud group.
+Use this data source to get the ID of an OpenTelekomCloud group.
 
 -> **Note:** This usually requires admin privileges.
 

@@ -58,7 +58,7 @@ func TestAccOTCVpcPeeringConnectionV2_timeout(t *testing.T) {
 
 func testAccCheckOTCVpcPeeringConnectionV2Destroy(s *terraform.State) error {
 	config := testAccProvider.Meta().(*Config)
-	peeringClient, err := config.hwNetworkV2Client(OS_REGION_NAME)
+	peeringClient, err := config.networkingV2Client(OS_REGION_NAME)
 	if err != nil {
 		return fmt.Errorf("Error creating OpenTelekomCloud Peering client: %s", err)
 	}
@@ -89,7 +89,7 @@ func testAccCheckOTCVpcPeeringConnectionV2Exists(n string, peering *peerings.Pee
 		}
 
 		config := testAccProvider.Meta().(*Config)
-		peeringClient, err := config.hwNetworkV2Client(OS_REGION_NAME)
+		peeringClient, err := config.networkingV2Client(OS_REGION_NAME)
 		if err != nil {
 			return fmt.Errorf("Error creating OpenTelekomCloud Peering client: %s", err)
 		}
@@ -122,8 +122,8 @@ resource "opentelekomcloud_vpc_v1" "vpc_2" {
 
 resource "opentelekomcloud_vpc_peering_connection_v2" "peering_1" {
   name = "opentelekomcloud_peering"
-  vpc_id = "${opentelekomcloud_vpc_v1.vpc_1.id}"
-  peer_vpc_id = "${opentelekomcloud_vpc_v1.vpc_2.id}"
+  vpc_id = opentelekomcloud_vpc_v1.vpc_1.id
+  peer_vpc_id = opentelekomcloud_vpc_v1.vpc_2.id
 }
 `
 const testAccOTCVpcPeeringConnectionV2_update = `
@@ -139,8 +139,8 @@ resource "opentelekomcloud_vpc_v1" "vpc_2" {
 
 resource "opentelekomcloud_vpc_peering_connection_v2" "peering_1" {
   name = "opentelekomcloud_peering_1"
-  vpc_id = "${opentelekomcloud_vpc_v1.vpc_1.id}"
-  peer_vpc_id = "${opentelekomcloud_vpc_v1.vpc_2.id}"
+  vpc_id = opentelekomcloud_vpc_v1.vpc_1.id
+  peer_vpc_id = opentelekomcloud_vpc_v1.vpc_2.id
 }
 `
 const testAccOTCVpcPeeringConnectionV2_timeout = `
@@ -156,8 +156,8 @@ resource "opentelekomcloud_vpc_v1" "vpc_2" {
 
 resource "opentelekomcloud_vpc_peering_connection_v2" "peering_1" {
   name = "opentelekomcloud_peering"
-  vpc_id = "${opentelekomcloud_vpc_v1.vpc_1.id}"
-  peer_vpc_id = "${opentelekomcloud_vpc_v1.vpc_2.id}"
+  vpc_id = opentelekomcloud_vpc_v1.vpc_1.id
+  peer_vpc_id = opentelekomcloud_vpc_v1.vpc_2.id
 
  timeouts {
     create = "5m"

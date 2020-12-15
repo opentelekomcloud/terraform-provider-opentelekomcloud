@@ -59,6 +59,6 @@ resource "opentelekomcloud_rts_software_config_v1" "config_1" {
 }
 
 data "opentelekomcloud_rts_software_config_v1" "configs" {
-  id = "${opentelekomcloud_rts_software_config_v1.config_1.id}"
+  id = opentelekomcloud_rts_software_config_v1.config_1.id
 }
 `

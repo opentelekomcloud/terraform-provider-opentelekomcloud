@@ -92,6 +92,26 @@ func resourceCSBSBackupPolicyV1() *schema.Resource {
 							Type:     schema.TypeInt,
 							Optional: true,
 						},
+						"day_backups": {
+							Type:     schema.TypeInt,
+							Optional: true,
+						},
+						"week_backups": {
+							Type:     schema.TypeInt,
+							Optional: true,
+						},
+						"month_backups": {
+							Type:     schema.TypeInt,
+							Optional: true,
+						},
+						"year_backups": {
+							Type:     schema.TypeInt,
+							Optional: true,
+						},
+						"timezone": {
+							Type:     schema.TypeString,
+							Optional: true,
+						},
 						"permanent": {
 							Type:     schema.TypeBool,
 							Optional: true,
@@ -164,14 +184,13 @@ func resourceCSBSBackupPolicyV1() *schema.Resource {
 			},
 		},
 	}
-
 }
 
 func resourceCSBSBackupPolicyCreate(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*Config)
 	policyClient, err := config.csbsV1Client(GetRegion(d, config))
 	if err != nil {
-		return fmt.Errorf("error creating backup policy client: %s", err)
+		return fmt.Errorf("error creating CSBSv1 client: %s", err)
 	}
 
 	createOpts := policies.CreateOpts{
@@ -181,6 +200,7 @@ func resourceCSBSBackupPolicyCreate(d *schema.ResourceData, meta interface{}) er
 		Parameters: policies.PolicyParam{
 			Common: resourceCSBSCommonParamsV1(d),
 		},
+
 		ScheduledOperations: resourceCSBSScheduleV1(d),
 
 		Resources: resourceCSBSResourceV1(d),
@@ -214,7 +234,7 @@ func resourceCSBSBackupPolicyRead(d *schema.ResourceData, meta interface{}) erro
 	config := meta.(*Config)
 	policyClient, err := config.csbsV1Client(GetRegion(d, config))
 	if err != nil {
-		return fmt.Errorf("error creating CSBS client: %s", err)
+		return fmt.Errorf("error creating CSBSv1 client: %s", err)
 	}
 
 	backupPolicy, err := policies.Get(policyClient, d.Id()).Extract()
@@ -232,7 +252,18 @@ func resourceCSBSBackupPolicyRead(d *schema.ResourceData, meta interface{}) erro
 		return fmt.Errorf(errorSaveMsg, "resource", d.Id(), err)
 	}
 
-	if err := d.Set("scheduled_operation", flattenCSBSScheduledOperations(*backupPolicy)); err != nil {
+	scheduledOperations := flattenCSBSScheduledOperations(*backupPolicy)
+	scheduledOperationsRaw := d.Get("scheduled_operation").(*schema.Set).List()
+	if len(scheduledOperationsRaw) == 1 {
+		operationDefinitionZero := scheduledOperationsRaw[0].(map[string]interface{})
+		scheduledOperations[0]["day_backups"] = operationDefinitionZero["day_backups"]
+		scheduledOperations[0]["week_backups"] = operationDefinitionZero["week_backups"]
+		scheduledOperations[0]["month_backups"] = operationDefinitionZero["month_backups"]
+		scheduledOperations[0]["year_backups"] = operationDefinitionZero["year_backups"]
+		scheduledOperations[0]["timezone"] = operationDefinitionZero["timezone"]
+	}
+
+	if err := d.Set("scheduled_operation", scheduledOperations); err != nil {
 		return fmt.Errorf(errorSaveMsg, "scheduler_operation", d.Id(), err)
 	}
 
@@ -250,18 +281,14 @@ func resourceCSBSBackupPolicyRead(d *schema.ResourceData, meta interface{}) erro
 		d.Set("region", GetRegion(d, config)),
 	)
 
-	if err = me.ErrorOrNil(); err != nil {
-		return fmt.Errorf(errorSaveMsg, "main conf", d.Id(), err)
-	}
-
-	return nil
+	return me.ErrorOrNil()
 }
 
 func resourceCSBSBackupPolicyUpdate(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*Config)
 	policyClient, err := config.csbsV1Client(GetRegion(d, config))
 	if err != nil {
-		return fmt.Errorf("error creating CSBS client: %s", err)
+		return fmt.Errorf("error creating CSBSv1 client: %s", err)
 	}
 	var updateOpts policies.UpdateOpts
 	if d.HasChange("name") {
@@ -277,7 +304,7 @@ func resourceCSBSBackupPolicyUpdate(d *schema.ResourceData, meta interface{}) er
 		updateOpts.Resources = resourceCSBSResourceV1(d)
 	}
 	if d.HasChange("scheduled_operation") {
-		updateOpts.ScheduledOperations = resourceCSBScheduleUpdateV1(d)
+		updateOpts.ScheduledOperations = resourceCSBSScheduleUpdateV1(d)
 	}
 
 	_, err = policies.Update(policyClient, d.Id(), updateOpts).Extract()
@@ -295,10 +322,15 @@ func resourceCSBSBackupPolicyDelete(d *schema.ResourceData, meta interface{}) er
 		return fmt.Errorf("error creating CSBS client: %s", err)
 	}
 
+	err = policies.Delete(policyClient, d.Id()).Err
+	if err != nil {
+		return fmt.Errorf("error delete CSBSv1 policy; %s", err)
+	}
+
 	stateConf := &resource.StateChangeConf{
 		Pending:    []string{"available"},
 		Target:     []string{"deleted"},
-		Refresh:    waitForVBSPolicyDelete(policyClient, d.Id()),
+		Refresh:    waitForCSBSPolicyDelete(policyClient, d.Id()),
 		Timeout:    d.Timeout(schema.TimeoutDelete),
 		Delay:      5 * time.Second,
 		MinTimeout: 3 * time.Second,
@@ -306,7 +338,7 @@ func resourceCSBSBackupPolicyDelete(d *schema.ResourceData, meta interface{}) er
 
 	_, err = stateConf.WaitForState()
 	if err != nil {
-		return fmt.Errorf("error deleting Backup Policy: %s", err)
+		return fmt.Errorf("error waiting for delete backup Policy: %s", err)
 	}
 
 	d.SetId("")
@@ -315,56 +347,39 @@ func resourceCSBSBackupPolicyDelete(d *schema.ResourceData, meta interface{}) er
 
 func waitForCSBSBackupPolicyActive(policyClient *golangsdk.ServiceClient, policyID string) resource.StateRefreshFunc {
 	return func() (interface{}, string, error) {
-		n, err := policies.Get(policyClient, policyID).Extract()
+		policy, err := policies.Get(policyClient, policyID).Extract()
 		if err != nil {
 			return nil, "", err
 		}
 
-		if n.Status == "error" {
-			return n, n.Status, nil
+		if policy.Status == "error" {
+			return policy, policy.Status, nil
 		}
-		return n, n.Status, nil
+		return policy, policy.Status, nil
 	}
 }
 
-func waitForVBSPolicyDelete(policyClient *golangsdk.ServiceClient, policyID string) resource.StateRefreshFunc {
+func waitForCSBSPolicyDelete(policyClient *golangsdk.ServiceClient, policyID string) resource.StateRefreshFunc {
 	return func() (interface{}, string, error) {
-
-		r, err := policies.Get(policyClient, policyID).Extract()
-
+		policy, err := policies.Get(policyClient, policyID).Extract()
 		if err != nil {
 			if _, ok := err.(golangsdk.ErrDefault404); ok {
 				log.Printf("[INFO] Successfully deleted Backup Policy %s", policyID)
-				return r, "deleted", nil
+				return policy, "deleted", nil
 			}
-			return r, "available", err
+			return policy, "available", err
 		}
 
-		policy := policies.Delete(policyClient, policyID)
-		err = policy.Err
-		if err != nil {
-			if _, ok := err.(golangsdk.ErrDefault404); ok {
-				log.Printf("[INFO] Successfully deleted Backup Policy %s", policyID)
-				return r, "deleted", nil
-			}
-			if errCode, ok := err.(golangsdk.ErrUnexpectedResponseCode); ok {
-				if errCode.Actual == 409 {
-					return r, "available", nil
-				}
-			}
-			return r, "available", err
-		}
-
-		return r, "deleted", nil
+		return policy, policy.Status, nil
 	}
 }
 
 func resourceCSBSScheduleV1(d *schema.ResourceData) []policies.ScheduledOperation {
 	scheduledOperations := d.Get("scheduled_operation").(*schema.Set).List()
-	so := make([]policies.ScheduledOperation, len(scheduledOperations))
+	scheduledOperation := make([]policies.ScheduledOperation, len(scheduledOperations))
 	for i, raw := range scheduledOperations {
 		rawMap := raw.(map[string]interface{})
-		so[i] = policies.ScheduledOperation{
+		scheduledOperation[i] = policies.ScheduledOperation{
 			Name:          rawMap["name"].(string),
 			Description:   rawMap["description"].(string),
 			Enabled:       rawMap["enabled"].(bool),
@@ -374,15 +389,21 @@ func resourceCSBSScheduleV1(d *schema.ResourceData) []policies.ScheduledOperatio
 					Pattern: rawMap["trigger_pattern"].(string),
 				},
 			},
+
 			OperationDefinition: policies.OperationDefinition{
 				MaxBackups:            rawMap["max_backups"].(int),
 				RetentionDurationDays: rawMap["retention_duration_days"].(int),
 				Permanent:             rawMap["permanent"].(bool),
+				DayBackups:            rawMap["day_backups"].(int),
+				WeekBackups:           rawMap["week_backups"].(int),
+				MonthBackups:          rawMap["month_backups"].(int),
+				YearBackups:           rawMap["year_backups"].(int),
+				TimeZone:              rawMap["timezone"].(string),
 			},
 		}
 	}
 
-	return so
+	return scheduledOperation
 }
 
 func resourceCSBSResourceV1(d *schema.ResourceData) []policies.Resource {
@@ -412,12 +433,12 @@ func resourceCSBSPolicyTagsV1(d *schema.ResourceData) []policies.ResourceTag {
 	return tags
 }
 
-func resourceCSBScheduleUpdateV1(d *schema.ResourceData) []policies.ScheduledOperationToUpdate {
+func resourceCSBSScheduleUpdateV1(d *schema.ResourceData) []policies.ScheduledOperationToUpdate {
 	oldSORaw, newSORaw := d.GetChange("scheduled_operation")
 	oldSOList := oldSORaw.(*schema.Set).List()
 	newSOSetList := newSORaw.(*schema.Set).List()
 
-	//scheduledOperations := d.Get("scheduled_operation").(*schema.Set).List()
+	// scheduledOperations := d.Get("scheduled_operation").(*schema.Set).List()
 	schedule := make([]policies.ScheduledOperationToUpdate, len(newSOSetList))
 	for i, raw := range newSOSetList {
 		rawNewMap := raw.(map[string]interface{})
@@ -436,6 +457,11 @@ func resourceCSBScheduleUpdateV1(d *schema.ResourceData) []policies.ScheduledOpe
 				MaxBackups:            rawNewMap["max_backups"].(int),
 				RetentionDurationDays: rawNewMap["retention_duration_days"].(int),
 				Permanent:             rawNewMap["permanent"].(bool),
+				DayBackups:            rawNewMap["day_backups"].(int),
+				WeekBackups:           rawNewMap["week_backups"].(int),
+				MonthBackups:          rawNewMap["month_backups"].(int),
+				YearBackups:           rawNewMap["year_backups"].(int),
+				TimeZone:              rawNewMap["timezone"].(string),
 			},
 		}
 	}

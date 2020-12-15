@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"net"
 	"regexp"
+	"strconv"
 	"strings"
 	"time"
 )
@@ -93,16 +94,13 @@ func validateJsonString(v interface{}, k string) (ws []string, errors []error) {
 
 func validateName(v interface{}, k string) (ws []string, errors []error) {
 	value := v.(string)
-	if len(value) > 64 {
-		errors = append(errors, fmt.Errorf(
-			"%q cannot be longer than 64 characters: %q", k, value))
+	if len(value) > 64 || len(value) < 1 {
+		errors = append(errors, fmt.Errorf("%q must contain more than 1 and less than 64 characters", k))
 	}
 
 	pattern := `^[\.\-_A-Za-z0-9]+$`
 	if !regexp.MustCompile(pattern).MatchString(value) {
-		errors = append(errors, fmt.Errorf(
-			"%q doesn't comply with restrictions (%q): %q",
-			k, pattern, value))
+		errors = append(errors, fmt.Errorf("only alphanumeric characters, hyphens, and underscores allowed in %q", k))
 	}
 
 	return
@@ -318,5 +316,93 @@ func validateECSTagValue(v interface{}, k string) (ws []string, errors []error) 
 			break
 		}
 	}
+	return
+}
+
+func validateK8sTagsMap(v interface{}, k string) (ws []string, errors []error) {
+	values := v.(map[string]interface{})
+	pattern := regexp.MustCompile(`^[.\-_A-Za-z0-9]+$`)
+
+	for key, value := range values {
+		valueString := value.(string)
+		if len(key) < 1 {
+			errors = append(errors, fmt.Errorf("key %q cannot be shorter than 1 characters: %q", k, key))
+		}
+
+		if len(valueString) < 1 {
+			errors = append(errors, fmt.Errorf("value %q cannot be shorter than 1 characters: %q", k, value))
+		}
+
+		if len(key) > 63 {
+			errors = append(errors, fmt.Errorf("key %q cannot be longer than 63 characters: %q", k, key))
+		}
+
+		if len(valueString) > 63 {
+			errors = append(errors, fmt.Errorf("value %q cannot be longer than 63 characters: %q", k, value))
+		}
+
+		if !pattern.MatchString(key) {
+			errors = append(errors, fmt.Errorf("key %q doesn't comply with restrictions (%q): %q", k, pattern, key))
+		}
+
+		if !pattern.MatchString(valueString) {
+			errors = append(errors, fmt.Errorf("value %q doesn't comply with restrictions (%q): %q", k, pattern, valueString))
+		}
+	}
+
+	return
+}
+
+func validateDDSStartTime(v interface{}, k string) (ws []string, errors []error) {
+	value := v.(string)
+	re := regexp.MustCompile(`(?P<hh>\d{2}):(?P<mm>\d{2})-(?P<HH>\d{2}):(?P<MM>\d{2})`)
+	timeRange := re.FindStringSubmatch(value)
+
+	paramsMap := make(map[string]string)
+	for i, name := range re.SubexpNames() {
+		if i > 0 && i <= len(timeRange) {
+			paramsMap[name] = timeRange[i]
+		}
+	}
+
+	startHour, err := strconv.Atoi(paramsMap["hh"])
+	if err != nil {
+		errors = append(errors, fmt.Errorf("%q must be int convertable: %s", paramsMap["hh"], err))
+	}
+	endHour, err := strconv.Atoi(paramsMap["HH"])
+	if err != nil {
+		errors = append(errors, fmt.Errorf("%q must be int convertable: %s", paramsMap["HH"], err))
+	}
+	startMinutes, err := strconv.Atoi(paramsMap["mm"])
+	if err != nil {
+		errors = append(errors, fmt.Errorf("%q must be int convertable: %s", paramsMap["mm"], err))
+	}
+	endMinutes, err := strconv.Atoi(paramsMap["MM"])
+	if err != nil {
+		errors = append(errors, fmt.Errorf("%q must be int convertable: %s", paramsMap["MM"], err))
+	}
+	if len(errors) != 0 {
+		return
+	}
+	if startHour+1 != endHour {
+		errors = append(errors, fmt.Errorf("the `HH` value must be 1 greater than the `hh` value: %s", v))
+	}
+	if startMinutes != endMinutes {
+		errors = append(errors, fmt.Errorf("the values from `mm` and `MM` must be the same: %s", v))
+	}
+	if startMinutes%15 != 0 {
+		errors = append(errors, fmt.Errorf("the values from `mm` and `MM` must be set to any of the 00, 15, 30, or 45: %s", v))
+	}
+
+	return
+}
+
+func resourceASGroupValidateListenerId(v interface{}, k string) (ws []string, errors []error) {
+	value := v.(string)
+	listenerIds := strings.Split(value, ",")
+	if len(listenerIds) <= 3 {
+		return
+	}
+	errors = append(errors, fmt.Errorf("%q supports binding up to 3 ELB listeners which are separated by a comma", k))
 	return
 }

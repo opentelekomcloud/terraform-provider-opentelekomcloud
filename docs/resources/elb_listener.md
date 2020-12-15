@@ -4,7 +4,7 @@ subcategory: "Elastic Load Balance (ELB)"
 
 # opentelekomcloud_elb_listener
 
-Manages a classic loadbalancer listener resource within OpentelekomCloud.
+Manages a classic loadbalancer listener resource within OpenTelekomCloud.
 
 ## Example Usage
 
@@ -26,8 +26,7 @@ resource "opentelekomcloud_elb_listener" "listener" {
   protocol_port    = 12345
   backend_port     = 8080
   lb_algorithm     = "roundrobin"
-  loadbalancer_id  = "${opentelekomcloud_elb_loadbalancer.elb.id}"
-  
+  loadbalancer_id  = opentelekomcloud_elb_loadbalancer.elb.id
   timeouts {
     create = "5m"
     update = "5m"
@@ -162,5 +161,5 @@ The following attributes are exported:
 * `id` - Specifies the listener ID.
 
 * `admin_state_up` - Specifies the status of the load balancer. Value range:
-  * `false`: The load balancer is disabled. 
+  * `false`: The load balancer is disabled.
   * `true`: The load balancer runs properly.
