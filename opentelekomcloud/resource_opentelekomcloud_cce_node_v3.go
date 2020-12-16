@@ -366,7 +366,6 @@ func resourceCCENodeV3Create(d *schema.ResourceData, meta interface{}) error {
 		Spec: nodes.Spec{
 			Flavor:      d.Get("flavor_id").(string),
 			Az:          d.Get("availability_zone").(string),
-			Os:          "EulerOS 2.5",
 			Login:       nodes.LoginSpec{SshKey: d.Get("key_pair").(string)},
 			RootVolume:  resourceCCERootVolume(d),
 			DataVolumes: resourceCCEDataVolume(d),
