@@ -1,5 +1,11 @@
 ## 1.23.0 (Unreleased)
 
+## 1.22.2 (December 16, 2020)
+
+ENHANCEMENTS:
+* **New Resource:** `opentelekomcloud_cce_addon_v3` ([#711](https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/issues/711))
+* `resource/opentelekomcloud_lb_loadbalancer_v2`: Clarify usage `lb_loadbalancer_v2` with `vpc_subnet_v1` in docs ([#766](https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/issues/766))
+* `resource/opentelekomcloud_cce_cluster_v3`: Add cluster name validation ([#768](https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/issues/768))
 
 ## 1.22.1 (December 10, 2020)
 
