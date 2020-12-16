@@ -4,14 +4,22 @@ import (
 	"fmt"
 	"log"
 	"net/url"
+	"regexp"
 	"time"
 
 	"github.com/hashicorp/go-multierror"
 	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/helper/validation"
 	"github.com/opentelekomcloud/gophertelekomcloud"
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/cce/v3/clusters"
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/networking/v2/extensions/layer3/floatingips"
+)
+
+var (
+	// Cluster name is 4 to 128 characters starting with a letter and not ending with a hyphen (-).
+	// Only lowercase letters, digits, and hyphens (-) are allowed
+	clusterNameRegex, _ = regexp.Compile("^[a-z][a-z0-9-]{2,126}[a-z0-9]$")
 )
 
 func resourceCCEClusterV3() *schema.Resource {
@@ -40,6 +48,9 @@ func resourceCCEClusterV3() *schema.Resource {
 				Type:     schema.TypeString,
 				Required: true,
 				ForceNew: true,
+				ValidateFunc: validation.StringMatch(clusterNameRegex, "Invalid cluster name. "+
+					"Cluster name should be 4 to 128 characters starting with a letter and not ending with a hyphen (-). "+
+					"Only lowercase letters, digits, and hyphens (-) are allowed."),
 			},
 			"labels": {
 				Type:     schema.TypeMap,
