@@ -29,7 +29,7 @@ func resourceObsBucketPolicy() *schema.Resource {
 			},
 			"policy": {
 				Type:             schema.TypeString,
-				Optional:         true,
+				Required:         true,
 				ValidateFunc:     validateJsonString,
 				DiffSuppressFunc: suppressEquivalentAwsPolicyDiffs,
 			},
