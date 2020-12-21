@@ -322,6 +322,7 @@ func Provider() terraform.ResourceProvider {
 			"opentelekomcloud_networking_vip_associate_v2":        resourceNetworkingVIPAssociateV2(),
 			"opentelekomcloud_obs_bucket":                         resourceObsBucket(),
 			"opentelekomcloud_obs_bucket_object":                  resourceObsBucketObject(),
+			"opentelekomcloud_obs_bucket_policy":                  resourceObsBucketPolicy(),
 			"opentelekomcloud_rds_instance_v1":                    resourceRdsInstance(),
 			"opentelekomcloud_rds_instance_v3":                    resourceRdsInstanceV3(),
 			"opentelekomcloud_rds_parametergroup_v3":              resourceRdsConfigurationV3(),
