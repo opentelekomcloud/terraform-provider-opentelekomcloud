@@ -9,17 +9,18 @@ Add a node to a container cluster.
 ## Example Usage
 
 ```hcl
-variable "cluster_id" { }
-variable "ssh_key" { }
-variable "availability_zone" { }
+variable "cluster_id" {}
+variable "ssh_key" {}
+variable "availability_zone" {}
 
 resource "opentelekomcloud_cce_node_v3" "node_1" {
   name              = "node1"
   cluster_id        = var.cluster_id
   availability_zone = var.availability_zone
 
-  flavor_id      = "s2.large.2"
-  key_pair       = var.ssh_key
+  os        = "EulerOS 2.5"
+  flavor_id = "s2.large.2"
+  key_pair  = var.ssh_key
 
   bandwidth_size = 100
 
@@ -40,7 +41,19 @@ The following arguments are supported:
 
 * `cluster_id` - (Required) ID of the cluster. Changing this parameter will create a new resource.
 
-* `billing_mode` - (Optional) Node's billing mode: The value is 0 (on demand). Changing this parameter will create a new resource.
+* `flavor_id` - (Required) Specifies the flavor id. Changing this parameter will create a new resource.
+
+* `availability_zone` - (Required) specify the name of the available partition (AZ). Changing this parameter will create a new resource.
+
+* `key_pair` - (Required) Key pair name when logging in to select the key pair mode. Changing this parameter will create a new resource.
+
+* `os` - (Optional) Node OS. Changing this parameter will create a new resource.
+
+  Supported OS depends on kubernetes version of the cluster.
+  * Clusters of Kubernetes `v1.13` or later support `EulerOS 2.5`.
+  * Clusters of Kubernetes `v1.17` or later support `EulerOS 2.5` and `CentOS 7.7`.
+
+* `billing_mode` - (Optional) Node's billing mode: The value is `0` (on demand). Changing this parameter will create a new resource.
 
 * `name` - (Optional) Node Name.
 
@@ -51,12 +64,6 @@ The following arguments are supported:
 * `k8s_tags` - (Optional) Tags of a Kubernetes node, key/value pair format.
 
 * `annotations` - (Optional) Node annotation, key/value pair format. Changing this parameter will create a new resource.
-
-* `flavor_id` - (Required) Specifies the flavor id. Changing this parameter will create a new resource.
-
-* `availability_zone` - (Required) specify the name of the available partition (AZ). Changing this parameter will create a new resource.
-
-* `key_pair` - (Required) Key pair name when logging in to select the key pair mode. Changing this parameter will create a new resource.
 
 * `eip_ids` - (Optional) List of existing elastic IP IDs.
 

@@ -11,6 +11,7 @@ import (
 	"github.com/hashicorp/go-multierror"
 	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/helper/validation"
 	"github.com/opentelekomcloud/gophertelekomcloud"
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/cce/v3/clusters"
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/cce/v3/nodes"
@@ -80,6 +81,15 @@ func resourceCCENodeV3() *schema.Resource {
 				Type:     schema.TypeString,
 				Required: true,
 				ForceNew: true,
+			},
+			"os": {
+				Type:     schema.TypeString,
+				Optional: true,
+				ForceNew: true,
+				Computed: true,
+				ValidateFunc: validation.StringInSlice([]string{
+					"EulerOS 2.5", "CentOS 7.7",
+				}, false),
 			},
 			"root_volume": {
 				Type:     schema.TypeList,
@@ -366,6 +376,7 @@ func resourceCCENodeV3Create(d *schema.ResourceData, meta interface{}) error {
 		Spec: nodes.Spec{
 			Flavor:      d.Get("flavor_id").(string),
 			Az:          d.Get("availability_zone").(string),
+			Os:          d.Get("os").(string),
 			Login:       nodes.LoginSpec{SshKey: d.Get("key_pair").(string)},
 			RootVolume:  resourceCCERootVolume(d),
 			DataVolumes: resourceCCEDataVolume(d),
@@ -480,6 +491,7 @@ func resourceCCENodeV3Read(d *schema.ResourceData, meta interface{}) error {
 		d.Set("region", GetRegion(d, config)),
 		d.Set("name", s.Metadata.Name),
 		d.Set("flavor_id", s.Spec.Flavor),
+		d.Set("os", s.Spec.Os),
 		d.Set("availability_zone", s.Spec.Az),
 		d.Set("billing_mode", s.Spec.BillingMode),
 		d.Set("extend_param_charging_mode", s.Spec.ExtendParam.ChargingMode),
