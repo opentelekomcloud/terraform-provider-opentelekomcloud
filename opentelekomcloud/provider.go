@@ -217,6 +217,7 @@ func Provider() terraform.ResourceProvider {
 			"opentelekomcloud_networking_network_v2":         dataSourceNetworkingNetworkV2(),
 			"opentelekomcloud_networking_port_v2":            dataSourceNetworkingPortV2(),
 			"opentelekomcloud_networking_secgroup_v2":        dataSourceNetworkingSecGroupV2(),
+			"opentelekomcloud_obs_bucket_object":             dataSourceObsBucketObject(),
 			"opentelekomcloud_rds_flavors_v1":                dataSourceRdsFlavorV1(),
 			"opentelekomcloud_rds_flavors_v3":                dataSourceRdsFlavorV3(),
 			"opentelekomcloud_rts_software_deployment_v1":    dataSourceRtsSoftwareDeploymentV1(),
