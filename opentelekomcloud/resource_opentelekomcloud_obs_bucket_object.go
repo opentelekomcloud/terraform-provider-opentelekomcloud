@@ -34,14 +34,15 @@ func resourceObsBucketObject() *schema.Resource {
 			},
 
 			"source": {
-				Type:     schema.TypeString,
-				Optional: true,
+				Type:         schema.TypeString,
+				Optional:     true,
+				AtLeastOneOf: []string{"content"},
 			},
 
 			"content": {
-				Type:          schema.TypeString,
-				Optional:      true,
-				ConflictsWith: []string{"source"},
+				Type:         schema.TypeString,
+				Optional:     true,
+				AtLeastOneOf: []string{"source"},
 			},
 
 			"storage_class": {
@@ -93,25 +94,6 @@ func resourceObsBucketObject() *schema.Resource {
 				Type:     schema.TypeInt,
 				Computed: true,
 			},
-
-			"credentials": {
-				Type:     schema.TypeList,
-				Optional: true,
-				MaxItems: 1,
-				Elem: &schema.Resource{
-					Schema: map[string]*schema.Schema{
-						"access_key": {
-							Type:     schema.TypeString,
-							Required: true,
-						},
-						"secret_key": {
-							Type:      schema.TypeString,
-							Required:  true,
-							Sensitive: true,
-						},
-					},
-				},
-			},
 		},
 	}
 }
@@ -125,18 +107,13 @@ func resourceObsBucketObjectPut(d *schema.ResourceData, meta interface{}) error 
 	if err != nil {
 		return fmt.Errorf("error creating OBS client: %s", err)
 	}
-	source := d.Get("source").(string)
-	content := d.Get("content").(string)
-	if source == "" && content == "" {
-		return fmt.Errorf("must specify \"source\" or \"content\" field")
-	}
 
-	if source != "" {
+	if source, ok := d.GetOk("source"); ok {
 		// check source file whether exist
-		_, err := os.Stat(source)
+		_, err := os.Stat(source.(string))
 		if err != nil {
 			if os.IsNotExist(err) {
-				return fmt.Errorf("source file %s is not exist", source)
+				return fmt.Errorf("source file %s does not exist", source)
 			}
 			return err
 		}
@@ -145,7 +122,7 @@ func resourceObsBucketObjectPut(d *schema.ResourceData, meta interface{}) error 
 		resp, err = putFileToObject(client, d)
 	}
 
-	if content != "" {
+	if _, ok := d.GetOk("content"); ok {
 		// put content
 		resp, err = putContentToObject(client, d)
 	}
@@ -171,33 +148,40 @@ func resourceObsBucketObjectPut(d *schema.ResourceData, meta interface{}) error 
 	return resourceObsBucketObjectRead(d, meta)
 }
 
-func putContentToObject(obsClient *obs.ObsClient, d *schema.ResourceData) (*obs.PutObjectOutput, error) {
-	bucket := d.Get("bucket").(string)
-	key := d.Get("key").(string)
-	content := d.Get("content").(string)
-
-	putInput := &obs.PutObjectInput{}
-	putInput.Bucket = bucket
-	putInput.Key = key
-
+func basicInput(d *schema.ResourceData) obs.PutObjectBasicInput {
+	common := obs.PutObjectBasicInput{
+		ObjectOperationInput: obs.ObjectOperationInput{
+			Bucket: d.Get("bucket").(string),
+			Key:    d.Get("key").(string),
+		},
+		ContentType: d.Get("content_type").(string),
+	}
 	if v, ok := d.GetOk("acl"); ok {
-		putInput.ACL = obs.AclType(v.(string))
+		common.ACL = obs.AclType(v.(string))
 	}
 	if v, ok := d.GetOk("storage_class"); ok {
-		putInput.StorageClass = obs.StorageClassType(v.(string))
+		common.StorageClass = obs.StorageClassType(v.(string))
 	}
 	if v, ok := d.GetOk("content_type"); ok {
-		putInput.ContentType = v.(string)
+		common.ContentType = v.(string)
 	}
-
 	var sseKmsHeader = obs.SseKmsHeader{}
 	if d.Get("encryption").(bool) {
 		sseKmsHeader.Encryption = obs.DEFAULT_SSE_KMS_ENCRYPTION
 		sseKmsHeader.Key = d.Get("kms_key_id").(string)
-		putInput.SseHeader = sseKmsHeader
+		common.SseHeader = sseKmsHeader
+	}
+	return common
+}
+
+func putContentToObject(obsClient *obs.ObsClient, d *schema.ResourceData) (*obs.PutObjectOutput, error) {
+	content := d.Get("content").(string)
+
+	putInput := &obs.PutObjectInput{
+		PutObjectBasicInput: basicInput(d),
 	}
 
-	log.Printf("[DEBUG] putting %s to OBS Bucket %s, opts: %#v", key, bucket, putInput)
+	log.Printf("[DEBUG] putting %s to OBS Bucket %s, opts: %#v", putInput.Key, putInput.Bucket, putInput)
 	// do not log content
 	body := bytes.NewReader([]byte(content))
 	putInput.Body = body
@@ -206,32 +190,12 @@ func putContentToObject(obsClient *obs.ObsClient, d *schema.ResourceData) (*obs.
 }
 
 func putFileToObject(obsClient *obs.ObsClient, d *schema.ResourceData) (*obs.PutObjectOutput, error) {
-	bucket := d.Get("bucket").(string)
-	key := d.Get("key").(string)
-
-	putInput := &obs.PutFileInput{}
-	putInput.Bucket = bucket
-	putInput.Key = key
+	putInput := &obs.PutFileInput{
+		PutObjectBasicInput: basicInput(d),
+	}
 	putInput.SourceFile = d.Get("source").(string)
 
-	if v, ok := d.GetOk("acl"); ok {
-		putInput.ACL = obs.AclType(v.(string))
-	}
-	if v, ok := d.GetOk("storage_class"); ok {
-		putInput.StorageClass = obs.StorageClassType(v.(string))
-	}
-	if v, ok := d.GetOk("content_type"); ok {
-		putInput.ContentType = v.(string)
-	}
-
-	var sseKmsHeader = obs.SseKmsHeader{}
-	if d.Get("encryption").(bool) {
-		sseKmsHeader.Encryption = obs.DEFAULT_SSE_KMS_ENCRYPTION
-		sseKmsHeader.Key = d.Get("kms_key_id").(string)
-		putInput.SseHeader = sseKmsHeader
-	}
-
-	log.Printf("[DEBUG] putting %s to OBS Bucket %s, opts: %#v", key, bucket, putInput)
+	log.Printf("[DEBUG] putting %s to OBS Bucket %s, opts: %#v", putInput.Key, putInput.Bucket, putInput)
 	return obsClient.PutFile(putInput)
 }
 
@@ -250,7 +214,7 @@ func resourceObsBucketObjectRead(d *schema.ResourceData, meta interface{}) error
 
 	resp, err := client.ListObjects(input)
 	if err != nil {
-		return getObsError("Error listing objects of OBS bucket", bucket, err)
+		return getObsError("error listing objects of OBS bucket", bucket, err)
 	}
 
 	var exist bool
@@ -268,8 +232,7 @@ func resourceObsBucketObjectRead(d *schema.ResourceData, meta interface{}) error
 	}
 	log.Printf("[DEBUG] Reading OBS Bucket Object %s: %#v", key, object)
 
-	class := string(object.StorageClass)
-	if class == "" {
+	if class := string(object.StorageClass); class == "" {
 		err = d.Set("storage_class", "STANDARD")
 	} else {
 		err = d.Set("storage_class", normalizeStorageClass(class))
