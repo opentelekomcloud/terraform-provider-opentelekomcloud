@@ -47,11 +47,13 @@ The following arguments are supported:
 
 * `key_pair` - (Required) Key pair name when logging in to select the key pair mode. Changing this parameter will create a new resource.
 
-* `os` - (Optional) Node OS.
-  * Nodes in clusters of Kubernetes `v1.13` or later support `EulerOS 2.5`.
-  * Nodes in clusters of Kubernetes `v1.17` or later support `EulerOS 2.5` and `CentOS 7.7`.
+* `os` - (Optional) Node OS. Changing this parameter will create a new resource.
 
-* `billing_mode` - (Optional) Node's billing mode: The value is 0 (on demand). Changing this parameter will create a new resource.
+  Supported OS depends on kubernetes version of the cluster.
+  * Clusters of Kubernetes `v1.13` or later support `EulerOS 2.5`.
+  * Clusters of Kubernetes `v1.17` or later support `EulerOS 2.5` and `CentOS 7.7`.
+
+* `billing_mode` - (Optional) Node's billing mode: The value is `0` (on demand). Changing this parameter will create a new resource.
 
 * `name` - (Optional) Node Name.
 
