@@ -24,6 +24,7 @@ func TestAccCCENodesV3_basic(t *testing.T) {
 					testAccCheckCCENodeV3Exists("opentelekomcloud_cce_node_v3.node_1", "opentelekomcloud_cce_cluster_v3.cluster_1", &node),
 					resource.TestCheckResourceAttr("opentelekomcloud_cce_node_v3.node_1", "name", "test-node"),
 					resource.TestCheckResourceAttr("opentelekomcloud_cce_node_v3.node_1", "flavor_id", "s2.xlarge.2"),
+					resource.TestCheckResourceAttr("opentelekomcloud_cce_node_v3.node_1", "os", "EulerOS 2.5"),
 				),
 			},
 			{
@@ -48,6 +49,28 @@ func TestAccCCENodesV3_timeout(t *testing.T) {
 				Config: testAccCCENodeV3_timeout,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckCCENodeV3Exists("opentelekomcloud_cce_node_v3.node_1", "opentelekomcloud_cce_cluster_v3.cluster_1", &node),
+				),
+			},
+		},
+	})
+}
+func TestAccCCENodesV3_os(t *testing.T) {
+	var node nodes.Nodes
+	var node2 nodes.Nodes
+
+	resource.Test(t, resource.TestCase{
+		PreCheck:     func() { testAccCCEKeyPairPreCheck(t) },
+		Providers:    testAccProviders,
+		CheckDestroy: testAccCheckCCENodeV3Destroy,
+		Steps: []resource.TestStep{
+			{
+				Config: testAccCCENodeV3_os,
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckCCENodeV3Exists("opentelekomcloud_cce_node_v3.node_1", "opentelekomcloud_cce_cluster_v3.cluster_1", &node),
+					resource.TestCheckResourceAttr("opentelekomcloud_cce_node_v3.node_1", "os", "EulerOS 2.5"),
+
+					testAccCheckCCENodeV3Exists("opentelekomcloud_cce_node_v3.node_2", "opentelekomcloud_cce_cluster_v3.cluster_1", &node2),
+					resource.TestCheckResourceAttr("opentelekomcloud_cce_node_v3.node_2", "os", "CentOS 7.7"),
 				),
 			},
 		},
@@ -263,6 +286,60 @@ func testAccCheckCCENodeV3Exists(n string, cluster string, node *nodes.Nodes) re
 		return nil
 	}
 }
+
+var testAccCCENodeV3_os = fmt.Sprintf(`
+resource "opentelekomcloud_cce_cluster_v3" "cluster_1" {
+  name         = "opentelekomcloud-cce"
+  cluster_type = "VirtualMachine"
+  flavor_id    = "cce.s1.small"
+  vpc_id       = "%s"
+  subnet_id    = "%s"
+
+  container_network_type = "overlay_l2"
+  authentication_mode    = "rbac"
+}
+
+resource "opentelekomcloud_cce_node_v3" "node_1" {
+  cluster_id = opentelekomcloud_cce_cluster_v3.cluster_1.id
+  name       = "test-node"
+  flavor_id  = "s2.large.2"
+  os         = "EulerOS 2.5"
+
+  availability_zone = "%s"
+  key_pair          = "%s"
+
+  root_volume {
+    size       = 40
+    volumetype = "SATA"
+  }
+
+  data_volumes {
+    size       = 100
+    volumetype = "SATA"
+  }
+}
+
+resource "opentelekomcloud_cce_node_v3" "node_2" {
+  cluster_id = opentelekomcloud_cce_cluster_v3.cluster_1.id
+  name       = "test-node"
+  flavor_id  = "s2.large.2"
+  os         = "CentOS 7.7"
+
+  availability_zone = "%[3]s"
+  key_pair          = "%[4]s"
+
+  root_volume {
+    size       = 40
+    volumetype = "SATA"
+  }
+
+  data_volumes {
+    size       = 100
+    volumetype = "SATA"
+  }
+}
+
+`, OS_VPC_ID, OS_NETWORK_ID, OS_AVAILABILITY_ZONE, OS_KEYPAIR_NAME)
 
 var testAccCCENodeV3_basic = fmt.Sprintf(`
 resource "opentelekomcloud_cce_cluster_v3" "cluster_1" {
