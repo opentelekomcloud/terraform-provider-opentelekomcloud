@@ -1,5 +1,5 @@
 ---
-subcategory: "Object Storage Service (OBS)"
+subcategory: "Object Storage Service (S3)"
 ---
 
 # opentelekomcloud_s3_bucket_object
