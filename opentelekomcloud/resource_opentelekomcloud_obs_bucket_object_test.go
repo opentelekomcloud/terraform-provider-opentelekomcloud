@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"io/ioutil"
 	"os"
+	"regexp"
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-sdk/helper/acctest"
@@ -73,6 +74,24 @@ func TestAccObsBucketObject_content(t *testing.T) {
 					resource.TestCheckResourceAttr(
 						"opentelekomcloud_obs_bucket_object.object", "size", "19"),
 				),
+			},
+		},
+	})
+}
+
+func TestAccObsBucketObject_nothing(t *testing.T) {
+	rInt := acctest.RandInt()
+
+	resource.Test(t, resource.TestCase{
+		PreCheck:     func() { testAccPreCheck(t) },
+		Providers:    testAccProviders,
+		CheckDestroy: testAccCheckObsBucketObjectDestroy,
+		Steps: []resource.TestStep{
+			{
+				PreConfig:   func() {},
+				Config:      testAccObsBucketObjectConfigNothing(rInt),
+				PlanOnly:    true,
+				ExpectError: regexp.MustCompile("-.+one\\sof\\s`content,source`\\smust\\sbe\\sspecified\\n"),
 			},
 		},
 	})
@@ -160,6 +179,18 @@ func testAccCheckObsBucketObjectExists(n string) resource.TestCheckFunc {
 
 		return nil
 	}
+}
+
+func testAccObsBucketObjectConfigNothing(randInt int) string {
+	return fmt.Sprintf(`
+resource "opentelekomcloud_obs_bucket" "object_bucket" {
+  bucket = "tf-object-test-bucket-%d"
+}
+resource "opentelekomcloud_obs_bucket_object" "object" {
+  bucket       = opentelekomcloud_obs_bucket.object_bucket.bucket
+  key          = "test-key"
+}
+`, randInt)
 }
 
 func testAccObsBucketObjectConfigSource(randInt int, source string) string {
