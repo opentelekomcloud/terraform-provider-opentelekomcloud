@@ -1,15 +1,35 @@
 ## 1.23.0 (Unreleased)
 
-## 1.22.2 (December 16, 2020)
+## 1.22.3 (December 23, 2020)
+
+FEATURES:
+* **New Resource:** `opentelekomcloud_obs_bucket_policy` ([#773](https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/issues/773))
+* **New Data Source:** `opentelekomcloud_obs_bucket_object` ([#780](https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/issues/780))
 
 ENHANCEMENTS:
+* `resource/opentelekomcloud_cce_node_v3`: Add `os` argument ([#778](https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/issues/778))
+
+BUG FIXES:
+* `resource/opentelekomcloud_obs_bucket_object`: Remove unused `credentials` argument ([#781](https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/issues/781))
+
+DOCUMENTATION:
+* `data_source/opentelekomcloud_s3_bucket_object`:  Move to `"Object Storage Service (S3)"` subcategory ([#772](https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/issues/772))
+* `resource/opentelekomcloud_s3_bucket`: Move to `"Object Storage Service (S3)"` subcategory ([#772](https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/issues/772))
+* `resource/opentelekomcloud_s3_bucket_object`: Move to `"Object Storage Service (S3)"` subcategory ([#772](https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/issues/772))
+* `resource/opentelekomcloud_s3_bucket_policy`: Move to `"Object Storage Service (S3)"` subcategory ([#772](https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/issues/772))
+
+## 1.22.2 (December 16, 2020)
+
+FEATURES:
 * **New Resource:** `opentelekomcloud_cce_addon_v3` ([#711](https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/issues/711))
+
+ENHANCEMENTS:
 * `resource/opentelekomcloud_lb_loadbalancer_v2`: Clarify usage `lb_loadbalancer_v2` with `vpc_subnet_v1` in docs ([#766](https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/issues/766))
 * `resource/opentelekomcloud_cce_cluster_v3`: Add cluster name validation ([#768](https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/issues/768))
 
 ## 1.22.1 (December 10, 2020)
 
-ENHANCEMENTS:
+FEATURES:
 * **New Resource:** `opentelekomcloud_cbr_policy_v3`([#758](https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/758))
 
 BUG FIXES:
@@ -21,8 +41,10 @@ BUG FIXES:
 
 ## 1.22.0 (December 03, 2020)
 
-ENHANCEMENTS:
+FEATURES:
 * **New Data Source:** `opetelekomcloud_dds_instance_v3` ([#725](https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/725))
+
+ENHANCEMENTS:
 * `resource/opentelekomcloud_cce_cluster_v3`: Add new argument `authenticating_proxy_ca` ([#727](https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/727))
 * `data_source/opentelekomcloud_cce_cluster_v3`: Add new argument `authentication_mode` ([#727](https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/727))
 * `resource/opentelekomcloud_obs_bucket`: Setting up AK/SK is not required anymore ([#745](https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/745))
@@ -36,7 +58,7 @@ BUG FIXES:
 
 ## 1.21.6 (November 25, 2020)
 
-ENHANCEMENTS:
+FEATURES:
 * **New Resource:** `opetelekomcloud_dds_instance_v3` ([#717](https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/717))
 * **New Data Source:** `opetelekomcloud_dds_flavors_v3` ([#718](https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/718))
 * **New Data Source:** `opentelekomcloud_vpc_bandwidth` ([#719](https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/719))
@@ -89,9 +111,11 @@ BUG FIXES:
 * `resource/opentelekomcloud_compute_secgroup_v2`: Fix delete group if it's used ([#677](https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/677))
 * `resource/opentelekomcloud_networking_secgroup_v2`: Fix delete group if it's used ([#676](https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/676))
 
+FEATURES:
+* **New Data Source:** `opentelekomcloud_identity_auth_scope_v3` ([#669](https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/669))
+
 ENHANCEMENTS:
 * `resource/opentelekomcloud_identity_user_v3`: Add email field to schema ([668](https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/668))
-* **New Data Source:** `opentelekomcloud_identity_auth_scope_v3` ([#669](https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/669))
 
 
 ## 1.21.1 (October 23, 2020)
@@ -112,7 +136,7 @@ ENHANCEMENTS:
 
 BUG FIXES:
 * `resource/opentelekomcloud_dcs_instance_v1`: Fix issues with DCS schema ([#643](https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/643))
-* `data-source/opentelekomcloud_role_v3`: Update role list ([#654](https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/654))
+* `data_source/opentelekomcloud_role_v3`: Update role list ([#654](https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/654))
 
 
 ## 1.20.2 (September 30, 2020)
@@ -133,9 +157,11 @@ ENHANCEMENTS:
 BUG FIXES:
 * `resource/opentelekomcloud_cce_node_v3`: `public_key` attribute not setting ([#616](https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/616))
 
+FEATURES:
+* **New Data Source:** `opentelekomcloud_dns_zone_v2` ([#620](https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/620))
+
 ENHANCEMENTS:
 * `resource/opentelekomcloud_cce_node_v3`: Only `bandwidth_charge_mode` is now required for EIP creation ([#616](https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/616))
-* **New Data Source:** `opentelekomcloud_dns_zone_v2` ([#620](https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/620))
 
 ## 1.20.0 (September 16, 2020)
 
@@ -144,7 +170,7 @@ BUG FIXES:
 * `resource/opentelekomcloud_cce_cluster_v3`: Update outdated docs ([#614](https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/614))
 * `resource/opentelekomcloud_lb_listener_v2`: Update outdated docs ([#615](https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/615))
 
-ENHANCEMENTS:
+FEATURES:
 * **New Data Source:** `opentelekomcloud_identity_credential_v3` ([#613](https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/613))
 * **New Resource:** `opentelekomcloud_identity_credential_v3` ([#613](https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/613))
 
@@ -155,7 +181,7 @@ BUG FIXES:
 * `resource/opentelekomcloud_smn_subscription_v2`: Fix r/smn_subscription_v2 and d/cts_tracker_v1 ([608](https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/608))
 * `data_source/opentelekomcloud_cts_tracker_v1`: Fix r/smn_subscription_v2 and d/cts_tracker_v1 ([608](https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/608))
 
-ENHANCEMENTS:
+FEATURES:
 * **New Data Source:** `opentelekomcloud_vpnaas_service_v2` ([#605](https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/605))
 
 ## 1.19.4 (September 1, 2020)
@@ -165,8 +191,10 @@ BUG FIXES:
 
 ## 1.19.3 (September 1, 2020)
 
-ENHANCEMENTS:
+FEATURES:
 * **Removed Resource:** `opentelekomcloud_maas_task_v1` ([#585](https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/585))
+
+ENHANCEMENTS:
 * `resource/opentelekomcloud_compute_instance_v2`: Fix ECS tags-tag confusion ([#586](https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/586))
 * `resource/opentelekomcloud_rds_instance_v3`: Add setting public IP for RDS instance v3 ([#596](https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/596))
 
@@ -540,9 +568,9 @@ BUG FIXES:
 ENHANCEMENTS:
 
 * Add AKSK authentication support ([#157](https://github.com/terraform-providers/terraform-provider-opentelekomcloud/issues/157))
-* `data/opentelekomcloud_images_image_v2`: Add properties filter support for images data source ([#165](https://github.com/terraform-providers/terraform-provider-opentelekomcloud/issues/165))
+* `data_source/opentelekomcloud_images_image_v2`: Add properties filter support for images data source ([#165](https://github.com/terraform-providers/terraform-provider-opentelekomcloud/issues/165))
 * `resource/opentelekomcloud_compute_instance_v2`: Add key/value tag support ([#169](https://github.com/terraform-providers/terraform-provider-opentelekomcloud/issues/169))
-* `data/opentelekomcloud_vpc_subnet_v1`: Sort vpc subnet ids by network ip availabilities ([#171](https://github.com/terraform-providers/terraform-provider-opentelekomcloud/issues/171))
+* `data_source/opentelekomcloud_vpc_subnet_v1`: Sort vpc subnet ids by network ip availabilities ([#171](https://github.com/terraform-providers/terraform-provider-opentelekomcloud/issues/171))
 
 ## 1.4.0 (December 10, 2018)
 
