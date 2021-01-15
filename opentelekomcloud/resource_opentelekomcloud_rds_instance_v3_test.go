@@ -141,6 +141,26 @@ func TestAccRdsInstanceV3_backupCheck(t *testing.T) {
 	})
 }
 
+func TestAccRdsInstanceV3_templateConfigCheck(t *testing.T) {
+	postfix := acctest.RandString(3)
+	var rdsInstance instances.RdsInstanceResponse
+
+	resource.Test(t, resource.TestCase{
+		PreCheck:     func() { testAccPreCheck(t) },
+		Providers:    testAccProviders,
+		CheckDestroy: testAccCheckRdsInstanceV3Destroy,
+		Steps: []resource.TestStep{
+			{
+				Config: testAccRdsInstanceV3_configTemplate(postfix),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckRdsInstanceV3Exists("opentelekomcloud_rds_instance_v3.instance", &rdsInstance),
+					resource.TestCheckResourceAttr("opentelekomcloud_rds_instance_v3.instance", "name", "tf_rds_instance_"+postfix),
+				),
+			},
+		},
+	})
+}
+
 func testAccCheckRdsInstanceV3Destroy(s *terraform.State) error {
 	config := testAccProvider.Meta().(*Config)
 	client, err := config.rdsV3Client(OS_REGION_NAME)
@@ -283,7 +303,7 @@ resource "opentelekomcloud_rds_instance_v3" "instance" {
   vpc_id             = "%s"
   volume {
     type = "COMMON"
-    size = 100
+    size = 40
   }
   flavor = "rds.pg.c2.medium"
   backup_strategy {
@@ -381,6 +401,45 @@ resource "opentelekomcloud_rds_instance_v3" "instance" {
     keep_days  = 5
   }
 
+}
+`, postfix, OS_AVAILABILITY_ZONE, OS_NETWORK_ID, OS_VPC_ID)
+}
+
+func testAccRdsInstanceV3_configTemplate(postfix string) string {
+	return fmt.Sprintf(`
+resource "opentelekomcloud_rds_parametergroup_v3" "pg" {
+	name = "pg-rds-test"
+	values = {
+		max_connections = "10"
+		autocommit = "OFF"
+	}
+	datastore {
+		type = "PostgreSQL"
+		version = "10"
+	}
+}
+
+resource "opentelekomcloud_networking_secgroup_v2" "sg" {
+  name = "sg-rds-test"
+}
+
+resource "opentelekomcloud_rds_instance_v3" "instance" {
+  name              = "tf_rds_instance_%s"
+  availability_zone = ["%s"]
+  db {
+    password = "Postgres!120521"
+    type     = "PostgreSQL"
+    version  = "10"
+  }
+  security_group_id  = opentelekomcloud_networking_secgroup_v2.sg.id
+  subnet_id          = "%s"
+  vpc_id             = "%s"
+  volume {
+    type = "COMMON"
+    size = 40
+  }
+  flavor                    = "rds.pg.c2.medium"
+  configuration_template_id = opentelekomcloud_rds_parametergroup_v3.pg.id
 }
 `, postfix, OS_AVAILABILITY_ZONE, OS_NETWORK_ID, OS_VPC_ID)
 }

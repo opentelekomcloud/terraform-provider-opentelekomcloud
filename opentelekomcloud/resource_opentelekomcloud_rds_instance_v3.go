@@ -8,7 +8,6 @@ import (
 	"time"
 
 	"github.com/hashicorp/go-multierror"
-
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
 	"github.com/opentelekomcloud/gophertelekomcloud"
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/networking/v1/subnets"
@@ -166,6 +165,12 @@ func resourceRdsInstanceV3() *schema.Resource {
 				ValidateFunc: validateECSTagValue,
 			},
 			"param_group_id": {
+				Type:       schema.TypeString,
+				Optional:   true,
+				ForceNew:   true,
+				Deprecated: "Please use `configuration_template_id` instead",
+			},
+			"configuration_template_id": {
 				Type:     schema.TypeString,
 				Optional: true,
 				ForceNew: true,
@@ -308,6 +313,7 @@ func resourceRdsInstanceV3Create(d *schema.ResourceData, meta interface{}) error
 		Name:             d.Get("name").(string),
 		Datastore:        resourceRDSDataStore(d),
 		Ha:               resourceRDSHa(d),
+		ConfigurationId:  d.Get("configuration_template_id").(string),
 		Port:             dbPortString,
 		Password:         dbInfo["password"].(string),
 		BackupStrategy:   resourceRDSBackupStrategy(d),
