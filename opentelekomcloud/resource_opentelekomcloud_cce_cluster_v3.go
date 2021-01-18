@@ -13,6 +13,8 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/helper/validation"
 	"github.com/opentelekomcloud/gophertelekomcloud"
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/cce/v3/clusters"
+	"github.com/opentelekomcloud/gophertelekomcloud/openstack/networking/v1/subnets"
+	"github.com/opentelekomcloud/gophertelekomcloud/openstack/networking/v1/vpcs"
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/networking/v2/extensions/layer3/floatingips"
 )
 
@@ -36,6 +38,8 @@ func resourceCCEClusterV3() *schema.Resource {
 			Create: schema.DefaultTimeout(30 * time.Minute),
 			Delete: schema.DefaultTimeout(30 * time.Minute),
 		},
+
+		CustomizeDiff: validateCCEClusterRequirements,
 
 		Schema: map[string]*schema.Schema{
 			"region": {
@@ -550,4 +554,27 @@ func resourceFloatingIPV2Exists(d *schema.ResourceData, meta interface{}, floati
 	}
 
 	return allFips[0].ID, nil
+}
+
+func validateCCEClusterRequirements(d *schema.ResourceDiff, meta interface{}) error {
+	config, ok := meta.(*Config)
+	if !ok {
+		return fmt.Errorf("error retreiving configuration: can't convert %v to Config", meta)
+	}
+	vpcClient, err := config.networkingV1Client(GetRegion(d, config))
+	if err != nil {
+		return fmt.Errorf("error creating opentelekomcloud CCE Client: %s", err)
+	}
+	vpcID := d.Get("vpc_id").(string)
+	err = vpcs.Get(vpcClient, vpcID).Err
+	if err != nil {
+		return fmt.Errorf("can't find VPC `%s`: %s", vpcID, err)
+	}
+
+	subnetID := d.Get("subnet_id").(string)
+	err = subnets.Get(vpcClient, subnetID).Err
+	if err != nil {
+		return fmt.Errorf("can't find subnet `%s`: %s", subnetID, err)
+	}
+	return nil
 }
