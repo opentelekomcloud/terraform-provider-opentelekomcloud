@@ -15,6 +15,7 @@ import (
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/networking/v2/ports"
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/rds/v1/tags"
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/rds/v3/backups"
+	"github.com/opentelekomcloud/gophertelekomcloud/openstack/rds/v3/configurations"
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/rds/v3/flavors"
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/rds/v3/instances"
 )
@@ -165,15 +166,8 @@ func resourceRdsInstanceV3() *schema.Resource {
 				ValidateFunc: validateECSTagValue,
 			},
 			"param_group_id": {
-				Type:       schema.TypeString,
-				Optional:   true,
-				ForceNew:   true,
-				Deprecated: "Please use `configuration_template_id` instead",
-			},
-			"configuration_template_id": {
 				Type:     schema.TypeString,
 				Optional: true,
-				ForceNew: true,
 			},
 			"created": {
 				Type:     schema.TypeString,
@@ -313,7 +307,7 @@ func resourceRdsInstanceV3Create(d *schema.ResourceData, meta interface{}) error
 		Name:             d.Get("name").(string),
 		Datastore:        resourceRDSDataStore(d),
 		Ha:               resourceRDSHa(d),
-		ConfigurationId:  d.Get("configuration_template_id").(string),
+		ConfigurationId:  d.Get("param_group_id").(string),
 		Port:             dbPortString,
 		Password:         dbInfo["password"].(string),
 		BackupStrategy:   resourceRDSBackupStrategy(d),
@@ -679,6 +673,22 @@ func resourceRdsInstanceV3Update(d *schema.ResourceData, meta interface{}) error
 			break
 		default:
 			return fmt.Errorf("RDS instance can't have more than one public IP")
+		}
+	}
+
+	if d.HasChange("param_group_id") {
+		_, newParamGroupRaw := d.GetChange("param_group_id")
+		newParamGroupID := newParamGroupRaw.(string)
+		if len(newParamGroupID) == 0 {
+			return fmt.Errorf("you can't remove `param_group_id` without recreation")
+		}
+		applyOpts := configurations.ApplyOpts{
+			InstanceIDs: []string{
+				d.Id(),
+			},
+		}
+		if err := configurations.Apply(client, newParamGroupID, applyOpts).Err; err != nil {
+			return fmt.Errorf("error during apply new configuration")
 		}
 	}
 

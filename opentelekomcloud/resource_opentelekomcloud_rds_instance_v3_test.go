@@ -151,7 +151,14 @@ func TestAccRdsInstanceV3_templateConfigCheck(t *testing.T) {
 		CheckDestroy: testAccCheckRdsInstanceV3Destroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccRdsInstanceV3_configTemplate(postfix),
+				Config: testAccRdsInstanceV3_configTemplateBasic(postfix),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckRdsInstanceV3Exists("opentelekomcloud_rds_instance_v3.instance", &rdsInstance),
+					resource.TestCheckResourceAttr("opentelekomcloud_rds_instance_v3.instance", "name", "tf_rds_instance_"+postfix),
+				),
+			},
+			{
+				Config: testAccRdsInstanceV3_configTemplateChange(postfix),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckRdsInstanceV3Exists("opentelekomcloud_rds_instance_v3.instance", &rdsInstance),
 					resource.TestCheckResourceAttr("opentelekomcloud_rds_instance_v3.instance", "name", "tf_rds_instance_"+postfix),
@@ -405,7 +412,7 @@ resource "opentelekomcloud_rds_instance_v3" "instance" {
 `, postfix, OS_AVAILABILITY_ZONE, OS_NETWORK_ID, OS_VPC_ID)
 }
 
-func testAccRdsInstanceV3_configTemplate(postfix string) string {
+func testAccRdsInstanceV3_configTemplateBasic(postfix string) string {
 	return fmt.Sprintf(`
 resource "opentelekomcloud_rds_parametergroup_v3" "pg" {
 	name = "pg-rds-test"
@@ -414,7 +421,19 @@ resource "opentelekomcloud_rds_parametergroup_v3" "pg" {
 		autocommit = "OFF"
 	}
 	datastore {
-		type = "PostgreSQL"
+		type = "postgresql"
+		version = "10"
+	}
+}
+
+resource "opentelekomcloud_rds_parametergroup_v3" "pg2" {
+	name = "pg-rds-test-2"
+	values = {
+		max_connections = "10"
+		autocommit = "OFF"
+	}
+	datastore {
+		type = "postgresql"
 		version = "10"
 	}
 }
@@ -438,8 +457,59 @@ resource "opentelekomcloud_rds_instance_v3" "instance" {
     type = "COMMON"
     size = 40
   }
-  flavor                    = "rds.pg.c2.medium"
-  configuration_template_id = opentelekomcloud_rds_parametergroup_v3.pg.id
+  flavor         = "rds.pg.c2.medium"
+  param_group_id = opentelekomcloud_rds_parametergroup_v3.pg.id
+}
+`, postfix, OS_AVAILABILITY_ZONE, OS_NETWORK_ID, OS_VPC_ID)
+}
+
+func testAccRdsInstanceV3_configTemplateChange(postfix string) string {
+	return fmt.Sprintf(`
+resource "opentelekomcloud_rds_parametergroup_v3" "pg" {
+	name = "pg-rds-test"
+	values = {
+		max_connections = "10"
+		autocommit = "OFF"
+	}
+	datastore {
+		type = "postgresql"
+		version = "10"
+	}
+}
+
+resource "opentelekomcloud_rds_parametergroup_v3" "pg2" {
+	name = "pg-rds-test-2"
+	values = {
+		max_connections = "10"
+		autocommit = "OFF"
+	}
+	datastore {
+		type = "postgresql"
+		version = "10"
+	}
+}
+
+resource "opentelekomcloud_networking_secgroup_v2" "sg" {
+  name = "sg-rds-test"
+}
+
+resource "opentelekomcloud_rds_instance_v3" "instance" {
+  name              = "tf_rds_instance_%s"
+  availability_zone = ["%s"]
+  db {
+    password = "Postgres!120521"
+    type     = "PostgreSQL"
+    version  = "10"
+  }
+  security_group_id  = opentelekomcloud_networking_secgroup_v2.sg.id
+  subnet_id          = "%s"
+  vpc_id             = "%s"
+  volume {
+    type = "COMMON"
+    size = 40
+  }
+  flavor         = "rds.pg.c2.medium"
+  param_group_id = opentelekomcloud_rds_parametergroup_v3.pg2.id
 }
 `, postfix, OS_AVAILABILITY_ZONE, OS_NETWORK_ID, OS_VPC_ID)
 }
