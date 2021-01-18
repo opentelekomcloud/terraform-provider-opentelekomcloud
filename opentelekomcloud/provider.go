@@ -220,6 +220,7 @@ func Provider() terraform.ResourceProvider {
 			"opentelekomcloud_obs_bucket_object":             dataSourceObsBucketObject(),
 			"opentelekomcloud_rds_flavors_v1":                dataSourceRdsFlavorV1(),
 			"opentelekomcloud_rds_flavors_v3":                dataSourceRdsFlavorV3(),
+			"opentelekomcloud_rds_versions_v3":               dataSourceRdsVersionsV3(),
 			"opentelekomcloud_rts_software_deployment_v1":    dataSourceRtsSoftwareDeploymentV1(),
 			"opentelekomcloud_rts_software_config_v1":        dataSourceRtsSoftwareConfigV1(),
 			"opentelekomcloud_rts_stack_resource_v1":         dataSourceRTSStackResourcesV1(),

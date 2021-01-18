@@ -7,7 +7,10 @@ import (
 	"log"
 	"reflect"
 	"regexp"
+	"sort"
 	"strings"
+
+	ver "github.com/hashicorp/go-version"
 )
 
 func jsonBytesEqual(b1, b2 []byte) bool {
@@ -70,4 +73,49 @@ func base64IfNot(src string) string {
 		return src
 	}
 	return base64.StdEncoding.EncodeToString([]byte(src))
+}
+
+type versionSlice []*ver.Version
+
+func (v versionSlice) Len() int {
+	return len(v)
+}
+
+func (v versionSlice) Swap(i, j int) {
+	v[i], v[j] = v[j], v[i]
+}
+
+func (v versionSlice) Less(i, j int) bool {
+	return v[i].LessThan(v[j])
+}
+
+func (v versionSlice) ToStringSlice() []string {
+	res := make([]string, len(v))
+	for i, version := range v {
+		res[i] = version.Original()
+	}
+	return res
+}
+
+func sortAsStringSlice(src []string) []string {
+	res := make([]string, len(src))
+	copy(res, src)
+	sort.Sort(sort.Reverse(sort.StringSlice(res)))
+	return res
+}
+
+// SortVersions sorts versions from newer to older.
+// If non-version-like string will be found in the slice,
+// slice will be sorted as string slice in reversed order (z-a)
+func SortVersions(src []string) []string {
+	verSlice := make(versionSlice, len(src))
+	for i, v := range src {
+		val, err := ver.NewVersion(v)
+		if err != nil {
+			return sortAsStringSlice(src) // in case it's not version-like
+		}
+		verSlice[i] = val
+	}
+	sort.Sort(sort.Reverse(verSlice))
+	return verSlice.ToStringSlice()
 }
