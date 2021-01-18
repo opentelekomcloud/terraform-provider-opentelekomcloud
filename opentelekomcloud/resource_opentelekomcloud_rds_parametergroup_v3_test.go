@@ -23,9 +23,9 @@ func TestAccRdsConfigurationV3_basic(t *testing.T) {
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckRdsConfigV3Exists("opentelekomcloud_rds_parametergroup_v3.pg_1", &config),
 					resource.TestCheckResourceAttr(
-						"opentelekomcloud_rds_parametergroup_v3.pg_1", "name", "pg_1"),
+						"opentelekomcloud_rds_parametergroup_v3.pg_1", "name", "pg_create"),
 					resource.TestCheckResourceAttr(
-						"opentelekomcloud_rds_parametergroup_v3.pg_1", "description", "description_1"),
+						"opentelekomcloud_rds_parametergroup_v3.pg_1", "description", "some description"),
 				),
 			},
 			{
@@ -35,7 +35,7 @@ func TestAccRdsConfigurationV3_basic(t *testing.T) {
 					resource.TestCheckResourceAttr(
 						"opentelekomcloud_rds_parametergroup_v3.pg_1", "name", "pg_update"),
 					resource.TestCheckResourceAttr(
-						"opentelekomcloud_rds_parametergroup_v3.pg_1", "description", "description_update"),
+						"opentelekomcloud_rds_parametergroup_v3.pg_1", "description", "updated description"),
 				),
 			},
 		},
@@ -46,7 +46,7 @@ func testAccCheckRdsConfigV3Destroy(s *terraform.State) error {
 	config := testAccProvider.Meta().(*Config)
 	rdsClient, err := config.rdsV3Client(OS_REGION_NAME)
 	if err != nil {
-		return fmt.Errorf("Error creating OpenTelekomCloud RDS client: %s", err)
+		return fmt.Errorf("error creating OpenTelekomCloud RDSv3 client: %s", err)
 	}
 
 	for _, rs := range s.RootModule().Resources {
@@ -56,7 +56,7 @@ func testAccCheckRdsConfigV3Destroy(s *terraform.State) error {
 
 		_, err := configurations.Get(rdsClient, rs.Primary.ID).Extract()
 		if err == nil {
-			return fmt.Errorf("Rds configuration still exists")
+			return fmt.Errorf("RDSv3 configuration still exists")
 		}
 	}
 
@@ -67,26 +67,26 @@ func testAccCheckRdsConfigV3Exists(n string, configuration *configurations.Confi
 	return func(s *terraform.State) error {
 		rs, ok := s.RootModule().Resources[n]
 		if !ok {
-			return fmt.Errorf("Not found: %s", n)
+			return fmt.Errorf("not found: %s", n)
 		}
 
 		if rs.Primary.ID == "" {
-			return fmt.Errorf("No ID is set")
+			return fmt.Errorf("no ID is set")
 		}
 
 		config := testAccProvider.Meta().(*Config)
-		rdsClient, err := config.rdsV3Client(OS_REGION_NAME)
+		client, err := config.rdsV3Client(OS_REGION_NAME)
 		if err != nil {
-			return fmt.Errorf("Error creating OpenTelekomCloud RDS client: %s", err)
+			return fmt.Errorf("error creating OpenTelekomCloud RDSv3 client: %s", err)
 		}
 
-		found, err := configurations.Get(rdsClient, rs.Primary.ID).Extract()
+		found, err := configurations.Get(client, rs.Primary.ID).Extract()
 		if err != nil {
 			return err
 		}
 
 		if found.ID != rs.Primary.ID {
-			return fmt.Errorf("Rds configuration not found")
+			return fmt.Errorf("RDSv3 configuration not found")
 		}
 
 		*configuration = *found
@@ -97,30 +97,34 @@ func testAccCheckRdsConfigV3Exists(n string, configuration *configurations.Confi
 
 const testAccRdsConfigV3_basic = `
 resource "opentelekomcloud_rds_parametergroup_v3" "pg_1" {
-	name = "pg_1"
-	description = "description_1"
-	values = {
-		max_connections = "10"
-		autocommit = "OFF"
-	}
-	datastore {
-		type = "mysql"
-		version = "5.6"
-	}
+  name        = "pg_create"
+  description = "some description"
+
+  values = {
+    max_connections = "10"
+    autocommit      = "OFF"
+  }
+
+  datastore {
+    type    = "mysql"
+    version = "5.6"
+  }
 }
 `
 
 const testAccRdsConfigV3_update = `
 resource "opentelekomcloud_rds_parametergroup_v3" "pg_1" {
-	name = "pg_update"
-	description = "description_update"
-	values = {
-		max_connections = "10"
-		autocommit = "OFF"
-	}
-	datastore {
-		type = "mysql"
-		version = "5.6"
-	}
+  name        = "pg_update"
+  description = "updated description"
+
+  values = {
+    max_connections = "10"
+    autocommit      = "OFF"
+  }
+
+  datastore {
+    type    = "mysql"
+    version = "5.6"
+  }
 }
 `

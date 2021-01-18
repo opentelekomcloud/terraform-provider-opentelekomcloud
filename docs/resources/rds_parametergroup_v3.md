@@ -4,15 +4,15 @@ subcategory: "Relational Database Service (RDS)"
 
 # opentelekomcloud_rds_parametergroup_v3
 
-Manages a V3 RDS parametergroup resource within OpenTelekomCloud.
+Manages a RDSv3 parametergroup resource within OpenTelekomCloud.
 
 ## Example Usage
 
 ```hcl
 resource "opentelekomcloud_rds_parametergroup_v3" "pg_1" {
   name        = "pg_1"
-  description = "description_1"
-  
+  description = "some description here"
+
    values = {
     max_connections = "10"
     autocommit      = "OFF"
@@ -30,8 +30,8 @@ The following arguments are supported:
 
 * `name` - (Required) The parameter group name. It contains a maximum of 64 characters.
 
-* `description` - (Optional) The parameter group description. It contains a maximum of 256 characters 
-  and cannot contain the following special characters:>!<"&'= the value is left blank by default.
+* `description` - (Optional) The parameter group description. It contains a maximum of 256 characters
+  and cannot contain the following special characters: `>!<"&'=` the value is left blank by default.
 
 * `values` - (Optional) Parameter group values key/value pairs defined by users based on the default parameter groups.
 
@@ -39,13 +39,13 @@ The following arguments are supported:
 
 The `datastore` block supports:
 
-* `type` - (Required) The DB engine. Currently, MySQL, PostgreSQL, and Microsoft SQL Server are supported. 
-  The value is case-insensitive and can be mysql, postgresql, or sqlserver.
+* `type` - (Required) Specifies the DB engine. Currently, MySQL, PostgreSQL and MS SQLServer are supported.
+  The value is case-insensitive and can be `mysql`, `postgresql` or `sqlserver`.
 
 * `version` - (Required) Specifies the database version.
-  * MySQL databases support MySQL 5.6 and 5.7. Example value: 5.7.
-  * PostgreSQL databases support PostgreSQL 9.5 and 9.6. Example value: 9.5.
-  * Microsoft SQL Server databases support 2014 SE, 2016 SE, and 2016 EE. Example value: 2014_SE.
+  * MySQL databases support MySQL `5.6`, `5.7`, `8.0`. Example value: `5.7`.
+  * PostgreSQL databases support PostgreSQL `9.5`, `9.6`, `10` and `11`. Example value: `9.5`.
+  * Microsoft SQL Server databases support `2014 SE`, `2016 SE`, and `2016 EE`. Example value: `2014_SE`.
 
 
 ## Attributes Reference
@@ -69,6 +69,10 @@ The following attributes are exported:
 * `type` - Indicates the parameter type.
 
 * `description` - Indicates the parameter description.
+
+* `created` - Indicates the creation time in the following format: `yyyy-MM-ddTHH:mm:ssZ`.
+
+* `updated` - Indicates the update time in the following format: `yyyy-MM-ddTHH:mm:ssZ`.
 
 ## Import
 
