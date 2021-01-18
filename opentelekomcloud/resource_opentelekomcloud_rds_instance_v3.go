@@ -677,8 +677,7 @@ func resourceRdsInstanceV3Update(d *schema.ResourceData, meta interface{}) error
 	}
 
 	if d.HasChange("param_group_id") {
-		_, newParamGroupRaw := d.GetChange("param_group_id")
-		newParamGroupID := newParamGroupRaw.(string)
+		newParamGroupID := d.Get("param_group_id").(string)
 		if len(newParamGroupID) == 0 {
 			return fmt.Errorf("you can't remove `param_group_id` without recreation")
 		}
@@ -688,7 +687,7 @@ func resourceRdsInstanceV3Update(d *schema.ResourceData, meta interface{}) error
 			},
 		}
 		if err := configurations.Apply(client, newParamGroupID, applyOpts).Err; err != nil {
-			return fmt.Errorf("error during apply new configuration")
+			return fmt.Errorf("error during apply new configuration: %s", err)
 		}
 	}
 
