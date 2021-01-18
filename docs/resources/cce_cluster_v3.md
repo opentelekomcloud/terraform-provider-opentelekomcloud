@@ -121,6 +121,14 @@ All above argument parameters can be exported as attribute parameters along with
   This mode supports incremental updates and can keep connections uninterrupted during service updates.
   It is suitable for large-sized clusters.
 
+## Timeouts
+
+This resource provides the following timeouts configuration options:
+
+- `create` - Default is 30 minutes.
+
+- `delete` - Default is 30 minutes.
+
 ## Import
 
 Cluster can be imported using the cluster id, e.g.
