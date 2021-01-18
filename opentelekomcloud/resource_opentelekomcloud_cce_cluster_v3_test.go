@@ -2,6 +2,7 @@ package opentelekomcloud
 
 import (
 	"fmt"
+	"regexp"
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-sdk/helper/acctest"
@@ -54,6 +55,26 @@ func TestAccCCEClusterV3_basic(t *testing.T) {
 	})
 }
 
+func TestAccCCEClusterV3_invalidNetwork(t *testing.T) {
+	resource.Test(t, resource.TestCase{
+		PreCheck:     func() { testAccPreCheck(t) },
+		Providers:    testAccProviders,
+		CheckDestroy: testAccCheckCCEClusterV3Destroy,
+		Steps: []resource.TestStep{
+			{
+				Config:      testAccCCEClusterV3_invalidSubnet,
+				PlanOnly:    true,
+				ExpectError: regexp.MustCompile(`can't find subnet.+`),
+			},
+			{
+				Config:      testAccCCEClusterV3_invalidVPC,
+				PlanOnly:    true,
+				ExpectError: regexp.MustCompile(`can't find VPC.+`),
+			},
+		},
+	})
+}
+
 func TestAccCCEClusterV3_proxyAuth(t *testing.T) {
 
 	resource.Test(t, resource.TestCase{
@@ -94,7 +115,7 @@ func testAccCheckCCEClusterV3Destroy(s *terraform.State) error {
 	config := testAccProvider.Meta().(*Config)
 	cceClient, err := config.cceV3Client(OS_REGION_NAME)
 	if err != nil {
-		return fmt.Errorf("Error creating opentelekomcloud CCE client: %s", err)
+		return fmt.Errorf("error creating opentelekomcloud CCE client: %s", err)
 	}
 
 	for _, rs := range s.RootModule().Resources {
@@ -104,7 +125,7 @@ func testAccCheckCCEClusterV3Destroy(s *terraform.State) error {
 
 		_, err := clusters.Get(cceClient, rs.Primary.ID).Extract()
 		if err == nil {
-			return fmt.Errorf("Cluster still exists")
+			return fmt.Errorf("cluster still exists")
 		}
 	}
 
@@ -115,17 +136,17 @@ func testAccCheckCCEClusterV3Exists(n string, cluster *clusters.Clusters) resour
 	return func(s *terraform.State) error {
 		rs, ok := s.RootModule().Resources[n]
 		if !ok {
-			return fmt.Errorf("Not found: %s", n)
+			return fmt.Errorf("not found: %s", n)
 		}
 
 		if rs.Primary.ID == "" {
-			return fmt.Errorf("No ID is set")
+			return fmt.Errorf("no ID is set")
 		}
 
 		config := testAccProvider.Meta().(*Config)
 		cceClient, err := config.cceV3Client(OS_REGION_NAME)
 		if err != nil {
-			return fmt.Errorf("Error creating opentelekomcloud CCE client: %s", err)
+			return fmt.Errorf("error creating opentelekomcloud CCE client: %s", err)
 		}
 
 		found, err := clusters.Get(cceClient, rs.Primary.ID).Extract()
@@ -134,7 +155,7 @@ func testAccCheckCCEClusterV3Exists(n string, cluster *clusters.Clusters) resour
 		}
 
 		if found.Metadata.Id != rs.Primary.ID {
-			return fmt.Errorf("Cluster not found")
+			return fmt.Errorf("cluster not found")
 		}
 
 		*cluster = *found
@@ -255,3 +276,25 @@ i1YhgnQbn5E0hz55OLu5jvOkKQjPCW+9Aa==
 -----END CERTIFICATE-----
 EOT
 }`, clusterName, OS_VPC_ID, OS_NETWORK_ID)
+
+var testAccCCEClusterV3_invalidSubnet = fmt.Sprintf(`
+resource "opentelekomcloud_cce_cluster_v3" "cluster_1" {
+  name = "%s"
+  cluster_type="VirtualMachine"
+  flavor_id="cce.s1.small"
+  vpc_id="%s"
+  subnet_id="abc"
+  container_network_type="overlay_l2"
+  kubernetes_svc_ip_range = "10.247.0.0/16"
+}`, clusterName, OS_VPC_ID)
+
+var testAccCCEClusterV3_invalidVPC = fmt.Sprintf(`
+resource "opentelekomcloud_cce_cluster_v3" "cluster_1" {
+  name = "%s"
+  cluster_type="VirtualMachine"
+  flavor_id="cce.s1.small"
+  vpc_id="abc"
+  subnet_id="%s"
+  container_network_type="overlay_l2"
+  kubernetes_svc_ip_range = "10.247.0.0/16"
+}`, clusterName, OS_NETWORK_ID)
