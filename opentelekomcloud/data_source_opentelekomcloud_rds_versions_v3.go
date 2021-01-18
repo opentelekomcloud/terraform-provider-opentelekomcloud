@@ -2,9 +2,6 @@ package opentelekomcloud
 
 import (
 	"fmt"
-	"sort"
-	"strconv"
-	"strings"
 
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/helper/validation"
@@ -52,43 +49,6 @@ func dataSourceRdsVersionsV3Read(d *schema.ResourceData, meta interface{}) error
 	return nil
 }
 
-type DataStoresSorting struct {
-	sort.StringSlice
-}
-
-type Version struct {
-	Major int
-	Minor int
-}
-
-func (d DataStoresSorting) Less(i, j int) bool {
-	v1 := strings.Split(d.StringSlice[i], ".")
-	v2 := strings.Split(d.StringSlice[j], ".")
-	v1Maj, err := strconv.Atoi(v1[0])
-	if err != nil {
-		return d.StringSlice.Less(i, j)
-	}
-	v2Maj, err := strconv.Atoi(v2[0])
-	if err != nil {
-		return d.StringSlice.Less(i, j)
-	}
-	if v1Maj < v2Maj {
-		return true
-	}
-	if v1Maj > v2Maj {
-		return false
-	}
-	v1Min, err := strconv.Atoi(v1[1])
-	if err != nil {
-		return d.StringSlice.Less(i, j)
-	}
-	v2Min, err := strconv.Atoi(v2[1])
-	if err != nil {
-		return d.StringSlice.Less(i, j)
-	}
-	return v1Min < v2Min
-}
-
 func getRdsV3VersionList(client *golangsdk.ServiceClient, dbName string) ([]string, error) {
 	pages, err := datastores.List(client, dbName).AllPages()
 	if err != nil {
@@ -102,7 +62,6 @@ func getRdsV3VersionList(client *golangsdk.ServiceClient, dbName string) ([]stri
 	for i, store := range stores.DataStores {
 		result[i] = store.Name
 	}
-	resultSorted := DataStoresSorting{StringSlice: result}
-	sort.Sort(sort.Reverse(resultSorted))
-	return resultSorted.StringSlice, nil
+	resultSorted := SortVersions(result)
+	return resultSorted, nil
 }
