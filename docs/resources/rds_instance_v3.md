@@ -211,7 +211,7 @@ The following arguments are supported:
   semi-synchronous replication mode. sync indicates the synchronous
   replication mode.  Changing this parameter will create a new resource.
 
-* `param_group_id` - (Optional) Specifies the parameter group ID. Changing this parameter will create a new resource.
+* `param_group_id` - (Optional) Specifies the parameter group ID.
 
 * `public_ips` - (Optional) Specifies floating IP to be assigned to the instance.
   This should be a list with single element only.

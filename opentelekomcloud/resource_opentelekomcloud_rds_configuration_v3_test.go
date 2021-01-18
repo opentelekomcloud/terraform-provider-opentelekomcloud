@@ -85,7 +85,7 @@ func testAccCheckRdsConfigV3Exists(n string, configuration *configurations.Confi
 			return err
 		}
 
-		if found.Id != rs.Primary.ID {
+		if found.ID != rs.Primary.ID {
 			return fmt.Errorf("Rds configuration not found")
 		}
 

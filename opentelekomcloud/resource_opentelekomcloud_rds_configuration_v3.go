@@ -142,7 +142,7 @@ func resourceRdsConfigurationV3Create(d *schema.ResourceData, meta interface{}) 
 	}
 
 	log.Printf("[DEBUG] RDS configuration created: %#v", configuration)
-	d.SetId(configuration.Id)
+	d.SetId(configuration.ID)
 
 	return resourceRdsConfigurationV3Read(d, meta)
 }
@@ -165,7 +165,7 @@ func resourceRdsConfigurationV3Read(d *schema.ResourceData, meta interface{}) er
 		return fmt.Errorf("Error retrieving OpenTelekomCloud RDS Configuration: %s", err)
 	}
 
-	d.SetId(n.Id)
+	d.SetId(n.ID)
 	d.Set("name", n.Name)
 	d.Set("description", n.Description)
 
