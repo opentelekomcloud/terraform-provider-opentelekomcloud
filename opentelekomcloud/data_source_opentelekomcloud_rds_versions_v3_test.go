@@ -13,14 +13,26 @@ func TestRDSVersionsV3_basic(t *testing.T) {
 		Steps: []resource.TestStep{
 			{
 				Config: testRDSVersionsV3_basic,
-				Check:  testAccCheckRdsFlavorV3DataSourceID("data.opentelekomcloud_rds_versions_v3.versions"),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckRdsFlavorV3DataSourceID("data.opentelekomcloud_rds_versions_v3.sqls_versions"),
+					testAccCheckRdsFlavorV3DataSourceID("data.opentelekomcloud_rds_versions_v3.mysql_versions"),
+					testAccCheckRdsFlavorV3DataSourceID("data.opentelekomcloud_rds_versions_v3.psql_versions"),
+				),
 			},
 		},
 	})
 }
 
 var testRDSVersionsV3_basic = `
-data "opentelekomcloud_rds_versions_v3" "versions" {
+data "opentelekomcloud_rds_versions_v3" "sqls_versions" {
+  database_name = "sqlserver"
+}
+
+data "opentelekomcloud_rds_versions_v3" "mysql_versions" {
   database_name = "mysql"
+}
+
+data "opentelekomcloud_rds_versions_v3" "psql_versions" {
+  database_name = "postgresql"
 }
 `

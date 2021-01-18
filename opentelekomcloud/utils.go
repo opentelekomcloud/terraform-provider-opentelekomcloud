@@ -92,7 +92,7 @@ func (v versionSlice) Less(i, j int) bool {
 func (v versionSlice) ToStringSlice() []string {
 	res := make([]string, len(v))
 	for i, version := range v {
-		res[i] = version.String()
+		res[i] = version.Original()
 	}
 	return res
 }
