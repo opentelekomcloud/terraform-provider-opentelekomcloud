@@ -3,6 +3,7 @@ package opentelekomcloud
 import (
 	"fmt"
 	"os"
+	"regexp"
 	"testing"
 
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/rds/v3/instances"
@@ -163,6 +164,23 @@ func TestAccRdsInstanceV3_templateConfigCheck(t *testing.T) {
 					testAccCheckRdsInstanceV3Exists("opentelekomcloud_rds_instance_v3.instance", &rdsInstance),
 					resource.TestCheckResourceAttr("opentelekomcloud_rds_instance_v3.instance", "name", "tf_rds_instance_"+postfix),
 				),
+			},
+		},
+	})
+}
+
+func TestAccRdsInstanceV3_invalidDbVersion(t *testing.T) {
+	postfix := acctest.RandString(3)
+
+	resource.Test(t, resource.TestCase{
+		PreCheck:     func() { testAccPreCheck(t) },
+		Providers:    testAccProviders,
+		CheckDestroy: testAccCheckRdsInstanceV3Destroy,
+		Steps: []resource.TestStep{
+			{
+				Config:      testAccRdsInstanceV3_invalidDbVersion(postfix),
+				PlanOnly:    true,
+				ExpectError: regexp.MustCompile(`can't find version.+`),
 			},
 		},
 	})
@@ -510,6 +528,33 @@ resource "opentelekomcloud_rds_instance_v3" "instance" {
   }
   flavor         = "rds.pg.c2.medium"
   param_group_id = opentelekomcloud_rds_parametergroup_v3.pg2.id
+}
+`, postfix, OS_AVAILABILITY_ZONE, OS_NETWORK_ID, OS_VPC_ID)
+}
+
+func testAccRdsInstanceV3_invalidDbVersion(postfix string) string {
+	return fmt.Sprintf(`
+resource "opentelekomcloud_networking_secgroup_v2" "sg" {
+  name = "sg-rds-test"
+}
+
+resource "opentelekomcloud_rds_instance_v3" "instance" {
+  name              = "tf_rds_instance_%s"
+  availability_zone = ["%s"]
+  db {
+    password = "Postgres!120521"
+    type     = "PostgreSQL"
+    version  = "5.6"
+    port     = "8635"
+  }
+  security_group_id = opentelekomcloud_networking_secgroup_v2.sg.id
+  subnet_id = "%s"
+  vpc_id    = "%s"
+  volume {
+    type = "COMMON"
+    size = 40
+  }
+  flavor = "rds.pg.c2.medium"
 }
 `, postfix, OS_AVAILABILITY_ZONE, OS_NETWORK_ID, OS_VPC_ID)
 }
