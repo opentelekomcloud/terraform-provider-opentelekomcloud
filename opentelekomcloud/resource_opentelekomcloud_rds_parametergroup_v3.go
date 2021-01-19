@@ -21,6 +21,8 @@ func resourceRdsConfigurationV3() *schema.Resource {
 			State: schema.ImportStatePassthrough,
 		},
 
+		CustomizeDiff: validateRDSv3Version("datastore"),
+
 		Schema: map[string]*schema.Schema{
 			"name": {
 				Type:     schema.TypeString,
