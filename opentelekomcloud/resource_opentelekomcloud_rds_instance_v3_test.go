@@ -542,7 +542,7 @@ resource "opentelekomcloud_rds_instance_v3" "instance" {
   name              = "tf_rds_instance_%s"
   availability_zone = ["%s"]
   db {
-    password = "Postgres!120521"
+    password = "Postgres!12052"
     type     = "PostgreSQL"
     version  = "5.6"
     port     = "8635"
