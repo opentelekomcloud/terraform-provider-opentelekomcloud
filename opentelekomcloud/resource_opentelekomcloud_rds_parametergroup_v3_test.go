@@ -2,6 +2,7 @@ package opentelekomcloud
 
 import (
 	"fmt"
+	"regexp"
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
@@ -37,6 +38,21 @@ func TestAccRdsConfigurationV3_basic(t *testing.T) {
 					resource.TestCheckResourceAttr(
 						"opentelekomcloud_rds_parametergroup_v3.pg_1", "description", "updated description"),
 				),
+			},
+		},
+	})
+}
+
+func TestAccRdsConfigurationV3_invalidDbVersion(t *testing.T) {
+	resource.Test(t, resource.TestCase{
+		PreCheck:     func() { testAccPreCheck(t) },
+		Providers:    testAccProviders,
+		CheckDestroy: testAccCheckRdsConfigV3Destroy,
+		Steps: []resource.TestStep{
+			{
+				Config:      testAccRdsConfigV3_invalidDataStoreVersion,
+				PlanOnly:    true,
+				ExpectError: regexp.MustCompile(`can't find version.+`),
 			},
 		},
 	})
@@ -125,6 +141,23 @@ resource "opentelekomcloud_rds_parametergroup_v3" "pg_1" {
   datastore {
     type    = "mysql"
     version = "5.6"
+  }
+}
+`
+
+const testAccRdsConfigV3_invalidDataStoreVersion = `
+resource "opentelekomcloud_rds_parametergroup_v3" "pg_1" {
+  name        = "pg_update"
+  description = "updated description"
+
+  values = {
+    max_connections = "10"
+    autocommit      = "OFF"
+  }
+
+  datastore {
+    type    = "mysql"
+    version = "1"
   }
 }
 `
