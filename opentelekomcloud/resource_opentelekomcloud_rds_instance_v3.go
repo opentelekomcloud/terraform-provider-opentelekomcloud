@@ -16,7 +16,6 @@ import (
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/rds/v1/tags"
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/rds/v3/backups"
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/rds/v3/configurations"
-	"github.com/opentelekomcloud/gophertelekomcloud/openstack/rds/v3/datastores"
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/rds/v3/flavors"
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/rds/v3/instances"
 )
@@ -850,22 +849,21 @@ func validateRDSDbVersionRequirements(d *schema.ResourceDiff, meta interface{}) 
 	if !ok {
 		return fmt.Errorf("error retreiving configuration: can't convert %v to Config", meta)
 	}
+
 	rdsClient, err := config.rdsV3Client(GetRegion(d, config))
 	if err != nil {
 		return fmt.Errorf("error creating OpenTelekomCloud RDSv3 Client: %s", err)
 	}
+
 	dataStoreInfo := d.Get("db").([]interface{})[0].(map[string]interface{})
-	datastorePages, err := datastores.List(rdsClient, dataStoreInfo["type"].(string)).AllPages()
+	datastoreVersions, err := getRdsV3VersionList(rdsClient, dataStoreInfo["type"].(string))
 	if err != nil {
-		return fmt.Errorf("unable to retrieve datastore pages from the RDSv3 API: %s", err)
+		return fmt.Errorf("unable to get datastore versions: %s", err)
 	}
-	datastoreVersions, err := datastores.ExtractDataStores(datastorePages)
-	if err != nil {
-		return fmt.Errorf("unable to extract RDSv3 datastores: %s", err)
-	}
+
 	var version = false
-	for _, datastore := range datastoreVersions.DataStores {
-		if datastore.Name == dataStoreInfo["version"] {
+	for _, datastore := range datastoreVersions {
+		if datastore == dataStoreInfo["version"] {
 			version = true
 			break
 		}
