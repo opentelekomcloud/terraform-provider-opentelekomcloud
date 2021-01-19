@@ -49,3 +49,5 @@ Keypairs can be imported using the `name`, e.g.
 ```sh
 terraform import opentelekomcloud_compute_keypair_v2.my-keypair test-keypair
 ```
+
+Imported key pairs are considered to be not shared.

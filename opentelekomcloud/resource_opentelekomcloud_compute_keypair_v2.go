@@ -16,7 +16,7 @@ func resourceComputeKeypairV2() *schema.Resource {
 		Read:   resourceComputeKeypairV2Read,
 		Delete: resourceComputeKeypairV2Delete,
 		Importer: &schema.ResourceImporter{
-			State: schema.ImportStatePassthrough,
+			State: importKeypairAsManaged,
 		},
 
 		CustomizeDiff: useSharedKeypair,
@@ -131,6 +131,10 @@ func useSharedKeypair(d *schema.ResourceDiff, meta interface{}) error {
 		return nil
 	}
 
+	if _, ok := d.GetOk("shared"); ok { // skip if shared is already set
+		return nil
+	}
+
 	config := meta.(*Config)
 	client, err := config.computeV2Client(GetRegion(d, config))
 	if err != nil {
@@ -159,4 +163,9 @@ func keyPairExist(client *golangsdk.ServiceClient, name, publicKey string) (exis
 		return true, nil
 	}
 	return true, fmt.Errorf("key %s already exist with different public key", name)
+}
+
+func importKeypairAsManaged(d *schema.ResourceData, _ interface{}) ([]*schema.ResourceData, error) {
+	_ = d.Set("shared", false)
+	return []*schema.ResourceData{d}, nil
 }
