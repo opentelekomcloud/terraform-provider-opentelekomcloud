@@ -29,8 +29,7 @@ func BuildRequest(opts interface{}, parent string) (map[string]interface{}, erro
 // sets the resource ID to the empty string instead of throwing an error.
 func CheckDeleted(d *schema.ResourceData, err error, msg string) error {
 	_, ok := err.(golangsdk.ErrDefault404)
-	_, ok1 := err.(golangsdk.ErrDefault404)
-	if ok || ok1 {
+	if ok {
 		d.SetId("")
 		return nil
 	}
