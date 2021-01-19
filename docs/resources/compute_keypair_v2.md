@@ -24,9 +24,9 @@ The following arguments are supported:
 * `public_key` - (Required) A pre-generated OpenSSH-formatted public key.
   Changing this creates a new keypair.
 
--> *Note:*
-  If both `name` and `public_key` duplicates existing keypair value, new keypair won't be managed
-  by the Terraform. Keypair resource will be marked as `shared.`
+->
+If both `name` and `public_key` duplicate the existing keypair value, the new keypair won't be
+managed by the Terraform. Keypair resource will be marked as `shared.`
 
 * `value_specs` - (Optional) Map of additional options.
 
