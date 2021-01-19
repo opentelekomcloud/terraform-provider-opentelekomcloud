@@ -36,7 +36,7 @@ func resourceRdsInstanceV3() *schema.Resource {
 			Update: schema.DefaultTimeout(30 * time.Minute),
 		},
 
-		CustomizeDiff: validateRDSDbVersionRequirements,
+		CustomizeDiff: validateRDSv3Version("db"),
 
 		Schema: map[string]*schema.Schema{
 			"availability_zone": {
@@ -841,36 +841,5 @@ func resourceRdsInstanceV3Delete(d *schema.ResourceData, meta interface{}) error
 	}
 
 	d.SetId("")
-	return nil
-}
-
-func validateRDSDbVersionRequirements(d *schema.ResourceDiff, meta interface{}) error {
-	config, ok := meta.(*Config)
-	if !ok {
-		return fmt.Errorf("error retreiving configuration: can't convert %v to Config", meta)
-	}
-
-	rdsClient, err := config.rdsV3Client(GetRegion(d, config))
-	if err != nil {
-		return fmt.Errorf("error creating OpenTelekomCloud RDSv3 Client: %s", err)
-	}
-
-	dataStoreInfo := d.Get("db").([]interface{})[0].(map[string]interface{})
-	datastoreVersions, err := getRdsV3VersionList(rdsClient, dataStoreInfo["type"].(string))
-	if err != nil {
-		return fmt.Errorf("unable to get datastore versions: %s", err)
-	}
-
-	var matches = false
-	for _, datastore := range datastoreVersions {
-		if datastore == dataStoreInfo["version"] {
-			matches = true
-			break
-		}
-	}
-	if !matches {
-		return fmt.Errorf("can't find version `%s`", dataStoreInfo["version"])
-	}
-
 	return nil
 }
