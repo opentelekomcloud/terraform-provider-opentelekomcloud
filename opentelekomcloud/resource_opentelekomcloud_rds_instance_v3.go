@@ -861,14 +861,14 @@ func validateRDSDbVersionRequirements(d *schema.ResourceDiff, meta interface{}) 
 		return fmt.Errorf("unable to get datastore versions: %s", err)
 	}
 
-	var version = false
+	var matches = false
 	for _, datastore := range datastoreVersions {
 		if datastore == dataStoreInfo["version"] {
-			version = true
+			matches = true
 			break
 		}
 	}
-	if !version {
+	if !matches {
 		return fmt.Errorf("can't find version `%s`", dataStoreInfo["version"])
 	}
 
