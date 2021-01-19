@@ -21,8 +21,12 @@ The following arguments are supported:
 
 * `name` - (Required) A unique name for the keypair. Changing this creates a new keypair.
 
-* `public_key` - (Required) A pregenerated OpenSSH-formatted public key.
+* `public_key` - (Required) A pre-generated OpenSSH-formatted public key.
   Changing this creates a new keypair.
+
+->
+If both `name` and `public_key` duplicate the existing keypair value, the new keypair won't be
+managed by the Terraform. Keypair resource will be marked as `shared.`
 
 * `value_specs` - (Optional) Map of additional options.
 
@@ -34,6 +38,10 @@ The following attributes are exported:
 
 * `public_key` - See Argument Reference above.
 
+* `value_specs` - See Argument Reference above.
+
+* `shared` - Indicates that keypair is shared (global) and not managed by Terraform.
+
 ## Import
 
 Keypairs can be imported using the `name`, e.g.
@@ -41,3 +49,5 @@ Keypairs can be imported using the `name`, e.g.
 ```sh
 terraform import opentelekomcloud_compute_keypair_v2.my-keypair test-keypair
 ```
+
+Imported key pairs are considered to be not shared.
