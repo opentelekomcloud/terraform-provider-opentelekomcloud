@@ -24,11 +24,6 @@ import (
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/obs"
 )
 
-const (
-	serviceProjectLevel string = "project"
-	serviceDomainLevel  string = "domain"
-)
-
 type Config struct {
 	AccessKey        string
 	SecretKey        string
@@ -129,17 +124,34 @@ func readCloudsYaml(c *Config) error {
 	c.TenantName = cloud.AuthInfo.ProjectName
 	c.TenantID = cloud.AuthInfo.ProjectID
 	c.DomainName = cloud.AuthInfo.DomainName
-	if c.DomainName == "" {
-		c.DomainName = cloud.AuthInfo.ProjectDomainName
-	}
+
 	c.DomainID = cloud.AuthInfo.DomainID
-	if c.DomainID == "" {
-		c.DomainID = cloud.AuthInfo.ProjectDomainID
+
+	// project scope
+	if c.TenantID != "" || c.TenantName != "" {
+		if cloud.AuthInfo.ProjectDomainName != "" {
+			c.DomainName = cloud.AuthInfo.ProjectDomainName
+		}
+		if cloud.AuthInfo.ProjectDomainID != "" {
+			c.TenantID = cloud.AuthInfo.ProjectDomainID
+		}
 	}
-	c.IdentityEndpoint = cloud.AuthInfo.AuthURL
-	c.Token = cloud.AuthInfo.Token
+
 	c.Username = cloud.AuthInfo.Username
 	c.UserID = cloud.AuthInfo.UserID
+
+	// user scope
+	if c.Username != "" || c.UserID != "" {
+		if cloud.AuthInfo.UserDomainName != "" {
+			c.DomainName = cloud.AuthInfo.UserDomainName
+		}
+		if cloud.AuthInfo.UserDomainID != "" {
+			c.TenantID = cloud.AuthInfo.UserDomainID
+		}
+	}
+
+	c.IdentityEndpoint = cloud.AuthInfo.AuthURL
+	c.Token = cloud.AuthInfo.Token
 	c.Password = cloud.AuthInfo.Password
 
 	// General cloud info
