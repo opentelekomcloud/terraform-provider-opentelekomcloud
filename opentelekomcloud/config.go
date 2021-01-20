@@ -13,7 +13,6 @@ import (
 	"github.com/aws/aws-sdk-go/aws/awserr"
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/s3"
-	"github.com/gophercloud/utils/openstack/clientconfig"
 	"github.com/hashicorp/errwrap"
 	"github.com/hashicorp/go-cleanhttp"
 	"github.com/hashicorp/terraform-plugin-sdk/helper/pathorcontents"
@@ -120,35 +119,28 @@ func (c *Config) LoadAndValidate() error {
 }
 
 func readCloudsYaml(c *Config) error {
-	clientOpts := &clientconfig.ClientOpts{
-		Cloud: c.Cloud,
-	}
-	cloud, err := clientconfig.GetCloudFromYAML(clientOpts)
+	env := openstack.NewEnv("OS")
+	cloud, err := env.Cloud()
 	if err != nil {
 		return err
 	}
 
-	ao, err := clientconfig.AuthOptions(clientOpts)
-
-	if err != nil {
-		return err
-	}
 	// Auth data
-	c.TenantName = ao.TenantName
-	c.TenantID = ao.TenantID
-	c.DomainName = ao.DomainName
+	c.TenantName = cloud.AuthInfo.ProjectName
+	c.TenantID = cloud.AuthInfo.ProjectID
+	c.DomainName = cloud.AuthInfo.DomainName
 	if c.DomainName == "" {
 		c.DomainName = cloud.AuthInfo.ProjectDomainName
 	}
-	c.DomainID = ao.DomainID
+	c.DomainID = cloud.AuthInfo.DomainID
 	if c.DomainID == "" {
 		c.DomainID = cloud.AuthInfo.ProjectDomainID
 	}
-	c.IdentityEndpoint = ao.IdentityEndpoint
-	c.Token = ao.TokenID
-	c.Username = ao.Username
-	c.UserID = ao.UserID
-	c.Password = ao.Password
+	c.IdentityEndpoint = cloud.AuthInfo.AuthURL
+	c.Token = cloud.AuthInfo.Token
+	c.Username = cloud.AuthInfo.Username
+	c.UserID = cloud.AuthInfo.UserID
+	c.Password = cloud.AuthInfo.Password
 
 	// General cloud info
 	if c.Region == "" && cloud.RegionName != "" {
