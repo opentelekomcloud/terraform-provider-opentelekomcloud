@@ -16,7 +16,7 @@ func resourceComputeKeypairV2() *schema.Resource {
 		Read:   resourceComputeKeypairV2Read,
 		Delete: resourceComputeKeypairV2Delete,
 		Importer: &schema.ResourceImporter{
-			State: importKeypairAsManaged,
+			State: importAsManaged,
 		},
 
 		CustomizeDiff: useSharedKeypair,
@@ -163,9 +163,4 @@ func keyPairExist(client *golangsdk.ServiceClient, name, publicKey string) (exis
 		return true, nil
 	}
 	return true, fmt.Errorf("key %s already exist with different public key", name)
-}
-
-func importKeypairAsManaged(d *schema.ResourceData, _ interface{}) ([]*schema.ResourceData, error) {
-	_ = d.Set("shared", false)
-	return []*schema.ResourceData{d}, nil
 }

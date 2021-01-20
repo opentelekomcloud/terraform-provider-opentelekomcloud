@@ -39,6 +39,7 @@ func CheckDeleted(d *schema.ResourceData, err error, msg string) error {
 
 type schemaOrDiff interface {
 	GetOk(key string) (interface{}, bool)
+	Get(key string) interface{}
 }
 
 // GetRegion returns the region that was specified in the resource. If a
@@ -87,7 +88,7 @@ func AddValueSpecs(body map[string]interface{}) map[string]interface{} {
 }
 
 // MapValueSpecs converts ResourceData into a map
-func MapValueSpecs(d *schema.ResourceData) map[string]string {
+func MapValueSpecs(d schemaOrDiff) map[string]string {
 	m := make(map[string]string)
 	for key, val := range d.Get("value_specs").(map[string]interface{}) {
 		m[key] = val.(string)

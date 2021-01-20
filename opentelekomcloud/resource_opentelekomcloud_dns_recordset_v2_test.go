@@ -98,6 +98,37 @@ func TestAccDNSV2RecordSet_timeout(t *testing.T) {
 	})
 }
 
+func TestAccDNSV2RecordSet_shared(t *testing.T) {
+	zoneName := randomZoneName()
+
+	resource.Test(t, resource.TestCase{
+		PreCheck:     func() { testAccPreCheck(t) },
+		Providers:    testAccProviders,
+		CheckDestroy: testAccCheckDNSV2RecordSetDestroy,
+		Steps: []resource.TestStep{
+			{
+				Config: testAccDNSV2RecordSet_basic(zoneName),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr(
+						"opentelekomcloud_dns_recordset_v2.recordset_1", "shared", "false"),
+				),
+			},
+			{
+				Config: testAccDNSV2RecordSet_reuse(zoneName),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr(
+						"opentelekomcloud_dns_recordset_v2.recordset_1", "shared", "false"),
+					resource.TestCheckResourceAttr(
+						"opentelekomcloud_dns_recordset_v2.recordset_2", "shared", "true"),
+				),
+			},
+			{
+				Config: testAccDNSV2RecordSet_basic(zoneName),
+			},
+		},
+	})
+}
+
 func testAccCheckDNSV2RecordSetDestroy(s *terraform.State) error {
 	config := testAccProvider.Meta().(*Config)
 	dnsClient, err := config.dnsV2Client(OS_REGION_NAME)
@@ -163,93 +194,132 @@ func testAccCheckDNSV2RecordSetExists(n string, recordset *recordsets.RecordSet)
 
 func testAccDNSV2RecordSet_basic(zoneName string) string {
 	return fmt.Sprintf(`
-		resource "opentelekomcloud_dns_zone_v2" "zone_1" {
-			name = "%s"
-			email = "email2@example.com"
-			description = "a zone"
-			ttl = 6000
-		}
+resource "opentelekomcloud_dns_zone_v2" "zone_1" {
+  name        = "%s"
+  email       = "email2@example.com"
+  description = "a zone"
+  ttl         = 6000
+}
 
-		resource "opentelekomcloud_dns_recordset_v2" "recordset_1" {
-			zone_id = opentelekomcloud_dns_zone_v2.zone_1.id
-			name = "%s"
-			type = "A"
-			description = "a record set"
-			ttl = 3000
-			records = ["10.1.0.0"]
+resource "opentelekomcloud_dns_recordset_v2" "recordset_1" {
+  zone_id     = opentelekomcloud_dns_zone_v2.zone_1.id
+  name        = "%s"
+  type        = "A"
+  description = "a record set"
+  ttl         = 3000
+  records     = ["10.1.0.0"]
 
-			tags = {
-			  foo = "bar"
-			  key = "value"
-			}
-		}
-	`, zoneName, zoneName)
+  tags = {
+    foo = "bar"
+    key = "value"
+  }
+}
+`, zoneName, zoneName)
 }
 
 func testAccDNSV2RecordSet_update(zoneName string) string {
 	return fmt.Sprintf(`
-		resource "opentelekomcloud_dns_zone_v2" "zone_1" {
-			name = "%s"
-			email = "email2@example.com"
-			description = "an updated zone"
-			ttl = 6000
-		}
+resource "opentelekomcloud_dns_zone_v2" "zone_1" {
+  name        = "%s"
+  email       = "email2@example.com"
+  description = "an updated zone"
+  ttl         = 6000
+}
 
-		resource "opentelekomcloud_dns_recordset_v2" "recordset_1" {
-			zone_id = opentelekomcloud_dns_zone_v2.zone_1.id
-			name = "%s"
-			type = "A"
-			description = "an updated record set"
-			ttl = 6000
-			records = ["10.1.0.1"]
+resource "opentelekomcloud_dns_recordset_v2" "recordset_1" {
+  zone_id     = opentelekomcloud_dns_zone_v2.zone_1.id
+  name        = "%s"
+  type        = "A"
+  description = "an updated record set"
+  ttl         = 6000
+  records     = ["10.1.0.1"]
 
-			tags = {
-			  foo = "bar"
-			  key = "value_updated"
-			}
-		}
-	`, zoneName, zoneName)
+  tags = {
+    foo = "bar"
+    key = "value_updated"
+  }
+}
+`, zoneName, zoneName)
 }
 
 func testAccDNSV2RecordSet_readTTL(zoneName string) string {
 	return fmt.Sprintf(`
-		resource "opentelekomcloud_dns_zone_v2" "zone_1" {
-			name = "%s"
-			email = "email2@example.com"
-			description = "an updated zone"
-			ttl = 6000
-		}
+resource "opentelekomcloud_dns_zone_v2" "zone_1" {
+  name        = "%s"
+  email       = "email2@example.com"
+  description = "an updated zone"
+  ttl         = 6000
+}
 
-		resource "opentelekomcloud_dns_recordset_v2" "recordset_1" {
-			zone_id = opentelekomcloud_dns_zone_v2.zone_1.id
-			name = "%s"
-			type = "A"
-			records = ["10.1.0.2"]
-		}
-	`, zoneName, zoneName)
+resource "opentelekomcloud_dns_recordset_v2" "recordset_1" {
+  zone_id = opentelekomcloud_dns_zone_v2.zone_1.id
+  name    = "%s"
+  type    = "A"
+  records = ["10.1.0.2"]
+}
+`, zoneName, zoneName)
 }
 
 func testAccDNSV2RecordSet_timeout(zoneName string) string {
 	return fmt.Sprintf(`
-		resource "opentelekomcloud_dns_zone_v2" "zone_1" {
-			name = "%s"
-			email = "email2@example.com"
-			description = "an updated zone"
-			ttl = 6000
-		}
+resource "opentelekomcloud_dns_zone_v2" "zone_1" {
+  name        = "%s"
+  email       = "email2@example.com"
+  description = "an updated zone"
+  ttl         = 6000
+}
 
-		resource "opentelekomcloud_dns_recordset_v2" "recordset_1" {
-			zone_id = opentelekomcloud_dns_zone_v2.zone_1.id
-			name = "%s"
-			type = "A"
-			ttl = 3000
-			records = ["10.1.0.3", "10.1.0.2"]
+resource "opentelekomcloud_dns_recordset_v2" "recordset_1" {
+  zone_id = opentelekomcloud_dns_zone_v2.zone_1.id
+  name    = "%s"
+  type    = "A"
+  ttl     = 3000
+  records = ["10.1.0.3", "10.1.0.2"]
 
-			timeouts {
-				create = "5m"
-				update = "5m"
-				delete = "5m"
-			}
-		}
-	`, zoneName, zoneName)
+  timeouts {
+    create = "5m"
+    update = "5m"
+    delete = "5m"
+  }
+}
+`, zoneName, zoneName)
+}
+
+func testAccDNSV2RecordSet_reuse(zoneName string) string {
+	return fmt.Sprintf(`
+resource "opentelekomcloud_dns_zone_v2" "zone_1" {
+  name        = "%[1]s"
+  email       = "email2@example.com"
+  description = "a zone"
+  ttl         = 6000
+}
+
+resource "opentelekomcloud_dns_recordset_v2" "recordset_1" {
+  zone_id     = opentelekomcloud_dns_zone_v2.zone_1.id
+  name        = "%[1]s"
+  type        = "A"
+  description = "a record set"
+  ttl         = 3000
+  records     = ["10.1.0.0"]
+
+  tags = {
+    foo = "bar"
+    key = "value"
+  }
+}
+
+resource "opentelekomcloud_dns_recordset_v2" "recordset_2" {
+  zone_id     = opentelekomcloud_dns_zone_v2.zone_1.id
+  name        = "%[1]s"
+  type        = "A"
+  description = "a record set"
+  ttl         = 3000
+  records     = ["10.1.0.0"]
+
+  tags = {
+    foo = "bar"
+    key = "value"
+  }
+}
+`, zoneName)
 }
