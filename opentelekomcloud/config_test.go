@@ -36,7 +36,6 @@ func checkConfigField(t *testing.T, act *Config, excp *Config, fieldName string)
 const fileName = "./clouds.yaml"
 
 func TestReadCloudsYaml(t *testing.T) {
-
 	tmpl := `
 clouds:
   useless_cloud:
@@ -69,6 +68,7 @@ clouds:
 		ClientKeyFile:    "key_file.key",
 		CACertFile:       "ca.crt",
 	}
+	_ = os.Setenv("OS_CLOUD", "otc")
 
 	err := writeYamlTemplate(tmpl, fileName, referenceConfig)
 	if err != nil {
@@ -77,8 +77,7 @@ clouds:
 	defer func() { _ = os.Remove(fileName) }()
 
 	c := &Config{Cloud: referenceConfig.Cloud}
-	err = readCloudsYaml(c)
-	if err != nil {
+	if err := c.load(); err != nil {
 		t.Fatal()
 	}
 
@@ -105,6 +104,7 @@ func TestDomain(t *testing.T) {
 		"DomainName": {"user_domain_name", "domain_name", "project_domain_name"},
 		"DomainID":   {"user_domain_id", "domain_id", "project_domain_id", "default_domain"},
 	}
+	_ = os.Setenv("OS_CLOUD", "otc")
 	for attr, def := range projectDefinition {
 		for name, options := range synonyms {
 			for _, option := range options {
@@ -128,16 +128,16 @@ clouds:
 					if err != nil {
 						tSyn.Fatal(err)
 					}
+					defer func() { _ = os.Remove(fileName) }()
 
-					c := &Config{Cloud: referenceConfig.Cloud}
-					err = readCloudsYaml(c)
-					if err != nil {
+					config := &Config{Cloud: referenceConfig.Cloud}
+
+					if err = config.load(); err != nil {
 						tSyn.Fatal()
 					}
 
-					checkConfigField(tSyn, c, referenceConfig, name)
+					checkConfigField(tSyn, config, referenceConfig, name)
 				})
-				_ = os.Remove(fileName)
 			}
 		}
 	}

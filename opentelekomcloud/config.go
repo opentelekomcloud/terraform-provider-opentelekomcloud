@@ -18,6 +18,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/helper/pathorcontents"
 	"github.com/hashicorp/terraform-plugin-sdk/httpclient"
 	"github.com/opentelekomcloud/gophertelekomcloud"
+	"github.com/opentelekomcloud/gophertelekomcloud/acceptance/clients"
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack"
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/identity/v3/credentials"
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/objectstorage/v1/swauth"
@@ -85,7 +86,7 @@ func (c *Config) LoadAndValidate() error {
 	}
 
 	if c.Cloud != "" {
-		err := readCloudsYaml(c)
+		err := c.load()
 		if err != nil {
 			return err
 		}
@@ -113,13 +114,11 @@ func (c *Config) LoadAndValidate() error {
 	return c.newS3Session(osDebug)
 }
 
-func readCloudsYaml(c *Config) error {
-	env := openstack.NewEnv("OS")
-	cloud, err := env.Cloud()
+func (c *Config) load() error {
+	cloud, err := clients.EnvOS.Cloud()
 	if err != nil {
 		return err
 	}
-
 	// Auth data
 	c.TenantName = cloud.AuthInfo.ProjectName
 	c.TenantID = cloud.AuthInfo.ProjectID
