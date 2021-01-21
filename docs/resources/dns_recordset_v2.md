@@ -54,6 +54,11 @@ The following arguments are supported:
 * `value_specs` - (Optional) Map of additional options. Changing this creates a
   new record set.
 
+->
+If all `zone_id`, `type`, `name` and `ttl` duplicate the existing DNS record set value,
+the new record set won't be managed by the Terraform.
+DNS `recordset` resource will be marked as `shared.`
+
 ## Attributes Reference
 
 The following attributes are exported:
@@ -82,3 +87,5 @@ separated by a forward slash.
 ```sh
 terraform import opentelekomcloud_dns_recordset_v2.recordset_1 <zone_id>/<recordset_id>
 ```
+
+Imported key pairs are considered to be not shared.
