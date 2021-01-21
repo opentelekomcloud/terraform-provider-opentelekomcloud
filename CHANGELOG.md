@@ -1,5 +1,23 @@
 ## 1.23.0 (Unreleased)
 
+## 1.22.4 (January 20, 2021)
+
+FEATURES:
+* **New Data Source:** `opentelekomcloud_rds_versions_v3` ([#792](https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/issues/792))
+
+ENHANCEMENTS:
+* `resource/opentelekomcloud_cce_cluster_v3`: Implement plan stage network validation ([#787](https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/issues/787))
+* `resource/opentelekomcloud_cce_cluster_v3`: Add timeouts section to CCE documentation ([#788](https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/issues/788))
+* `resource/opentelekomcloud_cce_node_v3`: Add timeouts section to CCE documentation ([#788](https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/issues/788))
+* `resource/opentelekomcloud_compute_keypair_v2`: Allow shared ("global") key pairs ([#794](https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/issues/794))
+* `resource/opentelekomcloud_rds_instance_v3`: Implement plan stage db version validation ([#795](https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/issues/795))
+* `resource/opentelekomcloud_rds_parametergroup_v3`: Implement plan stage db version validation ([#796](https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/issues/796))
+* `resource/opentelekomcloud_dns_recordset_v2`: Allow shared ("global") DNS record sets ([#800](https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/issues/800))
+
+BUG FIXES:
+* `resource/opentelekomcloud_rds_instance_v3`: Add `param_group_id` support ([#784](https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/issues/784))
+* `resource/opentelekomcloud_rds_parametergroup_v3`: Fix `rds_parametergroup_v3` recreation ([#789](https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/issues/789))
+
 ## 1.22.3 (December 23, 2020)
 
 FEATURES:
