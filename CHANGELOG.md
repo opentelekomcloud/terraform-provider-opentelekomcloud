@@ -1,6 +1,6 @@
 ## 1.23.0 (Unreleased)
 
-## 1.22.4 (January 20, 2021)
+## 1.22.4 (January 21, 2021)
 
 FEATURES:
 * **New Data Source:** `opentelekomcloud_rds_versions_v3` ([#792](https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/issues/792))
