@@ -39,7 +39,7 @@ func resourceCCEClusterV3() *schema.Resource {
 			Delete: schema.DefaultTimeout(30 * time.Minute),
 		},
 
-		CustomizeDiff: validateCCEClusterRequirements,
+		CustomizeDiff: validateCCEClusterNetwork,
 
 		Schema: map[string]*schema.Schema{
 			"region": {
@@ -554,27 +554,4 @@ func resourceFloatingIPV2Exists(d *schema.ResourceData, meta interface{}, floati
 	}
 
 	return allFips[0].ID, nil
-}
-
-func validateCCEClusterRequirements(d *schema.ResourceDiff, meta interface{}) error {
-	config, ok := meta.(*Config)
-	if !ok {
-		return fmt.Errorf("error retreiving configuration: can't convert %v to Config", meta)
-	}
-	vpcClient, err := config.networkingV1Client(GetRegion(d, config))
-	if err != nil {
-		return fmt.Errorf("error creating opentelekomcloud CCE Client: %s", err)
-	}
-	vpcID := d.Get("vpc_id").(string)
-	err = vpcs.Get(vpcClient, vpcID).Err
-	if err != nil {
-		return fmt.Errorf("can't find VPC `%s`: %s", vpcID, err)
-	}
-
-	subnetID := d.Get("subnet_id").(string)
-	err = subnets.Get(vpcClient, subnetID).Err
-	if err != nil {
-		return fmt.Errorf("can't find subnet `%s`: %s", subnetID, err)
-	}
-	return nil
 }
