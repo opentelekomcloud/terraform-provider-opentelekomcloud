@@ -71,6 +71,11 @@ func TestAccCCEClusterV3_invalidNetwork(t *testing.T) {
 				PlanOnly:    true,
 				ExpectError: regexp.MustCompile(`can't find VPC.+`),
 			},
+			{
+				Config:             testAccCCEClusterV3_computed,
+				PlanOnly:           true,
+				ExpectNonEmptyPlan: true,
+			},
 		},
 	})
 }
@@ -278,23 +283,76 @@ EOT
 }`, clusterName, OS_VPC_ID, OS_NETWORK_ID)
 
 var testAccCCEClusterV3_invalidSubnet = fmt.Sprintf(`
+resource "opentelekomcloud_vpc_v1" "vpc" {
+  cidr = "192.168.0.0/16"
+  name = "cce-test"
+}
+
 resource "opentelekomcloud_cce_cluster_v3" "cluster_1" {
-  name = "%s"
-  cluster_type="VirtualMachine"
-  flavor_id="cce.s1.small"
-  vpc_id="%s"
-  subnet_id="abc"
-  container_network_type="overlay_l2"
+  name                    = "%s"
+  cluster_type            = "VirtualMachine"
+  flavor_id               = "cce.s1.small"
+  vpc_id                  = opentelekomcloud_vpc_v1.vpc.id
+  subnet_id               = "abc"
+  container_network_type  = "overlay_l2"
   kubernetes_svc_ip_range = "10.247.0.0/16"
-}`, clusterName, OS_VPC_ID)
+}
+`, clusterName)
 
 var testAccCCEClusterV3_invalidVPC = fmt.Sprintf(`
+resource "opentelekomcloud_vpc_v1" "vpc" {
+  cidr = "192.168.0.0/16"
+  name = "cce-test"
+}
+
+locals {
+  subnet_cidr  = cidrsubnet(opentelekomcloud_vpc_v1.vpc.cidr, 8, 0)
+  subnet_gw_ip = cidrhost(local.subnet_cidr, 1)
+}
+
+resource "opentelekomcloud_vpc_subnet_v1" "subnet" {
+  cidr       = local.subnet_cidr
+  gateway_ip = local.subnet_gw_ip
+  name       = "cce-test"
+  vpc_id     = opentelekomcloud_vpc_v1.vpc.id
+}
+
 resource "opentelekomcloud_cce_cluster_v3" "cluster_1" {
-  name = "%s"
-  cluster_type="VirtualMachine"
-  flavor_id="cce.s1.small"
-  vpc_id="abc"
-  subnet_id="%s"
-  container_network_type="overlay_l2"
+  name                    = "%s"
+  cluster_type            = "VirtualMachine"
+  flavor_id               = "cce.s1.small"
+  vpc_id                  = "abc"
+  subnet_id               = opentelekomcloud_vpc_subnet_v1.subnet.id
+  container_network_type  = "overlay_l2"
   kubernetes_svc_ip_range = "10.247.0.0/16"
-}`, clusterName, OS_NETWORK_ID)
+}
+`, clusterName)
+
+var testAccCCEClusterV3_computed = fmt.Sprintf(`
+resource "opentelekomcloud_vpc_v1" "vpc" {
+  cidr = "192.168.0.0/16"
+  name = "cce-test"
+}
+
+locals {
+  subnet_cidr  = cidrsubnet(opentelekomcloud_vpc_v1.vpc.cidr, 8, 0)
+  subnet_gw_ip = cidrhost(local.subnet_cidr, 1)
+}
+
+resource "opentelekomcloud_vpc_subnet_v1" "subnet" {
+  cidr       = local.subnet_cidr
+  gateway_ip = local.subnet_gw_ip
+  name       = "cce-test"
+  vpc_id     = opentelekomcloud_vpc_v1.vpc.id
+}
+
+resource "opentelekomcloud_cce_cluster_v3" "cluster_1" {
+  name                    = "%s"
+  cluster_type            = "VirtualMachine"
+  flavor_id               = "cce.s1.small"
+  vpc_id                  = opentelekomcloud_vpc_v1.vpc.id
+  subnet_id               = opentelekomcloud_vpc_subnet_v1.subnet.id
+  container_network_type  = "overlay_l2"
+  kubernetes_svc_ip_range = "10.247.0.0/16"
+}
+`, clusterName)

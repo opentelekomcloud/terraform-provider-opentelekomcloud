@@ -4,6 +4,8 @@ import (
 	"fmt"
 
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
+	"github.com/opentelekomcloud/gophertelekomcloud/openstack/networking/v1/subnets"
+	"github.com/opentelekomcloud/gophertelekomcloud/openstack/networking/v1/vpcs"
 )
 
 func validateRDSv3Version(argumentName string) schema.CustomizeDiffFunc {
@@ -37,4 +39,29 @@ func validateRDSv3Version(argumentName string) schema.CustomizeDiffFunc {
 
 		return nil
 	}
+}
+
+func validateCCEClusterNetwork(d *schema.ResourceDiff, meta interface{}) error {
+	config, ok := meta.(*Config)
+	if !ok {
+		return fmt.Errorf("error retreiving configuration: can't convert %v to Config", meta)
+	}
+	vpcClient, err := config.networkingV1Client(GetRegion(d, config))
+	if err != nil {
+		return fmt.Errorf("error creating opentelekomcloud CCE Client: %s", err)
+	}
+
+	if vpcID := d.Get("vpc_id").(string); vpcID != "" {
+		if err = vpcs.Get(vpcClient, vpcID).Err; err != nil {
+			return fmt.Errorf("can't find VPC `%s`: %s", vpcID, err)
+		}
+	}
+
+	if subnetID := d.Get("subnet_id").(string); subnetID != "" {
+		if err = subnets.Get(vpcClient, subnetID).Err; err != nil {
+			return fmt.Errorf("can't find subnet `%s`: %s", subnetID, err)
+		}
+	}
+
+	return nil
 }
