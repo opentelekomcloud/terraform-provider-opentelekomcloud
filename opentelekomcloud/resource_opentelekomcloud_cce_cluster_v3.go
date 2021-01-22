@@ -13,8 +13,6 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/helper/validation"
 	"github.com/opentelekomcloud/gophertelekomcloud"
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/cce/v3/clusters"
-	"github.com/opentelekomcloud/gophertelekomcloud/openstack/networking/v1/subnets"
-	"github.com/opentelekomcloud/gophertelekomcloud/openstack/networking/v1/vpcs"
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/networking/v2/extensions/layer3/floatingips"
 )
 
