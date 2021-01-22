@@ -1,5 +1,11 @@
 ## 1.23.0 (Unreleased)
 
+
+## 1.22.5 (January 22, 2021)
+
+BUG FIXES:
+* `resource/opentelekomcloud_cce_cluster_v3`: Fix `vpc_id` and `subnet_id` validation during plan ([#804](https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/804))
+
 ## 1.22.4 (January 21, 2021)
 
 FEATURES:
