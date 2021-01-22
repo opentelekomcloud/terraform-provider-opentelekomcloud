@@ -51,18 +51,14 @@ func validateCCEClusterNetwork(d *schema.ResourceDiff, meta interface{}) error {
 		return fmt.Errorf("error creating opentelekomcloud CCE Client: %s", err)
 	}
 
-	vpcID := d.Get("vpc_id").(string)
-	if len(vpcID) != 0 {
-		err = vpcs.Get(vpcClient, vpcID).Err
-		if err != nil {
+	if vpcID := d.Get("vpc_id").(string); vpcID != "" {
+		if err = vpcs.Get(vpcClient, vpcID).Err; err != nil {
 			return fmt.Errorf("can't find VPC `%s`: %s", vpcID, err)
 		}
 	}
 
-	subnetID := d.Get("subnet_id").(string)
-	if len(subnetID) != 0 {
-		err = subnets.Get(vpcClient, subnetID).Err
-		if err != nil {
+	if subnetID := d.Get("subnet_id").(string); subnetID != "" {
+		if err = subnets.Get(vpcClient, subnetID).Err; err != nil {
 			return fmt.Errorf("can't find subnet `%s`: %s", subnetID, err)
 		}
 	}
