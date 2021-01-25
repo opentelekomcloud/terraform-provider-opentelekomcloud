@@ -11,6 +11,7 @@ import (
 	"text/template"
 
 	"github.com/opentelekomcloud/gophertelekomcloud"
+	"github.com/opentelekomcloud/gophertelekomcloud/openstack"
 	th "github.com/opentelekomcloud/gophertelekomcloud/testhelper"
 )
 
@@ -36,7 +37,6 @@ func checkConfigField(t *testing.T, act *Config, excp *Config, fieldName string)
 const fileName = "./clouds.yaml"
 
 func TestReadCloudsYaml(t *testing.T) {
-
 	tmpl := `
 clouds:
   useless_cloud:
@@ -69,6 +69,7 @@ clouds:
 		ClientKeyFile:    "key_file.key",
 		CACertFile:       "ca.crt",
 	}
+	_ = os.Setenv("OS_CLOUD", "otc")
 
 	err := writeYamlTemplate(tmpl, fileName, referenceConfig)
 	if err != nil {
@@ -77,8 +78,7 @@ clouds:
 	defer func() { _ = os.Remove(fileName) }()
 
 	c := &Config{Cloud: referenceConfig.Cloud}
-	err = readCloudsYaml(c)
-	if err != nil {
+	if err := c.load(); err != nil {
 		t.Fatal()
 	}
 
@@ -96,6 +96,17 @@ clouds:
 	}
 }
 
+func genTemplate(def, attr, option, name string) string {
+	return fmt.Sprintf(`
+clouds:
+  {{.Cloud}}:
+    auth:
+      auth_url: {{.IdentityEndpoint}}
+      %s: {{.%s}}
+      %s: {{.%s}}
+`, def, attr, option, name)
+}
+
 func TestDomain(t *testing.T) {
 	projectDefinition := map[string]string{
 		"TenantID":   "project_id",
@@ -108,15 +119,12 @@ func TestDomain(t *testing.T) {
 	for attr, def := range projectDefinition {
 		for name, options := range synonyms {
 			for _, option := range options {
-				tmpl := fmt.Sprintf(`
-clouds:
-  {{.Cloud}}:
-    auth:
-      auth_url: {{.IdentityEndpoint}}
-      %s: {{.%s}}
-      %s: {{.%s}}`, def, attr, option, name)
+				cloudName := fmt.Sprintf("otc-%s", def)
+				_ = os.Setenv("OS_CLOUD", cloudName)
+
+				tmpl := genTemplate(def, attr, option, name)
 				var referenceConfig = &Config{
-					Cloud:            "otc",
+					Cloud:            cloudName,
 					IdentityEndpoint: "https://localhost:9903/v3",
 					TenantID:         "4b04680e-c627-4acb-a972-918cc661bcba",
 					TenantName:       "eu-de",
@@ -128,16 +136,18 @@ clouds:
 					if err != nil {
 						tSyn.Fatal(err)
 					}
+					defer func() { _ = os.Remove(fileName) }()
 
-					c := &Config{Cloud: referenceConfig.Cloud}
-					err = readCloudsYaml(c)
-					if err != nil {
+					config := &Config{
+						Cloud:       referenceConfig.Cloud,
+						environment: openstack.NewEnv(osPrefix, false),
+					}
+					if err = config.load(); err != nil {
 						tSyn.Fatal()
 					}
 
-					checkConfigField(tSyn, c, referenceConfig, name)
+					checkConfigField(tSyn, config, referenceConfig, name)
 				})
-				_ = os.Remove(fileName)
 			}
 		}
 	}
@@ -160,7 +170,7 @@ func testRequestRetry(t *testing.T, count int) {
 	}
 
 	th.Mux.HandleFunc("/route/", func(w http.ResponseWriter, r *http.Request) {
-		defer r.Body.Close()
+		defer func() { _ = r.Body.Close() }()
 		_, err := ioutil.ReadAll(r.Body)
 		if err != nil {
 			t.Errorf("Error hadling test request")

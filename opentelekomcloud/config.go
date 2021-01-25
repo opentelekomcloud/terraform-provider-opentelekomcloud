@@ -13,7 +13,6 @@ import (
 	"github.com/aws/aws-sdk-go/aws/awserr"
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/s3"
-	"github.com/gophercloud/utils/openstack/clientconfig"
 	"github.com/hashicorp/errwrap"
 	"github.com/hashicorp/go-cleanhttp"
 	"github.com/hashicorp/terraform-plugin-sdk/helper/pathorcontents"
@@ -26,8 +25,7 @@ import (
 )
 
 const (
-	serviceProjectLevel string = "project"
-	serviceDomainLevel  string = "domain"
+	osPrefix = "OS_"
 )
 
 type Config struct {
@@ -61,6 +59,8 @@ type Config struct {
 	s3sess   *session.Session
 
 	DomainClient *golangsdk.ProviderClient
+
+	environment openstack.Env
 }
 
 func (c *Config) LoadAndValidate() error {
@@ -91,7 +91,7 @@ func (c *Config) LoadAndValidate() error {
 	}
 
 	if c.Cloud != "" {
-		err := readCloudsYaml(c)
+		err := c.load()
 		if err != nil {
 			return err
 		}
@@ -119,36 +119,46 @@ func (c *Config) LoadAndValidate() error {
 	return c.newS3Session(osDebug)
 }
 
-func readCloudsYaml(c *Config) error {
-	clientOpts := &clientconfig.ClientOpts{
-		Cloud: c.Cloud,
+func (c *Config) load() error {
+	if c.environment == nil {
+		c.environment = openstack.NewEnv(osPrefix)
 	}
-	cloud, err := clientconfig.GetCloudFromYAML(clientOpts)
-	if err != nil {
-		return err
-	}
-
-	ao, err := clientconfig.AuthOptions(clientOpts)
-
+	cloud, err := c.environment.Cloud()
 	if err != nil {
 		return err
 	}
 	// Auth data
-	c.TenantName = ao.TenantName
-	c.TenantID = ao.TenantID
-	c.DomainName = ao.DomainName
-	if c.DomainName == "" {
+	c.Username = cloud.AuthInfo.Username
+	c.UserID = cloud.AuthInfo.UserID
+	c.TenantName = cloud.AuthInfo.ProjectName
+	c.TenantID = cloud.AuthInfo.ProjectID
+	c.DomainName = cloud.AuthInfo.DomainName
+	c.DomainID = cloud.AuthInfo.DomainID
+
+	// project scope
+	if cloud.AuthInfo.ProjectDomainName != "" {
 		c.DomainName = cloud.AuthInfo.ProjectDomainName
 	}
-	c.DomainID = ao.DomainID
-	if c.DomainID == "" {
+	if cloud.AuthInfo.ProjectDomainID != "" {
 		c.DomainID = cloud.AuthInfo.ProjectDomainID
 	}
-	c.IdentityEndpoint = ao.IdentityEndpoint
-	c.Token = ao.TokenID
-	c.Username = ao.Username
-	c.UserID = ao.UserID
-	c.Password = ao.Password
+
+	// user scope
+	if cloud.AuthInfo.UserDomainName != "" {
+		c.DomainName = cloud.AuthInfo.UserDomainName
+	}
+	if cloud.AuthInfo.UserDomainID != "" {
+		c.DomainID = cloud.AuthInfo.UserDomainID
+	}
+
+	// default domain
+	if c.DomainID == "" {
+		c.DomainID = cloud.AuthInfo.DefaultDomain
+	}
+
+	c.IdentityEndpoint = cloud.AuthInfo.AuthURL
+	c.Token = cloud.AuthInfo.Token
+	c.Password = cloud.AuthInfo.Password
 
 	// General cloud info
 	if c.Region == "" && cloud.RegionName != "" {
