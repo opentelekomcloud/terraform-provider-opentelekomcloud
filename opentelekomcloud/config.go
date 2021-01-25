@@ -18,7 +18,6 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/helper/pathorcontents"
 	"github.com/hashicorp/terraform-plugin-sdk/httpclient"
 	"github.com/opentelekomcloud/gophertelekomcloud"
-	"github.com/opentelekomcloud/gophertelekomcloud/acceptance/clients"
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack"
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/identity/v3/credentials"
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/objectstorage/v1/swauth"
@@ -56,6 +55,8 @@ type Config struct {
 	s3sess   *session.Session
 
 	DomainClient *golangsdk.ProviderClient
+
+	environment openstack.Env
 }
 
 func (c *Config) LoadAndValidate() error {
@@ -115,7 +116,7 @@ func (c *Config) LoadAndValidate() error {
 }
 
 func (c *Config) load() error {
-	cloud, err := clients.EnvOS.Cloud()
+	cloud, err := c.environment.Cloud()
 	if err != nil {
 		return err
 	}
@@ -127,26 +128,27 @@ func (c *Config) load() error {
 	c.DomainID = cloud.AuthInfo.DomainID
 
 	// project scope
-	if c.TenantID != "" || c.TenantName != "" {
-		if cloud.AuthInfo.ProjectDomainName != "" {
-			c.DomainName = cloud.AuthInfo.ProjectDomainName
-		}
-		if cloud.AuthInfo.ProjectDomainID != "" {
-			c.TenantID = cloud.AuthInfo.ProjectDomainID
-		}
+	if cloud.AuthInfo.ProjectDomainName != "" {
+		c.DomainName = cloud.AuthInfo.ProjectDomainName
+	}
+	if cloud.AuthInfo.ProjectDomainID != "" {
+		c.DomainID = cloud.AuthInfo.ProjectDomainID
 	}
 
 	c.Username = cloud.AuthInfo.Username
 	c.UserID = cloud.AuthInfo.UserID
 
 	// user scope
-	if c.Username != "" || c.UserID != "" {
-		if cloud.AuthInfo.UserDomainName != "" {
-			c.DomainName = cloud.AuthInfo.UserDomainName
-		}
-		if cloud.AuthInfo.UserDomainID != "" {
-			c.TenantID = cloud.AuthInfo.UserDomainID
-		}
+	if cloud.AuthInfo.UserDomainName != "" {
+		c.DomainName = cloud.AuthInfo.UserDomainName
+	}
+	if cloud.AuthInfo.UserDomainID != "" {
+		c.DomainID = cloud.AuthInfo.UserDomainID
+	}
+
+	// default domain
+	if c.DomainID == "" {
+		c.DomainID = cloud.AuthInfo.DefaultDomain
 	}
 
 	c.IdentityEndpoint = cloud.AuthInfo.AuthURL

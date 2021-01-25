@@ -11,6 +11,7 @@ import (
 	"text/template"
 
 	"github.com/opentelekomcloud/gophertelekomcloud"
+	"github.com/opentelekomcloud/gophertelekomcloud/openstack"
 	th "github.com/opentelekomcloud/gophertelekomcloud/testhelper"
 )
 
@@ -95,6 +96,17 @@ clouds:
 	}
 }
 
+func genTemplate(def, attr, option, name string) string {
+	return fmt.Sprintf(`
+clouds:
+  {{.Cloud}}:
+    auth:
+      auth_url: {{.IdentityEndpoint}}
+      %s: {{.%s}}
+      %s: {{.%s}}
+`, def, attr, option, name)
+}
+
 func TestDomain(t *testing.T) {
 	projectDefinition := map[string]string{
 		"TenantID":   "project_id",
@@ -104,19 +116,15 @@ func TestDomain(t *testing.T) {
 		"DomainName": {"user_domain_name", "domain_name", "project_domain_name"},
 		"DomainID":   {"user_domain_id", "domain_id", "project_domain_id", "default_domain"},
 	}
-	_ = os.Setenv("OS_CLOUD", "otc")
 	for attr, def := range projectDefinition {
 		for name, options := range synonyms {
 			for _, option := range options {
-				tmpl := fmt.Sprintf(`
-clouds:
-  {{.Cloud}}:
-    auth:
-      auth_url: {{.IdentityEndpoint}}
-      %s: {{.%s}}
-      %s: {{.%s}}`, def, attr, option, name)
+				cloudName := fmt.Sprintf("otc-%s", def)
+				_ = os.Setenv("OS_CLOUD", cloudName)
+
+				tmpl := genTemplate(def, attr, option, name)
 				var referenceConfig = &Config{
-					Cloud:            "otc",
+					Cloud:            cloudName,
 					IdentityEndpoint: "https://localhost:9903/v3",
 					TenantID:         "4b04680e-c627-4acb-a972-918cc661bcba",
 					TenantName:       "eu-de",
@@ -130,8 +138,10 @@ clouds:
 					}
 					defer func() { _ = os.Remove(fileName) }()
 
-					config := &Config{Cloud: referenceConfig.Cloud}
-
+					config := &Config{
+						Cloud:       referenceConfig.Cloud,
+						environment: openstack.NewEnv("OS_", false),
+					}
 					if err = config.load(); err != nil {
 						tSyn.Fatal()
 					}
@@ -160,7 +170,7 @@ func testRequestRetry(t *testing.T, count int) {
 	}
 
 	th.Mux.HandleFunc("/route/", func(w http.ResponseWriter, r *http.Request) {
-		defer r.Body.Close()
+		defer func() { _ = r.Body.Close() }()
 		_, err := ioutil.ReadAll(r.Body)
 		if err != nil {
 			t.Errorf("Error hadling test request")
