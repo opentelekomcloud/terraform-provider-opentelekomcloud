@@ -121,10 +121,11 @@ func (c *Config) load() error {
 		return err
 	}
 	// Auth data
+	c.Username = cloud.AuthInfo.Username
+	c.UserID = cloud.AuthInfo.UserID
 	c.TenantName = cloud.AuthInfo.ProjectName
 	c.TenantID = cloud.AuthInfo.ProjectID
 	c.DomainName = cloud.AuthInfo.DomainName
-
 	c.DomainID = cloud.AuthInfo.DomainID
 
 	// project scope
@@ -134,9 +135,6 @@ func (c *Config) load() error {
 	if cloud.AuthInfo.ProjectDomainID != "" {
 		c.DomainID = cloud.AuthInfo.ProjectDomainID
 	}
-
-	c.Username = cloud.AuthInfo.Username
-	c.UserID = cloud.AuthInfo.UserID
 
 	// user scope
 	if cloud.AuthInfo.UserDomainName != "" {
