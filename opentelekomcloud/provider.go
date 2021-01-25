@@ -5,7 +5,6 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/terraform"
 	"github.com/jinzhu/copier"
-	"github.com/opentelekomcloud/gophertelekomcloud/openstack"
 )
 
 // This is a global MutexKV for use within this plugin.
@@ -465,7 +464,6 @@ func configureProvider(d *schema.ResourceData, terraformVersion string) (interfa
 		DelegatedProject: d.Get("delegated_project").(string),
 		MaxRetries:       d.Get("max_retries").(int),
 		terraformVersion: terraformVersion,
-		environment:      openstack.NewEnv("OS_"),
 	}
 
 	if err := config.LoadAndValidate(); err != nil {

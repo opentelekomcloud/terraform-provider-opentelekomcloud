@@ -140,7 +140,7 @@ func TestDomain(t *testing.T) {
 
 					config := &Config{
 						Cloud:       referenceConfig.Cloud,
-						environment: openstack.NewEnv("OS_", false),
+						environment: openstack.NewEnv(osPrefix, false),
 					}
 					if err = config.load(); err != nil {
 						tSyn.Fatal()

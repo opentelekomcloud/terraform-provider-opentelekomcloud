@@ -24,6 +24,10 @@ import (
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/obs"
 )
 
+const (
+	osPrefix = "OS_"
+)
+
 type Config struct {
 	AccessKey        string
 	SecretKey        string
@@ -116,6 +120,9 @@ func (c *Config) LoadAndValidate() error {
 }
 
 func (c *Config) load() error {
+	if c.environment == nil {
+		c.environment = openstack.NewEnv(osPrefix)
+	}
 	cloud, err := c.environment.Cloud()
 	if err != nil {
 		return err
