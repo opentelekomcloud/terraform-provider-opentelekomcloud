@@ -26,25 +26,21 @@ func resourceObsBucketObject() *schema.Resource {
 				Required: true,
 				ForceNew: true,
 			},
-
 			"key": {
 				Type:     schema.TypeString,
 				Required: true,
 				ForceNew: true,
 			},
-
 			"source": {
 				Type:         schema.TypeString,
 				Optional:     true,
 				AtLeastOneOf: []string{"content"},
 			},
-
 			"content": {
 				Type:         schema.TypeString,
 				Optional:     true,
 				AtLeastOneOf: []string{"source"},
 			},
-
 			"storage_class": {
 				Type:     schema.TypeString,
 				Optional: true,
@@ -53,7 +49,6 @@ func resourceObsBucketObject() *schema.Resource {
 					"STANDARD", "WARM", "COLD",
 				}, true),
 			},
-
 			"acl": {
 				Type:     schema.TypeString,
 				Optional: true,
@@ -61,22 +56,18 @@ func resourceObsBucketObject() *schema.Resource {
 					"private", "public-read", "public-read-write",
 				}, true),
 			},
-
 			"encryption": {
 				Type:     schema.TypeBool,
 				Optional: true,
 			},
-
 			"kms_key_id": {
 				Type:     schema.TypeString,
 				Optional: true,
 			},
-
 			"content_type": {
 				Type:     schema.TypeString,
 				Optional: true,
 			},
-
 			"etag": {
 				Type: schema.TypeString,
 				// This will conflict with server-side-encryption and multi-part upload
@@ -84,12 +75,10 @@ func resourceObsBucketObject() *schema.Resource {
 				Optional: true,
 				Computed: true,
 			},
-
 			"version_id": {
 				Type:     schema.TypeString,
 				Computed: true,
 			},
-
 			"size": {
 				Type:     schema.TypeInt,
 				Computed: true,
