@@ -1,6 +1,16 @@
 ## 1.23.0 (Unreleased)
 
 
+## 1.22.6 (January 27, 2021)
+
+BUG FIXES:
+* `resource/opentelekomcloud_obs_bucket`: Fix invalid AK/SK signature for OBS ([#811](https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/811))
+* `resource/opentelekomcloud_obs_bucket_object`: Fix invalid AK/SK signature for OBS ([#811](https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/811))
+* `resource/opentelekomcloud_obs_bucket_object`: Fix issue with deleting versioned objects ([#812](https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/812))
+
+ENHANCEMENTS:
+* `provider/opentelekomcloud`: Add provider credentials validation ([#813](https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/813))
+
 ## 1.22.5 (January 22, 2021)
 
 BUG FIXES:
