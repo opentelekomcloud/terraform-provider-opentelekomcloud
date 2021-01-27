@@ -79,7 +79,7 @@ func TestAccObsBucketObject_content(t *testing.T) {
 	})
 }
 
-func TestAccObsBucketObject_withContent(t *testing.T) {
+func TestAccObsBucketObject_withVersionedContent(t *testing.T) {
 	rInt := acctest.RandInt()
 
 	resource.Test(t, resource.TestCase{
