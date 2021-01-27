@@ -4,11 +4,13 @@ import (
 	"fmt"
 	"io/ioutil"
 	"os"
+	"regexp"
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-sdk/helper/pathorcontents"
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/terraform"
+	"github.com/opentelekomcloud/gophertelekomcloud/acceptance/tools"
 )
 
 var (
@@ -387,5 +389,55 @@ func testAccCCEKeyPairPreCheck(t *testing.T) {
 func testAccIdentityV3AgencyPreCheck(t *testing.T) {
 	if OS_TENANT_NAME == "" {
 		t.Skip("OS_TENANT_NAME must be set for acceptance tests")
+	}
+}
+
+func TestLoadAndValidate_errors(t *testing.T) {
+	type negativeConfig struct {
+		Config
+		ErrorRegex string
+	}
+
+	cases := map[string]negativeConfig{
+		"No Identity Endpoint": {
+			ErrorRegex: `one of 'auth_url' or 'cloud' must be`,
+		},
+		"No Project ID/Name": {
+			Config: Config{
+				IdentityEndpoint: "asd",
+			},
+			ErrorRegex: `no project name/id.+is provided`,
+		},
+		"No Credentials": {
+			Config: Config{
+				IdentityEndpoint: "asd",
+				TenantID:         tools.RandomString("id-", 10),
+				TenantName:       tools.RandomString("name-", 10),
+			},
+			ErrorRegex: "no auth means provided",
+		},
+		"Invalid Endpoint": {
+			Config: Config{
+				IdentityEndpoint: "asd",
+				EndpointType:     "invalid",
+			},
+			ErrorRegex: "invalid endpoint type provided",
+		},
+	}
+
+	for name, config := range cases {
+		t.Run(name, func(st *testing.T) {
+			regex, rErr := regexp.Compile(config.ErrorRegex)
+			if rErr != nil {
+				st.Fatalf("invalid error regexp: %s", config.ErrorRegex)
+			}
+			err := config.LoadAndValidate()
+			if err == nil {
+				st.Fatalf("error was expected to happen")
+			}
+			if !regex.MatchString(err.Error()) {
+				st.Fatalf("error `%s` doesn't match regex: `%s`", err, regex)
+			}
+		})
 	}
 }

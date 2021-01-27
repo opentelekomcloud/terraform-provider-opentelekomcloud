@@ -186,7 +186,7 @@ func testRequestRetry(t *testing.T, count int) {
 	})
 
 	cfg := &Config{MaxRetries: retryCount}
-	_, err := genClient(cfg, golangsdk.AuthOptions{
+	_, err := cfg.genClient(golangsdk.AuthOptions{
 		IdentityEndpoint: fmt.Sprintf("%s/route", th.Endpoint()),
 	})
 	_, ok := err.(golangsdk.ErrDefault500)

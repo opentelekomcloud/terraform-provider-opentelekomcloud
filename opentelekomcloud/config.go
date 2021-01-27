@@ -3,6 +3,7 @@ package opentelekomcloud
 import (
 	"crypto/tls"
 	"crypto/x509"
+	"errors"
 	"fmt"
 	"log"
 	"net/http"
@@ -13,7 +14,6 @@ import (
 	"github.com/aws/aws-sdk-go/aws/awserr"
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/s3"
-	"github.com/hashicorp/errwrap"
 	"github.com/hashicorp/go-cleanhttp"
 	"github.com/hashicorp/terraform-plugin-sdk/helper/pathorcontents"
 	"github.com/hashicorp/terraform-plugin-sdk/httpclient"
@@ -72,44 +72,34 @@ func (c *Config) LoadAndValidate() error {
 		return fmt.Errorf("one of 'auth_url' or 'cloud' must be specified")
 	}
 
-	validEndpoint := false
-	validEndpoints := []string{
-		"internal", "internalURL",
-		"admin", "adminURL",
-		"public", "publicURL",
-		"",
-	}
-
-	for _, endpoint := range validEndpoints {
-		if c.EndpointType == endpoint {
-			validEndpoint = true
-		}
-	}
-
-	if !validEndpoint {
-		return fmt.Errorf("invalid endpoint type provided")
-	}
-
 	if c.Cloud != "" {
-		err := c.load()
-		if err != nil {
+		if err := c.load(); err != nil {
 			return err
 		}
 	}
 
-	err := fmt.Errorf("must config token or aksk or username password to be authorized")
+	if err := c.validateEndpoint(); err != nil {
+		return err
+	}
 
-	if c.Token != "" {
+	if err := c.validateProject(); err != nil {
+		return err
+	}
+
+	var err error
+	switch {
+	case c.Token != "":
 		err = buildClientByToken(c)
-
-	} else if c.AccessKey != "" && c.SecretKey != "" {
+	case c.AccessKey != "" && c.SecretKey != "":
 		err = buildClientByAKSK(c)
-
-	} else if c.Password != "" && (c.Username != "" || c.UserID != "") {
+	case c.Password != "" && (c.Username != "" || c.UserID != ""):
 		err = buildClientByPassword(c)
+	default:
+		err = errors.New(
+			"no auth means provided. Token, AK/SK or username/password are required for authentication")
 	}
 	if err != nil {
-		return err
+		return fmt.Errorf("failed to authenticate:\n%s", err)
 	}
 
 	var osDebug bool
@@ -179,7 +169,7 @@ func (c *Config) load() error {
 	return nil
 }
 
-func generateTLSConfig(c *Config) (*tls.Config, error) {
+func (c *Config) generateTLSConfig() (*tls.Config, error) {
 	config := &tls.Config{}
 	if c.CACertFile != "" {
 		caCert, _, err := pathorcontents.Read(c.CACertFile)
@@ -232,7 +222,7 @@ func (c *Config) newS3Session(osDebug bool) error {
 		cp, err := creds.Get()
 		if err != nil {
 			if awsErr, ok := err.(awserr.Error); ok && awsErr.Code() == "NoCredentialProviders" {
-				return fmt.Errorf(`No valid credential sources found for Swift S3 Provider.
+				return fmt.Errorf(`no valid credential sources found for Swift S3 Provider.
   Please see https://terraform.io/docs/providers/aws/index.html for more information on
   providing credentials for the S3 Provider`)
 			}
@@ -265,8 +255,32 @@ func (c *Config) newS3Session(osDebug bool) error {
 		// Set up base session for AWS/Swift S3
 		c.s3sess, err = session.NewSession(awsConfig)
 		if err != nil {
-			return errwrap.Wrapf("Error creating Swift S3 session: {{err}}", err)
+			return fmt.Errorf("error creating Swift S3 session: %s", err)
 		}
+	}
+	return nil
+}
+
+var validEndpoints = []string{
+	"internal", "internalURL",
+	"admin", "adminURL",
+	"public", "publicURL",
+	"",
+}
+
+func (c *Config) validateEndpoint() error {
+	for _, endpoint := range validEndpoints {
+		if c.EndpointType == endpoint {
+			return nil
+		}
+	}
+	return fmt.Errorf("invalid endpoint type provided: %s", c.EndpointType)
+}
+
+// validateProject checks that `Project`(`Tenant`) value is set
+func (c *Config) validateProject() error {
+	if c.TenantName == "" && c.TenantID == "" && c.DelegatedProject == "" {
+		return errors.New("no project name/id or delegated project is provided")
 	}
 	return nil
 }
@@ -302,9 +316,8 @@ func buildClientByToken(c *Config) error {
 	for _, ao := range []*golangsdk.AuthOptions{&pao, &dao} {
 		ao.IdentityEndpoint = c.IdentityEndpoint
 		ao.TokenID = c.Token
-
 	}
-	return genClients(c, pao, dao)
+	return c.genClients(pao, dao)
 }
 
 func buildClientByAKSK(c *Config) error {
@@ -342,7 +355,7 @@ func buildClientByAKSK(c *Config) error {
 		ao.AccessKey = c.AccessKey
 		ao.SecretKey = c.SecretKey
 	}
-	return genClients(c, pao, dao)
+	return c.genClients(pao, dao)
 }
 
 func buildClientByPassword(c *Config) error {
@@ -383,24 +396,25 @@ func buildClientByPassword(c *Config) error {
 		ao.Username = c.Username
 		ao.UserID = c.UserID
 	}
-	return genClients(c, pao, dao)
+	return c.genClients(pao, dao)
 }
 
-func genClients(c *Config, pao, dao golangsdk.AuthOptionsProvider) error {
-	client, err := genClient(c, pao)
+func (c *Config) genClients(pao, dao golangsdk.AuthOptionsProvider) error {
+	client, err := c.genClient(pao)
 	if err != nil {
 		return err
 	}
 	c.HwClient = client
 
-	client, err = genClient(c, dao)
-	if err == nil {
-		c.DomainClient = client
+	client, err = c.genClient(dao)
+	if err != nil {
+		return err
 	}
-	return err
+	c.DomainClient = client
+	return nil
 }
 
-func genClient(c *Config, ao golangsdk.AuthOptionsProvider) (*golangsdk.ProviderClient, error) {
+func (c *Config) genClient(ao golangsdk.AuthOptionsProvider) (*golangsdk.ProviderClient, error) {
 	client, err := openstack.NewClient(ao.GetIdentityEndpoint())
 	if err != nil {
 		return nil, err
@@ -409,7 +423,7 @@ func genClient(c *Config, ao golangsdk.AuthOptionsProvider) (*golangsdk.Provider
 	// Set UserAgent
 	client.UserAgent.Prepend(httpclient.TerraformUserAgent(c.terraformVersion))
 
-	config, err := generateTLSConfig(c)
+	config, err := c.generateTLSConfig()
 	if err != nil {
 		return nil, err
 	}

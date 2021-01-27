@@ -64,7 +64,7 @@ func Provider() terraform.ResourceProvider {
 			},
 			"tenant_name": {
 				Type:     schema.TypeString,
-				Required: true,
+				Optional: true,
 				DefaultFunc: schema.MultiEnvDefaultFunc([]string{
 					"OS_TENANT_NAME",
 					"OS_PROJECT_NAME",
