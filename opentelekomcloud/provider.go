@@ -23,6 +23,7 @@ func Provider() terraform.ResourceProvider {
 			"secret_key": {
 				Type:        schema.TypeString,
 				Optional:    true,
+				Sensitive:   true,
 				DefaultFunc: schema.EnvDefaultFunc("OS_SECRET_KEY", ""),
 				Description: descriptions["secret_key"],
 			},
@@ -79,8 +80,9 @@ func Provider() terraform.ResourceProvider {
 				Description: descriptions["password"],
 			},
 			"token": {
-				Type:     schema.TypeString,
-				Optional: true,
+				Type:      schema.TypeString,
+				Optional:  true,
+				Sensitive: true,
 				DefaultFunc: schema.MultiEnvDefaultFunc([]string{
 					"OS_TOKEN",
 					"OS_AUTH_TOKEN",
@@ -90,6 +92,7 @@ func Provider() terraform.ResourceProvider {
 			"security_token": {
 				Type:        schema.TypeString,
 				Optional:    true,
+				Sensitive:   true,
 				DefaultFunc: schema.EnvDefaultFunc("OS_SECURITY_TOKEN", ""),
 				Description: descriptions["security_token"],
 			},
