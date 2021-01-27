@@ -10,6 +10,7 @@ BUG FIXES:
 
 ENHANCEMENTS:
 * `provider/opentelekomcloud`: Add provider credentials validation ([#813](https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/813))
+* `provider/opentelekomcloud`: Mark sensitive fields as `Sensitive` ([#816](https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/816))
 
 ## 1.22.5 (January 22, 2021)
 
