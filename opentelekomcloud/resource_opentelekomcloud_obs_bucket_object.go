@@ -247,15 +247,37 @@ func resourceObsBucketObjectDelete(d *schema.ResourceData, meta interface{}) err
 
 	bucket := d.Get("bucket").(string)
 	key := d.Get("key").(string)
-	input := &obs.DeleteObjectInput{
-		Bucket: bucket,
-		Key:    key,
-	}
+	if _, ok := d.GetOk("version_id"); ok {
+		// Bucket is versioned, we need to delete all versions
+		vInput := obs.ListVersionsInput{
+			Bucket: bucket,
+		}
+		out, err := client.ListVersions(&vInput)
+		if err != nil {
+			return fmt.Errorf("failed listing OBS object versions: %s", err)
+		}
 
-	log.Printf("[DEBUG] Object %s will be deleted with all versions", key)
-	_, err = client.DeleteObject(input)
-	if err != nil {
-		return getObsError("Error deleting object of OBS bucket", bucket, err)
+		for _, v := range out.Versions {
+			input := obs.DeleteObjectInput{
+				Bucket:    bucket,
+				Key:       key,
+				VersionId: v.VersionId,
+			}
+			_, err := client.DeleteObject(&input)
+			if err != nil {
+				return fmt.Errorf("error deleting OBS object version of %s:\n%s,\n%s", key, v.VersionId, err)
+			}
+		}
+	} else {
+		// Just delete the object
+		input := obs.DeleteObjectInput{
+			Bucket: bucket,
+			Key:    key,
+		}
+		_, err := client.DeleteObject(&input)
+		if err != nil {
+			return fmt.Errorf("error deleting OBS bucket object: %s  Bucket: %q Object: %q", err, bucket, key)
+		}
 	}
 
 	return nil

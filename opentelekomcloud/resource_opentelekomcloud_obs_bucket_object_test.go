@@ -46,7 +46,7 @@ func TestAccObsBucketObject_source(t *testing.T) {
 			},
 			{
 				// update with encryption
-				Config: testAccObsBucketObject_сonfigWithSSE(rInt, tmpFile.Name()),
+				Config: testAccObsBucketObject_configWithSSE(rInt, tmpFile.Name()),
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr(
 						"opentelekomcloud_obs_bucket_object.object", "encryption", "true"),
@@ -239,7 +239,7 @@ resource "opentelekomcloud_obs_bucket_object" "object" {
 `, randInt)
 }
 
-func testAccObsBucketObject_сonfigWithSSE(randInt int, source string) string {
+func testAccObsBucketObject_configWithSSE(randInt int, source string) string {
 	return fmt.Sprintf(`
 resource "opentelekomcloud_obs_bucket" "object_bucket" {
   bucket = "tf-object-test-bucket-%d"
