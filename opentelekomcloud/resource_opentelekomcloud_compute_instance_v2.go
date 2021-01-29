@@ -326,24 +326,6 @@ func resourceComputeInstanceV2() *schema.Resource {
 				},
 				Set: resourceComputeSchedulerHintsHash,
 			},
-			"personality": {
-				Type:     schema.TypeSet,
-				Optional: true,
-				ForceNew: true,
-				Elem: &schema.Resource{
-					Schema: map[string]*schema.Schema{
-						"file": {
-							Type:     schema.TypeString,
-							Required: true,
-						},
-						"content": {
-							Type:     schema.TypeString,
-							Required: true,
-						},
-					},
-				},
-				Set: resourceComputeInstancePersonalityHash,
-			},
 			"stop_before_destroy": {
 				Type:     schema.TypeBool,
 				Optional: true,
@@ -391,7 +373,7 @@ func resourceComputeInstanceV2Create(d *schema.ResourceData, meta interface{}) e
 	config := meta.(*Config)
 	computeClient, err := config.computeV2Client(GetRegion(d, config))
 	if err != nil {
-		return fmt.Errorf("Error creating OpenTelekomCloud ecs compute client: %s", err)
+		return fmt.Errorf("error creating OpenTelekomCloud ComputeV2 client: %s", err)
 	}
 
 	var createOpts servers.CreateOptsBuilder
@@ -400,12 +382,12 @@ func resourceComputeInstanceV2Create(d *schema.ResourceData, meta interface{}) e
 	// If a bootable block_device was specified, ignore the image altogether.
 	// If an image_id was specified, use it.
 	// If an image_name was specified, look up the image ID, report if error.
-	imageId, err := getImageIDFromConfig(computeClient, d)
+	imageID, err := getImageIDFromConfig(computeClient, d)
 	if err != nil {
 		return err
 	}
 
-	flavorId, err := getFlavorID(computeClient, d)
+	flavorID, err := getFlavorID(computeClient, d)
 	if err != nil {
 		return err
 	}
@@ -430,8 +412,8 @@ func resourceComputeInstanceV2Create(d *schema.ResourceData, meta interface{}) e
 
 	createOpts = &servers.CreateOpts{
 		Name:             d.Get("name").(string),
-		ImageRef:         imageId,
-		FlavorRef:        flavorId,
+		ImageRef:         imageID,
+		FlavorRef:        flavorID,
 		SecurityGroups:   resourceInstanceSecGroupsV2(d),
 		AvailabilityZone: d.Get("availability_zone").(string),
 		Networks:         networks,
@@ -439,7 +421,6 @@ func resourceComputeInstanceV2Create(d *schema.ResourceData, meta interface{}) e
 		ConfigDrive:      &configDrive,
 		AdminPass:        d.Get("admin_pass").(string),
 		UserData:         []byte(d.Get("user_data").(string)),
-		Personality:      resourceInstancePersonalityV2(d),
 	}
 
 	if keyName, ok := d.Get("key_pair").(string); ok && keyName != "" {
@@ -483,7 +464,7 @@ func resourceComputeInstanceV2Create(d *schema.ResourceData, meta interface{}) e
 	}
 
 	if err != nil {
-		return fmt.Errorf("Error creating OpenTelekomCloud server: %s", err)
+		return fmt.Errorf("error creating OpenTelekomCloud server: %s", err)
 	}
 	log.Printf("[INFO] Instance ID: %s", server.ID)
 
@@ -506,8 +487,7 @@ func resourceComputeInstanceV2Create(d *schema.ResourceData, meta interface{}) e
 
 	_, err = stateConf.WaitForState()
 	if err != nil {
-		return fmt.Errorf("Error waiting for instance (%s) to become ready: %s",
-			server.ID, err)
+		return fmt.Errorf("error waiting for instance (%s) to become ready: %s", server.ID, err)
 	}
 
 	if hasFilledOpt(d, "auto_recovery") {
@@ -543,7 +523,7 @@ func resourceComputeInstanceV2Read(d *schema.ResourceData, meta interface{}) err
 	config := meta.(*Config)
 	computeClient, err := config.computeV2Client(GetRegion(d, config))
 	if err != nil {
-		return fmt.Errorf("Error creating OpenTelekomCloud compute client: %s", err)
+		return fmt.Errorf("error creating OpenTelekomCloud ComputeV2 client: %s", err)
 	}
 
 	server, err := servers.Get(computeClient, d.Id()).Extract()
@@ -611,7 +591,7 @@ func resourceComputeInstanceV2Read(d *schema.ResourceData, meta interface{}) err
 
 	flavorId, ok := server.Flavor["id"].(string)
 	if !ok {
-		return fmt.Errorf("Error setting OpenTelekomCloud server's flavor: %v", server.Flavor)
+		return fmt.Errorf("error setting OpenTelekomCloud server's flavor: %v", server.Flavor)
 	}
 	d.Set("flavor_id", flavorId)
 
@@ -649,7 +629,7 @@ func resourceComputeInstanceV2Read(d *schema.ResourceData, meta interface{}) err
 
 	ar, err := resourceECSAutoRecoveryV1Read(d, meta, d.Id())
 	if err != nil && !isResourceNotFound(err) {
-		return fmt.Errorf("Error reading auto recovery of instance:%s, err=%s", d.Id(), err)
+		return fmt.Errorf("error reading auto recovery of instance: %s", err)
 	}
 	d.Set("auto_recovery", ar)
 
@@ -664,11 +644,11 @@ func resourceComputeInstanceV2Read(d *schema.ResourceData, meta interface{}) err
 	if tagParamName != "" {
 		ecsv1client, err := config.computeV1Client(GetRegion(d, config))
 		if err != nil {
-			return fmt.Errorf("Error creating OpenTelekomCloud compute v1 client: %s", err)
+			return fmt.Errorf("error creating OpenTelekomCloud ComputeV1 client: %s", err)
 		}
 		ecsTagsList, err := ecstags.Get(ecsv1client, d.Id()).Extract()
 		if err != nil {
-			return fmt.Errorf("Error fetching OpenTelekomCloud instance tags: %s", err)
+			return fmt.Errorf("error fetching OpenTelekomCloud instance tags: %s", err)
 		}
 		tagsMap := make(map[string]string)
 		for _, val := range ecsTagsList.Tags {
@@ -686,7 +666,7 @@ func resourceComputeInstanceV2Update(d *schema.ResourceData, meta interface{}) e
 	config := meta.(*Config)
 	computeClient, err := config.computeV2Client(GetRegion(d, config))
 	if err != nil {
-		return fmt.Errorf("Error creating OpenTelekomCloud compute client: %s", err)
+		return fmt.Errorf("error creating OpenTelekomCloud ComputeV2 client: %s", err)
 	}
 
 	var updateOpts servers.UpdateOpts
@@ -697,7 +677,7 @@ func resourceComputeInstanceV2Update(d *schema.ResourceData, meta interface{}) e
 	if updateOpts != (servers.UpdateOpts{}) {
 		_, err := servers.Update(computeClient, d.Id(), updateOpts).Extract()
 		if err != nil {
-			return fmt.Errorf("Error updating OpenTelekomCloud server: %s", err)
+			return fmt.Errorf("error updating OpenTelekomCloud server: %s", err)
 		}
 	}
 
@@ -723,7 +703,7 @@ func resourceComputeInstanceV2Update(d *schema.ResourceData, meta interface{}) e
 		for _, key := range metadataToDelete {
 			err := servers.DeleteMetadatum(computeClient, d.Id(), key).ExtractErr()
 			if err != nil {
-				return fmt.Errorf("Error deleting metadata (%s) from server (%s): %s", key, d.Id(), err)
+				return fmt.Errorf("error deleting metadata (%s) from server (%s): %s", key, d.Id(), err)
 			}
 		}
 
@@ -735,7 +715,7 @@ func resourceComputeInstanceV2Update(d *schema.ResourceData, meta interface{}) e
 
 		_, err := servers.UpdateMetadata(computeClient, d.Id(), metadataOpts).Extract()
 		if err != nil {
-			return fmt.Errorf("Error updating OpenTelekomCloud server (%s) metadata: %s", d.Id(), err)
+			return fmt.Errorf("error updating OpenTelekomCloud server (%s) metadata: %s", d.Id(), err)
 		}
 	}
 
@@ -757,7 +737,7 @@ func resourceComputeInstanceV2Update(d *schema.ResourceData, meta interface{}) e
 					continue
 				}
 
-				return fmt.Errorf("Error removing security group (%s) from OpenTelekomCloud server (%s): %s", g, d.Id(), err)
+				return fmt.Errorf("error removing security group (%s) from OpenTelekomCloud server (%s): %s", g, d.Id(), err)
 			} else {
 				log.Printf("[DEBUG] Removed security group (%s) from instance (%s)", g, d.Id())
 			}
@@ -766,7 +746,7 @@ func resourceComputeInstanceV2Update(d *schema.ResourceData, meta interface{}) e
 		for _, g := range secgroupsToAdd.List() {
 			err := secgroups.AddServer(computeClient, d.Id(), g.(string)).ExtractErr()
 			if err != nil && err.Error() != "EOF" {
-				return fmt.Errorf("Error adding security group (%s) to OpenTelekomCloud server (%s): %s", g, d.Id(), err)
+				return fmt.Errorf("error adding security group (%s) to OpenTelekomCloud server (%s): %s", g, d.Id(), err)
 			}
 			log.Printf("[DEBUG] Added security group (%s) to instance (%s)", g, d.Id())
 		}
@@ -776,7 +756,7 @@ func resourceComputeInstanceV2Update(d *schema.ResourceData, meta interface{}) e
 		if newPwd, ok := d.Get("admin_pass").(string); ok {
 			err := servers.ChangeAdminPassword(computeClient, d.Id(), newPwd).ExtractErr()
 			if err != nil {
-				return fmt.Errorf("Error changing admin password of OpenTelekomCloud server (%s): %s", d.Id(), err)
+				return fmt.Errorf("error changing admin password of OpenTelekomCloud server (%s): %s", d.Id(), err)
 			}
 		}
 	}
@@ -800,7 +780,7 @@ func resourceComputeInstanceV2Update(d *schema.ResourceData, meta interface{}) e
 		log.Printf("[DEBUG] Resize configuration: %#v", resizeOpts)
 		err = servers.Resize(computeClient, d.Id(), resizeOpts).ExtractErr()
 		if err != nil {
-			return fmt.Errorf("Error resizing OpenTelekomCloud server: %s", err)
+			return fmt.Errorf("error resizing OpenTelekomCloud server: %s", err)
 		}
 
 		// Wait for the instance to finish resizing.
@@ -817,14 +797,14 @@ func resourceComputeInstanceV2Update(d *schema.ResourceData, meta interface{}) e
 
 		_, err = stateConf.WaitForState()
 		if err != nil {
-			return fmt.Errorf("Error waiting for instance (%s) to resize: %s", d.Id(), err)
+			return fmt.Errorf("error waiting for instance (%s) to resize: %s", d.Id(), err)
 		}
 
 		// Confirm resize.
 		log.Printf("[DEBUG] Confirming resize")
 		err = servers.ConfirmResize(computeClient, d.Id()).ExtractErr()
 		if err != nil {
-			return fmt.Errorf("Error confirming resize of OpenTelekomCloud server: %s", err)
+			return fmt.Errorf("error confirming resize of OpenTelekomCloud server: %s", err)
 		}
 
 		stateConf = &resource.StateChangeConf{
@@ -838,7 +818,7 @@ func resourceComputeInstanceV2Update(d *schema.ResourceData, meta interface{}) e
 
 		_, err = stateConf.WaitForState()
 		if err != nil {
-			return fmt.Errorf("Error waiting for instance (%s) to confirm resize: %s", d.Id(), err)
+			return fmt.Errorf("error waiting for instance (%s) to confirm resize: %s", d.Id(), err)
 		}
 	}
 
@@ -852,17 +832,17 @@ func resourceComputeInstanceV2Update(d *schema.ResourceData, meta interface{}) e
 	if tagParamName != "" {
 		ecsv1Client, err := config.computeV1Client(GetRegion(d, config))
 		if err != nil {
-			return fmt.Errorf("Error creating OpenTelekomCloud compute v1 client: %s", err)
+			return fmt.Errorf("error creating OpenTelekomCloud ComputeV1 client: %s", err)
 		}
 		oldTags, err := ecstags.Get(ecsv1Client, d.Id()).Extract()
 		if err != nil {
-			return fmt.Errorf("Error fetching OpenTelekomCloud instance tags: %s", err)
+			return fmt.Errorf("error fetching OpenTelekomCloud instance tags: %s", err)
 		}
 		if len(oldTags.Tags) > 0 {
 			deleteOpts := ecstags.BatchOpts{Action: ecstags.ActionDelete, Tags: oldTags.Tags}
 			deleteTags := ecstags.BatchAction(ecsv1Client, d.Id(), deleteOpts)
 			if deleteTags.Err != nil {
-				return fmt.Errorf("Error updating OpenTelekomCloud instance tags: %s", deleteTags.Err)
+				return fmt.Errorf("error updating OpenTelekomCloud instance tags: %s", deleteTags.Err)
 			}
 		}
 
@@ -872,7 +852,7 @@ func resourceComputeInstanceV2Update(d *schema.ResourceData, meta interface{}) e
 				log.Printf("[DEBUG] Setting tag(key/value): %v", tagsMap)
 				err = setTagForInstance(d, meta, d.Id(), tagsMap)
 				if err != nil {
-					return fmt.Errorf("Error updating tag(key/value) of instance:%s, err:%s", d.Id(), err)
+					return fmt.Errorf("error updating tag(key/value) of instance: %s", err)
 				}
 			}
 		}
@@ -883,7 +863,7 @@ func resourceComputeInstanceV2Update(d *schema.ResourceData, meta interface{}) e
 		log.Printf("[DEBUG] Update auto recovery of instance to %t", ar)
 		err = setAutoRecoveryForInstance(d, meta, d.Id(), ar)
 		if err != nil {
-			return fmt.Errorf("Error updating auto recovery of instance:%s, err:%s", d.Id(), err)
+			return fmt.Errorf("error updating auto recovery of instance: %s", err)
 		}
 	}
 
@@ -894,7 +874,7 @@ func resourceComputeInstanceV2Delete(d *schema.ResourceData, meta interface{}) e
 	config := meta.(*Config)
 	computeClient, err := config.computeV2Client(GetRegion(d, config))
 	if err != nil {
-		return fmt.Errorf("Error creating OpenTelekomCloud compute client: %s", err)
+		return fmt.Errorf("error creating OpenTelekomCloud ComputeV2 client: %s", err)
 	}
 
 	if d.Get("stop_before_destroy").(bool) {
@@ -907,7 +887,7 @@ func resourceComputeInstanceV2Delete(d *schema.ResourceData, meta interface{}) e
 	log.Printf("[DEBUG] Deleting OpenTelekomCloud Instance %s", d.Id())
 	err = servers.Delete(computeClient, d.Id()).ExtractErr()
 	if err != nil {
-		return fmt.Errorf("Error deleting OpenTelekomCloud server: %s", err)
+		return fmt.Errorf("error deleting OpenTelekomCloud server: %s", err)
 	}
 
 	// Wait for the instance to delete before moving on.
@@ -924,8 +904,7 @@ func resourceComputeInstanceV2Delete(d *schema.ResourceData, meta interface{}) e
 
 	_, err = stateConf.WaitForState()
 	if err != nil {
-		return fmt.Errorf("Error waiting for instance (%s) to delete: %s",
-			d.Id(), err)
+		return fmt.Errorf("error waiting for instance (%s) to delete: %s", d.Id(), err)
 	}
 
 	d.SetId("")
@@ -954,10 +933,10 @@ func ServerV2StateRefreshFunc(client *golangsdk.ServiceClient, instanceID string
 }
 
 func resourceInstanceSecGroupsV2(d *schema.ResourceData) []string {
-	rawSecGroups := d.Get("security_groups").(*schema.Set).List()
-	secGroups := make([]string, len(rawSecGroups))
-	for i, raw := range rawSecGroups {
-		secGroups[i] = raw.(string)
+	secGroupsRaw := d.Get("security_groups").(*schema.Set).List()
+	secGroups := make([]string, len(secGroupsRaw))
+	for i, secGroup := range secGroupsRaw {
+		secGroups[i] = secGroup.(string)
 	}
 	return secGroups
 }
@@ -1049,7 +1028,7 @@ func resourceInstanceSchedulerHintsV2(d *schema.ResourceData, schedulerHintsRaw 
 	return schedulerHints
 }
 
-func getImageIDFromConfig(computeClient *golangsdk.ServiceClient, d *schema.ResourceData) (string, error) {
+func getImageIDFromConfig(client *golangsdk.ServiceClient, d *schema.ResourceData) (string, error) {
 	// If block_device was used, an Image does not need to be specified, unless an image/local
 	// combination was used. This emulates normal boot behavior. Otherwise, ignore the image altogether.
 	if vL, ok := d.GetOk("block_device"); ok {
@@ -1083,14 +1062,14 @@ func getImageIDFromConfig(computeClient *golangsdk.ServiceClient, d *schema.Reso
 	}
 
 	if imageName != "" {
-		imageId, err := images.IDFromName(computeClient, imageName)
+		imageId, err := images.IDFromName(client, imageName)
 		if err != nil {
 			return "", err
 		}
 		return imageId, nil
 	}
 
-	return "", fmt.Errorf("Neither a boot device, image ID, or image name were able to be determined.")
+	return "", fmt.Errorf("neither a boot device, image ID, or image name were able to be determined")
 }
 
 func setImageInformation(computeClient *golangsdk.ServiceClient, server *servers.Server, d *schema.ResourceData) error {
@@ -1178,53 +1157,22 @@ func checkBlockDeviceConfig(d *schema.ResourceData) error {
 			vM := v.(map[string]interface{})
 
 			if vM["source_type"] != "blank" && vM["uuid"] == "" {
-				return fmt.Errorf("You must specify a uuid for %s block device types", vM["source_type"])
+				return fmt.Errorf("you must specify a UUID for %s block device types", vM["source_type"])
 			}
 
 			if vM["source_type"] == "image" && vM["destination_type"] == "volume" {
 				if vM["volume_size"] == 0 {
-					return fmt.Errorf("You must specify a volume_size when creating a volume from an image")
+					return fmt.Errorf("you must specify a volume_size when creating a volume from an image")
 				}
 			}
 
 			if vM["source_type"] == "blank" && vM["destination_type"] == "local" {
 				if vM["volume_size"] == 0 {
-					return fmt.Errorf("You must specify a volume_size when creating a blank block device")
+					return fmt.Errorf("you must specify a volume_size when creating a blank block device")
 				}
 			}
 		}
 	}
 
 	return nil
-}
-
-func resourceComputeInstancePersonalityHash(v interface{}) int {
-	var buf bytes.Buffer
-	m := v.(map[string]interface{})
-	buf.WriteString(fmt.Sprintf("%s-", m["file"].(string)))
-
-	return hashcode.String(buf.String())
-}
-
-func resourceInstancePersonalityV2(d *schema.ResourceData) servers.Personality {
-	var personalities servers.Personality
-
-	if v := d.Get("personality"); v != nil {
-		personalityList := v.(*schema.Set).List()
-		if len(personalityList) > 0 {
-			for _, p := range personalityList {
-				rawPersonality := p.(map[string]interface{})
-				file := servers.File{
-					Path:     rawPersonality["file"].(string),
-					Contents: []byte(rawPersonality["content"].(string)),
-				}
-
-				log.Printf("[DEBUG] OpenTelekomCloud Compute Instance Personality: %+v", file)
-
-				personalities = append(personalities, &file)
-			}
-		}
-	}
-
-	return personalities
 }
