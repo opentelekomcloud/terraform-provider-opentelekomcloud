@@ -326,6 +326,24 @@ func resourceComputeInstanceV2() *schema.Resource {
 				},
 				Set: resourceComputeSchedulerHintsHash,
 			},
+			"personality": {
+				Type:     schema.TypeSet,
+				Optional: true,
+				ForceNew: true,
+				Elem: &schema.Resource{
+					Schema: map[string]*schema.Schema{
+						"file": {
+							Type:     schema.TypeString,
+							Required: true,
+						},
+						"content": {
+							Type:     schema.TypeString,
+							Required: true,
+						},
+					},
+				},
+				Deprecated: "This block will be removed in future releases, please don't use it",
+			},
 			"stop_before_destroy": {
 				Type:     schema.TypeBool,
 				Optional: true,
