@@ -353,6 +353,24 @@ func TestAccComputeV2Instance_autoRecovery(t *testing.T) {
 	})
 }
 
+func TestAccComputeV2Instance_crazyNICs(t *testing.T) {
+	var instance servers.Server
+
+	resource.Test(t, resource.TestCase{
+		PreCheck:     func() { testAccPreCheck(t) },
+		Providers:    testAccProviders,
+		CheckDestroy: testAccCheckComputeV2InstanceDestroy,
+		Steps: []resource.TestStep{
+			{
+				Config: testAccComputeV2Instance_crazyNICs,
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckComputeV2InstanceExists("opentelekomcloud_compute_instance_v2.instance_1", &instance),
+				),
+			},
+		},
+	})
+}
+
 func testAccCheckComputeV2InstanceDestroy(s *terraform.State) error {
 	config := testAccProvider.Meta().(*Config)
 	computeClient, err := config.computeV2Client(OS_REGION_NAME)
@@ -866,3 +884,105 @@ resource "opentelekomcloud_compute_instance_v2" "instance_1" {
   auto_recovery = false
 }
 `, OS_AVAILABILITY_ZONE, OS_NETWORK_ID)
+
+var testAccComputeV2Instance_crazyNICs = fmt.Sprintf(`
+resource "opentelekomcloud_networking_network_v2" "network_1" {
+  name = "network_1"
+}
+resource "opentelekomcloud_networking_subnet_v2" "subnet_1" {
+  name = "subnet_1"
+  network_id = opentelekomcloud_networking_network_v2.network_1.id
+  cidr = "192.168.1.0/24"
+  ip_version = 4
+  enable_dhcp = true
+  no_gateway = true
+}
+resource "opentelekomcloud_networking_network_v2" "network_2" {
+  name = "network_2"
+}
+resource "opentelekomcloud_networking_subnet_v2" "subnet_2" {
+  name = "subnet_2"
+  network_id = opentelekomcloud_networking_network_v2.network_2.id
+  cidr = "192.168.2.0/24"
+  ip_version = 4
+  enable_dhcp = true
+  no_gateway = true
+}
+resource "opentelekomcloud_networking_port_v2" "port_1" {
+  name = "port_1"
+  network_id = opentelekomcloud_networking_network_v2.network_1.id
+  admin_state_up = "true"
+  fixed_ip {
+    subnet_id = opentelekomcloud_networking_subnet_v2.subnet_1.id
+    ip_address = "192.168.1.103"
+  }
+}
+resource "opentelekomcloud_networking_port_v2" "port_2" {
+  name = "port_2"
+  network_id = opentelekomcloud_networking_network_v2.network_2.id
+  admin_state_up = "true"
+  fixed_ip {
+    subnet_id = opentelekomcloud_networking_subnet_v2.subnet_2.id
+    ip_address = "192.168.2.103"
+  }
+}
+resource "opentelekomcloud_networking_port_v2" "port_3" {
+  name = "port_3"
+  network_id = opentelekomcloud_networking_network_v2.network_1.id
+  admin_state_up = "true"
+  fixed_ip {
+    subnet_id = opentelekomcloud_networking_subnet_v2.subnet_1.id
+    ip_address = "192.168.1.104"
+  }
+}
+resource "opentelekomcloud_networking_port_v2" "port_4" {
+  name = "port_4"
+  network_id = opentelekomcloud_networking_network_v2.network_2.id
+  admin_state_up = "true"
+  fixed_ip {
+    subnet_id = opentelekomcloud_networking_subnet_v2.subnet_2.id
+    ip_address = "192.168.2.104"
+  }
+}
+resource "opentelekomcloud_compute_instance_v2" "instance_1" {
+  depends_on = [
+    "opentelekomcloud_networking_subnet_v2.subnet_1",
+    "opentelekomcloud_networking_subnet_v2.subnet_2",
+    "opentelekomcloud_networking_port_v2.port_1",
+    "opentelekomcloud_networking_port_v2.port_2",
+  ]
+  name = "instance_1"
+  security_groups = ["default"]
+  network {
+    uuid = "%s"
+  }
+  network {
+    uuid = opentelekomcloud_networking_network_v2.network_1.id
+    fixed_ip_v4 = "192.168.1.100"
+  }
+  network {
+    uuid = opentelekomcloud_networking_network_v2.network_2.id
+    fixed_ip_v4 = "192.168.2.100"
+  }
+  network {
+    uuid = opentelekomcloud_networking_network_v2.network_1.id
+    fixed_ip_v4 = "192.168.1.101"
+  }
+  network {
+    uuid = opentelekomcloud_networking_network_v2.network_2.id
+    fixed_ip_v4 = "192.168.2.101"
+  }
+  network {
+    port = opentelekomcloud_networking_port_v2.port_1.id
+  }
+  network {
+    port = opentelekomcloud_networking_port_v2.port_2.id
+  }
+  network {
+    port = opentelekomcloud_networking_port_v2.port_3.id
+  }
+  network {
+    port = opentelekomcloud_networking_port_v2.port_4.id
+  }
+}
+`, OS_NETWORK_ID)
