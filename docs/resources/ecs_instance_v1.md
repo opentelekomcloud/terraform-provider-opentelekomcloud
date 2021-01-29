@@ -167,11 +167,11 @@ The following arguments are supported:
   instance. The nics object structure is documented below. Changing this
   creates a new server.
 
-* `system_disk_type` - (Optional) The system disk type of the server. For HANA, HL1, and HL2 ECSs use co-p1 and uh-l1 disks.
-  Changing this creates a new server. Available options are:
-  * `SATA`: common I/O disk type.
-  * `SAS`: high I/O disk type.
-  * `SSD`: ultra-high I/O disk type.
+* `system_disk_type` - (Optional) The system disk type of the server. For HANA, HL1, and HL2 ECSs use `co-p1` and `uh-l1` disks.
+  Changing this creates a new server. Options are limited depending on AZ. Available options are:
+  * `SATA`: common I/O disk type. Available for all AZs.
+  * `SAS`: high I/O disk type. Available for all AZs.
+  * `SSD`: ultra-high I/O disk type. Available for all AZs.
   * `co-p1`: high I/O(performance-optimized) disk type.
   * `uh-l1`: ultra-high I/O(latency-optimized) disk type.
 
@@ -202,11 +202,11 @@ The `nics` block supports:
 
 The `data_disks` block supports:
 
-* `type` - (Required) The data disk type of the server. For HANA, HL1, and HL2 ECSs use co-p1 and uh-l1 disks.
-  Changing this creates a new server. Available options are:
-  * `SATA`: common I/O disk type.
-  * `SAS`: high I/O disk type.
-  * `SSD`: ultra-high I/O disk type.
+* `type` - (Required) The data disk type of the server. For HANA, HL1, and HL2 ECSs use `co-p1` and `uh-l1` disks.
+  Changing this creates a new server. Options are limited depending on AZ. Available options are:
+  * `SATA`: common I/O disk type. Available for all AZs.
+  * `SAS`: high I/O disk type. Available for all AZs.
+  * `SSD`: ultra-high I/O disk type. Available for all AZs..
   * `co-p1`: high I/O(performance-optimized) disk type.
   * `uh-l1`: ultra-high I/O(latency-optimized) disk type.
 

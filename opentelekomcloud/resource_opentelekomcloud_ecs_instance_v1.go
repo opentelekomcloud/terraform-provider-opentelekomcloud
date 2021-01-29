@@ -37,6 +37,7 @@ func resourceEcsInstanceV1() *schema.Resource {
 		CustomizeDiff: multipleCustomizeDiffs(
 			validateVPC("vpc_id"),
 			validateVolumeType("system_disk_type"),
+			validateVolumeType("data_disks.*.type"),
 		),
 
 		Schema: map[string]*schema.Schema{

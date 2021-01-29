@@ -58,6 +58,11 @@ func TestAccEcsV1Instance_diskTypeValidation(t *testing.T) {
 				PlanOnly:    true,
 				ExpectError: regexp.MustCompile(`volume type .+ doesn't exist`),
 			},
+			{
+				Config:      testAccEcsV1Instance_invalidDataDisk,
+				PlanOnly:    true,
+				ExpectError: regexp.MustCompile(`volume type .+ doesn't exist`),
+			},
 		},
 	})
 }
@@ -220,6 +225,33 @@ resource "opentelekomcloud_ecs_instance_v1" "instance_1" {
   }
 
   system_disk_type = "asdfasd"
+
+  password          = "Password@123"
+  availability_zone = "eu-de-03"
+  auto_recovery     = true
+
+  tags = {
+    foo = "bar"
+    key = "value"
+  }
+}
+`, OS_IMAGE_ID, OS_VPC_ID, OS_NETWORK_ID)
+
+var testAccEcsV1Instance_invalidDataDisk = fmt.Sprintf(`
+resource "opentelekomcloud_ecs_instance_v1" "instance_1" {
+  name     = "server_1"
+  image_id = "%s"
+  flavor   = "s2.medium.1"
+  vpc_id   = "%s"
+
+  nics {
+    network_id = "%s"
+  }
+
+  data_disks {
+    size = 10
+    type = "invalid"
+  }
 
   password          = "Password@123"
   availability_zone = "eu-de-03"

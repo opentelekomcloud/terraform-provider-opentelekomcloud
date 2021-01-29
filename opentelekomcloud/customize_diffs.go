@@ -3,6 +3,7 @@ package opentelekomcloud
 import (
 	"fmt"
 	"log"
+	"regexp"
 	"strings"
 
 	"github.com/hashicorp/go-multierror"
@@ -70,20 +71,54 @@ func validateCCEClusterNetwork(d *schema.ResourceDiff, meta interface{}) error {
 	return nil
 }
 
-const argMissingMsg = "schema missing %s argument"
+const (
+	argMissingMsg = "schema missing %s argument"
+)
+
+var (
+	elementListRegex = regexp.MustCompile(`^(.+?)\.\*\.(.+)$`)
+)
+
+func stringInSlice(str string, slice []string) bool {
+	for _, v := range slice {
+		if v == str {
+			return true
+		}
+	}
+	return false
+}
+
+func _checkVolumeTypeAvailable(d schemaOrDiff, argName, expectedAZ string, typeAZs map[string][]string) error {
+	volumeType := d.Get(argName)
+	if volumeType == nil {
+		return fmt.Errorf(argMissingMsg, argName)
+	}
+	resourceVolType := strings.ToLower(volumeType.(string))
+	if resourceVolType == "" {
+		return nil
+	}
+	var validAZs []string
+	for typeName, azs := range typeAZs {
+		if typeName == resourceVolType {
+			validAZs = azs
+			break
+		}
+	}
+	if len(validAZs) == 0 {
+		return fmt.Errorf("volume type `%s` doesn't exist", resourceVolType)
+	}
+	if !stringInSlice(expectedAZ, validAZs) {
+		return fmt.Errorf(
+			"volume type `%v` is not supported in AZ `%s`.\nSupported AZs: %v",
+			volumeType, expectedAZ, validAZs,
+		)
+	}
+	return nil
+}
 
 func validateVolumeType(argName string) schema.CustomizeDiffFunc {
 	return func(d *schema.ResourceDiff, meta interface{}) error {
-		volumeType := d.Get(argName)
-		if volumeType == nil {
-			return fmt.Errorf(argMissingMsg, argName)
-		}
-		expectedType := strings.ToLower(volumeType.(string))
-		if expectedType == "" {
-			return nil
-		}
-
-		expectedAZ := d.Get("availability_zone")
+		expectedAZ := d.Get("availability_zone").(string)
 		if expectedAZ == "" {
 			log.Printf("[DEBUG] No AZ provided, can't define available volume types")
 			return nil
@@ -102,28 +137,26 @@ func validateVolumeType(argName string) schema.CustomizeDiffFunc {
 		if err != nil {
 			return err
 		}
-
-		var zones []string
-		for _, t := range types {
-			actualType := strings.ToLower(t.Name)
-			if actualType == expectedType {
-				zones = getZonesFromVolumeType(t)
-				break
-			}
-		}
-		if len(zones) == 0 {
-			return fmt.Errorf("volume type `%s` doesn't exist", volumeType)
-		}
-		for _, az := range zones {
-			if az == expectedAZ {
-				return nil
-			}
+		typeAZs := make(map[string][]string) // map of type name (lower case) -> az list
+		for _, volumeType := range types {
+			typeName := strings.ToLower(volumeType.Name)
+			typeAZs[typeName] = getZonesFromVolumeType(volumeType)
 		}
 
-		return fmt.Errorf(
-			"volume type `%v` is not supported in AZ `%s`.\nSupported AZs: %v",
-			volumeType, expectedAZ, zones,
-		)
+		if !strings.Contains(argName, ".*") {
+			return _checkVolumeTypeAvailable(d, argName, expectedAZ, typeAZs)
+		}
+
+		reGroups := elementListRegex.FindStringSubmatch(argName)
+		countExpr := fmt.Sprintf("%s.#", reGroups[1])
+		count := d.Get(countExpr).(int)
+		for i := 0; i < count; i++ {
+			exactItemExpr := fmt.Sprintf("%s.%d.%s", reGroups[1], i, reGroups[2])
+			if err := _checkVolumeTypeAvailable(d, exactItemExpr, expectedAZ, typeAZs); err != nil {
+				return err
+			}
+		}
+		return nil
 	}
 }
 
