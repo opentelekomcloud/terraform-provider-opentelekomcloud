@@ -6,9 +6,10 @@ import (
 	"fmt"
 	"log"
 	"os"
-	"regexp"
 
+	"github.com/hashicorp/go-multierror"
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/helper/validation"
 	"github.com/opentelekomcloud/gophertelekomcloud"
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/autoscaling/v1/configurations"
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/autoscaling/v1/groups"
@@ -31,12 +32,12 @@ func resourceASConfiguration() *schema.Resource {
 			"scaling_configuration_name": {
 				Type:         schema.TypeString,
 				Required:     true,
-				ValidateFunc: resourceASConfigurationValidateName,
 				ForceNew:     true,
+				ValidateFunc: validateName,
 			},
 			"instance_config": {
-				Required: true,
 				Type:     schema.TypeList,
+				Required: true,
 				MaxItems: 1,
 				ForceNew: true,
 				Elem: &schema.Resource{
@@ -79,18 +80,23 @@ func resourceASConfiguration() *schema.Resource {
 							Elem: &schema.Resource{
 								Schema: map[string]*schema.Schema{
 									"size": {
-										Type:     schema.TypeInt,
-										Required: true,
+										Type:         schema.TypeInt,
+										Required:     true,
+										ValidateFunc: validation.IntBetween(10, 32768),
 									},
 									"volume_type": {
-										Type:         schema.TypeString,
-										Required:     true,
-										ValidateFunc: resourceASConfigurationValidateVolumeType,
+										Type:     schema.TypeString,
+										Required: true,
+										ValidateFunc: validation.StringInSlice([]string{
+											"SATA", "SSD",
+										}, false),
 									},
 									"disk_type": {
-										Type:         schema.TypeString,
-										Required:     true,
-										ValidateFunc: resourceASConfigurationValidateDiskType,
+										Type:     schema.TypeString,
+										Required: true,
+										ValidateFunc: validation.StringInSlice([]string{
+											"DATA", "SYS",
+										}, false),
 									},
 									"kms_id": {
 										Type:     schema.TypeString,
@@ -130,9 +136,11 @@ func resourceASConfiguration() *schema.Resource {
 										Elem: &schema.Resource{
 											Schema: map[string]*schema.Schema{
 												"ip_type": {
-													Type:         schema.TypeString,
-													Required:     true,
-													ValidateFunc: resourceASConfigurationValidateIpType,
+													Type:     schema.TypeString,
+													Required: true,
+													ValidateFunc: validation.StringInSlice([]string{
+														"5_bgp", "5_mailbgp",
+													}, false),
 												},
 												"bandwidth": {
 													Type:     schema.TypeList,
@@ -143,17 +151,21 @@ func resourceASConfiguration() *schema.Resource {
 															"size": {
 																Type:         schema.TypeInt,
 																Required:     true,
-																ValidateFunc: resourceASConfigurationValidateEipBandWidthSize,
+																ValidateFunc: validation.IntBetween(1, 500),
 															},
 															"share_type": {
-																Type:         schema.TypeString,
-																Required:     true,
-																ValidateFunc: resourceASConfigurationValidateShareType,
+																Type:     schema.TypeString,
+																Required: true,
+																ValidateFunc: validation.StringInSlice([]string{
+																	"PER",
+																}, false),
 															},
 															"charging_mode": {
-																Type:         schema.TypeString,
-																Required:     true,
-																ValidateFunc: resourceASConfigurationValidateChargeMode,
+																Type:     schema.TypeString,
+																Required: true,
+																ValidateFunc: validation.StringInSlice([]string{
+																	"traffic",
+																}, false),
 															},
 														},
 													},
@@ -176,12 +188,10 @@ func resourceASConfiguration() *schema.Resource {
 }
 
 func getDefaultFlavor() string {
-	flavorId := os.Getenv("OS_FLAVOR_ID")
-
-	if flavorId != "" {
-		return flavorId
+	flavorID := os.Getenv("OS_FLAVOR_ID")
+	if flavorID != "" {
+		return flavorID
 	}
-
 	return ""
 }
 
@@ -195,12 +205,12 @@ func getDisk(diskMeta []interface{}) ([]configurations.DiskOpts, error) {
 		diskType := disk["disk_type"].(string)
 		if diskType == "SYS" {
 			if size < 40 || size > 32768 {
-				return diskOptsList, fmt.Errorf("For system disk size should be [40, 32768]")
+				return diskOptsList, fmt.Errorf("for system disk size should be [40, 32768]")
 			}
 		}
 		if diskType == "DATA" {
 			if size < 10 || size > 32768 {
-				return diskOptsList, fmt.Errorf("For data disk size should be [10, 32768]")
+				return diskOptsList, fmt.Errorf("for data disk size should be [10, 32768]")
 			}
 		}
 		diskOpts := configurations.DiskOpts{
@@ -257,11 +267,11 @@ func getPublicIps(publicIpMeta map[string]interface{}) configurations.PublicIpOp
 	return publicIpOpts
 }
 
-func getInstanceConfig(configDataMap map[string]interface{}) (configurations.InstanceConfigOpts, error) {
+func getInstanceConfig(configDataMap map[string]interface{}) (*configurations.InstanceConfigOpts, error) {
 	disksData := configDataMap["disk"].([]interface{})
 	disks, err := getDisk(disksData)
 	if err != nil {
-		return configurations.InstanceConfigOpts{}, fmt.Errorf("Error happened when validating disk size: %s", err)
+		return nil, fmt.Errorf("error happened when validating disk size: %s", err)
 	}
 	log.Printf("[DEBUG] get disks: %#v", disks)
 
@@ -269,7 +279,7 @@ func getInstanceConfig(configDataMap map[string]interface{}) (configurations.Ins
 	personalities := getPersonality(personalityData)
 	log.Printf("[DEBUG] get personality: %#v", personalities)
 
-	instanceConfigOpts := configurations.InstanceConfigOpts{
+	instanceConfigOpts := &configurations.InstanceConfigOpts{
 		ID:          configDataMap["instance_id"].(string),
 		FlavorRef:   configDataMap["flavor"].(string),
 		ImageRef:    configDataMap["image"].(string),
@@ -290,174 +300,120 @@ func getInstanceConfig(configDataMap map[string]interface{}) (configurations.Ins
 		log.Printf("[DEBUG] get publicIps: %#v", publicIps)
 	}
 	log.Printf("[DEBUG] get instanceConfig: %#v", instanceConfigOpts)
+
 	return instanceConfigOpts, nil
 }
 
 func resourceASConfigurationCreate(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*Config)
-	asClient, err := config.autoscalingV1Client(GetRegion(d, config))
+	client, err := config.autoscalingV1Client(GetRegion(d, config))
 	if err != nil {
-		return fmt.Errorf("Error creating OpenTelekomCloud autoscaling client: %s", err)
+		return fmt.Errorf("error creating OpenTelekomCloud AutoScaling client: %s", err)
 	}
-	log.Printf("[DEBUG] asClient: %#v", asClient)
+
 	configDataMap := d.Get("instance_config").([]interface{})[0].(map[string]interface{})
 	log.Printf("[DEBUG] instance_config is: %#v", configDataMap)
-	instanceConfig, err1 := getInstanceConfig(configDataMap)
-	if err1 != nil {
-		return fmt.Errorf("Error when getting instance_config info: %s", err1)
+	instanceConfig, err := getInstanceConfig(configDataMap)
+	if err != nil {
+		return fmt.Errorf("error when getting instance_config info: %s", err)
 	}
 	createOpts := configurations.CreateOpts{
 		Name:           d.Get("scaling_configuration_name").(string),
-		InstanceConfig: instanceConfig,
+		InstanceConfig: *instanceConfig,
 	}
 
 	log.Printf("[DEBUG] Create AS configuration Options: %#v", createOpts)
-	asConfigId, err := configurations.Create(asClient, createOpts).Extract()
+	asConfigID, err := configurations.Create(client, createOpts).Extract()
 	if err != nil {
-		return fmt.Errorf("Error creating ASConfiguration: %s", err)
+		return fmt.Errorf("error creating ASConfiguration: %s", err)
 	}
-	log.Printf("[DEBUG] Create AS Configuration Options: %#v", createOpts)
-	d.SetId(asConfigId)
-	log.Printf("[DEBUG] Create AS Configuration %q Success!", asConfigId)
+	d.SetId(asConfigID)
+	log.Printf("[DEBUG] Create AS Configuration %q Success!", asConfigID)
 	return resourceASConfigurationRead(d, meta)
 }
 
 func resourceASConfigurationRead(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*Config)
-	asClient, err := config.autoscalingV1Client(GetRegion(d, config))
+	client, err := config.autoscalingV1Client(GetRegion(d, config))
 	if err != nil {
-		return fmt.Errorf("Error creating OpenTelekomCloud autoscaling client: %s", err)
+		return fmt.Errorf("error creating OpenTelekomCloud AutoScaling client: %s", err)
 	}
 
-	asConfig, err := configurations.Get(asClient, d.Id()).Extract()
+	asConfig, err := configurations.Get(client, d.Id()).Extract()
 	if err != nil {
 		return CheckDeleted(d, err, "AS Configuration")
 	}
 
 	log.Printf("[DEBUG] Retrieved ASConfiguration %q: %+v", d.Id(), asConfig)
 
+	mErr := multierror.Append(nil,
+		d.Set("region", GetRegion(d, config)),
+		d.Set("scaling_configuration_name", asConfig.Name),
+	)
+
+	instanceConfig := d.Get("instance_config").([]interface{})
+	instanceConfigInfo := make(map[string]interface{})
+	if len(instanceConfig) != 0 {
+		instanceConfigInfo = instanceConfig[0].(map[string]interface{})
+	}
+	instanceConfigInfo["instance_id"] = asConfig.InstanceConfig.InstanceID
+	instanceConfigInfo["flavor"] = asConfig.InstanceConfig.FlavorRef
+	instanceConfigInfo["image"] = asConfig.InstanceConfig.ImageRef
+	instanceConfigInfo["key_name"] = asConfig.InstanceConfig.SSHKey
+	instanceConfigInfo["user_data"] = asConfig.InstanceConfig.UserData
+	instanceConfigInfo["disk"] = asConfig.InstanceConfig.Disk               // TODO: Check
+	instanceConfigInfo["personality"] = asConfig.InstanceConfig.Personality // TODO: Check
+	instanceConfigInfo["public_ip"] = asConfig.InstanceConfig.PublicIp
+	instanceConfigInfo["metadata"] = asConfig.InstanceConfig.Metadata
+	instanceConfigList := []interface{}{instanceConfigInfo}
+
+	if err = d.Set("instance_config", instanceConfigList); err != nil {
+		return err
+	}
+
+	if mErr.ErrorOrNil() != nil {
+		return mErr
+	}
+
 	return nil
 }
 
 func resourceASConfigurationDelete(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*Config)
-	asClient, err := config.autoscalingV1Client(GetRegion(d, config))
+	client, err := config.autoscalingV1Client(GetRegion(d, config))
 	if err != nil {
-		return fmt.Errorf("Error creating OpenTelekomCloud autoscaling client: %s", err)
+		return fmt.Errorf("error creating OpenTelekomCloud AutoScaling client: %s", err)
 	}
-	groups, err1 := getASGroupsByConfiguration(asClient, d.Id())
-	if err1 != nil {
-		return fmt.Errorf("Error getting AS groups by configuration ID %q: %s", d.Id(), err1)
+
+	asConfigGroups, err := getASGroupsByConfiguration(client, d.Id())
+	if err != nil {
+		return fmt.Errorf("error getting AS groups by configuration ID %q: %s", d.Id(), err)
 	}
-	if len(groups) > 0 {
-		var groupIds []string
-		for _, group := range groups {
-			groupIds = append(groupIds, group.ID)
+	if len(asConfigGroups) > 0 {
+		var groupIDs []string
+		for _, group := range asConfigGroups {
+			groupIDs = append(groupIDs, group.ID)
 		}
-		return fmt.Errorf("Can not delete the configuration %q, it is used by AS groups %s.", d.Id(), groupIds)
+		return fmt.Errorf("can not delete the configuration %q, it is used by AS groups %s", d.Id(), groupIDs)
 	}
+
 	log.Printf("[DEBUG] Begin to delete AS configuration %q", d.Id())
-	if delErr := configurations.Delete(asClient, d.Id()).ExtractErr(); delErr != nil {
-		return fmt.Errorf("Error deleting AS configuration: %s", delErr)
+	if err := configurations.Delete(client, d.Id()).ExtractErr(); err != nil {
+		return fmt.Errorf("error deleting AS configuration: %s", err)
 	}
 
 	return nil
 }
 
-func getASGroupsByConfiguration(asClient *golangsdk.ServiceClient, configurationID string) ([]groups.Group, error) {
-	var gs []groups.Group
+func getASGroupsByConfiguration(client *golangsdk.ServiceClient, configID string) ([]groups.Group, error) {
+	var asGroups []groups.Group
 	listOpts := groups.ListOpts{
-		ConfigurationID: configurationID,
+		ConfigurationID: configID,
 	}
-	page, err := groups.List(asClient, listOpts).AllPages()
+	page, err := groups.List(client, listOpts).AllPages()
 	if err != nil {
-		return gs, fmt.Errorf("Error getting ASGroups by configuration %q: %s", configurationID, err)
+		return asGroups, fmt.Errorf("error getting ASGroups by configuration %q: %s", configID, err)
 	}
-	gs, err = page.(groups.GroupPage).Extract()
-	return gs, err
-}
-
-var BandWidthChargeMode = [1]string{"traffic"}
-
-func resourceASConfigurationValidateChargeMode(v interface{}, k string) (ws []string, errors []error) {
-	value := v.(string)
-	for i := range BandWidthChargeMode {
-		if value == BandWidthChargeMode[i] {
-			return
-		}
-	}
-	errors = append(errors, fmt.Errorf("%q must be one of %v", k, BandWidthChargeMode))
-	return
-}
-
-var BandWidthShareType = [1]string{"PER"}
-
-func resourceASConfigurationValidateShareType(v interface{}, k string) (ws []string, errors []error) {
-	value := v.(string)
-	for i := range BandWidthShareType {
-		if value == BandWidthShareType[i] {
-			return
-		}
-	}
-	errors = append(errors, fmt.Errorf("%q must be one of %v", k, BandWidthShareType))
-	return
-}
-
-func resourceASConfigurationValidateEipBandWidthSize(v interface{}, k string) (ws []string, errors []error) {
-	value := v.(int)
-	if 1 <= value && value <= 300 {
-		return
-	}
-	errors = append(errors, fmt.Errorf("%q must be [1, 300], but it is %d", k, value))
-	return
-}
-
-var IpTypes = [1]string{"5_bgp"}
-
-func resourceASConfigurationValidateIpType(v interface{}, k string) (ws []string, errors []error) {
-	value := v.(string)
-	for i := range IpTypes {
-		if value == IpTypes[i] {
-			return
-		}
-	}
-	errors = append(errors, fmt.Errorf("%q must be one of %v", k, IpTypes))
-	return
-}
-
-var DiskTypes = [2]string{"DATA", "SYS"}
-
-func resourceASConfigurationValidateDiskType(v interface{}, k string) (ws []string, errors []error) {
-	value := v.(string)
-	for i := range DiskTypes {
-		if value == DiskTypes[i] {
-			return
-		}
-	}
-	errors = append(errors, fmt.Errorf("%q must be one of %v", k, DiskTypes))
-	return
-}
-
-var VolumeTypes = [2]string{"SATA", "SSD"}
-
-func resourceASConfigurationValidateVolumeType(v interface{}, k string) (ws []string, errors []error) {
-	value := v.(string)
-	for i := range VolumeTypes {
-		if value == VolumeTypes[i] {
-			return
-		}
-	}
-	errors = append(errors, fmt.Errorf("%q must be one of %v", k, VolumeTypes))
-	return
-}
-
-func resourceASConfigurationValidateName(v interface{}, k string) (ws []string, errors []error) {
-	value := v.(string)
-	if len(value) > 64 || len(value) < 1 {
-		errors = append(errors, fmt.Errorf("%q must contain more than 1 and less than 64 characters", k))
-	}
-	if !regexp.MustCompile(`^[0-9a-zA-Z-_]+$`).MatchString(value) {
-		errors = append(errors, fmt.Errorf("only alphanumeric characters, hyphens, and underscores allowed in %q", k))
-	}
-	return
+	asGroups, err = page.(groups.GroupPage).Extract()
+	return asGroups, err
 }
