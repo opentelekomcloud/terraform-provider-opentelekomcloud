@@ -342,6 +342,7 @@ func resourceComputeInstanceV2() *schema.Resource {
 						},
 					},
 				},
+				Set:        resourceComputeInstancePersonalityHash,
 				Deprecated: "This block will be removed in future releases, please don't use it",
 			},
 			"stop_before_destroy": {
@@ -1125,6 +1126,14 @@ func setImageInformation(computeClient *golangsdk.ServiceClient, server *servers
 	}
 
 	return nil
+}
+
+func resourceComputeInstancePersonalityHash(v interface{}) int {
+	var buf bytes.Buffer
+	m := v.(map[string]interface{})
+	buf.WriteString(fmt.Sprintf("%s-", m["file"].(string)))
+
+	return hashcode.String(buf.String())
 }
 
 func getFlavorID(client *golangsdk.ServiceClient, d *schema.ResourceData) (string, error) {
