@@ -7,9 +7,9 @@ import (
 	"log"
 	"time"
 
+	"github.com/hashicorp/go-multierror"
 	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
-	"github.com/hashicorp/terraform-plugin-sdk/helper/validation"
 	"github.com/opentelekomcloud/gophertelekomcloud"
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/compute/v2/extensions/secgroups"
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/compute/v2/servers"
@@ -33,6 +33,12 @@ func resourceEcsInstanceV1() *schema.Resource {
 			Update: schema.DefaultTimeout(30 * time.Minute),
 			Delete: schema.DefaultTimeout(30 * time.Minute),
 		},
+
+		CustomizeDiff: multipleCustomizeDiffs(
+			validateVPC("vpc_id"),
+			validateVolumeType("system_disk_type"),
+			validateVolumeType("data_disks.*.type"),
+		),
 
 		Schema: map[string]*schema.Schema{
 			"name": {
@@ -111,9 +117,6 @@ func resourceEcsInstanceV1() *schema.Resource {
 				Type:     schema.TypeString,
 				Optional: true,
 				ForceNew: true,
-				ValidateFunc: validation.StringInSlice([]string{
-					"SATA", "SAS", "SSD", "co-p1", "uh-l1",
-				}, true),
 			},
 			"system_disk_size": {
 				Type:     schema.TypeInt,
@@ -261,23 +264,28 @@ func resourceEcsInstanceV1Read(d *schema.ResourceData, meta interface{}) error {
 
 	log.Printf("[DEBUG] Retrieved Server %s: %+v", d.Id(), server)
 
-	d.Set("name", server.Name)
-	d.Set("image_id", server.Image.ID)
-	d.Set("flavor", server.Flavor.ID)
-	d.Set("password", d.Get("password"))
-	d.Set("key_name", server.KeyName)
-	d.Set("vpc_id", server.Metadata.VpcID)
-	d.Set("availability_zone", server.AvailabilityZone)
-
+	mErr := multierror.Append(
+		d.Set("name", server.Name),
+		d.Set("image_id", server.Image.ID),
+		d.Set("flavor", server.Flavor.ID),
+		d.Set("password", d.Get("password")),
+		d.Set("key_name", server.KeyName),
+		d.Set("vpc_id", server.Metadata.VpcID),
+		d.Set("availability_zone", server.AvailabilityZone),
+	)
 	var secGrpNames []string
 	for _, sg := range server.SecurityGroups {
 		secGrpNames = append(secGrpNames, sg.Name)
 	}
-	d.Set("security_groups", secGrpNames)
+	mErr = multierror.Append(mErr,
+		d.Set("security_groups", secGrpNames),
+	)
 
 	// Get the instance network and address information
 	nics := flattenInstanceNicsV1(d, meta, server.Addresses)
-	d.Set("nics", nics)
+	mErr = multierror.Append(mErr,
+		d.Set("nics", nics),
+	)
 
 	// Set instance tags
 	tagList, err := tags.Get(computeClient, d.Id()).Extract()
@@ -297,7 +305,12 @@ func resourceEcsInstanceV1Read(d *schema.ResourceData, meta interface{}) error {
 	if err != nil && !isResourceNotFound(err) {
 		return fmt.Errorf("error reading auto recovery of instance:%s, err=%s", d.Id(), err)
 	}
-	d.Set("auto_recovery", ar)
+	mErr = multierror.Append(mErr,
+		d.Set("auto_recovery", ar),
+	)
+	if err := mErr.ErrorOrNil(); err != nil {
+		return fmt.Errorf("error setting ECS attrbutes: %s", err)
+	}
 
 	return nil
 }
