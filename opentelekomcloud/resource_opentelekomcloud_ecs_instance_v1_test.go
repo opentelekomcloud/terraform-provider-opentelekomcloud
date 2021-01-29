@@ -145,7 +145,6 @@ resource "opentelekomcloud_ecs_instance_v1" "instance_1" {
   }
 
   password          = "Password@123"
-  security_groups   = ["default"]
   availability_zone = "%s"
   auto_recovery     = true
 
@@ -199,7 +198,6 @@ resource "opentelekomcloud_ecs_instance_v1" "instance_1" {
   system_disk_type = "uh-l1"
 
   password          = "Password@123"
-  security_groups   = ["default"]
   availability_zone = "eu-de-03"
   auto_recovery     = true
 
@@ -224,7 +222,6 @@ resource "opentelekomcloud_ecs_instance_v1" "instance_1" {
   system_disk_type = "asdfasd"
 
   password          = "Password@123"
-  security_groups   = ["default"]
   availability_zone = "eu-de-03"
   auto_recovery     = true
 
@@ -265,6 +262,13 @@ resource "opentelekomcloud_vpc_v1" "vpc" {
   name = "vpc-ecs-test"
 }
 
+resource "opentelekomcloud_vpc_subnet_v1" "subnet" {
+  cidr       = cidrsubnet(opentelekomcloud_vpc_v1.vpc.cidr, 8, 0)
+  gateway_ip = cidrhost(opentelekomcloud_vpc_v1.vpc.cidr, 1)
+  name       = "subnet-ecs-test"
+  vpc_id     = opentelekomcloud_vpc_v1.vpc.id
+}
+
 resource "opentelekomcloud_ecs_instance_v1" "instance_1" {
   name     = "server_1"
   image_id = "%s"
@@ -272,7 +276,7 @@ resource "opentelekomcloud_ecs_instance_v1" "instance_1" {
   vpc_id   = opentelekomcloud_vpc_v1.vpc.id
 
   nics {
-    network_id = "%s"
+    network_id = opentelekomcloud_vpc_subnet_v1.subnet.id
   }
 
   system_disk_type = "SSD"
@@ -286,4 +290,4 @@ resource "opentelekomcloud_ecs_instance_v1" "instance_1" {
     key = "value"
   }
 }
-`, OS_IMAGE_ID, OS_NETWORK_ID)
+`, OS_IMAGE_ID)
