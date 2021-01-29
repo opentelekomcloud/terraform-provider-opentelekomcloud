@@ -343,7 +343,7 @@ func resourceComputeInstanceV2() *schema.Resource {
 					},
 				},
 				Set:        resourceComputeInstancePersonalityHash,
-				Deprecated: "This block will be removed in future releases. It doesn't work. Don't use it",
+				Deprecated: "Open Telekom Cloud API doesn't accept `personality`, please use `user_data` instead",
 			},
 			"stop_before_destroy": {
 				Type:     schema.TypeBool,
