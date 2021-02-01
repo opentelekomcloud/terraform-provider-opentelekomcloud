@@ -22,6 +22,8 @@ func resourceASConfiguration() *schema.Resource {
 		Update: nil,
 		Delete: resourceASConfigurationDelete,
 
+		CustomizeDiff: validateDiskSize(),
+
 		Schema: map[string]*schema.Schema{
 			"region": {
 				Type:     schema.TypeString,
@@ -80,9 +82,8 @@ func resourceASConfiguration() *schema.Resource {
 							Elem: &schema.Resource{
 								Schema: map[string]*schema.Schema{
 									"size": {
-										Type:         schema.TypeInt,
-										Required:     true,
-										ValidateFunc: validation.IntBetween(1, 32768),
+										Type:     schema.TypeInt,
+										Required: true,
 									},
 									"volume_type": {
 										Type:     schema.TypeString,
@@ -203,16 +204,6 @@ func getDisk(diskMeta []interface{}) (*[]configurations.DiskOpts, error) {
 		size := disk["size"].(int)
 		volumeType := disk["volume_type"].(string)
 		diskType := disk["disk_type"].(string)
-		if diskType == "SYS" {
-			if size < 1 || size > 32768 {
-				return nil, fmt.Errorf("for system disk size should be [1, 32768]")
-			}
-		}
-		if diskType == "DATA" {
-			if size < 10 || size > 32768 {
-				return nil, fmt.Errorf("for data disk size should be [10, 32768]")
-			}
-		}
 		diskOpts := configurations.DiskOpts{
 			Size:       size,
 			VolumeType: volumeType,
@@ -408,4 +399,32 @@ func getASGroupsByConfiguration(client *golangsdk.ServiceClient, configID string
 	}
 	asGroups, err = page.(groups.GroupPage).Extract()
 	return asGroups, err
+}
+
+func validateDiskSize() schema.CustomizeDiffFunc {
+	return func(d *schema.ResourceDiff, meta interface{}) error {
+		instanceConfigData := d.Get("instance_config").([]interface{})[0].(map[string]interface{})
+		disksData := instanceConfigData["disk"].([]interface{})
+		mErr := &multierror.Error{}
+		for _, v := range disksData {
+			disk := v.(map[string]interface{})
+			size := disk["size"].(int)
+			diskType := disk["disk_type"].(string)
+			if diskType == "SYS" {
+				if size < 40 || size > 32768 {
+					mErr = multierror.Append(mErr, fmt.Errorf("for system disk size should be [40, 32768]"))
+				}
+			}
+			if diskType == "DATA" {
+				if size < 10 || size > 32768 {
+					mErr = multierror.Append(mErr, fmt.Errorf("for data disk size should be [10, 32768]"))
+				}
+			}
+		}
+		if mErr.ErrorOrNil() != nil {
+			return mErr
+		}
+
+		return nil
+	}
 }

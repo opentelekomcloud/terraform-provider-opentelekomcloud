@@ -2,6 +2,7 @@ package opentelekomcloud
 
 import (
 	"fmt"
+	"regexp"
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
@@ -48,6 +49,21 @@ func TestAccASV1Configuration_publicIP(t *testing.T) {
 					resource.TestCheckResourceAttr(
 						"opentelekomcloud_as_configuration_v1.as_config", "instance_config.0.key_name", OS_KEYPAIR_NAME),
 				),
+			},
+		},
+	})
+}
+
+func TestAccASV1Configuration_invalidDiskSize(t *testing.T) {
+	resource.Test(t, resource.TestCase{
+		PreCheck:     func() { testAccAsConfigPreCheck(t) },
+		Providers:    testAccProviders,
+		CheckDestroy: testAccCheckASV1ConfigurationDestroy,
+		Steps: []resource.TestStep{
+			{
+				Config:      testAccASV1Configuration_invalidDiskSize,
+				PlanOnly:    true,
+				ExpectError: regexp.MustCompile(`for system disk size should be.+`),
 			},
 		},
 	})
@@ -156,6 +172,26 @@ resource "opentelekomcloud_as_configuration_v1" "as_config"{
         }
       }
     }
+  }
+}
+`, OS_IMAGE_ID, OS_KEYPAIR_NAME)
+
+var testAccASV1Configuration_invalidDiskSize = fmt.Sprintf(`
+resource "opentelekomcloud_as_configuration_v1" "as_config"{
+  scaling_configuration_name = "as_config"
+  instance_config {
+    image = "%s"
+    disk {
+      size        = 10
+      volume_type = "uh-l1"
+      disk_type   = "SYS"
+    }
+    disk {
+      size        = 5
+      volume_type = "co-p1"
+      disk_type   = "DATA"
+    }
+    key_name = "%s"
   }
 }
 `, OS_IMAGE_ID, OS_KEYPAIR_NAME)
