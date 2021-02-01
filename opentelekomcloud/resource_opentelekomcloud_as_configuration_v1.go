@@ -204,8 +204,8 @@ func getDisk(diskMeta []interface{}) (*[]configurations.DiskOpts, error) {
 		volumeType := disk["volume_type"].(string)
 		diskType := disk["disk_type"].(string)
 		if diskType == "SYS" {
-			if size < 1 || size > 1024 {
-				return nil, fmt.Errorf("for system disk size should be [1, 1024]")
+			if size < 1 || size > 32768 {
+				return nil, fmt.Errorf("for system disk size should be [1, 32768]")
 			}
 		}
 		if diskType == "DATA" {
@@ -357,9 +357,6 @@ func resourceASConfigurationRead(d *schema.ResourceData, meta interface{}) error
 	instanceConfigInfo["image"] = asConfig.InstanceConfig.ImageRef
 	instanceConfigInfo["key_name"] = asConfig.InstanceConfig.SSHKey
 	instanceConfigInfo["user_data"] = asConfig.InstanceConfig.UserData
-	// instanceConfigInfo["disk"] = asConfig.InstanceConfig.Disk               // TODO: Check
-	// instanceConfigInfo["personality"] = asConfig.InstanceConfig.Personality // TODO: Check
-	instanceConfigInfo["public_ip"] = asConfig.InstanceConfig.PublicIp
 	instanceConfigInfo["metadata"] = asConfig.InstanceConfig.Metadata
 	instanceConfigList := []interface{}{instanceConfigInfo}
 
