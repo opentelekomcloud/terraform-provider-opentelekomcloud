@@ -139,9 +139,8 @@ The `instance_config` block supports:
 
 The `disk` block supports:
 
-* `size` - (Required) The disk size. The unit is GB. The system and data disk size ranges from 10 to 32768.
-  System disk must be greater than or equal to the minimum size (**min_disk** value) of the system disk
-  specified in the image.
+* `size` - (Required) The disk size. The unit is GB. The system disk size ranges from 40 to 32768,
+  and the data disk size ranges from 10 to 32768.
 
 * `volume_type` - (Required) Specifies the ECS system disk type. The disk type must match the available disk type.
   * `SATA`: common I/O disk type
