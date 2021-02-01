@@ -41,6 +41,12 @@ func TestAccASV1Configuration_publicIP(t *testing.T) {
 				Config: testAccASV1Configuration_publicIP,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckASV1ConfigurationExists("opentelekomcloud_as_configuration_v1.as_config", &asConfig),
+					resource.TestCheckResourceAttr(
+						"opentelekomcloud_as_configuration_v1.as_config", "scaling_configuration_name", "as_config"),
+					resource.TestCheckResourceAttr(
+						"opentelekomcloud_as_configuration_v1.as_config", "instance_config.0.image", OS_IMAGE_ID),
+					resource.TestCheckResourceAttr(
+						"opentelekomcloud_as_configuration_v1.as_config", "instance_config.0.key_name", OS_KEYPAIR_NAME),
 				),
 			},
 		},
