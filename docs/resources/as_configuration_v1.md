@@ -181,3 +181,25 @@ The `bandwidth` block supports:
 * `share_type` - (Required) The bandwidth sharing type. The system only supports `PER`.
 
 * `charging_mode` - (Required) The bandwidth charging mode. The system only supports `traffic`.
+
+## Attributes Reference
+
+All above argument parameters can be exported as attribute parameters along with attribute reference.
+
+* `id` - Specifies the AS configuration ID.
+
+* `scaling_configuration_name` - Specifies the AS configuration name.
+
+* `instance_config` - Specifies the information about instance configurations.
+
+The `instance_config` block supports:
+
+* `flavor` - Specifies the ECS flavor ID.
+
+* `image` - Specifies the image ID.
+
+* `key_name` - See Argument Reference above.
+
+* `user_data` - See Argument Reference above.
+
+* `region` - See Argument Reference above.

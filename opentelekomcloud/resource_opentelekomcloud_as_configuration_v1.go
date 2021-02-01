@@ -357,7 +357,6 @@ func resourceASConfigurationRead(d *schema.ResourceData, meta interface{}) error
 	instanceConfigInfo["image"] = asConfig.InstanceConfig.ImageRef
 	instanceConfigInfo["key_name"] = asConfig.InstanceConfig.SSHKey
 	instanceConfigInfo["user_data"] = asConfig.InstanceConfig.UserData
-	instanceConfigInfo["metadata"] = asConfig.InstanceConfig.Metadata
 	instanceConfigList := []interface{}{instanceConfigInfo}
 
 	if err = d.Set("instance_config", instanceConfigList); err != nil {
