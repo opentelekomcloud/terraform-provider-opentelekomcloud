@@ -96,7 +96,7 @@ resource "opentelekomcloud_as_configuration_v1" "hth_as_config"{
       volume_type = "SATA"
       disk_type   = "DATA"
     }
-    key_name = %s
+    key_name = "%s"
   }
 }
 `, OS_IMAGE_ID, OS_KEYPAIR_NAME)

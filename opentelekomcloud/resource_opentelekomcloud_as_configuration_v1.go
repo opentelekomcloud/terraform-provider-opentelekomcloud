@@ -22,8 +22,6 @@ func resourceASConfiguration() *schema.Resource {
 		Update: nil,
 		Delete: resourceASConfigurationDelete,
 
-		CustomizeDiff: validateVolumeType("instance_config.*.disk.*.volume_type"),
-
 		Schema: map[string]*schema.Schema{
 			"region": {
 				Type:     schema.TypeString,
@@ -84,13 +82,13 @@ func resourceASConfiguration() *schema.Resource {
 									"size": {
 										Type:         schema.TypeInt,
 										Required:     true,
-										ValidateFunc: validation.IntBetween(10, 32768),
+										ValidateFunc: validation.IntBetween(1, 32768),
 									},
 									"volume_type": {
 										Type:     schema.TypeString,
 										Required: true,
 										ValidateFunc: validation.StringInSlice([]string{
-											"SATA", "SSD",
+											"SATA", "SAS", "SSD", "co-p1", "uh-l1",
 										}, false),
 									},
 									"disk_type": {
@@ -197,7 +195,7 @@ func getDefaultFlavor() string {
 	return ""
 }
 
-func getDisk(diskMeta []interface{}) ([]configurations.DiskOpts, error) {
+func getDisk(diskMeta []interface{}) (*[]configurations.DiskOpts, error) {
 	var diskOptsList []configurations.DiskOpts
 
 	for _, v := range diskMeta {
@@ -206,13 +204,13 @@ func getDisk(diskMeta []interface{}) ([]configurations.DiskOpts, error) {
 		volumeType := disk["volume_type"].(string)
 		diskType := disk["disk_type"].(string)
 		if diskType == "SYS" {
-			if size < 40 || size > 32768 {
-				return diskOptsList, fmt.Errorf("for system disk size should be [40, 32768]")
+			if size < 1 || size > 1024 {
+				return nil, fmt.Errorf("for system disk size should be [1, 1024]")
 			}
 		}
 		if diskType == "DATA" {
 			if size < 10 || size > 32768 {
-				return diskOptsList, fmt.Errorf("for data disk size should be [10, 32768]")
+				return nil, fmt.Errorf("for data disk size should be [10, 32768]")
 			}
 		}
 		diskOpts := configurations.DiskOpts{
@@ -220,17 +218,17 @@ func getDisk(diskMeta []interface{}) ([]configurations.DiskOpts, error) {
 			VolumeType: volumeType,
 			DiskType:   diskType,
 		}
-		kmsId := disk["kms_id"].(string)
-		if kmsId != "" {
-			m := make(map[string]string)
-			m["__system__cmkid"] = kmsId
-			m["__system__encrypted"] = "1"
-			diskOpts.Metadata = m
+		kmsID := disk["kms_id"].(string)
+		if kmsID != "" {
+			meta := make(map[string]string)
+			meta["__system__cmkid"] = kmsID
+			meta["__system__encrypted"] = "1"
+			diskOpts.Metadata = meta
 		}
 		diskOptsList = append(diskOptsList, diskOpts)
 	}
 
-	return diskOptsList, nil
+	return &diskOptsList, nil
 }
 
 func getPersonality(personalityMeta []interface{}) []configurations.PersonalityOpts {
@@ -275,11 +273,9 @@ func getInstanceConfig(configDataMap map[string]interface{}) (*configurations.In
 	if err != nil {
 		return nil, fmt.Errorf("error happened when validating disk size: %s", err)
 	}
-	log.Printf("[DEBUG] get disks: %#v", disks)
 
 	personalityData := configDataMap["personality"].([]interface{})
 	personalities := getPersonality(personalityData)
-	log.Printf("[DEBUG] get personality: %#v", personalities)
 
 	instanceConfigOpts := &configurations.InstanceConfigOpts{
 		ID:          configDataMap["instance_id"].(string),
@@ -287,19 +283,17 @@ func getInstanceConfig(configDataMap map[string]interface{}) (*configurations.In
 		ImageRef:    configDataMap["image"].(string),
 		SSHKey:      configDataMap["key_name"].(string),
 		UserData:    []byte(configDataMap["user_data"].(string)),
-		Disk:        disks,
+		Disk:        *disks,
 		Personality: personalities,
 		Metadata:    configDataMap["metadata"].(map[string]interface{}),
 	}
-	log.Printf("[DEBUG] instanceConfigOpts: %#v", instanceConfigOpts)
+
 	pubicIpData := configDataMap["public_ip"].([]interface{})
-	log.Printf("[DEBUG] pubicIpData: %#v", pubicIpData)
 	// user specify public_ip
 	if len(pubicIpData) == 1 {
 		publicIpMap := pubicIpData[0].(map[string]interface{})
 		publicIps := getPublicIps(publicIpMap)
 		instanceConfigOpts.PubicIp = publicIps
-		log.Printf("[DEBUG] get publicIps: %#v", publicIps)
 	}
 	log.Printf("[DEBUG] get instanceConfig: %#v", instanceConfigOpts)
 
@@ -363,8 +357,8 @@ func resourceASConfigurationRead(d *schema.ResourceData, meta interface{}) error
 	instanceConfigInfo["image"] = asConfig.InstanceConfig.ImageRef
 	instanceConfigInfo["key_name"] = asConfig.InstanceConfig.SSHKey
 	instanceConfigInfo["user_data"] = asConfig.InstanceConfig.UserData
-	instanceConfigInfo["disk"] = asConfig.InstanceConfig.Disk               // TODO: Check
-	instanceConfigInfo["personality"] = asConfig.InstanceConfig.Personality // TODO: Check
+	// instanceConfigInfo["disk"] = asConfig.InstanceConfig.Disk               // TODO: Check
+	// instanceConfigInfo["personality"] = asConfig.InstanceConfig.Personality // TODO: Check
 	instanceConfigInfo["public_ip"] = asConfig.InstanceConfig.PublicIp
 	instanceConfigInfo["metadata"] = asConfig.InstanceConfig.Metadata
 	instanceConfigList := []interface{}{instanceConfigInfo}
