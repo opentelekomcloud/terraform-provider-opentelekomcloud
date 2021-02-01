@@ -99,6 +99,9 @@ resource "opentelekomcloud_as_configuration_v1" "my_as_config" {
 
 The following arguments are supported:
 
+* `region` - (Optional) The region in which to obtain the V1 AutoScaling client. If omitted, the
+  `region` argument of the provider is used. Changing this creates a new group.
+
 * `scaling_configuration_name` - (Required) The name of the AS configuration. The name can contain letters,
   digits, underscores(_), and hyphens(-), and cannot exceed 64 characters.
 
