@@ -109,7 +109,7 @@ The `instance_config` block supports:
 
 * `instance_id` - (Optional) When using the existing instance specifications as the template to
   create AS configurations, specify this argument. In this case, flavor, image,
-  and disk arguments do not take effect. If the instance_id argument is not specified,
+  and disk arguments do not take effect. If the `instance_id` argument is not specified,
   flavor, image, and disk arguments are mandatory.
 
 * `flavor` - (Optional) The flavor ID.
@@ -136,9 +136,9 @@ The `instance_config` block supports:
 
 The `disk` block supports:
 
-* `size` - (Required) The disk size. The unit is GB. The system disk size ranges from 10 to 32768 and must be
-  greater than or equal to the minimum size (**min_disk** value) of the system disk specified in the image.
-  The data disk size ranges from 10 to 32768.
+* `size` - (Required) The disk size. The unit is GB. The system and data disk size ranges from 10 to 32768.
+  System disk must be greater than or equal to the minimum size (**min_disk** value) of the system disk
+  specified in the image.
 
 * `volume_type` - (Required) Specifies the ECS system disk type. The disk type must match the available disk type.
   * `SATA`: common I/O disk type
@@ -150,7 +150,7 @@ The `disk` block supports:
 ->For HANA, `HL1`, and `HL2` ECSs, use `co-p1` and `uh-l1` disks. For other ECSs, do not use `co-p1` or `uh-l1` disks.
 
 * `disk_type` - (Required) Whether the disk is a system disk or a data disk. Option `DATA` indicates
-  a data disk. option `SYS` indicates a system disk.
+  a data disk. Option `SYS` indicates a system disk.
 
 * `kms_id` - (Optional) The Encryption KMS ID of the data disk.
 
@@ -167,7 +167,7 @@ The `public_ip` block supports:
 
 The `eip` block supports:
 
-* `ip_type` - (Required) The IP address type. The system only supports `5_bgp` (indicates dynamic BGP).
+* `ip_type` - (Required) The IP address type. The system only supports `5_bgp` and `5_mailbgp`.
 
 * `bandwidth` - (Required) The bandwidth information. The structure is described below.
 
@@ -176,8 +176,7 @@ The `bandwidth` block supports:
 * `size` - (Required) The bandwidth (Mbit/s). The value range is 1 to 500.
 ->The specific range may vary depending on the configuration in each region. You can see the bandwidth range of
   each region on the management console. The minimum unit is 1 Mbit/s if the allowed bandwidth size ranges from
-  0 to 300 Mbit/s (with 300 Mbit/s included). The minimum unit is 50 Mbit/s if the allowed bandwidth size ranges
-  300 Mbit/s to 500 Mbit/s (with 500 Mbit/s included).
+  0 to 300 Mbit/s. The minimum unit is 50 Mbit/s if the allowed bandwidth size ranges 300 Mbit/s to 500 Mbit/s.
 
 * `share_type` - (Required) The bandwidth sharing type. The system only supports `PER`.
 
