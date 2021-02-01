@@ -22,6 +22,8 @@ func resourceASConfiguration() *schema.Resource {
 		Update: nil,
 		Delete: resourceASConfigurationDelete,
 
+		CustomizeDiff: validateVolumeType("instance_config.*.disk.*.volume_type"),
+
 		Schema: map[string]*schema.Schema{
 			"region": {
 				Type:     schema.TypeString,
