@@ -108,9 +108,9 @@ The following arguments are supported:
 The `instance_config` block supports:
 
 * `instance_id` - (Optional) When using the existing instance specifications as the template to
-  create AS configurations, specify this argument. In this case, flavor, image,
-  and disk arguments do not take effect. If the `instance_id` argument is not specified,
-  flavor, image, and disk arguments are mandatory.
+  create AS configurations, specify this argument. In this case, `flavor`, `image`,
+  and `disk` arguments do not take effect. If the `instance_id` argument is not specified,
+  `flavor`, `image`, and `disk` arguments are mandatory.
 
 * `flavor` - (Optional) The flavor ID.
 
@@ -149,8 +149,9 @@ The `disk` block supports:
 
 ->For HANA, `HL1`, and `HL2` ECSs, use `co-p1` and `uh-l1` disks. For other ECSs, do not use `co-p1` or `uh-l1` disks.
 
-* `disk_type` - (Required) Whether the disk is a system disk or a data disk. Option `DATA` indicates
-  a data disk. Option `SYS` indicates a system disk.
+* `disk_type` - (Required) Specifies a disk type. The options are as follows:
+  * `DATA`: indicates a data disk.
+  * `SYS`: indicates a system disk.
 
 * `kms_id` - (Optional) The Encryption KMS ID of the data disk.
 
