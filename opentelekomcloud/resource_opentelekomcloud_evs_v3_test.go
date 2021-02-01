@@ -2,6 +2,7 @@ package opentelekomcloud
 
 import (
 	"fmt"
+	"regexp"
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
@@ -100,11 +101,26 @@ func TestAccEvsStorageV3Volume_timeout(t *testing.T) {
 	})
 }
 
+func TestAccEvsStorageV3Volume_volumeType(t *testing.T) {
+	resource.Test(t, resource.TestCase{
+		PreCheck:     func() { testAccPreCheck(t) },
+		Providers:    testAccProviders,
+		CheckDestroy: testAccCheckEvsStorageV3VolumeDestroy,
+		Steps: []resource.TestStep{
+			{
+				Config:      testAccEvsStorageV3Volume_volumeType,
+				PlanOnly:    true,
+				ExpectError: regexp.MustCompile(`volume type .+ doesn't exist`),
+			},
+		},
+	})
+}
+
 func testAccCheckEvsStorageV3VolumeDestroy(s *terraform.State) error {
 	config := testAccProvider.Meta().(*Config)
 	blockStorageClient, err := config.blockStorageV3Client(OS_REGION_NAME)
 	if err != nil {
-		return fmt.Errorf("Error creating OpenTelekomCloud evs storage client: %s", err)
+		return fmt.Errorf("error creating OpenTelekomCloud evs storage client: %s", err)
 	}
 
 	for _, rs := range s.RootModule().Resources {
@@ -114,7 +130,7 @@ func testAccCheckEvsStorageV3VolumeDestroy(s *terraform.State) error {
 
 		_, err := volumes.Get(blockStorageClient, rs.Primary.ID).Extract()
 		if err == nil {
-			return fmt.Errorf("Volume still exists")
+			return fmt.Errorf("volume still exists")
 		}
 	}
 
@@ -125,17 +141,17 @@ func testAccCheckEvsStorageV3VolumeExists(n string, volume *volumes.Volume) reso
 	return func(s *terraform.State) error {
 		rs, ok := s.RootModule().Resources[n]
 		if !ok {
-			return fmt.Errorf("Not found: %s", n)
+			return fmt.Errorf("not found: %s", n)
 		}
 
 		if rs.Primary.ID == "" {
-			return fmt.Errorf("No ID is set")
+			return fmt.Errorf("no ID is set")
 		}
 
 		config := testAccProvider.Meta().(*Config)
 		blockStorageClient, err := config.blockStorageV3Client(OS_REGION_NAME)
 		if err != nil {
-			return fmt.Errorf("Error creating OpenTelekomCloud evs storage client: %s", err)
+			return fmt.Errorf("error creating OpenTelekomCloud evs storage client: %s", err)
 		}
 
 		found, err := volumes.Get(blockStorageClient, rs.Primary.ID).Extract()
@@ -144,7 +160,7 @@ func testAccCheckEvsStorageV3VolumeExists(n string, volume *volumes.Volume) reso
 		}
 
 		if found.ID != rs.Primary.ID {
-			return fmt.Errorf("Volume not found")
+			return fmt.Errorf("volume not found")
 		}
 
 		*volume = *found
@@ -157,17 +173,17 @@ func testAccCheckEvsStorageV3VolumeTags(n string, k string, v string) resource.T
 	return func(s *terraform.State) error {
 		rs, ok := s.RootModule().Resources[n]
 		if !ok {
-			return fmt.Errorf("Not found: %s", n)
+			return fmt.Errorf("not found: %s", n)
 		}
 
 		if rs.Primary.ID == "" {
-			return fmt.Errorf("No ID is set")
+			return fmt.Errorf("no ID is set")
 		}
 
 		config := testAccProvider.Meta().(*Config)
 		blockStorageClient, err := config.blockStorageV3Client(OS_REGION_NAME)
 		if err != nil {
-			return fmt.Errorf("Error creating OpenTelekomCloud block storage client: %s", err)
+			return fmt.Errorf("error creating OpenTelekomCloud block storage client: %s", err)
 		}
 
 		found, err := volumes.Get(blockStorageClient, rs.Primary.ID).Extract()
@@ -176,11 +192,11 @@ func testAccCheckEvsStorageV3VolumeTags(n string, k string, v string) resource.T
 		}
 
 		if found.ID != rs.Primary.ID {
-			return fmt.Errorf("Volume not found")
+			return fmt.Errorf("volume not found")
 		}
 
 		if found.Tags == nil {
-			return fmt.Errorf("No Tags")
+			return fmt.Errorf("no Tags")
 		}
 
 		for key, value := range found.Tags {
@@ -191,13 +207,14 @@ func testAccCheckEvsStorageV3VolumeTags(n string, k string, v string) resource.T
 			if v == value {
 				return nil
 			}
-			return fmt.Errorf("Bad value for %s: %s", k, value)
+			return fmt.Errorf("bad value for %s: %s", k, value)
 		}
-		return fmt.Errorf("Tag not found: %s", k)
+		return fmt.Errorf("tag not found: %s", k)
 	}
 }
 
-var testAccEvsStorageV3Volume_basic = fmt.Sprintf(`
+var (
+	testAccEvsStorageV3Volume_basic = fmt.Sprintf(`
 resource "opentelekomcloud_evs_volume_v3" "volume_1" {
   name = "volume_1"
   description = "first test volume"
@@ -206,8 +223,7 @@ resource "opentelekomcloud_evs_volume_v3" "volume_1" {
   size = 12
 }
 `, OS_AVAILABILITY_ZONE)
-
-var testAccEvsStorageV3Volume_update = fmt.Sprintf(`
+	testAccEvsStorageV3Volume_update = fmt.Sprintf(`
 resource "opentelekomcloud_evs_volume_v3" "volume_1" {
   name = "volume_1-updated"
   description = "first test volume"
@@ -216,8 +232,7 @@ resource "opentelekomcloud_evs_volume_v3" "volume_1" {
   size = 12
 }
 `, OS_AVAILABILITY_ZONE)
-
-var testAccEvsStorageV3Volume_tags = fmt.Sprintf(`
+	testAccEvsStorageV3Volume_tags = fmt.Sprintf(`
 resource "opentelekomcloud_evs_volume_v3" "volume_tags" {
   name = "volume_tags"
   description = "test volume with tags"
@@ -230,8 +245,7 @@ resource "opentelekomcloud_evs_volume_v3" "volume_tags" {
   size = 12
 }
 `, OS_AVAILABILITY_ZONE)
-
-var testAccEvsStorageV3Volume_tags_update = fmt.Sprintf(`
+	testAccEvsStorageV3Volume_tags_update = fmt.Sprintf(`
 resource "opentelekomcloud_evs_volume_v3" "volume_tags" {
   name = "volume_tags-updated"
   description = "test volume with tags"
@@ -244,8 +258,7 @@ resource "opentelekomcloud_evs_volume_v3" "volume_tags" {
   size = 12
 }
 `, OS_AVAILABILITY_ZONE)
-
-var testAccEvsStorageV3Volume_image = fmt.Sprintf(`
+	testAccEvsStorageV3Volume_image = fmt.Sprintf(`
 resource "opentelekomcloud_evs_volume_v3" "volume_1" {
   name = "volume_1"
   availability_zone = "%s"
@@ -254,8 +267,7 @@ resource "opentelekomcloud_evs_volume_v3" "volume_1" {
   image_id = "%s"
 }
 `, OS_AVAILABILITY_ZONE, OS_IMAGE_ID)
-
-var testAccEvsStorageV3Volume_timeout = fmt.Sprintf(`
+	testAccEvsStorageV3Volume_timeout = fmt.Sprintf(`
 resource "opentelekomcloud_evs_volume_v3" "volume_1" {
   name = "volume_1"
   description = "first test volume"
@@ -269,3 +281,14 @@ resource "opentelekomcloud_evs_volume_v3" "volume_1" {
   }
 }
 `, OS_AVAILABILITY_ZONE)
+
+	testAccEvsStorageV3Volume_volumeType = fmt.Sprintf(`
+resource "opentelekomcloud_evs_volume_v3" "volume_1" {
+  name = "volume_1"
+  description = "first test volume"
+  availability_zone = "%s"
+  volume_type = "asfddasf"
+  size = 12
+}
+`, OS_AVAILABILITY_ZONE)
+)
