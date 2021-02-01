@@ -99,6 +99,9 @@ resource "opentelekomcloud_as_configuration_v1" "my_as_config" {
 
 The following arguments are supported:
 
+* `region` - (Optional) The region in which to obtain the V1 AutoScaling client. If omitted, the
+  `region` argument of the provider is used. Changing this creates a new group.
+
 * `scaling_configuration_name` - (Required) The name of the AS configuration. The name can contain letters,
   digits, underscores(_), and hyphens(-), and cannot exceed 64 characters.
 
@@ -108,9 +111,9 @@ The following arguments are supported:
 The `instance_config` block supports:
 
 * `instance_id` - (Optional) When using the existing instance specifications as the template to
-  create AS configurations, specify this argument. In this case, flavor, image,
-  and disk arguments do not take effect. If the instance_id argument is not specified,
-  flavor, image, and disk arguments are mandatory.
+  create AS configurations, specify this argument. In this case, `flavor`, `image`,
+  and `disk` arguments do not take effect. If the `instance_id` argument is not specified,
+  `flavor`, `image`, and `disk` arguments are mandatory.
 
 * `flavor` - (Optional) The flavor ID.
 
@@ -139,11 +142,18 @@ The `disk` block supports:
 * `size` - (Required) The disk size. The unit is GB. The system disk size ranges from 40 to 32768,
   and the data disk size ranges from 10 to 32768.
 
-* `volume_type` - (Required) The disk type, which must be the same as the disk type available in the system.
-  The options include `SATA` (common I/O disk type) and `SSD` (ultra-high I/O disk type).
+* `volume_type` - (Required) Specifies the ECS system disk type. The disk type must match the available disk type.
+  * `SATA`: common I/O disk type
+  * `SAS`: high I/O disk type
+  * `SSD`: ultra-high I/O disk type
+  * `co-p1`: high I/O (performance-optimized I) disk type
+  * `uh-l1`: ultra-high I/O (latency-optimized) disk type
 
-* `disk_type` - (Required) Whether the disk is a system disk or a data disk. Option `DATA` indicates
-  a data disk. option `SYS` indicates a system disk.
+->For HANA, `HL1`, and `HL2` ECSs, use `co-p1` and `uh-l1` disks. For other ECSs, do not use `co-p1` or `uh-l1` disks.
+
+* `disk_type` - (Required) Specifies a disk type. The options are as follows:
+  * `DATA`: indicates a data disk.
+  * `SYS`: indicates a system disk.
 
 * `kms_id` - (Optional) The Encryption KMS ID of the data disk.
 
@@ -160,14 +170,39 @@ The `public_ip` block supports:
 
 The `eip` block supports:
 
-* `ip_type` - (Required) The IP address type. The system only supports `5_bgp` (indicates dynamic BGP).
+* `ip_type` - (Required) The IP address type. The system only supports `5_bgp` and `5_mailbgp`.
 
 * `bandwidth` - (Required) The bandwidth information. The structure is described below.
 
 The `bandwidth` block supports:
 
-* `size` - (Required) The bandwidth (Mbit/s). The value range is 1 to 300.
+* `size` - (Required) The bandwidth (Mbit/s). The value range is 1 to 500.
+->The specific range may vary depending on the configuration in each region. You can see the bandwidth range of
+  each region on the management console. The minimum unit is 1 Mbit/s if the allowed bandwidth size ranges from
+  0 to 300 Mbit/s. The minimum unit is 50 Mbit/s if the allowed bandwidth size ranges 300 Mbit/s to 500 Mbit/s.
 
-* `share_type` - (Required) The bandwidth sharing type. The system only supports `PER` (indicates exclusive bandwidth).
+* `share_type` - (Required) The bandwidth sharing type. The system only supports `PER`.
 
 * `charging_mode` - (Required) The bandwidth charging mode. The system only supports `traffic`.
+
+## Attributes Reference
+
+All above argument parameters can be exported as attribute parameters along with attribute reference.
+
+* `id` - Specifies the AS configuration ID.
+
+* `scaling_configuration_name` - Specifies the AS configuration name.
+
+* `instance_config` - Specifies the information about instance configurations.
+
+The `instance_config` block supports:
+
+* `flavor` - Specifies the ECS flavor ID.
+
+* `image` - Specifies the image ID.
+
+* `key_name` - See Argument Reference above.
+
+* `user_data` - See Argument Reference above.
+
+* `region` - See Argument Reference above.
