@@ -132,13 +132,12 @@ resource "opentelekomcloud_cce_node_pool_v3" "node_pool" {
 
   root_volume {
     size       = 40
-    volumetype = "SSD"
+    volume_type = "SSD"
   }
   data_volumes {
     size       = 50
-    volumetype = "SSD"
+    volume_type = "SSD"
   }
-}
 }`, OS_VPC_ID, OS_NETWORK_ID, OS_AVAILABILITY_ZONE, OS_KEYPAIR_NAME)
 
 var testAccCCENodePoolV3_update = fmt.Sprintf(`
@@ -159,11 +158,10 @@ resource "opentelekomcloud_cce_node_pool_v3" "node_pool" {
 
   root_volume {
     size       = 40
-    volumetype = "SSD"
+    volume_type = "SSD"
   }
   data_volumes {
     size       = 50
-    volumetype = "SSD"
+    volume_type = "SSD"
   }
-}
 }`, OS_AVAILABILITY_ZONE, OS_KEYPAIR_NAME)
