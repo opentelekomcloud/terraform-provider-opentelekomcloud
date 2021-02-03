@@ -1,6 +1,13 @@
 ## 1.23.0 (Unreleased)
 
 
+## 1.22.7 (February 03, 2021)
+
+ENHANCEMENTS:
+* `resource/opentelekomcloud_ecs_instance_v1`: Implement plan stage network and volume validation ([#820](https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/820))
+* `resource/opentelekomcloud_as_configuration`: Add possibility to set `5_mailbgp` to `ip_type` ([#821](https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/821))
+* `resource/opentelekomcloud_evs_volume_v3`: Add volume type validation ([#823](https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/823))
+
 ## 1.22.6 (January 27, 2021)
 
 BUG FIXES:
