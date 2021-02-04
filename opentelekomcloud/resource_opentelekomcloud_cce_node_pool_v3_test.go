@@ -105,7 +105,7 @@ func testAccCheckCCENodePoolV3Exists(n string, cluster string, nodepool *nodepoo
 
 var testAccCCENodePoolV3_basic = fmt.Sprintf(`
 resource "opentelekomcloud_cce_cluster_v3" "cluster" {
-  name         = "opentelekomcloud-cce"
+  name         = "opentelekomcloud-cce-np"
   cluster_type = "VirtualMachine"
   flavor_id    = "cce.s1.small"
   vpc_id       = "%s"
@@ -119,7 +119,7 @@ resource "opentelekomcloud_cce_node_pool_v3" "node_pool" {
   cluster_id         = opentelekomcloud_cce_cluster_v3.cluster.id
   name               = "opentelekomcloud-cce-node-pool"
   os                 = "EulerOS 2.5"
-  flavor             = "s6.large.2"
+  flavor             = "s2.xlarge.2"
   initial_node_count = 1
   availability_zone  = "%s"
   key_pair           = "%s"
@@ -135,14 +135,14 @@ resource "opentelekomcloud_cce_node_pool_v3" "node_pool" {
     volumetype = "SSD"
   }
   data_volumes {
-    size       = 50
+    size       = 100
     volumetype = "SSD"
   }
 }`, OS_VPC_ID, OS_NETWORK_ID, OS_AVAILABILITY_ZONE, OS_KEYPAIR_NAME)
 
 var testAccCCENodePoolV3_update = fmt.Sprintf(`
 resource "opentelekomcloud_cce_cluster_v3" "cluster" {
-  name         = "opentelekomcloud-cce"
+  name         = "opentelekomcloud-cce-np"
   cluster_type = "VirtualMachine"
   flavor_id    = "cce.s1.small"
   vpc_id       = "%s"
@@ -156,7 +156,7 @@ resource "opentelekomcloud_cce_node_pool_v3" "node_pool" {
   cluster_id         = opentelekomcloud_cce_cluster_v3.cluster.id
   name               = "opentelekomcloud-cce-node-pool"
   os                 = "EulerOS 2.5"
-  flavor             = "s6.large.2"
+  flavor             = "s2.xlarge.2"
   initial_node_count = 2
   availability_zone  = "%s"
   key_pair           = "%s"
@@ -172,7 +172,7 @@ resource "opentelekomcloud_cce_node_pool_v3" "node_pool" {
     volumetype = "SSD"
   }
   data_volumes {
-    size       = 50
+    size       = 100
     volumetype = "SSD"
   }
 }`, OS_VPC_ID, OS_NETWORK_ID, OS_AVAILABILITY_ZONE, OS_KEYPAIR_NAME)

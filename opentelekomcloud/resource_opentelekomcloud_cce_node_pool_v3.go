@@ -357,7 +357,7 @@ func resourceCCENodePoolV3Read(d *schema.ResourceData, meta interface{}) error {
 	me := &multierror.Error{}
 	me = multierror.Append(me,
 		d.Set("name", s.Metadata.Name),
-		d.Set("flavor_id", s.Spec.NodeTemplate.Flavor),
+		d.Set("flavor", s.Spec.NodeTemplate.Flavor),
 		d.Set("availability_zone", s.Spec.NodeTemplate.Az),
 		d.Set("os", s.Spec.NodeTemplate.Os),
 		d.Set("key_pair", s.Spec.NodeTemplate.Login.SshKey),
