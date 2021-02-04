@@ -285,7 +285,7 @@ func resourceCCENodePoolV3Create(d *schema.ResourceData, meta interface{}) error
 					PreInstall:  base64PreInstall,
 					PostInstall: base64PostInstall,
 				},
-				Taints:   resourceCCETaint(d),
+				Taints:   resourceCCENodeTaints(d),
 				K8sTags:  resourceCCENodeK8sTags(d),
 				UserTags: resourceCCENodePoolUserTags(d),
 			},

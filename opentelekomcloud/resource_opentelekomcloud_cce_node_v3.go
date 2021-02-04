@@ -300,7 +300,7 @@ func resourceCCENodeTags(d *schema.ResourceData) []tags.ResourceTag {
 	return expandResourceTags(tagRaw)
 }
 
-func resourceCCETaint(d *schema.ResourceData) []nodes.TaintSpec {
+func resourceCCENodeTaints(d *schema.ResourceData) []nodes.TaintSpec {
 	taintRaw := d.Get("taints").([]interface{})
 	taints := make([]nodes.TaintSpec, len(taintRaw))
 	for i, raw := range taintRaw {
