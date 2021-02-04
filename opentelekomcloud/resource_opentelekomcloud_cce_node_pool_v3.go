@@ -518,28 +518,24 @@ func waitForCceNodePoolDelete(cceClient *golangsdk.ServiceClient, clusterId, nod
 }
 
 func recursiveNodePoolCreate(cceClient *golangsdk.ServiceClient, opts nodepools.CreateOptsBuilder, ClusterID string, errCode int) (*nodepools.NodePool, string) {
-	if errCode == 403 {
-		stateCluster := &resource.StateChangeConf{
-			Target:     []string{"Available"},
-			Refresh:    waitForClusterAvailable(cceClient, ClusterID),
-			Timeout:    15 * time.Minute,
-			Delay:      15 * time.Second,
-			MinTimeout: 3 * time.Second,
-		}
-		_, stateErr := stateCluster.WaitForState()
-		if stateErr != nil {
-			log.Printf("[INFO] Cluster Unavailable %s.\n", stateErr)
-		}
-		s, err := nodepools.Create(cceClient, ClusterID, opts).Extract()
-		if err != nil {
-			if _, ok := err.(golangsdk.ErrDefault403); ok {
-				return recursiveNodePoolCreate(cceClient, opts, ClusterID, 403)
-			} else {
-				return s, "fail"
-			}
+	stateCluster := &resource.StateChangeConf{
+		Target:     []string{"Available"},
+		Refresh:    waitForClusterAvailable(cceClient, ClusterID),
+		Timeout:    15 * time.Minute,
+		Delay:      15 * time.Second,
+		MinTimeout: 3 * time.Second,
+	}
+	_, stateErr := stateCluster.WaitForState()
+	if stateErr != nil {
+		log.Printf("[INFO] Cluster Unavailable %s.\n", stateErr)
+	}
+	s, err := nodepools.Create(cceClient, ClusterID, opts).Extract()
+	if err != nil {
+		if _, ok := err.(golangsdk.ErrDefault403); ok {
+			return recursiveNodePoolCreate(cceClient, opts, ClusterID, 403)
 		} else {
-			return s, "success"
+			return s, "fail"
 		}
 	}
-	return nil, "fail"
+	return s, "success"
 }
