@@ -141,6 +141,17 @@ resource "opentelekomcloud_cce_node_pool_v3" "node_pool" {
 }`, OS_VPC_ID, OS_NETWORK_ID, OS_AVAILABILITY_ZONE, OS_KEYPAIR_NAME)
 
 var testAccCCENodePoolV3_update = fmt.Sprintf(`
+resource "opentelekomcloud_cce_cluster_v3" "cluster" {
+  name         = "opentelekomcloud-cce"
+  cluster_type = "VirtualMachine"
+  flavor_id    = "cce.s1.small"
+  vpc_id       = "%s"
+  subnet_id    = "%s"
+
+  container_network_type = "overlay_l2"
+  authentication_mode    = "rbac"
+}
+
 resource "opentelekomcloud_cce_node_pool_v3" "node_pool" {
   cluster_id         = opentelekomcloud_cce_cluster_v3.cluster.id
   name               = "opentelekomcloud-cce-node-pool"
@@ -164,4 +175,4 @@ resource "opentelekomcloud_cce_node_pool_v3" "node_pool" {
     size       = 50
     volumetype = "SSD"
   }
-}`, OS_AVAILABILITY_ZONE, OS_KEYPAIR_NAME)
+}`, OS_VPC_ID, OS_NETWORK_ID, OS_AVAILABILITY_ZONE, OS_KEYPAIR_NAME)
