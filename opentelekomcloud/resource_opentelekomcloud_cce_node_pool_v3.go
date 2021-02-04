@@ -3,6 +3,7 @@ package opentelekomcloud
 import (
 	"fmt"
 	"log"
+	"regexp"
 	"strings"
 	"time"
 
@@ -16,6 +17,12 @@ import (
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/common/tags"
 )
 
+var (
+	// Cluster pool taint key and value is 1 to 63 characters starting with a letter or digit.
+	// Only letters, digits, hyphens (-), underscores (_), and periods (.) are allowed.
+	clusterPoolTaintRegex, _ = regexp.Compile("^[a-zA-Z0-9_.-]{1,63}$")
+)
+
 func resourceCCENodePoolV3() *schema.Resource {
 	return &schema.Resource{
 		Create: resourceCCENodePoolV3Create,
@@ -26,7 +33,14 @@ func resourceCCENodePoolV3() *schema.Resource {
 		Timeouts: &schema.ResourceTimeout{
 			Create: schema.DefaultTimeout(20 * time.Minute),
 			Delete: schema.DefaultTimeout(20 * time.Minute),
+			Update: schema.DefaultTimeout(20 * time.Minute),
 		},
+
+		CustomizeDiff: multipleCustomizeDiffs(
+			validateVolumeType("root_volume.*.volumetype"),
+			validateVolumeType("data_volumes.*.volumetype"),
+			validateSubnet("subnet_id"),
+		),
 
 		Schema: map[string]*schema.Schema{
 			"name": {
@@ -69,9 +83,6 @@ func resourceCCENodePoolV3() *schema.Resource {
 						"volumetype": {
 							Type:     schema.TypeString,
 							Required: true,
-							ValidateFunc: validation.StringInSlice([]string{
-								"SATA", "SAS", "SSD",
-							}, true),
 						},
 						"extend_param": {
 							Type:     schema.TypeString,
@@ -93,9 +104,6 @@ func resourceCCENodePoolV3() *schema.Resource {
 						"volumetype": {
 							Type:     schema.TypeString,
 							Required: true,
-							ValidateFunc: validation.StringInSlice([]string{
-								"SATA", "SAS", "SSD", "co-p1", "uh-l1",
-							}, true),
 						},
 						"extend_param": {
 							Type:     schema.TypeString,
@@ -130,14 +138,23 @@ func resourceCCENodePoolV3() *schema.Resource {
 						"key": {
 							Type:     schema.TypeString,
 							Required: true,
+							ValidateFunc: validation.StringMatch(clusterPoolTaintRegex, "Invalid key. "+
+								"Cluster pool taint key is 1 to 63 characters starting with a letter or digit. "+
+								"Only lowercase letters, digits, and hyphens (-) are allowed."),
 						},
 						"value": {
 							Type:     schema.TypeString,
 							Required: true,
+							ValidateFunc: validation.StringMatch(clusterPoolTaintRegex, "Invalid value. "+
+								"Cluster pool taint value is 1 to 63 characters starting with a letter or digit. "+
+								"Only letters, digits, hyphens (-), underscores (_), and periods (.) are allowed."),
 						},
 						"effect": {
 							Type:     schema.TypeString,
 							Required: true,
+							ValidateFunc: validation.StringInSlice([]string{
+								"NoSchedule", "PreferNoSchedule", "NoExecute",
+							}, false),
 						},
 					}},
 			},
@@ -160,30 +177,16 @@ func resourceCCENodePoolV3() *schema.Resource {
 				ForceNew: true,
 			},
 			"preinstall": {
-				Type:     schema.TypeString,
-				Optional: true,
-				ForceNew: true,
-				StateFunc: func(v interface{}) string {
-					switch v.(type) {
-					case string:
-						return installScriptHashSum(v.(string))
-					default:
-						return ""
-					}
-				},
+				Type:      schema.TypeString,
+				Optional:  true,
+				ForceNew:  true,
+				StateFunc: getHashOrEmpty,
 			},
 			"postinstall": {
-				Type:     schema.TypeString,
-				Optional: true,
-				ForceNew: true,
-				StateFunc: func(v interface{}) string {
-					switch v.(type) {
-					case string:
-						return installScriptHashSum(v.(string))
-					default:
-						return ""
-					}
-				},
+				Type:      schema.TypeString,
+				Optional:  true,
+				ForceNew:  true,
+				StateFunc: getHashOrEmpty,
 			},
 			"scale_enable": {
 				Type:     schema.TypeBool,
@@ -308,11 +311,11 @@ func resourceCCENodePoolV3Create(d *schema.ResourceData, meta interface{}) error
 		if _, ok := err.(golangsdk.ErrDefault403); ok {
 			retryNode, err := recursiveNodePoolCreate(nodePoolClient, createOpts, clusterId, 403)
 			if err == "fail" {
-				return fmt.Errorf("error creating Open Telekom Cloud Node Pool")
+				return fmt.Errorf("error creating Open Telekom Cloud CCE Node Pool")
 			}
 			s = retryNode
 		} else {
-			return fmt.Errorf("error creating Open Telekom Cloud Node Pool: %s", err)
+			return fmt.Errorf("error creating Open Telekom Cloud CCE Node Pool: %s", err)
 		}
 	}
 
@@ -351,11 +354,10 @@ func resourceCCENodePoolV3Read(d *schema.ResourceData, meta interface{}) error {
 			return nil
 		}
 
-		return fmt.Errorf("error retrieving Open Telekom Cloud Node Pool: %s", err)
+		return fmt.Errorf("error retrieving Open Telekom Cloud CCE Node Pool: %s", err)
 	}
 
-	me := &multierror.Error{}
-	me = multierror.Append(me,
+	me := multierror.Append(nil,
 		d.Set("name", s.Metadata.Name),
 		d.Set("flavor", s.Spec.NodeTemplate.Flavor),
 		d.Set("availability_zone", s.Spec.NodeTemplate.Az),
@@ -380,7 +382,7 @@ func resourceCCENodePoolV3Read(d *schema.ResourceData, meta interface{}) error {
 		k8sTags[key] = val
 	}
 	if err := d.Set("k8s_tags", k8sTags); err != nil {
-		return fmt.Errorf("[DEBUG] Error saving k8s_tags to state for Open Telekom Cloud Node Pool (%s): %s", d.Id(), err)
+		return fmt.Errorf("[DEBUG] Error saving k8s_tags to state for Open Telekom Cloud CCE Node Pool (%s): %s", d.Id(), err)
 	}
 
 	var volumes []map[string]interface{}
@@ -392,7 +394,7 @@ func resourceCCENodePoolV3Read(d *schema.ResourceData, meta interface{}) error {
 		volumes = append(volumes, volume)
 	}
 	if err := d.Set("data_volumes", volumes); err != nil {
-		return fmt.Errorf("[DEBUG] Error saving dataVolumes to state for Open Telekom Cloud Node Pool (%s): %s", d.Id(), err)
+		return fmt.Errorf("[DEBUG] Error saving dataVolumes to state for Open Telekom Cloud CCE Node Pool (%s): %s", d.Id(), err)
 	}
 
 	rootVolume := []map[string]interface{}{
@@ -403,11 +405,11 @@ func resourceCCENodePoolV3Read(d *schema.ResourceData, meta interface{}) error {
 		},
 	}
 	if err := d.Set("root_volume", rootVolume); err != nil {
-		return fmt.Errorf("[DEBUG] Error saving rootVolume to state for Open Telekom Cloud Node Pool (%s): %s", d.Id(), err)
+		return fmt.Errorf("[DEBUG] Error saving rootVolume to state for Open Telekom Cloud CCE Node Pool (%s): %s", d.Id(), err)
 	}
 
 	if err := d.Set("status", s.Status.Phase); err != nil {
-		return fmt.Errorf("[DEBUG] Error saving status to state for Open Telekom Cloud Node Pool (%s): %s", d.Id(), err)
+		return fmt.Errorf("[DEBUG] Error saving status to state for Open Telekom Cloud CCE Node Pool (%s): %s", d.Id(), err)
 	}
 
 	return nil
@@ -439,7 +441,7 @@ func resourceCCENodePoolV3Update(d *schema.ResourceData, meta interface{}) error
 	clusterId := d.Get("cluster_id").(string)
 	_, err = nodepools.Update(nodePoolClient, clusterId, d.Id(), updateOpts).Extract()
 	if err != nil {
-		return fmt.Errorf("error updating Open Telekom Cloud Node Pool: %s", err)
+		return fmt.Errorf("error updating Open Telekom Cloud CCE Node Pool: %s", err)
 	}
 	stateConf := &resource.StateChangeConf{
 		Pending:    []string{"Synchronizing"},
@@ -451,7 +453,7 @@ func resourceCCENodePoolV3Update(d *schema.ResourceData, meta interface{}) error
 	}
 	_, err = stateConf.WaitForState()
 	if err != nil {
-		return fmt.Errorf("error creating Open Telekom Cloud Node Pool: %s", err)
+		return fmt.Errorf("error creating Open Telekom Cloud CCE Node Pool: %s", err)
 	}
 
 	return resourceCCENodePoolV3Read(d, meta)
@@ -465,7 +467,7 @@ func resourceCCENodePoolV3Delete(d *schema.ResourceData, meta interface{}) error
 	clusterId := d.Get("cluster_id").(string)
 	err = nodepools.Delete(nodePoolClient, clusterId, d.Id()).ExtractErr()
 	if err != nil {
-		return fmt.Errorf("error deleting Open Telekom Cloud Node Pool: %s", err)
+		return fmt.Errorf("error deleting Open Telekom Cloud CCE Node Pool: %s", err)
 	}
 	stateConf := &resource.StateChangeConf{
 		Pending:      []string{"Deleting"},
@@ -478,7 +480,7 @@ func resourceCCENodePoolV3Delete(d *schema.ResourceData, meta interface{}) error
 
 	_, err = stateConf.WaitForState()
 	if err != nil {
-		return fmt.Errorf("error deleting Open Telekom Cloud Node Pool: %s", err)
+		return fmt.Errorf("error deleting Open Telekom Cloud CCE Node Pool: %s", err)
 	}
 
 	d.SetId("")
@@ -497,13 +499,13 @@ func waitForCceNodePoolActive(cceClient *golangsdk.ServiceClient, clusterId, nod
 
 func waitForCceNodePoolDelete(cceClient *golangsdk.ServiceClient, clusterId, nodePoolId string) resource.StateRefreshFunc {
 	return func() (interface{}, string, error) {
-		log.Printf("[DEBUG] Attempting to delete Open Telekom Cloud Node Pool %s.\n", nodePoolId)
+		log.Printf("[DEBUG] Attempting to delete Open Telekom Cloud CCE Node Pool %s.\n", nodePoolId)
 
 		r, err := nodepools.Get(cceClient, clusterId, nodePoolId).Extract()
 
 		if err != nil {
 			if _, ok := err.(golangsdk.ErrDefault404); ok {
-				log.Printf("[DEBUG] Successfully deleted Open Telekom Cloud Node Pool %s", nodePoolId)
+				log.Printf("[DEBUG] Successfully deleted Open Telekom Cloud CCE Node Pool %s", nodePoolId)
 				return r, "Deleted", nil
 			}
 			return r, "Deleting", err
