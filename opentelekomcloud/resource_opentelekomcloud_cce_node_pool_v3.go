@@ -533,9 +533,8 @@ func recursiveNodePoolCreate(cceClient *golangsdk.ServiceClient, opts nodepools.
 	if err != nil {
 		if _, ok := err.(golangsdk.ErrDefault403); ok {
 			return recursiveNodePoolCreate(cceClient, opts, ClusterID, 403)
-		} else {
-			return s, "fail"
 		}
+		return s, "fail"
 	}
 	return s, "success"
 }
