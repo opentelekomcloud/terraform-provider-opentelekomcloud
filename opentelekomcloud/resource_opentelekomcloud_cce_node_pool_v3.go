@@ -88,7 +88,7 @@ func resourceCCENodePoolV3() *schema.Resource {
 						"size": {
 							Type:         schema.TypeInt,
 							Required:     true,
-							ValidateFunc: validation.IntBetween(10, 32768),
+							ValidateFunc: validation.IntBetween(100, 32768),
 						},
 						"volumetype": {
 							Type:     schema.TypeString,
