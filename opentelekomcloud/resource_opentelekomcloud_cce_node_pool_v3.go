@@ -243,7 +243,8 @@ func resourceCCENodePoolV3Create(d *schema.ResourceData, meta interface{}) error
 	var loginSpec nodes.LoginSpec
 	if hasFilledOpt(d, "key_pair") {
 		loginSpec = nodes.LoginSpec{SshKey: d.Get("key_pair").(string)}
-	} else if hasFilledOpt(d, "password") {
+	}
+	if hasFilledOpt(d, "password") {
 		loginSpec = nodes.LoginSpec{
 			UserPassword: nodes.UserPassword{
 				Username: "root",
