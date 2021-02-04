@@ -13,6 +13,7 @@ import (
 	"github.com/opentelekomcloud/gophertelekomcloud"
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/cce/v3/nodepools"
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/cce/v3/nodes"
+	"github.com/opentelekomcloud/gophertelekomcloud/openstack/common/tags"
 )
 
 func resourceCCENodePoolV3() *schema.Resource {
@@ -65,7 +66,7 @@ func resourceCCENodePoolV3() *schema.Resource {
 							Required:     true,
 							ValidateFunc: validation.IntBetween(10, 32768),
 						},
-						"volume_type": {
+						"volumetype": {
 							Type:     schema.TypeString,
 							Required: true,
 							ValidateFunc: validation.StringInSlice([]string{
@@ -89,7 +90,7 @@ func resourceCCENodePoolV3() *schema.Resource {
 							Required:     true,
 							ValidateFunc: validation.IntBetween(10, 32768),
 						},
-						"volume_type": {
+						"volumetype": {
 							Type:     schema.TypeString,
 							Required: true,
 							ValidateFunc: validation.StringInSlice([]string{
@@ -217,6 +218,11 @@ func resourceCCENodePoolV3() *schema.Resource {
 	}
 }
 
+func resourceCCENodePoolUserTags(d *schema.ResourceData) []tags.ResourceTag {
+	tagRaw := d.Get("user_tags").(map[string]interface{})
+	return expandResourceTags(tagRaw)
+}
+
 func resourceCCENodePoolV3Create(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*Config)
 	nodePoolClient, err := config.cceV3Client(GetRegion(d, config))
@@ -281,7 +287,7 @@ func resourceCCENodePoolV3Create(d *schema.ResourceData, meta interface{}) error
 					PostInstall: base64PostInstall,
 				},
 				Taints:   resourceCCETaint(d),
-				UserTags: resourceCCENodeTags(d),
+				UserTags: resourceCCENodePoolUserTags(d),
 			},
 		},
 	}

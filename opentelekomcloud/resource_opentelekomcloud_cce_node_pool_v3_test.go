@@ -132,11 +132,11 @@ resource "opentelekomcloud_cce_node_pool_v3" "node_pool" {
 
   root_volume {
     size       = 40
-    volume_type = "SSD"
+    volumetype = "SSD"
   }
   data_volumes {
     size       = 50
-    volume_type = "SSD"
+    volumetype = "SSD"
   }
 }`, OS_VPC_ID, OS_NETWORK_ID, OS_AVAILABILITY_ZONE, OS_KEYPAIR_NAME)
 
@@ -158,10 +158,10 @@ resource "opentelekomcloud_cce_node_pool_v3" "node_pool" {
 
   root_volume {
     size       = 40
-    volume_type = "SSD"
+    volumetype = "SSD"
   }
   data_volumes {
     size       = 50
-    volume_type = "SSD"
+    volumetype = "SSD"
   }
 }`, OS_AVAILABILITY_ZONE, OS_KEYPAIR_NAME)
