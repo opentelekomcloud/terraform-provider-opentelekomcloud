@@ -274,7 +274,6 @@ func resourceCCENodePoolV3Create(d *schema.ResourceData, meta interface{}) error
 				Login:       loginSpec,
 				RootVolume:  resourceCCERootVolume(d),
 				DataVolumes: resourceCCEDataVolume(d),
-				K8sTags:     resourceCCENodeK8sTags(d),
 				BillingMode: 0,
 				Count:       1,
 				NodeNicSpec: nodes.NodeNicSpec{
@@ -287,6 +286,7 @@ func resourceCCENodePoolV3Create(d *schema.ResourceData, meta interface{}) error
 					PostInstall: base64PostInstall,
 				},
 				Taints:   resourceCCETaint(d),
+				K8sTags:  resourceCCENodeK8sTags(d),
 				UserTags: resourceCCENodePoolUserTags(d),
 			},
 		},
@@ -367,8 +367,6 @@ func resourceCCENodePoolV3Read(d *schema.ResourceData, meta interface{}) error {
 		d.Set("max_node_count", s.Spec.Autoscaling.MaxNodeCount),
 		d.Set("scale_down_cooldown_time", s.Spec.Autoscaling.ScaleDownCooldownTime),
 		d.Set("priority", s.Spec.Autoscaling.Priority),
-		d.Set("user_tags", s.Spec.NodeTemplate.UserTags),
-		d.Set("taints", s.Spec.NodeTemplate.Taints),
 	)
 	if err := me.ErrorOrNil(); err != nil {
 		return fmt.Errorf("error setting CCE Node Pool attributes (%s): %s", d.Id(), err)

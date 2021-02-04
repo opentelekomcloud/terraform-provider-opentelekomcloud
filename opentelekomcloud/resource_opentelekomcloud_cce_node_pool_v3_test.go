@@ -23,14 +23,14 @@ func TestAccCCENodePoolsV3_basic(t *testing.T) {
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckCCENodePoolV3Exists("opentelekomcloud_cce_node_pool_v3.node_pool", "opentelekomcloud_cce_cluster_v3.cluster", &nodePool),
 					resource.TestCheckResourceAttr("opentelekomcloud_cce_node_pool_v3.node_pool", "name", "opentelekomcloud-cce-node-pool"),
-					resource.TestCheckResourceAttr("opentelekomcloud_cce_node_pool_v3.node_pool", "flavor_id", "s6.large.2"),
+					resource.TestCheckResourceAttr("opentelekomcloud_cce_node_pool_v3.node_pool", "flavor", "s2.xlarge.2"),
 					resource.TestCheckResourceAttr("opentelekomcloud_cce_node_pool_v3.node_pool", "os", "EulerOS 2.5"),
 				),
 			},
 			{
 				Config: testAccCCENodePoolV3_update,
 				Check: resource.ComposeTestCheckFunc(
-					resource.TestCheckResourceAttr("opentelekomcloud_cce_node_v3.node_pool", "initial_node_count", "2"),
+					resource.TestCheckResourceAttr("opentelekomcloud_cce_node_pool_v3.node_pool", "initial_node_count", "2"),
 				),
 			},
 		},
