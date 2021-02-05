@@ -113,7 +113,7 @@ func (c *Config) load() error {
 	if c.environment == nil {
 		c.environment = openstack.NewEnv(osPrefix)
 	}
-	cloud, err := c.environment.Cloud()
+	cloud, err := c.environment.Cloud(c.Cloud)
 	if err != nil {
 		return err
 	}
