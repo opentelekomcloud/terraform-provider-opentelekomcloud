@@ -4,13 +4,16 @@ import (
 	"fmt"
 	"io/ioutil"
 	"os"
+	"path/filepath"
 	"regexp"
 	"testing"
 
+	"github.com/hashicorp/terraform-plugin-sdk/helper/acctest"
 	"github.com/hashicorp/terraform-plugin-sdk/helper/pathorcontents"
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/terraform"
 	"github.com/opentelekomcloud/gophertelekomcloud/acceptance/tools"
+	th "github.com/opentelekomcloud/gophertelekomcloud/testhelper"
 )
 
 var (
@@ -390,6 +393,52 @@ func testAccIdentityV3AgencyPreCheck(t *testing.T) {
 	if OS_TENANT_NAME == "" {
 		t.Skip("OS_TENANT_NAME must be set for acceptance tests")
 	}
+}
+
+func TestLoadAndValidate_cloud(t *testing.T) {
+	cloudName := "terraform-test"
+	cloudsYamlFile := filepath.Join("/tmp",
+		fmt.Sprintf("%s.yaml", acctest.RandString(5)))
+	secureYamlFile := filepath.Join("/tmp",
+		fmt.Sprintf("%s.yaml", acctest.RandString(5)))
+	password := acctest.RandString(16)
+	projectName := acctest.RandString(10)
+	cloudsConfig := fmt.Sprintf(`
+clouds:
+  %s:
+    auth:
+      auth_url: https://iam.eu-de.otc.t-systems.com/v3
+      username: myuser
+      project_name: "%s"
+      domain_name: OTCMY1000000000066
+`, cloudName, projectName)
+	secureConfig := fmt.Sprintf(`
+clouds:
+  %s:
+    auth:
+      password: %s
+`, cloudName, password)
+
+	th.AssertNoErr(t, ioutil.WriteFile(cloudsYamlFile, []byte(cloudsConfig), 0755))
+	defer func() {
+		th.AssertNoErr(t, os.Remove(cloudsYamlFile))
+	}()
+	th.AssertNoErr(t, ioutil.WriteFile(secureYamlFile, []byte(secureConfig), 0755))
+	defer func() {
+		th.AssertNoErr(t, os.Remove(secureYamlFile))
+	}()
+
+	_ = os.Setenv("OS_CLIENT_CONFIG_FILE", cloudsYamlFile)
+	_ = os.Setenv("OS_CLIENT_SECURE_FILE", secureYamlFile)
+
+	config := Config{
+		Cloud: cloudName,
+	}
+	err := config.load()
+	th.AssertNoErr(t, err)
+
+	th.AssertEquals(t, projectName, config.TenantName)
+	th.AssertEquals(t, password, config.Password)
 }
 
 func TestLoadAndValidate_errors(t *testing.T) {
