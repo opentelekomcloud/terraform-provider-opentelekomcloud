@@ -69,3 +69,12 @@ func firstOneSet(res map[string]interface{}, k1, k2 string) (interface{}, error)
 	}
 	return v2, nil
 }
+
+func getHashOrEmpty(v interface{}) string {
+	switch v.(type) {
+	case string:
+		return installScriptHashSum(v.(string))
+	default:
+		return ""
+	}
+}

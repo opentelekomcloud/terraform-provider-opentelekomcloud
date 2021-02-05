@@ -186,6 +186,27 @@ func validateVPC(argName string) schema.CustomizeDiffFunc {
 	}
 }
 
+func validateSubnet(argName string) schema.CustomizeDiffFunc {
+	return func(d *schema.ResourceDiff, meta interface{}) error {
+		subnetId := d.Get(argName)
+		if subnetId == nil {
+			return fmt.Errorf(argMissingMsg, argName)
+		}
+		if subnetId == "" {
+			return nil
+		}
+		config := meta.(*Config)
+		subnetClient, err := config.networkingV1Client(GetRegion(d, config))
+		if err != nil {
+			return fmt.Errorf("error creating opentelekomcloud CCE Client: %s", err)
+		}
+		if err := subnets.Get(subnetClient, subnetId.(string)).Err; err != nil {
+			return fmt.Errorf("can't find Subnet `%s`: %s", subnetId, err)
+		}
+		return nil
+	}
+}
+
 func multipleCustomizeDiffs(funcs ...schema.CustomizeDiffFunc) schema.CustomizeDiffFunc {
 	return func(d *schema.ResourceDiff, meta interface{}) error {
 		mErr := &multierror.Error{}

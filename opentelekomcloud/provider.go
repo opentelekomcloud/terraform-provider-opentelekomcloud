@@ -253,6 +253,7 @@ func Provider() terraform.ResourceProvider {
 			"opentelekomcloud_cce_addon_v3":                       resourceCCEAddonV3(),
 			"opentelekomcloud_cce_cluster_v3":                     resourceCCEClusterV3(),
 			"opentelekomcloud_cce_node_v3":                        resourceCCENodeV3(),
+			"opentelekomcloud_cce_node_pool_v3":                   resourceCCENodePoolV3(),
 			"opentelekomcloud_ces_alarmrule":                      resourceAlarmRule(),
 			"opentelekomcloud_compute_bms_server_v2":              resourceComputeBMSInstanceV2(),
 			"opentelekomcloud_compute_bms_tags_v2":                resourceBMSTagsV2(),

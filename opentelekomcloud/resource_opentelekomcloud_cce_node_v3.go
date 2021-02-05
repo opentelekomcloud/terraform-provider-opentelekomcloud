@@ -300,6 +300,20 @@ func resourceCCENodeTags(d *schema.ResourceData) []tags.ResourceTag {
 	return expandResourceTags(tagRaw)
 }
 
+func resourceCCENodeTaints(d *schema.ResourceData) []nodes.TaintSpec {
+	taintRaw := d.Get("taints").([]interface{})
+	taints := make([]nodes.TaintSpec, len(taintRaw))
+	for i, raw := range taintRaw {
+		rawMap := raw.(map[string]interface{})
+		taints[i] = nodes.TaintSpec{
+			Key:    rawMap["key"].(string),
+			Value:  rawMap["value"].(string),
+			Effect: rawMap["effect"].(string),
+		}
+	}
+	return taints
+}
+
 func resourceCCENodeK8sTags(d *schema.ResourceData) map[string]string {
 	m := make(map[string]string)
 	for key, val := range d.Get("k8s_tags").(map[string]interface{}) {
