@@ -214,7 +214,7 @@ func resourceDNSRecordSetV2Read(d *schema.ResourceData, meta interface{}) error 
 		return fmt.Errorf("error fetching OpenTelekomCloud DNS record set tags: %s", err)
 	}
 
-	tagmap := tagsToMap(resourceTags.Tags)
+	tagmap := tagsToMap(resourceTags)
 	if err := d.Set("tags", tagmap); err != nil {
 		return fmt.Errorf("error saving tags for OpenTelekomCloud DNS record set %s: %s", recordsetID, err)
 	}

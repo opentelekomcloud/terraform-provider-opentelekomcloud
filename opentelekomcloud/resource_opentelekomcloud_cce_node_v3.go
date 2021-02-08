@@ -583,7 +583,7 @@ func resourceCCENodeV3Read(d *schema.ResourceData, meta interface{}) error {
 		return fmt.Errorf("error fetching OpenTelekomCloud instance tags: %s", err)
 	}
 
-	tagMap := tagsToMap(resourceTags.Tags)
+	tagMap := tagsToMap(resourceTags)
 	// ignore "CCE-Dynamic-Provisioning-Node"
 	delete(tagMap, "CCE-Dynamic-Provisioning-Node")
 	if err := d.Set("tags", tagMap); err != nil {

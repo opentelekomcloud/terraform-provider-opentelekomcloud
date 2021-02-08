@@ -276,7 +276,7 @@ func resourceVpnSiteConnectionV2Read(d *schema.ResourceData, meta interface{}) e
 		return fmt.Errorf("Error fetching VPN site connection tags: %s", err)
 	}
 
-	tagmap := tagsToMap(resourceTags.Tags)
+	tagmap := tagsToMap(resourceTags)
 	if err := d.Set("tags", tagmap); err != nil {
 		return fmt.Errorf("Error saving tags for VPN site connection %s: %s", d.Id(), err)
 	}

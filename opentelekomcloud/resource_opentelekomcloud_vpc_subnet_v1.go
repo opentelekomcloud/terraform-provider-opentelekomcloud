@@ -233,7 +233,7 @@ func resourceVpcSubnetV1Read(d *schema.ResourceData, meta interface{}) error {
 		return fmt.Errorf("Error fetching OpenTelekomCloud VpcSubnet tags: %s", err)
 	}
 
-	tagmap := tagsToMap(resourceTags.Tags)
+	tagmap := tagsToMap(resourceTags)
 	if err := d.Set("tags", tagmap); err != nil {
 		return fmt.Errorf("Error saving tags for OpenTelekomCloud VpcSubnet %s: %s", d.Id(), err)
 	}

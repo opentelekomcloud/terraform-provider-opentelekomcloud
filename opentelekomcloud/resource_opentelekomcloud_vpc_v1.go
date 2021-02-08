@@ -78,19 +78,19 @@ func addNetworkingTags(d *schema.ResourceData, config *Config, res string) error
 	return nil
 }
 
-func readNetworkingTags(d *schema.ResourceData, config *Config, res string) error {
-	vpcV2Client, err := config.networkingV2Client(GetRegion(d, config))
+func readNetworkingTags(d *schema.ResourceData, config *Config, resource string) error {
+	client, err := config.networkingV2Client(GetRegion(d, config))
 	if err != nil {
-		return fmt.Errorf("Error creating OpenTelekomCloud networking client: %s", err)
+		return fmt.Errorf("error creating OpenTelekomCloud NetworkingV2 client: %s", err)
 	}
-	resourceTags, err := tags.Get(vpcV2Client, res, d.Id()).Extract()
+	resourceTags, err := tags.Get(client, resource, d.Id()).Extract()
 	if err != nil {
-		return fmt.Errorf("Error fetching OpenTelekomCloud VirtualPrivateCloud tags: %s", err)
+		return fmt.Errorf("error fetching tags: %s", err)
 	}
 
-	tagmap := tagsToMap(resourceTags.Tags)
-	if err := d.Set("tags", tagmap); err != nil {
-		return fmt.Errorf("Error saving tags for OpenTelekomCloud VirtualPrivateCloud %s: %s", d.Id(), err)
+	tagMap := tagsToMap(resourceTags)
+	if err := d.Set("tags", tagMap); err != nil {
+		return fmt.Errorf("error setting tags: %s", err)
 	}
 	return nil
 }
