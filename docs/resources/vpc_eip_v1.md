@@ -26,19 +26,24 @@ resource "opentelekomcloud_vpc_eip_v1" "eip_1" {
 
 The following arguments are supported:
 
+* `region` - (Optional) The region in which to obtain the V1 Networking client.
+  If omitted, the `region` argument of the provider is used. Changing this
+  creates a new service.
+
 * `publicip` - (Required) The elastic IP address object.
 
 * `bandwidth` - (Required) The bandwidth object.
 
 The `publicip` block supports:
 
-* `type` - (Required) The value must be a type supported by [the system](https://docs.otc.t-systems.com/api/eip/eip_api_0001.html#eip_api_0001__en-us_topic_0201534274_table4491214). The value can be `5_bgp` and `5_mailbgp`. Changing this creates a new eip.
+* `type` - (Required) The value must be a type supported by [the system](https://docs.otc.t-systems.com/api/eip/eip_api_0001.html#eip_api_0001__en-us_topic_0201534274_table4491214).
+  The value can be `5_bgp` and `5_mailbgp`. Changing this creates a new eip.
 
 * `ip_address` - (Optional) The value must be a valid IP address in the available
   IP address segment. Changing this creates a new eip.
 
 * `port_id` - (Optional) The port id which this eip will associate with. If the value
-  is "" or this not specified, the eip will be in unbind state.
+  is `""` or this not specified, the eip will be in unbind state.
 
 The `bandwidth` block supports:
 
@@ -54,9 +59,13 @@ The `bandwidth` block supports:
   by traffic and this field is specified, then you are charged by traffic for elastic
   IP addresses. Changing this creates a new eip.
 
+* `tags` - (Optional) Tags key/value pairs to associate with the eip.
+
 ## Attributes Reference
 
 The following attributes are exported:
+
+* `region` - - See Argument Reference above.
 
 * `publicip/type` - See Argument Reference above.
 
@@ -71,6 +80,8 @@ The following attributes are exported:
 * `bandwidth/share_type` - See Argument Reference above.
 
 * `bandwidth/charge_mode` - See Argument Reference above.
+
+* `tags` - See Argument Reference above.
 
 ## Import
 

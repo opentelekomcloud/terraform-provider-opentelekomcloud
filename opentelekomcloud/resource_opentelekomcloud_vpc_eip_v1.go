@@ -40,6 +40,7 @@ func resourceVpcEIPV1() *schema.Resource {
 				Type:     schema.TypeList,
 				Required: true,
 				ForceNew: true,
+				MaxItems: 1,
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
 						"type": {
@@ -57,7 +58,6 @@ func resourceVpcEIPV1() *schema.Resource {
 							Type:     schema.TypeString,
 							Optional: true,
 							Computed: true,
-							ForceNew: false,
 						},
 					},
 				},
@@ -66,17 +66,16 @@ func resourceVpcEIPV1() *schema.Resource {
 				Type:     schema.TypeList,
 				Required: true,
 				ForceNew: true,
+				MaxItems: 1,
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
 						"name": {
 							Type:     schema.TypeString,
 							Required: true,
-							ForceNew: false,
 						},
 						"size": {
 							Type:     schema.TypeInt,
 							Required: true,
-							ForceNew: false,
 						},
 						"share_type": {
 							Type:     schema.TypeString,
@@ -86,8 +85,8 @@ func resourceVpcEIPV1() *schema.Resource {
 						"charge_mode": {
 							Type:     schema.TypeString,
 							Optional: true,
-							ForceNew: true,
 							Computed: true,
+							ForceNew: true,
 						},
 					},
 				},
@@ -95,7 +94,6 @@ func resourceVpcEIPV1() *schema.Resource {
 			"value_specs": {
 				Type:     schema.TypeMap,
 				Optional: true,
-				ForceNew: false,
 			},
 			"tags": tagsSchema(),
 		},
