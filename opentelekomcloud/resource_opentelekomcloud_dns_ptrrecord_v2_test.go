@@ -7,17 +7,12 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/helper/acctest"
 	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/terraform"
-
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/dns/v2/ptrrecords"
 )
 
-func randomPtrName() string {
-	return fmt.Sprintf("acpttest-%s.com.", acctest.RandString(5))
-}
-
 func TestAccDNSV2PtrRecord_basic(t *testing.T) {
-	var ptrrecord ptrrecords.Ptr
-	ptrName := randomPtrName()
+	var ptr ptrrecords.Ptr
+	ptrName := fmt.Sprintf("acc-test-%s.com.", acctest.RandString(3))
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
@@ -27,19 +22,21 @@ func TestAccDNSV2PtrRecord_basic(t *testing.T) {
 			{
 				Config: testAccDNSV2PtrRecord_basic(ptrName),
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckDNSV2PtrRecordExists("opentelekomcloud_dns_ptrrecord_v2.ptr_1", &ptrrecord),
+					testAccCheckDNSV2PtrRecordExists("opentelekomcloud_dns_ptrrecord_v2.ptr_1", &ptr),
 					resource.TestCheckResourceAttr(
 						"opentelekomcloud_dns_ptrrecord_v2.ptr_1", "description", "a ptr record"),
+					resource.TestCheckResourceAttr(
+						"opentelekomcloud_dns_ptrrecord_v2.ptr_1", "tags.muh", "value-create"),
 				),
 			},
 			{
 				Config: testAccDNSV2PtrRecord_update(ptrName),
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckDNSV2PtrRecordExists("opentelekomcloud_dns_ptrrecord_v2.ptr_1", &ptrrecord),
+					testAccCheckDNSV2PtrRecordExists("opentelekomcloud_dns_ptrrecord_v2.ptr_1", &ptr),
 					resource.TestCheckResourceAttr(
 						"opentelekomcloud_dns_ptrrecord_v2.ptr_1", "description", "ptr record updated"),
 					resource.TestCheckResourceAttr(
-						"opentelekomcloud_dns_ptrrecord_v2.ptr_1", "foo", "bar"),
+						"opentelekomcloud_dns_ptrrecord_v2.ptr_1", "tags.muh", "value-update"),
 				),
 			},
 		},
@@ -48,9 +45,9 @@ func TestAccDNSV2PtrRecord_basic(t *testing.T) {
 
 func testAccCheckDNSV2PtrRecordDestroy(s *terraform.State) error {
 	config := testAccProvider.Meta().(*Config)
-	dnsClient, err := config.dnsV2Client(OS_REGION_NAME)
+	client, err := config.dnsV2Client(OS_REGION_NAME)
 	if err != nil {
-		return fmt.Errorf("Error creating OpenTelekomCloud DNS client: %s", err)
+		return fmt.Errorf("error creating OpenTelekomCloud DNS client: %s", err)
 	}
 
 	for _, rs := range s.RootModule().Resources {
@@ -58,42 +55,42 @@ func testAccCheckDNSV2PtrRecordDestroy(s *terraform.State) error {
 			continue
 		}
 
-		_, err = ptrrecords.Get(dnsClient, rs.Primary.ID).Extract()
+		_, err = ptrrecords.Get(client, rs.Primary.ID).Extract()
 		if err == nil {
-			return fmt.Errorf("Ptr record still exists")
+			return fmt.Errorf("ptr record still exists")
 		}
 	}
 
 	return nil
 }
 
-func testAccCheckDNSV2PtrRecordExists(n string, ptrrecord *ptrrecords.Ptr) resource.TestCheckFunc {
+func testAccCheckDNSV2PtrRecordExists(n string, ptr *ptrrecords.Ptr) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
 		rs, ok := s.RootModule().Resources[n]
 		if !ok {
-			return fmt.Errorf("Not found: %s", n)
+			return fmt.Errorf("not found: %s", n)
 		}
 
 		if rs.Primary.ID == "" {
-			return fmt.Errorf("No ID is set")
+			return fmt.Errorf("no ID is set")
 		}
 
 		config := testAccProvider.Meta().(*Config)
-		dnsClient, err := config.dnsV2Client(OS_REGION_NAME)
+		client, err := config.dnsV2Client(OS_REGION_NAME)
 		if err != nil {
-			return fmt.Errorf("Error creating OpenTelekomCloud DNS client: %s", err)
+			return fmt.Errorf("error creating OpenTelekomCloud DNS client: %s", err)
 		}
 
-		found, err := ptrrecords.Get(dnsClient, rs.Primary.ID).Extract()
+		found, err := ptrrecords.Get(client, rs.Primary.ID).Extract()
 		if err != nil {
 			return err
 		}
 
 		if found.ID != rs.Primary.ID {
-			return fmt.Errorf("Ptr record not found")
+			return fmt.Errorf("ptr record not found")
 		}
 
-		*ptrrecord = *found
+		*ptr = *found
 
 		return nil
 	}
@@ -101,30 +98,32 @@ func testAccCheckDNSV2PtrRecordExists(n string, ptrrecord *ptrrecords.Ptr) resou
 
 func testAccDNSV2PtrRecord_basic(ptrName string) string {
 	return fmt.Sprintf(`
-resource "opentelekomcloud_networking_floatingip_v2" "fip_1" {
-}
+resource "opentelekomcloud_networking_floatingip_v2" "fip_1" {}
 
 resource "opentelekomcloud_dns_ptrrecord_v2" "ptr_1" {
-  name = "%s"
-  description = "a ptr record"
+  name          = "%s"
+  description   = "a ptr record"
   floatingip_id = opentelekomcloud_networking_floatingip_v2.fip_1.id
-  ttl = 6000
+  ttl           = 6000
+  tags = {
+    muh = "value-create"
+    kuh = "value-create"
+  }
 }
 `, ptrName)
 }
 
 func testAccDNSV2PtrRecord_update(ptrName string) string {
 	return fmt.Sprintf(`
-resource "opentelekomcloud_networking_floatingip_v2" "fip_1" {
-}
+resource "opentelekomcloud_networking_floatingip_v2" "fip_1" {}
 
 resource "opentelekomcloud_dns_ptrrecord_v2" "ptr_1" {
-  name = "%s"
-  description = "ptr record updated"
+  name          = "%s"
+  description   = "ptr record updated"
   floatingip_id = opentelekomcloud_networking_floatingip_v2.fip_1.id
-  ttl = 6000
+  ttl           = 6000
   tags = {
-    foo = "bar"
+    muh = "value-update"
   }
 }
 `, ptrName)
