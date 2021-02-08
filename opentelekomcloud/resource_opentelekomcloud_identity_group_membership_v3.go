@@ -148,7 +148,7 @@ func resourceIdentityGroupMembershipV3Delete(d *schema.ResourceData, meta interf
 func addUsersToGroup(identityClient *golangsdk.ServiceClient, group string, userList []string) error {
 	for _, u := range userList {
 		if r := users.AddToGroup(identityClient, group, u).ExtractErr(); r != nil {
-			return fmt.Errorf("Error add user %s to group %s: %s ", group, u, r)
+			return fmt.Errorf("Error add user %s to group %s: %s ", u, group, r)
 		}
 	}
 	return nil
@@ -157,7 +157,7 @@ func addUsersToGroup(identityClient *golangsdk.ServiceClient, group string, user
 func removeUsersFromGroup(identityClient *golangsdk.ServiceClient, group string, userList []string) error {
 	for _, u := range userList {
 		if r := users.RemoveFromGroup(identityClient, group, u).ExtractErr(); r != nil {
-			return fmt.Errorf("Error remove user %s from group %s: %s", group, u, r)
+			return fmt.Errorf("Error remove user %s from group %s: %s", u, group, r)
 		}
 	}
 	return nil
