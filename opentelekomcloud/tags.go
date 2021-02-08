@@ -24,25 +24,25 @@ func tagsSchemaComputed() *schema.Schema {
 
 // UpdateResourceTags is a helper to update the tags for a resource.
 // It expects the tags field to be named "tags"
-func UpdateResourceTags(conn *golangsdk.ServiceClient, d *schema.ResourceData, resourceType, id string) error {
+func UpdateResourceTags(client *golangsdk.ServiceClient, d *schema.ResourceData, resourceType, id string) error {
 	if d.HasChange("tags") {
-		oRaw, nRaw := d.GetChange("tags")
-		oMap := oRaw.(map[string]interface{})
-		nMap := nRaw.(map[string]interface{})
+		oldMapRaw, newMapRaw := d.GetChange("tags")
+		oldMap := oldMapRaw.(map[string]interface{})
+		newMap := newMapRaw.(map[string]interface{})
 
 		// remove old tags
-		if len(oMap) > 0 {
-			taglist := expandResourceTags(oMap)
-			err := tags.Delete(conn, resourceType, id, taglist).ExtractErr()
+		if len(oldMap) > 0 {
+			tagList := expandResourceTags(oldMap)
+			err := tags.Delete(client, resourceType, id, tagList).ExtractErr()
 			if err != nil {
 				return err
 			}
 		}
 
 		// set new tags
-		if len(nMap) > 0 {
-			taglist := expandResourceTags(nMap)
-			err := tags.Create(conn, resourceType, id, taglist).ExtractErr()
+		if len(newMap) > 0 {
+			tagList := expandResourceTags(newMap)
+			err := tags.Create(client, resourceType, id, tagList).ExtractErr()
 			if err != nil {
 				return err
 			}
@@ -63,16 +63,16 @@ func tagsToMap(tags []tags.ResourceTag) map[string]string {
 }
 
 // expandResourceTags returns the tags for the given map of data.
-func expandResourceTags(tagmap map[string]interface{}) []tags.ResourceTag {
-	var taglist []tags.ResourceTag
+func expandResourceTags(tagMap map[string]interface{}) []tags.ResourceTag {
+	var tagList []tags.ResourceTag
 
-	for k, v := range tagmap {
+	for k, v := range tagMap {
 		tag := tags.ResourceTag{
 			Key:   k,
 			Value: v.(string),
 		}
-		taglist = append(taglist, tag)
+		tagList = append(tagList, tag)
 	}
 
-	return taglist
+	return tagList
 }

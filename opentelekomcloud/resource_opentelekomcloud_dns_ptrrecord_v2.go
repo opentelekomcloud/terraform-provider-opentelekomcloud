@@ -148,7 +148,7 @@ func resourceDNSPtrRecordV2Read(d *schema.ResourceData, meta interface{}) error 
 		return fmt.Errorf("Error fetching OpenTelekomCloud DNS ptr record tags: %s", err)
 	}
 
-	tagmap := tagsToMap(resourceTags.Tags)
+	tagmap := tagsToMap(resourceTags)
 	if err := d.Set("tags", tagmap); err != nil {
 		return fmt.Errorf("Error saving tags for OpenTelekomCloud DNS ptr record %s: %s", d.Id(), err)
 	}
