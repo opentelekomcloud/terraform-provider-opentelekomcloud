@@ -62,7 +62,7 @@ func testAccCheckVpcV1EIPDestroy(s *terraform.State) error {
 	config := testAccProvider.Meta().(*Config)
 	networkingClient, err := config.networkingV1Client(OS_REGION_NAME)
 	if err != nil {
-		return fmt.Errorf("eror creating EIP: %s", err)
+		return fmt.Errorf("eror creating NetworkingV1 client: %s", err)
 	}
 
 	for _, rs := range s.RootModule().Resources {

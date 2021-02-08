@@ -65,7 +65,7 @@ The `bandwidth` block supports:
 
 The following attributes are exported:
 
-* `region` - - See Argument Reference above.
+* `region` - See Argument Reference above.
 
 * `publicip/type` - See Argument Reference above.
 
