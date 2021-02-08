@@ -6,6 +6,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/hashicorp/go-multierror"
 	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/helper/validation"
@@ -20,6 +21,7 @@ func resourceDNSPtrRecordV2() *schema.Resource {
 		Read:   resourceDNSPtrRecordV2Read,
 		Update: resourceDNSPtrRecordV2Update,
 		Delete: resourceDNSPtrRecordV2Delete,
+
 		Importer: &schema.ResourceImporter{
 			State: schema.ImportStatePassthrough,
 		},
@@ -64,93 +66,95 @@ func resourceDNSPtrRecordV2() *schema.Resource {
 func resourceDNSPtrRecordV2Create(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*Config)
 	region := GetRegion(d, config)
-	dnsClient, err := config.dnsV2Client(region)
+	client, err := config.dnsV2Client(region)
 	if err != nil {
-		return fmt.Errorf("Error creating OpenTelekomCloud DNS client: %s", err)
+		return fmt.Errorf("error creating OpenTelekomCloud DNS client: %s", err)
 	}
 
-	tagmap := d.Get("tags").(map[string]interface{})
-	taglist := []ptrrecords.Tag{}
-	for k, v := range tagmap {
+	tagMap := d.Get("tags").(map[string]interface{})
+	var tagList []ptrrecords.Tag
+	for k, v := range tagMap {
 		tag := ptrrecords.Tag{
 			Key:   k,
 			Value: v.(string),
 		}
-		taglist = append(taglist, tag)
+		tagList = append(tagList, tag)
 	}
 
 	createOpts := ptrrecords.CreateOpts{
 		PtrName:     d.Get("name").(string),
 		Description: d.Get("description").(string),
 		TTL:         d.Get("ttl").(int),
-		Tags:        taglist,
+		Tags:        tagList,
 	}
 
 	log.Printf("[DEBUG] Create Options: %#v", createOpts)
 	fipID := d.Get("floatingip_id").(string)
-	n, err := ptrrecords.Create(dnsClient, region, fipID, createOpts).Extract()
+	ptr, err := ptrrecords.Create(client, region, fipID, createOpts).Extract()
 	if err != nil {
-		return fmt.Errorf("Error creating OpenTelekomCloud DNS PTR record: %s", err)
+		return fmt.Errorf("error creating OpenTelekomCloud DNS PTR record: %s", err)
 	}
 
-	log.Printf("[DEBUG] Waiting for DNS PTR record (%s) to become available", n.ID)
+	log.Printf("[DEBUG] Waiting for DNS PTR record (%s) to become available", ptr.ID)
 	stateConf := &resource.StateChangeConf{
 		Target:     []string{"ACTIVE"},
 		Pending:    []string{"PENDING_CREATE"},
-		Refresh:    waitForDNSPtrRecord(dnsClient, n.ID),
+		Refresh:    waitForDNSPtrRecord(client, ptr.ID),
 		Timeout:    d.Timeout(schema.TimeoutCreate),
 		Delay:      5 * time.Second,
 		MinTimeout: 3 * time.Second,
 	}
-
 	_, err = stateConf.WaitForState()
 
 	if err != nil {
-		return fmt.Errorf(
-			"Error waiting for PTR record (%s) to become ACTIVE for creation: %s",
-			n.ID, err)
+		return fmt.Errorf("error waiting for PTR record (%s) to become ACTIVE for creation: %s", ptr.ID, err)
 	}
-	d.SetId(n.ID)
+	d.SetId(ptr.ID)
 
-	log.Printf("[DEBUG] Created OpenTelekomCloud DNS PTR record %s: %#v", n.ID, n)
+	log.Printf("[DEBUG] Created OpenTelekomCloud DNS PTR record %s: %#v", ptr.ID, ptr)
 	return resourceDNSPtrRecordV2Read(d, meta)
 }
 
 func resourceDNSPtrRecordV2Read(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*Config)
-	dnsClient, err := config.dnsV2Client(GetRegion(d, config))
+	client, err := config.dnsV2Client(GetRegion(d, config))
 	if err != nil {
-		return fmt.Errorf("Error creating OpenTelekomCloud DNS client: %s", err)
+		return fmt.Errorf("error creating OpenTelekomCloud DNS client: %s", err)
 	}
 
-	n, err := ptrrecords.Get(dnsClient, d.Id()).Extract()
+	ptr, err := ptrrecords.Get(client, d.Id()).Extract()
 	if err != nil {
-		return CheckDeleted(d, err, "ptr_record")
+		return CheckDeleted(d, err, "Unable to delete ptr_record")
 	}
 
-	log.Printf("[DEBUG] Retrieved PTR record %s: %#v", d.Id(), n)
+	log.Printf("[DEBUG] Retrieved PTR record %s: %#v", d.Id(), ptr)
 
 	// Obtain relevant info from parsing the ID
 	fipID, err := parseDNSV2PtrRecordID(d.Id())
 	if err != nil {
 		return err
 	}
+	mErr := multierror.Append(nil,
+		d.Set("name", ptr.PtrName),
+		d.Set("description", ptr.Description),
+		d.Set("floatingip_id", fipID),
+		d.Set("ttl", ptr.TTL),
+		d.Set("address", ptr.Address),
+	)
 
-	d.Set("name", n.PtrName)
-	d.Set("description", n.Description)
-	d.Set("floatingip_id", fipID)
-	d.Set("ttl", n.TTL)
-	d.Set("address", n.Address)
-
-	// save tags
-	resourceTags, err := tags.Get(dnsClient, "DNS-ptr_record", d.Id()).Extract()
-	if err != nil {
-		return fmt.Errorf("Error fetching OpenTelekomCloud DNS ptr record tags: %s", err)
+	if mErr.ErrorOrNil() != nil {
+		return mErr
 	}
 
-	tagmap := tagsToMap(resourceTags)
-	if err := d.Set("tags", tagmap); err != nil {
-		return fmt.Errorf("Error saving tags for OpenTelekomCloud DNS ptr record %s: %s", d.Id(), err)
+	// save tags
+	resourceTags, err := tags.Get(client, "DNS-ptr_record", d.Id()).Extract()
+	if err != nil {
+		return fmt.Errorf("error fetching OpenTelekomCloud DNS ptr record tags: %s", err)
+	}
+
+	tagMap := tagsToMap(resourceTags)
+	if err := d.Set("tags", tagMap); err != nil {
+		return fmt.Errorf("error saving tags for OpenTelekomCloud DNS ptr record %s: %s", d.Id(), err)
 	}
 
 	return nil
@@ -159,40 +163,46 @@ func resourceDNSPtrRecordV2Read(d *schema.ResourceData, meta interface{}) error 
 func resourceDNSPtrRecordV2Update(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*Config)
 	region := GetRegion(d, config)
-	dnsClient, err := config.dnsV2Client(region)
+	client, err := config.dnsV2Client(region)
 	if err != nil {
-		return fmt.Errorf("Error creating OpenTelekomCloud DNS client: %s", err)
+		return fmt.Errorf("error creating OpenTelekomCloud DNS client: %s", err)
 	}
 
-	tagmap := d.Get("tags").(map[string]interface{})
-	taglist := []ptrrecords.Tag{}
-	for k, v := range tagmap {
-		tag := ptrrecords.Tag{
+	tagMap := d.Get("tags").(map[string]interface{})
+	var tagList []tags.ResourceTag
+	for k, v := range tagMap {
+		tag := tags.ResourceTag{
 			Key:   k,
 			Value: v.(string),
 		}
-		taglist = append(taglist, tag)
+		tagList = append(tagList, tag)
 	}
 
 	createOpts := ptrrecords.CreateOpts{
 		PtrName:     d.Get("name").(string),
 		Description: d.Get("description").(string),
 		TTL:         d.Get("ttl").(int),
-		Tags:        taglist,
 	}
 
 	log.Printf("[DEBUG] Update Options: %#v", createOpts)
 	fipID := d.Get("floatingip_id").(string)
-	n, err := ptrrecords.Create(dnsClient, region, fipID, createOpts).Extract()
+	ptr, err := ptrrecords.Create(client, region, fipID, createOpts).Extract()
 	if err != nil {
-		return fmt.Errorf("Error updating OpenTelekomCloud DNS PTR record: %s", err)
+		return fmt.Errorf("error updating OpenTelekomCloud DNS PTR record: %s", err)
 	}
 
-	log.Printf("[DEBUG] Waiting for DNS PTR record (%s) to become available", n.ID)
+	// update tags
+	if d.HasChange("tags") {
+		if err := UpdateResourceTags(client, d, "DNS-ptr_record", d.Id()); err != nil {
+			return fmt.Errorf("error updating tags: %s", err)
+		}
+	}
+
+	log.Printf("[DEBUG] Waiting for DNS PTR record (%s) to become available", ptr.ID)
 	stateConf := &resource.StateChangeConf{
 		Target:     []string{"ACTIVE"},
 		Pending:    []string{"PENDING_CREATE"},
-		Refresh:    waitForDNSPtrRecord(dnsClient, n.ID),
+		Refresh:    waitForDNSPtrRecord(client, ptr.ID),
 		Timeout:    d.Timeout(schema.TimeoutCreate),
 		Delay:      5 * time.Second,
 		MinTimeout: 3 * time.Second,
@@ -201,33 +211,31 @@ func resourceDNSPtrRecordV2Update(d *schema.ResourceData, meta interface{}) erro
 	_, err = stateConf.WaitForState()
 
 	if err != nil {
-		return fmt.Errorf(
-			"Error waiting for PTR record (%s) to become ACTIVE for update: %s",
-			n.ID, err)
+		return fmt.Errorf("error waiting for PTR record (%s) to become ACTIVE for update: %s", ptr.ID, err)
 	}
 
-	log.Printf("[DEBUG] Updated OpenTelekomCloud DNS PTR record %s: %#v", n.ID, n)
+	log.Printf("[DEBUG] Updated OpenTelekomCloud DNS PTR record %s: %#v", ptr.ID, ptr)
 	return resourceDNSPtrRecordV2Read(d, meta)
 
 }
 
 func resourceDNSPtrRecordV2Delete(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*Config)
-	dnsClient, err := config.dnsV2Client(GetRegion(d, config))
+	client, err := config.dnsV2Client(GetRegion(d, config))
 	if err != nil {
-		return fmt.Errorf("Error creating OpenTelekomCloud DNS client: %s", err)
+		return fmt.Errorf("error creating OpenTelekomCloud DNS client: %s", err)
 	}
 
-	err = ptrrecords.Delete(dnsClient, d.Id()).ExtractErr()
+	err = ptrrecords.Delete(client, d.Id()).ExtractErr()
 	if err != nil {
-		return fmt.Errorf("Error deleting OpenTelekomCloud DNS PTR record: %s", err)
+		return fmt.Errorf("error deleting OpenTelekomCloud DNS PTR record: %s", err)
 	}
 
 	log.Printf("[DEBUG] Waiting for DNS PTR record (%s) to be deleted", d.Id())
 	stateConf := &resource.StateChangeConf{
 		Target:     []string{"DELETED"},
 		Pending:    []string{"ACTIVE", "PENDING_DELETE", "ERROR"},
-		Refresh:    waitForDNSPtrRecord(dnsClient, d.Id()),
+		Refresh:    waitForDNSPtrRecord(client, d.Id()),
 		Timeout:    d.Timeout(schema.TimeoutDelete),
 		Delay:      5 * time.Second,
 		MinTimeout: 3 * time.Second,
@@ -235,9 +243,7 @@ func resourceDNSPtrRecordV2Delete(d *schema.ResourceData, meta interface{}) erro
 
 	_, err = stateConf.WaitForState()
 	if err != nil {
-		return fmt.Errorf(
-			"Error waiting for PTR record (%s) to become DELETED for deletion: %s",
-			d.Id(), err)
+		return fmt.Errorf("error waiting for PTR record (%s) to become DELETED for deletion: %s", d.Id(), err)
 	}
 
 	d.SetId("")
@@ -246,17 +252,15 @@ func resourceDNSPtrRecordV2Delete(d *schema.ResourceData, meta interface{}) erro
 
 func waitForDNSPtrRecord(dnsClient *golangsdk.ServiceClient, id string) resource.StateRefreshFunc {
 	return func() (interface{}, string, error) {
-		ptrrecord, err := ptrrecords.Get(dnsClient, id).Extract()
+		ptr, err := ptrrecords.Get(dnsClient, id).Extract()
 		if err != nil {
 			if _, ok := err.(golangsdk.ErrDefault404); ok {
-				return ptrrecord, "DELETED", nil
+				return ptr, "DELETED", nil
 			}
-
 			return nil, "", err
 		}
 
-		log.Printf("[DEBUG] OpenTelekomCloud DNS PTR record (%s) current status: %s", ptrrecord.ID, ptrrecord.Status)
-		return ptrrecord, ptrrecord.Status, nil
+		return ptr, ptr.Status, nil
 	}
 }
 
@@ -264,7 +268,7 @@ func waitForDNSPtrRecord(dnsClient *golangsdk.ServiceClient, id string) resource
 func parseDNSV2PtrRecordID(id string) (string, error) {
 	idParts := strings.Split(id, ":")
 	if len(idParts) != 2 {
-		return "", fmt.Errorf("Unable to determine DNS PTR record ID from raw ID: %s", id)
+		return "", fmt.Errorf("unable to determine DNS PTR record ID from raw ID: %s", id)
 	}
 
 	fipID := idParts[1]
