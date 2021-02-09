@@ -216,9 +216,9 @@ func resourceSFSFileSystemV2Read(d *schema.ResourceData, meta interface{}) error
 		}
 		metadata[key] = val
 	}
-	mErr = multierror.Append(mErr,
-		d.Set("metadata", metadata),
-	)
+	if err := d.Set("metadata", metadata); err != nil {
+		return err
+	}
 
 	rules, err := shares.ListAccessRights(client, d.Id()).ExtractAccessRights()
 	if err != nil {
@@ -230,16 +230,17 @@ func resourceSFSFileSystemV2Read(d *schema.ResourceData, meta interface{}) error
 		return fmt.Errorf("error retrieving OpenTelekomCloud Shares: %s", err)
 	}
 
-	if len(rules) > 0 {
-		rule := rules[0]
-		mErr = multierror.Append(mErr,
-			d.Set("share_access_id", rule.ID),
-			d.Set("access_rule_status", rule.State),
-			d.Set("access_to", rule.AccessTo),
-			d.Set("access_type", rule.AccessType),
-			d.Set("access_level", rule.AccessLevel),
-		)
+	if len(rules) == 0 {
+		return nil
 	}
+	rule := rules[0]
+	mErr = multierror.Append(mErr,
+		d.Set("share_access_id", rule.ID),
+		d.Set("access_rule_status", rule.State),
+		d.Set("access_to", rule.AccessTo),
+		d.Set("access_type", rule.AccessType),
+		d.Set("access_level", rule.AccessLevel),
+	)
 
 	if mErr.ErrorOrNil() != nil {
 		return mErr
@@ -267,9 +268,8 @@ func resourceSFSFileSystemV2Update(d *schema.ResourceData, meta interface{}) err
 	}
 	if d.HasChange("access_to") || d.HasChange("access_level") || d.HasChange("access_type") {
 		deleteAccessOpts := shares.DeleteAccessOpts{AccessID: d.Get("share_access_id").(string)}
-		deny := shares.DeleteAccess(client, d.Id(), deleteAccessOpts)
-		if deny.Err != nil {
-			return fmt.Errorf("error changing access rules for share file: %s", deny.Err)
+		if err := shares.DeleteAccess(client, d.Id(), deleteAccessOpts).Err; err != nil {
+			return fmt.Errorf("error changing access rules for share file: %s", err)
 		}
 
 		grantAccessOpts := shares.GrantAccessOpts{
@@ -286,17 +286,16 @@ func resourceSFSFileSystemV2Update(d *schema.ResourceData, meta interface{}) err
 	}
 
 	if d.HasChange("size") {
-		oldSize, newSize := d.GetChange("size")
-		if oldSize.(int) < newSize.(int) {
-			expandOpts := shares.ExpandOpts{OSExtend: shares.OSExtendOpts{NewSize: newSize.(int)}}
-			err := shares.Expand(client, d.Id(), expandOpts).ExtractErr()
-			if err != nil {
+		oldSizeRaw, newSizeRaw := d.GetChange("size")
+		newSize := newSizeRaw.(int)
+		if oldSizeRaw.(int) < newSize {
+			expandOpts := shares.ExpandOpts{OSExtend: shares.OSExtendOpts{NewSize: newSize}}
+			if err := shares.Expand(client, d.Id(), expandOpts).ExtractErr(); err != nil {
 				return fmt.Errorf("error expanding OpenTelekomCloud Share File size: %s", err)
 			}
 		} else {
-			shrinkOpts := shares.ShrinkOpts{OSShrink: shares.OSShrinkOpts{NewSize: newSize.(int)}}
-			err := shares.Shrink(client, d.Id(), shrinkOpts).ExtractErr()
-			if err != nil {
+			shrinkOpts := shares.ShrinkOpts{OSShrink: shares.OSShrinkOpts{NewSize: newSize}}
+			if err := shares.Shrink(client, d.Id(), shrinkOpts).ExtractErr(); err != nil {
 				return fmt.Errorf("error shrinking OpenTelekomCloud Share File size: %s", err)
 			}
 		}
