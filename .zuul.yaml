@@ -14,12 +14,12 @@
       jobs:
         - golang-make-test
         - golang-make-vet
-        - goreleaser-build-vm
+        - goreleaser-build
     gate:
       jobs:
         - golang-make-test
         - golang-make-vet
-        - goreleaser-build-vm
+        - goreleaser-build
     tag:
       jobs:
-        - release-goreleaser-vm
+        - release-goreleaser
