@@ -10,18 +10,18 @@ import (
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/networking/v2/routes"
 )
 
-func TestAccOTCVpcRouteV2_basic(t *testing.T) {
+func TestAccVpcRouteV2_basic(t *testing.T) {
 	var route routes.Route
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
 		Providers:    testAccProviders,
-		CheckDestroy: testAccCheckOTCRouteV2Destroy,
+		CheckDestroy: testAccCheckRouteV2Destroy,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccRouteV2_basic,
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckOTCRouteV2Exists("opentelekomcloud_vpc_route_v2.route_1", &route),
+					testAccCheckRouteV2Exists("opentelekomcloud_vpc_route_v2.route_1", &route),
 					resource.TestCheckResourceAttr(
 						"opentelekomcloud_vpc_route_v2.route_1", "destination", "192.168.0.0/16"),
 					resource.TestCheckResourceAttr(
@@ -32,29 +32,29 @@ func TestAccOTCVpcRouteV2_basic(t *testing.T) {
 	})
 }
 
-func TestAccOTCVpcRouteV2_timeout(t *testing.T) {
+func TestAccVpcRouteV2_timeout(t *testing.T) {
 	var route routes.Route
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
 		Providers:    testAccProviders,
-		CheckDestroy: testAccCheckOTCRouteV2Destroy,
+		CheckDestroy: testAccCheckRouteV2Destroy,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccRouteV2_timeout,
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckOTCRouteV2Exists("opentelekomcloud_vpc_route_v2.route_1", &route),
+					testAccCheckRouteV2Exists("opentelekomcloud_vpc_route_v2.route_1", &route),
 				),
 			},
 		},
 	})
 }
 
-func testAccCheckOTCRouteV2Destroy(s *terraform.State) error {
+func testAccCheckRouteV2Destroy(s *terraform.State) error {
 	config := testAccProvider.Meta().(*Config)
-	routeClient, err := config.networkingV2Client(OS_REGION_NAME)
+	client, err := config.networkingV2Client(OS_REGION_NAME)
 	if err != nil {
-		return fmt.Errorf("Error creating OpenTelekomCloud route client: %s", err)
+		return fmt.Errorf("error creating OpenTelekomCloud NetworkingV2 client: %s", err)
 	}
 
 	for _, rs := range s.RootModule().Resources {
@@ -62,33 +62,33 @@ func testAccCheckOTCRouteV2Destroy(s *terraform.State) error {
 			continue
 		}
 
-		_, err := routes.Get(routeClient, rs.Primary.ID).Extract()
+		_, err := routes.Get(client, rs.Primary.ID).Extract()
 		if err == nil {
-			return fmt.Errorf("Route still exists")
+			return fmt.Errorf("route still exists")
 		}
 	}
 
 	return nil
 }
 
-func testAccCheckOTCRouteV2Exists(n string, route *routes.Route) resource.TestCheckFunc {
+func testAccCheckRouteV2Exists(n string, route *routes.Route) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
 		rs, ok := s.RootModule().Resources[n]
 		if !ok {
-			return fmt.Errorf("Not found: %s", n)
+			return fmt.Errorf("not found: %s", n)
 		}
 
 		if rs.Primary.ID == "" {
-			return fmt.Errorf("No ID is set")
+			return fmt.Errorf("no ID is set")
 		}
 
 		config := testAccProvider.Meta().(*Config)
-		routeClient, err := config.networkingV2Client(OS_REGION_NAME)
+		client, err := config.networkingV2Client(OS_REGION_NAME)
 		if err != nil {
-			return fmt.Errorf("Error creating OpenTelekomCloud route client: %s", err)
+			return fmt.Errorf("error creating OpenTelekomCloud NetworkingV2 client: %s", err)
 		}
 
-		found, err := routes.Get(routeClient, rs.Primary.ID).Extract()
+		found, err := routes.Get(client, rs.Primary.ID).Extract()
 		if err != nil {
 			return err
 		}
@@ -114,15 +114,15 @@ resource "opentelekomcloud_vpc_v1" "vpc_2" {
   cidr = "192.168.0.0/16"
 }
 resource "opentelekomcloud_vpc_peering_connection_v2" "peering_1" {
-  name = "opentelekomcloud_peering"
-  vpc_id = opentelekomcloud_vpc_v1.vpc_1.id
+  name        = "opentelekomcloud_peering"
+  vpc_id      = opentelekomcloud_vpc_v1.vpc_1.id
   peer_vpc_id = opentelekomcloud_vpc_v1.vpc_2.id
 }
 resource "opentelekomcloud_vpc_route_v2" "route_1" {
-  type = "peering"
-  nexthop = opentelekomcloud_vpc_peering_connection_v2.peering_1.id
+  type        = "peering"
+  nexthop     = opentelekomcloud_vpc_peering_connection_v2.peering_1.id
   destination = "192.168.0.0/16"
-  vpc_id =opentelekomcloud_vpc_v1.vpc_1.id
+  vpc_id      = opentelekomcloud_vpc_v1.vpc_1.id
 
 }
 `
@@ -139,16 +139,16 @@ resource "opentelekomcloud_vpc_v1" "vpc_2" {
 }
 
 resource "opentelekomcloud_vpc_peering_connection_v2" "peering_1" {
-  name = "opentelekomcloud_peering"
-  vpc_id = opentelekomcloud_vpc_v1.vpc_1.id
+  name        = "opentelekomcloud_peering"
+  vpc_id      = opentelekomcloud_vpc_v1.vpc_1.id
   peer_vpc_id = opentelekomcloud_vpc_v1.vpc_2.id
 }
 
 resource "opentelekomcloud_vpc_route_v2" "route_1" {
-   type = "peering"
-  nexthop = opentelekomcloud_vpc_peering_connection_v2.peering_1.id
+  type        = "peering"
+  nexthop     = opentelekomcloud_vpc_peering_connection_v2.peering_1.id
   destination = "192.168.0.0/16"
-  vpc_id =opentelekomcloud_vpc_v1.vpc_1.id
+  vpc_id      = opentelekomcloud_vpc_v1.vpc_1.id
 
   timeouts {
     create = "5m"
