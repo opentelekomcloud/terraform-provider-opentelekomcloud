@@ -46,3 +46,11 @@ The following attributes are exported:
 * `vpc_id` - The VPC ID of the route.
 
 * `tenant_id` - The project ID.
+
+## Import
+
+VPC route can be imported using the `id`, e.g.
+
+```sh
+terraform import opentelekomcloud_vpc_route_v2.vpc_route 2c7fs9f3-712b-18d1-940c-b50384177ee1
+```
