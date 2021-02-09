@@ -9,7 +9,7 @@ import (
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/sfs/v2/shares"
 )
 
-func TestAccOTCSFSFileSystemV2_basic(t *testing.T) {
+func TestAccSFSFileSystemV2_basic(t *testing.T) {
 	var share shares.Share
 
 	resource.Test(t, resource.TestCase{
@@ -61,7 +61,7 @@ func TestAccOTCSFSFileSystemV2_basic(t *testing.T) {
 	})
 }
 
-func TestAccOTCSFSFileSystemV2_timeout(t *testing.T) {
+func TestAccSFSFileSystemV2_timeout(t *testing.T) {
 	var share shares.Share
 
 	resource.Test(t, resource.TestCase{
@@ -81,9 +81,9 @@ func TestAccOTCSFSFileSystemV2_timeout(t *testing.T) {
 
 func testAccCheckSFSFileSystemV2Destroy(s *terraform.State) error {
 	config := testAccProvider.Meta().(*Config)
-	sfsClient, err := config.sfsV2Client(OS_REGION_NAME)
+	client, err := config.sfsV2Client(OS_REGION_NAME)
 	if err != nil {
-		return fmt.Errorf("Error creating opentelekomcloud sfs client: %s", err)
+		return fmt.Errorf("error creating OpenTelekomCloud sfs client: %s", err)
 	}
 
 	for _, rs := range s.RootModule().Resources {
@@ -91,9 +91,9 @@ func testAccCheckSFSFileSystemV2Destroy(s *terraform.State) error {
 			continue
 		}
 
-		_, err := shares.Get(sfsClient, rs.Primary.ID).Extract()
+		_, err := shares.Get(client, rs.Primary.ID).Extract()
 		if err == nil {
-			return fmt.Errorf("Share File still exists")
+			return fmt.Errorf("share file still exists")
 		}
 	}
 
@@ -104,20 +104,20 @@ func testAccCheckSFSFileSystemV2Exists(n string, share *shares.Share) resource.T
 	return func(s *terraform.State) error {
 		rs, ok := s.RootModule().Resources[n]
 		if !ok {
-			return fmt.Errorf("Not found: %s", n)
+			return fmt.Errorf("not found: %s", n)
 		}
 
 		if rs.Primary.ID == "" {
-			return fmt.Errorf("No ID is set")
+			return fmt.Errorf("no ID is set")
 		}
 
 		config := testAccProvider.Meta().(*Config)
-		sfsClient, err := config.sfsV2Client(OS_REGION_NAME)
+		client, err := config.sfsV2Client(OS_REGION_NAME)
 		if err != nil {
-			return fmt.Errorf("Error creating opentelekomcloud sfs client: %s", err)
+			return fmt.Errorf("error creating opentelekomcloud sfs client: %s", err)
 		}
 
-		found, err := shares.Get(sfsClient, rs.Primary.ID).Extract()
+		found, err := shares.Get(client, rs.Primary.ID).Extract()
 		if err != nil {
 			return err
 		}
@@ -134,39 +134,39 @@ func testAccCheckSFSFileSystemV2Exists(n string, share *shares.Share) resource.T
 
 var testAccSFSFileSystemV2_basic = fmt.Sprintf(`
 resource "opentelekomcloud_sfs_file_system_v2" "sfs_1" {
-	share_proto = "NFS"
-	size=1
-	name="sfs-test1"
-  	availability_zone="eu-de-01"
-	access_to="%s"
-  	access_type="cert"
-  	access_level="rw"
-	description="sfs_c2c_test-file"
+  share_proto       = "NFS"
+  size              = 1
+  name              = "sfs-test1"
+  availability_zone = "eu-de-01"
+  access_to         = "%s"
+  access_type       = "cert"
+  access_level      = "rw"
+  description       = "sfs_c2c_test-file"
 }
 `, OS_VPC_ID)
 
 var testAccSFSFileSystemV2_update = fmt.Sprintf(`
 resource "opentelekomcloud_sfs_file_system_v2" "sfs_1" {
-	share_proto = "NFS"
-	size=2
-	name="sfs-test2"
-  	availability_zone="eu-de-01"
-	access_to="%s"
-  	access_type="cert"
-  	access_level="rw"
-	description="sfs_c2c_test-file"
+  share_proto       = "NFS"
+  size              = 2
+  name              = "sfs-test2"
+  availability_zone = "eu-de-01"
+  access_to         = "%s"
+  access_type       = "cert"
+  access_level      = "rw"
+  description       = "sfs_c2c_test-file"
 }
 `, OS_VPC_ID)
 
 var testAccSFSFileSystemV2_timeout = fmt.Sprintf(`
 resource "opentelekomcloud_sfs_file_system_v2" "sfs_1" {
-	share_proto = "NFS"
-	size=1
-	name="sfs-test1"
-	access_to="%s"
-  	access_type="cert"
-  	access_level="rw"
-	description="sfs_c2c_test-file"
+  share_proto  = "NFS"
+  size         = 1
+  name         = "sfs-test1"
+  access_to    = "%s"
+  access_type  = "cert"
+  access_level = "rw"
+  description  = "sfs_c2c_test-file"
 
   timeouts {
     create = "5m"
