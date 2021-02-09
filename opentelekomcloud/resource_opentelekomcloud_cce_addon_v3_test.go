@@ -22,6 +22,19 @@ func TestAccCCEAddonV3_basic(t *testing.T) {
 	})
 }
 
+func TestAccCCEAddonV3_emptyBasic(t *testing.T) {
+	resource.Test(t, resource.TestCase{
+		PreCheck:     func() { testAccPreCheck(t) },
+		Providers:    testAccProviders,
+		CheckDestroy: testAccCheckCCEAddonV3Destroy,
+		Steps: []resource.TestStep{
+			{
+				Config: testAccCCEAddonV3_emptyBasic,
+			},
+		},
+	})
+}
+
 func testAccCheckCCEAddonV3Destroy(s *terraform.State) error {
 	config := testAccProvider.Meta().(*Config)
 	cceClient, err := config.cceV3Client(OS_REGION_NAME)
@@ -43,7 +56,8 @@ func testAccCheckCCEAddonV3Destroy(s *terraform.State) error {
 	return nil
 }
 
-var testAccCCEAddonV3_basic = fmt.Sprintf(`
+var (
+	testAccCCEAddonV3_basic = fmt.Sprintf(`
 resource opentelekomcloud_cce_cluster_v3 cluster_1 {
   name                    = "%s"
   cluster_type            = "VirtualMachine"
@@ -69,3 +83,25 @@ resource opentelekomcloud_cce_addon_v3 addon {
   }
 }
 `, clusterName, OS_VPC_ID, OS_NETWORK_ID)
+
+	testAccCCEAddonV3_emptyBasic = fmt.Sprintf(`
+resource opentelekomcloud_cce_cluster_v3 cluster {
+  name                    = "%s"
+  cluster_type            = "VirtualMachine"
+  flavor_id               = "cce.s1.small"
+  vpc_id                  = "%s"
+  subnet_id               = "%s"
+  container_network_type  = "overlay_l2"
+  kubernetes_svc_ip_range = "10.247.0.0/16"
+}
+
+resource "opentelekomcloud_cce_addon_v3" "cluster_autoscaler" {
+  template_name    = "autoscaler"
+  template_version = "1.17.2"
+  cluster_id       = opentelekomcloud_cce_cluster_v3.cluster.id
+  values {
+    basic = {}
+  }
+}
+`, clusterName, OS_VPC_ID, OS_NETWORK_ID)
+)

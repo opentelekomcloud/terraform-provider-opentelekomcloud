@@ -132,22 +132,13 @@ func resourceCCEAddonV3Read(d *schema.ResourceData, meta interface{}) error {
 }
 
 func getAddonValues(d *schema.ResourceData) (basic, custom map[string]interface{}, err error) {
-	values := d.Get("values").([]interface{})
-	if len(values) == 0 {
-		err = fmt.Errorf("no values are set for CCE addon") // should be impossible, as Required: true
+	valLength := d.Get("values.#").(int)
+	if valLength == 0 {
+		err = fmt.Errorf("no values are set for CCE addon")
 		return
 	}
-	valuesMap := values[0].(map[string]interface{})
-
-	basicRaw, ok := valuesMap["basic"]
-	if !ok {
-		err = fmt.Errorf("no basic values are set for CCE addon") // should be impossible, as Required: true
-		return
-	}
-	if customRaw, ok := valuesMap["custom"]; ok {
-		custom = customRaw.(map[string]interface{})
-	}
-	basic = basicRaw.(map[string]interface{})
+	basic = d.Get("values.0.basic").(map[string]interface{})
+	custom = d.Get("values.0.custom").(map[string]interface{})
 	return
 }
 
