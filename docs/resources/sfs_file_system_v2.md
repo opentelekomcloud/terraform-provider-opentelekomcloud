@@ -4,16 +4,16 @@ subcategory: "Scalable File Service (SFS)"
 
 # opentelekomcloud_sfs_file_system_v2
 
-Provides an Scalable File System resource.
+Provides a Scalable File System resource.
 
 ## Example Usage
 
 ```hcl
-variable "share_name" { }
+variable "share_name" {}
 
-variable "share_description" { }
+variable "share_description" {}
 
-variable "vpc_id" { }
+variable "vpc_id" {}
 
 resource "opentelekomcloud_sfs_file_system_v2" "share-file" {
   name         = var.share_name
@@ -21,9 +21,7 @@ resource "opentelekomcloud_sfs_file_system_v2" "share-file" {
   access_to    = var.vpc_id
   access_level = "rw"
   description  = var.share_description
-  metadata = {
-      "type" = "nfs"
-  }
+  share_proto  = "NFS"
 }
 ```
 
@@ -31,9 +29,12 @@ resource "opentelekomcloud_sfs_file_system_v2" "share-file" {
 
 The following arguments are supported:
 
+* `region` - (Optional) The region in which to obtain the V2 SFS client. If omitted, the
+  `region` argument of the provider is used. Changing this creates a new share.
+
 * `size` - (Required) The size (GB) of the shared file system.
 
-* `share_proto` - (Optional) The protocol for sharing file systems. The default value is NFS.
+* `share_proto` - (Optional) The protocol for sharing file systems. The default value is `NFS`.
 
 * `name` - (Optional) The name of the shared file system.
 
@@ -41,15 +42,20 @@ The following arguments are supported:
 
 * `is_public` - (Optional) The level of visibility for the shared file system.
 
-* `metadata` - (Optional) Metadata key and value pairs as a dictionary of strings.Changing this will create a new resource.
+* `metadata` - (Optional) Metadata key/value pairs as a dictionary of strings. Changing this will
+  create a new resource.
 
-* `availability_zone` - (Optional) The availability zone name.Changing this parameter will create a new resource.
+* `availability_zone` - (Optional) The availability zone name. Changing this parameter will create
+  a new resource.
 
-* `access_level` - (Required) The access level of the shared file system. Changing this will create a new access rule.
+* `access_level` - (Required) The access level of the shared file system. Changing this will create
+  a new access rule.
 
-* `access_type` - (Optional) The type of the share access rule. Changing this will create a new access rule.
+* `access_type` - (Optional) The type of the share access rule. Changing this will create a new
+  access rule.
 
-* `access_to` - (Required) The access that the back end grants or denies. Changing this will create a new access rule
+* `access_to` - (Required) The access that the back end grants or denies. Changing this will
+  create new access rule.
 
 ## Attributes Reference
 
@@ -59,8 +65,8 @@ In addition to all arguments above, the following attributes are exported:
 
 * `status` - The status of the shared file system.
 
-* `share_type` - The storage service type assigned for the shared file system, such as high-performance storage (composed of SSDs)
-  and large-capacity storage (composed of SATA disks).
+* `share_type` - The storage service type assigned for the shared file system, such as
+  high-performance storage (composed of SSDs) and large-capacity storage (composed of SATA disks).
 
 * `volume_type` - The volume type.
 
@@ -71,7 +77,6 @@ In addition to all arguments above, the following attributes are exported:
 * `share_access_id` - The UUID of the share access rule.
 
 * `access_rules_status` - The status of the share access rule.
-
 
 ## Import
 

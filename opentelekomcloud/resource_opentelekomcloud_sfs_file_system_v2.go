@@ -222,6 +222,11 @@ func resourceSFSFileSystemV2Read(d *schema.ResourceData, meta interface{}) error
 
 	rules, err := shares.ListAccessRights(client, d.Id()).ExtractAccessRights()
 	if err != nil {
+		if _, ok := err.(golangsdk.ErrDefault404); ok {
+			d.SetId("")
+			return nil
+		}
+
 		return fmt.Errorf("error retrieving OpenTelekomCloud Shares: %s", err)
 	}
 
