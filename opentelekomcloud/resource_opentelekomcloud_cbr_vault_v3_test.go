@@ -17,21 +17,20 @@ func TestAccCBRVaultV3_basic(t *testing.T) {
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr("opentelekomcloud_cbr_vault_v3.vault", "resource.#", "1"),
 					resource.TestCheckResourceAttr("opentelekomcloud_cbr_vault_v3.vault", "resource.0.name", "cbr-test-volume"),
-				),
-			},
-			{
-				Config: testCBRVaultV3_updated,
-				Check: resource.ComposeAggregateTestCheckFunc(
-					resource.TestCheckResourceAttr("opentelekomcloud_cbr_vault_v3.vault", "resource.#", "0"),
 					resource.TestCheckResourceAttrSet("opentelekomcloud_cbr_vault_v3.vault", "backup_policy_id"),
 				),
 			},
 			{
-				Config: testCBRVaultV3_basic,
-				Check: resource.ComposeTestCheckFunc(
-					resource.TestCheckResourceAttr("opentelekomcloud_cbr_vault_v3.vault", "resource.#", "1"),
-					resource.TestCheckResourceAttr("opentelekomcloud_cbr_vault_v3.vault", "resource.0.name", "cbr-test-volume"),
-					resource.TestCheckResourceAttr("opentelekomcloud_cbr_vault_v3.vault", "backup_policy_id", ""),
+				Config: testCBRVaultV3_noResource,
+				Check: resource.ComposeAggregateTestCheckFunc(
+					resource.TestCheckResourceAttr("opentelekomcloud_cbr_vault_v3.vault", "resource.#", "0"),
+					resource.TestCheckNoResourceAttr("opentelekomcloud_cbr_vault_v3.vault", "backup_policy_id"),
+				),
+			},
+			{
+				Config: testCBRVaultV3_noResourceResize,
+				Check: resource.ComposeAggregateTestCheckFunc(
+					resource.TestCheckResourceAttr("opentelekomcloud_cbr_vault_v3.vault", "billing.0.size", "120"),
 				),
 			},
 		},
@@ -47,31 +46,6 @@ resource "opentelekomcloud_blockstorage_volume_v2" "volume" {
   volume_type = "SSD"
 }
 
-resource "opentelekomcloud_cbr_vault_v3" "vault" {
-  name = "cbr-vault-test"
-
-  description = "CBR vault for terraform provider test"
-
-  billing {
-    size          = 100
-    object_type   = "disk"
-    protect_type  = "backup"
-    charging_mode = "post_paid"
-    period_type   = "month"
-    period_num    = 2
-
-    extra_info = {}
-  }
-
-  resource {
-    id   = opentelekomcloud_blockstorage_volume_v2.volume.id
-    type = "OS::Cinder::Volume"
-
-    extra_info = {}
-  }
-}
-`
-	testCBRVaultV3_updated = `
 resource "opentelekomcloud_cbr_policy_v3" "policy" {
   name           = "some-policy"
   operation_type = "backup"
@@ -105,8 +79,40 @@ resource "opentelekomcloud_cbr_vault_v3" "vault" {
     charging_mode = "post_paid"
     period_type   = "month"
     period_num    = 2
+  }
 
-    extra_info = {}
+  resource {
+    id   = opentelekomcloud_blockstorage_volume_v2.volume.id
+    type = "OS::Cinder::Volume"
+  }
+}
+`
+
+	testCBRVaultV3_noResource = `
+resource "opentelekomcloud_cbr_vault_v3" "vault" {
+  name = "cbr-vault-test"
+
+  description = "CBR vault for terraform provider test"
+
+  billing {
+    size          = 100
+    object_type   = "disk"
+    protect_type  = "backup"
+    charging_mode = "post_paid"
+  }
+}
+`
+	testCBRVaultV3_noResourceResize = `
+resource "opentelekomcloud_cbr_vault_v3" "vault" {
+  name = "cbr-vault-test-2"
+
+  description = "CBR vault for terraform provider test"
+
+  billing {
+    size          = 120
+    object_type   = "disk"
+    protect_type  = "backup"
+    charging_mode = "post_paid"
   }
 }
 `

@@ -25,6 +25,7 @@ func resourceCBRVaultV3() *schema.Resource {
 				Type:         schema.TypeString,
 				Optional:     true,
 				ValidateFunc: validation.StringLenBetween(0, 64),
+				ForceNew:     true,
 			},
 			"name": {
 				Type:         schema.TypeString,
@@ -341,6 +342,13 @@ func resourceCBRVaultV3Create(d *schema.ResourceData, meta interface{}) error {
 	}
 	d.SetId(vault.ID)
 
+	if policy := d.Get("backup_policy_id").(string); policy != "" {
+		_, err := vaults.BindPolicy(client, d.Id(), vaults.BindPolicyOpts{PolicyID: policy}).Extract()
+		if err != nil {
+			return fmt.Errorf("error binding policy to vault: %s", err)
+		}
+	}
+
 	return resourceCBRVaultV3Read(d, meta)
 }
 
@@ -474,17 +482,20 @@ func vaultAddedResources(d *schema.ResourceData) (res []vaults.ResourceCreate, e
 		newMap := newOne.(map[string]interface{})
 		newID := newMap["id"].(string)
 		if !oldIDs.Contains(newID) {
-			extra, err := resourceExtraMapToExtra(newMap["extra"].(map[string]interface{}))
-			if err != nil {
-				return nil, err
+			newResource := vaults.ResourceCreate{
+				ID:   newID,
+				Type: newMap["type"].(string),
+				Name: newMap["name"].(string),
 			}
-
-			res = append(res, vaults.ResourceCreate{
-				ID:        newID,
-				Type:      newMap["type"].(string),
-				Name:      newMap["name"].(string),
-				ExtraInfo: extra,
-			})
+			extraMap, ok := newMap["extra"].(map[string]interface{})
+			if ok {
+				extra, err := resourceExtraMapToExtra(extraMap)
+				if err != nil {
+					return nil, err
+				}
+				newResource.ExtraInfo = extra
+			}
+			res = append(res, newResource)
 		}
 	}
 	return
@@ -551,7 +562,7 @@ func updatePolicy(d *schema.ResourceData, client *golangsdk.ServiceClient) error
 			PolicyID: newP.(string),
 		}).Extract()
 		if err != nil {
-			return fmt.Errorf("error binding policy from vault: %s", err)
+			return fmt.Errorf("error binding policy to vault: %s", err)
 		}
 	}
 	return nil
