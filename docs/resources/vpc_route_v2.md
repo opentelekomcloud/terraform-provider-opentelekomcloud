@@ -33,6 +33,16 @@ The following arguments are supported:
 
 ## Attributes Reference
 
-All of the argument attributes are also exported as result attributes:
+The following attributes are exported:
 
 * `id` - The route ID.
+
+* `destination` - The destination address in the CIDR notation format, for example, `192.168.200.0/24`.
+
+* `nexthop` - The next hop. If the route type is `peering`, enter the VPC peering connection ID.
+
+* `type` - The route type. Currently, the value can only be peering.
+
+* `vpc_id` - The VPC ID of the route.
+
+* `tenant_id` - The project ID.
