@@ -21,10 +21,6 @@ resource "opentelekomcloud_cbr_vault_v3" "vault" {
     object_type   = "disk"
     protect_type  = "backup"
     charging_mode = "post_paid"
-    period_type   = "month"
-    period_num    = 2
-
-    extra_info = {}
   }
 }
 ```
@@ -49,10 +45,6 @@ resource "opentelekomcloud_cbr_vault_v3" "vault" {
     object_type   = "disk"
     protect_type  = "backup"
     charging_mode = "post_paid"
-    period_type   = "month"
-    period_num    = 2
-
-    extra_info = {}
   }
 
   resource {
@@ -98,10 +90,6 @@ resource "opentelekomcloud_cbr_vault_v3" "vault" {
     object_type   = "disk"
     protect_type  = "backup"
     charging_mode = "post_paid"
-    period_type   = "month"
-    period_num    = 2
-
-    extra_info = {}
   }
 }
 ```
