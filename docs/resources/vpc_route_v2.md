@@ -33,6 +33,24 @@ The following arguments are supported:
 
 ## Attributes Reference
 
-All of the argument attributes are also exported as result attributes:
+The following attributes are exported:
 
 * `id` - The route ID.
+
+* `destination` - The destination address in the CIDR notation format, for example, `192.168.200.0/24`.
+
+* `nexthop` - The next hop. If the route type is `peering`, enter the VPC peering connection ID.
+
+* `type` - The route type. Currently, the value can only be peering.
+
+* `vpc_id` - The VPC ID of the route.
+
+* `tenant_id` - The project ID.
+
+## Import
+
+VPC route can be imported using the `id`, e.g.
+
+```sh
+terraform import opentelekomcloud_vpc_route_v2.vpc_route 2c7fs9f3-712b-18d1-940c-b50384177ee1
+```
