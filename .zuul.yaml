@@ -1,25 +1,16 @@
 ---
-- job:
-    name: goreleaser-build-vm
-    parent: goreleaser-build
-    nodeset: debian-buster
-- job:
-    name: release-goreleaser-vm
-    parent: release-goreleaser
-    nodeset: debian-buster
-
 - project:
     merge-mode: squash-merge
     check:
       jobs:
         - golang-make-test
         - golang-make-vet
-        - goreleaser-build-vm
+        - goreleaser-build
     gate:
       jobs:
         - golang-make-test
         - golang-make-vet
-        - goreleaser-build-vm
+        - goreleaser-build
     tag:
       jobs:
-        - release-goreleaser-vm
+        - release-goreleaser
