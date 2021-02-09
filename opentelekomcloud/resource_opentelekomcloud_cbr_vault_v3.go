@@ -302,7 +302,7 @@ func resourceCBRVaultV3Read(d *schema.ResourceData, meta interface{}) error {
 		d.Set("user_id", vault.UserID),
 		d.Set("created_at", vault.CreatedAt),
 
-		billingRead(d, &vault.Billing),
+		setVaultBilling(d, &vault.Billing),
 	)
 	if err := mErr.ErrorOrNil(); err != nil {
 		return fmt.Errorf("error setting vault fields: %s", err)
@@ -392,7 +392,7 @@ func cbrVaultResourcesCreate(d *schema.ResourceData) (res []vaults.ResourceCreat
 	return
 }
 
-func billingRead(d *schema.ResourceData, billing *vaults.Billing) error {
+func setVaultBilling(d *schema.ResourceData, billing *vaults.Billing) error {
 	created := d.Get("billing.0").(map[string]interface{})
 	created["allocated"] = billing.Allocated
 	created["charging_mode"] = billing.ChargingMode
