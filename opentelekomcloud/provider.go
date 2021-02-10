@@ -250,6 +250,7 @@ func Provider() terraform.ResourceProvider {
 			"opentelekomcloud_as_policy_v1":                       resourceASPolicy(),
 			"opentelekomcloud_blockstorage_volume_v2":             resourceBlockStorageVolumeV2(),
 			"opentelekomcloud_cbr_policy_v3":                      resourceCBRPolicyV3(),
+			"opentelekomcloud_cbr_vault_v3":                       resourceCBRVaultV3(),
 			"opentelekomcloud_cce_addon_v3":                       resourceCCEAddonV3(),
 			"opentelekomcloud_cce_cluster_v3":                     resourceCCEClusterV3(),
 			"opentelekomcloud_cce_node_v3":                        resourceCCENodeV3(),
