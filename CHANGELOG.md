@@ -8,7 +8,7 @@ FEATURES:
 * **New Resource:** `opentelekomcloud_cbr_vault_v3` ([#833](https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/833))
 
 ENHANCEMENTS:
-* `resource/opentelekomcloud_vpc_eip_v1`: Update documentation with `tags` argument ([#830](https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/830))
+* `resource/opentelekomcloud_vpc_eip_v1`: Fix missing `tags` argument in the documentation ([#830](https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/830))
 
 BUG FIXES:
 * `provider/opentelekomcloud`: Fix not loading cloud config ([#828](https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/828))
