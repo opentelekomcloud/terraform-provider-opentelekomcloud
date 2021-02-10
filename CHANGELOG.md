@@ -1,6 +1,20 @@
 ## 1.23.0 (Unreleased)
 
 
+## 1.22.8 (February 10, 2021)
+
+FEATURES:
+* **New Resource:** `opentelekomcloud_cce_node_pool_v3` ([#825](https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/825))
+* **New Resource:** `opentelekomcloud_cbr_vault_v3` ([#833](https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/833))
+
+ENHANCEMENTS:
+* `resource/opentelekomcloud_vpc_eip_v1`: Update documentation with `tags` argument ([#830](https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/830))
+
+BUG FIXES:
+* `provider/opentelekomcloud`: Fix not loading cloud config ([#828](https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/828))
+* `resource/opentelekomcloud_dns_prrecord_v2`: Repair tags workflow in resource ([#832](https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/832))
+* `resource/opentelekomcloud_cce_addon_v3`: Fix crash on empty `basic` addon values ([#836](https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/836))
+
 ## 1.22.7 (February 03, 2021)
 
 ENHANCEMENTS:
