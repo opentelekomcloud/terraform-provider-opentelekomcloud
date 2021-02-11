@@ -827,11 +827,13 @@ func setObsBucketStorageClass(obsClient *obs.ObsClient, d *schema.ResourceData) 
 	bucket := d.Id()
 	output, err := obsClient.GetBucketStoragePolicy(bucket)
 	if err != nil {
-		return getObsError("error getting storage class of OBS bucket", bucket, err)
+		log.Printf("[WARN] Error getting storage class of OBS bucket %s: %s", bucket, err)
+		return nil
+	} else {
+		class := output.StorageClass
+		err = d.Set("storage_class", normalizeStorageClass(class))
 	}
 
-	class := output.StorageClass
-	err = d.Set("storage_class", normalizeStorageClass(class))
 	return err
 }
 
