@@ -182,7 +182,7 @@ func TestAccCCEClusterV3_withVersionDiff(t *testing.T) {
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckCCEClusterV3Exists("opentelekomcloud_cce_cluster_v3.cluster_1", &cluster),
 					resource.TestCheckResourceAttr(
-						"opentelekomcloud_cce_cluster_v3.cluster_1", "name", "opentelekomcloud-cce"),
+						"opentelekomcloud_cce_cluster_v3.cluster_1", "name", clusterName),
 				),
 			},
 		},
@@ -191,24 +191,24 @@ func TestAccCCEClusterV3_withVersionDiff(t *testing.T) {
 
 var testAccCCEClusterV3_basic = fmt.Sprintf(`
 resource "opentelekomcloud_cce_cluster_v3" "cluster_1" {
-  name = "%s"
-  cluster_type="VirtualMachine"
-  flavor_id="cce.s1.small"
-  vpc_id="%s"
-  subnet_id="%s"
-  container_network_type="overlay_l2"
+  name                    = "%s"
+  cluster_type            = "VirtualMachine"
+  flavor_id               = "cce.s1.small"
+  vpc_id                  = "%s"
+  subnet_id               = "%s"
+  container_network_type  = "overlay_l2"
   kubernetes_svc_ip_range = "10.247.0.0/16"
 }`, clusterName, OS_VPC_ID, OS_NETWORK_ID)
 
 var testAccCCEClusterV3_update = fmt.Sprintf(`
 resource "opentelekomcloud_cce_cluster_v3" "cluster_1" {
-  name = "%s"
-  cluster_type="VirtualMachine"
-  flavor_id="cce.s1.small"
-  vpc_id="%s"
-  subnet_id="%s"
-  container_network_type="overlay_l2"
-  description="new description"
+  name                    = "%s"
+  cluster_type            = "VirtualMachine"
+  flavor_id               = "cce.s1.small"
+  vpc_id                  = "%s"
+  subnet_id               = "%s"
+  container_network_type  = "overlay_l2"
+  description             = "new description"
   kubernetes_svc_ip_range = "10.247.0.0/16"
 }`, clusterName, OS_VPC_ID, OS_NETWORK_ID)
 
@@ -217,45 +217,46 @@ resource "opentelekomcloud_networking_floatingip_v2" "fip_1" {
 }
 
 resource "opentelekomcloud_cce_cluster_v3" "cluster_1" {
-  name = "%s"
-  cluster_type="VirtualMachine"
-  flavor_id="cce.s2.small"
-  cluster_version = "v1.9.2-r2"
-  vpc_id="%s"
-  subnet_id="%s"
-  eip=opentelekomcloud_networking_floatingip_v2.fip_1.address
-  container_network_type="overlay_l2"
-  authentication_mode = "rbac"
-    timeouts {
+  name                   = "%s"
+  cluster_type           = "VirtualMachine"
+  flavor_id              = "cce.s2.small"
+  cluster_version        = "v1.9.2-r2"
+  vpc_id                 = "%s"
+  subnet_id              = "%s"
+  eip                    = opentelekomcloud_networking_floatingip_v2.fip_1.address
+  container_network_type = "overlay_l2"
+  authentication_mode    = "rbac"
+  timeouts {
     create = "20m"
     delete = "10m"
   }
+
   multi_az = true
 }
-}`, clusterName, OS_VPC_ID, OS_NETWORK_ID)
+`, clusterName, OS_VPC_ID, OS_NETWORK_ID)
 
 var testAccCCEClusterV3_withInvalidVersion = fmt.Sprintf(`
 resource "opentelekomcloud_cce_cluster_v3" "cluster_1" {
-  name = "%s"
-  cluster_type="VirtualMachine"
-  flavor_id="cce.s1.small"
-  cluster_version = "v1.9.2"
-  vpc_id="%s"
-  subnet_id="%s"
-  container_network_type="overlay_l2"
-  description="new description"
+  name                   = "%s"
+  cluster_type           = "VirtualMachine"
+  flavor_id              = "cce.s1.small"
+  cluster_version        = "v1.9.2"
+  vpc_id                 = "%s"
+  subnet_id              = "%s"
+  container_network_type = "overlay_l2"
+  description            = "new description"
 }`, clusterName, OS_VPC_ID, OS_NETWORK_ID)
 
 var testAccCCEClusterV3_authProxy = fmt.Sprintf(`
 resource "opentelekomcloud_cce_cluster_v3" "cluster_1" {
-  name = "%s"
-  cluster_type="VirtualMachine"
-  flavor_id="cce.s1.small"
-  vpc_id="%s"
-  subnet_id="%s"
-  container_network_type="overlay_l2"
+  name                    = "%s"
+  cluster_type            = "VirtualMachine"
+  flavor_id               = "cce.s1.small"
+  vpc_id                  = "%s"
+  subnet_id               = "%s"
+  container_network_type  = "overlay_l2"
   kubernetes_svc_ip_range = "10.247.0.0/16"
-  authentication_mode = "authenticating_proxy"
+  authentication_mode     = "authenticating_proxy"
   authenticating_proxy_ca = <<EOT
 -----BEGIN CERTIFICATE-----
 MIIDpTCCAo2gAwIBAgIJAKdmmOBYnFvoMA0GCSqGSIb3DQEBCwUAMGkxCzAJBgNV
