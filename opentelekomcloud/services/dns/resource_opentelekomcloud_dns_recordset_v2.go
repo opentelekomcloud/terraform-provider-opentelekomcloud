@@ -413,9 +413,16 @@ func getExistingRecordSetID(d cfg.SchemaOrDiff, meta interface{}) (id string, er
 	if err != nil {
 		return "", fmt.Errorf("error extracting record sets: %s", err)
 	}
-	if len(sets) != 0 {
-		id = sets[0].ID
+	if len(sets) == 0 {
+		return
 	}
+	for _, set := range sets {
+		if set.Name == createOpts.Name {
+			id = set.ID
+			return
+		}
+	}
+
 	return
 }
 
