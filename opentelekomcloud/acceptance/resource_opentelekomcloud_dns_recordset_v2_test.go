@@ -61,6 +61,24 @@ func TestAccDNSV2RecordSet_basic(t *testing.T) {
 	})
 }
 
+// TestAccDNSV2RecordSet_childFirst covers #847
+func TestAccDNSV2RecordSet_childFirst(t *testing.T) {
+	zoneName := randomZoneName()
+	resource.Test(t, resource.TestCase{
+		PreCheck:     func() { testAccPreCheck(t) },
+		Providers:    testAccProviders,
+		CheckDestroy: testAccCheckDNSV2RecordSetDestroy,
+		Steps: []resource.TestStep{
+			{
+				Config: testAccDNSV2RecordSet_childFirst1(zoneName),
+			},
+			{
+				Config: testAccDNSV2RecordSet_childFirst2(zoneName),
+			},
+		},
+	})
+}
+
 func TestAccDNSV2RecordSet_readTTL(t *testing.T) {
 	var recordset recordsets.RecordSet
 	zoneName := randomZoneName()
@@ -323,6 +341,59 @@ resource "opentelekomcloud_dns_recordset_v2" "recordset_2" {
     foo = "bar"
     key = "value"
   }
+}
+`, zoneName)
+}
+
+func testAccDNSV2RecordSet_childFirst1(zoneName string) string {
+	return fmt.Sprintf(`
+resource "opentelekomcloud_dns_zone_v2" "zone_1" {
+  name        = "%[1]s"
+  email       = "email2@example.com"
+  description = "a zone"
+  ttl         = 6000
+}
+
+resource "opentelekomcloud_dns_recordset_v2" "recordset" {
+  zone_id     = opentelekomcloud_dns_zone_v2.zone_1.id
+  name        = "test.test.%[1]s"
+  type        = "A"
+  description = "a record set"
+  ttl         = 3000
+  records     = ["10.1.0.0"]
+
+  tags = {
+    foo = "bar"
+    key = "value"
+  }
+}
+`, zoneName)
+}
+
+func testAccDNSV2RecordSet_childFirst2(zoneName string) string {
+	return fmt.Sprintf(`
+resource "opentelekomcloud_dns_zone_v2" "zone_1" {
+  name        = "%[1]s"
+  email       = "email2@example.com"
+  description = "a zone"
+  ttl         = 6000
+}
+
+resource "opentelekomcloud_dns_recordset_v2" "recordset" {
+  zone_id     = opentelekomcloud_dns_zone_v2.zone_1.id
+  name        = "test.test.%[1]s"
+  type        = "A"
+  description = "a record set"
+  ttl         = 3000
+  records     = ["10.1.0.0"]
+}
+resource "opentelekomcloud_dns_recordset_v2" "recordset_sup" {
+  zone_id     = opentelekomcloud_dns_zone_v2.zone_1.id
+  name        = "test.%[1]s"
+  type        = "A"
+  description = "a parent record set"
+  ttl         = 3000
+  records     = ["10.1.0.0"]
 }
 `, zoneName)
 }
