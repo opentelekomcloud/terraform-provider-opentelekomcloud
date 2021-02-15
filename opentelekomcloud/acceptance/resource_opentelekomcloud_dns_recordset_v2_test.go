@@ -3,6 +3,7 @@ package acceptance
 import (
 	"fmt"
 	"regexp"
+	"strings"
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-sdk/helper/acctest"
@@ -56,6 +57,21 @@ func TestAccDNSV2RecordSet_basic(t *testing.T) {
 					resource.TestCheckResourceAttr(
 						"opentelekomcloud_dns_recordset_v2.recordset_1", "description", "an updated record set"),
 				),
+			},
+		},
+	})
+}
+
+func TestAccDNSV2RecordSet_undotted(t *testing.T) {
+	zoneName := randomZoneName()
+	zoneName = strings.TrimSuffix(zoneName, ".")
+	resource.Test(t, resource.TestCase{
+		PreCheck:     func() { testAccPreCheck(t) },
+		Providers:    testAccProviders,
+		CheckDestroy: testAccCheckDNSV2RecordSetDestroy,
+		Steps: []resource.TestStep{
+			{
+				Config: testAccDNSV2RecordSet_basic(zoneName),
 			},
 		},
 	})
@@ -216,7 +232,7 @@ func testAccCheckDNSV2RecordSetExists(n string, recordset *recordsets.RecordSet)
 func testAccDNSV2RecordSet_basic(zoneName string) string {
 	return fmt.Sprintf(`
 resource "opentelekomcloud_dns_zone_v2" "zone_1" {
-  name        = "%s"
+  name        = "%[1]s"
   email       = "email2@example.com"
   description = "a zone"
   ttl         = 6000
@@ -224,7 +240,7 @@ resource "opentelekomcloud_dns_zone_v2" "zone_1" {
 
 resource "opentelekomcloud_dns_recordset_v2" "recordset_1" {
   zone_id     = opentelekomcloud_dns_zone_v2.zone_1.id
-  name        = "%s"
+  name        = "%[1]s"
   type        = "A"
   description = "a record set"
   ttl         = 3000
@@ -235,7 +251,7 @@ resource "opentelekomcloud_dns_recordset_v2" "recordset_1" {
     key = "value"
   }
 }
-`, zoneName, zoneName)
+`, zoneName)
 }
 
 func testAccDNSV2RecordSet_update(zoneName string) string {
@@ -266,7 +282,7 @@ resource "opentelekomcloud_dns_recordset_v2" "recordset_1" {
 func testAccDNSV2RecordSet_readTTL(zoneName string) string {
 	return fmt.Sprintf(`
 resource "opentelekomcloud_dns_zone_v2" "zone_1" {
-  name        = "%s"
+  name        = "%[1]s"
   email       = "email2@example.com"
   description = "an updated zone"
   ttl         = 6000
@@ -274,17 +290,17 @@ resource "opentelekomcloud_dns_zone_v2" "zone_1" {
 
 resource "opentelekomcloud_dns_recordset_v2" "recordset_1" {
   zone_id = opentelekomcloud_dns_zone_v2.zone_1.id
-  name    = "%s"
+  name    = "%[1]s"
   type    = "A"
   records = ["10.1.0.2"]
 }
-`, zoneName, zoneName)
+`, zoneName)
 }
 
 func testAccDNSV2RecordSet_timeout(zoneName string) string {
 	return fmt.Sprintf(`
 resource "opentelekomcloud_dns_zone_v2" "zone_1" {
-  name        = "%s"
+  name        = "%[1]s"
   email       = "email2@example.com"
   description = "an updated zone"
   ttl         = 6000
@@ -292,7 +308,7 @@ resource "opentelekomcloud_dns_zone_v2" "zone_1" {
 
 resource "opentelekomcloud_dns_recordset_v2" "recordset_1" {
   zone_id = opentelekomcloud_dns_zone_v2.zone_1.id
-  name    = "%s"
+  name    = "%[1]s"
   type    = "A"
   ttl     = 3000
   records = ["10.1.0.3", "10.1.0.2"]
@@ -303,7 +319,7 @@ resource "opentelekomcloud_dns_recordset_v2" "recordset_1" {
     delete = "5m"
   }
 }
-`, zoneName, zoneName)
+`, zoneName)
 }
 
 func testAccDNSV2RecordSet_reuse(zoneName string) string {

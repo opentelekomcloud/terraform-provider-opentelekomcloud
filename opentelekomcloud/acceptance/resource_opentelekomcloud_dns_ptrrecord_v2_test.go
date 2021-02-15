@@ -2,6 +2,7 @@ package acceptance
 
 import (
 	"fmt"
+	"strings"
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-sdk/helper/acctest"
@@ -40,6 +41,21 @@ func TestAccDNSV2PtrRecord_basic(t *testing.T) {
 					resource.TestCheckResourceAttr(
 						"opentelekomcloud_dns_ptrrecord_v2.ptr_1", "tags.muh", "value-update"),
 				),
+			},
+		},
+	})
+}
+
+func TestAccDNSV2PtrRecord_undotted(t *testing.T) {
+	zoneName := randomZoneName()
+	zoneName = strings.TrimSuffix(zoneName, ".")
+	resource.Test(t, resource.TestCase{
+		PreCheck:     func() { testAccPreCheck(t) },
+		Providers:    testAccProviders,
+		CheckDestroy: testAccCheckDNSV2PtrRecordDestroy,
+		Steps: []resource.TestStep{
+			{
+				Config: testAccDNSV2PtrRecord_basic(zoneName),
 			},
 		},
 	})

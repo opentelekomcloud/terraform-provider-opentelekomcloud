@@ -37,8 +37,9 @@ func ResourceDNSPtrRecordV2() *schema.Resource {
 
 		Schema: map[string]*schema.Schema{
 			"name": {
-				Type:     schema.TypeString,
-				Required: true,
+				Type:             schema.TypeString,
+				Required:         true,
+				DiffSuppressFunc: common.SuppressEqualZoneNames,
 			},
 			"description": {
 				Type:     schema.TypeString,

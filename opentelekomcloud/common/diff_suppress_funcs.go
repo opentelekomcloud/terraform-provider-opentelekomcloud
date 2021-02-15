@@ -82,3 +82,9 @@ func SuppressSmartVersionDiff(_, old, new string, _ *schema.ResourceData) bool {
 func SuppressCaseInsensitive(_, old, new string, _ *schema.ResourceData) bool {
 	return strings.ToLower(old) == strings.ToLower(new)
 }
+
+func SuppressEqualZoneNames(_, old, new string, _ *schema.ResourceData) bool {
+	oldShort := strings.TrimSuffix(old, ".")
+	newShort := strings.TrimSuffix(new, ".")
+	return oldShort == newShort
+}

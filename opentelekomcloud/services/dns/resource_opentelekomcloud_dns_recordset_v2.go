@@ -49,9 +49,10 @@ func ResourceDNSRecordSetV2() *schema.Resource {
 				ForceNew: true,
 			},
 			"name": {
-				Type:     schema.TypeString,
-				Required: true,
-				ForceNew: true,
+				Type:             schema.TypeString,
+				Required:         true,
+				ForceNew:         true,
+				DiffSuppressFunc: common.SuppressEqualZoneNames,
 			},
 			"description": {
 				Type:     schema.TypeString,
@@ -416,8 +417,12 @@ func getExistingRecordSetID(d cfg.SchemaOrDiff, meta interface{}) (id string, er
 	if len(sets) == 0 {
 		return
 	}
+	expectedName := createOpts.Name
+	if !strings.HasSuffix(expectedName, ".") {
+		expectedName = fmt.Sprintf("%s.", expectedName)
+	}
 	for _, set := range sets {
-		if set.Name == createOpts.Name {
+		if set.Name == expectedName {
 			id = set.ID
 			return
 		}
