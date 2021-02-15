@@ -3,10 +3,13 @@ package vbs
 import (
 	"fmt"
 	"log"
+	"regexp"
 	"time"
 
+	"github.com/hashicorp/go-multierror"
 	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/helper/validation"
 	"github.com/opentelekomcloud/gophertelekomcloud"
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/vbs/v2/backups"
 
@@ -53,10 +56,16 @@ func ResourceVBSBackupV2() *schema.Resource {
 				Computed: true,
 			},
 			"description": {
-				Type:         schema.TypeString,
-				Optional:     true,
-				ForceNew:     true,
-				ValidateFunc: common.ValidateVBSBackupDescription,
+				Type:     schema.TypeString,
+				Optional: true,
+				ForceNew: true,
+				ValidateFunc: validation.All(
+					validation.StringLenBetween(0, 64),
+					validation.StringMatch(
+						regexp.MustCompile(`^[^<>]+$`),
+						"description doesn't comply with restrictions",
+					),
+				),
 			},
 			"container": {
 				Type:     schema.TypeString,
@@ -172,16 +181,21 @@ func resourceVBSBackupV2Read(d *schema.ResourceData, meta interface{}) error {
 		return fmt.Errorf("Error retrieving VBS Backup: %s", err)
 	}
 
-	d.Set("name", n.Name)
-	d.Set("description", n.Description)
-	d.Set("status", n.Status)
-	d.Set("availability_zone", n.AvailabilityZone)
-	d.Set("snapshot_id", n.SnapshotId)
-	d.Set("service_metadata", n.ServiceMetadata)
-	d.Set("size", n.Size)
-	d.Set("container", n.Container)
-	d.Set("volume_id", n.VolumeId)
-	d.Set("region", config.GetRegion(d))
+	mErr := multierror.Append(
+		d.Set("name", n.Name),
+		d.Set("description", n.Description),
+		d.Set("status", n.Status),
+		d.Set("availability_zone", n.AvailabilityZone),
+		d.Set("snapshot_id", n.SnapshotId),
+		d.Set("service_metadata", n.ServiceMetadata),
+		d.Set("size", n.Size),
+		d.Set("container", n.Container),
+		d.Set("volume_id", n.VolumeId),
+		d.Set("region", config.GetRegion(d)),
+	)
+	if err := mErr.ErrorOrNil(); err != nil {
+		return err
+	}
 
 	return nil
 }

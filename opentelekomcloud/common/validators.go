@@ -219,21 +219,6 @@ func ValidateVBSBackupName(v interface{}, k string) (ws []string, errors []error
 	return
 }
 
-func ValidateVBSBackupDescription(v interface{}, k string) (ws []string, errors []error) {
-	value := v.(string)
-	if len(value) > 64 {
-		errors = append(errors, fmt.Errorf(
-			"%q cannot be longer than 64 characters: %q", k, value))
-	}
-	pattern := `^[^<>]+$`
-	if !regexp.MustCompile(pattern).MatchString(value) {
-		errors = append(errors, fmt.Errorf(
-			"%q doesn't comply with restrictions (%q): %q",
-			k, pattern, value))
-	}
-	return
-}
-
 func ValidateAntiDdosTrafficPosID(v interface{}, k string) (ws []string, errors []error) {
 	value := v.(int)
 	if value < 1 || value > 9 {
