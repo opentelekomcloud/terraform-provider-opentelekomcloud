@@ -46,9 +46,10 @@ func ResourceDNSZoneV2() *schema.Resource {
 				ForceNew: true,
 			},
 			"name": {
-				Type:     schema.TypeString,
-				Required: true,
-				ForceNew: true,
+				Type:             schema.TypeString,
+				Required:         true,
+				ForceNew:         true,
+				DiffSuppressFunc: common.SuppressEqualZoneNames,
 			},
 			"email": {
 				Type:     schema.TypeString,
