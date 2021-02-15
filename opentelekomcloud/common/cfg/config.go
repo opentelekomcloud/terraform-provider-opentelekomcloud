@@ -785,6 +785,13 @@ func (c *Config) SfsV2Client(region string) (*golangsdk.ServiceClient, error) {
 	})
 }
 
+func (c *Config) SfsTurboV1Client(region string) (*golangsdk.ServiceClient, error) {
+	return openstack.NewSharedFileSystemTurboV1(c.HwClient, golangsdk.EndpointOpts{
+		Region:       region,
+		Availability: c.getEndpointType(),
+	})
+}
+
 func (c *Config) VbsV2Client(region string) (*golangsdk.ServiceClient, error) {
 	return openstack.NewVBS(c.HwClient, golangsdk.EndpointOpts{
 		Region:       region,
