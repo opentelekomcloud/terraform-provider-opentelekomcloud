@@ -6,13 +6,14 @@
         - golang-make-test
         - golang-make-vet
         - goreleaser-build:
-            voting: false
+            nodeset: fedora-32-large
     gate:
       jobs:
         - golang-make-test
         - golang-make-vet
         - goreleaser-build:
-            voting: false
+            nodeset: fedora-32-large
     tag:
       jobs:
-        - release-goreleaser
+        - release-goreleaser:
+            nodeset: fedora-32-large
