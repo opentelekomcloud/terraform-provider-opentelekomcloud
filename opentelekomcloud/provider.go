@@ -373,6 +373,7 @@ func Provider() terraform.ResourceProvider {
 			"opentelekomcloud_s3_bucket_policy":                   s3.ResourceS3BucketPolicy(),
 			"opentelekomcloud_s3_bucket_object":                   s3.ResourceS3BucketObject(),
 			"opentelekomcloud_sfs_file_system_v2":                 sfs.ResourceSFSFileSystemV2(),
+			"opentelekomcloud_sfs_turbo_share_v1":                 sfs.ResourceSFSTurboShareV1(),
 			"opentelekomcloud_smn_topic_v2":                       smn.ResourceTopic(),
 			"opentelekomcloud_smn_subscription_v2":                smn.ResourceSubscription(),
 			"opentelekomcloud_vpc_eip_v1":                         vpc.ResourceVpcEIPV1(),
