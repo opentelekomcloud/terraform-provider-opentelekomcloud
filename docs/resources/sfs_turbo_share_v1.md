@@ -2,7 +2,7 @@
 subcategory: "Scalable File Service (SFS)"
 ---
 
-# opentelekomcloud_sfs_turbo_v1
+# opentelekomcloud_sfs_turbo_share_v1
 
 Provides a Shared File System (SFS) Turbo resource.
 
@@ -14,7 +14,7 @@ variable "subnet_id" {}
 variable "sg_id" {}
 variable "az" {}
 
-resource "opentelekomcloud_sfs_turbo_v1" "sfs-turbo" {
+resource "opentelekomcloud_sfs_turbo_share_v1" "sfs-turbo" {
   name              = "sfs-turbo"
   size              = 500
   share_proto       = "NFS"

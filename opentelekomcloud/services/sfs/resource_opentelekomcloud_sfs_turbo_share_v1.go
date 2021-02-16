@@ -17,12 +17,12 @@ import (
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common/cfg"
 )
 
-func ResourceSFSTurboV1() *schema.Resource {
+func ResourceSFSTurboShareV1() *schema.Resource {
 	return &schema.Resource{
-		Create: resourceSFSTurboV1Create,
-		Read:   resourceSFSTurboV1Read,
-		Update: resourceSFSTurboV1Update,
-		Delete: resourceSFSTurboV1Delete,
+		Create: resourceSFSTurboShareV1Create,
+		Read:   resourceSFSTurboShareV1Read,
+		Update: resourceSFSTurboShareV1Update,
+		Delete: resourceSFSTurboShareV1Delete,
 
 		Importer: &schema.ResourceImporter{
 			State: schema.ImportStatePassthrough,
@@ -105,7 +105,7 @@ func ResourceSFSTurboV1() *schema.Resource {
 	}
 }
 
-func resourceSFSTurboV1Create(d *schema.ResourceData, meta interface{}) error {
+func resourceSFSTurboShareV1Create(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*cfg.Config)
 	client, err := config.SfsTurboV1Client(config.GetRegion(d))
 	if err != nil {
@@ -147,10 +147,10 @@ func resourceSFSTurboV1Create(d *schema.ResourceData, meta interface{}) error {
 
 	d.SetId(share.ID)
 
-	return resourceSFSTurboV1Read(d, meta)
+	return resourceSFSTurboShareV1Read(d, meta)
 }
 
-func resourceSFSTurboV1Read(d *schema.ResourceData, meta interface{}) error {
+func resourceSFSTurboShareV1Read(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*cfg.Config)
 	client, err := config.SfsTurboV1Client(config.GetRegion(d))
 	if err != nil {
@@ -191,7 +191,7 @@ func resourceSFSTurboV1Read(d *schema.ResourceData, meta interface{}) error {
 	return nil
 }
 
-func resourceSFSTurboV1Update(d *schema.ResourceData, meta interface{}) error {
+func resourceSFSTurboShareV1Update(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*cfg.Config)
 	client, err := config.SfsTurboV1Client(config.GetRegion(d))
 	if err != nil {
@@ -255,10 +255,10 @@ func resourceSFSTurboV1Update(d *schema.ResourceData, meta interface{}) error {
 
 	}
 
-	return resourceSFSTurboV1Read(d, meta)
+	return resourceSFSTurboShareV1Read(d, meta)
 }
 
-func resourceSFSTurboV1Delete(d *schema.ResourceData, meta interface{}) error {
+func resourceSFSTurboShareV1Delete(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*cfg.Config)
 	client, err := config.SfsTurboV1Client(config.GetRegion(d))
 	if err != nil {
