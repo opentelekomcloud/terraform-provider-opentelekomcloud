@@ -46,7 +46,7 @@ func TestAccSFSTurboShareV1_basic(t *testing.T) {
 
 func TestAccSFSTurboShareV1_withKMS(t *testing.T) {
 	postfix := acctest.RandString(5)
-	resourceName := "opentelekomcloud_sfs_turbo_v1.sfs-turbo"
+	resourceName := "opentelekomcloud_sfs_turbo_share_v1.sfs-turbo"
 	var turbo shares.Turbo
 
 	resource.Test(t, resource.TestCase{
