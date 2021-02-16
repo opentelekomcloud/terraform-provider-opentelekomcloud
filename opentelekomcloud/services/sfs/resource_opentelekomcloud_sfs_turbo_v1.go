@@ -182,8 +182,8 @@ func resourceSFSTurboV1Read(d *schema.ResourceData, meta interface{}) error {
 	}
 
 	// n.Size is a string of float64, should convert it to int
-	if fsize, err := strconv.ParseFloat(share.Size, 64); err == nil {
-		if err = d.Set("size", int(fsize)); err != nil {
+	if fSize, err := strconv.ParseFloat(share.Size, 64); err == nil {
+		if err = d.Set("size", int(fSize)); err != nil {
 			return fmt.Errorf("error reading size of SFS Turbo: %s", err)
 		}
 	}
@@ -199,22 +199,22 @@ func resourceSFSTurboV1Update(d *schema.ResourceData, meta interface{}) error {
 	}
 
 	if d.HasChange("size") {
-		old, newsize := d.GetChange("size")
-		if old.(int) > newsize.(int) {
-			return fmt.Errorf("Shrinking OpenTelekomCloud SFS Turbo size is not supported")
+		oldSize, newSize := d.GetChange("size")
+		if oldSize.(int) > newSize.(int) {
+			return fmt.Errorf("shrinking OpenTelekomCloud SFS Turbo size is not supported")
 		}
 
 		expandOpts := shares.ExpandOpts{
-			Extend: shares.ExtendOpts{NewSize: newsize.(int)},
+			Extend: shares.ExtendOpts{NewSize: newSize.(int)},
 		}
-		expand := shares.Expand(client, d.Id(), expandOpts)
-		if expand.Err != nil {
-			return fmt.Errorf("error Expanding OpenTelekomCloud Share File size: %s", expand.Err)
+
+		if err := shares.Expand(client, d.Id(), expandOpts).ExtractErr(); err != nil {
+			return fmt.Errorf("error expanding OpenTelekomCloud Share File size: %s", err)
 		}
 
 		stateConf := &resource.StateChangeConf{
 			Pending:    []string{"121"},
-			Target:     []string{"221", "200"},
+			Target:     []string{"221", "232"},
 			Refresh:    waitForSFSTurboSubStatus(client, d.Id()),
 			Timeout:    d.Timeout(schema.TimeoutDelete),
 			Delay:      10 * time.Second,
@@ -223,8 +223,36 @@ func resourceSFSTurboV1Update(d *schema.ResourceData, meta interface{}) error {
 
 		_, err = stateConf.WaitForState()
 		if err != nil {
-			return fmt.Errorf("error deleting OpenTelekomCloud SFS Turbo: %s", err)
+			return fmt.Errorf("error updating OpenTelekomCloud SFS Turbo: %s", err)
 		}
+	}
+
+	if d.HasChange("security_group_id") {
+		securityGroupID := d.Get("security_group_id").(string)
+		changeSGOpts := shares.ChangeSGOpts{
+			ChangeSecurityGroup: shares.SecurityGroupOpts{
+				SecurityGroupID: securityGroupID,
+			},
+		}
+
+		if err := shares.ChangeSG(client, d.Id(), changeSGOpts).ExtractErr(); err != nil {
+			return fmt.Errorf("error changing security group OpenTelekomCloud Share File size: %s", err)
+		}
+
+		stateConf := &resource.StateChangeConf{
+			Pending:    []string{"121"},
+			Target:     []string{"221", "232"},
+			Refresh:    waitForSFSTurboSubStatus(client, d.Id()),
+			Timeout:    d.Timeout(schema.TimeoutDelete),
+			Delay:      10 * time.Second,
+			MinTimeout: 5 * time.Second,
+		}
+
+		_, err = stateConf.WaitForState()
+		if err != nil {
+			return fmt.Errorf("error updating OpenTelekomCloud SFS Turbo: %s", err)
+		}
+
 	}
 
 	return resourceSFSTurboV1Read(d, meta)
@@ -232,20 +260,19 @@ func resourceSFSTurboV1Update(d *schema.ResourceData, meta interface{}) error {
 
 func resourceSFSTurboV1Delete(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*cfg.Config)
-	sfsClient, err := config.SfsTurboV1Client(config.GetRegion(d))
+	client, err := config.SfsTurboV1Client(config.GetRegion(d))
 	if err != nil {
 		return fmt.Errorf("error creating OpenTelekomCloud SFSTurboV1 client: %s", err)
 	}
 
-	err = shares.Delete(sfsClient, d.Id()).ExtractErr()
-	if err != nil {
+	if err := shares.Delete(client, d.Id()).ExtractErr(); err != nil {
 		return common.CheckDeleted(d, err, "Error deleting SFS Turbo")
 	}
 
 	stateConf := &resource.StateChangeConf{
 		Pending:    []string{"100", "200"},
 		Target:     []string{"deleted"},
-		Refresh:    waitForSFSTurboStatus(sfsClient, d.Id()),
+		Refresh:    waitForSFSTurboStatus(client, d.Id()),
 		Timeout:    d.Timeout(schema.TimeoutDelete),
 		Delay:      5 * time.Second,
 		MinTimeout: 3 * time.Second,
@@ -262,36 +289,34 @@ func resourceSFSTurboV1Delete(d *schema.ResourceData, meta interface{}) error {
 
 func waitForSFSTurboStatus(client *golangsdk.ServiceClient, shareID string) resource.StateRefreshFunc {
 	return func() (interface{}, string, error) {
-		r, err := shares.Get(client, shareID).Extract()
+		share, err := shares.Get(client, shareID).Extract()
 		if err != nil {
 			if _, ok := err.(golangsdk.ErrDefault404); ok {
 				log.Printf("[INFO] Successfully deleted OpenTelekomCloud Shared File System: %s", shareID)
-				return r, "deleted", nil
+				return share, "deleted", nil
 			}
-			return r, "error", err
+			return share, "error", err
 		}
-
-		return r, r.Status, nil
+		if share.Status == "200" {
+			return share, share.Status, nil
+		}
+		return share, share.Status, nil
 	}
 }
 
-func waitForSFSTurboSubStatus(sfsClient *golangsdk.ServiceClient, shareId string) resource.StateRefreshFunc {
+func waitForSFSTurboSubStatus(client *golangsdk.ServiceClient, shareID string) resource.StateRefreshFunc {
 	return func() (interface{}, string, error) {
-		r, err := shares.Get(sfsClient, shareId).Extract()
+		share, err := shares.Get(client, shareID).Extract()
 		if err != nil {
 			if _, ok := err.(golangsdk.ErrDefault404); ok {
-				log.Printf("[INFO] Successfully deleted OpenTelekomCloud Shared File System: %s", shareId)
-				return r, "deleted", nil
+				log.Printf("[INFO] Successfully deleted OpenTelekomCloud Shared File System: %s", shareID)
+				return share, "deleted", nil
 			}
-			return r, "error", err
+			return share, "error", err
 		}
-
-		var status string
-		if r.SubStatus != "" {
-			status = r.SubStatus
-		} else {
-			status = r.Status
+		if share.SubStatus == "221" || share.SubStatus == "232" {
+			return share, share.SubStatus, nil
 		}
-		return r, status, nil
+		return share, share.SubStatus, nil
 	}
 }

@@ -29,15 +29,14 @@ func TestAccSFSTurboV1_basic(t *testing.T) {
 					resource.TestCheckResourceAttr(resourceName, "name", "sfs-turbo-"+postfix),
 					resource.TestCheckResourceAttr(resourceName, "share_proto", "NFS"),
 					resource.TestCheckResourceAttr(resourceName, "share_type", "STANDARD"),
-					resource.TestCheckResourceAttr(resourceName, "enhanced", "false"),
-					resource.TestCheckResourceAttr(resourceName, "size", "500.00"),
+					resource.TestCheckResourceAttr(resourceName, "size", "500"),
 				),
 			},
 			{
 				Config: testAccSFSTurboV1_update(postfix),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckSFSTurboV1Exists(resourceName, &turbo),
-					resource.TestCheckResourceAttr(resourceName, "size", "600.00"),
+					resource.TestCheckResourceAttr(resourceName, "size", "600"),
 				),
 			},
 		},
@@ -61,8 +60,7 @@ func TestAccSFSTurboV1_withKMS(t *testing.T) {
 					resource.TestCheckResourceAttr(resourceName, "name", "sfs-turbo-"+postfix),
 					resource.TestCheckResourceAttr(resourceName, "share_proto", "NFS"),
 					resource.TestCheckResourceAttr(resourceName, "share_type", "STANDARD"),
-					resource.TestCheckResourceAttr(resourceName, "enhanced", "false"),
-					resource.TestCheckResourceAttr(resourceName, "size", "500.00"),
+					resource.TestCheckResourceAttr(resourceName, "size", "500"),
 					resource.TestCheckResourceAttrSet(resourceName, "crypt_key_id"),
 				),
 			},
@@ -84,7 +82,7 @@ func testAccCheckSFSTurboV1Destroy(s *terraform.State) error {
 
 		_, err := shares.Get(client, rs.Primary.ID).Extract()
 		if err == nil {
-			return fmt.Errorf("SFS Turbo still exists")
+			return fmt.Errorf("sfs turbo still exists")
 		}
 	}
 
@@ -128,7 +126,7 @@ resource "opentelekomcloud_networking_secgroup_v2" "sg" {
   name = "sg-sfs-turbo-acc"
 }
 
-resource "opentelekomcloud_sfs_turbo" "sfs-turbo" {
+resource "opentelekomcloud_sfs_turbo_v1" "sfs-turbo" {
   name        = "sfs-turbo-%s"
   size        = 500
   share_proto = "NFS"
@@ -147,7 +145,7 @@ resource "opentelekomcloud_networking_secgroup_v2" "sg" {
   name = "sg-sfs-turbo-acc"
 }
 
-resource "opentelekomcloud_sfs_turbo" "sfs-turbo" {
+resource "opentelekomcloud_sfs_turbo_v1" "sfs-turbo" {
   name        = "sfs-turbo-%s"
   size        = 600
   share_proto = "NFS"
@@ -167,12 +165,12 @@ resource "opentelekomcloud_networking_secgroup_v2" "sg" {
 }
 
 resource "opentelekomcloud_kms_key_v1" "key_1" {
-  key_alias    = "kms-sfs-turbo-acc"
+  key_alias    = "kms-sfs-turbo-%[1]s"
   pending_days = "7"
 }
 
 resource "opentelekomcloud_sfs_turbo_v1" "sfs-turbo" {
-  name        = "sfs-turbo-%s"
+  name        = "sfs-turbo-%[1]s"
   size        = 500
   share_proto = "NFS"
   vpc_id      = "%s"
