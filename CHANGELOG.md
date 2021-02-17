@@ -1,5 +1,43 @@
-## 1.23.0 (Unreleased)
+## 1.24.0 (Unreleased)
 
+## 1.23.0 (February 17, 2021)
+
+NOTES/DEPRECATIONS:
+
+Binary build matrix is narrowed ([#858](https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/issues/858)).
+Binaries for the following OS/architecture combinations are built:
+
+* **Linux**
+  * `AMD64`
+  * `i386`
+  * `ARMv6`
+  * `ARMv8` (`ARM64`)
+
+* **Darwin**
+  * `AMD64`
+
+* **Windows**
+  * `AMD64`
+  * `i386`
+
+* **FreeBSD**
+    * `AMD64`
+    * `i386`
+
+_`Darwin/ARMv8` (new `M1` chip) to be also built in future_
+
+FEATURES:
+* **New Resource:** `opentelekomcloud_sfs_turbo_share_v1` ([#852](https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/issues/852))
+
+ENHANCEMENTS:
+* `resource/opentelekomcloud_dns_zone_v2`: Make DNS resources diff ignore ending dot in name ([#850](https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/issues/850))
+* `resource/opentelekomcloud_dns_recordset_v2`: Make DNS resources diff ignore ending dot in name ([#850](https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/issues/850))
+* `resource/opentelekomcloud_dns_ptrrecord_v2`: Make DNS resources diff ignore ending dot in name ([#850](https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/issues/850))
+* `resource/opentelekomcloud_compute_instance_v2`: Remove `Deprecated` and `Removed` fields from schema ([#859](https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/issues/859))
+
+BUG FIXES:
+* `resource/opentelekomcloud_dns_recordset_v2`: Fix shared DNS recordset searching ([#848](https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/issues/848))
+* `resource/opentelekomcloud_vbs_backup_v2`: Fix reading backup description ([#855](https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/issues/855))
 
 ## 1.22.8 (February 10, 2021)
 
