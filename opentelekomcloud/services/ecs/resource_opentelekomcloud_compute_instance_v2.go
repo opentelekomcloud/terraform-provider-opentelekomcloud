@@ -79,12 +79,6 @@ func ResourceComputeInstanceV2() *schema.Resource {
 				Computed:    true,
 				DefaultFunc: schema.EnvDefaultFunc("OS_FLAVOR_NAME", nil),
 			},
-			"floating_ip": {
-				Type:     schema.TypeString,
-				Optional: true,
-				ForceNew: false,
-				Removed:  "Use the opentelekomcloud_compute_floatingip_associate_v2 resource instead",
-			},
 			"user_data": {
 				Type:     schema.TypeString,
 				Optional: true,
@@ -149,12 +143,6 @@ func ResourceComputeInstanceV2() *schema.Resource {
 							Optional: true,
 							ForceNew: true,
 							Computed: true,
-						},
-						"floating_ip": {
-							Type:     schema.TypeString,
-							Optional: true,
-							Computed: true,
-							Removed:  "Use the opentelekomcloud_compute_floatingip_associate_v2 resource instead",
 						},
 						"mac": {
 							Type:     schema.TypeString,
@@ -254,29 +242,6 @@ func ResourceComputeInstanceV2() *schema.Resource {
 					},
 				},
 			},
-			"volume": {
-				Type:     schema.TypeSet,
-				Optional: true,
-				Removed:  "Use block_device or opentelekomcloud_compute_volume_attach_v2 instead",
-				Elem: &schema.Resource{
-					Schema: map[string]*schema.Schema{
-						"id": {
-							Type:     schema.TypeString,
-							Optional: true,
-							Computed: true,
-						},
-						"volume_id": {
-							Type:     schema.TypeString,
-							Required: true,
-						},
-						"device": {
-							Type:     schema.TypeString,
-							Optional: true,
-							Computed: true,
-						},
-					},
-				},
-			},
 			"scheduler_hints": {
 				Type:     schema.TypeSet,
 				Optional: true,
@@ -328,25 +293,6 @@ func ResourceComputeInstanceV2() *schema.Resource {
 					},
 				},
 				Set: resourceComputeSchedulerHintsHash,
-			},
-			"personality": {
-				Type:     schema.TypeSet,
-				Optional: true,
-				ForceNew: true,
-				Elem: &schema.Resource{
-					Schema: map[string]*schema.Schema{
-						"file": {
-							Type:     schema.TypeString,
-							Required: true,
-						},
-						"content": {
-							Type:     schema.TypeString,
-							Required: true,
-						},
-					},
-				},
-				Set:        resourceComputeInstancePersonalityHash,
-				Deprecated: "Open Telekom Cloud API doesn't accept `personality`, please use `user_data` instead",
 			},
 			"stop_before_destroy": {
 				Type:     schema.TypeBool,
@@ -1129,14 +1075,6 @@ func setImageInformation(computeClient *golangsdk.ServiceClient, server *servers
 	}
 
 	return nil
-}
-
-func resourceComputeInstancePersonalityHash(v interface{}) int {
-	var buf bytes.Buffer
-	m := v.(map[string]interface{})
-	buf.WriteString(fmt.Sprintf("%s-", m["file"].(string)))
-
-	return hashcode.String(buf.String())
 }
 
 func getFlavorID(client *golangsdk.ServiceClient, d *schema.ResourceData) (string, error) {
