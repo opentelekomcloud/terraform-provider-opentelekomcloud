@@ -28,6 +28,21 @@ builds:
     ignore:
       - goos: darwin
         goarch: '386'
+      # Linux only:
+      # arm 8
+      - goos: darwin  # Requires Go 1.16: https://golang.org/doc/go1.16#darwin
+        goarch: arm64
+      - goos: freebsd
+        goarch: arm64
+      - goos: windows
+        goarch: arm64
+      # arm 6
+      - goos: darwin
+        goarch: arm
+      - goos: freebsd
+        goarch: arm
+      - goos: windows
+        goarch: arm
     binary: '{{ .ProjectName }}_v{{ .Version }}'  # this `v` is absolutely required - in CI `v` is stripped for some reason
 archives:
   - format: zip
@@ -44,7 +59,6 @@ signs:
       - "${artifact}"
 release:
   # Visit your project's GitHub Releases page to publish this release.
-  draft: true
   github:
     owner: opentelekomcloud
     name: terraform-provider-opentelekomcloud
