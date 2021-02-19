@@ -5,7 +5,6 @@ import (
 	"encoding/hex"
 	"fmt"
 	"log"
-	"os"
 	"time"
 
 	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
@@ -54,16 +53,18 @@ func ResourceComputeBMSInstanceV2() *schema.Resource {
 				ForceNew: false,
 			},
 			"image_id": {
-				Type:     schema.TypeString,
-				Optional: true,
-				ForceNew: true,
-				Computed: true,
+				Type:        schema.TypeString,
+				Optional:    true,
+				ForceNew:    true,
+				Computed:    true,
+				DefaultFunc: schema.EnvDefaultFunc("OS_IMAGE_ID", nil),
 			},
 			"image_name": {
-				Type:     schema.TypeString,
-				Optional: true,
-				ForceNew: true,
-				Computed: true,
+				Type:        schema.TypeString,
+				Optional:    true,
+				ForceNew:    true,
+				Computed:    true,
+				DefaultFunc: schema.EnvDefaultFunc("OS_IMAGE_NAME", nil),
 			},
 			"flavor_id": {
 				Type:        schema.TypeString,
@@ -792,22 +793,9 @@ func getImageId(computeClient *golangsdk.ServiceClient, d *schema.ResourceData) 
 
 	if imageId := d.Get("image_id").(string); imageId != "" {
 		return imageId, nil
-	} else {
-		// try the helpers.OS_IMAGE_ID environment variable
-		if v := os.Getenv("helpers.OS_IMAGE_ID"); v != "" {
-			return v, nil
-		}
 	}
 
-	imageName := d.Get("image_name").(string)
-	if imageName == "" {
-		// try the OS_IMAGE_NAME environment variable
-		if v := os.Getenv("OS_IMAGE_NAME"); v != "" {
-			imageName = v
-		}
-	}
-
-	if imageName != "" {
+	if imageName := d.Get("image_name").(string); imageName != "" {
 		imageId, err := images.IDFromName(computeClient, imageName)
 		if err != nil {
 			return "", err
@@ -815,7 +803,7 @@ func getImageId(computeClient *golangsdk.ServiceClient, d *schema.ResourceData) 
 		return imageId, nil
 	}
 
-	return "", fmt.Errorf("Neither a image ID, or image name were able to be determined.")
+	return "", fmt.Errorf("neither an image ID, or image name were able to be determined")
 }
 
 func setImageInformations(computeClient *golangsdk.ServiceClient, server *bms.Server, d *schema.ResourceData) error {

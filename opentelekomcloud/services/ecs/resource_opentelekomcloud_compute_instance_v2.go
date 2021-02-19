@@ -6,7 +6,6 @@ import (
 	"encoding/hex"
 	"fmt"
 	"log"
-	"os"
 	"time"
 
 	"github.com/hashicorp/terraform-plugin-sdk/helper/hashcode"
@@ -54,16 +53,18 @@ func ResourceComputeInstanceV2() *schema.Resource {
 				ForceNew: false,
 			},
 			"image_id": {
-				Type:     schema.TypeString,
-				Optional: true,
-				ForceNew: true,
-				Computed: true,
+				Type:        schema.TypeString,
+				Optional:    true,
+				ForceNew:    true,
+				Computed:    true,
+				DefaultFunc: schema.EnvDefaultFunc("OS_IMAGE_ID", nil),
 			},
 			"image_name": {
-				Type:     schema.TypeString,
-				Optional: true,
-				ForceNew: true,
-				Computed: true,
+				Type:        schema.TypeString,
+				Optional:    true,
+				ForceNew:    true,
+				Computed:    true,
+				DefaultFunc: schema.EnvDefaultFunc("OS_IMAGE_NAME", nil),
 			},
 			"flavor_id": {
 				Type:        schema.TypeString,
@@ -1014,22 +1015,9 @@ func getImageIDFromConfig(client *golangsdk.ServiceClient, d *schema.ResourceDat
 
 	if imageId := d.Get("image_id").(string); imageId != "" {
 		return imageId, nil
-	} else {
-		// try the helpers.OS_IMAGE_ID environment variable
-		if v := os.Getenv("helpers.OS_IMAGE_ID"); v != "" {
-			return v, nil
-		}
 	}
 
-	imageName := d.Get("image_name").(string)
-	if imageName == "" {
-		// try the OS_IMAGE_NAME environment variable
-		if v := os.Getenv("OS_IMAGE_NAME"); v != "" {
-			imageName = v
-		}
-	}
-
-	if imageName != "" {
+	if imageName := d.Get("image_name").(string); imageName != "" {
 		imageId, err := images.IDFromName(client, imageName)
 		if err != nil {
 			return "", err
