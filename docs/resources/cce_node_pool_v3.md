@@ -4,7 +4,7 @@ subcategory: "Cloud Container Engine (CCE)"
 
 # opentelekomcloud_cce_node_pool_v3
 
-Add a node pool resource to a container cluster.
+Provides a node pool resource management of a container cluster.
 
 ## Example Usage
 
@@ -47,7 +47,8 @@ The following arguments are supported:
 * `flavor` - (Required) Specifies the flavor id. Changing this parameter will create a new resource.
 
 * `availability_zone` - (Required) Specify the name of the available partition (AZ). If zone is not
-  specified than `node_pool` will be across `random`. Changing this parameter will create a new resource.
+  specified than `node_pool` will be in randomly selected AZ. The default value is `random`. Changing
+  this parameter will create a new resource.
 
 * `key_pair` - (Optional) Key pair name when logging in to select the key pair mode.
   This parameter and password are alternative. Changing this parameter will create a new resource.
