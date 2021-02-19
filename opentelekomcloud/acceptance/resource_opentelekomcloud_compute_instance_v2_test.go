@@ -566,9 +566,8 @@ resource "opentelekomcloud_compute_instance_v2" "instance_1" {
   network {
     uuid = "%s"
   }
-  image_id = "%s"
 }
-`, OS_AVAILABILITY_ZONE, OS_NETWORK_ID, OS_IMAGE_ID)
+`, OS_AVAILABILITY_ZONE, OS_NETWORK_ID)
 
 var testAccComputeV2Instance_withoutTags = fmt.Sprintf(`
 resource "opentelekomcloud_compute_instance_v2" "instance_1" {
@@ -581,9 +580,8 @@ resource "opentelekomcloud_compute_instance_v2" "instance_1" {
   network {
     uuid = "%s"
   }
-  image_id = "%s"
 }
-`, OS_AVAILABILITY_ZONE, OS_NETWORK_ID, OS_IMAGE_ID)
+`, OS_AVAILABILITY_ZONE, OS_NETWORK_ID)
 
 var testAccComputeV2Instance_withTags = fmt.Sprintf(`
 resource "opentelekomcloud_compute_instance_v2" "instance_1" {
@@ -596,13 +594,12 @@ resource "opentelekomcloud_compute_instance_v2" "instance_1" {
   network {
     uuid = "%s"
   }
-  image_id = "%s"
   tags = {
     foo = "bar"
     key = "value"
   }
 }
-`, OS_AVAILABILITY_ZONE, OS_NETWORK_ID, OS_IMAGE_ID)
+`, OS_AVAILABILITY_ZONE, OS_NETWORK_ID)
 
 var testAccComputeV2Instance_updateTags = fmt.Sprintf(`
 resource "opentelekomcloud_compute_instance_v2" "instance_1" {
@@ -615,13 +612,12 @@ resource "opentelekomcloud_compute_instance_v2" "instance_1" {
   network {
     uuid = "%s"
   }
-  image_id = "%s"
   tags = {
     foo2 = "bar2"
     key  = "value2"
   }
 }
-`, OS_AVAILABILITY_ZONE, OS_NETWORK_ID, OS_IMAGE_ID)
+`, OS_AVAILABILITY_ZONE, OS_NETWORK_ID)
 
 var testAccComputeV2Instance_tag = fmt.Sprintf(`
 resource "opentelekomcloud_compute_instance_v2" "instance_1" {
@@ -634,13 +630,12 @@ resource "opentelekomcloud_compute_instance_v2" "instance_1" {
   network {
     uuid = "%s"
   }
-  image_id = "%s"
   tag = {
     foo = "bar"
     key = "value"
   }
 }
-`, OS_AVAILABILITY_ZONE, OS_NETWORK_ID, OS_IMAGE_ID)
+`, OS_AVAILABILITY_ZONE, OS_NETWORK_ID)
 
 var testAccComputeV2Instance_updateTag = fmt.Sprintf(`
 resource "opentelekomcloud_compute_instance_v2" "instance_1" {
@@ -653,13 +648,12 @@ resource "opentelekomcloud_compute_instance_v2" "instance_1" {
   network {
     uuid = "%s"
   }
-  image_id = "%s"
   tag = {
     foo  = "bar2"
     key1 = "value"
   }
 }
-`, OS_AVAILABILITY_ZONE, OS_NETWORK_ID, OS_IMAGE_ID)
+`, OS_AVAILABILITY_ZONE, OS_NETWORK_ID)
 
 var testAccComputeV2Instance_multiSecgroup = fmt.Sprintf(`
 resource "opentelekomcloud_compute_secgroup_v2" "secgroup_1" {
@@ -690,9 +684,8 @@ resource "opentelekomcloud_compute_instance_v2" "instance_1" {
   network {
     uuid = "%s"
   }
-  image_id = "%s"
 }
-`, OS_NETWORK_ID, OS_IMAGE_ID)
+`, OS_NETWORK_ID)
 
 var testAccComputeV2Instance_multiSecgroupUpdate = fmt.Sprintf(`
 resource "opentelekomcloud_compute_secgroup_v2" "secgroup_1" {
@@ -727,9 +720,8 @@ resource "opentelekomcloud_compute_instance_v2" "instance_1" {
   network {
     uuid = "%s"
   }
-  image_id = "%s"
 }
-`, OS_NETWORK_ID, OS_IMAGE_ID)
+`, OS_NETWORK_ID)
 
 var testAccComputeV2Instance_bootFromVolumeImage = fmt.Sprintf(`
 resource "opentelekomcloud_compute_instance_v2" "instance_1" {
@@ -817,9 +809,8 @@ resource "opentelekomcloud_compute_instance_v2" "instance_1" {
     uuid        = "%s"
     fixed_ip_v4 = "192.168.0.24"
   }
-  image_id = "%s"
 }
-`, OS_NETWORK_ID, OS_IMAGE_ID)
+`, OS_NETWORK_ID)
 
 var testAccComputeV2Instance_fixedIPUpdate = fmt.Sprintf(`
 resource "opentelekomcloud_compute_instance_v2" "instance_1" {
@@ -829,9 +820,8 @@ resource "opentelekomcloud_compute_instance_v2" "instance_1" {
     uuid        = "%s"
     fixed_ip_v4 = "192.168.0.25"
   }
-  image_id = "%s"
 }
-`, OS_NETWORK_ID, OS_IMAGE_ID)
+`, OS_NETWORK_ID)
 
 var testAccComputeV2Instance_stopBeforeDestroy = fmt.Sprintf(`
 resource "opentelekomcloud_compute_instance_v2" "instance_1" {
@@ -841,9 +831,8 @@ resource "opentelekomcloud_compute_instance_v2" "instance_1" {
     uuid = "%s"
   }
   stop_before_destroy = true
-  image_id            = "%s"
 }
-`, OS_NETWORK_ID, OS_IMAGE_ID)
+`, OS_NETWORK_ID)
 
 var testAccComputeV2Instance_metadata = fmt.Sprintf(`
 resource "opentelekomcloud_compute_instance_v2" "instance_1" {
@@ -856,9 +845,8 @@ resource "opentelekomcloud_compute_instance_v2" "instance_1" {
     foo = "bar"
     abc = "def"
   }
-  image_id = "%s"
 }
-`, OS_NETWORK_ID, OS_IMAGE_ID)
+`, OS_NETWORK_ID)
 
 var testAccComputeV2Instance_metadataUpdate = fmt.Sprintf(`
 resource "opentelekomcloud_compute_instance_v2" "instance_1" {
@@ -871,9 +859,8 @@ resource "opentelekomcloud_compute_instance_v2" "instance_1" {
     foo = "bar"
     ghi = "jkl"
   }
-  image_id = "%s"
 }
-`, OS_NETWORK_ID, OS_IMAGE_ID)
+`, OS_NETWORK_ID)
 
 var testAccComputeV2Instance_timeout = fmt.Sprintf(`
 resource "opentelekomcloud_compute_instance_v2" "instance_1" {
@@ -886,10 +873,8 @@ resource "opentelekomcloud_compute_instance_v2" "instance_1" {
   timeouts {
     create = "10m"
   }
-
-  image_id = "%s"
 }
-`, OS_NETWORK_ID, OS_IMAGE_ID)
+`, OS_NETWORK_ID)
 
 var testAccComputeV2Instance_autoRecovery = fmt.Sprintf(`
 resource "opentelekomcloud_compute_instance_v2" "instance_1" {
@@ -902,10 +887,9 @@ resource "opentelekomcloud_compute_instance_v2" "instance_1" {
   network {
     uuid = "%s"
   }
-  image_id      = "%s"
   auto_recovery = false
 }
-`, OS_AVAILABILITY_ZONE, OS_NETWORK_ID, OS_IMAGE_ID)
+`, OS_AVAILABILITY_ZONE, OS_NETWORK_ID)
 
 var testAccComputeV2Instance_crazyNICs = fmt.Sprintf(`
 resource "opentelekomcloud_networking_network_v2" "network_1" {
@@ -978,7 +962,6 @@ resource "opentelekomcloud_compute_instance_v2" "instance_1" {
   network {
     uuid = "%s"
   }
-  image_id = "%s"
   network {
     uuid        = opentelekomcloud_networking_network_v2.network_1.id
     fixed_ip_v4 = "192.168.1.100"
@@ -1008,4 +991,4 @@ resource "opentelekomcloud_compute_instance_v2" "instance_1" {
     port = opentelekomcloud_networking_port_v2.port_4.id
   }
 }
-`, OS_NETWORK_ID, OS_IMAGE_ID)
+`, OS_NETWORK_ID)
