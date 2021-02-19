@@ -39,6 +39,24 @@ func TestAccCCENodePoolsV3_basic(t *testing.T) {
 	})
 }
 
+func TestAccCCENodePoolsV3_randomAZ(t *testing.T) {
+	var nodePool nodepools.NodePool
+
+	resource.Test(t, resource.TestCase{
+		PreCheck:     func() { testAccCCEKeyPairPreCheck(t) },
+		Providers:    testAccProviders,
+		CheckDestroy: testAccCheckCCENodePoolV3Destroy,
+		Steps: []resource.TestStep{
+			{
+				Config: testAccCCENodePoolV3_RandomAZ,
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckCCENodePoolV3Exists("opentelekomcloud_cce_node_pool_v3.node_pool", "opentelekomcloud_cce_cluster_v3.cluster", &nodePool),
+				),
+			},
+		},
+	})
+}
+
 func testAccCheckCCENodePoolV3Destroy(s *terraform.State) error {
 	config := testAccProvider.Meta().(*cfg.Config)
 	cceClient, err := config.CceV3Client(OS_REGION_NAME)
@@ -178,3 +196,40 @@ resource "opentelekomcloud_cce_node_pool_v3" "node_pool" {
     volumetype = "SSD"
   }
 }`, OS_VPC_ID, OS_NETWORK_ID, OS_AVAILABILITY_ZONE, OS_KEYPAIR_NAME)
+
+var testAccCCENodePoolV3_RandomAZ = fmt.Sprintf(`
+resource "opentelekomcloud_cce_cluster_v3" "cluster" {
+  name         = "opentelekomcloud-cce-np"
+  cluster_type = "VirtualMachine"
+  flavor_id    = "cce.s1.small"
+  vpc_id       = "%s"
+  subnet_id    = "%s"
+
+  container_network_type = "overlay_l2"
+  authentication_mode    = "rbac"
+}
+
+resource "opentelekomcloud_cce_node_pool_v3" "node_pool" {
+  cluster_id         = opentelekomcloud_cce_cluster_v3.cluster.id
+  name               = "opentelekomcloud-cce-node-pool"
+  os                 = "EulerOS 2.5"
+  flavor             = "s2.xlarge.2"
+  initial_node_count = 1
+  key_pair           = "%s"
+  availability_zone  = "random"
+
+  scale_enable             = false
+  min_node_count           = 0
+  max_node_count           = 0
+  scale_down_cooldown_time = 0
+  priority                 = 0
+
+  root_volume {
+    size       = 40
+    volumetype = "SSD"
+  }
+  data_volumes {
+    size       = 100
+    volumetype = "SSD"
+  }
+}`, OS_VPC_ID, OS_NETWORK_ID, OS_KEYPAIR_NAME)

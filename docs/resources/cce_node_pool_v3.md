@@ -4,7 +4,7 @@ subcategory: "Cloud Container Engine (CCE)"
 
 # opentelekomcloud_cce_node_pool_v3
 
-Add a node pool to a container cluster.
+Provides a node pool resource management of a container cluster.
 
 ## Example Usage
 
@@ -46,14 +46,17 @@ The following arguments are supported:
 
 * `flavor` - (Required) Specifies the flavor id. Changing this parameter will create a new resource.
 
-* `availability_zone` - (Required) specify the name of the available partition (AZ). Changing this parameter will create a new resource.
+* `availability_zone` - (Required) Specify the name of the available partition (AZ). If zone is not
+  specified than `node_pool` will be in randomly selected AZ. The default value is `random`. Changing
+  this parameter will create a new resource.
 
-* `key_pair` - (Optional) Key pair name when logging in to select the key pair mode. This parameter and password are alternative. Changing this parameter will create a new resource.
+* `key_pair` - (Optional) Key pair name when logging in to select the key pair mode.
+  This parameter and password are alternative. Changing this parameter will create a new resource.
 
-* `password` - (Optional) Key pair name when logging in to select the key pair mode. This parameter and password are alternative. Changing this parameter will create a new resource.
+* `password` - (Optional) Key pair name when logging in to select the key pair mode.
+  This parameter and password are alternative. Changing this parameter will create a new resource.
 
 * `os` - (Optional) Node OS. Changing this parameter will create a new resource.
-
   Supported OS depends on kubernetes version of the cluster.
   * Clusters of Kubernetes `v1.13` or later support `EulerOS 2.5`.
   * Clusters of Kubernetes `v1.17` or later support `EulerOS 2.5` and `CentOS 7.7`.
@@ -114,7 +117,5 @@ All above argument parameters can be exported as attribute parameters along with
 ## Timeouts
 
 This resource provides the following timeouts configuration options:
-
-- `create` - Default is 20 minutes.
-
-- `delete` - Default is 20 minutes.
+  - `create` - Default is 20 minutes.
+  - `delete` - Default is 20 minutes.

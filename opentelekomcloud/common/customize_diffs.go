@@ -63,7 +63,7 @@ func checkVolumeTypeAvailable(d cfg.SchemaOrDiff, argName, expectedAZ string, ty
 func ValidateVolumeType(argName string) schema.CustomizeDiffFunc {
 	return func(d *schema.ResourceDiff, meta interface{}) error {
 		expectedAZ := d.Get("availability_zone").(string)
-		if expectedAZ == "" {
+		if expectedAZ == "" || expectedAZ == "random" {
 			log.Printf("[DEBUG] No AZ provided, can't define available volume types")
 			return nil
 		}
