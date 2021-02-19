@@ -216,6 +216,7 @@ resource "opentelekomcloud_cce_node_pool_v3" "node_pool" {
   flavor             = "s2.xlarge.2"
   initial_node_count = 1
   key_pair           = "%s"
+  availability_zone  = "random"
 
   scale_enable             = false
   min_node_count           = 0
