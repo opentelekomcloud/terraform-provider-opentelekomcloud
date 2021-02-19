@@ -557,8 +557,8 @@ func testAccCheckComputeV2InstanceInstanceIDsDoNotMatch(instance1, instance2 *se
 
 var testAccComputeV2Instance_basic = fmt.Sprintf(`
 resource "opentelekomcloud_compute_instance_v2" "instance_1" {
-  name = "instance_1"
-  security_groups = ["default"]
+  name              = "instance_1"
+  security_groups   = ["default"]
   availability_zone = "%s"
   metadata = {
     foo = "bar"
@@ -566,13 +566,14 @@ resource "opentelekomcloud_compute_instance_v2" "instance_1" {
   network {
     uuid = "%s"
   }
+  image_id = "%s"
 }
-`, OS_AVAILABILITY_ZONE, OS_NETWORK_ID)
+`, OS_AVAILABILITY_ZONE, OS_NETWORK_ID, OS_IMAGE_ID)
 
 var testAccComputeV2Instance_withoutTags = fmt.Sprintf(`
 resource "opentelekomcloud_compute_instance_v2" "instance_1" {
-  name = "instance_1"
-  security_groups = ["default"]
+  name              = "instance_1"
+  security_groups   = ["default"]
   availability_zone = "%s"
   metadata = {
     foo = "bar"
@@ -580,13 +581,14 @@ resource "opentelekomcloud_compute_instance_v2" "instance_1" {
   network {
     uuid = "%s"
   }
+  image_id = "%s"
 }
-`, OS_AVAILABILITY_ZONE, OS_NETWORK_ID)
+`, OS_AVAILABILITY_ZONE, OS_NETWORK_ID, OS_IMAGE_ID)
 
 var testAccComputeV2Instance_withTags = fmt.Sprintf(`
 resource "opentelekomcloud_compute_instance_v2" "instance_1" {
-  name = "instance_1"
-  security_groups = ["default"]
+  name              = "instance_1"
+  security_groups   = ["default"]
   availability_zone = "%s"
   metadata = {
     foo = "bar"
@@ -594,17 +596,18 @@ resource "opentelekomcloud_compute_instance_v2" "instance_1" {
   network {
     uuid = "%s"
   }
+  image_id = "%s"
   tags = {
     foo = "bar"
     key = "value"
   }
 }
-`, OS_AVAILABILITY_ZONE, OS_NETWORK_ID)
+`, OS_AVAILABILITY_ZONE, OS_NETWORK_ID, OS_IMAGE_ID)
 
 var testAccComputeV2Instance_updateTags = fmt.Sprintf(`
 resource "opentelekomcloud_compute_instance_v2" "instance_1" {
-  name = "instance_1"
-  security_groups = ["default"]
+  name              = "instance_1"
+  security_groups   = ["default"]
   availability_zone = "%s"
   metadata = {
     foo = "bar"
@@ -612,17 +615,18 @@ resource "opentelekomcloud_compute_instance_v2" "instance_1" {
   network {
     uuid = "%s"
   }
+  image_id = "%s"
   tags = {
     foo2 = "bar2"
-    key = "value2"
+    key  = "value2"
   }
 }
-`, OS_AVAILABILITY_ZONE, OS_NETWORK_ID)
+`, OS_AVAILABILITY_ZONE, OS_NETWORK_ID, OS_IMAGE_ID)
 
 var testAccComputeV2Instance_tag = fmt.Sprintf(`
 resource "opentelekomcloud_compute_instance_v2" "instance_1" {
-  name = "instance_1"
-  security_groups = ["default"]
+  name              = "instance_1"
+  security_groups   = ["default"]
   availability_zone = "%s"
   metadata = {
     foo = "bar"
@@ -630,17 +634,18 @@ resource "opentelekomcloud_compute_instance_v2" "instance_1" {
   network {
     uuid = "%s"
   }
+  image_id = "%s"
   tag = {
     foo = "bar"
     key = "value"
   }
 }
-`, OS_AVAILABILITY_ZONE, OS_NETWORK_ID)
+`, OS_AVAILABILITY_ZONE, OS_NETWORK_ID, OS_IMAGE_ID)
 
 var testAccComputeV2Instance_updateTag = fmt.Sprintf(`
 resource "opentelekomcloud_compute_instance_v2" "instance_1" {
-  name = "instance_1"
-  security_groups = ["default"]
+  name              = "instance_1"
+  security_groups   = ["default"]
   availability_zone = "%s"
   metadata = {
     foo = "bar"
@@ -648,91 +653,98 @@ resource "opentelekomcloud_compute_instance_v2" "instance_1" {
   network {
     uuid = "%s"
   }
+  image_id = "%s"
   tag = {
-    foo = "bar2"
+    foo  = "bar2"
     key1 = "value"
   }
 }
-`, OS_AVAILABILITY_ZONE, OS_NETWORK_ID)
+`, OS_AVAILABILITY_ZONE, OS_NETWORK_ID, OS_IMAGE_ID)
 
 var testAccComputeV2Instance_multiSecgroup = fmt.Sprintf(`
 resource "opentelekomcloud_compute_secgroup_v2" "secgroup_1" {
-  name = "secgroup_1"
+  name        = "secgroup_1"
   description = "a security group"
   rule {
-    from_port = 22
-    to_port = 22
+    from_port   = 22
+    to_port     = 22
     ip_protocol = "tcp"
-    cidr = "0.0.0.0/0"
+    cidr        = "0.0.0.0/0"
   }
 }
 
 resource "opentelekomcloud_compute_secgroup_v2" "secgroup_2" {
-  name = "secgroup_2"
+  name        = "secgroup_2"
   description = "another security group"
   rule {
-    from_port = 80
-    to_port = 80
+    from_port   = 80
+    to_port     = 80
     ip_protocol = "tcp"
-    cidr = "0.0.0.0/0"
+    cidr        = "0.0.0.0/0"
   }
 }
 
 resource "opentelekomcloud_compute_instance_v2" "instance_1" {
-  name = "instance_1"
+  name            = "instance_1"
   security_groups = ["default"]
   network {
     uuid = "%s"
   }
+  image_id = "%s"
 }
-`, OS_NETWORK_ID)
+`, OS_NETWORK_ID, OS_IMAGE_ID)
 
 var testAccComputeV2Instance_multiSecgroupUpdate = fmt.Sprintf(`
 resource "opentelekomcloud_compute_secgroup_v2" "secgroup_1" {
-  name = "secgroup_1"
+  name        = "secgroup_1"
   description = "a security group"
   rule {
-    from_port = 22
-    to_port = 22
+    from_port   = 22
+    to_port     = 22
     ip_protocol = "tcp"
-    cidr = "0.0.0.0/0"
+    cidr        = "0.0.0.0/0"
   }
 }
 
 resource "opentelekomcloud_compute_secgroup_v2" "secgroup_2" {
-  name = "secgroup_2"
+  name        = "secgroup_2"
   description = "another security group"
   rule {
-    from_port = 80
-    to_port = 80
+    from_port   = 80
+    to_port     = 80
     ip_protocol = "tcp"
-    cidr = "0.0.0.0/0"
+    cidr        = "0.0.0.0/0"
   }
 }
 
 resource "opentelekomcloud_compute_instance_v2" "instance_1" {
   name = "instance_1"
-  security_groups = ["default", opentelekomcloud_compute_secgroup_v2.secgroup_1.name, opentelekomcloud_compute_secgroup_v2.secgroup_2.name]
+  security_groups = [
+    "default",
+    opentelekomcloud_compute_secgroup_v2.secgroup_1.name,
+    opentelekomcloud_compute_secgroup_v2.secgroup_2.name,
+  ]
   network {
     uuid = "%s"
   }
+  image_id = "%s"
 }
-`, OS_NETWORK_ID)
+`, OS_NETWORK_ID, OS_IMAGE_ID)
 
 var testAccComputeV2Instance_bootFromVolumeImage = fmt.Sprintf(`
 resource "opentelekomcloud_compute_instance_v2" "instance_1" {
-  name = "instance_1"
-  security_groups = ["default"]
+  name              = "instance_1"
+  security_groups   = ["default"]
   availability_zone = "%s"
   network {
     uuid = "%s"
   }
   block_device {
-    uuid = "%s"
-    source_type = "image"
-    volume_size = 50
-    boot_index = 0
-    destination_type = "volume"
+    uuid                  = "%s"
+    source_type           = "image"
+    volume_size           = 50
+    boot_index            = 0
+    destination_type      = "volume"
     delete_on_termination = true
   }
 }
@@ -740,22 +752,22 @@ resource "opentelekomcloud_compute_instance_v2" "instance_1" {
 
 var testAccComputeV2Instance_bootFromVolumeVolume = fmt.Sprintf(`
 resource "opentelekomcloud_blockstorage_volume_v2" "vol_1" {
-  name = "vol_1"
-  size = 50
+  name     = "vol_1"
+  size     = 50
   image_id = "%s"
 }
 
 resource "opentelekomcloud_compute_instance_v2" "instance_1" {
-  name = "instance_1"
+  name            = "instance_1"
   security_groups = ["default"]
   network {
     uuid = "%s"
   }
   block_device {
-    uuid = opentelekomcloud_blockstorage_volume_v2.vol_1.id
-    source_type = "volume"
-    boot_index = 0
-    destination_type = "volume"
+    uuid                  = opentelekomcloud_blockstorage_volume_v2.vol_1.id
+    source_type           = "volume"
+    boot_index            = 0
+    destination_type      = "volume"
     delete_on_termination = true
   }
 }
@@ -763,17 +775,17 @@ resource "opentelekomcloud_compute_instance_v2" "instance_1" {
 
 var testAccComputeV2Instance_bootFromVolume = fmt.Sprintf(`
 resource "opentelekomcloud_compute_instance_v2" "instance_1" {
-  name = "instance_1"
+  name            = "instance_1"
   security_groups = ["default"]
   network {
     uuid = "%s"
   }
   block_device {
-    uuid = "%s"
-    source_type = "image"
-    volume_size = 50
-    boot_index = 0
-    destination_type = "volume"
+    uuid                  = "%s"
+    source_type           = "image"
+    volume_size           = 50
+    boot_index            = 0
+    destination_type      = "volume"
     delete_on_termination = true
   }
 }
@@ -781,17 +793,17 @@ resource "opentelekomcloud_compute_instance_v2" "instance_1" {
 
 var testAccComputeV2Instance_bootFromVolumeUpdate = fmt.Sprintf(`
 resource "opentelekomcloud_compute_instance_v2" "instance_1" {
-  name = "instance_1"
+  name            = "instance_1"
   security_groups = ["default"]
   network {
     uuid = "%s"
   }
   block_device {
-    uuid = "%s"
-    source_type = "image"
-    volume_size = 51
-    boot_index = 0
-    destination_type = "volume"
+    uuid                  = "%s"
+    source_type           = "image"
+    volume_size           = 51
+    boot_index            = 0
+    destination_type      = "volume"
     delete_on_termination = true
   }
 }
@@ -799,40 +811,43 @@ resource "opentelekomcloud_compute_instance_v2" "instance_1" {
 
 var testAccComputeV2Instance_fixedIP = fmt.Sprintf(`
 resource "opentelekomcloud_compute_instance_v2" "instance_1" {
-  name = "instance_1"
+  name            = "instance_1"
   security_groups = ["default"]
   network {
-    uuid = "%s"
+    uuid        = "%s"
     fixed_ip_v4 = "192.168.0.24"
   }
+  image_id = "%s"
 }
-`, OS_NETWORK_ID)
+`, OS_NETWORK_ID, OS_IMAGE_ID)
 
 var testAccComputeV2Instance_fixedIPUpdate = fmt.Sprintf(`
 resource "opentelekomcloud_compute_instance_v2" "instance_1" {
-  name = "instance_1"
+  name            = "instance_1"
   security_groups = ["default"]
   network {
-    uuid = "%s"
+    uuid        = "%s"
     fixed_ip_v4 = "192.168.0.25"
   }
+  image_id = "%s"
 }
-`, OS_NETWORK_ID)
+`, OS_NETWORK_ID, OS_IMAGE_ID)
 
 var testAccComputeV2Instance_stopBeforeDestroy = fmt.Sprintf(`
 resource "opentelekomcloud_compute_instance_v2" "instance_1" {
-  name = "instance_1"
+  name            = "instance_1"
   security_groups = ["default"]
   network {
     uuid = "%s"
   }
   stop_before_destroy = true
+  image_id            = "%s"
 }
-`, OS_NETWORK_ID)
+`, OS_NETWORK_ID, OS_IMAGE_ID)
 
 var testAccComputeV2Instance_metadata = fmt.Sprintf(`
 resource "opentelekomcloud_compute_instance_v2" "instance_1" {
-  name = "instance_1"
+  name            = "instance_1"
   security_groups = ["default"]
   network {
     uuid = "%s"
@@ -841,12 +856,13 @@ resource "opentelekomcloud_compute_instance_v2" "instance_1" {
     foo = "bar"
     abc = "def"
   }
+  image_id = "%s"
 }
-`, OS_NETWORK_ID)
+`, OS_NETWORK_ID, OS_IMAGE_ID)
 
 var testAccComputeV2Instance_metadataUpdate = fmt.Sprintf(`
 resource "opentelekomcloud_compute_instance_v2" "instance_1" {
-  name = "instance_1"
+  name            = "instance_1"
   security_groups = ["default"]
   network {
     uuid = "%s"
@@ -855,12 +871,13 @@ resource "opentelekomcloud_compute_instance_v2" "instance_1" {
     foo = "bar"
     ghi = "jkl"
   }
+  image_id = "%s"
 }
-`, OS_NETWORK_ID)
+`, OS_NETWORK_ID, OS_IMAGE_ID)
 
 var testAccComputeV2Instance_timeout = fmt.Sprintf(`
 resource "opentelekomcloud_compute_instance_v2" "instance_1" {
-  name = "instance_1"
+  name            = "instance_1"
   security_groups = ["default"]
   network {
     uuid = "%s"
@@ -869,13 +886,15 @@ resource "opentelekomcloud_compute_instance_v2" "instance_1" {
   timeouts {
     create = "10m"
   }
+
+  image_id = "%s"
 }
-`, OS_NETWORK_ID)
+`, OS_NETWORK_ID, OS_IMAGE_ID)
 
 var testAccComputeV2Instance_autoRecovery = fmt.Sprintf(`
 resource "opentelekomcloud_compute_instance_v2" "instance_1" {
-  name = "instance_1"
-  security_groups = ["default"]
+  name              = "instance_1"
+  security_groups   = ["default"]
   availability_zone = "%s"
   metadata = {
     foo = "bar"
@@ -883,66 +902,67 @@ resource "opentelekomcloud_compute_instance_v2" "instance_1" {
   network {
     uuid = "%s"
   }
+  image_id      = "%s"
   auto_recovery = false
 }
-`, OS_AVAILABILITY_ZONE, OS_NETWORK_ID)
+`, OS_AVAILABILITY_ZONE, OS_NETWORK_ID, OS_IMAGE_ID)
 
 var testAccComputeV2Instance_crazyNICs = fmt.Sprintf(`
 resource "opentelekomcloud_networking_network_v2" "network_1" {
   name = "network_1"
 }
 resource "opentelekomcloud_networking_subnet_v2" "subnet_1" {
-  name = "subnet_1"
-  network_id = opentelekomcloud_networking_network_v2.network_1.id
-  cidr = "192.168.1.0/24"
-  ip_version = 4
+  name        = "subnet_1"
+  network_id  = opentelekomcloud_networking_network_v2.network_1.id
+  cidr        = "192.168.1.0/24"
+  ip_version  = 4
   enable_dhcp = true
-  no_gateway = true
+  no_gateway  = true
 }
 resource "opentelekomcloud_networking_network_v2" "network_2" {
   name = "network_2"
 }
 resource "opentelekomcloud_networking_subnet_v2" "subnet_2" {
-  name = "subnet_2"
-  network_id = opentelekomcloud_networking_network_v2.network_2.id
-  cidr = "192.168.2.0/24"
-  ip_version = 4
+  name        = "subnet_2"
+  network_id  = opentelekomcloud_networking_network_v2.network_2.id
+  cidr        = "192.168.2.0/24"
+  ip_version  = 4
   enable_dhcp = true
-  no_gateway = true
+  no_gateway  = true
 }
 resource "opentelekomcloud_networking_port_v2" "port_1" {
-  name = "port_1"
-  network_id = opentelekomcloud_networking_network_v2.network_1.id
+  name           = "port_1"
+  network_id     = opentelekomcloud_networking_network_v2.network_1.id
   admin_state_up = "true"
   fixed_ip {
-    subnet_id = opentelekomcloud_networking_subnet_v2.subnet_1.id
+    subnet_id  = opentelekomcloud_networking_subnet_v2.subnet_1.id
     ip_address = "192.168.1.103"
   }
 }
 resource "opentelekomcloud_networking_port_v2" "port_2" {
-  name = "port_2"
-  network_id = opentelekomcloud_networking_network_v2.network_2.id
+  name           = "port_2"
+  network_id     = opentelekomcloud_networking_network_v2.network_2.id
   admin_state_up = "true"
   fixed_ip {
-    subnet_id = opentelekomcloud_networking_subnet_v2.subnet_2.id
+    subnet_id  = opentelekomcloud_networking_subnet_v2.subnet_2.id
     ip_address = "192.168.2.103"
   }
 }
 resource "opentelekomcloud_networking_port_v2" "port_3" {
-  name = "port_3"
-  network_id = opentelekomcloud_networking_network_v2.network_1.id
+  name           = "port_3"
+  network_id     = opentelekomcloud_networking_network_v2.network_1.id
   admin_state_up = "true"
   fixed_ip {
-    subnet_id = opentelekomcloud_networking_subnet_v2.subnet_1.id
+    subnet_id  = opentelekomcloud_networking_subnet_v2.subnet_1.id
     ip_address = "192.168.1.104"
   }
 }
 resource "opentelekomcloud_networking_port_v2" "port_4" {
-  name = "port_4"
-  network_id = opentelekomcloud_networking_network_v2.network_2.id
+  name           = "port_4"
+  network_id     = opentelekomcloud_networking_network_v2.network_2.id
   admin_state_up = "true"
   fixed_ip {
-    subnet_id = opentelekomcloud_networking_subnet_v2.subnet_2.id
+    subnet_id  = opentelekomcloud_networking_subnet_v2.subnet_2.id
     ip_address = "192.168.2.104"
   }
 }
@@ -953,25 +973,26 @@ resource "opentelekomcloud_compute_instance_v2" "instance_1" {
     "opentelekomcloud_networking_port_v2.port_1",
     "opentelekomcloud_networking_port_v2.port_2",
   ]
-  name = "instance_1"
+  name            = "instance_1"
   security_groups = ["default"]
   network {
     uuid = "%s"
   }
+  image_id = "%s"
   network {
-    uuid = opentelekomcloud_networking_network_v2.network_1.id
+    uuid        = opentelekomcloud_networking_network_v2.network_1.id
     fixed_ip_v4 = "192.168.1.100"
   }
   network {
-    uuid = opentelekomcloud_networking_network_v2.network_2.id
+    uuid        = opentelekomcloud_networking_network_v2.network_2.id
     fixed_ip_v4 = "192.168.2.100"
   }
   network {
-    uuid = opentelekomcloud_networking_network_v2.network_1.id
+    uuid        = opentelekomcloud_networking_network_v2.network_1.id
     fixed_ip_v4 = "192.168.1.101"
   }
   network {
-    uuid = opentelekomcloud_networking_network_v2.network_2.id
+    uuid        = opentelekomcloud_networking_network_v2.network_2.id
     fixed_ip_v4 = "192.168.2.101"
   }
   network {
@@ -987,4 +1008,4 @@ resource "opentelekomcloud_compute_instance_v2" "instance_1" {
     port = opentelekomcloud_networking_port_v2.port_4.id
   }
 }
-`, OS_NETWORK_ID)
+`, OS_NETWORK_ID, OS_IMAGE_ID)
