@@ -10,8 +10,10 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
 	"github.com/opentelekomcloud/gophertelekomcloud"
+	"github.com/opentelekomcloud/gophertelekomcloud/openstack/common/tags"
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/sfs/v2/shares"
 
+	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common"
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common/cfg"
 )
 
@@ -113,6 +115,7 @@ func ResourceSFSFileSystemV2() *schema.Resource {
 				Type:     schema.TypeString,
 				Computed: true,
 			},
+			"tags": common.TagsSchema(),
 		},
 	}
 }
@@ -169,6 +172,15 @@ func resourceSFSFileSystemV2Create(d *schema.ResourceData, meta interface{}) err
 	_, err = shares.GrantAccess(client, share.ID, grantAccessOpts).ExtractAccess()
 	if err != nil {
 		return fmt.Errorf("error applying access rules to share file: %s", err)
+	}
+
+	// set tags
+	tagRaw := d.Get("tags").(map[string]interface{})
+	if len(tagRaw) > 0 {
+		tagList := common.ExpandResourceTags(tagRaw)
+		if err := tags.Create(client, "sfs", share.ID, tagList).ExtractErr(); err != nil {
+			return fmt.Errorf("error setting tags of SFS File System: %s", err)
+		}
 	}
 
 	d.SetId(share.ID)
@@ -248,6 +260,16 @@ func resourceSFSFileSystemV2Read(d *schema.ResourceData, meta interface{}) error
 		return mErr
 	}
 
+	// save tags
+	resourceTags, err := tags.Get(client, "sfs", d.Id()).Extract()
+	if err != nil {
+		return fmt.Errorf("error fetching OpenTelekomCloud SFS File System tags: %s", err)
+	}
+	tagMap := common.TagsToMap(resourceTags)
+	if err := d.Set("tags", tagMap); err != nil {
+		return fmt.Errorf("error saving tags for OpenTelekomCloud SFS File System: %s", err)
+	}
+
 	return nil
 }
 
@@ -300,6 +322,13 @@ func resourceSFSFileSystemV2Update(d *schema.ResourceData, meta interface{}) err
 			if err := shares.Shrink(client, d.Id(), shrinkOpts).ExtractErr(); err != nil {
 				return fmt.Errorf("error shrinking OpenTelekomCloud Share File size: %s", err)
 			}
+		}
+	}
+
+	// update tags
+	if d.HasChange("tags") {
+		if err := common.UpdateResourceTags(client, d, "sfs", d.Id()); err != nil {
+			return fmt.Errorf("error updating tags of SFS File System %s: %s", d.Id(), err)
 		}
 	}
 

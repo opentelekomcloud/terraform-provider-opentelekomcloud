@@ -14,6 +14,8 @@ import (
 func TestAccSFSFileSystemV2_basic(t *testing.T) {
 	var share shares.Share
 
+	resourceName := "opentelekomcloud_sfs_file_system_v2.sfs_1"
+
 	resource.Test(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
 		Providers:    testAccProviders,
@@ -22,41 +24,29 @@ func TestAccSFSFileSystemV2_basic(t *testing.T) {
 			{
 				Config: testAccSFSFileSystemV2_basic,
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckSFSFileSystemV2Exists("opentelekomcloud_sfs_file_system_v2.sfs_1", &share),
-					resource.TestCheckResourceAttr(
-						"opentelekomcloud_sfs_file_system_v2.sfs_1", "name", "sfs-test1"),
-					resource.TestCheckResourceAttr(
-						"opentelekomcloud_sfs_file_system_v2.sfs_1", "share_proto", "NFS"),
-					resource.TestCheckResourceAttr(
-						"opentelekomcloud_sfs_file_system_v2.sfs_1", "status", "available"),
-					resource.TestCheckResourceAttr(
-						"opentelekomcloud_sfs_file_system_v2.sfs_1", "size", "1"),
-					resource.TestCheckResourceAttr(
-						"opentelekomcloud_sfs_file_system_v2.sfs_1", "access_level", "rw"),
-					resource.TestCheckResourceAttr(
-						"opentelekomcloud_sfs_file_system_v2.sfs_1", "access_to", OS_VPC_ID),
-					resource.TestCheckResourceAttr(
-						"opentelekomcloud_sfs_file_system_v2.sfs_1", "access_type", "cert"),
+					testAccCheckSFSFileSystemV2Exists(resourceName, &share),
+					resource.TestCheckResourceAttr(resourceName, "name", "sfs-test1"),
+					resource.TestCheckResourceAttr(resourceName, "share_proto", "NFS"),
+					resource.TestCheckResourceAttr(resourceName, "status", "available"),
+					resource.TestCheckResourceAttr(resourceName, "size", "1"),
+					resource.TestCheckResourceAttr(resourceName, "access_level", "rw"),
+					resource.TestCheckResourceAttr(resourceName, "access_to", OS_VPC_ID),
+					resource.TestCheckResourceAttr(resourceName, "access_type", "cert"),
+					resource.TestCheckResourceAttr(resourceName, "tags.muh", "value-create"),
 				),
 			},
 			{
 				Config: testAccSFSFileSystemV2_update,
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckSFSFileSystemV2Exists("opentelekomcloud_sfs_file_system_v2.sfs_1", &share),
-					resource.TestCheckResourceAttr(
-						"opentelekomcloud_sfs_file_system_v2.sfs_1", "name", "sfs-test2"),
-					resource.TestCheckResourceAttr(
-						"opentelekomcloud_sfs_file_system_v2.sfs_1", "share_proto", "NFS"),
-					resource.TestCheckResourceAttr(
-						"opentelekomcloud_sfs_file_system_v2.sfs_1", "status", "available"),
-					resource.TestCheckResourceAttr(
-						"opentelekomcloud_sfs_file_system_v2.sfs_1", "size", "2"),
-					resource.TestCheckResourceAttr(
-						"opentelekomcloud_sfs_file_system_v2.sfs_1", "access_level", "rw"),
-					resource.TestCheckResourceAttr(
-						"opentelekomcloud_sfs_file_system_v2.sfs_1", "access_to", OS_VPC_ID),
-					resource.TestCheckResourceAttr(
-						"opentelekomcloud_sfs_file_system_v2.sfs_1", "access_type", "cert"),
+					testAccCheckSFSFileSystemV2Exists(resourceName, &share),
+					resource.TestCheckResourceAttr(resourceName, "name", "sfs-test2"),
+					resource.TestCheckResourceAttr(resourceName, "share_proto", "NFS"),
+					resource.TestCheckResourceAttr(resourceName, "status", "available"),
+					resource.TestCheckResourceAttr(resourceName, "size", "2"),
+					resource.TestCheckResourceAttr(resourceName, "access_level", "rw"),
+					resource.TestCheckResourceAttr(resourceName, "access_to", OS_VPC_ID),
+					resource.TestCheckResourceAttr(resourceName, "access_type", "cert"),
+					resource.TestCheckResourceAttr(resourceName, "tags.muh", "value-update"),
 				),
 			},
 		},
@@ -85,7 +75,7 @@ func testAccCheckSFSFileSystemV2Destroy(s *terraform.State) error {
 	config := testAccProvider.Meta().(*cfg.Config)
 	client, err := config.SfsV2Client(OS_REGION_NAME)
 	if err != nil {
-		return fmt.Errorf("error creating OpenTelekomCloud sfs client: %s", err)
+		return fmt.Errorf("error creating OpenTelekomCloud SFSv2 client: %s", err)
 	}
 
 	for _, rs := range s.RootModule().Resources {
@@ -144,6 +134,11 @@ resource "opentelekomcloud_sfs_file_system_v2" "sfs_1" {
   access_type       = "cert"
   access_level      = "rw"
   description       = "sfs_c2c_test-file"
+
+  tags = {
+    muh = "value-create"
+    kuh = "value-create"
+  }
 }
 `, OS_VPC_ID)
 
@@ -157,6 +152,10 @@ resource "opentelekomcloud_sfs_file_system_v2" "sfs_1" {
   access_type       = "cert"
   access_level      = "rw"
   description       = "sfs_c2c_test-file"
+
+  tags = {
+    muh = "value-update"
+  }
 }
 `, OS_VPC_ID)
 
