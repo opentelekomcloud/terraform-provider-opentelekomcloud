@@ -22,6 +22,10 @@ resource "opentelekomcloud_sfs_file_system_v2" "share-file" {
   access_level = "rw"
   description  = var.share_description
   share_proto  = "NFS"
+
+  tags = {
+    muh = "kuh"
+  }
 }
 ```
 
@@ -57,6 +61,8 @@ The following arguments are supported:
 * `access_to` - (Required) The access that the back end grants or denies. Changing this will
   create new access rule.
 
+* `tags` - (Optional) Tags key/value pairs to associate with the SFS File System.
+
 ## Attributes Reference
 
 In addition to all arguments above, the following attributes are exported:
@@ -77,6 +83,8 @@ In addition to all arguments above, the following attributes are exported:
 * `share_access_id` - The UUID of the share access rule.
 
 * `access_rules_status` - The status of the share access rule.
+
+* `tags` - See Argument Reference above.
 
 ## Import
 
