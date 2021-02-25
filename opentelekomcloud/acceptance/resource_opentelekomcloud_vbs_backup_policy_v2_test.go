@@ -72,7 +72,7 @@ func testAccVBSBackupPolicyV2Destroy(s *terraform.State) error {
 	config := testAccProvider.Meta().(*cfg.Config)
 	vbsClient, err := config.VbsV2Client(OS_REGION_NAME)
 	if err != nil {
-		return fmt.Errorf("Error creating opentelekomcloud sfs client: %s", err)
+		return fmt.Errorf("error creating opentelekomcloud sfs client: %s", err)
 	}
 
 	for _, rs := range s.RootModule().Resources {
@@ -82,7 +82,7 @@ func testAccVBSBackupPolicyV2Destroy(s *terraform.State) error {
 
 		_, err := policies.List(vbsClient, policies.ListOpts{ID: rs.Primary.ID})
 		if err != nil {
-			return fmt.Errorf("Backup Policy still exists")
+			return fmt.Errorf("backup Policy still exists")
 		}
 	}
 
@@ -93,17 +93,17 @@ func testAccVBSBackupPolicyV2Exists(n string, policy *policies.Policy) resource.
 	return func(s *terraform.State) error {
 		rs, ok := s.RootModule().Resources[n]
 		if !ok {
-			return fmt.Errorf("Not found: %s", n)
+			return fmt.Errorf("not found: %s", n)
 		}
 
 		if rs.Primary.ID == "" {
-			return fmt.Errorf("No ID is set")
+			return fmt.Errorf("no ID is set")
 		}
 
 		config := testAccProvider.Meta().(*cfg.Config)
 		vbsClient, err := config.VbsV2Client(OS_REGION_NAME)
 		if err != nil {
-			return fmt.Errorf("Error creating opentelekomcloud vbs client: %s", err)
+			return fmt.Errorf("error creating opentelekomcloud vbs client: %s", err)
 		}
 
 		policyList, err := policies.List(vbsClient, policies.ListOpts{ID: rs.Primary.ID})
@@ -123,14 +123,14 @@ func testAccVBSBackupPolicyV2Exists(n string, policy *policies.Policy) resource.
 
 var testAccVBSBackupPolicyV2_basic = fmt.Sprintf(`
 resource "opentelekomcloud_vbs_backup_policy_v2" "vbs" {
-  name = "policy_001"
-  start_time  = "12:00"
-  status  = "ON"
+  name                = "policy_001"
+  start_time          = "12:00"
+  status              = "ON"
   retain_first_backup = "N"
-  rentention_num = 2
-  frequency = 1
+  rentention_num      = 2
+  frequency           = 1
   tags {
-    key = "k2"
+    key   = "k2"
     value = "v2"
   }
 }
@@ -138,14 +138,14 @@ resource "opentelekomcloud_vbs_backup_policy_v2" "vbs" {
 
 var testAccVBSBackupPolicyV2_update = fmt.Sprintf(`
 resource "opentelekomcloud_vbs_backup_policy_v2" "vbs" {
-  name = "policy_001_update"
-  start_time  = "12:00"
-  status  = "ON"
+  name                = "policy_001_update"
+  start_time          = "12:00"
+  status              = "ON"
   retain_first_backup = "N"
-  rentention_num = 2
-  frequency = 1
+  rentention_num      = 2
+  frequency           = 1
   tags {
-    key = "k2"
+    key   = "k2"
     value = "v2"
   }
 }
@@ -153,9 +153,10 @@ resource "opentelekomcloud_vbs_backup_policy_v2" "vbs" {
 
 var testAccVBSBackupPolicyV2_rentention_day = fmt.Sprintf(`
 resource "opentelekomcloud_vbs_backup_policy_v2" "vbs" {
-  name = "policy_002"
-  start_time  = "00:00,12:00"
+  name                = "policy_002"
+  start_time          = "00:00,12:00"
   retain_first_backup = "N"
-  rentention_day = 30
-  week_frequency = ["MON","WED","SAT"]
-}`)
+  rentention_day      = 30
+  week_frequency      = ["MON", "WED", "SAT"]
+}
+`)
