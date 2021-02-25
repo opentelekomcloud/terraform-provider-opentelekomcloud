@@ -1,5 +1,16 @@
 ## 1.24.0 (Unreleased)
 
+## 1.23.1 (February 25, 2021)
+
+ENHANCEMENTS:
+* `resource/opentelekomcloud_sfs_file_system_v2`: Add possibility to set tags ([#867](https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/issues/867))
+
+BUG FIXES:
+* `resource/opentelekomcloud_cce_node_pool_v3`: Fix pool not creating with `random` availability zone ([#864](https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/issues/864))
+* `resource/opentelekomcloud_compute_instance_v2`: Fix ignored `OS_IMAGE_ID` env variable ([#866](https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/issues/866))
+* `resource/opentelekomcloud_compute_bms_server_v2`: Fix ignored `OS_IMAGE_ID` env variable ([#866](https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/issues/866))
+* `resource/opentelekomcloud_vbs_backup_policy_v2`: Fix panic on refresh when policy is missing ([#872](https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/issues/872))
+
 ## 1.23.0 (February 17, 2021)
 
 NOTES/DEPRECATIONS:
