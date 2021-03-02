@@ -217,3 +217,14 @@ func StrSliceContains(haystack []string, needle string) bool {
 	}
 	return false
 }
+
+func GetAllAvailableZones(d *schema.ResourceData) []string {
+	rawZones := d.Get("available_zones").([]interface{})
+	zones := make([]string, len(rawZones))
+	for i, raw := range rawZones {
+		zones[i] = raw.(string)
+	}
+	log.Printf("[DEBUG] getAvailableZones: %#v", zones)
+
+	return zones
+}
