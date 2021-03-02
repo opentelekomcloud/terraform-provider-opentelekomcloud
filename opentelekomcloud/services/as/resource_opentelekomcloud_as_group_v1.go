@@ -396,7 +396,7 @@ func resourceASGroupCreate(d *schema.ResourceData, meta interface{}) error {
 		stateConf := &resource.StateChangeConf{
 			Pending: []string{"PENDING"},
 			Target:  []string{"INSERVICE"}, // if there is no lifecycle status, meaning no instances in asg
-			Refresh: refreshInstancesLifeStates(client, d.Id(), initNum, true),
+			Refresh: refreshInstancesLifeStates(client, asGroupID, initNum, true),
 			Timeout: d.Timeout(schema.TimeoutCreate),
 			Delay:   10 * time.Second,
 		}
