@@ -12,7 +12,7 @@ Manages a V1 Autoscaling Group resource within OpenTelekomCloud.
 
 ```hcl
 resource "opentelekomcloud_as_group_v1" "as_group" {
-  scaling_group_name       = "my_as_group"
+  scaling_group_name       = "as_group"
   scaling_configuration_id = "37e310f5-db9d-446e-9135-c625f9c2bbfc"
   desire_instance_number   = 2
   min_instance_number      = 0
