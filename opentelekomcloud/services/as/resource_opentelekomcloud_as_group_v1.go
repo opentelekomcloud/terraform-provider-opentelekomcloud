@@ -10,6 +10,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/helper/validation"
 	"github.com/opentelekomcloud/gophertelekomcloud"
+	"github.com/opentelekomcloud/gophertelekomcloud/openstack/common/tags"
 
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/autoscaling/v1/groups"
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/autoscaling/v1/instances"
@@ -191,19 +192,9 @@ func ResourceASGroup() *schema.Resource {
 				Type:     schema.TypeString,
 				Computed: true,
 			},
+			"tags": common.TagsSchema(),
 		},
 	}
-}
-
-func GetAllAvailableZones(d *schema.ResourceData) []string {
-	rawZones := d.Get("available_zones").([]interface{})
-	zones := make([]string, len(rawZones))
-	for i, raw := range rawZones {
-		zones[i] = raw.(string)
-	}
-	log.Printf("[DEBUG] getAvailableZones: %#v", zones)
-
-	return zones
 }
 
 func getAllNotifications(d *schema.ResourceData) []string {
@@ -268,27 +259,28 @@ func getAllLBaaSListeners(d *schema.ResourceData) []groups.LBaaSListenerOpts {
 	return asListeners
 }
 
-func getInstancesInGroup(asClient *golangsdk.ServiceClient, groupID string, opts instances.ListOptsBuilder) ([]instances.Instance, error) {
-	var insList []instances.Instance
-	page, err := instances.List(asClient, groupID, opts).AllPages()
+func getInstancesInGroup(client *golangsdk.ServiceClient, groupID string, opts instances.ListOptsBuilder) ([]instances.Instance, error) {
+	var instanceList []instances.Instance
+	page, err := instances.List(client, groupID, opts).AllPages()
 	if err != nil {
-		return insList, fmt.Errorf("error getting instances in ASGroup %q: %s", groupID, err)
+		return instanceList, fmt.Errorf("error getting instances in ASGroup %q: %s", groupID, err)
 	}
-	insList, err = page.(instances.InstancePage).Extract()
-	return insList, err
+	instanceList, err = page.(instances.InstancePage).Extract()
+	return instanceList, err
 }
-func getInstancesIDs(allIns []instances.Instance) []string {
-	var allIDs []string
-	for _, ins := range allIns {
+
+func getInstancesIDs(instanceList []instances.Instance) []string {
+	var instanceIDs []string
+	for _, instance := range instanceList {
 		// Maybe the instance is pending, so we can't get the id,
 		// so unable to delete the instance this time, maybe next time to execute
 		// terraform destroy will works
-		if ins.ID != "" {
-			allIDs = append(allIDs, ins.ID)
+		if instance.ID != "" {
+			instanceIDs = append(instanceIDs, instance.ID)
 		}
 	}
-	log.Printf("[DEBUG] Get instances in ASGroups: %#v", allIDs)
-	return allIDs
+	log.Printf("[DEBUG] Get instances in ASGroups: %#v", instanceIDs)
+	return instanceIDs
 }
 
 func getInstancesLifeStates(allIns []instances.Instance) []string {
@@ -300,72 +292,44 @@ func getInstancesLifeStates(allIns []instances.Instance) []string {
 	return allLifeStates
 }
 
-func refreshInstancesLifeStates(asClient *golangsdk.ServiceClient, groupID string, insNum int, checkInService bool) resource.StateRefreshFunc {
+func refreshInstancesLifeStates(client *golangsdk.ServiceClient, groupID string, instanceNumber int, checkInService bool) resource.StateRefreshFunc {
 	return func() (interface{}, string, error) {
 		var opts instances.ListOptsBuilder
-		allIns, err := getInstancesInGroup(asClient, groupID, opts)
+		instanceList, err := getInstancesInGroup(client, groupID, opts)
 		if err != nil {
 			return nil, "ERROR", err
 		}
 		// maybe the instances (or some of the instances) have not put in the asg when creating
-		if checkInService && len(allIns) != insNum {
-			return allIns, "PENDING", err
+		if checkInService && len(instanceList) != instanceNumber {
+			return instanceList, "PENDING", err
 		}
-		allLifeStatus := getInstancesLifeStates(allIns)
+		allLifeStatus := getInstancesLifeStates(instanceList)
 		for _, lifeStatus := range allLifeStatus {
 			log.Printf("[DEBUG] Get lifecycle status in group %s: %s", groupID, lifeStatus)
 			// check for creation
 			if checkInService {
 				if lifeStatus == "PENDING" || lifeStatus == "REMOVING" {
-					return allIns, lifeStatus, err
+					return instanceList, lifeStatus, err
 				}
 			}
 			// check for removal
 			if !checkInService {
 				if lifeStatus != "INSERVICE" {
-					return allIns, lifeStatus, err
+					return instanceList, lifeStatus, err
 				}
 			}
 		}
 		if checkInService {
-			return allIns, "INSERVICE", err
+			return instanceList, "INSERVICE", err
 		}
 		log.Printf("[DEBUG] Exit refreshInstancesLifeStates for %q!", groupID)
-		return allIns, "", err
+		return instanceList, "", err
 	}
-}
-
-func checkASGroupInstancesInService(asClient *golangsdk.ServiceClient, groupID string, insNum int, timeout time.Duration) error {
-	stateConf := &resource.StateChangeConf{
-		Pending: []string{"PENDING"},
-		Target:  []string{"INSERVICE"}, // if there is no lifecycle status, meaning no instances in asg
-		Refresh: refreshInstancesLifeStates(asClient, groupID, insNum, true),
-		Timeout: timeout,
-		Delay:   10 * time.Second,
-	}
-
-	_, err := stateConf.WaitForState()
-
-	return err
-}
-
-func checkASGroupInstancesRemoved(asClient *golangsdk.ServiceClient, groupID string, timeout time.Duration) error {
-	stateConf := &resource.StateChangeConf{
-		Pending: []string{"REMOVING"},
-		Target:  []string{""}, // if there is no lifecycle status, meaning no instances in asg
-		Refresh: refreshInstancesLifeStates(asClient, groupID, 0, false),
-		Timeout: timeout,
-		Delay:   10 * time.Second,
-	}
-
-	_, err := stateConf.WaitForState()
-
-	return err
 }
 
 func resourceASGroupCreate(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*cfg.Config)
-	asClient, err := config.AutoscalingV1Client(config.GetRegion(d))
+	client, err := config.AutoscalingV1Client(config.GetRegion(d))
 	if err != nil {
 		return fmt.Errorf("error creating OpenTelekomCloud AutoScaling client: %s", err)
 	}
@@ -386,10 +350,9 @@ func resourceASGroupCreate(d *schema.ResourceData, meta interface{}) error {
 		initNum = minNum
 	}
 	log.Printf("[DEBUG] Init instance number is: %#v", initNum)
+
 	networks := getAllNetworks(d)
-
 	secGroups := getAllSecurityGroups(d)
-
 	asgLBaaSListeners := getAllLBaaSListeners(d)
 
 	log.Printf("[DEBUG] available_zones: %#v", d.Get("available_zones"))
@@ -402,7 +365,7 @@ func resourceASGroupCreate(d *schema.ResourceData, meta interface{}) error {
 		CoolDownTime:              d.Get("cool_down_time").(int),
 		LBListenerID:              d.Get("lb_listener_id").(string),
 		LBaaSListeners:            asgLBaaSListeners,
-		AvailableZones:            GetAllAvailableZones(d),
+		AvailableZones:            common.GetAllAvailableZones(d),
 		Networks:                  networks,
 		SecurityGroup:             secGroups,
 		VpcID:                     d.Get("vpc_id").(string),
@@ -415,76 +378,92 @@ func resourceASGroupCreate(d *schema.ResourceData, meta interface{}) error {
 	}
 
 	log.Printf("[DEBUG] Create Options: %#v", createOpts)
-	asgId, err := groups.Create(asClient, createOpts).Extract()
+	asGroupID, err := groups.Create(client, createOpts).Extract()
 	if err != nil {
 		return fmt.Errorf("error creating ASGroup: %s", err)
 	}
 
-	d.SetId(asgId)
-
 	time.Sleep(5 * time.Second)
-	// enable asg
-	enableResult := groups.Enable(asClient, asgId)
+
+	// enable AutoScaling Group
+	enableResult := groups.Enable(client, asGroupID)
 	if enableResult.Err != nil {
-		return fmt.Errorf("error enabling ASGroup %q: %s", asgId, enableResult.Err)
+		return fmt.Errorf("error enabling ASGroup %q: %s", asGroupID, enableResult.Err)
 	}
-	log.Printf("[DEBUG] Enable ASGroup %q success!", asgId)
+	log.Printf("[DEBUG] Enable ASGroup %q success!", asGroupID)
 	// check all instances are inService
 	if initNum > 0 {
-		timeout := d.Timeout(schema.TimeoutCreate)
-		err = checkASGroupInstancesInService(asClient, asgId, initNum, timeout)
+		stateConf := &resource.StateChangeConf{
+			Pending: []string{"PENDING"},
+			Target:  []string{"INSERVICE"}, // if there is no lifecycle status, meaning no instances in asg
+			Refresh: refreshInstancesLifeStates(client, asGroupID, initNum, true),
+			Timeout: d.Timeout(schema.TimeoutCreate),
+			Delay:   10 * time.Second,
+		}
+
+		_, err := stateConf.WaitForState()
 		if err != nil {
-			return fmt.Errorf("error waiting for instances in the ASGroup %q to become inservice!!: %s", asgId, err)
+			return fmt.Errorf("error waiting for instances in the ASGroup %q to become inservice: %s", asGroupID, err)
 		}
 	}
+
+	// set tags
+	tagRaw := d.Get("tags").(map[string]interface{})
+	if len(tagRaw) > 0 {
+		tagList := common.ExpandResourceTags(tagRaw)
+		if err := tags.Create(client, "scaling_group_tag", asGroupID, tagList).ExtractErr(); err != nil {
+			return fmt.Errorf("error setting tags of AutoScaling Group: %s", err)
+		}
+	}
+
+	d.SetId(asGroupID)
 
 	return resourceASGroupRead(d, meta)
 }
 
 func resourceASGroupRead(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*cfg.Config)
-	asClient, err := config.AutoscalingV1Client(config.GetRegion(d))
+	client, err := config.AutoscalingV1Client(config.GetRegion(d))
 	if err != nil {
 		return fmt.Errorf("error creating OpenTelekomCloud autoscaling client: %s", err)
 	}
 
-	asg, err := groups.Get(asClient, d.Id()).Extract()
+	asGroup, err := groups.Get(client, d.Id()).Extract()
 	if err != nil {
-		return common.CheckDeleted(d, err, "AS group")
+		if _, ok := err.(golangsdk.ErrDefault404); ok {
+			d.SetId("")
+			return nil
+		}
+
+		return fmt.Errorf("error retrieving OpenTelekomCloud AutoScaling Group: %s", err)
 	}
-	log.Printf("[DEBUG] Retrieved ASGroup %q: %+v", d.Id(), asg)
-	log.Printf("[DEBUG] Retrieved ASGroup %q notifications: %+v", d.Id(), asg.Notifications)
-	log.Printf("[DEBUG] Retrieved ASGroup %q availablezones: %+v", d.Id(), asg.AvailableZones)
-	log.Printf("[DEBUG] Retrieved ASGroup %q networks: %+v", d.Id(), asg.Networks)
-	log.Printf("[DEBUG] Retrieved ASGroup %q secgroups: %+v", d.Id(), asg.SecurityGroups)
-	log.Printf("[DEBUG] Retrieved ASGroup %q lbaaslisteners: %+v", d.Id(), asg.LBaaSListeners)
 
 	// set properties based on the read info
 	mErr := multierror.Append(nil,
-		d.Set("scaling_group_name", asg.Name),
-		d.Set("status", asg.Status),
-		d.Set("current_instance_number", asg.ActualInstanceNumber),
-		d.Set("desire_instance_number", asg.DesireInstanceNumber),
-		d.Set("min_instance_number", asg.MinInstanceNumber),
-		d.Set("max_instance_number", asg.MaxInstanceNumber),
-		d.Set("cool_down_time", asg.CoolDownTime),
-		d.Set("lb_listener_id", asg.LBListenerID),
-		d.Set("health_periodic_audit_method", asg.HealthPeriodicAuditMethod),
-		d.Set("health_periodic_audit_time", asg.HealthPeriodicAuditTime),
-		d.Set("health_periodic_audit_grace_period", asg.HealthPeriodicAuditGrace),
-		d.Set("instance_terminate_policy", asg.InstanceTerminatePolicy),
-		d.Set("scaling_configuration_id", asg.ConfigurationID),
-		d.Set("delete_publicip", asg.DeletePublicip),
+		d.Set("scaling_group_name", asGroup.Name),
+		d.Set("status", asGroup.Status),
+		d.Set("current_instance_number", asGroup.ActualInstanceNumber),
+		d.Set("desire_instance_number", asGroup.DesireInstanceNumber),
+		d.Set("min_instance_number", asGroup.MinInstanceNumber),
+		d.Set("max_instance_number", asGroup.MaxInstanceNumber),
+		d.Set("cool_down_time", asGroup.CoolDownTime),
+		d.Set("lb_listener_id", asGroup.LBListenerID),
+		d.Set("health_periodic_audit_method", asGroup.HealthPeriodicAuditMethod),
+		d.Set("health_periodic_audit_time", asGroup.HealthPeriodicAuditTime),
+		d.Set("health_periodic_audit_grace_period", asGroup.HealthPeriodicAuditGrace),
+		d.Set("instance_terminate_policy", asGroup.InstanceTerminatePolicy),
+		d.Set("scaling_configuration_id", asGroup.ConfigurationID),
+		d.Set("delete_publicip", asGroup.DeletePublicip),
 		d.Set("region", config.GetRegion(d)),
 	)
-	if len(asg.Notifications) >= 1 {
-		if err := d.Set("notifications", asg.Notifications); err != nil {
+	if len(asGroup.Notifications) >= 1 {
+		if err := d.Set("notifications", asGroup.Notifications); err != nil {
 			return err
 		}
 	}
-	if len(asg.LBaaSListeners) >= 1 {
-		listeners := make([]map[string]interface{}, len(asg.LBaaSListeners))
-		for i, listener := range asg.LBaaSListeners {
+	if len(asGroup.LBaaSListeners) >= 1 {
+		listeners := make([]map[string]interface{}, len(asGroup.LBaaSListeners))
+		for i, listener := range asGroup.LBaaSListeners {
 			listeners[i] = make(map[string]interface{})
 			listeners[i]["pool_id"] = listener.PoolID
 			listeners[i]["protocol_port"] = listener.ProtocolPort
@@ -496,25 +475,40 @@ func resourceASGroupRead(d *schema.ResourceData, meta interface{}) error {
 	}
 
 	var opts instances.ListOptsBuilder
-	allIns, err := getInstancesInGroup(asClient, d.Id(), opts)
+	instancesList, err := getInstancesInGroup(client, d.Id(), opts)
 	if err != nil {
-		return fmt.Errorf("can not get the instances in ASGroup %q!!: %s", d.Id(), err)
+		return fmt.Errorf("can not get the instances in ASGroup %q: %s", d.Id(), err)
 	}
-	allIDs := getInstancesIDs(allIns)
-	if err := d.Set("instances", allIDs); err != nil {
+	instanceIDs := getInstancesIDs(instancesList)
+	if err := d.Set("instances", instanceIDs); err != nil {
 		return err
 	}
 
-	return mErr.ErrorOrNil()
+	if mErr.ErrorOrNil() != nil {
+		return mErr
+	}
+
+	// save tags
+	resourceTags, err := tags.Get(client, "scaling_group_tag", d.Id()).Extract()
+	if err != nil {
+		return fmt.Errorf("error fetching OpenTelekomCloud AutoScaling Group tags: %s", err)
+	}
+	tagMap := common.TagsToMap(resourceTags)
+	if err := d.Set("tags", tagMap); err != nil {
+		return fmt.Errorf("error saving tags for OpenTelekomCloud AutoScaling Group: %s", err)
+	}
+
+	return nil
 }
 
 func resourceASGroupUpdate(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*cfg.Config)
-	asClient, err := config.AutoscalingV1Client(config.GetRegion(d))
+	client, err := config.AutoscalingV1Client(config.GetRegion(d))
 	if err != nil {
 		return fmt.Errorf("error creating OpenTelekomCloud autoscaling client: %s", err)
 	}
 	d.Partial(true)
+
 	if d.HasChange("min_instance_number") || d.HasChange("max_instance_number") || d.HasChange("desire_instance_number") || d.HasChange("lbaas_listeners") {
 		minNum := d.Get("min_instance_number").(int)
 		maxNum := d.Get("max_instance_number").(int)
@@ -529,7 +523,6 @@ func resourceASGroupUpdate(d *schema.ResourceData, meta interface{}) error {
 	}
 
 	networks := getAllNetworks(d)
-
 	secGroups := getAllSecurityGroups(d)
 
 	asgLBaaSListeners := getAllLBaaSListeners(d)
@@ -542,7 +535,7 @@ func resourceASGroupUpdate(d *schema.ResourceData, meta interface{}) error {
 		CoolDownTime:              d.Get("cool_down_time").(int),
 		LBListenerID:              d.Get("lb_listener_id").(string),
 		LBaaSListeners:            asgLBaaSListeners,
-		AvailableZones:            GetAllAvailableZones(d),
+		AvailableZones:            common.GetAllAvailableZones(d),
 		Networks:                  networks,
 		SecurityGroup:             secGroups,
 		HealthPeriodicAuditMethod: d.Get("health_periodic_audit_method").(string),
@@ -552,36 +545,44 @@ func resourceASGroupUpdate(d *schema.ResourceData, meta interface{}) error {
 		Notifications:             getAllNotifications(d),
 		IsDeletePublicip:          d.Get("delete_publicip").(bool),
 	}
-	asgID, err := groups.Update(asClient, d.Id(), updateOpts).Extract()
+	asGroupID, err := groups.Update(client, d.Id(), updateOpts).Extract()
 	if err != nil {
-		return fmt.Errorf("error updating ASGroup %q: %s", asgID, err)
+		return fmt.Errorf("error updating ASGroup %q: %s", asGroupID, err)
 	}
+
+	// update tags
+	if d.HasChange("tags") {
+		if err := common.UpdateResourceTags(client, d, "scaling_group_tag", d.Id()); err != nil {
+			return fmt.Errorf("error updating tags of AutoScaling Group %s: %s", d.Id(), err)
+		}
+	}
+
 	d.Partial(false)
 	return resourceASGroupRead(d, meta)
 }
 
 func resourceASGroupDelete(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*cfg.Config)
-	asClient, err := config.AutoscalingV1Client(config.GetRegion(d))
+	client, err := config.AutoscalingV1Client(config.GetRegion(d))
 	if err != nil {
-		return fmt.Errorf("error creating OpenTelekomCloud autoscaling client: %s", err)
+		return fmt.Errorf("error creating OpenTelekomCloud AutoScaling client: %s", err)
 	}
 
-	log.Printf("[DEBUG] Begin to get instances of ASGroup %q", d.Id())
+	log.Printf("[DEBUG] Begin to get instances of AutoScaling Group %q", d.Id())
 	var listOpts instances.ListOptsBuilder
-	allIns, err := getInstancesInGroup(asClient, d.Id(), listOpts)
+	instanceList, err := getInstancesInGroup(client, d.Id(), listOpts)
 	if err != nil {
-		return fmt.Errorf("error listing instances of asg: %s", err)
+		return fmt.Errorf("error listing instances of AutoScaling Group: %s", err)
 	}
-	allLifeStatus := getInstancesLifeStates(allIns)
+	allLifeStatus := getInstancesLifeStates(instanceList)
 	for _, lifeCycleState := range allLifeStatus {
 		if lifeCycleState != "INSERVICE" {
 			return fmt.Errorf("[DEBUG] Can't delete the ASGroup %q: There are some instances not in INSERVICE but in %s, try again latter", d.Id(), lifeCycleState)
 		}
 	}
-	allIDs := getInstancesIDs(allIns)
-	log.Printf("[DEBUG] InstanceIDs in ASGroup %q: %+v", d.Id(), allIDs)
-	log.Printf("[DEBUG] There are %d instances in ASGroup %q", len(allIDs), d.Id())
+	instanceIDs := getInstancesIDs(instanceList)
+	log.Printf("[DEBUG] InstanceIDs in ASGroup %q: %+v", d.Id(), instanceIDs)
+	log.Printf("[DEBUG] There are %d instances in ASGroup %q", len(instanceIDs), d.Id())
 	if len(allLifeStatus) > 0 {
 		minNumber := d.Get("min_instance_number").(int)
 		// If you need to delete as_group with `min_instance_number` > 0
@@ -590,28 +591,37 @@ func resourceASGroupDelete(d *schema.ResourceData, meta interface{}) error {
 			updateOpts := groups.UpdateOpts{
 				MinInstanceNumber: 0,
 			}
-			_, err := groups.Update(asClient, d.Id(), updateOpts).Extract()
+			_, err := groups.Update(client, d.Id(), updateOpts).Extract()
 			if err != nil {
 				return fmt.Errorf("error updating min_instance_number to 0: %s", err)
 			}
 		}
-		deleteIns := d.Get("delete_instances").(string)
-		log.Printf("[DEBUG] The flag delete_instances in ASGroup is %s", deleteIns)
-		batchResult := instances.BatchDelete(asClient, d.Id(), allIDs, deleteIns)
-		if batchResult.Err != nil {
-			return fmt.Errorf("error removing instancess of asg: %s", batchResult.Err)
+		deleteInstances := d.Get("delete_instances").(string)
+		log.Printf("[DEBUG] The flag delete_instances in AutoScaling Group is %s", deleteInstances)
+
+		if err := instances.BatchDelete(client, d.Id(), instanceIDs, deleteInstances).ExtractErr(); err != nil {
+			return fmt.Errorf("error removing instancess of AutoScaling Group: %s", err)
 		}
 		log.Printf("[DEBUG] Begin to remove instances of ASGroup %q", d.Id())
-		timeout := d.Timeout(schema.TimeoutDelete)
-		err = checkASGroupInstancesRemoved(asClient, d.Id(), timeout)
+
+		stateConf := &resource.StateChangeConf{
+			Pending: []string{"REMOVING"},
+			Target:  []string{""}, // if there is no lifecycle status, meaning no instances in asg
+			Refresh: refreshInstancesLifeStates(client, d.Id(), 0, false),
+			Timeout: d.Timeout(schema.TimeoutDelete),
+			Delay:   10 * time.Second,
+		}
+
+		_, err := stateConf.WaitForState()
+
 		if err != nil {
 			return fmt.Errorf("[DEBUG] Error removing instances from ASGroup %q: %s", d.Id(), err)
 		}
 	}
 
 	log.Printf("[DEBUG] Begin to delete ASGroup %q", d.Id())
-	if err = groups.Delete(asClient, d.Id()).ExtractErr(); err != nil {
-		return fmt.Errorf("error deleting ASGroup: %s", err)
+	if err := groups.Delete(client, d.Id()).ExtractErr(); err != nil {
+		return fmt.Errorf("error deleting AutoScaling Group: %s", err)
 	}
 
 	return nil

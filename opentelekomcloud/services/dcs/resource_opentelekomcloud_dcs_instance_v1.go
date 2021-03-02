@@ -13,7 +13,6 @@ import (
 
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common"
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common/cfg"
-	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/services/as"
 )
 
 func ResourceDcsInstanceV1() *schema.Resource {
@@ -288,7 +287,7 @@ func resourceDcsInstancesV1Create(d *schema.ResourceData, meta interface{}) erro
 		VPCID:                d.Get("vpc_id").(string),
 		SecurityGroupID:      d.Get("security_group_id").(string),
 		SubnetID:             d.Get("subnet_id").(string),
-		AvailableZones:       as.GetAllAvailableZones(d),
+		AvailableZones:       common.GetAllAvailableZones(d),
 		ProductID:            d.Get("product_id").(string),
 		InstanceBackupPolicy: getInstanceBackupPolicy(d),
 		MaintainBegin:        d.Get("maintain_begin").(string),

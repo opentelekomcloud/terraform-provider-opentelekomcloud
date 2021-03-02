@@ -11,8 +11,8 @@ Manages a V1 Autoscaling Group resource within OpenTelekomCloud.
 ### Basic Autoscaling Group
 
 ```hcl
-resource "opentelekomcloud_as_group_v1" "my_as_group" {
-  scaling_group_name       = "my_as_group"
+resource "opentelekomcloud_as_group_v1" "as_group" {
+  scaling_group_name       = "as_group"
   scaling_configuration_id = "37e310f5-db9d-446e-9135-c625f9c2bbfc"
   desire_instance_number   = 2
   min_instance_number      = 0
@@ -29,14 +29,18 @@ resource "opentelekomcloud_as_group_v1" "my_as_group" {
   vpc_id           = "1d8f7e7c-fe04-4cf5-85ac-08b478c290e9"
   delete_publicip  = true
   delete_instances = "yes"
+
+  tags = {
+    muh = "kuh"
+  }
 }
 ```
 
 ### Autoscaling Group Only Remove Members When Scaling Down
 
 ```hcl
-resource "opentelekomcloud_as_group_v1" "my_as_group_only_remove_members" {
-  scaling_group_name       = "my_as_group_only_remove_members"
+resource "opentelekomcloud_as_group_v1" "as_group_only_remove_members" {
+  scaling_group_name       = "as_group_only_remove_members"
   scaling_configuration_id = "37e310f5-db9d-446e-9135-c625f9c2bbfc"
   desire_instance_number   = 2
   min_instance_number      = 0
@@ -58,8 +62,8 @@ resource "opentelekomcloud_as_group_v1" "my_as_group_only_remove_members" {
 ### Autoscaling Group With ELB Listener
 
 ```hcl
-resource "opentelekomcloud_as_group_v1" "my_as_group_with_elb" {
-  scaling_group_name       = "my_as_group_with_elb"
+resource "opentelekomcloud_as_group_v1" "as_group_with_elb" {
+  scaling_group_name       = "as_group_with_elb"
   scaling_configuration_id = "37e310f5-db9d-446e-9135-c625f9c2bbfc"
   desire_instance_number   = 2
   min_instance_number      = 0
@@ -73,14 +77,14 @@ resource "opentelekomcloud_as_group_v1" "my_as_group_with_elb" {
   }
 
   vpc_id           = "1d8f7e7c-fe04-4cf5-85ac-08b478c290e9"
-  lb_listener_id   = opentelekomcloud_elb_listener.my_listener.id
+  lb_listener_id   = opentelekomcloud_elb_listener.as_listener.id
   delete_publicip  = true
   delete_instances = "yes"
 }
 
-resource "opentelekomcloud_elb_listener" "my_listener" {
-  name             = "my_listener"
-  description      = "my test listener"
+resource "opentelekomcloud_elb_listener" "as_listener" {
+  name             = "as_listener"
+  description      = "as test listener"
   protocol         = "TCP"
   backend_protocol = "TCP"
   port             = 12345
@@ -190,6 +194,8 @@ The `lbaas_listeners` block supports:
   backend ECS processes compared to other backend ECSs added to the same listener. The value
   of this parameter ranges from 0 to 100. The default value is 1.
 
+* `tags` - (Optional) Tags key/value pairs to associate with the AutoScaling Group.
+
 ## Attributes Reference
 
 The following attributes are exported:
@@ -223,3 +229,5 @@ The following attributes are exported:
 * `notifications` - See Argument Reference above.
 
 * `instances` - The instances IDs of the AS group.
+
+* `tags` - See Argument Reference above.
