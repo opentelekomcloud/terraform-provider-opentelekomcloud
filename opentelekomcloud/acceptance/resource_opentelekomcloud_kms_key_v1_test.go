@@ -145,7 +145,7 @@ func testAccCheckKmsKeyIsEnabled(key *keys.Key, isEnabled bool) resource.TestChe
 	}
 }
 
-func testAccKmsV1Key_basic(prefix string) string {
+func testAccKmsV1Key_basic(rName string) string {
 	return fmt.Sprintf(`
 		resource "opentelekomcloud_kms_key_v1" "key_1" {
 		  key_alias = "%s"
@@ -154,10 +154,10 @@ func testAccKmsV1Key_basic(prefix string) string {
             kuh = "value-create"
           }
 		}
-	`, prefix)
+	`, rName)
 }
 
-func testAccKmsV1Key_update(prefix string) string {
+func testAccKmsV1Key_update(rName string) string {
 	return fmt.Sprintf(`
 		resource "opentelekomcloud_kms_key_v1" "key_1" {
           key_alias       = "%s"
@@ -166,7 +166,7 @@ func testAccKmsV1Key_update(prefix string) string {
             muh = "value-update"
           }
 		}
-	`, prefix)
+	`, rName)
 }
 
 func testAccKmsKey_enabled(prefix string) string {
