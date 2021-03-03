@@ -4,7 +4,7 @@ subcategory: "Key Management Service (KMS)"
 
 # opentelekomcloud_kms_key_v1
 
-Manages a V1 key resource within OpenTelekomCloud KMS.
+Manages a V1 KMS key resource within OpenTelekomCloud.
 
 ## Example Usage
 
@@ -15,6 +15,10 @@ resource "opentelekomcloud_kms_key_v1" "key_1" {
   key_description = "first test key"
   realm           = "eu-de-01"
   is_enabled      = true
+
+  tags = {
+    muh = "kuh"
+  }
 }
 ```
 
@@ -32,10 +36,12 @@ The following arguments are supported:
 
 * `pending_days` - (Optional) Duration in days after which the key is deleted
   after destruction of the resource, must be between 7 and 1096 days. Defaults to 7.
-  It only be used when delete a key.
+  It only is used when delete a key.
 
 * `is_enabled` - (Optional) Specifies whether the key is enabled. Defaults to true.
   Changing this updates the state of existing key.
+
+* `tags` - (Optional) Tags key/value pairs to associate with the AutoScaling Group.
 
 
 ## Attributes Reference
@@ -50,8 +56,8 @@ The following attributes are exported:
 
 * `realm` - See Argument Reference above.
 
-* `default_key_flag` - Identification of a Master Key. The value 1 indicates a Default
-  Master Key, and the value 0 indicates a key.
+* `default_key_flag` - Identification of a Master Key. The value `1` indicates a Default
+  Master Key, and the value `0` indicates a key.
 
 * `origin` - Origin of a key. The default value is kms.
 
@@ -65,6 +71,7 @@ The following attributes are exported:
 
 * `is_enabled` - See Argument Reference above.
 
+* `tags` - See Argument Reference above.
 
 ## Import
 
