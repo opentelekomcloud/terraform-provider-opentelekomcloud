@@ -32,13 +32,13 @@ func TestAccCssClusterV1_basic(t *testing.T) {
 func testAccCssClusterV1_basic(val string) string {
 	return fmt.Sprintf(`
 resource "opentelekomcloud_networking_secgroup_v2" "secgroup" {
-  name = "terraform_test_security_group%s"
+  name = "terraform_test_security_group%[1]s"
   description = "terraform security group acceptance test"
 }
 
 resource "opentelekomcloud_css_cluster_v1" "cluster" {
   expect_node_num = 1
-  name = "terraform_test_cluster%s"
+  name = "terraform_test_cluster%[1]s"
   node_config {
     flavor = "css.medium.8"
     network_info {
@@ -53,14 +53,14 @@ resource "opentelekomcloud_css_cluster_v1" "cluster" {
     availability_zone = "%s"
   }
 }
-	`, val, val, OS_NETWORK_ID, OS_VPC_ID, OS_AVAILABILITY_ZONE)
+`, val, OS_NETWORK_ID, OS_VPC_ID, OS_AVAILABILITY_ZONE)
 }
 
 func testAccCheckCssClusterV1Destroy(s *terraform.State) error {
 	config := testAccProvider.Meta().(*cfg.Config)
 	client, err := config.CssV1Client(OS_REGION_NAME)
 	if err != nil {
-		return fmt.Errorf("Error creating sdk client, err=%s", err)
+		return fmt.Errorf("error creating sdk client, err=%s", err)
 	}
 
 	for _, rs := range s.RootModule().Resources {
@@ -89,17 +89,17 @@ func testAccCheckCssClusterV1Exists() resource.TestCheckFunc {
 		config := testAccProvider.Meta().(*cfg.Config)
 		client, err := config.CssV1Client(OS_REGION_NAME)
 		if err != nil {
-			return fmt.Errorf("Error creating sdk client, err=%s", err)
+			return fmt.Errorf("error creating sdk client, err=%s", err)
 		}
 
 		rs, ok := s.RootModule().Resources["opentelekomcloud_css_cluster_v1.cluster"]
 		if !ok {
-			return fmt.Errorf("Error checking opentelekomcloud_css_cluster_v1.cluster exist, err=not found this resource")
+			return fmt.Errorf("error checking opentelekomcloud_css_cluster_v1.cluster exist, err=not found this resource")
 		}
 
 		url, err := common.ReplaceVarsForTest(rs, "clusters/{id}")
 		if err != nil {
-			return fmt.Errorf("Error checking opentelekomcloud_css_cluster_v1.cluster exist, err=building url failed: %s", err)
+			return fmt.Errorf("error checking opentelekomcloud_css_cluster_v1.cluster exist, err=building url failed: %s", err)
 		}
 		url = client.ServiceURL(url)
 
@@ -109,7 +109,7 @@ func testAccCheckCssClusterV1Exists() resource.TestCheckFunc {
 			if _, ok := err.(golangsdk.ErrDefault404); ok {
 				return fmt.Errorf("opentelekomcloud_css_cluster_v1.cluster is not exist")
 			}
-			return fmt.Errorf("Error checking opentelekomcloud_css_cluster_v1.cluster exist, err=send request failed: %s", err)
+			return fmt.Errorf("error checking opentelekomcloud_css_cluster_v1.cluster exist, err=send request failed: %s", err)
 		}
 		return nil
 	}
