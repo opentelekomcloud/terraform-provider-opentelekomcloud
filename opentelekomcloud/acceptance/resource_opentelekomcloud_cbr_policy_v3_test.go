@@ -42,6 +42,7 @@ func TestAccCBRPolicyV3_basic(t *testing.T) {
 
 func TestAccCBRPolicyV3_minConfig(t *testing.T) {
 	var cbrPolicy policies.Policy
+	policyRes := "opentelekomcloud_cbr_policy_v3.policy"
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:     func() { testAccFlavorPreCheck(t) },
@@ -51,10 +52,16 @@ func TestAccCBRPolicyV3_minConfig(t *testing.T) {
 			{
 				Config: testCBRPolicyV3_minConfig,
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckCBRPolicyV3Exists("opentelekomcloud_cbr_policy_v3.policy", &cbrPolicy),
-					resource.TestCheckResourceAttr("opentelekomcloud_cbr_policy_v3.policy", "name", "some-policy-min"),
-					resource.TestCheckResourceAttr("opentelekomcloud_cbr_policy_v3.policy", "operation_type", "backup"),
-					resource.TestCheckResourceAttr("opentelekomcloud_cbr_policy_v3.policy", "enabled", "true"),
+					testAccCheckCBRPolicyV3Exists(policyRes, &cbrPolicy),
+					resource.TestCheckResourceAttr(policyRes, "name", "some-policy-min"),
+					resource.TestCheckResourceAttr(policyRes, "operation_type", "backup"),
+					resource.TestCheckResourceAttr(policyRes, "enabled", "true"),
+				),
+			},
+			{
+				Config: testCBRPolicyV3_minOperationDef,
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr(policyRes, "operation_definition.0.timezone", "UTC+03:00"),
 				),
 			},
 		},
@@ -112,7 +119,8 @@ func testAccCheckCBRPolicyV3Exists(n string, group *policies.Policy) resource.Te
 	}
 }
 
-var testCBRPolicyV3_basic = fmt.Sprintf(`
+const (
+	testCBRPolicyV3_basic = `
 resource opentelekomcloud_cbr_policy_v3 policy {
   name                 = "test-policy"
   operation_type       = "backup"
@@ -127,9 +135,8 @@ resource opentelekomcloud_cbr_policy_v3 policy {
   }
   enabled = "true"
 }
-`)
-
-var testCBRPolicyV3_update = fmt.Sprintf(`
+`
+	testCBRPolicyV3_update = `
 resource opentelekomcloud_cbr_policy_v3 policy {
   name                 = "name2"
   operation_type       = "backup"
@@ -144,12 +151,25 @@ resource opentelekomcloud_cbr_policy_v3 policy {
   }
   enabled = "false"
 }
-`)
-
-var testCBRPolicyV3_minConfig = fmt.Sprintf(`
+`
+	testCBRPolicyV3_minConfig = `
 resource opentelekomcloud_cbr_policy_v3 policy {
   name            = "some-policy-min"
   operation_type  = "backup"
   trigger_pattern = ["FREQ=WEEKLY;BYDAY=MO,TU,WE,TH,FR,SA,SU;BYHOUR=14;BYMINUTE=00"]
 }
-`)
+`
+
+	testCBRPolicyV3_minOperationDef = `
+resource opentelekomcloud_cbr_policy_v3 policy {
+  name            = "some-policy-min"
+  operation_type  = "backup"
+  trigger_pattern = ["FREQ=WEEKLY;BYDAY=MO,TU,WE,TH,FR,SA,SU;BYHOUR=14;BYMINUTE=00"]
+
+
+  operation_definition {
+    timezone                = "UTC+03:00"
+  }
+}
+`
+)

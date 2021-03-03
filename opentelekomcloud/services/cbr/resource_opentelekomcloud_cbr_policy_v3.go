@@ -69,8 +69,7 @@ func ResourceCBRPolicyV3() *schema.Resource {
 						},
 						"timezone": {
 							Type:     schema.TypeString,
-							Optional: true,
-							Computed: true,
+							Required: true,
 						},
 						"week_backups": {
 							Type:         schema.TypeInt,

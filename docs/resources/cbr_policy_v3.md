@@ -40,6 +40,13 @@ The following arguments are supported:
 
 * `operation_definition` - (Optional) Scheduling parameter. See reference below.
 
+* `operation_type` - (Required) Policy type. Enumeration values: `backup`, `replication`.
+
+* `trigger_pattern` - (Required) Scheduling rule. In the replication policy, you are advised
+  to set one time point for one day. A maximum of 24 rules can be configured. The scheduling
+  rule complies with iCalendar RFC 2445, but it supports only parameters `FREQ`, `BYDAY`, `BYHOUR`,
+  `BYMINUTE`, and `INTERVAL`. `FREQ` can be set only to `WEEKLY` and `DAILY`.
+
 The `operation_definition` block contains:
 
 * `day_backups` - (Optional) Specifies the number of retained daily backups. The latest
@@ -62,9 +69,7 @@ The `operation_definition` block contains:
   with the maximum number of retained backups specified by `max_backups`. The value ranges
   from `0` to `100`. If this parameter is configured, `timezone` is mandatory.
 
-* `timezone` - (Optional) Time zone where the user is located, for example, `UTC+00:00`.
-  Set this parameter only after you have configured any of the parameters `day_backups`,
-  `week_backups`, `month_backups`, `year_backups`.
+* `timezone` - (Required) Time zone where the user is located, for example, `UTC+00:00`.
 
 * `max_backups` - (Optional) Maximum number of retained backups. The value can be `-1` or ranges
   from `0` to `99999`. If the value is set to `-1`, the backups will not be cleared even though
@@ -75,13 +80,6 @@ The `operation_definition` block contains:
   The maximum value is `99999`. `-1` indicates that the backups will not be cleared based on
   the retention duration. If this parameter and `max_backups` are left blank at the same time,
   the backups will be retained permanently.
-
-* `operation_type` - (Required) Policy type. Enumeration values: `backup`, `replication`.
-
-* `trigger_pattern` - (Required) Scheduling rule. In the replication policy, you are advised
-  to set one time point for one day. A maximum of 24 rules can be configured. The scheduling
-  rule complies with iCalendar RFC 2445, but it supports only parameters `FREQ`, `BYDAY`, `BYHOUR`,
-  `BYMINUTE`, and `INTERVAL`. `FREQ` can be set only to `WEEKLY` and `DAILY`.
 
 ## Attributes Reference
 
