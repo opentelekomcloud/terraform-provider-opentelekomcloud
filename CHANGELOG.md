@@ -1,5 +1,17 @@
 ## 1.24.0 (Unreleased)
 
+
+## 1.23.2 (March 1, 2021)
+
+ENHANCEMENTS:
+* `resource/opentelekomcloud_as_group_v1`: Add possibility to set tags ([#877](https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/issues/877))
+* `resource/opentelekomcloud_kms_key_v1`: Add possibility to set tags ([#884](https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/issues/884))
+
+BUG FIXES:
+* `resource/opentelekomcloud_cce_node_v3`: Remove reading empty CCE Node`Spec.ExtendParam` ([#876](https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/issues/876))
+* `resource/opentelekomcloud_cce_node_v3`: Fix resource reading ([#882](https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/issues/882))
+* `resource/opentelekomcloud_cbr_policy_v3`: Fix issue with required argument `timezone` ([#883](https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/issues/883))
+
 ## 1.23.1 (February 25, 2021)
 
 ENHANCEMENTS:
