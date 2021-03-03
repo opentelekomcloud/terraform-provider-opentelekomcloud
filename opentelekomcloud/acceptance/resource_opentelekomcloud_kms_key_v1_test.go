@@ -15,8 +15,9 @@ import (
 
 func TestAccKmsKeyV1_basic(t *testing.T) {
 	var key keys.Key
-	var keyAlias = fmt.Sprintf("kms_%s", acctest.RandString(5))
-	var keyAliasUpdate = fmt.Sprintf("kms_updated_%s", acctest.RandString(5))
+	createName := fmt.Sprintf("kms_%s", acctest.RandString(5))
+	updateName := fmt.Sprintf("kms_updated_%s", acctest.RandString(5))
+	resourceName := "opentelekomcloud_kms_key_v1.key_1"
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
@@ -24,21 +25,20 @@ func TestAccKmsKeyV1_basic(t *testing.T) {
 		CheckDestroy: testAccCheckKmsV1KeyDestroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccKmsV1Key_basic(keyAlias),
+				Config: testAccKmsV1Key_basic(createName),
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckKmsV1KeyExists("opentelekomcloud_kms_key_v1.key_2", &key),
-					resource.TestCheckResourceAttr(
-						"opentelekomcloud_kms_key_v1.key_2", "key_alias", keyAlias),
+					testAccCheckKmsV1KeyExists(resourceName, &key),
+					resource.TestCheckResourceAttr(resourceName, "key_alias", createName),
+					resource.TestCheckResourceAttr(resourceName, "tags.muh", "value-create"),
 				),
 			},
 			{
-				Config: testAccKmsV1Key_update(keyAliasUpdate),
+				Config: testAccKmsV1Key_update(updateName),
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckKmsV1KeyExists("opentelekomcloud_kms_key_v1.key_2", &key),
-					resource.TestCheckResourceAttr(
-						"opentelekomcloud_kms_key_v1.key_2", "key_alias", keyAliasUpdate),
-					resource.TestCheckResourceAttr(
-						"opentelekomcloud_kms_key_v1.key_2", "key_description", "key update description"),
+					testAccCheckKmsV1KeyExists(resourceName, &key),
+					resource.TestCheckResourceAttr(resourceName, "key_alias", updateName),
+					resource.TestCheckResourceAttr(resourceName, "key_description", "key update description"),
+					resource.TestCheckResourceAttr(resourceName, "tags.muh", "value-update"),
 				),
 			},
 		},
@@ -47,16 +47,16 @@ func TestAccKmsKeyV1_basic(t *testing.T) {
 
 func testAccCheckKmsV1KeyDestroy(s *terraform.State) error {
 	config := testAccProvider.Meta().(*cfg.Config)
-	kmsClient, err := config.KmsKeyV1Client(OS_REGION_NAME)
+	client, err := config.KmsKeyV1Client(OS_REGION_NAME)
 	if err != nil {
-		return fmt.Errorf("Error creating OpenTelekomCloud kms client: %s", err)
+		return fmt.Errorf("error creating OpenTelekomCloud KMSv1 client: %s", err)
 	}
 
 	for _, rs := range s.RootModule().Resources {
 		if rs.Type != "opentelekomcloud_kms_key_v1" {
 			continue
 		}
-		v, err := keys.Get(kmsClient, rs.Primary.ID).ExtractKeyInfo()
+		v, err := keys.Get(client, rs.Primary.ID).ExtractKeyInfo()
 		if err != nil {
 			return err
 		}
@@ -71,19 +71,19 @@ func testAccCheckKmsV1KeyExists(n string, key *keys.Key) resource.TestCheckFunc 
 	return func(s *terraform.State) error {
 		rs, ok := s.RootModule().Resources[n]
 		if !ok {
-			return fmt.Errorf("Not found: %s", n)
+			return fmt.Errorf("not found: %s", n)
 		}
 
 		if rs.Primary.ID == "" {
-			return fmt.Errorf("No ID is set")
+			return fmt.Errorf("no ID is set")
 		}
 
 		config := testAccProvider.Meta().(*cfg.Config)
-		kmsClient, err := config.KmsKeyV1Client(OS_REGION_NAME)
+		client, err := config.KmsKeyV1Client(OS_REGION_NAME)
 		if err != nil {
-			return fmt.Errorf("Error creating OpenTelekomCloud kms client: %s", err)
+			return fmt.Errorf("error creating OpenTelekomCloud KMSv1 client: %s", err)
 		}
-		found, err := keys.Get(kmsClient, rs.Primary.ID).ExtractKeyInfo()
+		found, err := keys.Get(client, rs.Primary.ID).ExtractKeyInfo()
 		if err != nil {
 			return err
 		}
@@ -99,6 +99,7 @@ func testAccCheckKmsV1KeyExists(n string, key *keys.Key) resource.TestCheckFunc 
 func TestAccKmsKey_isEnabled(t *testing.T) {
 	var key1, key2, key3 keys.Key
 	rName := acctest.RandStringFromCharSet(10, acctest.CharSetAlphaNum)
+	resourceName := "opentelekomcloud_kms_key_v1.bar"
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
@@ -108,24 +109,24 @@ func TestAccKmsKey_isEnabled(t *testing.T) {
 			{
 				Config: testAccKmsKey_enabled(rName),
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckKmsV1KeyExists("opentelekomcloud_kms_key_v1.bar", &key1),
-					resource.TestCheckResourceAttr("opentelekomcloud_kms_key_v1.bar", "is_enabled", "true"),
+					testAccCheckKmsV1KeyExists(resourceName, &key1),
+					resource.TestCheckResourceAttr(resourceName, "is_enabled", "true"),
 					testAccCheckKmsKeyIsEnabled(&key1, true),
 				),
 			},
 			{
 				Config: testAccKmsKey_disabled(rName),
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckKmsV1KeyExists("opentelekomcloud_kms_key_v1.bar", &key2),
-					resource.TestCheckResourceAttr("opentelekomcloud_kms_key_v1.bar", "is_enabled", "false"),
+					testAccCheckKmsV1KeyExists(resourceName, &key2),
+					resource.TestCheckResourceAttr(resourceName, "is_enabled", "false"),
 					testAccCheckKmsKeyIsEnabled(&key2, false),
 				),
 			},
 			{
 				Config: testAccKmsKey_enabled(rName),
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckKmsV1KeyExists("opentelekomcloud_kms_key_v1.bar", &key3),
-					resource.TestCheckResourceAttr("opentelekomcloud_kms_key_v1.bar", "is_enabled", "true"),
+					testAccCheckKmsV1KeyExists(resourceName, &key3),
+					resource.TestCheckResourceAttr(resourceName, "is_enabled", "true"),
 					testAccCheckKmsKeyIsEnabled(&key3, true),
 				),
 			},
@@ -136,7 +137,7 @@ func TestAccKmsKey_isEnabled(t *testing.T) {
 func testAccCheckKmsKeyIsEnabled(key *keys.Key, isEnabled bool) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
 		if (key.KeyState == kms.EnabledState) != isEnabled {
-			return fmt.Errorf("Expected key %s to have is_enabled=%t, given %s",
+			return fmt.Errorf("expected key %s to have is_enabled=%t, given %s",
 				key.KeyID, isEnabled, key.KeyState)
 		}
 
@@ -144,38 +145,45 @@ func testAccCheckKmsKeyIsEnabled(key *keys.Key, isEnabled bool) resource.TestChe
 	}
 }
 
-func testAccKmsV1Key_basic(keyAlias string) string {
+func testAccKmsV1Key_basic(rName string) string {
 	return fmt.Sprintf(`
-		resource "opentelekomcloud_kms_key_v1" "key_2" {
-			key_alias = "%s"
+		resource "opentelekomcloud_kms_key_v1" "key_1" {
+		  key_alias = "%s"
+          tags = {
+            muh = "value-create"
+            kuh = "value-create"
+          }
 		}
-	`, keyAlias)
+	`, rName)
 }
 
-func testAccKmsV1Key_update(keyAliasUpdate string) string {
+func testAccKmsV1Key_update(rName string) string {
 	return fmt.Sprintf(`
-		resource "opentelekomcloud_kms_key_v1" "key_2" {
-           key_alias       = "%s"
-           key_description = "key update description"
+		resource "opentelekomcloud_kms_key_v1" "key_1" {
+          key_alias       = "%s"
+          key_description = "key update description"
+          tags = {
+            muh = "value-update"
+          }
 		}
-	`, keyAliasUpdate)
+	`, rName)
 }
 
-func testAccKmsKey_enabled(rName string) string {
+func testAccKmsKey_enabled(prefix string) string {
 	return fmt.Sprintf(`
 resource "opentelekomcloud_kms_key_v1" "bar" {
-    key_description = "Terraform acc test is_enabled %s"
-    pending_days    = "7"
-    key_alias       = "tf-acc-test-kms-key-%s"
-}`, rName, rName)
+  key_alias       = "tf-acc-test-kms-key-%[1]s"
+  key_description = "Terraform acc test is_enabled %[1]s"
+  pending_days    = "7"
+}`, prefix)
 }
 
-func testAccKmsKey_disabled(rName string) string {
+func testAccKmsKey_disabled(prefix string) string {
 	return fmt.Sprintf(`
 resource "opentelekomcloud_kms_key_v1" "bar" {
-    key_description = "Terraform acc test is_enabled %s"
-    pending_days    = "7"
-    key_alias       = "tf-acc-test-kms-key-%s"
-    is_enabled      = false
-}`, rName, rName)
+  key_description = "Terraform acc test is_enabled %[1]s"
+  pending_days    = "7"
+  key_alias       = "tf-acc-test-kms-key-%[1]s"
+  is_enabled      = false
+}`, prefix)
 }

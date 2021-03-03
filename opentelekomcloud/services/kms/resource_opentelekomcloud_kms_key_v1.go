@@ -5,9 +5,11 @@ import (
 	"log"
 	"time"
 
+	"github.com/hashicorp/go-multierror"
 	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
 	"github.com/opentelekomcloud/gophertelekomcloud"
+	"github.com/opentelekomcloud/gophertelekomcloud/openstack/common/tags"
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/kms/v1/keys"
 
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common"
@@ -27,6 +29,7 @@ func ResourceKmsKeyV1() *schema.Resource {
 		Read:   resourceKmsKeyV1Read,
 		Update: resourceKmsKeyV1Update,
 		Delete: resourceKmsKeyV1Delete,
+
 		Importer: &schema.ResourceImporter{
 			State: schema.ImportStatePassthrough,
 		},
@@ -80,15 +83,16 @@ func ResourceKmsKeyV1() *schema.Resource {
 				Optional: true,
 				Default:  "7",
 			},
+			"tags": common.TagsSchema(),
 		},
 	}
 }
 
 func resourceKmsKeyV1Create(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*cfg.Config)
-	KmsKeyV1Client, err := config.KmsKeyV1Client(config.GetRegion(d))
+	client, err := config.KmsKeyV1Client(config.GetRegion(d))
 	if err != nil {
-		return fmt.Errorf("Error creating OpenTelekomCloud kms key client: %s", err)
+		return fmt.Errorf("error creating OpenTelekomCloud KMSv1 client: %s", err)
 	}
 
 	createOpts := &keys.CreateOpts{
@@ -98,19 +102,19 @@ func resourceKmsKeyV1Create(d *schema.ResourceData, meta interface{}) error {
 	}
 
 	log.Printf("[DEBUG] Create Options: %#v", createOpts)
-	v, err := keys.Create(KmsKeyV1Client, createOpts).ExtractKeyInfo()
+	key, err := keys.Create(client, createOpts).ExtractKeyInfo()
 	if err != nil {
-		return fmt.Errorf("Error creating OpenTelekomCloud key: %s", err)
+		return fmt.Errorf("error creating OpenTelekomCloud key: %s", err)
 	}
-	log.Printf("[INFO] Key ID: %s", v.KeyID)
+	log.Printf("[INFO] Key ID: %s", key.KeyID)
 
 	// Wait for the key to become enabled.
-	log.Printf("[DEBUG] Waiting for key (%s) to become enabled", v.KeyID)
+	log.Printf("[DEBUG] Waiting for key (%s) to become enabled", key.KeyID)
 
 	stateConf := &resource.StateChangeConf{
 		Pending:    []string{WaitingForEnableState, DisabledState},
 		Target:     []string{EnabledState},
-		Refresh:    keyV1StateRefreshFunc(KmsKeyV1Client, v.KeyID),
+		Refresh:    keyV1StateRefreshFunc(client, key.KeyID),
 		Timeout:    d.Timeout(schema.TimeoutCreate),
 		Delay:      10 * time.Second,
 		MinTimeout: 3 * time.Second,
@@ -118,68 +122,89 @@ func resourceKmsKeyV1Create(d *schema.ResourceData, meta interface{}) error {
 
 	_, err = stateConf.WaitForState()
 	if err != nil {
-		return fmt.Errorf(
-			"Error waiting for key (%s) to become ready: %s",
-			v.KeyID, err)
+		return fmt.Errorf("error waiting for key (%s) to become ready: %s", key.KeyID, err)
 	}
 
 	if !d.Get("is_enabled").(bool) {
-		key, err := keys.DisableKey(KmsKeyV1Client, v.KeyID).ExtractKeyInfo()
+		disableKey, err := keys.DisableKey(client, key.KeyID).ExtractKeyInfo()
 		if err != nil {
-			return fmt.Errorf("Error disabling key: %s.", err)
+			return fmt.Errorf("error disabling key: %s", err)
 		}
 
-		if key.KeyState != DisabledState {
-			return fmt.Errorf("Error disabling key, the key state is: %s", key.KeyState)
+		if disableKey.KeyState != DisabledState {
+			return fmt.Errorf("error disabling key, the key state is: %s", disableKey.KeyState)
+		}
+	}
+
+	// set tags
+	tagRaw := d.Get("tags").(map[string]interface{})
+	if len(tagRaw) > 0 {
+		tagList := common.ExpandResourceTags(tagRaw)
+		if err := tags.Create(client, "kms", key.KeyID, tagList).ExtractErr(); err != nil {
+			return fmt.Errorf("error setting tags of KMS: %s", err)
 		}
 	}
 
 	// Store the key ID now
-	d.SetId(v.KeyID)
+	d.SetId(key.KeyID)
 
 	return resourceKmsKeyV1Read(d, meta)
 }
 
 func resourceKmsKeyV1Read(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*cfg.Config)
-
-	KmsKeyV1Client, err := config.KmsKeyV1Client(config.GetRegion(d))
+	client, err := config.KmsKeyV1Client(config.GetRegion(d))
 	if err != nil {
-		return fmt.Errorf("Error creating OpenTelekomCloud kms key client: %s", err)
+		return fmt.Errorf("error creating OpenTelekomCloud KMSv1 client: %s", err)
 	}
 
-	v, err := keys.Get(KmsKeyV1Client, d.Id()).ExtractKeyInfo()
+	key, err := keys.Get(client, d.Id()).ExtractKeyInfo()
 	if err != nil {
 		return err
 	}
 
-	log.Printf("[DEBUG] Kms key %s: %+v", d.Id(), v)
-	if v.KeyState == PendingDeletionState {
+	log.Printf("[DEBUG] Kms key %s: %+v", d.Id(), key)
+	if key.KeyState == PendingDeletionState {
 		log.Printf("[WARN] Removing KMS key %s because it's already gone", d.Id())
 		d.SetId("")
 		return nil
 	}
 
-	d.SetId(v.KeyID)
-	d.Set("domain_id", v.DomainID)
-	d.Set("key_alias", v.KeyAlias)
-	d.Set("realm", v.Realm)
-	d.Set("key_description", v.KeyDescription)
-	d.Set("creation_date", v.CreationDate)
-	d.Set("scheduled_deletion_date", v.ScheduledDeletionDate)
-	d.Set("is_enabled", v.KeyState == EnabledState)
-	d.Set("default_key_flag", v.DefaultKeyFlag)
-	d.Set("expiration_time", v.ExpirationTime)
-	d.Set("origin", v.Origin)
+	mErr := multierror.Append(nil,
+		d.Set("domain_id", key.DomainID),
+		d.Set("key_alias", key.KeyAlias),
+		d.Set("realm", key.Realm),
+		d.Set("key_description", key.KeyDescription),
+		d.Set("creation_date", key.CreationDate),
+		d.Set("scheduled_deletion_date", key.ScheduledDeletionDate),
+		d.Set("is_enabled", key.KeyState == EnabledState),
+		d.Set("default_key_flag", key.DefaultKeyFlag),
+		d.Set("expiration_time", key.ExpirationTime),
+		d.Set("origin", key.Origin),
+	)
+
+	if mErr.ErrorOrNil() != nil {
+		return mErr
+	}
+
+	// save tags
+	resourceTags, err := tags.Get(client, "kms", d.Id()).Extract()
+	if err != nil {
+		return fmt.Errorf("error fetching OpenTelekomCloud KMS tags: %s", err)
+	}
+	tagMap := common.TagsToMap(resourceTags)
+	if err := d.Set("tags", tagMap); err != nil {
+		return fmt.Errorf("error saving tags for OpenTelekomCloud KMS: %s", err)
+	}
 
 	return nil
 }
 
 func resourceKmsKeyV1Update(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*cfg.Config)
-	KmsKeyV1Client, err := config.KmsKeyV1Client(config.GetRegion(d))
+	client, err := config.KmsKeyV1Client(config.GetRegion(d))
 	if err != nil {
-		return fmt.Errorf("Error creating OpenTelekomCloud kms key client: %s", err)
+		return fmt.Errorf("error creating OpenTelekomCloud KMSv1 client: %s", err)
 	}
 
 	if d.HasChange("key_alias") {
@@ -187,9 +212,9 @@ func resourceKmsKeyV1Update(d *schema.ResourceData, meta interface{}) error {
 			KeyID:    d.Id(),
 			KeyAlias: d.Get("key_alias").(string),
 		}
-		_, err = keys.UpdateAlias(KmsKeyV1Client, updateAliasOpts).ExtractKeyInfo()
+		_, err = keys.UpdateAlias(client, updateAliasOpts).ExtractKeyInfo()
 		if err != nil {
-			return fmt.Errorf("Error updating OpenTelekomCloud key: %s", err)
+			return fmt.Errorf("error updating OpenTelekomCloud key: %s", err)
 		}
 	}
 
@@ -198,36 +223,43 @@ func resourceKmsKeyV1Update(d *schema.ResourceData, meta interface{}) error {
 			KeyID:          d.Id(),
 			KeyDescription: d.Get("key_description").(string),
 		}
-		_, err = keys.UpdateDes(KmsKeyV1Client, updateDesOpts).ExtractKeyInfo()
+		_, err = keys.UpdateDes(client, updateDesOpts).ExtractKeyInfo()
 		if err != nil {
-			return fmt.Errorf("Error updating OpenTelekomCloud key: %s", err)
+			return fmt.Errorf("error updating OpenTelekomCloud key: %s", err)
 		}
 	}
 
 	if d.HasChange("is_enabled") {
-		v, err := keys.Get(KmsKeyV1Client, d.Id()).ExtractKeyInfo()
+		key, err := keys.Get(client, d.Id()).ExtractKeyInfo()
 		if err != nil {
-			return fmt.Errorf("DescribeKey got an error: %s.", err)
+			return fmt.Errorf("describeKey got an error: %s", err)
 		}
 
-		if d.Get("is_enabled").(bool) && v.KeyState == DisabledState {
-			key, err := keys.EnableKey(KmsKeyV1Client, d.Id()).ExtractKeyInfo()
+		if d.Get("is_enabled").(bool) && key.KeyState == DisabledState {
+			key, err := keys.EnableKey(client, d.Id()).ExtractKeyInfo()
 			if err != nil {
-				return fmt.Errorf("Error enabling key: %s.", err)
+				return fmt.Errorf("error enabling key: %s", err)
 			}
 			if key.KeyState != EnabledState {
-				return fmt.Errorf("Error enabling key, the key state is: %s", key.KeyState)
+				return fmt.Errorf("error enabling key, the key state is: %s", key.KeyState)
 			}
 		}
 
-		if !d.Get("is_enabled").(bool) && v.KeyState == EnabledState {
-			key, err := keys.DisableKey(KmsKeyV1Client, d.Id()).ExtractKeyInfo()
+		if !d.Get("is_enabled").(bool) && key.KeyState == EnabledState {
+			key, err := keys.DisableKey(client, d.Id()).ExtractKeyInfo()
 			if err != nil {
-				return fmt.Errorf("Error disabling key: %s.", err)
+				return fmt.Errorf("error disabling key: %s", err)
 			}
 			if key.KeyState != DisabledState {
-				return fmt.Errorf("Error disabling key, the key state is: %s", key.KeyState)
+				return fmt.Errorf("error disabling key, the key state is: %s", key.KeyState)
 			}
+		}
+	}
+
+	// update tags
+	if d.HasChange("tags") {
+		if err := common.UpdateResourceTags(client, d, "kms", d.Id()); err != nil {
+			return fmt.Errorf("error updating tags of KMS %s: %s", d.Id(), err)
 		}
 	}
 
@@ -236,12 +268,12 @@ func resourceKmsKeyV1Update(d *schema.ResourceData, meta interface{}) error {
 
 func resourceKmsKeyV1Delete(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*cfg.Config)
-	KmsKeyV1Client, err := config.KmsKeyV1Client(config.GetRegion(d))
+	client, err := config.KmsKeyV1Client(config.GetRegion(d))
 	if err != nil {
-		return fmt.Errorf("Error creating OpenTelekomCloud kms key client: %s", err)
+		return fmt.Errorf("error creating OpenTelekomCloud KMSv1 client: %s", err)
 	}
 
-	v, err := keys.Get(KmsKeyV1Client, d.Id()).ExtractKeyInfo()
+	key, err := keys.Get(client, d.Id()).ExtractKeyInfo()
 	if err != nil {
 		return common.CheckDeleted(d, err, "key")
 	}
@@ -256,13 +288,13 @@ func resourceKmsKeyV1Delete(d *schema.ResourceData, meta interface{}) error {
 	// It's possible that this key was used as a boot device and is currently
 	// in a pending deletion state from when the instance was terminated.
 	// If this is true, just move on. It'll eventually delete.
-	if v.KeyState != PendingDeletionState {
-		v, err = keys.Delete(KmsKeyV1Client, deleteOpts).Extract()
+	if key.KeyState != PendingDeletionState {
+		key, err = keys.Delete(client, deleteOpts).Extract()
 		if err != nil {
 			return err
 		}
 
-		if v.KeyState != PendingDeletionState {
+		if key.KeyState != PendingDeletionState {
 			return fmt.Errorf("failed to delete key")
 		}
 	}
