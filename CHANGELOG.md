@@ -1,16 +1,17 @@
 ## 1.24.0 (Unreleased)
 
 
-## 1.23.2 (March 1, 2021)
+## 1.23.2 (March 4, 2021)
 
 ENHANCEMENTS:
 * `resource/opentelekomcloud_as_group_v1`: Add possibility to set tags ([#877](https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/issues/877))
 * `resource/opentelekomcloud_kms_key_v1`: Add possibility to set tags ([#884](https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/issues/884))
 
 BUG FIXES:
-* `resource/opentelekomcloud_cce_node_v3`: Remove reading empty CCE Node`Spec.ExtendParam` ([#876](https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/issues/876))
-* `resource/opentelekomcloud_cce_node_v3`: Fix resource reading ([#882](https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/issues/882))
-* `resource/opentelekomcloud_cbr_policy_v3`: Fix issue with required argument `timezone` ([#883](https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/issues/883))
+* `resource/opentelekomcloud_cce_node_v3`: Remove reading empty CCE Node `Spec.ExtendParam` ([#876](https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/issues/876))
+* `resource/opentelekomcloud_css_cluster_v1`: Fix error with reading cluster without encryption ([#882](https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/issues/882))
+* `resource/opentelekomcloud_cbr_policy_v3`: Make `timezone` argument required ([#883](https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/issues/883))
+* `resource/opentelekomcloud_compute_keypair_v2`: Fix raising error on changing existing public key ([#887](https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/issues/887))
 
 ## 1.23.1 (February 25, 2021)
 
