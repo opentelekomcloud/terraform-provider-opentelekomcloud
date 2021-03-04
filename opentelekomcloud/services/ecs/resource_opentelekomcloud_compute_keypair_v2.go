@@ -165,5 +165,5 @@ func keyPairExist(client *golangsdk.ServiceClient, name, publicKey string) (exis
 	if kp.PublicKey == publicKey {
 		return true, nil
 	}
-	return true, fmt.Errorf("key %s already exist with different public key", name)
+	return false, nil
 }
