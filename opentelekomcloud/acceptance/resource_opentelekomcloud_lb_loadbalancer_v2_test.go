@@ -56,8 +56,8 @@ func TestAccLBV2LoadBalancer_secGroup(t *testing.T) {
 				Config: testAccLBV2LoadBalancer_secGroup,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckLBV2LoadBalancerExists(resourceName, &lb),
-					testAccCheckNetworkingV2SecGroupExists(resourceName, &sg1),
-					testAccCheckNetworkingV2SecGroupExists(resourceName, &sg2),
+					testAccCheckNetworkingV2SecGroupExists(sgResourceName, &sg1),
+					testAccCheckNetworkingV2SecGroupExists(sgResourceName, &sg2),
 					resource.TestCheckResourceAttr(resourceName, "security_group_ids.#", "1"),
 					testAccCheckLBV2LoadBalancerHasSecGroup(&lb, &sg1),
 				),
