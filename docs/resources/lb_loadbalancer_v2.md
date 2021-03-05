@@ -13,6 +13,10 @@ Manages an Enhanced loadbalancer resource within OpenTelekomCloud.
 ```hcl
 resource "opentelekomcloud_lb_loadbalancer_v2" "lb_1" {
   vip_subnet_id = "d9415786-5f1a-428b-b35f-2f1523e146d2"
+
+  tags = {
+    muh = "kuh"
+  }
 }
 ```
 
@@ -50,7 +54,7 @@ The following arguments are supported:
   authorized by policy (e.g. networks that belong to them or networks that
   are shared). Changing this creates a new loadbalancer.
 
--> **Note:** When used with `opentelekomcloud_vpc_subnet_v1`, not `id` but
+-> When used with `opentelekomcloud_vpc_subnet_v1`, not `id` but
 `subnet_id`needs to be used
 
 * `name` - (Optional) Human-readable name for the loadbalancer. Does not have
@@ -60,7 +64,7 @@ The following arguments are supported:
 
 * `tenant_id` - (Optional) Required for admins. The UUID of the tenant who owns
   the Loadbalancer.  Only administrative users can specify a tenant UUID
-  other than their own.  Changing this creates a new loadbalancer.
+  other than their own. Changing this creates a new loadbalancer.
 
 * `vip_address` - (Optional) The ip address of the load balancer.
   Changing this creates a new loadbalancer.
@@ -74,6 +78,9 @@ The following arguments are supported:
 * `security_group_ids` - (Optional) A list of security group IDs to apply to the
   loadbalancer. The security groups must be specified by ID and not name (as
   opposed to how they are configured with the Compute Instance).
+
+* `tags` - (Optional) Tags key/value pairs to associate with the loadbalancer.
+
 
 ## Attributes Reference
 
@@ -96,3 +103,5 @@ The following attributes are exported:
 * `security_group_ids` - See Argument Reference above.
 
 * `vip_port_id` - The Port ID of the Load Balancer IP.
+
+* `tags` - See Argument Reference above.
