@@ -315,7 +315,7 @@ func resourceListenerV2Update(d *schema.ResourceData, meta interface{}) error {
 	// update tags
 	if d.HasChange("tags") {
 		if err := common.UpdateResourceTags(client, d, "listeners", d.Id()); err != nil {
-			return fmt.Errorf("error updating tags of LoadBalancer %s: %s", d.Id(), err)
+			return fmt.Errorf("error updating tags of LoadBalancer Listener %s: %s", d.Id(), err)
 		}
 	}
 

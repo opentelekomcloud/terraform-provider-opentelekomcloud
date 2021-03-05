@@ -25,7 +25,6 @@ func TestAccLBV2Listener_basic(t *testing.T) {
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckLBV2ListenerExists(resourceName, &listener),
 					resource.TestCheckResourceAttr(resourceName, "tags.muh", "value-create"),
-					// resource.TestCheckResourceAttr(resourceName, "connection_limit", "-1"),
 				),
 			},
 			{
@@ -33,7 +32,6 @@ func TestAccLBV2Listener_basic(t *testing.T) {
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr(resourceName, "name", "listener_1_updated"),
 					resource.TestCheckResourceAttr(resourceName, "tags.muh", "value-update"),
-					// resource.TestCheckResourceAttr(resourceName, "connection_limit", "100"),
 				),
 			},
 		},

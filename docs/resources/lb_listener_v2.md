@@ -72,7 +72,7 @@ The following arguments are supported:
 * `admin_state_up` - (Optional) The administrative state of the Listener.
   A valid value is `true` (UP) or `false` (DOWN).
 
-* `tags` - (Optional) Tags key/value pairs to associate with the AutoScaling Group.
+* `tags` - (Optional) Tags key/value pairs to associate with the loadbalancer listener.
 
 ## Attributes Reference
 
