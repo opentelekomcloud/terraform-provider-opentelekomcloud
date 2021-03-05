@@ -37,32 +37,30 @@ Quick Start
     }
     ```
 5. [Authenticate](https://registry.terraform.io/providers/opentelekomcloud/opentelekomcloud/latest/docs#authentication) either by providing `user_name` and `password` in the previous file or setting them as environment variables. 
-```bash
-# Linux
-OS_USERNAME="<your_username>"
-OS_PASSWORD="<your_password"
-# Windows
-$env:OS_USERNAME="<your_username>"
-$env:OS_PASSWORD="<your_password"
-```
+     ```bash
+     # Linux
+     OS_USERNAME="<your_username>"
+     OS_PASSWORD="<your_password"
+     # Windows
+     $env:OS_USERNAME="<your_username>"
+     $env:OS_PASSWORD="<your_password"
+     ```
 7. Create your first resource. 
+     ```hcl
+     # main.tf
 
-```hcl
-# main.tf
-
-# Create an Elastic Cloud Server resource
-resource "opentelekomcloud_compute_instance_v2" "test-server" {
-  name        = "test-server"
-  image_name  = "Standard_CentOS_8_latest"
-  flavor_name = "s3.medium.1"
-
-  key_pair        = "kp_ecs"
-  security_groups = ["default"]
-  network {
-    name = "network_ecs"
-  }
-}
-```
+     # Create an Elastic Cloud Server resource
+     resource "opentelekomcloud_compute_instance_v2" "test-server" {
+       name        = "test-server"
+       image_name  = "Standard_CentOS_8_latest"
+       flavor_name = "s3.medium.1"
+       key_pair        = "kp_ecs"
+       security_groups = ["default"]
+       network {
+         name = "network_ecs"
+       }
+     }
+     ```
 
 ### Full Examples
 
