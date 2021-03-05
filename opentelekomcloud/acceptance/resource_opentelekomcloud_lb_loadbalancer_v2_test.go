@@ -45,8 +45,8 @@ func TestAccLBV2LoadBalancer_secGroup(t *testing.T) {
 	var lb loadbalancers.LoadBalancer
 	var sg1, sg2 groups.SecGroup
 	resourceName := "opentelekomcloud_lb_loadbalancer_v2.loadbalancer_1"
-	sgResource1Name := "opentelekomcloud_networking_secgroup_v2.secgroup_2"
-	sgResource2Name := "opentelekomcloud_networking_secgroup_v2.secgroup_1"
+	sgResource1Name := "opentelekomcloud_networking_secgroup_v2.secgroup_1"
+	sgResource2Name := "opentelekomcloud_networking_secgroup_v2.secgroup_2"
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
