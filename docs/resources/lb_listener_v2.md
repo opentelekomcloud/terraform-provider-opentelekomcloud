@@ -13,6 +13,10 @@ resource "opentelekomcloud_lb_listener_v2" "listener_1" {
   protocol        = "HTTP"
   protocol_port   = 8080
   loadbalancer_id = "d9415786-5f1a-428b-b35f-2f1523e146d2"
+
+  tags = {
+    muh = "kuh"
+  }
 }
 ```
 
@@ -42,7 +46,7 @@ The following arguments are supported:
 * `description` - (Optional) Human-readable description for the Listener.
 
 * `http2_enable`- (Optional) `true` to enable HTTP/2 mode of ELB.
-  HTTP/2 is disabled by default if not set. 
+  HTTP/2 is disabled by default if not set.
 
 * `default_tls_container_ref` - (Optional) Specifies the ID of a certificate container of type `server`
   used by the listener. The value contains a maximum of 128 characters. The default value is `null`.
@@ -61,12 +65,14 @@ The following arguments are supported:
   The default value is `[]`. It only works in conjunction with `TERMINATED_HTTPS`.
 
 * `tls_ciphers_policy`- (Optional) Controls the TLS version used. Supported values are `tls-1-0`, `tls-1-1`,
-  `tls-1-2` and `tls-1-2-strict`. If not set, the loadbalancer uses `tls-1-0`. See 
+  `tls-1-2` and `tls-1-2-strict`. If not set, the loadbalancer uses `tls-1-0`. See
   [here](https://docs.otc.t-systems.com/api/elb/elb_zq_jt_0001.html) for details about the supported cipher
   suites. The option is effective only in conjunction with `TERMINATED_HTTPS`.
 
 * `admin_state_up` - (Optional) The administrative state of the Listener.
   A valid value is `true` (UP) or `false` (DOWN).
+
+* `tags` - (Optional) Tags key/value pairs to associate with the AutoScaling Group.
 
 ## Attributes Reference
 
@@ -97,3 +103,5 @@ The following attributes are exported:
 * `tls_ciphers_policy` - See Argument Reference above.
 
 * `admin_state_up` - See Argument Reference above.
+
+* `tags` - See Argument Reference above.
