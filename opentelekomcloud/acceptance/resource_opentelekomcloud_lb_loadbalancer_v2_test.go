@@ -45,7 +45,8 @@ func TestAccLBV2LoadBalancer_secGroup(t *testing.T) {
 	var lb loadbalancers.LoadBalancer
 	var sg1, sg2 groups.SecGroup
 	resourceName := "opentelekomcloud_lb_loadbalancer_v2.loadbalancer_1"
-	sgResourceName := "opentelekomcloud_networking_secgroup_v2.secgroup_2"
+	sgResource1Name := "opentelekomcloud_networking_secgroup_v2.secgroup_2"
+	sgResource2Name := "opentelekomcloud_networking_secgroup_v2.secgroup_1"
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
@@ -56,8 +57,8 @@ func TestAccLBV2LoadBalancer_secGroup(t *testing.T) {
 				Config: testAccLBV2LoadBalancer_secGroup,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckLBV2LoadBalancerExists(resourceName, &lb),
-					testAccCheckNetworkingV2SecGroupExists(sgResourceName, &sg1),
-					testAccCheckNetworkingV2SecGroupExists(sgResourceName, &sg2),
+					testAccCheckNetworkingV2SecGroupExists(sgResource1Name, &sg1),
+					testAccCheckNetworkingV2SecGroupExists(sgResource2Name, &sg2),
 					resource.TestCheckResourceAttr(resourceName, "security_group_ids.#", "1"),
 					testAccCheckLBV2LoadBalancerHasSecGroup(&lb, &sg1),
 				),
@@ -66,8 +67,8 @@ func TestAccLBV2LoadBalancer_secGroup(t *testing.T) {
 				Config: testAccLBV2LoadBalancer_secGroup_update1,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckLBV2LoadBalancerExists(resourceName, &lb),
-					testAccCheckNetworkingV2SecGroupExists(sgResourceName, &sg1),
-					testAccCheckNetworkingV2SecGroupExists(sgResourceName, &sg2),
+					testAccCheckNetworkingV2SecGroupExists(sgResource1Name, &sg1),
+					testAccCheckNetworkingV2SecGroupExists(sgResource2Name, &sg2),
 					resource.TestCheckResourceAttr(resourceName, "security_group_ids.#", "2"),
 					testAccCheckLBV2LoadBalancerHasSecGroup(&lb, &sg1),
 					testAccCheckLBV2LoadBalancerHasSecGroup(&lb, &sg2),
@@ -77,8 +78,8 @@ func TestAccLBV2LoadBalancer_secGroup(t *testing.T) {
 				Config: testAccLBV2LoadBalancer_secGroup_update2,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckLBV2LoadBalancerExists(resourceName, &lb),
-					testAccCheckNetworkingV2SecGroupExists(sgResourceName, &sg1),
-					testAccCheckNetworkingV2SecGroupExists(sgResourceName, &sg2),
+					testAccCheckNetworkingV2SecGroupExists(sgResource1Name, &sg1),
+					testAccCheckNetworkingV2SecGroupExists(sgResource2Name, &sg2),
 					resource.TestCheckResourceAttr(resourceName, "security_group_ids.#", "1"),
 					testAccCheckLBV2LoadBalancerHasSecGroup(&lb, &sg2),
 				),
