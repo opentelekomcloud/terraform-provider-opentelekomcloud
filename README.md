@@ -1,63 +1,54 @@
 Terraform Open Telekom Cloud Provider
 =====================================
+[Documentation](https://registry.terraform.io/providers/opentelekomcloud/opentelekomcloud/latest/docs) | [![Gitter chat](https://badges.gitter.im/hashicorp-terraform/Lobby.png)](https://gitter.im/hashicorp-terraform/Lobby)
+| [Mailing list](http://groups.google.com/group/terraform-tool)
 
-- Website: https://www.terraform.io
-- [![Gitter chat](https://badges.gitter.im/hashicorp-terraform/Lobby.png)](https://gitter.im/hashicorp-terraform/Lobby)
-- Mailing list: [Google Groups](http://groups.google.com/group/terraform-tool)
-
-<img src="https://cdn.rawgit.com/hashicorp/terraform-website/master/content/source/assets/images/logo-hashicorp.svg" width="600px">
-
-Requirements
-------------
-
-- [Terraform](https://www.terraform.io/downloads.html) 0.13+
-- [Go](https://golang.org/doc/install) 1.15 (to build the provider plugin)
-
-
-Building The Provider
----------------------
-
-Clone repository to: `$GOPATH/src/github.com/opentelekomcloud/terraform-provider-opentelekomcloud`
-
-```sh
-$ export GO111MODULE=on
-$ go get github.com/opentelekomcloud/terraform-provider-opentelekomcloud
-```
-
-Enter the provider directory and build the provider
-
-```sh
-$ cd $GOPATH/src/github.com/opentelekomcloud/terraform-provider-opentelekomcloud
-$ make build
-```
+[![alt text](https://cdn.rawgit.com/hashicorp/terraform-website/master/content/source/assets/images/logo-hashicorp.svg)](https://www.terraform.io/)
 
 Quick Start
 -----------
 > When using the OpenTelekomCloud Provider with Terraform 0.13 and later, the recommended approach is to declare Provider versions in the root module Terraform configuration, using a `required_providers` block as per the following example. For previous versions, please continue to pin the version within the provider block.
 
-```hcl
-# We strongly recommend using the required_providers block to set the
-# OpenTelekomCloud Provider source and version being used
-terraform {
-  required_providers {
-    opentelekomcloud = {
-      source = "opentelekomcloud/opentelekomcloud"
-      version = ">= 1.22.0"
+1. Add [opentelekomcloud/opentelekomcloud](https://registry.terraform.io/providers/opentelekomcloud/opentelekomcloud/latest/docs) to your `required_providers`.
+    ```hcl
+    # provider.tf
+    terraform {
+      required_providers {
+        opentelekomcloud = {
+          source = "opentelekomcloud/opentelekomcloud"
+          version = ">= 1.23.2"
+        }
+      }
     }
-  }
-}
+    ```
 
-provider "opentelekomcloud" {
-  # More information on the authentication methods supported by
-  # the OpenTelekomCloud Provider can be found here:
-  # https://registry.terraform.io/providers/opentelekomcloud/opentelekomcloud/latest/docs
+2. Run `terraform init -upgrade` to download the provider.
+3. Add the provider and supply your `tenant_name` and `domain_name` for minimum configuration.
+    ```hcl
+    # provider.tf
+    provider "opentelekomcloud" {
+      # OpenTelekomCloud Provider Documentation:
+      # https://registry.terraform.io/providers/opentelekomcloud/opentelekomcloud/latest/docs
+      # domain_name = "..."
+      # tenant_name = "..."
+      # auth_url    = "https://iam.eu-de.otc.t-systems.com/v3"
+      # user_name   = "..."
+      # password    = "..."
+    }
+    ```
+5. [Authenticate](https://registry.terraform.io/providers/opentelekomcloud/opentelekomcloud/latest/docs#authentication) either by providing `user_name` and `password` in the previous file or setting them as environment variables. 
+```bash
+# Linux
+OS_USERNAME="<your_username>"
+OS_PASSWORD="<your_password"
+# Windows
+$env:OS_USERNAME="<your_username>"
+$env:OS_PASSWORD="<your_password"
+```
+7. Create your first resource. 
 
-  # user_name   = "..."
-  # password    = "..."
-  # domain_name = "..."
-  # tenant_name = "..."
-  # auth_url    = "https://iam.eu-de.otc.t-systems.com/v3"
-}
+```hcl
+# main.tf
 
 # Create an Elastic Cloud Server resource
 resource "opentelekomcloud_compute_instance_v2" "test-server" {
@@ -73,17 +64,36 @@ resource "opentelekomcloud_compute_instance_v2" "test-server" {
 }
 ```
 
-Full Example
-------------
-Please see full example at https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/tree/master/examples,
-you must fill in the required variables in variables.tf.
+### Full Examples
 
-Using the provider
-------------------
-Please see the documentation at [provider usage](docs/index.md).
+ - [Have a look here for basic examples](https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/tree/devel/examples/basic-examples/modules)
+ - [and here for more advanced examples](https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/tree/master/examples)
+
+Don't forget to fill in the required variables in `variables.tf`.
 
 Developing the Provider
 -----------------------
+
+### Requirements
+- [Terraform](https://www.terraform.io/downloads.html) 0.13+
+- [Go](https://golang.org/doc/install) 1.15 (to build the provider plugin)
+
+
+### Building The Provider
+
+Clone repository to: `$GOPATH/src/github.com/opentelekomcloud/terraform-provider-opentelekomcloud`
+
+```sh
+$ export GO111MODULE=on
+$ go get github.com/opentelekomcloud/terraform-provider-opentelekomcloud
+```
+
+Enter the provider directory and build the provider
+
+```sh
+$ cd $GOPATH/src/github.com/opentelekomcloud/terraform-provider-opentelekomcloud
+$ make build
+```
 
 If you wish to work on the provider, you'll first need [Go](https://golang.org) installed on your machine (version 1.15+ is *required*).
 
