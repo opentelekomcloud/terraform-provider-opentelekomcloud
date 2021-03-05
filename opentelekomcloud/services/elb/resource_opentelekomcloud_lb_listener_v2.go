@@ -9,6 +9,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/helper/validation"
+	"github.com/opentelekomcloud/gophertelekomcloud/openstack/common/tags"
 
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/networking/v2/extensions/lbaas_v2/listeners"
 
@@ -36,7 +37,6 @@ func ResourceListenerV2() *schema.Resource {
 				Computed: true,
 				ForceNew: true,
 			},
-
 			"protocol": {
 				Type:     schema.TypeString,
 				Required: true,
@@ -44,96 +44,84 @@ func ResourceListenerV2() *schema.Resource {
 				ValidateFunc: validation.StringInSlice([]string{
 					"TCP", "UDP", "HTTP", "TERMINATED_HTTPS"}, false),
 			},
-
 			"protocol_port": {
 				Type:     schema.TypeInt,
 				Required: true,
 				ForceNew: true,
 			},
-
 			"tenant_id": {
 				Type:     schema.TypeString,
 				Optional: true,
 				Computed: true,
 				ForceNew: true,
 			},
-
 			"loadbalancer_id": {
 				Type:     schema.TypeString,
 				Required: true,
 				ForceNew: true,
 			},
-
 			"name": {
 				Type:     schema.TypeString,
 				Optional: true,
 				Computed: true,
 			},
-
 			"default_pool_id": {
 				Type:     schema.TypeString,
 				Optional: true,
 				Computed: true,
-				ForceNew: true, // could be updated due to docs, but gopher doesn´t define it
+				ForceNew: true, // could be updated due to docs, but gopher doesn't define it
 			},
-
 			"description": {
 				Type:     schema.TypeString,
 				Optional: true,
 			},
-
 			/*"connection_limit": &schema.Schema{
 				Type:     schema.TypeInt,
 				Optional: true,
 				Computed: true,
 				ForceNew: true,
 			}, */
-
 			// new feature 2020 to support https2
 			"http2_enable": {
 				Type:     schema.TypeBool,
 				Optional: true,
 			},
-
 			"default_tls_container_ref": {
 				Type:     schema.TypeString,
 				Optional: true,
 			},
-
 			// new feature 2020 to handle Client certificates
 			"client_ca_tls_container_ref": {
 				Type:     schema.TypeString,
 				Optional: true,
 			},
-
 			"sni_container_refs": {
 				Type:     schema.TypeList,
 				Optional: true,
 				Elem:     &schema.Schema{Type: schema.TypeString},
 			},
-
-			// new feature 2020 to give a choice of the http standard on https termiination
+			// new feature 2020 to give a choice of the http standard on https termination
 			"tls_ciphers_policy": {
 				Type:     schema.TypeString,
 				Optional: true,
 				ValidateFunc: validation.StringInSlice([]string{
 					"tls-1-0", "tls-1-1", "tls-1-2", "tls-1-2-strict"}, false),
 			},
-
 			"admin_state_up": {
 				Type:     schema.TypeBool,
 				Default:  true,
 				Optional: true,
 			},
+			"tags": common.TagsSchema(),
 		},
 	}
 }
 
 func resourceListenerV2Create(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*cfg.Config)
-	networkingClient, err := config.NetworkingV2Client(config.GetRegion(d))
+	client, err := config.NetworkingV2Client(config.GetRegion(d))
 	if err != nil {
-		return fmt.Errorf("Error creating OpenTelekomCloud networking client: %s", err)
+		return fmt.Errorf("error creating OpenTelekomCloud NetworkingV2 client: %s", err)
 	}
 
 	http2Enable := d.Get("http2_enable").(bool) // would prefer a fix in the gopher...
@@ -170,28 +158,35 @@ func resourceListenerV2Create(d *schema.ResourceData, meta interface{}) error {
 	// Wait for LoadBalancer to become active before continuing
 	lbID := createOpts.LoadbalancerID
 	timeout := d.Timeout(schema.TimeoutCreate)
-	err = waitForLBV2LoadBalancer(networkingClient, lbID, "ACTIVE", nil, timeout)
-	if err != nil {
+	if err := waitForLBV2LoadBalancer(client, lbID, "ACTIVE", nil, timeout); err != nil {
 		return err
 	}
 
 	log.Printf("[DEBUG] Attempting to create listener")
 	var listener *listeners.Listener
 	err = resource.Retry(timeout, func() *resource.RetryError {
-		listener, err = listeners.Create(networkingClient, createOpts).Extract()
+		listener, err = listeners.Create(client, createOpts).Extract()
 		if err != nil {
 			return common.CheckForRetryableError(err)
 		}
 		return nil
 	})
 	if err != nil {
-		return fmt.Errorf("Error creating listener: %s", err)
+		return fmt.Errorf("error creating listener: %s", err)
 	}
 
 	// Wait for LoadBalancer to become active again before continuing
-	err = waitForLBV2LoadBalancer(networkingClient, lbID, "ACTIVE", nil, timeout)
-	if err != nil {
+	if err := waitForLBV2LoadBalancer(client, lbID, "ACTIVE", nil, timeout); err != nil {
 		return err
+	}
+
+	// set tags
+	tagRaw := d.Get("tags").(map[string]interface{})
+	if len(tagRaw) > 0 {
+		tagList := common.ExpandResourceTags(tagRaw)
+		if err := tags.Create(client, "listeners", listener.ID, tagList).ExtractErr(); err != nil {
+			return fmt.Errorf("error setting tags of LoadBalancer: %s", err)
+		}
 	}
 
 	d.SetId(listener.ID)
@@ -201,19 +196,18 @@ func resourceListenerV2Create(d *schema.ResourceData, meta interface{}) error {
 
 func resourceListenerV2Read(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*cfg.Config)
-	networkingClient, err := config.NetworkingV2Client(config.GetRegion(d))
+	client, err := config.NetworkingV2Client(config.GetRegion(d))
 	if err != nil {
-		return fmt.Errorf("Error creating OpenTelekomCloud networking client: %s", err)
+		return fmt.Errorf("error creating OpenTelekomCloud NetworkingV2 client: %s", err)
 	}
 
-	listener, err := listeners.Get(networkingClient, d.Id()).Extract()
+	listener, err := listeners.Get(client, d.Id()).Extract()
 	if err != nil {
 		return common.CheckDeleted(d, err, "listener")
 	}
 
 	log.Printf("[DEBUG] Retrieved listener %s: %#v", d.Id(), listener)
 
-	d.SetId(listener.ID)
 	mErr := multierror.Append(nil,
 		d.Set("region", config.GetRegion(d)),
 		d.Set("protocol", listener.Protocol),
@@ -230,14 +224,29 @@ func resourceListenerV2Read(d *schema.ResourceData, meta interface{}) error {
 		d.Set("tls_ciphers_policy", listener.TlsCiphersPolicy),
 		d.Set("admin_state_up", listener.AdminStateUp),
 	)
-	return mErr.ErrorOrNil()
+
+	if mErr.ErrorOrNil() != nil {
+		return mErr
+	}
+
+	// save tags
+	resourceTags, err := tags.Get(client, "listeners", d.Id()).Extract()
+	if err != nil {
+		return fmt.Errorf("error fetching OpenTelekomCloud LB Listener tags: %s", err)
+	}
+	tagMap := common.TagsToMap(resourceTags)
+	if err := d.Set("tags", tagMap); err != nil {
+		return fmt.Errorf("error saving tags for OpenTelekomCloud LB Listener: %s", err)
+	}
+
+	return nil
 }
 
 func resourceListenerV2Update(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*cfg.Config)
-	networkingClient, err := config.NetworkingV2Client(config.GetRegion(d))
+	client, err := config.NetworkingV2Client(config.GetRegion(d))
 	if err != nil {
-		return fmt.Errorf("Error creating OpenTelekomCloud networking client: %s", err)
+		return fmt.Errorf("error creating OpenTelekomCloud NetworkingV2 client: %s", err)
 	}
 
 	var updateOpts listeners.UpdateOpts
@@ -281,14 +290,13 @@ func resourceListenerV2Update(d *schema.ResourceData, meta interface{}) error {
 	// Wait for LoadBalancer to become active before continuing
 	lbID := d.Get("loadbalancer_id").(string)
 	timeout := d.Timeout(schema.TimeoutUpdate)
-	err = waitForLBV2LoadBalancer(networkingClient, lbID, "ACTIVE", nil, timeout)
-	if err != nil {
+	if err := waitForLBV2LoadBalancer(client, lbID, "ACTIVE", nil, timeout); err != nil {
 		return err
 	}
 
 	log.Printf("[DEBUG] Updating listener %s with options: %#v", d.Id(), updateOpts)
 	err = resource.Retry(timeout, func() *resource.RetryError {
-		_, err = listeners.Update(networkingClient, d.Id(), updateOpts).Extract()
+		_, err = listeners.Update(client, d.Id(), updateOpts).Extract()
 		if err != nil {
 			return common.CheckForRetryableError(err)
 		}
@@ -296,13 +304,19 @@ func resourceListenerV2Update(d *schema.ResourceData, meta interface{}) error {
 	})
 
 	if err != nil {
-		return fmt.Errorf("Error updating listener %s: %s", d.Id(), err)
+		return fmt.Errorf("error updating listener %s: %s", d.Id(), err)
 	}
 
 	// Wait for LoadBalancer to become active again before continuing
-	err = waitForLBV2LoadBalancer(networkingClient, lbID, "ACTIVE", nil, timeout)
-	if err != nil {
+	if err := waitForLBV2LoadBalancer(client, lbID, "ACTIVE", nil, timeout); err != nil {
 		return err
+	}
+
+	// update tags
+	if d.HasChange("tags") {
+		if err := common.UpdateResourceTags(client, d, "listeners", d.Id()); err != nil {
+			return fmt.Errorf("error updating tags of LoadBalancer %s: %s", d.Id(), err)
+		}
 	}
 
 	return resourceListenerV2Read(d, meta)
@@ -311,41 +325,37 @@ func resourceListenerV2Update(d *schema.ResourceData, meta interface{}) error {
 
 func resourceListenerV2Delete(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*cfg.Config)
-	networkingClient, err := config.NetworkingV2Client(config.GetRegion(d))
+	client, err := config.NetworkingV2Client(config.GetRegion(d))
 	if err != nil {
-		return fmt.Errorf("Error creating OpenTelekomCloud networking client: %s", err)
+		return fmt.Errorf("error creating OpenTelekomCloud NetworkingV2 client: %s", err)
 	}
 
 	// Wait for LoadBalancer to become active before continuing
 	lbID := d.Get("loadbalancer_id").(string)
 	timeout := d.Timeout(schema.TimeoutDelete)
-	err = waitForLBV2LoadBalancer(networkingClient, lbID, "ACTIVE", nil, timeout)
-	if err != nil {
+	if err := waitForLBV2LoadBalancer(client, lbID, "ACTIVE", nil, timeout); err != nil {
 		return err
 	}
 
 	log.Printf("[DEBUG] Deleting listener %s", d.Id())
 	err = resource.Retry(timeout, func() *resource.RetryError {
-		err = listeners.Delete(networkingClient, d.Id()).ExtractErr()
+		err = listeners.Delete(client, d.Id()).ExtractErr()
 		if err != nil {
 			return common.CheckForRetryableError(err)
 		}
 		return nil
 	})
-
 	if err != nil {
-		return fmt.Errorf("Error deleting listener %s: %s", d.Id(), err)
+		return fmt.Errorf("error deleting listener %s: %s", d.Id(), err)
 	}
 
 	// Wait for LoadBalancer to become active again before continuing
-	err = waitForLBV2LoadBalancer(networkingClient, lbID, "ACTIVE", nil, timeout)
-	if err != nil {
+	if err := waitForLBV2LoadBalancer(client, lbID, "ACTIVE", nil, timeout); err != nil {
 		return err
 	}
 
 	// Wait for Listener to delete
-	err = waitForLBV2Listener(networkingClient, d.Id(), "DELETED", nil, timeout)
-	if err != nil {
+	if err := waitForLBV2Listener(client, d.Id(), "DELETED", nil, timeout); err != nil {
 		return err
 	}
 
