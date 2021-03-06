@@ -1,6 +1,6 @@
 Terraform Open Telekom Cloud Provider
 =====================================
-[![Documentation](https://camo.githubusercontent.com/3f4485d8adcf4893453f5aacd375ff6e32d9c1b79648335fec37a8a997aa9355/68747470733a2f2f696d672e736869656c64732e696f2f62616467652f646f63756d656e746174696f6e2d626c7565)](https://registry.terraform.io/providers/opentelekomcloud/opentelekomcloud/latest/docs) | [![Gitter chat](https://badges.gitter.im/hashicorp-terraform/Lobby.png)](https://gitter.im/hashicorp-terraform/Lobby)
+[![Documentation](https://img.shields.io/badge/documentation-blue)](https://registry.terraform.io/providers/opentelekomcloud/opentelekomcloud/latest/docs) | [![Gitter chat](https://badges.gitter.im/hashicorp-terraform/Lobby.png)](https://gitter.im/hashicorp-terraform/Lobby)
 | [Mailing list](http://groups.google.com/group/terraform-tool)
 
 [![alt text](https://cdn.rawgit.com/hashicorp/terraform-website/master/content/source/assets/images/logo-hashicorp.svg)](https://www.terraform.io/)
