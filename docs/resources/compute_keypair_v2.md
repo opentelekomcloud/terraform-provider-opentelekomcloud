@@ -11,10 +11,14 @@ Manages a V2 keypair resource within OpenTelekomCloud.
 ```hcl
 resource "opentelekomcloud_compute_keypair_v2" "test-keypair" {
   name       = "my-keypair"
+  public_key = "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQDAjpC1hwiOCCmKEWxJ4qzTTsJbKzndLotBCz5PcwtUnflmU+gHJtWMZKpuEGVi29h0A/+ydKek1O18k10Ff+4tyFjiHDQAnOfgWf7+b1yK+qDip3X1C0UPMbwHlTfSGWLGZqd9LvEFx9k3h/M+VtMvwR1lJ9LUyTAImnNjWG7TaIPmui30HvM2UiFEmqkr4ijq45MyX2+fLIePLRIF61p4whjHAQYufqyno3BS48icQb4p6iVEZPo4AE2o9oIyQvj2mx4dk5Y8CgSETOZTYDOR3rU2fZTRDRgPJDH9FWvQjF5tA0p3d9CoWWd2s6GKKbfoUIi8R/Db1BSPJwkqB"
 }
 ```
 
 ## Argument Reference
+
+->
+When creating an SSH key, you only need to configure `name`. When importing an SSH key, you must configure `public_key`.
 
 The following arguments are supported:
 
@@ -39,13 +43,17 @@ The following attributes are exported:
 
 * `private_key` - The information about the private for an SSH key.
 
+->
+The information about the `private_key` is contained in the response for **creating** an SSH key.
+The information about the `private_key` is not contained in the response for **importing** an SSH key.
+
 * `value_specs` - See Argument Reference above.
 
 * `shared` - Indicates that keypair is shared (global) and not managed by Terraform.
 
 ## Import
 
-Keypair can be imported using the `name`, e.g.
+Keypairs can be imported using the `name`, e.g.
 
 ```sh
 terraform import opentelekomcloud_compute_keypair_v2.my-keypair test-keypair
