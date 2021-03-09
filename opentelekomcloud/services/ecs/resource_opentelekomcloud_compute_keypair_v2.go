@@ -39,13 +39,12 @@ func ResourceComputeKeypairV2() *schema.Resource {
 			"public_key": {
 				Type:     schema.TypeString,
 				Optional: true,
+				Computed: true,
 				ForceNew: true,
 			},
 			"private_key": {
 				Type:     schema.TypeString,
-				Optional: true,
 				Computed: true,
-				ForceNew: true,
 			},
 			"value_specs": {
 				Type:     schema.TypeMap,
@@ -82,7 +81,7 @@ func resourceComputeKeypairV2Create(d *schema.ResourceData, meta interface{}) er
 		if err != nil {
 			return fmt.Errorf("error creating OpenTelekomCloud keypair: %s", err)
 		}
-		if len(opts.CreateOpts.PublicKey) == 0 {
+		if opts.CreateOpts.PublicKey == "" {
 			if err := d.Set("private_key", key.PrivateKey); err != nil {
 				return fmt.Errorf("error saving private key: %s", err)
 			}
