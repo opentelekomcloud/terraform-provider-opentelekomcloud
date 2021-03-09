@@ -20,6 +20,8 @@ resource "opentelekomcloud_compute_keypair_v2" "test-keypair" {
 ->
 When creating an SSH key, you only need to configure `name`. When importing an SSH key, you must configure `public_key`.
 
+The following arguments are supported:
+
 * `name` - (Required) A unique name for the keypair. Changing this creates a new keypair.
 
 * `public_key` - (Optional) A pre-generated OpenSSH-formatted public key.
