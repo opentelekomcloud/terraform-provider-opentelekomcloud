@@ -36,9 +36,10 @@ func ResourceCBRVaultV3() *schema.Resource {
 				ValidateFunc: validation.StringLenBetween(1, 64),
 			},
 			"resource": {
-				Type:     schema.TypeList,
-				Optional: true,
-				Computed: true,
+				Type:       schema.TypeList,
+				Optional:   true,
+				Computed:   true,
+				ConfigMode: schema.SchemaConfigModeAttr, // see ConfigMode documentation for the reasoning
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
 						"id": {
