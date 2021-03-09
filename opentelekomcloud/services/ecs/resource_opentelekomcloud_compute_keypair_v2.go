@@ -39,7 +39,12 @@ func ResourceComputeKeypairV2() *schema.Resource {
 			"public_key": {
 				Type:     schema.TypeString,
 				Optional: true,
+				Computed: true,
 				ForceNew: true,
+			},
+			"private_key": {
+				Type:     schema.TypeString,
+				Computed: true,
 			},
 			"value_specs": {
 				Type:     schema.TypeMap,
@@ -56,9 +61,9 @@ func ResourceComputeKeypairV2() *schema.Resource {
 
 func resourceComputeKeypairV2Create(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*cfg.Config)
-	computeClient, err := config.ComputeV2Client(config.GetRegion(d))
+	client, err := config.ComputeV2Client(config.GetRegion(d))
 	if err != nil {
-		return fmt.Errorf("error creating OpenTelekomCloud compute client: %s", err)
+		return fmt.Errorf("error creating OpenTelekomCloud ComputeV2 client: %s", err)
 	}
 
 	opts := KeyPairCreateOpts{
@@ -72,9 +77,14 @@ func resourceComputeKeypairV2Create(d *schema.ResourceData, meta interface{}) er
 	shared := d.Get("shared").(bool)
 	if !shared {
 		log.Printf("[DEBUG] Create Options: %#v", opts)
-		_, err := keypairs.Create(computeClient, opts).Extract()
+		key, err := keypairs.Create(client, opts).Extract()
 		if err != nil {
 			return fmt.Errorf("error creating OpenTelekomCloud keypair: %s", err)
+		}
+		if opts.CreateOpts.PublicKey == "" {
+			if err := d.Set("private_key", key.PrivateKey); err != nil {
+				return fmt.Errorf("error saving private key: %s", err)
+			}
 		}
 	} else {
 		log.Printf("[DEBUG] Using non-managed key pair, skipping creation")
@@ -86,12 +96,12 @@ func resourceComputeKeypairV2Create(d *schema.ResourceData, meta interface{}) er
 
 func resourceComputeKeypairV2Read(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*cfg.Config)
-	computeClient, err := config.ComputeV2Client(config.GetRegion(d))
+	client, err := config.ComputeV2Client(config.GetRegion(d))
 	if err != nil {
-		return fmt.Errorf("error creating OpenTelekomCloud compute client: %s", err)
+		return fmt.Errorf("error creating OpenTelekomCloud ComputeV2 client: %s", err)
 	}
 
-	kp, err := keypairs.Get(computeClient, d.Id()).Extract()
+	kp, err := keypairs.Get(client, d.Id()).Extract()
 	if err != nil {
 		return common.CheckDeleted(d, err, "keypair")
 	}
@@ -100,6 +110,7 @@ func resourceComputeKeypairV2Read(d *schema.ResourceData, meta interface{}) erro
 		d.Set("name", kp.Name),
 		d.Set("public_key", kp.PublicKey),
 		d.Set("region", config.GetRegion(d)),
+		d.Set("private_key", d.Get("private_key").(string)),
 	)
 	if err := mErr.ErrorOrNil(); err != nil {
 		return err
@@ -109,16 +120,14 @@ func resourceComputeKeypairV2Read(d *schema.ResourceData, meta interface{}) erro
 
 func resourceComputeKeypairV2Delete(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*cfg.Config)
-	computeClient, err := config.ComputeV2Client(config.GetRegion(d))
+	client, err := config.ComputeV2Client(config.GetRegion(d))
 	if err != nil {
-		return fmt.Errorf("error creating OpenTelekomCloud compute client: %s", err)
+		return fmt.Errorf("error creating OpenTelekomCloud ComputeV2 client: %s", err)
 	}
 
 	shared := d.Get("shared").(bool)
-
 	if !shared {
-		err = keypairs.Delete(computeClient, d.Id()).ExtractErr()
-		if err != nil {
+		if err := keypairs.Delete(client, d.Id()).ExtractErr(); err != nil {
 			return fmt.Errorf("error deleting OpenTelekomCloud keypair: %s", err)
 		}
 	} else {
@@ -141,7 +150,7 @@ func useSharedKeypair(d *schema.ResourceDiff, meta interface{}) error {
 	config := meta.(*cfg.Config)
 	client, err := config.ComputeV2Client(config.GetRegion(d))
 	if err != nil {
-		return fmt.Errorf("error creating OpenTelekomCloud compute client: %s", err)
+		return fmt.Errorf("error creating OpenTelekomCloud ComputeV2 client: %s", err)
 	}
 	name := d.Get("name").(string)
 	publicKey := d.Get("public_key").(string)
