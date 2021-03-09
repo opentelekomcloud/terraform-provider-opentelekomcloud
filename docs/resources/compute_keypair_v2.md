@@ -6,19 +6,31 @@ subcategory: "Elastic Cloud Server (ECS)"
 
 Manages a V2 keypair resource within OpenTelekomCloud.
 
+~> **Important Security Notice** When creating an SSH key, you only need to configure `name`.
+When importing an SSH key, you must configure `public_key`. If both `name` and `public_key` duplicate
+the existing keypair value, the new keypair won't be managed by the Terraform. Keypair resource
+will be marked as `shared.`
+
+
 ## Example Usage
 
+
+### Importing an SSH key
 ```hcl
-resource "opentelekomcloud_compute_keypair_v2" "test-keypair" {
-  name       = "my-keypair"
+resource "opentelekomcloud_compute_keypair_v2" "import-keypair" {
+  name       = "imported-keypair"
   public_key = "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQDAjpC1hwiOCCmKEWxJ4qzTTsJbKzndLotBCz5PcwtUnflmU+gHJtWMZKpuEGVi29h0A/+ydKek1O18k10Ff+4tyFjiHDQAnOfgWf7+b1yK+qDip3X1C0UPMbwHlTfSGWLGZqd9LvEFx9k3h/M+VtMvwR1lJ9LUyTAImnNjWG7TaIPmui30HvM2UiFEmqkr4ijq45MyX2+fLIePLRIF61p4whjHAQYufqyno3BS48icQb4p6iVEZPo4AE2o9oIyQvj2mx4dk5Y8CgSETOZTYDOR3rU2fZTRDRgPJDH9FWvQjF5tA0p3d9CoWWd2s6GKKbfoUIi8R/Db1BSPJwkqB"
 }
 ```
 
-## Argument Reference
+### Creating an SSH key
+```hcl
+resource "opentelekomcloud_compute_keypair_v2" "create-keypair" {
+  name       = "new-keypair"
+}
+```
 
-->
-When creating an SSH key, you only need to configure `name`. When importing an SSH key, you must configure `public_key`.
+## Argument Reference
 
 The following arguments are supported:
 
@@ -26,10 +38,6 @@ The following arguments are supported:
 
 * `public_key` - (Optional) A pre-generated OpenSSH-formatted public key.
   Changing this creates a new keypair.
-
-->
-If both `name` and `public_key` duplicate the existing keypair value, the new keypair won't be
-managed by the Terraform. Keypair resource will be marked as `shared.`
 
 * `value_specs` - (Optional) Map of additional options.
 
@@ -52,7 +60,7 @@ The information about the `private_key` exists if the `public_key` was not set o
 
 ## Import
 
-Keypairs can be imported using the `name`, e.g.
+Key pairs can be imported using the `name`, e.g.
 
 ```shell
 terraform import opentelekomcloud_compute_keypair_v2.my-keypair test-keypair
