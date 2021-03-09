@@ -45,6 +45,7 @@ func ResourceComputeKeypairV2() *schema.Resource {
 				Type:     schema.TypeString,
 				Optional: true,
 				Computed: true,
+				ForceNew: true,
 			},
 			"value_specs": {
 				Type:     schema.TypeMap,
@@ -110,6 +111,7 @@ func resourceComputeKeypairV2Read(d *schema.ResourceData, meta interface{}) erro
 		d.Set("name", kp.Name),
 		d.Set("public_key", kp.PublicKey),
 		d.Set("region", config.GetRegion(d)),
+		d.Set("private_key", d.Get("private_key").(string)),
 	)
 	if err := mErr.ErrorOrNil(); err != nil {
 		return err
@@ -125,10 +127,8 @@ func resourceComputeKeypairV2Delete(d *schema.ResourceData, meta interface{}) er
 	}
 
 	shared := d.Get("shared").(bool)
-
 	if !shared {
-		err = keypairs.Delete(client, d.Id()).ExtractErr()
-		if err != nil {
+		if err := keypairs.Delete(client, d.Id()).ExtractErr(); err != nil {
 			return fmt.Errorf("error deleting OpenTelekomCloud keypair: %s", err)
 		}
 	} else {
