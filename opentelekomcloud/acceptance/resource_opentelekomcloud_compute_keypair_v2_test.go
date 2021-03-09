@@ -34,7 +34,7 @@ func TestAccComputeV2Keypair_basic(t *testing.T) {
 func TestAccComputeV2Keypair_shared(t *testing.T) {
 	var keypair keypairs.KeyPair
 	resourceName1 := "opentelekomcloud_compute_keypair_v2.kp_1"
-	resourceName2 := "opentelekomcloud_compute_keypair_v2.kp_1"
+	resourceName2 := "opentelekomcloud_compute_keypair_v2.kp_2"
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
