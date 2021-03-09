@@ -20,8 +20,6 @@ resource "opentelekomcloud_compute_keypair_v2" "test-keypair" {
 ->
 When creating an SSH key, you only need to configure `name`. When importing an SSH key, you must configure `public_key`.
 
-The following arguments are supported:
-
 * `name` - (Required) A unique name for the keypair. Changing this creates a new keypair.
 
 * `public_key` - (Optional) A pre-generated OpenSSH-formatted public key.
@@ -44,8 +42,7 @@ The following attributes are exported:
 * `private_key` - The information about the private for an SSH key.
 
 ->
-The information about the `private_key` is contained in the response for **creating** an SSH key.
-The information about the `private_key` is not contained in the response for **importing** an SSH key.
+The information about the `private_key` exists if the `public_key` was not set originally.
 
 * `value_specs` - See Argument Reference above.
 
@@ -55,7 +52,7 @@ The information about the `private_key` is not contained in the response for **i
 
 Keypairs can be imported using the `name`, e.g.
 
-```sh
+```shell
 terraform import opentelekomcloud_compute_keypair_v2.my-keypair test-keypair
 ```
 
