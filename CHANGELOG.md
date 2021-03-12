@@ -1,5 +1,18 @@
 ## 1.24.0 (Unreleased)
 
+## 1.23.3 (March 12, 2021)
+
+ENHANCEMENTS:
+* `resource/opentelekomcloud_lb_loadbalancer_v2`: Add possibility to set tags ([#890](https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/issues/890))
+* `resource/opentelekomcloud_lb_listener_v2`: Add possibility to set tags ([#895](https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/issues/895))
+* `resource/opentelekomcloud_compute_keypair_v2`: Add new keypair creation support ([#896](https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/issues/896))
+
+BUG FIXES:
+* `resource/opentelekomcloud_cbr_vault_v3`: Fix not unassignable resources ([#897](https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/issues/897))
+
+DOCUMENTATION:
+* Improve repository `README.md` ([#894](https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/issues/894))
+* `resource/opentelekomcloud_dns_zone_v2`: Clarify that private zones are not searched by default ([#905](https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/issues/905))
 
 ## 1.23.2 (March 4, 2021)
 
