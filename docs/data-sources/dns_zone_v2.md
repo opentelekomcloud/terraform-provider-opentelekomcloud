@@ -16,7 +16,7 @@ data "opentelekomcloud_dns_zone_v2" "zone_1" {
 
 ## Argument Reference
 
-* `zone_type` - (Optional) The type of the zone: `private` or `public`.
+* `zone_type` - (Optional) The type of the zone: `private` or `public`. This argument is required to match private zones.
 
 * `name` - (Optional) The name of the zone.
 
