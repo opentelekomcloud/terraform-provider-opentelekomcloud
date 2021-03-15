@@ -5,8 +5,10 @@ import (
 	"log"
 	"time"
 
+	"github.com/hashicorp/go-multierror"
 	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/helper/validation"
 	"github.com/opentelekomcloud/gophertelekomcloud"
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/networking/v2/extensions/vpnaas/ipsecpolicies"
 
@@ -36,13 +38,17 @@ func ResourceVpnIPSecPolicyV2() *schema.Resource {
 				ForceNew: true,
 			},
 			"name": {
-				Type:     schema.TypeString,
-				Optional: true,
+				Type:         schema.TypeString,
+				Optional:     true,
+				ValidateFunc: common.ValidateName,
 			},
 			"auth_algorithm": {
 				Type:     schema.TypeString,
 				Optional: true,
 				Computed: true,
+				ValidateFunc: validation.StringInSlice([]string{
+					"md5", "sha1", "sha2-256", "sha2-384", "sha2-512",
+				}, false),
 			},
 			"encapsulation_mode": {
 				Type:     schema.TypeString,
@@ -53,11 +59,17 @@ func ResourceVpnIPSecPolicyV2() *schema.Resource {
 				Type:     schema.TypeString,
 				Optional: true,
 				Computed: true,
+				ValidateFunc: validation.StringInSlice([]string{
+					"group1", "group2", "group5", "group14", "group15", "group16", "group19", "group20", "group21", "disable",
+				}, false),
 			},
 			"encryption_algorithm": {
 				Type:     schema.TypeString,
 				Optional: true,
 				Computed: true,
+				ValidateFunc: validation.StringInSlice([]string{
+					"3des", "aes-128", "aes-192", "aes-256",
+				}, false),
 			},
 			"description": {
 				Type:     schema.TypeString,
@@ -67,8 +79,10 @@ func ResourceVpnIPSecPolicyV2() *schema.Resource {
 				Type:     schema.TypeString,
 				Optional: true,
 				Computed: true,
+				ValidateFunc: validation.StringInSlice([]string{
+					"esp", "ah", "ah-esp",
+				}, false),
 			},
-
 			"tenant_id": {
 				Type:     schema.TypeString,
 				Optional: true,
@@ -87,9 +101,10 @@ func ResourceVpnIPSecPolicyV2() *schema.Resource {
 							Optional: true,
 						},
 						"value": {
-							Type:     schema.TypeInt,
-							Computed: true,
-							Optional: true,
+							Type:         schema.TypeInt,
+							Computed:     true,
+							Optional:     true,
+							ValidateFunc: validation.IntBetween(60, 604800),
 						},
 					},
 				},
@@ -105,36 +120,39 @@ func ResourceVpnIPSecPolicyV2() *schema.Resource {
 
 func resourceVpnIPSecPolicyV2Create(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*cfg.Config)
-	networkingClient, err := config.NetworkingV2Client(config.GetRegion(d))
+	client, err := config.NetworkingV2Client(config.GetRegion(d))
 	if err != nil {
-		return fmt.Errorf("Error creating OpenTelekomCloud networking client: %s", err)
+		return fmt.Errorf("error creating OpenTelekomCloud NetworkingV2 client: %s", err)
 	}
 
-	encapsulationMode := resourceIPSecPolicyV2EncapsulationMode(d.Get("encapsulation_mode").(string))
-	authAlgorithm := resourceIPSecPolicyV2AuthAlgorithm(d.Get("auth_algorithm").(string))
-	encryptionAlgorithm := resourceIPSecPolicyV2EncryptionAlgorithm(d.Get("encryption_algorithm").(string))
-	pfs := resourceIPSecPolicyV2PFS(d.Get("pfs").(string))
-	transformProtocol := resourceIPSecPolicyV2TransformProtocol(d.Get("transform_protocol").(string))
-	lifetime := resourceIPSecPolicyV2LifetimeCreateOpts(d.Get("lifetime").(*schema.Set))
+	lifetimeRaw := d.Get("lifetime").(*schema.Set).List()
+	var lifetime *ipsecpolicies.LifetimeCreateOpts
+	if len(lifetimeRaw) == 1 {
+		lifetimeInfo := lifetimeRaw[0].(map[string]interface{})
+		lifetime = &ipsecpolicies.LifetimeCreateOpts{
+			Units: ipsecpolicies.Unit(lifetimeInfo["units"].(string)),
+			Value: lifetimeInfo["value"].(int),
+		}
+	}
 
 	opts := VpnIPSecPolicyCreateOpts{
 		ipsecpolicies.CreateOpts{
-			Name:                d.Get("name").(string),
-			Description:         d.Get("description").(string),
 			TenantID:            d.Get("tenant_id").(string),
-			EncapsulationMode:   encapsulationMode,
-			AuthAlgorithm:       authAlgorithm,
-			EncryptionAlgorithm: encryptionAlgorithm,
-			PFS:                 pfs,
-			TransformProtocol:   transformProtocol,
-			Lifetime:            &lifetime,
+			Description:         d.Get("description").(string),
+			Name:                d.Get("name").(string),
+			AuthAlgorithm:       ipsecpolicies.AuthAlgorithm(d.Get("auth_algorithm").(string)),
+			EncapsulationMode:   ipsecpolicies.EncapsulationMode(d.Get("encapsulation_mode").(string)),
+			EncryptionAlgorithm: ipsecpolicies.EncryptionAlgorithm(d.Get("encryption_algorithm").(string)),
+			PFS:                 ipsecpolicies.PFS(d.Get("pfs").(string)),
+			TransformProtocol:   ipsecpolicies.TransformProtocol(d.Get("transform_protocol").(string)),
+			Lifetime:            lifetime,
 		},
 		common.MapValueSpecs(d),
 	}
 
 	log.Printf("[DEBUG] Create IPSec policy: %#v", opts)
 
-	policy, err := ipsecpolicies.Create(networkingClient, opts).Extract()
+	policy, err := ipsecpolicies.Create(client, opts).Extract()
 	if err != nil {
 		return err
 	}
@@ -142,9 +160,8 @@ func resourceVpnIPSecPolicyV2Create(d *schema.ResourceData, meta interface{}) er
 	stateConf := &resource.StateChangeConf{
 		Pending:    []string{"PENDING_CREATE"},
 		Target:     []string{"ACTIVE"},
-		Refresh:    waitForIPSecPolicyCreation(networkingClient, policy.ID),
+		Refresh:    waitForIPSecPolicyCreate(client, policy.ID),
 		Timeout:    d.Timeout(schema.TimeoutCreate),
-		Delay:      0,
 		MinTimeout: 2 * time.Second,
 	}
 	_, err = stateConf.WaitForState()
@@ -157,40 +174,42 @@ func resourceVpnIPSecPolicyV2Create(d *schema.ResourceData, meta interface{}) er
 }
 
 func resourceVpnIPSecPolicyV2Read(d *schema.ResourceData, meta interface{}) error {
-	log.Printf("[DEBUG] Retrieve information about IPSec policy: %s", d.Id())
-
 	config := meta.(*cfg.Config)
-	networkingClient, err := config.NetworkingV2Client(config.GetRegion(d))
+	client, err := config.NetworkingV2Client(config.GetRegion(d))
 	if err != nil {
-		return fmt.Errorf("Error creating OpenTelekomCloud networking client: %s", err)
+		return fmt.Errorf("error creating OpenTelekomCloud NetworkingV2 client: %s", err)
 	}
 
-	policy, err := ipsecpolicies.Get(networkingClient, d.Id()).Extract()
+	policy, err := ipsecpolicies.Get(client, d.Id()).Extract()
 	if err != nil {
 		return common.CheckDeleted(d, err, "IPSec policy")
 	}
 
 	log.Printf("[DEBUG] Read OpenTelekomCloud IPSec policy %s: %#v", d.Id(), policy)
 
-	d.Set("name", policy.Name)
-	d.Set("description", policy.Description)
-	d.Set("tenant_id", policy.TenantID)
-	d.Set("encapsulation_mode", policy.EncapsulationMode)
-	d.Set("encryption_algorithm", policy.EncryptionAlgorithm)
-	d.Set("transform_protocol", policy.TransformProtocol)
-	d.Set("pfs", policy.PFS)
-	d.Set("auth_algorithm", policy.AuthAlgorithm)
-	d.Set("region", config.GetRegion(d))
+	mErr := multierror.Append(nil,
+		d.Set("name", policy.Name),
+		d.Set("description", policy.Description),
+		d.Set("tenant_id", policy.TenantID),
+		d.Set("encapsulation_mode", policy.EncapsulationMode),
+		d.Set("encryption_algorithm", policy.EncryptionAlgorithm),
+		d.Set("transform_protocol", policy.TransformProtocol),
+		d.Set("pfs", policy.PFS),
+		d.Set("auth_algorithm", policy.AuthAlgorithm),
+		d.Set("region", config.GetRegion(d)),
+	)
 
 	// Set the lifetime
-	var lifetimeMap map[string]interface{}
-	lifetimeMap = make(map[string]interface{})
-	lifetimeMap["units"] = policy.Lifetime.Units
-	lifetimeMap["value"] = policy.Lifetime.Value
-	var lifetime []map[string]interface{}
-	lifetime = append(lifetime, lifetimeMap)
-	if err := d.Set("lifetime", &lifetime); err != nil {
-		log.Printf("[WARN] unable to set IPSec policy lifetime")
+	lifetime := []map[string]interface{}{
+		{
+			"units": policy.Lifetime.Units,
+			"value": policy.Lifetime.Value,
+		},
+	}
+	mErr = multierror.Append(mErr, d.Set("lifetime", lifetime))
+
+	if mErr.ErrorOrNil() != nil {
+		return mErr
 	}
 
 	return nil
@@ -198,9 +217,9 @@ func resourceVpnIPSecPolicyV2Read(d *schema.ResourceData, meta interface{}) erro
 
 func resourceVpnIPSecPolicyV2Update(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*cfg.Config)
-	networkingClient, err := config.NetworkingV2Client(config.GetRegion(d))
+	client, err := config.NetworkingV2Client(config.GetRegion(d))
 	if err != nil {
-		return fmt.Errorf("Error creating OpenTelekomCloud networking client: %s", err)
+		return fmt.Errorf("error creating OpenTelekomCloud NetworkingV2 client: %s", err)
 	}
 
 	var hasChange bool
@@ -219,40 +238,48 @@ func resourceVpnIPSecPolicyV2Update(d *schema.ResourceData, meta interface{}) er
 	}
 
 	if d.HasChange("auth_algorithm") {
-		opts.AuthAlgorithm = resourceIPSecPolicyV2AuthAlgorithm(d.Get("auth_algorithm").(string))
+		opts.AuthAlgorithm = ipsecpolicies.AuthAlgorithm(d.Get("auth_algorithm").(string))
 		hasChange = true
 	}
 
 	if d.HasChange("encryption_algorithm") {
-		opts.EncryptionAlgorithm = resourceIPSecPolicyV2EncryptionAlgorithm(d.Get("encryption_algorithm").(string))
+		opts.EncryptionAlgorithm = ipsecpolicies.EncryptionAlgorithm(d.Get("encryption_algorithm").(string))
 		hasChange = true
 	}
 
 	if d.HasChange("transform_protocol") {
-		opts.TransformProtocol = resourceIPSecPolicyV2TransformProtocol(d.Get("transform_protocol").(string))
+		opts.TransformProtocol = ipsecpolicies.TransformProtocol(d.Get("transform_protocol").(string))
 		hasChange = true
 	}
 
 	if d.HasChange("pfs") {
-		opts.PFS = resourceIPSecPolicyV2PFS(d.Get("pfs").(string))
+		opts.PFS = ipsecpolicies.PFS(d.Get("pfs").(string))
 		hasChange = true
 	}
 
 	if d.HasChange("encapsulation_mode") {
-		opts.EncapsulationMode = resourceIPSecPolicyV2EncapsulationMode(d.Get("encapsulation_mode").(string))
+		opts.EncapsulationMode = ipsecpolicies.EncapsulationMode(d.Get("encapsulation_mode").(string))
 		hasChange = true
 	}
 
 	if d.HasChange("lifetime") {
-		lifetime := resourceIPSecPolicyV2LifetimeUpdateOpts(d.Get("lifetime").(*schema.Set))
-		opts.Lifetime = &lifetime
+		lifetimeRaw := d.Get("lifetime").(*schema.Set).List()
+		var lifetime *ipsecpolicies.LifetimeUpdateOpts
+		if len(lifetimeRaw) == 1 {
+			lifetimeInfo := lifetimeRaw[0].(map[string]interface{})
+			lifetime = &ipsecpolicies.LifetimeUpdateOpts{
+				Units: ipsecpolicies.Unit(lifetimeInfo["units"].(string)),
+				Value: lifetimeInfo["value"].(int),
+			}
+		}
+		opts.Lifetime = lifetime
 		hasChange = true
 	}
 
 	log.Printf("[DEBUG] Updating IPSec policy with id %s: %#v", d.Id(), opts)
 
 	if hasChange {
-		_, err = ipsecpolicies.Update(networkingClient, d.Id(), opts).Extract()
+		_, err = ipsecpolicies.Update(client, d.Id(), opts).Extract()
 		if err != nil {
 			return err
 		}
@@ -260,9 +287,8 @@ func resourceVpnIPSecPolicyV2Update(d *schema.ResourceData, meta interface{}) er
 		stateConf := &resource.StateChangeConf{
 			Pending:    []string{"PENDING_UPDATE"},
 			Target:     []string{"ACTIVE"},
-			Refresh:    waitForIPSecPolicyUpdate(networkingClient, d.Id()),
+			Refresh:    waitForIPSecPolicyUpdate(client, d.Id()),
 			Timeout:    d.Timeout(schema.TimeoutCreate),
-			Delay:      0,
 			MinTimeout: 2 * time.Second,
 		}
 		if _, err = stateConf.WaitForState(); err != nil {
@@ -273,50 +299,22 @@ func resourceVpnIPSecPolicyV2Update(d *schema.ResourceData, meta interface{}) er
 }
 
 func resourceVpnIPSecPolicyV2Delete(d *schema.ResourceData, meta interface{}) error {
-	log.Printf("[DEBUG] Destroy IPSec policy: %s", d.Id())
-
 	config := meta.(*cfg.Config)
-	networkingClient, err := config.NetworkingV2Client(config.GetRegion(d))
+	client, err := config.NetworkingV2Client(config.GetRegion(d))
 	if err != nil {
-		return fmt.Errorf("Error creating OpenTelekomCloud networking client: %s", err)
+		return fmt.Errorf("error creating OpenTelekomCloud NetworkingV2 client: %s", err)
 	}
 
-	stateConf := &resource.StateChangeConf{
-		Pending:    []string{"ACTIVE"},
-		Target:     []string{"DELETED"},
-		Refresh:    waitForIPSecPolicyDeletion(networkingClient, d.Id()),
-		Timeout:    d.Timeout(schema.TimeoutCreate),
-		Delay:      0,
-		MinTimeout: 2 * time.Second,
-	}
-
-	if _, err = stateConf.WaitForState(); err != nil {
-		return err
+	if err := ipsecpolicies.Delete(client, d.Id()).ExtractErr(); err != nil {
+		return fmt.Errorf("error deleting IPSec Poilicy: %s", err)
 	}
 
 	return nil
 }
 
-func waitForIPSecPolicyDeletion(networkingClient *golangsdk.ServiceClient, id string) resource.StateRefreshFunc {
+func waitForIPSecPolicyCreate(client *golangsdk.ServiceClient, id string) resource.StateRefreshFunc {
 	return func() (interface{}, string, error) {
-		err := ipsecpolicies.Delete(networkingClient, id).Err
-		if err == nil {
-			return "", "DELETED", nil
-		}
-
-		if errCode, ok := err.(golangsdk.ErrUnexpectedResponseCode); ok {
-			if errCode.Actual == 409 {
-				return nil, "ACTIVE", nil
-			}
-		}
-
-		return nil, "ACTIVE", err
-	}
-}
-
-func waitForIPSecPolicyCreation(networkingClient *golangsdk.ServiceClient, id string) resource.StateRefreshFunc {
-	return func() (interface{}, string, error) {
-		policy, err := ipsecpolicies.Get(networkingClient, id).Extract()
+		policy, err := ipsecpolicies.Get(client, id).Extract()
 		if err != nil {
 			return "", "PENDING_CREATE", nil
 		}
@@ -324,119 +322,12 @@ func waitForIPSecPolicyCreation(networkingClient *golangsdk.ServiceClient, id st
 	}
 }
 
-func waitForIPSecPolicyUpdate(networkingClient *golangsdk.ServiceClient, id string) resource.StateRefreshFunc {
+func waitForIPSecPolicyUpdate(client *golangsdk.ServiceClient, id string) resource.StateRefreshFunc {
 	return func() (interface{}, string, error) {
-		policy, err := ipsecpolicies.Get(networkingClient, id).Extract()
+		policy, err := ipsecpolicies.Get(client, id).Extract()
 		if err != nil {
 			return "", "PENDING_UPDATE", nil
 		}
 		return policy, "ACTIVE", nil
 	}
-}
-
-func resourceIPSecPolicyV2TransformProtocol(trp string) ipsecpolicies.TransformProtocol {
-	var protocol ipsecpolicies.TransformProtocol
-	switch trp {
-	case "esp":
-		protocol = ipsecpolicies.TransformProtocolESP
-	case "ah":
-		protocol = ipsecpolicies.TransformProtocolAH
-	case "ah-esp":
-		protocol = ipsecpolicies.TransformProtocolAHESP
-	}
-	return protocol
-
-}
-func resourceIPSecPolicyV2PFS(pfsString string) ipsecpolicies.PFS {
-	var pfs ipsecpolicies.PFS
-	switch pfsString {
-	case "group2":
-		pfs = ipsecpolicies.PFSGroup2
-	case "group5":
-		pfs = ipsecpolicies.PFSGroup5
-	case "group14":
-		pfs = ipsecpolicies.PFSGroup14
-	}
-	return pfs
-
-}
-func resourceIPSecPolicyV2EncryptionAlgorithm(encryptionAlgo string) ipsecpolicies.EncryptionAlgorithm {
-	var alg ipsecpolicies.EncryptionAlgorithm
-	switch encryptionAlgo {
-	case "3des":
-		alg = ipsecpolicies.EncryptionAlgorithm3DES
-	case "aes-128":
-		alg = ipsecpolicies.EncryptionAlgorithmAES128
-	case "aes-256":
-		alg = ipsecpolicies.EncryptionAlgorithmAES256
-	case "aes-192":
-		alg = ipsecpolicies.EncryptionAlgorithmAES192
-	}
-	return alg
-}
-func resourceIPSecPolicyV2AuthAlgorithm(authAlgo string) ipsecpolicies.AuthAlgorithm {
-	var alg ipsecpolicies.AuthAlgorithm
-	switch authAlgo {
-	case "md5":
-		alg = ipsecpolicies.AuthAlgorithmMD5
-	case "sha1":
-		alg = ipsecpolicies.AuthAlgorithmSHA1
-	case "sha2-256":
-		alg = ipsecpolicies.AuthAlgorithmSHA256
-	case "sha2-384":
-		alg = ipsecpolicies.AuthAlgorithmSHA384
-	case "sha2-512":
-		alg = ipsecpolicies.AuthAlgorithmSHA512
-	}
-	return alg
-}
-func resourceIPSecPolicyV2EncapsulationMode(encMode string) ipsecpolicies.EncapsulationMode {
-	var mode ipsecpolicies.EncapsulationMode
-	switch encMode {
-	case "tunnel":
-		mode = ipsecpolicies.EncapsulationModeTunnel
-	case "transport":
-		mode = ipsecpolicies.EncapsulationModeTransport
-	}
-	return mode
-}
-
-func resourceIPSecPolicyV2LifetimeCreateOpts(d *schema.Set) ipsecpolicies.LifetimeCreateOpts {
-	lifetime := ipsecpolicies.LifetimeCreateOpts{}
-
-	rawPairs := d.List()
-	for _, raw := range rawPairs {
-		rawMap := raw.(map[string]interface{})
-		lifetime.Units = resourceIPSecPolicyV2Unit(rawMap["units"].(string))
-
-		value := rawMap["value"].(int)
-		lifetime.Value = value
-	}
-	return lifetime
-}
-
-func resourceIPSecPolicyV2Unit(units string) ipsecpolicies.Unit {
-	var unit ipsecpolicies.Unit
-	switch units {
-	case "seconds":
-		unit = ipsecpolicies.UnitSeconds
-	case "kilobytes":
-		unit = ipsecpolicies.UnitKilobytes
-	}
-	return unit
-}
-
-func resourceIPSecPolicyV2LifetimeUpdateOpts(d *schema.Set) ipsecpolicies.LifetimeUpdateOpts {
-	lifetimeUpdateOpts := ipsecpolicies.LifetimeUpdateOpts{}
-
-	rawPairs := d.List()
-	for _, raw := range rawPairs {
-		rawMap := raw.(map[string]interface{})
-		lifetimeUpdateOpts.Units = resourceIPSecPolicyV2Unit(rawMap["units"].(string))
-
-		value := rawMap["value"].(int)
-		lifetimeUpdateOpts.Value = value
-	}
-	return lifetimeUpdateOpts
-
 }

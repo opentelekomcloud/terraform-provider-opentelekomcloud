@@ -14,6 +14,8 @@ import (
 
 func TestAccVpnIPSecPolicyV2_basic(t *testing.T) {
 	var policy ipsecpolicies.Policy
+	resourceName := "opentelekomcloud_vpnaas_ipsec_policy_v2.policy_1"
+
 	resource.Test(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
 		Providers:    testAccProviders,
@@ -22,24 +24,22 @@ func TestAccVpnIPSecPolicyV2_basic(t *testing.T) {
 			{
 				Config: testAccIPSecPolicyV2_basic,
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckIPSecPolicyV2Exists(
-						"opentelekomcloud_vpnaas_ipsec_policy_v2.policy_1", &policy),
-					resource.TestCheckResourceAttrPtr("opentelekomcloud_vpnaas_ipsec_policy_v2.policy_1", "name", &policy.Name),
-					resource.TestCheckResourceAttrPtr("opentelekomcloud_vpnaas_ipsec_policy_v2.policy_1", "description", &policy.Description),
-					resource.TestCheckResourceAttrPtr("opentelekomcloud_vpnaas_ipsec_policy_v2.policy_1", "tenant_id", &policy.TenantID),
-					resource.TestCheckResourceAttrPtr("opentelekomcloud_vpnaas_ipsec_policy_v2.policy_1", "pfs", &policy.PFS),
-					resource.TestCheckResourceAttrPtr("opentelekomcloud_vpnaas_ipsec_policy_v2.policy_1", "transform_protocol", &policy.TransformProtocol),
-					resource.TestCheckResourceAttrPtr("opentelekomcloud_vpnaas_ipsec_policy_v2.policy_1", "encapsulation_mode", &policy.EncapsulationMode),
-					resource.TestCheckResourceAttrPtr("opentelekomcloud_vpnaas_ipsec_policy_v2.policy_1", "auth_algorithm", &policy.AuthAlgorithm),
-					resource.TestCheckResourceAttrPtr("opentelekomcloud_vpnaas_ipsec_policy_v2.policy_1", "encryption_algorithm", &policy.EncryptionAlgorithm),
+					testAccCheckIPSecPolicyV2Exists(resourceName, &policy),
+					resource.TestCheckResourceAttrPtr(resourceName, "name", &policy.Name),
+					resource.TestCheckResourceAttrPtr(resourceName, "description", &policy.Description),
+					resource.TestCheckResourceAttrPtr(resourceName, "tenant_id", &policy.TenantID),
+					resource.TestCheckResourceAttrPtr(resourceName, "pfs", &policy.PFS),
+					resource.TestCheckResourceAttrPtr(resourceName, "transform_protocol", &policy.TransformProtocol),
+					resource.TestCheckResourceAttrPtr(resourceName, "encapsulation_mode", &policy.EncapsulationMode),
+					resource.TestCheckResourceAttrPtr(resourceName, "auth_algorithm", &policy.AuthAlgorithm),
+					resource.TestCheckResourceAttrPtr(resourceName, "encryption_algorithm", &policy.EncryptionAlgorithm),
 				),
 			},
 			{
-				Config: testAccIPSecPolicyV2_Update,
+				Config: testAccIPSecPolicyV2_update,
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckIPSecPolicyV2Exists(
-						"opentelekomcloud_vpnaas_ipsec_policy_v2.policy_1", &policy),
-					resource.TestCheckResourceAttrPtr("opentelekomcloud_vpnaas_ipsec_policy_v2.policy_1", "name", &policy.Name),
+					testAccCheckIPSecPolicyV2Exists(resourceName, &policy),
+					resource.TestCheckResourceAttrPtr(resourceName, "name", &policy.Name),
 				),
 			},
 		},
@@ -48,6 +48,8 @@ func TestAccVpnIPSecPolicyV2_basic(t *testing.T) {
 
 func TestAccVpnIPSecPolicyV2_withLifetime(t *testing.T) {
 	var policy ipsecpolicies.Policy
+	resourceName := "opentelekomcloud_vpnaas_ipsec_policy_v2.policy_1"
+
 	resource.Test(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
 		Providers:    testAccProviders,
@@ -56,17 +58,15 @@ func TestAccVpnIPSecPolicyV2_withLifetime(t *testing.T) {
 			{
 				Config: testAccIPSecPolicyV2_withLifetime,
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckIPSecPolicyV2Exists(
-						"opentelekomcloud_vpnaas_ipsec_policy_v2.policy_1", &policy),
-					resource.TestCheckResourceAttrPtr("opentelekomcloud_vpnaas_ipsec_policy_v2.policy_1", "auth_algorithm", &policy.AuthAlgorithm),
-					resource.TestCheckResourceAttrPtr("opentelekomcloud_vpnaas_ipsec_policy_v2.policy_1", "pfs", &policy.PFS),
+					testAccCheckIPSecPolicyV2Exists(resourceName, &policy),
+					resource.TestCheckResourceAttrPtr(resourceName, "auth_algorithm", &policy.AuthAlgorithm),
+					resource.TestCheckResourceAttrPtr(resourceName, "pfs", &policy.PFS),
 				),
 			},
 			{
 				Config: testAccIPSecPolicyV2_withLifetimeUpdate,
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckIPSecPolicyV2Exists(
-						"opentelekomcloud_vpnaas_ipsec_policy_v2.policy_1", &policy),
+					testAccCheckIPSecPolicyV2Exists(resourceName, &policy),
 				),
 			},
 		},
@@ -75,17 +75,17 @@ func TestAccVpnIPSecPolicyV2_withLifetime(t *testing.T) {
 
 func testAccCheckIPSecPolicyV2Destroy(s *terraform.State) error {
 	config := testAccProvider.Meta().(*cfg.Config)
-	networkingClient, err := config.NetworkingV2Client(OS_REGION_NAME)
+	client, err := config.NetworkingV2Client(OS_REGION_NAME)
 	if err != nil {
-		return fmt.Errorf("Error creating OpenTelekomCloud networking client: %s", err)
+		return fmt.Errorf("error creating OpenTelekomCloud NetworkingV2 client: %s", err)
 	}
 	for _, rs := range s.RootModule().Resources {
 		if rs.Type != "opentelekomcloud_vpnaas_ipsec_policy_v2" {
 			continue
 		}
-		_, err = ipsecpolicies.Get(networkingClient, rs.Primary.ID).Extract()
+		_, err = ipsecpolicies.Get(client, rs.Primary.ID).Extract()
 		if err == nil {
-			return fmt.Errorf("IPSec policy (%s) still exists.", rs.Primary.ID)
+			return fmt.Errorf("IPSec policy (%s) still exists", rs.Primary.ID)
 		}
 		if _, ok := err.(golangsdk.ErrDefault404); !ok {
 			return err
@@ -98,20 +98,20 @@ func testAccCheckIPSecPolicyV2Exists(n string, policy *ipsecpolicies.Policy) res
 	return func(s *terraform.State) error {
 		rs, ok := s.RootModule().Resources[n]
 		if !ok {
-			return fmt.Errorf("Not found: %s", n)
+			return fmt.Errorf("not found: %s", n)
 		}
 
 		if rs.Primary.ID == "" {
-			return fmt.Errorf("No ID is set")
+			return fmt.Errorf("no ID is set")
 		}
 
 		config := testAccProvider.Meta().(*cfg.Config)
-		networkingClient, err := config.NetworkingV2Client(OS_REGION_NAME)
+		client, err := config.NetworkingV2Client(OS_REGION_NAME)
 		if err != nil {
-			return fmt.Errorf("Error creating OpenTelekomCloud networking client: %s", err)
+			return fmt.Errorf("error creating OpenTelekomCloud NetworkingV2 client: %s", err)
 		}
 
-		found, err := ipsecpolicies.Get(networkingClient, rs.Primary.ID).Extract()
+		found, err := ipsecpolicies.Get(client, rs.Primary.ID).Extract()
 		if err != nil {
 			return err
 		}
@@ -122,34 +122,33 @@ func testAccCheckIPSecPolicyV2Exists(n string, policy *ipsecpolicies.Policy) res
 }
 
 const testAccIPSecPolicyV2_basic = `
-resource "opentelekomcloud_vpnaas_ipsec_policy_v2" "policy_1" {
-}
+resource "opentelekomcloud_vpnaas_ipsec_policy_v2" "policy_1" { }
 `
 
-const testAccIPSecPolicyV2_Update = `
+const testAccIPSecPolicyV2_update = `
 resource "opentelekomcloud_vpnaas_ipsec_policy_v2" "policy_1" {
-	name = "updatedname"
+  name = "updatedname"
 }
 `
 
 const testAccIPSecPolicyV2_withLifetime = `
 resource "opentelekomcloud_vpnaas_ipsec_policy_v2" "policy_1" {
-	auth_algorithm = "md5"
-	pfs = "group14"
-	lifetime {
-		units = "seconds"
-		value = 1200
-	}
+  auth_algorithm = "md5"
+  pfs            = "group14"
+  lifetime {
+    units = "seconds"
+    value = 1200
+  }
 }
 `
 
 const testAccIPSecPolicyV2_withLifetimeUpdate = `
 resource "opentelekomcloud_vpnaas_ipsec_policy_v2" "policy_1" {
-	auth_algorithm = "md5"
-	pfs = "group14"
-	lifetime {
-		units = "seconds"
-		value = 1400
-	}
+  auth_algorithm = "md5"
+  pfs            = "group14"
+  lifetime {
+    units = "seconds"
+    value = 1400
+  }
 }
 `
