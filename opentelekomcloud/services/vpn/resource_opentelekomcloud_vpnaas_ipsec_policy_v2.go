@@ -45,7 +45,7 @@ func ResourceVpnIPSecPolicyV2() *schema.Resource {
 			"auth_algorithm": {
 				Type:     schema.TypeString,
 				Optional: true,
-				Default:  "sha1",
+				Computed: true,
 				ValidateFunc: validation.StringInSlice([]string{
 					"md5", "sha1", "sha2-256", "sha2-384", "sha2-512",
 				}, false),
@@ -53,12 +53,12 @@ func ResourceVpnIPSecPolicyV2() *schema.Resource {
 			"encapsulation_mode": {
 				Type:     schema.TypeString,
 				Optional: true,
-				Default:  "tunnel",
+				Computed: true,
 			},
 			"pfs": {
 				Type:     schema.TypeString,
 				Optional: true,
-				Default:  "group5",
+				Computed: true,
 				ValidateFunc: validation.StringInSlice([]string{
 					"group1", "group2", "group5", "group14", "group15", "group16", "group19", "group20", "group21", "disable",
 				}, false),
@@ -66,7 +66,7 @@ func ResourceVpnIPSecPolicyV2() *schema.Resource {
 			"encryption_algorithm": {
 				Type:     schema.TypeString,
 				Optional: true,
-				Default:  "aes-128",
+				Computed: true,
 				ValidateFunc: validation.StringInSlice([]string{
 					"3des", "aes-128", "aes-192", "aes-256",
 				}, false),
@@ -78,7 +78,7 @@ func ResourceVpnIPSecPolicyV2() *schema.Resource {
 			"transform_protocol": {
 				Type:     schema.TypeString,
 				Optional: true,
-				Default:  "esp",
+				Computed: true,
 				ValidateFunc: validation.StringInSlice([]string{
 					"esp", "ah", "ah-esp",
 				}, false),
