@@ -8,6 +8,12 @@ default: build
 build: fmtcheck
 	go install
 
+release:
+	goreleaser release
+
+snapshot:
+	goreleaser release --snapshot --parallelism 2 --rm-dist
+
 test: fmtcheck
 	go test -i $(TEST) || exit 1
 	echo $(TEST) | \
