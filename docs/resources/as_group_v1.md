@@ -140,8 +140,8 @@ The following arguments are supported:
   The system supports up to five networks. The networks object structure
   is documented below.
 
-* `security_groups` - (Required) An array of one or more security group IDs
-  to associate with the group. The security_groups object structure is
+* `security_groups` - (Required) An array of security group IDs to associate with the group.
+  A maximum of one security group can be selected. The `security_groups` object structure is
   documented below.
 
 * `vpc_id` - (Required) The VPC ID. Changing this creates a new group.
