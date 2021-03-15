@@ -37,8 +37,8 @@ The following arguments are supported:
 * `encryption_algorithm` - (Optional) The encryption algorithm. Valid values are `3des`, `aes-128`, `aes-192` and so on.
   The default value is `aes-128`.
 
-* `pfs` - (Optional) The perfect forward secrecy mode. Valid values are `group1`, `group2`, `group5` and so on.
-  Default is `group5`.
+* `pfs` - (Optional) The perfect forward secrecy mode. Valid values are `group1`, `group2`, `group5`, `group14`,
+  `group15`, `group16`, `group19`, `group20`, `group21` or `disable` Default is `group5`.
 
 * `transform_protocol` - (Optional) The transform protocol. Valid values are `esp`, `ah` and `ah-esp`. Default is `esp`.
 

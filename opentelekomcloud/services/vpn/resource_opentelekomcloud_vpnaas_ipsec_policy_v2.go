@@ -60,7 +60,7 @@ func ResourceVpnIPSecPolicyV2() *schema.Resource {
 				Optional: true,
 				Default:  "group5",
 				ValidateFunc: validation.StringInSlice([]string{
-					"group1", "group2", "group5", "group14", "group15", "group16", "group19", "group20", "group21",
+					"group1", "group2", "group5", "group14", "group15", "group16", "group19", "group20", "group21", "disable",
 				}, false),
 			},
 			"encryption_algorithm": {
