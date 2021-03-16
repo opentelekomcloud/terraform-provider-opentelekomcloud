@@ -271,7 +271,7 @@ func ValidateECSTagValue(v interface{}, _ string) (ws []string, errors []error) 
 
 func ValidateK8sTagsMap(v interface{}, k string) (ws []string, errors []error) {
 	values := v.(map[string]interface{})
-	pattern := regexp.MustCompile(`^[.\-_A-Za-z0-9]+$`)
+	pattern := regexp.MustCompile(`^[./\-_A-Za-z0-9]+$`)
 
 	for key, value := range values {
 		valueString := value.(string)
@@ -283,7 +283,7 @@ func ValidateK8sTagsMap(v interface{}, k string) (ws []string, errors []error) {
 			errors = append(errors, fmt.Errorf("value %q cannot be shorter than 1 characters: %q", k, value))
 		}
 
-		if len(key) > 63 {
+		if len(key) > 253 {
 			errors = append(errors, fmt.Errorf("key %q cannot be longer than 63 characters: %q", k, key))
 		}
 
