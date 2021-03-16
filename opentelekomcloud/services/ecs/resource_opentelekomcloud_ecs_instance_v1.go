@@ -15,7 +15,6 @@ import (
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/compute/v2/servers"
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/ecs/v1/cloudservers"
 	tags "github.com/opentelekomcloud/gophertelekomcloud/openstack/ecs/v1/cloudservertags"
-	"github.com/opentelekomcloud/gophertelekomcloud/openstack/networking/v2/extensions/security/groups"
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/networking/v2/ports"
 
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common"
@@ -197,7 +196,7 @@ func resourceEcsInstanceV1Create(d *schema.ResourceData, meta interface{}) error
 		FlavorRef:        d.Get("flavor").(string),
 		KeyName:          d.Get("key_name").(string),
 		VpcId:            d.Get("vpc_id").(string),
-		SecurityGroups:   resourceInstanceSecGroupsV1(d, meta),
+		SecurityGroups:   resourceInstanceSecGroupsV1(d),
 		AvailabilityZone: d.Get("availability_zone").(string),
 		Nics:             resourceInstanceNicsV1(d),
 		RootVolume:       resourceInstanceRootVolumeV1(d),
@@ -272,12 +271,12 @@ func resourceEcsInstanceV1Read(d *schema.ResourceData, meta interface{}) error {
 		d.Set("vpc_id", server.Metadata.VpcID),
 		d.Set("availability_zone", server.AvailabilityZone),
 	)
-	var secGrpNames []string
+	var secGrpIDs []string
 	for _, sg := range server.SecurityGroups {
-		secGrpNames = append(secGrpNames, sg.Name)
+		secGrpIDs = append(secGrpIDs, sg.ID)
 	}
 	mErr = multierror.Append(mErr,
-		d.Set("security_groups", secGrpNames),
+		d.Set("security_groups", secGrpIDs),
 	)
 
 	// Get the instance network and address information
@@ -307,7 +306,7 @@ func resourceEcsInstanceV1Read(d *schema.ResourceData, meta interface{}) error {
 	mErr = multierror.Append(mErr,
 		d.Set("auto_recovery", ar),
 	)
-	if err := mErr.ErrorOrNil(); err != nil {
+	if mErr.ErrorOrNil() != nil {
 		return fmt.Errorf("error setting ECS attrbutes: %s", err)
 	}
 
@@ -344,25 +343,25 @@ func resourceEcsInstanceV1Update(d *schema.ResourceData, meta interface{}) error
 
 		log.Printf("[DEBUG] Security groups to remove: %v", secGroupsToRemove)
 
-		for _, g := range secGroupsToRemove.List() {
-			err := secgroups.RemoveServer(client, d.Id(), g.(string)).ExtractErr()
+		for _, sg := range secGroupsToRemove.List() {
+			err := secgroups.RemoveServer(client, d.Id(), sg.(string)).ExtractErr()
 			if err != nil && err.Error() != "EOF" {
 				if _, ok := err.(golangsdk.ErrDefault404); ok {
 					continue
 				}
 
-				return fmt.Errorf("error removing security group (%s) from OpenTelekomCloud server (%s): %s", g, d.Id(), err)
+				return fmt.Errorf("error removing security group (%s) from OpenTelekomCloud server (%s): %s", sg, d.Id(), err)
 			} else {
-				log.Printf("[DEBUG] Removed security group (%s) from instance (%s)", g, d.Id())
+				log.Printf("[DEBUG] Removed security group (%s) from instance (%s)", sg, d.Id())
 			}
 		}
 
-		for _, g := range secGroupsToAdd.List() {
-			err := secgroups.AddServer(client, d.Id(), g.(string)).ExtractErr()
+		for _, sg := range secGroupsToAdd.List() {
+			err := secgroups.AddServer(client, d.Id(), sg.(string)).ExtractErr()
 			if err != nil && err.Error() != "EOF" {
-				return fmt.Errorf("error adding security group (%s) to OpenTelekomCloud server (%s): %s", g, d.Id(), err)
+				return fmt.Errorf("error adding security group (%s) to OpenTelekomCloud server (%s): %s", sg, d.Id(), err)
 			}
-			log.Printf("[DEBUG] Added security group (%s) to instance (%s)", g, d.Id())
+			log.Printf("[DEBUG] Added security group (%s) to instance (%s)", sg, d.Id())
 		}
 	}
 
@@ -539,21 +538,12 @@ func resourceInstanceDataVolumesV1(d *schema.ResourceData) []cloudservers.DataVo
 	return volRequests
 }
 
-func resourceInstanceSecGroupsV1(d *schema.ResourceData, meta interface{}) []cloudservers.SecurityGroup {
+func resourceInstanceSecGroupsV1(d *schema.ResourceData) []cloudservers.SecurityGroup {
 	rawSecGroups := d.Get("security_groups").(*schema.Set).List()
 	secGroups := make([]cloudservers.SecurityGroup, len(rawSecGroups))
-	config := meta.(*cfg.Config)
-	networkingClient, err := config.NetworkingV2Client(config.GetRegion(d))
-	if err != nil {
-		log.Printf("error creating OpenTelekomCloud NetworkingV2 client: %s", err)
-	}
 	for i, raw := range rawSecGroups {
-		secGroupID, err := groups.IDFromName(networkingClient, raw.(string))
-		if err != nil {
-			log.Printf("error creating parsing security group from name: %s", err)
-		}
 		secGroups[i] = cloudservers.SecurityGroup{
-			ID: secGroupID,
+			ID: raw.(string),
 		}
 	}
 	return secGroups

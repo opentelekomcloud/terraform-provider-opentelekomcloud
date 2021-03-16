@@ -181,7 +181,7 @@ The following arguments are supported:
   instance. The data_disks object structure is documented below. Changing this
   creates a new server.
 
-* `security_groups` - (Optional) An array of one or more security group names
+* `security_groups` - (Optional) An array of one or more security group IDs
   to associate with the server. Changing this results in adding/removing
   security groups from the existing server.
 

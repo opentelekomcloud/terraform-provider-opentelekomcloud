@@ -151,7 +151,6 @@ resource "opentelekomcloud_ecs_instance_v1" "instance_1" {
     network_id = "%s"
   }
 
-  security_groups   = ["default"]
   password          = "Password@123"
   availability_zone = "%s"
   auto_recovery     = true
@@ -180,7 +179,7 @@ resource "opentelekomcloud_ecs_instance_v1" "instance_1" {
   }
 
   password                    = "Password@123"
-  security_groups             = ["default", opentelekomcloud_compute_secgroup_v2.secgroup_1.name]
+  security_groups             = [opentelekomcloud_compute_secgroup_v2.secgroup_1.id]
   availability_zone           = "%s"
   auto_recovery               = false
   delete_disks_on_termination = true
