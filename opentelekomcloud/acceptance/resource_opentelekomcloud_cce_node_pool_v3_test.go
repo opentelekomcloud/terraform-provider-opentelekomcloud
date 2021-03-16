@@ -158,6 +158,10 @@ resource "opentelekomcloud_cce_node_pool_v3" "node_pool" {
     size       = 100
     volumetype = "SSD"
   }
+
+  k8s_tags = {
+    "kubelet.kubernetes.io/namespace" = "dev"
+  }
 }`, OS_VPC_ID, OS_NETWORK_ID, OS_AVAILABILITY_ZONE, OS_KEYPAIR_NAME)
 
 var testAccCCENodePoolV3_update = fmt.Sprintf(`
@@ -194,6 +198,10 @@ resource "opentelekomcloud_cce_node_pool_v3" "node_pool" {
   data_volumes {
     size       = 100
     volumetype = "SSD"
+  }
+
+  k8s_tags = {
+    "kubelet.kubernetes.io/namespace" = "dev"
   }
 }`, OS_VPC_ID, OS_NETWORK_ID, OS_AVAILABILITY_ZONE, OS_KEYPAIR_NAME)
 
