@@ -284,7 +284,7 @@ func ValidateK8sTagsMap(v interface{}, k string) (ws []string, errors []error) {
 		}
 
 		if len(key) > 253 {
-			errors = append(errors, fmt.Errorf("key %q cannot be longer than 63 characters: %q", k, key))
+			errors = append(errors, fmt.Errorf("key %q cannot be longer than 253 characters: %q", k, key))
 		}
 
 		if len(valueString) > 63 {
