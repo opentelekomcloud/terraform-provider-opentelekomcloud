@@ -306,7 +306,7 @@ func resourceEcsInstanceV1Read(d *schema.ResourceData, meta interface{}) error {
 	mErr = multierror.Append(mErr,
 		d.Set("auto_recovery", ar),
 	)
-	if mErr.ErrorOrNil() != nil {
+	if err := mErr.ErrorOrNil(); err != nil {
 		return fmt.Errorf("error setting ECS attrbutes: %s", err)
 	}
 

@@ -15,6 +15,7 @@ import (
 
 func TestAccEcsV1Instance_basic(t *testing.T) {
 	var instance cloudservers.CloudServer
+	resourceName := "opentelekomcloud_ecs_instance_v1.instance_1"
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
@@ -24,21 +25,19 @@ func TestAccEcsV1Instance_basic(t *testing.T) {
 			{
 				Config: testAccEcsV1Instance_basic,
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckEcsV1InstanceExists("opentelekomcloud_ecs_instance_v1.instance_1", &instance),
-					resource.TestCheckResourceAttr(
-						"opentelekomcloud_ecs_instance_v1.instance_1", "availability_zone", OS_AVAILABILITY_ZONE),
-					resource.TestCheckResourceAttr(
-						"opentelekomcloud_ecs_instance_v1.instance_1", "auto_recovery", "true"),
+					testAccCheckEcsV1InstanceExists(resourceName, &instance),
+					resource.TestCheckResourceAttr(resourceName, "availability_zone", OS_AVAILABILITY_ZONE),
+					resource.TestCheckResourceAttr(resourceName, "auto_recovery", "true"),
+					resource.TestCheckResourceAttr(resourceName, "security_groups.#", "1"),
 				),
 			},
 			{
 				Config: testAccEcsV1Instance_update,
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckEcsV1InstanceExists("opentelekomcloud_ecs_instance_v1.instance_1", &instance),
-					resource.TestCheckResourceAttr(
-						"opentelekomcloud_ecs_instance_v1.instance_1", "availability_zone", OS_AVAILABILITY_ZONE),
-					resource.TestCheckResourceAttr(
-						"opentelekomcloud_ecs_instance_v1.instance_1", "auto_recovery", "false"),
+					testAccCheckEcsV1InstanceExists(resourceName, &instance),
+					resource.TestCheckResourceAttr(resourceName, "availability_zone", OS_AVAILABILITY_ZONE),
+					resource.TestCheckResourceAttr(resourceName, "auto_recovery", "false"),
+					resource.TestCheckResourceAttr(resourceName, "security_groups.#", "1"),
 				),
 			},
 		},
@@ -88,7 +87,7 @@ func TestAccEcsV1Instance_VPCValidation(t *testing.T) {
 
 func testAccCheckEcsV1InstanceDestroy(s *terraform.State) error {
 	config := testAccProvider.Meta().(*cfg.Config)
-	computeClient, err := config.ComputeV1Client(OS_REGION_NAME)
+	client, err := config.ComputeV1Client(OS_REGION_NAME)
 	if err != nil {
 		return fmt.Errorf("error creating OpenTelekomCloud compute client: %s", err)
 	}
@@ -98,7 +97,7 @@ func testAccCheckEcsV1InstanceDestroy(s *terraform.State) error {
 			continue
 		}
 
-		server, err := cloudservers.Get(computeClient, rs.Primary.ID).Extract()
+		server, err := cloudservers.Get(client, rs.Primary.ID).Extract()
 		if err == nil {
 			if server.Status != "DELETED" {
 				return fmt.Errorf("instance still exists")
@@ -121,12 +120,12 @@ func testAccCheckEcsV1InstanceExists(n string, instance *cloudservers.CloudServe
 		}
 
 		config := testAccProvider.Meta().(*cfg.Config)
-		computeClient, err := config.ComputeV1Client(OS_REGION_NAME)
+		client, err := config.ComputeV1Client(OS_REGION_NAME)
 		if err != nil {
-			return fmt.Errorf("error creating OpenTelekomCloud compute client: %s", err)
+			return fmt.Errorf("error creating OpenTelekomCloud ComputeV1 client: %s", err)
 		}
 
-		found, err := cloudservers.Get(computeClient, rs.Primary.ID).Extract()
+		found, err := cloudservers.Get(client, rs.Primary.ID).Extract()
 		if err != nil {
 			return err
 		}
