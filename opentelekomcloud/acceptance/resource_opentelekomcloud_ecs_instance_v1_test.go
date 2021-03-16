@@ -151,6 +151,7 @@ resource "opentelekomcloud_ecs_instance_v1" "instance_1" {
     network_id = "%s"
   }
 
+  security_groups   = ["default"]
   password          = "Password@123"
   availability_zone = "%s"
   auto_recovery     = true

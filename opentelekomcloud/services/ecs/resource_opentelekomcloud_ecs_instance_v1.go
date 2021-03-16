@@ -15,6 +15,7 @@ import (
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/compute/v2/servers"
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/ecs/v1/cloudservers"
 	tags "github.com/opentelekomcloud/gophertelekomcloud/openstack/ecs/v1/cloudservertags"
+	"github.com/opentelekomcloud/gophertelekomcloud/openstack/networking/v2/extensions/security/groups"
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/networking/v2/ports"
 
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common"
@@ -185,14 +186,9 @@ func ResourceEcsInstanceV1() *schema.Resource {
 
 func resourceEcsInstanceV1Create(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*cfg.Config)
-
-	computeClient, err := config.ComputeV1Client(config.GetRegion(d))
+	client, err := config.ComputeV1Client(config.GetRegion(d))
 	if err != nil {
-		return fmt.Errorf("error creating OpenTelekomCloud compute V1.1 client: %s", err)
-	}
-	ComputeV1Client, err := config.ComputeV1Client(config.GetRegion(d))
-	if err != nil {
-		return fmt.Errorf("error creating OpenTelekomCloud compute V1 client: %s", err)
+		return fmt.Errorf("error creating OpenTelekomCloud ComputeV1 client: %s", err)
 	}
 
 	createOpts := &cloudservers.CreateOpts{
@@ -201,7 +197,7 @@ func resourceEcsInstanceV1Create(d *schema.ResourceData, meta interface{}) error
 		FlavorRef:        d.Get("flavor").(string),
 		KeyName:          d.Get("key_name").(string),
 		VpcId:            d.Get("vpc_id").(string),
-		SecurityGroups:   resourceInstanceSecGroupsV1(d),
+		SecurityGroups:   resourceInstanceSecGroupsV1(d, meta),
 		AvailabilityZone: d.Get("availability_zone").(string),
 		Nics:             resourceInstanceNicsV1(d),
 		RootVolume:       resourceInstanceRootVolumeV1(d),
@@ -212,16 +208,16 @@ func resourceEcsInstanceV1Create(d *schema.ResourceData, meta interface{}) error
 
 	log.Printf("[DEBUG] Create Options: %#v", createOpts)
 
-	n, err := cloudservers.Create(computeClient, createOpts).ExtractJobResponse()
+	n, err := cloudservers.Create(client, createOpts).ExtractJobResponse()
 	if err != nil {
 		return fmt.Errorf("error creating OpenTelekomCloud server: %s", err)
 	}
 
-	if err := cloudservers.WaitForJobSuccess(ComputeV1Client, int(d.Timeout(schema.TimeoutCreate)/time.Second), n.JobID); err != nil {
+	if err := cloudservers.WaitForJobSuccess(client, int(d.Timeout(schema.TimeoutCreate)/time.Second), n.JobID); err != nil {
 		return err
 	}
 
-	entity, err := cloudservers.GetJobEntity(ComputeV1Client, n.JobID, "server_id")
+	entity, err := cloudservers.GetJobEntity(client, n.JobID, "server_id")
 	if err != nil {
 		return err
 	}
@@ -255,12 +251,12 @@ func resourceEcsInstanceV1Create(d *schema.ResourceData, meta interface{}) error
 
 func resourceEcsInstanceV1Read(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*cfg.Config)
-	computeClient, err := config.ComputeV1Client(config.GetRegion(d))
+	client, err := config.ComputeV1Client(config.GetRegion(d))
 	if err != nil {
-		return fmt.Errorf("error creating OpenTelekomCloud compute client: %s", err)
+		return fmt.Errorf("error creating OpenTelekomCloud ComputeV1 client: %s", err)
 	}
 
-	server, err := cloudservers.Get(computeClient, d.Id()).Extract()
+	server, err := cloudservers.Get(client, d.Id()).Extract()
 	if err != nil {
 		return common.CheckDeleted(d, err, "server")
 	}
@@ -291,7 +287,7 @@ func resourceEcsInstanceV1Read(d *schema.ResourceData, meta interface{}) error {
 	)
 
 	// Set instance tags
-	tagList, err := tags.Get(computeClient, d.Id()).Extract()
+	tagList, err := tags.Get(client, d.Id()).Extract()
 	if err != nil {
 		return fmt.Errorf("error fetching OpenTelekomCloud instance tags: %s", err)
 	}
@@ -320,9 +316,9 @@ func resourceEcsInstanceV1Read(d *schema.ResourceData, meta interface{}) error {
 
 func resourceEcsInstanceV1Update(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*cfg.Config)
-	computeClient, err := config.ComputeV2Client(config.GetRegion(d))
+	client, err := config.ComputeV2Client(config.GetRegion(d))
 	if err != nil {
-		return fmt.Errorf("error creating OpenTelekomCloud compute client: %s", err)
+		return fmt.Errorf("error creating OpenTelekomCloud ComputeV2 client: %s", err)
 	}
 
 	var updateOpts servers.UpdateOpts
@@ -331,7 +327,7 @@ func resourceEcsInstanceV1Update(d *schema.ResourceData, meta interface{}) error
 	}
 
 	if updateOpts != (servers.UpdateOpts{}) {
-		_, err := servers.Update(computeClient, d.Id(), updateOpts).Extract()
+		_, err := servers.Update(client, d.Id(), updateOpts).Extract()
 		if err != nil {
 			return fmt.Errorf("error updating OpenTelekomCloud server: %s", err)
 		}
@@ -349,7 +345,7 @@ func resourceEcsInstanceV1Update(d *schema.ResourceData, meta interface{}) error
 		log.Printf("[DEBUG] Security groups to remove: %v", secGroupsToRemove)
 
 		for _, g := range secGroupsToRemove.List() {
-			err := secgroups.RemoveServer(computeClient, d.Id(), g.(string)).ExtractErr()
+			err := secgroups.RemoveServer(client, d.Id(), g.(string)).ExtractErr()
 			if err != nil && err.Error() != "EOF" {
 				if _, ok := err.(golangsdk.ErrDefault404); ok {
 					continue
@@ -362,7 +358,7 @@ func resourceEcsInstanceV1Update(d *schema.ResourceData, meta interface{}) error
 		}
 
 		for _, g := range secGroupsToAdd.List() {
-			err := secgroups.AddServer(computeClient, d.Id(), g.(string)).ExtractErr()
+			err := secgroups.AddServer(client, d.Id(), g.(string)).ExtractErr()
 			if err != nil && err.Error() != "EOF" {
 				return fmt.Errorf("error adding security group (%s) to OpenTelekomCloud server (%s): %s", g, d.Id(), err)
 			}
@@ -377,7 +373,7 @@ func resourceEcsInstanceV1Update(d *schema.ResourceData, meta interface{}) error
 			FlavorRef: newFlavorId,
 		}
 		log.Printf("[DEBUG] Resize configuration: %#v", resizeOpts)
-		err := servers.Resize(computeClient, d.Id(), resizeOpts).ExtractErr()
+		err := servers.Resize(client, d.Id(), resizeOpts).ExtractErr()
 		if err != nil {
 			return fmt.Errorf("error resizing OpenTelekomCloud server: %s", err)
 		}
@@ -388,7 +384,7 @@ func resourceEcsInstanceV1Update(d *schema.ResourceData, meta interface{}) error
 		stateConf := &resource.StateChangeConf{
 			Pending:    []string{"RESIZE"},
 			Target:     []string{"VERIFY_RESIZE"},
-			Refresh:    ServerV2StateRefreshFunc(computeClient, d.Id()),
+			Refresh:    ServerV2StateRefreshFunc(client, d.Id()),
 			Timeout:    d.Timeout(schema.TimeoutUpdate),
 			Delay:      10 * time.Second,
 			MinTimeout: 3 * time.Second,
@@ -401,7 +397,7 @@ func resourceEcsInstanceV1Update(d *schema.ResourceData, meta interface{}) error
 
 		// Confirm resize.
 		log.Printf("[DEBUG] Confirming resize")
-		err = servers.ConfirmResize(computeClient, d.Id()).ExtractErr()
+		err = servers.ConfirmResize(client, d.Id()).ExtractErr()
 		if err != nil {
 			return fmt.Errorf("error confirming resize of OpenTelekomCloud server: %s", err)
 		}
@@ -409,7 +405,7 @@ func resourceEcsInstanceV1Update(d *schema.ResourceData, meta interface{}) error
 		stateConf = &resource.StateChangeConf{
 			Pending:    []string{"VERIFY_RESIZE"},
 			Target:     []string{"ACTIVE"},
-			Refresh:    ServerV2StateRefreshFunc(computeClient, d.Id()),
+			Refresh:    ServerV2StateRefreshFunc(client, d.Id()),
 			Timeout:    d.Timeout(schema.TimeoutUpdate),
 			Delay:      10 * time.Second,
 			MinTimeout: 3 * time.Second,
@@ -464,7 +460,7 @@ func resourceEcsInstanceV1Update(d *schema.ResourceData, meta interface{}) error
 
 func resourceEcsInstanceV1Delete(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*cfg.Config)
-	ComputeV1Client, err := config.ComputeV1Client(config.GetRegion(d))
+	client, err := config.ComputeV1Client(config.GetRegion(d))
 	if err != nil {
 		return fmt.Errorf("error creating OpenTelekomCloud compute client: %s", err)
 	}
@@ -480,12 +476,12 @@ func resourceEcsInstanceV1Delete(d *schema.ResourceData, meta interface{}) error
 		DeleteVolume: d.Get("delete_disks_on_termination").(bool),
 	}
 
-	n, err := cloudservers.Delete(ComputeV1Client, deleteOpts).ExtractJobResponse()
+	n, err := cloudservers.Delete(client, deleteOpts).ExtractJobResponse()
 	if err != nil {
 		return fmt.Errorf("error deleting OpenTelekomCloud server: %s", err)
 	}
 
-	if err := cloudservers.WaitForJobSuccess(ComputeV1Client, int(d.Timeout(schema.TimeoutCreate)/time.Second), n.JobID); err != nil {
+	if err := cloudservers.WaitForJobSuccess(client, int(d.Timeout(schema.TimeoutCreate)/time.Second), n.JobID); err != nil {
 		return err
 	}
 
@@ -543,12 +539,21 @@ func resourceInstanceDataVolumesV1(d *schema.ResourceData) []cloudservers.DataVo
 	return volRequests
 }
 
-func resourceInstanceSecGroupsV1(d *schema.ResourceData) []cloudservers.SecurityGroup {
+func resourceInstanceSecGroupsV1(d *schema.ResourceData, meta interface{}) []cloudservers.SecurityGroup {
 	rawSecGroups := d.Get("security_groups").(*schema.Set).List()
 	secGroups := make([]cloudservers.SecurityGroup, len(rawSecGroups))
+	config := meta.(*cfg.Config)
+	networkingClient, err := config.NetworkingV2Client(config.GetRegion(d))
+	if err != nil {
+		log.Printf("error creating OpenTelekomCloud NetworkingV2 client: %s", err)
+	}
 	for i, raw := range rawSecGroups {
+		secGroupID, err := groups.IDFromName(networkingClient, raw.(string))
+		if err != nil {
+			log.Printf("error creating parsing security group from name: %s", err)
+		}
 		secGroups[i] = cloudservers.SecurityGroup{
-			ID: raw.(string),
+			ID: secGroupID,
 		}
 	}
 	return secGroups
