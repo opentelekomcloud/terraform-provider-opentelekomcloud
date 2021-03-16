@@ -23,7 +23,29 @@ resource "opentelekomcloud_ecs_instance_v1" "basic" {
 
   availability_zone = "eu-de-01"
   key_name          = "KeyPair-test"
-  security_groups   = ["default"]
+}
+```
+
+### Basic Instance with security group
+
+```hcl
+resource "opentelekomcloud_compute_secgroup_v2" "secgroup_1" {
+  name = "ecs_secgroup"
+}
+
+resource "opentelekomcloud_ecs_instance_v1" "basic" {
+  name     = "server_1"
+  image_id = "ad091b52-742f-469e-8f3c-fd81cadf0743"
+  flavor   = "s2.large.2"
+  vpc_id   = "8eed4fc7-e5e5-44a2-b5f2-23b3e5d46235"
+
+  nics {
+    network_id = "55534eaa-533a-419d-9b40-ec427ea7195a"
+  }
+
+  security_groups   = [opentelekomcloud_compute_secgroup_v2.secgroup_1.id]
+  availability_zone = "eu-de-01"
+  key_name          = "KeyPair-test"
 }
 ```
 
@@ -55,7 +77,6 @@ resource "opentelekomcloud_ecs_instance_v1" "basic" {
   delete_disks_on_termination = true
   availability_zone = "eu-de-01"
   key_name          = "KeyPair-test"
-  security_groups   = ["default"]
 }
 ```
 
@@ -79,7 +100,6 @@ resource "opentelekomcloud_ecs_instance_v1" "basic" {
 
   availability_zone = "eu-de-01"
   key_name          = "KeyPair-test"
-  security_groups   = ["default"]
 }
 
 resource "opentelekomcloud_compute_volume_attach_v2" "attached" {
@@ -109,7 +129,6 @@ resource "opentelekomcloud_ecs_instance_v1" "multi-net" {
 
   availability_zone = "eu-de-01"
   key_name          = "KeyPair-test"
-  security_groups   = ["default"]
 }
 
 resource "opentelekomcloud_compute_floatingip_associate_v2" "myip" {
@@ -134,11 +153,10 @@ resource "opentelekomcloud_ecs_instance_v1" "basic" {
 
   user_data         = "#cloud-config\nhostname: server_1.example.com\nfqdn: server_1.example.com"
   key_name          = "KeyPair-test"
-  security_groups   = ["default"]
 }
 ```
 
-`user_data` can come from a variety of sources: inline, read in from the `file`
+-> `user_data` can come from a variety of sources: inline, read in from the `file`
 function, or the `template_cloudinit_config` resource.
 
 ## Argument Reference
@@ -149,7 +167,7 @@ The following arguments are supported:
 
 * `image_id` - (Required) The ID of the desired image for the server. Changing this creates a new server.
 
-* `flavor` - (Required) The name of the desired flavor for the server. Changing this resizes the existing server.
+* `flavor` - (Required) The name of the desired flavor for the server.
 
 * `user_data` - (Optional) The user data to provide when launching the instance.
   Changing this creates a new server.
@@ -175,21 +193,24 @@ The following arguments are supported:
   * `co-p1`: high I/O(performance-optimized) disk type.
   * `uh-l1`: ultra-high I/O(latency-optimized) disk type.
 
-* `system_disk_size` - (Optional) The system disk size in GB, The value range is 1 to 1024. Changing this creates a new server.
+* `system_disk_size` - (Optional) The system disk size in GB, The value range is 1 to 1024.
+  Changing this creates a new server.
 
 * `data_disks` - (Optional) An array of one or more data disks to attach to the
-  instance. The data_disks object structure is documented below. Changing this
+  instance. The `data_disks` object structure is documented below. Changing this
   creates a new server.
 
 * `security_groups` - (Optional) An array of one or more security group IDs
-  to associate with the server. Changing this results in adding/removing
-  security groups from the existing server.
+  to associate with the server. If this parameter is left blank, the `default`
+  security group is bound to the ECS by default.
 
-* `availability_zone` - (Required) The availability zone in which to create the server. Changing this creates a new server.
+* `availability_zone` - (Required) The availability zone in which to create the server.
+  Changing this creates a new server.
 
 * `auto_recovery` - (Optional) Whether configure automatic recovery of an instance.
 
-* `delete_disks_on_termination` - (Optional) Delete the data disks upon termination of the instance. Defaults to false. Changing this creates a new server.
+* `delete_disks_on_termination` - (Optional) Delete the data disks upon termination of the instance.
+  Defaults to false. Changing this creates a new server.
 
 * `tags` - (Optional) Tags key/value pairs to associate with the instance.
 
@@ -206,7 +227,7 @@ The `data_disks` block supports:
   Changing this creates a new server. Options are limited depending on AZ. Available options are:
   * `SATA`: common I/O disk type. Available for all AZs.
   * `SAS`: high I/O disk type. Available for all AZs.
-  * `SSD`: ultra-high I/O disk type. Available for all AZs..
+  * `SSD`: ultra-high I/O disk type. Available for all AZs.
   * `co-p1`: high I/O(performance-optimized) disk type.
   * `uh-l1`: ultra-high I/O(latency-optimized) disk type.
 
@@ -228,6 +249,6 @@ The following attributes are exported:
 
 Instances can be imported using the `id`, e.g.
 
-```sh
+```shell
 terraform import opentelekomcloud_ecs_instance_v1.instance_1 d90ce693-5ccf-4136-a0ed-152ce412b6b9
 ```
