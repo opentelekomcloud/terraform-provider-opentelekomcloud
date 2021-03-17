@@ -229,6 +229,7 @@ func Provider() terraform.ResourceProvider {
 			"opentelekomcloud_compute_bms_server_v2":         bms.DataSourceBMSServersV2(),
 			"opentelekomcloud_csbs_backup_v1":                csbs.DataSourceCSBSBackupV1(),
 			"opentelekomcloud_csbs_backup_policy_v1":         csbs.DataSourceCSBSBackupPolicyV1(),
+			"opentelekomcloud_css_flavor_v1":                 css.DataSourceCSSFlavorV1(),
 			"opentelekomcloud_cts_tracker_v1":                cts.DataSourceCTSTrackerV1(),
 			"opentelekomcloud_dcs_az_v1":                     dcs.DataSourceDcsAZV1(),
 			"opentelekomcloud_dcs_maintainwindow_v1":         dcs.DataSourceDcsMaintainWindowV1(),
