@@ -29,14 +29,14 @@ func TestAccCCENodePoolsV3_basic(t *testing.T) {
 					resource.TestCheckResourceAttr(nodePoolName, "name", "opentelekomcloud-cce-node-pool"),
 					resource.TestCheckResourceAttr(nodePoolName, "flavor", "s2.xlarge.2"),
 					resource.TestCheckResourceAttr(nodePoolName, "os", "EulerOS 2.5"),
-					resource.TestCheckResourceAttr(nodePoolName, "kubelet.kubernetes.io/namespace", "muh"),
+					resource.TestCheckResourceAttr(nodePoolName, "k8s_tags.kubelet.kubernetes.io/namespace", "muh"),
 				),
 			},
 			{
 				Config: testAccCCENodePoolV3_update,
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr(nodePoolName, "initial_node_count", "2"),
-					resource.TestCheckResourceAttr(nodePoolName, "kubelet.kubernetes.io/namespace", "kuh"),
+					resource.TestCheckResourceAttr(nodePoolName, "k8s_tags.kubelet.kubernetes.io/namespace", "kuh"),
 				),
 			},
 		},
