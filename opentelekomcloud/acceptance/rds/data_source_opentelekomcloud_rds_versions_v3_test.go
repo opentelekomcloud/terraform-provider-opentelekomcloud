@@ -1,0 +1,40 @@
+package acceptance
+
+import (
+	"testing"
+
+	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
+
+	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/acceptance/common"
+)
+
+func TestRDSVersionsV3_basic(t *testing.T) {
+	resource.Test(t, resource.TestCase{
+		PreCheck:  func() { common.TestAccPreCheck(t) },
+		Providers: common.TestAccProviders,
+		Steps: []resource.TestStep{
+			{
+				Config: testRDSVersionsV3_basic,
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckRdsFlavorV3DataSourceID("data.opentelekomcloud_rds_versions_v3.sqls_versions"),
+					testAccCheckRdsFlavorV3DataSourceID("data.opentelekomcloud_rds_versions_v3.mysql_versions"),
+					testAccCheckRdsFlavorV3DataSourceID("data.opentelekomcloud_rds_versions_v3.psql_versions"),
+				),
+			},
+		},
+	})
+}
+
+var testRDSVersionsV3_basic = `
+data "opentelekomcloud_rds_versions_v3" "sqls_versions" {
+  database_name = "sqlserver"
+}
+
+data "opentelekomcloud_rds_versions_v3" "mysql_versions" {
+  database_name = "mysql"
+}
+
+data "opentelekomcloud_rds_versions_v3" "psql_versions" {
+  database_name = "postgresql"
+}
+`

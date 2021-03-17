@@ -6,12 +6,14 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/terraform"
+
+	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/acceptance/common"
 )
 
 func TestAccCSSFlavorV1DataSource_basic(t *testing.T) {
 	resource.Test(t, resource.TestCase{
-		PreCheck:  func() { testAccPreCheck(t) },
-		Providers: testAccProviders,
+		PreCheck:  func() { common.TestAccPreCheck(t) },
+		Providers: common.TestAccProviders,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccCSSFlavorV1DataSource,
@@ -29,8 +31,8 @@ func TestAccCSSFlavorV1DataSource_basic(t *testing.T) {
 
 func TestAccCSSFlavorV1DataSource_byName(t *testing.T) {
 	resource.Test(t, resource.TestCase{
-		PreCheck:  func() { testAccPreCheck(t) },
-		Providers: testAccProviders,
+		PreCheck:  func() { common.TestAccPreCheck(t) },
+		Providers: common.TestAccProviders,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccCSSFlavorV1DataSourceByName,
