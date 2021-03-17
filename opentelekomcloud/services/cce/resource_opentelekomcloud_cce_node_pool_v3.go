@@ -121,7 +121,6 @@ func ResourceCCENodePoolV3() *schema.Resource {
 			"k8s_tags": {
 				Type:         schema.TypeMap,
 				Optional:     true,
-				ForceNew:     true,
 				ValidateFunc: common.ValidateK8sTagsMap,
 				Elem: &schema.Schema{
 					Type: schema.TypeString,
@@ -135,7 +134,6 @@ func ResourceCCENodePoolV3() *schema.Resource {
 			"taints": {
 				Type:     schema.TypeList,
 				Optional: true,
-				ForceNew: true,
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
 						"key": {
@@ -439,6 +437,10 @@ func resourceCCENodePoolV3Update(d *schema.ResourceData, meta interface{}) error
 				MaxNodeCount:          d.Get("max_node_count").(int),
 				ScaleDownCooldownTime: d.Get("scale_down_cooldown_time").(int),
 				Priority:              d.Get("priority").(int),
+			},
+			NodeTemplate: nodepools.UpdateNodeTemplate{
+				K8sTags: resourceCCENodeK8sTags(d),
+				Taints:  resourceCCENodeTaints(d),
 			},
 		},
 	}
