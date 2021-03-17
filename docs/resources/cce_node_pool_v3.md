@@ -87,9 +87,9 @@ The following arguments are supported:
 
 * `user_tags` - (Optional) Tag of a VM, key/value pair format. Changing this parameter will create a new resource.
 
-* `k8s_tags` - (Optional) Tags of a Kubernetes node, key/value pair format. Changing this parameter will create a new resource.
+* `k8s_tags` - (Optional) Tags of a Kubernetes node, key/value pair format.
 
-* `taints` - (Optional) Taints to created nodes to configure anti-affinity. Changing this parameter will create a new resource.
+* `taints` - (Optional) Taints to created nodes to configure anti-affinity.
   * `key` - (Required) A key must contain 1 to 63 characters starting with a letter or digit. Only letters, digits, hyphens (-), underscores (_), and periods (.) are allowed. A DNS subdomain name can be used as the prefix of a key.
   * `value` - (Required) A value must start with a letter or digit and can contain a maximum of 63 characters, including letters, digits, hyphens (-), underscores (_), and periods (.).
   * `effect` - (Optional) Available options are `NoSchedule`, `PreferNoSchedule`, and `NoExecute`.

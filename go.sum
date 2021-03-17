@@ -276,12 +276,6 @@ github.com/niemeyer/pretty v0.0.0-20200227124842-a10e7caefd8e h1:fD57ERR4JtEqsWb
 github.com/niemeyer/pretty v0.0.0-20200227124842-a10e7caefd8e/go.mod h1:zD1mROLANZcx1PVRCS0qkT7pwLkGfwJo4zjcN/Tysno=
 github.com/oklog/run v1.0.0 h1:Ru7dDtJNOyC66gQ5dQmaCa0qIsAUFY3sFpK1Xk8igrw=
 github.com/oklog/run v1.0.0/go.mod h1:dlhp/R75TPv97u0XWUtDeV/lRKWPKSdTuV0TZvrmrQA=
-github.com/opentelekomcloud/gophertelekomcloud v0.2.7-0.20210317090820-8370d90a51b4 h1:AFvZzFNsNlHWKXBXL8Hg2yCqUj1MyKWLrRgYvHDvUdM=
-github.com/opentelekomcloud/gophertelekomcloud v0.2.7-0.20210317090820-8370d90a51b4/go.mod h1:pzEP1kduNwv+hrI9R6/DFU/NiX7Kr9NiFjpQ7kJQTsM=
-github.com/opentelekomcloud/gophertelekomcloud v0.2.7-0.20210317091222-8ea5289d5117 h1:ukBPOKosH1W+Bj2jZV9Wo57sCtQzsLo/YuLiXn77scU=
-github.com/opentelekomcloud/gophertelekomcloud v0.2.7-0.20210317091222-8ea5289d5117/go.mod h1:pzEP1kduNwv+hrI9R6/DFU/NiX7Kr9NiFjpQ7kJQTsM=
-github.com/opentelekomcloud/gophertelekomcloud v0.2.7-0.20210317092810-a19fc2be5230 h1:VY8fkshDo9CweI2dGfDmwYVv8p0bc/4l4TMl4N+a8JI=
-github.com/opentelekomcloud/gophertelekomcloud v0.2.7-0.20210317092810-a19fc2be5230/go.mod h1:pzEP1kduNwv+hrI9R6/DFU/NiX7Kr9NiFjpQ7kJQTsM=
 github.com/opentelekomcloud/gophertelekomcloud v0.2.7-0.20210317130019-8526a9584142 h1:Z3GXIhdiWk0PQdxF9w2bARJWCX4rUAitymnX2NziX14=
 github.com/opentelekomcloud/gophertelekomcloud v0.2.7-0.20210317130019-8526a9584142/go.mod h1:pzEP1kduNwv+hrI9R6/DFU/NiX7Kr9NiFjpQ7kJQTsM=
 github.com/pierrec/lz4 v2.0.5+incompatible/go.mod h1:pdkljMzZIN41W+lC3N2tnIh5sFi+IEE17M5jbnwPHcY=
