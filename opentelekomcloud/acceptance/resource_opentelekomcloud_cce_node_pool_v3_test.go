@@ -14,6 +14,8 @@ import (
 
 func TestAccCCENodePoolsV3_basic(t *testing.T) {
 	var nodePool nodepools.NodePool
+	nodePoolName := "opentelekomcloud_cce_node_pool_v3.node_pool"
+	clusterName := "opentelekomcloud_cce_cluster_v3.cluster"
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:     func() { testAccCCEKeyPairPreCheck(t) },
@@ -23,16 +25,18 @@ func TestAccCCENodePoolsV3_basic(t *testing.T) {
 			{
 				Config: testAccCCENodePoolV3_basic,
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckCCENodePoolV3Exists("opentelekomcloud_cce_node_pool_v3.node_pool", "opentelekomcloud_cce_cluster_v3.cluster", &nodePool),
-					resource.TestCheckResourceAttr("opentelekomcloud_cce_node_pool_v3.node_pool", "name", "opentelekomcloud-cce-node-pool"),
-					resource.TestCheckResourceAttr("opentelekomcloud_cce_node_pool_v3.node_pool", "flavor", "s2.xlarge.2"),
-					resource.TestCheckResourceAttr("opentelekomcloud_cce_node_pool_v3.node_pool", "os", "EulerOS 2.5"),
+					testAccCheckCCENodePoolV3Exists(nodePoolName, clusterName, &nodePool),
+					resource.TestCheckResourceAttr(nodePoolName, "name", "opentelekomcloud-cce-node-pool"),
+					resource.TestCheckResourceAttr(nodePoolName, "flavor", "s2.xlarge.2"),
+					resource.TestCheckResourceAttr(nodePoolName, "os", "EulerOS 2.5"),
+					resource.TestCheckResourceAttr(nodePoolName, "kubelet.kubernetes.io/namespace", "muh"),
 				),
 			},
 			{
 				Config: testAccCCENodePoolV3_update,
 				Check: resource.ComposeTestCheckFunc(
-					resource.TestCheckResourceAttr("opentelekomcloud_cce_node_pool_v3.node_pool", "initial_node_count", "2"),
+					resource.TestCheckResourceAttr(nodePoolName, "initial_node_count", "2"),
+					resource.TestCheckResourceAttr(nodePoolName, "kubelet.kubernetes.io/namespace", "kuh"),
 				),
 			},
 		},
@@ -41,6 +45,8 @@ func TestAccCCENodePoolsV3_basic(t *testing.T) {
 
 func TestAccCCENodePoolsV3_randomAZ(t *testing.T) {
 	var nodePool nodepools.NodePool
+	nodePoolName := "opentelekomcloud_cce_node_pool_v3.node_pool"
+	clusterName := "opentelekomcloud_cce_cluster_v3.cluster"
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:     func() { testAccCCEKeyPairPreCheck(t) },
@@ -50,7 +56,8 @@ func TestAccCCENodePoolsV3_randomAZ(t *testing.T) {
 			{
 				Config: testAccCCENodePoolV3_RandomAZ,
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckCCENodePoolV3Exists("opentelekomcloud_cce_node_pool_v3.node_pool", "opentelekomcloud_cce_cluster_v3.cluster", &nodePool),
+					testAccCheckCCENodePoolV3Exists(nodePoolName, clusterName, &nodePool),
+					resource.TestCheckResourceAttr(nodePoolName, "availability_zone", "random"),
 				),
 			},
 		},
@@ -84,7 +91,7 @@ func testAccCheckCCENodePoolV3Destroy(s *terraform.State) error {
 	return nil
 }
 
-func testAccCheckCCENodePoolV3Exists(n string, cluster string, nodepool *nodepools.NodePool) resource.TestCheckFunc {
+func testAccCheckCCENodePoolV3Exists(n string, cluster string, nodePool *nodepools.NodePool) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
 		rs, ok := s.RootModule().Resources[n]
 		if !ok {
@@ -117,7 +124,7 @@ func testAccCheckCCENodePoolV3Exists(n string, cluster string, nodepool *nodepoo
 			return fmt.Errorf("node pool not found")
 		}
 
-		*nodepool = *found
+		*nodePool = *found
 
 		return nil
 	}
@@ -160,7 +167,7 @@ resource "opentelekomcloud_cce_node_pool_v3" "node_pool" {
   }
 
   k8s_tags = {
-    "kubelet.kubernetes.io/namespace" = "dev"
+    "kubelet.kubernetes.io/namespace" = "muh"
   }
 }`, OS_VPC_ID, OS_NETWORK_ID, OS_AVAILABILITY_ZONE, OS_KEYPAIR_NAME)
 
@@ -201,7 +208,7 @@ resource "opentelekomcloud_cce_node_pool_v3" "node_pool" {
   }
 
   k8s_tags = {
-    "kubelet.kubernetes.io/namespace" = "dev"
+    "kubelet.kubernetes.io/namespace" = "kuh"
   }
 }`, OS_VPC_ID, OS_NETWORK_ID, OS_AVAILABILITY_ZONE, OS_KEYPAIR_NAME)
 

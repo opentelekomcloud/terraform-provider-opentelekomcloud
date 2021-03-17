@@ -61,7 +61,7 @@ The following arguments are supported:
 
 * `tags` - (Optional) The field is alternative to `labels`, key/value pair format.
 
-* `k8s_tags` - (Optional) Tags of a Kubernetes node, key/value pair format. Changing this parameter will create a new resource.
+* `k8s_tags` - (Optional) Tags of a Kubernetes node, key/value pair format.
 
 * `annotations` - (Optional) Node annotation, key/value pair format. Changing this parameter will create a new resource.
 
