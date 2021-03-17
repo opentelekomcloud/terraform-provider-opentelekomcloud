@@ -1,5 +1,20 @@
 ## 1.24.0 (Unreleased)
 
+## 1.23.4 (March 17, 2021)
+
+FEATURES:
+* **New Data Source:** `opentelekomcloud_css_flavor_v1` ([#913](https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/issues/913))
+
+ENHANCEMENTS:
+* `resource/opentelekomcloud_css_cluster_v1`: Add support of `enable_authority` and `admin_pass` arguments ([#902](https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/issues/902))
+* `resource/opentelekomcloud_ecs_instance_v1`: Use security group IDs in all operations ([#909](https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/issues/909))
+
+BUG FIXES:
+* `resource/opentelekomcloud_vpnaas_ipsec_policy_v2`: Missing support of PFS groups ([#906](https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/issues/906))
+* `resource/opentelekomcloud_as_group_v1`: Limit `security_groups` maximum number to one ([#907](https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/issues/907))
+* `resource/opentelekomcloud_cce_node_pool_v3`: Fix too strict `k8s_tags` validations ([#911](https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/issues/911))
+* `resource/opentelekomcloud_cce_node_pool_v3`: Changes in `k8s_tags` and `taints` trigger resource re-creation no more ([#911](https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/issues/911))
+
 ## 1.23.3 (March 12, 2021)
 
 ENHANCEMENTS:
