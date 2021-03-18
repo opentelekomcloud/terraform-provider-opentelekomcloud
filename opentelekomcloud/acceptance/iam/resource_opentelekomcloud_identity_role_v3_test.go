@@ -23,15 +23,15 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/terraform"
 	"github.com/opentelekomcloud/gophertelekomcloud"
 
-	common2 "github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/acceptance/common"
+	acc "github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/acceptance/common"
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common"
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common/cfg"
 )
 
 func TestAccIdentityRoleV3_basic(t *testing.T) {
 	resource.Test(t, resource.TestCase{
-		PreCheck:     func() { common2.TestAccPreCheck(t) },
-		Providers:    common2.TestAccProviders,
+		PreCheck:     func() { acc.TestAccPreCheck(t) },
+		Providers:    acc.TestAccProviders,
 		CheckDestroy: testAccCheckIdentityRoleV3Destroy,
 		Steps: []resource.TestStep{
 			{
@@ -59,7 +59,7 @@ resource "opentelekomcloud_identity_role_v3" "role" {
 }
 
 func testAccCheckIdentityRoleV3Destroy(s *terraform.State) error {
-	config := common2.TestAccProvider.Meta().(*cfg.Config)
+	config := acc.TestAccProvider.Meta().(*cfg.Config)
 	client, err := config.IdentityV30Client()
 	if err != nil {
 		return fmt.Errorf("error creating sdk client, err=%s", err)
@@ -87,7 +87,7 @@ func testAccCheckIdentityRoleV3Destroy(s *terraform.State) error {
 }
 
 func testAccCheckIdentityRoleV3Exists(s *terraform.State) error {
-	config := common2.TestAccProvider.Meta().(*cfg.Config)
+	config := acc.TestAccProvider.Meta().(*cfg.Config)
 	client, err := config.IdentityV30Client()
 	if err != nil {
 		return fmt.Errorf("error creating sdk client, err=%s", err)

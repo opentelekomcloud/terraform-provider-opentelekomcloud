@@ -23,7 +23,7 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
 
-	common2 "github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/acceptance/common"
+	acc "github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/acceptance/common"
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/acceptance/env"
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common"
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common/cfg"
@@ -31,8 +31,8 @@ import (
 
 func TestAccNatDnat_basic(t *testing.T) {
 	resource.Test(t, resource.TestCase{
-		PreCheck:     func() { common2.TestAccPreCheck(t) },
-		Providers:    common2.TestAccProviders,
+		PreCheck:     func() { acc.TestAccPreCheck(t) },
+		Providers:    acc.TestAccProviders,
 		CheckDestroy: testAccCheckNatDnatDestroy,
 		Steps: []resource.TestStep{
 			{
@@ -106,7 +106,7 @@ resource "opentelekomcloud_nat_dnat_rule_v2" "dnat" {
 }
 
 func testAccCheckNatDnatDestroy(s *terraform.State) error {
-	config := common2.TestAccProvider.Meta().(*cfg.Config)
+	config := acc.TestAccProvider.Meta().(*cfg.Config)
 	client, err := config.NatV2Client(env.OS_REGION_NAME)
 	if err != nil {
 		return fmt.Errorf("Error creating sdk client, err=%s", err)
@@ -136,7 +136,7 @@ func testAccCheckNatDnatDestroy(s *terraform.State) error {
 
 func testAccCheckNatDnatExists() resource.TestCheckFunc {
 	return func(s *terraform.State) error {
-		config := common2.TestAccProvider.Meta().(*cfg.Config)
+		config := acc.TestAccProvider.Meta().(*cfg.Config)
 		client, err := config.NatV2Client(env.OS_REGION_NAME)
 		if err != nil {
 			return fmt.Errorf("Error creating sdk client, err=%s", err)

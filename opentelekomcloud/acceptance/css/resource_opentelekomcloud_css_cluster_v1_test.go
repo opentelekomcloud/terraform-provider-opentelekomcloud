@@ -9,7 +9,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/terraform"
 	"github.com/opentelekomcloud/gophertelekomcloud"
 
-	common2 "github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/acceptance/common"
+	acc "github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/acceptance/common"
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/acceptance/env"
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common"
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common/cfg"
@@ -20,8 +20,8 @@ func TestAccCssClusterV1_basic(t *testing.T) {
 	resourceName := "opentelekomcloud_css_cluster_v1.cluster"
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:     func() { common2.TestAccPreCheck(t) },
-		Providers:    common2.TestAccProviders,
+		PreCheck:     func() { acc.TestAccPreCheck(t) },
+		Providers:    acc.TestAccProviders,
 		CheckDestroy: testAccCheckCssClusterV1Destroy,
 		Steps: []resource.TestStep{
 			{
@@ -105,7 +105,7 @@ resource "opentelekomcloud_css_cluster_v1" "cluster" {
 }
 
 func testAccCheckCssClusterV1Destroy(s *terraform.State) error {
-	config := common2.TestAccProvider.Meta().(*cfg.Config)
+	config := acc.TestAccProvider.Meta().(*cfg.Config)
 	client, err := config.CssV1Client(env.OS_REGION_NAME)
 	if err != nil {
 		return fmt.Errorf("error creating sdk client, err=%s", err)
@@ -134,7 +134,7 @@ func testAccCheckCssClusterV1Destroy(s *terraform.State) error {
 
 func testAccCheckCssClusterV1Exists() resource.TestCheckFunc {
 	return func(s *terraform.State) error {
-		config := common2.TestAccProvider.Meta().(*cfg.Config)
+		config := acc.TestAccProvider.Meta().(*cfg.Config)
 		client, err := config.CssV1Client(env.OS_REGION_NAME)
 		if err != nil {
 			return fmt.Errorf("error creating sdk client, err=%s", err)
