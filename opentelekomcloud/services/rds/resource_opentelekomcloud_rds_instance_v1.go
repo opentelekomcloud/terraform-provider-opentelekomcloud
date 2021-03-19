@@ -187,7 +187,7 @@ func ResourceRdsInstance() *schema.Resource {
 			"tag": {
 				Type:         schema.TypeMap,
 				Optional:     true,
-				ValidateFunc: common.ValidateTagsMap,
+				ValidateFunc: common.ValidateTags,
 			},
 
 			"status": {

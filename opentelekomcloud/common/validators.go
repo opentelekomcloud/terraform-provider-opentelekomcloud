@@ -255,7 +255,7 @@ func ValidateAntiDdosAppTypeID(v interface{}, k string) (ws []string, errors []e
 	return
 }
 
-func ValidateTagsMap(v interface{}, k string) (ws []string, errors []error) {
+func ValidateTags(v interface{}, k string) (ws []string, errors []error) {
 	tagMap := v.(map[string]interface{})
 	pattern := regexp.MustCompile(`^[0-9a-zA-Z-_@]+$`)
 

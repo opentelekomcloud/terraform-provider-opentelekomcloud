@@ -304,13 +304,13 @@ func ResourceComputeInstanceV2() *schema.Resource {
 				Type:          schema.TypeMap,
 				Optional:      true,
 				ConflictsWith: []string{"tag"},
-				ValidateFunc:  common.ValidateTagsMap,
+				ValidateFunc:  common.ValidateTags,
 			},
 			"tag": {
 				Type:          schema.TypeMap,
 				Optional:      true,
 				ConflictsWith: []string{"tags"},
-				ValidateFunc:  common.ValidateTagsMap,
+				ValidateFunc:  common.ValidateTags,
 				Deprecated:    "Use field tags instead",
 			},
 			"all_metadata": {

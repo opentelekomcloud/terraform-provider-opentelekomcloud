@@ -11,7 +11,7 @@ func TagsSchema() *schema.Schema {
 	return &schema.Schema{
 		Type:         schema.TypeMap,
 		Optional:     true,
-		ValidateFunc: ValidateTagsMap,
+		ValidateFunc: ValidateTags,
 	}
 }
 
