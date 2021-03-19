@@ -23,6 +23,10 @@ resource "opentelekomcloud_ecs_instance_v1" "basic" {
 
   availability_zone = "eu-de-01"
   key_name          = "KeyPair-test"
+
+  tags = {
+    muh = "kuh"
+  }
 }
 ```
 

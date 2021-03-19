@@ -31,6 +31,7 @@ func TestAccEcsV1Instance_basic(t *testing.T) {
 					resource.TestCheckResourceAttr(resourceName, "availability_zone", env.OS_AVAILABILITY_ZONE),
 					resource.TestCheckResourceAttr(resourceName, "auto_recovery", "true"),
 					resource.TestCheckResourceAttr(resourceName, "security_groups.#", "1"),
+					resource.TestCheckResourceAttr(resourceName, "tags.muh", "value-create"),
 				),
 			},
 			{
@@ -40,6 +41,7 @@ func TestAccEcsV1Instance_basic(t *testing.T) {
 					resource.TestCheckResourceAttr(resourceName, "availability_zone", env.OS_AVAILABILITY_ZONE),
 					resource.TestCheckResourceAttr(resourceName, "auto_recovery", "false"),
 					resource.TestCheckResourceAttr(resourceName, "security_groups.#", "1"),
+					resource.TestCheckResourceAttr(resourceName, "tags.muh", "value-update"),
 				),
 			},
 		},
@@ -157,8 +159,8 @@ resource "opentelekomcloud_ecs_instance_v1" "instance_1" {
   auto_recovery     = true
 
   tags = {
-    foo = "bar"
-    key = "value"
+    muh = "value-create"
+    kuh = "value-create"
   }
 }
 `, env.OS_IMAGE_ID, env.OS_VPC_ID, env.OS_NETWORK_ID, env.OS_AVAILABILITY_ZONE)
@@ -186,8 +188,7 @@ resource "opentelekomcloud_ecs_instance_v1" "instance_1" {
   delete_disks_on_termination = true
 
   tags = {
-    foo  = "bar1"
-    key1 = "value"
+    muh = "value-update"
   }
 }
 `, env.OS_IMAGE_ID, env.OS_VPC_ID, env.OS_NETWORK_ID, env.OS_AVAILABILITY_ZONE)
