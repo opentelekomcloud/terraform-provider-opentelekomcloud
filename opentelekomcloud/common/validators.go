@@ -256,11 +256,11 @@ func ValidateAntiDdosAppTypeID(v interface{}, k string) (ws []string, errors []e
 }
 
 func ValidateECSTagValue(v interface{}, _ string) (ws []string, errors []error) {
-	tagmap := v.(map[string]interface{})
-	vv := regexp.MustCompile(`^[0-9a-zA-Z-_]+$`)
-	for k, v := range tagmap {
+	tagMap := v.(map[string]interface{})
+	regex := regexp.MustCompile(`^[0-9a-zA-Z-_]+$`)
+	for k, v := range tagMap {
 		value := v.(string)
-		if !vv.MatchString(value) {
+		if !regex.MatchString(value) {
 			errors = append(errors, fmt.Errorf(
 				"tag value must be string only contains digits, letters, underscores(_) and hyphens(-), but got %s=%s", k, value))
 			break
