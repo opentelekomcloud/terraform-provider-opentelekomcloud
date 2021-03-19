@@ -255,17 +255,37 @@ func ValidateAntiDdosAppTypeID(v interface{}, k string) (ws []string, errors []e
 	return
 }
 
-func ValidateECSTagValue(v interface{}, _ string) (ws []string, errors []error) {
+func ValidateTagsMap(v interface{}, k string) (ws []string, errors []error) {
 	tagMap := v.(map[string]interface{})
-	regex := regexp.MustCompile(`^[0-9a-zA-Z-_]+$`)
-	for k, v := range tagMap {
-		value := v.(string)
-		if !regex.MatchString(value) {
-			errors = append(errors, fmt.Errorf(
-				"tag value must be string only contains digits, letters, underscores(_) and hyphens(-), but got %s=%s", k, value))
-			break
+	pattern := regexp.MustCompile(`^[0-9a-zA-Z-_@]+$`)
+
+	for key, value := range tagMap {
+		valueString := value.(string)
+		if len(valueString) < 1 {
+			errors = append(errors, fmt.Errorf("value %q cannot be shorter than 1 characters: %q", k, value))
+		}
+
+		if len(key) < 1 {
+			errors = append(errors, fmt.Errorf("key %q cannot be shorter than 1 characters: %q", k, key))
+		}
+
+		if len(valueString) > 43 {
+			errors = append(errors, fmt.Errorf("value %q cannot be longer than 43 characters: %q", k, value))
+		}
+
+		if len(key) > 36 {
+			errors = append(errors, fmt.Errorf("key %q cannot be longer than 36 characters: %q", k, key))
+		}
+
+		if !pattern.MatchString(valueString) {
+			errors = append(errors, fmt.Errorf("value %q doesn't comply with restrictions (%q): %q", k, pattern, valueString))
+		}
+
+		if !pattern.MatchString(key) {
+			errors = append(errors, fmt.Errorf("key %q doesn't comply with restrictions (%q): %q", k, pattern, key))
 		}
 	}
+
 	return
 }
 

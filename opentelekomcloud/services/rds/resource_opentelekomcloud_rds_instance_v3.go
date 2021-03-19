@@ -168,7 +168,7 @@ func ResourceRdsInstanceV3() *schema.Resource {
 			"tag": {
 				Type:         schema.TypeMap,
 				Optional:     true,
-				ValidateFunc: common.ValidateECSTagValue,
+				ValidateFunc: common.ValidateTagsMap,
 			},
 			"param_group_id": {
 				Type:     schema.TypeString,

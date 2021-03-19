@@ -333,7 +333,7 @@ func ResourceMRSClusterV1() *schema.Resource {
 			"tags": {
 				Type:         schema.TypeMap,
 				Optional:     true,
-				ValidateFunc: common.ValidateECSTagValue,
+				ValidateFunc: common.ValidateTagsMap,
 			},
 			"order_id": {
 				Type:     schema.TypeString,
