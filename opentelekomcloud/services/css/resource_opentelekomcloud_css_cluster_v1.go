@@ -140,17 +140,23 @@ func ResourceCssClusterV1() *schema.Resource {
 
 			"datastore": {
 				Type:     schema.TypeList,
+				Optional: true,
 				Computed: true,
+				ForceNew: true,
 				MaxItems: 1,
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
 						"type": {
 							Type:     schema.TypeString,
+							Optional: true,
 							Computed: true,
+							ForceNew: true,
 						},
 						"version": {
 							Type:     schema.TypeString,
+							Optional: true,
 							Computed: true,
+							ForceNew: true,
 						},
 					},
 				},
@@ -226,6 +232,12 @@ func resourceCssClusterV1Create(d *schema.ResourceData, meta interface{}) error 
 		opts.DiskEncryption = &clusters.DiskEncryption{
 			Encrypted: "1",
 			CmkID:     cmkID.(string),
+		}
+	}
+	if count := d.Get("datastore.#").(int); count != 0 {
+		opts.Datastore = &clusters.Datastore{
+			Version: d.Get("datastore.0.version").(string),
+			Type:    d.Get("datastore.0.type").(string),
 		}
 	}
 
