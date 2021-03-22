@@ -41,8 +41,31 @@ The following arguments are supported:
   hyphens (`-`), and underscores (`_`) are allowed. The value must start with a letter.
   Changing this parameter will create a new resource.
 
+* `datastore` - (Optional) Type of the data search engine. Structure is documented below.
+  Changing this parameter will create a new resource.
+
 * `node_config` - (Required) Instance object. Structure is documented below.
   Changing this parameter will create a new resource.
+
+* `enable_https` - (Optional) Whether communication encryption is performed on the cluster.
+  By default, communication encryption is enabled.
+  Value `true` indicates that communication encryption is performed on the cluster.
+  Value `false` indicates that communication encryption is not performed on the cluster.
+  Changing this parameter will create a new resource.
+
+* `enable_authority` - (Optional) Whether to enable authentication.
+  Authentication is disabled by default. When authentication is enabled, `enable_https` must be set to `true`.
+  Changing this parameter will create a new resource.
+
+* `admin_pass` - (Optional) Password of the cluster user admin in security mode.
+  This parameter is mandatory only when `enable_authority` is set to `true`.
+
+~>
+The administrator password must meet the following requirements: contain `8` to `32` characters,
+contain at least `3` of the following character types: uppercase letters,
+lowercase letters, numbers, and special characters (`~!@#$%^&*()-_=+\\|[{}];:,<.>/?`).
+
+* `expect_node_num` - (Optional) Number of cluster instances. The value range is `1` to `32`.
 
 The `node_config` block supports:
 
@@ -90,25 +113,11 @@ The `volume` block supports:
   The SAS disk is used. `ULTRAHIGH`: Ultra-high I/O. The solid-state drive (SSD) is used.
   Changing this parameter will create a new resource.
 
-* `enable_https` - (Optional) Whether communication encryption is performed on the cluster.
-  By default, communication encryption is enabled.
-  Value `true` indicates that communication encryption is performed on the cluster.
-  Value `false` indicates that communication encryption is not performed on the cluster.
-  Changing this parameter will create a new resource.
+The `datastore` block contains:
 
-* `enable_authority` - (Optional) Whether to enable authentication.
-  Authentication is disabled by default. When authentication is enabled, `enable_https` must be set to `true`.
-  Changing this parameter will create a new resource.
+* `type` - Engine type. The default value is `elasticsearch`. Currently, the value can only be `elasticsearch`.
 
-* `admin_pass` - (Optional) Password of the cluster user admin in security mode.
-  This parameter is mandatory only when `enable_authority` is set to `true`.
-
-~>
-The administrator password must meet the following requirements: contain `8` to `32` characters,
-contain at least `3` of the following character types: uppercase letters,
-lowercase letters, numbers, and special characters (`~!@#$%^&*()-_=+\\|[{}];:,<.>/?`).
-
-* `expect_node_num` - (Optional) Number of cluster instances. The value range is `1` to `32`.
+* `version` - Engine version. The value can be `6.2.3`, `7.1.1` or `7.6.2`. The default value is `6.2.3`.
 
 ## Attributes Reference
 
@@ -116,19 +125,11 @@ In addition to the arguments listed above, the following computed attributes are
 
 * `created` - Time when a cluster is created. The format is ISO8601: `CCYY-MM-DDThh:mm:ss`.
 
-* `datastore` - Type of the data search engine. Structure is documented below.
-
 * `endpoint` - Indicates the IP address and port number of the user used to access the VPC.
 
 * `nodes` - List of node objects. Structure is documented below.
 
 * `updated` - Last modification time of a cluster. The format is ISO8601: `CCYY-MM-DDThh:mm:ss`.
-
-The `datastore` block contains:
-
-* `type` - Supported type: `elasticsearch`
-
-* `version` - Engine version number.
 
 The `nodes` block contains:
 
