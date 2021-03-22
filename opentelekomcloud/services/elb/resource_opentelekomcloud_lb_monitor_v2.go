@@ -63,6 +63,10 @@ func ResourceMonitorV2() *schema.Resource {
 				Type:     schema.TypeInt,
 				Required: true,
 			},
+			"domain_name": {
+				Type:     schema.TypeString,
+				Optional: true,
+			},
 			"timeout": {
 				Type:     schema.TypeInt,
 				Required: true,
@@ -106,22 +110,23 @@ func ResourceMonitorV2() *schema.Resource {
 
 func resourceMonitorV2Create(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*cfg.Config)
-	networkingClient, err := config.NetworkingV2Client(config.GetRegion(d))
+	client, err := config.NetworkingV2Client(config.GetRegion(d))
 	if err != nil {
-		return fmt.Errorf("error creating OpenTelekomCloud networking client: %s", err)
+		return fmt.Errorf("error creating OpenTelekomCloud NetworkingV2 client: %s", err)
 	}
 
 	adminStateUp := d.Get("admin_state_up").(bool)
 	createOpts := monitors.CreateOpts{
 		PoolID:        d.Get("pool_id").(string),
-		TenantID:      d.Get("tenant_id").(string),
 		Type:          d.Get("type").(string),
 		Delay:         d.Get("delay").(int),
+		DomainName:    d.Get("domain_name").(string),
 		Timeout:       d.Get("timeout").(int),
 		MaxRetries:    d.Get("max_retries").(int),
 		URLPath:       d.Get("url_path").(string),
 		HTTPMethod:    d.Get("http_method").(string),
 		ExpectedCodes: d.Get("expected_codes").(string),
+		TenantID:      d.Get("tenant_id").(string),
 		Name:          d.Get("name").(string),
 		AdminStateUp:  &adminStateUp,
 		MonitorPort:   d.Get("monitor_port").(int),
@@ -130,8 +135,7 @@ func resourceMonitorV2Create(d *schema.ResourceData, meta interface{}) error {
 	timeout := d.Timeout(schema.TimeoutCreate)
 	poolID := createOpts.PoolID
 	// Wait for parent pool to become active before continuing
-	err = waitForLBV2viaPool(networkingClient, poolID, "ACTIVE", timeout)
-	if err != nil {
+	if err := waitForLBV2viaPool(client, poolID, "ACTIVE", timeout); err != nil {
 		return err
 	}
 
@@ -139,7 +143,7 @@ func resourceMonitorV2Create(d *schema.ResourceData, meta interface{}) error {
 	log.Printf("[DEBUG] Attempting to create monitor")
 	var monitor *monitors.Monitor
 	err = resource.Retry(timeout, func() *resource.RetryError {
-		monitor, err = monitors.Create(networkingClient, createOpts).Extract()
+		monitor, err = monitors.Create(client, createOpts).Extract()
 		if err != nil {
 			return common.CheckForRetryableError(err)
 		}
@@ -149,8 +153,7 @@ func resourceMonitorV2Create(d *schema.ResourceData, meta interface{}) error {
 		return fmt.Errorf("unable to create monitor: %s", err)
 	}
 
-	err = waitForLBV2viaPool(networkingClient, poolID, "ACTIVE", timeout)
-	if err != nil {
+	if err := waitForLBV2viaPool(client, poolID, "ACTIVE", timeout); err != nil {
 		return err
 	}
 
@@ -161,12 +164,12 @@ func resourceMonitorV2Create(d *schema.ResourceData, meta interface{}) error {
 
 func resourceMonitorV2Read(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*cfg.Config)
-	networkingClient, err := config.NetworkingV2Client(config.GetRegion(d))
+	client, err := config.NetworkingV2Client(config.GetRegion(d))
 	if err != nil {
-		return fmt.Errorf("error creating OpenTelekomCloud networking client: %s", err)
+		return fmt.Errorf("error creating OpenTelekomCloud NetworkingV2 client: %s", err)
 	}
 
-	monitor, err := monitors.Get(networkingClient, d.Id()).Extract()
+	monitor, err := monitors.Get(client, d.Id()).Extract()
 	if err != nil {
 		return common.CheckDeleted(d, err, "monitor")
 	}
@@ -186,16 +189,20 @@ func resourceMonitorV2Read(d *schema.ResourceData, meta interface{}) error {
 		d.Set("name", monitor.Name),
 		d.Set("monitor_port", monitor.MonitorPort),
 		d.Set("region", config.GetRegion(d)),
+		d.Set("domain_name", monitor.DomainName),
 	)
+	if mErr.ErrorOrNil() != nil {
+		return mErr
+	}
 
-	return mErr.ErrorOrNil()
+	return nil
 }
 
 func resourceMonitorV2Update(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*cfg.Config)
-	networkingClient, err := config.NetworkingV2Client(config.GetRegion(d))
+	client, err := config.NetworkingV2Client(config.GetRegion(d))
 	if err != nil {
-		return fmt.Errorf("error creating OpenTelekomCloud networking client: %s", err)
+		return fmt.Errorf("error creating OpenTelekomCloud NetworkingV2 client: %s", err)
 	}
 
 	var updateOpts monitors.UpdateOpts
@@ -207,6 +214,9 @@ func resourceMonitorV2Update(d *schema.ResourceData, meta interface{}) error {
 	}
 	if d.HasChange("delay") {
 		updateOpts.Delay = d.Get("delay").(int)
+	}
+	if d.HasChange("domain_name") {
+		updateOpts.DomainName = d.Get("domain_name").(string)
 	}
 	if d.HasChange("timeout") {
 		updateOpts.Timeout = d.Get("timeout").(int)
@@ -231,13 +241,12 @@ func resourceMonitorV2Update(d *schema.ResourceData, meta interface{}) error {
 	log.Printf("[DEBUG] Updating monitor %s with options: %#v", d.Id(), updateOpts)
 	timeout := d.Timeout(schema.TimeoutUpdate)
 	poolID := d.Get("pool_id").(string)
-	err = waitForLBV2viaPool(networkingClient, poolID, "ACTIVE", timeout)
-	if err != nil {
+	if err := waitForLBV2viaPool(client, poolID, "ACTIVE", timeout); err != nil {
 		return err
 	}
 
 	err = resource.Retry(timeout, func() *resource.RetryError {
-		_, err = monitors.Update(networkingClient, d.Id(), updateOpts).Extract()
+		_, err = monitors.Update(client, d.Id(), updateOpts).Extract()
 		if err != nil {
 			return common.CheckForRetryableError(err)
 		}
@@ -249,8 +258,7 @@ func resourceMonitorV2Update(d *schema.ResourceData, meta interface{}) error {
 	}
 
 	// Wait for LB to become active before continuing
-	err = waitForLBV2viaPool(networkingClient, poolID, "ACTIVE", timeout)
-	if err != nil {
+	if err := waitForLBV2viaPool(client, poolID, "ACTIVE", timeout); err != nil {
 		return err
 	}
 
@@ -261,7 +269,7 @@ func resourceMonitorV2Delete(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*cfg.Config)
 	networkingClient, err := config.NetworkingV2Client(config.GetRegion(d))
 	if err != nil {
-		return fmt.Errorf("error creating OpenTelekomCloud networking client: %s", err)
+		return fmt.Errorf("error creating OpenTelekomCloud NetworkingV2 client: %s", err)
 	}
 
 	log.Printf("[DEBUG] Deleting monitor %s", d.Id())

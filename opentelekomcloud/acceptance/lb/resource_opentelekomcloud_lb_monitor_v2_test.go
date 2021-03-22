@@ -15,6 +15,7 @@ import (
 
 func TestAccLBV2Monitor_basic(t *testing.T) {
 	var monitor monitors.Monitor
+	resourceName := "opentelekomcloud_lb_monitor_v2.monitor_1"
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:     func() { common.TestAccPreCheck(t) },
@@ -24,19 +25,21 @@ func TestAccLBV2Monitor_basic(t *testing.T) {
 			{
 				Config: TestAccLBV2MonitorConfig_basic,
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckLBV2MonitorExists("opentelekomcloud_lb_monitor_v2.monitor_1", &monitor),
-					resource.TestCheckResourceAttr("opentelekomcloud_lb_monitor_v2.monitor_1", "monitor_port", "112"),
-					resource.TestCheckResourceAttr("opentelekomcloud_lb_monitor_v2.monitor_1", "delay", "20"),
-					resource.TestCheckResourceAttr("opentelekomcloud_lb_monitor_v2.monitor_1", "timeout", "10"),
+					testAccCheckLBV2MonitorExists(resourceName, &monitor),
+					resource.TestCheckResourceAttr(resourceName, "monitor_port", "112"),
+					resource.TestCheckResourceAttr(resourceName, "delay", "20"),
+					resource.TestCheckResourceAttr(resourceName, "timeout", "10"),
+					resource.TestCheckResourceAttr(resourceName, "domain_name", ""),
 				),
 			},
 			{
 				Config: TestAccLBV2MonitorConfig_update,
 				Check: resource.ComposeTestCheckFunc(
-					resource.TestCheckResourceAttr("opentelekomcloud_lb_monitor_v2.monitor_1", "name", "monitor_1_updated"),
-					resource.TestCheckResourceAttr("opentelekomcloud_lb_monitor_v2.monitor_1", "delay", "30"),
-					resource.TestCheckResourceAttr("opentelekomcloud_lb_monitor_v2.monitor_1", "timeout", "15"),
-					resource.TestCheckResourceAttr("opentelekomcloud_lb_monitor_v2.monitor_1", "monitor_port", "120"),
+					resource.TestCheckResourceAttr(resourceName, "name", "monitor_1_updated"),
+					resource.TestCheckResourceAttr(resourceName, "delay", "30"),
+					resource.TestCheckResourceAttr(resourceName, "timeout", "15"),
+					resource.TestCheckResourceAttr(resourceName, "monitor_port", "120"),
+					resource.TestCheckResourceAttr(resourceName, "domain_name", "www.test.com"),
 				),
 			},
 		},
@@ -45,6 +48,7 @@ func TestAccLBV2Monitor_basic(t *testing.T) {
 
 func TestAccLBV2Monitor_minConfig(t *testing.T) {
 	var monitor monitors.Monitor
+	resourceName := "opentelekomcloud_lb_monitor_v2.monitor_1"
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:     func() { common.TestAccPreCheck(t) },
@@ -54,16 +58,16 @@ func TestAccLBV2Monitor_minConfig(t *testing.T) {
 			{
 				Config: TestAccLBV2MonitorConfig_minConfig,
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckLBV2MonitorExists("opentelekomcloud_lb_monitor_v2.monitor_1", &monitor),
-					resource.TestCheckResourceAttr("opentelekomcloud_lb_monitor_v2.monitor_1", "delay", "20"),
-					resource.TestCheckResourceAttr("opentelekomcloud_lb_monitor_v2.monitor_1", "timeout", "10"),
+					testAccCheckLBV2MonitorExists(resourceName, &monitor),
+					resource.TestCheckResourceAttr(resourceName, "delay", "20"),
+					resource.TestCheckResourceAttr(resourceName, "timeout", "10"),
 				),
 			},
 			{
 				Config: TestAccLBV2MonitorConfig_update,
 				Check: resource.ComposeTestCheckFunc(
-					resource.TestCheckResourceAttr("opentelekomcloud_lb_monitor_v2.monitor_1", "name", "monitor_1_updated"),
-					resource.TestCheckResourceAttr("opentelekomcloud_lb_monitor_v2.monitor_1", "monitor_port", "120"),
+					resource.TestCheckResourceAttr(resourceName, "name", "monitor_1_updated"),
+					resource.TestCheckResourceAttr(resourceName, "monitor_port", "120"),
 				),
 			},
 		},
@@ -72,7 +76,7 @@ func TestAccLBV2Monitor_minConfig(t *testing.T) {
 
 func testAccCheckLBV2MonitorDestroy(s *terraform.State) error {
 	config := common.TestAccProvider.Meta().(*cfg.Config)
-	networkingClient, err := config.NetworkingV2Client(env.OS_REGION_NAME)
+	client, err := config.NetworkingV2Client(env.OS_REGION_NAME)
 	if err != nil {
 		return fmt.Errorf("error creating OpenTelekomCloud networking client: %s", err)
 	}
@@ -82,7 +86,7 @@ func testAccCheckLBV2MonitorDestroy(s *terraform.State) error {
 			continue
 		}
 
-		_, err := monitors.Get(networkingClient, rs.Primary.ID).Extract()
+		_, err := monitors.Get(client, rs.Primary.ID).Extract()
 		if err == nil {
 			return fmt.Errorf("monitor still exists: %s", rs.Primary.ID)
 		}
@@ -103,12 +107,12 @@ func testAccCheckLBV2MonitorExists(n string, monitor *monitors.Monitor) resource
 		}
 
 		config := common.TestAccProvider.Meta().(*cfg.Config)
-		networkingClient, err := config.NetworkingV2Client(env.OS_REGION_NAME)
+		client, err := config.NetworkingV2Client(env.OS_REGION_NAME)
 		if err != nil {
-			return fmt.Errorf("error creating OpenTelekomCloud networking client: %s", err)
+			return fmt.Errorf("error creating OpenTelekomCloud NetworkingV2 client: %s", err)
 		}
 
-		found, err := monitors.Get(networkingClient, rs.Primary.ID).Extract()
+		found, err := monitors.Get(client, rs.Primary.ID).Extract()
 		if err != nil {
 			return err
 		}
@@ -189,6 +193,7 @@ resource "opentelekomcloud_lb_monitor_v2" "monitor_1" {
   admin_state_up = "true"
   pool_id        = opentelekomcloud_lb_pool_v2.pool_1.id
   monitor_port   = 120
+  domain_name    = "www.test.com"
 
   timeouts {
     create = "5m"
