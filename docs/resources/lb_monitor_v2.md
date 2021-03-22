@@ -55,7 +55,6 @@ The following arguments are supported:
   are valid when the value of `type` is set to `HTTP`.
 
 * `domain_name` - (Optional) The `domain_name` of the HTTP request during the health check.
-  This parameter is valid when the value of `type` is set to `HTTP`.
 
 * `url_path` - (Optional) Required for HTTP types. URI path that will be
   accessed if monitor type is `HTTP`.
