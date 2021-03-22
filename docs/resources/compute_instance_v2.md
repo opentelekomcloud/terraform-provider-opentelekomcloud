@@ -41,10 +41,10 @@ resource "opentelekomcloud_blockstorage_volume_v2" "myvol" {
 }
 
 resource "opentelekomcloud_compute_instance_v2" "myinstance" {
-  name            = "my_instance"
+  name            = "myinstance"
   image_id        = "ad091b52-742f-469e-8f3c-fd81cadf0743"
   flavor_id       = "3"
-  key_pair        = "my_keypair"
+  key_pair        = "my_key_pair_name"
   security_groups = ["default"]
 
   network {

@@ -482,64 +482,6 @@ resource "opentelekomcloud_compute_instance_v2" "instance_1" {
 }
 `, env.OS_IMAGE_ID, env.OS_NETWORK_ID)
 
-var testAccComputeV2Instance_bootFromVolume = fmt.Sprintf(`
-resource "opentelekomcloud_compute_instance_v2" "instance_1" {
-  name            = "instance_1"
-  security_groups = ["default"]
-  network {
-    uuid = "%s"
-  }
-  block_device {
-    uuid                  = "%s"
-    source_type           = "image"
-    volume_size           = 50
-    boot_index            = 0
-    destination_type      = "volume"
-    delete_on_termination = true
-  }
-}
-`, env.OS_NETWORK_ID, env.OS_IMAGE_ID)
-
-var testAccComputeV2Instance_bootFromVolumeUpdate = fmt.Sprintf(`
-resource "opentelekomcloud_compute_instance_v2" "instance_1" {
-  name            = "instance_1"
-  security_groups = ["default"]
-  network {
-    uuid = "%s"
-  }
-  block_device {
-    uuid                  = "%s"
-    source_type           = "image"
-    volume_size           = 51
-    boot_index            = 0
-    destination_type      = "volume"
-    delete_on_termination = true
-  }
-}
-`, env.OS_NETWORK_ID, env.OS_IMAGE_ID)
-
-var testAccComputeV2Instance_fixedIP = fmt.Sprintf(`
-resource "opentelekomcloud_compute_instance_v2" "instance_1" {
-  name            = "instance_1"
-  security_groups = ["default"]
-  network {
-    uuid        = "%s"
-    fixed_ip_v4 = "192.168.0.24"
-  }
-}
-`, env.OS_NETWORK_ID)
-
-var testAccComputeV2Instance_fixedIPUpdate = fmt.Sprintf(`
-resource "opentelekomcloud_compute_instance_v2" "instance_1" {
-  name            = "instance_1"
-  security_groups = ["default"]
-  network {
-    uuid        = "%s"
-    fixed_ip_v4 = "192.168.0.25"
-  }
-}
-`, env.OS_NETWORK_ID)
-
 var testAccComputeV2Instance_stopBeforeDestroy = fmt.Sprintf(`
 resource "opentelekomcloud_compute_instance_v2" "instance_1" {
   name            = "instance_1"
