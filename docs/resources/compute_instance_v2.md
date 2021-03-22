@@ -18,17 +18,16 @@ resource "opentelekomcloud_compute_instance_v2" "basic" {
   key_pair        = "my_key_pair_name"
   security_groups = ["default"]
 
-  tags = {
-    foo = "bar"
-    key = "value"
+  network {
+    name = "my_network"
   }
 
   metadata = {
     this = "that"
   }
 
-  network {
-    name = "my_network"
+  tags = {
+    muh = "kuh"
   }
 }
 ```
@@ -42,10 +41,10 @@ resource "opentelekomcloud_blockstorage_volume_v2" "myvol" {
 }
 
 resource "opentelekomcloud_compute_instance_v2" "myinstance" {
-  name            = "myinstance"
+  name            = "my_instance"
   image_id        = "ad091b52-742f-469e-8f3c-fd81cadf0743"
   flavor_id       = "3"
-  key_pair        = "my_key_pair_name"
+  key_pair        = "my_keypair"
   security_groups = ["default"]
 
   network {
@@ -262,9 +261,6 @@ function, or the `template_cloudinit_config` resource.
 
 ## Argument Reference
 
--> **Note:** The `tag` attribute has been deprecated and might
-be removed in future releases, please use `tags` instead.
-
 The following arguments are supported:
 
 * `name` - (Required) A unique name for the resource.
@@ -289,7 +285,8 @@ The following arguments are supported:
 * `security_groups` - (Optional) An array of one or more security group names
   to associate with the server. Changing this results in adding/removing
   security groups from the existing server.
--> **Note:** When attaching the instance to networks using Ports,
+
+-> When attaching the instance to networks using Ports,
   place the security groups on the Port and not the instance.
 
 * `availability_zone` - (Optional) The availability zone in which to create
@@ -325,14 +322,12 @@ The following arguments are supported:
 
 * `tags` -  (Optional) Tags key/value pairs to associate with the instance.
 
-* `tag` **DEPRECATED** - (Optional) Tags key/value pairs to associate with the instance.
-
 * `stop_before_destroy` - (Optional) Whether to try stop instance gracefully
   before destroying it, thus giving chance for guest OS daemons to stop correctly.
-  If instance doesn't stop within timeout, it will be destroyed anyway.
+  If instance doesn't stop within a timeout, it will be destroyed anyway.
 
 * `force_delete` - (Optional) Whether to force the OpenTelekomCloud instance to be
-  forcefully deleted. This is useful for environments that have reclaim / soft
+  forcefully deleted. This is useful for environments that have reclaim/soft
   deletion enabled.
 
 * `auto_recovery` - (Optional) Configures or deletes automatic recovery of an instance.
@@ -371,7 +366,8 @@ The `block_device` block supports:
   in the following combinations: source=image and destination=volume,
   and source=blank and destination=volume. Changing this creates a new server.
 
-* `volume_type` - (Optional) Currently, the value can be `SSD` (ultra-I/O disk type), `SAS` (high I/O disk type), or `SATA` (common I/O disk type)
+* `volume_type` - (Optional) Currently, the value can be `SSD` (ultra-I/O disk type),
+  `SAS` (high I/O disk type), or `SATA` (common I/O disk type)
   [OTC-API](https://docs.otc.t-systems.com/en-us/api/ecs/en-us_topic_0065817708.html)
 
 * `boot_index` - (Optional) The boot index of the volume. It defaults to 0.
@@ -461,7 +457,7 @@ equal to what the chosen flavor supports.
 The following example shows how to create an instance with multiple ephemeral
 disks:
 
-```
+```hcl
 resource "opentelekomcloud_compute_instance_v2" "foo" {
   name            = "terraform-test"
   security_groups = ["default"]
