@@ -29,7 +29,6 @@ func TestAccLBV2Monitor_basic(t *testing.T) {
 					resource.TestCheckResourceAttr(resourceName, "monitor_port", "112"),
 					resource.TestCheckResourceAttr(resourceName, "delay", "20"),
 					resource.TestCheckResourceAttr(resourceName, "timeout", "10"),
-					resource.TestCheckResourceAttr(resourceName, "domain_name", ""),
 				),
 			},
 			{
