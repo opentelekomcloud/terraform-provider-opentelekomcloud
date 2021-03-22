@@ -10,6 +10,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
 	golangsdk "github.com/opentelekomcloud/gophertelekomcloud"
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/css/v1/clusters"
+	"github.com/opentelekomcloud/gophertelekomcloud/openstack/css/v1/flavors"
 
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common/cfg"
 )
@@ -25,6 +26,8 @@ func ResourceCssClusterV1() *schema.Resource {
 			Create: schema.DefaultTimeout(20 * time.Minute),
 			Update: schema.DefaultTimeout(30 * time.Minute),
 		},
+
+		CustomizeDiff: checkCssClusterFlavorRestrictions,
 
 		Schema: map[string]*schema.Schema{
 			"name": {
@@ -385,4 +388,34 @@ func resourceCssClusterV1StateRefresh(client *golangsdk.ServiceClient, id string
 		}
 		return cluster, clusterStateAvailable, nil
 	}
+}
+
+func checkCssClusterFlavorRestrictions(d *schema.ResourceDiff, meta interface{}) error {
+	config := meta.(*cfg.Config)
+	client, err := config.CssV1Client(config.GetRegion(d))
+	if err != nil {
+		return fmt.Errorf("error creating CSS v1 client: %s", err)
+	}
+
+	flavorName := d.Get("node_config.0.flavor").(string)
+	size := d.Get("node_config.0.volume.0.size").(int)
+
+	pages, err := flavors.List(client).AllPages()
+	if err != nil {
+		return fmt.Errorf("error retrieving flavor pages: %s", err)
+	}
+	versions, err := flavors.ExtractVersions(pages)
+	if err != nil {
+		return fmt.Errorf("error extracting flavor list: %s", err)
+	}
+	flavor := flavors.FindFlavor(versions, flavors.FilterOpts{
+		FlavorName: flavorName,
+	})
+
+	if size < flavor.DiskMin || size > flavor.DiskMax {
+		return fmt.Errorf("invalid disk size, `%s` support disk from %dGB to %dGB",
+			flavorName, flavor.DiskMin, flavor.DiskMax)
+	}
+
+	return nil
 }
