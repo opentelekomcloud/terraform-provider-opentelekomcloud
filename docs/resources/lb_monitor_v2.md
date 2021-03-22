@@ -44,22 +44,24 @@ The following arguments are supported:
   changing the member's status to INACTIVE. Must be a number between 1 and 10.
 
 * `admin_state_up` - (Optional) The administrative state of the monitor.
-  A valid value is true (UP) or false (DOWN).
+  A valid value is `true` (`UP`) or `false` (`DOWN`).
 
 * `http_method` - (Optional) Required for HTTP types. The HTTP method used
   for requests by the monitor. If this attribute is not specified, it
   defaults to `GET`. The value can be `GET`, `HEAD`, `POST`, `PUT`, `DELETE`,
   `TRACE`, `OPTIONS`, `CONNECT`, and `PATCH`.
 
--> **Note:** These parameters `url_path`, `expected_codes` and `monitor_port`
-  are valid when the value of `type` is set to `HTTP`
+-> These parameters `domain_name`, `url_path`, `expected_codes` and `monitor_port`
+  are valid when the value of `type` is set to `HTTP`.
+
+* `domain_name` - (Optional) The `domain_name` of the HTTP request during the health check.
 
 * `url_path` - (Optional) Required for HTTP types. URI path that will be
   accessed if monitor type is `HTTP`.
 
-* `expected_codes` - (Optional) Required for HTTP types. Expected HTTP codes
+* `expected_codes` - (Optional) Required for `HTTP` types. Expected HTTP codes
   for a passing HTTP monitor. You can either specify a single status like
-  "200", or a list like "200,202".
+  `"200"`, or a list like `"200,202"`.
 
 * `monitor_port` - (Optional) Specifies the health check port. The port number
   ranges from 1 to 65535. The value is left blank by default, indicating that
@@ -83,6 +85,8 @@ The following attributes are exported:
 * `max_retries` - See Argument Reference above.
 
 * `url_path` - See Argument Reference above.
+
+* `domain_name` - See Argument Reference above.
 
 * `http_method` - See Argument Reference above.
 
