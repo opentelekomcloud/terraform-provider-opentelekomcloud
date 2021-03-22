@@ -585,8 +585,12 @@ func resourceComputeInstanceV2Read(d *schema.ResourceData, meta interface{}) err
 	}
 	d.Set("auto_recovery", ar)
 
+	computeClient, err := config.ComputeV1Client(config.GetRegion(d))
+	if err != nil {
+		return fmt.Errorf("error creating OpenTelekomCloud ComputeV1 client: %s", err)
+	}
 	// save tags
-	resourceTags, err := tags.Get(client, "cloudservers", d.Id()).Extract()
+	resourceTags, err := tags.Get(computeClient, "cloudservers", d.Id()).Extract()
 	if err != nil {
 		return fmt.Errorf("error fetching OpenTelekomCloud CloudServers tags: %s", err)
 	}
@@ -968,7 +972,7 @@ func getImageIDFromConfig(client *golangsdk.ServiceClient, d *schema.ResourceDat
 	return "", fmt.Errorf("neither a boot device, image ID, or image name were able to be determined")
 }
 
-func setImageInformation(computeClient *golangsdk.ServiceClient, server *servers.Server, d *schema.ResourceData) error {
+func setImageInformation(client *golangsdk.ServiceClient, server *servers.Server, d *schema.ResourceData) error {
 	// If block_device was used, an Image does not need to be specified, unless an image/local
 	// combination was used. This emulates normal boot behavior. Otherwise, ignore the image altogether.
 	if vL, ok := d.GetOk("block_device"); ok {
@@ -988,7 +992,7 @@ func setImageInformation(computeClient *golangsdk.ServiceClient, server *servers
 	imageId := server.Image["id"].(string)
 	if imageId != "" {
 		d.Set("image_id", imageId)
-		if image, err := images.Get(computeClient, imageId).Extract(); err != nil {
+		if image, err := images.Get(client, imageId).Extract(); err != nil {
 			if _, ok := err.(golangsdk.ErrDefault404); ok {
 				// If the image name can't be found, set the value to "Image not found".
 				// The most likely scenario is that the image no longer exists in the Image Service
