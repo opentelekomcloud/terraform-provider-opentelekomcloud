@@ -43,9 +43,6 @@ The following arguments are supported:
 * `max_retries` - (Required) Number of permissible ping failures before
   changing the member's status to INACTIVE. Must be a number between 1 and 10.
 
-* `domain_name` - (Optional) The `domain_name` of the HTTP request during the health check.
-  This parameter is valid when the value of `type` is set to `HTTP`.
-
 * `admin_state_up` - (Optional) The administrative state of the monitor.
   A valid value is `true` (`UP`) or `false` (`DOWN`).
 
@@ -54,8 +51,11 @@ The following arguments are supported:
   defaults to `GET`. The value can be `GET`, `HEAD`, `POST`, `PUT`, `DELETE`,
   `TRACE`, `OPTIONS`, `CONNECT`, and `PATCH`.
 
--> These parameters `url_path`, `expected_codes` and `monitor_port`
+-> These parameters `domain_name`, `url_path`, `expected_codes` and `monitor_port`
   are valid when the value of `type` is set to `HTTP`.
+
+* `domain_name` - (Optional) The `domain_name` of the HTTP request during the health check.
+  This parameter is valid when the value of `type` is set to `HTTP`.
 
 * `url_path` - (Optional) Required for HTTP types. URI path that will be
   accessed if monitor type is `HTTP`.
