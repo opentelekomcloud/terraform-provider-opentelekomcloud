@@ -2,12 +2,13 @@ package acceptance
 
 import (
 	"fmt"
+	"regexp"
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-sdk/helper/acctest"
 	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/terraform"
-	"github.com/opentelekomcloud/gophertelekomcloud"
+	golangsdk "github.com/opentelekomcloud/gophertelekomcloud"
 
 	acc "github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/acceptance/common"
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/acceptance/env"
@@ -43,6 +44,32 @@ func TestAccCssClusterV1_basic(t *testing.T) {
 	})
 }
 
+func TestAccCssClusterV1_validateDiskRange(t *testing.T) {
+	name := fmt.Sprintf("css-%s", acctest.RandString(10))
+
+	resource.Test(t, resource.TestCase{
+		PreCheck:  func() { acc.TestAccPreCheck(t) },
+		Providers: acc.TestAccProviders,
+		Steps: []resource.TestStep{
+			{
+				Config:      testAccCssClusterV1_tooSmall(name),
+				ExpectError: regexp.MustCompile(`invalid disk size.+`),
+				PlanOnly:    true,
+			},
+			{
+				Config:      testAccCssClusterV1_tooBig(name),
+				ExpectError: regexp.MustCompile(`invalid disk size.+`),
+				PlanOnly:    true,
+			},
+			{
+				Config:             testAccCssClusterV1_basic(name),
+				PlanOnly:           true,
+				ExpectNonEmptyPlan: true,
+			},
+		},
+	})
+}
+
 func testAccCssClusterV1_basic(name string) string {
 	return fmt.Sprintf(`
 data "opentelekomcloud_networking_secgroup_v2" "secgroup" {
@@ -62,6 +89,66 @@ resource "opentelekomcloud_css_cluster_v1" "cluster" {
     volume {
       volume_type = "COMMON"
       size        = 40
+    }
+
+    availability_zone = "%s"
+  }
+
+  enable_https     = true
+  enable_authority = true
+  admin_pass       = "QwertyUI!"
+}
+`, name, env.OS_NETWORK_ID, env.OS_VPC_ID, env.OS_AVAILABILITY_ZONE)
+}
+func testAccCssClusterV1_tooSmall(name string) string {
+	return fmt.Sprintf(`
+data "opentelekomcloud_networking_secgroup_v2" "secgroup" {
+  name = "default"
+}
+
+resource "opentelekomcloud_css_cluster_v1" "cluster" {
+  expect_node_num = 1
+  name            = "%[1]s"
+  node_config {
+    flavor = "css.medium.8"
+    network_info {
+      security_group_id = data.opentelekomcloud_networking_secgroup_v2.secgroup.id
+      network_id        = "%s"
+      vpc_id            = "%s"
+    }
+    volume {
+      volume_type = "COMMON"
+      size        = 1
+    }
+
+    availability_zone = "%s"
+  }
+
+  enable_https     = true
+  enable_authority = true
+  admin_pass       = "QwertyUI!"
+}
+`, name, env.OS_NETWORK_ID, env.OS_VPC_ID, env.OS_AVAILABILITY_ZONE)
+}
+func testAccCssClusterV1_tooBig(name string) string {
+	return fmt.Sprintf(`
+data "opentelekomcloud_networking_secgroup_v2" "secgroup" {
+  name = "default"
+}
+
+resource "opentelekomcloud_css_cluster_v1" "cluster" {
+  expect_node_num = 1
+  name            = "%[1]s"
+  node_config {
+    flavor = "css.medium.8"
+    network_info {
+      security_group_id = data.opentelekomcloud_networking_secgroup_v2.secgroup.id
+      network_id        = "%s"
+      vpc_id            = "%s"
+    }
+    volume {
+      volume_type = "COMMON"
+      size        = 10000000
     }
 
     availability_zone = "%s"
