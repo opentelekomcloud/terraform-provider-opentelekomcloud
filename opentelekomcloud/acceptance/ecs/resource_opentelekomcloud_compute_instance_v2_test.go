@@ -81,7 +81,7 @@ func TestAccComputeV2Instance_multiSecgroup(t *testing.T) {
 	})
 }
 
-func TestAccComputeV2Instance_bootFromVolumeImage(t *testing.T) {
+func TestAccComputeV2Instance_bootFromImage(t *testing.T) {
 	var instance servers.Server
 	resourceName := "opentelekomcloud_compute_instance_v2.instance_1"
 
@@ -95,6 +95,44 @@ func TestAccComputeV2Instance_bootFromVolumeImage(t *testing.T) {
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckComputeV2InstanceExists(resourceName, &instance),
 					testAccCheckComputeV2InstanceBootVolumeAttachment(&instance),
+				),
+			},
+		},
+	})
+}
+
+func TestAccComputeV2Instance_bootFromVolume(t *testing.T) {
+	var instance servers.Server
+	resourceName := "opentelekomcloud_compute_instance_v2.instance_1"
+
+	resource.Test(t, resource.TestCase{
+		PreCheck:     func() { common.TestAccPreCheck(t) },
+		Providers:    common.TestAccProviders,
+		CheckDestroy: TestAccCheckComputeV2InstanceDestroy,
+		Steps: []resource.TestStep{
+			{
+				Config: testAccComputeV2Instance_bootFromVolume,
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckComputeV2InstanceExists(resourceName, &instance),
+				),
+			},
+		},
+	})
+}
+
+func TestAccComputeV2Instance_changeFixedIP(t *testing.T) {
+	var instance servers.Server
+
+	resource.Test(t, resource.TestCase{
+		PreCheck:     func() { common.TestAccPreCheck(t) },
+		Providers:    common.TestAccProviders,
+		CheckDestroy: TestAccCheckComputeV2InstanceDestroy,
+		Steps: []resource.TestStep{
+			{
+				Config: testAccComputeV2Instance_fixedIP,
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckComputeV2InstanceExists(
+						"opentelekomcloud_compute_instance_v2.instance_1", &instance),
 				),
 			},
 		},
@@ -481,6 +519,35 @@ resource "opentelekomcloud_compute_instance_v2" "instance_1" {
   }
 }
 `, env.OS_IMAGE_ID, env.OS_NETWORK_ID)
+
+var testAccComputeV2Instance_bootFromVolume = fmt.Sprintf(`
+resource "opentelekomcloud_compute_instance_v2" "instance_1" {
+  name            = "instance_1"
+  security_groups = ["default"]
+  network {
+    uuid = "%s"
+  }
+  block_device {
+    uuid                  = "%s"
+    source_type           = "image"
+    volume_size           = 50
+    boot_index            = 0
+    destination_type      = "volume"
+    delete_on_termination = true
+  }
+}
+`, env.OS_NETWORK_ID, env.OS_IMAGE_ID)
+
+var testAccComputeV2Instance_fixedIP = fmt.Sprintf(`
+resource "opentelekomcloud_compute_instance_v2" "instance_1" {
+  name            = "instance_1"
+  security_groups = ["default"]
+  network {
+    uuid        = "%s"
+    fixed_ip_v4 = "192.168.0.24"
+  }
+}
+`, env.OS_NETWORK_ID)
 
 var testAccComputeV2Instance_stopBeforeDestroy = fmt.Sprintf(`
 resource "opentelekomcloud_compute_instance_v2" "instance_1" {
