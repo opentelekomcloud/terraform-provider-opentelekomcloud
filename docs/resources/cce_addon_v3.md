@@ -55,6 +55,9 @@ The following arguments are supported:
 
     * `custom` - (Optional) Custom parameters of the add-on.
 
+Arguments which can be passed to the `basic` and `custom` addon parameters depends on the addon type and version.
+For more detailed description see [addons description](https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/blob/devel/opentelekomcloud/services/cce/addon-templates.md).
+
 ## Attributes Reference
 
 All above argument parameters can be exported as attribute parameters along with attribute reference.
