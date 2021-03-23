@@ -283,8 +283,11 @@ The following arguments are supported:
   Changing this creates a new server.
 
 * `security_groups` - (Optional) An array of one or more security group names
-  or IDs (recommended) to associate with the server. Changing this results in adding/removing
+  to associate with the server. Changing this results in adding/removing
   security groups from the existing server.
+
+~> **Warning:** Names should be used and not IDs. Security group names should be **unique**
+otherwise it will return an error.
 
 -> When attaching the instance to networks using Ports,
   place the security groups on the Port and not the instance.
