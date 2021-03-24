@@ -1,5 +1,20 @@
 ## 1.24.0 (Unreleased)
 
+
+## 1.23.5 (March 24, 2021)
+
+ENHANCEMENTS:
+* `resource/opentelekomcloud_ecs_instance_v1`: Use common `tags` approach in resource ([#919](https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/919))
+* `provider/opentelekomcloud`: Retry `502` error one time ([#921](https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/921))
+* `resource/opentelekomcloud_lb_monitor_v2`: Add possibility to set `domain_name` argument ([#925](https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/925))
+* `resource/opentelekomcloud_css_cluster_v1`: Add possibility to set `datastore` argument ([#926](https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/926))
+* `resource/opentelekomcloud_compute_instance_v2`: Use common `tags` approach in resource ([#927](https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/927))
+* `resource/opentelekomcloud_css_cluster_v1`: Add early disk size validation ([#928](https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/928))
+
+DOCUMENTATION:
+* `resource/opentelekomcloud_compute_instance_v2`: Update `security_groups` description ([#929](https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/929))
+* `resource/opentelekomcloud_cce_addon_v3`: Add description of addon template input values ([#931](https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/931))
+
 ## 1.23.4 (March 17, 2021)
 
 FEATURES:
