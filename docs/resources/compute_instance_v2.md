@@ -286,7 +286,7 @@ The following arguments are supported:
   to associate with the server. Changing this results in adding/removing
   security groups from the existing server.
 
-~> **Warning** Names should be used and not IDs. Security group names should be **unique**
+~> **Warning** Names should be used and not IDs. Security group names should be **unique**,
 otherwise it will return an error.
 
 -> When attaching the instance to networks using Ports,
