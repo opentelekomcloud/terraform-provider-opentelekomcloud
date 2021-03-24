@@ -9,7 +9,7 @@ ENHANCEMENTS:
 * `resource/opentelekomcloud_lb_monitor_v2`: Add possibility to set `domain_name` argument ([#925](https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/925))
 * `resource/opentelekomcloud_css_cluster_v1`: Add possibility to set `datastore` argument ([#926](https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/926))
 * `resource/opentelekomcloud_compute_instance_v2`: Use common `tags` approach in resource ([#927](https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/927))
-* `resource/opentelekomcloud_css_cluster_v1`: Add early disk size validation ([#928](https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/928))
+* `resource/opentelekomcloud_css_cluster_v1`: Add disk size validation during a plan ([#928](https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/928))
 
 DOCUMENTATION:
 * `resource/opentelekomcloud_compute_instance_v2`: Update `security_groups` description ([#929](https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/929))
