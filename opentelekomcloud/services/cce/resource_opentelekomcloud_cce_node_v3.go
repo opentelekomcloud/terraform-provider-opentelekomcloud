@@ -255,7 +255,9 @@ func ResourceCCENodeV3() *schema.Resource {
 			},
 			"private_ip": {
 				Type:     schema.TypeString,
+				Optional: true,
 				Computed: true,
+				ForceNew: true,
 			},
 			"public_ip": {
 				Type:     schema.TypeString,
@@ -403,6 +405,13 @@ func resourceCCENodeV3Create(d *schema.ResourceData, meta interface{}) error {
 			},
 			BillingMode: d.Get("billing_mode").(int),
 			Count:       1,
+			NodeNicSpec: nodes.NodeNicSpec{
+				PrimaryNic: nodes.PrimaryNic{
+					FixedIPs: []string{
+						d.Get("private_ip").(string),
+					},
+				},
+			},
 			ExtendParam: nodes.ExtendParam{
 				ChargingMode:       d.Get("extend_param_charging_mode").(int),
 				EcsPerformanceType: d.Get("ecs_performance_type").(string),
@@ -416,6 +425,10 @@ func resourceCCENodeV3Create(d *schema.ResourceData, meta interface{}) error {
 			UserTags: resourceCCENodeTags(d),
 			K8sTags:  resourceCCENodeK8sTags(d),
 		},
+	}
+
+	if ip := d.Get("private_ip").(string); ip != "" {
+		createOpts.Spec.NodeNicSpec.PrimaryNic.FixedIPs = []string{ip}
 	}
 
 	clusterId := d.Get("cluster_id").(string)
@@ -486,7 +499,7 @@ func resourceCCENodeV3Read(d *schema.ResourceData, meta interface{}) error {
 		return fmt.Errorf("error creating OpenTelekomCloud CCE Node client: %s", err)
 	}
 	clusterId := d.Get("cluster_id").(string)
-	s, err := nodes.Get(nodeClient, clusterId, d.Id()).Extract()
+	node, err := nodes.Get(nodeClient, clusterId, d.Id()).Extract()
 	if err != nil {
 		if _, ok := err.(golangsdk.ErrDefault404); ok {
 			d.SetId("")
@@ -498,24 +511,24 @@ func resourceCCENodeV3Read(d *schema.ResourceData, meta interface{}) error {
 	me := &multierror.Error{}
 	me = multierror.Append(me,
 		d.Set("region", config.GetRegion(d)),
-		d.Set("name", s.Metadata.Name),
-		d.Set("flavor_id", s.Spec.Flavor),
-		d.Set("os", s.Spec.Os),
-		d.Set("availability_zone", s.Spec.Az),
-		d.Set("billing_mode", s.Spec.BillingMode),
-		d.Set("key_pair", s.Spec.Login.SshKey),
-		d.Set("k8s_tags", s.Spec.K8sTags),
+		d.Set("name", node.Metadata.Name),
+		d.Set("flavor_id", node.Spec.Flavor),
+		d.Set("os", node.Spec.Os),
+		d.Set("availability_zone", node.Spec.Az),
+		d.Set("billing_mode", node.Spec.BillingMode),
+		d.Set("key_pair", node.Spec.Login.SshKey),
+		d.Set("k8s_tags", node.Spec.K8sTags),
 	)
 	if err := me.ErrorOrNil(); err != nil {
 		return fmt.Errorf("[DEBUG] Error saving main conf to state for OpenTelekomCloud Node (%s): %s", d.Id(), err)
 	}
 
 	var volumes []map[string]interface{}
-	for _, pairObject := range s.Spec.DataVolumes {
+	for _, dataVolume := range node.Spec.DataVolumes {
 		volume := make(map[string]interface{})
-		volume["size"] = pairObject.Size
-		volume["volumetype"] = pairObject.VolumeType
-		volume["extend_param"] = pairObject.ExtendParam
+		volume["size"] = dataVolume.Size
+		volume["volumetype"] = dataVolume.VolumeType
+		volume["extend_param"] = dataVolume.ExtendParam
 		volumes = append(volumes, volume)
 	}
 	if err := d.Set("data_volumes", volumes); err != nil {
@@ -524,9 +537,9 @@ func resourceCCENodeV3Read(d *schema.ResourceData, meta interface{}) error {
 
 	rootVolume := []map[string]interface{}{
 		{
-			"size":         s.Spec.RootVolume.Size,
-			"volumetype":   s.Spec.RootVolume.VolumeType,
-			"extend_param": s.Spec.RootVolume.ExtendParam,
+			"size":         node.Spec.RootVolume.Size,
+			"volumetype":   node.Spec.RootVolume.VolumeType,
+			"extend_param": node.Spec.RootVolume.ExtendParam,
 		},
 	}
 
@@ -535,12 +548,12 @@ func resourceCCENodeV3Read(d *schema.ResourceData, meta interface{}) error {
 	}
 
 	// set computed attributes
-	serverId := s.Status.ServerID
+	serverId := node.Status.ServerID
 	me = multierror.Append(me,
 		d.Set("server_id", serverId),
-		d.Set("private_ip", s.Status.PrivateIP),
-		d.Set("public_ip", s.Status.PublicIP),
-		d.Set("status", s.Status.Phase),
+		d.Set("private_ip", node.Status.PrivateIP),
+		d.Set("public_ip", node.Status.PublicIP),
+		d.Set("status", node.Status.Phase),
 	)
 	if err := me.ErrorOrNil(); err != nil {
 		return fmt.Errorf("[DEBUG] Error saving IP conf to state for OpenTelekomCloud Node (%s): %s", d.Id(), err)
