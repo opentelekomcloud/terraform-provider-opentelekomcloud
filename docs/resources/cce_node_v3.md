@@ -96,6 +96,8 @@ The following arguments are supported:
 
 * `public_key` - (Optional) The Public key. Changing this parameter will create a new cluster resource.
 
+* `private_ip` - (Optional) Private IP of the CCE node.  Changing this parameter will create a new resource.
+
 * `preinstall` - (Optional) Script required before installation. The input value can be a Base64 encoded string or not.
   Changing this parameter will create a new resource.
 
@@ -119,8 +121,6 @@ All above argument parameters can be exported as attribute parameters along with
 * `status` - Node status information.
 
 * `server_id` - ID of the ECS where the node resides.
-
-* `private_ip` - Private IP of the CCE node.
 
 * `public_ip` - Public IP of the CCE node.
 
