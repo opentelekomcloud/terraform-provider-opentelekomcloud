@@ -237,4 +237,4 @@ The `instance_config` block supports:
 
 * `user_data` - See Argument Reference above.
 
-* `region` - See Argument Reference above
+* `region` - See Argument Reference above.
