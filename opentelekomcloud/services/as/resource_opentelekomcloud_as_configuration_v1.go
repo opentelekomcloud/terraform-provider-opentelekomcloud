@@ -255,7 +255,7 @@ func getPublicIps(publicIpMeta map[string]interface{}) *configurations.PublicIpO
 }
 
 func getSecurityGroups(d *schema.ResourceData) []configurations.SecurityGroupOpts {
-	rawSecGroups := d.Get("security_groups").(*schema.Set).List()
+	rawSecGroups := d.Get("instance_config.0.security_groups").(*schema.Set).List()
 	secGroups := make([]configurations.SecurityGroupOpts, len(rawSecGroups))
 	for i, raw := range rawSecGroups {
 		secGroups[i] = configurations.SecurityGroupOpts{
