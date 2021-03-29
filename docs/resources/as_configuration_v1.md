@@ -95,6 +95,34 @@ resource "opentelekomcloud_as_configuration_v1" "my_as_config" {
 }
 ```
 
+### AS Configuration With Security Groups
+
+```hcl
+resource "opentelekomcloud_compute_secgroup_v2" "secgroup_1" {
+  name        = "acc-test-sg-1"
+  description = "Security group for AS config tf test"
+}
+
+resource "opentelekomcloud_as_configuration_v1" "my_as_config" {
+  scaling_configuration_name = "my_as_config"
+
+  instance_config {
+    flavor = var.flavor
+    image  = var.image_id
+    disk {
+      size        = 40
+      volume_type = "SATA"
+      disk_type   = "SYS"
+    }
+    key_name  = var.keyname
+    user_data = file("userdata.txt")
+    security_groups = [
+      opentelekomcloud_compute_secgroup_v2.secgroup_1.id
+    ]
+  }
+}
+```
+
 ## Argument Reference
 
 The following arguments are supported:
@@ -138,7 +166,7 @@ The `instance_config` block supports:
   within the instance.
 
 * `security_groups` - (Optional) An array of one or more security group IDs
-  to associate with the AutoScaling Configuration.
+  to associate with the AS configuration.
 
 The `disk` block supports:
 
@@ -146,11 +174,11 @@ The `disk` block supports:
   and the data disk size ranges from 10 to 32768.
 
 * `volume_type` - (Required) Specifies the ECS system disk type. The disk type must match the available disk type.
-  * `SATA`: common I/O disk type
-  * `SAS`: high I/O disk type
-  * `SSD`: ultra-high I/O disk type
-  * `co-p1`: high I/O (performance-optimized I) disk type
-  * `uh-l1`: ultra-high I/O (latency-optimized) disk type
+  * `SATA`: common I/O disk type.
+  * `SAS`: high I/O disk type.
+  * `SSD`: ultra-high I/O disk type.
+  * `co-p1`: high I/O (performance-optimized I) disk type.
+  * `uh-l1`: ultra-high I/O (latency-optimized) disk type.
 
 ->For HANA, `HL1`, and `HL2` ECSs, use `co-p1` and `uh-l1` disks. For other ECSs, do not use `co-p1` or `uh-l1` disks.
 
@@ -168,7 +196,7 @@ The `personality` block supports:
 
 The `public_ip` block supports:
 
-* `eip` - (Required) The configuration parameter for creating an elastic IP address
+* `eip` - (Optional) The configuration parameter for creating an elastic IP address
   that will be automatically assigned to the instance. The eip structure is described below.
 
 The `eip` block supports:
