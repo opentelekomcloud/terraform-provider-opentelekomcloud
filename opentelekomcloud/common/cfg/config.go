@@ -800,7 +800,7 @@ func (c *Config) VbsV2Client(region string) (*golangsdk.ServiceClient, error) {
 }
 
 func (c *Config) AutoscalingV1Client(region string) (*golangsdk.ServiceClient, error) {
-	return openstack.NewAutoScalingService(c.HwClient, golangsdk.EndpointOpts{
+	return openstack.NewAutoScalingV1(c.HwClient, golangsdk.EndpointOpts{
 		Region:       region,
 		Availability: c.getEndpointType(),
 	})
