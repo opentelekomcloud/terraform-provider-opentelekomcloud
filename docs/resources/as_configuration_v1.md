@@ -196,7 +196,7 @@ The `personality` block supports:
 
 The `public_ip` block supports:
 
-* `eip` - (Optional) The configuration parameter for creating an elastic IP address
+* `eip` - (Required) The configuration parameter for creating an elastic IP address
   that will be automatically assigned to the instance. The eip structure is described below.
 
 The `eip` block supports:
@@ -238,5 +238,3 @@ The `instance_config` block supports:
 * `user_data` - See Argument Reference above.
 
 * `region` - See Argument Reference above.
-
-* `security_groups` - See Argument Reference above.
