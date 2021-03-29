@@ -16,6 +16,7 @@ import (
 
 func TestAccASV1Configuration_basic(t *testing.T) {
 	var asConfig configurations.Configuration
+	resourceName := "opentelekomcloud_as_configuration_v1.hth_as_config"
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:     func() { common.TestAccFlavorPreCheck(t) },
@@ -25,8 +26,7 @@ func TestAccASV1Configuration_basic(t *testing.T) {
 			{
 				Config: testAccASV1Configuration_basic,
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckASV1ConfigurationExists(
-						"opentelekomcloud_as_configuration_v1.hth_as_config", &asConfig),
+					testAccCheckASV1ConfigurationExists(resourceName, &asConfig),
 				),
 			},
 		},
@@ -35,6 +35,7 @@ func TestAccASV1Configuration_basic(t *testing.T) {
 
 func TestAccASV1Configuration_publicIP(t *testing.T) {
 	var asConfig configurations.Configuration
+	resourceName := "opentelekomcloud_as_configuration_v1.as_config"
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:     func() { common.TestAccFlavorPreCheck(t) },
@@ -44,13 +45,10 @@ func TestAccASV1Configuration_publicIP(t *testing.T) {
 			{
 				Config: testAccASV1Configuration_publicIP,
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckASV1ConfigurationExists("opentelekomcloud_as_configuration_v1.as_config", &asConfig),
-					resource.TestCheckResourceAttr(
-						"opentelekomcloud_as_configuration_v1.as_config", "scaling_configuration_name", "as_config"),
-					resource.TestCheckResourceAttr(
-						"opentelekomcloud_as_configuration_v1.as_config", "instance_config.0.image", env.OS_IMAGE_ID),
-					resource.TestCheckResourceAttr(
-						"opentelekomcloud_as_configuration_v1.as_config", "instance_config.0.key_name", env.OS_KEYPAIR_NAME),
+					testAccCheckASV1ConfigurationExists(resourceName, &asConfig),
+					resource.TestCheckResourceAttr(resourceName, "scaling_configuration_name", "as_config"),
+					resource.TestCheckResourceAttr(resourceName, "instance_config.0.image", env.OS_IMAGE_ID),
+					resource.TestCheckResourceAttr(resourceName, "instance_config.0.key_name", env.OS_KEYPAIR_NAME),
 				),
 			},
 		},
@@ -67,6 +65,26 @@ func TestAccASV1Configuration_invalidDiskSize(t *testing.T) {
 				Config:      testAccASV1Configuration_invalidDiskSize,
 				PlanOnly:    true,
 				ExpectError: regexp.MustCompile(`for system disk size should be.+`),
+			},
+		},
+	})
+}
+
+func TestAccASV1Configuration_multipleSecurityGroups(t *testing.T) {
+	var asConfig configurations.Configuration
+	resourceName := "opentelekomcloud_as_configuration_v1.as_config"
+
+	resource.Test(t, resource.TestCase{
+		PreCheck:     func() { common.TestAccFlavorPreCheck(t) },
+		Providers:    common.TestAccProviders,
+		CheckDestroy: testAccCheckASV1ConfigurationDestroy,
+		Steps: []resource.TestStep{
+			{
+				Config: testAccASV1Configuration_multipleSecurityGroups,
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckASV1ConfigurationExists(resourceName, &asConfig),
+					resource.TestCheckResourceAttr(resourceName, "instance_config.0.security_groups.#", "3"),
+				),
 			},
 		},
 	})
@@ -198,3 +216,42 @@ resource "opentelekomcloud_as_configuration_v1" "as_config"{
   }
 }
 `, env.OS_IMAGE_ID, env.OS_KEYPAIR_NAME)
+
+var testAccASV1Configuration_multipleSecurityGroups = fmt.Sprintf(`
+resource "opentelekomcloud_compute_secgroup_v2" "secgroup_1" {
+  name        = "acc-test-sg-1"
+  description = "Security group for AS config tf test"
+}
+
+resource "opentelekomcloud_compute_secgroup_v2" "secgroup_2" {
+  name        = "acc-test-sg-2"
+  description = "Security group for AS config tf test"
+}
+
+resource "opentelekomcloud_compute_secgroup_v2" "secgroup_3" {
+  name        = "acc-test-sg-3"
+  description = "Security group for AS config tf test"
+}
+
+resource "opentelekomcloud_as_configuration_v1" "as_config"{
+  scaling_configuration_name = "as_config"
+  instance_config {
+    disk {
+      size        = 40
+      volume_type = "SATA"
+      disk_type   = "SYS"
+    }
+    disk {
+      size        = 40
+      volume_type = "SATA"
+      disk_type   = "DATA"
+    }
+    key_name        = "%s"
+    security_groups = [
+      opentelekomcloud_compute_secgroup_v2.secgroup_1.id,
+      opentelekomcloud_compute_secgroup_v2.secgroup_2.id,
+      opentelekomcloud_compute_secgroup_v2.secgroup_3.id
+    ]
+  }
+}
+`, env.OS_KEYPAIR_NAME)

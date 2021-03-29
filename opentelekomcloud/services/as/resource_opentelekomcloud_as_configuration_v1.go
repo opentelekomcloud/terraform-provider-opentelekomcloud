@@ -5,7 +5,6 @@ import (
 	"encoding/hex"
 	"fmt"
 	"log"
-	"os"
 
 	"github.com/hashicorp/go-multierror"
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
@@ -22,7 +21,6 @@ func ResourceASConfiguration() *schema.Resource {
 	return &schema.Resource{
 		Create: resourceASConfigurationCreate,
 		Read:   resourceASConfigurationRead,
-		Update: nil,
 		Delete: resourceASConfigurationDelete,
 
 		CustomizeDiff: validateDiskSize,
@@ -52,13 +50,14 @@ func ResourceASConfiguration() *schema.Resource {
 							Optional: true,
 						},
 						"flavor": {
-							Type:     schema.TypeString,
-							Optional: true,
-							Default:  getDefaultFlavor(),
+							Type:        schema.TypeString,
+							Optional:    true,
+							DefaultFunc: schema.EnvDefaultFunc("OS_FLAVOR_ID", nil),
 						},
 						"image": {
-							Type:     schema.TypeString,
-							Optional: true,
+							Type:        schema.TypeString,
+							Optional:    true,
+							DefaultFunc: schema.EnvDefaultFunc("OS_IMAGE_ID", nil),
 						},
 						"key_name": {
 							Type:     schema.TypeString,
@@ -184,6 +183,11 @@ func ResourceASConfiguration() *schema.Resource {
 							Type:     schema.TypeMap,
 							Optional: true,
 						},
+						"security_groups": {
+							Type:     schema.TypeSet,
+							Optional: true,
+							Elem:     &schema.Schema{Type: schema.TypeString},
+						},
 					},
 				},
 			},
@@ -191,15 +195,7 @@ func ResourceASConfiguration() *schema.Resource {
 	}
 }
 
-func getDefaultFlavor() string {
-	flavorID := os.Getenv("OS_FLAVOR_ID")
-	if flavorID != "" {
-		return flavorID
-	}
-	return ""
-}
-
-func getDisk(diskMeta []interface{}) (*[]configurations.DiskOpts, error) {
+func getDisk(diskMeta []interface{}) []configurations.DiskOpts {
 	var diskOptsList []configurations.DiskOpts
 
 	for _, v := range diskMeta {
@@ -222,7 +218,7 @@ func getDisk(diskMeta []interface{}) (*[]configurations.DiskOpts, error) {
 		diskOptsList = append(diskOptsList, diskOpts)
 	}
 
-	return &diskOptsList, nil
+	return diskOptsList
 }
 
 func getPersonality(personalityMeta []interface{}) []configurations.PersonalityOpts {
@@ -240,58 +236,60 @@ func getPersonality(personalityMeta []interface{}) []configurations.PersonalityO
 	return personalityOptsList
 }
 
-func getPublicIps(publicIpMeta map[string]interface{}) configurations.PublicIpOpts {
+func getPublicIps(publicIpMeta map[string]interface{}) *configurations.PublicIpOpts {
 	eipMap := publicIpMeta["eip"].([]interface{})[0].(map[string]interface{})
 	bandWidthMap := eipMap["bandwidth"].([]interface{})[0].(map[string]interface{})
-	bandWidthOpts := configurations.BandwidthOpts{
-		Size:         bandWidthMap["size"].(int),
-		ShareType:    bandWidthMap["share_type"].(string),
-		ChargingMode: bandWidthMap["charging_mode"].(string),
-	}
 
-	eipOpts := configurations.EipOpts{
-		IpType:    eipMap["ip_type"].(string),
-		Bandwidth: bandWidthOpts,
-	}
-
-	publicIpOpts := configurations.PublicIpOpts{
-		Eip: eipOpts,
+	publicIpOpts := &configurations.PublicIpOpts{
+		Eip: configurations.EipOpts{
+			IpType: eipMap["ip_type"].(string),
+			Bandwidth: configurations.BandwidthOpts{
+				Size:         bandWidthMap["size"].(int),
+				ShareType:    bandWidthMap["share_type"].(string),
+				ChargingMode: bandWidthMap["charging_mode"].(string),
+			},
+		},
 	}
 
 	return publicIpOpts
 }
 
-func getInstanceConfig(configDataMap map[string]interface{}) (*configurations.InstanceConfigOpts, error) {
-	disksData := configDataMap["disk"].([]interface{})
-	disks, err := getDisk(disksData)
-	if err != nil {
-		return nil, fmt.Errorf("error happened when validating disk size: %s", err)
+func getSecurityGroups(d *schema.ResourceData) []configurations.SecurityGroupOpts {
+	rawSecGroups := d.Get("security_groups").(*schema.Set).List()
+	secGroups := make([]configurations.SecurityGroupOpts, len(rawSecGroups))
+	for i, raw := range rawSecGroups {
+		secGroups[i] = configurations.SecurityGroupOpts{
+			ID: raw.(string),
+		}
 	}
+	return secGroups
+}
 
+func getInstanceConfig(d *schema.ResourceData) configurations.InstanceConfigOpts {
+	configDataMap := d.Get("instance_config").([]interface{})[0].(map[string]interface{})
+	disksData := configDataMap["disk"].([]interface{})
 	personalityData := configDataMap["personality"].([]interface{})
-	personalities := getPersonality(personalityData)
 
-	instanceConfigOpts := &configurations.InstanceConfigOpts{
-		ID:          configDataMap["instance_id"].(string),
-		FlavorRef:   configDataMap["flavor"].(string),
-		ImageRef:    configDataMap["image"].(string),
-		SSHKey:      configDataMap["key_name"].(string),
-		UserData:    []byte(configDataMap["user_data"].(string)),
-		Disk:        *disks,
-		Personality: personalities,
-		Metadata:    configDataMap["metadata"].(map[string]interface{}),
+	instanceConfigOpts := configurations.InstanceConfigOpts{
+		ID:             configDataMap["instance_id"].(string),
+		FlavorRef:      configDataMap["flavor"].(string),
+		ImageRef:       configDataMap["image"].(string),
+		Disk:           getDisk(disksData),
+		SSHKey:         configDataMap["key_name"].(string),
+		Personality:    getPersonality(personalityData),
+		UserData:       []byte(configDataMap["user_data"].(string)),
+		Metadata:       configDataMap["metadata"].(map[string]interface{}),
+		SecurityGroups: getSecurityGroups(d),
 	}
 
 	pubicIpData := configDataMap["public_ip"].([]interface{})
 	// user specify public_ip
 	if len(pubicIpData) == 1 {
 		publicIpMap := pubicIpData[0].(map[string]interface{})
-		publicIps := getPublicIps(publicIpMap)
-		instanceConfigOpts.PubicIp = publicIps
+		instanceConfigOpts.PubicIp = getPublicIps(publicIpMap)
 	}
-	log.Printf("[DEBUG] get instanceConfig: %#v", instanceConfigOpts)
 
-	return instanceConfigOpts, nil
+	return instanceConfigOpts
 }
 
 func resourceASConfigurationCreate(d *schema.ResourceData, meta interface{}) error {
@@ -301,15 +299,9 @@ func resourceASConfigurationCreate(d *schema.ResourceData, meta interface{}) err
 		return fmt.Errorf("error creating OpenTelekomCloud AutoScaling client: %s", err)
 	}
 
-	configDataMap := d.Get("instance_config").([]interface{})[0].(map[string]interface{})
-	log.Printf("[DEBUG] instance_config is: %#v", configDataMap)
-	instanceConfig, err := getInstanceConfig(configDataMap)
-	if err != nil {
-		return fmt.Errorf("error when getting instance_config info: %s", err)
-	}
 	createOpts := configurations.CreateOpts{
 		Name:           d.Get("scaling_configuration_name").(string),
-		InstanceConfig: *instanceConfig,
+		InstanceConfig: getInstanceConfig(d),
 	}
 
 	log.Printf("[DEBUG] Create AS configuration Options: %#v", createOpts)
@@ -317,8 +309,8 @@ func resourceASConfigurationCreate(d *schema.ResourceData, meta interface{}) err
 	if err != nil {
 		return fmt.Errorf("error creating ASConfiguration: %s", err)
 	}
+
 	d.SetId(asConfigID)
-	log.Printf("[DEBUG] Create AS Configuration %q Success!", asConfigID)
 	return resourceASConfigurationRead(d, meta)
 }
 
@@ -351,9 +343,15 @@ func resourceASConfigurationRead(d *schema.ResourceData, meta interface{}) error
 	instanceConfigInfo["image"] = asConfig.InstanceConfig.ImageRef
 	instanceConfigInfo["key_name"] = asConfig.InstanceConfig.SSHKey
 	instanceConfigInfo["user_data"] = asConfig.InstanceConfig.UserData
+
+	var secGrpIDs []string
+	for _, sg := range asConfig.InstanceConfig.SecurityGroups {
+		secGrpIDs = append(secGrpIDs, sg.ID)
+	}
+	instanceConfigInfo["security_groups"] = secGrpIDs
 	instanceConfigList := []interface{}{instanceConfigInfo}
 
-	if err = d.Set("instance_config", instanceConfigList); err != nil {
+	if err := d.Set("instance_config", instanceConfigList); err != nil {
 		return err
 	}
 
@@ -375,6 +373,7 @@ func resourceASConfigurationDelete(d *schema.ResourceData, meta interface{}) err
 	if err != nil {
 		return fmt.Errorf("error getting AS groups by configuration ID %q: %s", d.Id(), err)
 	}
+
 	if len(asConfigGroups) > 0 {
 		var groupIDs []string
 		for _, group := range asConfigGroups {

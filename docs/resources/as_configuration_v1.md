@@ -137,6 +137,9 @@ The `instance_config` block supports:
 * `metadata` - (Optional) Metadata key/value pairs to make available from
   within the instance.
 
+* `security_groups` - (Optional) An array of one or more security group IDs
+  to associate with the AutoScaling Configuration.
+
 The `disk` block supports:
 
 * `size` - (Required) The disk size. The unit is GB. The system disk size ranges from 40 to 32768,
@@ -177,6 +180,7 @@ The `eip` block supports:
 The `bandwidth` block supports:
 
 * `size` - (Required) The bandwidth (Mbit/s). The value range is 1 to 500.
+
 ->The specific range may vary depending on the configuration in each region. You can see the bandwidth range of
   each region on the management console. The minimum unit is 1 Mbit/s if the allowed bandwidth size ranges from
   0 to 300 Mbit/s. The minimum unit is 50 Mbit/s if the allowed bandwidth size ranges 300 Mbit/s to 500 Mbit/s.
@@ -206,3 +210,5 @@ The `instance_config` block supports:
 * `user_data` - See Argument Reference above.
 
 * `region` - See Argument Reference above.
+
+* `security_groups` - See Argument Reference above.
