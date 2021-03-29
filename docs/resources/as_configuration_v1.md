@@ -143,9 +143,9 @@ The `instance_config` block supports:
   and `disk` arguments do not take effect. If the `instance_id` argument is not specified,
   `flavor`, `image`, and `disk` arguments are mandatory.
 
-* `flavor` - (Optional) The flavor ID.
+* `flavor` - (Optional) The flavor ID. By default, it tries to get from env by `OS_FLAVOR_ID`.
 
-* `image` - (Optional) The image ID.
+* `image` - (Optional) The image ID. By default, it tries to get from env by `OS_IMAGE_ID`.
 
 * `disk` - (Optional) The disk group information. System disks are mandatory and data disks are optional.
   The dick structure is described below.
@@ -237,4 +237,4 @@ The `instance_config` block supports:
 
 * `user_data` - See Argument Reference above.
 
-* `region` - See Argument Reference above.
+* `region` - See Argument Reference above
