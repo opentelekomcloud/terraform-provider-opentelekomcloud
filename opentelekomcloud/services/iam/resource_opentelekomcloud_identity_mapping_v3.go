@@ -1,11 +1,14 @@
 package iam
 
 import (
+	"encoding/json"
 	"fmt"
 
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
+	golangsdk "github.com/opentelekomcloud/gophertelekomcloud"
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/identity/v3/federation/mappings"
 
+	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common"
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common/cfg"
 )
 
@@ -25,72 +28,18 @@ func ResourceIdentityMappingV3() *schema.Resource {
 				ForceNew: true,
 			},
 			"rules": {
-				Type:     schema.TypeList,
-				Required: true,
-				Elem: schema.Resource{
-					Schema: map[string]*schema.Schema{
-						"local": {
-							Type:     schema.TypeList,
-							Required: true,
-							Elem: schema.Resource{
-								Schema: map[string]*schema.Schema{
-									"user": {
-										Type:     schema.TypeMap,
-										Optional: true,
-										Elem: schema.Resource{
-											Schema: map[string]*schema.Schema{
-												"name": {
-													Type:     schema.TypeString,
-													Required: true,
-												},
-											},
-										},
-									},
-									"group": {
-										Type:     schema.TypeMap,
-										Optional: true,
-										Elem: schema.Resource{
-											Schema: map[string]*schema.Schema{
-												"name": {
-													Type:     schema.TypeString,
-													Required: true,
-												},
-											},
-										},
-									},
-									"groups": {
-										Type:     schema.TypeString,
-										Optional: true,
-									},
-								},
-							},
-						},
-						"remote": {
-							Type:     schema.TypeList,
-							Required: true,
-							Elem: schema.Resource{
-								Schema: map[string]*schema.Schema{
-									"type": {
-										Type:     schema.TypeString,
-										Required: true,
-									},
-									"not_any_of": {
-										Type:     schema.TypeSet,
-										Optional: true,
-									},
-									"any_one_of": {
-										Type:     schema.TypeSet,
-										Optional: true,
-									},
-									"regex": {
-										Type:     schema.TypeBool,
-										Optional: true,
-									},
-								},
-							},
-						},
-					},
+				Type:         schema.TypeList,
+				Required:     true,
+				ValidateFunc: common.ValidateJsonString,
+				StateFunc: func(v interface{}) string {
+					jsonString, _ := common.NormalizeJsonString(v)
+					return jsonString
 				},
+			},
+			"links": {
+				Type:     schema.TypeMap,
+				Computed: true,
+				Elem:     &schema.Schema{Type: schema.TypeString},
 			},
 		},
 	}
@@ -100,72 +49,21 @@ func resourceIdentityMappingV3Create(d *schema.ResourceData, meta interface{}) e
 	config := meta.(*cfg.Config)
 	client, err := config.IdentityV3Client(config.GetRegion(d))
 	if err != nil {
-		return fmt.Errorf("error creating OpenTelekomCloud identity client: %s", err)
+		return fmt.Errorf(clientCreationFail, err)
 	}
 
-	rulesRaw := d.Get("rules").([]map[string]interface{})
-	var rulesList []mappings.RuleOpts
-	for _, ruleRaw := range rulesRaw {
-		var localRulesList []mappings.LocalRuleOpts
-		localRuleRaw := ruleRaw["local"].([]map[string]interface{})
-		for _, local := range localRuleRaw {
-			var user *mappings.UserOpts
-			var group *mappings.GroupOpts
-			var groups string
-			if v, found := local["user"]; found {
-				user = &mappings.UserOpts{
-					Name: v.(map[string]interface{})["name"].(string),
-				}
-			}
-			if v, found := local["group"]; found {
-				group = &mappings.GroupOpts{
-					Name: v.(map[string]interface{})["name"].(string),
-				}
-			}
-			if v, found := local["groups"]; found {
-				groups = v.(string)
-			}
-			localRule := mappings.LocalRuleOpts{
-				User:   user,
-				Group:  group,
-				Groups: groups,
-			}
-			localRulesList = append(localRulesList, localRule)
-		}
-
-		var remoteRulesList []mappings.RemoteRuleOpts
-		remoteRuleRaw := ruleRaw["remote"].([]map[string]interface{})
-		for _, remote := range remoteRuleRaw {
-			var notAnyOf []string
-			var anyOneOf []string
-			var regex bool
-
-			if v, found := remote["not_any_of"]; found {
-				notAnyOf = v.([]string)
-			}
-			if v, found := remote["any_one_of"]; found {
-				anyOneOf = v.([]string)
-			}
-			if v, found := remote["regex"]; found {
-				regex = v.(bool)
-			}
-
-			remoteRule := mappings.RemoteRuleOpts{
-				Type:     remote["type"].(string),
-				NotAnyOf: notAnyOf,
-				AnyOneOf: anyOneOf,
-				Regex:    &regex,
-			}
-			remoteRulesList = append(remoteRulesList, remoteRule)
-		}
-		rule := mappings.RuleOpts{
-			Local:  localRulesList,
-			Remote: remoteRulesList,
-		}
-		rulesList = append(rulesList, rule)
+	rulesRaw := d.Get("rules")
+	rulesBytes, err := json.Marshal(rulesRaw)
+	if err != nil {
+		return err
 	}
+	rules := make([]mappings.RuleOpts, 1)
+	if err := json.Unmarshal(rulesBytes, &rules); err != nil {
+		return err
+	}
+
 	createOpts := mappings.CreateOpts{
-		Rules: rulesList,
+		Rules: rules,
 	}
 	mappingID := d.Get("mapping_id").(string)
 	mapping, err := mappings.Create(client, mappingID, createOpts).Extract()
@@ -182,7 +80,28 @@ func resourceIdentityMappingV3Read(d *schema.ResourceData, meta interface{}) err
 	config := meta.(*cfg.Config)
 	client, err := config.IdentityV3Client(config.GetRegion(d))
 	if err != nil {
-		return fmt.Errorf("error creating OpenTelekomCloud identity client: %s", err)
+		return fmt.Errorf(clientCreationFail, err)
+	}
+
+	mapping, err := mappings.Get(client, d.Id()).Extract()
+	if err != nil {
+		if _, ok := err.(golangsdk.ErrDefault404); ok {
+			d.SetId("")
+			return nil
+		}
+		return fmt.Errorf(mappingError, "reading", err)
+	}
+
+	rules, err := common.NormalizeJsonString(mapping.Rules)
+	if err != nil {
+		return err
+	}
+	if err := d.Set("rules", rules); err != nil {
+		return err
+	}
+
+	if err := d.Set("links", mapping.Links); err != nil {
+		return fmt.Errorf("error setting identity mapping links: %w", err)
 	}
 
 	return nil
@@ -192,7 +111,29 @@ func resourceIdentityMappingV3Update(d *schema.ResourceData, meta interface{}) e
 	config := meta.(*cfg.Config)
 	client, err := config.IdentityV3Client(config.GetRegion(d))
 	if err != nil {
-		return fmt.Errorf("error creating OpenTelekomCloud identity client: %s", err)
+		return fmt.Errorf(clientCreationFail, err)
+	}
+	changes := false
+	updateOpts := mappings.UpdateOpts{}
+
+	if d.HasChange("rules") {
+		changes = true
+		rulesRaw := d.Get("rules")
+		rulesBytes, err := json.Marshal(rulesRaw)
+		if err != nil {
+			return err
+		}
+		rules := make([]mappings.RuleOpts, 1)
+		if err := json.Unmarshal(rulesBytes, &rules); err != nil {
+			return err
+		}
+		updateOpts.Rules = rules
+	}
+	if changes {
+		_, err := mappings.Update(client, d.Id(), updateOpts).Extract()
+		if err != nil {
+			return err
+		}
 	}
 
 	return resourceIdentityMappingV3Read(d, meta)
@@ -202,7 +143,7 @@ func resourceIdentityMappingV3Delete(d *schema.ResourceData, meta interface{}) e
 	config := meta.(*cfg.Config)
 	client, err := config.IdentityV3Client(config.GetRegion(d))
 	if err != nil {
-		return fmt.Errorf("error creating OpenTelekomCloud identity client: %s", err)
+		return fmt.Errorf(clientCreationFail, err)
 	}
 
 	if err := mappings.Delete(client, d.Id()).ExtractErr(); err != nil {
