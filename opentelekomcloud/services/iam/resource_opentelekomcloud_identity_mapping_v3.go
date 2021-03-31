@@ -9,6 +9,8 @@ import (
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common/cfg"
 )
 
+const mappingError = "error %s identity mapping v3: %w"
+
 func ResourceIdentityMappingV3() *schema.Resource {
 	return &schema.Resource{
 		Create: resourceIdentityMappingV3Create,
@@ -168,7 +170,7 @@ func resourceIdentityMappingV3Create(d *schema.ResourceData, meta interface{}) e
 	mappingID := d.Get("mapping_id").(string)
 	mapping, err := mappings.Create(client, mappingID, createOpts).Extract()
 	if err != nil {
-		return err
+		return fmt.Errorf(mappingError, "creating", err)
 	}
 
 	d.SetId(mapping.ID)
@@ -204,7 +206,7 @@ func resourceIdentityMappingV3Delete(d *schema.ResourceData, meta interface{}) e
 	}
 
 	if err := mappings.Delete(client, d.Id()).ExtractErr(); err != nil {
-		return fmt.Errorf("error deleting OpenTelekomCloud identity mapping: %s", err)
+		return fmt.Errorf(mappingError, "deleting", err)
 	}
 
 	return nil
