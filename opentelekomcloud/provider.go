@@ -326,6 +326,7 @@ func Provider() terraform.ResourceProvider {
 			"opentelekomcloud_identity_group_v3":                  iam.ResourceIdentityGroupV3(),
 			"opentelekomcloud_identity_group_membership_v3":       iam.ResourceIdentityGroupMembershipV3(),
 			"opentelekomcloud_identity_project_v3":                iam.ResourceIdentityProjectV3(),
+			"opentelekomcloud_identity_provider_v3":               iam.ResourceIdentityProviderV3(),
 			"opentelekomcloud_identity_role_v3":                   iam.ResourceIdentityRoleV3(),
 			"opentelekomcloud_identity_role_assignment_v3":        iam.ResourceIdentityRoleAssignmentV3(),
 			"opentelekomcloud_identity_user_v3":                   iam.ResourceIdentityUserV3(),
