@@ -28,7 +28,7 @@ func ResourceIdentityMappingV3() *schema.Resource {
 				ForceNew: true,
 			},
 			"rules": {
-				Type:         schema.TypeList,
+				Type:         schema.TypeString,
 				Required:     true,
 				ValidateFunc: common.ValidateJsonString,
 				StateFunc: func(v interface{}) string {
