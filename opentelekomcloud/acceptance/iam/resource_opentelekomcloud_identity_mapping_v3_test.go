@@ -29,14 +29,11 @@ func TestAccIdentityV3MappingBasic(t *testing.T) {
 			{
 				Config: testAccIdentityV3MappingBasic(mappingID),
 				Check: resource.ComposeTestCheckFunc(
-					resource.TestCheckResourceAttr(resourceName, "", ""),
+					resource.TestCheckResourceAttr(resourceName, "mapping_id", mappingID),
 				),
 			},
 			{
 				Config: testAccIdentityV3MappingUpdate(mappingID),
-				Check: resource.ComposeTestCheckFunc(
-					resource.TestCheckResourceAttr(resourceName, "", ""),
-				),
 			},
 		},
 	})
@@ -76,7 +73,7 @@ func testAccIdentityV3MappingUpdate(mappingID string) string {
 	return fmt.Sprintf(`
 resource "opentelekomcloud_identity_mapping_v3" "mapping" {
   mapping_id = "%s"
-  rules      = jsonencode([{"local":[{"user":{"name":"samltestid-{0}"}},{"groups":"[\"admin\",\"manager\"]"}],"remote":[{"type":"uid"}]}])
+  rules      = jsonencode([{"local":[{"user":{"name":"samltestid-{0}"}}],"remote":[{"type":"uid"}]}])
 }
 `, mappingID)
 }

@@ -21,6 +21,10 @@ func ResourceIdentityMappingV3() *schema.Resource {
 		Update: resourceIdentityMappingV3Update,
 		Delete: resourceIdentityMappingV3Delete,
 
+		Importer: &schema.ResourceImporter{
+			State: schema.ImportStatePassthrough,
+		},
+
 		Schema: map[string]*schema.Schema{
 			"mapping_id": {
 				Type:     schema.TypeString,
@@ -35,6 +39,11 @@ func ResourceIdentityMappingV3() *schema.Resource {
 					jsonString, _ := common.NormalizeJsonString(v)
 					return jsonString
 				},
+			},
+			"links": {
+				Type:     schema.TypeMap,
+				Computed: true,
+				Elem:     &schema.Schema{Type: schema.TypeString},
 			},
 		},
 	}
@@ -88,7 +97,11 @@ func resourceIdentityMappingV3Read(d *schema.ResourceData, meta interface{}) err
 	if err != nil {
 		return err
 	}
-	if err := d.Set("rules", rules); err != nil {
+	if err := d.Set("rules", string(rules)); err != nil {
+		return err
+	}
+
+	if err := d.Set("mapping_id", mapping.ID); err != nil {
 		return err
 	}
 
@@ -121,7 +134,7 @@ func resourceIdentityMappingV3Update(d *schema.ResourceData, meta interface{}) e
 	if changes {
 		_, err := mappings.Update(client, d.Id(), updateOpts).Extract()
 		if err != nil {
-			return err
+			return fmt.Errorf(mappingError, "updating", err)
 		}
 	}
 
