@@ -36,11 +36,6 @@ func ResourceIdentityMappingV3() *schema.Resource {
 					return jsonString
 				},
 			},
-			"links": {
-				Type:     schema.TypeMap,
-				Computed: true,
-				Elem:     &schema.Schema{Type: schema.TypeString},
-			},
 		},
 	}
 }
@@ -52,11 +47,8 @@ func resourceIdentityMappingV3Create(d *schema.ResourceData, meta interface{}) e
 		return fmt.Errorf(clientCreationFail, err)
 	}
 
-	rulesRaw := d.Get("rules")
-	rulesBytes, err := json.Marshal(rulesRaw)
-	if err != nil {
-		return err
-	}
+	rulesRaw := d.Get("rules").(string)
+	rulesBytes := []byte(rulesRaw)
 	rules := make([]mappings.RuleOpts, 1)
 	if err := json.Unmarshal(rulesBytes, &rules); err != nil {
 		return err
@@ -92,7 +84,7 @@ func resourceIdentityMappingV3Read(d *schema.ResourceData, meta interface{}) err
 		return fmt.Errorf(mappingError, "reading", err)
 	}
 
-	rules, err := common.NormalizeJsonString(mapping.Rules)
+	rules, err := json.Marshal(mapping.Rules)
 	if err != nil {
 		return err
 	}
@@ -118,11 +110,8 @@ func resourceIdentityMappingV3Update(d *schema.ResourceData, meta interface{}) e
 
 	if d.HasChange("rules") {
 		changes = true
-		rulesRaw := d.Get("rules")
-		rulesBytes, err := json.Marshal(rulesRaw)
-		if err != nil {
-			return err
-		}
+		rulesRaw := d.Get("rules").(string)
+		rulesBytes := []byte(rulesRaw)
 		rules := make([]mappings.RuleOpts, 1)
 		if err := json.Unmarshal(rulesBytes, &rules); err != nil {
 			return err

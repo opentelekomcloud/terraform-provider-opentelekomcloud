@@ -67,7 +67,7 @@ func testAccIdentityV3MappingBasic(mappingID string) string {
 	return fmt.Sprintf(`
 resource "opentelekomcloud_identity_mapping_v3" "mapping" {
   mapping_id = "%s"
-  rules      = jsonencode({"local":[{"user":{ "name": "{0}"}},{"groups":"[\"admin\",\"manager\"]"}],"remote":[{"type": "uid"}]})
+  rules      = jsonencode([{"local":[{"user":{"name":"{0}"}},{"groups":"[\"admin\",\"manager\"]"}],"remote":[{"type":"uid"}]}])
 }
 `, mappingID)
 }
@@ -76,7 +76,7 @@ func testAccIdentityV3MappingUpdate(mappingID string) string {
 	return fmt.Sprintf(`
 resource "opentelekomcloud_identity_mapping_v3" "mapping" {
   mapping_id = "%s"
-  rules      = jsonencode({"local":[{"user":{ "name": "samltestid-{0}"}},{"groups":"[\"admin\",\"manager\"]"}],"remote":[{"type": "uid"}]})
+  rules      = jsonencode([{"local":[{"user":{"name":"samltestid-{0}"}},{"groups":"[\"admin\",\"manager\"]"}],"remote":[{"type":"uid"}]}])
 }
 `, mappingID)
 }
