@@ -185,7 +185,7 @@ The following arguments are supported:
 
 * `vpc_id` - (Required) The ID of the desired VPC for the server. Changing this creates a new server.
 
-* `nics` - (Optional) An array of one or more networks to attach to the
+* `nics` - (Required) An array of one or more networks to attach to the
   instance. The nics object structure is documented below. Changing this
   creates a new server.
 
