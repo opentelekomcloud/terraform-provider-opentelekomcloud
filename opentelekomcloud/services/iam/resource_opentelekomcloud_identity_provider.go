@@ -5,9 +5,11 @@ import (
 
 	"github.com/hashicorp/go-multierror"
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
-	"github.com/opentelekomcloud/gophertelekomcloud"
+	golangsdk "github.com/opentelekomcloud/gophertelekomcloud"
 	"github.com/opentelekomcloud/gophertelekomcloud/acceptance/clients"
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/identity/v3/federation/providers"
+
+	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common"
 )
 
 func ResourceIdentityProviderV3() *schema.Resource {
@@ -55,7 +57,7 @@ func ResourceIdentityProviderV3() *schema.Resource {
 func resourceIdentityProviderV3Create(d *schema.ResourceData, meta interface{}) error {
 	client, err := clients.NewIdentityV3Client()
 	if err != nil {
-		return fmt.Errorf(clientCreationFail, err)
+		return fmt.Errorf(common.ClientCreationFail, "identityV3", err)
 	}
 
 	opts := providers.CreateOpts{
@@ -77,7 +79,7 @@ func resourceIdentityProviderV3Create(d *schema.ResourceData, meta interface{}) 
 func resourceIdentityProviderV3Read(d *schema.ResourceData, meta interface{}) error {
 	client, err := clients.NewIdentityV3Client()
 	if err != nil {
-		return fmt.Errorf(clientCreationFail, err)
+		return fmt.Errorf(common.ClientCreationFail, "identityV3", err)
 	}
 
 	p, err := providers.Get(client, d.Id()).Extract()
@@ -107,7 +109,7 @@ func resourceIdentityProviderV3Read(d *schema.ResourceData, meta interface{}) er
 func resourceIdentityProviderV3Update(d *schema.ResourceData, meta interface{}) error {
 	client, err := clients.NewIdentityV3Client()
 	if err != nil {
-		return fmt.Errorf(clientCreationFail, err)
+		return fmt.Errorf(common.ClientCreationFail, "identityV3", err)
 	}
 
 	opts := providers.UpdateOpts{}
@@ -132,7 +134,7 @@ func resourceIdentityProviderV3Update(d *schema.ResourceData, meta interface{}) 
 func resourceIdentityProviderV3Delete(d *schema.ResourceData, meta interface{}) error {
 	client, err := clients.NewIdentityV3Client()
 	if err != nil {
-		return fmt.Errorf(clientCreationFail, err)
+		return fmt.Errorf(common.ClientCreationFail, "identityV3", err)
 	}
 
 	if err := providers.Delete(client, d.Id()).ExtractErr(); err != nil {
