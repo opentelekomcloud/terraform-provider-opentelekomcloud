@@ -79,8 +79,9 @@ func ResourceSFSFileSystemV2() *schema.Resource {
 				Computed: true,
 			},
 			"access_level": {
-				Type:     schema.TypeString,
-				Required: true,
+				Type:         schema.TypeString,
+				Optional:     true,
+				RequiredWith: []string{"access_to"},
 			},
 			"access_type": {
 				Type:     schema.TypeString,
@@ -88,8 +89,9 @@ func ResourceSFSFileSystemV2() *schema.Resource {
 				Default:  "cert",
 			},
 			"access_to": {
-				Type:     schema.TypeString,
-				Required: true,
+				Type:         schema.TypeString,
+				Optional:     true,
+				RequiredWith: []string{"access_level"},
 			},
 			"share_access_id": {
 				Type:     schema.TypeString,
@@ -160,18 +162,22 @@ func resourceSFSFileSystemV2Create(d *schema.ResourceData, meta interface{}) err
 	}
 	_, err = stateConf.WaitForState()
 	if err != nil {
-		return fmt.Errorf("error applying access rules to share file: %s", err)
+		return fmt.Errorf("error creating share file: %s", err)
 	}
 
-	grantAccessOpts := shares.GrantAccessOpts{
-		AccessLevel: d.Get("access_level").(string),
-		AccessType:  d.Get("access_type").(string),
-		AccessTo:    d.Get("access_to").(string),
-	}
+	accessLevel := d.Get("access_level").(string)
+	accessTo := d.Get("access_to").(string)
+	if accessLevel != "" || accessTo != "" {
+		grantAccessOpts := shares.GrantAccessOpts{
+			AccessLevel: d.Get("access_level").(string),
+			AccessType:  d.Get("access_type").(string),
+			AccessTo:    d.Get("access_to").(string),
+		}
 
-	_, err = shares.GrantAccess(client, share.ID, grantAccessOpts).ExtractAccess()
-	if err != nil {
-		return fmt.Errorf("error applying access rules to share file: %s", err)
+		_, err = shares.GrantAccess(client, share.ID, grantAccessOpts).ExtractAccess()
+		if err != nil {
+			return fmt.Errorf("error applying access rules to share file: %s", err)
+		}
 	}
 
 	// set tags
@@ -234,6 +240,16 @@ func resourceSFSFileSystemV2Read(d *schema.ResourceData, meta interface{}) error
 		return err
 	}
 
+	// save tags
+	resourceTags, err := tags.Get(client, "sfs", d.Id()).Extract()
+	if err != nil {
+		return fmt.Errorf("error fetching OpenTelekomCloud SFS File System tags: %s", err)
+	}
+	tagMap := common.TagsToMap(resourceTags)
+	if err := d.Set("tags", tagMap); err != nil {
+		return fmt.Errorf("error saving tags for OpenTelekomCloud SFS File System: %s", err)
+	}
+
 	rules, err := shares.ListAccessRights(client, d.Id()).ExtractAccessRights()
 	if err != nil {
 		if _, ok := err.(golangsdk.ErrDefault404); ok {
@@ -260,16 +276,6 @@ func resourceSFSFileSystemV2Read(d *schema.ResourceData, meta interface{}) error
 		return mErr
 	}
 
-	// save tags
-	resourceTags, err := tags.Get(client, "sfs", d.Id()).Extract()
-	if err != nil {
-		return fmt.Errorf("error fetching OpenTelekomCloud SFS File System tags: %s", err)
-	}
-	tagMap := common.TagsToMap(resourceTags)
-	if err := d.Set("tags", tagMap); err != nil {
-		return fmt.Errorf("error saving tags for OpenTelekomCloud SFS File System: %s", err)
-	}
-
 	return nil
 }
 
@@ -291,21 +297,28 @@ func resourceSFSFileSystemV2Update(d *schema.ResourceData, meta interface{}) err
 		}
 	}
 	if d.HasChange("access_to") || d.HasChange("access_level") || d.HasChange("access_type") {
-		deleteAccessOpts := shares.DeleteAccessOpts{AccessID: d.Get("share_access_id").(string)}
-		if err := shares.DeleteAccess(client, d.Id(), deleteAccessOpts).Err; err != nil {
-			return fmt.Errorf("error changing access rules for share file: %s", err)
+		shareAccessID := d.Get("share_access_id").(string)
+		if shareAccessID != "" {
+			deleteAccessOpts := shares.DeleteAccessOpts{AccessID: d.Get("share_access_id").(string)}
+			if err := shares.DeleteAccess(client, d.Id(), deleteAccessOpts).Err; err != nil {
+				return fmt.Errorf("error changing access rules for share file: %s", err)
+			}
 		}
 
-		grantAccessOpts := shares.GrantAccessOpts{
-			AccessLevel: d.Get("access_level").(string),
-			AccessType:  d.Get("access_type").(string),
-			AccessTo:    d.Get("access_to").(string),
-		}
+		accessLevel := d.Get("access_level").(string)
+		accessTo := d.Get("access_to").(string)
+		if accessTo != "" || accessLevel != "" {
+			grantAccessOpts := shares.GrantAccessOpts{
+				AccessLevel: d.Get("access_level").(string),
+				AccessType:  d.Get("access_type").(string),
+				AccessTo:    d.Get("access_to").(string),
+			}
 
-		log.Printf("[DEBUG] Grant Access Rules: %#v", grantAccessOpts)
-		_, err := shares.GrantAccess(client, d.Id(), grantAccessOpts).ExtractAccess()
-		if err != nil {
-			return fmt.Errorf("error changing access rules for share file: %s", err)
+			log.Printf("[DEBUG] Grant Access Rules: %#v", grantAccessOpts)
+			_, err := shares.GrantAccess(client, d.Id(), grantAccessOpts).ExtractAccess()
+			if err != nil {
+				return fmt.Errorf("error changing access rules for share file: %s", err)
+			}
 		}
 	}
 

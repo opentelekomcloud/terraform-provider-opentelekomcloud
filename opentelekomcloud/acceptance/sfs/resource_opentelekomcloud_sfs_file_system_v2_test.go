@@ -15,7 +15,6 @@ import (
 
 func TestAccSFSFileSystemV2_basic(t *testing.T) {
 	var share shares.Share
-
 	resourceName := "opentelekomcloud_sfs_file_system_v2.sfs_1"
 
 	resource.Test(t, resource.TestCase{
@@ -57,6 +56,7 @@ func TestAccSFSFileSystemV2_basic(t *testing.T) {
 
 func TestAccSFSFileSystemV2_timeout(t *testing.T) {
 	var share shares.Share
+	resourceName := "opentelekomcloud_sfs_file_system_v2.sfs_1"
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:     func() { common.TestAccPreCheck(t) },
@@ -66,7 +66,41 @@ func TestAccSFSFileSystemV2_timeout(t *testing.T) {
 			{
 				Config: testAccSFSFileSystemV2_timeout,
 				Check: resource.ComposeTestCheckFunc(
+					testAccCheckSFSFileSystemV2Exists(resourceName, &share),
+				),
+			},
+		},
+	})
+}
+
+func TestAccSFSFileSystemV2_clean(t *testing.T) {
+	var share shares.Share
+	resourceName := "opentelekomcloud_sfs_file_system_v2.sfs_1"
+
+	resource.Test(t, resource.TestCase{
+		PreCheck:     func() { common.TestAccPreCheck(t) },
+		Providers:    common.TestAccProviders,
+		CheckDestroy: testAccCheckSFSFileSystemV2Destroy,
+		Steps: []resource.TestStep{
+			{
+				Config: testAccSFSFileSystemV2_clean,
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckSFSFileSystemV2Exists(resourceName, &share),
+				),
+			},
+			{
+				Config: testAccSFSFileSystemV2_basic,
+				Check: resource.ComposeTestCheckFunc(
 					testAccCheckSFSFileSystemV2Exists("opentelekomcloud_sfs_file_system_v2.sfs_1", &share),
+					resource.TestCheckResourceAttr(resourceName, "access_level", "rw"),
+					resource.TestCheckResourceAttr(resourceName, "access_to", env.OS_VPC_ID),
+					resource.TestCheckResourceAttr(resourceName, "access_type", "cert"),
+				),
+			},
+			{
+				Config: testAccSFSFileSystemV2_clean,
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckSFSFileSystemV2Exists(resourceName, &share),
 				),
 			},
 		},
@@ -176,3 +210,12 @@ resource "opentelekomcloud_sfs_file_system_v2" "sfs_1" {
     delete = "5m"
   }
 }`, env.OS_VPC_ID)
+
+var testAccSFSFileSystemV2_clean = fmt.Sprintf(`
+resource "opentelekomcloud_sfs_file_system_v2" "sfs_1" {
+  share_proto       = "NFS"
+  size              = 1
+  name              = "sfs-test1"
+  availability_zone = "eu-de-01"
+}
+`)
