@@ -8,16 +8,16 @@ import (
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/acceptance/common"
 )
 
-func TestAccSFSShareAccessRuleV2_importBasic(t *testing.T) {
-	resourceName := "opentelekomcloud_sfs_share_access_rule_v2.sfs_rules"
+func TestAccSFSShareAccessRulesV2_importBasic(t *testing.T) {
+	resourceName := "opentelekomcloud_sfs_share_access_rules_v2.sfs_rules"
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:     func() { common.TestAccPreCheck(t) },
 		Providers:    common.TestAccProviders,
-		CheckDestroy: testAccCheckSFSShareAccessRuleV2Destroy,
+		CheckDestroy: testAccCheckSFSShareAccessRulesV2Destroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccSFSShareAccessRuleV2_basic,
+				Config: testAccSFSShareAccessRulesV2_basic,
 			},
 			{
 				ResourceName:      resourceName,

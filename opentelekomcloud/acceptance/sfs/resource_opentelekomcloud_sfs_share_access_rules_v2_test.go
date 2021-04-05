@@ -13,22 +13,22 @@ import (
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common/cfg"
 )
 
-func TestAccSFSShareAccessRuleV2_basic(t *testing.T) {
+func TestAccSFSShareAccessRulesV2_basic(t *testing.T) {
 	resourceName := "opentelekomcloud_sfs_share_access_rules_v2.sfs_rules"
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:     func() { common.TestAccPreCheck(t) },
 		Providers:    common.TestAccProviders,
-		CheckDestroy: testAccCheckSFSShareAccessRuleV2Destroy,
+		CheckDestroy: testAccCheckSFSShareAccessRulesV2Destroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccSFSShareAccessRuleV2_basic,
+				Config: testAccSFSShareAccessRulesV2_basic,
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr(resourceName, "access_rules.#", "2"),
 				),
 			},
 			{
-				Config: testAccSFSShareAccessRuleV2_update,
+				Config: testAccSFSShareAccessRulesV2_update,
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr(resourceName, "access_rules.#", "1"),
 				),
@@ -37,7 +37,7 @@ func TestAccSFSShareAccessRuleV2_basic(t *testing.T) {
 	})
 }
 
-func testAccCheckSFSShareAccessRuleV2Destroy(s *terraform.State) error {
+func testAccCheckSFSShareAccessRulesV2Destroy(s *terraform.State) error {
 	config := common.TestAccProvider.Meta().(*cfg.Config)
 	client, err := config.SfsV2Client(env.OS_REGION_NAME)
 	if err != nil {
@@ -58,7 +58,7 @@ func testAccCheckSFSShareAccessRuleV2Destroy(s *terraform.State) error {
 	return nil
 }
 
-var testAccSFSShareAccessRuleV2_basic = fmt.Sprintf(`
+var testAccSFSShareAccessRulesV2_basic = fmt.Sprintf(`
 resource "opentelekomcloud_vpc_v1" "vpc_1" {
   name   = "sfs_share_vpc_1"
   cidr   = "192.168.0.0/16"
@@ -93,7 +93,7 @@ resource "opentelekomcloud_sfs_share_access_rules_v2" "sfs_rules" {
 }
 `)
 
-var testAccSFSShareAccessRuleV2_update = fmt.Sprintf(`
+var testAccSFSShareAccessRulesV2_update = fmt.Sprintf(`
 resource "opentelekomcloud_vpc_v1" "vpc_1" {
   name   = "sfs_share_vpc_1"
   cidr   = "192.168.0.0/16"
