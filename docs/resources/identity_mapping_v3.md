@@ -41,7 +41,8 @@ The following arguments are supported:
 
 * `mapping_id` - (Required) The ID of the mapping. Changing this creates a new mapping.
 
-* `rules` - (Required) Rules used to map federated users to local users.
+* `rules` - (Required) Rules used to map federated users to local users. Full reference
+you can see [Syntax of Identity Conversion Rules](https://docs.otc.t-systems.com/en-us/usermanual/iam/en-us_topic_0079620340.html).
 
 ## Attributes Reference
 
