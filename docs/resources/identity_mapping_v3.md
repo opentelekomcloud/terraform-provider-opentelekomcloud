@@ -21,7 +21,7 @@ resource "opentelekomcloud_identity_mapping_v3" "mapping" {
 
 The following arguments are supported:
 
-* `mapping_id` - (Required) The name (ID) of the provider. Changing this creates a new mapping.
+* `mapping_id` - (Required) The ID of the mapping. Changing this creates a new mapping.
 
 * `rules` - (Required) Rules used to map federated users to local users.
 
