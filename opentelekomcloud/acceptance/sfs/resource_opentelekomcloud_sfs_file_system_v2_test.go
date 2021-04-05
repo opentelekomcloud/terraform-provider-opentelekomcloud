@@ -97,6 +97,12 @@ func TestAccSFSFileSystemV2_clean(t *testing.T) {
 					resource.TestCheckResourceAttr(resourceName, "access_type", "cert"),
 				),
 			},
+			{
+				Config: testAccSFSFileSystemV2_clean,
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckSFSFileSystemV2Exists(resourceName, &share),
+				),
+			},
 		},
 	})
 }
