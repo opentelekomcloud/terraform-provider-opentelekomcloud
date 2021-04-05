@@ -13,7 +13,25 @@ cloud to use this resource. Please refer to [User Management Model](https://docs
 ```hcl
 resource "opentelekomcloud_identity_mapping_v3" "mapping" {
   mapping_id = "ACME"
-  rules      = jsonencode([{"local":[{"user":{"name":"{0}"}},{"groups":"[\"admin\",\"manager\"]"}],"remote":[{"type":"uid"}]}])
+  rules      = <<EOF
+  [
+    {
+      "local":[
+        {
+          "user":{"name":"{0}"}
+        },
+        {
+          "groups":"[\"admin\",\"manager\"]"
+        }
+      ],
+      "remote":[
+        {
+          "type":"uid"
+        }
+      ]
+    }
+  ]
+EOF
 }
 ```
 
