@@ -79,7 +79,7 @@ func resourceIdentityProviderV3Create(d *schema.ResourceData, meta interface{}) 
 func resourceIdentityProviderV3Read(d *schema.ResourceData, meta interface{}) error {
 	client, err := clients.NewIdentityV3Client()
 	if err != nil {
-		return fmt.Errorf(common.ClientIAMCreationFail, "identityV3", err)
+		return fmt.Errorf(common.ClientIAMCreationFail, err)
 	}
 
 	p, err := providers.Get(client, d.Id()).Extract()
@@ -109,7 +109,7 @@ func resourceIdentityProviderV3Read(d *schema.ResourceData, meta interface{}) er
 func resourceIdentityProviderV3Update(d *schema.ResourceData, meta interface{}) error {
 	client, err := clients.NewIdentityV3Client()
 	if err != nil {
-		return fmt.Errorf(common.ClientIAMCreationFail, "identityV3", err)
+		return fmt.Errorf(common.ClientIAMCreationFail, err)
 	}
 
 	opts := providers.UpdateOpts{}
@@ -134,7 +134,7 @@ func resourceIdentityProviderV3Update(d *schema.ResourceData, meta interface{}) 
 func resourceIdentityProviderV3Delete(d *schema.ResourceData, meta interface{}) error {
 	client, err := clients.NewIdentityV3Client()
 	if err != nil {
-		return fmt.Errorf(common.ClientIAMCreationFail, "identityV3", err)
+		return fmt.Errorf(common.ClientIAMCreationFail, err)
 	}
 
 	if err := providers.Delete(client, d.Id()).ExtractErr(); err != nil {
