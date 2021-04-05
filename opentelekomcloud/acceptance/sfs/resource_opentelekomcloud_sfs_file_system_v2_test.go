@@ -15,7 +15,6 @@ import (
 
 func TestAccSFSFileSystemV2_basic(t *testing.T) {
 	var share shares.Share
-
 	resourceName := "opentelekomcloud_sfs_file_system_v2.sfs_1"
 
 	resource.Test(t, resource.TestCase{
@@ -57,6 +56,7 @@ func TestAccSFSFileSystemV2_basic(t *testing.T) {
 
 func TestAccSFSFileSystemV2_timeout(t *testing.T) {
 	var share shares.Share
+	resourceName := "opentelekomcloud_sfs_file_system_v2.sfs_1"
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:     func() { common.TestAccPreCheck(t) },
@@ -66,7 +66,7 @@ func TestAccSFSFileSystemV2_timeout(t *testing.T) {
 			{
 				Config: testAccSFSFileSystemV2_timeout,
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckSFSFileSystemV2Exists("opentelekomcloud_sfs_file_system_v2.sfs_1", &share),
+					testAccCheckSFSFileSystemV2Exists(resourceName, &share),
 				),
 			},
 		},
@@ -75,6 +75,7 @@ func TestAccSFSFileSystemV2_timeout(t *testing.T) {
 
 func TestAccSFSFileSystemV2_clean(t *testing.T) {
 	var share shares.Share
+	resourceName := "opentelekomcloud_sfs_file_system_v2.sfs_1"
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:     func() { common.TestAccPreCheck(t) },
@@ -84,7 +85,16 @@ func TestAccSFSFileSystemV2_clean(t *testing.T) {
 			{
 				Config: testAccSFSFileSystemV2_clean,
 				Check: resource.ComposeTestCheckFunc(
+					testAccCheckSFSFileSystemV2Exists(resourceName, &share),
+				),
+			},
+			{
+				Config: testAccSFSFileSystemV2_basic,
+				Check: resource.ComposeTestCheckFunc(
 					testAccCheckSFSFileSystemV2Exists("opentelekomcloud_sfs_file_system_v2.sfs_1", &share),
+					resource.TestCheckResourceAttr(resourceName, "access_level", "rw"),
+					resource.TestCheckResourceAttr(resourceName, "access_to", env.OS_VPC_ID),
+					resource.TestCheckResourceAttr(resourceName, "access_type", "cert"),
 				),
 			},
 		},
