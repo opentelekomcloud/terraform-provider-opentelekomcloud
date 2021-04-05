@@ -24,13 +24,13 @@ func TestAccSFSShareAccessRuleV2_basic(t *testing.T) {
 			{
 				Config: testAccSFSShareAccessRuleV2_basic,
 				Check: resource.ComposeTestCheckFunc(
-					resource.TestCheckResourceAttr(resourceName, "", "sfs-test1"),
+					resource.TestCheckResourceAttr(resourceName, "access_rules.#", "2"),
 				),
 			},
 			{
 				Config: testAccSFSShareAccessRuleV2_update,
 				Check: resource.ComposeTestCheckFunc(
-					resource.TestCheckResourceAttr(resourceName, "name", "sfs-test2"),
+					resource.TestCheckResourceAttr(resourceName, "access_rules.#", "1"),
 				),
 			},
 		},
@@ -63,58 +63,61 @@ resource "opentelekomcloud_vpc_v1" "vpc_1" {
   name   = "sfs_share_vpc_1"
   cidr   = "192.168.0.0/16"
 }
+
 resource "opentelekomcloud_vpc_v1" "vpc_2" {
   name   = "sfs_share_vpc_2"
   cidr   = "192.168.0.0/16"
 }
+
 resource "opentelekomcloud_sfs_file_system_v2" "sfs_1" {
   share_proto       = "NFS"
   size              = 1
   name              = "sfs-test1"
   availability_zone = "eu-de-01"
-  access_to         = "%s"
-  access_type       = "cert"
-  access_level      = "rw"
 }
-resource "opentelekomcloud_sfs_access_rule_v2" "sfs_rules" {
+
+resource "opentelekomcloud_sfs_share_access_rule_v2" "sfs_rules" {
   share_id = opentelekomcloud_sfs_file_system_v2.sfs_1.id
+
   access_rules {
     access_to    = opentelekomcloud_vpc_v1.vpc_1.id
     access_type  = "cert"
     access_level = "rw"
   }
+
   access_rules {
     access_to    = opentelekomcloud_vpc_v1.vpc_2.id
     access_type  = "cert"
     access_level = "rw"
   }
 }
-`, env.OS_VPC_ID)
+`)
 
 var testAccSFSShareAccessRuleV2_update = fmt.Sprintf(`
 resource "opentelekomcloud_vpc_v1" "vpc_1" {
   name   = "sfs_share_vpc_1"
   cidr   = "192.168.0.0/16"
 }
+
 resource "opentelekomcloud_vpc_v1" "vpc_2" {
   name   = "sfs_share_vpc_2"
   cidr   = "192.168.0.0/16"
 }
+
 resource "opentelekomcloud_sfs_file_system_v2" "sfs_1" {
   share_proto       = "NFS"
   size              = 1
   name              = "sfs-test1"
   availability_zone = "eu-de-01"
-  access_to         = "%s"
-  access_type       = "cert"
-  access_level      = "rw"
 }
-resource "opentelekomcloud_sfs_access_rule_v2" "sfs_rules" {
+
+resource "opentelekomcloud_sfs_share_access_rule_v2" "sfs_rules" {
   share_id = opentelekomcloud_sfs_file_system_v2.sfs_1.id
+
   access_rules {
     access_to    = opentelekomcloud_vpc_v1.vpc_1.id
     access_type  = "cert"
     access_level = "rw"
   }
 }
-`, env.OS_VPC_ID)
+`)

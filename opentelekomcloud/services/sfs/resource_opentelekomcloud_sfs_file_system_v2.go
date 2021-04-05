@@ -82,16 +82,19 @@ func ResourceSFSFileSystemV2() *schema.Resource {
 				Type:         schema.TypeString,
 				Optional:     true,
 				RequiredWith: []string{"access_to"},
+				Deprecated:   "Use the opentelekomcloud_sfs_share_access_rule_v2 resource instead",
 			},
 			"access_type": {
-				Type:     schema.TypeString,
-				Optional: true,
-				Default:  "cert",
+				Type:       schema.TypeString,
+				Optional:   true,
+				Default:    "cert",
+				Deprecated: "Use the opentelekomcloud_sfs_share_access_rule_v2 resource instead",
 			},
 			"access_to": {
 				Type:         schema.TypeString,
 				Optional:     true,
 				RequiredWith: []string{"access_level"},
+				Deprecated:   "Use the opentelekomcloud_sfs_share_access_rule_v2 resource instead",
 			},
 			"share_access_id": {
 				Type:     schema.TypeString,
@@ -260,17 +263,21 @@ func resourceSFSFileSystemV2Read(d *schema.ResourceData, meta interface{}) error
 		return fmt.Errorf("error retrieving OpenTelekomCloud Shares: %s", err)
 	}
 
-	if len(rules) == 0 {
-		return nil
+	attachResourceID := d.Get("access_to").(string)
+	if attachResourceID != "" {
+		for _, rule := range rules {
+			if rule.ID == attachResourceID {
+				mErr = multierror.Append(mErr,
+					d.Set("share_access_id", rule.ID),
+					d.Set("access_rule_status", rule.State),
+					d.Set("access_to", rule.AccessTo),
+					d.Set("access_type", rule.AccessType),
+					d.Set("access_level", rule.AccessLevel),
+				)
+				break
+			}
+		}
 	}
-	rule := rules[0]
-	mErr = multierror.Append(mErr,
-		d.Set("share_access_id", rule.ID),
-		d.Set("access_rule_status", rule.State),
-		d.Set("access_to", rule.AccessTo),
-		d.Set("access_type", rule.AccessType),
-		d.Set("access_level", rule.AccessLevel),
-	)
 
 	if mErr.ErrorOrNil() != nil {
 		return mErr

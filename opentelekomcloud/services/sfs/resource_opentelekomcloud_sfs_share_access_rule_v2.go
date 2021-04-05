@@ -28,7 +28,7 @@ func ResourceSFSShareAccessRuleV2() *schema.Resource {
 				ForceNew: true,
 			},
 			"access_rules": {
-				Type:     schema.TypeSet,
+				Type:     schema.TypeList,
 				Required: true,
 				MaxItems: 20,
 				Elem: &schema.Resource{
@@ -69,7 +69,7 @@ func resourceSFSShareAccessRuleV2Create(d *schema.ResourceData, meta interface{}
 	}
 
 	shareID := d.Get("share_id").(string)
-	accessRules := d.Get("access_rules").(*schema.Set).List()
+	accessRules := d.Get("access_rules").([]interface{})
 	for _, rule := range accessRules {
 		accessRuleMap := rule.(map[string]interface{})
 		grantAccessOpts := shares.GrantAccessOpts{
@@ -118,7 +118,11 @@ func resourceSFSShareAccessRuleV2Read(d *schema.ResourceData, meta interface{}) 
 	}
 
 	if err := d.Set("access_rules", accessRules); err != nil {
-		return fmt.Errorf("error saving access_rules to state for OpenTelekomCloud File Share (%s): %s", d.Id(), err)
+		return fmt.Errorf("error saving access_rules to state for OpenTelekomCloud File Share: %w", err)
+	}
+
+	if err := d.Set("share_id", d.Id()); err != nil {
+		return fmt.Errorf("error saving share_id to state for OpenTelekomCloud File Share: %w", err)
 	}
 
 	return nil
@@ -133,8 +137,8 @@ func resourceSFSShareAccessRuleV2Update(d *schema.ResourceData, meta interface{}
 
 	if d.HasChange("access_rules") {
 		oldMapRaw, newMapRaw := d.GetChange("access_rules")
-		oldMap := oldMapRaw.(*schema.Set).List()
-		newMap := newMapRaw.(*schema.Set).List()
+		oldMap := oldMapRaw.([]interface{})
+		newMap := newMapRaw.([]interface{})
 
 		for _, oldRule := range oldMap {
 			oldAccessRuleMap := oldRule.(map[string]interface{})
@@ -170,7 +174,7 @@ func resourceSFSShareAccessRuleV2Delete(d *schema.ResourceData, meta interface{}
 		return fmt.Errorf("error creating OpenTelekomCloud File Share client: %w", err)
 	}
 
-	accessRules := d.Get("access_rules").(*schema.Set).List()
+	accessRules := d.Get("access_rules").([]interface{})
 	for _, rule := range accessRules {
 		accessRuleMap := rule.(map[string]interface{})
 		deleteAccessOpts := shares.DeleteAccessOpts{

@@ -49,13 +49,15 @@ The following arguments are supported:
   a new resource.
 
 * `access_level` - (Optional) The access level of the shared file system. Changing this will create
-  a new access rule.
+  a new access rule. Deprecated, please use the `opentelekomcloud_sfs_share_access_rule_v2`
+  resource instead.
 
 * `access_type` - (Optional) The type of the share access rule. Changing this will create a new
-  access rule.
+  access rule. Deprecated, please use the `opentelekomcloud_sfs_share_access_rule_v2` resource instead.
 
 * `access_to` - (Optional) The access that the back end grants or denies. Changing this will
-  create new access rule.
+  create new access rule. Deprecated, please use the `opentelekomcloud_sfs_share_access_rule_v2`
+  resource instead.
 
 * `tags` - (Optional) Tags key/value pairs to associate with the SFS File System.
 
