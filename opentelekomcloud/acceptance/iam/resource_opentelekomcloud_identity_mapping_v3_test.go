@@ -11,7 +11,6 @@ import (
 
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/acceptance/common"
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/acceptance/env"
-	commonError "github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common"
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common/cfg"
 )
 
@@ -44,7 +43,7 @@ func testAccCheckIdentityV3MappingDestroy(s *terraform.State) error {
 	config := common.TestAccProvider.Meta().(*cfg.Config)
 	client, err := config.IdentityV3Client(env.OS_REGION_NAME)
 	if err != nil {
-		return fmt.Errorf(commonError.ClientIAMCreationFail, err)
+		return fmt.Errorf("error creating OpenTelekomCloud identity v3 client: %w", err)
 	}
 
 	for _, rs := range s.RootModule().Resources {

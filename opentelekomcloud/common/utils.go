@@ -18,8 +18,6 @@ import (
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common/cfg"
 )
 
-const ClientIAMCreationFail = "error creating OpenTelekomCloud identity v3 client: %w"
-
 func jsonBytesEqual(b1, b2 []byte) bool {
 	var o1 interface{}
 	if err := json.Unmarshal(b1, &o1); err != nil {
