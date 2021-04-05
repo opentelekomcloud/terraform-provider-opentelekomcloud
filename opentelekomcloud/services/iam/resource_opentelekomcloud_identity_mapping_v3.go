@@ -53,7 +53,7 @@ func resourceIdentityMappingV3Create(d *schema.ResourceData, meta interface{}) e
 	config := meta.(*cfg.Config)
 	client, err := config.IdentityV3Client(config.GetRegion(d))
 	if err != nil {
-		return fmt.Errorf(clientCreationFail, err)
+		return fmt.Errorf(common.ClientIAMCreationFail, err)
 	}
 
 	rulesRaw := d.Get("rules").(string)
@@ -81,7 +81,7 @@ func resourceIdentityMappingV3Read(d *schema.ResourceData, meta interface{}) err
 	config := meta.(*cfg.Config)
 	client, err := config.IdentityV3Client(config.GetRegion(d))
 	if err != nil {
-		return fmt.Errorf(clientCreationFail, err)
+		return fmt.Errorf(common.ClientIAMCreationFail, "identityV3", err)
 	}
 
 	mapping, err := mappings.Get(client, d.Id()).Extract()
@@ -116,7 +116,7 @@ func resourceIdentityMappingV3Update(d *schema.ResourceData, meta interface{}) e
 	config := meta.(*cfg.Config)
 	client, err := config.IdentityV3Client(config.GetRegion(d))
 	if err != nil {
-		return fmt.Errorf(clientCreationFail, err)
+		return fmt.Errorf(common.ClientIAMCreationFail, "identityV3", err)
 	}
 	changes := false
 	updateOpts := mappings.UpdateOpts{}
@@ -145,7 +145,7 @@ func resourceIdentityMappingV3Delete(d *schema.ResourceData, meta interface{}) e
 	config := meta.(*cfg.Config)
 	client, err := config.IdentityV3Client(config.GetRegion(d))
 	if err != nil {
-		return fmt.Errorf(clientCreationFail, err)
+		return fmt.Errorf(common.ClientIAMCreationFail, err)
 	}
 
 	if err := mappings.Delete(client, d.Id()).ExtractErr(); err != nil {
