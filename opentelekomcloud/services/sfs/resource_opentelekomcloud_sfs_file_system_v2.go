@@ -297,23 +297,28 @@ func resourceSFSFileSystemV2Update(d *schema.ResourceData, meta interface{}) err
 		}
 	}
 	if d.HasChange("access_to") || d.HasChange("access_level") || d.HasChange("access_type") {
-		if d.Get("share_access_id").(string) != "" {
+		shareAccessID := d.Get("share_access_id").(string)
+		if shareAccessID != "" {
 			deleteAccessOpts := shares.DeleteAccessOpts{AccessID: d.Get("share_access_id").(string)}
 			if err := shares.DeleteAccess(client, d.Id(), deleteAccessOpts).Err; err != nil {
 				return fmt.Errorf("error changing access rules for share file: %s", err)
 			}
 		}
 
-		grantAccessOpts := shares.GrantAccessOpts{
-			AccessLevel: d.Get("access_level").(string),
-			AccessType:  d.Get("access_type").(string),
-			AccessTo:    d.Get("access_to").(string),
-		}
+		accessLevel := d.Get("access_level").(string)
+		accessTo := d.Get("access_to").(string)
+		if accessTo != "" || accessLevel != "" {
+			grantAccessOpts := shares.GrantAccessOpts{
+				AccessLevel: d.Get("access_level").(string),
+				AccessType:  d.Get("access_type").(string),
+				AccessTo:    d.Get("access_to").(string),
+			}
 
-		log.Printf("[DEBUG] Grant Access Rules: %#v", grantAccessOpts)
-		_, err := shares.GrantAccess(client, d.Id(), grantAccessOpts).ExtractAccess()
-		if err != nil {
-			return fmt.Errorf("error changing access rules for share file: %s", err)
+			log.Printf("[DEBUG] Grant Access Rules: %#v", grantAccessOpts)
+			_, err := shares.GrantAccess(client, d.Id(), grantAccessOpts).ExtractAccess()
+			if err != nil {
+				return fmt.Errorf("error changing access rules for share file: %s", err)
+			}
 		}
 	}
 
