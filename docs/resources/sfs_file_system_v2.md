@@ -13,13 +13,9 @@ variable "share_name" {}
 
 variable "share_description" {}
 
-variable "vpc_id" {}
-
 resource "opentelekomcloud_sfs_file_system_v2" "share-file" {
   name         = var.share_name
   size         = 50
-  access_to    = var.vpc_id
-  access_level = "rw"
   description  = var.share_description
   share_proto  = "NFS"
 
@@ -52,13 +48,13 @@ The following arguments are supported:
 * `availability_zone` - (Optional) The availability zone name. Changing this parameter will create
   a new resource.
 
-* `access_level` - (Required) The access level of the shared file system. Changing this will create
+* `access_level` - (Optional) The access level of the shared file system. Changing this will create
   a new access rule.
 
 * `access_type` - (Optional) The type of the share access rule. Changing this will create a new
   access rule.
 
-* `access_to` - (Required) The access that the back end grants or denies. Changing this will
+* `access_to` - (Optional) The access that the back end grants or denies. Changing this will
   create new access rule.
 
 * `tags` - (Optional) Tags key/value pairs to associate with the SFS File System.
@@ -82,7 +78,7 @@ In addition to all arguments above, the following attributes are exported:
 
 * `share_access_id` - The UUID of the share access rule.
 
-* `access_rules_status` - The status of the share access rule.
+* `access_rule_status` - The status of the share access rule.
 
 * `tags` - See Argument Reference above.
 
@@ -90,6 +86,6 @@ In addition to all arguments above, the following attributes are exported:
 
 SFS can be imported using the `id`, e.g.
 
-```sh
+```shell
 terraform import opentelekomcloud_sfs_file_system_v2 4779ab1c-7c1a-44b1-a02e-93dfc361b32d
 ```

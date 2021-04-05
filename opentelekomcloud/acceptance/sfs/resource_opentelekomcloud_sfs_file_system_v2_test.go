@@ -73,6 +73,24 @@ func TestAccSFSFileSystemV2_timeout(t *testing.T) {
 	})
 }
 
+func TestAccSFSFileSystemV2_clean(t *testing.T) {
+	var share shares.Share
+
+	resource.Test(t, resource.TestCase{
+		PreCheck:     func() { common.TestAccPreCheck(t) },
+		Providers:    common.TestAccProviders,
+		CheckDestroy: testAccCheckSFSFileSystemV2Destroy,
+		Steps: []resource.TestStep{
+			{
+				Config: testAccSFSFileSystemV2_clean,
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckSFSFileSystemV2Exists("opentelekomcloud_sfs_file_system_v2.sfs_1", &share),
+				),
+			},
+		},
+	})
+}
+
 func testAccCheckSFSFileSystemV2Destroy(s *terraform.State) error {
 	config := common.TestAccProvider.Meta().(*cfg.Config)
 	client, err := config.SfsV2Client(env.OS_REGION_NAME)
@@ -176,3 +194,12 @@ resource "opentelekomcloud_sfs_file_system_v2" "sfs_1" {
     delete = "5m"
   }
 }`, env.OS_VPC_ID)
+
+var testAccSFSFileSystemV2_clean = fmt.Sprintf(`
+resource "opentelekomcloud_sfs_file_system_v2" "sfs_1" {
+  share_proto       = "NFS"
+  size              = 1
+  name              = "sfs-test1"
+  availability_zone = "eu-de-01"
+}
+`)
