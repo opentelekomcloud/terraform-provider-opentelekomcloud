@@ -10,12 +10,12 @@ import (
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common/cfg"
 )
 
-func ResourceSFSShareAccessRuleV2() *schema.Resource {
+func ResourceSFSShareAccessRulesV2() *schema.Resource {
 	return &schema.Resource{
-		Create: resourceSFSShareAccessRuleV2Create,
-		Read:   resourceSFSShareAccessRuleV2Read,
-		Update: resourceSFSShareAccessRuleV2Update,
-		Delete: resourceSFSShareAccessRuleV2Delete,
+		Create: resourceSFSShareAccessRulesV2Create,
+		Read:   resourceSFSShareAccessRulesV2Read,
+		Update: resourceSFSShareAccessRulesV2Update,
+		Delete: resourceSFSShareAccessRulesV2Delete,
 
 		Importer: &schema.ResourceImporter{
 			State: schema.ImportStatePassthrough,
@@ -61,7 +61,7 @@ func ResourceSFSShareAccessRuleV2() *schema.Resource {
 	}
 }
 
-func resourceSFSShareAccessRuleV2Create(d *schema.ResourceData, meta interface{}) error {
+func resourceSFSShareAccessRulesV2Create(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*cfg.Config)
 	client, err := config.SfsV2Client(config.GetRegion(d))
 	if err != nil {
@@ -85,10 +85,10 @@ func resourceSFSShareAccessRuleV2Create(d *schema.ResourceData, meta interface{}
 
 	d.SetId(shareID)
 
-	return resourceSFSShareAccessRuleV2Read(d, meta)
+	return resourceSFSShareAccessRulesV2Read(d, meta)
 }
 
-func resourceSFSShareAccessRuleV2Read(d *schema.ResourceData, meta interface{}) error {
+func resourceSFSShareAccessRulesV2Read(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*cfg.Config)
 	client, err := config.SfsV2Client(config.GetRegion(d))
 	if err != nil {
@@ -128,7 +128,7 @@ func resourceSFSShareAccessRuleV2Read(d *schema.ResourceData, meta interface{}) 
 	return nil
 }
 
-func resourceSFSShareAccessRuleV2Update(d *schema.ResourceData, meta interface{}) error {
+func resourceSFSShareAccessRulesV2Update(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*cfg.Config)
 	client, err := config.SfsV2Client(config.GetRegion(d))
 	if err != nil {
@@ -164,10 +164,10 @@ func resourceSFSShareAccessRuleV2Update(d *schema.ResourceData, meta interface{}
 		}
 	}
 
-	return resourceSFSShareAccessRuleV2Read(d, meta)
+	return resourceSFSShareAccessRulesV2Read(d, meta)
 }
 
-func resourceSFSShareAccessRuleV2Delete(d *schema.ResourceData, meta interface{}) error {
+func resourceSFSShareAccessRulesV2Delete(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*cfg.Config)
 	client, err := config.SfsV2Client(config.GetRegion(d))
 	if err != nil {

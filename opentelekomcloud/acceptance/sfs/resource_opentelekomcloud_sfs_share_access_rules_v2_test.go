@@ -14,7 +14,7 @@ import (
 )
 
 func TestAccSFSShareAccessRuleV2_basic(t *testing.T) {
-	resourceName := "opentelekomcloud_sfs_share_access_rule_v2.sfs_rules"
+	resourceName := "opentelekomcloud_sfs_share_access_rules_v2.sfs_rules"
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:     func() { common.TestAccPreCheck(t) },
@@ -45,7 +45,7 @@ func testAccCheckSFSShareAccessRuleV2Destroy(s *terraform.State) error {
 	}
 
 	for _, rs := range s.RootModule().Resources {
-		if rs.Type != "opentelekomcloud_sfs_share_access_rule_v2" {
+		if rs.Type != "opentelekomcloud_sfs_share_access_rules_v2" {
 			continue
 		}
 
@@ -76,7 +76,7 @@ resource "opentelekomcloud_sfs_file_system_v2" "sfs_1" {
   availability_zone = "eu-de-01"
 }
 
-resource "opentelekomcloud_sfs_share_access_rule_v2" "sfs_rules" {
+resource "opentelekomcloud_sfs_share_access_rules_v2" "sfs_rules" {
   share_id = opentelekomcloud_sfs_file_system_v2.sfs_1.id
 
   access_rules {
@@ -111,7 +111,7 @@ resource "opentelekomcloud_sfs_file_system_v2" "sfs_1" {
   availability_zone = "eu-de-01"
 }
 
-resource "opentelekomcloud_sfs_share_access_rule_v2" "sfs_rules" {
+resource "opentelekomcloud_sfs_share_access_rules_v2" "sfs_rules" {
   share_id = opentelekomcloud_sfs_file_system_v2.sfs_1.id
 
   access_rules {

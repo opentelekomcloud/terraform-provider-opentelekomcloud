@@ -2,7 +2,7 @@
 subcategory: "Scalable File Service (SFS)"
 ---
 
-# opentelekomcloud_sfs_share_access_rule_v2
+# opentelekomcloud_sfs_share_access_rules_v2
 
 Provides a Scalable File System resource.
 
@@ -30,7 +30,7 @@ resource "opentelekomcloud_sfs_file_system_v2" "sfs_1" {
   share_proto  = "NFS"
 }
 
-resource "opentelekomcloud_sfs_share_access_rule_v2" "sfs_rules" {
+resource "opentelekomcloud_sfs_share_access_rules_v2" "sfs_rules" {
   share_id = opentelekomcloud_sfs_file_system_v2.sfs_1.id
 
   access_rules {
@@ -81,5 +81,5 @@ In addition to all arguments above, the following attributes are exported:
 SFS access rules can be imported using the `id` of the file share, e.g.
 
 ```shell
-terraform import opentelekomcloud_sfs_share_access_rule_v2 4779ab1c-7c1a-44b1-a02e-93dfc361b32d
+terraform import opentelekomcloud_sfs_share_access_rules_v2 4779ab1c-7c1a-44b1-a02e-93dfc361b32d
 ```
