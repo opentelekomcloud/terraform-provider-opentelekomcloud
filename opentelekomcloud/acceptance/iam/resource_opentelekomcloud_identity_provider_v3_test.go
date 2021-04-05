@@ -52,7 +52,7 @@ func testAccCheckIdentityV3ProviderDestroy(s *terraform.State) error {
 	config := common.TestAccProvider.Meta().(*cfg.Config)
 	identityClient, err := config.IdentityV3Client(env.OS_REGION_NAME)
 	if err != nil {
-		return fmt.Errorf("error creating identity v3 client: %w", err)
+		return fmt.Errorf("error creating OpenTelekomCloud identity v3 client: %w", err)
 	}
 
 	for _, rs := range s.RootModule().Resources {
