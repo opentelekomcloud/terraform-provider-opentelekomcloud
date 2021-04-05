@@ -4,7 +4,7 @@ subcategory: "Scalable File Service (SFS)"
 
 # opentelekomcloud_sfs_share_access_rules_v2
 
-Provides a Scalable File System resource.
+Provides a possibility to manage access rules of Scalable File System resource.
 
 ## Example Usage
 
