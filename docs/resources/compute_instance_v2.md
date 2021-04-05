@@ -336,6 +336,12 @@ otherwise it will return an error.
 * `auto_recovery` - (Optional) Configures or deletes automatic recovery of an instance.
   Defaults to true.
 
+* `power_state` - (Optional) Provide the VM state. Only `active` and `shutoff` are supported values.
+
+  ->
+  If the initial `power_state` is the `shutoff` the VM will be stopped immediately after build,
+  and the provisioners like remote-exec or files are not supported.
+
 The `network` block supports:
 
 * `uuid` - (Required unless `port`  or `name` is provided) The network UUID to

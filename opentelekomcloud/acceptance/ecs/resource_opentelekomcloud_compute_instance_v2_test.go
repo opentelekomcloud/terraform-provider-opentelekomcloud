@@ -2,6 +2,7 @@ package acceptance
 
 import (
 	"fmt"
+	"strings"
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
@@ -271,6 +272,88 @@ func TestAccComputeV2Instance_crazyNICs(t *testing.T) {
 				Config: testAccComputeV2Instance_crazyNICs,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckComputeV2InstanceExists(resourceName, &instance),
+				),
+			},
+		},
+	})
+}
+
+func TestAccComputeV2Instance_initialStateActive(t *testing.T) {
+	var instance servers.Server
+
+	resource.Test(t, resource.TestCase{
+		PreCheck: func() {
+			common.TestAccPreCheck(t)
+		},
+		Providers:    common.TestAccProviders,
+		CheckDestroy: TestAccCheckComputeV2InstanceDestroy,
+		Steps: []resource.TestStep{
+			{
+				Config: testAccComputeV2Instance_active,
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckComputeV2InstanceExists("opentelekomcloud_compute_instance_v2.instance_1", &instance),
+					resource.TestCheckResourceAttr(
+						"opentelekomcloud_compute_instance_v2.instance_1", "power_state", "active"),
+					testAccCheckComputeV2InstanceState(&instance, "active"),
+				),
+			},
+			{
+				Config: testAccComputeV2Instance_shutoff,
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckComputeV2InstanceExists("opentelekomcloud_compute_instance_v2.instance_1", &instance),
+					resource.TestCheckResourceAttr(
+						"opentelekomcloud_compute_instance_v2.instance_1", "power_state", "shutoff"),
+					testAccCheckComputeV2InstanceState(&instance, "shutoff"),
+				),
+			},
+			{
+				Config: testAccComputeV2Instance_active,
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckComputeV2InstanceExists("opentelekomcloud_compute_instance_v2.instance_1", &instance),
+					resource.TestCheckResourceAttr(
+						"opentelekomcloud_compute_instance_v2.instance_1", "power_state", "active"),
+					testAccCheckComputeV2InstanceState(&instance, "active"),
+				),
+			},
+		},
+	})
+}
+
+func TestAccComputeV2Instance_initialStateShutoff(t *testing.T) {
+	var instance servers.Server
+
+	resource.Test(t, resource.TestCase{
+		PreCheck: func() {
+			common.TestAccPreCheck(t)
+		},
+		Providers:    common.TestAccProviders,
+		CheckDestroy: TestAccCheckComputeV2InstanceDestroy,
+		Steps: []resource.TestStep{
+			{
+				Config: testAccComputeV2Instance_shutoff,
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckComputeV2InstanceExists("opentelekomcloud_compute_instance_v2.instance_1", &instance),
+					resource.TestCheckResourceAttr(
+						"opentelekomcloud_compute_instance_v2.instance_1", "power_state", "shutoff"),
+					testAccCheckComputeV2InstanceState(&instance, "shutoff"),
+				),
+			},
+			{
+				Config: testAccComputeV2Instance_active,
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckComputeV2InstanceExists("opentelekomcloud_compute_instance_v2.instance_1", &instance),
+					resource.TestCheckResourceAttr(
+						"opentelekomcloud_compute_instance_v2.instance_1", "power_state", "active"),
+					testAccCheckComputeV2InstanceState(&instance, "active"),
+				),
+			},
+			{
+				Config: testAccComputeV2Instance_shutoff,
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckComputeV2InstanceExists("opentelekomcloud_compute_instance_v2.instance_1", &instance),
+					resource.TestCheckResourceAttr(
+						"opentelekomcloud_compute_instance_v2.instance_1", "power_state", "shutoff"),
+					testAccCheckComputeV2InstanceState(&instance, "shutoff"),
 				),
 			},
 		},
@@ -718,3 +801,36 @@ resource "opentelekomcloud_compute_instance_v2" "instance_1" {
   }
 }
 `, env.OS_NETWORK_ID)
+
+var testAccComputeV2Instance_active = fmt.Sprintf(`
+resource "opentelekomcloud_compute_instance_v2" "instance_1" {
+  name = "instance_1"
+  security_groups = ["default"]
+  power_state = "active"
+  network {
+    uuid = "%s"
+  }
+}
+`, env.OS_NETWORK_ID)
+
+var testAccComputeV2Instance_shutoff = fmt.Sprintf(`
+resource "opentelekomcloud_compute_instance_v2" "instance_1" {
+  name = "instance_1"
+  security_groups = ["default"]
+  power_state = "shutoff"
+  network {
+    uuid = "%s"
+  }
+}
+`, env.OS_NETWORK_ID)
+
+func testAccCheckComputeV2InstanceState(
+	instance *servers.Server, state string) resource.TestCheckFunc {
+	return func(s *terraform.State) error {
+		if strings.ToLower(instance.Status) != state {
+			return fmt.Errorf("Instance state is not match")
+		}
+
+		return nil
+	}
+}
