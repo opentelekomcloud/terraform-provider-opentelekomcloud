@@ -27,7 +27,7 @@ func ResourceSFSShareAccessRulesV2() *schema.Resource {
 				Required: true,
 				ForceNew: true,
 			},
-			"rule": {
+			"access_rule": {
 				Type:     schema.TypeList,
 				Required: true,
 				MaxItems: 20,
@@ -69,7 +69,7 @@ func resourceSFSShareAccessRulesV2Create(d *schema.ResourceData, meta interface{
 	}
 
 	shareID := d.Get("share_id").(string)
-	accessRules := d.Get("rule").([]interface{})
+	accessRules := d.Get("access_rule").([]interface{})
 	for _, rule := range accessRules {
 		accessRuleMap := rule.(map[string]interface{})
 		grantAccessOpts := shares.GrantAccessOpts{
@@ -117,8 +117,8 @@ func resourceSFSShareAccessRulesV2Read(d *schema.ResourceData, meta interface{})
 		accessRules = append(accessRules, accessRule)
 	}
 
-	if err := d.Set("rule", accessRules); err != nil {
-		return fmt.Errorf("error saving access_rules to state for OpenTelekomCloud File Share: %w", err)
+	if err := d.Set("access_rule", accessRules); err != nil {
+		return fmt.Errorf("error saving access_rule to state for OpenTelekomCloud File Share: %w", err)
 	}
 
 	if err := d.Set("share_id", d.Id()); err != nil {
@@ -135,8 +135,8 @@ func resourceSFSShareAccessRulesV2Update(d *schema.ResourceData, meta interface{
 		return fmt.Errorf("error creating OpenTelekomCloud File Share client: %w", err)
 	}
 
-	if d.HasChange("access_rules") {
-		oldMapRaw, newMapRaw := d.GetChange("access_rules")
+	if d.HasChange("access_rule") {
+		oldMapRaw, newMapRaw := d.GetChange("access_rule")
 		oldMap := oldMapRaw.([]interface{})
 		newMap := newMapRaw.([]interface{})
 
@@ -174,7 +174,7 @@ func resourceSFSShareAccessRulesV2Delete(d *schema.ResourceData, meta interface{
 		return fmt.Errorf("error creating OpenTelekomCloud File Share client: %w", err)
 	}
 
-	accessRules := d.Get("rule").([]interface{})
+	accessRules := d.Get("access_rule").([]interface{})
 	for _, rule := range accessRules {
 		accessRuleMap := rule.(map[string]interface{})
 		deleteAccessOpts := shares.DeleteAccessOpts{
