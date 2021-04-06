@@ -143,6 +143,6 @@ The `nodes` block contains:
 
 This resource provides the following timeouts configuration options:
 
-* `create` - Default is 20 minute.
+* `create` - Default is 20 minutes.
 
-* `update` - Default is 30 minute.
+* `update` - Default is 30 minutes.
