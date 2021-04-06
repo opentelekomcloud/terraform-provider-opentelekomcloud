@@ -57,9 +57,11 @@ The following arguments are supported:
 
 The `access_rule` block supports:
 
-* `access_level` - (Required) The access level of the shared file system.
+* `access_level` - (Required) The access level of the shared file system. Possible values are `ro` (read-only)
+  and `rw` (read-write). The default value is `rw` (read/write).
 
-* `access_type` - (Optional) The type of the share access rule.
+* `access_type` - (Optional) The type of the share access rule. The value `cert` indicates
+  that the certificate is used to access the storage.
 
 * `access_to` - (Required) The access that the back end grants or denies.
 
