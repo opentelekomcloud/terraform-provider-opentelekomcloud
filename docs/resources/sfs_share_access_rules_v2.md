@@ -18,6 +18,11 @@ resource "opentelekomcloud_vpc_v1" "vpc_1" {
   cidr   = "192.168.0.0/16"
 }
 
+resource "opentelekomcloud_vpc_v1" "vpc_2" {
+  name   = "sfs_share_vpc_2"
+  cidr   = "192.168.0.0/16"
+}
+
 resource "opentelekomcloud_sfs_file_system_v2" "sfs_1" {
   name         = var.share_name
   size         = 50
@@ -28,8 +33,14 @@ resource "opentelekomcloud_sfs_file_system_v2" "sfs_1" {
 resource "opentelekomcloud_sfs_share_access_rules_v2" "sfs_rules" {
   share_id = opentelekomcloud_sfs_file_system_v2.sfs_1.id
 
-  rule {
+  access_rule {
     access_to    = opentelekomcloud_vpc_v1.vpc_1.id
+    access_type  = "cert"
+    access_level = "rw"
+  }
+
+  access_rule {
+    access_to    = opentelekomcloud_vpc_v1.vpc_2.id
     access_type  = "cert"
     access_level = "rw"
   }
@@ -42,9 +53,9 @@ The following arguments are supported:
 
 * `share_id` - (Required) The UUID of the shared file system.
 
-* `access_rules` - (Required) Specifies the access rules of SFS file share. Structure is documented below.
+* `access_rule` - (Required) Specifies the access rules of SFS file share. Structure is documented below.
 
-The `access_rules` block supports:
+The `access_rule` block supports:
 
 * `access_level` - (Required) The access level of the shared file system.
 
@@ -56,9 +67,9 @@ The `access_rules` block supports:
 
 In addition to all arguments above, the following attributes are exported:
 
-* `access_rules` - See Argument Reference above. The `access_rules` block also contains:
+* `access_rule` - See Argument Reference above. The `access_rule` block also contains:
 
-The `access_rules` block supports:
+The `access_rule` block supports:
 
 * `share_access_id` - The UUID of the share access rule.
 
