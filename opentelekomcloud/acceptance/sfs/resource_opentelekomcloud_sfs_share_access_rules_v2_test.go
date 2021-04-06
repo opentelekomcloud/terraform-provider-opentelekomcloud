@@ -24,13 +24,13 @@ func TestAccSFSShareAccessRulesV2_basic(t *testing.T) {
 			{
 				Config: testAccSFSShareAccessRulesV2_basic,
 				Check: resource.ComposeTestCheckFunc(
-					resource.TestCheckResourceAttr(resourceName, "access_rules.#", "2"),
+					resource.TestCheckResourceAttr(resourceName, "rule.#", "2"),
 				),
 			},
 			{
 				Config: testAccSFSShareAccessRulesV2_update,
 				Check: resource.ComposeTestCheckFunc(
-					resource.TestCheckResourceAttr(resourceName, "access_rules.#", "1"),
+					resource.TestCheckResourceAttr(resourceName, "rule.#", "1"),
 				),
 			},
 		},
@@ -79,13 +79,13 @@ resource "opentelekomcloud_sfs_file_system_v2" "sfs_1" {
 resource "opentelekomcloud_sfs_share_access_rules_v2" "sfs_rules" {
   share_id = opentelekomcloud_sfs_file_system_v2.sfs_1.id
 
-  access_rules {
+  rule {
     access_to    = opentelekomcloud_vpc_v1.vpc_1.id
     access_type  = "cert"
     access_level = "rw"
   }
 
-  access_rules {
+  rule {
     access_to    = opentelekomcloud_vpc_v1.vpc_2.id
     access_type  = "cert"
     access_level = "rw"
@@ -114,7 +114,7 @@ resource "opentelekomcloud_sfs_file_system_v2" "sfs_1" {
 resource "opentelekomcloud_sfs_share_access_rules_v2" "sfs_rules" {
   share_id = opentelekomcloud_sfs_file_system_v2.sfs_1.id
 
-  access_rules {
+  rule {
     access_to    = opentelekomcloud_vpc_v1.vpc_1.id
     access_type  = "cert"
     access_level = "rw"
