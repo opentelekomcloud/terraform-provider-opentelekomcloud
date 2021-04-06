@@ -1,9 +1,9 @@
 ---
 name: "Feature Request/Idea ☁"
-about: Suggest a new resource or data-source
+about: Suggest a new feature or enhancement
 title: ''
-labels: new-data-source, new-resource
+labels: enhancement
 assignees: ''
 ---
 
-# Description of the new resource/data-source
+# Description of the enhancement
