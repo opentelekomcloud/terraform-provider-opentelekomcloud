@@ -40,14 +40,14 @@ The following arguments are supported:
 
 -> **Note:** The `.` at the end of the name.
 
-* `type` - (Optional) The type of record set. Examples: "A", "MX".
+* `type` - (Required) The type of record set. Examples: "A", "MX".
   Changing this creates a new DNS  record set.
 
 * `ttl` - (Optional) The time to live (TTL) of the record set.
 
 * `description` - (Optional) A description of the  record set.
 
-* `records` - (Optional) An array of DNS records.
+* `records` - (Required) An array of DNS records.
 
 * `tags` - (Optional) The key/value pairs to associate with the zone.
 
