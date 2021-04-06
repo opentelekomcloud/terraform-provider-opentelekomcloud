@@ -6,11 +6,13 @@ import (
 	"encoding/hex"
 	"fmt"
 	"log"
+	"strings"
 	"time"
 
 	"github.com/hashicorp/terraform-plugin-sdk/helper/hashcode"
 	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/helper/validation"
 	"github.com/opentelekomcloud/gophertelekomcloud"
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/common/tags"
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/compute/v2/extensions/availabilityzones"
@@ -300,6 +302,15 @@ func ResourceComputeInstanceV2() *schema.Resource {
 				Optional: true,
 				Default:  false,
 			},
+			"power_state": {
+				Type:     schema.TypeString,
+				Optional: true,
+				Default:  "active",
+				ValidateFunc: validation.StringInSlice([]string{
+					"active", "shutoff",
+				}, true),
+				DiffSuppressFunc: suppressPowerStateDiffs,
+			},
 			"tags": common.TagsSchema(),
 			"all_metadata": {
 				Type:     schema.TypeMap,
@@ -443,6 +454,30 @@ func resourceComputeInstanceV2Create(d *schema.ResourceData, meta interface{}) e
 		return fmt.Errorf("error waiting for instance (%s) to become ready: %s", server.ID, err)
 	}
 
+	// Store the ID now
+	d.SetId(server.ID)
+
+	vmState := d.Get("power_state").(string)
+	if strings.ToLower(vmState) == "shutoff" {
+		err = startstop.Stop(client, d.Id()).ExtractErr()
+		if err != nil {
+			return fmt.Errorf("error stopping server instance: %s", err)
+		}
+		stopStateConf := &resource.StateChangeConf{
+			Target:     []string{"SHUTOFF"},
+			Refresh:    ServerV2StateRefreshFunc(client, d.Id()),
+			Timeout:    d.Timeout(schema.TimeoutCreate),
+			Delay:      10 * time.Second,
+			MinTimeout: 3 * time.Second,
+		}
+
+		log.Printf("[DEBUG] Waiting for instance (%s) to stop", d.Id())
+		_, err = stopStateConf.WaitForState()
+		if err != nil {
+			return fmt.Errorf("error waiting for instance (%s) to become inactive(shutoff): %w", d.Id(), err)
+		}
+	}
+
 	if common.HasFilledOpt(d, "auto_recovery") {
 		ar := d.Get("auto_recovery").(bool)
 		log.Printf("[DEBUG] Set auto recovery of instance to %t", ar)
@@ -464,9 +499,6 @@ func resourceComputeInstanceV2Create(d *schema.ResourceData, meta interface{}) e
 			return fmt.Errorf("error setting tags of CloudServer: %s", err)
 		}
 	}
-
-	// Store the ID now
-	d.SetId(server.ID)
 
 	return resourceComputeInstanceV2Read(d, meta)
 }
@@ -579,6 +611,15 @@ func resourceComputeInstanceV2Read(d *schema.ResourceData, meta interface{}) err
 	// Set the region
 	d.Set("region", config.GetRegion(d))
 
+	// Set the current power_state
+	currentStatus := strings.ToLower(server.Status)
+	switch currentStatus {
+	case "active", "shutoff", "error", "migrating", "shelved_offloaded", "shelved":
+		d.Set("power_state", currentStatus)
+	default:
+		return fmt.Errorf("Invalid power_state for instance %s: %s", d.Id(), server.Status)
+	}
+
 	ar, err := resourceECSAutoRecoveryV1Read(d, meta, d.Id())
 	if err != nil && !common.IsResourceNotFound(err) {
 		return fmt.Errorf("error reading auto recovery of instance: %s", err)
@@ -618,6 +659,48 @@ func resourceComputeInstanceV2Update(d *schema.ResourceData, meta interface{}) e
 		_, err := servers.Update(client, d.Id(), updateOpts).Extract()
 		if err != nil {
 			return fmt.Errorf("error updating OpenTelekomCloud server: %s", err)
+		}
+	}
+
+	if d.HasChange("power_state") {
+		powerStateNew := d.Get("power_state").(string)
+		if strings.ToLower(powerStateNew) == "shutoff" {
+			err = startstop.Stop(client, d.Id()).ExtractErr()
+			if err != nil {
+				return fmt.Errorf("error stopping OpenStack instance: %s", err)
+			}
+			stopStateConf := &resource.StateChangeConf{
+				Target:     []string{"SHUTOFF"},
+				Refresh:    ServerV2StateRefreshFunc(client, d.Id()),
+				Timeout:    d.Timeout(schema.TimeoutUpdate),
+				Delay:      10 * time.Second,
+				MinTimeout: 3 * time.Second,
+			}
+
+			log.Printf("[DEBUG] Waiting for instance (%s) to stop", d.Id())
+			_, err = stopStateConf.WaitForState()
+			if err != nil {
+				return fmt.Errorf("error waiting for instance (%s) to become inactive(shutoff): %s", d.Id(), err)
+			}
+		}
+		if strings.ToLower(powerStateNew) == "active" {
+			err = startstop.Start(client, d.Id()).ExtractErr()
+			if err != nil {
+				return fmt.Errorf("error starting OpenStack instance: %s", err)
+			}
+			startStateConf := &resource.StateChangeConf{
+				Target:     []string{"ACTIVE"},
+				Refresh:    ServerV2StateRefreshFunc(client, d.Id()),
+				Timeout:    d.Timeout(schema.TimeoutUpdate),
+				Delay:      10 * time.Second,
+				MinTimeout: 3 * time.Second,
+			}
+
+			log.Printf("[DEBUG] Waiting for instance (%s) to start/unshelve", d.Id())
+			_, err = startStateConf.WaitForState()
+			if err != nil {
+				return fmt.Errorf("Error waiting for instance (%s) to become active: %s", d.Id(), err)
+			}
 		}
 	}
 
@@ -1075,4 +1158,13 @@ func checkBlockDeviceConfig(d *schema.ResourceData) error {
 	}
 
 	return nil
+}
+
+// suppressPowerStateDiffs will allow a state of "error" or "migrating" even though we don't
+// allow them as a user input.
+func suppressPowerStateDiffs(_, old, _ string, _ *schema.ResourceData) bool {
+	if old == "error" || old == "migrating" {
+		return true
+	}
+	return false
 }
