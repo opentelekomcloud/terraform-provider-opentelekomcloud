@@ -1,6 +1,25 @@
 ## 1.24.0 (Unreleased)
 
 
+## 1.23.6 (April 08, 2021)
+
+FEATURES:
+* **New Resource:** `opentelekomcloud_identity_provider_v3` ([#946](https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/issues/946))
+* **New Resource:** `opentelekomcloud_identity_mapping_v3` ([#947](https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/issues/947))
+* **New Resource:** `opentelekomcloud_sfs_share_access_rules_v2` ([#955](https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/issues/955))
+* **New Resource:** `opentelekomcloud_sdrs_protected_instance_v1` ([#963](https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/issues/963))
+
+ENHANCEMENTS:
+* `resource/opentelekomcloud_cce_node_v3`: Allow to set a `private_ip` ([#938](https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/issues/938))
+* `resource/opentelekomcloud_as_configuration_v1`: Allow to set a `security_groups` ([#941](https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/issues/941))
+* `resource/opentelekomcloud_cce_nodepool_v3`: Increase timeouts ([#945](https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/issues/945))
+* `resource/opentelekomcloud_sfs_file_share_v2`: Make `access` params optional ([#953](https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/issues/953))
+* `resource/opentelekomcloud_ompute_instance_v2`: Add possibility to set `power_state` param  ([#956](https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/issues/956))
+
+DOCUMENTATION:
+* `resource/opentelekomcloud_ecs_instance_v1`: Clarify that `nics` is required ([#951](https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/issues/951))
+* `resource/opentelekomcloud_dns_recordset_v2`: Clarify that `type` and `records` are required ([#961](https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/issues/961))
+
 ## 1.23.5 (March 24, 2021)
 
 ENHANCEMENTS:
