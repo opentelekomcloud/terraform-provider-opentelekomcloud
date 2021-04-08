@@ -10,7 +10,7 @@ Manages a SDRS protected instance resource within OpenTelekomCloud.
 
 ```hcl
 resource "opentelekomcloud_sdrs_protectiongroup_v1" "group_1" {
-  name        = "group_1"
+  name = "group_1"
 
   source_availability_zone = "eu-de-01"
   target_availability_zone = "eu-de-02"
@@ -53,19 +53,18 @@ The following arguments are supported:
 
 * `name` - (Required) The name of a protected instance.
 
-* `description` - (Optional) The description of a protected instance. Changing this creates a new instance.
+* `description` - (Optional) The description of a protected instance. Changing this creates a new instance. Changing this will create a new resource.
 
-* `group_id` - (Required) Specifies the ID of the protection group where a protected instance is added.
+* `group_id` - (Required) Specifies the ID of the protection group where a protected instance is added. Changing this will create a new resource.
 
-* `server_id` - (Required) Specifies the ID of the production site server.
+* `server_id` - (Required) Specifies the ID of the protected ECS instance. Changing this will create a new resource.
 
--> When the API is successfully invoked, the DR site server will be automatically created.
+-> When the API is successfully invoked, the disaster recovery instance will be automatically created.
 
-* `subnet_id` - (Optional) Specifies the network ID of the subnet for the primary NIC on the DR site server.
-  The value is the same as that of `network_id` obtained using the VPC API.
+* `subnet_id` - (Optional) Specifies the network ID of the subnet. Changing this will create a new resource.
 
 * `ip_address` - (Optional) Specifies the IP address of the primary NIC on the DR site server.
-  This parameter is valid only when `subnet_id` is specified.
+  This parameter is valid only when `subnet_id` is specified. Changing this will create a new resource.
 
 * `delete_target_server` - (Optional) Specifies whether to delete the DR site server. The default value is `false`.
 
