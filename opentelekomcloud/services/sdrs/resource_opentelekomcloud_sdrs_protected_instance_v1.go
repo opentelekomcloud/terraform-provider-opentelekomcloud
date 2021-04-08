@@ -79,10 +79,12 @@ func ResourceSdrsProtectedInstanceV1() *schema.Resource {
 			"delete_target_server": {
 				Type:     schema.TypeString,
 				Optional: true,
+				Default:  false,
 			},
 			"delete_target_eip": {
 				Type:     schema.TypeString,
 				Optional: true,
+				Default:  false,
 			},
 			"tags": common.TagsSchema(),
 		},
