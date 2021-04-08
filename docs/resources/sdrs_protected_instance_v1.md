@@ -62,7 +62,7 @@ The following arguments are supported:
 -> When the API is successfully invoked, the DR site server will be automatically created.
 
 * `subnet_id` - (Optional) Specifies the network ID of the subnet for the primary NIC on the DR site server.
-  The value is the same as that of `neutron_network_id` obtained using the VPC API.
+  The value is the same as that of `network_id` obtained using the VPC API.
 
 * `ip_address` - (Optional) Specifies the IP address of the primary NIC on the DR site server.
   This parameter is valid only when `subnet_id` is specified.
