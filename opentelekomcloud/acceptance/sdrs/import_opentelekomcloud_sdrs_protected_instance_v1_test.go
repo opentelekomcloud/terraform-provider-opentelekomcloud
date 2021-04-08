@@ -24,6 +24,9 @@ func TestAccSdrsProtectedInstanceV1_importBasic(t *testing.T) {
 				ResourceName:      resourceName,
 				ImportState:       true,
 				ImportStateVerify: true,
+				ImportStateVerifyIgnore: []string{
+					"delete_target_eip", "delete_target_server",
+				},
 			},
 		},
 	})
