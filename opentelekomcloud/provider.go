@@ -390,6 +390,7 @@ func Provider() terraform.ResourceProvider {
 			"opentelekomcloud_vbs_backup_policy_v2":               vbs.ResourceVBSBackupPolicyV2(),
 			"opentelekomcloud_vbs_backup_v2":                      vbs.ResourceVBSBackupV2(),
 			"opentelekomcloud_vbs_backup_share_v2":                vbs.ResourceVBSBackupShareV2(),
+			"opentelekomcloud_sdrs_protected_instance_v1":         sdrs.ResourceSdrsProtectedInstanceV1(),
 			"opentelekomcloud_sdrs_protectiongroup_v1":            sdrs.ResourceSdrsProtectiongroupV1(),
 			"opentelekomcloud_vpnaas_ipsec_policy_v2":             vpn.ResourceVpnIPSecPolicyV2(),
 			"opentelekomcloud_vpnaas_service_v2":                  vpn.ResourceVpnServiceV2(),

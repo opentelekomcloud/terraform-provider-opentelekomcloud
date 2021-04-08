@@ -20,13 +20,14 @@ func ResourceSdrsProtectedInstanceV1() *schema.Resource {
 		Read:   resourceSdrsProtectedInstanceV1Read,
 		Update: resourceSdrsProtectedInstanceV1Update,
 		Delete: resourceSdrsProtectedInstanceV1Delete,
+
 		Importer: &schema.ResourceImporter{
 			State: schema.ImportStatePassthrough,
 		},
 
 		Timeouts: &schema.ResourceTimeout{
-			Create: schema.DefaultTimeout(10 * time.Minute),
-			Delete: schema.DefaultTimeout(10 * time.Minute),
+			Create: schema.DefaultTimeout(20 * time.Minute),
+			Delete: schema.DefaultTimeout(20 * time.Minute),
 		},
 
 		Schema: map[string]*schema.Schema{
@@ -78,12 +79,10 @@ func ResourceSdrsProtectedInstanceV1() *schema.Resource {
 			"delete_target_server": {
 				Type:     schema.TypeString,
 				Optional: true,
-				ForceNew: true,
 			},
 			"delete_target_eip": {
 				Type:     schema.TypeString,
 				Optional: true,
-				ForceNew: true,
 			},
 			"tags": common.TagsSchema(),
 		},
@@ -194,11 +193,7 @@ func resourceSdrsProtectedInstanceV1Update(d *schema.ResourceData, meta interfac
 
 	// update tags
 	if d.HasChange("tags") {
-		computeClient, err := config.ComputeV1Client(config.GetRegion(d))
-		if err != nil {
-			return fmt.Errorf("error creating OpenTelekomCloud ComputeV1 client: %s", err)
-		}
-		if err := common.UpdateResourceTags(computeClient, d, "protected-instances", d.Id()); err != nil {
+		if err := common.UpdateResourceTags(client, d, "protected-instances", d.Id()); err != nil {
 			return fmt.Errorf("error updating tags of SDRS Protected Instance %s: %s", d.Id(), err)
 		}
 	}
