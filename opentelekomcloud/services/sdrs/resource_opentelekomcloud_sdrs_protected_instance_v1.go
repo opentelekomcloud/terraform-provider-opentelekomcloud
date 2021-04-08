@@ -1,0 +1,237 @@
+package sdrs
+
+import (
+	"fmt"
+	"time"
+
+	"github.com/hashicorp/go-multierror"
+	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
+	"github.com/opentelekomcloud/gophertelekomcloud"
+	"github.com/opentelekomcloud/gophertelekomcloud/openstack/common/tags"
+	"github.com/opentelekomcloud/gophertelekomcloud/openstack/sdrs/v1/protectedinstances"
+
+	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common"
+	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common/cfg"
+)
+
+func ResourceSdrsProtectedInstanceV1() *schema.Resource {
+	return &schema.Resource{
+		Create: resourceSdrsProtectedInstanceV1Create,
+		Read:   resourceSdrsProtectedInstanceV1Read,
+		Update: resourceSdrsProtectedInstanceV1Update,
+		Delete: resourceSdrsProtectedInstanceV1Delete,
+
+		Importer: &schema.ResourceImporter{
+			State: schema.ImportStatePassthrough,
+		},
+
+		Timeouts: &schema.ResourceTimeout{
+			Create: schema.DefaultTimeout(20 * time.Minute),
+			Delete: schema.DefaultTimeout(20 * time.Minute),
+		},
+
+		Schema: map[string]*schema.Schema{
+			"name": {
+				Type:     schema.TypeString,
+				Required: true,
+			},
+			"description": {
+				Type:     schema.TypeString,
+				Optional: true,
+				ForceNew: true,
+			},
+			"group_id": {
+				Type:     schema.TypeString,
+				Required: true,
+				ForceNew: true,
+			},
+			"server_id": {
+				Type:     schema.TypeString,
+				Required: true,
+				ForceNew: true,
+			},
+			"subnet_id": {
+				Type:     schema.TypeString,
+				Optional: true,
+				ForceNew: true,
+			},
+			"ip_address": {
+				Type:     schema.TypeString,
+				Optional: true,
+				ForceNew: true,
+			},
+			"priority_station": {
+				Type:     schema.TypeString,
+				Computed: true,
+			},
+			"target_id": {
+				Type:     schema.TypeString,
+				Computed: true,
+			},
+			"created_at": {
+				Type:     schema.TypeString,
+				Computed: true,
+			},
+			"updated_at": {
+				Type:     schema.TypeString,
+				Computed: true,
+			},
+			"delete_target_server": {
+				Type:     schema.TypeBool,
+				Optional: true,
+				Default:  false,
+			},
+			"delete_target_eip": {
+				Type:     schema.TypeBool,
+				Optional: true,
+				Default:  false,
+			},
+			"tags": common.TagsSchema(),
+		},
+	}
+}
+
+func resourceSdrsProtectedInstanceV1Create(d *schema.ResourceData, meta interface{}) error {
+	config := meta.(*cfg.Config)
+	client, err := config.SdrsV1Client(config.GetRegion(d))
+	if err != nil {
+		return fmt.Errorf("error creating OpenTelekomcomCloud SDRS Client: %w", err)
+	}
+
+	createOpts := protectedinstances.CreateOpts{
+		GroupID:     d.Get("group_id").(string),
+		ServerID:    d.Get("server_id").(string),
+		Name:        d.Get("name").(string),
+		Description: d.Get("description").(string),
+		SubnetID:    d.Get("subnet_id").(string),
+		IpAddress:   d.Get("ip_address").(string),
+	}
+
+	job, err := protectedinstances.Create(client, createOpts).ExtractJobResponse()
+	if err != nil {
+		return fmt.Errorf("error creating OpenTelekomcomCloud SDRS Protected Instance: %w", err)
+	}
+
+	createTimeout := int(d.Timeout(schema.TimeoutCreate) / time.Second)
+	if err := protectedinstances.WaitForJobSuccess(client, createTimeout, job.JobID); err != nil {
+		return err
+	}
+
+	instanceID, err := protectedinstances.GetJobEntity(client, job.JobID, "protected_instance_id")
+	if err != nil {
+		return err
+	}
+
+	d.SetId(instanceID.(string))
+
+	// set tags
+	tagRaw := d.Get("tags").(map[string]interface{})
+	if len(tagRaw) > 0 {
+		tagList := common.ExpandResourceTags(tagRaw)
+		if err := tags.Create(client, "protected-instances", d.Id(), tagList).ExtractErr(); err != nil {
+			return fmt.Errorf("error setting tags of SDRS Protected Instance: %s", err)
+		}
+	}
+	return resourceSdrsProtectedInstanceV1Read(d, meta)
+
+}
+
+func resourceSdrsProtectedInstanceV1Read(d *schema.ResourceData, meta interface{}) error {
+	config := meta.(*cfg.Config)
+	client, err := config.SdrsV1Client(config.GetRegion(d))
+	if err != nil {
+		return fmt.Errorf("error creating OpenTelekomCloud SDRS client: %s", err)
+	}
+
+	instance, err := protectedinstances.Get(client, d.Id()).Extract()
+	if err != nil {
+		if _, ok := err.(golangsdk.ErrDefault404); ok {
+			d.SetId("")
+			return nil
+		}
+
+		return fmt.Errorf("error retrieving OpenTelekomCloud SDRS Protected Instance: %s", err)
+	}
+
+	mErr := multierror.Append(
+		d.Set("name", instance.Name),
+		d.Set("description", instance.Description),
+		d.Set("group_id", instance.GroupID),
+		d.Set("server_id", instance.SourceServer),
+		d.Set("created_at", instance.CreatedAt),
+		d.Set("updated_at", instance.UpdatedAt),
+		d.Set("target_id", instance.TargetServer),
+		d.Set("priority_station", instance.PriorityStation),
+	)
+
+	// save tags
+	resourceTags, err := tags.Get(client, "protected-instances", d.Id()).Extract()
+	if err != nil {
+		return fmt.Errorf("error fetching OpenTelekomCloud SDRS Protected Instance tags: %s", err)
+	}
+	tagMap := common.TagsToMap(resourceTags)
+	if err := d.Set("tags", tagMap); err != nil {
+		return fmt.Errorf("error saving tags for OpenTelekomCloud SDRS Protected Instance: %s", err)
+	}
+
+	if mErr.ErrorOrNil() != nil {
+		return mErr
+	}
+
+	return nil
+}
+
+func resourceSdrsProtectedInstanceV1Update(d *schema.ResourceData, meta interface{}) error {
+	config := meta.(*cfg.Config)
+	client, err := config.SdrsV1Client(config.GetRegion(d))
+	if err != nil {
+		return fmt.Errorf("error creating OpenTelekomCloud SDRS Client: %w", err)
+	}
+	var updateOpts protectedinstances.UpdateOpts
+
+	if d.HasChange("name") {
+		updateOpts.Name = d.Get("name").(string)
+	}
+
+	// update tags
+	if d.HasChange("tags") {
+		if err := common.UpdateResourceTags(client, d, "protected-instances", d.Id()); err != nil {
+			return fmt.Errorf("error updating tags of SDRS Protected Instance %s: %s", d.Id(), err)
+		}
+	}
+
+	_, err = protectedinstances.Update(client, d.Id(), updateOpts).Extract()
+	if err != nil {
+		return fmt.Errorf("error updating OpenTelekomCloud SDRS Protected Instance: %w", err)
+	}
+	return resourceSdrsProtectedInstanceV1Read(d, meta)
+}
+
+func resourceSdrsProtectedInstanceV1Delete(d *schema.ResourceData, meta interface{}) error {
+	config := meta.(*cfg.Config)
+	client, err := config.SdrsV1Client(config.GetRegion(d))
+	if err != nil {
+		return fmt.Errorf("error creating OpenTelekomCloud SDRS client: %w", err)
+	}
+
+	deleteTargetServer := d.Get("delete_target_server").(bool)
+	deleteTargetEIP := d.Get("delete_target_eip").(bool)
+
+	deleteOpts := protectedinstances.DeleteOpts{
+		DeleteTargetServer: &deleteTargetServer,
+		DeleteTargetEip:    &deleteTargetEIP,
+	}
+
+	job, err := protectedinstances.Delete(client, d.Id(), deleteOpts).ExtractJobResponse()
+	if err != nil {
+		return fmt.Errorf("error deleting OpenTelekomCloud SDRS Protected Instance: %w", err)
+	}
+
+	deleteTimeout := int(d.Timeout(schema.TimeoutDelete) / time.Second)
+	if err := protectedinstances.WaitForJobSuccess(client, deleteTimeout, job.JobID); err != nil {
+		return err
+	}
+
+	d.SetId("")
+	return nil
+}
