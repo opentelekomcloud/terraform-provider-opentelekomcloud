@@ -26,7 +26,7 @@ func TestAccSdrsProtectedInstanceV1_basic(t *testing.T) {
 				Config: testAccSdrsProtectedInstanceV1_basic,
 				Check: resource.ComposeTestCheckFunc(
 					testAccSdrsProtectedInstanceV1Exists(resourceName, &intance),
-					resource.TestCheckResourceAttr(resourceName, "name", "instance_1"),
+					resource.TestCheckResourceAttr(resourceName, "name", "instance_create"),
 					resource.TestCheckResourceAttr(resourceName, "description", "some interesting description"),
 					resource.TestCheckResourceAttr(resourceName, "tags.muh", "value-create"),
 				),
@@ -35,8 +35,8 @@ func TestAccSdrsProtectedInstanceV1_basic(t *testing.T) {
 				Config: testAccSdrsProtectedInstanceV1_update,
 				Check: resource.ComposeTestCheckFunc(
 					testAccSdrsProtectedInstanceV1Exists(resourceName, &intance),
-					resource.TestCheckResourceAttr(resourceName, "name", "instance_updated"),
-					resource.TestCheckResourceAttr(resourceName, "tags", "value-update"),
+					resource.TestCheckResourceAttr(resourceName, "name", "instance_update"),
+					resource.TestCheckResourceAttr(resourceName, "tags.muh", "value-update"),
 				),
 			},
 		},
@@ -103,6 +103,7 @@ resource "opentelekomcloud_sdrs_protectiongroup_v1" "group_1" {
   target_availability_zone = "eu-de-01"
   domain_id                = "cdba26b2-cc35-4988-a904-82b7abf20094"
   source_vpc_id            = "%[2]s"
+  dr_type                  = "migration"
 }
 
 resource "opentelekomcloud_ecs_instance_v1" "instance_1" {
@@ -139,6 +140,7 @@ resource "opentelekomcloud_sdrs_protectiongroup_v1" "group_1" {
   target_availability_zone = "eu-de-01"
   domain_id                = "cdba26b2-cc35-4988-a904-82b7abf20094"
   source_vpc_id            = "%[2]s"
+  dr_type                  = "migration"
 }
 
 resource "opentelekomcloud_ecs_instance_v1" "instance_1" {

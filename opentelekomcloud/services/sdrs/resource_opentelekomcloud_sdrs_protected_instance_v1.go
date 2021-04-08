@@ -77,12 +77,12 @@ func ResourceSdrsProtectedInstanceV1() *schema.Resource {
 				Computed: true,
 			},
 			"delete_target_server": {
-				Type:     schema.TypeString,
+				Type:     schema.TypeBool,
 				Optional: true,
 				Default:  false,
 			},
 			"delete_target_eip": {
-				Type:     schema.TypeString,
+				Type:     schema.TypeBool,
 				Optional: true,
 				Default:  false,
 			},
@@ -132,7 +132,7 @@ func resourceSdrsProtectedInstanceV1Create(d *schema.ResourceData, meta interfac
 			return fmt.Errorf("error setting tags of SDRS Protected Instance: %s", err)
 		}
 	}
-	return resourceSdrsProtectiongroupV1Read(d, meta)
+	return resourceSdrsProtectedInstanceV1Read(d, meta)
 
 }
 
@@ -204,7 +204,7 @@ func resourceSdrsProtectedInstanceV1Update(d *schema.ResourceData, meta interfac
 	if err != nil {
 		return fmt.Errorf("error updating OpenTelekomCloud SDRS Protected Instance: %w", err)
 	}
-	return resourceSdrsProtectiongroupV1Read(d, meta)
+	return resourceSdrsProtectedInstanceV1Read(d, meta)
 }
 
 func resourceSdrsProtectedInstanceV1Delete(d *schema.ResourceData, meta interface{}) error {

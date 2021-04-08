@@ -17,6 +17,7 @@ resource "opentelekomcloud_sdrs_protectiongroup_v1" "group_1" {
 
   domain_id     = var.domain_id
   source_vpc_id = var.vpc_id
+  dr_type       = "migration"
 }
 
 resource "opentelekomcloud_ecs_instance_v1" "instance_1" {
