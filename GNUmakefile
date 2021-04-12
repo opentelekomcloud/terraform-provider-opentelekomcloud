@@ -16,7 +16,7 @@ snapshot:
 
 test: fmtcheck
 	go test -i $(TEST) || exit 1
-	echo $(TEST) | xargs -t -n10 go test $(TESTARGS) -timeout=30s -parallel=10
+	echo $(TEST) | xargs -t -n4 go test $(TESTARGS) -timeout=30s
 
 testacc: fmtcheck
 	@TF_ACC=1 go test $(TEST) -v -timeout 720m
