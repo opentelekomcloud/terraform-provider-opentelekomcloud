@@ -15,7 +15,7 @@ snapshot:
 	goreleaser release --snapshot --parallelism 2 --rm-dist
 
 test: fmtcheck
-	echo $(TEST) | xargs -t -n4 go test $(TESTARGS) -timeout=30s
+	go test -v ./...
 
 testacc: fmtcheck
 	@TF_ACC=1 go test $(TEST) -v -timeout 720m
