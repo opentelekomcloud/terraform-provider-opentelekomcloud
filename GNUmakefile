@@ -15,8 +15,8 @@ snapshot:
 	goreleaser release --snapshot --parallelism 2 --rm-dist
 
 test: fmtcheck
-	@go test -i $(TEST) || exit 1
-	@go test ./opentelekomcloud/acceptance/...
+	go test -i $(TEST) || exit 1
+	go test -v ./opentelekomcloud/acceptance/...
 
 testacc: fmtcheck
 	@TF_ACC=1 go test $(TEST) -v -timeout 720m
