@@ -30,8 +30,6 @@ builds:
         goarch: '386'
       # Linux only:
       # arm 8
-      - goos: darwin  # Requires Go 1.16: https://golang.org/doc/go1.16#darwin
-        goarch: arm64
       - goos: freebsd
         goarch: arm64
       - goos: windows
