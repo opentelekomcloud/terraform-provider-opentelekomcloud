@@ -405,13 +405,6 @@ func resourceCCENodeV3Create(d *schema.ResourceData, meta interface{}) error {
 			},
 			BillingMode: d.Get("billing_mode").(int),
 			Count:       1,
-			NodeNicSpec: nodes.NodeNicSpec{
-				PrimaryNic: nodes.PrimaryNic{
-					FixedIPs: []string{
-						d.Get("private_ip").(string),
-					},
-				},
-			},
 			ExtendParam: nodes.ExtendParam{
 				ChargingMode:       d.Get("extend_param_charging_mode").(int),
 				EcsPerformanceType: d.Get("ecs_performance_type").(string),
