@@ -16,7 +16,7 @@ snapshot:
 
 test: fmtcheck
 	@go test -i $(TEST) || exit 1
-	@go test ./...
+	@go test ./opentelekomcloud/acceptance/...
 
 testacc: fmtcheck
 	@TF_ACC=1 go test $(TEST) -v -timeout 720m
