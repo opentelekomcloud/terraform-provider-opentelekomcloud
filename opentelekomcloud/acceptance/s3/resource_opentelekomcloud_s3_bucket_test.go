@@ -7,7 +7,6 @@ import (
 	"reflect"
 	"regexp"
 	"strconv"
-	"strings"
 	"testing"
 	"text/template"
 
@@ -24,7 +23,6 @@ import (
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/acceptance/common"
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/acceptance/env"
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common/cfg"
-	s3s "github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/services/s3"
 )
 
 func TestAccS3Bucket_basic(t *testing.T) {
@@ -513,68 +511,6 @@ func TestAccS3Bucket_Lifecycle(t *testing.T) {
 			},
 		},
 	})
-}
-
-func TestS3BucketName(t *testing.T) {
-	validDnsNames := []string{
-		"foobar",
-		"foo.bar",
-		"foo.bar.baz",
-		"1234",
-		"foo-bar",
-		strings.Repeat("x", 63),
-	}
-
-	for _, v := range validDnsNames {
-		if err := s3s.ValidateS3BucketName(v, "us-west-2"); err != nil {
-			t.Fatalf("%q should be a valid S3 bucket name", v)
-		}
-	}
-
-	invalidDnsNames := []string{
-		"foo..bar",
-		"Foo.Bar",
-		"192.168.0.1",
-		"127.0.0.1",
-		".foo",
-		"bar.",
-		"foo_bar",
-		strings.Repeat("x", 64),
-	}
-
-	for _, v := range invalidDnsNames {
-		if err := s3s.ValidateS3BucketName(v, "us-west-2"); err == nil {
-			t.Fatalf("%q should not be a valid S3 bucket name", v)
-		}
-	}
-
-	validEastNames := []string{
-		"foobar",
-		"foo_bar",
-		"127.0.0.1",
-		"foo..bar",
-		"foo_bar_baz",
-		"foo.bar.baz",
-		"Foo.Bar",
-		strings.Repeat("x", 255),
-	}
-
-	for _, v := range validEastNames {
-		if err := s3s.ValidateS3BucketName(v, "us-east-1"); err != nil {
-			t.Fatalf("%q should be a valid S3 bucket name", v)
-		}
-	}
-
-	invalidEastNames := []string{
-		"foo;bar",
-		strings.Repeat("x", 256),
-	}
-
-	for _, v := range invalidEastNames {
-		if err := s3s.ValidateS3BucketName(v, "us-east-1"); err == nil {
-			t.Fatalf("%q should not be a valid S3 bucket name", v)
-		}
-	}
 }
 
 func testAccCheckS3BucketDestroy(s *terraform.State) error {

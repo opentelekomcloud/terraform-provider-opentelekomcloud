@@ -6,8 +6,6 @@ import (
 	"fmt"
 	"log"
 	"net/url"
-	"regexp"
-	"strings"
 	"time"
 
 	"github.com/aws/aws-sdk-go/aws"
@@ -16,6 +14,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/helper/hashcode"
 	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/helper/validation"
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common"
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common/cfg"
 )
@@ -36,12 +35,14 @@ func ResourceS3Bucket() *schema.Resource {
 				Optional:      true,
 				Computed:      true,
 				ForceNew:      true,
+				ValidateFunc:  common.ValidateName,
 				ConflictsWith: []string{"bucket_prefix"},
 			},
 			"bucket_prefix": {
 				Type:          schema.TypeString,
 				Optional:      true,
 				ForceNew:      true,
+				ValidateFunc:  validation.StringLenBetween(0, 63-resource.UniqueIDSuffixLength),
 				ConflictsWith: []string{"bucket"},
 			},
 			"bucket_domain_name": {
@@ -295,10 +296,6 @@ func resourceS3BucketCreate(d *schema.ResourceData, meta interface{}) error {
 	}
 
 	log.Printf("[DEBUG] S3 bucket create: %s, using region: %s", bucket, region)
-
-	if err := ValidateS3BucketName(bucket, region); err != nil {
-		return fmt.Errorf("error validating S3 bucket name: %s", err)
-	}
 
 	err = resource.Retry(5*time.Minute, func() *resource.RetryError {
 		log.Printf("[DEBUG] Trying to create new S3 bucket: %q", bucket)
@@ -1324,30 +1321,6 @@ func normalizeRoutingRules(w []*s3.RoutingRule) (string, error) {
 	}
 
 	return string(withoutNulls), nil
-}
-
-// ValidateS3BucketName validates any S3 bucket name
-func ValidateS3BucketName(value string, region string) error {
-	if (len(value) < 3) || (len(value) > 63) {
-		return fmt.Errorf("%q must contain from 3 to 63 characters", value)
-	}
-	if !regexp.MustCompile(`^[0-9a-z-.]+$`).MatchString(value) {
-		return fmt.Errorf("only lowercase alphanumeric characters and hyphens allowed in %q", value)
-	}
-	if regexp.MustCompile(`^(?:[0-9]{1,3}\.){3}[0-9]{1,3}$`).MatchString(value) {
-		return fmt.Errorf("%q must not be formatted as an IP address", value)
-	}
-	if strings.HasPrefix(value, `.`) {
-		return fmt.Errorf("%q cannot start with a period", value)
-	}
-	if strings.HasSuffix(value, `.`) {
-		return fmt.Errorf("%q cannot end with a period", value)
-	}
-	if strings.Contains(value, `..`) {
-		return fmt.Errorf("%q can be only one period between labels", value)
-	}
-
-	return nil
 }
 
 func transitionHash(v interface{}) int {
