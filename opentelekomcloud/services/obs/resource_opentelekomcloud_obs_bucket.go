@@ -302,9 +302,12 @@ func resourceObsBucketUpdate(d *schema.ResourceData, meta interface{}) error {
 		}
 	}
 
-	if d.HasChange("versioning") && !d.IsNewResource() {
-		if err := resourceObsBucketVersioningUpdate(client, d); err != nil {
-			return err
+	if d.HasChange("versioning") {
+		versioning := d.Get("versioning").(bool)
+		if versioning || !d.IsNewResource() {
+			if err := resourceObsBucketVersioningUpdate(client, d); err != nil {
+				return err
+			}
 		}
 	}
 
@@ -512,7 +515,7 @@ func resourceObsBucketVersioningUpdate(client *obs.ObsClient, d *schema.Resource
 
 	_, err := client.SetBucketVersioning(input)
 	if err != nil {
-		return GetObsError("Error setting versining status of OBS bucket", bucket, err)
+		return GetObsError("Error setting versioning status of OBS bucket", bucket, err)
 	}
 
 	return nil
@@ -1082,11 +1085,11 @@ func setObsBucketTags(client *obs.ObsClient, d *schema.ResourceData) error {
 		}
 	}
 
-	tagmap := make(map[string]string)
+	tagMap := make(map[string]string)
 	for _, tag := range output.Tags {
-		tagmap[tag.Key] = tag.Value
+		tagMap[tag.Key] = tag.Value
 	}
-	if err := d.Set("tags", tagmap); err != nil {
+	if err := d.Set("tags", tagMap); err != nil {
 		return fmt.Errorf("error saving tags of OBS bucket %s: %s", bucket, err)
 	}
 	return nil
@@ -1198,6 +1201,7 @@ type Redirect struct {
 	ReplaceKeyWith       string `json:"ReplaceKeyWith,omitempty"`
 	HttpRedirectCode     string `json:"HttpRedirectCode,omitempty"`
 }
+
 type WebsiteRoutingRule struct {
 	Condition Condition `json:"Condition,omitempty"`
 	Redirect  Redirect  `json:"Redirect"`
