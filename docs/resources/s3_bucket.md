@@ -11,7 +11,7 @@ Provides a S3 bucket resource within OpenTelekomCloud.
 ### Private Bucket w/ Tags
 
 ```hcl
-resource "opentelekomcloud_s3_bucket" "b" {
+resource "opentelekomcloud_s3_bucket" "bucket" {
   bucket = "my-tf-test-bucket"
   acl    = "private"
 
@@ -25,7 +25,7 @@ resource "opentelekomcloud_s3_bucket" "b" {
 ### Static Website Hosting
 
 ```hcl
-resource "opentelekomcloud_s3_bucket" "b" {
+resource "opentelekomcloud_s3_bucket" "bucket" {
   bucket = "s3-website-test.hashicorp.com"
   acl    = "public-read"
   policy = file("policy.json")
@@ -50,7 +50,7 @@ EOF
 ### Using CORS
 
 ```hcl
-resource "opentelekomcloud_s3_bucket" "b" {
+resource "opentelekomcloud_s3_bucket" "bucket" {
   bucket = "s3-website-test.hashicorp.com"
   acl    = "public-read"
 
@@ -67,7 +67,7 @@ resource "opentelekomcloud_s3_bucket" "b" {
 ### Using versioning
 
 ```hcl
-resource "opentelekomcloud_s3_bucket" "b" {
+resource "opentelekomcloud_s3_bucket" "bucket" {
   bucket = "my-tf-test-bucket"
   acl    = "private"
 
@@ -143,21 +143,25 @@ resource "opentelekomcloud_s3_bucket" "versioning_bucket" {
 
 The following arguments are supported:
 
-* `bucket` - (Optional, Forces new resource) The name of the bucket. If omitted, Terraform will assign a random, unique name.
+* `bucket` - (Optional, Forces new resource) The name of the bucket. If omitted, Terraform will assign a
+  random, unique name.
 
-* `bucket_prefix` - (Optional, Forces new resource) Creates a unique bucket name beginning with the specified prefix. Conflicts with `bucket`.
+* `bucket_prefix` - (Optional, Forces new resource) Creates a unique bucket name beginning with the specified prefix.
+  Conflicts with `bucket`.
 
-* `acl` - (Optional) The [canned ACL](https://docs.aws.amazon.com/AmazonS3/latest/dev/acl-overview.html#canned-acl) to apply. Defaults to "private".
+* `acl` - (Optional) The [canned ACL](https://docs.aws.amazon.com/AmazonS3/latest/dev/acl-overview.html#canned-acl)
+  to apply. Defaults to `private`.
 
-* `policy` - (Optional) A valid [bucket policy](https://docs.aws.amazon.com/AmazonS3/latest/dev/example-bucket-policies.html) JSON document.
+* `policy` - (Optional) A valid [bucket policy](https://docs.aws.amazon.com/AmazonS3/latest/dev/example-bucket-policies.html)
+  JSON document.
 
--> **Note:** If the policy document is not specific enough (but still valid), Terraform may view
-  the policy as constantly changing in a `terraform plan`. In this case, please make sure you use the verbose/specific version of the policy.
+-> If the policy document is not specific enough (but still valid), Terraform may view the policy as constantly
+changing in a `terraform plan`. In this case, please make sure you use the verbose/specific version of the policy.
 
 * `tags` - (Optional) A mapping of tags to assign to the bucket.
 
-* `force_destroy` - (Optional, Default:false ) A boolean that indicates all objects should be deleted from the bucket so that the bucket can be destroyed without error.
-  These objects are *not* recoverable.
+* `force_destroy` - (Optional, Default:false) A boolean that indicates all objects should be deleted from the bucket
+  so that the bucket can be destroyed without error. These objects are *not* recoverable.
 
 * `website` - (Optional) A website object (documented below).
 
@@ -170,15 +174,16 @@ The following arguments are supported:
 * `lifecycle_rule` - (Optional) A configuration of [object lifecycle management](http://docs.aws.amazon.com/AmazonS3/latest/dev/object-lifecycle-mgmt.html)
   (documented below). The `website` object supports the following:
 
-* `index_document` - (Required, unless using `redirect_all_requests_to`) Amazon S3 returns this index document when requests are made to the root domain or any of the subfolders.
+* `index_document` - (Required, unless using `redirect_all_requests_to`) Amazon S3 returns this index document when
+  requests are made to the root domain or any of the subfolders.
 
 * `error_document` - (Optional) An absolute path to the document to return in case of a 4XX error.
 
-* `redirect_all_requests_to` - (Optional) A hostname to redirect all website requests for this bucket to. Hostname can optionally
-  be prefixed with a protocol (`http://` or `https://`) to use when redirecting requests. The default is the protocol that is used in the original request.
+* `redirect_all_requests_to` - (Optional) A hostname to redirect all website requests for this bucket to.
+  Hostname can optionally be prefixed with a protocol (`http://` or `https://`) to use when redirecting
+  requests. The default is the protocol that is used in the original request.
 
-* `routing_rules` - (Optional) A json array containing
-  [routing rules](https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-properties-s3-websiteconfiguration-routingrules.html)
+* `routing_rules` - (Optional) A json array containing [routing rules](https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-properties-s3-websiteconfiguration-routingrules.html)
   describing redirect behavior and when redirects are applied.
 
 The `cors_rule` object supports the following:
@@ -195,9 +200,11 @@ The `cors_rule` object supports the following:
 
 The `versioning` object supports the following:
 
-* `enabled` - (Optional) Enable versioning. Once you version-enable a bucket, it can never return to an unversioned state. You can, however, suspend versioning on that bucket.
+* `enabled` - (Optional) Enable versioning. Once you version-enable a bucket, it can never return to an unversioned state.
+  You can, however, suspend versioning on that bucket. If omitted, during bucket creation it will be in `Disabled` state.
 
-* `mfa_delete` - (Optional) Enable MFA delete for either `Change the versioning state of your bucket` or `Permanently delete an object version`. Default is `false`.
+* `mfa_delete` - (Optional) Enable MFA delete for either `Change the versioning state of your bucket` or
+  `Permanently delete an object version`. Default is `false`.
 
 The `logging` object supports the following:
 
@@ -213,7 +220,8 @@ The `lifecycle_rule` object supports the following:
 
 * `enabled` - (Required) Specifies lifecycle rule status.
 
-* `abort_incomplete_multipart_upload_days` - (Optional) Specifies the number of days after initiating a multipart upload when the multipart upload must be completed.
+* `abort_incomplete_multipart_upload_days` - (Optional) Specifies the number of days after initiating
+  a multipart upload when the multipart upload must be completed.
 
 * `expiration` - (Optional) Specifies a period in the object's expire (documented below).
 
@@ -244,16 +252,18 @@ The following attributes are exported:
 
 * `bucket_domain_name` - The bucket domain name. Will be of format `bucketname.s3.amazonaws.com`.
 
-* `hosted_zone_id` - The [Route 53 Hosted Zone ID](https://docs.aws.amazon.com/general/latest/gr/rande.html#s3_website_region_endpoints) for this bucket's region.
+* `hosted_zone_id` - The [Route 53 Hosted Zone ID](https://docs.aws.amazon.com/general/latest/gr/rande.html#s3_website_region_endpoints)
+  for this bucket's region.
 
 * `website_endpoint` - The website endpoint, if the bucket is configured with a website. If not, this will be an empty string.
 
-* `website_domain` - The domain of the website endpoint, if the bucket is configured with a website. If not, this will be an empty string. This is used to create Route 53 alias records.
+* `website_domain` - The domain of the website endpoint, if the bucket is configured with a website. If not,
+  this will be an empty string. This is used to create Route 53 alias records.
 
 ## Import
 
 S3 bucket can be imported using the `bucket`, e.g.
 
-```sh
+```shell
 terraform import opentelekomcloud_s3_bucket.bucket bucket-name
 ```
