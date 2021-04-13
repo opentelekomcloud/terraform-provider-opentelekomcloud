@@ -29,33 +29,21 @@ import (
 
 func TestAccS3Bucket_basic(t *testing.T) {
 	rInt := acctest.RandInt()
-	// arnRegexp := regexp.MustCompile("^arn:aws:s3:::")
+	resourceName := "opentelekomcloud_s3_bucket.bucket"
 
 	resource.Test(t, resource.TestCase{
-		PreCheck: func() { testAccPreCheckS3(t) },
-		/*
-			IDRefreshName:   "opentelekomcloud_s3_bucket.bucket",
-			IDRefreshIgnore: []string{"force_destroy"},
-		*/
+		PreCheck:     func() { testAccPreCheckS3(t) },
 		Providers:    common.TestAccProviders,
 		CheckDestroy: testAccCheckS3BucketDestroy,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccS3BucketConfig(rInt),
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckS3BucketExists("opentelekomcloud_s3_bucket.bucket"),
-					/*resource.TestCheckResourceAttr(
-					"opentelekomcloud_s3_bucket.bucket", "hosted_zone_id", HostedZoneIDForRegion("us-west-2")), */
-					resource.TestCheckResourceAttr(
-						"opentelekomcloud_s3_bucket.bucket", "region", env.OS_REGION_NAME),
-					resource.TestCheckNoResourceAttr(
-						"opentelekomcloud_s3_bucket.bucket", "website_endpoint"),
-					/*resource.TestMatchResourceAttr(
-					"opentelekomcloud_s3_bucket.bucket", "arn", arnRegexp), */
-					resource.TestCheckResourceAttr(
-						"opentelekomcloud_s3_bucket.bucket", "bucket", testAccBucketName(rInt)),
-					resource.TestCheckResourceAttr(
-						"opentelekomcloud_s3_bucket.bucket", "bucket_domain_name", testAccBucketDomainName(rInt)),
+					testAccCheckS3BucketExists(resourceName),
+					resource.TestCheckResourceAttr(resourceName, "region", env.OS_REGION_NAME),
+					resource.TestCheckNoResourceAttr(resourceName, "website_endpoint"),
+					resource.TestCheckResourceAttr(resourceName, "bucket", testAccBucketName(rInt)),
+					resource.TestCheckResourceAttr(resourceName, "bucket_domain_name", testAccBucketDomainName(rInt)),
 				),
 			},
 		},
@@ -65,9 +53,9 @@ func TestAccS3Bucket_basic(t *testing.T) {
 func TestAccAWSS3MultiBucket_withTags(t *testing.T) {
 	rInt := acctest.RandInt()
 	resource.Test(t, resource.TestCase{
-		PreCheck:  func() { testAccPreCheckS3(t) },
-		Providers: common.TestAccProviders,
-		// CheckDestroy: testAccCheckAWSS3BucketDestroy,
+		PreCheck:     func() { testAccPreCheckS3(t) },
+		Providers:    common.TestAccProviders,
+		CheckDestroy: testAccCheckS3BucketDestroy,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccAWSS3MultiBucketConfigWithTags(rInt),
@@ -77,6 +65,8 @@ func TestAccAWSS3MultiBucket_withTags(t *testing.T) {
 }
 
 func TestAccS3Bucket_namePrefix(t *testing.T) {
+	resourceName := "opentelekomcloud_s3_bucket.test"
+
 	resource.Test(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheckS3(t) },
 		Providers:    common.TestAccProviders,
@@ -85,9 +75,8 @@ func TestAccS3Bucket_namePrefix(t *testing.T) {
 			{
 				Config: testAccS3BucketConfig_namePrefix,
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckS3BucketExists("opentelekomcloud_s3_bucket.test"),
-					resource.TestMatchResourceAttr(
-						"opentelekomcloud_s3_bucket.test", "bucket", regexp.MustCompile("^tf-test-")),
+					testAccCheckS3BucketExists(resourceName),
+					resource.TestMatchResourceAttr(resourceName, "bucket", regexp.MustCompile("^tf-test-")),
 				),
 			},
 		},
@@ -95,6 +84,8 @@ func TestAccS3Bucket_namePrefix(t *testing.T) {
 }
 
 func TestAccS3Bucket_generatedName(t *testing.T) {
+	resourceName := "opentelekomcloud_s3_bucket.test"
+
 	resource.Test(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheckS3(t) },
 		Providers:    common.TestAccProviders,
@@ -103,7 +94,7 @@ func TestAccS3Bucket_generatedName(t *testing.T) {
 			{
 				Config: testAccS3BucketConfig_generatedName,
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckS3BucketExists("opentelekomcloud_s3_bucket.test"),
+					testAccCheckS3BucketExists(resourceName),
 				),
 			},
 		},
@@ -112,6 +103,7 @@ func TestAccS3Bucket_generatedName(t *testing.T) {
 
 func TestAccS3Bucket_region(t *testing.T) {
 	rInt := acctest.RandInt()
+	resourceName := "opentelekomcloud_s3_bucket.bucket"
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheckS3(t) },
@@ -121,8 +113,8 @@ func TestAccS3Bucket_region(t *testing.T) {
 			{
 				Config: testAccS3BucketConfigWithRegion(rInt),
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckS3BucketExists("opentelekomcloud_s3_bucket.bucket"),
-					resource.TestCheckResourceAttr("opentelekomcloud_s3_bucket.bucket", "region", env.OS_REGION_NAME),
+					testAccCheckS3BucketExists(resourceName),
+					resource.TestCheckResourceAttr(resourceName, "region", env.OS_REGION_NAME),
 				),
 			},
 		},
@@ -131,6 +123,7 @@ func TestAccS3Bucket_region(t *testing.T) {
 
 func TestAccS3Bucket_Policy(t *testing.T) {
 	rInt := acctest.RandInt()
+	resourceName := "opentelekomcloud_s3_bucket.bucket"
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheckS3(t) },
@@ -140,25 +133,22 @@ func TestAccS3Bucket_Policy(t *testing.T) {
 			{
 				Config: testAccS3BucketConfigWithPolicy(rInt),
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckS3BucketExists("opentelekomcloud_s3_bucket.bucket"),
-					testAccCheckS3BucketPolicy(
-						"opentelekomcloud_s3_bucket.bucket", testAccS3BucketPolicy(rInt)),
+					testAccCheckS3BucketExists(resourceName),
+					testAccCheckS3BucketPolicy(resourceName, testAccS3BucketPolicy(rInt)),
 				),
 			},
 			{
 				Config: testAccS3BucketConfig(rInt),
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckS3BucketExists("opentelekomcloud_s3_bucket.bucket"),
-					testAccCheckS3BucketPolicy(
-						"opentelekomcloud_s3_bucket.bucket", ""),
+					testAccCheckS3BucketExists(resourceName),
+					testAccCheckS3BucketPolicy(resourceName, ""),
 				),
 			},
 			{
 				Config: testAccS3BucketConfigWithEmptyPolicy(rInt),
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckS3BucketExists("opentelekomcloud_s3_bucket.bucket"),
-					testAccCheckS3BucketPolicy(
-						"opentelekomcloud_s3_bucket.bucket", ""),
+					testAccCheckS3BucketExists(resourceName),
+					testAccCheckS3BucketPolicy(resourceName, ""),
 				),
 			},
 		},
@@ -169,6 +159,7 @@ func TestAccS3Bucket_UpdateAcl(t *testing.T) {
 	ri := acctest.RandInt()
 	preConfig := fmt.Sprintf(testAccS3BucketConfigWithAcl, ri)
 	postConfig := fmt.Sprintf(testAccS3BucketConfigWithAclUpdate, ri)
+	resourceName := "opentelekomcloud_s3_bucket.bucket"
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheckS3(t) },
@@ -178,17 +169,15 @@ func TestAccS3Bucket_UpdateAcl(t *testing.T) {
 			{
 				Config: preConfig,
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckS3BucketExists("opentelekomcloud_s3_bucket.bucket"),
-					resource.TestCheckResourceAttr(
-						"opentelekomcloud_s3_bucket.bucket", "acl", "public-read"),
+					testAccCheckS3BucketExists(resourceName),
+					resource.TestCheckResourceAttr(resourceName, "acl", "public-read"),
 				),
 			},
 			{
 				Config: postConfig,
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckS3BucketExists("opentelekomcloud_s3_bucket.bucket"),
-					resource.TestCheckResourceAttr(
-						"opentelekomcloud_s3_bucket.bucket", "acl", "private"),
+					testAccCheckS3BucketExists(resourceName),
+					resource.TestCheckResourceAttr(resourceName, "acl", "private"),
 				),
 			},
 		},
@@ -197,6 +186,8 @@ func TestAccS3Bucket_UpdateAcl(t *testing.T) {
 
 func TestAccS3Bucket_Website_Simple(t *testing.T) {
 	rInt := acctest.RandInt()
+	resourceName := "opentelekomcloud_s3_bucket.bucket"
+
 	resource.Test(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheckS3(t) },
 		Providers:    common.TestAccProviders,
@@ -205,31 +196,25 @@ func TestAccS3Bucket_Website_Simple(t *testing.T) {
 			{
 				Config: testAccS3BucketWebsiteConfig(rInt),
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckS3BucketExists("opentelekomcloud_s3_bucket.bucket"),
-					testAccCheckS3BucketWebsite(
-						"opentelekomcloud_s3_bucket.bucket", "index.html", "", "", ""),
-					resource.TestCheckResourceAttr(
-						"opentelekomcloud_s3_bucket.bucket", "website_endpoint", testAccWebsiteEndpoint(rInt)),
+					testAccCheckS3BucketExists(resourceName),
+					testAccCheckS3BucketWebsite(resourceName, "index.html", "", "", ""),
+					resource.TestCheckResourceAttr(resourceName, "website_endpoint", testAccWebsiteEndpoint(rInt)),
 				),
 			},
 			{
 				Config: testAccS3BucketWebsiteConfigWithError(rInt),
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckS3BucketExists("opentelekomcloud_s3_bucket.bucket"),
-					testAccCheckS3BucketWebsite(
-						"opentelekomcloud_s3_bucket.bucket", "index.html", "error.html", "", ""),
-					resource.TestCheckResourceAttr(
-						"opentelekomcloud_s3_bucket.bucket", "website_endpoint", testAccWebsiteEndpoint(rInt)),
+					testAccCheckS3BucketExists(resourceName),
+					testAccCheckS3BucketWebsite(resourceName, "index.html", "error.html", "", ""),
+					resource.TestCheckResourceAttr(resourceName, "website_endpoint", testAccWebsiteEndpoint(rInt)),
 				),
 			},
 			{
 				Config: testAccS3BucketConfig(rInt),
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckS3BucketExists("opentelekomcloud_s3_bucket.bucket"),
-					testAccCheckS3BucketWebsite(
-						"opentelekomcloud_s3_bucket.bucket", "", "", "", ""),
-					resource.TestCheckResourceAttr(
-						"opentelekomcloud_s3_bucket.bucket", "website_endpoint", ""),
+					testAccCheckS3BucketExists(resourceName),
+					testAccCheckS3BucketWebsite(resourceName, "", "", "", ""),
+					resource.TestCheckResourceAttr(resourceName, "website_endpoint", ""),
 				),
 			},
 		},
@@ -238,6 +223,8 @@ func TestAccS3Bucket_Website_Simple(t *testing.T) {
 
 func TestAccS3Bucket_WebsiteRedirect(t *testing.T) {
 	rInt := acctest.RandInt()
+	resourceName := "opentelekomcloud_s3_bucket.bucket"
+
 	resource.Test(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheckS3(t) },
 		Providers:    common.TestAccProviders,
@@ -246,31 +233,25 @@ func TestAccS3Bucket_WebsiteRedirect(t *testing.T) {
 			{
 				Config: testAccS3BucketWebsiteConfigWithRedirect(rInt),
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckS3BucketExists("opentelekomcloud_s3_bucket.bucket"),
-					testAccCheckS3BucketWebsite(
-						"opentelekomcloud_s3_bucket.bucket", "", "", "", "hashicorp.com"),
-					resource.TestCheckResourceAttr(
-						"opentelekomcloud_s3_bucket.bucket", "website_endpoint", testAccWebsiteEndpoint(rInt)),
+					testAccCheckS3BucketExists(resourceName),
+					testAccCheckS3BucketWebsite(resourceName, "", "", "", "hashicorp.com"),
+					resource.TestCheckResourceAttr(resourceName, "website_endpoint", testAccWebsiteEndpoint(rInt)),
 				),
 			},
 			{
 				Config: testAccS3BucketWebsiteConfigWithHttpsRedirect(rInt),
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckS3BucketExists("opentelekomcloud_s3_bucket.bucket"),
-					testAccCheckS3BucketWebsite(
-						"opentelekomcloud_s3_bucket.bucket", "", "", "https", "hashicorp.com"),
-					resource.TestCheckResourceAttr(
-						"opentelekomcloud_s3_bucket.bucket", "website_endpoint", testAccWebsiteEndpoint(rInt)),
+					testAccCheckS3BucketExists(resourceName),
+					testAccCheckS3BucketWebsite(resourceName, "", "", "https", "hashicorp.com"),
+					resource.TestCheckResourceAttr(resourceName, "website_endpoint", testAccWebsiteEndpoint(rInt)),
 				),
 			},
 			{
 				Config: testAccS3BucketConfig(rInt),
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckS3BucketExists("opentelekomcloud_s3_bucket.bucket"),
-					testAccCheckS3BucketWebsite(
-						"opentelekomcloud_s3_bucket.bucket", "", "", "", ""),
-					resource.TestCheckResourceAttr(
-						"opentelekomcloud_s3_bucket.bucket", "website_endpoint", ""),
+					testAccCheckS3BucketExists(resourceName),
+					testAccCheckS3BucketWebsite(resourceName, "", "", "", ""),
+					resource.TestCheckResourceAttr(resourceName, "website_endpoint", ""),
 				),
 			},
 		},
@@ -279,6 +260,8 @@ func TestAccS3Bucket_WebsiteRedirect(t *testing.T) {
 
 func TestAccS3Bucket_WebsiteRoutingRules(t *testing.T) {
 	rInt := acctest.RandInt()
+	resourceName := "opentelekomcloud_s3_bucket.bucket"
+
 	resource.Test(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheckS3(t) },
 		Providers:    common.TestAccProviders,
@@ -287,11 +270,9 @@ func TestAccS3Bucket_WebsiteRoutingRules(t *testing.T) {
 			{
 				Config: testAccS3BucketWebsiteConfigWithRoutingRules(rInt),
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckS3BucketExists("opentelekomcloud_s3_bucket.bucket"),
-					testAccCheckS3BucketWebsite(
-						"opentelekomcloud_s3_bucket.bucket", "index.html", "error.html", "", ""),
-					testAccCheckS3BucketWebsiteRoutingRules(
-						"opentelekomcloud_s3_bucket.bucket",
+					testAccCheckS3BucketExists(resourceName),
+					testAccCheckS3BucketWebsite(resourceName, "index.html", "error.html", "", ""),
+					testAccCheckS3BucketWebsiteRoutingRules(resourceName,
 						[]*s3.RoutingRule{
 							{
 								Condition: &s3.Condition{
@@ -303,19 +284,16 @@ func TestAccS3Bucket_WebsiteRoutingRules(t *testing.T) {
 							},
 						},
 					),
-					resource.TestCheckResourceAttr(
-						"opentelekomcloud_s3_bucket.bucket", "website_endpoint", testAccWebsiteEndpoint(rInt)),
+					resource.TestCheckResourceAttr(resourceName, "website_endpoint", testAccWebsiteEndpoint(rInt)),
 				),
 			},
 			{
 				Config: testAccS3BucketConfig(rInt),
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckS3BucketExists("opentelekomcloud_s3_bucket.bucket"),
-					testAccCheckS3BucketWebsite(
-						"opentelekomcloud_s3_bucket.bucket", "", "", "", ""),
-					testAccCheckS3BucketWebsiteRoutingRules("opentelekomcloud_s3_bucket.bucket", nil),
-					resource.TestCheckResourceAttr(
-						"opentelekomcloud_s3_bucket.bucket", "website_endpoint", ""),
+					testAccCheckS3BucketExists(resourceName),
+					testAccCheckS3BucketWebsite(resourceName, "", "", "", ""),
+					testAccCheckS3BucketWebsiteRoutingRules(resourceName, nil),
+					resource.TestCheckResourceAttr(resourceName, "website_endpoint", ""),
 				),
 			},
 		},
@@ -323,10 +301,12 @@ func TestAccS3Bucket_WebsiteRoutingRules(t *testing.T) {
 }
 
 // Test TestAccAWSS3Bucket_shouldFailNotFound is designed to fail with a "plan
-// not empty" error in Terraform, to check against regresssions.
+// not empty" error in Terraform, to check against regressions.
 // See https://github.com/hashicorp/terraform/pull/2925
 func TestAccS3Bucket_shouldFailNotFound(t *testing.T) {
 	rInt := acctest.RandInt()
+	resourceName := "opentelekomcloud_s3_bucket.bucket"
+
 	resource.Test(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheckS3(t) },
 		Providers:    common.TestAccProviders,
@@ -335,8 +315,8 @@ func TestAccS3Bucket_shouldFailNotFound(t *testing.T) {
 			{
 				Config: testAccS3BucketDestroyedConfig(rInt),
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckS3BucketExists("opentelekomcloud_s3_bucket.bucket"),
-					testAccCheckS3DestroyBucket("opentelekomcloud_s3_bucket.bucket"),
+					testAccCheckS3BucketExists(resourceName),
+					testAccCheckS3DestroyBucket(resourceName),
 				),
 				ExpectNonEmptyPlan: true,
 			},
@@ -346,6 +326,8 @@ func TestAccS3Bucket_shouldFailNotFound(t *testing.T) {
 
 func TestAccS3Bucket_Versioning(t *testing.T) {
 	rInt := acctest.RandInt()
+	resourceName := "opentelekomcloud_s3_bucket.bucket"
+
 	resource.Test(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheckS3(t) },
 		Providers:    common.TestAccProviders,
@@ -354,25 +336,22 @@ func TestAccS3Bucket_Versioning(t *testing.T) {
 			{
 				Config: testAccS3BucketConfig(rInt),
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckS3BucketExists("opentelekomcloud_s3_bucket.bucket"),
-					testAccCheckS3BucketVersioning(
-						"opentelekomcloud_s3_bucket.bucket", ""),
+					testAccCheckS3BucketExists(resourceName),
+					testAccCheckS3BucketVersioning(resourceName, ""),
 				),
 			},
 			{
 				Config: testAccS3BucketConfigWithVersioning(rInt),
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckS3BucketExists("opentelekomcloud_s3_bucket.bucket"),
-					testAccCheckS3BucketVersioning(
-						"opentelekomcloud_s3_bucket.bucket", s3.BucketVersioningStatusEnabled),
+					testAccCheckS3BucketExists(resourceName),
+					testAccCheckS3BucketVersioning(resourceName, s3.BucketVersioningStatusEnabled),
 				),
 			},
 			{
 				Config: testAccS3BucketConfigWithDisableVersioning(rInt),
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckS3BucketExists("opentelekomcloud_s3_bucket.bucket"),
-					testAccCheckS3BucketVersioning(
-						"opentelekomcloud_s3_bucket.bucket", s3.BucketVersioningStatusSuspended),
+					testAccCheckS3BucketExists(resourceName),
+					testAccCheckS3BucketVersioning(resourceName, s3.BucketVersioningStatusSuspended),
 				),
 			},
 		},
@@ -381,20 +360,21 @@ func TestAccS3Bucket_Versioning(t *testing.T) {
 
 func TestAccS3Bucket_Cors(t *testing.T) {
 	rInt := acctest.RandInt()
+	resourceName := "opentelekomcloud_s3_bucket.bucket"
 
 	updateBucketCors := func(n string) resource.TestCheckFunc {
 		return func(s *terraform.State) error {
 			rs, ok := s.RootModule().Resources[n]
 			if !ok {
-				return fmt.Errorf("Not found: %s", n)
+				return fmt.Errorf("not found: %s", n)
 			}
 
 			config := common.TestAccProvider.Meta().(*cfg.Config)
-			conn, err := config.S3Client(env.OS_REGION_NAME)
+			client, err := config.S3Client(env.OS_REGION_NAME)
 			if err != nil {
-				return fmt.Errorf("Error creating OpenTelekomCloud s3 client: %s", err)
+				return fmt.Errorf("error creating OpenTelekomCloud S3 client: %s", err)
 			}
-			_, err = conn.PutBucketCors(&s3.PutBucketCorsInput{
+			_, err = client.PutBucketCors(&s3.PutBucketCorsInput{
 				Bucket: aws.String(rs.Primary.ID),
 				CORSConfiguration: &s3.CORSConfiguration{
 					CORSRules: []*s3.CORSRule{
@@ -423,9 +403,8 @@ func TestAccS3Bucket_Cors(t *testing.T) {
 			{
 				Config: testAccS3BucketConfigWithCORS(rInt),
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckS3BucketExists("opentelekomcloud_s3_bucket.bucket"),
-					testAccCheckS3BucketCors(
-						"opentelekomcloud_s3_bucket.bucket",
+					testAccCheckS3BucketExists(resourceName),
+					testAccCheckS3BucketCors(resourceName,
 						[]*s3.CORSRule{
 							{
 								AllowedHeaders: []*string{aws.String("*")},
@@ -436,16 +415,15 @@ func TestAccS3Bucket_Cors(t *testing.T) {
 							},
 						},
 					),
-					updateBucketCors("opentelekomcloud_s3_bucket.bucket"),
+					updateBucketCors(resourceName),
 				),
 				ExpectNonEmptyPlan: true, // TODO: No diff in real life, so maybe a timing problem?
 			},
 			{
 				Config: testAccS3BucketConfigWithCORS(rInt),
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckS3BucketExists("opentelekomcloud_s3_bucket.bucket"),
-					testAccCheckS3BucketCors(
-						"opentelekomcloud_s3_bucket.bucket",
+					testAccCheckS3BucketExists(resourceName),
+					testAccCheckS3BucketCors(resourceName,
 						[]*s3.CORSRule{
 							{
 								AllowedHeaders: []*string{aws.String("*")},
@@ -464,6 +442,8 @@ func TestAccS3Bucket_Cors(t *testing.T) {
 
 func TestAccS3Bucket_Logging(t *testing.T) {
 	rInt := acctest.RandInt()
+	resourceName := "opentelekomcloud_s3_bucket.bucket"
+
 	resource.Test(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheckS3(t) },
 		Providers:    common.TestAccProviders,
@@ -472,9 +452,8 @@ func TestAccS3Bucket_Logging(t *testing.T) {
 			{
 				Config: testAccS3BucketConfigWithLogging(rInt),
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckS3BucketExists("opentelekomcloud_s3_bucket.bucket"),
-					testAccCheckS3BucketLogging(
-						"opentelekomcloud_s3_bucket.bucket", "opentelekomcloud_s3_bucket.log_bucket", "log/"),
+					testAccCheckS3BucketExists(resourceName),
+					testAccCheckS3BucketLogging(resourceName, "opentelekomcloud_s3_bucket.log_bucket", "log/"),
 				),
 			},
 		},
@@ -483,6 +462,8 @@ func TestAccS3Bucket_Logging(t *testing.T) {
 
 func TestAccS3Bucket_Lifecycle(t *testing.T) {
 	rInt := acctest.RandInt()
+	resourceName := "opentelekomcloud_s3_bucket.bucket"
+
 	resource.Test(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheckS3(t) },
 		Providers:    common.TestAccProviders,
@@ -491,67 +472,43 @@ func TestAccS3Bucket_Lifecycle(t *testing.T) {
 			{
 				Config: testAccS3BucketConfigWithLifecycle(rInt),
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckS3BucketExists("opentelekomcloud_s3_bucket.bucket"),
-					resource.TestCheckResourceAttr(
-						"opentelekomcloud_s3_bucket.bucket", "lifecycle_rule.0.id", "id1"),
-					resource.TestCheckResourceAttr(
-						"opentelekomcloud_s3_bucket.bucket", "lifecycle_rule.0.prefix", "path1/"),
-					resource.TestCheckResourceAttr(
-						"opentelekomcloud_s3_bucket.bucket", "lifecycle_rule.0.expiration.2613713285.days", "365"),
-					resource.TestCheckResourceAttr(
-						"opentelekomcloud_s3_bucket.bucket", "lifecycle_rule.0.expiration.2613713285.date", ""),
-					resource.TestCheckResourceAttr(
-						"opentelekomcloud_s3_bucket.bucket", "lifecycle_rule.0.expiration.2613713285.expired_object_delete_marker", "false"),
-					resource.TestCheckResourceAttr(
-						"opentelekomcloud_s3_bucket.bucket", "lifecycle_rule.1.id", "id2"),
-					resource.TestCheckResourceAttr(
-						"opentelekomcloud_s3_bucket.bucket", "lifecycle_rule.1.prefix", "path2/"),
-					resource.TestCheckResourceAttr(
-						"opentelekomcloud_s3_bucket.bucket", "lifecycle_rule.1.expiration.2855832418.date", "2016-01-12"),
-					resource.TestCheckResourceAttr(
-						"opentelekomcloud_s3_bucket.bucket", "lifecycle_rule.1.expiration.2855832418.days", "0"),
-					resource.TestCheckResourceAttr(
-						"opentelekomcloud_s3_bucket.bucket", "lifecycle_rule.1.expiration.2855832418.expired_object_delete_marker", "false"),
-					resource.TestCheckResourceAttr(
-						"opentelekomcloud_s3_bucket.bucket", "lifecycle_rule.2.id", "id3"),
-					resource.TestCheckResourceAttr(
-						"opentelekomcloud_s3_bucket.bucket", "lifecycle_rule.2.prefix", "path3/"),
-					resource.TestCheckResourceAttr(
-						"opentelekomcloud_s3_bucket.bucket", "lifecycle_rule.3.id", "id4"),
-					resource.TestCheckResourceAttr(
-						"opentelekomcloud_s3_bucket.bucket", "lifecycle_rule.3.prefix", "path4/"),
+					testAccCheckS3BucketExists(resourceName),
+					resource.TestCheckResourceAttr(resourceName, "lifecycle_rule.0.id", "id1"),
+					resource.TestCheckResourceAttr(resourceName, "lifecycle_rule.0.prefix", "path1/"),
+					resource.TestCheckResourceAttr(resourceName, "lifecycle_rule.0.expiration.2613713285.days", "365"),
+					resource.TestCheckResourceAttr(resourceName, "lifecycle_rule.0.expiration.2613713285.date", ""),
+					resource.TestCheckResourceAttr(resourceName, "lifecycle_rule.0.expiration.2613713285.expired_object_delete_marker", "false"),
+					resource.TestCheckResourceAttr(resourceName, "lifecycle_rule.1.id", "id2"),
+					resource.TestCheckResourceAttr(resourceName, "lifecycle_rule.1.prefix", "path2/"),
+					resource.TestCheckResourceAttr(resourceName, "lifecycle_rule.1.expiration.2855832418.date", "2016-01-12"),
+					resource.TestCheckResourceAttr(resourceName, "lifecycle_rule.1.expiration.2855832418.days", "0"),
+					resource.TestCheckResourceAttr(resourceName, "lifecycle_rule.1.expiration.2855832418.expired_object_delete_marker", "false"),
+					resource.TestCheckResourceAttr(resourceName, "lifecycle_rule.2.id", "id3"),
+					resource.TestCheckResourceAttr(resourceName, "lifecycle_rule.2.prefix", "path3/"),
+					resource.TestCheckResourceAttr(resourceName, "lifecycle_rule.3.id", "id4"),
+					resource.TestCheckResourceAttr(resourceName, "lifecycle_rule.3.prefix", "path4/"),
 				),
 			},
 			{
 				Config: testAccS3BucketConfigWithVersioningLifecycle(rInt),
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckS3BucketExists("opentelekomcloud_s3_bucket.bucket"),
-					resource.TestCheckResourceAttr(
-						"opentelekomcloud_s3_bucket.bucket", "lifecycle_rule.0.id", "id1"),
-					resource.TestCheckResourceAttr(
-						"opentelekomcloud_s3_bucket.bucket", "lifecycle_rule.0.prefix", "path1/"),
-					resource.TestCheckResourceAttr(
-						"opentelekomcloud_s3_bucket.bucket", "lifecycle_rule.0.enabled", "true"),
-					resource.TestCheckResourceAttr(
-						"opentelekomcloud_s3_bucket.bucket", "lifecycle_rule.0.noncurrent_version_expiration.80908210.days", "365"),
-					resource.TestCheckResourceAttr(
-						"opentelekomcloud_s3_bucket.bucket", "lifecycle_rule.1.id", "id2"),
-					resource.TestCheckResourceAttr(
-						"opentelekomcloud_s3_bucket.bucket", "lifecycle_rule.1.prefix", "path2/"),
-					resource.TestCheckResourceAttr(
-						"opentelekomcloud_s3_bucket.bucket", "lifecycle_rule.1.enabled", "false"),
-					resource.TestCheckResourceAttr(
-						"opentelekomcloud_s3_bucket.bucket", "lifecycle_rule.1.noncurrent_version_expiration.80908210.days", "365"),
-					resource.TestCheckResourceAttr(
-						"opentelekomcloud_s3_bucket.bucket", "lifecycle_rule.2.id", "id3"),
-					resource.TestCheckResourceAttr(
-						"opentelekomcloud_s3_bucket.bucket", "lifecycle_rule.2.prefix", "path3/"),
+					testAccCheckS3BucketExists(resourceName),
+					resource.TestCheckResourceAttr(resourceName, "lifecycle_rule.0.id", "id1"),
+					resource.TestCheckResourceAttr(resourceName, "lifecycle_rule.0.prefix", "path1/"),
+					resource.TestCheckResourceAttr(resourceName, "lifecycle_rule.0.enabled", "true"),
+					resource.TestCheckResourceAttr(resourceName, "lifecycle_rule.0.noncurrent_version_expiration.80908210.days", "365"),
+					resource.TestCheckResourceAttr(resourceName, "lifecycle_rule.1.id", "id2"),
+					resource.TestCheckResourceAttr(resourceName, "lifecycle_rule.1.prefix", "path2/"),
+					resource.TestCheckResourceAttr(resourceName, "lifecycle_rule.1.enabled", "false"),
+					resource.TestCheckResourceAttr(resourceName, "lifecycle_rule.1.noncurrent_version_expiration.80908210.days", "365"),
+					resource.TestCheckResourceAttr(resourceName, "lifecycle_rule.2.id", "id3"),
+					resource.TestCheckResourceAttr(resourceName, "lifecycle_rule.2.prefix", "path3/"),
 				),
 			},
 			{
 				Config: testAccS3BucketConfig(rInt),
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckS3BucketExists("opentelekomcloud_s3_bucket.bucket"),
+					testAccCheckS3BucketExists(resourceName),
 				),
 			},
 		},
@@ -635,11 +592,11 @@ func testAccCheckS3BucketExistsWithProviders(n string, providers *[]*schema.Prov
 	return func(s *terraform.State) error {
 		rs, ok := s.RootModule().Resources[n]
 		if !ok {
-			return fmt.Errorf("Not found: %s", n)
+			return fmt.Errorf("not found: %s", n)
 		}
 
 		if rs.Primary.ID == "" {
-			return fmt.Errorf("No ID is set")
+			return fmt.Errorf("no ID is set")
 		}
 		for _, provider := range *providers {
 			// Ignore if Meta is empty, this can happen for validation providers
@@ -650,19 +607,19 @@ func testAccCheckS3BucketExistsWithProviders(n string, providers *[]*schema.Prov
 			config := common.TestAccProvider.Meta().(*cfg.Config)
 			conn, err := config.S3Client(env.OS_REGION_NAME)
 			if err != nil {
-				return fmt.Errorf("Error creating OpenTelekomCloud s3 client: %s", err)
+				return fmt.Errorf("error creating OpenTelekomCloud S3 client: %s", err)
 			}
 			_, err = conn.HeadBucket(&s3.HeadBucketInput{
 				Bucket: aws.String(rs.Primary.ID),
 			})
 
 			if err != nil {
-				return fmt.Errorf("S3 Bucket error: %v", err)
+				return fmt.Errorf("s3 Bucket error: %v", err)
 			}
 			return nil
 		}
 
-		return fmt.Errorf("Instance not found")
+		return fmt.Errorf("instance not found")
 	}
 }
 
@@ -670,24 +627,24 @@ func testAccCheckS3DestroyBucket(n string) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
 		rs, ok := s.RootModule().Resources[n]
 		if !ok {
-			return fmt.Errorf("Not found: %s", n)
+			return fmt.Errorf("not found: %s", n)
 		}
 
 		if rs.Primary.ID == "" {
-			return fmt.Errorf("No S3 Bucket ID is set")
+			return fmt.Errorf("no S3 Bucket ID is set")
 		}
 
 		config := common.TestAccProvider.Meta().(*cfg.Config)
 		conn, err := config.S3Client(env.OS_REGION_NAME)
 		if err != nil {
-			return fmt.Errorf("Error creating OpenTelekomCloud s3 client: %s", err)
+			return fmt.Errorf("error creating OpenTelekomCloud s3 client: %s", err)
 		}
 		_, err = conn.DeleteBucket(&s3.DeleteBucketInput{
 			Bucket: aws.String(rs.Primary.ID),
 		})
 
 		if err != nil {
-			return fmt.Errorf("Error destroying Bucket (%s) in testAccCheckS3DestroyBucket: %s", rs.Primary.ID, err)
+			return fmt.Errorf("error destroying Bucket (%s) in testAccCheckS3DestroyBucket: %s", rs.Primary.ID, err)
 		}
 		return nil
 	}
@@ -699,7 +656,7 @@ func testAccCheckS3BucketPolicy(n string, policy string) resource.TestCheckFunc 
 		config := common.TestAccProvider.Meta().(*cfg.Config)
 		conn, err := config.S3Client(env.OS_REGION_NAME)
 		if err != nil {
-			return fmt.Errorf("Error creating OpenTelekomCloud s3 client: %s", err)
+			return fmt.Errorf("error creating OpenTelekomCloud s3 client: %s", err)
 		}
 
 		out, err := conn.GetBucketPolicy(&s3.GetBucketPolicyInput{
@@ -712,7 +669,7 @@ func testAccCheckS3BucketPolicy(n string, policy string) resource.TestCheckFunc 
 				return nil
 			}
 			if err == nil {
-				return fmt.Errorf("Expected no policy, got: %#v", *out.Policy)
+				return fmt.Errorf("expected no policy, got: %#v", *out.Policy)
 			} else {
 				return fmt.Errorf("GetBucketPolicy error: %v, expected %s", err, policy)
 			}
@@ -748,12 +705,12 @@ func testAccCheckS3BucketWebsite(n string, indexDoc string, errorDoc string, red
 	return func(s *terraform.State) error {
 		rs, _ := s.RootModule().Resources[n]
 		config := common.TestAccProvider.Meta().(*cfg.Config)
-		conn, err := config.S3Client(env.OS_REGION_NAME)
+		client, err := config.S3Client(env.OS_REGION_NAME)
 		if err != nil {
-			return fmt.Errorf("Error creating OpenTelekomCloud s3 client: %s", err)
+			return fmt.Errorf("error creating OpenTelekomCloud s3 client: %s", err)
 		}
 
-		out, err := conn.GetBucketWebsite(&s3.GetBucketWebsiteInput{
+		out, err := client.GetBucketWebsite(&s3.GetBucketWebsiteInput{
 			Bucket: aws.String(rs.Primary.ID),
 		})
 
@@ -808,12 +765,12 @@ func testAccCheckS3BucketWebsiteRoutingRules(n string, routingRules []*s3.Routin
 	return func(s *terraform.State) error {
 		rs, _ := s.RootModule().Resources[n]
 		config := common.TestAccProvider.Meta().(*cfg.Config)
-		conn, err := config.S3Client(env.OS_REGION_NAME)
+		client, err := config.S3Client(env.OS_REGION_NAME)
 		if err != nil {
-			return fmt.Errorf("Error creating OpenTelekomCloud s3 client: %s", err)
+			return fmt.Errorf("error creating OpenTelekomCloud s3 client: %s", err)
 		}
 
-		out, err := conn.GetBucketWebsite(&s3.GetBucketWebsiteInput{
+		out, err := client.GetBucketWebsite(&s3.GetBucketWebsiteInput{
 			Bucket: aws.String(rs.Primary.ID),
 		})
 
@@ -836,12 +793,12 @@ func testAccCheckS3BucketVersioning(n string, versioningStatus string) resource.
 	return func(s *terraform.State) error {
 		rs, _ := s.RootModule().Resources[n]
 		config := common.TestAccProvider.Meta().(*cfg.Config)
-		conn, err := config.S3Client(env.OS_REGION_NAME)
+		client, err := config.S3Client(env.OS_REGION_NAME)
 		if err != nil {
-			return fmt.Errorf("Error creating OpenTelekomCloud s3 client: %s", err)
+			return fmt.Errorf("error creating OpenTelekomCloud s3 client: %s", err)
 		}
 
-		out, err := conn.GetBucketVersioning(&s3.GetBucketVersioningInput{
+		out, err := client.GetBucketVersioning(&s3.GetBucketVersioningInput{
 			Bucket: aws.String(rs.Primary.ID),
 		})
 
@@ -867,12 +824,12 @@ func testAccCheckS3BucketCors(n string, corsRules []*s3.CORSRule) resource.TestC
 	return func(s *terraform.State) error {
 		rs, _ := s.RootModule().Resources[n]
 		config := common.TestAccProvider.Meta().(*cfg.Config)
-		conn, err := config.S3Client(env.OS_REGION_NAME)
+		client, err := config.S3Client(env.OS_REGION_NAME)
 		if err != nil {
-			return fmt.Errorf("Error creating OpenTelekomCloud s3 client: %s", err)
+			return fmt.Errorf("error creating OpenTelekomCloud s3 client: %s", err)
 		}
 
-		out, err := conn.GetBucketCors(&s3.GetBucketCorsInput{
+		out, err := client.GetBucketCors(&s3.GetBucketCorsInput{
 			Bucket: aws.String(rs.Primary.ID),
 		})
 
@@ -892,12 +849,12 @@ func testAccCheckS3BucketLogging(n, b, p string) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
 		rs, _ := s.RootModule().Resources[n]
 		config := common.TestAccProvider.Meta().(*cfg.Config)
-		conn, err := config.S3Client(env.OS_REGION_NAME)
+		client, err := config.S3Client(env.OS_REGION_NAME)
 		if err != nil {
-			return fmt.Errorf("Error creating OpenTelekomCloud s3 client: %s", err)
+			return fmt.Errorf("error creating OpenTelekomCloud s3 client: %s", err)
 		}
 
-		out, err := conn.GetBucketLogging(&s3.GetBucketLoggingInput{
+		out, err := client.GetBucketLogging(&s3.GetBucketLoggingInput{
 			Bucket: aws.String(rs.Primary.ID),
 		})
 
@@ -1187,20 +1144,6 @@ resource "opentelekomcloud_s3_bucket" "bucket" {
 `, randInt)
 }
 
-var testAccS3BucketConfigWithAcl = `
-resource "opentelekomcloud_s3_bucket" "bucket" {
-	bucket = "tf-test-bucket-%d"
-	acl = "public-read"
-}
-`
-
-var testAccS3BucketConfigWithAclUpdate = `
-resource "opentelekomcloud_s3_bucket" "bucket" {
-	bucket = "tf-test-bucket-%d"
-	acl = "private"
-}
-`
-
 func testAccS3BucketConfigWithLogging(randInt int) string {
 	return fmt.Sprintf(`
 resource "opentelekomcloud_s3_bucket" "log_bucket" {
@@ -1303,14 +1246,29 @@ resource "opentelekomcloud_s3_bucket" "bucket" {
 `, randInt)
 }
 
-const testAccS3BucketConfig_namePrefix = `
+const (
+	testAccS3BucketConfig_namePrefix = `
 resource "opentelekomcloud_s3_bucket" "test" {
-	bucket_prefix = "tf-test-"
+  bucket_prefix = "tf-test-"
+}
+`
+	testAccS3BucketConfig_generatedName = `
+resource "opentelekomcloud_s3_bucket" "test" {
+  bucket_prefix = "tf-test-"
 }
 `
 
-const testAccS3BucketConfig_generatedName = `
-resource "opentelekomcloud_s3_bucket" "test" {
-	bucket_prefix = "tf-test-"
+	testAccS3BucketConfigWithAcl = `
+resource "opentelekomcloud_s3_bucket" "bucket" {
+  bucket = "tf-test-bucket-%d"
+  acl = "public-read"
 }
 `
+
+	testAccS3BucketConfigWithAclUpdate = `
+resource "opentelekomcloud_s3_bucket" "bucket" {
+  bucket = "tf-test-bucket-%d"
+  acl = "private"
+}
+`
+)
