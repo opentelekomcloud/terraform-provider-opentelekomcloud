@@ -351,8 +351,7 @@ func resourceS3BucketUpdate(d *schema.ResourceData, meta interface{}) error {
 	}
 
 	if d.HasChange("versioning") {
-		lenVersioning := d.Get("versioning.#").(int)
-		if lenVersioning > 0 {
+		if d.Get("versioning.#").(int) > 0 {
 			enabled := d.Get("versioning.0.enabled").(bool)
 
 			if enabled || !d.IsNewResource() {
