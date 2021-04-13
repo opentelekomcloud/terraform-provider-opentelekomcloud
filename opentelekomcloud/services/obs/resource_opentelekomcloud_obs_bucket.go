@@ -258,10 +258,9 @@ func resourceObsBucketCreate(d *schema.ResourceData, meta interface{}) error {
 	acl := d.Get("acl").(string)
 	class := d.Get("storage_class").(string)
 	opts := &obs.CreateBucketInput{
-		BucketLocation: obs.BucketLocation{},
-		Bucket:         bucket,
-		ACL:            obs.AclType(acl),
-		StorageClass:   obs.StorageClassType(class),
+		Bucket:       bucket,
+		ACL:          obs.AclType(acl),
+		StorageClass: obs.StorageClassType(class),
 	}
 	opts.Location = d.Get("region").(string)
 	log.Printf("[DEBUG] OBS bucket create opts: %#v", opts)
@@ -1135,14 +1134,14 @@ func GetObsError(action string, bucket string, err error) error {
 
 // normalize format of storage class
 func normalizeStorageClass(class string) string {
-	var normalizedClass = class
-
-	if class == "STANDARD_IA" {
-		normalizedClass = "WARM"
-	} else if class == "GLACIER" {
-		normalizedClass = "COLD"
+	switch class {
+	case "STANDARD_IA":
+		return "WARM"
+	case "GLACIER":
+		return "COLD"
+	default:
+		return class
 	}
-	return normalizedClass
 }
 
 func normalizeWebsiteRoutingRules(w []obs.RoutingRule) (string, error) {
