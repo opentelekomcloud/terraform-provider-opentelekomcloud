@@ -350,9 +350,15 @@ func resourceS3BucketUpdate(d *schema.ResourceData, meta interface{}) error {
 		}
 	}
 
-	if d.HasChange("versioning") && !d.IsNewResource() {
-		if err := resourceS3BucketVersioningUpdate(client, d); err != nil {
-			return err
+	if d.HasChange("versioning") {
+		if d.Get("versioning.#").(int) > 0 {
+			enabled := d.Get("versioning.0.enabled").(bool)
+
+			if enabled || !d.IsNewResource() {
+				if err := resourceS3BucketVersioningUpdate(client, d); err != nil {
+					return err
+				}
+			}
 		}
 	}
 
