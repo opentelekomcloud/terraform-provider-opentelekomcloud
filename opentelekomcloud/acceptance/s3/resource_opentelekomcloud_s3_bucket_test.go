@@ -356,6 +356,33 @@ func TestAccS3Bucket_Versioning(t *testing.T) {
 	})
 }
 
+func TestAccS3Bucket_VersioningSecond(t *testing.T) {
+	rInt := acctest.RandInt()
+	resourceName := "opentelekomcloud_s3_bucket.bucket"
+
+	resource.Test(t, resource.TestCase{
+		PreCheck:     func() { testAccPreCheckS3(t) },
+		Providers:    common.TestAccProviders,
+		CheckDestroy: testAccCheckS3BucketDestroy,
+		Steps: []resource.TestStep{
+			{
+				Config: testAccS3BucketConfigWithVersioning(rInt),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckS3BucketExists(resourceName),
+					testAccCheckS3BucketVersioning(resourceName, s3.BucketVersioningStatusEnabled),
+				),
+			},
+			{
+				Config: testAccS3BucketConfigWithDisableVersioning(rInt),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckS3BucketExists(resourceName),
+					testAccCheckS3BucketVersioning(resourceName, s3.BucketVersioningStatusSuspended),
+				),
+			},
+		},
+	})
+}
+
 func TestAccS3Bucket_Cors(t *testing.T) {
 	rInt := acctest.RandInt()
 	resourceName := "opentelekomcloud_s3_bucket.bucket"
