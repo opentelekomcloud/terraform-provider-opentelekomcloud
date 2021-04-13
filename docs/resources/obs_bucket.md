@@ -147,19 +147,23 @@ The following arguments are supported:
   A bucket must be named according to the globally applied DNS naming regulations as follows:
   * The name must be globally unique in OBS.
   * The name must contain 3 to 63 characters. Only lowercase letters, digits, hyphens (-), and periods (.) are allowed.
-  * The name cannot start or end with a period (.) or hyphen (-), and cannot contain two consecutive periods (.) or contain a period (.) and a hyphen (-) adjacent to each other.
+  * The name cannot start or end with a period (.) or hyphen (-), and cannot contain two consecutive periods (.)
+    or contain a period (.) and a hyphen (-) adjacent to each other.
   * The name cannot be an IP address.
-  * If the name contains any periods (.), a security certificate verification message may appear when you access the bucket or its objects by entering a domain name.
+  * If the name contains any periods (.), a security certificate verification message may appear when you access
+    the bucket or its objects by entering a domain name.
 
 * `storage_class` - (Optional) Specifies the storage class of the bucket. OBS provides three storage classes:
   `STANDARD`, `WARM` (Infrequent Access) and `COLD` (Archive). Defaults to `STANDARD`.
 
-* `acl` - (Optional) Specifies the ACL policy for a bucket. The predefined common policies are as follows: "private", "public-read", "public-read-write" and "log-delivery-write". Defaults to `private`.
+* `acl` - (Optional) Specifies the ACL policy for a bucket. The predefined common policies are as follows:
+  `private`, `public-read`, `public-read-write` and `log-delivery-write`. Defaults to `private`.
 
 * `tags` - (Optional) A mapping of tags to assign to the bucket. Each tag is represented by one key-value pair.
 
-* `versioning` - (Optional) Whether enable versioning. Once you version-enable a bucket, it can never return to an unversioned state.
-  You can, however, suspend versioning on that bucket.
+* `enabled` - (Optional) Enable versioning. Once you version-enable a bucket, it can never return to an
+  unversioned state. You can, however, suspend versioning on that bucket. If omitted, during bucket
+  creation it will be in `Disabled` state.
 
 * `logging` - (Optional) A settings of bucket logging (documented below).
 
@@ -169,9 +173,11 @@ The following arguments are supported:
 
 * `lifecycle_rule` - (Optional) A configuration of object lifecycle management (documented below).
 
-* `force_destroy` - (Optional) A boolean that indicates all objects should be deleted from the bucket so that the bucket can be destroyed without error. Default to `false`.
+* `force_destroy` - (Optional) A boolean that indicates all objects should be deleted from the bucket so that the
+  bucket can be destroyed without error. Default to `false`.
 
-* `region` - (Optional) If specified, the region this bucket should reside in. Otherwise, the region used by the provider.
+* `region` - (Optional) If specified, the region this bucket should reside in. Otherwise,
+  the region used by the provider.
 
 The `logging` object supports the following:
 
@@ -182,22 +188,26 @@ The `logging` object supports the following:
 
 The `website` object supports the following:
 
-* `index_document` - (Required, unless using `redirect_all_requests_to`) Specifies the default homepage of the static website, only HTML web pages are supported.
-  OBS only allows files such as `index.html` in the root directory of a bucket to function as the default homepage.
-  That is to say, do not set the default homepage with a multi-level directory structure (for example, /page/index.html).
+* `index_document` - (Required, unless using `redirect_all_requests_to`) Specifies the default homepage of the
+  static website, only HTML web pages are supported. OBS only allows files such as `index.html` in the root
+  directory of a bucket to function as the default homepage. That is to say, do not set the default homepage
+  with a multi-level directory structure (for example, `/page/index.html`).
 
 * `error_document` - (Optional) Specifies the error page returned when an error occurs during static website access.
   Only HTML, JPG, PNG, BMP, and WEBP files under the root directory are supported.
 
-* `redirect_all_requests_to` - (Optional) A hostname to redirect all website requests for this bucket to. Hostname can optionally be prefixed with a protocol (`http://` or `https://`) to use when redirecting requests. The default is the protocol that is used in the original request.
+* `redirect_all_requests_to` - (Optional) A hostname to redirect all website requests for this bucket to.
+  Hostname can optionally be prefixed with a protocol (`http://` or `https://`) to use when redirecting
+  requests. The default is the protocol that is used in the original request.
 
-* `routing_rules` - (Optional) A JSON or XML format containing routing rules describing redirect behavior and when redirects are applied.
-  Each rule contains a `Condition` and a `Redirect` as shown in the following table:
+* `routing_rules` - (Optional) A JSON or XML format containing routing rules describing redirect
+  behavior and when redirects are applied. Each rule contains a `Condition` and a `Redirect`
+  as shown in the following table:
 
-Parameter | Key
--|-
-Condition | KeyPrefixEquals, HttpErrorCodeReturnedEquals
-Redirect | Protocol, HostName, ReplaceKeyPrefixWith, ReplaceKeyWith, HttpRedirectCode
+| Parameter | Key |
+|-----------|-----|
+| Condition | KeyPrefixEquals, HttpErrorCodeReturnedEquals |
+| Redirect | Protocol, HostName, ReplaceKeyPrefixWith, ReplaceKeyWith, HttpRedirectCode |
 
 The `cors_rule` object supports the following:
 
@@ -210,10 +220,11 @@ The `cors_rule` object supports the following:
 * `allowed_headers` - (Optional) Specifies the allowed header of cross-origin requests.
   Only CORS requests matching the allowed header are valid.
 
-* `expose_headers` - (Optional) Specifies the exposed header in CORS responses, providing additional information for clients.
+* `expose_headers` - (Optional) Specifies the exposed header in CORS responses, providing additional
+  information for clients.
 
-* `max_age_seconds` - (Optional) Specifies the duration that your browser can cache CORS responses, expressed in seconds.
-  The default value is 100.
+* `max_age_seconds` - (Optional) Specifies the duration that your browser can cache CORS responses,
+  expressed in seconds. The default value is `100`.
 
 The `lifecycle_rule` object supports the following:
 
@@ -222,18 +233,24 @@ The `lifecycle_rule` object supports the following:
 * `enabled` - (Required) Specifies lifecycle rule status.
 
 * `prefix` - (Optional) Object key prefix identifying one or more objects to which the rule applies.
-  If omitted, all objects in the bucket will be managed by the lifecycle rule.
-  The prefix cannot start or end with a slash (/), cannot have consecutive slashes (/), and cannot contain the following special characters: \:*?"<>|.
+  If omitted, all objects in the bucket will be managed by the lifecycle rule. The prefix cannot start
+  or end with a slash (/), cannot have consecutive slashes (/), and cannot contain the following
+  special characters: \:*?"<>|.
 
-* `expiration` - (Optional) Specifies a period when objects that have been last updated are automatically deleted. (documented below).
+* `expiration` - (Optional) Specifies a period when objects that have been last updated are automatically
+  deleted. (documented below).
 
-* `transition` - (Optional) Specifies a period when objects that have been last updated are automatically transitioned to `WARM` or `COLD` storage class (documented below).
+* `transition` - (Optional) Specifies a period when objects that have been last updated are automatically
+  transitioned to `WARM` or `COLD` storage class (documented below).
 
-* `noncurrent_version_expiration` - (Optional) Specifies a period when noncurrent object versions are automatically deleted. (documented below).
+* `noncurrent_version_expiration` - (Optional) Specifies a period when noncurrent object versions are
+  automatically deleted. (documented below).
 
-* `noncurrent_version_transition` - (Optional) Specifies a period when noncurrent object versions are automatically transitioned to `WARM` or `COLD` storage class (documented below).
+* `noncurrent_version_transition` - (Optional) Specifies a period when noncurrent object versions are
+  automatically transitioned to `WARM` or `COLD` storage class (documented below).
 
-At least one of `expiration`, `transition`, `noncurrent_version_expiration`, `noncurrent_version_transition` must be specified.
+-> At least one of `expiration`, `transition`, `noncurrent_version_expiration`, `noncurrent_version_transition`
+must be specified.
 
 The `expiration` object supports the following
 
@@ -242,7 +259,8 @@ The `expiration` object supports the following
 
 The `transition` object supports the following
 
-* `days` - (Required) Specifies the number of days when objects that have been last updated are automatically transitioned to the specified storage class.
+* `days` - (Required) Specifies the number of days when objects that have been last updated are automatically
+  transitioned to the specified storage class.
 
 * `storage_class` - (Required) The class of storage used to store the object. Only `WARM` and `COLD` are supported.
 
@@ -252,7 +270,8 @@ The `noncurrent_version_expiration` object supports the following
 
 The `noncurrent_version_transition` object supports the following
 
-* `days` - (Required) Specifies the number of days when noncurrent object versions are automatically transitioned to the specified storage class.
+* `days` - (Required) Specifies the number of days when noncurrent object versions are automatically
+  transitioned to the specified storage class.
 
 * `storage_class` - (Required) The class of storage used to store the object. Only `WARM` and `COLD` are supported.
 
@@ -270,6 +289,6 @@ The following attributes are exported:
 
 OBS bucket can be imported using the `bucket`, e.g.
 
-```sh
+```shell
 terraform import opentelekomcloud_obs_bucket.bucket bucket-name
 ```

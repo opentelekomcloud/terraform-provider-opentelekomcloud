@@ -23,29 +23,21 @@ func TestAccObsBucket_basic(t *testing.T) {
 		CheckDestroy: testAccCheckObsBucketDestroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccObsBucket_basic(rInt),
+				Config: testAccObsBucketBasic(rInt),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckObsBucketExists(resourceName),
-					resource.TestCheckResourceAttr(
-						resourceName, "bucket", testAccObsBucketName(rInt)),
-					resource.TestCheckResourceAttr(
-						resourceName, "bucket_domain_name", testAccObsBucketDomainName(rInt)),
-					resource.TestCheckResourceAttr(
-						resourceName, "acl", "private"),
-					resource.TestCheckResourceAttr(
-						resourceName, "storage_class", "STANDARD"),
-					resource.TestCheckResourceAttr(
-						resourceName, "region", env.OS_REGION_NAME),
+					resource.TestCheckResourceAttr(resourceName, "bucket", testAccObsBucketName(rInt)),
+					resource.TestCheckResourceAttr(resourceName, "bucket_domain_name", testAccObsBucketDomainName(rInt)),
+					resource.TestCheckResourceAttr(resourceName, "acl", "private"),
+					resource.TestCheckResourceAttr(resourceName, "storage_class", "STANDARD"),
+					resource.TestCheckResourceAttr(resourceName, "region", env.OS_REGION_NAME),
 				),
 			},
 			{
-				Config: testAccObsBucket_basic_update(rInt),
-				Check: resource.ComposeTestCheckFunc(
-					testAccCheckObsBucketExists(resourceName),
-					resource.TestCheckResourceAttr(
-						resourceName, "acl", "public-read"),
-					resource.TestCheckResourceAttr(
-						resourceName, "storage_class", "WARM"),
+				Config: testAccObsBucketUpdate(rInt),
+				Check: resource.ComposeTestCheckFunc(testAccCheckObsBucketExists(resourceName),
+					resource.TestCheckResourceAttr(resourceName, "acl", "public-read"),
+					resource.TestCheckResourceAttr(resourceName, "storage_class", "WARM"),
 				),
 			},
 		},
@@ -63,12 +55,9 @@ func TestAccObsBucket_tags(t *testing.T) {
 			{
 				Config: testAccObsBucketConfigWithTags(rInt),
 				Check: resource.ComposeTestCheckFunc(
-					resource.TestCheckResourceAttr(
-						resourceName, "tags.name", testAccObsBucketName(rInt)),
-					resource.TestCheckResourceAttr(
-						resourceName, "tags.foo", "bar"),
-					resource.TestCheckResourceAttr(
-						resourceName, "tags.key1", "value1"),
+					resource.TestCheckResourceAttr(resourceName, "tags.name", testAccObsBucketName(rInt)),
+					resource.TestCheckResourceAttr(resourceName, "tags.foo", "bar"),
+					resource.TestCheckResourceAttr(resourceName, "tags.key1", "value1"),
 				),
 			},
 		},
@@ -88,16 +77,14 @@ func TestAccObsBucket_versioning(t *testing.T) {
 				Config: testAccObsBucketConfigWithVersioning(rInt),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckObsBucketExists(resourceName),
-					resource.TestCheckResourceAttr(
-						resourceName, "versioning", "true"),
+					resource.TestCheckResourceAttr(resourceName, "versioning", "true"),
 				),
 			},
 			{
 				Config: testAccObsBucketConfigWithDisableVersioning(rInt),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckObsBucketExists(resourceName),
-					resource.TestCheckResourceAttr(
-						resourceName, "versioning", "false"),
+					resource.TestCheckResourceAttr(resourceName, "versioning", "false"),
 				),
 			},
 		},
@@ -138,26 +125,16 @@ func TestAccObsBucket_lifecycle(t *testing.T) {
 				Config: testAccObsBucketConfigWithLifecycle(rInt),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckObsBucketExists(resourceName),
-					resource.TestCheckResourceAttr(
-						resourceName, "lifecycle_rule.0.name", "rule1"),
-					resource.TestCheckResourceAttr(
-						resourceName, "lifecycle_rule.0.prefix", "path1/"),
-					resource.TestCheckResourceAttr(
-						resourceName, "lifecycle_rule.1.name", "rule2"),
-					resource.TestCheckResourceAttr(
-						resourceName, "lifecycle_rule.1.prefix", "path2/"),
-					resource.TestCheckResourceAttr(
-						resourceName, "lifecycle_rule.2.name", "rule3"),
-					resource.TestCheckResourceAttr(
-						resourceName, "lifecycle_rule.2.prefix", "path3/"),
-					resource.TestCheckResourceAttr(
-						resourceName, "lifecycle_rule.1.transition.0.days", "30"),
-					resource.TestCheckResourceAttr(
-						resourceName, "lifecycle_rule.1.transition.1.days", "180"),
-					resource.TestCheckResourceAttr(
-						resourceName, "lifecycle_rule.2.noncurrent_version_transition.0.days", "60"),
-					resource.TestCheckResourceAttr(
-						resourceName, "lifecycle_rule.2.noncurrent_version_transition.1.days", "180"),
+					resource.TestCheckResourceAttr(resourceName, "lifecycle_rule.0.name", "rule1"),
+					resource.TestCheckResourceAttr(resourceName, "lifecycle_rule.0.prefix", "path1/"),
+					resource.TestCheckResourceAttr(resourceName, "lifecycle_rule.1.name", "rule2"),
+					resource.TestCheckResourceAttr(resourceName, "lifecycle_rule.1.prefix", "path2/"),
+					resource.TestCheckResourceAttr(resourceName, "lifecycle_rule.2.name", "rule3"),
+					resource.TestCheckResourceAttr(resourceName, "lifecycle_rule.2.prefix", "path3/"),
+					resource.TestCheckResourceAttr(resourceName, "lifecycle_rule.1.transition.0.days", "30"),
+					resource.TestCheckResourceAttr(resourceName, "lifecycle_rule.1.transition.1.days", "180"),
+					resource.TestCheckResourceAttr(resourceName, "lifecycle_rule.2.noncurrent_version_transition.0.days", "60"),
+					resource.TestCheckResourceAttr(resourceName, "lifecycle_rule.2.noncurrent_version_transition.1.days", "180"),
 				),
 			},
 		},
@@ -177,10 +154,8 @@ func TestAccObsBucket_website(t *testing.T) {
 				Config: testAccObsBucketWebsiteConfigWithRoutingRules(rInt),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckObsBucketExists(resourceName),
-					resource.TestCheckResourceAttr(
-						resourceName, "website.0.index_document", "index.html"),
-					resource.TestCheckResourceAttr(
-						resourceName, "website.0.error_document", "error.html"),
+					resource.TestCheckResourceAttr(resourceName, "website.0.index_document", "index.html"),
+					resource.TestCheckResourceAttr(resourceName, "website.0.error_document", "error.html"),
 				),
 			},
 		},
@@ -200,16 +175,11 @@ func TestAccObsBucket_cors(t *testing.T) {
 				Config: testAccObsBucketConfigWithCORS(rInt),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckObsBucketExists(resourceName),
-					resource.TestCheckResourceAttr(
-						resourceName, "cors_rule.0.allowed_origins.0", "https://www.example.com"),
-					resource.TestCheckResourceAttr(
-						resourceName, "cors_rule.0.allowed_methods.0", "PUT"),
-					resource.TestCheckResourceAttr(
-						resourceName, "cors_rule.0.allowed_headers.0", "*"),
-					resource.TestCheckResourceAttr(
-						resourceName, "cors_rule.0.expose_headers.1", "ETag"),
-					resource.TestCheckResourceAttr(
-						resourceName, "cors_rule.0.max_age_seconds", "3000"),
+					resource.TestCheckResourceAttr(resourceName, "cors_rule.0.allowed_origins.0", "https://www.example.com"),
+					resource.TestCheckResourceAttr(resourceName, "cors_rule.0.allowed_methods.0", "PUT"),
+					resource.TestCheckResourceAttr(resourceName, "cors_rule.0.allowed_headers.0", "*"),
+					resource.TestCheckResourceAttr(resourceName, "cors_rule.0.expose_headers.1", "ETag"),
+					resource.TestCheckResourceAttr(resourceName, "cors_rule.0.max_age_seconds", "3000"),
 				),
 			},
 		},
@@ -218,7 +188,7 @@ func TestAccObsBucket_cors(t *testing.T) {
 
 func testAccCheckObsBucketDestroy(s *terraform.State) error {
 	config := common.TestAccProvider.Meta().(*cfg.Config)
-	obsClient, err := config.NewObjectStorageClient(env.OS_REGION_NAME)
+	client, err := config.NewObjectStorageClient(env.OS_REGION_NAME)
 	if err != nil {
 		return fmt.Errorf("error creating OpenTelekomCloud OBS client: %s", err)
 	}
@@ -228,7 +198,7 @@ func testAccCheckObsBucketDestroy(s *terraform.State) error {
 			continue
 		}
 
-		_, err := obsClient.HeadBucket(rs.Primary.ID)
+		_, err := client.HeadBucket(rs.Primary.ID)
 		if err == nil {
 			return fmt.Errorf("OpenTelekomCloud OBS Bucket %s still exists", rs.Primary.ID)
 		}
@@ -248,12 +218,12 @@ func testAccCheckObsBucketExists(n string) resource.TestCheckFunc {
 		}
 
 		config := common.TestAccProvider.Meta().(*cfg.Config)
-		obsClient, err := config.NewObjectStorageClient(env.OS_REGION_NAME)
+		client, err := config.NewObjectStorageClient(env.OS_REGION_NAME)
 		if err != nil {
 			return fmt.Errorf("error creating OpenTelekomCloud OBS client: %s", err)
 		}
 
-		_, err = obsClient.HeadBucket(rs.Primary.ID)
+		_, err = client.HeadBucket(rs.Primary.ID)
 		if err != nil {
 			return fmt.Errorf("OpenTelekomCloud OBS Bucket not found: %v", err)
 		}
@@ -269,12 +239,12 @@ func testAccCheckObsBucketLogging(name, target, prefix string) resource.TestChec
 		}
 
 		config := common.TestAccProvider.Meta().(*cfg.Config)
-		obsClient, err := config.NewObjectStorageClient(env.OS_REGION_NAME)
+		client, err := config.NewObjectStorageClient(env.OS_REGION_NAME)
 		if err != nil {
 			return fmt.Errorf("error creating OpenTelekomCloud OBS client: %s", err)
 		}
 
-		output, err := obsClient.GetBucketLoggingConfiguration(rs.Primary.ID)
+		output, err := client.GetBucketLoggingConfiguration(rs.Primary.ID)
 		if err != nil {
 			return fmt.Errorf("error getting logging configuration of OBS bucket: %s", err)
 		}
@@ -301,7 +271,7 @@ func testAccObsBucketDomainName(randInt int) string {
 	return fmt.Sprintf("tf-test-bucket-%d.obs.%s.otc.t-systems.com", randInt, env.OS_REGION_NAME)
 }
 
-func testAccObsBucket_basic(randInt int) string {
+func testAccObsBucketBasic(randInt int) string {
 	return fmt.Sprintf(`
 resource "opentelekomcloud_obs_bucket" "bucket" {
   bucket        = "tf-test-bucket-%d"
@@ -311,7 +281,7 @@ resource "opentelekomcloud_obs_bucket" "bucket" {
 `, randInt)
 }
 
-func testAccObsBucket_basic_update(randInt int) string {
+func testAccObsBucketUpdate(randInt int) string {
 	return fmt.Sprintf(`
 resource "opentelekomcloud_obs_bucket" "bucket" {
   bucket        = "tf-test-bucket-%d"
