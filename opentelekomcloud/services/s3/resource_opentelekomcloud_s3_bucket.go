@@ -1326,37 +1326,27 @@ func normalizeRoutingRules(w []*s3.RoutingRule) (string, error) {
 	return string(withoutNulls), nil
 }
 
-// ValidateS3BucketName validates any S3 bucket name that is not inside the us-east-1 region.
-// Buckets outside of this region have to be DNS-compliant. After the same restrictions are
-// applied to buckets in the us-east-1 region, this function can be refactored as a SchemaValidateFunc
+// ValidateS3BucketName validates any S3 bucket name
 func ValidateS3BucketName(value string, region string) error {
-	if region != "us-east-1" {
-		if (len(value) < 3) || (len(value) > 63) {
-			return fmt.Errorf("%q must contain from 3 to 63 characters", value)
-		}
-		if !regexp.MustCompile(`^[0-9a-z-.]+$`).MatchString(value) {
-			return fmt.Errorf("only lowercase alphanumeric characters and hyphens allowed in %q", value)
-		}
-		if regexp.MustCompile(`^(?:[0-9]{1,3}\.){3}[0-9]{1,3}$`).MatchString(value) {
-			return fmt.Errorf("%q must not be formatted as an IP address", value)
-		}
-		if strings.HasPrefix(value, `.`) {
-			return fmt.Errorf("%q cannot start with a period", value)
-		}
-		if strings.HasSuffix(value, `.`) {
-			return fmt.Errorf("%q cannot end with a period", value)
-		}
-		if strings.Contains(value, `..`) {
-			return fmt.Errorf("%q can be only one period between labels", value)
-		}
-	} else {
-		if len(value) > 255 {
-			return fmt.Errorf("%q must contain less than 256 characters", value)
-		}
-		if !regexp.MustCompile(`^[0-9a-zA-Z-._]+$`).MatchString(value) {
-			return fmt.Errorf("only alphanumeric characters, hyphens, periods, and underscores allowed in %q", value)
-		}
+	if (len(value) < 3) || (len(value) > 63) {
+		return fmt.Errorf("%q must contain from 3 to 63 characters", value)
 	}
+	if !regexp.MustCompile(`^[0-9a-z-.]+$`).MatchString(value) {
+		return fmt.Errorf("only lowercase alphanumeric characters and hyphens allowed in %q", value)
+	}
+	if regexp.MustCompile(`^(?:[0-9]{1,3}\.){3}[0-9]{1,3}$`).MatchString(value) {
+		return fmt.Errorf("%q must not be formatted as an IP address", value)
+	}
+	if strings.HasPrefix(value, `.`) {
+		return fmt.Errorf("%q cannot start with a period", value)
+	}
+	if strings.HasSuffix(value, `.`) {
+		return fmt.Errorf("%q cannot end with a period", value)
+	}
+	if strings.Contains(value, `..`) {
+		return fmt.Errorf("%q can be only one period between labels", value)
+	}
+
 	return nil
 }
 
