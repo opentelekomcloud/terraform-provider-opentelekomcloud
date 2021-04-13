@@ -5,6 +5,7 @@ import (
 	"log"
 	"time"
 
+	"github.com/hashicorp/go-multierror"
 	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
 	"github.com/opentelekomcloud/gophertelekomcloud"
@@ -16,12 +17,12 @@ import (
 )
 
 func resourceSubnetDNSListV1(d *schema.ResourceData) []string {
-	rawDNSN := d.Get("dns_list").([]interface{})
-	dnsn := make([]string, len(rawDNSN))
-	for i, raw := range rawDNSN {
-		dnsn[i] = raw.(string)
+	rawDNS := d.Get("dns_list").([]interface{})
+	dns := make([]string, len(rawDNS))
+	for i, raw := range rawDNS {
+		dns[i] = raw.(string)
 	}
-	return dnsn
+	return dns
 }
 
 func ResourceVpcSubnetV1() *schema.Resource {
@@ -84,14 +85,14 @@ func ResourceVpcSubnetV1() *schema.Resource {
 				ForceNew:     false,
 				Optional:     true,
 				ValidateFunc: common.ValidateIP,
-				Computed:     true,
+				Default:      defaultDNS[0],
 			},
 			"secondary_dns": {
 				Type:         schema.TypeString,
 				ForceNew:     false,
 				Optional:     true,
 				ValidateFunc: common.ValidateIP,
-				Computed:     true,
+				Default:      defaultDNS[1],
 			},
 			"availability_zone": {
 				Type:     schema.TypeString,
@@ -122,7 +123,7 @@ func resourceVpcSubnetV1Create(d *schema.ResourceData, meta interface{}) error {
 	subnetClient, err := config.NetworkingV1Client(config.GetRegion(d))
 
 	if err != nil {
-		return fmt.Errorf("Error creating OpenTelekomCloud networking client: %s", err)
+		return fmt.Errorf("error creating OpenTelekomCloud networking client: %s", err)
 	}
 
 	createOpts := subnets.CreateOpts{
@@ -149,7 +150,7 @@ func resourceVpcSubnetV1Create(d *schema.ResourceData, meta interface{}) error {
 
 	n, err := subnets.Create(subnetClient, createOpts).Extract()
 	if err != nil {
-		return fmt.Errorf("Error creating OpenTelekomCloud VPC subnet: %s", err)
+		return fmt.Errorf("error creating OpenTelekomCloud VPC subnet: %s", err)
 	}
 
 	d.SetId(n.ID)
@@ -167,7 +168,7 @@ func resourceVpcSubnetV1Create(d *schema.ResourceData, meta interface{}) error {
 	_, stateErr := stateConf.WaitForState()
 	if stateErr != nil {
 		return fmt.Errorf(
-			"Error waiting for Subnet (%s) to become ACTIVE: %s",
+			"error waiting for Subnet (%s) to become ACTIVE: %s",
 			n.ID, stateErr)
 	}
 
@@ -176,12 +177,12 @@ func resourceVpcSubnetV1Create(d *schema.ResourceData, meta interface{}) error {
 	if len(tagRaw) > 0 {
 		vpcSubnetV2Client, err := config.NetworkingV2Client(config.GetRegion(d))
 		if err != nil {
-			return fmt.Errorf("Error creating OpenTelekomCloud networking client: %s", err)
+			return fmt.Errorf("error creating OpenTelekomCloud networking client: %s", err)
 		}
 
 		taglist := common.ExpandResourceTags(tagRaw)
 		if tagErr := tags.Create(vpcSubnetV2Client, "subnets", n.ID, taglist).ExtractErr(); tagErr != nil {
-			return fmt.Errorf("Error setting tags of VpcSubnet %s: %s", n.ID, tagErr)
+			return fmt.Errorf("error setting tags of VpcSubnet %s: %s", n.ID, tagErr)
 		}
 	}
 
@@ -193,7 +194,7 @@ func resourceVpcSubnetV1Read(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*cfg.Config)
 	subnetClient, err := config.NetworkingV1Client(config.GetRegion(d))
 	if err != nil {
-		return fmt.Errorf("Error creating OpenTelekomCloud networking client: %s", err)
+		return fmt.Errorf("error creating OpenTelekomCloud networking client: %s", err)
 	}
 
 	n, err := subnets.Get(subnetClient, d.Id()).Extract()
@@ -203,42 +204,48 @@ func resourceVpcSubnetV1Read(d *schema.ResourceData, meta interface{}) error {
 			return nil
 		}
 
-		return fmt.Errorf("Error retrieving OpenTelekomCloud Subnets: %s", err)
+		return fmt.Errorf("error retrieving OpenTelekomCloud Subnets: %s", err)
 	}
 
-	d.Set("name", n.Name)
-	d.Set("cidr", n.CIDR)
-	d.Set("dns_list", n.DnsList)
-	d.Set("gateway_ip", n.GatewayIP)
-	d.Set("dhcp_enable", n.EnableDHCP)
-	d.Set("primary_dns", n.PRIMARY_DNS)
-	d.Set("secondary_dns", n.SECONDARY_DNS)
-	d.Set("availability_zone", n.AvailabilityZone)
-	d.Set("vpc_id", n.VPC_ID)
-	d.Set("subnet_id", n.SubnetId)
-	d.Set("region", config.GetRegion(d))
+	mErr := multierror.Append(
+		d.Set("name", n.Name),
+		d.Set("cidr", n.CIDR),
+		d.Set("dns_list", n.DnsList),
+		d.Set("gateway_ip", n.GatewayIP),
+		d.Set("dhcp_enable", n.EnableDHCP),
+		d.Set("primary_dns", n.PRIMARY_DNS),
+		d.Set("secondary_dns", n.SECONDARY_DNS),
+		d.Set("availability_zone", n.AvailabilityZone),
+		d.Set("vpc_id", n.VPC_ID),
+		d.Set("subnet_id", n.SubnetId),
+		d.Set("region", config.GetRegion(d)),
+	)
 
 	for _, opt := range n.ExtraDhcpOpts {
 		if opt.OptName == "ntp" {
-			d.Set("ntp_addresses", opt.OptValue)
+			mErr = multierror.Append(mErr, d.Set("ntp_addresses", opt.OptValue))
 			break
 		}
+	}
+
+	if mErr.ErrorOrNil() != nil {
+		return fmt.Errorf("error setting subnet fields: %w", mErr)
 	}
 
 	// save VpcSubnet tags
 	vpcSubnetV2Client, err := config.NetworkingV2Client(config.GetRegion(d))
 	if err != nil {
-		return fmt.Errorf("Error creating OpenTelekomCloud networking client: %s", err)
+		return fmt.Errorf("error creating OpenTelekomCloud networking client: %s", err)
 	}
 
 	resourceTags, err := tags.Get(vpcSubnetV2Client, "subnets", d.Id()).Extract()
 	if err != nil {
-		return fmt.Errorf("Error fetching OpenTelekomCloud VpcSubnet tags: %s", err)
+		return fmt.Errorf("error fetching OpenTelekomCloud VpcSubnet tags: %s", err)
 	}
 
 	tagmap := common.TagsToMap(resourceTags)
 	if err := d.Set("tags", tagmap); err != nil {
-		return fmt.Errorf("Error saving tags for OpenTelekomCloud VpcSubnet %s: %s", d.Id(), err)
+		return fmt.Errorf("error saving tags for OpenTelekomCloud VpcSubnet %s: %s", d.Id(), err)
 	}
 
 	return nil
@@ -248,7 +255,7 @@ func resourceVpcSubnetV1Update(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*cfg.Config)
 	subnetClient, err := config.NetworkingV1Client(config.GetRegion(d))
 	if err != nil {
-		return fmt.Errorf("Error creating OpenTelekomCloud networking client: %s", err)
+		return fmt.Errorf("error creating OpenTelekomCloud networking client: %s", err)
 	}
 
 	var updateOpts subnets.UpdateOpts
@@ -285,19 +292,19 @@ func resourceVpcSubnetV1Update(d *schema.ResourceData, meta interface{}) error {
 
 	_, err = subnets.Update(subnetClient, vpc_id, d.Id(), updateOpts).Extract()
 	if err != nil {
-		return fmt.Errorf("Error updating OpenTelekomCloud VPC Subnet: %s", err)
+		return fmt.Errorf("error updating OpenTelekomCloud VPC Subnet: %s", err)
 	}
 
 	// update tags
 	if d.HasChange("tags") {
 		vpcSubnetV2Client, err := config.NetworkingV2Client(config.GetRegion(d))
 		if err != nil {
-			return fmt.Errorf("Error creating OpenTelekomCloud networking client: %s", err)
+			return fmt.Errorf("error creating OpenTelekomCloud networking client: %s", err)
 		}
 
 		tagErr := common.UpdateResourceTags(vpcSubnetV2Client, d, "subnets", d.Id())
 		if tagErr != nil {
-			return fmt.Errorf("Error updating tags of VPC subnet %s: %s", d.Id(), tagErr)
+			return fmt.Errorf("error updating tags of VPC subnet %s: %s", d.Id(), tagErr)
 		}
 	}
 
@@ -309,7 +316,7 @@ func resourceVpcSubnetV1Delete(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*cfg.Config)
 	subnetClient, err := config.NetworkingV1Client(config.GetRegion(d))
 	if err != nil {
-		return fmt.Errorf("Error creating OpenTelekomCloud networking client: %s", err)
+		return fmt.Errorf("error creating OpenTelekomCloud networking client: %s", err)
 	}
 	vpc_id := d.Get("vpc_id").(string)
 
@@ -324,7 +331,7 @@ func resourceVpcSubnetV1Delete(d *schema.ResourceData, meta interface{}) error {
 
 	_, err = stateConf.WaitForState()
 	if err != nil {
-		return fmt.Errorf("Error deleting OpenTelekomCloud Subnet: %s", err)
+		return fmt.Errorf("error deleting OpenTelekomCloud Subnet: %s", err)
 	}
 
 	d.SetId("")
@@ -343,7 +350,7 @@ func waitForVpcSubnetActive(subnetClient *golangsdk.ServiceClient, vpcId string)
 		}
 
 		// If subnet status is other than Active, send error
-		if n.Status == "DOWN" || n.Status == "ERROR" {
+		if n.Status == "DOWN" || n.Status == "error" {
 			return nil, "", fmt.Errorf("Subnet status: '%s'", n.Status)
 		}
 

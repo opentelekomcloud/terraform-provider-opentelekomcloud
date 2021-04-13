@@ -59,8 +59,10 @@ The following arguments are supported:
 * `dhcp_enable` - (Optional) Specifies whether the DHCP function is enabled for the subnet. The value can be true or false. If this parameter is left blank, it is set to true by default.
 
 * `primary_dns` - (Optional) Specifies the IP address of DNS server 1 on the subnet. The value must be a valid IP address.
+  Default is `100.125.4.25`, OpenTelekomCloud internal DNS server.
 
 * `secondary_dns` - (Optional) Specifies the IP address of DNS server 2 on the subnet. The value must be a valid IP address.
+  Default is `1.1.1.1`, `Cloudflare`/`APNIC` public DNS server.
 
 * `dns_list` - (Optional) Specifies the DNS server address list of a subnet. This field is required if you need to use more than two DNS servers. This parameter value is the superset of both DNS server address 1 and DNS server address 2.
 
@@ -75,11 +77,11 @@ The following arguments are supported:
 
 All of the argument attributes are also exported as result attributes:
 
-* `id` - Specifies a resource ID in UUID format.
+* `id` - Specifies a resource ID in UUID format. Same as OpenStack network ID (`OS_NETWORK_ID`).
  
 * `status` - Specifies the status of the subnet. The value can be ACTIVE, DOWN, UNKNOWN, or ERROR.
 
-* `subnet_id` - Specifies the subnet (Native OpenStack API) ID.
+* `subnet_id` - Specifies the OpenStack subnet ID.
 
 ## Import
 
