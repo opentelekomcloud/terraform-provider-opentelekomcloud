@@ -1,6 +1,6 @@
 export PATH:=/usr/local/go/bin:$(PATH)
-TEST?=$$(go list ./... |grep -v 'vendor')
-GOFMT_FILES?=$$(find . -name '*.go' |grep -v vendor)
+TEST?=$$(go list ./...)
+GOFMT_FILES?=$$(find . -name '*.go')
 PKG_NAME=opentelekomcloud
 
 default: build
@@ -15,16 +15,14 @@ snapshot:
 	goreleaser release --snapshot --parallelism 2 --rm-dist
 
 test: fmtcheck
-	go test -i $(TEST) || exit 1
-	echo $(TEST) | \
-		xargs -t -n4 go test $(TESTARGS) -timeout=30s -parallel=4
+	go test -v ./...
 
 testacc: fmtcheck
-	TF_ACC=1 go test $(TEST) -v $(TESTARGS) -timeout 720m
+	@TF_ACC=1 go test $(TEST) -v -timeout 720m
 
 vet:
 	@echo "go vet ."
-	@go vet $$(go list ./... | grep -v vendor/) ; if [ $$? -eq 1 ]; then \
+	@go vet $$(go list ./...); if [ $$? -eq 1 ]; then \
 		echo ""; \
 		echo "Vet found suspicious constructs. Please check the reported constructs"; \
 		echo "and fix them if necessary before submitting the code for review."; \
@@ -32,7 +30,7 @@ vet:
 	fi
 
 fmt:
-	gofmt -w $(GOFMT_FILES)
+	@gofmt -w $(GOFMT_FILES)
 
 fmtcheck:
 	@sh -c "'$(CURDIR)/scripts/gofmtcheck.sh'"
@@ -47,7 +45,7 @@ test-compile:
 		echo "  make test-compile TEST=./$(PKG_NAME)"; \
 		exit 1; \
 	fi
-	go test -c $(TEST) $(TESTARGS)
+	go test -c $(TEST)
 
 .PHONY: build test testacc vet fmt fmtcheck errcheck test-compile
 
