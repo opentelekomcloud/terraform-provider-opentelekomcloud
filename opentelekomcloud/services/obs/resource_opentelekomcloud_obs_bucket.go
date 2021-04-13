@@ -29,11 +29,11 @@ func ResourceObsBucket() *schema.Resource {
 
 		Schema: map[string]*schema.Schema{
 			"bucket": {
-				Type:     schema.TypeString,
-				Required: true,
-				ForceNew: true,
+				Type:         schema.TypeString,
+				Required:     true,
+				ForceNew:     true,
+				ValidateFunc: common.ValidateName,
 			},
-
 			"storage_class": {
 				Type:     schema.TypeString,
 				Optional: true,
@@ -42,7 +42,6 @@ func ResourceObsBucket() *schema.Resource {
 					"STANDARD", "WARM", "COLD",
 				}, true),
 			},
-
 			"acl": {
 				Type:     schema.TypeString,
 				Optional: true,
@@ -51,13 +50,11 @@ func ResourceObsBucket() *schema.Resource {
 					"private", "public-read", "public-read-write", "log-delivery-write",
 				}, true),
 			},
-
 			"versioning": {
 				Type:     schema.TypeBool,
 				Optional: true,
 				Default:  false,
 			},
-
 			"logging": {
 				Type:     schema.TypeSet,
 				Optional: true,
@@ -75,7 +72,6 @@ func ResourceObsBucket() *schema.Resource {
 					},
 				},
 			},
-
 			"lifecycle_rule": {
 				Type:     schema.TypeList,
 				Optional: true,
@@ -158,7 +154,6 @@ func ResourceObsBucket() *schema.Resource {
 					},
 				},
 			},
-
 			"website": {
 				Type:     schema.TypeList,
 				MaxItems: 1,
@@ -197,7 +192,6 @@ func ResourceObsBucket() *schema.Resource {
 					},
 				},
 			},
-
 			"cors_rule": {
 				Type:     schema.TypeList,
 				Optional: true,
@@ -231,24 +225,20 @@ func ResourceObsBucket() *schema.Resource {
 					},
 				},
 			},
-
 			"tags": {
 				Type:     schema.TypeMap,
 				Optional: true,
 			},
-
 			"force_destroy": {
 				Type:     schema.TypeBool,
 				Optional: true,
 				Default:  false,
 			},
-
 			"region": {
 				Type:     schema.TypeString,
 				Optional: true,
 				Computed: true,
 			},
-
 			"bucket_domain_name": {
 				Type:     schema.TypeString,
 				Computed: true,
@@ -268,9 +258,10 @@ func resourceObsBucketCreate(d *schema.ResourceData, meta interface{}) error {
 	acl := d.Get("acl").(string)
 	class := d.Get("storage_class").(string)
 	opts := &obs.CreateBucketInput{
-		Bucket:       bucket,
-		ACL:          obs.AclType(acl),
-		StorageClass: obs.StorageClassType(class),
+		BucketLocation: obs.BucketLocation{},
+		Bucket:         bucket,
+		ACL:            obs.AclType(acl),
+		StorageClass:   obs.StorageClassType(class),
 	}
 	opts.Location = d.Get("region").(string)
 	log.Printf("[DEBUG] OBS bucket create opts: %#v", opts)
@@ -287,56 +278,56 @@ func resourceObsBucketCreate(d *schema.ResourceData, meta interface{}) error {
 
 func resourceObsBucketUpdate(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*cfg.Config)
-	obsClient, err := config.NewObjectStorageClient(config.GetRegion(d))
+	client, err := config.NewObjectStorageClient(config.GetRegion(d))
 	if err != nil {
 		return fmt.Errorf("error creating OBS client: %s", err)
 	}
 
 	log.Printf("[DEBUG] Update OBS bucket %s", d.Id())
 	if d.HasChange("acl") && !d.IsNewResource() {
-		if err := resourceObsBucketAclUpdate(obsClient, d); err != nil {
+		if err := resourceObsBucketAclUpdate(client, d); err != nil {
 			return err
 		}
 	}
 
 	if d.HasChange("storage_class") && !d.IsNewResource() {
-		if err := resourceObsBucketClassUpdate(obsClient, d); err != nil {
+		if err := resourceObsBucketClassUpdate(client, d); err != nil {
 			return err
 		}
 	}
 
 	if d.HasChange("tags") {
-		if err := resourceObsBucketTagsUpdate(obsClient, d); err != nil {
+		if err := resourceObsBucketTagsUpdate(client, d); err != nil {
 			return err
 		}
 	}
 
-	if d.HasChange("versioning") {
-		if err := resourceObsBucketVersioningUpdate(obsClient, d); err != nil {
+	if d.HasChange("versioning") && !d.IsNewResource() {
+		if err := resourceObsBucketVersioningUpdate(client, d); err != nil {
 			return err
 		}
 	}
 
 	if d.HasChange("logging") {
-		if err := resourceObsBucketLoggingUpdate(obsClient, d); err != nil {
+		if err := resourceObsBucketLoggingUpdate(client, d); err != nil {
 			return err
 		}
 	}
 
 	if d.HasChange("lifecycle_rule") {
-		if err := resourceObsBucketLifecycleUpdate(obsClient, d); err != nil {
+		if err := resourceObsBucketLifecycleUpdate(client, d); err != nil {
 			return err
 		}
 	}
 
 	if d.HasChange("website") {
-		if err := resourceObsBucketWebsiteUpdate(obsClient, d); err != nil {
+		if err := resourceObsBucketWebsiteUpdate(client, d); err != nil {
 			return err
 		}
 	}
 
 	if d.HasChange("cors_rule") {
-		if err := resourceObsBucketCorsUpdate(obsClient, d); err != nil {
+		if err := resourceObsBucketCorsUpdate(client, d); err != nil {
 			return err
 		}
 	}
@@ -347,13 +338,13 @@ func resourceObsBucketUpdate(d *schema.ResourceData, meta interface{}) error {
 func resourceObsBucketRead(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*cfg.Config)
 	region := config.GetRegion(d)
-	obsClient, err := config.NewObjectStorageClient(config.GetRegion(d))
+	client, err := config.NewObjectStorageClient(config.GetRegion(d))
 	if err != nil {
 		return fmt.Errorf("error creating OBS client: %s", err)
 	}
 
 	log.Printf("[DEBUG] Read OBS bucket: %s", d.Id())
-	_, err = obsClient.HeadBucket(d.Id())
+	_, err = client.HeadBucket(d.Id())
 	if err != nil {
 		if obsError, ok := err.(obs.ObsError); ok && obsError.StatusCode == 404 {
 			log.Printf("[WARN] OBS bucket(%s) not found", d.Id())
@@ -381,36 +372,36 @@ func resourceObsBucketRead(d *schema.ResourceData, meta interface{}) error {
 	}
 
 	// Read storage class
-	if err := setObsBucketStorageClass(obsClient, d); err != nil {
+	if err := setObsBucketStorageClass(client, d); err != nil {
 		return err
 	}
 
 	// Read the versioning
-	if err := setObsBucketVersioning(obsClient, d); err != nil {
+	if err := setObsBucketVersioning(client, d); err != nil {
 		return err
 	}
 	// Read the logging configuration
-	if err := setObsBucketLogging(obsClient, d); err != nil {
+	if err := setObsBucketLogging(client, d); err != nil {
 		return err
 	}
 
 	// Read the Lifecycle configuration
-	if err := setObsBucketLifecycleConfiguration(obsClient, d); err != nil {
+	if err := setObsBucketLifecycleConfiguration(client, d); err != nil {
 		return err
 	}
 
 	// Read the website configuration
-	if err := setObsBucketWebsiteConfiguration(obsClient, d); err != nil {
+	if err := setObsBucketWebsiteConfiguration(client, d); err != nil {
 		return err
 	}
 
 	// Read the CORS rules
-	if err := setObsBucketCorsRules(obsClient, d); err != nil {
+	if err := setObsBucketCorsRules(client, d); err != nil {
 		return err
 	}
 
 	// Read the tags
-	if err := setObsBucketTags(obsClient, d); err != nil {
+	if err := setObsBucketTags(client, d); err != nil {
 		return err
 	}
 
@@ -419,20 +410,20 @@ func resourceObsBucketRead(d *schema.ResourceData, meta interface{}) error {
 
 func resourceObsBucketDelete(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*cfg.Config)
-	obsClient, err := config.NewObjectStorageClient(config.GetRegion(d))
+	client, err := config.NewObjectStorageClient(config.GetRegion(d))
 	if err != nil {
 		return fmt.Errorf("error creating OBS client: %s", err)
 	}
 
 	bucket := d.Id()
 	log.Printf("[DEBUG] deleting OBS Bucket: %s", bucket)
-	_, err = obsClient.DeleteBucket(bucket)
+	_, err = client.DeleteBucket(bucket)
 	if err != nil {
 		obsError, ok := err.(obs.ObsError)
 		if ok && obsError.Code == "BucketNotEmpty" {
 			log.Printf("[WARN] OBS bucket: %s is not empty", bucket)
 			if d.Get("force_destroy").(bool) {
-				err = deleteAllBucketObjects(obsClient, bucket)
+				err = deleteAllBucketObjects(client, bucket)
 				if err == nil {
 					log.Printf("[WARN] all objects of %s have been deleted, and try again", bucket)
 					return resourceObsBucketDelete(d, meta)
@@ -445,7 +436,7 @@ func resourceObsBucketDelete(d *schema.ResourceData, meta interface{}) error {
 	return nil
 }
 
-func resourceObsBucketTagsUpdate(obsClient *obs.ObsClient, d *schema.ResourceData) error {
+func resourceObsBucketTagsUpdate(client *obs.ObsClient, d *schema.ResourceData) error {
 	bucket := d.Get("bucket").(string)
 	tagMap := d.Get("tags").(map[string]interface{})
 	var tagList []obs.Tag
@@ -462,14 +453,14 @@ func resourceObsBucketTagsUpdate(obsClient *obs.ObsClient, d *schema.ResourceDat
 	req.Tags = tagList
 	log.Printf("[DEBUG] set tags of OBS bucket %s: %#v", bucket, req)
 
-	_, err := obsClient.SetBucketTagging(req)
+	_, err := client.SetBucketTagging(req)
 	if err != nil {
 		return GetObsError("error updating tags of OBS bucket", bucket, err)
 	}
 	return nil
 }
 
-func resourceObsBucketAclUpdate(obsClient *obs.ObsClient, d *schema.ResourceData) error {
+func resourceObsBucketAclUpdate(client *obs.ObsClient, d *schema.ResourceData) error {
 	bucket := d.Get("bucket").(string)
 	acl := d.Get("acl").(string)
 
@@ -479,7 +470,7 @@ func resourceObsBucketAclUpdate(obsClient *obs.ObsClient, d *schema.ResourceData
 	}
 	log.Printf("[DEBUG] set ACL of OBS bucket %s: %#v", bucket, i)
 
-	_, err := obsClient.SetBucketAcl(i)
+	_, err := client.SetBucketAcl(i)
 	if err != nil {
 		return GetObsError("Error updating acl of OBS bucket", bucket, err)
 	}
@@ -489,7 +480,7 @@ func resourceObsBucketAclUpdate(obsClient *obs.ObsClient, d *schema.ResourceData
 	return err
 }
 
-func resourceObsBucketClassUpdate(obsClient *obs.ObsClient, d *schema.ResourceData) error {
+func resourceObsBucketClassUpdate(client *obs.ObsClient, d *schema.ResourceData) error {
 	bucket := d.Get("bucket").(string)
 	class := d.Get("storage_class").(string)
 
@@ -498,7 +489,7 @@ func resourceObsBucketClassUpdate(obsClient *obs.ObsClient, d *schema.ResourceDa
 	input.StorageClass = obs.StorageClassType(class)
 	log.Printf("[DEBUG] set storage class of OBS bucket %s: %#v", bucket, input)
 
-	_, err := obsClient.SetBucketStoragePolicy(input)
+	_, err := client.SetBucketStoragePolicy(input)
 	if err != nil {
 		return GetObsError("Error updating storage class of OBS bucket", bucket, err)
 	}
@@ -506,20 +497,20 @@ func resourceObsBucketClassUpdate(obsClient *obs.ObsClient, d *schema.ResourceDa
 	return nil
 }
 
-func resourceObsBucketVersioningUpdate(obsClient *obs.ObsClient, d *schema.ResourceData) error {
+func resourceObsBucketVersioningUpdate(client *obs.ObsClient, d *schema.ResourceData) error {
 	bucket := d.Get("bucket").(string)
-	version := d.Get("versioning").(bool)
+	versioning := d.Get("versioning").(bool)
 
 	input := &obs.SetBucketVersioningInput{}
 	input.Bucket = bucket
-	if version {
+	if versioning {
 		input.Status = obs.VersioningStatusEnabled
 	} else {
 		input.Status = obs.VersioningStatusSuspended
 	}
 	log.Printf("[DEBUG] set versioning of OBS bucket %s: %#v", bucket, input)
 
-	_, err := obsClient.SetBucketVersioning(input)
+	_, err := client.SetBucketVersioning(input)
 	if err != nil {
 		return GetObsError("Error setting versining status of OBS bucket", bucket, err)
 	}
@@ -527,7 +518,7 @@ func resourceObsBucketVersioningUpdate(obsClient *obs.ObsClient, d *schema.Resou
 	return nil
 }
 
-func resourceObsBucketLoggingUpdate(obsClient *obs.ObsClient, d *schema.ResourceData) error {
+func resourceObsBucketLoggingUpdate(client *obs.ObsClient, d *schema.ResourceData) error {
 	bucket := d.Get("bucket").(string)
 	rawLogging := d.Get("logging").(*schema.Set).List()
 	loggingStatus := &obs.SetBucketLoggingConfigurationInput{}
@@ -545,7 +536,7 @@ func resourceObsBucketLoggingUpdate(obsClient *obs.ObsClient, d *schema.Resource
 	}
 	log.Printf("[DEBUG] set logging of OBS bucket %s: %#v", bucket, loggingStatus)
 
-	_, err := obsClient.SetBucketLoggingConfiguration(loggingStatus)
+	_, err := client.SetBucketLoggingConfiguration(loggingStatus)
 	if err != nil {
 		return GetObsError("Error setting logging configuration of OBS bucket", bucket, err)
 	}
@@ -621,13 +612,13 @@ func mapToRule(src map[string]interface{}) (rule obs.LifecycleRule) {
 	return
 }
 
-func resourceObsBucketLifecycleUpdate(obsClient *obs.ObsClient, d *schema.ResourceData) error {
+func resourceObsBucketLifecycleUpdate(client *obs.ObsClient, d *schema.ResourceData) error {
 	bucket := d.Get("bucket").(string)
 	lifecycleRules := d.Get("lifecycle_rule").([]interface{})
 
 	if len(lifecycleRules) == 0 {
 		log.Printf("[DEBUG] remove all lifecycle rules of bucket %s", bucket)
-		_, err := obsClient.DeleteBucketLifecycleConfiguration(bucket)
+		_, err := client.DeleteBucketLifecycleConfiguration(bucket)
 		if err != nil {
 			return GetObsError("Error deleting lifecycle rules of OBS bucket", bucket, err)
 		}
@@ -645,7 +636,7 @@ func resourceObsBucketLifecycleUpdate(obsClient *obs.ObsClient, d *schema.Resour
 	opts.LifecycleRules = rules
 	log.Printf("[DEBUG] set lifecycle configurations of OBS bucket %s: %#v", bucket, opts)
 
-	_, err := obsClient.SetBucketLifecycleConfiguration(opts)
+	_, err := client.SetBucketLifecycleConfiguration(opts)
 	if err != nil {
 		return GetObsError("error setting lifecycle rules of OBS bucket", bucket, err)
 	}
@@ -653,12 +644,12 @@ func resourceObsBucketLifecycleUpdate(obsClient *obs.ObsClient, d *schema.Resour
 	return nil
 }
 
-func resourceObsBucketWebsiteUpdate(obsClient *obs.ObsClient, d *schema.ResourceData) error {
+func resourceObsBucketWebsiteUpdate(client *obs.ObsClient, d *schema.ResourceData) error {
 	websiteList := d.Get("website").([]interface{})
 
 	switch len(websiteList) {
 	case 0:
-		return resourceObsBucketWebsiteDelete(obsClient, d)
+		return resourceObsBucketWebsiteDelete(client, d)
 	case 1:
 		var website map[string]interface{}
 		if websiteList[0] != nil {
@@ -666,7 +657,7 @@ func resourceObsBucketWebsiteUpdate(obsClient *obs.ObsClient, d *schema.Resource
 		} else {
 			website = make(map[string]interface{})
 		}
-		return resourceObsBucketWebsitePut(obsClient, d, website)
+		return resourceObsBucketWebsitePut(client, d, website)
 	default:
 		return fmt.Errorf("cannot specify more than one website")
 	}
@@ -688,14 +679,14 @@ func asStringSlice(value interface{}) ([]string, bool) {
 	return result, true
 }
 
-func resourceObsBucketCorsUpdate(obsClient *obs.ObsClient, d *schema.ResourceData) error {
+func resourceObsBucketCorsUpdate(client *obs.ObsClient, d *schema.ResourceData) error {
 	bucket := d.Get("bucket").(string)
 	rawCors := d.Get("cors_rule").([]interface{})
 
 	if len(rawCors) == 0 {
 		// Delete CORS
 		log.Printf("[DEBUG] delete CORS rules of OBS bucket: %s", bucket)
-		_, err := obsClient.DeleteBucketCors(bucket)
+		_, err := client.DeleteBucketCors(bucket)
 		if err != nil {
 			return GetObsError("error deleting CORS rules of OBS bucket", bucket, err)
 		}
@@ -736,14 +727,14 @@ func resourceObsBucketCorsUpdate(obsClient *obs.ObsClient, d *schema.ResourceDat
 	corsInput.CorsRules = rules
 	log.Printf("[DEBUG] OBS bucket: %s, put CORS: %#v", bucket, corsInput)
 
-	_, err := obsClient.SetBucketCors(corsInput)
+	_, err := client.SetBucketCors(corsInput)
 	if err != nil {
 		return GetObsError("Error setting CORS rules of OBS bucket", bucket, err)
 	}
 	return nil
 }
 
-func resourceObsBucketWebsitePut(obsClient *obs.ObsClient, d *schema.ResourceData, website map[string]interface{}) error {
+func resourceObsBucketWebsitePut(client *obs.ObsClient, d *schema.ResourceData, website map[string]interface{}) error {
 	bucket := d.Get("bucket").(string)
 
 	var indexDocument, errorDocument, redirectAllRequestsTo, routingRules string
@@ -807,7 +798,7 @@ func resourceObsBucketWebsitePut(obsClient *obs.ObsClient, d *schema.ResourceDat
 	}
 
 	log.Printf("[DEBUG] set website configuration of OBS bucket %s: %#v", bucket, websiteConfiguration)
-	_, err := obsClient.SetBucketWebsiteConfiguration(websiteConfiguration)
+	_, err := client.SetBucketWebsiteConfiguration(websiteConfiguration)
 	if err != nil {
 		return GetObsError("Error updating website configuration of OBS bucket", bucket, err)
 	}
@@ -815,11 +806,11 @@ func resourceObsBucketWebsitePut(obsClient *obs.ObsClient, d *schema.ResourceDat
 	return nil
 }
 
-func resourceObsBucketWebsiteDelete(obsClient *obs.ObsClient, d *schema.ResourceData) error {
+func resourceObsBucketWebsiteDelete(client *obs.ObsClient, d *schema.ResourceData) error {
 	bucket := d.Get("bucket").(string)
 
 	log.Printf("[DEBUG] delete website configuration of OBS bucket %s", bucket)
-	_, err := obsClient.DeleteBucketWebsiteConfiguration(bucket)
+	_, err := client.DeleteBucketWebsiteConfiguration(bucket)
 	if err != nil {
 		return GetObsError("error deleting website configuration of OBS bucket", bucket, err)
 	}
@@ -827,9 +818,9 @@ func resourceObsBucketWebsiteDelete(obsClient *obs.ObsClient, d *schema.Resource
 	return nil
 }
 
-func setObsBucketStorageClass(obsClient *obs.ObsClient, d *schema.ResourceData) error {
+func setObsBucketStorageClass(client *obs.ObsClient, d *schema.ResourceData) error {
 	bucket := d.Id()
-	output, err := obsClient.GetBucketStoragePolicy(bucket)
+	output, err := client.GetBucketStoragePolicy(bucket)
 	if err != nil {
 		return GetObsError("error getting storage class of OBS bucket", bucket, err)
 	}
@@ -839,9 +830,9 @@ func setObsBucketStorageClass(obsClient *obs.ObsClient, d *schema.ResourceData) 
 	return err
 }
 
-func setObsBucketVersioning(obsClient *obs.ObsClient, d *schema.ResourceData) error {
+func setObsBucketVersioning(client *obs.ObsClient, d *schema.ResourceData) error {
 	bucket := d.Id()
-	output, err := obsClient.GetBucketVersioning(bucket)
+	output, err := client.GetBucketVersioning(bucket)
 	if err != nil {
 		return GetObsError("error getting versioning status of OBS bucket", bucket, err)
 	}
@@ -852,9 +843,9 @@ func setObsBucketVersioning(obsClient *obs.ObsClient, d *schema.ResourceData) er
 	return err
 }
 
-func setObsBucketLogging(obsClient *obs.ObsClient, d *schema.ResourceData) error {
+func setObsBucketLogging(client *obs.ObsClient, d *schema.ResourceData) error {
 	bucket := d.Id()
-	output, err := obsClient.GetBucketLoggingConfiguration(bucket)
+	output, err := client.GetBucketLoggingConfiguration(bucket)
 	if err != nil {
 		return GetObsError("Error getting logging configuration of OBS bucket", bucket, err)
 	}
@@ -928,9 +919,9 @@ func ruleToMap(src obs.LifecycleRule) map[string]interface{} {
 	return rule
 }
 
-func setObsBucketLifecycleConfiguration(obsClient *obs.ObsClient, d *schema.ResourceData) error {
+func setObsBucketLifecycleConfiguration(client *obs.ObsClient, d *schema.ResourceData) error {
 	bucket := d.Id()
-	output, err := obsClient.GetBucketLifecycleConfiguration(bucket)
+	output, err := client.GetBucketLifecycleConfiguration(bucket)
 	if err != nil {
 		if obsError, ok := err.(obs.ObsError); ok {
 			if obsError.Code == "NoSuchLifecycleConfiguration" {
@@ -999,9 +990,9 @@ func handleWebsite(src *obs.GetBucketWebsiteConfigurationOutput) (map[string]int
 	return website, nil
 }
 
-func setObsBucketWebsiteConfiguration(obsClient *obs.ObsClient, d *schema.ResourceData) error {
+func setObsBucketWebsiteConfiguration(client *obs.ObsClient, d *schema.ResourceData) error {
 	bucket := d.Id()
-	rawWebsite, err := obsClient.GetBucketWebsiteConfiguration(bucket)
+	rawWebsite, err := client.GetBucketWebsiteConfiguration(bucket)
 	if err != nil {
 		if obsError, ok := err.(obs.ObsError); ok {
 			if obsError.Code == "NoSuchWebsiteConfiguration" {
@@ -1031,9 +1022,9 @@ func setObsBucketWebsiteConfiguration(obsClient *obs.ObsClient, d *schema.Resour
 	return nil
 }
 
-func setObsBucketCorsRules(obsClient *obs.ObsClient, d *schema.ResourceData) error {
+func setObsBucketCorsRules(client *obs.ObsClient, d *schema.ResourceData) error {
 	bucket := d.Id()
-	output, err := obsClient.GetBucketCors(bucket)
+	output, err := client.GetBucketCors(bucket)
 	if err != nil {
 		if obsError, ok := err.(obs.ObsError); ok {
 			if obsError.Code == "NoSuchCORSConfiguration" {
@@ -1074,9 +1065,9 @@ func setObsBucketCorsRules(obsClient *obs.ObsClient, d *schema.ResourceData) err
 	return nil
 }
 
-func setObsBucketTags(obsClient *obs.ObsClient, d *schema.ResourceData) error {
+func setObsBucketTags(client *obs.ObsClient, d *schema.ResourceData) error {
 	bucket := d.Id()
-	output, err := obsClient.GetBucketTagging(bucket)
+	output, err := client.GetBucketTagging(bucket)
 	if err != nil {
 		if obsError, ok := err.(obs.ObsError); ok {
 			if obsError.Code == "NoSuchTagSet" {
@@ -1101,12 +1092,12 @@ func setObsBucketTags(obsClient *obs.ObsClient, d *schema.ResourceData) error {
 	return nil
 }
 
-func deleteAllBucketObjects(obsClient *obs.ObsClient, bucket string) error {
+func deleteAllBucketObjects(client *obs.ObsClient, bucket string) error {
 	listOpts := &obs.ListObjectsInput{
 		Bucket: bucket,
 	}
 	// list all objects
-	resp, err := obsClient.ListObjects(listOpts)
+	resp, err := client.ListObjects(listOpts)
 	if err != nil {
 		return GetObsError("error listing objects of OBS bucket", bucket, err)
 	}
@@ -1121,7 +1112,7 @@ func deleteAllBucketObjects(obsClient *obs.ObsClient, bucket string) error {
 		Objects: objects,
 	}
 	log.Printf("[DEBUG] objects of %s will be deleted: %v", bucket, objects)
-	output, err := obsClient.DeleteObjects(deleteOpts)
+	output, err := client.DeleteObjects(deleteOpts)
 	if err != nil {
 		return GetObsError("error deleting all objects of OBS bucket", bucket, err)
 	} else {
@@ -1141,14 +1132,14 @@ func GetObsError(action string, bucket string, err error) error {
 
 // normalize format of storage class
 func normalizeStorageClass(class string) string {
-	var ret = class
+	var normalizedClass = class
 
 	if class == "STANDARD_IA" {
-		ret = "WARM"
+		normalizedClass = "WARM"
 	} else if class == "GLACIER" {
-		ret = "COLD"
+		normalizedClass = "COLD"
 	}
-	return ret
+	return normalizedClass
 }
 
 func normalizeWebsiteRoutingRules(w []obs.RoutingRule) (string, error) {
