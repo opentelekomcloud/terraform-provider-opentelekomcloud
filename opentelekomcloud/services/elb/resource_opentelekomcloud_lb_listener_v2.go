@@ -275,7 +275,7 @@ func resourceListenerV2Update(d *schema.ResourceData, meta interface{}) error {
 	if d.HasChange("sni_container_refs") {
 		var sniContainerRefs []string
 		if raw, ok := d.GetOk("sni_container_refs"); ok {
-			for _, v := range raw.([]interface{}) {
+			for _, v := range raw.(*schema.Set).List() {
 				sniContainerRefs = append(sniContainerRefs, v.(string))
 			}
 		}
