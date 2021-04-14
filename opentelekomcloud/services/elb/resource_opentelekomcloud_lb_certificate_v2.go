@@ -9,9 +9,9 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/helper/validation"
-
+	"github.com/opentelekomcloud/gophertelekomcloud"
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/networking/v2/extensions/lbaas_v2/certificates"
-
+	"github.com/opentelekomcloud/gophertelekomcloud/openstack/networking/v2/extensions/lbaas_v2/listeners"
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common"
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common/cfg"
 )
@@ -184,15 +184,21 @@ func resourceCertificateV2Update(d *schema.ResourceData, meta interface{}) error
 
 func resourceCertificateV2Delete(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*cfg.Config)
-	networkingClient, err := config.NetworkingV2Client(config.GetRegion(d))
+	client, err := config.NetworkingV2Client(config.GetRegion(d))
 	if err != nil {
 		return fmt.Errorf("error creating OpenTelekomCloud networking client: %s", err)
+	}
+
+	// need to un-assign certificate from listeners first
+	log.Printf("[DEBUG] Unassigning certificate %s from listeners", d.Id())
+	if err := removeCertFromListeners(client, d.Id()); err != nil {
+		return fmt.Errorf("unable to remove certificate %s from listeners: %w", d.Id(), err)
 	}
 
 	log.Printf("[DEBUG] Deleting certificate %s", d.Id())
 	timeout := d.Timeout(schema.TimeoutDelete)
 	err = resource.Retry(timeout, func() *resource.RetryError {
-		err := certificates.Delete(networkingClient, d.Id()).ExtractErr()
+		err := certificates.Delete(client, d.Id()).ExtractErr()
 		if err != nil {
 			return common.CheckForRetryableError(err)
 		}
@@ -203,7 +209,48 @@ func resourceCertificateV2Delete(d *schema.ResourceData, meta interface{}) error
 			log.Printf("[INFO] deleting an unavailable certificate: %s", d.Id())
 			return nil
 		}
-		return fmt.Errorf("error deleting certificate %s: %s", d.Id(), err)
+		return fmt.Errorf("error deleting certificate %s: %w", d.Id(), err)
+	}
+
+	return nil
+}
+
+func removeCertFromListeners(client *golangsdk.ServiceClient, certID string) error {
+	pages, err := listeners.List(client, listeners.ListOpts{}).AllPages()
+	if err != nil {
+		return fmt.Errorf("error listing LBv2 listeners: %w", err)
+	}
+	listenerList, err := listeners.ExtractListeners(pages)
+	if err != nil {
+		return fmt.Errorf("error extracting listeners: %w", err)
+	}
+
+	var matching []listeners.Listener
+
+	for _, listener := range listenerList {
+		if listener.DefaultTlsContainerRef == certID {
+			return fmt.Errorf("error removing certificate from listener: certificate %s is default for listener %s", certID, listener.ID)
+		}
+		if common.StringInSlice(certID, listener.SniContainerRefs) {
+			matching = append(matching, listener)
+		}
+	}
+
+	mErr := new(multierror.Error)
+	for _, listener := range matching {
+		otherCerts := make([]string, 0)
+		for _, cert := range listener.SniContainerRefs {
+			if cert != certID {
+				otherCerts = append(otherCerts, cert)
+			}
+		}
+		_, err := listeners.Update(client, listener.ID, listeners.UpdateOpts{
+			SniContainerRefs: otherCerts,
+		}).Extract()
+		mErr = multierror.Append(mErr, err)
+	}
+	if err := mErr.ErrorOrNil(); err != nil {
+		return fmt.Errorf("error deleting certificate from listeners: %w", err)
 	}
 
 	return nil
