@@ -393,10 +393,6 @@ resource "opentelekomcloud_lb_listener_v2" "listener_tls" {
   # which blocks final destruction of certificates
   depends_on = [opentelekomcloud_lb_certificate_v2.certificate_tls, opentelekomcloud_lb_certificate_v2.certificate_ca]
 
-  lifecycle {
-	ignore_changes = [client_ca_tls_container_ref, default_tls_container_ref]
-  }
-
   timeouts {
     create = "5m"
     update = "5m"
