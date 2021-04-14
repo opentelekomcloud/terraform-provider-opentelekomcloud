@@ -89,14 +89,16 @@ func ResourceListenerV2() *schema.Resource {
 			"default_tls_container_ref": {
 				Type:     schema.TypeString,
 				Optional: true,
+				Computed: true,
 			},
 			// new feature 2020 to handle Client certificates
 			"client_ca_tls_container_ref": {
 				Type:     schema.TypeString,
 				Optional: true,
+				Computed: true,
 			},
 			"sni_container_refs": {
-				Type:     schema.TypeList,
+				Type:     schema.TypeSet,
 				Optional: true,
 				Elem:     &schema.Schema{Type: schema.TypeString},
 			},
@@ -128,7 +130,7 @@ func resourceListenerV2Create(d *schema.ResourceData, meta interface{}) error {
 	adminStateUp := d.Get("admin_state_up").(bool)
 	var sniContainerRefs []string
 	if raw, ok := d.GetOk("sni_container_refs"); ok {
-		for _, v := range raw.([]interface{}) {
+		for _, v := range raw.(*schema.Set).List() {
 			sniContainerRefs = append(sniContainerRefs, v.(string))
 		}
 	}
