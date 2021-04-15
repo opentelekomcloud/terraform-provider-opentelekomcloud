@@ -7,7 +7,7 @@ ENHANCEMENTS:
 * `resource/opentelekomcloud_vpc_subnet_v1`: Add default value for `primary_dns`, `secondary_dns` ([#977](https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/issues/977))
 
 BUG FIXES:
-* `resource/opentelekomcloud_cce_node_v3`: Remove setting empty `private_ip` ([#972](https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/issues/972))
+* `resource/opentelekomcloud_cce_node_v3`: Remove passing empty `private_ip` in create request ([#973](https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/issues/973))
 * `resource/opentelekomcloud_s3_bucket`: Make unversioned bucket creation possible ([#976](https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/issues/976), [#979](https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/issues/979))
 * `resource/opentelekomcloud_obs_bucket`: Make unversioned bucket creation possible ([#978](https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/issues/978))
 * `resource/opentelekomcloud_lb_listener_v2`: Fix schema to avoid resource always updating ([#983](https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/issues/983), [#984](https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/issues/984))
