@@ -1,5 +1,19 @@
 ## 1.24.0 (Unreleased)
 
+## 1.23.7 (April 15, 2021)
+
+ENHANCEMENTS:
+* `resource/opentelekomcloud_networking_subnet_v2`: Add default value for `dns_nameservers` ([#977](https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/issues/977))
+* `resource/opentelekomcloud_vpc_subnet_v1`: Add default value for `primary_dns`, `secondary_dns` ([#977](https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/issues/977))
+
+BUG FIXES:
+* `resource/opentelekomcloud_cce_node_v3`: Remove passing empty `private_ip` in create request ([#973](https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/issues/973))
+* `resource/opentelekomcloud_s3_bucket`: Make unversioned bucket creation possible ([#976](https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/issues/976), [#979](https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/issues/979))
+* `resource/opentelekomcloud_obs_bucket`: Make unversioned bucket creation possible ([#978](https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/issues/978))
+* `resource/opentelekomcloud_lb_listener_v2`: Fix schema to avoid resource always updating ([#983](https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/issues/983), [#984](https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/issues/984))
+
+DOCUMENTATION:
+* `resource/opentelekomcloud_cce_addon_v3`:  Fix documentation issues ([#969](https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/issues/969))
 
 ## 1.23.6 (April 08, 2021)
 
@@ -14,7 +28,7 @@ ENHANCEMENTS:
 * `resource/opentelekomcloud_as_configuration_v1`: Allow to set a `security_groups` ([#941](https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/issues/941))
 * `resource/opentelekomcloud_cce_nodepool_v3`: Increase timeouts ([#945](https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/issues/945))
 * `resource/opentelekomcloud_sfs_file_share_v2`: Make `access` params optional ([#953](https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/issues/953))
-* `resource/opentelekomcloud_ompute_instance_v2`: Add possibility to set `power_state` param  ([#956](https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/issues/956))
+* `resource/opentelekomcloud_сompute_instance_v2`: Add possibility to set `power_state` param  ([#956](https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/issues/956))
 
 DOCUMENTATION:
 * `resource/opentelekomcloud_ecs_instance_v1`: Clarify that `nics` is required ([#951](https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/issues/951))
