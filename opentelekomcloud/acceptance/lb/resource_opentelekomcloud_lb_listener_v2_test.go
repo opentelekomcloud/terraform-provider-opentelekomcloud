@@ -75,7 +75,7 @@ func TestAccLBV2Listener_tls(t *testing.T) {
 
 func TestAccLBV2ListenerSni(t *testing.T) {
 	// var listener listeners.Listener
-	// resourceName := "opentelekomcloud_lb_listener_v2.listener_tls"
+	resourceName := "opentelekomcloud_lb_listener_v2.elb_listener"
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:     func() { common.TestAccPreCheck(t) },
@@ -83,10 +83,22 @@ func TestAccLBV2ListenerSni(t *testing.T) {
 		CheckDestroy: testAccCheckLBV2ListenerDestroy,
 		Steps: []resource.TestStep{
 			{
+				Config: testAccLBV2ListenerConfigCert(1),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr(resourceName, "sni_container_refs.#", "1"),
+				),
+			},
+			{
 				Config: testAccLBV2ListenerConfigCert(3),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr(resourceName, "sni_container_refs.#", "3"),
+				),
 			},
 			{
 				Config: testAccLBV2ListenerConfigCert(1),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr(resourceName, "sni_container_refs.#", "1"),
+				),
 			},
 		},
 	})

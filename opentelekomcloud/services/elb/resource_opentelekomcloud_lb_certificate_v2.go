@@ -189,12 +189,6 @@ func resourceCertificateV2Delete(d *schema.ResourceData, meta interface{}) error
 		return fmt.Errorf("error creating OpenTelekomCloud networking client: %s", err)
 	}
 
-	// need to un-assign certificate from listeners first
-	log.Printf("[DEBUG] Unassigning certificate %s from listeners", d.Id())
-	if err := removeCertFromListeners(client, d.Id()); err != nil {
-		return fmt.Errorf("unable to remove certificate %s from listeners: %w", d.Id(), err)
-	}
-
 	log.Printf("[DEBUG] Deleting certificate %s", d.Id())
 	timeout := d.Timeout(schema.TimeoutDelete)
 	err = resource.Retry(timeout, func() *resource.RetryError {
@@ -205,53 +199,71 @@ func resourceCertificateV2Delete(d *schema.ResourceData, meta interface{}) error
 		return nil
 	})
 	if err != nil {
-		if common.IsResourceNotFound(err) {
-			log.Printf("[INFO] deleting an unavailable certificate: %s", d.Id())
-			return nil
-		}
-		return fmt.Errorf("error deleting certificate %s: %w", d.Id(), err)
+		return handleCertificateDeletionError(d, client, err)
 	}
 
 	return nil
 }
 
-func removeCertFromListeners(client *golangsdk.ServiceClient, certID string) error {
-	pages, err := listeners.List(client, listeners.ListOpts{}).AllPages()
-	if err != nil {
-		return fmt.Errorf("error listing LBv2 listeners: %w", err)
-	}
-	listenerList, err := listeners.ExtractListeners(pages)
-	if err != nil {
-		return fmt.Errorf("error extracting listeners: %w", err)
+func handleCertificateDeletionError(d *schema.ResourceData, client *golangsdk.ServiceClient, err error) error {
+	if common.IsResourceNotFound(err) {
+		log.Printf("[INFO] deleting an unavailable certificate: %s", d.Id())
+		return nil
 	}
 
-	var matching []listeners.Listener
-
-	for _, listener := range listenerList {
-		if listener.DefaultTlsContainerRef == certID {
-			return fmt.Errorf("error removing certificate from listener: certificate %s is default for listener %s", certID, listener.ID)
+	if _, ok := err.(golangsdk.ErrDefault409); ok { // certificate in use
+		var listenerIDs []string
+		// get assigned listeners
+		err = certificates.Delete(client, d.Id()).ExtractIntoSlicePtr(&listenerIDs, "listener_ids")
+		if err != nil {
+			return fmt.Errorf("error loading assigned listeners: %w", err)
 		}
-		if common.StringInSlice(certID, listener.SniContainerRefs) {
-			matching = append(matching, listener)
-		}
-	}
 
-	mErr := new(multierror.Error)
-	for _, listener := range matching {
-		otherCerts := make([]string, 0)
-		for _, cert := range listener.SniContainerRefs {
-			if cert != certID {
-				otherCerts = append(otherCerts, cert)
+		mErr := new(multierror.Error)
+		for _, listenerID := range listenerIDs {
+			mErr = multierror.Append(mErr, unassignCertWithRetry(client, d.Timeout(schema.TimeoutUpdate), d.Id(), listenerID))
+		}
+		if mErr.ErrorOrNil() != nil {
+			return mErr
+		}
+
+		log.Printf("[DEBUG] Retry deleting certificate %s", d.Id())
+		timeout := d.Timeout(schema.TimeoutDelete)
+		err = resource.Retry(timeout, func() *resource.RetryError {
+			err := certificates.Delete(client, d.Id()).ExtractErr()
+			if err != nil {
+				return common.CheckForRetryableError(err)
 			}
-		}
-		_, err := listeners.Update(client, listener.ID, listeners.UpdateOpts{
-			SniContainerRefs: otherCerts,
-		}).Extract()
-		mErr = multierror.Append(mErr, err)
+			return nil
+		})
 	}
-	if err := mErr.ErrorOrNil(); err != nil {
-		return fmt.Errorf("error deleting certificate from listeners: %w", err)
+	return fmt.Errorf("error deleting certificate %s: %w", d.Id(), err)
+}
+
+func unassignCertWithRetry(client *golangsdk.ServiceClient, timeout time.Duration, certID, listenerID string) error {
+	listener, err := listeners.Get(client, listenerID).Extract()
+	if err != nil {
+		return fmt.Errorf("failed to get listener %s: %w", listenerID, err)
 	}
 
+	var otherCerts []string
+	for _, cert := range listener.SniContainerRefs {
+		if cert != certID {
+			otherCerts = append(otherCerts, cert)
+		}
+	}
+	opts := listeners.UpdateOpts{
+		SniContainerRefs: otherCerts,
+	}
+	err = resource.Retry(timeout, func() *resource.RetryError {
+		_, err := listeners.Update(client, listener.ID, opts).Extract()
+		if err != nil {
+			return common.CheckForRetryableError(err)
+		}
+		return nil
+	})
+	if err != nil {
+		return fmt.Errorf("error updating listener %s: %w", listener.ID, err)
+	}
 	return nil
 }
