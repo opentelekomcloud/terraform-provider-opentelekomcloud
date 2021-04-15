@@ -28,7 +28,7 @@ ENHANCEMENTS:
 * `resource/opentelekomcloud_as_configuration_v1`: Allow to set a `security_groups` ([#941](https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/issues/941))
 * `resource/opentelekomcloud_cce_nodepool_v3`: Increase timeouts ([#945](https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/issues/945))
 * `resource/opentelekomcloud_sfs_file_share_v2`: Make `access` params optional ([#953](https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/issues/953))
-* `resource/opentelekomcloud_ompute_instance_v2`: Add possibility to set `power_state` param  ([#956](https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/issues/956))
+* `resource/opentelekomcloud_сompute_instance_v2`: Add possibility to set `power_state` param  ([#956](https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/issues/956))
 
 DOCUMENTATION:
 * `resource/opentelekomcloud_ecs_instance_v1`: Clarify that `nics` is required ([#951](https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/issues/951))
