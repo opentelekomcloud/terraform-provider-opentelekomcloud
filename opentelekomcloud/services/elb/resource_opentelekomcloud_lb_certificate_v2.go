@@ -1,6 +1,7 @@
 package elb
 
 import (
+	"encoding/json"
 	"fmt"
 	"log"
 	"time"
@@ -211,16 +212,16 @@ func handleCertificateDeletionError(d *schema.ResourceData, client *golangsdk.Se
 		return nil
 	}
 
-	if _, ok := err.(golangsdk.ErrDefault409); ok { // certificate in use
-		var listenerIDs []string
-		// get assigned listeners
-		err = certificates.Delete(client, d.Id()).ExtractIntoSlicePtr(&listenerIDs, "listener_ids")
-		if err != nil {
+	if err409, ok := err.(golangsdk.ErrDefault409); ok { // certificate in use
+		var dep struct {
+			ListenerIDs []string `json:"listener_ids"`
+		}
+		if err := json.Unmarshal(err409.Body, &dep); err != nil {
 			return fmt.Errorf("error loading assigned listeners: %w", err)
 		}
 
 		mErr := new(multierror.Error)
-		for _, listenerID := range listenerIDs {
+		for _, listenerID := range dep.ListenerIDs {
 			mErr = multierror.Append(mErr, unassignCertWithRetry(client, d.Timeout(schema.TimeoutUpdate), d.Id(), listenerID))
 		}
 		if mErr.ErrorOrNil() != nil {
@@ -229,13 +230,17 @@ func handleCertificateDeletionError(d *schema.ResourceData, client *golangsdk.Se
 
 		log.Printf("[DEBUG] Retry deleting certificate %s", d.Id())
 		timeout := d.Timeout(schema.TimeoutDelete)
-		err = resource.Retry(timeout, func() *resource.RetryError {
+		err := resource.Retry(timeout, func() *resource.RetryError {
 			err := certificates.Delete(client, d.Id()).ExtractErr()
 			if err != nil {
 				return common.CheckForRetryableError(err)
 			}
 			return nil
 		})
+		if err != nil {
+			return fmt.Errorf("error retrying certificate delition: %w", err)
+		}
+		return nil
 	}
 	return fmt.Errorf("error deleting certificate %s: %w", d.Id(), err)
 }
@@ -263,7 +268,7 @@ func unassignCertWithRetry(client *golangsdk.ServiceClient, timeout time.Duratio
 		return nil
 	})
 	if err != nil {
-		return fmt.Errorf("error updating listener %s: %w", listener.ID, err)
+		return fmt.Errorf("error unassigning certificate %s from listener %s: %w", certID, listener.ID, err)
 	}
 	return nil
 }
