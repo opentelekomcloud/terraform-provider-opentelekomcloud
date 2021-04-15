@@ -1,5 +1,19 @@
 ## 1.24.0 (Unreleased)
 
+## 1.23.7 (April 15, 2021)
+
+ENHANCEMENTS:
+* `resource/opentelekomcloud_networking_subnet_v2`: Add default value for `dns_nameservers` ([#977](https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/issues/977))
+* `resource/opentelekomcloud_vpc_subnet_v1`: Add default value for `primary_dns`, `secondary_dns` ([#977](https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/issues/977))
+
+BUG FIXES:
+* `resource/opentelekomcloud_cce_node_v3`: Remove setting empty `private_ip` ([#972](https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/issues/972))
+* `resource/opentelekomcloud_s3_bucket`: Make unversioned bucket creation possible ([#976](https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/issues/976), [#979](https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/issues/979))
+* `resource/opentelekomcloud_obs_bucket`: Make unversioned bucket creation possible ([#978](https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/issues/978))
+* `resource/opentelekomcloud_lb_listener_v2`: Fix schema to avoid resource always updating ([#983](https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/issues/983), [#984](https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/issues/984))
+
+DOCUMENTATION:
+* `resource/opentelekomcloud_cce_addon_v3`:  Fix documentation issues ([#969](https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/issues/969))
 
 ## 1.23.6 (April 08, 2021)
 
