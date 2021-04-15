@@ -88,3 +88,8 @@ func SuppressEqualZoneNames(_, old, new string, _ *schema.ResourceData) bool {
 	newShort := strings.TrimSuffix(new, ".")
 	return oldShort == newShort
 }
+
+func SuppressStrippedNewLines(_, old, new string, _ *schema.ResourceData) bool {
+	newline := "\n"
+	return strings.Trim(old, newline) == strings.Trim(new, newline)
+}
