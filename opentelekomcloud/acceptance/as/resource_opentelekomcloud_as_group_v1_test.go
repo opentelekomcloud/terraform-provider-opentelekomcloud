@@ -69,6 +69,27 @@ func TestAccASV1Group_RemoveWithSetMinNumber(t *testing.T) {
 	})
 }
 
+func TestAccASV1Group_WithoutSecurityGroups(t *testing.T) {
+	var asGroup groups.Group
+
+	resourceName := "opentelekomcloud_as_group_v1.proxy_group"
+
+	resource.Test(t, resource.TestCase{
+		PreCheck:     func() { common.TestAccFlavorPreCheck(t) },
+		Providers:    common.TestAccProviders,
+		CheckDestroy: testAccCheckASV1GroupDestroy,
+		Steps: []resource.TestStep{
+			{
+				Config: testASV1Group_withoutSGs,
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckASV1GroupExists(resourceName, &asGroup),
+					resource.TestCheckResourceAttr(resourceName, "security_groups.#", "0"),
+				),
+			},
+		},
+	})
+}
+
 func testAccCheckASV1GroupDestroy(s *terraform.State) error {
 	config := common.TestAccProvider.Meta().(*cfg.Config)
 	asClient, err := config.AutoscalingV1Client(env.OS_REGION_NAME)
@@ -295,6 +316,46 @@ resource "opentelekomcloud_as_group_v1" "proxy_group" {
     ignore_changes = [
       instances
     ]
+  }
+}
+`, env.OS_IMAGE_ID, env.OS_KEYPAIR_NAME, env.OS_AVAILABILITY_ZONE, env.OS_VPC_ID, env.OS_NETWORK_ID)
+
+var testASV1Group_withoutSGs = fmt.Sprintf(`
+# Proxy AS configuration
+resource "opentelekomcloud_as_configuration_v1" "proxy_config" {
+  scaling_configuration_name = "proxy-test-asg"
+  instance_config {
+    image     = "%s"
+    key_name  = "%s"
+    disk {
+      size        = 40
+      volume_type = "SATA"
+      disk_type   = "SYS"
+    }
+
+    metadata  = {
+      environment  = "otc-test"
+      generator    = "terraform"
+      puppetmaster = "pseudo-puppet"
+      role         = "pseudo-role"
+      autoscaling  = "proxy_ASG"
+    }
+  }
+}
+
+resource "opentelekomcloud_as_group_v1" "proxy_group" {
+  scaling_group_name       = "proxy-test-asg"
+  scaling_configuration_id = opentelekomcloud_as_configuration_v1.proxy_config.id
+  available_zones          = ["%s"]
+  desire_instance_number   = 3
+  min_instance_number      = 1
+  max_instance_number      = 10
+  vpc_id                   = "%s"
+  delete_publicip          = true
+  delete_instances         = "yes"
+
+  networks {
+    id = "%s"
   }
 }
 `, env.OS_IMAGE_ID, env.OS_KEYPAIR_NAME, env.OS_AVAILABILITY_ZONE, env.OS_VPC_ID, env.OS_NETWORK_ID)
