@@ -104,12 +104,12 @@ func testAccCheckASV1GroupExists(n string, group *groups.Group) resource.TestChe
 		}
 
 		config := common.TestAccProvider.Meta().(*cfg.Config)
-		asClient, err := config.AutoscalingV1Client(env.OS_REGION_NAME)
+		client, err := config.AutoscalingV1Client(env.OS_REGION_NAME)
 		if err != nil {
 			return fmt.Errorf("error creating opentelekomcloud autoscaling client: %s", err)
 		}
 
-		found, err := groups.Get(asClient, rs.Primary.ID).Extract()
+		found, err := groups.Get(client, rs.Primary.ID).Extract()
 		if err != nil {
 			return err
 		}
@@ -118,7 +118,7 @@ func testAccCheckASV1GroupExists(n string, group *groups.Group) resource.TestChe
 			return fmt.Errorf("autoscaling Group not found")
 		}
 		log.Printf("[DEBUG] test found is: %#v", found)
-		group = &found
+		group = found
 
 		return nil
 	}

@@ -140,7 +140,7 @@ The following arguments are supported:
   The system supports up to five networks. The networks object structure
   is documented below.
 
-* `security_groups` - (Required) An array of security group IDs to associate with the group.
+* `security_groups` - (Optional) An array of security group IDs to associate with the group.
   A maximum of one security group can be selected. The `security_groups` object structure is
   documented below.
 
