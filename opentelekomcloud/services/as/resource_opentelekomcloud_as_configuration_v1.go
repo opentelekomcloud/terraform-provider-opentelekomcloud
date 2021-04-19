@@ -396,11 +396,11 @@ func getASGroupsByConfiguration(client *golangsdk.ServiceClient, configID string
 	listOpts := groups.ListOpts{
 		ConfigurationID: configID,
 	}
-	page, err := groups.List(client, listOpts).AllPages()
+	allPages, err := groups.List(client, listOpts).AllPages()
 	if err != nil {
 		return asGroups, fmt.Errorf("error getting ASGroups by configuration %q: %s", configID, err)
 	}
-	asGroups, err = page.(groups.GroupPage).Extract()
+	asGroups, err = groups.ExtractGroups(allPages)
 	return asGroups, err
 }
 

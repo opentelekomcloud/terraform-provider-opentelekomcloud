@@ -116,7 +116,7 @@ func ResourceASGroup() *schema.Resource {
 			},
 			"security_groups": {
 				Type:     schema.TypeList,
-				Required: true,
+				Optional: true,
 				MaxItems: 1,
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
@@ -355,6 +355,7 @@ func resourceASGroupCreate(d *schema.ResourceData, meta interface{}) error {
 	networks := getAllNetworks(d)
 	secGroups := getAllSecurityGroups(d)
 	asgLBaaSListeners := getAllLBaaSListeners(d)
+	isDeletePublicIp := d.Get("delete_publicip").(bool)
 
 	log.Printf("[DEBUG] available_zones: %#v", d.Get("available_zones"))
 	createOpts := groups.CreateOpts{
@@ -375,7 +376,7 @@ func resourceASGroupCreate(d *schema.ResourceData, meta interface{}) error {
 		HealthPeriodicAuditGrace:  d.Get("health_periodic_audit_grace_period").(int),
 		InstanceTerminatePolicy:   d.Get("instance_terminate_policy").(string),
 		Notifications:             getAllNotifications(d),
-		IsDeletePublicip:          d.Get("delete_publicip").(bool),
+		IsDeletePublicip:          &isDeletePublicIp,
 	}
 
 	log.Printf("[DEBUG] Create Options: %#v", createOpts)
@@ -454,7 +455,7 @@ func resourceASGroupRead(d *schema.ResourceData, meta interface{}) error {
 		d.Set("health_periodic_audit_grace_period", asGroup.HealthPeriodicAuditGrace),
 		d.Set("instance_terminate_policy", asGroup.InstanceTerminatePolicy),
 		d.Set("scaling_configuration_id", asGroup.ConfigurationID),
-		d.Set("delete_publicip", asGroup.DeletePublicip),
+		d.Set("delete_publicip", asGroup.DeletePublicIP),
 		d.Set("region", config.GetRegion(d)),
 	)
 	if len(asGroup.Notifications) >= 1 {
@@ -525,6 +526,7 @@ func resourceASGroupUpdate(d *schema.ResourceData, meta interface{}) error {
 
 	networks := getAllNetworks(d)
 	secGroups := getAllSecurityGroups(d)
+	isDeletePublicIp := d.Get("delete_publicip").(bool)
 
 	asgLBaaSListeners := getAllLBaaSListeners(d)
 	updateOpts := groups.UpdateOpts{
@@ -544,7 +546,7 @@ func resourceASGroupUpdate(d *schema.ResourceData, meta interface{}) error {
 		HealthPeriodicAuditGrace:  d.Get("health_periodic_audit_grace_period").(int),
 		InstanceTerminatePolicy:   d.Get("instance_terminate_policy").(string),
 		Notifications:             getAllNotifications(d),
-		IsDeletePublicip:          d.Get("delete_publicip").(bool),
+		IsDeletePublicip:          &isDeletePublicIp,
 	}
 	asGroupID, err := groups.Update(client, d.Id(), updateOpts).Extract()
 	if err != nil {
