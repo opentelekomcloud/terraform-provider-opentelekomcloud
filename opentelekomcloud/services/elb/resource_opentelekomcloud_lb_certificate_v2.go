@@ -50,22 +50,26 @@ func ResourceCertificateV2() *schema.Resource {
 			"domain": {
 				Type:     schema.TypeString,
 				Optional: true,
+				Computed: true,
 			},
 
 			"private_key": {
-				Type:     schema.TypeString,
-				Optional: true,
+				Type:             schema.TypeString,
+				Optional:         true,
+				DiffSuppressFunc: common.SuppressStrippedNewLines,
 			},
 
 			"certificate": {
-				Type:     schema.TypeString,
-				Required: true,
+				Type:             schema.TypeString,
+				Required:         true,
+				DiffSuppressFunc: common.SuppressStrippedNewLines,
 			},
 
 			"type": {
 				Type:         schema.TypeString,
 				Optional:     true,
 				Computed:     true,
+				ForceNew:     true,
 				ValidateFunc: validation.StringInSlice([]string{"server", "client"}, false),
 			},
 
@@ -86,7 +90,7 @@ func resourceCertificateV2Create(d *schema.ResourceData, meta interface{}) error
 	config := meta.(*cfg.Config)
 	networkingClient, err := config.NetworkingV2Client(config.GetRegion(d))
 	if err != nil {
-		return fmt.Errorf("Error creating OpenTelekomCloud networking client: %s", err)
+		return fmt.Errorf("error creating OpenTelekomCloud networking client: %s", err)
 	}
 
 	createOpts := certificates.CreateOpts{
@@ -101,7 +105,7 @@ func resourceCertificateV2Create(d *schema.ResourceData, meta interface{}) error
 	log.Printf("[DEBUG] Create Options: %#v", createOpts)
 	c, err := certificates.Create(networkingClient, createOpts).Extract()
 	if err != nil {
-		return fmt.Errorf("Error creating Certificate: %s", err)
+		return fmt.Errorf("error creating Certificate: %s", err)
 	}
 
 	// If all has been successful, set the ID on the resource
@@ -114,7 +118,7 @@ func resourceCertificateV2Read(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*cfg.Config)
 	networkingClient, err := config.NetworkingV2Client(config.GetRegion(d))
 	if err != nil {
-		return fmt.Errorf("Error creating OpenTelekomCloud networking client: %s", err)
+		return fmt.Errorf("error creating OpenTelekomCloud networking client: %s", err)
 	}
 
 	c, err := certificates.Get(networkingClient, d.Id()).Extract()
@@ -141,7 +145,7 @@ func resourceCertificateV2Update(d *schema.ResourceData, meta interface{}) error
 	config := meta.(*cfg.Config)
 	networkingClient, err := config.NetworkingV2Client(config.GetRegion(d))
 	if err != nil {
-		return fmt.Errorf("Error creating OpenTelekomCloud networking client: %s", err)
+		return fmt.Errorf("error creating OpenTelekomCloud networking client: %s", err)
 	}
 
 	var updateOpts certificates.UpdateOpts
@@ -172,7 +176,7 @@ func resourceCertificateV2Update(d *schema.ResourceData, meta interface{}) error
 		return nil
 	})
 	if err != nil {
-		return fmt.Errorf("Error updating certificate %s: %s", d.Id(), err)
+		return fmt.Errorf("error updating certificate %s: %s", d.Id(), err)
 	}
 
 	return resourceCertificateV2Read(d, meta)
@@ -182,7 +186,7 @@ func resourceCertificateV2Delete(d *schema.ResourceData, meta interface{}) error
 	config := meta.(*cfg.Config)
 	networkingClient, err := config.NetworkingV2Client(config.GetRegion(d))
 	if err != nil {
-		return fmt.Errorf("Error creating OpenTelekomCloud networking client: %s", err)
+		return fmt.Errorf("error creating OpenTelekomCloud networking client: %s", err)
 	}
 
 	log.Printf("[DEBUG] Deleting certificate %s", d.Id())
@@ -199,7 +203,7 @@ func resourceCertificateV2Delete(d *schema.ResourceData, meta interface{}) error
 			log.Printf("[INFO] deleting an unavailable certificate: %s", d.Id())
 			return nil
 		}
-		return fmt.Errorf("Error deleting certificate %s: %s", d.Id(), err)
+		return fmt.Errorf("error deleting certificate %s: %s", d.Id(), err)
 	}
 
 	return nil

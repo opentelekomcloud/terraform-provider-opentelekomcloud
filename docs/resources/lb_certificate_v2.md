@@ -68,11 +68,6 @@ i1YhgnQbn5E0hz55OLu5jvOkKQjPCW+8Kg==
 -----END CERTIFICATE-----
 EOT
 
-  timeouts {
-    create = "5m"
-    update = "5m"
-    delete = "5m"
-  }
 }
 ```
 
@@ -98,7 +93,7 @@ The following arguments are supported:
 * `certificate` - (Required) The public encrypted key of the Certificate, PEM format.
 
 * `type`- (Optional) The type of certificate the container holds. Either `server` or `client`.
-  Defaults to `server` if not set.
+  Defaults to `server` if not set. Changing this creates a new LB certificate.
 
 ## Attributes Reference
 
@@ -121,3 +116,10 @@ The following attributes are exported:
 * `update_time` - Indicates the update time.
 
 * `create_time` - Indicates the creation time.
+
+## Timeouts
+
+This resource provides the following timeouts configuration options:
+- `create` - Default is 10 minutes.
+- `update` - Default is 10 minutes.
+- `delete` - Default is 5 minutes.

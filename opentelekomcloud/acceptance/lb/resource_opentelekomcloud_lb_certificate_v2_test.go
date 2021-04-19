@@ -166,10 +166,6 @@ i1YhgnQbn5E0hz55OLu5jvOkKQjPCW+8Kg==
 -----END CERTIFICATE-----
 EOT
 
-  lifecycle {
-	ignore_changes = [certificate, private_key]
-  }
-
   timeouts {
     create = "5m"
     update = "5m"
@@ -180,10 +176,10 @@ EOT
 
 const testAccLBV2ClientCertificateConfig_basic = `
 resource "opentelekomcloud_lb_certificate_v2" "certificate_ca" {
-	name = "certificate_client"
-	description = "terraform ca test certificate"
-	type = "client"
-    certificate = <<EOT
+  name        = "certificate_client"
+  description = "terraform ca test certificate"
+  type        = "client"
+  certificate = <<EOT
 -----BEGIN CERTIFICATE-----
 MIIDpTCCAo2gAwIBAgIJAKdmmOBYnFvoMA0GCSqGSIb3DQEBCwUAMGkxCzAJBgNV
 BAYTAnh4MQswCQYDVQQIDAJ4eDELMAkGA1UEBwwCeHgxCzAJBgNVBAoMAnh4MQsw
@@ -208,15 +204,11 @@ i1YhgnQbn5E0hz55OLu5jvOkKQjPCW+9Aa==
 -----END CERTIFICATE-----
 EOT
 
-    lifecycle {
-	  ignore_changes = [certificate]
-    }
-
-	timeouts {
-		create = "5m"
-		update = "5m"
-		delete = "5m"
-	}
+  timeouts {
+    create = "5m"
+    update = "5m"
+    delete = "5m"
+  }
 }
 `
 
@@ -280,10 +272,6 @@ i1YhgnQbn5E0hz55OLu5jvOkKQjPCW+9Aa==
 -----END CERTIFICATE-----
 EOT
 
-  lifecycle {
-	ignore_changes = [certificate, private_key]
-  }
-
   timeouts {
     create = "5m"
     update = "5m"
@@ -294,10 +282,10 @@ EOT
 
 const testAccLBV2ClientCertificateConfig_update = `
 resource "opentelekomcloud_lb_certificate_v2" "certificate_ca" {
-	name = "certificate_client_updated"
-	description = "terraform ca test certificate"
-	type = "client"
-    certificate = <<EOT
+  name        = "certificate_client_updated"
+  description = "terraform ca test certificate"
+  type        = "client"
+  certificate = <<EOT
 -----BEGIN CERTIFICATE-----
 MIIDpTCCAo2gAwIBAgIJAKdmmOBYnFvoMA0GCSqGSIb3DQEBCwUAMGkxCzAJBgNV
 BAYTAnh4MQswCQYDVQQIDAJ4eDELMAkGA1UEBwwCeHgxCzAJBgNVBAoMAnh4MQsw
@@ -322,14 +310,10 @@ i1YhgnQbn5E0hz55OLu5jvOkKQjPCW+9Aa==
 -----END CERTIFICATE-----
 EOT
 
-    lifecycle {
-	    ignore_changes = [certificate]
-	}
-
-	timeouts {
-		create = "5m"
-		update = "5m"
-		delete = "5m"
-	}
+  timeouts {
+    create = "5m"
+    update = "5m"
+    delete = "5m"
+  }
 }
 `
