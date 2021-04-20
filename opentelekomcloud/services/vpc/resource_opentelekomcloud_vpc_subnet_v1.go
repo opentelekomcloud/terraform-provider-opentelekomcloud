@@ -40,7 +40,7 @@ func ResourceVpcSubnetV1() *schema.Resource {
 			Delete: schema.DefaultTimeout(10 * time.Minute),
 		},
 
-		Schema: map[string]*schema.Schema{ // request and response parameters
+		Schema: map[string]*schema.Schema{
 			"region": {
 				Type:     schema.TypeString,
 				Optional: true,
@@ -82,17 +82,15 @@ func ResourceVpcSubnetV1() *schema.Resource {
 			},
 			"primary_dns": {
 				Type:         schema.TypeString,
-				ForceNew:     false,
 				Optional:     true,
 				ValidateFunc: common.ValidateIP,
-				Default:      defaultDNS[0],
+				Computed:     true,
 			},
 			"secondary_dns": {
 				Type:         schema.TypeString,
-				ForceNew:     false,
 				Optional:     true,
 				ValidateFunc: common.ValidateIP,
-				Default:      defaultDNS[1],
+				Computed:     true,
 			},
 			"availability_zone": {
 				Type:     schema.TypeString,
@@ -126,6 +124,14 @@ func resourceVpcSubnetV1Create(d *schema.ResourceData, meta interface{}) error {
 		return fmt.Errorf("error creating OpenTelekomCloud networking client: %s", err)
 	}
 
+	primaryDNS := d.Get("primary_dns").(string)
+	secondaryDNS := d.Get("secondary_dns").(string)
+	dnsList := resourceSubnetDNSListV1(d)
+	if primaryDNS == "" && secondaryDNS == "" && len(dnsList) == 0 {
+		primaryDNS = defaultDNS[0]
+		secondaryDNS = defaultDNS[1]
+	}
+
 	createOpts := subnets.CreateOpts{
 		Name:             d.Get("name").(string),
 		CIDR:             d.Get("cidr").(string),
@@ -133,9 +139,9 @@ func resourceVpcSubnetV1Create(d *schema.ResourceData, meta interface{}) error {
 		GatewayIP:        d.Get("gateway_ip").(string),
 		EnableDHCP:       d.Get("dhcp_enable").(bool),
 		VPC_ID:           d.Get("vpc_id").(string),
-		PRIMARY_DNS:      d.Get("primary_dns").(string),
-		SECONDARY_DNS:    d.Get("secondary_dns").(string),
-		DnsList:          resourceSubnetDNSListV1(d),
+		PRIMARY_DNS:      primaryDNS,
+		SECONDARY_DNS:    secondaryDNS,
+		DnsList:          dnsList,
 	}
 
 	if common.HasFilledOpt(d, "ntp_addresses") {
