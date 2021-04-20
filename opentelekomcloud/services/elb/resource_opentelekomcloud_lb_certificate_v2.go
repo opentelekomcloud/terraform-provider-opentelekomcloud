@@ -1,6 +1,7 @@
 package elb
 
 import (
+	"encoding/json"
 	"fmt"
 	"log"
 	"time"
@@ -9,9 +10,9 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/helper/validation"
-
+	"github.com/opentelekomcloud/gophertelekomcloud"
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/networking/v2/extensions/lbaas_v2/certificates"
-
+	"github.com/opentelekomcloud/gophertelekomcloud/openstack/networking/v2/extensions/lbaas_v2/listeners"
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common"
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common/cfg"
 )
@@ -184,7 +185,7 @@ func resourceCertificateV2Update(d *schema.ResourceData, meta interface{}) error
 
 func resourceCertificateV2Delete(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*cfg.Config)
-	networkingClient, err := config.NetworkingV2Client(config.GetRegion(d))
+	client, err := config.NetworkingV2Client(config.GetRegion(d))
 	if err != nil {
 		return fmt.Errorf("error creating OpenTelekomCloud networking client: %s", err)
 	}
@@ -192,19 +193,82 @@ func resourceCertificateV2Delete(d *schema.ResourceData, meta interface{}) error
 	log.Printf("[DEBUG] Deleting certificate %s", d.Id())
 	timeout := d.Timeout(schema.TimeoutDelete)
 	err = resource.Retry(timeout, func() *resource.RetryError {
-		err := certificates.Delete(networkingClient, d.Id()).ExtractErr()
+		err := certificates.Delete(client, d.Id()).ExtractErr()
 		if err != nil {
 			return common.CheckForRetryableError(err)
 		}
 		return nil
 	})
 	if err != nil {
-		if common.IsResourceNotFound(err) {
-			log.Printf("[INFO] deleting an unavailable certificate: %s", d.Id())
-			return nil
-		}
-		return fmt.Errorf("error deleting certificate %s: %s", d.Id(), err)
+		return handleCertificateDeletionError(d, client, err)
 	}
 
+	return nil
+}
+
+func handleCertificateDeletionError(d *schema.ResourceData, client *golangsdk.ServiceClient, err error) error {
+	if common.IsResourceNotFound(err) {
+		log.Printf("[INFO] deleting an unavailable certificate: %s", d.Id())
+		return nil
+	}
+
+	if err409, ok := err.(golangsdk.ErrDefault409); ok { // certificate in use
+		var dep struct {
+			ListenerIDs []string `json:"listener_ids"`
+		}
+		if err := json.Unmarshal(err409.Body, &dep); err != nil {
+			return fmt.Errorf("error loading assigned listeners: %w", err)
+		}
+
+		mErr := new(multierror.Error)
+		for _, listenerID := range dep.ListenerIDs {
+			mErr = multierror.Append(mErr, unassignCertWithRetry(client, d.Timeout(schema.TimeoutUpdate), d.Id(), listenerID))
+		}
+		if mErr.ErrorOrNil() != nil {
+			return mErr
+		}
+
+		log.Printf("[DEBUG] Retry deleting certificate %s", d.Id())
+		timeout := d.Timeout(schema.TimeoutDelete)
+		err := resource.Retry(timeout, func() *resource.RetryError {
+			err := certificates.Delete(client, d.Id()).ExtractErr()
+			if err != nil {
+				return common.CheckForRetryableError(err)
+			}
+			return nil
+		})
+		if err != nil {
+			return fmt.Errorf("error retrying certificate delition: %w", err)
+		}
+		return nil
+	}
+	return fmt.Errorf("error deleting certificate %s: %w", d.Id(), err)
+}
+
+func unassignCertWithRetry(client *golangsdk.ServiceClient, timeout time.Duration, certID, listenerID string) error {
+	listener, err := listeners.Get(client, listenerID).Extract()
+	if err != nil {
+		return fmt.Errorf("failed to get listener %s: %w", listenerID, err)
+	}
+
+	var otherCerts []string
+	for _, cert := range listener.SniContainerRefs {
+		if cert != certID {
+			otherCerts = append(otherCerts, cert)
+		}
+	}
+	opts := listeners.UpdateOpts{
+		SniContainerRefs: otherCerts,
+	}
+	err = resource.Retry(timeout, func() *resource.RetryError {
+		_, err := listeners.Update(client, listener.ID, opts).Extract()
+		if err != nil {
+			return common.CheckForRetryableError(err)
+		}
+		return nil
+	})
+	if err != nil {
+		return fmt.Errorf("error unassigning certificate %s from listener %s: %w", certID, listener.ID, err)
+	}
 	return nil
 }

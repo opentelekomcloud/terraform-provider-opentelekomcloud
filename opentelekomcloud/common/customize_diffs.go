@@ -23,15 +23,6 @@ var (
 	elementListRegex = regexp.MustCompile(`^(.+?)\.\*\.(.+)$`)
 )
 
-func stringInSlice(str string, slice []string) bool {
-	for _, v := range slice {
-		if v == str {
-			return true
-		}
-	}
-	return false
-}
-
 func checkVolumeTypeAvailable(d cfg.SchemaOrDiff, argName, expectedAZ string, typeAZs map[string][]string) error {
 	volumeType := d.Get(argName)
 	if volumeType == nil {
@@ -51,7 +42,7 @@ func checkVolumeTypeAvailable(d cfg.SchemaOrDiff, argName, expectedAZ string, ty
 	if len(validAZs) == 0 {
 		return fmt.Errorf("volume type `%s` doesn't exist", resourceVolType)
 	}
-	if !stringInSlice(expectedAZ, validAZs) {
+	if !StringInSlice(expectedAZ, validAZs) {
 		return fmt.Errorf(
 			"volume type `%v` is not supported in AZ `%s`.\nSupported AZs: %v",
 			volumeType, expectedAZ, validAZs,
