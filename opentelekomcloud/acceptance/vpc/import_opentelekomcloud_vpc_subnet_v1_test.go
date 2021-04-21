@@ -17,7 +17,7 @@ func TestAccOTCVpcSubnetV1_importBasic(t *testing.T) {
 		CheckDestroy: testAccCheckOTCVpcSubnetV1Destroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccOTCVpcSubnetV1_basic,
+				Config: testAccOTCVpcSubnetV1Basic,
 			},
 
 			{
