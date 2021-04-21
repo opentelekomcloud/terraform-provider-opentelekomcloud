@@ -6,6 +6,9 @@ subcategory: "Cloud Container Engine (CCE)"
 
 Provides a cluster resource management.
 
+~>
+  Before starting working with CCE, you need to authorize it via _console_.
+
 ## Example Usage
 
 ```hcl
