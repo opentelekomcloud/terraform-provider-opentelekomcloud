@@ -1,5 +1,18 @@
 ## 1.24.0 (Unreleased)
 
+## 1.23.8 (April 21, 2021)
+
+ENHANCEMENTS:
+* `resource/opentelekomcloud_as_group_v1`: Make `security_groups` optional ([#991](https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/issues/991))
+
+BUG FIXES:
+* `resource/opentelekomcloud_lb_certificate_v2`: Fix constantly updating `private_key`, `certificate` and `domain` fields ([#988](https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/issues/988))
+* `resource/opentelekomcloud_lb_certificate_v2`: Fix deleting certificates used in LB listener ([#987](https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/issues/987))
+* `resource/opentelekomcloud_vpc_subnet_v1`: Fix subnet creation when `dns_list` is set ([#995](https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/issues/995), follow-up of [#977](https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/issues/977))
+
+DOCUMENTATION:
+* `resource/opentelekomcloud_cce_cluster_v3`: Add note about CCE authorization required ([#998](https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/issues/998))
+
 ## 1.23.7 (April 15, 2021)
 
 ENHANCEMENTS:
