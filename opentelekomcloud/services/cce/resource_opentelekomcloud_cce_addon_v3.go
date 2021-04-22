@@ -3,6 +3,7 @@ package cce
 import (
 	"encoding/json"
 	"fmt"
+	"strconv"
 
 	"github.com/hashicorp/go-multierror"
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
@@ -73,6 +74,9 @@ func resourceCCEAddonV3Create(d *schema.ResourceData, meta interface{}) error {
 	if err != nil {
 		return fmt.Errorf("error getting values for CCE addon: %s", err)
 	}
+
+	basic = unStringMap(basic)
+	custom = unStringMap(custom)
 
 	templateName := d.Get("template_name").(string)
 	addon, err := addons.Create(client, addons.CreateOpts{
@@ -159,6 +163,9 @@ func resourceCCEAddonV3Update(d *schema.ResourceData, meta interface{}) error {
 	templateVersion := d.Get("template_version").(string)
 	templateName := d.Get("template_name").(string)
 
+	basic = unStringMap(basic)
+	custom = unStringMap(custom)
+
 	_, err = addons.Update(client, d.Id(), clusterID, addons.UpdateOpts{
 		Kind:       "Addon",
 		ApiVersion: "v3",
@@ -219,4 +226,26 @@ func logHttpError(err error) error {
 		return fmt.Errorf("response: %s\n %s", httpErr.Error(), httpErr.Body)
 	}
 	return err
+}
+
+// Make map values to be not a string, if possible
+func unStringMap(src map[string]interface{}) map[string]interface{} {
+	out := make(map[string]interface{}, len(src))
+	for key, v := range src {
+		val := v.(string)
+		if intVal, err := strconv.Atoi(val); err == nil {
+			out[key] = intVal
+			continue
+		}
+		if boolVal, err := strconv.ParseBool(val); err == nil {
+			out[key] = boolVal
+			continue
+		}
+		if floatVal, err := strconv.ParseFloat(val, 64); err == nil {
+			out[key] = floatVal
+			continue
+		}
+		out[key] = val
+	}
+	return out
 }
