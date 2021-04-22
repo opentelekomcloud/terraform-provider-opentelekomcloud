@@ -7,33 +7,35 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/terraform"
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/cce/v3/addons"
-
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/acceptance/common"
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/acceptance/env"
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common/cfg"
 )
 
-func TestAccCCEAddonV3_basic(t *testing.T) {
+func TestAccCCEAddonV3Basic(t *testing.T) {
 	resource.Test(t, resource.TestCase{
 		PreCheck:     func() { common.TestAccPreCheck(t) },
 		Providers:    common.TestAccProviders,
 		CheckDestroy: testAccCheckCCEAddonV3Destroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccCCEAddonV3_basic,
+				Config: testAccCCEAddonV3Basic,
+				Check: resource.ComposeTestCheckFunc(
+					checkScaleDownForAutoscaler("opentelekomcloud_cce_addon_v3.autoscaler", true),
+				),
 			},
 		},
 	})
 }
 
-func TestAccCCEAddonV3_emptyBasic(t *testing.T) {
+func TestAccCCEAddonV3EmptyBasic(t *testing.T) {
 	resource.Test(t, resource.TestCase{
 		PreCheck:     func() { common.TestAccPreCheck(t) },
 		Providers:    common.TestAccProviders,
 		CheckDestroy: testAccCheckCCEAddonV3Destroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccCCEAddonV3_emptyBasic,
+				Config: testAccCCEAddonV3EmptyBasic,
 			},
 		},
 	})
@@ -61,7 +63,7 @@ func testAccCheckCCEAddonV3Destroy(s *terraform.State) error {
 }
 
 var (
-	testAccCCEAddonV3_basic = fmt.Sprintf(`
+	testAccCCEAddonV3Basic = fmt.Sprintf(`
 resource opentelekomcloud_cce_cluster_v3 cluster_1 {
   name                    = "%s"
   cluster_type            = "VirtualMachine"
@@ -72,23 +74,42 @@ resource opentelekomcloud_cce_cluster_v3 cluster_1 {
   kubernetes_svc_ip_range = "10.247.0.0/16"
 }
 
-resource opentelekomcloud_cce_addon_v3 addon {
-  template_name    = "metrics-server"
-  template_version = "1.0.3"
+resource "opentelekomcloud_cce_addon_v3" "autoscaler" {
+  template_name    = "autoscaler"
+  template_version = "1.17.2"
   cluster_id       = opentelekomcloud_cce_cluster_v3.cluster_1.id
 
   values {
-    basic = {
-      euleros_version = "2.5"
-      rbac_enabled    = true
-      swr_addr        = "100.125.7.25:20202"
-      swr_user        = "hwofficial"
+    basic  = {
+      "cceEndpoint": "https://cce.eu-de.otc.t-systems.com",
+      "ecsEndpoint": "https://ecs.eu-de.otc.t-systems.com",
+      "euleros_version": "2.2.5",
+      "region": "eu-de",
+      "swr_addr": "100.125.7.25:20202",
+      "swr_user": "hwofficial"
+    }
+    custom = {
+      "coresTotal": 32000,
+      "maxEmptyBulkDeleteFlag": 10,
+      "maxNodesTotal": 1000,
+      "memoryTotal": 128000,
+      "scaleDownDelayAfterAdd": 11,
+      "scaleDownDelayAfterDelete": 11,
+      "scaleDownDelayAfterFailure": 3,
+      "scaleDownEnabled": true,
+      "scaleDownUnneededTime": 10,
+      "scaleDownUtilizationThreshold": 0.25,
+      "scaleUpCpuUtilizationThreshold": 0.8,
+      "scaleUpMemUtilizationThreshold": 0.8,
+      "scaleUpUnscheduledPodEnabled": true,
+      "scaleUpUtilizationEnabled": true,
+      "unremovableNodeRecheckTimeout": 5
     }
   }
 }
 `, clusterName, env.OS_VPC_ID, env.OS_NETWORK_ID)
 
-	testAccCCEAddonV3_emptyBasic = fmt.Sprintf(`
+	testAccCCEAddonV3EmptyBasic = fmt.Sprintf(`
 resource opentelekomcloud_cce_cluster_v3 cluster {
   name                    = "%s"
   cluster_type            = "VirtualMachine"
@@ -109,3 +130,37 @@ resource "opentelekomcloud_cce_addon_v3" "cluster_autoscaler" {
 }
 `, clusterName, env.OS_VPC_ID, env.OS_NETWORK_ID)
 )
+
+func checkScaleDownForAutoscaler(name string, enabled bool) resource.TestCheckFunc {
+	return func(s *terraform.State) error {
+		rs, ok := s.RootModule().Resources[name]
+		if !ok {
+			return fmt.Errorf("not found: %s", name)
+		}
+
+		if rs.Primary.ID == "" {
+			return fmt.Errorf("no ID is set")
+		}
+
+		config := common.TestAccProvider.Meta().(*cfg.Config)
+		client, err := config.CceV3AddonClient(env.OS_REGION_NAME)
+		if err != nil {
+			return fmt.Errorf("error creating opentelekomcloud CCE client: %s", err)
+		}
+
+		found, err := addons.Get(client, rs.Primary.ID, rs.Primary.Attributes["cluster_id"]).Extract()
+		if err != nil {
+			return err
+		}
+
+		if found.Metadata.Id != rs.Primary.ID {
+			return fmt.Errorf("cluster not found")
+		}
+
+		if actual := found.Spec.Values.Advanced["scaleDownEnabled"]; actual != enabled {
+			return fmt.Errorf("invalid `scaleDownEnabled` value: expected %v, got %v", enabled, actual)
+		}
+
+		return nil
+	}
+}
