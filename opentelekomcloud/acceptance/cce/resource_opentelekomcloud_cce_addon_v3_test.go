@@ -13,6 +13,7 @@ import (
 )
 
 func TestAccCCEAddonV3Basic(t *testing.T) {
+	resName := "opentelekomcloud_cce_addon_v3.autoscaler"
 	resource.Test(t, resource.TestCase{
 		PreCheck:     func() { common.TestAccPreCheck(t) },
 		Providers:    common.TestAccProviders,
@@ -21,7 +22,15 @@ func TestAccCCEAddonV3Basic(t *testing.T) {
 			{
 				Config: testAccCCEAddonV3Basic,
 				Check: resource.ComposeTestCheckFunc(
-					checkScaleDownForAutoscaler("opentelekomcloud_cce_addon_v3.autoscaler", true),
+					checkScaleDownForAutoscaler(resName, true),
+					resource.TestCheckResourceAttr(resName, "values.0.custom.scaleDownDelayAfterDelete", "11"),
+				),
+			},
+			{
+				Config: testAccCCEAddonV3Updated,
+				Check: resource.ComposeTestCheckFunc(
+					checkScaleDownForAutoscaler(resName, false),
+					resource.TestCheckResourceAttr(resName, "values.0.custom.scaleDownDelayAfterDelete", "8"),
 				),
 			},
 		},
@@ -97,6 +106,51 @@ resource "opentelekomcloud_cce_addon_v3" "autoscaler" {
       "scaleDownDelayAfterDelete": 11,
       "scaleDownDelayAfterFailure": 3,
       "scaleDownEnabled": true,
+      "scaleDownUnneededTime": 10,
+      "scaleDownUtilizationThreshold": 0.25,
+      "scaleUpCpuUtilizationThreshold": 0.8,
+      "scaleUpMemUtilizationThreshold": 0.8,
+      "scaleUpUnscheduledPodEnabled": true,
+      "scaleUpUtilizationEnabled": true,
+      "unremovableNodeRecheckTimeout": 5
+    }
+  }
+}
+`, clusterName, env.OS_VPC_ID, env.OS_NETWORK_ID)
+	testAccCCEAddonV3Updated = fmt.Sprintf(`
+resource opentelekomcloud_cce_cluster_v3 cluster_1 {
+  name                    = "%s"
+  cluster_type            = "VirtualMachine"
+  flavor_id               = "cce.s1.small"
+  vpc_id                  = "%s"
+  subnet_id               = "%s"
+  container_network_type  = "overlay_l2"
+  kubernetes_svc_ip_range = "10.247.0.0/16"
+}
+
+resource "opentelekomcloud_cce_addon_v3" "autoscaler" {
+  template_name    = "autoscaler"
+  template_version = "1.17.2"
+  cluster_id       = opentelekomcloud_cce_cluster_v3.cluster_1.id
+
+  values {
+    basic  = {
+      "cceEndpoint": "https://cce.eu-de.otc.t-systems.com",
+      "ecsEndpoint": "https://ecs.eu-de.otc.t-systems.com",
+      "euleros_version": "2.2.5",
+      "region": "eu-de",
+      "swr_addr": "100.125.7.25:20202",
+      "swr_user": "hwofficial"
+    }
+    custom = {
+      "coresTotal": 32000,
+      "maxEmptyBulkDeleteFlag": 10,
+      "maxNodesTotal": 100,
+      "memoryTotal": 128000,
+      "scaleDownDelayAfterAdd": 9,
+      "scaleDownDelayAfterDelete": 8,
+      "scaleDownDelayAfterFailure": 4,
+      "scaleDownEnabled": false,
       "scaleDownUnneededTime": 10,
       "scaleDownUtilizationThreshold": 0.25,
       "scaleUpCpuUtilizationThreshold": 0.8,
