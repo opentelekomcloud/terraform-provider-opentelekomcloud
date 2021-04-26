@@ -5,10 +5,10 @@ import (
 	"log"
 
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/helper/validation"
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/bms/v2/flavors"
 
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common/cfg"
-	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/services/ims"
 )
 
 func DataSourceBMSFlavorV2() *schema.Resource {
@@ -75,10 +75,12 @@ func DataSourceBMSFlavorV2() *schema.Resource {
 			},
 
 			"sort_dir": {
-				Type:         schema.TypeString,
-				Optional:     true,
-				Default:      "asc",
-				ValidateFunc: ims.DataSourceImagesImageV2SortDirection,
+				Type:     schema.TypeString,
+				Optional: true,
+				Default:  "asc",
+				ValidateFunc: validation.StringInSlice([]string{
+					"asc", "desc",
+				}, false),
 			},
 		},
 	}

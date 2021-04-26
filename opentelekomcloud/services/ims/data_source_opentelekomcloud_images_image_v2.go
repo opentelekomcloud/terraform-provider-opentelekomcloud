@@ -3,11 +3,13 @@ package ims
 import (
 	"fmt"
 	"log"
+	"regexp"
 	"sort"
 
-	"github.com/opentelekomcloud/gophertelekomcloud/openstack/imageservice/v2/images"
-
+	"github.com/hashicorp/go-multierror"
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/helper/validation"
+	"github.com/opentelekomcloud/gophertelekomcloud/openstack/imageservice/v2/images"
 
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common/cfg"
 )
@@ -23,125 +25,121 @@ func DataSourceImagesImageV2() *schema.Resource {
 				Computed: true,
 				ForceNew: true,
 			},
-
 			"name": {
 				Type:     schema.TypeString,
 				Optional: true,
 				ForceNew: true,
 			},
-
+			"name_regex": {
+				Type:         schema.TypeString,
+				Optional:     true,
+				ValidateFunc: validation.StringIsValidRegExp,
+			},
 			"visibility": {
 				Type:     schema.TypeString,
 				Optional: true,
 				ForceNew: true,
 			},
-
 			"owner": {
 				Type:     schema.TypeString,
 				Optional: true,
 				ForceNew: true,
 			},
-
 			"size_min": {
 				Type:     schema.TypeInt,
 				Optional: true,
 				ForceNew: true,
 			},
-
 			"size_max": {
 				Type:     schema.TypeInt,
 				Optional: true,
 				ForceNew: true,
 			},
-
 			"sort_key": {
 				Type:     schema.TypeString,
 				Optional: true,
 				ForceNew: true,
 				Default:  "name",
 			},
-
 			"sort_direction": {
-				Type:         schema.TypeString,
-				Optional:     true,
-				ForceNew:     true,
-				Default:      "asc",
-				ValidateFunc: DataSourceImagesImageV2SortDirection,
+				Type:     schema.TypeString,
+				Optional: true,
+				ForceNew: true,
+				Default:  "asc",
+				ValidateFunc: validation.StringInSlice([]string{
+					"asc", "desc",
+				}, false),
 			},
-
 			"tag": {
 				Type:     schema.TypeString,
 				Optional: true,
 				ForceNew: true,
 			},
-
 			"most_recent": {
 				Type:     schema.TypeBool,
 				Optional: true,
 				Default:  false,
 				ForceNew: true,
 			},
-
 			"properties": {
 				Type:     schema.TypeMap,
 				Optional: true,
 				ForceNew: true,
 			},
-
 			// Computed values
 			"container_format": {
 				Type:     schema.TypeString,
 				Computed: true,
 			},
-
 			"disk_format": {
 				Type:     schema.TypeString,
 				Computed: true,
 			},
-
 			"min_disk_gb": {
 				Type:     schema.TypeInt,
 				Computed: true,
 			},
-
 			"min_ram_mb": {
 				Type:     schema.TypeInt,
 				Computed: true,
 			},
-
 			"protected": {
 				Type:     schema.TypeBool,
 				Computed: true,
 			},
-
 			"checksum": {
 				Type:     schema.TypeString,
 				Computed: true,
 			},
-
 			"size_bytes": {
 				Type:     schema.TypeInt,
 				Computed: true,
 			},
-
 			"metadata": {
 				Type:     schema.TypeMap,
 				Computed: true,
 			},
-
+			"created_at": {
+				Type:     schema.TypeString,
+				Computed: true,
+			},
 			"updated_at": {
 				Type:     schema.TypeString,
 				Computed: true,
 			},
-
 			"file": {
 				Type:     schema.TypeString,
 				Computed: true,
 			},
-
 			"schema": {
 				Type:     schema.TypeString,
 				Computed: true,
+			},
+			"tags": {
+				Type:     schema.TypeSet,
+				Computed: true,
+				Elem:     &schema.Schema{Type: schema.TypeString},
+				Set:      schema.HashString,
 			},
 		},
 	}
@@ -150,9 +148,9 @@ func DataSourceImagesImageV2() *schema.Resource {
 // dataSourceImagesImageV2Read performs the image lookup.
 func dataSourceImagesImageV2Read(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*cfg.Config)
-	imageClient, err := config.ImageV2Client(config.GetRegion(d))
+	client, err := config.ImageV2Client(config.GetRegion(d))
 	if err != nil {
-		return fmt.Errorf("Error creating OpenTelekomCloud image client: %s", err)
+		return fmt.Errorf("error creating OpenTelekomCloud IMSv2 client: %w", err)
 	}
 
 	visibility := resourceImagesImageV2VisibilityFromString(d.Get("visibility").(string))
@@ -172,21 +170,31 @@ func dataSourceImagesImageV2Read(d *schema.ResourceData, meta interface{}) error
 	log.Printf("[DEBUG] List Options: %#v", listOpts)
 
 	var image images.Image
-	allPages, err := images.List(imageClient, listOpts).AllPages()
+	allPages, err := images.List(client, listOpts).AllPages()
 	if err != nil {
-		return fmt.Errorf("Unable to query images: %s", err)
+		return fmt.Errorf("unable to query images: %s", err)
 	}
 
 	allImages, err := images.ExtractImages(allPages)
 	if err != nil {
-		return fmt.Errorf("Unable to retrieve images: %s", err)
+		return fmt.Errorf("unable to retrieve images: %s", err)
+	}
+
+	var filteredImages []images.Image
+	if nameRegex, ok := d.GetOk("name_regex"); ok {
+		r := regexp.MustCompile(nameRegex.(string))
+		for _, image := range allImages {
+			if r.MatchString(image.Name) {
+				filteredImages = append(filteredImages, image)
+			}
+		}
+		allImages = filteredImages
 	}
 
 	properties := d.Get("properties").(map[string]interface{})
 	imageProperties := resourceImagesImageV2ExpandProperties(properties)
-	if len(allImages) > 1 && len(imageProperties) > 0 {
-		var filteredImages []images.Image
-		for _, image := range allImages {
+	if len(filteredImages) > 1 && len(imageProperties) > 0 {
+		for _, image := range filteredImages {
 			if len(image.Properties) > 0 {
 				match := true
 				for searchKey, searchValue := range imageProperties {
@@ -211,8 +219,8 @@ func dataSourceImagesImageV2Read(d *schema.ResourceData, meta interface{}) error
 	}
 
 	if len(allImages) < 1 {
-		return fmt.Errorf("Your query returned no results. " +
-			"Please change your search criteria and try again.")
+		return fmt.Errorf("your query returned no results. " +
+			"Please change your search criteria and try again")
 	}
 
 	if len(allImages) > 1 {
@@ -221,48 +229,52 @@ func dataSourceImagesImageV2Read(d *schema.ResourceData, meta interface{}) error
 		if recent {
 			image = mostRecentImage(allImages)
 		} else {
-			return fmt.Errorf("Your query returned more than one result. Please try a more " +
-				"specific search criteria, or set `most_recent` attribute to true.")
+			return fmt.Errorf("your query returned more than one result. Please try a more " +
+				"specific search criteria, or set `most_recent` attribute to true")
 		}
 	} else {
 		image = allImages[0]
 	}
 
 	log.Printf("[DEBUG] Single Image found: %s", image.ID)
-	return dataSourceImagesImageV2Attributes(d, &image)
-}
-
-// dataSourceImagesImageV2Attributes populates the fields of an Image resource.
-func dataSourceImagesImageV2Attributes(d *schema.ResourceData, image *images.Image) error {
-	log.Printf("[DEBUG] opentelekomcloud_images_image details: %#v", image)
-
 	d.SetId(image.ID)
-	d.Set("name", image.Name)
-	d.Set("tags", image.Tags)
-	d.Set("container_format", image.ContainerFormat)
-	d.Set("disk_format", image.DiskFormat)
-	d.Set("min_disk_gb", image.MinDiskGigabytes)
-	d.Set("min_ram_mb", image.MinRAMMegabytes)
-	d.Set("owner", image.Owner)
-	d.Set("protected", image.Protected)
-	d.Set("visibility", image.Visibility)
-	d.Set("checksum", image.Checksum)
-	d.Set("size_bytes", image.SizeBytes)
-	if err := d.Set("metadata", image.Metadata); err != nil {
-		return fmt.Errorf("[DEBUG] Error saving metadata to state for OpenTelekomCloud image (%s): %s", d.Id(), err)
+
+	mErr := multierror.Append(nil,
+		d.Set("name", image.Name),
+		d.Set("tags", image.Tags),
+		d.Set("container_format", image.ContainerFormat),
+		d.Set("disk_format", image.DiskFormat),
+		d.Set("min_disk_gb", image.MinDiskGigabytes),
+		d.Set("min_ram_mb", image.MinRAMMegabytes),
+		d.Set("owner", image.Owner),
+		d.Set("protected", image.Protected),
+		d.Set("visibility", image.Visibility),
+		d.Set("checksum", image.Checksum),
+		d.Set("size_bytes", image.SizeBytes),
+		d.Set("created_at", image.CreatedAt.String()),
+		d.Set("updated_at", image.UpdatedAt.String()),
+		d.Set("file", image.File),
+		d.Set("schema", image.Schema),
+		d.Set("metadata", image.Metadata),
+	)
+
+	if mErr.ErrorOrNil() != nil {
+		return mErr
 	}
-	d.Set("created_at", image.CreatedAt)
-	d.Set("updated_at", image.UpdatedAt)
-	d.Set("file", image.File)
-	d.Set("schema", image.Schema)
 
 	return nil
 }
 
 type imageSort []images.Image
 
-func (a imageSort) Len() int      { return len(a) }
-func (a imageSort) Swap(i, j int) { a[i], a[j] = a[j], a[i] }
+func (a imageSort) Len() int {
+	return len(a)
+}
+
+func (a imageSort) Swap(i, j int) {
+	a[i], a[j] = a[j], a[i]
+}
+
 func (a imageSort) Less(i, j int) bool {
 	itime := a[i].CreatedAt
 	jtime := a[j].CreatedAt
@@ -274,13 +286,4 @@ func mostRecentImage(images []images.Image) images.Image {
 	sortedImages := images
 	sort.Sort(imageSort(sortedImages))
 	return sortedImages[len(sortedImages)-1]
-}
-
-func DataSourceImagesImageV2SortDirection(v interface{}, k string) (ws []string, errors []error) {
-	value := v.(string)
-	if value != "asc" && value != "desc" {
-		err := fmt.Errorf("%s must be either asc or desc", k)
-		errors = append(errors, err)
-	}
-	return
 }
