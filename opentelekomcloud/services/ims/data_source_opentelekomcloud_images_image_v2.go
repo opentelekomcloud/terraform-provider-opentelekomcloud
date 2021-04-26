@@ -145,7 +145,6 @@ func DataSourceImagesImageV2() *schema.Resource {
 	}
 }
 
-// dataSourceImagesImageV2Read performs the image lookup.
 func dataSourceImagesImageV2Read(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*cfg.Config)
 	client, err := config.ImageV2Client(config.GetRegion(d))
