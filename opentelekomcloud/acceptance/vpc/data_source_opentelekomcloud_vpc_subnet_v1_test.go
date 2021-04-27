@@ -10,34 +10,36 @@ import (
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/acceptance/common"
 )
 
-func TestAccOTCVpcSubnetV1DataSource_basic(t *testing.T) {
+func TestAccVpcSubnetV1DataSource_basic(t *testing.T) {
+	dataSourceNameByID := "data.opentelekomcloud_vpc_subnet_v1.by_id"
+	dataSourceNameByCIDR := "data.opentelekomcloud_vpc_subnet_v1.by_cidr"
+	dataSourceNameByName := "data.opentelekomcloud_vpc_subnet_v1.by_name"
+	dataSourceNameByVPC := "data.opentelekomcloud_vpc_subnet_v1.by_vpc_id"
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:  func() { common.TestAccPreCheck(t) },
 		Providers: common.TestAccProviders,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccDataSourceOTCVpcSubnetV1Config,
+				Config: testAccDataSourceVpcSubnetV1Config,
 				Check: resource.ComposeTestCheckFunc(
-					testAccDataSourceOTCVpcSubnetV1Check("data.opentelekomcloud_vpc_subnet_v1.by_id", "opentelekomcloud_subnet", "192.168.0.0/16",
-						"192.168.0.1", "eu-de-02"),
-					testAccDataSourceOTCVpcSubnetV1Check("data.opentelekomcloud_vpc_subnet_v1.by_cidr", "opentelekomcloud_subnet", "192.168.0.0/16",
-						"192.168.0.1", "eu-de-02"),
-					testAccDataSourceOTCVpcSubnetV1Check("data.opentelekomcloud_vpc_subnet_v1.by_name", "opentelekomcloud_subnet", "192.168.0.0/16",
-						"192.168.0.1", "eu-de-02"),
-					testAccDataSourceOTCVpcSubnetV1Check("data.opentelekomcloud_vpc_subnet_v1.by_vpc_id", "opentelekomcloud_subnet", "192.168.0.0/16",
-						"192.168.0.1", "eu-de-02"),
-					resource.TestCheckResourceAttr(
-						"data.opentelekomcloud_vpc_subnet_v1.by_id", "status", "ACTIVE"),
-					resource.TestCheckResourceAttr(
-						"data.opentelekomcloud_vpc_subnet_v1.by_id", "dhcp_enable", "true"),
+					testAccDataSourceVpcSubnetV1Check(dataSourceNameByID, "test_subnet", "10.0.0.0/24",
+						"10.0.0.1", "eu-de-02"),
+					testAccDataSourceVpcSubnetV1Check(dataSourceNameByCIDR, "test_subnet", "10.0.0.0/24",
+						"10.0.0.1", "eu-de-02"),
+					testAccDataSourceVpcSubnetV1Check(dataSourceNameByName, "test_subnet", "10.0.0.0/24",
+						"10.0.0.1", "eu-de-02"),
+					testAccDataSourceVpcSubnetV1Check(dataSourceNameByVPC, "test_subnet", "10.0.0.0/24",
+						"10.0.0.1", "eu-de-02"),
+					resource.TestCheckResourceAttr(dataSourceNameByID, "status", "ACTIVE"),
+					resource.TestCheckResourceAttr(dataSourceNameByID, "dhcp_enable", "true"),
 				),
 			},
 		},
 	})
 }
 
-func testAccDataSourceOTCVpcSubnetV1Check(n, name, cidr, gateway_ip, availability_zone string) resource.TestCheckFunc {
+func testAccDataSourceVpcSubnetV1Check(n, name, cidr, gatewayIP, availabilityZone string) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
 		rs, ok := s.RootModule().Resources[n]
 		if !ok {
@@ -52,11 +54,7 @@ func testAccDataSourceOTCVpcSubnetV1Check(n, name, cidr, gateway_ip, availabilit
 		attr := rs.Primary.Attributes
 
 		if attr["id"] != subnetRs.Primary.Attributes["id"] {
-			return fmt.Errorf(
-				"id is %s; want %s",
-				attr["id"],
-				subnetRs.Primary.Attributes["id"],
-			)
+			return fmt.Errorf("bad id %s", attr["id"])
 		}
 
 		if attr["cidr"] != cidr {
@@ -65,10 +63,10 @@ func testAccDataSourceOTCVpcSubnetV1Check(n, name, cidr, gateway_ip, availabilit
 		if attr["name"] != name {
 			return fmt.Errorf("bad subnet name %s", attr["name"])
 		}
-		if attr["gateway_ip"] != gateway_ip {
+		if attr["gateway_ip"] != gatewayIP {
 			return fmt.Errorf("bad subnet gateway_ip %s", attr["gateway_ip"])
 		}
-		if attr["availability_zone"] != availability_zone {
+		if attr["availability_zone"] != availabilityZone {
 			return fmt.Errorf("bad subnet availability_zone %s", attr["availability_zone"])
 		}
 
@@ -76,19 +74,19 @@ func testAccDataSourceOTCVpcSubnetV1Check(n, name, cidr, gateway_ip, availabilit
 	}
 }
 
-const testAccDataSourceOTCVpcSubnetV1Config = `
+const testAccDataSourceVpcSubnetV1Config = `
 resource "opentelekomcloud_vpc_v1" "vpc_1" {
-	name = "test_vpc"
-	cidr= "192.168.0.0/16"
+  name = "test_vpc"
+  cidr= "10.0.0.0/24"
 }
 
 resource "opentelekomcloud_vpc_subnet_v1" "subnet_1" {
-  name = "opentelekomcloud_subnet"
-  cidr = "192.168.0.0/16"
-  gateway_ip = "192.168.0.1"
-  vpc_id = opentelekomcloud_vpc_v1.vpc_1.id
+  name              = "test_subnet"
+  cidr              = "10.0.0.0/24"
+  gateway_ip        = "10.0.0.1"
+  vpc_id            = opentelekomcloud_vpc_v1.vpc_1.id
   availability_zone = "eu-de-02"
- }
+}
 
 data "opentelekomcloud_vpc_subnet_v1" "by_id" {
   id = opentelekomcloud_vpc_subnet_v1.subnet_1.id
@@ -99,10 +97,10 @@ data "opentelekomcloud_vpc_subnet_v1" "by_cidr" {
 }
 
 data "opentelekomcloud_vpc_subnet_v1" "by_name" {
-	name = opentelekomcloud_vpc_subnet_v1.subnet_1.name
+  name = opentelekomcloud_vpc_subnet_v1.subnet_1.name
 }
 
 data "opentelekomcloud_vpc_subnet_v1" "by_vpc_id" {
-	vpc_id = opentelekomcloud_vpc_subnet_v1.subnet_1.vpc_id
+  vpc_id = opentelekomcloud_vpc_subnet_v1.subnet_1.vpc_id
 }
 `
