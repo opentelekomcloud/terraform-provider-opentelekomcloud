@@ -162,7 +162,7 @@ func resourceVpcSubnetV1Create(d *schema.ResourceData, meta interface{}) error {
 	}
 
 	stateConf := &resource.StateChangeConf{
-		Pending:    []string{"UNKNOWN"},
+		Pending:    []string{"CREATING"},
 		Target:     []string{"ACTIVE"},
 		Refresh:    waitForVpcSubnetActive(client, subnet.ID),
 		Timeout:    d.Timeout(schema.TimeoutCreate),
