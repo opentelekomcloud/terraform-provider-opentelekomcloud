@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"sort"
 
+	"github.com/hashicorp/go-multierror"
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/networking/v1/subnets"
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/networking/v2/extensions/networkipavailabilities"
 
@@ -85,12 +86,13 @@ func dataSourceVpcSubnetIdsV1Read(d *schema.ResourceData, meta interface{}) erro
 	}
 
 	d.SetId(vpcID)
-	if err := d.Set("ids", subnetIDs); err != nil {
-		return err
-	}
+	mErr := multierror.Append(
+		d.Set("ids", subnetIDs),
+		d.Set("region", config.GetRegion(d)),
+	)
 
-	if err := d.Set("region", config.GetRegion(d)); err != nil {
-		return err
+	if mErr.ErrorOrNil() != nil {
+		return mErr
 	}
 
 	return nil

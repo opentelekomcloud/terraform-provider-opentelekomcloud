@@ -11,7 +11,6 @@ import (
 	"github.com/opentelekomcloud/gophertelekomcloud"
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/common/tags"
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/networking/v1/subnets"
-
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common"
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common/cfg"
 )
@@ -41,6 +40,7 @@ func ResourceVpcSubnetV1() *schema.Resource {
 			"name": {
 				Type:         schema.TypeString,
 				Required:     true,
+				ForceNew:     false,
 				ValidateFunc: common.ValidateName,
 			},
 			"cidr": {
@@ -68,6 +68,7 @@ func ResourceVpcSubnetV1() *schema.Resource {
 				Type:     schema.TypeBool,
 				Optional: true,
 				Default:  true,
+				ForceNew: false,
 			},
 			"primary_dns": {
 				Type:         schema.TypeString,
@@ -109,15 +110,6 @@ func ResourceVpcSubnetV1() *schema.Resource {
 	}
 }
 
-func resourceSubnetDNSListV1(d *schema.ResourceData) []string {
-	rawDNS := d.Get("dns_list").([]interface{})
-	dns := make([]string, len(rawDNS))
-	for i, raw := range rawDNS {
-		dns[i] = raw.(string)
-	}
-	return dns
-}
-
 func resourceVpcSubnetV1Create(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*cfg.Config)
 	client, err := config.NetworkingV1Client(config.GetRegion(d))
@@ -127,7 +119,7 @@ func resourceVpcSubnetV1Create(d *schema.ResourceData, meta interface{}) error {
 
 	primaryDNS := d.Get("primary_dns").(string)
 	secondaryDNS := d.Get("secondary_dns").(string)
-	dnsList := resourceSubnetDNSListV1(d)
+	dnsList := common.ExpandStringList(d.Get("dns_list").([]interface{}))
 	if primaryDNS == "" && secondaryDNS == "" && len(dnsList) == 0 {
 		primaryDNS = defaultDNS[0]
 		secondaryDNS = defaultDNS[1]
@@ -276,7 +268,7 @@ func resourceVpcSubnetV1Update(d *schema.ResourceData, meta interface{}) error {
 		updateOpts.SecondaryDNS = d.Get("secondary_dns").(string)
 	}
 	if d.HasChange("dns_list") {
-		updateOpts.DNSList = resourceSubnetDNSListV1(d)
+		updateOpts.DNSList = common.ExpandStringList(d.Get("dns_list").([]interface{}))
 	}
 	if d.HasChange("dhcp_enable") {
 		enableDHCP := d.Get("dhcp_enable").(bool)

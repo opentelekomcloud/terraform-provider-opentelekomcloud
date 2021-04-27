@@ -88,13 +88,13 @@ The following arguments are supported:
 
 All the argument attributes are also exported as result attributes:
 
-* `id` - Specifies a resource ID in UUID format. Same as OpenStack Neutron Network ID (`OS_NETWORK_ID`).
+* `id` - Specifies a resource ID in UUID format. Same as OpenStack network ID (`OS_NETWORK_ID`).
 
 * `status` - Specifies the status of the subnet. The value can be `ACTIVE`, `DOWN`, `UNKNOWN`, or `ERROR`.
 
-* `subnet_id` - Specifies the OpenStack Neutron Subnet ID.
+* `subnet_id` - Specifies the OpenStack subnet ID.
 
-* `network_id` - Specifies the OpenStack Neutron Network ID.
+* `network_id` - Specifies the OpenStack network ID.
 
 ## Import
 

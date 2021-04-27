@@ -57,6 +57,6 @@ the selected subnet.
 
 * `dhcp_enable` - DHCP function for the subnet.
 
-* `subnet_id` - Specifies the OpenStack Neutron Subnet ID.
+* `subnet_id` - Specifies the OpenStack subnet ID.
 
-* `network_id` - Specifies the OpenStack Neutron Network ID.
+* `network_id` - Specifies the OpenStack network ID.
