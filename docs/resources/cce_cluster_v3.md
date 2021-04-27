@@ -7,11 +7,13 @@ subcategory: "Cloud Container Engine (CCE)"
 Provides a cluster resource management.
 
 ~>
-  Before starting working with CCE, you need to authorize it via _console_.
+  Before starting working with CCE, you need to authorize it via _console_ or [creating agency](#creating-agency).
   Otherwise, you will face the following error during cluster creation:
   `Bad request with: [POST https://cce.eu-de.otc.t-systems.com/api/v3/projects/.../clusters], error message: {"error_code":"CCE_CM.0201","error_msg":"Request body invalid","message":"Need authorize CCE to operate user resources","errorCode":"E.CFE.4000201","reason":"Request body invalid"}`
 
 ## Example Usage
+
+### Simple cluster
 
 ```hcl
 variable "flavor_id" { }
@@ -28,6 +30,42 @@ resource "opentelekomcloud_cce_cluster_v3" "cluster_1" {
   subnet_id              = var.subnet_id
   container_network_type = "overlay_l2"
   authentication_mode    = "rbac"
+}
+```
+
+### Creating agency
+
+You can create agency for CCE authorization using `opentelekomcloud_identity_agency_v3` resource.
+For agency creation your user need to have corresponding permissions, which are not required for authorizing CCE via console
+
+```hcl
+resource "opentelekomcloud_identity_agency_v3" "enable_cce_auto_creation" {
+  name                  = "cce_admin_trust"
+  description           = "Created by Terraform to auto create cce"
+  delegated_domain_name = "op_svc_cce"
+  dynamic "project_role" {
+    for_each = var.projects
+    content {
+      project = project_role.value
+      roles   = [
+        "Tenant Administrator"
+      ]
+    }
+  }
+}
+
+resource "opentelekomcloud_cce_cluster_v3" "cluster_1" {
+  name        = "cluster"
+  description = "Create cluster"
+
+  cluster_type           = "VirtualMachine"
+  flavor_id              = var.flavor_id
+  vpc_id                 = var.vpc_id
+  subnet_id              = var.subnet_id
+  container_network_type = "overlay_l2"
+  authentication_mode    = "rbac"
+
+  depends_on = [opentelekomcloud_identity_agency_v3.enable_cce_auto_creation]
 }
 ```
 
