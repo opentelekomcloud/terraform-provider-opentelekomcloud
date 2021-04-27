@@ -76,7 +76,6 @@ The following arguments are supported:
 ~>
   Please note that primary DNS should be set to OTC-internal for managed services (e.g. CCE, CSS) to work.
 
-* `availability_zone` - (Optional) Identifies the availability zone (AZ) to which the subnet belongs. The value must be an existing AZ in the system. Changing this creates a new Subnet.
 * `availability_zone` - (Optional) Identifies the availability zone (AZ) to which the subnet belongs.
   The value must be an existing AZ in the system. Changing this creates a new Subnet.
 
@@ -92,9 +91,6 @@ All the argument attributes are also exported as result attributes:
 * `id` - Specifies a resource ID in UUID format. Same as OpenStack Neutron Network ID (`OS_NETWORK_ID`).
 
 * `status` - Specifies the status of the subnet. The value can be `ACTIVE`, `DOWN`, `UNKNOWN`, or `ERROR`.
-* `id` - Specifies a resource ID in UUID format. Same as OpenStack network ID (`OS_NETWORK_ID`).
-
-* `status` - Specifies the status of the subnet. The value can be ACTIVE, DOWN, UNKNOWN, or ERROR.
 
 * `subnet_id` - Specifies the OpenStack Neutron Subnet ID.
 
