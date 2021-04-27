@@ -493,7 +493,7 @@ func getSubnetSubnetID(d *schema.ResourceData, config *cfg.Config) (id string, e
 	if err != nil {
 		return
 	}
-	id = sn.SubnetId
+	id = sn.SubnetID
 	return
 }
 

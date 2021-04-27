@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"sort"
 
+	"github.com/hashicorp/go-multierror"
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/networking/v1/subnets"
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/networking/v2/extensions/networkipavailabilities"
 
@@ -39,34 +40,35 @@ func DataSourceVpcSubnetIdsV1() *schema.Resource {
 
 func dataSourceVpcSubnetIdsV1Read(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*cfg.Config)
-	subnetClient, err := config.NetworkingV1Client(config.GetRegion(d))
+	client, err := config.NetworkingV1Client(config.GetRegion(d))
 	if err != nil {
-		return err
+		return fmt.Errorf("error creating OpenTelekomCloud NetworkingV1 client: %w", err)
 	}
 
+	vpcID := d.Get("vpc_id").(string)
 	listOpts := subnets.ListOpts{
-		VPC_ID: d.Get("vpc_id").(string),
+		VpcID: vpcID,
 	}
 
-	refinedSubnets, err := subnets.List(subnetClient, listOpts)
+	refinedSubnets, err := subnets.List(client, listOpts)
 	if err != nil {
-		return fmt.Errorf("Unable to retrieve subnets: %s", err)
+		return fmt.Errorf("unable to retrieve subnets: %w", err)
 	}
 
 	if len(refinedSubnets) == 0 {
-		return fmt.Errorf("no matching subnet found for vpc with id %s", d.Get("vpc_id").(string))
+		return fmt.Errorf("no matching subnet found for vpc with id %s", vpcID)
 	}
 
 	networkingClient, err := config.NetworkingV2Client(config.GetRegion(d))
 	if err != nil {
-		return fmt.Errorf("Error creating OpenTelekomCloud networking client: %s", err)
+		return fmt.Errorf("error creating OpenTelekomCloud NetworkingV2 client: %w", err)
 	}
 
 	sortedSubnets := make([]SubnetIP, 0)
 	for _, subnet := range refinedSubnets {
 		net, err := networkipavailabilities.Get(networkingClient, subnet.ID).Extract()
 		if err != nil {
-			return fmt.Errorf("Error retrieving network ip availabilities: %s", err)
+			return fmt.Errorf("error retrieving NetworkIP availabilities: %w", err)
 		}
 		subnetIPAvail := net.SubnetIPAvailabilities[0]
 		newSubnet := SubnetIP{
@@ -78,15 +80,20 @@ func dataSourceVpcSubnetIdsV1Read(d *schema.ResourceData, meta interface{}) erro
 
 	// Returns the Subnet contains most available IPs out of a slice of subnets.
 	sort.Sort(sort.Reverse(subnetSort(sortedSubnets)))
-	Subnets := make([]string, 0)
+	subnetIDs := make([]string, 0)
 	for _, subnet := range sortedSubnets {
-		Subnets = append(Subnets, subnet.ID)
+		subnetIDs = append(subnetIDs, subnet.ID)
 	}
 
-	d.SetId(d.Get("vpc_id").(string))
-	d.Set("ids", Subnets)
+	d.SetId(vpcID)
+	mErr := multierror.Append(
+		d.Set("ids", subnetIDs),
+		d.Set("region", config.GetRegion(d)),
+	)
 
-	d.Set("region", config.GetRegion(d))
+	if mErr.ErrorOrNil() != nil {
+		return mErr
+	}
 
 	return nil
 }

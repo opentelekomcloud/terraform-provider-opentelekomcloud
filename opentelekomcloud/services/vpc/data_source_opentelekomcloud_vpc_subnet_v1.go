@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"log"
 
+	"github.com/hashicorp/go-multierror"
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/networking/v1/subnets"
 
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
@@ -73,15 +74,19 @@ func DataSourceVpcSubnetV1() *schema.Resource {
 				Type:     schema.TypeString,
 				Computed: true,
 			},
+			"network_id": {
+				Type:     schema.TypeString,
+				Computed: true,
+			},
 		},
 	}
 }
 
 func dataSourceVpcSubnetV1Read(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*cfg.Config)
-	subnetClient, err := config.NetworkingV1Client(config.GetRegion(d))
+	client, err := config.NetworkingV1Client(config.GetRegion(d))
 	if err != nil {
-		return err
+		return fmt.Errorf("error creating OpenTelekomCloud NetworkingV1 client: %w", err)
 	}
 
 	listOpts := subnets.ListOpts{
@@ -90,43 +95,48 @@ func dataSourceVpcSubnetV1Read(d *schema.ResourceData, meta interface{}) error {
 		CIDR:             d.Get("cidr").(string),
 		Status:           d.Get("status").(string),
 		GatewayIP:        d.Get("gateway_ip").(string),
-		PRIMARY_DNS:      d.Get("primary_dns").(string),
-		SECONDARY_DNS:    d.Get("secondary_dns").(string),
+		PrimaryDNS:       d.Get("primary_dns").(string),
+		SecondaryDNS:     d.Get("secondary_dns").(string),
 		AvailabilityZone: d.Get("availability_zone").(string),
-		VPC_ID:           d.Get("vpc_id").(string),
+		VpcID:            d.Get("vpc_id").(string),
 	}
 
-	refinedSubnets, err := subnets.List(subnetClient, listOpts)
+	refinedSubnets, err := subnets.List(client, listOpts)
 	if err != nil {
-		return fmt.Errorf("Unable to retrieve subnets: %s", err)
+		return fmt.Errorf("unable to retrieve subnets: %w", err)
 	}
 
 	if refinedSubnets == nil || len(refinedSubnets) == 0 {
-		return fmt.Errorf("No matching subnet found. " +
-			"Please change your search criteria and try again.")
+		return fmt.Errorf("no matching subnet found. Please change your search criteria and try again")
 	}
 
 	if len(refinedSubnets) > 1 {
 		return fmt.Errorf("multiple subnets matched; use additional constraints to reduce matches to a single subnet")
 	}
 
-	Subnets := refinedSubnets[0]
+	subnet := refinedSubnets[0]
 
-	log.Printf("[INFO] Retrieved Subnet using given filter %s: %+v", Subnets.ID, Subnets)
-	d.SetId(Subnets.ID)
+	log.Printf("[INFO] Retrieved Subnet using given filter %s: %+v", subnet.ID, subnet)
+	d.SetId(subnet.ID)
 
-	d.Set("name", Subnets.Name)
-	d.Set("cidr", Subnets.CIDR)
-	d.Set("dns_list", Subnets.DnsList)
-	d.Set("status", Subnets.Status)
-	d.Set("gateway_ip", Subnets.GatewayIP)
-	d.Set("dhcp_enable", Subnets.EnableDHCP)
-	d.Set("primary_dns", Subnets.PRIMARY_DNS)
-	d.Set("secondary_dns", Subnets.SECONDARY_DNS)
-	d.Set("availability_zone", Subnets.AvailabilityZone)
-	d.Set("vpc_id", Subnets.VPC_ID)
-	d.Set("subnet_id", Subnets.SubnetId)
-	d.Set("region", config.GetRegion(d))
+	mErr := multierror.Append(
+		d.Set("name", subnet.Name),
+		d.Set("cidr", subnet.CIDR),
+		d.Set("dns_list", subnet.DNSList),
+		d.Set("status", subnet.Status),
+		d.Set("gateway_ip", subnet.GatewayIP),
+		d.Set("dhcp_enable", subnet.EnableDHCP),
+		d.Set("primary_dns", subnet.PrimaryDNS),
+		d.Set("secondary_dns", subnet.SecondaryDNS),
+		d.Set("availability_zone", subnet.AvailabilityZone),
+		d.Set("vpc_id", subnet.VpcID),
+		d.Set("subnet_id", subnet.SubnetID),
+		d.Set("network_id", subnet.SubnetID),
+		d.Set("region", config.GetRegion(d)),
+	)
+	if mErr.ErrorOrNil() != nil {
+		return mErr
+	}
 
 	return nil
 }
