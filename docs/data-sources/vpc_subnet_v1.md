@@ -48,7 +48,7 @@ subnet whose data will be exported as attributes.
 
 ## Attributes Reference
 
-All of the argument attributes are also exported as result attributes.
+All the argument attributes are also exported as result attributes.
 This data source will complete the data by populating
 any fields that are not included in the configuration with the data for
 the selected subnet.
@@ -57,4 +57,6 @@ the selected subnet.
 
 * `dhcp_enable` - DHCP function for the subnet.
 
-* `subnet_id` - Specifies the subnet (Native OpenStack API) ID.
+* `subnet_id` - Specifies the OpenStack Neutron Subnet ID.
+
+* `network_id` - Specifies the OpenStack Neutron Network ID.

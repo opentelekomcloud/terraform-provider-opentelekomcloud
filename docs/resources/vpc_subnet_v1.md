@@ -48,28 +48,37 @@ resource "opentelekomcloud_vpc_subnet_v1" "subnet_with_tags" {
 
 The following arguments are supported:
 
-* `name` - (Required) The subnet name. The value is a string of 1 to 64 characters that can contain letters, digits, underscores (_), and hyphens (-).
+* `name` - (Required) The subnet name. The value is a string of 1 to 64 characters that can contain letters,
+  digits, underscores (_), and hyphens (-).
 
-* `cidr` - (Required) Specifies the network segment on which the subnet resides. The value must be in CIDR format. The value must be within the CIDR block of the VPC. The subnet mask cannot be greater than 28. Changing this creates a new Subnet.
+* `cidr` - (Required) Specifies the network segment on which the subnet resides. The value must be in CIDR format.
+  The value must be within the CIDR block of the VPC. The subnet mask cannot be greater than 28.
+  Changing this creates a new Subnet.
 
-* `gateway_ip` - (Required) Specifies the gateway of the subnet. The value must be a valid IP address. The value must be an IP address in the subnet segment. Changing this creates a new Subnet.
+* `gateway_ip` - (Required) Specifies the gateway of the subnet. The value must be a valid IP address.
+  The value must be an IP address in the subnet segment. Changing this creates a new Subnet.
 
 * `vpc_id` - (Required) Specifies the ID of the VPC to which the subnet belongs. Changing this creates a new Subnet.
 
-* `dhcp_enable` - (Optional) Specifies whether the DHCP function is enabled for the subnet. The value can be true or false. If this parameter is left blank, it is set to true by default.
+* `dhcp_enable` - (Optional) Specifies whether the DHCP function is enabled for the subnet. The value can
+  be `true` or `false`. If this parameter is left blank, it is set to `true` by default.
 
-* `primary_dns` - (Optional) Specifies the IP address of DNS server 1 on the subnet. The value must be a valid IP address.
-  Default is `100.125.4.25`, OpenTelekomCloud internal DNS server.
+* `primary_dns` - (Optional) Specifies the IP address of DNS server 1 on the subnet. The value must be a
+  valid IP address. Default is `100.125.4.25`, OpenTelekomCloud internal DNS server.
 
-* `secondary_dns` - (Optional) Specifies the IP address of DNS server 2 on the subnet. The value must be a valid IP address.
-  Default is `1.1.1.1`, `Cloudflare`/`APNIC` public DNS server.
+* `secondary_dns` - (Optional) Specifies the IP address of DNS server 2 on the subnet. The value must be a
+  valid IP address. Default is `1.1.1.1`, `Cloudflare`/`APNIC` public DNS server.
 
-* `dns_list` - (Optional) Specifies the DNS server address list of a subnet. This field is required if you need to use more than two DNS servers. This parameter value is the superset of both DNS server address 1 and DNS server address 2.
+* `dns_list` - (Optional) Specifies the DNS server address list of a subnet. This field is required if you
+  need to use more than two DNS servers. This parameter value is the superset of both DNS server address
+  1 and DNS server address 2.
 
 ~>
   Please note that primary DNS should be set to OTC-internal for managed services (e.g. CCE, CSS) to work.
 
 * `availability_zone` - (Optional) Identifies the availability zone (AZ) to which the subnet belongs. The value must be an existing AZ in the system. Changing this creates a new Subnet.
+* `availability_zone` - (Optional) Identifies the availability zone (AZ) to which the subnet belongs.
+  The value must be an existing AZ in the system. Changing this creates a new Subnet.
 
 * `ntp_addresses` - (Optional) Specifies the NTP server address configured for the subnet.
 
@@ -78,18 +87,23 @@ The following arguments are supported:
 
 ## Attributes Reference
 
-All of the argument attributes are also exported as result attributes:
+All the argument attributes are also exported as result attributes:
 
+* `id` - Specifies a resource ID in UUID format. Same as OpenStack Neutron Network ID (`OS_NETWORK_ID`).
+
+* `status` - Specifies the status of the subnet. The value can be `ACTIVE`, `DOWN`, `UNKNOWN`, or `ERROR`.
 * `id` - Specifies a resource ID in UUID format. Same as OpenStack network ID (`OS_NETWORK_ID`).
 
 * `status` - Specifies the status of the subnet. The value can be ACTIVE, DOWN, UNKNOWN, or ERROR.
 
-* `subnet_id` - Specifies the OpenStack subnet ID.
+* `subnet_id` - Specifies the OpenStack Neutron Subnet ID.
+
+* `network_id` - Specifies the OpenStack Neutron Network ID.
 
 ## Import
 
 Subnets can be imported using the `subnet id`, e.g.
 
-```sh
+```shell
 terraform import opentelekomcloud_vpc_subnet_v1 4779ab1c-7c1a-44b1-a02e-93dfc361b32d
 ```
