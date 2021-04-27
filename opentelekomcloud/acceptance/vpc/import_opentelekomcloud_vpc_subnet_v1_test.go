@@ -8,18 +8,17 @@ import (
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/acceptance/common"
 )
 
-func TestAccOTCVpcSubnetV1_importBasic(t *testing.T) {
+func TestAccVpcSubnetV1_importBasic(t *testing.T) {
 	resourceName := "opentelekomcloud_vpc_subnet_v1.subnet_1"
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:     func() { common.TestAccPreCheck(t) },
 		Providers:    common.TestAccProviders,
-		CheckDestroy: testAccCheckOTCVpcSubnetV1Destroy,
+		CheckDestroy: testAccCheckVpcSubnetV1Destroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccOTCVpcSubnetV1Basic,
+				Config: testAccVpcSubnetV1Basic,
 			},
-
 			{
 				ResourceName:      resourceName,
 				ImportState:       true,
