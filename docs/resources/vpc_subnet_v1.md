@@ -66,6 +66,9 @@ The following arguments are supported:
 
 * `dns_list` - (Optional) Specifies the DNS server address list of a subnet. This field is required if you need to use more than two DNS servers. This parameter value is the superset of both DNS server address 1 and DNS server address 2.
 
+~>
+  Please note that primary DNS should be set to OTC-internal for managed services (e.g. CCE, CSS) to work.
+
 * `availability_zone` - (Optional) Identifies the availability zone (AZ) to which the subnet belongs. The value must be an existing AZ in the system. Changing this creates a new Subnet.
 
 * `ntp_addresses` - (Optional) Specifies the NTP server address configured for the subnet.
@@ -78,7 +81,7 @@ The following arguments are supported:
 All of the argument attributes are also exported as result attributes:
 
 * `id` - Specifies a resource ID in UUID format. Same as OpenStack network ID (`OS_NETWORK_ID`).
- 
+
 * `status` - Specifies the status of the subnet. The value can be ACTIVE, DOWN, UNKNOWN, or ERROR.
 
 * `subnet_id` - Specifies the OpenStack subnet ID.
