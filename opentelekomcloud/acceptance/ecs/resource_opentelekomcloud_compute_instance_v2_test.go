@@ -461,7 +461,6 @@ func testAccCheckComputeV2InstanceBootVolumeAttachment(instance *servers.Server)
 var testAccComputeV2Instance_basic = fmt.Sprintf(`
 resource "opentelekomcloud_compute_instance_v2" "instance_1" {
   name              = "instance_1"
-  security_groups   = ["default"]
   availability_zone = "%s"
   metadata = {
     foo = "bar"
