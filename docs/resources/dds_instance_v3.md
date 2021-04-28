@@ -14,7 +14,7 @@ variable "vpc_id" {}
 variable "subnet_id" {}
 variable "security_group_id" {}
 
-resource "opentelekomcloud_dds_instance" "instance" {
+resource "opentelekomcloud_dds_instance_v3" "instance" {
   name = "dds-instance"
   datastore {
     type           = "DDS-Community"
@@ -61,7 +61,7 @@ variable "vpc_id" {}
 variable "subnet_id" {}
 variable "security_group_id" {}
 
-resource "opentelekomcloud_dds_instance" "instance" {
+resource "opentelekomcloud_dds_instance_v3" "instance" {
   name = "dds-instance"
   datastore {
     type           = "DDS-Community"
