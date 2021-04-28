@@ -1,5 +1,23 @@
 ## 1.24.0 (Unreleased)
 
+## 1.23.9 (April 28, 2021)
+
+ENHANCEMENTS:
+* `data_source/opentelekomcloud_images_image_v2`: Add possibility to filter images by regex ([#1012](https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/issues/1012))
+* `resource/opentelekomcloud_vpc_subnet_v1`: Add `network_id` attribute ([#1021](https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/issues/1021))
+* `data_source/opentelekomcloud_vpc_subnet_v1`: Add `network_id` attribute ([#1021](https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/issues/1021))
+* `resource/opentelekomcloud_compute_instance_v2`: Add resource import support ([#1029](https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/issues/1029))
+
+BUG FIXES:
+* `resource/opentelekomcloud_cce_addon_v3`: Fix passing all `values` as strings ([#1003](https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/issues/1003))
+* `resource/opentelekomcloud_cce_addon_v3`:  Fix error during update ([#1009](https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/issues/1009))
+
+DOCUMENTATION:
+* `resource/opentelekomcloud_vpc_subnet_v1`: Add note about primary DNS ([#1018](https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/issues/1018))
+* `resource/opentelekomcloud_cce_cluster_v3`: Add note for authorizing CCE without console ([#1024](https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/issues/1024))
+* `resource/opentelekomcloud_dds_instance_v3`: Fix resource name in the examples ([#1031](https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/issues/1031))
+* `resource/opentelekomcloud_cce_cluster_v3`: Add auth note for usage with SWR ([#1032](https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/issues/1032))
+
 ## 1.23.8 (April 21, 2021)
 
 ENHANCEMENTS:
@@ -509,7 +527,7 @@ ENHANCEMENTS:
 BUG FIXES:
 
 * `resource/opentelekomcloud_elb_loadbalancer`: Increase bandwidth range to 1000 ([#459](https://github.com/terraform-providers/terraform-provider-opentelekomcloud/issues/459))
-* `data source/opentelekomcloud_vpc_subnet_v1`: Fix vpc_subnet_v1 retrieval by id ([#460](https://github.com/terraform-providers/terraform-provider-opentelekomcloud/issues/460))
+* `data_source/opentelekomcloud_vpc_subnet_v1`: Fix vpc_subnet_v1 retrieval by id ([#460](https://github.com/terraform-providers/terraform-provider-opentelekomcloud/issues/460))
 
 ## 1.15.1 (February 11, 2020)
 
