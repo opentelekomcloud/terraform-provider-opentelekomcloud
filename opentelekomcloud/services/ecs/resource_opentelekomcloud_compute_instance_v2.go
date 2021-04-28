@@ -9,11 +9,13 @@ import (
 	"strings"
 	"time"
 
+	"github.com/hashicorp/go-multierror"
 	"github.com/hashicorp/terraform-plugin-sdk/helper/hashcode"
 	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/helper/validation"
 	"github.com/opentelekomcloud/gophertelekomcloud"
+	"github.com/opentelekomcloud/gophertelekomcloud/openstack/blockstorage/v2/volumes"
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/common/tags"
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/compute/v2/extensions/availabilityzones"
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/compute/v2/extensions/bootfromvolume"
@@ -35,6 +37,9 @@ func ResourceComputeInstanceV2() *schema.Resource {
 		Read:   resourceComputeInstanceV2Read,
 		Update: resourceComputeInstanceV2Update,
 		Delete: resourceComputeInstanceV2Delete,
+		Importer: &schema.ResourceImporter{
+			State: resourceComputeInstanceV2ImportState,
+		},
 
 		Timeouts: &schema.ResourceTimeout{
 			Create: schema.DefaultTimeout(30 * time.Minute),
@@ -194,6 +199,7 @@ func ResourceComputeInstanceV2() *schema.Resource {
 			"block_device": {
 				Type:     schema.TypeList,
 				Optional: true,
+				Computed: true,
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
 						"source_type": {
@@ -517,7 +523,9 @@ func resourceComputeInstanceV2Read(d *schema.ResourceData, meta interface{}) err
 
 	log.Printf("[DEBUG] Retrieved Server %s: %+v", d.Id(), server)
 
-	d.Set("name", server.Name)
+	var mErr *multierror.Error
+
+	mErr = multierror.Append(mErr, d.Set("name", server.Name))
 
 	// Get the instance network and address information
 	networks, err := FlattenInstanceNetworks(d, meta)
@@ -538,11 +546,11 @@ func resourceComputeInstanceV2Read(d *schema.ResourceData, meta interface{}) err
 		hostv6 = server.AccessIPv6
 	}
 
-	if err := d.Set("network", networks); err != nil {
-		return fmt.Errorf("[DEBUG] Error saving network to state for OpenTelekomCloud server (%s): %s", d.Id(), err)
-	}
-	d.Set("access_ip_v4", hostv4)
-	d.Set("access_ip_v6", hostv6)
+	mErr = multierror.Append(mErr,
+		d.Set("network", networks),
+		d.Set("access_ip_v4", hostv4),
+		d.Set("access_ip_v6", hostv6),
+	)
 
 	// Determine the best IP address to use for SSH connectivity.
 	// Prefer IPv4 over IPv6.
@@ -577,20 +585,33 @@ func resourceComputeInstanceV2Read(d *schema.ResourceData, meta interface{}) err
 	if !ok {
 		return fmt.Errorf("error setting OpenTelekomCloud server's flavor: %v", server.Flavor)
 	}
-	d.Set("flavor_id", flavorId)
+	mErr = multierror.Append(mErr,
+		d.Set("flavor_id", flavorId),
+		d.Set("key_pair", server.KeyName),
+	)
 
 	flavor, err := flavors.Get(client, flavorId).Extract()
 	if err != nil {
 		return err
 	}
-	d.Set("flavor_name", flavor.Name)
-
-	// Set instance volume attached information
-	d.Set("volume_attached", server.VolumesAttached)
+	mErr = multierror.Append(mErr,
+		d.Set("flavor_name", flavor.Name),
+		// Set instance volume attached information
+		d.Set("volume_attached", server.VolumesAttached),
+	)
 
 	// Set the instance's image information appropriately
 	if err := setImageInformation(client, server, d); err != nil {
 		return err
+	}
+
+	// Changing `block_device` is possible only on instance creation.
+	// At the same time, if instance is created from volume, `setBlockDevice` will set `block_device`
+	// to exact attached device, not a source volume triggering instance re-creation
+	if _, ok := d.GetOk("block_device"); !ok {
+		if err := setBlockDevice(d, meta); err != nil {
+			return err
+		}
 	}
 
 	// Build a custom struct for the availability zone extension
@@ -605,26 +626,27 @@ func resourceComputeInstanceV2Read(d *schema.ResourceData, meta interface{}) err
 		return common.CheckDeleted(d, err, "server")
 	}
 
-	// Set the availability zone
-	d.Set("availability_zone", serverWithAZ.AvailabilityZone)
-
-	// Set the region
-	d.Set("region", config.GetRegion(d))
+	mErr = multierror.Append(mErr,
+		// Set the availability zone
+		d.Set("availability_zone", serverWithAZ.AvailabilityZone),
+		// Set the region
+		d.Set("region", config.GetRegion(d)),
+	)
 
 	// Set the current power_state
 	currentStatus := strings.ToLower(server.Status)
 	switch currentStatus {
 	case "active", "shutoff", "error", "migrating", "shelved_offloaded", "shelved":
-		d.Set("power_state", currentStatus)
+		mErr = multierror.Append(mErr, d.Set("power_state", currentStatus))
 	default:
-		return fmt.Errorf("Invalid power_state for instance %s: %s", d.Id(), server.Status)
+		return fmt.Errorf("invalid power_state for instance %s: %s", d.Id(), server.Status)
 	}
 
 	ar, err := resourceECSAutoRecoveryV1Read(d, meta, d.Id())
 	if err != nil && !common.IsResourceNotFound(err) {
 		return fmt.Errorf("error reading auto recovery of instance: %s", err)
 	}
-	d.Set("auto_recovery", ar)
+	mErr = multierror.Append(mErr, d.Set("auto_recovery", ar))
 
 	computeClient, err := config.ComputeV1Client(config.GetRegion(d))
 	if err != nil {
@@ -636,8 +658,10 @@ func resourceComputeInstanceV2Read(d *schema.ResourceData, meta interface{}) err
 		return fmt.Errorf("error fetching OpenTelekomCloud CloudServers tags: %s", err)
 	}
 	tagMap := common.TagsToMap(resourceTags)
-	if err := d.Set("tags", tagMap); err != nil {
-		return fmt.Errorf("error saving tags for OpenTelekomCloud CloudServers: %s", err)
+	mErr = multierror.Append(mErr, d.Set("tags", tagMap))
+
+	if err := mErr.ErrorOrNil(); err != nil {
+		return fmt.Errorf("error setting opentelekomcloud_compute_instance_v2 values: %w", err)
 	}
 
 	return nil
@@ -667,7 +691,7 @@ func resourceComputeInstanceV2Update(d *schema.ResourceData, meta interface{}) e
 		if strings.ToLower(powerStateNew) == "shutoff" {
 			err = startstop.Stop(client, d.Id()).ExtractErr()
 			if err != nil {
-				return fmt.Errorf("error stopping OpenStack instance: %s", err)
+				return fmt.Errorf("error stopping compute instance: %s", err)
 			}
 			stopStateConf := &resource.StateChangeConf{
 				Target:     []string{"SHUTOFF"},
@@ -686,7 +710,7 @@ func resourceComputeInstanceV2Update(d *schema.ResourceData, meta interface{}) e
 		if strings.ToLower(powerStateNew) == "active" {
 			err = startstop.Start(client, d.Id()).ExtractErr()
 			if err != nil {
-				return fmt.Errorf("error starting OpenStack instance: %s", err)
+				return fmt.Errorf("error starting compute instance: %s", err)
 			}
 			startStateConf := &resource.StateChangeConf{
 				Target:     []string{"ACTIVE"},
@@ -699,7 +723,7 @@ func resourceComputeInstanceV2Update(d *schema.ResourceData, meta interface{}) e
 			log.Printf("[DEBUG] Waiting for instance (%s) to start/unshelve", d.Id())
 			_, err = startStateConf.WaitForState()
 			if err != nil {
-				return fmt.Errorf("Error waiting for instance (%s) to become active: %s", d.Id(), err)
+				return fmt.Errorf("error waiting for instance (%s) to become active: %s", d.Id(), err)
 			}
 		}
 	}
@@ -945,7 +969,7 @@ func resourceInstanceMetadataV2(d *schema.ResourceData) map[string]string {
 	return m
 }
 
-func ResourceInstanceBlockDevicesV2(d *schema.ResourceData, bds []interface{}) ([]bootfromvolume.BlockDevice, error) {
+func ResourceInstanceBlockDevicesV2(_ *schema.ResourceData, bds []interface{}) ([]bootfromvolume.BlockDevice, error) {
 	blockDeviceOpts := make([]bootfromvolume.BlockDevice, len(bds))
 	for i, bd := range bds {
 		bdM := bd.(map[string]interface{})
@@ -988,7 +1012,7 @@ func ResourceInstanceBlockDevicesV2(d *schema.ResourceData, bds []interface{}) (
 	return blockDeviceOpts, nil
 }
 
-func resourceInstanceSchedulerHintsV2(d *schema.ResourceData, schedulerHintsRaw map[string]interface{}) schedulerhints.SchedulerHints {
+func resourceInstanceSchedulerHintsV2(_ *schema.ResourceData, schedulerHintsRaw map[string]interface{}) schedulerhints.SchedulerHints {
 	var differentHost []string
 	if len(schedulerHintsRaw["different_host"].([]interface{})) > 0 {
 		for _, dh := range schedulerHintsRaw["different_host"].([]interface{}) {
@@ -1056,36 +1080,21 @@ func getImageIDFromConfig(client *golangsdk.ServiceClient, d *schema.ResourceDat
 }
 
 func setImageInformation(client *golangsdk.ServiceClient, server *servers.Server, d *schema.ResourceData) error {
-	// If block_device was used, an Image does not need to be specified, unless an image/local
-	// combination was used. This emulates normal boot behavior. Otherwise, ignore the image altogether.
-	if vL, ok := d.GetOk("block_device"); ok {
-		needImage := false
-		for _, v := range vL.([]interface{}) {
-			vM := v.(map[string]interface{})
-			if vM["source_type"] == "image" && vM["destination_type"] == "local" {
-				needImage = true
-			}
-		}
-		if !needImage {
-			d.Set("image_id", "Attempt to boot from volume - no image supplied")
-			return nil
-		}
-	}
-
 	imageId := server.Image["id"].(string)
 	if imageId != "" {
-		d.Set("image_id", imageId)
+		if err := d.Set("image_id", imageId); err != nil {
+			return err
+		}
 		if image, err := images.Get(client, imageId).Extract(); err != nil {
 			if _, ok := err.(golangsdk.ErrDefault404); ok {
-				// If the image name can't be found, set the value to "Image not found".
+				// If the image name can't be found, don't set name.
 				// The most likely scenario is that the image no longer exists in the Image Service
 				// but the instance still has a record from when it existed.
-				d.Set("image_name", "Image not found")
-				return nil
+				return d.Set("image_name", "Not Found")
 			}
 			return err
 		} else {
-			d.Set("image_name", image.Name)
+			return d.Set("image_name", image.Name)
 		}
 	}
 
@@ -1167,4 +1176,94 @@ func suppressPowerStateDiffs(_, old, _ string, _ *schema.ResourceData) bool {
 		return true
 	}
 	return false
+}
+
+func resourceComputeInstanceV2ImportState(d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
+	config := meta.(*cfg.Config)
+	computeClient, err := config.ComputeV2Client(config.GetRegion(d))
+	if err != nil {
+		return nil, fmt.Errorf("error creating compute v2 client: %s", err)
+	}
+
+	results := make([]*schema.ResourceData, 1)
+	if err := resourceComputeInstanceV2Read(d, meta); err != nil {
+		return nil, fmt.Errorf("error reading opentelekomcloud_compute_instance_v2 %s: %s", d.Id(), err)
+	}
+
+	metadata, err := servers.Metadata(computeClient, d.Id()).Extract()
+	if err != nil {
+		return nil, fmt.Errorf("unable to read metadata for opentelekomcloud_compute_instance_v2 %s: %s", d.Id(), err)
+	}
+
+	if err := d.Set("metadata", metadata); err != nil {
+		return nil, fmt.Errorf("error setting metadata")
+	}
+
+	results[0] = d
+
+	return results, nil
+}
+
+func setBlockDevice(d *schema.ResourceData, meta interface{}) error {
+	config := meta.(*cfg.Config)
+	computeClient, err := config.ComputeV2Client(config.GetRegion(d))
+	if err != nil {
+		return fmt.Errorf("error creating compute v2 client: %s", err)
+	}
+
+	raw := servers.Get(computeClient, d.Id())
+	if raw.Err != nil {
+		return common.CheckDeleted(d, raw.Err, "opentelekomcloud_compute_instance_v2")
+	}
+
+	var serverWithAttachments struct {
+		VolumesAttached []map[string]interface{} `json:"os-extended-volumes:volumes_attached"`
+	}
+	if err := raw.ExtractInto(&serverWithAttachments); err != nil {
+		log.Printf("[DEBUG] unable to unmarshal raw struct to serverWithAttachments: %s", err)
+	}
+
+	log.Printf("[DEBUG] Retrieved opentelekomcloud_compute_instance_v2 %s volume attachments: %#v",
+		d.Id(), serverWithAttachments)
+
+	bds := make([]map[string]interface{}, 0)
+	if len(serverWithAttachments.VolumesAttached) > 0 {
+		blockStorageClient, err := config.BlockStorageV2Client(config.GetRegion(d))
+		if err != nil {
+			return fmt.Errorf("error creating volume v2 client: %s", err)
+		}
+
+		var volMetaData = struct {
+			VolumeImageMetadata map[string]interface{} `json:"volume_image_metadata"`
+			ID                  string                 `json:"id"`
+			Size                int                    `json:"size"`
+			Bootable            string                 `json:"bootable"`
+		}{}
+		for i, b := range serverWithAttachments.VolumesAttached {
+			rawVolume := volumes.Get(blockStorageClient, b["id"].(string))
+			if err := rawVolume.ExtractInto(&volMetaData); err != nil {
+				log.Printf("[DEBUG] unable to unmarshal raw struct to volume metadata: %s", err)
+			}
+
+			log.Printf("[DEBUG] retrieved volume%+v", volMetaData)
+			v := map[string]interface{}{
+				"delete_on_termination": true,
+				"uuid":                  volMetaData.VolumeImageMetadata["image_id"],
+				"boot_index":            i,
+				"destination_type":      "volume",
+				"source_type":           "image",
+				"volume_size":           volMetaData.Size,
+				"volume_type":           "",
+			}
+
+			if volMetaData.Bootable == "true" {
+				bds = append(bds, v)
+			}
+		}
+
+		if err := d.Set("block_device", bds); err != nil {
+			return fmt.Errorf("error setting block_device for compute_instance_v2: %w", err)
+		}
+	}
+	return nil
 }
