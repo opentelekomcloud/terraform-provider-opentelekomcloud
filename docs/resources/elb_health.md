@@ -6,6 +6,9 @@ subcategory: "Elastic Load Balance (ELB)"
 
 Manages a classic loadbalancer health resource within OpenTelekomCloud.
 
+~>
+Classic load balancers are no longer provided. Please use elastic load balancers instead.
+
 ## Example Usage
 
 ```hcl

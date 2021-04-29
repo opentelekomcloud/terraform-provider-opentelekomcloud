@@ -481,3 +481,5 @@ func waitForLBV2L7Rule(lbClient *golangsdk.ServiceClient, parentListener *listen
 
 	return nil
 }
+
+const classicLBDeprecated = "Classic load balancers are no longer provided. Please use elastic load balancers instead."

@@ -25,6 +25,8 @@ func ResourceEListener() *schema.Resource {
 		Update: resourceEListenerUpdate,
 		Delete: resourceEListenerDelete,
 
+		DeprecationMessage: classicLBDeprecated,
+
 		Timeouts: &schema.ResourceTimeout{
 			Create: schema.DefaultTimeout(10 * time.Minute),
 			Update: schema.DefaultTimeout(10 * time.Minute),

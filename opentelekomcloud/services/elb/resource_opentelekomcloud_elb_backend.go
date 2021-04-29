@@ -21,6 +21,8 @@ func ResourceBackend() *schema.Resource {
 		Read:   resourceBackendRead,
 		Delete: resourceBackendDelete,
 
+		DeprecationMessage: classicLBDeprecated,
+
 		Timeouts: &schema.ResourceTimeout{
 			Create: schema.DefaultTimeout(10 * time.Minute),
 			Delete: schema.DefaultTimeout(10 * time.Minute),
