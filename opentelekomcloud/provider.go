@@ -370,6 +370,7 @@ func Provider() terraform.ResourceProvider {
 			"opentelekomcloud_rds_instance_v1":                    rds.ResourceRdsInstance(),
 			"opentelekomcloud_rds_instance_v3":                    rds.ResourceRdsInstanceV3(),
 			"opentelekomcloud_rds_parametergroup_v3":              rds.ResourceRdsConfigurationV3(),
+			"opentelekomcloud_rds_read_replica_v3":                rds.ResourceRdsReadReplicaV3(),
 			"opentelekomcloud_rts_software_deployment_v1":         rts.ResourceRtsSoftwareDeploymentV1(),
 			"opentelekomcloud_rts_software_config_v1":             rts.ResourceSoftwareConfigV1(),
 			"opentelekomcloud_rts_stack_v1":                       rts.ResourceRTSStackV1(),
