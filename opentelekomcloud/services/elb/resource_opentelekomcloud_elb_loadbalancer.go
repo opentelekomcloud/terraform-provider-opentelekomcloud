@@ -21,6 +21,8 @@ func ResourceELoadBalancer() *schema.Resource {
 		Update: resourceELoadBalancerUpdate,
 		Delete: resourceELoadBalancerDelete,
 
+		DeprecationMessage: classicLBDeprecated,
+
 		Timeouts: &schema.ResourceTimeout{
 			Create: schema.DefaultTimeout(10 * time.Minute),
 			Update: schema.DefaultTimeout(10 * time.Minute),

@@ -20,6 +20,8 @@ func ResourceHealth() *schema.Resource {
 		Update: resourceHealthUpdate,
 		Delete: resourceHealthDelete,
 
+		DeprecationMessage: classicLBDeprecated,
+
 		Timeouts: &schema.ResourceTimeout{
 			Create: schema.DefaultTimeout(10 * time.Minute),
 			Update: schema.DefaultTimeout(10 * time.Minute),
