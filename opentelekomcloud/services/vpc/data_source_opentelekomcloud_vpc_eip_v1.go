@@ -40,7 +40,7 @@ func DataSourceVPCEipV1() *schema.Resource {
 			},
 			"public_ip_address": {
 				Type:     schema.TypeString,
-				Computed: true,
+				Optional: true,
 			},
 			"port_id": {
 				Type:     schema.TypeString,
@@ -87,6 +87,7 @@ func dataSourceVPCEipV1Read(d *schema.ResourceData, meta interface{}) error {
 		PrivateIPAddress: d.Get("private_ip_address").(string),
 		PortID:           d.Get("port_id").(string),
 		BandwidthID:      d.Get("bandwidth_id").(string),
+		PublicIPAddress:  d.Get("public_ip_address").(string),
 	}
 
 	refinedEIPs, err := eips.List(client, listOpts)
