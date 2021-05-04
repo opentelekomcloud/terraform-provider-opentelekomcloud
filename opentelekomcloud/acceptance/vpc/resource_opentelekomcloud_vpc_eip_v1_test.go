@@ -109,7 +109,7 @@ func testAccCheckVpcV1EIPExists(n string, eip *eips.PublicIp) resource.TestCheck
 			return fmt.Errorf("EIP not found")
 		}
 
-		eip = &found
+		eip = found
 
 		return nil
 	}

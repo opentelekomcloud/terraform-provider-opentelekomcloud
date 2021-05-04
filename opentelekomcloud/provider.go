@@ -265,6 +265,7 @@ func Provider() terraform.ResourceProvider {
 			"opentelekomcloud_s3_bucket_object":              s3.DataSourceS3BucketObject(),
 			"opentelekomcloud_sfs_file_system_v2":            sfs.DataSourceSFSFileSystemV2(),
 			"opentelekomcloud_sdrs_domain_v1":                sdrs.DataSourceSdrsDomainV1(),
+			"opentelekomcloud_vpc_eip_v1":                    vpc.DataSourceVPCEipV1(),
 			"opentelekomcloud_vpc_v1":                        vpc.DataSourceVirtualPrivateCloudVpcV1(),
 			"opentelekomcloud_vpc_bandwidth":                 vpc.DataSourceBandWidth(),
 			"opentelekomcloud_vbs_backup_v2":                 vbs.DataSourceVBSBackupV2(),
