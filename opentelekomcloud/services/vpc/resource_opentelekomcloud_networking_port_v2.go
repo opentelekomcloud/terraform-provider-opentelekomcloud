@@ -215,7 +215,7 @@ func resourceNetworkingPortV2Create(d *schema.ResourceData, meta interface{}) er
 	log.Printf("[DEBUG] Create Options: %#v", finalCreateOpts)
 	p, err := ports.Create(client, finalCreateOpts).Extract()
 	if err != nil {
-		return fmt.Errorf("error creating OpenTelekomCloud Neutron network: %w", err)
+		return fmt.Errorf("error creating OpenTelekomCloud Neutron port: %w", err)
 	}
 	log.Printf("[INFO] Network ID: %s", p.ID)
 
@@ -247,7 +247,7 @@ func resourceNetworkingPortV2Read(d *schema.ResourceData, meta interface{}) erro
 	}
 
 	var port portWithPortSecurityExtensions
-	err = ports.Get(client, d.Id()).ExtractInto(port)
+	err = ports.Get(client, d.Id()).ExtractInto(&port)
 	if err != nil {
 		return common.CheckDeleted(d, err, "port")
 	}

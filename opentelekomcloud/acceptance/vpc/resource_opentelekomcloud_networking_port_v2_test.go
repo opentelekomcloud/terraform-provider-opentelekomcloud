@@ -453,7 +453,6 @@ resource "opentelekomcloud_networking_subnet_v2" "subnet_1" {
 resource "opentelekomcloud_networking_port_v2" "port_1" {
   name                  = "port_1"
   network_id            = opentelekomcloud_networking_network_v2.network_1.id
-  no_security_groups    = true
   port_security_enabled = false
   fixed_ip {
     subnet_id  = opentelekomcloud_networking_subnet_v2.subnet_1.id
@@ -476,7 +475,6 @@ resource "opentelekomcloud_networking_subnet_v2" "subnet_1" {
 resource "opentelekomcloud_networking_port_v2" "port_1" {
   name                  = "port_1"
   network_id            = opentelekomcloud_networking_network_v2.network_1.id
-  no_security_groups    = true
   port_security_enabled = true
   fixed_ip {
     subnet_id  = opentelekomcloud_networking_subnet_v2.subnet_1.id
