@@ -6,10 +6,12 @@ import (
 	"log"
 	"time"
 
+	"github.com/hashicorp/go-multierror"
 	"github.com/hashicorp/terraform-plugin-sdk/helper/hashcode"
 	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
 	"github.com/opentelekomcloud/gophertelekomcloud"
+	"github.com/opentelekomcloud/gophertelekomcloud/openstack/networking/v2/extensions/portsecurity"
 
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/networking/v2/ports"
 
@@ -139,15 +141,20 @@ func ResourceNetworkingPortV2() *schema.Resource {
 				Computed: true,
 				Elem:     &schema.Schema{Type: schema.TypeString},
 			},
+			"port_security_enabled": {
+				Type:     schema.TypeBool,
+				Optional: true,
+				Computed: true,
+			},
 		},
 	}
 }
 
 func resourceNetworkingPortV2Create(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*cfg.Config)
-	networkingClient, err := config.NetworkingV2Client(config.GetRegion(d))
+	client, err := config.NetworkingV2Client(config.GetRegion(d))
 	if err != nil {
-		return fmt.Errorf("Error creating OpenTelekomCloud networking client: %s", err)
+		return fmt.Errorf("error creating OpenTelekomCloud NetworkingV2 client: %w", err)
 	}
 
 	asu, id := ExtractValFromNid(d.Get("network_id").(string))
@@ -162,7 +169,7 @@ func resourceNetworkingPortV2Create(d *schema.ResourceData, meta interface{}) er
 
 	// Check and make sure an invalid security group configuration wasn't given.
 	if noSecurityGroups && len(securityGroups) > 0 {
-		return fmt.Errorf("Cannot have both no_security_groups and security_group_ids set")
+		return fmt.Errorf("cannot have both no_security_groups and security_group_ids set")
 	}
 
 	createOpts := PortCreateOpts{
@@ -191,10 +198,24 @@ func resourceNetworkingPortV2Create(d *schema.ResourceData, meta interface{}) er
 		createOpts.SecurityGroups = &securityGroups
 	}
 
-	log.Printf("[DEBUG] Create Options: %#v", createOpts)
-	p, err := ports.Create(networkingClient, createOpts).Extract()
+	// Declare a finalCreateOpts interface to hold either the
+	// base create options.
+	var finalCreateOpts ports.CreateOptsBuilder
+	finalCreateOpts = createOpts
+
+	// Add the port security attribute if specified.
+	if v, ok := d.GetOkExists("port_security_enabled"); ok {
+		portSecurityEnabled := v.(bool)
+		finalCreateOpts = portsecurity.PortCreateOptsExt{
+			CreateOptsBuilder:   finalCreateOpts,
+			PortSecurityEnabled: &portSecurityEnabled,
+		}
+	}
+
+	log.Printf("[DEBUG] Create Options: %#v", finalCreateOpts)
+	p, err := ports.Create(client, finalCreateOpts).Extract()
 	if err != nil {
-		return fmt.Errorf("Error creating OpenTelekomCloud Neutron network: %s", err)
+		return fmt.Errorf("error creating OpenTelekomCloud Neutron network: %w", err)
 	}
 	log.Printf("[INFO] Network ID: %s", p.ID)
 
@@ -202,13 +223,16 @@ func resourceNetworkingPortV2Create(d *schema.ResourceData, meta interface{}) er
 
 	stateConf := &resource.StateChangeConf{
 		Target:     []string{"ACTIVE"},
-		Refresh:    waitForNetworkPortActive(networkingClient, p.ID),
+		Refresh:    waitForNetworkPortActive(client, p.ID),
 		Timeout:    d.Timeout(schema.TimeoutCreate),
 		Delay:      5 * time.Second,
 		MinTimeout: 3 * time.Second,
 	}
 
 	_, err = stateConf.WaitForState()
+	if err != nil {
+		return fmt.Errorf("error creating OpenTelekomCloud Neutron Network: %w", err)
+	}
 
 	d.SetId(p.ID)
 
@@ -217,64 +241,69 @@ func resourceNetworkingPortV2Create(d *schema.ResourceData, meta interface{}) er
 
 func resourceNetworkingPortV2Read(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*cfg.Config)
-	networkingClient, err := config.NetworkingV2Client(config.GetRegion(d))
+	client, err := config.NetworkingV2Client(config.GetRegion(d))
 	if err != nil {
-		return fmt.Errorf("Error creating OpenTelekomCloud networking client: %s", err)
+		return fmt.Errorf("error creating OpenTelekomCloud networking client: %w", err)
 	}
 
-	p, err := ports.Get(networkingClient, d.Id()).Extract()
+	var port portWithPortSecurityExtensions
+	err = ports.Get(client, d.Id()).ExtractInto(port)
 	if err != nil {
 		return common.CheckDeleted(d, err, "port")
 	}
 
-	log.Printf("[DEBUG] Retrieved Port %s: %+v", d.Id(), p)
+	log.Printf("[DEBUG] Retrieved Port %s: %+v", d.Id(), port)
 
 	asu, _ := ExtractValSFromNid(d.Get("network_id").(string))
-	nid := FormatNidFromValS(asu, p.NetworkID)
-	d.Set("name", p.Name)
-	d.Set("admin_state_up", p.AdminStateUp)
-	d.Set("network_id", nid)
-	d.Set("mac_address", p.MACAddress)
-	d.Set("tenant_id", p.TenantID)
-	d.Set("device_owner", p.DeviceOwner)
-	if err := d.Set("security_group_ids", p.SecurityGroups); err != nil {
-		return fmt.Errorf("[DEBUG] Error saving security_group_ids to state for OpenTelekomCloud port (%s): %s", d.Id(), err)
-	}
-	d.Set("device_id", p.DeviceID)
+	nid := FormatNidFromValS(asu, port.NetworkID)
+
+	mErr := multierror.Append(
+		d.Set("name", port.Name),
+		d.Set("admin_state_up", port.AdminStateUp),
+		d.Set("network_id", nid),
+		d.Set("mac_address", port.MACAddress),
+		d.Set("tenant_id", port.TenantID),
+		d.Set("device_owner", port.DeviceOwner),
+		d.Set("security_group_ids", port.SecurityGroups),
+		d.Set("device_id", port.DeviceID),
+		d.Set("port_security_enabled", port.PortSecurityEnabled),
+		d.Set("region", config.GetRegion(d)),
+	)
 
 	// Create a slice of all returned Fixed IPs.
 	// This will be in the order returned by the API,
 	// which is usually alpha-numeric.
 	var ips []string
-	for _, ipObject := range p.FixedIPs {
+	for _, ipObject := range port.FixedIPs {
 		ips = append(ips, ipObject.IPAddress)
-	}
-	if err := d.Set("all_fixed_ips", ips); err != nil {
-		return fmt.Errorf("[DEBUG] Error saving all_fixed_ips to state for OpenTelekomCloud port (%s): %s", d.Id(), err)
 	}
 
 	// Convert AllowedAddressPairs to list of map
 	var pairs []map[string]interface{}
-	for _, pairObject := range p.AllowedAddressPairs {
+	for _, pairObject := range port.AllowedAddressPairs {
 		pair := make(map[string]interface{})
 		pair["ip_address"] = pairObject.IPAddress
 		pair["mac_address"] = pairObject.MACAddress
 		pairs = append(pairs, pair)
 	}
-	if err := d.Set("allowed_address_pairs", pairs); err != nil {
-		return fmt.Errorf("[DEBUG] Error saving allowed_address_pairs to state for OpenTelekomCloud port (%s): %s", d.Id(), err)
-	}
 
-	d.Set("region", config.GetRegion(d))
+	mErr = multierror.Append(mErr,
+		d.Set("all_fixed_ips", ips),
+		d.Set("allowed_address_pairs", pairs),
+	)
+
+	if mErr.ErrorOrNil() != nil {
+		return mErr
+	}
 
 	return nil
 }
 
 func resourceNetworkingPortV2Update(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*cfg.Config)
-	networkingClient, err := config.NetworkingV2Client(config.GetRegion(d))
+	client, err := config.NetworkingV2Client(config.GetRegion(d))
 	if err != nil {
-		return fmt.Errorf("Error creating OpenTelekomCloud networking client: %s", err)
+		return fmt.Errorf("error creating OpenTelekomCloud networking client: %w", err)
 	}
 
 	noSecurityGroups := d.Get("no_security_groups").(bool)
@@ -295,7 +324,7 @@ func resourceNetworkingPortV2Update(d *schema.ResourceData, meta interface{}) er
 	if d.HasChange("no_security_groups") {
 		if noSecurityGroups {
 			hasChange = true
-			v := []string{}
+			var v []string
 			updateOpts.SecurityGroups = &v
 		}
 	}
@@ -336,12 +365,23 @@ func resourceNetworkingPortV2Update(d *schema.ResourceData, meta interface{}) er
 		updateOpts.FixedIPs = resourcePortFixedIpsV2(d)
 	}
 
+	var finalUpdateOpts ports.UpdateOptsBuilder
+	finalUpdateOpts = updateOpts
+	if d.HasChange("port_security_enabled") {
+		hasChange = true
+		portSecurityEnabled := d.Get("port_security_enabled").(bool)
+		finalUpdateOpts = portsecurity.PortUpdateOptsExt{
+			UpdateOptsBuilder:   finalUpdateOpts,
+			PortSecurityEnabled: &portSecurityEnabled,
+		}
+	}
+
 	if hasChange {
 		log.Printf("[DEBUG] Updating Port %s with options: %+v", d.Id(), updateOpts)
 
-		_, err = ports.Update(networkingClient, d.Id(), updateOpts).Extract()
+		_, err = ports.Update(client, d.Id(), finalUpdateOpts).Extract()
 		if err != nil {
-			return fmt.Errorf("Error updating OpenTelekomCloud Neutron Network: %s", err)
+			return fmt.Errorf("error updating OpenTelekomCloud Neutron Network: %w", err)
 		}
 	}
 	return resourceNetworkingPortV2Read(d, meta)
@@ -349,15 +389,15 @@ func resourceNetworkingPortV2Update(d *schema.ResourceData, meta interface{}) er
 
 func resourceNetworkingPortV2Delete(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*cfg.Config)
-	networkingClient, err := config.NetworkingV2Client(config.GetRegion(d))
+	client, err := config.NetworkingV2Client(config.GetRegion(d))
 	if err != nil {
-		return fmt.Errorf("Error creating OpenTelekomCloud networking client: %s", err)
+		return fmt.Errorf("error creating OpenTelekomCloud networking client: %w", err)
 	}
 
 	stateConf := &resource.StateChangeConf{
 		Pending:    []string{"ACTIVE"},
 		Target:     []string{"DELETED"},
-		Refresh:    waitForNetworkPortDelete(networkingClient, d.Id()),
+		Refresh:    waitForNetworkPortDelete(client, d.Id()),
 		Timeout:    d.Timeout(schema.TimeoutDelete),
 		Delay:      5 * time.Second,
 		MinTimeout: 3 * time.Second,
@@ -365,7 +405,7 @@ func resourceNetworkingPortV2Delete(d *schema.ResourceData, meta interface{}) er
 
 	_, err = stateConf.WaitForState()
 	if err != nil {
-		return fmt.Errorf("Error deleting OpenTelekomCloud Neutron Network: %s", err)
+		return fmt.Errorf("error deleting OpenTelekomCloud Neutron Network: %w", err)
 	}
 
 	d.SetId("")
@@ -448,29 +488,34 @@ func waitForNetworkPortActive(networkingClient *golangsdk.ServiceClient, portId 
 	}
 }
 
-func waitForNetworkPortDelete(networkingClient *golangsdk.ServiceClient, portId string) resource.StateRefreshFunc {
+func waitForNetworkPortDelete(networkingClient *golangsdk.ServiceClient, portID string) resource.StateRefreshFunc {
 	return func() (interface{}, string, error) {
-		log.Printf("[DEBUG] Attempting to delete OpenTelekomCloud Neutron Port %s", portId)
+		log.Printf("[DEBUG] Attempting to delete OpenTelekomCloud Neutron Port %s", portID)
 
-		p, err := ports.Get(networkingClient, portId).Extract()
+		p, err := ports.Get(networkingClient, portID).Extract()
 		if err != nil {
 			if _, ok := err.(golangsdk.ErrDefault404); ok {
-				log.Printf("[DEBUG] Successfully deleted OpenTelekomCloud Port %s", portId)
+				log.Printf("[DEBUG] Successfully deleted OpenTelekomCloud Port %s", portID)
 				return p, "DELETED", nil
 			}
 			return p, "ACTIVE", err
 		}
 
-		err = ports.Delete(networkingClient, portId).ExtractErr()
+		err = ports.Delete(networkingClient, portID).ExtractErr()
 		if err != nil {
 			if _, ok := err.(golangsdk.ErrDefault404); ok {
-				log.Printf("[DEBUG] Successfully deleted OpenTelekomCloud Port %s", portId)
+				log.Printf("[DEBUG] Successfully deleted OpenTelekomCloud Port %s", portID)
 				return p, "DELETED", nil
 			}
 			return p, "ACTIVE", err
 		}
 
-		log.Printf("[DEBUG] OpenTelekomCloud Port %s still active.\n", portId)
+		log.Printf("[DEBUG] OpenTelekomCloud Port %s still active.\n", portID)
 		return p, "ACTIVE", nil
 	}
+}
+
+type portWithPortSecurityExtensions struct {
+	ports.Port
+	portsecurity.PortSecurityExt
 }
