@@ -243,7 +243,7 @@ func resourceNetworkingPortV2Read(d *schema.ResourceData, meta interface{}) erro
 	config := meta.(*cfg.Config)
 	client, err := config.NetworkingV2Client(config.GetRegion(d))
 	if err != nil {
-		return fmt.Errorf("error creating OpenTelekomCloud networking client: %w", err)
+		return fmt.Errorf("error creating OpenTelekomCloud NetworkingV2 client: %w", err)
 	}
 
 	var port portWithPortSecurityExtensions
@@ -303,7 +303,7 @@ func resourceNetworkingPortV2Update(d *schema.ResourceData, meta interface{}) er
 	config := meta.(*cfg.Config)
 	client, err := config.NetworkingV2Client(config.GetRegion(d))
 	if err != nil {
-		return fmt.Errorf("error creating OpenTelekomCloud networking client: %w", err)
+		return fmt.Errorf("error creating OpenTelekomCloud NetworkingV2 client: %w", err)
 	}
 
 	noSecurityGroups := d.Get("no_security_groups").(bool)
@@ -391,7 +391,7 @@ func resourceNetworkingPortV2Delete(d *schema.ResourceData, meta interface{}) er
 	config := meta.(*cfg.Config)
 	client, err := config.NetworkingV2Client(config.GetRegion(d))
 	if err != nil {
-		return fmt.Errorf("error creating OpenTelekomCloud networking client: %w", err)
+		return fmt.Errorf("error creating OpenTelekomCloud NetworkingV2 client: %w", err)
 	}
 
 	stateConf := &resource.StateChangeConf{
@@ -472,9 +472,9 @@ func allowedAddressPairsHash(v interface{}) int {
 	return hashcode.String(buf.String())
 }
 
-func waitForNetworkPortActive(networkingClient *golangsdk.ServiceClient, portId string) resource.StateRefreshFunc {
+func waitForNetworkPortActive(client *golangsdk.ServiceClient, portId string) resource.StateRefreshFunc {
 	return func() (interface{}, string, error) {
-		p, err := ports.Get(networkingClient, portId).Extract()
+		p, err := ports.Get(client, portId).Extract()
 		if err != nil {
 			return nil, "", err
 		}
@@ -488,11 +488,11 @@ func waitForNetworkPortActive(networkingClient *golangsdk.ServiceClient, portId 
 	}
 }
 
-func waitForNetworkPortDelete(networkingClient *golangsdk.ServiceClient, portID string) resource.StateRefreshFunc {
+func waitForNetworkPortDelete(client *golangsdk.ServiceClient, portID string) resource.StateRefreshFunc {
 	return func() (interface{}, string, error) {
 		log.Printf("[DEBUG] Attempting to delete OpenTelekomCloud Neutron Port %s", portID)
 
-		p, err := ports.Get(networkingClient, portID).Extract()
+		p, err := ports.Get(client, portID).Extract()
 		if err != nil {
 			if _, ok := err.(golangsdk.ErrDefault404); ok {
 				log.Printf("[DEBUG] Successfully deleted OpenTelekomCloud Port %s", portID)
@@ -501,7 +501,7 @@ func waitForNetworkPortDelete(networkingClient *golangsdk.ServiceClient, portID 
 			return p, "ACTIVE", err
 		}
 
-		err = ports.Delete(networkingClient, portID).ExtractErr()
+		err = ports.Delete(client, portID).ExtractErr()
 		if err != nil {
 			if _, ok := err.(golangsdk.ErrDefault404); ok {
 				log.Printf("[DEBUG] Successfully deleted OpenTelekomCloud Port %s", portID)
