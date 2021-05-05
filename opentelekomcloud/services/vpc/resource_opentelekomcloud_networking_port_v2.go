@@ -231,7 +231,7 @@ func resourceNetworkingPortV2Create(d *schema.ResourceData, meta interface{}) er
 
 	_, err = stateConf.WaitForState()
 	if err != nil {
-		return fmt.Errorf("error creating OpenTelekomCloud Neutron Network: %w", err)
+		return fmt.Errorf("error creating OpenTelekomCloud Neutron port: %w", err)
 	}
 
 	d.SetId(p.ID)
@@ -324,7 +324,7 @@ func resourceNetworkingPortV2Update(d *schema.ResourceData, meta interface{}) er
 	if d.HasChange("no_security_groups") {
 		if noSecurityGroups {
 			hasChange = true
-			var v []string
+			v := []string{}
 			updateOpts.SecurityGroups = &v
 		}
 	}
@@ -367,6 +367,7 @@ func resourceNetworkingPortV2Update(d *schema.ResourceData, meta interface{}) er
 
 	var finalUpdateOpts ports.UpdateOptsBuilder
 	finalUpdateOpts = updateOpts
+
 	if d.HasChange("port_security_enabled") {
 		hasChange = true
 		portSecurityEnabled := d.Get("port_security_enabled").(bool)
@@ -381,7 +382,7 @@ func resourceNetworkingPortV2Update(d *schema.ResourceData, meta interface{}) er
 
 		_, err = ports.Update(client, d.Id(), finalUpdateOpts).Extract()
 		if err != nil {
-			return fmt.Errorf("error updating OpenTelekomCloud Neutron Network: %w", err)
+			return fmt.Errorf("error updating OpenTelekomCloud Neutron port: %w", err)
 		}
 	}
 	return resourceNetworkingPortV2Read(d, meta)
@@ -405,7 +406,7 @@ func resourceNetworkingPortV2Delete(d *schema.ResourceData, meta interface{}) er
 
 	_, err = stateConf.WaitForState()
 	if err != nil {
-		return fmt.Errorf("error deleting OpenTelekomCloud Neutron Network: %w", err)
+		return fmt.Errorf("error deleting OpenTelekomCloud Neutron port: %w", err)
 	}
 
 	d.SetId("")

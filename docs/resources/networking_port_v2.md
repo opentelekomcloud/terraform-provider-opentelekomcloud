@@ -48,6 +48,11 @@ The following arguments are supported:
   port. The security groups must be specified by ID and not name (as opposed
   to how they are configured with the Compute Instance).
 
+* `no_security_groups` - (Optional) If set to `true`, then no security groups
+  are applied to the port. If set to `false` and no `security_group_ids` are specified,
+  then the port will yield to the default behavior of the Networking service,
+  which is to usually apply the `"default"` security group.
+
 * `device_id` - (Optional) The ID of the device attached to the port. Changing this
   creates a new port.
 
@@ -74,6 +79,13 @@ The `allowed_address_pairs` block supports:
 
 * `mac_address` - (Optional) The additional MAC address.
 
+* `port_security_enabled` - (Optional) Whether to explicitly enable or disable
+  port security on the port. Port Security is usually enabled by default, so
+  omitting argument will usually result in a value of `true`. Setting this
+  explicitly to `false` will disable port security. In order to disable port
+  security, the port must not have any security groups. Valid values are `true`
+  and `false`.
+
 ## Attributes Reference
 
 The following attributes are exported:
@@ -93,6 +105,8 @@ The following attributes are exported:
 * `fixed_ip` - See Argument Reference above.
 
 * `all fixed_ips` - The collection of Fixed IP addresses on the port in the order returned by the Network v2 API.
+
+* `port_security_enabled` - See Argument Reference above.
 
 ## Import
 
