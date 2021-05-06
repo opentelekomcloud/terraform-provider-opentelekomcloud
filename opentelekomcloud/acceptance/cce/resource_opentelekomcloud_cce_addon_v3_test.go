@@ -55,7 +55,7 @@ func TestAccCCEAddonV3ForceNewCCE(t *testing.T) {
 			{
 				Config: testAccCCEAddonV3ForceNew,
 				Check: resource.ComposeTestCheckFunc(
-					checkScaleDownForAutoscaler(resName, false),
+					checkScaleDownForAutoscaler(resName, true),
 					resource.TestCheckResourceAttr(resName, "values.0.custom.scaleDownDelayAfterDelete", "11"),
 				),
 			},
@@ -239,12 +239,12 @@ resource "opentelekomcloud_cce_addon_v3" "autoscaler" {
     custom = {
       "coresTotal": 32000,
       "maxEmptyBulkDeleteFlag": 10,
-      "maxNodesTotal": 100,
+      "maxNodesTotal": 1000,
       "memoryTotal": 128000,
-      "scaleDownDelayAfterAdd": 9,
-      "scaleDownDelayAfterDelete": 8,
-      "scaleDownDelayAfterFailure": 4,
-      "scaleDownEnabled": false,
+      "scaleDownDelayAfterAdd": 11,
+      "scaleDownDelayAfterDelete": 11,
+      "scaleDownDelayAfterFailure": 3,
+      "scaleDownEnabled": true,
       "scaleDownUnneededTime": 10,
       "scaleDownUtilizationThreshold": 0.25,
       "scaleUpCpuUtilizationThreshold": 0.8,
