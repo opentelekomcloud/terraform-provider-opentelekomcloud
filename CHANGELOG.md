@@ -1,5 +1,24 @@
 ## 1.24.0 (Unreleased)
 
+## 1.23.10 (May 6, 2021)
+
+* **New Data Source:** `vpc_eip_v1` ([#1042](https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/1042))
+
+ENHANCEMENTS:
+* `resource/opentelekomcloud_networking_port_v2`: Allow to set a `port_security_enabled` ([#1045](https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/1045))
+
+BUG FIXES:
+* `resource/opentelekomcloud_cce_addon_v3`: Fix issue with CCE cluster recreation with installed addon ([#1047](https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/issues/1047))
+
+DOCUMENTATION:
+* `resource/opentelekomcloud_networking_port_v2`: Add missing field `no_security_groups` ([#1045](https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/1045))
+
+NOTES/DEPRECATIONS:
+* `resource/opentelekomcloud_elb_backend`: Classic load balancers are no longer provided. Please use elastic load balancers instead ([#1035](https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/1035))
+* `resource/opentelekomcloud_elb_health`: Classic load balancers are no longer provided. Please use elastic load balancers instead ([#1035](https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/1035))
+* `resource/opentelekomcloud_elb_listener`: Classic load balancers are no longer provided. Please use elastic load balancers instead ([#1035](https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/1035))
+* `resource/opentelekomcloud_elb_loadbalacer`: Classic load balancers are no longer provided. Please use elastic load balancers instead ([#1035](https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/1035))
+
 ## 1.23.9 (April 28, 2021)
 
 ENHANCEMENTS:
