@@ -28,6 +28,7 @@ func ResourceCCEAddonV3() *schema.Resource {
 			"cluster_id": {
 				Type:     schema.TypeString,
 				Required: true,
+				ForceNew: true,
 			},
 			"template_name": {
 				Type:     schema.TypeString,
