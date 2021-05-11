@@ -28,7 +28,6 @@ func TestAccLBV2Pool_basic(t *testing.T) {
 					testAccCheckLBV2PoolExists(resourceName, &pool),
 					resource.TestCheckResourceAttr(resourceName, "name", "pool_1"),
 					resource.TestCheckResourceAttr(resourceName, "lb_method", "ROUND_ROBIN"),
-					resource.TestCheckResourceAttr(resourceName, "admin_state_up", "false"),
 				),
 			},
 			{
