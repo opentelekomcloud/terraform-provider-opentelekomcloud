@@ -5,8 +5,10 @@ import (
 	"log"
 	"time"
 
+	"github.com/hashicorp/go-multierror"
 	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/helper/validation"
 
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/networking/v2/extensions/lbaas_v2/pools"
 
@@ -14,12 +16,12 @@ import (
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common/cfg"
 )
 
-func ResourcePoolV2() *schema.Resource {
+func ResourceLBPoolV2() *schema.Resource {
 	return &schema.Resource{
-		Create: resourcePoolV2Create,
-		Read:   resourcePoolV2Read,
-		Update: resourcePoolV2Update,
-		Delete: resourcePoolV2Delete,
+		Create: resourceLBPoolV2Create,
+		Read:   resourceLBPoolV2Read,
+		Update: resourceLBPoolV2Update,
+		Delete: resourceLBPoolV2Delete,
 
 		Timeouts: &schema.ResourceTimeout{
 			Create: schema.DefaultTimeout(10 * time.Minute),
@@ -34,36 +36,27 @@ func ResourcePoolV2() *schema.Resource {
 				Computed: true,
 				ForceNew: true,
 			},
-
 			"tenant_id": {
 				Type:     schema.TypeString,
 				Optional: true,
 				Computed: true,
 				ForceNew: true,
 			},
-
 			"name": {
 				Type:     schema.TypeString,
 				Optional: true,
 			},
-
 			"description": {
 				Type:     schema.TypeString,
 				Optional: true,
 			},
-
 			"protocol": {
 				Type:     schema.TypeString,
 				Required: true,
 				ForceNew: true,
-				ValidateFunc: func(v interface{}, k string) (ws []string, errors []error) {
-					value := v.(string)
-					if value != "TCP" && value != "UDP" && value != "HTTP" {
-						errors = append(errors, fmt.Errorf(
-							"Only 'TCP', 'UDP', and 'HTTP' are supported values for 'protocol'"))
-					}
-					return
-				},
+				ValidateFunc: validation.StringInSlice([]string{
+					"TCP", "UDP", "HTTP",
+				}, false),
 			},
 
 			// One of loadbalancer_id or listener_id must be provided
@@ -72,27 +65,19 @@ func ResourcePoolV2() *schema.Resource {
 				Optional: true,
 				ForceNew: true,
 			},
-
 			// One of loadbalancer_id or listener_id must be provided
 			"listener_id": {
 				Type:     schema.TypeString,
 				Optional: true,
 				ForceNew: true,
 			},
-
 			"lb_method": {
 				Type:     schema.TypeString,
 				Required: true,
-				ValidateFunc: func(v interface{}, k string) (ws []string, errors []error) {
-					value := v.(string)
-					if value != "ROUND_ROBIN" && value != "LEAST_CONNECTIONS" && value != "SOURCE_IP" {
-						errors = append(errors, fmt.Errorf(
-							"Only 'ROUND_ROBIN', 'LEAST_CONNECTIONS', and 'SOURCE_IP' are supported values for 'lb_method'"))
-					}
-					return
-				},
+				ValidateFunc: validation.StringInSlice([]string{
+					"ROUND_ROBIN", "LEAST_CONNECTIONS", "SOURCE_IP",
+				}, false),
 			},
-
 			"persistence": {
 				Type:     schema.TypeList,
 				Optional: true,
@@ -101,18 +86,12 @@ func ResourcePoolV2() *schema.Resource {
 					Schema: map[string]*schema.Schema{
 						"type": {
 							Type:     schema.TypeString,
-							Required: true,
+							Optional: true,
 							ForceNew: true,
-							ValidateFunc: func(v interface{}, k string) (ws []string, errors []error) {
-								value := v.(string)
-								if value != "SOURCE_IP" && value != "HTTP_COOKIE" && value != "APP_COOKIE" {
-									errors = append(errors, fmt.Errorf(
-										"Only 'SOURCE_IP', 'HTTP_COOKIE', and 'APP_COOKIE' are supported values for 'persistence'"))
-								}
-								return
-							},
+							ValidateFunc: validation.StringInSlice([]string{
+								"SOURCE_IP", "HTTP_COOKIE", "APP_COOKIE",
+							}, false),
 						},
-
 						"cookie_name": {
 							Type:     schema.TypeString,
 							Optional: true,
@@ -121,7 +100,6 @@ func ResourcePoolV2() *schema.Resource {
 					},
 				},
 			},
-
 			"admin_state_up": {
 				Type:     schema.TypeBool,
 				Default:  true,
@@ -131,35 +109,45 @@ func ResourcePoolV2() *schema.Resource {
 	}
 }
 
-func resourcePoolV2Create(d *schema.ResourceData, meta interface{}) error {
+func resourcePoolV2Persistence(d *schema.ResourceData) (*pools.SessionPersistence, error) {
+	persistenceRaw := d.Get("persistence").([]interface{})
+
+	var persistence pools.SessionPersistence
+	if len(persistenceRaw) > 0 && persistenceRaw[0] != nil {
+		persistenceInfo := persistenceRaw[0].(map[string]interface{})
+
+		persistence = pools.SessionPersistence{
+			Type: persistenceInfo["type"].(string),
+		}
+		if persistence.Type == "APP_COOKIE" {
+			if persistenceInfo["cookie_name"].(string) == "" {
+				return nil, fmt.Errorf("persistence cookie_name needs to be " +
+					"set if using 'APP_COOKIE' persistence type")
+			}
+			persistence.CookieName = persistenceInfo["cookie_name"].(string)
+		} else {
+			if persistenceInfo["cookie_name"].(string) != "" {
+				return nil, fmt.Errorf("persistence cookie_name can only be " +
+					"set if using 'APP_COOKIE' persistence type")
+			}
+		}
+		return &persistence, nil
+	}
+	return nil, nil
+}
+
+func resourceLBPoolV2Create(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*cfg.Config)
-	networkingClient, err := config.NetworkingV2Client(config.GetRegion(d))
+	client, err := config.NetworkingV2Client(config.GetRegion(d))
 	if err != nil {
-		return fmt.Errorf("Error creating OpenTelekomCloud networking client: %s", err)
+		return fmt.Errorf("error creating OpenTelekomCloud NetworkingV2 client: %w", err)
 	}
 
 	adminStateUp := d.Get("admin_state_up").(bool)
-	var persistence pools.SessionPersistence
-	if p, ok := d.GetOk("persistence"); ok {
-		pV := (p.([]interface{}))[0].(map[string]interface{})
 
-		persistence = pools.SessionPersistence{
-			Type: pV["type"].(string),
-		}
-
-		if persistence.Type == "APP_COOKIE" {
-			if pV["cookie_name"].(string) == "" {
-				return fmt.Errorf(
-					"Persistence cookie_name needs to be set if using 'APP_COOKIE' persistence type.")
-			} else {
-				persistence.CookieName = pV["cookie_name"].(string)
-			}
-		} else {
-			if pV["cookie_name"].(string) != "" {
-				return fmt.Errorf(
-					"Persistence cookie_name can only be set if using 'APP_COOKIE' persistence type.")
-			}
-		}
+	persistence, err := resourcePoolV2Persistence(d)
+	if err != nil {
+		return err
 	}
 
 	createOpts := pools.CreateOpts{
@@ -174,8 +162,8 @@ func resourcePoolV2Create(d *schema.ResourceData, meta interface{}) error {
 	}
 
 	// Must omit if not set
-	if persistence != (pools.SessionPersistence{}) {
-		createOpts.Persistence = &persistence
+	if persistence != nil {
+		createOpts.Persistence = persistence
 	}
 
 	log.Printf("[DEBUG] Create Options: %#v", createOpts)
@@ -185,14 +173,12 @@ func resourcePoolV2Create(d *schema.ResourceData, meta interface{}) error {
 	lbID := createOpts.LoadbalancerID
 	listenerID := createOpts.ListenerID
 	if lbID != "" {
-		err = waitForLBV2LoadBalancer(networkingClient, lbID, "ACTIVE", nil, timeout)
-		if err != nil {
+		if err := waitForLBV2LoadBalancer(client, lbID, "ACTIVE", nil, timeout); err != nil {
 			return err
 		}
 	} else if listenerID != "" {
 		// Wait for Listener to become active before continuing
-		err = waitForLBV2Listener(networkingClient, listenerID, "ACTIVE", nil, timeout)
-		if err != nil {
+		if err := waitForLBV2Listener(client, listenerID, "ACTIVE", nil, timeout); err != nil {
 			return err
 		}
 	}
@@ -200,23 +186,22 @@ func resourcePoolV2Create(d *schema.ResourceData, meta interface{}) error {
 	log.Printf("[DEBUG] Attempting to create pool")
 	var pool *pools.Pool
 	err = resource.Retry(timeout, func() *resource.RetryError {
-		pool, err = pools.Create(networkingClient, createOpts).Extract()
+		pool, err = pools.Create(client, createOpts).Extract()
 		if err != nil {
 			return common.CheckForRetryableError(err)
 		}
 		return nil
 	})
-
 	if err != nil {
-		return fmt.Errorf("Error creating pool: %s", err)
+		return fmt.Errorf("error creating pool: %w", err)
 	}
 
 	// Wait for LoadBalancer to become active before continuing
 	if lbID != "" {
-		err = waitForLBV2LoadBalancer(networkingClient, lbID, "ACTIVE", nil, timeout)
+		err = waitForLBV2LoadBalancer(client, lbID, "ACTIVE", nil, timeout)
 	} else {
 		// Pool exists by now so we can ask for lbID
-		err = waitForLBV2viaPool(networkingClient, pool.ID, "ACTIVE", timeout)
+		err = waitForLBV2viaPool(client, pool.ID, "ACTIVE", timeout)
 	}
 	if err != nil {
 		return err
@@ -224,43 +209,49 @@ func resourcePoolV2Create(d *schema.ResourceData, meta interface{}) error {
 
 	d.SetId(pool.ID)
 
-	return resourcePoolV2Read(d, meta)
+	return resourceLBPoolV2Read(d, meta)
 }
 
-func resourcePoolV2Read(d *schema.ResourceData, meta interface{}) error {
+func resourceLBPoolV2Read(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*cfg.Config)
-	networkingClient, err := config.NetworkingV2Client(config.GetRegion(d))
+	client, err := config.NetworkingV2Client(config.GetRegion(d))
 	if err != nil {
-		return fmt.Errorf("Error creating OpenTelekomCloud networking client: %s", err)
+		return fmt.Errorf("error creating OpenTelekomCloud NetworkingV2 client: %w", err)
 	}
 
-	pool, err := pools.Get(networkingClient, d.Id()).Extract()
+	pool, err := pools.Get(client, d.Id()).Extract()
 	if err != nil {
 		return common.CheckDeleted(d, err, "pool")
 	}
 
 	log.Printf("[DEBUG] Retrieved pool %s: %#v", d.Id(), pool)
 
-	d.Set("lb_method", pool.LBMethod)
-	d.Set("protocol", pool.Protocol)
-	d.Set("description", pool.Description)
-	d.Set("tenant_id", pool.TenantID)
-	d.Set("admin_state_up", pool.AdminStateUp)
-	d.Set("name", pool.Name)
-	d.Set("id", pool.ID)
+	mErr := multierror.Append(
+		d.Set("lb_method", pool.LBMethod),
+		d.Set("protocol", pool.Protocol),
+		d.Set("description", pool.Description),
+		d.Set("tenant_id", pool.TenantID),
+		d.Set("admin_state_up", pool.AdminStateUp),
+		d.Set("name", pool.Name),
+		d.Set("region", config.GetRegion(d)),
+	)
+
+	if mErr.ErrorOrNil() != nil {
+		return mErr
+	}
+
 	log.Printf("[DEBUG] pool persistence: %+v", pool.Persistence)
 	// UNDONE: This needs to check for failure, and it currently fails...
 	// d.Set("persistence", pool.Persistence);
-	d.Set("region", config.GetRegion(d))
 
 	return nil
 }
 
-func resourcePoolV2Update(d *schema.ResourceData, meta interface{}) error {
+func resourceLBPoolV2Update(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*cfg.Config)
-	networkingClient, err := config.NetworkingV2Client(config.GetRegion(d))
+	client, err := config.NetworkingV2Client(config.GetRegion(d))
 	if err != nil {
-		return fmt.Errorf("Error creating OpenTelekomCloud networking client: %s", err)
+		return fmt.Errorf("error creating OpenTelekomCloud NetworkingV2 client: %w", err)
 	}
 
 	var updateOpts pools.UpdateOpts
@@ -282,9 +273,9 @@ func resourcePoolV2Update(d *schema.ResourceData, meta interface{}) error {
 	timeout := d.Timeout(schema.TimeoutUpdate)
 	lbID := d.Get("loadbalancer_id").(string)
 	if lbID != "" {
-		err = waitForLBV2LoadBalancer(networkingClient, lbID, "ACTIVE", nil, timeout)
+		err = waitForLBV2LoadBalancer(client, lbID, "ACTIVE", nil, timeout)
 	} else {
-		err = waitForLBV2viaPool(networkingClient, d.Id(), "ACTIVE", timeout)
+		err = waitForLBV2viaPool(client, d.Id(), "ACTIVE", timeout)
 	}
 	if err != nil {
 		return err
@@ -292,7 +283,7 @@ func resourcePoolV2Update(d *schema.ResourceData, meta interface{}) error {
 
 	log.Printf("[DEBUG] Updating pool %s with options: %#v", d.Id(), updateOpts)
 	err = resource.Retry(timeout, func() *resource.RetryError {
-		_, err = pools.Update(networkingClient, d.Id(), updateOpts).Extract()
+		_, err = pools.Update(client, d.Id(), updateOpts).Extract()
 		if err != nil {
 			return common.CheckForRetryableError(err)
 		}
@@ -300,42 +291,41 @@ func resourcePoolV2Update(d *schema.ResourceData, meta interface{}) error {
 	})
 
 	if err != nil {
-		return fmt.Errorf("Unable to update pool %s: %s", d.Id(), err)
+		return fmt.Errorf("unable to update pool %s: %w", d.Id(), err)
 	}
 
 	// Wait for LoadBalancer to become active before continuing
 	if lbID != "" {
-		err = waitForLBV2LoadBalancer(networkingClient, lbID, "ACTIVE", nil, timeout)
+		err = waitForLBV2LoadBalancer(client, lbID, "ACTIVE", nil, timeout)
 	} else {
-		err = waitForLBV2viaPool(networkingClient, d.Id(), "ACTIVE", timeout)
+		err = waitForLBV2viaPool(client, d.Id(), "ACTIVE", timeout)
 	}
 	if err != nil {
 		return err
 	}
 
-	return resourcePoolV2Read(d, meta)
+	return resourceLBPoolV2Read(d, meta)
 }
 
-func resourcePoolV2Delete(d *schema.ResourceData, meta interface{}) error {
+func resourceLBPoolV2Delete(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*cfg.Config)
-	networkingClient, err := config.NetworkingV2Client(config.GetRegion(d))
+	client, err := config.NetworkingV2Client(config.GetRegion(d))
 	if err != nil {
-		return fmt.Errorf("Error creating OpenTelekomCloud networking client: %s", err)
+		return fmt.Errorf("error creating OpenTelekomCloud NetworkingV2 client: %w", err)
 	}
 
 	// Wait for LoadBalancer to become active before continuing
 	timeout := d.Timeout(schema.TimeoutDelete)
 	lbID := d.Get("loadbalancer_id").(string)
 	if lbID != "" {
-		err = waitForLBV2LoadBalancer(networkingClient, lbID, "ACTIVE", nil, timeout)
-		if err != nil {
+		if err := waitForLBV2LoadBalancer(client, lbID, "ACTIVE", nil, timeout); err != nil {
 			return err
 		}
 	}
 
 	log.Printf("[DEBUG] Attempting to delete pool %s", d.Id())
 	err = resource.Retry(timeout, func() *resource.RetryError {
-		err = pools.Delete(networkingClient, d.Id()).ExtractErr()
+		err = pools.Delete(client, d.Id()).ExtractErr()
 		if err != nil {
 			return common.CheckForRetryableError(err)
 		}
@@ -343,10 +333,10 @@ func resourcePoolV2Delete(d *schema.ResourceData, meta interface{}) error {
 	})
 
 	if lbID != "" {
-		err = waitForLBV2LoadBalancer(networkingClient, lbID, "ACTIVE", nil, timeout)
+		err = waitForLBV2LoadBalancer(client, lbID, "ACTIVE", nil, timeout)
 	} else {
 		// Wait for Pool to delete
-		err = waitForLBV2Pool(networkingClient, d.Id(), "DELETED", nil, timeout)
+		err = waitForLBV2Pool(client, d.Id(), "DELETED", nil, timeout)
 	}
 	if err != nil {
 		return err

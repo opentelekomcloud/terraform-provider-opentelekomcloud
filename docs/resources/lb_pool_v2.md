@@ -36,27 +36,26 @@ The following arguments are supported:
 * `protocol` - (Required) The protocol - can either be TCP, UDP or HTTP.
   Changing this creates a new pool.
 
--> **Note:** When a pool is added to a specific listener, the relationships between the load balancer protocol
-  and the pool protocol are as follows.
-  When the load balancer protocol is `UDP`, the pool protocol must be `UDP`.
-  When the load balancer protocol is `TCP`, the pool protocol must be `TCP`.
-  When the load balancer protocol is `HTTP` or `TERMINATED_HTTPS`, the pool protocol must be `HTTP`.
+-> When a pool is added to a specific listener, the relationships between the load balancer protocol
+and the pool protocol are as follows. When the load balancer protocol is `UDP`, the pool protocol must be `UDP`.
+When the load balancer protocol is `TCP`, the pool protocol must be `TCP`.
+When the load balancer protocol is `HTTP` or `TERMINATED_HTTPS`, the pool protocol must be `HTTP`.
 
 * `loadbalancer_id` - (Optional) The load balancer on which to provision this
   pool. Changing this creates a new pool.
 
--> **Note:**  One of LoadbalancerID or ListenerID must be provided.
+-> One of `loadbalancer_id` or `listener_id` must be provided.
 
 * `listener_id` - (Optional) The Listener on which the members of the pool
   will be associated with. Changing this creates a new pool.
 
--> **Note:**  One of LoadbalancerID or ListenerID must be provided.
+-> One of `loadbalancer_id` or `listener_id` must be provided.
 
 * `lb_method` - (Required) The load balancing algorithm to
   distribute traffic to the pool's members. Must be one of
   `ROUND_ROBIN`, `LEAST_CONNECTIONS`, or `SOURCE_IP`.
 
-* `persistence` - Omit this field to prevent session persistence. Indicates
+* `persistence` - (Optional) Omit this field to prevent session persistence. Indicates
   whether connections in the same session will be processed by the same Pool
   member or not. Changing this creates a new pool.
 
@@ -65,7 +64,7 @@ The following arguments are supported:
 
 The `persistence` argument supports:
 
-* `type` - (Required) The type of persistence mode. The current specification
+* `type` - (Optional; Required if `type != null`) The type of persistence mode. The current specification
   supports `SOURCE_IP`, `HTTP_COOKIE`, and `APP_COOKIE`.
 
 * `cookie_name` - (Optional; Required if `type = APP_COOKIE`) The name of the cookie if persistence mode is set
