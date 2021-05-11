@@ -343,7 +343,7 @@ func Provider() terraform.ResourceProvider {
 			"opentelekomcloud_lb_listener_v2":                     elb.ResourceListenerV2(),
 			"opentelekomcloud_lb_member_v2":                       elb.ResourceMemberV2(),
 			"opentelekomcloud_lb_monitor_v2":                      elb.ResourceMonitorV2(),
-			"opentelekomcloud_lb_pool_v2":                         elb.ResourcePoolV2(),
+			"opentelekomcloud_lb_pool_v2":                         elb.ResourceLBPoolV2(),
 			"opentelekomcloud_lb_whitelist_v2":                    elb.ResourceWhitelistV2(),
 			"opentelekomcloud_logtank_group_v2":                   lts.ResourceLTSGroupV2(),
 			"opentelekomcloud_logtank_topic_v2":                   lts.ResourceLTSTopicV2(),
