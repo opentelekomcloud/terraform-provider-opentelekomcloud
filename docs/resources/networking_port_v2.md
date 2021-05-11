@@ -53,6 +53,13 @@ The following arguments are supported:
   then the port will yield to the default behavior of the Networking service,
   which is to usually apply the `"default"` security group.
 
+* `port_security_enabled` - (Optional) Whether to explicitly enable or disable
+  port security on the port. Port Security is usually enabled by default, so
+  omitting argument will usually result in a value of `true`. Setting this
+  explicitly to `false` will disable port security. In order to disable port
+  security, the port must not have any security groups. Valid values are `true`
+  and `false`.
+
 * `device_id` - (Optional) The ID of the device attached to the port. Changing this
   creates a new port.
 
@@ -79,12 +86,6 @@ The `allowed_address_pairs` block supports:
 
 * `mac_address` - (Optional) The additional MAC address.
 
-* `port_security_enabled` - (Optional) Whether to explicitly enable or disable
-  port security on the port. Port Security is usually enabled by default, so
-  omitting argument will usually result in a value of `true`. Setting this
-  explicitly to `false` will disable port security. In order to disable port
-  security, the port must not have any security groups. Valid values are `true`
-  and `false`.
 
 ## Attributes Reference
 
