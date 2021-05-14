@@ -7,6 +7,7 @@
 //
 // The end result, from the user's point of view, is a structured set of
 // understandable network information within the instance resource.
+
 package ecs
 
 import (
@@ -74,16 +75,15 @@ type InstanceNetwork struct {
 func getAllInstanceNetworks(d *schema.ResourceData, meta interface{}) ([]InstanceNetwork, error) {
 	var instanceNetworks []InstanceNetwork
 
-	networks := d.Get("network").([]interface{})
-	for _, v := range networks {
+	networksRaw := d.Get("network").([]interface{})
+	for _, v := range networksRaw {
 		network := v.(map[string]interface{})
 		networkID := network["uuid"].(string)
 		networkName := network["name"].(string)
 		portID := network["port"].(string)
 
 		if networkID == "" && networkName == "" && portID == "" {
-			return nil, fmt.Errorf(
-				"At least one of network.uuid, network.name, or network.port must be set.")
+			return nil, fmt.Errorf("at least one of network.uuid, network.name, or network.port must be set")
 		}
 
 		// If a user specified both an ID and name, that makes things easy
@@ -162,7 +162,7 @@ func GetInstanceNetworkInfo(
 		if err == nil {
 			networkInfo, err := getInstanceNetworkInfoNeutron(networkClient, queryType, queryTerm)
 			if err != nil {
-				return nil, fmt.Errorf("Error trying to get network information from the Network API: %s", err)
+				return nil, fmt.Errorf("error trying to get network information from the Network API: %w", err)
 			}
 
 			return networkInfo, nil
@@ -173,12 +173,12 @@ func GetInstanceNetworkInfo(
 
 	computeClient, err := config.ComputeV2Client(config.GetRegion(d))
 	if err != nil {
-		return nil, fmt.Errorf("Error creating OpenTelekomCloud compute client: %s", err)
+		return nil, fmt.Errorf("error creating OpenTelekomCloud compute client: %w", err)
 	}
 
 	networkInfo, err := getInstanceNetworkInfoNovaNet(computeClient, queryType, queryTerm)
 	if err != nil {
-		return nil, fmt.Errorf("Error trying to get network information from the Nova API: %s", err)
+		return nil, fmt.Errorf("error trying to get network information from the Nova API: %w", err)
 	}
 
 	return networkInfo, nil
@@ -191,20 +191,17 @@ func getInstanceNetworkInfoNovaNet(
 
 	// If somehow a port ended up here, we should just error out.
 	if queryType == "port" {
-		return nil, fmt.Errorf(
-			"Unable to query a port (%s) using the Nova API", queryTerm)
+		return nil, fmt.Errorf("unable to query a port (%s) using the Nova API", queryTerm)
 	}
 
 	allPages, err := tenantnetworks.List(client).AllPages()
 	if err != nil {
-		return nil, fmt.Errorf(
-			"An error occurred while querying the Nova API for network information: %s", err)
+		return nil, fmt.Errorf("an error occurred while querying the Nova API for network information: %w", err)
 	}
 
 	networkList, err := tenantnetworks.ExtractNetworks(allPages)
 	if err != nil {
-		return nil, fmt.Errorf(
-			"An error occurred while querying the Nova API for network information: %s", err)
+		return nil, fmt.Errorf("an error occurred while querying the Nova API for network information: %w", err)
 	}
 
 	var networkFound bool
@@ -234,7 +231,7 @@ func getInstanceNetworkInfoNovaNet(
 		return v, nil
 	}
 
-	return nil, fmt.Errorf("Could not find any matching network for %s %s", queryType, queryTerm)
+	return nil, fmt.Errorf("could not find any matching network for %s %s", queryType, queryTerm)
 }
 
 // getInstanceNetworkInfoNeutron will query the neutron API for the network
@@ -250,22 +247,22 @@ func getInstanceNetworkInfoNeutron(
 		}
 		allPages, err := ports.List(client, listOpts).AllPages()
 		if err != nil {
-			return nil, fmt.Errorf("Unable to retrieve networks from the Network API: %s", err)
+			return nil, fmt.Errorf("unable to retrieve networks from the Network API: %w", err)
 		}
 
 		allPorts, err := ports.ExtractPorts(allPages)
 		if err != nil {
-			return nil, fmt.Errorf("Unable to retrieve networks from the Network API: %s", err)
+			return nil, fmt.Errorf("unable to retrieve networks from the Network API: %w", err)
 		}
 
 		var port ports.Port
 		switch len(allPorts) {
 		case 0:
-			return nil, fmt.Errorf("Could not find any matching port for %s %s", queryType, queryTerm)
+			return nil, fmt.Errorf("could not find any matching port for %s %s", queryType, queryTerm)
 		case 1:
 			port = allPorts[0]
 		default:
-			return nil, fmt.Errorf("More than one port found for %s %s", queryType, queryTerm)
+			return nil, fmt.Errorf("more than one port found for %s %s", queryType, queryTerm)
 		}
 
 		queryType = "id"
@@ -285,22 +282,22 @@ func getInstanceNetworkInfoNeutron(
 
 	allPages, err := networks.List(client, listOpts).AllPages()
 	if err != nil {
-		return nil, fmt.Errorf("Unable to retrieve networks from the Network API: %s", err)
+		return nil, fmt.Errorf("unable to retrieve networks from the Network API: %w", err)
 	}
 
 	allNetworks, err := networks.ExtractNetworks(allPages)
 	if err != nil {
-		return nil, fmt.Errorf("Unable to retrieve networks from the Network API: %s", err)
+		return nil, fmt.Errorf("unable to retrieve networks from the Network API: %w", err)
 	}
 
 	var network networks.Network
 	switch len(allNetworks) {
 	case 0:
-		return nil, fmt.Errorf("Could not find any matching network for %s %s", queryType, queryTerm)
+		return nil, fmt.Errorf("could not find any matching network for %s %s", queryType, queryTerm)
 	case 1:
 		network = allNetworks[0]
 	default:
-		return nil, fmt.Errorf("More than one network found for %s %s", queryType, queryTerm)
+		return nil, fmt.Errorf("more than one network found for %s %s", queryType, queryTerm)
 	}
 
 	v := map[string]interface{}{
@@ -371,17 +368,17 @@ func getInstanceAddresses(addresses map[string]interface{}) []InstanceAddresses 
 // expandInstanceNetworks takes network information found in []InstanceNetwork
 // and builds a golangsdk []servers.Network for use in creating an Instance.
 func expandInstanceNetworks(allInstanceNetworks []InstanceNetwork) []servers.Network {
-	var networks []servers.Network
+	var networkList []servers.Network
 	for _, v := range allInstanceNetworks {
 		n := servers.Network{
 			UUID:    v.UUID,
 			Port:    v.Port,
 			FixedIP: v.FixedIP,
 		}
-		networks = append(networks, n)
+		networkList = append(networkList, n)
 	}
 
-	return networks
+	return networkList
 }
 
 // FlattenInstanceNetworks collects instance network information from different
@@ -392,12 +389,17 @@ func FlattenInstanceNetworks(
 	config := meta.(*cfg.Config)
 	computeClient, err := config.ComputeV2Client(config.GetRegion(d))
 	if err != nil {
-		return nil, fmt.Errorf("Error creating OpenTelekomCloud compute client: %s", err)
+		return nil, fmt.Errorf("error creating OpenTelekomCloud compute client: %w", err)
 	}
 
 	server, err := servers.Get(computeClient, d.Id()).Extract()
 	if err != nil {
 		return nil, common.CheckDeleted(d, err, "server")
+	}
+
+	serverNICs, err := servers.GetNICs(computeClient, server.ID).Extract()
+	if err != nil {
+		return nil, err
 	}
 
 	allInstanceAddresses := getInstanceAddresses(server.Addresses)
@@ -406,7 +408,7 @@ func FlattenInstanceNetworks(
 		return nil, err
 	}
 
-	networks := []map[string]interface{}{}
+	var networkList []map[string]interface{}
 
 	// If there were no instance networks returned, this means that there
 	// was not a network specified in the Terraform configuration. When this
@@ -423,24 +425,21 @@ func FlattenInstanceNetworks(
 					"mac":         instanceNIC.MAC,
 				}
 
-				// Use the same method as getAllInstanceNetworks to get the network uuid
-				networkInfo, err := GetInstanceNetworkInfo(d, meta, "name", instanceAddresses.NetworkName)
-				if err != nil {
-					log.Printf("[WARN] Error getting default network uuid: %s", err)
-				} else {
-					if v["uuid"] != nil {
-						v["uuid"] = networkInfo["uuid"].(string)
-					} else {
-						log.Printf("[WARN] Could not get default network uuid")
+				for _, nicObj := range serverNICs {
+					if nicObj.MACAddress == instanceNIC.MAC {
+						v["uuid"] = nicObj.NetID
 					}
 				}
+				if v["uuid"] == "" {
+					log.Printf("[WARN] Could not get default network uuid")
+				}
 
-				networks = append(networks, v)
+				networkList = append(networkList, v)
 			}
 		}
 
-		log.Printf("[DEBUG] flattenInstanceNetworks: %#v", networks)
-		return networks, nil
+		log.Printf("[DEBUG] flattenInstanceNetworks: %#v", networkList)
+		return networkList, nil
 	}
 
 	// Loop through all networks and addresses, merge relevant address details.
@@ -465,22 +464,20 @@ func FlattenInstanceNetworks(
 					"port":           instanceNetwork.Port,
 					"access_network": instanceNetwork.AccessNetwork,
 				}
-				networks = append(networks, v)
+				networkList = append(networkList, v)
 			}
 		}
 	}
 
-	log.Printf("[DEBUG] flattenInstanceNetworks: %#v", networks)
-	return networks, nil
+	log.Printf("[DEBUG] flattenInstanceNetworks: %#v", networkList)
+	return networkList, nil
 }
 
 // GetInstanceAccessAddresses determines the best IP address to communicate
 // with the instance. It does this by looping through all networks and looking
 // for a valid IP address. Priority is given to a network that was flagged as
 // an access_network.
-func GetInstanceAccessAddresses(
-	d *schema.ResourceData, networks []map[string]interface{}) (string, string) {
-
+func GetInstanceAccessAddresses(d *schema.ResourceData, networks []map[string]interface{}) (string, string) {
 	var hostv4, hostv6 string
 
 	// Loop through all networks

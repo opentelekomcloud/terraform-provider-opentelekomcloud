@@ -347,7 +347,7 @@ func resourceComputeInstanceV2Create(d *schema.ResourceData, meta interface{}) e
 	config := meta.(*cfg.Config)
 	client, err := config.ComputeV2Client(config.GetRegion(d))
 	if err != nil {
-		return fmt.Errorf("error creating OpenTelekomCloud ComputeV2 client: %s", err)
+		return fmt.Errorf("error creating OpenTelekomCloud ComputeV2 client: %w", err)
 	}
 
 	var createOpts servers.CreateOptsBuilder
@@ -438,7 +438,7 @@ func resourceComputeInstanceV2Create(d *schema.ResourceData, meta interface{}) e
 	}
 
 	if err != nil {
-		return fmt.Errorf("error creating OpenTelekomCloud server: %s", err)
+		return fmt.Errorf("error creating OpenTelekomCloud server: %w", err)
 	}
 	log.Printf("[INFO] Instance ID: %s", server.ID)
 
@@ -467,7 +467,7 @@ func resourceComputeInstanceV2Create(d *schema.ResourceData, meta interface{}) e
 	if strings.ToLower(vmState) == "shutoff" {
 		err = startstop.Stop(client, d.Id()).ExtractErr()
 		if err != nil {
-			return fmt.Errorf("error stopping server instance: %s", err)
+			return fmt.Errorf("error stopping server instance: %w", err)
 		}
 		stopStateConf := &resource.StateChangeConf{
 			Target:     []string{"SHUTOFF"},
@@ -498,11 +498,11 @@ func resourceComputeInstanceV2Create(d *schema.ResourceData, meta interface{}) e
 	if len(tagRaw) > 0 {
 		computeClient, err := config.ComputeV1Client(config.GetRegion(d))
 		if err != nil {
-			return fmt.Errorf("error creating OpenTelekomCloud ComputeV1 client: %s", err)
+			return fmt.Errorf("error creating OpenTelekomCloud ComputeV1 client: %w", err)
 		}
 		tagList := common.ExpandResourceTags(tagRaw)
 		if err := tags.Create(computeClient, "cloudservers", server.ID, tagList).ExtractErr(); err != nil {
-			return fmt.Errorf("error setting tags of CloudServer: %s", err)
+			return fmt.Errorf("error setting tags of CloudServer: %w", err)
 		}
 	}
 
@@ -513,7 +513,7 @@ func resourceComputeInstanceV2Read(d *schema.ResourceData, meta interface{}) err
 	config := meta.(*cfg.Config)
 	client, err := config.ComputeV2Client(config.GetRegion(d))
 	if err != nil {
-		return fmt.Errorf("error creating OpenTelekomCloud ComputeV2 client: %s", err)
+		return fmt.Errorf("error creating OpenTelekomCloud ComputeV2 client: %w", err)
 	}
 
 	server, err := servers.Get(client, d.Id()).Extract()
@@ -644,18 +644,18 @@ func resourceComputeInstanceV2Read(d *schema.ResourceData, meta interface{}) err
 
 	ar, err := resourceECSAutoRecoveryV1Read(d, meta, d.Id())
 	if err != nil && !common.IsResourceNotFound(err) {
-		return fmt.Errorf("error reading auto recovery of instance: %s", err)
+		return fmt.Errorf("error reading auto recovery of instance: %w", err)
 	}
 	mErr = multierror.Append(mErr, d.Set("auto_recovery", ar))
 
 	computeClient, err := config.ComputeV1Client(config.GetRegion(d))
 	if err != nil {
-		return fmt.Errorf("error creating OpenTelekomCloud ComputeV1 client: %s", err)
+		return fmt.Errorf("error creating OpenTelekomCloud ComputeV1 client: %w", err)
 	}
 	// save tags
 	resourceTags, err := tags.Get(computeClient, "cloudservers", d.Id()).Extract()
 	if err != nil {
-		return fmt.Errorf("error fetching OpenTelekomCloud CloudServers tags: %s", err)
+		return fmt.Errorf("error fetching OpenTelekomCloud CloudServers tags: %w", err)
 	}
 	tagMap := common.TagsToMap(resourceTags)
 	mErr = multierror.Append(mErr, d.Set("tags", tagMap))
@@ -671,7 +671,7 @@ func resourceComputeInstanceV2Update(d *schema.ResourceData, meta interface{}) e
 	config := meta.(*cfg.Config)
 	client, err := config.ComputeV2Client(config.GetRegion(d))
 	if err != nil {
-		return fmt.Errorf("error creating OpenTelekomCloud ComputeV2 client: %s", err)
+		return fmt.Errorf("error creating OpenTelekomCloud ComputeV2 client: %w", err)
 	}
 
 	var updateOpts servers.UpdateOpts
@@ -682,7 +682,7 @@ func resourceComputeInstanceV2Update(d *schema.ResourceData, meta interface{}) e
 	if updateOpts != (servers.UpdateOpts{}) {
 		_, err := servers.Update(client, d.Id(), updateOpts).Extract()
 		if err != nil {
-			return fmt.Errorf("error updating OpenTelekomCloud server: %s", err)
+			return fmt.Errorf("error updating OpenTelekomCloud server: %w", err)
 		}
 	}
 
@@ -691,7 +691,7 @@ func resourceComputeInstanceV2Update(d *schema.ResourceData, meta interface{}) e
 		if strings.ToLower(powerStateNew) == "shutoff" {
 			err = startstop.Stop(client, d.Id()).ExtractErr()
 			if err != nil {
-				return fmt.Errorf("error stopping compute instance: %s", err)
+				return fmt.Errorf("error stopping compute instance: %w", err)
 			}
 			stopStateConf := &resource.StateChangeConf{
 				Target:     []string{"SHUTOFF"},
@@ -710,7 +710,7 @@ func resourceComputeInstanceV2Update(d *schema.ResourceData, meta interface{}) e
 		if strings.ToLower(powerStateNew) == "active" {
 			err = startstop.Start(client, d.Id()).ExtractErr()
 			if err != nil {
-				return fmt.Errorf("error starting compute instance: %s", err)
+				return fmt.Errorf("error starting compute instance: %w", err)
 			}
 			startStateConf := &resource.StateChangeConf{
 				Target:     []string{"ACTIVE"},
@@ -827,7 +827,7 @@ func resourceComputeInstanceV2Update(d *schema.ResourceData, meta interface{}) e
 		log.Printf("[DEBUG] Resize configuration: %#v", resizeOpts)
 		err = servers.Resize(client, d.Id(), resizeOpts).ExtractErr()
 		if err != nil {
-			return fmt.Errorf("error resizing OpenTelekomCloud server: %s", err)
+			return fmt.Errorf("error resizing OpenTelekomCloud server: %w", err)
 		}
 
 		// Wait for the instance to finish resizing.
@@ -851,7 +851,7 @@ func resourceComputeInstanceV2Update(d *schema.ResourceData, meta interface{}) e
 		log.Printf("[DEBUG] Confirming resize")
 		err = servers.ConfirmResize(client, d.Id()).ExtractErr()
 		if err != nil {
-			return fmt.Errorf("error confirming resize of OpenTelekomCloud server: %s", err)
+			return fmt.Errorf("error confirming resize of OpenTelekomCloud server: %w", err)
 		}
 
 		stateConf = &resource.StateChangeConf{
@@ -873,7 +873,7 @@ func resourceComputeInstanceV2Update(d *schema.ResourceData, meta interface{}) e
 	if d.HasChange("tags") {
 		computeClient, err := config.ComputeV1Client(config.GetRegion(d))
 		if err != nil {
-			return fmt.Errorf("error creating OpenTelekomCloud ComputeV1 client: %s", err)
+			return fmt.Errorf("error creating OpenTelekomCloud ComputeV1 client: %w", err)
 		}
 		if err := common.UpdateResourceTags(computeClient, d, "cloudservers", d.Id()); err != nil {
 			return fmt.Errorf("error updating tags of CloudServer %s: %s", d.Id(), err)
@@ -885,7 +885,7 @@ func resourceComputeInstanceV2Update(d *schema.ResourceData, meta interface{}) e
 		log.Printf("[DEBUG] Update auto recovery of instance to %t", ar)
 		err = setAutoRecoveryForInstance(d, meta, d.Id(), ar)
 		if err != nil {
-			return fmt.Errorf("error updating auto recovery of instance: %s", err)
+			return fmt.Errorf("error updating auto recovery of instance: %w", err)
 		}
 	}
 
@@ -896,7 +896,7 @@ func resourceComputeInstanceV2Delete(d *schema.ResourceData, meta interface{}) e
 	config := meta.(*cfg.Config)
 	client, err := config.ComputeV2Client(config.GetRegion(d))
 	if err != nil {
-		return fmt.Errorf("error creating OpenTelekomCloud ComputeV2 client: %s", err)
+		return fmt.Errorf("error creating OpenTelekomCloud ComputeV2 client: %w", err)
 	}
 
 	if d.Get("stop_before_destroy").(bool) {
@@ -907,7 +907,7 @@ func resourceComputeInstanceV2Delete(d *schema.ResourceData, meta interface{}) e
 
 	log.Printf("[DEBUG] Deleting OpenTelekomCloud Instance %s", d.Id())
 	if err := servers.Delete(client, d.Id()).ExtractErr(); err != nil {
-		return fmt.Errorf("error deleting OpenTelekomCloud server: %s", err)
+		return fmt.Errorf("error deleting OpenTelekomCloud server: %w", err)
 	}
 
 	// Wait for the instance to delete before moving on.
@@ -1182,7 +1182,7 @@ func resourceComputeInstanceV2ImportState(d *schema.ResourceData, meta interface
 	config := meta.(*cfg.Config)
 	computeClient, err := config.ComputeV2Client(config.GetRegion(d))
 	if err != nil {
-		return nil, fmt.Errorf("error creating compute v2 client: %s", err)
+		return nil, fmt.Errorf("error creating ComputeV2 client: %w", err)
 	}
 
 	results := make([]*schema.ResourceData, 1)
@@ -1208,7 +1208,7 @@ func setBlockDevice(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*cfg.Config)
 	computeClient, err := config.ComputeV2Client(config.GetRegion(d))
 	if err != nil {
-		return fmt.Errorf("error creating compute v2 client: %s", err)
+		return fmt.Errorf("error creating compute v2 client: %w", err)
 	}
 
 	raw := servers.Get(computeClient, d.Id())
@@ -1230,7 +1230,7 @@ func setBlockDevice(d *schema.ResourceData, meta interface{}) error {
 	if len(serverWithAttachments.VolumesAttached) > 0 {
 		blockStorageClient, err := config.BlockStorageV2Client(config.GetRegion(d))
 		if err != nil {
-			return fmt.Errorf("error creating volume v2 client: %s", err)
+			return fmt.Errorf("error creating volume v2 client: %w", err)
 		}
 
 		var volMetaData = struct {
