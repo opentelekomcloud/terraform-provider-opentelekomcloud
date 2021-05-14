@@ -397,6 +397,11 @@ func FlattenInstanceNetworks(
 		return nil, common.CheckDeleted(d, err, "server")
 	}
 
+	serverNICs, err := servers.GetNICs(computeClient, server.ID).Extract()
+	if err != nil {
+		return nil, err
+	}
+
 	allInstanceAddresses := getInstanceAddresses(server.Addresses)
 	allInstanceNetworks, err := getAllInstanceNetworks(d, meta)
 	if err != nil {
@@ -420,10 +425,6 @@ func FlattenInstanceNetworks(
 					"mac":         instanceNIC.MAC,
 				}
 
-				serverNICs, err := servers.GetNICs(computeClient, server.ID).Extract()
-				if err != nil {
-					return nil, err
-				}
 				for _, nicObj := range serverNICs {
 					if nicObj.MACAddress == instanceNIC.MAC {
 						v["uuid"] = nicObj.NetID
