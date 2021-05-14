@@ -528,37 +528,36 @@ func resourceComputeInstanceV2Read(d *schema.ResourceData, meta interface{}) err
 	mErr = multierror.Append(mErr, d.Set("name", server.Name))
 
 	// Get the instance network and address information
-	networks, err := FlattenInstanceNetworks(d, meta)
+	var networkList []map[string]interface{}
+	networkNICs, err := servers.GetNICs(client, server.ID).Extract()
 	if err != nil {
-		return err
+		return fmt.Errorf("error getting ECSv2 NICs: %w", err)
 	}
 
-	// Determine the best IPv4 and IPv6 addresses to access the instance with
-	hostv4, hostv6 := GetInstanceAccessAddresses(d, networks)
-
-	// AccessIPv4/v6 isn't standard in OpenTelekomCloud, but there have been reports
-	// of them being used in some environments.
-	if server.AccessIPv4 != "" && hostv4 == "" {
-		hostv4 = server.AccessIPv4
-	}
-
-	if server.AccessIPv6 != "" && hostv6 == "" {
-		hostv6 = server.AccessIPv6
+	for _, nicObj := range networkNICs {
+		nic := make(map[string]interface{})
+		nic["uuid"] = nicObj.NetID
+		nic["port"] = nicObj.PortID
+		nic["mac"] = nicObj.MACAddress
+		if len(nicObj.FixedIPs) > 0 {
+			nic["fixed_ip_v4"] = nicObj.FixedIPs[0].IPAddress
+		}
+		networkList = append(networkList, nic)
 	}
 
 	mErr = multierror.Append(mErr,
-		d.Set("network", networks),
-		d.Set("access_ip_v4", hostv4),
-		d.Set("access_ip_v6", hostv6),
+		d.Set("network", networkList),
+		d.Set("access_ip_v4", server.AccessIPv4),
+		d.Set("access_ip_v6", server.AccessIPv6),
 	)
 
 	// Determine the best IP address to use for SSH connectivity.
 	// Prefer IPv4 over IPv6.
 	var preferredSSHAddress string
-	if hostv4 != "" {
-		preferredSSHAddress = hostv4
-	} else if hostv6 != "" {
-		preferredSSHAddress = hostv6
+	if server.AccessIPv4 != "" {
+		preferredSSHAddress = server.AccessIPv4
+	} else if server.AccessIPv6 != "" {
+		preferredSSHAddress = server.AccessIPv6
 	}
 
 	if preferredSSHAddress != "" {
