@@ -16,6 +16,9 @@ func TestAccVpcEipV1DataSource_basic(t *testing.T) {
 		Providers: common.TestAccProviders,
 		Steps: []resource.TestStep{
 			{
+				Config: testAccDataSourceVpcEipV1Init,
+			},
+			{
 				Config: testAccDataSourceVpcEipV1Config,
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr(dataSourceNameByID, "type", "5_bgp"),
@@ -26,9 +29,31 @@ func TestAccVpcEipV1DataSource_basic(t *testing.T) {
 					resource.TestCheckResourceAttr(dataSourceNameByTags, "status", "DOWN"),
 				),
 			},
+			{
+				Config: testAccDataSourceVpcEipV1Init,
+			},
 		},
 	})
 }
+
+const testAccDataSourceVpcEipV1Init = `
+resource "opentelekomcloud_vpc_eip_v1" "eip" {
+  publicip {
+    type = "5_bgp"
+  }
+  bandwidth {
+    name        = "acc-band"
+    size        = 8
+    share_type  = "PER"
+    charge_mode = "traffic"
+  }
+
+  tags = {
+    muh = "value-create"
+    kuh = "value-create"
+  }
+}
+`
 
 const testAccDataSourceVpcEipV1Config = `
 resource "opentelekomcloud_vpc_eip_v1" "eip" {
@@ -53,8 +78,6 @@ data "opentelekomcloud_vpc_eip_v1" "by_id" {
 }
 
 data "opentelekomcloud_vpc_eip_v1" "by_tags" {
-  depends_on = [ opentelekomcloud_vpc_eip_v1.eip ]
-
   tags = {
     muh = "value-create"
     kuh = "value-create"
