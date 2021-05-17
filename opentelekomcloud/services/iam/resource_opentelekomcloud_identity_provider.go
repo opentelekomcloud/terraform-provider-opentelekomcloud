@@ -6,8 +6,9 @@ import (
 	"github.com/hashicorp/go-multierror"
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
 	"github.com/opentelekomcloud/gophertelekomcloud"
-	"github.com/opentelekomcloud/gophertelekomcloud/acceptance/clients"
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/identity/v3/federation/providers"
+
+	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common/cfg"
 )
 
 func ResourceIdentityProviderV3() *schema.Resource {
@@ -53,7 +54,8 @@ func ResourceIdentityProviderV3() *schema.Resource {
 }
 
 func resourceIdentityProviderV3Create(d *schema.ResourceData, meta interface{}) error {
-	client, err := clients.NewIdentityV3Client()
+	config := meta.(*cfg.Config)
+	client, err := config.IdentityV3Client(config.GetRegion(d))
 	if err != nil {
 		return fmt.Errorf(clientCreationFail, err)
 	}
@@ -75,7 +77,8 @@ func resourceIdentityProviderV3Create(d *schema.ResourceData, meta interface{}) 
 }
 
 func resourceIdentityProviderV3Read(d *schema.ResourceData, meta interface{}) error {
-	client, err := clients.NewIdentityV3Client()
+	config := meta.(*cfg.Config)
+	client, err := config.IdentityV3Client(config.GetRegion(d))
 	if err != nil {
 		return fmt.Errorf(clientCreationFail, err)
 	}
@@ -105,7 +108,8 @@ func resourceIdentityProviderV3Read(d *schema.ResourceData, meta interface{}) er
 }
 
 func resourceIdentityProviderV3Update(d *schema.ResourceData, meta interface{}) error {
-	client, err := clients.NewIdentityV3Client()
+	config := meta.(*cfg.Config)
+	client, err := config.IdentityV3Client(config.GetRegion(d))
 	if err != nil {
 		return fmt.Errorf(clientCreationFail, err)
 	}
@@ -130,7 +134,8 @@ func resourceIdentityProviderV3Update(d *schema.ResourceData, meta interface{}) 
 }
 
 func resourceIdentityProviderV3Delete(d *schema.ResourceData, meta interface{}) error {
-	client, err := clients.NewIdentityV3Client()
+	config := meta.(*cfg.Config)
+	client, err := config.IdentityV3Client(config.GetRegion(d))
 	if err != nil {
 		return fmt.Errorf(clientCreationFail, err)
 	}
