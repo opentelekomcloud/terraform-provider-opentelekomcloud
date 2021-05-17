@@ -3,7 +3,6 @@ package vpc
 import (
 	"fmt"
 	"log"
-	"reflect"
 
 	"github.com/hashicorp/go-multierror"
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
@@ -101,19 +100,28 @@ func dataSourceVPCEipV1Read(d *schema.ResourceData, meta interface{}) error {
 
 	tagRaw := d.Get("tags").(map[string]interface{})
 	var refinedByTags []eips.PublicIp
+	networkingV2Client, err := config.NetworkingV2Client(config.GetRegion(d))
+	if err != nil {
+		return fmt.Errorf("error creating OpenTelekomCloud NetworkingV2 client: %w", err)
+	}
 	if len(tagRaw) > 0 {
-		networkingV2Client, err := config.NetworkingV2Client(config.GetRegion(d))
-		if err != nil {
-			return fmt.Errorf("error creating OpenTelekomCloud NetworkingV2 client: %w", err)
-		}
 		tagList := common.ExpandResourceTags(tagRaw)
 		for _, eip := range refinedEIPs {
-			resourceTagList, err := tags.Get(networkingV2Client, "", eip.ID).Extract()
+			resourceTagList, err := tags.Get(networkingV2Client, "publicips", eip.ID).Extract()
 			if err != nil {
-				return err
+				return fmt.Errorf("error fetching OpenTelekomCloud VPC EIP tags: %w", err)
 			}
 
-			if reflect.DeepEqual(tagList, resourceTagList) {
+			var flag bool
+			for _, v := range tagList {
+				if contains(resourceTagList, v) {
+					flag = true
+					continue
+				}
+				flag = false
+				break
+			}
+			if flag {
 				refinedByTags = append(refinedByTags, eip)
 			}
 		}
@@ -150,9 +158,29 @@ func dataSourceVPCEipV1Read(d *schema.ResourceData, meta interface{}) error {
 		d.Set("region", config.GetRegion(d)),
 	)
 
+	// save tags
+	resourceTags, err := tags.Get(networkingV2Client, "publicips", d.Id()).Extract()
+	if err != nil {
+		return fmt.Errorf("error fetching OpenTelekomCloud VPC EIP tags: %w", err)
+	}
+	tagMap := common.TagsToMap(resourceTags)
+	mErr = multierror.Append(mErr,
+		d.Set("tags", tagMap),
+	)
+
 	if mErr.ErrorOrNil() != nil {
 		return mErr
 	}
 
 	return nil
+}
+
+func contains(s []tags.ResourceTag, tag tags.ResourceTag) bool {
+	for _, v := range s {
+		if v == tag {
+			return true
+		}
+	}
+
+	return false
 }

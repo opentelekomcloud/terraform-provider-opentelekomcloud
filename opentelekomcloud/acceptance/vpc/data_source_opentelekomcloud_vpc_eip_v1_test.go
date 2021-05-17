@@ -9,6 +9,7 @@ import (
 
 func TestAccVpcEipV1DataSource_basic(t *testing.T) {
 	dataSourceNameByID := "data.opentelekomcloud_vpc_eip_v1.by_id"
+	dataSourceNameByTags := "data.opentelekomcloud_vpc_eip_v1.by_tags"
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:  func() { common.TestAccPreCheck(t) },
@@ -20,6 +21,9 @@ func TestAccVpcEipV1DataSource_basic(t *testing.T) {
 					resource.TestCheckResourceAttr(dataSourceNameByID, "type", "5_bgp"),
 					resource.TestCheckResourceAttr(dataSourceNameByID, "bandwidth_share_type", "PER"),
 					resource.TestCheckResourceAttr(dataSourceNameByID, "status", "DOWN"),
+					resource.TestCheckResourceAttr(dataSourceNameByTags, "type", "5_bgp"),
+					resource.TestCheckResourceAttr(dataSourceNameByTags, "bandwidth_share_type", "PER"),
+					resource.TestCheckResourceAttr(dataSourceNameByTags, "status", "DOWN"),
 				),
 			},
 		},
@@ -37,9 +41,23 @@ resource "opentelekomcloud_vpc_eip_v1" "eip" {
     share_type  = "PER"
     charge_mode = "traffic"
   }
+
+  tags = {
+    muh = "value-create"
+    kuh = "value-create"
+  }
 }
 
 data "opentelekomcloud_vpc_eip_v1" "by_id" {
   id = opentelekomcloud_vpc_eip_v1.eip.id
+}
+
+data "opentelekomcloud_vpc_eip_v1" "by_tags" {
+  depends_on = [ opentelekomcloud_vpc_eip_v1.eip ]
+
+  tags = {
+    muh = "value-create"
+    kuh = "value-create"
+  }
 }
 `
