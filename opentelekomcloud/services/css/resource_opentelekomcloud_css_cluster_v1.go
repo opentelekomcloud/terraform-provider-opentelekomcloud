@@ -412,7 +412,7 @@ func checkCssClusterFlavorRestrictions(d *schema.ResourceDiff, meta interface{})
 		FlavorName: flavorName,
 	})
 	if flavor == nil {
-		return fmt.Errorf("can't find flavor matching criteria: %s", flavorName)
+		return fmt.Errorf("can't find flavor matching flavor name: %s", flavorName)
 	}
 
 	if size < flavor.DiskMin || size > flavor.DiskMax {
