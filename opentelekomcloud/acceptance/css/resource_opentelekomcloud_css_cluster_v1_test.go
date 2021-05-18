@@ -62,7 +62,7 @@ func TestAccCssClusterV1_validateDiskandFlavor(t *testing.T) {
 				PlanOnly:    true,
 			},
 			{
-				Config:      testAccCssClusterV1_flavorName(name),
+				Config:      testAccCssClusterV1FlavorName(name),
 				ExpectError: regexp.MustCompile(`can't find flavor matching.+`),
 				PlanOnly:    true,
 			},
@@ -166,7 +166,7 @@ resource "opentelekomcloud_css_cluster_v1" "cluster" {
 `, name, env.OS_NETWORK_ID, env.OS_VPC_ID, env.OS_AVAILABILITY_ZONE)
 }
 
-func testAccCssClusterV1_flavorName(name string) string {
+func testAccCssClusterV1FlavorName(name string) string {
 	return fmt.Sprintf(`
 data "opentelekomcloud_networking_secgroup_v2" "secgroup" {
   name = "default"
