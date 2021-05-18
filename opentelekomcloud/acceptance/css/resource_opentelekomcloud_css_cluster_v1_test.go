@@ -44,7 +44,7 @@ func TestAccCssClusterV1_basic(t *testing.T) {
 	})
 }
 
-func TestAccCssClusterV1_validateDiskRange(t *testing.T) {
+func TestAccCssClusterV1_validateDiskandFlavor(t *testing.T) {
 	name := fmt.Sprintf("css-%s", acctest.RandString(10))
 
 	resource.Test(t, resource.TestCase{
@@ -59,6 +59,11 @@ func TestAccCssClusterV1_validateDiskRange(t *testing.T) {
 			{
 				Config:      testAccCssClusterV1_tooBig(name),
 				ExpectError: regexp.MustCompile(`invalid disk size.+`),
+				PlanOnly:    true,
+			},
+			{
+				Config:      testAccCssClusterV1FlavorName(name),
+				ExpectError: regexp.MustCompile(`can't find flavor matching.+`),
 				PlanOnly:    true,
 			},
 			{
@@ -160,6 +165,38 @@ resource "opentelekomcloud_css_cluster_v1" "cluster" {
 }
 `, name, env.OS_NETWORK_ID, env.OS_VPC_ID, env.OS_AVAILABILITY_ZONE)
 }
+
+func testAccCssClusterV1FlavorName(name string) string {
+	return fmt.Sprintf(`
+data "opentelekomcloud_networking_secgroup_v2" "secgroup" {
+  name = "default"
+}
+
+resource "opentelekomcloud_css_cluster_v1" "cluster" {
+  expect_node_num = 1
+  name            = "%[1]s"
+  node_config {
+    flavor = "bla-bla-bla"
+    network_info {
+      security_group_id = data.opentelekomcloud_networking_secgroup_v2.secgroup.id
+      network_id        = "%s"
+      vpc_id            = "%s"
+    }
+    volume {
+      volume_type = "COMMON"
+      size        = 20
+    }
+
+    availability_zone = "%s"
+  }
+
+  enable_https     = true
+  enable_authority = true
+  admin_pass       = "QwertyUI!"
+}
+`, name, env.OS_NETWORK_ID, env.OS_VPC_ID, env.OS_AVAILABILITY_ZONE)
+}
+
 func testAccCssClusterV1_extend(name string) string {
 	return fmt.Sprintf(`
 data "opentelekomcloud_networking_secgroup_v2" "secgroup" {

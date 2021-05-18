@@ -411,6 +411,9 @@ func checkCssClusterFlavorRestrictions(d *schema.ResourceDiff, meta interface{})
 	flavor := flavors.FindFlavor(versions, flavors.FilterOpts{
 		FlavorName: flavorName,
 	})
+	if flavor == nil {
+		return fmt.Errorf("can't find flavor with name: %s", flavorName)
+	}
 
 	if size < flavor.DiskMin || size > flavor.DiskMax {
 		return fmt.Errorf("invalid disk size, `%s` support disk from %dGB to %dGB",
