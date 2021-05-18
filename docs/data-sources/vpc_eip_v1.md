@@ -39,6 +39,8 @@ associated with the elastic IP.
 
 * `bandwidth_id` - (Optional) The bandwidth ID of specific elastic IP.
 
+* `tags` - (Optional) Tags key/value pairs to filter the elastic IPs.
+
 ## Attributes Reference
 
 All the argument attributes are also exported as result attributes.
