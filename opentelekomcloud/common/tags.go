@@ -77,3 +77,13 @@ func ExpandResourceTags(tagMap map[string]interface{}) []tags.ResourceTag {
 
 	return tagList
 }
+
+func Contains(tagSlice []tags.ResourceTag, tag tags.ResourceTag) bool {
+	for _, v := range tagSlice {
+		if v == tag {
+			return true
+		}
+	}
+
+	return false
+}

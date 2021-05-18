@@ -114,7 +114,7 @@ func dataSourceVPCEipV1Read(d *schema.ResourceData, meta interface{}) error {
 
 			var flag bool
 			for _, v := range tagList {
-				if contains(resourceTagList, v) {
+				if common.Contains(resourceTagList, v) {
 					flag = true
 					continue
 				}
@@ -173,14 +173,4 @@ func dataSourceVPCEipV1Read(d *schema.ResourceData, meta interface{}) error {
 	}
 
 	return nil
-}
-
-func contains(s []tags.ResourceTag, tag tags.ResourceTag) bool {
-	for _, v := range s {
-		if v == tag {
-			return true
-		}
-	}
-
-	return false
 }
