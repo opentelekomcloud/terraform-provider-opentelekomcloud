@@ -161,11 +161,6 @@ func resourceRdsReadReplicaV3Create(d *schema.ResourceData, meta interface{}) er
 	}
 	d.SetId(job.Instance.Id)
 
-	// AZ is returned only in creation response
-	if err := d.Set("availability_zone", job.Instance.AvailabilityZone); err != nil {
-		return fmt.Errorf("error setting AZ for read replica: %w", err)
-	}
-
 	timeoutSeconds := d.Timeout(schema.TimeoutCreate).Seconds()
 	err = instances.WaitForJobCompleted(client, int(timeoutSeconds), job.JobId)
 	if err != nil {
