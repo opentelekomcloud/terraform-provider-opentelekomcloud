@@ -132,7 +132,8 @@ func testAccCheckCCENodePoolV3Exists(n string, cluster string, nodePool *nodepoo
 	}
 }
 
-var testAccCCENodePoolV3_basic = fmt.Sprintf(`
+var (
+	testAccCCENodePoolV3_basic = fmt.Sprintf(`
 resource "opentelekomcloud_cce_cluster_v3" "cluster" {
   name         = "opentelekomcloud-cce-np"
   cluster_type = "VirtualMachine"
@@ -154,10 +155,10 @@ resource "opentelekomcloud_cce_node_pool_v3" "node_pool" {
   key_pair           = "%s"
 
   scale_enable             = false
-  min_node_count           = 0
-  max_node_count           = 0
-  scale_down_cooldown_time = 0
-  priority                 = 0
+  min_node_count           = 1
+  max_node_count           = 3
+  scale_down_cooldown_time = 6
+  priority                 = 1
 
   root_volume {
     size       = 40
@@ -173,7 +174,7 @@ resource "opentelekomcloud_cce_node_pool_v3" "node_pool" {
   }
 }`, env.OS_VPC_ID, env.OS_NETWORK_ID, env.OS_AVAILABILITY_ZONE, env.OS_KEYPAIR_NAME)
 
-var testAccCCENodePoolV3_update = fmt.Sprintf(`
+	testAccCCENodePoolV3_update = fmt.Sprintf(`
 resource "opentelekomcloud_cce_cluster_v3" "cluster" {
   name         = "opentelekomcloud-cce-np"
   cluster_type = "VirtualMachine"
@@ -214,7 +215,7 @@ resource "opentelekomcloud_cce_node_pool_v3" "node_pool" {
   }
 }`, env.OS_VPC_ID, env.OS_NETWORK_ID, env.OS_AVAILABILITY_ZONE, env.OS_KEYPAIR_NAME)
 
-var testAccCCENodePoolV3_RandomAZ = fmt.Sprintf(`
+	testAccCCENodePoolV3_RandomAZ = fmt.Sprintf(`
 resource "opentelekomcloud_cce_cluster_v3" "cluster" {
   name         = "opentelekomcloud-cce-np"
   cluster_type = "VirtualMachine"
@@ -250,3 +251,4 @@ resource "opentelekomcloud_cce_node_pool_v3" "node_pool" {
     volumetype = "SSD"
   }
 }`, env.OS_VPC_ID, env.OS_NETWORK_ID, env.OS_KEYPAIR_NAME)
+)

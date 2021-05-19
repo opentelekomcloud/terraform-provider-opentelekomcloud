@@ -360,7 +360,7 @@ func resourceCCENodePoolV3Read(d *schema.ResourceData, meta interface{}) error {
 		return fmt.Errorf("error retrieving Open Telekom Cloud CCE Node Pool: %s", err)
 	}
 
-	me := multierror.Append(nil,
+	me := multierror.Append(
 		d.Set("name", s.Metadata.Name),
 		d.Set("flavor", s.Spec.NodeTemplate.Flavor),
 		d.Set("availability_zone", s.Spec.NodeTemplate.Az),
@@ -368,11 +368,17 @@ func resourceCCENodePoolV3Read(d *schema.ResourceData, meta interface{}) error {
 		d.Set("key_pair", s.Spec.NodeTemplate.Login.SshKey),
 		d.Set("initial_node_count", s.Spec.InitialNodeCount),
 		d.Set("scale_enable", s.Spec.Autoscaling.Enable),
-		d.Set("min_node_count", s.Spec.Autoscaling.MinNodeCount),
-		d.Set("max_node_count", s.Spec.Autoscaling.MaxNodeCount),
-		d.Set("scale_down_cooldown_time", s.Spec.Autoscaling.ScaleDownCooldownTime),
-		d.Set("priority", s.Spec.Autoscaling.Priority),
 	)
+
+	if s.Spec.Autoscaling.Enable {
+		me = multierror.Append(me,
+			d.Set("min_node_count", s.Spec.Autoscaling.MinNodeCount),
+			d.Set("max_node_count", s.Spec.Autoscaling.MaxNodeCount),
+			d.Set("scale_down_cooldown_time", s.Spec.Autoscaling.ScaleDownCooldownTime),
+			d.Set("priority", s.Spec.Autoscaling.Priority),
+		)
+	}
+
 	if err := me.ErrorOrNil(); err != nil {
 		return fmt.Errorf("error setting CCE Node Pool attributes (%s): %s", d.Id(), err)
 	}
