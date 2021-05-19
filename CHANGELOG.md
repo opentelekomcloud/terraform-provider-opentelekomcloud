@@ -1,8 +1,30 @@
 ## 1.24.0 (Unreleased)
 
+
+## 1.23.11 (May 19, 2021)
+
+FEATURES:
+* **New Resource:** `opentelekomcloud_rds_replica_v3` ([#1037](https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/1037))
+
+ENHANCEMENTS:
+* `resource/opentelekomcloud_lb_pool_v2`: Make `persistence.type` optional ([#1052](https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/1052))
+* `data_source/opentelekomcloud_vpc_eip_v1`: Add possibility to query by `tags` ([#1058](https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/1058))
+
+BUG FIXES:
+* `resource/opentelekomcloud_compute_instance_v2`: Fix issue with reading `networks` ([#1057](https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/issues/1057))
+* `resource/opentelekomcloud_identity_provider_v3`: Fix issue with failing provider operations ([#1059](https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/issues/1059))
+* `resource/opentelekomcloud_css_cluster_v1`: Fix potential nil pointer issue ([#1060](https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/issues/1060))
+
+DOCUMENTATION:
+* `resource/opentelekomcloud_networking_port_v2`: Fix wrong ordering of `port_security_enabled` ([#1051](https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/1051))
+
+NOTES/DEPRECATIONS:
+* `resource/opentelekomcloud_lb_loadbalancer_v2`: Deprecate `security_group_ids` ([#1055](https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/1055))
+
 ## 1.23.10 (May 6, 2021)
 
-* **New Data Source:** `vpc_eip_v1` ([#1042](https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/1042))
+FEATURES:
+* **New Data Source:** `opentelekomcloud_vpc_eip_v1` ([#1042](https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/1042))
 
 ENHANCEMENTS:
 * `resource/opentelekomcloud_networking_port_v2`: Allow to set a `port_security_enabled` ([#1045](https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/1045))
