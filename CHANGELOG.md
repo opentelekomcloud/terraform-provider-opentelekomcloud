@@ -7,10 +7,12 @@ FEATURES:
 * **New Resource:** `opentelekomcloud_rds_replica_v3` ([#1037](https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/1037))
 
 ENHANCEMENTS:
+* `resource/opentelekomcloud_lb_pool_v2`: Make `persistence.type` optional ([#1052](https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/1052))
 * `data_source/opentelekomcloud_vpc_eip_v1`: Add possibility to query by `tags` ([#1058](https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/1058))
 
 BUG FIXES:
 * `resource/opentelekomcloud_compute_instance_v2`: Fix issue with reading `networks` ([#1057](https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/issues/1057))
+* `resource/opentelekomcloud_identity_provider_v3`: Fix issue with failing provider operations ([#1059](https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/issues/1059))
 * `resource/opentelekomcloud_css_cluster_v1`: Fix potential nil pointer issue ([#1060](https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/issues/1060))
 
 DOCUMENTATION:
