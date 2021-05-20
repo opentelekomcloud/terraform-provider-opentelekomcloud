@@ -430,6 +430,7 @@ func resourceCCENodePoolV3Update(d *schema.ResourceData, meta interface{}) error
 			Name: d.Get("name").(string),
 		},
 		Spec: nodepools.UpdateSpec{
+			Type:             "vm",
 			InitialNodeCount: d.Get("initial_node_count").(int),
 			Autoscaling: nodepools.AutoscalingSpec{
 				Enable:                d.Get("scale_enable").(bool),
