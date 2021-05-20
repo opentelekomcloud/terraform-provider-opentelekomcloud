@@ -261,6 +261,7 @@ func resourceCCENodePoolV3Create(d *schema.ResourceData, meta interface{}) error
 			Name: d.Get("name").(string),
 		},
 		Spec: nodepools.CreateSpec{
+			Type:             "vm",
 			InitialNodeCount: d.Get("initial_node_count").(int),
 			Autoscaling: nodepools.AutoscalingSpec{
 				Enable:                d.Get("scale_enable").(bool),
