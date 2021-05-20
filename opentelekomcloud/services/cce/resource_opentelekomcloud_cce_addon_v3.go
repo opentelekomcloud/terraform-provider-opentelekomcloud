@@ -7,10 +7,10 @@ import (
 	"time"
 
 	"github.com/hashicorp/go-multierror"
-	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
 	golangsdk "github.com/opentelekomcloud/gophertelekomcloud"
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/cce/v3/addons"
+	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common"
 
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common/cfg"
 )
@@ -23,6 +23,10 @@ func ResourceCCEAddonV3() *schema.Resource {
 
 		Timeouts: &schema.ResourceTimeout{
 			Delete: schema.DefaultTimeout(5 * time.Minute),
+		},
+
+		Importer: &schema.ResourceImporter{
+			State: schema.ImportStatePassthrough,
 		},
 
 		Schema: map[string]*schema.Schema{
@@ -115,24 +119,30 @@ func resourceCCEAddonV3Create(d *schema.ResourceData, meta interface{}) error {
 		if aErr == nil {
 			errMsg = fmt.Errorf("\nAddon template spec: %s\n%s", addonSpec, errMsg)
 		}
-		return fmt.Errorf("error creating CCE addon instance: %s", errMsg)
+		return fmt.Errorf("error creating CCE addon instance: %w", errMsg)
 	}
 
 	d.SetId(addon.Metadata.Id)
 
 	return resourceCCEAddonV3Read(d, meta)
 }
+
 func resourceCCEAddonV3Read(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*cfg.Config)
 	client, err := config.CceV3AddonClient(config.GetRegion(d))
 	if err != nil {
-		return fmt.Errorf("error creating CCE client: %s", logHttpError(err))
+		return fmt.Errorf("error creating CCE client: %w", logHttpError(err))
 	}
 
 	clusterID := d.Get("cluster_id").(string)
 	addon, err := addons.Get(client, d.Id(), clusterID).Extract()
 	if err != nil {
-		return fmt.Errorf("error reading CCE addon instance: %s", logHttpError(err))
+		if _, ok := err.(golangsdk.ErrDefault404); ok {
+			d.SetId("")
+			return nil
+		}
+
+		return fmt.Errorf("error reading CCE addon instance: %w", logHttpError(err))
 	}
 
 	mErr := multierror.Append(nil,
@@ -143,7 +153,7 @@ func resourceCCEAddonV3Read(d *schema.ResourceData, meta interface{}) error {
 		d.Set("description", addon.Spec.Description),
 	)
 	if err := mErr.ErrorOrNil(); err != nil {
-		return fmt.Errorf("error setting addon attributes: %s", err)
+		return fmt.Errorf("error setting addon attributes: %w", err)
 	}
 
 	return nil

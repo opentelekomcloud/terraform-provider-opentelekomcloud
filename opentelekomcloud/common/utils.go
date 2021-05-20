@@ -237,3 +237,7 @@ func StringInSlice(str string, slice []string) bool {
 	}
 	return false
 }
+
+func BuildComponentID(parts ...string) string {
+	return strings.Join(parts, "/")
+}
