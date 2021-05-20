@@ -30,7 +30,7 @@ resource "opentelekomcloud_cce_addon_v3" "addon" {
 
   values {
     basic = {
-      euleros_version = "2.5"
+      euleros_version = "2.2.5"
       swr_addr        = "100.125.7.25:20202"
       swr_user        = "hwofficial"
     }
