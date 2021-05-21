@@ -49,18 +49,16 @@ The following arguments are supported:
   Changing this creates a new volume.
 
 * `volume_type` - (Required) The type of volume to create.
-  Currently, the value can be SSD, SAS, SATA, co-p1, or uh-l1.
+  Currently, the value can be `SSD`, `SAS`, `SATA`, `co-p1`, or `uh-l1`.
   Changing this creates a new volume.
 
-* `name` - (Optional) A unique name for the volume. Changing this updates the
-  volume's name.
+* `name` - (Optional) A unique name for the volume. Changing this updates the volume's name.
 
-* `size` - (Optional) The size of the volume to create (in gigabytes). This parameter is mandatory
-  when you create an empty EVS disk or use an image or a snapshot to create an EVS disk.
-  Changing this creates a new volume.
+* `size` - (Optional) The size of the volume to create (in gigabytes). This parameter is mandatory when
+  you create an empty EVS disk or use an image or a snapshot to create an EVS disk.
+  _Decreasing_ this value creates a new volume.
 
-* `description` - (Optional) A description of the volume. Changing this updates
-  the volume's description.
+* `description` - (Optional) A description of the volume. Changing this updates the volume's description.
 
 * `image_id` - (Optional) The image ID from which to create the volume.
   Changing this creates a new volume.
@@ -74,16 +72,16 @@ The following arguments are supported:
 * `tags` - (Optional) Tags key/value pairs to associate with the volume.
   Changing this updates the existing volume tags.
 
-* `multiattach` - (Optional, Default:false) Specifies the shared EVS disk information.
+* `multiattach` - (Optional) Specifies whether the disk is shareable. The default value is `false`.
   Changing this creates a new volume.
 
 * `kms_id` - (Optional) The Encryption KMS ID to create the volume.
   Changing this creates a new volume.
 
 * `device_type` - (Optional) The device type of volume to create. Valid options are VBD and SCSI.
-  Defaults to VBD. Changing this creates a new volume.
+  Defaults to `VBD`. Changing this creates a new volume.
 
-* `cascade` - (Optional, Default:false) Specifies to delete all snapshots associated with the EVS disk.
+* `cascade` - (Optional) Specifies to delete all snapshots associated with the EVS disk. Default is `false`.
 
 ## Attributes Reference
 

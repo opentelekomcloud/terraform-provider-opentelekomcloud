@@ -339,14 +339,8 @@ func resourceBlockStorageVolumeV2Update(d *schema.ResourceData, meta interface{}
 	}
 
 	if d.HasChange("size") {
-		oldSize, newSize := d.GetChange("size")
-		newSizeInt := newSize.(int)
-		if oldSize.(int) > newSizeInt {
-			return fmt.Errorf("can't decrease volume size. This is internal provider error, this point should never be reached")
-		}
-		result := volumeactions.ExtendSize(blockStorageClient, d.Id(), volumeactions.ExtendSizeOpts{NewSize: newSizeInt})
-		if result.ExtractErr() != nil {
-			return fmt.Errorf("failed to extend disk size: %s", err)
+		if err := extendSize(d, blockStorageClient); err != nil {
+			return err
 		}
 
 		stateConf := &resource.StateChangeConf{
@@ -365,6 +359,19 @@ func resourceBlockStorageVolumeV2Update(d *schema.ResourceData, meta interface{}
 	}
 
 	return resourceBlockStorageVolumeV2Read(d, meta)
+}
+
+func extendSize(d *schema.ResourceData, client *golangsdk.ServiceClient) error {
+	oldSize, newSize := d.GetChange("size")
+	newSizeInt := newSize.(int)
+	if oldSize.(int) > newSizeInt {
+		return fmt.Errorf("can't decrease volume size. This is internal provider error, this point should never be reached")
+	}
+	opts := volumeactions.ExtendSizeOpts{NewSize: newSizeInt}
+	if err := volumeactions.ExtendSize(client, d.Id(), opts).ExtractErr(); err != nil {
+		return fmt.Errorf("failed to extend disk size: %s", err)
+	}
+	return nil
 }
 
 func resourceBlockStorageVolumeV2Delete(d *schema.ResourceData, meta interface{}) error {
