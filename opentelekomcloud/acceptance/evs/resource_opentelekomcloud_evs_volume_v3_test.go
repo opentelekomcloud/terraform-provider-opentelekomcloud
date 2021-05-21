@@ -15,6 +15,8 @@ import (
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common/cfg"
 )
 
+const resourceName = "opentelekomcloud_evs_volume_v3.volume_1"
+
 func TestAccEvsStorageV3Volume_basic(t *testing.T) {
 	var volume volumes.Volume
 
@@ -24,19 +26,17 @@ func TestAccEvsStorageV3Volume_basic(t *testing.T) {
 		CheckDestroy: testAccCheckEvsStorageV3VolumeDestroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccEvsStorageV3Volume_basic,
+				Config: testAccEvsStorageV3VolumeBasic,
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckEvsStorageV3VolumeExists("opentelekomcloud_evs_volume_v3.volume_1", &volume),
-					resource.TestCheckResourceAttr(
-						"opentelekomcloud_evs_volume_v3.volume_1", "name", "volume_1"),
+					testAccCheckEvsStorageV3VolumeExists(resourceName, &volume),
+					resource.TestCheckResourceAttr(resourceName, "name", "volume_1"),
 				),
 			},
 			{
-				Config: testAccEvsStorageV3Volume_update,
+				Config: testAccEvsStorageV3VolumeUpdate,
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckEvsStorageV3VolumeExists("opentelekomcloud_evs_volume_v3.volume_1", &volume),
-					resource.TestCheckResourceAttr(
-						"opentelekomcloud_evs_volume_v3.volume_1", "name", "volume_1-updated"),
+					testAccCheckEvsStorageV3VolumeExists(resourceName, &volume),
+					resource.TestCheckResourceAttr(resourceName, "name", "volume_1-updated"),
 				),
 			},
 		},
@@ -44,23 +44,25 @@ func TestAccEvsStorageV3Volume_basic(t *testing.T) {
 }
 
 func TestAccEvsStorageV3Volume_tags(t *testing.T) {
+	resNameTags := "opentelekomcloud_evs_volume_v3.volume_tags"
+
 	resource.Test(t, resource.TestCase{
 		PreCheck:     func() { common.TestAccPreCheck(t) },
 		Providers:    common.TestAccProviders,
 		CheckDestroy: testAccCheckEvsStorageV3VolumeDestroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccEvsStorageV3Volume_tags,
+				Config: testAccEvsStorageV3VolumeTags,
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckEvsStorageV3VolumeTags("opentelekomcloud_evs_volume_v3.volume_tags", "foo", "bar"),
-					testAccCheckEvsStorageV3VolumeTags("opentelekomcloud_evs_volume_v3.volume_tags", "key", "value"),
+					testAccCheckEvsStorageV3VolumeTags(resNameTags, "foo", "bar"),
+					testAccCheckEvsStorageV3VolumeTags(resNameTags, "key", "value"),
 				),
 			},
 			{
-				Config: testAccEvsStorageV3Volume_tags_update,
+				Config: testAccEvsStorageV3VolumeTagsUpdate,
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckEvsStorageV3VolumeTags("opentelekomcloud_evs_volume_v3.volume_tags", "foo2", "bar2"),
-					testAccCheckEvsStorageV3VolumeTags("opentelekomcloud_evs_volume_v3.volume_tags", "key2", "value2"),
+					testAccCheckEvsStorageV3VolumeTags(resNameTags, "foo2", "bar2"),
+					testAccCheckEvsStorageV3VolumeTags(resNameTags, "key2", "value2"),
 				),
 			},
 		},
@@ -76,11 +78,10 @@ func TestAccEvsStorageV3Volume_image(t *testing.T) {
 		CheckDestroy: testAccCheckEvsStorageV3VolumeDestroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccEvsStorageV3Volume_image,
+				Config: testAccEvsStorageV3VolumeImage,
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckEvsStorageV3VolumeExists("opentelekomcloud_evs_volume_v3.volume_1", &volume),
-					resource.TestCheckResourceAttr(
-						"opentelekomcloud_evs_volume_v3.volume_1", "name", "volume_1"),
+					testAccCheckEvsStorageV3VolumeExists(resourceName, &volume),
+					resource.TestCheckResourceAttr(resourceName, "name", "volume_1"),
 				),
 			},
 		},
@@ -96,9 +97,9 @@ func TestAccEvsStorageV3Volume_timeout(t *testing.T) {
 		CheckDestroy: testAccCheckEvsStorageV3VolumeDestroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccEvsStorageV3Volume_timeout,
+				Config: testAccEvsStorageV3VolumeTimeout,
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckEvsStorageV3VolumeExists("opentelekomcloud_evs_volume_v3.volume_1", &volume),
+					testAccCheckEvsStorageV3VolumeExists(resourceName, &volume),
 				),
 			},
 		},
@@ -112,9 +113,36 @@ func TestAccEvsStorageV3Volume_volumeType(t *testing.T) {
 		CheckDestroy: testAccCheckEvsStorageV3VolumeDestroy,
 		Steps: []resource.TestStep{
 			{
-				Config:      testAccEvsStorageV3Volume_volumeType,
+				Config:      testAccEvsStorageV3VolumeVolumeType,
 				PlanOnly:    true,
 				ExpectError: regexp.MustCompile(`volume type .+ doesn't exist`),
+			},
+		},
+	})
+}
+
+func TestAccEvsStorageV3Volume_resize(t *testing.T) {
+	var volume volumes.Volume
+	var volumeUpscaled volumes.Volume
+
+	resource.Test(t, resource.TestCase{
+		PreCheck:     func() { common.TestAccPreCheck(t) },
+		Providers:    common.TestAccProviders,
+		CheckDestroy: testAccCheckEvsStorageV3VolumeDestroy,
+		Steps: []resource.TestStep{
+			{
+				Config: testAccEvsStorageV3VolumeBasic,
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckEvsStorageV3VolumeExists(resourceName, &volume),
+					resource.TestCheckResourceAttr(resourceName, "name", "volume_1"),
+				),
+			},
+			{
+				Config: testAccEvsStorageV3VolumeUpscale,
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckEvsStorageV3VolumePersists(resourceName, &volumeUpscaled, &volume),
+					resource.TestCheckResourceAttr(resourceName, "size", "20"),
+				),
 			},
 		},
 	})
@@ -172,6 +200,41 @@ func testAccCheckEvsStorageV3VolumeExists(n string, volume *volumes.Volume) reso
 		return nil
 	}
 }
+func testAccCheckEvsStorageV3VolumePersists(n string, volume, oldVolume *volumes.Volume) resource.TestCheckFunc {
+	return func(s *terraform.State) error {
+		rs, ok := s.RootModule().Resources[n]
+		if !ok {
+			return fmt.Errorf("not found: %s", n)
+		}
+
+		if rs.Primary.ID == "" {
+			return fmt.Errorf("no ID is set")
+		}
+
+		config := common.TestAccProvider.Meta().(*cfg.Config)
+		client, err := config.BlockStorageV3Client(env.OS_REGION_NAME)
+		if err != nil {
+			return fmt.Errorf("error creating OpenTelekomCloud evs storage client: %s", err)
+		}
+
+		found, err := volumes.Get(client, rs.Primary.ID).Extract()
+		if err != nil {
+			return err
+		}
+
+		if found.ID != rs.Primary.ID {
+			return fmt.Errorf("volume not found")
+		}
+
+		*volume = *found
+
+		if found.ID != oldVolume.ID {
+			return fmt.Errorf("volume was re-created")
+		}
+
+		return nil
+	}
+}
 
 func testAccCheckEvsStorageV3VolumeTags(n string, k string, v string) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
@@ -218,67 +281,67 @@ func testAccCheckEvsStorageV3VolumeTags(n string, k string, v string) resource.T
 }
 
 var (
-	testAccEvsStorageV3Volume_basic = fmt.Sprintf(`
+	testAccEvsStorageV3VolumeBasic = fmt.Sprintf(`
 resource "opentelekomcloud_evs_volume_v3" "volume_1" {
-  name = "volume_1"
-  description = "first test volume"
+  name              = "volume_1"
+  description       = "first test volume"
   availability_zone = "%s"
-  volume_type = "SATA"
-  size = 12
+  volume_type       = "SATA"
+  size              = 12
 }
 `, env.OS_AVAILABILITY_ZONE)
-	testAccEvsStorageV3Volume_update = fmt.Sprintf(`
+	testAccEvsStorageV3VolumeUpdate = fmt.Sprintf(`
 resource "opentelekomcloud_evs_volume_v3" "volume_1" {
-  name = "volume_1-updated"
-  description = "first test volume"
+  name              = "volume_1-updated"
+  description       = "first test volume"
   availability_zone = "%s"
-  volume_type = "SATA"
-  size = 12
+  volume_type       = "SATA"
+  size              = 12
 }
 `, env.OS_AVAILABILITY_ZONE)
-	testAccEvsStorageV3Volume_tags = fmt.Sprintf(`
+	testAccEvsStorageV3VolumeTags = fmt.Sprintf(`
 resource "opentelekomcloud_evs_volume_v3" "volume_tags" {
-  name = "volume_tags"
-  description = "test volume with tags"
+  name              = "volume_tags"
+  description       = "test volume with tags"
   availability_zone = "%s"
-  volume_type = "SATA"
+  volume_type       = "SATA"
   tags = {
     foo = "bar"
-	key = "value"
+    key = "value"
   }
   size = 12
 }
 `, env.OS_AVAILABILITY_ZONE)
-	testAccEvsStorageV3Volume_tags_update = fmt.Sprintf(`
+	testAccEvsStorageV3VolumeTagsUpdate = fmt.Sprintf(`
 resource "opentelekomcloud_evs_volume_v3" "volume_tags" {
-  name = "volume_tags-updated"
-  description = "test volume with tags"
+  name              = "volume_tags-updated"
+  description       = "test volume with tags"
   availability_zone = "%s"
-  volume_type = "SATA"
+  volume_type       = "SATA"
   tags = {
     foo2 = "bar2"
-	key2 = "value2"
+    key2 = "value2"
   }
   size = 12
 }
 `, env.OS_AVAILABILITY_ZONE)
-	testAccEvsStorageV3Volume_image = fmt.Sprintf(`
+	testAccEvsStorageV3VolumeImage = fmt.Sprintf(`
 resource "opentelekomcloud_evs_volume_v3" "volume_1" {
-  name = "volume_1"
+  name              = "volume_1"
   availability_zone = "%s"
-  volume_type = "SATA"
-  size = 12
-  image_id = "%s"
+  volume_type       = "SATA"
+  size              = 12
+  image_id          = "%s"
 }
 `, env.OS_AVAILABILITY_ZONE, env.OS_IMAGE_ID)
-	testAccEvsStorageV3Volume_timeout = fmt.Sprintf(`
+	testAccEvsStorageV3VolumeTimeout = fmt.Sprintf(`
 resource "opentelekomcloud_evs_volume_v3" "volume_1" {
-  name = "volume_1"
-  description = "first test volume"
+  name              = "volume_1"
+  description       = "first test volume"
   availability_zone = "%s"
-  size = 12
-  volume_type = "SATA"
-  device_type = "SCSI"
+  size              = 12
+  volume_type       = "SATA"
+  device_type       = "SCSI"
   timeouts {
     create = "10m"
     delete = "5m"
@@ -286,13 +349,22 @@ resource "opentelekomcloud_evs_volume_v3" "volume_1" {
 }
 `, env.OS_AVAILABILITY_ZONE)
 
-	testAccEvsStorageV3Volume_volumeType = fmt.Sprintf(`
+	testAccEvsStorageV3VolumeVolumeType = fmt.Sprintf(`
 resource "opentelekomcloud_evs_volume_v3" "volume_1" {
-  name = "volume_1"
-  description = "first test volume"
+  name              = "volume_1"
+  description       = "first test volume"
   availability_zone = "%s"
-  volume_type = "asfddasf"
-  size = 12
+  volume_type       = "asfddasf"
+  size              = 12
+}
+`, env.OS_AVAILABILITY_ZONE)
+	testAccEvsStorageV3VolumeUpscale = fmt.Sprintf(`
+resource "opentelekomcloud_evs_volume_v3" "volume_1" {
+  name              = "volume_1"
+  description       = "first test volume"
+  availability_zone = "%s"
+  volume_type       = "SATA"
+  size              = 20
 }
 `, env.OS_AVAILABILITY_ZONE)
 )

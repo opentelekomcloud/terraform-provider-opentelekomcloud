@@ -7,11 +7,13 @@ import (
 	"time"
 
 	"github.com/hashicorp/go-multierror"
+	"github.com/hashicorp/terraform-plugin-sdk/helper/customdiff"
 	"github.com/hashicorp/terraform-plugin-sdk/helper/hashcode"
+	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/helper/validation"
-
-	volumesV2 "github.com/opentelekomcloud/gophertelekomcloud/openstack/blockstorage/v2/volumes"
+	"github.com/opentelekomcloud/gophertelekomcloud"
+	cinderV3 "github.com/opentelekomcloud/gophertelekomcloud/openstack/blockstorage/v3/volumes"
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/evs/v3/volumes"
 
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common"
@@ -33,7 +35,10 @@ func ResourceEvsStorageVolumeV3() *schema.Resource {
 			Delete: schema.DefaultTimeout(3 * time.Minute),
 		},
 
-		CustomizeDiff: common.ValidateVolumeType("volume_type"),
+		CustomizeDiff: common.MultipleCustomizeDiffs(
+			common.ValidateVolumeType("volume_type"),
+			customdiff.ForceNewIfChange("size", isDownScale),
+		),
 
 		Schema: map[string]*schema.Schema{
 			"backup_id": {
@@ -54,7 +59,6 @@ func ResourceEvsStorageVolumeV3() *schema.Resource {
 			"size": {
 				Type:     schema.TypeInt,
 				Optional: true,
-				ForceNew: true,
 				Computed: true,
 			},
 			"name": {
@@ -135,18 +139,9 @@ func ResourceEvsStorageVolumeV3() *schema.Resource {
 	}
 }
 
-func resourceVolumeAttachmentHash(v interface{}) int {
-	var buf bytes.Buffer
-	m := v.(map[string]interface{})
-	if m["instance_id"] != nil {
-		buf.WriteString(fmt.Sprintf("%s-", m["instance_id"].(string)))
-	}
-	return hashcode.String(buf.String())
-}
-
 func resourceEvsVolumeV3Create(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*cfg.Config)
-	blockStorageClient, err := config.BlockStorageV3Client(config.GetRegion(d))
+	client, err := config.BlockStorageV3Client(config.GetRegion(d))
 	if err != nil {
 		return fmt.Errorf("error creating OpenTelekomCloud EVS storage client: %s", err)
 	}
@@ -180,7 +175,7 @@ func resourceEvsVolumeV3Create(d *schema.ResourceData, meta interface{}) error {
 	}
 
 	log.Printf("[DEBUG] Create Options: %#v", createOpts)
-	v, err := volumes.Create(blockStorageClient, createOpts).ExtractJobResponse()
+	v, err := volumes.Create(client, createOpts).ExtractJobResponse()
 	if err != nil {
 		return fmt.Errorf("error creating OpenTelekomCloud EVS volume: %s", err)
 	}
@@ -188,12 +183,12 @@ func resourceEvsVolumeV3Create(d *schema.ResourceData, meta interface{}) error {
 
 	// Wait for the volume to become available.
 	log.Printf("[DEBUG] Waiting for volume to become available")
-	err = volumes.WaitForJobSuccess(blockStorageClient, int(d.Timeout(schema.TimeoutCreate)/time.Second), v.JobID)
+	err = volumes.WaitForJobSuccess(client, int(d.Timeout(schema.TimeoutCreate)/time.Second), v.JobID)
 	if err != nil {
 		return err
 	}
 
-	entity, err := volumes.GetJobEntity(blockStorageClient, v.JobID, "volume_id")
+	entity, err := volumes.GetJobEntity(client, v.JobID, "volume_id")
 	if err != nil {
 		return err
 	}
@@ -262,17 +257,17 @@ func resourceEvsVolumeV3Read(d *schema.ResourceData, meta interface{}) error {
 // using OpenStack Cinder API v2 to update volume resource
 func resourceEvsVolumeV3Update(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*cfg.Config)
-	blockStorageClient, err := config.BlockStorageV2Client(config.GetRegion(d))
+	client, err := config.BlockStorageV3Client(config.GetRegion(d))
 	if err != nil {
 		return fmt.Errorf("error creating OpenTelekomCloud block storage client: %s", err)
 	}
 
-	updateOpts := volumesV2.UpdateOpts{
+	updateOpts := cinderV3.UpdateOpts{
 		Name:        d.Get("name").(string),
 		Description: d.Get("description").(string),
 	}
 
-	_, err = volumesV2.Update(blockStorageClient, d.Id(), updateOpts).Extract()
+	_, err = cinderV3.Update(client, d.Id(), updateOpts).Extract()
 	if err != nil {
 		return fmt.Errorf("error updating OpenTelekomCloud volume: %s", err)
 	}
@@ -280,5 +275,51 @@ func resourceEvsVolumeV3Update(d *schema.ResourceData, meta interface{}) error {
 	if d.HasChange("tags") {
 		_, err = resourceEVSTagV2Create(d, meta, "volumes", d.Id(), resourceContainerTags(d))
 	}
+
+	if d.HasChange("size") {
+		if err := extendSize(d, client); err != nil {
+			return err
+		}
+
+		stateConf := &resource.StateChangeConf{
+			Pending:    []string{"extending"},
+			Target:     []string{"available", "in-use"},
+			Refresh:    volumeV3StateRefreshFunc(client, d.Id()),
+			Timeout:    d.Timeout(schema.TimeoutDelete),
+			Delay:      10 * time.Second,
+			MinTimeout: 3 * time.Second,
+		}
+
+		_, err = stateConf.WaitForState()
+		if err != nil {
+			return fmt.Errorf("error waiting for volume (%s) to become ready after resize: %s", d.Id(), err)
+		}
+	}
+
 	return resourceEvsVolumeV3Read(d, meta)
+}
+
+func resourceVolumeAttachmentHash(v interface{}) int {
+	var buf bytes.Buffer
+	m := v.(map[string]interface{})
+	if m["instance_id"] != nil {
+		buf.WriteString(fmt.Sprintf("%s-", m["instance_id"].(string)))
+	}
+	return hashcode.String(buf.String())
+}
+
+func volumeV3StateRefreshFunc(client *golangsdk.ServiceClient, id string) resource.StateRefreshFunc {
+	return func() (interface{}, string, error) {
+		v, err := cinderV3.Get(client, id).Extract()
+		if err != nil {
+			if _, ok := err.(golangsdk.ErrDefault404); ok {
+				return v, "deleted", nil
+			}
+			return nil, "", err
+		}
+		if v.Status == "error" {
+			return v, v.Status, fmt.Errorf("volume is in the error state")
+		}
+		return v, v.Status, nil
+	}
 }
