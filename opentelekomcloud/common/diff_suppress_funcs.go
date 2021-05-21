@@ -19,22 +19,23 @@ func SuppressEquivalentAwsPolicyDiffs(_, old, new string, _ *schema.ResourceData
 	return equivalent
 }
 
-// Suppress all changes?
+// SuppressDiffAll suppress all changes?
 func SuppressDiffAll(_, _, _ string, _ *schema.ResourceData) bool {
 	return true
 }
 
-// Suppress changes if we get a computed min_disk_gb if value is unspecified (default 0)
+// SuppressMinDisk suppress changes if we get a computed min_disk_gb if value is unspecified (default 0)
 func SuppressMinDisk(_, old, new string, _ *schema.ResourceData) bool {
 	return new == "0" || old == new
 }
 
-// Suppress changes if we don't specify an external gateway, but one is specified for us
+// SuppressExternalGateway suppress changes if we don't specify an external gateway, but one is specified for us
 func SuppressExternalGateway(_, old, new string, _ *schema.ResourceData) bool {
 	return new == "" || old == new
 }
 
-// Suppress changes if we get a fixed ip when not expecting one, if we have a floating ip (generates fixed ip).
+// SuppressComputedFixedWhenFloatingIp suppress changes if we get a fixed ip when not expecting one,
+// if we have a floating ip (generates fixed ip).
 func SuppressComputedFixedWhenFloatingIp(_, old, new string, d *schema.ResourceData) bool {
 	if v, ok := d.GetOk("floating_ip"); ok && v != "" {
 		return new == "" || old == new
@@ -53,12 +54,12 @@ func SuppressLBWhitelistDiffs(_, old, new string, _ *schema.ResourceData) bool {
 	if len(old) != len(new) {
 		return false
 	}
-	old_array := strings.Split(old, ",")
-	new_array := strings.Split(new, ",")
-	sort.Strings(old_array)
-	sort.Strings(new_array)
+	oldArray := strings.Split(old, ",")
+	newArray := strings.Split(new, ",")
+	sort.Strings(oldArray)
+	sort.Strings(newArray)
 
-	return reflect.DeepEqual(old_array, new_array)
+	return reflect.DeepEqual(oldArray, newArray)
 }
 
 func SuppressSmartVersionDiff(_, old, new string, _ *schema.ResourceData) bool {

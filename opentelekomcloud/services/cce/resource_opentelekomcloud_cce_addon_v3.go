@@ -33,7 +33,6 @@ func ResourceCCEAddonV3() *schema.Resource {
 			"template_version": {
 				Type:     schema.TypeString,
 				Required: true,
-				ForceNew: true,
 			},
 			"cluster_id": {
 				Type:     schema.TypeString,
@@ -43,7 +42,6 @@ func ResourceCCEAddonV3() *schema.Resource {
 			"template_name": {
 				Type:     schema.TypeString,
 				Required: true,
-				ForceNew: true,
 			},
 			"name": {
 				Type:     schema.TypeString,
