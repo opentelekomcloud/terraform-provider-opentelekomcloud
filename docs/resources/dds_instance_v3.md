@@ -6,6 +6,37 @@ subcategory: "Document Database Service (DDS)"
 
 Manages DDS instance resource within OpenTelekomCloud
 
+## Example Usage: Creating a Replica Set
+```hcl
+variable "availability_zone" {}
+variable "vpc_id" {}
+variable "subnet_id" {}
+variable "security_group_id" {}
+
+resource "opentelekomcloud_dds_instance_v3" "instance" {
+  name = "dds-instance"
+  datastore {
+    type           = "DDS-Community"
+    version        = "3.4"
+    storage_engine = "wiredTiger"
+  }
+
+  availability_zone = var.availability_zone
+  vpc_id            = var.vpc_id
+  subnet_id         = var.subnet_id
+  security_group_id = var.security_group_id
+  password          = "5ecuredPa55w0rd@"
+  mode              = "ReplicaSet"
+  flavor {
+    type      = "replica"
+    num       = 1
+    storage   = "ULTRAHIGH"
+    size      = 30
+    spec_code = "dds.mongodb.s2.medium.4.repset"
+  }
+}
+```
+
 ## Example Usage: Creating a Cluster Community Edition
 
 ```hcl
@@ -50,37 +81,6 @@ resource "opentelekomcloud_dds_instance_v3" "instance" {
   backup_strategy {
     start_time = "08:00-09:00"
     keep_days  = "8"
-  }
-}
-```
-
-## Example Usage: Creating a Replica Set
-```hcl
-variable "availability_zone" {}
-variable "vpc_id" {}
-variable "subnet_id" {}
-variable "security_group_id" {}
-
-resource "opentelekomcloud_dds_instance_v3" "instance" {
-  name = "dds-instance"
-  datastore {
-    type           = "DDS-Community"
-    version        = "3.4"
-    storage_engine = "wiredTiger"
-  }
-
-  availability_zone = var.availability_zone
-  vpc_id            = var.vpc_id
-  subnet_id         = var.subnet_id
-  security_group_id = var.security_group_id
-  password          = "5ecuredPa55w0rd@"
-  mode              = "ReplicaSet"
-  flavor {
-    type      = "replica"
-    num       = 1
-    storage   = "ULTRAHIGH"
-    size      = 30
-    spec_code = "dds.mongodb.s2.medium.4.repset"
   }
 }
 ```
