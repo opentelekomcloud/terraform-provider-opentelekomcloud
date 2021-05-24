@@ -278,7 +278,7 @@ func resourceDdsBackupStrategy(d *schema.ResourceData) instances.BackupStrategy 
 	return backupStrategy
 }
 
-func DdsInstanceStateRefreshFunc(client *golangsdk.ServiceClient, instanceID string) resource.StateRefreshFunc {
+func instanceStateRefreshFunc(client *golangsdk.ServiceClient, instanceID string) resource.StateRefreshFunc {
 	return func() (interface{}, string, error) {
 		opts := instances.ListInstanceOpts{
 			Id: instanceID,
@@ -312,7 +312,7 @@ func resourceDdsInstanceV3Create(d *schema.ResourceData, meta interface{}) error
 	config := meta.(*cfg.Config)
 	client, err := config.DdsV3Client(config.GetRegion(d))
 	if err != nil {
-		return fmt.Errorf("error creating OpenTelekomCloud DDSv3 client: %s ", err)
+		return fmt.Errorf("error creating OpenTelekomCloud DDSv3 client: %w", err)
 	}
 
 	createOpts := instances.CreateOpts{
@@ -338,7 +338,7 @@ func resourceDdsInstanceV3Create(d *schema.ResourceData, meta interface{}) error
 
 	instance, err := instances.Create(client, createOpts).Extract()
 	if err != nil {
-		return fmt.Errorf("Error getting instance from result: %s ", err)
+		return fmt.Errorf("error getting instance from result: %w", err)
 	}
 	log.Printf("[DEBUG] Create instance %s: %#v", instance.Id, instance)
 
@@ -347,7 +347,7 @@ func resourceDdsInstanceV3Create(d *schema.ResourceData, meta interface{}) error
 	stateConf := &resource.StateChangeConf{
 		Pending:    []string{"creating", "updating"},
 		Target:     []string{"normal"},
-		Refresh:    DdsInstanceStateRefreshFunc(client, instance.Id),
+		Refresh:    instanceStateRefreshFunc(client, instance.Id),
 		Timeout:    d.Timeout(schema.TimeoutCreate),
 		Delay:      20 * time.Second,
 		MinTimeout: 10 * time.Second,
@@ -355,7 +355,7 @@ func resourceDdsInstanceV3Create(d *schema.ResourceData, meta interface{}) error
 
 	_, err = stateConf.WaitForState()
 	if err != nil {
-		return fmt.Errorf("Error waiting for instance (%s) to become ready: %s ", instance.Id, err)
+		return fmt.Errorf("error waiting for instance (%s) to become ready: %w", instance.Id, err)
 	}
 
 	return resourceDdsInstanceV3Read(d, meta)
@@ -365,7 +365,7 @@ func resourceDdsInstanceV3Read(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*cfg.Config)
 	client, err := config.DdsV3Client(config.GetRegion(d))
 	if err != nil {
-		return fmt.Errorf("error creating OpenTelekomCloud DDSv3 client: %s", err)
+		return fmt.Errorf("error creating OpenTelekomCloud DDSv3 client: %w", err)
 	}
 
 	listOpts := instances.ListInstanceOpts{
@@ -373,11 +373,11 @@ func resourceDdsInstanceV3Read(d *schema.ResourceData, meta interface{}) error {
 	}
 	allPages, err := instances.List(client, listOpts).AllPages()
 	if err != nil {
-		return fmt.Errorf("error fetching DDS instance: %s", err)
+		return fmt.Errorf("error fetching DDS instance: %w", err)
 	}
 	instancesList, err := instances.ExtractInstances(allPages)
 	if err != nil {
-		return fmt.Errorf("error extracting DDS instance: %s", err)
+		return fmt.Errorf("error extracting DDS instance: %w", err)
 	}
 	if instancesList.TotalCount == 0 {
 		log.Printf("[WARN] DDS instance (%s) was not found", d.Id())
@@ -420,7 +420,7 @@ func resourceDdsInstanceV3Read(d *schema.ResourceData, meta interface{}) error {
 	}
 	datastoreList = append(datastoreList, datastore)
 	if err = d.Set("datastore", datastoreList); err != nil {
-		return fmt.Errorf("error setting DDSv3 datastore opts: %s", err)
+		return fmt.Errorf("error setting DDSv3 datastore opts: %w", err)
 	}
 
 	backupStrategyList := make([]map[string]interface{}, 0, 1)
@@ -430,13 +430,13 @@ func resourceDdsInstanceV3Read(d *schema.ResourceData, meta interface{}) error {
 	}
 	backupStrategyList = append(backupStrategyList, backupStrategy)
 	if err = d.Set("backup_strategy", backupStrategyList); err != nil {
-		return fmt.Errorf("error setting DDSv3 backup_strategy opts: %s", err)
+		return fmt.Errorf("error setting DDSv3 backup_strategy opts: %w", err)
 	}
 
 	// save nodes attribute
 	err = d.Set("nodes", flattenDdsInstanceV3Nodes(instance))
 	if err != nil {
-		return fmt.Errorf("error setting nodes of DDSv3 instance: %s", err)
+		return fmt.Errorf("error setting nodes of DDSv3 instance: %w", err)
 	}
 
 	return mErr.ErrorOrNil()
@@ -446,7 +446,7 @@ func resourceDdsInstanceV3Update(d *schema.ResourceData, meta interface{}) error
 	config := meta.(*cfg.Config)
 	client, err := config.DdsV3Client(config.GetRegion(d))
 	if err != nil {
-		return fmt.Errorf("error creating OpenTelekomCloud DDSv3 client: %s ", err)
+		return fmt.Errorf("error creating OpenTelekomCloud DDSv3 client: %w", err)
 	}
 
 	var opts []instances.UpdateOpt
@@ -496,13 +496,13 @@ func resourceDdsInstanceV3Update(d *schema.ResourceData, meta interface{}) error
 
 	r := instances.Update(client, d.Id(), opts)
 	if r.Err != nil {
-		return fmt.Errorf("error updating instance from result: %s ", r.Err)
+		return fmt.Errorf("error updating instance from result: %w", r.Err)
 	}
 
 	stateConf := &resource.StateChangeConf{
 		Pending:    []string{"updating"},
 		Target:     []string{"normal"},
-		Refresh:    DdsInstanceStateRefreshFunc(client, d.Id()),
+		Refresh:    instanceStateRefreshFunc(client, d.Id()),
 		Timeout:    d.Timeout(schema.TimeoutCreate),
 		Delay:      15 * time.Second,
 		MinTimeout: 10 * time.Second,
@@ -510,7 +510,7 @@ func resourceDdsInstanceV3Update(d *schema.ResourceData, meta interface{}) error
 
 	_, err = stateConf.WaitForState()
 	if err != nil {
-		return fmt.Errorf("Error waiting for instance (%s) to become ready: %s ", d.Id(), err)
+		return fmt.Errorf("error waiting for instance (%s) to become ready: %w", d.Id(), err)
 	}
 
 	return resourceDdsInstanceV3Read(d, meta)
@@ -520,7 +520,7 @@ func resourceDdsInstanceV3Delete(d *schema.ResourceData, meta interface{}) error
 	config := meta.(*cfg.Config)
 	client, err := config.DdsV3Client(config.GetRegion(d))
 	if err != nil {
-		return fmt.Errorf("error creating OpenTelekomCloud DDSv3 client: %s ", err)
+		return fmt.Errorf("error creating OpenTelekomCloud DDSv3 client: %w", err)
 	}
 
 	result := instances.Delete(client, d.Id())
@@ -530,7 +530,7 @@ func resourceDdsInstanceV3Delete(d *schema.ResourceData, meta interface{}) error
 	stateConf := &resource.StateChangeConf{
 		Pending:    []string{"normal", "abnormal", "frozen", "createfail", "enlargefail", "data_disk_full"},
 		Target:     []string{"deleted"},
-		Refresh:    DdsInstanceStateRefreshFunc(client, d.Id()),
+		Refresh:    instanceStateRefreshFunc(client, d.Id()),
 		Timeout:    d.Timeout(schema.TimeoutCreate),
 		Delay:      15 * time.Second,
 		MinTimeout: 10 * time.Second,
@@ -538,7 +538,7 @@ func resourceDdsInstanceV3Delete(d *schema.ResourceData, meta interface{}) error
 
 	_, err = stateConf.WaitForState()
 	if err != nil {
-		return fmt.Errorf("Error waiting for instance (%s) to be deleted: %s ", d.Id(), err)
+		return fmt.Errorf("error waiting for instance (%s) to be deleted: %w", d.Id(), err)
 	}
 	log.Printf("[DEBUG] Successfully deleted instance %s", d.Id())
 	return nil
