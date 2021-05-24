@@ -72,13 +72,13 @@ func resourceCCEAddonV3Create(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*cfg.Config)
 	client, err := config.CceV3AddonClient(config.GetRegion(d))
 	if err != nil {
-		return fmt.Errorf("error creating CCE client: %s", err)
+		return fmt.Errorf("error creating CCE client: %w", err)
 	}
 
 	clusterID := d.Get("cluster_id").(string)
 	basic, custom, err := getAddonValues(d)
 	if err != nil {
-		return fmt.Errorf("error getting values for CCE addon: %s", err)
+		return fmt.Errorf("error getting values for CCE addon: %w", err)
 	}
 
 	basic = unStringMap(basic)
@@ -159,7 +159,7 @@ func resourceCCEAddonV3Delete(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*cfg.Config)
 	client, err := config.CceV3AddonClient(config.GetRegion(d))
 	if err != nil {
-		return fmt.Errorf("error creating CCE client: %s", err)
+		return fmt.Errorf("error creating CCE client: %w", err)
 	}
 	clusterID := d.Get("cluster_id").(string)
 

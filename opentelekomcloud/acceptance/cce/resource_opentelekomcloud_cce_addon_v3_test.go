@@ -80,7 +80,7 @@ func testAccCheckCCEAddonV3Destroy(s *terraform.State) error {
 	config := common.TestAccProvider.Meta().(*cfg.Config)
 	cceClient, err := config.CceV3Client(env.OS_REGION_NAME)
 	if err != nil {
-		return fmt.Errorf("error creating opentelekomcloud CCE client: %s", err)
+		return fmt.Errorf("error creating opentelekomcloud CCE client: %w", err)
 	}
 
 	for _, rs := range s.RootModule().Resources {
@@ -276,7 +276,7 @@ func checkScaleDownForAutoscaler(name string, enabled bool) resource.TestCheckFu
 		config := common.TestAccProvider.Meta().(*cfg.Config)
 		client, err := config.CceV3AddonClient(env.OS_REGION_NAME)
 		if err != nil {
-			return fmt.Errorf("error creating opentelekomcloud CCE client: %s", err)
+			return fmt.Errorf("error creating opentelekomcloud CCE client: %w", err)
 		}
 
 		found, err := addons.Get(client, rs.Primary.ID, rs.Primary.Attributes["cluster_id"]).Extract()
@@ -285,7 +285,7 @@ func checkScaleDownForAutoscaler(name string, enabled bool) resource.TestCheckFu
 		}
 
 		if found.Metadata.Id != rs.Primary.ID {
-			return fmt.Errorf("cluster not found")
+			return fmt.Errorf("addon not found")
 		}
 
 		if actual := found.Spec.Values.Advanced["scaleDownEnabled"]; actual != enabled {
