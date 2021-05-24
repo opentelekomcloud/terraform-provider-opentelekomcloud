@@ -63,7 +63,7 @@ func TestAccCCEAddonV3ForceNewCCE(t *testing.T) {
 	})
 }
 
-// This test broken due to OTC CCE updates
+// This test is broken due to OTC CCE updates
 func TestAccCCEAddonV3EmptyBasic(t *testing.T) {
 	resource.Test(t, resource.TestCase{
 		PreCheck:     func() { common.TestAccPreCheck(t) },

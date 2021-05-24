@@ -25,6 +25,9 @@ func TestAccCCEAddonV3ImportBasic(t *testing.T) {
 				ImportState:       true,
 				ImportStateVerify: true,
 				ImportStateIdFunc: testAccCCEAddonV3ImportStateIdFunc(),
+				ImportStateVerifyIgnore: []string{
+					"values",
+				},
 			},
 		},
 	})

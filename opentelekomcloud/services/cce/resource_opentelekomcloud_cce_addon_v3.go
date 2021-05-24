@@ -252,19 +252,41 @@ func waitForCCEAddonDelete(client *golangsdk.ServiceClient, addonID, clusterID s
 	}
 }
 
-func resourceCCEAddonV3Import(d *schema.ResourceData, _ interface{}) ([]*schema.ResourceData, error) {
+func resourceCCEAddonV3Import(d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
 	parts := strings.SplitN(d.Id(), "/", 2)
 	if len(parts) != 2 {
 		err := fmt.Errorf("invalid format specified for CCE Addon. Format must be <cluster id>/<addon id>")
 		return nil, err
 	}
-
 	clusterID := parts[0]
 	addonID := parts[1]
-
 	d.SetId(addonID)
-	if err := d.Set("cluster_id", clusterID); err != nil {
-		return nil, err
+
+	config := meta.(*cfg.Config)
+	client, err := config.CceV3AddonClient(config.GetRegion(d))
+	if err != nil {
+		return nil, fmt.Errorf("error creating CCE client: %w", logHttpError(err))
+	}
+
+	addon, err := addons.Get(client, d.Id(), clusterID).Extract()
+	if err != nil {
+		if _, ok := err.(golangsdk.ErrDefault404); ok {
+			d.SetId("")
+			return nil, fmt.Errorf("addon wasn't found")
+		}
+
+		return nil, fmt.Errorf("error reading CCE addon instance: %w", logHttpError(err))
+	}
+
+	mErr := multierror.Append(nil,
+		d.Set("name", addon.Metadata.Name),
+		d.Set("cluster_id", addon.Spec.ClusterID),
+		d.Set("template_version", addon.Spec.Version),
+		d.Set("template_name", addon.Spec.AddonTemplateName),
+		d.Set("description", addon.Spec.Description),
+	)
+	if err := mErr.ErrorOrNil(); err != nil {
+		return nil, fmt.Errorf("error setting addon attributes: %w", err)
 	}
 
 	return []*schema.ResourceData{d}, nil
