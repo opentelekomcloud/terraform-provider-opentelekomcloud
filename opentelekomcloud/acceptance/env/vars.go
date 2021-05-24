@@ -28,6 +28,7 @@ var (
 	OS_NIC_ID                 = os.Getenv("OS_NIC_ID")
 	OS_TO_TENANT_ID           = os.Getenv("OS_TO_TENANT_ID")
 	OS_TENANT_NAME            = GetTenantName()
+	OS_TENANT_ID              = os.Getenv("OS_TENANT_ID")
 )
 
 func GetTenantName() cfg.ProjectName {

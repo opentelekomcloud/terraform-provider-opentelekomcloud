@@ -1,7 +1,7 @@
 # Addon Templates
 
 Addon support configuration input depending on addon type and version. This page contains description of addon arguments
-for the cluster with most recent available k8s version `v1.17.9`.
+for the cluster with available k8s version `v1.17.9`.
 
 Up to date reference of addon arguments for your cluster you can get using API for listing CCE addon templates
 at `https://<cluster_id>.cce.eu-de.otc.t-systems.com/api/v3/addontemplates`, where `<cluster_id>` is ID of the created

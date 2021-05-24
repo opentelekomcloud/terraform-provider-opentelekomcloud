@@ -21,6 +21,7 @@ resource "opentelekomcloud_cce_cluster_v3" "cluster_1" {
   subnet_id               = var.subnet_id
   container_network_type  = "overlay_l2"
   kubernetes_svc_ip_range = "10.247.0.0/16"
+  cluster_version         = "v1.17.9-r0"
 }
 
 resource "opentelekomcloud_cce_addon_v3" "addon" {
@@ -34,6 +35,7 @@ resource "opentelekomcloud_cce_addon_v3" "addon" {
       swr_addr        = "100.125.7.25:20202"
       swr_user        = "hwofficial"
     }
+    custom = {}
   }
 }
 ```
@@ -52,7 +54,7 @@ The following arguments are supported:
 
     * `basic` - (Required) Basic add-on information.
 
-    * `custom` - (Optional) Custom parameters of the add-on.
+    * `custom` - (Required) Custom parameters of the add-on.
 
 Arguments which can be passed to the `basic` and `custom` addon parameters depends on the addon type and version.
 For more detailed description see [addons description](https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/blob/devel/opentelekomcloud/services/cce/addon-templates.md).
