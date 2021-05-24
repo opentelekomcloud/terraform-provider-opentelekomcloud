@@ -138,12 +138,8 @@ resource "opentelekomcloud_cce_addon_v3" "autoscaler" {
       "scaleUpMemUtilizationThreshold": 0.8,
       "scaleUpUnscheduledPodEnabled": true,
       "scaleUpUtilizationEnabled": true,
-<<<<<<< HEAD
       "unremovableNodeRecheckTimeout": 5,
       "tenant_id": "%s"
-=======
-      "unremovableNodeRecheckTimeout": 5
->>>>>>> 6a4a3109 (Major refactoring)
     }
   }
 }
@@ -280,11 +276,7 @@ func checkScaleDownForAutoscaler(name string, enabled bool) resource.TestCheckFu
 		config := common.TestAccProvider.Meta().(*cfg.Config)
 		client, err := config.CceV3AddonClient(env.OS_REGION_NAME)
 		if err != nil {
-<<<<<<< HEAD
 			return fmt.Errorf("error creating opentelekomcloud CCE client: %w", err)
-=======
-			return fmt.Errorf("error creating opentelekomcloud CCE client: %s", err)
->>>>>>> 6a4a3109 (Major refactoring)
 		}
 
 		found, err := addons.Get(client, rs.Primary.ID, rs.Primary.Attributes["cluster_id"]).Extract()
@@ -293,11 +285,7 @@ func checkScaleDownForAutoscaler(name string, enabled bool) resource.TestCheckFu
 		}
 
 		if found.Metadata.Id != rs.Primary.ID {
-<<<<<<< HEAD
 			return fmt.Errorf("addon not found")
-=======
-			return fmt.Errorf("cluster not found")
->>>>>>> 6a4a3109 (Major refactoring)
 		}
 
 		if actual := found.Spec.Values.Advanced["scaleDownEnabled"]; actual != enabled {

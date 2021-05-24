@@ -4,14 +4,14 @@ import (
 	"encoding/json"
 	"fmt"
 	"strconv"
+	"strings"
 	"time"
 
 	"github.com/hashicorp/go-multierror"
+	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
 	golangsdk "github.com/opentelekomcloud/gophertelekomcloud"
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/cce/v3/addons"
-	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common"
-
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common/cfg"
 )
 
@@ -26,13 +26,14 @@ func ResourceCCEAddonV3() *schema.Resource {
 		},
 
 		Importer: &schema.ResourceImporter{
-			State: schema.ImportStatePassthrough,
+			State: resourceCCEAddonV3Import,
 		},
 
 		Schema: map[string]*schema.Schema{
 			"template_version": {
 				Type:     schema.TypeString,
 				Required: true,
+				ForceNew: true,
 			},
 			"cluster_id": {
 				Type:     schema.TypeString,
@@ -42,6 +43,7 @@ func ResourceCCEAddonV3() *schema.Resource {
 			"template_name": {
 				Type:     schema.TypeString,
 				Required: true,
+				ForceNew: true,
 			},
 			"name": {
 				Type:     schema.TypeString,
@@ -248,4 +250,22 @@ func waitForCCEAddonDelete(client *golangsdk.ServiceClient, addonID, clusterID s
 
 		return addon, "available", nil
 	}
+}
+
+func resourceCCEAddonV3Import(d *schema.ResourceData, _ interface{}) ([]*schema.ResourceData, error) {
+	parts := strings.SplitN(d.Id(), "/", 2)
+	if len(parts) != 2 {
+		err := fmt.Errorf("invalid format specified for CCE Addon. Format must be <cluster id>/<addon id>")
+		return nil, err
+	}
+
+	clusterID := parts[0]
+	addonID := parts[1]
+
+	d.SetId(addonID)
+	if err := d.Set("cluster_id", clusterID); err != nil {
+		return nil, err
+	}
+
+	return []*schema.ResourceData{d}, nil
 }
