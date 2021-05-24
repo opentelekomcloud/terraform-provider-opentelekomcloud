@@ -342,6 +342,8 @@ func resourceDdsInstanceV3Create(d *schema.ResourceData, meta interface{}) error
 	}
 	log.Printf("[DEBUG] Create instance %s: %#v", instance.Id, instance)
 
+	d.SetId(instance.Id)
+
 	stateConf := &resource.StateChangeConf{
 		Pending:    []string{"creating", "updating"},
 		Target:     []string{"normal"},
@@ -356,7 +358,6 @@ func resourceDdsInstanceV3Create(d *schema.ResourceData, meta interface{}) error
 		return fmt.Errorf("Error waiting for instance (%s) to become ready: %s ", instance.Id, err)
 	}
 
-	d.SetId(instance.Id)
 	return resourceDdsInstanceV3Read(d, meta)
 }
 
