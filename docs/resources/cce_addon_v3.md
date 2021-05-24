@@ -66,3 +66,12 @@ All above argument parameters can be exported as attribute parameters along with
 * `name` - Installed add-on name.
 
 * `description` - Installed add-on description
+
+
+## Import
+
+CCE addons can be imported using the `cluster_id/addon_id`, e.g.
+
+```sh
+terraform import opentelekomcloud_cce_addon_v3.autoscaler c1881895-cdcb-4d23-96cb-032e6a3ee667/ea257959-eeb1-4c10-8d33-26f0409a755d
+```

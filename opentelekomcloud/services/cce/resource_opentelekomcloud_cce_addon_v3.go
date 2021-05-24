@@ -4,14 +4,14 @@ import (
 	"encoding/json"
 	"fmt"
 	"strconv"
+	"strings"
 	"time"
 
 	"github.com/hashicorp/go-multierror"
 	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
-	golangsdk "github.com/opentelekomcloud/gophertelekomcloud"
+	"github.com/opentelekomcloud/gophertelekomcloud"
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/cce/v3/addons"
-
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common/cfg"
 )
 
@@ -23,6 +23,10 @@ func ResourceCCEAddonV3() *schema.Resource {
 
 		Timeouts: &schema.ResourceTimeout{
 			Delete: schema.DefaultTimeout(5 * time.Minute),
+		},
+
+		Importer: &schema.ResourceImporter{
+			State: resourceCCEAddonV3Import,
 		},
 
 		Schema: map[string]*schema.Schema{
@@ -115,24 +119,30 @@ func resourceCCEAddonV3Create(d *schema.ResourceData, meta interface{}) error {
 		if aErr == nil {
 			errMsg = fmt.Errorf("\nAddon template spec: %s\n%s", addonSpec, errMsg)
 		}
-		return fmt.Errorf("error creating CCE addon instance: %s", errMsg)
+		return fmt.Errorf("error creating CCE addon instance: %w", errMsg)
 	}
 
 	d.SetId(addon.Metadata.Id)
 
 	return resourceCCEAddonV3Read(d, meta)
 }
+
 func resourceCCEAddonV3Read(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*cfg.Config)
 	client, err := config.CceV3AddonClient(config.GetRegion(d))
 	if err != nil {
-		return fmt.Errorf("error creating CCE client: %s", logHttpError(err))
+		return fmt.Errorf("error creating CCE client: %w", logHttpError(err))
 	}
 
 	clusterID := d.Get("cluster_id").(string)
 	addon, err := addons.Get(client, d.Id(), clusterID).Extract()
 	if err != nil {
-		return fmt.Errorf("error reading CCE addon instance: %s", logHttpError(err))
+		if _, ok := err.(golangsdk.ErrDefault404); ok {
+			d.SetId("")
+			return nil
+		}
+
+		return fmt.Errorf("error reading CCE addon instance: %w", logHttpError(err))
 	}
 
 	mErr := multierror.Append(nil,
@@ -142,8 +152,9 @@ func resourceCCEAddonV3Read(d *schema.ResourceData, meta interface{}) error {
 		d.Set("template_name", addon.Spec.AddonTemplateName),
 		d.Set("description", addon.Spec.Description),
 	)
+
 	if err := mErr.ErrorOrNil(); err != nil {
-		return fmt.Errorf("error setting addon attributes: %s", err)
+		return fmt.Errorf("error setting addon attributes: %w", err)
 	}
 
 	return nil
@@ -240,4 +251,45 @@ func waitForCCEAddonDelete(client *golangsdk.ServiceClient, addonID, clusterID s
 
 		return addon, "available", nil
 	}
+}
+
+func resourceCCEAddonV3Import(d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
+	parts := strings.SplitN(d.Id(), "/", 2)
+	if len(parts) != 2 {
+		err := fmt.Errorf("invalid format specified for CCE Addon. Format must be <cluster id>/<addon id>")
+		return nil, err
+	}
+	clusterID := parts[0]
+	addonID := parts[1]
+	d.SetId(addonID)
+
+	config := meta.(*cfg.Config)
+	client, err := config.CceV3AddonClient(config.GetRegion(d))
+	if err != nil {
+		return nil, fmt.Errorf("error creating CCE client: %w", logHttpError(err))
+	}
+
+	addon, err := addons.Get(client, d.Id(), clusterID).Extract()
+	if err != nil {
+		if _, ok := err.(golangsdk.ErrDefault404); ok {
+			d.SetId("")
+			return nil, fmt.Errorf("addon wasn't found")
+		}
+
+		return nil, fmt.Errorf("error reading CCE addon instance: %w", logHttpError(err))
+	}
+
+	mErr := multierror.Append(nil,
+		d.Set("name", addon.Metadata.Name),
+		d.Set("cluster_id", addon.Spec.ClusterID),
+		d.Set("template_version", addon.Spec.Version),
+		d.Set("template_name", addon.Spec.AddonTemplateName),
+		d.Set("description", addon.Spec.Description),
+	)
+
+	if err := mErr.ErrorOrNil(); err != nil {
+		return nil, fmt.Errorf("error setting addon attributes: %w", err)
+	}
+
+	return []*schema.ResourceData{d}, nil
 }
