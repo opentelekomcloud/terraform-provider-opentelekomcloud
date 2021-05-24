@@ -47,6 +47,10 @@ func ResourceCCENodePoolV3() *schema.Resource {
 			Default: schema.DefaultTimeout(15 * time.Minute),
 		},
 
+		Importer: &schema.ResourceImporter{
+			State: resourceCCENodePoolV3Import,
+		},
+
 		CustomizeDiff: common.MultipleCustomizeDiffs(
 			common.ValidateVolumeType("root_volume.*.volumetype"),
 			common.ValidateVolumeType("data_volumes.*.volumetype"),
@@ -537,4 +541,28 @@ func waitForCceNodePoolDelete(cceClient *golangsdk.ServiceClient, clusterId, nod
 		log.Printf("[DEBUG] Open Telekom Cloud Node Pool %s still available.\n", nodePoolId)
 		return r, r.Status.Phase, nil
 	}
+}
+
+func resourceCCENodePoolV3Import(d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
+	parts := strings.SplitN(d.Id(), "/", 2)
+	if len(parts) != 2 {
+		err := fmt.Errorf("invalid format specified for CCE NodePool. Format must be <cluster id>/<nodepool id>")
+		return nil, err
+	}
+	clusterID := parts[0]
+	nodePool := parts[1]
+
+	d.SetId(nodePool)
+	if err := d.Set("cluster_id", clusterID); err != nil {
+		return nil, err
+	}
+
+	results := make([]*schema.ResourceData, 1)
+	if err := resourceCCENodePoolV3Read(d, meta); err != nil {
+		return nil, fmt.Errorf("error reading opentelekomcloud_cce_node_pool_v3 %s: %w", d.Id(), err)
+	}
+
+	results[0] = d
+
+	return results, nil
 }
