@@ -63,20 +63,6 @@ func TestAccCCEAddonV3ForceNewCCE(t *testing.T) {
 	})
 }
 
-// // This test is broken due to OTC CCE updates
-// func TestAccCCEAddonV3EmptyBasic(t *testing.T) {
-// 	resource.Test(t, resource.TestCase{
-// 		PreCheck:     func() { common.TestAccPreCheck(t) },
-// 		Providers:    common.TestAccProviders,
-// 		CheckDestroy: testAccCheckCCEAddonV3Destroy,
-// 		Steps: []resource.TestStep{
-// 			{
-// 				Config: testAccCCEAddonV3EmptyBasic,
-// 			},
-// 		},
-// 	})
-// }
-
 func testAccCheckCCEAddonV3Destroy(s *terraform.State) error {
 	config := common.TestAccProvider.Meta().(*cfg.Config)
 	cceClient, err := config.CceV3Client(env.OS_REGION_NAME)
@@ -192,28 +178,6 @@ resource "opentelekomcloud_cce_addon_v3" "autoscaler" {
   }
 }
 `, clusterName, env.OS_VPC_ID, env.OS_NETWORK_ID, env.OS_TENANT_ID)
-
-	testAccCCEAddonV3EmptyBasic = fmt.Sprintf(`
-resource opentelekomcloud_cce_cluster_v3 cluster {
-  name                    = "%s"
-  cluster_type            = "VirtualMachine"
-  flavor_id               = "cce.s1.small"
-  vpc_id                  = "%s"
-  subnet_id               = "%s"
-  container_network_type  = "overlay_l2"
-  kubernetes_svc_ip_range = "10.247.0.0/16"
-}
-
-resource "opentelekomcloud_cce_addon_v3" "cluster_autoscaler" {
-  template_name    = "autoscaler"
-  template_version = "1.19.1"
-  cluster_id       = opentelekomcloud_cce_cluster_v3.cluster.id
-  values {
-    basic  = {}
-    custom = {}
-  }
-}
-`, clusterName, env.OS_VPC_ID, env.OS_NETWORK_ID)
 
 	testAccCCEAddonV3ForceNew = fmt.Sprintf(`
 resource opentelekomcloud_cce_cluster_v3 cluster_1 {
