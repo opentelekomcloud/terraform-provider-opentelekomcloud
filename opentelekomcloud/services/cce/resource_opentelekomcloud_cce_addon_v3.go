@@ -10,7 +10,7 @@ import (
 	"github.com/hashicorp/go-multierror"
 	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
-	golangsdk "github.com/opentelekomcloud/gophertelekomcloud"
+	"github.com/opentelekomcloud/gophertelekomcloud"
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/cce/v3/addons"
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common/cfg"
 )
@@ -152,6 +152,7 @@ func resourceCCEAddonV3Read(d *schema.ResourceData, meta interface{}) error {
 		d.Set("template_name", addon.Spec.AddonTemplateName),
 		d.Set("description", addon.Spec.Description),
 	)
+
 	if err := mErr.ErrorOrNil(); err != nil {
 		return fmt.Errorf("error setting addon attributes: %w", err)
 	}
@@ -285,6 +286,7 @@ func resourceCCEAddonV3Import(d *schema.ResourceData, meta interface{}) ([]*sche
 		d.Set("template_name", addon.Spec.AddonTemplateName),
 		d.Set("description", addon.Spec.Description),
 	)
+
 	if err := mErr.ErrorOrNil(); err != nil {
 		return nil, fmt.Errorf("error setting addon attributes: %w", err)
 	}
