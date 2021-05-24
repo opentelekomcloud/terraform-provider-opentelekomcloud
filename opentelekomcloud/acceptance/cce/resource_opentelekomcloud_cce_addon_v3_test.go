@@ -63,19 +63,19 @@ func TestAccCCEAddonV3ForceNewCCE(t *testing.T) {
 	})
 }
 
-// This test is broken due to OTC CCE updates
-func TestAccCCEAddonV3EmptyBasic(t *testing.T) {
-	resource.Test(t, resource.TestCase{
-		PreCheck:     func() { common.TestAccPreCheck(t) },
-		Providers:    common.TestAccProviders,
-		CheckDestroy: testAccCheckCCEAddonV3Destroy,
-		Steps: []resource.TestStep{
-			{
-				Config: testAccCCEAddonV3EmptyBasic,
-			},
-		},
-	})
-}
+// // This test is broken due to OTC CCE updates
+// func TestAccCCEAddonV3EmptyBasic(t *testing.T) {
+// 	resource.Test(t, resource.TestCase{
+// 		PreCheck:     func() { common.TestAccPreCheck(t) },
+// 		Providers:    common.TestAccProviders,
+// 		CheckDestroy: testAccCheckCCEAddonV3Destroy,
+// 		Steps: []resource.TestStep{
+// 			{
+// 				Config: testAccCCEAddonV3EmptyBasic,
+// 			},
+// 		},
+// 	})
+// }
 
 func testAccCheckCCEAddonV3Destroy(s *terraform.State) error {
 	config := common.TestAccProvider.Meta().(*cfg.Config)
