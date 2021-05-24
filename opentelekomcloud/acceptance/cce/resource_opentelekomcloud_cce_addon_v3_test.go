@@ -84,13 +84,13 @@ func testAccCheckCCEAddonV3Destroy(s *terraform.State) error {
 	}
 
 	for _, rs := range s.RootModule().Resources {
-		if rs.Type != "opentelekomcloud_cce_cluster_v3" {
+		if rs.Type != "opentelekomcloud_cce_addon_v3" {
 			continue
 		}
 
 		_, err := addons.Get(cceClient, rs.Primary.ID, rs.Primary.Attributes["cluster_id"]).Extract()
 		if err == nil {
-			return fmt.Errorf("cluster still exists")
+			return fmt.Errorf("addon still exists")
 		}
 	}
 
@@ -111,7 +111,7 @@ resource opentelekomcloud_cce_cluster_v3 cluster_1 {
 
 resource "opentelekomcloud_cce_addon_v3" "autoscaler" {
   template_name    = "autoscaler"
-  template_version = "1.17.2"
+  template_version = "1.19.1"
   cluster_id       = opentelekomcloud_cce_cluster_v3.cluster_1.id
 
   values {
@@ -138,11 +138,12 @@ resource "opentelekomcloud_cce_addon_v3" "autoscaler" {
       "scaleUpMemUtilizationThreshold": 0.8,
       "scaleUpUnscheduledPodEnabled": true,
       "scaleUpUtilizationEnabled": true,
-      "unremovableNodeRecheckTimeout": 5
+      "unremovableNodeRecheckTimeout": 5,
+      "tenant_id": "%s"
     }
   }
 }
-`, clusterName, env.OS_VPC_ID, env.OS_NETWORK_ID)
+`, clusterName, env.OS_VPC_ID, env.OS_NETWORK_ID, env.OS_TENANT_ID)
 
 	testAccCCEAddonV3Updated = fmt.Sprintf(`
 resource opentelekomcloud_cce_cluster_v3 cluster_1 {
@@ -157,7 +158,7 @@ resource opentelekomcloud_cce_cluster_v3 cluster_1 {
 
 resource "opentelekomcloud_cce_addon_v3" "autoscaler" {
   template_name    = "autoscaler"
-  template_version = "1.17.2"
+  template_version = "1.19.1"
   cluster_id       = opentelekomcloud_cce_cluster_v3.cluster_1.id
 
   values {
@@ -184,11 +185,12 @@ resource "opentelekomcloud_cce_addon_v3" "autoscaler" {
       "scaleUpMemUtilizationThreshold": 0.8,
       "scaleUpUnscheduledPodEnabled": true,
       "scaleUpUtilizationEnabled": true,
-      "unremovableNodeRecheckTimeout": 5
+      "unremovableNodeRecheckTimeout": 5,
+      "tenant_id": "%s"
     }
   }
 }
-`, clusterName, env.OS_VPC_ID, env.OS_NETWORK_ID)
+`, clusterName, env.OS_VPC_ID, env.OS_NETWORK_ID, env.OS_TENANT_ID)
 
 	testAccCCEAddonV3EmptyBasic = fmt.Sprintf(`
 resource opentelekomcloud_cce_cluster_v3 cluster {
@@ -203,10 +205,11 @@ resource opentelekomcloud_cce_cluster_v3 cluster {
 
 resource "opentelekomcloud_cce_addon_v3" "cluster_autoscaler" {
   template_name    = "autoscaler"
-  template_version = "1.17.2"
+  template_version = "1.19.1"
   cluster_id       = opentelekomcloud_cce_cluster_v3.cluster.id
   values {
-    basic = {}
+    basic  = {}
+    custom = {}
   }
 }
 `, clusterName, env.OS_VPC_ID, env.OS_NETWORK_ID)
@@ -224,7 +227,7 @@ resource opentelekomcloud_cce_cluster_v3 cluster_1 {
 
 resource "opentelekomcloud_cce_addon_v3" "autoscaler" {
   template_name    = "autoscaler"
-  template_version = "1.17.2"
+  template_version = "1.19.1"
   cluster_id       = opentelekomcloud_cce_cluster_v3.cluster_1.id
 
   values {
@@ -251,11 +254,12 @@ resource "opentelekomcloud_cce_addon_v3" "autoscaler" {
       "scaleUpMemUtilizationThreshold": 0.8,
       "scaleUpUnscheduledPodEnabled": true,
       "scaleUpUtilizationEnabled": true,
-      "unremovableNodeRecheckTimeout": 5
+      "unremovableNodeRecheckTimeout": 5,
+      "tenant_id": "%s"
     }
   }
 }
-`, clusterName, env.OS_VPC_ID, env.OS_NETWORK_ID)
+`, clusterName, env.OS_VPC_ID, env.OS_NETWORK_ID, env.OS_TENANT_ID)
 )
 
 func checkScaleDownForAutoscaler(name string, enabled bool) resource.TestCheckFunc {

@@ -21,6 +21,7 @@ resource "opentelekomcloud_cce_cluster_v3" "cluster_1" {
   subnet_id               = var.subnet_id
   container_network_type  = "overlay_l2"
   kubernetes_svc_ip_range = "10.247.0.0/16"
+  cluster_version         = "v1.17.9-r0"
 }
 
 resource "opentelekomcloud_cce_addon_v3" "addon" {
