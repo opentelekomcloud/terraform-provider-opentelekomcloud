@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"strconv"
+	"time"
 
 	"github.com/hashicorp/go-multierror"
 	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
@@ -19,6 +20,10 @@ func ResourceCCEAddonV3() *schema.Resource {
 		Create: resourceCCEAddonV3Create,
 		Read:   resourceCCEAddonV3Read,
 		Delete: resourceCCEAddonV3Delete,
+
+		Timeouts: &schema.ResourceTimeout{
+			Delete: schema.DefaultTimeout(5 * time.Minute),
+		},
 
 		Schema: map[string]*schema.Schema{
 			"template_version": {
