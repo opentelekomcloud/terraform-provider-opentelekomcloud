@@ -120,3 +120,11 @@ This resource provides the following timeouts configuration options:
   - `create` - Default is 30 minutes.
   - `update` - Default is 30 minutes.
   - `delete` - Default is 30 minutes.
+
+## Import
+
+CCE NodePool can be imported using the `cluster_id/node_pool_id`, e.g.
+
+```sh
+terraform import opentelekomcloud_cce_node_pool_v3.pool_1 14a80bc7-c12c-4fe0-a38a-cb77eeac9bd6/89c60255-9bd6-460c-822a-e2b959ede9d2
+```
