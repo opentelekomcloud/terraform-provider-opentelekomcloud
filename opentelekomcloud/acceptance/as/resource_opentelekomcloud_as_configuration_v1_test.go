@@ -148,7 +148,7 @@ resource "opentelekomcloud_as_configuration_v1" "hth_as_config"{
   instance_config {
     image = "%s"
     disk {
-      size        = 3000
+      size        = 40
       volume_type = "SATA"
       disk_type   = "SYS"
     }
@@ -208,7 +208,7 @@ resource "opentelekomcloud_as_configuration_v1" "as_config"{
       disk_type   = "SYS"
     }
     disk {
-      size        = 40
+      size        = 5
       volume_type = "co-p1"
       disk_type   = "DATA"
     }
