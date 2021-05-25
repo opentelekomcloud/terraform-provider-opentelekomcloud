@@ -26,6 +26,9 @@ func TestAccCCENodePoolV3ImportBasic(t *testing.T) {
 				ImportState:       true,
 				ImportStateVerify: true,
 				ImportStateIdFunc: testAccCCENodePoolV3ImportStateIdFunc(),
+				ImportStateVerifyIgnore: []string{
+					"max_node_count", "min_node_count", "priority", "scale_down_cooldown_time",
+				},
 			},
 		},
 	})
