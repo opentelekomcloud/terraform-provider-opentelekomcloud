@@ -413,8 +413,8 @@ func validateDiskSize(d *schema.ResourceDiff, _ interface{}) error {
 		size := disk["size"].(int)
 		diskType := disk["disk_type"].(string)
 		if diskType == "SYS" {
-			if size < 1 || size > 32768 {
-				mErr = multierror.Append(mErr, fmt.Errorf("for system disk size should be [1, 32768]"))
+			if size < 4 || size > 32768 {
+				mErr = multierror.Append(mErr, fmt.Errorf("for system disk size should be [4, 32768]"))
 			}
 		}
 		if diskType == "DATA" {

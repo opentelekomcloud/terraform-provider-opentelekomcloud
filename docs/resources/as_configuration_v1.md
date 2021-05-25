@@ -170,7 +170,7 @@ The `instance_config` block supports:
 
 The `disk` block supports:
 
-* `size` - (Required) The disk size. The unit is GB. The system disk size ranges from `1` to `32768` and must
+* `size` - (Required) The disk size. The unit is GB. The system disk size ranges from `4` to `32768` and must
   be greater than or equal to the minimum size (`min_disk` value) of the system disk specified in the image.
   The data disk size ranges from `10` to `32768`.
 
