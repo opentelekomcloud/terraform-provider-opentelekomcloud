@@ -203,12 +203,12 @@ resource "opentelekomcloud_as_configuration_v1" "as_config"{
   instance_config {
     image = "%s"
     disk {
-      size        = 10
+      size        = 1
       volume_type = "uh-l1"
       disk_type   = "SYS"
     }
     disk {
-      size        = 5
+      size        = 40
       volume_type = "co-p1"
       disk_type   = "DATA"
     }
