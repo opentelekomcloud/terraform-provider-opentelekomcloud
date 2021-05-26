@@ -18,7 +18,7 @@ func TestAccRdsInstanceV3_importBasic(t *testing.T) {
 		CheckDestroy: testAccCheckRdsInstanceV3Destroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccRdsInstanceV3_basic(acctest.RandString(10)),
+				Config: testAccRdsInstanceV3Basic(acctest.RandString(10)),
 			},
 
 			{

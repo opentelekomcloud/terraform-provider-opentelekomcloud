@@ -18,7 +18,9 @@ import (
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/services/rds"
 )
 
-func TestAccRdsInstanceV3_basic(t *testing.T) {
+const resourceName = "opentelekomcloud_rds_instance_v3.instance"
+
+func TestAccRdsInstanceV3Basic(t *testing.T) {
 	postfix := acctest.RandString(3)
 	var rdsInstance instances.RdsInstanceResponse
 
@@ -28,29 +30,32 @@ func TestAccRdsInstanceV3_basic(t *testing.T) {
 		CheckDestroy: testAccCheckRdsInstanceV3Destroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccRdsInstanceV3_basic(postfix),
+				Config: testAccRdsInstanceV3Basic(postfix),
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckRdsInstanceV3Exists("opentelekomcloud_rds_instance_v3.instance", &rdsInstance),
-					resource.TestCheckResourceAttr("opentelekomcloud_rds_instance_v3.instance", "flavor", "rds.pg.c2.medium"),
-					resource.TestCheckResourceAttr("opentelekomcloud_rds_instance_v3.instance", "db.0.port", "8635"),
-					resource.TestCheckResourceAttr("opentelekomcloud_rds_instance_v3.instance", "name", "tf_rds_instance_"+postfix),
-					resource.TestCheckResourceAttr("opentelekomcloud_rds_instance_v3.instance", "db.0.type", "PostgreSQL"),
-					resource.TestCheckResourceAttr("opentelekomcloud_rds_instance_v3.instance", "volume.0.size", "40"),
-					resource.TestCheckResourceAttr("opentelekomcloud_rds_instance_v3.instance", "backup_strategy.0.keep_days", "1"),
+					testAccCheckRdsInstanceV3Exists(resourceName, &rdsInstance),
+					resource.TestCheckResourceAttr(resourceName, "flavor", "rds.pg.c2.medium"),
+					resource.TestCheckResourceAttr(resourceName, "db.0.port", "8635"),
+					resource.TestCheckResourceAttr(resourceName, "name", "tf_rds_instance_"+postfix),
+					resource.TestCheckResourceAttr(resourceName, "db.0.type", "PostgreSQL"),
+					resource.TestCheckResourceAttr(resourceName, "volume.0.size", "40"),
+					resource.TestCheckResourceAttr(resourceName, "backup_strategy.0.keep_days", "1"),
+					resource.TestCheckResourceAttr(resourceName, "tags.muh", "value-create"),
+					resource.TestCheckResourceAttr(resourceName, "tags.kuh", "value-create"),
 				),
 			},
 			{
-				Config: testAccRdsInstanceV3_update(postfix),
+				Config: testAccRdsInstanceV3Update(postfix),
 				Check: resource.ComposeTestCheckFunc(
-					resource.TestCheckResourceAttr("opentelekomcloud_rds_instance_v3.instance", "flavor", "rds.pg.c2.large"),
-					resource.TestCheckResourceAttr("opentelekomcloud_rds_instance_v3.instance", "volume.0.size", "100"),
+					resource.TestCheckResourceAttr(resourceName, "flavor", "rds.pg.c2.large"),
+					resource.TestCheckResourceAttr(resourceName, "volume.0.size", "100"),
+					resource.TestCheckResourceAttr(resourceName, "muh.muh", "value-update"),
 				),
 			},
 		},
 	})
 }
 
-func TestAccRdsInstanceV3_ip(t *testing.T) {
+func TestAccRdsInstanceV3ElasticIP(t *testing.T) {
 	postfix := acctest.RandString(3)
 	var rdsInstance instances.RdsInstanceResponse
 
@@ -60,26 +65,26 @@ func TestAccRdsInstanceV3_ip(t *testing.T) {
 		CheckDestroy: testAccCheckRdsInstanceV3Destroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccRdsInstanceV3_eip(postfix),
+				Config: testAccRdsInstanceV3ElasticIP(postfix),
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckRdsInstanceV3Exists("opentelekomcloud_rds_instance_v3.instance", &rdsInstance),
-					resource.TestCheckResourceAttr("opentelekomcloud_rds_instance_v3.instance", "name", "tf_rds_instance_"+postfix),
-					resource.TestCheckResourceAttr("opentelekomcloud_rds_instance_v3.instance", "db.0.version", "10"),
-					resource.TestCheckResourceAttr("opentelekomcloud_rds_instance_v3.instance", "public_ips.#", "1"),
+					testAccCheckRdsInstanceV3Exists(resourceName, &rdsInstance),
+					resource.TestCheckResourceAttr(resourceName, "name", "tf_rds_instance_"+postfix),
+					resource.TestCheckResourceAttr(resourceName, "db.0.version", "10"),
+					resource.TestCheckResourceAttr(resourceName, "public_ips.#", "1"),
 				),
 			},
 			{
-				Config: testAccRdsInstanceV3_basic(postfix),
+				Config: testAccRdsInstanceV3Basic(postfix),
 				Check: resource.ComposeTestCheckFunc(
-					resource.TestCheckResourceAttr("opentelekomcloud_rds_instance_v3.instance", "db.0.version", "10"),
-					resource.TestCheckResourceAttr("opentelekomcloud_rds_instance_v3.instance", "public_ips.#", "0"),
+					resource.TestCheckResourceAttr(resourceName, "db.0.version", "10"),
+					resource.TestCheckResourceAttr(resourceName, "public_ips.#", "0"),
 				),
 			},
 		},
 	})
 }
 
-func TestAccRdsInstanceV3_ha(t *testing.T) {
+func TestAccRdsInstanceV3HA(t *testing.T) {
 	postfix := acctest.RandString(3)
 	var rdsInstance instances.RdsInstanceResponse
 
@@ -94,20 +99,20 @@ func TestAccRdsInstanceV3_ha(t *testing.T) {
 		CheckDestroy: testAccCheckRdsInstanceV3Destroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccRdsInstanceV3_ha(postfix, availabilityZone2),
+				Config: testAccRdsInstanceV3HA(postfix, availabilityZone2),
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckRdsInstanceV3Exists("opentelekomcloud_rds_instance_v3.instance", &rdsInstance),
-					resource.TestCheckResourceAttr("opentelekomcloud_rds_instance_v3.instance", "name", "tf_rds_instance_"+postfix),
-					resource.TestCheckResourceAttr("opentelekomcloud_rds_instance_v3.instance", "ha_replication_mode", "semisync"),
-					resource.TestCheckResourceAttr("opentelekomcloud_rds_instance_v3.instance", "volume.0.type", "ULTRAHIGH"),
-					resource.TestCheckResourceAttr("opentelekomcloud_rds_instance_v3.instance", "db.0.type", "MySQL"),
+					testAccCheckRdsInstanceV3Exists(resourceName, &rdsInstance),
+					resource.TestCheckResourceAttr(resourceName, "name", "tf_rds_instance_"+postfix),
+					resource.TestCheckResourceAttr(resourceName, "ha_replication_mode", "semisync"),
+					resource.TestCheckResourceAttr(resourceName, "volume.0.type", "ULTRAHIGH"),
+					resource.TestCheckResourceAttr(resourceName, "db.0.type", "MySQL"),
 				),
 			},
 		},
 	})
 }
 
-func TestAccRdsInstanceV3_optionalParams(t *testing.T) {
+func TestAccRdsInstanceV3OptionalParams(t *testing.T) {
 	postfix := acctest.RandString(3)
 	var rdsInstance instances.RdsInstanceResponse
 
@@ -117,17 +122,17 @@ func TestAccRdsInstanceV3_optionalParams(t *testing.T) {
 		CheckDestroy: testAccCheckRdsInstanceV3Destroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccRdsInstanceV3_optionalParams(postfix),
+				Config: testAccRdsInstanceV3OptionalParams(postfix),
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckRdsInstanceV3Exists("opentelekomcloud_rds_instance_v3.instance", &rdsInstance),
-					resource.TestCheckResourceAttr("opentelekomcloud_rds_instance_v3.instance", "name", "tf_rds_instance_"+postfix),
+					testAccCheckRdsInstanceV3Exists(resourceName, &rdsInstance),
+					resource.TestCheckResourceAttr(resourceName, "name", "tf_rds_instance_"+postfix),
 				),
 			},
 		},
 	})
 }
 
-func TestAccRdsInstanceV3_backupCheck(t *testing.T) {
+func TestAccRdsInstanceV3Backup(t *testing.T) {
 	postfix := acctest.RandString(3)
 	var rdsInstance instances.RdsInstanceResponse
 
@@ -137,17 +142,17 @@ func TestAccRdsInstanceV3_backupCheck(t *testing.T) {
 		CheckDestroy: testAccCheckRdsInstanceV3Destroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccRdsInstanceV3_backupCheck(postfix),
+				Config: testAccRdsInstanceV3Backup(postfix),
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckRdsInstanceV3Exists("opentelekomcloud_rds_instance_v3.instance", &rdsInstance),
-					resource.TestCheckResourceAttr("opentelekomcloud_rds_instance_v3.instance", "name", "tf_rds_instance_"+postfix),
+					testAccCheckRdsInstanceV3Exists(resourceName, &rdsInstance),
+					resource.TestCheckResourceAttr(resourceName, "name", "tf_rds_instance_"+postfix),
 				),
 			},
 		},
 	})
 }
 
-func TestAccRdsInstanceV3_templateConfigCheck(t *testing.T) {
+func TestAccRdsInstanceV3TemplateConfig(t *testing.T) {
 	postfix := acctest.RandString(3)
 	var rdsInstance instances.RdsInstanceResponse
 
@@ -157,24 +162,24 @@ func TestAccRdsInstanceV3_templateConfigCheck(t *testing.T) {
 		CheckDestroy: testAccCheckRdsInstanceV3Destroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccRdsInstanceV3_configTemplateBasic(postfix),
+				Config: testAccRdsInstanceV3ConfigTemplateBasic(postfix),
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckRdsInstanceV3Exists("opentelekomcloud_rds_instance_v3.instance", &rdsInstance),
-					resource.TestCheckResourceAttr("opentelekomcloud_rds_instance_v3.instance", "name", "tf_rds_instance_"+postfix),
+					testAccCheckRdsInstanceV3Exists(resourceName, &rdsInstance),
+					resource.TestCheckResourceAttr(resourceName, "name", "tf_rds_instance_"+postfix),
 				),
 			},
 			{
-				Config: testAccRdsInstanceV3_configTemplateChange(postfix),
+				Config: testAccRdsInstanceV3ConfigTemplateUpdate(postfix),
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckRdsInstanceV3Exists("opentelekomcloud_rds_instance_v3.instance", &rdsInstance),
-					resource.TestCheckResourceAttr("opentelekomcloud_rds_instance_v3.instance", "name", "tf_rds_instance_"+postfix),
+					testAccCheckRdsInstanceV3Exists(resourceName, &rdsInstance),
+					resource.TestCheckResourceAttr(resourceName, "name", "tf_rds_instance_"+postfix),
 				),
 			},
 		},
 	})
 }
 
-func TestAccRdsInstanceV3_invalidDbVersion(t *testing.T) {
+func TestAccRdsInstanceV3InvalidDBVersion(t *testing.T) {
 	postfix := acctest.RandString(3)
 
 	resource.Test(t, resource.TestCase{
@@ -183,7 +188,7 @@ func TestAccRdsInstanceV3_invalidDbVersion(t *testing.T) {
 		CheckDestroy: testAccCheckRdsInstanceV3Destroy,
 		Steps: []resource.TestStep{
 			{
-				Config:      testAccRdsInstanceV3_invalidDbVersion(postfix),
+				Config:      testAccRdsInstanceV3InvalidDBVersion(postfix),
 				PlanOnly:    true,
 				ExpectError: regexp.MustCompile(`can't find version.+`),
 			},
@@ -232,7 +237,7 @@ func testAccCheckRdsInstanceV3Exists(n string, rdsInstance *instances.RdsInstanc
 			return err
 		}
 		if found.Id != rs.Primary.ID {
-			return fmt.Errorf("rdsv3 instance not found")
+			return fmt.Errorf("RDSv3 instance not found")
 		}
 
 		*rdsInstance = *found
@@ -241,7 +246,7 @@ func testAccCheckRdsInstanceV3Exists(n string, rdsInstance *instances.RdsInstanc
 	}
 }
 
-func testAccRdsInstanceV3_basic(postfix string) string {
+func testAccRdsInstanceV3Basic(postfix string) string {
 	return fmt.Sprintf(`
 resource "opentelekomcloud_networking_secgroup_v2" "sg" {
   name = "sg-rds-test"
@@ -268,15 +273,15 @@ resource "opentelekomcloud_rds_instance_v3" "instance" {
     start_time = "08:00-09:00"
     keep_days  = 1
   }
-  tag = {
-    foo = "bar"
-    key = "value"
+  tags = {
+    muh = "value-create"
+    kuh = "value-create"
   }
 }
 `, postfix, env.OS_AVAILABILITY_ZONE, env.OS_NETWORK_ID, env.OS_VPC_ID)
 }
 
-func testAccRdsInstanceV3_update(postfix string) string {
+func testAccRdsInstanceV3Update(postfix string) string {
 	return fmt.Sprintf(`
 resource opentelekomcloud_networking_secgroup_v2 sg {
   name = "sg-rds-test"
@@ -303,15 +308,14 @@ resource "opentelekomcloud_rds_instance_v3" "instance" {
     start_time = "08:00-09:00"
     keep_days  = 1
   }
-  tag = {
-    foo = "bar1"
-    value = "key"
+  tags = {
+    muh = "value-update"
   }
 }
 `, postfix, env.OS_AVAILABILITY_ZONE, env.OS_NETWORK_ID, env.OS_VPC_ID)
 }
 
-func testAccRdsInstanceV3_eip(postfix string) string {
+func testAccRdsInstanceV3ElasticIP(postfix string) string {
 	return fmt.Sprintf(`
 resource "opentelekomcloud_networking_floatingip_v2" "fip_1" {}
 
@@ -346,7 +350,7 @@ resource "opentelekomcloud_rds_instance_v3" "instance" {
 `, postfix, env.OS_AVAILABILITY_ZONE, env.OS_NETWORK_ID, env.OS_VPC_ID)
 }
 
-func testAccRdsInstanceV3_ha(postfix string, az2 string) string {
+func testAccRdsInstanceV3HA(postfix string, az2 string) string {
 	return fmt.Sprintf(`
 resource "opentelekomcloud_networking_secgroup_v2" "sg" {
   name = "sg-rds-test"
@@ -378,7 +382,7 @@ resource "opentelekomcloud_rds_instance_v3" "instance" {
 `, postfix, env.OS_AVAILABILITY_ZONE, az2, env.OS_NETWORK_ID, env.OS_VPC_ID)
 }
 
-func testAccRdsInstanceV3_optionalParams(postfix string) string {
+func testAccRdsInstanceV3OptionalParams(postfix string) string {
 	return fmt.Sprintf(`
 resource "opentelekomcloud_networking_secgroup_v2" "sg" {
   name = "sg-rds-test"
@@ -404,7 +408,7 @@ resource "opentelekomcloud_rds_instance_v3" "instance" {
 `, postfix, env.OS_AVAILABILITY_ZONE, env.OS_NETWORK_ID, env.OS_VPC_ID)
 }
 
-func testAccRdsInstanceV3_backupCheck(postfix string) string {
+func testAccRdsInstanceV3Backup(postfix string) string {
 	return fmt.Sprintf(`
 resource "opentelekomcloud_networking_secgroup_v2" "sg" {
   name = "sg-rds-test"
@@ -435,7 +439,7 @@ resource "opentelekomcloud_rds_instance_v3" "instance" {
 `, postfix, env.OS_AVAILABILITY_ZONE, env.OS_NETWORK_ID, env.OS_VPC_ID)
 }
 
-func testAccRdsInstanceV3_configTemplateBasic(postfix string) string {
+func testAccRdsInstanceV3ConfigTemplateBasic(postfix string) string {
 	return fmt.Sprintf(`
 resource "opentelekomcloud_rds_parametergroup_v3" "pg" {
 	name = "pg-rds-test"
@@ -486,7 +490,7 @@ resource "opentelekomcloud_rds_instance_v3" "instance" {
 `, postfix, env.OS_AVAILABILITY_ZONE, env.OS_NETWORK_ID, env.OS_VPC_ID)
 }
 
-func testAccRdsInstanceV3_configTemplateChange(postfix string) string {
+func testAccRdsInstanceV3ConfigTemplateUpdate(postfix string) string {
 	return fmt.Sprintf(`
 resource "opentelekomcloud_rds_parametergroup_v3" "pg" {
 	name = "pg-rds-test"
@@ -537,7 +541,7 @@ resource "opentelekomcloud_rds_instance_v3" "instance" {
 `, postfix, env.OS_AVAILABILITY_ZONE, env.OS_NETWORK_ID, env.OS_VPC_ID)
 }
 
-func testAccRdsInstanceV3_invalidDbVersion(postfix string) string {
+func testAccRdsInstanceV3InvalidDBVersion(postfix string) string {
 	return fmt.Sprintf(`
 resource "opentelekomcloud_networking_secgroup_v2" "sg" {
   name = "sg-rds-test"
