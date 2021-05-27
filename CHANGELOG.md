@@ -12,9 +12,9 @@ BUG FIXES:
 * `resource/opentelekomcloud_cce_node_pool_v3`: Add missing field in `Update` operation ([#1068](https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/1068))
 * `resource/opentelekomcloud_cce_node_pool_v3`: Add missing field in `Create` operation ([#1069](https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/1069))
 * `resource/opentelekomcloud_cce_node_pool_v3`: Skip setting scale fields when scale disabled  ([#1071](https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/1071))
-* `resource/opentelekomcloud_cce_node_pool_v3`: Fix issue with infinite retrial creation  ([#1075](https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/1075))
-* `resource/opentelekomcloud_dds_instance_v3`: Fix issue with empty state file ([#1077](https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/1077))
-* `resource/opentelekomcloud_cce_addon_v3`: Fix issue with `Delete` operation ([#1080](https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/1080))
+* `resource/opentelekomcloud_cce_node_pool_v3`: Fix infinite retrial creation  ([#1075](https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/1075))
+* `resource/opentelekomcloud_dds_instance_v3`: Fix empty state file ([#1077](https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/1077))
+* `resource/opentelekomcloud_cce_addon_v3`: Fix false-positive `Delete` operation ([#1080](https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/1080))
 * `resource/opentelekomcloud_cce_addon_v3`: Remove `Update` operation which produces issues ([#1080](https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/1080))
 * `resource/opentelekomcloud_cce_addon_v3`: Improve `SYS` disk size validation ([#1084](https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/1084))
 
