@@ -12,6 +12,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/helper/validation"
 	"github.com/opentelekomcloud/gophertelekomcloud"
+	"github.com/opentelekomcloud/gophertelekomcloud/openstack/cce/v3/addons"
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/cce/v3/clusters"
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/networking/v1/subnets"
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/networking/v1/vpcs"
@@ -216,6 +217,17 @@ func ResourceCCEClusterV3() *schema.Resource {
 					},
 				},
 			},
+			"no_addons": {
+				Type:     schema.TypeBool,
+				Optional: true,
+				ForceNew: true,
+			},
+			"installed_addons": {
+				Type:     schema.TypeSet,
+				Computed: true,
+				Elem:     &schema.Schema{Type: schema.TypeString},
+				Set:      schema.HashString,
+			},
 		},
 	}
 }
@@ -326,6 +338,12 @@ func resourceCCEClusterV3Create(d *schema.ResourceData, meta interface{}) error 
 	}
 	d.SetId(create.Metadata.Id)
 
+	if d.Get("no_addons").(bool) {
+		if err := removeAddons(d, config); err != nil {
+			return err
+		}
+	}
+
 	return resourceCCEClusterV3Read(d, meta)
 }
 
@@ -411,6 +429,18 @@ func resourceCCEClusterV3Read(d *schema.ResourceData, meta interface{}) error {
 	}
 	if err := d.Set("certificate_users", userList); err != nil {
 		return err
+	}
+
+	instances, err := listInstalledAddons(d, config)
+	if err != nil {
+		return fmt.Errorf("error listing installed addons: %w", err)
+	}
+	installedAddons := make([]string, len(instances.Items))
+	for i, instance := range instances.Items {
+		installedAddons[i] = instance.Metadata.ID
+	}
+	if err := d.Set("installed_addons", installedAddons); err != nil {
+		return fmt.Errorf("error setting installed addons: %w", err)
 	}
 
 	return nil
@@ -582,4 +612,57 @@ func validateCCEClusterNetwork(d *schema.ResourceDiff, meta interface{}) error {
 	}
 
 	return nil
+}
+
+func listInstalledAddons(d *schema.ResourceData, config *cfg.Config) (*addons.AddonInstanceList, error) {
+	client, err := config.CceV3AddonClient(config.GetRegion(d))
+	if err != nil {
+		return nil, fmt.Errorf("error creating CCE Addon client: %w", logHttpError(err))
+	}
+	return addons.ListAddonInstances(client, d.Id()).Extract()
+}
+
+func removeAddons(d *schema.ResourceData, config *cfg.Config) error {
+	client, err := config.CceV3AddonClient(config.GetRegion(d))
+	if err != nil {
+		return fmt.Errorf("error creating CCE Addon client: %w", logHttpError(err))
+	}
+	instances, err := addons.ListAddonInstances(client, d.Id()).Extract()
+	if err != nil {
+		return fmt.Errorf("error listing cluster addons: %w", err)
+	}
+	for _, instance := range instances.Items {
+		addonID := instance.Metadata.ID
+		if err := addons.Delete(client, addonID, d.Id()).ExtractErr(); err != nil {
+			return fmt.Errorf("error deleting cluster addon %s/%s: %w", d.Id(), addonID, err)
+		}
+	}
+	stateConf := &resource.StateChangeConf{
+		Pending:    []string{"Available"},
+		Target:     []string{"Deleted"},
+		Refresh:    waitForCCEClusterAddonsState(client, d.Id()),
+		Timeout:    d.Timeout(schema.TimeoutDelete),
+		Delay:      5 * time.Second,
+		MinTimeout: 3 * time.Second,
+	}
+
+	_, err = stateConf.WaitForState()
+	if err != nil {
+		return fmt.Errorf("error waiting for addons to be removed: %w", err)
+	}
+
+	return nil
+}
+
+func waitForCCEClusterAddonsState(client *golangsdk.ServiceClient, clusterID string) resource.StateRefreshFunc {
+	return func() (r interface{}, s string, err error) {
+		instances, err := addons.ListAddonInstances(client, clusterID).Extract()
+		if err != nil {
+			return nil, "", fmt.Errorf("error listing cluster addons")
+		}
+		if len(instances.Items) > 0 {
+			return instances, "Available", nil
+		}
+		return instances, "Deleted", nil
+	}
 }
