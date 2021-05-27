@@ -17,7 +17,7 @@ func TestAccCCEClusterV3_importBasic(t *testing.T) {
 		CheckDestroy: testAccCheckCCEClusterV3Destroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccCCEClusterV3_basic,
+				Config: testAccCCEClusterV3Basic,
 			},
 
 			{
