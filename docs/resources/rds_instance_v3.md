@@ -42,7 +42,7 @@ resource "opentelekomcloud_rds_instance_v3" "instance" {
     keep_days  = 1
   }
 
-  tag = {
+  tags = {
     foo = "bar"
     key = "value"
   }
@@ -83,7 +83,7 @@ resource "opentelekomcloud_rds_instance_v3" "instance" {
     keep_days  = 1
   }
 
-  tag = {
+  tags = {
     foo = "bar"
     key = "value"
   }
@@ -125,10 +125,10 @@ resource "opentelekomcloud_rds_instance_v3" "instance" {
     start_time = "08:00-09:00"
     keep_days  = 1
   }
-  public_ips          = [
+  public_ips = [
     opentelekomcloud_compute_floatingip_v2.ip.address
   ]
-  tag                 = {
+  tags = {
     foo = "bar"
     key = "value"
   }
@@ -207,7 +207,7 @@ The following arguments are supported:
 * `ha_replication_mode` - (Optional) Specifies the replication mode for the standby DB instance. For MySQL, the value
   is async or semisync. For PostgreSQL, the value is async or sync. For Microsoft SQL Server, the value is sync.
 
--> **Note:** Async indicates the asynchronous replication mode. semisync indicates the
+-> Async indicates the asynchronous replication mode. `semisync` indicates the
   semi-synchronous replication mode. sync indicates the synchronous
   replication mode.  Changing this parameter will create a new resource.
 
@@ -216,12 +216,15 @@ The following arguments are supported:
 * `public_ips` - (Optional) Specifies floating IP to be assigned to the instance.
   This should be a list with single element only.
 
--> **Note:** Setting public IP is done with assigning floating IP to internally
+-> Setting public IP is done with assigning floating IP to internally
   created port. So RDS itself doesn't know about this assignment. This assignment
   won't show on the console.
   This argument will be ignored in future when RDSv3 API for EIP assignment will be implemented.
 
-* `tag` - (Optional) Tags key/value pairs to associate with the instance.
+* `tag` - (Optional) Tags key/value pairs to associate with the instance. Deprecated, please use
+  the `tags` instead.
+
+* `tags` - (Optional) Tags key/value pairs to associate with the instance.
 
 The `db` block supports:
 
