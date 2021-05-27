@@ -7,6 +7,7 @@ ENHANCEMENTS:
 * `resource/opentelekomcloud_evs_volume_v3`: Add possibility to increase volume size ([#1074](https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/1074))
 * `resource/opentelekomcloud_cce_node_pool_v3`: Add possibility to import ([#1082](https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/1082))
 * `resource/opentelekomcloud_rds_instance_v3`: Unify usage of `tags` ([#1085](https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/1085))
+* `resource/opentelekomcloud_cce_cluster_v3`: Allow creating cluster without addons ([#1087](https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/1087))
 
 BUG FIXES:
 * `resource/opentelekomcloud_cce_node_pool_v3`: Add missing field in `Update` operation ([#1068](https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/1068))
