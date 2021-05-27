@@ -18,6 +18,8 @@ import (
 
 var clusterName = fmt.Sprintf("cce-%s", acctest.RandString(5))
 
+const resourceName = "opentelekomcloud_cce_cluster_v3.cluster_1"
+
 func TestAccCCEClusterV3_basic(t *testing.T) {
 	var cluster clusters.Clusters
 
@@ -27,32 +29,25 @@ func TestAccCCEClusterV3_basic(t *testing.T) {
 		CheckDestroy: testAccCheckCCEClusterV3Destroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccCCEClusterV3_basic,
+				Config: testAccCCEClusterV3Basic,
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckCCEClusterV3Exists("opentelekomcloud_cce_cluster_v3.cluster_1", &cluster),
-					resource.TestCheckResourceAttr(
-						"opentelekomcloud_cce_cluster_v3.cluster_1", "name", clusterName),
-					resource.TestCheckResourceAttr(
-						"opentelekomcloud_cce_cluster_v3.cluster_1", "status", "Available"),
-					resource.TestCheckResourceAttr(
-						"opentelekomcloud_cce_cluster_v3.cluster_1", "cluster_type", "VirtualMachine"),
-					resource.TestCheckResourceAttr(
-						"opentelekomcloud_cce_cluster_v3.cluster_1", "flavor_id", "cce.s1.small"),
-					resource.TestCheckResourceAttr(
-						"opentelekomcloud_cce_cluster_v3.cluster_1", "container_network_type", "overlay_l2"),
-					resource.TestCheckResourceAttr(
-						"opentelekomcloud_cce_cluster_v3.cluster_1", "authentication_mode", "x509"),
-					resource.TestCheckResourceAttr(
-						"opentelekomcloud_cce_cluster_v3.cluster_1", "kube_proxy_mode", "iptables"),
-					resource.TestCheckResourceAttr(
-						"opentelekomcloud_cce_cluster_v3.cluster_1", "kubernetes_svc_ip_range", "10.247.0.0/16"),
+					testAccCheckCCEClusterV3Exists(resourceName, &cluster),
+					resource.TestCheckResourceAttr(resourceName, "name", clusterName),
+					resource.TestCheckResourceAttr(resourceName, "status", "Available"),
+					resource.TestCheckResourceAttr(resourceName, "cluster_type", "VirtualMachine"),
+					resource.TestCheckResourceAttr(resourceName, "flavor_id", "cce.s1.small"),
+					resource.TestCheckResourceAttr(resourceName, "container_network_type", "overlay_l2"),
+					resource.TestCheckResourceAttr(resourceName, "authentication_mode", "x509"),
+					resource.TestCheckResourceAttr(resourceName, "kube_proxy_mode", "iptables"),
+					resource.TestCheckResourceAttr(resourceName, "kubernetes_svc_ip_range", "10.247.0.0/16"),
+					resource.TestCheckResourceAttr(resourceName, "installed_addons.#", "2"),
 				),
 			},
 			{
-				Config: testAccCCEClusterV3_update,
+				Config: testAccCCEClusterV3Update,
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr(
-						"opentelekomcloud_cce_cluster_v3.cluster_1", "description", "new description"),
+						resourceName, "description", "new description"),
 				),
 			},
 		},
@@ -66,17 +61,17 @@ func TestAccCCEClusterV3_invalidNetwork(t *testing.T) {
 		CheckDestroy: testAccCheckCCEClusterV3Destroy,
 		Steps: []resource.TestStep{
 			{
-				Config:      testAccCCEClusterV3_invalidSubnet,
+				Config:      testAccCCEClusterV3InvalidSubnet,
 				PlanOnly:    true,
 				ExpectError: regexp.MustCompile(`can't find subnet.+`),
 			},
 			{
-				Config:      testAccCCEClusterV3_invalidVPC,
+				Config:      testAccCCEClusterV3InvalidVPC,
 				PlanOnly:    true,
 				ExpectError: regexp.MustCompile(`can't find VPC.+`),
 			},
 			{
-				Config:             testAccCCEClusterV3_computed,
+				Config:             testAccCCEClusterV3Computed,
 				PlanOnly:           true,
 				ExpectNonEmptyPlan: true,
 			},
@@ -92,9 +87,8 @@ func TestAccCCEClusterV3_proxyAuth(t *testing.T) {
 		CheckDestroy: testAccCheckCCEClusterV3Destroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccCCEClusterV3_authProxy,
-				Check: resource.TestCheckResourceAttr(
-					"opentelekomcloud_cce_cluster_v3.cluster_1", "authentication_mode", "authenticating_proxy"),
+				Config: testAccCCEClusterV3AuthProxy,
+				Check:  resource.TestCheckResourceAttr(resourceName, "authentication_mode", "authenticating_proxy"),
 			},
 		},
 	})
@@ -109,11 +103,29 @@ func TestAccCCEClusterV3_timeout(t *testing.T) {
 		CheckDestroy: testAccCheckCCEClusterV3Destroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccCCEClusterV3_timeout,
+				Config: testAccCCEClusterV3Timeout,
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckCCEClusterV3Exists("opentelekomcloud_cce_cluster_v3.cluster_1", &cluster),
-					resource.TestCheckResourceAttr(
-						"opentelekomcloud_cce_cluster_v3.cluster_1", "authentication_mode", "rbac"),
+					testAccCheckCCEClusterV3Exists(resourceName, &cluster),
+					resource.TestCheckResourceAttr(resourceName, "authentication_mode", "rbac"),
+				),
+			},
+		},
+	})
+}
+
+func TestAccCCEClusterV3NoAddons(t *testing.T) {
+	var cluster clusters.Clusters
+
+	resource.Test(t, resource.TestCase{
+		PreCheck:     func() { common.TestAccPreCheck(t) },
+		Providers:    common.TestAccProviders,
+		CheckDestroy: testAccCheckCCEClusterV3Destroy,
+		Steps: []resource.TestStep{
+			{
+				Config: testAccCCEClusterV3NoAddons,
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckCCEClusterV3Exists(resourceName, &cluster),
+					resource.TestCheckResourceAttr(resourceName, "installed_addons.#", "0"),
 				),
 			},
 		},
@@ -182,7 +194,7 @@ func TestAccCCEClusterV3_withVersionDiff(t *testing.T) {
 		CheckDestroy: testAccCheckCCEClusterV3Destroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccCCEClusterV3_withInvalidVersion,
+				Config: testAccCCEClusterV3WithInvalidVersion,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckCCEClusterV3Exists("opentelekomcloud_cce_cluster_v3.cluster_1", &cluster),
 					resource.TestCheckResourceAttr(
@@ -193,7 +205,8 @@ func TestAccCCEClusterV3_withVersionDiff(t *testing.T) {
 	})
 }
 
-var testAccCCEClusterV3_basic = fmt.Sprintf(`
+var (
+	testAccCCEClusterV3Basic = fmt.Sprintf(`
 resource "opentelekomcloud_cce_cluster_v3" "cluster_1" {
   name                    = "%s"
   cluster_type            = "VirtualMachine"
@@ -204,7 +217,7 @@ resource "opentelekomcloud_cce_cluster_v3" "cluster_1" {
   kubernetes_svc_ip_range = "10.247.0.0/16"
 }`, clusterName, env.OS_VPC_ID, env.OS_NETWORK_ID)
 
-var testAccCCEClusterV3_update = fmt.Sprintf(`
+	testAccCCEClusterV3Update = fmt.Sprintf(`
 resource "opentelekomcloud_cce_cluster_v3" "cluster_1" {
   name                    = "%s"
   cluster_type            = "VirtualMachine"
@@ -216,7 +229,7 @@ resource "opentelekomcloud_cce_cluster_v3" "cluster_1" {
   kubernetes_svc_ip_range = "10.247.0.0/16"
 }`, clusterName, env.OS_VPC_ID, env.OS_NETWORK_ID)
 
-var testAccCCEClusterV3_timeout = fmt.Sprintf(`
+	testAccCCEClusterV3Timeout = fmt.Sprintf(`
 resource "opentelekomcloud_networking_floatingip_v2" "fip_1" {
 }
 
@@ -239,7 +252,7 @@ resource "opentelekomcloud_cce_cluster_v3" "cluster_1" {
 }
 `, clusterName, env.OS_VPC_ID, env.OS_NETWORK_ID)
 
-var testAccCCEClusterV3_withInvalidVersion = fmt.Sprintf(`
+	testAccCCEClusterV3WithInvalidVersion = fmt.Sprintf(`
 resource "opentelekomcloud_cce_cluster_v3" "cluster_1" {
   name                   = "%s"
   cluster_type           = "VirtualMachine"
@@ -251,7 +264,7 @@ resource "opentelekomcloud_cce_cluster_v3" "cluster_1" {
   description            = "new description"
 }`, clusterName, env.OS_VPC_ID, env.OS_NETWORK_ID)
 
-var testAccCCEClusterV3_authProxy = fmt.Sprintf(`
+	testAccCCEClusterV3AuthProxy = fmt.Sprintf(`
 resource "opentelekomcloud_cce_cluster_v3" "cluster_1" {
   name                    = "%s"
   cluster_type            = "VirtualMachine"
@@ -287,7 +300,7 @@ i1YhgnQbn5E0hz55OLu5jvOkKQjPCW+9Aa==
 EOT
 }`, clusterName, env.OS_VPC_ID, env.OS_NETWORK_ID)
 
-var testAccCCEClusterV3_invalidSubnet = fmt.Sprintf(`
+	testAccCCEClusterV3InvalidSubnet = fmt.Sprintf(`
 resource "opentelekomcloud_vpc_v1" "vpc" {
   cidr = "192.168.0.0/16"
   name = "cce-test"
@@ -304,7 +317,7 @@ resource "opentelekomcloud_cce_cluster_v3" "cluster_1" {
 }
 `, clusterName)
 
-var testAccCCEClusterV3_invalidVPC = fmt.Sprintf(`
+	testAccCCEClusterV3InvalidVPC = fmt.Sprintf(`
 resource "opentelekomcloud_vpc_v1" "vpc" {
   cidr = "192.168.0.0/16"
   name = "cce-test"
@@ -333,7 +346,7 @@ resource "opentelekomcloud_cce_cluster_v3" "cluster_1" {
 }
 `, clusterName)
 
-var testAccCCEClusterV3_computed = fmt.Sprintf(`
+	testAccCCEClusterV3Computed = fmt.Sprintf(`
 resource "opentelekomcloud_vpc_v1" "vpc" {
   cidr = "192.168.0.0/16"
   name = "cce-test"
@@ -361,3 +374,16 @@ resource "opentelekomcloud_cce_cluster_v3" "cluster_1" {
   kubernetes_svc_ip_range = "10.247.0.0/16"
 }
 `, clusterName)
+
+	testAccCCEClusterV3NoAddons = fmt.Sprintf(`
+resource "opentelekomcloud_cce_cluster_v3" "cluster_1" {
+  name                    = "%s"
+  cluster_type            = "VirtualMachine"
+  flavor_id               = "cce.s1.small"
+  vpc_id                  = "%s"
+  subnet_id               = "%s"
+  container_network_type  = "overlay_l2"
+  kubernetes_svc_ip_range = "10.247.0.0/16"
+  no_addons               = true
+}`, clusterName, env.OS_VPC_ID, env.OS_NETWORK_ID)
+)
