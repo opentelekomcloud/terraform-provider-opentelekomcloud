@@ -338,6 +338,10 @@ func resourceCCEClusterV3Create(d *schema.ResourceData, meta interface{}) error 
 	}
 	d.SetId(create.Metadata.Id)
 
+	if err := waitForInstalledAddons(d, config); err != nil {
+		return fmt.Errorf("error waiting for default addons to install")
+	}
+
 	if d.Get("no_addons").(bool) {
 		if err := removeAddons(d, config); err != nil {
 			return err
@@ -622,11 +626,33 @@ func listInstalledAddons(d *schema.ResourceData, config *cfg.Config) (*addons.Ad
 	return addons.ListAddonInstances(client, d.Id()).Extract()
 }
 
+func waitForInstalledAddons(d *schema.ResourceData, config *cfg.Config) error {
+	client, err := config.CceV3AddonClient(config.GetRegion(d))
+	if err != nil {
+		return fmt.Errorf("error creating CCE Addon client: %w", logHttpError(err))
+	}
+	// First wait for addons to be assigned
+	stateConfExist := &resource.StateChangeConf{
+		Pending:    []string{"Deleted"},
+		Target:     []string{"Available"},
+		Refresh:    waitForCCEClusterAddonsState(client, d.Id()),
+		Timeout:    d.Timeout(schema.TimeoutDelete),
+		Delay:      30 * time.Second,
+		MinTimeout: 1 * time.Minute,
+	}
+
+	if _, err := stateConfExist.WaitForState(); err != nil {
+		return fmt.Errorf("error waiting for addons to be removed: %w", err)
+	}
+	return nil
+}
+
 func removeAddons(d *schema.ResourceData, config *cfg.Config) error {
 	client, err := config.CceV3AddonClient(config.GetRegion(d))
 	if err != nil {
 		return fmt.Errorf("error creating CCE Addon client: %w", logHttpError(err))
 	}
+
 	instances, err := addons.ListAddonInstances(client, d.Id()).Extract()
 	if err != nil {
 		return fmt.Errorf("error listing cluster addons: %w", err)
