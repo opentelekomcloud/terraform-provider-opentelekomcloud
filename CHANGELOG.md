@@ -1,5 +1,26 @@
 ## 1.24.0 (Unreleased)
 
+## 1.23.12 (May 27, 2021)
+
+ENHANCEMENTS:
+* `resource/opentelekomcloud_cce_addon_v3`: Add possibility to import ([#1066](https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/1066))
+* `resource/opentelekomcloud_evs_volume_v3`: Add possibility to increase volume size ([#1074](https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/1074))
+* `resource/opentelekomcloud_cce_node_pool_v3`: Add possibility to import ([#1082](https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/1082))
+* `resource/opentelekomcloud_rds_instance_v3`: Unify usage of `tags` ([#1085](https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/1085))
+
+BUG FIXES:
+* `resource/opentelekomcloud_cce_node_pool_v3`: Add missing field in `Update` operation ([#1068](https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/1068))
+* `resource/opentelekomcloud_cce_node_pool_v3`: Add missing field in `Create` operation ([#1069](https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/1069))
+* `resource/opentelekomcloud_cce_node_pool_v3`: Skip setting scale fields when scale disabled  ([#1071](https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/1071))
+* `resource/opentelekomcloud_cce_node_pool_v3`: Fix issue with infinite retrial creation  ([#1075](https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/1075))
+* `resource/opentelekomcloud_dds_instance_v3`: Fix issue with empty state file ([#1077](https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/1077))
+* `resource/opentelekomcloud_cce_addon_v3`: Fix issue with `Delete` operation ([#1080](https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/1080))
+* `resource/opentelekomcloud_cce_addon_v3`: Remove `Update` operation which produces issues ([#1080](https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/1080))
+* `resource/opentelekomcloud_cce_addon_v3`: Improve `SYS` disk size validation ([#1084](https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/1084))
+
+DOCUMENTATION:
+* `resource/opentelekomcloud_cce_addon_v3`: Fix wrong version of EuleorOS ([#1070](https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/1070))
+* `resource/opentelekomcloud_dds_instance_v3`: Add examples of creating a Replica Set ([#1079](https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/1079))
 
 ## 1.23.11 (May 19, 2021)
 
