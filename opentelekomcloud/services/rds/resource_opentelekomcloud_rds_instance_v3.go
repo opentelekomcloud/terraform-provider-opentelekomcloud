@@ -10,10 +10,11 @@ import (
 	"github.com/hashicorp/go-multierror"
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
 	"github.com/opentelekomcloud/gophertelekomcloud"
+	"github.com/opentelekomcloud/gophertelekomcloud/openstack/common/tags"
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/networking/v1/subnets"
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/networking/v2/extensions/layer3/floatingips"
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/networking/v2/ports"
-	"github.com/opentelekomcloud/gophertelekomcloud/openstack/rds/v1/tags"
+	tag "github.com/opentelekomcloud/gophertelekomcloud/openstack/rds/v1/tags"
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/rds/v3/backups"
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/rds/v3/configurations"
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/rds/v3/flavors"
@@ -166,9 +167,17 @@ func ResourceRdsInstanceV3() *schema.Resource {
 				ForceNew: true,
 			},
 			"tag": {
-				Type:         schema.TypeMap,
-				Optional:     true,
-				ValidateFunc: common.ValidateTags,
+				Type:          schema.TypeMap,
+				Optional:      true,
+				ValidateFunc:  common.ValidateTags,
+				Deprecated:    "Please use `tags` instead",
+				ConflictsWith: []string{"tags"},
+			},
+			"tags": {
+				Type:          schema.TypeMap,
+				Optional:      true,
+				ValidateFunc:  common.ValidateTags,
+				ConflictsWith: []string{"tag"},
 			},
 			"param_group_id": {
 				Type:     schema.TypeString,
@@ -361,13 +370,23 @@ func resourceRdsInstanceV3Create(d *schema.ResourceData, meta interface{}) error
 		tagMap := d.Get("tag").(map[string]interface{})
 		log.Printf("[DEBUG] Setting tag(key/value): %v", tagMap)
 		for key, val := range tagMap {
-			tagOpts := tags.CreateOpts{
+			tagOpts := tag.CreateOpts{
 				Key:   key,
 				Value: val.(string),
 			}
-			err = tags.Create(tagClient, nodeID, tagOpts).ExtractErr()
+			err = tag.Create(tagClient, nodeID, tagOpts).ExtractErr()
 			if err != nil {
 				log.Printf("[WARN] Error setting tag(key/value) of instance %s, err: %s", r.Instance.Id, err)
+			}
+		}
+	}
+
+	if common.HasFilledOpt(d, "tags") {
+		tagRaw := d.Get("tags").(map[string]interface{})
+		if len(tagRaw) > 0 {
+			tagList := common.ExpandResourceTags(tagRaw)
+			if err := tags.Create(client, "instances", r.Instance.Id, tagList).ExtractErr(); err != nil {
+				return fmt.Errorf("error setting tags of RDSv3 instance: %w", err)
 			}
 		}
 	}
@@ -549,7 +568,7 @@ func resourceRdsInstanceV3Update(d *schema.ResourceData, meta interface{}) error
 
 		if len(remove) > 0 {
 			for _, opts := range remove {
-				err = tags.Delete(tagClient, nodeID, opts).ExtractErr()
+				err = tag.Delete(tagClient, nodeID, opts).ExtractErr()
 				if err != nil {
 					log.Printf("[WARN] Error deleting tag(key/value) of instance: %s, err: %s", d.Id(), err)
 				}
@@ -557,11 +576,16 @@ func resourceRdsInstanceV3Update(d *schema.ResourceData, meta interface{}) error
 		}
 		if len(create) > 0 {
 			for _, opts := range create {
-				err = tags.Create(tagClient, nodeID, opts).ExtractErr()
+				err = tag.Create(tagClient, nodeID, opts).ExtractErr()
 				if err != nil {
 					log.Printf("[WARN] Error setting tag(key/value) of instance: %s, err: %s", d.Id(), err)
 				}
 			}
+		}
+	}
+	if d.HasChange("tags") {
+		if err := common.UpdateResourceTags(client, d, "instances", d.Id()); err != nil {
+			return fmt.Errorf("error updating tags of RDSv3 instance %s: %s", d.Id(), err)
 		}
 	}
 
@@ -796,34 +820,48 @@ func resourceRdsInstanceV3Read(d *schema.ResourceData, meta interface{}) error {
 		}
 	}
 
-	// set instance tag
-	var nodeID string
-	nodes := d.Get("nodes").([]interface{})
-	for _, node := range nodes {
-		nodeObj := node.(map[string]interface{})
-		if nodeObj["role"].(string) == "master" {
-			nodeID = nodeObj["id"].(string)
+	var tagParamName string
+	// set instance tags
+	if _, ok := d.GetOk("tags"); ok {
+		tagParamName = "tags"
+	} else if _, ok := d.GetOk("tag"); ok {
+		tagParamName = "tag"
+	}
+	if tagParamName == "tag" {
+		// set instance tag
+		var nodeID string
+		nodes := d.Get("nodes").([]interface{})
+		for _, node := range nodes {
+			nodeObj := node.(map[string]interface{})
+			if nodeObj["role"].(string) == "master" {
+				nodeID = nodeObj["id"].(string)
+			}
 		}
-	}
 
-	if nodeID == "" {
-		log.Printf("[WARN] Error fetching node id of instance:%s", d.Id())
-		return nil
-	}
-	tagClient, err := config.RdsTagV1Client(config.GetRegion(d))
-	if err != nil {
-		return fmt.Errorf("error creating OpenTelekomCloud rds tag client: %#v", err)
-	}
-	tagList, err := tags.Get(tagClient, nodeID).Extract()
-	if err != nil {
-		return fmt.Errorf("error fetching OpenTelekomCloud rds instance tags: %s", err)
-	}
-	tagMap := make(map[string]string)
-	for _, val := range tagList.Tags {
-		tagMap[val.Key] = val.Value
-	}
-	if err := d.Set("tag", tagMap); err != nil {
-		return fmt.Errorf("[DEBUG] Error saving tag to state for OpenTelekomCloud rds instance (%s): %s", d.Id(), err)
+		if nodeID == "" {
+			log.Printf("[WARN] Error fetching node id of instance: %s", d.Id())
+			return nil
+		}
+		tagClient, err := config.RdsTagV1Client(config.GetRegion(d))
+		if err != nil {
+			return fmt.Errorf("error creating OpenTelekomCloud rds tag client: %#v", err)
+		}
+		tagList, err := tag.Get(tagClient, nodeID).Extract()
+		if err != nil {
+			return fmt.Errorf("error fetching OpenTelekomCloud rds instance tags: %s", err)
+		}
+		tagMap := make(map[string]string)
+		for _, val := range tagList.Tags {
+			tagMap[val.Key] = val.Value
+		}
+		if err := d.Set("tag", tagMap); err != nil {
+			return fmt.Errorf("[DEBUG] Error saving tag to state for OpenTelekomCloud rds instance (%s): %s", d.Id(), err)
+		}
+	} else if tagParamName == "tags" {
+		tagsMap := common.TagsToMap(rdsInstance.Tags)
+		if err := d.Set("tags", tagsMap); err != nil {
+			return fmt.Errorf("error saving tags for OpenTelekomCloud RDSv3 instance: %s", err)
+		}
 	}
 
 	return nil
