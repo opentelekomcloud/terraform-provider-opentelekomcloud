@@ -820,44 +820,48 @@ func resourceRdsInstanceV3Read(d *schema.ResourceData, meta interface{}) error {
 		}
 	}
 
-	// set instance tag
-	var nodeID string
-	nodes := d.Get("nodes").([]interface{})
-	for _, node := range nodes {
-		nodeObj := node.(map[string]interface{})
-		if nodeObj["role"].(string) == "master" {
-			nodeID = nodeObj["id"].(string)
+	var tagParamName string
+	// set instance tags
+	if _, ok := d.GetOk("tags"); ok {
+		tagParamName = "tags"
+	} else if _, ok := d.GetOk("tag"); ok {
+		tagParamName = "tag"
+	}
+	if tagParamName == "tag" {
+		// set instance tag
+		var nodeID string
+		nodes := d.Get("nodes").([]interface{})
+		for _, node := range nodes {
+			nodeObj := node.(map[string]interface{})
+			if nodeObj["role"].(string) == "master" {
+				nodeID = nodeObj["id"].(string)
+			}
 		}
-	}
 
-	if nodeID == "" {
-		log.Printf("[WARN] Error fetching node id of instance: %s", d.Id())
-		return nil
-	}
-	tagClient, err := config.RdsTagV1Client(config.GetRegion(d))
-	if err != nil {
-		return fmt.Errorf("error creating OpenTelekomCloud rds tag client: %#v", err)
-	}
-	tagList, err := tag.Get(tagClient, nodeID).Extract()
-	if err != nil {
-		return fmt.Errorf("error fetching OpenTelekomCloud rds instance tags: %s", err)
-	}
-	tagMap := make(map[string]string)
-	for _, val := range tagList.Tags {
-		tagMap[val.Key] = val.Value
-	}
-	if err := d.Set("tag", tagMap); err != nil {
-		return fmt.Errorf("[DEBUG] Error saving tag to state for OpenTelekomCloud rds instance (%s): %s", d.Id(), err)
-	}
-
-	// save tags
-	resourceTags, err := tags.Get(client, "instances", d.Id()).Extract()
-	if err != nil {
-		return fmt.Errorf("error fetching OpenTelekomCloud RDSv3 instance tags: %s", err)
-	}
-	tagsMap := common.TagsToMap(resourceTags)
-	if err := d.Set("tags", tagsMap); err != nil {
-		return fmt.Errorf("error saving tags for OpenTelekomCloud RDSv3 instance: %s", err)
+		if nodeID == "" {
+			log.Printf("[WARN] Error fetching node id of instance: %s", d.Id())
+			return nil
+		}
+		tagClient, err := config.RdsTagV1Client(config.GetRegion(d))
+		if err != nil {
+			return fmt.Errorf("error creating OpenTelekomCloud rds tag client: %#v", err)
+		}
+		tagList, err := tag.Get(tagClient, nodeID).Extract()
+		if err != nil {
+			return fmt.Errorf("error fetching OpenTelekomCloud rds instance tags: %s", err)
+		}
+		tagMap := make(map[string]string)
+		for _, val := range tagList.Tags {
+			tagMap[val.Key] = val.Value
+		}
+		if err := d.Set("tag", tagMap); err != nil {
+			return fmt.Errorf("[DEBUG] Error saving tag to state for OpenTelekomCloud rds instance (%s): %s", d.Id(), err)
+		}
+	} else if tagParamName == "tags" {
+		tagsMap := common.TagsToMap(rdsInstance.Tags)
+		if err := d.Set("tags", tagsMap); err != nil {
+			return fmt.Errorf("error saving tags for OpenTelekomCloud RDSv3 instance: %s", err)
+		}
 	}
 
 	return nil

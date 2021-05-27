@@ -48,7 +48,7 @@ func TestAccRdsInstanceV3Basic(t *testing.T) {
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr(resourceName, "flavor", "rds.pg.c2.large"),
 					resource.TestCheckResourceAttr(resourceName, "volume.0.size", "100"),
-					resource.TestCheckResourceAttr(resourceName, "muh.muh", "value-update"),
+					resource.TestCheckResourceAttr(resourceName, "tags.muh", "value-update"),
 				),
 			},
 		},
