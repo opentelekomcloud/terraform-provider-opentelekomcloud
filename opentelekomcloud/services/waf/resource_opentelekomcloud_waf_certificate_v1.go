@@ -10,7 +10,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
 	"github.com/opentelekomcloud/gophertelekomcloud"
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/waf/v1/certificates"
-
+	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common"
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common/cfg"
 )
 
@@ -63,11 +63,9 @@ func ResourceWafCertificateV1() *schema.Resource {
 
 func resourceWafCertificateV1Create(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*cfg.Config)
-
 	wafClient, err := config.WafV1Client(config.GetRegion(d))
-
 	if err != nil {
-		return fmt.Errorf("Error creating OpenTelekomcomCloud WAF Client: %s", err)
+		return fmt.Errorf(wafClientError, err)
 	}
 
 	createOpts := certificates.CreateOpts{
@@ -78,7 +76,7 @@ func resourceWafCertificateV1Create(d *schema.ResourceData, meta interface{}) er
 
 	certificate, err := certificates.Create(wafClient, createOpts).Extract()
 	if err != nil {
-		return fmt.Errorf("Error creating OpenTelekomcomCloud WAF Certificate: %s", err)
+		return fmt.Errorf("error creating OpenTelekomcomCloud WAF Certificate: %w", err)
 	}
 
 	log.Printf("[DEBUG] Waf certificate created: %#v", certificate)
@@ -88,11 +86,10 @@ func resourceWafCertificateV1Create(d *schema.ResourceData, meta interface{}) er
 }
 
 func resourceWafCertificateV1Read(d *schema.ResourceData, meta interface{}) error {
-
 	config := meta.(*cfg.Config)
 	wafClient, err := config.WafV1Client(config.GetRegion(d))
 	if err != nil {
-		return fmt.Errorf("Error creating OpenTelekomCloud WAF client: %s", err)
+		return fmt.Errorf(wafClientError, err)
 	}
 	n, err := certificates.Get(wafClient, d.Id()).Extract()
 
@@ -102,7 +99,7 @@ func resourceWafCertificateV1Read(d *schema.ResourceData, meta interface{}) erro
 			return nil
 		}
 
-		return fmt.Errorf("Error retrieving OpenTelekomCloud Waf Certificate: %s", err)
+		return fmt.Errorf("error retrieving OpenTelekomCloud Waf Certificate: %w", err)
 	}
 
 	expires := time.Unix(int64(n.ExpireTime/1000), 0).UTC().Format("2006-01-02 15:04:05 MST")
@@ -122,8 +119,9 @@ func resourceWafCertificateV1Update(d *schema.ResourceData, meta interface{}) er
 	config := meta.(*cfg.Config)
 	wafClient, err := config.WafV1Client(config.GetRegion(d))
 	if err != nil {
-		return fmt.Errorf("Error creating OpenTelekomCloud WAF Client: %s", err)
+		return fmt.Errorf(wafClientError, err)
 	}
+
 	var updateOpts certificates.UpdateOpts
 
 	if d.HasChange("name") {
@@ -132,7 +130,7 @@ func resourceWafCertificateV1Update(d *schema.ResourceData, meta interface{}) er
 
 	_, err = certificates.Update(wafClient, d.Id(), updateOpts).Extract()
 	if err != nil {
-		return fmt.Errorf("Error updating OpenTelekomCloud WAF Certificate: %s", err)
+		return fmt.Errorf("error updating OpenTelekomCloud WAF Certificate: %w", err)
 	}
 	return resourceWafCertificateV1Read(d, meta)
 }
@@ -141,12 +139,12 @@ func resourceWafCertificateV1Delete(d *schema.ResourceData, meta interface{}) er
 	config := meta.(*cfg.Config)
 	wafClient, err := config.WafV1Client(config.GetRegion(d))
 	if err != nil {
-		return fmt.Errorf("Error creating OpenTelekomCloud WAF client: %s", err)
+		return fmt.Errorf(wafClientError, err)
 	}
 
 	err = certificates.Delete(wafClient, d.Id()).ExtractErr()
 	if err != nil {
-		return fmt.Errorf("Error deleting OpenTelekomCloud WAF Certificate: %s", err)
+		return fmt.Errorf("error deleting OpenTelekomCloud WAF Certificate: %w", err)
 	}
 
 	d.SetId("")
