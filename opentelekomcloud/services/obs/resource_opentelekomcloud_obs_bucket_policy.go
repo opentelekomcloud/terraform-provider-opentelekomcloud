@@ -49,7 +49,6 @@ func resourceObsBucketPolicyPut(d *schema.ResourceData, meta interface{}) error 
 
 	policy := d.Get("policy").(string)
 	bucket := d.Get("bucket").(string)
-	d.SetId(bucket)
 
 	log.Printf("[DEBUG] OBS bucket: %s, put policy: %s", bucket, policy)
 
@@ -73,6 +72,8 @@ func resourceObsBucketPolicyPut(d *schema.ResourceData, meta interface{}) error 
 	if err != nil {
 		return fmt.Errorf("error putting OBS policy: %s", err)
 	}
+
+	d.SetId(bucket)
 
 	return nil
 }
