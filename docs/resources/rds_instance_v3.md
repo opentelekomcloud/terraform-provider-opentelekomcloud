@@ -291,9 +291,9 @@ In addition to the arguments listed above, the following computed attributes are
 
 * `public_ips` - Indicates the public IP address list.
 
-* `db` - See Argument Reference above. The `db` block also contains:
+* `db` - See Argument Reference above. The `db` block additionally contains:
 
-* `user_name` - Indicates the default user name of database.
+  * `user_name` - Indicates the default user name of database.
 
 The `nodes` block contains:
 
