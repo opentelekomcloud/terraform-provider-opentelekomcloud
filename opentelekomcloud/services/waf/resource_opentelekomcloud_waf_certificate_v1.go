@@ -3,8 +3,10 @@ package waf
 import (
 	"fmt"
 	"log"
+	"strings"
 	"time"
 
+	"github.com/hashicorp/go-multierror"
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
 	"github.com/opentelekomcloud/gophertelekomcloud"
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/waf/v1/certificates"
@@ -40,14 +42,20 @@ func ResourceWafCertificateV1() *schema.Resource {
 				ForceNew: false,
 			},
 			"content": {
-				Type:     schema.TypeString,
-				Required: true,
-				ForceNew: true,
+				Type:      schema.TypeString,
+				Required:  true,
+				ForceNew:  true,
+				StateFunc: common.GetHashOrEmpty,
 			},
 			"key": {
+				Type:      schema.TypeString,
+				Required:  true,
+				ForceNew:  true,
+				StateFunc: common.GetHashOrEmpty,
+			},
+			"expires": {
 				Type:     schema.TypeString,
-				Required: true,
-				ForceNew: true,
+				Computed: true,
 			},
 		},
 	}
@@ -64,8 +72,8 @@ func resourceWafCertificateV1Create(d *schema.ResourceData, meta interface{}) er
 
 	createOpts := certificates.CreateOpts{
 		Name:    d.Get("name").(string),
-		Content: d.Get("content").(string),
-		Key:     d.Get("key").(string),
+		Content: strings.TrimSpace(d.Get("content").(string)),
+		Key:     strings.TrimSpace(d.Get("key").(string)),
 	}
 
 	certificate, err := certificates.Create(wafClient, createOpts).Extract()
@@ -97,8 +105,15 @@ func resourceWafCertificateV1Read(d *schema.ResourceData, meta interface{}) erro
 		return fmt.Errorf("Error retrieving OpenTelekomCloud Waf Certificate: %s", err)
 	}
 
-	d.SetId(n.Id)
-	d.Set("name", n.Name)
+	expires := time.Unix(int64(n.ExpireTime/1000), 0).UTC().Format("2006-01-02 15:04:05 MST")
+
+	mErr := multierror.Append(
+		d.Set("name", n.Name),
+		d.Set("expires", expires),
+	)
+	if mErr.ErrorOrNil() != nil {
+		return mErr
+	}
 
 	return nil
 }
