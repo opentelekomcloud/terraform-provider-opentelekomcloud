@@ -13,10 +13,6 @@ import (
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common/cfg"
 )
 
-const (
-	version = "2008-10-17"
-)
-
 func ResourceObsBucketPolicy() *schema.Resource {
 	return &schema.Resource{
 		Create: resourceObsBucketPolicyPut,
