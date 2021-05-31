@@ -11,8 +11,24 @@ Manages a WAF certificate resource within OpenTelekomCloud.
 ```hcl
 resource "opentelekomcloud_waf_certificate_v1" "certificate_1" {
   name    = "cert_1"
-  content = "-----BEGIN CERTIFICATE-----MIIDIjCCAougAwIBAgIJALV96mEtVF4EMA0GCSqGSIb3DQEBBQUAMGoxCzAJBgNVBAYTAnh4MQswCQYDVQQIEwJ4eDELMAkGA1UEBxMCeHgxCzAJBgNVBAoTAnh4MQswCQYDVQQLEwJ-----END CERTIFICATE-----"
-  key     = "-----BEGIN RSA PRIVATE KEY-----MIICXQIBAAKBgQDFPN9ojPndxSC4E1pqWQVKGHCFlXAAGBOxbGfSzXqzsoyacotueqMqXQbxrPSQFATeVmhZPNVEMdvcAMjYsV/mymtAwVqVA6q/OFdX/b3UHO+b/VqLo3J5SrM-----END RSA PRIVATE KEY-----"
+  content = <<EOT
+-----BEGIN CERTIFICATE-----
+MIIFazCCA1OgAwIBAgIUN3w1KX8/T/HWVxZIOdHXPhUOnsAwDQYJKoZIhvcNAQEL
+BQAwRTELMAkGA1UEBhMCQVUxEzARBgNVBAgMClNvbWUtU3RhdGUxITAfBgNVBAoM
+...
+dKvZbPEsygYRIjwyhHHUh/YXH8KDI/uu6u6AxDckQ3rP1BkkKXr5NPBGjVgM3ZI=
+-----END CERTIFICATE-----
+EOT
+  key     = <<EOT
+-----BEGIN PRIVATE KEY-----
+MIIJQQIBADANBgkqhkiG9w0BAQEFAASCCSswggknAgEAAoICAQC+9uwFVenCdPD9
+5LWSWMuy4riZW718wxBpYV5Y9N8nM7N0qZLLdpImZrzBbaBldTI+AZGI3Nupuurw
+...
+s9urs/Kk/tbQhsEvu0X8FyGwo0zH6rG8apTFTlac+v4mJ4vlpxSvT5+FW2lgLISE
++4sM7kp0qO3/p+45HykwBY5iHq3H
+-----END PRIVATE KEY-----
+EOT
+
 }
 ```
 
@@ -20,7 +36,8 @@ resource "opentelekomcloud_waf_certificate_v1" "certificate_1" {
 
 The following arguments are supported:
 
-* `name` - (Required) The certificate name. The maximum length is 256 characters. Only digits, letters, underscores(_), and hyphens(-) are allowed.
+* `name` - (Required) The certificate name. The maximum length is 256 characters.
+  Only digits, letters, underscores(`_`), and hyphens(`-`) are allowed.
 
 * `content` - (Optional) The certificate content. Changing this creates a new certificate.
 
@@ -30,9 +47,9 @@ The following arguments are supported:
 
 The following attributes are exported:
 
-* `id` -  ID of the certificate.
+* `id` - ID of the certificate.
 
-* `name` -  See Argument Reference above.
+* `name` - See Argument Reference above.
 
 * `content` - See Argument Reference above.
 
