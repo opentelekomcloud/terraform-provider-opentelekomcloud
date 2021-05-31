@@ -2,6 +2,7 @@ package acceptance
 
 import (
 	"fmt"
+	"regexp"
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-sdk/helper/acctest"
@@ -14,7 +15,9 @@ import (
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common/cfg"
 )
 
-func TestAccObsBucketPolicy_basic(t *testing.T) {
+const resourceName = "opentelekomcloud_obs_bucket.bucket"
+
+func TestAccObsBucketPolicyBasic(t *testing.T) {
 	name := fmt.Sprintf("tf-test-bucket-%d", acctest.RandInt())
 
 	expectedPolicyText := fmt.Sprintf(
@@ -29,15 +32,15 @@ func TestAccObsBucketPolicy_basic(t *testing.T) {
 			{
 				Config: testAccObsBucketPolicyConfig(name),
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckObsBucketExists("opentelekomcloud_obs_bucket.bucket"),
-					testAccCheckObsBucketHasPolicy("opentelekomcloud_obs_bucket.bucket", expectedPolicyText),
+					testAccCheckObsBucketExists(resourceName),
+					testAccCheckObsBucketHasPolicy(resourceName, expectedPolicyText),
 				),
 			},
 		},
 	})
 }
 
-func TestAccObsBucketPolicy_policyUpdate(t *testing.T) {
+func TestAccObsBucketPolicyUpdate(t *testing.T) {
 	name := fmt.Sprintf("tf-test-bucket-%d", acctest.RandInt())
 
 	expectedPolicyText1 := fmt.Sprintf(
@@ -56,17 +59,33 @@ func TestAccObsBucketPolicy_policyUpdate(t *testing.T) {
 			{
 				Config: testAccObsBucketPolicyConfig(name),
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckObsBucketExists("opentelekomcloud_obs_bucket.bucket"),
-					testAccCheckObsBucketHasPolicy("opentelekomcloud_obs_bucket.bucket", expectedPolicyText1),
+					testAccCheckObsBucketExists(resourceName),
+					testAccCheckObsBucketHasPolicy(resourceName, expectedPolicyText1),
 				),
 			},
 
 			{
-				Config: testAccObsBucketPolicyConfig_updated(name),
+				Config: testAccObsBucketPolicyConfigUpdated(name),
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckObsBucketExists("opentelekomcloud_obs_bucket.bucket"),
-					testAccCheckObsBucketHasPolicy("opentelekomcloud_obs_bucket.bucket", expectedPolicyText2),
+					testAccCheckObsBucketExists(resourceName),
+					testAccCheckObsBucketHasPolicy(resourceName, expectedPolicyText2),
 				),
+			},
+		},
+	})
+}
+
+func TestAccObsBucketPolicyMalformed(t *testing.T) {
+	name := fmt.Sprintf("tf-test-bucket-%d", acctest.RandInt())
+
+	resource.Test(t, resource.TestCase{
+		PreCheck:     func() { common.TestAccPreCheck(t) },
+		Providers:    common.TestAccProviders,
+		CheckDestroy: testAccCheckObsBucketDestroy,
+		Steps: []resource.TestStep{
+			{
+				Config:      testAccObsBucketPolicyConfigWrongPolicy(name),
+				ExpectError: regexp.MustCompile(`error putting OBS policy.+`),
 			},
 		},
 	})
@@ -80,7 +99,7 @@ func testAccCheckObsBucketHasPolicy(n string, expectedPolicyText string) resourc
 		}
 
 		if rs.Primary.ID == "" {
-			return fmt.Errorf("no Obs Bucket ID is set")
+			return fmt.Errorf("no OBS Bucket ID is set")
 		}
 
 		config := common.TestAccProvider.Meta().(*cfg.Config)
@@ -137,7 +156,7 @@ POLICY
 `, bucketName, bucketName, bucketName)
 }
 
-func testAccObsBucketPolicyConfig_updated(bucketName string) string {
+func testAccObsBucketPolicyConfigUpdated(bucketName string) string {
 	return fmt.Sprintf(`
 resource "opentelekomcloud_obs_bucket" "bucket" {
   bucket = "%s"
@@ -167,4 +186,44 @@ resource "opentelekomcloud_obs_bucket_policy" "bucket" {
 POLICY
 }
 `, bucketName, bucketName, bucketName)
+}
+
+func testAccObsBucketPolicyConfigWrongPolicy(bucketName string) string {
+	return fmt.Sprintf(`
+resource "opentelekomcloud_obs_bucket" "bucket" {
+  bucket = "%s"
+}
+
+resource "opentelekomcloud_obs_bucket_policy" "bucket" {
+  bucket = opentelekomcloud_obs_bucket.bucket.bucket
+  policy =<<POLICY
+{
+    "Id": "BUCKET_POLICY",
+    "Statement": [
+        {
+            "Effect": "Allow",
+            "Principal": {
+                "ID": [
+                    "domain/12345:user/67890"
+                ]
+            },
+            "Action": [
+                "s3:GetObject",
+                "s3:PutObject",
+                "s3:ListBucket",
+                "s3:ListBucketVersions",
+                "s3:ListBucketMultipartUploads",
+                "s3:GetBucketLocation",
+                "s3:GetBucketStorage"
+            ],
+            "Resource": [
+                "arn:aws:s3:::bucket/*",
+                "arn:aws:s3:::bucket"
+            ]
+        }
+    ]
+}
+POLICY
+}
+`, bucketName)
 }
