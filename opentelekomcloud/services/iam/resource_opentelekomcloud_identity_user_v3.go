@@ -163,8 +163,7 @@ func setExtendedOpts(d *schema.ResourceData, meta interface{}) error {
 			return fmt.Errorf("error updating OpenTelekomCloud user: %w", err)
 		}
 
-		sendWelcomeEmail := d.Get("send_welcome_email").(bool)
-		if sendWelcomeEmail {
+		if d.Get("send_welcome_email").(bool) {
 			if err := users.SendWelcomeEmail(client, d.Id()).ExtractErr(); err != nil {
 				return fmt.Errorf("error sending a welcome email: %w", err)
 			}

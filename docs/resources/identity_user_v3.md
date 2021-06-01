@@ -6,7 +6,7 @@ subcategory: "Identity and Access Management (IAM)"
 
 Manages a User resource within OpenTelekomCloud IAM service.
 
--> **Note:** You need to have admin privileges in your OpenTelekomCloud cloud to use
+-> You need to have admin privileges in your OpenTelekomCloud cloud to use
 this resource.
 
 ## Example Usage
@@ -39,9 +39,14 @@ The following arguments are supported:
 
 * `email` - (Optional) The email associated with user.
 
+* `send_welcome_email` - (Optional) Whether to send a `Welcome Email` or not.
+  Possible values are `true` and `false`.
+
+-> Welcome Email will be sent when email is set/changed and `send_welcome_email` is set to `true`.
+
 ## Attributes Reference
 
-The following attributes are exported:
+In addition to all arguments above, the following attributes are exported:
 
 * `domain_id` - See Argument Reference above.
 
