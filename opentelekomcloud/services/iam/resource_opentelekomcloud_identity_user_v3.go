@@ -12,19 +12,13 @@ import (
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common/cfg"
 )
 
-var userOptions = map[users.Option]string{
-	users.IgnoreChangePasswordUponFirstUse: "ignore_change_password_upon_first_use",
-	users.IgnorePasswordExpiry:             "ignore_password_expiry",
-	users.IgnoreLockoutFailureAttempts:     "ignore_lockout_failure_attempts",
-	users.MultiFactorAuthEnabled:           "multi_factor_auth_enabled",
-}
-
 func ResourceIdentityUserV3() *schema.Resource {
 	return &schema.Resource{
 		Create: resourceIdentityUserV3Create,
 		Read:   resourceIdentityUserV3Read,
 		Update: resourceIdentityUserV3Update,
 		Delete: resourceIdentityUserV3Delete,
+
 		Importer: &schema.ResourceImporter{
 			State: schema.ImportStatePassthrough,
 		},
@@ -71,15 +65,20 @@ func ResourceIdentityUserV3() *schema.Resource {
 				Optional:         true,
 				DiffSuppressFunc: common.SuppressCaseInsensitive,
 			},
+
+			"send_welcome_email": {
+				Type:     schema.TypeBool,
+				Optional: true,
+			},
 		},
 	}
 }
 
 func resourceIdentityUserV3Create(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*cfg.Config)
-	identityClient, err := config.IdentityV3Client(config.GetRegion(d))
+	client, err := config.IdentityV3Client(config.GetRegion(d))
 	if err != nil {
-		return fmt.Errorf("Error creating OpenStack identity client: %s", err)
+		return fmt.Errorf(clientCreationFail, err)
 	}
 
 	enabled := d.Get("enabled").(bool)
@@ -95,7 +94,7 @@ func resourceIdentityUserV3Create(d *schema.ResourceData, meta interface{}) erro
 	// Add password here so it wouldn't go in the above log entry
 	createOpts.Password = d.Get("password").(string)
 
-	user, err := users.Create(identityClient, createOpts).Extract()
+	user, err := users.Create(client, createOpts).Extract()
 	if err != nil {
 		return fmt.Errorf("error creating OpenTelekomCloud user: %s", err)
 	}
@@ -107,12 +106,12 @@ func resourceIdentityUserV3Create(d *schema.ResourceData, meta interface{}) erro
 
 func resourceIdentityUserV3Read(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*cfg.Config)
-	identityClient, err := config.IdentityV3Client(config.GetRegion(d))
+	client, err := config.IdentityV3Client(config.GetRegion(d))
 	if err != nil {
-		return fmt.Errorf("Error creating OpenStack identity client: %s", err)
+		return fmt.Errorf(clientCreationFail, err)
 	}
 
-	user, err := users.Get(identityClient, d.Id()).Extract()
+	user, err := users.Get(client, d.Id()).Extract()
 	if err != nil {
 		return common.CheckDeleted(d, err, "user")
 	}
@@ -128,7 +127,7 @@ func resourceIdentityUserV3Read(d *schema.ResourceData, meta interface{}) error 
 	)
 
 	// Read extended options
-	user, err = users.ExtendedUpdate(identityClient, d.Id(), users.ExtendedUpdateOpts{}).Extract()
+	user, err = users.ExtendedUpdate(client, d.Id(), users.ExtendedUpdateOpts{}).Extract()
 	if err != nil {
 		return err
 	}
@@ -136,14 +135,18 @@ func resourceIdentityUserV3Read(d *schema.ResourceData, meta interface{}) error 
 		d.Set("email", user.Email),
 	)
 
-	return mErr.ErrorOrNil()
+	if mErr.ErrorOrNil() != nil {
+		return mErr
+	}
+
+	return nil
 }
 
 func setExtendedOpts(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*cfg.Config)
-	identityClient, err := config.IdentityV3Client(config.GetRegion(d))
+	client, err := config.IdentityV3Client(config.GetRegion(d))
 	if err != nil {
-		return fmt.Errorf("Error creating OpenStack identity client: %s", err)
+		return fmt.Errorf(clientCreationFail, err)
 	}
 
 	var hasChange bool
@@ -155,9 +158,15 @@ func setExtendedOpts(d *schema.ResourceData, meta interface{}) error {
 	}
 
 	if hasChange {
-		_, err := users.ExtendedUpdate(identityClient, d.Id(), updateOpts).Extract()
+		_, err := users.ExtendedUpdate(client, d.Id(), updateOpts).Extract()
 		if err != nil {
-			return fmt.Errorf("Error updating OpenStack user: %s", err)
+			return fmt.Errorf("error updating OpenTelekomCloud user: %w", err)
+		}
+
+		if d.Get("send_welcome_email").(bool) {
+			if err := users.SendWelcomeEmail(client, d.Id()).ExtractErr(); err != nil {
+				return fmt.Errorf("error sending a welcome email: %w", err)
+			}
 		}
 	}
 
@@ -166,9 +175,9 @@ func setExtendedOpts(d *schema.ResourceData, meta interface{}) error {
 
 func resourceIdentityUserV3Update(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*cfg.Config)
-	identityClient, err := config.IdentityV3Client(config.GetRegion(d))
+	client, err := config.IdentityV3Client(config.GetRegion(d))
 	if err != nil {
-		return fmt.Errorf("Error creating OpenStack identity client: %s", err)
+		return fmt.Errorf(clientCreationFail, err)
 	}
 
 	var hasChange bool
@@ -205,9 +214,9 @@ func resourceIdentityUserV3Update(d *schema.ResourceData, meta interface{}) erro
 	}
 
 	if hasChange {
-		_, err := users.Update(identityClient, d.Id(), updateOpts).Extract()
+		_, err := users.Update(client, d.Id(), updateOpts).Extract()
 		if err != nil {
-			return fmt.Errorf("Error updating OpenStack user: %s", err)
+			return fmt.Errorf("error updating OpenTelekomCloud user: %w", err)
 		}
 	}
 
@@ -216,14 +225,14 @@ func resourceIdentityUserV3Update(d *schema.ResourceData, meta interface{}) erro
 
 func resourceIdentityUserV3Delete(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*cfg.Config)
-	identityClient, err := config.IdentityV3Client(config.GetRegion(d))
+	client, err := config.IdentityV3Client(config.GetRegion(d))
 	if err != nil {
-		return fmt.Errorf("Error creating OpenStack identity client: %s", err)
+		return fmt.Errorf(clientCreationFail, err)
 	}
 
-	err = users.Delete(identityClient, d.Id()).ExtractErr()
+	err = users.Delete(client, d.Id()).ExtractErr()
 	if err != nil {
-		return fmt.Errorf("Error deleting OpenStack user: %s", err)
+		return fmt.Errorf("error deleting OpenTelekomCloud user: %w", err)
 	}
 
 	return nil
