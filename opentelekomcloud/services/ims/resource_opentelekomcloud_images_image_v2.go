@@ -15,8 +15,8 @@ import (
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/imageservice/v2/imagedata"
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/imageservice/v2/images"
 
-	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
-	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common"
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common/cfg"

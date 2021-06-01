@@ -6,7 +6,7 @@ import (
 
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/sfs/v2/shares"
 
-	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common/cfg"
 )

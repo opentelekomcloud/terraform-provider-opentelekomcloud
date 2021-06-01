@@ -20,8 +20,7 @@ import (
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/s3"
 	"github.com/hashicorp/go-cleanhttp"
-	"github.com/hashicorp/terraform-plugin-sdk/helper/pathorcontents"
-	"github.com/hashicorp/terraform-plugin-sdk/httpclient"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/jinzhu/copier"
 	"github.com/opentelekomcloud/gophertelekomcloud"
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack"
@@ -209,7 +208,7 @@ func (c *Config) generateTLSConfig() (*tls.Config, error) {
 	return config, nil
 }
 
-// This function is responsible for reading credentials from the
+// GetCredentials This function is responsible for reading credentials from the
 // environment in the case that they're not explicitly specified
 // in the Terraform configuration.
 func (c *Config) GetCredentials() (*awsCredentials.Credentials, error) {
@@ -495,7 +494,7 @@ func (c *Config) genClient(ao golangsdk.AuthOptionsProvider) (*golangsdk.Provide
 	}
 
 	// Set UserAgent
-	client.UserAgent.Prepend(httpclient.TerraformUserAgent(c.TerraformVersion))
+	client.UserAgent.Prepend(schema.Provider.UserAgent(c.TerraformVersion))
 
 	config, err := c.generateTLSConfig()
 	if err != nil {

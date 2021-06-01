@@ -7,8 +7,8 @@ import (
 	"log"
 	"time"
 
-	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
-	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/opentelekomcloud/gophertelekomcloud"
 	bms "github.com/opentelekomcloud/gophertelekomcloud/openstack/bms/v2/servers"
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/bms/v2/tags"

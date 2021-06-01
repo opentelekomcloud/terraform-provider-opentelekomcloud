@@ -8,8 +8,8 @@ import (
 
 	"github.com/opentelekomcloud/gophertelekomcloud/pagination"
 
-	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
-	"github.com/hashicorp/terraform-plugin-sdk/terraform"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/identity/v3/groups"
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/identity/v3/roles"
