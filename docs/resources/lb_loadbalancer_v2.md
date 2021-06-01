@@ -75,10 +75,6 @@ The following arguments are supported:
 * `loadbalancer_provider` - (Optional) The name of the provider. Changing this
   creates a new loadbalancer.
 
-* `security_group_ids` **DEPRECATED** - (Optional) A list of security group IDs to apply to the
-  loadbalancer. The security groups must be specified by ID and not name (as
-  opposed to how they are configured with the Compute Instance).
-
 * `tags` - (Optional) Tags key/value pairs to associate with the loadbalancer.
 
 
@@ -99,8 +95,6 @@ The following attributes are exported:
 * `admin_state_up` - See Argument Reference above.
 
 * `loadbalancer_provider` - See Argument Reference above.
-
-* `security_group_ids` - See Argument Reference above.
 
 * `vip_port_id` - The Port ID of the Load Balancer IP.
 
