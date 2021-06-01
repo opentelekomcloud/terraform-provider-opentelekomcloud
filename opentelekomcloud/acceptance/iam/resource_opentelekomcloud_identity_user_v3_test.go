@@ -15,9 +15,11 @@ import (
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common/cfg"
 )
 
+const resourceName = "opentelekomcloud_identity_user_v3.user_1"
+
 func TestAccIdentityV3User_basic(t *testing.T) {
 	var user users.User
-	var userName = fmt.Sprintf("ACCPTTEST-%s", acctest.RandString(5))
+	var userName = fmt.Sprintf("tf-user-%s", acctest.RandString(5))
 
 	resource.Test(t, resource.TestCase{
 		PreCheck: func() {
@@ -28,27 +30,21 @@ func TestAccIdentityV3User_basic(t *testing.T) {
 		CheckDestroy: testAccCheckIdentityV3UserDestroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccIdentityV3User_basic(userName),
+				Config: testAccIdentityV3UserBasic(userName),
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckIdentityV3UserExists("opentelekomcloud_identity_user_v3.user_1", &user),
-					resource.TestCheckResourceAttrPtr(
-						"opentelekomcloud_identity_user_v3.user_1", "name", &user.Name),
-					resource.TestCheckResourceAttr(
-						"opentelekomcloud_identity_user_v3.user_1", "enabled", "true"),
-					resource.TestCheckResourceAttr(
-						"opentelekomcloud_identity_user_v3.user_1", "email", "test@acme.org"),
+					testAccCheckIdentityV3UserExists(resourceName, &user),
+					resource.TestCheckResourceAttrPtr(resourceName, "name", &user.Name),
+					resource.TestCheckResourceAttr(resourceName, "enabled", "true"),
+					resource.TestCheckResourceAttr(resourceName, "email", "test@acme.org"),
 				),
 			},
 			{
-				Config: testAccIdentityV3User_update(userName),
+				Config: testAccIdentityV3UserUpdate(userName),
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckIdentityV3UserExists("opentelekomcloud_identity_user_v3.user_1", &user),
-					resource.TestCheckResourceAttrPtr(
-						"opentelekomcloud_identity_user_v3.user_1", "name", &user.Name),
-					resource.TestCheckResourceAttr(
-						"opentelekomcloud_identity_user_v3.user_1", "enabled", "false"),
-					resource.TestCheckResourceAttr(
-						"opentelekomcloud_identity_user_v3.user_1", "email", "test2@acme.org"),
+					testAccCheckIdentityV3UserExists(resourceName, &user),
+					resource.TestCheckResourceAttrPtr(resourceName, "name", &user.Name),
+					resource.TestCheckResourceAttr(resourceName, "enabled", "false"),
+					resource.TestCheckResourceAttr(resourceName, "email", "test2@acme.org"),
 				),
 			},
 		},
@@ -57,9 +53,9 @@ func TestAccIdentityV3User_basic(t *testing.T) {
 
 func testAccCheckIdentityV3UserDestroy(s *terraform.State) error {
 	config := common.TestAccProvider.Meta().(*cfg.Config)
-	identityClient, err := config.IdentityV3Client(env.OS_REGION_NAME)
+	client, err := config.IdentityV3Client(env.OS_REGION_NAME)
 	if err != nil {
-		return fmt.Errorf("Error creating OpenTelekomcloud identity client: %s", err)
+		return fmt.Errorf("error creating OpenTelekomcloud IdentityV3 client: %w", err)
 	}
 
 	for _, rs := range s.RootModule().Resources {
@@ -67,9 +63,9 @@ func testAccCheckIdentityV3UserDestroy(s *terraform.State) error {
 			continue
 		}
 
-		_, err := users.Get(identityClient, rs.Primary.ID).Extract()
+		_, err := users.Get(client, rs.Primary.ID).Extract()
 		if err == nil {
-			return fmt.Errorf("User still exists")
+			return fmt.Errorf("user still exists")
 		}
 	}
 
@@ -80,17 +76,17 @@ func testAccCheckIdentityV3UserExists(n string, user *users.User) resource.TestC
 	return func(s *terraform.State) error {
 		rs, ok := s.RootModule().Resources[n]
 		if !ok {
-			return fmt.Errorf("Not found: %s", n)
+			return fmt.Errorf("not found: %s", n)
 		}
 
 		if rs.Primary.ID == "" {
-			return fmt.Errorf("No ID is set")
+			return fmt.Errorf("no ID is set")
 		}
 
 		config := common.TestAccProvider.Meta().(*cfg.Config)
 		identityClient, err := config.IdentityV3Client(env.OS_REGION_NAME)
 		if err != nil {
-			return fmt.Errorf("Error creating OpenTelekomcloud identity client: %s", err)
+			return fmt.Errorf("error creating OpenTelekomcloud IdentityV3 client: %w", err)
 		}
 
 		found, err := users.Get(identityClient, rs.Primary.ID).Extract()
@@ -99,7 +95,7 @@ func testAccCheckIdentityV3UserExists(n string, user *users.User) resource.TestC
 		}
 
 		if found.ID != rs.Primary.ID {
-			return fmt.Errorf("User not found")
+			return fmt.Errorf("user not found")
 		}
 
 		*user = *found
@@ -108,24 +104,24 @@ func testAccCheckIdentityV3UserExists(n string, user *users.User) resource.TestC
 	}
 }
 
-func testAccIdentityV3User_basic(userName string) string {
+func testAccIdentityV3UserBasic(userName string) string {
 	return fmt.Sprintf(`
-    resource "opentelekomcloud_identity_user_v3" "user_1" {
-      name = "%s"
-      password = "password123@!"
-      enabled = true
-      email = "test@acme.org"
-    }
+resource "opentelekomcloud_identity_user_v3" "user_1" {
+  name     = "%s"
+  password = "password123@!"
+  enabled  = true
+  email    = "test@acme.org"
+}
   `, userName)
 }
 
-func testAccIdentityV3User_update(userName string) string {
+func testAccIdentityV3UserUpdate(userName string) string {
 	return fmt.Sprintf(`
-    resource "opentelekomcloud_identity_user_v3" "user_1" {
-      name = "%s"
-      enabled = false
-      password = "password123@!"
-      email = "tEst2@acme.org"
-    }
+resource "opentelekomcloud_identity_user_v3" "user_1" {
+  name     = "%s"
+  enabled  = false
+  password = "password123@!"
+  email    = "tEst2@acme.org"
+}
   `, userName)
 }
