@@ -63,7 +63,7 @@ func TestAccCssClusterV1_validateDiskandFlavor(t *testing.T) {
 			},
 			{
 				Config:      testAccCssClusterV1FlavorName(name),
-				ExpectError: regexp.MustCompile(`can't find flavor matching.+`),
+				ExpectError: regexp.MustCompile(`can't find flavor with name: .+`),
 				PlanOnly:    true,
 			},
 			{
@@ -176,7 +176,7 @@ resource "opentelekomcloud_css_cluster_v1" "cluster" {
   expect_node_num = 1
   name            = "%[1]s"
   node_config {
-    flavor = "bla-bla-bla"
+    flavor = "css.large.8"
     network_info {
       security_group_id = data.opentelekomcloud_networking_secgroup_v2.secgroup.id
       network_id        = "%s"
