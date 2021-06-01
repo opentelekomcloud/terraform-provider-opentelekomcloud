@@ -12,19 +12,13 @@ import (
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common/cfg"
 )
 
-var userOptions = map[users.Option]string{
-	users.IgnoreChangePasswordUponFirstUse: "ignore_change_password_upon_first_use",
-	users.IgnorePasswordExpiry:             "ignore_password_expiry",
-	users.IgnoreLockoutFailureAttempts:     "ignore_lockout_failure_attempts",
-	users.MultiFactorAuthEnabled:           "multi_factor_auth_enabled",
-}
-
 func ResourceIdentityUserV3() *schema.Resource {
 	return &schema.Resource{
 		Create: resourceIdentityUserV3Create,
 		Read:   resourceIdentityUserV3Read,
 		Update: resourceIdentityUserV3Update,
 		Delete: resourceIdentityUserV3Delete,
+
 		Importer: &schema.ResourceImporter{
 			State: schema.ImportStatePassthrough,
 		},
@@ -70,6 +64,11 @@ func ResourceIdentityUserV3() *schema.Resource {
 				Type:             schema.TypeString,
 				Optional:         true,
 				DiffSuppressFunc: common.SuppressCaseInsensitive,
+			},
+
+			"send_welcome_email": {
+				Type:     schema.TypeBool,
+				Optional: true,
 			},
 		},
 	}
@@ -158,6 +157,13 @@ func setExtendedOpts(d *schema.ResourceData, meta interface{}) error {
 		_, err := users.ExtendedUpdate(identityClient, d.Id(), updateOpts).Extract()
 		if err != nil {
 			return fmt.Errorf("Error updating OpenStack user: %s", err)
+		}
+
+		sendWelcomeEmail := d.Get("send_welcome_email").(bool)
+		if sendWelcomeEmail {
+			if err := users.SendWelcomeEmail(identityClient, d.Id()).ExtractErr(); err != nil {
+				return fmt.Errorf("error sending a welcome email: %w", err)
+			}
 		}
 	}
 
