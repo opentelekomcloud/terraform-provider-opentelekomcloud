@@ -73,7 +73,6 @@ The `node_config` block supports:
 
 * `flavor` - (Required) Instance flavor name.
   - Value range of flavor `css.medium.8`: 40 GB to 640 GB
-  - Value range of flavor `css.large.8`: 40 GB to 1280 GB
   - Value range of flavor `css.xlarge.8`: 40 GB to 2560 GB
   - Value range of flavor `css.2xlarge.8`: 80 GB to 5120 GB
   - Value range of flavor `css.4xlarge.8`: 160 GB to 10240 GB
