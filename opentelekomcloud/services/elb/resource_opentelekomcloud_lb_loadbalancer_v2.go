@@ -10,13 +10,9 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/common/tags"
 
-	"github.com/opentelekomcloud/gophertelekomcloud"
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/networking/v2/extensions/lbaas_v2/loadbalancers"
-	"github.com/opentelekomcloud/gophertelekomcloud/openstack/networking/v2/ports"
-
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common"
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common/cfg"
-	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/services/vpc"
 )
 
 func ResourceLoadBalancerV2() *schema.Resource {
@@ -80,14 +76,6 @@ func ResourceLoadBalancerV2() *schema.Resource {
 				Computed: true,
 				ForceNew: true,
 			},
-			"security_group_ids": {
-				Type:       schema.TypeSet,
-				Optional:   true,
-				Computed:   true,
-				Elem:       &schema.Schema{Type: schema.TypeString},
-				Set:        schema.HashString,
-				Deprecated: "Security groups are not working for OTC ELBs. Please use `opentelekomcloud_lb_whitelist_v2` instead",
-			},
 			"tags": common.TagsSchema(),
 		},
 	}
@@ -126,12 +114,6 @@ func resourceLoadBalancerV2Create(d *schema.ResourceData, meta interface{}) erro
 	timeout := d.Timeout(schema.TimeoutCreate)
 	err = waitForLBV2LoadBalancer(client, lb.ID, "ACTIVE", nil, timeout)
 	if err != nil {
-		return err
-	}
-
-	// Once the loadbalancer has been created, apply any requested security groups
-	// to the port that was created behind the scenes.
-	if err := resourceLoadBalancerV2SecurityGroups(client, lb.VipPortID, d); err != nil {
 		return err
 	}
 
@@ -175,17 +157,6 @@ func resourceLoadBalancerV2Read(d *schema.ResourceData, meta interface{}) error 
 		d.Set("loadbalancer_provider", lb.Provider),
 		d.Set("region", config.GetRegion(d)),
 	)
-	// Get any security groups on the VIP Port
-	if lb.VipPortID != "" {
-		port, err := ports.Get(client, lb.VipPortID).Extract()
-		if err != nil {
-			return err
-		}
-
-		if err := d.Set("security_group_ids", port.SecurityGroups); err != nil {
-			return fmt.Errorf("error saving security_group_ids to state for OpenTelekomCloud loadbalancer (%s): %s", d.Id(), err)
-		}
-	}
 
 	if mErr.ErrorOrNil() != nil {
 		return mErr
@@ -248,14 +219,6 @@ func resourceLoadBalancerV2Update(d *schema.ResourceData, meta interface{}) erro
 		return err
 	}
 
-	// Security Groups get updated separately
-	if d.HasChange("security_group_ids") {
-		vipPortID := d.Get("vip_port_id").(string)
-		if err := resourceLoadBalancerV2SecurityGroups(client, vipPortID, d); err != nil {
-			return err
-		}
-	}
-
 	// update tags
 	if d.HasChange("tags") {
 		if err := common.UpdateResourceTags(client, d, "loadbalancers", d.Id()); err != nil {
@@ -291,25 +254,6 @@ func resourceLoadBalancerV2Delete(d *schema.ResourceData, meta interface{}) erro
 	err = waitForLBV2LoadBalancer(client, d.Id(), "DELETED", pending, timeout)
 	if err != nil {
 		return err
-	}
-
-	return nil
-}
-
-func resourceLoadBalancerV2SecurityGroups(client *golangsdk.ServiceClient, vipPortID string, d *schema.ResourceData) error {
-	if vipPortID != "" {
-		if _, ok := d.GetOk("security_group_ids"); ok {
-			securityGroups := vpc.ResourcePortSecurityGroupsV2(d)
-			updateOpts := ports.UpdateOpts{
-				SecurityGroups: &securityGroups,
-			}
-
-			log.Printf("[DEBUG] Adding security groups to loadbalancer VIP Port %s: %#v", vipPortID, updateOpts)
-			_, err := ports.Update(client, vipPortID, updateOpts).Extract()
-			if err != nil {
-				return err
-			}
-		}
 	}
 
 	return nil
