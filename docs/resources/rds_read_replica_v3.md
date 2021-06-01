@@ -82,7 +82,7 @@ The `volume` block supports:
 
 The following attributes are exported:
 
-* `id` - ID of the read replica group.
+* `id` - ID of the read replica instance.
 
 * `db` - Indicates the database information. Structure is documented below.
 
