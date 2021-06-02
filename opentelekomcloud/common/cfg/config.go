@@ -20,12 +20,12 @@ import (
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/s3"
 	"github.com/hashicorp/go-cleanhttp"
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/jinzhu/copier"
 	"github.com/opentelekomcloud/gophertelekomcloud"
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack"
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/identity/v3/credentials"
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/obs"
+	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/helper/pathorcontents"
 )
 
 const (
@@ -58,7 +58,8 @@ type Config struct {
 	AgencyDomainName string
 	DelegatedProject string
 	MaxRetries       int
-	TerraformVersion string
+
+	UserAgent string
 
 	HwClient *golangsdk.ProviderClient
 	s3sess   *session.Session
@@ -281,7 +282,7 @@ func (c *Config) GetCredentials() (*awsCredentials.Credentials, error) {
 }
 
 func (c *Config) newS3Session(osDebug bool) error {
-	// Don't get AWS session unless we need it for Accesskey, SecretKey.
+	// Don't get AWS session unless we need it for AccessKey, SecretKey.
 	if c.AccessKey != "" && c.SecretKey != "" {
 		// Setup AWS/S3 client/config information for Swift S3 buckets
 		log.Println("[INFO] Building Swift S3 auth structure")
@@ -494,7 +495,7 @@ func (c *Config) genClient(ao golangsdk.AuthOptionsProvider) (*golangsdk.Provide
 	}
 
 	// Set UserAgent
-	client.UserAgent.Prepend(schema.Provider.UserAgent(c.TerraformVersion))
+	client.UserAgent.Prepend(c.UserAgent)
 
 	config, err := c.generateTLSConfig()
 	if err != nil {

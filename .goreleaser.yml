@@ -14,7 +14,7 @@ builds:
     flags:
       - -trimpath
     ldflags:
-      - '-s -w -X main.version={{.Version}} -X main.commit={{.Commit}}'
+      - '-s -w -X main.version={{.Version}} -X main.commit={{.Commit}} -X=github.com/opentelekomcloud/terraform-provider-opentelekomcloud/version.ProviderVersion=v{{ .Version }}'
     goos:
       - freebsd
       - windows
@@ -51,10 +51,10 @@ checksum:
 signs:
   - artifacts: checksum
     args:
-      - "--output"
-      - "${signature}"
-      - "--detach-sign"
-      - "${artifact}"
+      - '--output'
+      - '${signature}'
+      - '--detach-sign'
+      - '${artifact}'
 release:
   # Visit your project's GitHub Releases page to publish this release.
   github:

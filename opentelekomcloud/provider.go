@@ -1,6 +1,9 @@
 package opentelekomcloud
 
 import (
+	"context"
+
+	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common"
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common/cfg"
@@ -39,6 +42,7 @@ import (
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/services/vpc"
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/services/vpn"
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/services/waf"
+	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/version"
 )
 
 // Provider returns a schema.Provider for OpenTelekomCloud.
@@ -415,20 +419,14 @@ func Provider() *schema.Provider {
 		},
 	}
 
-	provider.ConfigureFunc = func(d *schema.ResourceData) (interface{}, error) {
-		terraformVersion := provider.TerraformVersion
-		if terraformVersion == "" {
-			// Terraform 0.12 introduced this field to the protocol
-			// We can therefore assume that if it's missing it's 0.10 or 0.11
-			terraformVersion = "0.11+compatible"
-		}
-		return providerConfigure(d, terraformVersion)
+	provider.ConfigureContextFunc = func(ctx context.Context, d *schema.ResourceData) (interface{}, diag.Diagnostics) {
+		return providerConfigure(ctx, d, provider)
 	}
 
 	return provider
 }
 
-func providerConfigure(d *schema.ResourceData, terraformVersion string) (interface{}, error) {
+func providerConfigure(ctx context.Context, d *schema.ResourceData, p *schema.Provider) (interface{}, diag.Diagnostics) {
 	config := cfg.Config{
 		AccessKey:        d.Get("access_key").(string),
 		SecretKey:        d.Get("secret_key").(string),
@@ -455,11 +453,11 @@ func providerConfigure(d *schema.ResourceData, terraformVersion string) (interfa
 		AgencyDomainName: d.Get("agency_domain_name").(string),
 		DelegatedProject: d.Get("delegated_project").(string),
 		MaxRetries:       d.Get("max_retries").(int),
-		TerraformVersion: terraformVersion,
+		UserAgent:        p.UserAgent("terraform-provider-opentelekomcloud", version.ProviderVersion),
 	}
 
 	if err := config.LoadAndValidate(); err != nil {
-		return nil, err
+		return nil, diag.FromErr(err)
 	}
 
 	return &config, nil
