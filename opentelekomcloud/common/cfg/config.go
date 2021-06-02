@@ -46,6 +46,7 @@ type Config struct {
 	IdentityEndpoint string
 	Insecure         bool
 	Password         string
+	Passcode         string
 	Region           string
 	Swauth           bool
 	TenantID         string
@@ -114,6 +115,13 @@ func (c *Config) LoadAndValidate() error {
 	return c.newS3Session(osDebug)
 }
 
+// setIfEmpty set non-empty `loaded` value to empty `target` variable
+func setIfEmpty(target *string, loaded string) {
+	if *target == "" && loaded != "" {
+		*target = loaded
+	}
+}
+
 // Load - load existing configuration from config files (`clouds.yaml`, etc.) and env variables
 func (c *Config) Load() error {
 	if c.environment == nil {
@@ -124,51 +132,38 @@ func (c *Config) Load() error {
 		return err
 	}
 	// Auth data
-	c.Username = cloud.AuthInfo.Username
-	c.UserID = cloud.AuthInfo.UserID
-	c.TenantName = cloud.AuthInfo.ProjectName
-	c.TenantID = cloud.AuthInfo.ProjectID
-	c.DomainName = cloud.AuthInfo.DomainName
-	c.DomainID = cloud.AuthInfo.DomainID
+	setIfEmpty(&c.Username, cloud.AuthInfo.Username)
+	setIfEmpty(&c.UserID, cloud.AuthInfo.UserID)
+
+	if c.UserID != "" {
+		c.Username = ""
+	}
+
+	setIfEmpty(&c.TenantName, cloud.AuthInfo.ProjectName)
+	setIfEmpty(&c.TenantID, cloud.AuthInfo.ProjectID)
+	setIfEmpty(&c.DomainName, cloud.AuthInfo.DomainName)
+	setIfEmpty(&c.DomainID, cloud.AuthInfo.DomainID)
 
 	// project scope
-	if cloud.AuthInfo.ProjectDomainName != "" {
-		c.DomainName = cloud.AuthInfo.ProjectDomainName
-	}
-	if cloud.AuthInfo.ProjectDomainID != "" {
-		c.DomainID = cloud.AuthInfo.ProjectDomainID
-	}
+	setIfEmpty(&c.DomainName, cloud.AuthInfo.ProjectDomainName)
+	setIfEmpty(&c.DomainID, cloud.AuthInfo.ProjectDomainID)
 
 	// user scope
-	if cloud.AuthInfo.UserDomainName != "" {
-		c.DomainName = cloud.AuthInfo.UserDomainName
-	}
-	if cloud.AuthInfo.UserDomainID != "" {
-		c.DomainID = cloud.AuthInfo.UserDomainID
-	}
+	setIfEmpty(&c.DomainName, cloud.AuthInfo.UserDomainName)
+	setIfEmpty(&c.DomainID, cloud.AuthInfo.UserDomainID)
 
 	// default domain
-	if c.DomainID == "" {
-		c.DomainID = cloud.AuthInfo.DefaultDomain
-	}
+	setIfEmpty(&c.DomainID, cloud.AuthInfo.DefaultDomain)
 
 	c.IdentityEndpoint = cloud.AuthInfo.AuthURL
 	c.Token = cloud.AuthInfo.Token
 	c.Password = cloud.AuthInfo.Password
 
 	// General cloud info
-	if c.Region == "" && cloud.RegionName != "" {
-		c.Region = cloud.RegionName
-	}
-	if c.CACertFile == "" && cloud.CACertFile != "" {
-		c.CACertFile = cloud.CACertFile
-	}
-	if c.ClientCertFile == "" && cloud.ClientCertFile != "" {
-		c.ClientCertFile = cloud.ClientCertFile
-	}
-	if c.ClientKeyFile == "" && cloud.ClientKeyFile != "" {
-		c.ClientKeyFile = cloud.ClientKeyFile
-	}
+	setIfEmpty(&c.Region, cloud.RegionName)
+	setIfEmpty(&c.CACertFile, cloud.CACertFile)
+	setIfEmpty(&c.ClientCertFile, cloud.ClientCertFile)
+	setIfEmpty(&c.ClientKeyFile, cloud.ClientKeyFile)
 	if cloud.Verify != nil {
 		c.Insecure = !*cloud.Verify
 	}
@@ -473,6 +468,7 @@ func buildClientByPassword(c *Config) error {
 		ao.Password = c.Password
 		ao.Username = c.Username
 		ao.UserID = c.UserID
+		ao.Passcode = c.Passcode
 	}
 	return c.genClients(pao, dao)
 }
@@ -480,13 +476,13 @@ func buildClientByPassword(c *Config) error {
 func (c *Config) genClients(pao, dao golangsdk.AuthOptionsProvider) error {
 	client, err := c.genClient(pao)
 	if err != nil {
-		return err
+		return fmt.Errorf("error generating project client: %w", err)
 	}
 	c.HwClient = client
 
 	client, err = c.genClient(dao)
 	if err != nil {
-		return err
+		return fmt.Errorf("error generating domain client: %w", err)
 	}
 	c.DomainClient = client
 	return nil

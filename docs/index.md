@@ -70,7 +70,8 @@ provider "opentelekomcloud" {
 }
 ```
 
--> **Note:** If token, AK/SK and password are set simultaneously, then it will authenticate in the order of Token, AKSK and Password.
+-> **Note:** If token, AK/SK and password are set simultaneously, authentication will be done in the following order:
+  Token, AKSK, and Password.
 
 ### Federated
 
@@ -99,6 +100,20 @@ provider "opentelekomcloud" {
   password           = var.password
   domain_name        = var.domain_name
   auth_url           = "https://iam.eu-de.otc.t-systems.com/v3"
+}
+```
+
+#### User name + Password + TOTP
+```hcl
+provider "opentelekomcloud" {
+  agency_name        = var.agency_name
+  agency_domain_name = var.agency_domain_name
+  delegated_project  = var.delegated_project
+  user_name          = var.user_name
+  password           = var.password
+  domain_name        = var.domain_name
+  auth_url           = "https://iam.eu-de.otc.t-systems.com/v3"
+  passcode           = var.passcode
 }
 ```
 
@@ -164,6 +179,9 @@ The following arguments are supported:
 * `user_name` - (Optional) The Username to login with. If omitted, the
   `OS_USERNAME` environment variable is used.
 
+* `user_id` - (Optional) The ID of the user to login with. Required when TOTP is used (`passcode` is not empty).
+  If `user_id` is set, `user_name` is ignored.
+
 * `tenant_name` - (Optional) The Name of the Tenant (Identity v2) or Project
   (Identity v3) to login with. If omitted, the `OS_TENANT_NAME` or
   `OS_PROJECT_NAME` environment variable are used.
@@ -183,6 +201,11 @@ The following arguments are supported:
   variable is used.
 
 * `security_token` - (Optional) Security token to use for OBS federated authentication.
+
+* `passcode` - (Optional) One-time password provided by your authentication app.
+
+->
+  Please note that MFA requires `user_id` to be used. Setting `user_name` won't work.
 
 * `domain_name` - (Optional) The Name of the Domain to scope to (Identity v3).
   If omitted, the following environment variables are checked (in this order):
