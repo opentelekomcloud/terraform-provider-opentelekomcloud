@@ -33,9 +33,9 @@ func TestAccObsBucketObject_source(t *testing.T) {
 	}
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:     func() { common.TestAccPreCheck(t) },
-		Providers:    common.TestAccProviders,
-		CheckDestroy: testAccCheckObsBucketObjectDestroy,
+		PreCheck:          func() { common.TestAccPreCheck(t) },
+		ProviderFactories: common.TestAccProviderFactories,
+		CheckDestroy:      testAccCheckObsBucketObjectDestroy,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccObsBucketObject_configSource(rInt, tmpFile.Name()),
@@ -65,9 +65,9 @@ func TestAccObsBucketObject_content(t *testing.T) {
 	rInt := acctest.RandInt()
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:     func() { common.TestAccPreCheck(t) },
-		Providers:    common.TestAccProviders,
-		CheckDestroy: testAccCheckObsBucketObjectDestroy,
+		PreCheck:          func() { common.TestAccPreCheck(t) },
+		ProviderFactories: common.TestAccProviderFactories,
+		CheckDestroy:      testAccCheckObsBucketObjectDestroy,
 		Steps: []resource.TestStep{
 			{
 				PreConfig: func() {},
@@ -88,9 +88,9 @@ func TestAccObsBucketObject_withVersionedContent(t *testing.T) {
 	rInt := acctest.RandInt()
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:     func() { common.TestAccPreCheck(t) },
-		Providers:    common.TestAccProviders,
-		CheckDestroy: testAccCheckObsBucketObjectDestroy,
+		PreCheck:          func() { common.TestAccPreCheck(t) },
+		ProviderFactories: common.TestAccProviderFactories,
+		CheckDestroy:      testAccCheckObsBucketObjectDestroy,
 		Steps: []resource.TestStep{
 			{
 				PreConfig: func() {},
@@ -107,9 +107,9 @@ func TestAccObsBucketObject_nothing(t *testing.T) {
 	rInt := acctest.RandInt()
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:     func() { common.TestAccPreCheck(t) },
-		Providers:    common.TestAccProviders,
-		CheckDestroy: testAccCheckObsBucketObjectDestroy,
+		PreCheck:          func() { common.TestAccPreCheck(t) },
+		ProviderFactories: common.TestAccProviderFactories,
+		CheckDestroy:      testAccCheckObsBucketObjectDestroy,
 		Steps: []resource.TestStep{
 			{
 				PreConfig:   func() {},

@@ -8,7 +8,7 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
-	"github.com/opentelekomcloud/gophertelekomcloud"
+	golangsdk "github.com/opentelekomcloud/gophertelekomcloud"
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/networking/v2/extensions/fwaas_v2/rules"
 
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/acceptance/common"
@@ -52,9 +52,9 @@ func TestAccFWRuleV2_basic(t *testing.T) {
 	}
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:     func() { common.TestAccPreCheck(t) },
-		Providers:    common.TestAccProviders,
-		CheckDestroy: testAccCheckFWRuleV2Destroy,
+		PreCheck:          func() { common.TestAccPreCheck(t) },
+		ProviderFactories: common.TestAccProviderFactories,
+		CheckDestroy:      testAccCheckFWRuleV2Destroy,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccFWRuleV2_basic_1,
@@ -90,9 +90,9 @@ func TestAccFWRuleV2_anyProtocol(t *testing.T) {
 	}
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:     func() { common.TestAccPreCheck(t) },
-		Providers:    common.TestAccProviders,
-		CheckDestroy: testAccCheckFWRuleV2Destroy,
+		PreCheck:          func() { common.TestAccPreCheck(t) },
+		ProviderFactories: common.TestAccProviderFactories,
+		CheckDestroy:      testAccCheckFWRuleV2Destroy,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccFWRuleV2_anyProtocol,

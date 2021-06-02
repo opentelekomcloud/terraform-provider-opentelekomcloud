@@ -15,9 +15,9 @@ import (
 
 func TestAccDDSV3Instance_basic(t *testing.T) {
 	resource.Test(t, resource.TestCase{
-		PreCheck:     func() { common.TestAccPreCheck(t) },
-		Providers:    common.TestAccProviders,
-		CheckDestroy: testAccCheckDDSV3InstanceDestroy,
+		PreCheck:          func() { common.TestAccPreCheck(t) },
+		ProviderFactories: common.TestAccProviderFactories,
+		CheckDestroy:      testAccCheckDDSV3InstanceDestroy,
 		Steps: []resource.TestStep{
 			{
 				Config: TestAccDDSInstanceV3Config_basic,
@@ -34,9 +34,9 @@ func TestAccDDSV3Instance_basic(t *testing.T) {
 
 func TestAccDDSV3Instance_minConfig(t *testing.T) {
 	resource.Test(t, resource.TestCase{
-		PreCheck:     func() { common.TestAccPreCheck(t) },
-		Providers:    common.TestAccProviders,
-		CheckDestroy: testAccCheckDDSV3InstanceDestroy,
+		PreCheck:          func() { common.TestAccPreCheck(t) },
+		ProviderFactories: common.TestAccProviderFactories,
+		CheckDestroy:      testAccCheckDDSV3InstanceDestroy,
 		Steps: []resource.TestStep{
 			{
 				Config: TestAccDDSInstanceV3Config_minConfig,

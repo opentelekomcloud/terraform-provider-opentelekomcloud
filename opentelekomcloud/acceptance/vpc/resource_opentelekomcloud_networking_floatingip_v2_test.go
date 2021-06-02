@@ -18,9 +18,9 @@ func TestAccNetworkingV2FloatingIP_basic(t *testing.T) {
 	var fip floatingips.FloatingIP
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:     func() { common.TestAccPreCheck(t) },
-		Providers:    common.TestAccProviders,
-		CheckDestroy: testAccCheckNetworkingV2FloatingIPDestroy,
+		PreCheck:          func() { common.TestAccPreCheck(t) },
+		ProviderFactories: common.TestAccProviderFactories,
+		CheckDestroy:      testAccCheckNetworkingV2FloatingIPDestroy,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccNetworkingV2FloatingIP_basic,
@@ -36,9 +36,9 @@ func TestAccNetworkingV2FloatingIP_timeout(t *testing.T) {
 	var fip floatingips.FloatingIP
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:     func() { common.TestAccPreCheck(t) },
-		Providers:    common.TestAccProviders,
-		CheckDestroy: testAccCheckNetworkingV2FloatingIPDestroy,
+		PreCheck:          func() { common.TestAccPreCheck(t) },
+		ProviderFactories: common.TestAccProviderFactories,
+		CheckDestroy:      testAccCheckNetworkingV2FloatingIPDestroy,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccNetworkingV2FloatingIP_timeout,

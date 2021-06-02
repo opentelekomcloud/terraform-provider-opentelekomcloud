@@ -19,9 +19,9 @@ func TestAccASV1Configuration_basic(t *testing.T) {
 	resourceName := "opentelekomcloud_as_configuration_v1.hth_as_config"
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:     func() { common.TestAccFlavorPreCheck(t) },
-		Providers:    common.TestAccProviders,
-		CheckDestroy: testAccCheckASV1ConfigurationDestroy,
+		PreCheck:          func() { common.TestAccFlavorPreCheck(t) },
+		ProviderFactories: common.TestAccProviderFactories,
+		CheckDestroy:      testAccCheckASV1ConfigurationDestroy,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccASV1Configuration_basic,
@@ -38,9 +38,9 @@ func TestAccASV1Configuration_publicIP(t *testing.T) {
 	resourceName := "opentelekomcloud_as_configuration_v1.as_config"
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:     func() { common.TestAccFlavorPreCheck(t) },
-		Providers:    common.TestAccProviders,
-		CheckDestroy: testAccCheckASV1ConfigurationDestroy,
+		PreCheck:          func() { common.TestAccFlavorPreCheck(t) },
+		ProviderFactories: common.TestAccProviderFactories,
+		CheckDestroy:      testAccCheckASV1ConfigurationDestroy,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccASV1Configuration_publicIP,
@@ -57,9 +57,9 @@ func TestAccASV1Configuration_publicIP(t *testing.T) {
 
 func TestAccASV1Configuration_invalidDiskSize(t *testing.T) {
 	resource.Test(t, resource.TestCase{
-		PreCheck:     func() { common.TestAccFlavorPreCheck(t) },
-		Providers:    common.TestAccProviders,
-		CheckDestroy: testAccCheckASV1ConfigurationDestroy,
+		PreCheck:          func() { common.TestAccFlavorPreCheck(t) },
+		ProviderFactories: common.TestAccProviderFactories,
+		CheckDestroy:      testAccCheckASV1ConfigurationDestroy,
 		Steps: []resource.TestStep{
 			{
 				Config:      testAccASV1Configuration_invalidDiskSize,
@@ -75,9 +75,9 @@ func TestAccASV1Configuration_multipleSecurityGroups(t *testing.T) {
 	resourceName := "opentelekomcloud_as_configuration_v1.as_config"
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:     func() { common.TestAccFlavorPreCheck(t) },
-		Providers:    common.TestAccProviders,
-		CheckDestroy: testAccCheckASV1ConfigurationDestroy,
+		PreCheck:          func() { common.TestAccFlavorPreCheck(t) },
+		ProviderFactories: common.TestAccProviderFactories,
+		CheckDestroy:      testAccCheckASV1ConfigurationDestroy,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccASV1Configuration_multipleSecurityGroups,

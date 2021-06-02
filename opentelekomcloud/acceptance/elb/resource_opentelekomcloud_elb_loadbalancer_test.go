@@ -19,9 +19,9 @@ func TestAccELBLoadBalancer_basic(t *testing.T) {
 	var lb loadbalancer_elbs.LoadBalancer
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:     func() { common.TestAccPreCheck(t) },
-		Providers:    common.TestAccProviders,
-		CheckDestroy: testAccCheckELBLoadBalancerDestroy,
+		PreCheck:          func() { common.TestAccPreCheck(t) },
+		ProviderFactories: common.TestAccProviderFactories,
+		CheckDestroy:      testAccCheckELBLoadBalancerDestroy,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccELBLoadBalancerConfig_basic,

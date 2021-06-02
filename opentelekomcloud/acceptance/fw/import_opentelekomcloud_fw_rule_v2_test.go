@@ -12,9 +12,9 @@ func TestAccFWRuleV2_importBasic(t *testing.T) {
 	resourceName := "opentelekomcloud_fw_rule_v2.rule_1"
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:     func() { common.TestAccPreCheck(t) },
-		Providers:    common.TestAccProviders,
-		CheckDestroy: testAccCheckFWRuleV2Destroy,
+		PreCheck:          func() { common.TestAccPreCheck(t) },
+		ProviderFactories: common.TestAccProviderFactories,
+		CheckDestroy:      testAccCheckFWRuleV2Destroy,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccFWRuleV2_basic_2,

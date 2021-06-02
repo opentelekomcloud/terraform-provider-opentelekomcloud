@@ -13,9 +13,9 @@ import (
 func TestAccOTCVpcPeeringConnectionAccepterV2_basic(t *testing.T) {
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:     func() { common.TestAccPreCheck(t) },
-		Providers:    common.TestAccProviders,
-		CheckDestroy: testAccCheckOTCVpcPeeringConnectionAccepterDestroy,
+		PreCheck:          func() { common.TestAccPreCheck(t) },
+		ProviderFactories: common.TestAccProviderFactories,
+		CheckDestroy:      testAccCheckOTCVpcPeeringConnectionAccepterDestroy,
 		Steps: []resource.TestStep{
 			{
 				Config:      testAccOTCVpcPeeringConnectionAccepterV2_basic, // TODO: Research why normal scenario with peer tenant id is not working in acceptance tests

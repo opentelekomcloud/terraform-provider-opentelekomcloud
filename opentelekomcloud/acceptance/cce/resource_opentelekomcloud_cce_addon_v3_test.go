@@ -15,9 +15,9 @@ import (
 func TestAccCCEAddonV3Basic(t *testing.T) {
 	resName := "opentelekomcloud_cce_addon_v3.autoscaler"
 	resource.Test(t, resource.TestCase{
-		PreCheck:     func() { common.TestAccPreCheck(t) },
-		Providers:    common.TestAccProviders,
-		CheckDestroy: testAccCheckCCEAddonV3Destroy,
+		PreCheck:          func() { common.TestAccPreCheck(t) },
+		ProviderFactories: common.TestAccProviderFactories,
+		CheckDestroy:      testAccCheckCCEAddonV3Destroy,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccCCEAddonV3Basic,
@@ -41,9 +41,9 @@ func TestAccCCEAddonV3ForceNewCCE(t *testing.T) {
 	resName := "opentelekomcloud_cce_addon_v3.autoscaler"
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:     func() { common.TestAccPreCheck(t) },
-		Providers:    common.TestAccProviders,
-		CheckDestroy: testAccCheckCCEAddonV3Destroy,
+		PreCheck:          func() { common.TestAccPreCheck(t) },
+		ProviderFactories: common.TestAccProviderFactories,
+		CheckDestroy:      testAccCheckCCEAddonV3Destroy,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccCCEAddonV3Basic,

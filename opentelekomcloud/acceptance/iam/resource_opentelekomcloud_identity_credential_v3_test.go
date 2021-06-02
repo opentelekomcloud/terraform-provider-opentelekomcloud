@@ -19,8 +19,8 @@ func TestAccIdentityV3Credential_basic(t *testing.T) {
 			common.TestAccPreCheck(t)
 			checkAKSKUnset(t)
 		},
-		Providers:    common.TestAccProviders,
-		CheckDestroy: testAccIdentityV3CredentialDestroy,
+		ProviderFactories: common.TestAccProviderFactories,
+		CheckDestroy:      testAccIdentityV3CredentialDestroy,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccIdentityV3CredentialBasic,

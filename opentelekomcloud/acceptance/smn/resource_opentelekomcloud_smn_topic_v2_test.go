@@ -18,9 +18,9 @@ func TestAccSMNV2Topic_basic(t *testing.T) {
 	var topic topics.TopicGet
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:     func() { common.TestAccPreCheck(t) },
-		Providers:    common.TestAccProviders,
-		CheckDestroy: testAccCheckSMNTopicV2Destroy,
+		PreCheck:          func() { common.TestAccPreCheck(t) },
+		ProviderFactories: common.TestAccProviderFactories,
+		CheckDestroy:      testAccCheckSMNTopicV2Destroy,
 		Steps: []resource.TestStep{
 			{
 				Config: TestAccSMNV2TopicConfig_basic,
@@ -56,9 +56,9 @@ func TestAccSMNV2Topic_schemaProjectName(t *testing.T) {
 	env.OS_TENANT_NAME = cfg.ProjectName(projectName2)
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:     func() { common.TestAccPreCheck(t) },
-		Providers:    common.TestAccProviders,
-		CheckDestroy: testAccCheckSMNTopicV2Destroy,
+		PreCheck:          func() { common.TestAccPreCheck(t) },
+		ProviderFactories: common.TestAccProviderFactories,
+		CheckDestroy:      testAccCheckSMNTopicV2Destroy,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccSMNV2TopicConfig_projectName(env.OS_TENANT_NAME),

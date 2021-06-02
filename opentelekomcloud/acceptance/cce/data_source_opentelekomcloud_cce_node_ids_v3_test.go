@@ -16,8 +16,8 @@ func TestAccCceNodeIdsV3DataSource_basic(t *testing.T) {
 	var cceName = fmt.Sprintf("cce-test-%s", acctest.RandString(5))
 	var cceNodeName = fmt.Sprintf("node-test-%s", acctest.RandString(5))
 	resource.Test(t, resource.TestCase{
-		PreCheck:  func() { common.TestAccPreCheck(t) },
-		Providers: common.TestAccProviders,
+		PreCheck:          func() { common.TestAccPreCheck(t) },
+		ProviderFactories: common.TestAccProviderFactories,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccCceNodeIdsV3DataSource_basic(cceName, cceNodeName),

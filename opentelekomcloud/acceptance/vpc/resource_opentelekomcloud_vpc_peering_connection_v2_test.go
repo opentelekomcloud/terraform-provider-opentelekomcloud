@@ -17,9 +17,9 @@ func TestAccOTCVpcPeeringConnectionV2_basic(t *testing.T) {
 	var peering peerings.Peering
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:     func() { common.TestAccPreCheck(t) },
-		Providers:    common.TestAccProviders,
-		CheckDestroy: testAccCheckOTCVpcPeeringConnectionV2Destroy,
+		PreCheck:          func() { common.TestAccPreCheck(t) },
+		ProviderFactories: common.TestAccProviderFactories,
+		CheckDestroy:      testAccCheckOTCVpcPeeringConnectionV2Destroy,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccOTCVpcPeeringConnectionV2_basic,
@@ -46,9 +46,9 @@ func TestAccOTCVpcPeeringConnectionV2_timeout(t *testing.T) {
 	var peering peerings.Peering
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:     func() { common.TestAccPreCheck(t) },
-		Providers:    common.TestAccProviders,
-		CheckDestroy: testAccCheckOTCVpcPeeringConnectionV2Destroy,
+		PreCheck:          func() { common.TestAccPreCheck(t) },
+		ProviderFactories: common.TestAccProviderFactories,
+		CheckDestroy:      testAccCheckOTCVpcPeeringConnectionV2Destroy,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccOTCVpcPeeringConnectionV2_timeout,

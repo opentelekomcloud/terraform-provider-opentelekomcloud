@@ -18,9 +18,9 @@ func TestAccOTCRtsSoftwareDeploymentV1_basic(t *testing.T) {
 	var deployments softwaredeployment.Deployment
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:     func() { common.TestAccPreCheck(t) },
-		Providers:    common.TestAccProviders,
-		CheckDestroy: testAccCheckOTCRtsSoftwareDeploymentV1Destroy,
+		PreCheck:          func() { common.TestAccPreCheck(t) },
+		ProviderFactories: common.TestAccProviderFactories,
+		CheckDestroy:      testAccCheckOTCRtsSoftwareDeploymentV1Destroy,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccRtsSoftwareDeploymentV1_basic,
@@ -56,9 +56,9 @@ func TestAccOTCRtsSoftwareDeploymentV1_timeout(t *testing.T) {
 	var deployments softwaredeployment.Deployment
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:     func() { common.TestAccPreCheck(t) },
-		Providers:    common.TestAccProviders,
-		CheckDestroy: testAccCheckOTCRtsSoftwareDeploymentV1Destroy,
+		PreCheck:          func() { common.TestAccPreCheck(t) },
+		ProviderFactories: common.TestAccProviderFactories,
+		CheckDestroy:      testAccCheckOTCRtsSoftwareDeploymentV1Destroy,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccRtsSoftwareDeploymentV1_timeout,

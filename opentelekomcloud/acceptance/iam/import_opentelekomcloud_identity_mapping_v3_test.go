@@ -19,8 +19,8 @@ func TestAccIdentityV3Mapping_importBasic(t *testing.T) {
 			common.TestAccPreCheck(t)
 			common.TestAccPreCheckAdminOnly(t)
 		},
-		Providers:    common.TestAccProviders,
-		CheckDestroy: testAccCheckIdentityV3MappingDestroy,
+		ProviderFactories: common.TestAccProviderFactories,
+		CheckDestroy:      testAccCheckIdentityV3MappingDestroy,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccIdentityV3MappingBasic(mappingName),

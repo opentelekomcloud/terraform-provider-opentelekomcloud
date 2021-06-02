@@ -20,9 +20,9 @@ func TestAccCCENodePoolsV3_basic(t *testing.T) {
 	clusterName := "opentelekomcloud_cce_cluster_v3.cluster"
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:     func() { testAccCCEKeyPairPreCheck(t) },
-		Providers:    common.TestAccProviders,
-		CheckDestroy: testAccCheckCCENodePoolV3Destroy,
+		PreCheck:          func() { testAccCCEKeyPairPreCheck(t) },
+		ProviderFactories: common.TestAccProviderFactories,
+		CheckDestroy:      testAccCheckCCENodePoolV3Destroy,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccCCENodePoolV3_basic,
@@ -51,9 +51,9 @@ func TestAccCCENodePoolsV3_randomAZ(t *testing.T) {
 	clusterName := "opentelekomcloud_cce_cluster_v3.cluster"
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:     func() { testAccCCEKeyPairPreCheck(t) },
-		Providers:    common.TestAccProviders,
-		CheckDestroy: testAccCheckCCENodePoolV3Destroy,
+		PreCheck:          func() { testAccCCEKeyPairPreCheck(t) },
+		ProviderFactories: common.TestAccProviderFactories,
+		CheckDestroy:      testAccCheckCCENodePoolV3Destroy,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccCCENodePoolV3_RandomAZ,

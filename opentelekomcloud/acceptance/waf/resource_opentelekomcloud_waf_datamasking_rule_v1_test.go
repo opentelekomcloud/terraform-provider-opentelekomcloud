@@ -18,9 +18,9 @@ func TestAccWafDataMaskingRuleV1_basic(t *testing.T) {
 	var rule datamasking_rules.DataMasking
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:     func() { common.TestAccPreCheck(t) },
-		Providers:    common.TestAccProviders,
-		CheckDestroy: testAccCheckWafDataMaskingRuleV1Destroy,
+		PreCheck:          func() { common.TestAccPreCheck(t) },
+		ProviderFactories: common.TestAccProviderFactories,
+		CheckDestroy:      testAccCheckWafDataMaskingRuleV1Destroy,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccWafDataMaskingRuleV1_basic,

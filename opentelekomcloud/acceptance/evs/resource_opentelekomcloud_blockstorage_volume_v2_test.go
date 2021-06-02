@@ -8,7 +8,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 
-	"github.com/opentelekomcloud/gophertelekomcloud"
+	golangsdk "github.com/opentelekomcloud/gophertelekomcloud"
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/blockstorage/v2/volumes"
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/evs/v2/tags"
 
@@ -21,9 +21,9 @@ func TestAccBlockStorageV2Volume_basic(t *testing.T) {
 	var volume volumes.Volume
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:     func() { common.TestAccPreCheck(t) },
-		Providers:    common.TestAccProviders,
-		CheckDestroy: testAccCheckBlockStorageV2VolumeDestroy,
+		PreCheck:          func() { common.TestAccPreCheck(t) },
+		ProviderFactories: common.TestAccProviderFactories,
+		CheckDestroy:      testAccCheckBlockStorageV2VolumeDestroy,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccBlockStorageV2Volume_basic,
@@ -51,9 +51,9 @@ func TestAccBlockStorageV2Volume_upscaleDownScale(t *testing.T) {
 	var volume volumes.Volume
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:     func() { common.TestAccPreCheck(t) },
-		Providers:    common.TestAccProviders,
-		CheckDestroy: testAccCheckBlockStorageV2VolumeDestroy,
+		PreCheck:          func() { common.TestAccPreCheck(t) },
+		ProviderFactories: common.TestAccProviderFactories,
+		CheckDestroy:      testAccCheckBlockStorageV2VolumeDestroy,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccBlockStorageV2Volume_basic,
@@ -74,9 +74,9 @@ func TestAccBlockStorageV2Volume_upscaleDownScaleAssigned(t *testing.T) {
 	var volume volumes.Volume
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:     func() { common.TestAccPreCheck(t) },
-		Providers:    common.TestAccProviders,
-		CheckDestroy: testAccCheckBlockStorageV2VolumeDestroy,
+		PreCheck:          func() { common.TestAccPreCheck(t) },
+		ProviderFactories: common.TestAccProviderFactories,
+		CheckDestroy:      testAccCheckBlockStorageV2VolumeDestroy,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccBlockStorageV2Volume_assigned(10),
@@ -100,8 +100,8 @@ func TestAccBlockStorageV2Volume_policy(t *testing.T) {
 			common.TestAccPreCheck(t)
 			testPolicyPreCheck(t)
 		},
-		Providers:    common.TestAccProviders,
-		CheckDestroy: testAccCheckBlockStorageV2VolumeDestroy,
+		ProviderFactories: common.TestAccProviderFactories,
+		CheckDestroy:      testAccCheckBlockStorageV2VolumeDestroy,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccBlockStorageV2Volume_policy(os.Getenv("OS_KMS_KEY")),
@@ -118,9 +118,9 @@ func testPolicyPreCheck(t *testing.T) {
 
 func TestAccBlockStorageV2Volume_tags(t *testing.T) {
 	resource.Test(t, resource.TestCase{
-		PreCheck:     func() { common.TestAccPreCheck(t) },
-		Providers:    common.TestAccProviders,
-		CheckDestroy: testAccCheckBlockStorageV2VolumeDestroy,
+		PreCheck:          func() { common.TestAccPreCheck(t) },
+		ProviderFactories: common.TestAccProviderFactories,
+		CheckDestroy:      testAccCheckBlockStorageV2VolumeDestroy,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccBlockStorageV2Volume_tags,
@@ -144,9 +144,9 @@ func TestAccBlockStorageV2Volume_image(t *testing.T) {
 	var volume volumes.Volume
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:     func() { common.TestAccPreCheck(t) },
-		Providers:    common.TestAccProviders,
-		CheckDestroy: testAccCheckBlockStorageV2VolumeDestroy,
+		PreCheck:          func() { common.TestAccPreCheck(t) },
+		ProviderFactories: common.TestAccProviderFactories,
+		CheckDestroy:      testAccCheckBlockStorageV2VolumeDestroy,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccBlockStorageV2Volume_image,
@@ -164,9 +164,9 @@ func TestAccBlockStorageV2Volume_timeout(t *testing.T) {
 	var volume volumes.Volume
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:     func() { common.TestAccPreCheck(t) },
-		Providers:    common.TestAccProviders,
-		CheckDestroy: testAccCheckBlockStorageV2VolumeDestroy,
+		PreCheck:          func() { common.TestAccPreCheck(t) },
+		ProviderFactories: common.TestAccProviderFactories,
+		CheckDestroy:      testAccCheckBlockStorageV2VolumeDestroy,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccBlockStorageV2Volume_timeout,

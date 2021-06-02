@@ -17,9 +17,9 @@ func TestCESAlarmRule_basic(t *testing.T) {
 	var ar alarmrule.AlarmRule
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:     func() { common.TestAccPreCheck(t) },
-		Providers:    common.TestAccProviders,
-		CheckDestroy: testCESAlarmRuleDestroy,
+		PreCheck:          func() { common.TestAccPreCheck(t) },
+		ProviderFactories: common.TestAccProviderFactories,
+		CheckDestroy:      testCESAlarmRuleDestroy,
 		Steps: []resource.TestStep{
 			{
 				Config: testCESAlarmRule_basic,

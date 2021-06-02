@@ -14,8 +14,8 @@ func TestAccImagesV2ImageDataSource_basic(t *testing.T) {
 	dataSourceName := "data.opentelekomcloud_images_image_v2.image_1"
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:  func() { common.TestAccPreCheck(t) },
-		Providers: common.TestAccProviders,
+		PreCheck:          func() { common.TestAccPreCheck(t) },
+		ProviderFactories: common.TestAccProviderFactories,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccImagesV2ImageDataSource_cirros,
@@ -39,8 +39,8 @@ func TestAccImagesV2ImageDataSource_testQueries(t *testing.T) {
 	dataSourceName := "data.opentelekomcloud_images_image_v2.image_1"
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:  func() { common.TestAccPreCheck(t) },
-		Providers: common.TestAccProviders,
+		PreCheck:          func() { common.TestAccPreCheck(t) },
+		ProviderFactories: common.TestAccProviderFactories,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccImagesV2ImageDataSource_cirros,
@@ -74,8 +74,8 @@ func TestAccImagesV2ImageDataSource_regex(t *testing.T) {
 	dataSourceName := "data.opentelekomcloud_images_image_v2.image_1"
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:  func() { common.TestAccPreCheck(t) },
-		Providers: common.TestAccProviders,
+		PreCheck:          func() { common.TestAccPreCheck(t) },
+		ProviderFactories: common.TestAccProviderFactories,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccImagesV2ImageDataSource_regex,

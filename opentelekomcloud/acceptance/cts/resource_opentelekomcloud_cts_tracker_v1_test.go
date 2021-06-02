@@ -20,9 +20,9 @@ func TestAccCTSTrackerV1_basic(t *testing.T) {
 	var bucketName = fmt.Sprintf("terra-test-%s", acctest.RandString(5))
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:     func() { common.TestAccPreCheck(t) },
-		Providers:    common.TestAccProviders,
-		CheckDestroy: testAccCheckCTSTrackerV1Destroy,
+		PreCheck:          func() { common.TestAccPreCheck(t) },
+		ProviderFactories: common.TestAccProviderFactories,
+		CheckDestroy:      testAccCheckCTSTrackerV1Destroy,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccCTSTrackerV1_basic(bucketName),
@@ -51,9 +51,9 @@ func TestAccCTSTrackerV1_timeout(t *testing.T) {
 	var bucketName = fmt.Sprintf("terra-test-%s", acctest.RandString(5))
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:     func() { common.TestAccPreCheck(t) },
-		Providers:    common.TestAccProviders,
-		CheckDestroy: testAccCheckCTSTrackerV1Destroy,
+		PreCheck:          func() { common.TestAccPreCheck(t) },
+		ProviderFactories: common.TestAccProviderFactories,
+		CheckDestroy:      testAccCheckCTSTrackerV1Destroy,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccCTSTrackerV1_timeout(bucketName),
@@ -75,9 +75,9 @@ func TestAccCTSTrackerV1_schemaProjectName(t *testing.T) {
 	env.OS_TENANT_NAME = cfg.ProjectName(projectName2)
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:     func() { common.TestAccPreCheck(t) },
-		Providers:    common.TestAccProviders,
-		CheckDestroy: testAccCheckCTSTrackerV1Destroy,
+		PreCheck:          func() { common.TestAccPreCheck(t) },
+		ProviderFactories: common.TestAccProviderFactories,
+		CheckDestroy:      testAccCheckCTSTrackerV1Destroy,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccCTSTrackerV1_projectName(bucketName, env.OS_TENANT_NAME),

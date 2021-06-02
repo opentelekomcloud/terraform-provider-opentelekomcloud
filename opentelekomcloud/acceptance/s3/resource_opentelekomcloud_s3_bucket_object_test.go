@@ -37,9 +37,9 @@ func TestAccS3BucketObject_source(t *testing.T) {
 	var obj s3.GetObjectOutput
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheckS3(t) },
-		Providers:    common.TestAccProviders,
-		CheckDestroy: testAccCheckS3BucketObjectDestroy,
+		PreCheck:          func() { testAccPreCheckS3(t) },
+		ProviderFactories: common.TestAccProviderFactories,
+		CheckDestroy:      testAccCheckS3BucketObjectDestroy,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccS3BucketObjectConfigSource(rInt, tmpFile.Name()),
@@ -54,9 +54,9 @@ func TestAccS3BucketObject_content(t *testing.T) {
 	var obj s3.GetObjectOutput
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheckS3(t) },
-		Providers:    common.TestAccProviders,
-		CheckDestroy: testAccCheckS3BucketObjectDestroy,
+		PreCheck:          func() { testAccPreCheckS3(t) },
+		ProviderFactories: common.TestAccProviderFactories,
+		CheckDestroy:      testAccCheckS3BucketObjectDestroy,
 		Steps: []resource.TestStep{
 			{
 				PreConfig: func() {},
@@ -84,9 +84,9 @@ func TestAccS3BucketObject_withContentCharacteristics(t *testing.T) {
 	var obj s3.GetObjectOutput
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheckS3(t) },
-		Providers:    common.TestAccProviders,
-		CheckDestroy: testAccCheckS3BucketObjectDestroy,
+		PreCheck:          func() { testAccPreCheckS3(t) },
+		ProviderFactories: common.TestAccProviderFactories,
+		CheckDestroy:      testAccCheckS3BucketObjectDestroy,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccS3BucketObjectConfig_withContentCharacteristics(rInt, tmpFile.Name()),
@@ -117,9 +117,9 @@ func TestAccS3BucketObject_updates(t *testing.T) {
 	var obj s3.GetObjectOutput
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheckS3(t) },
-		Providers:    common.TestAccProviders,
-		CheckDestroy: testAccCheckS3BucketObjectDestroy,
+		PreCheck:          func() { testAccPreCheckS3(t) },
+		ProviderFactories: common.TestAccProviderFactories,
+		CheckDestroy:      testAccCheckS3BucketObjectDestroy,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccS3BucketObjectConfig_updates(rInt, tmpFile.Name()),
@@ -161,9 +161,9 @@ func TestAccS3BucketObject_updatesWithVersioning(t *testing.T) {
 	var originalObj, modifiedObj s3.GetObjectOutput
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheckS3(t) },
-		Providers:    common.TestAccProviders,
-		CheckDestroy: testAccCheckS3BucketObjectDestroy,
+		PreCheck:          func() { testAccPreCheckS3(t) },
+		ProviderFactories: common.TestAccProviderFactories,
+		CheckDestroy:      testAccCheckS3BucketObjectDestroy,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccS3BucketObjectConfig_updatesWithVersioning(rInt, tmpFile.Name()),
@@ -281,9 +281,9 @@ func TestAccS3BucketObject_sse(t *testing.T) {
 	var obj s3.GetObjectOutput
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheckS3(t) },
-		Providers:    common.TestAccProviders,
-		CheckDestroy: testAccCheckS3BucketObjectDestroy,
+		PreCheck:          func() { testAccPreCheckS3(t) },
+		ProviderFactories: common.TestAccProviderFactories,
+		CheckDestroy:      testAccCheckS3BucketObjectDestroy,
 		Steps: []resource.TestStep{
 			{
 				PreConfig: func() {},
@@ -306,9 +306,9 @@ func TestAccS3BucketObject_acl(t *testing.T) {
 	var obj s3.GetObjectOutput
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheckS3(t) },
-		Providers:    common.TestAccProviders,
-		CheckDestroy: testAccCheckS3BucketObjectDestroy,
+		PreCheck:          func() { testAccPreCheckS3(t) },
+		ProviderFactories: common.TestAccProviderFactories,
+		CheckDestroy:      testAccCheckS3BucketObjectDestroy,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccS3BucketObjectConfig_acl(rInt, "private"),

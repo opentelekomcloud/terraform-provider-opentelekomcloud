@@ -18,9 +18,9 @@ func TestAccWafFalseAlarmMaskingRuleV1_basic(t *testing.T) {
 	var rule falsealarmmasking_rules.AlarmMasking
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:     func() { common.TestAccPreCheck(t) },
-		Providers:    common.TestAccProviders,
-		CheckDestroy: testAccCheckWafFalseAlarmMaskingRuleV1Destroy,
+		PreCheck:          func() { common.TestAccPreCheck(t) },
+		ProviderFactories: common.TestAccProviderFactories,
+		CheckDestroy:      testAccCheckWafFalseAlarmMaskingRuleV1Destroy,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccWafFalseAlarmMaskingRuleV1_basic,

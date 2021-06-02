@@ -12,9 +12,9 @@ func TestAccDDSInstanceV3_importBasic(t *testing.T) {
 	resourceName := "opentelekomcloud_dds_instance_v3.instance"
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:     func() { common.TestAccPreCheck(t) },
-		Providers:    common.TestAccProviders,
-		CheckDestroy: testAccCheckDDSV3InstanceDestroy,
+		PreCheck:          func() { common.TestAccPreCheck(t) },
+		ProviderFactories: common.TestAccProviderFactories,
+		CheckDestroy:      testAccCheckDDSV3InstanceDestroy,
 		Steps: []resource.TestStep{
 			{
 				Config: TestAccDDSInstanceV3Config_basic,

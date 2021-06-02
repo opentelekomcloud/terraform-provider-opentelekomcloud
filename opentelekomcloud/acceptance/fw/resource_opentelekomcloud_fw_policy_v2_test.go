@@ -8,7 +8,7 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
-	"github.com/opentelekomcloud/gophertelekomcloud"
+	golangsdk "github.com/opentelekomcloud/gophertelekomcloud"
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/networking/v2/extensions/fwaas_v2/policies"
 
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/acceptance/common"
@@ -18,9 +18,9 @@ import (
 
 func TestAccFWPolicyV2_basic(t *testing.T) {
 	resource.Test(t, resource.TestCase{
-		PreCheck:     func() { common.TestAccPreCheck(t) },
-		Providers:    common.TestAccProviders,
-		CheckDestroy: testAccCheckFWPolicyV2Destroy,
+		PreCheck:          func() { common.TestAccPreCheck(t) },
+		ProviderFactories: common.TestAccProviderFactories,
+		CheckDestroy:      testAccCheckFWPolicyV2Destroy,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccFWPolicyV2_basic,
@@ -35,9 +35,9 @@ func TestAccFWPolicyV2_basic(t *testing.T) {
 
 func TestAccFWPolicyV2_addRules(t *testing.T) {
 	resource.Test(t, resource.TestCase{
-		PreCheck:     func() { common.TestAccPreCheck(t) },
-		Providers:    common.TestAccProviders,
-		CheckDestroy: testAccCheckFWPolicyV2Destroy,
+		PreCheck:          func() { common.TestAccPreCheck(t) },
+		ProviderFactories: common.TestAccProviderFactories,
+		CheckDestroy:      testAccCheckFWPolicyV2Destroy,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccFWPolicyV2_addRules,
@@ -52,9 +52,9 @@ func TestAccFWPolicyV2_addRules(t *testing.T) {
 
 func TestAccFWPolicyV2_deleteRules(t *testing.T) {
 	resource.Test(t, resource.TestCase{
-		PreCheck:     func() { common.TestAccPreCheck(t) },
-		Providers:    common.TestAccProviders,
-		CheckDestroy: testAccCheckFWPolicyV2Destroy,
+		PreCheck:          func() { common.TestAccPreCheck(t) },
+		ProviderFactories: common.TestAccProviderFactories,
+		CheckDestroy:      testAccCheckFWPolicyV2Destroy,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccFWPolicyV2_deleteRules,
@@ -69,9 +69,9 @@ func TestAccFWPolicyV2_deleteRules(t *testing.T) {
 
 func TestAccFWPolicyV2_timeout(t *testing.T) {
 	resource.Test(t, resource.TestCase{
-		PreCheck:     func() { common.TestAccPreCheck(t) },
-		Providers:    common.TestAccProviders,
-		CheckDestroy: testAccCheckFWPolicyV2Destroy,
+		PreCheck:          func() { common.TestAccPreCheck(t) },
+		ProviderFactories: common.TestAccProviderFactories,
+		CheckDestroy:      testAccCheckFWPolicyV2Destroy,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccFWPolicyV2_timeout,
@@ -87,9 +87,9 @@ func TestAccFWPolicyV2_timeout(t *testing.T) {
 func TestAccFWPolicyV2_removeSingleRule(t *testing.T) {
 	notEmptyPlan, _ := regexp.Compile(".+?plan was not empty:")
 	resource.Test(t, resource.TestCase{
-		PreCheck:     func() { common.TestAccPreCheck(t) },
-		Providers:    common.TestAccProviders,
-		CheckDestroy: testAccCheckFWPolicyV2Destroy,
+		PreCheck:          func() { common.TestAccPreCheck(t) },
+		ProviderFactories: common.TestAccProviderFactories,
+		CheckDestroy:      testAccCheckFWPolicyV2Destroy,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccFWPolicyV2SingleRule,

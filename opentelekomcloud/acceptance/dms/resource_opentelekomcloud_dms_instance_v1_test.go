@@ -21,9 +21,9 @@ func TestAccDmsInstancesV1_basic(t *testing.T) {
 	var instanceUpdate = fmt.Sprintf("dms_instance_update_%s", acctest.RandString(5))
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheckDms(t) },
-		Providers:    common.TestAccProviders,
-		CheckDestroy: testAccCheckDmsV1InstanceDestroy,
+		PreCheck:          func() { testAccPreCheckDms(t) },
+		ProviderFactories: common.TestAccProviderFactories,
+		CheckDestroy:      testAccCheckDmsV1InstanceDestroy,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccDmsV1Instance_basic(instanceName),
@@ -54,9 +54,9 @@ func TestAccDmsInstancesV1_KafkaInstance(t *testing.T) {
 	var instanceName = fmt.Sprintf("dms_instance_%s", acctest.RandString(5))
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheckDms(t) },
-		Providers:    common.TestAccProviders,
-		CheckDestroy: testAccCheckDmsV1InstanceDestroy,
+		PreCheck:          func() { testAccPreCheckDms(t) },
+		ProviderFactories: common.TestAccProviderFactories,
+		CheckDestroy:      testAccCheckDmsV1InstanceDestroy,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccDmsV1Instance_KafkaInstance(instanceName),

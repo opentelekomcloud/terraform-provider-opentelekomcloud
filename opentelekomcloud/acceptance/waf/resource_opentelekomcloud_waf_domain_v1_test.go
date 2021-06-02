@@ -18,9 +18,9 @@ func TestAccWafDomainV1_basic(t *testing.T) {
 	var domain domains.Domain
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:     func() { common.TestAccPreCheck(t) },
-		Providers:    common.TestAccProviders,
-		CheckDestroy: testAccCheckWafDomainV1Destroy,
+		PreCheck:          func() { common.TestAccPreCheck(t) },
+		ProviderFactories: common.TestAccProviderFactories,
+		CheckDestroy:      testAccCheckWafDomainV1Destroy,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccWafDomainV1_basic,

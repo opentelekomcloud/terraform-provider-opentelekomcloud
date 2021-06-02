@@ -18,9 +18,9 @@ func TestAccNetworkingV2Router_basic(t *testing.T) {
 	var router routers.Router
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:     func() { common.TestAccPreCheck(t) },
-		Providers:    common.TestAccProviders,
-		CheckDestroy: testAccCheckNetworkingV2RouterDestroy,
+		PreCheck:          func() { common.TestAccPreCheck(t) },
+		ProviderFactories: common.TestAccProviderFactories,
+		CheckDestroy:      testAccCheckNetworkingV2RouterDestroy,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccNetworkingV2Router_basic,
@@ -43,9 +43,9 @@ func TestAccNetworkingV2Router_update_external_gw(t *testing.T) {
 	var router routers.Router
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:     func() { common.TestAccPreCheck(t) },
-		Providers:    common.TestAccProviders,
-		CheckDestroy: testAccCheckNetworkingV2RouterDestroy,
+		PreCheck:          func() { common.TestAccPreCheck(t) },
+		ProviderFactories: common.TestAccProviderFactories,
+		CheckDestroy:      testAccCheckNetworkingV2RouterDestroy,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccNetworkingV2Router_update_external_gw_1,
@@ -68,9 +68,9 @@ func TestAccNetworkingV2Router_timeout(t *testing.T) {
 	var router routers.Router
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:     func() { common.TestAccPreCheck(t) },
-		Providers:    common.TestAccProviders,
-		CheckDestroy: testAccCheckNetworkingV2RouterDestroy,
+		PreCheck:          func() { common.TestAccPreCheck(t) },
+		ProviderFactories: common.TestAccProviderFactories,
+		CheckDestroy:      testAccCheckNetworkingV2RouterDestroy,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccNetworkingV2Router_timeout,

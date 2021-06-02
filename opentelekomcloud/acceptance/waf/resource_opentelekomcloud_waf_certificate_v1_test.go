@@ -18,9 +18,9 @@ func TestAccWafCertificateV1_basic(t *testing.T) {
 	var certificate certificates.Certificate
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:     func() { common.TestAccPreCheck(t) },
-		Providers:    common.TestAccProviders,
-		CheckDestroy: testAccCheckWafCertificateV1Destroy,
+		PreCheck:          func() { common.TestAccPreCheck(t) },
+		ProviderFactories: common.TestAccProviderFactories,
+		CheckDestroy:      testAccCheckWafCertificateV1Destroy,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccWafCertificateV1Basic,

@@ -10,9 +10,9 @@ import (
 
 func TestAccNetworkingV2PortDataSource_basic(t *testing.T) {
 	resource.Test(t, resource.TestCase{
-		PreCheck:     func() { common.TestAccPreCheck(t) },
-		Providers:    common.TestAccProviders,
-		CheckDestroy: testAccCheckNetworkingV2PortDestroy,
+		PreCheck:          func() { common.TestAccPreCheck(t) },
+		ProviderFactories: common.TestAccProviderFactories,
+		CheckDestroy:      testAccCheckNetworkingV2PortDestroy,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccNetworkingV2PortDataSource_basic,

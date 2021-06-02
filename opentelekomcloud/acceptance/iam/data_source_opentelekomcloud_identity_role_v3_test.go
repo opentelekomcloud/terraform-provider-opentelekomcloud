@@ -16,7 +16,7 @@ func TestAccOpenStackIdentityV3RoleDataSource_basic(t *testing.T) {
 			common.TestAccPreCheck(t)
 			common.TestAccPreCheckAdminOnly(t)
 		},
-		Providers: common.TestAccProviders,
+		ProviderFactories: common.TestAccProviderFactories,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccOpenStackIdentityV3RoleDataSource_basic,

@@ -18,9 +18,9 @@ func TestAccNetworkingV2SecGroup_basic(t *testing.T) {
 	var securityGroup groups.SecGroup
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:     func() { common.TestAccPreCheck(t) },
-		Providers:    common.TestAccProviders,
-		CheckDestroy: testAccCheckNetworkingV2SecGroupDestroy,
+		PreCheck:          func() { common.TestAccPreCheck(t) },
+		ProviderFactories: common.TestAccProviderFactories,
+		CheckDestroy:      testAccCheckNetworkingV2SecGroupDestroy,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccNetworkingV2SecGroup_basic,
@@ -44,9 +44,9 @@ func TestAccNetworkingV2SecGroup_noDefaultRules(t *testing.T) {
 	var securityGroup groups.SecGroup
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:     func() { common.TestAccPreCheck(t) },
-		Providers:    common.TestAccProviders,
-		CheckDestroy: testAccCheckNetworkingV2SecGroupDestroy,
+		PreCheck:          func() { common.TestAccPreCheck(t) },
+		ProviderFactories: common.TestAccProviderFactories,
+		CheckDestroy:      testAccCheckNetworkingV2SecGroupDestroy,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccNetworkingV2SecGroup_noDefaultRules,
@@ -63,9 +63,9 @@ func TestAccNetworkingV2SecGroup_timeout(t *testing.T) {
 	var securityGroup groups.SecGroup
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:     func() { common.TestAccPreCheck(t) },
-		Providers:    common.TestAccProviders,
-		CheckDestroy: testAccCheckNetworkingV2SecGroupDestroy,
+		PreCheck:          func() { common.TestAccPreCheck(t) },
+		ProviderFactories: common.TestAccProviderFactories,
+		CheckDestroy:      testAccCheckNetworkingV2SecGroupDestroy,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccNetworkingV2SecGroup_timeout,

@@ -18,9 +18,9 @@ func TestAccRDSV1Instance_basic(t *testing.T) {
 	var instance instances.Instance
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:     func() { common.TestAccPreCheck(t) },
-		Providers:    common.TestAccProviders,
-		CheckDestroy: testAccCheckRDSV1InstanceDestroy,
+		PreCheck:          func() { common.TestAccPreCheck(t) },
+		ProviderFactories: common.TestAccProviderFactories,
+		CheckDestroy:      testAccCheckRDSV1InstanceDestroy,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccSInstanceV1Config_basic,

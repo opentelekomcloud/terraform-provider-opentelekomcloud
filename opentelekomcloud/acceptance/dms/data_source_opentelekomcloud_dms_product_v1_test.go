@@ -12,8 +12,8 @@ import (
 
 func TestAccDmsProductV1DataSource_basic(t *testing.T) {
 	resource.Test(t, resource.TestCase{
-		PreCheck:  func() { testAccPreCheckDms(t) },
-		Providers: common.TestAccProviders,
+		PreCheck:          func() { testAccPreCheckDms(t) },
+		ProviderFactories: common.TestAccProviderFactories,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccDmsProductV1DataSource_basic,
@@ -33,8 +33,8 @@ func TestAccDmsProductV1DataSource_basic(t *testing.T) {
 
 func TestAccDmsProductV1DataSource_rabbitmqSingle(t *testing.T) {
 	resource.Test(t, resource.TestCase{
-		PreCheck:  func() { testAccPreCheckDms(t) },
-		Providers: common.TestAccProviders,
+		PreCheck:          func() { testAccPreCheckDms(t) },
+		ProviderFactories: common.TestAccProviderFactories,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccDmsProductV1DataSource_rabbitmqSingle,
@@ -56,8 +56,8 @@ func TestAccDmsProductV1DataSource_rabbitmqSingle(t *testing.T) {
 
 func TestAccDmsProductV1DataSource_rabbitmqCluster(t *testing.T) {
 	resource.Test(t, resource.TestCase{
-		PreCheck:  func() { testAccPreCheckDms(t) },
-		Providers: common.TestAccProviders,
+		PreCheck:          func() { testAccPreCheckDms(t) },
+		ProviderFactories: common.TestAccProviderFactories,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccDmsProductV1DataSource_rabbitmqCluster,

@@ -12,9 +12,9 @@ func TestAccNetworkingV2Port_importBasic(t *testing.T) {
 	resourceName := "opentelekomcloud_networking_port_v2.port_1"
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:     func() { common.TestAccPreCheck(t) },
-		Providers:    common.TestAccProviders,
-		CheckDestroy: testAccCheckNetworkingV2PortDestroy,
+		PreCheck:          func() { common.TestAccPreCheck(t) },
+		ProviderFactories: common.TestAccProviderFactories,
+		CheckDestroy:      testAccCheckNetworkingV2PortDestroy,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccNetworkingV2Port_basic,

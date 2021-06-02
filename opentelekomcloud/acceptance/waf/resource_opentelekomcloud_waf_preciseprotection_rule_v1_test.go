@@ -18,9 +18,9 @@ func TestAccWafPreciseProtectionRuleV1_basic(t *testing.T) {
 	var rule preciseprotection_rules.Precise
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:     func() { common.TestAccPreCheck(t) },
-		Providers:    common.TestAccProviders,
-		CheckDestroy: testAccCheckWafPreciseProtectionRuleV1Destroy,
+		PreCheck:          func() { common.TestAccPreCheck(t) },
+		ProviderFactories: common.TestAccProviderFactories,
+		CheckDestroy:      testAccCheckWafPreciseProtectionRuleV1Destroy,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccWafPreciseProtectionRuleV1_basic,

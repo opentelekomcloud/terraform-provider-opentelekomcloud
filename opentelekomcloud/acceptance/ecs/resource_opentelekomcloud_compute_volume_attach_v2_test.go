@@ -19,9 +19,9 @@ func TestAccComputeV2VolumeAttach_basic(t *testing.T) {
 	var va volumeattach.VolumeAttachment
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:     func() { common.TestAccPreCheck(t) },
-		Providers:    common.TestAccProviders,
-		CheckDestroy: testAccCheckComputeV2VolumeAttachDestroy,
+		PreCheck:          func() { common.TestAccPreCheck(t) },
+		ProviderFactories: common.TestAccProviderFactories,
+		CheckDestroy:      testAccCheckComputeV2VolumeAttachDestroy,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccComputeV2VolumeAttach_basic,
@@ -37,9 +37,9 @@ func TestAccComputeV2VolumeAttach_device(t *testing.T) {
 	var va volumeattach.VolumeAttachment
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:     func() { common.TestAccPreCheck(t) },
-		Providers:    common.TestAccProviders,
-		CheckDestroy: testAccCheckComputeV2VolumeAttachDestroy,
+		PreCheck:          func() { common.TestAccPreCheck(t) },
+		ProviderFactories: common.TestAccProviderFactories,
+		CheckDestroy:      testAccCheckComputeV2VolumeAttachDestroy,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccComputeV2VolumeAttach_device,
@@ -56,9 +56,9 @@ func TestAccComputeV2VolumeAttach_timeout(t *testing.T) {
 	var va volumeattach.VolumeAttachment
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:     func() { common.TestAccPreCheck(t) },
-		Providers:    common.TestAccProviders,
-		CheckDestroy: testAccCheckComputeV2VolumeAttachDestroy,
+		PreCheck:          func() { common.TestAccPreCheck(t) },
+		ProviderFactories: common.TestAccProviderFactories,
+		CheckDestroy:      testAccCheckComputeV2VolumeAttachDestroy,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccComputeV2VolumeAttach_timeout,

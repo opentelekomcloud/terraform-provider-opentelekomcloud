@@ -18,9 +18,9 @@ func TestAccOTCRtsSoftwareConfigV1_basic(t *testing.T) {
 	var config softwareconfig.SoftwareConfig
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:     func() { common.TestAccPreCheck(t) },
-		Providers:    common.TestAccProviders,
-		CheckDestroy: testAccCheckRtsSoftwareConfigV1Destroy,
+		PreCheck:          func() { common.TestAccPreCheck(t) },
+		ProviderFactories: common.TestAccProviderFactories,
+		CheckDestroy:      testAccCheckRtsSoftwareConfigV1Destroy,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccRtsSoftwareConfigV1_basic,
@@ -40,9 +40,9 @@ func TestAccOTCRtsSoftwareConfigV1_timeout(t *testing.T) {
 	var config softwareconfig.SoftwareConfig
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:     func() { common.TestAccPreCheck(t) },
-		Providers:    common.TestAccProviders,
-		CheckDestroy: testAccCheckRtsSoftwareConfigV1Destroy,
+		PreCheck:          func() { common.TestAccPreCheck(t) },
+		ProviderFactories: common.TestAccProviderFactories,
+		CheckDestroy:      testAccCheckRtsSoftwareConfigV1Destroy,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccRtsSoftwareConfigV1_timeout,

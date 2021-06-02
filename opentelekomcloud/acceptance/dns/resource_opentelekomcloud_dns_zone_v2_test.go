@@ -23,9 +23,9 @@ func TestAccDNSV2Zone_basic(t *testing.T) {
 	var zoneName = fmt.Sprintf("accepttest%s.com.", acctest.RandString(5))
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:     func() { common.TestAccPreCheck(t) },
-		Providers:    common.TestAccProviders,
-		CheckDestroy: testAccCheckDNSV2ZoneDestroy,
+		PreCheck:          func() { common.TestAccPreCheck(t) },
+		ProviderFactories: common.TestAccProviderFactories,
+		CheckDestroy:      testAccCheckDNSV2ZoneDestroy,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccDNSV2Zone_basic(zoneName),
@@ -61,9 +61,9 @@ func TestAccDNSV2Zone_undotted(t *testing.T) {
 	zoneName := randomZoneName()
 	zoneName = strings.TrimSuffix(zoneName, ".")
 	resource.Test(t, resource.TestCase{
-		PreCheck:     func() { common.TestAccPreCheck(t) },
-		Providers:    common.TestAccProviders,
-		CheckDestroy: testAccCheckDNSV2ZoneDestroy,
+		PreCheck:          func() { common.TestAccPreCheck(t) },
+		ProviderFactories: common.TestAccProviderFactories,
+		CheckDestroy:      testAccCheckDNSV2ZoneDestroy,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccDNSV2Zone_basic(zoneName),
@@ -78,9 +78,9 @@ func TestAccDNSV2Zone_private(t *testing.T) {
 	var zoneName = fmt.Sprintf("acpttest%s.com.", acctest.RandString(5))
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:     func() { common.TestAccPreCheck(t) },
-		Providers:    common.TestAccProviders,
-		CheckDestroy: testAccCheckDNSV2ZoneDestroy,
+		PreCheck:          func() { common.TestAccPreCheck(t) },
+		ProviderFactories: common.TestAccProviderFactories,
+		CheckDestroy:      testAccCheckDNSV2ZoneDestroy,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccDNSV2Zone_private(zoneName),
@@ -106,9 +106,9 @@ func TestAccDNSV2Zone_readTTL(t *testing.T) {
 	var zoneName = fmt.Sprintf("ACPTTEST%s.com.", acctest.RandString(5))
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:     func() { common.TestAccPreCheck(t) },
-		Providers:    common.TestAccProviders,
-		CheckDestroy: testAccCheckDNSV2ZoneDestroy,
+		PreCheck:          func() { common.TestAccPreCheck(t) },
+		ProviderFactories: common.TestAccProviderFactories,
+		CheckDestroy:      testAccCheckDNSV2ZoneDestroy,
 		Steps: []resource.TestStep{
 			{
 				Config:             testAccDNSV2Zone_readTTL(zoneName),
@@ -129,9 +129,9 @@ func TestAccDNSV2Zone_timeout(t *testing.T) {
 	var zoneName = fmt.Sprintf("ACPTTEST%s.com.", acctest.RandString(5))
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:     func() { common.TestAccPreCheck(t) },
-		Providers:    common.TestAccProviders,
-		CheckDestroy: testAccCheckDNSV2ZoneDestroy,
+		PreCheck:          func() { common.TestAccPreCheck(t) },
+		ProviderFactories: common.TestAccProviderFactories,
+		CheckDestroy:      testAccCheckDNSV2ZoneDestroy,
 		Steps: []resource.TestStep{
 			{
 				Config:             testAccDNSV2Zone_timeout(zoneName),

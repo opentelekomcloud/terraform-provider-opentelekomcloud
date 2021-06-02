@@ -21,9 +21,9 @@ func TestAccNetworkingV2Network_basic(t *testing.T) {
 	var network networks.Network
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:     func() { common.TestAccPreCheck(t) },
-		Providers:    common.TestAccProviders,
-		CheckDestroy: testAccCheckNetworkingV2NetworkDestroy,
+		PreCheck:          func() { common.TestAccPreCheck(t) },
+		ProviderFactories: common.TestAccProviderFactories,
+		CheckDestroy:      testAccCheckNetworkingV2NetworkDestroy,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccNetworkingV2Network_basic,
@@ -48,9 +48,9 @@ func TestAccNetworkingV2Network_netstack(t *testing.T) {
 	var router routers.Router
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:     func() { common.TestAccPreCheck(t) },
-		Providers:    common.TestAccProviders,
-		CheckDestroy: testAccCheckNetworkingV2NetworkDestroy,
+		PreCheck:          func() { common.TestAccPreCheck(t) },
+		ProviderFactories: common.TestAccProviderFactories,
+		CheckDestroy:      testAccCheckNetworkingV2NetworkDestroy,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccNetworkingV2Network_netstack,
@@ -70,9 +70,9 @@ func TestAccNetworkingV2Network_timeout(t *testing.T) {
 	var network networks.Network
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:     func() { common.TestAccPreCheck(t) },
-		Providers:    common.TestAccProviders,
-		CheckDestroy: testAccCheckNetworkingV2NetworkDestroy,
+		PreCheck:          func() { common.TestAccPreCheck(t) },
+		ProviderFactories: common.TestAccProviderFactories,
+		CheckDestroy:      testAccCheckNetworkingV2NetworkDestroy,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccNetworkingV2Network_timeout,
@@ -93,8 +93,8 @@ func TestAccNetworkingV2Network_multipleSegmentMappings(t *testing.T) {
 			common.TestAccPreCheck(t)
 			common.TestAccPreCheckAdminOnly(t)
 		},
-		Providers:    common.TestAccProviders,
-		CheckDestroy: testAccCheckNetworkingV2NetworkDestroy,
+		ProviderFactories: common.TestAccProviderFactories,
+		CheckDestroy:      testAccCheckNetworkingV2NetworkDestroy,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccNetworkingV2Network_multipleSegmentMappings,

@@ -9,7 +9,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/acctest"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
-	"github.com/jen20/awspolicyequivalence"
+	awspolicy "github.com/jen20/awspolicyequivalence"
 
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/acceptance/common"
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/acceptance/env"
@@ -24,9 +24,9 @@ func TestAccS3BucketPolicy_basic(t *testing.T) {
 		name, name)
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheckS3(t) },
-		Providers:    common.TestAccProviders,
-		CheckDestroy: testAccCheckS3BucketDestroy,
+		PreCheck:          func() { testAccPreCheckS3(t) },
+		ProviderFactories: common.TestAccProviderFactories,
+		CheckDestroy:      testAccCheckS3BucketDestroy,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccS3BucketPolicyConfig(name),
@@ -51,9 +51,9 @@ func TestAccS3BucketPolicy_policyUpdate(t *testing.T) {
 		name, name)
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheckS3(t) },
-		Providers:    common.TestAccProviders,
-		CheckDestroy: testAccCheckS3BucketDestroy,
+		PreCheck:          func() { testAccPreCheckS3(t) },
+		ProviderFactories: common.TestAccProviderFactories,
+		CheckDestroy:      testAccCheckS3BucketDestroy,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccS3BucketPolicyConfig(name),

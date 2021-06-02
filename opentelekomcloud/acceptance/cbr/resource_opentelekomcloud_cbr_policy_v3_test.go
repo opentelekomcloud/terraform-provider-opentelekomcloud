@@ -17,9 +17,9 @@ func TestAccCBRPolicyV3_basic(t *testing.T) {
 	var cbrPolicy policies.Policy
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:     func() { common.TestAccFlavorPreCheck(t) },
-		Providers:    common.TestAccProviders,
-		CheckDestroy: testAccCheckCBRPolicyV3Destroy,
+		PreCheck:          func() { common.TestAccFlavorPreCheck(t) },
+		ProviderFactories: common.TestAccProviderFactories,
+		CheckDestroy:      testAccCheckCBRPolicyV3Destroy,
 		Steps: []resource.TestStep{
 			{
 				Config: testCBRPolicyV3_basic,
@@ -47,9 +47,9 @@ func TestAccCBRPolicyV3_minConfig(t *testing.T) {
 	policyRes := "opentelekomcloud_cbr_policy_v3.policy"
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:     func() { common.TestAccFlavorPreCheck(t) },
-		Providers:    common.TestAccProviders,
-		CheckDestroy: testAccCheckCBRPolicyV3Destroy,
+		PreCheck:          func() { common.TestAccFlavorPreCheck(t) },
+		ProviderFactories: common.TestAccProviderFactories,
+		CheckDestroy:      testAccCheckCBRPolicyV3Destroy,
 		Steps: []resource.TestStep{
 			{
 				Config: testCBRPolicyV3_minConfig,

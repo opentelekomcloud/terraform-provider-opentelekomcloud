@@ -12,9 +12,9 @@ func TestAccVpcRouteV2_importBasic(t *testing.T) {
 	resourceName := "opentelekomcloud_vpc_route_v2.route_1"
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:     func() { common.TestAccPreCheck(t) },
-		Providers:    common.TestAccProviders,
-		CheckDestroy: testAccCheckRouteV2Destroy,
+		PreCheck:          func() { common.TestAccPreCheck(t) },
+		ProviderFactories: common.TestAccProviderFactories,
+		CheckDestroy:      testAccCheckRouteV2Destroy,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccRouteV2_basic,

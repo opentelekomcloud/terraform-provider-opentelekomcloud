@@ -29,8 +29,8 @@ func TestAccIdentityV3RoleAssignment_basic(t *testing.T) {
 			common.TestAccPreCheck(t)
 			common.TestAccPreCheckAdminOnly(t)
 		},
-		Providers:    common.TestAccProviders,
-		CheckDestroy: testAccCheckIdentityV3RoleAssignmentDestroy,
+		ProviderFactories: common.TestAccProviderFactories,
+		CheckDestroy:      testAccCheckIdentityV3RoleAssignmentDestroy,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccIdentityV3RoleAssignment_basic,

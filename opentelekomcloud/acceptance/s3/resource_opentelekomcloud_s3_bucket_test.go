@@ -30,9 +30,9 @@ func TestAccS3Bucket_basic(t *testing.T) {
 	resourceName := "opentelekomcloud_s3_bucket.bucket"
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheckS3(t) },
-		Providers:    common.TestAccProviders,
-		CheckDestroy: testAccCheckS3BucketDestroy,
+		PreCheck:          func() { testAccPreCheckS3(t) },
+		ProviderFactories: common.TestAccProviderFactories,
+		CheckDestroy:      testAccCheckS3BucketDestroy,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccS3BucketConfig(rInt),
@@ -51,9 +51,9 @@ func TestAccS3Bucket_basic(t *testing.T) {
 func TestAccAWSS3MultiBucket_withTags(t *testing.T) {
 	rInt := acctest.RandInt()
 	resource.Test(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheckS3(t) },
-		Providers:    common.TestAccProviders,
-		CheckDestroy: testAccCheckS3BucketDestroy,
+		PreCheck:          func() { testAccPreCheckS3(t) },
+		ProviderFactories: common.TestAccProviderFactories,
+		CheckDestroy:      testAccCheckS3BucketDestroy,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccAWSS3MultiBucketConfigWithTags(rInt),
@@ -66,9 +66,9 @@ func TestAccS3Bucket_namePrefix(t *testing.T) {
 	resourceName := "opentelekomcloud_s3_bucket.test"
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheckS3(t) },
-		Providers:    common.TestAccProviders,
-		CheckDestroy: testAccCheckS3BucketDestroy,
+		PreCheck:          func() { testAccPreCheckS3(t) },
+		ProviderFactories: common.TestAccProviderFactories,
+		CheckDestroy:      testAccCheckS3BucketDestroy,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccS3BucketConfig_namePrefix,
@@ -85,9 +85,9 @@ func TestAccS3Bucket_generatedName(t *testing.T) {
 	resourceName := "opentelekomcloud_s3_bucket.test"
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheckS3(t) },
-		Providers:    common.TestAccProviders,
-		CheckDestroy: testAccCheckS3BucketDestroy,
+		PreCheck:          func() { testAccPreCheckS3(t) },
+		ProviderFactories: common.TestAccProviderFactories,
+		CheckDestroy:      testAccCheckS3BucketDestroy,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccS3BucketConfig_generatedName,
@@ -104,9 +104,9 @@ func TestAccS3Bucket_region(t *testing.T) {
 	resourceName := "opentelekomcloud_s3_bucket.bucket"
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheckS3(t) },
-		Providers:    common.TestAccProviders,
-		CheckDestroy: testAccCheckS3BucketDestroy,
+		PreCheck:          func() { testAccPreCheckS3(t) },
+		ProviderFactories: common.TestAccProviderFactories,
+		CheckDestroy:      testAccCheckS3BucketDestroy,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccS3BucketConfigWithRegion(rInt),
@@ -124,9 +124,9 @@ func TestAccS3Bucket_Policy(t *testing.T) {
 	resourceName := "opentelekomcloud_s3_bucket.bucket"
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheckS3(t) },
-		Providers:    common.TestAccProviders,
-		CheckDestroy: testAccCheckS3BucketDestroy,
+		PreCheck:          func() { testAccPreCheckS3(t) },
+		ProviderFactories: common.TestAccProviderFactories,
+		CheckDestroy:      testAccCheckS3BucketDestroy,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccS3BucketConfigWithPolicy(rInt),
@@ -160,9 +160,9 @@ func TestAccS3Bucket_UpdateAcl(t *testing.T) {
 	resourceName := "opentelekomcloud_s3_bucket.bucket"
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheckS3(t) },
-		Providers:    common.TestAccProviders,
-		CheckDestroy: testAccCheckS3BucketDestroy,
+		PreCheck:          func() { testAccPreCheckS3(t) },
+		ProviderFactories: common.TestAccProviderFactories,
+		CheckDestroy:      testAccCheckS3BucketDestroy,
 		Steps: []resource.TestStep{
 			{
 				Config: preConfig,
@@ -187,9 +187,9 @@ func TestAccS3Bucket_Website_Simple(t *testing.T) {
 	resourceName := "opentelekomcloud_s3_bucket.bucket"
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheckS3(t) },
-		Providers:    common.TestAccProviders,
-		CheckDestroy: testAccCheckS3BucketDestroy,
+		PreCheck:          func() { testAccPreCheckS3(t) },
+		ProviderFactories: common.TestAccProviderFactories,
+		CheckDestroy:      testAccCheckS3BucketDestroy,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccS3BucketWebsiteConfig(rInt),
@@ -224,9 +224,9 @@ func TestAccS3Bucket_WebsiteRedirect(t *testing.T) {
 	resourceName := "opentelekomcloud_s3_bucket.bucket"
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheckS3(t) },
-		Providers:    common.TestAccProviders,
-		CheckDestroy: testAccCheckS3BucketDestroy,
+		PreCheck:          func() { testAccPreCheckS3(t) },
+		ProviderFactories: common.TestAccProviderFactories,
+		CheckDestroy:      testAccCheckS3BucketDestroy,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccS3BucketWebsiteConfigWithRedirect(rInt),
@@ -261,9 +261,9 @@ func TestAccS3Bucket_WebsiteRoutingRules(t *testing.T) {
 	resourceName := "opentelekomcloud_s3_bucket.bucket"
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheckS3(t) },
-		Providers:    common.TestAccProviders,
-		CheckDestroy: testAccCheckS3BucketDestroy,
+		PreCheck:          func() { testAccPreCheckS3(t) },
+		ProviderFactories: common.TestAccProviderFactories,
+		CheckDestroy:      testAccCheckS3BucketDestroy,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccS3BucketWebsiteConfigWithRoutingRules(rInt),
@@ -306,9 +306,9 @@ func TestAccS3Bucket_shouldFailNotFound(t *testing.T) {
 	resourceName := "opentelekomcloud_s3_bucket.bucket"
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheckS3(t) },
-		Providers:    common.TestAccProviders,
-		CheckDestroy: testAccCheckS3BucketDestroy,
+		PreCheck:          func() { testAccPreCheckS3(t) },
+		ProviderFactories: common.TestAccProviderFactories,
+		CheckDestroy:      testAccCheckS3BucketDestroy,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccS3BucketDestroyedConfig(rInt),
@@ -327,9 +327,9 @@ func TestAccS3Bucket_Versioning(t *testing.T) {
 	resourceName := "opentelekomcloud_s3_bucket.bucket"
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheckS3(t) },
-		Providers:    common.TestAccProviders,
-		CheckDestroy: testAccCheckS3BucketDestroy,
+		PreCheck:          func() { testAccPreCheckS3(t) },
+		ProviderFactories: common.TestAccProviderFactories,
+		CheckDestroy:      testAccCheckS3BucketDestroy,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccS3BucketConfig(rInt),
@@ -361,9 +361,9 @@ func TestAccS3Bucket_VersioningSecond(t *testing.T) {
 	resourceName := "opentelekomcloud_s3_bucket.bucket"
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheckS3(t) },
-		Providers:    common.TestAccProviders,
-		CheckDestroy: testAccCheckS3BucketDestroy,
+		PreCheck:          func() { testAccPreCheckS3(t) },
+		ProviderFactories: common.TestAccProviderFactories,
+		CheckDestroy:      testAccCheckS3BucketDestroy,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccS3BucketConfigWithVersioning(rInt),
@@ -421,9 +421,9 @@ func TestAccS3Bucket_Cors(t *testing.T) {
 	}
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheckS3(t) },
-		Providers:    common.TestAccProviders,
-		CheckDestroy: testAccCheckS3BucketDestroy,
+		PreCheck:          func() { testAccPreCheckS3(t) },
+		ProviderFactories: common.TestAccProviderFactories,
+		CheckDestroy:      testAccCheckS3BucketDestroy,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccS3BucketConfigWithCORS(rInt),
@@ -470,9 +470,9 @@ func TestAccS3Bucket_Logging(t *testing.T) {
 	resourceName := "opentelekomcloud_s3_bucket.bucket"
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheckS3(t) },
-		Providers:    common.TestAccProviders,
-		CheckDestroy: testAccCheckS3BucketDestroy,
+		PreCheck:          func() { testAccPreCheckS3(t) },
+		ProviderFactories: common.TestAccProviderFactories,
+		CheckDestroy:      testAccCheckS3BucketDestroy,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccS3BucketConfigWithLogging(rInt),
@@ -490,9 +490,9 @@ func TestAccS3Bucket_Lifecycle(t *testing.T) {
 	resourceName := "opentelekomcloud_s3_bucket.bucket"
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheckS3(t) },
-		Providers:    common.TestAccProviders,
-		CheckDestroy: testAccCheckS3BucketDestroy,
+		PreCheck:          func() { testAccPreCheckS3(t) },
+		ProviderFactories: common.TestAccProviderFactories,
+		CheckDestroy:      testAccCheckS3BucketDestroy,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccS3BucketConfigWithLifecycle(rInt),

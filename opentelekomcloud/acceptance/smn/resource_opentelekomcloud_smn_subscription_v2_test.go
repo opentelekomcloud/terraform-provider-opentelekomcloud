@@ -19,9 +19,9 @@ func TestAccSMNV2Subscription_basic(t *testing.T) {
 	var subscription2 subscriptions.SubscriptionGet
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:     func() { common.TestAccPreCheck(t) },
-		Providers:    common.TestAccProviders,
-		CheckDestroy: testAccCheckSMNSubscriptionV2Destroy,
+		PreCheck:          func() { common.TestAccPreCheck(t) },
+		ProviderFactories: common.TestAccProviderFactories,
+		CheckDestroy:      testAccCheckSMNSubscriptionV2Destroy,
 		Steps: []resource.TestStep{
 			{
 				Config: TestAccSMNV2SubscriptionConfig_basic,
@@ -50,9 +50,9 @@ func TestAccSMNV2Subscription_schemaProjectName(t *testing.T) {
 	env.OS_TENANT_NAME = cfg.ProjectName(projectName2)
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:     func() { common.TestAccPreCheck(t) },
-		Providers:    common.TestAccProviders,
-		CheckDestroy: testAccCheckSMNSubscriptionV2Destroy,
+		PreCheck:          func() { common.TestAccPreCheck(t) },
+		ProviderFactories: common.TestAccProviderFactories,
+		CheckDestroy:      testAccCheckSMNSubscriptionV2Destroy,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccSMNV2SubscriptionConfig_projectName(env.OS_TENANT_NAME),

@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/opentelekomcloud/gophertelekomcloud"
+	golangsdk "github.com/opentelekomcloud/gophertelekomcloud"
 
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/compute/v2/servers"
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/networking/v2/extensions/layer3/floatingips"
@@ -24,9 +24,9 @@ func TestAccComputeV2FloatingIPAssociate_basic(t *testing.T) {
 	var fip floatingips.FloatingIP
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:     func() { common.TestAccPreCheck(t) },
-		Providers:    common.TestAccProviders,
-		CheckDestroy: testAccCheckComputeV2FloatingIPAssociateDestroy,
+		PreCheck:          func() { common.TestAccPreCheck(t) },
+		ProviderFactories: common.TestAccProviderFactories,
+		CheckDestroy:      testAccCheckComputeV2FloatingIPAssociateDestroy,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccComputeV2FloatingIPAssociate_basic,
@@ -45,9 +45,9 @@ func TestAccComputeV2FloatingIPAssociate_fixedIP(t *testing.T) {
 	var fip floatingips.FloatingIP
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:     func() { common.TestAccPreCheck(t) },
-		Providers:    common.TestAccProviders,
-		CheckDestroy: testAccCheckComputeV2FloatingIPAssociateDestroy,
+		PreCheck:          func() { common.TestAccPreCheck(t) },
+		ProviderFactories: common.TestAccProviderFactories,
+		CheckDestroy:      testAccCheckComputeV2FloatingIPAssociateDestroy,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccComputeV2FloatingIPAssociate_fixedIP,
@@ -66,9 +66,9 @@ func TestAccComputeV2FloatingIPAssociate_attachToFirstNetwork(t *testing.T) {
 	var fip floatingips.FloatingIP
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:     func() { common.TestAccPreCheck(t) },
-		Providers:    common.TestAccProviders,
-		CheckDestroy: testAccCheckComputeV2FloatingIPAssociateDestroy,
+		PreCheck:          func() { common.TestAccPreCheck(t) },
+		ProviderFactories: common.TestAccProviderFactories,
+		CheckDestroy:      testAccCheckComputeV2FloatingIPAssociateDestroy,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccComputeV2FloatingIPAssociate_attachToFirstNetwork,
@@ -88,9 +88,9 @@ func TestAccComputeV2FloatingIPAssociate_attachNew(t *testing.T) {
 	var fip_2 floatingips.FloatingIP
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:     func() { common.TestAccPreCheck(t) },
-		Providers:    common.TestAccProviders,
-		CheckDestroy: testAccCheckComputeV2FloatingIPAssociateDestroy,
+		PreCheck:          func() { common.TestAccPreCheck(t) },
+		ProviderFactories: common.TestAccProviderFactories,
+		CheckDestroy:      testAccCheckComputeV2FloatingIPAssociateDestroy,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccComputeV2FloatingIPAssociate_attachNew_1,

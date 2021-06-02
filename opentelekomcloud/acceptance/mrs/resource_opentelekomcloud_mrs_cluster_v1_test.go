@@ -7,7 +7,7 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
-	"github.com/opentelekomcloud/gophertelekomcloud"
+	golangsdk "github.com/opentelekomcloud/gophertelekomcloud"
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/mrs/v1/cluster"
 
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/acceptance/common"
@@ -19,9 +19,9 @@ func TestAccMRSV1Cluster_basic(t *testing.T) {
 	var clusterGet cluster.Cluster
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheckMrs(t) },
-		Providers:    common.TestAccProviders,
-		CheckDestroy: testAccCheckMRSV1ClusterDestroy,
+		PreCheck:          func() { testAccPreCheckMrs(t) },
+		ProviderFactories: common.TestAccProviderFactories,
+		CheckDestroy:      testAccCheckMRSV1ClusterDestroy,
 		Steps: []resource.TestStep{
 			{
 				Config: TestAccMRSV1ClusterConfig_basic,

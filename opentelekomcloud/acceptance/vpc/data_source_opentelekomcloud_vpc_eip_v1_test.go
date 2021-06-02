@@ -12,8 +12,8 @@ func TestAccVpcEipV1DataSource_basic(t *testing.T) {
 	dataSourceNameByTags := "data.opentelekomcloud_vpc_eip_v1.by_tags"
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:  func() { common.TestAccPreCheck(t) },
-		Providers: common.TestAccProviders,
+		PreCheck:          func() { common.TestAccPreCheck(t) },
+		ProviderFactories: common.TestAccProviderFactories,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccDataSourceVpcEipV1Init,

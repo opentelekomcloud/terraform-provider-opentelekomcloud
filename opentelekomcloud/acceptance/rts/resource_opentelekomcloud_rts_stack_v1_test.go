@@ -18,9 +18,9 @@ func TestAccOTCRTSStackV1_basic(t *testing.T) {
 	var stacks stacks.RetrievedStack
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:     func() { common.TestAccPreCheck(t) },
-		Providers:    common.TestAccProviders,
-		CheckDestroy: testAccCheckOTCRTSStackV1Destroy,
+		PreCheck:          func() { common.TestAccPreCheck(t) },
+		ProviderFactories: common.TestAccProviderFactories,
+		CheckDestroy:      testAccCheckOTCRTSStackV1Destroy,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccRTSStackV1_basic,
@@ -56,9 +56,9 @@ func TestAccOTCRTSStackV1_timeout(t *testing.T) {
 	var stacks stacks.RetrievedStack
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:     func() { common.TestAccPreCheck(t) },
-		Providers:    common.TestAccProviders,
-		CheckDestroy: testAccCheckOTCRTSStackV1Destroy,
+		PreCheck:          func() { common.TestAccPreCheck(t) },
+		ProviderFactories: common.TestAccProviderFactories,
+		CheckDestroy:      testAccCheckOTCRTSStackV1Destroy,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccRTSStackV1_timeout,

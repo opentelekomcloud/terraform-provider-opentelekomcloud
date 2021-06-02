@@ -17,9 +17,9 @@ func TestAccCSBSBackupPolicyV1_basic(t *testing.T) {
 	var policy policies.BackupPolicy
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:     func() { common.TestAccPreCheck(t) },
-		Providers:    common.TestAccProviders,
-		CheckDestroy: testAccCheckCSBSBackupPolicyV1Destroy,
+		PreCheck:          func() { common.TestAccPreCheck(t) },
+		ProviderFactories: common.TestAccProviderFactories,
+		CheckDestroy:      testAccCheckCSBSBackupPolicyV1Destroy,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccCSBSBackupPolicyV1_basic,
@@ -47,9 +47,9 @@ func TestAccCSBSBackupPolicyV1_timeout(t *testing.T) {
 	var policy policies.BackupPolicy
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:     func() { common.TestAccPreCheck(t) },
-		Providers:    common.TestAccProviders,
-		CheckDestroy: testAccCheckCSBSBackupPolicyV1Destroy,
+		PreCheck:          func() { common.TestAccPreCheck(t) },
+		ProviderFactories: common.TestAccProviderFactories,
+		CheckDestroy:      testAccCheckCSBSBackupPolicyV1Destroy,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccCSBSBackupPolicyV1_timeout,
@@ -65,9 +65,9 @@ func TestAccCSBSBackupPolicyV1_weekMonth(t *testing.T) {
 	var policy policies.BackupPolicy
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:     func() { common.TestAccPreCheck(t) },
-		Providers:    common.TestAccProviders,
-		CheckDestroy: testAccCheckCSBSBackupPolicyV1Destroy,
+		PreCheck:          func() { common.TestAccPreCheck(t) },
+		ProviderFactories: common.TestAccProviderFactories,
+		CheckDestroy:      testAccCheckCSBSBackupPolicyV1Destroy,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccCSBSBackupPolicyV1_weekMonth,

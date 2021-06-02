@@ -15,9 +15,9 @@ func TestAccCTSTrackerV1_importBasic(t *testing.T) {
 	var bucketName = fmt.Sprintf("terra-test-%s", acctest.RandString(5))
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:     func() { common.TestAccPreCheck(t) },
-		Providers:    common.TestAccProviders,
-		CheckDestroy: testAccCheckCTSTrackerV1Destroy,
+		PreCheck:          func() { common.TestAccPreCheck(t) },
+		ProviderFactories: common.TestAccProviderFactories,
+		CheckDestroy:      testAccCheckCTSTrackerV1Destroy,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccCTSTrackerV1_basic(bucketName),

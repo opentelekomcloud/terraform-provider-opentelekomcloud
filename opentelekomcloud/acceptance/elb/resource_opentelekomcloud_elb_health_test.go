@@ -18,9 +18,9 @@ func TestAccELBHealth_basic(t *testing.T) {
 	var health healthcheck.Health
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:     func() { common.TestAccPreCheck(t) },
-		Providers:    common.TestAccProviders,
-		CheckDestroy: testAccCheckELBHealthDestroy,
+		PreCheck:          func() { common.TestAccPreCheck(t) },
+		ProviderFactories: common.TestAccProviderFactories,
+		CheckDestroy:      testAccCheckELBHealthDestroy,
 		Steps: []resource.TestStep{
 			{
 				Config: TestAccELBHealthConfig_basic,

@@ -13,8 +13,8 @@ import (
 
 func TestAccOTCBMSV2KeyPairDataSource_basic(t *testing.T) {
 	resource.Test(t, resource.TestCase{
-		PreCheck:  func() { testAccBmsKeyPairPreCheck(t) },
-		Providers: common.TestAccProviders,
+		PreCheck:          func() { testAccBmsKeyPairPreCheck(t) },
+		ProviderFactories: common.TestAccProviderFactories,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccBMSV2KeyPairDataSource_basic,

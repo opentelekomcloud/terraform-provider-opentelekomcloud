@@ -20,9 +20,9 @@ func TestAccDNSV2PtrRecord_basic(t *testing.T) {
 	ptrName := fmt.Sprintf("acc-test-%s.com.", acctest.RandString(3))
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:     func() { common.TestAccPreCheck(t) },
-		Providers:    common.TestAccProviders,
-		CheckDestroy: testAccCheckDNSV2PtrRecordDestroy,
+		PreCheck:          func() { common.TestAccPreCheck(t) },
+		ProviderFactories: common.TestAccProviderFactories,
+		CheckDestroy:      testAccCheckDNSV2PtrRecordDestroy,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccDNSV2PtrRecord_basic(ptrName),
@@ -52,9 +52,9 @@ func TestAccDNSV2PtrRecord_undotted(t *testing.T) {
 	zoneName := randomZoneName()
 	zoneName = strings.TrimSuffix(zoneName, ".")
 	resource.Test(t, resource.TestCase{
-		PreCheck:     func() { common.TestAccPreCheck(t) },
-		Providers:    common.TestAccProviders,
-		CheckDestroy: testAccCheckDNSV2PtrRecordDestroy,
+		PreCheck:          func() { common.TestAccPreCheck(t) },
+		ProviderFactories: common.TestAccProviderFactories,
+		CheckDestroy:      testAccCheckDNSV2PtrRecordDestroy,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccDNSV2PtrRecord_basic(zoneName),

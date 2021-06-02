@@ -18,9 +18,9 @@ func TestAccComputeV2BmsInstance_basic(t *testing.T) {
 	var instance servers.Server
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:     func() { testAccBmsFlavorPreCheck(t) },
-		Providers:    common.TestAccProviders,
-		CheckDestroy: testAccCheckComputeV2BmsInstanceDestroy,
+		PreCheck:          func() { testAccBmsFlavorPreCheck(t) },
+		ProviderFactories: common.TestAccProviderFactories,
+		CheckDestroy:      testAccCheckComputeV2BmsInstanceDestroy,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccComputeV2BmsInstance_basic,
@@ -46,9 +46,9 @@ func TestAccComputeV2BmsInstance_bootFromVolumeImage(t *testing.T) {
 	var instance servers.Server
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:     func() { testAccBmsFlavorPreCheck(t) },
-		Providers:    common.TestAccProviders,
-		CheckDestroy: testAccCheckComputeV2BmsInstanceDestroy,
+		PreCheck:          func() { testAccBmsFlavorPreCheck(t) },
+		ProviderFactories: common.TestAccProviderFactories,
+		CheckDestroy:      testAccCheckComputeV2BmsInstanceDestroy,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccComputeV2BmsInstance_bootFromVolumeImage,
@@ -65,9 +65,9 @@ func TestAccComputeV2BmsInstance_bootFromVolumeImage(t *testing.T) {
 func TestAccComputeV2BmsInstance_timeout(t *testing.T) {
 	var instance servers.Server
 	resource.Test(t, resource.TestCase{
-		PreCheck:     func() { testAccBmsFlavorPreCheck(t) },
-		Providers:    common.TestAccProviders,
-		CheckDestroy: ecs.TestAccCheckComputeV2InstanceDestroy,
+		PreCheck:          func() { testAccBmsFlavorPreCheck(t) },
+		ProviderFactories: common.TestAccProviderFactories,
+		CheckDestroy:      ecs.TestAccCheckComputeV2InstanceDestroy,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccComputeV2BmsInstance_timeout,

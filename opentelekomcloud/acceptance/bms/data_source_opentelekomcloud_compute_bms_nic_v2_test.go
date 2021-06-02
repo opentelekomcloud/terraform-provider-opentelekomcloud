@@ -13,8 +13,8 @@ import (
 
 func TestAccOTCBMSNicV2DataSource_basic(t *testing.T) {
 	resource.Test(t, resource.TestCase{
-		PreCheck:  func() { testAccPreCheckBMSNic(t) },
-		Providers: common.TestAccProviders,
+		PreCheck:          func() { testAccPreCheckBMSNic(t) },
+		ProviderFactories: common.TestAccProviderFactories,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccOpenTelekomCloudBMSNicV2DataSource_basic,

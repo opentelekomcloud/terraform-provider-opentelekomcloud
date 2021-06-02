@@ -25,7 +25,7 @@ func TestAccDataSourceS3BucketObject_basic(t *testing.T) {
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:                  func() { common.TestAccPreCheck(t) },
-		Providers:                 common.TestAccProviders,
+		ProviderFactories:         common.TestAccProviderFactories,
 		PreventPostDestroyRefresh: true,
 		Steps: []resource.TestStep{
 			{
@@ -59,7 +59,7 @@ func TestAccDataSourceS3BucketObject_readableBody(t *testing.T) {
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:                  func() { common.TestAccPreCheck(t) },
-		Providers:                 common.TestAccProviders,
+		ProviderFactories:         common.TestAccProviderFactories,
 		PreventPostDestroyRefresh: true,
 		Steps: []resource.TestStep{
 			{
@@ -93,7 +93,7 @@ func TestAccDataSourceAWSS3BucketObject_allParams(t *testing.T) {
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:                  func() { common.TestAccPreCheck(t) },
-		Providers:                 common.TestAccProviders,
+		ProviderFactories:         common.TestAccProviderFactories,
 		PreventPostDestroyRefresh: true,
 		Steps: []resource.TestStep{
 			{

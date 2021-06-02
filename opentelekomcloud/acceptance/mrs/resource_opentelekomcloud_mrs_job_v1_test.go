@@ -19,9 +19,9 @@ func TestAccMRSV1Job_basic(t *testing.T) {
 	var jobGet job.Job
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheckMrs(t) },
-		Providers:    common.TestAccProviders,
-		CheckDestroy: testAccCheckMRSV1JobDestroy,
+		PreCheck:          func() { testAccPreCheckMrs(t) },
+		ProviderFactories: common.TestAccProviderFactories,
+		CheckDestroy:      testAccCheckMRSV1JobDestroy,
 		Steps: []resource.TestStep{
 			{
 				Config: TestAccMRSV1JobConfig_basic,

@@ -18,9 +18,9 @@ func TestAccVBSBackupShareV2_basic(t *testing.T) {
 	var share shares.Share
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:     func() { common.TestAccVBSBackupShareCheck(t) },
-		Providers:    common.TestAccProviders,
-		CheckDestroy: testAccVBSBackupShareV2Destroy,
+		PreCheck:          func() { common.TestAccVBSBackupShareCheck(t) },
+		ProviderFactories: common.TestAccProviderFactories,
+		CheckDestroy:      testAccVBSBackupShareV2Destroy,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccVBSBackupShareV2_basic,
@@ -38,9 +38,9 @@ func TestAccVBSBackupShareV2_timeout(t *testing.T) {
 	var share shares.Share
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:     func() { common.TestAccVBSBackupShareCheck(t) },
-		Providers:    common.TestAccProviders,
-		CheckDestroy: testAccVBSBackupShareV2Destroy,
+		PreCheck:          func() { common.TestAccVBSBackupShareCheck(t) },
+		ProviderFactories: common.TestAccProviderFactories,
+		CheckDestroy:      testAccVBSBackupShareV2Destroy,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccVBSBackupShareV2_timeout,

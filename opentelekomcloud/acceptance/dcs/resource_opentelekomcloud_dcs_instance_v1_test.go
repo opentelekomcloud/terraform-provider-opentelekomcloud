@@ -20,9 +20,9 @@ func TestAccDcsInstancesV1_depr(t *testing.T) {
 	var instanceName = fmt.Sprintf("dcs_instance_%s", acctest.RandString(5))
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheckDcs(t) },
-		Providers:    common.TestAccProviders,
-		CheckDestroy: testAccCheckDcsV1InstanceDestroy,
+		PreCheck:          func() { testAccPreCheckDcs(t) },
+		ProviderFactories: common.TestAccProviderFactories,
+		CheckDestroy:      testAccCheckDcsV1InstanceDestroy,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccDcsV1Instance_depr(instanceName),
@@ -43,9 +43,9 @@ func TestAccDcsInstancesV1_basic(t *testing.T) {
 	var instanceName = fmt.Sprintf("dcs_instance_%s", acctest.RandString(5))
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:     func() { common.TestAccPreCheck(t) },
-		Providers:    common.TestAccProviders,
-		CheckDestroy: testAccCheckDcsV1InstanceDestroy,
+		PreCheck:          func() { common.TestAccPreCheck(t) },
+		ProviderFactories: common.TestAccProviderFactories,
+		CheckDestroy:      testAccCheckDcsV1InstanceDestroy,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccDcsV1Instance_basic(instanceName),

@@ -13,8 +13,8 @@ import (
 func TestAccOTCVpcRouteV2DataSource_basic(t *testing.T) {
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:  func() { common.TestAccPreCheck(t) },
-		Providers: common.TestAccProviders,
+		PreCheck:          func() { common.TestAccPreCheck(t) },
+		ProviderFactories: common.TestAccProviderFactories,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccDataSourceRouteV2Config,

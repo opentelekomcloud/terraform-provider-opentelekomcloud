@@ -17,9 +17,9 @@ func TestAccELBListener_basic(t *testing.T) {
 	var listener listeners.Listener
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:     func() { common.TestAccPreCheck(t) },
-		Providers:    common.TestAccProviders,
-		CheckDestroy: testAccCheckELBListenerDestroy,
+		PreCheck:          func() { common.TestAccPreCheck(t) },
+		ProviderFactories: common.TestAccProviderFactories,
+		CheckDestroy:      testAccCheckELBListenerDestroy,
 		Steps: []resource.TestStep{
 			{
 				Config: TestAccELBListenerConfig_basic,

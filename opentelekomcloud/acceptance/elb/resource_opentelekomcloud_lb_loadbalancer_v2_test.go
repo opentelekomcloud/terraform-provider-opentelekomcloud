@@ -19,9 +19,9 @@ func TestAccLBV2LoadBalancer_basic(t *testing.T) {
 	resourceName := "opentelekomcloud_lb_loadbalancer_v2.loadbalancer_1"
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:     func() { common.TestAccPreCheck(t) },
-		Providers:    common.TestAccProviders,
-		CheckDestroy: testAccCheckLBV2LoadBalancerDestroy,
+		PreCheck:          func() { common.TestAccPreCheck(t) },
+		ProviderFactories: common.TestAccProviderFactories,
+		CheckDestroy:      testAccCheckLBV2LoadBalancerDestroy,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccLBV2LoadBalancerConfig_basic,

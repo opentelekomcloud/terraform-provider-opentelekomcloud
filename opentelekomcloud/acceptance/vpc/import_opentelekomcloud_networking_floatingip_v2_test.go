@@ -12,9 +12,9 @@ func TestAccNetworkingV2FloatingIP_importBasic(t *testing.T) {
 	resourceName := "opentelekomcloud_networking_floatingip_v2.fip_1"
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:     func() { common.TestAccPreCheck(t) },
-		Providers:    common.TestAccProviders,
-		CheckDestroy: testAccCheckNetworkingV2FloatingIPDestroy,
+		PreCheck:          func() { common.TestAccPreCheck(t) },
+		ProviderFactories: common.TestAccProviderFactories,
+		CheckDestroy:      testAccCheckNetworkingV2FloatingIPDestroy,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccNetworkingV2FloatingIP_basic,

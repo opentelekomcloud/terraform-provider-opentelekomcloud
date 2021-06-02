@@ -20,7 +20,7 @@ func TestAccOpenStackIdentityV3UserDataSource_basic(t *testing.T) {
 			common.TestAccPreCheck(t)
 			common.TestAccPreCheckAdminOnly(t)
 		},
-		Providers: common.TestAccProviders,
+		ProviderFactories: common.TestAccProviderFactories,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccOpenStackIdentityUserV3DataSource_user(userName, userPassword),

@@ -13,8 +13,8 @@ import (
 
 func TestAccOTCBMSV2FlavorDataSource_basic(t *testing.T) {
 	resource.Test(t, resource.TestCase{
-		PreCheck:  func() { testAccBmsFlavorPreCheck(t) },
-		Providers: common.TestAccProviders,
+		PreCheck:          func() { testAccBmsFlavorPreCheck(t) },
+		ProviderFactories: common.TestAccProviderFactories,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccBMSV2FlavorDataSource_basic,

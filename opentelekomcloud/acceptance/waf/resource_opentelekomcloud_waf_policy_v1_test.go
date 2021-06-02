@@ -18,9 +18,9 @@ func TestAccWafPolicyV1_basic(t *testing.T) {
 	var policy policies.Policy
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:     func() { common.TestAccPreCheck(t) },
-		Providers:    common.TestAccProviders,
-		CheckDestroy: testAccCheckWafPolicyV1Destroy,
+		PreCheck:          func() { common.TestAccPreCheck(t) },
+		ProviderFactories: common.TestAccProviderFactories,
+		CheckDestroy:      testAccCheckWafPolicyV1Destroy,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccWafPolicyV1_basic,

@@ -13,9 +13,9 @@ func TestAccCCENodePoolV3ImportBasic(t *testing.T) {
 	resourceName := "opentelekomcloud_cce_node_pool_v3.node_pool"
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:     func() { common.TestAccPreCheck(t) },
-		Providers:    common.TestAccProviders,
-		CheckDestroy: testAccCheckCCENodePoolV3Destroy,
+		PreCheck:          func() { common.TestAccPreCheck(t) },
+		ProviderFactories: common.TestAccProviderFactories,
+		CheckDestroy:      testAccCheckCCENodePoolV3Destroy,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccCCENodePoolV3_basic,

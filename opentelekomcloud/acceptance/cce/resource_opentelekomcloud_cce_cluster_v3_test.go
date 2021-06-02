@@ -24,9 +24,9 @@ func TestAccCCEClusterV3_basic(t *testing.T) {
 	var cluster clusters.Clusters
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:     func() { common.TestAccPreCheck(t) },
-		Providers:    common.TestAccProviders,
-		CheckDestroy: testAccCheckCCEClusterV3Destroy,
+		PreCheck:          func() { common.TestAccPreCheck(t) },
+		ProviderFactories: common.TestAccProviderFactories,
+		CheckDestroy:      testAccCheckCCEClusterV3Destroy,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccCCEClusterV3Basic,
@@ -56,9 +56,9 @@ func TestAccCCEClusterV3_basic(t *testing.T) {
 
 func TestAccCCEClusterV3_invalidNetwork(t *testing.T) {
 	resource.Test(t, resource.TestCase{
-		PreCheck:     func() { common.TestAccPreCheck(t) },
-		Providers:    common.TestAccProviders,
-		CheckDestroy: testAccCheckCCEClusterV3Destroy,
+		PreCheck:          func() { common.TestAccPreCheck(t) },
+		ProviderFactories: common.TestAccProviderFactories,
+		CheckDestroy:      testAccCheckCCEClusterV3Destroy,
 		Steps: []resource.TestStep{
 			{
 				Config:      testAccCCEClusterV3InvalidSubnet,
@@ -82,9 +82,9 @@ func TestAccCCEClusterV3_invalidNetwork(t *testing.T) {
 func TestAccCCEClusterV3_proxyAuth(t *testing.T) {
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:     func() { common.TestAccPreCheck(t) },
-		Providers:    common.TestAccProviders,
-		CheckDestroy: testAccCheckCCEClusterV3Destroy,
+		PreCheck:          func() { common.TestAccPreCheck(t) },
+		ProviderFactories: common.TestAccProviderFactories,
+		CheckDestroy:      testAccCheckCCEClusterV3Destroy,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccCCEClusterV3AuthProxy,
@@ -98,9 +98,9 @@ func TestAccCCEClusterV3_timeout(t *testing.T) {
 	var cluster clusters.Clusters
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:     func() { common.TestAccPreCheck(t) },
-		Providers:    common.TestAccProviders,
-		CheckDestroy: testAccCheckCCEClusterV3Destroy,
+		PreCheck:          func() { common.TestAccPreCheck(t) },
+		ProviderFactories: common.TestAccProviderFactories,
+		CheckDestroy:      testAccCheckCCEClusterV3Destroy,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccCCEClusterV3Timeout,
@@ -117,9 +117,9 @@ func TestAccCCEClusterV3NoAddons(t *testing.T) {
 	var cluster clusters.Clusters
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:     func() { common.TestAccPreCheck(t) },
-		Providers:    common.TestAccProviders,
-		CheckDestroy: testAccCheckCCEClusterV3Destroy,
+		PreCheck:          func() { common.TestAccPreCheck(t) },
+		ProviderFactories: common.TestAccProviderFactories,
+		CheckDestroy:      testAccCheckCCEClusterV3Destroy,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccCCEClusterV3NoAddons,
@@ -189,9 +189,9 @@ func TestAccCCEClusterV3_withVersionDiff(t *testing.T) {
 	var cluster clusters.Clusters
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:     func() { common.TestAccPreCheck(t) },
-		Providers:    common.TestAccProviders,
-		CheckDestroy: testAccCheckCCEClusterV3Destroy,
+		PreCheck:          func() { common.TestAccPreCheck(t) },
+		ProviderFactories: common.TestAccProviderFactories,
+		CheckDestroy:      testAccCheckCCEClusterV3Destroy,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccCCEClusterV3WithInvalidVersion,

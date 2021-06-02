@@ -12,9 +12,9 @@ func TestAccComputeV2InstanceImportBasic(t *testing.T) {
 	resourceName := "opentelekomcloud_compute_instance_v2.instance_1"
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:     func() { common.TestAccPreCheck(t) },
-		Providers:    common.TestAccProviders,
-		CheckDestroy: TestAccCheckComputeV2InstanceDestroy,
+		PreCheck:          func() { common.TestAccPreCheck(t) },
+		ProviderFactories: common.TestAccProviderFactories,
+		CheckDestroy:      TestAccCheckComputeV2InstanceDestroy,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccComputeV2Instance_basic,
@@ -36,9 +36,9 @@ func TestAccComputeV2InstanceImportBootFromVolumeImage(t *testing.T) {
 	resourceName := "opentelekomcloud_compute_instance_v2.instance_1"
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:     func() { common.TestAccPreCheck(t) },
-		Providers:    common.TestAccProviders,
-		CheckDestroy: TestAccCheckComputeV2InstanceDestroy,
+		PreCheck:          func() { common.TestAccPreCheck(t) },
+		ProviderFactories: common.TestAccProviderFactories,
+		CheckDestroy:      TestAccCheckComputeV2InstanceDestroy,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccComputeV2Instance_bootFromVolumeImage,

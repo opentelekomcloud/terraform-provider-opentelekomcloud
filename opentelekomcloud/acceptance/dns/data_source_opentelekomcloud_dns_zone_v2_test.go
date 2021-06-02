@@ -16,9 +16,9 @@ func TestAccOpenStackDNSZoneV2DataSource_basic(t *testing.T) {
 	randZoneTag := fmt.Sprintf("value-%s", acctest.RandString(5))
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:     func() { common.TestAccPreCheckRequiredEnvVars(t) },
-		Providers:    common.TestAccProviders,
-		CheckDestroy: testAccCheckDNSV2ZoneDestroy,
+		PreCheck:          func() { common.TestAccPreCheckRequiredEnvVars(t) },
+		ProviderFactories: common.TestAccProviderFactories,
+		CheckDestroy:      testAccCheckDNSV2ZoneDestroy,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccOpenStackDNSZoneV2DataSource_zone(zone, randZoneTag),
@@ -47,9 +47,9 @@ func TestAccOpenStackDNSZoneV2DataSource_byTag(t *testing.T) {
 	randZoneTag := fmt.Sprintf("value-%s", acctest.RandString(5))
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:     func() { common.TestAccPreCheckRequiredEnvVars(t) },
-		Providers:    common.TestAccProviders,
-		CheckDestroy: testAccCheckDNSV2ZoneDestroy,
+		PreCheck:          func() { common.TestAccPreCheckRequiredEnvVars(t) },
+		ProviderFactories: common.TestAccProviderFactories,
+		CheckDestroy:      testAccCheckDNSV2ZoneDestroy,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccOpenStackDNSZoneV2DataSource_zone(zone, randZoneTag),

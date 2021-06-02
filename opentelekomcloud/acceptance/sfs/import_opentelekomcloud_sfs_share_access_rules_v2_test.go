@@ -12,9 +12,9 @@ func TestAccSFSShareAccessRulesV2_importBasic(t *testing.T) {
 	resourceName := "opentelekomcloud_sfs_share_access_rules_v2.sfs_rules"
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:     func() { common.TestAccPreCheck(t) },
-		Providers:    common.TestAccProviders,
-		CheckDestroy: testAccCheckSFSShareAccessRulesV2Destroy,
+		PreCheck:          func() { common.TestAccPreCheck(t) },
+		ProviderFactories: common.TestAccProviderFactories,
+		CheckDestroy:      testAccCheckSFSShareAccessRulesV2Destroy,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccSFSShareAccessRulesV2_basic,

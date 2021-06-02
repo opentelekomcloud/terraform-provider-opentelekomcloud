@@ -24,8 +24,8 @@ func TestAccIdentityV3Agency_basic(t *testing.T) {
 			TestAccIdentityV3AgencyPreCheck(t)
 			common.TestAccPreCheckAdminOnly(t)
 		},
-		Providers:    common.TestAccProviders,
-		CheckDestroy: testAccCheckIdentityV3AgencyDestroy,
+		ProviderFactories: common.TestAccProviderFactories,
+		CheckDestroy:      testAccCheckIdentityV3AgencyDestroy,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccIdentityV3Agency_basic,

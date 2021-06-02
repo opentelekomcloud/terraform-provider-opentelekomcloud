@@ -16,8 +16,8 @@ func TestAccBandWidthDataSource_basic(t *testing.T) {
 	dataName := "data.opentelekomcloud_vpc_bandwidth.test"
 
 	resource.ParallelTest(t, resource.TestCase{
-		PreCheck:  func() { common.TestAccPreCheck(t) },
-		Providers: common.TestAccProviders,
+		PreCheck:          func() { common.TestAccPreCheck(t) },
+		ProviderFactories: common.TestAccProviderFactories,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccBandWidthDataSource_basic(rName),

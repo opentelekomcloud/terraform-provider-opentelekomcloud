@@ -18,9 +18,9 @@ func TestAccWafCcAttackProtectionRuleV1_basic(t *testing.T) {
 	var rule ccattackprotection_rules.CcAttack
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:     func() { common.TestAccPreCheck(t) },
-		Providers:    common.TestAccProviders,
-		CheckDestroy: testAccCheckWafCcAttackProtectionRuleV1Destroy,
+		PreCheck:          func() { common.TestAccPreCheck(t) },
+		ProviderFactories: common.TestAccProviderFactories,
+		CheckDestroy:      testAccCheckWafCcAttackProtectionRuleV1Destroy,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccWafCcAttackProtectionRuleV1_basic,

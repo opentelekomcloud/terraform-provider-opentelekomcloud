@@ -20,9 +20,9 @@ func TestAccASV1Group_basic(t *testing.T) {
 	resourceName := "opentelekomcloud_as_group_v1.hth_as_group"
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:     func() { common.TestAccFlavorPreCheck(t) },
-		Providers:    common.TestAccProviders,
-		CheckDestroy: testAccCheckASV1GroupDestroy,
+		PreCheck:          func() { common.TestAccFlavorPreCheck(t) },
+		ProviderFactories: common.TestAccProviderFactories,
+		CheckDestroy:      testAccCheckASV1GroupDestroy,
 		Steps: []resource.TestStep{
 			{
 				Config: testASV1Group_basic,
@@ -53,9 +53,9 @@ func TestAccASV1Group_RemoveWithSetMinNumber(t *testing.T) {
 	resourceName := "opentelekomcloud_as_group_v1.proxy_group"
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:     func() { common.TestAccFlavorPreCheck(t) },
-		Providers:    common.TestAccProviders,
-		CheckDestroy: testAccCheckASV1GroupDestroy,
+		PreCheck:          func() { common.TestAccFlavorPreCheck(t) },
+		ProviderFactories: common.TestAccProviderFactories,
+		CheckDestroy:      testAccCheckASV1GroupDestroy,
 		Steps: []resource.TestStep{
 			{
 				Config: testASV1Group_removeWithSetMinNumber,
@@ -75,9 +75,9 @@ func TestAccASV1Group_WithoutSecurityGroups(t *testing.T) {
 	resourceName := "opentelekomcloud_as_group_v1.proxy_group"
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:     func() { common.TestAccFlavorPreCheck(t) },
-		Providers:    common.TestAccProviders,
-		CheckDestroy: testAccCheckASV1GroupDestroy,
+		PreCheck:          func() { common.TestAccFlavorPreCheck(t) },
+		ProviderFactories: common.TestAccProviderFactories,
+		CheckDestroy:      testAccCheckASV1GroupDestroy,
 		Steps: []resource.TestStep{
 			{
 				Config: testASV1Group_withoutSGs,

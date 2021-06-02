@@ -20,9 +20,9 @@ func TestAccDmsQueuesV1_basic(t *testing.T) {
 	var queueName = fmt.Sprintf("dms_queue_%s", acctest.RandString(5))
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:     func() { common.TestAccPreCheck(t) },
-		Providers:    common.TestAccProviders,
-		CheckDestroy: testAccCheckDmsV1QueueDestroy,
+		PreCheck:          func() { common.TestAccPreCheck(t) },
+		ProviderFactories: common.TestAccProviderFactories,
+		CheckDestroy:      testAccCheckDmsV1QueueDestroy,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccDmsV1Queue_basic(queueName),
@@ -43,9 +43,9 @@ func TestAccDmsQueuesV1_FIFOmode(t *testing.T) {
 	var queueName = fmt.Sprintf("dms_queue_%s", acctest.RandString(5))
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:     func() { common.TestAccPreCheck(t) },
-		Providers:    common.TestAccProviders,
-		CheckDestroy: testAccCheckDmsV1QueueDestroy,
+		PreCheck:          func() { common.TestAccPreCheck(t) },
+		ProviderFactories: common.TestAccProviderFactories,
+		CheckDestroy:      testAccCheckDmsV1QueueDestroy,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccDmsV1Queue_FIFOmode(queueName),

@@ -19,8 +19,8 @@ func TestAccIdentityV3User_importBasic(t *testing.T) {
 			common.TestAccPreCheck(t)
 			common.TestAccPreCheckAdminOnly(t)
 		},
-		Providers:    common.TestAccProviders,
-		CheckDestroy: testAccCheckIdentityV3UserDestroy,
+		ProviderFactories: common.TestAccProviderFactories,
+		CheckDestroy:      testAccCheckIdentityV3UserDestroy,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccIdentityV3UserBasic(userName),

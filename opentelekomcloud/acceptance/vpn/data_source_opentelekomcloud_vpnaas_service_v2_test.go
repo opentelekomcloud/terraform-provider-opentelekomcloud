@@ -11,8 +11,8 @@ import (
 
 func TestAccVpnServiceV2DataSource_byId(t *testing.T) {
 	resource.Test(t, resource.TestCase{
-		PreCheck:  func() { common.TestAccPreCheck(t) },
-		Providers: common.TestAccProviders,
+		PreCheck:          func() { common.TestAccPreCheck(t) },
+		ProviderFactories: common.TestAccProviderFactories,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccDataSourceVpnServiceV2ConfigById,
@@ -29,8 +29,8 @@ func TestAccVpnServiceV2DataSource_byId(t *testing.T) {
 
 func TestAccVpnServiceV2DataSource_byName(t *testing.T) {
 	resource.Test(t, resource.TestCase{
-		PreCheck:  func() { common.TestAccPreCheck(t) },
-		Providers: common.TestAccProviders,
+		PreCheck:          func() { common.TestAccPreCheck(t) },
+		ProviderFactories: common.TestAccProviderFactories,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccDataSourceVpnServiceV2ConfigByName,

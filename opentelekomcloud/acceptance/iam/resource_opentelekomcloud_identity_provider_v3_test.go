@@ -24,8 +24,8 @@ func TestAccIdentityV3ProviderBasic(t *testing.T) {
 			common.TestAccPreCheck(t)
 			common.TestAccPreCheckAdminOnly(t)
 		},
-		Providers:    common.TestAccProviders,
-		CheckDestroy: testAccCheckIdentityV3ProviderDestroy,
+		ProviderFactories: common.TestAccProviderFactories,
+		CheckDestroy:      testAccCheckIdentityV3ProviderDestroy,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccIdentityV3ProviderBasic,

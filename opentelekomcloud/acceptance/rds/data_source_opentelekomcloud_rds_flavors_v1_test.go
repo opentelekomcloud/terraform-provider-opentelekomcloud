@@ -13,8 +13,8 @@ import (
 
 func TestAccOpenTelekomCloudRdsFlavorV1DataSource_basic(t *testing.T) {
 	resource.Test(t, resource.TestCase{
-		PreCheck:  func() { common.TestAccPreCheck(t) },
-		Providers: common.TestAccProviders,
+		PreCheck:          func() { common.TestAccPreCheck(t) },
+		ProviderFactories: common.TestAccProviderFactories,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccOpenTelekomCloudRdsFlavorV1DataSource_basic,
@@ -34,8 +34,8 @@ func TestAccOpenTelekomCloudRdsFlavorV1DataSource_basic(t *testing.T) {
 
 func TestAccOpenTelekomCloudRdsFlavorV1DataSource_speccode(t *testing.T) {
 	resource.Test(t, resource.TestCase{
-		PreCheck:  func() { common.TestAccPreCheck(t) },
-		Providers: common.TestAccProviders,
+		PreCheck:          func() { common.TestAccPreCheck(t) },
+		ProviderFactories: common.TestAccProviderFactories,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccOpenTelekomCloudRdsFlavorV1DataSource_speccode,

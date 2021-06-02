@@ -23,9 +23,9 @@ func TestAccComputeV2Instance_basic(t *testing.T) {
 	resourceName := "opentelekomcloud_compute_instance_v2.instance_1"
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:     func() { common.TestAccPreCheck(t) },
-		Providers:    common.TestAccProviders,
-		CheckDestroy: TestAccCheckComputeV2InstanceDestroy,
+		PreCheck:          func() { common.TestAccPreCheck(t) },
+		ProviderFactories: common.TestAccProviderFactories,
+		CheckDestroy:      TestAccCheckComputeV2InstanceDestroy,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccComputeV2Instance_basic,
@@ -58,9 +58,9 @@ func TestAccComputeV2Instance_multiSecgroup(t *testing.T) {
 	secGroupName2 := "opentelekomcloud_compute_secgroup_v2.secgroup_2"
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:     func() { common.TestAccPreCheck(t) },
-		Providers:    common.TestAccProviders,
-		CheckDestroy: TestAccCheckComputeV2InstanceDestroy,
+		PreCheck:          func() { common.TestAccPreCheck(t) },
+		ProviderFactories: common.TestAccProviderFactories,
+		CheckDestroy:      TestAccCheckComputeV2InstanceDestroy,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccComputeV2Instance_multiSecgroup,
@@ -87,9 +87,9 @@ func TestAccComputeV2Instance_bootFromImage(t *testing.T) {
 	resourceName := "opentelekomcloud_compute_instance_v2.instance_1"
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:     func() { common.TestAccPreCheck(t) },
-		Providers:    common.TestAccProviders,
-		CheckDestroy: TestAccCheckComputeV2InstanceDestroy,
+		PreCheck:          func() { common.TestAccPreCheck(t) },
+		ProviderFactories: common.TestAccProviderFactories,
+		CheckDestroy:      TestAccCheckComputeV2InstanceDestroy,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccComputeV2Instance_bootFromVolumeImage,
@@ -107,9 +107,9 @@ func TestAccComputeV2Instance_bootFromVolume(t *testing.T) {
 	resourceName := "opentelekomcloud_compute_instance_v2.instance_1"
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:     func() { common.TestAccPreCheck(t) },
-		Providers:    common.TestAccProviders,
-		CheckDestroy: TestAccCheckComputeV2InstanceDestroy,
+		PreCheck:          func() { common.TestAccPreCheck(t) },
+		ProviderFactories: common.TestAccProviderFactories,
+		CheckDestroy:      TestAccCheckComputeV2InstanceDestroy,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccComputeV2Instance_bootFromVolume,
@@ -125,9 +125,9 @@ func TestAccComputeV2Instance_changeFixedIP(t *testing.T) {
 	var instance servers.Server
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:     func() { common.TestAccPreCheck(t) },
-		Providers:    common.TestAccProviders,
-		CheckDestroy: TestAccCheckComputeV2InstanceDestroy,
+		PreCheck:          func() { common.TestAccPreCheck(t) },
+		ProviderFactories: common.TestAccProviderFactories,
+		CheckDestroy:      TestAccCheckComputeV2InstanceDestroy,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccComputeV2Instance_fixedIP,
@@ -145,9 +145,9 @@ func TestAccComputeV2Instance_bootFromVolumeVolume(t *testing.T) {
 	resourceName := "opentelekomcloud_compute_instance_v2.instance_1"
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:     func() { common.TestAccPreCheck(t) },
-		Providers:    common.TestAccProviders,
-		CheckDestroy: TestAccCheckComputeV2InstanceDestroy,
+		PreCheck:          func() { common.TestAccPreCheck(t) },
+		ProviderFactories: common.TestAccProviderFactories,
+		CheckDestroy:      TestAccCheckComputeV2InstanceDestroy,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccComputeV2Instance_bootFromVolumeVolume,
@@ -165,9 +165,9 @@ func TestAccComputeV2Instance_stopBeforeDestroy(t *testing.T) {
 	resourceName := "opentelekomcloud_compute_instance_v2.instance_1"
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:     func() { common.TestAccPreCheck(t) },
-		Providers:    common.TestAccProviders,
-		CheckDestroy: TestAccCheckComputeV2InstanceDestroy,
+		PreCheck:          func() { common.TestAccPreCheck(t) },
+		ProviderFactories: common.TestAccProviderFactories,
+		CheckDestroy:      TestAccCheckComputeV2InstanceDestroy,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccComputeV2Instance_stopBeforeDestroy,
@@ -184,9 +184,9 @@ func TestAccComputeV2Instance_metadata(t *testing.T) {
 	resourceName := "opentelekomcloud_compute_instance_v2.instance_1"
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:     func() { common.TestAccPreCheck(t) },
-		Providers:    common.TestAccProviders,
-		CheckDestroy: TestAccCheckComputeV2InstanceDestroy,
+		PreCheck:          func() { common.TestAccPreCheck(t) },
+		ProviderFactories: common.TestAccProviderFactories,
+		CheckDestroy:      TestAccCheckComputeV2InstanceDestroy,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccComputeV2Instance_metadata,
@@ -218,9 +218,9 @@ func TestAccComputeV2Instance_timeout(t *testing.T) {
 	resourceName := "opentelekomcloud_compute_instance_v2.instance_1"
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:     func() { common.TestAccPreCheck(t) },
-		Providers:    common.TestAccProviders,
-		CheckDestroy: TestAccCheckComputeV2InstanceDestroy,
+		PreCheck:          func() { common.TestAccPreCheck(t) },
+		ProviderFactories: common.TestAccProviderFactories,
+		CheckDestroy:      TestAccCheckComputeV2InstanceDestroy,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccComputeV2Instance_timeout,
@@ -237,9 +237,9 @@ func TestAccComputeV2Instance_autoRecovery(t *testing.T) {
 	resourceName := "opentelekomcloud_compute_instance_v2.instance_1"
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:     func() { common.TestAccPreCheck(t) },
-		Providers:    common.TestAccProviders,
-		CheckDestroy: TestAccCheckComputeV2InstanceDestroy,
+		PreCheck:          func() { common.TestAccPreCheck(t) },
+		ProviderFactories: common.TestAccProviderFactories,
+		CheckDestroy:      TestAccCheckComputeV2InstanceDestroy,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccComputeV2Instance_basic,
@@ -264,9 +264,9 @@ func TestAccComputeV2Instance_crazyNICs(t *testing.T) {
 	resourceName := "opentelekomcloud_compute_instance_v2.instance_1"
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:     func() { common.TestAccPreCheck(t) },
-		Providers:    common.TestAccProviders,
-		CheckDestroy: TestAccCheckComputeV2InstanceDestroy,
+		PreCheck:          func() { common.TestAccPreCheck(t) },
+		ProviderFactories: common.TestAccProviderFactories,
+		CheckDestroy:      TestAccCheckComputeV2InstanceDestroy,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccComputeV2Instance_crazyNICs,
@@ -285,8 +285,8 @@ func TestAccComputeV2Instance_initialStateActive(t *testing.T) {
 		PreCheck: func() {
 			common.TestAccPreCheck(t)
 		},
-		Providers:    common.TestAccProviders,
-		CheckDestroy: TestAccCheckComputeV2InstanceDestroy,
+		ProviderFactories: common.TestAccProviderFactories,
+		CheckDestroy:      TestAccCheckComputeV2InstanceDestroy,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccComputeV2Instance_active,
@@ -326,8 +326,8 @@ func TestAccComputeV2Instance_initialStateShutoff(t *testing.T) {
 		PreCheck: func() {
 			common.TestAccPreCheck(t)
 		},
-		Providers:    common.TestAccProviders,
-		CheckDestroy: TestAccCheckComputeV2InstanceDestroy,
+		ProviderFactories: common.TestAccProviderFactories,
+		CheckDestroy:      TestAccCheckComputeV2InstanceDestroy,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccComputeV2Instance_shutoff,

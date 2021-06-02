@@ -12,9 +12,9 @@ func TestAccComputeV2ServerGroup_importBasic(t *testing.T) {
 	resourceName := "opentelekomcloud_compute_servergroup_v2.sg_1"
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:     func() { common.TestAccPreCheck(t) },
-		Providers:    common.TestAccProviders,
-		CheckDestroy: testAccCheckComputeV2ServerGroupDestroy,
+		PreCheck:          func() { common.TestAccPreCheck(t) },
+		ProviderFactories: common.TestAccProviderFactories,
+		CheckDestroy:      testAccCheckComputeV2ServerGroupDestroy,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccComputeV2ServerGroup_basic,

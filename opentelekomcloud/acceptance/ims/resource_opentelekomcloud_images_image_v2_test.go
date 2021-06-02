@@ -18,9 +18,9 @@ func TestAccImagesImageV2_basic(t *testing.T) {
 	var image images.Image
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:     func() { common.TestAccPreCheck(t) },
-		Providers:    common.TestAccProviders,
-		CheckDestroy: testAccCheckImagesImageV2Destroy,
+		PreCheck:          func() { common.TestAccPreCheck(t) },
+		ProviderFactories: common.TestAccProviderFactories,
+		CheckDestroy:      testAccCheckImagesImageV2Destroy,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccImagesImageV2_basic,
@@ -44,9 +44,9 @@ func TestAccImagesImageV2_name(t *testing.T) {
 	var image images.Image
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:     func() { common.TestAccPreCheck(t) },
-		Providers:    common.TestAccProviders,
-		CheckDestroy: testAccCheckImagesImageV2Destroy,
+		PreCheck:          func() { common.TestAccPreCheck(t) },
+		ProviderFactories: common.TestAccProviderFactories,
+		CheckDestroy:      testAccCheckImagesImageV2Destroy,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccImagesImageV2_name_1,
@@ -72,9 +72,9 @@ func TestAccImagesImageV2_tags(t *testing.T) {
 	var image images.Image
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:     func() { common.TestAccPreCheck(t) },
-		Providers:    common.TestAccProviders,
-		CheckDestroy: testAccCheckImagesImageV2Destroy,
+		PreCheck:          func() { common.TestAccPreCheck(t) },
+		ProviderFactories: common.TestAccProviderFactories,
+		CheckDestroy:      testAccCheckImagesImageV2Destroy,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccImagesImageV2_tags_1,
@@ -116,8 +116,8 @@ func TestAccImagesImageV2_visibility(t *testing.T) {
 			common.TestAccPreCheck(t)
 			common.TestAccPreCheckAdminOnly(t)
 		},
-		Providers:    common.TestAccProviders,
-		CheckDestroy: testAccCheckImagesImageV2Destroy,
+		ProviderFactories: common.TestAccProviderFactories,
+		CheckDestroy:      testAccCheckImagesImageV2Destroy,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccImagesImageV2_visibility_1,
@@ -143,9 +143,9 @@ func TestAccImagesImageV2_timeout(t *testing.T) {
 	var image images.Image
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:     func() { common.TestAccPreCheck(t) },
-		Providers:    common.TestAccProviders,
-		CheckDestroy: testAccCheckImagesImageV2Destroy,
+		PreCheck:          func() { common.TestAccPreCheck(t) },
+		ProviderFactories: common.TestAccProviderFactories,
+		CheckDestroy:      testAccCheckImagesImageV2Destroy,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccImagesImageV2_timeout,

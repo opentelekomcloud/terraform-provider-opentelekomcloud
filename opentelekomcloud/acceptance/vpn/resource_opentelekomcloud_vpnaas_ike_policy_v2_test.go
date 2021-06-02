@@ -6,7 +6,7 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
-	"github.com/opentelekomcloud/gophertelekomcloud"
+	golangsdk "github.com/opentelekomcloud/gophertelekomcloud"
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/networking/v2/extensions/vpnaas/ikepolicies"
 
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/acceptance/common"
@@ -17,9 +17,9 @@ import (
 func TestAccVpnIKEPolicyV2_basic(t *testing.T) {
 	var policy ikepolicies.Policy
 	resource.Test(t, resource.TestCase{
-		PreCheck:     func() { common.TestAccPreCheck(t) },
-		Providers:    common.TestAccProviders,
-		CheckDestroy: testAccCheckIKEPolicyV2Destroy,
+		PreCheck:          func() { common.TestAccPreCheck(t) },
+		ProviderFactories: common.TestAccProviderFactories,
+		CheckDestroy:      testAccCheckIKEPolicyV2Destroy,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccIKEPolicyV2_basic,
@@ -44,9 +44,9 @@ func TestAccVpnIKEPolicyV2_basic(t *testing.T) {
 func TestAccVpnIKEPolicyV2_withLifetime(t *testing.T) {
 	var policy ikepolicies.Policy
 	resource.Test(t, resource.TestCase{
-		PreCheck:     func() { common.TestAccPreCheck(t) },
-		Providers:    common.TestAccProviders,
-		CheckDestroy: testAccCheckIKEPolicyV2Destroy,
+		PreCheck:          func() { common.TestAccPreCheck(t) },
+		ProviderFactories: common.TestAccProviderFactories,
+		CheckDestroy:      testAccCheckIKEPolicyV2Destroy,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccIKEPolicyV2_withLifetime,
@@ -69,9 +69,9 @@ func TestAccVpnIKEPolicyV2_withLifetime(t *testing.T) {
 func TestAccVpnIKEPolicyV2_withNewParams(t *testing.T) {
 	var policy ikepolicies.Policy
 	resource.Test(t, resource.TestCase{
-		PreCheck:     func() { common.TestAccPreCheck(t) },
-		Providers:    common.TestAccProviders,
-		CheckDestroy: testAccCheckIKEPolicyV2Destroy,
+		PreCheck:          func() { common.TestAccPreCheck(t) },
+		ProviderFactories: common.TestAccProviderFactories,
+		CheckDestroy:      testAccCheckIKEPolicyV2Destroy,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccIKEPolicyV2_withNewParams,

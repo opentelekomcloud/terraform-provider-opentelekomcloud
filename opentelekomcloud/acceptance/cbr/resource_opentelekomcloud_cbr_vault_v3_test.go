@@ -12,9 +12,9 @@ import (
 
 func TestAccCBRVaultV3_basic(t *testing.T) {
 	resource.Test(t, resource.TestCase{
-		PreCheck:     func() { common.TestAccFlavorPreCheck(t) },
-		Providers:    common.TestAccProviders,
-		CheckDestroy: testAccCheckCBRPolicyV3Destroy,
+		PreCheck:          func() { common.TestAccFlavorPreCheck(t) },
+		ProviderFactories: common.TestAccProviderFactories,
+		CheckDestroy:      testAccCheckCBRPolicyV3Destroy,
 		Steps: []resource.TestStep{
 			{
 				Config: testCBRVaultV3_basic,
@@ -43,9 +43,9 @@ func TestAccCBRVaultV3_basic(t *testing.T) {
 
 func TestAccCBRVaultV3_unassign(t *testing.T) {
 	resource.Test(t, resource.TestCase{
-		PreCheck:     func() { common.TestAccFlavorPreCheck(t) },
-		Providers:    common.TestAccProviders,
-		CheckDestroy: testAccCheckCBRPolicyV3Destroy,
+		PreCheck:          func() { common.TestAccFlavorPreCheck(t) },
+		ProviderFactories: common.TestAccProviderFactories,
+		CheckDestroy:      testAccCheckCBRPolicyV3Destroy,
 		Steps: []resource.TestStep{
 			{
 				Config: testCBRVaultV3_basic,
@@ -63,9 +63,9 @@ func TestAccCBRVaultV3_unassign(t *testing.T) {
 
 func TestAccCBRVaultV3_instance(t *testing.T) {
 	resource.Test(t, resource.TestCase{
-		PreCheck:     func() { common.TestAccFlavorPreCheck(t) },
-		Providers:    common.TestAccProviders,
-		CheckDestroy: testAccCheckCBRPolicyV3Destroy,
+		PreCheck:          func() { common.TestAccFlavorPreCheck(t) },
+		ProviderFactories: common.TestAccProviderFactories,
+		CheckDestroy:      testAccCheckCBRPolicyV3Destroy,
 		Steps: []resource.TestStep{
 			{
 				Config: testCBRVaultV3_basicInstance,

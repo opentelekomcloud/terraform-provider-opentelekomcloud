@@ -13,8 +13,8 @@ func TestAccIdentityV3Credential_importBasic(t *testing.T) {
 		PreCheck: func() {
 			common.TestAccPreCheck(t)
 		},
-		Providers:    common.TestAccProviders,
-		CheckDestroy: testAccCheckIdentityV3UserDestroy,
+		ProviderFactories: common.TestAccProviderFactories,
+		CheckDestroy:      testAccCheckIdentityV3UserDestroy,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccIdentityV3CredentialBasic,

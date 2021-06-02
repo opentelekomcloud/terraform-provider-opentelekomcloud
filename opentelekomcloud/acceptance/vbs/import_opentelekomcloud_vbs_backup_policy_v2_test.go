@@ -12,9 +12,9 @@ func TestAccVBSBackupPolicyV2_importBasic(t *testing.T) {
 	resourceName := "opentelekomcloud_vbs_backup_policy_v2.vbs"
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:     func() { common.TestAccPreCheckRequiredEnvVars(t) },
-		Providers:    common.TestAccProviders,
-		CheckDestroy: testAccVBSBackupPolicyV2Destroy,
+		PreCheck:          func() { common.TestAccPreCheckRequiredEnvVars(t) },
+		ProviderFactories: common.TestAccProviderFactories,
+		CheckDestroy:      testAccVBSBackupPolicyV2Destroy,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccVBSBackupPolicyV2_basic,

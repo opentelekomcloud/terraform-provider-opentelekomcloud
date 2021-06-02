@@ -12,8 +12,8 @@ import (
 
 func TestAccDmsMaintainWindowV1DataSource_basic(t *testing.T) {
 	resource.Test(t, resource.TestCase{
-		PreCheck:  func() { testAccPreCheckDms(t) },
-		Providers: common.TestAccProviders,
+		PreCheck:          func() { testAccPreCheckDms(t) },
+		ProviderFactories: common.TestAccProviderFactories,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccDmsMaintainWindowV1DataSource_basic,
