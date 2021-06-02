@@ -65,7 +65,7 @@ type Config struct {
 
 	DomainClient *golangsdk.ProviderClient
 
-	environment openstack.Env
+	environment *openstack.Env
 }
 
 func (c *Config) LoadAndValidate() error {
