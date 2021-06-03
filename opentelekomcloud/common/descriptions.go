@@ -53,4 +53,6 @@ var Descriptions = map[string]string{
 	"cloud": "An entry in a `clouds.yaml` file to use.",
 
 	"max_retries": "How many times HTTP connection should be retried until giving up.",
+
+	"passcode": "One-time MFA passcode",
 }

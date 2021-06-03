@@ -129,6 +129,12 @@ func Provider() terraform.ResourceProvider {
 				DefaultFunc: schema.EnvDefaultFunc("OS_SECURITY_TOKEN", ""),
 				Description: common.Descriptions["security_token"],
 			},
+			"passcode": {
+				Type:        schema.TypeString,
+				Optional:    true,
+				DefaultFunc: schema.EnvDefaultFunc("OS_PASSCODE", ""),
+				Description: common.Descriptions["passcode"],
+			},
 			"domain_id": {
 				Type:     schema.TypeString,
 				Optional: true,
@@ -438,6 +444,7 @@ func configureProvider(d *schema.ResourceData, terraformVersion string) (interfa
 		IdentityEndpoint: d.Get("auth_url").(string),
 		Insecure:         d.Get("insecure").(bool),
 		Password:         d.Get("password").(string),
+		Passcode:         d.Get("passcode").(string),
 		Region:           d.Get("region").(string),
 		Swauth:           d.Get("swauth").(bool),
 		Token:            d.Get("token").(string),
