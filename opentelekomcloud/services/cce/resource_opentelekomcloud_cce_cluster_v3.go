@@ -1,6 +1,7 @@
 package cce
 
 import (
+	"encoding/json"
 	"fmt"
 	"log"
 	"net/url"
@@ -318,6 +319,9 @@ func resourceCCEClusterV3Create(d *schema.ResourceData, meta interface{}) error 
 	create, err := clusters.Create(cceClient, createOpts).Extract()
 
 	if err != nil {
+		if isAuthRequired(err) {
+			err = fmt.Errorf("CCE is not authorized, see `cce_cluster_v3` documentation for details")
+		}
 		return fmt.Errorf("error creating opentelekomcloud Cluster: %s", err)
 	}
 
@@ -691,4 +695,22 @@ func waitForCCEClusterAddonsState(client *golangsdk.ServiceClient, clusterID str
 		}
 		return instances, "Deleted", nil
 	}
+}
+
+func isAuthRequired(err error) bool {
+	authRequiredRegex := regexp.MustCompile(`.+\sauthorize\sCCE.+`)
+
+	if err400, ok := err.(golangsdk.ErrDefault400); ok {
+		var body struct {
+			Message string `json:"message"`
+		}
+		if jsonErr := json.Unmarshal(err400.Body, &body); jsonErr != nil {
+			return false // return original error
+		}
+
+		if authRequiredRegex.MatchString(body.Message) {
+			return true
+		}
+	}
+	return false
 }
