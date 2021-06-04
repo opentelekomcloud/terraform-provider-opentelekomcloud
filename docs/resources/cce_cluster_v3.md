@@ -9,7 +9,7 @@ Provides a cluster resource management.
 ~>
   Before starting working with CCE, you need to authorize it via _console_ or [creating agency](#creating-agency).
   Otherwise, you will face the following error during cluster creation:
-  `Bad request with: [POST https://cce.eu-de.otc.t-systems.com/api/v3/projects/.../clusters], error message: {"error_code":"CCE_CM.0201","error_msg":"Request body invalid","message":"Need authorize CCE to operate user resources","errorCode":"E.CFE.4000201","reason":"Request body invalid"}`.
+  `CCE is not authorized, see `cce_cluster_v3` documentation for details`.
 
 ~>
   You need to authorize CCE for the default (`eu-de`) project for CCE to be able to pull SWR images.
