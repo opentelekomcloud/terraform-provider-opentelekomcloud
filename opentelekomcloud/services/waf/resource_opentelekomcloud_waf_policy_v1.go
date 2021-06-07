@@ -1,13 +1,14 @@
 package waf
 
 import (
-	"fmt"
+	"context"
 	"log"
 	"time"
 
+	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
-	"github.com/opentelekomcloud/gophertelekomcloud"
+	golangsdk "github.com/opentelekomcloud/gophertelekomcloud"
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/waf/v1/policies"
 
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common"
@@ -16,10 +17,10 @@ import (
 
 func ResourceWafPolicyV1() *schema.Resource {
 	return &schema.Resource{
-		Create: resourceWafPolicyV1Create,
-		Read:   resourceWafPolicyV1Read,
-		Update: resourceWafPolicyV1Update,
-		Delete: resourceWafPolicyV1Delete,
+		CreateContext: resourceWafPolicyV1Create,
+		ReadContext:   resourceWafPolicyV1Read,
+		UpdateContext: resourceWafPolicyV1Update,
+		DeleteContext: resourceWafPolicyV1Delete,
 		Importer: &schema.ResourceImporter{
 			State: schema.ImportStatePassthrough,
 		},
@@ -208,13 +209,13 @@ func getAction(d *schema.ResourceData) *policies.Action {
 	return action
 }
 
-func resourceWafPolicyV1Create(d *schema.ResourceData, meta interface{}) error {
+func resourceWafPolicyV1Create(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*cfg.Config)
 
 	wafClient, err := config.WafV1Client(config.GetRegion(d))
 
 	if err != nil {
-		return fmt.Errorf("Error creating OpenTelekomcomCloud WAF Client: %s", err)
+		return diag.Errorf("Error creating OpenTelekomcomCloud WAF Client: %s", err)
 	}
 
 	createOpts := policies.CreateOpts{
@@ -223,7 +224,7 @@ func resourceWafPolicyV1Create(d *schema.ResourceData, meta interface{}) error {
 
 	policy, err := policies.Create(wafClient, createOpts).Extract()
 	if err != nil {
-		return fmt.Errorf("Error creating OpenTelekomcomCloud WAF Policy: %s", err)
+		return diag.Errorf("Error creating OpenTelekomcomCloud WAF Policy: %s", err)
 	}
 
 	log.Printf("[DEBUG] Waf policy created: %#v", policy)
@@ -252,7 +253,7 @@ func resourceWafPolicyV1Create(d *schema.ResourceData, meta interface{}) error {
 	if updateOpts != (policies.UpdateOpts{}) {
 		_, err = policies.Update(wafClient, d.Id(), updateOpts).Extract()
 		if err != nil {
-			return fmt.Errorf("Error updating OpenTelekomCloud WAF Policy: %s", err)
+			return diag.Errorf("Error updating OpenTelekomCloud WAF Policy: %s", err)
 		}
 	}
 
@@ -267,19 +268,19 @@ func resourceWafPolicyV1Create(d *schema.ResourceData, meta interface{}) error {
 
 		_, err = policies.UpdateHosts(wafClient, d.Id(), updateHostsOpts).Extract()
 		if err != nil {
-			return fmt.Errorf("Error updating OpenTelekomCloud WAF Policy Hosts: %s", err)
+			return diag.Errorf("Error updating OpenTelekomCloud WAF Policy Hosts: %s", err)
 		}
 	}
 
-	return resourceWafPolicyV1Read(d, meta)
+	return resourceWafPolicyV1Read(ctx, d, meta)
 }
 
-func resourceWafPolicyV1Read(d *schema.ResourceData, meta interface{}) error {
+func resourceWafPolicyV1Read(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 
 	config := meta.(*cfg.Config)
 	wafClient, err := config.WafV1Client(config.GetRegion(d))
 	if err != nil {
-		return fmt.Errorf("Error creating OpenTelekomCloud WAF client: %s", err)
+		return diag.Errorf("Error creating OpenTelekomCloud WAF client: %s", err)
 	}
 	n, err := policies.Get(wafClient, d.Id()).Extract()
 
@@ -289,7 +290,7 @@ func resourceWafPolicyV1Read(d *schema.ResourceData, meta interface{}) error {
 			return nil
 		}
 
-		return fmt.Errorf("Error retrieving OpenTelekomCloud Waf Policy: %s", err)
+		return diag.Errorf("Error retrieving OpenTelekomCloud Waf Policy: %s", err)
 	}
 
 	d.SetId(n.Id)
@@ -327,11 +328,11 @@ func resourceWafPolicyV1Read(d *schema.ResourceData, meta interface{}) error {
 	return nil
 }
 
-func resourceWafPolicyV1Update(d *schema.ResourceData, meta interface{}) error {
+func resourceWafPolicyV1Update(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*cfg.Config)
 	wafClient, err := config.WafV1Client(config.GetRegion(d))
 	if err != nil {
-		return fmt.Errorf("Error creating OpenTelekomCloud WAF Client: %s", err)
+		return diag.Errorf("Error creating OpenTelekomCloud WAF Client: %s", err)
 	}
 	var updateOpts policies.UpdateOpts
 
@@ -359,7 +360,7 @@ func resourceWafPolicyV1Update(d *schema.ResourceData, meta interface{}) error {
 	if updateOpts != (policies.UpdateOpts{}) {
 		_, err = policies.Update(wafClient, d.Id(), updateOpts).Extract()
 		if err != nil {
-			return fmt.Errorf("Error updating OpenTelekomCloud WAF Policy: %s", err)
+			return diag.Errorf("Error updating OpenTelekomCloud WAF Policy: %s", err)
 		}
 	}
 
@@ -374,17 +375,17 @@ func resourceWafPolicyV1Update(d *schema.ResourceData, meta interface{}) error {
 
 		_, err = policies.UpdateHosts(wafClient, d.Id(), updateHostsOpts).Extract()
 		if err != nil {
-			return fmt.Errorf("Error updating OpenTelekomCloud WAF Policy Hosts: %s", err)
+			return diag.Errorf("Error updating OpenTelekomCloud WAF Policy Hosts: %s", err)
 		}
 	}
-	return resourceWafPolicyV1Read(d, meta)
+	return resourceWafPolicyV1Read(ctx, d, meta)
 }
 
-func resourceWafPolicyV1Delete(d *schema.ResourceData, meta interface{}) error {
+func resourceWafPolicyV1Delete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*cfg.Config)
 	wafClient, err := config.WafV1Client(config.GetRegion(d))
 	if err != nil {
-		return fmt.Errorf("Error creating OpenTelekomCloud WAF client: %s", err)
+		return diag.Errorf("Error creating OpenTelekomCloud WAF client: %s", err)
 	}
 
 	if hosts, ok := d.GetOk("hosts"); ok {
@@ -398,12 +399,12 @@ func resourceWafPolicyV1Delete(d *schema.ResourceData, meta interface{}) error {
 				d.SetId("")
 				return nil
 			}
-			return fmt.Errorf("Error updating OpenTelekomCloud WAF Policy Hosts: %s", err)
+			return diag.Errorf("Error updating OpenTelekomCloud WAF Policy Hosts: %s", err)
 		}
 	}
 	err = policies.Delete(wafClient, d.Id()).ExtractErr()
 	if err != nil {
-		return fmt.Errorf("Error deleting OpenTelekomCloud WAF Policy: %s", err)
+		return diag.Errorf("Error deleting OpenTelekomCloud WAF Policy: %s", err)
 	}
 
 	d.SetId("")

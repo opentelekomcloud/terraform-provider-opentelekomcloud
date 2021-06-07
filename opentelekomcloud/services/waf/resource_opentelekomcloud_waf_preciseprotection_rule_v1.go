@@ -1,13 +1,14 @@
 package waf
 
 import (
-	"fmt"
+	"context"
 	"log"
 	"strconv"
 	"time"
 
+	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
-	"github.com/opentelekomcloud/gophertelekomcloud"
+	golangsdk "github.com/opentelekomcloud/gophertelekomcloud"
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/waf/v1/preciseprotection_rules"
 
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common/cfg"
@@ -15,9 +16,9 @@ import (
 
 func ResourceWafPreciseProtectionRuleV1() *schema.Resource {
 	return &schema.Resource{
-		Create: resourceWafPreciseProtectionRuleV1Create,
-		Read:   resourceWafPreciseProtectionRuleV1Read,
-		Delete: resourceWafPreciseProtectionRuleV1Delete,
+		CreateContext: resourceWafPreciseProtectionRuleV1Create,
+		ReadContext:   resourceWafPreciseProtectionRuleV1Read,
+		DeleteContext: resourceWafPreciseProtectionRuleV1Delete,
 		Importer: &schema.ResourceImporter{
 			State: schema.ImportStatePassthrough,
 		},
@@ -136,13 +137,13 @@ func getPreciseAction(d *schema.ResourceData) preciseprotection_rules.Action {
 	return action
 }
 
-func resourceWafPreciseProtectionRuleV1Create(d *schema.ResourceData, meta interface{}) error {
+func resourceWafPreciseProtectionRuleV1Create(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*cfg.Config)
 
 	wafClient, err := config.WafV1Client(config.GetRegion(d))
 
 	if err != nil {
-		return fmt.Errorf("Error creating OpenTelekomcomCloud WAF Client: %s", err)
+		return diag.Errorf("Error creating OpenTelekomcomCloud WAF Client: %s", err)
 	}
 	priority := d.Get("priority").(int)
 	createOpts := preciseprotection_rules.CreateOpts{
@@ -156,14 +157,14 @@ func resourceWafPreciseProtectionRuleV1Create(d *schema.ResourceData, meta inter
 	if _, ok := d.GetOk("start"); ok {
 		start, err := strconv.ParseInt(d.Get("start").(string), 10, 64)
 		if err != nil {
-			return fmt.Errorf("Error converting start: %s", err)
+			return diag.Errorf("Error converting start: %s", err)
 		}
 		createOpts.Start = start
 	}
 	if _, ok := d.GetOk("cache_control"); ok {
 		end, err := strconv.ParseInt(d.Get("end").(string), 10, 64)
 		if err != nil {
-			return fmt.Errorf("Error converting end: %s", err)
+			return diag.Errorf("Error converting end: %s", err)
 		}
 		createOpts.End = end
 	}
@@ -171,20 +172,20 @@ func resourceWafPreciseProtectionRuleV1Create(d *schema.ResourceData, meta inter
 	policy_id := d.Get("policy_id").(string)
 	rule, err := preciseprotection_rules.Create(wafClient, policy_id, createOpts).Extract()
 	if err != nil {
-		return fmt.Errorf("Error creating OpenTelekomcomCloud WAF Precise Protection Rule: %s", err)
+		return diag.Errorf("Error creating OpenTelekomcomCloud WAF Precise Protection Rule: %s", err)
 	}
 
 	log.Printf("[DEBUG] Waf precise protection rule created: %#v", rule)
 	d.SetId(rule.Id)
 
-	return resourceWafPreciseProtectionRuleV1Read(d, meta)
+	return resourceWafPreciseProtectionRuleV1Read(ctx, d, meta)
 }
 
-func resourceWafPreciseProtectionRuleV1Read(d *schema.ResourceData, meta interface{}) error {
+func resourceWafPreciseProtectionRuleV1Read(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*cfg.Config)
 	wafClient, err := config.WafV1Client(config.GetRegion(d))
 	if err != nil {
-		return fmt.Errorf("Error creating OpenTelekomCloud WAF client: %s", err)
+		return diag.Errorf("Error creating OpenTelekomCloud WAF client: %s", err)
 	}
 	policy_id := d.Get("policy_id").(string)
 	n, err := preciseprotection_rules.Get(wafClient, policy_id, d.Id()).Extract()
@@ -195,7 +196,7 @@ func resourceWafPreciseProtectionRuleV1Read(d *schema.ResourceData, meta interfa
 			return nil
 		}
 
-		return fmt.Errorf("Error retrieving OpenTelekomCloud Waf Precise Protection Rule: %s", err)
+		return diag.Errorf("Error retrieving OpenTelekomCloud Waf Precise Protection Rule: %s", err)
 	}
 
 	d.SetId(n.Id)
@@ -220,17 +221,17 @@ func resourceWafPreciseProtectionRuleV1Read(d *schema.ResourceData, meta interfa
 	return nil
 }
 
-func resourceWafPreciseProtectionRuleV1Delete(d *schema.ResourceData, meta interface{}) error {
+func resourceWafPreciseProtectionRuleV1Delete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*cfg.Config)
 	wafClient, err := config.WafV1Client(config.GetRegion(d))
 	if err != nil {
-		return fmt.Errorf("Error creating OpenTelekomCloud WAF client: %s", err)
+		return diag.Errorf("Error creating OpenTelekomCloud WAF client: %s", err)
 	}
 
 	policy_id := d.Get("policy_id").(string)
 	err = preciseprotection_rules.Delete(wafClient, policy_id, d.Id()).ExtractErr()
 	if err != nil {
-		return fmt.Errorf("Error deleting OpenTelekomCloud WAF Precise Protection Rule: %s", err)
+		return diag.Errorf("Error deleting OpenTelekomCloud WAF Precise Protection Rule: %s", err)
 	}
 
 	d.SetId("")
