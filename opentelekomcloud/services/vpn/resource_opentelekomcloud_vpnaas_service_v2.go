@@ -1,13 +1,15 @@
 package vpn
 
 import (
+	"context"
 	"fmt"
 	"log"
 	"time"
 
+	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
-	"github.com/opentelekomcloud/gophertelekomcloud"
+	golangsdk "github.com/opentelekomcloud/gophertelekomcloud"
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/networking/v2/extensions/vpnaas/services"
 
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common"
@@ -16,10 +18,10 @@ import (
 
 func ResourceVpnServiceV2() *schema.Resource {
 	return &schema.Resource{
-		Create: resourceVpnServiceV2Create,
-		Read:   resourceVpnServiceV2Read,
-		Update: resourceVpnServiceV2Update,
-		Delete: resourceVpnServiceV2Delete,
+		CreateContext: resourceVpnServiceV2Create,
+		ReadContext:   resourceVpnServiceV2Read,
+		UpdateContext: resourceVpnServiceV2Update,
+		DeleteContext: resourceVpnServiceV2Delete,
 		Importer: &schema.ResourceImporter{
 			State: schema.ImportStatePassthrough,
 		},
@@ -88,12 +90,12 @@ func ResourceVpnServiceV2() *schema.Resource {
 	}
 }
 
-func resourceVpnServiceV2Create(d *schema.ResourceData, meta interface{}) error {
+func resourceVpnServiceV2Create(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 
 	config := meta.(*cfg.Config)
 	networkingClient, err := config.NetworkingV2Client(config.GetRegion(d))
 	if err != nil {
-		return fmt.Errorf("Error creating OpenTelekomCloud networking client: %s", err)
+		return diag.Errorf("Error creating OpenTelekomCloud networking client: %s", err)
 	}
 
 	var createOpts services.CreateOptsBuilder
@@ -115,7 +117,7 @@ func resourceVpnServiceV2Create(d *schema.ResourceData, meta interface{}) error 
 
 	service, err := services.Create(networkingClient, createOpts).Extract()
 	if err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 
 	stateConf := &resource.StateChangeConf{
@@ -129,28 +131,28 @@ func resourceVpnServiceV2Create(d *schema.ResourceData, meta interface{}) error 
 	_, err = stateConf.WaitForState()
 
 	if err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 
 	log.Printf("[DEBUG] Service created: %#v", service)
 
 	d.SetId(service.ID)
 
-	return resourceVpnServiceV2Read(d, meta)
+	return resourceVpnServiceV2Read(ctx, d, meta)
 }
 
-func resourceVpnServiceV2Read(d *schema.ResourceData, meta interface{}) error {
+func resourceVpnServiceV2Read(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	log.Printf("[DEBUG] Retrieve information about service: %s", d.Id())
 
 	config := meta.(*cfg.Config)
 	networkingClient, err := config.NetworkingV2Client(config.GetRegion(d))
 	if err != nil {
-		return fmt.Errorf("Error creating OpenTelekomCloud networking client: %s", err)
+		return diag.Errorf("Error creating OpenTelekomCloud networking client: %s", err)
 	}
 
 	service, err := services.Get(networkingClient, d.Id()).Extract()
 	if err != nil {
-		return common.CheckDeleted(d, err, "service")
+		return diag.FromErr(common.CheckDeleted(d, err, "service"))
 	}
 
 	log.Printf("[DEBUG] Read OpenTelekomCloud Service %s: %#v", d.Id(), service)
@@ -169,12 +171,11 @@ func resourceVpnServiceV2Read(d *schema.ResourceData, meta interface{}) error {
 	return nil
 }
 
-func resourceVpnServiceV2Update(d *schema.ResourceData, meta interface{}) error {
-
+func resourceVpnServiceV2Update(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*cfg.Config)
 	networkingClient, err := config.NetworkingV2Client(config.GetRegion(d))
 	if err != nil {
-		return fmt.Errorf("Error creating OpenTelekomCloud networking client: %s", err)
+		return diag.Errorf("Error creating OpenTelekomCloud networking client: %s", err)
 	}
 
 	opts := services.UpdateOpts{}
@@ -207,7 +208,7 @@ func resourceVpnServiceV2Update(d *schema.ResourceData, meta interface{}) error 
 	if hasChange {
 		service, err := services.Update(networkingClient, d.Id(), updateOpts).Extract()
 		if err != nil {
-			return err
+			return diag.FromErr(err)
 		}
 		stateConf := &resource.StateChangeConf{
 			Pending:    []string{"PENDING_UPDATE"},
@@ -220,28 +221,28 @@ func resourceVpnServiceV2Update(d *schema.ResourceData, meta interface{}) error 
 		_, err = stateConf.WaitForState()
 
 		if err != nil {
-			return err
+			return diag.FromErr(err)
 		}
 
 		log.Printf("[DEBUG] Updated service with id %s", d.Id())
 	}
 
-	return resourceVpnServiceV2Read(d, meta)
+	return resourceVpnServiceV2Read(ctx, d, meta)
 }
 
-func resourceVpnServiceV2Delete(d *schema.ResourceData, meta interface{}) error {
+func resourceVpnServiceV2Delete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	log.Printf("[DEBUG] Destroy service: %s", d.Id())
 
 	config := meta.(*cfg.Config)
 	networkingClient, err := config.NetworkingV2Client(config.GetRegion(d))
 	if err != nil {
-		return fmt.Errorf("Error creating OpenTelekomCloud networking client: %s", err)
+		return diag.Errorf("Error creating OpenTelekomCloud networking client: %s", err)
 	}
 
 	err = services.Delete(networkingClient, d.Id()).Err
 
 	if err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 
 	stateConf := &resource.StateChangeConf{
@@ -255,11 +256,10 @@ func resourceVpnServiceV2Delete(d *schema.ResourceData, meta interface{}) error 
 
 	_, err = stateConf.WaitForState()
 
-	return err
+	return diag.FromErr(err)
 }
 
 func waitForServiceDeletion(networkingClient *golangsdk.ServiceClient, id string) resource.StateRefreshFunc {
-
 	return func() (interface{}, string, error) {
 		serv, err := services.Get(networkingClient, id).Extract()
 		log.Printf("[DEBUG] Got service %s => %#v", id, serv)
