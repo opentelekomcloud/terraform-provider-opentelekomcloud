@@ -1,11 +1,13 @@
 package vbs
 
 import (
+	"context"
 	"fmt"
 	"log"
 	"time"
 
 	"github.com/hashicorp/go-multierror"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/opentelekomcloud/gophertelekomcloud"
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/vbs/v2/policies"
@@ -17,10 +19,10 @@ import (
 
 func ResourceVBSBackupPolicyV2() *schema.Resource {
 	return &schema.Resource{
-		Create: resourceVBSBackupPolicyV2Create,
-		Read:   resourceVBSBackupPolicyV2Read,
-		Update: resourceVBSBackupPolicyV2Update,
-		Delete: resourceVBSBackupPolicyV2Delete,
+		CreateContext: resourceVBSBackupPolicyV2Create,
+		ReadContext:   resourceVBSBackupPolicyV2Read,
+		UpdateContext: resourceVBSBackupPolicyV2Update,
+		DeleteContext: resourceVBSBackupPolicyV2Delete,
 		Importer: &schema.ResourceImporter{
 			State: schema.ImportStatePassthrough,
 		},
@@ -115,29 +117,29 @@ func ResourceVBSBackupPolicyV2() *schema.Resource {
 	}
 }
 
-func resourceVBSBackupPolicyV2Create(d *schema.ResourceData, meta interface{}) error {
+func resourceVBSBackupPolicyV2Create(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*cfg.Config)
 	vbsClient, err := config.VbsV2Client(config.GetRegion(d))
 
 	if err != nil {
-		return fmt.Errorf("error creating OpenTelekomCloud VBS Client: %s", err)
+		return diag.Errorf("error creating OpenTelekomCloud VBS Client: %s", err)
 	}
 
 	_, isExist1 := d.GetOk("frequency")
 	_, isExist2 := d.GetOk("week_frequency")
 	if !isExist1 && !isExist2 {
-		return fmt.Errorf("either frequency or week_frequency must be specified")
+		return diag.Errorf("either frequency or week_frequency must be specified")
 	}
 
 	_, isExist1 = d.GetOk("rentention_num")
 	_, isExist2 = d.GetOk("rentention_day")
 	if !isExist1 && !isExist2 {
-		return fmt.Errorf("either rentention_num or rentention_day must be specified")
+		return diag.Errorf("either rentention_num or rentention_day must be specified")
 	}
 
 	weeks, err := buildWeekFrequencyResource(d)
 	if err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 
 	createOpts := policies.CreateOpts{
@@ -157,7 +159,7 @@ func resourceVBSBackupPolicyV2Create(d *schema.ResourceData, meta interface{}) e
 	create, err := policies.Create(vbsClient, createOpts).Extract()
 
 	if err != nil {
-		return fmt.Errorf("error creating OpenTelekomCloud Backup Policy: %s", err)
+		return diag.Errorf("error creating OpenTelekomCloud Backup Policy: %s", err)
 	}
 	d.SetId(create.ID)
 
@@ -171,21 +173,21 @@ func resourceVBSBackupPolicyV2Create(d *schema.ResourceData, meta interface{}) e
 
 		_, err := policies.Associate(vbsClient, opts).ExtractResource()
 		if err != nil {
-			return fmt.Errorf("error associate volumes to VBS backup policy %s: %s",
+			return diag.Errorf("error associate volumes to VBS backup policy %s: %s",
 				d.Id(), err)
 		}
 	}
 
-	return resourceVBSBackupPolicyV2Read(d, meta)
+	return resourceVBSBackupPolicyV2Read(ctx, d, meta)
 
 }
 
-func resourceVBSBackupPolicyV2Read(d *schema.ResourceData, meta interface{}) error {
+func resourceVBSBackupPolicyV2Read(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 
 	config := meta.(*cfg.Config)
 	vbsClient, err := config.VbsV2Client(config.GetRegion(d))
 	if err != nil {
-		return fmt.Errorf("error creating OpenTelekomCloud VBS Client: %s", err)
+		return diag.Errorf("error creating OpenTelekomCloud VBS Client: %s", err)
 	}
 
 	PolicyOpts := policies.ListOpts{ID: d.Id()}
@@ -196,7 +198,7 @@ func resourceVBSBackupPolicyV2Read(d *schema.ResourceData, meta interface{}) err
 			return nil
 		}
 
-		return fmt.Errorf("error retrieving OpenTelekomCloud Backup Policy: %s", err)
+		return diag.Errorf("error retrieving OpenTelekomCloud Backup Policy: %s", err)
 	}
 
 	if len(policyList) == 0 {
@@ -218,7 +220,7 @@ func resourceVBSBackupPolicyV2Read(d *schema.ResourceData, meta interface{}) err
 		d.Set("policy_resource_count", policy.ResourceCount),
 	)
 	if mErr.ErrorOrNil() != nil {
-		return fmt.Errorf("error setting policy fields: %s", mErr)
+		return diag.Errorf("error setting policy fields: %s", mErr)
 	}
 
 	tags, err := vbsTags.Get(vbsClient, d.Id()).Extract()
@@ -227,7 +229,7 @@ func resourceVBSBackupPolicyV2Read(d *schema.ResourceData, meta interface{}) err
 		if _, ok := err.(golangsdk.ErrDefault404); ok {
 			return nil
 		}
-		return fmt.Errorf("error retrieving OpenTelekomCloud Backup Policy Tags: %s", err)
+		return diag.Errorf("error retrieving OpenTelekomCloud Backup Policy Tags: %s", err)
 	}
 	var tagList []map[string]interface{}
 	for _, v := range tags.Tags {
@@ -238,34 +240,34 @@ func resourceVBSBackupPolicyV2Read(d *schema.ResourceData, meta interface{}) err
 		tagList = append(tagList, tag)
 	}
 	if err := d.Set("tags", tagList); err != nil {
-		return fmt.Errorf("[DEBUG] Error saving tags to state for OpenTelekomCloud backup policy (%s): %s", d.Id(), err)
+		return diag.Errorf("[DEBUG] Error saving tags to state for OpenTelekomCloud backup policy (%s): %s", d.Id(), err)
 	}
 	return nil
 }
 
-func resourceVBSBackupPolicyV2Update(d *schema.ResourceData, meta interface{}) error {
+func resourceVBSBackupPolicyV2Update(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*cfg.Config)
 	vbsClient, err := config.VbsV2Client(config.GetRegion(d))
 	if err != nil {
-		return fmt.Errorf("error updating OpenTelekomCloud VBS client: %s", err)
+		return diag.Errorf("error updating OpenTelekomCloud VBS client: %s", err)
 	}
 
 	_, isExist1 := d.GetOk("frequency")
 	_, isExist2 := d.GetOk("week_frequency")
 	if !isExist1 && !isExist2 {
-		return fmt.Errorf("either frequency or week_frequency must be specified")
+		return diag.Errorf("either frequency or week_frequency must be specified")
 	}
 
 	_, isExist1 = d.GetOk("rentention_num")
 	_, isExist2 = d.GetOk("rentention_day")
 	if !isExist1 && !isExist2 {
-		return fmt.Errorf("either rentention_num or rentention_day must be specified")
+		return diag.Errorf("either rentention_num or rentention_day must be specified")
 	}
 
 	frequency := d.Get("frequency").(int)
 	weeks, err := buildWeekFrequencyResource(d)
 	if err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 
 	var updateOpts policies.UpdateOpts
@@ -299,7 +301,7 @@ func resourceVBSBackupPolicyV2Update(d *schema.ResourceData, meta interface{}) e
 
 		_, err = policies.Update(vbsClient, d.Id(), updateOpts).Extract()
 		if err != nil {
-			return fmt.Errorf("error updating OpenTelekomCloud backup policy: %s", err)
+			return diag.Errorf("error updating OpenTelekomCloud backup policy: %s", err)
 		}
 	}
 	if d.HasChange("tags") {
@@ -307,12 +309,12 @@ func resourceVBSBackupPolicyV2Update(d *schema.ResourceData, meta interface{}) e
 		deleteopts := vbsTags.BatchOpts{Action: vbsTags.ActionDelete, Tags: oldTags.Tags}
 		deleteTags := vbsTags.BatchAction(vbsClient, d.Id(), deleteopts)
 		if deleteTags.Err != nil {
-			return fmt.Errorf("error updating OpenTelekomCloud backup policy tags: %s", deleteTags.Err)
+			return diag.Errorf("error updating OpenTelekomCloud backup policy tags: %s", deleteTags.Err)
 		}
 
 		createTags := vbsTags.BatchAction(vbsClient, d.Id(), vbsTags.BatchOpts{Action: vbsTags.ActionCreate, Tags: resourceVBSUpdateTagsV2(d)})
 		if createTags.Err != nil {
-			return fmt.Errorf("error updating OpenTelekomCloud backup policy tags: %s", createTags.Err)
+			return diag.Errorf("error updating OpenTelekomCloud backup policy tags: %s", createTags.Err)
 		}
 	}
 
@@ -328,7 +330,7 @@ func resourceVBSBackupPolicyV2Update(d *schema.ResourceData, meta interface{}) e
 
 			_, err := policies.Disassociate(vbsClient, d.Id(), opts).ExtractResource()
 			if err != nil {
-				return fmt.Errorf("error disassociate volumes from VBS backup policy %s: %s",
+				return diag.Errorf("error disassociate volumes from VBS backup policy %s: %s",
 					d.Id(), err)
 			}
 		}
@@ -343,20 +345,20 @@ func resourceVBSBackupPolicyV2Update(d *schema.ResourceData, meta interface{}) e
 
 			_, err := policies.Associate(vbsClient, opts).ExtractResource()
 			if err != nil {
-				return fmt.Errorf("error associate volumes to VBS backup policy %s: %s",
+				return diag.Errorf("error associate volumes to VBS backup policy %s: %s",
 					d.Id(), err)
 			}
 		}
 	}
 
-	return resourceVBSBackupPolicyV2Read(d, meta)
+	return resourceVBSBackupPolicyV2Read(ctx, d, meta)
 }
 
-func resourceVBSBackupPolicyV2Delete(d *schema.ResourceData, meta interface{}) error {
+func resourceVBSBackupPolicyV2Delete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*cfg.Config)
 	vbsClient, err := config.VbsV2Client(config.GetRegion(d))
 	if err != nil {
-		return fmt.Errorf("error creating OpenTelekomCloud VBS client: %s", err)
+		return diag.Errorf("error creating OpenTelekomCloud VBS client: %s", err)
 	}
 
 	err = policies.Delete(vbsClient, d.Id()).Err

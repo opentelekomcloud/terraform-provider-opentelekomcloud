@@ -1,9 +1,10 @@
 package vbs
 
 import (
-	"fmt"
+	"context"
 	"log"
 
+	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/vbs/v2/backups"
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/vbs/v2/shares"
@@ -13,7 +14,7 @@ import (
 
 func DataSourceVBSBackupV2() *schema.Resource {
 	return &schema.Resource{
-		Read: dataSourceVBSBackupV2Read,
+		ReadContext: dataSourceVBSBackupV2Read,
 
 		Schema: map[string]*schema.Schema{
 			"region": {
@@ -78,7 +79,7 @@ func DataSourceVBSBackupV2() *schema.Resource {
 	}
 }
 
-func dataSourceVBSBackupV2Read(d *schema.ResourceData, meta interface{}) error {
+func dataSourceVBSBackupV2Read(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*cfg.Config)
 	vbsClient, err := config.VbsV2Client(config.GetRegion(d))
 
@@ -92,16 +93,16 @@ func dataSourceVBSBackupV2Read(d *schema.ResourceData, meta interface{}) error {
 
 	refinedBackups, err := backups.List(vbsClient, listBackupOpts)
 	if err != nil {
-		return fmt.Errorf("Unable to retrieve backups: %s", err)
+		return diag.Errorf("Unable to retrieve backups: %s", err)
 	}
 
 	if len(refinedBackups) < 1 {
-		return fmt.Errorf("Your query returned no results. " +
+		return diag.Errorf("Your query returned no results. " +
 			"Please change your search criteria and try again.")
 	}
 
 	if len(refinedBackups) > 1 {
-		return fmt.Errorf("Your query returned more than one result." +
+		return diag.Errorf("Your query returned more than one result." +
 			" Please try a more specific search criteria")
 	}
 
@@ -127,7 +128,7 @@ func dataSourceVBSBackupV2Read(d *schema.ResourceData, meta interface{}) error {
 
 	shares, err := shares.List(vbsClient, listShareOpts)
 	if err != nil {
-		return fmt.Errorf("Unable to retrieve shares: %s", err)
+		return diag.Errorf("Unable to retrieve shares: %s", err)
 	}
 
 	d.Set("to_project_ids", resourceToProjectIdsV2(shares))
