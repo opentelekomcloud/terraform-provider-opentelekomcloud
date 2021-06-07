@@ -1,10 +1,11 @@
 package antiddos
 
 import (
-	"fmt"
+	"context"
 	"log"
 	"time"
 
+	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/antiddos/v1/antiddos"
 
@@ -17,10 +18,10 @@ import (
 
 func ResourceAntiDdosV1() *schema.Resource {
 	return &schema.Resource{
-		Create: resourceAntiDdosV1Create,
-		Read:   resourceAntiDdosV1Read,
-		Update: resourceAntiDdosV1Update,
-		Delete: resourceAntiDdosV1Delete,
+		CreateContext: resourceAntiDdosV1Create,
+		ReadContext:   resourceAntiDdosV1Read,
+		UpdateContext: resourceAntiDdosV1Update,
+		DeleteContext: resourceAntiDdosV1Delete,
 		Importer: &schema.ResourceImporter{
 			State: schema.ImportStatePassthrough,
 		},
@@ -70,12 +71,12 @@ func ResourceAntiDdosV1() *schema.Resource {
 	}
 }
 
-func resourceAntiDdosV1Create(d *schema.ResourceData, meta interface{}) error {
+func resourceAntiDdosV1Create(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*cfg.Config)
 
 	antiddosClient, err := config.AntiddosV1Client(config.GetRegion(d))
 	if err != nil {
-		return fmt.Errorf("error creating AntiDdos client: %s", err)
+		return diag.Errorf("error creating AntiDdos client: %s", err)
 	}
 
 	createOpts := antiddos.CreateOpts{
@@ -89,7 +90,7 @@ func resourceAntiDdosV1Create(d *schema.ResourceData, meta interface{}) error {
 	_, err = antiddos.Create(antiddosClient, d.Get("floating_ip_id").(string), createOpts).Extract()
 
 	if err != nil {
-		return fmt.Errorf("error creating AntiDdos: %s", err)
+		return diag.Errorf("error creating AntiDdos: %s", err)
 	}
 
 	d.SetId(d.Get("floating_ip_id").(string))
@@ -107,17 +108,17 @@ func resourceAntiDdosV1Create(d *schema.ResourceData, meta interface{}) error {
 
 	_, stateErr := stateConf.WaitForState()
 	if stateErr != nil {
-		return fmt.Errorf("error waiting for AntiDdos (%s) to become normal: %s", d.Id(), stateErr)
+		return diag.Errorf("error waiting for AntiDdos (%s) to become normal: %s", d.Id(), stateErr)
 	}
 
-	return resourceAntiDdosV1Read(d, meta)
+	return resourceAntiDdosV1Read(ctx, d, meta)
 }
 
-func resourceAntiDdosV1Read(d *schema.ResourceData, meta interface{}) error {
+func resourceAntiDdosV1Read(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*cfg.Config)
 	antiddosClient, err := config.AntiddosV1Client(config.GetRegion(d))
 	if err != nil {
-		return fmt.Errorf("error creating AntiDdos client: %s", err)
+		return diag.Errorf("error creating AntiDdos client: %s", err)
 	}
 
 	n, err := antiddos.Get(antiddosClient, d.Id()).Extract()
@@ -127,7 +128,7 @@ func resourceAntiDdosV1Read(d *schema.ResourceData, meta interface{}) error {
 			return nil
 		}
 
-		return fmt.Errorf("error retrieving AntiDdos: %s", err)
+		return diag.Errorf("error retrieving AntiDdos: %s", err)
 	}
 
 	d.Set("floating_ip_id", d.Id())
@@ -141,11 +142,11 @@ func resourceAntiDdosV1Read(d *schema.ResourceData, meta interface{}) error {
 	return nil
 }
 
-func resourceAntiDdosV1Update(d *schema.ResourceData, meta interface{}) error {
+func resourceAntiDdosV1Update(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*cfg.Config)
 	antiddosClient, err := config.AntiddosV1Client(config.GetRegion(d))
 	if err != nil {
-		return fmt.Errorf("error creating AntiDdos client: %s", err)
+		return diag.Errorf("error creating AntiDdos client: %s", err)
 	}
 
 	var updateOpts antiddos.UpdateOpts
@@ -158,7 +159,7 @@ func resourceAntiDdosV1Update(d *schema.ResourceData, meta interface{}) error {
 
 	_, err = antiddos.Update(antiddosClient, d.Id(), updateOpts).Extract()
 	if err != nil {
-		return fmt.Errorf("error updating AntiDdos: %s", err)
+		return diag.Errorf("error updating AntiDdos: %s", err)
 	}
 
 	stateConf := &resource.StateChangeConf{
@@ -172,17 +173,17 @@ func resourceAntiDdosV1Update(d *schema.ResourceData, meta interface{}) error {
 
 	_, stateErr := stateConf.WaitForState()
 	if stateErr != nil {
-		return fmt.Errorf("error waiting for AntiDdos to become normal: %s", stateErr)
+		return diag.Errorf("error waiting for AntiDdos to become normal: %s", stateErr)
 	}
 
-	return resourceAntiDdosV1Read(d, meta)
+	return resourceAntiDdosV1Read(ctx, d, meta)
 }
 
-func resourceAntiDdosV1Delete(d *schema.ResourceData, meta interface{}) error {
+func resourceAntiDdosV1Delete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*cfg.Config)
 	antiddosClient, err := config.AntiddosV1Client(config.GetRegion(d))
 	if err != nil {
-		return fmt.Errorf("error creating AntiDdos client: %s", err)
+		return diag.Errorf("error creating AntiDdos client: %s", err)
 	}
 
 	stateConf := &resource.StateChangeConf{
@@ -196,7 +197,7 @@ func resourceAntiDdosV1Delete(d *schema.ResourceData, meta interface{}) error {
 
 	_, err = stateConf.WaitForState()
 	if err != nil {
-		return fmt.Errorf("error deleting AntiDdos: %s", err)
+		return diag.Errorf("error deleting AntiDdos: %s", err)
 	}
 
 	d.SetId("")
