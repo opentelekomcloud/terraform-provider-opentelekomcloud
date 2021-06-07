@@ -1,9 +1,10 @@
 package smn
 
 import (
-	"fmt"
+	"context"
 	"log"
 
+	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/smn/v2/topics"
@@ -14,10 +15,10 @@ import (
 
 func ResourceTopic() *schema.Resource {
 	return &schema.Resource{
-		Create: resourceTopicCreate,
-		Read:   resourceTopicRead,
-		Delete: resourceTopicDelete,
-		Update: resourceTopicUpdate,
+		CreateContext: resourceTopicCreate,
+		ReadContext:   resourceTopicRead,
+		UpdateContext: resourceTopicUpdate,
+		DeleteContext: resourceTopicDelete,
 
 		Schema: map[string]*schema.Schema{
 			"name": {
@@ -56,11 +57,11 @@ func ResourceTopic() *schema.Resource {
 	}
 }
 
-func resourceTopicCreate(d *schema.ResourceData, meta interface{}) error {
+func resourceTopicCreate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*cfg.Config)
 	client, err := config.SmnV2Client(config.GetProjectName(d))
 	if err != nil {
-		return fmt.Errorf("Error creating OpenTelekomCloud smn client: %s", err)
+		return diag.Errorf("Error creating OpenTelekomCloud smn client: %s", err)
 	}
 
 	createOpts := topics.CreateOps{
@@ -71,28 +72,28 @@ func resourceTopicCreate(d *schema.ResourceData, meta interface{}) error {
 
 	topic, err := topics.Create(client, createOpts).Extract()
 	if err != nil {
-		return fmt.Errorf("Error getting topic from result: %s", err)
+		return diag.Errorf("Error getting topic from result: %s", err)
 	}
 	log.Printf("[DEBUG] Create : topic.TopicUrn %s", topic.TopicUrn)
 	if topic.TopicUrn != "" {
 		d.SetId(topic.TopicUrn)
-		return resourceTopicRead(d, meta)
+		return resourceTopicRead(ctx, d, meta)
 	}
 
-	return fmt.Errorf("Unexpected conversion error in resourceTopicCreate.")
+	return diag.Errorf("Unexpected conversion error in resourceTopicCreate.")
 }
 
-func resourceTopicRead(d *schema.ResourceData, meta interface{}) error {
+func resourceTopicRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*cfg.Config)
 	client, err := config.SmnV2Client(config.GetProjectName(d))
 	if err != nil {
-		return fmt.Errorf("Error creating OpenTelekomCloud smn client: %s", err)
+		return diag.Errorf("Error creating OpenTelekomCloud smn client: %s", err)
 	}
 
 	topicUrn := d.Id()
 	topicGet, err := topics.Get(client, topicUrn).ExtractGet()
 	if err != nil {
-		return common.CheckDeleted(d, err, "topic")
+		return diag.FromErr(common.CheckDeleted(d, err, "topic"))
 	}
 
 	log.Printf("[DEBUG] Retrieved topic %s: %#v", topicUrn, topicGet)
@@ -107,11 +108,11 @@ func resourceTopicRead(d *schema.ResourceData, meta interface{}) error {
 	return nil
 }
 
-func resourceTopicDelete(d *schema.ResourceData, meta interface{}) error {
+func resourceTopicDelete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*cfg.Config)
 	client, err := config.SmnV2Client(config.GetProjectName(d))
 	if err != nil {
-		return fmt.Errorf("Error creating OpenTelekomCloud smn client: %s", err)
+		return diag.Errorf("Error creating OpenTelekomCloud smn client: %s", err)
 	}
 
 	log.Printf("[DEBUG] Deleting topic %s", d.Id())
@@ -119,17 +120,17 @@ func resourceTopicDelete(d *schema.ResourceData, meta interface{}) error {
 	id := d.Id()
 	result := topics.Delete(client, id)
 	if result.Err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 	log.Printf("[DEBUG] Successfully deleted topic %s", id)
 	return nil
 }
 
-func resourceTopicUpdate(d *schema.ResourceData, meta interface{}) error {
+func resourceTopicUpdate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*cfg.Config)
 	client, err := config.SmnV2Client(config.GetProjectName(d))
 	if err != nil {
-		return fmt.Errorf("Error creating OpenTelekomCloud smn client: %s", err)
+		return diag.Errorf("Error creating OpenTelekomCloud smn client: %s", err)
 	}
 
 	log.Printf("[DEBUG] Updating topic %s", d.Id())
@@ -142,13 +143,13 @@ func resourceTopicUpdate(d *schema.ResourceData, meta interface{}) error {
 
 	topic, err := topics.Update(client, updateOpts, id).Extract()
 	if err != nil {
-		return fmt.Errorf("Error updating topic from result: %s", err)
+		return diag.Errorf("Error updating topic from result: %s", err)
 	}
 
 	log.Printf("[DEBUG] Update : topic.TopicUrn: %s", topic.TopicUrn)
 	if topic.TopicUrn != "" {
 		d.SetId(topic.TopicUrn)
-		return resourceTopicRead(d, meta)
+		return resourceTopicRead(ctx, d, meta)
 	}
 	return nil
 }

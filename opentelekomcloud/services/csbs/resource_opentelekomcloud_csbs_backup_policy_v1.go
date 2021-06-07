@@ -1,13 +1,14 @@
 package csbs
 
 import (
-	"fmt"
+	"context"
 	"log"
 	"time"
 
 	"github.com/hashicorp/go-multierror"
 	"github.com/opentelekomcloud/gophertelekomcloud"
 
+	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/csbs/v1/policies"
@@ -19,10 +20,10 @@ const errorSaveMsg = "[DEBUG] Error saving %s to state for OpenTelekomCloud CSBS
 
 func ResourceCSBSBackupPolicyV1() *schema.Resource {
 	return &schema.Resource{
-		Create: resourceCSBSBackupPolicyCreate,
-		Read:   resourceCSBSBackupPolicyRead,
-		Update: resourceCSBSBackupPolicyUpdate,
-		Delete: resourceCSBSBackupPolicyDelete,
+		CreateContext: resourceCSBSBackupPolicyCreate,
+		ReadContext:   resourceCSBSBackupPolicyRead,
+		UpdateContext: resourceCSBSBackupPolicyUpdate,
+		DeleteContext: resourceCSBSBackupPolicyDelete,
 
 		Importer: &schema.ResourceImporter{
 			State: schema.ImportStatePassthrough,
@@ -188,11 +189,11 @@ func ResourceCSBSBackupPolicyV1() *schema.Resource {
 	}
 }
 
-func resourceCSBSBackupPolicyCreate(d *schema.ResourceData, meta interface{}) error {
+func resourceCSBSBackupPolicyCreate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*cfg.Config)
 	policyClient, err := config.CsbsV1Client(config.GetRegion(d))
 	if err != nil {
-		return fmt.Errorf("error creating CSBSv1 client: %s", err)
+		return diag.Errorf("error creating CSBSv1 client: %s", err)
 	}
 
 	createOpts := policies.CreateOpts{
@@ -211,7 +212,7 @@ func resourceCSBSBackupPolicyCreate(d *schema.ResourceData, meta interface{}) er
 
 	backupPolicy, err := policies.Create(policyClient, createOpts).Extract()
 	if err != nil {
-		return fmt.Errorf("error creating Backup Policy : %s", err)
+		return diag.Errorf("error creating Backup Policy : %s", err)
 	}
 
 	stateConf := &resource.StateChangeConf{
@@ -225,18 +226,18 @@ func resourceCSBSBackupPolicyCreate(d *schema.ResourceData, meta interface{}) er
 
 	_, err = stateConf.WaitForState()
 	if err != nil {
-		return fmt.Errorf("error waiting for Backup Policy (%s) to become available: %s", backupPolicy.ID, err)
+		return diag.Errorf("error waiting for Backup Policy (%s) to become available: %s", backupPolicy.ID, err)
 	}
 
 	d.SetId(backupPolicy.ID)
-	return resourceCSBSBackupPolicyRead(d, meta)
+	return resourceCSBSBackupPolicyRead(ctx, d, meta)
 }
 
-func resourceCSBSBackupPolicyRead(d *schema.ResourceData, meta interface{}) error {
+func resourceCSBSBackupPolicyRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*cfg.Config)
 	policyClient, err := config.CsbsV1Client(config.GetRegion(d))
 	if err != nil {
-		return fmt.Errorf("error creating CSBSv1 client: %s", err)
+		return diag.Errorf("error creating CSBSv1 client: %s", err)
 	}
 
 	backupPolicy, err := policies.Get(policyClient, d.Id()).Extract()
@@ -247,11 +248,11 @@ func resourceCSBSBackupPolicyRead(d *schema.ResourceData, meta interface{}) erro
 			return nil
 		}
 
-		return fmt.Errorf("error retrieving backup policy: %s", err)
+		return diag.Errorf("error retrieving backup policy: %s", err)
 	}
 
 	if err := d.Set("resource", flattenCSBSPolicyResources(*backupPolicy)); err != nil {
-		return fmt.Errorf(errorSaveMsg, "resource", d.Id(), err)
+		return diag.Errorf(errorSaveMsg, "resource", d.Id(), err)
 	}
 
 	scheduledOperations := flattenCSBSScheduledOperations(*backupPolicy)
@@ -266,11 +267,11 @@ func resourceCSBSBackupPolicyRead(d *schema.ResourceData, meta interface{}) erro
 	}
 
 	if err := d.Set("scheduled_operation", scheduledOperations); err != nil {
-		return fmt.Errorf(errorSaveMsg, "scheduler_operation", d.Id(), err)
+		return diag.Errorf(errorSaveMsg, "scheduler_operation", d.Id(), err)
 	}
 
 	if err := d.Set("tags", flattenCSBSPolicyTags(*backupPolicy)); err != nil {
-		return fmt.Errorf(errorSaveMsg, "policy tags", d.Id(), err)
+		return diag.Errorf(errorSaveMsg, "policy tags", d.Id(), err)
 	}
 
 	me := multierror.Append(nil,
@@ -283,14 +284,14 @@ func resourceCSBSBackupPolicyRead(d *schema.ResourceData, meta interface{}) erro
 		d.Set("region", config.GetRegion(d)),
 	)
 
-	return me.ErrorOrNil()
+	return diag.FromErr(me.ErrorOrNil())
 }
 
-func resourceCSBSBackupPolicyUpdate(d *schema.ResourceData, meta interface{}) error {
+func resourceCSBSBackupPolicyUpdate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*cfg.Config)
 	policyClient, err := config.CsbsV1Client(config.GetRegion(d))
 	if err != nil {
-		return fmt.Errorf("error creating CSBSv1 client: %s", err)
+		return diag.Errorf("error creating CSBSv1 client: %s", err)
 	}
 	var updateOpts policies.UpdateOpts
 	if d.HasChange("name") {
@@ -311,22 +312,22 @@ func resourceCSBSBackupPolicyUpdate(d *schema.ResourceData, meta interface{}) er
 
 	_, err = policies.Update(policyClient, d.Id(), updateOpts).Extract()
 	if err != nil {
-		return fmt.Errorf("error updating Backup Policy: %s", err)
+		return diag.Errorf("error updating Backup Policy: %s", err)
 	}
 
-	return resourceCSBSBackupPolicyRead(d, meta)
+	return resourceCSBSBackupPolicyRead(ctx, d, meta)
 }
 
-func resourceCSBSBackupPolicyDelete(d *schema.ResourceData, meta interface{}) error {
+func resourceCSBSBackupPolicyDelete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*cfg.Config)
 	policyClient, err := config.CsbsV1Client(config.GetRegion(d))
 	if err != nil {
-		return fmt.Errorf("error creating CSBS client: %s", err)
+		return diag.Errorf("error creating CSBS client: %s", err)
 	}
 
 	err = policies.Delete(policyClient, d.Id()).Err
 	if err != nil {
-		return fmt.Errorf("error delete CSBSv1 policy; %s", err)
+		return diag.Errorf("error delete CSBSv1 policy; %s", err)
 	}
 
 	stateConf := &resource.StateChangeConf{
@@ -340,7 +341,7 @@ func resourceCSBSBackupPolicyDelete(d *schema.ResourceData, meta interface{}) er
 
 	_, err = stateConf.WaitForState()
 	if err != nil {
-		return fmt.Errorf("error waiting for delete backup Policy: %s", err)
+		return diag.Errorf("error waiting for delete backup Policy: %s", err)
 	}
 
 	d.SetId("")

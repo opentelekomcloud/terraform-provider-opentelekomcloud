@@ -1,10 +1,11 @@
 package fw
 
 import (
-	"fmt"
+	"context"
 	"log"
 	"time"
 
+	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/opentelekomcloud/gophertelekomcloud"
@@ -16,10 +17,10 @@ import (
 
 func ResourceFWPolicyV2() *schema.Resource {
 	return &schema.Resource{
-		Create: resourceFWPolicyV2Create,
-		Read:   resourceFWPolicyV2Read,
-		Update: resourceFWPolicyV2Update,
-		Delete: resourceFWPolicyV2Delete,
+		CreateContext: resourceFWPolicyV2Create,
+		ReadContext:   resourceFWPolicyV2Read,
+		UpdateContext: resourceFWPolicyV2Update,
+		DeleteContext: resourceFWPolicyV2Delete,
 		Importer: &schema.ResourceImporter{
 			State: schema.ImportStatePassthrough,
 		},
@@ -72,11 +73,11 @@ func ResourceFWPolicyV2() *schema.Resource {
 	}
 }
 
-func resourceFWPolicyV2Create(d *schema.ResourceData, meta interface{}) error {
+func resourceFWPolicyV2Create(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*cfg.Config)
 	networkingClient, err := config.NetworkingV2Client(config.GetRegion(d))
 	if err != nil {
-		return fmt.Errorf("Error creating OpenTelekomCloud networking client: %s", err)
+		return diag.Errorf("Error creating OpenTelekomCloud networking client: %s", err)
 	}
 
 	v := d.Get("rules").([]interface{})
@@ -111,28 +112,28 @@ func resourceFWPolicyV2Create(d *schema.ResourceData, meta interface{}) error {
 
 	policy, err := policies.Create(networkingClient, opts).Extract()
 	if err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 
 	log.Printf("[DEBUG] Firewall policy created: %#v", policy)
 
 	d.SetId(policy.ID)
 
-	return resourceFWPolicyV2Read(d, meta)
+	return resourceFWPolicyV2Read(ctx, d, meta)
 }
 
-func resourceFWPolicyV2Read(d *schema.ResourceData, meta interface{}) error {
+func resourceFWPolicyV2Read(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	log.Printf("[DEBUG] Retrieve information about firewall policy: %s", d.Id())
 
 	config := meta.(*cfg.Config)
 	networkingClient, err := config.NetworkingV2Client(config.GetRegion(d))
 	if err != nil {
-		return fmt.Errorf("Error creating OpenTelekomCloud networking client: %s", err)
+		return diag.Errorf("Error creating OpenTelekomCloud networking client: %s", err)
 	}
 
 	policy, err := policies.Get(networkingClient, d.Id()).Extract()
 	if err != nil {
-		return common.CheckDeleted(d, err, "FW policy")
+		return diag.FromErr(common.CheckDeleted(d, err, "FW policy"))
 	}
 
 	log.Printf("[DEBUG] Read OpenTelekomCloud Firewall Policy %s: %#v", d.Id(), policy)
@@ -143,18 +144,18 @@ func resourceFWPolicyV2Read(d *schema.ResourceData, meta interface{}) error {
 	d.Set("audited", policy.Audited)
 	d.Set("tenant_id", policy.TenantID)
 	if err := d.Set("rules", policy.Rules); err != nil {
-		return fmt.Errorf("[DEBUG] Error saving rules to state for OpenTelekomCloud firewall policy (%s): %s", d.Id(), err)
+		return diag.Errorf("[DEBUG] Error saving rules to state for OpenTelekomCloud firewall policy (%s): %s", d.Id(), err)
 	}
 	d.Set("region", config.GetRegion(d))
 
 	return nil
 }
 
-func resourceFWPolicyV2Update(d *schema.ResourceData, meta interface{}) error {
+func resourceFWPolicyV2Update(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*cfg.Config)
 	networkingClient, err := config.NetworkingV2Client(config.GetRegion(d))
 	if err != nil {
-		return fmt.Errorf("Error creating OpenTelekomCloud networking client: %s", err)
+		return diag.Errorf("Error creating OpenTelekomCloud networking client: %s", err)
 	}
 
 	opts := policies.UpdateOpts{}
@@ -184,19 +185,19 @@ func resourceFWPolicyV2Update(d *schema.ResourceData, meta interface{}) error {
 
 	err = policies.Update(networkingClient, d.Id(), opts).Err
 	if err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 
-	return resourceFWPolicyV2Read(d, meta)
+	return resourceFWPolicyV2Read(ctx, d, meta)
 }
 
-func resourceFWPolicyV2Delete(d *schema.ResourceData, meta interface{}) error {
+func resourceFWPolicyV2Delete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	log.Printf("[DEBUG] Destroy firewall policy: %s", d.Id())
 
 	config := meta.(*cfg.Config)
 	networkingClient, err := config.NetworkingV2Client(config.GetRegion(d))
 	if err != nil {
-		return fmt.Errorf("Error creating OpenTelekomCloud networking client: %s", err)
+		return diag.Errorf("Error creating OpenTelekomCloud networking client: %s", err)
 	}
 
 	stateConf := &resource.StateChangeConf{
@@ -209,7 +210,7 @@ func resourceFWPolicyV2Delete(d *schema.ResourceData, meta interface{}) error {
 	}
 
 	if _, err = stateConf.WaitForState(); err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 
 	return nil

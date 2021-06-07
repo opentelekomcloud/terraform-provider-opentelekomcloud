@@ -1,10 +1,11 @@
 package kms
 
 import (
-	"fmt"
+	"context"
 	"log"
 	"reflect"
 
+	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/kms/v1/keys"
@@ -14,7 +15,7 @@ import (
 
 func DataSourceKmsKeyV1() *schema.Resource {
 	return &schema.Resource{
-		Read: dataSourceKmsKeyV1Read,
+		ReadContext: dataSourceKmsKeyV1Read,
 
 		Schema: map[string]*schema.Schema{
 			"key_alias": {
@@ -78,11 +79,11 @@ func DataSourceKmsKeyV1() *schema.Resource {
 	}
 }
 
-func dataSourceKmsKeyV1Read(d *schema.ResourceData, meta interface{}) error {
+func dataSourceKmsKeyV1Read(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*cfg.Config)
 	KmsKeyV1Client, err := config.KmsKeyV1Client(config.GetRegion(d))
 	if err != nil {
-		return fmt.Errorf("Error creating OpenTelekomCloud kms key client: %s", err)
+		return diag.Errorf("Error creating OpenTelekomCloud kms key client: %s", err)
 	}
 
 	is_list_key := true
@@ -97,7 +98,7 @@ func dataSourceKmsKeyV1Read(d *schema.ResourceData, meta interface{}) error {
 
 		v, err := keys.List(KmsKeyV1Client, req).ExtractListKey()
 		if err != nil {
-			return err
+			return diag.FromErr(err)
 		}
 
 		is_list_key = v.Truncated == "true"
@@ -155,12 +156,12 @@ func dataSourceKmsKeyV1Read(d *schema.ResourceData, meta interface{}) error {
 	}
 
 	if len(allKeys) < 1 {
-		return fmt.Errorf("Your query returned no results. " +
+		return diag.Errorf("Your query returned no results. " +
 			"Please change your search criteria and try again.")
 	}
 
 	if len(allKeys) > 1 {
-		return fmt.Errorf("Your query returned more than one result." +
+		return diag.Errorf("Your query returned more than one result." +
 			" Please try a more specific search criteria")
 	}
 

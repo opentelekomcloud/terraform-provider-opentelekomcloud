@@ -1,8 +1,9 @@
 package sfs
 
 import (
-	"fmt"
+	"context"
 
+	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/opentelekomcloud/gophertelekomcloud"
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/sfs/v2/shares"
@@ -12,10 +13,10 @@ import (
 
 func ResourceSFSShareAccessRulesV2() *schema.Resource {
 	return &schema.Resource{
-		Create: resourceSFSShareAccessRulesV2Create,
-		Read:   resourceSFSShareAccessRulesV2Read,
-		Update: resourceSFSShareAccessRulesV2Update,
-		Delete: resourceSFSShareAccessRulesV2Delete,
+		CreateContext: resourceSFSShareAccessRulesV2Create,
+		ReadContext:   resourceSFSShareAccessRulesV2Read,
+		UpdateContext: resourceSFSShareAccessRulesV2Update,
+		DeleteContext: resourceSFSShareAccessRulesV2Delete,
 
 		Importer: &schema.ResourceImporter{
 			State: schema.ImportStatePassthrough,
@@ -61,11 +62,11 @@ func ResourceSFSShareAccessRulesV2() *schema.Resource {
 	}
 }
 
-func resourceSFSShareAccessRulesV2Create(d *schema.ResourceData, meta interface{}) error {
+func resourceSFSShareAccessRulesV2Create(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*cfg.Config)
 	client, err := config.SfsV2Client(config.GetRegion(d))
 	if err != nil {
-		return fmt.Errorf("error creating OpenTelekomCloud File Share client: %w", err)
+		return diag.Errorf("error creating OpenTelekomCloud File Share client: %w", err)
 	}
 
 	shareID := d.Get("share_id").(string)
@@ -79,20 +80,20 @@ func resourceSFSShareAccessRulesV2Create(d *schema.ResourceData, meta interface{
 		}
 		_, err = shares.GrantAccess(client, shareID, grantAccessOpts).ExtractAccess()
 		if err != nil {
-			return fmt.Errorf("error applying access rule for OpenTelekomCloud File Share: %w", err)
+			return diag.Errorf("error applying access rule for OpenTelekomCloud File Share: %w", err)
 		}
 	}
 
 	d.SetId(shareID)
 
-	return resourceSFSShareAccessRulesV2Read(d, meta)
+	return resourceSFSShareAccessRulesV2Read(ctx, d, meta)
 }
 
-func resourceSFSShareAccessRulesV2Read(d *schema.ResourceData, meta interface{}) error {
+func resourceSFSShareAccessRulesV2Read(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*cfg.Config)
 	client, err := config.SfsV2Client(config.GetRegion(d))
 	if err != nil {
-		return fmt.Errorf("error creating OpenTelekomCloud File Share client: %w", err)
+		return diag.Errorf("error creating OpenTelekomCloud File Share client: %w", err)
 	}
 
 	rules, err := shares.ListAccessRights(client, d.Id()).ExtractAccessRights()
@@ -102,7 +103,7 @@ func resourceSFSShareAccessRulesV2Read(d *schema.ResourceData, meta interface{})
 			return nil
 		}
 
-		return fmt.Errorf("error retrieving rules of OpenTelekomCloud File Share: %s", err)
+		return diag.Errorf("error retrieving rules of OpenTelekomCloud File Share: %s", err)
 	}
 
 	var accessRules []map[string]interface{}
@@ -118,21 +119,43 @@ func resourceSFSShareAccessRulesV2Read(d *schema.ResourceData, meta interface{})
 	}
 
 	if err := d.Set("access_rule", accessRules); err != nil {
-		return fmt.Errorf("error saving access_rule to state for OpenTelekomCloud File Share: %w", err)
+		return diag.Errorf("error saving access_rule to state for OpenTelekomCloud File Share: %w", err)
 	}
 
 	if err := d.Set("share_id", d.Id()); err != nil {
-		return fmt.Errorf("error saving share_id to state for OpenTelekomCloud File Share: %w", err)
+		return diag.Errorf("error saving share_id to state for OpenTelekomCloud File Share: %w", err)
 	}
 
 	return nil
 }
 
-func resourceSFSShareAccessRulesV2Update(d *schema.ResourceData, meta interface{}) error {
+func resourceSFSShareAccessRulesV2Delete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*cfg.Config)
 	client, err := config.SfsV2Client(config.GetRegion(d))
 	if err != nil {
-		return fmt.Errorf("error creating OpenTelekomCloud File Share client: %w", err)
+		return diag.Errorf("error creating OpenTelekomCloud File Share client: %w", err)
+	}
+
+	accessRules := d.Get("access_rule").([]interface{})
+	for _, rule := range accessRules {
+		accessRuleMap := rule.(map[string]interface{})
+		deleteAccessOpts := shares.DeleteAccessOpts{
+			AccessID: accessRuleMap["share_access_id"].(string),
+		}
+		if err := shares.DeleteAccess(client, d.Id(), deleteAccessOpts).Err; err != nil {
+			return diag.Errorf("error deleting access rule for OpenTelekomCloud File Share: %w", err)
+		}
+	}
+
+	d.SetId("")
+	return nil
+}
+
+func resourceSFSShareAccessRulesV2Update(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+	config := meta.(*cfg.Config)
+	client, err := config.SfsV2Client(config.GetRegion(d))
+	if err != nil {
+		return diag.Errorf("error creating OpenTelekomCloud File Share client: %w", err)
 	}
 
 	if d.HasChange("access_rule") {
@@ -146,7 +169,7 @@ func resourceSFSShareAccessRulesV2Update(d *schema.ResourceData, meta interface{
 				AccessID: oldAccessRuleMap["share_access_id"].(string),
 			}
 			if err := shares.DeleteAccess(client, d.Id(), deleteAccessOpts).Err; err != nil {
-				return fmt.Errorf("error deleting access rule for OpenTelekomCloud File Share: %w", err)
+				return diag.Errorf("error deleting access rule for OpenTelekomCloud File Share: %w", err)
 			}
 		}
 
@@ -159,32 +182,10 @@ func resourceSFSShareAccessRulesV2Update(d *schema.ResourceData, meta interface{
 			}
 			_, err = shares.GrantAccess(client, d.Id(), grantAccessOpts).ExtractAccess()
 			if err != nil {
-				return fmt.Errorf("error applying access rule for OpenTelekomCloud File Share: %w", err)
+				return diag.Errorf("error applying access rule for OpenTelekomCloud File Share: %w", err)
 			}
 		}
 	}
 
-	return resourceSFSShareAccessRulesV2Read(d, meta)
-}
-
-func resourceSFSShareAccessRulesV2Delete(d *schema.ResourceData, meta interface{}) error {
-	config := meta.(*cfg.Config)
-	client, err := config.SfsV2Client(config.GetRegion(d))
-	if err != nil {
-		return fmt.Errorf("error creating OpenTelekomCloud File Share client: %w", err)
-	}
-
-	accessRules := d.Get("access_rule").([]interface{})
-	for _, rule := range accessRules {
-		accessRuleMap := rule.(map[string]interface{})
-		deleteAccessOpts := shares.DeleteAccessOpts{
-			AccessID: accessRuleMap["share_access_id"].(string),
-		}
-		if err := shares.DeleteAccess(client, d.Id(), deleteAccessOpts).Err; err != nil {
-			return fmt.Errorf("error deleting access rule for OpenTelekomCloud File Share: %w", err)
-		}
-	}
-
-	d.SetId("")
-	return nil
+	return resourceSFSShareAccessRulesV2Read(ctx, d, meta)
 }

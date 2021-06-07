@@ -1,9 +1,10 @@
 package lts
 
 import (
-	"fmt"
+	"context"
 	"log"
 
+	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/lts/v2/loggroups"
 
@@ -13,9 +14,9 @@ import (
 
 func ResourceLTSGroupV2() *schema.Resource {
 	return &schema.Resource{
-		Create: resourceGroupV2Create,
-		Read:   resourceGroupV2Read,
-		Delete: resourceGroupV2Delete,
+		CreateContext: resourceGroupV2Create,
+		ReadContext:   resourceGroupV2Read,
+		DeleteContext: resourceGroupV2Delete,
 		Importer: &schema.ResourceImporter{
 			State: schema.ImportStatePassthrough,
 		},
@@ -35,11 +36,11 @@ func ResourceLTSGroupV2() *schema.Resource {
 	}
 }
 
-func resourceGroupV2Create(d *schema.ResourceData, meta interface{}) error {
+func resourceGroupV2Create(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*cfg.Config)
 	client, err := config.LtsV2Client(config.GetRegion(d))
 	if err != nil {
-		return fmt.Errorf("Error creating OpenTelekomCloud LTS client: %s", err)
+		return diag.Errorf("Error creating OpenTelekomCloud LTS client: %s", err)
 	}
 
 	createOpts := &loggroups.CreateOpts{
@@ -50,23 +51,23 @@ func resourceGroupV2Create(d *schema.ResourceData, meta interface{}) error {
 
 	groupCreate, err := loggroups.Create(client, createOpts).Extract()
 	if err != nil {
-		return fmt.Errorf("Error creating log group: %s", err)
+		return diag.Errorf("Error creating log group: %s", err)
 	}
 
 	d.SetId(groupCreate.ID)
-	return resourceGroupV2Read(d, meta)
+	return resourceGroupV2Read(ctx, d, meta)
 }
 
-func resourceGroupV2Read(d *schema.ResourceData, meta interface{}) error {
+func resourceGroupV2Read(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*cfg.Config)
 	client, err := config.LtsV2Client(config.GetRegion(d))
 	if err != nil {
-		return fmt.Errorf("Error creating OpenTelekomCloud LTS client: %s", err)
+		return diag.Errorf("Error creating OpenTelekomCloud LTS client: %s", err)
 	}
 
 	group, err := loggroups.Get(client, d.Id()).Extract()
 	if err != nil {
-		return fmt.Errorf("Error getting OpenTelekomCloud log group %s: %s", d.Id(), err)
+		return diag.Errorf("Error getting OpenTelekomCloud log group %s: %s", d.Id(), err)
 	}
 
 	log.Printf("[DEBUG] Retrieved Cluster %s: %#v", d.Id(), group)
@@ -76,16 +77,16 @@ func resourceGroupV2Read(d *schema.ResourceData, meta interface{}) error {
 	return nil
 }
 
-func resourceGroupV2Delete(d *schema.ResourceData, meta interface{}) error {
+func resourceGroupV2Delete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*cfg.Config)
 	client, err := config.LtsV2Client(config.GetRegion(d))
 	if err != nil {
-		return fmt.Errorf("Error creating OpenTelekomCloud LTS client: %s", err)
+		return diag.Errorf("Error creating OpenTelekomCloud LTS client: %s", err)
 	}
 
 	err = loggroups.Delete(client, d.Id()).ExtractErr()
 	if err != nil {
-		return common.CheckDeleted(d, err, "Error deleting log group")
+		return diag.FromErr(common.CheckDeleted(d, err, "Error deleting log group"))
 	}
 
 	d.SetId("")

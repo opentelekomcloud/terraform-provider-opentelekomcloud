@@ -1,10 +1,11 @@
 package sdrs
 
 import (
-	"fmt"
+	"context"
 	"log"
 	"time"
 
+	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/opentelekomcloud/gophertelekomcloud"
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/sdrs/v1/protectiongroups"
@@ -14,10 +15,10 @@ import (
 
 func ResourceSdrsProtectiongroupV1() *schema.Resource {
 	return &schema.Resource{
-		Create: resourceSdrsProtectiongroupV1Create,
-		Read:   resourceSdrsProtectiongroupV1Read,
-		Update: resourceSdrsProtectiongroupV1Update,
-		Delete: resourceSdrsProtectiongroupV1Delete,
+		CreateContext: resourceSdrsProtectiongroupV1Create,
+		ReadContext:   resourceSdrsProtectiongroupV1Read,
+		UpdateContext: resourceSdrsProtectiongroupV1Update,
+		DeleteContext: resourceSdrsProtectiongroupV1Delete,
 		Importer: &schema.ResourceImporter{
 			State: schema.ImportStatePassthrough,
 		},
@@ -67,13 +68,13 @@ func ResourceSdrsProtectiongroupV1() *schema.Resource {
 	}
 }
 
-func resourceSdrsProtectiongroupV1Create(d *schema.ResourceData, meta interface{}) error {
+func resourceSdrsProtectiongroupV1Create(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*cfg.Config)
 
 	sdrsClient, err := config.SdrsV1Client(config.GetRegion(d))
 
 	if err != nil {
-		return fmt.Errorf("Error creating OpenTelekomcomCloud SDRS Client: %s", err)
+		return diag.Errorf("Error creating OpenTelekomcomCloud SDRS Client: %s", err)
 	}
 
 	createOpts := protectiongroups.CreateOpts{
@@ -89,32 +90,32 @@ func resourceSdrsProtectiongroupV1Create(d *schema.ResourceData, meta interface{
 
 	n, err := protectiongroups.Create(sdrsClient, createOpts).ExtractJobResponse()
 	if err != nil {
-		return fmt.Errorf("Error creating OpenTelekomcomCloud SDRS Protectiongroup: %s", err)
+		return diag.Errorf("Error creating OpenTelekomcomCloud SDRS Protectiongroup: %s", err)
 	}
 
 	if err := protectiongroups.WaitForJobSuccess(sdrsClient, int(d.Timeout(schema.TimeoutCreate)/time.Second), n.JobID); err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 
 	entity, err := protectiongroups.GetJobEntity(sdrsClient, n.JobID, "server_group_id")
 	if err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 
 	if id, ok := entity.(string); ok {
 		d.SetId(id)
-		return resourceSdrsProtectiongroupV1Read(d, meta)
+		return resourceSdrsProtectiongroupV1Read(ctx, d, meta)
 	}
 
-	return fmt.Errorf("Unexpected conversion error in resourceSdrsProtectiongroupV1Create.")
+	return diag.Errorf("Unexpected conversion error in resourceSdrsProtectiongroupV1Create.")
 }
 
-func resourceSdrsProtectiongroupV1Read(d *schema.ResourceData, meta interface{}) error {
+func resourceSdrsProtectiongroupV1Read(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 
 	config := meta.(*cfg.Config)
 	sdrsClient, err := config.SdrsV1Client(config.GetRegion(d))
 	if err != nil {
-		return fmt.Errorf("Error creating OpenTelekomCloud SDRS client: %s", err)
+		return diag.Errorf("Error creating OpenTelekomCloud SDRS client: %s", err)
 	}
 	n, err := protectiongroups.Get(sdrsClient, d.Id()).Extract()
 
@@ -124,7 +125,7 @@ func resourceSdrsProtectiongroupV1Read(d *schema.ResourceData, meta interface{})
 			return nil
 		}
 
-		return fmt.Errorf("Error retrieving OpenTelekomCloud SDRS Protectiongroup: %s", err)
+		return diag.Errorf("Error retrieving OpenTelekomCloud SDRS Protectiongroup: %s", err)
 	}
 
 	d.Set("name", n.Name)
@@ -138,11 +139,11 @@ func resourceSdrsProtectiongroupV1Read(d *schema.ResourceData, meta interface{})
 	return nil
 }
 
-func resourceSdrsProtectiongroupV1Update(d *schema.ResourceData, meta interface{}) error {
+func resourceSdrsProtectiongroupV1Update(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*cfg.Config)
 	sdrsClient, err := config.SdrsV1Client(config.GetRegion(d))
 	if err != nil {
-		return fmt.Errorf("Error creating OpenTelekomCloud SDRS Client: %s", err)
+		return diag.Errorf("Error creating OpenTelekomCloud SDRS Client: %s", err)
 	}
 	var updateOpts protectiongroups.UpdateOpts
 
@@ -153,25 +154,25 @@ func resourceSdrsProtectiongroupV1Update(d *schema.ResourceData, meta interface{
 
 	_, err = protectiongroups.Update(sdrsClient, d.Id(), updateOpts).Extract()
 	if err != nil {
-		return fmt.Errorf("Error updating OpenTelekomCloud SDRS Protectiongroup: %s", err)
+		return diag.Errorf("Error updating OpenTelekomCloud SDRS Protectiongroup: %s", err)
 	}
-	return resourceSdrsProtectiongroupV1Read(d, meta)
+	return resourceSdrsProtectiongroupV1Read(ctx, d, meta)
 }
 
-func resourceSdrsProtectiongroupV1Delete(d *schema.ResourceData, meta interface{}) error {
+func resourceSdrsProtectiongroupV1Delete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*cfg.Config)
 	sdrsClient, err := config.SdrsV1Client(config.GetRegion(d))
 	if err != nil {
-		return fmt.Errorf("Error creating OpenTelekomCloud SDRS client: %s", err)
+		return diag.Errorf("Error creating OpenTelekomCloud SDRS client: %s", err)
 	}
 
 	n, err := protectiongroups.Delete(sdrsClient, d.Id()).ExtractJobResponse()
 	if err != nil {
-		return fmt.Errorf("Error deleting OpenTelekomCloud SDRS Protectiongroup: %s", err)
+		return diag.Errorf("Error deleting OpenTelekomCloud SDRS Protectiongroup: %s", err)
 	}
 
 	if err := protectiongroups.WaitForJobSuccess(sdrsClient, int(d.Timeout(schema.TimeoutDelete)/time.Second), n.JobID); err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 
 	d.SetId("")

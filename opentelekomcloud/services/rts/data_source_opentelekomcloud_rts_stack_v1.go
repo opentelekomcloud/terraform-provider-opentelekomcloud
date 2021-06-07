@@ -1,12 +1,12 @@
 package rts
 
 import (
-	"fmt"
+	"context"
 	"log"
 	"reflect"
 	"unsafe"
 
-	"github.com/hashicorp/errwrap"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/rts/v1/stacks"
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/rts/v1/stacktemplates"
@@ -16,7 +16,7 @@ import (
 
 func DataSourceRTSStackV1() *schema.Resource {
 	return &schema.Resource{
-		Read: dataSourceRTSStackV1Read,
+		ReadContext: dataSourceRTSStackV1Read,
 
 		Schema: map[string]*schema.Schema{
 			"region": {
@@ -73,17 +73,17 @@ func DataSourceRTSStackV1() *schema.Resource {
 	}
 }
 
-func dataSourceRTSStackV1Read(d *schema.ResourceData, meta interface{}) error {
+func dataSourceRTSStackV1Read(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*cfg.Config)
 	orchestrationClient, err := config.OrchestrationV1Client(config.GetRegion(d))
 	if err != nil {
-		return fmt.Errorf("Error creating OpenTelekomCloud rts client: %s", err)
+		return diag.Errorf("Error creating OpenTelekomCloud rts client: %s", err)
 	}
 	stackName := d.Get("name").(string)
 
 	stack, err := stacks.Get(orchestrationClient, stackName).Extract()
 	if err != nil {
-		return fmt.Errorf("Unable to retrieve stack %s: %s", stackName, err)
+		return diag.Errorf("Unable to retrieve stack %s: %s", stackName, err)
 	}
 
 	log.Printf("[INFO] Retrieved Stack %s", stackName)
@@ -103,13 +103,13 @@ func dataSourceRTSStackV1Read(d *schema.ResourceData, meta interface{}) error {
 
 	out, err := stacktemplates.Get(orchestrationClient, stack.Name, stack.ID).Extract()
 	if err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 
 	sTemplate := BytesToString(out)
-	template, error := normalizeStackTemplate(sTemplate)
-	if error != nil {
-		return errwrap.Wrapf("template body contains an invalid JSON or YAML: {{err}}", err)
+	template, err := normalizeStackTemplate(sTemplate)
+	if err != nil {
+		return diag.Errorf("template body contains an invalid JSON or YAML: %w", err)
 	}
 	d.Set("template_body", template)
 

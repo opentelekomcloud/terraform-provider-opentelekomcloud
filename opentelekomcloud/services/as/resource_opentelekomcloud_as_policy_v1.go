@@ -1,12 +1,14 @@
 package as
 
 import (
+	"context"
 	"fmt"
 	"log"
 	"regexp"
 	"strings"
 	"time"
 
+	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/autoscaling/v1/policies"
 
@@ -16,10 +18,10 @@ import (
 
 func ResourceASPolicy() *schema.Resource {
 	return &schema.Resource{
-		Create: resourceASPolicyCreate,
-		Read:   resourceASPolicyRead,
-		Update: resourceASPolicyUpdate,
-		Delete: resourceASPolicyDelete,
+		CreateContext: resourceASPolicyCreate,
+		ReadContext:   resourceASPolicyRead,
+		UpdateContext: resourceASPolicyUpdate,
+		DeleteContext: resourceASPolicyDelete,
 
 		Schema: map[string]*schema.Schema{
 			"region": {
@@ -182,16 +184,16 @@ func getPolicyAction(rawPolicyAction map[string]interface{}) policies.ActionOpts
 	return policyAction
 }
 
-func resourceASPolicyCreate(d *schema.ResourceData, meta interface{}) error {
+func resourceASPolicyCreate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*cfg.Config)
 	asClient, err := config.AutoscalingV1Client(config.GetRegion(d))
 	if err != nil {
-		return fmt.Errorf("Error creating OpenTelekomCloud autoscaling client: %s", err)
+		return diag.Errorf("Error creating OpenTelekomCloud autoscaling client: %s", err)
 	}
 	log.Printf("[DEBUG] asClient: %#v", asClient)
 	err = validateParameters(d)
 	if err != nil {
-		return fmt.Errorf("Error creating ASPolicy: %s", err)
+		return diag.Errorf("Error creating ASPolicy: %s", err)
 	}
 	createOpts := policies.CreateOpts{
 		Name:         d.Get("scaling_policy_name").(string),
@@ -216,23 +218,23 @@ func resourceASPolicyCreate(d *schema.ResourceData, meta interface{}) error {
 	log.Printf("[DEBUG] Create AS policy Options: %#v", createOpts)
 	asPolicyId, err := policies.Create(asClient, createOpts).Extract()
 	if err != nil {
-		return fmt.Errorf("Error creating ASPolicy: %s", err)
+		return diag.Errorf("Error creating ASPolicy: %s", err)
 	}
 	d.SetId(asPolicyId)
 	log.Printf("[DEBUG] Create AS Policy %q Success!", asPolicyId)
-	return resourceASPolicyRead(d, meta)
+	return resourceASPolicyRead(ctx, d, meta)
 }
 
-func resourceASPolicyRead(d *schema.ResourceData, meta interface{}) error {
+func resourceASPolicyRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*cfg.Config)
 	asClient, err := config.AutoscalingV1Client(config.GetRegion(d))
 	if err != nil {
-		return fmt.Errorf("Error creating OpenTelekomCloud autoscaling client: %s", err)
+		return diag.Errorf("Error creating OpenTelekomCloud autoscaling client: %s", err)
 	}
 
 	asPolicy, err := policies.Get(asClient, d.Id()).Extract()
 	if err != nil {
-		return common.CheckDeleted(d, err, "AS Policy")
+		return diag.FromErr(common.CheckDeleted(d, err, "AS Policy"))
 	}
 
 	log.Printf("[DEBUG] Retrieved ASPolicy %q: %+v", d.Id(), asPolicy)
@@ -265,16 +267,16 @@ func resourceASPolicyRead(d *schema.ResourceData, meta interface{}) error {
 	return nil
 }
 
-func resourceASPolicyUpdate(d *schema.ResourceData, meta interface{}) error {
+func resourceASPolicyUpdate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*cfg.Config)
 	asClient, err := config.AutoscalingV1Client(config.GetRegion(d))
 	if err != nil {
-		return fmt.Errorf("Error creating OpenTelekomCloud autoscaling client: %s", err)
+		return diag.Errorf("Error creating OpenTelekomCloud autoscaling client: %s", err)
 	}
 
 	err = validateParameters(d)
 	if err != nil {
-		return fmt.Errorf("Error updating ASPolicy: %s", err)
+		return diag.Errorf("Error updating ASPolicy: %s", err)
 	}
 	updateOpts := policies.UpdateOpts{
 		Name:         d.Get("scaling_policy_name").(string),
@@ -297,21 +299,21 @@ func resourceASPolicyUpdate(d *schema.ResourceData, meta interface{}) error {
 	log.Printf("[DEBUG] Update AS policy Options: %#v", updateOpts)
 	asPolicyID, err := policies.Update(asClient, d.Id(), updateOpts).Extract()
 	if err != nil {
-		return fmt.Errorf("Error updating ASPolicy %q: %s", asPolicyID, err)
+		return diag.Errorf("Error updating ASPolicy %q: %s", asPolicyID, err)
 	}
 
-	return resourceASPolicyRead(d, meta)
+	return resourceASPolicyRead(ctx, d, meta)
 }
 
-func resourceASPolicyDelete(d *schema.ResourceData, meta interface{}) error {
+func resourceASPolicyDelete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*cfg.Config)
 	asClient, err := config.AutoscalingV1Client(config.GetRegion(d))
 	if err != nil {
-		return fmt.Errorf("Error creating OpenTelekomCloud autoscaling client: %s", err)
+		return diag.Errorf("Error creating OpenTelekomCloud autoscaling client: %s", err)
 	}
 	log.Printf("[DEBUG] Begin to delete AS policy %q", d.Id())
 	if delErr := policies.Delete(asClient, d.Id()).ExtractErr(); delErr != nil {
-		return fmt.Errorf("Error deleting AS policy: %s", delErr)
+		return diag.Errorf("Error deleting AS policy: %s", delErr)
 	}
 
 	return nil

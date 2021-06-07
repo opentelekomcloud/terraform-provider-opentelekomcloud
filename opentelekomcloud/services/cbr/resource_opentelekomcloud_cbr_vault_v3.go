@@ -1,10 +1,12 @@
 package cbr
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
 
 	"github.com/hashicorp/go-multierror"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 	"github.com/opentelekomcloud/gophertelekomcloud"
@@ -16,10 +18,10 @@ import (
 
 func ResourceCBRVaultV3() *schema.Resource {
 	return &schema.Resource{
-		Create: resourceCBRVaultV3Create,
-		Read:   resourceCBRVaultV3Read,
-		Update: resourceCBRVaultV3Update,
-		Delete: resourceCBRVaultV3Delete,
+		CreateContext: resourceCBRVaultV3Create,
+		ReadContext:   resourceCBRVaultV3Read,
+		UpdateContext: resourceCBRVaultV3Update,
+		DeleteContext: resourceCBRVaultV3Delete,
 
 		CustomizeDiff: common.MultipleCustomizeDiffs(cbrVaultRequiredFields),
 
@@ -257,16 +259,16 @@ func ResourceCBRVaultV3() *schema.Resource {
 	}
 }
 
-func resourceCBRVaultV3Read(d *schema.ResourceData, meta interface{}) error {
+func resourceCBRVaultV3Read(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*cfg.Config)
 	client, err := config.CbrV3Client(config.GetRegion(d))
 	if err != nil {
-		return fmt.Errorf("error creating OpenTelekomCloud CBRv3 client: %s", err)
+		return diag.Errorf("error creating OpenTelekomCloud CBRv3 client: %s", err)
 	}
 
 	vault, err := vaults.Get(client, d.Id()).Extract()
 	if err != nil {
-		return fmt.Errorf("error getting vault details: %s", err)
+		return diag.Errorf("error getting vault details: %s", err)
 	}
 
 	resourceList := make([]interface{}, len(vault.Resources))
@@ -275,7 +277,7 @@ func resourceCBRVaultV3Read(d *schema.ResourceData, meta interface{}) error {
 		resMap := make(map[string]interface{})
 		err = json.Unmarshal(data, &resMap)
 		if err != nil {
-			return fmt.Errorf("error converting resource list: %s", err)
+			return diag.Errorf("error converting resource list: %s", err)
 		}
 		resourceList[i] = resMap
 	}
@@ -309,22 +311,22 @@ func resourceCBRVaultV3Read(d *schema.ResourceData, meta interface{}) error {
 		setVaultBilling(d, &vault.Billing),
 	)
 	if err := mErr.ErrorOrNil(); err != nil {
-		return fmt.Errorf("error setting vault fields: %s", err)
+		return diag.Errorf("error setting vault fields: %s", err)
 	}
 
 	return nil
 }
 
-func resourceCBRVaultV3Create(d *schema.ResourceData, meta interface{}) error {
+func resourceCBRVaultV3Create(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*cfg.Config)
 	client, err := config.CbrV3Client(config.GetRegion(d))
 	if err != nil {
-		return fmt.Errorf("error creating OpenTelekomCloud CBRv3 client: %s", err)
+		return diag.Errorf("error creating OpenTelekomCloud CBRv3 client: %s", err)
 	}
 
 	resources, err := cbrVaultResourcesCreate(d)
 	if err != nil {
-		return fmt.Errorf("error constructing resources list: %s", err)
+		return diag.Errorf("error constructing resources list: %s", err)
 	}
 
 	opts := vaults.CreateOpts{
@@ -342,18 +344,18 @@ func resourceCBRVaultV3Create(d *schema.ResourceData, meta interface{}) error {
 
 	vault, err := vaults.Create(client, opts).Extract()
 	if err != nil {
-		return fmt.Errorf("error creating vaults: %s", err)
+		return diag.Errorf("error creating vaults: %s", err)
 	}
 	d.SetId(vault.ID)
 
 	if policy := d.Get("backup_policy_id").(string); policy != "" {
 		_, err := vaults.BindPolicy(client, d.Id(), vaults.BindPolicyOpts{PolicyID: policy}).Extract()
 		if err != nil {
-			return fmt.Errorf("error binding policy to vault: %s", err)
+			return diag.Errorf("error binding policy to vault: %s", err)
 		}
 	}
 
-	return resourceCBRVaultV3Read(d, meta)
+	return resourceCBRVaultV3Read(ctx, d, meta)
 }
 
 func resFieldName(i int, field string) string {
@@ -571,11 +573,11 @@ func updatePolicy(d *schema.ResourceData, client *golangsdk.ServiceClient) error
 	return nil
 }
 
-func resourceCBRVaultV3Update(d *schema.ResourceData, meta interface{}) error {
+func resourceCBRVaultV3Update(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*cfg.Config)
 	client, err := config.CbrV3Client(config.GetRegion(d))
 	if err != nil {
-		return fmt.Errorf("error creating OpenTelekomCloud CBRv3 client: %s", err)
+		return diag.Errorf("error creating OpenTelekomCloud CBRv3 client: %s", err)
 	}
 
 	opts := vaults.UpdateOpts{}
@@ -614,34 +616,34 @@ func resourceCBRVaultV3Update(d *schema.ResourceData, meta interface{}) error {
 	if needsUpdate {
 		_, err := vaults.Update(client, d.Id(), opts).Extract()
 		if err != nil {
-			return fmt.Errorf("error updating the vault: %s", err)
+			return diag.Errorf("error updating the vault: %s", err)
 		}
 	}
 
 	if d.HasChange("resource") {
 		if err := updateResources(d, client); err != nil {
-			return err
+			return diag.FromErr(err)
 		}
 	}
 
 	if d.HasChange("backup_policy_id") {
 		if err := updatePolicy(d, client); err != nil {
-			return err
+			return diag.FromErr(err)
 		}
 	}
 
-	return resourceCBRVaultV3Read(d, meta)
+	return resourceCBRVaultV3Read(ctx, d, meta)
 }
 
-func resourceCBRVaultV3Delete(d *schema.ResourceData, meta interface{}) error {
+func resourceCBRVaultV3Delete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*cfg.Config)
 	client, err := config.CbrV3Client(config.GetRegion(d))
 	if err != nil {
-		return fmt.Errorf("error creating OpenTelekomCloud CBRv3 client: %s", err)
+		return diag.Errorf("error creating OpenTelekomCloud CBRv3 client: %s", err)
 	}
 
 	if err := vaults.Delete(client, d.Id()).ExtractErr(); err != nil {
-		return fmt.Errorf("error deleting CBRv3 vault: %s", err)
+		return diag.Errorf("error deleting CBRv3 vault: %s", err)
 	}
 
 	d.SetId("")
@@ -657,7 +659,7 @@ func requiredForPrepaid(d *schema.ResourceDiff, field string) error {
 	return nil
 }
 
-func cbrVaultRequiredFields(d *schema.ResourceDiff, _ interface{}) error {
+func cbrVaultRequiredFields(ctx context.Context, d *schema.ResourceDiff, _ interface{}) error {
 	if d.Get("billing.0.charging_mode") == "pre_paid" {
 		mErr := multierror.Append(
 			requiredForPrepaid(d, "period_type"),

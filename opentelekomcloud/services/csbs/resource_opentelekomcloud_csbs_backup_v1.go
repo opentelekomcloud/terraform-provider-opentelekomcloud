@@ -1,10 +1,12 @@
 package csbs
 
 import (
+	"context"
 	"fmt"
 	"log"
 	"time"
 
+	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/opentelekomcloud/gophertelekomcloud"
@@ -15,9 +17,9 @@ import (
 
 func ResourceCSBSBackupV1() *schema.Resource {
 	return &schema.Resource{
-		Create: resourceCSBSBackupV1Create,
-		Read:   resourceCSBSBackupV1Read,
-		Delete: resourceCSBSBackupV1Delete,
+		CreateContext: resourceCSBSBackupV1Create,
+		ReadContext:   resourceCSBSBackupV1Read,
+		DeleteContext: resourceCSBSBackupV1Delete,
 		Importer: &schema.ResourceImporter{
 			State: schema.ImportStatePassthrough,
 		},
@@ -189,12 +191,12 @@ func ResourceCSBSBackupV1() *schema.Resource {
 	}
 }
 
-func resourceCSBSBackupV1Create(d *schema.ResourceData, meta interface{}) error {
+func resourceCSBSBackupV1Create(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*cfg.Config)
 	backupClient, err := config.CsbsV1Client(config.GetRegion(d))
 
 	if err != nil {
-		return fmt.Errorf("Error creating csbs client: %s", err)
+		return diag.Errorf("Error creating csbs client: %s", err)
 	}
 
 	resourceID := d.Get("resource_id").(string)
@@ -211,7 +213,7 @@ func resourceCSBSBackupV1Create(d *schema.ResourceData, meta interface{}) error 
 
 	query, err := backup.QueryResourceBackupCapability(backupClient, queryOpts).ExtractQueryResponse()
 	if err != nil {
-		return fmt.Errorf("Error querying resource backup capability: %s", err)
+		return diag.Errorf("Error querying resource backup capability: %s", err)
 	}
 
 	if query[0].Result {
@@ -225,18 +227,18 @@ func resourceCSBSBackupV1Create(d *schema.ResourceData, meta interface{}) error 
 
 		checkpoint, err := backup.Create(backupClient, resourceID, createOpts).Extract()
 		if err != nil {
-			return fmt.Errorf("Error creating backup: %s", err)
+			return diag.Errorf("Error creating backup: %s", err)
 		}
 
 		backupOpts := backup.ListOpts{CheckpointId: checkpoint.Id}
 		backupItems, err := backup.List(backupClient, backupOpts)
 
 		if err != nil {
-			return fmt.Errorf("Error listing Backup: %s", err)
+			return diag.Errorf("Error listing Backup: %s", err)
 		}
 
 		if len(backupItems) == 0 {
-			return fmt.Errorf("Not able to find created Backup: %s", err)
+			return diag.Errorf("Not able to find created Backup: %s", err)
 		}
 
 		backupObject := backupItems[0]
@@ -255,25 +257,25 @@ func resourceCSBSBackupV1Create(d *schema.ResourceData, meta interface{}) error 
 		}
 		_, stateErr := stateConf.WaitForState()
 		if stateErr != nil {
-			return fmt.Errorf(
+			return diag.Errorf(
 				"Error waiting for Backup (%s) to become available: %s",
 				backupObject.Id, stateErr)
 		}
 
 	} else {
-		return fmt.Errorf("Error code: %s\n Error msg: %s", query[0].ErrorCode, query[0].ErrorMsg)
+		return diag.Errorf("Error code: %s\n Error msg: %s", query[0].ErrorCode, query[0].ErrorMsg)
 	}
 
-	return resourceCSBSBackupV1Read(d, meta)
+	return resourceCSBSBackupV1Read(ctx, d, meta)
 
 }
 
-func resourceCSBSBackupV1Read(d *schema.ResourceData, meta interface{}) error {
+func resourceCSBSBackupV1Read(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 
 	config := meta.(*cfg.Config)
 	backupClient, err := config.CsbsV1Client(config.GetRegion(d))
 	if err != nil {
-		return fmt.Errorf("Error creating csbs client: %s", err)
+		return diag.Errorf("Error creating csbs client: %s", err)
 	}
 
 	backupObject, err := backup.Get(backupClient, d.Id()).ExtractBackup()
@@ -286,7 +288,7 @@ func resourceCSBSBackupV1Read(d *schema.ResourceData, meta interface{}) error {
 			return nil
 		}
 
-		return fmt.Errorf("Error retrieving backup: %s", err)
+		return diag.Errorf("Error retrieving backup: %s", err)
 
 	}
 
@@ -300,7 +302,7 @@ func resourceCSBSBackupV1Read(d *schema.ResourceData, meta interface{}) error {
 	d.Set("backup_record_id", backupObject.CheckpointId)
 
 	if err := d.Set("tags", flattenCSBSTags(backupObject)); err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 
 	d.Set("region", config.GetRegion(d))
@@ -308,11 +310,11 @@ func resourceCSBSBackupV1Read(d *schema.ResourceData, meta interface{}) error {
 	return nil
 }
 
-func resourceCSBSBackupV1Delete(d *schema.ResourceData, meta interface{}) error {
+func resourceCSBSBackupV1Delete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*cfg.Config)
 	backupClient, err := config.CsbsV1Client(config.GetRegion(d))
 	if err != nil {
-		return fmt.Errorf("Error creating csbs client: %s", err)
+		return diag.Errorf("Error creating csbs client: %s", err)
 	}
 
 	stateConf := &resource.StateChangeConf{
@@ -326,7 +328,7 @@ func resourceCSBSBackupV1Delete(d *schema.ResourceData, meta interface{}) error 
 
 	_, err = stateConf.WaitForState()
 	if err != nil {
-		return fmt.Errorf("Error deleting csbs backup: %s", err)
+		return diag.Errorf("Error deleting csbs backup: %s", err)
 	}
 
 	d.SetId("")

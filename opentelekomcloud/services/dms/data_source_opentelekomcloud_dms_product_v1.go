@@ -1,9 +1,10 @@
 package dms
 
 import (
-	"fmt"
+	"context"
 	"log"
 
+	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/dms/v1/products"
 
@@ -12,7 +13,7 @@ import (
 
 func DataSourceDmsProductV1() *schema.Resource {
 	return &schema.Resource{
-		Read: dataSourceDmsProductV1Read,
+		ReadContext: dataSourceDmsProductV1Read,
 
 		Schema: map[string]*schema.Schema{
 			"engine": {
@@ -82,28 +83,28 @@ func getIObyIOtype(d *schema.ResourceData, IOs []products.IO) []products.IO {
 	return IOs
 }
 
-func dataSourceDmsProductV1Read(d *schema.ResourceData, meta interface{}) error {
+func dataSourceDmsProductV1Read(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*cfg.Config)
 	DmsV1Client, err := config.DmsV1Client(config.GetRegion(d))
 	if err != nil {
-		return fmt.Errorf("Error get OpenTelekomCloud dms product client: %s", err)
+		return diag.Errorf("Error get OpenTelekomCloud dms product client: %s", err)
 	}
 
 	instance_engine := d.Get("engine").(string)
 	if instance_engine != "rabbitmq" && instance_engine != "kafka" {
-		return fmt.Errorf("The instance_engine value should be 'rabbitmq' or 'kafka', not: %s", instance_engine)
+		return diag.Errorf("The instance_engine value should be 'rabbitmq' or 'kafka', not: %s", instance_engine)
 	}
 
 	v, err := products.Get(DmsV1Client, instance_engine).Extract()
 	if err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 	Products := v.Hourly
 
 	log.Printf("[DEBUG] Dms get products : %+v", Products)
 	instance_type := d.Get("instance_type").(string)
 	if instance_type != "single" && instance_type != "cluster" {
-		return fmt.Errorf("The instance_type value should be 'single' or 'cluster', not: %s", instance_type)
+		return diag.Errorf("The instance_type value should be 'single' or 'cluster', not: %s", instance_type)
 	}
 	var FilteredPd []products.Detail
 	var FilteredPdInfo []products.ProductInfo
@@ -166,7 +167,7 @@ func dataSourceDmsProductV1Read(d *schema.ResourceData, meta interface{}) error 
 	}
 
 	if len(FilteredPd) < 1 {
-		return fmt.Errorf("Your query returned no results. Please change your filters and try again.")
+		return diag.Errorf("Your query returned no results. Please change your filters and try again.")
 	}
 
 	pd := FilteredPd[0]
@@ -181,7 +182,7 @@ func dataSourceDmsProductV1Read(d *schema.ResourceData, meta interface{}) error 
 		log.Printf("[DEBUG] Dms product : %+v", pd)
 	} else {
 		if len(pd.ProductInfos) < 1 {
-			return fmt.Errorf("Your query returned no results. Please change your filters and try again.")
+			return diag.Errorf("Your query returned no results. Please change your filters and try again.")
 		}
 		pdInfo := pd.ProductInfos[0]
 		d.SetId(pdInfo.ProductID)

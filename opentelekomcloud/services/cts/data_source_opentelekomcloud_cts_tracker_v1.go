@@ -1,9 +1,10 @@
 package cts
 
 import (
-	"fmt"
+	"context"
 	"log"
 
+	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/cts/v1/tracker"
 
@@ -12,7 +13,7 @@ import (
 
 func DataSourceCTSTrackerV1() *schema.Resource {
 	return &schema.Resource{
-		Read: dataSourceCTSTrackerV1Read,
+		ReadContext: dataSourceCTSTrackerV1Read,
 
 		Schema: map[string]*schema.Schema{
 			"region": {
@@ -75,11 +76,11 @@ func DataSourceCTSTrackerV1() *schema.Resource {
 	}
 }
 
-func dataSourceCTSTrackerV1Read(d *schema.ResourceData, meta interface{}) error {
+func dataSourceCTSTrackerV1Read(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*cfg.Config)
 	ctsClient, err := config.CtsV1Client(config.GetProjectName(d))
 	if err != nil {
-		return fmt.Errorf("Error creating cts v1 client: %s", err)
+		return diag.Errorf("Error creating cts v1 client: %s", err)
 	}
 
 	listOpts := tracker.ListOpts{
@@ -91,16 +92,16 @@ func dataSourceCTSTrackerV1Read(d *schema.ResourceData, meta interface{}) error 
 
 	refinedTrackers, err := tracker.List(ctsClient, listOpts)
 	if err != nil {
-		return fmt.Errorf("Unable to retrieve cts tracker: %s", err)
+		return diag.Errorf("Unable to retrieve cts tracker: %s", err)
 	}
 
 	if len(refinedTrackers) < 1 {
-		return fmt.Errorf("Your query returned no results. " +
+		return diag.Errorf("Your query returned no results. " +
 			"Please change your search criteria and try again.")
 	}
 
 	if len(refinedTrackers) > 1 {
-		return fmt.Errorf("Your query returned more than one result." +
+		return diag.Errorf("Your query returned more than one result." +
 			" Please try a more specific search criteria")
 	}
 

@@ -1,9 +1,10 @@
 package smn
 
 import (
-	"fmt"
+	"context"
 	"log"
 
+	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/smn/v2/subscriptions"
@@ -14,9 +15,9 @@ import (
 
 func ResourceSubscription() *schema.Resource {
 	return &schema.Resource{
-		Create: resourceSubscriptionCreate,
-		Read:   resourceSubscriptionRead,
-		Delete: resourceSubscriptionDelete,
+		CreateContext: resourceSubscriptionCreate,
+		ReadContext:   resourceSubscriptionRead,
+		DeleteContext: resourceSubscriptionDelete,
 
 		Schema: map[string]*schema.Schema{
 			"topic_urn": {
@@ -64,11 +65,11 @@ func ResourceSubscription() *schema.Resource {
 	}
 }
 
-func resourceSubscriptionCreate(d *schema.ResourceData, meta interface{}) error {
+func resourceSubscriptionCreate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*cfg.Config)
 	client, err := config.SmnV2Client(config.GetProjectName(d))
 	if err != nil {
-		return fmt.Errorf("Error creating OpenTelekomCloud smn client: %s", err)
+		return diag.Errorf("Error creating OpenTelekomCloud smn client: %s", err)
 	}
 	topicUrn := d.Get("topic_urn").(string)
 	createOpts := subscriptions.CreateOps{
@@ -80,23 +81,23 @@ func resourceSubscriptionCreate(d *schema.ResourceData, meta interface{}) error 
 
 	subscription, err := subscriptions.Create(client, createOpts, topicUrn).Extract()
 	if err != nil {
-		return fmt.Errorf("Error getting subscription from result: %s", err)
+		return diag.Errorf("Error getting subscription from result: %s", err)
 	}
 	log.Printf("[DEBUG] Create : subscription.SubscriptionUrn %s", subscription.SubscriptionUrn)
 	if subscription.SubscriptionUrn != "" {
 		d.SetId(subscription.SubscriptionUrn)
 		d.Set("subscription_urn", subscription.SubscriptionUrn)
-		return resourceSubscriptionRead(d, meta)
+		return resourceSubscriptionRead(ctx, d, meta)
 	}
 
-	return fmt.Errorf("Unexpected conversion error in resourceSubscriptionCreate.")
+	return diag.Errorf("Unexpected conversion error in resourceSubscriptionCreate.")
 }
 
-func resourceSubscriptionDelete(d *schema.ResourceData, meta interface{}) error {
+func resourceSubscriptionDelete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*cfg.Config)
 	client, err := config.SmnV2Client(config.GetProjectName(d))
 	if err != nil {
-		return fmt.Errorf("Error creating OpenTelekomCloud smn client: %s", err)
+		return diag.Errorf("Error creating OpenTelekomCloud smn client: %s", err)
 	}
 
 	log.Printf("[DEBUG] Deleting subscription %s", d.Id())
@@ -104,18 +105,18 @@ func resourceSubscriptionDelete(d *schema.ResourceData, meta interface{}) error 
 	id := d.Id()
 	result := subscriptions.Delete(client, id)
 	if result.Err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 
 	log.Printf("[DEBUG] Successfully deleted subscription %s", id)
 	return nil
 }
 
-func resourceSubscriptionRead(d *schema.ResourceData, meta interface{}) error {
+func resourceSubscriptionRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*cfg.Config)
 	client, err := config.SmnV2Client(config.GetProjectName(d))
 	if err != nil {
-		return fmt.Errorf("Error creating OpenTelekomCloud smn client: %s", err)
+		return diag.Errorf("Error creating OpenTelekomCloud smn client: %s", err)
 	}
 
 	log.Printf("[DEBUG] Getting subscription %s", d.Id())
@@ -123,7 +124,7 @@ func resourceSubscriptionRead(d *schema.ResourceData, meta interface{}) error {
 	id := d.Id()
 	subscriptionsList, err := subscriptions.List(client).Extract()
 	if err != nil {
-		return fmt.Errorf("Error Get subscriptionsList: %s", err)
+		return diag.Errorf("Error Get subscriptionsList: %s", err)
 	}
 	log.Printf("[DEBUG] list : subscriptionsList %#v", subscriptionsList)
 	for _, subscription := range subscriptionsList {

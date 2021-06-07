@@ -1,10 +1,11 @@
 package kms
 
 import (
-	"fmt"
+	"context"
 	"log"
 	"time"
 
+	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/kms/v1/keys"
 
@@ -13,7 +14,7 @@ import (
 
 func DataSourceKmsDataKeyV1() *schema.Resource {
 	return &schema.Resource{
-		Read: dataSourceKmsDataKeyV1Read,
+		ReadContext: dataSourceKmsDataKeyV1Read,
 
 		Schema: map[string]*schema.Schema{
 			"key_id": {
@@ -43,12 +44,12 @@ func DataSourceKmsDataKeyV1() *schema.Resource {
 	}
 }
 
-func dataSourceKmsDataKeyV1Read(d *schema.ResourceData, meta interface{}) error {
+func dataSourceKmsDataKeyV1Read(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*cfg.Config)
 
 	KmsDataKeyV1Client, err := config.KmsKeyV1Client(config.GetRegion(d))
 	if err != nil {
-		return fmt.Errorf("Error creating OpenTelekomCloud kms key client: %s", err)
+		return diag.Errorf("Error creating OpenTelekomCloud kms key client: %s", err)
 	}
 
 	req := &keys.DataEncryptOpts{
@@ -59,7 +60,7 @@ func dataSourceKmsDataKeyV1Read(d *schema.ResourceData, meta interface{}) error 
 	log.Printf("[DEBUG] KMS get data key for key: %s", d.Get("key_id").(string))
 	v, err := keys.DataEncryptGet(KmsDataKeyV1Client, req).ExtractDataKey()
 	if err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 
 	d.SetId(time.Now().UTC().String())

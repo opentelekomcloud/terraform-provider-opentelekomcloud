@@ -1,16 +1,17 @@
 package sfs
 
 import (
-	"fmt"
+	"context"
 	"log"
 	"strconv"
 	"time"
 
 	"github.com/hashicorp/go-multierror"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
-	golangsdk "github.com/opentelekomcloud/gophertelekomcloud"
+	"github.com/opentelekomcloud/gophertelekomcloud"
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/sfs_turbo/v1/shares"
 
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common"
@@ -19,10 +20,10 @@ import (
 
 func ResourceSFSTurboShareV1() *schema.Resource {
 	return &schema.Resource{
-		Create: resourceSFSTurboShareV1Create,
-		Read:   resourceSFSTurboShareV1Read,
-		Update: resourceSFSTurboShareV1Update,
-		Delete: resourceSFSTurboShareV1Delete,
+		CreateContext: resourceSFSTurboShareV1Create,
+		ReadContext:   resourceSFSTurboShareV1Read,
+		UpdateContext: resourceSFSTurboShareV1Update,
+		DeleteContext: resourceSFSTurboShareV1Delete,
 
 		Importer: &schema.ResourceImporter{
 			State: schema.ImportStatePassthrough,
@@ -105,11 +106,11 @@ func ResourceSFSTurboShareV1() *schema.Resource {
 	}
 }
 
-func resourceSFSTurboShareV1Create(d *schema.ResourceData, meta interface{}) error {
+func resourceSFSTurboShareV1Create(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*cfg.Config)
 	client, err := config.SfsTurboV1Client(config.GetRegion(d))
 	if err != nil {
-		return fmt.Errorf("error creating OpenTelekomCloud SFSTurboV1 client: %s", err)
+		return diag.Errorf("error creating OpenTelekomCloud SFSTurboV1 client: %s", err)
 	}
 
 	createOpts := shares.CreateOpts{
@@ -129,7 +130,7 @@ func resourceSFSTurboShareV1Create(d *schema.ResourceData, meta interface{}) err
 	log.Printf("[DEBUG] Create SFS turbo with option: %+v", createOpts)
 	share, err := shares.Create(client, createOpts).Extract()
 	if err != nil {
-		return fmt.Errorf("error creating OpenTelekomCloud SFS Turbo: %s", err)
+		return diag.Errorf("error creating OpenTelekomCloud SFS Turbo: %s", err)
 	}
 
 	stateConf := &resource.StateChangeConf{
@@ -142,24 +143,24 @@ func resourceSFSTurboShareV1Create(d *schema.ResourceData, meta interface{}) err
 	}
 	_, err = stateConf.WaitForState()
 	if err != nil {
-		return fmt.Errorf("error waiting for SFS Turbo (%s) to become ready: %s", share.ID, err)
+		return diag.Errorf("error waiting for SFS Turbo (%s) to become ready: %s", share.ID, err)
 	}
 
 	d.SetId(share.ID)
 
-	return resourceSFSTurboShareV1Read(d, meta)
+	return resourceSFSTurboShareV1Read(ctx, d, meta)
 }
 
-func resourceSFSTurboShareV1Read(d *schema.ResourceData, meta interface{}) error {
+func resourceSFSTurboShareV1Read(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*cfg.Config)
 	client, err := config.SfsTurboV1Client(config.GetRegion(d))
 	if err != nil {
-		return fmt.Errorf("error creating OpenTelekomCloud SFSTurboV1 client: %s", err)
+		return diag.Errorf("error creating OpenTelekomCloud SFSTurboV1 client: %s", err)
 	}
 
 	share, err := shares.Get(client, d.Id()).Extract()
 	if err != nil {
-		return common.CheckDeleted(d, err, "Error deleting SFS Turbo")
+		return diag.FromErr(common.CheckDeleted(d, err, "Error deleting SFS Turbo"))
 	}
 
 	mErr := multierror.Append(nil,
@@ -178,30 +179,30 @@ func resourceSFSTurboShareV1Read(d *schema.ResourceData, meta interface{}) error
 	)
 
 	if mErr.ErrorOrNil() != nil {
-		return mErr
+		return diag.FromErr(mErr)
 	}
 
 	// n.Size is a string of float64, should convert it to int
 	if fSize, err := strconv.ParseFloat(share.Size, 64); err == nil {
 		if err = d.Set("size", int(fSize)); err != nil {
-			return fmt.Errorf("error reading size of SFS Turbo: %s", err)
+			return diag.Errorf("error reading size of SFS Turbo: %s", err)
 		}
 	}
 
 	return nil
 }
 
-func resourceSFSTurboShareV1Update(d *schema.ResourceData, meta interface{}) error {
+func resourceSFSTurboShareV1Update(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*cfg.Config)
 	client, err := config.SfsTurboV1Client(config.GetRegion(d))
 	if err != nil {
-		return fmt.Errorf("error creating OpenTelekomCloud SFSTurboV1 client: %s", err)
+		return diag.Errorf("error creating OpenTelekomCloud SFSTurboV1 client: %s", err)
 	}
 
 	if d.HasChange("size") {
 		oldSize, newSize := d.GetChange("size")
 		if oldSize.(int) > newSize.(int) {
-			return fmt.Errorf("shrinking OpenTelekomCloud SFS Turbo size is not supported")
+			return diag.Errorf("shrinking OpenTelekomCloud SFS Turbo size is not supported")
 		}
 
 		expandOpts := shares.ExpandOpts{
@@ -209,7 +210,7 @@ func resourceSFSTurboShareV1Update(d *schema.ResourceData, meta interface{}) err
 		}
 
 		if err := shares.Expand(client, d.Id(), expandOpts).ExtractErr(); err != nil {
-			return fmt.Errorf("error expanding OpenTelekomCloud Share File size: %s", err)
+			return diag.Errorf("error expanding OpenTelekomCloud Share File size: %s", err)
 		}
 
 		stateConf := &resource.StateChangeConf{
@@ -223,7 +224,7 @@ func resourceSFSTurboShareV1Update(d *schema.ResourceData, meta interface{}) err
 
 		_, err = stateConf.WaitForState()
 		if err != nil {
-			return fmt.Errorf("error updating OpenTelekomCloud SFS Turbo: %s", err)
+			return diag.Errorf("error updating OpenTelekomCloud SFS Turbo: %s", err)
 		}
 	}
 
@@ -236,7 +237,7 @@ func resourceSFSTurboShareV1Update(d *schema.ResourceData, meta interface{}) err
 		}
 
 		if err := shares.ChangeSG(client, d.Id(), changeSGOpts).ExtractErr(); err != nil {
-			return fmt.Errorf("error changing security group OpenTelekomCloud Share File size: %s", err)
+			return diag.Errorf("error changing security group OpenTelekomCloud Share File size: %s", err)
 		}
 
 		stateConf := &resource.StateChangeConf{
@@ -250,23 +251,23 @@ func resourceSFSTurboShareV1Update(d *schema.ResourceData, meta interface{}) err
 
 		_, err = stateConf.WaitForState()
 		if err != nil {
-			return fmt.Errorf("error updating OpenTelekomCloud SFS Turbo: %s", err)
+			return diag.Errorf("error updating OpenTelekomCloud SFS Turbo: %s", err)
 		}
 
 	}
 
-	return resourceSFSTurboShareV1Read(d, meta)
+	return resourceSFSTurboShareV1Read(ctx, d, meta)
 }
 
-func resourceSFSTurboShareV1Delete(d *schema.ResourceData, meta interface{}) error {
+func resourceSFSTurboShareV1Delete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*cfg.Config)
 	client, err := config.SfsTurboV1Client(config.GetRegion(d))
 	if err != nil {
-		return fmt.Errorf("error creating OpenTelekomCloud SFSTurboV1 client: %s", err)
+		return diag.Errorf("error creating OpenTelekomCloud SFSTurboV1 client: %s", err)
 	}
 
 	if err := shares.Delete(client, d.Id()).ExtractErr(); err != nil {
-		return common.CheckDeleted(d, err, "Error deleting SFS Turbo")
+		return diag.FromErr(common.CheckDeleted(d, err, "Error deleting SFS Turbo"))
 	}
 
 	stateConf := &resource.StateChangeConf{
@@ -280,7 +281,7 @@ func resourceSFSTurboShareV1Delete(d *schema.ResourceData, meta interface{}) err
 
 	_, err = stateConf.WaitForState()
 	if err != nil {
-		return fmt.Errorf("error deleting OpenTelekomCloud SFS Turbo: %s", err)
+		return diag.Errorf("error deleting OpenTelekomCloud SFS Turbo: %s", err)
 	}
 
 	d.SetId("")

@@ -1,9 +1,10 @@
 package dms
 
 import (
-	"fmt"
+	"context"
 	"log"
 
+	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/dms/v1/queues"
 
@@ -13,9 +14,9 @@ import (
 
 func ResourceDmsQueuesV1() *schema.Resource {
 	return &schema.Resource{
-		Create: resourceDmsQueuesV1Create,
-		Read:   resourceDmsQueuesV1Read,
-		Delete: resourceDmsQueuesV1Delete,
+		CreateContext: resourceDmsQueuesV1Create,
+		ReadContext:   resourceDmsQueuesV1Read,
+		DeleteContext: resourceDmsQueuesV1Delete,
 		Importer: &schema.ResourceImporter{
 			State: schema.ImportStatePassthrough,
 		},
@@ -80,11 +81,11 @@ func ResourceDmsQueuesV1() *schema.Resource {
 	}
 }
 
-func resourceDmsQueuesV1Create(d *schema.ResourceData, meta interface{}) error {
+func resourceDmsQueuesV1Create(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*cfg.Config)
 	DmsV1Client, err := config.DmsV1Client(config.GetRegion(d))
 	if err != nil {
-		return fmt.Errorf("Error creating OpenTelekomCloud dms queue client: %s", err)
+		return diag.Errorf("Error creating OpenTelekomCloud dms queue client: %s", err)
 	}
 
 	createOpts := &queues.CreateOps{
@@ -99,26 +100,26 @@ func resourceDmsQueuesV1Create(d *schema.ResourceData, meta interface{}) error {
 	log.Printf("[DEBUG] Create Options: %#v", createOpts)
 	v, err := queues.Create(DmsV1Client, createOpts).Extract()
 	if err != nil {
-		return fmt.Errorf("Error creating OpenTelekomCloud queue: %s", err)
+		return diag.Errorf("Error creating OpenTelekomCloud queue: %s", err)
 	}
 	log.Printf("[INFO] Queue ID: %s", v.ID)
 
 	// Store the queue ID now
 	d.SetId(v.ID)
 
-	return resourceDmsQueuesV1Read(d, meta)
+	return resourceDmsQueuesV1Read(ctx, d, meta)
 }
 
-func resourceDmsQueuesV1Read(d *schema.ResourceData, meta interface{}) error {
+func resourceDmsQueuesV1Read(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*cfg.Config)
 
 	DmsV1Client, err := config.DmsV1Client(config.GetRegion(d))
 	if err != nil {
-		return fmt.Errorf("Error creating OpenTelekomCloud dms queue client: %s", err)
+		return diag.Errorf("Error creating OpenTelekomCloud dms queue client: %s", err)
 	}
 	v, err := queues.Get(DmsV1Client, d.Id(), true).Extract()
 	if err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 
 	log.Printf("[DEBUG] Dms queue %s: %+v", d.Id(), v)
@@ -138,21 +139,21 @@ func resourceDmsQueuesV1Read(d *schema.ResourceData, meta interface{}) error {
 	return nil
 }
 
-func resourceDmsQueuesV1Delete(d *schema.ResourceData, meta interface{}) error {
+func resourceDmsQueuesV1Delete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*cfg.Config)
 	DmsV1Client, err := config.DmsV1Client(config.GetRegion(d))
 	if err != nil {
-		return fmt.Errorf("Error creating OpenTelekomCloud dms queue client: %s", err)
+		return diag.Errorf("Error creating OpenTelekomCloud dms queue client: %s", err)
 	}
 
 	v, err := queues.Get(DmsV1Client, d.Id(), false).Extract()
 	if err != nil {
-		return common.CheckDeleted(d, err, "queue")
+		return diag.FromErr(common.CheckDeleted(d, err, "queue"))
 	}
 
 	err = queues.Delete(DmsV1Client, d.Id()).ExtractErr()
 	if err != nil {
-		return fmt.Errorf("Error deleting OpenTelekomCloud queue: %s", err)
+		return diag.Errorf("Error deleting OpenTelekomCloud queue: %s", err)
 	}
 
 	log.Printf("[DEBUG] Dms queue %s: %+v deactivated.", d.Id(), v)

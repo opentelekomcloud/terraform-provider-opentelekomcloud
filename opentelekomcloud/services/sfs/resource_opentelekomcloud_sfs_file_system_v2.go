@@ -1,12 +1,13 @@
 package sfs
 
 import (
-	"fmt"
+	"context"
 	"log"
 	"strings"
 	"time"
 
 	"github.com/hashicorp/go-multierror"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/opentelekomcloud/gophertelekomcloud"
@@ -19,10 +20,10 @@ import (
 
 func ResourceSFSFileSystemV2() *schema.Resource {
 	return &schema.Resource{
-		Create: resourceSFSFileSystemV2Create,
-		Read:   resourceSFSFileSystemV2Read,
-		Update: resourceSFSFileSystemV2Update,
-		Delete: resourceSFSFileSystemV2Delete,
+		CreateContext: resourceSFSFileSystemV2Create,
+		ReadContext:   resourceSFSFileSystemV2Read,
+		UpdateContext: resourceSFSFileSystemV2Update,
+		DeleteContext: resourceSFSFileSystemV2Delete,
 
 		Importer: &schema.ResourceImporter{
 			State: schema.ImportStatePassthrough,
@@ -133,11 +134,11 @@ func resourceSFSMetadataV2(d *schema.ResourceData) map[string]string {
 	return meta
 }
 
-func resourceSFSFileSystemV2Create(d *schema.ResourceData, meta interface{}) error {
+func resourceSFSFileSystemV2Create(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*cfg.Config)
 	client, err := config.SfsV2Client(config.GetRegion(d))
 	if err != nil {
-		return fmt.Errorf("error creating OpenTelekomCloud File Share Client: %s", err)
+		return diag.Errorf("error creating OpenTelekomCloud File Share Client: %s", err)
 	}
 
 	createOpts := shares.CreateOpts{
@@ -152,7 +153,7 @@ func resourceSFSFileSystemV2Create(d *schema.ResourceData, meta interface{}) err
 
 	share, err := shares.Create(client, createOpts).Extract()
 	if err != nil {
-		return fmt.Errorf("error creating OpenTelekomCloud File Share: %s", err)
+		return diag.Errorf("error creating OpenTelekomCloud File Share: %s", err)
 	}
 
 	stateConf := &resource.StateChangeConf{
@@ -165,7 +166,7 @@ func resourceSFSFileSystemV2Create(d *schema.ResourceData, meta interface{}) err
 	}
 	_, err = stateConf.WaitForState()
 	if err != nil {
-		return fmt.Errorf("error creating share file: %s", err)
+		return diag.Errorf("error creating share file: %s", err)
 	}
 
 	accessLevel := d.Get("access_level").(string)
@@ -179,7 +180,7 @@ func resourceSFSFileSystemV2Create(d *schema.ResourceData, meta interface{}) err
 
 		_, err = shares.GrantAccess(client, share.ID, grantAccessOpts).ExtractAccess()
 		if err != nil {
-			return fmt.Errorf("error applying access rules to share file: %s", err)
+			return diag.Errorf("error applying access rules to share file: %s", err)
 		}
 	}
 
@@ -188,20 +189,20 @@ func resourceSFSFileSystemV2Create(d *schema.ResourceData, meta interface{}) err
 	if len(tagRaw) > 0 {
 		tagList := common.ExpandResourceTags(tagRaw)
 		if err := tags.Create(client, "sfs", share.ID, tagList).ExtractErr(); err != nil {
-			return fmt.Errorf("error setting tags of SFS File System: %s", err)
+			return diag.Errorf("error setting tags of SFS File System: %s", err)
 		}
 	}
 
 	d.SetId(share.ID)
 
-	return resourceSFSFileSystemV2Read(d, meta)
+	return resourceSFSFileSystemV2Read(ctx, d, meta)
 }
 
-func resourceSFSFileSystemV2Read(d *schema.ResourceData, meta interface{}) error {
+func resourceSFSFileSystemV2Read(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*cfg.Config)
 	client, err := config.SfsV2Client(config.GetRegion(d))
 	if err != nil {
-		return fmt.Errorf("error creating OpenTelekomCloud File Share: %s", err)
+		return diag.Errorf("error creating OpenTelekomCloud File Share: %s", err)
 	}
 
 	share, err := shares.Get(client, d.Id()).Extract()
@@ -211,7 +212,7 @@ func resourceSFSFileSystemV2Read(d *schema.ResourceData, meta interface{}) error
 			return nil
 		}
 
-		return fmt.Errorf("error retrieving OpenTelekomCloud Shares: %s", err)
+		return diag.Errorf("error retrieving OpenTelekomCloud Shares: %s", err)
 	}
 	mErr := multierror.Append(nil,
 		d.Set("name", share.Name),
@@ -240,17 +241,17 @@ func resourceSFSFileSystemV2Read(d *schema.ResourceData, meta interface{}) error
 		metadata[key] = val
 	}
 	if err := d.Set("metadata", metadata); err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 
 	// save tags
 	resourceTags, err := tags.Get(client, "sfs", d.Id()).Extract()
 	if err != nil {
-		return fmt.Errorf("error fetching OpenTelekomCloud SFS File System tags: %s", err)
+		return diag.Errorf("error fetching OpenTelekomCloud SFS File System tags: %s", err)
 	}
 	tagMap := common.TagsToMap(resourceTags)
 	if err := d.Set("tags", tagMap); err != nil {
-		return fmt.Errorf("error saving tags for OpenTelekomCloud SFS File System: %s", err)
+		return diag.Errorf("error saving tags for OpenTelekomCloud SFS File System: %s", err)
 	}
 
 	rules, err := shares.ListAccessRights(client, d.Id()).ExtractAccessRights()
@@ -260,7 +261,7 @@ func resourceSFSFileSystemV2Read(d *schema.ResourceData, meta interface{}) error
 			return nil
 		}
 
-		return fmt.Errorf("error retrieving OpenTelekomCloud Shares: %s", err)
+		return diag.Errorf("error retrieving OpenTelekomCloud Shares: %s", err)
 	}
 
 	attachResourceID := d.Get("access_to").(string)
@@ -280,17 +281,17 @@ func resourceSFSFileSystemV2Read(d *schema.ResourceData, meta interface{}) error
 	}
 
 	if mErr.ErrorOrNil() != nil {
-		return mErr
+		return diag.FromErr(mErr)
 	}
 
 	return nil
 }
 
-func resourceSFSFileSystemV2Update(d *schema.ResourceData, meta interface{}) error {
+func resourceSFSFileSystemV2Update(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*cfg.Config)
 	client, err := config.SfsV2Client(config.GetRegion(d))
 	if err != nil {
-		return fmt.Errorf("error updating OpenTelekomCloud Share File: %s", err)
+		return diag.Errorf("error updating OpenTelekomCloud Share File: %s", err)
 	}
 	var updateOpts shares.UpdateOpts
 
@@ -300,7 +301,7 @@ func resourceSFSFileSystemV2Update(d *schema.ResourceData, meta interface{}) err
 
 		_, err = shares.Update(client, d.Id(), updateOpts).Extract()
 		if err != nil {
-			return fmt.Errorf("error updating OpenTelekomCloud Share File: %s", err)
+			return diag.Errorf("error updating OpenTelekomCloud Share File: %s", err)
 		}
 	}
 	if d.HasChange("access_to") || d.HasChange("access_level") || d.HasChange("access_type") {
@@ -308,7 +309,7 @@ func resourceSFSFileSystemV2Update(d *schema.ResourceData, meta interface{}) err
 		if shareAccessID != "" {
 			deleteAccessOpts := shares.DeleteAccessOpts{AccessID: d.Get("share_access_id").(string)}
 			if err := shares.DeleteAccess(client, d.Id(), deleteAccessOpts).Err; err != nil {
-				return fmt.Errorf("error changing access rules for share file: %s", err)
+				return diag.Errorf("error changing access rules for share file: %s", err)
 			}
 		}
 
@@ -324,7 +325,7 @@ func resourceSFSFileSystemV2Update(d *schema.ResourceData, meta interface{}) err
 			log.Printf("[DEBUG] Grant Access Rules: %#v", grantAccessOpts)
 			_, err := shares.GrantAccess(client, d.Id(), grantAccessOpts).ExtractAccess()
 			if err != nil {
-				return fmt.Errorf("error changing access rules for share file: %s", err)
+				return diag.Errorf("error changing access rules for share file: %s", err)
 			}
 		}
 	}
@@ -335,12 +336,12 @@ func resourceSFSFileSystemV2Update(d *schema.ResourceData, meta interface{}) err
 		if oldSizeRaw.(int) < newSize {
 			expandOpts := shares.ExpandOpts{OSExtend: shares.OSExtendOpts{NewSize: newSize}}
 			if err := shares.Expand(client, d.Id(), expandOpts).ExtractErr(); err != nil {
-				return fmt.Errorf("error expanding OpenTelekomCloud Share File size: %s", err)
+				return diag.Errorf("error expanding OpenTelekomCloud Share File size: %s", err)
 			}
 		} else {
 			shrinkOpts := shares.ShrinkOpts{OSShrink: shares.OSShrinkOpts{NewSize: newSize}}
 			if err := shares.Shrink(client, d.Id(), shrinkOpts).ExtractErr(); err != nil {
-				return fmt.Errorf("error shrinking OpenTelekomCloud Share File size: %s", err)
+				return diag.Errorf("error shrinking OpenTelekomCloud Share File size: %s", err)
 			}
 		}
 	}
@@ -348,22 +349,22 @@ func resourceSFSFileSystemV2Update(d *schema.ResourceData, meta interface{}) err
 	// update tags
 	if d.HasChange("tags") {
 		if err := common.UpdateResourceTags(client, d, "sfs", d.Id()); err != nil {
-			return fmt.Errorf("error updating tags of SFS File System %s: %s", d.Id(), err)
+			return diag.Errorf("error updating tags of SFS File System %s: %s", d.Id(), err)
 		}
 	}
 
-	return resourceSFSFileSystemV2Read(d, meta)
+	return resourceSFSFileSystemV2Read(ctx, d, meta)
 }
 
-func resourceSFSFileSystemV2Delete(d *schema.ResourceData, meta interface{}) error {
+func resourceSFSFileSystemV2Delete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*cfg.Config)
 	client, err := config.SfsV2Client(config.GetRegion(d))
 	if err != nil {
-		return fmt.Errorf("error creating OpenTelekomCloud Shared File: %s", err)
+		return diag.Errorf("error creating OpenTelekomCloud Shared File: %s", err)
 	}
 	err = shares.Delete(client, d.Id()).ExtractErr()
 	if err != nil {
-		return fmt.Errorf("error deleting OpenTelekomCloud Shared File: %s", err)
+		return diag.Errorf("error deleting OpenTelekomCloud Shared File: %s", err)
 	}
 
 	stateConf := &resource.StateChangeConf{
@@ -377,7 +378,7 @@ func resourceSFSFileSystemV2Delete(d *schema.ResourceData, meta interface{}) err
 
 	_, err = stateConf.WaitForState()
 	if err != nil {
-		return fmt.Errorf("error deleting OpenTelekomCloud Share File: %s", err)
+		return diag.Errorf("error deleting OpenTelekomCloud Share File: %s", err)
 	}
 
 	d.SetId("")

@@ -1,8 +1,9 @@
 package rts
 
 import (
-	"fmt"
+	"context"
 
+	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/rts/v1/stackresources"
 
@@ -11,7 +12,7 @@ import (
 
 func DataSourceRTSStackResourcesV1() *schema.Resource {
 	return &schema.Resource{
-		Read: dataSourceRTSStackResourcesV1Read,
+		ReadContext: dataSourceRTSStackResourcesV1Read,
 
 		Schema: map[string]*schema.Schema{
 			"region": {
@@ -58,7 +59,7 @@ func DataSourceRTSStackResourcesV1() *schema.Resource {
 	}
 }
 
-func dataSourceRTSStackResourcesV1Read(d *schema.ResourceData, meta interface{}) error {
+func dataSourceRTSStackResourcesV1Read(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*cfg.Config)
 	orchestrationClient, err := config.OrchestrationV1Client(config.GetRegion(d))
 
@@ -70,16 +71,16 @@ func dataSourceRTSStackResourcesV1Read(d *schema.ResourceData, meta interface{})
 
 	refinedResources, err := stackresources.List(orchestrationClient, d.Get("stack_name").(string), listOpts)
 	if err != nil {
-		return fmt.Errorf("Unable to retrieve Stack Resources: %s", err)
+		return diag.Errorf("Unable to retrieve Stack Resources: %s", err)
 	}
 
 	if len(refinedResources) < 1 {
-		return fmt.Errorf("No matching resource found. " +
+		return diag.Errorf("No matching resource found. " +
 			"Please change your search criteria and try again.")
 	}
 
 	if len(refinedResources) > 1 {
-		return fmt.Errorf("Multiple resources matched; use additional constraints to reduce matches to a single resource")
+		return diag.Errorf("Multiple resources matched; use additional constraints to reduce matches to a single resource")
 	}
 
 	stackResource := refinedResources[0]

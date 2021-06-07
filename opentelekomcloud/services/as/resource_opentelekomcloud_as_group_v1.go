@@ -1,11 +1,13 @@
 package as
 
 import (
+	"context"
 	"fmt"
 	"log"
 	"time"
 
 	"github.com/hashicorp/go-multierror"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
@@ -21,10 +23,10 @@ import (
 
 func ResourceASGroup() *schema.Resource {
 	return &schema.Resource{
-		Create: resourceASGroupCreate,
-		Read:   resourceASGroupRead,
-		Update: resourceASGroupUpdate,
-		Delete: resourceASGroupDelete,
+		CreateContext: resourceASGroupCreate,
+		ReadContext:   resourceASGroupRead,
+		UpdateContext: resourceASGroupUpdate,
+		DeleteContext: resourceASGroupDelete,
 
 		Timeouts: &schema.ResourceTimeout{
 			Create: schema.DefaultTimeout(10 * time.Minute),
@@ -328,11 +330,11 @@ func refreshInstancesLifeStates(client *golangsdk.ServiceClient, groupID string,
 	}
 }
 
-func resourceASGroupCreate(d *schema.ResourceData, meta interface{}) error {
+func resourceASGroupCreate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*cfg.Config)
 	client, err := config.AutoscalingV1Client(config.GetRegion(d))
 	if err != nil {
-		return fmt.Errorf("error creating OpenTelekomCloud AutoScaling client: %s", err)
+		return diag.Errorf("error creating OpenTelekomCloud AutoScaling client: %s", err)
 	}
 
 	minNum := d.Get("min_instance_number").(int)
@@ -342,7 +344,7 @@ func resourceASGroupCreate(d *schema.ResourceData, meta interface{}) error {
 	log.Printf("[DEBUG] Max instance number is: %#v", maxNum)
 	log.Printf("[DEBUG] Desire instance number is: %#v", desireNum)
 	if desireNum < minNum || desireNum > maxNum {
-		return fmt.Errorf("invalid parameters: it should be `min_instance_number`<=`desire_instance_number`<=`max_instance_number`")
+		return diag.Errorf("invalid parameters: it should be `min_instance_number`<=`desire_instance_number`<=`max_instance_number`")
 	}
 	var initNum int
 	if desireNum > 0 {
@@ -382,7 +384,7 @@ func resourceASGroupCreate(d *schema.ResourceData, meta interface{}) error {
 	log.Printf("[DEBUG] Create Options: %#v", createOpts)
 	asGroupID, err := groups.Create(client, createOpts).Extract()
 	if err != nil {
-		return fmt.Errorf("error creating ASGroup: %s", err)
+		return diag.Errorf("error creating ASGroup: %s", err)
 	}
 
 	time.Sleep(5 * time.Second)
@@ -390,7 +392,7 @@ func resourceASGroupCreate(d *schema.ResourceData, meta interface{}) error {
 	// enable AutoScaling Group
 	enableResult := groups.Enable(client, asGroupID)
 	if enableResult.Err != nil {
-		return fmt.Errorf("error enabling ASGroup %q: %s", asGroupID, enableResult.Err)
+		return diag.Errorf("error enabling ASGroup %q: %s", asGroupID, enableResult.Err)
 	}
 	log.Printf("[DEBUG] Enable ASGroup %q success!", asGroupID)
 	// check all instances are inService
@@ -405,7 +407,7 @@ func resourceASGroupCreate(d *schema.ResourceData, meta interface{}) error {
 
 		_, err := stateConf.WaitForState()
 		if err != nil {
-			return fmt.Errorf("error waiting for instances in the ASGroup %q to become inservice: %s", asGroupID, err)
+			return diag.Errorf("error waiting for instances in the ASGroup %q to become inservice: %s", asGroupID, err)
 		}
 	}
 
@@ -414,20 +416,20 @@ func resourceASGroupCreate(d *schema.ResourceData, meta interface{}) error {
 	if len(tagRaw) > 0 {
 		tagList := common.ExpandResourceTags(tagRaw)
 		if err := tags.Create(client, "scaling_group_tag", asGroupID, tagList).ExtractErr(); err != nil {
-			return fmt.Errorf("error setting tags of AutoScaling Group: %s", err)
+			return diag.Errorf("error setting tags of AutoScaling Group: %s", err)
 		}
 	}
 
 	d.SetId(asGroupID)
 
-	return resourceASGroupRead(d, meta)
+	return resourceASGroupRead(ctx, d, meta)
 }
 
-func resourceASGroupRead(d *schema.ResourceData, meta interface{}) error {
+func resourceASGroupRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*cfg.Config)
 	client, err := config.AutoscalingV1Client(config.GetRegion(d))
 	if err != nil {
-		return fmt.Errorf("error creating OpenTelekomCloud autoscaling client: %s", err)
+		return diag.Errorf("error creating OpenTelekomCloud autoscaling client: %s", err)
 	}
 
 	asGroup, err := groups.Get(client, d.Id()).Extract()
@@ -437,7 +439,7 @@ func resourceASGroupRead(d *schema.ResourceData, meta interface{}) error {
 			return nil
 		}
 
-		return fmt.Errorf("error retrieving OpenTelekomCloud AutoScaling Group: %s", err)
+		return diag.Errorf("error retrieving OpenTelekomCloud AutoScaling Group: %s", err)
 	}
 
 	// set properties based on the read info
@@ -460,7 +462,7 @@ func resourceASGroupRead(d *schema.ResourceData, meta interface{}) error {
 	)
 	if len(asGroup.Notifications) >= 1 {
 		if err := d.Set("notifications", asGroup.Notifications); err != nil {
-			return err
+			return diag.FromErr(err)
 		}
 	}
 	if len(asGroup.LBaaSListeners) >= 1 {
@@ -472,42 +474,42 @@ func resourceASGroupRead(d *schema.ResourceData, meta interface{}) error {
 			listeners[i]["weight"] = listener.Weight
 		}
 		if err := d.Set("lbaas_listeners", listeners); err != nil {
-			return err
+			return diag.FromErr(err)
 		}
 	}
 
 	var opts instances.ListOptsBuilder
 	instancesList, err := getInstancesInGroup(client, d.Id(), opts)
 	if err != nil {
-		return fmt.Errorf("can not get the instances in ASGroup %q: %s", d.Id(), err)
+		return diag.Errorf("can not get the instances in ASGroup %q: %s", d.Id(), err)
 	}
 	instanceIDs := getInstancesIDs(instancesList)
 	if err := d.Set("instances", instanceIDs); err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 
 	if mErr.ErrorOrNil() != nil {
-		return mErr
+		return diag.FromErr(mErr)
 	}
 
 	// save tags
 	resourceTags, err := tags.Get(client, "scaling_group_tag", d.Id()).Extract()
 	if err != nil {
-		return fmt.Errorf("error fetching OpenTelekomCloud AutoScaling Group tags: %s", err)
+		return diag.Errorf("error fetching OpenTelekomCloud AutoScaling Group tags: %s", err)
 	}
 	tagMap := common.TagsToMap(resourceTags)
 	if err := d.Set("tags", tagMap); err != nil {
-		return fmt.Errorf("error saving tags for OpenTelekomCloud AutoScaling Group: %s", err)
+		return diag.Errorf("error saving tags for OpenTelekomCloud AutoScaling Group: %s", err)
 	}
 
 	return nil
 }
 
-func resourceASGroupUpdate(d *schema.ResourceData, meta interface{}) error {
+func resourceASGroupUpdate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*cfg.Config)
 	client, err := config.AutoscalingV1Client(config.GetRegion(d))
 	if err != nil {
-		return fmt.Errorf("error creating OpenTelekomCloud autoscaling client: %s", err)
+		return diag.Errorf("error creating OpenTelekomCloud autoscaling client: %s", err)
 	}
 	d.Partial(true)
 
@@ -519,7 +521,7 @@ func resourceASGroupUpdate(d *schema.ResourceData, meta interface{}) error {
 		log.Printf("[DEBUG] Max instance number is: %#v", maxNum)
 		log.Printf("[DEBUG] Desire instance number is: %#v", desireNum)
 		if desireNum < minNum || desireNum > maxNum {
-			return fmt.Errorf("invalid parameters: it should be min_instance_number<=desire_instance_number<=max_instance_number")
+			return diag.Errorf("invalid parameters: it should be min_instance_number<=desire_instance_number<=max_instance_number")
 		}
 
 	}
@@ -550,37 +552,37 @@ func resourceASGroupUpdate(d *schema.ResourceData, meta interface{}) error {
 	}
 	asGroupID, err := groups.Update(client, d.Id(), updateOpts).Extract()
 	if err != nil {
-		return fmt.Errorf("error updating ASGroup %q: %s", asGroupID, err)
+		return diag.Errorf("error updating ASGroup %q: %s", asGroupID, err)
 	}
 
 	// update tags
 	if d.HasChange("tags") {
 		if err := common.UpdateResourceTags(client, d, "scaling_group_tag", d.Id()); err != nil {
-			return fmt.Errorf("error updating tags of AutoScaling Group %s: %s", d.Id(), err)
+			return diag.Errorf("error updating tags of AutoScaling Group %s: %s", d.Id(), err)
 		}
 	}
 
 	d.Partial(false)
-	return resourceASGroupRead(d, meta)
+	return resourceASGroupRead(ctx, d, meta)
 }
 
-func resourceASGroupDelete(d *schema.ResourceData, meta interface{}) error {
+func resourceASGroupDelete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*cfg.Config)
 	client, err := config.AutoscalingV1Client(config.GetRegion(d))
 	if err != nil {
-		return fmt.Errorf("error creating OpenTelekomCloud AutoScaling client: %s", err)
+		return diag.Errorf("error creating OpenTelekomCloud AutoScaling client: %s", err)
 	}
 
 	log.Printf("[DEBUG] Begin to get instances of AutoScaling Group %q", d.Id())
 	var listOpts instances.ListOptsBuilder
 	instanceList, err := getInstancesInGroup(client, d.Id(), listOpts)
 	if err != nil {
-		return fmt.Errorf("error listing instances of AutoScaling Group: %s", err)
+		return diag.Errorf("error listing instances of AutoScaling Group: %s", err)
 	}
 	allLifeStatus := getInstancesLifeStates(instanceList)
 	for _, lifeCycleState := range allLifeStatus {
 		if lifeCycleState != "INSERVICE" {
-			return fmt.Errorf("[DEBUG] Can't delete the ASGroup %q: There are some instances not in INSERVICE but in %s, try again latter", d.Id(), lifeCycleState)
+			return diag.Errorf("[DEBUG] Can't delete the ASGroup %q: There are some instances not in INSERVICE but in %s, try again latter", d.Id(), lifeCycleState)
 		}
 	}
 	instanceIDs := getInstancesIDs(instanceList)
@@ -596,14 +598,14 @@ func resourceASGroupDelete(d *schema.ResourceData, meta interface{}) error {
 			}
 			_, err := groups.Update(client, d.Id(), updateOpts).Extract()
 			if err != nil {
-				return fmt.Errorf("error updating min_instance_number to 0: %s", err)
+				return diag.Errorf("error updating min_instance_number to 0: %s", err)
 			}
 		}
 		deleteInstances := d.Get("delete_instances").(string)
 		log.Printf("[DEBUG] The flag delete_instances in AutoScaling Group is %s", deleteInstances)
 
 		if err := instances.BatchDelete(client, d.Id(), instanceIDs, deleteInstances).ExtractErr(); err != nil {
-			return fmt.Errorf("error removing instancess of AutoScaling Group: %s", err)
+			return diag.Errorf("error removing instancess of AutoScaling Group: %s", err)
 		}
 		log.Printf("[DEBUG] Begin to remove instances of ASGroup %q", d.Id())
 
@@ -618,13 +620,13 @@ func resourceASGroupDelete(d *schema.ResourceData, meta interface{}) error {
 		_, err := stateConf.WaitForState()
 
 		if err != nil {
-			return fmt.Errorf("[DEBUG] Error removing instances from ASGroup %q: %s", d.Id(), err)
+			return diag.Errorf("[DEBUG] Error removing instances from ASGroup %q: %s", d.Id(), err)
 		}
 	}
 
 	log.Printf("[DEBUG] Begin to delete ASGroup %q", d.Id())
 	if err := groups.Delete(client, d.Id()).ExtractErr(); err != nil {
-		return fmt.Errorf("error deleting AutoScaling Group: %s", err)
+		return diag.Errorf("error deleting AutoScaling Group: %s", err)
 	}
 
 	return nil

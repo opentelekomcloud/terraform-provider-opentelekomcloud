@@ -1,9 +1,10 @@
 package csbs
 
 import (
-	"fmt"
+	"context"
 	"log"
 
+	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/csbs/v1/backup"
 
@@ -12,7 +13,7 @@ import (
 
 func DataSourceCSBSBackupV1() *schema.Resource {
 	return &schema.Resource{
-		Read: dataSourceCSBSBackupV1Read,
+		ReadContext: dataSourceCSBSBackupV1Read,
 
 		Schema: map[string]*schema.Schema{
 			"region": {
@@ -199,7 +200,7 @@ func DataSourceCSBSBackupV1() *schema.Resource {
 	}
 }
 
-func dataSourceCSBSBackupV1Read(d *schema.ResourceData, meta interface{}) error {
+func dataSourceCSBSBackupV1Read(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*cfg.Config)
 	backupClient, err := config.CsbsV1Client(config.GetRegion(d))
 
@@ -217,16 +218,16 @@ func dataSourceCSBSBackupV1Read(d *schema.ResourceData, meta interface{}) error 
 
 	refinedbackups, err := backup.List(backupClient, listOpts)
 	if err != nil {
-		return fmt.Errorf("Unable to retrieve backup: %s", err)
+		return diag.Errorf("Unable to retrieve backup: %s", err)
 	}
 
 	if len(refinedbackups) < 1 {
-		return fmt.Errorf("Your query returned no results. " +
+		return diag.Errorf("Your query returned no results. " +
 			"Please change your search criteria and try again.")
 	}
 
 	if len(refinedbackups) > 1 {
-		return fmt.Errorf("Your query returned more than one result." +
+		return diag.Errorf("Your query returned more than one result." +
 			" Please try a more specific search criteria")
 	}
 
@@ -249,7 +250,7 @@ func dataSourceCSBSBackupV1Read(d *schema.ResourceData, meta interface{}) error 
 	d.Set("vm_metadata", flattenCSBSVMMetadata(&backupObject))
 
 	if err := d.Set("tags", flattenCSBSTags(&backupObject)); err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 
 	d.Set("region", config.GetRegion(d))

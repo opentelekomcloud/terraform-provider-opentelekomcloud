@@ -2,13 +2,14 @@ package evs
 
 import (
 	"bytes"
+	"context"
 	"fmt"
 	"log"
 	"time"
 
 	"github.com/hashicorp/go-multierror"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/customdiff"
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/hashcode"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
@@ -17,6 +18,7 @@ import (
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/blockstorage/v2/volumes"
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/compute/v2/extensions/volumeattach"
 	volumes_v3 "github.com/opentelekomcloud/gophertelekomcloud/openstack/evs/v3/volumes"
+	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/helper/hashcode"
 
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common"
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common/cfg"
@@ -24,10 +26,10 @@ import (
 
 func ResourceBlockStorageVolumeV2() *schema.Resource {
 	return &schema.Resource{
-		Create: resourceBlockStorageVolumeV2Create,
-		Read:   resourceBlockStorageVolumeV2Read,
-		Update: resourceBlockStorageVolumeV2Update,
-		Delete: resourceBlockStorageVolumeV2Delete,
+		CreateContext: resourceBlockStorageVolumeV2Create,
+		ReadContext:   resourceBlockStorageVolumeV2Read,
+		UpdateContext: resourceBlockStorageVolumeV2Update,
+		DeleteContext: resourceBlockStorageVolumeV2Delete,
 		Importer: &schema.ResourceImporter{
 			State: schema.ImportStatePassthrough,
 		},
@@ -166,11 +168,11 @@ func resourceContainerTags(d *schema.ResourceData) map[string]string {
 	return m
 }
 
-func resourceBlockStorageVolumeV2Create(d *schema.ResourceData, meta interface{}) error {
+func resourceBlockStorageVolumeV2Create(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*cfg.Config)
 	blockStorageClient, err := config.BlockStorageV2Client(config.GetRegion(d))
 	if err != nil {
-		return fmt.Errorf("Error creating OpenTelekomCloud block storage client: %s", err)
+		return diag.Errorf("Error creating OpenTelekomCloud block storage client: %s", err)
 	}
 	metadata := resourceContainerMetadataV2(d)
 	if d.Get("device_type").(string) == "SCSI" {
@@ -194,7 +196,7 @@ func resourceBlockStorageVolumeV2Create(d *schema.ResourceData, meta interface{}
 	log.Printf("[DEBUG] Create Options: %#v", createOpts)
 	v, err := volumes.Create(blockStorageClient, createOpts).Extract()
 	if err != nil {
-		return fmt.Errorf("Error creating OpenTelekomCloud volume: %s", err)
+		return diag.Errorf("Error creating OpenTelekomCloud volume: %s", err)
 	}
 	log.Printf("[INFO] Volume ID: %s", v.ID)
 
@@ -214,31 +216,31 @@ func resourceBlockStorageVolumeV2Create(d *schema.ResourceData, meta interface{}
 
 	_, err = stateConf.WaitForState()
 	if err != nil {
-		return fmt.Errorf(
+		return diag.Errorf(
 			"Error waiting for volume (%s) to become ready: %s",
 			v.ID, err)
 	}
-	_, err = resourceEVSTagV2Create(d, meta, "volumes", v.ID, resourceContainerTags(d))
+	_, err = resourceEVSTagV2Create(ctx, d, meta, "volumes", v.ID, resourceContainerTags(d))
 	if err != nil {
-		return fmt.Errorf("Error creating tags for volume (%s): %s", v.ID, err)
+		return diag.Errorf("Error creating tags for volume (%s): %s", v.ID, err)
 	}
 
 	// Store the ID now
 	d.SetId(v.ID)
 
-	return resourceBlockStorageVolumeV2Read(d, meta)
+	return resourceBlockStorageVolumeV2Read(ctx, d, meta)
 }
 
-func resourceBlockStorageVolumeV2Read(d *schema.ResourceData, meta interface{}) error {
+func resourceBlockStorageVolumeV2Read(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*cfg.Config)
 	blockStorageClient, err := config.BlockStorageV2Client(config.GetRegion(d))
 	if err != nil {
-		return fmt.Errorf("Error creating OpenTelekomCloud block storage client: %s", err)
+		return diag.Errorf("Error creating OpenTelekomCloud block storage client: %s", err)
 	}
 
 	v, err := volumes.Get(blockStorageClient, d.Id()).Extract()
 	if err != nil {
-		return common.CheckDeleted(d, err, "volume")
+		return diag.FromErr(common.CheckDeleted(d, err, "volume"))
 	}
 
 	log.Printf("[DEBUG] Retrieved volume %s: %+v", d.Id(), v)
@@ -252,7 +254,7 @@ func resourceBlockStorageVolumeV2Read(d *schema.ResourceData, meta interface{}) 
 		d.Set("volume_type", v.VolumeType),
 	)
 	if mErr.ErrorOrNil() != nil {
-		return mErr
+		return diag.FromErr(mErr)
 	}
 	// NOTE: This tries to remove system metadata.
 	md := make(map[string]string)
@@ -269,7 +271,7 @@ OUTER:
 	}
 
 	if err := d.Set("metadata", md); err != nil {
-		return fmt.Errorf("[DEBUG] Error saving metadata to state for OpenTelekomCloud block storage (%s): %s", d.Id(), err)
+		return diag.Errorf("[DEBUG] Error saving metadata to state for OpenTelekomCloud block storage (%s): %s", d.Id(), err)
 	}
 	d.Set("region", config.GetRegion(d))
 
@@ -282,11 +284,11 @@ OUTER:
 		log.Printf("[DEBUG] attachment: %v", attachment)
 	}
 	if err := d.Set("attachment", attachments); err != nil {
-		return fmt.Errorf("[DEBUG] Error saving attachment to state for OpenTelekomCloud block storage (%s): %s", d.Id(), err)
+		return diag.Errorf("[DEBUG] Error saving attachment to state for OpenTelekomCloud block storage (%s): %s", d.Id(), err)
 	}
 	taglist, err := resourceEVSTagV2Get(d, meta, "volumes", v.ID)
 	if err != nil {
-		return fmt.Errorf("Error fetching tags for volume (%s): %s", v.ID, err)
+		return diag.Errorf("Error fetching tags for volume (%s): %s", v.ID, err)
 	}
 	d.Set("tags", taglist)
 
@@ -298,12 +300,12 @@ OUTER:
 	if d.Get("device_type").(string) == "SCSI" {
 		blockStorageClientV3, err := config.BlockStorageV3Client(config.GetRegion(d))
 		if err != nil {
-			return fmt.Errorf("Error creating OpenTelekomCloud block storage client: %s", err)
+			return diag.Errorf("Error creating OpenTelekomCloud block storage client: %s", err)
 		}
 
 		v, err := volumes_v3.Get(blockStorageClientV3, d.Id()).Extract()
 		if err != nil {
-			return common.CheckDeleted(d, err, "volume")
+			return diag.FromErr(common.CheckDeleted(d, err, "volume"))
 		}
 
 		log.Printf("[DEBUG] Retrieved volume %s: %+v", d.Id(), v)
@@ -314,11 +316,11 @@ OUTER:
 	return nil
 }
 
-func resourceBlockStorageVolumeV2Update(d *schema.ResourceData, meta interface{}) error {
+func resourceBlockStorageVolumeV2Update(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*cfg.Config)
 	blockStorageClient, err := config.BlockStorageV2Client(config.GetRegion(d))
 	if err != nil {
-		return fmt.Errorf("Error creating OpenTelekomCloud block storage client: %s", err)
+		return diag.Errorf("Error creating OpenTelekomCloud block storage client: %s", err)
 	}
 
 	updateOpts := volumes.UpdateOpts{
@@ -332,15 +334,15 @@ func resourceBlockStorageVolumeV2Update(d *schema.ResourceData, meta interface{}
 
 	_, err = volumes.Update(blockStorageClient, d.Id(), updateOpts).Extract()
 	if err != nil {
-		return fmt.Errorf("Error updating OpenTelekomCloud volume: %s", err)
+		return diag.Errorf("Error updating OpenTelekomCloud volume: %s", err)
 	}
 	if d.HasChange("tags") {
-		_, err = resourceEVSTagV2Create(d, meta, "volumes", d.Id(), resourceContainerTags(d))
+		_, err = resourceEVSTagV2Create(ctx, d, meta, "volumes", d.Id(), resourceContainerTags(d))
 	}
 
 	if d.HasChange("size") {
 		if err := extendSize(d, blockStorageClient); err != nil {
-			return err
+			return diag.FromErr(err)
 		}
 
 		stateConf := &resource.StateChangeConf{
@@ -354,11 +356,11 @@ func resourceBlockStorageVolumeV2Update(d *schema.ResourceData, meta interface{}
 
 		_, err = stateConf.WaitForState()
 		if err != nil {
-			return fmt.Errorf("error waiting for volume (%s) to become ready after resize: %s", d.Id(), err)
+			return diag.Errorf("error waiting for volume (%s) to become ready after resize: %s", d.Id(), err)
 		}
 	}
 
-	return resourceBlockStorageVolumeV2Read(d, meta)
+	return resourceBlockStorageVolumeV2Read(ctx, d, meta)
 }
 
 func extendSize(d *schema.ResourceData, client *golangsdk.ServiceClient) error {
@@ -374,28 +376,28 @@ func extendSize(d *schema.ResourceData, client *golangsdk.ServiceClient) error {
 	return nil
 }
 
-func resourceBlockStorageVolumeV2Delete(d *schema.ResourceData, meta interface{}) error {
+func resourceBlockStorageVolumeV2Delete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*cfg.Config)
 	blockStorageClient, err := config.BlockStorageV2Client(config.GetRegion(d))
 	if err != nil {
-		return fmt.Errorf("Error creating OpenTelekomCloud block storage client: %s", err)
+		return diag.Errorf("Error creating OpenTelekomCloud block storage client: %s", err)
 	}
 
 	v, err := volumes.Get(blockStorageClient, d.Id()).Extract()
 	if err != nil {
-		return common.CheckDeleted(d, err, "volume")
+		return diag.FromErr(common.CheckDeleted(d, err, "volume"))
 	}
 
 	// make sure this volume is detached from all instances before deleting
 	if len(v.Attachments) > 0 {
 		log.Printf("[DEBUG] detaching volumes")
 		if computeClient, err := config.ComputeV2Client(config.GetRegion(d)); err != nil {
-			return err
+			return diag.FromErr(err)
 		} else {
 			for _, volumeAttachment := range v.Attachments {
 				log.Printf("[DEBUG] Attachment: %v", volumeAttachment)
 				if err := volumeattach.Delete(computeClient, volumeAttachment.ServerID, volumeAttachment.ID).ExtractErr(); err != nil {
-					return err
+					return diag.FromErr(err)
 				}
 			}
 
@@ -410,7 +412,7 @@ func resourceBlockStorageVolumeV2Delete(d *schema.ResourceData, meta interface{}
 
 			_, err = stateConf.WaitForState()
 			if err != nil {
-				return fmt.Errorf(
+				return diag.Errorf(
 					"Error waiting for volume (%s) to become available: %s",
 					d.Id(), err)
 			}
@@ -426,7 +428,7 @@ func resourceBlockStorageVolumeV2Delete(d *schema.ResourceData, meta interface{}
 	// If this is true, just move on. It'll eventually delete.
 	if v.Status != "deleting" {
 		if err := volumes.Delete(blockStorageClient, d.Id(), deleteOpts).ExtractErr(); err != nil {
-			return common.CheckDeleted(d, err, "volume")
+			return diag.FromErr(common.CheckDeleted(d, err, "volume"))
 		}
 	}
 
@@ -444,7 +446,7 @@ func resourceBlockStorageVolumeV2Delete(d *schema.ResourceData, meta interface{}
 
 	_, err = stateConf.WaitForState()
 	if err != nil {
-		return fmt.Errorf(
+		return diag.Errorf(
 			"Error waiting for volume (%s) to delete: %s",
 			d.Id(), err)
 	}
@@ -499,6 +501,6 @@ func suppressMetadataPolicy(k, old, new string, _ *schema.ResourceData) bool {
 	return old == new
 }
 
-func isDownScale(old, new, _ interface{}) bool {
+func isDownScale(ctx context.Context, old, new, _ interface{}) bool {
 	return old.(int) > new.(int)
 }

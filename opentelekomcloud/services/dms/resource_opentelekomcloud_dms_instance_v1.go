@@ -1,10 +1,11 @@
 package dms
 
 import (
-	"fmt"
+	"context"
 	"log"
 	"time"
 
+	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/opentelekomcloud/gophertelekomcloud"
@@ -16,10 +17,10 @@ import (
 
 func ResourceDmsInstancesV1() *schema.Resource {
 	return &schema.Resource{
-		Create: resourceDmsInstancesV1Create,
-		Read:   resourceDmsInstancesV1Read,
-		Update: resourceDmsInstancesV1Update,
-		Delete: resourceDmsInstancesV1Delete,
+		CreateContext: resourceDmsInstancesV1Create,
+		ReadContext:   resourceDmsInstancesV1Read,
+		UpdateContext: resourceDmsInstancesV1Update,
+		DeleteContext: resourceDmsInstancesV1Delete,
 		Importer: &schema.ResourceImporter{
 			State: schema.ImportStatePassthrough,
 		},
@@ -151,11 +152,11 @@ func ResourceDmsInstancesV1() *schema.Resource {
 	}
 }
 
-func resourceDmsInstancesV1Create(d *schema.ResourceData, meta interface{}) error {
+func resourceDmsInstancesV1Create(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*cfg.Config)
 	DmsV1Client, err := config.DmsV1Client(config.GetRegion(d))
 	if err != nil {
-		return fmt.Errorf("Error creating OpenTelekomCloud dms instance client: %s", err)
+		return diag.Errorf("Error creating OpenTelekomCloud dms instance client: %s", err)
 	}
 
 	ssl_enable := false
@@ -186,7 +187,7 @@ func resourceDmsInstancesV1Create(d *schema.ResourceData, meta interface{}) erro
 	log.Printf("[DEBUG] Create Options: %#v", createOpts)
 	v, err := instances.Create(DmsV1Client, createOpts).Extract()
 	if err != nil {
-		return fmt.Errorf("Error creating OpenTelekomCloud instance: %s", err)
+		return diag.Errorf("Error creating OpenTelekomCloud instance: %s", err)
 	}
 	log.Printf("[INFO] instance ID: %s", v.InstanceID)
 
@@ -200,7 +201,7 @@ func resourceDmsInstancesV1Create(d *schema.ResourceData, meta interface{}) erro
 	}
 	_, err = stateConf.WaitForState()
 	if err != nil {
-		return fmt.Errorf(
+		return diag.Errorf(
 			"Error waiting for instance (%s) to become ready: %s",
 			v.InstanceID, err)
 	}
@@ -208,19 +209,19 @@ func resourceDmsInstancesV1Create(d *schema.ResourceData, meta interface{}) erro
 	// Store the instance ID now
 	d.SetId(v.InstanceID)
 
-	return resourceDmsInstancesV1Read(d, meta)
+	return resourceDmsInstancesV1Read(ctx, d, meta)
 }
 
-func resourceDmsInstancesV1Read(d *schema.ResourceData, meta interface{}) error {
+func resourceDmsInstancesV1Read(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*cfg.Config)
 
 	DmsV1Client, err := config.DmsV1Client(config.GetRegion(d))
 	if err != nil {
-		return fmt.Errorf("Error creating OpenTelekomCloud dms instance client: %s", err)
+		return diag.Errorf("Error creating OpenTelekomCloud dms instance client: %s", err)
 	}
 	v, err := instances.Get(DmsV1Client, d.Id()).Extract()
 	if err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 
 	log.Printf("[DEBUG] Dms instance %s: %+v", d.Id(), v)
@@ -255,11 +256,11 @@ func resourceDmsInstancesV1Read(d *schema.ResourceData, meta interface{}) error 
 	return nil
 }
 
-func resourceDmsInstancesV1Update(d *schema.ResourceData, meta interface{}) error {
+func resourceDmsInstancesV1Update(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*cfg.Config)
 	DmsV1Client, err := config.DmsV1Client(config.GetRegion(d))
 	if err != nil {
-		return fmt.Errorf("Error updating OpenTelekomCloud dms instance client: %s", err)
+		return diag.Errorf("Error updating OpenTelekomCloud dms instance client: %s", err)
 	}
 	var updateOpts instances.UpdateOpts
 	if d.HasChange("name") {
@@ -284,27 +285,27 @@ func resourceDmsInstancesV1Update(d *schema.ResourceData, meta interface{}) erro
 
 	err = instances.Update(DmsV1Client, d.Id(), updateOpts).Err
 	if err != nil {
-		return fmt.Errorf("Error updating OpenTelekomCloud Dms Instance: %s", err)
+		return diag.Errorf("Error updating OpenTelekomCloud Dms Instance: %s", err)
 	}
 
-	return resourceDmsInstancesV1Read(d, meta)
+	return resourceDmsInstancesV1Read(ctx, d, meta)
 }
 
-func resourceDmsInstancesV1Delete(d *schema.ResourceData, meta interface{}) error {
+func resourceDmsInstancesV1Delete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*cfg.Config)
 	DmsV1Client, err := config.DmsV1Client(config.GetRegion(d))
 	if err != nil {
-		return fmt.Errorf("Error creating OpenTelekomCloud dms instance client: %s", err)
+		return diag.Errorf("Error creating OpenTelekomCloud dms instance client: %s", err)
 	}
 
 	_, err = instances.Get(DmsV1Client, d.Id()).Extract()
 	if err != nil {
-		return common.CheckDeleted(d, err, "instance")
+		return diag.FromErr(common.CheckDeleted(d, err, "instance"))
 	}
 
 	err = instances.Delete(DmsV1Client, d.Id()).ExtractErr()
 	if err != nil {
-		return fmt.Errorf("Error deleting OpenTelekomCloud instance: %s", err)
+		return diag.Errorf("Error deleting OpenTelekomCloud instance: %s", err)
 	}
 
 	// Wait for the instance to delete before moving on.
@@ -321,7 +322,7 @@ func resourceDmsInstancesV1Delete(d *schema.ResourceData, meta interface{}) erro
 
 	_, err = stateConf.WaitForState()
 	if err != nil {
-		return fmt.Errorf(
+		return diag.Errorf(
 			"Error waiting for instance (%s) to delete: %s",
 			d.Id(), err)
 	}

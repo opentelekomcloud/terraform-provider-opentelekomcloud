@@ -1,15 +1,17 @@
 package as
 
 import (
+	"context"
 	"crypto/sha1"
 	"encoding/hex"
 	"fmt"
 	"log"
 
 	"github.com/hashicorp/go-multierror"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
-	"github.com/opentelekomcloud/gophertelekomcloud"
+	golangsdk "github.com/opentelekomcloud/gophertelekomcloud"
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/autoscaling/v1/configurations"
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/autoscaling/v1/groups"
 
@@ -19,9 +21,9 @@ import (
 
 func ResourceASConfiguration() *schema.Resource {
 	return &schema.Resource{
-		Create: resourceASConfigurationCreate,
-		Read:   resourceASConfigurationRead,
-		Delete: resourceASConfigurationDelete,
+		CreateContext: resourceASConfigurationCreate,
+		ReadContext:   resourceASConfigurationRead,
+		DeleteContext: resourceASConfigurationDelete,
 
 		CustomizeDiff: validateDiskSize,
 
@@ -293,11 +295,11 @@ func getInstanceConfig(d *schema.ResourceData) configurations.InstanceConfigOpts
 	return instanceConfigOpts
 }
 
-func resourceASConfigurationCreate(d *schema.ResourceData, meta interface{}) error {
+func resourceASConfigurationCreate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*cfg.Config)
 	client, err := config.AutoscalingV1Client(config.GetRegion(d))
 	if err != nil {
-		return fmt.Errorf("error creating OpenTelekomCloud AutoScaling client: %s", err)
+		return diag.Errorf("error creating OpenTelekomCloud AutoScaling client: %s", err)
 	}
 
 	createOpts := configurations.CreateOpts{
@@ -308,23 +310,23 @@ func resourceASConfigurationCreate(d *schema.ResourceData, meta interface{}) err
 	log.Printf("[DEBUG] Create AS configuration Options: %#v", createOpts)
 	asConfigID, err := configurations.Create(client, createOpts).Extract()
 	if err != nil {
-		return fmt.Errorf("error creating ASConfiguration: %s", err)
+		return diag.Errorf("error creating ASConfiguration: %s", err)
 	}
 
 	d.SetId(asConfigID)
-	return resourceASConfigurationRead(d, meta)
+	return resourceASConfigurationRead(ctx, d, meta)
 }
 
-func resourceASConfigurationRead(d *schema.ResourceData, meta interface{}) error {
+func resourceASConfigurationRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*cfg.Config)
 	client, err := config.AutoscalingV1Client(config.GetRegion(d))
 	if err != nil {
-		return fmt.Errorf("error creating OpenTelekomCloud AutoScaling client: %s", err)
+		return diag.Errorf("error creating OpenTelekomCloud AutoScaling client: %s", err)
 	}
 
 	asConfig, err := configurations.Get(client, d.Id()).Extract()
 	if err != nil {
-		return common.CheckDeleted(d, err, "AS Configuration")
+		return diag.FromErr(common.CheckDeleted(d, err, "AS Configuration"))
 	}
 
 	log.Printf("[DEBUG] Retrieved ASConfiguration %q: %+v", d.Id(), asConfig)
@@ -353,26 +355,26 @@ func resourceASConfigurationRead(d *schema.ResourceData, meta interface{}) error
 	instanceConfigList := []interface{}{instanceConfigInfo}
 
 	if err := d.Set("instance_config", instanceConfigList); err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 
 	if mErr.ErrorOrNil() != nil {
-		return mErr
+		return diag.FromErr(mErr)
 	}
 
 	return nil
 }
 
-func resourceASConfigurationDelete(d *schema.ResourceData, meta interface{}) error {
+func resourceASConfigurationDelete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*cfg.Config)
 	client, err := config.AutoscalingV1Client(config.GetRegion(d))
 	if err != nil {
-		return fmt.Errorf("error creating OpenTelekomCloud AutoScaling client: %s", err)
+		return diag.Errorf("error creating OpenTelekomCloud AutoScaling client: %s", err)
 	}
 
 	asConfigGroups, err := getASGroupsByConfiguration(client, d.Id())
 	if err != nil {
-		return fmt.Errorf("error getting AS groups by configuration ID %q: %s", d.Id(), err)
+		return diag.Errorf("error getting AS groups by configuration ID %q: %s", d.Id(), err)
 	}
 
 	if len(asConfigGroups) > 0 {
@@ -380,12 +382,12 @@ func resourceASConfigurationDelete(d *schema.ResourceData, meta interface{}) err
 		for _, group := range asConfigGroups {
 			groupIDs = append(groupIDs, group.ID)
 		}
-		return fmt.Errorf("can not delete the configuration %q, it is used by AS groups %s", d.Id(), groupIDs)
+		return diag.Errorf("can not delete the configuration %q, it is used by AS groups %s", d.Id(), groupIDs)
 	}
 
 	log.Printf("[DEBUG] Begin to delete AS configuration %q", d.Id())
 	if err := configurations.Delete(client, d.Id()).ExtractErr(); err != nil {
-		return fmt.Errorf("error deleting AS configuration: %s", err)
+		return diag.Errorf("error deleting AS configuration: %s", err)
 	}
 
 	return nil
@@ -404,7 +406,7 @@ func getASGroupsByConfiguration(client *golangsdk.ServiceClient, configID string
 	return asGroups, err
 }
 
-func validateDiskSize(d *schema.ResourceDiff, _ interface{}) error {
+func validateDiskSize(ctx context.Context, d *schema.ResourceDiff, _ interface{}) error {
 	instanceConfigData := d.Get("instance_config").([]interface{})[0].(map[string]interface{})
 	disksData := instanceConfigData["disk"].([]interface{})
 	mErr := &multierror.Error{}
