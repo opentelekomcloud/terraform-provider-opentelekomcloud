@@ -51,10 +51,10 @@ checksum:
 signs:
   - artifacts: checksum
     args:
-      - '--output'
-      - '${signature}'
-      - '--detach-sign'
-      - '${artifact}'
+      - "--output"
+      - "${signature}"
+      - "--detach-sign"
+      - "${artifact}"
 release:
   # Visit your project's GitHub Releases page to publish this release.
   github:
