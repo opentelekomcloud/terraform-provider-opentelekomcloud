@@ -2,12 +2,14 @@ package obs
 
 import (
 	"bytes"
+	"context"
 	"encoding/json"
 	"fmt"
 	"log"
 	"net/url"
 
 	"github.com/hashicorp/go-multierror"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/obs"
@@ -19,10 +21,10 @@ import (
 
 func ResourceObsBucket() *schema.Resource {
 	return &schema.Resource{
-		Create: resourceObsBucketCreate,
-		Read:   resourceObsBucketRead,
-		Update: resourceObsBucketUpdate,
-		Delete: resourceObsBucketDelete,
+		CreateContext: resourceObsBucketCreate,
+		ReadContext:   resourceObsBucketRead,
+		UpdateContext: resourceObsBucketUpdate,
+		DeleteContext: resourceObsBucketDelete,
 		Importer: &schema.ResourceImporter{
 			State: schema.ImportStatePassthrough,
 		},
@@ -247,11 +249,11 @@ func ResourceObsBucket() *schema.Resource {
 	}
 }
 
-func resourceObsBucketCreate(d *schema.ResourceData, meta interface{}) error {
+func resourceObsBucketCreate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*cfg.Config)
 	client, err := config.NewObjectStorageClient(config.GetRegion(d))
 	if err != nil {
-		return fmt.Errorf("error creating OBS client: %s", err)
+		return diag.Errorf("error creating OBS client: %s", err)
 	}
 
 	bucket := d.Get("bucket").(string)
@@ -267,37 +269,37 @@ func resourceObsBucketCreate(d *schema.ResourceData, meta interface{}) error {
 
 	_, err = client.CreateBucket(opts)
 	if err != nil {
-		return GetObsError("Error creating bucket", bucket, err)
+		return diag.FromErr(GetObsError("Error creating bucket", bucket, err))
 	}
 
 	// Assign the bucket name as the resource ID
 	d.SetId(bucket)
-	return resourceObsBucketUpdate(d, meta)
+	return resourceObsBucketUpdate(ctx, d, meta)
 }
 
-func resourceObsBucketUpdate(d *schema.ResourceData, meta interface{}) error {
+func resourceObsBucketUpdate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*cfg.Config)
 	client, err := config.NewObjectStorageClient(config.GetRegion(d))
 	if err != nil {
-		return fmt.Errorf("error creating OBS client: %s", err)
+		return diag.Errorf("error creating OBS client: %s", err)
 	}
 
 	log.Printf("[DEBUG] Update OBS bucket %s", d.Id())
 	if d.HasChange("acl") && !d.IsNewResource() {
 		if err := resourceObsBucketAclUpdate(client, d); err != nil {
-			return err
+			return diag.FromErr(err)
 		}
 	}
 
 	if d.HasChange("storage_class") && !d.IsNewResource() {
 		if err := resourceObsBucketClassUpdate(client, d); err != nil {
-			return err
+			return diag.FromErr(err)
 		}
 	}
 
 	if d.HasChange("tags") {
 		if err := resourceObsBucketTagsUpdate(client, d); err != nil {
-			return err
+			return diag.FromErr(err)
 		}
 	}
 
@@ -305,44 +307,44 @@ func resourceObsBucketUpdate(d *schema.ResourceData, meta interface{}) error {
 		versioning := d.Get("versioning").(bool)
 		if versioning || !d.IsNewResource() {
 			if err := resourceObsBucketVersioningUpdate(client, d); err != nil {
-				return err
+				return diag.FromErr(err)
 			}
 		}
 	}
 
 	if d.HasChange("logging") {
 		if err := resourceObsBucketLoggingUpdate(client, d); err != nil {
-			return err
+			return diag.FromErr(err)
 		}
 	}
 
 	if d.HasChange("lifecycle_rule") {
 		if err := resourceObsBucketLifecycleUpdate(client, d); err != nil {
-			return err
+			return diag.FromErr(err)
 		}
 	}
 
 	if d.HasChange("website") {
 		if err := resourceObsBucketWebsiteUpdate(client, d); err != nil {
-			return err
+			return diag.FromErr(err)
 		}
 	}
 
 	if d.HasChange("cors_rule") {
 		if err := resourceObsBucketCorsUpdate(client, d); err != nil {
-			return err
+			return diag.FromErr(err)
 		}
 	}
 
-	return resourceObsBucketRead(d, meta)
+	return resourceObsBucketRead(ctx, d, meta)
 }
 
-func resourceObsBucketRead(d *schema.ResourceData, meta interface{}) error {
+func resourceObsBucketRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*cfg.Config)
 	region := config.GetRegion(d)
 	client, err := config.NewObjectStorageClient(config.GetRegion(d))
 	if err != nil {
-		return fmt.Errorf("error creating OBS client: %s", err)
+		return diag.Errorf("error creating OBS client: %s", err)
 	}
 
 	log.Printf("[DEBUG] Read OBS bucket: %s", d.Id())
@@ -353,7 +355,7 @@ func resourceObsBucketRead(d *schema.ResourceData, meta interface{}) error {
 			d.SetId("")
 			return nil
 		} else {
-			return fmt.Errorf("error reading OBS bucket %s: %s", d.Id(), err)
+			return diag.Errorf("error reading OBS bucket %s: %s", d.Id(), err)
 		}
 	}
 
@@ -370,51 +372,51 @@ func resourceObsBucketRead(d *schema.ResourceData, meta interface{}) error {
 	)
 
 	if err := mErr.ErrorOrNil(); err != nil {
-		return fmt.Errorf("error setting OBS bucket fields: %s", err)
+		return diag.Errorf("error setting OBS bucket fields: %s", err)
 	}
 
 	// Read storage class
 	if err := setObsBucketStorageClass(client, d); err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 
 	// Read the versioning
 	if err := setObsBucketVersioning(client, d); err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 	// Read the logging configuration
 	if err := setObsBucketLogging(client, d); err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 
 	// Read the Lifecycle configuration
 	if err := setObsBucketLifecycleConfiguration(client, d); err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 
 	// Read the website configuration
 	if err := setObsBucketWebsiteConfiguration(client, d); err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 
 	// Read the CORS rules
 	if err := setObsBucketCorsRules(client, d); err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 
 	// Read the tags
 	if err := setObsBucketTags(client, d); err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 
 	return nil
 }
 
-func resourceObsBucketDelete(d *schema.ResourceData, meta interface{}) error {
+func resourceObsBucketDelete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*cfg.Config)
 	client, err := config.NewObjectStorageClient(config.GetRegion(d))
 	if err != nil {
-		return fmt.Errorf("error creating OBS client: %s", err)
+		return diag.Errorf("error creating OBS client: %s", err)
 	}
 
 	bucket := d.Id()
@@ -428,12 +430,12 @@ func resourceObsBucketDelete(d *schema.ResourceData, meta interface{}) error {
 				err = deleteAllBucketObjects(client, bucket)
 				if err == nil {
 					log.Printf("[WARN] all objects of %s have been deleted, and try again", bucket)
-					return resourceObsBucketDelete(d, meta)
+					return resourceObsBucketDelete(ctx, d, meta)
 				}
 			}
-			return err
+			return diag.FromErr(err)
 		}
-		return fmt.Errorf("error deleting OBS bucket: %s %s", bucket, err)
+		return diag.Errorf("error deleting OBS bucket: %s %s", bucket, err)
 	}
 	return nil
 }

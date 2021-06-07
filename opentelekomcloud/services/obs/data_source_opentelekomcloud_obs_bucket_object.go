@@ -2,12 +2,14 @@ package obs
 
 import (
 	"bytes"
+	"context"
 	"fmt"
 	"log"
 	"strings"
 	"time"
 
 	"github.com/hashicorp/go-multierror"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/obs"
 
@@ -17,7 +19,7 @@ import (
 
 func DataSourceObsBucketObject() *schema.Resource {
 	return &schema.Resource{
-		Read: dataSourceObsBucketObjectRead,
+		ReadContext: dataSourceObsBucketObjectRead,
 
 		Schema: map[string]*schema.Schema{
 			"bucket": {
@@ -89,11 +91,11 @@ func DataSourceObsBucketObject() *schema.Resource {
 	}
 }
 
-func dataSourceObsBucketObjectRead(d *schema.ResourceData, meta interface{}) error {
+func dataSourceObsBucketObjectRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*cfg.Config)
 	client, err := config.NewObjectStorageClient(config.GetRegion(d))
 	if err != nil {
-		return fmt.Errorf("error creating OBS client: %s", err)
+		return diag.Errorf("error creating OBS client: %s", err)
 	}
 
 	bucket := d.Get("bucket").(string)
@@ -119,10 +121,10 @@ func dataSourceObsBucketObjectRead(d *schema.ResourceData, meta interface{}) err
 	log.Printf("[DEBUG] Reading OBS object: %v", input)
 	out, err := client.GetObject(&input)
 	if err != nil {
-		return fmt.Errorf("failed getting OBS object: %s Bucket: %q Object: %q", err, bucket, key)
+		return diag.Errorf("failed getting OBS object: %s Bucket: %q Object: %q", err, bucket, key)
 	}
 	if out.DeleteMarker {
-		return fmt.Errorf("requested OBS object %q%s has been deleted",
+		return diag.Errorf("requested OBS object %q%s has been deleted",
 			bucket+key, versionText)
 	}
 
@@ -146,7 +148,7 @@ func dataSourceObsBucketObjectRead(d *schema.ResourceData, meta interface{}) err
 		d.Set("website_redirect_location", out.WebsiteRedirectLocation),
 	)
 	if err := mErr.ErrorOrNil(); err != nil {
-		return err
+		return diag.FromErr(mErr)
 	}
 
 	if s3.IsContentTypeAllowed(&out.ContentType) {
@@ -159,13 +161,13 @@ func dataSourceObsBucketObjectRead(d *schema.ResourceData, meta interface{}) err
 		input.VersionId = out.VersionId
 		out, err := client.GetObject(input)
 		if err != nil {
-			return fmt.Errorf("failed getting OBS object: %s", err)
+			return diag.Errorf("failed getting OBS object: %s", err)
 		}
 
 		buf := new(bytes.Buffer)
 		bytesRead, err := buf.ReadFrom(out.Body)
 		if err != nil {
-			return fmt.Errorf("failed reading content of OBS object (%s): %s",
+			return diag.Errorf("failed reading content of OBS object (%s): %s",
 				uniqueId, err)
 		}
 		log.Printf("[INFO] Saving %d bytes from OBS object %s", bytesRead, uniqueId)

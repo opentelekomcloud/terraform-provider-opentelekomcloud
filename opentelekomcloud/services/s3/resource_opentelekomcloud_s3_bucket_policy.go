@@ -1,13 +1,14 @@
 package s3
 
 import (
-	"fmt"
+	"context"
 	"log"
 	"time"
 
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/awserr"
 	"github.com/aws/aws-sdk-go/service/s3"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 
@@ -17,10 +18,10 @@ import (
 
 func ResourceS3BucketPolicy() *schema.Resource {
 	return &schema.Resource{
-		Create: resourceS3BucketPolicyPut,
-		Read:   resourceS3BucketPolicyRead,
-		Update: resourceS3BucketPolicyPut,
-		Delete: resourceS3BucketPolicyDelete,
+		CreateContext: resourceS3BucketPolicyPut,
+		ReadContext:   resourceS3BucketPolicyRead,
+		UpdateContext: resourceS3BucketPolicyPut,
+		DeleteContext: resourceS3BucketPolicyDelete,
 
 		Schema: map[string]*schema.Schema{
 			"bucket": {
@@ -39,11 +40,11 @@ func ResourceS3BucketPolicy() *schema.Resource {
 	}
 }
 
-func resourceS3BucketPolicyPut(d *schema.ResourceData, meta interface{}) error {
+func resourceS3BucketPolicyPut(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*cfg.Config)
 	s3conn, err := config.S3Client(config.GetRegion(d))
 	if err != nil {
-		return fmt.Errorf("Error creating OpenTelekomCloud s3 client: %s", err)
+		return diag.Errorf("Error creating OpenTelekomCloud s3 client: %s", err)
 	}
 
 	bucket := d.Get("bucket").(string)
@@ -71,17 +72,17 @@ func resourceS3BucketPolicyPut(d *schema.ResourceData, meta interface{}) error {
 	})
 
 	if err != nil {
-		return fmt.Errorf("Error putting S3 policy: %s", err)
+		return diag.Errorf("Error putting S3 policy: %s", err)
 	}
 
 	return nil
 }
 
-func resourceS3BucketPolicyRead(d *schema.ResourceData, meta interface{}) error {
+func resourceS3BucketPolicyRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*cfg.Config)
 	s3conn, err := config.S3Client(config.GetRegion(d))
 	if err != nil {
-		return fmt.Errorf("Error creating OpenTelekomCloud s3 client: %s", err)
+		return diag.Errorf("Error creating OpenTelekomCloud s3 client: %s", err)
 	}
 
 	log.Printf("[DEBUG] S3 bucket policy, read for bucket: %s", d.Id())
@@ -94,17 +95,17 @@ func resourceS3BucketPolicyRead(d *schema.ResourceData, meta interface{}) error 
 		v = *pol.Policy
 	}
 	if err := d.Set("policy", v); err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 
 	return nil
 }
 
-func resourceS3BucketPolicyDelete(d *schema.ResourceData, meta interface{}) error {
+func resourceS3BucketPolicyDelete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*cfg.Config)
 	s3conn, err := config.S3Client(config.GetRegion(d))
 	if err != nil {
-		return fmt.Errorf("Error creating OpenTelekomCloud s3 client: %s", err)
+		return diag.Errorf("Error creating OpenTelekomCloud s3 client: %s", err)
 	}
 
 	bucket := d.Get("bucket").(string)
@@ -118,7 +119,7 @@ func resourceS3BucketPolicyDelete(d *schema.ResourceData, meta interface{}) erro
 		if awsErr, ok := err.(awserr.Error); ok && awsErr.Code() == "NoSuchBucket" {
 			return nil
 		}
-		return fmt.Errorf("Error deleting S3 policy: %s", err)
+		return diag.Errorf("Error deleting S3 policy: %s", err)
 	}
 
 	return nil

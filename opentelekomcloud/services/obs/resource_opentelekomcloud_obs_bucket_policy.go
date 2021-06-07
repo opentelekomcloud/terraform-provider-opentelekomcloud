@@ -1,10 +1,11 @@
 package obs
 
 import (
-	"fmt"
+	"context"
 	"log"
 	"time"
 
+	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/obs"
@@ -15,10 +16,10 @@ import (
 
 func ResourceObsBucketPolicy() *schema.Resource {
 	return &schema.Resource{
-		Create: resourceObsBucketPolicyPut,
-		Read:   resourceObsBucketPolicyRead,
-		Update: resourceObsBucketPolicyPut,
-		Delete: resourceObsBucketPolicyDelete,
+		CreateContext: resourceObsBucketPolicyPut,
+		ReadContext:   resourceObsBucketPolicyRead,
+		UpdateContext: resourceObsBucketPolicyPut,
+		DeleteContext: resourceObsBucketPolicyDelete,
 
 		Schema: map[string]*schema.Schema{
 			"bucket": {
@@ -36,11 +37,11 @@ func ResourceObsBucketPolicy() *schema.Resource {
 	}
 }
 
-func resourceObsBucketPolicyPut(d *schema.ResourceData, meta interface{}) error {
+func resourceObsBucketPolicyPut(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*cfg.Config)
 	client, err := config.NewObjectStorageClient(config.GetRegion(d))
 	if err != nil {
-		return fmt.Errorf("error creating OBS client: %s", err)
+		return diag.Errorf("error creating OBS client: %s", err)
 	}
 
 	policy := d.Get("policy").(string)
@@ -66,7 +67,7 @@ func resourceObsBucketPolicyPut(d *schema.ResourceData, meta interface{}) error 
 	})
 
 	if err != nil {
-		return fmt.Errorf("error putting OBS policy: %s", err)
+		return diag.Errorf("error putting OBS policy: %s", err)
 	}
 
 	d.SetId(bucket)
@@ -74,32 +75,32 @@ func resourceObsBucketPolicyPut(d *schema.ResourceData, meta interface{}) error 
 	return nil
 }
 
-func resourceObsBucketPolicyRead(d *schema.ResourceData, meta interface{}) error {
+func resourceObsBucketPolicyRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*cfg.Config)
 	client, err := config.NewObjectStorageClient(config.GetRegion(d))
 	if err != nil {
-		return fmt.Errorf("error creating OBS client: %s", err)
+		return diag.Errorf("error creating OBS client: %s", err)
 	}
 
 	log.Printf("[DEBUG] OBS bucket policy, read for bucket: %s", d.Id())
 	pol, err := client.GetBucketPolicy(d.Id())
 
 	if err != nil {
-		return fmt.Errorf("error getting bucket policy")
+		return diag.Errorf("error getting bucket policy")
 	}
 
 	if err := d.Set("policy", pol.Policy); err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 
 	return nil
 }
 
-func resourceObsBucketPolicyDelete(d *schema.ResourceData, meta interface{}) error {
+func resourceObsBucketPolicyDelete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*cfg.Config)
 	client, err := config.NewObjectStorageClient(config.GetRegion(d))
 	if err != nil {
-		return fmt.Errorf("error creating OBS client: %s", err)
+		return diag.Errorf("error creating OBS client: %s", err)
 	}
 
 	bucket := d.Get("bucket").(string)
@@ -111,7 +112,7 @@ func resourceObsBucketPolicyDelete(d *schema.ResourceData, meta interface{}) err
 		if obsErr, ok := err.(obs.ObsError); ok && obsErr.Code == "NoSuchBucket" {
 			return nil
 		}
-		return fmt.Errorf("error deleting OBS policy: %s", err)
+		return diag.Errorf("error deleting OBS policy: %s", err)
 	}
 	return nil
 }
