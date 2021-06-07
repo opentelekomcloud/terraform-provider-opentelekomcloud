@@ -1,11 +1,12 @@
 package vpc
 
 import (
-	"fmt"
+	"context"
 	"log"
 
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/networking/v2/routes"
 
+	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common/cfg"
@@ -13,7 +14,7 @@ import (
 
 func DataSourceVPCRouteV2() *schema.Resource {
 	return &schema.Resource{
-		Read: dataSourceVpcRouteV2Read,
+		ReadContext: dataSourceVpcRouteV2Read,
 
 		Schema: map[string]*schema.Schema{
 			"region": {
@@ -50,11 +51,11 @@ func DataSourceVPCRouteV2() *schema.Resource {
 	}
 }
 
-func dataSourceVpcRouteV2Read(d *schema.ResourceData, meta interface{}) error {
+func dataSourceVpcRouteV2Read(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*cfg.Config)
 	vpcRouteClient, err := config.NetworkingV2Client(config.GetRegion(d))
 	if err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 
 	listOpts := routes.ListOpts{
@@ -69,16 +70,16 @@ func dataSourceVpcRouteV2Read(d *schema.ResourceData, meta interface{}) error {
 	refinedRoutes, err := routes.ExtractRoutes(pages)
 
 	if err != nil {
-		return fmt.Errorf("Unable to retrieve vpc routes: %s", err)
+		return diag.Errorf("Unable to retrieve vpc routes: %s", err)
 	}
 
 	if len(refinedRoutes) < 1 {
-		return fmt.Errorf("Your query returned no results. " +
+		return diag.Errorf("Your query returned no results. " +
 			"Please change your search criteria and try again.")
 	}
 
 	if len(refinedRoutes) > 1 {
-		return fmt.Errorf("Your query returned more than one result." +
+		return diag.Errorf("Your query returned more than one result." +
 			" Please try a more specific search criteria")
 	}
 

@@ -1,10 +1,12 @@
 package vpc
 
 import (
+	"context"
 	"fmt"
 	"log"
 	"time"
 
+	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/opentelekomcloud/gophertelekomcloud"
@@ -17,10 +19,10 @@ import (
 
 func ResourceVirtualPrivateCloudV1() *schema.Resource {
 	return &schema.Resource{
-		Create: resourceVirtualPrivateCloudV1Create,
-		Read:   resourceVirtualPrivateCloudV1Read,
-		Update: resourceVirtualPrivateCloudV1Update,
-		Delete: resourceVirtualPrivateCloudV1Delete,
+		CreateContext: resourceVirtualPrivateCloudV1Create,
+		ReadContext:   resourceVirtualPrivateCloudV1Read,
+		UpdateContext: resourceVirtualPrivateCloudV1Update,
+		DeleteContext: resourceVirtualPrivateCloudV1Delete,
 		Importer: &schema.ResourceImporter{
 			State: schema.ImportStatePassthrough,
 		},
@@ -98,12 +100,12 @@ func readNetworkingTags(d *schema.ResourceData, config *cfg.Config, resource str
 	return nil
 }
 
-func resourceVirtualPrivateCloudV1Create(d *schema.ResourceData, meta interface{}) error {
+func resourceVirtualPrivateCloudV1Create(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*cfg.Config)
 	vpcClient, err := config.NetworkingV1Client(config.GetRegion(d))
 
 	if err != nil {
-		return fmt.Errorf("Error creating OpenTelekomCloud vpc client: %s", err)
+		return diag.Errorf("Error creating OpenTelekomCloud vpc client: %s", err)
 	}
 
 	createOpts := vpcs.CreateOpts{
@@ -114,7 +116,7 @@ func resourceVirtualPrivateCloudV1Create(d *schema.ResourceData, meta interface{
 	n, err := vpcs.Create(vpcClient, createOpts).Extract()
 
 	if err != nil {
-		return fmt.Errorf("Error creating OpenTelekomCloud VPC: %s", err)
+		return diag.Errorf("Error creating OpenTelekomCloud VPC: %s", err)
 	}
 	d.SetId(n.ID)
 
@@ -131,7 +133,7 @@ func resourceVirtualPrivateCloudV1Create(d *schema.ResourceData, meta interface{
 
 	_, stateErr := stateConf.WaitForState()
 	if stateErr != nil {
-		return fmt.Errorf(
+		return diag.Errorf(
 			"Error waiting for Vpc (%s) to become ACTIVE: %s",
 			n.ID, stateErr)
 	}
@@ -148,18 +150,18 @@ func resourceVirtualPrivateCloudV1Create(d *schema.ResourceData, meta interface{
 	}
 
 	if err := addNetworkingTags(d, config, "vpcs"); err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 
-	return resourceVirtualPrivateCloudV1Read(d, meta)
+	return resourceVirtualPrivateCloudV1Read(ctx, d, meta)
 
 }
 
-func resourceVirtualPrivateCloudV1Read(d *schema.ResourceData, meta interface{}) error {
+func resourceVirtualPrivateCloudV1Read(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*cfg.Config)
 	vpcClient, err := config.NetworkingV1Client(config.GetRegion(d))
 	if err != nil {
-		return fmt.Errorf("Error creating OpenTelekomCloud Vpc client: %s", err)
+		return diag.Errorf("Error creating OpenTelekomCloud Vpc client: %s", err)
 	}
 
 	n, err := vpcs.Get(vpcClient, d.Id()).Extract()
@@ -169,7 +171,7 @@ func resourceVirtualPrivateCloudV1Read(d *schema.ResourceData, meta interface{})
 			return nil
 		}
 
-		return fmt.Errorf("Error retrieving OpenTelekomCloud Vpc: %s", err)
+		return diag.Errorf("Error retrieving OpenTelekomCloud Vpc: %s", err)
 	}
 
 	d.Set("id", n.ID)
@@ -180,17 +182,17 @@ func resourceVirtualPrivateCloudV1Read(d *schema.ResourceData, meta interface{})
 	d.Set("region", config.GetRegion(d))
 
 	if err := readNetworkingTags(d, config, "vpcs"); err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 
 	return nil
 }
 
-func resourceVirtualPrivateCloudV1Update(d *schema.ResourceData, meta interface{}) error {
+func resourceVirtualPrivateCloudV1Update(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*cfg.Config)
 	vpcClient, err := config.NetworkingV1Client(config.GetRegion(d))
 	if err != nil {
-		return fmt.Errorf("Error creating OpenTelekomCloud Vpc: %s", err)
+		return diag.Errorf("Error creating OpenTelekomCloud Vpc: %s", err)
 	}
 
 	var updateOpts vpcs.UpdateOpts
@@ -208,31 +210,31 @@ func resourceVirtualPrivateCloudV1Update(d *schema.ResourceData, meta interface{
 
 	_, err = vpcs.Update(vpcClient, d.Id(), updateOpts).Extract()
 	if err != nil {
-		return fmt.Errorf("Error updating OpenTelekomCloud Vpc: %s", err)
+		return diag.Errorf("Error updating OpenTelekomCloud Vpc: %s", err)
 	}
 
 	// update tags
 	if d.HasChange("tags") {
 		vpcV2Client, err := config.NetworkingV2Client(config.GetRegion(d))
 		if err != nil {
-			return fmt.Errorf("Error creating OpenTelekomCloud networking client: %s", err)
+			return diag.Errorf("Error creating OpenTelekomCloud networking client: %s", err)
 		}
 
 		tagErr := common.UpdateResourceTags(vpcV2Client, d, "vpcs", d.Id())
 		if tagErr != nil {
-			return fmt.Errorf("Error updating tags of VPC %s: %s", d.Id(), tagErr)
+			return diag.Errorf("Error updating tags of VPC %s: %s", d.Id(), tagErr)
 		}
 	}
 
-	return resourceVirtualPrivateCloudV1Read(d, meta)
+	return resourceVirtualPrivateCloudV1Read(ctx, d, meta)
 }
 
-func resourceVirtualPrivateCloudV1Delete(d *schema.ResourceData, meta interface{}) error {
+func resourceVirtualPrivateCloudV1Delete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 
 	config := meta.(*cfg.Config)
 	vpcClient, err := config.NetworkingV1Client(config.GetRegion(d))
 	if err != nil {
-		return fmt.Errorf("Error creating OpenTelekomCloud vpc: %s", err)
+		return diag.Errorf("Error creating OpenTelekomCloud vpc: %s", err)
 	}
 
 	stateConf := &resource.StateChangeConf{
@@ -246,7 +248,7 @@ func resourceVirtualPrivateCloudV1Delete(d *schema.ResourceData, meta interface{
 
 	_, err = stateConf.WaitForState()
 	if err != nil {
-		return fmt.Errorf("Error deleting OpenTelekomCloud Vpc: %s", err)
+		return diag.Errorf("Error deleting OpenTelekomCloud Vpc: %s", err)
 	}
 
 	d.SetId("")

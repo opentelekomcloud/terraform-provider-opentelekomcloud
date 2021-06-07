@@ -1,12 +1,13 @@
 package vpc
 
 import (
-	"fmt"
+	"context"
 	"log"
 
 	"github.com/hashicorp/go-multierror"
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/networking/v1/subnets"
 
+	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common/cfg"
@@ -14,7 +15,7 @@ import (
 
 func DataSourceVpcSubnetV1() *schema.Resource {
 	return &schema.Resource{
-		Read: dataSourceVpcSubnetV1Read,
+		ReadContext: dataSourceVpcSubnetV1Read,
 
 		Schema: map[string]*schema.Schema{
 			"region": {
@@ -82,11 +83,11 @@ func DataSourceVpcSubnetV1() *schema.Resource {
 	}
 }
 
-func dataSourceVpcSubnetV1Read(d *schema.ResourceData, meta interface{}) error {
+func dataSourceVpcSubnetV1Read(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*cfg.Config)
 	client, err := config.NetworkingV1Client(config.GetRegion(d))
 	if err != nil {
-		return fmt.Errorf("error creating OpenTelekomCloud NetworkingV1 client: %w", err)
+		return diag.Errorf("error creating OpenTelekomCloud NetworkingV1 client: %w", err)
 	}
 
 	listOpts := subnets.ListOpts{
@@ -103,15 +104,15 @@ func dataSourceVpcSubnetV1Read(d *schema.ResourceData, meta interface{}) error {
 
 	refinedSubnets, err := subnets.List(client, listOpts)
 	if err != nil {
-		return fmt.Errorf("unable to retrieve subnets: %w", err)
+		return diag.Errorf("unable to retrieve subnets: %w", err)
 	}
 
 	if refinedSubnets == nil || len(refinedSubnets) == 0 {
-		return fmt.Errorf("no matching subnet found. Please change your search criteria and try again")
+		return diag.Errorf("no matching subnet found. Please change your search criteria and try again")
 	}
 
 	if len(refinedSubnets) > 1 {
-		return fmt.Errorf("multiple subnets matched; use additional constraints to reduce matches to a single subnet")
+		return diag.Errorf("multiple subnets matched; use additional constraints to reduce matches to a single subnet")
 	}
 
 	subnet := refinedSubnets[0]
@@ -135,7 +136,7 @@ func dataSourceVpcSubnetV1Read(d *schema.ResourceData, meta interface{}) error {
 		d.Set("region", config.GetRegion(d)),
 	)
 	if mErr.ErrorOrNil() != nil {
-		return mErr
+		return diag.FromErr(mErr)
 	}
 
 	return nil

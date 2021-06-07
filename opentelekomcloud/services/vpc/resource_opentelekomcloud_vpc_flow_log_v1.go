@@ -1,10 +1,11 @@
 package vpc
 
 import (
-	"fmt"
+	"context"
 	"log"
 	"time"
 
+	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 	"github.com/opentelekomcloud/gophertelekomcloud"
@@ -17,10 +18,10 @@ import (
 
 func ResourceVpcFlowLogV1() *schema.Resource {
 	return &schema.Resource{
-		Create: resourceVpcFlowLogV1Create,
-		Read:   resourceVpcFlowLogV1Read,
-		Update: resourceVpcFlowLogV1Update,
-		Delete: resourceVpcFlowLogV1Delete,
+		CreateContext: resourceVpcFlowLogV1Create,
+		ReadContext:   resourceVpcFlowLogV1Read,
+		UpdateContext: resourceVpcFlowLogV1Update,
+		DeleteContext: resourceVpcFlowLogV1Delete,
 		Importer: &schema.ResourceImporter{
 			State: schema.ImportStatePassthrough,
 		},
@@ -87,12 +88,12 @@ func ResourceVpcFlowLogV1() *schema.Resource {
 	}
 }
 
-func resourceVpcFlowLogV1Create(d *schema.ResourceData, meta interface{}) error {
+func resourceVpcFlowLogV1Create(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*cfg.Config)
 	vpcClient, err := config.NetworkingV1Client(config.GetRegion(d))
 
 	if err != nil {
-		return fmt.Errorf("Error creating OpenTelekomCloud vpc client: %s", err)
+		return diag.Errorf("Error creating OpenTelekomCloud vpc client: %s", err)
 	}
 
 	createOpts := flowlogs.CreateOpts{
@@ -108,18 +109,18 @@ func resourceVpcFlowLogV1Create(d *schema.ResourceData, meta interface{}) error 
 	log.Printf("[DEBUG] Create VPC Flow Log Options: %#v", createOpts)
 	fl, err := flowlogs.Create(vpcClient, createOpts).Extract()
 	if err != nil {
-		return fmt.Errorf("Error creating OpenTelekomCloud VPC flow log: %s", err)
+		return diag.Errorf("Error creating OpenTelekomCloud VPC flow log: %s", err)
 	}
 
 	d.SetId(fl.ID)
-	return resourceVpcFlowLogV1Read(d, config)
+	return resourceVpcFlowLogV1Read(ctx, d, config)
 }
 
-func resourceVpcFlowLogV1Read(d *schema.ResourceData, meta interface{}) error {
+func resourceVpcFlowLogV1Read(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*cfg.Config)
 	vpcClient, err := config.NetworkingV1Client(config.GetRegion(d))
 	if err != nil {
-		return fmt.Errorf("Error creating OpenTelekomCloud vpc client: %s", err)
+		return diag.Errorf("Error creating OpenTelekomCloud vpc client: %s", err)
 	}
 
 	fl, err := flowlogs.Get(vpcClient, d.Id()).Extract()
@@ -130,7 +131,7 @@ func resourceVpcFlowLogV1Read(d *schema.ResourceData, meta interface{}) error {
 			return nil
 		}
 
-		return fmt.Errorf("Error retrieving OpenTelekomCloud flowlog: %s", err)
+		return diag.Errorf("Error retrieving OpenTelekomCloud flowlog: %s", err)
 	}
 
 	d.Set("name", fl.Name)
@@ -146,11 +147,11 @@ func resourceVpcFlowLogV1Read(d *schema.ResourceData, meta interface{}) error {
 	return nil
 }
 
-func resourceVpcFlowLogV1Update(d *schema.ResourceData, meta interface{}) error {
+func resourceVpcFlowLogV1Update(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*cfg.Config)
 	vpcClient, err := config.NetworkingV1Client(config.GetRegion(d))
 	if err != nil {
-		return fmt.Errorf("Error creating OpenTelekomCloud vpc client: %s", err)
+		return diag.Errorf("Error creating OpenTelekomCloud vpc client: %s", err)
 	}
 
 	var updateOpts flowlogs.UpdateOpts
@@ -164,17 +165,17 @@ func resourceVpcFlowLogV1Update(d *schema.ResourceData, meta interface{}) error 
 
 	_, err = flowlogs.Update(vpcClient, d.Id(), updateOpts).Extract()
 	if err != nil {
-		return fmt.Errorf("Error updating OpenTelekomCloud VPC flow log: %s", err)
+		return diag.Errorf("Error updating OpenTelekomCloud VPC flow log: %s", err)
 	}
 
-	return resourceVpcFlowLogV1Read(d, meta)
+	return resourceVpcFlowLogV1Read(ctx, d, meta)
 }
 
-func resourceVpcFlowLogV1Delete(d *schema.ResourceData, meta interface{}) error {
+func resourceVpcFlowLogV1Delete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*cfg.Config)
 	vpcClient, err := config.NetworkingV1Client(config.GetRegion(d))
 	if err != nil {
-		return fmt.Errorf("Error creating OpenTelekomCloud vpc client: %s", err)
+		return diag.Errorf("Error creating OpenTelekomCloud vpc client: %s", err)
 	}
 
 	err = flowlogs.Delete(vpcClient, d.Id()).ExtractErr()
@@ -184,7 +185,7 @@ func resourceVpcFlowLogV1Delete(d *schema.ResourceData, meta interface{}) error 
 			log.Printf("[INFO] Successfully deleted OpenTelekomCloud vpc flow log %s", d.Id())
 			return nil
 		}
-		return err
+		return diag.FromErr(err)
 	}
 
 	d.SetId("")
