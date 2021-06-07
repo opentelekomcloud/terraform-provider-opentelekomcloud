@@ -1,6 +1,7 @@
 package common
 
 import (
+	"context"
 	"fmt"
 	"log"
 	"regexp"
@@ -52,7 +53,7 @@ func checkVolumeTypeAvailable(d cfg.SchemaOrDiff, argName, expectedAZ string, ty
 }
 
 func ValidateVolumeType(argName string) schema.CustomizeDiffFunc {
-	return func(d *schema.ResourceDiff, meta interface{}) error {
+	return func(ctx context.Context, d *schema.ResourceDiff, meta interface{}) error {
 		expectedAZ := d.Get("availability_zone").(string)
 		if expectedAZ == "" || expectedAZ == "random" {
 			log.Printf("[DEBUG] No AZ provided, can't define available volume types")
@@ -101,7 +102,7 @@ func getZonesFromVolumeType(t volumetypes.VolumeType) []string {
 }
 
 func ValidateVPC(argName string) schema.CustomizeDiffFunc {
-	return func(d *schema.ResourceDiff, meta interface{}) error {
+	return func(ctx context.Context, d *schema.ResourceDiff, meta interface{}) error {
 		vpcID := d.Get(argName)
 		if vpcID == nil {
 			return fmt.Errorf(argMissingMsg, argName)
@@ -122,7 +123,7 @@ func ValidateVPC(argName string) schema.CustomizeDiffFunc {
 }
 
 func ValidateSubnet(argName string) schema.CustomizeDiffFunc {
-	return func(d *schema.ResourceDiff, meta interface{}) error {
+	return func(ctx context.Context, d *schema.ResourceDiff, meta interface{}) error {
 		subnetId := d.Get(argName)
 		if subnetId == nil {
 			return fmt.Errorf(argMissingMsg, argName)
@@ -143,10 +144,10 @@ func ValidateSubnet(argName string) schema.CustomizeDiffFunc {
 }
 
 func MultipleCustomizeDiffs(funcs ...schema.CustomizeDiffFunc) schema.CustomizeDiffFunc {
-	return func(d *schema.ResourceDiff, meta interface{}) error {
+	return func(ctx context.Context, d *schema.ResourceDiff, meta interface{}) error {
 		mErr := &multierror.Error{}
 		for _, fn := range funcs {
-			mErr = multierror.Append(mErr, fn(d, meta))
+			mErr = multierror.Append(mErr, fn(ctx, d, meta))
 		}
 		return mErr.ErrorOrNil()
 	}
