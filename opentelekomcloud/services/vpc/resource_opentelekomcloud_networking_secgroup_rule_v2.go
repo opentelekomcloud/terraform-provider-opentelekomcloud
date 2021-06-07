@@ -1,12 +1,13 @@
 package vpc
 
 import (
-	"fmt"
+	"context"
 	"log"
 	"strconv"
 	"strings"
 	"time"
 
+	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/opentelekomcloud/gophertelekomcloud"
@@ -19,9 +20,9 @@ import (
 
 func ResourceNetworkingSecGroupRuleV2() *schema.Resource {
 	return &schema.Resource{
-		Create: resourceNetworkingSecGroupRuleV2Create,
-		Read:   resourceNetworkingSecGroupRuleV2Read,
-		Delete: resourceNetworkingSecGroupRuleV2Delete,
+		CreateContext: resourceNetworkingSecGroupRuleV2Create,
+		ReadContext:   resourceNetworkingSecGroupRuleV2Read,
+		DeleteContext: resourceNetworkingSecGroupRuleV2Delete,
 		Importer: &schema.ResourceImporter{
 			State: schema.ImportStatePassthrough,
 		},
@@ -101,12 +102,12 @@ func ResourceNetworkingSecGroupRuleV2() *schema.Resource {
 	}
 }
 
-func resourceNetworkingSecGroupRuleV2Create(d *schema.ResourceData, meta interface{}) error {
+func resourceNetworkingSecGroupRuleV2Create(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 
 	config := meta.(*cfg.Config)
 	networkingClient, err := config.NetworkingV2Client(config.GetRegion(d))
 	if err != nil {
-		return fmt.Errorf("Error creating OpenTelekomCloud networking client: %s", err)
+		return diag.Errorf("Error creating OpenTelekomCloud networking client: %s", err)
 	}
 
 	portRangeMin := d.Get("port_range_min").(int)
@@ -115,7 +116,7 @@ func resourceNetworkingSecGroupRuleV2Create(d *schema.ResourceData, meta interfa
 
 	if protocol == "" {
 		if portRangeMin != 0 || portRangeMax != 0 {
-			return fmt.Errorf("A protocol must be specified when using port_range_min and port_range_max")
+			return diag.Errorf("A protocol must be specified when using port_range_min and port_range_max")
 		}
 	}
 
@@ -148,29 +149,29 @@ func resourceNetworkingSecGroupRuleV2Create(d *schema.ResourceData, meta interfa
 
 	security_group_rule, err := rules.Create(networkingClient, opts).Extract()
 	if err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 
 	log.Printf("[DEBUG] OpenTelekomCloud Neutron Security Group Rule created: %#v", security_group_rule)
 
 	d.SetId(security_group_rule.ID)
 
-	return resourceNetworkingSecGroupRuleV2Read(d, meta)
+	return resourceNetworkingSecGroupRuleV2Read(ctx, d, meta)
 }
 
-func resourceNetworkingSecGroupRuleV2Read(d *schema.ResourceData, meta interface{}) error {
+func resourceNetworkingSecGroupRuleV2Read(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	log.Printf("[DEBUG] Retrieve information about security group rule: %s", d.Id())
 
 	config := meta.(*cfg.Config)
 	networkingClient, err := config.NetworkingV2Client(config.GetRegion(d))
 	if err != nil {
-		return fmt.Errorf("Error creating OpenTelekomCloud networking client: %s", err)
+		return diag.Errorf("Error creating OpenTelekomCloud networking client: %s", err)
 	}
 
 	security_group_rule, err := rules.Get(networkingClient, d.Id()).Extract()
 
 	if err != nil {
-		return common.CheckDeleted(d, err, "OpenTelekomCloud Security Group Rule")
+		return diag.FromErr(common.CheckDeleted(d, err, "OpenTelekomCloud Security Group Rule"))
 	}
 
 	d.Set("description", security_group_rule.Description)
@@ -188,13 +189,13 @@ func resourceNetworkingSecGroupRuleV2Read(d *schema.ResourceData, meta interface
 	return nil
 }
 
-func resourceNetworkingSecGroupRuleV2Delete(d *schema.ResourceData, meta interface{}) error {
+func resourceNetworkingSecGroupRuleV2Delete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	log.Printf("[DEBUG] Destroy security group rule: %s", d.Id())
 
 	config := meta.(*cfg.Config)
 	networkingClient, err := config.NetworkingV2Client(config.GetRegion(d))
 	if err != nil {
-		return fmt.Errorf("Error creating OpenTelekomCloud networking client: %s", err)
+		return diag.Errorf("Error creating OpenTelekomCloud networking client: %s", err)
 	}
 
 	stateConf := &resource.StateChangeConf{
@@ -208,11 +209,11 @@ func resourceNetworkingSecGroupRuleV2Delete(d *schema.ResourceData, meta interfa
 
 	_, err = stateConf.WaitForState()
 	if err != nil {
-		return fmt.Errorf("Error deleting OpenTelekomCloud Neutron Security Group Rule: %s", err)
+		return diag.Errorf("Error deleting OpenTelekomCloud Neutron Security Group Rule: %s", err)
 	}
 
 	d.SetId("")
-	return err
+	return diag.FromErr(err)
 }
 
 func resourceNetworkingSecGroupRuleV2DetermineDirection(v string) rules.RuleDirection {

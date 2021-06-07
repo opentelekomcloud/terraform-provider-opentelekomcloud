@@ -1,14 +1,15 @@
 package vpc
 
 import (
-	"fmt"
+	"context"
 	"log"
 	"time"
 
+	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 
-	"github.com/opentelekomcloud/gophertelekomcloud"
+	golangsdk "github.com/opentelekomcloud/gophertelekomcloud"
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/networking/v2/extensions/layer3/routers"
 
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common"
@@ -17,10 +18,10 @@ import (
 
 func ResourceNetworkingRouterV2() *schema.Resource {
 	return &schema.Resource{
-		Create: resourceNetworkingRouterV2Create,
-		Read:   resourceNetworkingRouterV2Read,
-		Update: resourceNetworkingRouterV2Update,
-		Delete: resourceNetworkingRouterV2Delete,
+		CreateContext: resourceNetworkingRouterV2Create,
+		ReadContext:   resourceNetworkingRouterV2Read,
+		UpdateContext: resourceNetworkingRouterV2Update,
+		DeleteContext: resourceNetworkingRouterV2Delete,
 
 		Timeouts: &schema.ResourceTimeout{
 			Create: schema.DefaultTimeout(10 * time.Minute),
@@ -78,11 +79,11 @@ func ResourceNetworkingRouterV2() *schema.Resource {
 	}
 }
 
-func resourceNetworkingRouterV2Create(d *schema.ResourceData, meta interface{}) error {
+func resourceNetworkingRouterV2Create(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*cfg.Config)
 	networkingClient, err := config.NetworkingV2Client(config.GetRegion(d))
 	if err != nil {
-		return fmt.Errorf("Error creating OpenTelekomCloud networking client: %s", err)
+		return diag.Errorf("Error creating OpenTelekomCloud networking client: %s", err)
 	}
 
 	createOpts := RouterCreateOpts{
@@ -113,7 +114,7 @@ func resourceNetworkingRouterV2Create(d *schema.ResourceData, meta interface{}) 
 
 	if esRaw, ok := d.GetOk("enable_snat"); ok {
 		if externalGateway == "" {
-			return fmt.Errorf("setting enable_snat requires external_gateway to be set")
+			return diag.Errorf("setting enable_snat requires external_gateway to be set")
 		}
 		es := esRaw.(bool)
 		createOpts.GatewayInfo.EnableSNAT = &es
@@ -122,7 +123,7 @@ func resourceNetworkingRouterV2Create(d *schema.ResourceData, meta interface{}) 
 	log.Printf("[DEBUG] Create Options: %#v", createOpts)
 	n, err := routers.Create(networkingClient, createOpts).Extract()
 	if err != nil {
-		return fmt.Errorf("Error creating OpenTelekomCloud Neutron router: %s", err)
+		return diag.Errorf("Error creating OpenTelekomCloud Neutron router: %s", err)
 	}
 	log.Printf("[INFO] Router ID: %s", n.ID)
 
@@ -140,14 +141,14 @@ func resourceNetworkingRouterV2Create(d *schema.ResourceData, meta interface{}) 
 
 	d.SetId(n.ID)
 
-	return resourceNetworkingRouterV2Read(d, meta)
+	return resourceNetworkingRouterV2Read(ctx, d, meta)
 }
 
-func resourceNetworkingRouterV2Read(d *schema.ResourceData, meta interface{}) error {
+func resourceNetworkingRouterV2Read(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*cfg.Config)
 	networkingClient, err := config.NetworkingV2Client(config.GetRegion(d))
 	if err != nil {
-		return fmt.Errorf("Error creating OpenTelekomCloud networking client: %s", err)
+		return diag.Errorf("Error creating OpenTelekomCloud networking client: %s", err)
 	}
 
 	n, err := routers.Get(networkingClient, d.Id()).Extract()
@@ -157,7 +158,7 @@ func resourceNetworkingRouterV2Read(d *schema.ResourceData, meta interface{}) er
 			return nil
 		}
 
-		return fmt.Errorf("Error retrieving OpenTelekomCloud Neutron Router: %s", err)
+		return diag.Errorf("Error retrieving OpenTelekomCloud Neutron Router: %s", err)
 	}
 
 	log.Printf("[DEBUG] Retrieved Router %s: %+v", d.Id(), n)
@@ -173,7 +174,7 @@ func resourceNetworkingRouterV2Read(d *schema.ResourceData, meta interface{}) er
 	return nil
 }
 
-func resourceNetworkingRouterV2Update(d *schema.ResourceData, meta interface{}) error {
+func resourceNetworkingRouterV2Update(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	routerId := d.Id()
 	osMutexKV.Lock(routerId)
 	defer osMutexKV.Unlock(routerId)
@@ -181,7 +182,7 @@ func resourceNetworkingRouterV2Update(d *schema.ResourceData, meta interface{}) 
 	config := meta.(*cfg.Config)
 	networkingClient, err := config.NetworkingV2Client(config.GetRegion(d))
 	if err != nil {
-		return fmt.Errorf("Error creating OpenTelekomCloud networking client: %s", err)
+		return diag.Errorf("Error creating OpenTelekomCloud networking client: %s", err)
 	}
 
 	var updateOpts routers.UpdateOpts
@@ -212,7 +213,7 @@ func resourceNetworkingRouterV2Update(d *schema.ResourceData, meta interface{}) 
 	if d.HasChange("enable_snat") {
 		updateGatewaySettings = true
 		if externalGateway == "" {
-			return fmt.Errorf("setting enable_snat requires external_gateway to be set")
+			return diag.Errorf("setting enable_snat requires external_gateway to be set")
 		}
 
 		enableSNAT := d.Get("enable_snat").(bool)
@@ -227,17 +228,17 @@ func resourceNetworkingRouterV2Update(d *schema.ResourceData, meta interface{}) 
 
 	_, err = routers.Update(networkingClient, d.Id(), updateOpts).Extract()
 	if err != nil {
-		return fmt.Errorf("Error updating OpenTelekomCloud Neutron Router: %s", err)
+		return diag.Errorf("Error updating OpenTelekomCloud Neutron Router: %s", err)
 	}
 
-	return resourceNetworkingRouterV2Read(d, meta)
+	return resourceNetworkingRouterV2Read(ctx, d, meta)
 }
 
-func resourceNetworkingRouterV2Delete(d *schema.ResourceData, meta interface{}) error {
+func resourceNetworkingRouterV2Delete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*cfg.Config)
 	networkingClient, err := config.NetworkingV2Client(config.GetRegion(d))
 	if err != nil {
-		return fmt.Errorf("Error creating OpenTelekomCloud networking client: %s", err)
+		return diag.Errorf("Error creating OpenTelekomCloud networking client: %s", err)
 	}
 
 	stateConf := &resource.StateChangeConf{
@@ -251,7 +252,7 @@ func resourceNetworkingRouterV2Delete(d *schema.ResourceData, meta interface{}) 
 
 	_, err = stateConf.WaitForState()
 	if err != nil {
-		return fmt.Errorf("Error deleting OpenTelekomCloud Neutron Router: %s", err)
+		return diag.Errorf("Error deleting OpenTelekomCloud Neutron Router: %s", err)
 	}
 
 	d.SetId("")

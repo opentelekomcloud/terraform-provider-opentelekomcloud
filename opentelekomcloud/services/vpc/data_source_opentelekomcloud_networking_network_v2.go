@@ -1,10 +1,11 @@
 package vpc
 
 import (
-	"fmt"
+	"context"
 	"log"
 	"strconv"
 
+	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 
 	"github.com/opentelekomcloud/gophertelekomcloud"
@@ -17,7 +18,7 @@ import (
 
 func DataSourceNetworkingNetworkV2() *schema.Resource {
 	return &schema.Resource{
-		Read: dataSourceNetworkingNetworkV2Read,
+		ReadContext: dataSourceNetworkingNetworkV2Read,
 
 		Schema: map[string]*schema.Schema{
 			"region": {
@@ -59,7 +60,7 @@ func DataSourceNetworkingNetworkV2() *schema.Resource {
 	}
 }
 
-func dataSourceNetworkingNetworkV2Read(d *schema.ResourceData, meta interface{}) error {
+func dataSourceNetworkingNetworkV2Read(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*cfg.Config)
 	networkingClient, err := config.NetworkingV2Client(config.GetRegion(d))
 
@@ -73,12 +74,12 @@ func dataSourceNetworkingNetworkV2Read(d *schema.ResourceData, meta interface{})
 
 	pages, err := networks.List(networkingClient, listOpts).AllPages()
 	if err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 
 	allNetworks, err := networks.ExtractNetworks(pages)
 	if err != nil {
-		return fmt.Errorf("Unable to retrieve networks: %s", err)
+		return diag.Errorf("Unable to retrieve networks: %s", err)
 	}
 
 	var refinedNetworks []networks.Network
@@ -90,7 +91,7 @@ func dataSourceNetworkingNetworkV2Read(d *schema.ResourceData, meta interface{})
 					if _, ok := err.(golangsdk.ErrDefault404); ok {
 						continue
 					}
-					return fmt.Errorf("Unable to retrieve network subnet: %s", err)
+					return diag.Errorf("Unable to retrieve network subnet: %s", err)
 				}
 				if cidr == subnet.CIDR {
 					refinedNetworks = append(refinedNetworks, n)
@@ -102,12 +103,12 @@ func dataSourceNetworkingNetworkV2Read(d *schema.ResourceData, meta interface{})
 	}
 
 	if len(refinedNetworks) < 1 {
-		return fmt.Errorf("Your query returned no results. " +
+		return diag.Errorf("Your query returned no results. " +
 			"Please change your search criteria and try again.")
 	}
 
 	if len(refinedNetworks) > 1 {
-		return fmt.Errorf("Your query returned more than one result." +
+		return diag.Errorf("Your query returned more than one result." +
 			" Please try a more specific search criteria")
 	}
 

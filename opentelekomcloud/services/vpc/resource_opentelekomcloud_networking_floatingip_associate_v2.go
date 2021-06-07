@@ -1,9 +1,11 @@
 package vpc
 
 import (
+	"context"
 	"fmt"
 	"log"
 
+	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/opentelekomcloud/gophertelekomcloud"
 
@@ -15,9 +17,9 @@ import (
 
 func ResourceNetworkingFloatingIPAssociateV2() *schema.Resource {
 	return &schema.Resource{
-		Create: resourceNetworkingFloatingIPAssociateV2Create,
-		Read:   resourceNetworkingFloatingIPAssociateV2Read,
-		Delete: resourceNetworkingFloatingIPAssociateV2Delete,
+		CreateContext: resourceNetworkingFloatingIPAssociateV2Create,
+		ReadContext:   resourceNetworkingFloatingIPAssociateV2Read,
+		DeleteContext: resourceNetworkingFloatingIPAssociateV2Delete,
 		Importer: &schema.ResourceImporter{
 			State: schema.ImportStatePassthrough,
 		},
@@ -45,11 +47,11 @@ func ResourceNetworkingFloatingIPAssociateV2() *schema.Resource {
 	}
 }
 
-func resourceNetworkingFloatingIPAssociateV2Create(d *schema.ResourceData, meta interface{}) error {
+func resourceNetworkingFloatingIPAssociateV2Create(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*cfg.Config)
 	networkingClient, err := config.NetworkingV2Client(config.GetRegion(d))
 	if err != nil {
-		return fmt.Errorf("Error creating OpenTelekomCloud network client: %s", err)
+		return diag.Errorf("Error creating OpenTelekomCloud network client: %s", err)
 	}
 
 	floatingIP := d.Get("floating_ip").(string)
@@ -57,7 +59,7 @@ func resourceNetworkingFloatingIPAssociateV2Create(d *schema.ResourceData, meta 
 
 	floatingIPID, err := resourceNetworkingFloatingIPAssociateV2IP2ID(networkingClient, floatingIP)
 	if err != nil {
-		return fmt.Errorf("Unable to get ID of floating IP: %s", err)
+		return diag.Errorf("Unable to get ID of floating IP: %s", err)
 	}
 
 	updateOpts := floatingips.UpdateOpts{
@@ -68,25 +70,25 @@ func resourceNetworkingFloatingIPAssociateV2Create(d *schema.ResourceData, meta 
 
 	_, err = floatingips.Update(networkingClient, floatingIPID, updateOpts).Extract()
 	if err != nil {
-		return fmt.Errorf("Error associating floating IP %s to port %s: %s",
+		return diag.Errorf("Error associating floating IP %s to port %s: %s",
 			floatingIPID, portID, err)
 	}
 
 	d.SetId(floatingIPID)
 
-	return resourceNetworkFloatingIPV2Read(d, meta)
+	return resourceNetworkFloatingIPV2Read(ctx, d, meta)
 }
 
-func resourceNetworkingFloatingIPAssociateV2Read(d *schema.ResourceData, meta interface{}) error {
+func resourceNetworkingFloatingIPAssociateV2Read(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*cfg.Config)
 	networkingClient, err := config.NetworkingV2Client(config.GetRegion(d))
 	if err != nil {
-		return fmt.Errorf("Error creating OpenTelekomCloud network client: %s", err)
+		return diag.Errorf("Error creating OpenTelekomCloud network client: %s", err)
 	}
 
 	floatingIP, err := floatingips.Get(networkingClient, d.Id()).Extract()
 	if err != nil {
-		return common.CheckDeleted(d, err, "floating IP")
+		return diag.FromErr(common.CheckDeleted(d, err, "floating IP"))
 	}
 
 	d.Set("floating_ip", floatingIP.FloatingIP)
@@ -96,11 +98,11 @@ func resourceNetworkingFloatingIPAssociateV2Read(d *schema.ResourceData, meta in
 	return nil
 }
 
-func resourceNetworkingFloatingIPAssociateV2Delete(d *schema.ResourceData, meta interface{}) error {
+func resourceNetworkingFloatingIPAssociateV2Delete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*cfg.Config)
 	networkingClient, err := config.NetworkingV2Client(config.GetRegion(d))
 	if err != nil {
-		return fmt.Errorf("Error creating OpenTelekomCloud network client: %s", err)
+		return diag.Errorf("Error creating OpenTelekomCloud network client: %s", err)
 	}
 
 	portID := d.Get("port_id").(string)
@@ -112,7 +114,7 @@ func resourceNetworkingFloatingIPAssociateV2Delete(d *schema.ResourceData, meta 
 
 	_, err = floatingips.Update(networkingClient, d.Id(), updateOpts).Extract()
 	if err != nil {
-		return fmt.Errorf("Error disassociating floating IP %s from port %s: %s",
+		return diag.Errorf("Error disassociating floating IP %s from port %s: %s",
 			d.Id(), portID, err)
 	}
 

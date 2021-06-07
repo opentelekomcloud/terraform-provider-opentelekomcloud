@@ -1,10 +1,12 @@
 package vpc
 
 import (
+	"context"
 	"fmt"
 	"log"
 	"strings"
 
+	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/networking/v2/ports"
 
@@ -14,9 +16,9 @@ import (
 
 func ResourceNetworkingVIPAssociateV2() *schema.Resource {
 	return &schema.Resource{
-		Create: resourceNetworkingVIPAssociateV2Create,
-		Read:   resourceNetworkingVIPAssociateV2Read,
-		Delete: resourceNetworkingVIPAssociateV2Delete,
+		CreateContext: resourceNetworkingVIPAssociateV2Create,
+		ReadContext:   resourceNetworkingVIPAssociateV2Read,
+		DeleteContext: resourceNetworkingVIPAssociateV2Delete,
 
 		Schema: map[string]*schema.Schema{
 			"vip_id": {
@@ -64,14 +66,14 @@ func resourceNetworkingPortIDs(d *schema.ResourceData) []string {
 	return portids
 }
 
-func resourceNetworkingVIPAssociateV2Create(d *schema.ResourceData, meta interface{}) error {
+func resourceNetworkingVIPAssociateV2Create(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*cfg.Config)
 	vipid := d.Get("vip_id").(string)
 	portids := resourceNetworkingPortIDs(d)
 
 	networkingClient, err := config.NetworkingV2Client(config.GetRegion(d))
 	if err != nil {
-		return fmt.Errorf("Error creating OpenTelekomCloud networking client: %s", err)
+		return diag.Errorf("Error creating OpenTelekomCloud networking client: %s", err)
 	}
 
 	// port by port
@@ -81,7 +83,7 @@ func resourceNetworkingVIPAssociateV2Create(d *schema.ResourceData, meta interfa
 		fauxid = fmt.Sprintf("%s/%s", fauxid, portid)
 		port, err := ports.Get(networkingClient, portid).Extract()
 		if err != nil {
-			return common.CheckDeleted(d, err, "port")
+			return diag.FromErr(common.CheckDeleted(d, err, "port"))
 		}
 
 		ipaddress := ""
@@ -89,13 +91,13 @@ func resourceNetworkingVIPAssociateV2Create(d *schema.ResourceData, meta interfa
 			ipaddress = port.FixedIPs[0].IPAddress
 		}
 		if len(ipaddress) == 0 {
-			return fmt.Errorf("IPAddress is empty, Error associate vip: %#v", port)
+			return diag.Errorf("IPAddress is empty, Error associate vip: %#v", port)
 		}
 
 		// Then get the vip information
 		vip, err := ports.Get(networkingClient, vipid).Extract()
 		if err != nil {
-			return common.CheckDeleted(d, err, "vip")
+			return diag.FromErr(common.CheckDeleted(d, err, "vip"))
 		}
 
 		// Finnaly associate vip to port
@@ -127,7 +129,7 @@ func resourceNetworkingVIPAssociateV2Create(d *schema.ResourceData, meta interfa
 			log.Printf("[DEBUG] VIP Associate %s with options: %#v", vipid, associateOpts)
 			_, err = ports.Update(networkingClient, vipid, associateOpts).Extract()
 			if err != nil {
-				return fmt.Errorf("Error associate vip: %s", err)
+				return diag.Errorf("Error associate vip: %s", err)
 			}
 		}
 
@@ -143,34 +145,34 @@ func resourceNetworkingVIPAssociateV2Create(d *schema.ResourceData, meta interfa
 		log.Printf("[DEBUG] Port Update %s with options: %#v", vipid, portUpdateOpts)
 		_, err = ports.Update(networkingClient, portid, portUpdateOpts).Extract()
 		if err != nil {
-			return fmt.Errorf("Error update port: %s", err)
+			return diag.Errorf("Error update port: %s", err)
 		}
 	}
 
 	// There's no assciate vip id, therefore a faux ID will be used.
 	d.SetId(fauxid)
 
-	return resourceNetworkingVIPAssociateV2Read(d, meta)
+	return resourceNetworkingVIPAssociateV2Read(ctx, d, meta)
 }
 
-func resourceNetworkingVIPAssociateV2Read(d *schema.ResourceData, meta interface{}) error {
+func resourceNetworkingVIPAssociateV2Read(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*cfg.Config)
 	// Obtain relevant info from parsing the ID
 	vipid, portids, err := ParseNetworkingVIPAssociateID(d.Id())
 	if err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 
 	// First see if the port still exists
 	networkingClient, err := config.NetworkingV2Client(config.GetRegion(d))
 	if err != nil {
-		return fmt.Errorf("Error creating OpenTelekomCloud networking client: %s", err)
+		return diag.Errorf("Error creating OpenTelekomCloud networking client: %s", err)
 	}
 
 	// Then try to do this by querying the vip API.
 	vip, err := ports.Get(networkingClient, vipid).Extract()
 	if err != nil {
-		return common.CheckDeleted(d, err, "vip")
+		return diag.FromErr(common.CheckDeleted(d, err, "vip"))
 	}
 
 	// port by port
@@ -178,7 +180,7 @@ func resourceNetworkingVIPAssociateV2Read(d *schema.ResourceData, meta interface
 	for _, portid := range portids {
 		p, err := ports.Get(networkingClient, portid).Extract()
 		if err != nil {
-			return common.CheckDeleted(d, err, "port")
+			return diag.FromErr(common.CheckDeleted(d, err, "port"))
 		}
 
 		for _, ip := range p.FixedIPs {
@@ -215,18 +217,18 @@ func resourceNetworkingVIPAssociateV2Read(d *schema.ResourceData, meta interface
 	return nil
 }
 
-func resourceNetworkingVIPAssociateV2Delete(d *schema.ResourceData, meta interface{}) error {
+func resourceNetworkingVIPAssociateV2Delete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*cfg.Config)
 	networkingClient, err := config.NetworkingV2Client(config.GetRegion(d))
 	if err != nil {
-		return fmt.Errorf("Error creating OpenTelekomCloud networking client: %s", err)
+		return diag.Errorf("Error creating OpenTelekomCloud networking client: %s", err)
 	}
 
 	// Obtain relevant info from parsing the ID
 	id := d.Id()
 	vipid, portids, err := ParseNetworkingVIPAssociateID(id)
 	if err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 
 	// port by port
@@ -234,7 +236,7 @@ func resourceNetworkingVIPAssociateV2Delete(d *schema.ResourceData, meta interfa
 		// First get the port information
 		port, err := ports.Get(networkingClient, portid).Extract()
 		if err != nil {
-			return common.CheckDeleted(d, err, "port")
+			return diag.FromErr(common.CheckDeleted(d, err, "port"))
 		}
 
 		ipaddress := ""
@@ -242,13 +244,13 @@ func resourceNetworkingVIPAssociateV2Delete(d *schema.ResourceData, meta interfa
 			ipaddress = port.FixedIPs[0].IPAddress
 		}
 		if len(ipaddress) == 0 {
-			return fmt.Errorf("IPAddress is empty, Error disassociate vip: %#v", port)
+			return diag.Errorf("IPAddress is empty, Error disassociate vip: %#v", port)
 		}
 
 		// Then get the vip information
 		vip, err := ports.Get(networkingClient, vipid).Extract()
 		if err != nil {
-			return common.CheckDeleted(d, err, "vip")
+			return diag.FromErr(common.CheckDeleted(d, err, "vip"))
 		}
 
 		// Update VIP AllowedAddressPairs
@@ -280,7 +282,7 @@ func resourceNetworkingVIPAssociateV2Delete(d *schema.ResourceData, meta interfa
 			log.Printf("[DEBUG] VIP Disassociate %s with options: %#v", vipid, disassociateOpts)
 			_, err = ports.Update(networkingClient, vipid, disassociateOpts).Extract()
 			if err != nil {
-				return fmt.Errorf("Error disassociate vip: %s", err)
+				return diag.Errorf("Error disassociate vip: %s", err)
 			}
 		}
 	}

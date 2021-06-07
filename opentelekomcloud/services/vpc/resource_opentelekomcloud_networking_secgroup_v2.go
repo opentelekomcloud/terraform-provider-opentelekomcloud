@@ -1,11 +1,12 @@
 package vpc
 
 import (
-	"fmt"
+	"context"
 	"log"
 	"time"
 
 	"github.com/hashicorp/go-multierror"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/opentelekomcloud/gophertelekomcloud"
@@ -19,10 +20,10 @@ import (
 
 func ResourceNetworkingSecGroupV2() *schema.Resource {
 	return &schema.Resource{
-		Create: resourceNetworkingSecGroupV2Create,
-		Read:   resourceNetworkingSecGroupV2Read,
-		Update: resourceNetworkingSecGroupV2Update,
-		Delete: resourceNetworkingSecGroupV2Delete,
+		CreateContext: resourceNetworkingSecGroupV2Create,
+		ReadContext:   resourceNetworkingSecGroupV2Read,
+		UpdateContext: resourceNetworkingSecGroupV2Update,
+		DeleteContext: resourceNetworkingSecGroupV2Delete,
 
 		Importer: &schema.ResourceImporter{
 			State: schema.ImportStatePassthrough,
@@ -63,11 +64,11 @@ func ResourceNetworkingSecGroupV2() *schema.Resource {
 	}
 }
 
-func resourceNetworkingSecGroupV2Create(d *schema.ResourceData, meta interface{}) error {
+func resourceNetworkingSecGroupV2Create(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*cfg.Config)
 	networkingClient, err := config.NetworkingV2Client(config.GetRegion(d))
 	if err != nil {
-		return fmt.Errorf("error creating OpenTelekomCloud NetworkingV2 client: %s", err)
+		return diag.Errorf("error creating OpenTelekomCloud NetworkingV2 client: %s", err)
 	}
 
 	opts := groups.CreateOpts{
@@ -80,7 +81,7 @@ func resourceNetworkingSecGroupV2Create(d *schema.ResourceData, meta interface{}
 
 	securityGroup, err := groups.Create(networkingClient, opts).Extract()
 	if err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 
 	// Delete the default security group rules if it has been requested.
@@ -88,11 +89,11 @@ func resourceNetworkingSecGroupV2Create(d *schema.ResourceData, meta interface{}
 	if deleteDefaultRules {
 		securityGroup, err := groups.Get(networkingClient, securityGroup.ID).Extract()
 		if err != nil {
-			return err
+			return diag.FromErr(err)
 		}
 		for _, rule := range securityGroup.Rules {
 			if err := rules.Delete(networkingClient, rule.ID).ExtractErr(); err != nil {
-				return fmt.Errorf("there was a problem deleting a default security group rule: %s", err)
+				return diag.Errorf("there was a problem deleting a default security group rule: %s", err)
 			}
 		}
 	}
@@ -100,21 +101,21 @@ func resourceNetworkingSecGroupV2Create(d *schema.ResourceData, meta interface{}
 
 	d.SetId(securityGroup.ID)
 
-	return resourceNetworkingSecGroupV2Read(d, meta)
+	return resourceNetworkingSecGroupV2Read(ctx, d, meta)
 }
 
-func resourceNetworkingSecGroupV2Read(d *schema.ResourceData, meta interface{}) error {
+func resourceNetworkingSecGroupV2Read(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	log.Printf("[DEBUG] Retrieve information about security group: %s", d.Id())
 
 	config := meta.(*cfg.Config)
 	networkingClient, err := config.NetworkingV2Client(config.GetRegion(d))
 	if err != nil {
-		return fmt.Errorf("error creating OpenTelekomCloud NetworkingV2 client: %s", err)
+		return diag.Errorf("error creating OpenTelekomCloud NetworkingV2 client: %s", err)
 	}
 
 	securityGroup, err := groups.Get(networkingClient, d.Id()).Extract()
 	if err != nil {
-		return common.CheckDeleted(d, err, "OpenTelekomCloud Neutron Security group")
+		return diag.FromErr(common.CheckDeleted(d, err, "OpenTelekomCloud Neutron Security group"))
 	}
 
 	me := multierror.Append(nil,
@@ -124,14 +125,14 @@ func resourceNetworkingSecGroupV2Read(d *schema.ResourceData, meta interface{}) 
 		d.Set("region", config.GetRegion(d)),
 	)
 
-	return me.ErrorOrNil()
+	return diag.FromErr(me.ErrorOrNil())
 }
 
-func resourceNetworkingSecGroupV2Update(d *schema.ResourceData, meta interface{}) error {
+func resourceNetworkingSecGroupV2Update(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*cfg.Config)
 	networkingClient, err := config.NetworkingV2Client(config.GetRegion(d))
 	if err != nil {
-		return fmt.Errorf("error creating OpenTelekomCloud Networkingv2 client: %s", err)
+		return diag.Errorf("error creating OpenTelekomCloud Networkingv2 client: %s", err)
 	}
 	var updateOpts groups.UpdateOpts
 
@@ -146,19 +147,19 @@ func resourceNetworkingSecGroupV2Update(d *schema.ResourceData, meta interface{}
 	log.Printf("[DEBUG] Updating SecGroup %s with options: %#v", d.Id(), updateOpts)
 	_, err = groups.Update(networkingClient, d.Id(), updateOpts).Extract()
 	if err != nil {
-		return fmt.Errorf("error updating OpenTelekomCloud networking SecGroup: %s", err)
+		return diag.Errorf("error updating OpenTelekomCloud networking SecGroup: %s", err)
 	}
 
-	return resourceNetworkingSecGroupV2Read(d, meta)
+	return resourceNetworkingSecGroupV2Read(ctx, d, meta)
 }
 
-func resourceNetworkingSecGroupV2Delete(d *schema.ResourceData, meta interface{}) error {
+func resourceNetworkingSecGroupV2Delete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	log.Printf("[DEBUG] Destroy security group: %s", d.Id())
 
 	config := meta.(*cfg.Config)
 	networkingClient, err := config.NetworkingV2Client(config.GetRegion(d))
 	if err != nil {
-		return fmt.Errorf("error creating OpenTelekomCloud NetworkingV2 client: %s", err)
+		return diag.Errorf("error creating OpenTelekomCloud NetworkingV2 client: %s", err)
 	}
 
 	stateConf := &resource.StateChangeConf{
@@ -172,11 +173,11 @@ func resourceNetworkingSecGroupV2Delete(d *schema.ResourceData, meta interface{}
 
 	_, err = stateConf.WaitForState()
 	if err != nil {
-		return fmt.Errorf("error deleting OpenTelekomCloud Neutron Security Group: %s", err)
+		return diag.Errorf("error deleting OpenTelekomCloud Neutron Security Group: %s", err)
 	}
 
 	d.SetId("")
-	return err
+	return diag.FromErr(err)
 }
 
 func waitForSecGroupDelete(networkingClient *golangsdk.ServiceClient, secGroupId string) resource.StateRefreshFunc {

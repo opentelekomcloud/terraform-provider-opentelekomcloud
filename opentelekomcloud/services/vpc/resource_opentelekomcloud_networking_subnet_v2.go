@@ -1,11 +1,12 @@
 package vpc
 
 import (
-	"fmt"
+	"context"
 	"log"
 	"time"
 
 	"github.com/hashicorp/go-multierror"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/opentelekomcloud/gophertelekomcloud"
@@ -18,10 +19,10 @@ import (
 
 func ResourceNetworkingSubnetV2() *schema.Resource {
 	return &schema.Resource{
-		Create: resourceNetworkingSubnetV2Create,
-		Read:   resourceNetworkingSubnetV2Read,
-		Update: resourceNetworkingSubnetV2Update,
-		Delete: resourceNetworkingSubnetV2Delete,
+		CreateContext: resourceNetworkingSubnetV2Create,
+		ReadContext:   resourceNetworkingSubnetV2Read,
+		UpdateContext: resourceNetworkingSubnetV2Update,
+		DeleteContext: resourceNetworkingSubnetV2Delete,
 		Importer: &schema.ResourceImporter{
 			State: schema.ImportStatePassthrough,
 		},
@@ -136,11 +137,11 @@ func ResourceNetworkingSubnetV2() *schema.Resource {
 	}
 }
 
-func resourceNetworkingSubnetV2Create(d *schema.ResourceData, meta interface{}) error {
+func resourceNetworkingSubnetV2Create(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*cfg.Config)
 	networkingClient, err := config.NetworkingV2Client(config.GetRegion(d))
 	if err != nil {
-		return fmt.Errorf("error creating OpenTelekomCloud networking client: %s", err)
+		return diag.Errorf("error creating OpenTelekomCloud networking client: %s", err)
 	}
 
 	log.Printf("[DEBUG] Checking Subnet 0 %s: network_id: %s", d.Id(), d.Get("network_id").(string))
@@ -164,7 +165,7 @@ func resourceNetworkingSubnetV2Create(d *schema.ResourceData, meta interface{}) 
 	gatewayIP := d.Get("gateway_ip").(string)
 
 	if gatewayIP != "" && noGateway {
-		return fmt.Errorf("both gateway_ip and no_gateway cannot be set")
+		return diag.Errorf("both gateway_ip and no_gateway cannot be set")
 	}
 
 	if gatewayIP != "" {
@@ -187,7 +188,7 @@ func resourceNetworkingSubnetV2Create(d *schema.ResourceData, meta interface{}) 
 
 	s, err := subnets.Create(networkingClient, createOpts).Extract()
 	if err != nil {
-		return fmt.Errorf("error creating OpenTelekomCloud Neutron subnet: %s", err)
+		return diag.Errorf("error creating OpenTelekomCloud Neutron subnet: %s", err)
 	}
 
 	log.Printf("[DEBUG] Waiting for Subnet (%s) to become available", s.ID)
@@ -205,20 +206,20 @@ func resourceNetworkingSubnetV2Create(d *schema.ResourceData, meta interface{}) 
 
 	log.Printf("[DEBUG] Checking Subnet 3 %s: network_id: %s", d.Id(), d.Get("network_id").(string))
 	log.Printf("[DEBUG] Created Subnet %s: %#v", s.ID, s)
-	return resourceNetworkingSubnetV2Read(d, meta)
+	return resourceNetworkingSubnetV2Read(ctx, d, meta)
 }
 
-func resourceNetworkingSubnetV2Read(d *schema.ResourceData, meta interface{}) error {
+func resourceNetworkingSubnetV2Read(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	log.Printf("[DEBUG] Checking Subnet 4 %s: network_id: %s", d.Id(), d.Get("network_id").(string))
 	config := meta.(*cfg.Config)
 	networkingClient, err := config.NetworkingV2Client(config.GetRegion(d))
 	if err != nil {
-		return fmt.Errorf("error creating OpenTelekomCloud networking client: %s", err)
+		return diag.Errorf("error creating OpenTelekomCloud networking client: %s", err)
 	}
 
 	s, err := subnets.Get(networkingClient, d.Id()).Extract()
 	if err != nil {
-		return common.CheckDeleted(d, err, "subnet")
+		return diag.FromErr(common.CheckDeleted(d, err, "subnet"))
 	}
 
 	log.Printf("[DEBUG] Retrieved Subnet %s: %#v", d.Id(), s)
@@ -239,7 +240,7 @@ func resourceNetworkingSubnetV2Read(d *schema.ResourceData, meta interface{}) er
 		d.Set("region", config.GetRegion(d)),
 	)
 	if mErr.ErrorOrNil() != nil {
-		return fmt.Errorf("error setting subnet fields: %w", mErr)
+		return diag.Errorf("error setting subnet fields: %w", mErr)
 	}
 
 	// Set the allocation_pools
@@ -252,24 +253,24 @@ func resourceNetworkingSubnetV2Read(d *schema.ResourceData, meta interface{}) er
 		allocationPools = append(allocationPools, pool)
 	}
 	if err := d.Set("allocation_pools", allocationPools); err != nil {
-		return fmt.Errorf("[DEBUG] Error saving allocation_pools to state for OpenTelekomCloud subnet (%s): %s", d.Id(), err)
+		return diag.Errorf("[DEBUG] Error saving allocation_pools to state for OpenTelekomCloud subnet (%s): %s", d.Id(), err)
 	}
 
 	return nil
 }
 
-func resourceNetworkingSubnetV2Update(d *schema.ResourceData, meta interface{}) error {
+func resourceNetworkingSubnetV2Update(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*cfg.Config)
 	networkingClient, err := config.NetworkingV2Client(config.GetRegion(d))
 	if err != nil {
-		return fmt.Errorf("error creating OpenTelekomCloud networking client: %s", err)
+		return diag.Errorf("error creating OpenTelekomCloud networking client: %s", err)
 	}
 
 	// Check if both gateway_ip and no_gateway are set
 	if _, ok := d.GetOk("gateway_ip"); ok {
 		noGateway := d.Get("no_gateway").(bool)
 		if noGateway {
-			return fmt.Errorf("both gateway_ip and no_gateway cannot be set")
+			return diag.Errorf("both gateway_ip and no_gateway cannot be set")
 		}
 	}
 
@@ -279,7 +280,7 @@ func resourceNetworkingSubnetV2Update(d *schema.ResourceData, meta interface{}) 
 	gatewayIP := d.Get("gateway_ip").(string)
 
 	if gatewayIP != "" && noGateway {
-		return fmt.Errorf("both gateway_ip and no_gateway cannot be set")
+		return diag.Errorf("both gateway_ip and no_gateway cannot be set")
 	}
 
 	if d.HasChange("name") {
@@ -322,17 +323,17 @@ func resourceNetworkingSubnetV2Update(d *schema.ResourceData, meta interface{}) 
 
 	_, err = subnets.Update(networkingClient, d.Id(), updateOpts).Extract()
 	if err != nil {
-		return fmt.Errorf("error updating OpenTelekomCloud Neutron Subnet: %s", err)
+		return diag.Errorf("error updating OpenTelekomCloud Neutron Subnet: %s", err)
 	}
 
-	return resourceNetworkingSubnetV2Read(d, meta)
+	return resourceNetworkingSubnetV2Read(ctx, d, meta)
 }
 
-func resourceNetworkingSubnetV2Delete(d *schema.ResourceData, meta interface{}) error {
+func resourceNetworkingSubnetV2Delete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*cfg.Config)
 	networkingClient, err := config.NetworkingV2Client(config.GetRegion(d))
 	if err != nil {
-		return fmt.Errorf("error creating OpenTelekomCloud networking client: %s", err)
+		return diag.Errorf("error creating OpenTelekomCloud networking client: %s", err)
 	}
 
 	stateConf := &resource.StateChangeConf{
@@ -346,7 +347,7 @@ func resourceNetworkingSubnetV2Delete(d *schema.ResourceData, meta interface{}) 
 
 	_, err = stateConf.WaitForState()
 	if err != nil {
-		return fmt.Errorf("error deleting OpenTelekomCloud Neutron Subnet: %s", err)
+		return diag.Errorf("error deleting OpenTelekomCloud Neutron Subnet: %s", err)
 	}
 
 	d.SetId("")

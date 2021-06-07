@@ -1,10 +1,11 @@
 package vpc
 
 import (
-	"fmt"
+	"context"
 	"log"
 	"time"
 
+	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/opentelekomcloud/gophertelekomcloud"
@@ -17,9 +18,9 @@ import (
 
 func ResourceNetworkingRouterInterfaceV2() *schema.Resource {
 	return &schema.Resource{
-		Create: resourceNetworkingRouterInterfaceV2Create,
-		Read:   resourceNetworkingRouterInterfaceV2Read,
-		Delete: resourceNetworkingRouterInterfaceV2Delete,
+		CreateContext: resourceNetworkingRouterInterfaceV2Create,
+		ReadContext:   resourceNetworkingRouterInterfaceV2Read,
+		DeleteContext: resourceNetworkingRouterInterfaceV2Delete,
 
 		Timeouts: &schema.ResourceTimeout{
 			Create: schema.DefaultTimeout(10 * time.Minute),
@@ -52,11 +53,11 @@ func ResourceNetworkingRouterInterfaceV2() *schema.Resource {
 	}
 }
 
-func resourceNetworkingRouterInterfaceV2Create(d *schema.ResourceData, meta interface{}) error {
+func resourceNetworkingRouterInterfaceV2Create(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*cfg.Config)
 	networkingClient, err := config.NetworkingV2Client(config.GetRegion(d))
 	if err != nil {
-		return fmt.Errorf("Error creating OpenTelekomCloud networking client: %s", err)
+		return diag.Errorf("Error creating OpenTelekomCloud networking client: %s", err)
 	}
 
 	createOpts := routers.AddInterfaceOpts{
@@ -67,7 +68,7 @@ func resourceNetworkingRouterInterfaceV2Create(d *schema.ResourceData, meta inte
 	log.Printf("[DEBUG] Create Options: %#v", createOpts)
 	n, err := routers.AddInterface(networkingClient, d.Get("router_id").(string), createOpts).Extract()
 	if err != nil {
-		return fmt.Errorf("Error creating OpenTelekomCloud Neutron router interface: %s", err)
+		return diag.Errorf("Error creating OpenTelekomCloud Neutron router interface: %s", err)
 	}
 	log.Printf("[INFO] Router interface Port ID: %s", n.PortID)
 
@@ -86,14 +87,14 @@ func resourceNetworkingRouterInterfaceV2Create(d *schema.ResourceData, meta inte
 
 	d.SetId(n.PortID)
 
-	return resourceNetworkingRouterInterfaceV2Read(d, meta)
+	return resourceNetworkingRouterInterfaceV2Read(ctx, d, meta)
 }
 
-func resourceNetworkingRouterInterfaceV2Read(d *schema.ResourceData, meta interface{}) error {
+func resourceNetworkingRouterInterfaceV2Read(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*cfg.Config)
 	networkingClient, err := config.NetworkingV2Client(config.GetRegion(d))
 	if err != nil {
-		return fmt.Errorf("Error creating OpenTelekomCloud networking client: %s", err)
+		return diag.Errorf("Error creating OpenTelekomCloud networking client: %s", err)
 	}
 
 	n, err := ports.Get(networkingClient, d.Id()).Extract()
@@ -103,7 +104,7 @@ func resourceNetworkingRouterInterfaceV2Read(d *schema.ResourceData, meta interf
 			return nil
 		}
 
-		return fmt.Errorf("Error retrieving OpenTelekomCloud Neutron Router Interface: %s", err)
+		return diag.Errorf("Error retrieving OpenTelekomCloud Neutron Router Interface: %s", err)
 	}
 
 	log.Printf("[DEBUG] Retrieved Router Interface %s: %+v", d.Id(), n)
@@ -113,11 +114,11 @@ func resourceNetworkingRouterInterfaceV2Read(d *schema.ResourceData, meta interf
 	return nil
 }
 
-func resourceNetworkingRouterInterfaceV2Delete(d *schema.ResourceData, meta interface{}) error {
+func resourceNetworkingRouterInterfaceV2Delete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*cfg.Config)
 	networkingClient, err := config.NetworkingV2Client(config.GetRegion(d))
 	if err != nil {
-		return fmt.Errorf("Error creating OpenTelekomCloud networking client: %s", err)
+		return diag.Errorf("Error creating OpenTelekomCloud networking client: %s", err)
 	}
 
 	stateConf := &resource.StateChangeConf{
@@ -131,7 +132,7 @@ func resourceNetworkingRouterInterfaceV2Delete(d *schema.ResourceData, meta inte
 
 	_, err = stateConf.WaitForState()
 	if err != nil {
-		return fmt.Errorf("Error deleting OpenTelekomCloud Neutron Router Interface: %s", err)
+		return diag.Errorf("Error deleting OpenTelekomCloud Neutron Router Interface: %s", err)
 	}
 
 	d.SetId("")
