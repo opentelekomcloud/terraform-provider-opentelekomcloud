@@ -1,8 +1,9 @@
 package cce
 
 import (
-	"fmt"
+	"context"
 
+	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/cce/v3/nodes"
 
@@ -11,7 +12,7 @@ import (
 
 func DataSourceCceNodeIdsV3() *schema.Resource {
 	return &schema.Resource{
-		Read: dataSourceCceNodeIdsV3Read,
+		ReadContext: dataSourceCceNodeIdsV3Read,
 
 		Schema: map[string]*schema.Schema{
 			"region": {
@@ -34,21 +35,21 @@ func DataSourceCceNodeIdsV3() *schema.Resource {
 	}
 }
 
-func dataSourceCceNodeIdsV3Read(d *schema.ResourceData, meta interface{}) error {
+func dataSourceCceNodeIdsV3Read(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*cfg.Config)
 	cceClient, err := config.CceV3Client(config.GetRegion(d))
 	if err != nil {
-		return fmt.Errorf("unable to create opentelekomcloud CCE client : %s", err)
+		return diag.Errorf("unable to create opentelekomcloud CCE client : %s", err)
 	}
 
 	var listOpts nodes.ListOpts
 	refinedNodes, err := nodes.List(cceClient, d.Get("cluster_id").(string), listOpts)
 	if err != nil {
-		return fmt.Errorf("unable to retrieve Nodes: %s", err)
+		return diag.Errorf("unable to retrieve Nodes: %s", err)
 	}
 
 	if len(refinedNodes) < 1 {
-		return fmt.Errorf("your query returned no results. Please change your search criteria and try again")
+		return diag.Errorf("your query returned no results. Please change your search criteria and try again")
 	}
 
 	Nodes := make([]string, 0)

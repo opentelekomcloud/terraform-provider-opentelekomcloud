@@ -1,6 +1,7 @@
 package cce
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
 	"strconv"
@@ -8,6 +9,7 @@ import (
 	"time"
 
 	"github.com/hashicorp/go-multierror"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/opentelekomcloud/gophertelekomcloud"
@@ -17,9 +19,9 @@ import (
 
 func ResourceCCEAddonV3() *schema.Resource {
 	return &schema.Resource{
-		Create: resourceCCEAddonV3Create,
-		Read:   resourceCCEAddonV3Read,
-		Delete: resourceCCEAddonV3Delete,
+		CreateContext: resourceCCEAddonV3Create,
+		ReadContext:   resourceCCEAddonV3Read,
+		DeleteContext: resourceCCEAddonV3Delete,
 
 		Timeouts: &schema.ResourceTimeout{
 			Delete: schema.DefaultTimeout(5 * time.Minute),
@@ -77,17 +79,17 @@ func ResourceCCEAddonV3() *schema.Resource {
 	}
 }
 
-func resourceCCEAddonV3Create(d *schema.ResourceData, meta interface{}) error {
+func resourceCCEAddonV3Create(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*cfg.Config)
 	client, err := config.CceV3AddonClient(config.GetRegion(d))
 	if err != nil {
-		return fmt.Errorf("error creating CCE client: %w", err)
+		return diag.Errorf("error creating CCE client: %w", err)
 	}
 
 	clusterID := d.Get("cluster_id").(string)
 	basic, custom, err := getAddonValues(d)
 	if err != nil {
-		return fmt.Errorf("error getting values for CCE addon: %w", err)
+		return diag.Errorf("error getting values for CCE addon: %w", err)
 	}
 
 	basic = unStringMap(basic)
@@ -119,19 +121,19 @@ func resourceCCEAddonV3Create(d *schema.ResourceData, meta interface{}) error {
 		if aErr == nil {
 			errMsg = fmt.Errorf("\nAddon template spec: %s\n%s", addonSpec, errMsg)
 		}
-		return fmt.Errorf("error creating CCE addon instance: %w", errMsg)
+		return diag.Errorf("error creating CCE addon instance: %w", errMsg)
 	}
 
 	d.SetId(addon.Metadata.Id)
 
-	return resourceCCEAddonV3Read(d, meta)
+	return resourceCCEAddonV3Read(ctx, d, meta)
 }
 
-func resourceCCEAddonV3Read(d *schema.ResourceData, meta interface{}) error {
+func resourceCCEAddonV3Read(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*cfg.Config)
 	client, err := config.CceV3AddonClient(config.GetRegion(d))
 	if err != nil {
-		return fmt.Errorf("error creating CCE client: %w", logHttpError(err))
+		return diag.Errorf("error creating CCE client: %w", logHttpError(err))
 	}
 
 	clusterID := d.Get("cluster_id").(string)
@@ -142,7 +144,7 @@ func resourceCCEAddonV3Read(d *schema.ResourceData, meta interface{}) error {
 			return nil
 		}
 
-		return fmt.Errorf("error reading CCE addon instance: %w", logHttpError(err))
+		return diag.Errorf("error reading CCE addon instance: %w", logHttpError(err))
 	}
 
 	mErr := multierror.Append(nil,
@@ -154,7 +156,7 @@ func resourceCCEAddonV3Read(d *schema.ResourceData, meta interface{}) error {
 	)
 
 	if err := mErr.ErrorOrNil(); err != nil {
-		return fmt.Errorf("error setting addon attributes: %w", err)
+		return diag.Errorf("error setting addon attributes: %w", err)
 	}
 
 	return nil
@@ -171,11 +173,11 @@ func getAddonValues(d *schema.ResourceData) (basic, custom map[string]interface{
 	return
 }
 
-func resourceCCEAddonV3Delete(d *schema.ResourceData, meta interface{}) error {
+func resourceCCEAddonV3Delete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*cfg.Config)
 	client, err := config.CceV3AddonClient(config.GetRegion(d))
 	if err != nil {
-		return fmt.Errorf("error creating CCE client: %w", err)
+		return diag.Errorf("error creating CCE client: %w", err)
 	}
 	clusterID := d.Get("cluster_id").(string)
 
@@ -188,7 +190,7 @@ func resourceCCEAddonV3Delete(d *schema.ResourceData, meta interface{}) error {
 
 	_, err = stateConf.WaitForState()
 	if err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 	d.SetId("")
 	return nil
