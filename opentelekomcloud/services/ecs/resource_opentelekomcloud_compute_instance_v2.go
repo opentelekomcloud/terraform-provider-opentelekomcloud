@@ -27,6 +27,7 @@ import (
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/compute/v2/flavors"
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/compute/v2/images"
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/compute/v2/servers"
+	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common/fmterr"
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/helper/hashcode"
 
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common"
@@ -440,7 +441,7 @@ func resourceComputeInstanceV2Create(ctx context.Context, d *schema.ResourceData
 	}
 
 	if err != nil {
-		return diag.Errorf("error creating OpenTelekomCloud server: %w", err)
+		return fmterr.Errorf("error creating OpenTelekomCloud server: %w", err)
 	}
 	log.Printf("[INFO] Instance ID: %s", server.ID)
 
