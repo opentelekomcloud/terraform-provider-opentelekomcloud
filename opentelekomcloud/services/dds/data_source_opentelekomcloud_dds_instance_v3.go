@@ -76,7 +76,6 @@ func DataSourceDdsInstanceV3() *schema.Resource {
 			"backup_strategy": {
 				Type:     schema.TypeList,
 				Computed: true,
-				MaxItems: 1,
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
 						"start_time": {

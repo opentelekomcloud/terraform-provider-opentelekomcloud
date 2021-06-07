@@ -113,7 +113,6 @@ func ResourceRdsReadReplicaV3() *schema.Resource {
 			"db": {
 				Type:     schema.TypeList,
 				Computed: true,
-				MaxItems: 1,
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
 						"type": {
