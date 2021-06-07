@@ -1,11 +1,12 @@
 package elb
 
 import (
-	"fmt"
+	"context"
 	"log"
 	"time"
 
 	"github.com/hashicorp/go-multierror"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
@@ -18,10 +19,10 @@ import (
 
 func ResourceMonitorV2() *schema.Resource {
 	return &schema.Resource{
-		Create: resourceMonitorV2Create,
-		Read:   resourceMonitorV2Read,
-		Update: resourceMonitorV2Update,
-		Delete: resourceMonitorV2Delete,
+		CreateContext: resourceMonitorV2Create,
+		ReadContext:   resourceMonitorV2Read,
+		UpdateContext: resourceMonitorV2Update,
+		DeleteContext: resourceMonitorV2Delete,
 
 		Timeouts: &schema.ResourceTimeout{
 			Create: schema.DefaultTimeout(10 * time.Minute),
@@ -108,11 +109,11 @@ func ResourceMonitorV2() *schema.Resource {
 	}
 }
 
-func resourceMonitorV2Create(d *schema.ResourceData, meta interface{}) error {
+func resourceMonitorV2Create(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*cfg.Config)
 	client, err := config.NetworkingV2Client(config.GetRegion(d))
 	if err != nil {
-		return fmt.Errorf("error creating OpenTelekomCloud NetworkingV2 client: %s", err)
+		return diag.Errorf("error creating OpenTelekomCloud NetworkingV2 client: %s", err)
 	}
 
 	adminStateUp := d.Get("admin_state_up").(bool)
@@ -136,7 +137,7 @@ func resourceMonitorV2Create(d *schema.ResourceData, meta interface{}) error {
 	poolID := createOpts.PoolID
 	// Wait for parent pool to become active before continuing
 	if err := waitForLBV2viaPool(client, poolID, "ACTIVE", timeout); err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 
 	log.Printf("[DEBUG] Create Options: %#v", createOpts)
@@ -150,28 +151,28 @@ func resourceMonitorV2Create(d *schema.ResourceData, meta interface{}) error {
 		return nil
 	})
 	if err != nil {
-		return fmt.Errorf("unable to create monitor: %s", err)
+		return diag.Errorf("unable to create monitor: %s", err)
 	}
 
 	if err := waitForLBV2viaPool(client, poolID, "ACTIVE", timeout); err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 
 	d.SetId(monitor.ID)
 
-	return resourceMonitorV2Read(d, meta)
+	return resourceMonitorV2Read(ctx, d, meta)
 }
 
-func resourceMonitorV2Read(d *schema.ResourceData, meta interface{}) error {
+func resourceMonitorV2Read(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*cfg.Config)
 	client, err := config.NetworkingV2Client(config.GetRegion(d))
 	if err != nil {
-		return fmt.Errorf("error creating OpenTelekomCloud NetworkingV2 client: %s", err)
+		return diag.Errorf("error creating OpenTelekomCloud NetworkingV2 client: %s", err)
 	}
 
 	monitor, err := monitors.Get(client, d.Id()).Extract()
 	if err != nil {
-		return common.CheckDeleted(d, err, "monitor")
+		return diag.FromErr(common.CheckDeleted(d, err, "monitor"))
 	}
 
 	log.Printf("[DEBUG] Retrieved monitor %s: %#v", d.Id(), monitor)
@@ -192,17 +193,17 @@ func resourceMonitorV2Read(d *schema.ResourceData, meta interface{}) error {
 		d.Set("domain_name", monitor.DomainName),
 	)
 	if mErr.ErrorOrNil() != nil {
-		return mErr
+		return diag.FromErr(mErr)
 	}
 
 	return nil
 }
 
-func resourceMonitorV2Update(d *schema.ResourceData, meta interface{}) error {
+func resourceMonitorV2Update(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*cfg.Config)
 	client, err := config.NetworkingV2Client(config.GetRegion(d))
 	if err != nil {
-		return fmt.Errorf("error creating OpenTelekomCloud NetworkingV2 client: %s", err)
+		return diag.Errorf("error creating OpenTelekomCloud NetworkingV2 client: %s", err)
 	}
 
 	var updateOpts monitors.UpdateOpts
@@ -242,7 +243,7 @@ func resourceMonitorV2Update(d *schema.ResourceData, meta interface{}) error {
 	timeout := d.Timeout(schema.TimeoutUpdate)
 	poolID := d.Get("pool_id").(string)
 	if err := waitForLBV2viaPool(client, poolID, "ACTIVE", timeout); err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 
 	err = resource.Retry(timeout, func() *resource.RetryError {
@@ -254,22 +255,22 @@ func resourceMonitorV2Update(d *schema.ResourceData, meta interface{}) error {
 	})
 
 	if err != nil {
-		return fmt.Errorf("unable to update monitor %s: %s", d.Id(), err)
+		return diag.Errorf("unable to update monitor %s: %s", d.Id(), err)
 	}
 
 	// Wait for LB to become active before continuing
 	if err := waitForLBV2viaPool(client, poolID, "ACTIVE", timeout); err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 
-	return resourceMonitorV2Read(d, meta)
+	return resourceMonitorV2Read(ctx, d, meta)
 }
 
-func resourceMonitorV2Delete(d *schema.ResourceData, meta interface{}) error {
+func resourceMonitorV2Delete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*cfg.Config)
 	networkingClient, err := config.NetworkingV2Client(config.GetRegion(d))
 	if err != nil {
-		return fmt.Errorf("error creating OpenTelekomCloud NetworkingV2 client: %s", err)
+		return diag.Errorf("error creating OpenTelekomCloud NetworkingV2 client: %s", err)
 	}
 
 	log.Printf("[DEBUG] Deleting monitor %s", d.Id())
@@ -277,7 +278,7 @@ func resourceMonitorV2Delete(d *schema.ResourceData, meta interface{}) error {
 	poolID := d.Get("pool_id").(string)
 	err = waitForLBV2viaPool(networkingClient, poolID, "ACTIVE", timeout)
 	if err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 
 	err = resource.Retry(timeout, func() *resource.RetryError {
@@ -289,12 +290,12 @@ func resourceMonitorV2Delete(d *schema.ResourceData, meta interface{}) error {
 	})
 
 	if err != nil {
-		return fmt.Errorf("unable to delete monitor %s: %s", d.Id(), err)
+		return diag.Errorf("unable to delete monitor %s: %s", d.Id(), err)
 	}
 
 	err = waitForLBV2viaPool(networkingClient, poolID, "ACTIVE", timeout)
 	if err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 
 	return nil

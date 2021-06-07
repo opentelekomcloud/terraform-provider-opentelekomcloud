@@ -1,10 +1,11 @@
 package elb
 
 import (
-	"fmt"
+	"context"
 	"log"
 	"time"
 
+	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/opentelekomcloud/gophertelekomcloud"
 
@@ -16,10 +17,10 @@ import (
 
 func ResourceELoadBalancer() *schema.Resource {
 	return &schema.Resource{
-		Create: resourceELoadBalancerCreate,
-		Read:   resourceELoadBalancerRead,
-		Update: resourceELoadBalancerUpdate,
-		Delete: resourceELoadBalancerDelete,
+		CreateContext: resourceELoadBalancerCreate,
+		ReadContext:   resourceELoadBalancerRead,
+		UpdateContext: resourceELoadBalancerUpdate,
+		DeleteContext: resourceELoadBalancerDelete,
 
 		DeprecationMessage: classicLBDeprecated,
 
@@ -105,11 +106,11 @@ func ResourceELoadBalancer() *schema.Resource {
 	}
 }
 
-func resourceELoadBalancerCreate(d *schema.ResourceData, meta interface{}) error {
+func resourceELoadBalancerCreate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*cfg.Config)
 	client, err := config.ElbV1Client(config.GetRegion(d))
 	if err != nil {
-		return fmt.Errorf("Error creating OpenTelekomCloud networking client: %s", err)
+		return diag.Errorf("Error creating OpenTelekomCloud networking client: %s", err)
 	}
 
 	adminStateUp := d.Get("admin_state_up").(bool)
@@ -130,11 +131,11 @@ func resourceELoadBalancerCreate(d *schema.ResourceData, meta interface{}) error
 
 	job, err := loadbalancer_elbs.Create(client, createOpts).ExtractJobResponse()
 	if err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 
 	if err := golangsdk.WaitForJobSuccess(client, job.URI, int(d.Timeout(schema.TimeoutCreate)/time.Second)); err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 
 	entity, err := golangsdk.GetJobEntity(client, job.URI, "elb")
@@ -144,24 +145,24 @@ func resourceELoadBalancerCreate(d *schema.ResourceData, meta interface{}) error
 			if id, ok := vid.(string); ok {
 				// If all has been successful, set the ID on the resource, return Read of it
 				d.SetId(id)
-				return resourceELoadBalancerRead(d, meta)
+				return resourceELoadBalancerRead(ctx, d, meta)
 			}
 		}
 	}
 
-	return fmt.Errorf("Unexpected conversion error in resourceELoadBalancerCreate.")
+	return diag.Errorf("Unexpected conversion error in resourceELoadBalancerCreate.")
 }
 
-func resourceELoadBalancerRead(d *schema.ResourceData, meta interface{}) error {
+func resourceELoadBalancerRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*cfg.Config)
 	networkingClient, err := config.ElbV1Client(config.GetRegion(d))
 	if err != nil {
-		return fmt.Errorf("Error creating OpenTelekomCloud networking client: %s", err)
+		return diag.Errorf("Error creating OpenTelekomCloud networking client: %s", err)
 	}
 
 	lb, err := loadbalancer_elbs.Get(networkingClient, d.Id()).Extract()
 	if err != nil {
-		return common.CheckDeleted(d, err, "loadbalancer")
+		return diag.FromErr(common.CheckDeleted(d, err, "loadbalancer"))
 	}
 
 	log.Printf("[DEBUG] Retrieved loadbalancer %s: %#v", d.Id(), lb)
@@ -186,11 +187,11 @@ func resourceELoadBalancerRead(d *schema.ResourceData, meta interface{}) error {
 	return nil
 }
 
-func resourceELoadBalancerUpdate(d *schema.ResourceData, meta interface{}) error {
+func resourceELoadBalancerUpdate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*cfg.Config)
 	client, err := config.ElbV1Client(config.GetRegion(d))
 	if err != nil {
-		return fmt.Errorf("Error creating OpenTelekomCloud networking client: %s", err)
+		return diag.Errorf("Error creating OpenTelekomCloud networking client: %s", err)
 	}
 
 	var updateOpts loadbalancer_elbs.UpdateOpts
@@ -211,30 +212,30 @@ func resourceELoadBalancerUpdate(d *schema.ResourceData, meta interface{}) error
 	log.Printf("[DEBUG] Updating loadbalancer %s with options: %#v", d.Id(), updateOpts)
 	job, err := loadbalancer_elbs.Update(client, d.Id(), updateOpts).ExtractJobResponse()
 	if err := golangsdk.WaitForJobSuccess(client, job.URI, int(d.Timeout(schema.TimeoutUpdate)/time.Second)); err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 
-	return resourceELoadBalancerRead(d, meta)
+	return resourceELoadBalancerRead(ctx, d, meta)
 }
 
-func resourceELoadBalancerDelete(d *schema.ResourceData, meta interface{}) error {
+func resourceELoadBalancerDelete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*cfg.Config)
 	client, err := config.ElbV1Client(config.GetRegion(d))
 	if err != nil {
-		return fmt.Errorf("Error creating OpenTelekomCloud networking client: %s", err)
+		return diag.Errorf("Error creating OpenTelekomCloud networking client: %s", err)
 	}
 
 	id := d.Id()
 	log.Printf("[DEBUG] Deleting loadbalancer %s", d.Id())
 	job, err := loadbalancer_elbs.Delete(client, id, false).ExtractJobResponse()
 	if err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 
 	log.Printf("Waiting for loadbalancer %s to delete", id)
 
 	if err := golangsdk.WaitForJobSuccess(client, job.URI, int(d.Timeout(schema.TimeoutDelete)/time.Second)); err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 
 	log.Printf("Successfully deleted loadbalancer %s", id)

@@ -1,11 +1,13 @@
 package elb
 
 import (
+	"context"
 	"fmt"
 	"log"
 	"strings"
 	"time"
 
+	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
@@ -19,10 +21,10 @@ import (
 
 func ResourceL7RuleV2() *schema.Resource {
 	return &schema.Resource{
-		Create: resourceL7RuleV2Create,
-		Read:   resourceL7RuleV2Read,
-		Update: resourceL7RuleV2Update,
-		Delete: resourceL7RuleV2Delete,
+		CreateContext: resourceL7RuleV2Create,
+		ReadContext:   resourceL7RuleV2Read,
+		UpdateContext: resourceL7RuleV2Update,
+		DeleteContext: resourceL7RuleV2Delete,
 		Importer: &schema.ResourceImporter{
 			State: resourceL7RuleV2Import,
 		},
@@ -103,11 +105,11 @@ func ResourceL7RuleV2() *schema.Resource {
 	}
 }
 
-func resourceL7RuleV2Create(d *schema.ResourceData, meta interface{}) error {
+func resourceL7RuleV2Create(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*cfg.Config)
 	lbClient, err := config.NetworkingV2Client(config.GetRegion(d))
 	if err != nil {
-		return fmt.Errorf("Error creating OpenTelekomCloud networking client: %s", err)
+		return diag.Errorf("Error creating OpenTelekomCloud networking client: %s", err)
 	}
 
 	// Assign some required variables for use in creation.
@@ -121,7 +123,7 @@ func resourceL7RuleV2Create(d *schema.ResourceData, meta interface{}) error {
 	// Ensure the right combination of options have been specified.
 	err = checkL7RuleType(ruleType, key)
 	if err != nil {
-		return fmt.Errorf("Unable to create L7 Rule: %s", err)
+		return diag.Errorf("Unable to create L7 Rule: %s", err)
 	}
 
 	createOpts := l7policies.CreateRuleOpts{
@@ -140,7 +142,7 @@ func resourceL7RuleV2Create(d *schema.ResourceData, meta interface{}) error {
 	// Get a clean copy of the parent L7 Policy.
 	parentL7Policy, err := l7policies.Get(lbClient, l7policyID).Extract()
 	if err != nil {
-		return fmt.Errorf("Unable to get parent L7 Policy: %s", err)
+		return diag.Errorf("Unable to get parent L7 Policy: %s", err)
 	}
 
 	if parentL7Policy.ListenerID != "" {
@@ -149,20 +151,20 @@ func resourceL7RuleV2Create(d *schema.ResourceData, meta interface{}) error {
 		// Fallback for the Neutron LBaaSv2 extension
 		listenerID, err = getListenerIDForL7Policy(lbClient, l7policyID)
 		if err != nil {
-			return err
+			return diag.FromErr(err)
 		}
 	}
 
 	// Get a clean copy of the parent listener.
 	parentListener, err := listeners.Get(lbClient, listenerID).Extract()
 	if err != nil {
-		return fmt.Errorf("Unable to retrieve listener %s: %s", listenerID, err)
+		return diag.Errorf("Unable to retrieve listener %s: %s", listenerID, err)
 	}
 
 	// Wait for parent L7 Policy to become active before continuing
 	err = waitForLBV2L7Policy(lbClient, parentListener, parentL7Policy, "ACTIVE", lbPendingStatuses, timeout)
 	if err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 
 	log.Printf("[DEBUG] Attempting to create L7 Rule")
@@ -176,33 +178,33 @@ func resourceL7RuleV2Create(d *schema.ResourceData, meta interface{}) error {
 	})
 
 	if err != nil {
-		return fmt.Errorf("Error creating L7 Rule: %s", err)
+		return diag.Errorf("Error creating L7 Rule: %s", err)
 	}
 
 	// Wait for L7 Rule to become active before continuing
 	err = waitForLBV2L7Rule(lbClient, parentListener, parentL7Policy, l7Rule, "ACTIVE", lbPendingStatuses, timeout)
 	if err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 
 	d.SetId(l7Rule.ID)
 	d.Set("listener_id", listenerID)
 
-	return resourceL7RuleV2Read(d, meta)
+	return resourceL7RuleV2Read(ctx, d, meta)
 }
 
-func resourceL7RuleV2Read(d *schema.ResourceData, meta interface{}) error {
+func resourceL7RuleV2Read(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*cfg.Config)
 	lbClient, err := config.NetworkingV2Client(config.GetRegion(d))
 	if err != nil {
-		return fmt.Errorf("Error creating OpenTelekomCloud networking client: %s", err)
+		return diag.Errorf("Error creating OpenTelekomCloud networking client: %s", err)
 	}
 
 	l7policyID := d.Get("l7policy_id").(string)
 
 	l7Rule, err := l7policies.GetRule(lbClient, l7policyID, d.Id()).Extract()
 	if err != nil {
-		return common.CheckDeleted(d, err, "L7 Rule")
+		return diag.FromErr(common.CheckDeleted(d, err, "L7 Rule"))
 	}
 
 	log.Printf("[DEBUG] Retrieved L7 Rule %s: %#v", d.Id(), l7Rule)
@@ -218,11 +220,11 @@ func resourceL7RuleV2Read(d *schema.ResourceData, meta interface{}) error {
 	return nil
 }
 
-func resourceL7RuleV2Update(d *schema.ResourceData, meta interface{}) error {
+func resourceL7RuleV2Update(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*cfg.Config)
 	lbClient, err := config.NetworkingV2Client(config.GetRegion(d))
 	if err != nil {
-		return fmt.Errorf("Error creating OpenTelekomCloud networking client: %s", err)
+		return diag.Errorf("Error creating OpenTelekomCloud networking client: %s", err)
 	}
 
 	// Assign some required variables for use in updating.
@@ -250,7 +252,7 @@ func resourceL7RuleV2Update(d *schema.ResourceData, meta interface{}) error {
 	// Ensure the right combination of options have been specified.
 	err = checkL7RuleType(ruleType, key)
 	if err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 
 	timeout := d.Timeout(schema.TimeoutUpdate)
@@ -258,31 +260,31 @@ func resourceL7RuleV2Update(d *schema.ResourceData, meta interface{}) error {
 	// Get a clean copy of the parent listener.
 	parentListener, err := listeners.Get(lbClient, listenerID).Extract()
 	if err != nil {
-		return fmt.Errorf("Unable to retrieve listener %s: %s", listenerID, err)
+		return diag.Errorf("Unable to retrieve listener %s: %s", listenerID, err)
 	}
 
 	// Get a clean copy of the parent L7 Policy.
 	parentL7Policy, err := l7policies.Get(lbClient, l7policyID).Extract()
 	if err != nil {
-		return fmt.Errorf("Unable to get parent L7 Policy: %s", err)
+		return diag.Errorf("Unable to get parent L7 Policy: %s", err)
 	}
 
 	// Get a clean copy of the L7 Rule.
 	l7Rule, err := l7policies.GetRule(lbClient, l7policyID, d.Id()).Extract()
 	if err != nil {
-		return fmt.Errorf("Unable to get L7 Rule: %s", err)
+		return diag.Errorf("Unable to get L7 Rule: %s", err)
 	}
 
 	// Wait for parent L7 Policy to become active before continuing
 	err = waitForLBV2L7Policy(lbClient, parentListener, parentL7Policy, "ACTIVE", lbPendingStatuses, timeout)
 	if err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 
 	// Wait for L7 Rule to become active before continuing
 	err = waitForLBV2L7Rule(lbClient, parentListener, parentL7Policy, l7Rule, "ACTIVE", lbPendingStatuses, timeout)
 	if err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 
 	log.Printf("[DEBUG] Updating L7 Rule %s with options: %#v", d.Id(), updateOpts)
@@ -295,23 +297,23 @@ func resourceL7RuleV2Update(d *schema.ResourceData, meta interface{}) error {
 	})
 
 	if err != nil {
-		return fmt.Errorf("Unable to update L7 Rule %s: %s", d.Id(), err)
+		return diag.Errorf("Unable to update L7 Rule %s: %s", d.Id(), err)
 	}
 
 	// Wait for L7 Rule to become active before continuing
 	err = waitForLBV2L7Rule(lbClient, parentListener, parentL7Policy, l7Rule, "ACTIVE", lbPendingStatuses, timeout)
 	if err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 
-	return resourceL7RuleV2Read(d, meta)
+	return resourceL7RuleV2Read(ctx, d, meta)
 }
 
-func resourceL7RuleV2Delete(d *schema.ResourceData, meta interface{}) error {
+func resourceL7RuleV2Delete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*cfg.Config)
 	lbClient, err := config.NetworkingV2Client(config.GetRegion(d))
 	if err != nil {
-		return fmt.Errorf("Error creating OpenTelekomCloud networking client: %s", err)
+		return diag.Errorf("Error creating OpenTelekomCloud networking client: %s", err)
 	}
 
 	timeout := d.Timeout(schema.TimeoutDelete)
@@ -322,25 +324,25 @@ func resourceL7RuleV2Delete(d *schema.ResourceData, meta interface{}) error {
 	// Get a clean copy of the parent listener.
 	parentListener, err := listeners.Get(lbClient, listenerID).Extract()
 	if err != nil {
-		return fmt.Errorf("Unable to retrieve parent listener (%s) for the L7 Rule: %s", listenerID, err)
+		return diag.Errorf("Unable to retrieve parent listener (%s) for the L7 Rule: %s", listenerID, err)
 	}
 
 	// Get a clean copy of the parent L7 Policy.
 	parentL7Policy, err := l7policies.Get(lbClient, l7policyID).Extract()
 	if err != nil {
-		return fmt.Errorf("Unable to retrieve parent L7 Policy (%s) for the L7 Rule: %s", l7policyID, err)
+		return diag.Errorf("Unable to retrieve parent L7 Policy (%s) for the L7 Rule: %s", l7policyID, err)
 	}
 
 	// Get a clean copy of the L7 Rule.
 	l7Rule, err := l7policies.GetRule(lbClient, l7policyID, d.Id()).Extract()
 	if err != nil {
-		return common.CheckDeleted(d, err, "Unable to retrieve L7 Rule")
+		return diag.FromErr(common.CheckDeleted(d, err, "Unable to retrieve L7 Rule"))
 	}
 
 	// Wait for parent L7 Policy to become active before continuing
 	err = waitForLBV2L7Policy(lbClient, parentListener, parentL7Policy, "ACTIVE", lbPendingStatuses, timeout)
 	if err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 
 	log.Printf("[DEBUG] Attempting to delete L7 Rule %s", d.Id())
@@ -353,12 +355,12 @@ func resourceL7RuleV2Delete(d *schema.ResourceData, meta interface{}) error {
 	})
 
 	if err != nil {
-		return common.CheckDeleted(d, err, "Error deleting L7 Rule")
+		return diag.FromErr(common.CheckDeleted(d, err, "Error deleting L7 Rule"))
 	}
 
 	err = waitForLBV2L7Rule(lbClient, parentListener, parentL7Policy, l7Rule, "DELETED", lbPendingDeleteStatuses, timeout)
 	if err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 
 	return nil

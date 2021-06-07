@@ -1,11 +1,12 @@
 package elb
 
 import (
-	"fmt"
+	"context"
 	"log"
 	"time"
 
 	"github.com/hashicorp/go-multierror"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
@@ -19,10 +20,10 @@ import (
 
 func ResourceListenerV2() *schema.Resource {
 	return &schema.Resource{
-		Create: resourceListenerV2Create,
-		Read:   resourceListenerV2Read,
-		Update: resourceListenerV2Update,
-		Delete: resourceListenerV2Delete,
+		CreateContext: resourceListenerV2Create,
+		ReadContext:   resourceListenerV2Read,
+		UpdateContext: resourceListenerV2Update,
+		DeleteContext: resourceListenerV2Delete,
 
 		Timeouts: &schema.ResourceTimeout{
 			Create: schema.DefaultTimeout(10 * time.Minute),
@@ -119,11 +120,11 @@ func ResourceListenerV2() *schema.Resource {
 	}
 }
 
-func resourceListenerV2Create(d *schema.ResourceData, meta interface{}) error {
+func resourceListenerV2Create(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*cfg.Config)
 	client, err := config.NetworkingV2Client(config.GetRegion(d))
 	if err != nil {
-		return fmt.Errorf("error creating OpenTelekomCloud NetworkingV2 client: %s", err)
+		return diag.Errorf("error creating OpenTelekomCloud NetworkingV2 client: %s", err)
 	}
 
 	http2Enable := d.Get("http2_enable").(bool) // would prefer a fix in the gopher...
@@ -161,7 +162,7 @@ func resourceListenerV2Create(d *schema.ResourceData, meta interface{}) error {
 	lbID := createOpts.LoadbalancerID
 	timeout := d.Timeout(schema.TimeoutCreate)
 	if err := waitForLBV2LoadBalancer(client, lbID, "ACTIVE", nil, timeout); err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 
 	log.Printf("[DEBUG] Attempting to create listener")
@@ -174,12 +175,12 @@ func resourceListenerV2Create(d *schema.ResourceData, meta interface{}) error {
 		return nil
 	})
 	if err != nil {
-		return fmt.Errorf("error creating listener: %s", err)
+		return diag.Errorf("error creating listener: %s", err)
 	}
 
 	// Wait for LoadBalancer to become active again before continuing
 	if err := waitForLBV2LoadBalancer(client, lbID, "ACTIVE", nil, timeout); err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 
 	// set tags
@@ -187,25 +188,25 @@ func resourceListenerV2Create(d *schema.ResourceData, meta interface{}) error {
 	if len(tagRaw) > 0 {
 		tagList := common.ExpandResourceTags(tagRaw)
 		if err := tags.Create(client, "listeners", listener.ID, tagList).ExtractErr(); err != nil {
-			return fmt.Errorf("error setting tags of LoadBalancer: %s", err)
+			return diag.Errorf("error setting tags of LoadBalancer: %s", err)
 		}
 	}
 
 	d.SetId(listener.ID)
 
-	return resourceListenerV2Read(d, meta)
+	return resourceListenerV2Read(ctx, d, meta)
 }
 
-func resourceListenerV2Read(d *schema.ResourceData, meta interface{}) error {
+func resourceListenerV2Read(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*cfg.Config)
 	client, err := config.NetworkingV2Client(config.GetRegion(d))
 	if err != nil {
-		return fmt.Errorf("error creating OpenTelekomCloud NetworkingV2 client: %s", err)
+		return diag.Errorf("error creating OpenTelekomCloud NetworkingV2 client: %s", err)
 	}
 
 	listener, err := listeners.Get(client, d.Id()).Extract()
 	if err != nil {
-		return common.CheckDeleted(d, err, "listener")
+		return diag.FromErr(common.CheckDeleted(d, err, "listener"))
 	}
 
 	log.Printf("[DEBUG] Retrieved listener %s: %#v", d.Id(), listener)
@@ -228,27 +229,27 @@ func resourceListenerV2Read(d *schema.ResourceData, meta interface{}) error {
 	)
 
 	if mErr.ErrorOrNil() != nil {
-		return mErr
+		return diag.FromErr(mErr)
 	}
 
 	// save tags
 	resourceTags, err := tags.Get(client, "listeners", d.Id()).Extract()
 	if err != nil {
-		return fmt.Errorf("error fetching OpenTelekomCloud LB Listener tags: %s", err)
+		return diag.Errorf("error fetching OpenTelekomCloud LB Listener tags: %s", err)
 	}
 	tagMap := common.TagsToMap(resourceTags)
 	if err := d.Set("tags", tagMap); err != nil {
-		return fmt.Errorf("error saving tags for OpenTelekomCloud LB Listener: %s", err)
+		return diag.Errorf("error saving tags for OpenTelekomCloud LB Listener: %s", err)
 	}
 
 	return nil
 }
 
-func resourceListenerV2Update(d *schema.ResourceData, meta interface{}) error {
+func resourceListenerV2Update(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*cfg.Config)
 	client, err := config.NetworkingV2Client(config.GetRegion(d))
 	if err != nil {
-		return fmt.Errorf("error creating OpenTelekomCloud NetworkingV2 client: %s", err)
+		return diag.Errorf("error creating OpenTelekomCloud NetworkingV2 client: %s", err)
 	}
 
 	var updateOpts listeners.UpdateOpts
@@ -293,7 +294,7 @@ func resourceListenerV2Update(d *schema.ResourceData, meta interface{}) error {
 	lbID := d.Get("loadbalancer_id").(string)
 	timeout := d.Timeout(schema.TimeoutUpdate)
 	if err := waitForLBV2LoadBalancer(client, lbID, "ACTIVE", nil, timeout); err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 
 	log.Printf("[DEBUG] Updating listener %s with options: %#v", d.Id(), updateOpts)
@@ -306,37 +307,37 @@ func resourceListenerV2Update(d *schema.ResourceData, meta interface{}) error {
 	})
 
 	if err != nil {
-		return fmt.Errorf("error updating listener %s: %s", d.Id(), err)
+		return diag.Errorf("error updating listener %s: %s", d.Id(), err)
 	}
 
 	// Wait for LoadBalancer to become active again before continuing
 	if err := waitForLBV2LoadBalancer(client, lbID, "ACTIVE", nil, timeout); err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 
 	// update tags
 	if d.HasChange("tags") {
 		if err := common.UpdateResourceTags(client, d, "listeners", d.Id()); err != nil {
-			return fmt.Errorf("error updating tags of LoadBalancer Listener %s: %s", d.Id(), err)
+			return diag.Errorf("error updating tags of LoadBalancer Listener %s: %s", d.Id(), err)
 		}
 	}
 
-	return resourceListenerV2Read(d, meta)
+	return resourceListenerV2Read(ctx, d, meta)
 
 }
 
-func resourceListenerV2Delete(d *schema.ResourceData, meta interface{}) error {
+func resourceListenerV2Delete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*cfg.Config)
 	client, err := config.NetworkingV2Client(config.GetRegion(d))
 	if err != nil {
-		return fmt.Errorf("error creating OpenTelekomCloud NetworkingV2 client: %s", err)
+		return diag.Errorf("error creating OpenTelekomCloud NetworkingV2 client: %s", err)
 	}
 
 	// Wait for LoadBalancer to become active before continuing
 	lbID := d.Get("loadbalancer_id").(string)
 	timeout := d.Timeout(schema.TimeoutDelete)
 	if err := waitForLBV2LoadBalancer(client, lbID, "ACTIVE", nil, timeout); err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 
 	log.Printf("[DEBUG] Deleting listener %s", d.Id())
@@ -348,17 +349,17 @@ func resourceListenerV2Delete(d *schema.ResourceData, meta interface{}) error {
 		return nil
 	})
 	if err != nil {
-		return fmt.Errorf("error deleting listener %s: %s", d.Id(), err)
+		return diag.Errorf("error deleting listener %s: %s", d.Id(), err)
 	}
 
 	// Wait for LoadBalancer to become active again before continuing
 	if err := waitForLBV2LoadBalancer(client, lbID, "ACTIVE", nil, timeout); err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 
 	// Wait for Listener to delete
 	if err := waitForLBV2Listener(client, d.Id(), "DELETED", nil, timeout); err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 
 	return nil

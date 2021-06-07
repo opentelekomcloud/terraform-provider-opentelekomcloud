@@ -1,16 +1,18 @@
 package elb
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
 	"log"
 	"time"
 
 	"github.com/hashicorp/go-multierror"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
-	"github.com/opentelekomcloud/gophertelekomcloud"
+	golangsdk "github.com/opentelekomcloud/gophertelekomcloud"
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/networking/v2/extensions/lbaas_v2/certificates"
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/networking/v2/extensions/lbaas_v2/listeners"
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common"
@@ -19,10 +21,10 @@ import (
 
 func ResourceCertificateV2() *schema.Resource {
 	return &schema.Resource{
-		Create: resourceCertificateV2Create,
-		Read:   resourceCertificateV2Read,
-		Update: resourceCertificateV2Update,
-		Delete: resourceCertificateV2Delete,
+		CreateContext: resourceCertificateV2Create,
+		ReadContext:   resourceCertificateV2Read,
+		UpdateContext: resourceCertificateV2Update,
+		DeleteContext: resourceCertificateV2Delete,
 
 		Timeouts: &schema.ResourceTimeout{
 			Create: schema.DefaultTimeout(10 * time.Minute),
@@ -87,11 +89,11 @@ func ResourceCertificateV2() *schema.Resource {
 	}
 }
 
-func resourceCertificateV2Create(d *schema.ResourceData, meta interface{}) error {
+func resourceCertificateV2Create(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*cfg.Config)
 	networkingClient, err := config.NetworkingV2Client(config.GetRegion(d))
 	if err != nil {
-		return fmt.Errorf("error creating OpenTelekomCloud networking client: %s", err)
+		return diag.Errorf("error creating OpenTelekomCloud networking client: %s", err)
 	}
 
 	createOpts := certificates.CreateOpts{
@@ -106,25 +108,25 @@ func resourceCertificateV2Create(d *schema.ResourceData, meta interface{}) error
 	log.Printf("[DEBUG] Create Options: %#v", createOpts)
 	c, err := certificates.Create(networkingClient, createOpts).Extract()
 	if err != nil {
-		return fmt.Errorf("error creating Certificate: %s", err)
+		return diag.Errorf("error creating Certificate: %s", err)
 	}
 
 	// If all has been successful, set the ID on the resource
 	d.SetId(c.ID)
 
-	return resourceCertificateV2Read(d, meta)
+	return resourceCertificateV2Read(ctx, d, meta)
 }
 
-func resourceCertificateV2Read(d *schema.ResourceData, meta interface{}) error {
+func resourceCertificateV2Read(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*cfg.Config)
 	networkingClient, err := config.NetworkingV2Client(config.GetRegion(d))
 	if err != nil {
-		return fmt.Errorf("error creating OpenTelekomCloud networking client: %s", err)
+		return diag.Errorf("error creating OpenTelekomCloud networking client: %s", err)
 	}
 
 	c, err := certificates.Get(networkingClient, d.Id()).Extract()
 	if err != nil {
-		return common.CheckDeleted(d, err, "certificate")
+		return diag.FromErr(common.CheckDeleted(d, err, "certificate"))
 	}
 	log.Printf("[DEBUG] Retrieved certificate %s: %#v", d.Id(), c)
 
@@ -139,14 +141,14 @@ func resourceCertificateV2Read(d *schema.ResourceData, meta interface{}) error {
 		d.Set("update_time", c.UpdateTime),
 		d.Set("region", config.GetRegion(d)),
 	)
-	return mErr.ErrorOrNil()
+	return diag.FromErr(mErr.ErrorOrNil())
 }
 
-func resourceCertificateV2Update(d *schema.ResourceData, meta interface{}) error {
+func resourceCertificateV2Update(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*cfg.Config)
 	networkingClient, err := config.NetworkingV2Client(config.GetRegion(d))
 	if err != nil {
-		return fmt.Errorf("error creating OpenTelekomCloud networking client: %s", err)
+		return diag.Errorf("error creating OpenTelekomCloud networking client: %s", err)
 	}
 
 	var updateOpts certificates.UpdateOpts
@@ -177,17 +179,17 @@ func resourceCertificateV2Update(d *schema.ResourceData, meta interface{}) error
 		return nil
 	})
 	if err != nil {
-		return fmt.Errorf("error updating certificate %s: %s", d.Id(), err)
+		return diag.Errorf("error updating certificate %s: %s", d.Id(), err)
 	}
 
-	return resourceCertificateV2Read(d, meta)
+	return resourceCertificateV2Read(ctx, d, meta)
 }
 
-func resourceCertificateV2Delete(d *schema.ResourceData, meta interface{}) error {
+func resourceCertificateV2Delete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*cfg.Config)
 	client, err := config.NetworkingV2Client(config.GetRegion(d))
 	if err != nil {
-		return fmt.Errorf("error creating OpenTelekomCloud networking client: %s", err)
+		return diag.Errorf("error creating OpenTelekomCloud networking client: %s", err)
 	}
 
 	log.Printf("[DEBUG] Deleting certificate %s", d.Id())
@@ -200,7 +202,7 @@ func resourceCertificateV2Delete(d *schema.ResourceData, meta interface{}) error
 		return nil
 	})
 	if err != nil {
-		return handleCertificateDeletionError(d, client, err)
+		return diag.FromErr(handleCertificateDeletionError(d, client, err))
 	}
 
 	return nil

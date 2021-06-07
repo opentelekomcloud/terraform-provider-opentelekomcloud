@@ -1,10 +1,11 @@
 package elb
 
 import (
-	"fmt"
+	"context"
 	"log"
 	"time"
 
+	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/networking/v2/extensions/elbaas/listeners"
 
@@ -20,10 +21,10 @@ func ValidateProtocolFormat(v interface{}, k string) (ws []string, errors []erro
 
 func ResourceEListener() *schema.Resource {
 	return &schema.Resource{
-		Create: resourceEListenerCreate,
-		Read:   resourceEListenerRead,
-		Update: resourceEListenerUpdate,
-		Delete: resourceEListenerDelete,
+		CreateContext: resourceEListenerCreate,
+		ReadContext:   resourceEListenerRead,
+		UpdateContext: resourceEListenerUpdate,
+		DeleteContext: resourceEListenerDelete,
 
 		DeprecationMessage: classicLBDeprecated,
 
@@ -181,11 +182,11 @@ func ResourceEListener() *schema.Resource {
 	}
 }
 
-func resourceEListenerCreate(d *schema.ResourceData, meta interface{}) error {
+func resourceEListenerCreate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*cfg.Config)
 	client, err := config.ElbV1Client(config.GetRegion(d))
 	if err != nil {
-		return fmt.Errorf("Error creating OpenTelekomCloud networking client: %s", err)
+		return diag.Errorf("Error creating OpenTelekomCloud networking client: %s", err)
 	}
 
 	var certificates []string
@@ -220,25 +221,25 @@ func resourceEListenerCreate(d *schema.ResourceData, meta interface{}) error {
 
 	listener, err := listeners.Create(client, createOpts).Extract()
 	if err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 	d.SetId(listener.ID)
 
 	log.Printf("[DEBUG] Successfully created listener %s", listener.ID)
 
-	return resourceEListenerRead(d, meta)
+	return resourceEListenerRead(ctx, d, meta)
 }
 
-func resourceEListenerRead(d *schema.ResourceData, meta interface{}) error {
+func resourceEListenerRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*cfg.Config)
 	client, err := config.ElbV1Client(config.GetRegion(d))
 	if err != nil {
-		return fmt.Errorf("Error creating OpenTelekomCloud networking client: %s", err)
+		return diag.Errorf("Error creating OpenTelekomCloud networking client: %s", err)
 	}
 
 	listener, err := listeners.Get(client, d.Id()).Extract()
 	if err != nil {
-		return common.CheckDeleted(d, err, "listener")
+		return diag.FromErr(common.CheckDeleted(d, err, "listener"))
 	}
 
 	log.Printf("[DEBUG] Retrieved listener %s: %#v", d.Id(), listener)
@@ -269,11 +270,11 @@ func resourceEListenerRead(d *schema.ResourceData, meta interface{}) error {
 	return nil
 }
 
-func resourceEListenerUpdate(d *schema.ResourceData, meta interface{}) error {
+func resourceEListenerUpdate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*cfg.Config)
 	client, err := config.ElbV1Client(config.GetRegion(d))
 	if err != nil {
-		return fmt.Errorf("Error creating OpenTelekomCloud networking client: %s", err)
+		return diag.Errorf("Error creating OpenTelekomCloud networking client: %s", err)
 	}
 
 	var updateOpts listeners.UpdateOpts
@@ -313,18 +314,18 @@ func resourceEListenerUpdate(d *schema.ResourceData, meta interface{}) error {
 
 	_, err = listeners.Update(client, d.Id(), updateOpts).Extract()
 	if err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 
-	return resourceEListenerRead(d, meta)
+	return resourceEListenerRead(ctx, d, meta)
 
 }
 
-func resourceEListenerDelete(d *schema.ResourceData, meta interface{}) error {
+func resourceEListenerDelete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*cfg.Config)
 	client, err := config.ElbV1Client(config.GetRegion(d))
 	if err != nil {
-		return fmt.Errorf("Error creating OpenTelekomCloud networking client: %s", err)
+		return diag.Errorf("Error creating OpenTelekomCloud networking client: %s", err)
 	}
 
 	id := d.Id()
@@ -332,7 +333,7 @@ func resourceEListenerDelete(d *schema.ResourceData, meta interface{}) error {
 
 	err = listeners.Delete(client, id).ExtractErr()
 	if err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 
 	return nil

@@ -1,10 +1,11 @@
 package elb
 
 import (
-	"fmt"
+	"context"
 	"log"
 	"time"
 
+	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/networking/v2/extensions/lbaas_v2/whitelists"
 
@@ -14,10 +15,10 @@ import (
 
 func ResourceWhitelistV2() *schema.Resource {
 	return &schema.Resource{
-		Create: resourceWhitelistV2Create,
-		Read:   resourceWhitelistV2Read,
-		Update: resourceWhitelistV2Update,
-		Delete: resourceWhitelistV2Delete,
+		CreateContext: resourceWhitelistV2Create,
+		ReadContext:   resourceWhitelistV2Read,
+		UpdateContext: resourceWhitelistV2Update,
+		DeleteContext: resourceWhitelistV2Delete,
 
 		Timeouts: &schema.ResourceTimeout{
 			Create: schema.DefaultTimeout(10 * time.Minute),
@@ -53,11 +54,11 @@ func ResourceWhitelistV2() *schema.Resource {
 	}
 }
 
-func resourceWhitelistV2Create(d *schema.ResourceData, meta interface{}) error {
+func resourceWhitelistV2Create(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*cfg.Config)
 	networkingClient, err := config.NetworkingV2Client(config.GetRegion(d))
 	if err != nil {
-		return fmt.Errorf("Error creating OpenTelekomCloud networking client: %s", err)
+		return diag.Errorf("Error creating OpenTelekomCloud networking client: %s", err)
 	}
 
 	enableWhitelist := d.Get("enable_whitelist").(bool)
@@ -71,23 +72,23 @@ func resourceWhitelistV2Create(d *schema.ResourceData, meta interface{}) error {
 	log.Printf("[DEBUG] Create Options: %#v", createOpts)
 	wl, err := whitelists.Create(networkingClient, createOpts).Extract()
 	if err != nil {
-		return fmt.Errorf("Error creating OpenTelekomCloud Whitelist: %s", err)
+		return diag.Errorf("Error creating OpenTelekomCloud Whitelist: %s", err)
 	}
 
 	d.SetId(wl.ID)
-	return resourceWhitelistV2Read(d, meta)
+	return resourceWhitelistV2Read(ctx, d, meta)
 }
 
-func resourceWhitelistV2Read(d *schema.ResourceData, meta interface{}) error {
+func resourceWhitelistV2Read(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*cfg.Config)
 	networkingClient, err := config.NetworkingV2Client(config.GetRegion(d))
 	if err != nil {
-		return fmt.Errorf("Error creating OpenTelekomCloud networking client: %s", err)
+		return diag.Errorf("Error creating OpenTelekomCloud networking client: %s", err)
 	}
 
 	wl, err := whitelists.Get(networkingClient, d.Id()).Extract()
 	if err != nil {
-		return common.CheckDeleted(d, err, "whitelist")
+		return diag.FromErr(common.CheckDeleted(d, err, "whitelist"))
 	}
 
 	log.Printf("[DEBUG] Retrieved whitelist %s: %#v", d.Id(), wl)
@@ -101,11 +102,11 @@ func resourceWhitelistV2Read(d *schema.ResourceData, meta interface{}) error {
 	return nil
 }
 
-func resourceWhitelistV2Update(d *schema.ResourceData, meta interface{}) error {
+func resourceWhitelistV2Update(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*cfg.Config)
 	networkingClient, err := config.NetworkingV2Client(config.GetRegion(d))
 	if err != nil {
-		return fmt.Errorf("Error creating OpenTelekomCloud networking client: %s", err)
+		return diag.Errorf("Error creating OpenTelekomCloud networking client: %s", err)
 	}
 
 	var updateOpts whitelists.UpdateOpts
@@ -120,23 +121,23 @@ func resourceWhitelistV2Update(d *schema.ResourceData, meta interface{}) error {
 	log.Printf("[DEBUG] Updating whitelist %s with options: %#v", d.Id(), updateOpts)
 	_, err = whitelists.Update(networkingClient, d.Id(), updateOpts).Extract()
 	if err != nil {
-		return fmt.Errorf("Unable to update whitelist %s: %s", d.Id(), err)
+		return diag.Errorf("Unable to update whitelist %s: %s", d.Id(), err)
 	}
 
-	return resourceWhitelistV2Read(d, meta)
+	return resourceWhitelistV2Read(ctx, d, meta)
 }
 
-func resourceWhitelistV2Delete(d *schema.ResourceData, meta interface{}) error {
+func resourceWhitelistV2Delete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*cfg.Config)
 	networkingClient, err := config.NetworkingV2Client(config.GetRegion(d))
 	if err != nil {
-		return fmt.Errorf("Error creating OpenTelekomCloud networking client: %s", err)
+		return diag.Errorf("Error creating OpenTelekomCloud networking client: %s", err)
 	}
 
 	log.Printf("[DEBUG] Attempting to delete whitelist %s", d.Id())
 	err = whitelists.Delete(networkingClient, d.Id()).ExtractErr()
 	if err != nil {
-		return fmt.Errorf("Error deleting OpenTelekomCloud whitelist: %s", err)
+		return diag.Errorf("Error deleting OpenTelekomCloud whitelist: %s", err)
 	}
 	d.SetId("")
 	return nil
