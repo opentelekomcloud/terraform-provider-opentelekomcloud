@@ -1,8 +1,10 @@
 package iam
 
 import (
+	"context"
 	"fmt"
 
+	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/opentelekomcloud/gophertelekomcloud"
@@ -14,10 +16,10 @@ import (
 
 func ResourceIdentityGroupMembershipV3() *schema.Resource {
 	return &schema.Resource{
-		Create: resourceIdentityGroupMembershipV3Create,
-		Read:   resourceIdentityGroupMembershipV3Read,
-		Update: resourceIdentityGroupMembershipV3Update,
-		Delete: resourceIdentityGroupMembershipV3Delete,
+		CreateContext: resourceIdentityGroupMembershipV3Create,
+		ReadContext:   resourceIdentityGroupMembershipV3Read,
+		UpdateContext: resourceIdentityGroupMembershipV3Update,
+		DeleteContext: resourceIdentityGroupMembershipV3Delete,
 		Importer: &schema.ResourceImporter{
 			State: schema.ImportStatePassthrough,
 		},
@@ -38,30 +40,30 @@ func ResourceIdentityGroupMembershipV3() *schema.Resource {
 	}
 }
 
-func resourceIdentityGroupMembershipV3Create(d *schema.ResourceData, meta interface{}) error {
+func resourceIdentityGroupMembershipV3Create(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*cfg.Config)
 	identityClient, err := config.IdentityV3Client(config.GetRegion(d))
 	if err != nil {
-		return fmt.Errorf("Error creating OpenTelekomcloud identity client: %s", err)
+		return diag.Errorf("Error creating OpenTelekomcloud identity client: %s", err)
 	}
 
 	group := d.Get("group").(string)
 	userList := common.ExpandStringList(d.Get("users").(*schema.Set).List())
 
 	if err := addUsersToGroup(identityClient, group, userList); err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 
 	d.SetId(resource.UniqueId())
 
-	return resourceIdentityGroupMembershipV3Read(d, meta)
+	return resourceIdentityGroupMembershipV3Read(ctx, d, meta)
 }
 
-func resourceIdentityGroupMembershipV3Read(d *schema.ResourceData, meta interface{}) error {
+func resourceIdentityGroupMembershipV3Read(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*cfg.Config)
 	identityClient, err := config.IdentityV3Client(config.GetRegion(d))
 	if err != nil {
-		return fmt.Errorf("Error creating OpenTelekomcloud identity client: %s", err)
+		return diag.Errorf("Error creating OpenTelekomcloud identity client: %s", err)
 	}
 	group := d.Get("group").(string)
 	userList := d.Get("users").(*schema.Set)
@@ -73,13 +75,13 @@ func resourceIdentityGroupMembershipV3Read(d *schema.ResourceData, meta interfac
 			d.SetId("")
 			return nil
 		} else {
-			return fmt.Errorf("Unable to query groups: %s", err)
+			return diag.Errorf("Unable to query groups: %s", err)
 		}
 	}
 
 	allUsers, err := users.ExtractUsers(allPages)
 	if err != nil {
-		return fmt.Errorf("Unable to retrieve users: %s", err)
+		return diag.Errorf("Unable to retrieve users: %s", err)
 	}
 
 	for _, u := range allUsers {
@@ -89,17 +91,17 @@ func resourceIdentityGroupMembershipV3Read(d *schema.ResourceData, meta interfac
 	}
 
 	if err := d.Set("users", ul); err != nil {
-		return fmt.Errorf("Error setting user list from IAM (%s), error: %s", group, err)
+		return diag.Errorf("Error setting user list from IAM (%s), error: %s", group, err)
 	}
 
 	return nil
 }
 
-func resourceIdentityGroupMembershipV3Update(d *schema.ResourceData, meta interface{}) error {
+func resourceIdentityGroupMembershipV3Update(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*cfg.Config)
 	identityClient, err := config.IdentityV3Client(config.GetRegion(d))
 	if err != nil {
-		return fmt.Errorf("Error creating OpenTelekomCloud identity client: %s", err)
+		return diag.Errorf("Error creating OpenTelekomCloud identity client: %s", err)
 	}
 
 	if d.HasChange("users") {
@@ -119,29 +121,29 @@ func resourceIdentityGroupMembershipV3Update(d *schema.ResourceData, meta interf
 		add := common.ExpandStringList(ns.Difference(os).List())
 
 		if err := removeUsersFromGroup(identityClient, group, remove); err != nil {
-			return fmt.Errorf("Error update user-group-membership: %s", err)
+			return diag.Errorf("Error update user-group-membership: %s", err)
 		}
 
 		if err := addUsersToGroup(identityClient, group, add); err != nil {
-			return fmt.Errorf("Error update user-group-membership: %s", err)
+			return diag.Errorf("Error update user-group-membership: %s", err)
 		}
 	}
 
-	return resourceIdentityGroupMembershipV3Read(d, meta)
+	return resourceIdentityGroupMembershipV3Read(ctx, d, meta)
 }
 
-func resourceIdentityGroupMembershipV3Delete(d *schema.ResourceData, meta interface{}) error {
+func resourceIdentityGroupMembershipV3Delete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*cfg.Config)
 	identityClient, err := config.IdentityV3Client(config.GetRegion(d))
 	if err != nil {
-		return fmt.Errorf("Error creating OpenStack identity client: %s", err)
+		return diag.Errorf("Error creating OpenStack identity client: %s", err)
 	}
 
 	group := d.Get("group").(string)
 	users := common.ExpandStringList(d.Get("users").(*schema.Set).List())
 
 	if err := removeUsersFromGroup(identityClient, group, users); err != nil {
-		return fmt.Errorf("Error delete user-group-membership: %s", err)
+		return diag.Errorf("Error delete user-group-membership: %s", err)
 	}
 
 	d.SetId("")

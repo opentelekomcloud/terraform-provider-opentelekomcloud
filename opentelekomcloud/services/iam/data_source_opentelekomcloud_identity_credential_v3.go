@@ -1,9 +1,11 @@
 package iam
 
 import (
+	"context"
 	"fmt"
 
 	"github.com/hashicorp/go-multierror"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/identity/v3/credentials"
 
@@ -12,7 +14,7 @@ import (
 
 func DataSourceIdentityCredentialV3() *schema.Resource {
 	return &schema.Resource{
-		Read: dataSourceIdentityCredentialV3Read,
+		ReadContext: dataSourceIdentityCredentialV3Read,
 		Schema: map[string]*schema.Schema{
 			"user_id": {
 				Type:     schema.TypeString,
@@ -50,16 +52,16 @@ func DataSourceIdentityCredentialV3() *schema.Resource {
 	}
 }
 
-func dataSourceIdentityCredentialV3Read(d *schema.ResourceData, meta interface{}) error {
+func dataSourceIdentityCredentialV3Read(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*cfg.Config)
 	client, err := config.IdentityV30Client()
 	if err != nil {
-		return fmt.Errorf("error creating identity v3.0 client: %s", err)
+		return diag.Errorf("error creating identity v3.0 client: %s", err)
 	}
 	userID := d.Get("user_id").(string)
 	credentialList, err := credentials.List(client, credentials.ListOpts{UserID: userID}).Extract()
 	if err != nil {
-		return fmt.Errorf("error retrieving AK/SK information: %s", err)
+		return diag.Errorf("error retrieving AK/SK information: %s", err)
 	}
 
 	me := new(multierror.Error)
@@ -73,5 +75,5 @@ func dataSourceIdentityCredentialV3Read(d *schema.ResourceData, meta interface{}
 			d.Set(credKey+"description", credential.Description),
 		)
 	}
-	return me.ErrorOrNil()
+	return diag.FromErr(me.ErrorOrNil())
 }

@@ -1,10 +1,11 @@
 package iam
 
 import (
-	"fmt"
+	"context"
 	"log"
 
 	"github.com/hashicorp/go-multierror"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/identity/v3/tokens"
@@ -14,7 +15,7 @@ import (
 
 func DataSourceIdentityAuthScopeV3() *schema.Resource {
 	return &schema.Resource{
-		Read: dataSourceIdentityAuthScopeV3Read,
+		ReadContext: dataSourceIdentityAuthScopeV3Read,
 
 		Schema: map[string]*schema.Schema{
 			"name": {
@@ -101,11 +102,11 @@ func DataSourceIdentityAuthScopeV3() *schema.Resource {
 	}
 }
 
-func dataSourceIdentityAuthScopeV3Read(d *schema.ResourceData, meta interface{}) error {
+func dataSourceIdentityAuthScopeV3Read(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*cfg.Config)
 	identityClient, err := config.IdentityV3Client("")
 	if err != nil {
-		return fmt.Errorf("error creating OpenTelekomCloud identity client: %s", err)
+		return diag.Errorf("error creating OpenTelekomCloud identity client: %s", err)
 	}
 	tokenID := config.Token
 
@@ -113,12 +114,12 @@ func dataSourceIdentityAuthScopeV3Read(d *schema.ResourceData, meta interface{})
 
 	result := tokens.Get(identityClient, tokenID)
 	if result.Err != nil {
-		return result.Err
+		return diag.FromErr(result.Err)
 	}
 
 	user, err := result.ExtractUser()
 	if err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 
 	mErr := multierror.Append(nil,
@@ -128,11 +129,11 @@ func dataSourceIdentityAuthScopeV3Read(d *schema.ResourceData, meta interface{})
 		d.Set("user_domain_id", user.Domain.ID),
 	)
 	if err := mErr.ErrorOrNil(); err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 	domain, err := result.ExtractDomain()
 	if err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 	if domain != nil {
 		mErr = multierror.Append(mErr,
@@ -146,12 +147,12 @@ func dataSourceIdentityAuthScopeV3Read(d *schema.ResourceData, meta interface{})
 		)
 	}
 	if err := mErr.ErrorOrNil(); err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 
 	project, err := result.ExtractProject()
 	if err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 	if project != nil {
 		mErr = multierror.Append(mErr,
@@ -169,12 +170,12 @@ func dataSourceIdentityAuthScopeV3Read(d *schema.ResourceData, meta interface{})
 		)
 	}
 	if err := mErr.ErrorOrNil(); err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 
 	roles, err := result.ExtractRoles()
 	if err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 
 	allRoles := flattenIdentityAuthScopeV3Roles(roles)

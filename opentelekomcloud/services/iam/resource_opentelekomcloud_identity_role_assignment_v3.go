@@ -1,10 +1,12 @@
 package iam
 
 import (
+	"context"
 	"fmt"
 	"log"
 	"strings"
 
+	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/opentelekomcloud/gophertelekomcloud"
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/identity/v3/roles"
@@ -15,9 +17,9 @@ import (
 
 func ResourceIdentityRoleAssignmentV3() *schema.Resource {
 	return &schema.Resource{
-		Create: resourceIdentityRoleAssignmentV3Create,
-		Read:   resourceIdentityRoleAssignmentV3Read,
-		Delete: resourceIdentityRoleAssignmentV3Delete,
+		CreateContext: resourceIdentityRoleAssignmentV3Create,
+		ReadContext:   resourceIdentityRoleAssignmentV3Read,
+		DeleteContext: resourceIdentityRoleAssignmentV3Delete,
 		Importer: &schema.ResourceImporter{
 			State: schema.ImportStatePassthrough,
 		},
@@ -60,11 +62,11 @@ func ResourceIdentityRoleAssignmentV3() *schema.Resource {
 	}
 }
 
-func resourceIdentityRoleAssignmentV3Create(d *schema.ResourceData, meta interface{}) error {
+func resourceIdentityRoleAssignmentV3Create(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*cfg.Config)
 	identityClient, err := config.IdentityV3Client(config.GetRegion(d))
 	if err != nil {
-		return fmt.Errorf("Error creating OpenStack identity client: %s", err)
+		return diag.Errorf("Error creating OpenStack identity client: %s", err)
 	}
 
 	domainID := d.Get("domain_id").(string)
@@ -81,24 +83,24 @@ func resourceIdentityRoleAssignmentV3Create(d *schema.ResourceData, meta interfa
 
 	err = roles.Assign(identityClient, roleID, opts).ExtractErr()
 	if err != nil {
-		return fmt.Errorf("Error assigning role: %s", err)
+		return diag.Errorf("Error assigning role: %s", err)
 	}
 
 	d.SetId(buildRoleAssignmentID(domainID, projectID, groupID, userID, roleID))
 
-	return resourceIdentityRoleAssignmentV3Read(d, meta)
+	return resourceIdentityRoleAssignmentV3Read(ctx, d, meta)
 }
 
-func resourceIdentityRoleAssignmentV3Read(d *schema.ResourceData, meta interface{}) error {
+func resourceIdentityRoleAssignmentV3Read(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*cfg.Config)
 	identityClient, err := config.IdentityV3Client(config.GetRegion(d))
 	if err != nil {
-		return fmt.Errorf("Error creating OpenStack identity client: %s", err)
+		return diag.Errorf("Error creating OpenStack identity client: %s", err)
 	}
 
 	roleAssignment, err := getRoleAssignment(identityClient, d)
 	if err != nil {
-		return fmt.Errorf("Error getting role assignment: %s", err)
+		return diag.Errorf("Error getting role assignment: %s", err)
 	}
 	domainID, projectID, groupID, userID, _ := ExtractRoleAssignmentID(d.Id())
 
@@ -113,11 +115,11 @@ func resourceIdentityRoleAssignmentV3Read(d *schema.ResourceData, meta interface
 	return nil
 }
 
-func resourceIdentityRoleAssignmentV3Delete(d *schema.ResourceData, meta interface{}) error {
+func resourceIdentityRoleAssignmentV3Delete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*cfg.Config)
 	identityClient, err := config.IdentityV3Client(config.GetRegion(d))
 	if err != nil {
-		return fmt.Errorf("Error creating OpenStack identity client: %s", err)
+		return diag.Errorf("Error creating OpenStack identity client: %s", err)
 	}
 
 	domainID, projectID, groupID, userID, roleID := ExtractRoleAssignmentID(d.Id())
@@ -130,7 +132,7 @@ func resourceIdentityRoleAssignmentV3Delete(d *schema.ResourceData, meta interfa
 	}
 	roles.Unassign(identityClient, roleID, opts).ExtractErr()
 	if err != nil {
-		return fmt.Errorf("Error unassigning role: %s", err)
+		return diag.Errorf("Error unassigning role: %s", err)
 	}
 
 	return nil

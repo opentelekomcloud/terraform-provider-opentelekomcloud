@@ -2,12 +2,13 @@ package iam
 
 import (
 	"bytes"
+	"context"
 	"fmt"
 	"log"
 	"strings"
 	"time"
 
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/hashcode"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/opentelekomcloud/gophertelekomcloud"
@@ -15,6 +16,7 @@ import (
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/identity/v3/domains"
 	sdkprojects "github.com/opentelekomcloud/gophertelekomcloud/openstack/identity/v3/projects"
 	sdkroles "github.com/opentelekomcloud/gophertelekomcloud/openstack/identity/v3/roles"
+	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/helper/hashcode"
 
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common"
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common/cfg"
@@ -22,10 +24,10 @@ import (
 
 func ResourceIdentityAgencyV3() *schema.Resource {
 	return &schema.Resource{
-		Create: resourceIdentityAgencyV3Create,
-		Read:   resourceIdentityAgencyV3Read,
-		Update: resourceIdentityAgencyV3Update,
-		Delete: resourceIdentityAgencyV3Delete,
+		CreateContext: resourceIdentityAgencyV3Create,
+		ReadContext:   resourceIdentityAgencyV3Read,
+		UpdateContext: resourceIdentityAgencyV3Update,
+		DeleteContext: resourceIdentityAgencyV3Delete,
 		Importer: &schema.ResourceImporter{
 			State: schema.ImportStatePassthrough,
 		},
@@ -287,22 +289,22 @@ func diffChangeOfProjectRole(old, newv *schema.Set) (delete, add []string) {
 	return
 }
 
-func resourceIdentityAgencyV3Create(d *schema.ResourceData, meta interface{}) error {
+func resourceIdentityAgencyV3Create(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	prs := d.Get("project_role").(*schema.Set)
 	drs := d.Get("domain_roles").(*schema.Set)
 	if prs.Len() == 0 && drs.Len() == 0 {
-		return fmt.Errorf("One or both of project_role and domain_roles must be input")
+		return diag.Errorf("One or both of project_role and domain_roles must be input")
 	}
 
 	config := meta.(*cfg.Config)
 	client, err := agencyClient(d, config)
 	if err != nil {
-		return fmt.Errorf("Error creating client: %s", err)
+		return diag.Errorf("Error creating client: %s", err)
 	}
 
 	domainID, err := getDomainID(config, client)
 	if err != nil {
-		return fmt.Errorf("Error getting the domain id, err=%s", err)
+		return diag.Errorf("Error getting the domain id, err=%s", err)
 	}
 
 	opts := agency.CreateOpts{
@@ -314,19 +316,19 @@ func resourceIdentityAgencyV3Create(d *schema.ResourceData, meta interface{}) er
 	log.Printf("[DEBUG] Create Identity-Agency Options: %#v", opts)
 	a, err := agency.Create(client, opts).Extract()
 	if err != nil {
-		return fmt.Errorf("Error creating Identity-Agency: %s", err)
+		return diag.Errorf("Error creating Identity-Agency: %s", err)
 	}
 
 	d.SetId(a.ID)
 
 	projects, err := listProjectsOfDomain(domainID, client)
 	if err != nil {
-		return fmt.Errorf("Error querying the projects, err=%s", err)
+		return diag.Errorf("Error querying the projects, err=%s", err)
 	}
 
 	roles, err := allRolesOfDomain(domainID, client)
 	if err != nil {
-		return fmt.Errorf("Error querying the roles, err=%s", err)
+		return diag.Errorf("Error querying the roles, err=%s", err)
 	}
 
 	agencyID := a.ID
@@ -335,7 +337,7 @@ func resourceIdentityAgencyV3Create(d *schema.ResourceData, meta interface{}) er
 		pn := pr["project"].(string)
 		pid, ok := projects[pn]
 		if !ok {
-			return fmt.Errorf("The project(%s) is not exist", pn)
+			return diag.Errorf("The project(%s) is not exist", pn)
 		}
 
 		rs := pr["roles"].(*schema.Set)
@@ -343,12 +345,12 @@ func resourceIdentityAgencyV3Create(d *schema.ResourceData, meta interface{}) er
 			r := role.(string)
 			rid, ok := roles[r]
 			if !ok {
-				return fmt.Errorf("The role(%s) is not exist", r)
+				return diag.Errorf("The role(%s) is not exist", r)
 			}
 
 			err = agency.AttachRoleByProject(client, agencyID, pid, rid).ExtractErr()
 			if err != nil {
-				return fmt.Errorf("Error attaching role(%s) by project{%s} to agency(%s), err=%s",
+				return diag.Errorf("Error attaching role(%s) by project{%s} to agency(%s), err=%s",
 					rid, pid, agencyID, err)
 			}
 		}
@@ -358,29 +360,29 @@ func resourceIdentityAgencyV3Create(d *schema.ResourceData, meta interface{}) er
 		r := role.(string)
 		rid, ok := roles[r]
 		if !ok {
-			return fmt.Errorf("The role(%s) is not exist", r)
+			return diag.Errorf("The role(%s) is not exist", r)
 		}
 
 		err = agency.AttachRoleByDomain(client, agencyID, domainID, rid).ExtractErr()
 		if err != nil {
-			return fmt.Errorf("Error attaching role(%s) by domain{%s} to agency(%s), err=%s",
+			return diag.Errorf("Error attaching role(%s) by domain{%s} to agency(%s), err=%s",
 				rid, domainID, agencyID, err)
 		}
 	}
 
-	return resourceIdentityAgencyV3Read(d, meta)
+	return resourceIdentityAgencyV3Read(ctx, d, meta)
 }
 
-func resourceIdentityAgencyV3Read(d *schema.ResourceData, meta interface{}) error {
+func resourceIdentityAgencyV3Read(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*cfg.Config)
 	client, err := agencyClient(d, config)
 	if err != nil {
-		return fmt.Errorf("Error creating client: %s", err)
+		return diag.Errorf("Error creating client: %s", err)
 	}
 
 	a, err := agency.Get(client, d.Id()).Extract()
 	if err != nil {
-		return common.CheckDeleted(d, err, "Identity-Agency")
+		return diag.FromErr(common.CheckDeleted(d, err, "Identity-Agency"))
 	}
 	log.Printf("[DEBUG] Retrieved Identity-Agency %s: %#v", d.Id(), a)
 
@@ -393,14 +395,14 @@ func resourceIdentityAgencyV3Read(d *schema.ResourceData, meta interface{}) erro
 
 	projects, err := listProjectsOfDomain(a.DomainID, client)
 	if err != nil {
-		return fmt.Errorf("Error querying the projects, err=%s", err)
+		return diag.Errorf("Error querying the projects, err=%s", err)
 	}
 	agencyID := d.Id()
 	prs := schema.Set{F: resourceIdentityAgencyProRoleHash}
 	for pn, pid := range projects {
 		roles, err := agency.ListRolesAttachedOnProject(client, agencyID, pid).ExtractRoles()
 		if err != nil && !common.IsResourceNotFound(err) {
-			return fmt.Errorf("Error querying the roles attached on project(%s), err=%s", pn, err)
+			return diag.Errorf("Error querying the roles attached on project(%s), err=%s", pn, err)
 		}
 		if len(roles) == 0 {
 			continue
@@ -421,7 +423,7 @@ func resourceIdentityAgencyV3Read(d *schema.ResourceData, meta interface{}) erro
 
 	roles, err := agency.ListRolesAttachedOnDomain(client, agencyID, a.DomainID).ExtractRoles()
 	if err != nil && !common.IsResourceNotFound(err) {
-		return fmt.Errorf("Error querying the roles attached on domain, err=%s", err)
+		return diag.Errorf("Error querying the roles attached on domain, err=%s", err)
 	}
 	if len(roles) != 0 {
 		v := schema.Set{F: schema.HashString}
@@ -437,11 +439,11 @@ func resourceIdentityAgencyV3Read(d *schema.ResourceData, meta interface{}) erro
 	return nil
 }
 
-func resourceIdentityAgencyV3Update(d *schema.ResourceData, meta interface{}) error {
+func resourceIdentityAgencyV3Update(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*cfg.Config)
 	client, err := agencyClient(d, config)
 	if err != nil {
-		return fmt.Errorf("Error creating client: %s", err)
+		return diag.Errorf("Error creating client: %s", err)
 	}
 
 	aID := d.Id()
@@ -461,7 +463,7 @@ func resourceIdentityAgencyV3Update(d *schema.ResourceData, meta interface{}) er
 			return nil
 		})
 		if err != nil {
-			return fmt.Errorf("Error updating Identity-Agency %s: %s", aID, err)
+			return diag.Errorf("Error updating Identity-Agency %s: %s", aID, err)
 		}
 	}
 
@@ -470,19 +472,19 @@ func resourceIdentityAgencyV3Update(d *schema.ResourceData, meta interface{}) er
 	if d.HasChange("project_role") || d.HasChange("domain_roles") {
 		domainID, err = getDomainID(config, client)
 		if err != nil {
-			return fmt.Errorf("Error getting the domain id, err=%s", err)
+			return diag.Errorf("Error getting the domain id, err=%s", err)
 		}
 
 		roles, err = allRolesOfDomain(domainID, client)
 		if err != nil {
-			return fmt.Errorf("Error querying the roles, err=%s", err)
+			return diag.Errorf("Error querying the roles, err=%s", err)
 		}
 	}
 
 	if d.HasChange("project_role") {
 		projects, err := listProjectsOfDomain(domainID, client)
 		if err != nil {
-			return fmt.Errorf("Error querying the projects, err=%s", err)
+			return diag.Errorf("Error querying the projects, err=%s", err)
 		}
 
 		o, n := d.GetChange("project_role")
@@ -491,16 +493,16 @@ func resourceIdentityAgencyV3Update(d *schema.ResourceData, meta interface{}) er
 			pr := strings.Split(v, "|")
 			pid, ok := projects[pr[0]]
 			if !ok {
-				return fmt.Errorf("The project(%s) is not exist", pr[0])
+				return diag.Errorf("The project(%s) is not exist", pr[0])
 			}
 			rid, ok := roles[pr[1]]
 			if !ok {
-				return fmt.Errorf("The role(%s) is not exist", pr[1])
+				return diag.Errorf("The role(%s) is not exist", pr[1])
 			}
 
 			err = agency.DetachRoleByProject(client, aID, pid, rid).ExtractErr()
 			if err != nil && !common.IsResourceNotFound(err) {
-				return fmt.Errorf("Error detaching role(%s) by project{%s} from agency(%s), err=%s",
+				return diag.Errorf("Error detaching role(%s) by project{%s} from agency(%s), err=%s",
 					rid, pid, aID, err)
 			}
 		}
@@ -509,16 +511,16 @@ func resourceIdentityAgencyV3Update(d *schema.ResourceData, meta interface{}) er
 			pr := strings.Split(v, "|")
 			pid, ok := projects[pr[0]]
 			if !ok {
-				return fmt.Errorf("The project(%s) is not exist", pr[0])
+				return diag.Errorf("The project(%s) is not exist", pr[0])
 			}
 			rid, ok := roles[pr[1]]
 			if !ok {
-				return fmt.Errorf("The role(%s) is not exist", pr[1])
+				return diag.Errorf("The role(%s) is not exist", pr[1])
 			}
 
 			err = agency.AttachRoleByProject(client, aID, pid, rid).ExtractErr()
 			if err != nil {
-				return fmt.Errorf("Error attaching role(%s) by project{%s} to agency(%s), err=%s",
+				return diag.Errorf("Error attaching role(%s) by project{%s} to agency(%s), err=%s",
 					rid, pid, aID, err)
 			}
 		}
@@ -532,12 +534,12 @@ func resourceIdentityAgencyV3Update(d *schema.ResourceData, meta interface{}) er
 		for _, r := range oldr.Difference(newr).List() {
 			rid, ok := roles[r.(string)]
 			if !ok {
-				return fmt.Errorf("The role(%s) is not exist", r.(string))
+				return diag.Errorf("The role(%s) is not exist", r.(string))
 			}
 
 			err = agency.DetachRoleByDomain(client, aID, domainID, rid).ExtractErr()
 			if err != nil && !common.IsResourceNotFound(err) {
-				return fmt.Errorf("Error detaching role(%s) by domain{%s} from agency(%s), err=%s",
+				return diag.Errorf("Error detaching role(%s) by domain{%s} from agency(%s), err=%s",
 					rid, domainID, aID, err)
 			}
 		}
@@ -545,24 +547,24 @@ func resourceIdentityAgencyV3Update(d *schema.ResourceData, meta interface{}) er
 		for _, r := range newr.Difference(oldr).List() {
 			rid, ok := roles[r.(string)]
 			if !ok {
-				return fmt.Errorf("The role(%s) is not exist", r.(string))
+				return diag.Errorf("The role(%s) is not exist", r.(string))
 			}
 
 			err = agency.AttachRoleByDomain(client, aID, domainID, rid).ExtractErr()
 			if err != nil {
-				return fmt.Errorf("Error attaching role(%s) by domain{%s} to agency(%s), err=%s",
+				return diag.Errorf("Error attaching role(%s) by domain{%s} to agency(%s), err=%s",
 					rid, domainID, aID, err)
 			}
 		}
 	}
-	return resourceIdentityAgencyV3Read(d, meta)
+	return resourceIdentityAgencyV3Read(ctx, d, meta)
 }
 
-func resourceIdentityAgencyV3Delete(d *schema.ResourceData, meta interface{}) error {
+func resourceIdentityAgencyV3Delete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*cfg.Config)
 	client, err := agencyClient(d, config)
 	if err != nil {
-		return fmt.Errorf("Error creating client: %s", err)
+		return diag.Errorf("Error creating client: %s", err)
 	}
 
 	rID := d.Id()
@@ -581,7 +583,7 @@ func resourceIdentityAgencyV3Delete(d *schema.ResourceData, meta interface{}) er
 			log.Printf("[INFO] deleting an unavailable Identity-Agency: %s", rID)
 			return nil
 		}
-		return fmt.Errorf("Error deleting Identity-Agency %s: %s", rID, err)
+		return diag.Errorf("Error deleting Identity-Agency %s: %s", rID, err)
 	}
 
 	return nil

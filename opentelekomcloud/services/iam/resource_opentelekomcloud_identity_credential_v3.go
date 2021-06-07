@@ -1,9 +1,10 @@
 package iam
 
 import (
-	"fmt"
+	"context"
 
 	"github.com/hashicorp/go-multierror"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/identity/v3/credentials"
 
@@ -13,10 +14,10 @@ import (
 
 func ResourceIdentityCredentialV3() *schema.Resource {
 	return &schema.Resource{
-		Create: resourceIdentityCredentialV3Create,
-		Read:   resourceIdentityCredentialV3Read,
-		Update: resourceIdentityCredentialV3Update,
-		Delete: resourceIdentityCredentialV3Delete,
+		CreateContext: resourceIdentityCredentialV3Create,
+		ReadContext:   resourceIdentityCredentialV3Read,
+		UpdateContext: resourceIdentityCredentialV3Update,
+		DeleteContext: resourceIdentityCredentialV3Delete,
 		Importer: &schema.ResourceImporter{
 			State: schema.ImportStatePassthrough,
 		},
@@ -55,11 +56,11 @@ func ResourceIdentityCredentialV3() *schema.Resource {
 	}
 }
 
-func resourceIdentityCredentialV3Create(d *schema.ResourceData, meta interface{}) error {
+func resourceIdentityCredentialV3Create(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*cfg.Config)
 	client, err := config.IdentityV3Client()
 	if err != nil {
-		return fmt.Errorf("error creating OpenStack identity client: %s", err)
+		return diag.Errorf("error creating OpenStack identity client: %s", err)
 	}
 
 	userID, ok := d.GetOk("user_id")
@@ -68,7 +69,7 @@ func resourceIdentityCredentialV3Create(d *schema.ResourceData, meta interface{}
 	}
 
 	if userID == "" {
-		return fmt.Errorf("error defining current user ID, please either provide " +
+		return diag.Errorf("error defining current user ID, please either provide " +
 			"`user_id` or authenticate with token auth (not using AK/SK)")
 	}
 
@@ -77,20 +78,20 @@ func resourceIdentityCredentialV3Create(d *schema.ResourceData, meta interface{}
 		Description: d.Get("description").(string),
 	}).Extract()
 	if err != nil {
-		return fmt.Errorf("error creating AK/SK: %s", err)
+		return diag.Errorf("error creating AK/SK: %s", err)
 	}
 
 	d.SetId(credential.AccessKey)
 	_ = d.Set("secret", credential.SecretKey) // secret key returned only once
 
-	return resourceIdentityCredentialV3Read(d, meta)
+	return resourceIdentityCredentialV3Read(ctx, d, meta)
 }
 
-func resourceIdentityCredentialV3Read(d *schema.ResourceData, meta interface{}) error {
+func resourceIdentityCredentialV3Read(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*cfg.Config)
 	client, err := config.IdentityV3Client()
 	if err != nil {
-		return fmt.Errorf("error creating OpenStack identity client: %s", err)
+		return diag.Errorf("error creating OpenStack identity client: %s", err)
 	}
 	credential, err := credentials.Get(client, d.Id()).Extract()
 	if err != nil {
@@ -98,7 +99,7 @@ func resourceIdentityCredentialV3Read(d *schema.ResourceData, meta interface{}) 
 			d.SetId("")
 			return nil
 		}
-		return fmt.Errorf("error retrieving AK/SK information: %s", err)
+		return diag.Errorf("error retrieving AK/SK information: %s", err)
 	}
 	mErr := multierror.Append(nil,
 		d.Set("user_id", credential.UserID),
@@ -109,16 +110,16 @@ func resourceIdentityCredentialV3Read(d *schema.ResourceData, meta interface{}) 
 		d.Set("description", credential.Description),
 	)
 	if err := mErr.ErrorOrNil(); err != nil {
-		return fmt.Errorf("error setting AK/SK attributes: %s", err)
+		return diag.Errorf("error setting AK/SK attributes: %s", err)
 	}
 	return nil
 }
 
-func resourceIdentityCredentialV3Update(d *schema.ResourceData, meta interface{}) error {
+func resourceIdentityCredentialV3Update(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*cfg.Config)
 	client, err := config.IdentityV3Client()
 	if err != nil {
-		return fmt.Errorf("error creating OpenStack identity client: %s", err)
+		return diag.Errorf("error creating OpenStack identity client: %s", err)
 	}
 	opts := credentials.UpdateOpts{}
 	if d.HasChange("status") {
@@ -129,20 +130,20 @@ func resourceIdentityCredentialV3Update(d *schema.ResourceData, meta interface{}
 	}
 	_, err = credentials.Update(client, d.Id(), opts).Extract()
 	if err != nil {
-		return fmt.Errorf("error updating AK/SK: %s", err)
+		return diag.Errorf("error updating AK/SK: %s", err)
 	}
-	return resourceIdentityCredentialV3Read(d, meta)
+	return resourceIdentityCredentialV3Read(ctx, d, meta)
 }
 
-func resourceIdentityCredentialV3Delete(d *schema.ResourceData, meta interface{}) error {
+func resourceIdentityCredentialV3Delete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*cfg.Config)
 	client, err := config.IdentityV3Client()
 	if err != nil {
-		return fmt.Errorf("error creating OpenStack identity client: %s", err)
+		return diag.Errorf("error creating OpenStack identity client: %s", err)
 	}
 	err = credentials.Delete(client, d.Id()).ExtractErr()
 	if err != nil {
-		return fmt.Errorf("error deleting AK/SK: %s", err)
+		return diag.Errorf("error deleting AK/SK: %s", err)
 	}
 	d.SetId("")
 	return nil

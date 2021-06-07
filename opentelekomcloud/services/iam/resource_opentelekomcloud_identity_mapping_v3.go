@@ -1,9 +1,10 @@
 package iam
 
 import (
+	"context"
 	"encoding/json"
-	"fmt"
 
+	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/opentelekomcloud/gophertelekomcloud"
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/identity/v3/federation/mappings"
@@ -16,10 +17,10 @@ const mappingError = "error %s identity mapping v3: %w"
 
 func ResourceIdentityMappingV3() *schema.Resource {
 	return &schema.Resource{
-		Create: resourceIdentityMappingV3Create,
-		Read:   resourceIdentityMappingV3Read,
-		Update: resourceIdentityMappingV3Update,
-		Delete: resourceIdentityMappingV3Delete,
+		CreateContext: resourceIdentityMappingV3Create,
+		ReadContext:   resourceIdentityMappingV3Read,
+		UpdateContext: resourceIdentityMappingV3Update,
+		DeleteContext: resourceIdentityMappingV3Delete,
 
 		Importer: &schema.ResourceImporter{
 			State: schema.ImportStatePassthrough,
@@ -49,18 +50,18 @@ func ResourceIdentityMappingV3() *schema.Resource {
 	}
 }
 
-func resourceIdentityMappingV3Create(d *schema.ResourceData, meta interface{}) error {
+func resourceIdentityMappingV3Create(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*cfg.Config)
 	client, err := config.IdentityV3Client(config.GetRegion(d))
 	if err != nil {
-		return fmt.Errorf(clientCreationFail, err)
+		return diag.Errorf(clientCreationFail, err)
 	}
 
 	rulesRaw := d.Get("rules").(string)
 	rulesBytes := []byte(rulesRaw)
 	rules := make([]mappings.RuleOpts, 1)
 	if err := json.Unmarshal(rulesBytes, &rules); err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 
 	createOpts := mappings.CreateOpts{
@@ -69,19 +70,19 @@ func resourceIdentityMappingV3Create(d *schema.ResourceData, meta interface{}) e
 	mappingID := d.Get("mapping_id").(string)
 	mapping, err := mappings.Create(client, mappingID, createOpts).Extract()
 	if err != nil {
-		return fmt.Errorf(mappingError, "creating", err)
+		return diag.Errorf(mappingError, "creating", err)
 	}
 
 	d.SetId(mapping.ID)
 
-	return resourceIdentityMappingV3Read(d, meta)
+	return resourceIdentityMappingV3Read(ctx, d, meta)
 }
 
-func resourceIdentityMappingV3Read(d *schema.ResourceData, meta interface{}) error {
+func resourceIdentityMappingV3Read(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*cfg.Config)
 	client, err := config.IdentityV3Client(config.GetRegion(d))
 	if err != nil {
-		return fmt.Errorf(clientCreationFail, err)
+		return diag.Errorf(clientCreationFail, err)
 	}
 
 	mapping, err := mappings.Get(client, d.Id()).Extract()
@@ -90,33 +91,33 @@ func resourceIdentityMappingV3Read(d *schema.ResourceData, meta interface{}) err
 			d.SetId("")
 			return nil
 		}
-		return fmt.Errorf(mappingError, "reading", err)
+		return diag.Errorf(mappingError, "reading", err)
 	}
 
 	rules, err := json.Marshal(mapping.Rules)
 	if err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 	if err := d.Set("rules", string(rules)); err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 
 	if err := d.Set("mapping_id", mapping.ID); err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 
 	if err := d.Set("links", mapping.Links); err != nil {
-		return fmt.Errorf("error setting identity mapping links: %w", err)
+		return diag.Errorf("error setting identity mapping links: %w", err)
 	}
 
 	return nil
 }
 
-func resourceIdentityMappingV3Update(d *schema.ResourceData, meta interface{}) error {
+func resourceIdentityMappingV3Update(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*cfg.Config)
 	client, err := config.IdentityV3Client(config.GetRegion(d))
 	if err != nil {
-		return fmt.Errorf(clientCreationFail, err)
+		return diag.Errorf(clientCreationFail, err)
 	}
 	changes := false
 	updateOpts := mappings.UpdateOpts{}
@@ -127,29 +128,29 @@ func resourceIdentityMappingV3Update(d *schema.ResourceData, meta interface{}) e
 		rulesBytes := []byte(rulesRaw)
 		rules := make([]mappings.RuleOpts, 1)
 		if err := json.Unmarshal(rulesBytes, &rules); err != nil {
-			return err
+			return diag.FromErr(err)
 		}
 		updateOpts.Rules = rules
 	}
 	if changes {
 		_, err := mappings.Update(client, d.Id(), updateOpts).Extract()
 		if err != nil {
-			return fmt.Errorf(mappingError, "updating", err)
+			return diag.Errorf(mappingError, "updating", err)
 		}
 	}
 
-	return resourceIdentityMappingV3Read(d, meta)
+	return resourceIdentityMappingV3Read(ctx, d, meta)
 }
 
-func resourceIdentityMappingV3Delete(d *schema.ResourceData, meta interface{}) error {
+func resourceIdentityMappingV3Delete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*cfg.Config)
 	client, err := config.IdentityV3Client(config.GetRegion(d))
 	if err != nil {
-		return fmt.Errorf(clientCreationFail, err)
+		return diag.Errorf(clientCreationFail, err)
 	}
 
 	if err := mappings.Delete(client, d.Id()).ExtractErr(); err != nil {
-		return fmt.Errorf(mappingError, "deleting", err)
+		return diag.Errorf(mappingError, "deleting", err)
 	}
 
 	return nil

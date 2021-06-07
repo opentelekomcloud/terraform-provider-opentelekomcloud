@@ -1,9 +1,10 @@
 package iam
 
 import (
-	"fmt"
+	"context"
 	"log"
 
+	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/identity/v3/groups"
 
@@ -13,10 +14,10 @@ import (
 
 func ResourceIdentityGroupV3() *schema.Resource {
 	return &schema.Resource{
-		Create: resourceIdentityGroupV3Create,
-		Read:   resourceIdentityGroupV3Read,
-		Update: resourceIdentityGroupV3Update,
-		Delete: resourceIdentityGroupV3Delete,
+		CreateContext: resourceIdentityGroupV3Create,
+		ReadContext:   resourceIdentityGroupV3Read,
+		UpdateContext: resourceIdentityGroupV3Update,
+		DeleteContext: resourceIdentityGroupV3Delete,
 		Importer: &schema.ResourceImporter{
 			State: schema.ImportStatePassthrough,
 		},
@@ -48,11 +49,11 @@ func ResourceIdentityGroupV3() *schema.Resource {
 	}
 }
 
-func resourceIdentityGroupV3Create(d *schema.ResourceData, meta interface{}) error {
+func resourceIdentityGroupV3Create(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*cfg.Config)
 	identityClient, err := config.IdentityV3Client(config.GetRegion(d))
 	if err != nil {
-		return fmt.Errorf("Error creating OpenTelekomCloud identity client: %s", err)
+		return diag.Errorf("Error creating OpenTelekomCloud identity client: %s", err)
 	}
 
 	createOpts := groups.CreateOpts{
@@ -65,24 +66,24 @@ func resourceIdentityGroupV3Create(d *schema.ResourceData, meta interface{}) err
 
 	group, err := groups.Create(identityClient, createOpts).Extract()
 	if err != nil {
-		return fmt.Errorf("Error creating OpenTelekomCloud Group: %s", err)
+		return diag.Errorf("Error creating OpenTelekomCloud Group: %s", err)
 	}
 
 	d.SetId(group.ID)
 
-	return resourceIdentityGroupV3Read(d, meta)
+	return resourceIdentityGroupV3Read(ctx, d, meta)
 }
 
-func resourceIdentityGroupV3Read(d *schema.ResourceData, meta interface{}) error {
+func resourceIdentityGroupV3Read(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*cfg.Config)
 	identityClient, err := config.IdentityV3Client(config.GetRegion(d))
 	if err != nil {
-		return fmt.Errorf("Error creating OpenTelekomCloud identity client: %s", err)
+		return diag.Errorf("Error creating OpenTelekomCloud identity client: %s", err)
 	}
 
 	group, err := groups.Get(identityClient, d.Id()).Extract()
 	if err != nil {
-		return common.CheckDeleted(d, err, "group")
+		return diag.FromErr(common.CheckDeleted(d, err, "group"))
 	}
 
 	log.Printf("[DEBUG] Retrieved OpenTelekomCloud Group: %#v", group)
@@ -95,11 +96,11 @@ func resourceIdentityGroupV3Read(d *schema.ResourceData, meta interface{}) error
 	return nil
 }
 
-func resourceIdentityGroupV3Update(d *schema.ResourceData, meta interface{}) error {
+func resourceIdentityGroupV3Update(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*cfg.Config)
 	identityClient, err := config.IdentityV3Client(config.GetRegion(d))
 	if err != nil {
-		return fmt.Errorf("Error creating OpenTelekomCloud identity client: %s", err)
+		return diag.Errorf("Error creating OpenTelekomCloud identity client: %s", err)
 	}
 
 	var hasChange bool
@@ -127,23 +128,23 @@ func resourceIdentityGroupV3Update(d *schema.ResourceData, meta interface{}) err
 	if hasChange {
 		_, err := groups.Update(identityClient, d.Id(), updateOpts).Extract()
 		if err != nil {
-			return fmt.Errorf("Error updating OpenTelekomCloud group: %s", err)
+			return diag.Errorf("Error updating OpenTelekomCloud group: %s", err)
 		}
 	}
 
-	return resourceIdentityGroupV3Read(d, meta)
+	return resourceIdentityGroupV3Read(ctx, d, meta)
 }
 
-func resourceIdentityGroupV3Delete(d *schema.ResourceData, meta interface{}) error {
+func resourceIdentityGroupV3Delete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*cfg.Config)
 	identityClient, err := config.IdentityV3Client(config.GetRegion(d))
 	if err != nil {
-		return fmt.Errorf("Error creating OpenTelekomCloud identity client: %s", err)
+		return diag.Errorf("Error creating OpenTelekomCloud identity client: %s", err)
 	}
 
 	err = groups.Delete(identityClient, d.Id()).ExtractErr()
 	if err != nil {
-		return fmt.Errorf("Error deleting OpenTelekomCloud group: %s", err)
+		return diag.Errorf("Error deleting OpenTelekomCloud group: %s", err)
 	}
 
 	return nil
