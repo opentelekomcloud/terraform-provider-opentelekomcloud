@@ -10,6 +10,7 @@ import (
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/cce/v3/clusters"
 
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common/cfg"
+	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common/fmterr"
 )
 
 func DataSourceCCEClusterV3() *schema.Resource {
@@ -136,7 +137,7 @@ func dataSourceCCEClusterV3Read(ctx context.Context, d *schema.ResourceData, met
 	cceClient, err := config.CceV3Client(config.GetRegion(d))
 
 	if err != nil {
-		return diag.Errorf("unable to create opentelekomcloud CCE client : %s", err)
+		return fmterr.Errorf("unable to create opentelekomcloud CCE client : %s", err)
 	}
 
 	listOpts := clusters.ListOpts{
@@ -150,16 +151,16 @@ func dataSourceCCEClusterV3Read(ctx context.Context, d *schema.ResourceData, met
 	refinedClusters, err := clusters.List(cceClient, listOpts)
 	log.Printf("[DEBUG] Value of allClusters: %#v", refinedClusters)
 	if err != nil {
-		return diag.Errorf("unable to retrieve clusters: %s", err)
+		return fmterr.Errorf("unable to retrieve clusters: %s", err)
 	}
 
 	if len(refinedClusters) < 1 {
-		return diag.Errorf("your query returned no results." +
+		return fmterr.Errorf("your query returned no results." +
 			" Please change your search criteria and try again")
 	}
 
 	if len(refinedClusters) > 1 {
-		return diag.Errorf("your query returned more than one result." +
+		return fmterr.Errorf("your query returned more than one result." +
 			" Please try a more specific search criteria")
 	}
 
@@ -194,7 +195,7 @@ func dataSourceCCEClusterV3Read(ctx context.Context, d *schema.ResourceData, met
 
 	cert, err := clusters.GetCert(cceClient, d.Id()).Extract()
 	if err != nil {
-		return diag.Errorf("error retrieving opentelekomcloud CCE cluster cert: %s", err)
+		return fmterr.Errorf("error retrieving opentelekomcloud CCE cluster cert: %s", err)
 	}
 
 	// Set Certificate Clusters

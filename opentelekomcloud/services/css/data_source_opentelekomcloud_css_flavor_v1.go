@@ -9,6 +9,7 @@ import (
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/css/v1/flavors"
 
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common/cfg"
+	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common/fmterr"
 )
 
 func DataSourceCSSFlavorV1() *schema.Resource {
@@ -93,17 +94,17 @@ func dataSourceCSSFlavorV1Read(ctx context.Context, d *schema.ResourceData, meta
 	config := meta.(*cfg.Config)
 	client, err := config.CssV1Client(config.GetRegion(d))
 	if err != nil {
-		return diag.Errorf("error creating CSS v1 client: %s", err)
+		return fmterr.Errorf("error creating CSS v1 client: %s", err)
 	}
 
 	pages, err := flavors.List(client).AllPages()
 	if err != nil {
-		return diag.Errorf("error reading cluster value: %s", err)
+		return fmterr.Errorf("error reading cluster value: %s", err)
 	}
 
 	versions, err := flavors.ExtractVersions(pages)
 	if err != nil {
-		return diag.Errorf("error extracting versions")
+		return fmterr.Errorf("error extracting versions")
 	}
 
 	opts := flavors.FilterOpts{
@@ -114,12 +115,12 @@ func dataSourceCSSFlavorV1Read(ctx context.Context, d *schema.ResourceData, meta
 	filtered := flavors.FilterVersions(versions, opts)
 
 	if len(filtered) == 0 {
-		return diag.Errorf("can't find version matching criteria: %+v", opts)
+		return fmterr.Errorf("can't find version matching criteria: %+v", opts)
 	}
 
 	result := findFlavorInVersions(d, filtered)
 	if result == nil {
-		return diag.Errorf("can't find flavor matching criteria")
+		return fmterr.Errorf("can't find flavor matching criteria")
 	}
 
 	d.SetId(result.FlavorID)

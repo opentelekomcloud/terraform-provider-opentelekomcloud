@@ -20,6 +20,7 @@ import (
 
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common"
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common/cfg"
+	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common/fmterr"
 )
 
 const (
@@ -245,7 +246,7 @@ func resourceCCENodePoolV3Create(ctx context.Context, d *schema.ResourceData, me
 	config := meta.(*cfg.Config)
 	nodePoolClient, err := config.CceV3Client(config.GetRegion(d))
 	if err != nil {
-		return diag.Errorf(cceClientError, err)
+		return fmterr.Errorf(cceClientError, err)
 	}
 
 	var base64PreInstall, base64PostInstall string
@@ -320,7 +321,7 @@ func resourceCCENodePoolV3Create(ctx context.Context, d *schema.ResourceData, me
 		MinTimeout: 3 * time.Second,
 	}
 	if _, err := stateCluster.WaitForState(); err != nil {
-		return diag.Errorf("error waiting for cluster to be available: %w", err)
+		return fmterr.Errorf("error waiting for cluster to be available: %w", err)
 	}
 
 	log.Printf("[DEBUG] Create Options: %#v", createOpts)
@@ -328,15 +329,15 @@ func resourceCCENodePoolV3Create(ctx context.Context, d *schema.ResourceData, me
 	if err != nil {
 		if _, ok := err.(golangsdk.ErrDefault403); ok {
 			if _, err := stateCluster.WaitForState(); err != nil {
-				return diag.Errorf("error waiting for cluster to be available: %w", err)
+				return fmterr.Errorf("error waiting for cluster to be available: %w", err)
 			}
 			retried, err := nodepools.Create(nodePoolClient, clusterId, createOpts).Extract()
 			if err != nil {
-				return diag.Errorf(createError, err)
+				return fmterr.Errorf(createError, err)
 			}
 			pool = retried
 		} else {
-			return diag.Errorf(createError, err)
+			return fmterr.Errorf(createError, err)
 		}
 	}
 
@@ -351,7 +352,7 @@ func resourceCCENodePoolV3Create(ctx context.Context, d *schema.ResourceData, me
 		PollInterval: 20 * time.Second,
 	}
 	if _, err := stateConf.WaitForState(); err != nil {
-		return diag.Errorf(createError, err)
+		return fmterr.Errorf(createError, err)
 	}
 
 	return resourceCCENodePoolV3Read(ctx, d, meta)
@@ -361,7 +362,7 @@ func resourceCCENodePoolV3Read(ctx context.Context, d *schema.ResourceData, meta
 	config := meta.(*cfg.Config)
 	nodePoolClient, err := config.CceV3Client(config.GetRegion(d))
 	if err != nil {
-		return diag.Errorf(cceClientError, err)
+		return fmterr.Errorf(cceClientError, err)
 	}
 	clusterId := d.Get("cluster_id").(string)
 	s, err := nodepools.Get(nodePoolClient, clusterId, d.Id()).Extract()
@@ -371,7 +372,7 @@ func resourceCCENodePoolV3Read(ctx context.Context, d *schema.ResourceData, meta
 			return nil
 		}
 
-		return diag.Errorf("error retrieving Open Telekom Cloud CCE Node Pool: %w", err)
+		return fmterr.Errorf("error retrieving Open Telekom Cloud CCE Node Pool: %w", err)
 	}
 
 	me := multierror.Append(
@@ -394,7 +395,7 @@ func resourceCCENodePoolV3Read(ctx context.Context, d *schema.ResourceData, meta
 	}
 
 	if err := me.ErrorOrNil(); err != nil {
-		return diag.Errorf(setError, "attributes", err)
+		return fmterr.Errorf(setError, "attributes", err)
 	}
 
 	k8sTags := map[string]string{}
@@ -405,7 +406,7 @@ func resourceCCENodePoolV3Read(ctx context.Context, d *schema.ResourceData, meta
 		k8sTags[key] = val
 	}
 	if err := d.Set("k8s_tags", k8sTags); err != nil {
-		return diag.Errorf(setError, "k8s_tags", err)
+		return fmterr.Errorf(setError, "k8s_tags", err)
 	}
 
 	var volumes []interface{}
@@ -418,7 +419,7 @@ func resourceCCENodePoolV3Read(ctx context.Context, d *schema.ResourceData, meta
 		volumes = append(volumes, volume)
 	}
 	if err := d.Set("data_volumes", volumes); err != nil {
-		return diag.Errorf(setError, "data_volumes", err)
+		return fmterr.Errorf(setError, "data_volumes", err)
 	}
 
 	rootVolume := []map[string]interface{}{
@@ -429,11 +430,11 @@ func resourceCCENodePoolV3Read(ctx context.Context, d *schema.ResourceData, meta
 		},
 	}
 	if err := d.Set("root_volume", rootVolume); err != nil {
-		return diag.Errorf(setError, "root_volume", err)
+		return fmterr.Errorf(setError, "root_volume", err)
 	}
 
 	if err := d.Set("status", s.Status.Phase); err != nil {
-		return diag.Errorf(setError, "status", err)
+		return fmterr.Errorf(setError, "status", err)
 	}
 
 	return nil
@@ -443,7 +444,7 @@ func resourceCCENodePoolV3Update(ctx context.Context, d *schema.ResourceData, me
 	config := meta.(*cfg.Config)
 	nodePoolClient, err := config.CceV3Client(config.GetRegion(d))
 	if err != nil {
-		return diag.Errorf(cceClientError, err)
+		return fmterr.Errorf(cceClientError, err)
 	}
 	updateOpts := nodepools.UpdateOpts{
 		Kind:       "NodePool",
@@ -470,7 +471,7 @@ func resourceCCENodePoolV3Update(ctx context.Context, d *schema.ResourceData, me
 	clusterId := d.Get("cluster_id").(string)
 	_, err = nodepools.Update(nodePoolClient, clusterId, d.Id(), updateOpts).Extract()
 	if err != nil {
-		return diag.Errorf("error updating Open Telekom Cloud CCE Node Pool: %w", err)
+		return fmterr.Errorf("error updating Open Telekom Cloud CCE Node Pool: %w", err)
 	}
 	stateConf := &resource.StateChangeConf{
 		Pending:    []string{"Synchronizing"},
@@ -481,7 +482,7 @@ func resourceCCENodePoolV3Update(ctx context.Context, d *schema.ResourceData, me
 		MinTimeout: 5 * time.Second,
 	}
 	if _, err := stateConf.WaitForState(); err != nil {
-		return diag.Errorf("error waiting for Open Telekom Cloud CCE Node Pool to update: %w", err)
+		return fmterr.Errorf("error waiting for Open Telekom Cloud CCE Node Pool to update: %w", err)
 	}
 
 	return resourceCCENodePoolV3Read(ctx, d, meta)
@@ -491,12 +492,12 @@ func resourceCCENodePoolV3Delete(ctx context.Context, d *schema.ResourceData, me
 	config := meta.(*cfg.Config)
 	client, err := config.CceV3Client(config.GetRegion(d))
 	if err != nil {
-		return diag.Errorf(cceClientError, err)
+		return fmterr.Errorf(cceClientError, err)
 	}
 	clusterId := d.Get("cluster_id").(string)
 
 	if err := nodepools.Delete(client, clusterId, d.Id()).ExtractErr(); err != nil {
-		return diag.Errorf("error deleting Open Telekom Cloud CCE Node Pool: %w", err)
+		return fmterr.Errorf("error deleting Open Telekom Cloud CCE Node Pool: %w", err)
 	}
 	stateConf := &resource.StateChangeConf{
 		Pending:      []string{"Deleting"},
@@ -509,7 +510,7 @@ func resourceCCENodePoolV3Delete(ctx context.Context, d *schema.ResourceData, me
 
 	_, err = stateConf.WaitForState()
 	if err != nil {
-		return diag.Errorf("error waiting for Open Telekom Cloud CCE Node Pool to be deleted: %w", err)
+		return fmterr.Errorf("error waiting for Open Telekom Cloud CCE Node Pool to be deleted: %w", err)
 	}
 
 	d.SetId("")

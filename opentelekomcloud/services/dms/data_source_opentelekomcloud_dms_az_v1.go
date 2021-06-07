@@ -9,6 +9,7 @@ import (
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/dms/v1/availablezones"
 
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common/cfg"
+	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common/fmterr"
 )
 
 func DataSourceDmsAZV1() *schema.Resource {
@@ -39,7 +40,7 @@ func dataSourceDmsAZV1Read(ctx context.Context, d *schema.ResourceData, meta int
 	config := meta.(*cfg.Config)
 	DmsV1Client, err := config.DmsV1Client(config.GetRegion(d))
 	if err != nil {
-		return diag.Errorf("Error creating OpenTelekomCloud dms client: %s", err)
+		return fmterr.Errorf("Error creating OpenTelekomCloud dms client: %s", err)
 	}
 
 	v, err := availablezones.Get(DmsV1Client).Extract()
@@ -74,7 +75,7 @@ func dataSourceDmsAZV1Read(ctx context.Context, d *schema.ResourceData, meta int
 	}
 
 	if len(filteredAZs) < 1 {
-		return diag.Errorf("Not found any available zones")
+		return fmterr.Errorf("Not found any available zones")
 	}
 
 	az := filteredAZs[0]

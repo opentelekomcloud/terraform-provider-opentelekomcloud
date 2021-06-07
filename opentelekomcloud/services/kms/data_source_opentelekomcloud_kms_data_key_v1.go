@@ -10,6 +10,7 @@ import (
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/kms/v1/keys"
 
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common/cfg"
+	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common/fmterr"
 )
 
 func DataSourceKmsDataKeyV1() *schema.Resource {
@@ -49,7 +50,7 @@ func dataSourceKmsDataKeyV1Read(ctx context.Context, d *schema.ResourceData, met
 
 	KmsDataKeyV1Client, err := config.KmsKeyV1Client(config.GetRegion(d))
 	if err != nil {
-		return diag.Errorf("Error creating OpenTelekomCloud kms key client: %s", err)
+		return fmterr.Errorf("Error creating OpenTelekomCloud kms key client: %s", err)
 	}
 
 	req := &keys.DataEncryptOpts{

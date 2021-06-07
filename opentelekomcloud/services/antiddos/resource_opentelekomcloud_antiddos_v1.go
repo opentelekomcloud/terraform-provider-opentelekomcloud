@@ -10,10 +10,11 @@ import (
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/antiddos/v1/antiddos"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
-	"github.com/opentelekomcloud/gophertelekomcloud"
+	golangsdk "github.com/opentelekomcloud/gophertelekomcloud"
 
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common"
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common/cfg"
+	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common/fmterr"
 )
 
 func ResourceAntiDdosV1() *schema.Resource {
@@ -76,7 +77,7 @@ func resourceAntiDdosV1Create(ctx context.Context, d *schema.ResourceData, meta 
 
 	antiddosClient, err := config.AntiddosV1Client(config.GetRegion(d))
 	if err != nil {
-		return diag.Errorf("error creating AntiDdos client: %s", err)
+		return fmterr.Errorf("error creating AntiDdos client: %s", err)
 	}
 
 	createOpts := antiddos.CreateOpts{
@@ -90,7 +91,7 @@ func resourceAntiDdosV1Create(ctx context.Context, d *schema.ResourceData, meta 
 	_, err = antiddos.Create(antiddosClient, d.Get("floating_ip_id").(string), createOpts).Extract()
 
 	if err != nil {
-		return diag.Errorf("error creating AntiDdos: %s", err)
+		return fmterr.Errorf("error creating AntiDdos: %s", err)
 	}
 
 	d.SetId(d.Get("floating_ip_id").(string))
@@ -108,7 +109,7 @@ func resourceAntiDdosV1Create(ctx context.Context, d *schema.ResourceData, meta 
 
 	_, stateErr := stateConf.WaitForState()
 	if stateErr != nil {
-		return diag.Errorf("error waiting for AntiDdos (%s) to become normal: %s", d.Id(), stateErr)
+		return fmterr.Errorf("error waiting for AntiDdos (%s) to become normal: %s", d.Id(), stateErr)
 	}
 
 	return resourceAntiDdosV1Read(ctx, d, meta)
@@ -118,7 +119,7 @@ func resourceAntiDdosV1Read(ctx context.Context, d *schema.ResourceData, meta in
 	config := meta.(*cfg.Config)
 	antiddosClient, err := config.AntiddosV1Client(config.GetRegion(d))
 	if err != nil {
-		return diag.Errorf("error creating AntiDdos client: %s", err)
+		return fmterr.Errorf("error creating AntiDdos client: %s", err)
 	}
 
 	n, err := antiddos.Get(antiddosClient, d.Id()).Extract()
@@ -128,7 +129,7 @@ func resourceAntiDdosV1Read(ctx context.Context, d *schema.ResourceData, meta in
 			return nil
 		}
 
-		return diag.Errorf("error retrieving AntiDdos: %s", err)
+		return fmterr.Errorf("error retrieving AntiDdos: %s", err)
 	}
 
 	d.Set("floating_ip_id", d.Id())
@@ -146,7 +147,7 @@ func resourceAntiDdosV1Update(ctx context.Context, d *schema.ResourceData, meta 
 	config := meta.(*cfg.Config)
 	antiddosClient, err := config.AntiddosV1Client(config.GetRegion(d))
 	if err != nil {
-		return diag.Errorf("error creating AntiDdos client: %s", err)
+		return fmterr.Errorf("error creating AntiDdos client: %s", err)
 	}
 
 	var updateOpts antiddos.UpdateOpts
@@ -159,7 +160,7 @@ func resourceAntiDdosV1Update(ctx context.Context, d *schema.ResourceData, meta 
 
 	_, err = antiddos.Update(antiddosClient, d.Id(), updateOpts).Extract()
 	if err != nil {
-		return diag.Errorf("error updating AntiDdos: %s", err)
+		return fmterr.Errorf("error updating AntiDdos: %s", err)
 	}
 
 	stateConf := &resource.StateChangeConf{
@@ -173,7 +174,7 @@ func resourceAntiDdosV1Update(ctx context.Context, d *schema.ResourceData, meta 
 
 	_, stateErr := stateConf.WaitForState()
 	if stateErr != nil {
-		return diag.Errorf("error waiting for AntiDdos to become normal: %s", stateErr)
+		return fmterr.Errorf("error waiting for AntiDdos to become normal: %s", stateErr)
 	}
 
 	return resourceAntiDdosV1Read(ctx, d, meta)
@@ -183,7 +184,7 @@ func resourceAntiDdosV1Delete(ctx context.Context, d *schema.ResourceData, meta 
 	config := meta.(*cfg.Config)
 	antiddosClient, err := config.AntiddosV1Client(config.GetRegion(d))
 	if err != nil {
-		return diag.Errorf("error creating AntiDdos client: %s", err)
+		return fmterr.Errorf("error creating AntiDdos client: %s", err)
 	}
 
 	stateConf := &resource.StateChangeConf{
@@ -197,7 +198,7 @@ func resourceAntiDdosV1Delete(ctx context.Context, d *schema.ResourceData, meta 
 
 	_, err = stateConf.WaitForState()
 	if err != nil {
-		return diag.Errorf("error deleting AntiDdos: %s", err)
+		return fmterr.Errorf("error deleting AntiDdos: %s", err)
 	}
 
 	d.SetId("")

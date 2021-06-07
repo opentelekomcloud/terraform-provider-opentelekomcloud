@@ -11,6 +11,7 @@ import (
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/rds/v3/instances"
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common"
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common/cfg"
+	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common/fmterr"
 )
 
 func ResourceRdsReadReplicaV3() *schema.Resource {
@@ -142,7 +143,7 @@ func resourceRdsReadReplicaV3Create(ctx context.Context, d *schema.ResourceData,
 	config := meta.(*cfg.Config)
 	client, err := config.RdsV3Client(config.GetRegion(d))
 	if err != nil {
-		return diag.Errorf(errCreateClient, err)
+		return fmterr.Errorf(errCreateClient, err)
 	}
 
 	opts := &instances.CreateReplicaOpts{
@@ -158,14 +159,14 @@ func resourceRdsReadReplicaV3Create(ctx context.Context, d *schema.ResourceData,
 	}
 	job, err := instances.CreateReplica(client, opts).Extract()
 	if err != nil {
-		return diag.Errorf("error creating read replica: %w", err)
+		return fmterr.Errorf("error creating read replica: %w", err)
 	}
 	d.SetId(job.Instance.Id)
 
 	timeoutSeconds := d.Timeout(schema.TimeoutCreate).Seconds()
 	err = instances.WaitForJobCompleted(client, int(timeoutSeconds), job.JobId)
 	if err != nil {
-		return diag.Errorf("error waiting for read replica to complete creation: %w", err)
+		return fmterr.Errorf("error waiting for read replica to complete creation: %w", err)
 	}
 
 	return resourceRdsReadReplicaV3Read(ctx, d, meta)
@@ -175,12 +176,12 @@ func resourceRdsReadReplicaV3Read(ctx context.Context, d *schema.ResourceData, m
 	config := meta.(*cfg.Config)
 	client, err := config.RdsV3Client(config.GetRegion(d))
 	if err != nil {
-		return diag.Errorf(errCreateClient, err)
+		return fmterr.Errorf(errCreateClient, err)
 	}
 
 	replica, err := GetRdsInstance(client, d.Id())
 	if err != nil {
-		return diag.Errorf("error finding RDS instance: %w", err)
+		return fmterr.Errorf("error finding RDS instance: %w", err)
 	}
 	if replica == nil {
 		d.SetId("")
@@ -212,7 +213,7 @@ func resourceRdsReadReplicaV3Read(ctx context.Context, d *schema.ResourceData, m
 		d.Set("public_ips", replica.PublicIps),
 	)
 	if err := mErr.ErrorOrNil(); err != nil {
-		return diag.Errorf("error setting replica fields: %w", err)
+		return fmterr.Errorf("error setting replica fields: %w", err)
 	}
 
 	volume := map[string]interface{}{
@@ -221,7 +222,7 @@ func resourceRdsReadReplicaV3Read(ctx context.Context, d *schema.ResourceData, m
 		"disk_encryption_id": replica.DiskEncryptionId,
 	}
 	if err = d.Set("volume", []interface{}{volume}); err != nil {
-		return diag.Errorf("error setting replica volume: %w", err)
+		return fmterr.Errorf("error setting replica volume: %w", err)
 	}
 
 	dbInfo := map[string]interface{}{
@@ -231,7 +232,7 @@ func resourceRdsReadReplicaV3Read(ctx context.Context, d *schema.ResourceData, m
 		"user_name": replica.DbUserName,
 	}
 	if err = d.Set("db", []interface{}{dbInfo}); err != nil {
-		return diag.Errorf("error setting replica db info: %w", err)
+		return fmterr.Errorf("error setting replica db info: %w", err)
 	}
 
 	return nil
@@ -241,7 +242,7 @@ func resourceRdsReadReplicaV3Update(ctx context.Context, d *schema.ResourceData,
 	config := meta.(*cfg.Config)
 	client, err := config.RdsV3Client(config.GetRegion(d))
 	if err != nil {
-		return diag.Errorf(errCreateClient, err)
+		return fmterr.Errorf(errCreateClient, err)
 	}
 
 	if d.HasChange("flavor_ref") {
@@ -253,7 +254,7 @@ func resourceRdsReadReplicaV3Update(ctx context.Context, d *schema.ResourceData,
 
 		_, err := instances.Resize(client, resizeOpts, d.Id()).Extract()
 		if err != nil {
-			return diag.Errorf("error resizing read replica: %w", err)
+			return fmterr.Errorf("error resizing read replica: %w", err)
 		}
 	}
 
@@ -264,14 +265,14 @@ func resourceRdsReadReplicaV3Delete(ctx context.Context, d *schema.ResourceData,
 	config := meta.(*cfg.Config)
 	client, err := config.RdsV3Client(config.GetRegion(d))
 	if err != nil {
-		return diag.Errorf(errCreateClient, err)
+		return fmterr.Errorf(errCreateClient, err)
 	}
 
 	log.Printf("[DEBUG] Deleting Instance %s", d.Id())
 
 	_, err = instances.Delete(client, d.Id()).Extract()
 	if err != nil {
-		return diag.Errorf("error deleting read replica instance: %w", err)
+		return fmterr.Errorf("error deleting read replica instance: %w", err)
 	}
 
 	d.SetId("")

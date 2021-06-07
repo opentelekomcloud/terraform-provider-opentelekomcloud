@@ -10,6 +10,7 @@ import (
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/bms/v2/flavors"
 
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common/cfg"
+	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common/fmterr"
 )
 
 func DataSourceBMSFlavorV2() *schema.Resource {
@@ -91,7 +92,7 @@ func dataSourceBMSFlavorV2Read(ctx context.Context, d *schema.ResourceData, meta
 	config := meta.(*cfg.Config)
 	flavorClient, err := config.ComputeV2Client(config.GetRegion(d))
 	if err != nil {
-		return diag.Errorf("Error creating OpenTelekom bms client: %s", err)
+		return fmterr.Errorf("Error creating OpenTelekom bms client: %s", err)
 	}
 
 	listOpts := flavors.ListOpts{
@@ -105,11 +106,11 @@ func dataSourceBMSFlavorV2Read(ctx context.Context, d *schema.ResourceData, meta
 	var flavor flavors.Flavor
 	refinedflavors, err := flavors.List(flavorClient, listOpts)
 	if err != nil {
-		return diag.Errorf("Unable to retrieve flavors: %s", err)
+		return fmterr.Errorf("Unable to retrieve flavors: %s", err)
 	}
 
 	if len(refinedflavors) < 1 {
-		return diag.Errorf("Your query returned no results. " +
+		return fmterr.Errorf("Your query returned no results. " +
 			"Please change your search criteria and try again.")
 	} else {
 		flavor = refinedflavors[0]

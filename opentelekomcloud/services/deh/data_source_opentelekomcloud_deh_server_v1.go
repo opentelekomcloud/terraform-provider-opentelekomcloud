@@ -9,6 +9,7 @@ import (
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/deh/v1/hosts"
 
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common/cfg"
+	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common/fmterr"
 )
 
 func DataSourceDEHServersV1() *schema.Resource {
@@ -93,15 +94,15 @@ func dataSourceDEHServersV1Read(ctx context.Context, d *schema.ResourceData, met
 	pages, err := hosts.ListServer(dehClient, d.Get("dedicated_host_id").(string), listServerOpts)
 
 	if err != nil {
-		return diag.Errorf("Unable to retrieve deh server: %s", err)
+		return fmterr.Errorf("Unable to retrieve deh server: %s", err)
 	}
 
 	if len(pages) < 1 {
-		return diag.Errorf("Your query returned no results. " +
+		return fmterr.Errorf("Your query returned no results. " +
 			"Please change your search criteria and try again.")
 	}
 	if len(pages) > 1 {
-		return diag.Errorf("Your query returned more than one result." +
+		return fmterr.Errorf("Your query returned more than one result." +
 			" Please try a more specific search criteria")
 	}
 
@@ -124,7 +125,7 @@ func dataSourceDEHServersV1Read(ctx context.Context, d *schema.ResourceData, met
 		return diag.FromErr(err)
 	}
 	if err := d.Set("addresses", networks); err != nil {
-		return diag.Errorf("[DEBUG] Error saving network to state for OpenTelekomCloud server (%s): %s", d.Id(), err)
+		return fmterr.Errorf("[DEBUG] Error saving network to state for OpenTelekomCloud server (%s): %s", d.Id(), err)
 	}
 
 	return nil

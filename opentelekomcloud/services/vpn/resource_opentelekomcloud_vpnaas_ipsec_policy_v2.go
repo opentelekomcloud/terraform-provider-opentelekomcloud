@@ -15,6 +15,7 @@ import (
 
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common"
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common/cfg"
+	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common/fmterr"
 )
 
 func ResourceVpnIPSecPolicyV2() *schema.Resource {
@@ -123,7 +124,7 @@ func resourceVpnIPSecPolicyV2Create(ctx context.Context, d *schema.ResourceData,
 	config := meta.(*cfg.Config)
 	client, err := config.NetworkingV2Client(config.GetRegion(d))
 	if err != nil {
-		return diag.Errorf("error creating OpenTelekomCloud NetworkingV2 client: %s", err)
+		return fmterr.Errorf("error creating OpenTelekomCloud NetworkingV2 client: %s", err)
 	}
 
 	lifetimeRaw := d.Get("lifetime").(*schema.Set).List()
@@ -178,7 +179,7 @@ func resourceVpnIPSecPolicyV2Read(ctx context.Context, d *schema.ResourceData, m
 	config := meta.(*cfg.Config)
 	client, err := config.NetworkingV2Client(config.GetRegion(d))
 	if err != nil {
-		return diag.Errorf("error creating OpenTelekomCloud NetworkingV2 client: %s", err)
+		return fmterr.Errorf("error creating OpenTelekomCloud NetworkingV2 client: %s", err)
 	}
 
 	policy, err := ipsecpolicies.Get(client, d.Id()).Extract()
@@ -220,7 +221,7 @@ func resourceVpnIPSecPolicyV2Update(ctx context.Context, d *schema.ResourceData,
 	config := meta.(*cfg.Config)
 	client, err := config.NetworkingV2Client(config.GetRegion(d))
 	if err != nil {
-		return diag.Errorf("error creating OpenTelekomCloud NetworkingV2 client: %s", err)
+		return fmterr.Errorf("error creating OpenTelekomCloud NetworkingV2 client: %s", err)
 	}
 
 	var hasChange bool
@@ -303,11 +304,11 @@ func resourceVpnIPSecPolicyV2Delete(ctx context.Context, d *schema.ResourceData,
 	config := meta.(*cfg.Config)
 	client, err := config.NetworkingV2Client(config.GetRegion(d))
 	if err != nil {
-		return diag.Errorf("error creating OpenTelekomCloud NetworkingV2 client: %s", err)
+		return fmterr.Errorf("error creating OpenTelekomCloud NetworkingV2 client: %s", err)
 	}
 
 	if err := ipsecpolicies.Delete(client, d.Id()).ExtractErr(); err != nil {
-		return diag.Errorf("error deleting IPSec Poilicy: %s", err)
+		return fmterr.Errorf("error deleting IPSec Poilicy: %s", err)
 	}
 
 	return nil

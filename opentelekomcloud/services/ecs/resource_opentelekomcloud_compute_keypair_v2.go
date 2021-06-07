@@ -8,11 +8,12 @@ import (
 	"github.com/hashicorp/go-multierror"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
-	"github.com/opentelekomcloud/gophertelekomcloud"
+	golangsdk "github.com/opentelekomcloud/gophertelekomcloud"
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/compute/v2/extensions/keypairs"
 
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common"
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common/cfg"
+	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common/fmterr"
 )
 
 func ResourceComputeKeypairV2() *schema.Resource {
@@ -65,7 +66,7 @@ func resourceComputeKeypairV2Create(ctx context.Context, d *schema.ResourceData,
 	config := meta.(*cfg.Config)
 	client, err := config.ComputeV2Client(config.GetRegion(d))
 	if err != nil {
-		return diag.Errorf("error creating OpenTelekomCloud ComputeV2 client: %s", err)
+		return fmterr.Errorf("error creating OpenTelekomCloud ComputeV2 client: %s", err)
 	}
 
 	opts := KeyPairCreateOpts{
@@ -81,11 +82,11 @@ func resourceComputeKeypairV2Create(ctx context.Context, d *schema.ResourceData,
 		log.Printf("[DEBUG] Create Options: %#v", opts)
 		key, err := keypairs.Create(client, opts).Extract()
 		if err != nil {
-			return diag.Errorf("error creating OpenTelekomCloud keypair: %s", err)
+			return fmterr.Errorf("error creating OpenTelekomCloud keypair: %s", err)
 		}
 		if opts.CreateOpts.PublicKey == "" {
 			if err := d.Set("private_key", key.PrivateKey); err != nil {
-				return diag.Errorf("error saving private key: %s", err)
+				return fmterr.Errorf("error saving private key: %s", err)
 			}
 		}
 	} else {
@@ -100,7 +101,7 @@ func resourceComputeKeypairV2Read(ctx context.Context, d *schema.ResourceData, m
 	config := meta.(*cfg.Config)
 	client, err := config.ComputeV2Client(config.GetRegion(d))
 	if err != nil {
-		return diag.Errorf("error creating OpenTelekomCloud ComputeV2 client: %s", err)
+		return fmterr.Errorf("error creating OpenTelekomCloud ComputeV2 client: %s", err)
 	}
 
 	kp, err := keypairs.Get(client, d.Id()).Extract()
@@ -124,13 +125,13 @@ func resourceComputeKeypairV2Delete(ctx context.Context, d *schema.ResourceData,
 	config := meta.(*cfg.Config)
 	client, err := config.ComputeV2Client(config.GetRegion(d))
 	if err != nil {
-		return diag.Errorf("error creating OpenTelekomCloud ComputeV2 client: %s", err)
+		return fmterr.Errorf("error creating OpenTelekomCloud ComputeV2 client: %s", err)
 	}
 
 	shared := d.Get("shared").(bool)
 	if !shared {
 		if err := keypairs.Delete(client, d.Id()).ExtractErr(); err != nil {
-			return diag.Errorf("error deleting OpenTelekomCloud keypair: %s", err)
+			return fmterr.Errorf("error deleting OpenTelekomCloud keypair: %s", err)
 		}
 	} else {
 		log.Printf("[DEBUG] Using non-managed key pair, skipping deletion")

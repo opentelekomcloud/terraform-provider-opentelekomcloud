@@ -9,6 +9,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common/cfg"
+	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common/fmterr"
 )
 
 func DataSourceVPCRouteIdsV2() *schema.Resource {
@@ -51,11 +52,11 @@ func dataSourceVpcRouteIdsV2Read(ctx context.Context, d *schema.ResourceData, me
 	refinedRoutes, err := routes.ExtractRoutes(pages)
 
 	if err != nil {
-		return diag.Errorf("Unable to retrieve vpc Routes: %s", err)
+		return fmterr.Errorf("Unable to retrieve vpc Routes: %s", err)
 	}
 
 	if len(refinedRoutes) == 0 {
-		return diag.Errorf("no matching route found for vpc with id %s", d.Get("vpc_id").(string))
+		return fmterr.Errorf("no matching route found for vpc with id %s", d.Get("vpc_id").(string))
 	}
 
 	listRoutes := make([]string, 0)

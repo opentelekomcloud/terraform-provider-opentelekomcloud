@@ -9,6 +9,7 @@ import (
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/identity/v3/groups"
 
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common/cfg"
+	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common/fmterr"
 )
 
 func DataSourceIdentityGroupV3() *schema.Resource {
@@ -42,7 +43,7 @@ func dataSourceIdentityGroupV3Read(ctx context.Context, d *schema.ResourceData, 
 	config := meta.(*cfg.Config)
 	identityClient, err := config.IdentityV3Client(config.GetRegion(d))
 	if err != nil {
-		return diag.Errorf("Error creating OpenStack identity client: %s", err)
+		return fmterr.Errorf("Error creating OpenStack identity client: %s", err)
 	}
 
 	listOpts := groups.ListOpts{
@@ -55,22 +56,22 @@ func dataSourceIdentityGroupV3Read(ctx context.Context, d *schema.ResourceData, 
 	var group groups.Group
 	allPages, err := groups.List(identityClient, listOpts).AllPages()
 	if err != nil {
-		return diag.Errorf("Unable to query groups: %s", err)
+		return fmterr.Errorf("Unable to query groups: %s", err)
 	}
 
 	allGroups, err := groups.ExtractGroups(allPages)
 	if err != nil {
-		return diag.Errorf("Unable to retrieve roles: %s", err)
+		return fmterr.Errorf("Unable to retrieve roles: %s", err)
 	}
 
 	if len(allGroups) < 1 {
-		return diag.Errorf("Your query returned no results. " +
+		return fmterr.Errorf("Your query returned no results. " +
 			"Please change your search criteria and try again.")
 	}
 
 	if len(allGroups) > 1 {
 		log.Printf("[DEBUG] Multiple results found: %#v", allGroups)
-		return diag.Errorf("Your query returned more than one result. Please try a more " +
+		return fmterr.Errorf("Your query returned more than one result. Please try a more " +
 			"specific search criteria, or set `most_recent` attribute to true.")
 	}
 	group = allGroups[0]

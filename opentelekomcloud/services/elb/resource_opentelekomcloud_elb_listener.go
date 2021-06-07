@@ -11,6 +11,7 @@ import (
 
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common"
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common/cfg"
+	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common/fmterr"
 )
 
 var ProtocolFormats = []string{"HTTP", "TCP", "HTTPS", "SSL", "UDP"}
@@ -186,7 +187,7 @@ func resourceEListenerCreate(ctx context.Context, d *schema.ResourceData, meta i
 	config := meta.(*cfg.Config)
 	client, err := config.ElbV1Client(config.GetRegion(d))
 	if err != nil {
-		return diag.Errorf("Error creating OpenTelekomCloud networking client: %s", err)
+		return fmterr.Errorf("Error creating OpenTelekomCloud networking client: %s", err)
 	}
 
 	var certificates []string
@@ -234,7 +235,7 @@ func resourceEListenerRead(ctx context.Context, d *schema.ResourceData, meta int
 	config := meta.(*cfg.Config)
 	client, err := config.ElbV1Client(config.GetRegion(d))
 	if err != nil {
-		return diag.Errorf("Error creating OpenTelekomCloud networking client: %s", err)
+		return fmterr.Errorf("Error creating OpenTelekomCloud networking client: %s", err)
 	}
 
 	listener, err := listeners.Get(client, d.Id()).Extract()
@@ -274,7 +275,7 @@ func resourceEListenerUpdate(ctx context.Context, d *schema.ResourceData, meta i
 	config := meta.(*cfg.Config)
 	client, err := config.ElbV1Client(config.GetRegion(d))
 	if err != nil {
-		return diag.Errorf("Error creating OpenTelekomCloud networking client: %s", err)
+		return fmterr.Errorf("Error creating OpenTelekomCloud networking client: %s", err)
 	}
 
 	var updateOpts listeners.UpdateOpts
@@ -325,7 +326,7 @@ func resourceEListenerDelete(ctx context.Context, d *schema.ResourceData, meta i
 	config := meta.(*cfg.Config)
 	client, err := config.ElbV1Client(config.GetRegion(d))
 	if err != nil {
-		return diag.Errorf("Error creating OpenTelekomCloud networking client: %s", err)
+		return fmterr.Errorf("Error creating OpenTelekomCloud networking client: %s", err)
 	}
 
 	id := d.Id()

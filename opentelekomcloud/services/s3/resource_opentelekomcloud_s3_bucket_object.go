@@ -21,6 +21,7 @@ import (
 	"github.com/aws/aws-sdk-go/service/s3"
 
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common/cfg"
+	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common/fmterr"
 )
 
 func ResourceS3BucketObject() *schema.Resource {
@@ -128,7 +129,7 @@ func resourceS3BucketObjectPut(ctx context.Context, d *schema.ResourceData, meta
 	config := meta.(*cfg.Config)
 	s3conn, err := config.S3Client(config.GetRegion(d))
 	if err != nil {
-		return diag.Errorf("Error creating OpenTelekomCloud s3 client: %s", err)
+		return fmterr.Errorf("Error creating OpenTelekomCloud s3 client: %s", err)
 	}
 
 	var body io.ReadSeeker
@@ -137,11 +138,11 @@ func resourceS3BucketObjectPut(ctx context.Context, d *schema.ResourceData, meta
 		source := v.(string)
 		path, err := homedir.Expand(source)
 		if err != nil {
-			return diag.Errorf("Error expanding homedir in source (%s): %s", source, err)
+			return fmterr.Errorf("Error expanding homedir in source (%s): %s", source, err)
 		}
 		file, err := os.Open(path)
 		if err != nil {
-			return diag.Errorf("Error opening S3 bucket object source (%s): %s", source, err)
+			return fmterr.Errorf("Error opening S3 bucket object source (%s): %s", source, err)
 		}
 
 		body = file
@@ -149,7 +150,7 @@ func resourceS3BucketObjectPut(ctx context.Context, d *schema.ResourceData, meta
 		content := v.(string)
 		body = bytes.NewReader([]byte(content))
 	} else {
-		return diag.Errorf("Must specify \"source\" or \"content\" field")
+		return fmterr.Errorf("Must specify \"source\" or \"content\" field")
 	}
 
 	bucket := d.Get("bucket").(string)
@@ -196,7 +197,7 @@ func resourceS3BucketObjectPut(ctx context.Context, d *schema.ResourceData, meta
 
 	resp, err := s3conn.PutObject(putInput)
 	if err != nil {
-		return diag.Errorf("Error putting object in S3 bucket (%s): %s", bucket, err)
+		return fmterr.Errorf("Error putting object in S3 bucket (%s): %s", bucket, err)
 	}
 
 	// See https://forums.aws.amazon.com/thread.jspa?threadID=44003
@@ -211,7 +212,7 @@ func resourceS3BucketObjectRead(ctx context.Context, d *schema.ResourceData, met
 	config := meta.(*cfg.Config)
 	s3conn, err := config.S3Client(config.GetRegion(d))
 	if err != nil {
-		return diag.Errorf("Error creating OpenTelekomCloud s3 client: %s", err)
+		return fmterr.Errorf("Error creating OpenTelekomCloud s3 client: %s", err)
 	}
 
 	// restricted := false //meta.(*AWSClient).IsGovCloud() || meta.(*AWSClient).IsChinaCloud()
@@ -255,7 +256,7 @@ func resourceS3BucketObjectDelete(ctx context.Context, d *schema.ResourceData, m
 	config := meta.(*cfg.Config)
 	s3conn, err := config.S3Client(config.GetRegion(d))
 	if err != nil {
-		return diag.Errorf("Error creating OpenTelekomCloud s3 client: %s", err)
+		return fmterr.Errorf("Error creating OpenTelekomCloud s3 client: %s", err)
 	}
 
 	bucket := d.Get("bucket").(string)
@@ -269,7 +270,7 @@ func resourceS3BucketObjectDelete(ctx context.Context, d *schema.ResourceData, m
 		}
 		out, err := s3conn.ListObjectVersions(&vInput)
 		if err != nil {
-			return diag.Errorf("Failed listing S3 object versions: %s", err)
+			return fmterr.Errorf("Failed listing S3 object versions: %s", err)
 		}
 
 		for _, v := range out.Versions {
@@ -280,7 +281,7 @@ func resourceS3BucketObjectDelete(ctx context.Context, d *schema.ResourceData, m
 			}
 			_, err := s3conn.DeleteObject(&input)
 			if err != nil {
-				return diag.Errorf("Error deleting S3 object version of %s:\n %s:\n %s",
+				return fmterr.Errorf("Error deleting S3 object version of %s:\n %s:\n %s",
 					key, v, err)
 			}
 		}
@@ -292,7 +293,7 @@ func resourceS3BucketObjectDelete(ctx context.Context, d *schema.ResourceData, m
 		}
 		_, err := s3conn.DeleteObject(&input)
 		if err != nil {
-			return diag.Errorf("Error deleting S3 bucket object: %s  Bucket: %q Object: %q", err, bucket, key)
+			return fmterr.Errorf("Error deleting S3 bucket object: %s  Bucket: %q Object: %q", err, bucket, key)
 		}
 	}
 

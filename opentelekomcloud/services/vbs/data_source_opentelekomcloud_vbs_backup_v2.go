@@ -10,6 +10,7 @@ import (
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/vbs/v2/shares"
 
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common/cfg"
+	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common/fmterr"
 )
 
 func DataSourceVBSBackupV2() *schema.Resource {
@@ -93,16 +94,16 @@ func dataSourceVBSBackupV2Read(ctx context.Context, d *schema.ResourceData, meta
 
 	refinedBackups, err := backups.List(vbsClient, listBackupOpts)
 	if err != nil {
-		return diag.Errorf("Unable to retrieve backups: %s", err)
+		return fmterr.Errorf("Unable to retrieve backups: %s", err)
 	}
 
 	if len(refinedBackups) < 1 {
-		return diag.Errorf("Your query returned no results. " +
+		return fmterr.Errorf("Your query returned no results. " +
 			"Please change your search criteria and try again.")
 	}
 
 	if len(refinedBackups) > 1 {
-		return diag.Errorf("Your query returned more than one result." +
+		return fmterr.Errorf("Your query returned more than one result." +
 			" Please try a more specific search criteria")
 	}
 
@@ -128,7 +129,7 @@ func dataSourceVBSBackupV2Read(ctx context.Context, d *schema.ResourceData, meta
 
 	shares, err := shares.List(vbsClient, listShareOpts)
 	if err != nil {
-		return diag.Errorf("Unable to retrieve shares: %s", err)
+		return fmterr.Errorf("Unable to retrieve shares: %s", err)
 	}
 
 	d.Set("to_project_ids", resourceToProjectIdsV2(shares))

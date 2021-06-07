@@ -11,6 +11,7 @@ import (
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/networking/v1/bandwidths"
 
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common/cfg"
+	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common/fmterr"
 )
 
 func DataSourceBandWidth() *schema.Resource {
@@ -60,7 +61,7 @@ func dataSourceBandWidthRead(ctx context.Context, d *schema.ResourceData, meta i
 	config := meta.(*cfg.Config)
 	vpcClient, err := config.NetworkingV1Client(config.GetRegion(d))
 	if err != nil {
-		return diag.Errorf("error creating OpenTelekomCloud vpc client: %s", err)
+		return fmterr.Errorf("error creating OpenTelekomCloud vpc client: %s", err)
 	}
 
 	listOpts := bandwidths.ListOpts{
@@ -69,10 +70,10 @@ func dataSourceBandWidthRead(ctx context.Context, d *schema.ResourceData, meta i
 
 	allBWs, err := bandwidths.List(vpcClient, listOpts).Extract()
 	if err != nil {
-		return diag.Errorf("unable to list OpenTelekomCloud bandwidths: %s", err)
+		return fmterr.Errorf("unable to list OpenTelekomCloud bandwidths: %s", err)
 	}
 	if len(allBWs) == 0 {
-		return diag.Errorf("no OpenTelekomCloud bandwidth was found")
+		return fmterr.Errorf("no OpenTelekomCloud bandwidth was found")
 	}
 
 	// Filter bandwidths by "name"
@@ -84,7 +85,7 @@ func dataSourceBandWidthRead(ctx context.Context, d *schema.ResourceData, meta i
 		}
 	}
 	if len(bandList) == 0 {
-		return diag.Errorf("no OpenTelekomCloud bandwidth was found by name: %s", name)
+		return fmterr.Errorf("no OpenTelekomCloud bandwidth was found by name: %s", name)
 	}
 
 	// Filter bandwidths by "size"
@@ -99,7 +100,7 @@ func dataSourceBandWidthRead(ctx context.Context, d *schema.ResourceData, meta i
 			}
 		}
 		if !found {
-			return diag.Errorf("no OpenTelekomCloud bandwidth was found by size: %d", v.(int))
+			return fmterr.Errorf("no OpenTelekomCloud bandwidth was found by size: %d", v.(int))
 		}
 	}
 

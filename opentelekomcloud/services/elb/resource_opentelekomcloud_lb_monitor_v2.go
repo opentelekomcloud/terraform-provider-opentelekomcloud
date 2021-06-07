@@ -15,6 +15,7 @@ import (
 
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common"
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common/cfg"
+	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common/fmterr"
 )
 
 func ResourceMonitorV2() *schema.Resource {
@@ -113,7 +114,7 @@ func resourceMonitorV2Create(ctx context.Context, d *schema.ResourceData, meta i
 	config := meta.(*cfg.Config)
 	client, err := config.NetworkingV2Client(config.GetRegion(d))
 	if err != nil {
-		return diag.Errorf("error creating OpenTelekomCloud NetworkingV2 client: %s", err)
+		return fmterr.Errorf("error creating OpenTelekomCloud NetworkingV2 client: %s", err)
 	}
 
 	adminStateUp := d.Get("admin_state_up").(bool)
@@ -151,7 +152,7 @@ func resourceMonitorV2Create(ctx context.Context, d *schema.ResourceData, meta i
 		return nil
 	})
 	if err != nil {
-		return diag.Errorf("unable to create monitor: %s", err)
+		return fmterr.Errorf("unable to create monitor: %s", err)
 	}
 
 	if err := waitForLBV2viaPool(client, poolID, "ACTIVE", timeout); err != nil {
@@ -167,7 +168,7 @@ func resourceMonitorV2Read(ctx context.Context, d *schema.ResourceData, meta int
 	config := meta.(*cfg.Config)
 	client, err := config.NetworkingV2Client(config.GetRegion(d))
 	if err != nil {
-		return diag.Errorf("error creating OpenTelekomCloud NetworkingV2 client: %s", err)
+		return fmterr.Errorf("error creating OpenTelekomCloud NetworkingV2 client: %s", err)
 	}
 
 	monitor, err := monitors.Get(client, d.Id()).Extract()
@@ -203,7 +204,7 @@ func resourceMonitorV2Update(ctx context.Context, d *schema.ResourceData, meta i
 	config := meta.(*cfg.Config)
 	client, err := config.NetworkingV2Client(config.GetRegion(d))
 	if err != nil {
-		return diag.Errorf("error creating OpenTelekomCloud NetworkingV2 client: %s", err)
+		return fmterr.Errorf("error creating OpenTelekomCloud NetworkingV2 client: %s", err)
 	}
 
 	var updateOpts monitors.UpdateOpts
@@ -255,7 +256,7 @@ func resourceMonitorV2Update(ctx context.Context, d *schema.ResourceData, meta i
 	})
 
 	if err != nil {
-		return diag.Errorf("unable to update monitor %s: %s", d.Id(), err)
+		return fmterr.Errorf("unable to update monitor %s: %s", d.Id(), err)
 	}
 
 	// Wait for LB to become active before continuing
@@ -270,7 +271,7 @@ func resourceMonitorV2Delete(ctx context.Context, d *schema.ResourceData, meta i
 	config := meta.(*cfg.Config)
 	networkingClient, err := config.NetworkingV2Client(config.GetRegion(d))
 	if err != nil {
-		return diag.Errorf("error creating OpenTelekomCloud NetworkingV2 client: %s", err)
+		return fmterr.Errorf("error creating OpenTelekomCloud NetworkingV2 client: %s", err)
 	}
 
 	log.Printf("[DEBUG] Deleting monitor %s", d.Id())
@@ -290,7 +291,7 @@ func resourceMonitorV2Delete(ctx context.Context, d *schema.ResourceData, meta i
 	})
 
 	if err != nil {
-		return diag.Errorf("unable to delete monitor %s: %s", d.Id(), err)
+		return fmterr.Errorf("unable to delete monitor %s: %s", d.Id(), err)
 	}
 
 	err = waitForLBV2viaPool(networkingClient, poolID, "ACTIVE", timeout)

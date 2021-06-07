@@ -15,6 +15,7 @@ import (
 
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common"
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common/cfg"
+	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common/fmterr"
 )
 
 func ResourceVpnIKEPolicyV2() *schema.Resource {
@@ -127,7 +128,7 @@ func resourceVpnIKEPolicyV2Create(ctx context.Context, d *schema.ResourceData, m
 	config := meta.(*cfg.Config)
 	networkingClient, err := config.NetworkingV2Client(config.GetRegion(d))
 	if err != nil {
-		return diag.Errorf("error creating OpenTelekomCloud NetworkingV2 client: %s", err)
+		return fmterr.Errorf("error creating OpenTelekomCloud NetworkingV2 client: %s", err)
 	}
 
 	lifetimeRaw := d.Get("lifetime").(*schema.Set).List()
@@ -183,7 +184,7 @@ func resourceVpnIKEPolicyV2Read(ctx context.Context, d *schema.ResourceData, met
 	config := meta.(*cfg.Config)
 	networkingClient, err := config.NetworkingV2Client(config.GetRegion(d))
 	if err != nil {
-		return diag.Errorf("error creating OpenTelekomCloud NetworkingV2 client: %s", err)
+		return fmterr.Errorf("error creating OpenTelekomCloud NetworkingV2 client: %s", err)
 	}
 
 	policy, err := ikepolicies.Get(networkingClient, d.Id()).Extract()
@@ -215,7 +216,7 @@ func resourceVpnIKEPolicyV2Read(ctx context.Context, d *schema.ResourceData, met
 	mErr = multierror.Append(mErr, d.Set("lifetime", lifetime))
 
 	if err := mErr.ErrorOrNil(); err != nil {
-		return diag.Errorf("error setting IKE policy fields: %s", err)
+		return fmterr.Errorf("error setting IKE policy fields: %s", err)
 	}
 
 	return nil
@@ -225,7 +226,7 @@ func resourceVpnIKEPolicyV2Update(ctx context.Context, d *schema.ResourceData, m
 	config := meta.(*cfg.Config)
 	networkingClient, err := config.NetworkingV2Client(config.GetRegion(d))
 	if err != nil {
-		return diag.Errorf("error creating OpenTelekomCloud NetworkingV2 client: %s", err)
+		return fmterr.Errorf("error creating OpenTelekomCloud NetworkingV2 client: %s", err)
 	}
 
 	opts := ikepolicies.UpdateOpts{}
@@ -304,7 +305,7 @@ func resourceVpnIKEPolicyV2Delete(ctx context.Context, d *schema.ResourceData, m
 	config := meta.(*cfg.Config)
 	networkingClient, err := config.NetworkingV2Client(config.GetRegion(d))
 	if err != nil {
-		return diag.Errorf("error creating OpenTelekomCloud networking client: %s", err)
+		return fmterr.Errorf("error creating OpenTelekomCloud networking client: %s", err)
 	}
 
 	stateConf := &resource.StateChangeConf{

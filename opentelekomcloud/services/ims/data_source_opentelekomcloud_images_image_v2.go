@@ -13,6 +13,7 @@ import (
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/imageservice/v2/images"
 
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common/cfg"
+	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common/fmterr"
 )
 
 func DataSourceImagesImageV2() *schema.Resource {
@@ -150,7 +151,7 @@ func dataSourceImagesImageV2Read(ctx context.Context, d *schema.ResourceData, me
 	config := meta.(*cfg.Config)
 	client, err := config.ImageV2Client(config.GetRegion(d))
 	if err != nil {
-		return diag.Errorf("error creating OpenTelekomCloud IMSv2 client: %w", err)
+		return fmterr.Errorf("error creating OpenTelekomCloud IMSv2 client: %w", err)
 	}
 
 	visibility := resourceImagesImageV2VisibilityFromString(d.Get("visibility").(string))
@@ -172,12 +173,12 @@ func dataSourceImagesImageV2Read(ctx context.Context, d *schema.ResourceData, me
 	var image images.Image
 	allPages, err := images.List(client, listOpts).AllPages()
 	if err != nil {
-		return diag.Errorf("unable to query images: %s", err)
+		return fmterr.Errorf("unable to query images: %s", err)
 	}
 
 	allImages, err := images.ExtractImages(allPages)
 	if err != nil {
-		return diag.Errorf("unable to retrieve images: %s", err)
+		return fmterr.Errorf("unable to retrieve images: %s", err)
 	}
 
 	var filteredImages []images.Image
@@ -219,7 +220,7 @@ func dataSourceImagesImageV2Read(ctx context.Context, d *schema.ResourceData, me
 	}
 
 	if len(allImages) < 1 {
-		return diag.Errorf("your query returned no results. " +
+		return fmterr.Errorf("your query returned no results. " +
 			"Please change your search criteria and try again")
 	}
 
@@ -229,7 +230,7 @@ func dataSourceImagesImageV2Read(ctx context.Context, d *schema.ResourceData, me
 		if recent {
 			image = mostRecentImage(allImages)
 		} else {
-			return diag.Errorf("your query returned more than one result. Please try a more " +
+			return fmterr.Errorf("your query returned more than one result. Please try a more " +
 				"specific search criteria, or set `most_recent` attribute to true")
 		}
 	} else {

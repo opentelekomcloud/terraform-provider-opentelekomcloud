@@ -8,6 +8,7 @@ import (
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/rts/v1/stackresources"
 
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common/cfg"
+	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common/fmterr"
 )
 
 func DataSourceRTSStackResourcesV1() *schema.Resource {
@@ -71,16 +72,16 @@ func dataSourceRTSStackResourcesV1Read(ctx context.Context, d *schema.ResourceDa
 
 	refinedResources, err := stackresources.List(orchestrationClient, d.Get("stack_name").(string), listOpts)
 	if err != nil {
-		return diag.Errorf("Unable to retrieve Stack Resources: %s", err)
+		return fmterr.Errorf("Unable to retrieve Stack Resources: %s", err)
 	}
 
 	if len(refinedResources) < 1 {
-		return diag.Errorf("No matching resource found. " +
+		return fmterr.Errorf("No matching resource found. " +
 			"Please change your search criteria and try again.")
 	}
 
 	if len(refinedResources) > 1 {
-		return diag.Errorf("Multiple resources matched; use additional constraints to reduce matches to a single resource")
+		return fmterr.Errorf("Multiple resources matched; use additional constraints to reduce matches to a single resource")
 	}
 
 	stackResource := refinedResources[0]

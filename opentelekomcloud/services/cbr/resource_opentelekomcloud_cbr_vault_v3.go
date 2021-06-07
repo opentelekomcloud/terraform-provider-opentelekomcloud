@@ -9,11 +9,12 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
-	"github.com/opentelekomcloud/gophertelekomcloud"
+	golangsdk "github.com/opentelekomcloud/gophertelekomcloud"
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/cbr/v3/vaults"
 
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common"
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common/cfg"
+	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common/fmterr"
 )
 
 func ResourceCBRVaultV3() *schema.Resource {
@@ -263,12 +264,12 @@ func resourceCBRVaultV3Read(ctx context.Context, d *schema.ResourceData, meta in
 	config := meta.(*cfg.Config)
 	client, err := config.CbrV3Client(config.GetRegion(d))
 	if err != nil {
-		return diag.Errorf("error creating OpenTelekomCloud CBRv3 client: %s", err)
+		return fmterr.Errorf("error creating OpenTelekomCloud CBRv3 client: %s", err)
 	}
 
 	vault, err := vaults.Get(client, d.Id()).Extract()
 	if err != nil {
-		return diag.Errorf("error getting vault details: %s", err)
+		return fmterr.Errorf("error getting vault details: %s", err)
 	}
 
 	resourceList := make([]interface{}, len(vault.Resources))
@@ -277,7 +278,7 @@ func resourceCBRVaultV3Read(ctx context.Context, d *schema.ResourceData, meta in
 		resMap := make(map[string]interface{})
 		err = json.Unmarshal(data, &resMap)
 		if err != nil {
-			return diag.Errorf("error converting resource list: %s", err)
+			return fmterr.Errorf("error converting resource list: %s", err)
 		}
 		resourceList[i] = resMap
 	}
@@ -311,7 +312,7 @@ func resourceCBRVaultV3Read(ctx context.Context, d *schema.ResourceData, meta in
 		setVaultBilling(d, &vault.Billing),
 	)
 	if err := mErr.ErrorOrNil(); err != nil {
-		return diag.Errorf("error setting vault fields: %s", err)
+		return fmterr.Errorf("error setting vault fields: %s", err)
 	}
 
 	return nil
@@ -321,12 +322,12 @@ func resourceCBRVaultV3Create(ctx context.Context, d *schema.ResourceData, meta 
 	config := meta.(*cfg.Config)
 	client, err := config.CbrV3Client(config.GetRegion(d))
 	if err != nil {
-		return diag.Errorf("error creating OpenTelekomCloud CBRv3 client: %s", err)
+		return fmterr.Errorf("error creating OpenTelekomCloud CBRv3 client: %s", err)
 	}
 
 	resources, err := cbrVaultResourcesCreate(d)
 	if err != nil {
-		return diag.Errorf("error constructing resources list: %s", err)
+		return fmterr.Errorf("error constructing resources list: %s", err)
 	}
 
 	opts := vaults.CreateOpts{
@@ -344,14 +345,14 @@ func resourceCBRVaultV3Create(ctx context.Context, d *schema.ResourceData, meta 
 
 	vault, err := vaults.Create(client, opts).Extract()
 	if err != nil {
-		return diag.Errorf("error creating vaults: %s", err)
+		return fmterr.Errorf("error creating vaults: %s", err)
 	}
 	d.SetId(vault.ID)
 
 	if policy := d.Get("backup_policy_id").(string); policy != "" {
 		_, err := vaults.BindPolicy(client, d.Id(), vaults.BindPolicyOpts{PolicyID: policy}).Extract()
 		if err != nil {
-			return diag.Errorf("error binding policy to vault: %s", err)
+			return fmterr.Errorf("error binding policy to vault: %s", err)
 		}
 	}
 
@@ -577,7 +578,7 @@ func resourceCBRVaultV3Update(ctx context.Context, d *schema.ResourceData, meta 
 	config := meta.(*cfg.Config)
 	client, err := config.CbrV3Client(config.GetRegion(d))
 	if err != nil {
-		return diag.Errorf("error creating OpenTelekomCloud CBRv3 client: %s", err)
+		return fmterr.Errorf("error creating OpenTelekomCloud CBRv3 client: %s", err)
 	}
 
 	opts := vaults.UpdateOpts{}
@@ -616,7 +617,7 @@ func resourceCBRVaultV3Update(ctx context.Context, d *schema.ResourceData, meta 
 	if needsUpdate {
 		_, err := vaults.Update(client, d.Id(), opts).Extract()
 		if err != nil {
-			return diag.Errorf("error updating the vault: %s", err)
+			return fmterr.Errorf("error updating the vault: %s", err)
 		}
 	}
 
@@ -639,11 +640,11 @@ func resourceCBRVaultV3Delete(ctx context.Context, d *schema.ResourceData, meta 
 	config := meta.(*cfg.Config)
 	client, err := config.CbrV3Client(config.GetRegion(d))
 	if err != nil {
-		return diag.Errorf("error creating OpenTelekomCloud CBRv3 client: %s", err)
+		return fmterr.Errorf("error creating OpenTelekomCloud CBRv3 client: %s", err)
 	}
 
 	if err := vaults.Delete(client, d.Id()).ExtractErr(); err != nil {
-		return diag.Errorf("error deleting CBRv3 vault: %s", err)
+		return fmterr.Errorf("error deleting CBRv3 vault: %s", err)
 	}
 
 	d.SetId("")

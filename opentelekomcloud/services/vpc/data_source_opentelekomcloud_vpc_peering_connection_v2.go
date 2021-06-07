@@ -11,6 +11,7 @@ import (
 
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common"
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common/cfg"
+	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common/fmterr"
 )
 
 func DataSourceVpcPeeringConnectionV2() *schema.Resource {
@@ -70,16 +71,16 @@ func dataSourceVpcPeeringConnectionV2Read(ctx context.Context, d *schema.Resourc
 
 	refinedPeering, err := peerings.List(peeringClient, listOpts)
 	if err != nil {
-		return diag.Errorf("Unable to retrieve vpc peering connections: %s", err)
+		return fmterr.Errorf("Unable to retrieve vpc peering connections: %s", err)
 	}
 
 	if len(refinedPeering) < 1 {
-		return diag.Errorf("Your query returned no results. " +
+		return fmterr.Errorf("Your query returned no results. " +
 			"Please change your search criteria and try again.")
 	}
 
 	if len(refinedPeering) > 1 {
-		return diag.Errorf("Multiple VPC peering connections matched." +
+		return fmterr.Errorf("Multiple VPC peering connections matched." +
 			" Use additional constraints to reduce matches to a single VPC peering connection")
 	}
 

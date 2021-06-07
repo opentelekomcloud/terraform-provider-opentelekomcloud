@@ -8,10 +8,11 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
-	"github.com/opentelekomcloud/gophertelekomcloud"
+	golangsdk "github.com/opentelekomcloud/gophertelekomcloud"
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/networking/v2/peerings"
 
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common/cfg"
+	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common/fmterr"
 )
 
 func ResourceVpcPeeringConnectionAccepterV2() *schema.Resource {
@@ -73,18 +74,18 @@ func resourceVPCPeeringAccepterV2Create(ctx context.Context, d *schema.ResourceD
 	peeringClient, err := config.NetworkingV2Client(config.GetRegion(d))
 
 	if err != nil {
-		return diag.Errorf("Error creating OpenTelekomCloud Peering client: %s", err)
+		return fmterr.Errorf("Error creating OpenTelekomCloud Peering client: %s", err)
 	}
 
 	id := d.Get("vpc_peering_connection_id").(string)
 
 	n, err := peerings.Get(peeringClient, id).Extract()
 	if err != nil {
-		return diag.Errorf("Error retrieving OpenTelekomCloud Vpc Peering Connection: %s", err)
+		return fmterr.Errorf("Error retrieving OpenTelekomCloud Vpc Peering Connection: %s", err)
 	}
 
 	if n.Status != "PENDING_ACCEPTANCE" {
-		return diag.Errorf("VPC peering action not permitted: Can not accept/reject peering request not in PENDING_ACCEPTANCE state.")
+		return fmterr.Errorf("VPC peering action not permitted: Can not accept/reject peering request not in PENDING_ACCEPTANCE state.")
 	}
 
 	var expectedStatus string
@@ -95,7 +96,7 @@ func resourceVPCPeeringAccepterV2Create(ctx context.Context, d *schema.ResourceD
 		_, err := peerings.Accept(peeringClient, id).ExtractResult()
 
 		if err != nil {
-			return diag.Errorf("Unable to accept VPC Peering Connection: %w", err)
+			return fmterr.Errorf("Unable to accept VPC Peering Connection: %w", err)
 		}
 
 	} else {
@@ -104,7 +105,7 @@ func resourceVPCPeeringAccepterV2Create(ctx context.Context, d *schema.ResourceD
 		_, err := peerings.Reject(peeringClient, id).ExtractResult()
 
 		if err != nil {
-			return diag.Errorf("Unable to reject VPC Peering Connection: %w", err)
+			return fmterr.Errorf("Unable to reject VPC Peering Connection: %w", err)
 		}
 	}
 
@@ -129,7 +130,7 @@ func resourceVpcPeeringAccepterRead(ctx context.Context, d *schema.ResourceData,
 	config := meta.(*cfg.Config)
 	peeringclient, err := config.NetworkingV2Client(config.GetRegion(d))
 	if err != nil {
-		return diag.Errorf("Error creating OpenTelekomCloud peering client: %s", err)
+		return fmterr.Errorf("Error creating OpenTelekomCloud peering client: %s", err)
 	}
 
 	n, err := peerings.Get(peeringclient, d.Id()).Extract()
@@ -139,7 +140,7 @@ func resourceVpcPeeringAccepterRead(ctx context.Context, d *schema.ResourceData,
 			return nil
 		}
 
-		return diag.Errorf("Error retrieving OpenTelekomCloud Vpc Peering Connection: %s", err)
+		return fmterr.Errorf("Error retrieving OpenTelekomCloud Vpc Peering Connection: %s", err)
 	}
 
 	d.Set("id", n.ID)
@@ -156,7 +157,7 @@ func resourceVpcPeeringAccepterRead(ctx context.Context, d *schema.ResourceData,
 func resourceVPCPeeringAccepterUpdate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 
 	if d.HasChange("accept") {
-		return diag.Errorf("VPC peering action not permitted: Can not accept/reject peering request not in pending_acceptance state.'")
+		return fmterr.Errorf("VPC peering action not permitted: Can not accept/reject peering request not in pending_acceptance state.'")
 	}
 
 	return resourceVpcPeeringAccepterRead(ctx, d, meta)

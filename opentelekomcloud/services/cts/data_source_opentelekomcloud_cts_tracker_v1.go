@@ -9,6 +9,7 @@ import (
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/cts/v1/tracker"
 
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common/cfg"
+	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common/fmterr"
 )
 
 func DataSourceCTSTrackerV1() *schema.Resource {
@@ -80,7 +81,7 @@ func dataSourceCTSTrackerV1Read(ctx context.Context, d *schema.ResourceData, met
 	config := meta.(*cfg.Config)
 	ctsClient, err := config.CtsV1Client(config.GetProjectName(d))
 	if err != nil {
-		return diag.Errorf("Error creating cts v1 client: %s", err)
+		return fmterr.Errorf("Error creating cts v1 client: %s", err)
 	}
 
 	listOpts := tracker.ListOpts{
@@ -92,16 +93,16 @@ func dataSourceCTSTrackerV1Read(ctx context.Context, d *schema.ResourceData, met
 
 	refinedTrackers, err := tracker.List(ctsClient, listOpts)
 	if err != nil {
-		return diag.Errorf("Unable to retrieve cts tracker: %s", err)
+		return fmterr.Errorf("Unable to retrieve cts tracker: %s", err)
 	}
 
 	if len(refinedTrackers) < 1 {
-		return diag.Errorf("Your query returned no results. " +
+		return fmterr.Errorf("Your query returned no results. " +
 			"Please change your search criteria and try again.")
 	}
 
 	if len(refinedTrackers) > 1 {
-		return diag.Errorf("Your query returned more than one result." +
+		return fmterr.Errorf("Your query returned more than one result." +
 			" Please try a more specific search criteria")
 	}
 

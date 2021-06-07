@@ -8,13 +8,14 @@ import (
 	"github.com/hashicorp/go-multierror"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
-	"github.com/opentelekomcloud/gophertelekomcloud"
+	golangsdk "github.com/opentelekomcloud/gophertelekomcloud"
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/networking/v2/routes"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common"
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common/cfg"
+	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common/fmterr"
 )
 
 func ResourceVPCRouteV2() *schema.Resource {
@@ -73,7 +74,7 @@ func resourceVpcRouteV2Create(ctx context.Context, d *schema.ResourceData, meta 
 	config := meta.(*cfg.Config)
 	client, err := config.NetworkingV2Client(config.GetRegion(d))
 	if err != nil {
-		return diag.Errorf("error creating OpenTelekomCloud NetworkingV2 client: %s", err)
+		return fmterr.Errorf("error creating OpenTelekomCloud NetworkingV2 client: %s", err)
 	}
 
 	createOpts := routes.CreateOpts{
@@ -86,7 +87,7 @@ func resourceVpcRouteV2Create(ctx context.Context, d *schema.ResourceData, meta 
 
 	route, err := routes.Create(client, createOpts).Extract()
 	if err != nil {
-		return diag.Errorf("error creating OpenTelekomCloud VPC route: %s", err)
+		return fmterr.Errorf("error creating OpenTelekomCloud VPC route: %s", err)
 	}
 
 	log.Printf("[INFO] Vpc Route ID: %s", route.RouteID)
@@ -100,7 +101,7 @@ func resourceVpcRouteV2Read(ctx context.Context, d *schema.ResourceData, meta in
 	config := meta.(*cfg.Config)
 	client, err := config.NetworkingV2Client(config.GetRegion(d))
 	if err != nil {
-		return diag.Errorf("error creating OpenTelekomCloud NetworkingV2 client: %s", err)
+		return fmterr.Errorf("error creating OpenTelekomCloud NetworkingV2 client: %s", err)
 	}
 
 	route, err := routes.Get(client, d.Id()).Extract()
@@ -110,7 +111,7 @@ func resourceVpcRouteV2Read(ctx context.Context, d *schema.ResourceData, meta in
 			return nil
 		}
 
-		return diag.Errorf("error retrieving OpenTelekomCloud Vpc route: %s", err)
+		return fmterr.Errorf("error retrieving OpenTelekomCloud Vpc route: %s", err)
 	}
 
 	mErr := multierror.Append(nil,
@@ -133,11 +134,11 @@ func resourceVpcRouteV2Delete(ctx context.Context, d *schema.ResourceData, meta 
 	config := meta.(*cfg.Config)
 	client, err := config.NetworkingV2Client(config.GetRegion(d))
 	if err != nil {
-		return diag.Errorf("error creating OpenTelekomCloud NetworkingV2 client: %s", err)
+		return fmterr.Errorf("error creating OpenTelekomCloud NetworkingV2 client: %s", err)
 	}
 
 	if err = routes.Delete(client, d.Id()).ExtractErr(); err != nil {
-		return diag.Errorf("error deleting VPC route: %s", err)
+		return fmterr.Errorf("error deleting VPC route: %s", err)
 	}
 
 	stateConf := &resource.StateChangeConf{
@@ -151,7 +152,7 @@ func resourceVpcRouteV2Delete(ctx context.Context, d *schema.ResourceData, meta 
 
 	_, err = stateConf.WaitForState()
 	if err != nil {
-		return diag.Errorf("error deleting OpenTelekomCloud VPC route: %s", err)
+		return fmterr.Errorf("error deleting OpenTelekomCloud VPC route: %s", err)
 	}
 
 	d.SetId("")

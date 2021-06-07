@@ -5,10 +5,11 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
-	"github.com/opentelekomcloud/gophertelekomcloud"
+	golangsdk "github.com/opentelekomcloud/gophertelekomcloud"
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/sfs/v2/shares"
 
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common/cfg"
+	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common/fmterr"
 )
 
 func ResourceSFSShareAccessRulesV2() *schema.Resource {
@@ -66,7 +67,7 @@ func resourceSFSShareAccessRulesV2Create(ctx context.Context, d *schema.Resource
 	config := meta.(*cfg.Config)
 	client, err := config.SfsV2Client(config.GetRegion(d))
 	if err != nil {
-		return diag.Errorf("error creating OpenTelekomCloud File Share client: %w", err)
+		return fmterr.Errorf("error creating OpenTelekomCloud File Share client: %w", err)
 	}
 
 	shareID := d.Get("share_id").(string)
@@ -80,7 +81,7 @@ func resourceSFSShareAccessRulesV2Create(ctx context.Context, d *schema.Resource
 		}
 		_, err = shares.GrantAccess(client, shareID, grantAccessOpts).ExtractAccess()
 		if err != nil {
-			return diag.Errorf("error applying access rule for OpenTelekomCloud File Share: %w", err)
+			return fmterr.Errorf("error applying access rule for OpenTelekomCloud File Share: %w", err)
 		}
 	}
 
@@ -93,7 +94,7 @@ func resourceSFSShareAccessRulesV2Read(ctx context.Context, d *schema.ResourceDa
 	config := meta.(*cfg.Config)
 	client, err := config.SfsV2Client(config.GetRegion(d))
 	if err != nil {
-		return diag.Errorf("error creating OpenTelekomCloud File Share client: %w", err)
+		return fmterr.Errorf("error creating OpenTelekomCloud File Share client: %w", err)
 	}
 
 	rules, err := shares.ListAccessRights(client, d.Id()).ExtractAccessRights()
@@ -103,7 +104,7 @@ func resourceSFSShareAccessRulesV2Read(ctx context.Context, d *schema.ResourceDa
 			return nil
 		}
 
-		return diag.Errorf("error retrieving rules of OpenTelekomCloud File Share: %s", err)
+		return fmterr.Errorf("error retrieving rules of OpenTelekomCloud File Share: %s", err)
 	}
 
 	var accessRules []map[string]interface{}
@@ -119,11 +120,11 @@ func resourceSFSShareAccessRulesV2Read(ctx context.Context, d *schema.ResourceDa
 	}
 
 	if err := d.Set("access_rule", accessRules); err != nil {
-		return diag.Errorf("error saving access_rule to state for OpenTelekomCloud File Share: %w", err)
+		return fmterr.Errorf("error saving access_rule to state for OpenTelekomCloud File Share: %w", err)
 	}
 
 	if err := d.Set("share_id", d.Id()); err != nil {
-		return diag.Errorf("error saving share_id to state for OpenTelekomCloud File Share: %w", err)
+		return fmterr.Errorf("error saving share_id to state for OpenTelekomCloud File Share: %w", err)
 	}
 
 	return nil
@@ -133,7 +134,7 @@ func resourceSFSShareAccessRulesV2Delete(ctx context.Context, d *schema.Resource
 	config := meta.(*cfg.Config)
 	client, err := config.SfsV2Client(config.GetRegion(d))
 	if err != nil {
-		return diag.Errorf("error creating OpenTelekomCloud File Share client: %w", err)
+		return fmterr.Errorf("error creating OpenTelekomCloud File Share client: %w", err)
 	}
 
 	accessRules := d.Get("access_rule").([]interface{})
@@ -143,7 +144,7 @@ func resourceSFSShareAccessRulesV2Delete(ctx context.Context, d *schema.Resource
 			AccessID: accessRuleMap["share_access_id"].(string),
 		}
 		if err := shares.DeleteAccess(client, d.Id(), deleteAccessOpts).Err; err != nil {
-			return diag.Errorf("error deleting access rule for OpenTelekomCloud File Share: %w", err)
+			return fmterr.Errorf("error deleting access rule for OpenTelekomCloud File Share: %w", err)
 		}
 	}
 
@@ -155,7 +156,7 @@ func resourceSFSShareAccessRulesV2Update(ctx context.Context, d *schema.Resource
 	config := meta.(*cfg.Config)
 	client, err := config.SfsV2Client(config.GetRegion(d))
 	if err != nil {
-		return diag.Errorf("error creating OpenTelekomCloud File Share client: %w", err)
+		return fmterr.Errorf("error creating OpenTelekomCloud File Share client: %w", err)
 	}
 
 	if d.HasChange("access_rule") {
@@ -169,7 +170,7 @@ func resourceSFSShareAccessRulesV2Update(ctx context.Context, d *schema.Resource
 				AccessID: oldAccessRuleMap["share_access_id"].(string),
 			}
 			if err := shares.DeleteAccess(client, d.Id(), deleteAccessOpts).Err; err != nil {
-				return diag.Errorf("error deleting access rule for OpenTelekomCloud File Share: %w", err)
+				return fmterr.Errorf("error deleting access rule for OpenTelekomCloud File Share: %w", err)
 			}
 		}
 
@@ -182,7 +183,7 @@ func resourceSFSShareAccessRulesV2Update(ctx context.Context, d *schema.Resource
 			}
 			_, err = shares.GrantAccess(client, d.Id(), grantAccessOpts).ExtractAccess()
 			if err != nil {
-				return diag.Errorf("error applying access rule for OpenTelekomCloud File Share: %w", err)
+				return fmterr.Errorf("error applying access rule for OpenTelekomCloud File Share: %w", err)
 			}
 		}
 	}

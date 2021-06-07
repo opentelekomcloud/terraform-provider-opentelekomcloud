@@ -8,11 +8,12 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
-	"github.com/opentelekomcloud/gophertelekomcloud"
+	golangsdk "github.com/opentelekomcloud/gophertelekomcloud"
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/cbr/v3/policies"
 
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common"
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common/cfg"
+	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common/fmterr"
 )
 
 func ResourceCBRPolicyV3() *schema.Resource {
@@ -138,7 +139,7 @@ func resourceCBRPolicyV3Create(ctx context.Context, d *schema.ResourceData, meta
 	config := meta.(*cfg.Config)
 	client, err := config.CbrV3Client(config.GetRegion(d))
 	if err != nil {
-		return diag.Errorf("error creating OpenTelekomCloud CBRv3 client: %s", err)
+		return fmterr.Errorf("error creating OpenTelekomCloud CBRv3 client: %s", err)
 	}
 
 	enabled := d.Get("enabled").(bool)
@@ -158,7 +159,7 @@ func resourceCBRPolicyV3Create(ctx context.Context, d *schema.ResourceData, meta
 	log.Printf("[DEBUG] Create Options: %#v", createOpts)
 	cbrPolicy, err := policies.Create(client, createOpts).Extract()
 	if err != nil {
-		return diag.Errorf("error creating OpenTelekomCloud CBRv3 policy: %s", err)
+		return fmterr.Errorf("error creating OpenTelekomCloud CBRv3 policy: %s", err)
 	}
 
 	// Store the ID
@@ -171,7 +172,7 @@ func resourceCBRPolicyV3Read(ctx context.Context, d *schema.ResourceData, meta i
 	config := meta.(*cfg.Config)
 	client, err := config.CbrV3Client(config.GetRegion(d))
 	if err != nil {
-		return diag.Errorf("error creating OpenTelekomCloud CBRv3 client: %s", err)
+		return fmterr.Errorf("error creating OpenTelekomCloud CBRv3 client: %s", err)
 	}
 
 	cbrPolicy, err := policies.Get(client, d.Id()).Extract()
@@ -181,7 +182,7 @@ func resourceCBRPolicyV3Read(ctx context.Context, d *schema.ResourceData, meta i
 			d.SetId("")
 			return nil
 		}
-		return diag.Errorf("error retrieving CBRv3 policy: %s", err)
+		return fmterr.Errorf("error retrieving CBRv3 policy: %s", err)
 	}
 
 	log.Printf("[DEBUG] Retrieved policy %s: %+v", d.Id(), cbrPolicy)
@@ -208,7 +209,7 @@ func resourceCBRPolicyV3Read(ctx context.Context, d *schema.ResourceData, meta i
 	opDefinition["year_backups"] = cbrPolicyOD.YearBackups
 	opDefinitionList = append(opDefinitionList, opDefinition)
 	if err := d.Set("operation_definition", opDefinitionList); err != nil {
-		return diag.Errorf("error setting operetion_definition: %s", err)
+		return fmterr.Errorf("error setting operetion_definition: %s", err)
 	}
 
 	return nil
@@ -218,7 +219,7 @@ func resourceCBRPolicyV3Update(ctx context.Context, d *schema.ResourceData, meta
 	config := meta.(*cfg.Config)
 	client, err := config.CbrV3Client(config.GetRegion(d))
 	if err != nil {
-		return diag.Errorf("error creating OpenTelekomCloud CBRv3 client: %s", err)
+		return fmterr.Errorf("error creating OpenTelekomCloud CBRv3 client: %s", err)
 	}
 
 	var updateOpts policies.UpdateOpts
@@ -249,7 +250,7 @@ func resourceCBRPolicyV3Update(ctx context.Context, d *schema.ResourceData, meta
 
 	_, err = policies.Update(client, d.Id(), updateOpts).Extract()
 	if err != nil {
-		return diag.Errorf("error updating OpenTelekomCloud CBRv3 policy: %s", err)
+		return fmterr.Errorf("error updating OpenTelekomCloud CBRv3 policy: %s", err)
 	}
 
 	return resourceCBRPolicyV3Read(ctx, d, meta)
@@ -259,13 +260,13 @@ func resourceCBRPolicyV3Delete(ctx context.Context, d *schema.ResourceData, meta
 	config := meta.(*cfg.Config)
 	client, err := config.CbrV3Client(config.GetRegion(d))
 	if err != nil {
-		return diag.Errorf("error creating OpenTelekomCloud CBRv3 client: %s", err)
+		return fmterr.Errorf("error creating OpenTelekomCloud CBRv3 client: %s", err)
 	}
 
 	log.Printf("[DEBUG] Deleting CBRv3 policy %s", d.Id())
 
 	if err = policies.Delete(client, d.Id()).ExtractErr(); err != nil {
-		return diag.Errorf("eror deleting OpenTelekomCloud CBRv3 policy: %s", err)
+		return fmterr.Errorf("eror deleting OpenTelekomCloud CBRv3 policy: %s", err)
 	}
 
 	d.SetId("")

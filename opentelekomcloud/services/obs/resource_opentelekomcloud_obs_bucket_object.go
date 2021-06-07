@@ -14,6 +14,7 @@ import (
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/obs"
 
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common/cfg"
+	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common/fmterr"
 )
 
 func ResourceObsBucketObject() *schema.Resource {
@@ -97,7 +98,7 @@ func resourceObsBucketObjectPut(ctx context.Context, d *schema.ResourceData, met
 	config := meta.(*cfg.Config)
 	client, err := config.NewObjectStorageClient(config.GetRegion(d))
 	if err != nil {
-		return diag.Errorf("error creating OBS client: %s", err)
+		return fmterr.Errorf("error creating OBS client: %s", err)
 	}
 
 	if source, ok := d.GetOk("source"); ok {
@@ -105,7 +106,7 @@ func resourceObsBucketObjectPut(ctx context.Context, d *schema.ResourceData, met
 		_, err := os.Stat(source.(string))
 		if err != nil {
 			if os.IsNotExist(err) {
-				return diag.Errorf("source file %s does not exist", source)
+				return fmterr.Errorf("source file %s does not exist", source)
 			}
 			return diag.FromErr(err)
 		}
@@ -132,7 +133,7 @@ func resourceObsBucketObjectPut(ctx context.Context, d *schema.ResourceData, met
 		err = d.Set("version_id", "")
 	}
 	if err != nil {
-		return diag.Errorf("error setting version_id: %s", err)
+		return fmterr.Errorf("error setting version_id: %s", err)
 	}
 
 	d.SetId(key)
@@ -195,7 +196,7 @@ func resourceObsBucketObjectRead(ctx context.Context, d *schema.ResourceData, me
 	config := meta.(*cfg.Config)
 	client, err := config.NewObjectStorageClient(config.GetRegion(d))
 	if err != nil {
-		return diag.Errorf("error creating OBS client: %s", err)
+		return fmterr.Errorf("error creating OBS client: %s", err)
 	}
 
 	bucket := d.Get("bucket").(string)
@@ -220,7 +221,7 @@ func resourceObsBucketObjectRead(ctx context.Context, d *schema.ResourceData, me
 	}
 	if !exist {
 		d.SetId("")
-		return diag.Errorf("object %s not found in bucket %s", key, bucket)
+		return fmterr.Errorf("object %s not found in bucket %s", key, bucket)
 	}
 	log.Printf("[DEBUG] Reading OBS Bucket Object %s: %#v", key, object)
 
@@ -235,7 +236,7 @@ func resourceObsBucketObjectRead(ctx context.Context, d *schema.ResourceData, me
 	)
 
 	if err := mErr.ErrorOrNil(); err != nil {
-		return diag.Errorf("error setting OBS bucket attributes: %s", err)
+		return fmterr.Errorf("error setting OBS bucket attributes: %s", err)
 	}
 
 	return nil
@@ -245,7 +246,7 @@ func resourceObsBucketObjectDelete(ctx context.Context, d *schema.ResourceData, 
 	config := meta.(*cfg.Config)
 	client, err := config.NewObjectStorageClient(config.GetRegion(d))
 	if err != nil {
-		return diag.Errorf("error creating OBS client: %s", err)
+		return fmterr.Errorf("error creating OBS client: %s", err)
 	}
 	bucket := d.Get("bucket").(string)
 	key := d.Get("key").(string)
@@ -261,14 +262,14 @@ func resourceObsBucketObjectDelete(ctx context.Context, d *schema.ResourceData, 
 		}
 		out, err := client.ListVersions(&vInput)
 		if err != nil {
-			return diag.Errorf("failed listing OBS object versions: %s", err)
+			return fmterr.Errorf("failed listing OBS object versions: %s", err)
 		}
 
 		for _, v := range out.Versions {
 			input.VersionId = v.VersionId
 			_, err := client.DeleteObject(&input)
 			if err != nil {
-				return diag.Errorf("error deleting OBS object version of %s:\n%s,\n%s", key, v.VersionId, err)
+				return fmterr.Errorf("error deleting OBS object version of %s:\n%s,\n%s", key, v.VersionId, err)
 			}
 		}
 		return nil
@@ -277,7 +278,7 @@ func resourceObsBucketObjectDelete(ctx context.Context, d *schema.ResourceData, 
 	// Just delete the object
 	_, err = client.DeleteObject(&input)
 	if err != nil {
-		return diag.Errorf("error deleting OBS bucket object: %s  Bucket: %q Object: %q", err, bucket, key)
+		return fmterr.Errorf("error deleting OBS bucket object: %s  Bucket: %q Object: %q", err, bucket, key)
 	}
 
 	return nil

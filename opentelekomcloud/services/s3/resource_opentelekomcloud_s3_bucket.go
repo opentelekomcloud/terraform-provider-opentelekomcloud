@@ -18,6 +18,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common"
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common/cfg"
+	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common/fmterr"
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/helper/hashcode"
 )
 
@@ -275,7 +276,7 @@ func resourceS3BucketCreate(ctx context.Context, d *schema.ResourceData, meta in
 	region := config.GetRegion(d)
 	client, err := config.S3Client(region)
 	if err != nil {
-		return diag.Errorf("error creating OpenTelekomCloud S3 client: %s", err)
+		return fmterr.Errorf("error creating OpenTelekomCloud S3 client: %s", err)
 	}
 
 	// Get the bucket and acl
@@ -315,7 +316,7 @@ func resourceS3BucketCreate(ctx context.Context, d *schema.ResourceData, meta in
 		return nil
 	})
 	if err != nil {
-		return diag.Errorf("error creating S3 bucket: %s", err)
+		return fmterr.Errorf("error creating S3 bucket: %s", err)
 	}
 
 	// Assign the bucket name as the resource ID
@@ -327,11 +328,11 @@ func resourceS3BucketUpdate(ctx context.Context, d *schema.ResourceData, meta in
 	config := meta.(*cfg.Config)
 	client, err := config.S3Client(config.GetRegion(d))
 	if err != nil {
-		return diag.Errorf("error creating OpenTelekomCloud S3 client: %s", err)
+		return fmterr.Errorf("error creating OpenTelekomCloud S3 client: %s", err)
 	}
 
 	if err := setTagsS3(client, d); err != nil {
-		return diag.Errorf("%q: %s", d.Get("bucket").(string), err)
+		return fmterr.Errorf("%q: %s", d.Get("bucket").(string), err)
 	}
 
 	if d.HasChange("policy") {
@@ -389,7 +390,7 @@ func resourceS3BucketRead(ctx context.Context, d *schema.ResourceData, meta inte
 	config := meta.(*cfg.Config)
 	client, err := config.S3Client(config.GetRegion(d))
 	if err != nil {
-		return diag.Errorf("error creating OpenTelekomCloud S3 client: %s", err)
+		return fmterr.Errorf("error creating OpenTelekomCloud S3 client: %s", err)
 	}
 
 	_, err = retryOnAwsCode("NoSuchBucket", func() (interface{}, error) {
@@ -405,7 +406,7 @@ func resourceS3BucketRead(ctx context.Context, d *schema.ResourceData, meta inte
 		} else {
 			// some of the AWS SDK's errors can be empty strings, so let's add
 			// some additional context.
-			return diag.Errorf("error reading S3 bucket %s: %s", d.Id(), err)
+			return fmterr.Errorf("error reading S3 bucket %s: %s", d.Id(), err)
 		}
 	}
 
@@ -437,7 +438,7 @@ func resourceS3BucketRead(ctx context.Context, d *schema.ResourceData, meta inte
 			} else {
 				policy, err := common.NormalizeJsonString(*v)
 				if err != nil {
-					return diag.Errorf("policy contains an invalid JSON: %w", err)
+					return fmterr.Errorf("policy contains an invalid JSON: %w", err)
 				}
 				d.Set("policy", policy)
 			}
@@ -525,7 +526,7 @@ func resourceS3BucketRead(ctx context.Context, d *schema.ResourceData, meta inte
 		if v := ws.RoutingRules; v != nil {
 			rr, err := normalizeRoutingRules(v)
 			if err != nil {
-				return diag.Errorf("error while marshaling routing rules: %s", err)
+				return fmterr.Errorf("error while marshaling routing rules: %s", err)
 			}
 			w["routing_rules"] = rr
 		}
@@ -779,7 +780,7 @@ func resourceS3BucketDelete(ctx context.Context, d *schema.ResourceData, meta in
 	config := meta.(*cfg.Config)
 	s3conn, err := config.S3Client(config.GetRegion(d))
 	if err != nil {
-		return diag.Errorf("error creating OpenTelekomCloud S3 client: %s", err)
+		return fmterr.Errorf("error creating OpenTelekomCloud S3 client: %s", err)
 	}
 
 	log.Printf("[DEBUG] S3 Delete Bucket: %s", d.Id())
@@ -801,7 +802,7 @@ func resourceS3BucketDelete(ctx context.Context, d *schema.ResourceData, meta in
 				)
 
 				if err != nil {
-					return diag.Errorf("error S3 Bucket list Object Versions err: %s", err)
+					return fmterr.Errorf("error S3 Bucket list Object Versions err: %s", err)
 				}
 
 				objectsToDelete := make([]*s3.ObjectIdentifier, 0)
@@ -835,14 +836,14 @@ func resourceS3BucketDelete(ctx context.Context, d *schema.ResourceData, meta in
 				_, err = s3conn.DeleteObjects(params)
 
 				if err != nil {
-					return diag.Errorf("error S3 Bucket force_destroy error deleting: %s", err)
+					return fmterr.Errorf("error S3 Bucket force_destroy error deleting: %s", err)
 				}
 
 				// this line recourses until all objects are deleted or an error is returned
 				return resourceS3BucketDelete(ctx, d, meta)
 			}
 		}
-		return diag.Errorf("error deleting S3 Bucket: %s %q", err, d.Get("bucket").(string))
+		return fmterr.Errorf("error deleting S3 Bucket: %s %q", err, d.Get("bucket").(string))
 	}
 	return nil
 }

@@ -9,12 +9,13 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
-	"github.com/opentelekomcloud/gophertelekomcloud"
+	golangsdk "github.com/opentelekomcloud/gophertelekomcloud"
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/networking/v2/extensions/fwaas_v2/firewall_groups"
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/networking/v2/extensions/fwaas_v2/routerinsertion"
 
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common"
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common/cfg"
+	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common/fmterr"
 )
 
 func ResourceFWFirewallGroupV2() *schema.Resource {
@@ -88,7 +89,7 @@ func resourceFWFirewallGroupV2Create(ctx context.Context, d *schema.ResourceData
 	config := meta.(*cfg.Config)
 	networkingClient, err := config.NetworkingV2Client(config.GetRegion(d))
 	if err != nil {
-		return diag.Errorf("Error creating OpenTelekomCloud networking client: %s", err)
+		return fmterr.Errorf("Error creating OpenTelekomCloud networking client: %s", err)
 	}
 
 	var createOpts firewall_groups.CreateOptsBuilder
@@ -153,7 +154,7 @@ func resourceFWFirewallGroupV2Read(ctx context.Context, d *schema.ResourceData, 
 	config := meta.(*cfg.Config)
 	networkingClient, err := config.NetworkingV2Client(config.GetRegion(d))
 	if err != nil {
-		return diag.Errorf("Error creating OpenTelekomCloud networking client: %s", err)
+		return fmterr.Errorf("Error creating OpenTelekomCloud networking client: %s", err)
 	}
 
 	var firewall_group FirewallGroup
@@ -171,7 +172,7 @@ func resourceFWFirewallGroupV2Read(ctx context.Context, d *schema.ResourceData, 
 	d.Set("admin_state_up", firewall_group.AdminStateUp)
 	d.Set("tenant_id", firewall_group.TenantID)
 	if err := d.Set("ports", firewall_group.PortIDs); err != nil {
-		return diag.Errorf("[DEBUG] Error saving ports to state for OpenTelekomCloud firewall group (%s): %s", d.Id(), err)
+		return fmterr.Errorf("[DEBUG] Error saving ports to state for OpenTelekomCloud firewall group (%s): %s", d.Id(), err)
 	}
 	d.Set("region", config.GetRegion(d))
 
@@ -182,7 +183,7 @@ func resourceFWFirewallGroupV2Update(ctx context.Context, d *schema.ResourceData
 	config := meta.(*cfg.Config)
 	networkingClient, err := config.NetworkingV2Client(config.GetRegion(d))
 	if err != nil {
-		return diag.Errorf("Error creating OpenTelekomCloud networking client: %s", err)
+		return fmterr.Errorf("Error creating OpenTelekomCloud networking client: %s", err)
 	}
 
 	// PolicyID is required
@@ -248,7 +249,7 @@ func resourceFWFirewallGroupV2Delete(ctx context.Context, d *schema.ResourceData
 	config := meta.(*cfg.Config)
 	networkingClient, err := config.NetworkingV2Client(config.GetRegion(d))
 	if err != nil {
-		return diag.Errorf("Error creating OpenTelekomCloud networking client: %s", err)
+		return fmterr.Errorf("Error creating OpenTelekomCloud networking client: %s", err)
 	}
 
 	// Ensure the firewall group was fully created/updated before being deleted.

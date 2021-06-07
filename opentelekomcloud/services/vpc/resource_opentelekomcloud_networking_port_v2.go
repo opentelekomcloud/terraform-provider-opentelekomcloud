@@ -11,7 +11,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
-	"github.com/opentelekomcloud/gophertelekomcloud"
+	golangsdk "github.com/opentelekomcloud/gophertelekomcloud"
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/networking/v2/extensions/portsecurity"
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/helper/hashcode"
 
@@ -19,6 +19,7 @@ import (
 
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common"
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common/cfg"
+	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common/fmterr"
 )
 
 func ResourceNetworkingPortV2() *schema.Resource {
@@ -156,7 +157,7 @@ func resourceNetworkingPortV2Create(ctx context.Context, d *schema.ResourceData,
 	config := meta.(*cfg.Config)
 	client, err := config.NetworkingV2Client(config.GetRegion(d))
 	if err != nil {
-		return diag.Errorf("error creating OpenTelekomCloud NetworkingV2 client: %w", err)
+		return fmterr.Errorf("error creating OpenTelekomCloud NetworkingV2 client: %w", err)
 	}
 
 	asu, id := ExtractValFromNid(d.Get("network_id").(string))
@@ -171,7 +172,7 @@ func resourceNetworkingPortV2Create(ctx context.Context, d *schema.ResourceData,
 
 	// Check and make sure an invalid security group configuration wasn't given.
 	if noSecurityGroups && len(securityGroups) > 0 {
-		return diag.Errorf("cannot have both no_security_groups and security_group_ids set")
+		return fmterr.Errorf("cannot have both no_security_groups and security_group_ids set")
 	}
 
 	createOpts := PortCreateOpts{
@@ -217,7 +218,7 @@ func resourceNetworkingPortV2Create(ctx context.Context, d *schema.ResourceData,
 	log.Printf("[DEBUG] Create Options: %#v", finalCreateOpts)
 	p, err := ports.Create(client, finalCreateOpts).Extract()
 	if err != nil {
-		return diag.Errorf("error creating OpenTelekomCloud Neutron port: %w", err)
+		return fmterr.Errorf("error creating OpenTelekomCloud Neutron port: %w", err)
 	}
 	log.Printf("[INFO] Network ID: %s", p.ID)
 
@@ -233,7 +234,7 @@ func resourceNetworkingPortV2Create(ctx context.Context, d *schema.ResourceData,
 
 	_, err = stateConf.WaitForState()
 	if err != nil {
-		return diag.Errorf("error creating OpenTelekomCloud Neutron port: %w", err)
+		return fmterr.Errorf("error creating OpenTelekomCloud Neutron port: %w", err)
 	}
 
 	d.SetId(p.ID)
@@ -245,7 +246,7 @@ func resourceNetworkingPortV2Read(ctx context.Context, d *schema.ResourceData, m
 	config := meta.(*cfg.Config)
 	client, err := config.NetworkingV2Client(config.GetRegion(d))
 	if err != nil {
-		return diag.Errorf("error creating OpenTelekomCloud NetworkingV2 client: %w", err)
+		return fmterr.Errorf("error creating OpenTelekomCloud NetworkingV2 client: %w", err)
 	}
 
 	var port portWithPortSecurityExtensions
@@ -305,7 +306,7 @@ func resourceNetworkingPortV2Update(ctx context.Context, d *schema.ResourceData,
 	config := meta.(*cfg.Config)
 	client, err := config.NetworkingV2Client(config.GetRegion(d))
 	if err != nil {
-		return diag.Errorf("error creating OpenTelekomCloud NetworkingV2 client: %w", err)
+		return fmterr.Errorf("error creating OpenTelekomCloud NetworkingV2 client: %w", err)
 	}
 
 	noSecurityGroups := d.Get("no_security_groups").(bool)
@@ -384,7 +385,7 @@ func resourceNetworkingPortV2Update(ctx context.Context, d *schema.ResourceData,
 
 		_, err = ports.Update(client, d.Id(), finalUpdateOpts).Extract()
 		if err != nil {
-			return diag.Errorf("error updating OpenTelekomCloud Neutron port: %w", err)
+			return fmterr.Errorf("error updating OpenTelekomCloud Neutron port: %w", err)
 		}
 	}
 	return resourceNetworkingPortV2Read(ctx, d, meta)
@@ -394,7 +395,7 @@ func resourceNetworkingPortV2Delete(ctx context.Context, d *schema.ResourceData,
 	config := meta.(*cfg.Config)
 	client, err := config.NetworkingV2Client(config.GetRegion(d))
 	if err != nil {
-		return diag.Errorf("error creating OpenTelekomCloud NetworkingV2 client: %w", err)
+		return fmterr.Errorf("error creating OpenTelekomCloud NetworkingV2 client: %w", err)
 	}
 
 	stateConf := &resource.StateChangeConf{
@@ -408,7 +409,7 @@ func resourceNetworkingPortV2Delete(ctx context.Context, d *schema.ResourceData,
 
 	_, err = stateConf.WaitForState()
 	if err != nil {
-		return diag.Errorf("error deleting OpenTelekomCloud Neutron port: %w", err)
+		return fmterr.Errorf("error deleting OpenTelekomCloud Neutron port: %w", err)
 	}
 
 	d.SetId("")

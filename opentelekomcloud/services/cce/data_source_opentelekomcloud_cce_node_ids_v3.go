@@ -8,6 +8,7 @@ import (
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/cce/v3/nodes"
 
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common/cfg"
+	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common/fmterr"
 )
 
 func DataSourceCceNodeIdsV3() *schema.Resource {
@@ -39,17 +40,17 @@ func dataSourceCceNodeIdsV3Read(ctx context.Context, d *schema.ResourceData, met
 	config := meta.(*cfg.Config)
 	cceClient, err := config.CceV3Client(config.GetRegion(d))
 	if err != nil {
-		return diag.Errorf("unable to create opentelekomcloud CCE client : %s", err)
+		return fmterr.Errorf("unable to create opentelekomcloud CCE client : %s", err)
 	}
 
 	var listOpts nodes.ListOpts
 	refinedNodes, err := nodes.List(cceClient, d.Get("cluster_id").(string), listOpts)
 	if err != nil {
-		return diag.Errorf("unable to retrieve Nodes: %s", err)
+		return fmterr.Errorf("unable to retrieve Nodes: %s", err)
 	}
 
 	if len(refinedNodes) < 1 {
-		return diag.Errorf("your query returned no results. Please change your search criteria and try again")
+		return fmterr.Errorf("your query returned no results. Please change your search criteria and try again")
 	}
 
 	Nodes := make([]string, 0)

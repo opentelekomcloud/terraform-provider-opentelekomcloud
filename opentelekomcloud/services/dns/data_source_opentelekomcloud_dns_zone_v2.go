@@ -14,6 +14,7 @@ import (
 
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common"
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common/cfg"
+	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common/fmterr"
 )
 
 func DataSourceDNSZoneV2() *schema.Resource {
@@ -171,21 +172,21 @@ func dataSourceDNSZoneV2Read(ctx context.Context, d *schema.ResourceData, meta i
 
 	pages, err := zones.List(dnsClient, listOpts).AllPages()
 	if err != nil {
-		return diag.Errorf("unable to retrieve zones: %s", err)
+		return fmterr.Errorf("unable to retrieve zones: %s", err)
 	}
 
 	allZones, err := zones.ExtractZones(pages)
 	if err != nil {
-		return diag.Errorf("unable to extract zones: %s", err)
+		return fmterr.Errorf("unable to extract zones: %s", err)
 	}
 
 	if len(allZones) < 1 {
-		return diag.Errorf("your query returned no results." +
+		return fmterr.Errorf("your query returned no results." +
 			"Please change your search criteria and try again")
 	}
 
 	if len(allZones) > 1 {
-		return diag.Errorf("your query returned more than one result." +
+		return fmterr.Errorf("your query returned more than one result." +
 			" Please try a more specific search criteria")
 	}
 

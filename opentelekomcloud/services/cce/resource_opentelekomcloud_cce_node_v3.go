@@ -11,7 +11,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
-	"github.com/opentelekomcloud/gophertelekomcloud"
+	golangsdk "github.com/opentelekomcloud/gophertelekomcloud"
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/cce/v3/clusters"
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/cce/v3/nodes"
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/common/tags"
@@ -21,6 +21,7 @@ import (
 
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common"
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common/cfg"
+	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common/fmterr"
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/services/vpc"
 )
 
@@ -359,7 +360,7 @@ func resourceCCENodeV3Create(ctx context.Context, d *schema.ResourceData, meta i
 	config := meta.(*cfg.Config)
 	nodeClient, err := config.CceV3Client(config.GetRegion(d))
 	if err != nil {
-		return diag.Errorf("error creating OpenTelekomCloud CCE Node client: %s", err)
+		return fmterr.Errorf("error creating OpenTelekomCloud CCE Node client: %s", err)
 	}
 
 	var base64PreInstall, base64PostInstall string
@@ -442,23 +443,23 @@ func resourceCCENodeV3Create(ctx context.Context, d *schema.ResourceData, meta i
 		if _, ok := err.(golangsdk.ErrDefault403); ok {
 			retryNode, err := recursiveCreate(nodeClient, createOpts, clusterId, 403)
 			if err == "fail" {
-				return diag.Errorf("error creating OpenTelekomCloud Node")
+				return fmterr.Errorf("error creating OpenTelekomCloud Node")
 			}
 			s = retryNode
 		} else {
-			return diag.Errorf("error creating OpenTelekomCloud Node: %s", err)
+			return fmterr.Errorf("error creating OpenTelekomCloud Node: %s", err)
 		}
 	}
 
 	job, err := nodes.GetJobDetails(nodeClient, s.Status.JobID).ExtractJob()
 	if err != nil {
-		return diag.Errorf("error fetching OpenTelekomCloud Job Details: %s", err)
+		return fmterr.Errorf("error fetching OpenTelekomCloud Job Details: %s", err)
 	}
 	jobResourceId := job.Spec.SubJobs[0].Metadata.ID
 
 	subJob, err := nodes.GetJobDetails(nodeClient, jobResourceId).ExtractJob()
 	if err != nil {
-		return diag.Errorf("error fetching OpenTelekomCloud Job Details: %s", err)
+		return fmterr.Errorf("error fetching OpenTelekomCloud Job Details: %s", err)
 	}
 
 	var nodeId string
@@ -480,7 +481,7 @@ func resourceCCENodeV3Create(ctx context.Context, d *schema.ResourceData, meta i
 	}
 	_, err = stateConf.WaitForState()
 	if err != nil {
-		return diag.Errorf("error creating OpenTelekomCloud CCE Node: %s", err)
+		return fmterr.Errorf("error creating OpenTelekomCloud CCE Node: %s", err)
 	}
 
 	d.SetId(nodeId)
@@ -491,7 +492,7 @@ func resourceCCENodeV3Read(ctx context.Context, d *schema.ResourceData, meta int
 	config := meta.(*cfg.Config)
 	nodeClient, err := config.CceV3Client(config.GetRegion(d))
 	if err != nil {
-		return diag.Errorf("error creating OpenTelekomCloud CCE Node client: %s", err)
+		return fmterr.Errorf("error creating OpenTelekomCloud CCE Node client: %s", err)
 	}
 	clusterId := d.Get("cluster_id").(string)
 	node, err := nodes.Get(nodeClient, clusterId, d.Id()).Extract()
@@ -500,7 +501,7 @@ func resourceCCENodeV3Read(ctx context.Context, d *schema.ResourceData, meta int
 			d.SetId("")
 			return nil
 		}
-		return diag.Errorf("error retrieving OpenTelekomCloud Node: %s", err)
+		return fmterr.Errorf("error retrieving OpenTelekomCloud Node: %s", err)
 	}
 
 	me := &multierror.Error{}
@@ -515,7 +516,7 @@ func resourceCCENodeV3Read(ctx context.Context, d *schema.ResourceData, meta int
 		d.Set("k8s_tags", node.Spec.K8sTags),
 	)
 	if err := me.ErrorOrNil(); err != nil {
-		return diag.Errorf("[DEBUG] Error saving main conf to state for OpenTelekomCloud Node (%s): %s", d.Id(), err)
+		return fmterr.Errorf("[DEBUG] Error saving main conf to state for OpenTelekomCloud Node (%s): %s", d.Id(), err)
 	}
 
 	var volumes []map[string]interface{}
@@ -527,7 +528,7 @@ func resourceCCENodeV3Read(ctx context.Context, d *schema.ResourceData, meta int
 		volumes = append(volumes, volume)
 	}
 	if err := d.Set("data_volumes", volumes); err != nil {
-		return diag.Errorf("[DEBUG] Error saving dataVolumes to state for OpenTelekomCloud Node (%s): %s", d.Id(), err)
+		return fmterr.Errorf("[DEBUG] Error saving dataVolumes to state for OpenTelekomCloud Node (%s): %s", d.Id(), err)
 	}
 
 	rootVolume := []map[string]interface{}{
@@ -539,7 +540,7 @@ func resourceCCENodeV3Read(ctx context.Context, d *schema.ResourceData, meta int
 	}
 
 	if err := d.Set("root_volume", rootVolume); err != nil {
-		return diag.Errorf("[DEBUG] Error saving root Volume to state for OpenTelekomCloud Node (%s): %s", d.Id(), err)
+		return fmterr.Errorf("[DEBUG] Error saving root Volume to state for OpenTelekomCloud Node (%s): %s", d.Id(), err)
 	}
 
 	// set computed attributes
@@ -551,13 +552,13 @@ func resourceCCENodeV3Read(ctx context.Context, d *schema.ResourceData, meta int
 		d.Set("status", node.Status.Phase),
 	)
 	if err := me.ErrorOrNil(); err != nil {
-		return diag.Errorf("[DEBUG] Error saving IP conf to state for OpenTelekomCloud Node (%s): %s", d.Id(), err)
+		return fmterr.Errorf("[DEBUG] Error saving IP conf to state for OpenTelekomCloud Node (%s): %s", d.Id(), err)
 	}
 
 	// fetch tags from ECS instance
 	computeClient, err := config.ComputeV1Client(config.GetRegion(d))
 	if err != nil {
-		return diag.Errorf("error creating OpenTelekomCloud compute client: %s", err)
+		return fmterr.Errorf("error creating OpenTelekomCloud compute client: %s", err)
 	}
 
 	resourceTags, err := tags.Get(computeClient, "cloudservers", serverId).Extract()
@@ -566,14 +567,14 @@ func resourceCCENodeV3Read(ctx context.Context, d *schema.ResourceData, meta int
 			d.SetId("")
 			return nil
 		}
-		return diag.Errorf("error fetching OpenTelekomCloud instance tags: %s", err)
+		return fmterr.Errorf("error fetching OpenTelekomCloud instance tags: %s", err)
 	}
 
 	tagMap := common.TagsToMap(resourceTags)
 	// ignore "CCE-Dynamic-Provisioning-Node"
 	delete(tagMap, "CCE-Dynamic-Provisioning-Node")
 	if err := d.Set("tags", tagMap); err != nil {
-		return diag.Errorf("error saving tags of CCE node: %s", err)
+		return fmterr.Errorf("error saving tags of CCE node: %s", err)
 	}
 
 	return nil
@@ -583,7 +584,7 @@ func resourceCCENodeV3Update(ctx context.Context, d *schema.ResourceData, meta i
 	config := meta.(*cfg.Config)
 	nodeClient, err := config.CceV3Client(config.GetRegion(d))
 	if err != nil {
-		return diag.Errorf("error creating OpenTelekomCloud CCE client: %s", err)
+		return fmterr.Errorf("error creating OpenTelekomCloud CCE client: %s", err)
 	}
 
 	var updateOpts nodes.UpdateOpts
@@ -594,7 +595,7 @@ func resourceCCENodeV3Update(ctx context.Context, d *schema.ResourceData, meta i
 		clusterId := d.Get("cluster_id").(string)
 		_, err = nodes.Update(nodeClient, clusterId, d.Id(), updateOpts).Extract()
 		if err != nil {
-			return diag.Errorf("error updating OpenTelekomCloud CCE node: %s", err)
+			return fmterr.Errorf("error updating OpenTelekomCloud CCE node: %s", err)
 		}
 	}
 
@@ -602,13 +603,13 @@ func resourceCCENodeV3Update(ctx context.Context, d *schema.ResourceData, meta i
 	if d.HasChange("tags") {
 		computeClient, err := config.ComputeV1Client(config.GetRegion(d))
 		if err != nil {
-			return diag.Errorf("error creating OpenTelekomCloud compute client: %s", err)
+			return fmterr.Errorf("error creating OpenTelekomCloud compute client: %s", err)
 		}
 
 		serverId := d.Get("server_id").(string)
 		tagErr := common.UpdateResourceTags(computeClient, d, "cloudservers", serverId)
 		if tagErr != nil {
-			return diag.Errorf("error updating tags of CCE node %s: %s", d.Id(), tagErr)
+			return fmterr.Errorf("error updating tags of CCE node %s: %s", d.Id(), tagErr)
 		}
 	}
 
@@ -621,7 +622,7 @@ func resourceCCENodeV3Update(ctx context.Context, d *schema.ResourceData, meta i
 		config := meta.(*cfg.Config)
 		client, err := config.ComputeV2Client(config.GetRegion(d))
 		if err != nil {
-			return diag.Errorf("error creating OpenTelekomCloud ComputeV2 client: %s", err)
+			return fmterr.Errorf("error creating OpenTelekomCloud ComputeV2 client: %s", err)
 		}
 		floatingIp, err := getCCENodeV3FloatingIp(client, serverId)
 		if err != nil {
@@ -649,7 +650,7 @@ func resourceCCENodeV3Update(ctx context.Context, d *schema.ResourceData, meta i
 		serverId := d.Get("server_id").(string)
 		computeV2Client, err := config.ComputeV2Client(config.GetRegion(d))
 		if err != nil {
-			return diag.Errorf("error creating OpenTelekomCloud ComputeV2 client: %s", err)
+			return fmterr.Errorf("error creating OpenTelekomCloud ComputeV2 client: %s", err)
 		}
 		if len(newEipIds) == 0 {
 			if err := unbindCCENodeV3FloatingIP(computeV2Client, serverId, oldEipIds[0].(string)); err != nil {
@@ -671,12 +672,12 @@ func resourceCCENodeV3Delete(ctx context.Context, d *schema.ResourceData, meta i
 	config := meta.(*cfg.Config)
 	nodeClient, err := config.CceV3Client(config.GetRegion(d))
 	if err != nil {
-		return diag.Errorf("error creating OpenTelekomCloud CCE client: %s", err)
+		return fmterr.Errorf("error creating OpenTelekomCloud CCE client: %s", err)
 	}
 	clusterId := d.Get("cluster_id").(string)
 	err = nodes.Delete(nodeClient, clusterId, d.Id()).ExtractErr()
 	if err != nil {
-		return diag.Errorf("error deleting OpenTelekomCloud CCE Cluster: %s", err)
+		return fmterr.Errorf("error deleting OpenTelekomCloud CCE Cluster: %s", err)
 	}
 	stateConf := &resource.StateChangeConf{
 		Pending:    []string{"Deleting"},
@@ -689,7 +690,7 @@ func resourceCCENodeV3Delete(ctx context.Context, d *schema.ResourceData, meta i
 
 	_, err = stateConf.WaitForState()
 	if err != nil {
-		return diag.Errorf("error deleting OpenTelekomCloud CCE Node: %s", err)
+		return fmterr.Errorf("error deleting OpenTelekomCloud CCE Node: %s", err)
 	}
 
 	d.SetId("")

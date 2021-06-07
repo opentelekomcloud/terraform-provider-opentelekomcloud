@@ -17,6 +17,7 @@ import (
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/networking/v2/extensions/lbaas_v2/listeners"
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common"
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common/cfg"
+	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common/fmterr"
 )
 
 func ResourceCertificateV2() *schema.Resource {
@@ -93,7 +94,7 @@ func resourceCertificateV2Create(ctx context.Context, d *schema.ResourceData, me
 	config := meta.(*cfg.Config)
 	networkingClient, err := config.NetworkingV2Client(config.GetRegion(d))
 	if err != nil {
-		return diag.Errorf("error creating OpenTelekomCloud networking client: %s", err)
+		return fmterr.Errorf("error creating OpenTelekomCloud networking client: %s", err)
 	}
 
 	createOpts := certificates.CreateOpts{
@@ -108,7 +109,7 @@ func resourceCertificateV2Create(ctx context.Context, d *schema.ResourceData, me
 	log.Printf("[DEBUG] Create Options: %#v", createOpts)
 	c, err := certificates.Create(networkingClient, createOpts).Extract()
 	if err != nil {
-		return diag.Errorf("error creating Certificate: %s", err)
+		return fmterr.Errorf("error creating Certificate: %s", err)
 	}
 
 	// If all has been successful, set the ID on the resource
@@ -121,7 +122,7 @@ func resourceCertificateV2Read(ctx context.Context, d *schema.ResourceData, meta
 	config := meta.(*cfg.Config)
 	networkingClient, err := config.NetworkingV2Client(config.GetRegion(d))
 	if err != nil {
-		return diag.Errorf("error creating OpenTelekomCloud networking client: %s", err)
+		return fmterr.Errorf("error creating OpenTelekomCloud networking client: %s", err)
 	}
 
 	c, err := certificates.Get(networkingClient, d.Id()).Extract()
@@ -148,7 +149,7 @@ func resourceCertificateV2Update(ctx context.Context, d *schema.ResourceData, me
 	config := meta.(*cfg.Config)
 	networkingClient, err := config.NetworkingV2Client(config.GetRegion(d))
 	if err != nil {
-		return diag.Errorf("error creating OpenTelekomCloud networking client: %s", err)
+		return fmterr.Errorf("error creating OpenTelekomCloud networking client: %s", err)
 	}
 
 	var updateOpts certificates.UpdateOpts
@@ -179,7 +180,7 @@ func resourceCertificateV2Update(ctx context.Context, d *schema.ResourceData, me
 		return nil
 	})
 	if err != nil {
-		return diag.Errorf("error updating certificate %s: %s", d.Id(), err)
+		return fmterr.Errorf("error updating certificate %s: %s", d.Id(), err)
 	}
 
 	return resourceCertificateV2Read(ctx, d, meta)
@@ -189,7 +190,7 @@ func resourceCertificateV2Delete(ctx context.Context, d *schema.ResourceData, me
 	config := meta.(*cfg.Config)
 	client, err := config.NetworkingV2Client(config.GetRegion(d))
 	if err != nil {
-		return diag.Errorf("error creating OpenTelekomCloud networking client: %s", err)
+		return fmterr.Errorf("error creating OpenTelekomCloud networking client: %s", err)
 	}
 
 	log.Printf("[DEBUG] Deleting certificate %s", d.Id())

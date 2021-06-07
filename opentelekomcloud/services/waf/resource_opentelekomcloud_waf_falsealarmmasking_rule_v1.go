@@ -10,6 +10,7 @@ import (
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/waf/v1/falsealarmmasking_rules"
 
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common/cfg"
+	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common/fmterr"
 )
 
 func ResourceWafFalseAlarmMaskingRuleV1() *schema.Resource {
@@ -52,7 +53,7 @@ func resourceWafFalseAlarmMaskingRuleV1Create(ctx context.Context, d *schema.Res
 	wafClient, err := config.WafV1Client(config.GetRegion(d))
 
 	if err != nil {
-		return diag.Errorf("Error creating OpenTelekomcomCloud WAF Client: %s", err)
+		return fmterr.Errorf("Error creating OpenTelekomcomCloud WAF Client: %s", err)
 	}
 
 	createOpts := falsealarmmasking_rules.CreateOpts{
@@ -63,7 +64,7 @@ func resourceWafFalseAlarmMaskingRuleV1Create(ctx context.Context, d *schema.Res
 	policy_id := d.Get("policy_id").(string)
 	rule, err := falsealarmmasking_rules.Create(wafClient, policy_id, createOpts).Extract()
 	if err != nil {
-		return diag.Errorf("Error creating OpenTelekomcomCloud WAF False Alarm Masking Rule: %s", err)
+		return fmterr.Errorf("Error creating OpenTelekomcomCloud WAF False Alarm Masking Rule: %s", err)
 	}
 
 	log.Printf("[DEBUG] Waf falsealarmmasking rule created: %#v", rule)
@@ -76,13 +77,13 @@ func resourceWafFalseAlarmMaskingRuleV1Read(ctx context.Context, d *schema.Resou
 	config := meta.(*cfg.Config)
 	wafClient, err := config.WafV1Client(config.GetRegion(d))
 	if err != nil {
-		return diag.Errorf("Error creating OpenTelekomCloud WAF client: %s", err)
+		return fmterr.Errorf("Error creating OpenTelekomCloud WAF client: %s", err)
 	}
 	policy_id := d.Get("policy_id").(string)
 	rules, err := falsealarmmasking_rules.List(wafClient, policy_id).Extract()
 
 	if err != nil {
-		return diag.Errorf("Error retrieving OpenTelekomCloud Waf False Alarm Masking Rule: %s", err)
+		return fmterr.Errorf("Error retrieving OpenTelekomCloud Waf False Alarm Masking Rule: %s", err)
 	}
 	for _, r := range rules {
 		if r.Id == d.Id() {
@@ -102,13 +103,13 @@ func resourceWafFalseAlarmMaskingRuleV1Delete(ctx context.Context, d *schema.Res
 	config := meta.(*cfg.Config)
 	wafClient, err := config.WafV1Client(config.GetRegion(d))
 	if err != nil {
-		return diag.Errorf("Error creating OpenTelekomCloud WAF client: %s", err)
+		return fmterr.Errorf("Error creating OpenTelekomCloud WAF client: %s", err)
 	}
 
 	policy_id := d.Get("policy_id").(string)
 	err = falsealarmmasking_rules.Delete(wafClient, policy_id, d.Id()).ExtractErr()
 	if err != nil {
-		return diag.Errorf("Error deleting OpenTelekomCloud WAF False Alarm Masking Rule: %s", err)
+		return fmterr.Errorf("Error deleting OpenTelekomCloud WAF False Alarm Masking Rule: %s", err)
 	}
 
 	d.SetId("")

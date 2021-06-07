@@ -8,10 +8,11 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
-	"github.com/opentelekomcloud/gophertelekomcloud"
+	golangsdk "github.com/opentelekomcloud/gophertelekomcloud"
 
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common"
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common/cfg"
+	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common/fmterr"
 )
 
 func ResourceIdentityRoleV3() *schema.Resource {
@@ -92,19 +93,19 @@ func resourceIdentityRoleV3Create(ctx context.Context, d *schema.ResourceData, m
 	config := meta.(*cfg.Config)
 	client, err := config.IdentityV30Client()
 	if err != nil {
-		return diag.Errorf("error creating identity v3.0 client: %s", err)
+		return fmterr.Errorf("error creating identity v3.0 client: %s", err)
 	}
 
 	opts := resourceIdentityRoleV3UserInputParams(d)
 
 	r, err := sendIdentityRoleV3CreateRequest(d, opts, nil, client)
 	if err != nil {
-		return diag.Errorf("error creating IdentityRoleV3: %s", err)
+		return fmterr.Errorf("error creating IdentityRoleV3: %s", err)
 	}
 
 	id, err := common.NavigateValue(r, []string{"role", "id"}, nil)
 	if err != nil {
-		return diag.Errorf("error constructing id: %s", err)
+		return fmterr.Errorf("error constructing id: %s", err)
 	}
 	d.SetId(id.(string))
 
@@ -115,7 +116,7 @@ func resourceIdentityRoleV3Read(ctx context.Context, d *schema.ResourceData, met
 	config := meta.(*cfg.Config)
 	client, err := config.IdentityV30Client()
 	if err != nil {
-		return diag.Errorf("error creating identity v3.0 client: %s", err)
+		return fmterr.Errorf("error creating identity v3.0 client: %s", err)
 	}
 
 	res := make(map[string]interface{})
@@ -132,14 +133,14 @@ func resourceIdentityRoleV3Update(ctx context.Context, d *schema.ResourceData, m
 	config := meta.(*cfg.Config)
 	client, err := config.IdentityV30Client()
 	if err != nil {
-		return diag.Errorf("error creating identity v3.0 client: %s", err)
+		return fmterr.Errorf("error creating identity v3.0 client: %s", err)
 	}
 
 	opts := resourceIdentityRoleV3UserInputParams(d)
 
 	_, err = sendIdentityRoleV3UpdateRequest(d, opts, nil, client)
 	if err != nil {
-		return diag.Errorf("error updating (IdentityRoleV3: %v): %s", d.Id(), err)
+		return fmterr.Errorf("error updating (IdentityRoleV3: %v): %s", d.Id(), err)
 	}
 
 	return resourceIdentityRoleV3Read(ctx, d, meta)
@@ -149,7 +150,7 @@ func resourceIdentityRoleV3Delete(ctx context.Context, d *schema.ResourceData, m
 	config := meta.(*cfg.Config)
 	client, err := config.IdentityV30Client()
 	if err != nil {
-		return diag.Errorf("error creating identity v3.0 client: %s", err)
+		return fmterr.Errorf("error creating identity v3.0 client: %s", err)
 	}
 
 	url, err := common.ReplaceVars(d, "OS-ROLE/roles/{id}", nil)
@@ -167,7 +168,7 @@ func resourceIdentityRoleV3Delete(ctx context.Context, d *schema.ResourceData, m
 		MoreHeaders:  map[string]string{"Content-Type": "application/json"},
 	})
 	if r.Err != nil {
-		return diag.Errorf("error deleting Role %q: %s", d.Id(), r.Err)
+		return fmterr.Errorf("error deleting Role %q: %s", d.Id(), r.Err)
 	}
 
 	return nil

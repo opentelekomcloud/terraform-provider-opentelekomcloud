@@ -10,6 +10,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common/cfg"
+	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common/fmterr"
 )
 
 func DataSourceSFSFileSystemV2() *schema.Resource {
@@ -133,16 +134,16 @@ func dataSourceSFSFileSystemV2Read(ctx context.Context, d *schema.ResourceData, 
 
 	refinedSfs, err := shares.List(sfsClient, listOpts)
 	if err != nil {
-		return diag.Errorf("Unable to retrieve shares: %s", err)
+		return fmterr.Errorf("Unable to retrieve shares: %s", err)
 	}
 
 	if len(refinedSfs) < 1 {
-		return diag.Errorf("Your query returned no results. " +
+		return fmterr.Errorf("Your query returned no results. " +
 			"Please change your search criteria and try again.")
 	}
 
 	if len(refinedSfs) > 1 {
-		return diag.Errorf("Your query returned more than one result." +
+		return fmterr.Errorf("Your query returned more than one result." +
 			" Please try a more specific search criteria")
 	}
 

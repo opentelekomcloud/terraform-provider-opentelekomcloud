@@ -9,11 +9,12 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 
-	"github.com/opentelekomcloud/gophertelekomcloud"
+	golangsdk "github.com/opentelekomcloud/gophertelekomcloud"
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/networking/v2/extensions/snatrules"
 
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common"
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common/cfg"
+	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common/fmterr"
 )
 
 func ResourceNatSnatRuleV2() *schema.Resource {
@@ -70,11 +71,11 @@ func resourceNatSnatRuleV2Create(ctx context.Context, d *schema.ResourceData, me
 	_, cidr_ok := d.GetOk("cidr")
 
 	if !net_ok && !cidr_ok {
-		return diag.Errorf("Both network_id and cidr are empty, must specify one of them.")
+		return fmterr.Errorf("Both network_id and cidr are empty, must specify one of them.")
 	}
 	NatV2Client, err := config.NatV2Client(config.GetRegion(d))
 	if err != nil {
-		return diag.Errorf("Error creating OpenTelekomCloud nat client: %s", err)
+		return fmterr.Errorf("Error creating OpenTelekomCloud nat client: %s", err)
 	}
 
 	createOpts := &snatrules.CreateOpts{
@@ -88,7 +89,7 @@ func resourceNatSnatRuleV2Create(ctx context.Context, d *schema.ResourceData, me
 	log.Printf("[DEBUG] Create Options: %#v", createOpts)
 	snatRule, err := snatrules.Create(NatV2Client, createOpts).Extract()
 	if err != nil {
-		return diag.Errorf("Error creatting Snat Rule: %s", err)
+		return fmterr.Errorf("Error creatting Snat Rule: %s", err)
 	}
 
 	log.Printf("[DEBUG] Waiting for OpenTelekomCloud Snat Rule (%s) to become available.", snatRule.ID)
@@ -103,7 +104,7 @@ func resourceNatSnatRuleV2Create(ctx context.Context, d *schema.ResourceData, me
 
 	_, err = stateConf.WaitForState()
 	if err != nil {
-		return diag.Errorf("Error creating OpenTelekomCloud Snat Rule: %s", err)
+		return fmterr.Errorf("Error creating OpenTelekomCloud Snat Rule: %s", err)
 	}
 
 	d.SetId(snatRule.ID)
@@ -115,7 +116,7 @@ func resourceNatSnatRuleV2Read(ctx context.Context, d *schema.ResourceData, meta
 	config := meta.(*cfg.Config)
 	NatV2Client, err := config.NatV2Client(config.GetRegion(d))
 	if err != nil {
-		return diag.Errorf("Error creating OpenTelekomCloud nat client: %s", err)
+		return fmterr.Errorf("Error creating OpenTelekomCloud nat client: %s", err)
 	}
 
 	snatRule, err := snatrules.Get(NatV2Client, d.Id()).Extract()
@@ -138,7 +139,7 @@ func resourceNatSnatRuleV2Delete(ctx context.Context, d *schema.ResourceData, me
 	config := meta.(*cfg.Config)
 	NatV2Client, err := config.NatV2Client(config.GetRegion(d))
 	if err != nil {
-		return diag.Errorf("Error creating OpenTelekomCloud nat client: %s", err)
+		return fmterr.Errorf("Error creating OpenTelekomCloud nat client: %s", err)
 	}
 
 	stateConf := &resource.StateChangeConf{
@@ -152,7 +153,7 @@ func resourceNatSnatRuleV2Delete(ctx context.Context, d *schema.ResourceData, me
 
 	_, err = stateConf.WaitForState()
 	if err != nil {
-		return diag.Errorf("Error deleting OpenTelekomCloud Snat Rule: %s", err)
+		return fmterr.Errorf("Error deleting OpenTelekomCloud Snat Rule: %s", err)
 	}
 
 	d.SetId("")

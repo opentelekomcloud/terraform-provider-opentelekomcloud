@@ -9,6 +9,7 @@ import (
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/sdrs/v1/domains"
 
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common/cfg"
+	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common/fmterr"
 )
 
 func DataSourceSdrsDomainV1() *schema.Resource {
@@ -33,7 +34,7 @@ func dataSourceSdrsDomainV1Read(ctx context.Context, d *schema.ResourceData, met
 	config := meta.(*cfg.Config)
 	sdrsV1Client, err := config.SdrsV1Client(config.GetRegion(d))
 	if err != nil {
-		return diag.Errorf("Error creating SDRS client: %s", err)
+		return fmterr.Errorf("Error creating SDRS client: %s", err)
 	}
 
 	v, err := domains.Get(sdrsV1Client).Extract()
@@ -51,7 +52,7 @@ func dataSourceSdrsDomainV1Read(ctx context.Context, d *schema.ResourceData, met
 		filteredDomains = append(filteredDomains, dm)
 	}
 	if len(filteredDomains) < 1 {
-		return diag.Errorf("Your query returned no results. Please change your filters and try again.")
+		return fmterr.Errorf("Your query returned no results. Please change your filters and try again.")
 	}
 	dm := filteredDomains[0]
 	d.SetId(dm.Id)

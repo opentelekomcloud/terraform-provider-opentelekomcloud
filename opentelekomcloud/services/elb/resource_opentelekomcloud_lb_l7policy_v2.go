@@ -17,6 +17,7 @@ import (
 
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common"
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common/cfg"
+	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common/fmterr"
 )
 
 func ResourceL7PolicyV2() *schema.Resource {
@@ -108,7 +109,7 @@ func resourceL7PolicyV2Create(ctx context.Context, d *schema.ResourceData, meta 
 	config := meta.(*cfg.Config)
 	lbClient, err := config.NetworkingV2Client(config.GetRegion(d))
 	if err != nil {
-		return diag.Errorf("Error creating OpenTelekomCloud networking client: %s", err)
+		return fmterr.Errorf("Error creating OpenTelekomCloud networking client: %s", err)
 	}
 
 	// Assign some required variables for use in creation.
@@ -120,7 +121,7 @@ func resourceL7PolicyV2Create(ctx context.Context, d *schema.ResourceData, meta 
 	// Ensure the right combination of options have been specified.
 	err = checkL7PolicyAction(action, redirectListenerID, redirectPoolID)
 	if err != nil {
-		return diag.Errorf("Unable to create L7 Policy: %s", err)
+		return fmterr.Errorf("Unable to create L7 Policy: %s", err)
 	}
 
 	adminStateUp := d.Get("admin_state_up").(bool)
@@ -147,7 +148,7 @@ func resourceL7PolicyV2Create(ctx context.Context, d *schema.ResourceData, meta 
 	if redirectPoolID != "" {
 		pool, err := pools.Get(lbClient, redirectPoolID).Extract()
 		if err != nil {
-			return diag.Errorf("Unable to retrieve %s: %s", redirectPoolID, err)
+			return fmterr.Errorf("Unable to retrieve %s: %s", redirectPoolID, err)
 		}
 
 		err = waitForLBV2Pool(lbClient, pool.ID, "ACTIVE", lbPendingStatuses, timeout)
@@ -159,7 +160,7 @@ func resourceL7PolicyV2Create(ctx context.Context, d *schema.ResourceData, meta 
 	// Get a clean copy of the parent listener.
 	parentListener, err := listeners.Get(lbClient, listenerID).Extract()
 	if err != nil {
-		return diag.Errorf("Unable to retrieve listener %s: %s", listenerID, err)
+		return fmterr.Errorf("Unable to retrieve listener %s: %s", listenerID, err)
 	}
 
 	// Wait for parent Listener to become active before continuing.
@@ -179,7 +180,7 @@ func resourceL7PolicyV2Create(ctx context.Context, d *schema.ResourceData, meta 
 	})
 
 	if err != nil {
-		return diag.Errorf("Error creating L7 Policy: %s", err)
+		return fmterr.Errorf("Error creating L7 Policy: %s", err)
 	}
 
 	// Wait for L7 Policy to become active before continuing
@@ -197,7 +198,7 @@ func resourceL7PolicyV2Read(ctx context.Context, d *schema.ResourceData, meta in
 	config := meta.(*cfg.Config)
 	lbClient, err := config.NetworkingV2Client(config.GetRegion(d))
 	if err != nil {
-		return diag.Errorf("Error creating OpenTelekomCloud networking client: %s", err)
+		return fmterr.Errorf("Error creating OpenTelekomCloud networking client: %s", err)
 	}
 
 	l7Policy, err := l7policies.Get(lbClient, d.Id()).Extract()
@@ -224,7 +225,7 @@ func resourceL7PolicyV2Update(ctx context.Context, d *schema.ResourceData, meta 
 	config := meta.(*cfg.Config)
 	lbClient, err := config.NetworkingV2Client(config.GetRegion(d))
 	if err != nil {
-		return diag.Errorf("Error creating OpenTelekomCloud networking client: %s", err)
+		return fmterr.Errorf("Error creating OpenTelekomCloud networking client: %s", err)
 	}
 
 	// Assign some required variables for use in updating.
@@ -264,7 +265,7 @@ func resourceL7PolicyV2Update(ctx context.Context, d *schema.ResourceData, meta 
 	if redirectPoolID != "" {
 		pool, err := pools.Get(lbClient, redirectPoolID).Extract()
 		if err != nil {
-			return diag.Errorf("Unable to retrieve %s: %s", redirectPoolID, err)
+			return fmterr.Errorf("Unable to retrieve %s: %s", redirectPoolID, err)
 		}
 
 		err = waitForLBV2Pool(lbClient, pool.ID, "ACTIVE", lbPendingStatuses, timeout)
@@ -276,13 +277,13 @@ func resourceL7PolicyV2Update(ctx context.Context, d *schema.ResourceData, meta 
 	// Get a clean copy of the parent listener.
 	parentListener, err := listeners.Get(lbClient, listenerID).Extract()
 	if err != nil {
-		return diag.Errorf("Unable to retrieve parent listener %s: %s", listenerID, err)
+		return fmterr.Errorf("Unable to retrieve parent listener %s: %s", listenerID, err)
 	}
 
 	// Get a clean copy of the L7 Policy.
 	l7Policy, err := l7policies.Get(lbClient, d.Id()).Extract()
 	if err != nil {
-		return diag.Errorf("Unable to retrieve L7 Policy: %s: %s", d.Id(), err)
+		return fmterr.Errorf("Unable to retrieve L7 Policy: %s: %s", d.Id(), err)
 	}
 
 	// Wait for parent Listener to become active before continuing.
@@ -307,7 +308,7 @@ func resourceL7PolicyV2Update(ctx context.Context, d *schema.ResourceData, meta 
 	})
 
 	if err != nil {
-		return diag.Errorf("Unable to update L7 Policy %s: %s", d.Id(), err)
+		return fmterr.Errorf("Unable to update L7 Policy %s: %s", d.Id(), err)
 	}
 
 	// Wait for L7 Policy to become active before continuing
@@ -323,7 +324,7 @@ func resourceL7PolicyV2Delete(ctx context.Context, d *schema.ResourceData, meta 
 	config := meta.(*cfg.Config)
 	lbClient, err := config.NetworkingV2Client(config.GetRegion(d))
 	if err != nil {
-		return diag.Errorf("Error creating OpenTelekomCloud networking client: %s", err)
+		return fmterr.Errorf("Error creating OpenTelekomCloud networking client: %s", err)
 	}
 
 	timeout := d.Timeout(schema.TimeoutDelete)
@@ -332,7 +333,7 @@ func resourceL7PolicyV2Delete(ctx context.Context, d *schema.ResourceData, meta 
 	// Get a clean copy of the listener.
 	listener, err := listeners.Get(lbClient, listenerID).Extract()
 	if err != nil {
-		return diag.Errorf("Unable to retrieve parent listener (%s) for the L7 Policy: %s", listenerID, err)
+		return fmterr.Errorf("Unable to retrieve parent listener (%s) for the L7 Policy: %s", listenerID, err)
 	}
 
 	// Get a clean copy of the L7 Policy.

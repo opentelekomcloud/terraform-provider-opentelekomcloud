@@ -8,10 +8,11 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
-	"github.com/opentelekomcloud/gophertelekomcloud"
+	golangsdk "github.com/opentelekomcloud/gophertelekomcloud"
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/deh/v1/hosts"
 
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common/cfg"
+	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common/fmterr"
 )
 
 func ResourceDeHHostV1() *schema.Resource {
@@ -130,7 +131,7 @@ func resourceDeHHostV1Create(ctx context.Context, d *schema.ResourceData, meta i
 	dehClient, err := config.DehV1Client(config.GetRegion(d))
 
 	if err != nil {
-		return diag.Errorf("Error creating OpenTelekomcomCloud DeH Client: %s", err)
+		return fmterr.Errorf("Error creating OpenTelekomcomCloud DeH Client: %s", err)
 	}
 
 	allocateOpts := hosts.AllocateOpts{
@@ -144,7 +145,7 @@ func resourceDeHHostV1Create(ctx context.Context, d *schema.ResourceData, meta i
 	allocate, err := hosts.Allocate(dehClient, allocateOpts).ExtractHost()
 
 	if err != nil {
-		return diag.Errorf("Error creating OpenTelekomcomCloud Dedicated Host: %s", err)
+		return fmterr.Errorf("Error creating OpenTelekomcomCloud Dedicated Host: %s", err)
 	}
 	d.SetId(allocate.AllocatedHostIds[0])
 
@@ -160,7 +161,7 @@ func resourceDeHHostV1Create(ctx context.Context, d *schema.ResourceData, meta i
 	}
 	_, Stateerr := stateConf.WaitForState()
 	if Stateerr != nil {
-		return diag.Errorf("Error creating OpenTelekomCloud Dedicated Host : %s", Stateerr)
+		return fmterr.Errorf("Error creating OpenTelekomCloud Dedicated Host : %s", Stateerr)
 	}
 
 	return resourceDeHHostV1Read(ctx, d, meta)
@@ -171,7 +172,7 @@ func resourceDeHHostV1Read(ctx context.Context, d *schema.ResourceData, meta int
 	config := meta.(*cfg.Config)
 	dehClient, err := config.DehV1Client(config.GetRegion(d))
 	if err != nil {
-		return diag.Errorf("Error creating OpenTelekomCloud DeH client: %s", err)
+		return fmterr.Errorf("Error creating OpenTelekomCloud DeH client: %s", err)
 	}
 	n, err := hosts.Get(dehClient, d.Id()).Extract()
 
@@ -181,7 +182,7 @@ func resourceDeHHostV1Read(ctx context.Context, d *schema.ResourceData, meta int
 			return nil
 		}
 
-		return diag.Errorf("Error retrieving OpenTelekomCloud Dedicated Host: %s", err)
+		return fmterr.Errorf("Error retrieving OpenTelekomCloud Dedicated Host: %s", err)
 	}
 
 	d.Set("id", n.ID)
@@ -209,7 +210,7 @@ func resourceDeHHostV1Update(ctx context.Context, d *schema.ResourceData, meta i
 	config := meta.(*cfg.Config)
 	dehClient, err := config.DehV1Client(config.GetRegion(d))
 	if err != nil {
-		return diag.Errorf("Error creating OpenTelekomCloud DeH Client: %s", err)
+		return fmterr.Errorf("Error creating OpenTelekomCloud DeH Client: %s", err)
 	}
 	var updateOpts hosts.UpdateOpts
 
@@ -222,7 +223,7 @@ func resourceDeHHostV1Update(ctx context.Context, d *schema.ResourceData, meta i
 
 	_, err = hosts.Update(dehClient, d.Id(), updateOpts).Extract()
 	if err != nil {
-		return diag.Errorf("Error updating OpenTelekomCloud Dedicated Host: %s", err)
+		return fmterr.Errorf("Error updating OpenTelekomCloud Dedicated Host: %s", err)
 	}
 	return resourceDeHHostV1Read(ctx, d, meta)
 }
@@ -231,12 +232,12 @@ func resourceDeHHostV1Delete(ctx context.Context, d *schema.ResourceData, meta i
 	config := meta.(*cfg.Config)
 	dehClient, err := config.DehV1Client(config.GetRegion(d))
 	if err != nil {
-		return diag.Errorf("Error creating OpenTelekomCloud DeH client: %s", err)
+		return fmterr.Errorf("Error creating OpenTelekomCloud DeH client: %s", err)
 	}
 
 	result := hosts.Delete(dehClient, d.Id())
 	if result.Err != nil {
-		return diag.Errorf("Error deleting OpenTelekomCloud Dedicated Host: %s", err)
+		return fmterr.Errorf("Error deleting OpenTelekomCloud Dedicated Host: %s", err)
 	}
 
 	stateConf := &resource.StateChangeConf{
@@ -249,7 +250,7 @@ func resourceDeHHostV1Delete(ctx context.Context, d *schema.ResourceData, meta i
 	}
 	_, err = stateConf.WaitForState()
 	if err != nil {
-		return diag.Errorf("Error deleting OpenTelekomCloud Dedicated Host : %s", err)
+		return fmterr.Errorf("Error deleting OpenTelekomCloud Dedicated Host : %s", err)
 	}
 	d.SetId("")
 	return nil

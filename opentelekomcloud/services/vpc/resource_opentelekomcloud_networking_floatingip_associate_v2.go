@@ -7,12 +7,13 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
-	"github.com/opentelekomcloud/gophertelekomcloud"
+	golangsdk "github.com/opentelekomcloud/gophertelekomcloud"
 
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/networking/v2/extensions/layer3/floatingips"
 
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common"
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common/cfg"
+	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common/fmterr"
 )
 
 func ResourceNetworkingFloatingIPAssociateV2() *schema.Resource {
@@ -51,7 +52,7 @@ func resourceNetworkingFloatingIPAssociateV2Create(ctx context.Context, d *schem
 	config := meta.(*cfg.Config)
 	networkingClient, err := config.NetworkingV2Client(config.GetRegion(d))
 	if err != nil {
-		return diag.Errorf("Error creating OpenTelekomCloud network client: %s", err)
+		return fmterr.Errorf("Error creating OpenTelekomCloud network client: %s", err)
 	}
 
 	floatingIP := d.Get("floating_ip").(string)
@@ -59,7 +60,7 @@ func resourceNetworkingFloatingIPAssociateV2Create(ctx context.Context, d *schem
 
 	floatingIPID, err := resourceNetworkingFloatingIPAssociateV2IP2ID(networkingClient, floatingIP)
 	if err != nil {
-		return diag.Errorf("Unable to get ID of floating IP: %s", err)
+		return fmterr.Errorf("Unable to get ID of floating IP: %s", err)
 	}
 
 	updateOpts := floatingips.UpdateOpts{
@@ -70,7 +71,7 @@ func resourceNetworkingFloatingIPAssociateV2Create(ctx context.Context, d *schem
 
 	_, err = floatingips.Update(networkingClient, floatingIPID, updateOpts).Extract()
 	if err != nil {
-		return diag.Errorf("Error associating floating IP %s to port %s: %s",
+		return fmterr.Errorf("Error associating floating IP %s to port %s: %s",
 			floatingIPID, portID, err)
 	}
 
@@ -83,7 +84,7 @@ func resourceNetworkingFloatingIPAssociateV2Read(ctx context.Context, d *schema.
 	config := meta.(*cfg.Config)
 	networkingClient, err := config.NetworkingV2Client(config.GetRegion(d))
 	if err != nil {
-		return diag.Errorf("Error creating OpenTelekomCloud network client: %s", err)
+		return fmterr.Errorf("Error creating OpenTelekomCloud network client: %s", err)
 	}
 
 	floatingIP, err := floatingips.Get(networkingClient, d.Id()).Extract()
@@ -102,7 +103,7 @@ func resourceNetworkingFloatingIPAssociateV2Delete(ctx context.Context, d *schem
 	config := meta.(*cfg.Config)
 	networkingClient, err := config.NetworkingV2Client(config.GetRegion(d))
 	if err != nil {
-		return diag.Errorf("Error creating OpenTelekomCloud network client: %s", err)
+		return fmterr.Errorf("Error creating OpenTelekomCloud network client: %s", err)
 	}
 
 	portID := d.Get("port_id").(string)
@@ -114,7 +115,7 @@ func resourceNetworkingFloatingIPAssociateV2Delete(ctx context.Context, d *schem
 
 	_, err = floatingips.Update(networkingClient, d.Id(), updateOpts).Extract()
 	if err != nil {
-		return diag.Errorf("Error disassociating floating IP %s from port %s: %s",
+		return fmterr.Errorf("Error disassociating floating IP %s from port %s: %s",
 			d.Id(), portID, err)
 	}
 

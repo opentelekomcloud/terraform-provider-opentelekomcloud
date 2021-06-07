@@ -14,6 +14,7 @@ import (
 
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common"
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common/cfg"
+	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common/fmterr"
 )
 
 func ResourceMemberV2() *schema.Resource {
@@ -100,7 +101,7 @@ func resourceMemberV2Create(ctx context.Context, d *schema.ResourceData, meta in
 	config := meta.(*cfg.Config)
 	networkingClient, err := config.NetworkingV2Client(config.GetRegion(d))
 	if err != nil {
-		return diag.Errorf("Error creating OpenTelekomCloud networking client: %s", err)
+		return fmterr.Errorf("Error creating OpenTelekomCloud networking client: %s", err)
 	}
 
 	adminStateUp := d.Get("admin_state_up").(bool)
@@ -139,7 +140,7 @@ func resourceMemberV2Create(ctx context.Context, d *schema.ResourceData, meta in
 	})
 
 	if err != nil {
-		return diag.Errorf("Error creating member: %s", err)
+		return fmterr.Errorf("Error creating member: %s", err)
 	}
 
 	// Wait for LB to become ACTIVE again
@@ -163,7 +164,7 @@ func resourceMemberV2Read(ctx context.Context, d *schema.ResourceData, meta inte
 	config := meta.(*cfg.Config)
 	networkingClient, err := config.NetworkingV2Client(config.GetRegion(d))
 	if err != nil {
-		return diag.Errorf("Error creating OpenTelekomCloud networking client: %s", err)
+		return fmterr.Errorf("Error creating OpenTelekomCloud networking client: %s", err)
 	}
 
 	member, err := pools.GetMember(networkingClient, d.Get("pool_id").(string), d.Id()).Extract()
@@ -190,7 +191,7 @@ func resourceMemberV2Update(ctx context.Context, d *schema.ResourceData, meta in
 	config := meta.(*cfg.Config)
 	networkingClient, err := config.NetworkingV2Client(config.GetRegion(d))
 	if err != nil {
-		return diag.Errorf("Error creating OpenTelekomCloud networking client: %s", err)
+		return fmterr.Errorf("Error creating OpenTelekomCloud networking client: %s", err)
 	}
 
 	var updateOpts pools.UpdateMemberOpts
@@ -223,7 +224,7 @@ func resourceMemberV2Update(ctx context.Context, d *schema.ResourceData, meta in
 	})
 
 	if err != nil {
-		return diag.Errorf("Unable to update member %s: %s", d.Id(), err)
+		return fmterr.Errorf("Unable to update member %s: %s", d.Id(), err)
 	}
 
 	err = waitForLBV2viaPool(networkingClient, poolID, "ACTIVE", timeout)
@@ -238,7 +239,7 @@ func resourceMemberV2Delete(ctx context.Context, d *schema.ResourceData, meta in
 	config := meta.(*cfg.Config)
 	networkingClient, err := config.NetworkingV2Client(config.GetRegion(d))
 	if err != nil {
-		return diag.Errorf("Error creating OpenTelekomCloud networking client: %s", err)
+		return fmterr.Errorf("Error creating OpenTelekomCloud networking client: %s", err)
 	}
 
 	// Wait for Pool to become active before continuing
@@ -258,7 +259,7 @@ func resourceMemberV2Delete(ctx context.Context, d *schema.ResourceData, meta in
 		return nil
 	})
 	if err != nil {
-		return diag.Errorf("Unable to delete member %s: %s", d.Id(), err)
+		return fmterr.Errorf("Unable to delete member %s: %s", d.Id(), err)
 	}
 
 	// Wait for LB to become ACTIVE

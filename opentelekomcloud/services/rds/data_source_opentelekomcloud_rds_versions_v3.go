@@ -7,11 +7,12 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
-	"github.com/opentelekomcloud/gophertelekomcloud"
+	golangsdk "github.com/opentelekomcloud/gophertelekomcloud"
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/rds/v3/datastores"
 
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common"
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common/cfg"
+	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common/fmterr"
 )
 
 func DataSourceRdsVersionsV3() *schema.Resource {
@@ -41,13 +42,13 @@ func dataSourceRdsVersionsV3Read(ctx context.Context, d *schema.ResourceData, me
 	config := meta.(*cfg.Config)
 	client, err := config.RdsV3Client(config.GetRegion(d))
 	if err != nil {
-		return diag.Errorf("error creating RDSv3 client: %s", err)
+		return fmterr.Errorf("error creating RDSv3 client: %s", err)
 	}
 	name := d.Get("database_name").(string)
 	stores, err := getRdsV3VersionList(client, name)
 
 	if err := d.Set("versions", stores); err != nil {
-		return diag.Errorf("error setting version list: %s", err)
+		return fmterr.Errorf("error setting version list: %s", err)
 	}
 	d.SetId(fmt.Sprintf("%s_versions", name))
 

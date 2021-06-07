@@ -9,10 +9,11 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
-	"github.com/opentelekomcloud/gophertelekomcloud"
+	golangsdk "github.com/opentelekomcloud/gophertelekomcloud"
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/csbs/v1/backup"
 
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common/cfg"
+	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common/fmterr"
 )
 
 func ResourceCSBSBackupV1() *schema.Resource {
@@ -196,7 +197,7 @@ func resourceCSBSBackupV1Create(ctx context.Context, d *schema.ResourceData, met
 	backupClient, err := config.CsbsV1Client(config.GetRegion(d))
 
 	if err != nil {
-		return diag.Errorf("Error creating csbs client: %s", err)
+		return fmterr.Errorf("Error creating csbs client: %s", err)
 	}
 
 	resourceID := d.Get("resource_id").(string)
@@ -213,7 +214,7 @@ func resourceCSBSBackupV1Create(ctx context.Context, d *schema.ResourceData, met
 
 	query, err := backup.QueryResourceBackupCapability(backupClient, queryOpts).ExtractQueryResponse()
 	if err != nil {
-		return diag.Errorf("Error querying resource backup capability: %s", err)
+		return fmterr.Errorf("Error querying resource backup capability: %s", err)
 	}
 
 	if query[0].Result {
@@ -227,18 +228,18 @@ func resourceCSBSBackupV1Create(ctx context.Context, d *schema.ResourceData, met
 
 		checkpoint, err := backup.Create(backupClient, resourceID, createOpts).Extract()
 		if err != nil {
-			return diag.Errorf("Error creating backup: %s", err)
+			return fmterr.Errorf("Error creating backup: %s", err)
 		}
 
 		backupOpts := backup.ListOpts{CheckpointId: checkpoint.Id}
 		backupItems, err := backup.List(backupClient, backupOpts)
 
 		if err != nil {
-			return diag.Errorf("Error listing Backup: %s", err)
+			return fmterr.Errorf("Error listing Backup: %s", err)
 		}
 
 		if len(backupItems) == 0 {
-			return diag.Errorf("Not able to find created Backup: %s", err)
+			return fmterr.Errorf("Not able to find created Backup: %s", err)
 		}
 
 		backupObject := backupItems[0]
@@ -257,13 +258,13 @@ func resourceCSBSBackupV1Create(ctx context.Context, d *schema.ResourceData, met
 		}
 		_, stateErr := stateConf.WaitForState()
 		if stateErr != nil {
-			return diag.Errorf(
+			return fmterr.Errorf(
 				"Error waiting for Backup (%s) to become available: %s",
 				backupObject.Id, stateErr)
 		}
 
 	} else {
-		return diag.Errorf("Error code: %s\n Error msg: %s", query[0].ErrorCode, query[0].ErrorMsg)
+		return fmterr.Errorf("Error code: %s\n Error msg: %s", query[0].ErrorCode, query[0].ErrorMsg)
 	}
 
 	return resourceCSBSBackupV1Read(ctx, d, meta)
@@ -275,7 +276,7 @@ func resourceCSBSBackupV1Read(ctx context.Context, d *schema.ResourceData, meta 
 	config := meta.(*cfg.Config)
 	backupClient, err := config.CsbsV1Client(config.GetRegion(d))
 	if err != nil {
-		return diag.Errorf("Error creating csbs client: %s", err)
+		return fmterr.Errorf("Error creating csbs client: %s", err)
 	}
 
 	backupObject, err := backup.Get(backupClient, d.Id()).ExtractBackup()
@@ -288,7 +289,7 @@ func resourceCSBSBackupV1Read(ctx context.Context, d *schema.ResourceData, meta 
 			return nil
 		}
 
-		return diag.Errorf("Error retrieving backup: %s", err)
+		return fmterr.Errorf("Error retrieving backup: %s", err)
 
 	}
 
@@ -314,7 +315,7 @@ func resourceCSBSBackupV1Delete(ctx context.Context, d *schema.ResourceData, met
 	config := meta.(*cfg.Config)
 	backupClient, err := config.CsbsV1Client(config.GetRegion(d))
 	if err != nil {
-		return diag.Errorf("Error creating csbs client: %s", err)
+		return fmterr.Errorf("Error creating csbs client: %s", err)
 	}
 
 	stateConf := &resource.StateChangeConf{
@@ -328,7 +329,7 @@ func resourceCSBSBackupV1Delete(ctx context.Context, d *schema.ResourceData, met
 
 	_, err = stateConf.WaitForState()
 	if err != nil {
-		return diag.Errorf("Error deleting csbs backup: %s", err)
+		return fmterr.Errorf("Error deleting csbs backup: %s", err)
 	}
 
 	d.SetId("")

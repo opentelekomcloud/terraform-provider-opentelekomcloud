@@ -11,6 +11,7 @@ import (
 
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common"
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common/cfg"
+	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common/fmterr"
 )
 
 func DataSourceRdsFlavorV3() *schema.Resource {
@@ -63,7 +64,7 @@ func dataSourceRdsFlavorV3Read(ctx context.Context, d *schema.ResourceData, meta
 
 	client, err := config.RdsV1Client(config.GetRegion(d))
 	if err != nil {
-		return diag.Errorf("Error creating OpenTelekomCloud rds client: %s", err)
+		return fmterr.Errorf("Error creating OpenTelekomCloud rds client: %s", err)
 	}
 	client.Endpoint = strings.Replace(client.Endpoint, "/rds/v1/", "/v3/", 1)
 

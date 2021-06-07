@@ -16,6 +16,7 @@ import (
 
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common"
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common/cfg"
+	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common/fmterr"
 )
 
 func ResourceListenerV2() *schema.Resource {
@@ -124,7 +125,7 @@ func resourceListenerV2Create(ctx context.Context, d *schema.ResourceData, meta 
 	config := meta.(*cfg.Config)
 	client, err := config.NetworkingV2Client(config.GetRegion(d))
 	if err != nil {
-		return diag.Errorf("error creating OpenTelekomCloud NetworkingV2 client: %s", err)
+		return fmterr.Errorf("error creating OpenTelekomCloud NetworkingV2 client: %s", err)
 	}
 
 	http2Enable := d.Get("http2_enable").(bool) // would prefer a fix in the gopher...
@@ -175,7 +176,7 @@ func resourceListenerV2Create(ctx context.Context, d *schema.ResourceData, meta 
 		return nil
 	})
 	if err != nil {
-		return diag.Errorf("error creating listener: %s", err)
+		return fmterr.Errorf("error creating listener: %s", err)
 	}
 
 	// Wait for LoadBalancer to become active again before continuing
@@ -188,7 +189,7 @@ func resourceListenerV2Create(ctx context.Context, d *schema.ResourceData, meta 
 	if len(tagRaw) > 0 {
 		tagList := common.ExpandResourceTags(tagRaw)
 		if err := tags.Create(client, "listeners", listener.ID, tagList).ExtractErr(); err != nil {
-			return diag.Errorf("error setting tags of LoadBalancer: %s", err)
+			return fmterr.Errorf("error setting tags of LoadBalancer: %s", err)
 		}
 	}
 
@@ -201,7 +202,7 @@ func resourceListenerV2Read(ctx context.Context, d *schema.ResourceData, meta in
 	config := meta.(*cfg.Config)
 	client, err := config.NetworkingV2Client(config.GetRegion(d))
 	if err != nil {
-		return diag.Errorf("error creating OpenTelekomCloud NetworkingV2 client: %s", err)
+		return fmterr.Errorf("error creating OpenTelekomCloud NetworkingV2 client: %s", err)
 	}
 
 	listener, err := listeners.Get(client, d.Id()).Extract()
@@ -235,11 +236,11 @@ func resourceListenerV2Read(ctx context.Context, d *schema.ResourceData, meta in
 	// save tags
 	resourceTags, err := tags.Get(client, "listeners", d.Id()).Extract()
 	if err != nil {
-		return diag.Errorf("error fetching OpenTelekomCloud LB Listener tags: %s", err)
+		return fmterr.Errorf("error fetching OpenTelekomCloud LB Listener tags: %s", err)
 	}
 	tagMap := common.TagsToMap(resourceTags)
 	if err := d.Set("tags", tagMap); err != nil {
-		return diag.Errorf("error saving tags for OpenTelekomCloud LB Listener: %s", err)
+		return fmterr.Errorf("error saving tags for OpenTelekomCloud LB Listener: %s", err)
 	}
 
 	return nil
@@ -249,7 +250,7 @@ func resourceListenerV2Update(ctx context.Context, d *schema.ResourceData, meta 
 	config := meta.(*cfg.Config)
 	client, err := config.NetworkingV2Client(config.GetRegion(d))
 	if err != nil {
-		return diag.Errorf("error creating OpenTelekomCloud NetworkingV2 client: %s", err)
+		return fmterr.Errorf("error creating OpenTelekomCloud NetworkingV2 client: %s", err)
 	}
 
 	var updateOpts listeners.UpdateOpts
@@ -307,7 +308,7 @@ func resourceListenerV2Update(ctx context.Context, d *schema.ResourceData, meta 
 	})
 
 	if err != nil {
-		return diag.Errorf("error updating listener %s: %s", d.Id(), err)
+		return fmterr.Errorf("error updating listener %s: %s", d.Id(), err)
 	}
 
 	// Wait for LoadBalancer to become active again before continuing
@@ -318,7 +319,7 @@ func resourceListenerV2Update(ctx context.Context, d *schema.ResourceData, meta 
 	// update tags
 	if d.HasChange("tags") {
 		if err := common.UpdateResourceTags(client, d, "listeners", d.Id()); err != nil {
-			return diag.Errorf("error updating tags of LoadBalancer Listener %s: %s", d.Id(), err)
+			return fmterr.Errorf("error updating tags of LoadBalancer Listener %s: %s", d.Id(), err)
 		}
 	}
 
@@ -330,7 +331,7 @@ func resourceListenerV2Delete(ctx context.Context, d *schema.ResourceData, meta 
 	config := meta.(*cfg.Config)
 	client, err := config.NetworkingV2Client(config.GetRegion(d))
 	if err != nil {
-		return diag.Errorf("error creating OpenTelekomCloud NetworkingV2 client: %s", err)
+		return fmterr.Errorf("error creating OpenTelekomCloud NetworkingV2 client: %s", err)
 	}
 
 	// Wait for LoadBalancer to become active before continuing
@@ -349,7 +350,7 @@ func resourceListenerV2Delete(ctx context.Context, d *schema.ResourceData, meta 
 		return nil
 	})
 	if err != nil {
-		return diag.Errorf("error deleting listener %s: %s", d.Id(), err)
+		return fmterr.Errorf("error deleting listener %s: %s", d.Id(), err)
 	}
 
 	// Wait for LoadBalancer to become active again before continuing

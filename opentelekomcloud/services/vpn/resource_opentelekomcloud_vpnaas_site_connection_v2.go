@@ -15,6 +15,7 @@ import (
 
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common"
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common/cfg"
+	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common/fmterr"
 )
 
 func ResourceVpnSiteConnectionV2() *schema.Resource {
@@ -152,7 +153,7 @@ func resourceVpnSiteConnectionV2Create(ctx context.Context, d *schema.ResourceDa
 	config := meta.(*cfg.Config)
 	networkingClient, err := config.NetworkingV2Client(config.GetRegion(d))
 	if err != nil {
-		return diag.Errorf("Error creating OpenTelekomCloud networking client: %s", err)
+		return fmterr.Errorf("Error creating OpenTelekomCloud networking client: %s", err)
 	}
 
 	var createOpts siteconnections.CreateOptsBuilder
@@ -221,7 +222,7 @@ func resourceVpnSiteConnectionV2Create(ctx context.Context, d *schema.ResourceDa
 	if len(tagRaw) > 0 {
 		taglist := common.ExpandResourceTags(tagRaw)
 		if tagErr := tags.Create(networkingClient, "ipsec-site-connections", d.Id(), taglist).ExtractErr(); tagErr != nil {
-			return diag.Errorf("Error setting tags of VPN site connection %s: %s", d.Id(), tagErr)
+			return fmterr.Errorf("Error setting tags of VPN site connection %s: %s", d.Id(), tagErr)
 		}
 	}
 
@@ -234,7 +235,7 @@ func resourceVpnSiteConnectionV2Read(ctx context.Context, d *schema.ResourceData
 	config := meta.(*cfg.Config)
 	networkingClient, err := config.NetworkingV2Client(config.GetRegion(d))
 	if err != nil {
-		return diag.Errorf("Error creating OpenTelekomCloud networking client: %s", err)
+		return fmterr.Errorf("Error creating OpenTelekomCloud networking client: %s", err)
 	}
 
 	conn, err := siteconnections.Get(networkingClient, d.Id()).Extract()
@@ -278,12 +279,12 @@ func resourceVpnSiteConnectionV2Read(ctx context.Context, d *schema.ResourceData
 	// Set tags
 	resourceTags, err := tags.Get(networkingClient, "ipsec-site-connections", d.Id()).Extract()
 	if err != nil {
-		return diag.Errorf("Error fetching VPN site connection tags: %s", err)
+		return fmterr.Errorf("Error fetching VPN site connection tags: %s", err)
 	}
 
 	tagmap := common.TagsToMap(resourceTags)
 	if err := d.Set("tags", tagmap); err != nil {
-		return diag.Errorf("Error saving tags for VPN site connection %s: %s", d.Id(), err)
+		return fmterr.Errorf("Error saving tags for VPN site connection %s: %s", d.Id(), err)
 	}
 
 	return nil
@@ -293,7 +294,7 @@ func resourceVpnSiteConnectionV2Update(ctx context.Context, d *schema.ResourceDa
 	config := meta.(*cfg.Config)
 	networkingClient, err := config.NetworkingV2Client(config.GetRegion(d))
 	if err != nil {
-		return diag.Errorf("Error creating OpenTelekomCloud networking client: %s", err)
+		return fmterr.Errorf("Error creating OpenTelekomCloud networking client: %s", err)
 	}
 
 	opts := siteconnections.UpdateOpts{}
@@ -400,7 +401,7 @@ func resourceVpnSiteConnectionV2Update(ctx context.Context, d *schema.ResourceDa
 	// update tags
 	tagErr := common.UpdateResourceTags(networkingClient, d, "ipsec-site-connections", d.Id())
 	if tagErr != nil {
-		return diag.Errorf("Error updating tags of VPN site connection %s: %s", d.Id(), tagErr)
+		return fmterr.Errorf("Error updating tags of VPN site connection %s: %s", d.Id(), tagErr)
 	}
 
 	return resourceVpnSiteConnectionV2Read(ctx, d, meta)
@@ -412,7 +413,7 @@ func resourceVpnSiteConnectionV2Delete(ctx context.Context, d *schema.ResourceDa
 	config := meta.(*cfg.Config)
 	networkingClient, err := config.NetworkingV2Client(config.GetRegion(d))
 	if err != nil {
-		return diag.Errorf("Error creating OpenTelekomCloud networking client: %s", err)
+		return fmterr.Errorf("Error creating OpenTelekomCloud networking client: %s", err)
 	}
 
 	err = siteconnections.Delete(networkingClient, d.Id()).Err

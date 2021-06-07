@@ -7,10 +7,11 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
-	"github.com/opentelekomcloud/gophertelekomcloud"
+	golangsdk "github.com/opentelekomcloud/gophertelekomcloud"
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/vbs/v2/shares"
 
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common/cfg"
+	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common/fmterr"
 )
 
 func ResourceVBSBackupShareV2() *schema.Resource {
@@ -106,7 +107,7 @@ func resourceVBSBackupShareV2Create(ctx context.Context, d *schema.ResourceData,
 	vbsClient, err := config.VbsV2Client(config.GetRegion(d))
 
 	if err != nil {
-		return diag.Errorf("Error creating OpenTelekomCloud vbs client: %s", err)
+		return fmterr.Errorf("Error creating OpenTelekomCloud vbs client: %s", err)
 	}
 
 	createOpts := shares.CreateOpts{
@@ -117,7 +118,7 @@ func resourceVBSBackupShareV2Create(ctx context.Context, d *schema.ResourceData,
 	n, err := shares.Create(vbsClient, createOpts).Extract()
 
 	if err != nil {
-		return diag.Errorf("Error creating OpenTelekomCloud VBS Backup Share: %s", err)
+		return fmterr.Errorf("Error creating OpenTelekomCloud VBS Backup Share: %s", err)
 	}
 
 	share := n[0]
@@ -132,7 +133,7 @@ func resourceVBSBackupShareV2Read(ctx context.Context, d *schema.ResourceData, m
 	config := meta.(*cfg.Config)
 	vbsClient, err := config.VbsV2Client(config.GetRegion(d))
 	if err != nil {
-		return diag.Errorf("Error creating OpenTelekomCloud Vbs client: %s", err)
+		return fmterr.Errorf("Error creating OpenTelekomCloud Vbs client: %s", err)
 	}
 
 	backups, err := shares.List(vbsClient, shares.ListOpts{BackupID: d.Id()})
@@ -142,7 +143,7 @@ func resourceVBSBackupShareV2Read(ctx context.Context, d *schema.ResourceData, m
 			return nil
 		}
 
-		return diag.Errorf("Error retrieving OpenTelekomCloud Vbs: %s", err)
+		return fmterr.Errorf("Error retrieving OpenTelekomCloud Vbs: %s", err)
 	}
 
 	n := backups[0]
@@ -168,7 +169,7 @@ func resourceVBSBackupShareV2Delete(ctx context.Context, d *schema.ResourceData,
 	config := meta.(*cfg.Config)
 	vbsClient, err := config.VbsV2Client(config.GetRegion(d))
 	if err != nil {
-		return diag.Errorf("Error creating OpenTelekomCloud Vbs client: %s", err)
+		return fmterr.Errorf("Error creating OpenTelekomCloud Vbs client: %s", err)
 	}
 
 	deleteopts := shares.DeleteOpts{IsBackupID: true}

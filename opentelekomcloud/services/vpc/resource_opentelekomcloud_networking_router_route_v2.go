@@ -7,11 +7,12 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
-	"github.com/opentelekomcloud/gophertelekomcloud"
+	golangsdk "github.com/opentelekomcloud/gophertelekomcloud"
 
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/networking/v2/extensions/layer3/routers"
 
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common/cfg"
+	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common/fmterr"
 )
 
 func ResourceNetworkingRouterRouteV2() *schema.Resource {
@@ -58,7 +59,7 @@ func resourceNetworkingRouterRouteV2Create(ctx context.Context, d *schema.Resour
 	config := meta.(*cfg.Config)
 	networkingClient, err := config.NetworkingV2Client(config.GetRegion(d))
 	if err != nil {
-		return diag.Errorf("Error creating OpenTelekomCloud networking client: %s", err)
+		return fmterr.Errorf("Error creating OpenTelekomCloud networking client: %s", err)
 	}
 
 	n, err := routers.Get(networkingClient, routerId).Extract()
@@ -68,7 +69,7 @@ func resourceNetworkingRouterRouteV2Create(ctx context.Context, d *schema.Resour
 			return nil
 		}
 
-		return diag.Errorf("Error retrieving OpenTelekomCloud Neutron Router: %s", err)
+		return fmterr.Errorf("Error retrieving OpenTelekomCloud Neutron Router: %s", err)
 	}
 
 	var updateOpts routers.UpdateOpts
@@ -98,7 +99,7 @@ func resourceNetworkingRouterRouteV2Create(ctx context.Context, d *schema.Resour
 
 		_, err = routers.Update(networkingClient, routerId, updateOpts).Extract()
 		if err != nil {
-			return diag.Errorf("Error updating OpenTelekomCloud Neutron Router: %s", err)
+			return fmterr.Errorf("Error updating OpenTelekomCloud Neutron Router: %s", err)
 		}
 		d.SetId(fmt.Sprintf("%s-route-%s-%s", routerId, destCidr, nextHop))
 
@@ -116,7 +117,7 @@ func resourceNetworkingRouterRouteV2Read(ctx context.Context, d *schema.Resource
 	config := meta.(*cfg.Config)
 	networkingClient, err := config.NetworkingV2Client(config.GetRegion(d))
 	if err != nil {
-		return diag.Errorf("Error creating OpenTelekomCloud networking client: %s", err)
+		return fmterr.Errorf("Error creating OpenTelekomCloud networking client: %s", err)
 	}
 
 	n, err := routers.Get(networkingClient, routerId).Extract()
@@ -126,7 +127,7 @@ func resourceNetworkingRouterRouteV2Read(ctx context.Context, d *schema.Resource
 			return nil
 		}
 
-		return diag.Errorf("Error retrieving OpenTelekomCloud Neutron Router: %s", err)
+		return fmterr.Errorf("Error retrieving OpenTelekomCloud Neutron Router: %s", err)
 	}
 
 	log.Printf("[DEBUG] Retrieved Router %s: %+v", routerId, n)
@@ -161,7 +162,7 @@ func resourceNetworkingRouterRouteV2Delete(ctx context.Context, d *schema.Resour
 
 	networkingClient, err := config.NetworkingV2Client(config.GetRegion(d))
 	if err != nil {
-		return diag.Errorf("Error creating OpenTelekomCloud networking client: %s", err)
+		return fmterr.Errorf("Error creating OpenTelekomCloud networking client: %s", err)
 	}
 
 	n, err := routers.Get(networkingClient, routerId).Extract()
@@ -170,7 +171,7 @@ func resourceNetworkingRouterRouteV2Delete(ctx context.Context, d *schema.Resour
 			return nil
 		}
 
-		return diag.Errorf("Error retrieving OpenTelekomCloud Neutron Router: %s", err)
+		return fmterr.Errorf("Error retrieving OpenTelekomCloud Neutron Router: %s", err)
 	}
 
 	var updateOpts routers.UpdateOpts
@@ -198,10 +199,10 @@ func resourceNetworkingRouterRouteV2Delete(ctx context.Context, d *schema.Resour
 
 		_, err = routers.Update(networkingClient, routerId, updateOpts).Extract()
 		if err != nil {
-			return diag.Errorf("Error updating OpenTelekomCloud Neutron Router: %s", err)
+			return fmterr.Errorf("Error updating OpenTelekomCloud Neutron Router: %s", err)
 		}
 	} else {
-		return diag.Errorf("Route did not exist already")
+		return fmterr.Errorf("Route did not exist already")
 	}
 
 	return nil

@@ -16,6 +16,7 @@ import (
 
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common"
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common/cfg"
+	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common/fmterr"
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/services/s3"
 )
 
@@ -253,7 +254,7 @@ func resourceObsBucketCreate(ctx context.Context, d *schema.ResourceData, meta i
 	config := meta.(*cfg.Config)
 	client, err := config.NewObjectStorageClient(config.GetRegion(d))
 	if err != nil {
-		return diag.Errorf("error creating OBS client: %s", err)
+		return fmterr.Errorf("error creating OBS client: %s", err)
 	}
 
 	bucket := d.Get("bucket").(string)
@@ -281,7 +282,7 @@ func resourceObsBucketUpdate(ctx context.Context, d *schema.ResourceData, meta i
 	config := meta.(*cfg.Config)
 	client, err := config.NewObjectStorageClient(config.GetRegion(d))
 	if err != nil {
-		return diag.Errorf("error creating OBS client: %s", err)
+		return fmterr.Errorf("error creating OBS client: %s", err)
 	}
 
 	log.Printf("[DEBUG] Update OBS bucket %s", d.Id())
@@ -344,7 +345,7 @@ func resourceObsBucketRead(ctx context.Context, d *schema.ResourceData, meta int
 	region := config.GetRegion(d)
 	client, err := config.NewObjectStorageClient(config.GetRegion(d))
 	if err != nil {
-		return diag.Errorf("error creating OBS client: %s", err)
+		return fmterr.Errorf("error creating OBS client: %s", err)
 	}
 
 	log.Printf("[DEBUG] Read OBS bucket: %s", d.Id())
@@ -355,7 +356,7 @@ func resourceObsBucketRead(ctx context.Context, d *schema.ResourceData, meta int
 			d.SetId("")
 			return nil
 		} else {
-			return diag.Errorf("error reading OBS bucket %s: %s", d.Id(), err)
+			return fmterr.Errorf("error reading OBS bucket %s: %s", d.Id(), err)
 		}
 	}
 
@@ -372,7 +373,7 @@ func resourceObsBucketRead(ctx context.Context, d *schema.ResourceData, meta int
 	)
 
 	if err := mErr.ErrorOrNil(); err != nil {
-		return diag.Errorf("error setting OBS bucket fields: %s", err)
+		return fmterr.Errorf("error setting OBS bucket fields: %s", err)
 	}
 
 	// Read storage class
@@ -416,7 +417,7 @@ func resourceObsBucketDelete(ctx context.Context, d *schema.ResourceData, meta i
 	config := meta.(*cfg.Config)
 	client, err := config.NewObjectStorageClient(config.GetRegion(d))
 	if err != nil {
-		return diag.Errorf("error creating OBS client: %s", err)
+		return fmterr.Errorf("error creating OBS client: %s", err)
 	}
 
 	bucket := d.Id()
@@ -435,7 +436,7 @@ func resourceObsBucketDelete(ctx context.Context, d *schema.ResourceData, meta i
 			}
 			return diag.FromErr(err)
 		}
-		return diag.Errorf("error deleting OBS bucket: %s %s", bucket, err)
+		return fmterr.Errorf("error deleting OBS bucket: %s %s", bucket, err)
 	}
 	return nil
 }

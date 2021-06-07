@@ -10,6 +10,7 @@ import (
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/rds/v1/flavors"
 
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common/cfg"
+	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common/fmterr"
 )
 
 func DataSourceRdsFlavorV1() *schema.Resource {
@@ -53,16 +54,16 @@ func dataSourcedataSourceRdsFlavorV1Read(ctx context.Context, d *schema.Resource
 
 	rdsClient, err := config.RdsV1Client(config.GetRegion(d))
 	if err != nil {
-		return diag.Errorf("Error creating OpenTelekomCloud rds client: %s", err)
+		return fmterr.Errorf("Error creating OpenTelekomCloud rds client: %s", err)
 	}
 
 	datastoresList, err := datastores.List(rdsClient, d.Get("datastore_name").(string)).Extract()
 	if err != nil {
-		return diag.Errorf("Unable to retrieve datastores: %s ", err)
+		return fmterr.Errorf("Unable to retrieve datastores: %s ", err)
 	}
 
 	if len(datastoresList) < 1 {
-		return diag.Errorf("Returned no datastore result. ")
+		return fmterr.Errorf("Returned no datastore result. ")
 	}
 	var datastoreId string
 	for _, datastore := range datastoresList {
@@ -72,16 +73,16 @@ func dataSourcedataSourceRdsFlavorV1Read(ctx context.Context, d *schema.Resource
 		}
 	}
 	if datastoreId == "" {
-		return diag.Errorf("Returned no datastore ID. ")
+		return fmterr.Errorf("Returned no datastore ID. ")
 	}
 	log.Printf("[DEBUG] Received datastore Id: %s", datastoreId)
 
 	flavorsList, err := flavors.List(rdsClient, datastoreId, d.Get("region").(string)).Extract()
 	if err != nil {
-		return diag.Errorf("Unable to retrieve flavors: %s", err)
+		return fmterr.Errorf("Unable to retrieve flavors: %s", err)
 	}
 	if len(flavorsList) < 1 {
-		return diag.Errorf("Returned no flavor result. ")
+		return fmterr.Errorf("Returned no flavor result. ")
 	}
 
 	var rdsFlavor flavors.Flavor
@@ -97,7 +98,7 @@ func dataSourcedataSourceRdsFlavorV1Read(ctx context.Context, d *schema.Resource
 	}
 	log.Printf("[DEBUG] Retrieved flavorId %s: %+v ", rdsFlavor.ID, rdsFlavor)
 	if rdsFlavor.ID == "" {
-		return diag.Errorf("Returned no flavor Id. ")
+		return fmterr.Errorf("Returned no flavor Id. ")
 	}
 
 	d.SetId(rdsFlavor.ID)

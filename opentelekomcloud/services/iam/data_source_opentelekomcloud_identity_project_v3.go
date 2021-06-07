@@ -9,6 +9,7 @@ import (
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/identity/v3/projects"
 
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common/cfg"
+	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common/fmterr"
 )
 
 func DataSourceIdentityProjectV3() *schema.Resource {
@@ -51,7 +52,7 @@ func dataSourceIdentityProjectV3Read(ctx context.Context, d *schema.ResourceData
 	config := meta.(*cfg.Config)
 	identityClient, err := config.IdentityV3Client(config.GetRegion(d))
 	if err != nil {
-		return diag.Errorf("Error creating OpenStack identity client: %s", err)
+		return fmterr.Errorf("Error creating OpenStack identity client: %s", err)
 	}
 
 	listOpts := projects.ListOpts{
@@ -65,22 +66,22 @@ func dataSourceIdentityProjectV3Read(ctx context.Context, d *schema.ResourceData
 	var project projects.Project
 	allPages, err := projects.List(identityClient, listOpts).AllPages()
 	if err != nil {
-		return diag.Errorf("Unable to query projects: %s", err)
+		return fmterr.Errorf("Unable to query projects: %s", err)
 	}
 
 	allProjects, err := projects.ExtractProjects(allPages)
 	if err != nil {
-		return diag.Errorf("Unable to retrieve projects: %s", err)
+		return fmterr.Errorf("Unable to retrieve projects: %s", err)
 	}
 
 	if len(allProjects) < 1 {
-		return diag.Errorf("Your query returned no results. " +
+		return fmterr.Errorf("Your query returned no results. " +
 			"Please change your search criteria and try again.")
 	}
 
 	if len(allProjects) > 1 {
 		log.Printf("[DEBUG] Multiple results found: %#v", allProjects)
-		return diag.Errorf("Your query returned more than one result")
+		return fmterr.Errorf("Your query returned more than one result")
 	}
 	project = allProjects[0]
 

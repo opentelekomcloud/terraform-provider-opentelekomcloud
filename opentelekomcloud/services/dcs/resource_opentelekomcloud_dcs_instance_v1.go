@@ -9,11 +9,12 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
-	"github.com/opentelekomcloud/gophertelekomcloud"
+	golangsdk "github.com/opentelekomcloud/gophertelekomcloud"
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/dcs/v1/instances"
 
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common"
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common/cfg"
+	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common/fmterr"
 )
 
 func ResourceDcsInstanceV1() *schema.Resource {
@@ -269,7 +270,7 @@ func resourceDcsInstancesV1Create(ctx context.Context, d *schema.ResourceData, m
 	config := meta.(*cfg.Config)
 	DcsV1Client, err := config.DcsV1Client(config.GetRegion(d))
 	if err != nil {
-		return diag.Errorf("Error creating dcs instance client: %s", err)
+		return fmterr.Errorf("Error creating dcs instance client: %s", err)
 	}
 
 	noPasswordAccess := "true"
@@ -298,7 +299,7 @@ func resourceDcsInstancesV1Create(ctx context.Context, d *schema.ResourceData, m
 	log.Printf("[DEBUG] Create Options: %#v", createOpts)
 	v, err := instances.Create(DcsV1Client, createOpts).Extract()
 	if err != nil {
-		return diag.Errorf("Error creating instance: %s", err)
+		return fmterr.Errorf("Error creating instance: %s", err)
 	}
 	log.Printf("[INFO] instance ID: %s", v.InstanceID)
 
@@ -312,7 +313,7 @@ func resourceDcsInstancesV1Create(ctx context.Context, d *schema.ResourceData, m
 	}
 	_, err = stateConf.WaitForState()
 	if err != nil {
-		return diag.Errorf(
+		return fmterr.Errorf(
 			"Error waiting for instance (%s) to become ready: %s",
 			v.InstanceID, err)
 	}
@@ -328,7 +329,7 @@ func resourceDcsInstancesV1Read(ctx context.Context, d *schema.ResourceData, met
 
 	DcsV1Client, err := config.DcsV1Client(config.GetRegion(d))
 	if err != nil {
-		return diag.Errorf("Error creating dcs instance client: %s", err)
+		return fmterr.Errorf("Error creating dcs instance client: %s", err)
 	}
 	v, err := instances.Get(DcsV1Client, d.Id()).Extract()
 	if err != nil {
@@ -372,7 +373,7 @@ func resourceDcsInstancesV1Update(ctx context.Context, d *schema.ResourceData, m
 	config := meta.(*cfg.Config)
 	DcsV1Client, err := config.DcsV1Client(config.GetRegion(d))
 	if err != nil {
-		return diag.Errorf("Error updating dcs instance client: %s", err)
+		return fmterr.Errorf("Error updating dcs instance client: %s", err)
 	}
 	var updateOpts instances.UpdateOpts
 	if d.HasChange("name") {
@@ -397,7 +398,7 @@ func resourceDcsInstancesV1Update(ctx context.Context, d *schema.ResourceData, m
 
 	err = instances.Update(DcsV1Client, d.Id(), updateOpts).Err
 	if err != nil {
-		return diag.Errorf("Error updating Dcs Instance: %s", err)
+		return fmterr.Errorf("Error updating Dcs Instance: %s", err)
 	}
 
 	return resourceDcsInstancesV1Read(ctx, d, meta)
@@ -407,7 +408,7 @@ func resourceDcsInstancesV1Delete(ctx context.Context, d *schema.ResourceData, m
 	config := meta.(*cfg.Config)
 	DcsV1Client, err := config.DcsV1Client(config.GetRegion(d))
 	if err != nil {
-		return diag.Errorf("Error creating dcs instance client: %s", err)
+		return fmterr.Errorf("Error creating dcs instance client: %s", err)
 	}
 
 	_, err = instances.Get(DcsV1Client, d.Id()).Extract()
@@ -417,7 +418,7 @@ func resourceDcsInstancesV1Delete(ctx context.Context, d *schema.ResourceData, m
 
 	err = instances.Delete(DcsV1Client, d.Id()).ExtractErr()
 	if err != nil {
-		return diag.Errorf("Error deleting instance: %s", err)
+		return fmterr.Errorf("Error deleting instance: %s", err)
 	}
 
 	// Wait for the instance to delete before moving on.
@@ -434,7 +435,7 @@ func resourceDcsInstancesV1Delete(ctx context.Context, d *schema.ResourceData, m
 
 	_, err = stateConf.WaitForState()
 	if err != nil {
-		return diag.Errorf(
+		return fmterr.Errorf(
 			"Error waiting for instance (%s) to delete: %s",
 			d.Id(), err)
 	}

@@ -12,6 +12,7 @@ import (
 
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common"
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common/cfg"
+	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common/fmterr"
 )
 
 func DataSourceNetworkingPortV2() *schema.Resource {
@@ -108,7 +109,7 @@ func dataSourceNetworkingPortV2Read(ctx context.Context, d *schema.ResourceData,
 	config := meta.(*cfg.Config)
 	networkingClient, err := config.NetworkingV2Client(config.GetRegion(d))
 	if err != nil {
-		return diag.Errorf("Error creating OpenTelekomCloud networking client: %s", err)
+		return fmterr.Errorf("Error creating OpenTelekomCloud networking client: %s", err)
 	}
 
 	listOpts := ports.ListOpts{}
@@ -156,18 +157,18 @@ func dataSourceNetworkingPortV2Read(ctx context.Context, d *schema.ResourceData,
 
 	allPages, err := ports.List(networkingClient, listOpts).AllPages()
 	if err != nil {
-		return diag.Errorf("Unable to list opentelekomcloud_networking_ports_v2: %s", err)
+		return fmterr.Errorf("Unable to list opentelekomcloud_networking_ports_v2: %s", err)
 	}
 
 	var allPorts []ports.Port
 
 	err = ports.ExtractPortsInto(allPages, &allPorts)
 	if err != nil {
-		return diag.Errorf("Unable to retrieve opentelekomcloud_networking_ports_v2: %s", err)
+		return fmterr.Errorf("Unable to retrieve opentelekomcloud_networking_ports_v2: %s", err)
 	}
 
 	if len(allPorts) == 0 {
-		return diag.Errorf("No opentelekomcloud_networking_port_v2 found")
+		return fmterr.Errorf("No opentelekomcloud_networking_port_v2 found")
 	}
 
 	var portsList []ports.Port
@@ -183,7 +184,7 @@ func dataSourceNetworkingPortV2Read(ctx context.Context, d *schema.ResourceData,
 		}
 		if len(portsList) == 0 {
 			log.Printf("No opentelekomcloud_networking_port_v2 found after the 'fixed_ip' filter")
-			return diag.Errorf("No opentelekomcloud_networking_port_v2 found")
+			return fmterr.Errorf("No opentelekomcloud_networking_port_v2 found")
 		}
 	} else {
 		portsList = allPorts
@@ -201,13 +202,13 @@ func dataSourceNetworkingPortV2Read(ctx context.Context, d *schema.ResourceData,
 		}
 		if len(sgPorts) == 0 {
 			log.Printf("[DEBUG] No opentelekomcloud_networking_port_v2 found after the 'security_group_ids' filter")
-			return diag.Errorf("No opentelekomcloud_networking_port_v2 found")
+			return fmterr.Errorf("No opentelekomcloud_networking_port_v2 found")
 		}
 		portsList = sgPorts
 	}
 
 	if len(portsList) > 1 {
-		return diag.Errorf("More than one opentelekomcloud_networking_port_v2 found (%d)", len(portsList))
+		return fmterr.Errorf("More than one opentelekomcloud_networking_port_v2 found (%d)", len(portsList))
 	}
 
 	port := portsList[0]

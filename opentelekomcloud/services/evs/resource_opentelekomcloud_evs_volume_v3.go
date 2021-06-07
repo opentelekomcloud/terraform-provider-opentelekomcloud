@@ -13,13 +13,14 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
-	"github.com/opentelekomcloud/gophertelekomcloud"
+	golangsdk "github.com/opentelekomcloud/gophertelekomcloud"
 	cinderV3 "github.com/opentelekomcloud/gophertelekomcloud/openstack/blockstorage/v3/volumes"
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/evs/v3/volumes"
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/helper/hashcode"
 
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common"
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common/cfg"
+	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common/fmterr"
 )
 
 func ResourceEvsStorageVolumeV3() *schema.Resource {
@@ -145,11 +146,11 @@ func resourceEvsVolumeV3Create(ctx context.Context, d *schema.ResourceData, meta
 	config := meta.(*cfg.Config)
 	client, err := config.BlockStorageV3Client(config.GetRegion(d))
 	if err != nil {
-		return diag.Errorf("error creating OpenTelekomCloud EVS storage client: %s", err)
+		return fmterr.Errorf("error creating OpenTelekomCloud EVS storage client: %s", err)
 	}
 
 	if !common.HasFilledOpt(d, "backup_id") && !common.HasFilledOpt(d, "size") {
-		return diag.Errorf("missing required argument: 'size' is required, but no definition was found")
+		return fmterr.Errorf("missing required argument: 'size' is required, but no definition was found")
 	}
 	tags := resourceContainerTags(d)
 	createOpts := &volumes.CreateOpts{
@@ -179,7 +180,7 @@ func resourceEvsVolumeV3Create(ctx context.Context, d *schema.ResourceData, meta
 	log.Printf("[DEBUG] Create Options: %#v", createOpts)
 	v, err := volumes.Create(client, createOpts).ExtractJobResponse()
 	if err != nil {
-		return diag.Errorf("error creating OpenTelekomCloud EVS volume: %s", err)
+		return fmterr.Errorf("error creating OpenTelekomCloud EVS volume: %s", err)
 	}
 	log.Printf("[INFO] Volume Job ID: %s", v.JobID)
 
@@ -201,14 +202,14 @@ func resourceEvsVolumeV3Create(ctx context.Context, d *schema.ResourceData, meta
 		d.SetId(id)
 		return resourceEvsVolumeV3Read(ctx, d, meta)
 	}
-	return diag.Errorf("unexpected conversion error in resourceEvsVolumeV3Create")
+	return fmterr.Errorf("unexpected conversion error in resourceEvsVolumeV3Create")
 }
 
 func resourceEvsVolumeV3Read(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*cfg.Config)
 	blockStorageClient, err := config.BlockStorageV3Client(config.GetRegion(d))
 	if err != nil {
-		return diag.Errorf("error creating OpenTelekomCloud EVS storage client: %s", err)
+		return fmterr.Errorf("error creating OpenTelekomCloud EVS storage client: %s", err)
 	}
 
 	v, err := volumes.Get(blockStorageClient, d.Id()).Extract()
@@ -237,7 +238,7 @@ func resourceEvsVolumeV3Read(ctx context.Context, d *schema.ResourceData, meta i
 		tags[key] = val
 	}
 	if err := d.Set("tags", tags); err != nil {
-		return diag.Errorf("[DEBUG] Error saving tags to state for OpenTelekomCloud evs storage (%s): %s", d.Id(), err)
+		return fmterr.Errorf("[DEBUG] Error saving tags to state for OpenTelekomCloud evs storage (%s): %s", d.Id(), err)
 	}
 
 	// set attachments
@@ -250,7 +251,7 @@ func resourceEvsVolumeV3Read(ctx context.Context, d *schema.ResourceData, meta i
 		log.Printf("[DEBUG] attachment: %v", attachment)
 	}
 	if err := d.Set("attachment", attachments); err != nil {
-		return diag.Errorf("[DEBUG] Error saving attachment to state for OpenTelekomCloud evs storage (%s): %s", d.Id(), err)
+		return fmterr.Errorf("[DEBUG] Error saving attachment to state for OpenTelekomCloud evs storage (%s): %s", d.Id(), err)
 	}
 
 	return nil
@@ -261,7 +262,7 @@ func resourceEvsVolumeV3Update(ctx context.Context, d *schema.ResourceData, meta
 	config := meta.(*cfg.Config)
 	client, err := config.BlockStorageV3Client(config.GetRegion(d))
 	if err != nil {
-		return diag.Errorf("error creating OpenTelekomCloud block storage client: %s", err)
+		return fmterr.Errorf("error creating OpenTelekomCloud block storage client: %s", err)
 	}
 
 	updateOpts := cinderV3.UpdateOpts{
@@ -271,7 +272,7 @@ func resourceEvsVolumeV3Update(ctx context.Context, d *schema.ResourceData, meta
 
 	_, err = cinderV3.Update(client, d.Id(), updateOpts).Extract()
 	if err != nil {
-		return diag.Errorf("error updating OpenTelekomCloud volume: %s", err)
+		return fmterr.Errorf("error updating OpenTelekomCloud volume: %s", err)
 	}
 
 	if d.HasChange("tags") {
@@ -294,7 +295,7 @@ func resourceEvsVolumeV3Update(ctx context.Context, d *schema.ResourceData, meta
 
 		_, err = stateConf.WaitForState()
 		if err != nil {
-			return diag.Errorf("error waiting for volume (%s) to become ready after resize: %s", d.Id(), err)
+			return fmterr.Errorf("error waiting for volume (%s) to become ready after resize: %s", d.Id(), err)
 		}
 	}
 

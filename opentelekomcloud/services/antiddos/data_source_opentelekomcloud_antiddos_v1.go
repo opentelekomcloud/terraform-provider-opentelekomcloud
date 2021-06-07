@@ -5,6 +5,7 @@ import (
 	"log"
 
 	"github.com/hashicorp/go-multierror"
+	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common/fmterr"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
@@ -124,15 +125,15 @@ func dataSourceAntiDdosV1Read(ctx context.Context, d *schema.ResourceData, meta 
 
 	refinedAntiddos, err := antiddos.ListStatus(antiddosClient, listStatusOpts)
 	if err != nil {
-		return diag.Errorf("Unable to retrieve the defense status of  EIP, defense is not configured.: %s", err)
+		return fmterr.Errorf("Unable to retrieve the defense status of  EIP, defense is not configured.: %s", err)
 	}
 
 	if len(refinedAntiddos) < 1 {
-		return diag.Errorf("your query returned no results. Please change your search criteria and try again")
+		return fmterr.Errorf("your query returned no results. Please change your search criteria and try again")
 	}
 
 	if len(refinedAntiddos) > 1 {
-		return diag.Errorf("your query returned more than one result. Please try a more specific search criteria")
+		return fmterr.Errorf("your query returned more than one result. Please try a more specific search criteria")
 	}
 
 	ddosStatus := refinedAntiddos[0]
@@ -150,13 +151,13 @@ func dataSourceAntiDdosV1Read(ctx context.Context, d *schema.ResourceData, meta 
 		d.Set("region", config.GetRegion(d)),
 	)
 	if err = me.ErrorOrNil(); err != nil {
-		return diag.Errorf("[DEBUG] Error saving main conf to state for AntiDdos data-source (%s): %s", d.Id(), err)
+		return fmterr.Errorf("[DEBUG] Error saving main conf to state for AntiDdos data-source (%s): %s", d.Id(), err)
 	}
 
 	traffic, err := antiddos.DailyReport(antiddosClient, ddosStatus.FloatingIpId).Extract()
 	log.Printf("traffic %#v", traffic)
 	if err != nil {
-		return diag.Errorf("unable to retrieve the traffic of a specified EIP, defense is not configured: %s", err)
+		return fmterr.Errorf("unable to retrieve the traffic of a specified EIP, defense is not configured: %s", err)
 	}
 
 	periodStart := make([]int, 0)
@@ -205,7 +206,7 @@ func dataSourceAntiDdosV1Read(ctx context.Context, d *schema.ResourceData, meta 
 	event, err := antiddos.ListLogs(antiddosClient, ddosStatus.FloatingIpId, listEventOpts).Extract()
 	log.Printf("event %#v", event)
 	if err != nil {
-		return diag.Errorf("unable to retrieve the event of a specified EIP, defense is not configured: %s", err)
+		return fmterr.Errorf("unable to retrieve the event of a specified EIP, defense is not configured: %s", err)
 	}
 
 	startTime := make([]int, 0)

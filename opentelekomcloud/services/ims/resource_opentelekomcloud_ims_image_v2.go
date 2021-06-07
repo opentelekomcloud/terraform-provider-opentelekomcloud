@@ -17,6 +17,7 @@ import (
 
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common"
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common/cfg"
+	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common/fmterr"
 )
 
 func ResourceImsImageV2() *schema.Resource {
@@ -144,11 +145,11 @@ func resourceImsImageV2Create(ctx context.Context, d *schema.ResourceData, meta 
 	config := meta.(*cfg.Config)
 	ims_Client, err := config.ImageV2Client(config.GetRegion(d))
 	if err != nil {
-		return diag.Errorf("Error creating OpenTelekomCloud image client: %s", err)
+		return fmterr.Errorf("Error creating OpenTelekomCloud image client: %s", err)
 	}
 
 	if !common.HasFilledOpt(d, "instance_id") && !common.HasFilledOpt(d, "image_url") {
-		return diag.Errorf("Error creating OpenTelekomCloud IMS: " +
+		return fmterr.Errorf("Error creating OpenTelekomCloud IMS: " +
 			"Either 'instance_id' or 'image_url' must be specified")
 	}
 
@@ -167,7 +168,7 @@ func resourceImsImageV2Create(ctx context.Context, d *schema.ResourceData, meta 
 		v, err = cloudimages.CreateImageByServer(ims_Client, createOpts).ExtractJobResponse()
 	} else {
 		if !common.HasFilledOpt(d, "min_disk") {
-			return diag.Errorf("Error creating OpenTelekomCloud IMS: 'min_disk' must be specified")
+			return fmterr.Errorf("Error creating OpenTelekomCloud IMS: 'min_disk' must be specified")
 		}
 
 		createOpts := &cloudimages.CreateByOBSOpts{
@@ -188,7 +189,7 @@ func resourceImsImageV2Create(ctx context.Context, d *schema.ResourceData, meta 
 	}
 
 	if err != nil {
-		return diag.Errorf("Error creating OpenTelekomCloud IMS: %s", err)
+		return fmterr.Errorf("Error creating OpenTelekomCloud IMS: %s", err)
 	}
 	log.Printf("[INFO] IMS Job ID: %s", v.JobID)
 
@@ -210,7 +211,7 @@ func resourceImsImageV2Create(ctx context.Context, d *schema.ResourceData, meta 
 		d.SetId(id)
 		return resourceImsImageV2Read(ctx, d, meta)
 	}
-	return diag.Errorf("Unexpected conversion error in resourceImsImageV2Create.")
+	return fmterr.Errorf("Unexpected conversion error in resourceImsImageV2Create.")
 }
 
 func GetCloudImage(client *golangsdk.ServiceClient, id string) (*cloudimages.Image, error) {
@@ -244,12 +245,12 @@ func resourceImsImageV2Read(ctx context.Context, d *schema.ResourceData, meta in
 	config := meta.(*cfg.Config)
 	ims_Client, err := config.ImageV2Client(config.GetRegion(d))
 	if err != nil {
-		return diag.Errorf("Error creating OpenTelekomCloud image client: %s", err)
+		return fmterr.Errorf("Error creating OpenTelekomCloud image client: %s", err)
 	}
 
 	img, err := GetCloudImage(ims_Client, d.Id())
 	if err != nil {
-		return diag.Errorf("Image %s not found: %s", d.Id(), err)
+		return fmterr.Errorf("Image %s not found: %s", d.Id(), err)
 	}
 	log.Printf("[DEBUG] Retrieved Image %s: %#v", d.Id(), img)
 
@@ -264,7 +265,7 @@ func resourceImsImageV2Read(ctx context.Context, d *schema.ResourceData, meta in
 	// Set image tags
 	Taglist, err := tags.Get(ims_Client, d.Id()).Extract()
 	if err != nil {
-		return diag.Errorf("Error fetching OpenTelekomCloud image tags: %s", err)
+		return fmterr.Errorf("Error fetching OpenTelekomCloud image tags: %s", err)
 	}
 
 	tagmap := make(map[string]string)
@@ -272,7 +273,7 @@ func resourceImsImageV2Read(ctx context.Context, d *schema.ResourceData, meta in
 		tagmap[val.Key] = val.Value
 	}
 	if err := d.Set("tags", tagmap); err != nil {
-		return diag.Errorf("[DEBUG] Error saving tags for OpenTelekomCloud image (%s): %s", d.Id(), err)
+		return fmterr.Errorf("[DEBUG] Error saving tags for OpenTelekomCloud image (%s): %s", d.Id(), err)
 	}
 	return nil
 }
@@ -307,7 +308,7 @@ func resourceImsImageV2Update(ctx context.Context, d *schema.ResourceData, meta 
 	config := meta.(*cfg.Config)
 	ims_Client, err := config.ImageV2Client(config.GetRegion(d))
 	if err != nil {
-		return diag.Errorf("Error creating OpenTelekomCloud image client: %s", err)
+		return fmterr.Errorf("Error creating OpenTelekomCloud image client: %s", err)
 	}
 
 	if d.HasChange("name") {
@@ -318,20 +319,20 @@ func resourceImsImageV2Update(ctx context.Context, d *schema.ResourceData, meta 
 		log.Printf("[DEBUG] Update Options: %#v", updateOpts)
 		_, err = imageservice_v2.Update(ims_Client, d.Id(), updateOpts).Extract()
 		if err != nil {
-			return diag.Errorf("Error updating image: %s", err)
+			return fmterr.Errorf("Error updating image: %s", err)
 		}
 	}
 
 	if d.HasChange("tags") {
 		oldTags, err := tags.Get(ims_Client, d.Id()).Extract()
 		if err != nil {
-			return diag.Errorf("Error fetching OpenTelekomCloud image tags: %s", err)
+			return fmterr.Errorf("Error fetching OpenTelekomCloud image tags: %s", err)
 		}
 		if len(oldTags.Tags) > 0 {
 			deleteopts := tags.BatchOpts{Action: tags.ActionDelete, Tags: oldTags.Tags}
 			deleteTags := tags.BatchAction(ims_Client, d.Id(), deleteopts)
 			if deleteTags.Err != nil {
-				return diag.Errorf("Error deleting OpenTelekomCloud image tags: %s", deleteTags.Err)
+				return fmterr.Errorf("Error deleting OpenTelekomCloud image tags: %s", deleteTags.Err)
 			}
 		}
 
@@ -341,7 +342,7 @@ func resourceImsImageV2Update(ctx context.Context, d *schema.ResourceData, meta 
 				log.Printf("[DEBUG] Setting tags: %v", tagmap)
 				err = setTagForImage(d, meta, d.Id(), tagmap)
 				if err != nil {
-					return diag.Errorf("Error updating OpenTelekomCloud tags of image:%s", err)
+					return fmterr.Errorf("Error updating OpenTelekomCloud tags of image:%s", err)
 				}
 			}
 		}

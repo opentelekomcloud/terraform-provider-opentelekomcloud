@@ -12,6 +12,7 @@ import (
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/identity/v3/users"
 
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common/cfg"
+	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common/fmterr"
 )
 
 func DataSourceIdentityUserV3() *schema.Resource {
@@ -51,7 +52,7 @@ func dataSourceIdentityUserV3Read(ctx context.Context, d *schema.ResourceData, m
 	config := meta.(*cfg.Config)
 	identityClient, err := config.IdentityV3Client(config.GetRegion(d))
 	if err != nil {
-		return diag.Errorf("Error creating OpenStack identity client: %s", err)
+		return fmterr.Errorf("Error creating OpenStack identity client: %s", err)
 	}
 
 	enabled := d.Get("enabled").(bool)
@@ -66,22 +67,22 @@ func dataSourceIdentityUserV3Read(ctx context.Context, d *schema.ResourceData, m
 	var user users.User
 	allPages, err := users.List(identityClient, listOpts).AllPages()
 	if err != nil {
-		return diag.Errorf("Unable to query users: %s", err)
+		return fmterr.Errorf("Unable to query users: %s", err)
 	}
 
 	allUsers, err := users.ExtractUsers(allPages)
 	if err != nil {
-		return diag.Errorf("Unable to retrieve users: %s", err)
+		return fmterr.Errorf("Unable to retrieve users: %s", err)
 	}
 
 	if len(allUsers) < 1 {
-		return diag.Errorf("Your query returned no results. " +
+		return fmterr.Errorf("Your query returned no results. " +
 			"Please change your search criteria and try again.")
 	}
 
 	if len(allUsers) > 1 {
 		log.Printf("[DEBUG] Multiple results found: %#v", allUsers)
-		return diag.Errorf("Your query returned more than one result")
+		return fmterr.Errorf("Your query returned more than one result")
 	}
 	user = allUsers[0]
 

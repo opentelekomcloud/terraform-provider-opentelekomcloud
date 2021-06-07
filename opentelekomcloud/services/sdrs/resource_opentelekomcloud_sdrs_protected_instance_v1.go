@@ -7,12 +7,13 @@ import (
 	"github.com/hashicorp/go-multierror"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
-	"github.com/opentelekomcloud/gophertelekomcloud"
+	golangsdk "github.com/opentelekomcloud/gophertelekomcloud"
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/common/tags"
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/sdrs/v1/protectedinstances"
 
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common"
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common/cfg"
+	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common/fmterr"
 )
 
 func ResourceSdrsProtectedInstanceV1() *schema.Resource {
@@ -96,7 +97,7 @@ func resourceSdrsProtectedInstanceV1Create(ctx context.Context, d *schema.Resour
 	config := meta.(*cfg.Config)
 	client, err := config.SdrsV1Client(config.GetRegion(d))
 	if err != nil {
-		return diag.Errorf("error creating OpenTelekomcomCloud SDRS Client: %w", err)
+		return fmterr.Errorf("error creating OpenTelekomcomCloud SDRS Client: %w", err)
 	}
 
 	createOpts := protectedinstances.CreateOpts{
@@ -110,7 +111,7 @@ func resourceSdrsProtectedInstanceV1Create(ctx context.Context, d *schema.Resour
 
 	job, err := protectedinstances.Create(client, createOpts).ExtractJobResponse()
 	if err != nil {
-		return diag.Errorf("error creating OpenTelekomcomCloud SDRS Protected Instance: %w", err)
+		return fmterr.Errorf("error creating OpenTelekomcomCloud SDRS Protected Instance: %w", err)
 	}
 
 	createTimeout := int(d.Timeout(schema.TimeoutCreate) / time.Second)
@@ -130,7 +131,7 @@ func resourceSdrsProtectedInstanceV1Create(ctx context.Context, d *schema.Resour
 	if len(tagRaw) > 0 {
 		tagList := common.ExpandResourceTags(tagRaw)
 		if err := tags.Create(client, "protected-instances", d.Id(), tagList).ExtractErr(); err != nil {
-			return diag.Errorf("error setting tags of SDRS Protected Instance: %s", err)
+			return fmterr.Errorf("error setting tags of SDRS Protected Instance: %s", err)
 		}
 	}
 	return resourceSdrsProtectedInstanceV1Read(ctx, d, meta)
@@ -141,7 +142,7 @@ func resourceSdrsProtectedInstanceV1Read(ctx context.Context, d *schema.Resource
 	config := meta.(*cfg.Config)
 	client, err := config.SdrsV1Client(config.GetRegion(d))
 	if err != nil {
-		return diag.Errorf("error creating OpenTelekomCloud SDRS client: %s", err)
+		return fmterr.Errorf("error creating OpenTelekomCloud SDRS client: %s", err)
 	}
 
 	instance, err := protectedinstances.Get(client, d.Id()).Extract()
@@ -151,7 +152,7 @@ func resourceSdrsProtectedInstanceV1Read(ctx context.Context, d *schema.Resource
 			return nil
 		}
 
-		return diag.Errorf("error retrieving OpenTelekomCloud SDRS Protected Instance: %s", err)
+		return fmterr.Errorf("error retrieving OpenTelekomCloud SDRS Protected Instance: %s", err)
 	}
 
 	mErr := multierror.Append(
@@ -168,11 +169,11 @@ func resourceSdrsProtectedInstanceV1Read(ctx context.Context, d *schema.Resource
 	// save tags
 	resourceTags, err := tags.Get(client, "protected-instances", d.Id()).Extract()
 	if err != nil {
-		return diag.Errorf("error fetching OpenTelekomCloud SDRS Protected Instance tags: %s", err)
+		return fmterr.Errorf("error fetching OpenTelekomCloud SDRS Protected Instance tags: %s", err)
 	}
 	tagMap := common.TagsToMap(resourceTags)
 	if err := d.Set("tags", tagMap); err != nil {
-		return diag.Errorf("error saving tags for OpenTelekomCloud SDRS Protected Instance: %s", err)
+		return fmterr.Errorf("error saving tags for OpenTelekomCloud SDRS Protected Instance: %s", err)
 	}
 
 	if mErr.ErrorOrNil() != nil {
@@ -186,7 +187,7 @@ func resourceSdrsProtectedInstanceV1Update(ctx context.Context, d *schema.Resour
 	config := meta.(*cfg.Config)
 	client, err := config.SdrsV1Client(config.GetRegion(d))
 	if err != nil {
-		return diag.Errorf("error creating OpenTelekomCloud SDRS Client: %w", err)
+		return fmterr.Errorf("error creating OpenTelekomCloud SDRS Client: %w", err)
 	}
 	var updateOpts protectedinstances.UpdateOpts
 
@@ -197,13 +198,13 @@ func resourceSdrsProtectedInstanceV1Update(ctx context.Context, d *schema.Resour
 	// update tags
 	if d.HasChange("tags") {
 		if err := common.UpdateResourceTags(client, d, "protected-instances", d.Id()); err != nil {
-			return diag.Errorf("error updating tags of SDRS Protected Instance %s: %s", d.Id(), err)
+			return fmterr.Errorf("error updating tags of SDRS Protected Instance %s: %s", d.Id(), err)
 		}
 	}
 
 	_, err = protectedinstances.Update(client, d.Id(), updateOpts).Extract()
 	if err != nil {
-		return diag.Errorf("error updating OpenTelekomCloud SDRS Protected Instance: %w", err)
+		return fmterr.Errorf("error updating OpenTelekomCloud SDRS Protected Instance: %w", err)
 	}
 	return resourceSdrsProtectedInstanceV1Read(ctx, d, meta)
 }
@@ -212,7 +213,7 @@ func resourceSdrsProtectedInstanceV1Delete(ctx context.Context, d *schema.Resour
 	config := meta.(*cfg.Config)
 	client, err := config.SdrsV1Client(config.GetRegion(d))
 	if err != nil {
-		return diag.Errorf("error creating OpenTelekomCloud SDRS client: %w", err)
+		return fmterr.Errorf("error creating OpenTelekomCloud SDRS client: %w", err)
 	}
 
 	deleteTargetServer := d.Get("delete_target_server").(bool)
@@ -225,7 +226,7 @@ func resourceSdrsProtectedInstanceV1Delete(ctx context.Context, d *schema.Resour
 
 	job, err := protectedinstances.Delete(client, d.Id(), deleteOpts).ExtractJobResponse()
 	if err != nil {
-		return diag.Errorf("error deleting OpenTelekomCloud SDRS Protected Instance: %w", err)
+		return fmterr.Errorf("error deleting OpenTelekomCloud SDRS Protected Instance: %w", err)
 	}
 
 	deleteTimeout := int(d.Timeout(schema.TimeoutDelete) / time.Second)

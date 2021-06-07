@@ -9,6 +9,7 @@ import (
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/dds/v3/instances"
 
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common/cfg"
+	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common/fmterr"
 )
 
 func DataSourceDdsInstanceV3() *schema.Resource {
@@ -153,7 +154,7 @@ func dataSourceDdsInstanceV3Read(ctx context.Context, d *schema.ResourceData, me
 	config := meta.(*cfg.Config)
 	ddsClient, err := config.DdsV3Client(config.GetRegion(d))
 	if err != nil {
-		return diag.Errorf("error creating OpenTelekomCloud DDS client: %s", err)
+		return fmterr.Errorf("error creating OpenTelekomCloud DDS client: %s", err)
 	}
 
 	listOpts := instances.ListInstanceOpts{
@@ -166,18 +167,18 @@ func dataSourceDdsInstanceV3Read(ctx context.Context, d *schema.ResourceData, me
 
 	allPages, err := instances.List(ddsClient, listOpts).AllPages()
 	if err != nil {
-		return diag.Errorf("error fetching DDS instance: %s", err)
+		return fmterr.Errorf("error fetching DDS instance: %s", err)
 	}
 	instancesList, err := instances.ExtractInstances(allPages)
 	if err != nil {
-		return diag.Errorf("error extracting DDS instance: %s", err)
+		return fmterr.Errorf("error extracting DDS instance: %s", err)
 	}
 	if len(instancesList.Instances) < 0 {
-		return diag.Errorf("your query returned no results. Please change your search criteria and try again")
+		return fmterr.Errorf("your query returned no results. Please change your search criteria and try again")
 	}
 
 	if len(instancesList.Instances) > 1 {
-		return diag.Errorf("your query returned more than one result. Please try a more specific search criteria")
+		return fmterr.Errorf("your query returned more than one result. Please try a more specific search criteria")
 	}
 
 	ddsInstance := instancesList.Instances[0]
@@ -214,7 +215,7 @@ func dataSourceDdsInstanceV3Read(ctx context.Context, d *schema.ResourceData, me
 	}
 	datastoreList = append(datastoreList, datastore)
 	if err = d.Set("datastore", datastoreList); err != nil {
-		return diag.Errorf("error setting DDSv3 datastore opts: %s", err)
+		return fmterr.Errorf("error setting DDSv3 datastore opts: %s", err)
 	}
 
 	backupStrategyList := make([]map[string]interface{}, 0, 1)
@@ -224,12 +225,12 @@ func dataSourceDdsInstanceV3Read(ctx context.Context, d *schema.ResourceData, me
 	}
 	backupStrategyList = append(backupStrategyList, backupStrategy)
 	if err = d.Set("backup_strategy", backupStrategyList); err != nil {
-		return diag.Errorf("error setting DDSv3 backup_strategy opts: %s", err)
+		return fmterr.Errorf("error setting DDSv3 backup_strategy opts: %s", err)
 	}
 
 	err = d.Set("nodes", flattenDdsInstanceV3Nodes(ddsInstance))
 	if err != nil {
-		return diag.Errorf("error setting nodes of DDSv3 instance: %s", err)
+		return fmterr.Errorf("error setting nodes of DDSv3 instance: %s", err)
 	}
 
 	return diag.FromErr(mErr.ErrorOrNil())

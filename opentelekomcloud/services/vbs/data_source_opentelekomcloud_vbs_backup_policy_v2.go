@@ -10,6 +10,7 @@ import (
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/vbs/v2/tags"
 
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common/cfg"
+	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common/fmterr"
 )
 
 func DataSourceVBSBackupPolicyV2() *schema.Resource {
@@ -103,10 +104,10 @@ func dataSourceVBSPolicyV2Read(ctx context.Context, d *schema.ResourceData, meta
 		tagsOpts := tags.ListOpts{Action: "filter", Tags: getVBSFilterTagsV2(d)}
 		querytags, err := tags.ListResources(vbsClient, tagsOpts).ExtractResources()
 		if err != nil {
-			return diag.Errorf("Error Querying backup policy using tags: %s ", err)
+			return fmterr.Errorf("Error Querying backup policy using tags: %s ", err)
 		}
 		if querytags.TotalCount > 1 {
-			return diag.Errorf("Your tags query returned more than one result." +
+			return fmterr.Errorf("Your tags query returned more than one result." +
 				" Please try a more specific search criteria.")
 		}
 		if querytags.TotalCount > 0 {
@@ -121,16 +122,16 @@ func dataSourceVBSPolicyV2Read(ctx context.Context, d *schema.ResourceData, meta
 
 	refinedPolicies, err := policies.List(vbsClient, listOpts)
 	if err != nil {
-		return diag.Errorf("Unable to retrieve policies: %s", err)
+		return fmterr.Errorf("Unable to retrieve policies: %s", err)
 	}
 
 	if len(refinedPolicies) < 1 {
-		return diag.Errorf("Your query returned no results. " +
+		return fmterr.Errorf("Your query returned no results. " +
 			"Please change your search criteria and try again.")
 	}
 
 	if len(refinedPolicies) > 1 {
-		return diag.Errorf("Your query returned more than one result." +
+		return fmterr.Errorf("Your query returned more than one result." +
 			" Please try a more specific search criteria")
 	}
 

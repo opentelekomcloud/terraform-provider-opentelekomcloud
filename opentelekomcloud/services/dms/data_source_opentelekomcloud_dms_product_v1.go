@@ -9,6 +9,7 @@ import (
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/dms/v1/products"
 
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common/cfg"
+	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common/fmterr"
 )
 
 func DataSourceDmsProductV1() *schema.Resource {
@@ -87,12 +88,12 @@ func dataSourceDmsProductV1Read(ctx context.Context, d *schema.ResourceData, met
 	config := meta.(*cfg.Config)
 	DmsV1Client, err := config.DmsV1Client(config.GetRegion(d))
 	if err != nil {
-		return diag.Errorf("Error get OpenTelekomCloud dms product client: %s", err)
+		return fmterr.Errorf("Error get OpenTelekomCloud dms product client: %s", err)
 	}
 
 	instance_engine := d.Get("engine").(string)
 	if instance_engine != "rabbitmq" && instance_engine != "kafka" {
-		return diag.Errorf("The instance_engine value should be 'rabbitmq' or 'kafka', not: %s", instance_engine)
+		return fmterr.Errorf("The instance_engine value should be 'rabbitmq' or 'kafka', not: %s", instance_engine)
 	}
 
 	v, err := products.Get(DmsV1Client, instance_engine).Extract()
@@ -104,7 +105,7 @@ func dataSourceDmsProductV1Read(ctx context.Context, d *schema.ResourceData, met
 	log.Printf("[DEBUG] Dms get products : %+v", Products)
 	instance_type := d.Get("instance_type").(string)
 	if instance_type != "single" && instance_type != "cluster" {
-		return diag.Errorf("The instance_type value should be 'single' or 'cluster', not: %s", instance_type)
+		return fmterr.Errorf("The instance_type value should be 'single' or 'cluster', not: %s", instance_type)
 	}
 	var FilteredPd []products.Detail
 	var FilteredPdInfo []products.ProductInfo
@@ -167,7 +168,7 @@ func dataSourceDmsProductV1Read(ctx context.Context, d *schema.ResourceData, met
 	}
 
 	if len(FilteredPd) < 1 {
-		return diag.Errorf("Your query returned no results. Please change your filters and try again.")
+		return fmterr.Errorf("Your query returned no results. Please change your filters and try again.")
 	}
 
 	pd := FilteredPd[0]
@@ -182,7 +183,7 @@ func dataSourceDmsProductV1Read(ctx context.Context, d *schema.ResourceData, met
 		log.Printf("[DEBUG] Dms product : %+v", pd)
 	} else {
 		if len(pd.ProductInfos) < 1 {
-			return diag.Errorf("Your query returned no results. Please change your filters and try again.")
+			return fmterr.Errorf("Your query returned no results. Please change your filters and try again.")
 		}
 		pdInfo := pd.ProductInfos[0]
 		d.SetId(pdInfo.ProductID)

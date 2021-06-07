@@ -9,6 +9,7 @@ import (
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/csbs/v1/policies"
 
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common/cfg"
+	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common/fmterr"
 )
 
 func DataSourceCSBSBackupPolicyV1() *schema.Resource {
@@ -158,16 +159,16 @@ func dataSourceCSBSBackupPolicyV1Read(ctx context.Context, d *schema.ResourceDat
 	refinedPolicies, err := policies.List(policyClient, listOpts)
 
 	if err != nil {
-		return diag.Errorf("Unable to retrieve backup policies: %s", err)
+		return fmterr.Errorf("Unable to retrieve backup policies: %s", err)
 	}
 
 	if len(refinedPolicies) < 1 {
-		return diag.Errorf("Your query returned no results. " +
+		return fmterr.Errorf("Your query returned no results. " +
 			"Please change your search criteria and try again.")
 	}
 
 	if len(refinedPolicies) > 1 {
-		return diag.Errorf("Your query returned more than one result." +
+		return fmterr.Errorf("Your query returned more than one result." +
 			" Please try a more specific search criteria")
 	}
 

@@ -9,12 +9,13 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
-	"github.com/opentelekomcloud/gophertelekomcloud"
+	golangsdk "github.com/opentelekomcloud/gophertelekomcloud"
 
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/networking/v2/extensions/natgateways"
 
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common"
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common/cfg"
+	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common/fmterr"
 )
 
 func ResourceNatGatewayV2() *schema.Resource {
@@ -77,7 +78,7 @@ func resourceNatGatewayV2Create(ctx context.Context, d *schema.ResourceData, met
 	config := meta.(*cfg.Config)
 	NatV2Client, err := config.NatV2Client(config.GetRegion(d))
 	if err != nil {
-		return diag.Errorf("Error creating OpenTelekomCloud nat client: %s", err)
+		return fmterr.Errorf("Error creating OpenTelekomCloud nat client: %s", err)
 	}
 
 	createOpts := &natgateways.CreateOpts{
@@ -92,7 +93,7 @@ func resourceNatGatewayV2Create(ctx context.Context, d *schema.ResourceData, met
 	log.Printf("[DEBUG] Create Options: %#v", createOpts)
 	natGateway, err := natgateways.Create(NatV2Client, createOpts).Extract()
 	if err != nil {
-		return diag.Errorf("Error creatting Nat Gateway: %s", err)
+		return fmterr.Errorf("Error creatting Nat Gateway: %s", err)
 	}
 
 	log.Printf("[DEBUG] Waiting for OpenTelekomCloud Nat Gateway (%s) to become available.", natGateway.ID)
@@ -107,7 +108,7 @@ func resourceNatGatewayV2Create(ctx context.Context, d *schema.ResourceData, met
 
 	_, err = stateConf.WaitForState()
 	if err != nil {
-		return diag.Errorf("Error creating OpenTelekomCloud Nat Gateway: %s", err)
+		return fmterr.Errorf("Error creating OpenTelekomCloud Nat Gateway: %s", err)
 	}
 
 	d.SetId(natGateway.ID)
@@ -119,7 +120,7 @@ func resourceNatGatewayV2Read(ctx context.Context, d *schema.ResourceData, meta 
 	config := meta.(*cfg.Config)
 	NatV2Client, err := config.NatV2Client(config.GetRegion(d))
 	if err != nil {
-		return diag.Errorf("Error creating OpenTelekomCloud nat client: %s", err)
+		return fmterr.Errorf("Error creating OpenTelekomCloud nat client: %s", err)
 	}
 
 	natGateway, err := natgateways.Get(NatV2Client, d.Id()).Extract()
@@ -143,7 +144,7 @@ func resourceNatGatewayV2Update(ctx context.Context, d *schema.ResourceData, met
 	config := meta.(*cfg.Config)
 	NatV2Client, err := config.NatV2Client(config.GetRegion(d))
 	if err != nil {
-		return diag.Errorf("Error creating OpenTelekomCloud nat client: %s", err)
+		return fmterr.Errorf("Error creating OpenTelekomCloud nat client: %s", err)
 	}
 
 	var updateOpts natgateways.UpdateOpts
@@ -162,7 +163,7 @@ func resourceNatGatewayV2Update(ctx context.Context, d *schema.ResourceData, met
 
 	_, err = natgateways.Update(NatV2Client, d.Id(), updateOpts).Extract()
 	if err != nil {
-		return diag.Errorf("Error updating Nat Gateway: %s", err)
+		return fmterr.Errorf("Error updating Nat Gateway: %s", err)
 	}
 
 	return resourceNatGatewayV2Read(ctx, d, meta)
@@ -172,7 +173,7 @@ func resourceNatGatewayV2Delete(ctx context.Context, d *schema.ResourceData, met
 	config := meta.(*cfg.Config)
 	NatV2Client, err := config.NatV2Client(config.GetRegion(d))
 	if err != nil {
-		return diag.Errorf("Error creating OpenTelekomCloud nat client: %s", err)
+		return fmterr.Errorf("Error creating OpenTelekomCloud nat client: %s", err)
 	}
 
 	stateConf := &resource.StateChangeConf{
@@ -186,7 +187,7 @@ func resourceNatGatewayV2Delete(ctx context.Context, d *schema.ResourceData, met
 
 	_, err = stateConf.WaitForState()
 	if err != nil {
-		return diag.Errorf("Error deleting OpenTelekomCloud Nat Gateway: %s", err)
+		return fmterr.Errorf("Error deleting OpenTelekomCloud Nat Gateway: %s", err)
 	}
 
 	d.SetId("")

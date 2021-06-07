@@ -10,11 +10,12 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
-	"github.com/opentelekomcloud/gophertelekomcloud"
+	golangsdk "github.com/opentelekomcloud/gophertelekomcloud"
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/css/v1/clusters"
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/css/v1/flavors"
 
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common/cfg"
+	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common/fmterr"
 )
 
 func ResourceCssClusterV1() *schema.Resource {
@@ -205,7 +206,7 @@ func resourceCssClusterV1Create(ctx context.Context, d *schema.ResourceData, met
 	config := meta.(*cfg.Config)
 	client, err := config.CssV1Client(config.GetRegion(d))
 	if err != nil {
-		return diag.Errorf("error creating CSS v1 client: %s", err)
+		return fmterr.Errorf("error creating CSS v1 client: %s", err)
 	}
 
 	opts := clusters.CreateOpts{
@@ -248,13 +249,13 @@ func resourceCssClusterV1Create(ctx context.Context, d *schema.ResourceData, met
 
 	created, err := clusters.Create(client, opts).Extract()
 	if err != nil {
-		return diag.Errorf("error creating CSS cluster: %s", err)
+		return fmterr.Errorf("error creating CSS cluster: %s", err)
 	}
 
 	secondsWait := int(math.Round(d.Timeout(schema.TimeoutCreate).Seconds()))
 	err = clusters.WaitForClusterOperationSucces(client, created.ID, secondsWait)
 	if err != nil {
-		return diag.Errorf("error waiting for CSS cluster to be running: %s", err)
+		return fmterr.Errorf("error waiting for CSS cluster to be running: %s", err)
 	}
 
 	d.SetId(created.ID)
@@ -266,12 +267,12 @@ func resourceCssClusterV1Read(ctx context.Context, d *schema.ResourceData, meta 
 	config := meta.(*cfg.Config)
 	client, err := config.CssV1Client(config.GetRegion(d))
 	if err != nil {
-		return diag.Errorf("error creating CSS v1 client: %s", err)
+		return fmterr.Errorf("error creating CSS v1 client: %s", err)
 	}
 
 	cluster, err := clusters.Get(client, d.Id()).Extract()
 	if err != nil {
-		return diag.Errorf("error reading cluster value: %s", err)
+		return fmterr.Errorf("error reading cluster value: %s", err)
 	}
 
 	mErr := multierror.Append(
@@ -317,7 +318,7 @@ func resourceCssClusterV1Update(ctx context.Context, d *schema.ResourceData, met
 	config := meta.(*cfg.Config)
 	client, err := config.CssV1Client(config.GetRegion(d))
 	if err != nil {
-		return diag.Errorf("error creating CSS v1 client: %s", err)
+		return fmterr.Errorf("error creating CSS v1 client: %s", err)
 	}
 
 	if !d.HasChange("expect_node_num") {
@@ -327,23 +328,23 @@ func resourceCssClusterV1Update(ctx context.Context, d *schema.ResourceData, met
 	oldNum, newNum := d.GetChange("expect_node_num")
 	diff := newNum.(int) - oldNum.(int)
 	if diff < 0 {
-		return diag.Errorf("invalid number of new nodes: %d", diff)
+		return fmterr.Errorf("invalid number of new nodes: %d", diff)
 	}
 
 	_, err = clusters.ExtendCluster(client, d.Id(), clusters.ClusterExtendCommonOpts{
 		ModifySize: diff,
 	}).Extract()
 	if err != nil {
-		return diag.Errorf("error extending cluster: %s", err)
+		return fmterr.Errorf("error extending cluster: %s", err)
 	}
 
 	secondsWait := int(math.Round(d.Timeout(schema.TimeoutUpdate).Seconds()))
 	if err := clusters.WaitForClusterToExtend(client, d.Id(), secondsWait); err != nil {
 		state, _ := clusters.Get(client, d.Id()).Extract()
 		if state != nil {
-			return diag.Errorf("error waiting cluster to extend: %s\nFail reason: %+v", err, state.FailedReasons)
+			return fmterr.Errorf("error waiting cluster to extend: %s\nFail reason: %+v", err, state.FailedReasons)
 		}
-		return diag.Errorf("error waiting cluster to extend: %s", err)
+		return fmterr.Errorf("error waiting cluster to extend: %s", err)
 	}
 
 	return resourceCssClusterV1Read(ctx, d, meta)
@@ -353,11 +354,11 @@ func resourceCssClusterV1Delete(ctx context.Context, d *schema.ResourceData, met
 	config := meta.(*cfg.Config)
 	client, err := config.CssV1Client(config.GetRegion(d))
 	if err != nil {
-		return diag.Errorf("error creating CSS v1 client: %s", err)
+		return fmterr.Errorf("error creating CSS v1 client: %s", err)
 	}
 
 	if err := clusters.Delete(client, d.Id()).ExtractErr(); err != nil {
-		return diag.Errorf("error deleting cluster: %s", err)
+		return fmterr.Errorf("error deleting cluster: %s", err)
 	}
 
 	stateConf := &resource.StateChangeConf{
@@ -370,7 +371,7 @@ func resourceCssClusterV1Delete(ctx context.Context, d *schema.ResourceData, met
 	}
 	_, err = stateConf.WaitForState()
 	if err != nil {
-		return diag.Errorf("error waiting for cluster to be deleted: %s", err)
+		return fmterr.Errorf("error waiting for cluster to be deleted: %s", err)
 	}
 	return nil
 }

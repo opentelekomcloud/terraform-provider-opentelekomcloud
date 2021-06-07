@@ -10,6 +10,7 @@ import (
 
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common"
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common/cfg"
+	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common/fmterr"
 )
 
 func ResourceLTSGroupV2() *schema.Resource {
@@ -40,7 +41,7 @@ func resourceGroupV2Create(ctx context.Context, d *schema.ResourceData, meta int
 	config := meta.(*cfg.Config)
 	client, err := config.LtsV2Client(config.GetRegion(d))
 	if err != nil {
-		return diag.Errorf("Error creating OpenTelekomCloud LTS client: %s", err)
+		return fmterr.Errorf("Error creating OpenTelekomCloud LTS client: %s", err)
 	}
 
 	createOpts := &loggroups.CreateOpts{
@@ -51,7 +52,7 @@ func resourceGroupV2Create(ctx context.Context, d *schema.ResourceData, meta int
 
 	groupCreate, err := loggroups.Create(client, createOpts).Extract()
 	if err != nil {
-		return diag.Errorf("Error creating log group: %s", err)
+		return fmterr.Errorf("Error creating log group: %s", err)
 	}
 
 	d.SetId(groupCreate.ID)
@@ -62,12 +63,12 @@ func resourceGroupV2Read(ctx context.Context, d *schema.ResourceData, meta inter
 	config := meta.(*cfg.Config)
 	client, err := config.LtsV2Client(config.GetRegion(d))
 	if err != nil {
-		return diag.Errorf("Error creating OpenTelekomCloud LTS client: %s", err)
+		return fmterr.Errorf("Error creating OpenTelekomCloud LTS client: %s", err)
 	}
 
 	group, err := loggroups.Get(client, d.Id()).Extract()
 	if err != nil {
-		return diag.Errorf("Error getting OpenTelekomCloud log group %s: %s", d.Id(), err)
+		return fmterr.Errorf("Error getting OpenTelekomCloud log group %s: %s", d.Id(), err)
 	}
 
 	log.Printf("[DEBUG] Retrieved Cluster %s: %#v", d.Id(), group)
@@ -81,7 +82,7 @@ func resourceGroupV2Delete(ctx context.Context, d *schema.ResourceData, meta int
 	config := meta.(*cfg.Config)
 	client, err := config.LtsV2Client(config.GetRegion(d))
 	if err != nil {
-		return diag.Errorf("Error creating OpenTelekomCloud LTS client: %s", err)
+		return fmterr.Errorf("Error creating OpenTelekomCloud LTS client: %s", err)
 	}
 
 	err = loggroups.Delete(client, d.Id()).ExtractErr()

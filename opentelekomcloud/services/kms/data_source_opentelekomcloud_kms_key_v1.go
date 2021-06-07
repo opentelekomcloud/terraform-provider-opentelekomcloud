@@ -11,6 +11,7 @@ import (
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/kms/v1/keys"
 
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common/cfg"
+	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common/fmterr"
 )
 
 func DataSourceKmsKeyV1() *schema.Resource {
@@ -83,7 +84,7 @@ func dataSourceKmsKeyV1Read(ctx context.Context, d *schema.ResourceData, meta in
 	config := meta.(*cfg.Config)
 	KmsKeyV1Client, err := config.KmsKeyV1Client(config.GetRegion(d))
 	if err != nil {
-		return diag.Errorf("Error creating OpenTelekomCloud kms key client: %s", err)
+		return fmterr.Errorf("Error creating OpenTelekomCloud kms key client: %s", err)
 	}
 
 	is_list_key := true
@@ -156,12 +157,12 @@ func dataSourceKmsKeyV1Read(ctx context.Context, d *schema.ResourceData, meta in
 	}
 
 	if len(allKeys) < 1 {
-		return diag.Errorf("Your query returned no results. " +
+		return fmterr.Errorf("Your query returned no results. " +
 			"Please change your search criteria and try again.")
 	}
 
 	if len(allKeys) > 1 {
-		return diag.Errorf("Your query returned more than one result." +
+		return fmterr.Errorf("Your query returned more than one result." +
 			" Please try a more specific search criteria")
 	}
 

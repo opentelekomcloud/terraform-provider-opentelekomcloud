@@ -10,6 +10,7 @@ import (
 	"github.com/opentelekomcloud/gophertelekomcloud/pagination"
 
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common/cfg"
+	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common/fmterr"
 )
 
 func DataSourceVpnServiceV2() *schema.Resource {
@@ -79,7 +80,7 @@ func dataSourceVpnServiceV2Read(ctx context.Context, d *schema.ResourceData, met
 	config := meta.(*cfg.Config)
 	networkingClient, err := config.NetworkingV2Client(config.GetRegion(d))
 	if err != nil {
-		return diag.Errorf("Error creating OpenTelekomCloud networking client: %s", err)
+		return fmterr.Errorf("Error creating OpenTelekomCloud networking client: %s", err)
 	}
 	adminStateUp := d.Get("admin_state_up").(bool)
 	listOpts := services.ListOpts{
@@ -113,11 +114,11 @@ func dataSourceVpnServiceV2Read(ctx context.Context, d *schema.ResourceData, met
 	}
 
 	if len(refinedVpns) < 1 {
-		return diag.Errorf("Your query returned zero results. Please change your search criteria and try again.")
+		return fmterr.Errorf("Your query returned zero results. Please change your search criteria and try again.")
 	}
 
 	if len(refinedVpns) > 1 {
-		return diag.Errorf("Your query returned more than one result. Please try a more specific search criteria")
+		return fmterr.Errorf("Your query returned more than one result. Please try a more specific search criteria")
 	}
 	Vpn := refinedVpns[0]
 

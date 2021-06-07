@@ -14,6 +14,7 @@ import (
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/networking/v2/extensions/lbaas_v2/loadbalancers"
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common"
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common/cfg"
+	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common/fmterr"
 )
 
 func ResourceLoadBalancerV2() *schema.Resource {
@@ -86,7 +87,7 @@ func resourceLoadBalancerV2Create(ctx context.Context, d *schema.ResourceData, m
 	config := meta.(*cfg.Config)
 	client, err := config.NetworkingV2Client(config.GetRegion(d))
 	if err != nil {
-		return diag.Errorf("error creating OpenTelekomCloud NetworkingV2 client: %s", err)
+		return fmterr.Errorf("error creating OpenTelekomCloud NetworkingV2 client: %s", err)
 	}
 
 	var lbProvider string
@@ -108,7 +109,7 @@ func resourceLoadBalancerV2Create(ctx context.Context, d *schema.ResourceData, m
 	log.Printf("[DEBUG] Create Options: %#v", createOpts)
 	lb, err := loadbalancers.Create(client, createOpts).Extract()
 	if err != nil {
-		return diag.Errorf("error creating LoadBalancer: %s", err)
+		return fmterr.Errorf("error creating LoadBalancer: %s", err)
 	}
 
 	// Wait for LoadBalancer to become active before continuing
@@ -123,7 +124,7 @@ func resourceLoadBalancerV2Create(ctx context.Context, d *schema.ResourceData, m
 	if len(tagRaw) > 0 {
 		tagList := common.ExpandResourceTags(tagRaw)
 		if err := tags.Create(client, "loadbalancers", lb.ID, tagList).ExtractErr(); err != nil {
-			return diag.Errorf("error setting tags of LoadBalancer: %s", err)
+			return fmterr.Errorf("error setting tags of LoadBalancer: %s", err)
 		}
 	}
 
@@ -137,7 +138,7 @@ func resourceLoadBalancerV2Read(ctx context.Context, d *schema.ResourceData, met
 	config := meta.(*cfg.Config)
 	client, err := config.NetworkingV2Client(config.GetRegion(d))
 	if err != nil {
-		return diag.Errorf("error creating OpenTelekomCloud NetworkingV2 client: %s", err)
+		return fmterr.Errorf("error creating OpenTelekomCloud NetworkingV2 client: %s", err)
 	}
 
 	lb, err := loadbalancers.Get(client, d.Id()).Extract()
@@ -166,11 +167,11 @@ func resourceLoadBalancerV2Read(ctx context.Context, d *schema.ResourceData, met
 	// save tags
 	resourceTags, err := tags.Get(client, "loadbalancers", d.Id()).Extract()
 	if err != nil {
-		return diag.Errorf("error fetching OpenTelekomCloud LoadCalancer tags: %s", err)
+		return fmterr.Errorf("error fetching OpenTelekomCloud LoadCalancer tags: %s", err)
 	}
 	tagMap := common.TagsToMap(resourceTags)
 	if err := d.Set("tags", tagMap); err != nil {
-		return diag.Errorf("error saving tags for OpenTelekomCloud LoadCalancer: %s", err)
+		return fmterr.Errorf("error saving tags for OpenTelekomCloud LoadCalancer: %s", err)
 	}
 
 	return nil
@@ -180,7 +181,7 @@ func resourceLoadBalancerV2Update(ctx context.Context, d *schema.ResourceData, m
 	config := meta.(*cfg.Config)
 	client, err := config.NetworkingV2Client(config.GetRegion(d))
 	if err != nil {
-		return diag.Errorf("error creating OpenTelekomCloud NetworkingV2 client: %s", err)
+		return fmterr.Errorf("error creating OpenTelekomCloud NetworkingV2 client: %s", err)
 	}
 
 	var updateOpts loadbalancers.UpdateOpts
@@ -211,7 +212,7 @@ func resourceLoadBalancerV2Update(ctx context.Context, d *schema.ResourceData, m
 		return nil
 	})
 	if err != nil {
-		return diag.Errorf("unable to update loadbalancer %s: %s", d.Id(), err)
+		return fmterr.Errorf("unable to update loadbalancer %s: %s", d.Id(), err)
 	}
 
 	// Wait for LoadBalancer to become active before continuing
@@ -223,7 +224,7 @@ func resourceLoadBalancerV2Update(ctx context.Context, d *schema.ResourceData, m
 	// update tags
 	if d.HasChange("tags") {
 		if err := common.UpdateResourceTags(client, d, "loadbalancers", d.Id()); err != nil {
-			return diag.Errorf("error updating tags of LoadBalancer %s: %s", d.Id(), err)
+			return fmterr.Errorf("error updating tags of LoadBalancer %s: %s", d.Id(), err)
 		}
 	}
 
@@ -234,7 +235,7 @@ func resourceLoadBalancerV2Delete(ctx context.Context, d *schema.ResourceData, m
 	config := meta.(*cfg.Config)
 	client, err := config.NetworkingV2Client(config.GetRegion(d))
 	if err != nil {
-		return diag.Errorf("error creating OpenTelekomCloud NetworkingV2 client: %s", err)
+		return fmterr.Errorf("error creating OpenTelekomCloud NetworkingV2 client: %s", err)
 	}
 
 	log.Printf("[DEBUG] Deleting loadbalancer %s", d.Id())
@@ -247,7 +248,7 @@ func resourceLoadBalancerV2Delete(ctx context.Context, d *schema.ResourceData, m
 		return nil
 	})
 	if err != nil {
-		return diag.Errorf("unable to delete loadbalancer %s: %s", d.Id(), err)
+		return fmterr.Errorf("unable to delete loadbalancer %s: %s", d.Id(), err)
 	}
 
 	// Wait for LoadBalancer to become delete

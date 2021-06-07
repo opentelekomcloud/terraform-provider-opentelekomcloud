@@ -14,7 +14,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
-	"github.com/opentelekomcloud/gophertelekomcloud"
+	golangsdk "github.com/opentelekomcloud/gophertelekomcloud"
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/cce/v3/addons"
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/cce/v3/clusters"
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/networking/v1/subnets"
@@ -23,6 +23,7 @@ import (
 
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common"
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common/cfg"
+	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common/fmterr"
 )
 
 var (
@@ -268,15 +269,15 @@ func resourceCCEClusterV3Create(ctx context.Context, d *schema.ResourceData, met
 	cceClient, err := config.CceV3Client(config.GetRegion(d))
 
 	if err != nil {
-		return diag.Errorf(cceClientError, err)
+		return fmterr.Errorf(cceClientError, err)
 	}
 	if d.Get("eip").(string) != "" {
 		fipId, err := resourceFloatingIPV2Exists(d, meta, d.Get("eip").(string))
 		if err != nil {
-			return diag.Errorf("error retrieving the eip: %w", err)
+			return fmterr.Errorf("error retrieving the eip: %w", err)
 		}
 		if fipId == "" {
-			return diag.Errorf("the specified EIP %s does not exist", d.Get("eip").(string))
+			return fmterr.Errorf("the specified EIP %s does not exist", d.Get("eip").(string))
 		}
 	}
 
@@ -324,7 +325,7 @@ func resourceCCEClusterV3Create(ctx context.Context, d *schema.ResourceData, met
 		if isAuthRequired(err) {
 			err = fmt.Errorf("CCE is not authorized, see `cce_cluster_v3` documentation for details")
 		}
-		return diag.Errorf("error creating opentelekomcloud Cluster: %w", err)
+		return fmterr.Errorf("error creating opentelekomcloud Cluster: %w", err)
 	}
 
 	log.Printf("[DEBUG] Waiting for opentelekomcloud CCE cluster (%s) to become available", create.Metadata.Id)
@@ -340,12 +341,12 @@ func resourceCCEClusterV3Create(ctx context.Context, d *schema.ResourceData, met
 
 	_, err = stateConf.WaitForState()
 	if err != nil {
-		return diag.Errorf("error creating OpenTelekomCloud CCE cluster: %s", err)
+		return fmterr.Errorf("error creating OpenTelekomCloud CCE cluster: %s", err)
 	}
 	d.SetId(create.Metadata.Id)
 
 	if err := waitForInstalledAddons(d, config); err != nil {
-		return diag.Errorf("error waiting for default addons to install")
+		return fmterr.Errorf("error waiting for default addons to install")
 	}
 
 	if d.Get("no_addons").(bool) {
@@ -361,7 +362,7 @@ func resourceCCEClusterV3Read(ctx context.Context, d *schema.ResourceData, meta 
 	config := meta.(*cfg.Config)
 	cceClient, err := config.CceV3Client(config.GetRegion(d))
 	if err != nil {
-		return diag.Errorf(cceClientError, err)
+		return fmterr.Errorf(cceClientError, err)
 	}
 
 	cluster, err := clusters.Get(cceClient, d.Id()).Extract()
@@ -370,14 +371,14 @@ func resourceCCEClusterV3Read(ctx context.Context, d *schema.ResourceData, meta 
 			d.SetId("")
 			return nil
 		}
-		return diag.Errorf("error retrieving opentelekomcloud CCE: %w", err)
+		return fmterr.Errorf("error retrieving opentelekomcloud CCE: %w", err)
 	}
 
 	eip := ""
 	if cluster.Status.Endpoints[0].External != "" {
 		endpointURL, err := url.Parse(cluster.Status.Endpoints[0].External)
 		if err != nil {
-			return diag.Errorf("error parsing endpoint URL: %w", err)
+			return fmterr.Errorf("error parsing endpoint URL: %w", err)
 		}
 		eip = endpointURL.Hostname()
 	}
@@ -405,12 +406,12 @@ func resourceCCEClusterV3Read(ctx context.Context, d *schema.ResourceData, meta 
 		d.Set("eip", eip),
 	)
 	if err := mErr.ErrorOrNil(); err != nil {
-		return diag.Errorf("error setting cce cluster fields: %w", err)
+		return fmterr.Errorf("error setting cce cluster fields: %w", err)
 	}
 
 	cert, err := clusters.GetCert(cceClient, d.Id()).Extract()
 	if err != nil {
-		return diag.Errorf("error retrieving opentelekomcloud CCE cluster cert: %w", err)
+		return fmterr.Errorf("error retrieving opentelekomcloud CCE cluster cert: %w", err)
 	}
 
 	// Set Certificate Clusters
@@ -443,14 +444,14 @@ func resourceCCEClusterV3Read(ctx context.Context, d *schema.ResourceData, meta 
 
 	instances, err := listInstalledAddons(d, config)
 	if err != nil {
-		return diag.Errorf("error listing installed addons: %w", err)
+		return fmterr.Errorf("error listing installed addons: %w", err)
 	}
 	installedAddons := make([]string, len(instances.Items))
 	for i, instance := range instances.Items {
 		installedAddons[i] = instance.Metadata.ID
 	}
 	if err := d.Set("installed_addons", installedAddons); err != nil {
-		return diag.Errorf("error setting installed addons: %w", err)
+		return fmterr.Errorf("error setting installed addons: %w", err)
 	}
 
 	return nil
@@ -460,7 +461,7 @@ func resourceCCEClusterV3Update(ctx context.Context, d *schema.ResourceData, met
 	config := meta.(*cfg.Config)
 	cceClient, err := config.CceV3Client(config.GetRegion(d))
 	if err != nil {
-		return diag.Errorf(cceClientError, err)
+		return fmterr.Errorf(cceClientError, err)
 	}
 
 	var updateOpts clusters.UpdateOpts
@@ -469,7 +470,7 @@ func resourceCCEClusterV3Update(ctx context.Context, d *schema.ResourceData, met
 		updateOpts.Spec.Description = d.Get("description").(string)
 		_, err = clusters.Update(cceClient, d.Id(), updateOpts).Extract()
 		if err != nil {
-			return diag.Errorf("error updating opentelekomcloud CCE: %w", err)
+			return fmterr.Errorf("error updating opentelekomcloud CCE: %w", err)
 		}
 	}
 
@@ -481,10 +482,10 @@ func resourceCCEClusterV3Update(ctx context.Context, d *schema.ResourceData, met
 		if newEipStr != "" {
 			fipId, err = resourceFloatingIPV2Exists(d, meta, newEipStr)
 			if err != nil {
-				return diag.Errorf("error retrieving the eip: %w", err)
+				return fmterr.Errorf("error retrieving the eip: %w", err)
 			}
 			if fipId == "" {
-				return diag.Errorf("the specified EIP %s does not exist", newEipStr)
+				return fmterr.Errorf("the specified EIP %s does not exist", newEipStr)
 			}
 		}
 		if oldEipStr != "" {
@@ -493,7 +494,7 @@ func resourceCCEClusterV3Update(ctx context.Context, d *schema.ResourceData, met
 			}
 			err = clusters.UpdateMasterIp(cceClient, d.Id(), updateIpOpts).ExtractErr()
 			if err != nil {
-				return diag.Errorf("error unbinding EIP to opentelekomcloud CCE: %w", err)
+				return fmterr.Errorf("error unbinding EIP to opentelekomcloud CCE: %w", err)
 			}
 		}
 		if newEipStr != "" {
@@ -504,7 +505,7 @@ func resourceCCEClusterV3Update(ctx context.Context, d *schema.ResourceData, met
 			updateIpOpts.Spec.ID = fipId
 			err = clusters.UpdateMasterIp(cceClient, d.Id(), updateIpOpts).ExtractErr()
 			if err != nil {
-				return diag.Errorf("error binding EIP to opentelekomcloud CCE: %w", err)
+				return fmterr.Errorf("error binding EIP to opentelekomcloud CCE: %w", err)
 			}
 		}
 	}
@@ -516,11 +517,11 @@ func resourceCCEClusterV3Delete(ctx context.Context, d *schema.ResourceData, met
 	config := meta.(*cfg.Config)
 	cceClient, err := config.CceV3Client(config.GetRegion(d))
 	if err != nil {
-		return diag.Errorf(cceClientError, err)
+		return fmterr.Errorf(cceClientError, err)
 	}
 	err = clusters.Delete(cceClient, d.Id()).ExtractErr()
 	if err != nil {
-		return diag.Errorf("error deleting opentelekomcloud CCE Cluster: %w", err)
+		return fmterr.Errorf("error deleting opentelekomcloud CCE Cluster: %w", err)
 	}
 	stateConf := &resource.StateChangeConf{
 		Pending:    []string{"Deleting", "Available", "Unavailable"},
@@ -534,7 +535,7 @@ func resourceCCEClusterV3Delete(ctx context.Context, d *schema.ResourceData, met
 	_, err = stateConf.WaitForState()
 
 	if err != nil {
-		return diag.Errorf("error deleting opentelekomcloud CCE cluster: %w", err)
+		return fmterr.Errorf("error deleting opentelekomcloud CCE cluster: %w", err)
 	}
 
 	d.SetId("")

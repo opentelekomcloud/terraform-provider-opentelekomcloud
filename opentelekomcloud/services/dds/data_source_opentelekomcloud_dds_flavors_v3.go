@@ -10,6 +10,7 @@ import (
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/dds/v3/flavors"
 
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common/cfg"
+	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common/fmterr"
 )
 
 func DataSourceDdsFlavorV3() *schema.Resource {
@@ -77,7 +78,7 @@ func dataSourceDdsFlavorV3Read(ctx context.Context, d *schema.ResourceData, meta
 	config := meta.(*cfg.Config)
 	ddsClient, err := config.DdsV3Client(config.GetRegion(d))
 	if err != nil {
-		return diag.Errorf("error creating OpenTelekomCloud DDS client: %s", err)
+		return fmterr.Errorf("error creating OpenTelekomCloud DDS client: %s", err)
 	}
 
 	listOpts := flavors.ListOpts{
@@ -87,12 +88,12 @@ func dataSourceDdsFlavorV3Read(ctx context.Context, d *schema.ResourceData, meta
 
 	pages, err := flavors.List(ddsClient, listOpts).AllPages()
 	if err != nil {
-		return diag.Errorf("unable to all flavor pages: %s", err)
+		return fmterr.Errorf("unable to all flavor pages: %s", err)
 	}
 
 	extractedFlavors, err := flavors.ExtractFlavors(pages)
 	if err != nil {
-		return diag.Errorf("unable to extract flavors: %s", err)
+		return fmterr.Errorf("unable to extract flavors: %s", err)
 	}
 
 	matchFlavorList := make([]map[string]interface{}, 0)
@@ -116,7 +117,7 @@ func dataSourceDdsFlavorV3Read(ctx context.Context, d *schema.ResourceData, meta
 	}
 
 	if len(matchFlavorList) < 1 {
-		return diag.Errorf("your query returned no results. Please change your search criteria and try again")
+		return fmterr.Errorf("your query returned no results. Please change your search criteria and try again")
 	}
 
 	d.SetId("flavors")

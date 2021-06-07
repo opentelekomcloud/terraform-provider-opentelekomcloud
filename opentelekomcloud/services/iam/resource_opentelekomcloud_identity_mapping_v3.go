@@ -6,11 +6,12 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
-	"github.com/opentelekomcloud/gophertelekomcloud"
+	golangsdk "github.com/opentelekomcloud/gophertelekomcloud"
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/identity/v3/federation/mappings"
 
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common"
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common/cfg"
+	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common/fmterr"
 )
 
 const mappingError = "error %s identity mapping v3: %w"
@@ -54,7 +55,7 @@ func resourceIdentityMappingV3Create(ctx context.Context, d *schema.ResourceData
 	config := meta.(*cfg.Config)
 	client, err := config.IdentityV3Client(config.GetRegion(d))
 	if err != nil {
-		return diag.Errorf(clientCreationFail, err)
+		return fmterr.Errorf(clientCreationFail, err)
 	}
 
 	rulesRaw := d.Get("rules").(string)
@@ -70,7 +71,7 @@ func resourceIdentityMappingV3Create(ctx context.Context, d *schema.ResourceData
 	mappingID := d.Get("mapping_id").(string)
 	mapping, err := mappings.Create(client, mappingID, createOpts).Extract()
 	if err != nil {
-		return diag.Errorf(mappingError, "creating", err)
+		return fmterr.Errorf(mappingError, "creating", err)
 	}
 
 	d.SetId(mapping.ID)
@@ -82,7 +83,7 @@ func resourceIdentityMappingV3Read(ctx context.Context, d *schema.ResourceData, 
 	config := meta.(*cfg.Config)
 	client, err := config.IdentityV3Client(config.GetRegion(d))
 	if err != nil {
-		return diag.Errorf(clientCreationFail, err)
+		return fmterr.Errorf(clientCreationFail, err)
 	}
 
 	mapping, err := mappings.Get(client, d.Id()).Extract()
@@ -91,7 +92,7 @@ func resourceIdentityMappingV3Read(ctx context.Context, d *schema.ResourceData, 
 			d.SetId("")
 			return nil
 		}
-		return diag.Errorf(mappingError, "reading", err)
+		return fmterr.Errorf(mappingError, "reading", err)
 	}
 
 	rules, err := json.Marshal(mapping.Rules)
@@ -107,7 +108,7 @@ func resourceIdentityMappingV3Read(ctx context.Context, d *schema.ResourceData, 
 	}
 
 	if err := d.Set("links", mapping.Links); err != nil {
-		return diag.Errorf("error setting identity mapping links: %w", err)
+		return fmterr.Errorf("error setting identity mapping links: %w", err)
 	}
 
 	return nil
@@ -117,7 +118,7 @@ func resourceIdentityMappingV3Update(ctx context.Context, d *schema.ResourceData
 	config := meta.(*cfg.Config)
 	client, err := config.IdentityV3Client(config.GetRegion(d))
 	if err != nil {
-		return diag.Errorf(clientCreationFail, err)
+		return fmterr.Errorf(clientCreationFail, err)
 	}
 	changes := false
 	updateOpts := mappings.UpdateOpts{}
@@ -135,7 +136,7 @@ func resourceIdentityMappingV3Update(ctx context.Context, d *schema.ResourceData
 	if changes {
 		_, err := mappings.Update(client, d.Id(), updateOpts).Extract()
 		if err != nil {
-			return diag.Errorf(mappingError, "updating", err)
+			return fmterr.Errorf(mappingError, "updating", err)
 		}
 	}
 
@@ -146,11 +147,11 @@ func resourceIdentityMappingV3Delete(ctx context.Context, d *schema.ResourceData
 	config := meta.(*cfg.Config)
 	client, err := config.IdentityV3Client(config.GetRegion(d))
 	if err != nil {
-		return diag.Errorf(clientCreationFail, err)
+		return fmterr.Errorf(clientCreationFail, err)
 	}
 
 	if err := mappings.Delete(client, d.Id()).ExtractErr(); err != nil {
-		return diag.Errorf(mappingError, "deleting", err)
+		return fmterr.Errorf(mappingError, "deleting", err)
 	}
 
 	return nil

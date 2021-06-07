@@ -7,11 +7,12 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
-	"github.com/opentelekomcloud/gophertelekomcloud"
+	golangsdk "github.com/opentelekomcloud/gophertelekomcloud"
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/identity/v3/users"
 
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common"
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common/cfg"
+	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common/fmterr"
 )
 
 func ResourceIdentityGroupMembershipV3() *schema.Resource {
@@ -44,7 +45,7 @@ func resourceIdentityGroupMembershipV3Create(ctx context.Context, d *schema.Reso
 	config := meta.(*cfg.Config)
 	identityClient, err := config.IdentityV3Client(config.GetRegion(d))
 	if err != nil {
-		return diag.Errorf("Error creating OpenTelekomcloud identity client: %s", err)
+		return fmterr.Errorf("Error creating OpenTelekomcloud identity client: %s", err)
 	}
 
 	group := d.Get("group").(string)
@@ -63,7 +64,7 @@ func resourceIdentityGroupMembershipV3Read(ctx context.Context, d *schema.Resour
 	config := meta.(*cfg.Config)
 	identityClient, err := config.IdentityV3Client(config.GetRegion(d))
 	if err != nil {
-		return diag.Errorf("Error creating OpenTelekomcloud identity client: %s", err)
+		return fmterr.Errorf("Error creating OpenTelekomcloud identity client: %s", err)
 	}
 	group := d.Get("group").(string)
 	userList := d.Get("users").(*schema.Set)
@@ -75,13 +76,13 @@ func resourceIdentityGroupMembershipV3Read(ctx context.Context, d *schema.Resour
 			d.SetId("")
 			return nil
 		} else {
-			return diag.Errorf("Unable to query groups: %s", err)
+			return fmterr.Errorf("Unable to query groups: %s", err)
 		}
 	}
 
 	allUsers, err := users.ExtractUsers(allPages)
 	if err != nil {
-		return diag.Errorf("Unable to retrieve users: %s", err)
+		return fmterr.Errorf("Unable to retrieve users: %s", err)
 	}
 
 	for _, u := range allUsers {
@@ -91,7 +92,7 @@ func resourceIdentityGroupMembershipV3Read(ctx context.Context, d *schema.Resour
 	}
 
 	if err := d.Set("users", ul); err != nil {
-		return diag.Errorf("Error setting user list from IAM (%s), error: %s", group, err)
+		return fmterr.Errorf("Error setting user list from IAM (%s), error: %s", group, err)
 	}
 
 	return nil
@@ -101,7 +102,7 @@ func resourceIdentityGroupMembershipV3Update(ctx context.Context, d *schema.Reso
 	config := meta.(*cfg.Config)
 	identityClient, err := config.IdentityV3Client(config.GetRegion(d))
 	if err != nil {
-		return diag.Errorf("Error creating OpenTelekomCloud identity client: %s", err)
+		return fmterr.Errorf("Error creating OpenTelekomCloud identity client: %s", err)
 	}
 
 	if d.HasChange("users") {
@@ -121,11 +122,11 @@ func resourceIdentityGroupMembershipV3Update(ctx context.Context, d *schema.Reso
 		add := common.ExpandStringList(ns.Difference(os).List())
 
 		if err := removeUsersFromGroup(identityClient, group, remove); err != nil {
-			return diag.Errorf("Error update user-group-membership: %s", err)
+			return fmterr.Errorf("Error update user-group-membership: %s", err)
 		}
 
 		if err := addUsersToGroup(identityClient, group, add); err != nil {
-			return diag.Errorf("Error update user-group-membership: %s", err)
+			return fmterr.Errorf("Error update user-group-membership: %s", err)
 		}
 	}
 
@@ -136,14 +137,14 @@ func resourceIdentityGroupMembershipV3Delete(ctx context.Context, d *schema.Reso
 	config := meta.(*cfg.Config)
 	identityClient, err := config.IdentityV3Client(config.GetRegion(d))
 	if err != nil {
-		return diag.Errorf("Error creating OpenStack identity client: %s", err)
+		return fmterr.Errorf("Error creating OpenStack identity client: %s", err)
 	}
 
 	group := d.Get("group").(string)
 	users := common.ExpandStringList(d.Get("users").(*schema.Set).List())
 
 	if err := removeUsersFromGroup(identityClient, group, users); err != nil {
-		return diag.Errorf("Error delete user-group-membership: %s", err)
+		return fmterr.Errorf("Error delete user-group-membership: %s", err)
 	}
 
 	d.SetId("")

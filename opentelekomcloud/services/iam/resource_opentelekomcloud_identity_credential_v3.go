@@ -10,6 +10,7 @@ import (
 
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common"
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common/cfg"
+	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common/fmterr"
 )
 
 func ResourceIdentityCredentialV3() *schema.Resource {
@@ -60,7 +61,7 @@ func resourceIdentityCredentialV3Create(ctx context.Context, d *schema.ResourceD
 	config := meta.(*cfg.Config)
 	client, err := config.IdentityV3Client()
 	if err != nil {
-		return diag.Errorf("error creating OpenStack identity client: %s", err)
+		return fmterr.Errorf("error creating OpenStack identity client: %s", err)
 	}
 
 	userID, ok := d.GetOk("user_id")
@@ -69,7 +70,7 @@ func resourceIdentityCredentialV3Create(ctx context.Context, d *schema.ResourceD
 	}
 
 	if userID == "" {
-		return diag.Errorf("error defining current user ID, please either provide " +
+		return fmterr.Errorf("error defining current user ID, please either provide " +
 			"`user_id` or authenticate with token auth (not using AK/SK)")
 	}
 
@@ -78,7 +79,7 @@ func resourceIdentityCredentialV3Create(ctx context.Context, d *schema.ResourceD
 		Description: d.Get("description").(string),
 	}).Extract()
 	if err != nil {
-		return diag.Errorf("error creating AK/SK: %s", err)
+		return fmterr.Errorf("error creating AK/SK: %s", err)
 	}
 
 	d.SetId(credential.AccessKey)
@@ -91,7 +92,7 @@ func resourceIdentityCredentialV3Read(ctx context.Context, d *schema.ResourceDat
 	config := meta.(*cfg.Config)
 	client, err := config.IdentityV3Client()
 	if err != nil {
-		return diag.Errorf("error creating OpenStack identity client: %s", err)
+		return fmterr.Errorf("error creating OpenStack identity client: %s", err)
 	}
 	credential, err := credentials.Get(client, d.Id()).Extract()
 	if err != nil {
@@ -99,7 +100,7 @@ func resourceIdentityCredentialV3Read(ctx context.Context, d *schema.ResourceDat
 			d.SetId("")
 			return nil
 		}
-		return diag.Errorf("error retrieving AK/SK information: %s", err)
+		return fmterr.Errorf("error retrieving AK/SK information: %s", err)
 	}
 	mErr := multierror.Append(nil,
 		d.Set("user_id", credential.UserID),
@@ -110,7 +111,7 @@ func resourceIdentityCredentialV3Read(ctx context.Context, d *schema.ResourceDat
 		d.Set("description", credential.Description),
 	)
 	if err := mErr.ErrorOrNil(); err != nil {
-		return diag.Errorf("error setting AK/SK attributes: %s", err)
+		return fmterr.Errorf("error setting AK/SK attributes: %s", err)
 	}
 	return nil
 }
@@ -119,7 +120,7 @@ func resourceIdentityCredentialV3Update(ctx context.Context, d *schema.ResourceD
 	config := meta.(*cfg.Config)
 	client, err := config.IdentityV3Client()
 	if err != nil {
-		return diag.Errorf("error creating OpenStack identity client: %s", err)
+		return fmterr.Errorf("error creating OpenStack identity client: %s", err)
 	}
 	opts := credentials.UpdateOpts{}
 	if d.HasChange("status") {
@@ -130,7 +131,7 @@ func resourceIdentityCredentialV3Update(ctx context.Context, d *schema.ResourceD
 	}
 	_, err = credentials.Update(client, d.Id(), opts).Extract()
 	if err != nil {
-		return diag.Errorf("error updating AK/SK: %s", err)
+		return fmterr.Errorf("error updating AK/SK: %s", err)
 	}
 	return resourceIdentityCredentialV3Read(ctx, d, meta)
 }
@@ -139,11 +140,11 @@ func resourceIdentityCredentialV3Delete(ctx context.Context, d *schema.ResourceD
 	config := meta.(*cfg.Config)
 	client, err := config.IdentityV3Client()
 	if err != nil {
-		return diag.Errorf("error creating OpenStack identity client: %s", err)
+		return fmterr.Errorf("error creating OpenStack identity client: %s", err)
 	}
 	err = credentials.Delete(client, d.Id()).ExtractErr()
 	if err != nil {
-		return diag.Errorf("error deleting AK/SK: %s", err)
+		return fmterr.Errorf("error deleting AK/SK: %s", err)
 	}
 	d.SetId("")
 	return nil

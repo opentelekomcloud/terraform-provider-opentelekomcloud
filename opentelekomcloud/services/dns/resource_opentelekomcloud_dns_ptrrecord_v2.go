@@ -12,12 +12,13 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
-	"github.com/opentelekomcloud/gophertelekomcloud"
+	golangsdk "github.com/opentelekomcloud/gophertelekomcloud"
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/common/tags"
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/dns/v2/ptrrecords"
 
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common"
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common/cfg"
+	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common/fmterr"
 )
 
 func ResourceDNSPtrRecordV2() *schema.Resource {
@@ -70,7 +71,7 @@ func resourceDNSPtrRecordV2Create(ctx context.Context, d *schema.ResourceData, m
 	region := config.GetRegion(d)
 	client, err := config.DnsV2Client(region)
 	if err != nil {
-		return diag.Errorf("error creating OpenTelekomCloud DNS client: %s", err)
+		return fmterr.Errorf("error creating OpenTelekomCloud DNS client: %s", err)
 	}
 
 	tagMap := d.Get("tags").(map[string]interface{})
@@ -94,7 +95,7 @@ func resourceDNSPtrRecordV2Create(ctx context.Context, d *schema.ResourceData, m
 	fipID := d.Get("floatingip_id").(string)
 	ptr, err := ptrrecords.Create(client, region, fipID, createOpts).Extract()
 	if err != nil {
-		return diag.Errorf("error creating OpenTelekomCloud DNS PTR record: %s", err)
+		return fmterr.Errorf("error creating OpenTelekomCloud DNS PTR record: %s", err)
 	}
 
 	log.Printf("[DEBUG] Waiting for DNS PTR record (%s) to become available", ptr.ID)
@@ -109,7 +110,7 @@ func resourceDNSPtrRecordV2Create(ctx context.Context, d *schema.ResourceData, m
 	_, err = stateConf.WaitForState()
 
 	if err != nil {
-		return diag.Errorf("error waiting for PTR record (%s) to become ACTIVE for creation: %s", ptr.ID, err)
+		return fmterr.Errorf("error waiting for PTR record (%s) to become ACTIVE for creation: %s", ptr.ID, err)
 	}
 	d.SetId(ptr.ID)
 
@@ -121,7 +122,7 @@ func resourceDNSPtrRecordV2Read(ctx context.Context, d *schema.ResourceData, met
 	config := meta.(*cfg.Config)
 	client, err := config.DnsV2Client(config.GetRegion(d))
 	if err != nil {
-		return diag.Errorf("error creating OpenTelekomCloud DNS client: %s", err)
+		return fmterr.Errorf("error creating OpenTelekomCloud DNS client: %s", err)
 	}
 
 	ptr, err := ptrrecords.Get(client, d.Id()).Extract()
@@ -151,12 +152,12 @@ func resourceDNSPtrRecordV2Read(ctx context.Context, d *schema.ResourceData, met
 	// save tags
 	resourceTags, err := tags.Get(client, "DNS-ptr_record", d.Id()).Extract()
 	if err != nil {
-		return diag.Errorf("error fetching OpenTelekomCloud DNS ptr record tags: %s", err)
+		return fmterr.Errorf("error fetching OpenTelekomCloud DNS ptr record tags: %s", err)
 	}
 
 	tagMap := common.TagsToMap(resourceTags)
 	if err := d.Set("tags", tagMap); err != nil {
-		return diag.Errorf("error saving tags for OpenTelekomCloud DNS ptr record %s: %s", d.Id(), err)
+		return fmterr.Errorf("error saving tags for OpenTelekomCloud DNS ptr record %s: %s", d.Id(), err)
 	}
 
 	return nil
@@ -167,7 +168,7 @@ func resourceDNSPtrRecordV2Update(ctx context.Context, d *schema.ResourceData, m
 	region := config.GetRegion(d)
 	client, err := config.DnsV2Client(region)
 	if err != nil {
-		return diag.Errorf("error creating OpenTelekomCloud DNS client: %s", err)
+		return fmterr.Errorf("error creating OpenTelekomCloud DNS client: %s", err)
 	}
 
 	tagMap := d.Get("tags").(map[string]interface{})
@@ -190,13 +191,13 @@ func resourceDNSPtrRecordV2Update(ctx context.Context, d *schema.ResourceData, m
 	fipID := d.Get("floatingip_id").(string)
 	ptr, err := ptrrecords.Create(client, region, fipID, createOpts).Extract()
 	if err != nil {
-		return diag.Errorf("error updating OpenTelekomCloud DNS PTR record: %s", err)
+		return fmterr.Errorf("error updating OpenTelekomCloud DNS PTR record: %s", err)
 	}
 
 	// update tags
 	if d.HasChange("tags") {
 		if err := common.UpdateResourceTags(client, d, "DNS-ptr_record", d.Id()); err != nil {
-			return diag.Errorf("error updating tags: %s", err)
+			return fmterr.Errorf("error updating tags: %s", err)
 		}
 	}
 
@@ -213,7 +214,7 @@ func resourceDNSPtrRecordV2Update(ctx context.Context, d *schema.ResourceData, m
 	_, err = stateConf.WaitForState()
 
 	if err != nil {
-		return diag.Errorf("error waiting for PTR record (%s) to become ACTIVE for update: %s", ptr.ID, err)
+		return fmterr.Errorf("error waiting for PTR record (%s) to become ACTIVE for update: %s", ptr.ID, err)
 	}
 
 	log.Printf("[DEBUG] Updated OpenTelekomCloud DNS PTR record %s: %#v", ptr.ID, ptr)
@@ -225,12 +226,12 @@ func resourceDNSPtrRecordV2Delete(ctx context.Context, d *schema.ResourceData, m
 	config := meta.(*cfg.Config)
 	client, err := config.DnsV2Client(config.GetRegion(d))
 	if err != nil {
-		return diag.Errorf("error creating OpenTelekomCloud DNS client: %s", err)
+		return fmterr.Errorf("error creating OpenTelekomCloud DNS client: %s", err)
 	}
 
 	err = ptrrecords.Delete(client, d.Id()).ExtractErr()
 	if err != nil {
-		return diag.Errorf("error deleting OpenTelekomCloud DNS PTR record: %s", err)
+		return fmterr.Errorf("error deleting OpenTelekomCloud DNS PTR record: %s", err)
 	}
 
 	log.Printf("[DEBUG] Waiting for DNS PTR record (%s) to be deleted", d.Id())
@@ -245,7 +246,7 @@ func resourceDNSPtrRecordV2Delete(ctx context.Context, d *schema.ResourceData, m
 
 	_, err = stateConf.WaitForState()
 	if err != nil {
-		return diag.Errorf("error waiting for PTR record (%s) to become DELETED for deletion: %s", d.Id(), err)
+		return fmterr.Errorf("error waiting for PTR record (%s) to become DELETED for deletion: %s", d.Id(), err)
 	}
 
 	d.SetId("")

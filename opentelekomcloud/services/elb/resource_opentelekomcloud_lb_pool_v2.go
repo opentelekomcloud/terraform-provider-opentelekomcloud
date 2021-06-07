@@ -16,6 +16,7 @@ import (
 
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common"
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common/cfg"
+	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common/fmterr"
 )
 
 func ResourceLBPoolV2() *schema.Resource {
@@ -142,7 +143,7 @@ func resourceLBPoolV2Create(ctx context.Context, d *schema.ResourceData, meta in
 	config := meta.(*cfg.Config)
 	client, err := config.NetworkingV2Client(config.GetRegion(d))
 	if err != nil {
-		return diag.Errorf("error creating OpenTelekomCloud NetworkingV2 client: %w", err)
+		return fmterr.Errorf("error creating OpenTelekomCloud NetworkingV2 client: %w", err)
 	}
 
 	adminStateUp := d.Get("admin_state_up").(bool)
@@ -195,7 +196,7 @@ func resourceLBPoolV2Create(ctx context.Context, d *schema.ResourceData, meta in
 		return nil
 	})
 	if err != nil {
-		return diag.Errorf("error creating pool: %w", err)
+		return fmterr.Errorf("error creating pool: %w", err)
 	}
 
 	// Wait for LoadBalancer to become active before continuing
@@ -218,7 +219,7 @@ func resourceLBPoolV2Read(ctx context.Context, d *schema.ResourceData, meta inte
 	config := meta.(*cfg.Config)
 	client, err := config.NetworkingV2Client(config.GetRegion(d))
 	if err != nil {
-		return diag.Errorf("error creating OpenTelekomCloud NetworkingV2 client: %w", err)
+		return fmterr.Errorf("error creating OpenTelekomCloud NetworkingV2 client: %w", err)
 	}
 
 	pool, err := pools.Get(client, d.Id()).Extract()
@@ -253,7 +254,7 @@ func resourceLBPoolV2Update(ctx context.Context, d *schema.ResourceData, meta in
 	config := meta.(*cfg.Config)
 	client, err := config.NetworkingV2Client(config.GetRegion(d))
 	if err != nil {
-		return diag.Errorf("error creating OpenTelekomCloud NetworkingV2 client: %w", err)
+		return fmterr.Errorf("error creating OpenTelekomCloud NetworkingV2 client: %w", err)
 	}
 
 	var updateOpts pools.UpdateOpts
@@ -293,7 +294,7 @@ func resourceLBPoolV2Update(ctx context.Context, d *schema.ResourceData, meta in
 	})
 
 	if err != nil {
-		return diag.Errorf("unable to update pool %s: %w", d.Id(), err)
+		return fmterr.Errorf("unable to update pool %s: %w", d.Id(), err)
 	}
 
 	// Wait for LoadBalancer to become active before continuing
@@ -313,7 +314,7 @@ func resourceLBPoolV2Delete(ctx context.Context, d *schema.ResourceData, meta in
 	config := meta.(*cfg.Config)
 	client, err := config.NetworkingV2Client(config.GetRegion(d))
 	if err != nil {
-		return diag.Errorf("error creating OpenTelekomCloud NetworkingV2 client: %w", err)
+		return fmterr.Errorf("error creating OpenTelekomCloud NetworkingV2 client: %w", err)
 	}
 
 	// Wait for LoadBalancer to become active before continuing

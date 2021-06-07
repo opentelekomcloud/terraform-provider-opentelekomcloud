@@ -12,6 +12,7 @@ import (
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/rts/v1/stacktemplates"
 
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common/cfg"
+	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common/fmterr"
 )
 
 func DataSourceRTSStackV1() *schema.Resource {
@@ -77,13 +78,13 @@ func dataSourceRTSStackV1Read(ctx context.Context, d *schema.ResourceData, meta 
 	config := meta.(*cfg.Config)
 	orchestrationClient, err := config.OrchestrationV1Client(config.GetRegion(d))
 	if err != nil {
-		return diag.Errorf("Error creating OpenTelekomCloud rts client: %s", err)
+		return fmterr.Errorf("Error creating OpenTelekomCloud rts client: %s", err)
 	}
 	stackName := d.Get("name").(string)
 
 	stack, err := stacks.Get(orchestrationClient, stackName).Extract()
 	if err != nil {
-		return diag.Errorf("Unable to retrieve stack %s: %s", stackName, err)
+		return fmterr.Errorf("Unable to retrieve stack %s: %s", stackName, err)
 	}
 
 	log.Printf("[INFO] Retrieved Stack %s", stackName)
@@ -109,7 +110,7 @@ func dataSourceRTSStackV1Read(ctx context.Context, d *schema.ResourceData, meta 
 	sTemplate := BytesToString(out)
 	template, err := normalizeStackTemplate(sTemplate)
 	if err != nil {
-		return diag.Errorf("template body contains an invalid JSON or YAML: %w", err)
+		return fmterr.Errorf("template body contains an invalid JSON or YAML: %w", err)
 	}
 	d.Set("template_body", template)
 

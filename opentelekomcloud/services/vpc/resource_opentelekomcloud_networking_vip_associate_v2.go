@@ -12,6 +12,7 @@ import (
 
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common"
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common/cfg"
+	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common/fmterr"
 )
 
 func ResourceNetworkingVIPAssociateV2() *schema.Resource {
@@ -73,7 +74,7 @@ func resourceNetworkingVIPAssociateV2Create(ctx context.Context, d *schema.Resou
 
 	networkingClient, err := config.NetworkingV2Client(config.GetRegion(d))
 	if err != nil {
-		return diag.Errorf("Error creating OpenTelekomCloud networking client: %s", err)
+		return fmterr.Errorf("Error creating OpenTelekomCloud networking client: %s", err)
 	}
 
 	// port by port
@@ -91,7 +92,7 @@ func resourceNetworkingVIPAssociateV2Create(ctx context.Context, d *schema.Resou
 			ipaddress = port.FixedIPs[0].IPAddress
 		}
 		if len(ipaddress) == 0 {
-			return diag.Errorf("IPAddress is empty, Error associate vip: %#v", port)
+			return fmterr.Errorf("IPAddress is empty, Error associate vip: %#v", port)
 		}
 
 		// Then get the vip information
@@ -129,7 +130,7 @@ func resourceNetworkingVIPAssociateV2Create(ctx context.Context, d *schema.Resou
 			log.Printf("[DEBUG] VIP Associate %s with options: %#v", vipid, associateOpts)
 			_, err = ports.Update(networkingClient, vipid, associateOpts).Extract()
 			if err != nil {
-				return diag.Errorf("Error associate vip: %s", err)
+				return fmterr.Errorf("Error associate vip: %s", err)
 			}
 		}
 
@@ -145,7 +146,7 @@ func resourceNetworkingVIPAssociateV2Create(ctx context.Context, d *schema.Resou
 		log.Printf("[DEBUG] Port Update %s with options: %#v", vipid, portUpdateOpts)
 		_, err = ports.Update(networkingClient, portid, portUpdateOpts).Extract()
 		if err != nil {
-			return diag.Errorf("Error update port: %s", err)
+			return fmterr.Errorf("Error update port: %s", err)
 		}
 	}
 
@@ -166,7 +167,7 @@ func resourceNetworkingVIPAssociateV2Read(ctx context.Context, d *schema.Resourc
 	// First see if the port still exists
 	networkingClient, err := config.NetworkingV2Client(config.GetRegion(d))
 	if err != nil {
-		return diag.Errorf("Error creating OpenTelekomCloud networking client: %s", err)
+		return fmterr.Errorf("Error creating OpenTelekomCloud networking client: %s", err)
 	}
 
 	// Then try to do this by querying the vip API.
@@ -221,7 +222,7 @@ func resourceNetworkingVIPAssociateV2Delete(ctx context.Context, d *schema.Resou
 	config := meta.(*cfg.Config)
 	networkingClient, err := config.NetworkingV2Client(config.GetRegion(d))
 	if err != nil {
-		return diag.Errorf("Error creating OpenTelekomCloud networking client: %s", err)
+		return fmterr.Errorf("Error creating OpenTelekomCloud networking client: %s", err)
 	}
 
 	// Obtain relevant info from parsing the ID
@@ -244,7 +245,7 @@ func resourceNetworkingVIPAssociateV2Delete(ctx context.Context, d *schema.Resou
 			ipaddress = port.FixedIPs[0].IPAddress
 		}
 		if len(ipaddress) == 0 {
-			return diag.Errorf("IPAddress is empty, Error disassociate vip: %#v", port)
+			return fmterr.Errorf("IPAddress is empty, Error disassociate vip: %#v", port)
 		}
 
 		// Then get the vip information
@@ -282,7 +283,7 @@ func resourceNetworkingVIPAssociateV2Delete(ctx context.Context, d *schema.Resou
 			log.Printf("[DEBUG] VIP Disassociate %s with options: %#v", vipid, disassociateOpts)
 			_, err = ports.Update(networkingClient, vipid, disassociateOpts).Extract()
 			if err != nil {
-				return diag.Errorf("Error disassociate vip: %s", err)
+				return fmterr.Errorf("Error disassociate vip: %s", err)
 			}
 		}
 	}

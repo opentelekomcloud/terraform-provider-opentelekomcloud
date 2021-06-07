@@ -10,6 +10,7 @@ import (
 
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common"
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common/cfg"
+	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common/fmterr"
 )
 
 func ResourceComputeServerGroupV2() *schema.Resource {
@@ -59,7 +60,7 @@ func resourceComputeServerGroupV2Create(ctx context.Context, d *schema.ResourceD
 	config := meta.(*cfg.Config)
 	computeClient, err := config.ComputeV2Client(config.GetRegion(d))
 	if err != nil {
-		return diag.Errorf("Error creating OpenTelekomCloud compute client: %s", err)
+		return fmterr.Errorf("Error creating OpenTelekomCloud compute client: %s", err)
 	}
 
 	createOpts := ServerGroupCreateOpts{
@@ -73,7 +74,7 @@ func resourceComputeServerGroupV2Create(ctx context.Context, d *schema.ResourceD
 	log.Printf("[DEBUG] Create Options: %#v", createOpts)
 	newSG, err := servergroups.Create(computeClient, createOpts).Extract()
 	if err != nil {
-		return diag.Errorf("Error creating ServerGroup: %s", err)
+		return fmterr.Errorf("Error creating ServerGroup: %s", err)
 	}
 
 	d.SetId(newSG.ID)
@@ -85,7 +86,7 @@ func resourceComputeServerGroupV2Read(ctx context.Context, d *schema.ResourceDat
 	config := meta.(*cfg.Config)
 	computeClient, err := config.ComputeV2Client(config.GetRegion(d))
 	if err != nil {
-		return diag.Errorf("Error creating OpenTelekomCloud compute client: %s", err)
+		return fmterr.Errorf("Error creating OpenTelekomCloud compute client: %s", err)
 	}
 
 	sg, err := servergroups.Get(computeClient, d.Id()).Extract()
@@ -104,7 +105,7 @@ func resourceComputeServerGroupV2Read(ctx context.Context, d *schema.ResourceDat
 		policies = append(policies, p)
 	}
 	if err := d.Set("policies", policies); err != nil {
-		return diag.Errorf("[DEBUG] Error saving policies to state for OpenTelekomCloud server group (%s): %s", d.Id(), err)
+		return fmterr.Errorf("[DEBUG] Error saving policies to state for OpenTelekomCloud server group (%s): %s", d.Id(), err)
 	}
 
 	// Set the members
@@ -113,7 +114,7 @@ func resourceComputeServerGroupV2Read(ctx context.Context, d *schema.ResourceDat
 		members = append(members, m)
 	}
 	if err := d.Set("members", members); err != nil {
-		return diag.Errorf("[DEBUG] Error saving members to state for OpenTelekomCloud server group (%s): %s", d.Id(), err)
+		return fmterr.Errorf("[DEBUG] Error saving members to state for OpenTelekomCloud server group (%s): %s", d.Id(), err)
 	}
 
 	d.Set("region", config.GetRegion(d))
@@ -125,12 +126,12 @@ func resourceComputeServerGroupV2Delete(ctx context.Context, d *schema.ResourceD
 	config := meta.(*cfg.Config)
 	computeClient, err := config.ComputeV2Client(config.GetRegion(d))
 	if err != nil {
-		return diag.Errorf("Error creating OpenTelekomCloud compute client: %s", err)
+		return fmterr.Errorf("Error creating OpenTelekomCloud compute client: %s", err)
 	}
 
 	log.Printf("[DEBUG] Deleting ServerGroup %s", d.Id())
 	if err := servergroups.Delete(computeClient, d.Id()).ExtractErr(); err != nil {
-		return diag.Errorf("Error deleting ServerGroup: %s", err)
+		return fmterr.Errorf("Error deleting ServerGroup: %s", err)
 	}
 
 	return nil

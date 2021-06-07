@@ -11,6 +11,7 @@ import (
 
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common"
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common/cfg"
+	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common/fmterr"
 )
 
 func ResourceIdentityUserV3() *schema.Resource {
@@ -79,7 +80,7 @@ func resourceIdentityUserV3Create(ctx context.Context, d *schema.ResourceData, m
 	config := meta.(*cfg.Config)
 	client, err := config.IdentityV3Client(config.GetRegion(d))
 	if err != nil {
-		return diag.Errorf(clientCreationFail, err)
+		return fmterr.Errorf(clientCreationFail, err)
 	}
 
 	enabled := d.Get("enabled").(bool)
@@ -97,7 +98,7 @@ func resourceIdentityUserV3Create(ctx context.Context, d *schema.ResourceData, m
 
 	user, err := users.Create(client, createOpts).Extract()
 	if err != nil {
-		return diag.Errorf("error creating OpenTelekomCloud user: %s", err)
+		return fmterr.Errorf("error creating OpenTelekomCloud user: %s", err)
 	}
 
 	d.SetId(user.ID)
@@ -109,7 +110,7 @@ func resourceIdentityUserV3Read(ctx context.Context, d *schema.ResourceData, met
 	config := meta.(*cfg.Config)
 	client, err := config.IdentityV3Client(config.GetRegion(d))
 	if err != nil {
-		return diag.Errorf(clientCreationFail, err)
+		return fmterr.Errorf(clientCreationFail, err)
 	}
 
 	user, err := users.Get(client, d.Id()).Extract()
@@ -147,7 +148,7 @@ func setExtendedOpts(ctx context.Context, d *schema.ResourceData, meta interface
 	config := meta.(*cfg.Config)
 	client, err := config.IdentityV3Client(config.GetRegion(d))
 	if err != nil {
-		return diag.Errorf(clientCreationFail, err)
+		return fmterr.Errorf(clientCreationFail, err)
 	}
 
 	var hasChange bool
@@ -161,12 +162,12 @@ func setExtendedOpts(ctx context.Context, d *schema.ResourceData, meta interface
 	if hasChange {
 		_, err := users.ExtendedUpdate(client, d.Id(), updateOpts).Extract()
 		if err != nil {
-			return diag.Errorf("error updating OpenTelekomCloud user: %w", err)
+			return fmterr.Errorf("error updating OpenTelekomCloud user: %w", err)
 		}
 
 		if d.Get("send_welcome_email").(bool) {
 			if err := users.SendWelcomeEmail(client, d.Id()).ExtractErr(); err != nil {
-				return diag.Errorf("error sending a welcome email: %w", err)
+				return fmterr.Errorf("error sending a welcome email: %w", err)
 			}
 		}
 	}
@@ -178,7 +179,7 @@ func resourceIdentityUserV3Update(ctx context.Context, d *schema.ResourceData, m
 	config := meta.(*cfg.Config)
 	client, err := config.IdentityV3Client(config.GetRegion(d))
 	if err != nil {
-		return diag.Errorf(clientCreationFail, err)
+		return fmterr.Errorf(clientCreationFail, err)
 	}
 
 	var hasChange bool
@@ -217,7 +218,7 @@ func resourceIdentityUserV3Update(ctx context.Context, d *schema.ResourceData, m
 	if hasChange {
 		_, err := users.Update(client, d.Id(), updateOpts).Extract()
 		if err != nil {
-			return diag.Errorf("error updating OpenTelekomCloud user: %w", err)
+			return fmterr.Errorf("error updating OpenTelekomCloud user: %w", err)
 		}
 	}
 
@@ -228,12 +229,12 @@ func resourceIdentityUserV3Delete(ctx context.Context, d *schema.ResourceData, m
 	config := meta.(*cfg.Config)
 	client, err := config.IdentityV3Client(config.GetRegion(d))
 	if err != nil {
-		return diag.Errorf(clientCreationFail, err)
+		return fmterr.Errorf(clientCreationFail, err)
 	}
 
 	err = users.Delete(client, d.Id()).ExtractErr()
 	if err != nil {
-		return diag.Errorf("error deleting OpenTelekomCloud user: %w", err)
+		return fmterr.Errorf("error deleting OpenTelekomCloud user: %w", err)
 	}
 
 	return nil

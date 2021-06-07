@@ -10,6 +10,7 @@ import (
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/identity/v3/credentials"
 
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common/cfg"
+	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common/fmterr"
 )
 
 func DataSourceIdentityCredentialV3() *schema.Resource {
@@ -56,12 +57,12 @@ func dataSourceIdentityCredentialV3Read(ctx context.Context, d *schema.ResourceD
 	config := meta.(*cfg.Config)
 	client, err := config.IdentityV30Client()
 	if err != nil {
-		return diag.Errorf("error creating identity v3.0 client: %s", err)
+		return fmterr.Errorf("error creating identity v3.0 client: %s", err)
 	}
 	userID := d.Get("user_id").(string)
 	credentialList, err := credentials.List(client, credentials.ListOpts{UserID: userID}).Extract()
 	if err != nil {
-		return diag.Errorf("error retrieving AK/SK information: %s", err)
+		return fmterr.Errorf("error retrieving AK/SK information: %s", err)
 	}
 
 	me := new(multierror.Error)

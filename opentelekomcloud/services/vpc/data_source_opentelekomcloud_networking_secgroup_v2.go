@@ -10,6 +10,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common/cfg"
+	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common/fmterr"
 )
 
 func DataSourceNetworkingSecGroupV2() *schema.Resource {
@@ -53,20 +54,20 @@ func dataSourceNetworkingSecGroupV2Read(ctx context.Context, d *schema.ResourceD
 
 	pages, err := groups.List(networkingClient, listOpts).AllPages()
 	if err != nil {
-		return diag.Errorf("Unable to list security groups: %s", err)
+		return fmterr.Errorf("Unable to list security groups: %s", err)
 	}
 
 	allSecGroups, err := groups.ExtractGroups(pages)
 	if err != nil {
-		return diag.Errorf("Unable to retrieve security groups: %s", err)
+		return fmterr.Errorf("Unable to retrieve security groups: %s", err)
 	}
 
 	if len(allSecGroups) < 1 {
-		return diag.Errorf("No Security Group found with name: %s", d.Get("name"))
+		return fmterr.Errorf("No Security Group found with name: %s", d.Get("name"))
 	}
 
 	if len(allSecGroups) > 1 {
-		return diag.Errorf("More than one Security Group found with name: %s", d.Get("name"))
+		return fmterr.Errorf("More than one Security Group found with name: %s", d.Get("name"))
 	}
 
 	secGroup := allSecGroups[0]

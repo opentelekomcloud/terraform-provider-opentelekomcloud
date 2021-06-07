@@ -9,6 +9,7 @@ import (
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/deh/v1/hosts"
 
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common/cfg"
+	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common/fmterr"
 )
 
 func DataSourceDEHHostV1() *schema.Resource {
@@ -118,16 +119,16 @@ func dataSourceDEHHostV1Read(ctx context.Context, d *schema.ResourceData, meta i
 	deh, err := hosts.List(dehClient, listOpts).AllPages()
 	refinedDeh, err := hosts.ExtractHosts(deh)
 	if err != nil {
-		return diag.Errorf("Unable to retrieve dedicated hosts: %s", err)
+		return fmterr.Errorf("Unable to retrieve dedicated hosts: %s", err)
 	}
 
 	if len(refinedDeh) < 1 {
-		return diag.Errorf("Your query returned no results. " +
+		return fmterr.Errorf("Your query returned no results. " +
 			"Please change your search criteria and try again.")
 	}
 
 	if len(refinedDeh) > 1 {
-		return diag.Errorf("Your query returned more than one result." +
+		return fmterr.Errorf("Your query returned more than one result." +
 			" Please try a more specific search criteria")
 	}
 

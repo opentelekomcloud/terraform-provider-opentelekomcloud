@@ -24,6 +24,7 @@ import (
 
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common"
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common/cfg"
+	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common/fmterr"
 )
 
 func ResourceRdsInstanceV3() *schema.Resource {
@@ -306,7 +307,7 @@ func resourceRdsInstanceV3Create(ctx context.Context, d *schema.ResourceData, me
 	config := meta.(*cfg.Config)
 	client, err := config.RdsV3Client(config.GetRegion(d))
 	if err != nil {
-		return diag.Errorf("error creating RDSv3 client: %s", err)
+		return fmterr.Errorf("error creating RDSv3 client: %s", err)
 	}
 
 	dbInfo := resourceRDSDbInfo(d)
@@ -367,7 +368,7 @@ func resourceRdsInstanceV3Create(ctx context.Context, d *schema.ResourceData, me
 		}
 		tagClient, err := config.RdsTagV1Client(config.GetRegion(d))
 		if err != nil {
-			return diag.Errorf("error creating OpenTelekomCloud RDSv1 tag client: %s", err)
+			return fmterr.Errorf("error creating OpenTelekomCloud RDSv1 tag client: %s", err)
 		}
 		tagMap := d.Get("tag").(map[string]interface{})
 		log.Printf("[DEBUG] Setting tag(key/value): %v", tagMap)
@@ -388,7 +389,7 @@ func resourceRdsInstanceV3Create(ctx context.Context, d *schema.ResourceData, me
 		if len(tagRaw) > 0 {
 			tagList := common.ExpandResourceTags(tagRaw)
 			if err := tags.Create(client, "instances", r.Instance.Id, tagList).ExtractErr(); err != nil {
-				return diag.Errorf("error setting tags of RDSv3 instance: %w", err)
+				return fmterr.Errorf("error setting tags of RDSv3 instance: %w", err)
 			}
 		}
 	}
@@ -530,7 +531,7 @@ func resourceRdsInstanceV3Update(ctx context.Context, d *schema.ResourceData, me
 	config := meta.(*cfg.Config)
 	client, err := config.RdsV3Client(config.GetRegion(d))
 	if err != nil {
-		return diag.Errorf("error creating OpenTelekomCloud RDSv3 Client: %s", err)
+		return fmterr.Errorf("error creating OpenTelekomCloud RDSv3 Client: %s", err)
 	}
 	var updateBackupOpts backups.UpdateOpts
 
@@ -542,7 +543,7 @@ func resourceRdsInstanceV3Update(ctx context.Context, d *schema.ResourceData, me
 		log.Printf("[DEBUG] updateOpts: %#v", updateBackupOpts)
 
 		if err = backups.Update(client, d.Id(), updateBackupOpts).ExtractErr(); err != nil {
-			return diag.Errorf("error updating OpenTelekomCloud RDSv3 Instance: %s", err)
+			return fmterr.Errorf("error updating OpenTelekomCloud RDSv3 Instance: %s", err)
 		}
 	}
 
@@ -565,7 +566,7 @@ func resourceRdsInstanceV3Update(ctx context.Context, d *schema.ResourceData, me
 		create, remove := diffTagsRDS(oldTag, newTag)
 		tagClient, err := config.RdsTagV1Client(config.GetRegion(d))
 		if err != nil {
-			return diag.Errorf("Error creating OpenTelekomCloud RDSv3 tag client: %s ", err)
+			return fmterr.Errorf("Error creating OpenTelekomCloud RDSv3 tag client: %s ", err)
 		}
 
 		if len(remove) > 0 {
@@ -587,7 +588,7 @@ func resourceRdsInstanceV3Update(ctx context.Context, d *schema.ResourceData, me
 	}
 	if d.HasChange("tags") {
 		if err := common.UpdateResourceTags(client, d, "instances", d.Id()); err != nil {
-			return diag.Errorf("error updating tags of RDSv3 instance %s: %s", d.Id(), err)
+			return fmterr.Errorf("error updating tags of RDSv3 instance %s: %s", d.Id(), err)
 		}
 	}
 
@@ -604,14 +605,14 @@ func resourceRdsInstanceV3Update(ctx context.Context, d *schema.ResourceData, me
 		}
 		flavorsPages, err := flavors.List(client, dbFlavorsOpts, datastoreType).AllPages()
 		if err != nil {
-			return diag.Errorf("unable to retrieve flavors all pages: %s", err)
+			return fmterr.Errorf("unable to retrieve flavors all pages: %s", err)
 		}
 		flavorsList, err := flavors.ExtractDbFlavors(flavorsPages)
 		if err != nil {
 			return diag.FromErr(err)
 		}
 		if len(flavorsList.Flavorslist) < 1 {
-			return diag.Errorf("no flavors returned")
+			return fmterr.Errorf("no flavors returned")
 		}
 		var rdsFlavor flavors.Flavors
 		for _, flavor := range flavorsList.Flavorslist {
@@ -634,7 +635,7 @@ func resourceRdsInstanceV3Update(ctx context.Context, d *schema.ResourceData, me
 		log.Printf("[DEBUG] Update flavor: %s", newFlavor.(string))
 		_, err = instances.Resize(client, updateFlavorOpts, d.Id()).Extract()
 		if err != nil {
-			return diag.Errorf("error updating instance Flavor from result: %s", err)
+			return fmterr.Errorf("error updating instance Flavor from result: %s", err)
 		}
 
 		log.Printf("Waiting for RDSv3 become in status `available`")
@@ -669,7 +670,7 @@ func resourceRdsInstanceV3Update(ctx context.Context, d *schema.ResourceData, me
 
 		updateResult, err := instances.EnlargeVolume(client, updateOpts, d.Id()).ExtractJobResponse()
 		if err != nil {
-			return diag.Errorf("error updating instance volume from result: %s", err)
+			return fmterr.Errorf("error updating instance volume from result: %s", err)
 		}
 		timeout := d.Timeout(schema.TimeoutCreate)
 		if err := instances.WaitForJobCompleted(client, int(timeout.Seconds()), updateResult.JobID); err != nil {
@@ -703,14 +704,14 @@ func resourceRdsInstanceV3Update(ctx context.Context, d *schema.ResourceData, me
 			err = assignEipToInstance(nwClient, newIPs[0].(string), privateIP, subnetID)
 			break
 		default:
-			return diag.Errorf("RDS instance can't have more than one public IP")
+			return fmterr.Errorf("RDS instance can't have more than one public IP")
 		}
 	}
 
 	if d.HasChange("param_group_id") {
 		newParamGroupID := d.Get("param_group_id").(string)
 		if len(newParamGroupID) == 0 {
-			return diag.Errorf("you can't remove `param_group_id` without recreation")
+			return fmterr.Errorf("you can't remove `param_group_id` without recreation")
 		}
 		applyOpts := configurations.ApplyOpts{
 			InstanceIDs: []string{
@@ -718,7 +719,7 @@ func resourceRdsInstanceV3Update(ctx context.Context, d *schema.ResourceData, me
 			},
 		}
 		if err := configurations.Apply(client, newParamGroupID, applyOpts).Err; err != nil {
-			return diag.Errorf("error during apply new configuration: %s", err)
+			return fmterr.Errorf("error during apply new configuration: %s", err)
 		}
 	}
 
@@ -738,12 +739,12 @@ func resourceRdsInstanceV3Read(ctx context.Context, d *schema.ResourceData, meta
 	config := meta.(*cfg.Config)
 	client, err := config.RdsV3Client(config.GetRegion(d))
 	if err != nil {
-		return diag.Errorf("error creating RDSv3 client: %s", err)
+		return fmterr.Errorf("error creating RDSv3 client: %s", err)
 	}
 
 	rdsInstance, err := GetRdsInstance(client, d.Id())
 	if err != nil {
-		return diag.Errorf("error fetching RDS instance: %s", err)
+		return fmterr.Errorf("error fetching RDS instance: %s", err)
 	}
 	if rdsInstance == nil {
 		d.SetId("")
@@ -775,7 +776,7 @@ func resourceRdsInstanceV3Read(ctx context.Context, d *schema.ResourceData, meta
 		nodesList = append(nodesList, node)
 	}
 	if err := d.Set("nodes", nodesList); err != nil {
-		return diag.Errorf("error setting node list: %s", err)
+		return fmterr.Errorf("error setting node list: %s", err)
 	}
 
 	var backupStrategyList []map[string]interface{}
@@ -784,7 +785,7 @@ func resourceRdsInstanceV3Read(ctx context.Context, d *schema.ResourceData, meta
 	backupStrategy["keep_days"] = rdsInstance.BackupStrategy.KeepDays
 	backupStrategyList = append(backupStrategyList, backupStrategy)
 	if err := d.Set("backup_strategy", backupStrategyList); err != nil {
-		return diag.Errorf("error setting backup strategy: %s", err)
+		return fmterr.Errorf("error setting backup strategy: %s", err)
 	}
 
 	var volumeList []map[string]interface{}
@@ -846,23 +847,23 @@ func resourceRdsInstanceV3Read(ctx context.Context, d *schema.ResourceData, meta
 		}
 		tagClient, err := config.RdsTagV1Client(config.GetRegion(d))
 		if err != nil {
-			return diag.Errorf("error creating OpenTelekomCloud rds tag client: %#v", err)
+			return fmterr.Errorf("error creating OpenTelekomCloud rds tag client: %#v", err)
 		}
 		tagList, err := tag.Get(tagClient, nodeID).Extract()
 		if err != nil {
-			return diag.Errorf("error fetching OpenTelekomCloud rds instance tags: %s", err)
+			return fmterr.Errorf("error fetching OpenTelekomCloud rds instance tags: %s", err)
 		}
 		tagMap := make(map[string]string)
 		for _, val := range tagList.Tags {
 			tagMap[val.Key] = val.Value
 		}
 		if err := d.Set("tag", tagMap); err != nil {
-			return diag.Errorf("[DEBUG] Error saving tag to state for OpenTelekomCloud rds instance (%s): %s", d.Id(), err)
+			return fmterr.Errorf("[DEBUG] Error saving tag to state for OpenTelekomCloud rds instance (%s): %s", d.Id(), err)
 		}
 	} else if tagParamName == "tags" {
 		tagsMap := common.TagsToMap(rdsInstance.Tags)
 		if err := d.Set("tags", tagsMap); err != nil {
-			return diag.Errorf("error saving tags for OpenTelekomCloud RDSv3 instance: %s", err)
+			return fmterr.Errorf("error saving tags for OpenTelekomCloud RDSv3 instance: %s", err)
 		}
 	}
 
@@ -873,14 +874,14 @@ func resourceRdsInstanceV3Delete(ctx context.Context, d *schema.ResourceData, me
 	config := meta.(*cfg.Config)
 	client, err := config.RdsV3Client(config.GetRegion(d))
 	if err != nil {
-		return diag.Errorf("error creating OpenTelekomCloud RDSv3 client: %s", err)
+		return fmterr.Errorf("error creating OpenTelekomCloud RDSv3 client: %s", err)
 	}
 
 	log.Printf("[DEBUG] Deleting Instance %s", d.Id())
 
 	_, err = instances.Delete(client, d.Id()).Extract()
 	if err != nil {
-		return diag.Errorf("eror deleting OpenTelekomCloud RDSv3 instance: %s", err)
+		return fmterr.Errorf("eror deleting OpenTelekomCloud RDSv3 instance: %s", err)
 	}
 
 	d.SetId("")

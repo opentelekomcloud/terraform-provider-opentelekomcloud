@@ -10,6 +10,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common/cfg"
+	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common/fmterr"
 )
 
 func DataSourceVirtualPrivateCloudVpcV1() *schema.Resource {
@@ -79,16 +80,16 @@ func dataSourceVirtualPrivateCloudV1Read(ctx context.Context, d *schema.Resource
 
 	refinedVpcs, err := vpcs.List(vpcClient, listOpts)
 	if err != nil {
-		return diag.Errorf("Unable to retrieve vpcs: %s", err)
+		return fmterr.Errorf("Unable to retrieve vpcs: %s", err)
 	}
 
 	if len(refinedVpcs) < 1 {
-		return diag.Errorf("Your query returned no results. " +
+		return fmterr.Errorf("Your query returned no results. " +
 			"Please change your search criteria and try again.")
 	}
 
 	if len(refinedVpcs) > 1 {
-		return diag.Errorf("Your query returned more than one result." +
+		return fmterr.Errorf("Your query returned more than one result." +
 			" Please try a more specific search criteria")
 	}
 

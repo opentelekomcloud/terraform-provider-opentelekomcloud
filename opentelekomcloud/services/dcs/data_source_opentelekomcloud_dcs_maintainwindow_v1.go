@@ -10,6 +10,7 @@ import (
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/dcs/v1/maintainwindows"
 
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common/cfg"
+	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common/fmterr"
 )
 
 func DataSourceDcsMaintainWindowV1() *schema.Resource {
@@ -45,7 +46,7 @@ func dataSourceDcsMaintainWindowV1Read(ctx context.Context, d *schema.ResourceDa
 	config := meta.(*cfg.Config)
 	DcsV1Client, err := config.DcsV1Client(config.GetRegion(d))
 	if err != nil {
-		return diag.Errorf("Error creating dcs key client: %s", err)
+		return fmterr.Errorf("Error creating dcs key client: %s", err)
 	}
 
 	v, err := maintainwindows.Get(DcsV1Client).Extract()
@@ -77,7 +78,7 @@ func dataSourceDcsMaintainWindowV1Read(ctx context.Context, d *schema.ResourceDa
 		filteredMVs = append(filteredMVs, mv)
 	}
 	if len(filteredMVs) < 1 {
-		return diag.Errorf("Your query returned no results. Please change your filters and try again.")
+		return fmterr.Errorf("Your query returned no results. Please change your filters and try again.")
 	}
 	mw := filteredMVs[0]
 	d.SetId(strconv.Itoa(mw.ID))

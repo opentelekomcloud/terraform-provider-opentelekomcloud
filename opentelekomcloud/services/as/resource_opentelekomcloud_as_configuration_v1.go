@@ -17,6 +17,7 @@ import (
 
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common"
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common/cfg"
+	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common/fmterr"
 )
 
 func ResourceASConfiguration() *schema.Resource {
@@ -299,7 +300,7 @@ func resourceASConfigurationCreate(ctx context.Context, d *schema.ResourceData, 
 	config := meta.(*cfg.Config)
 	client, err := config.AutoscalingV1Client(config.GetRegion(d))
 	if err != nil {
-		return diag.Errorf("error creating OpenTelekomCloud AutoScaling client: %s", err)
+		return fmterr.Errorf("error creating OpenTelekomCloud AutoScaling client: %s", err)
 	}
 
 	createOpts := configurations.CreateOpts{
@@ -310,7 +311,7 @@ func resourceASConfigurationCreate(ctx context.Context, d *schema.ResourceData, 
 	log.Printf("[DEBUG] Create AS configuration Options: %#v", createOpts)
 	asConfigID, err := configurations.Create(client, createOpts).Extract()
 	if err != nil {
-		return diag.Errorf("error creating ASConfiguration: %s", err)
+		return fmterr.Errorf("error creating ASConfiguration: %s", err)
 	}
 
 	d.SetId(asConfigID)
@@ -321,7 +322,7 @@ func resourceASConfigurationRead(ctx context.Context, d *schema.ResourceData, me
 	config := meta.(*cfg.Config)
 	client, err := config.AutoscalingV1Client(config.GetRegion(d))
 	if err != nil {
-		return diag.Errorf("error creating OpenTelekomCloud AutoScaling client: %s", err)
+		return fmterr.Errorf("error creating OpenTelekomCloud AutoScaling client: %s", err)
 	}
 
 	asConfig, err := configurations.Get(client, d.Id()).Extract()
@@ -369,12 +370,12 @@ func resourceASConfigurationDelete(ctx context.Context, d *schema.ResourceData, 
 	config := meta.(*cfg.Config)
 	client, err := config.AutoscalingV1Client(config.GetRegion(d))
 	if err != nil {
-		return diag.Errorf("error creating OpenTelekomCloud AutoScaling client: %s", err)
+		return fmterr.Errorf("error creating OpenTelekomCloud AutoScaling client: %s", err)
 	}
 
 	asConfigGroups, err := getASGroupsByConfiguration(client, d.Id())
 	if err != nil {
-		return diag.Errorf("error getting AS groups by configuration ID %q: %s", d.Id(), err)
+		return fmterr.Errorf("error getting AS groups by configuration ID %q: %s", d.Id(), err)
 	}
 
 	if len(asConfigGroups) > 0 {
@@ -382,12 +383,12 @@ func resourceASConfigurationDelete(ctx context.Context, d *schema.ResourceData, 
 		for _, group := range asConfigGroups {
 			groupIDs = append(groupIDs, group.ID)
 		}
-		return diag.Errorf("can not delete the configuration %q, it is used by AS groups %s", d.Id(), groupIDs)
+		return fmterr.Errorf("can not delete the configuration %q, it is used by AS groups %s", d.Id(), groupIDs)
 	}
 
 	log.Printf("[DEBUG] Begin to delete AS configuration %q", d.Id())
 	if err := configurations.Delete(client, d.Id()).ExtractErr(); err != nil {
-		return diag.Errorf("error deleting AS configuration: %s", err)
+		return fmterr.Errorf("error deleting AS configuration: %s", err)
 	}
 
 	return nil

@@ -15,6 +15,7 @@ import (
 
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common"
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common/cfg"
+	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common/fmterr"
 )
 
 const (
@@ -86,7 +87,7 @@ func resourceNetworkFloatingIPV2Create(ctx context.Context, d *schema.ResourceDa
 	config := meta.(*cfg.Config)
 	networkingClient, err := config.NetworkingV2Client(config.GetRegion(d))
 	if err != nil {
-		return diag.Errorf("Error creating OpenTelekomCloud network client: %s", err)
+		return fmterr.Errorf("Error creating OpenTelekomCloud network client: %s", err)
 	}
 
 	createOpts := FloatingIPCreateOpts{
@@ -102,7 +103,7 @@ func resourceNetworkFloatingIPV2Create(ctx context.Context, d *schema.ResourceDa
 	log.Printf("[DEBUG] Create Options: %#v", createOpts)
 	floatingIP, err := floatingips.Create(networkingClient, createOpts).Extract()
 	if err != nil {
-		return diag.Errorf("Error allocating floating IP: %s", err)
+		return fmterr.Errorf("Error allocating floating IP: %s", err)
 	}
 
 	log.Printf("[DEBUG] Waiting for OpenTelekomCloud Neutron Floating IP (%s) to become available.", floatingIP.ID)
@@ -126,7 +127,7 @@ func resourceNetworkFloatingIPV2Read(ctx context.Context, d *schema.ResourceData
 	config := meta.(*cfg.Config)
 	networkingClient, err := config.NetworkingV2Client(config.GetRegion(d))
 	if err != nil {
-		return diag.Errorf("Error creating OpenTelekomCloud network client: %s", err)
+		return fmterr.Errorf("Error creating OpenTelekomCloud network client: %s", err)
 	}
 
 	floatingIP, err := floatingips.Get(networkingClient, d.Id()).Extract()
@@ -149,7 +150,7 @@ func resourceNetworkFloatingIPV2Update(ctx context.Context, d *schema.ResourceDa
 	config := meta.(*cfg.Config)
 	networkingClient, err := config.NetworkingV2Client(config.GetRegion(d))
 	if err != nil {
-		return diag.Errorf("Error creating OpenTelekomCloud network client: %s", err)
+		return fmterr.Errorf("Error creating OpenTelekomCloud network client: %s", err)
 	}
 
 	var updateOpts floatingips.UpdateOpts
@@ -163,7 +164,7 @@ func resourceNetworkFloatingIPV2Update(ctx context.Context, d *schema.ResourceDa
 
 	_, err = floatingips.Update(networkingClient, d.Id(), updateOpts).Extract()
 	if err != nil {
-		return diag.Errorf("Error updating floating IP: %s", err)
+		return fmterr.Errorf("Error updating floating IP: %s", err)
 	}
 
 	return resourceNetworkFloatingIPV2Read(ctx, d, meta)
@@ -173,7 +174,7 @@ func resourceNetworkFloatingIPV2Delete(ctx context.Context, d *schema.ResourceDa
 	config := meta.(*cfg.Config)
 	networkingClient, err := config.NetworkingV2Client(config.GetRegion(d))
 	if err != nil {
-		return diag.Errorf("Error creating OpenTelekomCloud network client: %s", err)
+		return fmterr.Errorf("Error creating OpenTelekomCloud network client: %s", err)
 	}
 
 	stateConf := &resource.StateChangeConf{
@@ -187,7 +188,7 @@ func resourceNetworkFloatingIPV2Delete(ctx context.Context, d *schema.ResourceDa
 
 	_, err = stateConf.WaitForState()
 	if err != nil {
-		return diag.Errorf("Error deleting OpenTelekomCloud Neutron Floating IP: %s", err)
+		return fmterr.Errorf("Error deleting OpenTelekomCloud Neutron Floating IP: %s", err)
 	}
 
 	d.SetId("")

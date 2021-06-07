@@ -9,6 +9,7 @@ import (
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/bms/v2/keypairs"
 
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common/cfg"
+	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common/fmterr"
 )
 
 func DataSourceBMSKeyPairV2() *schema.Resource {
@@ -44,7 +45,7 @@ func dataSourceBMSKeyPairV2Read(ctx context.Context, d *schema.ResourceData, met
 	config := meta.(*cfg.Config)
 	bmsClient, err := config.ComputeV2Client(config.GetRegion(d))
 	if err != nil {
-		return diag.Errorf("Error creating OpenTelekom bms client: %s", err)
+		return fmterr.Errorf("Error creating OpenTelekom bms client: %s", err)
 	}
 
 	listOpts := keypairs.ListOpts{
@@ -53,16 +54,16 @@ func dataSourceBMSKeyPairV2Read(ctx context.Context, d *schema.ResourceData, met
 
 	refinedKeypairs, err := keypairs.List(bmsClient, listOpts)
 	if err != nil {
-		return diag.Errorf("Unable to retrieve keypairs: %s", err)
+		return fmterr.Errorf("Unable to retrieve keypairs: %s", err)
 	}
 
 	if len(refinedKeypairs) < 1 {
-		return diag.Errorf("Your query returned no results. " +
+		return fmterr.Errorf("Your query returned no results. " +
 			"Please change your search criteria and try again.")
 	}
 
 	if len(refinedKeypairs) > 1 {
-		return diag.Errorf("Your query returned more than one result." +
+		return fmterr.Errorf("Your query returned more than one result." +
 			" Please try a more specific search criteria")
 	}
 

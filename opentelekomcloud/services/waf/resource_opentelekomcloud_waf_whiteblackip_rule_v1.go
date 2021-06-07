@@ -11,6 +11,7 @@ import (
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/waf/v1/whiteblackip_rules"
 
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common/cfg"
+	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common/fmterr"
 )
 
 func ResourceWafWhiteBlackIpRuleV1() *schema.Resource {
@@ -55,7 +56,7 @@ func resourceWafWhiteBlackIpRuleV1Create(ctx context.Context, d *schema.Resource
 	wafClient, err := config.WafV1Client(config.GetRegion(d))
 
 	if err != nil {
-		return diag.Errorf("Error creating OpenTelekomcomCloud WAF Client: %s", err)
+		return fmterr.Errorf("Error creating OpenTelekomcomCloud WAF Client: %s", err)
 	}
 
 	createOpts := whiteblackip_rules.CreateOpts{
@@ -66,7 +67,7 @@ func resourceWafWhiteBlackIpRuleV1Create(ctx context.Context, d *schema.Resource
 	policy_id := d.Get("policy_id").(string)
 	rule, err := whiteblackip_rules.Create(wafClient, policy_id, createOpts).Extract()
 	if err != nil {
-		return diag.Errorf("Error creating OpenTelekomcomCloud WAF WhiteBlackIP Rule: %s", err)
+		return fmterr.Errorf("Error creating OpenTelekomcomCloud WAF WhiteBlackIP Rule: %s", err)
 	}
 
 	log.Printf("[DEBUG] Waf whiteblackip rule created: %#v", rule)
@@ -79,7 +80,7 @@ func resourceWafWhiteBlackIpRuleV1Read(ctx context.Context, d *schema.ResourceDa
 	config := meta.(*cfg.Config)
 	wafClient, err := config.WafV1Client(config.GetRegion(d))
 	if err != nil {
-		return diag.Errorf("Error creating OpenTelekomCloud WAF client: %s", err)
+		return fmterr.Errorf("Error creating OpenTelekomCloud WAF client: %s", err)
 	}
 	policy_id := d.Get("policy_id").(string)
 	n, err := whiteblackip_rules.Get(wafClient, policy_id, d.Id()).Extract()
@@ -90,7 +91,7 @@ func resourceWafWhiteBlackIpRuleV1Read(ctx context.Context, d *schema.ResourceDa
 			return nil
 		}
 
-		return diag.Errorf("Error retrieving OpenTelekomCloud Waf WhiteBlackIP Rule: %s", err)
+		return fmterr.Errorf("Error retrieving OpenTelekomCloud Waf WhiteBlackIP Rule: %s", err)
 	}
 
 	d.SetId(n.Id)
@@ -105,7 +106,7 @@ func resourceWafWhiteBlackIpRuleV1Update(ctx context.Context, d *schema.Resource
 	config := meta.(*cfg.Config)
 	wafClient, err := config.WafV1Client(config.GetRegion(d))
 	if err != nil {
-		return diag.Errorf("Error creating OpenTelekomCloud WAF Client: %s", err)
+		return fmterr.Errorf("Error creating OpenTelekomCloud WAF Client: %s", err)
 	}
 	var updateOpts whiteblackip_rules.UpdateOpts
 
@@ -120,7 +121,7 @@ func resourceWafWhiteBlackIpRuleV1Update(ctx context.Context, d *schema.Resource
 		policy_id := d.Get("policy_id").(string)
 		_, err = whiteblackip_rules.Update(wafClient, policy_id, d.Id(), updateOpts).Extract()
 		if err != nil {
-			return diag.Errorf("Error updating OpenTelekomCloud WAF WhiteBlackIP Rule: %s", err)
+			return fmterr.Errorf("Error updating OpenTelekomCloud WAF WhiteBlackIP Rule: %s", err)
 		}
 	}
 
@@ -131,13 +132,13 @@ func resourceWafWhiteBlackIpRuleV1Delete(ctx context.Context, d *schema.Resource
 	config := meta.(*cfg.Config)
 	wafClient, err := config.WafV1Client(config.GetRegion(d))
 	if err != nil {
-		return diag.Errorf("Error creating OpenTelekomCloud WAF client: %s", err)
+		return fmterr.Errorf("Error creating OpenTelekomCloud WAF client: %s", err)
 	}
 
 	policy_id := d.Get("policy_id").(string)
 	err = whiteblackip_rules.Delete(wafClient, policy_id, d.Id()).ExtractErr()
 	if err != nil {
-		return diag.Errorf("Error deleting OpenTelekomCloud WAF WhiteBlackIP Rule: %s", err)
+		return fmterr.Errorf("Error deleting OpenTelekomCloud WAF WhiteBlackIP Rule: %s", err)
 	}
 
 	d.SetId("")

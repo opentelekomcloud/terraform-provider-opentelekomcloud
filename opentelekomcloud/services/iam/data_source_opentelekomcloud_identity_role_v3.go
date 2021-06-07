@@ -9,6 +9,7 @@ import (
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/identity/v3/roles"
 
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common/cfg"
+	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common/fmterr"
 )
 
 func DataSourceIdentityRoleV3() *schema.Resource {
@@ -42,7 +43,7 @@ func dataSourceIdentityRoleV3Read(ctx context.Context, d *schema.ResourceData, m
 	config := meta.(*cfg.Config)
 	identityClient, err := config.IdentityV3Client(config.GetRegion(d))
 	if err != nil {
-		return diag.Errorf("Error creating OpenStack identity client: %s", err)
+		return fmterr.Errorf("Error creating OpenStack identity client: %s", err)
 	}
 
 	listOpts := roles.ListOpts{
@@ -55,22 +56,22 @@ func dataSourceIdentityRoleV3Read(ctx context.Context, d *schema.ResourceData, m
 	var role roles.Role
 	allPages, err := roles.List(identityClient, listOpts).AllPages()
 	if err != nil {
-		return diag.Errorf("Unable to query roles: %s", err)
+		return fmterr.Errorf("Unable to query roles: %s", err)
 	}
 
 	allRoles, err := roles.ExtractRoles(allPages)
 	if err != nil {
-		return diag.Errorf("Unable to retrieve roles: %s", err)
+		return fmterr.Errorf("Unable to retrieve roles: %s", err)
 	}
 
 	if len(allRoles) < 1 {
-		return diag.Errorf("Your query returned no results. " +
+		return fmterr.Errorf("Your query returned no results. " +
 			"Please change your search criteria and try again.")
 	}
 
 	if len(allRoles) > 1 {
 		log.Printf("[DEBUG] Multiple results found: %#v", allRoles)
-		return diag.Errorf("Your query returned more than one result. Please try a more " +
+		return fmterr.Errorf("Your query returned more than one result. Please try a more " +
 			"specific search criteria, or set `most_recent` attribute to true.")
 	}
 	role = allRoles[0]

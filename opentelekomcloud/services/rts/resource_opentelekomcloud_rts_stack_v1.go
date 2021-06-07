@@ -9,12 +9,13 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
-	"github.com/opentelekomcloud/gophertelekomcloud"
+	golangsdk "github.com/opentelekomcloud/gophertelekomcloud"
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/rts/v1/stacks"
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/rts/v1/stacktemplates"
 
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common"
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common/cfg"
+	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common/fmterr"
 )
 
 func ResourceRTSStackV1() *schema.Resource {
@@ -159,12 +160,12 @@ func resourceRTSStackV1Create(ctx context.Context, d *schema.ResourceData, meta 
 	_, url_ok := d.GetOk("template_url")
 
 	if !body_ok && !url_ok {
-		return diag.Errorf("Both template_body and template_url are empty, must specify one of them.")
+		return fmterr.Errorf("Both template_body and template_url are empty, must specify one of them.")
 	}
 
 	orchestrationClient, err := config.OrchestrationV1Client(config.GetRegion(d))
 	if err != nil {
-		return diag.Errorf("Error creating RTS client: %s", err)
+		return fmterr.Errorf("Error creating RTS client: %s", err)
 	}
 
 	rollback := d.Get("disable_rollback").(bool)
@@ -179,7 +180,7 @@ func resourceRTSStackV1Create(ctx context.Context, d *schema.ResourceData, meta 
 
 	n, err := stacks.Create(orchestrationClient, createOpts).Extract()
 	if err != nil {
-		return diag.Errorf("Error creating stack: %s", err)
+		return fmterr.Errorf("Error creating stack: %s", err)
 	}
 	d.SetId(n.ID)
 
@@ -197,7 +198,7 @@ func resourceRTSStackV1Create(ctx context.Context, d *schema.ResourceData, meta 
 	_, stateErr := stateConf.WaitForState()
 
 	if stateErr != nil {
-		return diag.Errorf(
+		return fmterr.Errorf(
 			"Error waiting for Stack (%s) to become ACTIVE: %s",
 			stackName, stateErr)
 	}
@@ -210,7 +211,7 @@ func resourceRTSStackV1Read(ctx context.Context, d *schema.ResourceData, meta in
 	config := meta.(*cfg.Config)
 	orchestrationClient, err := config.OrchestrationV1Client(config.GetRegion(d))
 	if err != nil {
-		return diag.Errorf("Error creating RTS Client: %s", err)
+		return fmterr.Errorf("Error creating RTS Client: %s", err)
 	}
 
 	stack, err := stacks.Get(orchestrationClient, d.Id()).Extract()
@@ -222,7 +223,7 @@ func resourceRTSStackV1Read(ctx context.Context, d *schema.ResourceData, meta in
 			return nil
 		}
 
-		return diag.Errorf("Error retrieving Stack: %s", err)
+		return fmterr.Errorf("Error retrieving Stack: %s", err)
 
 	}
 
@@ -262,7 +263,7 @@ func resourceRTSStackV1Read(ctx context.Context, d *schema.ResourceData, meta in
 	sTemplate := BytesToString(out)
 	template, err := normalizeStackTemplate(sTemplate)
 	if err != nil {
-		return diag.Errorf("template body contains an invalid JSON or YAML: %w", err)
+		return fmterr.Errorf("template body contains an invalid JSON or YAML: %w", err)
 	}
 	d.Set("template_body", template)
 
@@ -273,13 +274,13 @@ func resourceRTSStackV1Update(ctx context.Context, d *schema.ResourceData, meta 
 	config := meta.(*cfg.Config)
 	orchestrationClient, err := config.OrchestrationV1Client(config.GetRegion(d))
 	if err != nil {
-		return diag.Errorf("Error creating RTS Client: %s", err)
+		return fmterr.Errorf("Error creating RTS Client: %s", err)
 	}
 	_, body_ok := d.GetOk("template_body")
 	_, url_ok := d.GetOk("template_url")
 
 	if !body_ok && !url_ok {
-		return diag.Errorf("Both template_body and template_url are empty, must specify one of them.")
+		return fmterr.Errorf("Both template_body and template_url are empty, must specify one of them.")
 	}
 
 	var updateOpts stacks.UpdateOpts
@@ -300,7 +301,7 @@ func resourceRTSStackV1Update(ctx context.Context, d *schema.ResourceData, meta 
 
 	err = stacks.Update(orchestrationClient, d.Get("name").(string), d.Id(), updateOpts).ExtractErr()
 	if err != nil {
-		return diag.Errorf("Error updating Stack: %s", err)
+		return fmterr.Errorf("Error updating Stack: %s", err)
 	}
 	stateConf := &resource.StateChangeConf{
 		Pending: []string{"UPDATE_IN_PROGRESS",
@@ -316,7 +317,7 @@ func resourceRTSStackV1Update(ctx context.Context, d *schema.ResourceData, meta 
 	_, stateErr := stateConf.WaitForState()
 
 	if stateErr != nil {
-		return diag.Errorf(
+		return fmterr.Errorf(
 			"Error waiting for updating stack: %s", stateErr)
 	}
 
@@ -330,7 +331,7 @@ func resourceRTSStackV1Delete(ctx context.Context, d *schema.ResourceData, meta 
 	config := meta.(*cfg.Config)
 	orchestrationClient, err := config.OrchestrationV1Client(config.GetRegion(d))
 	if err != nil {
-		return diag.Errorf("Error creating RTS Client: %s", err)
+		return fmterr.Errorf("Error creating RTS Client: %s", err)
 	}
 
 	stateConf := &resource.StateChangeConf{
@@ -352,7 +353,7 @@ func resourceRTSStackV1Delete(ctx context.Context, d *schema.ResourceData, meta 
 	_, stateErr := stateConf.WaitForState()
 
 	if stateErr != nil {
-		return diag.Errorf("Error deleting Stack: %s", stateErr)
+		return fmterr.Errorf("Error deleting Stack: %s", stateErr)
 	}
 
 	d.SetId("")

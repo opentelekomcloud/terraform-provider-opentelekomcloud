@@ -8,11 +8,12 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
-	"github.com/opentelekomcloud/gophertelekomcloud"
+	golangsdk "github.com/opentelekomcloud/gophertelekomcloud"
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/networking/v2/ports"
 
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common"
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common/cfg"
+	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common/fmterr"
 )
 
 func ResourceNetworkingVIPV2() *schema.Resource {
@@ -62,7 +63,7 @@ func resourceNetworkingVIPV2Create(ctx context.Context, d *schema.ResourceData, 
 	config := meta.(*cfg.Config)
 	networkingClient, err := config.NetworkingV2Client(config.GetRegion(d))
 	if err != nil {
-		return diag.Errorf("Error creating OpenTelekomCloud networking client: %s", err)
+		return fmterr.Errorf("Error creating OpenTelekomCloud networking client: %s", err)
 	}
 
 	// Contruct CreateOpts
@@ -81,7 +82,7 @@ func resourceNetworkingVIPV2Create(ctx context.Context, d *schema.ResourceData, 
 	log.Printf("[DEBUG] Create Options: %#v", createOpts)
 	vip, err := ports.Create(networkingClient, createOpts).Extract()
 	if err != nil {
-		return diag.Errorf("Error creating OpenTelekomCloud Neutron network: %s", err)
+		return fmterr.Errorf("Error creating OpenTelekomCloud Neutron network: %s", err)
 	}
 	log.Printf("[DEBUG] Waiting for OpenTelekomCloud Neutron VIP (%s) to become available.", vip.ID)
 
@@ -104,7 +105,7 @@ func resourceNetworkingVIPV2Read(ctx context.Context, d *schema.ResourceData, me
 	config := meta.(*cfg.Config)
 	networkingClient, err := config.NetworkingV2Client(config.GetRegion(d))
 	if err != nil {
-		return diag.Errorf("Error creating OpenTelekomCloud networking client: %s", err)
+		return fmterr.Errorf("Error creating OpenTelekomCloud networking client: %s", err)
 	}
 
 	vip, err := ports.Get(networkingClient, d.Id()).Extract()
@@ -136,7 +137,7 @@ func resourceNetworkingVIPV2Delete(ctx context.Context, d *schema.ResourceData, 
 	config := meta.(*cfg.Config)
 	networkingClient, err := config.NetworkingV2Client(config.GetRegion(d))
 	if err != nil {
-		return diag.Errorf("Error creating OpenTelekomCloud networking client: %s", err)
+		return fmterr.Errorf("Error creating OpenTelekomCloud networking client: %s", err)
 	}
 
 	stateConf := &resource.StateChangeConf{
@@ -150,7 +151,7 @@ func resourceNetworkingVIPV2Delete(ctx context.Context, d *schema.ResourceData, 
 
 	_, err = stateConf.WaitForState()
 	if err != nil {
-		return diag.Errorf("Error deleting OpenTelekomCloud Neutron Network: %s", err)
+		return fmterr.Errorf("Error deleting OpenTelekomCloud Neutron Network: %s", err)
 	}
 
 	d.SetId("")

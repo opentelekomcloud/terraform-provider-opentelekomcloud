@@ -14,6 +14,7 @@ import (
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/obs"
 
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common/cfg"
+	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common/fmterr"
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/services/s3"
 )
 
@@ -95,7 +96,7 @@ func dataSourceObsBucketObjectRead(ctx context.Context, d *schema.ResourceData, 
 	config := meta.(*cfg.Config)
 	client, err := config.NewObjectStorageClient(config.GetRegion(d))
 	if err != nil {
-		return diag.Errorf("error creating OBS client: %s", err)
+		return fmterr.Errorf("error creating OBS client: %s", err)
 	}
 
 	bucket := d.Get("bucket").(string)
@@ -121,10 +122,10 @@ func dataSourceObsBucketObjectRead(ctx context.Context, d *schema.ResourceData, 
 	log.Printf("[DEBUG] Reading OBS object: %v", input)
 	out, err := client.GetObject(&input)
 	if err != nil {
-		return diag.Errorf("failed getting OBS object: %s Bucket: %q Object: %q", err, bucket, key)
+		return fmterr.Errorf("failed getting OBS object: %s Bucket: %q Object: %q", err, bucket, key)
 	}
 	if out.DeleteMarker {
-		return diag.Errorf("requested OBS object %q%s has been deleted",
+		return fmterr.Errorf("requested OBS object %q%s has been deleted",
 			bucket+key, versionText)
 	}
 
@@ -161,13 +162,13 @@ func dataSourceObsBucketObjectRead(ctx context.Context, d *schema.ResourceData, 
 		input.VersionId = out.VersionId
 		out, err := client.GetObject(input)
 		if err != nil {
-			return diag.Errorf("failed getting OBS object: %s", err)
+			return fmterr.Errorf("failed getting OBS object: %s", err)
 		}
 
 		buf := new(bytes.Buffer)
 		bytesRead, err := buf.ReadFrom(out.Body)
 		if err != nil {
-			return diag.Errorf("failed reading content of OBS object (%s): %s",
+			return fmterr.Errorf("failed reading content of OBS object (%s): %s",
 				uniqueId, err)
 		}
 		log.Printf("[INFO] Saving %d bytes from OBS object %s", bytesRead, uniqueId)

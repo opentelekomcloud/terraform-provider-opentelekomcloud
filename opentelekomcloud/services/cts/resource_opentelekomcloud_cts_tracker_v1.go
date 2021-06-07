@@ -11,6 +11,7 @@ import (
 
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common"
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common/cfg"
+	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common/fmterr"
 )
 
 func ResourceCTSTrackerV1() *schema.Resource {
@@ -94,7 +95,7 @@ func resourceCTSTrackerCreate(ctx context.Context, d *schema.ResourceData, meta 
 	config := meta.(*cfg.Config)
 	ctsClient, err := config.CtsV1Client(config.GetProjectName(d))
 	if err != nil {
-		return diag.Errorf("Error creating cts Client: %s", err)
+		return fmterr.Errorf("Error creating cts Client: %s", err)
 	}
 
 	createOpts := tracker.CreateOptsWithSMN{
@@ -111,7 +112,7 @@ func resourceCTSTrackerCreate(ctx context.Context, d *schema.ResourceData, meta 
 
 	trackers, err := tracker.Create(ctsClient, createOpts).Extract()
 	if err != nil {
-		return diag.Errorf("Error creating CTS tracker: %s", err)
+		return fmterr.Errorf("Error creating CTS tracker: %s", err)
 	}
 
 	d.SetId(trackers.TrackerName)
@@ -124,7 +125,7 @@ func resourceCTSTrackerRead(ctx context.Context, d *schema.ResourceData, meta in
 	config := meta.(*cfg.Config)
 	ctsClient, err := config.CtsV1Client(config.GetProjectName(d))
 	if err != nil {
-		return diag.Errorf("Error creating cts Client: %s", err)
+		return fmterr.Errorf("Error creating cts Client: %s", err)
 	}
 
 	listOpts := tracker.ListOpts{
@@ -135,7 +136,7 @@ func resourceCTSTrackerRead(ctx context.Context, d *schema.ResourceData, meta in
 	}
 	trackers, err := tracker.List(ctsClient, listOpts)
 	if err != nil {
-		return diag.Errorf("Error retrieving cts tracker: %s", err)
+		return fmterr.Errorf("Error retrieving cts tracker: %s", err)
 	}
 
 	if len(trackers) == 0 {
@@ -166,7 +167,7 @@ func resourceCTSTrackerUpdate(ctx context.Context, d *schema.ResourceData, meta 
 	config := meta.(*cfg.Config)
 	ctsClient, err := config.CtsV1Client(config.GetProjectName(d))
 	if err != nil {
-		return diag.Errorf("Error creating cts Client: %s", err)
+		return fmterr.Errorf("Error creating cts Client: %s", err)
 	}
 	var updateOpts tracker.UpdateOptsWithSMN
 
@@ -193,7 +194,7 @@ func resourceCTSTrackerUpdate(ctx context.Context, d *schema.ResourceData, meta 
 
 	_, err = tracker.Update(ctsClient, updateOpts).Extract()
 	if err != nil {
-		return diag.Errorf("Error updating cts tracker: %s", err)
+		return fmterr.Errorf("Error updating cts tracker: %s", err)
 	}
 	time.Sleep(20 * time.Second)
 	return resourceCTSTrackerRead(ctx, d, meta)
@@ -203,7 +204,7 @@ func resourceCTSTrackerDelete(ctx context.Context, d *schema.ResourceData, meta 
 	config := meta.(*cfg.Config)
 	ctsClient, err := config.CtsV1Client(config.GetProjectName(d))
 	if err != nil {
-		return diag.Errorf("Error creating cts Client: %s", err)
+		return fmterr.Errorf("Error creating cts Client: %s", err)
 	}
 
 	result := tracker.Delete(ctsClient)

@@ -9,6 +9,7 @@ import (
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/dcs/v1/availablezones"
 
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common/cfg"
+	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common/fmterr"
 )
 
 func DataSourceDcsAZV1() *schema.Resource {
@@ -39,7 +40,7 @@ func dataSourceDcsAZV1Read(ctx context.Context, d *schema.ResourceData, meta int
 	config := meta.(*cfg.Config)
 	DcsV1Client, err := config.DcsV1Client(config.GetRegion(d))
 	if err != nil {
-		return diag.Errorf("Error creating dcs key client: %s", err)
+		return fmterr.Errorf("Error creating dcs key client: %s", err)
 	}
 
 	v, err := availablezones.Get(DcsV1Client).Extract()
@@ -70,7 +71,7 @@ func dataSourceDcsAZV1Read(ctx context.Context, d *schema.ResourceData, meta int
 	}
 
 	if len(filteredAZs) < 1 {
-		return diag.Errorf("Not found any available zones")
+		return fmterr.Errorf("Not found any available zones")
 	}
 
 	az := filteredAZs[0]

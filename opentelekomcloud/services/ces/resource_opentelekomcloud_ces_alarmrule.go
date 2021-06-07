@@ -15,6 +15,7 @@ import (
 
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common"
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common/cfg"
+	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common/fmterr"
 )
 
 const nameCESAR = "CES-AlarmRule"
@@ -396,7 +397,7 @@ func resourceAlarmRuleCreate(ctx context.Context, d *schema.ResourceData, meta i
 	config := meta.(*cfg.Config)
 	client, err := config.CesV1Client(config.GetRegion(d))
 	if err != nil {
-		return diag.Errorf("Error creating Cloud Eye Service client: %s", err)
+		return fmterr.Errorf("Error creating Cloud Eye Service client: %s", err)
 	}
 
 	metric, err := getMetricOpts(d)
@@ -428,7 +429,7 @@ func resourceAlarmRuleCreate(ctx context.Context, d *schema.ResourceData, meta i
 
 	r, err := alarmrule.Create(client, createOpts).Extract()
 	if err != nil {
-		return diag.Errorf("Error creating %s: %s", nameCESAR, err)
+		return fmterr.Errorf("Error creating %s: %s", nameCESAR, err)
 	}
 	log.Printf("[DEBUG] Create %s: %#v", nameCESAR, *r)
 
@@ -441,7 +442,7 @@ func resourceAlarmRuleRead(ctx context.Context, d *schema.ResourceData, meta int
 	config := meta.(*cfg.Config)
 	client, err := config.CesV1Client(config.GetRegion(d))
 	if err != nil {
-		return diag.Errorf("Error creating Cloud Eye Service client: %s", err)
+		return fmterr.Errorf("Error creating Cloud Eye Service client: %s", err)
 	}
 
 	r, err := alarmrule.Get(client, d.Id()).Extract()
@@ -473,7 +474,7 @@ func resourceAlarmRuleUpdate(ctx context.Context, d *schema.ResourceData, meta i
 	config := meta.(*cfg.Config)
 	client, err := config.CesV1Client(config.GetRegion(d))
 	if err != nil {
-		return diag.Errorf("Error creating Cloud Eye Service client: %s", err)
+		return fmterr.Errorf("Error creating Cloud Eye Service client: %s", err)
 	}
 
 	arId := d.Id()
@@ -494,7 +495,7 @@ func resourceAlarmRuleUpdate(ctx context.Context, d *schema.ResourceData, meta i
 		return nil
 	})
 	if err != nil {
-		return diag.Errorf("Error updating %s %s: %s", nameCESAR, arId, err)
+		return fmterr.Errorf("Error updating %s %s: %s", nameCESAR, arId, err)
 	}
 
 	return resourceAlarmRuleRead(ctx, d, meta)
@@ -504,7 +505,7 @@ func resourceAlarmRuleDelete(ctx context.Context, d *schema.ResourceData, meta i
 	config := meta.(*cfg.Config)
 	client, err := config.CesV1Client(config.GetRegion(d))
 	if err != nil {
-		return diag.Errorf("Error creating Cloud Eye Service client: %s", err)
+		return fmterr.Errorf("Error creating Cloud Eye Service client: %s", err)
 	}
 
 	arId := d.Id()
@@ -523,7 +524,7 @@ func resourceAlarmRuleDelete(ctx context.Context, d *schema.ResourceData, meta i
 			log.Printf("[INFO] deleting an unavailable %s: %s", nameCESAR, arId)
 			return nil
 		}
-		return diag.Errorf("Error deleting %s %s: %s", nameCESAR, arId, err)
+		return fmterr.Errorf("Error deleting %s %s: %s", nameCESAR, arId, err)
 	}
 
 	return nil

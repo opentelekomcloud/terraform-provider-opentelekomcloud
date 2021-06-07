@@ -12,6 +12,7 @@ import (
 
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common"
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common/cfg"
+	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common/fmterr"
 )
 
 func ResourceObsBucketPolicy() *schema.Resource {
@@ -41,7 +42,7 @@ func resourceObsBucketPolicyPut(ctx context.Context, d *schema.ResourceData, met
 	config := meta.(*cfg.Config)
 	client, err := config.NewObjectStorageClient(config.GetRegion(d))
 	if err != nil {
-		return diag.Errorf("error creating OBS client: %s", err)
+		return fmterr.Errorf("error creating OBS client: %s", err)
 	}
 
 	policy := d.Get("policy").(string)
@@ -67,7 +68,7 @@ func resourceObsBucketPolicyPut(ctx context.Context, d *schema.ResourceData, met
 	})
 
 	if err != nil {
-		return diag.Errorf("error putting OBS policy: %s", err)
+		return fmterr.Errorf("error putting OBS policy: %s", err)
 	}
 
 	d.SetId(bucket)
@@ -79,14 +80,14 @@ func resourceObsBucketPolicyRead(ctx context.Context, d *schema.ResourceData, me
 	config := meta.(*cfg.Config)
 	client, err := config.NewObjectStorageClient(config.GetRegion(d))
 	if err != nil {
-		return diag.Errorf("error creating OBS client: %s", err)
+		return fmterr.Errorf("error creating OBS client: %s", err)
 	}
 
 	log.Printf("[DEBUG] OBS bucket policy, read for bucket: %s", d.Id())
 	pol, err := client.GetBucketPolicy(d.Id())
 
 	if err != nil {
-		return diag.Errorf("error getting bucket policy")
+		return fmterr.Errorf("error getting bucket policy")
 	}
 
 	if err := d.Set("policy", pol.Policy); err != nil {
@@ -100,7 +101,7 @@ func resourceObsBucketPolicyDelete(ctx context.Context, d *schema.ResourceData, 
 	config := meta.(*cfg.Config)
 	client, err := config.NewObjectStorageClient(config.GetRegion(d))
 	if err != nil {
-		return diag.Errorf("error creating OBS client: %s", err)
+		return fmterr.Errorf("error creating OBS client: %s", err)
 	}
 
 	bucket := d.Get("bucket").(string)
@@ -112,7 +113,7 @@ func resourceObsBucketPolicyDelete(ctx context.Context, d *schema.ResourceData, 
 		if obsErr, ok := err.(obs.ObsError); ok && obsErr.Code == "NoSuchBucket" {
 			return nil
 		}
-		return diag.Errorf("error deleting OBS policy: %s", err)
+		return fmterr.Errorf("error deleting OBS policy: %s", err)
 	}
 	return nil
 }

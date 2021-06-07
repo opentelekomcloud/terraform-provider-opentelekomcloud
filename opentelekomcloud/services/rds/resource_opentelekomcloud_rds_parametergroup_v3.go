@@ -7,11 +7,12 @@ import (
 	"github.com/hashicorp/go-multierror"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
-	"github.com/opentelekomcloud/gophertelekomcloud"
+	golangsdk "github.com/opentelekomcloud/gophertelekomcloud"
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/rds/v3/configurations"
 
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common"
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common/cfg"
+	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common/fmterr"
 )
 
 func ResourceRdsConfigurationV3() *schema.Resource {
@@ -135,7 +136,7 @@ func resourceRdsConfigurationV3Create(ctx context.Context, d *schema.ResourceDat
 
 	rdsClient, err := config.RdsV3Client(config.GetRegion(d))
 	if err != nil {
-		return diag.Errorf("error creating OpenTelekomCloud RDSv3 client: %s", err)
+		return fmterr.Errorf("error creating OpenTelekomCloud RDSv3 client: %s", err)
 	}
 
 	createOpts := configurations.CreateOpts{
@@ -148,7 +149,7 @@ func resourceRdsConfigurationV3Create(ctx context.Context, d *schema.ResourceDat
 
 	configuration, err := configurations.Create(rdsClient, createOpts).Extract()
 	if err != nil {
-		return diag.Errorf("error creating OpenTelekomCloud RDSv3 configuration: %s", err)
+		return fmterr.Errorf("error creating OpenTelekomCloud RDSv3 configuration: %s", err)
 	}
 
 	log.Printf("[DEBUG] RDSv3 configuration created: %#v", configuration)
@@ -161,7 +162,7 @@ func resourceRdsConfigurationV3Read(ctx context.Context, d *schema.ResourceData,
 	config := meta.(*cfg.Config)
 	client, err := config.RdsV3Client(config.GetRegion(d))
 	if err != nil {
-		return diag.Errorf("error creating OpenTelekomCloud RDSv3 client: %s", err)
+		return fmterr.Errorf("error creating OpenTelekomCloud RDSv3 client: %s", err)
 	}
 	configuration, err := configurations.Get(client, d.Id()).Extract()
 
@@ -171,7 +172,7 @@ func resourceRdsConfigurationV3Read(ctx context.Context, d *schema.ResourceData,
 			return nil
 		}
 
-		return diag.Errorf("error retrieving OpenTelekomCloud RDSv3 configuration: %s", err)
+		return fmterr.Errorf("error retrieving OpenTelekomCloud RDSv3 configuration: %s", err)
 	}
 	mErr := multierror.Append(nil,
 		d.Set("name", configuration.Name),
@@ -215,7 +216,7 @@ func resourceRdsConfigurationV3Update(ctx context.Context, d *schema.ResourceDat
 	config := meta.(*cfg.Config)
 	rdsClient, err := config.RdsV3Client(config.GetRegion(d))
 	if err != nil {
-		return diag.Errorf("error creating OpenTelekomCloud RDSv3 Client: %s", err)
+		return fmterr.Errorf("error creating OpenTelekomCloud RDSv3 Client: %s", err)
 	}
 	var updateOpts configurations.UpdateOpts
 
@@ -232,7 +233,7 @@ func resourceRdsConfigurationV3Update(ctx context.Context, d *schema.ResourceDat
 
 	err = configurations.Update(rdsClient, d.Id(), updateOpts).ExtractErr()
 	if err != nil {
-		return diag.Errorf("error updating OpenTelekomCloud RDSv3 configuration: %s", err)
+		return fmterr.Errorf("error updating OpenTelekomCloud RDSv3 configuration: %s", err)
 	}
 	return resourceRdsConfigurationV3Read(ctx, d, meta)
 }
@@ -241,12 +242,12 @@ func resourceRdsConfigurationV3Delete(ctx context.Context, d *schema.ResourceDat
 	config := meta.(*cfg.Config)
 	rdsClient, err := config.RdsV3Client(config.GetRegion(d))
 	if err != nil {
-		return diag.Errorf("error creating OpenTelekomCloud RDSv3 client: %s", err)
+		return fmterr.Errorf("error creating OpenTelekomCloud RDSv3 client: %s", err)
 	}
 
 	err = configurations.Delete(rdsClient, d.Id()).ExtractErr()
 	if err != nil {
-		return diag.Errorf("error deleting OpenTelekomCloud RDSv3 configuration: %s", err)
+		return fmterr.Errorf("error deleting OpenTelekomCloud RDSv3 configuration: %s", err)
 	}
 
 	d.SetId("")

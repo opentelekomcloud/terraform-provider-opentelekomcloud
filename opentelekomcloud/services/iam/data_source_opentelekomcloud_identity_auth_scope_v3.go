@@ -11,6 +11,7 @@ import (
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/identity/v3/tokens"
 
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common/cfg"
+	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common/fmterr"
 )
 
 func DataSourceIdentityAuthScopeV3() *schema.Resource {
@@ -106,7 +107,7 @@ func dataSourceIdentityAuthScopeV3Read(ctx context.Context, d *schema.ResourceDa
 	config := meta.(*cfg.Config)
 	identityClient, err := config.IdentityV3Client("")
 	if err != nil {
-		return diag.Errorf("error creating OpenTelekomCloud identity client: %s", err)
+		return fmterr.Errorf("error creating OpenTelekomCloud identity client: %s", err)
 	}
 	tokenID := config.Token
 

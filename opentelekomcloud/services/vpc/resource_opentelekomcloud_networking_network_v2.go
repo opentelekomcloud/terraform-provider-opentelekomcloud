@@ -11,13 +11,14 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
-	"github.com/opentelekomcloud/gophertelekomcloud"
+	golangsdk "github.com/opentelekomcloud/gophertelekomcloud"
 
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/networking/v2/extensions/provider"
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/networking/v2/networks"
 
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common"
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common/cfg"
+	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common/fmterr"
 )
 
 func ExtractValSFromNid(s string) (string, string) {
@@ -134,7 +135,7 @@ func resourceNetworkingNetworkV2Create(ctx context.Context, d *schema.ResourceDa
 	config := meta.(*cfg.Config)
 	networkingClient, err := config.NetworkingV2Client(config.GetRegion(d))
 	if err != nil {
-		return diag.Errorf("Error creating OpenTelekomCloud networking client: %s", err)
+		return fmterr.Errorf("Error creating OpenTelekomCloud networking client: %s", err)
 	}
 
 	createOpts := NetworkCreateOpts{
@@ -150,7 +151,7 @@ func resourceNetworkingNetworkV2Create(ctx context.Context, d *schema.ResourceDa
 	if asuRaw != "" {
 		asuT, err := strconv.ParseBool(asuRaw)
 		if err != nil {
-			return diag.Errorf("admin_state_up, if provided, must be either 'true' or 'false'")
+			return fmterr.Errorf("admin_state_up, if provided, must be either 'true' or 'false'")
 		}
 		asu = asuT
 		// asuFake := true
@@ -161,7 +162,7 @@ func resourceNetworkingNetworkV2Create(ctx context.Context, d *schema.ResourceDa
 	if sharedRaw != "" {
 		shared, err := strconv.ParseBool(sharedRaw)
 		if err != nil {
-			return diag.Errorf("shared, if provided, must be either 'true' or 'false': %v", err)
+			return fmterr.Errorf("shared, if provided, must be either 'true' or 'false': %v", err)
 		}
 		createOpts.Shared = &shared
 	}
@@ -182,7 +183,7 @@ func resourceNetworkingNetworkV2Create(ctx context.Context, d *schema.ResourceDa
 	}
 
 	if err != nil {
-		return diag.Errorf("Error creating OpenTelekomCloud Neutron network: %s", err)
+		return fmterr.Errorf("Error creating OpenTelekomCloud Neutron network: %s", err)
 	}
 	d.SetId(FormatNidFromValS(strconv.FormatBool(asu), n.ID))
 
@@ -210,7 +211,7 @@ func resourceNetworkingNetworkV2Read(ctx context.Context, d *schema.ResourceData
 	config := meta.(*cfg.Config)
 	networkingClient, err := config.NetworkingV2Client(config.GetRegion(d))
 	if err != nil {
-		return diag.Errorf("Error creating OpenTelekomCloud networking client: %s", err)
+		return fmterr.Errorf("Error creating OpenTelekomCloud networking client: %s", err)
 	}
 
 	asu, id := ExtractValSFromNid(d.Id())
@@ -235,7 +236,7 @@ func resourceNetworkingNetworkV2Update(ctx context.Context, d *schema.ResourceDa
 	config := meta.(*cfg.Config)
 	networkingClient, err := config.NetworkingV2Client(config.GetRegion(d))
 	if err != nil {
-		return diag.Errorf("Error creating OpenTelekomCloud networking client: %s", err)
+		return fmterr.Errorf("Error creating OpenTelekomCloud networking client: %s", err)
 	}
 
 	var updateOpts networks.UpdateOpts
@@ -248,7 +249,7 @@ func resourceNetworkingNetworkV2Update(ctx context.Context, d *schema.ResourceDa
 		if asuRaw != "" {
 			asuT, err := strconv.ParseBool(asuRaw)
 			if err != nil {
-				return diag.Errorf("admin_state_up, if provided, must be either 'true' or 'false'")
+				return fmterr.Errorf("admin_state_up, if provided, must be either 'true' or 'false'")
 			}
 			asu = asuT
 			// asuFake := true
@@ -260,7 +261,7 @@ func resourceNetworkingNetworkV2Update(ctx context.Context, d *schema.ResourceDa
 		if sharedRaw != "" {
 			shared, err := strconv.ParseBool(sharedRaw)
 			if err != nil {
-				return diag.Errorf("shared, if provided, must be either 'true' or 'false': %v", err)
+				return fmterr.Errorf("shared, if provided, must be either 'true' or 'false': %v", err)
 			}
 			updateOpts.Shared = &shared
 		}
@@ -271,7 +272,7 @@ func resourceNetworkingNetworkV2Update(ctx context.Context, d *schema.ResourceDa
 
 	_, err = networks.Update(networkingClient, id, updateOpts).Extract()
 	if err != nil {
-		return diag.Errorf("Error updating OpenTelekomCloud Neutron Network: %s", err)
+		return fmterr.Errorf("Error updating OpenTelekomCloud Neutron Network: %s", err)
 	}
 
 	d.SetId(FormatNidFromValS(strconv.FormatBool(asu), id))
@@ -282,7 +283,7 @@ func resourceNetworkingNetworkV2Delete(ctx context.Context, d *schema.ResourceDa
 	config := meta.(*cfg.Config)
 	networkingClient, err := config.NetworkingV2Client(config.GetRegion(d))
 	if err != nil {
-		return diag.Errorf("Error creating OpenTelekomCloud networking client: %s", err)
+		return fmterr.Errorf("Error creating OpenTelekomCloud networking client: %s", err)
 	}
 
 	_, id := ExtractValFromNid(d.Id())
@@ -297,7 +298,7 @@ func resourceNetworkingNetworkV2Delete(ctx context.Context, d *schema.ResourceDa
 
 	_, err = stateConf.WaitForState()
 	if err != nil {
-		return diag.Errorf("Error deleting OpenTelekomCloud Neutron Network: %s", err)
+		return fmterr.Errorf("Error deleting OpenTelekomCloud Neutron Network: %s", err)
 	}
 
 	d.SetId("")

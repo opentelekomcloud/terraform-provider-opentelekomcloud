@@ -9,6 +9,7 @@ import (
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/dcs/v1/products"
 
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common/cfg"
+	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common/fmterr"
 )
 
 func DataSourceDcsProductV1() *schema.Resource {
@@ -29,7 +30,7 @@ func dataSourceDcsProductV1Read(ctx context.Context, d *schema.ResourceData, met
 	config := meta.(*cfg.Config)
 	DcsV1Client, err := config.DcsV1Client(config.GetRegion(d))
 	if err != nil {
-		return diag.Errorf("Error get dcs product client: %s", err)
+		return fmterr.Errorf("Error get dcs product client: %s", err)
 	}
 
 	v, err := products.Get(DcsV1Client).Extract()
@@ -47,7 +48,7 @@ func dataSourceDcsProductV1Read(ctx context.Context, d *schema.ResourceData, met
 	}
 
 	if len(FilteredPd) < 1 {
-		return diag.Errorf("Your query returned no results. Please change your filters and try again.")
+		return fmterr.Errorf("Your query returned no results. Please change your filters and try again.")
 	}
 
 	pd := FilteredPd[0]

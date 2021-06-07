@@ -11,6 +11,7 @@ import (
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/waf/v1/webtamperprotection_rules"
 
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common/cfg"
+	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common/fmterr"
 )
 
 func ResourceWafWebTamperProtectionRuleV1() *schema.Resource {
@@ -53,7 +54,7 @@ func resourceWafWebTamperProtectionRuleV1Create(ctx context.Context, d *schema.R
 	wafClient, err := config.WafV1Client(config.GetRegion(d))
 
 	if err != nil {
-		return diag.Errorf("Error creating OpenTelekomcomCloud WAF Client: %s", err)
+		return fmterr.Errorf("Error creating OpenTelekomcomCloud WAF Client: %s", err)
 	}
 
 	createOpts := webtamperprotection_rules.CreateOpts{
@@ -64,7 +65,7 @@ func resourceWafWebTamperProtectionRuleV1Create(ctx context.Context, d *schema.R
 	policy_id := d.Get("policy_id").(string)
 	rule, err := webtamperprotection_rules.Create(wafClient, policy_id, createOpts).Extract()
 	if err != nil {
-		return diag.Errorf("Error creating OpenTelekomcomCloud WAF Web Tamper Protection Rule: %s", err)
+		return fmterr.Errorf("Error creating OpenTelekomcomCloud WAF Web Tamper Protection Rule: %s", err)
 	}
 
 	log.Printf("[DEBUG] Waf web tamper protection rule created: %#v", rule)
@@ -77,7 +78,7 @@ func resourceWafWebTamperProtectionRuleV1Read(ctx context.Context, d *schema.Res
 	config := meta.(*cfg.Config)
 	wafClient, err := config.WafV1Client(config.GetRegion(d))
 	if err != nil {
-		return diag.Errorf("Error creating OpenTelekomCloud WAF client: %s", err)
+		return fmterr.Errorf("Error creating OpenTelekomCloud WAF client: %s", err)
 	}
 	policy_id := d.Get("policy_id").(string)
 	n, err := webtamperprotection_rules.Get(wafClient, policy_id, d.Id()).Extract()
@@ -88,7 +89,7 @@ func resourceWafWebTamperProtectionRuleV1Read(ctx context.Context, d *schema.Res
 			return nil
 		}
 
-		return diag.Errorf("Error retrieving OpenTelekomCloud Waf Web Tamper Protection Rule: %s", err)
+		return fmterr.Errorf("Error retrieving OpenTelekomCloud Waf Web Tamper Protection Rule: %s", err)
 	}
 
 	d.SetId(n.Id)
@@ -103,13 +104,13 @@ func resourceWafWebTamperProtectionRuleV1Delete(ctx context.Context, d *schema.R
 	config := meta.(*cfg.Config)
 	wafClient, err := config.WafV1Client(config.GetRegion(d))
 	if err != nil {
-		return diag.Errorf("Error creating OpenTelekomCloud WAF client: %s", err)
+		return fmterr.Errorf("Error creating OpenTelekomCloud WAF client: %s", err)
 	}
 
 	policy_id := d.Get("policy_id").(string)
 	err = webtamperprotection_rules.Delete(wafClient, policy_id, d.Id()).ExtractErr()
 	if err != nil {
-		return diag.Errorf("Error deleting OpenTelekomCloud WAF Web Tamper Protection Rule: %s", err)
+		return fmterr.Errorf("Error deleting OpenTelekomCloud WAF Web Tamper Protection Rule: %s", err)
 	}
 
 	d.SetId("")
