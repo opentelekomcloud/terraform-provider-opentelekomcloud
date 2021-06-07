@@ -27,7 +27,7 @@ func ResourceSFSFileSystemV2() *schema.Resource {
 		DeleteContext: resourceSFSFileSystemV2Delete,
 
 		Importer: &schema.ResourceImporter{
-			State: schema.ImportStatePassthrough,
+			StateContext: schema.ImportStatePassthroughContext,
 		},
 
 		Timeouts: &schema.ResourceTimeout{
@@ -165,7 +165,7 @@ func resourceSFSFileSystemV2Create(ctx context.Context, d *schema.ResourceData, 
 		Delay:      5 * time.Second,
 		MinTimeout: 3 * time.Second,
 	}
-	_, err = stateConf.WaitForState()
+	_, err = stateConf.WaitForStateContext(ctx)
 	if err != nil {
 		return fmterr.Errorf("error creating share file: %s", err)
 	}
@@ -377,7 +377,7 @@ func resourceSFSFileSystemV2Delete(ctx context.Context, d *schema.ResourceData, 
 		MinTimeout: 3 * time.Second,
 	}
 
-	_, err = stateConf.WaitForState()
+	_, err = stateConf.WaitForStateContext(ctx)
 	if err != nil {
 		return fmterr.Errorf("error deleting OpenTelekomCloud Share File: %s", err)
 	}

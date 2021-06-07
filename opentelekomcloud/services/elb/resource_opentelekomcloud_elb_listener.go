@@ -7,18 +7,13 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/networking/v2/extensions/elbaas/listeners"
 
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common"
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common/cfg"
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common/fmterr"
 )
-
-var ProtocolFormats = []string{"HTTP", "TCP", "HTTPS", "SSL", "UDP"}
-
-func ValidateProtocolFormat(v interface{}, k string) (ws []string, errors []error) {
-	return common.ValidateStringList(v, k, ProtocolFormats)
-}
 
 func ResourceEListener() *schema.Resource {
 	return &schema.Resource{
@@ -61,10 +56,12 @@ func ResourceEListener() *schema.Resource {
 			},
 
 			"protocol": {
-				Type:         schema.TypeString,
-				Required:     true,
-				ForceNew:     true,
-				ValidateFunc: ValidateProtocolFormat,
+				Type:     schema.TypeString,
+				Required: true,
+				ForceNew: true,
+				ValidateFunc: validation.StringInSlice([]string{
+					"HTTP", "TCP", "HTTPS", "SSL", "UDP",
+				}, false),
 			},
 
 			"protocol_port": {
@@ -76,24 +73,21 @@ func ResourceEListener() *schema.Resource {
 				Type:     schema.TypeString,
 				Required: true,
 				ForceNew: true,
-				ValidateFunc: func(v interface{}, k string) (ws []string, errors []error) {
-					return common.ValidateStringList(v, k, []string{"HTTP", "TCP", "UDP"})
-				},
+				ValidateFunc: validation.StringInSlice([]string{
+					"HTTP", "TCP", "UDP",
+				}, false),
 			},
 			"backend_port": {
-				Type:     schema.TypeInt,
-				Required: true,
-				ValidateFunc: func(v interface{}, k string) (ws []string, errors []error) {
-					return common.ValidateIntRange(v, k, 1, 65535)
-				},
+				Type:         schema.TypeInt,
+				Required:     true,
+				ValidateFunc: validation.IntBetween(1, 65535),
 			},
-
 			"lb_algorithm": {
 				Type:     schema.TypeString,
 				Required: true,
-				ValidateFunc: func(v interface{}, k string) (ws []string, errors []error) {
-					return common.ValidateStringList(v, k, []string{"roundrobin", "leastconn", "source"})
-				},
+				ValidateFunc: validation.StringInSlice([]string{
+					"roundrobin", "leastconn", "source",
+				}, false),
 			},
 
 			"session_sticky": {
@@ -109,22 +103,18 @@ func ResourceEListener() *schema.Resource {
 			},
 
 			"cookie_timeout": {
-				Type:     schema.TypeInt,
-				Optional: true,
-				ForceNew: true,
-				Computed: true,
-				ValidateFunc: func(v interface{}, k string) (ws []string, errors []error) {
-					return common.ValidateIntRange(v, k, 1, 1440)
-				},
+				Type:         schema.TypeInt,
+				Optional:     true,
+				ForceNew:     true,
+				Computed:     true,
+				ValidateFunc: validation.IntBetween(1, 1440),
 			},
 
 			"tcp_timeout": {
-				Type:     schema.TypeInt,
-				Optional: true,
-				Computed: true,
-				ValidateFunc: func(v interface{}, k string) (ws []string, errors []error) {
-					return common.ValidateIntRange(v, k, 1, 5)
-				},
+				Type:         schema.TypeInt,
+				Optional:     true,
+				Computed:     true,
+				ValidateFunc: validation.IntBetween(1, 5),
 			},
 
 			"tcp_draining": {
@@ -133,11 +123,9 @@ func ResourceEListener() *schema.Resource {
 			},
 
 			"tcp_draining_timeout": {
-				Type:     schema.TypeInt,
-				Optional: true,
-				ValidateFunc: func(v interface{}, k string) (ws []string, errors []error) {
-					return common.ValidateIntRange(v, k, 0, 60)
-				},
+				Type:         schema.TypeInt,
+				Optional:     true,
+				ValidateFunc: validation.IntBetween(0, 60),
 			},
 
 			"certificate_id": {
@@ -154,11 +142,9 @@ func ResourceEListener() *schema.Resource {
 			},
 
 			"udp_timeout": {
-				Type:     schema.TypeInt,
-				Optional: true,
-				ValidateFunc: func(v interface{}, k string) (ws []string, errors []error) {
-					return common.ValidateIntRange(v, k, 1, 1440)
-				},
+				Type:         schema.TypeInt,
+				Optional:     true,
+				ValidateFunc: validation.IntBetween(1, 1440),
 			},
 
 			"ssl_protocols": {
@@ -166,18 +152,18 @@ func ResourceEListener() *schema.Resource {
 				Optional: true,
 				ForceNew: true,
 				Computed: true,
-				ValidateFunc: func(v interface{}, k string) (ws []string, errors []error) {
-					return common.ValidateStringList(v, k, []string{"TLSv1.2", "TLSv1.2 TLSv1.1 TLSv1"})
-				},
+				ValidateFunc: validation.StringInSlice([]string{
+					"TLSv1.2", "TLSv1.2 TLSv1.1 TLSv1",
+				}, false),
 			},
 
 			"ssl_ciphers": {
 				Type:     schema.TypeString,
 				Optional: true,
 				Computed: true,
-				ValidateFunc: func(v interface{}, k string) (ws []string, errors []error) {
-					return common.ValidateStringList(v, k, []string{"Default", "Extended", "Strict"})
-				},
+				ValidateFunc: validation.StringInSlice([]string{
+					"Default", "Extended", "Strict",
+				}, false),
 			},
 		},
 	}

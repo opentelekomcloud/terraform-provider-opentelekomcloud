@@ -24,7 +24,7 @@ func ResourceVpcFlowLogV1() *schema.Resource {
 		UpdateContext: resourceVpcFlowLogV1Update,
 		DeleteContext: resourceVpcFlowLogV1Delete,
 		Importer: &schema.ResourceImporter{
-			State: schema.ImportStatePassthrough,
+			StateContext: schema.ImportStatePassthroughContext,
 		},
 
 		Timeouts: &schema.ResourceTimeout{

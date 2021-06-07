@@ -23,8 +23,9 @@ func ResourceAntiDdosV1() *schema.Resource {
 		ReadContext:   resourceAntiDdosV1Read,
 		UpdateContext: resourceAntiDdosV1Update,
 		DeleteContext: resourceAntiDdosV1Delete,
+
 		Importer: &schema.ResourceImporter{
-			State: schema.ImportStatePassthrough,
+			StateContext: schema.ImportStatePassthroughContext,
 		},
 
 		Timeouts: &schema.ResourceTimeout{
@@ -107,7 +108,7 @@ func resourceAntiDdosV1Create(ctx context.Context, d *schema.ResourceData, meta 
 		MinTimeout: 3 * time.Second,
 	}
 
-	_, stateErr := stateConf.WaitForState()
+	_, stateErr := stateConf.WaitForStateContext(ctx)
 	if stateErr != nil {
 		return fmterr.Errorf("error waiting for AntiDdos (%s) to become normal: %s", d.Id(), stateErr)
 	}
@@ -172,7 +173,7 @@ func resourceAntiDdosV1Update(ctx context.Context, d *schema.ResourceData, meta 
 		MinTimeout: 3 * time.Second,
 	}
 
-	_, stateErr := stateConf.WaitForState()
+	_, stateErr := stateConf.WaitForStateContext(ctx)
 	if stateErr != nil {
 		return fmterr.Errorf("error waiting for AntiDdos to become normal: %s", stateErr)
 	}
@@ -196,7 +197,7 @@ func resourceAntiDdosV1Delete(ctx context.Context, d *schema.ResourceData, meta 
 		MinTimeout: 3 * time.Second,
 	}
 
-	_, err = stateConf.WaitForState()
+	_, err = stateConf.WaitForStateContext(ctx)
 	if err != nil {
 		return fmterr.Errorf("error deleting AntiDdos: %s", err)
 	}

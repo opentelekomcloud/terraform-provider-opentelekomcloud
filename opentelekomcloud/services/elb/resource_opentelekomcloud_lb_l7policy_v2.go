@@ -27,7 +27,7 @@ func ResourceL7PolicyV2() *schema.Resource {
 		UpdateContext: resourceL7PolicyV2Update,
 		DeleteContext: resourceL7PolicyV2Delete,
 		Importer: &schema.ResourceImporter{
-			State: resourceL7PolicyV2Import,
+			StateContext: resourceL7PolicyV2Import,
 		},
 
 		Timeouts: &schema.ResourceTimeout{
@@ -151,7 +151,7 @@ func resourceL7PolicyV2Create(ctx context.Context, d *schema.ResourceData, meta 
 			return fmterr.Errorf("Unable to retrieve %s: %s", redirectPoolID, err)
 		}
 
-		err = waitForLBV2Pool(lbClient, pool.ID, "ACTIVE", lbPendingStatuses, timeout)
+		err = waitForLBV2Pool(ctx, lbClient, pool.ID, "ACTIVE", lbPendingStatuses, timeout)
 		if err != nil {
 			return diag.FromErr(err)
 		}
@@ -164,14 +164,14 @@ func resourceL7PolicyV2Create(ctx context.Context, d *schema.ResourceData, meta 
 	}
 
 	// Wait for parent Listener to become active before continuing.
-	err = waitForLBV2Listener(lbClient, parentListener.ID, "ACTIVE", lbPendingStatuses, timeout)
+	err = waitForLBV2Listener(ctx, lbClient, parentListener.ID, "ACTIVE", lbPendingStatuses, timeout)
 	if err != nil {
 		return diag.FromErr(err)
 	}
 
 	log.Printf("[DEBUG] Attempting to create L7 Policy")
 	var l7Policy *l7policies.L7Policy
-	err = resource.Retry(timeout, func() *resource.RetryError {
+	err = resource.RetryContext(ctx, timeout, func() *resource.RetryError {
 		l7Policy, err = l7policies.Create(lbClient, createOpts).Extract()
 		if err != nil {
 			return common.CheckForRetryableError(err)
@@ -184,7 +184,7 @@ func resourceL7PolicyV2Create(ctx context.Context, d *schema.ResourceData, meta 
 	}
 
 	// Wait for L7 Policy to become active before continuing
-	err = waitForLBV2L7Policy(lbClient, parentListener, l7Policy, "ACTIVE", lbPendingStatuses, timeout)
+	err = waitForLBV2L7Policy(ctx, lbClient, parentListener, l7Policy, "ACTIVE", lbPendingStatuses, timeout)
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -268,7 +268,7 @@ func resourceL7PolicyV2Update(ctx context.Context, d *schema.ResourceData, meta 
 			return fmterr.Errorf("Unable to retrieve %s: %s", redirectPoolID, err)
 		}
 
-		err = waitForLBV2Pool(lbClient, pool.ID, "ACTIVE", lbPendingStatuses, timeout)
+		err = waitForLBV2Pool(ctx, lbClient, pool.ID, "ACTIVE", lbPendingStatuses, timeout)
 		if err != nil {
 			return diag.FromErr(err)
 		}
@@ -287,19 +287,19 @@ func resourceL7PolicyV2Update(ctx context.Context, d *schema.ResourceData, meta 
 	}
 
 	// Wait for parent Listener to become active before continuing.
-	err = waitForLBV2Listener(lbClient, parentListener.ID, "ACTIVE", lbPendingStatuses, timeout)
+	err = waitForLBV2Listener(ctx, lbClient, parentListener.ID, "ACTIVE", lbPendingStatuses, timeout)
 	if err != nil {
 		return diag.FromErr(err)
 	}
 
 	// Wait for L7 Policy to become active before continuing
-	err = waitForLBV2L7Policy(lbClient, parentListener, l7Policy, "ACTIVE", lbPendingStatuses, timeout)
+	err = waitForLBV2L7Policy(ctx, lbClient, parentListener, l7Policy, "ACTIVE", lbPendingStatuses, timeout)
 	if err != nil {
 		return diag.FromErr(err)
 	}
 
 	log.Printf("[DEBUG] Updating L7 Policy %s with options: %#v", d.Id(), updateOpts)
-	err = resource.Retry(timeout, func() *resource.RetryError {
+	err = resource.RetryContext(ctx, timeout, func() *resource.RetryError {
 		_, err = l7policies.Update(lbClient, d.Id(), updateOpts).Extract()
 		if err != nil {
 			return common.CheckForRetryableError(err)
@@ -312,7 +312,7 @@ func resourceL7PolicyV2Update(ctx context.Context, d *schema.ResourceData, meta 
 	}
 
 	// Wait for L7 Policy to become active before continuing
-	err = waitForLBV2L7Policy(lbClient, parentListener, l7Policy, "ACTIVE", lbPendingStatuses, timeout)
+	err = waitForLBV2L7Policy(ctx, lbClient, parentListener, l7Policy, "ACTIVE", lbPendingStatuses, timeout)
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -343,13 +343,13 @@ func resourceL7PolicyV2Delete(ctx context.Context, d *schema.ResourceData, meta 
 	}
 
 	// Wait for Listener to become active before continuing.
-	err = waitForLBV2Listener(lbClient, listener.ID, "ACTIVE", lbPendingStatuses, timeout)
+	err = waitForLBV2Listener(ctx, lbClient, listener.ID, "ACTIVE", lbPendingStatuses, timeout)
 	if err != nil {
 		return diag.FromErr(err)
 	}
 
 	log.Printf("[DEBUG] Attempting to delete L7 Policy %s", d.Id())
-	err = resource.Retry(timeout, func() *resource.RetryError {
+	err = resource.RetryContext(ctx, timeout, func() *resource.RetryError {
 		err = l7policies.Delete(lbClient, d.Id()).ExtractErr()
 		if err != nil {
 			return common.CheckForRetryableError(err)
@@ -361,7 +361,7 @@ func resourceL7PolicyV2Delete(ctx context.Context, d *schema.ResourceData, meta 
 		return diag.FromErr(common.CheckDeleted(d, err, "Error deleting L7 Policy"))
 	}
 
-	err = waitForLBV2L7Policy(lbClient, listener, l7Policy, "DELETED", lbPendingDeleteStatuses, timeout)
+	err = waitForLBV2L7Policy(ctx, lbClient, listener, l7Policy, "DELETED", lbPendingDeleteStatuses, timeout)
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -369,7 +369,7 @@ func resourceL7PolicyV2Delete(ctx context.Context, d *schema.ResourceData, meta 
 	return nil
 }
 
-func resourceL7PolicyV2Import(d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
+func resourceL7PolicyV2Import(ctx context.Context, d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
 	config := meta.(*cfg.Config)
 	lbClient, err := config.NetworkingV2Client(config.GetRegion(d))
 	if err != nil {

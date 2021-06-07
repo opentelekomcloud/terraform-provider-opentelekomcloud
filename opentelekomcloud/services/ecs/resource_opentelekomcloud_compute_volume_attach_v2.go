@@ -25,7 +25,7 @@ func ResourceComputeVolumeAttachV2() *schema.Resource {
 		ReadContext:   resourceComputeVolumeAttachV2Read,
 		DeleteContext: resourceComputeVolumeAttachV2Delete,
 		Importer: &schema.ResourceImporter{
-			State: schema.ImportStatePassthrough,
+			StateContext: schema.ImportStatePassthroughContext,
 		},
 
 		Timeouts: &schema.ResourceTimeout{
@@ -99,7 +99,7 @@ func resourceComputeVolumeAttachV2Create(ctx context.Context, d *schema.Resource
 		MinTimeout: 15 * time.Second,
 	}
 
-	if _, err = stateConf.WaitForState(); err != nil {
+	if _, err = stateConf.WaitForStateContext(ctx); err != nil {
 		return fmterr.Errorf("Error attaching OpenTelekomCloud volume: %s", err)
 	}
 
@@ -162,7 +162,7 @@ func resourceComputeVolumeAttachV2Delete(ctx context.Context, d *schema.Resource
 		MinTimeout: 15 * time.Second,
 	}
 
-	if _, err = stateConf.WaitForState(); err != nil {
+	if _, err = stateConf.WaitForStateContext(ctx); err != nil {
 		return fmterr.Errorf("Error detaching OpenTelekomCloud volume: %s", err)
 	}
 

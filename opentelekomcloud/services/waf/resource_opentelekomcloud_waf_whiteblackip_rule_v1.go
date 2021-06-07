@@ -21,7 +21,7 @@ func ResourceWafWhiteBlackIpRuleV1() *schema.Resource {
 		UpdateContext: resourceWafWhiteBlackIpRuleV1Update,
 		DeleteContext: resourceWafWhiteBlackIpRuleV1Delete,
 		Importer: &schema.ResourceImporter{
-			State: schema.ImportStatePassthrough,
+			StateContext: schema.ImportStatePassthroughContext,
 		},
 
 		Timeouts: &schema.ResourceTimeout{

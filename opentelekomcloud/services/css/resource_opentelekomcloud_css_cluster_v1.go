@@ -369,7 +369,7 @@ func resourceCssClusterV1Delete(ctx context.Context, d *schema.ResourceData, met
 		Delay:      10 * time.Second,
 		MinTimeout: 10 * time.Second,
 	}
-	_, err = stateConf.WaitForState()
+	_, err = stateConf.WaitForStateContext(ctx)
 	if err != nil {
 		return fmterr.Errorf("error waiting for cluster to be deleted: %s", err)
 	}

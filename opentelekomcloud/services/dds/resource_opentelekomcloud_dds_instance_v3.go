@@ -26,7 +26,7 @@ func ResourceDdsInstanceV3() *schema.Resource {
 		DeleteContext: resourceDdsInstanceV3Delete,
 
 		Importer: &schema.ResourceImporter{
-			State: schema.ImportStatePassthrough,
+			StateContext: schema.ImportStatePassthroughContext,
 		},
 
 		Timeouts: &schema.ResourceTimeout{
@@ -355,7 +355,7 @@ func resourceDdsInstanceV3Create(ctx context.Context, d *schema.ResourceData, me
 		MinTimeout: 10 * time.Second,
 	}
 
-	_, err = stateConf.WaitForState()
+	_, err = stateConf.WaitForStateContext(ctx)
 	if err != nil {
 		return fmterr.Errorf("error waiting for instance (%s) to become ready: %w", instance.Id, err)
 	}
@@ -510,7 +510,7 @@ func resourceDdsInstanceV3Update(ctx context.Context, d *schema.ResourceData, me
 		MinTimeout: 10 * time.Second,
 	}
 
-	_, err = stateConf.WaitForState()
+	_, err = stateConf.WaitForStateContext(ctx)
 	if err != nil {
 		return fmterr.Errorf("error waiting for instance (%s) to become ready: %w", d.Id(), err)
 	}
@@ -538,7 +538,7 @@ func resourceDdsInstanceV3Delete(ctx context.Context, d *schema.ResourceData, me
 		MinTimeout: 10 * time.Second,
 	}
 
-	_, err = stateConf.WaitForState()
+	_, err = stateConf.WaitForStateContext(ctx)
 	if err != nil {
 		return fmterr.Errorf("error waiting for instance (%s) to be deleted: %w", d.Id(), err)
 	}

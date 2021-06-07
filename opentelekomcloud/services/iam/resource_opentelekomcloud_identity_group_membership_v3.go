@@ -22,7 +22,7 @@ func ResourceIdentityGroupMembershipV3() *schema.Resource {
 		UpdateContext: resourceIdentityGroupMembershipV3Update,
 		DeleteContext: resourceIdentityGroupMembershipV3Delete,
 		Importer: &schema.ResourceImporter{
-			State: schema.ImportStatePassthrough,
+			StateContext: schema.ImportStatePassthroughContext,
 		},
 
 		Schema: map[string]*schema.Schema{

@@ -23,7 +23,7 @@ func ResourceWafPolicyV1() *schema.Resource {
 		UpdateContext: resourceWafPolicyV1Update,
 		DeleteContext: resourceWafPolicyV1Delete,
 		Importer: &schema.ResourceImporter{
-			State: schema.ImportStatePassthrough,
+			StateContext: schema.ImportStatePassthroughContext,
 		},
 
 		Timeouts: &schema.ResourceTimeout{

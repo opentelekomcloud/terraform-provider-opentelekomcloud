@@ -25,7 +25,7 @@ func ResourceFWFirewallGroupV2() *schema.Resource {
 		UpdateContext: resourceFWFirewallGroupV2Update,
 		DeleteContext: resourceFWFirewallGroupV2Delete,
 		Importer: &schema.ResourceImporter{
-			State: schema.ImportStatePassthrough,
+			StateContext: schema.ImportStatePassthroughContext,
 		},
 
 		Timeouts: &schema.ResourceTimeout{
@@ -140,7 +140,7 @@ func resourceFWFirewallGroupV2Create(ctx context.Context, d *schema.ResourceData
 		MinTimeout: 2 * time.Second,
 	}
 
-	_, err = stateConf.WaitForState()
+	_, err = stateConf.WaitForStateContext(ctx)
 	log.Printf("[DEBUG] Firewall group (%s) is active.", firewall_group.ID)
 
 	d.SetId(firewall_group.ID)
@@ -238,7 +238,7 @@ func resourceFWFirewallGroupV2Update(ctx context.Context, d *schema.ResourceData
 		MinTimeout: 2 * time.Second,
 	}
 
-	_, err = stateConf.WaitForState()
+	_, err = stateConf.WaitForStateContext(ctx)
 
 	return resourceFWFirewallGroupV2Read(ctx, d, meta)
 }
@@ -262,7 +262,7 @@ func resourceFWFirewallGroupV2Delete(ctx context.Context, d *schema.ResourceData
 		MinTimeout: 2 * time.Second,
 	}
 
-	_, err = stateConf.WaitForState()
+	_, err = stateConf.WaitForStateContext(ctx)
 
 	err = firewall_groups.Delete(networkingClient, d.Id()).Err
 
@@ -279,7 +279,7 @@ func resourceFWFirewallGroupV2Delete(ctx context.Context, d *schema.ResourceData
 		MinTimeout: 2 * time.Second,
 	}
 
-	_, err = stateConf.WaitForState()
+	_, err = stateConf.WaitForStateContext(ctx)
 
 	return diag.FromErr(err)
 }

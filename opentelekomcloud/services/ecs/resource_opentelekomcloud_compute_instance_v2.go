@@ -458,7 +458,7 @@ func resourceComputeInstanceV2Create(ctx context.Context, d *schema.ResourceData
 		MinTimeout: 3 * time.Second,
 	}
 
-	_, err = stateConf.WaitForState()
+	_, err = stateConf.WaitForStateContext(ctx)
 	if err != nil {
 		return fmterr.Errorf("error waiting for instance (%s) to become ready: %s", server.ID, err)
 	}
@@ -481,7 +481,7 @@ func resourceComputeInstanceV2Create(ctx context.Context, d *schema.ResourceData
 		}
 
 		log.Printf("[DEBUG] Waiting for instance (%s) to stop", d.Id())
-		_, err = stopStateConf.WaitForState()
+		_, err = stopStateConf.WaitForStateContext(ctx)
 		if err != nil {
 			return fmterr.Errorf("error waiting for instance (%s) to become inactive(shutoff): %w", d.Id(), err)
 		}
@@ -490,7 +490,7 @@ func resourceComputeInstanceV2Create(ctx context.Context, d *schema.ResourceData
 	if common.HasFilledOpt(d, "auto_recovery") {
 		ar := d.Get("auto_recovery").(bool)
 		log.Printf("[DEBUG] Set auto recovery of instance to %t", ar)
-		err = setAutoRecoveryForInstance(d, meta, server.ID, ar)
+		err = setAutoRecoveryForInstance(ctx, d, meta, server.ID, ar)
 		if err != nil {
 			log.Printf("[WARN] Error setting auto recovery of instance: %s", err)
 		}
@@ -705,7 +705,7 @@ func resourceComputeInstanceV2Update(ctx context.Context, d *schema.ResourceData
 			}
 
 			log.Printf("[DEBUG] Waiting for instance (%s) to stop", d.Id())
-			_, err = stopStateConf.WaitForState()
+			_, err = stopStateConf.WaitForStateContext(ctx)
 			if err != nil {
 				return fmterr.Errorf("error waiting for instance (%s) to become inactive(shutoff): %s", d.Id(), err)
 			}
@@ -724,7 +724,7 @@ func resourceComputeInstanceV2Update(ctx context.Context, d *schema.ResourceData
 			}
 
 			log.Printf("[DEBUG] Waiting for instance (%s) to start/unshelve", d.Id())
-			_, err = startStateConf.WaitForState()
+			_, err = startStateConf.WaitForStateContext(ctx)
 			if err != nil {
 				return fmterr.Errorf("error waiting for instance (%s) to become active: %s", d.Id(), err)
 			}
@@ -845,7 +845,7 @@ func resourceComputeInstanceV2Update(ctx context.Context, d *schema.ResourceData
 			MinTimeout: 3 * time.Second,
 		}
 
-		_, err = stateConf.WaitForState()
+		_, err = stateConf.WaitForStateContext(ctx)
 		if err != nil {
 			return fmterr.Errorf("error waiting for instance (%s) to resize: %s", d.Id(), err)
 		}
@@ -866,7 +866,7 @@ func resourceComputeInstanceV2Update(ctx context.Context, d *schema.ResourceData
 			MinTimeout: 3 * time.Second,
 		}
 
-		_, err = stateConf.WaitForState()
+		_, err = stateConf.WaitForStateContext(ctx)
 		if err != nil {
 			return fmterr.Errorf("error waiting for instance (%s) to confirm resize: %s", d.Id(), err)
 		}
@@ -886,7 +886,7 @@ func resourceComputeInstanceV2Update(ctx context.Context, d *schema.ResourceData
 	if d.HasChange("auto_recovery") {
 		ar := d.Get("auto_recovery").(bool)
 		log.Printf("[DEBUG] Update auto recovery of instance to %t", ar)
-		err = setAutoRecoveryForInstance(d, meta, d.Id(), ar)
+		err = setAutoRecoveryForInstance(ctx, d, meta, d.Id(), ar)
 		if err != nil {
 			return fmterr.Errorf("error updating auto recovery of instance: %w", err)
 		}
@@ -925,7 +925,7 @@ func resourceComputeInstanceV2Delete(ctx context.Context, d *schema.ResourceData
 		MinTimeout: 3 * time.Second,
 	}
 
-	_, err = stateConf.WaitForState()
+	_, err = stateConf.WaitForStateContext(ctx)
 	if err != nil {
 		return fmterr.Errorf("error waiting for instance (%s) to delete: %s", d.Id(), err)
 	}
@@ -1189,8 +1189,8 @@ func resourceComputeInstanceV2ImportState(ctx context.Context, d *schema.Resourc
 	}
 
 	results := make([]*schema.ResourceData, 1)
-	if err := resourceComputeInstanceV2Read(ctx, d, meta); err != nil {
-		return nil, fmt.Errorf("error reading opentelekomcloud_compute_instance_v2 %s: %s", d.Id(), err)
+	if diagRead := resourceComputeInstanceV2Read(ctx, d, meta); diagRead.HasError() {
+		return nil, fmt.Errorf("error reading opentelekomcloud_compute_instance_v2 %s: %s", d.Id(), diagRead[0].Summary)
 	}
 
 	metadata, err := servers.Metadata(computeClient, d.Id()).Extract()

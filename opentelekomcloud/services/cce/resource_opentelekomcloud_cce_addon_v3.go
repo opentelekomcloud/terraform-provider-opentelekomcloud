@@ -29,7 +29,7 @@ func ResourceCCEAddonV3() *schema.Resource {
 		},
 
 		Importer: &schema.ResourceImporter{
-			State: resourceCCEAddonV3Import,
+			StateContext: resourceCCEAddonV3Import,
 		},
 
 		Schema: map[string]*schema.Schema{
@@ -189,7 +189,7 @@ func resourceCCEAddonV3Delete(ctx context.Context, d *schema.ResourceData, meta 
 		Timeout: d.Timeout(schema.TimeoutDelete),
 	}
 
-	_, err = stateConf.WaitForState()
+	_, err = stateConf.WaitForStateContext(ctx)
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -256,7 +256,7 @@ func waitForCCEAddonDelete(client *golangsdk.ServiceClient, addonID, clusterID s
 	}
 }
 
-func resourceCCEAddonV3Import(d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
+func resourceCCEAddonV3Import(ctx context.Context, d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
 	parts := strings.SplitN(d.Id(), "/", 2)
 	if len(parts) != 2 {
 		err := fmt.Errorf("invalid format specified for CCE Addon. Format must be <cluster id>/<addon id>")

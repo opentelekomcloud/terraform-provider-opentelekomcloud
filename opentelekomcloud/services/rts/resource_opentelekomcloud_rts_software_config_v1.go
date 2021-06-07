@@ -20,7 +20,7 @@ func ResourceSoftwareConfigV1() *schema.Resource {
 		ReadContext:   resourceSoftwareConfigV1Read,
 		DeleteContext: resourceSoftwareConfigV1Delete,
 		Importer: &schema.ResourceImporter{
-			State: schema.ImportStatePassthrough,
+			StateContext: schema.ImportStatePassthroughContext,
 		},
 
 		Timeouts: &schema.ResourceTimeout{

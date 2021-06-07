@@ -396,7 +396,7 @@ func resourceComputeBMSInstanceV2Create(ctx context.Context, d *schema.ResourceD
 		MinTimeout: 3 * time.Second,
 	}
 
-	_, err = stateConf.WaitForState()
+	_, err = stateConf.WaitForStateContext(ctx)
 	if err != nil {
 		return fmterr.Errorf(
 			"Error waiting for instance (%s) to become ready: %s",
@@ -517,7 +517,7 @@ func resourceComputeBMSInstanceV2Delete(ctx context.Context, d *schema.ResourceD
 				MinTimeout: 3 * time.Second,
 			}
 			log.Printf("[DEBUG] Waiting for instance (%s) to stop", d.Id())
-			_, err = stopStateConf.WaitForState()
+			_, err = stopStateConf.WaitForStateContext(ctx)
 			if err != nil {
 				log.Printf("[WARN] Error waiting for instance (%s) to stop: %s, proceeding to delete", d.Id(), err)
 			}
@@ -542,7 +542,7 @@ func resourceComputeBMSInstanceV2Delete(ctx context.Context, d *schema.ResourceD
 		MinTimeout: 3 * time.Second,
 	}
 
-	_, err = stateConf.WaitForState()
+	_, err = stateConf.WaitForStateContext(ctx)
 	if err != nil {
 		return fmterr.Errorf(
 			"Error waiting for instance (%s) to delete: %s",
@@ -715,7 +715,7 @@ func resourceComputeBMSInstanceV2Update(ctx context.Context, d *schema.ResourceD
 			MinTimeout: 3 * time.Second,
 		}
 
-		_, err = stateConf.WaitForState()
+		_, err = stateConf.WaitForStateContext(ctx)
 		if err != nil {
 			return fmterr.Errorf("Error waiting for instance (%s) to resize: %s", d.Id(), err)
 		}
@@ -736,7 +736,7 @@ func resourceComputeBMSInstanceV2Update(ctx context.Context, d *schema.ResourceD
 			MinTimeout: 3 * time.Second,
 		}
 
-		_, err = stateConf.WaitForState()
+		_, err = stateConf.WaitForStateContext(ctx)
 		if err != nil {
 			return fmterr.Errorf("Error waiting for instance (%s) to confirm resize: %s", d.Id(), err)
 		}

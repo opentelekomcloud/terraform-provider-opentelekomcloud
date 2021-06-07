@@ -22,7 +22,7 @@ func ResourceRdsReadReplicaV3() *schema.Resource {
 		DeleteContext: resourceRdsReadReplicaV3Delete,
 
 		Importer: &schema.ResourceImporter{
-			State: schema.ImportStatePassthrough,
+			StateContext: schema.ImportStatePassthroughContext,
 		},
 
 		Timeouts: &schema.ResourceTimeout{

@@ -7,6 +7,7 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 	golangsdk "github.com/opentelekomcloud/gophertelekomcloud"
 
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/networking/v2/extensions/elbaas/loadbalancer_elbs"
@@ -56,20 +57,18 @@ func ResourceELoadBalancer() *schema.Resource {
 			},
 
 			"bandwidth": {
-				Type:     schema.TypeInt,
-				Optional: true,
-				ValidateFunc: func(v interface{}, k string) (ws []string, errors []error) {
-					return common.ValidateIntRange(v, k, 1, 1000)
-				},
+				Type:         schema.TypeInt,
+				Optional:     true,
+				ValidateFunc: validation.IntBetween(1, 1000),
 			},
 
 			"type": {
 				Type:     schema.TypeString,
 				Required: true,
 				ForceNew: true,
-				ValidateFunc: func(v interface{}, k string) (ws []string, errors []error) {
-					return common.ValidateStringList(v, k, []string{"Internal", "External"})
-				},
+				ValidateFunc: validation.StringInSlice([]string{
+					"Internal", "External",
+				}, false),
 			},
 
 			"admin_state_up": {

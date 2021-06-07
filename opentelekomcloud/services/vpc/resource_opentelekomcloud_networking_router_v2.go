@@ -138,7 +138,7 @@ func resourceNetworkingRouterV2Create(ctx context.Context, d *schema.ResourceDat
 		MinTimeout: 3 * time.Second,
 	}
 
-	_, err = stateConf.WaitForState()
+	_, err = stateConf.WaitForStateContext(ctx)
 
 	d.SetId(n.ID)
 
@@ -251,7 +251,7 @@ func resourceNetworkingRouterV2Delete(ctx context.Context, d *schema.ResourceDat
 		MinTimeout: 3 * time.Second,
 	}
 
-	_, err = stateConf.WaitForState()
+	_, err = stateConf.WaitForStateContext(ctx)
 	if err != nil {
 		return fmterr.Errorf("Error deleting OpenTelekomCloud Neutron Router: %s", err)
 	}

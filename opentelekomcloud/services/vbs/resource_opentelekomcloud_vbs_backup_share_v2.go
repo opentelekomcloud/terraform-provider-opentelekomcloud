@@ -20,7 +20,7 @@ func ResourceVBSBackupShareV2() *schema.Resource {
 		ReadContext:   resourceVBSBackupShareV2Read,
 		DeleteContext: resourceVBSBackupShareV2Delete,
 		Importer: &schema.ResourceImporter{
-			State: schema.ImportStatePassthrough,
+			StateContext: schema.ImportStatePassthroughContext,
 		},
 
 		Timeouts: &schema.ResourceTimeout{

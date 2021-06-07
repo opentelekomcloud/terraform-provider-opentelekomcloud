@@ -21,7 +21,7 @@ func ResourceWafPreciseProtectionRuleV1() *schema.Resource {
 		ReadContext:   resourceWafPreciseProtectionRuleV1Read,
 		DeleteContext: resourceWafPreciseProtectionRuleV1Delete,
 		Importer: &schema.ResourceImporter{
-			State: schema.ImportStatePassthrough,
+			StateContext: schema.ImportStatePassthroughContext,
 		},
 
 		Timeouts: &schema.ResourceTimeout{

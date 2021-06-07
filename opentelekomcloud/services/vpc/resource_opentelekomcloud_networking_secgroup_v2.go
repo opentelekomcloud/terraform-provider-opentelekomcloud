@@ -27,7 +27,7 @@ func ResourceNetworkingSecGroupV2() *schema.Resource {
 		DeleteContext: resourceNetworkingSecGroupV2Delete,
 
 		Importer: &schema.ResourceImporter{
-			State: schema.ImportStatePassthrough,
+			StateContext: schema.ImportStatePassthroughContext,
 		},
 
 		Timeouts: &schema.ResourceTimeout{
@@ -172,7 +172,7 @@ func resourceNetworkingSecGroupV2Delete(ctx context.Context, d *schema.ResourceD
 		MinTimeout: 3 * time.Second,
 	}
 
-	_, err = stateConf.WaitForState()
+	_, err = stateConf.WaitForStateContext(ctx)
 	if err != nil {
 		return fmterr.Errorf("error deleting OpenTelekomCloud Neutron Security Group: %s", err)
 	}

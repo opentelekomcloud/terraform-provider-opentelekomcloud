@@ -25,7 +25,7 @@ func ResourceVBSBackupPolicyV2() *schema.Resource {
 		UpdateContext: resourceVBSBackupPolicyV2Update,
 		DeleteContext: resourceVBSBackupPolicyV2Delete,
 		Importer: &schema.ResourceImporter{
-			State: schema.ImportStatePassthrough,
+			StateContext: schema.ImportStatePassthroughContext,
 		},
 
 		Timeouts: &schema.ResourceTimeout{

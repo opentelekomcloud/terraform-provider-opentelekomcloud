@@ -162,13 +162,13 @@ func resourceListenerV2Create(ctx context.Context, d *schema.ResourceData, meta 
 	// Wait for LoadBalancer to become active before continuing
 	lbID := createOpts.LoadbalancerID
 	timeout := d.Timeout(schema.TimeoutCreate)
-	if err := waitForLBV2LoadBalancer(client, lbID, "ACTIVE", nil, timeout); err != nil {
+	if err := waitForLBV2LoadBalancer(ctx, client, lbID, "ACTIVE", nil, timeout); err != nil {
 		return diag.FromErr(err)
 	}
 
 	log.Printf("[DEBUG] Attempting to create listener")
 	var listener *listeners.Listener
-	err = resource.Retry(timeout, func() *resource.RetryError {
+	err = resource.RetryContext(ctx, timeout, func() *resource.RetryError {
 		listener, err = listeners.Create(client, createOpts).Extract()
 		if err != nil {
 			return common.CheckForRetryableError(err)
@@ -180,7 +180,7 @@ func resourceListenerV2Create(ctx context.Context, d *schema.ResourceData, meta 
 	}
 
 	// Wait for LoadBalancer to become active again before continuing
-	if err := waitForLBV2LoadBalancer(client, lbID, "ACTIVE", nil, timeout); err != nil {
+	if err := waitForLBV2LoadBalancer(ctx, client, lbID, "ACTIVE", nil, timeout); err != nil {
 		return diag.FromErr(err)
 	}
 
@@ -294,12 +294,12 @@ func resourceListenerV2Update(ctx context.Context, d *schema.ResourceData, meta 
 	// Wait for LoadBalancer to become active before continuing
 	lbID := d.Get("loadbalancer_id").(string)
 	timeout := d.Timeout(schema.TimeoutUpdate)
-	if err := waitForLBV2LoadBalancer(client, lbID, "ACTIVE", nil, timeout); err != nil {
+	if err := waitForLBV2LoadBalancer(ctx, client, lbID, "ACTIVE", nil, timeout); err != nil {
 		return diag.FromErr(err)
 	}
 
 	log.Printf("[DEBUG] Updating listener %s with options: %#v", d.Id(), updateOpts)
-	err = resource.Retry(timeout, func() *resource.RetryError {
+	err = resource.RetryContext(ctx, timeout, func() *resource.RetryError {
 		_, err = listeners.Update(client, d.Id(), updateOpts).Extract()
 		if err != nil {
 			return common.CheckForRetryableError(err)
@@ -312,7 +312,7 @@ func resourceListenerV2Update(ctx context.Context, d *schema.ResourceData, meta 
 	}
 
 	// Wait for LoadBalancer to become active again before continuing
-	if err := waitForLBV2LoadBalancer(client, lbID, "ACTIVE", nil, timeout); err != nil {
+	if err := waitForLBV2LoadBalancer(ctx, client, lbID, "ACTIVE", nil, timeout); err != nil {
 		return diag.FromErr(err)
 	}
 
@@ -337,12 +337,12 @@ func resourceListenerV2Delete(ctx context.Context, d *schema.ResourceData, meta 
 	// Wait for LoadBalancer to become active before continuing
 	lbID := d.Get("loadbalancer_id").(string)
 	timeout := d.Timeout(schema.TimeoutDelete)
-	if err := waitForLBV2LoadBalancer(client, lbID, "ACTIVE", nil, timeout); err != nil {
+	if err := waitForLBV2LoadBalancer(ctx, client, lbID, "ACTIVE", nil, timeout); err != nil {
 		return diag.FromErr(err)
 	}
 
 	log.Printf("[DEBUG] Deleting listener %s", d.Id())
-	err = resource.Retry(timeout, func() *resource.RetryError {
+	err = resource.RetryContext(ctx, timeout, func() *resource.RetryError {
 		err = listeners.Delete(client, d.Id()).ExtractErr()
 		if err != nil {
 			return common.CheckForRetryableError(err)
@@ -354,12 +354,12 @@ func resourceListenerV2Delete(ctx context.Context, d *schema.ResourceData, meta 
 	}
 
 	// Wait for LoadBalancer to become active again before continuing
-	if err := waitForLBV2LoadBalancer(client, lbID, "ACTIVE", nil, timeout); err != nil {
+	if err := waitForLBV2LoadBalancer(ctx, client, lbID, "ACTIVE", nil, timeout); err != nil {
 		return diag.FromErr(err)
 	}
 
 	// Wait for Listener to delete
-	if err := waitForLBV2Listener(client, d.Id(), "DELETED", nil, timeout); err != nil {
+	if err := waitForLBV2Listener(ctx, client, d.Id(), "DELETED", nil, timeout); err != nil {
 		return diag.FromErr(err)
 	}
 

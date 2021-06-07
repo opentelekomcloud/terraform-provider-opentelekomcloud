@@ -29,7 +29,7 @@ func ResourceDNSPtrRecordV2() *schema.Resource {
 		DeleteContext: resourceDNSPtrRecordV2Delete,
 
 		Importer: &schema.ResourceImporter{
-			State: schema.ImportStatePassthrough,
+			StateContext: schema.ImportStatePassthroughContext,
 		},
 
 		Timeouts: &schema.ResourceTimeout{
@@ -107,7 +107,7 @@ func resourceDNSPtrRecordV2Create(ctx context.Context, d *schema.ResourceData, m
 		Delay:      5 * time.Second,
 		MinTimeout: 3 * time.Second,
 	}
-	_, err = stateConf.WaitForState()
+	_, err = stateConf.WaitForStateContext(ctx)
 
 	if err != nil {
 		return fmterr.Errorf("error waiting for PTR record (%s) to become ACTIVE for creation: %s", ptr.ID, err)
@@ -211,7 +211,7 @@ func resourceDNSPtrRecordV2Update(ctx context.Context, d *schema.ResourceData, m
 		MinTimeout: 3 * time.Second,
 	}
 
-	_, err = stateConf.WaitForState()
+	_, err = stateConf.WaitForStateContext(ctx)
 
 	if err != nil {
 		return fmterr.Errorf("error waiting for PTR record (%s) to become ACTIVE for update: %s", ptr.ID, err)
@@ -244,7 +244,7 @@ func resourceDNSPtrRecordV2Delete(ctx context.Context, d *schema.ResourceData, m
 		MinTimeout: 3 * time.Second,
 	}
 
-	_, err = stateConf.WaitForState()
+	_, err = stateConf.WaitForStateContext(ctx)
 	if err != nil {
 		return fmterr.Errorf("error waiting for PTR record (%s) to become DELETED for deletion: %s", d.Id(), err)
 	}

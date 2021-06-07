@@ -27,7 +27,7 @@ func ResourceObsBucket() *schema.Resource {
 		UpdateContext: resourceObsBucketUpdate,
 		DeleteContext: resourceObsBucketDelete,
 		Importer: &schema.ResourceImporter{
-			State: schema.ImportStatePassthrough,
+			StateContext: schema.ImportStatePassthroughContext,
 		},
 
 		Schema: map[string]*schema.Schema{

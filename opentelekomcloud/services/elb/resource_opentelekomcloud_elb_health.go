@@ -7,6 +7,7 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/networking/v2/extensions/elbaas/healthcheck"
 
@@ -47,53 +48,42 @@ func ResourceHealth() *schema.Resource {
 				Type:     schema.TypeString,
 				Optional: true,
 				Computed: true,
-				ValidateFunc: func(v interface{}, k string) (ws []string, errors []error) {
-					return common.ValidateStringList(v, k, []string{"HTTP", "TCP"})
-				},
+				ValidateFunc: validation.StringInSlice(
+					[]string{"HTTP", "TCP"}, false),
 			},
 			"healthcheck_uri": {
 				Type:     schema.TypeString,
 				Optional: true,
 			},
 			"healthcheck_connect_port": {
-				Type:     schema.TypeInt,
-				Optional: true,
-				Computed: true,
-				ValidateFunc: func(v interface{}, k string) (ws []string, errors []error) {
-					return common.ValidateIntRange(v, k, 1, 65535)
-				},
+				Type:         schema.TypeInt,
+				Optional:     true,
+				Computed:     true,
+				ValidateFunc: validation.IntBetween(1, 65535),
 			},
 			"healthy_threshold": {
-				Type:     schema.TypeInt,
-				Optional: true,
-				Computed: true,
-				ValidateFunc: func(v interface{}, k string) (ws []string, errors []error) {
-					return common.ValidateIntRange(v, k, 1, 10)
-				},
+				Type:         schema.TypeInt,
+				Optional:     true,
+				Computed:     true,
+				ValidateFunc: validation.IntBetween(1, 10),
 			},
 			"unhealthy_threshold": {
-				Type:     schema.TypeInt,
-				Optional: true,
-				Computed: true,
-				ValidateFunc: func(v interface{}, k string) (ws []string, errors []error) {
-					return common.ValidateIntRange(v, k, 1, 10)
-				},
+				Type:         schema.TypeInt,
+				Optional:     true,
+				Computed:     true,
+				ValidateFunc: validation.IntBetween(1, 10),
 			},
 			"healthcheck_timeout": {
-				Type:     schema.TypeInt,
-				Optional: true,
-				Computed: true,
-				ValidateFunc: func(v interface{}, k string) (ws []string, errors []error) {
-					return common.ValidateIntRange(v, k, 1, 50)
-				},
+				Type:         schema.TypeInt,
+				Optional:     true,
+				Computed:     true,
+				ValidateFunc: validation.IntBetween(1, 50),
 			},
 			"healthcheck_interval": {
-				Type:     schema.TypeInt,
-				Optional: true,
-				Computed: true,
-				ValidateFunc: func(v interface{}, k string) (ws []string, errors []error) {
-					return common.ValidateIntRange(v, k, 1, 5)
-				},
+				Type:         schema.TypeInt,
+				Optional:     true,
+				Computed:     true,
+				ValidateFunc: validation.IntBetween(1, 5),
 			},
 		},
 	}

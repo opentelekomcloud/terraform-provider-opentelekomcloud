@@ -39,7 +39,7 @@ func ResourceCCEClusterV3() *schema.Resource {
 		UpdateContext: resourceCCEClusterV3Update,
 		DeleteContext: resourceCCEClusterV3Delete,
 		Importer: &schema.ResourceImporter{
-			State: schema.ImportStatePassthrough,
+			StateContext: schema.ImportStatePassthroughContext,
 		},
 
 		Timeouts: &schema.ResourceTimeout{
@@ -339,18 +339,18 @@ func resourceCCEClusterV3Create(ctx context.Context, d *schema.ResourceData, met
 		MinTimeout: 3 * time.Second,
 	}
 
-	_, err = stateConf.WaitForState()
+	_, err = stateConf.WaitForStateContext(ctx)
 	if err != nil {
 		return fmterr.Errorf("error creating OpenTelekomCloud CCE cluster: %s", err)
 	}
 	d.SetId(create.Metadata.Id)
 
-	if err := waitForInstalledAddons(d, config); err != nil {
+	if err := waitForInstalledAddons(ctx, d, config); err != nil {
 		return fmterr.Errorf("error waiting for default addons to install")
 	}
 
 	if d.Get("no_addons").(bool) {
-		if err := removeAddons(d, config); err != nil {
+		if err := removeAddons(ctx, d, config); err != nil {
 			return diag.FromErr(err)
 		}
 	}
@@ -532,7 +532,7 @@ func resourceCCEClusterV3Delete(ctx context.Context, d *schema.ResourceData, met
 		MinTimeout: 3 * time.Second,
 	}
 
-	_, err = stateConf.WaitForState()
+	_, err = stateConf.WaitForStateContext(ctx)
 
 	if err != nil {
 		return fmterr.Errorf("error deleting opentelekomcloud CCE cluster: %w", err)
@@ -633,7 +633,7 @@ func listInstalledAddons(d *schema.ResourceData, config *cfg.Config) (*addons.Ad
 	return addons.ListAddonInstances(client, d.Id()).Extract()
 }
 
-func waitForInstalledAddons(d *schema.ResourceData, config *cfg.Config) error {
+func waitForInstalledAddons(ctx context.Context, d *schema.ResourceData, config *cfg.Config) error {
 	client, err := config.CceV3AddonClient(config.GetRegion(d))
 	if err != nil {
 		return fmt.Errorf("error creating CCE Addon client: %w", logHttpError(err))
@@ -648,13 +648,13 @@ func waitForInstalledAddons(d *schema.ResourceData, config *cfg.Config) error {
 		MinTimeout: 1 * time.Minute,
 	}
 
-	if _, err := stateConfExist.WaitForState(); err != nil {
+	if _, err := stateConfExist.WaitForStateContext(ctx); err != nil {
 		return fmt.Errorf("error waiting for addons to be removed: %w", err)
 	}
 	return nil
 }
 
-func removeAddons(d *schema.ResourceData, config *cfg.Config) error {
+func removeAddons(ctx context.Context, d *schema.ResourceData, config *cfg.Config) error {
 	client, err := config.CceV3AddonClient(config.GetRegion(d))
 	if err != nil {
 		return fmt.Errorf("error creating CCE Addon client: %w", logHttpError(err))
@@ -679,7 +679,7 @@ func removeAddons(d *schema.ResourceData, config *cfg.Config) error {
 		MinTimeout: 3 * time.Second,
 	}
 
-	_, err = stateConf.WaitForState()
+	_, err = stateConf.WaitForStateContext(ctx)
 	if err != nil {
 		return fmt.Errorf("error waiting for addons to be removed: %w", err)
 	}

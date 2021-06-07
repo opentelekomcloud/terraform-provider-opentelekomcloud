@@ -24,7 +24,7 @@ func ResourceComputeFloatingIPAssociateV2() *schema.Resource {
 		ReadContext:   resourceComputeFloatingIPAssociateV2Read,
 		DeleteContext: resourceComputeFloatingIPAssociateV2Delete,
 		Importer: &schema.ResourceImporter{
-			State: schema.ImportStatePassthrough,
+			StateContext: schema.ImportStatePassthroughContext,
 		},
 
 		Schema: map[string]*schema.Schema{

@@ -24,7 +24,7 @@ func ResourceVPCRouteV2() *schema.Resource {
 		ReadContext:   resourceVpcRouteV2Read,
 		DeleteContext: resourceVpcRouteV2Delete,
 		Importer: &schema.ResourceImporter{
-			State: schema.ImportStatePassthrough,
+			StateContext: schema.ImportStatePassthroughContext,
 		},
 
 		Timeouts: &schema.ResourceTimeout{
@@ -150,7 +150,7 @@ func resourceVpcRouteV2Delete(ctx context.Context, d *schema.ResourceData, meta 
 		MinTimeout: 3 * time.Second,
 	}
 
-	_, err = stateConf.WaitForState()
+	_, err = stateConf.WaitForStateContext(ctx)
 	if err != nil {
 		return fmterr.Errorf("error deleting OpenTelekomCloud VPC route: %s", err)
 	}

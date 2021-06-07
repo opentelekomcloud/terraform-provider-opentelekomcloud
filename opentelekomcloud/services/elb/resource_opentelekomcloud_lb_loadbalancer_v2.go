@@ -114,7 +114,7 @@ func resourceLoadBalancerV2Create(ctx context.Context, d *schema.ResourceData, m
 
 	// Wait for LoadBalancer to become active before continuing
 	timeout := d.Timeout(schema.TimeoutCreate)
-	err = waitForLBV2LoadBalancer(client, lb.ID, "ACTIVE", nil, timeout)
+	err = waitForLBV2LoadBalancer(ctx, client, lb.ID, "ACTIVE", nil, timeout)
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -198,13 +198,13 @@ func resourceLoadBalancerV2Update(ctx context.Context, d *schema.ResourceData, m
 
 	// Wait for LoadBalancer to become active before continuing
 	timeout := d.Timeout(schema.TimeoutUpdate)
-	err = waitForLBV2LoadBalancer(client, d.Id(), "ACTIVE", nil, timeout)
+	err = waitForLBV2LoadBalancer(ctx, client, d.Id(), "ACTIVE", nil, timeout)
 	if err != nil {
 		return diag.FromErr(err)
 	}
 
 	log.Printf("[DEBUG] Updating loadbalancer %s with options: %#v", d.Id(), updateOpts)
-	err = resource.Retry(timeout, func() *resource.RetryError {
+	err = resource.RetryContext(ctx, timeout, func() *resource.RetryError {
 		_, err = loadbalancers.Update(client, d.Id(), updateOpts).Extract()
 		if err != nil {
 			return common.CheckForRetryableError(err)
@@ -216,7 +216,7 @@ func resourceLoadBalancerV2Update(ctx context.Context, d *schema.ResourceData, m
 	}
 
 	// Wait for LoadBalancer to become active before continuing
-	err = waitForLBV2LoadBalancer(client, d.Id(), "ACTIVE", nil, timeout)
+	err = waitForLBV2LoadBalancer(ctx, client, d.Id(), "ACTIVE", nil, timeout)
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -240,7 +240,7 @@ func resourceLoadBalancerV2Delete(ctx context.Context, d *schema.ResourceData, m
 
 	log.Printf("[DEBUG] Deleting loadbalancer %s", d.Id())
 	timeout := d.Timeout(schema.TimeoutDelete)
-	err = resource.Retry(timeout, func() *resource.RetryError {
+	err = resource.RetryContext(ctx, timeout, func() *resource.RetryError {
 		err = loadbalancers.Delete(client, d.Id()).ExtractErr()
 		if err != nil {
 			return common.CheckForRetryableError(err)
@@ -253,7 +253,7 @@ func resourceLoadBalancerV2Delete(ctx context.Context, d *schema.ResourceData, m
 
 	// Wait for LoadBalancer to become delete
 	pending := []string{"PENDING_UPDATE", "PENDING_DELETE", "ACTIVE"}
-	err = waitForLBV2LoadBalancer(client, d.Id(), "DELETED", pending, timeout)
+	err = waitForLBV2LoadBalancer(ctx, client, d.Id(), "DELETED", pending, timeout)
 	if err != nil {
 		return diag.FromErr(err)
 	}

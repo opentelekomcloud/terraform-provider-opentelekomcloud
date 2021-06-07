@@ -22,7 +22,7 @@ func ResourceNetworkingFloatingIPAssociateV2() *schema.Resource {
 		ReadContext:   resourceNetworkingFloatingIPAssociateV2Read,
 		DeleteContext: resourceNetworkingFloatingIPAssociateV2Delete,
 		Importer: &schema.ResourceImporter{
-			State: schema.ImportStatePassthrough,
+			StateContext: schema.ImportStatePassthroughContext,
 		},
 
 		Schema: map[string]*schema.Schema{

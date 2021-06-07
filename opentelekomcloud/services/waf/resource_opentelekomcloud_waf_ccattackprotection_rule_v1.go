@@ -20,7 +20,7 @@ func ResourceWafCcAttackProtectionRuleV1() *schema.Resource {
 		ReadContext:   resourceWafCcAttackProtectionRuleV1Read,
 		DeleteContext: resourceWafCcAttackProtectionRuleV1Delete,
 		Importer: &schema.ResourceImporter{
-			State: schema.ImportStatePassthrough,
+			StateContext: schema.ImportStatePassthroughContext,
 		},
 
 		Timeouts: &schema.ResourceTimeout{

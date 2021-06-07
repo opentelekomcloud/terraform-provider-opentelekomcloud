@@ -27,7 +27,7 @@ func ResourceL7RuleV2() *schema.Resource {
 		UpdateContext: resourceL7RuleV2Update,
 		DeleteContext: resourceL7RuleV2Delete,
 		Importer: &schema.ResourceImporter{
-			State: resourceL7RuleV2Import,
+			StateContext: resourceL7RuleV2Import,
 		},
 
 		Timeouts: &schema.ResourceTimeout{
@@ -163,14 +163,14 @@ func resourceL7RuleV2Create(ctx context.Context, d *schema.ResourceData, meta in
 	}
 
 	// Wait for parent L7 Policy to become active before continuing
-	err = waitForLBV2L7Policy(lbClient, parentListener, parentL7Policy, "ACTIVE", lbPendingStatuses, timeout)
+	err = waitForLBV2L7Policy(ctx, lbClient, parentListener, parentL7Policy, "ACTIVE", lbPendingStatuses, timeout)
 	if err != nil {
 		return diag.FromErr(err)
 	}
 
 	log.Printf("[DEBUG] Attempting to create L7 Rule")
 	var l7Rule *l7policies.Rule
-	err = resource.Retry(timeout, func() *resource.RetryError {
+	err = resource.RetryContext(ctx, timeout, func() *resource.RetryError {
 		l7Rule, err = l7policies.CreateRule(lbClient, l7policyID, createOpts).Extract()
 		if err != nil {
 			return common.CheckForRetryableError(err)
@@ -183,7 +183,7 @@ func resourceL7RuleV2Create(ctx context.Context, d *schema.ResourceData, meta in
 	}
 
 	// Wait for L7 Rule to become active before continuing
-	err = waitForLBV2L7Rule(lbClient, parentListener, parentL7Policy, l7Rule, "ACTIVE", lbPendingStatuses, timeout)
+	err = waitForLBV2L7Rule(ctx, lbClient, parentListener, parentL7Policy, l7Rule, "ACTIVE", lbPendingStatuses, timeout)
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -277,19 +277,19 @@ func resourceL7RuleV2Update(ctx context.Context, d *schema.ResourceData, meta in
 	}
 
 	// Wait for parent L7 Policy to become active before continuing
-	err = waitForLBV2L7Policy(lbClient, parentListener, parentL7Policy, "ACTIVE", lbPendingStatuses, timeout)
+	err = waitForLBV2L7Policy(ctx, lbClient, parentListener, parentL7Policy, "ACTIVE", lbPendingStatuses, timeout)
 	if err != nil {
 		return diag.FromErr(err)
 	}
 
 	// Wait for L7 Rule to become active before continuing
-	err = waitForLBV2L7Rule(lbClient, parentListener, parentL7Policy, l7Rule, "ACTIVE", lbPendingStatuses, timeout)
+	err = waitForLBV2L7Rule(ctx, lbClient, parentListener, parentL7Policy, l7Rule, "ACTIVE", lbPendingStatuses, timeout)
 	if err != nil {
 		return diag.FromErr(err)
 	}
 
 	log.Printf("[DEBUG] Updating L7 Rule %s with options: %#v", d.Id(), updateOpts)
-	err = resource.Retry(timeout, func() *resource.RetryError {
+	err = resource.RetryContext(ctx, timeout, func() *resource.RetryError {
 		_, err := l7policies.UpdateRule(lbClient, l7policyID, d.Id(), updateOpts).Extract()
 		if err != nil {
 			return common.CheckForRetryableError(err)
@@ -302,7 +302,7 @@ func resourceL7RuleV2Update(ctx context.Context, d *schema.ResourceData, meta in
 	}
 
 	// Wait for L7 Rule to become active before continuing
-	err = waitForLBV2L7Rule(lbClient, parentListener, parentL7Policy, l7Rule, "ACTIVE", lbPendingStatuses, timeout)
+	err = waitForLBV2L7Rule(ctx, lbClient, parentListener, parentL7Policy, l7Rule, "ACTIVE", lbPendingStatuses, timeout)
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -341,13 +341,13 @@ func resourceL7RuleV2Delete(ctx context.Context, d *schema.ResourceData, meta in
 	}
 
 	// Wait for parent L7 Policy to become active before continuing
-	err = waitForLBV2L7Policy(lbClient, parentListener, parentL7Policy, "ACTIVE", lbPendingStatuses, timeout)
+	err = waitForLBV2L7Policy(ctx, lbClient, parentListener, parentL7Policy, "ACTIVE", lbPendingStatuses, timeout)
 	if err != nil {
 		return diag.FromErr(err)
 	}
 
 	log.Printf("[DEBUG] Attempting to delete L7 Rule %s", d.Id())
-	err = resource.Retry(timeout, func() *resource.RetryError {
+	err = resource.RetryContext(ctx, timeout, func() *resource.RetryError {
 		err = l7policies.DeleteRule(lbClient, l7policyID, d.Id()).ExtractErr()
 		if err != nil {
 			return common.CheckForRetryableError(err)
@@ -359,7 +359,7 @@ func resourceL7RuleV2Delete(ctx context.Context, d *schema.ResourceData, meta in
 		return diag.FromErr(common.CheckDeleted(d, err, "Error deleting L7 Rule"))
 	}
 
-	err = waitForLBV2L7Rule(lbClient, parentListener, parentL7Policy, l7Rule, "DELETED", lbPendingDeleteStatuses, timeout)
+	err = waitForLBV2L7Rule(ctx, lbClient, parentListener, parentL7Policy, l7Rule, "DELETED", lbPendingDeleteStatuses, timeout)
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -367,7 +367,7 @@ func resourceL7RuleV2Delete(ctx context.Context, d *schema.ResourceData, meta in
 	return nil
 }
 
-func resourceL7RuleV2Import(d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
+func resourceL7RuleV2Import(ctx context.Context, d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
 	parts := strings.SplitN(d.Id(), "/", 2)
 	if len(parts) != 2 {
 		err := fmt.Errorf("Invalid format specified for L7 Rule. Format must be <policy id>/<rule id>")

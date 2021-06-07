@@ -1,6 +1,7 @@
 package acceptance
 
 import (
+	"context"
 	"fmt"
 	"io/ioutil"
 	"os"
@@ -50,7 +51,7 @@ func TestAccProvider_caCertFile(t *testing.T) {
 		"cacert_file": caFile,
 	}
 
-	if err := p.Configure(nil, terraform.NewResourceConfigRaw(raw)); err != nil {
+	if p.Configure(nil, terraform.NewResourceConfigRaw(raw)).HasError() {
 		t.Fatalf("Unexpected err when specifying OpenTelekomCloud CA by file: %s", err)
 	}
 }
@@ -73,7 +74,7 @@ func TestAccProvider_caCertString(t *testing.T) {
 		"cacert_file": caContents,
 	}
 
-	if err := p.Configure(nil, terraform.NewResourceConfigRaw(raw)); err != nil {
+	if p.Configure(nil, terraform.NewResourceConfigRaw(raw)).HasError() {
 		t.Fatalf("Unexpected err when specifying OpenTelekomCloud CA by string: %s", err)
 	}
 }
@@ -104,7 +105,7 @@ func TestAccProvider_clientCertFile(t *testing.T) {
 		"key":  keyFile,
 	}
 
-	if err := p.Configure(nil, terraform.NewResourceConfigRaw(raw)); err != nil {
+	if p.Configure(context.Background(), terraform.NewResourceConfigRaw(raw)).HasError() {
 		t.Fatalf("Unexpected err when specifying OpenTelekomCloud Client keypair by file: %s", err)
 	}
 }
@@ -133,7 +134,7 @@ func TestAccProvider_clientCertString(t *testing.T) {
 		"key":  keyContents,
 	}
 
-	if err := p.Configure(nil, terraform.NewResourceConfigRaw(raw)); err != nil {
+	if p.Configure(context.Background(), terraform.NewResourceConfigRaw(raw)).HasError() {
 		t.Fatalf("Unexpected err when specifying OpenTelekomCloud Client keypair by contents: %s", err)
 	}
 }

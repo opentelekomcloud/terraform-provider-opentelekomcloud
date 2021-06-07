@@ -32,7 +32,7 @@ func ResourceBlockStorageVolumeV2() *schema.Resource {
 		UpdateContext: resourceBlockStorageVolumeV2Update,
 		DeleteContext: resourceBlockStorageVolumeV2Delete,
 		Importer: &schema.ResourceImporter{
-			State: schema.ImportStatePassthrough,
+			StateContext: schema.ImportStatePassthroughContext,
 		},
 
 		Timeouts: &schema.ResourceTimeout{
@@ -215,7 +215,7 @@ func resourceBlockStorageVolumeV2Create(ctx context.Context, d *schema.ResourceD
 		MinTimeout: 3 * time.Second,
 	}
 
-	_, err = stateConf.WaitForState()
+	_, err = stateConf.WaitForStateContext(ctx)
 	if err != nil {
 		return fmterr.Errorf(
 			"Error waiting for volume (%s) to become ready: %s",
@@ -355,7 +355,7 @@ func resourceBlockStorageVolumeV2Update(ctx context.Context, d *schema.ResourceD
 			MinTimeout: 3 * time.Second,
 		}
 
-		_, err = stateConf.WaitForState()
+		_, err = stateConf.WaitForStateContext(ctx)
 		if err != nil {
 			return fmterr.Errorf("error waiting for volume (%s) to become ready after resize: %s", d.Id(), err)
 		}
@@ -411,7 +411,7 @@ func resourceBlockStorageVolumeV2Delete(ctx context.Context, d *schema.ResourceD
 				MinTimeout: 3 * time.Second,
 			}
 
-			_, err = stateConf.WaitForState()
+			_, err = stateConf.WaitForStateContext(ctx)
 			if err != nil {
 				return fmterr.Errorf(
 					"Error waiting for volume (%s) to become available: %s",
@@ -445,7 +445,7 @@ func resourceBlockStorageVolumeV2Delete(ctx context.Context, d *schema.ResourceD
 		MinTimeout: 3 * time.Second,
 	}
 
-	_, err = stateConf.WaitForState()
+	_, err = stateConf.WaitForStateContext(ctx)
 	if err != nil {
 		return fmterr.Errorf(
 			"Error waiting for volume (%s) to delete: %s",

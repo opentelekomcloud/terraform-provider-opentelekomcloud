@@ -19,7 +19,7 @@ func ResourceWafFalseAlarmMaskingRuleV1() *schema.Resource {
 		ReadContext:   resourceWafFalseAlarmMaskingRuleV1Read,
 		DeleteContext: resourceWafFalseAlarmMaskingRuleV1Delete,
 		Importer: &schema.ResourceImporter{
-			State: schema.ImportStatePassthrough,
+			StateContext: schema.ImportStatePassthroughContext,
 		},
 
 		Timeouts: &schema.ResourceTimeout{

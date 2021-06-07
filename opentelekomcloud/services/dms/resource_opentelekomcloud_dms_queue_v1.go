@@ -19,7 +19,7 @@ func ResourceDmsQueuesV1() *schema.Resource {
 		ReadContext:   resourceDmsQueuesV1Read,
 		DeleteContext: resourceDmsQueuesV1Delete,
 		Importer: &schema.ResourceImporter{
-			State: schema.ImportStatePassthrough,
+			StateContext: schema.ImportStatePassthroughContext,
 		},
 
 		Schema: map[string]*schema.Schema{

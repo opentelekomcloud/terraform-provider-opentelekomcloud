@@ -25,7 +25,7 @@ func ResourceVBSBackupV2() *schema.Resource {
 		ReadContext:   resourceVBSBackupV2Read,
 		DeleteContext: resourceVBSBackupV2Delete,
 		Importer: &schema.ResourceImporter{
-			State: schema.ImportStatePassthrough,
+			StateContext: schema.ImportStatePassthroughContext,
 		},
 
 		Timeouts: &schema.ResourceTimeout{
@@ -219,7 +219,7 @@ func resourceVBSBackupV2Delete(ctx context.Context, d *schema.ResourceData, meta
 		MinTimeout: 3 * time.Second,
 	}
 
-	_, err = stateConf.WaitForState()
+	_, err = stateConf.WaitForStateContext(ctx)
 	if err != nil {
 		return fmterr.Errorf("Error deleting VBS Backup: %s", err)
 	}

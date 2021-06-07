@@ -27,7 +27,7 @@ func ResourceSFSTurboShareV1() *schema.Resource {
 		DeleteContext: resourceSFSTurboShareV1Delete,
 
 		Importer: &schema.ResourceImporter{
-			State: schema.ImportStatePassthrough,
+			StateContext: schema.ImportStatePassthroughContext,
 		},
 
 		Timeouts: &schema.ResourceTimeout{
@@ -142,7 +142,7 @@ func resourceSFSTurboShareV1Create(ctx context.Context, d *schema.ResourceData, 
 		Delay:      20 * time.Second,
 		MinTimeout: 3 * time.Second,
 	}
-	_, err = stateConf.WaitForState()
+	_, err = stateConf.WaitForStateContext(ctx)
 	if err != nil {
 		return fmterr.Errorf("error waiting for SFS Turbo (%s) to become ready: %s", share.ID, err)
 	}
@@ -223,7 +223,7 @@ func resourceSFSTurboShareV1Update(ctx context.Context, d *schema.ResourceData, 
 			MinTimeout: 5 * time.Second,
 		}
 
-		_, err = stateConf.WaitForState()
+		_, err = stateConf.WaitForStateContext(ctx)
 		if err != nil {
 			return fmterr.Errorf("error updating OpenTelekomCloud SFS Turbo: %s", err)
 		}
@@ -250,7 +250,7 @@ func resourceSFSTurboShareV1Update(ctx context.Context, d *schema.ResourceData, 
 			MinTimeout: 5 * time.Second,
 		}
 
-		_, err = stateConf.WaitForState()
+		_, err = stateConf.WaitForStateContext(ctx)
 		if err != nil {
 			return fmterr.Errorf("error updating OpenTelekomCloud SFS Turbo: %s", err)
 		}
@@ -280,7 +280,7 @@ func resourceSFSTurboShareV1Delete(ctx context.Context, d *schema.ResourceData, 
 		MinTimeout: 3 * time.Second,
 	}
 
-	_, err = stateConf.WaitForState()
+	_, err = stateConf.WaitForStateContext(ctx)
 	if err != nil {
 		return fmterr.Errorf("error deleting OpenTelekomCloud SFS Turbo: %s", err)
 	}

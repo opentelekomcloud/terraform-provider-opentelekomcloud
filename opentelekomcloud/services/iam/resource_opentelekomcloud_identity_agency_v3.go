@@ -30,7 +30,7 @@ func ResourceIdentityAgencyV3() *schema.Resource {
 		UpdateContext: resourceIdentityAgencyV3Update,
 		DeleteContext: resourceIdentityAgencyV3Delete,
 		Importer: &schema.ResourceImporter{
-			State: schema.ImportStatePassthrough,
+			StateContext: schema.ImportStatePassthroughContext,
 		},
 
 		Timeouts: &schema.ResourceTimeout{
@@ -456,7 +456,7 @@ func resourceIdentityAgencyV3Update(ctx context.Context, d *schema.ResourceData,
 		}
 		log.Printf("[DEBUG] Updating Identity-Agency %s with options: %#v", aID, updateOpts)
 		timeout := d.Timeout(schema.TimeoutUpdate)
-		err = resource.Retry(timeout, func() *resource.RetryError {
+		err = resource.RetryContext(ctx, timeout, func() *resource.RetryError {
 			_, err := agency.Update(client, aID, updateOpts).Extract()
 			if err != nil {
 				return common.CheckForRetryableError(err)
@@ -572,7 +572,7 @@ func resourceIdentityAgencyV3Delete(ctx context.Context, d *schema.ResourceData,
 	log.Printf("[DEBUG] Deleting Identity-Agency %s", rID)
 
 	timeout := d.Timeout(schema.TimeoutDelete)
-	err = resource.Retry(timeout, func() *resource.RetryError {
+	err = resource.RetryContext(ctx, timeout, func() *resource.RetryError {
 		err := agency.Delete(client, rID).ExtractErr()
 		if err != nil {
 			return common.CheckForRetryableError(err)

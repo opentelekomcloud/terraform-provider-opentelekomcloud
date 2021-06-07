@@ -21,7 +21,7 @@ func ResourceCTSTrackerV1() *schema.Resource {
 		UpdateContext: resourceCTSTrackerUpdate,
 		DeleteContext: resourceCTSTrackerDelete,
 		Importer: &schema.ResourceImporter{
-			State: schema.ImportStatePassthrough,
+			StateContext: schema.ImportStatePassthroughContext,
 		},
 
 		Timeouts: &schema.ResourceTimeout{

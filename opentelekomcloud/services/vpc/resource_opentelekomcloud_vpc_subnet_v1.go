@@ -25,7 +25,7 @@ func ResourceVpcSubnetV1() *schema.Resource {
 		UpdateContext: resourceVpcSubnetV1Update,
 		DeleteContext: resourceVpcSubnetV1Delete,
 		Importer: &schema.ResourceImporter{
-			State: schema.ImportStatePassthrough,
+			StateContext: schema.ImportStatePassthroughContext,
 		},
 
 		Timeouts: &schema.ResourceTimeout{
@@ -165,7 +165,7 @@ func resourceVpcSubnetV1Create(ctx context.Context, d *schema.ResourceData, meta
 		MinTimeout: 3 * time.Second,
 	}
 
-	_, err = stateConf.WaitForState()
+	_, err = stateConf.WaitForStateContext(ctx)
 	if err != nil {
 		return fmterr.Errorf("error waiting for Subnet (%s) to become ACTIVE: %w", subnet.ID, err)
 	}
@@ -326,7 +326,7 @@ func resourceVpcSubnetV1Delete(ctx context.Context, d *schema.ResourceData, meta
 		MinTimeout: 3 * time.Second,
 	}
 
-	_, err = stateConf.WaitForState()
+	_, err = stateConf.WaitForStateContext(ctx)
 	if err != nil {
 		return fmterr.Errorf("error deleting OpenTelekomCloud Subnet: %w", err)
 	}

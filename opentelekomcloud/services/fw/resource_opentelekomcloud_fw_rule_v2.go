@@ -23,7 +23,7 @@ func ResourceFWRuleV2() *schema.Resource {
 		UpdateContext: resourceFWRuleV2Update,
 		DeleteContext: resourceFWRuleV2Delete,
 		Importer: &schema.ResourceImporter{
-			State: schema.ImportStatePassthrough,
+			StateContext: schema.ImportStatePassthroughContext,
 		},
 
 		Schema: map[string]*schema.Schema{

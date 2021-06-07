@@ -24,7 +24,7 @@ func ResourceIdentityMappingV3() *schema.Resource {
 		DeleteContext: resourceIdentityMappingV3Delete,
 
 		Importer: &schema.ResourceImporter{
-			State: schema.ImportStatePassthrough,
+			StateContext: schema.ImportStatePassthroughContext,
 		},
 
 		Schema: map[string]*schema.Schema{

@@ -25,7 +25,7 @@ func ResourceRTSStackV1() *schema.Resource {
 		UpdateContext: resourceRTSStackV1Update,
 		DeleteContext: resourceRTSStackV1Delete,
 		Importer: &schema.ResourceImporter{
-			State: schema.ImportStatePassthrough,
+			StateContext: schema.ImportStatePassthroughContext,
 		},
 		Timeouts: &schema.ResourceTimeout{
 			Create: schema.DefaultTimeout(30 * time.Minute),
@@ -195,7 +195,7 @@ func resourceRTSStackV1Create(ctx context.Context, d *schema.ResourceData, meta 
 		MinTimeout: 3 * time.Second,
 	}
 
-	_, stateErr := stateConf.WaitForState()
+	_, stateErr := stateConf.WaitForStateContext(ctx)
 
 	if stateErr != nil {
 		return fmterr.Errorf(
@@ -314,7 +314,7 @@ func resourceRTSStackV1Update(ctx context.Context, d *schema.ResourceData, meta 
 		MinTimeout: 3 * time.Second,
 	}
 
-	_, stateErr := stateConf.WaitForState()
+	_, stateErr := stateConf.WaitForStateContext(ctx)
 
 	if stateErr != nil {
 		return fmterr.Errorf(
@@ -350,7 +350,7 @@ func resourceRTSStackV1Delete(ctx context.Context, d *schema.ResourceData, meta 
 		MinTimeout: 3 * time.Second,
 	}
 
-	_, stateErr := stateConf.WaitForState()
+	_, stateErr := stateConf.WaitForStateContext(ctx)
 
 	if stateErr != nil {
 		return fmterr.Errorf("Error deleting Stack: %s", stateErr)

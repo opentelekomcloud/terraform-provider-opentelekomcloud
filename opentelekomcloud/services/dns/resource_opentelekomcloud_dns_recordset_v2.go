@@ -28,7 +28,7 @@ func ResourceDNSRecordSetV2() *schema.Resource {
 		UpdateContext: resourceDNSRecordSetV2Update,
 		DeleteContext: resourceDNSRecordSetV2Delete,
 		Importer: &schema.ResourceImporter{
-			State: common.ImportAsManaged,
+			StateContext: common.ImportAsManaged,
 		},
 
 		CustomizeDiff: useSharedRecordSet,
@@ -149,7 +149,7 @@ func resourceDNSRecordSetV2Create(ctx context.Context, d *schema.ResourceData, m
 		MinTimeout: 3 * time.Second,
 	}
 
-	_, err = stateConf.WaitForState()
+	_, err = stateConf.WaitForStateContext(ctx)
 	if err != nil {
 		return fmterr.Errorf(
 			"error waiting for record set (%s) to become ACTIVE for creation: %s",
@@ -276,7 +276,7 @@ func resourceDNSRecordSetV2Update(ctx context.Context, d *schema.ResourceData, m
 		MinTimeout: 3 * time.Second,
 	}
 
-	_, err = stateConf.WaitForState()
+	_, err = stateConf.WaitForStateContext(ctx)
 	if err != nil {
 		return fmterr.Errorf(
 			"error waiting for record set (%s) to become ACTIVE for updation: %s",
@@ -332,7 +332,7 @@ func resourceDNSRecordSetV2Delete(ctx context.Context, d *schema.ResourceData, m
 		MinTimeout: 3 * time.Second,
 	}
 
-	_, err = stateConf.WaitForState()
+	_, err = stateConf.WaitForStateContext(ctx)
 	if err != nil {
 		return fmterr.Errorf(
 			"error waiting for record set (%s) to become DELETED for deletion: %s",

@@ -30,7 +30,7 @@ func ResourceEvsStorageVolumeV3() *schema.Resource {
 		UpdateContext: resourceEvsVolumeV3Update,
 		DeleteContext: resourceBlockStorageVolumeV2Delete,
 		Importer: &schema.ResourceImporter{
-			State: schema.ImportStatePassthrough,
+			StateContext: schema.ImportStatePassthroughContext,
 		},
 
 		Timeouts: &schema.ResourceTimeout{
@@ -293,7 +293,7 @@ func resourceEvsVolumeV3Update(ctx context.Context, d *schema.ResourceData, meta
 			MinTimeout: 3 * time.Second,
 		}
 
-		_, err = stateConf.WaitForState()
+		_, err = stateConf.WaitForStateContext(ctx)
 		if err != nil {
 			return fmterr.Errorf("error waiting for volume (%s) to become ready after resize: %s", d.Id(), err)
 		}

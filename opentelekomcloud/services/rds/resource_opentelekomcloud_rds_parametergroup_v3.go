@@ -23,7 +23,7 @@ func ResourceRdsConfigurationV3() *schema.Resource {
 		DeleteContext: resourceRdsConfigurationV3Delete,
 
 		Importer: &schema.ResourceImporter{
-			State: schema.ImportStatePassthrough,
+			StateContext: schema.ImportStatePassthroughContext,
 		},
 
 		CustomizeDiff: validateRDSv3Version("datastore"),

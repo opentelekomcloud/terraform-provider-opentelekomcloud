@@ -23,7 +23,7 @@ func ResourceFWPolicyV2() *schema.Resource {
 		UpdateContext: resourceFWPolicyV2Update,
 		DeleteContext: resourceFWPolicyV2Delete,
 		Importer: &schema.ResourceImporter{
-			State: schema.ImportStatePassthrough,
+			StateContext: schema.ImportStatePassthroughContext,
 		},
 
 		Timeouts: &schema.ResourceTimeout{
@@ -210,7 +210,7 @@ func resourceFWPolicyV2Delete(ctx context.Context, d *schema.ResourceData, meta 
 		MinTimeout: 2 * time.Second,
 	}
 
-	if _, err = stateConf.WaitForState(); err != nil {
+	if _, err = stateConf.WaitForStateContext(ctx); err != nil {
 		return diag.FromErr(err)
 	}
 

@@ -21,7 +21,7 @@ func ResourceSdrsProtectiongroupV1() *schema.Resource {
 		UpdateContext: resourceSdrsProtectiongroupV1Update,
 		DeleteContext: resourceSdrsProtectiongroupV1Delete,
 		Importer: &schema.ResourceImporter{
-			State: schema.ImportStatePassthrough,
+			StateContext: schema.ImportStatePassthroughContext,
 		},
 
 		Timeouts: &schema.ResourceTimeout{

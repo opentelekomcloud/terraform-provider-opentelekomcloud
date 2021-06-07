@@ -27,7 +27,7 @@ func ResourceImsImageV2() *schema.Resource {
 		UpdateContext: resourceImsImageV2Update,
 		DeleteContext: resourceImagesImageV2Delete,
 		Importer: &schema.ResourceImporter{
-			State: schema.ImportStatePassthrough,
+			StateContext: schema.ImportStatePassthroughContext,
 		},
 
 		Timeouts: &schema.ResourceTimeout{

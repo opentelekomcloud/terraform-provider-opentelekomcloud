@@ -20,7 +20,7 @@ func ResourceComputeServerGroupV2() *schema.Resource {
 		UpdateContext: nil,
 		DeleteContext: resourceComputeServerGroupV2Delete,
 		Importer: &schema.ResourceImporter{
-			State: schema.ImportStatePassthrough,
+			StateContext: schema.ImportStatePassthroughContext,
 		},
 
 		Schema: map[string]*schema.Schema{

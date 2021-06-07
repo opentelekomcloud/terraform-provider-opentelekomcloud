@@ -28,7 +28,7 @@ func ResourceMRSClusterV1() *schema.Resource {
 		UpdateContext: resourceClusterV1Update,
 		DeleteContext: resourceClusterV1Delete,
 		Importer: &schema.ResourceImporter{
-			State: schema.ImportStatePassthrough,
+			StateContext: schema.ImportStatePassthroughContext,
 		},
 
 		Timeouts: &schema.ResourceTimeout{
@@ -611,7 +611,7 @@ func resourceClusterV1Create(ctx context.Context, d *schema.ResourceData, meta i
 		MinTimeout: 3 * time.Second,
 	}
 
-	_, err = stateConf.WaitForState()
+	_, err = stateConf.WaitForStateContext(ctx)
 	if err != nil {
 		return fmterr.Errorf(
 			"Error waiting for cluster (%s) to become ready: %s ",
@@ -832,7 +832,7 @@ func resourceClusterV1Delete(ctx context.Context, d *schema.ResourceData, meta i
 		MinTimeout: 3 * time.Second,
 	}
 
-	_, err = stateConf.WaitForState()
+	_, err = stateConf.WaitForStateContext(ctx)
 	if err != nil {
 		return fmterr.Errorf(
 			"Error waiting for Cluster (%s) to be terminated: %s",

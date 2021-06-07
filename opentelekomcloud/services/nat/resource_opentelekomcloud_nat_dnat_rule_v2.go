@@ -36,7 +36,7 @@ func ResourceNatDnatRuleV2() *schema.Resource {
 		DeleteContext: resourceNatDnatRuleDelete,
 
 		Importer: &schema.ResourceImporter{
-			State: schema.ImportStatePassthrough,
+			StateContext: schema.ImportStatePassthroughContext,
 		},
 
 		Schema: map[string]*schema.Schema{

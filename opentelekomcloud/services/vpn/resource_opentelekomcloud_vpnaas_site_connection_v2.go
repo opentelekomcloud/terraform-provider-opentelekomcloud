@@ -25,7 +25,7 @@ func ResourceVpnSiteConnectionV2() *schema.Resource {
 		UpdateContext: resourceVpnSiteConnectionV2Update,
 		DeleteContext: resourceVpnSiteConnectionV2Delete,
 		Importer: &schema.ResourceImporter{
-			State: schema.ImportStatePassthrough,
+			StateContext: schema.ImportStatePassthroughContext,
 		},
 
 		Timeouts: &schema.ResourceTimeout{
@@ -207,7 +207,7 @@ func resourceVpnSiteConnectionV2Create(ctx context.Context, d *schema.ResourceDa
 		Delay:      0,
 		MinTimeout: 2 * time.Second,
 	}
-	_, err = stateConf.WaitForState()
+	_, err = stateConf.WaitForStateContext(ctx)
 
 	if err != nil {
 		return diag.FromErr(err)
@@ -389,7 +389,7 @@ func resourceVpnSiteConnectionV2Update(ctx context.Context, d *schema.ResourceDa
 			Delay:      0,
 			MinTimeout: 2 * time.Second,
 		}
-		_, err = stateConf.WaitForState()
+		_, err = stateConf.WaitForStateContext(ctx)
 
 		if err != nil {
 			return diag.FromErr(err)
@@ -431,7 +431,7 @@ func resourceVpnSiteConnectionV2Delete(ctx context.Context, d *schema.ResourceDa
 		MinTimeout: 2 * time.Second,
 	}
 
-	_, err = stateConf.WaitForState()
+	_, err = stateConf.WaitForStateContext(ctx)
 
 	return diag.FromErr(err)
 }

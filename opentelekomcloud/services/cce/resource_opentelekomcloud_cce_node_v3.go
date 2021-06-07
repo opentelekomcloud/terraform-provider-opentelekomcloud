@@ -33,7 +33,7 @@ func ResourceCCENodeV3() *schema.Resource {
 		DeleteContext: resourceCCENodeV3Delete,
 
 		Importer: &schema.ResourceImporter{
-			State: schema.ImportStatePassthrough,
+			StateContext: schema.ImportStatePassthroughContext,
 		},
 
 		Timeouts: &schema.ResourceTimeout{
@@ -435,13 +435,13 @@ func resourceCCENodeV3Create(ctx context.Context, d *schema.ResourceData, meta i
 		Delay:      15 * time.Second,
 		MinTimeout: 3 * time.Second,
 	}
-	_, err = stateCluster.WaitForState()
+	_, err = stateCluster.WaitForStateContext(ctx)
 
 	log.Printf("[DEBUG] Create Options: %#v", createOpts)
 	s, err := nodes.Create(nodeClient, clusterId, createOpts).Extract()
 	if err != nil {
 		if _, ok := err.(golangsdk.ErrDefault403); ok {
-			retryNode, err := recursiveCreate(nodeClient, createOpts, clusterId, 403)
+			retryNode, err := recursiveCreate(ctx, nodeClient, createOpts, clusterId, 403)
 			if err == "fail" {
 				return fmterr.Errorf("error creating OpenTelekomCloud Node")
 			}
@@ -479,7 +479,7 @@ func resourceCCENodeV3Create(ctx context.Context, d *schema.ResourceData, meta i
 		Delay:      5 * time.Second,
 		MinTimeout: 3 * time.Second,
 	}
-	_, err = stateConf.WaitForState()
+	_, err = stateConf.WaitForStateContext(ctx)
 	if err != nil {
 		return fmterr.Errorf("error creating OpenTelekomCloud CCE Node: %s", err)
 	}
@@ -635,7 +635,7 @@ func resourceCCENodeV3Update(ctx context.Context, d *schema.ResourceData, meta i
 			if oldBandwidth > 0 {
 				err = resizeCCENodeV3IpBandwidth(d, config, floatingIp.ID, newBandWidth)
 			} else {
-				err = createAndAssociateCCENodeV3FloatingIp(d, config, newBandWidth, serverId)
+				err = createAndAssociateCCENodeV3FloatingIp(ctx, d, config, newBandWidth, serverId)
 			}
 		}
 		if err != nil {
@@ -688,7 +688,7 @@ func resourceCCENodeV3Delete(ctx context.Context, d *schema.ResourceData, meta i
 		MinTimeout: 3 * time.Second,
 	}
 
-	_, err = stateConf.WaitForState()
+	_, err = stateConf.WaitForStateContext(ctx)
 	if err != nil {
 		return fmterr.Errorf("error deleting OpenTelekomCloud CCE Node: %s", err)
 	}
@@ -746,7 +746,7 @@ func resizeCCENodeV3IpBandwidth(d *schema.ResourceData, meta interface{}, eipId 
 	return nil
 }
 
-func createAndAssociateCCENodeV3FloatingIp(d *schema.ResourceData, meta interface{}, size int, serverId string) error {
+func createAndAssociateCCENodeV3FloatingIp(ctx context.Context, d *schema.ResourceData, meta interface{}, size int, serverId string) error {
 	config := meta.(*cfg.Config)
 	nwClient, err := config.NetworkingV1Client(config.GetRegion(d))
 	if err != nil {
@@ -771,7 +771,7 @@ func createAndAssociateCCENodeV3FloatingIp(d *schema.ResourceData, meta interfac
 		return fmt.Errorf("error updating bandwidth size: %s", err)
 	}
 
-	err = vpc.WaitForEIPActive(nwClient, eip.ID, time.Minute*10)
+	err = vpc.WaitForEIPActive(ctx, nwClient, eip.ID, time.Minute*10)
 	if err != nil {
 		return fmt.Errorf("error waiting for EIP (%s) to become ready: %s", eip.ID, err)
 	}
@@ -891,7 +891,7 @@ func waitForClusterAvailable(cceClient *golangsdk.ServiceClient, clusterId strin
 	}
 }
 
-func recursiveCreate(cceClient *golangsdk.ServiceClient, opts nodes.CreateOptsBuilder, ClusterID string, errCode int) (*nodes.Nodes, string) {
+func recursiveCreate(ctx context.Context, cceClient *golangsdk.ServiceClient, opts nodes.CreateOptsBuilder, ClusterID string, errCode int) (*nodes.Nodes, string) {
 	if errCode == 403 {
 		stateCluster := &resource.StateChangeConf{
 			Target:     []string{"Available"},
@@ -900,14 +900,14 @@ func recursiveCreate(cceClient *golangsdk.ServiceClient, opts nodes.CreateOptsBu
 			Delay:      15 * time.Second,
 			MinTimeout: 3 * time.Second,
 		}
-		_, stateErr := stateCluster.WaitForState()
+		_, stateErr := stateCluster.WaitForStateContext(ctx)
 		if stateErr != nil {
 			log.Printf("[INFO] Cluster Unavailable %s.\n", stateErr)
 		}
 		s, err := nodes.Create(cceClient, ClusterID, opts).Extract()
 		if err != nil {
 			if _, ok := err.(golangsdk.ErrDefault403); ok {
-				return recursiveCreate(cceClient, opts, ClusterID, 403)
+				return recursiveCreate(ctx, cceClient, opts, ClusterID, 403)
 			} else {
 				return s, "fail"
 			}

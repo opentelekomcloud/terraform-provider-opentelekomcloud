@@ -102,7 +102,7 @@ func resourceNatSnatRuleV2Create(ctx context.Context, d *schema.ResourceData, me
 		MinTimeout: 3 * time.Second,
 	}
 
-	_, err = stateConf.WaitForState()
+	_, err = stateConf.WaitForStateContext(ctx)
 	if err != nil {
 		return fmterr.Errorf("Error creating OpenTelekomCloud Snat Rule: %s", err)
 	}
@@ -151,7 +151,7 @@ func resourceNatSnatRuleV2Delete(ctx context.Context, d *schema.ResourceData, me
 		MinTimeout: 3 * time.Second,
 	}
 
-	_, err = stateConf.WaitForState()
+	_, err = stateConf.WaitForStateContext(ctx)
 	if err != nil {
 		return fmterr.Errorf("Error deleting OpenTelekomCloud Snat Rule: %s", err)
 	}

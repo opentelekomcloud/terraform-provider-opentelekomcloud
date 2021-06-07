@@ -22,7 +22,7 @@ func ResourceCSBSBackupV1() *schema.Resource {
 		ReadContext:   resourceCSBSBackupV1Read,
 		DeleteContext: resourceCSBSBackupV1Delete,
 		Importer: &schema.ResourceImporter{
-			State: schema.ImportStatePassthrough,
+			StateContext: schema.ImportStatePassthroughContext,
 		},
 
 		Timeouts: &schema.ResourceTimeout{
@@ -256,7 +256,7 @@ func resourceCSBSBackupV1Create(ctx context.Context, d *schema.ResourceData, met
 			Delay:      3 * time.Minute,
 			MinTimeout: 3 * time.Minute,
 		}
-		_, stateErr := stateConf.WaitForState()
+		_, stateErr := stateConf.WaitForStateContext(ctx)
 		if stateErr != nil {
 			return fmterr.Errorf(
 				"Error waiting for Backup (%s) to become available: %s",
@@ -327,7 +327,7 @@ func resourceCSBSBackupV1Delete(ctx context.Context, d *schema.ResourceData, met
 		MinTimeout: 3 * time.Second,
 	}
 
-	_, err = stateConf.WaitForState()
+	_, err = stateConf.WaitForStateContext(ctx)
 	if err != nil {
 		return fmterr.Errorf("Error deleting csbs backup: %s", err)
 	}

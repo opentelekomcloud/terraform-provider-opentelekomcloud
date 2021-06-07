@@ -26,7 +26,7 @@ func ResourceRdsInstance() *schema.Resource {
 		UpdateContext: resourceInstanceUpdate,
 		DeleteContext: resourceInstanceDelete,
 		Importer: &schema.ResourceImporter{
-			State: schema.ImportStatePassthrough,
+			StateContext: schema.ImportStatePassthroughContext,
 		},
 
 		Timeouts: &schema.ResourceTimeout{
@@ -352,7 +352,7 @@ func resourceInstanceCreate(ctx context.Context, d *schema.ResourceData, meta in
 		MinTimeout: 3 * time.Second,
 	}
 
-	_, err = stateConf.WaitForState()
+	_, err = stateConf.WaitForStateContext(ctx)
 	if err != nil {
 		return fmterr.Errorf(
 			"Error waiting for instance (%s) to become ready: %s ",
@@ -508,7 +508,7 @@ func resourceInstanceDelete(ctx context.Context, d *schema.ResourceData, meta in
 		MinTimeout: 3 * time.Second,
 	}
 
-	_, err = stateConf.WaitForState()
+	_, err = stateConf.WaitForStateContext(ctx)
 	if err != nil {
 		return fmterr.Errorf(
 			"Error waiting for instance (%s) to be deleted: %s ",
@@ -587,7 +587,7 @@ func resourceInstanceUpdate(ctx context.Context, d *schema.ResourceData, meta in
 			MinTimeout: 3 * time.Second,
 		}
 
-		_, err = stateConf.WaitForState()
+		_, err = stateConf.WaitForStateContext(ctx)
 		if err != nil {
 			return fmterr.Errorf(
 				"Error waiting for instance (%s) volume to be Updated: %s ",
@@ -616,7 +616,7 @@ func resourceInstanceUpdate(ctx context.Context, d *schema.ResourceData, meta in
 			MinTimeout: 3 * time.Second,
 		}
 
-		_, err = stateConf.WaitForState()
+		_, err = stateConf.WaitForStateContext(ctx)
 		if err != nil {
 			return fmterr.Errorf(
 				"Error waiting for instance (%s) flavor to be Updated: %s ",

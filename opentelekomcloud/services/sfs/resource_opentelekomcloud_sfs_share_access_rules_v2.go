@@ -20,7 +20,7 @@ func ResourceSFSShareAccessRulesV2() *schema.Resource {
 		DeleteContext: resourceSFSShareAccessRulesV2Delete,
 
 		Importer: &schema.ResourceImporter{
-			State: schema.ImportStatePassthrough,
+			StateContext: schema.ImportStatePassthroughContext,
 		},
 
 		Schema: map[string]*schema.Schema{

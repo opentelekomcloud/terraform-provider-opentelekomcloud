@@ -32,7 +32,7 @@ func ResourceImagesImageV2() *schema.Resource {
 		UpdateContext: resourceImagesImageV2Update,
 		DeleteContext: resourceImagesImageV2Delete,
 		Importer: &schema.ResourceImporter{
-			State: schema.ImportStatePassthrough,
+			StateContext: schema.ImportStatePassthroughContext,
 		},
 
 		Timeouts: &schema.ResourceTimeout{
@@ -243,7 +243,7 @@ func resourceImagesImageV2Create(ctx context.Context, d *schema.ResourceData, me
 		MinTimeout: 3 * time.Second,
 	}
 
-	if _, err = stateConf.WaitForState(); err != nil {
+	if _, err = stateConf.WaitForStateContext(ctx); err != nil {
 		return fmterr.Errorf("Error waiting for Image: %s", err)
 	}
 

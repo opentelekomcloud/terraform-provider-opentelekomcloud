@@ -124,14 +124,14 @@ func resourceMemberV2Create(ctx context.Context, d *schema.ResourceData, meta in
 	// Wait for LB to become active before continuing
 	poolID := d.Get("pool_id").(string)
 	timeout := d.Timeout(schema.TimeoutCreate)
-	err = waitForLBV2viaPool(networkingClient, poolID, "ACTIVE", timeout)
+	err = waitForLBV2viaPool(ctx, networkingClient, poolID, "ACTIVE", timeout)
 	if err != nil {
 		return diag.FromErr(err)
 	}
 
 	log.Printf("[DEBUG] Attempting to create member")
 	var member *pools.Member
-	err = resource.Retry(timeout, func() *resource.RetryError {
+	err = resource.RetryContext(ctx, timeout, func() *resource.RetryError {
 		member, err = pools.CreateMember(networkingClient, poolID, createOpts).Extract()
 		if err != nil {
 			return common.CheckForRetryableError(err)
@@ -144,7 +144,7 @@ func resourceMemberV2Create(ctx context.Context, d *schema.ResourceData, meta in
 	}
 
 	// Wait for LB to become ACTIVE again
-	err = waitForLBV2viaPool(networkingClient, poolID, "ACTIVE", timeout)
+	err = waitForLBV2viaPool(ctx, networkingClient, poolID, "ACTIVE", timeout)
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -209,13 +209,13 @@ func resourceMemberV2Update(ctx context.Context, d *schema.ResourceData, meta in
 	// Wait for LB to become active before continuing
 	poolID := d.Get("pool_id").(string)
 	timeout := d.Timeout(schema.TimeoutUpdate)
-	err = waitForLBV2viaPool(networkingClient, poolID, "ACTIVE", timeout)
+	err = waitForLBV2viaPool(ctx, networkingClient, poolID, "ACTIVE", timeout)
 	if err != nil {
 		return diag.FromErr(err)
 	}
 
 	log.Printf("[DEBUG] Updating member %s with options: %#v", d.Id(), updateOpts)
-	err = resource.Retry(timeout, func() *resource.RetryError {
+	err = resource.RetryContext(ctx, timeout, func() *resource.RetryError {
 		_, err = pools.UpdateMember(networkingClient, poolID, d.Id(), updateOpts).Extract()
 		if err != nil {
 			return common.CheckForRetryableError(err)
@@ -227,7 +227,7 @@ func resourceMemberV2Update(ctx context.Context, d *schema.ResourceData, meta in
 		return fmterr.Errorf("Unable to update member %s: %s", d.Id(), err)
 	}
 
-	err = waitForLBV2viaPool(networkingClient, poolID, "ACTIVE", timeout)
+	err = waitForLBV2viaPool(ctx, networkingClient, poolID, "ACTIVE", timeout)
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -245,13 +245,13 @@ func resourceMemberV2Delete(ctx context.Context, d *schema.ResourceData, meta in
 	// Wait for Pool to become active before continuing
 	poolID := d.Get("pool_id").(string)
 	timeout := d.Timeout(schema.TimeoutDelete)
-	err = waitForLBV2viaPool(networkingClient, poolID, "ACTIVE", timeout)
+	err = waitForLBV2viaPool(ctx, networkingClient, poolID, "ACTIVE", timeout)
 	if err != nil {
 		return diag.FromErr(err)
 	}
 
 	log.Printf("[DEBUG] Attempting to delete member %s", d.Id())
-	err = resource.Retry(timeout, func() *resource.RetryError {
+	err = resource.RetryContext(ctx, timeout, func() *resource.RetryError {
 		err = pools.DeleteMember(networkingClient, poolID, d.Id()).ExtractErr()
 		if err != nil {
 			return common.CheckForRetryableError(err)
@@ -263,7 +263,7 @@ func resourceMemberV2Delete(ctx context.Context, d *schema.ResourceData, meta in
 	}
 
 	// Wait for LB to become ACTIVE
-	err = waitForLBV2viaPool(networkingClient, poolID, "ACTIVE", timeout)
+	err = waitForLBV2viaPool(ctx, networkingClient, poolID, "ACTIVE", timeout)
 	if err != nil {
 		return diag.FromErr(err)
 	}

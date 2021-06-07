@@ -23,7 +23,7 @@ func ResourceVpcPeeringConnectionV2() *schema.Resource {
 		UpdateContext: resourceVPCPeeringV2Update,
 		DeleteContext: resourceVPCPeeringV2Delete,
 		Importer: &schema.ResourceImporter{
-			State: schema.ImportStatePassthrough,
+			StateContext: schema.ImportStatePassthroughContext,
 		},
 		Timeouts: &schema.ResourceTimeout{
 			Create: schema.DefaultTimeout(10 * time.Minute),
@@ -109,7 +109,7 @@ func resourceVPCPeeringV2Create(ctx context.Context, d *schema.ResourceData, met
 		MinTimeout: 3 * time.Second,
 	}
 
-	_, err = stateConf.WaitForState()
+	_, err = stateConf.WaitForStateContext(ctx)
 	d.SetId(n.ID)
 
 	return resourceVPCPeeringV2Read(ctx, d, meta)
@@ -180,7 +180,7 @@ func resourceVPCPeeringV2Delete(ctx context.Context, d *schema.ResourceData, met
 		MinTimeout: 3 * time.Second,
 	}
 
-	_, err = stateConf.WaitForState()
+	_, err = stateConf.WaitForStateContext(ctx)
 	if err != nil {
 		return fmterr.Errorf("Error deleting OpenTelekomCloud Vpc Peering Connection: %s", err)
 	}

@@ -20,7 +20,7 @@ func ResourceBMSTagsV2() *schema.Resource {
 		ReadContext:   resourceBMSTagsV2Read,
 		DeleteContext: resourceBMSTagsV2Delete,
 		Importer: &schema.ResourceImporter{
-			State: schema.ImportStatePassthrough,
+			StateContext: schema.ImportStatePassthroughContext,
 		},
 
 		Timeouts: &schema.ResourceTimeout{

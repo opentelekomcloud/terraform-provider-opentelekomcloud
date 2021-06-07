@@ -25,7 +25,7 @@ func ResourceComputeFloatingIPV2() *schema.Resource {
 		UpdateContext: nil,
 		DeleteContext: resourceComputeFloatingIPV2Delete,
 		Importer: &schema.ResourceImporter{
-			State: schema.ImportStatePassthrough,
+			StateContext: schema.ImportStatePassthroughContext,
 		},
 
 		Schema: map[string]*schema.Schema{
@@ -144,7 +144,7 @@ func resourceComputeFloatingIPV2Delete(ctx context.Context, d *schema.ResourceDa
 		MinTimeout: 3 * time.Second,
 	}
 
-	_, err = stateConf.WaitForState()
+	_, err = stateConf.WaitForStateContext(ctx)
 	if err != nil {
 		return fmterr.Errorf("Error deleting OpenTelekomCloud Floating IP: %s", err)
 	}

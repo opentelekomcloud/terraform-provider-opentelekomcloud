@@ -172,7 +172,7 @@ func resourceCertificateV2Update(ctx context.Context, d *schema.ResourceData, me
 	log.Printf("[DEBUG] Updating certificate %s with options: %#v", d.Id(), updateOpts)
 
 	timeout := d.Timeout(schema.TimeoutUpdate)
-	err = resource.Retry(timeout, func() *resource.RetryError {
+	err = resource.RetryContext(ctx, timeout, func() *resource.RetryError {
 		_, err := certificates.Update(networkingClient, d.Id(), updateOpts).Extract()
 		if err != nil {
 			return common.CheckForRetryableError(err)
@@ -195,7 +195,7 @@ func resourceCertificateV2Delete(ctx context.Context, d *schema.ResourceData, me
 
 	log.Printf("[DEBUG] Deleting certificate %s", d.Id())
 	timeout := d.Timeout(schema.TimeoutDelete)
-	err = resource.Retry(timeout, func() *resource.RetryError {
+	err = resource.RetryContext(ctx, timeout, func() *resource.RetryError {
 		err := certificates.Delete(client, d.Id()).ExtractErr()
 		if err != nil {
 			return common.CheckForRetryableError(err)
@@ -203,13 +203,13 @@ func resourceCertificateV2Delete(ctx context.Context, d *schema.ResourceData, me
 		return nil
 	})
 	if err != nil {
-		return diag.FromErr(handleCertificateDeletionError(d, client, err))
+		return diag.FromErr(handleCertificateDeletionError(ctx, d, client, err))
 	}
 
 	return nil
 }
 
-func handleCertificateDeletionError(d *schema.ResourceData, client *golangsdk.ServiceClient, err error) error {
+func handleCertificateDeletionError(ctx context.Context, d *schema.ResourceData, client *golangsdk.ServiceClient, err error) error {
 	if common.IsResourceNotFound(err) {
 		log.Printf("[INFO] deleting an unavailable certificate: %s", d.Id())
 		return nil
@@ -225,7 +225,7 @@ func handleCertificateDeletionError(d *schema.ResourceData, client *golangsdk.Se
 
 		mErr := new(multierror.Error)
 		for _, listenerID := range dep.ListenerIDs {
-			mErr = multierror.Append(mErr, unassignCertWithRetry(client, d.Timeout(schema.TimeoutUpdate), d.Id(), listenerID))
+			mErr = multierror.Append(mErr, unassignCertWithRetry(ctx, client, d.Timeout(schema.TimeoutUpdate), d.Id(), listenerID))
 		}
 		if mErr.ErrorOrNil() != nil {
 			return mErr
@@ -233,7 +233,7 @@ func handleCertificateDeletionError(d *schema.ResourceData, client *golangsdk.Se
 
 		log.Printf("[DEBUG] Retry deleting certificate %s", d.Id())
 		timeout := d.Timeout(schema.TimeoutDelete)
-		err := resource.Retry(timeout, func() *resource.RetryError {
+		err := resource.RetryContext(ctx, timeout, func() *resource.RetryError {
 			err := certificates.Delete(client, d.Id()).ExtractErr()
 			if err != nil {
 				return common.CheckForRetryableError(err)
@@ -248,7 +248,7 @@ func handleCertificateDeletionError(d *schema.ResourceData, client *golangsdk.Se
 	return fmt.Errorf("error deleting certificate %s: %w", d.Id(), err)
 }
 
-func unassignCertWithRetry(client *golangsdk.ServiceClient, timeout time.Duration, certID, listenerID string) error {
+func unassignCertWithRetry(ctx context.Context, client *golangsdk.ServiceClient, timeout time.Duration, certID, listenerID string) error {
 	listener, err := listeners.Get(client, listenerID).Extract()
 	if err != nil {
 		return fmt.Errorf("failed to get listener %s: %w", listenerID, err)
@@ -263,7 +263,7 @@ func unassignCertWithRetry(client *golangsdk.ServiceClient, timeout time.Duratio
 	opts := listeners.UpdateOpts{
 		SniContainerRefs: otherCerts,
 	}
-	err = resource.Retry(timeout, func() *resource.RetryError {
+	err = resource.RetryContext(ctx, timeout, func() *resource.RetryError {
 		_, err := listeners.Update(client, listener.ID, opts).Extract()
 		if err != nil {
 			return common.CheckForRetryableError(err)

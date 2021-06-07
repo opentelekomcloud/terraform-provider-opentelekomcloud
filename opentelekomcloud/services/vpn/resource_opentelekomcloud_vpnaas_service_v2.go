@@ -24,7 +24,7 @@ func ResourceVpnServiceV2() *schema.Resource {
 		UpdateContext: resourceVpnServiceV2Update,
 		DeleteContext: resourceVpnServiceV2Delete,
 		Importer: &schema.ResourceImporter{
-			State: schema.ImportStatePassthrough,
+			StateContext: schema.ImportStatePassthroughContext,
 		},
 
 		Timeouts: &schema.ResourceTimeout{
@@ -129,7 +129,7 @@ func resourceVpnServiceV2Create(ctx context.Context, d *schema.ResourceData, met
 		Delay:      0,
 		MinTimeout: 2 * time.Second,
 	}
-	_, err = stateConf.WaitForState()
+	_, err = stateConf.WaitForStateContext(ctx)
 
 	if err != nil {
 		return diag.FromErr(err)
@@ -219,7 +219,7 @@ func resourceVpnServiceV2Update(ctx context.Context, d *schema.ResourceData, met
 			Delay:      0,
 			MinTimeout: 2 * time.Second,
 		}
-		_, err = stateConf.WaitForState()
+		_, err = stateConf.WaitForStateContext(ctx)
 
 		if err != nil {
 			return diag.FromErr(err)
@@ -255,7 +255,7 @@ func resourceVpnServiceV2Delete(ctx context.Context, d *schema.ResourceData, met
 		MinTimeout: 2 * time.Second,
 	}
 
-	_, err = stateConf.WaitForState()
+	_, err = stateConf.WaitForStateContext(ctx)
 
 	return diag.FromErr(err)
 }

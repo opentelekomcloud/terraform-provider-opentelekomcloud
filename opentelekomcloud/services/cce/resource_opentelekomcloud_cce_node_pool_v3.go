@@ -320,7 +320,7 @@ func resourceCCENodePoolV3Create(ctx context.Context, d *schema.ResourceData, me
 		Delay:      15 * time.Second,
 		MinTimeout: 3 * time.Second,
 	}
-	if _, err := stateCluster.WaitForState(); err != nil {
+	if _, err := stateCluster.WaitForStateContext(ctx); err != nil {
 		return fmterr.Errorf("error waiting for cluster to be available: %w", err)
 	}
 
@@ -328,7 +328,7 @@ func resourceCCENodePoolV3Create(ctx context.Context, d *schema.ResourceData, me
 	pool, err := nodepools.Create(nodePoolClient, clusterId, createOpts).Extract()
 	if err != nil {
 		if _, ok := err.(golangsdk.ErrDefault403); ok {
-			if _, err := stateCluster.WaitForState(); err != nil {
+			if _, err := stateCluster.WaitForStateContext(ctx); err != nil {
 				return fmterr.Errorf("error waiting for cluster to be available: %w", err)
 			}
 			retried, err := nodepools.Create(nodePoolClient, clusterId, createOpts).Extract()
@@ -351,7 +351,7 @@ func resourceCCENodePoolV3Create(ctx context.Context, d *schema.ResourceData, me
 		Delay:        120 * time.Second,
 		PollInterval: 20 * time.Second,
 	}
-	if _, err := stateConf.WaitForState(); err != nil {
+	if _, err := stateConf.WaitForStateContext(ctx); err != nil {
 		return fmterr.Errorf(createError, err)
 	}
 
@@ -395,7 +395,7 @@ func resourceCCENodePoolV3Read(ctx context.Context, d *schema.ResourceData, meta
 	}
 
 	if err := me.ErrorOrNil(); err != nil {
-		return fmterr.Errorf(setError, "attributes", err)
+		return fmterr.Errorf(setError, "attributes", me)
 	}
 
 	k8sTags := map[string]string{}
@@ -481,7 +481,7 @@ func resourceCCENodePoolV3Update(ctx context.Context, d *schema.ResourceData, me
 		Delay:      15 * time.Second,
 		MinTimeout: 5 * time.Second,
 	}
-	if _, err := stateConf.WaitForState(); err != nil {
+	if _, err := stateConf.WaitForStateContext(ctx); err != nil {
 		return fmterr.Errorf("error waiting for Open Telekom Cloud CCE Node Pool to update: %w", err)
 	}
 
@@ -508,7 +508,7 @@ func resourceCCENodePoolV3Delete(ctx context.Context, d *schema.ResourceData, me
 		PollInterval: 20 * time.Second,
 	}
 
-	_, err = stateConf.WaitForState()
+	_, err = stateConf.WaitForStateContext(ctx)
 	if err != nil {
 		return fmterr.Errorf("error waiting for Open Telekom Cloud CCE Node Pool to be deleted: %w", err)
 	}
@@ -562,8 +562,8 @@ func resourceCCENodePoolV3Import(ctx context.Context, d *schema.ResourceData, me
 
 	results := make([]*schema.ResourceData, 1)
 
-	if err := resourceCCENodePoolV3Read(ctx, d, meta); err != nil {
-		return nil, fmt.Errorf("error reading opentelekomcloud_cce_node_pool_v3 %s: %w", d.Id(), err)
+	if diagRead := resourceCCENodePoolV3Read(ctx, d, meta); diagRead.HasError() {
+		return nil, fmt.Errorf("error reading opentelekomcloud_cce_node_pool_v3 %s: %s", d.Id(), diagRead[0].Summary)
 	}
 
 	results[0] = d

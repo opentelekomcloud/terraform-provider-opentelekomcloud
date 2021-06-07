@@ -406,7 +406,7 @@ func resourceASGroupCreate(ctx context.Context, d *schema.ResourceData, meta int
 			Delay:   10 * time.Second,
 		}
 
-		_, err := stateConf.WaitForState()
+		_, err := stateConf.WaitForStateContext(ctx)
 		if err != nil {
 			return fmterr.Errorf("error waiting for instances in the ASGroup %q to become inservice: %s", asGroupID, err)
 		}
@@ -618,7 +618,7 @@ func resourceASGroupDelete(ctx context.Context, d *schema.ResourceData, meta int
 			Delay:   10 * time.Second,
 		}
 
-		_, err := stateConf.WaitForState()
+		_, err := stateConf.WaitForStateContext(ctx)
 
 		if err != nil {
 			return fmterr.Errorf("[DEBUG] Error removing instances from ASGroup %q: %s", d.Id(), err)

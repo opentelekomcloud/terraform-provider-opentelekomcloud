@@ -29,7 +29,7 @@ func ResourceComputeSecGroupV2() *schema.Resource {
 		DeleteContext: resourceComputeSecGroupV2Delete,
 
 		Importer: &schema.ResourceImporter{
-			State: schema.ImportStatePassthrough,
+			StateContext: schema.ImportStatePassthroughContext,
 		},
 
 		Timeouts: &schema.ResourceTimeout{
@@ -242,7 +242,7 @@ func resourceComputeSecGroupV2Delete(ctx context.Context, d *schema.ResourceData
 		MinTimeout: 3 * time.Second,
 	}
 
-	_, err = stateConf.WaitForState()
+	_, err = stateConf.WaitForStateContext(ctx)
 	if err != nil {
 		return fmterr.Errorf("error deleting OpenTelekomCloud security group: %s", err)
 	}

@@ -21,7 +21,7 @@ func ResourceIdentityProjectV3() *schema.Resource {
 		UpdateContext: resourceIdentityProjectV3Update,
 		DeleteContext: resourceIdentityProjectV3Delete,
 		Importer: &schema.ResourceImporter{
-			State: schema.ImportStatePassthrough,
+			StateContext: schema.ImportStatePassthroughContext,
 		},
 
 		Schema: map[string]*schema.Schema{

@@ -24,7 +24,7 @@ func ResourceDcsInstanceV1() *schema.Resource {
 		UpdateContext: resourceDcsInstancesV1Update,
 		DeleteContext: resourceDcsInstancesV1Delete,
 		Importer: &schema.ResourceImporter{
-			State: schema.ImportStatePassthrough,
+			StateContext: schema.ImportStatePassthroughContext,
 		},
 
 		Schema: map[string]*schema.Schema{
@@ -311,7 +311,7 @@ func resourceDcsInstancesV1Create(ctx context.Context, d *schema.ResourceData, m
 		Delay:      10 * time.Second,
 		MinTimeout: 3 * time.Second,
 	}
-	_, err = stateConf.WaitForState()
+	_, err = stateConf.WaitForStateContext(ctx)
 	if err != nil {
 		return fmterr.Errorf(
 			"Error waiting for instance (%s) to become ready: %s",
@@ -433,7 +433,7 @@ func resourceDcsInstancesV1Delete(ctx context.Context, d *schema.ResourceData, m
 		MinTimeout: 3 * time.Second,
 	}
 
-	_, err = stateConf.WaitForState()
+	_, err = stateConf.WaitForStateContext(ctx)
 	if err != nil {
 		return fmterr.Errorf(
 			"Error waiting for instance (%s) to delete: %s",

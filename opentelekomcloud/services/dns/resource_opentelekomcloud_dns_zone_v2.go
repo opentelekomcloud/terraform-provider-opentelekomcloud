@@ -31,7 +31,7 @@ func ResourceDNSZoneV2() *schema.Resource {
 		UpdateContext: resourceDNSZoneV2Update,
 		DeleteContext: resourceDNSZoneV2Delete,
 		Importer: &schema.ResourceImporter{
-			State: schema.ImportStatePassthrough,
+			StateContext: schema.ImportStatePassthroughContext,
 		},
 
 		Timeouts: &schema.ResourceTimeout{
@@ -169,7 +169,7 @@ func resourceDNSZoneV2Create(ctx context.Context, d *schema.ResourceData, meta i
 		MinTimeout: 3 * time.Second,
 	}
 
-	_, err = stateConf.WaitForState()
+	_, err = stateConf.WaitForStateContext(ctx)
 	if err != nil {
 		return fmterr.Errorf(
 			"Error waiting for DNS Zone (%s) to become ACTIVE: %s",
@@ -201,7 +201,7 @@ func resourceDNSZoneV2Create(ctx context.Context, d *schema.ResourceData, meta i
 						MinTimeout: 3 * time.Second,
 					}
 
-					_, err = stateRouterConf.WaitForState()
+					_, err = stateRouterConf.WaitForStateContext(ctx)
 					if err != nil {
 						return fmterr.Errorf("Error waiting for AssociateZone (%s) to Router (%s) become ACTIVE: %s",
 							n.ID, routerList[i].RouterID, err)
@@ -311,7 +311,7 @@ func resourceDNSZoneV2Update(ctx context.Context, d *schema.ResourceData, meta i
 		MinTimeout: 3 * time.Second,
 	}
 
-	_, err = stateConf.WaitForState()
+	_, err = stateConf.WaitForStateContext(ctx)
 
 	if d.HasChange("router") {
 		// when updating private zone
@@ -340,7 +340,7 @@ func resourceDNSZoneV2Update(ctx context.Context, d *schema.ResourceData, meta i
 						MinTimeout: 3 * time.Second,
 					}
 
-					_, err = stateRouterConf.WaitForState()
+					_, err = stateRouterConf.WaitForStateContext(ctx)
 					if err != nil {
 						return fmterr.Errorf("Error waiting for AssociateZone (%s) to Router (%s) become ACTIVE: %s",
 							d.Id(), associateList[i].RouterID, err)
@@ -367,7 +367,7 @@ func resourceDNSZoneV2Update(ctx context.Context, d *schema.ResourceData, meta i
 						MinTimeout: 3 * time.Second,
 					}
 
-					_, err = stateRouterConf.WaitForState()
+					_, err = stateRouterConf.WaitForStateContext(ctx)
 					if err != nil {
 						return fmterr.Errorf("Error waiting for DisassociateZone (%s) to Router (%s) become DELETED: %s",
 							d.Id(), disassociateList[j].RouterID, err)
@@ -409,7 +409,7 @@ func resourceDNSZoneV2Delete(ctx context.Context, d *schema.ResourceData, meta i
 		MinTimeout: 3 * time.Second,
 	}
 
-	_, err = stateConf.WaitForState()
+	_, err = stateConf.WaitForStateContext(ctx)
 	if err != nil {
 		return fmterr.Errorf(
 			"Error waiting for DNS Zone (%s) to delete: %s",

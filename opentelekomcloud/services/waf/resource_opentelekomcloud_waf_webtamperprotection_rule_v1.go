@@ -20,7 +20,7 @@ func ResourceWafWebTamperProtectionRuleV1() *schema.Resource {
 		ReadContext:   resourceWafWebTamperProtectionRuleV1Read,
 		DeleteContext: resourceWafWebTamperProtectionRuleV1Delete,
 		Importer: &schema.ResourceImporter{
-			State: schema.ImportStatePassthrough,
+			StateContext: schema.ImportStatePassthroughContext,
 		},
 
 		Timeouts: &schema.ResourceTimeout{

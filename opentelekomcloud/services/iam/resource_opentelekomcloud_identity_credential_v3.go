@@ -20,7 +20,7 @@ func ResourceIdentityCredentialV3() *schema.Resource {
 		UpdateContext: resourceIdentityCredentialV3Update,
 		DeleteContext: resourceIdentityCredentialV3Delete,
 		Importer: &schema.ResourceImporter{
-			State: schema.ImportStatePassthrough,
+			StateContext: schema.ImportStatePassthroughContext,
 		},
 		Schema: map[string]*schema.Schema{
 			"user_id": {

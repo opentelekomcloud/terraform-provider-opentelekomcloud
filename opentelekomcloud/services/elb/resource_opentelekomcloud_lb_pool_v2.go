@@ -176,19 +176,19 @@ func resourceLBPoolV2Create(ctx context.Context, d *schema.ResourceData, meta in
 	lbID := createOpts.LoadbalancerID
 	listenerID := createOpts.ListenerID
 	if lbID != "" {
-		if err := waitForLBV2LoadBalancer(client, lbID, "ACTIVE", nil, timeout); err != nil {
+		if err := waitForLBV2LoadBalancer(ctx, client, lbID, "ACTIVE", nil, timeout); err != nil {
 			return diag.FromErr(err)
 		}
 	} else if listenerID != "" {
 		// Wait for Listener to become active before continuing
-		if err := waitForLBV2Listener(client, listenerID, "ACTIVE", nil, timeout); err != nil {
+		if err := waitForLBV2Listener(ctx, client, listenerID, "ACTIVE", nil, timeout); err != nil {
 			return diag.FromErr(err)
 		}
 	}
 
 	log.Printf("[DEBUG] Attempting to create pool")
 	var pool *pools.Pool
-	err = resource.Retry(timeout, func() *resource.RetryError {
+	err = resource.RetryContext(ctx, timeout, func() *resource.RetryError {
 		pool, err = pools.Create(client, createOpts).Extract()
 		if err != nil {
 			return common.CheckForRetryableError(err)
@@ -201,10 +201,10 @@ func resourceLBPoolV2Create(ctx context.Context, d *schema.ResourceData, meta in
 
 	// Wait for LoadBalancer to become active before continuing
 	if lbID != "" {
-		err = waitForLBV2LoadBalancer(client, lbID, "ACTIVE", nil, timeout)
+		err = waitForLBV2LoadBalancer(ctx, client, lbID, "ACTIVE", nil, timeout)
 	} else {
 		// Pool exists by now so we can ask for lbID
-		err = waitForLBV2viaPool(client, pool.ID, "ACTIVE", timeout)
+		err = waitForLBV2viaPool(ctx, client, pool.ID, "ACTIVE", timeout)
 	}
 	if err != nil {
 		return diag.FromErr(err)
@@ -276,16 +276,16 @@ func resourceLBPoolV2Update(ctx context.Context, d *schema.ResourceData, meta in
 	timeout := d.Timeout(schema.TimeoutUpdate)
 	lbID := d.Get("loadbalancer_id").(string)
 	if lbID != "" {
-		err = waitForLBV2LoadBalancer(client, lbID, "ACTIVE", nil, timeout)
+		err = waitForLBV2LoadBalancer(ctx, client, lbID, "ACTIVE", nil, timeout)
 	} else {
-		err = waitForLBV2viaPool(client, d.Id(), "ACTIVE", timeout)
+		err = waitForLBV2viaPool(ctx, client, d.Id(), "ACTIVE", timeout)
 	}
 	if err != nil {
 		return diag.FromErr(err)
 	}
 
 	log.Printf("[DEBUG] Updating pool %s with options: %#v", d.Id(), updateOpts)
-	err = resource.Retry(timeout, func() *resource.RetryError {
+	err = resource.RetryContext(ctx, timeout, func() *resource.RetryError {
 		_, err = pools.Update(client, d.Id(), updateOpts).Extract()
 		if err != nil {
 			return common.CheckForRetryableError(err)
@@ -299,9 +299,9 @@ func resourceLBPoolV2Update(ctx context.Context, d *schema.ResourceData, meta in
 
 	// Wait for LoadBalancer to become active before continuing
 	if lbID != "" {
-		err = waitForLBV2LoadBalancer(client, lbID, "ACTIVE", nil, timeout)
+		err = waitForLBV2LoadBalancer(ctx, client, lbID, "ACTIVE", nil, timeout)
 	} else {
-		err = waitForLBV2viaPool(client, d.Id(), "ACTIVE", timeout)
+		err = waitForLBV2viaPool(ctx, client, d.Id(), "ACTIVE", timeout)
 	}
 	if err != nil {
 		return diag.FromErr(err)
@@ -321,13 +321,13 @@ func resourceLBPoolV2Delete(ctx context.Context, d *schema.ResourceData, meta in
 	timeout := d.Timeout(schema.TimeoutDelete)
 	lbID := d.Get("loadbalancer_id").(string)
 	if lbID != "" {
-		if err := waitForLBV2LoadBalancer(client, lbID, "ACTIVE", nil, timeout); err != nil {
+		if err := waitForLBV2LoadBalancer(ctx, client, lbID, "ACTIVE", nil, timeout); err != nil {
 			return diag.FromErr(err)
 		}
 	}
 
 	log.Printf("[DEBUG] Attempting to delete pool %s", d.Id())
-	err = resource.Retry(timeout, func() *resource.RetryError {
+	err = resource.RetryContext(ctx, timeout, func() *resource.RetryError {
 		err = pools.Delete(client, d.Id()).ExtractErr()
 		if err != nil {
 			return common.CheckForRetryableError(err)
@@ -336,10 +336,10 @@ func resourceLBPoolV2Delete(ctx context.Context, d *schema.ResourceData, meta in
 	})
 
 	if lbID != "" {
-		err = waitForLBV2LoadBalancer(client, lbID, "ACTIVE", nil, timeout)
+		err = waitForLBV2LoadBalancer(ctx, client, lbID, "ACTIVE", nil, timeout)
 	} else {
 		// Wait for Pool to delete
-		err = waitForLBV2Pool(client, d.Id(), "DELETED", nil, timeout)
+		err = waitForLBV2Pool(ctx, client, d.Id(), "DELETED", nil, timeout)
 	}
 	if err != nil {
 		return diag.FromErr(err)

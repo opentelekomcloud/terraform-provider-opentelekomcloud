@@ -25,7 +25,7 @@ func ResourceNetworkingSubnetV2() *schema.Resource {
 		UpdateContext: resourceNetworkingSubnetV2Update,
 		DeleteContext: resourceNetworkingSubnetV2Delete,
 		Importer: &schema.ResourceImporter{
-			State: schema.ImportStatePassthrough,
+			StateContext: schema.ImportStatePassthroughContext,
 		},
 
 		Timeouts: &schema.ResourceTimeout{
@@ -201,7 +201,7 @@ func resourceNetworkingSubnetV2Create(ctx context.Context, d *schema.ResourceDat
 		MinTimeout: 3 * time.Second,
 	}
 
-	_, err = stateConf.WaitForState()
+	_, err = stateConf.WaitForStateContext(ctx)
 
 	d.SetId(s.ID)
 
@@ -346,7 +346,7 @@ func resourceNetworkingSubnetV2Delete(ctx context.Context, d *schema.ResourceDat
 		MinTimeout: 3 * time.Second,
 	}
 
-	_, err = stateConf.WaitForState()
+	_, err = stateConf.WaitForStateContext(ctx)
 	if err != nil {
 		return fmterr.Errorf("error deleting OpenTelekomCloud Neutron Subnet: %s", err)
 	}

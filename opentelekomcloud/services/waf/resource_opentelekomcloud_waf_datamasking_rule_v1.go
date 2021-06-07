@@ -21,7 +21,7 @@ func ResourceWafDataMaskingRuleV1() *schema.Resource {
 		UpdateContext: resourceWafDataMaskingRuleV1Update,
 		DeleteContext: resourceWafDataMaskingRuleV1Delete,
 		Importer: &schema.ResourceImporter{
-			State: schema.ImportStatePassthrough,
+			StateContext: schema.ImportStatePassthroughContext,
 		},
 
 		Timeouts: &schema.ResourceTimeout{

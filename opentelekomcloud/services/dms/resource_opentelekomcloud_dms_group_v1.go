@@ -18,7 +18,7 @@ func ResourceDmsGroupsV1() *schema.Resource {
 		ReadContext:   resourceDmsGroupsV1Read,
 		DeleteContext: resourceDmsGroupsV1Delete,
 		Importer: &schema.ResourceImporter{
-			State: schema.ImportStatePassthrough,
+			StateContext: schema.ImportStatePassthroughContext,
 		},
 
 		Schema: map[string]*schema.Schema{

@@ -55,7 +55,7 @@ func resourceObsBucketPolicyPut(ctx context.Context, d *schema.ResourceData, met
 		Policy: policy,
 	}
 
-	err = resource.Retry(1*time.Minute, func() *resource.RetryError {
+	err = resource.RetryContext(ctx, 1*time.Minute, func() *resource.RetryError {
 		if _, err := client.SetBucketPolicy(params); err != nil {
 			if err, ok := err.(obs.ObsError); ok {
 				if err.Code == "MalformedPolicy" {

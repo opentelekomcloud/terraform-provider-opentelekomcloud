@@ -20,7 +20,7 @@ func ResourceIdentityGroupV3() *schema.Resource {
 		UpdateContext: resourceIdentityGroupV3Update,
 		DeleteContext: resourceIdentityGroupV3Delete,
 		Importer: &schema.ResourceImporter{
-			State: schema.ImportStatePassthrough,
+			StateContext: schema.ImportStatePassthroughContext,
 		},
 
 		Schema: map[string]*schema.Schema{

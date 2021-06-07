@@ -25,7 +25,7 @@ func ResourceVirtualPrivateCloudV1() *schema.Resource {
 		UpdateContext: resourceVirtualPrivateCloudV1Update,
 		DeleteContext: resourceVirtualPrivateCloudV1Delete,
 		Importer: &schema.ResourceImporter{
-			State: schema.ImportStatePassthrough,
+			StateContext: schema.ImportStatePassthroughContext,
 		},
 
 		Timeouts: &schema.ResourceTimeout{
@@ -132,7 +132,7 @@ func resourceVirtualPrivateCloudV1Create(ctx context.Context, d *schema.Resource
 		MinTimeout: 3 * time.Second,
 	}
 
-	_, stateErr := stateConf.WaitForState()
+	_, stateErr := stateConf.WaitForStateContext(ctx)
 	if stateErr != nil {
 		return fmterr.Errorf(
 			"Error waiting for Vpc (%s) to become ACTIVE: %s",
@@ -247,7 +247,7 @@ func resourceVirtualPrivateCloudV1Delete(ctx context.Context, d *schema.Resource
 		MinTimeout: 3 * time.Second,
 	}
 
-	_, err = stateConf.WaitForState()
+	_, err = stateConf.WaitForStateContext(ctx)
 	if err != nil {
 		return fmterr.Errorf("Error deleting OpenTelekomCloud Vpc: %s", err)
 	}

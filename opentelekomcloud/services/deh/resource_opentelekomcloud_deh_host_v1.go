@@ -22,7 +22,7 @@ func ResourceDeHHostV1() *schema.Resource {
 		UpdateContext: resourceDeHHostV1Update,
 		DeleteContext: resourceDeHHostV1Delete,
 		Importer: &schema.ResourceImporter{
-			State: schema.ImportStatePassthrough,
+			StateContext: schema.ImportStatePassthroughContext,
 		},
 
 		Timeouts: &schema.ResourceTimeout{
@@ -159,7 +159,7 @@ func resourceDeHHostV1Create(ctx context.Context, d *schema.ResourceData, meta i
 		Delay:      5 * time.Second,
 		MinTimeout: 3 * time.Second,
 	}
-	_, Stateerr := stateConf.WaitForState()
+	_, Stateerr := stateConf.WaitForStateContext(ctx)
 	if Stateerr != nil {
 		return fmterr.Errorf("Error creating OpenTelekomCloud Dedicated Host : %s", Stateerr)
 	}
@@ -248,7 +248,7 @@ func resourceDeHHostV1Delete(ctx context.Context, d *schema.ResourceData, meta i
 		Delay:      5 * time.Second,
 		MinTimeout: 3 * time.Second,
 	}
-	_, err = stateConf.WaitForState()
+	_, err = stateConf.WaitForStateContext(ctx)
 	if err != nil {
 		return fmterr.Errorf("Error deleting OpenTelekomCloud Dedicated Host : %s", err)
 	}

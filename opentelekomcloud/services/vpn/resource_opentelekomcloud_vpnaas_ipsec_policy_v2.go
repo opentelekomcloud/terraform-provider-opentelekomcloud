@@ -25,7 +25,7 @@ func ResourceVpnIPSecPolicyV2() *schema.Resource {
 		UpdateContext: resourceVpnIPSecPolicyV2Update,
 		DeleteContext: resourceVpnIPSecPolicyV2Delete,
 		Importer: &schema.ResourceImporter{
-			State: schema.ImportStatePassthrough,
+			StateContext: schema.ImportStatePassthroughContext,
 		},
 
 		Timeouts: &schema.ResourceTimeout{
@@ -166,7 +166,7 @@ func resourceVpnIPSecPolicyV2Create(ctx context.Context, d *schema.ResourceData,
 		Timeout:    d.Timeout(schema.TimeoutCreate),
 		MinTimeout: 2 * time.Second,
 	}
-	_, err = stateConf.WaitForState()
+	_, err = stateConf.WaitForStateContext(ctx)
 
 	log.Printf("[DEBUG] IPSec policy created: %#v", policy)
 
@@ -293,7 +293,7 @@ func resourceVpnIPSecPolicyV2Update(ctx context.Context, d *schema.ResourceData,
 			Timeout:    d.Timeout(schema.TimeoutCreate),
 			MinTimeout: 2 * time.Second,
 		}
-		if _, err = stateConf.WaitForState(); err != nil {
+		if _, err = stateConf.WaitForStateContext(ctx); err != nil {
 			return diag.FromErr(err)
 		}
 	}

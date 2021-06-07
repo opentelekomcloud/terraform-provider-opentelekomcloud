@@ -22,7 +22,7 @@ func ResourceMRSJobV1() *schema.Resource {
 		ReadContext:   resourceMRSJobV1Read,
 		DeleteContext: resourceMRSJobV1Delete,
 		Importer: &schema.ResourceImporter{
-			State: schema.ImportStatePassthrough,
+			StateContext: schema.ImportStatePassthroughContext,
 		},
 
 		Timeouts: &schema.ResourceTimeout{
@@ -166,7 +166,7 @@ func resourceMRSJobV1Create(ctx context.Context, d *schema.ResourceData, meta in
 		MinTimeout: 3 * time.Second,
 	}
 
-	_, err = stateConf.WaitForState()
+	_, err = stateConf.WaitForStateContext(ctx)
 	if err != nil {
 		return fmterr.Errorf(
 			"Error waiting for job (%s) to become ready: %s ",

@@ -22,7 +22,7 @@ func ResourceIdentityUserV3() *schema.Resource {
 		DeleteContext: resourceIdentityUserV3Delete,
 
 		Importer: &schema.ResourceImporter{
-			State: schema.ImportStatePassthrough,
+			StateContext: schema.ImportStatePassthroughContext,
 		},
 
 		Schema: map[string]*schema.Schema{

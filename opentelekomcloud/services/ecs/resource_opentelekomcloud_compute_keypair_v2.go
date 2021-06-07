@@ -22,7 +22,7 @@ func ResourceComputeKeypairV2() *schema.Resource {
 		ReadContext:   resourceComputeKeypairV2Read,
 		DeleteContext: resourceComputeKeypairV2Delete,
 		Importer: &schema.ResourceImporter{
-			State: common.ImportAsManaged,
+			StateContext: common.ImportAsManaged,
 		},
 
 		CustomizeDiff: useSharedKeypair,

@@ -94,7 +94,7 @@ func resourceNetworkingVIPV2Create(ctx context.Context, d *schema.ResourceData, 
 		MinTimeout: 3 * time.Second,
 	}
 
-	_, err = stateConf.WaitForState()
+	_, err = stateConf.WaitForStateContext(ctx)
 
 	d.SetId(vip.ID)
 
@@ -149,7 +149,7 @@ func resourceNetworkingVIPV2Delete(ctx context.Context, d *schema.ResourceData, 
 		MinTimeout: 3 * time.Second,
 	}
 
-	_, err = stateConf.WaitForState()
+	_, err = stateConf.WaitForStateContext(ctx)
 	if err != nil {
 		return fmterr.Errorf("Error deleting OpenTelekomCloud Neutron Network: %s", err)
 	}

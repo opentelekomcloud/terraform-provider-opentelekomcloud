@@ -21,7 +21,7 @@ func ResourceRtsSoftwareDeploymentV1() *schema.Resource {
 		UpdateContext: resourceRtsSoftwareDeploymentV1Update,
 		DeleteContext: resourceRtsSoftwareDeploymentV1Delete,
 		Importer: &schema.ResourceImporter{
-			State: schema.ImportStatePassthrough,
+			StateContext: schema.ImportStatePassthroughContext,
 		},
 
 		Timeouts: &schema.ResourceTimeout{

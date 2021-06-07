@@ -26,7 +26,7 @@ func ResourceVpnIKEPolicyV2() *schema.Resource {
 		DeleteContext: resourceVpnIKEPolicyV2Delete,
 
 		Importer: &schema.ResourceImporter{
-			State: schema.ImportStatePassthrough,
+			StateContext: schema.ImportStatePassthroughContext,
 		},
 
 		Timeouts: &schema.ResourceTimeout{
@@ -169,7 +169,7 @@ func resourceVpnIKEPolicyV2Create(ctx context.Context, d *schema.ResourceData, m
 		Timeout:    d.Timeout(schema.TimeoutCreate),
 		MinTimeout: 2 * time.Second,
 	}
-	_, err = stateConf.WaitForState()
+	_, err = stateConf.WaitForStateContext(ctx)
 
 	log.Printf("[DEBUG] IKE policy created: %#v", policy)
 
@@ -291,7 +291,7 @@ func resourceVpnIKEPolicyV2Update(ctx context.Context, d *schema.ResourceData, m
 			Timeout:    d.Timeout(schema.TimeoutCreate),
 			MinTimeout: 2 * time.Second,
 		}
-		if _, err = stateConf.WaitForState(); err != nil {
+		if _, err = stateConf.WaitForStateContext(ctx); err != nil {
 			return diag.FromErr(err)
 		}
 	}
@@ -316,7 +316,7 @@ func resourceVpnIKEPolicyV2Delete(ctx context.Context, d *schema.ResourceData, m
 		MinTimeout: 2 * time.Second,
 	}
 
-	if _, err = stateConf.WaitForState(); err != nil {
+	if _, err = stateConf.WaitForStateContext(ctx); err != nil {
 		return diag.FromErr(err)
 	}
 

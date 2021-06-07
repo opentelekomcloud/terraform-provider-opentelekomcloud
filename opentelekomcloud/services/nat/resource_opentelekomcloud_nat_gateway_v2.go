@@ -106,7 +106,7 @@ func resourceNatGatewayV2Create(ctx context.Context, d *schema.ResourceData, met
 		MinTimeout: 3 * time.Second,
 	}
 
-	_, err = stateConf.WaitForState()
+	_, err = stateConf.WaitForStateContext(ctx)
 	if err != nil {
 		return fmterr.Errorf("Error creating OpenTelekomCloud Nat Gateway: %s", err)
 	}
@@ -185,7 +185,7 @@ func resourceNatGatewayV2Delete(ctx context.Context, d *schema.ResourceData, met
 		MinTimeout: 3 * time.Second,
 	}
 
-	_, err = stateConf.WaitForState()
+	_, err = stateConf.WaitForStateContext(ctx)
 	if err != nil {
 		return fmterr.Errorf("Error deleting OpenTelekomCloud Nat Gateway: %s", err)
 	}

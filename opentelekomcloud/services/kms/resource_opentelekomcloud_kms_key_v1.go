@@ -33,7 +33,7 @@ func ResourceKmsKeyV1() *schema.Resource {
 		DeleteContext: resourceKmsKeyV1Delete,
 
 		Importer: &schema.ResourceImporter{
-			State: schema.ImportStatePassthrough,
+			StateContext: schema.ImportStatePassthroughContext,
 		},
 
 		Schema: map[string]*schema.Schema{
@@ -122,7 +122,7 @@ func resourceKmsKeyV1Create(ctx context.Context, d *schema.ResourceData, meta in
 		MinTimeout: 3 * time.Second,
 	}
 
-	_, err = stateConf.WaitForState()
+	_, err = stateConf.WaitForStateContext(ctx)
 	if err != nil {
 		return fmterr.Errorf("error waiting for key (%s) to become ready: %s", key.KeyID, err)
 	}

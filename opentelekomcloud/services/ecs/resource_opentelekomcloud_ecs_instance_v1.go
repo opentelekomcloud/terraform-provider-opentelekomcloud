@@ -30,7 +30,7 @@ func ResourceEcsInstanceV1() *schema.Resource {
 		UpdateContext: resourceEcsInstanceV1Update,
 		DeleteContext: resourceEcsInstanceV1Delete,
 		Importer: &schema.ResourceImporter{
-			State: schema.ImportStatePassthrough,
+			StateContext: schema.ImportStatePassthroughContext,
 		},
 
 		Timeouts: &schema.ResourceTimeout{
@@ -235,7 +235,7 @@ func resourceEcsInstanceV1Create(ctx context.Context, d *schema.ResourceData, me
 		ar := d.Get("auto_recovery").(bool)
 		log.Printf("[DEBUG] Set auto recovery of instance to %t", ar)
 
-		if err := setAutoRecoveryForInstance(d, meta, d.Id(), ar); err != nil {
+		if err := setAutoRecoveryForInstance(ctx, d, meta, d.Id(), ar); err != nil {
 			log.Printf("[WARN] Error setting auto recovery of CloudServer: %s", err)
 		}
 	}
@@ -378,7 +378,7 @@ func resourceEcsInstanceV1Update(ctx context.Context, d *schema.ResourceData, me
 			MinTimeout: 3 * time.Second,
 		}
 
-		_, err = stateConf.WaitForState()
+		_, err = stateConf.WaitForStateContext(ctx)
 		if err != nil {
 			return fmterr.Errorf("error waiting for instance (%s) to resize: %s", d.Id(), err)
 		}
@@ -398,7 +398,7 @@ func resourceEcsInstanceV1Update(ctx context.Context, d *schema.ResourceData, me
 			MinTimeout: 3 * time.Second,
 		}
 
-		_, err = stateConf.WaitForState()
+		_, err = stateConf.WaitForStateContext(ctx)
 		if err != nil {
 			return fmterr.Errorf("error waiting for instance (%s) to confirm resize: %s", d.Id(), err)
 		}
@@ -418,7 +418,7 @@ func resourceEcsInstanceV1Update(ctx context.Context, d *schema.ResourceData, me
 	if d.HasChange("auto_recovery") {
 		ar := d.Get("auto_recovery").(bool)
 		log.Printf("[DEBUG] Update auto recovery of instance to %t", ar)
-		if err := setAutoRecoveryForInstance(d, meta, d.Id(), ar); err != nil {
+		if err := setAutoRecoveryForInstance(ctx, d, meta, d.Id(), ar); err != nil {
 			return fmterr.Errorf("error updating auto recovery of CloudServer:%s", err)
 		}
 	}

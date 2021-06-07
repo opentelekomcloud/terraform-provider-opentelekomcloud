@@ -22,7 +22,7 @@ func ResourceLTSTopicV2() *schema.Resource {
 		ReadContext:   resourceTopicV2Read,
 		DeleteContext: resourceTopicV2Delete,
 		Importer: &schema.ResourceImporter{
-			State: resourceTopicV2Import,
+			StateContext: resourceTopicV2Import,
 		},
 
 		Schema: map[string]*schema.Schema{
@@ -108,7 +108,7 @@ func resourceTopicV2Delete(ctx context.Context, d *schema.ResourceData, meta int
 	return nil
 }
 
-func resourceTopicV2Import(d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
+func resourceTopicV2Import(ctx context.Context, d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
 	parts := strings.SplitN(d.Id(), "/", 2)
 	if len(parts) != 2 {
 		err := fmt.Errorf("Invalid format specified for logtank topic. Format must be <group id>/<topic id>")

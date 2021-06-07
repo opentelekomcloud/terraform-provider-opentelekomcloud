@@ -22,7 +22,7 @@ func ResourceVpcPeeringConnectionAccepterV2() *schema.Resource {
 		UpdateContext: resourceVPCPeeringAccepterUpdate,
 		DeleteContext: resourceVPCPeeringAccepterDelete,
 		Importer: &schema.ResourceImporter{
-			State: schema.ImportStatePassthrough,
+			StateContext: schema.ImportStatePassthroughContext,
 		},
 		Timeouts: &schema.ResourceTimeout{
 			Create: schema.DefaultTimeout(10 * time.Minute),
@@ -118,7 +118,7 @@ func resourceVPCPeeringAccepterV2Create(ctx context.Context, d *schema.ResourceD
 		MinTimeout: 3 * time.Second,
 	}
 
-	_, err = stateConf.WaitForState()
+	_, err = stateConf.WaitForStateContext(ctx)
 	d.SetId(n.ID)
 	log.Printf("[INFO] VPC Peering Connection status: %s", expectedStatus)
 
