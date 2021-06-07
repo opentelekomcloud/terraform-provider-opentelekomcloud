@@ -1,6 +1,7 @@
 package ims
 
 import (
+	"context"
 	"crypto/md5"
 	"encoding/hex"
 	"fmt"
@@ -15,6 +16,7 @@ import (
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/imageservice/v2/imagedata"
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/imageservice/v2/images"
 
+	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 
@@ -24,10 +26,10 @@ import (
 
 func ResourceImagesImageV2() *schema.Resource {
 	return &schema.Resource{
-		Create: resourceImagesImageV2Create,
-		Read:   resourceImagesImageV2Read,
-		Update: resourceImagesImageV2Update,
-		Delete: resourceImagesImageV2Delete,
+		CreateContext: resourceImagesImageV2Create,
+		ReadContext:   resourceImagesImageV2Read,
+		UpdateContext: resourceImagesImageV2Update,
+		DeleteContext: resourceImagesImageV2Delete,
 		Importer: &schema.ResourceImporter{
 			State: schema.ImportStatePassthrough,
 		},
@@ -172,11 +174,11 @@ func ResourceImagesImageV2() *schema.Resource {
 	}
 }
 
-func resourceImagesImageV2Create(d *schema.ResourceData, meta interface{}) error {
+func resourceImagesImageV2Create(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*cfg.Config)
 	imageClient, err := config.ImageV2Client(config.GetRegion(d))
 	if err != nil {
-		return fmt.Errorf("Error creating OpenTelekomCloud image client: %s", err)
+		return diag.Errorf("Error creating OpenTelekomCloud image client: %s", err)
 	}
 
 	protected := d.Get("protected").(bool)
@@ -201,7 +203,7 @@ func resourceImagesImageV2Create(d *schema.ResourceData, meta interface{}) error
 	log.Printf("[DEBUG] Create Options: %#v", createOpts)
 	newImg, err := images.Create(imageClient, createOpts).Extract()
 	if err != nil {
-		return fmt.Errorf("Error creating Image: %s", err)
+		return diag.Errorf("Error creating Image: %s", err)
 	}
 
 	d.SetId(newImg.ID)
@@ -209,25 +211,25 @@ func resourceImagesImageV2Create(d *schema.ResourceData, meta interface{}) error
 	// downloading/getting image file props
 	imgFilePath, err := resourceImagesImageV2File(d)
 	if err != nil {
-		return fmt.Errorf("Error opening file for Image: %s", err)
+		return diag.Errorf("Error opening file for Image: %s", err)
 
 	}
 	fileSize, fileChecksum, err := resourceImagesImageV2FileProps(imgFilePath)
 	if err != nil {
-		return fmt.Errorf("Error getting file props: %s", err)
+		return diag.Errorf("Error getting file props: %s", err)
 	}
 
 	// upload
 	imgFile, err := os.Open(imgFilePath)
 	if err != nil {
-		return fmt.Errorf("Error opening file %q: %s", imgFilePath, err)
+		return diag.Errorf("Error opening file %q: %s", imgFilePath, err)
 	}
 	defer imgFile.Close()
 	log.Printf("[WARN] Uploading image %s (%d bytes). This can be pretty long.", d.Id(), fileSize)
 
 	res := imagedata.Upload(imageClient, d.Id(), imgFile)
 	if res.Err != nil {
-		return fmt.Errorf("Error while uploading file %q: %s", imgFilePath, res.Err)
+		return diag.Errorf("Error while uploading file %q: %s", imgFilePath, res.Err)
 	}
 
 	// wait for active
@@ -241,24 +243,24 @@ func resourceImagesImageV2Create(d *schema.ResourceData, meta interface{}) error
 	}
 
 	if _, err = stateConf.WaitForState(); err != nil {
-		return fmt.Errorf("Error waiting for Image: %s", err)
+		return diag.Errorf("Error waiting for Image: %s", err)
 	}
 
 	d.Partial(false)
 
-	return resourceImagesImageV2Read(d, meta)
+	return resourceImagesImageV2Read(ctx, d, meta)
 }
 
-func resourceImagesImageV2Read(d *schema.ResourceData, meta interface{}) error {
+func resourceImagesImageV2Read(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*cfg.Config)
 	imageClient, err := config.ImageV2Client(config.GetRegion(d))
 	if err != nil {
-		return fmt.Errorf("Error creating OpenTelekomCloud image client: %s", err)
+		return diag.Errorf("Error creating OpenTelekomCloud image client: %s", err)
 	}
 
 	img, err := images.Get(imageClient, d.Id()).Extract()
 	if err != nil {
-		return common.CheckDeleted(d, err, "image")
+		return diag.FromErr(common.CheckDeleted(d, err, "image"))
 	}
 
 	log.Printf("[DEBUG] Retrieved Image %s: %#v", d.Id(), img)
@@ -270,7 +272,7 @@ func resourceImagesImageV2Read(d *schema.ResourceData, meta interface{}) error {
 	d.Set("checksum", img.Checksum)
 	d.Set("size_bytes", img.SizeBytes)
 	if err := d.Set("metadata", img.Metadata); err != nil {
-		return fmt.Errorf("[DEBUG] Error saving metadata to state for OpenTelekomCloud image (%s): %s", d.Id(), err)
+		return diag.Errorf("[DEBUG] Error saving metadata to state for OpenTelekomCloud image (%s): %s", d.Id(), err)
 	}
 	d.Set("created_at", img.CreatedAt)
 	d.Set("update_at", img.UpdatedAt)
@@ -283,7 +285,7 @@ func resourceImagesImageV2Read(d *schema.ResourceData, meta interface{}) error {
 	d.Set("protected", img.Protected)
 	d.Set("size_bytes", img.SizeBytes)
 	if err := d.Set("tags", img.Tags); err != nil {
-		return fmt.Errorf("[DEBUG] Error saving tags to state for OpenTelekomCloud image (%s): %s", d.Id(), err)
+		return diag.Errorf("[DEBUG] Error saving tags to state for OpenTelekomCloud image (%s): %s", d.Id(), err)
 	}
 	d.Set("visibility", img.Visibility)
 	d.Set("region", config.GetRegion(d))
@@ -291,11 +293,11 @@ func resourceImagesImageV2Read(d *schema.ResourceData, meta interface{}) error {
 	return nil
 }
 
-func resourceImagesImageV2Update(d *schema.ResourceData, meta interface{}) error {
+func resourceImagesImageV2Update(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*cfg.Config)
 	imageClient, err := config.ImageV2Client(config.GetRegion(d))
 	if err != nil {
-		return fmt.Errorf("Error creating OpenTelekomCloud image client: %s", err)
+		return diag.Errorf("Error creating OpenTelekomCloud image client: %s", err)
 	}
 
 	updateOpts := make(images.UpdateOpts, 0)
@@ -323,22 +325,22 @@ func resourceImagesImageV2Update(d *schema.ResourceData, meta interface{}) error
 
 	_, err = images.Update(imageClient, d.Id(), updateOpts).Extract()
 	if err != nil {
-		return fmt.Errorf("Error updating image: %s", err)
+		return diag.Errorf("Error updating image: %s", err)
 	}
 
-	return resourceImagesImageV2Read(d, meta)
+	return resourceImagesImageV2Read(ctx, d, meta)
 }
 
-func resourceImagesImageV2Delete(d *schema.ResourceData, meta interface{}) error {
+func resourceImagesImageV2Delete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*cfg.Config)
 	imageClient, err := config.ImageV2Client(config.GetRegion(d))
 	if err != nil {
-		return fmt.Errorf("Error creating OpenTelekomCloud image client: %s", err)
+		return diag.Errorf("Error creating OpenTelekomCloud image client: %s", err)
 	}
 
 	log.Printf("[DEBUG] Deleting Image %s", d.Id())
 	if err := images.Delete(imageClient, d.Id()).Err; err != nil {
-		return fmt.Errorf("Error deleting Image: %s", err)
+		return diag.Errorf("Error deleting Image: %s", err)
 	}
 
 	d.SetId("")
