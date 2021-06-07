@@ -1,11 +1,12 @@
 package rds
 
 import (
-	"fmt"
+	"context"
 	"log"
 	"strings"
 	"time"
 
+	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
@@ -19,10 +20,10 @@ import (
 
 func ResourceRdsInstance() *schema.Resource {
 	return &schema.Resource{
-		Create: resourceInstanceCreate,
-		Read:   resourceInstanceRead,
-		Delete: resourceInstanceDelete,
-		Update: resourceInstanceUpdate,
+		CreateContext: resourceInstanceCreate,
+		ReadContext:   resourceInstanceRead,
+		UpdateContext: resourceInstanceUpdate,
+		DeleteContext: resourceInstanceDelete,
 		Importer: &schema.ResourceImporter{
 			State: schema.ImportStatePassthrough,
 		},
@@ -310,11 +311,11 @@ func InstanceStateRefreshFunc(client *golangsdk.ServiceClient, instanceID string
 	}
 }
 
-func resourceInstanceCreate(d *schema.ResourceData, meta interface{}) error {
+func resourceInstanceCreate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*cfg.Config)
 	client, err := config.RdsV1Client(config.GetRegion(d))
 	if err != nil {
-		return fmt.Errorf("Error creating OpenTelekomCloud rds client: %s ", err)
+		return diag.Errorf("Error creating OpenTelekomCloud rds client: %s ", err)
 	}
 
 	createOpts := instances.CreateOps{
@@ -336,7 +337,7 @@ func resourceInstanceCreate(d *schema.ResourceData, meta interface{}) error {
 
 	instance, err := instances.Create(client, createOpts).Extract()
 	if err != nil {
-		return fmt.Errorf("Error getting instance from result: %s ", err)
+		return diag.Errorf("Error getting instance from result: %s ", err)
 	}
 	log.Printf("[DEBUG] Create : instance %s: %#v", instance.ID, instance)
 
@@ -352,7 +353,7 @@ func resourceInstanceCreate(d *schema.ResourceData, meta interface{}) error {
 
 	_, err = stateConf.WaitForState()
 	if err != nil {
-		return fmt.Errorf(
+		return diag.Errorf(
 			"Error waiting for instance (%s) to become ready: %s ",
 			instance.ID, err)
 	}
@@ -360,7 +361,7 @@ func resourceInstanceCreate(d *schema.ResourceData, meta interface{}) error {
 	if common.HasFilledOpt(d, "tag") {
 		tagClient, err := config.RdsTagV1Client(config.GetRegion(d))
 		if err != nil {
-			return fmt.Errorf("Error creating OpenTelekomCloud rds tag client: %s ", err)
+			return diag.Errorf("Error creating OpenTelekomCloud rds tag client: %s ", err)
 		}
 		tagmap := d.Get("tag").(map[string]interface{})
 		log.Printf("[DEBUG] Setting tag(key/value): %v", tagmap)
@@ -377,22 +378,22 @@ func resourceInstanceCreate(d *schema.ResourceData, meta interface{}) error {
 	}
 
 	if instance.ID != "" {
-		return resourceInstanceRead(d, meta)
+		return resourceInstanceRead(ctx, d, meta)
 	}
-	return fmt.Errorf("Unexpected conversion error in resourceInstanceCreate. ")
+	return diag.Errorf("Unexpected conversion error in resourceInstanceCreate. ")
 }
 
-func resourceInstanceRead(d *schema.ResourceData, meta interface{}) error {
+func resourceInstanceRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*cfg.Config)
 	client, err := config.RdsV1Client(config.GetRegion(d))
 	if err != nil {
-		return fmt.Errorf("Error creating OpenTelekomCloud rds client: %s", err)
+		return diag.Errorf("Error creating OpenTelekomCloud rds client: %s", err)
 	}
 
 	instanceID := d.Id()
 	instance, err := instances.Get(client, instanceID).Extract()
 	if err != nil {
-		return common.CheckDeleted(d, err, "instance")
+		return diag.FromErr(common.CheckDeleted(d, err, "instance"))
 	}
 
 	log.Printf("[DEBUG] Retrieved instance %s: %#v", instanceID, instance)
@@ -419,7 +420,7 @@ func resourceInstanceRead(d *schema.ResourceData, meta interface{}) error {
 	nicsList = append(nicsList, nics)
 	log.Printf("[DEBUG] nicsList: %+v", nicsList)
 	if err := d.Set("nics", nicsList); err != nil {
-		return fmt.Errorf("[DEBUG] Error saving nics to Rds instance (%s): %s", d.Id(), err)
+		return diag.Errorf("[DEBUG] Error saving nics to Rds instance (%s): %s", d.Id(), err)
 	}
 
 	securitygroupList := make([]map[string]interface{}, 0, 1)
@@ -429,7 +430,7 @@ func resourceInstanceRead(d *schema.ResourceData, meta interface{}) error {
 	securitygroupList = append(securitygroupList, securitygroup)
 	log.Printf("[DEBUG] securitygroupList: %+v", securitygroupList)
 	if err := d.Set("securitygroup", securitygroupList); err != nil {
-		return fmt.Errorf("[DEBUG] Error saving securitygroup to Rds instance (%s): %s", d.Id(), err)
+		return diag.Errorf("[DEBUG] Error saving securitygroup to Rds instance (%s): %s", d.Id(), err)
 	}
 
 	d.Set("flavorref", instance.Flavor.Id)
@@ -441,7 +442,7 @@ func resourceInstanceRead(d *schema.ResourceData, meta interface{}) error {
 	}
 	volumeList = append(volumeList, volume)
 	if err := d.Set("volume", volumeList); err != nil {
-		return fmt.Errorf(
+		return diag.Errorf(
 			"[DEBUG] Error saving volume to Rds instance (%s): %s", d.Id(), err)
 	}
 
@@ -454,7 +455,7 @@ func resourceInstanceRead(d *schema.ResourceData, meta interface{}) error {
 	}
 	datastoreList = append(datastoreList, datastore)
 	if err := d.Set("datastore", datastoreList); err != nil {
-		return fmt.Errorf(
+		return diag.Errorf(
 			"[DEBUG] Error saving datastore to Rds instance (%s): %s", d.Id(), err)
 	}
 
@@ -465,11 +466,11 @@ func resourceInstanceRead(d *schema.ResourceData, meta interface{}) error {
 	if _, ok := d.GetOk("tag"); ok {
 		tagClient, err := config.RdsTagV1Client(config.GetRegion(d))
 		if err != nil {
-			return fmt.Errorf("Error creating OpenTelekomCloud rds tag client: %#v", err)
+			return diag.Errorf("Error creating OpenTelekomCloud rds tag client: %#v", err)
 		}
 		taglist, err := tags.Get(tagClient, d.Id()).Extract()
 		if err != nil {
-			return fmt.Errorf("Error fetching OpenTelekomCloud rds instance tags: %s", err)
+			return diag.Errorf("Error fetching OpenTelekomCloud rds instance tags: %s", err)
 		}
 
 		tagmap := make(map[string]string)
@@ -477,17 +478,17 @@ func resourceInstanceRead(d *schema.ResourceData, meta interface{}) error {
 			tagmap[val.Key] = val.Value
 		}
 		if err := d.Set("tag", tagmap); err != nil {
-			return fmt.Errorf("[DEBUG] Error saving tag to state for OpenTelekomCloud rds instance (%s): %s", d.Id(), err)
+			return diag.Errorf("[DEBUG] Error saving tag to state for OpenTelekomCloud rds instance (%s): %s", d.Id(), err)
 		}
 	}
 	return nil
 }
 
-func resourceInstanceDelete(d *schema.ResourceData, meta interface{}) error {
+func resourceInstanceDelete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*cfg.Config)
 	client, err := config.RdsV1Client(config.GetRegion(d))
 	if err != nil {
-		return fmt.Errorf("Error creating OpenTelekomCloud rds client: %s ", err)
+		return diag.Errorf("Error creating OpenTelekomCloud rds client: %s ", err)
 	}
 
 	log.Printf("[DEBUG] Deleting Instance %s", d.Id())
@@ -495,7 +496,7 @@ func resourceInstanceDelete(d *schema.ResourceData, meta interface{}) error {
 	id := d.Id()
 	result := instances.Delete(client, id)
 	if result.Err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 	stateConf := &resource.StateChangeConf{
 		Pending:    []string{"ACTIVE"},
@@ -508,7 +509,7 @@ func resourceInstanceDelete(d *schema.ResourceData, meta interface{}) error {
 
 	_, err = stateConf.WaitForState()
 	if err != nil {
-		return fmt.Errorf(
+		return diag.Errorf(
 			"Error waiting for instance (%s) to be deleted: %s ",
 			id, err)
 	}
@@ -549,11 +550,11 @@ func instanceStateFlavorUpdateRefreshFunc(client *golangsdk.ServiceClient, insta
 	}
 }
 
-func resourceInstanceUpdate(d *schema.ResourceData, meta interface{}) error {
+func resourceInstanceUpdate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*cfg.Config)
 	client, err := config.RdsV1Client(config.GetRegion(d))
 	if err != nil {
-		return fmt.Errorf("Error Updating OpenTelekomCloud rds client: %s ", err)
+		return diag.Errorf("Error Updating OpenTelekomCloud rds client: %s ", err)
 	}
 
 	log.Printf("[DEBUG] Updating instances %s", d.Id())
@@ -573,7 +574,7 @@ func resourceInstanceUpdate(d *schema.ResourceData, meta interface{}) error {
 		updateOpts.Volume = volume
 		_, err = instances.UpdateVolumeSize(client, updateOpts, id).Extract()
 		if err != nil {
-			return fmt.Errorf("Error updating instance volume from result: %s ", err)
+			return diag.Errorf("Error updating instance volume from result: %s ", err)
 		}
 
 		stateConf := &resource.StateChangeConf{
@@ -587,7 +588,7 @@ func resourceInstanceUpdate(d *schema.ResourceData, meta interface{}) error {
 
 		_, err = stateConf.WaitForState()
 		if err != nil {
-			return fmt.Errorf(
+			return diag.Errorf(
 				"Error waiting for instance (%s) volume to be Updated: %s ",
 				id, err)
 		}
@@ -602,7 +603,7 @@ func resourceInstanceUpdate(d *schema.ResourceData, meta interface{}) error {
 		updateFlavorOpts.FlavorRef = d.Get("flavorref").(string)
 		_, err = instances.UpdateFlavorRef(client, updateFlavorOpts, id).Extract()
 		if err != nil {
-			return fmt.Errorf("Error updating instance Flavor from result: %s ", err)
+			return diag.Errorf("Error updating instance Flavor from result: %s ", err)
 		}
 
 		stateConf := &resource.StateChangeConf{
@@ -616,7 +617,7 @@ func resourceInstanceUpdate(d *schema.ResourceData, meta interface{}) error {
 
 		_, err = stateConf.WaitForState()
 		if err != nil {
-			return fmt.Errorf(
+			return diag.Errorf(
 				"Error waiting for instance (%s) flavor to be Updated: %s ",
 				id, err)
 		}
@@ -637,7 +638,7 @@ func resourceInstanceUpdate(d *schema.ResourceData, meta interface{}) error {
 		log.Printf("[DEBUG] updatepolicyOpts: %+v", updatepolicyOpts)
 		_, err = instances.UpdatePolicy(client, updatepolicyOpts, id).Extract()
 		if err != nil {
-			return fmt.Errorf("Error updating instance policy from result: %s ", err)
+			return diag.Errorf("Error updating instance policy from result: %s ", err)
 		}
 
 		log.Printf("[DEBUG] Successfully updated instance %s policy: %+v", id, updatepolicyOpts)
@@ -650,7 +651,7 @@ func resourceInstanceUpdate(d *schema.ResourceData, meta interface{}) error {
 		create, remove := diffTagsRDS(o, n)
 		tagClient, err := config.RdsTagV1Client(config.GetRegion(d))
 		if err != nil {
-			return fmt.Errorf("Error creating OpenTelekomCloud rds tag client: %s ", err)
+			return diag.Errorf("Error creating OpenTelekomCloud rds tag client: %s ", err)
 		}
 
 		if len(remove) > 0 {
@@ -673,7 +674,7 @@ func resourceInstanceUpdate(d *schema.ResourceData, meta interface{}) error {
 
 	log.Printf("[DEBUG] Successfully updated instance %s", id)
 	d.SetId(id)
-	return resourceInstanceRead(d, meta)
+	return resourceInstanceRead(ctx, d, meta)
 }
 
 func diffTagsRDS(oldTags, newTags map[string]interface{}) ([]tags.CreateOptsBuilder, []tags.DeleteOptsBuilder) {

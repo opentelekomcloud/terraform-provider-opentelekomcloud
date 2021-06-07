@@ -1,9 +1,10 @@
 package dds
 
 import (
-	"fmt"
+	"context"
 
 	"github.com/hashicorp/go-multierror"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/dds/v3/flavors"
@@ -13,7 +14,7 @@ import (
 
 func DataSourceDdsFlavorV3() *schema.Resource {
 	return &schema.Resource{
-		Read: dataSourceDdsFlavorV3Read,
+		ReadContext: dataSourceDdsFlavorV3Read,
 
 		Schema: map[string]*schema.Schema{
 			"region": {
@@ -72,11 +73,11 @@ func DataSourceDdsFlavorV3() *schema.Resource {
 	}
 }
 
-func dataSourceDdsFlavorV3Read(d *schema.ResourceData, meta interface{}) error {
+func dataSourceDdsFlavorV3Read(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*cfg.Config)
 	ddsClient, err := config.DdsV3Client(config.GetRegion(d))
 	if err != nil {
-		return fmt.Errorf("error creating OpenTelekomCloud DDS client: %s", err)
+		return diag.Errorf("error creating OpenTelekomCloud DDS client: %s", err)
 	}
 
 	listOpts := flavors.ListOpts{
@@ -86,12 +87,12 @@ func dataSourceDdsFlavorV3Read(d *schema.ResourceData, meta interface{}) error {
 
 	pages, err := flavors.List(ddsClient, listOpts).AllPages()
 	if err != nil {
-		return fmt.Errorf("unable to all flavor pages: %s", err)
+		return diag.Errorf("unable to all flavor pages: %s", err)
 	}
 
 	extractedFlavors, err := flavors.ExtractFlavors(pages)
 	if err != nil {
-		return fmt.Errorf("unable to extract flavors: %s", err)
+		return diag.Errorf("unable to extract flavors: %s", err)
 	}
 
 	matchFlavorList := make([]map[string]interface{}, 0)
@@ -115,7 +116,7 @@ func dataSourceDdsFlavorV3Read(d *schema.ResourceData, meta interface{}) error {
 	}
 
 	if len(matchFlavorList) < 1 {
-		return fmt.Errorf("your query returned no results. Please change your search criteria and try again")
+		return diag.Errorf("your query returned no results. Please change your search criteria and try again")
 	}
 
 	d.SetId("flavors")
@@ -123,7 +124,7 @@ func dataSourceDdsFlavorV3Read(d *schema.ResourceData, meta interface{}) error {
 		d.Set("flavors", matchFlavorList),
 		d.Set("region", config.GetRegion(d)),
 	)
-	return mErr.ErrorOrNil()
+	return diag.FromErr(mErr.ErrorOrNil())
 }
 
 func matchesFilters(item flavors.Flavor, flavorType, flavorVcpus, flavorMemory string) bool {

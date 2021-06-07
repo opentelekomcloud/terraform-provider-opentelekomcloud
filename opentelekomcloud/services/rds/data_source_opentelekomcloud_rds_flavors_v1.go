@@ -1,9 +1,10 @@
 package rds
 
 import (
-	"fmt"
+	"context"
 	"log"
 
+	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/rds/v1/datastores"
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/rds/v1/flavors"
@@ -13,7 +14,7 @@ import (
 
 func DataSourceRdsFlavorV1() *schema.Resource {
 	return &schema.Resource{
-		Read: dataSourcedataSourceRdsFlavorV1Read,
+		ReadContext: dataSourcedataSourceRdsFlavorV1Read,
 
 		Schema: map[string]*schema.Schema{
 			"region": {
@@ -47,21 +48,21 @@ func DataSourceRdsFlavorV1() *schema.Resource {
 	}
 }
 
-func dataSourcedataSourceRdsFlavorV1Read(d *schema.ResourceData, meta interface{}) error {
+func dataSourcedataSourceRdsFlavorV1Read(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*cfg.Config)
 
 	rdsClient, err := config.RdsV1Client(config.GetRegion(d))
 	if err != nil {
-		return fmt.Errorf("Error creating OpenTelekomCloud rds client: %s", err)
+		return diag.Errorf("Error creating OpenTelekomCloud rds client: %s", err)
 	}
 
 	datastoresList, err := datastores.List(rdsClient, d.Get("datastore_name").(string)).Extract()
 	if err != nil {
-		return fmt.Errorf("Unable to retrieve datastores: %s ", err)
+		return diag.Errorf("Unable to retrieve datastores: %s ", err)
 	}
 
 	if len(datastoresList) < 1 {
-		return fmt.Errorf("Returned no datastore result. ")
+		return diag.Errorf("Returned no datastore result. ")
 	}
 	var datastoreId string
 	for _, datastore := range datastoresList {
@@ -71,16 +72,16 @@ func dataSourcedataSourceRdsFlavorV1Read(d *schema.ResourceData, meta interface{
 		}
 	}
 	if datastoreId == "" {
-		return fmt.Errorf("Returned no datastore ID. ")
+		return diag.Errorf("Returned no datastore ID. ")
 	}
 	log.Printf("[DEBUG] Received datastore Id: %s", datastoreId)
 
 	flavorsList, err := flavors.List(rdsClient, datastoreId, d.Get("region").(string)).Extract()
 	if err != nil {
-		return fmt.Errorf("Unable to retrieve flavors: %s", err)
+		return diag.Errorf("Unable to retrieve flavors: %s", err)
 	}
 	if len(flavorsList) < 1 {
-		return fmt.Errorf("Returned no flavor result. ")
+		return diag.Errorf("Returned no flavor result. ")
 	}
 
 	var rdsFlavor flavors.Flavor
@@ -96,7 +97,7 @@ func dataSourcedataSourceRdsFlavorV1Read(d *schema.ResourceData, meta interface{
 	}
 	log.Printf("[DEBUG] Retrieved flavorId %s: %+v ", rdsFlavor.ID, rdsFlavor)
 	if rdsFlavor.ID == "" {
-		return fmt.Errorf("Returned no flavor Id. ")
+		return diag.Errorf("Returned no flavor Id. ")
 	}
 
 	d.SetId(rdsFlavor.ID)

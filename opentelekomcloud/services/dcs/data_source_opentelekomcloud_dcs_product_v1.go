@@ -1,9 +1,10 @@
 package dcs
 
 import (
-	"fmt"
+	"context"
 	"log"
 
+	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/dcs/v1/products"
 
@@ -12,7 +13,7 @@ import (
 
 func DataSourceDcsProductV1() *schema.Resource {
 	return &schema.Resource{
-		Read: dataSourceDcsProductV1Read,
+		ReadContext: dataSourceDcsProductV1Read,
 
 		Schema: map[string]*schema.Schema{
 			"spec_code": {
@@ -24,16 +25,16 @@ func DataSourceDcsProductV1() *schema.Resource {
 	}
 }
 
-func dataSourceDcsProductV1Read(d *schema.ResourceData, meta interface{}) error {
+func dataSourceDcsProductV1Read(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*cfg.Config)
 	DcsV1Client, err := config.DcsV1Client(config.GetRegion(d))
 	if err != nil {
-		return fmt.Errorf("Error get dcs product client: %s", err)
+		return diag.Errorf("Error get dcs product client: %s", err)
 	}
 
 	v, err := products.Get(DcsV1Client).Extract()
 	if err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 	log.Printf("[DEBUG] Dcs get products : %+v", v)
 	var FilteredPd []products.Product
@@ -46,7 +47,7 @@ func dataSourceDcsProductV1Read(d *schema.ResourceData, meta interface{}) error 
 	}
 
 	if len(FilteredPd) < 1 {
-		return fmt.Errorf("Your query returned no results. Please change your filters and try again.")
+		return diag.Errorf("Your query returned no results. Please change your filters and try again.")
 	}
 
 	pd := FilteredPd[0]

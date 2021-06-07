@@ -1,10 +1,11 @@
 package dcs
 
 import (
-	"fmt"
+	"context"
 	"log"
 	"strconv"
 
+	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/dcs/v1/maintainwindows"
 
@@ -13,7 +14,7 @@ import (
 
 func DataSourceDcsMaintainWindowV1() *schema.Resource {
 	return &schema.Resource{
-		Read: dataSourceDcsMaintainWindowV1Read,
+		ReadContext: dataSourceDcsMaintainWindowV1Read,
 
 		Schema: map[string]*schema.Schema{
 			"seq": {
@@ -40,16 +41,16 @@ func DataSourceDcsMaintainWindowV1() *schema.Resource {
 	}
 }
 
-func dataSourceDcsMaintainWindowV1Read(d *schema.ResourceData, meta interface{}) error {
+func dataSourceDcsMaintainWindowV1Read(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*cfg.Config)
 	DcsV1Client, err := config.DcsV1Client(config.GetRegion(d))
 	if err != nil {
-		return fmt.Errorf("Error creating dcs key client: %s", err)
+		return diag.Errorf("Error creating dcs key client: %s", err)
 	}
 
 	v, err := maintainwindows.Get(DcsV1Client).Extract()
 	if err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 
 	maintainWindows := v.MaintainWindows
@@ -76,7 +77,7 @@ func dataSourceDcsMaintainWindowV1Read(d *schema.ResourceData, meta interface{})
 		filteredMVs = append(filteredMVs, mv)
 	}
 	if len(filteredMVs) < 1 {
-		return fmt.Errorf("Your query returned no results. Please change your filters and try again.")
+		return diag.Errorf("Your query returned no results. Please change your filters and try again.")
 	}
 	mw := filteredMVs[0]
 	d.SetId(strconv.Itoa(mw.ID))
