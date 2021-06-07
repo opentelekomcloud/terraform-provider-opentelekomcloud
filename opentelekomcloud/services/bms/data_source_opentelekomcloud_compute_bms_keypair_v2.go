@@ -1,9 +1,10 @@
 package bms
 
 import (
-	"fmt"
+	"context"
 	"log"
 
+	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/bms/v2/keypairs"
 
@@ -12,7 +13,7 @@ import (
 
 func DataSourceBMSKeyPairV2() *schema.Resource {
 	return &schema.Resource{
-		Read: dataSourceBMSKeyPairV2Read,
+		ReadContext: dataSourceBMSKeyPairV2Read,
 
 		Schema: map[string]*schema.Schema{
 			"region": {
@@ -39,11 +40,11 @@ func DataSourceBMSKeyPairV2() *schema.Resource {
 	}
 }
 
-func dataSourceBMSKeyPairV2Read(d *schema.ResourceData, meta interface{}) error {
+func dataSourceBMSKeyPairV2Read(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*cfg.Config)
 	bmsClient, err := config.ComputeV2Client(config.GetRegion(d))
 	if err != nil {
-		return fmt.Errorf("Error creating OpenTelekom bms client: %s", err)
+		return diag.Errorf("Error creating OpenTelekom bms client: %s", err)
 	}
 
 	listOpts := keypairs.ListOpts{
@@ -52,16 +53,16 @@ func dataSourceBMSKeyPairV2Read(d *schema.ResourceData, meta interface{}) error 
 
 	refinedKeypairs, err := keypairs.List(bmsClient, listOpts)
 	if err != nil {
-		return fmt.Errorf("Unable to retrieve keypairs: %s", err)
+		return diag.Errorf("Unable to retrieve keypairs: %s", err)
 	}
 
 	if len(refinedKeypairs) < 1 {
-		return fmt.Errorf("Your query returned no results. " +
+		return diag.Errorf("Your query returned no results. " +
 			"Please change your search criteria and try again.")
 	}
 
 	if len(refinedKeypairs) > 1 {
-		return fmt.Errorf("Your query returned more than one result." +
+		return diag.Errorf("Your query returned more than one result." +
 			" Please try a more specific search criteria")
 	}
 

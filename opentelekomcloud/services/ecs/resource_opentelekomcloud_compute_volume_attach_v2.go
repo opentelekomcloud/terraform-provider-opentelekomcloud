@@ -1,6 +1,7 @@
 package ecs
 
 import (
+	"context"
 	"fmt"
 	"log"
 	"strings"
@@ -9,6 +10,7 @@ import (
 	"github.com/opentelekomcloud/gophertelekomcloud"
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/compute/v2/extensions/volumeattach"
 
+	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 
@@ -18,9 +20,9 @@ import (
 
 func ResourceComputeVolumeAttachV2() *schema.Resource {
 	return &schema.Resource{
-		Create: resourceComputeVolumeAttachV2Create,
-		Read:   resourceComputeVolumeAttachV2Read,
-		Delete: resourceComputeVolumeAttachV2Delete,
+		CreateContext: resourceComputeVolumeAttachV2Create,
+		ReadContext:   resourceComputeVolumeAttachV2Read,
+		DeleteContext: resourceComputeVolumeAttachV2Delete,
 		Importer: &schema.ResourceImporter{
 			State: schema.ImportStatePassthrough,
 		},
@@ -60,11 +62,11 @@ func ResourceComputeVolumeAttachV2() *schema.Resource {
 	}
 }
 
-func resourceComputeVolumeAttachV2Create(d *schema.ResourceData, meta interface{}) error {
+func resourceComputeVolumeAttachV2Create(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*cfg.Config)
 	computeClient, err := config.ComputeV2Client(config.GetRegion(d))
 	if err != nil {
-		return fmt.Errorf("Error creating OpenTelekomCloud compute client: %s", err)
+		return diag.Errorf("Error creating OpenTelekomCloud compute client: %s", err)
 	}
 
 	instanceId := d.Get("instance_id").(string)
@@ -84,7 +86,7 @@ func resourceComputeVolumeAttachV2Create(d *schema.ResourceData, meta interface{
 
 	attachment, err := volumeattach.Create(computeClient, instanceId, attachOpts).Extract()
 	if err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 
 	stateConf := &resource.StateChangeConf{
@@ -97,7 +99,7 @@ func resourceComputeVolumeAttachV2Create(d *schema.ResourceData, meta interface{
 	}
 
 	if _, err = stateConf.WaitForState(); err != nil {
-		return fmt.Errorf("Error attaching OpenTelekomCloud volume: %s", err)
+		return diag.Errorf("Error attaching OpenTelekomCloud volume: %s", err)
 	}
 
 	log.Printf("[DEBUG] Created volume attachment: %#v", attachment)
@@ -108,24 +110,24 @@ func resourceComputeVolumeAttachV2Create(d *schema.ResourceData, meta interface{
 
 	d.SetId(id)
 
-	return resourceComputeVolumeAttachV2Read(d, meta)
+	return resourceComputeVolumeAttachV2Read(ctx, d, meta)
 }
 
-func resourceComputeVolumeAttachV2Read(d *schema.ResourceData, meta interface{}) error {
+func resourceComputeVolumeAttachV2Read(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*cfg.Config)
 	computeClient, err := config.ComputeV2Client(config.GetRegion(d))
 	if err != nil {
-		return fmt.Errorf("Error creating OpenTelekomCloud compute client: %s", err)
+		return diag.Errorf("Error creating OpenTelekomCloud compute client: %s", err)
 	}
 
 	instanceId, attachmentId, err := ParseComputeVolumeAttachmentId(d.Id())
 	if err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 
 	attachment, err := volumeattach.Get(computeClient, instanceId, attachmentId).Extract()
 	if err != nil {
-		return common.CheckDeleted(d, err, "compute_volume_attach")
+		return diag.FromErr(common.CheckDeleted(d, err, "compute_volume_attach"))
 	}
 
 	log.Printf("[DEBUG] Retrieved volume attachment: %#v", attachment)
@@ -138,16 +140,16 @@ func resourceComputeVolumeAttachV2Read(d *schema.ResourceData, meta interface{})
 	return nil
 }
 
-func resourceComputeVolumeAttachV2Delete(d *schema.ResourceData, meta interface{}) error {
+func resourceComputeVolumeAttachV2Delete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*cfg.Config)
 	computeClient, err := config.ComputeV2Client(config.GetRegion(d))
 	if err != nil {
-		return fmt.Errorf("Error creating OpenTelekomCloud compute client: %s", err)
+		return diag.Errorf("Error creating OpenTelekomCloud compute client: %s", err)
 	}
 
 	instanceId, attachmentId, err := ParseComputeVolumeAttachmentId(d.Id())
 	if err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 
 	stateConf := &resource.StateChangeConf{
@@ -160,7 +162,7 @@ func resourceComputeVolumeAttachV2Delete(d *schema.ResourceData, meta interface{
 	}
 
 	if _, err = stateConf.WaitForState(); err != nil {
-		return fmt.Errorf("Error detaching OpenTelekomCloud volume: %s", err)
+		return diag.Errorf("Error detaching OpenTelekomCloud volume: %s", err)
 	}
 
 	return nil

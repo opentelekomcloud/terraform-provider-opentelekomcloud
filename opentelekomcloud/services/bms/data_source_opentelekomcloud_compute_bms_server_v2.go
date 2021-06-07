@@ -1,9 +1,10 @@
 package bms
 
 import (
-	"fmt"
+	"context"
 	"log"
 
+	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/bms/v2/servers"
 
@@ -12,7 +13,7 @@ import (
 
 func DataSourceBMSServersV2() *schema.Resource {
 	return &schema.Resource{
-		Read: dataSourceBMSServersV2Read,
+		ReadContext: dataSourceBMSServersV2Read,
 
 		Schema: map[string]*schema.Schema{
 			"region": {
@@ -155,7 +156,7 @@ func DataSourceBMSServersV2() *schema.Resource {
 	}
 }
 
-func dataSourceBMSServersV2Read(d *schema.ResourceData, meta interface{}) error {
+func dataSourceBMSServersV2Read(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*cfg.Config)
 	bmsClient, err := config.ComputeV2Client(config.GetRegion(d))
 
@@ -172,15 +173,15 @@ func dataSourceBMSServersV2Read(d *schema.ResourceData, meta interface{}) error 
 	pages, err := servers.List(bmsClient, listServerOpts)
 
 	if err != nil {
-		return fmt.Errorf("Unable to retrieve bms server: %s", err)
+		return diag.Errorf("Unable to retrieve bms server: %s", err)
 	}
 
 	if len(pages) < 1 {
-		return fmt.Errorf("Your query returned no results. " +
+		return diag.Errorf("Your query returned no results. " +
 			"Please change your search criteria and try again.")
 	}
 	if len(pages) > 1 {
-		return fmt.Errorf("Your query returned more than one result." +
+		return diag.Errorf("Your query returned more than one result." +
 			" Please try a more specific search criteria")
 	}
 	server := pages[0]
@@ -223,10 +224,10 @@ func dataSourceBMSServersV2Read(d *schema.ResourceData, meta interface{}) error 
 	d.Set("region", config.GetRegion(d))
 	networks, err := flattenServerNetwork(d, meta)
 	if err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 	if err := d.Set("network", networks); err != nil {
-		return fmt.Errorf("[DEBUG] Error saving network to state for OpenTelekomCloud server (%s): %s", d.Id(), err)
+		return diag.Errorf("[DEBUG] Error saving network to state for OpenTelekomCloud server (%s): %s", d.Id(), err)
 	}
 
 	return nil
