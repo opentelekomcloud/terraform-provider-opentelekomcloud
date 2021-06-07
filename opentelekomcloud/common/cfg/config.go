@@ -21,7 +21,7 @@ import (
 	"github.com/aws/aws-sdk-go/service/s3"
 	"github.com/hashicorp/go-cleanhttp"
 	"github.com/jinzhu/copier"
-	"github.com/opentelekomcloud/gophertelekomcloud"
+	golangsdk "github.com/opentelekomcloud/gophertelekomcloud"
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack"
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/identity/v3/credentials"
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/obs"
@@ -203,6 +203,7 @@ func (c *Config) generateTLSConfig() (*tls.Config, error) {
 		}
 
 		config.Certificates = []tls.Certificate{cert}
+
 		config.BuildNameToCertificate()
 	}
 
