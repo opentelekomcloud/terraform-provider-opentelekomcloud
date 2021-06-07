@@ -9,24 +9,23 @@ import (
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/acctest"
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/pathorcontents"
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 	"github.com/opentelekomcloud/gophertelekomcloud/acceptance/tools"
 	th "github.com/opentelekomcloud/gophertelekomcloud/testhelper"
+	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/helper/pathorcontents"
 
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud"
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common/cfg"
 )
 
 func TestProvider(t *testing.T) {
-	if err := opentelekomcloud.Provider().(*schema.Provider).InternalValidate(); err != nil {
+	if err := opentelekomcloud.Provider().InternalValidate(); err != nil {
 		t.Fatalf("err: %s", err)
 	}
 }
 
 func TestProvider_impl(t *testing.T) {
-	var _ terraform.ResourceProvider = opentelekomcloud.Provider()
+	var _ = opentelekomcloud.Provider()
 }
 
 // Steps for configuring OpenTelekomCloud with SSL validation are here:
@@ -51,8 +50,7 @@ func TestAccProvider_caCertFile(t *testing.T) {
 		"cacert_file": caFile,
 	}
 
-	err = p.Configure(terraform.NewResourceConfigRaw(raw))
-	if err != nil {
+	if err := p.Configure(nil, terraform.NewResourceConfigRaw(raw)); err != nil {
 		t.Fatalf("Unexpected err when specifying OpenTelekomCloud CA by file: %s", err)
 	}
 }
@@ -75,8 +73,7 @@ func TestAccProvider_caCertString(t *testing.T) {
 		"cacert_file": caContents,
 	}
 
-	err = p.Configure(terraform.NewResourceConfigRaw(raw))
-	if err != nil {
+	if err := p.Configure(nil, terraform.NewResourceConfigRaw(raw)); err != nil {
 		t.Fatalf("Unexpected err when specifying OpenTelekomCloud CA by string: %s", err)
 	}
 }
@@ -107,8 +104,7 @@ func TestAccProvider_clientCertFile(t *testing.T) {
 		"key":  keyFile,
 	}
 
-	err = p.Configure(terraform.NewResourceConfigRaw(raw))
-	if err != nil {
+	if err := p.Configure(nil, terraform.NewResourceConfigRaw(raw)); err != nil {
 		t.Fatalf("Unexpected err when specifying OpenTelekomCloud Client keypair by file: %s", err)
 	}
 }
@@ -137,8 +133,7 @@ func TestAccProvider_clientCertString(t *testing.T) {
 		"key":  keyContents,
 	}
 
-	err = p.Configure(terraform.NewResourceConfigRaw(raw))
-	if err != nil {
+	if err := p.Configure(nil, terraform.NewResourceConfigRaw(raw)); err != nil {
 		t.Fatalf("Unexpected err when specifying OpenTelekomCloud Client keypair by contents: %s", err)
 	}
 }
