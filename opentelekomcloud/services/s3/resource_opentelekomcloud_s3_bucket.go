@@ -28,7 +28,7 @@ func ResourceS3Bucket() *schema.Resource {
 		UpdateContext: resourceS3BucketUpdate,
 		DeleteContext: resourceS3BucketDelete,
 		Importer: &schema.ResourceImporter{
-			State: resourceS3BucketImportState,
+			StateContext: resourceS3BucketImportState,
 		},
 
 		Schema: map[string]*schema.Schema{
@@ -1348,4 +1348,36 @@ func transitionHash(v interface{}) int {
 
 type Website struct {
 	Endpoint, Domain string
+}
+
+func resourceS3BucketImportState(ctx context.Context, d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
+
+	results := make([]*schema.ResourceData, 1, 1)
+	results[0] = d
+
+	config := meta.(*cfg.Config)
+	conn, err := config.S3Client(config.GetRegion(d))
+	if err != nil {
+		return nil, fmt.Errorf("Error creating OpenTelekomCloud s3 client: %s", err)
+	}
+	pol, err := conn.GetBucketPolicy(&s3.GetBucketPolicyInput{
+		Bucket: aws.String(d.Id()),
+	})
+	if err != nil {
+		if awsErr, ok := err.(awserr.Error); ok && awsErr.Code() == "NoSuchBucketPolicy" {
+			// Bucket without policy
+			return results, nil
+		}
+		return nil, fmt.Errorf("Error importing AWS S3 bucket policy: %w", err)
+	}
+
+	policy := ResourceS3BucketPolicy()
+	pData := policy.Data(nil)
+	pData.SetId(d.Id())
+	pData.SetType("opentelekomcloud_s3_bucket_policy")
+	pData.Set("bucket", d.Id())
+	pData.Set("policy", pol)
+	results = append(results, pData)
+
+	return results, nil
 }
