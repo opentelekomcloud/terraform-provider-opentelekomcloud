@@ -158,7 +158,7 @@ func resourceVirtualPrivateCloudV1Create(ctx context.Context, d *schema.Resource
 
 }
 
-func resourceVirtualPrivateCloudV1Read(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceVirtualPrivateCloudV1Read(_ context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*cfg.Config)
 	vpcClient, err := config.NetworkingV1Client(config.GetRegion(d))
 	if err != nil {

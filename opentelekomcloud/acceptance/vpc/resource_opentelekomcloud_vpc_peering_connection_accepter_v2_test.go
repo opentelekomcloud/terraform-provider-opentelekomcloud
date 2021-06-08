@@ -25,7 +25,7 @@ func TestAccOTCVpcPeeringConnectionAccepterV2_basic(t *testing.T) {
 	})
 }
 
-func testAccCheckOTCVpcPeeringConnectionAccepterDestroy(s *terraform.State) error {
+func testAccCheckOTCVpcPeeringConnectionAccepterDestroy(_ *terraform.State) error {
 	// We don't destroy the underlying VPC Peering Connection.
 	return nil
 }

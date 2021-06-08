@@ -90,7 +90,7 @@ func resourceSFSShareAccessRulesV2Create(ctx context.Context, d *schema.Resource
 	return resourceSFSShareAccessRulesV2Read(ctx, d, meta)
 }
 
-func resourceSFSShareAccessRulesV2Read(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceSFSShareAccessRulesV2Read(_ context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*cfg.Config)
 	client, err := config.SfsV2Client(config.GetRegion(d))
 	if err != nil {
@@ -130,7 +130,7 @@ func resourceSFSShareAccessRulesV2Read(ctx context.Context, d *schema.ResourceDa
 	return nil
 }
 
-func resourceSFSShareAccessRulesV2Delete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceSFSShareAccessRulesV2Delete(_ context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*cfg.Config)
 	client, err := config.SfsV2Client(config.GetRegion(d))
 	if err != nil {

@@ -241,7 +241,7 @@ func GetCloudImage(client *golangsdk.ServiceClient, id string) (*cloudimages.Ima
 	return &img, nil
 }
 
-func resourceImsImageV2Read(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceImsImageV2Read(_ context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*cfg.Config)
 	ims_Client, err := config.ImageV2Client(config.GetRegion(d))
 	if err != nil {

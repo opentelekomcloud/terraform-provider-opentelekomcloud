@@ -59,7 +59,7 @@ func resourceGroupV2Create(ctx context.Context, d *schema.ResourceData, meta int
 	return resourceGroupV2Read(ctx, d, meta)
 }
 
-func resourceGroupV2Read(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceGroupV2Read(_ context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*cfg.Config)
 	client, err := config.LtsV2Client(config.GetRegion(d))
 	if err != nil {
@@ -78,7 +78,7 @@ func resourceGroupV2Read(ctx context.Context, d *schema.ResourceData, meta inter
 	return nil
 }
 
-func resourceGroupV2Delete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceGroupV2Delete(_ context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*cfg.Config)
 	client, err := config.LtsV2Client(config.GetRegion(d))
 	if err != nil {

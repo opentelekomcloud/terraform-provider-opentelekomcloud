@@ -194,7 +194,7 @@ func resourceL7PolicyV2Create(ctx context.Context, d *schema.ResourceData, meta 
 	return resourceL7PolicyV2Read(ctx, d, meta)
 }
 
-func resourceL7PolicyV2Read(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceL7PolicyV2Read(_ context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*cfg.Config)
 	lbClient, err := config.NetworkingV2Client(config.GetRegion(d))
 	if err != nil {
@@ -369,7 +369,7 @@ func resourceL7PolicyV2Delete(ctx context.Context, d *schema.ResourceData, meta 
 	return nil
 }
 
-func resourceL7PolicyV2Import(ctx context.Context, d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
+func resourceL7PolicyV2Import(_ context.Context, d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
 	config := meta.(*cfg.Config)
 	lbClient, err := config.NetworkingV2Client(config.GetRegion(d))
 	if err != nil {

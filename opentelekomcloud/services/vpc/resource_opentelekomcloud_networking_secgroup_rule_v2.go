@@ -160,7 +160,7 @@ func resourceNetworkingSecGroupRuleV2Create(ctx context.Context, d *schema.Resou
 	return resourceNetworkingSecGroupRuleV2Read(ctx, d, meta)
 }
 
-func resourceNetworkingSecGroupRuleV2Read(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceNetworkingSecGroupRuleV2Read(_ context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	log.Printf("[DEBUG] Retrieve information about security group rule: %s", d.Id())
 
 	config := meta.(*cfg.Config)

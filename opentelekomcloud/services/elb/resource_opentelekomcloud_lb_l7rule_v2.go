@@ -194,7 +194,7 @@ func resourceL7RuleV2Create(ctx context.Context, d *schema.ResourceData, meta in
 	return resourceL7RuleV2Read(ctx, d, meta)
 }
 
-func resourceL7RuleV2Read(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceL7RuleV2Read(_ context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*cfg.Config)
 	lbClient, err := config.NetworkingV2Client(config.GetRegion(d))
 	if err != nil {
@@ -367,7 +367,7 @@ func resourceL7RuleV2Delete(ctx context.Context, d *schema.ResourceData, meta in
 	return nil
 }
 
-func resourceL7RuleV2Import(ctx context.Context, d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
+func resourceL7RuleV2Import(_ context.Context, d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
 	parts := strings.SplitN(d.Id(), "/", 2)
 	if len(parts) != 2 {
 		err := fmt.Errorf("Invalid format specified for L7 Rule. Format must be <policy id>/<rule id>")

@@ -152,7 +152,7 @@ func resourceSFSTurboShareV1Create(ctx context.Context, d *schema.ResourceData, 
 	return resourceSFSTurboShareV1Read(ctx, d, meta)
 }
 
-func resourceSFSTurboShareV1Read(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceSFSTurboShareV1Read(_ context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*cfg.Config)
 	client, err := config.SfsTurboV1Client(config.GetRegion(d))
 	if err != nil {

@@ -164,7 +164,7 @@ func resourceMonitorV2Create(ctx context.Context, d *schema.ResourceData, meta i
 	return resourceMonitorV2Read(ctx, d, meta)
 }
 
-func resourceMonitorV2Read(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceMonitorV2Read(_ context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*cfg.Config)
 	client, err := config.NetworkingV2Client(config.GetRegion(d))
 	if err != nil {

@@ -88,7 +88,7 @@ func resourceIdentityCredentialV3Create(ctx context.Context, d *schema.ResourceD
 	return resourceIdentityCredentialV3Read(ctx, d, meta)
 }
 
-func resourceIdentityCredentialV3Read(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceIdentityCredentialV3Read(_ context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*cfg.Config)
 	client, err := config.IdentityV3Client()
 	if err != nil {
@@ -136,7 +136,7 @@ func resourceIdentityCredentialV3Update(ctx context.Context, d *schema.ResourceD
 	return resourceIdentityCredentialV3Read(ctx, d, meta)
 }
 
-func resourceIdentityCredentialV3Delete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceIdentityCredentialV3Delete(_ context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*cfg.Config)
 	client, err := config.IdentityV3Client()
 	if err != nil {

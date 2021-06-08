@@ -116,7 +116,7 @@ func resourceVPCPeeringV2Create(ctx context.Context, d *schema.ResourceData, met
 
 }
 
-func resourceVPCPeeringV2Read(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceVPCPeeringV2Read(_ context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*cfg.Config)
 	peeringClient, err := config.NetworkingV2Client(config.GetRegion(d))
 	if err != nil {

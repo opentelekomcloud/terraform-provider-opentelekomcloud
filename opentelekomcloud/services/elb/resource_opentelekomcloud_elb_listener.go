@@ -217,7 +217,7 @@ func resourceEListenerCreate(ctx context.Context, d *schema.ResourceData, meta i
 	return resourceEListenerRead(ctx, d, meta)
 }
 
-func resourceEListenerRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceEListenerRead(_ context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*cfg.Config)
 	client, err := config.ElbV1Client(config.GetRegion(d))
 	if err != nil {
@@ -308,7 +308,7 @@ func resourceEListenerUpdate(ctx context.Context, d *schema.ResourceData, meta i
 
 }
 
-func resourceEListenerDelete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceEListenerDelete(_ context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*cfg.Config)
 	client, err := config.ElbV1Client(config.GetRegion(d))
 	if err != nil {

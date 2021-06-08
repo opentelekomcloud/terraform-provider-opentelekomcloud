@@ -92,7 +92,7 @@ func resourceIdentityRoleAssignmentV3Create(ctx context.Context, d *schema.Resou
 	return resourceIdentityRoleAssignmentV3Read(ctx, d, meta)
 }
 
-func resourceIdentityRoleAssignmentV3Read(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceIdentityRoleAssignmentV3Read(_ context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*cfg.Config)
 	identityClient, err := config.IdentityV3Client(config.GetRegion(d))
 	if err != nil {
@@ -116,7 +116,7 @@ func resourceIdentityRoleAssignmentV3Read(ctx context.Context, d *schema.Resourc
 	return nil
 }
 
-func resourceIdentityRoleAssignmentV3Delete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceIdentityRoleAssignmentV3Delete(_ context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*cfg.Config)
 	identityClient, err := config.IdentityV3Client(config.GetRegion(d))
 	if err != nil {

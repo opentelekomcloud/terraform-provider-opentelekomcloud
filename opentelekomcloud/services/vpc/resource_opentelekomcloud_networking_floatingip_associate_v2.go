@@ -80,7 +80,7 @@ func resourceNetworkingFloatingIPAssociateV2Create(ctx context.Context, d *schem
 	return resourceNetworkFloatingIPV2Read(ctx, d, meta)
 }
 
-func resourceNetworkingFloatingIPAssociateV2Read(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceNetworkingFloatingIPAssociateV2Read(_ context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*cfg.Config)
 	networkingClient, err := config.NetworkingV2Client(config.GetRegion(d))
 	if err != nil {
@@ -99,7 +99,7 @@ func resourceNetworkingFloatingIPAssociateV2Read(ctx context.Context, d *schema.
 	return nil
 }
 
-func resourceNetworkingFloatingIPAssociateV2Delete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceNetworkingFloatingIPAssociateV2Delete(_ context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*cfg.Config)
 	networkingClient, err := config.NetworkingV2Client(config.GetRegion(d))
 	if err != nil {

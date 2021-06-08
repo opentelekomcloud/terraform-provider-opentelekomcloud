@@ -111,7 +111,7 @@ func resourceSdrsProtectiongroupV1Create(ctx context.Context, d *schema.Resource
 	return fmterr.Errorf("Unexpected conversion error in resourceSdrsProtectiongroupV1Create.")
 }
 
-func resourceSdrsProtectiongroupV1Read(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceSdrsProtectiongroupV1Read(_ context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 
 	config := meta.(*cfg.Config)
 	sdrsClient, err := config.SdrsV1Client(config.GetRegion(d))
@@ -160,7 +160,7 @@ func resourceSdrsProtectiongroupV1Update(ctx context.Context, d *schema.Resource
 	return resourceSdrsProtectiongroupV1Read(ctx, d, meta)
 }
 
-func resourceSdrsProtectiongroupV1Delete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceSdrsProtectiongroupV1Delete(_ context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*cfg.Config)
 	sdrsClient, err := config.SdrsV1Client(config.GetRegion(d))
 	if err != nil {

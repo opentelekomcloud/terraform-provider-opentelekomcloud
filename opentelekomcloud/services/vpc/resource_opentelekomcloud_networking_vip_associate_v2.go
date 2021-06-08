@@ -156,7 +156,7 @@ func resourceNetworkingVIPAssociateV2Create(ctx context.Context, d *schema.Resou
 	return resourceNetworkingVIPAssociateV2Read(ctx, d, meta)
 }
 
-func resourceNetworkingVIPAssociateV2Read(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceNetworkingVIPAssociateV2Read(_ context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*cfg.Config)
 	// Obtain relevant info from parsing the ID
 	vipid, portids, err := ParseNetworkingVIPAssociateID(d.Id())
@@ -218,7 +218,7 @@ func resourceNetworkingVIPAssociateV2Read(ctx context.Context, d *schema.Resourc
 	return nil
 }
 
-func resourceNetworkingVIPAssociateV2Delete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceNetworkingVIPAssociateV2Delete(_ context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*cfg.Config)
 	networkingClient, err := config.NetworkingV2Client(config.GetRegion(d))
 	if err != nil {

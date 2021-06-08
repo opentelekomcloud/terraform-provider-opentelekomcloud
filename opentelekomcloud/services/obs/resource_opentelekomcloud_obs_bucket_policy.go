@@ -76,7 +76,7 @@ func resourceObsBucketPolicyPut(ctx context.Context, d *schema.ResourceData, met
 	return nil
 }
 
-func resourceObsBucketPolicyRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceObsBucketPolicyRead(_ context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*cfg.Config)
 	client, err := config.NewObjectStorageClient(config.GetRegion(d))
 	if err != nil {
@@ -97,7 +97,7 @@ func resourceObsBucketPolicyRead(ctx context.Context, d *schema.ResourceData, me
 	return nil
 }
 
-func resourceObsBucketPolicyDelete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceObsBucketPolicyDelete(_ context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*cfg.Config)
 	client, err := config.NewObjectStorageClient(config.GetRegion(d))
 	if err != nil {

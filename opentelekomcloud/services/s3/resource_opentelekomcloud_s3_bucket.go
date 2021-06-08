@@ -386,7 +386,7 @@ func resourceS3BucketUpdate(ctx context.Context, d *schema.ResourceData, meta in
 	return resourceS3BucketRead(ctx, d, meta)
 }
 
-func resourceS3BucketRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceS3BucketRead(_ context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*cfg.Config)
 	client, err := config.S3Client(config.GetRegion(d))
 	if err != nil {
@@ -1351,7 +1351,7 @@ type Website struct {
 	Endpoint, Domain string
 }
 
-func resourceS3BucketImportState(ctx context.Context, d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
+func resourceS3BucketImportState(_ context.Context, d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
 
 	results := make([]*schema.ResourceData, 1, 1)
 	results[0] = d

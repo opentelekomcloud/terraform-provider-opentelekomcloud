@@ -190,7 +190,7 @@ func resourceVpcSubnetV1Create(ctx context.Context, d *schema.ResourceData, meta
 
 }
 
-func resourceVpcSubnetV1Read(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceVpcSubnetV1Read(_ context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*cfg.Config)
 	client, err := config.NetworkingV1Client(config.GetRegion(d))
 	if err != nil {

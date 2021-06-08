@@ -207,7 +207,7 @@ func resourceRTSStackV1Create(ctx context.Context, d *schema.ResourceData, meta 
 
 }
 
-func resourceRTSStackV1Read(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceRTSStackV1Read(_ context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*cfg.Config)
 	orchestrationClient, err := config.OrchestrationV1Client(config.GetRegion(d))
 	if err != nil {

@@ -252,7 +252,7 @@ func resourceImagesImageV2Create(ctx context.Context, d *schema.ResourceData, me
 	return resourceImagesImageV2Read(ctx, d, meta)
 }
 
-func resourceImagesImageV2Read(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceImagesImageV2Read(_ context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*cfg.Config)
 	imageClient, err := config.ImageV2Client(config.GetRegion(d))
 	if err != nil {
@@ -332,7 +332,7 @@ func resourceImagesImageV2Update(ctx context.Context, d *schema.ResourceData, me
 	return resourceImagesImageV2Read(ctx, d, meta)
 }
 
-func resourceImagesImageV2Delete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceImagesImageV2Delete(_ context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*cfg.Config)
 	imageClient, err := config.ImageV2Client(config.GetRegion(d))
 	if err != nil {

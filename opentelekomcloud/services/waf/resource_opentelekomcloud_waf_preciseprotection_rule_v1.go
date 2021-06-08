@@ -182,7 +182,7 @@ func resourceWafPreciseProtectionRuleV1Create(ctx context.Context, d *schema.Res
 	return resourceWafPreciseProtectionRuleV1Read(ctx, d, meta)
 }
 
-func resourceWafPreciseProtectionRuleV1Read(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceWafPreciseProtectionRuleV1Read(_ context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*cfg.Config)
 	wafClient, err := config.WafV1Client(config.GetRegion(d))
 	if err != nil {
@@ -222,7 +222,7 @@ func resourceWafPreciseProtectionRuleV1Read(ctx context.Context, d *schema.Resou
 	return nil
 }
 
-func resourceWafPreciseProtectionRuleV1Delete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceWafPreciseProtectionRuleV1Delete(_ context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*cfg.Config)
 	wafClient, err := config.WafV1Client(config.GetRegion(d))
 	if err != nil {

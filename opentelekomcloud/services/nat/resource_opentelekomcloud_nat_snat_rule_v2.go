@@ -112,7 +112,7 @@ func resourceNatSnatRuleV2Create(ctx context.Context, d *schema.ResourceData, me
 	return resourceNatSnatRuleV2Read(ctx, d, meta)
 }
 
-func resourceNatSnatRuleV2Read(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceNatSnatRuleV2Read(_ context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*cfg.Config)
 	NatV2Client, err := config.NatV2Client(config.GetRegion(d))
 	if err != nil {

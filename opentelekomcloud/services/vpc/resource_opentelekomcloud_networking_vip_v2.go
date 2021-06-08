@@ -101,7 +101,7 @@ func resourceNetworkingVIPV2Create(ctx context.Context, d *schema.ResourceData, 
 	return resourceNetworkingVIPV2Read(ctx, d, meta)
 }
 
-func resourceNetworkingVIPV2Read(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceNetworkingVIPV2Read(_ context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*cfg.Config)
 	networkingClient, err := config.NetworkingV2Client(config.GetRegion(d))
 	if err != nil {

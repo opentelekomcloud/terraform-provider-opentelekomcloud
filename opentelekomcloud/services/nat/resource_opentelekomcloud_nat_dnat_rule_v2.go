@@ -241,7 +241,7 @@ func resourceNatDnatRuleCreate(ctx context.Context, d *schema.ResourceData, meta
 	return resourceNatDnatRuleRead(ctx, d, meta)
 }
 
-func resourceNatDnatRuleRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceNatDnatRuleRead(_ context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*cfg.Config)
 	client, err := config.NatV2Client(config.GetRegion(d))
 	if err != nil {
@@ -410,7 +410,7 @@ func resourceNatDnatRuleRead(ctx context.Context, d *schema.ResourceData, meta i
 	return nil
 }
 
-func resourceNatDnatRuleDelete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceNatDnatRuleDelete(_ context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*cfg.Config)
 	client, err := config.NatV2Client(config.GetRegion(d))
 	if err != nil {

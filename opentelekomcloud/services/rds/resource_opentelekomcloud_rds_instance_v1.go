@@ -384,7 +384,7 @@ func resourceInstanceCreate(ctx context.Context, d *schema.ResourceData, meta in
 	return fmterr.Errorf("Unexpected conversion error in resourceInstanceCreate. ")
 }
 
-func resourceInstanceRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceInstanceRead(_ context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*cfg.Config)
 	client, err := config.RdsV1Client(config.GetRegion(d))
 	if err != nil {

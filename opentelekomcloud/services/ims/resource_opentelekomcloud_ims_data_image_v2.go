@@ -195,7 +195,7 @@ func resourceImsDataImageV2Create(ctx context.Context, d *schema.ResourceData, m
 	return fmterr.Errorf("Unexpected conversion error in resourceImsDataImageV2Create.")
 }
 
-func resourceImsDataImageV2Read(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceImsDataImageV2Read(_ context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*cfg.Config)
 	ims_Client, err := config.ImageV2Client(config.GetRegion(d))
 	if err != nil {

@@ -138,7 +138,7 @@ func resourceSdrsProtectedInstanceV1Create(ctx context.Context, d *schema.Resour
 
 }
 
-func resourceSdrsProtectedInstanceV1Read(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceSdrsProtectedInstanceV1Read(_ context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*cfg.Config)
 	client, err := config.SdrsV1Client(config.GetRegion(d))
 	if err != nil {
@@ -209,7 +209,7 @@ func resourceSdrsProtectedInstanceV1Update(ctx context.Context, d *schema.Resour
 	return resourceSdrsProtectedInstanceV1Read(ctx, d, meta)
 }
 
-func resourceSdrsProtectedInstanceV1Delete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceSdrsProtectedInstanceV1Delete(_ context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*cfg.Config)
 	client, err := config.SdrsV1Client(config.GetRegion(d))
 	if err != nil {

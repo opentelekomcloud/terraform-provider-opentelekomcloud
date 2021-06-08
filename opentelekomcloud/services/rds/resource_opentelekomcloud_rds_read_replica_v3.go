@@ -171,7 +171,7 @@ func resourceRdsReadReplicaV3Create(ctx context.Context, d *schema.ResourceData,
 	return resourceRdsReadReplicaV3Read(ctx, d, meta)
 }
 
-func resourceRdsReadReplicaV3Read(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceRdsReadReplicaV3Read(_ context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*cfg.Config)
 	client, err := config.RdsV3Client(config.GetRegion(d))
 	if err != nil {
@@ -260,7 +260,7 @@ func resourceRdsReadReplicaV3Update(ctx context.Context, d *schema.ResourceData,
 	return resourceRdsReadReplicaV3Read(ctx, d, meta)
 }
 
-func resourceRdsReadReplicaV3Delete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceRdsReadReplicaV3Delete(_ context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*cfg.Config)
 	client, err := config.RdsV3Client(config.GetRegion(d))
 	if err != nil {

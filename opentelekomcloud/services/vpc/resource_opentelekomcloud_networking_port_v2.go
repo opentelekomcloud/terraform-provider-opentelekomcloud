@@ -242,7 +242,7 @@ func resourceNetworkingPortV2Create(ctx context.Context, d *schema.ResourceData,
 	return resourceNetworkingPortV2Read(ctx, d, meta)
 }
 
-func resourceNetworkingPortV2Read(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceNetworkingPortV2Read(_ context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*cfg.Config)
 	client, err := config.NetworkingV2Client(config.GetRegion(d))
 	if err != nil {

@@ -69,7 +69,7 @@ func resourceTopicV2Create(ctx context.Context, d *schema.ResourceData, meta int
 	return resourceTopicV2Read(ctx, d, meta)
 }
 
-func resourceTopicV2Read(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceTopicV2Read(_ context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*cfg.Config)
 	client, err := config.LtsV2Client(config.GetRegion(d))
 	if err != nil {
@@ -91,7 +91,7 @@ func resourceTopicV2Read(ctx context.Context, d *schema.ResourceData, meta inter
 	return nil
 }
 
-func resourceTopicV2Delete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceTopicV2Delete(_ context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*cfg.Config)
 	client, err := config.LtsV2Client(config.GetRegion(d))
 	if err != nil {
@@ -108,7 +108,7 @@ func resourceTopicV2Delete(ctx context.Context, d *schema.ResourceData, meta int
 	return nil
 }
 
-func resourceTopicV2Import(ctx context.Context, d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
+func resourceTopicV2Import(_ context.Context, d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
 	parts := strings.SplitN(d.Id(), "/", 2)
 	if len(parts) != 2 {
 		err := fmt.Errorf("Invalid format specified for logtank topic. Format must be <group id>/<topic id>")

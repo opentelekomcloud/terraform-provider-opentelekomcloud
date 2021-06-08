@@ -60,7 +60,7 @@ func resourceIdentityGroupMembershipV3Create(ctx context.Context, d *schema.Reso
 	return resourceIdentityGroupMembershipV3Read(ctx, d, meta)
 }
 
-func resourceIdentityGroupMembershipV3Read(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceIdentityGroupMembershipV3Read(_ context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*cfg.Config)
 	identityClient, err := config.IdentityV3Client(config.GetRegion(d))
 	if err != nil {
@@ -133,7 +133,7 @@ func resourceIdentityGroupMembershipV3Update(ctx context.Context, d *schema.Reso
 	return resourceIdentityGroupMembershipV3Read(ctx, d, meta)
 }
 
-func resourceIdentityGroupMembershipV3Delete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceIdentityGroupMembershipV3Delete(_ context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*cfg.Config)
 	identityClient, err := config.IdentityV3Client(config.GetRegion(d))
 	if err != nil {

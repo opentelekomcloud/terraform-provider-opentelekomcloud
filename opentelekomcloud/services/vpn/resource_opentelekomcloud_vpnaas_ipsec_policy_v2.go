@@ -175,7 +175,7 @@ func resourceVpnIPSecPolicyV2Create(ctx context.Context, d *schema.ResourceData,
 	return resourceVpnIPSecPolicyV2Read(ctx, d, meta)
 }
 
-func resourceVpnIPSecPolicyV2Read(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceVpnIPSecPolicyV2Read(_ context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*cfg.Config)
 	client, err := config.NetworkingV2Client(config.GetRegion(d))
 	if err != nil {
@@ -300,7 +300,7 @@ func resourceVpnIPSecPolicyV2Update(ctx context.Context, d *schema.ResourceData,
 	return resourceVpnIPSecPolicyV2Read(ctx, d, meta)
 }
 
-func resourceVpnIPSecPolicyV2Delete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceVpnIPSecPolicyV2Delete(_ context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*cfg.Config)
 	client, err := config.NetworkingV2Client(config.GetRegion(d))
 	if err != nil {

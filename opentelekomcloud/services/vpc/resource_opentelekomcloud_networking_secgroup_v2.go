@@ -105,7 +105,7 @@ func resourceNetworkingSecGroupV2Create(ctx context.Context, d *schema.ResourceD
 	return resourceNetworkingSecGroupV2Read(ctx, d, meta)
 }
 
-func resourceNetworkingSecGroupV2Read(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceNetworkingSecGroupV2Read(_ context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	log.Printf("[DEBUG] Retrieve information about security group: %s", d.Id())
 
 	config := meta.(*cfg.Config)

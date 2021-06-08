@@ -229,7 +229,7 @@ func resourceVpnSiteConnectionV2Create(ctx context.Context, d *schema.ResourceDa
 	return resourceVpnSiteConnectionV2Read(ctx, d, meta)
 }
 
-func resourceVpnSiteConnectionV2Read(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceVpnSiteConnectionV2Read(_ context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	log.Printf("[DEBUG] Retrieve information about site connection: %s", d.Id())
 
 	config := meta.(*cfg.Config)

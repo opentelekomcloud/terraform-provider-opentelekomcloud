@@ -106,7 +106,7 @@ func resourceIdentityUserV3Create(ctx context.Context, d *schema.ResourceData, m
 	return setExtendedOpts(ctx, d, meta)
 }
 
-func resourceIdentityUserV3Read(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceIdentityUserV3Read(_ context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*cfg.Config)
 	client, err := config.IdentityV3Client(config.GetRegion(d))
 	if err != nil {
@@ -225,7 +225,7 @@ func resourceIdentityUserV3Update(ctx context.Context, d *schema.ResourceData, m
 	return setExtendedOpts(ctx, d, meta)
 }
 
-func resourceIdentityUserV3Delete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceIdentityUserV3Delete(_ context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*cfg.Config)
 	client, err := config.IdentityV3Client(config.GetRegion(d))
 	if err != nil {

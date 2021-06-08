@@ -199,7 +199,7 @@ func resourceSFSFileSystemV2Create(ctx context.Context, d *schema.ResourceData, 
 	return resourceSFSFileSystemV2Read(ctx, d, meta)
 }
 
-func resourceSFSFileSystemV2Read(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceSFSFileSystemV2Read(_ context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*cfg.Config)
 	client, err := config.SfsV2Client(config.GetRegion(d))
 	if err != nil {

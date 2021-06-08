@@ -74,7 +74,7 @@ func resourceWafWebTamperProtectionRuleV1Create(ctx context.Context, d *schema.R
 	return resourceWafWebTamperProtectionRuleV1Read(ctx, d, meta)
 }
 
-func resourceWafWebTamperProtectionRuleV1Read(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceWafWebTamperProtectionRuleV1Read(_ context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*cfg.Config)
 	wafClient, err := config.WafV1Client(config.GetRegion(d))
 	if err != nil {
@@ -100,7 +100,7 @@ func resourceWafWebTamperProtectionRuleV1Read(ctx context.Context, d *schema.Res
 	return nil
 }
 
-func resourceWafWebTamperProtectionRuleV1Delete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceWafWebTamperProtectionRuleV1Delete(_ context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*cfg.Config)
 	wafClient, err := config.WafV1Client(config.GetRegion(d))
 	if err != nil {

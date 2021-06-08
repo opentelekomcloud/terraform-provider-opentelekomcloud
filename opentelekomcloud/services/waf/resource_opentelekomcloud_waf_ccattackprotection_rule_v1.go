@@ -174,7 +174,7 @@ func resourceWafCcAttackProtectionRuleV1Create(ctx context.Context, d *schema.Re
 	return resourceWafCcAttackProtectionRuleV1Read(ctx, d, meta)
 }
 
-func resourceWafCcAttackProtectionRuleV1Read(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceWafCcAttackProtectionRuleV1Read(_ context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*cfg.Config)
 	wafClient, err := config.WafV1Client(config.GetRegion(d))
 	if err != nil {
@@ -210,7 +210,7 @@ func resourceWafCcAttackProtectionRuleV1Read(ctx context.Context, d *schema.Reso
 	return nil
 }
 
-func resourceWafCcAttackProtectionRuleV1Delete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceWafCcAttackProtectionRuleV1Delete(_ context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*cfg.Config)
 	wafClient, err := config.WafV1Client(config.GetRegion(d))
 	if err != nil {

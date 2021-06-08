@@ -192,7 +192,7 @@ func putFileToObject(obsClient *obs.ObsClient, d *schema.ResourceData) (*obs.Put
 	return obsClient.PutFile(putInput)
 }
 
-func resourceObsBucketObjectRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceObsBucketObjectRead(_ context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*cfg.Config)
 	client, err := config.NewObjectStorageClient(config.GetRegion(d))
 	if err != nil {
@@ -242,7 +242,7 @@ func resourceObsBucketObjectRead(ctx context.Context, d *schema.ResourceData, me
 	return nil
 }
 
-func resourceObsBucketObjectDelete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceObsBucketObjectDelete(_ context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*cfg.Config)
 	client, err := config.NewObjectStorageClient(config.GetRegion(d))
 	if err != nil {

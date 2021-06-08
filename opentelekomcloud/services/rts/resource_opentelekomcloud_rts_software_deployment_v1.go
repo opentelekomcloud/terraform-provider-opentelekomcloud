@@ -129,7 +129,7 @@ func resourceRtsSoftwareDeploymentV1Create(ctx context.Context, d *schema.Resour
 
 }
 
-func resourceRtsSoftwareDeploymentV1Read(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceRtsSoftwareDeploymentV1Read(_ context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*cfg.Config)
 	orchestrationClient, err := config.OrchestrationV1Client(config.GetRegion(d))
 	if err != nil {
@@ -192,7 +192,7 @@ func resourceRtsSoftwareDeploymentV1Update(ctx context.Context, d *schema.Resour
 	return resourceRtsSoftwareDeploymentV1Read(ctx, d, meta)
 }
 
-func resourceRtsSoftwareDeploymentV1Delete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceRtsSoftwareDeploymentV1Delete(_ context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*cfg.Config)
 	orchestrationClient, err := config.OrchestrationV1Client(config.GetRegion(d))
 	if err != nil {

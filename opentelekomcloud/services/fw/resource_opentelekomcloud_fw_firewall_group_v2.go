@@ -148,7 +148,7 @@ func resourceFWFirewallGroupV2Create(ctx context.Context, d *schema.ResourceData
 	return resourceFWFirewallGroupV2Read(ctx, d, meta)
 }
 
-func resourceFWFirewallGroupV2Read(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceFWFirewallGroupV2Read(_ context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	log.Printf("[DEBUG] Retrieve information about firewall: %s", d.Id())
 
 	config := meta.(*cfg.Config)

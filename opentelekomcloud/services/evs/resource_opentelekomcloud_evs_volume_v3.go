@@ -205,7 +205,7 @@ func resourceEvsVolumeV3Create(ctx context.Context, d *schema.ResourceData, meta
 	return fmterr.Errorf("unexpected conversion error in resourceEvsVolumeV3Create")
 }
 
-func resourceEvsVolumeV3Read(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceEvsVolumeV3Read(_ context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*cfg.Config)
 	blockStorageClient, err := config.BlockStorageV3Client(config.GetRegion(d))
 	if err != nil {

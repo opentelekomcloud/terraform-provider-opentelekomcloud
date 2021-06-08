@@ -123,7 +123,7 @@ func resourceNetworkFloatingIPV2Create(ctx context.Context, d *schema.ResourceDa
 	return resourceNetworkFloatingIPV2Read(ctx, d, meta)
 }
 
-func resourceNetworkFloatingIPV2Read(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceNetworkFloatingIPV2Read(_ context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*cfg.Config)
 	networkingClient, err := config.NetworkingV2Client(config.GetRegion(d))
 	if err != nil {

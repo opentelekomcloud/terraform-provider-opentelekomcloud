@@ -142,7 +142,7 @@ func resourceVpnServiceV2Create(ctx context.Context, d *schema.ResourceData, met
 	return resourceVpnServiceV2Read(ctx, d, meta)
 }
 
-func resourceVpnServiceV2Read(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceVpnServiceV2Read(_ context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	log.Printf("[DEBUG] Retrieve information about service: %s", d.Id())
 
 	config := meta.(*cfg.Config)

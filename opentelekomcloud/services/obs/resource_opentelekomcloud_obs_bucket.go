@@ -340,7 +340,7 @@ func resourceObsBucketUpdate(ctx context.Context, d *schema.ResourceData, meta i
 	return resourceObsBucketRead(ctx, d, meta)
 }
 
-func resourceObsBucketRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceObsBucketRead(_ context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*cfg.Config)
 	region := config.GetRegion(d)
 	client, err := config.NewObjectStorageClient(config.GetRegion(d))

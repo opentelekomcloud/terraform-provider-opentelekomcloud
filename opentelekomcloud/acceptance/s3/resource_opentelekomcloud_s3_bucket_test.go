@@ -540,7 +540,7 @@ func TestAccS3Bucket_Lifecycle(t *testing.T) {
 	})
 }
 
-func testAccCheckS3BucketDestroy(s *terraform.State) error {
+func testAccCheckS3BucketDestroy(_ *terraform.State) error {
 	// UNDONE: Why instance check?
 	// return testAccCheckInstanceDestroyWithProvider(s, TestAccProvider)
 	return nil

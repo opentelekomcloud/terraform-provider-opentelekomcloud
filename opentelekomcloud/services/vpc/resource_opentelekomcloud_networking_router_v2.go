@@ -145,7 +145,7 @@ func resourceNetworkingRouterV2Create(ctx context.Context, d *schema.ResourceDat
 	return resourceNetworkingRouterV2Read(ctx, d, meta)
 }
 
-func resourceNetworkingRouterV2Read(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceNetworkingRouterV2Read(_ context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*cfg.Config)
 	networkingClient, err := config.NetworkingV2Client(config.GetRegion(d))
 	if err != nil {

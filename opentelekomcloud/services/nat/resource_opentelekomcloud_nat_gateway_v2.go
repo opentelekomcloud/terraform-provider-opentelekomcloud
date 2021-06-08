@@ -116,7 +116,7 @@ func resourceNatGatewayV2Create(ctx context.Context, d *schema.ResourceData, met
 	return resourceNatGatewayV2Read(ctx, d, meta)
 }
 
-func resourceNatGatewayV2Read(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceNatGatewayV2Read(_ context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*cfg.Config)
 	NatV2Client, err := config.NatV2Client(config.GetRegion(d))
 	if err != nil {

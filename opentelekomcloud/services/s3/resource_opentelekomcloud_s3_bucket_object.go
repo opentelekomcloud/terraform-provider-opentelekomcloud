@@ -208,7 +208,7 @@ func resourceS3BucketObjectPut(ctx context.Context, d *schema.ResourceData, meta
 	return resourceS3BucketObjectRead(ctx, d, meta)
 }
 
-func resourceS3BucketObjectRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceS3BucketObjectRead(_ context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*cfg.Config)
 	s3conn, err := config.S3Client(config.GetRegion(d))
 	if err != nil {
@@ -252,7 +252,7 @@ func resourceS3BucketObjectRead(ctx context.Context, d *schema.ResourceData, met
 	return nil
 }
 
-func resourceS3BucketObjectDelete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceS3BucketObjectDelete(_ context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*cfg.Config)
 	s3conn, err := config.S3Client(config.GetRegion(d))
 	if err != nil {

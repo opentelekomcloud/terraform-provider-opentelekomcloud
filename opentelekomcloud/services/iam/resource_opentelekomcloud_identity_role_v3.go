@@ -146,7 +146,7 @@ func resourceIdentityRoleV3Update(ctx context.Context, d *schema.ResourceData, m
 	return resourceIdentityRoleV3Read(ctx, d, meta)
 }
 
-func resourceIdentityRoleV3Delete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceIdentityRoleV3Delete(_ context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*cfg.Config)
 	client, err := config.IdentityV30Client()
 	if err != nil {
@@ -492,7 +492,7 @@ func expandIdentityRoleV3UpdateType(d interface{}, arrayIndex map[string]int) (i
 	return nil, fmt.Errorf("unknown display layer:%v", v)
 }
 
-func readIdentityRoleV3Read(ctx context.Context, d *schema.ResourceData, client *golangsdk.ServiceClient, result map[string]interface{}) error {
+func readIdentityRoleV3Read(_ context.Context, d *schema.ResourceData, client *golangsdk.ServiceClient, result map[string]interface{}) error {
 	url, err := common.ReplaceVars(d, "OS-ROLE/roles/{id}", nil)
 	if err != nil {
 		return err

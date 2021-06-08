@@ -79,7 +79,7 @@ func resourceIdentityMappingV3Create(ctx context.Context, d *schema.ResourceData
 	return resourceIdentityMappingV3Read(ctx, d, meta)
 }
 
-func resourceIdentityMappingV3Read(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceIdentityMappingV3Read(_ context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*cfg.Config)
 	client, err := config.IdentityV3Client(config.GetRegion(d))
 	if err != nil {
@@ -143,7 +143,7 @@ func resourceIdentityMappingV3Update(ctx context.Context, d *schema.ResourceData
 	return resourceIdentityMappingV3Read(ctx, d, meta)
 }
 
-func resourceIdentityMappingV3Delete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceIdentityMappingV3Delete(_ context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*cfg.Config)
 	client, err := config.IdentityV3Client(config.GetRegion(d))
 	if err != nil {

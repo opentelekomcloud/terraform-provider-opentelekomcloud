@@ -134,7 +134,7 @@ func resourceLoadBalancerV2Create(ctx context.Context, d *schema.ResourceData, m
 	return resourceLoadBalancerV2Read(ctx, d, meta)
 }
 
-func resourceLoadBalancerV2Read(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceLoadBalancerV2Read(_ context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*cfg.Config)
 	client, err := config.NetworkingV2Client(config.GetRegion(d))
 	if err != nil {

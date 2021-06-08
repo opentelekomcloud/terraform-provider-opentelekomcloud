@@ -94,7 +94,7 @@ func resourceSubscriptionCreate(ctx context.Context, d *schema.ResourceData, met
 	return fmterr.Errorf("Unexpected conversion error in resourceSubscriptionCreate.")
 }
 
-func resourceSubscriptionDelete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceSubscriptionDelete(_ context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*cfg.Config)
 	client, err := config.SmnV2Client(config.GetProjectName(d))
 	if err != nil {
@@ -113,7 +113,7 @@ func resourceSubscriptionDelete(ctx context.Context, d *schema.ResourceData, met
 	return nil
 }
 
-func resourceSubscriptionRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceSubscriptionRead(_ context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*cfg.Config)
 	client, err := config.SmnV2Client(config.GetProjectName(d))
 	if err != nil {

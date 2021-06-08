@@ -123,7 +123,7 @@ func resourceFWPolicyV2Create(ctx context.Context, d *schema.ResourceData, meta 
 	return resourceFWPolicyV2Read(ctx, d, meta)
 }
 
-func resourceFWPolicyV2Read(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceFWPolicyV2Read(_ context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	log.Printf("[DEBUG] Retrieve information about firewall policy: %s", d.Id())
 
 	config := meta.(*cfg.Config)

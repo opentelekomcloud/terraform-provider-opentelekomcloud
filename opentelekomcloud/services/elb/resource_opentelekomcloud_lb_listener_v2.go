@@ -198,7 +198,7 @@ func resourceListenerV2Create(ctx context.Context, d *schema.ResourceData, meta 
 	return resourceListenerV2Read(ctx, d, meta)
 }
 
-func resourceListenerV2Read(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceListenerV2Read(_ context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*cfg.Config)
 	client, err := config.NetworkingV2Client(config.GetRegion(d))
 	if err != nil {

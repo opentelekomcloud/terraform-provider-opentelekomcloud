@@ -119,7 +119,7 @@ func resourceHealthCreate(ctx context.Context, d *schema.ResourceData, meta inte
 	return resourceHealthRead(ctx, d, meta)
 }
 
-func resourceHealthRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceHealthRead(_ context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*cfg.Config)
 	networkingClient, err := config.ElbV1Client(config.GetRegion(d))
 	if err != nil {
@@ -187,7 +187,7 @@ func resourceHealthUpdate(ctx context.Context, d *schema.ResourceData, meta inte
 	return resourceHealthRead(ctx, d, meta)
 }
 
-func resourceHealthDelete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceHealthDelete(_ context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*cfg.Config)
 	client, err := config.ElbV1Client(config.GetRegion(d))
 	if err != nil {

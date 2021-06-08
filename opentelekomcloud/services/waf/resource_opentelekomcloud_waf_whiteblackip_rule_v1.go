@@ -76,7 +76,7 @@ func resourceWafWhiteBlackIpRuleV1Create(ctx context.Context, d *schema.Resource
 	return resourceWafWhiteBlackIpRuleV1Read(ctx, d, meta)
 }
 
-func resourceWafWhiteBlackIpRuleV1Read(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceWafWhiteBlackIpRuleV1Read(_ context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*cfg.Config)
 	wafClient, err := config.WafV1Client(config.GetRegion(d))
 	if err != nil {
@@ -128,7 +128,7 @@ func resourceWafWhiteBlackIpRuleV1Update(ctx context.Context, d *schema.Resource
 	return resourceWafWhiteBlackIpRuleV1Read(ctx, d, meta)
 }
 
-func resourceWafWhiteBlackIpRuleV1Delete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceWafWhiteBlackIpRuleV1Delete(_ context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*cfg.Config)
 	wafClient, err := config.WafV1Client(config.GetRegion(d))
 	if err != nil {

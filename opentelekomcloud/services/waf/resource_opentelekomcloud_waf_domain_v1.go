@@ -235,7 +235,7 @@ func resourceWafDomainV1Create(ctx context.Context, d *schema.ResourceData, meta
 	return resourceWafDomainV1Read(ctx, d, meta)
 }
 
-func resourceWafDomainV1Read(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceWafDomainV1Read(_ context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 
 	config := meta.(*cfg.Config)
 	wafClient, err := config.WafV1Client(config.GetRegion(d))
@@ -331,7 +331,7 @@ func resourceWafDomainV1Update(ctx context.Context, d *schema.ResourceData, meta
 	return resourceWafDomainV1Read(ctx, d, meta)
 }
 
-func resourceWafDomainV1Delete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceWafDomainV1Delete(_ context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*cfg.Config)
 	wafClient, err := config.WafV1Client(config.GetRegion(d))
 	if err != nil {

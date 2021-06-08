@@ -176,7 +176,7 @@ func resourceMRSJobV1Create(ctx context.Context, d *schema.ResourceData, meta in
 	return resourceMRSJobV1Read(ctx, d, meta)
 }
 
-func resourceMRSJobV1Read(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceMRSJobV1Read(_ context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*cfg.Config)
 	client, err := config.MrsV1Client(config.GetRegion(d))
 	if err != nil {
@@ -219,7 +219,7 @@ func resourceMRSJobV1Read(ctx context.Context, d *schema.ResourceData, meta inte
 	return nil
 }
 
-func resourceMRSJobV1Delete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceMRSJobV1Delete(_ context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*cfg.Config)
 	client, err := config.MrsV1Client(config.GetRegion(d))
 	if err != nil {

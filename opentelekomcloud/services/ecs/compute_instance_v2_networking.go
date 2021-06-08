@@ -477,7 +477,7 @@ func FlattenInstanceNetworks(
 // with the instance. It does this by looping through all networks and looking
 // for a valid IP address. Priority is given to a network that was flagged as
 // an access_network.
-func GetInstanceAccessAddresses(d *schema.ResourceData, networks []map[string]interface{}) (string, string) {
+func GetInstanceAccessAddresses(_ *schema.ResourceData, networks []map[string]interface{}) (string, string) {
 	var hostv4, hostv6 string
 
 	// Loop through all networks

@@ -158,7 +158,7 @@ func resourceRdsConfigurationV3Create(ctx context.Context, d *schema.ResourceDat
 	return resourceRdsConfigurationV3Read(ctx, d, meta)
 }
 
-func resourceRdsConfigurationV3Read(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceRdsConfigurationV3Read(_ context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*cfg.Config)
 	client, err := config.RdsV3Client(config.GetRegion(d))
 	if err != nil {
@@ -238,7 +238,7 @@ func resourceRdsConfigurationV3Update(ctx context.Context, d *schema.ResourceDat
 	return resourceRdsConfigurationV3Read(ctx, d, meta)
 }
 
-func resourceRdsConfigurationV3Delete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceRdsConfigurationV3Delete(_ context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*cfg.Config)
 	rdsClient, err := config.RdsV3Client(config.GetRegion(d))
 	if err != nil {

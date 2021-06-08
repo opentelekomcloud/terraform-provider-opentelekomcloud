@@ -735,7 +735,7 @@ func getMasterID(nodes []instances.Nodes) (nodeID string) {
 	return
 }
 
-func resourceRdsInstanceV3Read(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceRdsInstanceV3Read(_ context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*cfg.Config)
 	client, err := config.RdsV3Client(config.GetRegion(d))
 	if err != nil {
@@ -870,7 +870,7 @@ func resourceRdsInstanceV3Read(ctx context.Context, d *schema.ResourceData, meta
 	return nil
 }
 
-func resourceRdsInstanceV3Delete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceRdsInstanceV3Delete(_ context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*cfg.Config)
 	client, err := config.RdsV3Client(config.GetRegion(d))
 	if err != nil {

@@ -374,7 +374,7 @@ func resourceIdentityAgencyV3Create(ctx context.Context, d *schema.ResourceData,
 	return resourceIdentityAgencyV3Read(ctx, d, meta)
 }
 
-func resourceIdentityAgencyV3Read(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceIdentityAgencyV3Read(_ context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*cfg.Config)
 	client, err := agencyClient(d, config)
 	if err != nil {

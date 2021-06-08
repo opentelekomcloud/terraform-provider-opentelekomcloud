@@ -110,7 +110,7 @@ func resourceNetworkingRouterRouteV2Create(ctx context.Context, d *schema.Resour
 	return resourceNetworkingRouterRouteV2Read(ctx, d, meta)
 }
 
-func resourceNetworkingRouterRouteV2Read(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceNetworkingRouterRouteV2Read(_ context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 
 	routerId := d.Get("router_id").(string)
 
@@ -152,7 +152,7 @@ func resourceNetworkingRouterRouteV2Read(ctx context.Context, d *schema.Resource
 	return nil
 }
 
-func resourceNetworkingRouterRouteV2Delete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceNetworkingRouterRouteV2Delete(_ context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 
 	routerId := d.Get("router_id").(string)
 	osMutexKV.Lock(routerId)

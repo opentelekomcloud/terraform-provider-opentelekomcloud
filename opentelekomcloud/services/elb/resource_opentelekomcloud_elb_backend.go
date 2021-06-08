@@ -94,7 +94,7 @@ func resourceBackendCreate(ctx context.Context, d *schema.ResourceData, meta int
 	return fmterr.Errorf("unexpected conversion error in resourceBackendCreate")
 }
 
-func resourceBackendRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceBackendRead(_ context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*cfg.Config)
 	client, err := config.ElbV1Client(config.GetRegion(d))
 	if err != nil {
@@ -119,7 +119,7 @@ func resourceBackendRead(ctx context.Context, d *schema.ResourceData, meta inter
 	return nil
 }
 
-func resourceBackendDelete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceBackendDelete(_ context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*cfg.Config)
 	client, err := config.ElbV1Client(config.GetRegion(d))
 	if err != nil {

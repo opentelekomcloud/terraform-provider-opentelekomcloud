@@ -80,7 +80,7 @@ func resourceWhitelistV2Create(ctx context.Context, d *schema.ResourceData, meta
 	return resourceWhitelistV2Read(ctx, d, meta)
 }
 
-func resourceWhitelistV2Read(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceWhitelistV2Read(_ context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*cfg.Config)
 	networkingClient, err := config.NetworkingV2Client(config.GetRegion(d))
 	if err != nil {
@@ -128,7 +128,7 @@ func resourceWhitelistV2Update(ctx context.Context, d *schema.ResourceData, meta
 	return resourceWhitelistV2Read(ctx, d, meta)
 }
 
-func resourceWhitelistV2Delete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceWhitelistV2Delete(_ context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*cfg.Config)
 	networkingClient, err := config.NetworkingV2Client(config.GetRegion(d))
 	if err != nil {

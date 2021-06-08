@@ -87,7 +87,7 @@ func resourceWafCertificateV1Create(ctx context.Context, d *schema.ResourceData,
 	return resourceWafCertificateV1Read(ctx, d, meta)
 }
 
-func resourceWafCertificateV1Read(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceWafCertificateV1Read(_ context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*cfg.Config)
 	wafClient, err := config.WafV1Client(config.GetRegion(d))
 	if err != nil {
@@ -137,7 +137,7 @@ func resourceWafCertificateV1Update(ctx context.Context, d *schema.ResourceData,
 	return resourceWafCertificateV1Read(ctx, d, meta)
 }
 
-func resourceWafCertificateV1Delete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceWafCertificateV1Delete(_ context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*cfg.Config)
 	wafClient, err := config.WafV1Client(config.GetRegion(d))
 	if err != nil {

@@ -119,7 +119,7 @@ func resourceSoftwareConfigV1Create(ctx context.Context, d *schema.ResourceData,
 	return resourceSoftwareConfigV1Read(ctx, d, meta)
 }
 
-func resourceSoftwareConfigV1Read(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceSoftwareConfigV1Read(_ context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*cfg.Config)
 	orchastrationClient, err := config.OrchestrationV1Client(config.GetRegion(d))
 	if err != nil {
@@ -151,7 +151,7 @@ func resourceSoftwareConfigV1Read(ctx context.Context, d *schema.ResourceData, m
 	return nil
 }
 
-func resourceSoftwareConfigV1Delete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceSoftwareConfigV1Delete(_ context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*cfg.Config)
 	orchastrationClient, err := config.OrchestrationV1Client(config.GetRegion(d))
 	if err != nil {

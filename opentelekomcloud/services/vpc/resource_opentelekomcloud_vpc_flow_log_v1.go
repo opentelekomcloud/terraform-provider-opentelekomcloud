@@ -117,7 +117,7 @@ func resourceVpcFlowLogV1Create(ctx context.Context, d *schema.ResourceData, met
 	return resourceVpcFlowLogV1Read(ctx, d, config)
 }
 
-func resourceVpcFlowLogV1Read(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceVpcFlowLogV1Read(_ context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*cfg.Config)
 	vpcClient, err := config.NetworkingV1Client(config.GetRegion(d))
 	if err != nil {
@@ -172,7 +172,7 @@ func resourceVpcFlowLogV1Update(ctx context.Context, d *schema.ResourceData, met
 	return resourceVpcFlowLogV1Read(ctx, d, meta)
 }
 
-func resourceVpcFlowLogV1Delete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceVpcFlowLogV1Delete(_ context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*cfg.Config)
 	vpcClient, err := config.NetworkingV1Client(config.GetRegion(d))
 	if err != nil {

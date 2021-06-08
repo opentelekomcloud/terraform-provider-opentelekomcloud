@@ -183,7 +183,7 @@ func resourceVBSBackupPolicyV2Create(ctx context.Context, d *schema.ResourceData
 
 }
 
-func resourceVBSBackupPolicyV2Read(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceVBSBackupPolicyV2Read(_ context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 
 	config := meta.(*cfg.Config)
 	vbsClient, err := config.VbsV2Client(config.GetRegion(d))
@@ -355,7 +355,7 @@ func resourceVBSBackupPolicyV2Update(ctx context.Context, d *schema.ResourceData
 	return resourceVBSBackupPolicyV2Read(ctx, d, meta)
 }
 
-func resourceVBSBackupPolicyV2Delete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceVBSBackupPolicyV2Delete(_ context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*cfg.Config)
 	vbsClient, err := config.VbsV2Client(config.GetRegion(d))
 	if err != nil {

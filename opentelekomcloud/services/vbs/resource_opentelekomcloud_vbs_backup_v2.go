@@ -166,7 +166,7 @@ func resourceVBSBackupV2Create(ctx context.Context, d *schema.ResourceData, meta
 	return fmterr.Errorf("Unexpected conversion error in resourceVBSBackupV2Create.")
 }
 
-func resourceVBSBackupV2Read(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceVBSBackupV2Read(_ context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*cfg.Config)
 	vbsClient, err := config.VbsV2Client(config.GetRegion(d))
 	if err != nil {

@@ -178,7 +178,7 @@ func resourceVpnIKEPolicyV2Create(ctx context.Context, d *schema.ResourceData, m
 	return resourceVpnIKEPolicyV2Read(ctx, d, meta)
 }
 
-func resourceVpnIKEPolicyV2Read(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceVpnIKEPolicyV2Read(_ context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	log.Printf("[DEBUG] Retrieve information about IKE policy: %s", d.Id())
 
 	config := meta.(*cfg.Config)

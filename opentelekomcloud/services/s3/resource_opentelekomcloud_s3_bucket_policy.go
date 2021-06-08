@@ -41,7 +41,7 @@ func ResourceS3BucketPolicy() *schema.Resource {
 	}
 }
 
-func resourceS3BucketPolicyPut(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceS3BucketPolicyPut(_ context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*cfg.Config)
 	s3conn, err := config.S3Client(config.GetRegion(d))
 	if err != nil {
@@ -79,7 +79,7 @@ func resourceS3BucketPolicyPut(ctx context.Context, d *schema.ResourceData, meta
 	return nil
 }
 
-func resourceS3BucketPolicyRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceS3BucketPolicyRead(_ context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*cfg.Config)
 	s3conn, err := config.S3Client(config.GetRegion(d))
 	if err != nil {
@@ -102,7 +102,7 @@ func resourceS3BucketPolicyRead(ctx context.Context, d *schema.ResourceData, met
 	return nil
 }
 
-func resourceS3BucketPolicyDelete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceS3BucketPolicyDelete(_ context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*cfg.Config)
 	s3conn, err := config.S3Client(config.GetRegion(d))
 	if err != nil {

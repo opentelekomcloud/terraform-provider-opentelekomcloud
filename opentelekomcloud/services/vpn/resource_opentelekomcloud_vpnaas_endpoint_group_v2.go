@@ -131,7 +131,7 @@ func resourceVpnEndpointGroupV2Create(ctx context.Context, d *schema.ResourceDat
 	return resourceVpnEndpointGroupV2Read(ctx, d, meta)
 }
 
-func resourceVpnEndpointGroupV2Read(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceVpnEndpointGroupV2Read(_ context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	log.Printf("[DEBUG] Retrieve information about group: %s", d.Id())
 
 	config := meta.(*cfg.Config)

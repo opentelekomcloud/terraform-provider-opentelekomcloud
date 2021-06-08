@@ -153,7 +153,7 @@ func resourceKmsKeyV1Create(ctx context.Context, d *schema.ResourceData, meta in
 	return resourceKmsKeyV1Read(ctx, d, meta)
 }
 
-func resourceKmsKeyV1Read(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceKmsKeyV1Read(_ context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*cfg.Config)
 	client, err := config.KmsKeyV1Client(config.GetRegion(d))
 	if err != nil {
@@ -268,7 +268,7 @@ func resourceKmsKeyV1Update(ctx context.Context, d *schema.ResourceData, meta in
 	return resourceKmsKeyV1Read(ctx, d, meta)
 }
 
-func resourceKmsKeyV1Delete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceKmsKeyV1Delete(_ context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*cfg.Config)
 	client, err := config.KmsKeyV1Client(config.GetRegion(d))
 	if err != nil {

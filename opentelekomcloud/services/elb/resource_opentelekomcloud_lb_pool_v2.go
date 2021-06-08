@@ -215,7 +215,7 @@ func resourceLBPoolV2Create(ctx context.Context, d *schema.ResourceData, meta in
 	return resourceLBPoolV2Read(ctx, d, meta)
 }
 
-func resourceLBPoolV2Read(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceLBPoolV2Read(_ context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*cfg.Config)
 	client, err := config.NetworkingV2Client(config.GetRegion(d))
 	if err != nil {

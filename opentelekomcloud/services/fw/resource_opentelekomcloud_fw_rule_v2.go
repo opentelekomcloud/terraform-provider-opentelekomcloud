@@ -133,7 +133,7 @@ func resourceFWRuleV2Create(ctx context.Context, d *schema.ResourceData, meta in
 	return resourceFWRuleV2Read(ctx, d, meta)
 }
 
-func resourceFWRuleV2Read(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceFWRuleV2Read(_ context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	log.Printf("[DEBUG] Retrieve information about firewall rule: %s", d.Id())
 
 	config := meta.(*cfg.Config)
@@ -228,7 +228,7 @@ func resourceFWRuleV2Update(ctx context.Context, d *schema.ResourceData, meta in
 	return resourceFWRuleV2Read(ctx, d, meta)
 }
 
-func resourceFWRuleV2Delete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceFWRuleV2Delete(_ context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	log.Printf("[DEBUG] Destroy firewall rule: %s", d.Id())
 
 	config := meta.(*cfg.Config)

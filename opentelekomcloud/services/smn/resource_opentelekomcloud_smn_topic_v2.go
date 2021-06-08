@@ -84,7 +84,7 @@ func resourceTopicCreate(ctx context.Context, d *schema.ResourceData, meta inter
 	return fmterr.Errorf("Unexpected conversion error in resourceTopicCreate.")
 }
 
-func resourceTopicRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceTopicRead(_ context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*cfg.Config)
 	client, err := config.SmnV2Client(config.GetProjectName(d))
 	if err != nil {
@@ -109,7 +109,7 @@ func resourceTopicRead(ctx context.Context, d *schema.ResourceData, meta interfa
 	return nil
 }
 
-func resourceTopicDelete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceTopicDelete(_ context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*cfg.Config)
 	client, err := config.SmnV2Client(config.GetProjectName(d))
 	if err != nil {

@@ -210,7 +210,7 @@ func resourceNetworkingSubnetV2Create(ctx context.Context, d *schema.ResourceDat
 	return resourceNetworkingSubnetV2Read(ctx, d, meta)
 }
 
-func resourceNetworkingSubnetV2Read(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceNetworkingSubnetV2Read(_ context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	log.Printf("[DEBUG] Checking Subnet 4 %s: network_id: %s", d.Id(), d.Get("network_id").(string))
 	config := meta.(*cfg.Config)
 	networkingClient, err := config.NetworkingV2Client(config.GetRegion(d))

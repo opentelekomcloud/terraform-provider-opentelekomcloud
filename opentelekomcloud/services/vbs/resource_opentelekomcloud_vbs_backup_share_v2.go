@@ -129,7 +129,7 @@ func resourceVBSBackupShareV2Create(ctx context.Context, d *schema.ResourceData,
 	return resourceVBSBackupShareV2Read(ctx, d, meta)
 }
 
-func resourceVBSBackupShareV2Read(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceVBSBackupShareV2Read(_ context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*cfg.Config)
 	vbsClient, err := config.VbsV2Client(config.GetRegion(d))
 	if err != nil {
@@ -165,7 +165,7 @@ func resourceVBSBackupShareV2Read(ctx context.Context, d *schema.ResourceData, m
 	return nil
 }
 
-func resourceVBSBackupShareV2Delete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceVBSBackupShareV2Delete(_ context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*cfg.Config)
 	vbsClient, err := config.VbsV2Client(config.GetRegion(d))
 	if err != nil {

@@ -153,7 +153,7 @@ func resourceELoadBalancerCreate(ctx context.Context, d *schema.ResourceData, me
 	return fmterr.Errorf("Unexpected conversion error in resourceELoadBalancerCreate.")
 }
 
-func resourceELoadBalancerRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceELoadBalancerRead(_ context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*cfg.Config)
 	networkingClient, err := config.ElbV1Client(config.GetRegion(d))
 	if err != nil {
@@ -218,7 +218,7 @@ func resourceELoadBalancerUpdate(ctx context.Context, d *schema.ResourceData, me
 	return resourceELoadBalancerRead(ctx, d, meta)
 }
 
-func resourceELoadBalancerDelete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceELoadBalancerDelete(_ context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*cfg.Config)
 	client, err := config.ElbV1Client(config.GetRegion(d))
 	if err != nil {
