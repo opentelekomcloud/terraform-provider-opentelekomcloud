@@ -125,7 +125,7 @@ func resourceComputeFloatingIPV2Delete(ctx context.Context, d *schema.ResourceDa
 	config := meta.(*cfg.Config)
 	computeClient, err := config.ComputeV2Client(config.GetRegion(d))
 	if err != nil {
-		return fmterr.Errorf("Error creating OpenTelekomCloud compute client: %s", err)
+		return fmterr.Errorf("error creating OpenTelekomCloud compute client: %s", err)
 	}
 
 	log.Printf("[DEBUG] Attempting to delete Floating IP %s.\n", d.Id())
@@ -146,7 +146,7 @@ func resourceComputeFloatingIPV2Delete(ctx context.Context, d *schema.ResourceDa
 
 	_, err = stateConf.WaitForStateContext(ctx)
 	if err != nil {
-		return fmterr.Errorf("Error deleting OpenTelekomCloud Floating IP: %s", err)
+		return fmterr.Errorf("error deleting OpenTelekomCloud Floating IP: %s", err)
 	}
 
 	return nil

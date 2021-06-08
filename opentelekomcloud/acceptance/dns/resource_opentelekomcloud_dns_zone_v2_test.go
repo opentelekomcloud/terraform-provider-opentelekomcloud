@@ -148,7 +148,7 @@ func testAccCheckDNSV2ZoneDestroy(s *terraform.State) error {
 	config := common.TestAccProvider.Meta().(*cfg.Config)
 	dnsClient, err := config.DnsV2Client(env.OS_REGION_NAME)
 	if err != nil {
-		return fmt.Errorf("Error creating OpenTelekomCloud DNS client: %s", err)
+		return fmt.Errorf("error creating OpenTelekomCloud DNS client: %s", err)
 	}
 
 	for _, rs := range s.RootModule().Resources {
@@ -179,7 +179,7 @@ func testAccCheckDNSV2ZoneExists(n string, zone *zones.Zone) resource.TestCheckF
 		config := common.TestAccProvider.Meta().(*cfg.Config)
 		dnsClient, err := config.DnsV2Client(env.OS_REGION_NAME)
 		if err != nil {
-			return fmt.Errorf("Error creating OpenTelekomCloud DNS client: %s", err)
+			return fmt.Errorf("error creating OpenTelekomCloud DNS client: %s", err)
 		}
 
 		found, err := zones.Get(dnsClient, rs.Primary.ID).Extract()

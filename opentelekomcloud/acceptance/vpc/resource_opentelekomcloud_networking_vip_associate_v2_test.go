@@ -46,7 +46,7 @@ func testAccCheckNetworkingV2VIPAssociateDestroy(s *terraform.State) error {
 	config := common.TestAccProvider.Meta().(*cfg.Config)
 	networkingClient, err := config.NetworkingV2Client(env.OS_REGION_NAME)
 	if err != nil {
-		return fmt.Errorf("Error creating OpenTelekomCloud networking client: %s", err)
+		return fmt.Errorf("error creating OpenTelekomCloud networking client: %s", err)
 	}
 
 	for _, rs := range s.RootModule().Resources {
@@ -101,7 +101,7 @@ func testAccCheckNetworkingV2VIPAssociateAssociated(p *ports.Port, vip *ports.Po
 		config := common.TestAccProvider.Meta().(*cfg.Config)
 		networkingClient, err := config.NetworkingV2Client(env.OS_REGION_NAME)
 		if err != nil {
-			return fmt.Errorf("Error creating OpenTelekomCloud networking client: %s", err)
+			return fmt.Errorf("error creating OpenTelekomCloud networking client: %s", err)
 		}
 
 		p, err := ports.Get(networkingClient, p.ID).Extract()

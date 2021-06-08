@@ -157,7 +157,7 @@ func resourceDmsInstancesV1Create(ctx context.Context, d *schema.ResourceData, m
 	config := meta.(*cfg.Config)
 	DmsV1Client, err := config.DmsV1Client(config.GetRegion(d))
 	if err != nil {
-		return fmterr.Errorf("Error creating OpenTelekomCloud dms instance client: %s", err)
+		return fmterr.Errorf("error creating OpenTelekomCloud dms instance client: %s", err)
 	}
 
 	ssl_enable := false
@@ -188,7 +188,7 @@ func resourceDmsInstancesV1Create(ctx context.Context, d *schema.ResourceData, m
 	log.Printf("[DEBUG] Create Options: %#v", createOpts)
 	v, err := instances.Create(DmsV1Client, createOpts).Extract()
 	if err != nil {
-		return fmterr.Errorf("Error creating OpenTelekomCloud instance: %s", err)
+		return fmterr.Errorf("error creating OpenTelekomCloud instance: %s", err)
 	}
 	log.Printf("[INFO] instance ID: %s", v.InstanceID)
 
@@ -218,7 +218,7 @@ func resourceDmsInstancesV1Read(ctx context.Context, d *schema.ResourceData, met
 
 	DmsV1Client, err := config.DmsV1Client(config.GetRegion(d))
 	if err != nil {
-		return fmterr.Errorf("Error creating OpenTelekomCloud dms instance client: %s", err)
+		return fmterr.Errorf("error creating OpenTelekomCloud dms instance client: %s", err)
 	}
 	v, err := instances.Get(DmsV1Client, d.Id()).Extract()
 	if err != nil {
@@ -261,7 +261,7 @@ func resourceDmsInstancesV1Update(ctx context.Context, d *schema.ResourceData, m
 	config := meta.(*cfg.Config)
 	DmsV1Client, err := config.DmsV1Client(config.GetRegion(d))
 	if err != nil {
-		return fmterr.Errorf("Error updating OpenTelekomCloud dms instance client: %s", err)
+		return fmterr.Errorf("error updating OpenTelekomCloud dms instance client: %s", err)
 	}
 	var updateOpts instances.UpdateOpts
 	if d.HasChange("name") {
@@ -286,7 +286,7 @@ func resourceDmsInstancesV1Update(ctx context.Context, d *schema.ResourceData, m
 
 	err = instances.Update(DmsV1Client, d.Id(), updateOpts).Err
 	if err != nil {
-		return fmterr.Errorf("Error updating OpenTelekomCloud Dms Instance: %s", err)
+		return fmterr.Errorf("error updating OpenTelekomCloud Dms Instance: %s", err)
 	}
 
 	return resourceDmsInstancesV1Read(ctx, d, meta)
@@ -296,7 +296,7 @@ func resourceDmsInstancesV1Delete(ctx context.Context, d *schema.ResourceData, m
 	config := meta.(*cfg.Config)
 	DmsV1Client, err := config.DmsV1Client(config.GetRegion(d))
 	if err != nil {
-		return fmterr.Errorf("Error creating OpenTelekomCloud dms instance client: %s", err)
+		return fmterr.Errorf("error creating OpenTelekomCloud dms instance client: %s", err)
 	}
 
 	_, err = instances.Get(DmsV1Client, d.Id()).Extract()
@@ -306,7 +306,7 @@ func resourceDmsInstancesV1Delete(ctx context.Context, d *schema.ResourceData, m
 
 	err = instances.Delete(DmsV1Client, d.Id()).ExtractErr()
 	if err != nil {
-		return fmterr.Errorf("Error deleting OpenTelekomCloud instance: %s", err)
+		return fmterr.Errorf("error deleting OpenTelekomCloud instance: %s", err)
 	}
 
 	// Wait for the instance to delete before moving on.

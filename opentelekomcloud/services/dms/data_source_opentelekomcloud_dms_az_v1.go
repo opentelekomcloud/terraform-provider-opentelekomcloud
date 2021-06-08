@@ -40,7 +40,7 @@ func dataSourceDmsAZV1Read(ctx context.Context, d *schema.ResourceData, meta int
 	config := meta.(*cfg.Config)
 	DmsV1Client, err := config.DmsV1Client(config.GetRegion(d))
 	if err != nil {
-		return fmterr.Errorf("Error creating OpenTelekomCloud dms client: %s", err)
+		return fmterr.Errorf("error creating OpenTelekomCloud dms client: %s", err)
 	}
 
 	v, err := availablezones.Get(DmsV1Client).Extract()

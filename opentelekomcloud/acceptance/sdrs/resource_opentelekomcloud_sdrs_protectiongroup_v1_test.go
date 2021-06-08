@@ -46,7 +46,7 @@ func testAccCheckSdrsProtectiongroupV1Destroy(s *terraform.State) error {
 	config := common.TestAccProvider.Meta().(*cfg.Config)
 	sdrsClient, err := config.SdrsV1Client(env.OS_REGION_NAME)
 	if err != nil {
-		return fmt.Errorf("Error creating OpenTelekomCloud SDRS client: %s", err)
+		return fmt.Errorf("error creating OpenTelekomCloud SDRS client: %s", err)
 	}
 
 	for _, rs := range s.RootModule().Resources {
@@ -77,7 +77,7 @@ func testAccCheckSdrsProtectiongroupV1Exists(n string, group *protectiongroups.G
 		config := common.TestAccProvider.Meta().(*cfg.Config)
 		sdrsClient, err := config.SdrsV1Client(env.OS_REGION_NAME)
 		if err != nil {
-			return fmt.Errorf("Error creating OpenTelekomCloud SDRS client: %s", err)
+			return fmt.Errorf("error creating OpenTelekomCloud SDRS client: %s", err)
 		}
 
 		found, err := protectiongroups.Get(sdrsClient, rs.Primary.ID).Extract()

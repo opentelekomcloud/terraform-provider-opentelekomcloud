@@ -135,7 +135,7 @@ func resourceNetworkingNetworkV2Create(ctx context.Context, d *schema.ResourceDa
 	config := meta.(*cfg.Config)
 	networkingClient, err := config.NetworkingV2Client(config.GetRegion(d))
 	if err != nil {
-		return fmterr.Errorf("Error creating OpenTelekomCloud networking client: %s", err)
+		return fmterr.Errorf("error creating OpenTelekomCloud networking client: %s", err)
 	}
 
 	createOpts := NetworkCreateOpts{
@@ -183,7 +183,7 @@ func resourceNetworkingNetworkV2Create(ctx context.Context, d *schema.ResourceDa
 	}
 
 	if err != nil {
-		return fmterr.Errorf("Error creating OpenTelekomCloud Neutron network: %s", err)
+		return fmterr.Errorf("error creating OpenTelekomCloud Neutron network: %s", err)
 	}
 	d.SetId(FormatNidFromValS(strconv.FormatBool(asu), n.ID))
 
@@ -211,7 +211,7 @@ func resourceNetworkingNetworkV2Read(ctx context.Context, d *schema.ResourceData
 	config := meta.(*cfg.Config)
 	networkingClient, err := config.NetworkingV2Client(config.GetRegion(d))
 	if err != nil {
-		return fmterr.Errorf("Error creating OpenTelekomCloud networking client: %s", err)
+		return fmterr.Errorf("error creating OpenTelekomCloud networking client: %s", err)
 	}
 
 	asu, id := ExtractValSFromNid(d.Id())
@@ -236,7 +236,7 @@ func resourceNetworkingNetworkV2Update(ctx context.Context, d *schema.ResourceDa
 	config := meta.(*cfg.Config)
 	networkingClient, err := config.NetworkingV2Client(config.GetRegion(d))
 	if err != nil {
-		return fmterr.Errorf("Error creating OpenTelekomCloud networking client: %s", err)
+		return fmterr.Errorf("error creating OpenTelekomCloud networking client: %s", err)
 	}
 
 	var updateOpts networks.UpdateOpts
@@ -272,7 +272,7 @@ func resourceNetworkingNetworkV2Update(ctx context.Context, d *schema.ResourceDa
 
 	_, err = networks.Update(networkingClient, id, updateOpts).Extract()
 	if err != nil {
-		return fmterr.Errorf("Error updating OpenTelekomCloud Neutron Network: %s", err)
+		return fmterr.Errorf("error updating OpenTelekomCloud Neutron Network: %s", err)
 	}
 
 	d.SetId(FormatNidFromValS(strconv.FormatBool(asu), id))
@@ -283,7 +283,7 @@ func resourceNetworkingNetworkV2Delete(ctx context.Context, d *schema.ResourceDa
 	config := meta.(*cfg.Config)
 	networkingClient, err := config.NetworkingV2Client(config.GetRegion(d))
 	if err != nil {
-		return fmterr.Errorf("Error creating OpenTelekomCloud networking client: %s", err)
+		return fmterr.Errorf("error creating OpenTelekomCloud networking client: %s", err)
 	}
 
 	_, id := ExtractValFromNid(d.Id())
@@ -298,7 +298,7 @@ func resourceNetworkingNetworkV2Delete(ctx context.Context, d *schema.ResourceDa
 
 	_, err = stateConf.WaitForStateContext(ctx)
 	if err != nil {
-		return fmterr.Errorf("Error deleting OpenTelekomCloud Neutron Network: %s", err)
+		return fmterr.Errorf("error deleting OpenTelekomCloud Neutron Network: %s", err)
 	}
 
 	d.SetId("")

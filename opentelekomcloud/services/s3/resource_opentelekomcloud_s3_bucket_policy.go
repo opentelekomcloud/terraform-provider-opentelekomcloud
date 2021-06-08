@@ -45,7 +45,7 @@ func resourceS3BucketPolicyPut(ctx context.Context, d *schema.ResourceData, meta
 	config := meta.(*cfg.Config)
 	s3conn, err := config.S3Client(config.GetRegion(d))
 	if err != nil {
-		return fmterr.Errorf("Error creating OpenTelekomCloud s3 client: %s", err)
+		return fmterr.Errorf("error creating OpenTelekomCloud s3 client: %s", err)
 	}
 
 	bucket := d.Get("bucket").(string)
@@ -73,7 +73,7 @@ func resourceS3BucketPolicyPut(ctx context.Context, d *schema.ResourceData, meta
 	})
 
 	if err != nil {
-		return fmterr.Errorf("Error putting S3 policy: %s", err)
+		return fmterr.Errorf("error putting S3 policy: %s", err)
 	}
 
 	return nil
@@ -83,7 +83,7 @@ func resourceS3BucketPolicyRead(ctx context.Context, d *schema.ResourceData, met
 	config := meta.(*cfg.Config)
 	s3conn, err := config.S3Client(config.GetRegion(d))
 	if err != nil {
-		return fmterr.Errorf("Error creating OpenTelekomCloud s3 client: %s", err)
+		return fmterr.Errorf("error creating OpenTelekomCloud s3 client: %s", err)
 	}
 
 	log.Printf("[DEBUG] S3 bucket policy, read for bucket: %s", d.Id())
@@ -106,7 +106,7 @@ func resourceS3BucketPolicyDelete(ctx context.Context, d *schema.ResourceData, m
 	config := meta.(*cfg.Config)
 	s3conn, err := config.S3Client(config.GetRegion(d))
 	if err != nil {
-		return fmterr.Errorf("Error creating OpenTelekomCloud s3 client: %s", err)
+		return fmterr.Errorf("error creating OpenTelekomCloud s3 client: %s", err)
 	}
 
 	bucket := d.Get("bucket").(string)
@@ -120,7 +120,7 @@ func resourceS3BucketPolicyDelete(ctx context.Context, d *schema.ResourceData, m
 		if awsErr, ok := err.(awserr.Error); ok && awsErr.Code() == "NoSuchBucket" {
 			return nil
 		}
-		return fmterr.Errorf("Error deleting S3 policy: %s", err)
+		return fmterr.Errorf("error deleting S3 policy: %s", err)
 	}
 
 	return nil

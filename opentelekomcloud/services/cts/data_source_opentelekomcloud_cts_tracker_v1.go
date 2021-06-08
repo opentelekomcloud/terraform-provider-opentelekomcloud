@@ -81,7 +81,7 @@ func dataSourceCTSTrackerV1Read(ctx context.Context, d *schema.ResourceData, met
 	config := meta.(*cfg.Config)
 	ctsClient, err := config.CtsV1Client(config.GetProjectName(d))
 	if err != nil {
-		return fmterr.Errorf("Error creating cts v1 client: %s", err)
+		return fmterr.Errorf("error creating cts v1 client: %s", err)
 	}
 
 	listOpts := tracker.ListOpts{

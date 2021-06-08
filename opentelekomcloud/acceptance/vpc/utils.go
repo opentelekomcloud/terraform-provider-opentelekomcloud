@@ -47,7 +47,7 @@ func TestAccCheckNetworkingV2NetworkExists(n string, network *networks.Network) 
 		config := common.TestAccProvider.Meta().(*cfg.Config)
 		networkingClient, err := config.NetworkingV2Client(env.OS_REGION_NAME)
 		if err != nil {
-			return fmt.Errorf("Error creating OpenTelekomCloud networking client: %s", err)
+			return fmt.Errorf("error creating OpenTelekomCloud networking client: %s", err)
 		}
 
 		_, id := vpc.ExtractValFromNid(rs.Primary.ID)
@@ -80,7 +80,7 @@ func TestAccCheckNetworkingV2SubnetExists(n string, subnet *subnets.Subnet) reso
 		config := common.TestAccProvider.Meta().(*cfg.Config)
 		networkingClient, err := config.NetworkingV2Client(env.OS_REGION_NAME)
 		if err != nil {
-			return fmt.Errorf("Error creating OpenTelekomCloud networking client: %s", err)
+			return fmt.Errorf("error creating OpenTelekomCloud networking client: %s", err)
 		}
 
 		found, err := subnets.Get(networkingClient, rs.Primary.ID).Extract()
@@ -112,7 +112,7 @@ func TestAccCheckNetworkingV2RouterExists(n string, router *routers.Router) reso
 		config := common.TestAccProvider.Meta().(*cfg.Config)
 		networkingClient, err := config.NetworkingV2Client(env.OS_REGION_NAME)
 		if err != nil {
-			return fmt.Errorf("Error creating OpenTelekomCloud networking client: %s", err)
+			return fmt.Errorf("error creating OpenTelekomCloud networking client: %s", err)
 		}
 
 		found, err := routers.Get(networkingClient, rs.Primary.ID).Extract()
@@ -144,7 +144,7 @@ func TestAccCheckNetworkingV2FloatingIPExists(n string, kp *floatingips.Floating
 		config := common.TestAccProvider.Meta().(*cfg.Config)
 		networkClient, err := config.NetworkingV2Client(env.OS_REGION_NAME)
 		if err != nil {
-			return fmt.Errorf("Error creating OpenTelekomCloud networking client: %s", err)
+			return fmt.Errorf("error creating OpenTelekomCloud networking client: %s", err)
 		}
 
 		found, err := floatingips.Get(networkClient, rs.Primary.ID).Extract()
@@ -176,7 +176,7 @@ func TestAccCheckNetworkingV2RouterInterfaceExists(n string) resource.TestCheckF
 		config := common.TestAccProvider.Meta().(*cfg.Config)
 		networkingClient, err := config.NetworkingV2Client(env.OS_REGION_NAME)
 		if err != nil {
-			return fmt.Errorf("Error creating OpenTelekomCloud networking client: %s", err)
+			return fmt.Errorf("error creating OpenTelekomCloud networking client: %s", err)
 		}
 
 		found, err := ports.Get(networkingClient, rs.Primary.ID).Extract()

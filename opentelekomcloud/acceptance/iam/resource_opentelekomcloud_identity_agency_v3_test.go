@@ -45,7 +45,7 @@ func testAccCheckIdentityV3AgencyDestroy(s *terraform.State) error {
 	config := common.TestAccProvider.Meta().(*cfg.Config)
 	identityClient, err := config.IdentityV3Client(env.OS_REGION_NAME)
 	if err != nil {
-		return fmt.Errorf("Error creating OpenTelekomcloud identity client: %s", err)
+		return fmt.Errorf("error creating OpenTelekomcloud identity client: %s", err)
 	}
 	identityClient.Endpoint = strings.Replace(identityClient.Endpoint, "v3", "v3.0", 1)
 
@@ -77,7 +77,7 @@ func testAccCheckIdentityV3AgencyExists(n string, a *agency.Agency) resource.Tes
 		config := common.TestAccProvider.Meta().(*cfg.Config)
 		identityClient, err := config.IdentityV3Client(env.OS_REGION_NAME)
 		if err != nil {
-			return fmt.Errorf("Error creating OpenTelekomcloud identity client: %s", err)
+			return fmt.Errorf("error creating OpenTelekomcloud identity client: %s", err)
 		}
 		identityClient.Endpoint = strings.Replace(identityClient.Endpoint, "v3", "v3.0", 1)
 		found, err := agency.Get(identityClient, rs.Primary.ID).Extract()

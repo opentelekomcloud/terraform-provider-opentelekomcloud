@@ -67,7 +67,7 @@ func resourceIdentityRoleAssignmentV3Create(ctx context.Context, d *schema.Resou
 	config := meta.(*cfg.Config)
 	identityClient, err := config.IdentityV3Client(config.GetRegion(d))
 	if err != nil {
-		return fmterr.Errorf("Error creating OpenStack identity client: %s", err)
+		return fmterr.Errorf("error creating OpenStack identity client: %s", err)
 	}
 
 	domainID := d.Get("domain_id").(string)
@@ -84,7 +84,7 @@ func resourceIdentityRoleAssignmentV3Create(ctx context.Context, d *schema.Resou
 
 	err = roles.Assign(identityClient, roleID, opts).ExtractErr()
 	if err != nil {
-		return fmterr.Errorf("Error assigning role: %s", err)
+		return fmterr.Errorf("error assigning role: %s", err)
 	}
 
 	d.SetId(buildRoleAssignmentID(domainID, projectID, groupID, userID, roleID))
@@ -96,12 +96,12 @@ func resourceIdentityRoleAssignmentV3Read(ctx context.Context, d *schema.Resourc
 	config := meta.(*cfg.Config)
 	identityClient, err := config.IdentityV3Client(config.GetRegion(d))
 	if err != nil {
-		return fmterr.Errorf("Error creating OpenStack identity client: %s", err)
+		return fmterr.Errorf("error creating OpenStack identity client: %s", err)
 	}
 
 	roleAssignment, err := getRoleAssignment(identityClient, d)
 	if err != nil {
-		return fmterr.Errorf("Error getting role assignment: %s", err)
+		return fmterr.Errorf("error getting role assignment: %s", err)
 	}
 	domainID, projectID, groupID, userID, _ := ExtractRoleAssignmentID(d.Id())
 
@@ -120,7 +120,7 @@ func resourceIdentityRoleAssignmentV3Delete(ctx context.Context, d *schema.Resou
 	config := meta.(*cfg.Config)
 	identityClient, err := config.IdentityV3Client(config.GetRegion(d))
 	if err != nil {
-		return fmterr.Errorf("Error creating OpenStack identity client: %s", err)
+		return fmterr.Errorf("error creating OpenStack identity client: %s", err)
 	}
 
 	domainID, projectID, groupID, userID, roleID := ExtractRoleAssignmentID(d.Id())
@@ -133,7 +133,7 @@ func resourceIdentityRoleAssignmentV3Delete(ctx context.Context, d *schema.Resou
 	}
 	roles.Unassign(identityClient, roleID, opts).ExtractErr()
 	if err != nil {
-		return fmterr.Errorf("Error unassigning role: %s", err)
+		return fmterr.Errorf("error unassigning role: %s", err)
 	}
 
 	return nil

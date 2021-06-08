@@ -52,7 +52,7 @@ func resourceNetworkingFloatingIPAssociateV2Create(ctx context.Context, d *schem
 	config := meta.(*cfg.Config)
 	networkingClient, err := config.NetworkingV2Client(config.GetRegion(d))
 	if err != nil {
-		return fmterr.Errorf("Error creating OpenTelekomCloud network client: %s", err)
+		return fmterr.Errorf("error creating OpenTelekomCloud network client: %s", err)
 	}
 
 	floatingIP := d.Get("floating_ip").(string)
@@ -71,7 +71,7 @@ func resourceNetworkingFloatingIPAssociateV2Create(ctx context.Context, d *schem
 
 	_, err = floatingips.Update(networkingClient, floatingIPID, updateOpts).Extract()
 	if err != nil {
-		return fmterr.Errorf("Error associating floating IP %s to port %s: %s",
+		return fmterr.Errorf("error associating floating IP %s to port %s: %s",
 			floatingIPID, portID, err)
 	}
 
@@ -84,7 +84,7 @@ func resourceNetworkingFloatingIPAssociateV2Read(ctx context.Context, d *schema.
 	config := meta.(*cfg.Config)
 	networkingClient, err := config.NetworkingV2Client(config.GetRegion(d))
 	if err != nil {
-		return fmterr.Errorf("Error creating OpenTelekomCloud network client: %s", err)
+		return fmterr.Errorf("error creating OpenTelekomCloud network client: %s", err)
 	}
 
 	floatingIP, err := floatingips.Get(networkingClient, d.Id()).Extract()
@@ -103,7 +103,7 @@ func resourceNetworkingFloatingIPAssociateV2Delete(ctx context.Context, d *schem
 	config := meta.(*cfg.Config)
 	networkingClient, err := config.NetworkingV2Client(config.GetRegion(d))
 	if err != nil {
-		return fmterr.Errorf("Error creating OpenTelekomCloud network client: %s", err)
+		return fmterr.Errorf("error creating OpenTelekomCloud network client: %s", err)
 	}
 
 	portID := d.Get("port_id").(string)
@@ -115,7 +115,7 @@ func resourceNetworkingFloatingIPAssociateV2Delete(ctx context.Context, d *schem
 
 	_, err = floatingips.Update(networkingClient, d.Id(), updateOpts).Extract()
 	if err != nil {
-		return fmterr.Errorf("Error disassociating floating IP %s from port %s: %s",
+		return fmterr.Errorf("error disassociating floating IP %s from port %s: %s",
 			d.Id(), portID, err)
 	}
 

@@ -110,7 +110,7 @@ func resourceL7RuleV2Create(ctx context.Context, d *schema.ResourceData, meta in
 	config := meta.(*cfg.Config)
 	lbClient, err := config.NetworkingV2Client(config.GetRegion(d))
 	if err != nil {
-		return fmterr.Errorf("Error creating OpenTelekomCloud networking client: %s", err)
+		return fmterr.Errorf("error creating OpenTelekomCloud networking client: %s", err)
 	}
 
 	// Assign some required variables for use in creation.
@@ -179,7 +179,7 @@ func resourceL7RuleV2Create(ctx context.Context, d *schema.ResourceData, meta in
 	})
 
 	if err != nil {
-		return fmterr.Errorf("Error creating L7 Rule: %s", err)
+		return fmterr.Errorf("error creating L7 Rule: %s", err)
 	}
 
 	// Wait for L7 Rule to become active before continuing
@@ -198,7 +198,7 @@ func resourceL7RuleV2Read(ctx context.Context, d *schema.ResourceData, meta inte
 	config := meta.(*cfg.Config)
 	lbClient, err := config.NetworkingV2Client(config.GetRegion(d))
 	if err != nil {
-		return fmterr.Errorf("Error creating OpenTelekomCloud networking client: %s", err)
+		return fmterr.Errorf("error creating OpenTelekomCloud networking client: %s", err)
 	}
 
 	l7policyID := d.Get("l7policy_id").(string)
@@ -225,7 +225,7 @@ func resourceL7RuleV2Update(ctx context.Context, d *schema.ResourceData, meta in
 	config := meta.(*cfg.Config)
 	lbClient, err := config.NetworkingV2Client(config.GetRegion(d))
 	if err != nil {
-		return fmterr.Errorf("Error creating OpenTelekomCloud networking client: %s", err)
+		return fmterr.Errorf("error creating OpenTelekomCloud networking client: %s", err)
 	}
 
 	// Assign some required variables for use in updating.
@@ -314,7 +314,7 @@ func resourceL7RuleV2Delete(ctx context.Context, d *schema.ResourceData, meta in
 	config := meta.(*cfg.Config)
 	lbClient, err := config.NetworkingV2Client(config.GetRegion(d))
 	if err != nil {
-		return fmterr.Errorf("Error creating OpenTelekomCloud networking client: %s", err)
+		return fmterr.Errorf("error creating OpenTelekomCloud networking client: %s", err)
 	}
 
 	timeout := d.Timeout(schema.TimeoutDelete)
@@ -377,7 +377,7 @@ func resourceL7RuleV2Import(ctx context.Context, d *schema.ResourceData, meta in
 	config := meta.(*cfg.Config)
 	lbClient, err := config.NetworkingV2Client(config.GetRegion(d))
 	if err != nil {
-		return nil, fmt.Errorf("Error creating OpenTelekomCloud networking client: %s", err)
+		return nil, fmt.Errorf("error creating OpenTelekomCloud networking client: %s", err)
 	}
 
 	listenerID := ""

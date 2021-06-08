@@ -78,7 +78,7 @@ func dataSourceRTSStackV1Read(ctx context.Context, d *schema.ResourceData, meta 
 	config := meta.(*cfg.Config)
 	orchestrationClient, err := config.OrchestrationV1Client(config.GetRegion(d))
 	if err != nil {
-		return fmterr.Errorf("Error creating OpenTelekomCloud rts client: %s", err)
+		return fmterr.Errorf("error creating OpenTelekomCloud rts client: %s", err)
 	}
 	stackName := d.Get("name").(string)
 

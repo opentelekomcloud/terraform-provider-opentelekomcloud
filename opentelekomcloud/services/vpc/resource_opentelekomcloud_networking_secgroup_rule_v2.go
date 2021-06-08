@@ -108,7 +108,7 @@ func resourceNetworkingSecGroupRuleV2Create(ctx context.Context, d *schema.Resou
 	config := meta.(*cfg.Config)
 	networkingClient, err := config.NetworkingV2Client(config.GetRegion(d))
 	if err != nil {
-		return fmterr.Errorf("Error creating OpenTelekomCloud networking client: %s", err)
+		return fmterr.Errorf("error creating OpenTelekomCloud networking client: %s", err)
 	}
 
 	portRangeMin := d.Get("port_range_min").(int)
@@ -166,7 +166,7 @@ func resourceNetworkingSecGroupRuleV2Read(ctx context.Context, d *schema.Resourc
 	config := meta.(*cfg.Config)
 	networkingClient, err := config.NetworkingV2Client(config.GetRegion(d))
 	if err != nil {
-		return fmterr.Errorf("Error creating OpenTelekomCloud networking client: %s", err)
+		return fmterr.Errorf("error creating OpenTelekomCloud networking client: %s", err)
 	}
 
 	security_group_rule, err := rules.Get(networkingClient, d.Id()).Extract()
@@ -196,7 +196,7 @@ func resourceNetworkingSecGroupRuleV2Delete(ctx context.Context, d *schema.Resou
 	config := meta.(*cfg.Config)
 	networkingClient, err := config.NetworkingV2Client(config.GetRegion(d))
 	if err != nil {
-		return fmterr.Errorf("Error creating OpenTelekomCloud networking client: %s", err)
+		return fmterr.Errorf("error creating OpenTelekomCloud networking client: %s", err)
 	}
 
 	stateConf := &resource.StateChangeConf{
@@ -210,7 +210,7 @@ func resourceNetworkingSecGroupRuleV2Delete(ctx context.Context, d *schema.Resou
 
 	_, err = stateConf.WaitForStateContext(ctx)
 	if err != nil {
-		return fmterr.Errorf("Error deleting OpenTelekomCloud Neutron Security Group Rule: %s", err)
+		return fmterr.Errorf("error deleting OpenTelekomCloud Neutron Security Group Rule: %s", err)
 	}
 
 	d.SetId("")

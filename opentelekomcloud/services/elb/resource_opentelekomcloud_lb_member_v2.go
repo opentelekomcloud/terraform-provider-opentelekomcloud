@@ -101,7 +101,7 @@ func resourceMemberV2Create(ctx context.Context, d *schema.ResourceData, meta in
 	config := meta.(*cfg.Config)
 	networkingClient, err := config.NetworkingV2Client(config.GetRegion(d))
 	if err != nil {
-		return fmterr.Errorf("Error creating OpenTelekomCloud networking client: %s", err)
+		return fmterr.Errorf("error creating OpenTelekomCloud networking client: %s", err)
 	}
 
 	adminStateUp := d.Get("admin_state_up").(bool)
@@ -140,7 +140,7 @@ func resourceMemberV2Create(ctx context.Context, d *schema.ResourceData, meta in
 	})
 
 	if err != nil {
-		return fmterr.Errorf("Error creating member: %s", err)
+		return fmterr.Errorf("error creating member: %s", err)
 	}
 
 	// Wait for LB to become ACTIVE again
@@ -164,7 +164,7 @@ func resourceMemberV2Read(ctx context.Context, d *schema.ResourceData, meta inte
 	config := meta.(*cfg.Config)
 	networkingClient, err := config.NetworkingV2Client(config.GetRegion(d))
 	if err != nil {
-		return fmterr.Errorf("Error creating OpenTelekomCloud networking client: %s", err)
+		return fmterr.Errorf("error creating OpenTelekomCloud networking client: %s", err)
 	}
 
 	member, err := pools.GetMember(networkingClient, d.Get("pool_id").(string), d.Id()).Extract()
@@ -191,7 +191,7 @@ func resourceMemberV2Update(ctx context.Context, d *schema.ResourceData, meta in
 	config := meta.(*cfg.Config)
 	networkingClient, err := config.NetworkingV2Client(config.GetRegion(d))
 	if err != nil {
-		return fmterr.Errorf("Error creating OpenTelekomCloud networking client: %s", err)
+		return fmterr.Errorf("error creating OpenTelekomCloud networking client: %s", err)
 	}
 
 	var updateOpts pools.UpdateMemberOpts
@@ -239,7 +239,7 @@ func resourceMemberV2Delete(ctx context.Context, d *schema.ResourceData, meta in
 	config := meta.(*cfg.Config)
 	networkingClient, err := config.NetworkingV2Client(config.GetRegion(d))
 	if err != nil {
-		return fmterr.Errorf("Error creating OpenTelekomCloud networking client: %s", err)
+		return fmterr.Errorf("error creating OpenTelekomCloud networking client: %s", err)
 	}
 
 	// Wait for Pool to become active before continuing

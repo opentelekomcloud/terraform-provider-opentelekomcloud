@@ -74,7 +74,7 @@ func resourceNetworkingVIPAssociateV2Create(ctx context.Context, d *schema.Resou
 
 	networkingClient, err := config.NetworkingV2Client(config.GetRegion(d))
 	if err != nil {
-		return fmterr.Errorf("Error creating OpenTelekomCloud networking client: %s", err)
+		return fmterr.Errorf("error creating OpenTelekomCloud networking client: %s", err)
 	}
 
 	// port by port
@@ -130,7 +130,7 @@ func resourceNetworkingVIPAssociateV2Create(ctx context.Context, d *schema.Resou
 			log.Printf("[DEBUG] VIP Associate %s with options: %#v", vipid, associateOpts)
 			_, err = ports.Update(networkingClient, vipid, associateOpts).Extract()
 			if err != nil {
-				return fmterr.Errorf("Error associate vip: %s", err)
+				return fmterr.Errorf("error associate vip: %s", err)
 			}
 		}
 
@@ -146,7 +146,7 @@ func resourceNetworkingVIPAssociateV2Create(ctx context.Context, d *schema.Resou
 		log.Printf("[DEBUG] Port Update %s with options: %#v", vipid, portUpdateOpts)
 		_, err = ports.Update(networkingClient, portid, portUpdateOpts).Extract()
 		if err != nil {
-			return fmterr.Errorf("Error update port: %s", err)
+			return fmterr.Errorf("error update port: %s", err)
 		}
 	}
 
@@ -167,7 +167,7 @@ func resourceNetworkingVIPAssociateV2Read(ctx context.Context, d *schema.Resourc
 	// First see if the port still exists
 	networkingClient, err := config.NetworkingV2Client(config.GetRegion(d))
 	if err != nil {
-		return fmterr.Errorf("Error creating OpenTelekomCloud networking client: %s", err)
+		return fmterr.Errorf("error creating OpenTelekomCloud networking client: %s", err)
 	}
 
 	// Then try to do this by querying the vip API.
@@ -222,7 +222,7 @@ func resourceNetworkingVIPAssociateV2Delete(ctx context.Context, d *schema.Resou
 	config := meta.(*cfg.Config)
 	networkingClient, err := config.NetworkingV2Client(config.GetRegion(d))
 	if err != nil {
-		return fmterr.Errorf("Error creating OpenTelekomCloud networking client: %s", err)
+		return fmterr.Errorf("error creating OpenTelekomCloud networking client: %s", err)
 	}
 
 	// Obtain relevant info from parsing the ID
@@ -283,7 +283,7 @@ func resourceNetworkingVIPAssociateV2Delete(ctx context.Context, d *schema.Resou
 			log.Printf("[DEBUG] VIP Disassociate %s with options: %#v", vipid, disassociateOpts)
 			_, err = ports.Update(networkingClient, vipid, disassociateOpts).Extract()
 			if err != nil {
-				return fmterr.Errorf("Error disassociate vip: %s", err)
+				return fmterr.Errorf("error disassociate vip: %s", err)
 			}
 		}
 	}

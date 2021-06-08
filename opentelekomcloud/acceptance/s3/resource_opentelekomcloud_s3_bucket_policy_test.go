@@ -88,7 +88,7 @@ func testAccCheckS3BucketHasPolicy(n string, expectedPolicyText string) resource
 		config := common.TestAccProvider.Meta().(*cfg.Config)
 		conn, err := config.S3Client(env.OS_REGION_NAME)
 		if err != nil {
-			return fmt.Errorf("Error creating OpenTelekomCloud s3 client: %s", err)
+			return fmt.Errorf("error creating OpenTelekomCloud s3 client: %s", err)
 		}
 
 		policy, err := conn.GetBucketPolicy(&s3.GetBucketPolicyInput{
@@ -102,7 +102,7 @@ func testAccCheckS3BucketHasPolicy(n string, expectedPolicyText string) resource
 
 		equivalent, err := awspolicy.PoliciesAreEquivalent(actualPolicyText, expectedPolicyText)
 		if err != nil {
-			return fmt.Errorf("Error testing policy equivalence: %s", err)
+			return fmt.Errorf("error testing policy equivalence: %s", err)
 		}
 		if !equivalent {
 			return fmt.Errorf("Non-equivalent policy error:\n\nexpected: %s\n\n     got: %s\n",

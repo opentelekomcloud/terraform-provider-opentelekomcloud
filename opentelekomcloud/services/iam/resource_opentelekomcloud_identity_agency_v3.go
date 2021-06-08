@@ -188,12 +188,12 @@ func listRolesOfDomain(domainID string, client *golangsdk.ServiceClient) (map[st
 func allRolesOfDomain(domainID string, client *golangsdk.ServiceClient) (map[string]string, error) {
 	roles, err := listRolesOfDomain("", client)
 	if err != nil {
-		return nil, fmt.Errorf("Error listing global roles, err=%s", err)
+		return nil, fmt.Errorf("error listing global roles, err=%s", err)
 	}
 
 	customRoles, err := listRolesOfDomain(domainID, client)
 	if err != nil {
-		return nil, fmt.Errorf("Error listing domain's custom roles, err=%s", err)
+		return nil, fmt.Errorf("error listing domain's custom roles, err=%s", err)
 	}
 
 	if roles == nil {
@@ -300,12 +300,12 @@ func resourceIdentityAgencyV3Create(ctx context.Context, d *schema.ResourceData,
 	config := meta.(*cfg.Config)
 	client, err := agencyClient(d, config)
 	if err != nil {
-		return fmterr.Errorf("Error creating client: %s", err)
+		return fmterr.Errorf("error creating client: %s", err)
 	}
 
 	domainID, err := getDomainID(config, client)
 	if err != nil {
-		return fmterr.Errorf("Error getting the domain id, err=%s", err)
+		return fmterr.Errorf("error getting the domain id, err=%s", err)
 	}
 
 	opts := agency.CreateOpts{
@@ -317,19 +317,19 @@ func resourceIdentityAgencyV3Create(ctx context.Context, d *schema.ResourceData,
 	log.Printf("[DEBUG] Create Identity-Agency Options: %#v", opts)
 	a, err := agency.Create(client, opts).Extract()
 	if err != nil {
-		return fmterr.Errorf("Error creating Identity-Agency: %s", err)
+		return fmterr.Errorf("error creating Identity-Agency: %s", err)
 	}
 
 	d.SetId(a.ID)
 
 	projects, err := listProjectsOfDomain(domainID, client)
 	if err != nil {
-		return fmterr.Errorf("Error querying the projects, err=%s", err)
+		return fmterr.Errorf("error querying the projects, err=%s", err)
 	}
 
 	roles, err := allRolesOfDomain(domainID, client)
 	if err != nil {
-		return fmterr.Errorf("Error querying the roles, err=%s", err)
+		return fmterr.Errorf("error querying the roles, err=%s", err)
 	}
 
 	agencyID := a.ID
@@ -351,7 +351,7 @@ func resourceIdentityAgencyV3Create(ctx context.Context, d *schema.ResourceData,
 
 			err = agency.AttachRoleByProject(client, agencyID, pid, rid).ExtractErr()
 			if err != nil {
-				return fmterr.Errorf("Error attaching role(%s) by project{%s} to agency(%s), err=%s",
+				return fmterr.Errorf("error attaching role(%s) by project{%s} to agency(%s), err=%s",
 					rid, pid, agencyID, err)
 			}
 		}
@@ -366,7 +366,7 @@ func resourceIdentityAgencyV3Create(ctx context.Context, d *schema.ResourceData,
 
 		err = agency.AttachRoleByDomain(client, agencyID, domainID, rid).ExtractErr()
 		if err != nil {
-			return fmterr.Errorf("Error attaching role(%s) by domain{%s} to agency(%s), err=%s",
+			return fmterr.Errorf("error attaching role(%s) by domain{%s} to agency(%s), err=%s",
 				rid, domainID, agencyID, err)
 		}
 	}
@@ -378,7 +378,7 @@ func resourceIdentityAgencyV3Read(ctx context.Context, d *schema.ResourceData, m
 	config := meta.(*cfg.Config)
 	client, err := agencyClient(d, config)
 	if err != nil {
-		return fmterr.Errorf("Error creating client: %s", err)
+		return fmterr.Errorf("error creating client: %s", err)
 	}
 
 	a, err := agency.Get(client, d.Id()).Extract()
@@ -396,14 +396,14 @@ func resourceIdentityAgencyV3Read(ctx context.Context, d *schema.ResourceData, m
 
 	projects, err := listProjectsOfDomain(a.DomainID, client)
 	if err != nil {
-		return fmterr.Errorf("Error querying the projects, err=%s", err)
+		return fmterr.Errorf("error querying the projects, err=%s", err)
 	}
 	agencyID := d.Id()
 	prs := schema.Set{F: resourceIdentityAgencyProRoleHash}
 	for pn, pid := range projects {
 		roles, err := agency.ListRolesAttachedOnProject(client, agencyID, pid).ExtractRoles()
 		if err != nil && !common.IsResourceNotFound(err) {
-			return fmterr.Errorf("Error querying the roles attached on project(%s), err=%s", pn, err)
+			return fmterr.Errorf("error querying the roles attached on project(%s), err=%s", pn, err)
 		}
 		if len(roles) == 0 {
 			continue
@@ -424,7 +424,7 @@ func resourceIdentityAgencyV3Read(ctx context.Context, d *schema.ResourceData, m
 
 	roles, err := agency.ListRolesAttachedOnDomain(client, agencyID, a.DomainID).ExtractRoles()
 	if err != nil && !common.IsResourceNotFound(err) {
-		return fmterr.Errorf("Error querying the roles attached on domain, err=%s", err)
+		return fmterr.Errorf("error querying the roles attached on domain, err=%s", err)
 	}
 	if len(roles) != 0 {
 		v := schema.Set{F: schema.HashString}
@@ -444,7 +444,7 @@ func resourceIdentityAgencyV3Update(ctx context.Context, d *schema.ResourceData,
 	config := meta.(*cfg.Config)
 	client, err := agencyClient(d, config)
 	if err != nil {
-		return fmterr.Errorf("Error creating client: %s", err)
+		return fmterr.Errorf("error creating client: %s", err)
 	}
 
 	aID := d.Id()
@@ -464,7 +464,7 @@ func resourceIdentityAgencyV3Update(ctx context.Context, d *schema.ResourceData,
 			return nil
 		})
 		if err != nil {
-			return fmterr.Errorf("Error updating Identity-Agency %s: %s", aID, err)
+			return fmterr.Errorf("error updating Identity-Agency %s: %s", aID, err)
 		}
 	}
 
@@ -473,19 +473,19 @@ func resourceIdentityAgencyV3Update(ctx context.Context, d *schema.ResourceData,
 	if d.HasChange("project_role") || d.HasChange("domain_roles") {
 		domainID, err = getDomainID(config, client)
 		if err != nil {
-			return fmterr.Errorf("Error getting the domain id, err=%s", err)
+			return fmterr.Errorf("error getting the domain id, err=%s", err)
 		}
 
 		roles, err = allRolesOfDomain(domainID, client)
 		if err != nil {
-			return fmterr.Errorf("Error querying the roles, err=%s", err)
+			return fmterr.Errorf("error querying the roles, err=%s", err)
 		}
 	}
 
 	if d.HasChange("project_role") {
 		projects, err := listProjectsOfDomain(domainID, client)
 		if err != nil {
-			return fmterr.Errorf("Error querying the projects, err=%s", err)
+			return fmterr.Errorf("error querying the projects, err=%s", err)
 		}
 
 		o, n := d.GetChange("project_role")
@@ -503,7 +503,7 @@ func resourceIdentityAgencyV3Update(ctx context.Context, d *schema.ResourceData,
 
 			err = agency.DetachRoleByProject(client, aID, pid, rid).ExtractErr()
 			if err != nil && !common.IsResourceNotFound(err) {
-				return fmterr.Errorf("Error detaching role(%s) by project{%s} from agency(%s), err=%s",
+				return fmterr.Errorf("error detaching role(%s) by project{%s} from agency(%s), err=%s",
 					rid, pid, aID, err)
 			}
 		}
@@ -521,7 +521,7 @@ func resourceIdentityAgencyV3Update(ctx context.Context, d *schema.ResourceData,
 
 			err = agency.AttachRoleByProject(client, aID, pid, rid).ExtractErr()
 			if err != nil {
-				return fmterr.Errorf("Error attaching role(%s) by project{%s} to agency(%s), err=%s",
+				return fmterr.Errorf("error attaching role(%s) by project{%s} to agency(%s), err=%s",
 					rid, pid, aID, err)
 			}
 		}
@@ -540,7 +540,7 @@ func resourceIdentityAgencyV3Update(ctx context.Context, d *schema.ResourceData,
 
 			err = agency.DetachRoleByDomain(client, aID, domainID, rid).ExtractErr()
 			if err != nil && !common.IsResourceNotFound(err) {
-				return fmterr.Errorf("Error detaching role(%s) by domain{%s} from agency(%s), err=%s",
+				return fmterr.Errorf("error detaching role(%s) by domain{%s} from agency(%s), err=%s",
 					rid, domainID, aID, err)
 			}
 		}
@@ -553,7 +553,7 @@ func resourceIdentityAgencyV3Update(ctx context.Context, d *schema.ResourceData,
 
 			err = agency.AttachRoleByDomain(client, aID, domainID, rid).ExtractErr()
 			if err != nil {
-				return fmterr.Errorf("Error attaching role(%s) by domain{%s} to agency(%s), err=%s",
+				return fmterr.Errorf("error attaching role(%s) by domain{%s} to agency(%s), err=%s",
 					rid, domainID, aID, err)
 			}
 		}
@@ -565,7 +565,7 @@ func resourceIdentityAgencyV3Delete(ctx context.Context, d *schema.ResourceData,
 	config := meta.(*cfg.Config)
 	client, err := agencyClient(d, config)
 	if err != nil {
-		return fmterr.Errorf("Error creating client: %s", err)
+		return fmterr.Errorf("error creating client: %s", err)
 	}
 
 	rID := d.Id()
@@ -584,7 +584,7 @@ func resourceIdentityAgencyV3Delete(ctx context.Context, d *schema.ResourceData,
 			log.Printf("[INFO] deleting an unavailable Identity-Agency: %s", rID)
 			return nil
 		}
-		return fmterr.Errorf("Error deleting Identity-Agency %s: %s", rID, err)
+		return fmterr.Errorf("error deleting Identity-Agency %s: %s", rID, err)
 	}
 
 	return nil

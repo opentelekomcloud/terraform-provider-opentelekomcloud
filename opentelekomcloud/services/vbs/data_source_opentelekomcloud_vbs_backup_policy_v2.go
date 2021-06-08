@@ -104,7 +104,7 @@ func dataSourceVBSPolicyV2Read(ctx context.Context, d *schema.ResourceData, meta
 		tagsOpts := tags.ListOpts{Action: "filter", Tags: getVBSFilterTagsV2(d)}
 		querytags, err := tags.ListResources(vbsClient, tagsOpts).ExtractResources()
 		if err != nil {
-			return fmterr.Errorf("Error Querying backup policy using tags: %s ", err)
+			return fmterr.Errorf("error Querying backup policy using tags: %s ", err)
 		}
 		if querytags.TotalCount > 1 {
 			return fmterr.Errorf("Your tags query returned more than one result." +

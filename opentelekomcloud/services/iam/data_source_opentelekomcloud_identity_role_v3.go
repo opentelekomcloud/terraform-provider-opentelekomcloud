@@ -43,7 +43,7 @@ func dataSourceIdentityRoleV3Read(ctx context.Context, d *schema.ResourceData, m
 	config := meta.(*cfg.Config)
 	identityClient, err := config.IdentityV3Client(config.GetRegion(d))
 	if err != nil {
-		return fmterr.Errorf("Error creating OpenStack identity client: %s", err)
+		return fmterr.Errorf("error creating OpenStack identity client: %s", err)
 	}
 
 	listOpts := roles.ListOpts{

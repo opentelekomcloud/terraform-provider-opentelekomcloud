@@ -316,7 +316,7 @@ func resourceInstanceCreate(ctx context.Context, d *schema.ResourceData, meta in
 	config := meta.(*cfg.Config)
 	client, err := config.RdsV1Client(config.GetRegion(d))
 	if err != nil {
-		return fmterr.Errorf("Error creating OpenTelekomCloud rds client: %s ", err)
+		return fmterr.Errorf("error creating OpenTelekomCloud rds client: %s ", err)
 	}
 
 	createOpts := instances.CreateOps{
@@ -338,7 +338,7 @@ func resourceInstanceCreate(ctx context.Context, d *schema.ResourceData, meta in
 
 	instance, err := instances.Create(client, createOpts).Extract()
 	if err != nil {
-		return fmterr.Errorf("Error getting instance from result: %s ", err)
+		return fmterr.Errorf("error getting instance from result: %s ", err)
 	}
 	log.Printf("[DEBUG] Create : instance %s: %#v", instance.ID, instance)
 
@@ -362,7 +362,7 @@ func resourceInstanceCreate(ctx context.Context, d *schema.ResourceData, meta in
 	if common.HasFilledOpt(d, "tag") {
 		tagClient, err := config.RdsTagV1Client(config.GetRegion(d))
 		if err != nil {
-			return fmterr.Errorf("Error creating OpenTelekomCloud rds tag client: %s ", err)
+			return fmterr.Errorf("error creating OpenTelekomCloud rds tag client: %s ", err)
 		}
 		tagmap := d.Get("tag").(map[string]interface{})
 		log.Printf("[DEBUG] Setting tag(key/value): %v", tagmap)
@@ -388,7 +388,7 @@ func resourceInstanceRead(ctx context.Context, d *schema.ResourceData, meta inte
 	config := meta.(*cfg.Config)
 	client, err := config.RdsV1Client(config.GetRegion(d))
 	if err != nil {
-		return fmterr.Errorf("Error creating OpenTelekomCloud rds client: %s", err)
+		return fmterr.Errorf("error creating OpenTelekomCloud rds client: %s", err)
 	}
 
 	instanceID := d.Id()
@@ -467,11 +467,11 @@ func resourceInstanceRead(ctx context.Context, d *schema.ResourceData, meta inte
 	if _, ok := d.GetOk("tag"); ok {
 		tagClient, err := config.RdsTagV1Client(config.GetRegion(d))
 		if err != nil {
-			return fmterr.Errorf("Error creating OpenTelekomCloud rds tag client: %#v", err)
+			return fmterr.Errorf("error creating OpenTelekomCloud rds tag client: %#v", err)
 		}
 		taglist, err := tags.Get(tagClient, d.Id()).Extract()
 		if err != nil {
-			return fmterr.Errorf("Error fetching OpenTelekomCloud rds instance tags: %s", err)
+			return fmterr.Errorf("error fetching OpenTelekomCloud rds instance tags: %s", err)
 		}
 
 		tagmap := make(map[string]string)
@@ -489,7 +489,7 @@ func resourceInstanceDelete(ctx context.Context, d *schema.ResourceData, meta in
 	config := meta.(*cfg.Config)
 	client, err := config.RdsV1Client(config.GetRegion(d))
 	if err != nil {
-		return fmterr.Errorf("Error creating OpenTelekomCloud rds client: %s ", err)
+		return fmterr.Errorf("error creating OpenTelekomCloud rds client: %s ", err)
 	}
 
 	log.Printf("[DEBUG] Deleting Instance %s", d.Id())
@@ -555,7 +555,7 @@ func resourceInstanceUpdate(ctx context.Context, d *schema.ResourceData, meta in
 	config := meta.(*cfg.Config)
 	client, err := config.RdsV1Client(config.GetRegion(d))
 	if err != nil {
-		return fmterr.Errorf("Error Updating OpenTelekomCloud rds client: %s ", err)
+		return fmterr.Errorf("error Updating OpenTelekomCloud rds client: %s ", err)
 	}
 
 	log.Printf("[DEBUG] Updating instances %s", d.Id())
@@ -575,7 +575,7 @@ func resourceInstanceUpdate(ctx context.Context, d *schema.ResourceData, meta in
 		updateOpts.Volume = volume
 		_, err = instances.UpdateVolumeSize(client, updateOpts, id).Extract()
 		if err != nil {
-			return fmterr.Errorf("Error updating instance volume from result: %s ", err)
+			return fmterr.Errorf("error updating instance volume from result: %s ", err)
 		}
 
 		stateConf := &resource.StateChangeConf{
@@ -604,7 +604,7 @@ func resourceInstanceUpdate(ctx context.Context, d *schema.ResourceData, meta in
 		updateFlavorOpts.FlavorRef = d.Get("flavorref").(string)
 		_, err = instances.UpdateFlavorRef(client, updateFlavorOpts, id).Extract()
 		if err != nil {
-			return fmterr.Errorf("Error updating instance Flavor from result: %s ", err)
+			return fmterr.Errorf("error updating instance Flavor from result: %s ", err)
 		}
 
 		stateConf := &resource.StateChangeConf{
@@ -639,7 +639,7 @@ func resourceInstanceUpdate(ctx context.Context, d *schema.ResourceData, meta in
 		log.Printf("[DEBUG] updatepolicyOpts: %+v", updatepolicyOpts)
 		_, err = instances.UpdatePolicy(client, updatepolicyOpts, id).Extract()
 		if err != nil {
-			return fmterr.Errorf("Error updating instance policy from result: %s ", err)
+			return fmterr.Errorf("error updating instance policy from result: %s ", err)
 		}
 
 		log.Printf("[DEBUG] Successfully updated instance %s policy: %+v", id, updatepolicyOpts)
@@ -652,7 +652,7 @@ func resourceInstanceUpdate(ctx context.Context, d *schema.ResourceData, meta in
 		create, remove := diffTagsRDS(o, n)
 		tagClient, err := config.RdsTagV1Client(config.GetRegion(d))
 		if err != nil {
-			return fmterr.Errorf("Error creating OpenTelekomCloud rds tag client: %s ", err)
+			return fmterr.Errorf("error creating OpenTelekomCloud rds tag client: %s ", err)
 		}
 
 		if len(remove) > 0 {

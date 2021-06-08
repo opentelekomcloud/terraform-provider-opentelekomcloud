@@ -54,7 +54,7 @@ func dataSourcedataSourceRdsFlavorV1Read(ctx context.Context, d *schema.Resource
 
 	rdsClient, err := config.RdsV1Client(config.GetRegion(d))
 	if err != nil {
-		return fmterr.Errorf("Error creating OpenTelekomCloud rds client: %s", err)
+		return fmterr.Errorf("error creating OpenTelekomCloud rds client: %s", err)
 	}
 
 	datastoresList, err := datastores.List(rdsClient, d.Get("datastore_name").(string)).Extract()

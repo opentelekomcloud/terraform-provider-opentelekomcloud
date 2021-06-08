@@ -64,7 +64,7 @@ func testAccCheckOTCVpcPeeringConnectionV2Destroy(s *terraform.State) error {
 	config := common.TestAccProvider.Meta().(*cfg.Config)
 	peeringClient, err := config.NetworkingV2Client(env.OS_REGION_NAME)
 	if err != nil {
-		return fmt.Errorf("Error creating OpenTelekomCloud Peering client: %s", err)
+		return fmt.Errorf("error creating OpenTelekomCloud Peering client: %s", err)
 	}
 
 	for _, rs := range s.RootModule().Resources {
@@ -95,7 +95,7 @@ func testAccCheckOTCVpcPeeringConnectionV2Exists(n string, peering *peerings.Pee
 		config := common.TestAccProvider.Meta().(*cfg.Config)
 		peeringClient, err := config.NetworkingV2Client(env.OS_REGION_NAME)
 		if err != nil {
-			return fmt.Errorf("Error creating OpenTelekomCloud Peering client: %s", err)
+			return fmt.Errorf("error creating OpenTelekomCloud Peering client: %s", err)
 		}
 
 		found, err := peerings.Get(peeringClient, rs.Primary.ID).Extract()

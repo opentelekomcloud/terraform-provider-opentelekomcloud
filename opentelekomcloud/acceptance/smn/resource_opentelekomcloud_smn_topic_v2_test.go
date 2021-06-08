@@ -77,7 +77,7 @@ func testAccCheckSMNTopicV2Destroy(s *terraform.State) error {
 	config := common.TestAccProvider.Meta().(*cfg.Config)
 	smnClient, err := config.SmnV2Client(env.OS_TENANT_NAME)
 	if err != nil {
-		return fmt.Errorf("Error creating OpenTelekomCloud smn: %s", err)
+		return fmt.Errorf("error creating OpenTelekomCloud smn: %s", err)
 	}
 
 	for _, rs := range s.RootModule().Resources {
@@ -108,7 +108,7 @@ func testAccCheckSMNV2TopicExists(n string, topic *topics.TopicGet, projectName 
 		config := common.TestAccProvider.Meta().(*cfg.Config)
 		smnClient, err := config.SmnV2Client(projectName)
 		if err != nil {
-			return fmt.Errorf("Error creating OpenTelekomCloud smn client: %s", err)
+			return fmt.Errorf("error creating OpenTelekomCloud smn client: %s", err)
 		}
 
 		found, err := topics.Get(smnClient, rs.Primary.ID).ExtractGet()

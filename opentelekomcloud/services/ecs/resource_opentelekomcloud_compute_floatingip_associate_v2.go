@@ -59,7 +59,7 @@ func resourceComputeFloatingIPAssociateV2Create(ctx context.Context, d *schema.R
 	config := meta.(*cfg.Config)
 	computeClient, err := config.ComputeV2Client(config.GetRegion(d))
 	if err != nil {
-		return fmterr.Errorf("Error creating OpenTelekomCloud compute client: %s", err)
+		return fmterr.Errorf("error creating OpenTelekomCloud compute client: %s", err)
 	}
 
 	floatingIP := d.Get("floating_ip").(string)
@@ -74,7 +74,7 @@ func resourceComputeFloatingIPAssociateV2Create(ctx context.Context, d *schema.R
 
 	err = floatingips.AssociateInstance(computeClient, instanceId, associateOpts).ExtractErr()
 	if err != nil {
-		return fmterr.Errorf("Error associating Floating IP: %s", err)
+		return fmterr.Errorf("error associating Floating IP: %s", err)
 	}
 
 	// There's an API call to get this information, but it has been
@@ -93,7 +93,7 @@ func resourceComputeFloatingIPAssociateV2Read(ctx context.Context, d *schema.Res
 	config := meta.(*cfg.Config)
 	computeClient, err := config.ComputeV2Client(config.GetRegion(d))
 	if err != nil {
-		return fmterr.Errorf("Error creating OpenTelekomCloud compute client: %s", err)
+		return fmterr.Errorf("error creating OpenTelekomCloud compute client: %s", err)
 	}
 
 	// Obtain relevant info from parsing the ID
@@ -164,7 +164,7 @@ func resourceComputeFloatingIPAssociateV2Delete(ctx context.Context, d *schema.R
 	config := meta.(*cfg.Config)
 	computeClient, err := config.ComputeV2Client(config.GetRegion(d))
 	if err != nil {
-		return fmterr.Errorf("Error creating OpenTelekomCloud compute client: %s", err)
+		return fmterr.Errorf("error creating OpenTelekomCloud compute client: %s", err)
 	}
 
 	floatingIP := d.Get("floating_ip").(string)

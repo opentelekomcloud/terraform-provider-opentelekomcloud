@@ -39,7 +39,7 @@ func testAccCheckMRSV1ClusterDestroy(s *terraform.State) error {
 	config := common.TestAccProvider.Meta().(*cfg.Config)
 	mrsClient, err := config.MrsV1Client(env.OS_REGION_NAME)
 	if err != nil {
-		return fmt.Errorf("Error creating opentelekomcloud mrs: %s", err)
+		return fmt.Errorf("error creating opentelekomcloud mrs: %s", err)
 	}
 
 	for _, rs := range s.RootModule().Resources {
@@ -76,7 +76,7 @@ func testAccCheckMRSV1ClusterExists(n string, clusterGet *cluster.Cluster) resou
 		config := common.TestAccProvider.Meta().(*cfg.Config)
 		mrsClient, err := config.MrsV1Client(env.OS_REGION_NAME)
 		if err != nil {
-			return fmt.Errorf("Error creating opentelekomcloud mrs client: %s ", err)
+			return fmt.Errorf("error creating opentelekomcloud mrs client: %s ", err)
 		}
 
 		found, err := cluster.Get(mrsClient, rs.Primary.ID).Extract()

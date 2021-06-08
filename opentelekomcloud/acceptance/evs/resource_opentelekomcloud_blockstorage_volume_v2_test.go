@@ -182,7 +182,7 @@ func testAccCheckBlockStorageV2VolumeDestroy(s *terraform.State) error {
 	config := common.TestAccProvider.Meta().(*cfg.Config)
 	blockStorageClient, err := config.BlockStorageV2Client(env.OS_REGION_NAME)
 	if err != nil {
-		return fmt.Errorf("Error creating OpenTelekomCloud block storage client: %s", err)
+		return fmt.Errorf("error creating OpenTelekomCloud block storage client: %s", err)
 	}
 
 	for _, rs := range s.RootModule().Resources {
@@ -213,7 +213,7 @@ func testAccCheckBlockStorageV2VolumeExists(n string, volume *volumes.Volume) re
 		config := common.TestAccProvider.Meta().(*cfg.Config)
 		blockStorageClient, err := config.BlockStorageV2Client(env.OS_REGION_NAME)
 		if err != nil {
-			return fmt.Errorf("Error creating OpenTelekomCloud block storage client: %s", err)
+			return fmt.Errorf("error creating OpenTelekomCloud block storage client: %s", err)
 		}
 
 		found, err := volumes.Get(blockStorageClient, rs.Primary.ID).Extract()
@@ -236,7 +236,7 @@ func testAccCheckBlockStorageV2VolumeDoesNotExist(t *testing.T, n string, volume
 		config := common.TestAccProvider.Meta().(*cfg.Config)
 		blockStorageClient, err := config.BlockStorageV2Client(env.OS_REGION_NAME)
 		if err != nil {
-			return fmt.Errorf("Error creating OpenTelekomCloud block storage client: %s", err)
+			return fmt.Errorf("error creating OpenTelekomCloud block storage client: %s", err)
 		}
 
 		_, err = volumes.Get(blockStorageClient, volume.ID).Extract()
@@ -288,7 +288,7 @@ func testAccCheckBlockStorageV2VolumeTags(n string, k string, v string) resource
 		config := common.TestAccProvider.Meta().(*cfg.Config)
 		blockStorageClient, err := config.BlockStorageV2Client(env.OS_REGION_NAME)
 		if err != nil {
-			return fmt.Errorf("Error creating OpenTelekomCloud block storage client: %s", err)
+			return fmt.Errorf("error creating OpenTelekomCloud block storage client: %s", err)
 		}
 
 		found, err := volumes.Get(blockStorageClient, rs.Primary.ID).Extract()
@@ -302,7 +302,7 @@ func testAccCheckBlockStorageV2VolumeTags(n string, k string, v string) resource
 
 		client, err := config.BlockStorageV2Client(env.OS_REGION_NAME)
 		if err != nil {
-			return fmt.Errorf("Error creating OpenTelekomCloud block storage client: %s", err)
+			return fmt.Errorf("error creating OpenTelekomCloud block storage client: %s", err)
 		}
 		taglist, err := tags.Get(client, "volumes", found.ID).Extract()
 		for key, value := range taglist.Tags {

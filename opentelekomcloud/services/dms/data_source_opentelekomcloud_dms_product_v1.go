@@ -88,7 +88,7 @@ func dataSourceDmsProductV1Read(ctx context.Context, d *schema.ResourceData, met
 	config := meta.(*cfg.Config)
 	DmsV1Client, err := config.DmsV1Client(config.GetRegion(d))
 	if err != nil {
-		return fmterr.Errorf("Error get OpenTelekomCloud dms product client: %s", err)
+		return fmterr.Errorf("error get OpenTelekomCloud dms product client: %s", err)
 	}
 
 	instance_engine := d.Get("engine").(string)

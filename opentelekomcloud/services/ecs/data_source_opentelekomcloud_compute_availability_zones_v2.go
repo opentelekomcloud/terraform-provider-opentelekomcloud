@@ -47,16 +47,16 @@ func dataSourceComputeAvailabilityZonesV2Read(ctx context.Context, d *schema.Res
 	region := config.GetRegion(d)
 	computeClient, err := config.ComputeV2Client(region)
 	if err != nil {
-		return fmterr.Errorf("Error creating OpenStack compute client: %s", err)
+		return fmterr.Errorf("error creating OpenStack compute client: %s", err)
 	}
 
 	allPages, err := availabilityzones.List(computeClient).AllPages()
 	if err != nil {
-		return fmterr.Errorf("Error retrieving openstack_compute_availability_zones_v2: %s", err)
+		return fmterr.Errorf("error retrieving openstack_compute_availability_zones_v2: %s", err)
 	}
 	zoneInfo, err := availabilityzones.ExtractAvailabilityZones(allPages)
 	if err != nil {
-		return fmterr.Errorf("Error extracting openstack_compute_availability_zones_v2 from response: %s", err)
+		return fmterr.Errorf("error extracting openstack_compute_availability_zones_v2 from response: %s", err)
 	}
 
 	stateBool := d.Get("state").(string) == "available"

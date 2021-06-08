@@ -10,7 +10,7 @@ import (
 	"testing"
 	"text/template"
 
-	"github.com/opentelekomcloud/gophertelekomcloud"
+	golangsdk "github.com/opentelekomcloud/gophertelekomcloud"
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack"
 	th "github.com/opentelekomcloud/gophertelekomcloud/testhelper"
 )
@@ -173,7 +173,7 @@ func testRequestRetry(t *testing.T, count int) {
 		defer func() { _ = r.Body.Close() }()
 		_, err := ioutil.ReadAll(r.Body)
 		if err != nil {
-			t.Errorf("Error hadling test request")
+			t.Errorf("error hadling test request")
 		}
 		if info.retries < retryCount {
 			info.mut.RLock()

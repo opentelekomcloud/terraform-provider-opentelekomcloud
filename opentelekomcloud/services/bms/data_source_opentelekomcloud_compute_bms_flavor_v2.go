@@ -92,7 +92,7 @@ func dataSourceBMSFlavorV2Read(ctx context.Context, d *schema.ResourceData, meta
 	config := meta.(*cfg.Config)
 	flavorClient, err := config.ComputeV2Client(config.GetRegion(d))
 	if err != nil {
-		return fmterr.Errorf("Error creating OpenTelekom bms client: %s", err)
+		return fmterr.Errorf("error creating OpenTelekom bms client: %s", err)
 	}
 
 	listOpts := flavors.ListOpts{

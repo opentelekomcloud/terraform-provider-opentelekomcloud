@@ -107,7 +107,7 @@ func dataSourceS3BucketObjectRead(ctx context.Context, d *schema.ResourceData, m
 	config := meta.(*cfg.Config)
 	conn, err := config.S3Client(config.GetRegion(d))
 	if err != nil {
-		return fmterr.Errorf("Error creating OpenTelekomCloud s3 client: %s", err)
+		return fmterr.Errorf("error creating OpenTelekomCloud s3 client: %s", err)
 	}
 
 	bucket := d.Get("bucket").(string)

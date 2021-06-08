@@ -40,7 +40,7 @@ func dataSourceDcsAZV1Read(ctx context.Context, d *schema.ResourceData, meta int
 	config := meta.(*cfg.Config)
 	DcsV1Client, err := config.DcsV1Client(config.GetRegion(d))
 	if err != nil {
-		return fmterr.Errorf("Error creating dcs key client: %s", err)
+		return fmterr.Errorf("error creating dcs key client: %s", err)
 	}
 
 	v, err := availablezones.Get(DcsV1Client).Extract()

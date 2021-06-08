@@ -100,7 +100,7 @@ func testAccCheckIdentityRoleV3Exists(s *terraform.State) error {
 
 	url, err := common.ReplaceVarsForTest(rs, "OS-ROLE/roles/{id}")
 	if err != nil {
-		return fmt.Errorf("Error checking opentelekomcloud_identity_role_v3.role exist, err=building url failed: %s", err)
+		return fmt.Errorf("error checking opentelekomcloud_identity_role_v3.role exist, err=building url failed: %s", err)
 	}
 	url = client.ServiceURL(url)
 

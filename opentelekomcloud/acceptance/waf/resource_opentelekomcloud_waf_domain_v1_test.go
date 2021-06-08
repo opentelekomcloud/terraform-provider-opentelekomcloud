@@ -54,7 +54,7 @@ func testAccCheckWafDomainV1Destroy(s *terraform.State) error {
 	config := common.TestAccProvider.Meta().(*cfg.Config)
 	wafClient, err := config.WafV1Client(env.OS_REGION_NAME)
 	if err != nil {
-		return fmt.Errorf("Error creating OpenTelekomCloud WAF client: %s", err)
+		return fmt.Errorf("error creating OpenTelekomCloud WAF client: %s", err)
 	}
 
 	for _, rs := range s.RootModule().Resources {
@@ -85,7 +85,7 @@ func testAccCheckWafDomainV1Exists(n string, domain *domains.Domain) resource.Te
 		config := common.TestAccProvider.Meta().(*cfg.Config)
 		wafClient, err := config.WafV1Client(env.OS_REGION_NAME)
 		if err != nil {
-			return fmt.Errorf("Error creating OpenTelekomCloud WAF client: %s", err)
+			return fmt.Errorf("error creating OpenTelekomCloud WAF client: %s", err)
 		}
 
 		found, err := domains.Get(wafClient, rs.Primary.ID).Extract()

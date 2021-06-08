@@ -95,7 +95,7 @@ func testAccCheckNetworkingV2SecGroupRuleDestroy(s *terraform.State) error {
 	config := common.TestAccProvider.Meta().(*cfg.Config)
 	networkingClient, err := config.NetworkingV2Client(env.OS_REGION_NAME)
 	if err != nil {
-		return fmt.Errorf("Error creating OpenTelekomCloud networking client: %s", err)
+		return fmt.Errorf("error creating OpenTelekomCloud networking client: %s", err)
 	}
 
 	for _, rs := range s.RootModule().Resources {
@@ -126,7 +126,7 @@ func testAccCheckNetworkingV2SecGroupRuleExists(n string, security_group_rule *r
 		config := common.TestAccProvider.Meta().(*cfg.Config)
 		networkingClient, err := config.NetworkingV2Client(env.OS_REGION_NAME)
 		if err != nil {
-			return fmt.Errorf("Error creating OpenTelekomCloud networking client: %s", err)
+			return fmt.Errorf("error creating OpenTelekomCloud networking client: %s", err)
 		}
 
 		found, err := rules.Get(networkingClient, rs.Primary.ID).Extract()

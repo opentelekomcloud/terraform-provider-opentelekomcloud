@@ -46,7 +46,7 @@ func dataSourceDcsMaintainWindowV1Read(ctx context.Context, d *schema.ResourceDa
 	config := meta.(*cfg.Config)
 	DcsV1Client, err := config.DcsV1Client(config.GetRegion(d))
 	if err != nil {
-		return fmterr.Errorf("Error creating dcs key client: %s", err)
+		return fmterr.Errorf("error creating dcs key client: %s", err)
 	}
 
 	v, err := maintainwindows.Get(DcsV1Client).Extract()

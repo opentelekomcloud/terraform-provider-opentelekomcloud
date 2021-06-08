@@ -58,7 +58,7 @@ func testAccCSBSBackupV1Destroy(s *terraform.State) error {
 	config := common.TestAccProvider.Meta().(*cfg.Config)
 	backupClient, err := config.CsbsV1Client(env.OS_REGION_NAME)
 	if err != nil {
-		return fmt.Errorf("Error creating csbs client: %s", err)
+		return fmt.Errorf("error creating csbs client: %s", err)
 	}
 
 	for _, rs := range s.RootModule().Resources {
@@ -89,7 +89,7 @@ func testAccCSBSBackupV1Exists(n string, backups *backup.Backup) resource.TestCh
 		config := common.TestAccProvider.Meta().(*cfg.Config)
 		backupClient, err := config.CsbsV1Client(env.OS_REGION_NAME)
 		if err != nil {
-			return fmt.Errorf("Error creating csbs client: %s", err)
+			return fmt.Errorf("error creating csbs client: %s", err)
 		}
 
 		found, err := backup.Get(backupClient, rs.Primary.ID).ExtractBackup()

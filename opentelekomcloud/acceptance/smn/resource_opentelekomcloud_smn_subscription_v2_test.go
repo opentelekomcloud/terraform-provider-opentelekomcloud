@@ -72,7 +72,7 @@ func testAccCheckSMNSubscriptionV2Destroy(s *terraform.State) error {
 	config := common.TestAccProvider.Meta().(*cfg.Config)
 	smnClient, err := config.SmnV2Client(env.OS_TENANT_NAME)
 	if err != nil {
-		return fmt.Errorf("Error creating OpenTelekomCloud smn: %s", err)
+		return fmt.Errorf("error creating OpenTelekomCloud smn: %s", err)
 	}
 	var subscription *subscriptions.SubscriptionGet
 	for _, rs := range s.RootModule().Resources {
@@ -110,7 +110,7 @@ func testAccCheckSMNV2SubscriptionExists(n string, subscription *subscriptions.S
 		config := common.TestAccProvider.Meta().(*cfg.Config)
 		smnClient, err := config.SmnV2Client(projectName)
 		if err != nil {
-			return fmt.Errorf("Error creating OpenTelekomCloud smn client: %s", err)
+			return fmt.Errorf("error creating OpenTelekomCloud smn client: %s", err)
 		}
 
 		foundList, err := subscriptions.List(smnClient).Extract()

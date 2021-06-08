@@ -78,7 +78,7 @@ func testAccCheckNetworkingV2RouterRouteEmpty(n string) resource.TestCheckFunc {
 		config := common.TestAccProvider.Meta().(*cfg.Config)
 		networkingClient, err := config.NetworkingV2Client(env.OS_REGION_NAME)
 		if err != nil {
-			return fmt.Errorf("Error creating OpenTelekomCloud networking client: %s", err)
+			return fmt.Errorf("error creating OpenTelekomCloud networking client: %s", err)
 		}
 
 		router, err := routers.Get(networkingClient, rs.Primary.ID).Extract()
@@ -112,7 +112,7 @@ func testAccCheckNetworkingV2RouterRouteExists(n string) resource.TestCheckFunc 
 		config := common.TestAccProvider.Meta().(*cfg.Config)
 		networkingClient, err := config.NetworkingV2Client(env.OS_REGION_NAME)
 		if err != nil {
-			return fmt.Errorf("Error creating OpenTelekomCloud networking client: %s", err)
+			return fmt.Errorf("error creating OpenTelekomCloud networking client: %s", err)
 		}
 
 		router, err := routers.Get(networkingClient, rs.Primary.Attributes["router_id"]).Extract()
@@ -142,7 +142,7 @@ func testAccCheckNetworkingV2RouterRouteDestroy(s *terraform.State) error {
 	config := common.TestAccProvider.Meta().(*cfg.Config)
 	networkingClient, err := config.NetworkingV2Client(env.OS_REGION_NAME)
 	if err != nil {
-		return fmt.Errorf("Error creating OpenTelekomCloud networking client: %s", err)
+		return fmt.Errorf("error creating OpenTelekomCloud networking client: %s", err)
 	}
 
 	for _, rs := range s.RootModule().Resources {

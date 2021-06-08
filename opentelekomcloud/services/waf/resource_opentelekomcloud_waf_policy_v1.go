@@ -216,7 +216,7 @@ func resourceWafPolicyV1Create(ctx context.Context, d *schema.ResourceData, meta
 	wafClient, err := config.WafV1Client(config.GetRegion(d))
 
 	if err != nil {
-		return fmterr.Errorf("Error creating OpenTelekomcomCloud WAF Client: %s", err)
+		return fmterr.Errorf("error creating OpenTelekomcomCloud WAF Client: %s", err)
 	}
 
 	createOpts := policies.CreateOpts{
@@ -225,7 +225,7 @@ func resourceWafPolicyV1Create(ctx context.Context, d *schema.ResourceData, meta
 
 	policy, err := policies.Create(wafClient, createOpts).Extract()
 	if err != nil {
-		return fmterr.Errorf("Error creating OpenTelekomcomCloud WAF Policy: %s", err)
+		return fmterr.Errorf("error creating OpenTelekomcomCloud WAF Policy: %s", err)
 	}
 
 	log.Printf("[DEBUG] Waf policy created: %#v", policy)
@@ -254,7 +254,7 @@ func resourceWafPolicyV1Create(ctx context.Context, d *schema.ResourceData, meta
 	if updateOpts != (policies.UpdateOpts{}) {
 		_, err = policies.Update(wafClient, d.Id(), updateOpts).Extract()
 		if err != nil {
-			return fmterr.Errorf("Error updating OpenTelekomCloud WAF Policy: %s", err)
+			return fmterr.Errorf("error updating OpenTelekomCloud WAF Policy: %s", err)
 		}
 	}
 
@@ -269,7 +269,7 @@ func resourceWafPolicyV1Create(ctx context.Context, d *schema.ResourceData, meta
 
 		_, err = policies.UpdateHosts(wafClient, d.Id(), updateHostsOpts).Extract()
 		if err != nil {
-			return fmterr.Errorf("Error updating OpenTelekomCloud WAF Policy Hosts: %s", err)
+			return fmterr.Errorf("error updating OpenTelekomCloud WAF Policy Hosts: %s", err)
 		}
 	}
 
@@ -281,7 +281,7 @@ func resourceWafPolicyV1Read(ctx context.Context, d *schema.ResourceData, meta i
 	config := meta.(*cfg.Config)
 	wafClient, err := config.WafV1Client(config.GetRegion(d))
 	if err != nil {
-		return fmterr.Errorf("Error creating OpenTelekomCloud WAF client: %s", err)
+		return fmterr.Errorf("error creating OpenTelekomCloud WAF client: %s", err)
 	}
 	n, err := policies.Get(wafClient, d.Id()).Extract()
 
@@ -291,7 +291,7 @@ func resourceWafPolicyV1Read(ctx context.Context, d *schema.ResourceData, meta i
 			return nil
 		}
 
-		return fmterr.Errorf("Error retrieving OpenTelekomCloud Waf Policy: %s", err)
+		return fmterr.Errorf("error retrieving OpenTelekomCloud Waf Policy: %s", err)
 	}
 
 	d.SetId(n.Id)
@@ -333,7 +333,7 @@ func resourceWafPolicyV1Update(ctx context.Context, d *schema.ResourceData, meta
 	config := meta.(*cfg.Config)
 	wafClient, err := config.WafV1Client(config.GetRegion(d))
 	if err != nil {
-		return fmterr.Errorf("Error creating OpenTelekomCloud WAF Client: %s", err)
+		return fmterr.Errorf("error creating OpenTelekomCloud WAF Client: %s", err)
 	}
 	var updateOpts policies.UpdateOpts
 
@@ -361,7 +361,7 @@ func resourceWafPolicyV1Update(ctx context.Context, d *schema.ResourceData, meta
 	if updateOpts != (policies.UpdateOpts{}) {
 		_, err = policies.Update(wafClient, d.Id(), updateOpts).Extract()
 		if err != nil {
-			return fmterr.Errorf("Error updating OpenTelekomCloud WAF Policy: %s", err)
+			return fmterr.Errorf("error updating OpenTelekomCloud WAF Policy: %s", err)
 		}
 	}
 
@@ -376,7 +376,7 @@ func resourceWafPolicyV1Update(ctx context.Context, d *schema.ResourceData, meta
 
 		_, err = policies.UpdateHosts(wafClient, d.Id(), updateHostsOpts).Extract()
 		if err != nil {
-			return fmterr.Errorf("Error updating OpenTelekomCloud WAF Policy Hosts: %s", err)
+			return fmterr.Errorf("error updating OpenTelekomCloud WAF Policy Hosts: %s", err)
 		}
 	}
 	return resourceWafPolicyV1Read(ctx, d, meta)
@@ -386,7 +386,7 @@ func resourceWafPolicyV1Delete(ctx context.Context, d *schema.ResourceData, meta
 	config := meta.(*cfg.Config)
 	wafClient, err := config.WafV1Client(config.GetRegion(d))
 	if err != nil {
-		return fmterr.Errorf("Error creating OpenTelekomCloud WAF client: %s", err)
+		return fmterr.Errorf("error creating OpenTelekomCloud WAF client: %s", err)
 	}
 
 	if hosts, ok := d.GetOk("hosts"); ok {
@@ -400,12 +400,12 @@ func resourceWafPolicyV1Delete(ctx context.Context, d *schema.ResourceData, meta
 				d.SetId("")
 				return nil
 			}
-			return fmterr.Errorf("Error updating OpenTelekomCloud WAF Policy Hosts: %s", err)
+			return fmterr.Errorf("error updating OpenTelekomCloud WAF Policy Hosts: %s", err)
 		}
 	}
 	err = policies.Delete(wafClient, d.Id()).ExtractErr()
 	if err != nil {
-		return fmterr.Errorf("Error deleting OpenTelekomCloud WAF Policy: %s", err)
+		return fmterr.Errorf("error deleting OpenTelekomCloud WAF Policy: %s", err)
 	}
 
 	d.SetId("")

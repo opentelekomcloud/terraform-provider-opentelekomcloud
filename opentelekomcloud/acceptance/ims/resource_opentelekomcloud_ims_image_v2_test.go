@@ -53,7 +53,7 @@ func testAccCheckImsImageV2Destroy(s *terraform.State) error {
 	config := common.TestAccProvider.Meta().(*cfg.Config)
 	imageClient, err := config.ImageV2Client(env.OS_REGION_NAME)
 	if err != nil {
-		return fmt.Errorf("Error creating OpenTelekomCloud Image: %s", err)
+		return fmt.Errorf("error creating OpenTelekomCloud Image: %s", err)
 	}
 
 	for _, rs := range s.RootModule().Resources {
@@ -84,7 +84,7 @@ func testAccCheckImsImageV2Exists(n string, image *cloudimages.Image) resource.T
 		config := common.TestAccProvider.Meta().(*cfg.Config)
 		imageClient, err := config.ImageV2Client(env.OS_REGION_NAME)
 		if err != nil {
-			return fmt.Errorf("Error creating OpenTelekomCloud Image: %s", err)
+			return fmt.Errorf("error creating OpenTelekomCloud Image: %s", err)
 		}
 
 		found, err := ims.GetCloudImage(imageClient, rs.Primary.ID)
@@ -111,7 +111,7 @@ func testAccCheckImsImageV2Tags(n string, k string, v string) resource.TestCheck
 		config := common.TestAccProvider.Meta().(*cfg.Config)
 		imageClient, err := config.ImageV2Client(env.OS_REGION_NAME)
 		if err != nil {
-			return fmt.Errorf("Error creating OpenTelekomCloud image client: %s", err)
+			return fmt.Errorf("error creating OpenTelekomCloud image client: %s", err)
 		}
 
 		found, err := tags.Get(imageClient, rs.Primary.ID).Extract()

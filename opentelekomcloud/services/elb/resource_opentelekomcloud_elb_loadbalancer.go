@@ -110,7 +110,7 @@ func resourceELoadBalancerCreate(ctx context.Context, d *schema.ResourceData, me
 	config := meta.(*cfg.Config)
 	client, err := config.ElbV1Client(config.GetRegion(d))
 	if err != nil {
-		return fmterr.Errorf("Error creating OpenTelekomCloud networking client: %s", err)
+		return fmterr.Errorf("error creating OpenTelekomCloud networking client: %s", err)
 	}
 
 	adminStateUp := d.Get("admin_state_up").(bool)
@@ -157,7 +157,7 @@ func resourceELoadBalancerRead(ctx context.Context, d *schema.ResourceData, meta
 	config := meta.(*cfg.Config)
 	networkingClient, err := config.ElbV1Client(config.GetRegion(d))
 	if err != nil {
-		return fmterr.Errorf("Error creating OpenTelekomCloud networking client: %s", err)
+		return fmterr.Errorf("error creating OpenTelekomCloud networking client: %s", err)
 	}
 
 	lb, err := loadbalancer_elbs.Get(networkingClient, d.Id()).Extract()
@@ -191,7 +191,7 @@ func resourceELoadBalancerUpdate(ctx context.Context, d *schema.ResourceData, me
 	config := meta.(*cfg.Config)
 	client, err := config.ElbV1Client(config.GetRegion(d))
 	if err != nil {
-		return fmterr.Errorf("Error creating OpenTelekomCloud networking client: %s", err)
+		return fmterr.Errorf("error creating OpenTelekomCloud networking client: %s", err)
 	}
 
 	var updateOpts loadbalancer_elbs.UpdateOpts
@@ -222,7 +222,7 @@ func resourceELoadBalancerDelete(ctx context.Context, d *schema.ResourceData, me
 	config := meta.(*cfg.Config)
 	client, err := config.ElbV1Client(config.GetRegion(d))
 	if err != nil {
-		return fmterr.Errorf("Error creating OpenTelekomCloud networking client: %s", err)
+		return fmterr.Errorf("error creating OpenTelekomCloud networking client: %s", err)
 	}
 
 	id := d.Id()

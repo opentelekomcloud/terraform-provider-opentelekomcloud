@@ -123,7 +123,7 @@ func resourceNatDnatRuleCreate(ctx context.Context, d *schema.ResourceData, meta
 	config := meta.(*cfg.Config)
 	client, err := config.NatV2Client(config.GetRegion(d))
 	if err != nil {
-		return fmterr.Errorf("Error creating sdk client, err=%s", err)
+		return fmterr.Errorf("error creating sdk client, err=%s", err)
 	}
 
 	opts := resourceNatDnatUserInputParams(d)
@@ -229,12 +229,12 @@ func resourceNatDnatRuleCreate(ctx context.Context, d *schema.ResourceData, meta
 		&r.Body,
 		&golangsdk.RequestOpts{OkCodes: common.SuccessHTTPCodes})
 	if r.Err != nil {
-		return fmterr.Errorf("Error creating Dnat: %s", r.Err)
+		return fmterr.Errorf("error creating Dnat: %s", r.Err)
 	}
 
 	id, err := common.NavigateValue(r.Body, []string{"dnat_rule", "id"}, nil)
 	if err != nil {
-		return fmterr.Errorf("Error constructing id: %s", err)
+		return fmterr.Errorf("error constructing id: %s", err)
 	}
 	d.SetId(id.(string))
 
@@ -245,7 +245,7 @@ func resourceNatDnatRuleRead(ctx context.Context, d *schema.ResourceData, meta i
 	config := meta.(*cfg.Config)
 	client, err := config.NatV2Client(config.GetRegion(d))
 	if err != nil {
-		return fmterr.Errorf("Error creating sdk client, err=%s", err)
+		return fmterr.Errorf("error creating sdk client, err=%s", err)
 	}
 
 	url, err := common.ReplaceVars(d, "dnat_rules/{id}", nil)
@@ -259,11 +259,11 @@ func resourceNatDnatRuleRead(ctx context.Context, d *schema.ResourceData, meta i
 		url, &r.Body,
 		&golangsdk.RequestOpts{MoreHeaders: map[string]string{"Accept": "application/json"}})
 	if r.Err != nil {
-		return fmterr.Errorf("Error reading %s: %s", fmt.Sprintf("NatDnat %q", d.Id()), r.Err)
+		return fmterr.Errorf("error reading %s: %s", fmt.Sprintf("NatDnat %q", d.Id()), r.Err)
 	}
 	v, ok := r.Body.(map[string]interface{})
 	if !ok {
-		return fmterr.Errorf("Error reading %s: the result is not map", fmt.Sprintf("NatDnat %q", d.Id()))
+		return fmterr.Errorf("error reading %s: the result is not map", fmt.Sprintf("NatDnat %q", d.Id()))
 	}
 
 	res := map[string]interface{}{"read": v}
@@ -272,10 +272,10 @@ func resourceNatDnatRuleRead(ctx context.Context, d *schema.ResourceData, meta i
 
 	createdATProp, err := common.NavigateValue(res, []string{"read", "dnat_rule", "created_at"}, nil)
 	if err != nil {
-		return fmterr.Errorf("Error reading Dnat:created_at, err: %s", err)
+		return fmterr.Errorf("error reading Dnat:created_at, err: %s", err)
 	}
 	if err = d.Set("created_at", createdATProp); err != nil {
-		return fmterr.Errorf("Error setting Dnat:created_at, err: %s", err)
+		return fmterr.Errorf("error setting Dnat:created_at, err: %s", err)
 	}
 
 	floatingIPIDProp, ok := opts["floating_ip_id"]
@@ -286,19 +286,19 @@ func resourceNatDnatRuleRead(ctx context.Context, d *schema.ResourceData, meta i
 	if !ok {
 		floatingIPIDProp, err = common.NavigateValue(res, []string{"read", "dnat_rule", "floating_ip_id"}, nil)
 		if err != nil {
-			return fmterr.Errorf("Error reading Dnat:floating_ip_id, err: %s", err)
+			return fmterr.Errorf("error reading Dnat:floating_ip_id, err: %s", err)
 		}
 		if err = d.Set("floating_ip_id", floatingIPIDProp); err != nil {
-			return fmterr.Errorf("Error setting Dnat:floating_ip_id, err: %s", err)
+			return fmterr.Errorf("error setting Dnat:floating_ip_id, err: %s", err)
 		}
 	}
 
 	floatingIPAddrProp, err := common.NavigateValue(res, []string{"read", "dnat_rule", "floating_ip_address"}, nil)
 	if err != nil {
-		return fmterr.Errorf("Error reading Dnat:floating_ip_address, err: %s", err)
+		return fmterr.Errorf("error reading Dnat:floating_ip_address, err: %s", err)
 	}
 	if err = d.Set("floating_ip_address", floatingIPAddrProp); err != nil {
-		return fmterr.Errorf("Error setting Dnat:floating_ip_address, err: %s", err)
+		return fmterr.Errorf("error setting Dnat:floating_ip_address, err: %s", err)
 	}
 
 	internalServicePortProp, ok := opts["internal_service_port"]
@@ -309,10 +309,10 @@ func resourceNatDnatRuleRead(ctx context.Context, d *schema.ResourceData, meta i
 	if !ok {
 		internalServicePortProp, err = common.NavigateValue(res, []string{"read", "dnat_rule", "internal_service_port"}, nil)
 		if err != nil {
-			return fmterr.Errorf("Error reading Dnat:internal_service_port, err: %s", err)
+			return fmterr.Errorf("error reading Dnat:internal_service_port, err: %s", err)
 		}
 		if err = d.Set("internal_service_port", internalServicePortProp); err != nil {
-			return fmterr.Errorf("Error setting Dnat:internal_service_port, err: %s", err)
+			return fmterr.Errorf("error setting Dnat:internal_service_port, err: %s", err)
 		}
 	}
 
@@ -324,10 +324,10 @@ func resourceNatDnatRuleRead(ctx context.Context, d *schema.ResourceData, meta i
 	if !ok {
 		externalServicePortProp, err = common.NavigateValue(res, []string{"read", "dnat_rule", "external_service_port"}, nil)
 		if err != nil {
-			return fmterr.Errorf("Error reading Dnat:external_service_port, err: %s", err)
+			return fmterr.Errorf("error reading Dnat:external_service_port, err: %s", err)
 		}
 		if err = d.Set("external_service_port", externalServicePortProp); err != nil {
-			return fmterr.Errorf("Error setting Dnat:external_service_port, err: %s", err)
+			return fmterr.Errorf("error setting Dnat:external_service_port, err: %s", err)
 		}
 	}
 
@@ -339,10 +339,10 @@ func resourceNatDnatRuleRead(ctx context.Context, d *schema.ResourceData, meta i
 	if !ok {
 		natGatewayIDProp, err = common.NavigateValue(res, []string{"read", "dnat_rule", "nat_gateway_id"}, nil)
 		if err != nil {
-			return fmterr.Errorf("Error reading Dnat:nat_gateway_id, err: %s", err)
+			return fmterr.Errorf("error reading Dnat:nat_gateway_id, err: %s", err)
 		}
 		if err = d.Set("nat_gateway_id", natGatewayIDProp); err != nil {
-			return fmterr.Errorf("Error setting Dnat:nat_gateway_id, err: %s", err)
+			return fmterr.Errorf("error setting Dnat:nat_gateway_id, err: %s", err)
 		}
 	}
 
@@ -354,10 +354,10 @@ func resourceNatDnatRuleRead(ctx context.Context, d *schema.ResourceData, meta i
 	if !ok {
 		portIDProp, err = common.NavigateValue(res, []string{"read", "dnat_rule", "port_id"}, nil)
 		if err != nil {
-			return fmterr.Errorf("Error reading Dnat:port_id, err: %s", err)
+			return fmterr.Errorf("error reading Dnat:port_id, err: %s", err)
 		}
 		if err = d.Set("port_id", portIDProp); err != nil {
-			return fmterr.Errorf("Error setting Dnat:port_id, err: %s", err)
+			return fmterr.Errorf("error setting Dnat:port_id, err: %s", err)
 		}
 	}
 
@@ -369,10 +369,10 @@ func resourceNatDnatRuleRead(ctx context.Context, d *schema.ResourceData, meta i
 	if !ok {
 		privateIPProp, err = common.NavigateValue(res, []string{"read", "dnat_rule", "private_ip"}, nil)
 		if err != nil {
-			return fmterr.Errorf("Error reading Dnat:private_ip, err: %s", err)
+			return fmterr.Errorf("error reading Dnat:private_ip, err: %s", err)
 		}
 		if err = d.Set("private_ip", privateIPProp); err != nil {
-			return fmterr.Errorf("Error setting Dnat:private_ip, err: %s", err)
+			return fmterr.Errorf("error setting Dnat:private_ip, err: %s", err)
 		}
 	}
 
@@ -384,27 +384,27 @@ func resourceNatDnatRuleRead(ctx context.Context, d *schema.ResourceData, meta i
 	if !ok {
 		protocolProp, err = common.NavigateValue(res, []string{"read", "dnat_rule", "protocol"}, nil)
 		if err != nil {
-			return fmterr.Errorf("Error reading Dnat:protocol, err: %s", err)
+			return fmterr.Errorf("error reading Dnat:protocol, err: %s", err)
 		}
 		if err = d.Set("protocol", protocolProp); err != nil {
-			return fmterr.Errorf("Error setting Dnat:protocol, err: %s", err)
+			return fmterr.Errorf("error setting Dnat:protocol, err: %s", err)
 		}
 	}
 
 	statusProp, err := common.NavigateValue(res, []string{"read", "dnat_rule", "status"}, nil)
 	if err != nil {
-		return fmterr.Errorf("Error reading Dnat:status, err: %s", err)
+		return fmterr.Errorf("error reading Dnat:status, err: %s", err)
 	}
 	if err = d.Set("status", statusProp); err != nil {
-		return fmterr.Errorf("Error setting Dnat:status, err: %s", err)
+		return fmterr.Errorf("error setting Dnat:status, err: %s", err)
 	}
 
 	tenantIDProp, err := common.NavigateValue(res, []string{"read", "dnat_rule", "tenant_id"}, nil)
 	if err != nil {
-		return fmterr.Errorf("Error reading Dnat:tenant_id, err: %s", err)
+		return fmterr.Errorf("error reading Dnat:tenant_id, err: %s", err)
 	}
 	if err = d.Set("tenant_id", tenantIDProp); err != nil {
-		return fmterr.Errorf("Error setting Dnat:tenant_id, err: %s", err)
+		return fmterr.Errorf("error setting Dnat:tenant_id, err: %s", err)
 	}
 
 	return nil
@@ -414,7 +414,7 @@ func resourceNatDnatRuleDelete(ctx context.Context, d *schema.ResourceData, meta
 	config := meta.(*cfg.Config)
 	client, err := config.NatV2Client(config.GetRegion(d))
 	if err != nil {
-		return fmterr.Errorf("Error creating sdk client, err=%s", err)
+		return fmterr.Errorf("error creating sdk client, err=%s", err)
 	}
 
 	url, err := common.ReplaceVars(d, "dnat_rules/{id}", nil)
@@ -431,7 +431,7 @@ func resourceNatDnatRuleDelete(ctx context.Context, d *schema.ResourceData, meta
 		MoreHeaders:  map[string]string{"Content-Type": "application/json"},
 	})
 	if r.Err != nil {
-		return fmterr.Errorf("Error deleting Dnat %q: %s", d.Id(), r.Err)
+		return fmterr.Errorf("error deleting Dnat %q: %s", d.Id(), r.Err)
 	}
 
 	return nil

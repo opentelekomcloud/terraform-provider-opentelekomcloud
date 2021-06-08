@@ -45,7 +45,7 @@ func testAccCheckELBHealthDestroy(s *terraform.State) error {
 	config := common.TestAccProvider.Meta().(*cfg.Config)
 	networkingClient, err := config.ElbV1Client(env.OS_REGION_NAME)
 	if err != nil {
-		return fmt.Errorf("Error creating OpenTelekomCloud networking client: %s", err)
+		return fmt.Errorf("error creating OpenTelekomCloud networking client: %s", err)
 	}
 
 	for _, rs := range s.RootModule().Resources {
@@ -77,7 +77,7 @@ func testAccCheckELBHealthExists(t *testing.T, n string, health *healthcheck.Hea
 		config := common.TestAccProvider.Meta().(*cfg.Config)
 		client, err := config.ElbV1Client(env.OS_REGION_NAME)
 		if err != nil {
-			return fmt.Errorf("Error creating OpenTelekomCloud networking client: %s", err)
+			return fmt.Errorf("error creating OpenTelekomCloud networking client: %s", err)
 		}
 
 		found, err := healthcheck.Get(client, rs.Primary.ID).Extract()

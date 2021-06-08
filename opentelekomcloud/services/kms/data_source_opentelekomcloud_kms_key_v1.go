@@ -84,7 +84,7 @@ func dataSourceKmsKeyV1Read(ctx context.Context, d *schema.ResourceData, meta in
 	config := meta.(*cfg.Config)
 	KmsKeyV1Client, err := config.KmsKeyV1Client(config.GetRegion(d))
 	if err != nil {
-		return fmterr.Errorf("Error creating OpenTelekomCloud kms key client: %s", err)
+		return fmterr.Errorf("error creating OpenTelekomCloud kms key client: %s", err)
 	}
 
 	is_list_key := true

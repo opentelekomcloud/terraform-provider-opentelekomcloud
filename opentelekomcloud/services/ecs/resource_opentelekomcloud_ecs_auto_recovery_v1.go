@@ -18,7 +18,7 @@ func resourceECSAutoRecoveryV1Read(ctx context.Context, d *schema.ResourceData, 
 	config := meta.(*cfg.Config)
 	client, err := config.ComputeV1Client(config.GetRegion(d))
 	if err != nil {
-		return false, fmt.Errorf("Error creating OpenTelekomCloud client: %s", err)
+		return false, fmt.Errorf("error creating OpenTelekomCloud client: %s", err)
 	}
 
 	rId := instanceID
@@ -35,7 +35,7 @@ func setAutoRecoveryForInstance(ctx context.Context, d *schema.ResourceData, met
 	config := meta.(*cfg.Config)
 	client, err := config.ComputeV1Client(config.GetRegion(d))
 	if err != nil {
-		return fmt.Errorf("Error creating OpenTelekomCloud client: %s", err)
+		return fmt.Errorf("error creating OpenTelekomCloud client: %s", err)
 	}
 
 	rId := instanceID
@@ -53,7 +53,7 @@ func setAutoRecoveryForInstance(ctx context.Context, d *schema.ResourceData, met
 		return nil
 	})
 	if err != nil {
-		return fmt.Errorf("Error setting ECS-AutoRecovery for instance%s: %s", rId, err)
+		return fmt.Errorf("error setting ECS-AutoRecovery for instance%s: %s", rId, err)
 	}
 	return nil
 }

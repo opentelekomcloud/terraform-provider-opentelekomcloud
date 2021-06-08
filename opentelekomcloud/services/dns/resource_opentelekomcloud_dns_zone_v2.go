@@ -126,7 +126,7 @@ func resourceDNSZoneV2Create(ctx context.Context, d *schema.ResourceData, meta i
 	config := meta.(*cfg.Config)
 	dnsClient, err := config.DnsV2Client(config.GetRegion(d))
 	if err != nil {
-		return fmterr.Errorf("Error creating OpenTelekomCloud DNS client: %s", err)
+		return fmterr.Errorf("error creating OpenTelekomCloud DNS client: %s", err)
 	}
 
 	zone_type := d.Get("type").(string)
@@ -156,7 +156,7 @@ func resourceDNSZoneV2Create(ctx context.Context, d *schema.ResourceData, meta i
 	log.Printf("[DEBUG] Create Options: %#v", createOpts)
 	n, err := zones.Create(dnsClient, createOpts).Extract()
 	if err != nil {
-		return fmterr.Errorf("Error creating OpenTelekomCloud DNS zone: %s", err)
+		return fmterr.Errorf("error creating OpenTelekomCloud DNS zone: %s", err)
 	}
 
 	log.Printf("[DEBUG] Waiting for DNS Zone (%s) to become available", n.ID)
@@ -187,7 +187,7 @@ func resourceDNSZoneV2Create(ctx context.Context, d *schema.ResourceData, meta i
 					log.Printf("[DEBUG] Creating AssociateZone Options: %#v", routerList[i])
 					_, err := zones.AssociateZone(dnsClient, n.ID, routerList[i]).Extract()
 					if err != nil {
-						return fmterr.Errorf("Error AssociateZone: %s", err)
+						return fmterr.Errorf("error AssociateZone: %s", err)
 					}
 
 					log.Printf("[DEBUG] Waiting for AssociateZone (%s) to Router (%s) become ACTIVE",
@@ -203,7 +203,7 @@ func resourceDNSZoneV2Create(ctx context.Context, d *schema.ResourceData, meta i
 
 					_, err = stateRouterConf.WaitForStateContext(ctx)
 					if err != nil {
-						return fmterr.Errorf("Error waiting for AssociateZone (%s) to Router (%s) become ACTIVE: %s",
+						return fmterr.Errorf("error waiting for AssociateZone (%s) to Router (%s) become ACTIVE: %s",
 							n.ID, routerList[i].RouterID, err)
 					}
 				} else {
@@ -220,7 +220,7 @@ func resourceDNSZoneV2Create(ctx context.Context, d *schema.ResourceData, meta i
 	if len(tagRaw) > 0 {
 		taglist := common.ExpandResourceTags(tagRaw)
 		if tagErr := tags.Create(dnsClient, serviceMap[zone_type], n.ID, taglist).ExtractErr(); tagErr != nil {
-			return fmterr.Errorf("Error setting tags of DNS zone %s: %s", n.ID, tagErr)
+			return fmterr.Errorf("error setting tags of DNS zone %s: %s", n.ID, tagErr)
 		}
 	}
 
@@ -232,7 +232,7 @@ func resourceDNSZoneV2Read(ctx context.Context, d *schema.ResourceData, meta int
 	config := meta.(*cfg.Config)
 	dnsClient, err := config.DnsV2Client(config.GetRegion(d))
 	if err != nil {
-		return fmterr.Errorf("Error creating OpenTelekomCloud DNS client: %s", err)
+		return fmterr.Errorf("error creating OpenTelekomCloud DNS client: %s", err)
 	}
 
 	n, err := zones.Get(dnsClient, d.Id()).Extract()
@@ -255,12 +255,12 @@ func resourceDNSZoneV2Read(ctx context.Context, d *schema.ResourceData, meta int
 	// save tags
 	resourceTags, err := tags.Get(dnsClient, serviceMap[n.ZoneType], d.Id()).Extract()
 	if err != nil {
-		return fmterr.Errorf("Error fetching OpenTelekomCloud DNS zone tags: %s", err)
+		return fmterr.Errorf("error fetching OpenTelekomCloud DNS zone tags: %s", err)
 	}
 
 	tagmap := common.TagsToMap(resourceTags)
 	if err := d.Set("tags", tagmap); err != nil {
-		return fmterr.Errorf("Error saving tags for OpenTelekomCloud DNS zone %s: %s", d.Id(), err)
+		return fmterr.Errorf("error saving tags for OpenTelekomCloud DNS zone %s: %s", d.Id(), err)
 	}
 
 	return nil
@@ -270,7 +270,7 @@ func resourceDNSZoneV2Update(ctx context.Context, d *schema.ResourceData, meta i
 	config := meta.(*cfg.Config)
 	dnsClient, err := config.DnsV2Client(config.GetRegion(d))
 	if err != nil {
-		return fmterr.Errorf("Error creating OpenTelekomCloud DNS client: %s", err)
+		return fmterr.Errorf("error creating OpenTelekomCloud DNS client: %s", err)
 	}
 
 	zone_type := d.Get("type").(string)
@@ -298,7 +298,7 @@ func resourceDNSZoneV2Update(ctx context.Context, d *schema.ResourceData, meta i
 
 	_, err = zones.Update(dnsClient, d.Id(), updateOpts).Extract()
 	if err != nil {
-		return fmterr.Errorf("Error updating OpenTelekomCloud DNS Zone: %s", err)
+		return fmterr.Errorf("error updating OpenTelekomCloud DNS Zone: %s", err)
 	}
 
 	log.Printf("[DEBUG] Waiting for DNS Zone (%s) to update", d.Id())
@@ -318,7 +318,7 @@ func resourceDNSZoneV2Update(ctx context.Context, d *schema.ResourceData, meta i
 		if zone_type == "private" {
 			associateList, disassociateList, err := resourceGetDNSRouters(dnsClient, d)
 			if err != nil {
-				return fmterr.Errorf("Error getting OpenTelekomCloud DNS Zone Router: %s", err)
+				return fmterr.Errorf("error getting OpenTelekomCloud DNS Zone Router: %s", err)
 			}
 			if len(associateList) > 0 {
 				// AssociateZone
@@ -326,7 +326,7 @@ func resourceDNSZoneV2Update(ctx context.Context, d *schema.ResourceData, meta i
 					log.Printf("[DEBUG] Updating AssociateZone Options: %#v", associateList[i])
 					_, err := zones.AssociateZone(dnsClient, d.Id(), associateList[i]).Extract()
 					if err != nil {
-						return fmterr.Errorf("Error AssociateZone: %s", err)
+						return fmterr.Errorf("error AssociateZone: %s", err)
 					}
 
 					log.Printf("[DEBUG] Waiting for AssociateZone (%s) to Router (%s) become ACTIVE",
@@ -342,7 +342,7 @@ func resourceDNSZoneV2Update(ctx context.Context, d *schema.ResourceData, meta i
 
 					_, err = stateRouterConf.WaitForStateContext(ctx)
 					if err != nil {
-						return fmterr.Errorf("Error waiting for AssociateZone (%s) to Router (%s) become ACTIVE: %s",
+						return fmterr.Errorf("error waiting for AssociateZone (%s) to Router (%s) become ACTIVE: %s",
 							d.Id(), associateList[i].RouterID, err)
 					}
 				}
@@ -353,7 +353,7 @@ func resourceDNSZoneV2Update(ctx context.Context, d *schema.ResourceData, meta i
 					log.Printf("[DEBUG] Updating DisassociateZone Options: %#v", disassociateList[j])
 					_, err := zones.DisassociateZone(dnsClient, d.Id(), disassociateList[j]).Extract()
 					if err != nil {
-						return fmterr.Errorf("Error DisassociateZone: %s", err)
+						return fmterr.Errorf("error DisassociateZone: %s", err)
 					}
 
 					log.Printf("[DEBUG] Waiting for DisassociateZone (%s) to Router (%s) become DELETED",
@@ -369,7 +369,7 @@ func resourceDNSZoneV2Update(ctx context.Context, d *schema.ResourceData, meta i
 
 					_, err = stateRouterConf.WaitForStateContext(ctx)
 					if err != nil {
-						return fmterr.Errorf("Error waiting for DisassociateZone (%s) to Router (%s) become DELETED: %s",
+						return fmterr.Errorf("error waiting for DisassociateZone (%s) to Router (%s) become DELETED: %s",
 							d.Id(), disassociateList[j].RouterID, err)
 					}
 				}
@@ -380,7 +380,7 @@ func resourceDNSZoneV2Update(ctx context.Context, d *schema.ResourceData, meta i
 	// update tags
 	tagErr := common.UpdateResourceTags(dnsClient, d, serviceMap[zone_type], d.Id())
 	if tagErr != nil {
-		return fmterr.Errorf("Error updating tags of DNS zone %s: %s", d.Id(), tagErr)
+		return fmterr.Errorf("error updating tags of DNS zone %s: %s", d.Id(), tagErr)
 	}
 
 	return resourceDNSZoneV2Read(ctx, d, meta)
@@ -390,12 +390,12 @@ func resourceDNSZoneV2Delete(ctx context.Context, d *schema.ResourceData, meta i
 	config := meta.(*cfg.Config)
 	dnsClient, err := config.DnsV2Client(config.GetRegion(d))
 	if err != nil {
-		return fmterr.Errorf("Error creating OpenTelekomCloud DNS client: %s", err)
+		return fmterr.Errorf("error creating OpenTelekomCloud DNS client: %s", err)
 	}
 
 	_, err = zones.Delete(dnsClient, d.Id()).Extract()
 	if err != nil {
-		return fmterr.Errorf("Error deleting OpenTelekomCloud DNS Zone: %s", err)
+		return fmterr.Errorf("error deleting OpenTelekomCloud DNS Zone: %s", err)
 	}
 
 	log.Printf("[DEBUG] Waiting for DNS Zone (%s) to become available", d.Id())

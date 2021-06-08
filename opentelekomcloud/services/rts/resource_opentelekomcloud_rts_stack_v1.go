@@ -165,7 +165,7 @@ func resourceRTSStackV1Create(ctx context.Context, d *schema.ResourceData, meta 
 
 	orchestrationClient, err := config.OrchestrationV1Client(config.GetRegion(d))
 	if err != nil {
-		return fmterr.Errorf("Error creating RTS client: %s", err)
+		return fmterr.Errorf("error creating RTS client: %s", err)
 	}
 
 	rollback := d.Get("disable_rollback").(bool)
@@ -180,7 +180,7 @@ func resourceRTSStackV1Create(ctx context.Context, d *schema.ResourceData, meta 
 
 	n, err := stacks.Create(orchestrationClient, createOpts).Extract()
 	if err != nil {
-		return fmterr.Errorf("Error creating stack: %s", err)
+		return fmterr.Errorf("error creating stack: %s", err)
 	}
 	d.SetId(n.ID)
 
@@ -211,7 +211,7 @@ func resourceRTSStackV1Read(ctx context.Context, d *schema.ResourceData, meta in
 	config := meta.(*cfg.Config)
 	orchestrationClient, err := config.OrchestrationV1Client(config.GetRegion(d))
 	if err != nil {
-		return fmterr.Errorf("Error creating RTS Client: %s", err)
+		return fmterr.Errorf("error creating RTS Client: %s", err)
 	}
 
 	stack, err := stacks.Get(orchestrationClient, d.Id()).Extract()
@@ -223,7 +223,7 @@ func resourceRTSStackV1Read(ctx context.Context, d *schema.ResourceData, meta in
 			return nil
 		}
 
-		return fmterr.Errorf("Error retrieving Stack: %s", err)
+		return fmterr.Errorf("error retrieving Stack: %s", err)
 
 	}
 
@@ -274,7 +274,7 @@ func resourceRTSStackV1Update(ctx context.Context, d *schema.ResourceData, meta 
 	config := meta.(*cfg.Config)
 	orchestrationClient, err := config.OrchestrationV1Client(config.GetRegion(d))
 	if err != nil {
-		return fmterr.Errorf("Error creating RTS Client: %s", err)
+		return fmterr.Errorf("error creating RTS Client: %s", err)
 	}
 	_, body_ok := d.GetOk("template_body")
 	_, url_ok := d.GetOk("template_url")
@@ -301,7 +301,7 @@ func resourceRTSStackV1Update(ctx context.Context, d *schema.ResourceData, meta 
 
 	err = stacks.Update(orchestrationClient, d.Get("name").(string), d.Id(), updateOpts).ExtractErr()
 	if err != nil {
-		return fmterr.Errorf("Error updating Stack: %s", err)
+		return fmterr.Errorf("error updating Stack: %s", err)
 	}
 	stateConf := &resource.StateChangeConf{
 		Pending: []string{"UPDATE_IN_PROGRESS",
@@ -331,7 +331,7 @@ func resourceRTSStackV1Delete(ctx context.Context, d *schema.ResourceData, meta 
 	config := meta.(*cfg.Config)
 	orchestrationClient, err := config.OrchestrationV1Client(config.GetRegion(d))
 	if err != nil {
-		return fmterr.Errorf("Error creating RTS Client: %s", err)
+		return fmterr.Errorf("error creating RTS Client: %s", err)
 	}
 
 	stateConf := &resource.StateChangeConf{
@@ -353,7 +353,7 @@ func resourceRTSStackV1Delete(ctx context.Context, d *schema.ResourceData, meta 
 	_, stateErr := stateConf.WaitForStateContext(ctx)
 
 	if stateErr != nil {
-		return fmterr.Errorf("Error deleting Stack: %s", stateErr)
+		return fmterr.Errorf("error deleting Stack: %s", stateErr)
 	}
 
 	d.SetId("")

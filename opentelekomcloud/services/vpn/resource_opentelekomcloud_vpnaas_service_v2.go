@@ -96,7 +96,7 @@ func resourceVpnServiceV2Create(ctx context.Context, d *schema.ResourceData, met
 	config := meta.(*cfg.Config)
 	networkingClient, err := config.NetworkingV2Client(config.GetRegion(d))
 	if err != nil {
-		return fmterr.Errorf("Error creating OpenTelekomCloud networking client: %s", err)
+		return fmterr.Errorf("error creating OpenTelekomCloud networking client: %s", err)
 	}
 
 	var createOpts services.CreateOptsBuilder
@@ -148,7 +148,7 @@ func resourceVpnServiceV2Read(ctx context.Context, d *schema.ResourceData, meta 
 	config := meta.(*cfg.Config)
 	networkingClient, err := config.NetworkingV2Client(config.GetRegion(d))
 	if err != nil {
-		return fmterr.Errorf("Error creating OpenTelekomCloud networking client: %s", err)
+		return fmterr.Errorf("error creating OpenTelekomCloud networking client: %s", err)
 	}
 
 	service, err := services.Get(networkingClient, d.Id()).Extract()
@@ -176,7 +176,7 @@ func resourceVpnServiceV2Update(ctx context.Context, d *schema.ResourceData, met
 	config := meta.(*cfg.Config)
 	networkingClient, err := config.NetworkingV2Client(config.GetRegion(d))
 	if err != nil {
-		return fmterr.Errorf("Error creating OpenTelekomCloud networking client: %s", err)
+		return fmterr.Errorf("error creating OpenTelekomCloud networking client: %s", err)
 	}
 
 	opts := services.UpdateOpts{}
@@ -237,7 +237,7 @@ func resourceVpnServiceV2Delete(ctx context.Context, d *schema.ResourceData, met
 	config := meta.(*cfg.Config)
 	networkingClient, err := config.NetworkingV2Client(config.GetRegion(d))
 	if err != nil {
-		return fmterr.Errorf("Error creating OpenTelekomCloud networking client: %s", err)
+		return fmterr.Errorf("error creating OpenTelekomCloud networking client: %s", err)
 	}
 
 	err = services.Delete(networkingClient, d.Id()).Err

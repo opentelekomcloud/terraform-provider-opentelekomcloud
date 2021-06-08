@@ -102,7 +102,7 @@ func testAccCheckOTCVpcV1Destroy(s *terraform.State) error {
 	config := common.TestAccProvider.Meta().(*cfg.Config)
 	vpcClient, err := config.NetworkingV1Client(env.OS_REGION_NAME)
 	if err != nil {
-		return fmt.Errorf("Error creating OpenTelekomCloud vpc client: %s", err)
+		return fmt.Errorf("error creating OpenTelekomCloud vpc client: %s", err)
 	}
 
 	for _, rs := range s.RootModule().Resources {
@@ -133,7 +133,7 @@ func testAccCheckOTCVpcV1Exists(n string, vpc *vpcs.Vpc) resource.TestCheckFunc 
 		config := common.TestAccProvider.Meta().(*cfg.Config)
 		vpcClient, err := config.NetworkingV1Client(env.OS_REGION_NAME)
 		if err != nil {
-			return fmt.Errorf("Error creating OpenTelekomCloud vpc client: %s", err)
+			return fmt.Errorf("error creating OpenTelekomCloud vpc client: %s", err)
 		}
 
 		found, err := vpcs.Get(vpcClient, rs.Primary.ID).Extract()

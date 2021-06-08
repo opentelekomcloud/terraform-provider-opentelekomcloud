@@ -67,7 +67,7 @@ func resourceComputeVolumeAttachV2Create(ctx context.Context, d *schema.Resource
 	config := meta.(*cfg.Config)
 	computeClient, err := config.ComputeV2Client(config.GetRegion(d))
 	if err != nil {
-		return fmterr.Errorf("Error creating OpenTelekomCloud compute client: %s", err)
+		return fmterr.Errorf("error creating OpenTelekomCloud compute client: %s", err)
 	}
 
 	instanceId := d.Get("instance_id").(string)
@@ -100,7 +100,7 @@ func resourceComputeVolumeAttachV2Create(ctx context.Context, d *schema.Resource
 	}
 
 	if _, err = stateConf.WaitForStateContext(ctx); err != nil {
-		return fmterr.Errorf("Error attaching OpenTelekomCloud volume: %s", err)
+		return fmterr.Errorf("error attaching OpenTelekomCloud volume: %s", err)
 	}
 
 	log.Printf("[DEBUG] Created volume attachment: %#v", attachment)
@@ -118,7 +118,7 @@ func resourceComputeVolumeAttachV2Read(ctx context.Context, d *schema.ResourceDa
 	config := meta.(*cfg.Config)
 	computeClient, err := config.ComputeV2Client(config.GetRegion(d))
 	if err != nil {
-		return fmterr.Errorf("Error creating OpenTelekomCloud compute client: %s", err)
+		return fmterr.Errorf("error creating OpenTelekomCloud compute client: %s", err)
 	}
 
 	instanceId, attachmentId, err := ParseComputeVolumeAttachmentId(d.Id())
@@ -145,7 +145,7 @@ func resourceComputeVolumeAttachV2Delete(ctx context.Context, d *schema.Resource
 	config := meta.(*cfg.Config)
 	computeClient, err := config.ComputeV2Client(config.GetRegion(d))
 	if err != nil {
-		return fmterr.Errorf("Error creating OpenTelekomCloud compute client: %s", err)
+		return fmterr.Errorf("error creating OpenTelekomCloud compute client: %s", err)
 	}
 
 	instanceId, attachmentId, err := ParseComputeVolumeAttachmentId(d.Id())
@@ -163,7 +163,7 @@ func resourceComputeVolumeAttachV2Delete(ctx context.Context, d *schema.Resource
 	}
 
 	if _, err = stateConf.WaitForStateContext(ctx); err != nil {
-		return fmterr.Errorf("Error detaching OpenTelekomCloud volume: %s", err)
+		return fmterr.Errorf("error detaching OpenTelekomCloud volume: %s", err)
 	}
 
 	return nil

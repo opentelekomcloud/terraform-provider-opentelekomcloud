@@ -544,22 +544,22 @@ func resourceClusterV1Create(ctx context.Context, d *schema.ResourceData, meta i
 	config := meta.(*cfg.Config)
 	client, err := config.MrsV1Client(config.GetRegion(d))
 	if err != nil {
-		return fmterr.Errorf("Error creating OpenTelekomCloud MRS client: %s", err)
+		return fmterr.Errorf("error creating OpenTelekomCloud MRS client: %s", err)
 	}
 	vpcClient, err := config.NetworkingV1Client(config.GetRegion(d))
 	if err != nil {
-		return fmterr.Errorf("Error creating OpenTelekomCloud Vpc client: %s", err)
+		return fmterr.Errorf("error creating OpenTelekomCloud Vpc client: %s", err)
 	}
 
 	// Get vpc name
 	vpc, err := vpcs.Get(vpcClient, d.Get("vpc_id").(string)).Extract()
 	if err != nil {
-		return fmterr.Errorf("Error retrieving OpenTelekomCloud Vpc: %s", err)
+		return fmterr.Errorf("error retrieving OpenTelekomCloud Vpc: %s", err)
 	}
 	// Get subnet name
 	subnet, err := subnets.Get(vpcClient, d.Get("subnet_id").(string)).Extract()
 	if err != nil {
-		return fmterr.Errorf("Error retrieving OpenTelekomCloud Subnet: %s", err)
+		return fmterr.Errorf("error retrieving OpenTelekomCloud Subnet: %s", err)
 	}
 
 	createOpts := &cluster.CreateOpts{
@@ -598,7 +598,7 @@ func resourceClusterV1Create(ctx context.Context, d *schema.ResourceData, meta i
 
 	clusterCreate, err := cluster.Create(client, createOpts).Extract()
 	if err != nil {
-		return fmterr.Errorf("Error creating Cluster: %s", err)
+		return fmterr.Errorf("error creating Cluster: %s", err)
 	}
 	d.SetId(clusterCreate.ClusterID)
 
@@ -635,18 +635,18 @@ func resourceClusterV1Update(ctx context.Context, d *schema.ResourceData, meta i
 	config := meta.(*cfg.Config)
 	client, err := config.MrsV1Client(config.GetRegion(d))
 	if err != nil {
-		return fmterr.Errorf("Error creating OpenTelekomCloud MRS client: %s", err)
+		return fmterr.Errorf("error creating OpenTelekomCloud MRS client: %s", err)
 	}
 
 	oldTags, err := tags.Get(client, d.Id()).Extract()
 	if err != nil {
-		return fmterr.Errorf("Error fetching OpenTelekomCloud MRS cluster tags: %s", err)
+		return fmterr.Errorf("error fetching OpenTelekomCloud MRS cluster tags: %s", err)
 	}
 	if len(oldTags.Tags) > 0 {
 		deleteopts := tags.BatchOpts{Action: tags.ActionDelete, Tags: oldTags.Tags}
 		deleteTags := tags.BatchAction(client, d.Id(), deleteopts)
 		if deleteTags.Err != nil {
-			return fmterr.Errorf("Error updating OpenTelekomCloud MRS cluster tags: %s", deleteTags.Err)
+			return fmterr.Errorf("error updating OpenTelekomCloud MRS cluster tags: %s", deleteTags.Err)
 		}
 	}
 
@@ -656,7 +656,7 @@ func resourceClusterV1Update(ctx context.Context, d *schema.ResourceData, meta i
 			log.Printf("[DEBUG] Setting tags: %v", tagmap)
 			err = setTagForMrs(d, meta, d.Id(), tagmap)
 			if err != nil {
-				return fmterr.Errorf("Error updating tags of MRS cluster:%s, err:%s", d.Id(), err)
+				return fmterr.Errorf("error updating tags of MRS cluster:%s, err:%s", d.Id(), err)
 			}
 		}
 	}
@@ -668,7 +668,7 @@ func resourceClusterV1Read(ctx context.Context, d *schema.ResourceData, meta int
 	config := meta.(*cfg.Config)
 	client, err := config.MrsV1Client(config.GetRegion(d))
 	if err != nil {
-		return fmterr.Errorf("Error creating OpenTelekomCloud MRS client: %s", err)
+		return fmterr.Errorf("error creating OpenTelekomCloud MRS client: %s", err)
 	}
 
 	clusterGet, err := cluster.Get(client, d.Id()).Extract()
@@ -686,11 +686,11 @@ func resourceClusterV1Read(ctx context.Context, d *schema.ResourceData, meta int
 
 	masterNodeNum, err := strconv.Atoi(clusterGet.Masternodenum)
 	if err != nil {
-		return fmterr.Errorf("Error converting Masternodenum: %s", err)
+		return fmterr.Errorf("error converting Masternodenum: %s", err)
 	}
 	coreNodeNum, err := strconv.Atoi(clusterGet.Corenodenum)
 	if err != nil {
-		return fmterr.Errorf("Error converting Corenodenum: %s", err)
+		return fmterr.Errorf("error converting Corenodenum: %s", err)
 	}
 	d.Set("master_node_num", masterNodeNum)
 	d.Set("core_node_num", coreNodeNum)
@@ -730,19 +730,19 @@ func resourceClusterV1Read(ctx context.Context, d *schema.ResourceData, meta int
 
 	updateAt, err := strconv.ParseInt(clusterGet.Updateat, 10, 64)
 	if err != nil {
-		return fmterr.Errorf("Error converting Updateat: %s", err)
+		return fmterr.Errorf("error converting Updateat: %s", err)
 	}
 	updateAtTm := time.Unix(updateAt, 0)
 
 	createAt, err := strconv.ParseInt(clusterGet.Createat, 10, 64)
 	if err != nil {
-		return fmterr.Errorf("Error converting Createat: %s", err)
+		return fmterr.Errorf("error converting Createat: %s", err)
 	}
 	createAtTm := time.Unix(createAt, 0)
 
 	chargingStartTime, err := strconv.ParseInt(clusterGet.Chargingstarttime, 10, 64)
 	if err != nil {
-		return fmterr.Errorf("Error converting chargingStartTime: %s", err)
+		return fmterr.Errorf("error converting chargingStartTime: %s", err)
 	}
 	chargingStartTimeTm := time.Unix(chargingStartTime, 0)
 
@@ -779,7 +779,7 @@ func resourceClusterV1Read(ctx context.Context, d *schema.ResourceData, meta int
 	// Set instance tags
 	Taglist, err := tags.Get(client, d.Id()).Extract()
 	if err != nil {
-		return fmterr.Errorf("Error fetching OpenTelekomCloud MRS cluster tags: %s", err)
+		return fmterr.Errorf("error fetching OpenTelekomCloud MRS cluster tags: %s", err)
 	}
 
 	tagmap := make(map[string]string)
@@ -796,7 +796,7 @@ func resourceClusterV1Delete(ctx context.Context, d *schema.ResourceData, meta i
 	config := meta.(*cfg.Config)
 	client, err := config.MrsV1Client(config.GetRegion(d))
 	if err != nil {
-		return fmterr.Errorf("Error creating OpenTelekomCloud MRS client: %s", err)
+		return fmterr.Errorf("error creating OpenTelekomCloud MRS client: %s", err)
 	}
 
 	rId := d.Id()
@@ -806,7 +806,7 @@ func resourceClusterV1Delete(ctx context.Context, d *schema.ResourceData, meta i
 			log.Printf("[INFO] getting an unavailable Cluster: %s", rId)
 			return nil
 		}
-		return fmterr.Errorf("Error getting Cluster %s: %s", rId, err)
+		return fmterr.Errorf("error getting Cluster %s: %s", rId, err)
 	}
 
 	if clusterGet.Clusterstate == "terminated" {
@@ -818,7 +818,7 @@ func resourceClusterV1Delete(ctx context.Context, d *schema.ResourceData, meta i
 
 	err = cluster.Delete(client, rId).ExtractErr()
 	if err != nil {
-		return fmterr.Errorf("Error deleting OpenTelekomCloud Cluster: %s", err)
+		return fmterr.Errorf("error deleting OpenTelekomCloud Cluster: %s", err)
 	}
 
 	log.Printf("[DEBUG] Waiting for Cluster (%s) to be terminated", rId)
@@ -847,7 +847,7 @@ func setTagForMrs(d *schema.ResourceData, meta interface{}, instanceID string, t
 	config := meta.(*cfg.Config)
 	client, err := config.MrsV1Client(config.GetRegion(d))
 	if err != nil {
-		return fmt.Errorf("Error creating OpenTelekomCloud MRS v1 client: %s", err)
+		return fmt.Errorf("error creating OpenTelekomCloud MRS v1 client: %s", err)
 	}
 
 	rId := instanceID
@@ -863,7 +863,7 @@ func setTagForMrs(d *schema.ResourceData, meta interface{}, instanceID string, t
 	createOpts := tags.BatchOpts{Action: tags.ActionCreate, Tags: taglist}
 	createTags := tags.BatchAction(client, rId, createOpts)
 	if createTags.Err != nil {
-		return fmt.Errorf("Error creating OpenTelekomCloud MRS cluster tags: %s", createTags.Err)
+		return fmt.Errorf("error creating OpenTelekomCloud MRS cluster tags: %s", createTags.Err)
 	}
 
 	return nil

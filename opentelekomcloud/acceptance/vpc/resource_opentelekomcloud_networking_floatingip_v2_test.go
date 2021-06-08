@@ -54,7 +54,7 @@ func testAccCheckNetworkingV2FloatingIPDestroy(s *terraform.State) error {
 	config := common.TestAccProvider.Meta().(*cfg.Config)
 	networkClient, err := config.NetworkingV2Client(env.OS_REGION_NAME)
 	if err != nil {
-		return fmt.Errorf("Error creating OpenTelekomCloud floating IP: %s", err)
+		return fmt.Errorf("error creating OpenTelekomCloud floating IP: %s", err)
 	}
 
 	for _, rs := range s.RootModule().Resources {

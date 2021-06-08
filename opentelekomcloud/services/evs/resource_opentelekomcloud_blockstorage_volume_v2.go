@@ -173,7 +173,7 @@ func resourceBlockStorageVolumeV2Create(ctx context.Context, d *schema.ResourceD
 	config := meta.(*cfg.Config)
 	blockStorageClient, err := config.BlockStorageV2Client(config.GetRegion(d))
 	if err != nil {
-		return fmterr.Errorf("Error creating OpenTelekomCloud block storage client: %s", err)
+		return fmterr.Errorf("error creating OpenTelekomCloud block storage client: %s", err)
 	}
 	metadata := resourceContainerMetadataV2(d)
 	if d.Get("device_type").(string) == "SCSI" {
@@ -197,7 +197,7 @@ func resourceBlockStorageVolumeV2Create(ctx context.Context, d *schema.ResourceD
 	log.Printf("[DEBUG] Create Options: %#v", createOpts)
 	v, err := volumes.Create(blockStorageClient, createOpts).Extract()
 	if err != nil {
-		return fmterr.Errorf("Error creating OpenTelekomCloud volume: %s", err)
+		return fmterr.Errorf("error creating OpenTelekomCloud volume: %s", err)
 	}
 	log.Printf("[INFO] Volume ID: %s", v.ID)
 
@@ -223,7 +223,7 @@ func resourceBlockStorageVolumeV2Create(ctx context.Context, d *schema.ResourceD
 	}
 	_, err = resourceEVSTagV2Create(ctx, d, meta, "volumes", v.ID, resourceContainerTags(d))
 	if err != nil {
-		return fmterr.Errorf("Error creating tags for volume (%s): %s", v.ID, err)
+		return fmterr.Errorf("error creating tags for volume (%s): %s", v.ID, err)
 	}
 
 	// Store the ID now
@@ -236,7 +236,7 @@ func resourceBlockStorageVolumeV2Read(ctx context.Context, d *schema.ResourceDat
 	config := meta.(*cfg.Config)
 	blockStorageClient, err := config.BlockStorageV2Client(config.GetRegion(d))
 	if err != nil {
-		return fmterr.Errorf("Error creating OpenTelekomCloud block storage client: %s", err)
+		return fmterr.Errorf("error creating OpenTelekomCloud block storage client: %s", err)
 	}
 
 	v, err := volumes.Get(blockStorageClient, d.Id()).Extract()
@@ -289,7 +289,7 @@ OUTER:
 	}
 	taglist, err := resourceEVSTagV2Get(d, meta, "volumes", v.ID)
 	if err != nil {
-		return fmterr.Errorf("Error fetching tags for volume (%s): %s", v.ID, err)
+		return fmterr.Errorf("error fetching tags for volume (%s): %s", v.ID, err)
 	}
 	d.Set("tags", taglist)
 
@@ -301,7 +301,7 @@ OUTER:
 	if d.Get("device_type").(string) == "SCSI" {
 		blockStorageClientV3, err := config.BlockStorageV3Client(config.GetRegion(d))
 		if err != nil {
-			return fmterr.Errorf("Error creating OpenTelekomCloud block storage client: %s", err)
+			return fmterr.Errorf("error creating OpenTelekomCloud block storage client: %s", err)
 		}
 
 		v, err := volumes_v3.Get(blockStorageClientV3, d.Id()).Extract()
@@ -321,7 +321,7 @@ func resourceBlockStorageVolumeV2Update(ctx context.Context, d *schema.ResourceD
 	config := meta.(*cfg.Config)
 	blockStorageClient, err := config.BlockStorageV2Client(config.GetRegion(d))
 	if err != nil {
-		return fmterr.Errorf("Error creating OpenTelekomCloud block storage client: %s", err)
+		return fmterr.Errorf("error creating OpenTelekomCloud block storage client: %s", err)
 	}
 
 	updateOpts := volumes.UpdateOpts{
@@ -335,7 +335,7 @@ func resourceBlockStorageVolumeV2Update(ctx context.Context, d *schema.ResourceD
 
 	_, err = volumes.Update(blockStorageClient, d.Id(), updateOpts).Extract()
 	if err != nil {
-		return fmterr.Errorf("Error updating OpenTelekomCloud volume: %s", err)
+		return fmterr.Errorf("error updating OpenTelekomCloud volume: %s", err)
 	}
 	if d.HasChange("tags") {
 		_, err = resourceEVSTagV2Create(ctx, d, meta, "volumes", d.Id(), resourceContainerTags(d))
@@ -381,7 +381,7 @@ func resourceBlockStorageVolumeV2Delete(ctx context.Context, d *schema.ResourceD
 	config := meta.(*cfg.Config)
 	blockStorageClient, err := config.BlockStorageV2Client(config.GetRegion(d))
 	if err != nil {
-		return fmterr.Errorf("Error creating OpenTelekomCloud block storage client: %s", err)
+		return fmterr.Errorf("error creating OpenTelekomCloud block storage client: %s", err)
 	}
 
 	v, err := volumes.Get(blockStorageClient, d.Id()).Extract()

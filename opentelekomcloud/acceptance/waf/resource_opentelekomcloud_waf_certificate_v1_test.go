@@ -45,7 +45,7 @@ func testAccCheckWafCertificateV1Destroy(s *terraform.State) error {
 	config := common.TestAccProvider.Meta().(*cfg.Config)
 	wafClient, err := config.WafV1Client(env.OS_REGION_NAME)
 	if err != nil {
-		return fmt.Errorf("Error creating OpenTelekomCloud WAF client: %s", err)
+		return fmt.Errorf("error creating OpenTelekomCloud WAF client: %s", err)
 	}
 
 	for _, rs := range s.RootModule().Resources {
@@ -76,7 +76,7 @@ func testAccCheckWafCertificateV1Exists(n string, certificate *certificates.Cert
 		config := common.TestAccProvider.Meta().(*cfg.Config)
 		wafClient, err := config.WafV1Client(env.OS_REGION_NAME)
 		if err != nil {
-			return fmt.Errorf("Error creating OpenTelekomCloud WAF client: %s", err)
+			return fmt.Errorf("error creating OpenTelekomCloud WAF client: %s", err)
 		}
 
 		found, err := certificates.Get(wafClient, rs.Primary.ID).Extract()

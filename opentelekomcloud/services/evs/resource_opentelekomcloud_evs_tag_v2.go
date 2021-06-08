@@ -14,7 +14,7 @@ func resourceEVSTagV2Create(ctx context.Context, d *schema.ResourceData, meta in
 	config := meta.(*cfg.Config)
 	client, err := config.BlockStorageV2Client(config.GetRegion(d))
 	if err != nil {
-		return nil, fmt.Errorf("Error creating OpenTelekomCloud client: %s", err)
+		return nil, fmt.Errorf("error creating OpenTelekomCloud client: %s", err)
 	}
 
 	createOpts := tags.CreateOpts{Tags: tag}
@@ -25,7 +25,7 @@ func resourceEVSTagV2Get(d *schema.ResourceData, meta interface{}, resourceType,
 	config := meta.(*cfg.Config)
 	client, err := config.BlockStorageV2Client(config.GetRegion(d))
 	if err != nil {
-		return nil, fmt.Errorf("Error creating OpenTelekomCloud client: %s", err)
+		return nil, fmt.Errorf("error creating OpenTelekomCloud client: %s", err)
 	}
 
 	return tags.Get(client, resourceType, resourceID).Extract()

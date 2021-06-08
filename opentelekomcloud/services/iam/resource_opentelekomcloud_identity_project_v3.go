@@ -71,7 +71,7 @@ func resourceIdentityProjectV3Create(ctx context.Context, d *schema.ResourceData
 	config := meta.(*cfg.Config)
 	identityClient, err := config.IdentityV3Client(config.GetRegion(d))
 	if err != nil {
-		return fmterr.Errorf("Error creating OpenStack identity client: %s", err)
+		return fmterr.Errorf("error creating OpenStack identity client: %s", err)
 	}
 
 	createOpts := projects.CreateOpts{
@@ -84,7 +84,7 @@ func resourceIdentityProjectV3Create(ctx context.Context, d *schema.ResourceData
 	log.Printf("[DEBUG] Create Options: %#v", createOpts)
 	project, err := projects.Create(identityClient, createOpts).Extract()
 	if err != nil {
-		return fmterr.Errorf("Error creating OpenStack project: %s", err)
+		return fmterr.Errorf("error creating OpenStack project: %s", err)
 	}
 
 	d.SetId(project.ID)
@@ -105,7 +105,7 @@ func resourceIdentityProjectV3Read(ctx context.Context, d *schema.ResourceData, 
 	config := meta.(*cfg.Config)
 	identityClient, err := config.IdentityV3Client(config.GetRegion(d))
 	if err != nil {
-		return fmterr.Errorf("Error creating OpenStack identity client: %s", err)
+		return fmterr.Errorf("error creating OpenStack identity client: %s", err)
 	}
 
 	project, err := projects.Get(identityClient, d.Id()).Extract()
@@ -130,7 +130,7 @@ func resourceIdentityProjectV3Update(ctx context.Context, d *schema.ResourceData
 	config := meta.(*cfg.Config)
 	identityClient, err := config.IdentityV3Client(config.GetRegion(d))
 	if err != nil {
-		return fmterr.Errorf("Error creating OpenStack identity client: %s", err)
+		return fmterr.Errorf("error creating OpenStack identity client: %s", err)
 	}
 
 	var hasChange bool
@@ -150,7 +150,7 @@ func resourceIdentityProjectV3Update(ctx context.Context, d *schema.ResourceData
 	if hasChange {
 		_, err := projects.Update(identityClient, d.Id(), updateOpts).Extract()
 		if err != nil {
-			return fmterr.Errorf("Error updating OpenStack project: %s", err)
+			return fmterr.Errorf("error updating OpenStack project: %s", err)
 		}
 	}
 
@@ -161,12 +161,12 @@ func resourceIdentityProjectV3Delete(ctx context.Context, d *schema.ResourceData
 	config := meta.(*cfg.Config)
 	identityClient, err := config.IdentityV3Client(config.GetRegion(d))
 	if err != nil {
-		return fmterr.Errorf("Error creating OpenStack identity client: %s", err)
+		return fmterr.Errorf("error creating OpenStack identity client: %s", err)
 	}
 
 	err = projects.Delete(identityClient, d.Id()).ExtractErr()
 	if err != nil {
-		return fmterr.Errorf("Error deleting OpenStack project: %s", err)
+		return fmterr.Errorf("error deleting OpenStack project: %s", err)
 	}
 
 	return nil

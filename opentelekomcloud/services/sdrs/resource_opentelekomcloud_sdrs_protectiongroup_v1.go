@@ -75,7 +75,7 @@ func resourceSdrsProtectiongroupV1Create(ctx context.Context, d *schema.Resource
 	sdrsClient, err := config.SdrsV1Client(config.GetRegion(d))
 
 	if err != nil {
-		return fmterr.Errorf("Error creating OpenTelekomcomCloud SDRS Client: %s", err)
+		return fmterr.Errorf("error creating OpenTelekomcomCloud SDRS Client: %s", err)
 	}
 
 	createOpts := protectiongroups.CreateOpts{
@@ -91,7 +91,7 @@ func resourceSdrsProtectiongroupV1Create(ctx context.Context, d *schema.Resource
 
 	n, err := protectiongroups.Create(sdrsClient, createOpts).ExtractJobResponse()
 	if err != nil {
-		return fmterr.Errorf("Error creating OpenTelekomcomCloud SDRS Protectiongroup: %s", err)
+		return fmterr.Errorf("error creating OpenTelekomcomCloud SDRS Protectiongroup: %s", err)
 	}
 
 	if err := protectiongroups.WaitForJobSuccess(sdrsClient, int(d.Timeout(schema.TimeoutCreate)/time.Second), n.JobID); err != nil {
@@ -116,7 +116,7 @@ func resourceSdrsProtectiongroupV1Read(ctx context.Context, d *schema.ResourceDa
 	config := meta.(*cfg.Config)
 	sdrsClient, err := config.SdrsV1Client(config.GetRegion(d))
 	if err != nil {
-		return fmterr.Errorf("Error creating OpenTelekomCloud SDRS client: %s", err)
+		return fmterr.Errorf("error creating OpenTelekomCloud SDRS client: %s", err)
 	}
 	n, err := protectiongroups.Get(sdrsClient, d.Id()).Extract()
 
@@ -126,7 +126,7 @@ func resourceSdrsProtectiongroupV1Read(ctx context.Context, d *schema.ResourceDa
 			return nil
 		}
 
-		return fmterr.Errorf("Error retrieving OpenTelekomCloud SDRS Protectiongroup: %s", err)
+		return fmterr.Errorf("error retrieving OpenTelekomCloud SDRS Protectiongroup: %s", err)
 	}
 
 	d.Set("name", n.Name)
@@ -144,7 +144,7 @@ func resourceSdrsProtectiongroupV1Update(ctx context.Context, d *schema.Resource
 	config := meta.(*cfg.Config)
 	sdrsClient, err := config.SdrsV1Client(config.GetRegion(d))
 	if err != nil {
-		return fmterr.Errorf("Error creating OpenTelekomCloud SDRS Client: %s", err)
+		return fmterr.Errorf("error creating OpenTelekomCloud SDRS Client: %s", err)
 	}
 	var updateOpts protectiongroups.UpdateOpts
 
@@ -155,7 +155,7 @@ func resourceSdrsProtectiongroupV1Update(ctx context.Context, d *schema.Resource
 
 	_, err = protectiongroups.Update(sdrsClient, d.Id(), updateOpts).Extract()
 	if err != nil {
-		return fmterr.Errorf("Error updating OpenTelekomCloud SDRS Protectiongroup: %s", err)
+		return fmterr.Errorf("error updating OpenTelekomCloud SDRS Protectiongroup: %s", err)
 	}
 	return resourceSdrsProtectiongroupV1Read(ctx, d, meta)
 }
@@ -164,12 +164,12 @@ func resourceSdrsProtectiongroupV1Delete(ctx context.Context, d *schema.Resource
 	config := meta.(*cfg.Config)
 	sdrsClient, err := config.SdrsV1Client(config.GetRegion(d))
 	if err != nil {
-		return fmterr.Errorf("Error creating OpenTelekomCloud SDRS client: %s", err)
+		return fmterr.Errorf("error creating OpenTelekomCloud SDRS client: %s", err)
 	}
 
 	n, err := protectiongroups.Delete(sdrsClient, d.Id()).ExtractJobResponse()
 	if err != nil {
-		return fmterr.Errorf("Error deleting OpenTelekomCloud SDRS Protectiongroup: %s", err)
+		return fmterr.Errorf("error deleting OpenTelekomCloud SDRS Protectiongroup: %s", err)
 	}
 
 	if err := protectiongroups.WaitForJobSuccess(sdrsClient, int(d.Timeout(schema.TimeoutDelete)/time.Second), n.JobID); err != nil {

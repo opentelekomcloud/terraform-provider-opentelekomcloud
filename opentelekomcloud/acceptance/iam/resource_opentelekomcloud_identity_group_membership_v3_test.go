@@ -54,7 +54,7 @@ func testAccCheckIdentityV3GroupMembershipDestroy(s *terraform.State) error {
 	config := common.TestAccProvider.Meta().(*cfg.Config)
 	identityClient, err := config.IdentityV3Client(env.OS_REGION_NAME)
 	if err != nil {
-		return fmt.Errorf("Error creating OpenStack identity client: %s", err)
+		return fmt.Errorf("error creating OpenStack identity client: %s", err)
 	}
 
 	for _, rs := range s.RootModule().Resources {
@@ -86,7 +86,7 @@ func testAccCheckIdentityV3GroupMembershipExists(n string, us []string) resource
 		config := common.TestAccProvider.Meta().(*cfg.Config)
 		identityClient, err := config.IdentityV3Client(env.OS_REGION_NAME)
 		if err != nil {
-			return fmt.Errorf("Error creating OpenStack identity client: %s", err)
+			return fmt.Errorf("error creating OpenStack identity client: %s", err)
 		}
 		group := rs.Primary.Attributes["group"]
 		if group == "" {

@@ -50,7 +50,7 @@ func resourceTopicV2Create(ctx context.Context, d *schema.ResourceData, meta int
 	config := meta.(*cfg.Config)
 	client, err := config.LtsV2Client(config.GetRegion(d))
 	if err != nil {
-		return fmterr.Errorf("Error creating OpenTelekomCloud LTS client: %s", err)
+		return fmterr.Errorf("error creating OpenTelekomCloud LTS client: %s", err)
 	}
 
 	groupId := d.Get("group_id").(string)
@@ -62,7 +62,7 @@ func resourceTopicV2Create(ctx context.Context, d *schema.ResourceData, meta int
 
 	topicCreate, err := logtopics.Create(client, groupId, createOpts).Extract()
 	if err != nil {
-		return fmterr.Errorf("Error creating log topic: %s", err)
+		return fmterr.Errorf("error creating log topic: %s", err)
 	}
 
 	d.SetId(topicCreate.ID)
@@ -73,13 +73,13 @@ func resourceTopicV2Read(ctx context.Context, d *schema.ResourceData, meta inter
 	config := meta.(*cfg.Config)
 	client, err := config.LtsV2Client(config.GetRegion(d))
 	if err != nil {
-		return fmterr.Errorf("Error creating OpenTelekomCloud LTS client: %s", err)
+		return fmterr.Errorf("error creating OpenTelekomCloud LTS client: %s", err)
 	}
 
 	groupId := d.Get("group_id").(string)
 	topic, err := logtopics.Get(client, groupId, d.Id()).Extract()
 	if err != nil {
-		return fmterr.Errorf("Error getting OpenTelekomCloud log topic %s: %s", d.Id(), err)
+		return fmterr.Errorf("error getting OpenTelekomCloud log topic %s: %s", d.Id(), err)
 	}
 
 	log.Printf("[DEBUG] Retrieved log topic %s: %#v", d.Id(), topic)
@@ -95,7 +95,7 @@ func resourceTopicV2Delete(ctx context.Context, d *schema.ResourceData, meta int
 	config := meta.(*cfg.Config)
 	client, err := config.LtsV2Client(config.GetRegion(d))
 	if err != nil {
-		return fmterr.Errorf("Error creating OpenTelekomCloud LTS client: %s", err)
+		return fmterr.Errorf("error creating OpenTelekomCloud LTS client: %s", err)
 	}
 
 	groupId := d.Get("group_id").(string)
@@ -118,7 +118,7 @@ func resourceTopicV2Import(ctx context.Context, d *schema.ResourceData, meta int
 	config := meta.(*cfg.Config)
 	client, err := config.LtsV2Client(config.GetRegion(d))
 	if err != nil {
-		return nil, fmt.Errorf("Error creating OpenTelekomCloud LTS client: %s", err)
+		return nil, fmt.Errorf("error creating OpenTelekomCloud LTS client: %s", err)
 	}
 
 	groupId := parts[0]
@@ -128,7 +128,7 @@ func resourceTopicV2Import(ctx context.Context, d *schema.ResourceData, meta int
 	// check the parent logtank group whether exists.
 	_, err = loggroups.Get(client, groupId).Extract()
 	if err != nil {
-		return nil, fmt.Errorf("Error importing OpenTelekomCloud log topic %s: %s", topicId, err)
+		return nil, fmt.Errorf("error importing OpenTelekomCloud log topic %s: %s", topicId, err)
 	}
 
 	d.SetId(topicId)

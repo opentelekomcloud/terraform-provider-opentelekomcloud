@@ -132,7 +132,7 @@ func resourceVBSBackupV2Create(ctx context.Context, d *schema.ResourceData, meta
 	vbsClient, err := config.VbsV2Client(config.GetRegion(d))
 
 	if err != nil {
-		return fmterr.Errorf("Error creating OpenTelekomCloud vbs client: %s", err)
+		return fmterr.Errorf("error creating OpenTelekomCloud vbs client: %s", err)
 	}
 
 	createOpts := backups.CreateOpts{
@@ -146,7 +146,7 @@ func resourceVBSBackupV2Create(ctx context.Context, d *schema.ResourceData, meta
 	n, err := backups.Create(vbsClient, createOpts).ExtractJobResponse()
 
 	if err != nil {
-		return fmterr.Errorf("Error creating OpenTelekomCloud VBS Backup: %s", err)
+		return fmterr.Errorf("error creating OpenTelekomCloud VBS Backup: %s", err)
 	}
 
 	if err := backups.WaitForJobSuccess(vbsClient, int(d.Timeout(schema.TimeoutCreate)/time.Second), n.JobID); err != nil {
@@ -170,7 +170,7 @@ func resourceVBSBackupV2Read(ctx context.Context, d *schema.ResourceData, meta i
 	config := meta.(*cfg.Config)
 	vbsClient, err := config.VbsV2Client(config.GetRegion(d))
 	if err != nil {
-		return fmterr.Errorf("Error creating Vbs client: %s", err)
+		return fmterr.Errorf("error creating Vbs client: %s", err)
 	}
 
 	n, err := backups.Get(vbsClient, d.Id()).Extract()
@@ -180,7 +180,7 @@ func resourceVBSBackupV2Read(ctx context.Context, d *schema.ResourceData, meta i
 			return nil
 		}
 
-		return fmterr.Errorf("Error retrieving VBS Backup: %s", err)
+		return fmterr.Errorf("error retrieving VBS Backup: %s", err)
 	}
 
 	mErr := multierror.Append(
@@ -207,7 +207,7 @@ func resourceVBSBackupV2Delete(ctx context.Context, d *schema.ResourceData, meta
 	config := meta.(*cfg.Config)
 	vbsClient, err := config.VbsV2Client(config.GetRegion(d))
 	if err != nil {
-		return fmterr.Errorf("Error creating  vbs: %s", err)
+		return fmterr.Errorf("error creating  vbs: %s", err)
 	}
 
 	stateConf := &resource.StateChangeConf{
@@ -221,7 +221,7 @@ func resourceVBSBackupV2Delete(ctx context.Context, d *schema.ResourceData, meta
 
 	_, err = stateConf.WaitForStateContext(ctx)
 	if err != nil {
-		return fmterr.Errorf("Error deleting VBS Backup: %s", err)
+		return fmterr.Errorf("error deleting VBS Backup: %s", err)
 	}
 
 	d.SetId("")

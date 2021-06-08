@@ -46,10 +46,10 @@ func waitForLBV2Listener(ctx context.Context, networkingClient *golangsdk.Servic
 			case "DELETED":
 				return nil
 			default:
-				return fmt.Errorf("Error: listener %s not found: %s", id, err)
+				return fmt.Errorf("error: listener %s not found: %s", id, err)
 			}
 		}
-		return fmt.Errorf("Error waiting for listener %s to become %s: %s", id, target, err)
+		return fmt.Errorf("error waiting for listener %s to become %s: %s", id, target, err)
 	}
 
 	return nil
@@ -86,10 +86,10 @@ func waitForLBV2LoadBalancer(ctx context.Context, networkingClient *golangsdk.Se
 			case "DELETED":
 				return nil
 			default:
-				return fmt.Errorf("Error: loadbalancer %s not found: %s", id, err)
+				return fmt.Errorf("error: loadbalancer %s not found: %s", id, err)
 			}
 		}
-		return fmt.Errorf("Error waiting for loadbalancer %s to become %s: %s", id, target, err)
+		return fmt.Errorf("error waiting for loadbalancer %s to become %s: %s", id, target, err)
 	}
 
 	return nil
@@ -125,10 +125,10 @@ func waitForLBV2Member(ctx context.Context, networkingClient *golangsdk.ServiceC
 			case "DELETED":
 				return nil
 			default:
-				return fmt.Errorf("Error: member %s not found: %s", memberID, err)
+				return fmt.Errorf("error: member %s not found: %s", memberID, err)
 			}
 		}
-		return fmt.Errorf("Error waiting for member %s to become %s: %s", memberID, target, err)
+		return fmt.Errorf("error waiting for member %s to become %s: %s", memberID, target, err)
 	}
 
 	return nil
@@ -165,10 +165,10 @@ func waitForLBV2Monitor(ctx context.Context, networkingClient *golangsdk.Service
 			case "DELETED":
 				return nil
 			default:
-				return fmt.Errorf("Error: monitor %s not found: %s", id, err)
+				return fmt.Errorf("error: monitor %s not found: %s", id, err)
 			}
 		}
-		return fmt.Errorf("Error waiting for monitor %s to become %s: %s", id, target, err)
+		return fmt.Errorf("error waiting for monitor %s to become %s: %s", id, target, err)
 	}
 
 	return nil
@@ -205,10 +205,10 @@ func waitForLBV2Pool(ctx context.Context, networkingClient *golangsdk.ServiceCli
 			case "DELETED":
 				return nil
 			default:
-				return fmt.Errorf("Error: pool %s not found: %s", id, err)
+				return fmt.Errorf("error: pool %s not found: %s", id, err)
 			}
 		}
-		return fmt.Errorf("Error waiting for pool %s to become %s: %s", id, target, err)
+		return fmt.Errorf("error waiting for pool %s to become %s: %s", id, target, err)
 	}
 
 	return nil
@@ -393,7 +393,7 @@ func waitForLBV2L7Policy(ctx context.Context, lbClient *golangsdk.ServiceClient,
 			}
 		}
 
-		return fmt.Errorf("Error waiting for l7policy %s to become %s: %s", l7policy.ID, target, err)
+		return fmt.Errorf("error waiting for l7policy %s to become %s: %s", l7policy.ID, target, err)
 	}
 
 	return nil
@@ -477,7 +477,7 @@ func waitForLBV2L7Rule(ctx context.Context, lbClient *golangsdk.ServiceClient, p
 			}
 		}
 
-		return fmt.Errorf("Error waiting for l7rule %s to become %s: %s", l7rule.ID, target, err)
+		return fmt.Errorf("error waiting for l7rule %s to become %s: %s", l7rule.ID, target, err)
 	}
 
 	return nil

@@ -89,7 +89,7 @@ func resourceFWFirewallGroupV2Create(ctx context.Context, d *schema.ResourceData
 	config := meta.(*cfg.Config)
 	networkingClient, err := config.NetworkingV2Client(config.GetRegion(d))
 	if err != nil {
-		return fmterr.Errorf("Error creating OpenTelekomCloud networking client: %s", err)
+		return fmterr.Errorf("error creating OpenTelekomCloud networking client: %s", err)
 	}
 
 	var createOpts firewall_groups.CreateOptsBuilder
@@ -154,7 +154,7 @@ func resourceFWFirewallGroupV2Read(ctx context.Context, d *schema.ResourceData, 
 	config := meta.(*cfg.Config)
 	networkingClient, err := config.NetworkingV2Client(config.GetRegion(d))
 	if err != nil {
-		return fmterr.Errorf("Error creating OpenTelekomCloud networking client: %s", err)
+		return fmterr.Errorf("error creating OpenTelekomCloud networking client: %s", err)
 	}
 
 	var firewall_group FirewallGroup
@@ -183,7 +183,7 @@ func resourceFWFirewallGroupV2Update(ctx context.Context, d *schema.ResourceData
 	config := meta.(*cfg.Config)
 	networkingClient, err := config.NetworkingV2Client(config.GetRegion(d))
 	if err != nil {
-		return fmterr.Errorf("Error creating OpenTelekomCloud networking client: %s", err)
+		return fmterr.Errorf("error creating OpenTelekomCloud networking client: %s", err)
 	}
 
 	// PolicyID is required
@@ -249,7 +249,7 @@ func resourceFWFirewallGroupV2Delete(ctx context.Context, d *schema.ResourceData
 	config := meta.(*cfg.Config)
 	networkingClient, err := config.NetworkingV2Client(config.GetRegion(d))
 	if err != nil {
-		return fmterr.Errorf("Error creating OpenTelekomCloud networking client: %s", err)
+		return fmterr.Errorf("error creating OpenTelekomCloud networking client: %s", err)
 	}
 
 	// Ensure the firewall group was fully created/updated before being deleted.

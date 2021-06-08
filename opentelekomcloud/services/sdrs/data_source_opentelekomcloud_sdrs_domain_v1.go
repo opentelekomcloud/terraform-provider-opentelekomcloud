@@ -34,7 +34,7 @@ func dataSourceSdrsDomainV1Read(ctx context.Context, d *schema.ResourceData, met
 	config := meta.(*cfg.Config)
 	sdrsV1Client, err := config.SdrsV1Client(config.GetRegion(d))
 	if err != nil {
-		return fmterr.Errorf("Error creating SDRS client: %s", err)
+		return fmterr.Errorf("error creating SDRS client: %s", err)
 	}
 
 	v, err := domains.Get(sdrsV1Client).Extract()

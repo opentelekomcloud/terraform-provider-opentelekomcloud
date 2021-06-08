@@ -58,7 +58,7 @@ func testAccCheckRtsSoftwareConfigV1Destroy(s *terraform.State) error {
 	config := common.TestAccProvider.Meta().(*cfg.Config)
 	orchestrationClient, err := config.OrchestrationV1Client(env.OS_REGION_NAME)
 	if err != nil {
-		return fmt.Errorf("Error creating OpenTelekomCloud orchestration client: %s", err)
+		return fmt.Errorf("error creating OpenTelekomCloud orchestration client: %s", err)
 	}
 
 	for _, rs := range s.RootModule().Resources {
@@ -89,7 +89,7 @@ func testAccCheckRtsSoftwareConfigV1Exists(n string, configs *softwareconfig.Sof
 		config := common.TestAccProvider.Meta().(*cfg.Config)
 		orchestrationClient, err := config.OrchestrationV1Client(env.OS_REGION_NAME)
 		if err != nil {
-			return fmt.Errorf("Error creating OpenTelekomCloud orchestration client: %s", err)
+			return fmt.Errorf("error creating OpenTelekomCloud orchestration client: %s", err)
 		}
 
 		found, err := softwareconfig.Get(orchestrationClient, rs.Primary.ID).Extract()

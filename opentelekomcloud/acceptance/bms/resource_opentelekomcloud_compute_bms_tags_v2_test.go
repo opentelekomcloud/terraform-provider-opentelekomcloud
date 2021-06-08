@@ -56,7 +56,7 @@ func testAccCheckOTCBMSTagsV2Destroy(s *terraform.State) error {
 	config := common.TestAccProvider.Meta().(*cfg.Config)
 	bmsClient, err := config.ComputeV2Client(env.OS_REGION_NAME)
 	if err != nil {
-		return fmt.Errorf("Error creating OpenTelekomCloud bms client: %s", err)
+		return fmt.Errorf("error creating OpenTelekomCloud bms client: %s", err)
 	}
 
 	for _, rs := range s.RootModule().Resources {
@@ -87,7 +87,7 @@ func testAccCheckOTCBMSTagsV2Exists(n string, tag *tags.Tags) resource.TestCheck
 		config := common.TestAccProvider.Meta().(*cfg.Config)
 		bmsClient, err := config.ComputeV2Client(env.OS_REGION_NAME)
 		if err != nil {
-			return fmt.Errorf("Error creating OpenTelekomCloud bms client: %s", err)
+			return fmt.Errorf("error creating OpenTelekomCloud bms client: %s", err)
 		}
 
 		found, err := tags.Get(bmsClient, rs.Primary.ID).Extract()

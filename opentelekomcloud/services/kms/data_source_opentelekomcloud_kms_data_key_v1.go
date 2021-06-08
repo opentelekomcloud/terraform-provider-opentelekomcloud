@@ -50,7 +50,7 @@ func dataSourceKmsDataKeyV1Read(ctx context.Context, d *schema.ResourceData, met
 
 	KmsDataKeyV1Client, err := config.KmsKeyV1Client(config.GetRegion(d))
 	if err != nil {
-		return fmterr.Errorf("Error creating OpenTelekomCloud kms key client: %s", err)
+		return fmterr.Errorf("error creating OpenTelekomCloud kms key client: %s", err)
 	}
 
 	req := &keys.DataEncryptOpts{

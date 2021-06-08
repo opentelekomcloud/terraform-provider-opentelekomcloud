@@ -67,7 +67,7 @@ func testAccCheckRDSV1InstanceDestroy(s *terraform.State) error {
 	config := common.TestAccProvider.Meta().(*cfg.Config)
 	rdsClient, err := config.RdsV1Client(env.OS_REGION_NAME)
 	if err != nil {
-		return fmt.Errorf("Error creating OpenTelekomCloud rds: %s", err)
+		return fmt.Errorf("error creating OpenTelekomCloud rds: %s", err)
 	}
 
 	for _, rs := range s.RootModule().Resources {
@@ -98,7 +98,7 @@ func testAccCheckRDSV1InstanceExists(n string, instance *instances.Instance) res
 		config := common.TestAccProvider.Meta().(*cfg.Config)
 		rdsClient, err := config.RdsV1Client(env.OS_REGION_NAME)
 		if err != nil {
-			return fmt.Errorf("Error creating OpenTelekomCloud rds client: %s ", err)
+			return fmt.Errorf("error creating OpenTelekomCloud rds client: %s ", err)
 		}
 
 		found, err := instances.Get(rdsClient, rs.Primary.ID).Extract()
@@ -122,7 +122,7 @@ func testAccCheckRDSV1InstanceTag(
 		config := common.TestAccProvider.Meta().(*cfg.Config)
 		tagClient, err := config.RdsTagV1Client(env.OS_REGION_NAME)
 		if err != nil {
-			return fmt.Errorf("Error creating OpenTelekomCloud rds client: %s ", err)
+			return fmt.Errorf("error creating OpenTelekomCloud rds client: %s ", err)
 		}
 
 		taglist, err := tags.Get(tagClient, instance.ID).Extract()
@@ -148,7 +148,7 @@ func testAccCheckRDSV1InstanceNoTag(
 		config := common.TestAccProvider.Meta().(*cfg.Config)
 		tagClient, err := config.RdsTagV1Client(env.OS_REGION_NAME)
 		if err != nil {
-			return fmt.Errorf("Error creating OpenTelekomCloud rds client: %s ", err)
+			return fmt.Errorf("error creating OpenTelekomCloud rds client: %s ", err)
 		}
 
 		taglist, err := tags.Get(tagClient, instance.ID).Extract()

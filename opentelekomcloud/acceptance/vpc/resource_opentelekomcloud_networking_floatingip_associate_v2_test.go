@@ -42,7 +42,7 @@ func testAccCheckNetworkingV2FloatingIPAssociateDestroy(s *terraform.State) erro
 	config := common.TestAccProvider.Meta().(*cfg.Config)
 	networkClient, err := config.NetworkingV2Client(env.OS_REGION_NAME)
 	if err != nil {
-		return fmt.Errorf("Error creating OpenTelekomCloud floating IP: %s", err)
+		return fmt.Errorf("error creating OpenTelekomCloud floating IP: %s", err)
 	}
 
 	for _, rs := range s.RootModule().Resources {
@@ -56,7 +56,7 @@ func testAccCheckNetworkingV2FloatingIPAssociateDestroy(s *terraform.State) erro
 				return nil
 			}
 
-			return fmt.Errorf("Error retrieving floating IP: %s", err)
+			return fmt.Errorf("error retrieving floating IP: %s", err)
 		}
 
 		if fip.PortID != "" {
@@ -81,7 +81,7 @@ func testAccCheckNetworkingV2FloatingIPAssociateExists(n string, fip *floatingip
 		config := common.TestAccProvider.Meta().(*cfg.Config)
 		networkClient, err := config.NetworkingV2Client(env.OS_REGION_NAME)
 		if err != nil {
-			return fmt.Errorf("Error creating OpenTelekomCloud networking client: %s", err)
+			return fmt.Errorf("error creating OpenTelekomCloud networking client: %s", err)
 		}
 
 		found, err := floatingips.Get(networkClient, rs.Primary.ID).Extract()

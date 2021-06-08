@@ -97,7 +97,7 @@ func testAccCheckCTSTrackerV1Destroy(s *terraform.State) error {
 	config := common.TestAccProvider.Meta().(*cfg.Config)
 	ctsClient, err := config.CtsV1Client(env.OS_TENANT_NAME)
 	if err != nil {
-		return fmt.Errorf("Error creating cts client: %s", err)
+		return fmt.Errorf("error creating cts client: %s", err)
 	}
 
 	for _, rs := range s.RootModule().Resources {
@@ -131,7 +131,7 @@ func testAccCheckCTSTrackerV1Exists(n string, trackers *tracker.Tracker, project
 		config := common.TestAccProvider.Meta().(*cfg.Config)
 		ctsClient, err := config.CtsV1Client(projectName)
 		if err != nil {
-			return fmt.Errorf("Error creating cts client: %s", err)
+			return fmt.Errorf("error creating cts client: %s", err)
 		}
 
 		trackerList, err := tracker.List(ctsClient, tracker.ListOpts{TrackerName: rs.Primary.ID})

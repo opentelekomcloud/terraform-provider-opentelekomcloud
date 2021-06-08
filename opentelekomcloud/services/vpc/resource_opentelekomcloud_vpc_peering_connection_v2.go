@@ -72,7 +72,7 @@ func resourceVPCPeeringV2Create(ctx context.Context, d *schema.ResourceData, met
 	peeringClient, err := config.NetworkingV2Client(config.GetRegion(d))
 
 	if err != nil {
-		return fmterr.Errorf("Error creating OpenTelekomCloud Vpc Peering Connection Client: %s", err)
+		return fmterr.Errorf("error creating OpenTelekomCloud Vpc Peering Connection Client: %s", err)
 	}
 
 	requestvpcinfo := peerings.VpcInfo{
@@ -93,7 +93,7 @@ func resourceVPCPeeringV2Create(ctx context.Context, d *schema.ResourceData, met
 	n, err := peerings.Create(peeringClient, createOpts).Extract()
 
 	if err != nil {
-		return fmterr.Errorf("Error creating OpenTelekomCloud Vpc Peering Connection: %s", err)
+		return fmterr.Errorf("error creating OpenTelekomCloud Vpc Peering Connection: %s", err)
 	}
 
 	log.Printf("[INFO] Vpc Peering Connection ID: %s", n.ID)
@@ -120,7 +120,7 @@ func resourceVPCPeeringV2Read(ctx context.Context, d *schema.ResourceData, meta 
 	config := meta.(*cfg.Config)
 	peeringClient, err := config.NetworkingV2Client(config.GetRegion(d))
 	if err != nil {
-		return fmterr.Errorf("Error creating OpenTelekomCloud   Vpc Peering Connection Client: %s", err)
+		return fmterr.Errorf("error creating OpenTelekomCloud   Vpc Peering Connection Client: %s", err)
 	}
 
 	n, err := peerings.Get(peeringClient, d.Id()).Extract()
@@ -130,7 +130,7 @@ func resourceVPCPeeringV2Read(ctx context.Context, d *schema.ResourceData, meta 
 			return nil
 		}
 
-		return fmterr.Errorf("Error retrieving OpenTelekomCloud Vpc Peering Connection: %s", err)
+		return fmterr.Errorf("error retrieving OpenTelekomCloud Vpc Peering Connection: %s", err)
 	}
 
 	d.Set("id", n.ID)
@@ -148,7 +148,7 @@ func resourceVPCPeeringV2Update(ctx context.Context, d *schema.ResourceData, met
 	config := meta.(*cfg.Config)
 	peeringClient, err := config.NetworkingV2Client(config.GetRegion(d))
 	if err != nil {
-		return fmterr.Errorf("Error creating OpenTelekomCloud  Vpc Peering Connection Client: %s", err)
+		return fmterr.Errorf("error creating OpenTelekomCloud  Vpc Peering Connection Client: %s", err)
 	}
 
 	var updateOpts peerings.UpdateOpts
@@ -157,7 +157,7 @@ func resourceVPCPeeringV2Update(ctx context.Context, d *schema.ResourceData, met
 
 	_, err = peerings.Update(peeringClient, d.Id(), updateOpts).Extract()
 	if err != nil {
-		return fmterr.Errorf("Error updating OpenTelekomCloud Vpc Peering Connection: %s", err)
+		return fmterr.Errorf("error updating OpenTelekomCloud Vpc Peering Connection: %s", err)
 	}
 
 	return resourceVPCPeeringV2Read(ctx, d, meta)
@@ -168,7 +168,7 @@ func resourceVPCPeeringV2Delete(ctx context.Context, d *schema.ResourceData, met
 	config := meta.(*cfg.Config)
 	peeringClient, err := config.NetworkingV2Client(config.GetRegion(d))
 	if err != nil {
-		return fmterr.Errorf("Error creating OpenTelekomCloud  Vpc Peering Connection Client: %s", err)
+		return fmterr.Errorf("error creating OpenTelekomCloud  Vpc Peering Connection Client: %s", err)
 	}
 
 	stateConf := &resource.StateChangeConf{
@@ -182,7 +182,7 @@ func resourceVPCPeeringV2Delete(ctx context.Context, d *schema.ResourceData, met
 
 	_, err = stateConf.WaitForStateContext(ctx)
 	if err != nil {
-		return fmterr.Errorf("Error deleting OpenTelekomCloud Vpc Peering Connection: %s", err)
+		return fmterr.Errorf("error deleting OpenTelekomCloud Vpc Peering Connection: %s", err)
 	}
 
 	d.SetId("")

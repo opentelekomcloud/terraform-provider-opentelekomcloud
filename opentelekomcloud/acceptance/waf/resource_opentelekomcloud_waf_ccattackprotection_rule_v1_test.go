@@ -38,7 +38,7 @@ func testAccCheckWafCcAttackProtectionRuleV1Destroy(s *terraform.State) error {
 	config := common.TestAccProvider.Meta().(*cfg.Config)
 	wafClient, err := config.WafV1Client(env.OS_REGION_NAME)
 	if err != nil {
-		return fmt.Errorf("Error creating OpenTelekomCloud WAF client: %s", err)
+		return fmt.Errorf("error creating OpenTelekomCloud WAF client: %s", err)
 	}
 
 	for _, rs := range s.RootModule().Resources {
@@ -69,7 +69,7 @@ func testAccCheckWafCcAttackProtectionRuleV1Exists(n string, rule *ccattackprote
 		config := common.TestAccProvider.Meta().(*cfg.Config)
 		wafClient, err := config.WafV1Client(env.OS_REGION_NAME)
 		if err != nil {
-			return fmt.Errorf("Error creating OpenTelekomCloud WAF client: %s", err)
+			return fmt.Errorf("error creating OpenTelekomCloud WAF client: %s", err)
 		}
 
 		found, err := ccattackprotection_rules.Get(wafClient, rs.Primary.Attributes["policy_id"], rs.Primary.ID).Extract()

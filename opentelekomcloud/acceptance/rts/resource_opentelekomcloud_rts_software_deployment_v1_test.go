@@ -74,7 +74,7 @@ func testAccCheckOTCRtsSoftwareDeploymentV1Destroy(s *terraform.State) error {
 	config := common.TestAccProvider.Meta().(*cfg.Config)
 	orchestrationClient, err := config.OrchestrationV1Client(env.OS_REGION_NAME)
 	if err != nil {
-		return fmt.Errorf("Error creating RTS client: %s", err)
+		return fmt.Errorf("error creating RTS client: %s", err)
 	}
 
 	for _, rs := range s.RootModule().Resources {
@@ -108,7 +108,7 @@ func testAccCheckOTCRtsSoftwareDeploymentV1Exists(n string, stack *softwaredeplo
 		config := common.TestAccProvider.Meta().(*cfg.Config)
 		orchestrationClient, err := config.OrchestrationV1Client(env.OS_REGION_NAME)
 		if err != nil {
-			return fmt.Errorf("Error creating RTS Client : %s", err)
+			return fmt.Errorf("error creating RTS Client : %s", err)
 		}
 
 		found, err := softwaredeployment.Get(orchestrationClient, rs.Primary.ID).Extract()

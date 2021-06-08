@@ -80,7 +80,7 @@ func dataSourceVpnServiceV2Read(ctx context.Context, d *schema.ResourceData, met
 	config := meta.(*cfg.Config)
 	networkingClient, err := config.NetworkingV2Client(config.GetRegion(d))
 	if err != nil {
-		return fmterr.Errorf("Error creating OpenTelekomCloud networking client: %s", err)
+		return fmterr.Errorf("error creating OpenTelekomCloud networking client: %s", err)
 	}
 	adminStateUp := d.Get("admin_state_up").(bool)
 	listOpts := services.ListOpts{

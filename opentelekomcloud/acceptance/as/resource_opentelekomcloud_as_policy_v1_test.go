@@ -37,7 +37,7 @@ func testAccCheckASV1PolicyDestroy(s *terraform.State) error {
 	config := common.TestAccProvider.Meta().(*cfg.Config)
 	asClient, err := config.AutoscalingV1Client(env.OS_REGION_NAME)
 	if err != nil {
-		return fmt.Errorf("Error creating opentelekomcloud autoscaling client: %s", err)
+		return fmt.Errorf("error creating opentelekomcloud autoscaling client: %s", err)
 	}
 
 	for _, rs := range s.RootModule().Resources {
@@ -70,7 +70,7 @@ func testAccCheckASV1PolicyExists(n string, policy *policies.Policy) resource.Te
 		config := common.TestAccProvider.Meta().(*cfg.Config)
 		asClient, err := config.AutoscalingV1Client(env.OS_REGION_NAME)
 		if err != nil {
-			return fmt.Errorf("Error creating opentelekomcloud autoscaling client: %s", err)
+			return fmt.Errorf("error creating opentelekomcloud autoscaling client: %s", err)
 		}
 
 		found, err := policies.Get(asClient, rs.Primary.ID).Extract()

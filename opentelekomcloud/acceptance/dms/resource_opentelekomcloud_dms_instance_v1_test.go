@@ -74,7 +74,7 @@ func testAccCheckDmsV1InstanceDestroy(s *terraform.State) error {
 	config := common.TestAccProvider.Meta().(*cfg.Config)
 	dmsClient, err := config.DmsV1Client(env.OS_REGION_NAME)
 	if err != nil {
-		return fmt.Errorf("Error creating OpenTelekomCloud instance client: %s", err)
+		return fmt.Errorf("error creating OpenTelekomCloud instance client: %s", err)
 	}
 
 	for _, rs := range s.RootModule().Resources {
@@ -104,12 +104,12 @@ func testAccCheckDmsV1InstanceExists(n string, instance instances.Instance) reso
 		config := common.TestAccProvider.Meta().(*cfg.Config)
 		dmsClient, err := config.DmsV1Client(env.OS_REGION_NAME)
 		if err != nil {
-			return fmt.Errorf("Error creating OpenTelekomCloud instance client: %s", err)
+			return fmt.Errorf("error creating OpenTelekomCloud instance client: %s", err)
 		}
 
 		v, err := instances.Get(dmsClient, rs.Primary.ID).Extract()
 		if err != nil {
-			return fmt.Errorf("Error getting OpenTelekomCloud instance: %s, err: %s", rs.Primary.ID, err)
+			return fmt.Errorf("error getting OpenTelekomCloud instance: %s, err: %s", rs.Primary.ID, err)
 		}
 
 		if v.InstanceID != rs.Primary.ID {

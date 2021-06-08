@@ -94,7 +94,7 @@ func testAccCheckOTCDeHV1Destroy(s *terraform.State) error {
 	config := common.TestAccProvider.Meta().(*cfg.Config)
 	dehClient, err := config.DehV1Client(env.OS_REGION_NAME)
 	if err != nil {
-		return fmt.Errorf("Error creating OpenTelekomCloud deh client: %s", err)
+		return fmt.Errorf("error creating OpenTelekomCloud deh client: %s", err)
 	}
 
 	for _, rs := range s.RootModule().Resources {
@@ -125,7 +125,7 @@ func testAccCheckOTCDeHV1Exists(n string, host *hosts.Host) resource.TestCheckFu
 		config := common.TestAccProvider.Meta().(*cfg.Config)
 		dehClient, err := config.DehV1Client(env.OS_REGION_NAME)
 		if err != nil {
-			return fmt.Errorf("Error creating OpenTelekomCloud DeH client: %s", err)
+			return fmt.Errorf("error creating OpenTelekomCloud DeH client: %s", err)
 		}
 
 		found, err := hosts.Get(dehClient, rs.Primary.ID).Extract()

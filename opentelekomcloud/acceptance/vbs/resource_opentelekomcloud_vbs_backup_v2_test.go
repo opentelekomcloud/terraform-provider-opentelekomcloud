@@ -60,7 +60,7 @@ func testAccCheckVBSBackupV2Destroy(s *terraform.State) error {
 	config := common.TestAccProvider.Meta().(*cfg.Config)
 	vbsClient, err := config.VbsV2Client(env.OS_REGION_NAME)
 	if err != nil {
-		return fmt.Errorf("Error creating OpenTelekomCloud vbs client: %s", err)
+		return fmt.Errorf("error creating OpenTelekomCloud vbs client: %s", err)
 	}
 
 	for _, rs := range s.RootModule().Resources {
@@ -91,7 +91,7 @@ func testAccCheckVBSBackupV2Exists(n string, configs *backups.Backup) resource.T
 		config := common.TestAccProvider.Meta().(*cfg.Config)
 		vbsClient, err := config.VbsV2Client(env.OS_REGION_NAME)
 		if err != nil {
-			return fmt.Errorf("Error creating OpenTelekomCloud vbs client: %s", err)
+			return fmt.Errorf("error creating OpenTelekomCloud vbs client: %s", err)
 		}
 
 		found, err := backups.Get(vbsClient, rs.Primary.ID).Extract()

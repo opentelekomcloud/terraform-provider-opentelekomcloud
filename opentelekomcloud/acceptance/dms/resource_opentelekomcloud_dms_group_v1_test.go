@@ -41,7 +41,7 @@ func testAccCheckDmsV1GroupDestroy(s *terraform.State) error {
 	config := common.TestAccProvider.Meta().(*cfg.Config)
 	dmsClient, err := config.DmsV1Client(env.OS_REGION_NAME)
 	if err != nil {
-		return fmt.Errorf("Error creating OpenTelekomCloud group client: %s", err)
+		return fmt.Errorf("error creating OpenTelekomCloud group client: %s", err)
 	}
 
 	for _, rs := range s.RootModule().Resources {
@@ -54,7 +54,7 @@ func testAccCheckDmsV1GroupDestroy(s *terraform.State) error {
 		if err == nil {
 			groupsList, err := groups.ExtractGroups(page)
 			if err != nil {
-				return fmt.Errorf("Error getting groups in queue %s: %s", queueID, err)
+				return fmt.Errorf("error getting groups in queue %s: %s", queueID, err)
 			}
 			if len(groupsList) > 0 {
 				for _, group := range groupsList {
@@ -82,13 +82,13 @@ func testAccCheckDmsV1GroupExists(n string, group groups.Group) resource.TestChe
 		config := common.TestAccProvider.Meta().(*cfg.Config)
 		dmsClient, err := config.DmsV1Client(env.OS_REGION_NAME)
 		if err != nil {
-			return fmt.Errorf("Error creating OpenTelekomCloud group client: %s", err)
+			return fmt.Errorf("error creating OpenTelekomCloud group client: %s", err)
 		}
 
 		queueID := rs.Primary.Attributes["queue_id"]
 		page, err := groups.List(dmsClient, queueID, false).AllPages()
 		if err != nil {
-			return fmt.Errorf("Error getting groups in queue %s: %s", queueID, err)
+			return fmt.Errorf("error getting groups in queue %s: %s", queueID, err)
 		}
 
 		groupsList, err := groups.ExtractGroups(page)

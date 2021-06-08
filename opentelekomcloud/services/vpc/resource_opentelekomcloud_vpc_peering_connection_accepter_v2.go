@@ -74,14 +74,14 @@ func resourceVPCPeeringAccepterV2Create(ctx context.Context, d *schema.ResourceD
 	peeringClient, err := config.NetworkingV2Client(config.GetRegion(d))
 
 	if err != nil {
-		return fmterr.Errorf("Error creating OpenTelekomCloud Peering client: %s", err)
+		return fmterr.Errorf("error creating OpenTelekomCloud Peering client: %s", err)
 	}
 
 	id := d.Get("vpc_peering_connection_id").(string)
 
 	n, err := peerings.Get(peeringClient, id).Extract()
 	if err != nil {
-		return fmterr.Errorf("Error retrieving OpenTelekomCloud Vpc Peering Connection: %s", err)
+		return fmterr.Errorf("error retrieving OpenTelekomCloud Vpc Peering Connection: %s", err)
 	}
 
 	if n.Status != "PENDING_ACCEPTANCE" {
@@ -130,7 +130,7 @@ func resourceVpcPeeringAccepterRead(ctx context.Context, d *schema.ResourceData,
 	config := meta.(*cfg.Config)
 	peeringclient, err := config.NetworkingV2Client(config.GetRegion(d))
 	if err != nil {
-		return fmterr.Errorf("Error creating OpenTelekomCloud peering client: %s", err)
+		return fmterr.Errorf("error creating OpenTelekomCloud peering client: %s", err)
 	}
 
 	n, err := peerings.Get(peeringclient, d.Id()).Extract()
@@ -140,7 +140,7 @@ func resourceVpcPeeringAccepterRead(ctx context.Context, d *schema.ResourceData,
 			return nil
 		}
 
-		return fmterr.Errorf("Error retrieving OpenTelekomCloud Vpc Peering Connection: %s", err)
+		return fmterr.Errorf("error retrieving OpenTelekomCloud Vpc Peering Connection: %s", err)
 	}
 
 	d.Set("id", n.ID)

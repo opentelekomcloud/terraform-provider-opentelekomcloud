@@ -30,7 +30,7 @@ func dataSourceDcsProductV1Read(ctx context.Context, d *schema.ResourceData, met
 	config := meta.(*cfg.Config)
 	DcsV1Client, err := config.DcsV1Client(config.GetRegion(d))
 	if err != nil {
-		return fmterr.Errorf("Error get dcs product client: %s", err)
+		return fmterr.Errorf("error get dcs product client: %s", err)
 	}
 
 	v, err := products.Get(DcsV1Client).Extract()

@@ -62,7 +62,7 @@ func resourceTopicCreate(ctx context.Context, d *schema.ResourceData, meta inter
 	config := meta.(*cfg.Config)
 	client, err := config.SmnV2Client(config.GetProjectName(d))
 	if err != nil {
-		return fmterr.Errorf("Error creating OpenTelekomCloud smn client: %s", err)
+		return fmterr.Errorf("error creating OpenTelekomCloud smn client: %s", err)
 	}
 
 	createOpts := topics.CreateOps{
@@ -73,7 +73,7 @@ func resourceTopicCreate(ctx context.Context, d *schema.ResourceData, meta inter
 
 	topic, err := topics.Create(client, createOpts).Extract()
 	if err != nil {
-		return fmterr.Errorf("Error getting topic from result: %s", err)
+		return fmterr.Errorf("error getting topic from result: %s", err)
 	}
 	log.Printf("[DEBUG] Create : topic.TopicUrn %s", topic.TopicUrn)
 	if topic.TopicUrn != "" {
@@ -88,7 +88,7 @@ func resourceTopicRead(ctx context.Context, d *schema.ResourceData, meta interfa
 	config := meta.(*cfg.Config)
 	client, err := config.SmnV2Client(config.GetProjectName(d))
 	if err != nil {
-		return fmterr.Errorf("Error creating OpenTelekomCloud smn client: %s", err)
+		return fmterr.Errorf("error creating OpenTelekomCloud smn client: %s", err)
 	}
 
 	topicUrn := d.Id()
@@ -113,7 +113,7 @@ func resourceTopicDelete(ctx context.Context, d *schema.ResourceData, meta inter
 	config := meta.(*cfg.Config)
 	client, err := config.SmnV2Client(config.GetProjectName(d))
 	if err != nil {
-		return fmterr.Errorf("Error creating OpenTelekomCloud smn client: %s", err)
+		return fmterr.Errorf("error creating OpenTelekomCloud smn client: %s", err)
 	}
 
 	log.Printf("[DEBUG] Deleting topic %s", d.Id())
@@ -131,7 +131,7 @@ func resourceTopicUpdate(ctx context.Context, d *schema.ResourceData, meta inter
 	config := meta.(*cfg.Config)
 	client, err := config.SmnV2Client(config.GetProjectName(d))
 	if err != nil {
-		return fmterr.Errorf("Error creating OpenTelekomCloud smn client: %s", err)
+		return fmterr.Errorf("error creating OpenTelekomCloud smn client: %s", err)
 	}
 
 	log.Printf("[DEBUG] Updating topic %s", d.Id())
@@ -144,7 +144,7 @@ func resourceTopicUpdate(ctx context.Context, d *schema.ResourceData, meta inter
 
 	topic, err := topics.Update(client, updateOpts, id).Extract()
 	if err != nil {
-		return fmterr.Errorf("Error updating topic from result: %s", err)
+		return fmterr.Errorf("error updating topic from result: %s", err)
 	}
 
 	log.Printf("[DEBUG] Update : topic.TopicUrn: %s", topic.TopicUrn)

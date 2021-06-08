@@ -131,7 +131,7 @@ func resourceDeHHostV1Create(ctx context.Context, d *schema.ResourceData, meta i
 	dehClient, err := config.DehV1Client(config.GetRegion(d))
 
 	if err != nil {
-		return fmterr.Errorf("Error creating OpenTelekomcomCloud DeH Client: %s", err)
+		return fmterr.Errorf("error creating OpenTelekomcomCloud DeH Client: %s", err)
 	}
 
 	allocateOpts := hosts.AllocateOpts{
@@ -145,7 +145,7 @@ func resourceDeHHostV1Create(ctx context.Context, d *schema.ResourceData, meta i
 	allocate, err := hosts.Allocate(dehClient, allocateOpts).ExtractHost()
 
 	if err != nil {
-		return fmterr.Errorf("Error creating OpenTelekomcomCloud Dedicated Host: %s", err)
+		return fmterr.Errorf("error creating OpenTelekomcomCloud Dedicated Host: %s", err)
 	}
 	d.SetId(allocate.AllocatedHostIds[0])
 
@@ -161,7 +161,7 @@ func resourceDeHHostV1Create(ctx context.Context, d *schema.ResourceData, meta i
 	}
 	_, Stateerr := stateConf.WaitForStateContext(ctx)
 	if Stateerr != nil {
-		return fmterr.Errorf("Error creating OpenTelekomCloud Dedicated Host : %s", Stateerr)
+		return fmterr.Errorf("error creating OpenTelekomCloud Dedicated Host : %s", Stateerr)
 	}
 
 	return resourceDeHHostV1Read(ctx, d, meta)
@@ -172,7 +172,7 @@ func resourceDeHHostV1Read(ctx context.Context, d *schema.ResourceData, meta int
 	config := meta.(*cfg.Config)
 	dehClient, err := config.DehV1Client(config.GetRegion(d))
 	if err != nil {
-		return fmterr.Errorf("Error creating OpenTelekomCloud DeH client: %s", err)
+		return fmterr.Errorf("error creating OpenTelekomCloud DeH client: %s", err)
 	}
 	n, err := hosts.Get(dehClient, d.Id()).Extract()
 
@@ -182,7 +182,7 @@ func resourceDeHHostV1Read(ctx context.Context, d *schema.ResourceData, meta int
 			return nil
 		}
 
-		return fmterr.Errorf("Error retrieving OpenTelekomCloud Dedicated Host: %s", err)
+		return fmterr.Errorf("error retrieving OpenTelekomCloud Dedicated Host: %s", err)
 	}
 
 	d.Set("id", n.ID)
@@ -210,7 +210,7 @@ func resourceDeHHostV1Update(ctx context.Context, d *schema.ResourceData, meta i
 	config := meta.(*cfg.Config)
 	dehClient, err := config.DehV1Client(config.GetRegion(d))
 	if err != nil {
-		return fmterr.Errorf("Error creating OpenTelekomCloud DeH Client: %s", err)
+		return fmterr.Errorf("error creating OpenTelekomCloud DeH Client: %s", err)
 	}
 	var updateOpts hosts.UpdateOpts
 
@@ -223,7 +223,7 @@ func resourceDeHHostV1Update(ctx context.Context, d *schema.ResourceData, meta i
 
 	_, err = hosts.Update(dehClient, d.Id(), updateOpts).Extract()
 	if err != nil {
-		return fmterr.Errorf("Error updating OpenTelekomCloud Dedicated Host: %s", err)
+		return fmterr.Errorf("error updating OpenTelekomCloud Dedicated Host: %s", err)
 	}
 	return resourceDeHHostV1Read(ctx, d, meta)
 }
@@ -232,12 +232,12 @@ func resourceDeHHostV1Delete(ctx context.Context, d *schema.ResourceData, meta i
 	config := meta.(*cfg.Config)
 	dehClient, err := config.DehV1Client(config.GetRegion(d))
 	if err != nil {
-		return fmterr.Errorf("Error creating OpenTelekomCloud DeH client: %s", err)
+		return fmterr.Errorf("error creating OpenTelekomCloud DeH client: %s", err)
 	}
 
 	result := hosts.Delete(dehClient, d.Id())
 	if result.Err != nil {
-		return fmterr.Errorf("Error deleting OpenTelekomCloud Dedicated Host: %s", err)
+		return fmterr.Errorf("error deleting OpenTelekomCloud Dedicated Host: %s", err)
 	}
 
 	stateConf := &resource.StateChangeConf{
@@ -250,7 +250,7 @@ func resourceDeHHostV1Delete(ctx context.Context, d *schema.ResourceData, meta i
 	}
 	_, err = stateConf.WaitForStateContext(ctx)
 	if err != nil {
-		return fmterr.Errorf("Error deleting OpenTelekomCloud Dedicated Host : %s", err)
+		return fmterr.Errorf("error deleting OpenTelekomCloud Dedicated Host : %s", err)
 	}
 	d.SetId("")
 	return nil

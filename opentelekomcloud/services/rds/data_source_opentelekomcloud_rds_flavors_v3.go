@@ -64,7 +64,7 @@ func dataSourceRdsFlavorV3Read(ctx context.Context, d *schema.ResourceData, meta
 
 	client, err := config.RdsV1Client(config.GetRegion(d))
 	if err != nil {
-		return fmterr.Errorf("Error creating OpenTelekomCloud rds client: %s", err)
+		return fmterr.Errorf("error creating OpenTelekomCloud rds client: %s", err)
 	}
 	client.Endpoint = strings.Replace(client.Endpoint, "/rds/v1/", "/v3/", 1)
 
@@ -103,7 +103,7 @@ func sendRdsFlavorV3ListRequest(client *golangsdk.ServiceClient, url string) (in
 			"X-Language":   "en-us",
 		}})
 	if r.Err != nil {
-		return nil, fmt.Errorf("Error fetching flavors for rds v3, error: %s", r.Err)
+		return nil, fmt.Errorf("error fetching flavors for rds v3, error: %s", r.Err)
 	}
 
 	v, err := common.NavigateValue(r.Body, []string{"flavors"}, nil)

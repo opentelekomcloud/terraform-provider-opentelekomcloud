@@ -94,7 +94,7 @@ func resourceFWRuleV2Create(ctx context.Context, d *schema.ResourceData, meta in
 	config := meta.(*cfg.Config)
 	networkingClient, err := config.NetworkingV2Client(config.GetRegion(d))
 	if err != nil {
-		return fmterr.Errorf("Error creating OpenTelekomCloud networking client: %s", err)
+		return fmterr.Errorf("error creating OpenTelekomCloud networking client: %s", err)
 	}
 
 	enabled := d.Get("enabled").(bool)
@@ -139,7 +139,7 @@ func resourceFWRuleV2Read(ctx context.Context, d *schema.ResourceData, meta inte
 	config := meta.(*cfg.Config)
 	networkingClient, err := config.NetworkingV2Client(config.GetRegion(d))
 	if err != nil {
-		return fmterr.Errorf("Error creating OpenTelekomCloud networking client: %s", err)
+		return fmterr.Errorf("error creating OpenTelekomCloud networking client: %s", err)
 	}
 
 	rule, err := rules.Get(networkingClient, d.Id()).Extract()
@@ -174,7 +174,7 @@ func resourceFWRuleV2Update(ctx context.Context, d *schema.ResourceData, meta in
 	config := meta.(*cfg.Config)
 	networkingClient, err := config.NetworkingV2Client(config.GetRegion(d))
 	if err != nil {
-		return fmterr.Errorf("Error creating OpenTelekomCloud networking client: %s", err)
+		return fmterr.Errorf("error creating OpenTelekomCloud networking client: %s", err)
 	}
 
 	var updateOpts rules.UpdateOpts
@@ -234,7 +234,7 @@ func resourceFWRuleV2Delete(ctx context.Context, d *schema.ResourceData, meta in
 	config := meta.(*cfg.Config)
 	networkingClient, err := config.NetworkingV2Client(config.GetRegion(d))
 	if err != nil {
-		return fmterr.Errorf("Error creating OpenTelekomCloud networking client: %s", err)
+		return fmterr.Errorf("error creating OpenTelekomCloud networking client: %s", err)
 	}
 
 	rule, err := rules.Get(networkingClient, d.Id()).Extract()

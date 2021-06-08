@@ -83,7 +83,7 @@ func testAccCheckComputeV2BmsInstanceDestroy(s *terraform.State) error {
 	config := common.TestAccProvider.Meta().(*cfg.Config)
 	computeClient, err := config.ComputeV2Client(env.OS_REGION_NAME)
 	if err != nil {
-		return fmt.Errorf("Error creating OpenTelekomCloud compute client: %s", err)
+		return fmt.Errorf("error creating OpenTelekomCloud compute client: %s", err)
 	}
 
 	for _, rs := range s.RootModule().Resources {
@@ -116,7 +116,7 @@ func testAccCheckComputeV2BmsInstanceExists(n string, instance *servers.Server) 
 		config := common.TestAccProvider.Meta().(*cfg.Config)
 		computeClient, err := config.ComputeV2Client(env.OS_REGION_NAME)
 		if err != nil {
-			return fmt.Errorf("Error creating OpenTelekomCloud compute client: %s", err)
+			return fmt.Errorf("error creating OpenTelekomCloud compute client: %s", err)
 		}
 
 		found, err := servers.Get(computeClient, rs.Primary.ID).Extract()

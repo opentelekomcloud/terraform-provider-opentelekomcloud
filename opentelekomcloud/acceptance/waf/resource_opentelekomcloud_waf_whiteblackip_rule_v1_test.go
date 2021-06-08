@@ -50,7 +50,7 @@ func testAccCheckWafWhiteBlackIpRuleV1Destroy(s *terraform.State) error {
 	config := common.TestAccProvider.Meta().(*cfg.Config)
 	wafClient, err := config.WafV1Client(env.OS_REGION_NAME)
 	if err != nil {
-		return fmt.Errorf("Error creating OpenTelekomCloud WAF client: %s", err)
+		return fmt.Errorf("error creating OpenTelekomCloud WAF client: %s", err)
 	}
 	for _, rs := range s.RootModule().Resources {
 		if rs.Type != "opentelekomcloud_waf_whiteblackip_rule_v1" {
@@ -80,7 +80,7 @@ func testAccCheckWafWhiteBlackIpRuleV1Exists(n string, rule *whiteblackip_rules.
 		config := common.TestAccProvider.Meta().(*cfg.Config)
 		wafClient, err := config.WafV1Client(env.OS_REGION_NAME)
 		if err != nil {
-			return fmt.Errorf("Error creating OpenTelekomCloud WAF client: %s", err)
+			return fmt.Errorf("error creating OpenTelekomCloud WAF client: %s", err)
 		}
 
 		found, err := whiteblackip_rules.Get(wafClient, rs.Primary.Attributes["policy_id"], rs.Primary.ID).Extract()

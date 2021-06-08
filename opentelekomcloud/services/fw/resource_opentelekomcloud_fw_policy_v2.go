@@ -78,7 +78,7 @@ func resourceFWPolicyV2Create(ctx context.Context, d *schema.ResourceData, meta 
 	config := meta.(*cfg.Config)
 	networkingClient, err := config.NetworkingV2Client(config.GetRegion(d))
 	if err != nil {
-		return fmterr.Errorf("Error creating OpenTelekomCloud networking client: %s", err)
+		return fmterr.Errorf("error creating OpenTelekomCloud networking client: %s", err)
 	}
 
 	v := d.Get("rules").([]interface{})
@@ -129,7 +129,7 @@ func resourceFWPolicyV2Read(ctx context.Context, d *schema.ResourceData, meta in
 	config := meta.(*cfg.Config)
 	networkingClient, err := config.NetworkingV2Client(config.GetRegion(d))
 	if err != nil {
-		return fmterr.Errorf("Error creating OpenTelekomCloud networking client: %s", err)
+		return fmterr.Errorf("error creating OpenTelekomCloud networking client: %s", err)
 	}
 
 	policy, err := policies.Get(networkingClient, d.Id()).Extract()
@@ -156,7 +156,7 @@ func resourceFWPolicyV2Update(ctx context.Context, d *schema.ResourceData, meta 
 	config := meta.(*cfg.Config)
 	networkingClient, err := config.NetworkingV2Client(config.GetRegion(d))
 	if err != nil {
-		return fmterr.Errorf("Error creating OpenTelekomCloud networking client: %s", err)
+		return fmterr.Errorf("error creating OpenTelekomCloud networking client: %s", err)
 	}
 
 	opts := policies.UpdateOpts{}
@@ -198,7 +198,7 @@ func resourceFWPolicyV2Delete(ctx context.Context, d *schema.ResourceData, meta 
 	config := meta.(*cfg.Config)
 	networkingClient, err := config.NetworkingV2Client(config.GetRegion(d))
 	if err != nil {
-		return fmterr.Errorf("Error creating OpenTelekomCloud networking client: %s", err)
+		return fmterr.Errorf("error creating OpenTelekomCloud networking client: %s", err)
 	}
 
 	stateConf := &resource.StateChangeConf{

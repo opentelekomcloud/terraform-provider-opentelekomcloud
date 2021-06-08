@@ -179,7 +179,7 @@ func flattenInstanceNetwork(d *schema.ResourceData, meta interface{}) ([]map[str
 	config := meta.(*cfg.Config)
 	computeClient, err := config.ComputeV2Client(config.GetRegion(d))
 	if err != nil {
-		return nil, fmt.Errorf("Error creating OpenTelekomCloud compute client: %s", err)
+		return nil, fmt.Errorf("error creating OpenTelekomCloud compute client: %s", err)
 	}
 
 	server, err := servers.Get(computeClient, d.Id()).Extract()

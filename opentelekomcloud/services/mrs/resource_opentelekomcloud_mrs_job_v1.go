@@ -132,7 +132,7 @@ func resourceMRSJobV1Create(ctx context.Context, d *schema.ResourceData, meta in
 	config := meta.(*cfg.Config)
 	client, err := config.MrsV1Client(config.GetRegion(d))
 	if err != nil {
-		return fmterr.Errorf("Error creating OpenTelekomCloud MRS client: %s", err)
+		return fmterr.Errorf("error creating OpenTelekomCloud MRS client: %s", err)
 	}
 
 	createOpts := &job.CreateOpts{
@@ -153,7 +153,7 @@ func resourceMRSJobV1Create(ctx context.Context, d *schema.ResourceData, meta in
 
 	jobCreate, err := job.Create(client, createOpts).Extract()
 	if err != nil {
-		return fmterr.Errorf("Error creating Job: %s", err)
+		return fmterr.Errorf("error creating Job: %s", err)
 	}
 
 	d.SetId(jobCreate.ID)
@@ -180,7 +180,7 @@ func resourceMRSJobV1Read(ctx context.Context, d *schema.ResourceData, meta inte
 	config := meta.(*cfg.Config)
 	client, err := config.MrsV1Client(config.GetRegion(d))
 	if err != nil {
-		return fmterr.Errorf("Error creating OpenTelekomCloud  MRS client: %s", err)
+		return fmterr.Errorf("error creating OpenTelekomCloud  MRS client: %s", err)
 	}
 
 	jobGet, err := job.Get(client, d.Id()).Extract()
@@ -223,7 +223,7 @@ func resourceMRSJobV1Delete(ctx context.Context, d *schema.ResourceData, meta in
 	config := meta.(*cfg.Config)
 	client, err := config.MrsV1Client(config.GetRegion(d))
 	if err != nil {
-		return fmterr.Errorf("Error creating OpenTelekomCloud client: %s", err)
+		return fmterr.Errorf("error creating OpenTelekomCloud client: %s", err)
 	}
 
 	rId := d.Id()
@@ -242,7 +242,7 @@ func resourceMRSJobV1Delete(ctx context.Context, d *schema.ResourceData, meta in
 			log.Printf("[INFO] deleting an unavailable MRS Job: %s", rId)
 			return nil
 		}
-		return fmterr.Errorf("Error deleting MRS Job %s: %s", rId, err)
+		return fmterr.Errorf("error deleting MRS Job %s: %s", rId, err)
 	}
 	return nil
 }

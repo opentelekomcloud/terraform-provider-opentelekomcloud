@@ -60,7 +60,7 @@ func resourceComputeServerGroupV2Create(ctx context.Context, d *schema.ResourceD
 	config := meta.(*cfg.Config)
 	computeClient, err := config.ComputeV2Client(config.GetRegion(d))
 	if err != nil {
-		return fmterr.Errorf("Error creating OpenTelekomCloud compute client: %s", err)
+		return fmterr.Errorf("error creating OpenTelekomCloud compute client: %s", err)
 	}
 
 	createOpts := ServerGroupCreateOpts{
@@ -74,7 +74,7 @@ func resourceComputeServerGroupV2Create(ctx context.Context, d *schema.ResourceD
 	log.Printf("[DEBUG] Create Options: %#v", createOpts)
 	newSG, err := servergroups.Create(computeClient, createOpts).Extract()
 	if err != nil {
-		return fmterr.Errorf("Error creating ServerGroup: %s", err)
+		return fmterr.Errorf("error creating ServerGroup: %s", err)
 	}
 
 	d.SetId(newSG.ID)
@@ -86,7 +86,7 @@ func resourceComputeServerGroupV2Read(ctx context.Context, d *schema.ResourceDat
 	config := meta.(*cfg.Config)
 	computeClient, err := config.ComputeV2Client(config.GetRegion(d))
 	if err != nil {
-		return fmterr.Errorf("Error creating OpenTelekomCloud compute client: %s", err)
+		return fmterr.Errorf("error creating OpenTelekomCloud compute client: %s", err)
 	}
 
 	sg, err := servergroups.Get(computeClient, d.Id()).Extract()
@@ -126,12 +126,12 @@ func resourceComputeServerGroupV2Delete(ctx context.Context, d *schema.ResourceD
 	config := meta.(*cfg.Config)
 	computeClient, err := config.ComputeV2Client(config.GetRegion(d))
 	if err != nil {
-		return fmterr.Errorf("Error creating OpenTelekomCloud compute client: %s", err)
+		return fmterr.Errorf("error creating OpenTelekomCloud compute client: %s", err)
 	}
 
 	log.Printf("[DEBUG] Deleting ServerGroup %s", d.Id())
 	if err := servergroups.Delete(computeClient, d.Id()).ExtractErr(); err != nil {
-		return fmterr.Errorf("Error deleting ServerGroup: %s", err)
+		return fmterr.Errorf("error deleting ServerGroup: %s", err)
 	}
 
 	return nil

@@ -85,7 +85,7 @@ func resourceSoftwareConfigV1Create(ctx context.Context, d *schema.ResourceData,
 	orchastrationClient, err := config.OrchestrationV1Client(config.GetRegion(d))
 
 	if err != nil {
-		return fmterr.Errorf("Error creating OpenTelekomCloud RTS client: %s", err)
+		return fmterr.Errorf("error creating OpenTelekomCloud RTS client: %s", err)
 	}
 	input := d.Get("input_values").([]interface{})
 
@@ -112,7 +112,7 @@ func resourceSoftwareConfigV1Create(ctx context.Context, d *schema.ResourceData,
 	n, err := softwareconfig.Create(orchastrationClient, createOpts).Extract()
 
 	if err != nil {
-		return fmterr.Errorf("Error creating OpenTelekomCloud RTS Software Config: %s", err)
+		return fmterr.Errorf("error creating OpenTelekomCloud RTS Software Config: %s", err)
 	}
 	d.SetId(n.Id)
 
@@ -123,7 +123,7 @@ func resourceSoftwareConfigV1Read(ctx context.Context, d *schema.ResourceData, m
 	config := meta.(*cfg.Config)
 	orchastrationClient, err := config.OrchestrationV1Client(config.GetRegion(d))
 	if err != nil {
-		return fmterr.Errorf("Error creating OpenTelekomCloud RTS client: %s", err)
+		return fmterr.Errorf("error creating OpenTelekomCloud RTS client: %s", err)
 	}
 
 	n, err := softwareconfig.Get(orchastrationClient, d.Id()).Extract()
@@ -133,7 +133,7 @@ func resourceSoftwareConfigV1Read(ctx context.Context, d *schema.ResourceData, m
 			return nil
 		}
 
-		return fmterr.Errorf("Error retrieving OpenTelekomCloud Vpc: %s", err)
+		return fmterr.Errorf("error retrieving OpenTelekomCloud Vpc: %s", err)
 	}
 
 	d.Set("id", n.Id)
@@ -155,7 +155,7 @@ func resourceSoftwareConfigV1Delete(ctx context.Context, d *schema.ResourceData,
 	config := meta.(*cfg.Config)
 	orchastrationClient, err := config.OrchestrationV1Client(config.GetRegion(d))
 	if err != nil {
-		return fmterr.Errorf("Error creating OpenTelekomCloud vpc: %s", err)
+		return fmterr.Errorf("error creating OpenTelekomCloud vpc: %s", err)
 	}
 	err = softwareconfig.Delete(orchastrationClient, d.Id()).ExtractErr()
 

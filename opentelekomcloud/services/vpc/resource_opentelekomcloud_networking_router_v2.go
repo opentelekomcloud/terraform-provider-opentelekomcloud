@@ -84,7 +84,7 @@ func resourceNetworkingRouterV2Create(ctx context.Context, d *schema.ResourceDat
 	config := meta.(*cfg.Config)
 	networkingClient, err := config.NetworkingV2Client(config.GetRegion(d))
 	if err != nil {
-		return fmterr.Errorf("Error creating OpenTelekomCloud networking client: %s", err)
+		return fmterr.Errorf("error creating OpenTelekomCloud networking client: %s", err)
 	}
 
 	createOpts := RouterCreateOpts{
@@ -124,7 +124,7 @@ func resourceNetworkingRouterV2Create(ctx context.Context, d *schema.ResourceDat
 	log.Printf("[DEBUG] Create Options: %#v", createOpts)
 	n, err := routers.Create(networkingClient, createOpts).Extract()
 	if err != nil {
-		return fmterr.Errorf("Error creating OpenTelekomCloud Neutron router: %s", err)
+		return fmterr.Errorf("error creating OpenTelekomCloud Neutron router: %s", err)
 	}
 	log.Printf("[INFO] Router ID: %s", n.ID)
 
@@ -149,7 +149,7 @@ func resourceNetworkingRouterV2Read(ctx context.Context, d *schema.ResourceData,
 	config := meta.(*cfg.Config)
 	networkingClient, err := config.NetworkingV2Client(config.GetRegion(d))
 	if err != nil {
-		return fmterr.Errorf("Error creating OpenTelekomCloud networking client: %s", err)
+		return fmterr.Errorf("error creating OpenTelekomCloud networking client: %s", err)
 	}
 
 	n, err := routers.Get(networkingClient, d.Id()).Extract()
@@ -159,7 +159,7 @@ func resourceNetworkingRouterV2Read(ctx context.Context, d *schema.ResourceData,
 			return nil
 		}
 
-		return fmterr.Errorf("Error retrieving OpenTelekomCloud Neutron Router: %s", err)
+		return fmterr.Errorf("error retrieving OpenTelekomCloud Neutron Router: %s", err)
 	}
 
 	log.Printf("[DEBUG] Retrieved Router %s: %+v", d.Id(), n)
@@ -183,7 +183,7 @@ func resourceNetworkingRouterV2Update(ctx context.Context, d *schema.ResourceDat
 	config := meta.(*cfg.Config)
 	networkingClient, err := config.NetworkingV2Client(config.GetRegion(d))
 	if err != nil {
-		return fmterr.Errorf("Error creating OpenTelekomCloud networking client: %s", err)
+		return fmterr.Errorf("error creating OpenTelekomCloud networking client: %s", err)
 	}
 
 	var updateOpts routers.UpdateOpts
@@ -229,7 +229,7 @@ func resourceNetworkingRouterV2Update(ctx context.Context, d *schema.ResourceDat
 
 	_, err = routers.Update(networkingClient, d.Id(), updateOpts).Extract()
 	if err != nil {
-		return fmterr.Errorf("Error updating OpenTelekomCloud Neutron Router: %s", err)
+		return fmterr.Errorf("error updating OpenTelekomCloud Neutron Router: %s", err)
 	}
 
 	return resourceNetworkingRouterV2Read(ctx, d, meta)
@@ -239,7 +239,7 @@ func resourceNetworkingRouterV2Delete(ctx context.Context, d *schema.ResourceDat
 	config := meta.(*cfg.Config)
 	networkingClient, err := config.NetworkingV2Client(config.GetRegion(d))
 	if err != nil {
-		return fmterr.Errorf("Error creating OpenTelekomCloud networking client: %s", err)
+		return fmterr.Errorf("error creating OpenTelekomCloud networking client: %s", err)
 	}
 
 	stateConf := &resource.StateChangeConf{
@@ -253,7 +253,7 @@ func resourceNetworkingRouterV2Delete(ctx context.Context, d *schema.ResourceDat
 
 	_, err = stateConf.WaitForStateContext(ctx)
 	if err != nil {
-		return fmterr.Errorf("Error deleting OpenTelekomCloud Neutron Router: %s", err)
+		return fmterr.Errorf("error deleting OpenTelekomCloud Neutron Router: %s", err)
 	}
 
 	d.SetId("")

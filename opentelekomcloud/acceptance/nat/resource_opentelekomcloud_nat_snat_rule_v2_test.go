@@ -50,7 +50,7 @@ func testAccCheckNatV2SnatRuleDestroy(s *terraform.State) error {
 	config := common.TestAccProvider.Meta().(*cfg.Config)
 	natClient, err := config.NatV2Client(env.OS_REGION_NAME)
 	if err != nil {
-		return fmt.Errorf("Error creating OpenTelekomCloud nat client: %s", err)
+		return fmt.Errorf("error creating OpenTelekomCloud nat client: %s", err)
 	}
 
 	for _, rs := range s.RootModule().Resources {
@@ -81,7 +81,7 @@ func testAccCheckNatV2SnatRuleExists(n string) resource.TestCheckFunc {
 		config := common.TestAccProvider.Meta().(*cfg.Config)
 		natClient, err := config.NatV2Client(env.OS_REGION_NAME)
 		if err != nil {
-			return fmt.Errorf("Error creating OpenTelekomCloud nat client: %s", err)
+			return fmt.Errorf("error creating OpenTelekomCloud nat client: %s", err)
 		}
 
 		found, err := snatrules.Get(natClient, rs.Primary.ID).Extract()

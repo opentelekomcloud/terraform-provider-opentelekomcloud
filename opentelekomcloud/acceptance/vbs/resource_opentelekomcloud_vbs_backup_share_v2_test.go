@@ -56,7 +56,7 @@ func testAccVBSBackupShareV2Destroy(s *terraform.State) error {
 	config := common.TestAccProvider.Meta().(*cfg.Config)
 	vbsClient, err := config.VbsV2Client(env.OS_REGION_NAME)
 	if err != nil {
-		return fmt.Errorf("Error creating opentelekomcloud vbs client: %s", err)
+		return fmt.Errorf("error creating opentelekomcloud vbs client: %s", err)
 	}
 
 	for _, rs := range s.RootModule().Resources {
@@ -87,7 +87,7 @@ func testAccVBSBackupShareV2Exists(n string, share *shares.Share) resource.TestC
 		config := common.TestAccProvider.Meta().(*cfg.Config)
 		vbsClient, err := config.VbsV2Client(env.OS_REGION_NAME)
 		if err != nil {
-			return fmt.Errorf("Error creating opentelekomcloud vbs client: %s", err)
+			return fmt.Errorf("error creating opentelekomcloud vbs client: %s", err)
 		}
 
 		shareList, err := shares.List(vbsClient, shares.ListOpts{BackupID: rs.Primary.ID})

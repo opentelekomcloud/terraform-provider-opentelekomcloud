@@ -54,7 +54,7 @@ func testAccCheckVpcFlowLogV1Destroy(s *terraform.State) error {
 	config := common.TestAccProvider.Meta().(*cfg.Config)
 	vpcClient, err := config.NetworkingV1Client(env.OS_REGION_NAME)
 	if err != nil {
-		return fmt.Errorf("Error creating OpenTelekomCloud vpc client: %s", err)
+		return fmt.Errorf("error creating OpenTelekomCloud vpc client: %s", err)
 	}
 
 	for _, rs := range s.RootModule().Resources {
@@ -85,7 +85,7 @@ func testAccCheckVpcFlowLogV1Exists(n string, flowlog *flowlogs.FlowLog) resourc
 		config := common.TestAccProvider.Meta().(*cfg.Config)
 		vpcClient, err := config.NetworkingV1Client(env.OS_REGION_NAME)
 		if err != nil {
-			return fmt.Errorf("Error creating OpenTelekomCloud Vpc client: %s", err)
+			return fmt.Errorf("error creating OpenTelekomCloud Vpc client: %s", err)
 		}
 
 		found, err := flowlogs.Get(vpcClient, rs.Primary.ID).Extract()

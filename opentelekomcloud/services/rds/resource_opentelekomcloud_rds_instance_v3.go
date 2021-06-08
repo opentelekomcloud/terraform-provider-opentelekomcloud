@@ -11,7 +11,7 @@ import (
 	"github.com/hashicorp/go-multierror"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
-	"github.com/opentelekomcloud/gophertelekomcloud"
+	golangsdk "github.com/opentelekomcloud/gophertelekomcloud"
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/common/tags"
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/networking/v1/subnets"
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/networking/v2/extensions/layer3/floatingips"
@@ -566,7 +566,7 @@ func resourceRdsInstanceV3Update(ctx context.Context, d *schema.ResourceData, me
 		create, remove := diffTagsRDS(oldTag, newTag)
 		tagClient, err := config.RdsTagV1Client(config.GetRegion(d))
 		if err != nil {
-			return fmterr.Errorf("Error creating OpenTelekomCloud RDSv3 tag client: %s ", err)
+			return fmterr.Errorf("error creating OpenTelekomCloud RDSv3 tag client: %s ", err)
 		}
 
 		if len(remove) > 0 {

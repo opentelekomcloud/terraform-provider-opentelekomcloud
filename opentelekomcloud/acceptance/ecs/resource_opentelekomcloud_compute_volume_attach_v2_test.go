@@ -74,7 +74,7 @@ func testAccCheckComputeV2VolumeAttachDestroy(s *terraform.State) error {
 	config := common.TestAccProvider.Meta().(*cfg.Config)
 	computeClient, err := config.ComputeV2Client(env.OS_REGION_NAME)
 	if err != nil {
-		return fmt.Errorf("Error creating OpenTelekomCloud compute client: %s", err)
+		return fmt.Errorf("error creating OpenTelekomCloud compute client: %s", err)
 	}
 
 	for _, rs := range s.RootModule().Resources {
@@ -110,7 +110,7 @@ func testAccCheckComputeV2VolumeAttachExists(n string, va *volumeattach.VolumeAt
 		config := common.TestAccProvider.Meta().(*cfg.Config)
 		computeClient, err := config.ComputeV2Client(env.OS_REGION_NAME)
 		if err != nil {
-			return fmt.Errorf("Error creating OpenTelekomCloud compute client: %s", err)
+			return fmt.Errorf("error creating OpenTelekomCloud compute client: %s", err)
 		}
 
 		instanceId, volumeId, err := ecs.ParseComputeVolumeAttachmentId(rs.Primary.ID)

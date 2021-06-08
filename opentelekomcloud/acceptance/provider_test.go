@@ -142,7 +142,7 @@ func TestAccProvider_clientCertString(t *testing.T) {
 func envVarContents(varName string) (string, error) {
 	contents, _, err := pathorcontents.Read(os.Getenv(varName))
 	if err != nil {
-		return "", fmt.Errorf("Error reading %s: %s", varName, err)
+		return "", fmt.Errorf("error reading %s: %s", varName, err)
 	}
 	return contents, nil
 }
@@ -155,15 +155,15 @@ func envVarFile(varName string) (string, error) {
 
 	tmpFile, err := ioutil.TempFile("", varName)
 	if err != nil {
-		return "", fmt.Errorf("Error creating temp file: %s", err)
+		return "", fmt.Errorf("error creating temp file: %s", err)
 	}
 	if _, err := tmpFile.Write([]byte(contents)); err != nil {
 		_ = os.Remove(tmpFile.Name())
-		return "", fmt.Errorf("Error writing temp file: %s", err)
+		return "", fmt.Errorf("error writing temp file: %s", err)
 	}
 	if err := tmpFile.Close(); err != nil {
 		_ = os.Remove(tmpFile.Name())
-		return "", fmt.Errorf("Error closing temp file: %s", err)
+		return "", fmt.Errorf("error closing temp file: %s", err)
 	}
 	return tmpFile.Name(), nil
 }

@@ -1359,7 +1359,7 @@ func resourceS3BucketImportState(ctx context.Context, d *schema.ResourceData, me
 	config := meta.(*cfg.Config)
 	conn, err := config.S3Client(config.GetRegion(d))
 	if err != nil {
-		return nil, fmt.Errorf("Error creating OpenTelekomCloud s3 client: %s", err)
+		return nil, fmt.Errorf("error creating OpenTelekomCloud s3 client: %s", err)
 	}
 	pol, err := conn.GetBucketPolicy(&s3.GetBucketPolicyInput{
 		Bucket: aws.String(d.Id()),
@@ -1369,7 +1369,7 @@ func resourceS3BucketImportState(ctx context.Context, d *schema.ResourceData, me
 			// Bucket without policy
 			return results, nil
 		}
-		return nil, fmt.Errorf("Error importing AWS S3 bucket policy: %w", err)
+		return nil, fmt.Errorf("error importing AWS S3 bucket policy: %w", err)
 	}
 
 	policy := ResourceS3BucketPolicy()

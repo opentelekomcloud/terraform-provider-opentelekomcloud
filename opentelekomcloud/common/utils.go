@@ -38,12 +38,12 @@ func jsonBytesEqual(b1, b2 []byte) bool {
 func ConvertStructToMap(obj interface{}, nameMap map[string]string) (map[string]interface{}, error) {
 	b, err := json.Marshal(obj)
 	if err != nil {
-		return nil, fmt.Errorf("Error converting struct to map, marshal failed:%v", err)
+		return nil, fmt.Errorf("error converting struct to map, marshal failed:%v", err)
 	}
 
 	m, err := regexp.Compile(`"[a-z0-9A-Z_]+":`)
 	if err != nil {
-		return nil, fmt.Errorf("Error converting struct to map, compile regular express failed")
+		return nil, fmt.Errorf("error converting struct to map, compile regular express failed")
 	}
 	nb := m.ReplaceAllFunc(
 		b,
@@ -62,7 +62,7 @@ func ConvertStructToMap(obj interface{}, nameMap map[string]string) (map[string]
 	p := make(map[string]interface{})
 	err = json.Unmarshal(nb, &p)
 	if err != nil {
-		return nil, fmt.Errorf("Error converting struct to map, unmarshal failed:%v", err)
+		return nil, fmt.Errorf("error converting struct to map, unmarshal failed:%v", err)
 	}
 	log.Printf("[DEBUG]ConvertStructToMap:: map= %#v\n", p)
 	return p, nil
