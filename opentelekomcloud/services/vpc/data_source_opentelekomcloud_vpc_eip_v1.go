@@ -1,21 +1,23 @@
 package vpc
 
 import (
-	"fmt"
+	"context"
 	"log"
 
 	"github.com/hashicorp/go-multierror"
-	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/common/tags"
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/networking/v1/eips"
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common"
 
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common/cfg"
+	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common/fmterr"
 )
 
 func DataSourceVPCEipV1() *schema.Resource {
 	return &schema.Resource{
-		Read: dataSourceVPCEipV1Read,
+		ReadContext: dataSourceVPCEipV1Read,
 
 		Schema: map[string]*schema.Schema{
 			"region": {
@@ -77,11 +79,11 @@ func DataSourceVPCEipV1() *schema.Resource {
 	}
 }
 
-func dataSourceVPCEipV1Read(d *schema.ResourceData, meta interface{}) error {
+func dataSourceVPCEipV1Read(_ context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*cfg.Config)
 	client, err := config.NetworkingV1Client(config.GetRegion(d))
 	if err != nil {
-		return fmt.Errorf("error creating OpenTelekomCloud NetworkingV1 client: %w", err)
+		return fmterr.Errorf("error creating OpenTelekomCloud NetworkingV1 client: %w", err)
 	}
 
 	listOpts := eips.ListOpts{
@@ -95,21 +97,21 @@ func dataSourceVPCEipV1Read(d *schema.ResourceData, meta interface{}) error {
 
 	refinedEIPs, err := eips.List(client, listOpts)
 	if err != nil {
-		return fmt.Errorf("unable to retrieve EIPs: %w", err)
+		return fmterr.Errorf("unable to retrieve EIPs: %w", err)
 	}
 
 	tagRaw := d.Get("tags").(map[string]interface{})
 	var refinedByTags []eips.PublicIp
 	networkingV2Client, err := config.NetworkingV2Client(config.GetRegion(d))
 	if err != nil {
-		return fmt.Errorf("error creating OpenTelekomCloud NetworkingV2 client: %w", err)
+		return fmterr.Errorf("error creating OpenTelekomCloud NetworkingV2 client: %w", err)
 	}
 	if len(tagRaw) > 0 {
 		tagList := common.ExpandResourceTags(tagRaw)
 		for _, eip := range refinedEIPs {
 			resourceTagList, err := tags.Get(networkingV2Client, "publicips", eip.ID).Extract()
 			if err != nil {
-				return fmt.Errorf("error fetching OpenTelekomCloud VPC EIP tags: %w", err)
+				return fmterr.Errorf("error fetching OpenTelekomCloud VPC EIP tags: %w", err)
 			}
 
 			var flag bool
@@ -130,11 +132,11 @@ func dataSourceVPCEipV1Read(d *schema.ResourceData, meta interface{}) error {
 	}
 
 	if len(refinedByTags) < 1 {
-		return fmt.Errorf("your query returned no results. Please change your search criteria and try again")
+		return fmterr.Errorf("your query returned no results. Please change your search criteria and try again")
 	}
 
 	if len(refinedByTags) > 1 {
-		return fmt.Errorf("your query returned more than one result. Please try a more specific search criteria")
+		return fmterr.Errorf("your query returned more than one result. Please try a more specific search criteria")
 	}
 
 	elasticIP := refinedByTags[0]
@@ -161,7 +163,7 @@ func dataSourceVPCEipV1Read(d *schema.ResourceData, meta interface{}) error {
 	// save tags
 	resourceTags, err := tags.Get(networkingV2Client, "publicips", d.Id()).Extract()
 	if err != nil {
-		return fmt.Errorf("error fetching OpenTelekomCloud VPC EIP tags: %w", err)
+		return fmterr.Errorf("error fetching OpenTelekomCloud VPC EIP tags: %w", err)
 	}
 	tagMap := common.TagsToMap(resourceTags)
 	mErr = multierror.Append(mErr,
@@ -169,7 +171,7 @@ func dataSourceVPCEipV1Read(d *schema.ResourceData, meta interface{}) error {
 	)
 
 	if mErr.ErrorOrNil() != nil {
-		return mErr
+		return diag.FromErr(mErr)
 	}
 
 	return nil

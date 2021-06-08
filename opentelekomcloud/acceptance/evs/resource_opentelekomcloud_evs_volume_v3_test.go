@@ -5,8 +5,8 @@ import (
 	"regexp"
 	"testing"
 
-	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
-	"github.com/hashicorp/terraform-plugin-sdk/terraform"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/evs/v3/volumes"
 
@@ -21,9 +21,9 @@ func TestAccEvsStorageV3Volume_basic(t *testing.T) {
 	var volume volumes.Volume
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:     func() { common.TestAccPreCheck(t) },
-		Providers:    common.TestAccProviders,
-		CheckDestroy: testAccCheckEvsStorageV3VolumeDestroy,
+		PreCheck:          func() { common.TestAccPreCheck(t) },
+		ProviderFactories: common.TestAccProviderFactories,
+		CheckDestroy:      testAccCheckEvsStorageV3VolumeDestroy,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccEvsStorageV3VolumeBasic,
@@ -47,9 +47,9 @@ func TestAccEvsStorageV3Volume_tags(t *testing.T) {
 	resNameTags := "opentelekomcloud_evs_volume_v3.volume_tags"
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:     func() { common.TestAccPreCheck(t) },
-		Providers:    common.TestAccProviders,
-		CheckDestroy: testAccCheckEvsStorageV3VolumeDestroy,
+		PreCheck:          func() { common.TestAccPreCheck(t) },
+		ProviderFactories: common.TestAccProviderFactories,
+		CheckDestroy:      testAccCheckEvsStorageV3VolumeDestroy,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccEvsStorageV3VolumeTags,
@@ -73,9 +73,9 @@ func TestAccEvsStorageV3Volume_image(t *testing.T) {
 	var volume volumes.Volume
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:     func() { common.TestAccPreCheck(t) },
-		Providers:    common.TestAccProviders,
-		CheckDestroy: testAccCheckEvsStorageV3VolumeDestroy,
+		PreCheck:          func() { common.TestAccPreCheck(t) },
+		ProviderFactories: common.TestAccProviderFactories,
+		CheckDestroy:      testAccCheckEvsStorageV3VolumeDestroy,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccEvsStorageV3VolumeImage,
@@ -92,9 +92,9 @@ func TestAccEvsStorageV3Volume_timeout(t *testing.T) {
 	var volume volumes.Volume
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:     func() { common.TestAccPreCheck(t) },
-		Providers:    common.TestAccProviders,
-		CheckDestroy: testAccCheckEvsStorageV3VolumeDestroy,
+		PreCheck:          func() { common.TestAccPreCheck(t) },
+		ProviderFactories: common.TestAccProviderFactories,
+		CheckDestroy:      testAccCheckEvsStorageV3VolumeDestroy,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccEvsStorageV3VolumeTimeout,
@@ -108,9 +108,9 @@ func TestAccEvsStorageV3Volume_timeout(t *testing.T) {
 
 func TestAccEvsStorageV3Volume_volumeType(t *testing.T) {
 	resource.Test(t, resource.TestCase{
-		PreCheck:     func() { common.TestAccPreCheck(t) },
-		Providers:    common.TestAccProviders,
-		CheckDestroy: testAccCheckEvsStorageV3VolumeDestroy,
+		PreCheck:          func() { common.TestAccPreCheck(t) },
+		ProviderFactories: common.TestAccProviderFactories,
+		CheckDestroy:      testAccCheckEvsStorageV3VolumeDestroy,
 		Steps: []resource.TestStep{
 			{
 				Config:      testAccEvsStorageV3VolumeVolumeType,
@@ -126,9 +126,9 @@ func TestAccEvsStorageV3Volume_resize(t *testing.T) {
 	var volumeUpscaled volumes.Volume
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:     func() { common.TestAccPreCheck(t) },
-		Providers:    common.TestAccProviders,
-		CheckDestroy: testAccCheckEvsStorageV3VolumeDestroy,
+		PreCheck:          func() { common.TestAccPreCheck(t) },
+		ProviderFactories: common.TestAccProviderFactories,
+		CheckDestroy:      testAccCheckEvsStorageV3VolumeDestroy,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccEvsStorageV3VolumeBasic,

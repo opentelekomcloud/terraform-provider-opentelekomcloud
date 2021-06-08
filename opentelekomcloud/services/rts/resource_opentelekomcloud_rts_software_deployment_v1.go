@@ -1,25 +1,27 @@
 package rts
 
 import (
-	"fmt"
+	"context"
 	"log"
 	"time"
 
-	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
-	"github.com/opentelekomcloud/gophertelekomcloud"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	golangsdk "github.com/opentelekomcloud/gophertelekomcloud"
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/rts/v1/softwaredeployment"
 
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common/cfg"
+	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common/fmterr"
 )
 
 func ResourceRtsSoftwareDeploymentV1() *schema.Resource {
 	return &schema.Resource{
-		Create: resourceRtsSoftwareDeploymentV1Create,
-		Read:   resourceRtsSoftwareDeploymentV1Read,
-		Update: resourceRtsSoftwareDeploymentV1Update,
-		Delete: resourceRtsSoftwareDeploymentV1Delete,
+		CreateContext: resourceRtsSoftwareDeploymentV1Create,
+		ReadContext:   resourceRtsSoftwareDeploymentV1Read,
+		UpdateContext: resourceRtsSoftwareDeploymentV1Update,
+		DeleteContext: resourceRtsSoftwareDeploymentV1Delete,
 		Importer: &schema.ResourceImporter{
-			State: schema.ImportStatePassthrough,
+			StateContext: schema.ImportStatePassthroughContext,
 		},
 
 		Timeouts: &schema.ResourceTimeout{
@@ -95,12 +97,12 @@ func resourceOutputValuesV1(d *schema.ResourceData) map[string]interface{} {
 	return m
 }
 
-func resourceRtsSoftwareDeploymentV1Create(d *schema.ResourceData, meta interface{}) error {
+func resourceRtsSoftwareDeploymentV1Create(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*cfg.Config)
 	orchestrationClient, err := config.OrchestrationV1Client(config.GetRegion(d))
 
 	if err != nil {
-		return fmt.Errorf("Error creating OpenTelekomCloud Orchestration client: %s", err)
+		return fmterr.Errorf("error creating OpenTelekomCloud Orchestration client: %s", err)
 	}
 
 	createOpts := softwaredeployment.CreateOpts{
@@ -116,22 +118,22 @@ func resourceRtsSoftwareDeploymentV1Create(d *schema.ResourceData, meta interfac
 	n, err := softwaredeployment.Create(orchestrationClient, createOpts).Extract()
 
 	if err != nil {
-		return fmt.Errorf("Error creating OpenTelekomCloud RTS Software Deployment: %s", err)
+		return fmterr.Errorf("error creating OpenTelekomCloud RTS Software Deployment: %s", err)
 	}
 
 	d.SetId(n.Id)
 
 	log.Printf("[INFO] Software Deployment ID: %s", n.Id)
 
-	return resourceRtsSoftwareDeploymentV1Read(d, meta)
+	return resourceRtsSoftwareDeploymentV1Read(ctx, d, meta)
 
 }
 
-func resourceRtsSoftwareDeploymentV1Read(d *schema.ResourceData, meta interface{}) error {
+func resourceRtsSoftwareDeploymentV1Read(_ context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*cfg.Config)
 	orchestrationClient, err := config.OrchestrationV1Client(config.GetRegion(d))
 	if err != nil {
-		return fmt.Errorf("Error creating OpenTelekomCloud Orchestration client: %s", err)
+		return fmterr.Errorf("error creating OpenTelekomCloud Orchestration client: %s", err)
 	}
 
 	n, err := softwaredeployment.Get(orchestrationClient, d.Id()).Extract()
@@ -141,7 +143,7 @@ func resourceRtsSoftwareDeploymentV1Read(d *schema.ResourceData, meta interface{
 			return nil
 		}
 
-		return fmt.Errorf("Error retrieving OpenTelekomCloud RTS Software Deployment: %s", err)
+		return fmterr.Errorf("error retrieving OpenTelekomCloud RTS Software Deployment: %s", err)
 	}
 
 	d.Set("id", n.Id)
@@ -157,11 +159,11 @@ func resourceRtsSoftwareDeploymentV1Read(d *schema.ResourceData, meta interface{
 	return nil
 }
 
-func resourceRtsSoftwareDeploymentV1Update(d *schema.ResourceData, meta interface{}) error {
+func resourceRtsSoftwareDeploymentV1Update(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*cfg.Config)
 	orchestrationClient, err := config.OrchestrationV1Client(config.GetRegion(d))
 	if err != nil {
-		return fmt.Errorf("Error creating OpenTelekomCloud orchestration client: %s", err)
+		return fmterr.Errorf("error creating OpenTelekomCloud orchestration client: %s", err)
 	}
 
 	var updateOpts softwaredeployment.UpdateOpts
@@ -184,17 +186,17 @@ func resourceRtsSoftwareDeploymentV1Update(d *schema.ResourceData, meta interfac
 
 	_, err = softwaredeployment.Update(orchestrationClient, d.Id(), updateOpts).Extract()
 	if err != nil {
-		return fmt.Errorf("Error updating OpenTelekomCloud RTS Software Deployment: %s", err)
+		return fmterr.Errorf("error updating OpenTelekomCloud RTS Software Deployment: %s", err)
 	}
 
-	return resourceRtsSoftwareDeploymentV1Read(d, meta)
+	return resourceRtsSoftwareDeploymentV1Read(ctx, d, meta)
 }
 
-func resourceRtsSoftwareDeploymentV1Delete(d *schema.ResourceData, meta interface{}) error {
+func resourceRtsSoftwareDeploymentV1Delete(_ context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*cfg.Config)
 	orchestrationClient, err := config.OrchestrationV1Client(config.GetRegion(d))
 	if err != nil {
-		return fmt.Errorf("Error creating OpenTelekomCloud Orchestration: %s", err)
+		return fmterr.Errorf("error creating OpenTelekomCloud Orchestration: %s", err)
 	}
 
 	err = softwaredeployment.Delete(orchestrationClient, d.Id()).ExtractErr()

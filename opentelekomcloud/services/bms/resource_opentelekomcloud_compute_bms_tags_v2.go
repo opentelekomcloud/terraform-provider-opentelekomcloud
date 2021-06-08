@@ -1,24 +1,26 @@
 package bms
 
 import (
-	"fmt"
+	"context"
 	"log"
 	"time"
 
-	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
-	"github.com/opentelekomcloud/gophertelekomcloud"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	golangsdk "github.com/opentelekomcloud/gophertelekomcloud"
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/bms/v2/tags"
 
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common/cfg"
+	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common/fmterr"
 )
 
 func ResourceBMSTagsV2() *schema.Resource {
 	return &schema.Resource{
-		Create: resourceBMSTagsV2Create,
-		Read:   resourceBMSTagsV2Read,
-		Delete: resourceBMSTagsV2Delete,
+		CreateContext: resourceBMSTagsV2Create,
+		ReadContext:   resourceBMSTagsV2Read,
+		DeleteContext: resourceBMSTagsV2Delete,
 		Importer: &schema.ResourceImporter{
-			State: schema.ImportStatePassthrough,
+			StateContext: schema.ImportStatePassthroughContext,
 		},
 
 		Timeouts: &schema.ResourceTimeout{
@@ -58,12 +60,12 @@ func resourceTagsV2(d *schema.ResourceData) []string {
 	return tags
 }
 
-func resourceBMSTagsV2Create(d *schema.ResourceData, meta interface{}) error {
+func resourceBMSTagsV2Create(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*cfg.Config)
 	bmsClient, err := config.ComputeV2Client(config.GetRegion(d))
 
 	if err != nil {
-		return fmt.Errorf("Error creating OpenTelekomCloud bms client: %s", err)
+		return fmterr.Errorf("error creating OpenTelekomCloud bms client: %s", err)
 	}
 
 	createOpts := tags.CreateOpts{
@@ -73,21 +75,21 @@ func resourceBMSTagsV2Create(d *schema.ResourceData, meta interface{}) error {
 	_, err = tags.Create(bmsClient, d.Get("server_id").(string), createOpts).Extract()
 
 	if err != nil {
-		return fmt.Errorf("Error creating OpenTelekomCloud Tags: %s", err)
+		return fmterr.Errorf("error creating OpenTelekomCloud Tags: %s", err)
 	}
 	d.SetId(d.Get("server_id").(string))
 
 	log.Printf("[INFO] Server ID: %s", d.Id())
 
-	return resourceBMSTagsV2Read(d, meta)
+	return resourceBMSTagsV2Read(ctx, d, meta)
 
 }
 
-func resourceBMSTagsV2Read(d *schema.ResourceData, meta interface{}) error {
+func resourceBMSTagsV2Read(_ context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*cfg.Config)
 	bmsClient, err := config.ComputeV2Client(config.GetRegion(d))
 	if err != nil {
-		return fmt.Errorf("Error creating OpenTelekomCloud bms client: %s", err)
+		return fmterr.Errorf("error creating OpenTelekomCloud bms client: %s", err)
 	}
 
 	n, err := tags.Get(bmsClient, d.Id()).Extract()
@@ -97,7 +99,7 @@ func resourceBMSTagsV2Read(d *schema.ResourceData, meta interface{}) error {
 			return nil
 		}
 
-		return fmt.Errorf("Error retrieving OpenTelekomCloud tags: %s", err)
+		return fmterr.Errorf("error retrieving OpenTelekomCloud tags: %s", err)
 	}
 
 	d.Set("tags", n.Tags)
@@ -107,16 +109,16 @@ func resourceBMSTagsV2Read(d *schema.ResourceData, meta interface{}) error {
 	return nil
 }
 
-func resourceBMSTagsV2Delete(d *schema.ResourceData, meta interface{}) error {
+func resourceBMSTagsV2Delete(_ context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*cfg.Config)
 	bmsClient, err := config.ComputeV2Client(config.GetRegion(d))
 	if err != nil {
-		return fmt.Errorf("Error creating OpenTelekomCloud bms client: %s", err)
+		return fmterr.Errorf("error creating OpenTelekomCloud bms client: %s", err)
 	}
 
 	err = tags.Delete(bmsClient, d.Id()).ExtractErr()
 	if err != nil {
-		return fmt.Errorf("Error deleting OpenTelekomCloud tags: %s", err)
+		return fmterr.Errorf("error deleting OpenTelekomCloud tags: %s", err)
 	}
 
 	d.SetId("")

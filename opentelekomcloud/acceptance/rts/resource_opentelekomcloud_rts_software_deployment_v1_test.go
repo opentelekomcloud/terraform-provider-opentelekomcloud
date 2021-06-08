@@ -4,8 +4,8 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
-	"github.com/hashicorp/terraform-plugin-sdk/terraform"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/rts/v1/softwaredeployment"
 
@@ -18,9 +18,9 @@ func TestAccOTCRtsSoftwareDeploymentV1_basic(t *testing.T) {
 	var deployments softwaredeployment.Deployment
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:     func() { common.TestAccPreCheck(t) },
-		Providers:    common.TestAccProviders,
-		CheckDestroy: testAccCheckOTCRtsSoftwareDeploymentV1Destroy,
+		PreCheck:          func() { common.TestAccPreCheck(t) },
+		ProviderFactories: common.TestAccProviderFactories,
+		CheckDestroy:      testAccCheckOTCRtsSoftwareDeploymentV1Destroy,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccRtsSoftwareDeploymentV1_basic,
@@ -56,9 +56,9 @@ func TestAccOTCRtsSoftwareDeploymentV1_timeout(t *testing.T) {
 	var deployments softwaredeployment.Deployment
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:     func() { common.TestAccPreCheck(t) },
-		Providers:    common.TestAccProviders,
-		CheckDestroy: testAccCheckOTCRtsSoftwareDeploymentV1Destroy,
+		PreCheck:          func() { common.TestAccPreCheck(t) },
+		ProviderFactories: common.TestAccProviderFactories,
+		CheckDestroy:      testAccCheckOTCRtsSoftwareDeploymentV1Destroy,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccRtsSoftwareDeploymentV1_timeout,
@@ -74,7 +74,7 @@ func testAccCheckOTCRtsSoftwareDeploymentV1Destroy(s *terraform.State) error {
 	config := common.TestAccProvider.Meta().(*cfg.Config)
 	orchestrationClient, err := config.OrchestrationV1Client(env.OS_REGION_NAME)
 	if err != nil {
-		return fmt.Errorf("Error creating RTS client: %s", err)
+		return fmt.Errorf("error creating RTS client: %s", err)
 	}
 
 	for _, rs := range s.RootModule().Resources {
@@ -108,7 +108,7 @@ func testAccCheckOTCRtsSoftwareDeploymentV1Exists(n string, stack *softwaredeplo
 		config := common.TestAccProvider.Meta().(*cfg.Config)
 		orchestrationClient, err := config.OrchestrationV1Client(env.OS_REGION_NAME)
 		if err != nil {
-			return fmt.Errorf("Error creating RTS Client : %s", err)
+			return fmt.Errorf("error creating RTS Client : %s", err)
 		}
 
 		found, err := softwaredeployment.Get(orchestrationClient, rs.Primary.ID).Extract()

@@ -1,18 +1,20 @@
 package csbs
 
 import (
-	"fmt"
+	"context"
 	"log"
 
-	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/csbs/v1/policies"
 
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common/cfg"
+	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common/fmterr"
 )
 
 func DataSourceCSBSBackupPolicyV1() *schema.Resource {
 	return &schema.Resource{
-		Read: dataSourceCSBSBackupPolicyV1Read,
+		ReadContext: dataSourceCSBSBackupPolicyV1Read,
 
 		Schema: map[string]*schema.Schema{
 			"region": {
@@ -144,7 +146,7 @@ func DataSourceCSBSBackupPolicyV1() *schema.Resource {
 	}
 }
 
-func dataSourceCSBSBackupPolicyV1Read(d *schema.ResourceData, meta interface{}) error {
+func dataSourceCSBSBackupPolicyV1Read(_ context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*cfg.Config)
 	policyClient, err := config.CsbsV1Client(config.GetRegion(d))
 
@@ -157,16 +159,16 @@ func dataSourceCSBSBackupPolicyV1Read(d *schema.ResourceData, meta interface{}) 
 	refinedPolicies, err := policies.List(policyClient, listOpts)
 
 	if err != nil {
-		return fmt.Errorf("Unable to retrieve backup policies: %s", err)
+		return fmterr.Errorf("Unable to retrieve backup policies: %s", err)
 	}
 
 	if len(refinedPolicies) < 1 {
-		return fmt.Errorf("Your query returned no results. " +
+		return fmterr.Errorf("Your query returned no results. " +
 			"Please change your search criteria and try again.")
 	}
 
 	if len(refinedPolicies) > 1 {
-		return fmt.Errorf("Your query returned more than one result." +
+		return fmterr.Errorf("Your query returned more than one result." +
 			" Please try a more specific search criteria")
 	}
 
@@ -177,15 +179,15 @@ func dataSourceCSBSBackupPolicyV1Read(d *schema.ResourceData, meta interface{}) 
 	d.SetId(backupPolicy.ID)
 
 	if err := d.Set("resource", flattenCSBSPolicyResources(backupPolicy)); err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 
 	if err := d.Set("scheduled_operation", flattenCSBSScheduledOperations(backupPolicy)); err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 
 	if err := d.Set("tags", flattenCSBSPolicyTags(backupPolicy)); err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 
 	d.Set("name", backupPolicy.Name)

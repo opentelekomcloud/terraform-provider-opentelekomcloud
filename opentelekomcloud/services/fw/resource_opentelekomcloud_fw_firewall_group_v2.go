@@ -1,28 +1,31 @@
 package fw
 
 import (
+	"context"
 	"fmt"
 	"log"
 	"time"
 
-	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
-	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
-	"github.com/opentelekomcloud/gophertelekomcloud"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	golangsdk "github.com/opentelekomcloud/gophertelekomcloud"
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/networking/v2/extensions/fwaas_v2/firewall_groups"
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/networking/v2/extensions/fwaas_v2/routerinsertion"
 
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common"
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common/cfg"
+	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common/fmterr"
 )
 
 func ResourceFWFirewallGroupV2() *schema.Resource {
 	return &schema.Resource{
-		Create: resourceFWFirewallGroupV2Create,
-		Read:   resourceFWFirewallGroupV2Read,
-		Update: resourceFWFirewallGroupV2Update,
-		Delete: resourceFWFirewallGroupV2Delete,
+		CreateContext: resourceFWFirewallGroupV2Create,
+		ReadContext:   resourceFWFirewallGroupV2Read,
+		UpdateContext: resourceFWFirewallGroupV2Update,
+		DeleteContext: resourceFWFirewallGroupV2Delete,
 		Importer: &schema.ResourceImporter{
-			State: schema.ImportStatePassthrough,
+			StateContext: schema.ImportStatePassthroughContext,
 		},
 
 		Timeouts: &schema.ResourceTimeout{
@@ -81,12 +84,12 @@ func ResourceFWFirewallGroupV2() *schema.Resource {
 	}
 }
 
-func resourceFWFirewallGroupV2Create(d *schema.ResourceData, meta interface{}) error {
+func resourceFWFirewallGroupV2Create(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 
 	config := meta.(*cfg.Config)
 	networkingClient, err := config.NetworkingV2Client(config.GetRegion(d))
 	if err != nil {
-		return fmt.Errorf("Error creating OpenTelekomCloud networking client: %s", err)
+		return fmterr.Errorf("error creating OpenTelekomCloud networking client: %s", err)
 	}
 
 	var createOpts firewall_groups.CreateOptsBuilder
@@ -123,7 +126,7 @@ func resourceFWFirewallGroupV2Create(d *schema.ResourceData, meta interface{}) e
 
 	firewall_group, err := firewall_groups.Create(networkingClient, createOpts).Extract()
 	if err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 
 	log.Printf("[DEBUG] Firewall group created: %#v", firewall_group)
@@ -137,27 +140,27 @@ func resourceFWFirewallGroupV2Create(d *schema.ResourceData, meta interface{}) e
 		MinTimeout: 2 * time.Second,
 	}
 
-	_, err = stateConf.WaitForState()
+	_, err = stateConf.WaitForStateContext(ctx)
 	log.Printf("[DEBUG] Firewall group (%s) is active.", firewall_group.ID)
 
 	d.SetId(firewall_group.ID)
 
-	return resourceFWFirewallGroupV2Read(d, meta)
+	return resourceFWFirewallGroupV2Read(ctx, d, meta)
 }
 
-func resourceFWFirewallGroupV2Read(d *schema.ResourceData, meta interface{}) error {
+func resourceFWFirewallGroupV2Read(_ context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	log.Printf("[DEBUG] Retrieve information about firewall: %s", d.Id())
 
 	config := meta.(*cfg.Config)
 	networkingClient, err := config.NetworkingV2Client(config.GetRegion(d))
 	if err != nil {
-		return fmt.Errorf("Error creating OpenTelekomCloud networking client: %s", err)
+		return fmterr.Errorf("error creating OpenTelekomCloud networking client: %s", err)
 	}
 
 	var firewall_group FirewallGroup
 	err = firewall_groups.Get(networkingClient, d.Id()).ExtractInto(&firewall_group)
 	if err != nil {
-		return common.CheckDeleted(d, err, "firewall")
+		return diag.FromErr(common.CheckDeleted(d, err, "firewall"))
 	}
 
 	log.Printf("[DEBUG] Read OpenTelekomCloud Firewall group %s: %#v", d.Id(), firewall_group)
@@ -169,19 +172,18 @@ func resourceFWFirewallGroupV2Read(d *schema.ResourceData, meta interface{}) err
 	d.Set("admin_state_up", firewall_group.AdminStateUp)
 	d.Set("tenant_id", firewall_group.TenantID)
 	if err := d.Set("ports", firewall_group.PortIDs); err != nil {
-		return fmt.Errorf("[DEBUG] Error saving ports to state for OpenTelekomCloud firewall group (%s): %s", d.Id(), err)
+		return fmterr.Errorf("[DEBUG] Error saving ports to state for OpenTelekomCloud firewall group (%s): %s", d.Id(), err)
 	}
 	d.Set("region", config.GetRegion(d))
 
 	return nil
 }
 
-func resourceFWFirewallGroupV2Update(d *schema.ResourceData, meta interface{}) error {
-
+func resourceFWFirewallGroupV2Update(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*cfg.Config)
 	networkingClient, err := config.NetworkingV2Client(config.GetRegion(d))
 	if err != nil {
-		return fmt.Errorf("Error creating OpenTelekomCloud networking client: %s", err)
+		return fmterr.Errorf("error creating OpenTelekomCloud networking client: %s", err)
 	}
 
 	// PolicyID is required
@@ -224,7 +226,7 @@ func resourceFWFirewallGroupV2Update(d *schema.ResourceData, meta interface{}) e
 
 	err = firewall_groups.Update(networkingClient, d.Id(), updateOpts).Err
 	if err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 
 	stateConf := &resource.StateChangeConf{
@@ -236,18 +238,18 @@ func resourceFWFirewallGroupV2Update(d *schema.ResourceData, meta interface{}) e
 		MinTimeout: 2 * time.Second,
 	}
 
-	_, err = stateConf.WaitForState()
+	_, err = stateConf.WaitForStateContext(ctx)
 
-	return resourceFWFirewallGroupV2Read(d, meta)
+	return resourceFWFirewallGroupV2Read(ctx, d, meta)
 }
 
-func resourceFWFirewallGroupV2Delete(d *schema.ResourceData, meta interface{}) error {
+func resourceFWFirewallGroupV2Delete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	log.Printf("[DEBUG] Destroy firewall group: %s", d.Id())
 
 	config := meta.(*cfg.Config)
 	networkingClient, err := config.NetworkingV2Client(config.GetRegion(d))
 	if err != nil {
-		return fmt.Errorf("Error creating OpenTelekomCloud networking client: %s", err)
+		return fmterr.Errorf("error creating OpenTelekomCloud networking client: %s", err)
 	}
 
 	// Ensure the firewall group was fully created/updated before being deleted.
@@ -260,12 +262,12 @@ func resourceFWFirewallGroupV2Delete(d *schema.ResourceData, meta interface{}) e
 		MinTimeout: 2 * time.Second,
 	}
 
-	_, err = stateConf.WaitForState()
+	_, err = stateConf.WaitForStateContext(ctx)
 
 	err = firewall_groups.Delete(networkingClient, d.Id()).Err
 
 	if err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 
 	stateConf = &resource.StateChangeConf{
@@ -277,9 +279,9 @@ func resourceFWFirewallGroupV2Delete(d *schema.ResourceData, meta interface{}) e
 		MinTimeout: 2 * time.Second,
 	}
 
-	_, err = stateConf.WaitForState()
+	_, err = stateConf.WaitForStateContext(ctx)
 
-	return err
+	return diag.FromErr(err)
 }
 
 func waitForFirewallGroupActive(networkingClient *golangsdk.ServiceClient, id string) resource.StateRefreshFunc {
@@ -296,7 +298,6 @@ func waitForFirewallGroupActive(networkingClient *golangsdk.ServiceClient, id st
 }
 
 func waitForFirewallGroupDeletion(networkingClient *golangsdk.ServiceClient, id string) resource.StateRefreshFunc {
-
 	return func() (interface{}, string, error) {
 		fw, err := firewall_groups.Get(networkingClient, id).Extract()
 		log.Printf("[DEBUG] Got firewall group %s => %#v", id, fw)

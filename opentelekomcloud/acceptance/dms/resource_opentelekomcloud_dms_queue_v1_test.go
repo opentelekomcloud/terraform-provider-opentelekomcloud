@@ -4,11 +4,11 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
-	"github.com/hashicorp/terraform-plugin-sdk/terraform"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/dms/v1/queues"
 
-	"github.com/hashicorp/terraform-plugin-sdk/helper/acctest"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/acctest"
 
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/acceptance/common"
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/acceptance/env"
@@ -20,9 +20,9 @@ func TestAccDmsQueuesV1_basic(t *testing.T) {
 	var queueName = fmt.Sprintf("dms_queue_%s", acctest.RandString(5))
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:     func() { common.TestAccPreCheck(t) },
-		Providers:    common.TestAccProviders,
-		CheckDestroy: testAccCheckDmsV1QueueDestroy,
+		PreCheck:          func() { common.TestAccPreCheck(t) },
+		ProviderFactories: common.TestAccProviderFactories,
+		CheckDestroy:      testAccCheckDmsV1QueueDestroy,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccDmsV1Queue_basic(queueName),
@@ -43,9 +43,9 @@ func TestAccDmsQueuesV1_FIFOmode(t *testing.T) {
 	var queueName = fmt.Sprintf("dms_queue_%s", acctest.RandString(5))
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:     func() { common.TestAccPreCheck(t) },
-		Providers:    common.TestAccProviders,
-		CheckDestroy: testAccCheckDmsV1QueueDestroy,
+		PreCheck:          func() { common.TestAccPreCheck(t) },
+		ProviderFactories: common.TestAccProviderFactories,
+		CheckDestroy:      testAccCheckDmsV1QueueDestroy,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccDmsV1Queue_FIFOmode(queueName),
@@ -71,7 +71,7 @@ func testAccCheckDmsV1QueueDestroy(s *terraform.State) error {
 	config := common.TestAccProvider.Meta().(*cfg.Config)
 	dmsClient, err := config.DmsV1Client(env.OS_REGION_NAME)
 	if err != nil {
-		return fmt.Errorf("Error creating OpenTelekomCloud queue client: %s", err)
+		return fmt.Errorf("error creating OpenTelekomCloud queue client: %s", err)
 	}
 
 	for _, rs := range s.RootModule().Resources {
@@ -101,12 +101,12 @@ func testAccCheckDmsV1QueueExists(n string, queue queues.Queue) resource.TestChe
 		config := common.TestAccProvider.Meta().(*cfg.Config)
 		dmsClient, err := config.DmsV1Client(env.OS_REGION_NAME)
 		if err != nil {
-			return fmt.Errorf("Error creating OpenTelekomCloud queue client: %s", err)
+			return fmt.Errorf("error creating OpenTelekomCloud queue client: %s", err)
 		}
 
 		v, err := queues.Get(dmsClient, rs.Primary.ID, false).Extract()
 		if err != nil {
-			return fmt.Errorf("Error getting OpenTelekomCloud queue: %s, err: %s", rs.Primary.ID, err)
+			return fmt.Errorf("error getting OpenTelekomCloud queue: %s, err: %s", rs.Primary.ID, err)
 		}
 		if v.ID != rs.Primary.ID {
 			return fmt.Errorf("The Dms queue not found.")

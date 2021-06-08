@@ -5,9 +5,9 @@ import (
 	"testing"
 	"time"
 
-	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
-	"github.com/hashicorp/terraform-plugin-sdk/terraform"
-	"github.com/opentelekomcloud/gophertelekomcloud"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
+	golangsdk "github.com/opentelekomcloud/gophertelekomcloud"
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/mrs/v1/cluster"
 
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/acceptance/common"
@@ -19,9 +19,9 @@ func TestAccMRSV1Cluster_basic(t *testing.T) {
 	var clusterGet cluster.Cluster
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheckMrs(t) },
-		Providers:    common.TestAccProviders,
-		CheckDestroy: testAccCheckMRSV1ClusterDestroy,
+		PreCheck:          func() { testAccPreCheckMrs(t) },
+		ProviderFactories: common.TestAccProviderFactories,
+		CheckDestroy:      testAccCheckMRSV1ClusterDestroy,
 		Steps: []resource.TestStep{
 			{
 				Config: TestAccMRSV1ClusterConfig_basic,
@@ -39,7 +39,7 @@ func testAccCheckMRSV1ClusterDestroy(s *terraform.State) error {
 	config := common.TestAccProvider.Meta().(*cfg.Config)
 	mrsClient, err := config.MrsV1Client(env.OS_REGION_NAME)
 	if err != nil {
-		return fmt.Errorf("Error creating opentelekomcloud mrs: %s", err)
+		return fmt.Errorf("error creating opentelekomcloud mrs: %s", err)
 	}
 
 	for _, rs := range s.RootModule().Resources {
@@ -76,7 +76,7 @@ func testAccCheckMRSV1ClusterExists(n string, clusterGet *cluster.Cluster) resou
 		config := common.TestAccProvider.Meta().(*cfg.Config)
 		mrsClient, err := config.MrsV1Client(env.OS_REGION_NAME)
 		if err != nil {
-			return fmt.Errorf("Error creating opentelekomcloud mrs client: %s ", err)
+			return fmt.Errorf("error creating opentelekomcloud mrs client: %s ", err)
 		}
 
 		found, err := cluster.Get(mrsClient, rs.Primary.ID).Extract()

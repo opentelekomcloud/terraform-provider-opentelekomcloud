@@ -1,19 +1,21 @@
 package cce
 
 import (
-	"fmt"
+	"context"
 	"log"
 
 	"github.com/hashicorp/go-multierror"
-	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/cce/v3/clusters"
 
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common/cfg"
+	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common/fmterr"
 )
 
 func DataSourceCCEClusterV3() *schema.Resource {
 	return &schema.Resource{
-		Read: dataSourceCCEClusterV3Read,
+		ReadContext: dataSourceCCEClusterV3Read,
 
 		Schema: map[string]*schema.Schema{
 			"region": {
@@ -130,12 +132,12 @@ func DataSourceCCEClusterV3() *schema.Resource {
 	}
 }
 
-func dataSourceCCEClusterV3Read(d *schema.ResourceData, meta interface{}) error {
+func dataSourceCCEClusterV3Read(_ context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*cfg.Config)
 	cceClient, err := config.CceV3Client(config.GetRegion(d))
 
 	if err != nil {
-		return fmt.Errorf("unable to create opentelekomcloud CCE client : %s", err)
+		return fmterr.Errorf("unable to create opentelekomcloud CCE client : %s", err)
 	}
 
 	listOpts := clusters.ListOpts{
@@ -149,16 +151,16 @@ func dataSourceCCEClusterV3Read(d *schema.ResourceData, meta interface{}) error 
 	refinedClusters, err := clusters.List(cceClient, listOpts)
 	log.Printf("[DEBUG] Value of allClusters: %#v", refinedClusters)
 	if err != nil {
-		return fmt.Errorf("unable to retrieve clusters: %s", err)
+		return fmterr.Errorf("unable to retrieve clusters: %s", err)
 	}
 
 	if len(refinedClusters) < 1 {
-		return fmt.Errorf("your query returned no results." +
+		return fmterr.Errorf("your query returned no results." +
 			" Please change your search criteria and try again")
 	}
 
 	if len(refinedClusters) > 1 {
-		return fmt.Errorf("your query returned more than one result." +
+		return fmterr.Errorf("your query returned more than one result." +
 			" Please try a more specific search criteria")
 	}
 
@@ -188,12 +190,12 @@ func dataSourceCCEClusterV3Read(d *schema.ResourceData, meta interface{}) error 
 		d.Set("region", config.GetRegion(d)),
 	)
 	if err := mErr.ErrorOrNil(); err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 
 	cert, err := clusters.GetCert(cceClient, d.Id()).Extract()
 	if err != nil {
-		return fmt.Errorf("error retrieving opentelekomcloud CCE cluster cert: %s", err)
+		return fmterr.Errorf("error retrieving opentelekomcloud CCE cluster cert: %s", err)
 	}
 
 	// Set Certificate Clusters
@@ -207,7 +209,7 @@ func dataSourceCCEClusterV3Read(d *schema.ResourceData, meta interface{}) error 
 		clusterList = append(clusterList, clusterCert)
 	}
 	if err := d.Set("certificate_clusters", clusterList); err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 
 	// Set Certificate Users
@@ -221,7 +223,7 @@ func dataSourceCCEClusterV3Read(d *schema.ResourceData, meta interface{}) error 
 		userList = append(userList, userCert)
 	}
 	if err := d.Set("certificate_users", userList); err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 
 	return nil

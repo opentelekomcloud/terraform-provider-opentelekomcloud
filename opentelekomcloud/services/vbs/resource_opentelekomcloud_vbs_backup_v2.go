@@ -1,29 +1,31 @@
 package vbs
 
 import (
-	"fmt"
+	"context"
 	"log"
 	"regexp"
 	"time"
 
 	"github.com/hashicorp/go-multierror"
-	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
-	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
-	"github.com/hashicorp/terraform-plugin-sdk/helper/validation"
-	"github.com/opentelekomcloud/gophertelekomcloud"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
+	golangsdk "github.com/opentelekomcloud/gophertelekomcloud"
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/vbs/v2/backups"
 
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common"
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common/cfg"
+	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common/fmterr"
 )
 
 func ResourceVBSBackupV2() *schema.Resource {
 	return &schema.Resource{
-		Create: resourceVBSBackupV2Create,
-		Read:   resourceVBSBackupV2Read,
-		Delete: resourceVBSBackupV2Delete,
+		CreateContext: resourceVBSBackupV2Create,
+		ReadContext:   resourceVBSBackupV2Read,
+		DeleteContext: resourceVBSBackupV2Delete,
 		Importer: &schema.ResourceImporter{
-			State: schema.ImportStatePassthrough,
+			StateContext: schema.ImportStatePassthroughContext,
 		},
 
 		Timeouts: &schema.ResourceTimeout{
@@ -125,12 +127,12 @@ func resourceVBSBackupTagsV2(d *schema.ResourceData) []backups.Tag {
 	return tags
 }
 
-func resourceVBSBackupV2Create(d *schema.ResourceData, meta interface{}) error {
+func resourceVBSBackupV2Create(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*cfg.Config)
 	vbsClient, err := config.VbsV2Client(config.GetRegion(d))
 
 	if err != nil {
-		return fmt.Errorf("Error creating OpenTelekomCloud vbs client: %s", err)
+		return fmterr.Errorf("error creating OpenTelekomCloud vbs client: %s", err)
 	}
 
 	createOpts := backups.CreateOpts{
@@ -144,31 +146,31 @@ func resourceVBSBackupV2Create(d *schema.ResourceData, meta interface{}) error {
 	n, err := backups.Create(vbsClient, createOpts).ExtractJobResponse()
 
 	if err != nil {
-		return fmt.Errorf("Error creating OpenTelekomCloud VBS Backup: %s", err)
+		return fmterr.Errorf("error creating OpenTelekomCloud VBS Backup: %s", err)
 	}
 
 	if err := backups.WaitForJobSuccess(vbsClient, int(d.Timeout(schema.TimeoutCreate)/time.Second), n.JobID); err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 
 	entity, err := backups.GetJobEntity(vbsClient, n.JobID, "backup_id")
 	if err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 
 	if id, ok := entity.(string); ok {
 		d.SetId(id)
-		return resourceVBSBackupV2Read(d, meta)
+		return resourceVBSBackupV2Read(ctx, d, meta)
 	}
 
-	return fmt.Errorf("Unexpected conversion error in resourceVBSBackupV2Create.")
+	return fmterr.Errorf("Unexpected conversion error in resourceVBSBackupV2Create.")
 }
 
-func resourceVBSBackupV2Read(d *schema.ResourceData, meta interface{}) error {
+func resourceVBSBackupV2Read(_ context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*cfg.Config)
 	vbsClient, err := config.VbsV2Client(config.GetRegion(d))
 	if err != nil {
-		return fmt.Errorf("Error creating Vbs client: %s", err)
+		return fmterr.Errorf("error creating Vbs client: %s", err)
 	}
 
 	n, err := backups.Get(vbsClient, d.Id()).Extract()
@@ -178,7 +180,7 @@ func resourceVBSBackupV2Read(d *schema.ResourceData, meta interface{}) error {
 			return nil
 		}
 
-		return fmt.Errorf("Error retrieving VBS Backup: %s", err)
+		return fmterr.Errorf("error retrieving VBS Backup: %s", err)
 	}
 
 	mErr := multierror.Append(
@@ -194,18 +196,18 @@ func resourceVBSBackupV2Read(d *schema.ResourceData, meta interface{}) error {
 		d.Set("region", config.GetRegion(d)),
 	)
 	if err := mErr.ErrorOrNil(); err != nil {
-		return err
+		return diag.FromErr(mErr)
 	}
 
 	return nil
 }
 
-func resourceVBSBackupV2Delete(d *schema.ResourceData, meta interface{}) error {
+func resourceVBSBackupV2Delete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 
 	config := meta.(*cfg.Config)
 	vbsClient, err := config.VbsV2Client(config.GetRegion(d))
 	if err != nil {
-		return fmt.Errorf("Error creating  vbs: %s", err)
+		return fmterr.Errorf("error creating  vbs: %s", err)
 	}
 
 	stateConf := &resource.StateChangeConf{
@@ -217,9 +219,9 @@ func resourceVBSBackupV2Delete(d *schema.ResourceData, meta interface{}) error {
 		MinTimeout: 3 * time.Second,
 	}
 
-	_, err = stateConf.WaitForState()
+	_, err = stateConf.WaitForStateContext(ctx)
 	if err != nil {
-		return fmt.Errorf("Error deleting VBS Backup: %s", err)
+		return fmterr.Errorf("error deleting VBS Backup: %s", err)
 	}
 
 	d.SetId("")

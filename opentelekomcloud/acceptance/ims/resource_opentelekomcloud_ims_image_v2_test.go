@@ -7,8 +7,8 @@ import (
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/ims/v2/cloudimages"
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/ims/v2/tags"
 
-	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
-	"github.com/hashicorp/terraform-plugin-sdk/terraform"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/acceptance/common"
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/acceptance/env"
@@ -20,9 +20,9 @@ func TestAccImsImageV2_basic(t *testing.T) {
 	var image cloudimages.Image
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:     func() { common.TestAccPreCheck(t) },
-		Providers:    common.TestAccProviders,
-		CheckDestroy: testAccCheckImsImageV2Destroy,
+		PreCheck:          func() { common.TestAccPreCheck(t) },
+		ProviderFactories: common.TestAccProviderFactories,
+		CheckDestroy:      testAccCheckImsImageV2Destroy,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccImsImageV2_basic,
@@ -53,7 +53,7 @@ func testAccCheckImsImageV2Destroy(s *terraform.State) error {
 	config := common.TestAccProvider.Meta().(*cfg.Config)
 	imageClient, err := config.ImageV2Client(env.OS_REGION_NAME)
 	if err != nil {
-		return fmt.Errorf("Error creating OpenTelekomCloud Image: %s", err)
+		return fmt.Errorf("error creating OpenTelekomCloud Image: %s", err)
 	}
 
 	for _, rs := range s.RootModule().Resources {
@@ -84,7 +84,7 @@ func testAccCheckImsImageV2Exists(n string, image *cloudimages.Image) resource.T
 		config := common.TestAccProvider.Meta().(*cfg.Config)
 		imageClient, err := config.ImageV2Client(env.OS_REGION_NAME)
 		if err != nil {
-			return fmt.Errorf("Error creating OpenTelekomCloud Image: %s", err)
+			return fmt.Errorf("error creating OpenTelekomCloud Image: %s", err)
 		}
 
 		found, err := ims.GetCloudImage(imageClient, rs.Primary.ID)
@@ -111,7 +111,7 @@ func testAccCheckImsImageV2Tags(n string, k string, v string) resource.TestCheck
 		config := common.TestAccProvider.Meta().(*cfg.Config)
 		imageClient, err := config.ImageV2Client(env.OS_REGION_NAME)
 		if err != nil {
-			return fmt.Errorf("Error creating OpenTelekomCloud image client: %s", err)
+			return fmt.Errorf("error creating OpenTelekomCloud image client: %s", err)
 		}
 
 		found, err := tags.Get(imageClient, rs.Primary.ID).Extract()

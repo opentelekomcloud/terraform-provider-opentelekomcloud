@@ -1,18 +1,20 @@
 package sdrs
 
 import (
-	"fmt"
+	"context"
 	"log"
 
-	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/sdrs/v1/domains"
 
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common/cfg"
+	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common/fmterr"
 )
 
 func DataSourceSdrsDomainV1() *schema.Resource {
 	return &schema.Resource{
-		Read: dataSourceSdrsDomainV1Read,
+		ReadContext: dataSourceSdrsDomainV1Read,
 
 		Schema: map[string]*schema.Schema{
 			"name": {
@@ -28,16 +30,16 @@ func DataSourceSdrsDomainV1() *schema.Resource {
 	}
 }
 
-func dataSourceSdrsDomainV1Read(d *schema.ResourceData, meta interface{}) error {
+func dataSourceSdrsDomainV1Read(_ context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*cfg.Config)
 	sdrsV1Client, err := config.SdrsV1Client(config.GetRegion(d))
 	if err != nil {
-		return fmt.Errorf("Error creating SDRS client: %s", err)
+		return fmterr.Errorf("error creating SDRS client: %s", err)
 	}
 
 	v, err := domains.Get(sdrsV1Client).Extract()
 	if err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 
 	adomains := v.Domains
@@ -50,7 +52,7 @@ func dataSourceSdrsDomainV1Read(d *schema.ResourceData, meta interface{}) error 
 		filteredDomains = append(filteredDomains, dm)
 	}
 	if len(filteredDomains) < 1 {
-		return fmt.Errorf("Your query returned no results. Please change your filters and try again.")
+		return fmterr.Errorf("Your query returned no results. Please change your filters and try again.")
 	}
 	dm := filteredDomains[0]
 	d.SetId(dm.Id)

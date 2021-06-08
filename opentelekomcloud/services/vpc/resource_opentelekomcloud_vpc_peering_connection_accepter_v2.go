@@ -1,27 +1,28 @@
 package vpc
 
 import (
-	"fmt"
+	"context"
 	"log"
 	"time"
 
-	"github.com/hashicorp/errwrap"
-	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
-	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
-	"github.com/opentelekomcloud/gophertelekomcloud"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	golangsdk "github.com/opentelekomcloud/gophertelekomcloud"
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/networking/v2/peerings"
 
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common/cfg"
+	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common/fmterr"
 )
 
 func ResourceVpcPeeringConnectionAccepterV2() *schema.Resource {
 	return &schema.Resource{
-		Create: resourceVPCPeeringAccepterV2Create,
-		Read:   resourceVpcPeeringAccepterRead,
-		Update: resourceVPCPeeringAccepterUpdate,
-		Delete: resourceVPCPeeringAccepterDelete,
+		CreateContext: resourceVPCPeeringAccepterV2Create,
+		ReadContext:   resourceVpcPeeringAccepterRead,
+		UpdateContext: resourceVPCPeeringAccepterUpdate,
+		DeleteContext: resourceVPCPeeringAccepterDelete,
 		Importer: &schema.ResourceImporter{
-			State: schema.ImportStatePassthrough,
+			StateContext: schema.ImportStatePassthroughContext,
 		},
 		Timeouts: &schema.ResourceTimeout{
 			Create: schema.DefaultTimeout(10 * time.Minute),
@@ -68,23 +69,23 @@ func ResourceVpcPeeringConnectionAccepterV2() *schema.Resource {
 	}
 }
 
-func resourceVPCPeeringAccepterV2Create(d *schema.ResourceData, meta interface{}) error {
+func resourceVPCPeeringAccepterV2Create(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*cfg.Config)
 	peeringClient, err := config.NetworkingV2Client(config.GetRegion(d))
 
 	if err != nil {
-		return fmt.Errorf("Error creating OpenTelekomCloud Peering client: %s", err)
+		return fmterr.Errorf("error creating OpenTelekomCloud Peering client: %s", err)
 	}
 
 	id := d.Get("vpc_peering_connection_id").(string)
 
 	n, err := peerings.Get(peeringClient, id).Extract()
 	if err != nil {
-		return fmt.Errorf("Error retrieving OpenTelekomCloud Vpc Peering Connection: %s", err)
+		return fmterr.Errorf("error retrieving OpenTelekomCloud Vpc Peering Connection: %s", err)
 	}
 
 	if n.Status != "PENDING_ACCEPTANCE" {
-		return fmt.Errorf("VPC peering action not permitted: Can not accept/reject peering request not in PENDING_ACCEPTANCE state.")
+		return fmterr.Errorf("VPC peering action not permitted: Can not accept/reject peering request not in PENDING_ACCEPTANCE state.")
 	}
 
 	var expectedStatus string
@@ -95,7 +96,7 @@ func resourceVPCPeeringAccepterV2Create(d *schema.ResourceData, meta interface{}
 		_, err := peerings.Accept(peeringClient, id).ExtractResult()
 
 		if err != nil {
-			return errwrap.Wrapf("Unable to accept VPC Peering Connection: {{err}}", err)
+			return fmterr.Errorf("Unable to accept VPC Peering Connection: %w", err)
 		}
 
 	} else {
@@ -104,7 +105,7 @@ func resourceVPCPeeringAccepterV2Create(d *schema.ResourceData, meta interface{}
 		_, err := peerings.Reject(peeringClient, id).ExtractResult()
 
 		if err != nil {
-			return errwrap.Wrapf("Unable to reject VPC Peering Connection: {{err}}", err)
+			return fmterr.Errorf("Unable to reject VPC Peering Connection: %w", err)
 		}
 	}
 
@@ -117,19 +118,19 @@ func resourceVPCPeeringAccepterV2Create(d *schema.ResourceData, meta interface{}
 		MinTimeout: 3 * time.Second,
 	}
 
-	_, err = stateConf.WaitForState()
+	_, err = stateConf.WaitForStateContext(ctx)
 	d.SetId(n.ID)
 	log.Printf("[INFO] VPC Peering Connection status: %s", expectedStatus)
 
-	return resourceVpcPeeringAccepterRead(d, meta)
+	return resourceVpcPeeringAccepterRead(ctx, d, meta)
 
 }
 
-func resourceVpcPeeringAccepterRead(d *schema.ResourceData, meta interface{}) error {
+func resourceVpcPeeringAccepterRead(_ context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*cfg.Config)
 	peeringclient, err := config.NetworkingV2Client(config.GetRegion(d))
 	if err != nil {
-		return fmt.Errorf("Error creating OpenTelekomCloud peering client: %s", err)
+		return fmterr.Errorf("error creating OpenTelekomCloud peering client: %s", err)
 	}
 
 	n, err := peerings.Get(peeringclient, d.Id()).Extract()
@@ -139,7 +140,7 @@ func resourceVpcPeeringAccepterRead(d *schema.ResourceData, meta interface{}) er
 			return nil
 		}
 
-		return fmt.Errorf("Error retrieving OpenTelekomCloud Vpc Peering Connection: %s", err)
+		return fmterr.Errorf("error retrieving OpenTelekomCloud Vpc Peering Connection: %s", err)
 	}
 
 	d.Set("id", n.ID)
@@ -153,16 +154,16 @@ func resourceVpcPeeringAccepterRead(d *schema.ResourceData, meta interface{}) er
 	return nil
 }
 
-func resourceVPCPeeringAccepterUpdate(d *schema.ResourceData, meta interface{}) error {
+func resourceVPCPeeringAccepterUpdate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 
 	if d.HasChange("accept") {
-		return fmt.Errorf("VPC peering action not permitted: Can not accept/reject peering request not in pending_acceptance state.'")
+		return fmterr.Errorf("VPC peering action not permitted: Can not accept/reject peering request not in pending_acceptance state.'")
 	}
 
-	return resourceVpcPeeringAccepterRead(d, meta)
+	return resourceVpcPeeringAccepterRead(ctx, d, meta)
 }
 
-func resourceVPCPeeringAccepterDelete(d *schema.ResourceData, meta interface{}) error {
+func resourceVPCPeeringAccepterDelete(_ context.Context, d *schema.ResourceData, _ interface{}) diag.Diagnostics {
 	log.Printf("[WARN] Will not delete VPC peering connection. Terraform will remove this resource from the state file, however resources may remain.")
 	d.SetId("")
 	return nil

@@ -4,8 +4,8 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
-	"github.com/hashicorp/terraform-plugin-sdk/terraform"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/sfs/v2/shares"
 
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/acceptance/common"
@@ -18,9 +18,9 @@ func TestAccSFSFileSystemV2_basic(t *testing.T) {
 	resourceName := "opentelekomcloud_sfs_file_system_v2.sfs_1"
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:     func() { common.TestAccPreCheck(t) },
-		Providers:    common.TestAccProviders,
-		CheckDestroy: testAccCheckSFSFileSystemV2Destroy,
+		PreCheck:          func() { common.TestAccPreCheck(t) },
+		ProviderFactories: common.TestAccProviderFactories,
+		CheckDestroy:      testAccCheckSFSFileSystemV2Destroy,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccSFSFileSystemV2_basic,
@@ -59,9 +59,9 @@ func TestAccSFSFileSystemV2_timeout(t *testing.T) {
 	resourceName := "opentelekomcloud_sfs_file_system_v2.sfs_1"
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:     func() { common.TestAccPreCheck(t) },
-		Providers:    common.TestAccProviders,
-		CheckDestroy: testAccCheckSFSFileSystemV2Destroy,
+		PreCheck:          func() { common.TestAccPreCheck(t) },
+		ProviderFactories: common.TestAccProviderFactories,
+		CheckDestroy:      testAccCheckSFSFileSystemV2Destroy,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccSFSFileSystemV2_timeout,
@@ -78,9 +78,9 @@ func TestAccSFSFileSystemV2_clean(t *testing.T) {
 	resourceName := "opentelekomcloud_sfs_file_system_v2.sfs_1"
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:     func() { common.TestAccPreCheck(t) },
-		Providers:    common.TestAccProviders,
-		CheckDestroy: testAccCheckSFSFileSystemV2Destroy,
+		PreCheck:          func() { common.TestAccPreCheck(t) },
+		ProviderFactories: common.TestAccProviderFactories,
+		CheckDestroy:      testAccCheckSFSFileSystemV2Destroy,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccSFSFileSystemV2_clean,

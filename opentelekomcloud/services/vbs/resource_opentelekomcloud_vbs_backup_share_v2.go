@@ -1,24 +1,26 @@
 package vbs
 
 import (
-	"fmt"
+	"context"
 	"log"
 	"time"
 
-	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
-	"github.com/opentelekomcloud/gophertelekomcloud"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	golangsdk "github.com/opentelekomcloud/gophertelekomcloud"
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/vbs/v2/shares"
 
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common/cfg"
+	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common/fmterr"
 )
 
 func ResourceVBSBackupShareV2() *schema.Resource {
 	return &schema.Resource{
-		Create: resourceVBSBackupShareV2Create,
-		Read:   resourceVBSBackupShareV2Read,
-		Delete: resourceVBSBackupShareV2Delete,
+		CreateContext: resourceVBSBackupShareV2Create,
+		ReadContext:   resourceVBSBackupShareV2Read,
+		DeleteContext: resourceVBSBackupShareV2Delete,
 		Importer: &schema.ResourceImporter{
-			State: schema.ImportStatePassthrough,
+			StateContext: schema.ImportStatePassthroughContext,
 		},
 
 		Timeouts: &schema.ResourceTimeout{
@@ -100,12 +102,12 @@ func resourceBackupShareToProjectIdsV2(d *schema.ResourceData) []string {
 	return projectids
 }
 
-func resourceVBSBackupShareV2Create(d *schema.ResourceData, meta interface{}) error {
+func resourceVBSBackupShareV2Create(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*cfg.Config)
 	vbsClient, err := config.VbsV2Client(config.GetRegion(d))
 
 	if err != nil {
-		return fmt.Errorf("Error creating OpenTelekomCloud vbs client: %s", err)
+		return fmterr.Errorf("error creating OpenTelekomCloud vbs client: %s", err)
 	}
 
 	createOpts := shares.CreateOpts{
@@ -116,7 +118,7 @@ func resourceVBSBackupShareV2Create(d *schema.ResourceData, meta interface{}) er
 	n, err := shares.Create(vbsClient, createOpts).Extract()
 
 	if err != nil {
-		return fmt.Errorf("Error creating OpenTelekomCloud VBS Backup Share: %s", err)
+		return fmterr.Errorf("error creating OpenTelekomCloud VBS Backup Share: %s", err)
 	}
 
 	share := n[0]
@@ -124,14 +126,14 @@ func resourceVBSBackupShareV2Create(d *schema.ResourceData, meta interface{}) er
 
 	log.Printf("[INFO] VBS Backup Share ID: %s", d.Id())
 
-	return resourceVBSBackupShareV2Read(d, meta)
+	return resourceVBSBackupShareV2Read(ctx, d, meta)
 }
 
-func resourceVBSBackupShareV2Read(d *schema.ResourceData, meta interface{}) error {
+func resourceVBSBackupShareV2Read(_ context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*cfg.Config)
 	vbsClient, err := config.VbsV2Client(config.GetRegion(d))
 	if err != nil {
-		return fmt.Errorf("Error creating OpenTelekomCloud Vbs client: %s", err)
+		return fmterr.Errorf("error creating OpenTelekomCloud Vbs client: %s", err)
 	}
 
 	backups, err := shares.List(vbsClient, shares.ListOpts{BackupID: d.Id()})
@@ -141,7 +143,7 @@ func resourceVBSBackupShareV2Read(d *schema.ResourceData, meta interface{}) erro
 			return nil
 		}
 
-		return fmt.Errorf("Error retrieving OpenTelekomCloud Vbs: %s", err)
+		return fmterr.Errorf("error retrieving OpenTelekomCloud Vbs: %s", err)
 	}
 
 	n := backups[0]
@@ -163,11 +165,11 @@ func resourceVBSBackupShareV2Read(d *schema.ResourceData, meta interface{}) erro
 	return nil
 }
 
-func resourceVBSBackupShareV2Delete(d *schema.ResourceData, meta interface{}) error {
+func resourceVBSBackupShareV2Delete(_ context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*cfg.Config)
 	vbsClient, err := config.VbsV2Client(config.GetRegion(d))
 	if err != nil {
-		return fmt.Errorf("Error creating OpenTelekomCloud Vbs client: %s", err)
+		return fmterr.Errorf("error creating OpenTelekomCloud Vbs client: %s", err)
 	}
 
 	deleteopts := shares.DeleteOpts{IsBackupID: true}

@@ -1,28 +1,31 @@
 package vpn
 
 import (
+	"context"
 	"fmt"
 	"log"
 	"time"
 
-	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
-	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
-	"github.com/opentelekomcloud/gophertelekomcloud"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	golangsdk "github.com/opentelekomcloud/gophertelekomcloud"
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/common/tags"
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/networking/v2/extensions/vpnaas/siteconnections"
 
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common"
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common/cfg"
+	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common/fmterr"
 )
 
 func ResourceVpnSiteConnectionV2() *schema.Resource {
 	return &schema.Resource{
-		Create: resourceVpnSiteConnectionV2Create,
-		Read:   resourceVpnSiteConnectionV2Read,
-		Update: resourceVpnSiteConnectionV2Update,
-		Delete: resourceVpnSiteConnectionV2Delete,
+		CreateContext: resourceVpnSiteConnectionV2Create,
+		ReadContext:   resourceVpnSiteConnectionV2Read,
+		UpdateContext: resourceVpnSiteConnectionV2Update,
+		DeleteContext: resourceVpnSiteConnectionV2Delete,
 		Importer: &schema.ResourceImporter{
-			State: schema.ImportStatePassthrough,
+			StateContext: schema.ImportStatePassthroughContext,
 		},
 
 		Timeouts: &schema.ResourceTimeout{
@@ -145,12 +148,12 @@ func ResourceVpnSiteConnectionV2() *schema.Resource {
 	}
 }
 
-func resourceVpnSiteConnectionV2Create(d *schema.ResourceData, meta interface{}) error {
+func resourceVpnSiteConnectionV2Create(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 
 	config := meta.(*cfg.Config)
 	networkingClient, err := config.NetworkingV2Client(config.GetRegion(d))
 	if err != nil {
-		return fmt.Errorf("Error creating OpenTelekomCloud networking client: %s", err)
+		return fmterr.Errorf("error creating OpenTelekomCloud networking client: %s", err)
 	}
 
 	var createOpts siteconnections.CreateOptsBuilder
@@ -193,7 +196,7 @@ func resourceVpnSiteConnectionV2Create(d *schema.ResourceData, meta interface{})
 
 	conn, err := siteconnections.Create(networkingClient, createOpts).Extract()
 	if err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 
 	stateConf := &resource.StateChangeConf{
@@ -204,10 +207,10 @@ func resourceVpnSiteConnectionV2Create(d *schema.ResourceData, meta interface{})
 		Delay:      0,
 		MinTimeout: 2 * time.Second,
 	}
-	_, err = stateConf.WaitForState()
+	_, err = stateConf.WaitForStateContext(ctx)
 
 	if err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 
 	log.Printf("[DEBUG] SiteConnection created: %#v", conn)
@@ -219,25 +222,25 @@ func resourceVpnSiteConnectionV2Create(d *schema.ResourceData, meta interface{})
 	if len(tagRaw) > 0 {
 		taglist := common.ExpandResourceTags(tagRaw)
 		if tagErr := tags.Create(networkingClient, "ipsec-site-connections", d.Id(), taglist).ExtractErr(); tagErr != nil {
-			return fmt.Errorf("Error setting tags of VPN site connection %s: %s", d.Id(), tagErr)
+			return fmterr.Errorf("error setting tags of VPN site connection %s: %s", d.Id(), tagErr)
 		}
 	}
 
-	return resourceVpnSiteConnectionV2Read(d, meta)
+	return resourceVpnSiteConnectionV2Read(ctx, d, meta)
 }
 
-func resourceVpnSiteConnectionV2Read(d *schema.ResourceData, meta interface{}) error {
+func resourceVpnSiteConnectionV2Read(_ context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	log.Printf("[DEBUG] Retrieve information about site connection: %s", d.Id())
 
 	config := meta.(*cfg.Config)
 	networkingClient, err := config.NetworkingV2Client(config.GetRegion(d))
 	if err != nil {
-		return fmt.Errorf("Error creating OpenTelekomCloud networking client: %s", err)
+		return fmterr.Errorf("error creating OpenTelekomCloud networking client: %s", err)
 	}
 
 	conn, err := siteconnections.Get(networkingClient, d.Id()).Extract()
 	if err != nil {
-		return common.CheckDeleted(d, err, "site_connection")
+		return diag.FromErr(common.CheckDeleted(d, err, "site_connection"))
 	}
 
 	log.Printf("[DEBUG] Read OpenTelekomCloud SiteConnection %s: %#v", d.Id(), conn)
@@ -276,23 +279,22 @@ func resourceVpnSiteConnectionV2Read(d *schema.ResourceData, meta interface{}) e
 	// Set tags
 	resourceTags, err := tags.Get(networkingClient, "ipsec-site-connections", d.Id()).Extract()
 	if err != nil {
-		return fmt.Errorf("Error fetching VPN site connection tags: %s", err)
+		return fmterr.Errorf("error fetching VPN site connection tags: %s", err)
 	}
 
 	tagmap := common.TagsToMap(resourceTags)
 	if err := d.Set("tags", tagmap); err != nil {
-		return fmt.Errorf("Error saving tags for VPN site connection %s: %s", d.Id(), err)
+		return fmterr.Errorf("error saving tags for VPN site connection %s: %s", d.Id(), err)
 	}
 
 	return nil
 }
 
-func resourceVpnSiteConnectionV2Update(d *schema.ResourceData, meta interface{}) error {
-
+func resourceVpnSiteConnectionV2Update(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*cfg.Config)
 	networkingClient, err := config.NetworkingV2Client(config.GetRegion(d))
 	if err != nil {
-		return fmt.Errorf("Error creating OpenTelekomCloud networking client: %s", err)
+		return fmterr.Errorf("error creating OpenTelekomCloud networking client: %s", err)
 	}
 
 	opts := siteconnections.UpdateOpts{}
@@ -377,7 +379,7 @@ func resourceVpnSiteConnectionV2Update(d *schema.ResourceData, meta interface{})
 	if hasChange {
 		conn, err := siteconnections.Update(networkingClient, d.Id(), updateOpts).Extract()
 		if err != nil {
-			return err
+			return diag.FromErr(err)
 		}
 		stateConf := &resource.StateChangeConf{
 			Pending:    []string{"PENDING_UPDATE"},
@@ -387,10 +389,10 @@ func resourceVpnSiteConnectionV2Update(d *schema.ResourceData, meta interface{})
 			Delay:      0,
 			MinTimeout: 2 * time.Second,
 		}
-		_, err = stateConf.WaitForState()
+		_, err = stateConf.WaitForStateContext(ctx)
 
 		if err != nil {
-			return err
+			return diag.FromErr(err)
 		}
 
 		log.Printf("[DEBUG] Updated connection with id %s", d.Id())
@@ -399,25 +401,25 @@ func resourceVpnSiteConnectionV2Update(d *schema.ResourceData, meta interface{})
 	// update tags
 	tagErr := common.UpdateResourceTags(networkingClient, d, "ipsec-site-connections", d.Id())
 	if tagErr != nil {
-		return fmt.Errorf("Error updating tags of VPN site connection %s: %s", d.Id(), tagErr)
+		return fmterr.Errorf("error updating tags of VPN site connection %s: %s", d.Id(), tagErr)
 	}
 
-	return resourceVpnSiteConnectionV2Read(d, meta)
+	return resourceVpnSiteConnectionV2Read(ctx, d, meta)
 }
 
-func resourceVpnSiteConnectionV2Delete(d *schema.ResourceData, meta interface{}) error {
+func resourceVpnSiteConnectionV2Delete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	log.Printf("[DEBUG] Destroy service: %s", d.Id())
 
 	config := meta.(*cfg.Config)
 	networkingClient, err := config.NetworkingV2Client(config.GetRegion(d))
 	if err != nil {
-		return fmt.Errorf("Error creating OpenTelekomCloud networking client: %s", err)
+		return fmterr.Errorf("error creating OpenTelekomCloud networking client: %s", err)
 	}
 
 	err = siteconnections.Delete(networkingClient, d.Id()).Err
 
 	if err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 
 	stateConf := &resource.StateChangeConf{
@@ -429,9 +431,9 @@ func resourceVpnSiteConnectionV2Delete(d *schema.ResourceData, meta interface{})
 		MinTimeout: 2 * time.Second,
 	}
 
-	_, err = stateConf.WaitForState()
+	_, err = stateConf.WaitForStateContext(ctx)
 
-	return err
+	return diag.FromErr(err)
 }
 
 func waitForSiteConnectionDeletion(networkingClient *golangsdk.ServiceClient, id string) resource.StateRefreshFunc {

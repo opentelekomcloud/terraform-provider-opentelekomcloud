@@ -1,18 +1,20 @@
 package bms
 
 import (
-	"fmt"
+	"context"
 	"log"
 
-	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/bms/v2/nics"
 
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common/cfg"
+	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common/fmterr"
 )
 
 func DataSourceBMSNicV2() *schema.Resource {
 	return &schema.Resource{
-		Read: dataSourceBMSNicV2Read,
+		ReadContext: dataSourceBMSNicV2Read,
 
 		Schema: map[string]*schema.Schema{
 			"region": {
@@ -61,7 +63,7 @@ func DataSourceBMSNicV2() *schema.Resource {
 	}
 }
 
-func dataSourceBMSNicV2Read(d *schema.ResourceData, meta interface{}) error {
+func dataSourceBMSNicV2Read(_ context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*cfg.Config)
 	nicClient, err := config.ComputeV2Client(config.GetRegion(d))
 
@@ -73,16 +75,16 @@ func dataSourceBMSNicV2Read(d *schema.ResourceData, meta interface{}) error {
 	refinedNics, err := nics.List(nicClient, d.Get("server_id").(string), listOpts)
 	log.Printf("[DEBUG] Nic info: %#v", refinedNics)
 	if err != nil {
-		return fmt.Errorf("Unable to retrieve nics: %s", err)
+		return fmterr.Errorf("Unable to retrieve nics: %s", err)
 	}
 
 	if len(refinedNics) < 1 {
-		return fmt.Errorf("Your query returned no results. " +
+		return fmterr.Errorf("Your query returned no results. " +
 			"Please change your search criteria and try again.")
 	}
 
 	if len(refinedNics) > 1 {
-		return fmt.Errorf("Your query returned more than one result." +
+		return fmterr.Errorf("Your query returned more than one result." +
 			" Please try a more specific search criteria")
 	}
 
@@ -105,7 +107,7 @@ func dataSourceBMSNicV2Read(d *schema.ResourceData, meta interface{}) error {
 	d.Set("mac_address", Nic.MACAddress)
 	d.Set("region", config.GetRegion(d))
 	if err := d.Set("fixed_ips", s); err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 
 	return nil

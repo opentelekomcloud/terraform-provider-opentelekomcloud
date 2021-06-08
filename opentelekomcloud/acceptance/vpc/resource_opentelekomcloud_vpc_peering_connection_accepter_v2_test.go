@@ -4,8 +4,8 @@ import (
 	"regexp"
 	"testing"
 
-	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
-	"github.com/hashicorp/terraform-plugin-sdk/terraform"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/acceptance/common"
 )
@@ -13,9 +13,9 @@ import (
 func TestAccOTCVpcPeeringConnectionAccepterV2_basic(t *testing.T) {
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:     func() { common.TestAccPreCheck(t) },
-		Providers:    common.TestAccProviders,
-		CheckDestroy: testAccCheckOTCVpcPeeringConnectionAccepterDestroy,
+		PreCheck:          func() { common.TestAccPreCheck(t) },
+		ProviderFactories: common.TestAccProviderFactories,
+		CheckDestroy:      testAccCheckOTCVpcPeeringConnectionAccepterDestroy,
 		Steps: []resource.TestStep{
 			{
 				Config:      testAccOTCVpcPeeringConnectionAccepterV2_basic, // TODO: Research why normal scenario with peer tenant id is not working in acceptance tests
@@ -25,7 +25,7 @@ func TestAccOTCVpcPeeringConnectionAccepterV2_basic(t *testing.T) {
 	})
 }
 
-func testAccCheckOTCVpcPeeringConnectionAccepterDestroy(s *terraform.State) error {
+func testAccCheckOTCVpcPeeringConnectionAccepterDestroy(_ *terraform.State) error {
 	// We don't destroy the underlying VPC Peering Connection.
 	return nil
 }

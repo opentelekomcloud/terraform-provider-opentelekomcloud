@@ -19,7 +19,6 @@ modules-dev/
 .idea
 *.iml
 *.test
-*.iml
 localrc2
 localrc
 

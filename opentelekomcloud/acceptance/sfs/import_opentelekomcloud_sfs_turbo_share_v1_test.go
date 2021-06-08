@@ -3,7 +3,7 @@ package acceptance
 import (
 	"testing"
 
-	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/opentelekomcloud/gophertelekomcloud/acceptance/tools"
 
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/acceptance/common"
@@ -14,9 +14,9 @@ func TestAccSFSTurboShareV1_importBasic(t *testing.T) {
 	resourceName := "opentelekomcloud_sfs_turbo_share_v1.sfs-turbo"
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:     func() { common.TestAccPreCheck(t) },
-		Providers:    common.TestAccProviders,
-		CheckDestroy: testAccCheckSFSTurboShareV1Destroy,
+		PreCheck:          func() { common.TestAccPreCheck(t) },
+		ProviderFactories: common.TestAccProviderFactories,
+		CheckDestroy:      testAccCheckSFSTurboShareV1Destroy,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccSFSTurboShareV1_basic(shareName),

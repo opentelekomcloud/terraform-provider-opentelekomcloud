@@ -1,27 +1,29 @@
 package fw
 
 import (
-	"fmt"
+	"context"
 	"log"
 
-	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
-	"github.com/opentelekomcloud/gophertelekomcloud"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	golangsdk "github.com/opentelekomcloud/gophertelekomcloud"
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/networking/v2/extensions/fwaas_v2/policies"
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/networking/v2/extensions/fwaas_v2/rules"
 	"github.com/opentelekomcloud/gophertelekomcloud/pagination"
 
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common"
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common/cfg"
+	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common/fmterr"
 )
 
 func ResourceFWRuleV2() *schema.Resource {
 	return &schema.Resource{
-		Create: resourceFWRuleV2Create,
-		Read:   resourceFWRuleV2Read,
-		Update: resourceFWRuleV2Update,
-		Delete: resourceFWRuleV2Delete,
+		CreateContext: resourceFWRuleV2Create,
+		ReadContext:   resourceFWRuleV2Read,
+		UpdateContext: resourceFWRuleV2Update,
+		DeleteContext: resourceFWRuleV2Delete,
 		Importer: &schema.ResourceImporter{
-			State: schema.ImportStatePassthrough,
+			StateContext: schema.ImportStatePassthroughContext,
 		},
 
 		Schema: map[string]*schema.Schema{
@@ -87,12 +89,12 @@ func ResourceFWRuleV2() *schema.Resource {
 	}
 }
 
-func resourceFWRuleV2Create(d *schema.ResourceData, meta interface{}) error {
+func resourceFWRuleV2Create(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 
 	config := meta.(*cfg.Config)
 	networkingClient, err := config.NetworkingV2Client(config.GetRegion(d))
 	if err != nil {
-		return fmt.Errorf("Error creating OpenTelekomCloud networking client: %s", err)
+		return fmterr.Errorf("error creating OpenTelekomCloud networking client: %s", err)
 	}
 
 	enabled := d.Get("enabled").(bool)
@@ -121,28 +123,28 @@ func resourceFWRuleV2Create(d *schema.ResourceData, meta interface{}) error {
 	rule, err := rules.Create(networkingClient, ruleConfiguration).Extract()
 
 	if err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 
 	log.Printf("[DEBUG] Firewall rule with id %s : %#v", rule.ID, rule)
 
 	d.SetId(rule.ID)
 
-	return resourceFWRuleV2Read(d, meta)
+	return resourceFWRuleV2Read(ctx, d, meta)
 }
 
-func resourceFWRuleV2Read(d *schema.ResourceData, meta interface{}) error {
+func resourceFWRuleV2Read(_ context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	log.Printf("[DEBUG] Retrieve information about firewall rule: %s", d.Id())
 
 	config := meta.(*cfg.Config)
 	networkingClient, err := config.NetworkingV2Client(config.GetRegion(d))
 	if err != nil {
-		return fmt.Errorf("Error creating OpenTelekomCloud networking client: %s", err)
+		return fmterr.Errorf("error creating OpenTelekomCloud networking client: %s", err)
 	}
 
 	rule, err := rules.Get(networkingClient, d.Id()).Extract()
 	if err != nil {
-		return common.CheckDeleted(d, err, "FW rule")
+		return diag.FromErr(common.CheckDeleted(d, err, "FW rule"))
 	}
 
 	log.Printf("[DEBUG] Read OpenTelekomCloud Firewall Rule %s: %#v", d.Id(), rule)
@@ -168,11 +170,11 @@ func resourceFWRuleV2Read(d *schema.ResourceData, meta interface{}) error {
 	return nil
 }
 
-func resourceFWRuleV2Update(d *schema.ResourceData, meta interface{}) error {
+func resourceFWRuleV2Update(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*cfg.Config)
 	networkingClient, err := config.NetworkingV2Client(config.GetRegion(d))
 	if err != nil {
-		return fmt.Errorf("Error creating OpenTelekomCloud networking client: %s", err)
+		return fmterr.Errorf("error creating OpenTelekomCloud networking client: %s", err)
 	}
 
 	var updateOpts rules.UpdateOpts
@@ -220,38 +222,38 @@ func resourceFWRuleV2Update(d *schema.ResourceData, meta interface{}) error {
 	log.Printf("[DEBUG] Updating firewall rules: %#v", updateOpts)
 	err = rules.Update(networkingClient, d.Id(), updateOpts).Err
 	if err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 
-	return resourceFWRuleV2Read(d, meta)
+	return resourceFWRuleV2Read(ctx, d, meta)
 }
 
-func resourceFWRuleV2Delete(d *schema.ResourceData, meta interface{}) error {
+func resourceFWRuleV2Delete(_ context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	log.Printf("[DEBUG] Destroy firewall rule: %s", d.Id())
 
 	config := meta.(*cfg.Config)
 	networkingClient, err := config.NetworkingV2Client(config.GetRegion(d))
 	if err != nil {
-		return fmt.Errorf("Error creating OpenTelekomCloud networking client: %s", err)
+		return fmterr.Errorf("error creating OpenTelekomCloud networking client: %s", err)
 	}
 
 	rule, err := rules.Get(networkingClient, d.Id()).Extract()
 	if err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 
 	policyID, err := assignedPolicyID(networkingClient, rule.ID)
 	if err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 	if policyID != "" {
 		_, err := policies.RemoveRule(networkingClient, policyID, rule.ID).Extract()
 		if err != nil {
-			return err
+			return diag.FromErr(err)
 		}
 	}
 
-	return rules.Delete(networkingClient, d.Id()).Err
+	return diag.FromErr(rules.Delete(networkingClient, d.Id()).Err)
 }
 
 func assignedPolicyID(nwClient *golangsdk.ServiceClient, ruleID string) (string, error) {

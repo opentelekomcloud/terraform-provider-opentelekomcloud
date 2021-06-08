@@ -5,8 +5,8 @@ import (
 	"testing"
 	"time"
 
-	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
-	"github.com/hashicorp/terraform-plugin-sdk/terraform"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 	golangsdk "github.com/opentelekomcloud/gophertelekomcloud"
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/mrs/v1/job"
 
@@ -19,9 +19,9 @@ func TestAccMRSV1Job_basic(t *testing.T) {
 	var jobGet job.Job
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheckMrs(t) },
-		Providers:    common.TestAccProviders,
-		CheckDestroy: testAccCheckMRSV1JobDestroy,
+		PreCheck:          func() { testAccPreCheckMrs(t) },
+		ProviderFactories: common.TestAccProviderFactories,
+		CheckDestroy:      testAccCheckMRSV1JobDestroy,
 		Steps: []resource.TestStep{
 			{
 				Config: TestAccMRSV1JobConfig_basic,
@@ -39,7 +39,7 @@ func testAccCheckMRSV1JobDestroy(s *terraform.State) error {
 	config := common.TestAccProvider.Meta().(*cfg.Config)
 	mrsClient, err := config.MrsV1Client(env.OS_REGION_NAME)
 	if err != nil {
-		return fmt.Errorf("Error creating opentelekomcloud mrs: %s", err)
+		return fmt.Errorf("error creating opentelekomcloud mrs: %s", err)
 	}
 
 	for _, rs := range s.RootModule().Resources {
@@ -76,7 +76,7 @@ func testAccCheckMRSV1JobExists(n string, jobGet *job.Job) resource.TestCheckFun
 		config := common.TestAccProvider.Meta().(*cfg.Config)
 		mrsClient, err := config.MrsV1Client(env.OS_REGION_NAME)
 		if err != nil {
-			return fmt.Errorf("Error creating opentelekomcloud mrs client: %s ", err)
+			return fmt.Errorf("error creating opentelekomcloud mrs client: %s ", err)
 		}
 
 		found, err := job.Get(mrsClient, rs.Primary.ID).Extract()

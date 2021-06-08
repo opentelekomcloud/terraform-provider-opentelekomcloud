@@ -1,29 +1,26 @@
 package elb
 
 import (
-	"fmt"
+	"context"
 	"log"
 	"time"
 
-	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/networking/v2/extensions/elbaas/listeners"
 
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common"
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common/cfg"
+	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common/fmterr"
 )
-
-var ProtocolFormats = []string{"HTTP", "TCP", "HTTPS", "SSL", "UDP"}
-
-func ValidateProtocolFormat(v interface{}, k string) (ws []string, errors []error) {
-	return common.ValidateStringList(v, k, ProtocolFormats)
-}
 
 func ResourceEListener() *schema.Resource {
 	return &schema.Resource{
-		Create: resourceEListenerCreate,
-		Read:   resourceEListenerRead,
-		Update: resourceEListenerUpdate,
-		Delete: resourceEListenerDelete,
+		CreateContext: resourceEListenerCreate,
+		ReadContext:   resourceEListenerRead,
+		UpdateContext: resourceEListenerUpdate,
+		DeleteContext: resourceEListenerDelete,
 
 		DeprecationMessage: classicLBDeprecated,
 
@@ -59,10 +56,12 @@ func ResourceEListener() *schema.Resource {
 			},
 
 			"protocol": {
-				Type:         schema.TypeString,
-				Required:     true,
-				ForceNew:     true,
-				ValidateFunc: ValidateProtocolFormat,
+				Type:     schema.TypeString,
+				Required: true,
+				ForceNew: true,
+				ValidateFunc: validation.StringInSlice([]string{
+					"HTTP", "TCP", "HTTPS", "SSL", "UDP",
+				}, false),
 			},
 
 			"protocol_port": {
@@ -74,24 +73,21 @@ func ResourceEListener() *schema.Resource {
 				Type:     schema.TypeString,
 				Required: true,
 				ForceNew: true,
-				ValidateFunc: func(v interface{}, k string) (ws []string, errors []error) {
-					return common.ValidateStringList(v, k, []string{"HTTP", "TCP", "UDP"})
-				},
+				ValidateFunc: validation.StringInSlice([]string{
+					"HTTP", "TCP", "UDP",
+				}, false),
 			},
 			"backend_port": {
-				Type:     schema.TypeInt,
-				Required: true,
-				ValidateFunc: func(v interface{}, k string) (ws []string, errors []error) {
-					return common.ValidateIntRange(v, k, 1, 65535)
-				},
+				Type:         schema.TypeInt,
+				Required:     true,
+				ValidateFunc: validation.IntBetween(1, 65535),
 			},
-
 			"lb_algorithm": {
 				Type:     schema.TypeString,
 				Required: true,
-				ValidateFunc: func(v interface{}, k string) (ws []string, errors []error) {
-					return common.ValidateStringList(v, k, []string{"roundrobin", "leastconn", "source"})
-				},
+				ValidateFunc: validation.StringInSlice([]string{
+					"roundrobin", "leastconn", "source",
+				}, false),
 			},
 
 			"session_sticky": {
@@ -107,22 +103,18 @@ func ResourceEListener() *schema.Resource {
 			},
 
 			"cookie_timeout": {
-				Type:     schema.TypeInt,
-				Optional: true,
-				ForceNew: true,
-				Computed: true,
-				ValidateFunc: func(v interface{}, k string) (ws []string, errors []error) {
-					return common.ValidateIntRange(v, k, 1, 1440)
-				},
+				Type:         schema.TypeInt,
+				Optional:     true,
+				ForceNew:     true,
+				Computed:     true,
+				ValidateFunc: validation.IntBetween(1, 1440),
 			},
 
 			"tcp_timeout": {
-				Type:     schema.TypeInt,
-				Optional: true,
-				Computed: true,
-				ValidateFunc: func(v interface{}, k string) (ws []string, errors []error) {
-					return common.ValidateIntRange(v, k, 1, 5)
-				},
+				Type:         schema.TypeInt,
+				Optional:     true,
+				Computed:     true,
+				ValidateFunc: validation.IntBetween(1, 5),
 			},
 
 			"tcp_draining": {
@@ -131,11 +123,9 @@ func ResourceEListener() *schema.Resource {
 			},
 
 			"tcp_draining_timeout": {
-				Type:     schema.TypeInt,
-				Optional: true,
-				ValidateFunc: func(v interface{}, k string) (ws []string, errors []error) {
-					return common.ValidateIntRange(v, k, 0, 60)
-				},
+				Type:         schema.TypeInt,
+				Optional:     true,
+				ValidateFunc: validation.IntBetween(0, 60),
 			},
 
 			"certificate_id": {
@@ -152,11 +142,9 @@ func ResourceEListener() *schema.Resource {
 			},
 
 			"udp_timeout": {
-				Type:     schema.TypeInt,
-				Optional: true,
-				ValidateFunc: func(v interface{}, k string) (ws []string, errors []error) {
-					return common.ValidateIntRange(v, k, 1, 1440)
-				},
+				Type:         schema.TypeInt,
+				Optional:     true,
+				ValidateFunc: validation.IntBetween(1, 1440),
 			},
 
 			"ssl_protocols": {
@@ -164,28 +152,28 @@ func ResourceEListener() *schema.Resource {
 				Optional: true,
 				ForceNew: true,
 				Computed: true,
-				ValidateFunc: func(v interface{}, k string) (ws []string, errors []error) {
-					return common.ValidateStringList(v, k, []string{"TLSv1.2", "TLSv1.2 TLSv1.1 TLSv1"})
-				},
+				ValidateFunc: validation.StringInSlice([]string{
+					"TLSv1.2", "TLSv1.2 TLSv1.1 TLSv1",
+				}, false),
 			},
 
 			"ssl_ciphers": {
 				Type:     schema.TypeString,
 				Optional: true,
 				Computed: true,
-				ValidateFunc: func(v interface{}, k string) (ws []string, errors []error) {
-					return common.ValidateStringList(v, k, []string{"Default", "Extended", "Strict"})
-				},
+				ValidateFunc: validation.StringInSlice([]string{
+					"Default", "Extended", "Strict",
+				}, false),
 			},
 		},
 	}
 }
 
-func resourceEListenerCreate(d *schema.ResourceData, meta interface{}) error {
+func resourceEListenerCreate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*cfg.Config)
 	client, err := config.ElbV1Client(config.GetRegion(d))
 	if err != nil {
-		return fmt.Errorf("Error creating OpenTelekomCloud networking client: %s", err)
+		return fmterr.Errorf("error creating OpenTelekomCloud networking client: %s", err)
 	}
 
 	var certificates []string
@@ -220,25 +208,25 @@ func resourceEListenerCreate(d *schema.ResourceData, meta interface{}) error {
 
 	listener, err := listeners.Create(client, createOpts).Extract()
 	if err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 	d.SetId(listener.ID)
 
 	log.Printf("[DEBUG] Successfully created listener %s", listener.ID)
 
-	return resourceEListenerRead(d, meta)
+	return resourceEListenerRead(ctx, d, meta)
 }
 
-func resourceEListenerRead(d *schema.ResourceData, meta interface{}) error {
+func resourceEListenerRead(_ context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*cfg.Config)
 	client, err := config.ElbV1Client(config.GetRegion(d))
 	if err != nil {
-		return fmt.Errorf("Error creating OpenTelekomCloud networking client: %s", err)
+		return fmterr.Errorf("error creating OpenTelekomCloud networking client: %s", err)
 	}
 
 	listener, err := listeners.Get(client, d.Id()).Extract()
 	if err != nil {
-		return common.CheckDeleted(d, err, "listener")
+		return diag.FromErr(common.CheckDeleted(d, err, "listener"))
 	}
 
 	log.Printf("[DEBUG] Retrieved listener %s: %#v", d.Id(), listener)
@@ -269,11 +257,11 @@ func resourceEListenerRead(d *schema.ResourceData, meta interface{}) error {
 	return nil
 }
 
-func resourceEListenerUpdate(d *schema.ResourceData, meta interface{}) error {
+func resourceEListenerUpdate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*cfg.Config)
 	client, err := config.ElbV1Client(config.GetRegion(d))
 	if err != nil {
-		return fmt.Errorf("Error creating OpenTelekomCloud networking client: %s", err)
+		return fmterr.Errorf("error creating OpenTelekomCloud networking client: %s", err)
 	}
 
 	var updateOpts listeners.UpdateOpts
@@ -313,18 +301,18 @@ func resourceEListenerUpdate(d *schema.ResourceData, meta interface{}) error {
 
 	_, err = listeners.Update(client, d.Id(), updateOpts).Extract()
 	if err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 
-	return resourceEListenerRead(d, meta)
+	return resourceEListenerRead(ctx, d, meta)
 
 }
 
-func resourceEListenerDelete(d *schema.ResourceData, meta interface{}) error {
+func resourceEListenerDelete(_ context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*cfg.Config)
 	client, err := config.ElbV1Client(config.GetRegion(d))
 	if err != nil {
-		return fmt.Errorf("Error creating OpenTelekomCloud networking client: %s", err)
+		return fmterr.Errorf("error creating OpenTelekomCloud networking client: %s", err)
 	}
 
 	id := d.Id()
@@ -332,7 +320,7 @@ func resourceEListenerDelete(d *schema.ResourceData, meta interface{}) error {
 
 	err = listeners.Delete(client, id).ExtractErr()
 	if err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 
 	return nil

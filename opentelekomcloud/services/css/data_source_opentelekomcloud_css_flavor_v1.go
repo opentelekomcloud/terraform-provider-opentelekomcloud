@@ -1,18 +1,20 @@
 package css
 
 import (
-	"fmt"
+	"context"
 
 	"github.com/hashicorp/go-multierror"
-	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/css/v1/flavors"
 
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common/cfg"
+	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common/fmterr"
 )
 
 func DataSourceCSSFlavorV1() *schema.Resource {
 	return &schema.Resource{
-		Read: dataSourceCSSFlavorV1Read,
+		ReadContext: dataSourceCSSFlavorV1Read,
 		Schema: map[string]*schema.Schema{
 
 			"name": {
@@ -88,21 +90,21 @@ func DataSourceCSSFlavorV1() *schema.Resource {
 	}
 }
 
-func dataSourceCSSFlavorV1Read(d *schema.ResourceData, meta interface{}) error {
+func dataSourceCSSFlavorV1Read(_ context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*cfg.Config)
 	client, err := config.CssV1Client(config.GetRegion(d))
 	if err != nil {
-		return fmt.Errorf("error creating CSS v1 client: %s", err)
+		return fmterr.Errorf("error creating CSS v1 client: %s", err)
 	}
 
 	pages, err := flavors.List(client).AllPages()
 	if err != nil {
-		return fmt.Errorf("error reading cluster value: %s", err)
+		return fmterr.Errorf("error reading cluster value: %s", err)
 	}
 
 	versions, err := flavors.ExtractVersions(pages)
 	if err != nil {
-		return fmt.Errorf("error extracting versions")
+		return fmterr.Errorf("error extracting versions")
 	}
 
 	opts := flavors.FilterOpts{
@@ -113,12 +115,12 @@ func dataSourceCSSFlavorV1Read(d *schema.ResourceData, meta interface{}) error {
 	filtered := flavors.FilterVersions(versions, opts)
 
 	if len(filtered) == 0 {
-		return fmt.Errorf("can't find version matching criteria: %+v", opts)
+		return fmterr.Errorf("can't find version matching criteria: %+v", opts)
 	}
 
 	result := findFlavorInVersions(d, filtered)
 	if result == nil {
-		return fmt.Errorf("can't find flavor matching criteria")
+		return fmterr.Errorf("can't find flavor matching criteria")
 	}
 
 	d.SetId(result.FlavorID)
@@ -133,7 +135,7 @@ func dataSourceCSSFlavorV1Read(d *schema.ResourceData, meta interface{}) error {
 	)
 
 	if mErr.ErrorOrNil() != nil {
-		return mErr
+		return diag.FromErr(mErr)
 	}
 	return nil
 }

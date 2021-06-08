@@ -1,22 +1,24 @@
 package ims
 
 import (
-	"fmt"
+	"context"
 	"log"
 	"regexp"
 	"sort"
 
 	"github.com/hashicorp/go-multierror"
-	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
-	"github.com/hashicorp/terraform-plugin-sdk/helper/validation"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/imageservice/v2/images"
 
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common/cfg"
+	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common/fmterr"
 )
 
 func DataSourceImagesImageV2() *schema.Resource {
 	return &schema.Resource{
-		Read: dataSourceImagesImageV2Read,
+		ReadContext: dataSourceImagesImageV2Read,
 
 		Schema: map[string]*schema.Schema{
 			"region": {
@@ -145,11 +147,11 @@ func DataSourceImagesImageV2() *schema.Resource {
 	}
 }
 
-func dataSourceImagesImageV2Read(d *schema.ResourceData, meta interface{}) error {
+func dataSourceImagesImageV2Read(_ context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*cfg.Config)
 	client, err := config.ImageV2Client(config.GetRegion(d))
 	if err != nil {
-		return fmt.Errorf("error creating OpenTelekomCloud IMSv2 client: %w", err)
+		return fmterr.Errorf("error creating OpenTelekomCloud IMSv2 client: %w", err)
 	}
 
 	visibility := resourceImagesImageV2VisibilityFromString(d.Get("visibility").(string))
@@ -171,12 +173,12 @@ func dataSourceImagesImageV2Read(d *schema.ResourceData, meta interface{}) error
 	var image images.Image
 	allPages, err := images.List(client, listOpts).AllPages()
 	if err != nil {
-		return fmt.Errorf("unable to query images: %s", err)
+		return fmterr.Errorf("unable to query images: %s", err)
 	}
 
 	allImages, err := images.ExtractImages(allPages)
 	if err != nil {
-		return fmt.Errorf("unable to retrieve images: %s", err)
+		return fmterr.Errorf("unable to retrieve images: %s", err)
 	}
 
 	var filteredImages []images.Image
@@ -218,7 +220,7 @@ func dataSourceImagesImageV2Read(d *schema.ResourceData, meta interface{}) error
 	}
 
 	if len(allImages) < 1 {
-		return fmt.Errorf("your query returned no results. " +
+		return fmterr.Errorf("your query returned no results. " +
 			"Please change your search criteria and try again")
 	}
 
@@ -228,7 +230,7 @@ func dataSourceImagesImageV2Read(d *schema.ResourceData, meta interface{}) error
 		if recent {
 			image = mostRecentImage(allImages)
 		} else {
-			return fmt.Errorf("your query returned more than one result. Please try a more " +
+			return fmterr.Errorf("your query returned more than one result. Please try a more " +
 				"specific search criteria, or set `most_recent` attribute to true")
 		}
 	} else {
@@ -258,7 +260,7 @@ func dataSourceImagesImageV2Read(d *schema.ResourceData, meta interface{}) error
 	)
 
 	if mErr.ErrorOrNil() != nil {
-		return mErr
+		return diag.FromErr(mErr)
 	}
 
 	return nil

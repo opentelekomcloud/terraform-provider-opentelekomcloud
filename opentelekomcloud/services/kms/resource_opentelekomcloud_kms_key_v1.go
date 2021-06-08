@@ -1,19 +1,21 @@
 package kms
 
 import (
-	"fmt"
+	"context"
 	"log"
 	"time"
 
 	"github.com/hashicorp/go-multierror"
-	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
-	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
-	"github.com/opentelekomcloud/gophertelekomcloud"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	golangsdk "github.com/opentelekomcloud/gophertelekomcloud"
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/common/tags"
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/kms/v1/keys"
 
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common"
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common/cfg"
+	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common/fmterr"
 )
 
 const (
@@ -25,13 +27,13 @@ const (
 
 func ResourceKmsKeyV1() *schema.Resource {
 	return &schema.Resource{
-		Create: resourceKmsKeyV1Create,
-		Read:   resourceKmsKeyV1Read,
-		Update: resourceKmsKeyV1Update,
-		Delete: resourceKmsKeyV1Delete,
+		CreateContext: resourceKmsKeyV1Create,
+		ReadContext:   resourceKmsKeyV1Read,
+		UpdateContext: resourceKmsKeyV1Update,
+		DeleteContext: resourceKmsKeyV1Delete,
 
 		Importer: &schema.ResourceImporter{
-			State: schema.ImportStatePassthrough,
+			StateContext: schema.ImportStatePassthroughContext,
 		},
 
 		Schema: map[string]*schema.Schema{
@@ -88,11 +90,11 @@ func ResourceKmsKeyV1() *schema.Resource {
 	}
 }
 
-func resourceKmsKeyV1Create(d *schema.ResourceData, meta interface{}) error {
+func resourceKmsKeyV1Create(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*cfg.Config)
 	client, err := config.KmsKeyV1Client(config.GetRegion(d))
 	if err != nil {
-		return fmt.Errorf("error creating OpenTelekomCloud KMSv1 client: %s", err)
+		return fmterr.Errorf("error creating OpenTelekomCloud KMSv1 client: %s", err)
 	}
 
 	createOpts := &keys.CreateOpts{
@@ -104,7 +106,7 @@ func resourceKmsKeyV1Create(d *schema.ResourceData, meta interface{}) error {
 	log.Printf("[DEBUG] Create Options: %#v", createOpts)
 	key, err := keys.Create(client, createOpts).ExtractKeyInfo()
 	if err != nil {
-		return fmt.Errorf("error creating OpenTelekomCloud key: %s", err)
+		return fmterr.Errorf("error creating OpenTelekomCloud key: %s", err)
 	}
 	log.Printf("[INFO] Key ID: %s", key.KeyID)
 
@@ -120,19 +122,19 @@ func resourceKmsKeyV1Create(d *schema.ResourceData, meta interface{}) error {
 		MinTimeout: 3 * time.Second,
 	}
 
-	_, err = stateConf.WaitForState()
+	_, err = stateConf.WaitForStateContext(ctx)
 	if err != nil {
-		return fmt.Errorf("error waiting for key (%s) to become ready: %s", key.KeyID, err)
+		return fmterr.Errorf("error waiting for key (%s) to become ready: %s", key.KeyID, err)
 	}
 
 	if !d.Get("is_enabled").(bool) {
 		disableKey, err := keys.DisableKey(client, key.KeyID).ExtractKeyInfo()
 		if err != nil {
-			return fmt.Errorf("error disabling key: %s", err)
+			return fmterr.Errorf("error disabling key: %s", err)
 		}
 
 		if disableKey.KeyState != DisabledState {
-			return fmt.Errorf("error disabling key, the key state is: %s", disableKey.KeyState)
+			return fmterr.Errorf("error disabling key, the key state is: %s", disableKey.KeyState)
 		}
 	}
 
@@ -141,26 +143,26 @@ func resourceKmsKeyV1Create(d *schema.ResourceData, meta interface{}) error {
 	if len(tagRaw) > 0 {
 		tagList := common.ExpandResourceTags(tagRaw)
 		if err := tags.Create(client, "kms", key.KeyID, tagList).ExtractErr(); err != nil {
-			return fmt.Errorf("error setting tags of KMS: %s", err)
+			return fmterr.Errorf("error setting tags of KMS: %s", err)
 		}
 	}
 
 	// Store the key ID now
 	d.SetId(key.KeyID)
 
-	return resourceKmsKeyV1Read(d, meta)
+	return resourceKmsKeyV1Read(ctx, d, meta)
 }
 
-func resourceKmsKeyV1Read(d *schema.ResourceData, meta interface{}) error {
+func resourceKmsKeyV1Read(_ context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*cfg.Config)
 	client, err := config.KmsKeyV1Client(config.GetRegion(d))
 	if err != nil {
-		return fmt.Errorf("error creating OpenTelekomCloud KMSv1 client: %s", err)
+		return fmterr.Errorf("error creating OpenTelekomCloud KMSv1 client: %s", err)
 	}
 
 	key, err := keys.Get(client, d.Id()).ExtractKeyInfo()
 	if err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 
 	log.Printf("[DEBUG] Kms key %s: %+v", d.Id(), key)
@@ -184,27 +186,27 @@ func resourceKmsKeyV1Read(d *schema.ResourceData, meta interface{}) error {
 	)
 
 	if mErr.ErrorOrNil() != nil {
-		return mErr
+		return diag.FromErr(mErr)
 	}
 
 	// save tags
 	resourceTags, err := tags.Get(client, "kms", d.Id()).Extract()
 	if err != nil {
-		return fmt.Errorf("error fetching OpenTelekomCloud KMS tags: %s", err)
+		return fmterr.Errorf("error fetching OpenTelekomCloud KMS tags: %s", err)
 	}
 	tagMap := common.TagsToMap(resourceTags)
 	if err := d.Set("tags", tagMap); err != nil {
-		return fmt.Errorf("error saving tags for OpenTelekomCloud KMS: %s", err)
+		return fmterr.Errorf("error saving tags for OpenTelekomCloud KMS: %s", err)
 	}
 
 	return nil
 }
 
-func resourceKmsKeyV1Update(d *schema.ResourceData, meta interface{}) error {
+func resourceKmsKeyV1Update(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*cfg.Config)
 	client, err := config.KmsKeyV1Client(config.GetRegion(d))
 	if err != nil {
-		return fmt.Errorf("error creating OpenTelekomCloud KMSv1 client: %s", err)
+		return fmterr.Errorf("error creating OpenTelekomCloud KMSv1 client: %s", err)
 	}
 
 	if d.HasChange("key_alias") {
@@ -214,7 +216,7 @@ func resourceKmsKeyV1Update(d *schema.ResourceData, meta interface{}) error {
 		}
 		_, err = keys.UpdateAlias(client, updateAliasOpts).ExtractKeyInfo()
 		if err != nil {
-			return fmt.Errorf("error updating OpenTelekomCloud key: %s", err)
+			return fmterr.Errorf("error updating OpenTelekomCloud key: %s", err)
 		}
 	}
 
@@ -225,33 +227,33 @@ func resourceKmsKeyV1Update(d *schema.ResourceData, meta interface{}) error {
 		}
 		_, err = keys.UpdateDes(client, updateDesOpts).ExtractKeyInfo()
 		if err != nil {
-			return fmt.Errorf("error updating OpenTelekomCloud key: %s", err)
+			return fmterr.Errorf("error updating OpenTelekomCloud key: %s", err)
 		}
 	}
 
 	if d.HasChange("is_enabled") {
 		key, err := keys.Get(client, d.Id()).ExtractKeyInfo()
 		if err != nil {
-			return fmt.Errorf("describeKey got an error: %s", err)
+			return fmterr.Errorf("describeKey got an error: %s", err)
 		}
 
 		if d.Get("is_enabled").(bool) && key.KeyState == DisabledState {
 			key, err := keys.EnableKey(client, d.Id()).ExtractKeyInfo()
 			if err != nil {
-				return fmt.Errorf("error enabling key: %s", err)
+				return fmterr.Errorf("error enabling key: %s", err)
 			}
 			if key.KeyState != EnabledState {
-				return fmt.Errorf("error enabling key, the key state is: %s", key.KeyState)
+				return fmterr.Errorf("error enabling key, the key state is: %s", key.KeyState)
 			}
 		}
 
 		if !d.Get("is_enabled").(bool) && key.KeyState == EnabledState {
 			key, err := keys.DisableKey(client, d.Id()).ExtractKeyInfo()
 			if err != nil {
-				return fmt.Errorf("error disabling key: %s", err)
+				return fmterr.Errorf("error disabling key: %s", err)
 			}
 			if key.KeyState != DisabledState {
-				return fmt.Errorf("error disabling key, the key state is: %s", key.KeyState)
+				return fmterr.Errorf("error disabling key, the key state is: %s", key.KeyState)
 			}
 		}
 	}
@@ -259,23 +261,23 @@ func resourceKmsKeyV1Update(d *schema.ResourceData, meta interface{}) error {
 	// update tags
 	if d.HasChange("tags") {
 		if err := common.UpdateResourceTags(client, d, "kms", d.Id()); err != nil {
-			return fmt.Errorf("error updating tags of KMS %s: %s", d.Id(), err)
+			return fmterr.Errorf("error updating tags of KMS %s: %s", d.Id(), err)
 		}
 	}
 
-	return resourceKmsKeyV1Read(d, meta)
+	return resourceKmsKeyV1Read(ctx, d, meta)
 }
 
-func resourceKmsKeyV1Delete(d *schema.ResourceData, meta interface{}) error {
+func resourceKmsKeyV1Delete(_ context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*cfg.Config)
 	client, err := config.KmsKeyV1Client(config.GetRegion(d))
 	if err != nil {
-		return fmt.Errorf("error creating OpenTelekomCloud KMSv1 client: %s", err)
+		return fmterr.Errorf("error creating OpenTelekomCloud KMSv1 client: %s", err)
 	}
 
 	key, err := keys.Get(client, d.Id()).ExtractKeyInfo()
 	if err != nil {
-		return common.CheckDeleted(d, err, "key")
+		return diag.FromErr(common.CheckDeleted(d, err, "key"))
 	}
 
 	deleteOpts := &keys.DeleteOpts{
@@ -291,11 +293,11 @@ func resourceKmsKeyV1Delete(d *schema.ResourceData, meta interface{}) error {
 	if key.KeyState != PendingDeletionState {
 		key, err = keys.Delete(client, deleteOpts).Extract()
 		if err != nil {
-			return err
+			return diag.FromErr(err)
 		}
 
 		if key.KeyState != PendingDeletionState {
-			return fmt.Errorf("failed to delete key")
+			return fmterr.Errorf("failed to delete key")
 		}
 	}
 

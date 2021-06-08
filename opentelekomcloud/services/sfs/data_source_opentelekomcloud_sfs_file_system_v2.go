@@ -1,19 +1,21 @@
 package sfs
 
 import (
-	"fmt"
+	"context"
 	"log"
 
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/sfs/v2/shares"
 
-	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common/cfg"
+	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common/fmterr"
 )
 
 func DataSourceSFSFileSystemV2() *schema.Resource {
 	return &schema.Resource{
-		Read: dataSourceSFSFileSystemV2Read,
+		ReadContext: dataSourceSFSFileSystemV2Read,
 
 		Schema: map[string]*schema.Schema{
 			"region": {
@@ -120,7 +122,7 @@ func DataSourceSFSFileSystemV2() *schema.Resource {
 	}
 }
 
-func dataSourceSFSFileSystemV2Read(d *schema.ResourceData, meta interface{}) error {
+func dataSourceSFSFileSystemV2Read(_ context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*cfg.Config)
 	sfsClient, err := config.SfsV2Client(config.GetRegion(d))
 
@@ -132,16 +134,16 @@ func dataSourceSFSFileSystemV2Read(d *schema.ResourceData, meta interface{}) err
 
 	refinedSfs, err := shares.List(sfsClient, listOpts)
 	if err != nil {
-		return fmt.Errorf("Unable to retrieve shares: %s", err)
+		return fmterr.Errorf("Unable to retrieve shares: %s", err)
 	}
 
 	if len(refinedSfs) < 1 {
-		return fmt.Errorf("Your query returned no results. " +
+		return fmterr.Errorf("Your query returned no results. " +
 			"Please change your search criteria and try again.")
 	}
 
 	if len(refinedSfs) > 1 {
-		return fmt.Errorf("Your query returned more than one result." +
+		return fmterr.Errorf("Your query returned more than one result." +
 			" Please try a more specific search criteria")
 	}
 

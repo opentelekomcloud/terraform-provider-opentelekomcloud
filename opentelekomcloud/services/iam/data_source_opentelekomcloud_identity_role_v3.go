@@ -1,18 +1,20 @@
 package iam
 
 import (
-	"fmt"
+	"context"
 	"log"
 
-	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/identity/v3/roles"
 
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common/cfg"
+	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common/fmterr"
 )
 
 func DataSourceIdentityRoleV3() *schema.Resource {
 	return &schema.Resource{
-		Read: dataSourceIdentityRoleV3Read,
+		ReadContext: dataSourceIdentityRoleV3Read,
 
 		Schema: map[string]*schema.Schema{
 			"domain_id": {
@@ -37,11 +39,11 @@ func DataSourceIdentityRoleV3() *schema.Resource {
 }
 
 // dataSourceIdentityRoleV3Read performs the role lookup.
-func dataSourceIdentityRoleV3Read(d *schema.ResourceData, meta interface{}) error {
+func dataSourceIdentityRoleV3Read(_ context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*cfg.Config)
 	identityClient, err := config.IdentityV3Client(config.GetRegion(d))
 	if err != nil {
-		return fmt.Errorf("Error creating OpenStack identity client: %s", err)
+		return fmterr.Errorf("error creating OpenStack identity client: %s", err)
 	}
 
 	listOpts := roles.ListOpts{
@@ -54,28 +56,28 @@ func dataSourceIdentityRoleV3Read(d *schema.ResourceData, meta interface{}) erro
 	var role roles.Role
 	allPages, err := roles.List(identityClient, listOpts).AllPages()
 	if err != nil {
-		return fmt.Errorf("Unable to query roles: %s", err)
+		return fmterr.Errorf("Unable to query roles: %s", err)
 	}
 
 	allRoles, err := roles.ExtractRoles(allPages)
 	if err != nil {
-		return fmt.Errorf("Unable to retrieve roles: %s", err)
+		return fmterr.Errorf("Unable to retrieve roles: %s", err)
 	}
 
 	if len(allRoles) < 1 {
-		return fmt.Errorf("Your query returned no results. " +
+		return fmterr.Errorf("Your query returned no results. " +
 			"Please change your search criteria and try again.")
 	}
 
 	if len(allRoles) > 1 {
 		log.Printf("[DEBUG] Multiple results found: %#v", allRoles)
-		return fmt.Errorf("Your query returned more than one result. Please try a more " +
+		return fmterr.Errorf("Your query returned more than one result. Please try a more " +
 			"specific search criteria, or set `most_recent` attribute to true.")
 	}
 	role = allRoles[0]
 
 	log.Printf("[DEBUG] Single Role found: %s", role.ID)
-	return dataSourceIdentityRoleV3Attributes(d, config, &role)
+	return diag.FromErr(dataSourceIdentityRoleV3Attributes(d, config, &role))
 }
 
 // dataSourceIdentityRoleV3Attributes populates the fields of an Role resource.

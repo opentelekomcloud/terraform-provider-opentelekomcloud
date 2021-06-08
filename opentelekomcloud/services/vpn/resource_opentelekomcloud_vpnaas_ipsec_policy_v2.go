@@ -1,29 +1,31 @@
 package vpn
 
 import (
-	"fmt"
+	"context"
 	"log"
 	"time"
 
 	"github.com/hashicorp/go-multierror"
-	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
-	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
-	"github.com/hashicorp/terraform-plugin-sdk/helper/validation"
-	"github.com/opentelekomcloud/gophertelekomcloud"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
+	golangsdk "github.com/opentelekomcloud/gophertelekomcloud"
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/networking/v2/extensions/vpnaas/ipsecpolicies"
 
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common"
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common/cfg"
+	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common/fmterr"
 )
 
 func ResourceVpnIPSecPolicyV2() *schema.Resource {
 	return &schema.Resource{
-		Create: resourceVpnIPSecPolicyV2Create,
-		Read:   resourceVpnIPSecPolicyV2Read,
-		Update: resourceVpnIPSecPolicyV2Update,
-		Delete: resourceVpnIPSecPolicyV2Delete,
+		CreateContext: resourceVpnIPSecPolicyV2Create,
+		ReadContext:   resourceVpnIPSecPolicyV2Read,
+		UpdateContext: resourceVpnIPSecPolicyV2Update,
+		DeleteContext: resourceVpnIPSecPolicyV2Delete,
 		Importer: &schema.ResourceImporter{
-			State: schema.ImportStatePassthrough,
+			StateContext: schema.ImportStatePassthroughContext,
 		},
 
 		Timeouts: &schema.ResourceTimeout{
@@ -118,11 +120,11 @@ func ResourceVpnIPSecPolicyV2() *schema.Resource {
 	}
 }
 
-func resourceVpnIPSecPolicyV2Create(d *schema.ResourceData, meta interface{}) error {
+func resourceVpnIPSecPolicyV2Create(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*cfg.Config)
 	client, err := config.NetworkingV2Client(config.GetRegion(d))
 	if err != nil {
-		return fmt.Errorf("error creating OpenTelekomCloud NetworkingV2 client: %s", err)
+		return fmterr.Errorf("error creating OpenTelekomCloud NetworkingV2 client: %s", err)
 	}
 
 	lifetimeRaw := d.Get("lifetime").(*schema.Set).List()
@@ -154,7 +156,7 @@ func resourceVpnIPSecPolicyV2Create(d *schema.ResourceData, meta interface{}) er
 
 	policy, err := ipsecpolicies.Create(client, opts).Extract()
 	if err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 
 	stateConf := &resource.StateChangeConf{
@@ -164,25 +166,25 @@ func resourceVpnIPSecPolicyV2Create(d *schema.ResourceData, meta interface{}) er
 		Timeout:    d.Timeout(schema.TimeoutCreate),
 		MinTimeout: 2 * time.Second,
 	}
-	_, err = stateConf.WaitForState()
+	_, err = stateConf.WaitForStateContext(ctx)
 
 	log.Printf("[DEBUG] IPSec policy created: %#v", policy)
 
 	d.SetId(policy.ID)
 
-	return resourceVpnIPSecPolicyV2Read(d, meta)
+	return resourceVpnIPSecPolicyV2Read(ctx, d, meta)
 }
 
-func resourceVpnIPSecPolicyV2Read(d *schema.ResourceData, meta interface{}) error {
+func resourceVpnIPSecPolicyV2Read(_ context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*cfg.Config)
 	client, err := config.NetworkingV2Client(config.GetRegion(d))
 	if err != nil {
-		return fmt.Errorf("error creating OpenTelekomCloud NetworkingV2 client: %s", err)
+		return fmterr.Errorf("error creating OpenTelekomCloud NetworkingV2 client: %s", err)
 	}
 
 	policy, err := ipsecpolicies.Get(client, d.Id()).Extract()
 	if err != nil {
-		return common.CheckDeleted(d, err, "IPSec policy")
+		return diag.FromErr(common.CheckDeleted(d, err, "IPSec policy"))
 	}
 
 	log.Printf("[DEBUG] Read OpenTelekomCloud IPSec policy %s: %#v", d.Id(), policy)
@@ -209,17 +211,17 @@ func resourceVpnIPSecPolicyV2Read(d *schema.ResourceData, meta interface{}) erro
 	mErr = multierror.Append(mErr, d.Set("lifetime", lifetime))
 
 	if mErr.ErrorOrNil() != nil {
-		return mErr
+		return diag.FromErr(mErr)
 	}
 
 	return nil
 }
 
-func resourceVpnIPSecPolicyV2Update(d *schema.ResourceData, meta interface{}) error {
+func resourceVpnIPSecPolicyV2Update(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*cfg.Config)
 	client, err := config.NetworkingV2Client(config.GetRegion(d))
 	if err != nil {
-		return fmt.Errorf("error creating OpenTelekomCloud NetworkingV2 client: %s", err)
+		return fmterr.Errorf("error creating OpenTelekomCloud NetworkingV2 client: %s", err)
 	}
 
 	var hasChange bool
@@ -281,7 +283,7 @@ func resourceVpnIPSecPolicyV2Update(d *schema.ResourceData, meta interface{}) er
 	if hasChange {
 		_, err = ipsecpolicies.Update(client, d.Id(), opts).Extract()
 		if err != nil {
-			return err
+			return diag.FromErr(err)
 		}
 
 		stateConf := &resource.StateChangeConf{
@@ -291,22 +293,22 @@ func resourceVpnIPSecPolicyV2Update(d *schema.ResourceData, meta interface{}) er
 			Timeout:    d.Timeout(schema.TimeoutCreate),
 			MinTimeout: 2 * time.Second,
 		}
-		if _, err = stateConf.WaitForState(); err != nil {
-			return err
+		if _, err = stateConf.WaitForStateContext(ctx); err != nil {
+			return diag.FromErr(err)
 		}
 	}
-	return resourceVpnIPSecPolicyV2Read(d, meta)
+	return resourceVpnIPSecPolicyV2Read(ctx, d, meta)
 }
 
-func resourceVpnIPSecPolicyV2Delete(d *schema.ResourceData, meta interface{}) error {
+func resourceVpnIPSecPolicyV2Delete(_ context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*cfg.Config)
 	client, err := config.NetworkingV2Client(config.GetRegion(d))
 	if err != nil {
-		return fmt.Errorf("error creating OpenTelekomCloud NetworkingV2 client: %s", err)
+		return fmterr.Errorf("error creating OpenTelekomCloud NetworkingV2 client: %s", err)
 	}
 
 	if err := ipsecpolicies.Delete(client, d.Id()).ExtractErr(); err != nil {
-		return fmt.Errorf("error deleting IPSec Poilicy: %s", err)
+		return fmterr.Errorf("error deleting IPSec Poilicy: %s", err)
 	}
 
 	return nil

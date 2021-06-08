@@ -1,27 +1,30 @@
 package ecs
 
 import (
+	"context"
 	"fmt"
 	"log"
 	"strings"
 
-	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
-	"github.com/opentelekomcloud/gophertelekomcloud"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	golangsdk "github.com/opentelekomcloud/gophertelekomcloud"
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/compute/v2/extensions/floatingips"
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/compute/v2/servers"
 	nfloatingips "github.com/opentelekomcloud/gophertelekomcloud/openstack/networking/v2/extensions/layer3/floatingips"
 
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common"
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common/cfg"
+	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common/fmterr"
 )
 
 func ResourceComputeFloatingIPAssociateV2() *schema.Resource {
 	return &schema.Resource{
-		Create: resourceComputeFloatingIPAssociateV2Create,
-		Read:   resourceComputeFloatingIPAssociateV2Read,
-		Delete: resourceComputeFloatingIPAssociateV2Delete,
+		CreateContext: resourceComputeFloatingIPAssociateV2Create,
+		ReadContext:   resourceComputeFloatingIPAssociateV2Read,
+		DeleteContext: resourceComputeFloatingIPAssociateV2Delete,
 		Importer: &schema.ResourceImporter{
-			State: schema.ImportStatePassthrough,
+			StateContext: schema.ImportStatePassthroughContext,
 		},
 
 		Schema: map[string]*schema.Schema{
@@ -52,11 +55,11 @@ func ResourceComputeFloatingIPAssociateV2() *schema.Resource {
 	}
 }
 
-func resourceComputeFloatingIPAssociateV2Create(d *schema.ResourceData, meta interface{}) error {
+func resourceComputeFloatingIPAssociateV2Create(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*cfg.Config)
 	computeClient, err := config.ComputeV2Client(config.GetRegion(d))
 	if err != nil {
-		return fmt.Errorf("Error creating OpenTelekomCloud compute client: %s", err)
+		return fmterr.Errorf("error creating OpenTelekomCloud compute client: %s", err)
 	}
 
 	floatingIP := d.Get("floating_ip").(string)
@@ -71,7 +74,7 @@ func resourceComputeFloatingIPAssociateV2Create(d *schema.ResourceData, meta int
 
 	err = floatingips.AssociateInstance(computeClient, instanceId, associateOpts).ExtractErr()
 	if err != nil {
-		return fmt.Errorf("Error associating Floating IP: %s", err)
+		return fmterr.Errorf("error associating Floating IP: %s", err)
 	}
 
 	// There's an API call to get this information, but it has been
@@ -83,20 +86,20 @@ func resourceComputeFloatingIPAssociateV2Create(d *schema.ResourceData, meta int
 	// This API call is synchronous, so Create won't return until the IP
 	// is attached. No need to wait for a state.
 
-	return resourceComputeFloatingIPAssociateV2Read(d, meta)
+	return resourceComputeFloatingIPAssociateV2Read(ctx, d, meta)
 }
 
-func resourceComputeFloatingIPAssociateV2Read(d *schema.ResourceData, meta interface{}) error {
+func resourceComputeFloatingIPAssociateV2Read(_ context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*cfg.Config)
 	computeClient, err := config.ComputeV2Client(config.GetRegion(d))
 	if err != nil {
-		return fmt.Errorf("Error creating OpenTelekomCloud compute client: %s", err)
+		return fmterr.Errorf("error creating OpenTelekomCloud compute client: %s", err)
 	}
 
 	// Obtain relevant info from parsing the ID
 	floatingIP, instanceId, fixedIP, err := ParseComputeFloatingIPAssociateId(d.Id())
 	if err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 
 	// Now check and see whether the floating IP still exists.
@@ -117,7 +120,7 @@ func resourceComputeFloatingIPAssociateV2Read(d *schema.ResourceData, meta inter
 	}
 
 	if err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 
 	if !exists {
@@ -157,11 +160,11 @@ func resourceComputeFloatingIPAssociateV2Read(d *schema.ResourceData, meta inter
 	return nil
 }
 
-func resourceComputeFloatingIPAssociateV2Delete(d *schema.ResourceData, meta interface{}) error {
+func resourceComputeFloatingIPAssociateV2Delete(_ context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*cfg.Config)
 	computeClient, err := config.ComputeV2Client(config.GetRegion(d))
 	if err != nil {
-		return fmt.Errorf("Error creating OpenTelekomCloud compute client: %s", err)
+		return fmterr.Errorf("error creating OpenTelekomCloud compute client: %s", err)
 	}
 
 	floatingIP := d.Get("floating_ip").(string)
@@ -174,7 +177,7 @@ func resourceComputeFloatingIPAssociateV2Delete(d *schema.ResourceData, meta int
 
 	err = floatingips.DisassociateInstance(computeClient, instanceId, disassociateOpts).ExtractErr()
 	if err != nil {
-		return common.CheckDeleted(d, err, "floating ip association")
+		return diag.FromErr(common.CheckDeleted(d, err, "floating ip association"))
 	}
 
 	return nil

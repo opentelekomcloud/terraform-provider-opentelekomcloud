@@ -1,19 +1,21 @@
 package vbs
 
 import (
-	"fmt"
+	"context"
 	"log"
 
-	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/vbs/v2/policies"
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/vbs/v2/tags"
 
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common/cfg"
+	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common/fmterr"
 )
 
 func DataSourceVBSBackupPolicyV2() *schema.Resource {
 	return &schema.Resource{
-		Read: dataSourceVBSPolicyV2Read,
+		ReadContext: dataSourceVBSPolicyV2Read,
 
 		Schema: map[string]*schema.Schema{
 			"region": {
@@ -92,7 +94,7 @@ func DataSourceVBSBackupPolicyV2() *schema.Resource {
 	}
 }
 
-func dataSourceVBSPolicyV2Read(d *schema.ResourceData, meta interface{}) error {
+func dataSourceVBSPolicyV2Read(_ context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*cfg.Config)
 	vbsClient, err := config.VbsV2Client(config.GetRegion(d))
 
@@ -102,10 +104,10 @@ func dataSourceVBSPolicyV2Read(d *schema.ResourceData, meta interface{}) error {
 		tagsOpts := tags.ListOpts{Action: "filter", Tags: getVBSFilterTagsV2(d)}
 		querytags, err := tags.ListResources(vbsClient, tagsOpts).ExtractResources()
 		if err != nil {
-			return fmt.Errorf("Error Querying backup policy using tags: %s ", err)
+			return fmterr.Errorf("error Querying backup policy using tags: %s ", err)
 		}
 		if querytags.TotalCount > 1 {
-			return fmt.Errorf("Your tags query returned more than one result." +
+			return fmterr.Errorf("Your tags query returned more than one result." +
 				" Please try a more specific search criteria.")
 		}
 		if querytags.TotalCount > 0 {
@@ -120,16 +122,16 @@ func dataSourceVBSPolicyV2Read(d *schema.ResourceData, meta interface{}) error {
 
 	refinedPolicies, err := policies.List(vbsClient, listOpts)
 	if err != nil {
-		return fmt.Errorf("Unable to retrieve policies: %s", err)
+		return fmterr.Errorf("Unable to retrieve policies: %s", err)
 	}
 
 	if len(refinedPolicies) < 1 {
-		return fmt.Errorf("Your query returned no results. " +
+		return fmterr.Errorf("Your query returned no results. " +
 			"Please change your search criteria and try again.")
 	}
 
 	if len(refinedPolicies) > 1 {
-		return fmt.Errorf("Your query returned more than one result." +
+		return fmterr.Errorf("Your query returned more than one result." +
 			" Please try a more specific search criteria")
 	}
 
@@ -158,7 +160,7 @@ func dataSourceVBSPolicyV2Read(d *schema.ResourceData, meta interface{}) error {
 	}
 
 	if err := d.Set("tags", tag); err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 
 	return nil

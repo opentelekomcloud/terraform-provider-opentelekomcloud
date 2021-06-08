@@ -4,8 +4,8 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
-	"github.com/hashicorp/terraform-plugin-sdk/terraform"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/rts/v1/softwareconfig"
 
@@ -18,9 +18,9 @@ func TestAccOTCRtsSoftwareConfigV1_basic(t *testing.T) {
 	var config softwareconfig.SoftwareConfig
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:     func() { common.TestAccPreCheck(t) },
-		Providers:    common.TestAccProviders,
-		CheckDestroy: testAccCheckRtsSoftwareConfigV1Destroy,
+		PreCheck:          func() { common.TestAccPreCheck(t) },
+		ProviderFactories: common.TestAccProviderFactories,
+		CheckDestroy:      testAccCheckRtsSoftwareConfigV1Destroy,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccRtsSoftwareConfigV1_basic,
@@ -40,9 +40,9 @@ func TestAccOTCRtsSoftwareConfigV1_timeout(t *testing.T) {
 	var config softwareconfig.SoftwareConfig
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:     func() { common.TestAccPreCheck(t) },
-		Providers:    common.TestAccProviders,
-		CheckDestroy: testAccCheckRtsSoftwareConfigV1Destroy,
+		PreCheck:          func() { common.TestAccPreCheck(t) },
+		ProviderFactories: common.TestAccProviderFactories,
+		CheckDestroy:      testAccCheckRtsSoftwareConfigV1Destroy,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccRtsSoftwareConfigV1_timeout,
@@ -58,7 +58,7 @@ func testAccCheckRtsSoftwareConfigV1Destroy(s *terraform.State) error {
 	config := common.TestAccProvider.Meta().(*cfg.Config)
 	orchestrationClient, err := config.OrchestrationV1Client(env.OS_REGION_NAME)
 	if err != nil {
-		return fmt.Errorf("Error creating OpenTelekomCloud orchestration client: %s", err)
+		return fmt.Errorf("error creating OpenTelekomCloud orchestration client: %s", err)
 	}
 
 	for _, rs := range s.RootModule().Resources {
@@ -89,7 +89,7 @@ func testAccCheckRtsSoftwareConfigV1Exists(n string, configs *softwareconfig.Sof
 		config := common.TestAccProvider.Meta().(*cfg.Config)
 		orchestrationClient, err := config.OrchestrationV1Client(env.OS_REGION_NAME)
 		if err != nil {
-			return fmt.Errorf("Error creating OpenTelekomCloud orchestration client: %s", err)
+			return fmt.Errorf("error creating OpenTelekomCloud orchestration client: %s", err)
 		}
 
 		found, err := softwareconfig.Get(orchestrationClient, rs.Primary.ID).Extract()

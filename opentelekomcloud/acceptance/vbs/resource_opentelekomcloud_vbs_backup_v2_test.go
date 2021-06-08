@@ -4,8 +4,8 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
-	"github.com/hashicorp/terraform-plugin-sdk/terraform"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/vbs/v2/backups"
 
@@ -18,9 +18,9 @@ func TestAccVBSBackupV2_basic(t *testing.T) {
 	var config backups.Backup
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:     func() { common.TestAccPreCheck(t) },
-		Providers:    common.TestAccProviders,
-		CheckDestroy: testAccCheckVBSBackupV2Destroy,
+		PreCheck:          func() { common.TestAccPreCheck(t) },
+		ProviderFactories: common.TestAccProviderFactories,
+		CheckDestroy:      testAccCheckVBSBackupV2Destroy,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccVBSBackupV2_basic,
@@ -42,9 +42,9 @@ func TestAccVBSBackupV2_timeout(t *testing.T) {
 	var config backups.Backup
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:     func() { common.TestAccPreCheck(t) },
-		Providers:    common.TestAccProviders,
-		CheckDestroy: testAccCheckVBSBackupV2Destroy,
+		PreCheck:          func() { common.TestAccPreCheck(t) },
+		ProviderFactories: common.TestAccProviderFactories,
+		CheckDestroy:      testAccCheckVBSBackupV2Destroy,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccVBSBackupV2_timeout,
@@ -60,7 +60,7 @@ func testAccCheckVBSBackupV2Destroy(s *terraform.State) error {
 	config := common.TestAccProvider.Meta().(*cfg.Config)
 	vbsClient, err := config.VbsV2Client(env.OS_REGION_NAME)
 	if err != nil {
-		return fmt.Errorf("Error creating OpenTelekomCloud vbs client: %s", err)
+		return fmt.Errorf("error creating OpenTelekomCloud vbs client: %s", err)
 	}
 
 	for _, rs := range s.RootModule().Resources {
@@ -91,7 +91,7 @@ func testAccCheckVBSBackupV2Exists(n string, configs *backups.Backup) resource.T
 		config := common.TestAccProvider.Meta().(*cfg.Config)
 		vbsClient, err := config.VbsV2Client(env.OS_REGION_NAME)
 		if err != nil {
-			return fmt.Errorf("Error creating OpenTelekomCloud vbs client: %s", err)
+			return fmt.Errorf("error creating OpenTelekomCloud vbs client: %s", err)
 		}
 
 		found, err := backups.Get(vbsClient, rs.Primary.ID).Extract()

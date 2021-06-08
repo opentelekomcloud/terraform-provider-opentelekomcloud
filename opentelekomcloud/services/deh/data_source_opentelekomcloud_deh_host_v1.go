@@ -1,18 +1,20 @@
 package deh
 
 import (
-	"fmt"
+	"context"
 	"log"
 
-	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/deh/v1/hosts"
 
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common/cfg"
+	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common/fmterr"
 )
 
 func DataSourceDEHHostV1() *schema.Resource {
 	return &schema.Resource{
-		Read: dataSourceDEHHostV1Read,
+		ReadContext: dataSourceDEHHostV1Read,
 		Schema: map[string]*schema.Schema{
 			"region": {
 				Type:     schema.TypeString,
@@ -103,7 +105,7 @@ func DataSourceDEHHostV1() *schema.Resource {
 	}
 }
 
-func dataSourceDEHHostV1Read(d *schema.ResourceData, meta interface{}) error {
+func dataSourceDEHHostV1Read(_ context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*cfg.Config)
 	dehClient, err := config.DehV1Client(config.GetRegion(d))
 
@@ -117,16 +119,16 @@ func dataSourceDEHHostV1Read(d *schema.ResourceData, meta interface{}) error {
 	deh, err := hosts.List(dehClient, listOpts).AllPages()
 	refinedDeh, err := hosts.ExtractHosts(deh)
 	if err != nil {
-		return fmt.Errorf("Unable to retrieve dedicated hosts: %s", err)
+		return fmterr.Errorf("Unable to retrieve dedicated hosts: %s", err)
 	}
 
 	if len(refinedDeh) < 1 {
-		return fmt.Errorf("Your query returned no results. " +
+		return fmterr.Errorf("Your query returned no results. " +
 			"Please change your search criteria and try again.")
 	}
 
 	if len(refinedDeh) > 1 {
-		return fmt.Errorf("Your query returned more than one result." +
+		return fmterr.Errorf("Your query returned more than one result." +
 			" Please try a more specific search criteria")
 	}
 

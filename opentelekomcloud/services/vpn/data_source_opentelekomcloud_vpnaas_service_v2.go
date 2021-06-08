@@ -1,19 +1,21 @@
 package vpn
 
 import (
-	"fmt"
+	"context"
 	"log"
 
-	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/networking/v2/extensions/vpnaas/services"
 	"github.com/opentelekomcloud/gophertelekomcloud/pagination"
 
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common/cfg"
+	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common/fmterr"
 )
 
 func DataSourceVpnServiceV2() *schema.Resource {
 	return &schema.Resource{
-		Read: dataSourceVpnServiceV2Read,
+		ReadContext: dataSourceVpnServiceV2Read,
 
 		Schema: map[string]*schema.Schema{
 			"id": {
@@ -74,11 +76,11 @@ func DataSourceVpnServiceV2() *schema.Resource {
 	}
 }
 
-func dataSourceVpnServiceV2Read(d *schema.ResourceData, meta interface{}) error {
+func dataSourceVpnServiceV2Read(_ context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*cfg.Config)
 	networkingClient, err := config.NetworkingV2Client(config.GetRegion(d))
 	if err != nil {
-		return fmt.Errorf("Error creating OpenTelekomCloud networking client: %s", err)
+		return fmterr.Errorf("error creating OpenTelekomCloud networking client: %s", err)
 	}
 	adminStateUp := d.Get("admin_state_up").(bool)
 	listOpts := services.ListOpts{
@@ -108,15 +110,15 @@ func dataSourceVpnServiceV2Read(d *schema.ResourceData, meta interface{}) error 
 		return true, nil
 	})
 	if err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 
 	if len(refinedVpns) < 1 {
-		return fmt.Errorf("Your query returned zero results. Please change your search criteria and try again.")
+		return fmterr.Errorf("Your query returned zero results. Please change your search criteria and try again.")
 	}
 
 	if len(refinedVpns) > 1 {
-		return fmt.Errorf("Your query returned more than one result. Please try a more specific search criteria")
+		return fmterr.Errorf("Your query returned more than one result. Please try a more specific search criteria")
 	}
 	Vpn := refinedVpns[0]
 

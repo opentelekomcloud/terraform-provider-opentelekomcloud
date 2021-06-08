@@ -5,8 +5,8 @@ import (
 	"os"
 	"testing"
 
-	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
-	"github.com/hashicorp/terraform-plugin-sdk/terraform"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/smn/v2/subscriptions"
 
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/acceptance/common"
@@ -19,9 +19,9 @@ func TestAccSMNV2Subscription_basic(t *testing.T) {
 	var subscription2 subscriptions.SubscriptionGet
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:     func() { common.TestAccPreCheck(t) },
-		Providers:    common.TestAccProviders,
-		CheckDestroy: testAccCheckSMNSubscriptionV2Destroy,
+		PreCheck:          func() { common.TestAccPreCheck(t) },
+		ProviderFactories: common.TestAccProviderFactories,
+		CheckDestroy:      testAccCheckSMNSubscriptionV2Destroy,
 		Steps: []resource.TestStep{
 			{
 				Config: TestAccSMNV2SubscriptionConfig_basic,
@@ -50,9 +50,9 @@ func TestAccSMNV2Subscription_schemaProjectName(t *testing.T) {
 	env.OS_TENANT_NAME = cfg.ProjectName(projectName2)
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:     func() { common.TestAccPreCheck(t) },
-		Providers:    common.TestAccProviders,
-		CheckDestroy: testAccCheckSMNSubscriptionV2Destroy,
+		PreCheck:          func() { common.TestAccPreCheck(t) },
+		ProviderFactories: common.TestAccProviderFactories,
+		CheckDestroy:      testAccCheckSMNSubscriptionV2Destroy,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccSMNV2SubscriptionConfig_projectName(env.OS_TENANT_NAME),
@@ -72,7 +72,7 @@ func testAccCheckSMNSubscriptionV2Destroy(s *terraform.State) error {
 	config := common.TestAccProvider.Meta().(*cfg.Config)
 	smnClient, err := config.SmnV2Client(env.OS_TENANT_NAME)
 	if err != nil {
-		return fmt.Errorf("Error creating OpenTelekomCloud smn: %s", err)
+		return fmt.Errorf("error creating OpenTelekomCloud smn: %s", err)
 	}
 	var subscription *subscriptions.SubscriptionGet
 	for _, rs := range s.RootModule().Resources {
@@ -110,7 +110,7 @@ func testAccCheckSMNV2SubscriptionExists(n string, subscription *subscriptions.S
 		config := common.TestAccProvider.Meta().(*cfg.Config)
 		smnClient, err := config.SmnV2Client(projectName)
 		if err != nil {
-			return fmt.Errorf("Error creating OpenTelekomCloud smn client: %s", err)
+			return fmt.Errorf("error creating OpenTelekomCloud smn client: %s", err)
 		}
 
 		foundList, err := subscriptions.List(smnClient).Extract()

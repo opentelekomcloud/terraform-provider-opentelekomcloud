@@ -1,19 +1,21 @@
 package dms
 
 import (
-	"fmt"
+	"context"
 	"log"
 	"strconv"
 
-	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/dms/v1/maintainwindows"
 
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common/cfg"
+	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common/fmterr"
 )
 
 func DataSourceDmsMaintainWindowV1() *schema.Resource {
 	return &schema.Resource{
-		Read: dataSourceDmsMaintainWindowV1Read,
+		ReadContext: dataSourceDmsMaintainWindowV1Read,
 
 		Schema: map[string]*schema.Schema{
 			"seq": {
@@ -40,16 +42,16 @@ func DataSourceDmsMaintainWindowV1() *schema.Resource {
 	}
 }
 
-func dataSourceDmsMaintainWindowV1Read(d *schema.ResourceData, meta interface{}) error {
+func dataSourceDmsMaintainWindowV1Read(_ context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*cfg.Config)
 	DmsV1Client, err := config.DmsV1Client(config.GetRegion(d))
 	if err != nil {
-		return fmt.Errorf("Error creating OpenTelekomCloud dms client: %s", err)
+		return fmterr.Errorf("error creating OpenTelekomCloud dms client: %s", err)
 	}
 
 	v, err := maintainwindows.Get(DmsV1Client).Extract()
 	if err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 
 	seq := d.Get("seq").(int)
@@ -77,7 +79,7 @@ func dataSourceDmsMaintainWindowV1Read(d *schema.ResourceData, meta interface{})
 		filteredMVs = append(filteredMVs, mv)
 	}
 	if len(filteredMVs) < 1 {
-		return fmt.Errorf("Your query returned no results. Please change your filters and try again.")
+		return fmterr.Errorf("Your query returned no results. Please change your filters and try again.")
 	}
 	mw := filteredMVs[0]
 	d.SetId(strconv.Itoa(mw.ID))

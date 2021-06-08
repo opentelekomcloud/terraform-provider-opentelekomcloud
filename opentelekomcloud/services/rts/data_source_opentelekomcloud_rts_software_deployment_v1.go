@@ -1,17 +1,19 @@
 package rts
 
 import (
-	"fmt"
+	"context"
 
-	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/rts/v1/softwaredeployment"
 
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common/cfg"
+	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common/fmterr"
 )
 
 func DataSourceRtsSoftwareDeploymentV1() *schema.Resource {
 	return &schema.Resource{
-		Read: dataSourceRTSSoftwareDeploymentV1Read,
+		ReadContext: dataSourceRTSSoftwareDeploymentV1Read,
 
 		Schema: map[string]*schema.Schema{ // request and response parameters
 			"region": {
@@ -56,7 +58,7 @@ func DataSourceRtsSoftwareDeploymentV1() *schema.Resource {
 	}
 }
 
-func dataSourceRTSSoftwareDeploymentV1Read(d *schema.ResourceData, meta interface{}) error {
+func dataSourceRTSSoftwareDeploymentV1Read(_ context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*cfg.Config)
 	orchestrationClient, err := config.OrchestrationV1Client(config.GetRegion(d))
 
@@ -70,16 +72,16 @@ func dataSourceRTSSoftwareDeploymentV1Read(d *schema.ResourceData, meta interfac
 
 	refinedDeployments, err := softwaredeployment.List(orchestrationClient, listOpts)
 	if err != nil {
-		return fmt.Errorf("Unable to retrieve RTS Software Deployment: %s", err)
+		return fmterr.Errorf("Unable to retrieve RTS Software Deployment: %s", err)
 	}
 
 	if len(refinedDeployments) < 1 {
-		return fmt.Errorf("No matching resource found. " +
+		return fmterr.Errorf("No matching resource found. " +
 			"Please change your search criteria and try again.")
 	}
 
 	if len(refinedDeployments) > 1 {
-		return fmt.Errorf("Multiple resources matched; use additional constraints to reduce matches to a single resource")
+		return fmterr.Errorf("Multiple resources matched; use additional constraints to reduce matches to a single resource")
 	}
 
 	stackResource := refinedDeployments[0]

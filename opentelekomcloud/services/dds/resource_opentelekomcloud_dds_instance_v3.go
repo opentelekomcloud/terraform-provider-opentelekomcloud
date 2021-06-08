@@ -1,30 +1,32 @@
 package dds
 
 import (
-	"fmt"
+	"context"
 	"log"
 	"time"
 
 	"github.com/hashicorp/go-multierror"
-	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
-	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
-	"github.com/hashicorp/terraform-plugin-sdk/helper/validation"
-	"github.com/opentelekomcloud/gophertelekomcloud"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
+	golangsdk "github.com/opentelekomcloud/gophertelekomcloud"
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/dds/v3/instances"
 
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common"
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common/cfg"
+	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common/fmterr"
 )
 
 func ResourceDdsInstanceV3() *schema.Resource {
 	return &schema.Resource{
-		Create: resourceDdsInstanceV3Create,
-		Read:   resourceDdsInstanceV3Read,
-		Update: resourceDdsInstanceV3Update,
-		Delete: resourceDdsInstanceV3Delete,
+		CreateContext: resourceDdsInstanceV3Create,
+		ReadContext:   resourceDdsInstanceV3Read,
+		UpdateContext: resourceDdsInstanceV3Update,
+		DeleteContext: resourceDdsInstanceV3Delete,
 
 		Importer: &schema.ResourceImporter{
-			State: schema.ImportStatePassthrough,
+			StateContext: schema.ImportStatePassthroughContext,
 		},
 
 		Timeouts: &schema.ResourceTimeout{
@@ -308,11 +310,11 @@ func instanceStateRefreshFunc(client *golangsdk.ServiceClient, instanceID string
 	}
 }
 
-func resourceDdsInstanceV3Create(d *schema.ResourceData, meta interface{}) error {
+func resourceDdsInstanceV3Create(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*cfg.Config)
 	client, err := config.DdsV3Client(config.GetRegion(d))
 	if err != nil {
-		return fmt.Errorf("error creating OpenTelekomCloud DDSv3 client: %w", err)
+		return fmterr.Errorf("error creating OpenTelekomCloud DDSv3 client: %w", err)
 	}
 
 	createOpts := instances.CreateOpts{
@@ -338,7 +340,7 @@ func resourceDdsInstanceV3Create(d *schema.ResourceData, meta interface{}) error
 
 	instance, err := instances.Create(client, createOpts).Extract()
 	if err != nil {
-		return fmt.Errorf("error getting instance from result: %w", err)
+		return fmterr.Errorf("error getting instance from result: %w", err)
 	}
 	log.Printf("[DEBUG] Create instance %s: %#v", instance.Id, instance)
 
@@ -353,19 +355,19 @@ func resourceDdsInstanceV3Create(d *schema.ResourceData, meta interface{}) error
 		MinTimeout: 10 * time.Second,
 	}
 
-	_, err = stateConf.WaitForState()
+	_, err = stateConf.WaitForStateContext(ctx)
 	if err != nil {
-		return fmt.Errorf("error waiting for instance (%s) to become ready: %w", instance.Id, err)
+		return fmterr.Errorf("error waiting for instance (%s) to become ready: %w", instance.Id, err)
 	}
 
-	return resourceDdsInstanceV3Read(d, meta)
+	return resourceDdsInstanceV3Read(ctx, d, meta)
 }
 
-func resourceDdsInstanceV3Read(d *schema.ResourceData, meta interface{}) error {
+func resourceDdsInstanceV3Read(_ context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*cfg.Config)
 	client, err := config.DdsV3Client(config.GetRegion(d))
 	if err != nil {
-		return fmt.Errorf("error creating OpenTelekomCloud DDSv3 client: %w", err)
+		return fmterr.Errorf("error creating OpenTelekomCloud DDSv3 client: %w", err)
 	}
 
 	listOpts := instances.ListInstanceOpts{
@@ -373,11 +375,11 @@ func resourceDdsInstanceV3Read(d *schema.ResourceData, meta interface{}) error {
 	}
 	allPages, err := instances.List(client, listOpts).AllPages()
 	if err != nil {
-		return fmt.Errorf("error fetching DDS instance: %w", err)
+		return fmterr.Errorf("error fetching DDS instance: %w", err)
 	}
 	instancesList, err := instances.ExtractInstances(allPages)
 	if err != nil {
-		return fmt.Errorf("error extracting DDS instance: %w", err)
+		return fmterr.Errorf("error extracting DDS instance: %w", err)
 	}
 	if instancesList.TotalCount == 0 {
 		log.Printf("[WARN] DDS instance (%s) was not found", d.Id())
@@ -420,7 +422,7 @@ func resourceDdsInstanceV3Read(d *schema.ResourceData, meta interface{}) error {
 	}
 	datastoreList = append(datastoreList, datastore)
 	if err = d.Set("datastore", datastoreList); err != nil {
-		return fmt.Errorf("error setting DDSv3 datastore opts: %w", err)
+		return fmterr.Errorf("error setting DDSv3 datastore opts: %w", err)
 	}
 
 	backupStrategyList := make([]map[string]interface{}, 0, 1)
@@ -430,23 +432,23 @@ func resourceDdsInstanceV3Read(d *schema.ResourceData, meta interface{}) error {
 	}
 	backupStrategyList = append(backupStrategyList, backupStrategy)
 	if err = d.Set("backup_strategy", backupStrategyList); err != nil {
-		return fmt.Errorf("error setting DDSv3 backup_strategy opts: %w", err)
+		return fmterr.Errorf("error setting DDSv3 backup_strategy opts: %w", err)
 	}
 
 	// save nodes attribute
 	err = d.Set("nodes", flattenDdsInstanceV3Nodes(instance))
 	if err != nil {
-		return fmt.Errorf("error setting nodes of DDSv3 instance: %w", err)
+		return fmterr.Errorf("error setting nodes of DDSv3 instance: %w", err)
 	}
 
-	return mErr.ErrorOrNil()
+	return diag.FromErr(mErr.ErrorOrNil())
 }
 
-func resourceDdsInstanceV3Update(d *schema.ResourceData, meta interface{}) error {
+func resourceDdsInstanceV3Update(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*cfg.Config)
 	client, err := config.DdsV3Client(config.GetRegion(d))
 	if err != nil {
-		return fmt.Errorf("error creating OpenTelekomCloud DDSv3 client: %w", err)
+		return fmterr.Errorf("error creating OpenTelekomCloud DDSv3 client: %w", err)
 	}
 
 	var opts []instances.UpdateOpt
@@ -496,7 +498,7 @@ func resourceDdsInstanceV3Update(d *schema.ResourceData, meta interface{}) error
 
 	r := instances.Update(client, d.Id(), opts)
 	if r.Err != nil {
-		return fmt.Errorf("error updating instance from result: %w", r.Err)
+		return fmterr.Errorf("error updating instance from result: %w", r.Err)
 	}
 
 	stateConf := &resource.StateChangeConf{
@@ -508,24 +510,24 @@ func resourceDdsInstanceV3Update(d *schema.ResourceData, meta interface{}) error
 		MinTimeout: 10 * time.Second,
 	}
 
-	_, err = stateConf.WaitForState()
+	_, err = stateConf.WaitForStateContext(ctx)
 	if err != nil {
-		return fmt.Errorf("error waiting for instance (%s) to become ready: %w", d.Id(), err)
+		return fmterr.Errorf("error waiting for instance (%s) to become ready: %w", d.Id(), err)
 	}
 
-	return resourceDdsInstanceV3Read(d, meta)
+	return resourceDdsInstanceV3Read(ctx, d, meta)
 }
 
-func resourceDdsInstanceV3Delete(d *schema.ResourceData, meta interface{}) error {
+func resourceDdsInstanceV3Delete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*cfg.Config)
 	client, err := config.DdsV3Client(config.GetRegion(d))
 	if err != nil {
-		return fmt.Errorf("error creating OpenTelekomCloud DDSv3 client: %w", err)
+		return fmterr.Errorf("error creating OpenTelekomCloud DDSv3 client: %w", err)
 	}
 
 	result := instances.Delete(client, d.Id())
 	if result.Err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 	stateConf := &resource.StateChangeConf{
 		Pending:    []string{"normal", "abnormal", "frozen", "createfail", "enlargefail", "data_disk_full"},
@@ -536,9 +538,9 @@ func resourceDdsInstanceV3Delete(d *schema.ResourceData, meta interface{}) error
 		MinTimeout: 10 * time.Second,
 	}
 
-	_, err = stateConf.WaitForState()
+	_, err = stateConf.WaitForStateContext(ctx)
 	if err != nil {
-		return fmt.Errorf("error waiting for instance (%s) to be deleted: %w", d.Id(), err)
+		return fmterr.Errorf("error waiting for instance (%s) to be deleted: %w", d.Id(), err)
 	}
 	log.Printf("[DEBUG] Successfully deleted instance %s", d.Id())
 	return nil

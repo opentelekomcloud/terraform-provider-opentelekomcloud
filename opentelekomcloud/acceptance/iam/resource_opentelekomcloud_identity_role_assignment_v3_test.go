@@ -8,8 +8,8 @@ import (
 
 	"github.com/opentelekomcloud/gophertelekomcloud/pagination"
 
-	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
-	"github.com/hashicorp/terraform-plugin-sdk/terraform"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/identity/v3/groups"
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/identity/v3/roles"
@@ -29,8 +29,8 @@ func TestAccIdentityV3RoleAssignment_basic(t *testing.T) {
 			common.TestAccPreCheck(t)
 			common.TestAccPreCheckAdminOnly(t)
 		},
-		Providers:    common.TestAccProviders,
-		CheckDestroy: testAccCheckIdentityV3RoleAssignmentDestroy,
+		ProviderFactories: common.TestAccProviderFactories,
+		CheckDestroy:      testAccCheckIdentityV3RoleAssignmentDestroy,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccIdentityV3RoleAssignment_basic,
@@ -52,7 +52,7 @@ func testAccCheckIdentityV3RoleAssignmentDestroy(s *terraform.State) error {
 	config := common.TestAccProvider.Meta().(*cfg.Config)
 	identityClient, err := config.IdentityV3Client(env.OS_REGION_NAME)
 	if err != nil {
-		return fmt.Errorf("Error creating OpenTelekomCloud identity client: %s", err)
+		return fmt.Errorf("error creating OpenTelekomCloud identity client: %s", err)
 	}
 
 	for _, rs := range s.RootModule().Resources {
@@ -83,7 +83,7 @@ func testAccCheckIdentityV3RoleAssignmentExists(n string, role *roles.Role, grou
 		config := common.TestAccProvider.Meta().(*cfg.Config)
 		identityClient, err := config.IdentityV3Client(env.OS_REGION_NAME)
 		if err != nil {
-			return fmt.Errorf("Error creating OpenTelekomCloud identity client: %s", err)
+			return fmt.Errorf("error creating OpenTelekomCloud identity client: %s", err)
 		}
 
 		domainID, projectID, groupID, userID, roleID := iam.ExtractRoleAssignmentID(rs.Primary.ID)

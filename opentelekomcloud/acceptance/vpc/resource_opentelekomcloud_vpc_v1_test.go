@@ -4,8 +4,8 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
-	"github.com/hashicorp/terraform-plugin-sdk/terraform"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/networking/v1/vpcs"
 
@@ -18,9 +18,9 @@ func TestAccOTCVpcV1_basic(t *testing.T) {
 	var vpc vpcs.Vpc
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:     func() { common.TestAccPreCheck(t) },
-		Providers:    common.TestAccProviders,
-		CheckDestroy: testAccCheckOTCVpcV1Destroy,
+		PreCheck:          func() { common.TestAccPreCheck(t) },
+		ProviderFactories: common.TestAccProviderFactories,
+		CheckDestroy:      testAccCheckOTCVpcV1Destroy,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccVpcV1_basic,
@@ -48,9 +48,9 @@ func TestAccOTCVpcV1_update(t *testing.T) {
 	var vpc vpcs.Vpc
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:     func() { common.TestAccPreCheck(t) },
-		Providers:    common.TestAccProviders,
-		CheckDestroy: testAccCheckOTCVpcV1Destroy,
+		PreCheck:          func() { common.TestAccPreCheck(t) },
+		ProviderFactories: common.TestAccProviderFactories,
+		CheckDestroy:      testAccCheckOTCVpcV1Destroy,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccVpcV1_basic,
@@ -84,9 +84,9 @@ func TestAccOTCVpcV1_timeout(t *testing.T) {
 	var vpc vpcs.Vpc
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:     func() { common.TestAccPreCheck(t) },
-		Providers:    common.TestAccProviders,
-		CheckDestroy: testAccCheckOTCVpcV1Destroy,
+		PreCheck:          func() { common.TestAccPreCheck(t) },
+		ProviderFactories: common.TestAccProviderFactories,
+		CheckDestroy:      testAccCheckOTCVpcV1Destroy,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccVpcV1_timeout,
@@ -102,7 +102,7 @@ func testAccCheckOTCVpcV1Destroy(s *terraform.State) error {
 	config := common.TestAccProvider.Meta().(*cfg.Config)
 	vpcClient, err := config.NetworkingV1Client(env.OS_REGION_NAME)
 	if err != nil {
-		return fmt.Errorf("Error creating OpenTelekomCloud vpc client: %s", err)
+		return fmt.Errorf("error creating OpenTelekomCloud vpc client: %s", err)
 	}
 
 	for _, rs := range s.RootModule().Resources {
@@ -133,7 +133,7 @@ func testAccCheckOTCVpcV1Exists(n string, vpc *vpcs.Vpc) resource.TestCheckFunc 
 		config := common.TestAccProvider.Meta().(*cfg.Config)
 		vpcClient, err := config.NetworkingV1Client(env.OS_REGION_NAME)
 		if err != nil {
-			return fmt.Errorf("Error creating OpenTelekomCloud vpc client: %s", err)
+			return fmt.Errorf("error creating OpenTelekomCloud vpc client: %s", err)
 		}
 
 		found, err := vpcs.Get(vpcClient, rs.Primary.ID).Extract()

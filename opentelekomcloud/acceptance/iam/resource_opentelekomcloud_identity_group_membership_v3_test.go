@@ -4,9 +4,9 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/hashicorp/terraform-plugin-sdk/helper/acctest"
-	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
-	"github.com/hashicorp/terraform-plugin-sdk/terraform"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/acctest"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/identity/v3/users"
 
@@ -25,8 +25,8 @@ func TestAccIdentityV3GroupMembership_basic(t *testing.T) {
 			common.TestAccPreCheck(t)
 			common.TestAccPreCheckAdminOnly(t)
 		},
-		Providers:    common.TestAccProviders,
-		CheckDestroy: testAccCheckIdentityV3GroupMembershipDestroy,
+		ProviderFactories: common.TestAccProviderFactories,
+		CheckDestroy:      testAccCheckIdentityV3GroupMembershipDestroy,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccIdentityV3GroupMembership_basic(groupName, userName),
@@ -54,7 +54,7 @@ func testAccCheckIdentityV3GroupMembershipDestroy(s *terraform.State) error {
 	config := common.TestAccProvider.Meta().(*cfg.Config)
 	identityClient, err := config.IdentityV3Client(env.OS_REGION_NAME)
 	if err != nil {
-		return fmt.Errorf("Error creating OpenStack identity client: %s", err)
+		return fmt.Errorf("error creating OpenStack identity client: %s", err)
 	}
 
 	for _, rs := range s.RootModule().Resources {
@@ -86,7 +86,7 @@ func testAccCheckIdentityV3GroupMembershipExists(n string, us []string) resource
 		config := common.TestAccProvider.Meta().(*cfg.Config)
 		identityClient, err := config.IdentityV3Client(env.OS_REGION_NAME)
 		if err != nil {
-			return fmt.Errorf("Error creating OpenStack identity client: %s", err)
+			return fmt.Errorf("error creating OpenStack identity client: %s", err)
 		}
 		group := rs.Primary.Attributes["group"]
 		if group == "" {

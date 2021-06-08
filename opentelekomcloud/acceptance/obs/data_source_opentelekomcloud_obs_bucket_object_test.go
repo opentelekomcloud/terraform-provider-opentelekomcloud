@@ -5,9 +5,9 @@ import (
 	"regexp"
 	"testing"
 
-	"github.com/hashicorp/terraform-plugin-sdk/helper/acctest"
-	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
-	"github.com/hashicorp/terraform-plugin-sdk/terraform"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/acctest"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/obs"
 
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/acceptance/common"
@@ -23,7 +23,7 @@ func TestAccDataSourceObsBucketObject_basic(t *testing.T) {
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:                  func() { common.TestAccPreCheck(t) },
-		Providers:                 common.TestAccProviders,
+		ProviderFactories:         common.TestAccProviderFactories,
 		PreventPostDestroyRefresh: true,
 		Steps: []resource.TestStep{
 			{
@@ -56,7 +56,7 @@ func TestAccDataSourceObsBucketObject_readableBody(t *testing.T) {
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:                  func() { common.TestAccPreCheck(t) },
-		Providers:                 common.TestAccProviders,
+		ProviderFactories:         common.TestAccProviderFactories,
 		PreventPostDestroyRefresh: true,
 		Steps: []resource.TestStep{
 			{
@@ -91,7 +91,7 @@ func TestAccDataSourceObsBucketObject_allParams(t *testing.T) {
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:                  func() { common.TestAccPreCheck(t) },
-		Providers:                 common.TestAccProviders,
+		ProviderFactories:         common.TestAccProviderFactories,
 		PreventPostDestroyRefresh: true,
 		Steps: []resource.TestStep{
 			{

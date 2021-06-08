@@ -4,8 +4,8 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
-	"github.com/hashicorp/terraform-plugin-sdk/terraform"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/deh/v1/hosts"
 
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/acceptance/common"
@@ -17,9 +17,9 @@ func TestAccOTCDedicatedHostV1_basic(t *testing.T) {
 	var host hosts.Host
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:     func() { common.TestAccPreCheck(t) },
-		Providers:    common.TestAccProviders,
-		CheckDestroy: testAccCheckOTCDeHV1Destroy,
+		PreCheck:          func() { common.TestAccPreCheck(t) },
+		ProviderFactories: common.TestAccProviderFactories,
+		CheckDestroy:      testAccCheckOTCDeHV1Destroy,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccDeHV1_basic,
@@ -40,9 +40,9 @@ func TestAccOTCDedicatedHostV1_basic(t *testing.T) {
 func TestAccOTCDedicatedHostV1_update(t *testing.T) {
 	var host hosts.Host
 	resource.Test(t, resource.TestCase{
-		PreCheck:     func() { common.TestAccPreCheck(t) },
-		Providers:    common.TestAccProviders,
-		CheckDestroy: testAccCheckOTCDeHV1Destroy,
+		PreCheck:          func() { common.TestAccPreCheck(t) },
+		ProviderFactories: common.TestAccProviderFactories,
+		CheckDestroy:      testAccCheckOTCDeHV1Destroy,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccDeHV1_basic,
@@ -76,9 +76,9 @@ func TestAccOTCDedicatedHostV1_timeout(t *testing.T) {
 	var host hosts.Host
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:     func() { common.TestAccPreCheck(t) },
-		Providers:    common.TestAccProviders,
-		CheckDestroy: testAccCheckOTCDeHV1Destroy,
+		PreCheck:          func() { common.TestAccPreCheck(t) },
+		ProviderFactories: common.TestAccProviderFactories,
+		CheckDestroy:      testAccCheckOTCDeHV1Destroy,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccDeHV1_timeout,
@@ -94,7 +94,7 @@ func testAccCheckOTCDeHV1Destroy(s *terraform.State) error {
 	config := common.TestAccProvider.Meta().(*cfg.Config)
 	dehClient, err := config.DehV1Client(env.OS_REGION_NAME)
 	if err != nil {
-		return fmt.Errorf("Error creating OpenTelekomCloud deh client: %s", err)
+		return fmt.Errorf("error creating OpenTelekomCloud deh client: %s", err)
 	}
 
 	for _, rs := range s.RootModule().Resources {
@@ -125,7 +125,7 @@ func testAccCheckOTCDeHV1Exists(n string, host *hosts.Host) resource.TestCheckFu
 		config := common.TestAccProvider.Meta().(*cfg.Config)
 		dehClient, err := config.DehV1Client(env.OS_REGION_NAME)
 		if err != nil {
-			return fmt.Errorf("Error creating OpenTelekomCloud DeH client: %s", err)
+			return fmt.Errorf("error creating OpenTelekomCloud DeH client: %s", err)
 		}
 
 		found, err := hosts.Get(dehClient, rs.Primary.ID).Extract()

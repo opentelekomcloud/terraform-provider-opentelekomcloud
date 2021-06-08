@@ -5,8 +5,8 @@ import (
 	"regexp"
 	"testing"
 
-	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
-	"github.com/hashicorp/terraform-plugin-sdk/terraform"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/rds/v3/configurations"
 
@@ -19,9 +19,9 @@ func TestAccRdsConfigurationV3_basic(t *testing.T) {
 	var config configurations.Configuration
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:     func() { common.TestAccPreCheck(t) },
-		Providers:    common.TestAccProviders,
-		CheckDestroy: testAccCheckRdsConfigV3Destroy,
+		PreCheck:          func() { common.TestAccPreCheck(t) },
+		ProviderFactories: common.TestAccProviderFactories,
+		CheckDestroy:      testAccCheckRdsConfigV3Destroy,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccRdsConfigV3_basic,
@@ -49,9 +49,9 @@ func TestAccRdsConfigurationV3_basic(t *testing.T) {
 
 func TestAccRdsConfigurationV3_invalidDbVersion(t *testing.T) {
 	resource.Test(t, resource.TestCase{
-		PreCheck:     func() { common.TestAccPreCheck(t) },
-		Providers:    common.TestAccProviders,
-		CheckDestroy: testAccCheckRdsConfigV3Destroy,
+		PreCheck:          func() { common.TestAccPreCheck(t) },
+		ProviderFactories: common.TestAccProviderFactories,
+		CheckDestroy:      testAccCheckRdsConfigV3Destroy,
 		Steps: []resource.TestStep{
 			{
 				Config:      testAccRdsConfigV3_invalidDataStoreVersion,

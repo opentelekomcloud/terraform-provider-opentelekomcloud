@@ -1,6 +1,7 @@
 package acceptance
 
 import (
+	"context"
 	"fmt"
 	"io/ioutil"
 	"os"
@@ -8,25 +9,24 @@ import (
 	"regexp"
 	"testing"
 
-	"github.com/hashicorp/terraform-plugin-sdk/helper/acctest"
-	"github.com/hashicorp/terraform-plugin-sdk/helper/pathorcontents"
-	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
-	"github.com/hashicorp/terraform-plugin-sdk/terraform"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/acctest"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 	"github.com/opentelekomcloud/gophertelekomcloud/acceptance/tools"
 	th "github.com/opentelekomcloud/gophertelekomcloud/testhelper"
+	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/helper/pathorcontents"
 
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud"
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common/cfg"
 )
 
 func TestProvider(t *testing.T) {
-	if err := opentelekomcloud.Provider().(*schema.Provider).InternalValidate(); err != nil {
+	if err := opentelekomcloud.Provider().InternalValidate(); err != nil {
 		t.Fatalf("err: %s", err)
 	}
 }
 
 func TestProvider_impl(t *testing.T) {
-	var _ terraform.ResourceProvider = opentelekomcloud.Provider()
+	var _ = opentelekomcloud.Provider()
 }
 
 // Steps for configuring OpenTelekomCloud with SSL validation are here:
@@ -51,8 +51,7 @@ func TestAccProvider_caCertFile(t *testing.T) {
 		"cacert_file": caFile,
 	}
 
-	err = p.Configure(terraform.NewResourceConfigRaw(raw))
-	if err != nil {
+	if p.Configure(nil, terraform.NewResourceConfigRaw(raw)).HasError() {
 		t.Fatalf("Unexpected err when specifying OpenTelekomCloud CA by file: %s", err)
 	}
 }
@@ -75,8 +74,7 @@ func TestAccProvider_caCertString(t *testing.T) {
 		"cacert_file": caContents,
 	}
 
-	err = p.Configure(terraform.NewResourceConfigRaw(raw))
-	if err != nil {
+	if p.Configure(nil, terraform.NewResourceConfigRaw(raw)).HasError() {
 		t.Fatalf("Unexpected err when specifying OpenTelekomCloud CA by string: %s", err)
 	}
 }
@@ -107,8 +105,7 @@ func TestAccProvider_clientCertFile(t *testing.T) {
 		"key":  keyFile,
 	}
 
-	err = p.Configure(terraform.NewResourceConfigRaw(raw))
-	if err != nil {
+	if p.Configure(context.Background(), terraform.NewResourceConfigRaw(raw)).HasError() {
 		t.Fatalf("Unexpected err when specifying OpenTelekomCloud Client keypair by file: %s", err)
 	}
 }
@@ -137,8 +134,7 @@ func TestAccProvider_clientCertString(t *testing.T) {
 		"key":  keyContents,
 	}
 
-	err = p.Configure(terraform.NewResourceConfigRaw(raw))
-	if err != nil {
+	if p.Configure(context.Background(), terraform.NewResourceConfigRaw(raw)).HasError() {
 		t.Fatalf("Unexpected err when specifying OpenTelekomCloud Client keypair by contents: %s", err)
 	}
 }
@@ -146,7 +142,7 @@ func TestAccProvider_clientCertString(t *testing.T) {
 func envVarContents(varName string) (string, error) {
 	contents, _, err := pathorcontents.Read(os.Getenv(varName))
 	if err != nil {
-		return "", fmt.Errorf("Error reading %s: %s", varName, err)
+		return "", fmt.Errorf("error reading %s: %s", varName, err)
 	}
 	return contents, nil
 }
@@ -159,15 +155,15 @@ func envVarFile(varName string) (string, error) {
 
 	tmpFile, err := ioutil.TempFile("", varName)
 	if err != nil {
-		return "", fmt.Errorf("Error creating temp file: %s", err)
+		return "", fmt.Errorf("error creating temp file: %s", err)
 	}
 	if _, err := tmpFile.Write([]byte(contents)); err != nil {
 		_ = os.Remove(tmpFile.Name())
-		return "", fmt.Errorf("Error writing temp file: %s", err)
+		return "", fmt.Errorf("error writing temp file: %s", err)
 	}
 	if err := tmpFile.Close(); err != nil {
 		_ = os.Remove(tmpFile.Name())
-		return "", fmt.Errorf("Error closing temp file: %s", err)
+		return "", fmt.Errorf("error closing temp file: %s", err)
 	}
 	return tmpFile.Name(), nil
 }

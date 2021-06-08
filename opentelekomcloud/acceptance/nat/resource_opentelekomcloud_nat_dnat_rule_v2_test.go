@@ -18,10 +18,10 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/hashicorp/terraform-plugin-sdk/terraform"
-	"github.com/opentelekomcloud/gophertelekomcloud"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
+	golangsdk "github.com/opentelekomcloud/gophertelekomcloud"
 
-	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 
 	acc "github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/acceptance/common"
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/acceptance/env"
@@ -31,9 +31,9 @@ import (
 
 func TestAccNatDnat_basic(t *testing.T) {
 	resource.Test(t, resource.TestCase{
-		PreCheck:     func() { acc.TestAccPreCheck(t) },
-		Providers:    acc.TestAccProviders,
-		CheckDestroy: testAccCheckNatDnatDestroy,
+		PreCheck:          func() { acc.TestAccPreCheck(t) },
+		ProviderFactories: acc.TestAccProviderFactories,
+		CheckDestroy:      testAccCheckNatDnatDestroy,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccNatDnat_basic(),
@@ -109,7 +109,7 @@ func testAccCheckNatDnatDestroy(s *terraform.State) error {
 	config := acc.TestAccProvider.Meta().(*cfg.Config)
 	client, err := config.NatV2Client(env.OS_REGION_NAME)
 	if err != nil {
-		return fmt.Errorf("Error creating sdk client, err=%s", err)
+		return fmt.Errorf("error creating sdk client, err=%s", err)
 	}
 
 	for _, rs := range s.RootModule().Resources {
@@ -139,17 +139,17 @@ func testAccCheckNatDnatExists() resource.TestCheckFunc {
 		config := acc.TestAccProvider.Meta().(*cfg.Config)
 		client, err := config.NatV2Client(env.OS_REGION_NAME)
 		if err != nil {
-			return fmt.Errorf("Error creating sdk client, err=%s", err)
+			return fmt.Errorf("error creating sdk client, err=%s", err)
 		}
 
 		rs, ok := s.RootModule().Resources["opentelekomcloud_nat_dnat_rule_v2.dnat"]
 		if !ok {
-			return fmt.Errorf("Error checking opentelekomcloud_nat_dnat_rule_v2.dnat exist, err=not found opentelekomcloud_nat_dnat_rule_v2.dnat")
+			return fmt.Errorf("error checking opentelekomcloud_nat_dnat_rule_v2.dnat exist, err=not found opentelekomcloud_nat_dnat_rule_v2.dnat")
 		}
 
 		url, err := common.ReplaceVarsForTest(rs, "dnat_rules/{id}")
 		if err != nil {
-			return fmt.Errorf("Error checking opentelekomcloud_nat_dnat_rule_v2.dnat exist, err=building url failed: %s", err)
+			return fmt.Errorf("error checking opentelekomcloud_nat_dnat_rule_v2.dnat exist, err=building url failed: %s", err)
 		}
 		url = client.ServiceURL(url)
 
@@ -160,7 +160,7 @@ func testAccCheckNatDnatExists() resource.TestCheckFunc {
 			if _, ok := err.(golangsdk.ErrDefault404); ok {
 				return fmt.Errorf("opentelekomcloud_nat_dnat_rule_v2.dnat is not exist")
 			}
-			return fmt.Errorf("Error checking opentelekomcloud_nat_dnat_rule_v2.dnat exist, err=send request failed: %s", err)
+			return fmt.Errorf("error checking opentelekomcloud_nat_dnat_rule_v2.dnat exist, err=send request failed: %s", err)
 		}
 		return nil
 	}

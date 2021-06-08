@@ -1,26 +1,29 @@
 package iam
 
 import (
+	"context"
 	"fmt"
 	"log"
 	"reflect"
 
-	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
-	"github.com/opentelekomcloud/gophertelekomcloud"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	golangsdk "github.com/opentelekomcloud/gophertelekomcloud"
 
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common"
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common/cfg"
+	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common/fmterr"
 )
 
 func ResourceIdentityRoleV3() *schema.Resource {
 	return &schema.Resource{
-		Create: resourceIdentityRoleV3Create,
-		Read:   resourceIdentityRoleV3Read,
-		Update: resourceIdentityRoleV3Update,
-		Delete: resourceIdentityRoleV3Delete,
+		CreateContext: resourceIdentityRoleV3Create,
+		ReadContext:   resourceIdentityRoleV3Read,
+		UpdateContext: resourceIdentityRoleV3Update,
+		DeleteContext: resourceIdentityRoleV3Delete,
 
 		Importer: &schema.ResourceImporter{
-			State: schema.ImportStatePassthrough,
+			StateContext: schema.ImportStatePassthroughContext,
 		},
 
 		Schema: map[string]*schema.Schema{
@@ -86,73 +89,73 @@ func resourceIdentityRoleV3UserInputParams(d *schema.ResourceData) map[string]in
 	}
 }
 
-func resourceIdentityRoleV3Create(d *schema.ResourceData, meta interface{}) error {
+func resourceIdentityRoleV3Create(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*cfg.Config)
 	client, err := config.IdentityV30Client()
 	if err != nil {
-		return fmt.Errorf("error creating identity v3.0 client: %s", err)
+		return fmterr.Errorf("error creating identity v3.0 client: %s", err)
 	}
 
 	opts := resourceIdentityRoleV3UserInputParams(d)
 
 	r, err := sendIdentityRoleV3CreateRequest(d, opts, nil, client)
 	if err != nil {
-		return fmt.Errorf("error creating IdentityRoleV3: %s", err)
+		return fmterr.Errorf("error creating IdentityRoleV3: %s", err)
 	}
 
 	id, err := common.NavigateValue(r, []string{"role", "id"}, nil)
 	if err != nil {
-		return fmt.Errorf("error constructing id: %s", err)
+		return fmterr.Errorf("error constructing id: %s", err)
 	}
 	d.SetId(id.(string))
 
-	return resourceIdentityRoleV3Read(d, meta)
+	return resourceIdentityRoleV3Read(ctx, d, meta)
 }
 
-func resourceIdentityRoleV3Read(d *schema.ResourceData, meta interface{}) error {
+func resourceIdentityRoleV3Read(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*cfg.Config)
 	client, err := config.IdentityV30Client()
 	if err != nil {
-		return fmt.Errorf("error creating identity v3.0 client: %s", err)
+		return fmterr.Errorf("error creating identity v3.0 client: %s", err)
 	}
 
 	res := make(map[string]interface{})
 
-	err = readIdentityRoleV3Read(d, client, res)
+	err = readIdentityRoleV3Read(ctx, d, client, res)
 	if err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 
-	return setIdentityRoleV3Properties(d, res)
+	return diag.FromErr(setIdentityRoleV3Properties(d, res))
 }
 
-func resourceIdentityRoleV3Update(d *schema.ResourceData, meta interface{}) error {
+func resourceIdentityRoleV3Update(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*cfg.Config)
 	client, err := config.IdentityV30Client()
 	if err != nil {
-		return fmt.Errorf("error creating identity v3.0 client: %s", err)
+		return fmterr.Errorf("error creating identity v3.0 client: %s", err)
 	}
 
 	opts := resourceIdentityRoleV3UserInputParams(d)
 
 	_, err = sendIdentityRoleV3UpdateRequest(d, opts, nil, client)
 	if err != nil {
-		return fmt.Errorf("error updating (IdentityRoleV3: %v): %s", d.Id(), err)
+		return fmterr.Errorf("error updating (IdentityRoleV3: %v): %s", d.Id(), err)
 	}
 
-	return resourceIdentityRoleV3Read(d, meta)
+	return resourceIdentityRoleV3Read(ctx, d, meta)
 }
 
-func resourceIdentityRoleV3Delete(d *schema.ResourceData, meta interface{}) error {
+func resourceIdentityRoleV3Delete(_ context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*cfg.Config)
 	client, err := config.IdentityV30Client()
 	if err != nil {
-		return fmt.Errorf("error creating identity v3.0 client: %s", err)
+		return fmterr.Errorf("error creating identity v3.0 client: %s", err)
 	}
 
 	url, err := common.ReplaceVars(d, "OS-ROLE/roles/{id}", nil)
 	if err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 	url = client.ServiceURL(url)
 
@@ -165,7 +168,7 @@ func resourceIdentityRoleV3Delete(d *schema.ResourceData, meta interface{}) erro
 		MoreHeaders:  map[string]string{"Content-Type": "application/json"},
 	})
 	if r.Err != nil {
-		return fmt.Errorf("error deleting Role %q: %s", d.Id(), r.Err)
+		return fmterr.Errorf("error deleting Role %q: %s", d.Id(), r.Err)
 	}
 
 	return nil
@@ -489,7 +492,7 @@ func expandIdentityRoleV3UpdateType(d interface{}, arrayIndex map[string]int) (i
 	return nil, fmt.Errorf("unknown display layer:%v", v)
 }
 
-func readIdentityRoleV3Read(d *schema.ResourceData, client *golangsdk.ServiceClient, result map[string]interface{}) error {
+func readIdentityRoleV3Read(_ context.Context, d *schema.ResourceData, client *golangsdk.ServiceClient, result map[string]interface{}) error {
 	url, err := common.ReplaceVars(d, "OS-ROLE/roles/{id}", nil)
 	if err != nil {
 		return err

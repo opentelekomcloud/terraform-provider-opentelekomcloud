@@ -1,27 +1,29 @@
 package vpc
 
 import (
-	"fmt"
+	"context"
 	"log"
 	"time"
 
-	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
-	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
-	"github.com/opentelekomcloud/gophertelekomcloud"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	golangsdk "github.com/opentelekomcloud/gophertelekomcloud"
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/networking/v2/peerings"
 
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common"
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common/cfg"
+	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common/fmterr"
 )
 
 func ResourceVpcPeeringConnectionV2() *schema.Resource {
 	return &schema.Resource{
-		Create: resourceVPCPeeringV2Create,
-		Read:   resourceVPCPeeringV2Read,
-		Update: resourceVPCPeeringV2Update,
-		Delete: resourceVPCPeeringV2Delete,
+		CreateContext: resourceVPCPeeringV2Create,
+		ReadContext:   resourceVPCPeeringV2Read,
+		UpdateContext: resourceVPCPeeringV2Update,
+		DeleteContext: resourceVPCPeeringV2Delete,
 		Importer: &schema.ResourceImporter{
-			State: schema.ImportStatePassthrough,
+			StateContext: schema.ImportStatePassthroughContext,
 		},
 		Timeouts: &schema.ResourceTimeout{
 			Create: schema.DefaultTimeout(10 * time.Minute),
@@ -65,12 +67,12 @@ func ResourceVpcPeeringConnectionV2() *schema.Resource {
 	}
 }
 
-func resourceVPCPeeringV2Create(d *schema.ResourceData, meta interface{}) error {
+func resourceVPCPeeringV2Create(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*cfg.Config)
 	peeringClient, err := config.NetworkingV2Client(config.GetRegion(d))
 
 	if err != nil {
-		return fmt.Errorf("Error creating OpenTelekomCloud Vpc Peering Connection Client: %s", err)
+		return fmterr.Errorf("error creating OpenTelekomCloud Vpc Peering Connection Client: %s", err)
 	}
 
 	requestvpcinfo := peerings.VpcInfo{
@@ -91,7 +93,7 @@ func resourceVPCPeeringV2Create(d *schema.ResourceData, meta interface{}) error 
 	n, err := peerings.Create(peeringClient, createOpts).Extract()
 
 	if err != nil {
-		return fmt.Errorf("Error creating OpenTelekomCloud Vpc Peering Connection: %s", err)
+		return fmterr.Errorf("error creating OpenTelekomCloud Vpc Peering Connection: %s", err)
 	}
 
 	log.Printf("[INFO] Vpc Peering Connection ID: %s", n.ID)
@@ -107,18 +109,18 @@ func resourceVPCPeeringV2Create(d *schema.ResourceData, meta interface{}) error 
 		MinTimeout: 3 * time.Second,
 	}
 
-	_, err = stateConf.WaitForState()
+	_, err = stateConf.WaitForStateContext(ctx)
 	d.SetId(n.ID)
 
-	return resourceVPCPeeringV2Read(d, meta)
+	return resourceVPCPeeringV2Read(ctx, d, meta)
 
 }
 
-func resourceVPCPeeringV2Read(d *schema.ResourceData, meta interface{}) error {
+func resourceVPCPeeringV2Read(_ context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*cfg.Config)
 	peeringClient, err := config.NetworkingV2Client(config.GetRegion(d))
 	if err != nil {
-		return fmt.Errorf("Error creating OpenTelekomCloud   Vpc Peering Connection Client: %s", err)
+		return fmterr.Errorf("error creating OpenTelekomCloud   Vpc Peering Connection Client: %s", err)
 	}
 
 	n, err := peerings.Get(peeringClient, d.Id()).Extract()
@@ -128,7 +130,7 @@ func resourceVPCPeeringV2Read(d *schema.ResourceData, meta interface{}) error {
 			return nil
 		}
 
-		return fmt.Errorf("Error retrieving OpenTelekomCloud Vpc Peering Connection: %s", err)
+		return fmterr.Errorf("error retrieving OpenTelekomCloud Vpc Peering Connection: %s", err)
 	}
 
 	d.Set("id", n.ID)
@@ -142,11 +144,11 @@ func resourceVPCPeeringV2Read(d *schema.ResourceData, meta interface{}) error {
 	return nil
 }
 
-func resourceVPCPeeringV2Update(d *schema.ResourceData, meta interface{}) error {
+func resourceVPCPeeringV2Update(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*cfg.Config)
 	peeringClient, err := config.NetworkingV2Client(config.GetRegion(d))
 	if err != nil {
-		return fmt.Errorf("Error creating OpenTelekomCloud  Vpc Peering Connection Client: %s", err)
+		return fmterr.Errorf("error creating OpenTelekomCloud  Vpc Peering Connection Client: %s", err)
 	}
 
 	var updateOpts peerings.UpdateOpts
@@ -155,18 +157,18 @@ func resourceVPCPeeringV2Update(d *schema.ResourceData, meta interface{}) error 
 
 	_, err = peerings.Update(peeringClient, d.Id(), updateOpts).Extract()
 	if err != nil {
-		return fmt.Errorf("Error updating OpenTelekomCloud Vpc Peering Connection: %s", err)
+		return fmterr.Errorf("error updating OpenTelekomCloud Vpc Peering Connection: %s", err)
 	}
 
-	return resourceVPCPeeringV2Read(d, meta)
+	return resourceVPCPeeringV2Read(ctx, d, meta)
 }
 
-func resourceVPCPeeringV2Delete(d *schema.ResourceData, meta interface{}) error {
+func resourceVPCPeeringV2Delete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 
 	config := meta.(*cfg.Config)
 	peeringClient, err := config.NetworkingV2Client(config.GetRegion(d))
 	if err != nil {
-		return fmt.Errorf("Error creating OpenTelekomCloud  Vpc Peering Connection Client: %s", err)
+		return fmterr.Errorf("error creating OpenTelekomCloud  Vpc Peering Connection Client: %s", err)
 	}
 
 	stateConf := &resource.StateChangeConf{
@@ -178,9 +180,9 @@ func resourceVPCPeeringV2Delete(d *schema.ResourceData, meta interface{}) error 
 		MinTimeout: 3 * time.Second,
 	}
 
-	_, err = stateConf.WaitForState()
+	_, err = stateConf.WaitForStateContext(ctx)
 	if err != nil {
-		return fmt.Errorf("Error deleting OpenTelekomCloud Vpc Peering Connection: %s", err)
+		return fmterr.Errorf("error deleting OpenTelekomCloud Vpc Peering Connection: %s", err)
 	}
 
 	d.SetId("")

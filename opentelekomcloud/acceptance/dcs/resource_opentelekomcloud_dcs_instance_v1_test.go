@@ -4,11 +4,11 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
-	"github.com/hashicorp/terraform-plugin-sdk/terraform"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/dcs/v1/instances"
 
-	"github.com/hashicorp/terraform-plugin-sdk/helper/acctest"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/acctest"
 
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/acceptance/common"
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/acceptance/env"
@@ -20,9 +20,9 @@ func TestAccDcsInstancesV1_depr(t *testing.T) {
 	var instanceName = fmt.Sprintf("dcs_instance_%s", acctest.RandString(5))
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheckDcs(t) },
-		Providers:    common.TestAccProviders,
-		CheckDestroy: testAccCheckDcsV1InstanceDestroy,
+		PreCheck:          func() { testAccPreCheckDcs(t) },
+		ProviderFactories: common.TestAccProviderFactories,
+		CheckDestroy:      testAccCheckDcsV1InstanceDestroy,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccDcsV1Instance_depr(instanceName),
@@ -43,9 +43,9 @@ func TestAccDcsInstancesV1_basic(t *testing.T) {
 	var instanceName = fmt.Sprintf("dcs_instance_%s", acctest.RandString(5))
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:     func() { common.TestAccPreCheck(t) },
-		Providers:    common.TestAccProviders,
-		CheckDestroy: testAccCheckDcsV1InstanceDestroy,
+		PreCheck:          func() { common.TestAccPreCheck(t) },
+		ProviderFactories: common.TestAccProviderFactories,
+		CheckDestroy:      testAccCheckDcsV1InstanceDestroy,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccDcsV1Instance_basic(instanceName),
@@ -82,7 +82,7 @@ func testAccCheckDcsV1InstanceDestroy(s *terraform.State) error {
 	config := common.TestAccProvider.Meta().(*cfg.Config)
 	dcsClient, err := config.DcsV1Client(env.OS_REGION_NAME)
 	if err != nil {
-		return fmt.Errorf("Error creating instance client: %s", err)
+		return fmt.Errorf("error creating instance client: %s", err)
 	}
 
 	for _, rs := range s.RootModule().Resources {
@@ -112,12 +112,12 @@ func testAccCheckDcsV1InstanceExists(n string, instance instances.Instance) reso
 		config := common.TestAccProvider.Meta().(*cfg.Config)
 		dcsClient, err := config.DcsV1Client(env.OS_REGION_NAME)
 		if err != nil {
-			return fmt.Errorf("Error creating instance client: %s", err)
+			return fmt.Errorf("error creating instance client: %s", err)
 		}
 
 		v, err := instances.Get(dcsClient, rs.Primary.ID).Extract()
 		if err != nil {
-			return fmt.Errorf("Error getting instance: %s, err: %s", rs.Primary.ID, err)
+			return fmt.Errorf("error getting instance: %s, err: %s", rs.Primary.ID, err)
 		}
 
 		if v.InstanceID != rs.Primary.ID {

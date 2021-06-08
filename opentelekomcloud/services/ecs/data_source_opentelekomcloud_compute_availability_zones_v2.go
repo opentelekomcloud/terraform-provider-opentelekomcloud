@@ -1,20 +1,22 @@
 package ecs
 
 import (
-	"fmt"
+	"context"
 	"sort"
 
-	"github.com/hashicorp/terraform-plugin-sdk/helper/hashcode"
-	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
-	"github.com/hashicorp/terraform-plugin-sdk/helper/validation"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/compute/v2/extensions/availabilityzones"
+	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/helper/hashcode"
 
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common/cfg"
+	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common/fmterr"
 )
 
 func DataSourceComputeAvailabilityZonesV2() *schema.Resource {
 	return &schema.Resource{
-		Read: dataSourceComputeAvailabilityZonesV2Read,
+		ReadContext: dataSourceComputeAvailabilityZonesV2Read,
 		Schema: map[string]*schema.Schema{
 			"names": {
 				Type:     schema.TypeList,
@@ -40,21 +42,21 @@ func DataSourceComputeAvailabilityZonesV2() *schema.Resource {
 	}
 }
 
-func dataSourceComputeAvailabilityZonesV2Read(d *schema.ResourceData, meta interface{}) error {
+func dataSourceComputeAvailabilityZonesV2Read(_ context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*cfg.Config)
 	region := config.GetRegion(d)
 	computeClient, err := config.ComputeV2Client(region)
 	if err != nil {
-		return fmt.Errorf("Error creating OpenStack compute client: %s", err)
+		return fmterr.Errorf("error creating OpenStack compute client: %s", err)
 	}
 
 	allPages, err := availabilityzones.List(computeClient).AllPages()
 	if err != nil {
-		return fmt.Errorf("Error retrieving openstack_compute_availability_zones_v2: %s", err)
+		return fmterr.Errorf("error retrieving openstack_compute_availability_zones_v2: %s", err)
 	}
 	zoneInfo, err := availabilityzones.ExtractAvailabilityZones(allPages)
 	if err != nil {
-		return fmt.Errorf("Error extracting openstack_compute_availability_zones_v2 from response: %s", err)
+		return fmterr.Errorf("error extracting openstack_compute_availability_zones_v2 from response: %s", err)
 	}
 
 	stateBool := d.Get("state").(string) == "available"

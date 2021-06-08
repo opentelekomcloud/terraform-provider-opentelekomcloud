@@ -4,8 +4,8 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
-	"github.com/hashicorp/terraform-plugin-sdk/terraform"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/cloudeyeservice/alarmrule"
 
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/acceptance/common"
@@ -17,9 +17,9 @@ func TestCESAlarmRule_basic(t *testing.T) {
 	var ar alarmrule.AlarmRule
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:     func() { common.TestAccPreCheck(t) },
-		Providers:    common.TestAccProviders,
-		CheckDestroy: testCESAlarmRuleDestroy,
+		PreCheck:          func() { common.TestAccPreCheck(t) },
+		ProviderFactories: common.TestAccProviderFactories,
+		CheckDestroy:      testCESAlarmRuleDestroy,
 		Steps: []resource.TestStep{
 			{
 				Config: testCESAlarmRule_basic,
@@ -42,7 +42,7 @@ func testCESAlarmRuleDestroy(s *terraform.State) error {
 	config := common.TestAccProvider.Meta().(*cfg.Config)
 	networkingClient, err := config.CesV1Client(env.OS_REGION_NAME)
 	if err != nil {
-		return fmt.Errorf("Error creating OpenTelekomCloud ces client: %s", err)
+		return fmt.Errorf("error creating OpenTelekomCloud ces client: %s", err)
 	}
 
 	for _, rs := range s.RootModule().Resources {
@@ -74,7 +74,7 @@ func testCESAlarmRuleExists(n string, ar *alarmrule.AlarmRule) resource.TestChec
 		config := common.TestAccProvider.Meta().(*cfg.Config)
 		networkingClient, err := config.CesV1Client(env.OS_REGION_NAME)
 		if err != nil {
-			return fmt.Errorf("Error creating OpenTelekomCloud ces client: %s", err)
+			return fmt.Errorf("error creating OpenTelekomCloud ces client: %s", err)
 		}
 
 		id := rs.Primary.ID

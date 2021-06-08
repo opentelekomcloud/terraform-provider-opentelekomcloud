@@ -1,24 +1,26 @@
 package ecs
 
 import (
-	"fmt"
+	"context"
 	"log"
 
-	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/compute/v2/extensions/servergroups"
 
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common"
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common/cfg"
+	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common/fmterr"
 )
 
 func ResourceComputeServerGroupV2() *schema.Resource {
 	return &schema.Resource{
-		Create: resourceComputeServerGroupV2Create,
-		Read:   resourceComputeServerGroupV2Read,
-		Update: nil,
-		Delete: resourceComputeServerGroupV2Delete,
+		CreateContext: resourceComputeServerGroupV2Create,
+		ReadContext:   resourceComputeServerGroupV2Read,
+		UpdateContext: nil,
+		DeleteContext: resourceComputeServerGroupV2Delete,
 		Importer: &schema.ResourceImporter{
-			State: schema.ImportStatePassthrough,
+			StateContext: schema.ImportStatePassthroughContext,
 		},
 
 		Schema: map[string]*schema.Schema{
@@ -54,11 +56,11 @@ func ResourceComputeServerGroupV2() *schema.Resource {
 	}
 }
 
-func resourceComputeServerGroupV2Create(d *schema.ResourceData, meta interface{}) error {
+func resourceComputeServerGroupV2Create(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*cfg.Config)
 	computeClient, err := config.ComputeV2Client(config.GetRegion(d))
 	if err != nil {
-		return fmt.Errorf("Error creating OpenTelekomCloud compute client: %s", err)
+		return fmterr.Errorf("error creating OpenTelekomCloud compute client: %s", err)
 	}
 
 	createOpts := ServerGroupCreateOpts{
@@ -72,24 +74,24 @@ func resourceComputeServerGroupV2Create(d *schema.ResourceData, meta interface{}
 	log.Printf("[DEBUG] Create Options: %#v", createOpts)
 	newSG, err := servergroups.Create(computeClient, createOpts).Extract()
 	if err != nil {
-		return fmt.Errorf("Error creating ServerGroup: %s", err)
+		return fmterr.Errorf("error creating ServerGroup: %s", err)
 	}
 
 	d.SetId(newSG.ID)
 
-	return resourceComputeServerGroupV2Read(d, meta)
+	return resourceComputeServerGroupV2Read(ctx, d, meta)
 }
 
-func resourceComputeServerGroupV2Read(d *schema.ResourceData, meta interface{}) error {
+func resourceComputeServerGroupV2Read(_ context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*cfg.Config)
 	computeClient, err := config.ComputeV2Client(config.GetRegion(d))
 	if err != nil {
-		return fmt.Errorf("Error creating OpenTelekomCloud compute client: %s", err)
+		return fmterr.Errorf("error creating OpenTelekomCloud compute client: %s", err)
 	}
 
 	sg, err := servergroups.Get(computeClient, d.Id()).Extract()
 	if err != nil {
-		return common.CheckDeleted(d, err, "server group")
+		return diag.FromErr(common.CheckDeleted(d, err, "server group"))
 	}
 
 	log.Printf("[DEBUG] Retrieved ServerGroup %s: %+v", d.Id(), sg)
@@ -103,7 +105,7 @@ func resourceComputeServerGroupV2Read(d *schema.ResourceData, meta interface{}) 
 		policies = append(policies, p)
 	}
 	if err := d.Set("policies", policies); err != nil {
-		return fmt.Errorf("[DEBUG] Error saving policies to state for OpenTelekomCloud server group (%s): %s", d.Id(), err)
+		return fmterr.Errorf("[DEBUG] Error saving policies to state for OpenTelekomCloud server group (%s): %s", d.Id(), err)
 	}
 
 	// Set the members
@@ -112,7 +114,7 @@ func resourceComputeServerGroupV2Read(d *schema.ResourceData, meta interface{}) 
 		members = append(members, m)
 	}
 	if err := d.Set("members", members); err != nil {
-		return fmt.Errorf("[DEBUG] Error saving members to state for OpenTelekomCloud server group (%s): %s", d.Id(), err)
+		return fmterr.Errorf("[DEBUG] Error saving members to state for OpenTelekomCloud server group (%s): %s", d.Id(), err)
 	}
 
 	d.Set("region", config.GetRegion(d))
@@ -120,16 +122,16 @@ func resourceComputeServerGroupV2Read(d *schema.ResourceData, meta interface{}) 
 	return nil
 }
 
-func resourceComputeServerGroupV2Delete(d *schema.ResourceData, meta interface{}) error {
+func resourceComputeServerGroupV2Delete(_ context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*cfg.Config)
 	computeClient, err := config.ComputeV2Client(config.GetRegion(d))
 	if err != nil {
-		return fmt.Errorf("Error creating OpenTelekomCloud compute client: %s", err)
+		return fmterr.Errorf("error creating OpenTelekomCloud compute client: %s", err)
 	}
 
 	log.Printf("[DEBUG] Deleting ServerGroup %s", d.Id())
 	if err := servergroups.Delete(computeClient, d.Id()).ExtractErr(); err != nil {
-		return fmt.Errorf("Error deleting ServerGroup: %s", err)
+		return fmterr.Errorf("error deleting ServerGroup: %s", err)
 	}
 
 	return nil

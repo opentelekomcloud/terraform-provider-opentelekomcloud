@@ -1,27 +1,32 @@
 package common
 
 import (
+	"context"
 	"os"
 	"testing"
 
-	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
-	"github.com/hashicorp/terraform-plugin-sdk/terraform"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud"
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/acceptance/env"
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common/cfg"
 )
 
-var TestAccProviders map[string]terraform.ResourceProvider
-var TestAccProvider *schema.Provider
+var (
+	TestAccProviderFactories map[string]func() (*schema.Provider, error)
+	TestAccProvider          *schema.Provider
+)
 
 func init() {
-	TestAccProvider = opentelekomcloud.Provider().(*schema.Provider)
-	TestAccProviders = map[string]terraform.ResourceProvider{
-		"opentelekomcloud": TestAccProvider,
+	TestAccProvider = opentelekomcloud.Provider()
+	TestAccProviderFactories = map[string]func() (*schema.Provider, error){
+		"opentelekomcloud": func() (*schema.Provider, error) {
+			return TestAccProvider, nil
+		},
 	}
 
-	err := TestAccProvider.Configure(terraform.NewResourceConfigRaw(nil))
+	err := TestAccProvider.Configure(context.Background(), terraform.NewResourceConfigRaw(nil))
 	if err == nil {
 		config := TestAccProvider.Meta().(*cfg.Config)
 		env.OS_REGION_NAME = config.GetRegion(nil)

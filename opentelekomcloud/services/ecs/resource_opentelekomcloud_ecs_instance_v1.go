@@ -1,16 +1,17 @@
 package ecs
 
 import (
+	"context"
 	"crypto/sha1"
 	"encoding/hex"
-	"fmt"
 	"log"
 	"time"
 
 	"github.com/hashicorp/go-multierror"
-	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
-	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
-	"github.com/opentelekomcloud/gophertelekomcloud"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	golangsdk "github.com/opentelekomcloud/gophertelekomcloud"
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/common/tags"
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/compute/v2/extensions/secgroups"
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/compute/v2/servers"
@@ -19,16 +20,17 @@ import (
 
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common"
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common/cfg"
+	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common/fmterr"
 )
 
 func ResourceEcsInstanceV1() *schema.Resource {
 	return &schema.Resource{
-		Create: resourceEcsInstanceV1Create,
-		Read:   resourceEcsInstanceV1Read,
-		Update: resourceEcsInstanceV1Update,
-		Delete: resourceEcsInstanceV1Delete,
+		CreateContext: resourceEcsInstanceV1Create,
+		ReadContext:   resourceEcsInstanceV1Read,
+		UpdateContext: resourceEcsInstanceV1Update,
+		DeleteContext: resourceEcsInstanceV1Delete,
 		Importer: &schema.ResourceImporter{
-			State: schema.ImportStatePassthrough,
+			StateContext: schema.ImportStatePassthroughContext,
 		},
 
 		Timeouts: &schema.ResourceTimeout{
@@ -179,11 +181,11 @@ func ResourceEcsInstanceV1() *schema.Resource {
 	}
 }
 
-func resourceEcsInstanceV1Create(d *schema.ResourceData, meta interface{}) error {
+func resourceEcsInstanceV1Create(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*cfg.Config)
 	client, err := config.ComputeV1Client(config.GetRegion(d))
 	if err != nil {
-		return fmt.Errorf("error creating OpenTelekomCloud ComputeV1 client: %s", err)
+		return fmterr.Errorf("error creating OpenTelekomCloud ComputeV1 client: %s", err)
 	}
 
 	createOpts := &cloudservers.CreateOpts{
@@ -205,17 +207,17 @@ func resourceEcsInstanceV1Create(d *schema.ResourceData, meta interface{}) error
 
 	jobResponse, err := cloudservers.Create(client, createOpts).ExtractJobResponse()
 	if err != nil {
-		return fmt.Errorf("error creating OpenTelekomCloud server: %s", err)
+		return fmterr.Errorf("error creating OpenTelekomCloud server: %s", err)
 	}
 
 	timeout := int(d.Timeout(schema.TimeoutCreate) / time.Second)
 	if err := cloudservers.WaitForJobSuccess(client, timeout, jobResponse.JobID); err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 
 	serverID, err := cloudservers.GetJobEntity(client, jobResponse.JobID, "server_id")
 	if err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 
 	d.SetId(serverID.(string))
@@ -225,7 +227,7 @@ func resourceEcsInstanceV1Create(d *schema.ResourceData, meta interface{}) error
 	if len(tagRaw) > 0 {
 		tagList := common.ExpandResourceTags(tagRaw)
 		if err := tags.Create(client, "cloudservers", d.Id(), tagList).ExtractErr(); err != nil {
-			return fmt.Errorf("error setting tags of CloudServer: %s", err)
+			return fmterr.Errorf("error setting tags of CloudServer: %s", err)
 		}
 	}
 
@@ -233,24 +235,24 @@ func resourceEcsInstanceV1Create(d *schema.ResourceData, meta interface{}) error
 		ar := d.Get("auto_recovery").(bool)
 		log.Printf("[DEBUG] Set auto recovery of instance to %t", ar)
 
-		if err := setAutoRecoveryForInstance(d, meta, d.Id(), ar); err != nil {
+		if err := setAutoRecoveryForInstance(ctx, d, meta, d.Id(), ar); err != nil {
 			log.Printf("[WARN] Error setting auto recovery of CloudServer: %s", err)
 		}
 	}
 
-	return resourceEcsInstanceV1Read(d, meta)
+	return resourceEcsInstanceV1Read(ctx, d, meta)
 }
 
-func resourceEcsInstanceV1Read(d *schema.ResourceData, meta interface{}) error {
+func resourceEcsInstanceV1Read(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*cfg.Config)
 	client, err := config.ComputeV1Client(config.GetRegion(d))
 	if err != nil {
-		return fmt.Errorf("error creating OpenTelekomCloud ComputeV1 client: %s", err)
+		return fmterr.Errorf("error creating OpenTelekomCloud ComputeV1 client: %s", err)
 	}
 
 	server, err := cloudservers.Get(client, d.Id()).Extract()
 	if err != nil {
-		return common.CheckDeleted(d, err, "CloudServer")
+		return diag.FromErr(common.CheckDeleted(d, err, "CloudServer"))
 	}
 
 	log.Printf("[DEBUG] Retrieved Server %s: %+v", d.Id(), server)
@@ -281,32 +283,32 @@ func resourceEcsInstanceV1Read(d *schema.ResourceData, meta interface{}) error {
 	// save tags
 	resourceTags, err := tags.Get(client, "cloudservers", d.Id()).Extract()
 	if err != nil {
-		return fmt.Errorf("error fetching OpenTelekomCloud CloudServers tags: %s", err)
+		return fmterr.Errorf("error fetching OpenTelekomCloud CloudServers tags: %s", err)
 	}
 	tagMap := common.TagsToMap(resourceTags)
 	if err := d.Set("tags", tagMap); err != nil {
-		return fmt.Errorf("error saving tags for OpenTelekomCloud CloudServers: %s", err)
+		return fmterr.Errorf("error saving tags for OpenTelekomCloud CloudServers: %s", err)
 	}
 
-	ar, err := resourceECSAutoRecoveryV1Read(d, meta, d.Id())
+	ar, err := resourceECSAutoRecoveryV1Read(ctx, d, meta, d.Id())
 	if err != nil && !common.IsResourceNotFound(err) {
-		return fmt.Errorf("error reading auto recovery of instance:%s, err=%s", d.Id(), err)
+		return fmterr.Errorf("error reading auto recovery of instance:%s, err=%s", d.Id(), err)
 	}
 	mErr = multierror.Append(mErr,
 		d.Set("auto_recovery", ar),
 	)
 	if err := mErr.ErrorOrNil(); err != nil {
-		return fmt.Errorf("error setting ECS attrbutes: %s", err)
+		return fmterr.Errorf("error setting ECS attrbutes: %s", err)
 	}
 
 	return nil
 }
 
-func resourceEcsInstanceV1Update(d *schema.ResourceData, meta interface{}) error {
+func resourceEcsInstanceV1Update(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*cfg.Config)
 	client, err := config.ComputeV2Client(config.GetRegion(d))
 	if err != nil {
-		return fmt.Errorf("error creating OpenTelekomCloud ComputeV2 client: %s", err)
+		return fmterr.Errorf("error creating OpenTelekomCloud ComputeV2 client: %s", err)
 	}
 
 	var updateOpts servers.UpdateOpts
@@ -317,7 +319,7 @@ func resourceEcsInstanceV1Update(d *schema.ResourceData, meta interface{}) error
 	if updateOpts != (servers.UpdateOpts{}) {
 		_, err := servers.Update(client, d.Id(), updateOpts).Extract()
 		if err != nil {
-			return fmt.Errorf("error updating OpenTelekomCloud server: %s", err)
+			return fmterr.Errorf("error updating OpenTelekomCloud server: %s", err)
 		}
 	}
 
@@ -338,7 +340,7 @@ func resourceEcsInstanceV1Update(d *schema.ResourceData, meta interface{}) error
 				if _, ok := err.(golangsdk.ErrDefault404); ok {
 					continue
 				}
-				return fmt.Errorf("error removing security group (%s) from OpenTelekomCloud server (%s): %s", sg, d.Id(), err)
+				return fmterr.Errorf("error removing security group (%s) from OpenTelekomCloud server (%s): %s", sg, d.Id(), err)
 			}
 			log.Printf("[DEBUG] Removed security group (%s) from instance (%s)", sg, d.Id())
 		}
@@ -346,7 +348,7 @@ func resourceEcsInstanceV1Update(d *schema.ResourceData, meta interface{}) error
 		for _, sg := range secGroupsToAdd.List() {
 			err := secgroups.AddServer(client, d.Id(), sg.(string)).ExtractErr()
 			if err != nil && err.Error() != "EOF" {
-				return fmt.Errorf("error adding security group (%s) to OpenTelekomCloud server (%s): %s", sg, d.Id(), err)
+				return fmterr.Errorf("error adding security group (%s) to OpenTelekomCloud server (%s): %s", sg, d.Id(), err)
 			}
 			log.Printf("[DEBUG] Added security group (%s) to instance (%s)", sg, d.Id())
 		}
@@ -361,7 +363,7 @@ func resourceEcsInstanceV1Update(d *schema.ResourceData, meta interface{}) error
 		log.Printf("[DEBUG] Resize configuration: %#v", resizeOpts)
 
 		if err := servers.Resize(client, d.Id(), resizeOpts).ExtractErr(); err != nil {
-			return fmt.Errorf("error resizing OpenTelekomCloud server: %s", err)
+			return fmterr.Errorf("error resizing OpenTelekomCloud server: %s", err)
 		}
 
 		// Wait for the instance to finish resizing.
@@ -376,15 +378,15 @@ func resourceEcsInstanceV1Update(d *schema.ResourceData, meta interface{}) error
 			MinTimeout: 3 * time.Second,
 		}
 
-		_, err = stateConf.WaitForState()
+		_, err = stateConf.WaitForStateContext(ctx)
 		if err != nil {
-			return fmt.Errorf("error waiting for instance (%s) to resize: %s", d.Id(), err)
+			return fmterr.Errorf("error waiting for instance (%s) to resize: %s", d.Id(), err)
 		}
 
 		// Confirm resize.
 		log.Printf("[DEBUG] Confirming resize")
 		if err := servers.ConfirmResize(client, d.Id()).ExtractErr(); err != nil {
-			return fmt.Errorf("error confirming resize of OpenTelekomCloud server: %s", err)
+			return fmterr.Errorf("error confirming resize of OpenTelekomCloud server: %s", err)
 		}
 
 		stateConf = &resource.StateChangeConf{
@@ -396,9 +398,9 @@ func resourceEcsInstanceV1Update(d *schema.ResourceData, meta interface{}) error
 			MinTimeout: 3 * time.Second,
 		}
 
-		_, err = stateConf.WaitForState()
+		_, err = stateConf.WaitForStateContext(ctx)
 		if err != nil {
-			return fmt.Errorf("error waiting for instance (%s) to confirm resize: %s", d.Id(), err)
+			return fmterr.Errorf("error waiting for instance (%s) to confirm resize: %s", d.Id(), err)
 		}
 	}
 
@@ -406,29 +408,29 @@ func resourceEcsInstanceV1Update(d *schema.ResourceData, meta interface{}) error
 	if d.HasChange("tags") {
 		computeClient, err := config.ComputeV1Client(config.GetRegion(d))
 		if err != nil {
-			return fmt.Errorf("error creating OpenTelekomCloud Computev1 client: %s", err)
+			return fmterr.Errorf("error creating OpenTelekomCloud Computev1 client: %s", err)
 		}
 		if err := common.UpdateResourceTags(computeClient, d, "cloudservers", d.Id()); err != nil {
-			return fmt.Errorf("error updating tags of CloudServer %s: %s", d.Id(), err)
+			return fmterr.Errorf("error updating tags of CloudServer %s: %s", d.Id(), err)
 		}
 	}
 
 	if d.HasChange("auto_recovery") {
 		ar := d.Get("auto_recovery").(bool)
 		log.Printf("[DEBUG] Update auto recovery of instance to %t", ar)
-		if err := setAutoRecoveryForInstance(d, meta, d.Id(), ar); err != nil {
-			return fmt.Errorf("error updating auto recovery of CloudServer:%s", err)
+		if err := setAutoRecoveryForInstance(ctx, d, meta, d.Id(), ar); err != nil {
+			return fmterr.Errorf("error updating auto recovery of CloudServer:%s", err)
 		}
 	}
 
-	return resourceEcsInstanceV1Read(d, meta)
+	return resourceEcsInstanceV1Read(ctx, d, meta)
 }
 
-func resourceEcsInstanceV1Delete(d *schema.ResourceData, meta interface{}) error {
+func resourceEcsInstanceV1Delete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*cfg.Config)
 	client, err := config.ComputeV1Client(config.GetRegion(d))
 	if err != nil {
-		return fmt.Errorf("error creating OpenTelekomCloud ComputeV1 client: %s", err)
+		return fmterr.Errorf("error creating OpenTelekomCloud ComputeV1 client: %s", err)
 	}
 
 	var serverRequests []cloudservers.Server
@@ -444,12 +446,12 @@ func resourceEcsInstanceV1Delete(d *schema.ResourceData, meta interface{}) error
 
 	jobResponse, err := cloudservers.Delete(client, deleteOpts).ExtractJobResponse()
 	if err != nil {
-		return fmt.Errorf("error deleting OpenTelekomCloud server: %s", err)
+		return fmterr.Errorf("error deleting OpenTelekomCloud server: %s", err)
 	}
 
 	timeout := int(d.Timeout(schema.TimeoutDelete) / time.Second)
 	if err := cloudservers.WaitForJobSuccess(client, timeout, jobResponse.JobID); err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 
 	d.SetId("")

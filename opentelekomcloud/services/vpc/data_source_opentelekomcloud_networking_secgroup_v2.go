@@ -1,19 +1,21 @@
 package vpc
 
 import (
-	"fmt"
+	"context"
 	"log"
 
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/networking/v2/extensions/security/groups"
 
-	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common/cfg"
+	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common/fmterr"
 )
 
 func DataSourceNetworkingSecGroupV2() *schema.Resource {
 	return &schema.Resource{
-		Read: dataSourceNetworkingSecGroupV2Read,
+		ReadContext: dataSourceNetworkingSecGroupV2Read,
 
 		Schema: map[string]*schema.Schema{
 			"region": {
@@ -40,7 +42,7 @@ func DataSourceNetworkingSecGroupV2() *schema.Resource {
 	}
 }
 
-func dataSourceNetworkingSecGroupV2Read(d *schema.ResourceData, meta interface{}) error {
+func dataSourceNetworkingSecGroupV2Read(_ context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*cfg.Config)
 	networkingClient, err := config.NetworkingV2Client(config.GetRegion(d))
 
@@ -52,20 +54,20 @@ func dataSourceNetworkingSecGroupV2Read(d *schema.ResourceData, meta interface{}
 
 	pages, err := groups.List(networkingClient, listOpts).AllPages()
 	if err != nil {
-		return fmt.Errorf("Unable to list security groups: %s", err)
+		return fmterr.Errorf("Unable to list security groups: %s", err)
 	}
 
 	allSecGroups, err := groups.ExtractGroups(pages)
 	if err != nil {
-		return fmt.Errorf("Unable to retrieve security groups: %s", err)
+		return fmterr.Errorf("Unable to retrieve security groups: %s", err)
 	}
 
 	if len(allSecGroups) < 1 {
-		return fmt.Errorf("No Security Group found with name: %s", d.Get("name"))
+		return fmterr.Errorf("No Security Group found with name: %s", d.Get("name"))
 	}
 
 	if len(allSecGroups) > 1 {
-		return fmt.Errorf("More than one Security Group found with name: %s", d.Get("name"))
+		return fmterr.Errorf("More than one Security Group found with name: %s", d.Get("name"))
 	}
 
 	secGroup := allSecGroups[0]

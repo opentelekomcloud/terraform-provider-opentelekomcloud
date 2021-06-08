@@ -4,8 +4,8 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
-	"github.com/hashicorp/terraform-plugin-sdk/terraform"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/networking/v2/extensions/layer3/floatingips"
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/networking/v2/extensions/layer3/routers"
@@ -26,9 +26,9 @@ func TestAccNatSnatRule_basic(t *testing.T) {
 	var subnet subnets.Subnet
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:     func() { common.TestAccPreCheck(t) },
-		Providers:    common.TestAccProviders,
-		CheckDestroy: testAccCheckNatV2SnatRuleDestroy,
+		PreCheck:          func() { common.TestAccPreCheck(t) },
+		ProviderFactories: common.TestAccProviderFactories,
+		CheckDestroy:      testAccCheckNatV2SnatRuleDestroy,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccNatV2SnatRule_basic,
@@ -50,7 +50,7 @@ func testAccCheckNatV2SnatRuleDestroy(s *terraform.State) error {
 	config := common.TestAccProvider.Meta().(*cfg.Config)
 	natClient, err := config.NatV2Client(env.OS_REGION_NAME)
 	if err != nil {
-		return fmt.Errorf("Error creating OpenTelekomCloud nat client: %s", err)
+		return fmt.Errorf("error creating OpenTelekomCloud nat client: %s", err)
 	}
 
 	for _, rs := range s.RootModule().Resources {
@@ -81,7 +81,7 @@ func testAccCheckNatV2SnatRuleExists(n string) resource.TestCheckFunc {
 		config := common.TestAccProvider.Meta().(*cfg.Config)
 		natClient, err := config.NatV2Client(env.OS_REGION_NAME)
 		if err != nil {
-			return fmt.Errorf("Error creating OpenTelekomCloud nat client: %s", err)
+			return fmt.Errorf("error creating OpenTelekomCloud nat client: %s", err)
 		}
 
 		found, err := snatrules.Get(natClient, rs.Primary.ID).Extract()

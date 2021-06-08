@@ -1,26 +1,29 @@
 package css
 
 import (
+	"context"
 	"fmt"
 	"math"
 	"time"
 
 	"github.com/hashicorp/go-multierror"
-	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
-	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	golangsdk "github.com/opentelekomcloud/gophertelekomcloud"
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/css/v1/clusters"
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/css/v1/flavors"
 
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common/cfg"
+	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common/fmterr"
 )
 
 func ResourceCssClusterV1() *schema.Resource {
 	return &schema.Resource{
-		Create: resourceCssClusterV1Create,
-		Read:   resourceCssClusterV1Read,
-		Update: resourceCssClusterV1Update,
-		Delete: resourceCssClusterV1Delete,
+		CreateContext: resourceCssClusterV1Create,
+		ReadContext:   resourceCssClusterV1Read,
+		UpdateContext: resourceCssClusterV1Update,
+		DeleteContext: resourceCssClusterV1Delete,
 
 		Timeouts: &schema.ResourceTimeout{
 			Create: schema.DefaultTimeout(20 * time.Minute),
@@ -199,11 +202,11 @@ func ResourceCssClusterV1() *schema.Resource {
 	}
 }
 
-func resourceCssClusterV1Create(d *schema.ResourceData, meta interface{}) error {
+func resourceCssClusterV1Create(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*cfg.Config)
 	client, err := config.CssV1Client(config.GetRegion(d))
 	if err != nil {
-		return fmt.Errorf("error creating CSS v1 client: %s", err)
+		return fmterr.Errorf("error creating CSS v1 client: %s", err)
 	}
 
 	opts := clusters.CreateOpts{
@@ -246,30 +249,30 @@ func resourceCssClusterV1Create(d *schema.ResourceData, meta interface{}) error 
 
 	created, err := clusters.Create(client, opts).Extract()
 	if err != nil {
-		return fmt.Errorf("error creating CSS cluster: %s", err)
+		return fmterr.Errorf("error creating CSS cluster: %s", err)
 	}
 
 	secondsWait := int(math.Round(d.Timeout(schema.TimeoutCreate).Seconds()))
 	err = clusters.WaitForClusterOperationSucces(client, created.ID, secondsWait)
 	if err != nil {
-		return fmt.Errorf("error waiting for CSS cluster to be running: %s", err)
+		return fmterr.Errorf("error waiting for CSS cluster to be running: %s", err)
 	}
 
 	d.SetId(created.ID)
 
-	return resourceCssClusterV1Read(d, meta)
+	return resourceCssClusterV1Read(ctx, d, meta)
 }
 
-func resourceCssClusterV1Read(d *schema.ResourceData, meta interface{}) error {
+func resourceCssClusterV1Read(_ context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*cfg.Config)
 	client, err := config.CssV1Client(config.GetRegion(d))
 	if err != nil {
-		return fmt.Errorf("error creating CSS v1 client: %s", err)
+		return fmterr.Errorf("error creating CSS v1 client: %s", err)
 	}
 
 	cluster, err := clusters.Get(client, d.Id()).Extract()
 	if err != nil {
-		return fmt.Errorf("error reading cluster value: %s", err)
+		return fmterr.Errorf("error reading cluster value: %s", err)
 	}
 
 	mErr := multierror.Append(
@@ -285,7 +288,7 @@ func resourceCssClusterV1Read(d *schema.ResourceData, meta interface{}) error {
 	)
 
 	if err := mErr.ErrorOrNil(); err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 	return nil
 }
@@ -311,11 +314,11 @@ func extractDatastore(c *clusters.Cluster) []interface{} {
 	}
 }
 
-func resourceCssClusterV1Update(d *schema.ResourceData, meta interface{}) error {
+func resourceCssClusterV1Update(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*cfg.Config)
 	client, err := config.CssV1Client(config.GetRegion(d))
 	if err != nil {
-		return fmt.Errorf("error creating CSS v1 client: %s", err)
+		return fmterr.Errorf("error creating CSS v1 client: %s", err)
 	}
 
 	if !d.HasChange("expect_node_num") {
@@ -325,37 +328,37 @@ func resourceCssClusterV1Update(d *schema.ResourceData, meta interface{}) error 
 	oldNum, newNum := d.GetChange("expect_node_num")
 	diff := newNum.(int) - oldNum.(int)
 	if diff < 0 {
-		return fmt.Errorf("invalid number of new nodes: %d", diff)
+		return fmterr.Errorf("invalid number of new nodes: %d", diff)
 	}
 
 	_, err = clusters.ExtendCluster(client, d.Id(), clusters.ClusterExtendCommonOpts{
 		ModifySize: diff,
 	}).Extract()
 	if err != nil {
-		return fmt.Errorf("error extending cluster: %s", err)
+		return fmterr.Errorf("error extending cluster: %s", err)
 	}
 
 	secondsWait := int(math.Round(d.Timeout(schema.TimeoutUpdate).Seconds()))
 	if err := clusters.WaitForClusterToExtend(client, d.Id(), secondsWait); err != nil {
 		state, _ := clusters.Get(client, d.Id()).Extract()
 		if state != nil {
-			return fmt.Errorf("error waiting cluster to extend: %s\nFail reason: %+v", err, state.FailedReasons)
+			return fmterr.Errorf("error waiting cluster to extend: %s\nFail reason: %+v", err, state.FailedReasons)
 		}
-		return fmt.Errorf("error waiting cluster to extend: %s", err)
+		return fmterr.Errorf("error waiting cluster to extend: %s", err)
 	}
 
-	return resourceCssClusterV1Read(d, meta)
+	return resourceCssClusterV1Read(ctx, d, meta)
 }
 
-func resourceCssClusterV1Delete(d *schema.ResourceData, meta interface{}) error {
+func resourceCssClusterV1Delete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*cfg.Config)
 	client, err := config.CssV1Client(config.GetRegion(d))
 	if err != nil {
-		return fmt.Errorf("error creating CSS v1 client: %s", err)
+		return fmterr.Errorf("error creating CSS v1 client: %s", err)
 	}
 
 	if err := clusters.Delete(client, d.Id()).ExtractErr(); err != nil {
-		return fmt.Errorf("error deleting cluster: %s", err)
+		return fmterr.Errorf("error deleting cluster: %s", err)
 	}
 
 	stateConf := &resource.StateChangeConf{
@@ -366,9 +369,9 @@ func resourceCssClusterV1Delete(d *schema.ResourceData, meta interface{}) error 
 		Delay:      10 * time.Second,
 		MinTimeout: 10 * time.Second,
 	}
-	_, err = stateConf.WaitForState()
+	_, err = stateConf.WaitForStateContext(ctx)
 	if err != nil {
-		return fmt.Errorf("error waiting for cluster to be deleted: %s", err)
+		return fmterr.Errorf("error waiting for cluster to be deleted: %s", err)
 	}
 	return nil
 }
@@ -390,7 +393,7 @@ func resourceCssClusterV1StateRefresh(client *golangsdk.ServiceClient, id string
 	}
 }
 
-func checkCssClusterFlavorRestrictions(d *schema.ResourceDiff, meta interface{}) error {
+func checkCssClusterFlavorRestrictions(_ context.Context, d *schema.ResourceDiff, meta interface{}) error {
 	config := meta.(*cfg.Config)
 	client, err := config.CssV1Client(config.GetRegion(d))
 	if err != nil {

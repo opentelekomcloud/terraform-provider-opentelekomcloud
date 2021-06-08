@@ -1,15 +1,17 @@
 package bms
 
 import (
+	"context"
 	"crypto/sha1"
 	"encoding/hex"
 	"fmt"
 	"log"
 	"time"
 
-	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
-	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
-	"github.com/opentelekomcloud/gophertelekomcloud"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	golangsdk "github.com/opentelekomcloud/gophertelekomcloud"
 	bms "github.com/opentelekomcloud/gophertelekomcloud/openstack/bms/v2/servers"
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/bms/v2/tags"
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/compute/v2/extensions/bootfromvolume"
@@ -23,15 +25,16 @@ import (
 
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common"
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common/cfg"
+	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common/fmterr"
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/services/ecs"
 )
 
 func ResourceComputeBMSInstanceV2() *schema.Resource {
 	return &schema.Resource{
-		Create: resourceComputeBMSInstanceV2Create,
-		Read:   resourceComputeBMSInstanceV2Read,
-		Update: resourceComputeBMSInstanceV2Update,
-		Delete: resourceComputeBMSInstanceV2Delete,
+		CreateContext: resourceComputeBMSInstanceV2Create,
+		ReadContext:   resourceComputeBMSInstanceV2Read,
+		UpdateContext: resourceComputeBMSInstanceV2Update,
+		DeleteContext: resourceComputeBMSInstanceV2Delete,
 
 		Timeouts: &schema.ResourceTimeout{
 			Create: schema.DefaultTimeout(30 * time.Minute),
@@ -284,16 +287,16 @@ func bmsTagsCreate(client *golangsdk.ServiceClient, server_id string) error {
 	_, err := tags.Create(client, server_id, createOpts).Extract()
 
 	if err != nil {
-		return fmt.Errorf("Error creating OpenTelekomCloud Tags: %s", err)
+		return fmt.Errorf("error creating OpenTelekomCloud Tags: %s", err)
 	}
 	return nil
 }
 
-func resourceComputeBMSInstanceV2Create(d *schema.ResourceData, meta interface{}) error {
+func resourceComputeBMSInstanceV2Create(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*cfg.Config)
 	computeClient, err := config.ComputeV2Client(config.GetRegion(d))
 	if err != nil {
-		return fmt.Errorf("Error creating OpenTelekomCloud compute client: %s", err)
+		return fmterr.Errorf("error creating OpenTelekomCloud compute client: %s", err)
 	}
 
 	var createOpts servers.CreateOptsBuilder
@@ -303,19 +306,19 @@ func resourceComputeBMSInstanceV2Create(d *schema.ResourceData, meta interface{}
 	// If an image_name was specified, look up the image ID, report if error.
 	imageId, err := getImageId(computeClient, d)
 	if err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 
 	flavorId, err := getFlavorId(computeClient, d)
 	if err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 
 	// Build a list of networks with the information given upon creation.
 	// Error out if an invalid network configuration was used.
 	allInstanceNetworks, err := getAllServerNetwork(d, meta)
 	if err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 
 	// Build a []servers.Network to pass into the create options.
@@ -343,7 +346,7 @@ func resourceComputeBMSInstanceV2Create(d *schema.ResourceData, meta interface{}
 	if vL, ok := d.GetOk("block_device"); ok {
 		blockDevices, err := ecs.ResourceInstanceBlockDevicesV2(d, vL.([]interface{}))
 		if err != nil {
-			return err
+			return diag.FromErr(err)
 		}
 
 		createOpts = &bootfromvolume.CreateOptsExt{
@@ -361,7 +364,7 @@ func resourceComputeBMSInstanceV2Create(d *schema.ResourceData, meta interface{}
 		server, err = servers.Create(computeClient, createOpts).Extract()
 	}
 	if err != nil {
-		return fmt.Errorf("Error creating OpenTelekomCloud server: %s", err)
+		return fmterr.Errorf("error creating OpenTelekomCloud server: %s", err)
 	}
 	log.Printf("[INFO] Instance ID: %s", server.ID)
 
@@ -371,11 +374,11 @@ func resourceComputeBMSInstanceV2Create(d *schema.ResourceData, meta interface{}
 	// Set bms sepcific tag
 	bmsClient, err := config.ComputeV2Client(config.GetRegion(d))
 	if err != nil {
-		return fmt.Errorf("Error creating OpenTelekomCloud bms client: %s", err)
+		return fmterr.Errorf("error creating OpenTelekomCloud bms client: %s", err)
 	}
 	err = bmsTagsCreate(bmsClient, d.Id())
 	if err != nil {
-		return fmt.Errorf("Error creating OpenTelekomCloud bms tag: %s", err)
+		return fmterr.Errorf("error creating OpenTelekomCloud bms tag: %s", err)
 	}
 
 	// Wait for the instance to become running so we can get some attributes
@@ -393,9 +396,9 @@ func resourceComputeBMSInstanceV2Create(d *schema.ResourceData, meta interface{}
 		MinTimeout: 3 * time.Second,
 	}
 
-	_, err = stateConf.WaitForState()
+	_, err = stateConf.WaitForStateContext(ctx)
 	if err != nil {
-		return fmt.Errorf(
+		return fmterr.Errorf(
 			"Error waiting for instance (%s) to become ready: %s",
 			server.ID, err)
 	}
@@ -409,19 +412,19 @@ func resourceComputeBMSInstanceV2Create(d *schema.ResourceData, meta interface{}
 		}
 	}
 
-	return resourceComputeBMSInstanceV2Read(d, meta)
+	return resourceComputeBMSInstanceV2Read(ctx, d, meta)
 }
 
-func resourceComputeBMSInstanceV2Read(d *schema.ResourceData, meta interface{}) error {
+func resourceComputeBMSInstanceV2Read(_ context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*cfg.Config)
 	computeClient, err := config.ComputeV2Client(config.GetRegion(d))
 	if err != nil {
-		return fmt.Errorf("Error creating OpenTelekomCloud compute client: %s", err)
+		return fmterr.Errorf("error creating OpenTelekomCloud compute client: %s", err)
 	}
 
 	server, err := bms.Get(computeClient, d.Id()).Extract()
 	if err != nil {
-		return common.CheckDeleted(d, err, "server")
+		return diag.FromErr(common.CheckDeleted(d, err, "server"))
 	}
 
 	log.Printf("[DEBUG] Retrieved Server %s: %+v", d.Id(), server)
@@ -431,7 +434,7 @@ func resourceComputeBMSInstanceV2Read(d *schema.ResourceData, meta interface{}) 
 	// Get the instance network and address information
 	networks, err := ecs.FlattenInstanceNetworks(d, meta)
 	if err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 
 	// Determine the best IPv4 and IPv6 addresses to access the instance with
@@ -473,13 +476,13 @@ func resourceComputeBMSInstanceV2Read(d *schema.ResourceData, meta interface{}) 
 
 	flavor, err := flavors.Get(computeClient, server.Flavor.ID).Extract()
 	if err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 	d.Set("flavor_name", flavor.Name)
 
 	// Set the instance's image information appropriately
 	if err := setImageInformations(computeClient, server, d); err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 
 	d.Set("availability_zone", server.AvailabilityZone)
@@ -493,11 +496,68 @@ func resourceComputeBMSInstanceV2Read(d *schema.ResourceData, meta interface{}) 
 	return nil
 }
 
-func resourceComputeBMSInstanceV2Update(d *schema.ResourceData, meta interface{}) error {
+func resourceComputeBMSInstanceV2Delete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*cfg.Config)
 	computeClient, err := config.ComputeV2Client(config.GetRegion(d))
 	if err != nil {
-		return fmt.Errorf("Error creating OpenTelekomCloud compute client: %s", err)
+		return fmterr.Errorf("error creating OpenTelekomCloud compute client: %s", err)
+	}
+
+	if d.Get("stop_before_destroy").(bool) {
+		err = startstop.Stop(computeClient, d.Id()).ExtractErr()
+		if err != nil {
+			log.Printf("[WARN] Error stopping OpenTelekomCloud instance: %s", err)
+		} else {
+			stopStateConf := &resource.StateChangeConf{
+				Pending:    []string{"ACTIVE"},
+				Target:     []string{"SHUTOFF"},
+				Refresh:    BmsServerV2StateRefreshFunc(computeClient, d.Id()),
+				Timeout:    3 * time.Minute,
+				Delay:      10 * time.Second,
+				MinTimeout: 3 * time.Second,
+			}
+			log.Printf("[DEBUG] Waiting for instance (%s) to stop", d.Id())
+			_, err = stopStateConf.WaitForStateContext(ctx)
+			if err != nil {
+				log.Printf("[WARN] Error waiting for instance (%s) to stop: %s, proceeding to delete", d.Id(), err)
+			}
+		}
+	}
+
+	log.Printf("[DEBUG] Deleting OpenTelekomCloud Instance %s", d.Id())
+	err = servers.Delete(computeClient, d.Id()).ExtractErr()
+	if err != nil {
+		return fmterr.Errorf("error deleting OpenTelekomCloud server: %s", err)
+	}
+
+	// Wait for the instance to delete before moving on.
+	log.Printf("[DEBUG] Waiting for instance (%s) to delete", d.Id())
+
+	stateConf := &resource.StateChangeConf{
+		Pending:    []string{"ACTIVE", "SHUTOFF"},
+		Target:     []string{"DELETED", "SOFT_DELETED"},
+		Refresh:    BmsServerV2StateRefreshFunc(computeClient, d.Id()),
+		Timeout:    d.Timeout(schema.TimeoutDelete),
+		Delay:      10 * time.Second,
+		MinTimeout: 3 * time.Second,
+	}
+
+	_, err = stateConf.WaitForStateContext(ctx)
+	if err != nil {
+		return fmterr.Errorf(
+			"Error waiting for instance (%s) to delete: %s",
+			d.Id(), err)
+	}
+
+	d.SetId("")
+	return nil
+}
+
+func resourceComputeBMSInstanceV2Update(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+	config := meta.(*cfg.Config)
+	computeClient, err := config.ComputeV2Client(config.GetRegion(d))
+	if err != nil {
+		return fmterr.Errorf("error creating OpenTelekomCloud compute client: %s", err)
 	}
 
 	var updateOpts servers.UpdateOpts
@@ -508,7 +568,7 @@ func resourceComputeBMSInstanceV2Update(d *schema.ResourceData, meta interface{}
 	if updateOpts != (servers.UpdateOpts{}) {
 		_, err := servers.Update(computeClient, d.Id(), updateOpts).Extract()
 		if err != nil {
-			return fmt.Errorf("Error updating OpenTelekomCloud server: %s", err)
+			return fmterr.Errorf("error updating OpenTelekomCloud server: %s", err)
 		}
 	}
 
@@ -534,7 +594,7 @@ func resourceComputeBMSInstanceV2Update(d *schema.ResourceData, meta interface{}
 		for _, key := range metadataToDelete {
 			err := servers.DeleteMetadatum(computeClient, d.Id(), key).ExtractErr()
 			if err != nil {
-				return fmt.Errorf("Error deleting metadata (%s) from server (%s): %s", key, d.Id(), err)
+				return fmterr.Errorf("error deleting metadata (%s) from server (%s): %s", key, d.Id(), err)
 			}
 		}
 
@@ -546,7 +606,7 @@ func resourceComputeBMSInstanceV2Update(d *schema.ResourceData, meta interface{}
 
 		_, err := servers.UpdateMetadata(computeClient, d.Id(), metadataOpts).Extract()
 		if err != nil {
-			return fmt.Errorf("Error updating OpenTelekomCloud server (%s) metadata: %s", d.Id(), err)
+			return fmterr.Errorf("error updating OpenTelekomCloud server (%s) metadata: %s", d.Id(), err)
 		}
 	}
 
@@ -568,7 +628,7 @@ func resourceComputeBMSInstanceV2Update(d *schema.ResourceData, meta interface{}
 					continue
 				}
 
-				return fmt.Errorf("Error removing security group (%s) from OpenTelekomCloud server (%s): %s", g, d.Id(), err)
+				return fmterr.Errorf("error removing security group (%s) from OpenTelekomCloud server (%s): %s", g, d.Id(), err)
 			} else {
 				log.Printf("[DEBUG] Removed security group (%s) from instance (%s)", g, d.Id())
 			}
@@ -577,7 +637,7 @@ func resourceComputeBMSInstanceV2Update(d *schema.ResourceData, meta interface{}
 		for _, g := range secgroupsToAdd.List() {
 			err := secgroups.AddServer(computeClient, d.Id(), g.(string)).ExtractErr()
 			if err != nil && err.Error() != "EOF" {
-				return fmt.Errorf("Error adding security group (%s) to OpenTelekomCloud server (%s): %s", g, d.Id(), err)
+				return fmterr.Errorf("error adding security group (%s) to OpenTelekomCloud server (%s): %s", g, d.Id(), err)
 			}
 			log.Printf("[DEBUG] Added security group (%s) to instance (%s)", g, d.Id())
 		}
@@ -587,7 +647,7 @@ func resourceComputeBMSInstanceV2Update(d *schema.ResourceData, meta interface{}
 		if newPwd, ok := d.Get("admin_pass").(string); ok {
 			err := servers.ChangeAdminPassword(computeClient, d.Id(), newPwd).ExtractErr()
 			if err != nil {
-				return fmt.Errorf("Error changing admin password of OpenTelekomCloud server (%s): %s", d.Id(), err)
+				return fmterr.Errorf("error changing admin password of OpenTelekomCloud server (%s): %s", d.Id(), err)
 			}
 		}
 	}
@@ -595,17 +655,17 @@ func resourceComputeBMSInstanceV2Update(d *schema.ResourceData, meta interface{}
 	if d.HasChange("tags") {
 		computeClient, err := config.ComputeV1Client(config.GetRegion(d))
 		if err != nil {
-			return fmt.Errorf("Error creating OpenTelekomCloud compute v1 client: %s", err)
+			return fmterr.Errorf("error creating OpenTelekomCloud compute v1 client: %s", err)
 		}
 		oldTags, err := ecstags.Get(computeClient, d.Id()).Extract()
 		if err != nil {
-			return fmt.Errorf("Error fetching OpenTelekomCloud instance tags: %s", err)
+			return fmterr.Errorf("error fetching OpenTelekomCloud instance tags: %s", err)
 		}
 		if len(oldTags.Tags) > 0 {
 			deleteopts := ecstags.BatchOpts{Action: ecstags.ActionDelete, Tags: oldTags.Tags}
 			deleteTags := ecstags.BatchAction(computeClient, d.Id(), deleteopts)
 			if deleteTags.Err != nil {
-				return fmt.Errorf("Error updating OpenTelekomCloud instance tags: %s", deleteTags.Err)
+				return fmterr.Errorf("error updating OpenTelekomCloud instance tags: %s", deleteTags.Err)
 			}
 		}
 
@@ -615,7 +675,7 @@ func resourceComputeBMSInstanceV2Update(d *schema.ResourceData, meta interface{}
 				log.Printf("[DEBUG] Setting tags: %v", tagmap)
 				err = ecs.SetTagForInstance(d, meta, d.Id(), tagmap)
 				if err != nil {
-					return fmt.Errorf("Error updating tags of instance:%s, err:%s", d.Id(), err)
+					return fmterr.Errorf("error updating tags of instance:%s, err:%s", d.Id(), err)
 				}
 			}
 		}
@@ -630,7 +690,7 @@ func resourceComputeBMSInstanceV2Update(d *schema.ResourceData, meta interface{}
 			newFlavorName := d.Get("flavor_name").(string)
 			newFlavorId, err = flavors.IDFromName(computeClient, newFlavorName)
 			if err != nil {
-				return err
+				return diag.FromErr(err)
 			}
 		}
 
@@ -640,7 +700,7 @@ func resourceComputeBMSInstanceV2Update(d *schema.ResourceData, meta interface{}
 		log.Printf("[DEBUG] Resize configuration: %#v", resizeOpts)
 		err = servers.Resize(computeClient, d.Id(), resizeOpts).ExtractErr()
 		if err != nil {
-			return fmt.Errorf("Error resizing OpenTelekomCloud server: %s", err)
+			return fmterr.Errorf("error resizing OpenTelekomCloud server: %s", err)
 		}
 
 		// Wait for the instance to finish resizing.
@@ -655,16 +715,16 @@ func resourceComputeBMSInstanceV2Update(d *schema.ResourceData, meta interface{}
 			MinTimeout: 3 * time.Second,
 		}
 
-		_, err = stateConf.WaitForState()
+		_, err = stateConf.WaitForStateContext(ctx)
 		if err != nil {
-			return fmt.Errorf("Error waiting for instance (%s) to resize: %s", d.Id(), err)
+			return fmterr.Errorf("error waiting for instance (%s) to resize: %s", d.Id(), err)
 		}
 
 		// Confirm resize.
 		log.Printf("[DEBUG] Confirming resize")
 		err = servers.ConfirmResize(computeClient, d.Id()).ExtractErr()
 		if err != nil {
-			return fmt.Errorf("Error confirming resize of OpenTelekomCloud server: %s", err)
+			return fmterr.Errorf("error confirming resize of OpenTelekomCloud server: %s", err)
 		}
 
 		stateConf = &resource.StateChangeConf{
@@ -676,70 +736,13 @@ func resourceComputeBMSInstanceV2Update(d *schema.ResourceData, meta interface{}
 			MinTimeout: 3 * time.Second,
 		}
 
-		_, err = stateConf.WaitForState()
+		_, err = stateConf.WaitForStateContext(ctx)
 		if err != nil {
-			return fmt.Errorf("Error waiting for instance (%s) to confirm resize: %s", d.Id(), err)
+			return fmterr.Errorf("error waiting for instance (%s) to confirm resize: %s", d.Id(), err)
 		}
 	}
 
-	return resourceComputeBMSInstanceV2Read(d, meta)
-}
-
-func resourceComputeBMSInstanceV2Delete(d *schema.ResourceData, meta interface{}) error {
-	config := meta.(*cfg.Config)
-	computeClient, err := config.ComputeV2Client(config.GetRegion(d))
-	if err != nil {
-		return fmt.Errorf("Error creating OpenTelekomCloud compute client: %s", err)
-	}
-
-	if d.Get("stop_before_destroy").(bool) {
-		err = startstop.Stop(computeClient, d.Id()).ExtractErr()
-		if err != nil {
-			log.Printf("[WARN] Error stopping OpenTelekomCloud instance: %s", err)
-		} else {
-			stopStateConf := &resource.StateChangeConf{
-				Pending:    []string{"ACTIVE"},
-				Target:     []string{"SHUTOFF"},
-				Refresh:    BmsServerV2StateRefreshFunc(computeClient, d.Id()),
-				Timeout:    3 * time.Minute,
-				Delay:      10 * time.Second,
-				MinTimeout: 3 * time.Second,
-			}
-			log.Printf("[DEBUG] Waiting for instance (%s) to stop", d.Id())
-			_, err = stopStateConf.WaitForState()
-			if err != nil {
-				log.Printf("[WARN] Error waiting for instance (%s) to stop: %s, proceeding to delete", d.Id(), err)
-			}
-		}
-	}
-
-	log.Printf("[DEBUG] Deleting OpenTelekomCloud Instance %s", d.Id())
-	err = servers.Delete(computeClient, d.Id()).ExtractErr()
-	if err != nil {
-		return fmt.Errorf("Error deleting OpenTelekomCloud server: %s", err)
-	}
-
-	// Wait for the instance to delete before moving on.
-	log.Printf("[DEBUG] Waiting for instance (%s) to delete", d.Id())
-
-	stateConf := &resource.StateChangeConf{
-		Pending:    []string{"ACTIVE", "SHUTOFF"},
-		Target:     []string{"DELETED", "SOFT_DELETED"},
-		Refresh:    BmsServerV2StateRefreshFunc(computeClient, d.Id()),
-		Timeout:    d.Timeout(schema.TimeoutDelete),
-		Delay:      10 * time.Second,
-		MinTimeout: 3 * time.Second,
-	}
-
-	_, err = stateConf.WaitForState()
-	if err != nil {
-		return fmt.Errorf(
-			"Error waiting for instance (%s) to delete: %s",
-			d.Id(), err)
-	}
-
-	d.SetId("")
-	return nil
+	return resourceComputeBMSInstanceV2Read(ctx, d, meta)
 }
 
 // ServerV2StateRefreshFunc returns a resource.StateRefreshFunc that is used to watch

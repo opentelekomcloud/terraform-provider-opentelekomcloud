@@ -6,10 +6,10 @@ import (
 
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/service/s3"
-	"github.com/hashicorp/terraform-plugin-sdk/helper/acctest"
-	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
-	"github.com/hashicorp/terraform-plugin-sdk/terraform"
-	"github.com/jen20/awspolicyequivalence"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/acctest"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
+	awspolicy "github.com/jen20/awspolicyequivalence"
 
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/acceptance/common"
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/acceptance/env"
@@ -24,9 +24,9 @@ func TestAccS3BucketPolicy_basic(t *testing.T) {
 		name, name)
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheckS3(t) },
-		Providers:    common.TestAccProviders,
-		CheckDestroy: testAccCheckS3BucketDestroy,
+		PreCheck:          func() { testAccPreCheckS3(t) },
+		ProviderFactories: common.TestAccProviderFactories,
+		CheckDestroy:      testAccCheckS3BucketDestroy,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccS3BucketPolicyConfig(name),
@@ -51,9 +51,9 @@ func TestAccS3BucketPolicy_policyUpdate(t *testing.T) {
 		name, name)
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheckS3(t) },
-		Providers:    common.TestAccProviders,
-		CheckDestroy: testAccCheckS3BucketDestroy,
+		PreCheck:          func() { testAccPreCheckS3(t) },
+		ProviderFactories: common.TestAccProviderFactories,
+		CheckDestroy:      testAccCheckS3BucketDestroy,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccS3BucketPolicyConfig(name),
@@ -88,7 +88,7 @@ func testAccCheckS3BucketHasPolicy(n string, expectedPolicyText string) resource
 		config := common.TestAccProvider.Meta().(*cfg.Config)
 		conn, err := config.S3Client(env.OS_REGION_NAME)
 		if err != nil {
-			return fmt.Errorf("Error creating OpenTelekomCloud s3 client: %s", err)
+			return fmt.Errorf("error creating OpenTelekomCloud s3 client: %s", err)
 		}
 
 		policy, err := conn.GetBucketPolicy(&s3.GetBucketPolicyInput{
@@ -102,7 +102,7 @@ func testAccCheckS3BucketHasPolicy(n string, expectedPolicyText string) resource
 
 		equivalent, err := awspolicy.PoliciesAreEquivalent(actualPolicyText, expectedPolicyText)
 		if err != nil {
-			return fmt.Errorf("Error testing policy equivalence: %s", err)
+			return fmt.Errorf("error testing policy equivalence: %s", err)
 		}
 		if !equivalent {
 			return fmt.Errorf("Non-equivalent policy error:\n\nexpected: %s\n\n     got: %s\n",

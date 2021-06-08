@@ -1,19 +1,21 @@
 package vpc
 
 import (
-	"fmt"
+	"context"
 	"log"
 
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/networking/v1/vpcs"
 
-	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common/cfg"
+	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common/fmterr"
 )
 
 func DataSourceVirtualPrivateCloudVpcV1() *schema.Resource {
 	return &schema.Resource{
-		Read: dataSourceVirtualPrivateCloudV1Read,
+		ReadContext: dataSourceVirtualPrivateCloudV1Read,
 
 		Schema: map[string]*schema.Schema{
 			"region": {
@@ -62,11 +64,11 @@ func DataSourceVirtualPrivateCloudVpcV1() *schema.Resource {
 	}
 }
 
-func dataSourceVirtualPrivateCloudV1Read(d *schema.ResourceData, meta interface{}) error {
+func dataSourceVirtualPrivateCloudV1Read(_ context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*cfg.Config)
 	vpcClient, err := config.NetworkingV1Client(config.GetRegion(d))
 	if err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 
 	listOpts := vpcs.ListOpts{
@@ -78,16 +80,16 @@ func dataSourceVirtualPrivateCloudV1Read(d *schema.ResourceData, meta interface{
 
 	refinedVpcs, err := vpcs.List(vpcClient, listOpts)
 	if err != nil {
-		return fmt.Errorf("Unable to retrieve vpcs: %s", err)
+		return fmterr.Errorf("Unable to retrieve vpcs: %s", err)
 	}
 
 	if len(refinedVpcs) < 1 {
-		return fmt.Errorf("Your query returned no results. " +
+		return fmterr.Errorf("Your query returned no results. " +
 			"Please change your search criteria and try again.")
 	}
 
 	if len(refinedVpcs) > 1 {
-		return fmt.Errorf("Your query returned more than one result." +
+		return fmterr.Errorf("Your query returned more than one result." +
 			" Please try a more specific search criteria")
 	}
 
@@ -112,7 +114,7 @@ func dataSourceVirtualPrivateCloudV1Read(d *schema.ResourceData, meta interface{
 	d.Set("shared", Vpc.EnableSharedSnat)
 	d.Set("region", config.GetRegion(d))
 	if err := d.Set("routes", s); err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 
 	return nil

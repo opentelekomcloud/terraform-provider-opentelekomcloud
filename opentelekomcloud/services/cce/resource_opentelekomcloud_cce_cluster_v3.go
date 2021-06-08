@@ -1,6 +1,7 @@
 package cce
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
 	"log"
@@ -9,10 +10,11 @@ import (
 	"time"
 
 	"github.com/hashicorp/go-multierror"
-	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
-	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
-	"github.com/hashicorp/terraform-plugin-sdk/helper/validation"
-	"github.com/opentelekomcloud/gophertelekomcloud"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
+	golangsdk "github.com/opentelekomcloud/gophertelekomcloud"
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/cce/v3/addons"
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/cce/v3/clusters"
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/networking/v1/subnets"
@@ -21,6 +23,7 @@ import (
 
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common"
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common/cfg"
+	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common/fmterr"
 )
 
 var (
@@ -31,12 +34,12 @@ var (
 
 func ResourceCCEClusterV3() *schema.Resource {
 	return &schema.Resource{
-		Create: resourceCCEClusterV3Create,
-		Read:   resourceCCEClusterV3Read,
-		Update: resourceCCEClusterV3Update,
-		Delete: resourceCCEClusterV3Delete,
+		CreateContext: resourceCCEClusterV3Create,
+		ReadContext:   resourceCCEClusterV3Read,
+		UpdateContext: resourceCCEClusterV3Update,
+		DeleteContext: resourceCCEClusterV3Delete,
 		Importer: &schema.ResourceImporter{
-			State: schema.ImportStatePassthrough,
+			StateContext: schema.ImportStatePassthroughContext,
 		},
 
 		Timeouts: &schema.ResourceTimeout{
@@ -261,20 +264,20 @@ func resourceClusterExtendParamV3(d *schema.ResourceData) map[string]string {
 	return m
 }
 
-func resourceCCEClusterV3Create(d *schema.ResourceData, meta interface{}) error {
+func resourceCCEClusterV3Create(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*cfg.Config)
 	cceClient, err := config.CceV3Client(config.GetRegion(d))
 
 	if err != nil {
-		return fmt.Errorf(cceClientError, err)
+		return fmterr.Errorf(cceClientError, err)
 	}
 	if d.Get("eip").(string) != "" {
 		fipId, err := resourceFloatingIPV2Exists(d, meta, d.Get("eip").(string))
 		if err != nil {
-			return fmt.Errorf("error retrieving the eip: %w", err)
+			return fmterr.Errorf("error retrieving the eip: %w", err)
 		}
 		if fipId == "" {
-			return fmt.Errorf("the specified EIP %s does not exist", d.Get("eip").(string))
+			return fmterr.Errorf("the specified EIP %s does not exist", d.Get("eip").(string))
 		}
 	}
 
@@ -322,7 +325,7 @@ func resourceCCEClusterV3Create(d *schema.ResourceData, meta interface{}) error 
 		if isAuthRequired(err) {
 			err = fmt.Errorf("CCE is not authorized, see `cce_cluster_v3` documentation for details")
 		}
-		return fmt.Errorf("error creating opentelekomcloud Cluster: %w", err)
+		return fmterr.Errorf("error creating opentelekomcloud Cluster: %w", err)
 	}
 
 	log.Printf("[DEBUG] Waiting for opentelekomcloud CCE cluster (%s) to become available", create.Metadata.Id)
@@ -336,30 +339,30 @@ func resourceCCEClusterV3Create(d *schema.ResourceData, meta interface{}) error 
 		MinTimeout: 3 * time.Second,
 	}
 
-	_, err = stateConf.WaitForState()
+	_, err = stateConf.WaitForStateContext(ctx)
 	if err != nil {
-		return fmt.Errorf("error creating OpenTelekomCloud CCE cluster: %w", err)
+		return fmterr.Errorf("error creating OpenTelekomCloud CCE cluster: %s", err)
 	}
 	d.SetId(create.Metadata.Id)
 
-	if err := waitForInstalledAddons(d, config); err != nil {
-		return fmt.Errorf("error waiting for default addons to install: %w", err)
+	if err := waitForInstalledAddons(ctx, d, config); err != nil {
+		return fmterr.Errorf("error waiting for default addons to install")
 	}
 
 	if d.Get("no_addons").(bool) {
-		if err := removeAddons(d, config); err != nil {
-			return err
+		if err := removeAddons(ctx, d, config); err != nil {
+			return diag.FromErr(err)
 		}
 	}
 
-	return resourceCCEClusterV3Read(d, meta)
+	return resourceCCEClusterV3Read(ctx, d, meta)
 }
 
-func resourceCCEClusterV3Read(d *schema.ResourceData, meta interface{}) error {
+func resourceCCEClusterV3Read(_ context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*cfg.Config)
 	cceClient, err := config.CceV3Client(config.GetRegion(d))
 	if err != nil {
-		return fmt.Errorf(cceClientError, err)
+		return fmterr.Errorf(cceClientError, err)
 	}
 
 	cluster, err := clusters.Get(cceClient, d.Id()).Extract()
@@ -368,14 +371,14 @@ func resourceCCEClusterV3Read(d *schema.ResourceData, meta interface{}) error {
 			d.SetId("")
 			return nil
 		}
-		return fmt.Errorf("error retrieving opentelekomcloud CCE: %w", err)
+		return fmterr.Errorf("error retrieving opentelekomcloud CCE: %w", err)
 	}
 
 	eip := ""
 	if cluster.Status.Endpoints[0].External != "" {
 		endpointURL, err := url.Parse(cluster.Status.Endpoints[0].External)
 		if err != nil {
-			return fmt.Errorf("error parsing endpoint URL: %w", err)
+			return fmterr.Errorf("error parsing endpoint URL: %w", err)
 		}
 		eip = endpointURL.Hostname()
 	}
@@ -403,12 +406,12 @@ func resourceCCEClusterV3Read(d *schema.ResourceData, meta interface{}) error {
 		d.Set("eip", eip),
 	)
 	if err := mErr.ErrorOrNil(); err != nil {
-		return fmt.Errorf("error setting cce cluster fields: %w", err)
+		return fmterr.Errorf("error setting cce cluster fields: %w", err)
 	}
 
 	cert, err := clusters.GetCert(cceClient, d.Id()).Extract()
 	if err != nil {
-		return fmt.Errorf("error retrieving opentelekomcloud CCE cluster cert: %w", err)
+		return fmterr.Errorf("error retrieving opentelekomcloud CCE cluster cert: %w", err)
 	}
 
 	// Set Certificate Clusters
@@ -422,7 +425,7 @@ func resourceCCEClusterV3Read(d *schema.ResourceData, meta interface{}) error {
 		clusterList = append(clusterList, clusterCert)
 	}
 	if err := d.Set("certificate_clusters", clusterList); err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 
 	// Set Certificate Users
@@ -436,29 +439,29 @@ func resourceCCEClusterV3Read(d *schema.ResourceData, meta interface{}) error {
 		userList = append(userList, userCert)
 	}
 	if err := d.Set("certificate_users", userList); err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 
 	instances, err := listInstalledAddons(d, config)
 	if err != nil {
-		return fmt.Errorf("error listing installed addons: %w", err)
+		return fmterr.Errorf("error listing installed addons: %w", err)
 	}
 	installedAddons := make([]string, len(instances.Items))
 	for i, instance := range instances.Items {
 		installedAddons[i] = instance.Metadata.ID
 	}
 	if err := d.Set("installed_addons", installedAddons); err != nil {
-		return fmt.Errorf("error setting installed addons: %w", err)
+		return fmterr.Errorf("error setting installed addons: %w", err)
 	}
 
 	return nil
 }
 
-func resourceCCEClusterV3Update(d *schema.ResourceData, meta interface{}) error {
+func resourceCCEClusterV3Update(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*cfg.Config)
 	cceClient, err := config.CceV3Client(config.GetRegion(d))
 	if err != nil {
-		return fmt.Errorf(cceClientError, err)
+		return fmterr.Errorf(cceClientError, err)
 	}
 
 	var updateOpts clusters.UpdateOpts
@@ -467,7 +470,7 @@ func resourceCCEClusterV3Update(d *schema.ResourceData, meta interface{}) error 
 		updateOpts.Spec.Description = d.Get("description").(string)
 		_, err = clusters.Update(cceClient, d.Id(), updateOpts).Extract()
 		if err != nil {
-			return fmt.Errorf("error updating opentelekomcloud CCE: %w", err)
+			return fmterr.Errorf("error updating opentelekomcloud CCE: %w", err)
 		}
 	}
 
@@ -479,10 +482,10 @@ func resourceCCEClusterV3Update(d *schema.ResourceData, meta interface{}) error 
 		if newEipStr != "" {
 			fipId, err = resourceFloatingIPV2Exists(d, meta, newEipStr)
 			if err != nil {
-				return fmt.Errorf("error retrieving the eip: %w", err)
+				return fmterr.Errorf("error retrieving the eip: %w", err)
 			}
 			if fipId == "" {
-				return fmt.Errorf("the specified EIP %s does not exist", newEipStr)
+				return fmterr.Errorf("the specified EIP %s does not exist", newEipStr)
 			}
 		}
 		if oldEipStr != "" {
@@ -491,7 +494,7 @@ func resourceCCEClusterV3Update(d *schema.ResourceData, meta interface{}) error 
 			}
 			err = clusters.UpdateMasterIp(cceClient, d.Id(), updateIpOpts).ExtractErr()
 			if err != nil {
-				return fmt.Errorf("error unbinding EIP to opentelekomcloud CCE: %w", err)
+				return fmterr.Errorf("error unbinding EIP to opentelekomcloud CCE: %w", err)
 			}
 		}
 		if newEipStr != "" {
@@ -502,23 +505,23 @@ func resourceCCEClusterV3Update(d *schema.ResourceData, meta interface{}) error 
 			updateIpOpts.Spec.ID = fipId
 			err = clusters.UpdateMasterIp(cceClient, d.Id(), updateIpOpts).ExtractErr()
 			if err != nil {
-				return fmt.Errorf("error binding EIP to opentelekomcloud CCE: %w", err)
+				return fmterr.Errorf("error binding EIP to opentelekomcloud CCE: %w", err)
 			}
 		}
 	}
 
-	return resourceCCEClusterV3Read(d, meta)
+	return resourceCCEClusterV3Read(ctx, d, meta)
 }
 
-func resourceCCEClusterV3Delete(d *schema.ResourceData, meta interface{}) error {
+func resourceCCEClusterV3Delete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*cfg.Config)
 	cceClient, err := config.CceV3Client(config.GetRegion(d))
 	if err != nil {
-		return fmt.Errorf(cceClientError, err)
+		return fmterr.Errorf(cceClientError, err)
 	}
 	err = clusters.Delete(cceClient, d.Id()).ExtractErr()
 	if err != nil {
-		return fmt.Errorf("error deleting opentelekomcloud CCE Cluster: %w", err)
+		return fmterr.Errorf("error deleting opentelekomcloud CCE Cluster: %w", err)
 	}
 	stateConf := &resource.StateChangeConf{
 		Pending:    []string{"Deleting", "Available", "Unavailable"},
@@ -529,10 +532,10 @@ func resourceCCEClusterV3Delete(d *schema.ResourceData, meta interface{}) error 
 		MinTimeout: 3 * time.Second,
 	}
 
-	_, err = stateConf.WaitForState()
+	_, err = stateConf.WaitForStateContext(ctx)
 
 	if err != nil {
-		return fmt.Errorf("error deleting opentelekomcloud CCE cluster: %w", err)
+		return fmterr.Errorf("error deleting opentelekomcloud CCE cluster: %w", err)
 	}
 
 	d.SetId("")
@@ -597,7 +600,7 @@ func resourceFloatingIPV2Exists(d *schema.ResourceData, meta interface{}, floati
 	return allFips[0].ID, nil
 }
 
-func validateCCEClusterNetwork(d *schema.ResourceDiff, meta interface{}) error {
+func validateCCEClusterNetwork(_ context.Context, d *schema.ResourceDiff, meta interface{}) error {
 	config, ok := meta.(*cfg.Config)
 	if !ok {
 		return fmt.Errorf("error retreiving configuration: can't convert %v to Config", meta)
@@ -630,7 +633,7 @@ func listInstalledAddons(d *schema.ResourceData, config *cfg.Config) (*addons.Ad
 	return addons.ListAddonInstances(client, d.Id()).Extract()
 }
 
-func waitForInstalledAddons(d *schema.ResourceData, config *cfg.Config) error {
+func waitForInstalledAddons(ctx context.Context, d *schema.ResourceData, config *cfg.Config) error {
 	client, err := config.CceV3AddonClient(config.GetRegion(d))
 	if err != nil {
 		return fmt.Errorf("error creating CCE Addon client: %w", logHttpError(err))
@@ -645,13 +648,13 @@ func waitForInstalledAddons(d *schema.ResourceData, config *cfg.Config) error {
 		MinTimeout: 1 * time.Minute,
 	}
 
-	if _, err := stateConfExist.WaitForState(); err != nil {
+	if _, err := stateConfExist.WaitForStateContext(ctx); err != nil {
 		return fmt.Errorf("error waiting for addons to be removed: %w", err)
 	}
 	return nil
 }
 
-func removeAddons(d *schema.ResourceData, config *cfg.Config) error {
+func removeAddons(ctx context.Context, d *schema.ResourceData, config *cfg.Config) error {
 	client, err := config.CceV3AddonClient(config.GetRegion(d))
 	if err != nil {
 		return fmt.Errorf("error creating CCE Addon client: %w", logHttpError(err))
@@ -676,7 +679,7 @@ func removeAddons(d *schema.ResourceData, config *cfg.Config) error {
 		MinTimeout: 3 * time.Second,
 	}
 
-	_, err = stateConf.WaitForState()
+	_, err = stateConf.WaitForStateContext(ctx)
 	if err != nil {
 		return fmt.Errorf("error waiting for addons to be removed: %w", err)
 	}

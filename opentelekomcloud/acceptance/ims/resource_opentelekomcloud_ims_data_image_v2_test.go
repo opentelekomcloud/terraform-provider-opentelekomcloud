@@ -6,8 +6,8 @@ import (
 
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/ims/v2/cloudimages"
 
-	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
-	"github.com/hashicorp/terraform-plugin-sdk/terraform"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/acceptance/common"
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/acceptance/env"
@@ -19,9 +19,9 @@ func TestAccImsDataImageV2_basic(t *testing.T) {
 	var image cloudimages.Image
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:     func() { common.TestAccPreCheck(t) },
-		Providers:    common.TestAccProviders,
-		CheckDestroy: testAccCheckImsDataImageV2Destroy,
+		PreCheck:          func() { common.TestAccPreCheck(t) },
+		ProviderFactories: common.TestAccProviderFactories,
+		CheckDestroy:      testAccCheckImsDataImageV2Destroy,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccImsDataImageV2_basic,
@@ -52,7 +52,7 @@ func testAccCheckImsDataImageV2Destroy(s *terraform.State) error {
 	config := common.TestAccProvider.Meta().(*cfg.Config)
 	imageClient, err := config.ImageV2Client(env.OS_REGION_NAME)
 	if err != nil {
-		return fmt.Errorf("Error creating OpenTelekomCloud Image: %s", err)
+		return fmt.Errorf("error creating OpenTelekomCloud Image: %s", err)
 	}
 
 	for _, rs := range s.RootModule().Resources {
@@ -83,7 +83,7 @@ func testAccCheckImsDataImageV2Exists(n string, image *cloudimages.Image) resour
 		config := common.TestAccProvider.Meta().(*cfg.Config)
 		imageClient, err := config.ImageV2Client(env.OS_REGION_NAME)
 		if err != nil {
-			return fmt.Errorf("Error creating OpenTelekomCloud Image: %s", err)
+			return fmt.Errorf("error creating OpenTelekomCloud Image: %s", err)
 		}
 
 		found, err := ims.GetCloudImage(imageClient, rs.Primary.ID)

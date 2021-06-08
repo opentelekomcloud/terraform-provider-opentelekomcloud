@@ -1,27 +1,30 @@
 package elb
 
 import (
+	"context"
 	"fmt"
 	"log"
 	"time"
 
 	"github.com/hashicorp/go-multierror"
-	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
-	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
-	"github.com/hashicorp/terraform-plugin-sdk/helper/validation"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/networking/v2/extensions/lbaas_v2/pools"
 
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common"
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common/cfg"
+	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common/fmterr"
 )
 
 func ResourceLBPoolV2() *schema.Resource {
 	return &schema.Resource{
-		Create: resourceLBPoolV2Create,
-		Read:   resourceLBPoolV2Read,
-		Update: resourceLBPoolV2Update,
-		Delete: resourceLBPoolV2Delete,
+		CreateContext: resourceLBPoolV2Create,
+		ReadContext:   resourceLBPoolV2Read,
+		UpdateContext: resourceLBPoolV2Update,
+		DeleteContext: resourceLBPoolV2Delete,
 
 		Timeouts: &schema.ResourceTimeout{
 			Create: schema.DefaultTimeout(10 * time.Minute),
@@ -136,18 +139,18 @@ func resourcePoolV2Persistence(d *schema.ResourceData) (*pools.SessionPersistenc
 	return nil, nil
 }
 
-func resourceLBPoolV2Create(d *schema.ResourceData, meta interface{}) error {
+func resourceLBPoolV2Create(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*cfg.Config)
 	client, err := config.NetworkingV2Client(config.GetRegion(d))
 	if err != nil {
-		return fmt.Errorf("error creating OpenTelekomCloud NetworkingV2 client: %w", err)
+		return fmterr.Errorf("error creating OpenTelekomCloud NetworkingV2 client: %w", err)
 	}
 
 	adminStateUp := d.Get("admin_state_up").(bool)
 
 	persistence, err := resourcePoolV2Persistence(d)
 	if err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 
 	createOpts := pools.CreateOpts{
@@ -173,19 +176,19 @@ func resourceLBPoolV2Create(d *schema.ResourceData, meta interface{}) error {
 	lbID := createOpts.LoadbalancerID
 	listenerID := createOpts.ListenerID
 	if lbID != "" {
-		if err := waitForLBV2LoadBalancer(client, lbID, "ACTIVE", nil, timeout); err != nil {
-			return err
+		if err := waitForLBV2LoadBalancer(ctx, client, lbID, "ACTIVE", nil, timeout); err != nil {
+			return diag.FromErr(err)
 		}
 	} else if listenerID != "" {
 		// Wait for Listener to become active before continuing
-		if err := waitForLBV2Listener(client, listenerID, "ACTIVE", nil, timeout); err != nil {
-			return err
+		if err := waitForLBV2Listener(ctx, client, listenerID, "ACTIVE", nil, timeout); err != nil {
+			return diag.FromErr(err)
 		}
 	}
 
 	log.Printf("[DEBUG] Attempting to create pool")
 	var pool *pools.Pool
-	err = resource.Retry(timeout, func() *resource.RetryError {
+	err = resource.RetryContext(ctx, timeout, func() *resource.RetryError {
 		pool, err = pools.Create(client, createOpts).Extract()
 		if err != nil {
 			return common.CheckForRetryableError(err)
@@ -193,35 +196,35 @@ func resourceLBPoolV2Create(d *schema.ResourceData, meta interface{}) error {
 		return nil
 	})
 	if err != nil {
-		return fmt.Errorf("error creating pool: %w", err)
+		return fmterr.Errorf("error creating pool: %w", err)
 	}
 
 	// Wait for LoadBalancer to become active before continuing
 	if lbID != "" {
-		err = waitForLBV2LoadBalancer(client, lbID, "ACTIVE", nil, timeout)
+		err = waitForLBV2LoadBalancer(ctx, client, lbID, "ACTIVE", nil, timeout)
 	} else {
 		// Pool exists by now so we can ask for lbID
-		err = waitForLBV2viaPool(client, pool.ID, "ACTIVE", timeout)
+		err = waitForLBV2viaPool(ctx, client, pool.ID, "ACTIVE", timeout)
 	}
 	if err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 
 	d.SetId(pool.ID)
 
-	return resourceLBPoolV2Read(d, meta)
+	return resourceLBPoolV2Read(ctx, d, meta)
 }
 
-func resourceLBPoolV2Read(d *schema.ResourceData, meta interface{}) error {
+func resourceLBPoolV2Read(_ context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*cfg.Config)
 	client, err := config.NetworkingV2Client(config.GetRegion(d))
 	if err != nil {
-		return fmt.Errorf("error creating OpenTelekomCloud NetworkingV2 client: %w", err)
+		return fmterr.Errorf("error creating OpenTelekomCloud NetworkingV2 client: %w", err)
 	}
 
 	pool, err := pools.Get(client, d.Id()).Extract()
 	if err != nil {
-		return common.CheckDeleted(d, err, "pool")
+		return diag.FromErr(common.CheckDeleted(d, err, "pool"))
 	}
 
 	log.Printf("[DEBUG] Retrieved pool %s: %#v", d.Id(), pool)
@@ -237,7 +240,7 @@ func resourceLBPoolV2Read(d *schema.ResourceData, meta interface{}) error {
 	)
 
 	if mErr.ErrorOrNil() != nil {
-		return mErr
+		return diag.FromErr(mErr)
 	}
 
 	log.Printf("[DEBUG] pool persistence: %+v", pool.Persistence)
@@ -247,11 +250,11 @@ func resourceLBPoolV2Read(d *schema.ResourceData, meta interface{}) error {
 	return nil
 }
 
-func resourceLBPoolV2Update(d *schema.ResourceData, meta interface{}) error {
+func resourceLBPoolV2Update(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*cfg.Config)
 	client, err := config.NetworkingV2Client(config.GetRegion(d))
 	if err != nil {
-		return fmt.Errorf("error creating OpenTelekomCloud NetworkingV2 client: %w", err)
+		return fmterr.Errorf("error creating OpenTelekomCloud NetworkingV2 client: %w", err)
 	}
 
 	var updateOpts pools.UpdateOpts
@@ -273,16 +276,16 @@ func resourceLBPoolV2Update(d *schema.ResourceData, meta interface{}) error {
 	timeout := d.Timeout(schema.TimeoutUpdate)
 	lbID := d.Get("loadbalancer_id").(string)
 	if lbID != "" {
-		err = waitForLBV2LoadBalancer(client, lbID, "ACTIVE", nil, timeout)
+		err = waitForLBV2LoadBalancer(ctx, client, lbID, "ACTIVE", nil, timeout)
 	} else {
-		err = waitForLBV2viaPool(client, d.Id(), "ACTIVE", timeout)
+		err = waitForLBV2viaPool(ctx, client, d.Id(), "ACTIVE", timeout)
 	}
 	if err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 
 	log.Printf("[DEBUG] Updating pool %s with options: %#v", d.Id(), updateOpts)
-	err = resource.Retry(timeout, func() *resource.RetryError {
+	err = resource.RetryContext(ctx, timeout, func() *resource.RetryError {
 		_, err = pools.Update(client, d.Id(), updateOpts).Extract()
 		if err != nil {
 			return common.CheckForRetryableError(err)
@@ -291,40 +294,40 @@ func resourceLBPoolV2Update(d *schema.ResourceData, meta interface{}) error {
 	})
 
 	if err != nil {
-		return fmt.Errorf("unable to update pool %s: %w", d.Id(), err)
+		return fmterr.Errorf("unable to update pool %s: %w", d.Id(), err)
 	}
 
 	// Wait for LoadBalancer to become active before continuing
 	if lbID != "" {
-		err = waitForLBV2LoadBalancer(client, lbID, "ACTIVE", nil, timeout)
+		err = waitForLBV2LoadBalancer(ctx, client, lbID, "ACTIVE", nil, timeout)
 	} else {
-		err = waitForLBV2viaPool(client, d.Id(), "ACTIVE", timeout)
+		err = waitForLBV2viaPool(ctx, client, d.Id(), "ACTIVE", timeout)
 	}
 	if err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 
-	return resourceLBPoolV2Read(d, meta)
+	return resourceLBPoolV2Read(ctx, d, meta)
 }
 
-func resourceLBPoolV2Delete(d *schema.ResourceData, meta interface{}) error {
+func resourceLBPoolV2Delete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*cfg.Config)
 	client, err := config.NetworkingV2Client(config.GetRegion(d))
 	if err != nil {
-		return fmt.Errorf("error creating OpenTelekomCloud NetworkingV2 client: %w", err)
+		return fmterr.Errorf("error creating OpenTelekomCloud NetworkingV2 client: %w", err)
 	}
 
 	// Wait for LoadBalancer to become active before continuing
 	timeout := d.Timeout(schema.TimeoutDelete)
 	lbID := d.Get("loadbalancer_id").(string)
 	if lbID != "" {
-		if err := waitForLBV2LoadBalancer(client, lbID, "ACTIVE", nil, timeout); err != nil {
-			return err
+		if err := waitForLBV2LoadBalancer(ctx, client, lbID, "ACTIVE", nil, timeout); err != nil {
+			return diag.FromErr(err)
 		}
 	}
 
 	log.Printf("[DEBUG] Attempting to delete pool %s", d.Id())
-	err = resource.Retry(timeout, func() *resource.RetryError {
+	err = resource.RetryContext(ctx, timeout, func() *resource.RetryError {
 		err = pools.Delete(client, d.Id()).ExtractErr()
 		if err != nil {
 			return common.CheckForRetryableError(err)
@@ -333,13 +336,13 @@ func resourceLBPoolV2Delete(d *schema.ResourceData, meta interface{}) error {
 	})
 
 	if lbID != "" {
-		err = waitForLBV2LoadBalancer(client, lbID, "ACTIVE", nil, timeout)
+		err = waitForLBV2LoadBalancer(ctx, client, lbID, "ACTIVE", nil, timeout)
 	} else {
 		// Wait for Pool to delete
-		err = waitForLBV2Pool(client, d.Id(), "DELETED", nil, timeout)
+		err = waitForLBV2Pool(ctx, client, d.Id(), "DELETED", nil, timeout)
 	}
 	if err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 
 	return nil

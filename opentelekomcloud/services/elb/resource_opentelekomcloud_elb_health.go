@@ -1,24 +1,27 @@
 package elb
 
 import (
-	"fmt"
+	"context"
 	"log"
 	"time"
 
-	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/networking/v2/extensions/elbaas/healthcheck"
 
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common"
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common/cfg"
+	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common/fmterr"
 )
 
 func ResourceHealth() *schema.Resource {
 	return &schema.Resource{
-		Create: resourceHealthCreate,
-		Read:   resourceHealthRead,
-		Update: resourceHealthUpdate,
-		Delete: resourceHealthDelete,
+		CreateContext: resourceHealthCreate,
+		ReadContext:   resourceHealthRead,
+		UpdateContext: resourceHealthUpdate,
+		DeleteContext: resourceHealthDelete,
 
 		DeprecationMessage: classicLBDeprecated,
 
@@ -45,63 +48,52 @@ func ResourceHealth() *schema.Resource {
 				Type:     schema.TypeString,
 				Optional: true,
 				Computed: true,
-				ValidateFunc: func(v interface{}, k string) (ws []string, errors []error) {
-					return common.ValidateStringList(v, k, []string{"HTTP", "TCP"})
-				},
+				ValidateFunc: validation.StringInSlice(
+					[]string{"HTTP", "TCP"}, false),
 			},
 			"healthcheck_uri": {
 				Type:     schema.TypeString,
 				Optional: true,
 			},
 			"healthcheck_connect_port": {
-				Type:     schema.TypeInt,
-				Optional: true,
-				Computed: true,
-				ValidateFunc: func(v interface{}, k string) (ws []string, errors []error) {
-					return common.ValidateIntRange(v, k, 1, 65535)
-				},
+				Type:         schema.TypeInt,
+				Optional:     true,
+				Computed:     true,
+				ValidateFunc: validation.IntBetween(1, 65535),
 			},
 			"healthy_threshold": {
-				Type:     schema.TypeInt,
-				Optional: true,
-				Computed: true,
-				ValidateFunc: func(v interface{}, k string) (ws []string, errors []error) {
-					return common.ValidateIntRange(v, k, 1, 10)
-				},
+				Type:         schema.TypeInt,
+				Optional:     true,
+				Computed:     true,
+				ValidateFunc: validation.IntBetween(1, 10),
 			},
 			"unhealthy_threshold": {
-				Type:     schema.TypeInt,
-				Optional: true,
-				Computed: true,
-				ValidateFunc: func(v interface{}, k string) (ws []string, errors []error) {
-					return common.ValidateIntRange(v, k, 1, 10)
-				},
+				Type:         schema.TypeInt,
+				Optional:     true,
+				Computed:     true,
+				ValidateFunc: validation.IntBetween(1, 10),
 			},
 			"healthcheck_timeout": {
-				Type:     schema.TypeInt,
-				Optional: true,
-				Computed: true,
-				ValidateFunc: func(v interface{}, k string) (ws []string, errors []error) {
-					return common.ValidateIntRange(v, k, 1, 50)
-				},
+				Type:         schema.TypeInt,
+				Optional:     true,
+				Computed:     true,
+				ValidateFunc: validation.IntBetween(1, 50),
 			},
 			"healthcheck_interval": {
-				Type:     schema.TypeInt,
-				Optional: true,
-				Computed: true,
-				ValidateFunc: func(v interface{}, k string) (ws []string, errors []error) {
-					return common.ValidateIntRange(v, k, 1, 5)
-				},
+				Type:         schema.TypeInt,
+				Optional:     true,
+				Computed:     true,
+				ValidateFunc: validation.IntBetween(1, 5),
 			},
 		},
 	}
 }
 
-func resourceHealthCreate(d *schema.ResourceData, meta interface{}) error {
+func resourceHealthCreate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*cfg.Config)
 	client, err := config.ElbV1Client(config.GetRegion(d))
 	if err != nil {
-		return fmt.Errorf("Error creating OpenTelekomCloud networking client: %s", err)
+		return fmterr.Errorf("error creating OpenTelekomCloud networking client: %s", err)
 	}
 
 	// adminStateUp := d.Get("admin_state_up").(bool)
@@ -118,25 +110,25 @@ func resourceHealthCreate(d *schema.ResourceData, meta interface{}) error {
 
 	health, err := healthcheck.Create(client, createOpts).Extract()
 	if err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 	d.SetId(health.ID)
 
 	log.Printf("Successfully created healthcheck %s.", health.ID)
 
-	return resourceHealthRead(d, meta)
+	return resourceHealthRead(ctx, d, meta)
 }
 
-func resourceHealthRead(d *schema.ResourceData, meta interface{}) error {
+func resourceHealthRead(_ context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*cfg.Config)
 	networkingClient, err := config.ElbV1Client(config.GetRegion(d))
 	if err != nil {
-		return fmt.Errorf("Error creating OpenTelekomCloud networking client: %s", err)
+		return fmterr.Errorf("error creating OpenTelekomCloud networking client: %s", err)
 	}
 
 	health, err := healthcheck.Get(networkingClient, d.Id()).Extract()
 	if err != nil {
-		return common.CheckDeleted(d, err, "health")
+		return diag.FromErr(common.CheckDeleted(d, err, "health"))
 	}
 
 	log.Printf("[DEBUG] Retrieved health %s: %+v", d.Id(), health)
@@ -155,11 +147,11 @@ func resourceHealthRead(d *schema.ResourceData, meta interface{}) error {
 	return nil
 }
 
-func resourceHealthUpdate(d *schema.ResourceData, meta interface{}) error {
+func resourceHealthUpdate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*cfg.Config)
 	networkingClient, err := config.ElbV1Client(config.GetRegion(d))
 	if err != nil {
-		return fmt.Errorf("Error creating OpenTelekomCloud networking client: %s", err)
+		return fmterr.Errorf("error creating OpenTelekomCloud networking client: %s", err)
 	}
 
 	var updateOpts healthcheck.UpdateOpts
@@ -189,24 +181,24 @@ func resourceHealthUpdate(d *schema.ResourceData, meta interface{}) error {
 
 	_, err = healthcheck.Update(networkingClient, d.Id(), updateOpts).Extract()
 	if err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 
-	return resourceHealthRead(d, meta)
+	return resourceHealthRead(ctx, d, meta)
 }
 
-func resourceHealthDelete(d *schema.ResourceData, meta interface{}) error {
+func resourceHealthDelete(_ context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*cfg.Config)
 	client, err := config.ElbV1Client(config.GetRegion(d))
 	if err != nil {
-		return fmt.Errorf("Error creating OpenTelekomCloud networking client: %s", err)
+		return fmterr.Errorf("error creating OpenTelekomCloud networking client: %s", err)
 	}
 
 	id := d.Id()
 	log.Printf("[DEBUG] Deleting health %s", id)
 
 	if err := healthcheck.Delete(client, id).ExtractErr(); err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 
 	log.Printf("Successfully deleted health %s", id)

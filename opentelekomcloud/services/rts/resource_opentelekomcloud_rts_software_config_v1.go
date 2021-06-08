@@ -1,24 +1,26 @@
 package rts
 
 import (
-	"fmt"
+	"context"
 	"log"
 	"time"
 
-	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
-	"github.com/opentelekomcloud/gophertelekomcloud"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	golangsdk "github.com/opentelekomcloud/gophertelekomcloud"
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/rts/v1/softwareconfig"
 
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common/cfg"
+	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common/fmterr"
 )
 
 func ResourceSoftwareConfigV1() *schema.Resource {
 	return &schema.Resource{
-		Create: resourceSoftwareConfigV1Create,
-		Read:   resourceSoftwareConfigV1Read,
-		Delete: resourceSoftwareConfigV1Delete,
+		CreateContext: resourceSoftwareConfigV1Create,
+		ReadContext:   resourceSoftwareConfigV1Read,
+		DeleteContext: resourceSoftwareConfigV1Delete,
 		Importer: &schema.ResourceImporter{
-			State: schema.ImportStatePassthrough,
+			StateContext: schema.ImportStatePassthroughContext,
 		},
 
 		Timeouts: &schema.ResourceTimeout{
@@ -78,12 +80,12 @@ func resourceOptionsV1(d *schema.ResourceData) map[string]interface{} {
 	return m
 }
 
-func resourceSoftwareConfigV1Create(d *schema.ResourceData, meta interface{}) error {
+func resourceSoftwareConfigV1Create(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*cfg.Config)
 	orchastrationClient, err := config.OrchestrationV1Client(config.GetRegion(d))
 
 	if err != nil {
-		return fmt.Errorf("Error creating OpenTelekomCloud RTS client: %s", err)
+		return fmterr.Errorf("error creating OpenTelekomCloud RTS client: %s", err)
 	}
 	input := d.Get("input_values").([]interface{})
 
@@ -110,18 +112,18 @@ func resourceSoftwareConfigV1Create(d *schema.ResourceData, meta interface{}) er
 	n, err := softwareconfig.Create(orchastrationClient, createOpts).Extract()
 
 	if err != nil {
-		return fmt.Errorf("Error creating OpenTelekomCloud RTS Software Config: %s", err)
+		return fmterr.Errorf("error creating OpenTelekomCloud RTS Software Config: %s", err)
 	}
 	d.SetId(n.Id)
 
-	return resourceSoftwareConfigV1Read(d, meta)
+	return resourceSoftwareConfigV1Read(ctx, d, meta)
 }
 
-func resourceSoftwareConfigV1Read(d *schema.ResourceData, meta interface{}) error {
+func resourceSoftwareConfigV1Read(_ context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*cfg.Config)
 	orchastrationClient, err := config.OrchestrationV1Client(config.GetRegion(d))
 	if err != nil {
-		return fmt.Errorf("Error creating OpenTelekomCloud RTS client: %s", err)
+		return fmterr.Errorf("error creating OpenTelekomCloud RTS client: %s", err)
 	}
 
 	n, err := softwareconfig.Get(orchastrationClient, d.Id()).Extract()
@@ -131,7 +133,7 @@ func resourceSoftwareConfigV1Read(d *schema.ResourceData, meta interface{}) erro
 			return nil
 		}
 
-		return fmt.Errorf("Error retrieving OpenTelekomCloud Vpc: %s", err)
+		return fmterr.Errorf("error retrieving OpenTelekomCloud Vpc: %s", err)
 	}
 
 	d.Set("id", n.Id)
@@ -141,19 +143,19 @@ func resourceSoftwareConfigV1Read(d *schema.ResourceData, meta interface{}) erro
 	d.Set("options", n.Options)
 	d.Set("region", config.GetRegion(d))
 	if err := d.Set("input_values", n.Inputs); err != nil {
-		return fmt.Errorf("[DEBUG] Error saving inputs to state for OpenTelekomCloud RTS Software Config (%s): %s", d.Id(), err)
+		return fmterr.Errorf("[DEBUG] Error saving inputs to state for OpenTelekomCloud RTS Software Config (%s): %s", d.Id(), err)
 	}
 	if err := d.Set("output_values", n.Outputs); err != nil {
-		return fmt.Errorf("[DEBUG] Error saving outputs to state for OpenTelekomCloud RTS Software Config (%s): %s", d.Id(), err)
+		return fmterr.Errorf("[DEBUG] Error saving outputs to state for OpenTelekomCloud RTS Software Config (%s): %s", d.Id(), err)
 	}
 	return nil
 }
 
-func resourceSoftwareConfigV1Delete(d *schema.ResourceData, meta interface{}) error {
+func resourceSoftwareConfigV1Delete(_ context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*cfg.Config)
 	orchastrationClient, err := config.OrchestrationV1Client(config.GetRegion(d))
 	if err != nil {
-		return fmt.Errorf("Error creating OpenTelekomCloud vpc: %s", err)
+		return fmterr.Errorf("error creating OpenTelekomCloud vpc: %s", err)
 	}
 	err = softwareconfig.Delete(orchastrationClient, d.Id()).ExtractErr()
 

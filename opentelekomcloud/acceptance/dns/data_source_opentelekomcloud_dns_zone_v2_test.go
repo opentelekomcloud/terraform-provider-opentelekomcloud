@@ -4,9 +4,9 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/hashicorp/terraform-plugin-sdk/helper/acctest"
-	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
-	"github.com/hashicorp/terraform-plugin-sdk/terraform"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/acctest"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/acceptance/common"
 )
@@ -16,9 +16,9 @@ func TestAccOpenStackDNSZoneV2DataSource_basic(t *testing.T) {
 	randZoneTag := fmt.Sprintf("value-%s", acctest.RandString(5))
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:     func() { common.TestAccPreCheckRequiredEnvVars(t) },
-		Providers:    common.TestAccProviders,
-		CheckDestroy: testAccCheckDNSV2ZoneDestroy,
+		PreCheck:          func() { common.TestAccPreCheckRequiredEnvVars(t) },
+		ProviderFactories: common.TestAccProviderFactories,
+		CheckDestroy:      testAccCheckDNSV2ZoneDestroy,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccOpenStackDNSZoneV2DataSource_zone(zone, randZoneTag),
@@ -47,9 +47,9 @@ func TestAccOpenStackDNSZoneV2DataSource_byTag(t *testing.T) {
 	randZoneTag := fmt.Sprintf("value-%s", acctest.RandString(5))
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:     func() { common.TestAccPreCheckRequiredEnvVars(t) },
-		Providers:    common.TestAccProviders,
-		CheckDestroy: testAccCheckDNSV2ZoneDestroy,
+		PreCheck:          func() { common.TestAccPreCheckRequiredEnvVars(t) },
+		ProviderFactories: common.TestAccProviderFactories,
+		CheckDestroy:      testAccCheckDNSV2ZoneDestroy,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccOpenStackDNSZoneV2DataSource_zone(zone, randZoneTag),

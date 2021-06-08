@@ -1,20 +1,23 @@
 package iam
 
 import (
+	"context"
 	"fmt"
 	"log"
 	"strings"
 	"time"
 
-	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/identity/v3/users"
 
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common/cfg"
+	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common/fmterr"
 )
 
 func DataSourceIdentityUserV3() *schema.Resource {
 	return &schema.Resource{
-		Read: dataSourceIdentityUserV3Read,
+		ReadContext: dataSourceIdentityUserV3Read,
 
 		Schema: map[string]*schema.Schema{
 			"domain_id": {
@@ -45,11 +48,11 @@ func DataSourceIdentityUserV3() *schema.Resource {
 }
 
 // dataSourceIdentityUserV3Read performs the user lookup.
-func dataSourceIdentityUserV3Read(d *schema.ResourceData, meta interface{}) error {
+func dataSourceIdentityUserV3Read(_ context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*cfg.Config)
 	identityClient, err := config.IdentityV3Client(config.GetRegion(d))
 	if err != nil {
-		return fmt.Errorf("Error creating OpenStack identity client: %s", err)
+		return fmterr.Errorf("error creating OpenStack identity client: %s", err)
 	}
 
 	enabled := d.Get("enabled").(bool)
@@ -64,27 +67,27 @@ func dataSourceIdentityUserV3Read(d *schema.ResourceData, meta interface{}) erro
 	var user users.User
 	allPages, err := users.List(identityClient, listOpts).AllPages()
 	if err != nil {
-		return fmt.Errorf("Unable to query users: %s", err)
+		return fmterr.Errorf("Unable to query users: %s", err)
 	}
 
 	allUsers, err := users.ExtractUsers(allPages)
 	if err != nil {
-		return fmt.Errorf("Unable to retrieve users: %s", err)
+		return fmterr.Errorf("Unable to retrieve users: %s", err)
 	}
 
 	if len(allUsers) < 1 {
-		return fmt.Errorf("Your query returned no results. " +
+		return fmterr.Errorf("Your query returned no results. " +
 			"Please change your search criteria and try again.")
 	}
 
 	if len(allUsers) > 1 {
 		log.Printf("[DEBUG] Multiple results found: %#v", allUsers)
-		return fmt.Errorf("Your query returned more than one result")
+		return fmterr.Errorf("Your query returned more than one result")
 	}
 	user = allUsers[0]
 
 	log.Printf("[DEBUG] Single user found: %s", user.ID)
-	return dataSourceIdentityUserV3Attributes(d, &user)
+	return diag.FromErr(dataSourceIdentityUserV3Attributes(d, &user))
 }
 
 // dataSourceIdentityUserV3Attributes populates the fields of an User resource.

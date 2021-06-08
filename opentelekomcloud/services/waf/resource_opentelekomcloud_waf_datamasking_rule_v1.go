@@ -1,25 +1,27 @@
 package waf
 
 import (
-	"fmt"
+	"context"
 	"log"
 	"time"
 
-	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
-	"github.com/opentelekomcloud/gophertelekomcloud"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	golangsdk "github.com/opentelekomcloud/gophertelekomcloud"
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/waf/v1/datamasking_rules"
 
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common/cfg"
+	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common/fmterr"
 )
 
 func ResourceWafDataMaskingRuleV1() *schema.Resource {
 	return &schema.Resource{
-		Create: resourceWafDataMaskingRuleV1Create,
-		Read:   resourceWafDataMaskingRuleV1Read,
-		Update: resourceWafDataMaskingRuleV1Update,
-		Delete: resourceWafDataMaskingRuleV1Delete,
+		CreateContext: resourceWafDataMaskingRuleV1Create,
+		ReadContext:   resourceWafDataMaskingRuleV1Read,
+		UpdateContext: resourceWafDataMaskingRuleV1Update,
+		DeleteContext: resourceWafDataMaskingRuleV1Delete,
 		Importer: &schema.ResourceImporter{
-			State: schema.ImportStatePassthrough,
+			StateContext: schema.ImportStatePassthroughContext,
 		},
 
 		Timeouts: &schema.ResourceTimeout{
@@ -52,13 +54,13 @@ func ResourceWafDataMaskingRuleV1() *schema.Resource {
 	}
 }
 
-func resourceWafDataMaskingRuleV1Create(d *schema.ResourceData, meta interface{}) error {
+func resourceWafDataMaskingRuleV1Create(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*cfg.Config)
 
 	wafClient, err := config.WafV1Client(config.GetRegion(d))
 
 	if err != nil {
-		return fmt.Errorf("Error creating OpenTelekomcomCloud WAF Client: %s", err)
+		return fmterr.Errorf("error creating OpenTelekomcomCloud WAF Client: %s", err)
 	}
 
 	createOpts := datamasking_rules.CreateOpts{
@@ -70,20 +72,20 @@ func resourceWafDataMaskingRuleV1Create(d *schema.ResourceData, meta interface{}
 	policy_id := d.Get("policy_id").(string)
 	rule, err := datamasking_rules.Create(wafClient, policy_id, createOpts).Extract()
 	if err != nil {
-		return fmt.Errorf("Error creating OpenTelekomcomCloud WAF DataMasking Rule: %s", err)
+		return fmterr.Errorf("error creating OpenTelekomcomCloud WAF DataMasking Rule: %s", err)
 	}
 
 	log.Printf("[DEBUG] Waf datamasking rule created: %#v", rule)
 	d.SetId(rule.Id)
 
-	return resourceWafDataMaskingRuleV1Read(d, meta)
+	return resourceWafDataMaskingRuleV1Read(ctx, d, meta)
 }
 
-func resourceWafDataMaskingRuleV1Read(d *schema.ResourceData, meta interface{}) error {
+func resourceWafDataMaskingRuleV1Read(_ context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*cfg.Config)
 	wafClient, err := config.WafV1Client(config.GetRegion(d))
 	if err != nil {
-		return fmt.Errorf("Error creating OpenTelekomCloud WAF client: %s", err)
+		return fmterr.Errorf("error creating OpenTelekomCloud WAF client: %s", err)
 	}
 	policy_id := d.Get("policy_id").(string)
 	n, err := datamasking_rules.Get(wafClient, policy_id, d.Id()).Extract()
@@ -94,7 +96,7 @@ func resourceWafDataMaskingRuleV1Read(d *schema.ResourceData, meta interface{}) 
 			return nil
 		}
 
-		return fmt.Errorf("Error retrieving OpenTelekomCloud Waf DataMasking Rule: %s", err)
+		return fmterr.Errorf("error retrieving OpenTelekomCloud Waf DataMasking Rule: %s", err)
 	}
 
 	d.SetId(n.Id)
@@ -106,11 +108,11 @@ func resourceWafDataMaskingRuleV1Read(d *schema.ResourceData, meta interface{}) 
 	return nil
 }
 
-func resourceWafDataMaskingRuleV1Update(d *schema.ResourceData, meta interface{}) error {
+func resourceWafDataMaskingRuleV1Update(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*cfg.Config)
 	wafClient, err := config.WafV1Client(config.GetRegion(d))
 	if err != nil {
-		return fmt.Errorf("Error creating OpenTelekomCloud WAF Client: %s", err)
+		return fmterr.Errorf("error creating OpenTelekomCloud WAF Client: %s", err)
 	}
 	var updateOpts datamasking_rules.UpdateOpts
 
@@ -125,24 +127,24 @@ func resourceWafDataMaskingRuleV1Update(d *schema.ResourceData, meta interface{}
 		policy_id := d.Get("policy_id").(string)
 		_, err = datamasking_rules.Update(wafClient, policy_id, d.Id(), updateOpts).Extract()
 		if err != nil {
-			return fmt.Errorf("Error updating OpenTelekomCloud WAF DataMasking Rule: %s", err)
+			return fmterr.Errorf("error updating OpenTelekomCloud WAF DataMasking Rule: %s", err)
 		}
 	}
 
-	return resourceWafDataMaskingRuleV1Read(d, meta)
+	return resourceWafDataMaskingRuleV1Read(ctx, d, meta)
 }
 
-func resourceWafDataMaskingRuleV1Delete(d *schema.ResourceData, meta interface{}) error {
+func resourceWafDataMaskingRuleV1Delete(_ context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*cfg.Config)
 	wafClient, err := config.WafV1Client(config.GetRegion(d))
 	if err != nil {
-		return fmt.Errorf("Error creating OpenTelekomCloud WAF client: %s", err)
+		return fmterr.Errorf("error creating OpenTelekomCloud WAF client: %s", err)
 	}
 
 	policy_id := d.Get("policy_id").(string)
 	err = datamasking_rules.Delete(wafClient, policy_id, d.Id()).ExtractErr()
 	if err != nil {
-		return fmt.Errorf("Error deleting OpenTelekomCloud WAF DataMasking Rule: %s", err)
+		return fmterr.Errorf("error deleting OpenTelekomCloud WAF DataMasking Rule: %s", err)
 	}
 
 	d.SetId("")

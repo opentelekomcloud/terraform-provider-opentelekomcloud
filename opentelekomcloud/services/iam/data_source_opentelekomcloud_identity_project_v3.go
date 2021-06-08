@@ -1,18 +1,20 @@
 package iam
 
 import (
-	"fmt"
+	"context"
 	"log"
 
-	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/identity/v3/projects"
 
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common/cfg"
+	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common/fmterr"
 )
 
 func DataSourceIdentityProjectV3() *schema.Resource {
 	return &schema.Resource{
-		Read: dataSourceIdentityProjectV3Read,
+		ReadContext: dataSourceIdentityProjectV3Read,
 
 		Schema: map[string]*schema.Schema{
 			"description": {
@@ -46,11 +48,11 @@ func DataSourceIdentityProjectV3() *schema.Resource {
 }
 
 // dataSourceIdentityProjectV3Read performs the project lookup.
-func dataSourceIdentityProjectV3Read(d *schema.ResourceData, meta interface{}) error {
+func dataSourceIdentityProjectV3Read(_ context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*cfg.Config)
 	identityClient, err := config.IdentityV3Client(config.GetRegion(d))
 	if err != nil {
-		return fmt.Errorf("Error creating OpenStack identity client: %s", err)
+		return fmterr.Errorf("error creating OpenStack identity client: %s", err)
 	}
 
 	listOpts := projects.ListOpts{
@@ -64,27 +66,27 @@ func dataSourceIdentityProjectV3Read(d *schema.ResourceData, meta interface{}) e
 	var project projects.Project
 	allPages, err := projects.List(identityClient, listOpts).AllPages()
 	if err != nil {
-		return fmt.Errorf("Unable to query projects: %s", err)
+		return fmterr.Errorf("Unable to query projects: %s", err)
 	}
 
 	allProjects, err := projects.ExtractProjects(allPages)
 	if err != nil {
-		return fmt.Errorf("Unable to retrieve projects: %s", err)
+		return fmterr.Errorf("Unable to retrieve projects: %s", err)
 	}
 
 	if len(allProjects) < 1 {
-		return fmt.Errorf("Your query returned no results. " +
+		return fmterr.Errorf("Your query returned no results. " +
 			"Please change your search criteria and try again.")
 	}
 
 	if len(allProjects) > 1 {
 		log.Printf("[DEBUG] Multiple results found: %#v", allProjects)
-		return fmt.Errorf("Your query returned more than one result")
+		return fmterr.Errorf("Your query returned more than one result")
 	}
 	project = allProjects[0]
 
 	log.Printf("[DEBUG] Single project found: %s", project.ID)
-	return dataSourceIdentityProjectV3Attributes(d, &project)
+	return diag.FromErr(dataSourceIdentityProjectV3Attributes(d, &project))
 }
 
 // dataSourceIdentityProjectV3Attributes populates the fields of an Project resource.

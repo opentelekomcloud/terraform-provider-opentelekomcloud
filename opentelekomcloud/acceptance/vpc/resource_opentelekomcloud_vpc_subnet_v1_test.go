@@ -4,8 +4,8 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
-	"github.com/hashicorp/terraform-plugin-sdk/terraform"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/networking/v1/subnets"
 
@@ -19,9 +19,9 @@ func TestAccVpcSubnetV1Basic(t *testing.T) {
 	resourceName := "opentelekomcloud_vpc_subnet_v1.subnet_1"
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:     func() { common.TestAccPreCheck(t) },
-		Providers:    common.TestAccProviders,
-		CheckDestroy: testAccCheckVpcSubnetV1Destroy,
+		PreCheck:          func() { common.TestAccPreCheck(t) },
+		ProviderFactories: common.TestAccProviderFactories,
+		CheckDestroy:      testAccCheckVpcSubnetV1Destroy,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccVpcSubnetV1Basic,
@@ -53,9 +53,9 @@ func TestAccVpcSubnetV1Timeout(t *testing.T) {
 	resourceName := "opentelekomcloud_vpc_subnet_v1.subnet_1"
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:     func() { common.TestAccPreCheck(t) },
-		Providers:    common.TestAccProviders,
-		CheckDestroy: testAccCheckVpcSubnetV1Destroy,
+		PreCheck:          func() { common.TestAccPreCheck(t) },
+		ProviderFactories: common.TestAccProviderFactories,
+		CheckDestroy:      testAccCheckVpcSubnetV1Destroy,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccVpcSubnetV1Timeout,
@@ -72,9 +72,9 @@ func TestAccVpcSubnetV1DnsList(t *testing.T) {
 	resourceName := "opentelekomcloud_vpc_subnet_v1.subnet_1"
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:     func() { common.TestAccPreCheck(t) },
-		Providers:    common.TestAccProviders,
-		CheckDestroy: testAccCheckVpcSubnetV1Destroy,
+		PreCheck:          func() { common.TestAccPreCheck(t) },
+		ProviderFactories: common.TestAccProviderFactories,
+		CheckDestroy:      testAccCheckVpcSubnetV1Destroy,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccVpcSubnetV1DnsList,

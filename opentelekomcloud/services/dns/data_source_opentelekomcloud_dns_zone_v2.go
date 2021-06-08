@@ -1,22 +1,25 @@
 package dns
 
 import (
+	"context"
 	"fmt"
 	"log"
 	"strings"
 	"time"
 
 	"github.com/hashicorp/go-multierror"
-	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/dns/v2/zones"
 
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common"
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common/cfg"
+	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common/fmterr"
 )
 
 func DataSourceDNSZoneV2() *schema.Resource {
 	return &schema.Resource{
-		Read: dataSourceDNSZoneV2Read,
+		ReadContext: dataSourceDNSZoneV2Read,
 
 		Schema: map[string]*schema.Schema{
 			"name": {
@@ -130,11 +133,11 @@ func tagsAsString(tags map[string]interface{}) string {
 	return strings.Join(tagList, "|")
 }
 
-func dataSourceDNSZoneV2Read(d *schema.ResourceData, meta interface{}) error {
+func dataSourceDNSZoneV2Read(_ context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*cfg.Config)
 	dnsClient, err := config.DnsV2Client(config.GetRegion(d))
 	if err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 
 	listOpts := TaggedListOpts{}
@@ -169,21 +172,21 @@ func dataSourceDNSZoneV2Read(d *schema.ResourceData, meta interface{}) error {
 
 	pages, err := zones.List(dnsClient, listOpts).AllPages()
 	if err != nil {
-		return fmt.Errorf("unable to retrieve zones: %s", err)
+		return fmterr.Errorf("unable to retrieve zones: %s", err)
 	}
 
 	allZones, err := zones.ExtractZones(pages)
 	if err != nil {
-		return fmt.Errorf("unable to extract zones: %s", err)
+		return fmterr.Errorf("unable to extract zones: %s", err)
 	}
 
 	if len(allZones) < 1 {
-		return fmt.Errorf("your query returned no results." +
+		return fmterr.Errorf("your query returned no results." +
 			"Please change your search criteria and try again")
 	}
 
 	if len(allZones) > 1 {
-		return fmt.Errorf("your query returned more than one result." +
+		return fmterr.Errorf("your query returned more than one result." +
 			" Please try a more specific search criteria")
 	}
 
@@ -212,20 +215,20 @@ func dataSourceDNSZoneV2Read(d *schema.ResourceData, meta interface{}) error {
 		d.Set("updated_at", zone.UpdatedAt.Format(time.RFC3339)),
 	)
 	if err := me.ErrorOrNil(); err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 
 	// maps
 	err = d.Set("links", zone.Links)
 	if err != nil {
 		log.Printf("[DEBUG] Unable to set links: %s", err)
-		return err
+		return diag.FromErr(err)
 	}
 	// slices
 	err = d.Set("masters", zone.Masters)
 	if err != nil {
 		log.Printf("[DEBUG] Unable to set masters: %s", err)
-		return err
+		return diag.FromErr(err)
 	}
 
 	return nil

@@ -5,10 +5,10 @@ import (
 	"os"
 	"testing"
 
-	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
-	"github.com/hashicorp/terraform-plugin-sdk/terraform"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 
-	"github.com/opentelekomcloud/gophertelekomcloud"
+	golangsdk "github.com/opentelekomcloud/gophertelekomcloud"
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/blockstorage/v2/volumes"
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/evs/v2/tags"
 
@@ -21,9 +21,9 @@ func TestAccBlockStorageV2Volume_basic(t *testing.T) {
 	var volume volumes.Volume
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:     func() { common.TestAccPreCheck(t) },
-		Providers:    common.TestAccProviders,
-		CheckDestroy: testAccCheckBlockStorageV2VolumeDestroy,
+		PreCheck:          func() { common.TestAccPreCheck(t) },
+		ProviderFactories: common.TestAccProviderFactories,
+		CheckDestroy:      testAccCheckBlockStorageV2VolumeDestroy,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccBlockStorageV2Volume_basic,
@@ -51,9 +51,9 @@ func TestAccBlockStorageV2Volume_upscaleDownScale(t *testing.T) {
 	var volume volumes.Volume
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:     func() { common.TestAccPreCheck(t) },
-		Providers:    common.TestAccProviders,
-		CheckDestroy: testAccCheckBlockStorageV2VolumeDestroy,
+		PreCheck:          func() { common.TestAccPreCheck(t) },
+		ProviderFactories: common.TestAccProviderFactories,
+		CheckDestroy:      testAccCheckBlockStorageV2VolumeDestroy,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccBlockStorageV2Volume_basic,
@@ -74,9 +74,9 @@ func TestAccBlockStorageV2Volume_upscaleDownScaleAssigned(t *testing.T) {
 	var volume volumes.Volume
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:     func() { common.TestAccPreCheck(t) },
-		Providers:    common.TestAccProviders,
-		CheckDestroy: testAccCheckBlockStorageV2VolumeDestroy,
+		PreCheck:          func() { common.TestAccPreCheck(t) },
+		ProviderFactories: common.TestAccProviderFactories,
+		CheckDestroy:      testAccCheckBlockStorageV2VolumeDestroy,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccBlockStorageV2Volume_assigned(10),
@@ -100,8 +100,8 @@ func TestAccBlockStorageV2Volume_policy(t *testing.T) {
 			common.TestAccPreCheck(t)
 			testPolicyPreCheck(t)
 		},
-		Providers:    common.TestAccProviders,
-		CheckDestroy: testAccCheckBlockStorageV2VolumeDestroy,
+		ProviderFactories: common.TestAccProviderFactories,
+		CheckDestroy:      testAccCheckBlockStorageV2VolumeDestroy,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccBlockStorageV2Volume_policy(os.Getenv("OS_KMS_KEY")),
@@ -118,9 +118,9 @@ func testPolicyPreCheck(t *testing.T) {
 
 func TestAccBlockStorageV2Volume_tags(t *testing.T) {
 	resource.Test(t, resource.TestCase{
-		PreCheck:     func() { common.TestAccPreCheck(t) },
-		Providers:    common.TestAccProviders,
-		CheckDestroy: testAccCheckBlockStorageV2VolumeDestroy,
+		PreCheck:          func() { common.TestAccPreCheck(t) },
+		ProviderFactories: common.TestAccProviderFactories,
+		CheckDestroy:      testAccCheckBlockStorageV2VolumeDestroy,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccBlockStorageV2Volume_tags,
@@ -144,9 +144,9 @@ func TestAccBlockStorageV2Volume_image(t *testing.T) {
 	var volume volumes.Volume
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:     func() { common.TestAccPreCheck(t) },
-		Providers:    common.TestAccProviders,
-		CheckDestroy: testAccCheckBlockStorageV2VolumeDestroy,
+		PreCheck:          func() { common.TestAccPreCheck(t) },
+		ProviderFactories: common.TestAccProviderFactories,
+		CheckDestroy:      testAccCheckBlockStorageV2VolumeDestroy,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccBlockStorageV2Volume_image,
@@ -164,9 +164,9 @@ func TestAccBlockStorageV2Volume_timeout(t *testing.T) {
 	var volume volumes.Volume
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:     func() { common.TestAccPreCheck(t) },
-		Providers:    common.TestAccProviders,
-		CheckDestroy: testAccCheckBlockStorageV2VolumeDestroy,
+		PreCheck:          func() { common.TestAccPreCheck(t) },
+		ProviderFactories: common.TestAccProviderFactories,
+		CheckDestroy:      testAccCheckBlockStorageV2VolumeDestroy,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccBlockStorageV2Volume_timeout,
@@ -182,7 +182,7 @@ func testAccCheckBlockStorageV2VolumeDestroy(s *terraform.State) error {
 	config := common.TestAccProvider.Meta().(*cfg.Config)
 	blockStorageClient, err := config.BlockStorageV2Client(env.OS_REGION_NAME)
 	if err != nil {
-		return fmt.Errorf("Error creating OpenTelekomCloud block storage client: %s", err)
+		return fmt.Errorf("error creating OpenTelekomCloud block storage client: %s", err)
 	}
 
 	for _, rs := range s.RootModule().Resources {
@@ -213,7 +213,7 @@ func testAccCheckBlockStorageV2VolumeExists(n string, volume *volumes.Volume) re
 		config := common.TestAccProvider.Meta().(*cfg.Config)
 		blockStorageClient, err := config.BlockStorageV2Client(env.OS_REGION_NAME)
 		if err != nil {
-			return fmt.Errorf("Error creating OpenTelekomCloud block storage client: %s", err)
+			return fmt.Errorf("error creating OpenTelekomCloud block storage client: %s", err)
 		}
 
 		found, err := volumes.Get(blockStorageClient, rs.Primary.ID).Extract()
@@ -236,7 +236,7 @@ func testAccCheckBlockStorageV2VolumeDoesNotExist(t *testing.T, n string, volume
 		config := common.TestAccProvider.Meta().(*cfg.Config)
 		blockStorageClient, err := config.BlockStorageV2Client(env.OS_REGION_NAME)
 		if err != nil {
-			return fmt.Errorf("Error creating OpenTelekomCloud block storage client: %s", err)
+			return fmt.Errorf("error creating OpenTelekomCloud block storage client: %s", err)
 		}
 
 		_, err = volumes.Get(blockStorageClient, volume.ID).Extract()
@@ -288,7 +288,7 @@ func testAccCheckBlockStorageV2VolumeTags(n string, k string, v string) resource
 		config := common.TestAccProvider.Meta().(*cfg.Config)
 		blockStorageClient, err := config.BlockStorageV2Client(env.OS_REGION_NAME)
 		if err != nil {
-			return fmt.Errorf("Error creating OpenTelekomCloud block storage client: %s", err)
+			return fmt.Errorf("error creating OpenTelekomCloud block storage client: %s", err)
 		}
 
 		found, err := volumes.Get(blockStorageClient, rs.Primary.ID).Extract()
@@ -302,7 +302,7 @@ func testAccCheckBlockStorageV2VolumeTags(n string, k string, v string) resource
 
 		client, err := config.BlockStorageV2Client(env.OS_REGION_NAME)
 		if err != nil {
-			return fmt.Errorf("Error creating OpenTelekomCloud block storage client: %s", err)
+			return fmt.Errorf("error creating OpenTelekomCloud block storage client: %s", err)
 		}
 		taglist, err := tags.Get(client, "volumes", found.ID).Extract()
 		for key, value := range taglist.Tags {

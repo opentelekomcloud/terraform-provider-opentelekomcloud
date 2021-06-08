@@ -1,30 +1,33 @@
 package waf
 
 import (
+	"context"
 	"fmt"
 	"log"
 	"strconv"
 	"time"
 
 	"github.com/hashicorp/go-multierror"
-	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
-	"github.com/hashicorp/terraform-plugin-sdk/helper/validation"
-	"github.com/opentelekomcloud/gophertelekomcloud"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
+	golangsdk "github.com/opentelekomcloud/gophertelekomcloud"
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/waf/v1/domains"
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/waf/v1/policies"
 
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common"
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common/cfg"
+	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common/fmterr"
 )
 
 func ResourceWafDomainV1() *schema.Resource {
 	return &schema.Resource{
-		Create: resourceWafDomainV1Create,
-		Read:   resourceWafDomainV1Read,
-		Update: resourceWafDomainV1Update,
-		Delete: resourceWafDomainV1Delete,
+		CreateContext: resourceWafDomainV1Create,
+		ReadContext:   resourceWafDomainV1Read,
+		UpdateContext: resourceWafDomainV1Update,
+		DeleteContext: resourceWafDomainV1Delete,
 		Importer: &schema.ResourceImporter{
-			State: schema.ImportStatePassthrough,
+			StateContext: schema.ImportStatePassthroughContext,
 		},
 
 		Timeouts: &schema.ResourceTimeout{
@@ -169,12 +172,12 @@ func getAllServers(d *schema.ResourceData) ([]domains.ServerOpts, error) {
 	return serverOpts, nil
 }
 
-func resourceWafDomainV1Create(d *schema.ResourceData, meta interface{}) error {
+func resourceWafDomainV1Create(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*cfg.Config)
 	wafClient, err := config.WafV1Client(config.GetRegion(d))
 
 	if err != nil {
-		return fmt.Errorf("error creating OpenTelekomcomCloud WAF Client: %s", err)
+		return fmterr.Errorf("error creating OpenTelekomcomCloud WAF Client: %s", err)
 	}
 
 	var hosts []string
@@ -182,7 +185,7 @@ func resourceWafDomainV1Create(d *schema.ResourceData, meta interface{}) error {
 		policyId := v.(string)
 		policy, err := policies.Get(wafClient, policyId).Extract()
 		if err != nil {
-			return fmt.Errorf("error retrieving OpenTelekomCloud Waf Policy %s: %s", policyId, err)
+			return fmterr.Errorf("error retrieving OpenTelekomCloud Waf Policy %s: %s", policyId, err)
 		}
 		hosts = append(hosts, policy.Hosts...)
 	}
@@ -196,7 +199,7 @@ func resourceWafDomainV1Create(d *schema.ResourceData, meta interface{}) error {
 	proxy := d.Get("proxy").(bool)
 	servers, err := getAllServers(d)
 	if err != nil {
-		return fmt.Errorf("error parsing servers: %s", err)
+		return fmterr.Errorf("error parsing servers: %s", err)
 	}
 	createOpts := domains.CreateOpts{
 		HostName:      d.Get("hostname").(string),
@@ -210,7 +213,7 @@ func resourceWafDomainV1Create(d *schema.ResourceData, meta interface{}) error {
 
 	domain, err := domains.Create(wafClient, createOpts).Extract()
 	if err != nil {
-		return fmt.Errorf("error creating OpenTelekomcomCloud WAF Domain: %s", err)
+		return fmterr.Errorf("error creating OpenTelekomcomCloud WAF Domain: %s", err)
 	}
 
 	log.Printf("[DEBUG] Waf domain created: %#v", domain)
@@ -225,19 +228,19 @@ func resourceWafDomainV1Create(d *schema.ResourceData, meta interface{}) error {
 
 		_, err = policies.UpdateHosts(wafClient, policyId, updateHostsOpts).Extract()
 		if err != nil {
-			return fmt.Errorf("error updating OpenTelekomCloud WAF Policy Hosts: %s", err)
+			return fmterr.Errorf("error updating OpenTelekomCloud WAF Policy Hosts: %s", err)
 		}
 	}
 
-	return resourceWafDomainV1Read(d, meta)
+	return resourceWafDomainV1Read(ctx, d, meta)
 }
 
-func resourceWafDomainV1Read(d *schema.ResourceData, meta interface{}) error {
+func resourceWafDomainV1Read(_ context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 
 	config := meta.(*cfg.Config)
 	wafClient, err := config.WafV1Client(config.GetRegion(d))
 	if err != nil {
-		return fmt.Errorf("error creating OpenTelekomCloud WAF client: %s", err)
+		return fmterr.Errorf("error creating OpenTelekomCloud WAF client: %s", err)
 	}
 	n, err := domains.Get(wafClient, d.Id()).Extract()
 
@@ -247,7 +250,7 @@ func resourceWafDomainV1Read(d *schema.ResourceData, meta interface{}) error {
 			return nil
 		}
 
-		return fmt.Errorf("error retrieving OpenTelekomCloud Waf Domain: %s", err)
+		return fmterr.Errorf("error retrieving OpenTelekomCloud Waf Domain: %s", err)
 	}
 
 	mErr := multierror.Append(nil,
@@ -270,7 +273,7 @@ func resourceWafDomainV1Read(d *schema.ResourceData, meta interface{}) error {
 		d.Set("protocol", n.Protocol),
 	)
 	if err := mErr.ErrorOrNil(); err != nil {
-		return fmt.Errorf("error setting WAF fields: %s", err)
+		return fmterr.Errorf("error setting WAF fields: %s", err)
 	}
 
 	servers := make([]map[string]interface{}, len(n.Server))
@@ -283,14 +286,14 @@ func resourceWafDomainV1Read(d *schema.ResourceData, meta interface{}) error {
 		servers[i]["address"] = server.Address
 		servers[i]["port"] = strconv.Itoa(server.Port)
 	}
-	return d.Set("server", servers)
+	return diag.FromErr(d.Set("server", servers))
 }
 
-func resourceWafDomainV1Update(d *schema.ResourceData, meta interface{}) error {
+func resourceWafDomainV1Update(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*cfg.Config)
 	wafClient, err := config.WafV1Client(config.GetRegion(d))
 	if err != nil {
-		return fmt.Errorf("error creating OpenTelekomCloud WAF Client: %s", err)
+		return fmterr.Errorf("error creating OpenTelekomCloud WAF Client: %s", err)
 	}
 	var updateOpts domains.UpdateOpts
 
@@ -300,7 +303,7 @@ func resourceWafDomainV1Update(d *schema.ResourceData, meta interface{}) error {
 	if d.HasChange("server") {
 		servers, err := getAllServers(d)
 		if err != nil {
-			return fmt.Errorf("error parsing servers: %s", err)
+			return fmterr.Errorf("error parsing servers: %s", err)
 		}
 		updateOpts.Server = servers
 	}
@@ -323,21 +326,21 @@ func resourceWafDomainV1Update(d *schema.ResourceData, meta interface{}) error {
 
 	_, err = domains.Update(wafClient, d.Id(), updateOpts).Extract()
 	if err != nil {
-		return fmt.Errorf("error updating OpenTelekomCloud WAF Domain: %s", err)
+		return fmterr.Errorf("error updating OpenTelekomCloud WAF Domain: %s", err)
 	}
-	return resourceWafDomainV1Read(d, meta)
+	return resourceWafDomainV1Read(ctx, d, meta)
 }
 
-func resourceWafDomainV1Delete(d *schema.ResourceData, meta interface{}) error {
+func resourceWafDomainV1Delete(_ context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*cfg.Config)
 	wafClient, err := config.WafV1Client(config.GetRegion(d))
 	if err != nil {
-		return fmt.Errorf("error creating OpenTelekomCloud WAF client: %s", err)
+		return fmterr.Errorf("error creating OpenTelekomCloud WAF client: %s", err)
 	}
 
 	err = domains.Delete(wafClient, d.Id()).ExtractErr()
 	if err != nil {
-		return fmt.Errorf("error deleting OpenTelekomCloud WAF Domain: %s", err)
+		return fmterr.Errorf("error deleting OpenTelekomCloud WAF Domain: %s", err)
 	}
 
 	d.SetId("")

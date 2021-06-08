@@ -1,19 +1,22 @@
 package rds
 
 import (
+	"context"
 	"fmt"
 	"strings"
 
-	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
-	"github.com/opentelekomcloud/gophertelekomcloud"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	golangsdk "github.com/opentelekomcloud/gophertelekomcloud"
 
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common"
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common/cfg"
+	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common/fmterr"
 )
 
 func DataSourceRdsFlavorV3() *schema.Resource {
 	return &schema.Resource{
-		Read: dataSourceRdsFlavorV3Read,
+		ReadContext: dataSourceRdsFlavorV3Read,
 
 		Schema: map[string]*schema.Schema{
 			"db_type": {
@@ -56,12 +59,12 @@ func DataSourceRdsFlavorV3() *schema.Resource {
 	}
 }
 
-func dataSourceRdsFlavorV3Read(d *schema.ResourceData, meta interface{}) error {
+func dataSourceRdsFlavorV3Read(_ context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*cfg.Config)
 
 	client, err := config.RdsV1Client(config.GetRegion(d))
 	if err != nil {
-		return fmt.Errorf("Error creating OpenTelekomCloud rds client: %s", err)
+		return fmterr.Errorf("error creating OpenTelekomCloud rds client: %s", err)
 	}
 	client.Endpoint = strings.Replace(client.Endpoint, "/rds/v1/", "/v3/", 1)
 
@@ -70,7 +73,7 @@ func dataSourceRdsFlavorV3Read(d *schema.ResourceData, meta interface{}) error {
 
 	r, err := sendRdsFlavorV3ListRequest(client, url)
 	if err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 
 	mode := d.Get("instance_mode").(string)
@@ -89,7 +92,7 @@ func dataSourceRdsFlavorV3Read(d *schema.ResourceData, meta interface{}) error {
 	}
 
 	d.SetId("flavors")
-	return d.Set("flavors", flavors)
+	return diag.FromErr(d.Set("flavors", flavors))
 }
 
 func sendRdsFlavorV3ListRequest(client *golangsdk.ServiceClient, url string) (interface{}, error) {
@@ -100,7 +103,7 @@ func sendRdsFlavorV3ListRequest(client *golangsdk.ServiceClient, url string) (in
 			"X-Language":   "en-us",
 		}})
 	if r.Err != nil {
-		return nil, fmt.Errorf("Error fetching flavors for rds v3, error: %s", r.Err)
+		return nil, fmt.Errorf("error fetching flavors for rds v3, error: %s", r.Err)
 	}
 
 	v, err := common.NavigateValue(r.Body, []string{"flavors"}, nil)

@@ -1,6 +1,6 @@
 package vpc
 
-import "github.com/hashicorp/terraform-plugin-sdk/helper/mutexkv"
+import "github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/helper/mutexkv"
 
 // This is a global MutexKV for use within this plugin.
 var osMutexKV = mutexkv.NewMutexKV()

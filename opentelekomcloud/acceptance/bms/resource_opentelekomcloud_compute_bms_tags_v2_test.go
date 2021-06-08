@@ -4,8 +4,8 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
-	"github.com/hashicorp/terraform-plugin-sdk/terraform"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/bms/v2/tags"
 
@@ -18,9 +18,9 @@ func TestAccOTCBMSTagsV2_basic(t *testing.T) {
 	var tags tags.Tags
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:     func() { testAccBmsFlavorPreCheck(t) },
-		Providers:    common.TestAccProviders,
-		CheckDestroy: testAccCheckOTCBMSTagsV2Destroy,
+		PreCheck:          func() { testAccBmsFlavorPreCheck(t) },
+		ProviderFactories: common.TestAccProviderFactories,
+		CheckDestroy:      testAccCheckOTCBMSTagsV2Destroy,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccBMSTagsV2_basic,
@@ -38,9 +38,9 @@ func TestAccOTCBMSTagsV2_timeout(t *testing.T) {
 	var tags tags.Tags
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:     func() { testAccBmsFlavorPreCheck(t) },
-		Providers:    common.TestAccProviders,
-		CheckDestroy: testAccCheckOTCBMSTagsV2Destroy,
+		PreCheck:          func() { testAccBmsFlavorPreCheck(t) },
+		ProviderFactories: common.TestAccProviderFactories,
+		CheckDestroy:      testAccCheckOTCBMSTagsV2Destroy,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccBMSTagsV2_timeout,
@@ -56,7 +56,7 @@ func testAccCheckOTCBMSTagsV2Destroy(s *terraform.State) error {
 	config := common.TestAccProvider.Meta().(*cfg.Config)
 	bmsClient, err := config.ComputeV2Client(env.OS_REGION_NAME)
 	if err != nil {
-		return fmt.Errorf("Error creating OpenTelekomCloud bms client: %s", err)
+		return fmt.Errorf("error creating OpenTelekomCloud bms client: %s", err)
 	}
 
 	for _, rs := range s.RootModule().Resources {
@@ -87,7 +87,7 @@ func testAccCheckOTCBMSTagsV2Exists(n string, tag *tags.Tags) resource.TestCheck
 		config := common.TestAccProvider.Meta().(*cfg.Config)
 		bmsClient, err := config.ComputeV2Client(env.OS_REGION_NAME)
 		if err != nil {
-			return fmt.Errorf("Error creating OpenTelekomCloud bms client: %s", err)
+			return fmt.Errorf("error creating OpenTelekomCloud bms client: %s", err)
 		}
 
 		found, err := tags.Get(bmsClient, rs.Primary.ID).Extract()

@@ -5,9 +5,9 @@ import (
 	"testing"
 	"time"
 
-	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
-	"github.com/hashicorp/terraform-plugin-sdk/terraform"
-	"github.com/opentelekomcloud/gophertelekomcloud"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
+	golangsdk "github.com/opentelekomcloud/gophertelekomcloud"
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/networking/v2/extensions/fwaas_v2/firewall_groups"
 
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/acceptance/common"
@@ -21,9 +21,9 @@ func TestAccFWFirewallGroupV2_basic(t *testing.T) {
 	var ipolicyID *string
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:     func() { common.TestAccPreCheck(t) },
-		Providers:    common.TestAccProviders,
-		CheckDestroy: testAccCheckFWFirewallGroupV2Destroy,
+		PreCheck:          func() { common.TestAccPreCheck(t) },
+		ProviderFactories: common.TestAccProviderFactories,
+		CheckDestroy:      testAccCheckFWFirewallGroupV2Destroy,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccFWFirewallGroupV2_basic_1,
@@ -46,9 +46,9 @@ func TestAccFWFirewallGroupV2_port0(t *testing.T) {
 	var firewall_group fw.FirewallGroup
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:     func() { common.TestAccPreCheck(t) },
-		Providers:    common.TestAccProviders,
-		CheckDestroy: testAccCheckFWFirewallGroupV2Destroy,
+		PreCheck:          func() { common.TestAccPreCheck(t) },
+		ProviderFactories: common.TestAccProviderFactories,
+		CheckDestroy:      testAccCheckFWFirewallGroupV2Destroy,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccFWFirewallV2_port,
@@ -65,9 +65,9 @@ func TestAccFWFirewallGroupV2_no_ports(t *testing.T) {
 	var firewall_group fw.FirewallGroup
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:     func() { common.TestAccPreCheck(t) },
-		Providers:    common.TestAccProviders,
-		CheckDestroy: testAccCheckFWFirewallGroupV2Destroy,
+		PreCheck:          func() { common.TestAccPreCheck(t) },
+		ProviderFactories: common.TestAccProviderFactories,
+		CheckDestroy:      testAccCheckFWFirewallGroupV2Destroy,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccFWFirewallV2_no_ports,
@@ -85,9 +85,9 @@ func TestAccFWFirewallGroupV2_port_update(t *testing.T) {
 	var firewall_group fw.FirewallGroup
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:     func() { common.TestAccPreCheck(t) },
-		Providers:    common.TestAccProviders,
-		CheckDestroy: testAccCheckFWFirewallGroupV2Destroy,
+		PreCheck:          func() { common.TestAccPreCheck(t) },
+		ProviderFactories: common.TestAccProviderFactories,
+		CheckDestroy:      testAccCheckFWFirewallGroupV2Destroy,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccFWFirewallV2_port,
@@ -111,9 +111,9 @@ func TestAccFWFirewallGroupV2_port_remove(t *testing.T) {
 	var firewall_group fw.FirewallGroup
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:     func() { common.TestAccPreCheck(t) },
-		Providers:    common.TestAccProviders,
-		CheckDestroy: testAccCheckFWFirewallGroupV2Destroy,
+		PreCheck:          func() { common.TestAccPreCheck(t) },
+		ProviderFactories: common.TestAccProviderFactories,
+		CheckDestroy:      testAccCheckFWFirewallGroupV2Destroy,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccFWFirewallV2_port,
@@ -137,7 +137,7 @@ func testAccCheckFWFirewallGroupV2Destroy(s *terraform.State) error {
 	config := common.TestAccProvider.Meta().(*cfg.Config)
 	networkingClient, err := config.NetworkingV2Client(env.OS_REGION_NAME)
 	if err != nil {
-		return fmt.Errorf("Error creating OpenTelekomCloud networking client: %s", err)
+		return fmt.Errorf("error creating OpenTelekomCloud networking client: %s", err)
 	}
 	for _, rs := range s.RootModule().Resources {
 		if rs.Type != "opentelekomcloud_firewall_group" {

@@ -4,8 +4,8 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
-	"github.com/hashicorp/terraform-plugin-sdk/terraform"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/vbs/v2/shares"
 
@@ -18,9 +18,9 @@ func TestAccVBSBackupShareV2_basic(t *testing.T) {
 	var share shares.Share
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:     func() { common.TestAccVBSBackupShareCheck(t) },
-		Providers:    common.TestAccProviders,
-		CheckDestroy: testAccVBSBackupShareV2Destroy,
+		PreCheck:          func() { common.TestAccVBSBackupShareCheck(t) },
+		ProviderFactories: common.TestAccProviderFactories,
+		CheckDestroy:      testAccVBSBackupShareV2Destroy,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccVBSBackupShareV2_basic,
@@ -38,9 +38,9 @@ func TestAccVBSBackupShareV2_timeout(t *testing.T) {
 	var share shares.Share
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:     func() { common.TestAccVBSBackupShareCheck(t) },
-		Providers:    common.TestAccProviders,
-		CheckDestroy: testAccVBSBackupShareV2Destroy,
+		PreCheck:          func() { common.TestAccVBSBackupShareCheck(t) },
+		ProviderFactories: common.TestAccProviderFactories,
+		CheckDestroy:      testAccVBSBackupShareV2Destroy,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccVBSBackupShareV2_timeout,
@@ -56,7 +56,7 @@ func testAccVBSBackupShareV2Destroy(s *terraform.State) error {
 	config := common.TestAccProvider.Meta().(*cfg.Config)
 	vbsClient, err := config.VbsV2Client(env.OS_REGION_NAME)
 	if err != nil {
-		return fmt.Errorf("Error creating opentelekomcloud vbs client: %s", err)
+		return fmt.Errorf("error creating opentelekomcloud vbs client: %s", err)
 	}
 
 	for _, rs := range s.RootModule().Resources {
@@ -87,7 +87,7 @@ func testAccVBSBackupShareV2Exists(n string, share *shares.Share) resource.TestC
 		config := common.TestAccProvider.Meta().(*cfg.Config)
 		vbsClient, err := config.VbsV2Client(env.OS_REGION_NAME)
 		if err != nil {
-			return fmt.Errorf("Error creating opentelekomcloud vbs client: %s", err)
+			return fmt.Errorf("error creating opentelekomcloud vbs client: %s", err)
 		}
 
 		shareList, err := shares.List(vbsClient, shares.ListOpts{BackupID: rs.Primary.ID})

@@ -1,25 +1,27 @@
 package cbr
 
 import (
-	"fmt"
+	"context"
 	"log"
 
 	"github.com/hashicorp/go-multierror"
-	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
-	"github.com/hashicorp/terraform-plugin-sdk/helper/validation"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 	golangsdk "github.com/opentelekomcloud/gophertelekomcloud"
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/cbr/v3/policies"
 
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common"
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common/cfg"
+	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common/fmterr"
 )
 
 func ResourceCBRPolicyV3() *schema.Resource {
 	return &schema.Resource{
-		Create: resourceCBRPolicyV3Create,
-		Read:   resourceCBRPolicyV3Read,
-		Update: resourceCBRPolicyV3Update,
-		Delete: resourceCBRPolicyV3Delete,
+		CreateContext: resourceCBRPolicyV3Create,
+		ReadContext:   resourceCBRPolicyV3Read,
+		UpdateContext: resourceCBRPolicyV3Update,
+		DeleteContext: resourceCBRPolicyV3Delete,
 
 		Schema: map[string]*schema.Schema{
 			"region": {
@@ -133,11 +135,11 @@ func resourceCBRPolicyV3TriggerPattern(d *schema.ResourceData) []string {
 	return patterns
 }
 
-func resourceCBRPolicyV3Create(d *schema.ResourceData, meta interface{}) error {
+func resourceCBRPolicyV3Create(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*cfg.Config)
 	client, err := config.CbrV3Client(config.GetRegion(d))
 	if err != nil {
-		return fmt.Errorf("error creating OpenTelekomCloud CBRv3 client: %s", err)
+		return fmterr.Errorf("error creating OpenTelekomCloud CBRv3 client: %s", err)
 	}
 
 	enabled := d.Get("enabled").(bool)
@@ -157,20 +159,20 @@ func resourceCBRPolicyV3Create(d *schema.ResourceData, meta interface{}) error {
 	log.Printf("[DEBUG] Create Options: %#v", createOpts)
 	cbrPolicy, err := policies.Create(client, createOpts).Extract()
 	if err != nil {
-		return fmt.Errorf("error creating OpenTelekomCloud CBRv3 policy: %s", err)
+		return fmterr.Errorf("error creating OpenTelekomCloud CBRv3 policy: %s", err)
 	}
 
 	// Store the ID
 	d.SetId(cbrPolicy.ID)
 
-	return resourceCBRPolicyV3Read(d, meta)
+	return resourceCBRPolicyV3Read(ctx, d, meta)
 }
 
-func resourceCBRPolicyV3Read(d *schema.ResourceData, meta interface{}) error {
+func resourceCBRPolicyV3Read(_ context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*cfg.Config)
 	client, err := config.CbrV3Client(config.GetRegion(d))
 	if err != nil {
-		return fmt.Errorf("error creating OpenTelekomCloud CBRv3 client: %s", err)
+		return fmterr.Errorf("error creating OpenTelekomCloud CBRv3 client: %s", err)
 	}
 
 	cbrPolicy, err := policies.Get(client, d.Id()).Extract()
@@ -180,7 +182,7 @@ func resourceCBRPolicyV3Read(d *schema.ResourceData, meta interface{}) error {
 			d.SetId("")
 			return nil
 		}
-		return fmt.Errorf("error retrieving CBRv3 policy: %s", err)
+		return fmterr.Errorf("error retrieving CBRv3 policy: %s", err)
 	}
 
 	log.Printf("[DEBUG] Retrieved policy %s: %+v", d.Id(), cbrPolicy)
@@ -192,7 +194,7 @@ func resourceCBRPolicyV3Read(d *schema.ResourceData, meta interface{}) error {
 		d.Set("region", config.GetRegion(d)),
 	)
 	if mErr.ErrorOrNil() != nil {
-		return mErr
+		return diag.FromErr(mErr)
 	}
 
 	var opDefinitionList []map[string]interface{}
@@ -207,17 +209,17 @@ func resourceCBRPolicyV3Read(d *schema.ResourceData, meta interface{}) error {
 	opDefinition["year_backups"] = cbrPolicyOD.YearBackups
 	opDefinitionList = append(opDefinitionList, opDefinition)
 	if err := d.Set("operation_definition", opDefinitionList); err != nil {
-		return fmt.Errorf("error setting operetion_definition: %s", err)
+		return fmterr.Errorf("error setting operetion_definition: %s", err)
 	}
 
 	return nil
 }
 
-func resourceCBRPolicyV3Update(d *schema.ResourceData, meta interface{}) error {
+func resourceCBRPolicyV3Update(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*cfg.Config)
 	client, err := config.CbrV3Client(config.GetRegion(d))
 	if err != nil {
-		return fmt.Errorf("error creating OpenTelekomCloud CBRv3 client: %s", err)
+		return fmterr.Errorf("error creating OpenTelekomCloud CBRv3 client: %s", err)
 	}
 
 	var updateOpts policies.UpdateOpts
@@ -248,23 +250,23 @@ func resourceCBRPolicyV3Update(d *schema.ResourceData, meta interface{}) error {
 
 	_, err = policies.Update(client, d.Id(), updateOpts).Extract()
 	if err != nil {
-		return fmt.Errorf("error updating OpenTelekomCloud CBRv3 policy: %s", err)
+		return fmterr.Errorf("error updating OpenTelekomCloud CBRv3 policy: %s", err)
 	}
 
-	return resourceCBRPolicyV3Read(d, meta)
+	return resourceCBRPolicyV3Read(ctx, d, meta)
 }
 
-func resourceCBRPolicyV3Delete(d *schema.ResourceData, meta interface{}) error {
+func resourceCBRPolicyV3Delete(_ context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*cfg.Config)
 	client, err := config.CbrV3Client(config.GetRegion(d))
 	if err != nil {
-		return fmt.Errorf("error creating OpenTelekomCloud CBRv3 client: %s", err)
+		return fmterr.Errorf("error creating OpenTelekomCloud CBRv3 client: %s", err)
 	}
 
 	log.Printf("[DEBUG] Deleting CBRv3 policy %s", d.Id())
 
 	if err = policies.Delete(client, d.Id()).ExtractErr(); err != nil {
-		return fmt.Errorf("eror deleting OpenTelekomCloud CBRv3 policy: %s", err)
+		return fmterr.Errorf("eror deleting OpenTelekomCloud CBRv3 policy: %s", err)
 	}
 
 	d.SetId("")

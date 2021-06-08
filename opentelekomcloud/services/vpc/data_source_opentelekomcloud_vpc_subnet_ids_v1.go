@@ -1,21 +1,23 @@
 package vpc
 
 import (
-	"fmt"
+	"context"
 	"sort"
 
 	"github.com/hashicorp/go-multierror"
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/networking/v1/subnets"
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/networking/v2/extensions/networkipavailabilities"
 
-	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common/cfg"
+	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common/fmterr"
 )
 
 func DataSourceVpcSubnetIdsV1() *schema.Resource {
 	return &schema.Resource{
-		Read: dataSourceVpcSubnetIdsV1Read,
+		ReadContext: dataSourceVpcSubnetIdsV1Read,
 
 		Schema: map[string]*schema.Schema{
 			"region": {
@@ -38,11 +40,11 @@ func DataSourceVpcSubnetIdsV1() *schema.Resource {
 	}
 }
 
-func dataSourceVpcSubnetIdsV1Read(d *schema.ResourceData, meta interface{}) error {
+func dataSourceVpcSubnetIdsV1Read(_ context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*cfg.Config)
 	client, err := config.NetworkingV1Client(config.GetRegion(d))
 	if err != nil {
-		return fmt.Errorf("error creating OpenTelekomCloud NetworkingV1 client: %w", err)
+		return fmterr.Errorf("error creating OpenTelekomCloud NetworkingV1 client: %w", err)
 	}
 
 	vpcID := d.Get("vpc_id").(string)
@@ -52,23 +54,23 @@ func dataSourceVpcSubnetIdsV1Read(d *schema.ResourceData, meta interface{}) erro
 
 	refinedSubnets, err := subnets.List(client, listOpts)
 	if err != nil {
-		return fmt.Errorf("unable to retrieve subnets: %w", err)
+		return fmterr.Errorf("unable to retrieve subnets: %w", err)
 	}
 
 	if len(refinedSubnets) == 0 {
-		return fmt.Errorf("no matching subnet found for vpc with id %s", vpcID)
+		return fmterr.Errorf("no matching subnet found for vpc with id %s", vpcID)
 	}
 
 	networkingClient, err := config.NetworkingV2Client(config.GetRegion(d))
 	if err != nil {
-		return fmt.Errorf("error creating OpenTelekomCloud NetworkingV2 client: %w", err)
+		return fmterr.Errorf("error creating OpenTelekomCloud NetworkingV2 client: %w", err)
 	}
 
 	sortedSubnets := make([]SubnetIP, 0)
 	for _, subnet := range refinedSubnets {
 		net, err := networkipavailabilities.Get(networkingClient, subnet.ID).Extract()
 		if err != nil {
-			return fmt.Errorf("error retrieving NetworkIP availabilities: %w", err)
+			return fmterr.Errorf("error retrieving NetworkIP availabilities: %w", err)
 		}
 		subnetIPAvail := net.SubnetIPAvailabilities[0]
 		newSubnet := SubnetIP{
@@ -92,7 +94,7 @@ func dataSourceVpcSubnetIdsV1Read(d *schema.ResourceData, meta interface{}) erro
 	)
 
 	if mErr.ErrorOrNil() != nil {
-		return mErr
+		return diag.FromErr(mErr)
 	}
 
 	return nil

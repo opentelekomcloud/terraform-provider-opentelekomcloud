@@ -2,25 +2,27 @@ package obs
 
 import (
 	"bytes"
-	"fmt"
+	"context"
 	"log"
 	"os"
 	"strings"
 
 	"github.com/hashicorp/go-multierror"
-	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
-	"github.com/hashicorp/terraform-plugin-sdk/helper/validation"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/obs"
 
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common/cfg"
+	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common/fmterr"
 )
 
 func ResourceObsBucketObject() *schema.Resource {
 	return &schema.Resource{
-		Create: resourceObsBucketObjectPut,
-		Read:   resourceObsBucketObjectRead,
-		Update: resourceObsBucketObjectPut,
-		Delete: resourceObsBucketObjectDelete,
+		CreateContext: resourceObsBucketObjectPut,
+		ReadContext:   resourceObsBucketObjectRead,
+		UpdateContext: resourceObsBucketObjectPut,
+		DeleteContext: resourceObsBucketObjectDelete,
 
 		Schema: map[string]*schema.Schema{
 			"bucket": {
@@ -89,14 +91,14 @@ func ResourceObsBucketObject() *schema.Resource {
 	}
 }
 
-func resourceObsBucketObjectPut(d *schema.ResourceData, meta interface{}) error {
+func resourceObsBucketObjectPut(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	var resp *obs.PutObjectOutput
 	var err error
 
 	config := meta.(*cfg.Config)
 	client, err := config.NewObjectStorageClient(config.GetRegion(d))
 	if err != nil {
-		return fmt.Errorf("error creating OBS client: %s", err)
+		return fmterr.Errorf("error creating OBS client: %s", err)
 	}
 
 	if source, ok := d.GetOk("source"); ok {
@@ -104,9 +106,9 @@ func resourceObsBucketObjectPut(d *schema.ResourceData, meta interface{}) error 
 		_, err := os.Stat(source.(string))
 		if err != nil {
 			if os.IsNotExist(err) {
-				return fmt.Errorf("source file %s does not exist", source)
+				return fmterr.Errorf("source file %s does not exist", source)
 			}
-			return err
+			return diag.FromErr(err)
 		}
 
 		// put source file
@@ -121,7 +123,7 @@ func resourceObsBucketObjectPut(d *schema.ResourceData, meta interface{}) error 
 	bucket := d.Get("bucket").(string)
 	key := d.Get("key").(string)
 	if err != nil {
-		return GetObsError("error putting object to OBS bucket", bucket, err)
+		return diag.FromErr(GetObsError("error putting object to OBS bucket", bucket, err))
 	}
 
 	log.Printf("[DEBUG] Response of putting %s to OBS Bucket %s: %#v", key, bucket, resp)
@@ -131,12 +133,12 @@ func resourceObsBucketObjectPut(d *schema.ResourceData, meta interface{}) error 
 		err = d.Set("version_id", "")
 	}
 	if err != nil {
-		return fmt.Errorf("error setting version_id: %s", err)
+		return fmterr.Errorf("error setting version_id: %s", err)
 	}
 
 	d.SetId(key)
 
-	return resourceObsBucketObjectRead(d, meta)
+	return resourceObsBucketObjectRead(ctx, d, meta)
 }
 
 func basicInput(d *schema.ResourceData) obs.PutObjectBasicInput {
@@ -190,11 +192,11 @@ func putFileToObject(obsClient *obs.ObsClient, d *schema.ResourceData) (*obs.Put
 	return obsClient.PutFile(putInput)
 }
 
-func resourceObsBucketObjectRead(d *schema.ResourceData, meta interface{}) error {
+func resourceObsBucketObjectRead(_ context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*cfg.Config)
 	client, err := config.NewObjectStorageClient(config.GetRegion(d))
 	if err != nil {
-		return fmt.Errorf("error creating OBS client: %s", err)
+		return fmterr.Errorf("error creating OBS client: %s", err)
 	}
 
 	bucket := d.Get("bucket").(string)
@@ -205,7 +207,7 @@ func resourceObsBucketObjectRead(d *schema.ResourceData, meta interface{}) error
 
 	resp, err := client.ListObjects(input)
 	if err != nil {
-		return GetObsError("error listing objects of OBS bucket", bucket, err)
+		return diag.FromErr(GetObsError("error listing objects of OBS bucket", bucket, err))
 	}
 
 	var exist bool
@@ -219,7 +221,7 @@ func resourceObsBucketObjectRead(d *schema.ResourceData, meta interface{}) error
 	}
 	if !exist {
 		d.SetId("")
-		return fmt.Errorf("object %s not found in bucket %s", key, bucket)
+		return fmterr.Errorf("object %s not found in bucket %s", key, bucket)
 	}
 	log.Printf("[DEBUG] Reading OBS Bucket Object %s: %#v", key, object)
 
@@ -234,17 +236,17 @@ func resourceObsBucketObjectRead(d *schema.ResourceData, meta interface{}) error
 	)
 
 	if err := mErr.ErrorOrNil(); err != nil {
-		return fmt.Errorf("error setting OBS bucket attributes: %s", err)
+		return fmterr.Errorf("error setting OBS bucket attributes: %s", err)
 	}
 
 	return nil
 }
 
-func resourceObsBucketObjectDelete(d *schema.ResourceData, meta interface{}) error {
+func resourceObsBucketObjectDelete(_ context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*cfg.Config)
 	client, err := config.NewObjectStorageClient(config.GetRegion(d))
 	if err != nil {
-		return fmt.Errorf("error creating OBS client: %s", err)
+		return fmterr.Errorf("error creating OBS client: %s", err)
 	}
 	bucket := d.Get("bucket").(string)
 	key := d.Get("key").(string)
@@ -260,14 +262,14 @@ func resourceObsBucketObjectDelete(d *schema.ResourceData, meta interface{}) err
 		}
 		out, err := client.ListVersions(&vInput)
 		if err != nil {
-			return fmt.Errorf("failed listing OBS object versions: %s", err)
+			return fmterr.Errorf("failed listing OBS object versions: %s", err)
 		}
 
 		for _, v := range out.Versions {
 			input.VersionId = v.VersionId
 			_, err := client.DeleteObject(&input)
 			if err != nil {
-				return fmt.Errorf("error deleting OBS object version of %s:\n%s,\n%s", key, v.VersionId, err)
+				return fmterr.Errorf("error deleting OBS object version of %s:\n%s,\n%s", key, v.VersionId, err)
 			}
 		}
 		return nil
@@ -276,7 +278,7 @@ func resourceObsBucketObjectDelete(d *schema.ResourceData, meta interface{}) err
 	// Just delete the object
 	_, err = client.DeleteObject(&input)
 	if err != nil {
-		return fmt.Errorf("error deleting OBS bucket object: %s  Bucket: %q Object: %q", err, bucket, key)
+		return fmterr.Errorf("error deleting OBS bucket object: %s  Bucket: %q Object: %q", err, bucket, key)
 	}
 
 	return nil

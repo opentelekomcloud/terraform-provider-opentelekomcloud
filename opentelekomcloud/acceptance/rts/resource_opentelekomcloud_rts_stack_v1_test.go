@@ -4,8 +4,8 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
-	"github.com/hashicorp/terraform-plugin-sdk/terraform"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/rts/v1/stacks"
 
@@ -18,9 +18,9 @@ func TestAccOTCRTSStackV1_basic(t *testing.T) {
 	var stacks stacks.RetrievedStack
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:     func() { common.TestAccPreCheck(t) },
-		Providers:    common.TestAccProviders,
-		CheckDestroy: testAccCheckOTCRTSStackV1Destroy,
+		PreCheck:          func() { common.TestAccPreCheck(t) },
+		ProviderFactories: common.TestAccProviderFactories,
+		CheckDestroy:      testAccCheckOTCRTSStackV1Destroy,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccRTSStackV1_basic,
@@ -56,9 +56,9 @@ func TestAccOTCRTSStackV1_timeout(t *testing.T) {
 	var stacks stacks.RetrievedStack
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:     func() { common.TestAccPreCheck(t) },
-		Providers:    common.TestAccProviders,
-		CheckDestroy: testAccCheckOTCRTSStackV1Destroy,
+		PreCheck:          func() { common.TestAccPreCheck(t) },
+		ProviderFactories: common.TestAccProviderFactories,
+		CheckDestroy:      testAccCheckOTCRTSStackV1Destroy,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccRTSStackV1_timeout,
@@ -74,7 +74,7 @@ func testAccCheckOTCRTSStackV1Destroy(s *terraform.State) error {
 	config := common.TestAccProvider.Meta().(*cfg.Config)
 	orchestrationClient, err := config.OrchestrationV1Client(env.OS_REGION_NAME)
 	if err != nil {
-		return fmt.Errorf("Error creating RTS client: %s", err)
+		return fmt.Errorf("error creating RTS client: %s", err)
 	}
 
 	for _, rs := range s.RootModule().Resources {
@@ -108,7 +108,7 @@ func testAccCheckOTCRTSStackV1Exists(n string, stack *stacks.RetrievedStack) res
 		config := common.TestAccProvider.Meta().(*cfg.Config)
 		orchestrationClient, err := config.OrchestrationV1Client(env.OS_REGION_NAME)
 		if err != nil {
-			return fmt.Errorf("Error creating RTS Client : %s", err)
+			return fmt.Errorf("error creating RTS Client : %s", err)
 		}
 
 		found, err := stacks.Get(orchestrationClient, "terraform_provider_stack").Extract()

@@ -1,26 +1,28 @@
 package mrs
 
 import (
-	"fmt"
+	"context"
 	"log"
 	"time"
 
-	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
-	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
-	"github.com/opentelekomcloud/gophertelekomcloud"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	golangsdk "github.com/opentelekomcloud/gophertelekomcloud"
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/mrs/v1/job"
 
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common"
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common/cfg"
+	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common/fmterr"
 )
 
 func ResourceMRSJobV1() *schema.Resource {
 	return &schema.Resource{
-		Create: resourceMRSJobV1Create,
-		Read:   resourceMRSJobV1Read,
-		Delete: resourceMRSJobV1Delete,
+		CreateContext: resourceMRSJobV1Create,
+		ReadContext:   resourceMRSJobV1Read,
+		DeleteContext: resourceMRSJobV1Delete,
 		Importer: &schema.ResourceImporter{
-			State: schema.ImportStatePassthrough,
+			StateContext: schema.ImportStatePassthroughContext,
 		},
 
 		Timeouts: &schema.ResourceTimeout{
@@ -126,11 +128,11 @@ func JobStateRefreshFunc(client *golangsdk.ServiceClient, jobID string) resource
 	}
 }
 
-func resourceMRSJobV1Create(d *schema.ResourceData, meta interface{}) error {
+func resourceMRSJobV1Create(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*cfg.Config)
 	client, err := config.MrsV1Client(config.GetRegion(d))
 	if err != nil {
-		return fmt.Errorf("Error creating OpenTelekomCloud MRS client: %s", err)
+		return fmterr.Errorf("error creating OpenTelekomCloud MRS client: %s", err)
 	}
 
 	createOpts := &job.CreateOpts{
@@ -151,7 +153,7 @@ func resourceMRSJobV1Create(d *schema.ResourceData, meta interface{}) error {
 
 	jobCreate, err := job.Create(client, createOpts).Extract()
 	if err != nil {
-		return fmt.Errorf("Error creating Job: %s", err)
+		return fmterr.Errorf("error creating Job: %s", err)
 	}
 
 	d.SetId(jobCreate.ID)
@@ -164,26 +166,26 @@ func resourceMRSJobV1Create(d *schema.ResourceData, meta interface{}) error {
 		MinTimeout: 3 * time.Second,
 	}
 
-	_, err = stateConf.WaitForState()
+	_, err = stateConf.WaitForStateContext(ctx)
 	if err != nil {
-		return fmt.Errorf(
+		return fmterr.Errorf(
 			"Error waiting for job (%s) to become ready: %s ",
 			jobCreate.ID, err)
 	}
 
-	return resourceMRSJobV1Read(d, meta)
+	return resourceMRSJobV1Read(ctx, d, meta)
 }
 
-func resourceMRSJobV1Read(d *schema.ResourceData, meta interface{}) error {
+func resourceMRSJobV1Read(_ context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*cfg.Config)
 	client, err := config.MrsV1Client(config.GetRegion(d))
 	if err != nil {
-		return fmt.Errorf("Error creating OpenTelekomCloud  MRS client: %s", err)
+		return fmterr.Errorf("error creating OpenTelekomCloud  MRS client: %s", err)
 	}
 
 	jobGet, err := job.Get(client, d.Id()).Extract()
 	if err != nil {
-		return common.CheckDeleted(d, err, "MRS Job")
+		return diag.FromErr(common.CheckDeleted(d, err, "MRS Job"))
 	}
 	log.Printf("[DEBUG] Retrieved MRS Job %s: %#v", d.Id(), jobGet)
 
@@ -217,11 +219,11 @@ func resourceMRSJobV1Read(d *schema.ResourceData, meta interface{}) error {
 	return nil
 }
 
-func resourceMRSJobV1Delete(d *schema.ResourceData, meta interface{}) error {
+func resourceMRSJobV1Delete(_ context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*cfg.Config)
 	client, err := config.MrsV1Client(config.GetRegion(d))
 	if err != nil {
-		return fmt.Errorf("Error creating OpenTelekomCloud client: %s", err)
+		return fmterr.Errorf("error creating OpenTelekomCloud client: %s", err)
 	}
 
 	rId := d.Id()
@@ -240,7 +242,7 @@ func resourceMRSJobV1Delete(d *schema.ResourceData, meta interface{}) error {
 			log.Printf("[INFO] deleting an unavailable MRS Job: %s", rId)
 			return nil
 		}
-		return fmt.Errorf("Error deleting MRS Job %s: %s", rId, err)
+		return fmterr.Errorf("error deleting MRS Job %s: %s", rId, err)
 	}
 	return nil
 }

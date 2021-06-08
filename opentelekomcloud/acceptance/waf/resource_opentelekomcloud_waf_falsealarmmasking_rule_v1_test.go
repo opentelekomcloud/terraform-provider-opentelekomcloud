@@ -4,8 +4,8 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
-	"github.com/hashicorp/terraform-plugin-sdk/terraform"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/waf/v1/falsealarmmasking_rules"
 
@@ -18,9 +18,9 @@ func TestAccWafFalseAlarmMaskingRuleV1_basic(t *testing.T) {
 	var rule falsealarmmasking_rules.AlarmMasking
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:     func() { common.TestAccPreCheck(t) },
-		Providers:    common.TestAccProviders,
-		CheckDestroy: testAccCheckWafFalseAlarmMaskingRuleV1Destroy,
+		PreCheck:          func() { common.TestAccPreCheck(t) },
+		ProviderFactories: common.TestAccProviderFactories,
+		CheckDestroy:      testAccCheckWafFalseAlarmMaskingRuleV1Destroy,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccWafFalseAlarmMaskingRuleV1_basic,
@@ -40,7 +40,7 @@ func testAccCheckWafFalseAlarmMaskingRuleV1Destroy(s *terraform.State) error {
 	config := common.TestAccProvider.Meta().(*cfg.Config)
 	wafClient, err := config.WafV1Client(env.OS_REGION_NAME)
 	if err != nil {
-		return fmt.Errorf("Error creating OpenTelekomCloud WAF client: %s", err)
+		return fmt.Errorf("error creating OpenTelekomCloud WAF client: %s", err)
 	}
 	for _, rs := range s.RootModule().Resources {
 		if rs.Type != "opentelekomcloud_waf_falsealarmmasking_rule_v1" {
@@ -75,7 +75,7 @@ func testAccCheckWafFalseAlarmMaskingRuleV1Exists(n string, rule *falsealarmmask
 		config := common.TestAccProvider.Meta().(*cfg.Config)
 		wafClient, err := config.WafV1Client(env.OS_REGION_NAME)
 		if err != nil {
-			return fmt.Errorf("Error creating OpenTelekomCloud WAF client: %s", err)
+			return fmt.Errorf("error creating OpenTelekomCloud WAF client: %s", err)
 		}
 
 		rules, err := falsealarmmasking_rules.List(wafClient, rs.Primary.Attributes["policy_id"]).Extract()

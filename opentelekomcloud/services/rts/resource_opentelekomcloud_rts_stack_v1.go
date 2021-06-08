@@ -1,29 +1,31 @@
 package rts
 
 import (
+	"context"
 	"fmt"
 	"log"
 	"time"
 
-	"github.com/hashicorp/errwrap"
-	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
-	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
-	"github.com/opentelekomcloud/gophertelekomcloud"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	golangsdk "github.com/opentelekomcloud/gophertelekomcloud"
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/rts/v1/stacks"
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/rts/v1/stacktemplates"
 
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common"
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common/cfg"
+	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common/fmterr"
 )
 
 func ResourceRTSStackV1() *schema.Resource {
 	return &schema.Resource{
-		Create: resourceRTSStackV1Create,
-		Read:   resourceRTSStackV1Read,
-		Update: resourceRTSStackV1Update,
-		Delete: resourceRTSStackV1Delete,
+		CreateContext: resourceRTSStackV1Create,
+		ReadContext:   resourceRTSStackV1Read,
+		UpdateContext: resourceRTSStackV1Update,
+		DeleteContext: resourceRTSStackV1Delete,
 		Importer: &schema.ResourceImporter{
-			State: schema.ImportStatePassthrough,
+			StateContext: schema.ImportStatePassthroughContext,
 		},
 		Timeouts: &schema.ResourceTimeout{
 			Create: schema.DefaultTimeout(30 * time.Minute),
@@ -150,7 +152,7 @@ func resourceParametersV1(d *schema.ResourceData) map[string]string {
 
 	return m
 }
-func resourceRTSStackV1Create(d *schema.ResourceData, meta interface{}) error {
+func resourceRTSStackV1Create(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*cfg.Config)
 
 	stackName := d.Get("name").(string)
@@ -158,12 +160,12 @@ func resourceRTSStackV1Create(d *schema.ResourceData, meta interface{}) error {
 	_, url_ok := d.GetOk("template_url")
 
 	if !body_ok && !url_ok {
-		return fmt.Errorf("Both template_body and template_url are empty, must specify one of them.")
+		return fmterr.Errorf("Both template_body and template_url are empty, must specify one of them.")
 	}
 
 	orchestrationClient, err := config.OrchestrationV1Client(config.GetRegion(d))
 	if err != nil {
-		return fmt.Errorf("Error creating RTS client: %s", err)
+		return fmterr.Errorf("error creating RTS client: %s", err)
 	}
 
 	rollback := d.Get("disable_rollback").(bool)
@@ -178,7 +180,7 @@ func resourceRTSStackV1Create(d *schema.ResourceData, meta interface{}) error {
 
 	n, err := stacks.Create(orchestrationClient, createOpts).Extract()
 	if err != nil {
-		return fmt.Errorf("Error creating stack: %s", err)
+		return fmterr.Errorf("error creating stack: %s", err)
 	}
 	d.SetId(n.ID)
 
@@ -193,23 +195,23 @@ func resourceRTSStackV1Create(d *schema.ResourceData, meta interface{}) error {
 		MinTimeout: 3 * time.Second,
 	}
 
-	_, stateErr := stateConf.WaitForState()
+	_, stateErr := stateConf.WaitForStateContext(ctx)
 
 	if stateErr != nil {
-		return fmt.Errorf(
+		return fmterr.Errorf(
 			"Error waiting for Stack (%s) to become ACTIVE: %s",
 			stackName, stateErr)
 	}
 
-	return resourceRTSStackV1Read(d, meta)
+	return resourceRTSStackV1Read(ctx, d, meta)
 
 }
 
-func resourceRTSStackV1Read(d *schema.ResourceData, meta interface{}) error {
+func resourceRTSStackV1Read(_ context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*cfg.Config)
 	orchestrationClient, err := config.OrchestrationV1Client(config.GetRegion(d))
 	if err != nil {
-		return fmt.Errorf("Error creating RTS Client: %s", err)
+		return fmterr.Errorf("error creating RTS Client: %s", err)
 	}
 
 	stack, err := stacks.Get(orchestrationClient, d.Id()).Extract()
@@ -221,7 +223,7 @@ func resourceRTSStackV1Read(d *schema.ResourceData, meta interface{}) error {
 			return nil
 		}
 
-		return fmt.Errorf("Error retrieving Stack: %s", err)
+		return fmterr.Errorf("error retrieving Stack: %s", err)
 
 	}
 
@@ -241,7 +243,7 @@ func resourceRTSStackV1Read(d *schema.ResourceData, meta interface{}) error {
 	originalParams := d.Get("parameters").(map[string]interface{})
 	err = d.Set("parameters", flattenStackParameters(stack.Parameters, originalParams))
 	if err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 
 	d.Set("status_reason", stack.StatusReason)
@@ -255,30 +257,30 @@ func resourceRTSStackV1Read(d *schema.ResourceData, meta interface{}) error {
 
 	out, err := stacktemplates.Get(orchestrationClient, stack.Name, stack.ID).Extract()
 	if err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 
 	sTemplate := BytesToString(out)
-	template, error := normalizeStackTemplate(sTemplate)
-	if error != nil {
-		return errwrap.Wrapf("template body contains an invalid JSON or YAML: {{err}}", err)
+	template, err := normalizeStackTemplate(sTemplate)
+	if err != nil {
+		return fmterr.Errorf("template body contains an invalid JSON or YAML: %w", err)
 	}
 	d.Set("template_body", template)
 
 	return nil
 }
 
-func resourceRTSStackV1Update(d *schema.ResourceData, meta interface{}) error {
+func resourceRTSStackV1Update(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*cfg.Config)
 	orchestrationClient, err := config.OrchestrationV1Client(config.GetRegion(d))
 	if err != nil {
-		return fmt.Errorf("Error creating RTS Client: %s", err)
+		return fmterr.Errorf("error creating RTS Client: %s", err)
 	}
 	_, body_ok := d.GetOk("template_body")
 	_, url_ok := d.GetOk("template_url")
 
 	if !body_ok && !url_ok {
-		return fmt.Errorf("Both template_body and template_url are empty, must specify one of them.")
+		return fmterr.Errorf("Both template_body and template_url are empty, must specify one of them.")
 	}
 
 	var updateOpts stacks.UpdateOpts
@@ -299,7 +301,7 @@ func resourceRTSStackV1Update(d *schema.ResourceData, meta interface{}) error {
 
 	err = stacks.Update(orchestrationClient, d.Get("name").(string), d.Id(), updateOpts).ExtractErr()
 	if err != nil {
-		return fmt.Errorf("Error updating Stack: %s", err)
+		return fmterr.Errorf("error updating Stack: %s", err)
 	}
 	stateConf := &resource.StateChangeConf{
 		Pending: []string{"UPDATE_IN_PROGRESS",
@@ -312,24 +314,24 @@ func resourceRTSStackV1Update(d *schema.ResourceData, meta interface{}) error {
 		MinTimeout: 3 * time.Second,
 	}
 
-	_, stateErr := stateConf.WaitForState()
+	_, stateErr := stateConf.WaitForStateContext(ctx)
 
 	if stateErr != nil {
-		return fmt.Errorf(
+		return fmterr.Errorf(
 			"Error waiting for updating stack: %s", stateErr)
 	}
 
 	log.Printf("[INFO] Successfully updated stack %s", d.Get("name").(string))
 
-	return resourceRTSStackV1Read(d, meta)
+	return resourceRTSStackV1Read(ctx, d, meta)
 }
 
-func resourceRTSStackV1Delete(d *schema.ResourceData, meta interface{}) error {
+func resourceRTSStackV1Delete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 
 	config := meta.(*cfg.Config)
 	orchestrationClient, err := config.OrchestrationV1Client(config.GetRegion(d))
 	if err != nil {
-		return fmt.Errorf("Error creating RTS Client: %s", err)
+		return fmterr.Errorf("error creating RTS Client: %s", err)
 	}
 
 	stateConf := &resource.StateChangeConf{
@@ -348,10 +350,10 @@ func resourceRTSStackV1Delete(d *schema.ResourceData, meta interface{}) error {
 		MinTimeout: 3 * time.Second,
 	}
 
-	_, stateErr := stateConf.WaitForState()
+	_, stateErr := stateConf.WaitForStateContext(ctx)
 
 	if stateErr != nil {
-		return fmt.Errorf("Error deleting Stack: %s", stateErr)
+		return fmterr.Errorf("error deleting Stack: %s", stateErr)
 	}
 
 	d.SetId("")

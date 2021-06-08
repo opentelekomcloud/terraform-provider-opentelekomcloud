@@ -2,6 +2,7 @@ package s3
 
 import (
 	"bytes"
+	"context"
 	"fmt"
 	"log"
 	"strings"
@@ -9,14 +10,16 @@ import (
 
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/service/s3"
-	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common/cfg"
+	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common/fmterr"
 )
 
 func DataSourceS3BucketObject() *schema.Resource {
 	return &schema.Resource{
-		Read: dataSourceS3BucketObjectRead,
+		ReadContext: dataSourceS3BucketObjectRead,
 
 		Schema: map[string]*schema.Schema{
 			"body": {
@@ -100,11 +103,11 @@ func DataSourceS3BucketObject() *schema.Resource {
 	}
 }
 
-func dataSourceS3BucketObjectRead(d *schema.ResourceData, meta interface{}) error {
+func dataSourceS3BucketObjectRead(_ context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*cfg.Config)
 	conn, err := config.S3Client(config.GetRegion(d))
 	if err != nil {
-		return fmt.Errorf("Error creating OpenTelekomCloud s3 client: %s", err)
+		return fmterr.Errorf("error creating OpenTelekomCloud s3 client: %s", err)
 	}
 
 	bucket := d.Get("bucket").(string)
@@ -131,10 +134,10 @@ func dataSourceS3BucketObjectRead(d *schema.ResourceData, meta interface{}) erro
 	log.Printf("[DEBUG] Reading S3 object: %s", input)
 	out, err := conn.HeadObject(&input)
 	if err != nil {
-		return fmt.Errorf("Failed getting S3 object: %s Bucket: %q Object: %q", err, bucket, key)
+		return fmterr.Errorf("Failed getting S3 object: %s Bucket: %q Object: %q", err, bucket, key)
 	}
 	if out.DeleteMarker != nil && *out.DeleteMarker == true {
-		return fmt.Errorf("Requested S3 object %q%s has been deleted",
+		return fmterr.Errorf("Requested S3 object %q%s has been deleted",
 			bucket+key, versionText)
 	}
 
@@ -154,7 +157,7 @@ func dataSourceS3BucketObjectRead(d *schema.ResourceData, meta interface{}) erro
 	d.Set("expires", out.Expires)
 	d.Set("last_modified", out.LastModified.Format(time.RFC1123))
 	if err := d.Set("metadata", pointersMapToStringList(out.Metadata)); err != nil {
-		return fmt.Errorf("[DEBUG] Error saving metadata to state for OpenTelekomCloud S3 object (%s): %s", d.Id(), err)
+		return fmterr.Errorf("[DEBUG] Error saving metadata to state for OpenTelekomCloud S3 object (%s): %s", d.Id(), err)
 	}
 	d.Set("server_side_encryption", out.ServerSideEncryption)
 	d.Set("sse_kms_key_id", out.SSEKMSKeyId)
@@ -174,13 +177,13 @@ func dataSourceS3BucketObjectRead(d *schema.ResourceData, meta interface{}) erro
 		}
 		out, err := conn.GetObject(&input)
 		if err != nil {
-			return fmt.Errorf("Failed getting S3 object: %s", err)
+			return fmterr.Errorf("Failed getting S3 object: %s", err)
 		}
 
 		buf := new(bytes.Buffer)
 		bytesRead, err := buf.ReadFrom(out.Body)
 		if err != nil {
-			return fmt.Errorf("Failed reading content of S3 object (%s): %s",
+			return fmterr.Errorf("Failed reading content of S3 object (%s): %s",
 				uniqueId, err)
 		}
 		log.Printf("[INFO] Saving %d bytes from S3 object %s", bytesRead, uniqueId)

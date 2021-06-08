@@ -1,24 +1,26 @@
 package waf
 
 import (
-	"fmt"
+	"context"
 	"log"
 	"time"
 
-	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
-	"github.com/opentelekomcloud/gophertelekomcloud"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	golangsdk "github.com/opentelekomcloud/gophertelekomcloud"
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/waf/v1/ccattackprotection_rules"
 
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common/cfg"
+	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common/fmterr"
 )
 
 func ResourceWafCcAttackProtectionRuleV1() *schema.Resource {
 	return &schema.Resource{
-		Create: resourceWafCcAttackProtectionRuleV1Create,
-		Read:   resourceWafCcAttackProtectionRuleV1Read,
-		Delete: resourceWafCcAttackProtectionRuleV1Delete,
+		CreateContext: resourceWafCcAttackProtectionRuleV1Create,
+		ReadContext:   resourceWafCcAttackProtectionRuleV1Read,
+		DeleteContext: resourceWafCcAttackProtectionRuleV1Delete,
 		Importer: &schema.ResourceImporter{
-			State: schema.ImportStatePassthrough,
+			StateContext: schema.ImportStatePassthroughContext,
 		},
 
 		Timeouts: &schema.ResourceTimeout{
@@ -132,13 +134,13 @@ func getCcAction(d *schema.ResourceData) ccattackprotection_rules.Action {
 	return action
 }
 
-func resourceWafCcAttackProtectionRuleV1Create(d *schema.ResourceData, meta interface{}) error {
+func resourceWafCcAttackProtectionRuleV1Create(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*cfg.Config)
 
 	wafClient, err := config.WafV1Client(config.GetRegion(d))
 
 	if err != nil {
-		return fmt.Errorf("Error creating OpenTelekomcomCloud WAF Client: %s", err)
+		return fmterr.Errorf("error creating OpenTelekomcomCloud WAF Client: %s", err)
 	}
 
 	limit_num := d.Get("limit_num").(int)
@@ -163,20 +165,20 @@ func resourceWafCcAttackProtectionRuleV1Create(d *schema.ResourceData, meta inte
 	policy_id := d.Get("policy_id").(string)
 	rule, err := ccattackprotection_rules.Create(wafClient, policy_id, createOpts).Extract()
 	if err != nil {
-		return fmt.Errorf("Error creating OpenTelekomcomCloud WAF CC Attack Protection Rule: %s", err)
+		return fmterr.Errorf("error creating OpenTelekomcomCloud WAF CC Attack Protection Rule: %s", err)
 	}
 
 	log.Printf("[DEBUG] Waf cc attack protection rule created: %#v", rule)
 	d.SetId(rule.Id)
 
-	return resourceWafCcAttackProtectionRuleV1Read(d, meta)
+	return resourceWafCcAttackProtectionRuleV1Read(ctx, d, meta)
 }
 
-func resourceWafCcAttackProtectionRuleV1Read(d *schema.ResourceData, meta interface{}) error {
+func resourceWafCcAttackProtectionRuleV1Read(_ context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*cfg.Config)
 	wafClient, err := config.WafV1Client(config.GetRegion(d))
 	if err != nil {
-		return fmt.Errorf("Error creating OpenTelekomCloud WAF client: %s", err)
+		return fmterr.Errorf("error creating OpenTelekomCloud WAF client: %s", err)
 	}
 	policy_id := d.Get("policy_id").(string)
 	n, err := ccattackprotection_rules.Get(wafClient, policy_id, d.Id()).Extract()
@@ -187,7 +189,7 @@ func resourceWafCcAttackProtectionRuleV1Read(d *schema.ResourceData, meta interf
 			return nil
 		}
 
-		return fmt.Errorf("Error retrieving OpenTelekomCloud Waf CC Attack Protection Rule: %s", err)
+		return fmterr.Errorf("error retrieving OpenTelekomCloud Waf CC Attack Protection Rule: %s", err)
 	}
 
 	d.SetId(n.Id)
@@ -208,17 +210,17 @@ func resourceWafCcAttackProtectionRuleV1Read(d *schema.ResourceData, meta interf
 	return nil
 }
 
-func resourceWafCcAttackProtectionRuleV1Delete(d *schema.ResourceData, meta interface{}) error {
+func resourceWafCcAttackProtectionRuleV1Delete(_ context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*cfg.Config)
 	wafClient, err := config.WafV1Client(config.GetRegion(d))
 	if err != nil {
-		return fmt.Errorf("Error creating OpenTelekomCloud WAF client: %s", err)
+		return fmterr.Errorf("error creating OpenTelekomCloud WAF client: %s", err)
 	}
 
 	policy_id := d.Get("policy_id").(string)
 	err = ccattackprotection_rules.Delete(wafClient, policy_id, d.Id()).ExtractErr()
 	if err != nil {
-		return fmt.Errorf("Error deleting OpenTelekomCloud WAF CC Attack Protection Rule: %s", err)
+		return fmterr.Errorf("error deleting OpenTelekomCloud WAF CC Attack Protection Rule: %s", err)
 	}
 
 	d.SetId("")

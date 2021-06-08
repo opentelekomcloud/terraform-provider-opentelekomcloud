@@ -4,8 +4,8 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
-	"github.com/hashicorp/terraform-plugin-sdk/terraform"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/bms/v2/servers"
 
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/acceptance/common"
@@ -18,9 +18,9 @@ func TestAccComputeV2BmsInstance_basic(t *testing.T) {
 	var instance servers.Server
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:     func() { testAccBmsFlavorPreCheck(t) },
-		Providers:    common.TestAccProviders,
-		CheckDestroy: testAccCheckComputeV2BmsInstanceDestroy,
+		PreCheck:          func() { testAccBmsFlavorPreCheck(t) },
+		ProviderFactories: common.TestAccProviderFactories,
+		CheckDestroy:      testAccCheckComputeV2BmsInstanceDestroy,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccComputeV2BmsInstance_basic,
@@ -46,9 +46,9 @@ func TestAccComputeV2BmsInstance_bootFromVolumeImage(t *testing.T) {
 	var instance servers.Server
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:     func() { testAccBmsFlavorPreCheck(t) },
-		Providers:    common.TestAccProviders,
-		CheckDestroy: testAccCheckComputeV2BmsInstanceDestroy,
+		PreCheck:          func() { testAccBmsFlavorPreCheck(t) },
+		ProviderFactories: common.TestAccProviderFactories,
+		CheckDestroy:      testAccCheckComputeV2BmsInstanceDestroy,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccComputeV2BmsInstance_bootFromVolumeImage,
@@ -65,9 +65,9 @@ func TestAccComputeV2BmsInstance_bootFromVolumeImage(t *testing.T) {
 func TestAccComputeV2BmsInstance_timeout(t *testing.T) {
 	var instance servers.Server
 	resource.Test(t, resource.TestCase{
-		PreCheck:     func() { testAccBmsFlavorPreCheck(t) },
-		Providers:    common.TestAccProviders,
-		CheckDestroy: ecs.TestAccCheckComputeV2InstanceDestroy,
+		PreCheck:          func() { testAccBmsFlavorPreCheck(t) },
+		ProviderFactories: common.TestAccProviderFactories,
+		CheckDestroy:      ecs.TestAccCheckComputeV2InstanceDestroy,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccComputeV2BmsInstance_timeout,
@@ -83,7 +83,7 @@ func testAccCheckComputeV2BmsInstanceDestroy(s *terraform.State) error {
 	config := common.TestAccProvider.Meta().(*cfg.Config)
 	computeClient, err := config.ComputeV2Client(env.OS_REGION_NAME)
 	if err != nil {
-		return fmt.Errorf("Error creating OpenTelekomCloud compute client: %s", err)
+		return fmt.Errorf("error creating OpenTelekomCloud compute client: %s", err)
 	}
 
 	for _, rs := range s.RootModule().Resources {
@@ -116,7 +116,7 @@ func testAccCheckComputeV2BmsInstanceExists(n string, instance *servers.Server) 
 		config := common.TestAccProvider.Meta().(*cfg.Config)
 		computeClient, err := config.ComputeV2Client(env.OS_REGION_NAME)
 		if err != nil {
-			return fmt.Errorf("Error creating OpenTelekomCloud compute client: %s", err)
+			return fmt.Errorf("error creating OpenTelekomCloud compute client: %s", err)
 		}
 
 		found, err := servers.Get(computeClient, rs.Primary.ID).Extract()

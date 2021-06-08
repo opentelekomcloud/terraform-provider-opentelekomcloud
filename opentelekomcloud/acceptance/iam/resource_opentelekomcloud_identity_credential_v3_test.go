@@ -4,8 +4,8 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
-	"github.com/hashicorp/terraform-plugin-sdk/terraform"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/identity/v3/credentials"
 
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/acceptance/common"
@@ -19,8 +19,8 @@ func TestAccIdentityV3Credential_basic(t *testing.T) {
 			common.TestAccPreCheck(t)
 			checkAKSKUnset(t)
 		},
-		Providers:    common.TestAccProviders,
-		CheckDestroy: testAccIdentityV3CredentialDestroy,
+		ProviderFactories: common.TestAccProviderFactories,
+		CheckDestroy:      testAccIdentityV3CredentialDestroy,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccIdentityV3CredentialBasic,

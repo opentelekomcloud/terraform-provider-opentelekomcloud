@@ -5,8 +5,8 @@ import (
 	"log"
 	"testing"
 
-	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
-	"github.com/hashicorp/terraform-plugin-sdk/terraform"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/autoscaling/v1/policies"
 
@@ -19,9 +19,9 @@ func TestAccASV1Policy_basic(t *testing.T) {
 	var asPolicy policies.Policy
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:     func() { common.TestAccFlavorPreCheck(t) },
-		Providers:    common.TestAccProviders,
-		CheckDestroy: testAccCheckASV1PolicyDestroy,
+		PreCheck:          func() { common.TestAccFlavorPreCheck(t) },
+		ProviderFactories: common.TestAccProviderFactories,
+		CheckDestroy:      testAccCheckASV1PolicyDestroy,
 		Steps: []resource.TestStep{
 			{
 				Config: testASV1Policy_basic,
@@ -37,7 +37,7 @@ func testAccCheckASV1PolicyDestroy(s *terraform.State) error {
 	config := common.TestAccProvider.Meta().(*cfg.Config)
 	asClient, err := config.AutoscalingV1Client(env.OS_REGION_NAME)
 	if err != nil {
-		return fmt.Errorf("Error creating opentelekomcloud autoscaling client: %s", err)
+		return fmt.Errorf("error creating opentelekomcloud autoscaling client: %s", err)
 	}
 
 	for _, rs := range s.RootModule().Resources {
@@ -70,7 +70,7 @@ func testAccCheckASV1PolicyExists(n string, policy *policies.Policy) resource.Te
 		config := common.TestAccProvider.Meta().(*cfg.Config)
 		asClient, err := config.AutoscalingV1Client(env.OS_REGION_NAME)
 		if err != nil {
-			return fmt.Errorf("Error creating opentelekomcloud autoscaling client: %s", err)
+			return fmt.Errorf("error creating opentelekomcloud autoscaling client: %s", err)
 		}
 
 		found, err := policies.Get(asClient, rs.Primary.ID).Extract()

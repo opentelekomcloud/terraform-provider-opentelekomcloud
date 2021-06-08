@@ -1,18 +1,20 @@
 package rts
 
 import (
-	"fmt"
+	"context"
 	"log"
 
-	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/rts/v1/softwareconfig"
 
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common/cfg"
+	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common/fmterr"
 )
 
 func DataSourceRtsSoftwareConfigV1() *schema.Resource {
 	return &schema.Resource{
-		Read: dataSourceRtsSoftwareConfigV1Read,
+		ReadContext: dataSourceRtsSoftwareConfigV1Read,
 
 		Schema: map[string]*schema.Schema{
 			"region": {
@@ -55,7 +57,7 @@ func DataSourceRtsSoftwareConfigV1() *schema.Resource {
 	}
 }
 
-func dataSourceRtsSoftwareConfigV1Read(d *schema.ResourceData, meta interface{}) error {
+func dataSourceRtsSoftwareConfigV1Read(_ context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*cfg.Config)
 	orchestrationClient, err := config.OrchestrationV1Client(config.GetRegion(d))
 
@@ -66,16 +68,16 @@ func dataSourceRtsSoftwareConfigV1Read(d *schema.ResourceData, meta interface{})
 
 	refinedConfigs, err := softwareconfig.List(orchestrationClient, listOpts)
 	if err != nil {
-		return fmt.Errorf("Unable to retrieve RTS Software Configs: %s", err)
+		return fmterr.Errorf("Unable to retrieve RTS Software Configs: %s", err)
 	}
 
 	if len(refinedConfigs) < 1 {
-		return fmt.Errorf("Your query returned no results. " +
+		return fmterr.Errorf("Your query returned no results. " +
 			"Please change your search criteria and try again.")
 	}
 
 	if len(refinedConfigs) > 1 {
-		return fmt.Errorf("Your query returned more than one result." +
+		return fmterr.Errorf("Your query returned more than one result." +
 			" Please try a more specific search criteria")
 	}
 
@@ -90,16 +92,16 @@ func dataSourceRtsSoftwareConfigV1Read(d *schema.ResourceData, meta interface{})
 
 	n, err := softwareconfig.Get(orchestrationClient, Config.Id).Extract()
 	if err != nil {
-		return fmt.Errorf("Unable to retrieve RTS Software Config: %s", err)
+		return fmterr.Errorf("Unable to retrieve RTS Software Config: %s", err)
 	}
 
 	d.Set("config", n.Config)
 	d.Set("options", n.Options)
 	if err := d.Set("input_values", n.Inputs); err != nil {
-		return fmt.Errorf("[DEBUG] Error saving inputs to state for OpenTelekomCloud RTS Software Config (%s): %s", d.Id(), err)
+		return fmterr.Errorf("[DEBUG] Error saving inputs to state for OpenTelekomCloud RTS Software Config (%s): %s", d.Id(), err)
 	}
 	if err := d.Set("output_values", n.Outputs); err != nil {
-		return fmt.Errorf("[DEBUG] Error saving outputs to state for OpenTelekomCloud RTS Software Config (%s): %s", d.Id(), err)
+		return fmterr.Errorf("[DEBUG] Error saving outputs to state for OpenTelekomCloud RTS Software Config (%s): %s", d.Id(), err)
 	}
 
 	return nil

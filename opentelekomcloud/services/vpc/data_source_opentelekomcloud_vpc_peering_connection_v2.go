@@ -1,20 +1,22 @@
 package vpc
 
 import (
-	"fmt"
+	"context"
 	"log"
 
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/networking/v2/peerings"
 
-	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common"
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common/cfg"
+	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common/fmterr"
 )
 
 func DataSourceVpcPeeringConnectionV2() *schema.Resource {
 	return &schema.Resource{
-		Read: dataSourceVpcPeeringConnectionV2Read,
+		ReadContext: dataSourceVpcPeeringConnectionV2Read,
 
 		Schema: map[string]*schema.Schema{
 			"region": {
@@ -51,11 +53,11 @@ func DataSourceVpcPeeringConnectionV2() *schema.Resource {
 	}
 }
 
-func dataSourceVpcPeeringConnectionV2Read(d *schema.ResourceData, meta interface{}) error {
+func dataSourceVpcPeeringConnectionV2Read(_ context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*cfg.Config)
 	peeringClient, err := config.NetworkingV2Client(config.GetRegion(d))
 	if err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 
 	listOpts := peerings.ListOpts{
@@ -69,16 +71,16 @@ func dataSourceVpcPeeringConnectionV2Read(d *schema.ResourceData, meta interface
 
 	refinedPeering, err := peerings.List(peeringClient, listOpts)
 	if err != nil {
-		return fmt.Errorf("Unable to retrieve vpc peering connections: %s", err)
+		return fmterr.Errorf("Unable to retrieve vpc peering connections: %s", err)
 	}
 
 	if len(refinedPeering) < 1 {
-		return fmt.Errorf("Your query returned no results. " +
+		return fmterr.Errorf("Your query returned no results. " +
 			"Please change your search criteria and try again.")
 	}
 
 	if len(refinedPeering) > 1 {
-		return fmt.Errorf("Multiple VPC peering connections matched." +
+		return fmterr.Errorf("Multiple VPC peering connections matched." +
 			" Use additional constraints to reduce matches to a single VPC peering connection")
 	}
 

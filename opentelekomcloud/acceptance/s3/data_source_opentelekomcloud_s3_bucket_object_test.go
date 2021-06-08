@@ -7,9 +7,9 @@ import (
 
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/service/s3"
-	"github.com/hashicorp/terraform-plugin-sdk/helper/acctest"
-	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
-	"github.com/hashicorp/terraform-plugin-sdk/terraform"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/acctest"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/acceptance/common"
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/acceptance/env"
@@ -25,7 +25,7 @@ func TestAccDataSourceS3BucketObject_basic(t *testing.T) {
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:                  func() { common.TestAccPreCheck(t) },
-		Providers:                 common.TestAccProviders,
+		ProviderFactories:         common.TestAccProviderFactories,
 		PreventPostDestroyRefresh: true,
 		Steps: []resource.TestStep{
 			{
@@ -59,7 +59,7 @@ func TestAccDataSourceS3BucketObject_readableBody(t *testing.T) {
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:                  func() { common.TestAccPreCheck(t) },
-		Providers:                 common.TestAccProviders,
+		ProviderFactories:         common.TestAccProviderFactories,
 		PreventPostDestroyRefresh: true,
 		Steps: []resource.TestStep{
 			{
@@ -93,7 +93,7 @@ func TestAccDataSourceAWSS3BucketObject_allParams(t *testing.T) {
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:                  func() { common.TestAccPreCheck(t) },
-		Providers:                 common.TestAccProviders,
+		ProviderFactories:         common.TestAccProviderFactories,
 		PreventPostDestroyRefresh: true,
 		Steps: []resource.TestStep{
 			{
@@ -144,7 +144,7 @@ func testAccCheckAwsS3ObjectDataSourceExists(n string, obj *s3.GetObjectOutput) 
 		config := common.TestAccProvider.Meta().(*cfg.Config)
 		s3conn, err := config.S3Client(env.OS_REGION_NAME)
 		if err != nil {
-			return fmt.Errorf("Error creating OpenTelekomCloud s3 client: %s", err)
+			return fmt.Errorf("error creating OpenTelekomCloud s3 client: %s", err)
 		}
 		out, err := s3conn.GetObject(
 			&s3.GetObjectInput{

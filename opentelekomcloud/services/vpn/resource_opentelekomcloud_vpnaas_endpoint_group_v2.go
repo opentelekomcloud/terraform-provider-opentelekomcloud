@@ -1,27 +1,30 @@
 package vpn
 
 import (
+	"context"
 	"fmt"
 	"log"
 	"time"
 
-	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
-	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
-	"github.com/opentelekomcloud/gophertelekomcloud"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	golangsdk "github.com/opentelekomcloud/gophertelekomcloud"
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/networking/v2/extensions/vpnaas/endpointgroups"
 
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common"
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common/cfg"
+	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common/fmterr"
 )
 
 func ResourceVpnEndpointGroupV2() *schema.Resource {
 	return &schema.Resource{
-		Create: resourceVpnEndpointGroupV2Create,
-		Read:   resourceVpnEndpointGroupV2Read,
-		Update: resourceVpnEndpointGroupV2Update,
-		Delete: resourceVpnEndpointGroupV2Delete,
+		CreateContext: resourceVpnEndpointGroupV2Create,
+		ReadContext:   resourceVpnEndpointGroupV2Read,
+		UpdateContext: resourceVpnEndpointGroupV2Update,
+		DeleteContext: resourceVpnEndpointGroupV2Delete,
 		Importer: &schema.ResourceImporter{
-			State: schema.ImportStatePassthrough,
+			StateContext: schema.ImportStatePassthroughContext,
 		},
 
 		Timeouts: &schema.ResourceTimeout{
@@ -72,12 +75,12 @@ func ResourceVpnEndpointGroupV2() *schema.Resource {
 	}
 }
 
-func resourceVpnEndpointGroupV2Create(d *schema.ResourceData, meta interface{}) error {
+func resourceVpnEndpointGroupV2Create(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 
 	config := meta.(*cfg.Config)
 	networkingClient, err := config.NetworkingV2Client(config.GetRegion(d))
 	if err != nil {
-		return fmt.Errorf("Error creating OpenTelekomCloud networking client: %s", err)
+		return fmterr.Errorf("error creating OpenTelekomCloud networking client: %s", err)
 	}
 
 	var createOpts endpointgroups.CreateOptsBuilder
@@ -104,7 +107,7 @@ func resourceVpnEndpointGroupV2Create(d *schema.ResourceData, meta interface{}) 
 
 	group, err := endpointgroups.Create(networkingClient, createOpts).Extract()
 	if err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 
 	stateConf := &resource.StateChangeConf{
@@ -115,31 +118,31 @@ func resourceVpnEndpointGroupV2Create(d *schema.ResourceData, meta interface{}) 
 		Delay:      0,
 		MinTimeout: 2 * time.Second,
 	}
-	_, err = stateConf.WaitForState()
+	_, err = stateConf.WaitForStateContext(ctx)
 
 	if err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 
 	log.Printf("[DEBUG] EndpointGroup created: %#v", group)
 
 	d.SetId(group.ID)
 
-	return resourceVpnEndpointGroupV2Read(d, meta)
+	return resourceVpnEndpointGroupV2Read(ctx, d, meta)
 }
 
-func resourceVpnEndpointGroupV2Read(d *schema.ResourceData, meta interface{}) error {
+func resourceVpnEndpointGroupV2Read(_ context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	log.Printf("[DEBUG] Retrieve information about group: %s", d.Id())
 
 	config := meta.(*cfg.Config)
 	networkingClient, err := config.NetworkingV2Client(config.GetRegion(d))
 	if err != nil {
-		return fmt.Errorf("Error creating OpenTelekomCloud networking client: %s", err)
+		return fmterr.Errorf("error creating OpenTelekomCloud networking client: %s", err)
 	}
 
 	group, err := endpointgroups.Get(networkingClient, d.Id()).Extract()
 	if err != nil {
-		return common.CheckDeleted(d, err, "group")
+		return diag.FromErr(common.CheckDeleted(d, err, "group"))
 	}
 
 	log.Printf("[DEBUG] Read OpenTelekomCloud Endpoint EndpointGroup %s: %#v", d.Id(), group)
@@ -154,12 +157,11 @@ func resourceVpnEndpointGroupV2Read(d *schema.ResourceData, meta interface{}) er
 	return nil
 }
 
-func resourceVpnEndpointGroupV2Update(d *schema.ResourceData, meta interface{}) error {
-
+func resourceVpnEndpointGroupV2Update(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*cfg.Config)
 	networkingClient, err := config.NetworkingV2Client(config.GetRegion(d))
 	if err != nil {
-		return fmt.Errorf("Error creating OpenTelekomCloud networking client: %s", err)
+		return fmterr.Errorf("error creating OpenTelekomCloud networking client: %s", err)
 	}
 
 	opts := endpointgroups.UpdateOpts{}
@@ -186,7 +188,7 @@ func resourceVpnEndpointGroupV2Update(d *schema.ResourceData, meta interface{}) 
 	if hasChange {
 		group, err := endpointgroups.Update(networkingClient, d.Id(), updateOpts).Extract()
 		if err != nil {
-			return err
+			return diag.FromErr(err)
 		}
 		stateConf := &resource.StateChangeConf{
 			Pending:    []string{"PENDING_UPDATE"},
@@ -196,31 +198,31 @@ func resourceVpnEndpointGroupV2Update(d *schema.ResourceData, meta interface{}) 
 			Delay:      0,
 			MinTimeout: 2 * time.Second,
 		}
-		_, err = stateConf.WaitForState()
+		_, err = stateConf.WaitForStateContext(ctx)
 
 		if err != nil {
-			return err
+			return diag.FromErr(err)
 		}
 
 		log.Printf("[DEBUG] Updated group with id %s", d.Id())
 	}
 
-	return resourceVpnEndpointGroupV2Read(d, meta)
+	return resourceVpnEndpointGroupV2Read(ctx, d, meta)
 }
 
-func resourceVpnEndpointGroupV2Delete(d *schema.ResourceData, meta interface{}) error {
+func resourceVpnEndpointGroupV2Delete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	log.Printf("[DEBUG] Destroy group: %s", d.Id())
 
 	config := meta.(*cfg.Config)
 	networkingClient, err := config.NetworkingV2Client(config.GetRegion(d))
 	if err != nil {
-		return fmt.Errorf("Error creating OpenTelekomCloud networking client: %s", err)
+		return fmterr.Errorf("error creating OpenTelekomCloud networking client: %s", err)
 	}
 
 	err = endpointgroups.Delete(networkingClient, d.Id()).Err
 
 	if err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 
 	stateConf := &resource.StateChangeConf{
@@ -232,9 +234,9 @@ func resourceVpnEndpointGroupV2Delete(d *schema.ResourceData, meta interface{}) 
 		MinTimeout: 2 * time.Second,
 	}
 
-	_, err = stateConf.WaitForState()
+	_, err = stateConf.WaitForStateContext(ctx)
 
-	return err
+	return diag.FromErr(err)
 }
 
 func waitForEndpointGroupDeletion(networkingClient *golangsdk.ServiceClient, id string) resource.StateRefreshFunc {

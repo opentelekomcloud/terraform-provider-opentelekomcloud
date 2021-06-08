@@ -8,9 +8,9 @@ import (
 	"sort"
 	"testing"
 
-	"github.com/hashicorp/terraform-plugin-sdk/helper/acctest"
-	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
-	"github.com/hashicorp/terraform-plugin-sdk/terraform"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/acctest"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/service/s3"
@@ -37,9 +37,9 @@ func TestAccS3BucketObject_source(t *testing.T) {
 	var obj s3.GetObjectOutput
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheckS3(t) },
-		Providers:    common.TestAccProviders,
-		CheckDestroy: testAccCheckS3BucketObjectDestroy,
+		PreCheck:          func() { testAccPreCheckS3(t) },
+		ProviderFactories: common.TestAccProviderFactories,
+		CheckDestroy:      testAccCheckS3BucketObjectDestroy,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccS3BucketObjectConfigSource(rInt, tmpFile.Name()),
@@ -54,9 +54,9 @@ func TestAccS3BucketObject_content(t *testing.T) {
 	var obj s3.GetObjectOutput
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheckS3(t) },
-		Providers:    common.TestAccProviders,
-		CheckDestroy: testAccCheckS3BucketObjectDestroy,
+		PreCheck:          func() { testAccPreCheckS3(t) },
+		ProviderFactories: common.TestAccProviderFactories,
+		CheckDestroy:      testAccCheckS3BucketObjectDestroy,
 		Steps: []resource.TestStep{
 			{
 				PreConfig: func() {},
@@ -84,9 +84,9 @@ func TestAccS3BucketObject_withContentCharacteristics(t *testing.T) {
 	var obj s3.GetObjectOutput
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheckS3(t) },
-		Providers:    common.TestAccProviders,
-		CheckDestroy: testAccCheckS3BucketObjectDestroy,
+		PreCheck:          func() { testAccPreCheckS3(t) },
+		ProviderFactories: common.TestAccProviderFactories,
+		CheckDestroy:      testAccCheckS3BucketObjectDestroy,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccS3BucketObjectConfig_withContentCharacteristics(rInt, tmpFile.Name()),
@@ -117,9 +117,9 @@ func TestAccS3BucketObject_updates(t *testing.T) {
 	var obj s3.GetObjectOutput
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheckS3(t) },
-		Providers:    common.TestAccProviders,
-		CheckDestroy: testAccCheckS3BucketObjectDestroy,
+		PreCheck:          func() { testAccPreCheckS3(t) },
+		ProviderFactories: common.TestAccProviderFactories,
+		CheckDestroy:      testAccCheckS3BucketObjectDestroy,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccS3BucketObjectConfig_updates(rInt, tmpFile.Name()),
@@ -161,9 +161,9 @@ func TestAccS3BucketObject_updatesWithVersioning(t *testing.T) {
 	var originalObj, modifiedObj s3.GetObjectOutput
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheckS3(t) },
-		Providers:    common.TestAccProviders,
-		CheckDestroy: testAccCheckS3BucketObjectDestroy,
+		PreCheck:          func() { testAccPreCheckS3(t) },
+		ProviderFactories: common.TestAccProviderFactories,
+		CheckDestroy:      testAccCheckS3BucketObjectDestroy,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccS3BucketObjectConfig_updatesWithVersioning(rInt, tmpFile.Name()),
@@ -211,7 +211,7 @@ func testAccCheckS3BucketObjectDestroy(s *terraform.State) error {
 	config := common.TestAccProvider.Meta().(*cfg.Config)
 	s3conn, err := config.S3Client(env.OS_REGION_NAME)
 	if err != nil {
-		return fmt.Errorf("Error creating OpenTelekomCloud s3 client: %s", err)
+		return fmt.Errorf("error creating OpenTelekomCloud s3 client: %s", err)
 	}
 
 	for _, rs := range s.RootModule().Resources {
@@ -246,7 +246,7 @@ func testAccCheckS3BucketObjectExists(n string, obj *s3.GetObjectOutput) resourc
 		config := common.TestAccProvider.Meta().(*cfg.Config)
 		s3conn, err := config.S3Client(env.OS_REGION_NAME)
 		if err != nil {
-			return fmt.Errorf("Error creating OpenTelekomCloud s3 client: %s", err)
+			return fmt.Errorf("error creating OpenTelekomCloud s3 client: %s", err)
 		}
 		out, err := s3conn.GetObject(
 			&s3.GetObjectInput{
@@ -281,9 +281,9 @@ func TestAccS3BucketObject_sse(t *testing.T) {
 	var obj s3.GetObjectOutput
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheckS3(t) },
-		Providers:    common.TestAccProviders,
-		CheckDestroy: testAccCheckS3BucketObjectDestroy,
+		PreCheck:          func() { testAccPreCheckS3(t) },
+		ProviderFactories: common.TestAccProviderFactories,
+		CheckDestroy:      testAccCheckS3BucketObjectDestroy,
 		Steps: []resource.TestStep{
 			{
 				PreConfig: func() {},
@@ -306,9 +306,9 @@ func TestAccS3BucketObject_acl(t *testing.T) {
 	var obj s3.GetObjectOutput
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheckS3(t) },
-		Providers:    common.TestAccProviders,
-		CheckDestroy: testAccCheckS3BucketObjectDestroy,
+		PreCheck:          func() { testAccPreCheckS3(t) },
+		ProviderFactories: common.TestAccProviderFactories,
+		CheckDestroy:      testAccCheckS3BucketObjectDestroy,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccS3BucketObjectConfig_acl(rInt, "private"),
@@ -349,7 +349,7 @@ func testAccCheckS3BucketObjectAcl(n string, expectedPerms []string) resource.Te
 		config := common.TestAccProvider.Meta().(*cfg.Config)
 		s3conn, err := config.S3Client(env.OS_REGION_NAME)
 		if err != nil {
-			return fmt.Errorf("Error creating OpenTelekomCloud s3 client: %s", err)
+			return fmt.Errorf("error creating OpenTelekomCloud s3 client: %s", err)
 		}
 
 		out, err := s3conn.GetObjectAcl(&s3.GetObjectAclInput{
@@ -437,7 +437,7 @@ func testAccCheckS3BucketObjectSSE(n, expectedSSE string) resource.TestCheckFunc
 		config := common.TestAccProvider.Meta().(*cfg.Config)
 		s3conn, err := config.S3Client(env.OS_REGION_NAME)
 		if err != nil {
-			return fmt.Errorf("Error creating OpenTelekomCloud s3 client: %s", err)
+			return fmt.Errorf("error creating OpenTelekomCloud s3 client: %s", err)
 		}
 
 		out, err := s3conn.HeadObject(&s3.HeadObjectInput{

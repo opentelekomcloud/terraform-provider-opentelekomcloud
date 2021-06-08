@@ -1,22 +1,24 @@
 package dms
 
 import (
-	"fmt"
+	"context"
 	"log"
 
-	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/dms/v1/groups"
 
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common/cfg"
+	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common/fmterr"
 )
 
 func ResourceDmsGroupsV1() *schema.Resource {
 	return &schema.Resource{
-		Create: resourceDmsGroupsV1Create,
-		Read:   resourceDmsGroupsV1Read,
-		Delete: resourceDmsGroupsV1Delete,
+		CreateContext: resourceDmsGroupsV1Create,
+		ReadContext:   resourceDmsGroupsV1Read,
+		DeleteContext: resourceDmsGroupsV1Delete,
 		Importer: &schema.ResourceImporter{
-			State: schema.ImportStatePassthrough,
+			StateContext: schema.ImportStatePassthroughContext,
 		},
 
 		Schema: map[string]*schema.Schema{
@@ -54,11 +56,11 @@ func ResourceDmsGroupsV1() *schema.Resource {
 	}
 }
 
-func resourceDmsGroupsV1Create(d *schema.ResourceData, meta interface{}) error {
+func resourceDmsGroupsV1Create(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*cfg.Config)
 	DmsV1Client, err := config.DmsV1Client(config.GetRegion(d))
 	if err != nil {
-		return fmt.Errorf("Error creating OpenTelekomCloud dms group client: %s", err)
+		return fmterr.Errorf("error creating OpenTelekomCloud dms group client: %s", err)
 	}
 
 	var getGroups []groups.GroupOps
@@ -76,7 +78,7 @@ func resourceDmsGroupsV1Create(d *schema.ResourceData, meta interface{}) error {
 
 	v, err := groups.Create(DmsV1Client, d.Get("queue_id").(string), createOpts).Extract()
 	if err != nil {
-		return fmt.Errorf("Error creating OpenTelekomCloud group: %s", err)
+		return fmterr.Errorf("error creating OpenTelekomCloud group: %s", err)
 	}
 	log.Printf("[INFO] group Name: %s", v[0].Name)
 
@@ -84,30 +86,30 @@ func resourceDmsGroupsV1Create(d *schema.ResourceData, meta interface{}) error {
 	d.SetId(v[0].ID)
 	d.Set("queue_id", d.Get("queue_id").(string))
 
-	return resourceDmsGroupsV1Read(d, meta)
+	return resourceDmsGroupsV1Read(ctx, d, meta)
 }
 
-func resourceDmsGroupsV1Read(d *schema.ResourceData, meta interface{}) error {
+func resourceDmsGroupsV1Read(_ context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*cfg.Config)
 
 	DmsV1Client, err := config.DmsV1Client(config.GetRegion(d))
 	if err != nil {
-		return fmt.Errorf("Error creating OpenTelekomCloud dms group client: %s", err)
+		return fmterr.Errorf("error creating OpenTelekomCloud dms group client: %s", err)
 	}
 
 	queueID := d.Get("queue_id").(string)
 	page, err := groups.List(DmsV1Client, queueID, false).AllPages()
 	if err != nil {
-		return fmt.Errorf("Error getting groups in queue %s: %s", queueID, err)
+		return fmterr.Errorf("error getting groups in queue %s: %s", queueID, err)
 	}
 
 	groupsList, err := groups.ExtractGroups(page)
 	if len(groupsList) < 1 {
-		return fmt.Errorf("No matching resource found.")
+		return fmterr.Errorf("No matching resource found.")
 	}
 
 	if len(groupsList) > 1 {
-		return fmt.Errorf("Multiple resources matched;")
+		return fmterr.Errorf("Multiple resources matched;")
 	}
 
 	group := groupsList[0]
@@ -124,16 +126,16 @@ func resourceDmsGroupsV1Read(d *schema.ResourceData, meta interface{}) error {
 	return nil
 }
 
-func resourceDmsGroupsV1Delete(d *schema.ResourceData, meta interface{}) error {
+func resourceDmsGroupsV1Delete(_ context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*cfg.Config)
 	DmsV1Client, err := config.DmsV1Client(config.GetRegion(d))
 	if err != nil {
-		return fmt.Errorf("Error creating OpenTelekomCloud dms group client: %s", err)
+		return fmterr.Errorf("error creating OpenTelekomCloud dms group client: %s", err)
 	}
 
 	err = groups.Delete(DmsV1Client, d.Get("queue_id").(string), d.Id()).ExtractErr()
 	if err != nil {
-		return fmt.Errorf("Error deleting OpenTelekomCloud group: %s", err)
+		return fmterr.Errorf("error deleting OpenTelekomCloud group: %s", err)
 	}
 
 	log.Printf("[DEBUG] Dms group %s deactivated.", d.Id())

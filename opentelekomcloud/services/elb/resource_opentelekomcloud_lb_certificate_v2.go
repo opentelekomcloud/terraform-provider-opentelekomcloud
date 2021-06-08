@@ -1,28 +1,31 @@
 package elb
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
 	"log"
 	"time"
 
 	"github.com/hashicorp/go-multierror"
-	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
-	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
-	"github.com/hashicorp/terraform-plugin-sdk/helper/validation"
-	"github.com/opentelekomcloud/gophertelekomcloud"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
+	golangsdk "github.com/opentelekomcloud/gophertelekomcloud"
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/networking/v2/extensions/lbaas_v2/certificates"
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/networking/v2/extensions/lbaas_v2/listeners"
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common"
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common/cfg"
+	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common/fmterr"
 )
 
 func ResourceCertificateV2() *schema.Resource {
 	return &schema.Resource{
-		Create: resourceCertificateV2Create,
-		Read:   resourceCertificateV2Read,
-		Update: resourceCertificateV2Update,
-		Delete: resourceCertificateV2Delete,
+		CreateContext: resourceCertificateV2Create,
+		ReadContext:   resourceCertificateV2Read,
+		UpdateContext: resourceCertificateV2Update,
+		DeleteContext: resourceCertificateV2Delete,
 
 		Timeouts: &schema.ResourceTimeout{
 			Create: schema.DefaultTimeout(10 * time.Minute),
@@ -87,11 +90,11 @@ func ResourceCertificateV2() *schema.Resource {
 	}
 }
 
-func resourceCertificateV2Create(d *schema.ResourceData, meta interface{}) error {
+func resourceCertificateV2Create(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*cfg.Config)
 	networkingClient, err := config.NetworkingV2Client(config.GetRegion(d))
 	if err != nil {
-		return fmt.Errorf("error creating OpenTelekomCloud networking client: %s", err)
+		return fmterr.Errorf("error creating OpenTelekomCloud networking client: %s", err)
 	}
 
 	createOpts := certificates.CreateOpts{
@@ -106,25 +109,25 @@ func resourceCertificateV2Create(d *schema.ResourceData, meta interface{}) error
 	log.Printf("[DEBUG] Create Options: %#v", createOpts)
 	c, err := certificates.Create(networkingClient, createOpts).Extract()
 	if err != nil {
-		return fmt.Errorf("error creating Certificate: %s", err)
+		return fmterr.Errorf("error creating Certificate: %s", err)
 	}
 
 	// If all has been successful, set the ID on the resource
 	d.SetId(c.ID)
 
-	return resourceCertificateV2Read(d, meta)
+	return resourceCertificateV2Read(ctx, d, meta)
 }
 
-func resourceCertificateV2Read(d *schema.ResourceData, meta interface{}) error {
+func resourceCertificateV2Read(_ context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*cfg.Config)
 	networkingClient, err := config.NetworkingV2Client(config.GetRegion(d))
 	if err != nil {
-		return fmt.Errorf("error creating OpenTelekomCloud networking client: %s", err)
+		return fmterr.Errorf("error creating OpenTelekomCloud networking client: %s", err)
 	}
 
 	c, err := certificates.Get(networkingClient, d.Id()).Extract()
 	if err != nil {
-		return common.CheckDeleted(d, err, "certificate")
+		return diag.FromErr(common.CheckDeleted(d, err, "certificate"))
 	}
 	log.Printf("[DEBUG] Retrieved certificate %s: %#v", d.Id(), c)
 
@@ -139,14 +142,14 @@ func resourceCertificateV2Read(d *schema.ResourceData, meta interface{}) error {
 		d.Set("update_time", c.UpdateTime),
 		d.Set("region", config.GetRegion(d)),
 	)
-	return mErr.ErrorOrNil()
+	return diag.FromErr(mErr.ErrorOrNil())
 }
 
-func resourceCertificateV2Update(d *schema.ResourceData, meta interface{}) error {
+func resourceCertificateV2Update(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*cfg.Config)
 	networkingClient, err := config.NetworkingV2Client(config.GetRegion(d))
 	if err != nil {
-		return fmt.Errorf("error creating OpenTelekomCloud networking client: %s", err)
+		return fmterr.Errorf("error creating OpenTelekomCloud networking client: %s", err)
 	}
 
 	var updateOpts certificates.UpdateOpts
@@ -169,7 +172,7 @@ func resourceCertificateV2Update(d *schema.ResourceData, meta interface{}) error
 	log.Printf("[DEBUG] Updating certificate %s with options: %#v", d.Id(), updateOpts)
 
 	timeout := d.Timeout(schema.TimeoutUpdate)
-	err = resource.Retry(timeout, func() *resource.RetryError {
+	err = resource.RetryContext(ctx, timeout, func() *resource.RetryError {
 		_, err := certificates.Update(networkingClient, d.Id(), updateOpts).Extract()
 		if err != nil {
 			return common.CheckForRetryableError(err)
@@ -177,22 +180,22 @@ func resourceCertificateV2Update(d *schema.ResourceData, meta interface{}) error
 		return nil
 	})
 	if err != nil {
-		return fmt.Errorf("error updating certificate %s: %s", d.Id(), err)
+		return fmterr.Errorf("error updating certificate %s: %s", d.Id(), err)
 	}
 
-	return resourceCertificateV2Read(d, meta)
+	return resourceCertificateV2Read(ctx, d, meta)
 }
 
-func resourceCertificateV2Delete(d *schema.ResourceData, meta interface{}) error {
+func resourceCertificateV2Delete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*cfg.Config)
 	client, err := config.NetworkingV2Client(config.GetRegion(d))
 	if err != nil {
-		return fmt.Errorf("error creating OpenTelekomCloud networking client: %s", err)
+		return fmterr.Errorf("error creating OpenTelekomCloud networking client: %s", err)
 	}
 
 	log.Printf("[DEBUG] Deleting certificate %s", d.Id())
 	timeout := d.Timeout(schema.TimeoutDelete)
-	err = resource.Retry(timeout, func() *resource.RetryError {
+	err = resource.RetryContext(ctx, timeout, func() *resource.RetryError {
 		err := certificates.Delete(client, d.Id()).ExtractErr()
 		if err != nil {
 			return common.CheckForRetryableError(err)
@@ -200,13 +203,13 @@ func resourceCertificateV2Delete(d *schema.ResourceData, meta interface{}) error
 		return nil
 	})
 	if err != nil {
-		return handleCertificateDeletionError(d, client, err)
+		return diag.FromErr(handleCertificateDeletionError(ctx, d, client, err))
 	}
 
 	return nil
 }
 
-func handleCertificateDeletionError(d *schema.ResourceData, client *golangsdk.ServiceClient, err error) error {
+func handleCertificateDeletionError(ctx context.Context, d *schema.ResourceData, client *golangsdk.ServiceClient, err error) error {
 	if common.IsResourceNotFound(err) {
 		log.Printf("[INFO] deleting an unavailable certificate: %s", d.Id())
 		return nil
@@ -222,7 +225,7 @@ func handleCertificateDeletionError(d *schema.ResourceData, client *golangsdk.Se
 
 		mErr := new(multierror.Error)
 		for _, listenerID := range dep.ListenerIDs {
-			mErr = multierror.Append(mErr, unassignCertWithRetry(client, d.Timeout(schema.TimeoutUpdate), d.Id(), listenerID))
+			mErr = multierror.Append(mErr, unassignCertWithRetry(ctx, client, d.Timeout(schema.TimeoutUpdate), d.Id(), listenerID))
 		}
 		if mErr.ErrorOrNil() != nil {
 			return mErr
@@ -230,7 +233,7 @@ func handleCertificateDeletionError(d *schema.ResourceData, client *golangsdk.Se
 
 		log.Printf("[DEBUG] Retry deleting certificate %s", d.Id())
 		timeout := d.Timeout(schema.TimeoutDelete)
-		err := resource.Retry(timeout, func() *resource.RetryError {
+		err := resource.RetryContext(ctx, timeout, func() *resource.RetryError {
 			err := certificates.Delete(client, d.Id()).ExtractErr()
 			if err != nil {
 				return common.CheckForRetryableError(err)
@@ -245,7 +248,7 @@ func handleCertificateDeletionError(d *schema.ResourceData, client *golangsdk.Se
 	return fmt.Errorf("error deleting certificate %s: %w", d.Id(), err)
 }
 
-func unassignCertWithRetry(client *golangsdk.ServiceClient, timeout time.Duration, certID, listenerID string) error {
+func unassignCertWithRetry(ctx context.Context, client *golangsdk.ServiceClient, timeout time.Duration, certID, listenerID string) error {
 	listener, err := listeners.Get(client, listenerID).Extract()
 	if err != nil {
 		return fmt.Errorf("failed to get listener %s: %w", listenerID, err)
@@ -260,7 +263,7 @@ func unassignCertWithRetry(client *golangsdk.ServiceClient, timeout time.Duratio
 	opts := listeners.UpdateOpts{
 		SniContainerRefs: otherCerts,
 	}
-	err = resource.Retry(timeout, func() *resource.RetryError {
+	err = resource.RetryContext(ctx, timeout, func() *resource.RetryError {
 		_, err := listeners.Update(client, listener.ID, opts).Extract()
 		if err != nil {
 			return common.CheckForRetryableError(err)

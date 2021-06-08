@@ -2,6 +2,7 @@ package s3
 
 import (
 	"bytes"
+	"context"
 	"encoding/json"
 	"fmt"
 	"log"
@@ -11,22 +12,24 @@ import (
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/awserr"
 	"github.com/aws/aws-sdk-go/service/s3"
-	"github.com/hashicorp/terraform-plugin-sdk/helper/hashcode"
-	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
-	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
-	"github.com/hashicorp/terraform-plugin-sdk/helper/validation"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common"
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common/cfg"
+	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common/fmterr"
+	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/helper/hashcode"
 )
 
 func ResourceS3Bucket() *schema.Resource {
 	return &schema.Resource{
-		Create: resourceS3BucketCreate,
-		Read:   resourceS3BucketRead,
-		Update: resourceS3BucketUpdate,
-		Delete: resourceS3BucketDelete,
+		CreateContext: resourceS3BucketCreate,
+		ReadContext:   resourceS3BucketRead,
+		UpdateContext: resourceS3BucketUpdate,
+		DeleteContext: resourceS3BucketDelete,
 		Importer: &schema.ResourceImporter{
-			State: resourceS3BucketImportState,
+			StateContext: resourceS3BucketImportState,
 		},
 
 		Schema: map[string]*schema.Schema{
@@ -268,12 +271,12 @@ func ResourceS3Bucket() *schema.Resource {
 	}
 }
 
-func resourceS3BucketCreate(d *schema.ResourceData, meta interface{}) error {
+func resourceS3BucketCreate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*cfg.Config)
 	region := config.GetRegion(d)
 	client, err := config.S3Client(region)
 	if err != nil {
-		return fmt.Errorf("error creating OpenTelekomCloud S3 client: %s", err)
+		return fmterr.Errorf("error creating OpenTelekomCloud S3 client: %s", err)
 	}
 
 	// Get the bucket and acl
@@ -313,40 +316,40 @@ func resourceS3BucketCreate(d *schema.ResourceData, meta interface{}) error {
 		return nil
 	})
 	if err != nil {
-		return fmt.Errorf("error creating S3 bucket: %s", err)
+		return fmterr.Errorf("error creating S3 bucket: %s", err)
 	}
 
 	// Assign the bucket name as the resource ID
 	d.SetId(bucket)
-	return resourceS3BucketUpdate(d, meta)
+	return resourceS3BucketUpdate(ctx, d, meta)
 }
 
-func resourceS3BucketUpdate(d *schema.ResourceData, meta interface{}) error {
+func resourceS3BucketUpdate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*cfg.Config)
 	client, err := config.S3Client(config.GetRegion(d))
 	if err != nil {
-		return fmt.Errorf("error creating OpenTelekomCloud S3 client: %s", err)
+		return fmterr.Errorf("error creating OpenTelekomCloud S3 client: %s", err)
 	}
 
 	if err := setTagsS3(client, d); err != nil {
-		return fmt.Errorf("%q: %s", d.Get("bucket").(string), err)
+		return fmterr.Errorf("%q: %s", d.Get("bucket").(string), err)
 	}
 
 	if d.HasChange("policy") {
 		if err := resourceS3BucketPolicyUpdate(client, d); err != nil {
-			return err
+			return diag.FromErr(err)
 		}
 	}
 
 	if d.HasChange("cors_rule") {
 		if err := resourceS3BucketCorsUpdate(client, d); err != nil {
-			return err
+			return diag.FromErr(err)
 		}
 	}
 
 	if d.HasChange("website") {
 		if err := resourceS3BucketWebsiteUpdate(client, d); err != nil {
-			return err
+			return diag.FromErr(err)
 		}
 	}
 
@@ -356,7 +359,7 @@ func resourceS3BucketUpdate(d *schema.ResourceData, meta interface{}) error {
 
 			if enabled || !d.IsNewResource() {
 				if err := resourceS3BucketVersioningUpdate(client, d); err != nil {
-					return err
+					return diag.FromErr(err)
 				}
 			}
 		}
@@ -364,30 +367,30 @@ func resourceS3BucketUpdate(d *schema.ResourceData, meta interface{}) error {
 
 	if d.HasChange("acl") {
 		if err := resourceS3BucketAclUpdate(client, d); err != nil {
-			return err
+			return diag.FromErr(err)
 		}
 	}
 
 	if d.HasChange("logging") {
 		if err := resourceS3BucketLoggingUpdate(client, d); err != nil {
-			return err
+			return diag.FromErr(err)
 		}
 	}
 
 	if d.HasChange("lifecycle_rule") {
 		if err := resourceAwsS3BucketLifecycleUpdate(client, d); err != nil {
-			return err
+			return diag.FromErr(err)
 		}
 	}
 
-	return resourceS3BucketRead(d, meta)
+	return resourceS3BucketRead(ctx, d, meta)
 }
 
-func resourceS3BucketRead(d *schema.ResourceData, meta interface{}) error {
+func resourceS3BucketRead(_ context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*cfg.Config)
 	client, err := config.S3Client(config.GetRegion(d))
 	if err != nil {
-		return fmt.Errorf("error creating OpenTelekomCloud S3 client: %s", err)
+		return fmterr.Errorf("error creating OpenTelekomCloud S3 client: %s", err)
 	}
 
 	_, err = retryOnAwsCode("NoSuchBucket", func() (interface{}, error) {
@@ -403,7 +406,7 @@ func resourceS3BucketRead(d *schema.ResourceData, meta interface{}) error {
 		} else {
 			// some of the AWS SDK's errors can be empty strings, so let's add
 			// some additional context.
-			return fmt.Errorf("error reading S3 bucket %s: %s", d.Id(), err)
+			return fmterr.Errorf("error reading S3 bucket %s: %s", d.Id(), err)
 		}
 	}
 
@@ -425,17 +428,17 @@ func resourceS3BucketRead(d *schema.ResourceData, meta interface{}) error {
 		log.Printf("[DEBUG] S3 bucket: %s, read policy: %v", d.Id(), pol)
 		if err != nil {
 			if err := d.Set("policy", ""); err != nil {
-				return err
+				return diag.FromErr(err)
 			}
 		} else {
 			if v := pol.(*s3.GetBucketPolicyOutput).Policy; v == nil {
 				if err := d.Set("policy", ""); err != nil {
-					return err
+					return diag.FromErr(err)
 				}
 			} else {
 				policy, err := common.NormalizeJsonString(*v)
 				if err != nil {
-					return fmt.Errorf("policy contains an invalid JSON: %w", err)
+					return fmterr.Errorf("policy contains an invalid JSON: %w", err)
 				}
 				d.Set("policy", policy)
 			}
@@ -452,7 +455,7 @@ func resourceS3BucketRead(d *schema.ResourceData, meta interface{}) error {
 	if err != nil {
 		// An S3 Bucket might not have CORS configuration set.
 		if awsErr, ok := err.(awserr.Error); ok && awsErr.Code() != "NoSuchCORSConfiguration" {
-			return err
+			return diag.FromErr(err)
 		}
 		log.Printf("[WARN] S3 bucket: %s, no CORS configuration could be found.", d.Id())
 	}
@@ -474,7 +477,7 @@ func resourceS3BucketRead(d *schema.ResourceData, meta interface{}) error {
 			rules = append(rules, rule)
 		}
 		if err := d.Set("cors_rule", rules); err != nil {
-			return err
+			return diag.FromErr(err)
 		}
 	}
 
@@ -523,7 +526,7 @@ func resourceS3BucketRead(d *schema.ResourceData, meta interface{}) error {
 		if v := ws.RoutingRules; v != nil {
 			rr, err := normalizeRoutingRules(v)
 			if err != nil {
-				return fmt.Errorf("error while marshaling routing rules: %s", err)
+				return fmterr.Errorf("error while marshaling routing rules: %s", err)
 			}
 			w["routing_rules"] = rr
 		}
@@ -531,7 +534,7 @@ func resourceS3BucketRead(d *schema.ResourceData, meta interface{}) error {
 		websites = append(websites, w)
 	}
 	if err := d.Set("website", websites); err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 
 	versioningResponse, err := retryOnAwsCode("NoSuchBucket", func() (interface{}, error) {
@@ -541,7 +544,7 @@ func resourceS3BucketRead(d *schema.ResourceData, meta interface{}) error {
 	})
 	versioning := versioningResponse.(*s3.GetBucketVersioningOutput)
 	if err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 	log.Printf("[DEBUG] S3 Bucket: %s, versioning: %v", d.Id(), versioning)
 	if versioning != nil {
@@ -560,7 +563,7 @@ func resourceS3BucketRead(d *schema.ResourceData, meta interface{}) error {
 		}
 		vcl = append(vcl, vc)
 		if err := d.Set("versioning", vcl); err != nil {
-			return err
+			return diag.FromErr(err)
 		}
 	}
 
@@ -572,7 +575,7 @@ func resourceS3BucketRead(d *schema.ResourceData, meta interface{}) error {
 	})
 	logging := loggingResponse.(*s3.GetBucketLoggingOutput)
 	if err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 
 	log.Printf("[DEBUG] S3 Bucket: %s, logging: %v", d.Id(), logging)
@@ -588,7 +591,7 @@ func resourceS3BucketRead(d *schema.ResourceData, meta interface{}) error {
 		lcl = append(lcl, lc)
 	}
 	if err := d.Set("logging", lcl); err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 
 	// Read the lifecycle configuration
@@ -601,7 +604,7 @@ func resourceS3BucketRead(d *schema.ResourceData, meta interface{}) error {
 	lifecycle := lifecycleResponse.(*s3.GetBucketLifecycleConfigurationOutput)
 	if err != nil {
 		if awsError, ok := err.(awserr.RequestFailure); ok && awsError.StatusCode() != 404 {
-			return err
+			return diag.FromErr(err)
 		}
 	}
 	log.Printf("[DEBUG] S3 Bucket: %s, lifecycle: %v", d.Id(), lifecycle)
@@ -710,7 +713,7 @@ func resourceS3BucketRead(d *schema.ResourceData, meta interface{}) error {
 		}
 
 		if err := d.Set("lifecycle_rule", rules); err != nil {
-			return err
+			return diag.FromErr(err)
 		}
 	}
 
@@ -725,14 +728,14 @@ func resourceS3BucketRead(d *schema.ResourceData, meta interface{}) error {
 	})
 	location := locationResponse.(*s3.GetBucketLocationOutput)
 	if err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 	var region string
 	if location.LocationConstraint != nil {
 		region = *location.LocationConstraint
 	}
 	if err := d.Set("region", region); err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 
 	// Add the hosted zone ID for this bucket's region as an attribute
@@ -747,24 +750,24 @@ func resourceS3BucketRead(d *schema.ResourceData, meta interface{}) error {
 	// Add website_endpoint as an attribute
 	websiteEndpoint, err := websiteEndpoint(client, d)
 	if err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 	if websiteEndpoint != nil {
 		if err := d.Set("website_endpoint", websiteEndpoint.Endpoint); err != nil {
-			return err
+			return diag.FromErr(err)
 		}
 		if err := d.Set("website_domain", websiteEndpoint.Domain); err != nil {
-			return err
+			return diag.FromErr(err)
 		}
 	}
 
 	tagSet, err := getTagSetS3(client, d.Id())
 	if err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 
 	if err := d.Set("tags", tagsToMapS3(tagSet)); err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 
 	// UNUSED?
@@ -773,11 +776,11 @@ func resourceS3BucketRead(d *schema.ResourceData, meta interface{}) error {
 	return nil
 }
 
-func resourceS3BucketDelete(d *schema.ResourceData, meta interface{}) error {
+func resourceS3BucketDelete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*cfg.Config)
 	s3conn, err := config.S3Client(config.GetRegion(d))
 	if err != nil {
-		return fmt.Errorf("error creating OpenTelekomCloud S3 client: %s", err)
+		return fmterr.Errorf("error creating OpenTelekomCloud S3 client: %s", err)
 	}
 
 	log.Printf("[DEBUG] S3 Delete Bucket: %s", d.Id())
@@ -799,7 +802,7 @@ func resourceS3BucketDelete(d *schema.ResourceData, meta interface{}) error {
 				)
 
 				if err != nil {
-					return fmt.Errorf("error S3 Bucket list Object Versions err: %s", err)
+					return fmterr.Errorf("error S3 Bucket list Object Versions err: %s", err)
 				}
 
 				objectsToDelete := make([]*s3.ObjectIdentifier, 0)
@@ -833,14 +836,14 @@ func resourceS3BucketDelete(d *schema.ResourceData, meta interface{}) error {
 				_, err = s3conn.DeleteObjects(params)
 
 				if err != nil {
-					return fmt.Errorf("error S3 Bucket force_destroy error deleting: %s", err)
+					return fmterr.Errorf("error S3 Bucket force_destroy error deleting: %s", err)
 				}
 
 				// this line recourses until all objects are deleted or an error is returned
-				return resourceS3BucketDelete(d, meta)
+				return resourceS3BucketDelete(ctx, d, meta)
 			}
 		}
-		return fmt.Errorf("error deleting S3 Bucket: %s %q", err, d.Get("bucket").(string))
+		return fmterr.Errorf("error deleting S3 Bucket: %s %q", err, d.Get("bucket").(string))
 	}
 	return nil
 }
@@ -1346,4 +1349,36 @@ func transitionHash(v interface{}) int {
 
 type Website struct {
 	Endpoint, Domain string
+}
+
+func resourceS3BucketImportState(_ context.Context, d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
+
+	results := make([]*schema.ResourceData, 1, 1)
+	results[0] = d
+
+	config := meta.(*cfg.Config)
+	conn, err := config.S3Client(config.GetRegion(d))
+	if err != nil {
+		return nil, fmt.Errorf("error creating OpenTelekomCloud s3 client: %s", err)
+	}
+	pol, err := conn.GetBucketPolicy(&s3.GetBucketPolicyInput{
+		Bucket: aws.String(d.Id()),
+	})
+	if err != nil {
+		if awsErr, ok := err.(awserr.Error); ok && awsErr.Code() == "NoSuchBucketPolicy" {
+			// Bucket without policy
+			return results, nil
+		}
+		return nil, fmt.Errorf("error importing AWS S3 bucket policy: %w", err)
+	}
+
+	policy := ResourceS3BucketPolicy()
+	pData := policy.Data(nil)
+	pData.SetId(d.Id())
+	pData.SetType("opentelekomcloud_s3_bucket_policy")
+	pData.Set("bucket", d.Id())
+	pData.Set("policy", pol)
+	results = append(results, pData)
+
+	return results, nil
 }

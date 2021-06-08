@@ -1,18 +1,20 @@
 package dcs
 
 import (
-	"fmt"
+	"context"
 	"log"
 
-	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/dcs/v1/availablezones"
 
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common/cfg"
+	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common/fmterr"
 )
 
 func DataSourceDcsAZV1() *schema.Resource {
 	return &schema.Resource{
-		Read: dataSourceDcsAZV1Read,
+		ReadContext: dataSourceDcsAZV1Read,
 
 		Schema: map[string]*schema.Schema{
 			"name": {
@@ -34,16 +36,16 @@ func DataSourceDcsAZV1() *schema.Resource {
 	}
 }
 
-func dataSourceDcsAZV1Read(d *schema.ResourceData, meta interface{}) error {
+func dataSourceDcsAZV1Read(_ context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*cfg.Config)
 	DcsV1Client, err := config.DcsV1Client(config.GetRegion(d))
 	if err != nil {
-		return fmt.Errorf("Error creating dcs key client: %s", err)
+		return fmterr.Errorf("error creating dcs key client: %s", err)
 	}
 
 	v, err := availablezones.Get(DcsV1Client).Extract()
 	if err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 
 	log.Printf("[DEBUG] Dcs az : %+v", v)
@@ -69,7 +71,7 @@ func dataSourceDcsAZV1Read(d *schema.ResourceData, meta interface{}) error {
 	}
 
 	if len(filteredAZs) < 1 {
-		return fmt.Errorf("Not found any available zones")
+		return fmterr.Errorf("Not found any available zones")
 	}
 
 	az := filteredAZs[0]

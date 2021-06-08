@@ -4,8 +4,8 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
-	"github.com/hashicorp/terraform-plugin-sdk/terraform"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/cce/v3/nodes"
 
@@ -21,9 +21,9 @@ func TestAccCCENodesV3_basic(t *testing.T) {
 	resName := "opentelekomcloud_cce_node_v3.node_1"
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:     func() { testAccCCEKeyPairPreCheck(t) },
-		Providers:    common.TestAccProviders,
-		CheckDestroy: testAccCheckCCENodeV3Destroy,
+		PreCheck:          func() { testAccCCEKeyPairPreCheck(t) },
+		ProviderFactories: common.TestAccProviderFactories,
+		CheckDestroy:      testAccCheckCCENodeV3Destroy,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccCCENodeV3_basic,
@@ -49,9 +49,9 @@ func TestAccCCENodesV3_timeout(t *testing.T) {
 	var node nodes.Nodes
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:     func() { testAccCCEKeyPairPreCheck(t) },
-		Providers:    common.TestAccProviders,
-		CheckDestroy: testAccCheckCCENodeV3Destroy,
+		PreCheck:          func() { testAccCCEKeyPairPreCheck(t) },
+		ProviderFactories: common.TestAccProviderFactories,
+		CheckDestroy:      testAccCheckCCENodeV3Destroy,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccCCENodeV3_timeout,
@@ -67,9 +67,9 @@ func TestAccCCENodesV3_os(t *testing.T) {
 	var node2 nodes.Nodes
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:     func() { testAccCCEKeyPairPreCheck(t) },
-		Providers:    common.TestAccProviders,
-		CheckDestroy: testAccCheckCCENodeV3Destroy,
+		PreCheck:          func() { testAccCCEKeyPairPreCheck(t) },
+		ProviderFactories: common.TestAccProviderFactories,
+		CheckDestroy:      testAccCheckCCENodeV3Destroy,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccCCENodeV3_os,
@@ -89,9 +89,9 @@ func TestAccCCENodesV3_bandWidthResize(t *testing.T) {
 	var node nodes.Nodes
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:     func() { testAccCCEKeyPairPreCheck(t) },
-		Providers:    common.TestAccProviders,
-		CheckDestroy: testAccCheckCCENodeV3Destroy,
+		PreCheck:          func() { testAccCCEKeyPairPreCheck(t) },
+		ProviderFactories: common.TestAccProviderFactories,
+		CheckDestroy:      testAccCheckCCENodeV3Destroy,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccCCENodeV3_ip,
@@ -119,9 +119,9 @@ func TestAccCCENodesV3_eipIds(t *testing.T) {
 	var node nodes.Nodes
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:     func() { testAccCCEKeyPairPreCheck(t) },
-		Providers:    common.TestAccProviders,
-		CheckDestroy: testAccCheckCCENodeV3Destroy,
+		PreCheck:          func() { testAccCCEKeyPairPreCheck(t) },
+		ProviderFactories: common.TestAccProviderFactories,
+		CheckDestroy:      testAccCheckCCENodeV3Destroy,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccCCENodeV3_ipIds,
@@ -143,9 +143,9 @@ func TestAccCCENodesV3_ipSetNull(t *testing.T) {
 	var node nodes.Nodes
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:     func() { testAccCCEKeyPairPreCheck(t) },
-		Providers:    common.TestAccProviders,
-		CheckDestroy: testAccCheckCCENodeV3Destroy,
+		PreCheck:          func() { testAccCCEKeyPairPreCheck(t) },
+		ProviderFactories: common.TestAccProviderFactories,
+		CheckDestroy:      testAccCheckCCENodeV3Destroy,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccCCENodeV3_ip,
@@ -170,9 +170,9 @@ func TestAccCCENodesV3_ipCreate(t *testing.T) {
 	var node nodes.Nodes
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:     func() { testAccCCEKeyPairPreCheck(t) },
-		Providers:    common.TestAccProviders,
-		CheckDestroy: testAccCheckCCENodeV3Destroy,
+		PreCheck:          func() { testAccCCEKeyPairPreCheck(t) },
+		ProviderFactories: common.TestAccProviderFactories,
+		CheckDestroy:      testAccCheckCCENodeV3Destroy,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccCCENodeV3_ipUnset,
@@ -194,9 +194,9 @@ func TestAccCCENodesV3_ipWithExtendedParameters(t *testing.T) {
 	var node nodes.Nodes
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:     func() { testAccCCEKeyPairPreCheck(t) },
-		Providers:    common.TestAccProviders,
-		CheckDestroy: testAccCheckCCENodeV3Destroy,
+		PreCheck:          func() { testAccCCEKeyPairPreCheck(t) },
+		ProviderFactories: common.TestAccProviderFactories,
+		CheckDestroy:      testAccCheckCCENodeV3Destroy,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccCCENodeV3_ipParams,
@@ -215,9 +215,9 @@ func TestAccCCENodesV3_ipNulls(t *testing.T) {
 	var node nodes.Nodes
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:     func() { testAccCCEKeyPairPreCheck(t) },
-		Providers:    common.TestAccProviders,
-		CheckDestroy: testAccCheckCCENodeV3Destroy,
+		PreCheck:          func() { testAccCCEKeyPairPreCheck(t) },
+		ProviderFactories: common.TestAccProviderFactories,
+		CheckDestroy:      testAccCheckCCENodeV3Destroy,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccCCENodeV3_ipNull,

@@ -4,11 +4,11 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
-	"github.com/hashicorp/terraform-plugin-sdk/terraform"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/dms/v1/instances"
 
-	"github.com/hashicorp/terraform-plugin-sdk/helper/acctest"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/acctest"
 
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/acceptance/common"
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/acceptance/env"
@@ -21,9 +21,9 @@ func TestAccDmsInstancesV1_basic(t *testing.T) {
 	var instanceUpdate = fmt.Sprintf("dms_instance_update_%s", acctest.RandString(5))
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheckDms(t) },
-		Providers:    common.TestAccProviders,
-		CheckDestroy: testAccCheckDmsV1InstanceDestroy,
+		PreCheck:          func() { testAccPreCheckDms(t) },
+		ProviderFactories: common.TestAccProviderFactories,
+		CheckDestroy:      testAccCheckDmsV1InstanceDestroy,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccDmsV1Instance_basic(instanceName),
@@ -54,9 +54,9 @@ func TestAccDmsInstancesV1_KafkaInstance(t *testing.T) {
 	var instanceName = fmt.Sprintf("dms_instance_%s", acctest.RandString(5))
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheckDms(t) },
-		Providers:    common.TestAccProviders,
-		CheckDestroy: testAccCheckDmsV1InstanceDestroy,
+		PreCheck:          func() { testAccPreCheckDms(t) },
+		ProviderFactories: common.TestAccProviderFactories,
+		CheckDestroy:      testAccCheckDmsV1InstanceDestroy,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccDmsV1Instance_KafkaInstance(instanceName),
@@ -74,7 +74,7 @@ func testAccCheckDmsV1InstanceDestroy(s *terraform.State) error {
 	config := common.TestAccProvider.Meta().(*cfg.Config)
 	dmsClient, err := config.DmsV1Client(env.OS_REGION_NAME)
 	if err != nil {
-		return fmt.Errorf("Error creating OpenTelekomCloud instance client: %s", err)
+		return fmt.Errorf("error creating OpenTelekomCloud instance client: %s", err)
 	}
 
 	for _, rs := range s.RootModule().Resources {
@@ -104,12 +104,12 @@ func testAccCheckDmsV1InstanceExists(n string, instance instances.Instance) reso
 		config := common.TestAccProvider.Meta().(*cfg.Config)
 		dmsClient, err := config.DmsV1Client(env.OS_REGION_NAME)
 		if err != nil {
-			return fmt.Errorf("Error creating OpenTelekomCloud instance client: %s", err)
+			return fmt.Errorf("error creating OpenTelekomCloud instance client: %s", err)
 		}
 
 		v, err := instances.Get(dmsClient, rs.Primary.ID).Extract()
 		if err != nil {
-			return fmt.Errorf("Error getting OpenTelekomCloud instance: %s, err: %s", rs.Primary.ID, err)
+			return fmt.Errorf("error getting OpenTelekomCloud instance: %s, err: %s", rs.Primary.ID, err)
 		}
 
 		if v.InstanceID != rs.Primary.ID {

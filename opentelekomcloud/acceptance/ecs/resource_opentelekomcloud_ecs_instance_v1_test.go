@@ -5,8 +5,8 @@ import (
 	"regexp"
 	"testing"
 
-	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
-	"github.com/hashicorp/terraform-plugin-sdk/terraform"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/ecs/v1/cloudservers"
 
@@ -20,9 +20,9 @@ func TestAccEcsV1Instance_basic(t *testing.T) {
 	resourceName := "opentelekomcloud_ecs_instance_v1.instance_1"
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:     func() { common.TestAccPreCheck(t) },
-		Providers:    common.TestAccProviders,
-		CheckDestroy: testAccCheckEcsV1InstanceDestroy,
+		PreCheck:          func() { common.TestAccPreCheck(t) },
+		ProviderFactories: common.TestAccProviderFactories,
+		CheckDestroy:      testAccCheckEcsV1InstanceDestroy,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccEcsV1Instance_basic,
@@ -50,8 +50,8 @@ func TestAccEcsV1Instance_basic(t *testing.T) {
 
 func TestAccEcsV1Instance_diskTypeValidation(t *testing.T) {
 	resource.Test(t, resource.TestCase{
-		PreCheck:  func() { common.TestAccPreCheck(t) },
-		Providers: common.TestAccProviders,
+		PreCheck:          func() { common.TestAccPreCheck(t) },
+		ProviderFactories: common.TestAccProviderFactories,
 		Steps: []resource.TestStep{
 			{
 				Config:      testAccEcsV1Instance_invalidTypeForAZ,
@@ -74,8 +74,8 @@ func TestAccEcsV1Instance_diskTypeValidation(t *testing.T) {
 
 func TestAccEcsV1Instance_VPCValidation(t *testing.T) {
 	resource.Test(t, resource.TestCase{
-		PreCheck:  func() { common.TestAccPreCheck(t) },
-		Providers: common.TestAccProviders,
+		PreCheck:          func() { common.TestAccPreCheck(t) },
+		ProviderFactories: common.TestAccProviderFactories,
 		Steps: []resource.TestStep{
 			{
 				Config:      testAccEcsV1Instance_invalidVPC,

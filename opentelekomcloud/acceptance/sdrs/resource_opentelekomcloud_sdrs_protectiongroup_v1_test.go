@@ -4,8 +4,8 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
-	"github.com/hashicorp/terraform-plugin-sdk/terraform"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/sdrs/v1/protectiongroups"
 
@@ -18,9 +18,9 @@ func TestAccSdrsProtectiongroupV1_basic(t *testing.T) {
 	var group protectiongroups.Group
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:     func() { common.TestAccPreCheck(t) },
-		Providers:    common.TestAccProviders,
-		CheckDestroy: testAccCheckSdrsProtectiongroupV1Destroy,
+		PreCheck:          func() { common.TestAccPreCheck(t) },
+		ProviderFactories: common.TestAccProviderFactories,
+		CheckDestroy:      testAccCheckSdrsProtectiongroupV1Destroy,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccSdrsProtectiongroupV1_basic,
@@ -46,7 +46,7 @@ func testAccCheckSdrsProtectiongroupV1Destroy(s *terraform.State) error {
 	config := common.TestAccProvider.Meta().(*cfg.Config)
 	sdrsClient, err := config.SdrsV1Client(env.OS_REGION_NAME)
 	if err != nil {
-		return fmt.Errorf("Error creating OpenTelekomCloud SDRS client: %s", err)
+		return fmt.Errorf("error creating OpenTelekomCloud SDRS client: %s", err)
 	}
 
 	for _, rs := range s.RootModule().Resources {
@@ -77,7 +77,7 @@ func testAccCheckSdrsProtectiongroupV1Exists(n string, group *protectiongroups.G
 		config := common.TestAccProvider.Meta().(*cfg.Config)
 		sdrsClient, err := config.SdrsV1Client(env.OS_REGION_NAME)
 		if err != nil {
-			return fmt.Errorf("Error creating OpenTelekomCloud SDRS client: %s", err)
+			return fmt.Errorf("error creating OpenTelekomCloud SDRS client: %s", err)
 		}
 
 		found, err := protectiongroups.Get(sdrsClient, rs.Primary.ID).Extract()

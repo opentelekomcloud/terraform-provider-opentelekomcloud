@@ -4,8 +4,8 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
-	"github.com/hashicorp/terraform-plugin-sdk/terraform"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/networking/v1/flowlogs"
 
@@ -23,9 +23,9 @@ func TestAccVpcFlowLogV1_basic(t *testing.T) {
 	var flowlog flowlogs.FlowLog
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:     func() { common.TestAccPreCheck(t) },
-		Providers:    common.TestAccProviders,
-		CheckDestroy: testAccCheckVpcFlowLogV1Destroy,
+		PreCheck:          func() { common.TestAccPreCheck(t) },
+		ProviderFactories: common.TestAccProviderFactories,
+		CheckDestroy:      testAccCheckVpcFlowLogV1Destroy,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccOTCVpcFlowLogV1_basic,
@@ -54,7 +54,7 @@ func testAccCheckVpcFlowLogV1Destroy(s *terraform.State) error {
 	config := common.TestAccProvider.Meta().(*cfg.Config)
 	vpcClient, err := config.NetworkingV1Client(env.OS_REGION_NAME)
 	if err != nil {
-		return fmt.Errorf("Error creating OpenTelekomCloud vpc client: %s", err)
+		return fmt.Errorf("error creating OpenTelekomCloud vpc client: %s", err)
 	}
 
 	for _, rs := range s.RootModule().Resources {
@@ -85,7 +85,7 @@ func testAccCheckVpcFlowLogV1Exists(n string, flowlog *flowlogs.FlowLog) resourc
 		config := common.TestAccProvider.Meta().(*cfg.Config)
 		vpcClient, err := config.NetworkingV1Client(env.OS_REGION_NAME)
 		if err != nil {
-			return fmt.Errorf("Error creating OpenTelekomCloud Vpc client: %s", err)
+			return fmt.Errorf("error creating OpenTelekomCloud Vpc client: %s", err)
 		}
 
 		found, err := flowlogs.Get(vpcClient, rs.Primary.ID).Extract()

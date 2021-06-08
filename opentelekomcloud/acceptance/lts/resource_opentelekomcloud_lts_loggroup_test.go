@@ -4,9 +4,9 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
-	"github.com/hashicorp/terraform-plugin-sdk/terraform"
-	"github.com/opentelekomcloud/gophertelekomcloud"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
+	golangsdk "github.com/opentelekomcloud/gophertelekomcloud"
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/lts/v2/loggroups"
 
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/acceptance/common"
@@ -17,9 +17,9 @@ import (
 func TestAccLogTankGroupV2_basic(t *testing.T) {
 	var group loggroups.LogGroup
 	resource.Test(t, resource.TestCase{
-		PreCheck:     func() { common.TestAccPreCheck(t) },
-		Providers:    common.TestAccProviders,
-		CheckDestroy: testAccCheckLogTankGroupV2Destroy,
+		PreCheck:          func() { common.TestAccPreCheck(t) },
+		ProviderFactories: common.TestAccProviderFactories,
+		CheckDestroy:      testAccCheckLogTankGroupV2Destroy,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccLogTankGroupV2_basic,
@@ -38,7 +38,7 @@ func testAccCheckLogTankGroupV2Destroy(s *terraform.State) error {
 	config := common.TestAccProvider.Meta().(*cfg.Config)
 	ltsclient, err := config.LtsV2Client(env.OS_REGION_NAME)
 	if err != nil {
-		return fmt.Errorf("Error creating OpenTelekomCloud LTS client: %s", err)
+		return fmt.Errorf("error creating OpenTelekomCloud LTS client: %s", err)
 	}
 
 	for _, rs := range s.RootModule().Resources {
@@ -71,7 +71,7 @@ func testAccCheckLogTankGroupV2Exists(n string, group *loggroups.LogGroup) resou
 		config := common.TestAccProvider.Meta().(*cfg.Config)
 		ltsclient, err := config.LtsV2Client(env.OS_REGION_NAME)
 		if err != nil {
-			return fmt.Errorf("Error creating OpenTelekomCloud LTS client: %s", err)
+			return fmt.Errorf("error creating OpenTelekomCloud LTS client: %s", err)
 		}
 
 		var found *loggroups.LogGroup

@@ -4,9 +4,9 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/hashicorp/terraform-plugin-sdk/helper/acctest"
-	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
-	"github.com/hashicorp/terraform-plugin-sdk/terraform"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/acctest"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 	"github.com/opentelekomcloud/gophertelekomcloud/acceptance/tools"
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/sfs_turbo/v1/shares"
 
@@ -21,9 +21,9 @@ func TestAccSFSTurboShareV1_basic(t *testing.T) {
 	var turbo shares.Turbo
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:     func() { common.TestAccPreCheck(t) },
-		Providers:    common.TestAccProviders,
-		CheckDestroy: testAccCheckSFSTurboShareV1Destroy,
+		PreCheck:          func() { common.TestAccPreCheck(t) },
+		ProviderFactories: common.TestAccProviderFactories,
+		CheckDestroy:      testAccCheckSFSTurboShareV1Destroy,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccSFSTurboShareV1_basic(shareName),
@@ -52,9 +52,9 @@ func TestAccSFSTurboShareV1_withKMS(t *testing.T) {
 	var turbo shares.Turbo
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:     func() { common.TestAccPreCheck(t) },
-		Providers:    common.TestAccProviders,
-		CheckDestroy: testAccCheckSFSTurboShareV1Destroy,
+		PreCheck:          func() { common.TestAccPreCheck(t) },
+		ProviderFactories: common.TestAccProviderFactories,
+		CheckDestroy:      testAccCheckSFSTurboShareV1Destroy,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccSFSTurboV1_crypt(postfix),

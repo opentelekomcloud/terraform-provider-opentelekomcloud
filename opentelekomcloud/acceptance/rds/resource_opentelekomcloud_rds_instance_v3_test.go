@@ -8,9 +8,9 @@ import (
 
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/rds/v3/instances"
 
-	"github.com/hashicorp/terraform-plugin-sdk/helper/acctest"
-	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
-	"github.com/hashicorp/terraform-plugin-sdk/terraform"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/acctest"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/acceptance/common"
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/acceptance/env"
@@ -25,9 +25,9 @@ func TestAccRdsInstanceV3Basic(t *testing.T) {
 	var rdsInstance instances.RdsInstanceResponse
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:     func() { common.TestAccPreCheck(t) },
-		Providers:    common.TestAccProviders,
-		CheckDestroy: testAccCheckRdsInstanceV3Destroy,
+		PreCheck:          func() { common.TestAccPreCheck(t) },
+		ProviderFactories: common.TestAccProviderFactories,
+		CheckDestroy:      testAccCheckRdsInstanceV3Destroy,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccRdsInstanceV3Basic(postfix),
@@ -60,9 +60,9 @@ func TestAccRdsInstanceV3ElasticIP(t *testing.T) {
 	var rdsInstance instances.RdsInstanceResponse
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:     func() { common.TestAccPreCheck(t) },
-		Providers:    common.TestAccProviders,
-		CheckDestroy: testAccCheckRdsInstanceV3Destroy,
+		PreCheck:          func() { common.TestAccPreCheck(t) },
+		ProviderFactories: common.TestAccProviderFactories,
+		CheckDestroy:      testAccCheckRdsInstanceV3Destroy,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccRdsInstanceV3ElasticIP(postfix),
@@ -94,9 +94,9 @@ func TestAccRdsInstanceV3HA(t *testing.T) {
 	}
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:     func() { common.TestAccPreCheck(t) },
-		Providers:    common.TestAccProviders,
-		CheckDestroy: testAccCheckRdsInstanceV3Destroy,
+		PreCheck:          func() { common.TestAccPreCheck(t) },
+		ProviderFactories: common.TestAccProviderFactories,
+		CheckDestroy:      testAccCheckRdsInstanceV3Destroy,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccRdsInstanceV3HA(postfix, availabilityZone2),
@@ -117,9 +117,9 @@ func TestAccRdsInstanceV3OptionalParams(t *testing.T) {
 	var rdsInstance instances.RdsInstanceResponse
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:     func() { common.TestAccPreCheck(t) },
-		Providers:    common.TestAccProviders,
-		CheckDestroy: testAccCheckRdsInstanceV3Destroy,
+		PreCheck:          func() { common.TestAccPreCheck(t) },
+		ProviderFactories: common.TestAccProviderFactories,
+		CheckDestroy:      testAccCheckRdsInstanceV3Destroy,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccRdsInstanceV3OptionalParams(postfix),
@@ -137,9 +137,9 @@ func TestAccRdsInstanceV3Backup(t *testing.T) {
 	var rdsInstance instances.RdsInstanceResponse
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:     func() { common.TestAccPreCheck(t) },
-		Providers:    common.TestAccProviders,
-		CheckDestroy: testAccCheckRdsInstanceV3Destroy,
+		PreCheck:          func() { common.TestAccPreCheck(t) },
+		ProviderFactories: common.TestAccProviderFactories,
+		CheckDestroy:      testAccCheckRdsInstanceV3Destroy,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccRdsInstanceV3Backup(postfix),
@@ -157,9 +157,9 @@ func TestAccRdsInstanceV3TemplateConfig(t *testing.T) {
 	var rdsInstance instances.RdsInstanceResponse
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:     func() { common.TestAccPreCheck(t) },
-		Providers:    common.TestAccProviders,
-		CheckDestroy: testAccCheckRdsInstanceV3Destroy,
+		PreCheck:          func() { common.TestAccPreCheck(t) },
+		ProviderFactories: common.TestAccProviderFactories,
+		CheckDestroy:      testAccCheckRdsInstanceV3Destroy,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccRdsInstanceV3ConfigTemplateBasic(postfix),
@@ -183,9 +183,9 @@ func TestAccRdsInstanceV3InvalidDBVersion(t *testing.T) {
 	postfix := acctest.RandString(3)
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:     func() { common.TestAccPreCheck(t) },
-		Providers:    common.TestAccProviders,
-		CheckDestroy: testAccCheckRdsInstanceV3Destroy,
+		PreCheck:          func() { common.TestAccPreCheck(t) },
+		ProviderFactories: common.TestAccProviderFactories,
+		CheckDestroy:      testAccCheckRdsInstanceV3Destroy,
 		Steps: []resource.TestStep{
 			{
 				Config:      testAccRdsInstanceV3InvalidDBVersion(postfix),

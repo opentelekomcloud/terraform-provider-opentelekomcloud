@@ -1,18 +1,20 @@
 package dms
 
 import (
-	"fmt"
+	"context"
 	"log"
 
-	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/dms/v1/availablezones"
 
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common/cfg"
+	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common/fmterr"
 )
 
 func DataSourceDmsAZV1() *schema.Resource {
 	return &schema.Resource{
-		Read: dataSourceDmsAZV1Read,
+		ReadContext: dataSourceDmsAZV1Read,
 
 		Schema: map[string]*schema.Schema{
 			"name": {
@@ -34,16 +36,16 @@ func DataSourceDmsAZV1() *schema.Resource {
 	}
 }
 
-func dataSourceDmsAZV1Read(d *schema.ResourceData, meta interface{}) error {
+func dataSourceDmsAZV1Read(_ context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*cfg.Config)
 	DmsV1Client, err := config.DmsV1Client(config.GetRegion(d))
 	if err != nil {
-		return fmt.Errorf("Error creating OpenTelekomCloud dms client: %s", err)
+		return fmterr.Errorf("error creating OpenTelekomCloud dms client: %s", err)
 	}
 
 	v, err := availablezones.Get(DmsV1Client).Extract()
 	if err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 
 	log.Printf("[DEBUG] Dms az : %+v", v)
@@ -73,7 +75,7 @@ func dataSourceDmsAZV1Read(d *schema.ResourceData, meta interface{}) error {
 	}
 
 	if len(filteredAZs) < 1 {
-		return fmt.Errorf("Not found any available zones")
+		return fmterr.Errorf("Not found any available zones")
 	}
 
 	az := filteredAZs[0]

@@ -2,6 +2,7 @@ package s3
 
 import (
 	"bytes"
+	"context"
 	"fmt"
 	"io"
 	"log"
@@ -9,23 +10,26 @@ import (
 	"sort"
 	"strings"
 
-	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/mitchellh/go-homedir"
 
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/awserr"
+
 	// "github.com/aws/aws-sdk-go/service/kms"
 	"github.com/aws/aws-sdk-go/service/s3"
 
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common/cfg"
+	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common/fmterr"
 )
 
 func ResourceS3BucketObject() *schema.Resource {
 	return &schema.Resource{
-		Create: resourceS3BucketObjectPut,
-		Read:   resourceS3BucketObjectRead,
-		Update: resourceS3BucketObjectPut,
-		Delete: resourceS3BucketObjectDelete,
+		CreateContext: resourceS3BucketObjectPut,
+		ReadContext:   resourceS3BucketObjectRead,
+		UpdateContext: resourceS3BucketObjectPut,
+		DeleteContext: resourceS3BucketObjectDelete,
 
 		Schema: map[string]*schema.Schema{
 			"bucket": {
@@ -121,11 +125,11 @@ func ResourceS3BucketObject() *schema.Resource {
 	}
 }
 
-func resourceS3BucketObjectPut(d *schema.ResourceData, meta interface{}) error {
+func resourceS3BucketObjectPut(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*cfg.Config)
 	s3conn, err := config.S3Client(config.GetRegion(d))
 	if err != nil {
-		return fmt.Errorf("Error creating OpenTelekomCloud s3 client: %s", err)
+		return fmterr.Errorf("error creating OpenTelekomCloud s3 client: %s", err)
 	}
 
 	var body io.ReadSeeker
@@ -134,11 +138,11 @@ func resourceS3BucketObjectPut(d *schema.ResourceData, meta interface{}) error {
 		source := v.(string)
 		path, err := homedir.Expand(source)
 		if err != nil {
-			return fmt.Errorf("Error expanding homedir in source (%s): %s", source, err)
+			return fmterr.Errorf("error expanding homedir in source (%s): %s", source, err)
 		}
 		file, err := os.Open(path)
 		if err != nil {
-			return fmt.Errorf("Error opening S3 bucket object source (%s): %s", source, err)
+			return fmterr.Errorf("error opening S3 bucket object source (%s): %s", source, err)
 		}
 
 		body = file
@@ -146,7 +150,7 @@ func resourceS3BucketObjectPut(d *schema.ResourceData, meta interface{}) error {
 		content := v.(string)
 		body = bytes.NewReader([]byte(content))
 	} else {
-		return fmt.Errorf("Must specify \"source\" or \"content\" field")
+		return fmterr.Errorf("Must specify \"source\" or \"content\" field")
 	}
 
 	bucket := d.Get("bucket").(string)
@@ -193,7 +197,7 @@ func resourceS3BucketObjectPut(d *schema.ResourceData, meta interface{}) error {
 
 	resp, err := s3conn.PutObject(putInput)
 	if err != nil {
-		return fmt.Errorf("Error putting object in S3 bucket (%s): %s", bucket, err)
+		return fmterr.Errorf("error putting object in S3 bucket (%s): %s", bucket, err)
 	}
 
 	// See https://forums.aws.amazon.com/thread.jspa?threadID=44003
@@ -201,14 +205,14 @@ func resourceS3BucketObjectPut(d *schema.ResourceData, meta interface{}) error {
 
 	d.Set("version_id", resp.VersionId)
 	d.SetId(key)
-	return resourceS3BucketObjectRead(d, meta)
+	return resourceS3BucketObjectRead(ctx, d, meta)
 }
 
-func resourceS3BucketObjectRead(d *schema.ResourceData, meta interface{}) error {
+func resourceS3BucketObjectRead(_ context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*cfg.Config)
 	s3conn, err := config.S3Client(config.GetRegion(d))
 	if err != nil {
-		return fmt.Errorf("Error creating OpenTelekomCloud s3 client: %s", err)
+		return fmterr.Errorf("error creating OpenTelekomCloud s3 client: %s", err)
 	}
 
 	// restricted := false //meta.(*AWSClient).IsGovCloud() || meta.(*AWSClient).IsChinaCloud()
@@ -229,7 +233,7 @@ func resourceS3BucketObjectRead(d *schema.ResourceData, meta interface{}) error 
 			log.Printf("[WARN] Error Reading Object (%s), object not found (HTTP status 404)", key)
 			return nil
 		}
-		return err
+		return diag.FromErr(err)
 	}
 	log.Printf("[DEBUG] Reading S3 Bucket Object meta: %s", resp)
 
@@ -248,11 +252,11 @@ func resourceS3BucketObjectRead(d *schema.ResourceData, meta interface{}) error 
 	return nil
 }
 
-func resourceS3BucketObjectDelete(d *schema.ResourceData, meta interface{}) error {
+func resourceS3BucketObjectDelete(_ context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*cfg.Config)
 	s3conn, err := config.S3Client(config.GetRegion(d))
 	if err != nil {
-		return fmt.Errorf("Error creating OpenTelekomCloud s3 client: %s", err)
+		return fmterr.Errorf("error creating OpenTelekomCloud s3 client: %s", err)
 	}
 
 	bucket := d.Get("bucket").(string)
@@ -266,7 +270,7 @@ func resourceS3BucketObjectDelete(d *schema.ResourceData, meta interface{}) erro
 		}
 		out, err := s3conn.ListObjectVersions(&vInput)
 		if err != nil {
-			return fmt.Errorf("Failed listing S3 object versions: %s", err)
+			return fmterr.Errorf("Failed listing S3 object versions: %s", err)
 		}
 
 		for _, v := range out.Versions {
@@ -277,7 +281,7 @@ func resourceS3BucketObjectDelete(d *schema.ResourceData, meta interface{}) erro
 			}
 			_, err := s3conn.DeleteObject(&input)
 			if err != nil {
-				return fmt.Errorf("Error deleting S3 object version of %s:\n %s:\n %s",
+				return fmterr.Errorf("error deleting S3 object version of %s:\n %s:\n %s",
 					key, v, err)
 			}
 		}
@@ -289,7 +293,7 @@ func resourceS3BucketObjectDelete(d *schema.ResourceData, meta interface{}) erro
 		}
 		_, err := s3conn.DeleteObject(&input)
 		if err != nil {
-			return fmt.Errorf("Error deleting S3 bucket object: %s  Bucket: %q Object: %q", err, bucket, key)
+			return fmterr.Errorf("error deleting S3 bucket object: %s  Bucket: %q Object: %q", err, bucket, key)
 		}
 	}
 
