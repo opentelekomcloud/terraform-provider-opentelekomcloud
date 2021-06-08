@@ -111,7 +111,7 @@ func resourceDmsQueuesV1Create(ctx context.Context, d *schema.ResourceData, meta
 	return resourceDmsQueuesV1Read(ctx, d, meta)
 }
 
-func resourceDmsQueuesV1Read(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceDmsQueuesV1Read(_ context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*cfg.Config)
 
 	DmsV1Client, err := config.DmsV1Client(config.GetRegion(d))
@@ -140,7 +140,7 @@ func resourceDmsQueuesV1Read(ctx context.Context, d *schema.ResourceData, meta i
 	return nil
 }
 
-func resourceDmsQueuesV1Delete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceDmsQueuesV1Delete(_ context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*cfg.Config)
 	DmsV1Client, err := config.DmsV1Client(config.GetRegion(d))
 	if err != nil {

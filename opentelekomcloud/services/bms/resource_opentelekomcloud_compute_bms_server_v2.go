@@ -415,7 +415,7 @@ func resourceComputeBMSInstanceV2Create(ctx context.Context, d *schema.ResourceD
 	return resourceComputeBMSInstanceV2Read(ctx, d, meta)
 }
 
-func resourceComputeBMSInstanceV2Read(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceComputeBMSInstanceV2Read(_ context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*cfg.Config)
 	computeClient, err := config.ComputeV2Client(config.GetRegion(d))
 	if err != nil {

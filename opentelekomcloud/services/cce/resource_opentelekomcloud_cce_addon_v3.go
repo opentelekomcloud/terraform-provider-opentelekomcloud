@@ -130,7 +130,7 @@ func resourceCCEAddonV3Create(ctx context.Context, d *schema.ResourceData, meta 
 	return resourceCCEAddonV3Read(ctx, d, meta)
 }
 
-func resourceCCEAddonV3Read(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceCCEAddonV3Read(_ context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*cfg.Config)
 	client, err := config.CceV3AddonClient(config.GetRegion(d))
 	if err != nil {
@@ -256,7 +256,7 @@ func waitForCCEAddonDelete(client *golangsdk.ServiceClient, addonID, clusterID s
 	}
 }
 
-func resourceCCEAddonV3Import(ctx context.Context, d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
+func resourceCCEAddonV3Import(_ context.Context, d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
 	parts := strings.SplitN(d.Id(), "/", 2)
 	if len(parts) != 2 {
 		err := fmt.Errorf("invalid format specified for CCE Addon. Format must be <cluster id>/<addon id>")

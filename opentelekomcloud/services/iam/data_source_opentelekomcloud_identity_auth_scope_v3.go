@@ -103,7 +103,7 @@ func DataSourceIdentityAuthScopeV3() *schema.Resource {
 	}
 }
 
-func dataSourceIdentityAuthScopeV3Read(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func dataSourceIdentityAuthScopeV3Read(_ context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*cfg.Config)
 	identityClient, err := config.IdentityV3Client("")
 	if err != nil {

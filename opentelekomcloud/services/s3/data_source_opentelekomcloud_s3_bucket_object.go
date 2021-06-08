@@ -103,7 +103,7 @@ func DataSourceS3BucketObject() *schema.Resource {
 	}
 }
 
-func dataSourceS3BucketObjectRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func dataSourceS3BucketObjectRead(_ context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*cfg.Config)
 	conn, err := config.S3Client(config.GetRegion(d))
 	if err != nil {

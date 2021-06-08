@@ -438,7 +438,7 @@ func resourceAlarmRuleCreate(ctx context.Context, d *schema.ResourceData, meta i
 	return resourceAlarmRuleRead(ctx, d, meta)
 }
 
-func resourceAlarmRuleRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceAlarmRuleRead(_ context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*cfg.Config)
 	client, err := config.CesV1Client(config.GetRegion(d))
 	if err != nil {

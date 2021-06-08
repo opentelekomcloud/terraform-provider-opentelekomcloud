@@ -116,7 +116,7 @@ func resourceAntiDdosV1Create(ctx context.Context, d *schema.ResourceData, meta 
 	return resourceAntiDdosV1Read(ctx, d, meta)
 }
 
-func resourceAntiDdosV1Read(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceAntiDdosV1Read(_ context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*cfg.Config)
 	antiddosClient, err := config.AntiddosV1Client(config.GetRegion(d))
 	if err != nil {

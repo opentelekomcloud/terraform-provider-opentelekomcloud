@@ -59,7 +59,7 @@ func DataSourceRdsFlavorV3() *schema.Resource {
 	}
 }
 
-func dataSourceRdsFlavorV3Read(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func dataSourceRdsFlavorV3Read(_ context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*cfg.Config)
 
 	client, err := config.RdsV1Client(config.GetRegion(d))

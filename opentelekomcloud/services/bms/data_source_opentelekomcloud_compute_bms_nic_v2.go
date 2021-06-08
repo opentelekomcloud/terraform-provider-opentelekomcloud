@@ -63,7 +63,7 @@ func DataSourceBMSNicV2() *schema.Resource {
 	}
 }
 
-func dataSourceBMSNicV2Read(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func dataSourceBMSNicV2Read(_ context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*cfg.Config)
 	nicClient, err := config.ComputeV2Client(config.GetRegion(d))
 

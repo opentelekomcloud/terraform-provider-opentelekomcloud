@@ -168,7 +168,7 @@ func resourceCBRPolicyV3Create(ctx context.Context, d *schema.ResourceData, meta
 	return resourceCBRPolicyV3Read(ctx, d, meta)
 }
 
-func resourceCBRPolicyV3Read(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceCBRPolicyV3Read(_ context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*cfg.Config)
 	client, err := config.CbrV3Client(config.GetRegion(d))
 	if err != nil {
@@ -256,7 +256,7 @@ func resourceCBRPolicyV3Update(ctx context.Context, d *schema.ResourceData, meta
 	return resourceCBRPolicyV3Read(ctx, d, meta)
 }
 
-func resourceCBRPolicyV3Delete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceCBRPolicyV3Delete(_ context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*cfg.Config)
 	client, err := config.CbrV3Client(config.GetRegion(d))
 	if err != nil {

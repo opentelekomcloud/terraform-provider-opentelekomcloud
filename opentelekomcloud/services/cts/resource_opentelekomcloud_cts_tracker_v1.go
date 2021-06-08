@@ -121,7 +121,7 @@ func resourceCTSTrackerCreate(ctx context.Context, d *schema.ResourceData, meta 
 	return resourceCTSTrackerRead(ctx, d, meta)
 }
 
-func resourceCTSTrackerRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceCTSTrackerRead(_ context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*cfg.Config)
 	ctsClient, err := config.CtsV1Client(config.GetProjectName(d))
 	if err != nil {
@@ -200,7 +200,7 @@ func resourceCTSTrackerUpdate(ctx context.Context, d *schema.ResourceData, meta 
 	return resourceCTSTrackerRead(ctx, d, meta)
 }
 
-func resourceCTSTrackerDelete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceCTSTrackerDelete(_ context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*cfg.Config)
 	ctsClient, err := config.CtsV1Client(config.GetProjectName(d))
 	if err != nil {

@@ -64,7 +64,7 @@ func DataSourceVirtualPrivateCloudVpcV1() *schema.Resource {
 	}
 }
 
-func dataSourceVirtualPrivateCloudV1Read(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func dataSourceVirtualPrivateCloudV1Read(_ context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*cfg.Config)
 	vpcClient, err := config.NetworkingV1Client(config.GetRegion(d))
 	if err != nil {

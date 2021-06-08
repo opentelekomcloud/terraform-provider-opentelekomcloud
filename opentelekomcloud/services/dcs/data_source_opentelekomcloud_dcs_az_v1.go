@@ -36,7 +36,7 @@ func DataSourceDcsAZV1() *schema.Resource {
 	}
 }
 
-func dataSourceDcsAZV1Read(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func dataSourceDcsAZV1Read(_ context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*cfg.Config)
 	DcsV1Client, err := config.DcsV1Client(config.GetRegion(d))
 	if err != nil {

@@ -36,7 +36,7 @@ func DataSourceDmsAZV1() *schema.Resource {
 	}
 }
 
-func dataSourceDmsAZV1Read(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func dataSourceDmsAZV1Read(_ context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*cfg.Config)
 	DmsV1Client, err := config.DmsV1Client(config.GetRegion(d))
 	if err != nil {

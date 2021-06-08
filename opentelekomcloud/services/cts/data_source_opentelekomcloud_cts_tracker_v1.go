@@ -77,7 +77,7 @@ func DataSourceCTSTrackerV1() *schema.Resource {
 	}
 }
 
-func dataSourceCTSTrackerV1Read(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func dataSourceCTSTrackerV1Read(_ context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*cfg.Config)
 	ctsClient, err := config.CtsV1Client(config.GetProjectName(d))
 	if err != nil {

@@ -78,7 +78,7 @@ func resourceComputeFloatingIPV2Create(ctx context.Context, d *schema.ResourceDa
 	return resourceComputeFloatingIPV2Read(ctx, d, meta)
 }
 
-func resourceComputeFloatingIPV2Read(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceComputeFloatingIPV2Read(_ context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*cfg.Config)
 	computeClient, err := config.ComputeV2Client(config.GetRegion(d))
 	if err != nil {

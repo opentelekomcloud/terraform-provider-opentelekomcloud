@@ -143,7 +143,7 @@ func resourceComputeSecGroupV2Create(ctx context.Context, d *schema.ResourceData
 	return resourceComputeSecGroupV2Read(ctx, d, meta)
 }
 
-func resourceComputeSecGroupV2Read(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceComputeSecGroupV2Read(_ context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*cfg.Config)
 	computeClient, err := config.ComputeV2Client(config.GetRegion(d))
 	if err != nil {

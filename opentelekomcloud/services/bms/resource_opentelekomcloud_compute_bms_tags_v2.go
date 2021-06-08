@@ -85,7 +85,7 @@ func resourceBMSTagsV2Create(ctx context.Context, d *schema.ResourceData, meta i
 
 }
 
-func resourceBMSTagsV2Read(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceBMSTagsV2Read(_ context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*cfg.Config)
 	bmsClient, err := config.ComputeV2Client(config.GetRegion(d))
 	if err != nil {
@@ -109,7 +109,7 @@ func resourceBMSTagsV2Read(ctx context.Context, d *schema.ResourceData, meta int
 	return nil
 }
 
-func resourceBMSTagsV2Delete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceBMSTagsV2Delete(_ context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*cfg.Config)
 	bmsClient, err := config.ComputeV2Client(config.GetRegion(d))
 	if err != nil {

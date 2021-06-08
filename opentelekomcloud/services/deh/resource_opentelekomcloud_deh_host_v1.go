@@ -167,7 +167,7 @@ func resourceDeHHostV1Create(ctx context.Context, d *schema.ResourceData, meta i
 	return resourceDeHHostV1Read(ctx, d, meta)
 }
 
-func resourceDeHHostV1Read(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceDeHHostV1Read(_ context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 
 	config := meta.(*cfg.Config)
 	dehClient, err := config.DehV1Client(config.GetRegion(d))

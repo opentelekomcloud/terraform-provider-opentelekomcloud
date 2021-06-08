@@ -97,7 +97,7 @@ func resourceComputeKeypairV2Create(ctx context.Context, d *schema.ResourceData,
 	return resourceComputeKeypairV2Read(ctx, d, meta)
 }
 
-func resourceComputeKeypairV2Read(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceComputeKeypairV2Read(_ context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*cfg.Config)
 	client, err := config.ComputeV2Client(config.GetRegion(d))
 	if err != nil {
@@ -121,7 +121,7 @@ func resourceComputeKeypairV2Read(ctx context.Context, d *schema.ResourceData, m
 	return nil
 }
 
-func resourceComputeKeypairV2Delete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceComputeKeypairV2Delete(_ context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*cfg.Config)
 	client, err := config.ComputeV2Client(config.GetRegion(d))
 	if err != nil {
@@ -141,7 +141,7 @@ func resourceComputeKeypairV2Delete(ctx context.Context, d *schema.ResourceData,
 	return nil
 }
 
-func useSharedKeypair(ctx context.Context, d *schema.ResourceDiff, meta interface{}) error {
+func useSharedKeypair(_ context.Context, d *schema.ResourceDiff, meta interface{}) error {
 	if d.Id() != "" { // skip if not new resource
 		return nil
 	}

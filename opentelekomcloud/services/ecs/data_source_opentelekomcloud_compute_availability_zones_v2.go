@@ -42,7 +42,7 @@ func DataSourceComputeAvailabilityZonesV2() *schema.Resource {
 	}
 }
 
-func dataSourceComputeAvailabilityZonesV2Read(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func dataSourceComputeAvailabilityZonesV2Read(_ context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*cfg.Config)
 	region := config.GetRegion(d)
 	computeClient, err := config.ComputeV2Client(region)

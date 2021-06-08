@@ -41,7 +41,7 @@ func DataSourceBMSKeyPairV2() *schema.Resource {
 	}
 }
 
-func dataSourceBMSKeyPairV2Read(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func dataSourceBMSKeyPairV2Read(_ context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*cfg.Config)
 	bmsClient, err := config.ComputeV2Client(config.GetRegion(d))
 	if err != nil {

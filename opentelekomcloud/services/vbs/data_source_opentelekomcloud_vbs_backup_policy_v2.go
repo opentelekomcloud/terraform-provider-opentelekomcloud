@@ -94,7 +94,7 @@ func DataSourceVBSBackupPolicyV2() *schema.Resource {
 	}
 }
 
-func dataSourceVBSPolicyV2Read(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func dataSourceVBSPolicyV2Read(_ context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*cfg.Config)
 	vbsClient, err := config.VbsV2Client(config.GetRegion(d))
 

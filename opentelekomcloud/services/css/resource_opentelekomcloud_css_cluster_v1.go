@@ -263,7 +263,7 @@ func resourceCssClusterV1Create(ctx context.Context, d *schema.ResourceData, met
 	return resourceCssClusterV1Read(ctx, d, meta)
 }
 
-func resourceCssClusterV1Read(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceCssClusterV1Read(_ context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*cfg.Config)
 	client, err := config.CssV1Client(config.GetRegion(d))
 	if err != nil {
@@ -393,7 +393,7 @@ func resourceCssClusterV1StateRefresh(client *golangsdk.ServiceClient, id string
 	}
 }
 
-func checkCssClusterFlavorRestrictions(ctx context.Context, d *schema.ResourceDiff, meta interface{}) error {
+func checkCssClusterFlavorRestrictions(_ context.Context, d *schema.ResourceDiff, meta interface{}) error {
 	config := meta.(*cfg.Config)
 	client, err := config.CssV1Client(config.GetRegion(d))
 	if err != nil {

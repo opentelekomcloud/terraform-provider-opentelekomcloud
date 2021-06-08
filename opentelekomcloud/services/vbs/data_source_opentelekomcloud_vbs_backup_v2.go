@@ -80,7 +80,7 @@ func DataSourceVBSBackupV2() *schema.Resource {
 	}
 }
 
-func dataSourceVBSBackupV2Read(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func dataSourceVBSBackupV2Read(_ context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*cfg.Config)
 	vbsClient, err := config.VbsV2Client(config.GetRegion(d))
 

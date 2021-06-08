@@ -146,7 +146,7 @@ func DataSourceCSBSBackupPolicyV1() *schema.Resource {
 	}
 }
 
-func dataSourceCSBSBackupPolicyV1Read(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func dataSourceCSBSBackupPolicyV1Read(_ context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*cfg.Config)
 	policyClient, err := config.CsbsV1Client(config.GetRegion(d))
 

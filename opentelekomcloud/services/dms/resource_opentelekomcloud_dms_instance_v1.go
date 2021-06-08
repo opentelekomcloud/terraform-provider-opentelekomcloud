@@ -213,7 +213,7 @@ func resourceDmsInstancesV1Create(ctx context.Context, d *schema.ResourceData, m
 	return resourceDmsInstancesV1Read(ctx, d, meta)
 }
 
-func resourceDmsInstancesV1Read(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceDmsInstancesV1Read(_ context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*cfg.Config)
 
 	DmsV1Client, err := config.DmsV1Client(config.GetRegion(d))

@@ -53,7 +53,7 @@ func DataSourceIdentityCredentialV3() *schema.Resource {
 	}
 }
 
-func dataSourceIdentityCredentialV3Read(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func dataSourceIdentityCredentialV3Read(_ context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*cfg.Config)
 	client, err := config.IdentityV30Client()
 	if err != nil {

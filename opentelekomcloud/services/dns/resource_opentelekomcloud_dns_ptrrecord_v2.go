@@ -118,7 +118,7 @@ func resourceDNSPtrRecordV2Create(ctx context.Context, d *schema.ResourceData, m
 	return resourceDNSPtrRecordV2Read(ctx, d, meta)
 }
 
-func resourceDNSPtrRecordV2Read(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceDNSPtrRecordV2Read(_ context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*cfg.Config)
 	client, err := config.DnsV2Client(config.GetRegion(d))
 	if err != nil {

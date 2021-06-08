@@ -228,7 +228,7 @@ func resourceDNSZoneV2Create(ctx context.Context, d *schema.ResourceData, meta i
 	return resourceDNSZoneV2Read(ctx, d, meta)
 }
 
-func resourceDNSZoneV2Read(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceDNSZoneV2Read(_ context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*cfg.Config)
 	dnsClient, err := config.DnsV2Client(config.GetRegion(d))
 	if err != nil {

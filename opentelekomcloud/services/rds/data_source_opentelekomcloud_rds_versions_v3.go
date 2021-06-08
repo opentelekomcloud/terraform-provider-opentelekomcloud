@@ -38,7 +38,7 @@ func DataSourceRdsVersionsV3() *schema.Resource {
 	}
 }
 
-func dataSourceRdsVersionsV3Read(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func dataSourceRdsVersionsV3Read(_ context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*cfg.Config)
 	client, err := config.RdsV3Client(config.GetRegion(d))
 	if err != nil {

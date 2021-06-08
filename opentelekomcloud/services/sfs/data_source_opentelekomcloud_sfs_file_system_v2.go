@@ -122,7 +122,7 @@ func DataSourceSFSFileSystemV2() *schema.Resource {
 	}
 }
 
-func dataSourceSFSFileSystemV2Read(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func dataSourceSFSFileSystemV2Read(_ context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*cfg.Config)
 	sfsClient, err := config.SfsV2Client(config.GetRegion(d))
 

@@ -358,7 +358,7 @@ func resourceCCEClusterV3Create(ctx context.Context, d *schema.ResourceData, met
 	return resourceCCEClusterV3Read(ctx, d, meta)
 }
 
-func resourceCCEClusterV3Read(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceCCEClusterV3Read(_ context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*cfg.Config)
 	cceClient, err := config.CceV3Client(config.GetRegion(d))
 	if err != nil {
@@ -600,7 +600,7 @@ func resourceFloatingIPV2Exists(d *schema.ResourceData, meta interface{}, floati
 	return allFips[0].ID, nil
 }
 
-func validateCCEClusterNetwork(ctx context.Context, d *schema.ResourceDiff, meta interface{}) error {
+func validateCCEClusterNetwork(_ context.Context, d *schema.ResourceDiff, meta interface{}) error {
 	config, ok := meta.(*cfg.Config)
 	if !ok {
 		return fmt.Errorf("error retreiving configuration: can't convert %v to Config", meta)

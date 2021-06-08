@@ -426,7 +426,7 @@ func resourceASGroupCreate(ctx context.Context, d *schema.ResourceData, meta int
 	return resourceASGroupRead(ctx, d, meta)
 }
 
-func resourceASGroupRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceASGroupRead(_ context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*cfg.Config)
 	client, err := config.AutoscalingV1Client(config.GetRegion(d))
 	if err != nil {

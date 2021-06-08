@@ -39,7 +39,7 @@ func DataSourceIdentityRoleV3() *schema.Resource {
 }
 
 // dataSourceIdentityRoleV3Read performs the role lookup.
-func dataSourceIdentityRoleV3Read(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func dataSourceIdentityRoleV3Read(_ context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*cfg.Config)
 	identityClient, err := config.IdentityV3Client(config.GetRegion(d))
 	if err != nil {

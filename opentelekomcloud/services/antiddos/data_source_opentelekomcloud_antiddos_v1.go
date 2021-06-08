@@ -113,7 +113,7 @@ func DataSourceAntiDdosV1() *schema.Resource {
 	}
 }
 
-func dataSourceAntiDdosV1Read(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func dataSourceAntiDdosV1Read(_ context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*cfg.Config)
 	antiddosClient, err := config.AntiddosV1Client(config.GetRegion(d))
 

@@ -324,7 +324,7 @@ func resourceDcsInstancesV1Create(ctx context.Context, d *schema.ResourceData, m
 	return resourceDcsInstancesV1Read(ctx, d, meta)
 }
 
-func resourceDcsInstancesV1Read(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceDcsInstancesV1Read(_ context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*cfg.Config)
 
 	DcsV1Client, err := config.DcsV1Client(config.GetRegion(d))

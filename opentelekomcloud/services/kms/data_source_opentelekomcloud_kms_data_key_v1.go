@@ -45,7 +45,7 @@ func DataSourceKmsDataKeyV1() *schema.Resource {
 	}
 }
 
-func dataSourceKmsDataKeyV1Read(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func dataSourceKmsDataKeyV1Read(_ context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*cfg.Config)
 
 	KmsDataKeyV1Client, err := config.KmsKeyV1Client(config.GetRegion(d))

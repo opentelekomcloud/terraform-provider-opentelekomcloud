@@ -234,7 +234,7 @@ func resourceCSBSBackupPolicyCreate(ctx context.Context, d *schema.ResourceData,
 	return resourceCSBSBackupPolicyRead(ctx, d, meta)
 }
 
-func resourceCSBSBackupPolicyRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceCSBSBackupPolicyRead(_ context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*cfg.Config)
 	policyClient, err := config.CsbsV1Client(config.GetRegion(d))
 	if err != nil {

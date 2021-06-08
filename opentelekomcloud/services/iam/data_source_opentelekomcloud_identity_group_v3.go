@@ -39,7 +39,7 @@ func DataSourceIdentityGroupV3() *schema.Resource {
 }
 
 // dataSourceIdentityGroupV3Read performs the group lookup.
-func dataSourceIdentityGroupV3Read(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func dataSourceIdentityGroupV3Read(_ context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*cfg.Config)
 	identityClient, err := config.IdentityV3Client(config.GetRegion(d))
 	if err != nil {

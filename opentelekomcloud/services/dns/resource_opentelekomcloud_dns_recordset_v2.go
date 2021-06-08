@@ -177,7 +177,7 @@ func resourceDNSRecordSetV2Create(ctx context.Context, d *schema.ResourceData, m
 	return resourceDNSRecordSetV2Read(ctx, d, meta)
 }
 
-func resourceDNSRecordSetV2Read(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceDNSRecordSetV2Read(_ context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*cfg.Config)
 	dnsClient, err := config.DnsV2Client(config.GetRegion(d))
 	if err != nil {
@@ -434,7 +434,7 @@ func getExistingRecordSetID(d cfg.SchemaOrDiff, meta interface{}) (id string, er
 	return
 }
 
-func useSharedRecordSet(ctx context.Context, d *schema.ResourceDiff, meta interface{}) (err error) {
+func useSharedRecordSet(_ context.Context, d *schema.ResourceDiff, meta interface{}) (err error) {
 	if d.Id() != "" { // skip if not new resource
 		return
 	}

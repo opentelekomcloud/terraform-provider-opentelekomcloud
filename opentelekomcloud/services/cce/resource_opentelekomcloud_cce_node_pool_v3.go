@@ -358,7 +358,7 @@ func resourceCCENodePoolV3Create(ctx context.Context, d *schema.ResourceData, me
 	return resourceCCENodePoolV3Read(ctx, d, meta)
 }
 
-func resourceCCENodePoolV3Read(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceCCENodePoolV3Read(_ context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*cfg.Config)
 	nodePoolClient, err := config.CceV3Client(config.GetRegion(d))
 	if err != nil {

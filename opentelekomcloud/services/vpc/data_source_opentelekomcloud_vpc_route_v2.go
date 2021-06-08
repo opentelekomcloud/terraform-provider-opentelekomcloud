@@ -52,7 +52,7 @@ func DataSourceVPCRouteV2() *schema.Resource {
 	}
 }
 
-func dataSourceVpcRouteV2Read(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func dataSourceVpcRouteV2Read(_ context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*cfg.Config)
 	vpcRouteClient, err := config.NetworkingV2Client(config.GetRegion(d))
 	if err != nil {

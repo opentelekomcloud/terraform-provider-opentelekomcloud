@@ -30,7 +30,7 @@ func DataSourceSdrsDomainV1() *schema.Resource {
 	}
 }
 
-func dataSourceSdrsDomainV1Read(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func dataSourceSdrsDomainV1Read(_ context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*cfg.Config)
 	sdrsV1Client, err := config.SdrsV1Client(config.GetRegion(d))
 	if err != nil {

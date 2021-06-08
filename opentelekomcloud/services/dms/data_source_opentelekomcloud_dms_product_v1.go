@@ -84,7 +84,7 @@ func getIObyIOtype(d *schema.ResourceData, IOs []products.IO) []products.IO {
 	return IOs
 }
 
-func dataSourceDmsProductV1Read(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func dataSourceDmsProductV1Read(_ context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*cfg.Config)
 	DmsV1Client, err := config.DmsV1Client(config.GetRegion(d))
 	if err != nil {

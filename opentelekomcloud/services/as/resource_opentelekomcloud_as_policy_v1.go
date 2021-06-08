@@ -226,7 +226,7 @@ func resourceASPolicyCreate(ctx context.Context, d *schema.ResourceData, meta in
 	return resourceASPolicyRead(ctx, d, meta)
 }
 
-func resourceASPolicyRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceASPolicyRead(_ context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*cfg.Config)
 	asClient, err := config.AutoscalingV1Client(config.GetRegion(d))
 	if err != nil {
@@ -306,7 +306,7 @@ func resourceASPolicyUpdate(ctx context.Context, d *schema.ResourceData, meta in
 	return resourceASPolicyRead(ctx, d, meta)
 }
 
-func resourceASPolicyDelete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceASPolicyDelete(_ context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*cfg.Config)
 	asClient, err := config.AutoscalingV1Client(config.GetRegion(d))
 	if err != nil {
@@ -359,7 +359,7 @@ func resourceASPolicyValidatePolicyType(v interface{}, k string) (ws []string, e
 	return
 }
 
-func resourceASPolicyValidateName(v interface{}, k string) (ws []string, errors []error) {
+func resourceASPolicyValidateName(v interface{}, _ string) (ws []string, errors []error) {
 	value := v.(string)
 	if len(value) > 64 || len(value) < 1 {
 		errors = append(errors, fmt.Errorf("%q must contain more than 1 and less than 64 characters", value))

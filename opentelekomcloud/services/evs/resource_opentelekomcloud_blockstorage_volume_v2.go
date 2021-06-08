@@ -232,7 +232,7 @@ func resourceBlockStorageVolumeV2Create(ctx context.Context, d *schema.ResourceD
 	return resourceBlockStorageVolumeV2Read(ctx, d, meta)
 }
 
-func resourceBlockStorageVolumeV2Read(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceBlockStorageVolumeV2Read(_ context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*cfg.Config)
 	blockStorageClient, err := config.BlockStorageV2Client(config.GetRegion(d))
 	if err != nil {
@@ -502,6 +502,6 @@ func suppressMetadataPolicy(k, old, new string, _ *schema.ResourceData) bool {
 	return old == new
 }
 
-func isDownScale(ctx context.Context, old, new, _ interface{}) bool {
+func isDownScale(_ context.Context, old, new, _ interface{}) bool {
 	return old.(int) > new.(int)
 }

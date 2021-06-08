@@ -133,7 +133,7 @@ func tagsAsString(tags map[string]interface{}) string {
 	return strings.Join(tagList, "|")
 }
 
-func dataSourceDNSZoneV2Read(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func dataSourceDNSZoneV2Read(_ context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*cfg.Config)
 	dnsClient, err := config.DnsV2Client(config.GetRegion(d))
 	if err != nil {

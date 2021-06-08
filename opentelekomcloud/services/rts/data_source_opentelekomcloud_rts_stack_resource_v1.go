@@ -60,7 +60,7 @@ func DataSourceRTSStackResourcesV1() *schema.Resource {
 	}
 }
 
-func dataSourceRTSStackResourcesV1Read(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func dataSourceRTSStackResourcesV1Read(_ context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*cfg.Config)
 	orchestrationClient, err := config.OrchestrationV1Client(config.GetRegion(d))
 

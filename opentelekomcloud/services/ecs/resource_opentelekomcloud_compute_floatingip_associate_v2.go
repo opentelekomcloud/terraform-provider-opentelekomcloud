@@ -89,7 +89,7 @@ func resourceComputeFloatingIPAssociateV2Create(ctx context.Context, d *schema.R
 	return resourceComputeFloatingIPAssociateV2Read(ctx, d, meta)
 }
 
-func resourceComputeFloatingIPAssociateV2Read(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceComputeFloatingIPAssociateV2Read(_ context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*cfg.Config)
 	computeClient, err := config.ComputeV2Client(config.GetRegion(d))
 	if err != nil {
@@ -160,7 +160,7 @@ func resourceComputeFloatingIPAssociateV2Read(ctx context.Context, d *schema.Res
 	return nil
 }
 
-func resourceComputeFloatingIPAssociateV2Delete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceComputeFloatingIPAssociateV2Delete(_ context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*cfg.Config)
 	computeClient, err := config.ComputeV2Client(config.GetRegion(d))
 	if err != nil {

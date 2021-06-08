@@ -26,7 +26,7 @@ func DataSourceDcsProductV1() *schema.Resource {
 	}
 }
 
-func dataSourceDcsProductV1Read(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func dataSourceDcsProductV1Read(_ context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*cfg.Config)
 	DcsV1Client, err := config.DcsV1Client(config.GetRegion(d))
 	if err != nil {

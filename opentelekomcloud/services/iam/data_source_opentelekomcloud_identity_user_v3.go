@@ -48,7 +48,7 @@ func DataSourceIdentityUserV3() *schema.Resource {
 }
 
 // dataSourceIdentityUserV3Read performs the user lookup.
-func dataSourceIdentityUserV3Read(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func dataSourceIdentityUserV3Read(_ context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*cfg.Config)
 	identityClient, err := config.IdentityV3Client(config.GetRegion(d))
 	if err != nil {

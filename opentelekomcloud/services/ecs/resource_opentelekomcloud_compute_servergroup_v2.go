@@ -82,7 +82,7 @@ func resourceComputeServerGroupV2Create(ctx context.Context, d *schema.ResourceD
 	return resourceComputeServerGroupV2Read(ctx, d, meta)
 }
 
-func resourceComputeServerGroupV2Read(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceComputeServerGroupV2Read(_ context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*cfg.Config)
 	computeClient, err := config.ComputeV2Client(config.GetRegion(d))
 	if err != nil {
@@ -122,7 +122,7 @@ func resourceComputeServerGroupV2Read(ctx context.Context, d *schema.ResourceDat
 	return nil
 }
 
-func resourceComputeServerGroupV2Delete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceComputeServerGroupV2Delete(_ context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*cfg.Config)
 	computeClient, err := config.ComputeV2Client(config.GetRegion(d))
 	if err != nil {

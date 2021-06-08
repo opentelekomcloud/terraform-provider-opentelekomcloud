@@ -40,7 +40,7 @@ func DataSourceVpcSubnetIdsV1() *schema.Resource {
 	}
 }
 
-func dataSourceVpcSubnetIdsV1Read(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func dataSourceVpcSubnetIdsV1Read(_ context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*cfg.Config)
 	client, err := config.NetworkingV1Client(config.GetRegion(d))
 	if err != nil {

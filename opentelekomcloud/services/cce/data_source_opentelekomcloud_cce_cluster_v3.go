@@ -132,7 +132,7 @@ func DataSourceCCEClusterV3() *schema.Resource {
 	}
 }
 
-func dataSourceCCEClusterV3Read(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func dataSourceCCEClusterV3Read(_ context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*cfg.Config)
 	cceClient, err := config.CceV3Client(config.GetRegion(d))
 

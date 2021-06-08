@@ -488,7 +488,7 @@ func resourceCCENodeV3Create(ctx context.Context, d *schema.ResourceData, meta i
 	return resourceCCENodeV3Read(ctx, d, meta)
 }
 
-func resourceCCENodeV3Read(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceCCENodeV3Read(_ context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*cfg.Config)
 	nodeClient, err := config.CceV3Client(config.GetRegion(d))
 	if err != nil {

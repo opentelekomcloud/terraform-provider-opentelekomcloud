@@ -318,7 +318,7 @@ func resourceASConfigurationCreate(ctx context.Context, d *schema.ResourceData, 
 	return resourceASConfigurationRead(ctx, d, meta)
 }
 
-func resourceASConfigurationRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceASConfigurationRead(_ context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*cfg.Config)
 	client, err := config.AutoscalingV1Client(config.GetRegion(d))
 	if err != nil {
@@ -366,7 +366,7 @@ func resourceASConfigurationRead(ctx context.Context, d *schema.ResourceData, me
 	return nil
 }
 
-func resourceASConfigurationDelete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceASConfigurationDelete(_ context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*cfg.Config)
 	client, err := config.AutoscalingV1Client(config.GetRegion(d))
 	if err != nil {
@@ -407,7 +407,7 @@ func getASGroupsByConfiguration(client *golangsdk.ServiceClient, configID string
 	return asGroups, err
 }
 
-func validateDiskSize(ctx context.Context, d *schema.ResourceDiff, _ interface{}) error {
+func validateDiskSize(_ context.Context, d *schema.ResourceDiff, _ interface{}) error {
 	instanceConfigData := d.Get("instance_config").([]interface{})[0].(map[string]interface{})
 	disksData := instanceConfigData["disk"].([]interface{})
 	mErr := &multierror.Error{}

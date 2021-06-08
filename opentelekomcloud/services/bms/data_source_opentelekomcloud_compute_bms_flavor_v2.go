@@ -88,7 +88,7 @@ func DataSourceBMSFlavorV2() *schema.Resource {
 	}
 }
 
-func dataSourceBMSFlavorV2Read(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func dataSourceBMSFlavorV2Read(_ context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*cfg.Config)
 	flavorClient, err := config.ComputeV2Client(config.GetRegion(d))
 	if err != nil {

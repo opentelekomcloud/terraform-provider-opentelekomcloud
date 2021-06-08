@@ -105,7 +105,7 @@ func DataSourceDEHHostV1() *schema.Resource {
 	}
 }
 
-func dataSourceDEHHostV1Read(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func dataSourceDEHHostV1Read(_ context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*cfg.Config)
 	dehClient, err := config.DehV1Client(config.GetRegion(d))
 

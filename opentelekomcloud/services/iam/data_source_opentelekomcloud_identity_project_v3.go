@@ -48,7 +48,7 @@ func DataSourceIdentityProjectV3() *schema.Resource {
 }
 
 // dataSourceIdentityProjectV3Read performs the project lookup.
-func dataSourceIdentityProjectV3Read(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func dataSourceIdentityProjectV3Read(_ context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*cfg.Config)
 	identityClient, err := config.IdentityV3Client(config.GetRegion(d))
 	if err != nil {

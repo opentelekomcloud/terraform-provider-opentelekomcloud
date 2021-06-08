@@ -260,7 +260,7 @@ func ResourceCBRVaultV3() *schema.Resource {
 	}
 }
 
-func resourceCBRVaultV3Read(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceCBRVaultV3Read(_ context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*cfg.Config)
 	client, err := config.CbrV3Client(config.GetRegion(d))
 	if err != nil {
@@ -636,7 +636,7 @@ func resourceCBRVaultV3Update(ctx context.Context, d *schema.ResourceData, meta 
 	return resourceCBRVaultV3Read(ctx, d, meta)
 }
 
-func resourceCBRVaultV3Delete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceCBRVaultV3Delete(_ context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*cfg.Config)
 	client, err := config.CbrV3Client(config.GetRegion(d))
 	if err != nil {
@@ -660,7 +660,7 @@ func requiredForPrepaid(d *schema.ResourceDiff, field string) error {
 	return nil
 }
 
-func cbrVaultRequiredFields(ctx context.Context, d *schema.ResourceDiff, _ interface{}) error {
+func cbrVaultRequiredFields(_ context.Context, d *schema.ResourceDiff, _ interface{}) error {
 	if d.Get("billing.0.charging_mode") == "pre_paid" {
 		mErr := multierror.Append(
 			requiredForPrepaid(d, "period_type"),

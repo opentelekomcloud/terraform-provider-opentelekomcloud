@@ -42,7 +42,7 @@ func DataSourceDcsMaintainWindowV1() *schema.Resource {
 	}
 }
 
-func dataSourceDcsMaintainWindowV1Read(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func dataSourceDcsMaintainWindowV1Read(_ context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*cfg.Config)
 	DcsV1Client, err := config.DcsV1Client(config.GetRegion(d))
 	if err != nil {

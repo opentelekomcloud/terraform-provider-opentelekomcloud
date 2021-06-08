@@ -363,7 +363,7 @@ func resourceDdsInstanceV3Create(ctx context.Context, d *schema.ResourceData, me
 	return resourceDdsInstanceV3Read(ctx, d, meta)
 }
 
-func resourceDdsInstanceV3Read(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceDdsInstanceV3Read(_ context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*cfg.Config)
 	client, err := config.DdsV3Client(config.GetRegion(d))
 	if err != nil {

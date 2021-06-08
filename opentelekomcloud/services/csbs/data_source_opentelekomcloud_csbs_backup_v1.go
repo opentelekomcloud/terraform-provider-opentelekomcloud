@@ -201,7 +201,7 @@ func DataSourceCSBSBackupV1() *schema.Resource {
 	}
 }
 
-func dataSourceCSBSBackupV1Read(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func dataSourceCSBSBackupV1Read(_ context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*cfg.Config)
 	backupClient, err := config.CsbsV1Client(config.GetRegion(d))
 

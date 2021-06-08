@@ -74,7 +74,7 @@ func DataSourceDdsFlavorV3() *schema.Resource {
 	}
 }
 
-func dataSourceDdsFlavorV3Read(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func dataSourceDdsFlavorV3Read(_ context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*cfg.Config)
 	ddsClient, err := config.DdsV3Client(config.GetRegion(d))
 	if err != nil {
