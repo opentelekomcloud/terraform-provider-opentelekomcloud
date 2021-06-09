@@ -1,4 +1,34 @@
-## 1.24.0 (Unreleased)
+## 1.25.0 (Unreleased)
+
+## 1.24.0 (June 9, 2021)
+
+This release contains no functional differences from `1.23.13`.
+
+NOTES/DEPRECATIONS:
+
+* Move to `terraform-plugin-sdk/v2`, only Terraform versions `0.12+` are supported ([#1104](https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/issues/1104))
+
+## 1.23.13 (June 9, 2021)
+
+This is the last release to support Terraform versions lower than `0.12`.
+
+ENHANCEMENTS:
+* `resource/opentelekomcloud_identity_user_v3`: Add possibility to send welcome email on user creation ([#1103](https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/issues/1103))
+* `provider/opentelekomcloud`: Add `passcode` argument for TOTP MFA support ([#1106](https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/issues/1106))
+* `resource/opentelekomcloud_cce_cluster_v3`: Improve error for missing CCE authorization ([#1108](https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/issues/1108))
+
+BUG FIXES:
+* `resource/opentelekomcloud_obs_bucket_policy`: Malformed policy is no more stored in the state ([#1097](https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/issues/1097))
+* `resource/pentelekomcloud_waf_certificate_v1`: Fix not creating certificate with valid certificate and key values ([#1098](https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/issues/1098))
+
+DOCUMENTATION:
+* `resource/opentelekomcloud_rds_instance_v3`: Make clear user_name is part of the db ([#1093](https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/issues/1093))
+* `resource/pentelekomcloud_waf_certificate_v1`: Use valid certificate and key example ([#1098](https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/issues/1098))
+* `resource/pentelekomcloud_rds_read_replica_v3`: Fix `id` field description ([#1100](https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/issues/1100))
+* `resource/opentelekomcloud_css_cluster_v1`: Remove `css.large.8` flavor from the valid flavor list ([#1102](https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/issues/1102))
+
+NOTES/DEPRECATIONS:
+* `resource/opentelekomcloud_lb_loadbalancer_v2`:  Remove deprecated `security_group_ids` ([#1101](https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/issues/1101))
 
 ## 1.23.12 (May 27, 2021)
 
