@@ -2,10 +2,13 @@ package waf
 
 import (
 	"context"
+	"fmt"
 	"log"
+	"regexp"
 	"strings"
 	"time"
 
+	"github.com/hashicorp/go-cty/cty"
 	"github.com/hashicorp/go-multierror"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
@@ -39,9 +42,9 @@ func ResourceWafCertificateV1() *schema.Resource {
 				ForceNew: true,
 			},
 			"name": {
-				Type:     schema.TypeString,
-				Required: true,
-				ForceNew: false,
+				Type:             schema.TypeString,
+				Required:         true,
+				ValidateDiagFunc: validateCertificateName,
 			},
 			"content": {
 				Type:      schema.TypeString,
@@ -151,4 +154,19 @@ func resourceWafCertificateV1Delete(_ context.Context, d *schema.ResourceData, m
 
 	d.SetId("")
 	return nil
+}
+
+var validNameRe = regexp.MustCompile(`^[\w-]{1,256}$`)
+
+func validateCertificateName(v interface{}, path cty.Path) diag.Diagnostics {
+	name := v.(string)
+	if validNameRe.MatchString(name) {
+		return nil
+	}
+	return diag.Diagnostics{diag.Diagnostic{
+		Severity:      diag.Error,
+		Summary:       fmt.Sprintf("invalid certificate name: %s", name),
+		Detail:        "The maximum length is 256 characters. Only digits, letters, underscores (_), and hyphens (-) are allowed.",
+		AttributePath: path,
+	}}
 }
