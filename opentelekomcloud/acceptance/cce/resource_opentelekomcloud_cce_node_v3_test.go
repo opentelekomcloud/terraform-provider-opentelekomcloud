@@ -699,7 +699,7 @@ resource "opentelekomcloud_cce_node_v3" "node_1" {
 
 	testAccCCENodeV3EncryptedVolume = fmt.Sprintf(`
 resource "opentelekomcloud_cce_cluster_v3" "cluster_1" {
-  name         = "opentelekomcloud-cce-ids"
+  name         = "opentelekomcloud-cce-encryption"
   cluster_type = "VirtualMachine"
   flavor_id    = "cce.s1.small"
   vpc_id       = "%s"
