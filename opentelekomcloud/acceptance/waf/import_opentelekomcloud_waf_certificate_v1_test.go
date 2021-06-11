@@ -22,6 +22,13 @@ func TestAccWafCertificateV1_import(t *testing.T) {
 				ImportStateVerify:       true,
 				ImportStateVerifyIgnore: []string{"content", "key"},
 			},
+			{
+				ResourceName:            resourceName,
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateId:           "cert_1",
+				ImportStateVerifyIgnore: []string{"content", "key"},
+			},
 		},
 	})
 }

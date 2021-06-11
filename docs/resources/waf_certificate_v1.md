@@ -59,6 +59,12 @@ The following attributes are exported:
 
 Certificates can be imported using the `id`, e.g.
 
-```sh
+```shell
 terraform import opentelekomcloud_waf_certificate_v1.cert_1 7117d38e-4c8f-4624-a505-bd96b97d024c
+```
+
+Or using `name`, e.g.
+
+```shell
+terraform import opentelekomcloud_waf_certificate_v1.cert_1 cert_1
 ```
