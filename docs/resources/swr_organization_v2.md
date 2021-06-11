@@ -39,6 +39,6 @@ The following attributes are exported:
 
 Organizations can be imported using the `name`, e.g.
 
-```sh
+```shell
 terraform import opentelekomcloud_swr_organization_v2.org_1 organization_1
 ```
