@@ -92,6 +92,7 @@ func resourceOrganizationRead(_ context.Context, d *schema.ResourceData, meta in
 		return fmterr.Errorf("error reading SWR organization: %w", err)
 	}
 	mErr := multierror.Append(
+		d.Set("name", org.Name),
 		d.Set("organization_id", org.ID),
 		d.Set("creator_name", org.CreatorName),
 		d.Set("auth", org.Auth),
