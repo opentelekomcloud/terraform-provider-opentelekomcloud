@@ -14,6 +14,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	golangsdk "github.com/opentelekomcloud/gophertelekomcloud"
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/waf/v1/certificates"
+	"github.com/opentelekomcloud/gophertelekomcloud/pagination"
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common"
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common/cfg"
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common/fmterr"
@@ -26,7 +27,7 @@ func ResourceWafCertificateV1() *schema.Resource {
 		UpdateContext: resourceWafCertificateV1Update,
 		DeleteContext: resourceWafCertificateV1Delete,
 		Importer: &schema.ResourceImporter{
-			StateContext: schema.ImportStatePassthroughContext,
+			StateContext: importCertificateByIdOrName,
 		},
 
 		Timeouts: &schema.ResourceTimeout{
@@ -169,4 +170,40 @@ func validateCertificateName(v interface{}, path cty.Path) diag.Diagnostics {
 		Detail:        "The maximum length is 256 characters. Only digits, letters, underscores (_), and hyphens (-) are allowed.",
 		AttributePath: path,
 	}}
+}
+
+func importCertificateByIdOrName(ctx context.Context, d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
+	config := meta.(*cfg.Config)
+	client, err := config.WafV1Client(config.GetRegion(d))
+	if err != nil {
+		return nil, fmt.Errorf(wafClientError, err)
+	}
+
+	// If there is such ID, use standard import
+	_, err = certificates.Get(client, d.Id()).Extract()
+	if err == nil {
+		return schema.ImportStatePassthroughContext(ctx, d, meta)
+	}
+	if _, ok := err.(golangsdk.ErrDefault400); !ok { // it is 400 for invalid ID 🤦
+		return nil, err
+	}
+
+	// if it's missing, find it by the name
+	err = certificates.List(client, nil).EachPage(func(p pagination.Page) (bool, error) {
+		certs, err := certificates.ExtractCertificates(p)
+		if err != nil {
+			return false, fmt.Errorf("error extracting certificates: %w", err)
+		}
+		for _, c := range certs {
+			if c.Name == d.Id() {
+				d.SetId(c.Id)
+				return false, nil
+			}
+		}
+		return true, nil
+	})
+	if err != nil {
+		return nil, fmt.Errorf("error listing certificates: %w", err)
+	}
+	return schema.ImportStatePassthroughContext(ctx, d, meta)
 }
