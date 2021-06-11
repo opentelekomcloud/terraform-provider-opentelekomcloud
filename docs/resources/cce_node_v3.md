@@ -67,7 +67,7 @@ The following arguments are supported:
 
 * `eip_ids` - (Optional) List of existing elastic IP IDs.
 
--> **Note:** If the `eip_ids` parameter is configured, you do not need to configure the `eip_count` and `bandwidth` parameters:
+-> If the `eip_ids` parameter is configured, you do not need to configure the `eip_count` and `bandwidth` parameters:
 `iptype`, `bandwidth_charge_mode`, `bandwidth_size` and `share_type`.
 
 * `eip_count` - (Optional) Number of elastic IPs to be dynamically created.
@@ -76,7 +76,7 @@ The following arguments are supported:
 
 * `bandwidth_size` - (Optional) Bandwidth size.
 
--> **Note:** If the `bandwidth_size` parameter is configured, you do not need to configure the
+-> If the `bandwidth_size` parameter is configured, you do not need to configure the
   `eip_count`, `bandwidth_charge_mode`, `sharetype` and `iptype` parameters.
 
 * `bandwidth_charge_mode` - (Optional) Bandwidth billing type.
@@ -113,6 +113,11 @@ The following arguments are supported:
   * `size` - (Required) Disk size in GB.
   * `volumetype` - (Required) Disk type.
   * `extend_param` - (Optional) Disk expansion parameters.
+  * `kms_id` - (Optional) The Encryption KMS ID of the data volume. By default, it tries to get from env by `OS_KMS_ID`.
+
+-> To enable encryption with the KMS. Firstly, you need to create the agency to grant KMS rights to EVS.
+The agency has to be created for a new project first with a user who has security `admin` permissions.
+It is created automatically with the first encrypted EVS disk via UI.
 
 ## Attributes Reference
 

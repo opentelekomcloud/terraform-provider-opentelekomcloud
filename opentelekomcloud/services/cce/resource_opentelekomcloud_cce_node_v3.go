@@ -11,7 +11,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
-	golangsdk "github.com/opentelekomcloud/gophertelekomcloud"
+	"github.com/opentelekomcloud/gophertelekomcloud"
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/cce/v3/clusters"
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/cce/v3/nodes"
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/common/tags"
@@ -134,6 +134,12 @@ func ResourceCCENodeV3() *schema.Resource {
 							Type:     schema.TypeString,
 							Required: true,
 							ForceNew: true,
+						},
+						"kms_id": {
+							Type:        schema.TypeString,
+							Optional:    true,
+							ForceNew:    true,
+							DefaultFunc: schema.EnvDefaultFunc("OS_KMS_ID", nil),
 						},
 						"extend_param": {
 							Type:     schema.TypeString,
@@ -332,6 +338,12 @@ func resourceCCEDataVolume(d *schema.ResourceData) []nodes.VolumeSpec {
 			VolumeType:  rawMap["volumetype"].(string),
 			ExtendParam: rawMap["extend_param"].(string),
 		}
+		if kmsID := rawMap["kms_id"]; kmsID != "" {
+			volumes[i].Metadata = map[string]interface{}{
+				"__system__cmkid":     kmsID,
+				"__system__encrypted": "1",
+			}
+		}
 	}
 	return volumes
 }
@@ -525,6 +537,9 @@ func resourceCCENodeV3Read(_ context.Context, d *schema.ResourceData, meta inter
 		volume["size"] = dataVolume.Size
 		volume["volumetype"] = dataVolume.VolumeType
 		volume["extend_param"] = dataVolume.ExtendParam
+		if dataVolume.Metadata != nil {
+			volume["kms_id"] = dataVolume.Metadata["__system__cmkid"]
+		}
 		volumes = append(volumes, volume)
 	}
 	if err := d.Set("data_volumes", volumes); err != nil {
