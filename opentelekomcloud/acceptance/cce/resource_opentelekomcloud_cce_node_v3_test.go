@@ -16,7 +16,8 @@ import (
 
 var privateIP = "192.168.1.13"
 
-const nodeName = "opentelekomcloud_cce_node_v3.node_1"
+const resourceNameNode = "opentelekomcloud_cce_node_v3.node_1"
+const resourceNameNode2 = "opentelekomcloud_cce_node_v3.node_2"
 
 func TestAccCCENodesV3Basic(t *testing.T) {
 	var node nodes.Nodes
@@ -29,17 +30,17 @@ func TestAccCCENodesV3Basic(t *testing.T) {
 			{
 				Config: testAccCCENodeV3Basic,
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckCCENodeV3Exists(nodeName, "opentelekomcloud_cce_cluster_v3.cluster_1", &node),
-					resource.TestCheckResourceAttr(nodeName, "name", "test-node"),
-					resource.TestCheckResourceAttr(nodeName, "flavor_id", "s2.xlarge.2"),
-					resource.TestCheckResourceAttr(nodeName, "os", "EulerOS 2.5"),
-					resource.TestCheckResourceAttr(nodeName, "private_ip", privateIP),
+					testAccCheckCCENodeV3Exists(resourceNameNode, "opentelekomcloud_cce_cluster_v3.cluster_1", &node),
+					resource.TestCheckResourceAttr(resourceNameNode, "name", "test-node"),
+					resource.TestCheckResourceAttr(resourceNameNode, "flavor_id", "s2.xlarge.2"),
+					resource.TestCheckResourceAttr(resourceNameNode, "os", "EulerOS 2.5"),
+					resource.TestCheckResourceAttr(resourceNameNode, "private_ip", privateIP),
 				),
 			},
 			{
 				Config: testAccCCENodeV3Update,
 				Check: resource.ComposeTestCheckFunc(
-					resource.TestCheckResourceAttr(nodeName, "name", "test-node2"),
+					resource.TestCheckResourceAttr(resourceNameNode, "name", "test-node2"),
 				),
 			},
 		},
@@ -57,7 +58,7 @@ func TestAccCCENodesV3Timeout(t *testing.T) {
 			{
 				Config: testAccCCENodeV3Timeout,
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckCCENodeV3Exists(nodeName, "opentelekomcloud_cce_cluster_v3.cluster_1", &node),
+					testAccCheckCCENodeV3Exists(resourceNameNode, "opentelekomcloud_cce_cluster_v3.cluster_1", &node),
 				),
 			},
 		},
@@ -75,10 +76,10 @@ func TestAccCCENodesV3OS(t *testing.T) {
 			{
 				Config: testAccCCENodeV3OS,
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckCCENodeV3Exists(nodeName, "opentelekomcloud_cce_cluster_v3.cluster_1", &node),
-					resource.TestCheckResourceAttr(nodeName, "os", "EulerOS 2.5"),
-					testAccCheckCCENodeV3Exists("opentelekomcloud_cce_node_v3.node_2", "opentelekomcloud_cce_cluster_v3.cluster_1", &node2),
-					resource.TestCheckResourceAttr("opentelekomcloud_cce_node_v3.node_2", "os", "CentOS 7.7"),
+					testAccCheckCCENodeV3Exists(resourceNameNode, "opentelekomcloud_cce_cluster_v3.cluster_1", &node),
+					resource.TestCheckResourceAttr(resourceNameNode, "os", "EulerOS 2.5"),
+					testAccCheckCCENodeV3Exists(resourceNameNode2, "opentelekomcloud_cce_cluster_v3.cluster_1", &node2),
+					resource.TestCheckResourceAttr(resourceNameNode2, "os", "CentOS 7.7"),
 				),
 			},
 		},
@@ -96,18 +97,18 @@ func TestAccCCENodesV3BandWidthResize(t *testing.T) {
 			{
 				Config: testAccCCENodeV3Ip,
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckCCENodeV3Exists(nodeName, "opentelekomcloud_cce_cluster_v3.cluster_1", &node),
-					resource.TestCheckResourceAttr(nodeName, "iptype", "5_bgp"),
-					resource.TestCheckResourceAttr(nodeName, "sharetype", "PER"),
-					resource.TestCheckResourceAttr(nodeName, "bandwidth_charge_mode", "traffic"),
-					resource.TestCheckResourceAttr(nodeName, "bandwidth_size", "100"),
+					testAccCheckCCENodeV3Exists(resourceNameNode, "opentelekomcloud_cce_cluster_v3.cluster_1", &node),
+					resource.TestCheckResourceAttr(resourceNameNode, "iptype", "5_bgp"),
+					resource.TestCheckResourceAttr(resourceNameNode, "sharetype", "PER"),
+					resource.TestCheckResourceAttr(resourceNameNode, "bandwidth_charge_mode", "traffic"),
+					resource.TestCheckResourceAttr(resourceNameNode, "bandwidth_size", "100"),
 				),
 			},
 			{
 				Config: testAccCCENodeV3BandWidthResize,
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckCCENodeV3Exists(nodeName, "opentelekomcloud_cce_cluster_v3.cluster_1", &node),
-					resource.TestCheckResourceAttr(nodeName, "bandwidth_size", "10"),
+					testAccCheckCCENodeV3Exists(resourceNameNode, "opentelekomcloud_cce_cluster_v3.cluster_1", &node),
+					resource.TestCheckResourceAttr(resourceNameNode, "bandwidth_size", "10"),
 				),
 			},
 		},
@@ -126,13 +127,13 @@ func TestAccCCENodesV3_eipIds(t *testing.T) {
 			{
 				Config: testAccCCENodeV3IpIDs,
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckCCENodeV3Exists(nodeName, "opentelekomcloud_cce_cluster_v3.cluster_1", &node),
+					testAccCheckCCENodeV3Exists(resourceNameNode, "opentelekomcloud_cce_cluster_v3.cluster_1", &node),
 				),
 			},
 			{
 				Config: testAccCCENodeV3IpIDsUnset,
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckCCENodeV3Exists(nodeName, "opentelekomcloud_cce_cluster_v3.cluster_1", &node),
+					testAccCheckCCENodeV3Exists(resourceNameNode, "opentelekomcloud_cce_cluster_v3.cluster_1", &node),
 				),
 			},
 		},
@@ -150,16 +151,16 @@ func TestAccCCENodesV3IpSetNull(t *testing.T) {
 			{
 				Config: testAccCCENodeV3Ip,
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckCCENodeV3Exists(nodeName, "opentelekomcloud_cce_cluster_v3.cluster_1", &node),
-					resource.TestCheckResourceAttr(nodeName, "iptype", "5_bgp"),
-					resource.TestCheckResourceAttr(nodeName, "sharetype", "PER"),
-					resource.TestCheckResourceAttr(nodeName, "bandwidth_charge_mode", "traffic"),
+					testAccCheckCCENodeV3Exists(resourceNameNode, "opentelekomcloud_cce_cluster_v3.cluster_1", &node),
+					resource.TestCheckResourceAttr(resourceNameNode, "iptype", "5_bgp"),
+					resource.TestCheckResourceAttr(resourceNameNode, "sharetype", "PER"),
+					resource.TestCheckResourceAttr(resourceNameNode, "bandwidth_charge_mode", "traffic"),
 				),
 			},
 			{
 				Config: testAccCCENodeV3IpUnset,
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckCCENodeV3Exists(nodeName, "opentelekomcloud_cce_cluster_v3.cluster_1", &node),
+					testAccCheckCCENodeV3Exists(resourceNameNode, "opentelekomcloud_cce_cluster_v3.cluster_1", &node),
 				),
 			},
 		},
@@ -177,13 +178,13 @@ func TestAccCCENodesV3IpCreate(t *testing.T) {
 			{
 				Config: testAccCCENodeV3IpUnset,
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckCCENodeV3Exists(nodeName, "opentelekomcloud_cce_cluster_v3.cluster_1", &node),
+					testAccCheckCCENodeV3Exists(resourceNameNode, "opentelekomcloud_cce_cluster_v3.cluster_1", &node),
 				),
 			},
 			{
 				Config: testAccCCENodeV3Ip,
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckCCENodeV3Exists(nodeName, "opentelekomcloud_cce_cluster_v3.cluster_1", &node),
+					testAccCheckCCENodeV3Exists(resourceNameNode, "opentelekomcloud_cce_cluster_v3.cluster_1", &node),
 				),
 			},
 		},
@@ -201,10 +202,10 @@ func TestAccCCENodesV3IpWithExtendedParameters(t *testing.T) {
 			{
 				Config: testAccCCENodeV3IpParams,
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckCCENodeV3Exists(nodeName, "opentelekomcloud_cce_cluster_v3.cluster_1", &node),
-					resource.TestCheckResourceAttr(nodeName, "iptype", "5_bgp"),
-					resource.TestCheckResourceAttr(nodeName, "sharetype", "PER"),
-					resource.TestCheckResourceAttr(nodeName, "bandwidth_charge_mode", "traffic"),
+					testAccCheckCCENodeV3Exists(resourceNameNode, "opentelekomcloud_cce_cluster_v3.cluster_1", &node),
+					resource.TestCheckResourceAttr(resourceNameNode, "iptype", "5_bgp"),
+					resource.TestCheckResourceAttr(resourceNameNode, "sharetype", "PER"),
+					resource.TestCheckResourceAttr(resourceNameNode, "bandwidth_charge_mode", "traffic"),
 				),
 			},
 		},
@@ -222,7 +223,7 @@ func TestAccCCENodesV3IpNulls(t *testing.T) {
 			{
 				Config: testAccCCENodeV3IpNull,
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckCCENodeV3Exists(nodeName, "opentelekomcloud_cce_cluster_v3.cluster_1", &node),
+					testAccCheckCCENodeV3Exists(resourceNameNode, "opentelekomcloud_cce_cluster_v3.cluster_1", &node),
 				),
 			},
 		},
@@ -240,7 +241,8 @@ func TestAccCCENodesV3EncryptedVolume(t *testing.T) {
 			{
 				Config: testAccCCENodeV3EncryptedVolume,
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckCCENodeV3Exists(nodeName, "opentelekomcloud_cce_cluster_v3.cluster_1", &node),
+					testAccCheckCCENodeV3Exists(resourceNameNode, "opentelekomcloud_cce_cluster_v3.cluster_1", &node),
+					resource.TestCheckResourceAttr(resourceNameNode, "data_volumes.0.kms_id", env.OS_KMS_ID),
 				),
 			},
 		},

@@ -136,9 +136,10 @@ func ResourceCCENodeV3() *schema.Resource {
 							ForceNew: true,
 						},
 						"kms_id": {
-							Type:     schema.TypeString,
-							Optional: true,
-							ForceNew: true,
+							Type:        schema.TypeString,
+							Optional:    true,
+							ForceNew:    true,
+							DefaultFunc: schema.EnvDefaultFunc("OS_KMS_ID", nil),
 						},
 						"extend_param": {
 							Type:     schema.TypeString,
@@ -536,6 +537,9 @@ func resourceCCENodeV3Read(_ context.Context, d *schema.ResourceData, meta inter
 		volume["size"] = dataVolume.Size
 		volume["volumetype"] = dataVolume.VolumeType
 		volume["extend_param"] = dataVolume.ExtendParam
+		if dataVolume.Metadata != nil {
+			volume["kms_id"] = dataVolume.Metadata["__system__cmkid"]
+		}
 		volumes = append(volumes, volume)
 	}
 	if err := d.Set("data_volumes", volumes); err != nil {
