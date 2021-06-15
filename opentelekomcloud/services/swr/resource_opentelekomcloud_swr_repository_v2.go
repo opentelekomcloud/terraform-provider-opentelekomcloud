@@ -39,7 +39,7 @@ func ResourceSwrRepositoryV2() *schema.Resource {
 				Type:     schema.TypeString,
 				Required: true,
 				ValidateFunc: validation.All(
-					validation.StringLenBetween(1, 64),
+					validation.StringLenBetween(1, 128),
 					validation.StringMatch(
 						regexp.MustCompile(`^[a-z0-9][a-z0-9._-]+[a-z0-9]+$`),
 						"Only lowercase letters, digits, periods (.), underscores (_), and hyphens (-) are allowed.",
