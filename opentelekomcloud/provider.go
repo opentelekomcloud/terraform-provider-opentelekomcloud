@@ -392,6 +392,7 @@ func Provider() *schema.Provider {
 			"opentelekomcloud_smn_topic_v2":                       smn.ResourceTopic(),
 			"opentelekomcloud_smn_subscription_v2":                smn.ResourceSubscription(),
 			"opentelekomcloud_swr_organization_v2":                swr.ResourceSwrOrganizationV2(),
+			"opentelekomcloud_swr_repository_v2":                  swr.ResourceSwrRepositoryV2(),
 			"opentelekomcloud_vpc_eip_v1":                         vpc.ResourceVpcEIPV1(),
 			"opentelekomcloud_vpc_v1":                             vpc.ResourceVirtualPrivateCloudV1(),
 			"opentelekomcloud_vpc_peering_connection_v2":          vpc.ResourceVpcPeeringConnectionV2(),
