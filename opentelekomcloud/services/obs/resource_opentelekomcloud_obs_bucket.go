@@ -246,6 +246,26 @@ func ResourceObsBucket() *schema.Resource {
 				Type:     schema.TypeString,
 				Computed: true,
 			},
+			"server_side_encryption": {
+				Type:     schema.TypeList,
+				Optional: true,
+				MaxItems: 1,
+				Elem: &schema.Resource{
+					Schema: map[string]*schema.Schema{
+						"kms_key_id": {
+							Type:     schema.TypeString,
+							Required: true,
+						},
+						"algorithm": {
+							Type:     schema.TypeString,
+							Required: true,
+							ValidateDiagFunc: validation.ToDiagFunc(
+								validation.StringInSlice([]string{"aws:kms"}, false),
+							),
+						},
+					},
+				},
+			},
 		},
 	}
 }
@@ -337,6 +357,12 @@ func resourceObsBucketUpdate(ctx context.Context, d *schema.ResourceData, meta i
 		}
 	}
 
+	if d.HasChange("server_side_encryption") {
+		if err := resourceObsBucketEncryptionUpdate(client, d); err != nil {
+			return diag.FromErr(err)
+		}
+	}
+
 	return resourceObsBucketRead(ctx, d, meta)
 }
 
@@ -407,6 +433,11 @@ func resourceObsBucketRead(_ context.Context, d *schema.ResourceData, meta inter
 
 	// Read the tags
 	if err := setObsBucketTags(client, d); err != nil {
+		return diag.FromErr(err)
+	}
+
+	// Read SSE settings
+	if err := setObsBucketEncryption(client, d); err != nil {
 		return diag.FromErr(err)
 	}
 
@@ -1207,4 +1238,38 @@ type Redirect struct {
 type WebsiteRoutingRule struct {
 	Condition Condition `json:"Condition,omitempty"`
 	Redirect  Redirect  `json:"Redirect"`
+}
+
+func resourceObsBucketEncryptionUpdate(client *obs.ObsClient, d *schema.ResourceData) error {
+	if d.Get("server_side_encryption.#") == 0 {
+		return nil
+	}
+	_, err := client.SetBucketEncryption(&obs.SetBucketEncryptionInput{
+		Bucket: d.Id(),
+		BucketEncryptionConfiguration: obs.BucketEncryptionConfiguration{
+			SSEAlgorithm:   d.Get("server_side_encryption.0.algorithm").(string),
+			KMSMasterKeyID: d.Get("server_side_encryption.0.kms_key_id").(string),
+		},
+	})
+	if err != nil {
+		return fmt.Errorf("error setting bucket encryption: %w", err)
+	}
+	return nil
+}
+
+func setObsBucketEncryption(client *obs.ObsClient, d *schema.ResourceData) error {
+	config, err := client.GetBucketEncryption(d.Id())
+	if err != nil {
+		if oErr, ok := err.(obs.ObsError); ok {
+			if oErr.BaseModel.StatusCode == 404 {
+				return nil
+			}
+		}
+		return fmt.Errorf("error reading bucket encryption: %w", err)
+	}
+	value := []map[string]interface{}{{
+		"kms_key_id": config.KMSMasterKeyID,
+		"algorithm":  config.SSEAlgorithm,
+	}}
+	return d.Set("server_side_encryption", value)
 }
