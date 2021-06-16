@@ -93,6 +93,21 @@ resource "opentelekomcloud_obs_bucket" "b" {
 }
 ```
 
+### Using server side encryption for the bucket
+
+```hcl
+resource "opentelekomcloud_obs_bucket" "bucket" {
+  bucket        = "my-bucket"
+  storage_class = "WARM"
+  acl           = "public-read"
+
+  server_side_encryption {
+    algorithm  = "aws:kms"
+    kms_key_id = var.kms_master_key_id
+  }
+}
+```
+
 ### Using object lifecycle
 
 ```hcl
@@ -172,6 +187,8 @@ The following arguments are supported:
 * `cors_rule` - (Optional) A rule of Cross-Origin Resource Sharing (documented below).
 
 * `lifecycle_rule` - (Optional) A configuration of object lifecycle management (documented below).
+
+* `server_side_encryption` - (Optional) A configuration of server side encryption (documented below).
 
 * `force_destroy` - (Optional) A boolean that indicates all objects should be deleted from the bucket so that the
   bucket can be destroyed without error. Default to `false`.
@@ -274,6 +291,14 @@ The `noncurrent_version_transition` object supports the following
   transitioned to the specified storage class.
 
 * `storage_class` - (Required) The class of storage used to store the object. Only `WARM` and `COLD` are supported.
+
+The `server_side_encryption` object supports the following
+
+* `algorithm` - (Required) The algorithm used for SSE. Only `aws:kms` is supported.
+
+* `kms_key_id` - (Required) The ID of KMS key used for the encryption.
+
+~> Only base project (e.g. `eu-de`) KMS keys can be used for the encryption
 
 ## Attributes Reference
 

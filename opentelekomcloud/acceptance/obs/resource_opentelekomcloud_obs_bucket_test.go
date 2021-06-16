@@ -40,6 +40,13 @@ func TestAccObsBucket_basic(t *testing.T) {
 					resource.TestCheckResourceAttr(resourceName, "storage_class", "WARM"),
 				),
 			},
+			{
+				Config: testAccObsBucketSSE(rInt),
+				Check: resource.ComposeTestCheckFunc(testAccCheckObsBucketExists(resourceName),
+					resource.TestCheckResourceAttr(resourceName, "server_side_encryption.0.kms_key_id", env.OS_KMS_ID),
+					resource.TestCheckResourceAttr(resourceName, "server_side_encryption.0.algorithm", "aws:kms"),
+				),
+			},
 		},
 	})
 }
@@ -289,6 +296,21 @@ resource "opentelekomcloud_obs_bucket" "bucket" {
   acl           = "public-read"
 }
 `, randInt)
+}
+
+func testAccObsBucketSSE(randInt int) string {
+	return fmt.Sprintf(`
+resource "opentelekomcloud_obs_bucket" "bucket" {
+  bucket        = "tf-test-bucket-%d"
+  storage_class = "WARM"
+  acl           = "public-read"
+
+  server_side_encryption {
+    algorithm  = "aws:kms"
+    kms_key_id = "%s"
+  }
+}
+`, randInt, env.OS_KMS_ID)
 }
 
 func testAccObsBucketConfigWithTags(randInt int) string {
