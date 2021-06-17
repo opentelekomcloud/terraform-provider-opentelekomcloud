@@ -92,15 +92,11 @@ func ResourceSwrRepositoryV2() *schema.Resource {
 	}
 }
 
-func organization(d *schema.ResourceData) string {
-	return d.Get("organization").(string)
-}
-
 func resourceRepositoryCreate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*cfg.Config)
 	client, err := config.SwrV2Client(config.GetRegion(d))
 	if err != nil {
-		return fmterr.Errorf(SwrClientError, err)
+		return fmterr.Errorf(ClientError, err)
 	}
 
 	opts := repositories.CreateOpts{
@@ -123,7 +119,7 @@ func resourceRepositoryRead(_ context.Context, d *schema.ResourceData, meta inte
 	config := meta.(*cfg.Config)
 	client, err := config.SwrV2Client(config.GetRegion(d))
 	if err != nil {
-		return fmterr.Errorf(SwrClientError, err)
+		return fmterr.Errorf(ClientError, err)
 	}
 
 	repo, err := repositories.Get(client, organization(d), d.Id()).Extract()
@@ -153,7 +149,7 @@ func resourceRepositoryUpdate(ctx context.Context, d *schema.ResourceData, meta 
 	config := meta.(*cfg.Config)
 	client, err := config.SwrV2Client(config.GetRegion(d))
 	if err != nil {
-		return fmterr.Errorf(SwrClientError, err)
+		return fmterr.Errorf(ClientError, err)
 	}
 
 	opts := repositories.UpdateOpts{
@@ -173,7 +169,7 @@ func resourceRepositoryDelete(_ context.Context, d *schema.ResourceData, meta in
 	config := meta.(*cfg.Config)
 	client, err := config.SwrV2Client(config.GetRegion(d))
 	if err != nil {
-		return fmterr.Errorf(SwrClientError, err)
+		return fmterr.Errorf(ClientError, err)
 	}
 
 	err = repositories.Delete(client, organization(d), d.Id()).ExtractErr()

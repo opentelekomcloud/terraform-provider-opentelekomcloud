@@ -88,7 +88,7 @@ func resourceSwrDomainCreate(ctx context.Context, d *schema.ResourceData, meta i
 	config := meta.(*cfg.Config)
 	client, err := config.SwrV2Client(config.GetRegion(d))
 	if err != nil {
-		return fmterr.Errorf(SwrClientError, err)
+		return fmterr.Errorf(ClientError, err)
 	}
 
 	opts := domains.CreateOpts{
@@ -111,7 +111,7 @@ func resourceSwrDomainRead(_ context.Context, d *schema.ResourceData, meta inter
 	config := meta.(*cfg.Config)
 	client, err := config.SwrV2Client(config.GetRegion(d))
 	if err != nil {
-		return fmterr.Errorf(SwrClientError, err)
+		return fmterr.Errorf(ClientError, err)
 	}
 
 	domain, err := domains.Get(client, organization(d), repository(d), d.Id()).Extract()
@@ -142,7 +142,7 @@ func resourceSwrDomainUpdate(ctx context.Context, d *schema.ResourceData, meta i
 	config := meta.(*cfg.Config)
 	client, err := config.SwrV2Client(config.GetRegion(d))
 	if err != nil {
-		return fmterr.Errorf(SwrClientError, err)
+		return fmterr.Errorf(ClientError, err)
 	}
 
 	opts := domains.UpdateOpts{
@@ -163,7 +163,7 @@ func resourceSwrDomainDelete(_ context.Context, d *schema.ResourceData, meta int
 	config := meta.(*cfg.Config)
 	client, err := config.SwrV2Client(config.GetRegion(d))
 	if err != nil {
-		return fmterr.Errorf(SwrClientError, err)
+		return fmterr.Errorf(ClientError, err)
 	}
 
 	err = domains.Delete(client, organization(d), repository(d), d.Id()).ExtractErr()
