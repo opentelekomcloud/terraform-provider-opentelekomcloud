@@ -2,6 +2,7 @@ package swr
 
 import (
 	"context"
+	"strings"
 	"time"
 
 	"github.com/hashicorp/go-multierror"
@@ -115,7 +116,7 @@ func resourceSwrDomainRead(_ context.Context, d *schema.ResourceData, meta inter
 	}
 
 	mErr := multierror.Append(
-		d.Set("access_domain", domain.AccessDomain),
+		d.Set("access_domain", strings.ToUpper(domain.AccessDomain)),
 		d.Set("repository", domain.Repository),
 		d.Set("organization", domain.Organization),
 		d.Set("description", domain.Description),
