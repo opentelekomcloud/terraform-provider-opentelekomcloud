@@ -2,8 +2,6 @@ package as
 
 import (
 	"context"
-	"crypto/sha1"
-	"encoding/hex"
 	"fmt"
 	"log"
 
@@ -74,8 +72,7 @@ func ResourceASConfiguration() *schema.Resource {
 							StateFunc: func(v interface{}) string {
 								switch v.(type) {
 								case string:
-									hash := sha1.Sum([]byte(v.(string)))
-									return hex.EncodeToString(hash[:])
+									return common.InstallScriptHashSum(v.(string))
 								default:
 									return ""
 								}
@@ -346,7 +343,7 @@ func resourceASConfigurationRead(_ context.Context, d *schema.ResourceData, meta
 	instanceConfigInfo["flavor"] = asConfig.InstanceConfig.FlavorRef
 	instanceConfigInfo["image"] = asConfig.InstanceConfig.ImageRef
 	instanceConfigInfo["key_name"] = asConfig.InstanceConfig.SSHKey
-	instanceConfigInfo["user_data"] = asConfig.InstanceConfig.UserData
+	instanceConfigInfo["user_data"] = common.InstallScriptHashSum(asConfig.InstanceConfig.UserData)
 
 	var secGrpIDs []string
 	for _, sg := range asConfig.InstanceConfig.SecurityGroups {

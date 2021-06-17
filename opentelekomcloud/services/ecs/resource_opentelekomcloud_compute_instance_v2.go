@@ -3,8 +3,6 @@ package ecs
 import (
 	"bytes"
 	"context"
-	"crypto/sha1"
-	"encoding/hex"
 	"fmt"
 	"log"
 	"strings"
@@ -98,8 +96,7 @@ func ResourceComputeInstanceV2() *schema.Resource {
 				StateFunc: func(v interface{}) string {
 					switch v.(type) {
 					case string:
-						hash := sha1.Sum([]byte(v.(string)))
-						return hex.EncodeToString(hash[:])
+						return common.InstallScriptHashSum(v.(string))
 					default:
 						return ""
 					}

@@ -158,6 +158,7 @@ resource "opentelekomcloud_as_configuration_v1" "hth_as_config"{
       disk_type   = "DATA"
     }
     key_name = "%s"
+    user_data = "#! /bin/bash"
   }
 }
 `, env.OS_IMAGE_ID, env.OS_KEYPAIR_NAME)
