@@ -42,6 +42,8 @@ The following arguments are supported:
 
 * `access_domain` - (Required) The name of the domain for image sharing.
 
+-> `access_domain` should be an existing OTC domain.
+
 * `permission` - (Required) Permission to be granted. Currently, only the `read` permission is supported.
 
 * `deadline` - (Required) End date of image sharing (UTC). When the value is set to `forever`,
@@ -52,11 +54,9 @@ The following arguments are supported:
 
 ## Attributes Reference
 
-The following attributes are exported:
+In addition to all arguments above, the following attributes are exported:
 
-* `name` - See Argument Reference above.
-
-* `creater_id` - Username ID of the domain creator.
+* `creator_id` - Username ID of the domain creator.
 
 * `creator_name` - Username of the domain creator.
 
