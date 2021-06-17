@@ -1,5 +1,23 @@
 ## 1.25.0 (Unreleased)
 
+
+## 1.24.1 (June 17, 2021)
+
+FEATURES:
+* **New Resource:** `opentelekomcloud_swr_organization_v2` ([#1120](https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/1120))
+* **New Resource:** `opentelekomcloud_swr_repository_v2` ([#1123](https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/1123))
+* **New Resource:** `opentelekomcloud_swr_domain_v2` ([#1127](https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/1127))
+* **New Resource:** `opentelekomcloud_swr_organization_permissions_v2` ([#1129](https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/1129))
+
+ENHANCEMENTS:
+* `resource/opentelekomcloud_waf_certificate_v1`: Add name certificate name validation ([#1116](https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/1116))
+* `resource/opentelekomcloud_cce_node_v3`: Add possibility to encrypt `data_volumes` ([#1117](https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/1117))
+* `resource/opentelekomcloud_waf_certificate_v1`: Add possibility to import by name ([#1119](https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/1119))
+* `resource/opentelekomcloud_obs_bucket_v1`: Add possibility to create buckets with encryption ([#1125](https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/1125))
+
+BUG FIXES:
+* `resource/opentelekomcloud_as_configuration_v1`: Fix wrong SHA1 sum in `Read` operation ([#1130](https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/1130))
+
 ## 1.24.0 (June 9, 2021)
 
 This release contains no functional differences from `1.23.13`.
