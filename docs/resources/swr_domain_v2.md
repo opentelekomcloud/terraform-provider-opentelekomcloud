@@ -4,7 +4,7 @@ subcategory: "Software Repository for Container (SWR)"
 
 # opentelekomcloud_swr_domain_v2
 
-Manages SWRv2 image sharing domain.
+Manages the SWR image sharing domain resource within Open Telekom Cloud.
 
 ## Example Usage
 
