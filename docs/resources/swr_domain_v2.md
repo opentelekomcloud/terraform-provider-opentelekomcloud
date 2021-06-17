@@ -64,4 +64,4 @@ In addition to all arguments above, the following attributes are exported:
 
 * `updated` - Indicates the domain when was last updated.
 
-* `status` - Indicates the domain is valid or expired.
+* `status` - Indicates the domain is valid (`true`) or expired (`false`).
