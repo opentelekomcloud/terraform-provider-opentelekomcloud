@@ -25,7 +25,7 @@ func ResourceSwrDomainV2() *schema.Resource {
 		},
 
 		Schema: map[string]*schema.Schema{
-			"namespace": {
+			"organization": {
 				Type:     schema.TypeString,
 				Required: true,
 				ForceNew: true,
@@ -39,6 +39,9 @@ func ResourceSwrDomainV2() *schema.Resource {
 				Type:     schema.TypeString,
 				Required: true,
 				ForceNew: true,
+				StateFunc: func(v interface{}) string {
+					return strings.ToUpper(v.(string))
+				},
 			},
 			"permission": {
 				Type:     schema.TypeString,
@@ -116,7 +119,7 @@ func resourceSwrDomainRead(_ context.Context, d *schema.ResourceData, meta inter
 	}
 
 	mErr := multierror.Append(
-		d.Set("access_domain", strings.ToUpper(domain.AccessDomain)),
+		d.Set("access_domain", domain.AccessDomain),
 		d.Set("repository", domain.Repository),
 		d.Set("organization", domain.Organization),
 		d.Set("description", domain.Description),
