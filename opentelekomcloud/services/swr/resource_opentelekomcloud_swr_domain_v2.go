@@ -39,9 +39,6 @@ func ResourceSwrDomainV2() *schema.Resource {
 				Type:     schema.TypeString,
 				Required: true,
 				ForceNew: true,
-				StateFunc: func(v interface{}) string {
-					return strings.ToUpper(v.(string))
-				},
 			},
 			"permission": {
 				Type:     schema.TypeString,
@@ -103,7 +100,7 @@ func resourceSwrDomainCreate(ctx context.Context, d *schema.ResourceData, meta i
 	}
 	d.SetId(opts.AccessDomain)
 
-	return resourceRepositoryRead(ctx, d, meta)
+	return resourceSwrDomainRead(ctx, d, meta)
 }
 
 func resourceSwrDomainRead(_ context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
@@ -115,11 +112,11 @@ func resourceSwrDomainRead(_ context.Context, d *schema.ResourceData, meta inter
 
 	domain, err := domains.Get(client, organization(d), repository(d), d.Id()).Extract()
 	if err != nil {
-		return fmterr.Errorf("error reading repository: %w", err)
+		return fmterr.Errorf("error reading domain: %w", err)
 	}
 
 	mErr := multierror.Append(
-		d.Set("access_domain", domain.AccessDomain),
+		d.Set("access_domain", strings.ToUpper(domain.AccessDomain)),
 		d.Set("repository", domain.Repository),
 		d.Set("organization", domain.Organization),
 		d.Set("description", domain.Description),
@@ -149,12 +146,13 @@ func resourceSwrDomainUpdate(ctx context.Context, d *schema.ResourceData, meta i
 		Deadline:    d.Get("deadline").(string),
 		Description: d.Get("description").(string),
 	}
+
 	err = domains.Update(client, organization(d), repository(d), d.Id(), opts).ExtractErr()
 	if err != nil {
 		return fmterr.Errorf("error updating domain: %w", err)
 	}
 
-	return resourceRepositoryRead(ctx, d, meta)
+	return resourceSwrDomainRead(ctx, d, meta)
 }
 
 func resourceSwrDomainDelete(_ context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {

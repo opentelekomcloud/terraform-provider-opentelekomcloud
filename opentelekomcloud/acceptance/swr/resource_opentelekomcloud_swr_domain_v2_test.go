@@ -77,7 +77,7 @@ resource opentelekomcloud_swr_repository_v2 repo_1 {
 
 resource opentelekomcloud_swr_domain_v2 domain_1 {
   organization  = opentelekomcloud_swr_organization_v2.org_1.name
-  repository    = opentelekomcloud_swr_repository_v2.name
+  repository    = opentelekomcloud_swr_repository_v2.repo_1.name
   access_domain = "%[2]s"
   permission    = "read"
   deadline      = "forever"
