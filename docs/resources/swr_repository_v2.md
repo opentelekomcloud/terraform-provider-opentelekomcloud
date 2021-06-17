@@ -4,6 +4,7 @@ subcategory: "Software Repository for Container (SWR)"
 
 # opentelekomcloud_swr_organization_v2
 
+Manages the SWR repository resource within Open Telekom Cloud.
 
 ## Example Usage
 
