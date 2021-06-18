@@ -593,8 +593,12 @@ func setUpOBSLogging() {
 
 // issueTemporaryCredentials creates temporary AK/SK, which can be used to auth in OBS when AK/SK is not provided
 func (c *Config) issueTemporaryCredentials() (*credentials.TemporaryCredential, error) {
-	if c.SecurityToken != "" || (c.AccessKey != "" && c.SecretKey != "") {
-		return nil, nil
+	if c.AccessKey != "" && c.SecretKey != "" {
+		return &credentials.TemporaryCredential{
+			AccessKey:     c.AccessKey,
+			SecretKey:     c.SecretKey,
+			SecurityToken: c.SecurityToken,
+		}, nil
 	}
 	client, err := c.IdentityV3Client()
 	if err != nil {
