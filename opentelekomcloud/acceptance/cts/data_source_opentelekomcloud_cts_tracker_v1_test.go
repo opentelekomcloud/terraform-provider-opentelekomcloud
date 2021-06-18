@@ -46,7 +46,7 @@ func testAccCheckCTSTrackerV1DataSourceID(n string) resource.TestCheckFunc {
 
 func testAccCTSTrackerV1DataSource_basic(bucketName string) string {
 	return fmt.Sprintf(`
-resource "opentelekomcloud_s3_bucket" "bucket" {
+resource "opentelekomcloud_obs_bucket" "bucket" {
   bucket        = "%s"
   acl           = "public-read"
   force_destroy = true
@@ -57,7 +57,7 @@ resource "opentelekomcloud_smn_topic_v2" "topic_1" {
 }
 
 resource "opentelekomcloud_cts_tracker_v1" "tracker_v1" {
-  bucket_name               = opentelekomcloud_s3_bucket.bucket.bucket
+  bucket_name               = opentelekomcloud_obs_bucket.bucket.bucket
   file_prefix_name          = "yO8Q"
   is_support_smn            = true
   topic_id                  = opentelekomcloud_smn_topic_v2.topic_1.id

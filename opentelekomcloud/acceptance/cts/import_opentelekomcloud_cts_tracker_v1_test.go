@@ -20,7 +20,7 @@ func TestAccCTSTrackerV1_importBasic(t *testing.T) {
 		CheckDestroy:      testAccCheckCTSTrackerV1Destroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccCTSTrackerV1_basic(bucketName),
+				Config: testAccCTSTrackerV1Basic(bucketName),
 			},
 
 			{
