@@ -591,30 +591,32 @@ func setUpOBSLogging() {
 	}
 }
 
-// setupTemporaryCredentials creates temporary AK/SK, which can be used to auth in OBS when AK/SK is not provided
-func (c *Config) setupTemporaryCredentials() error {
-	if c.SecurityToken != "" || (c.AccessKey != "" && c.SecretKey != "") {
-		return nil
+// issueTemporaryCredentials creates temporary AK/SK, which can be used to auth in OBS when AK/SK is not provided
+func (c *Config) issueTemporaryCredentials() (*credentials.TemporaryCredential, error) {
+	if c.AccessKey != "" && c.SecretKey != "" {
+		return &credentials.TemporaryCredential{
+			AccessKey:     c.AccessKey,
+			SecretKey:     c.SecretKey,
+			SecurityToken: c.SecurityToken,
+		}, nil
 	}
 	client, err := c.IdentityV3Client()
 	if err != nil {
-		return fmt.Errorf("error creating identity v3 domain client: %s", err)
+		return nil, fmt.Errorf("error creating identity v3 domain client: %s", err)
 	}
 	credential, err := credentials.CreateTemporary(client, credentials.CreateTemporaryOpts{
 		Methods: []string{"token"},
 		Token:   client.Token(),
 	}).Extract()
 	if err != nil {
-		return fmt.Errorf("error creating temporary AK/SK: %s", err)
+		return nil, fmt.Errorf("error creating temporary AK/SK: %s", err)
 	}
-	c.AccessKey = credential.AccessKey
-	c.SecretKey = credential.SecretKey
-	c.SecurityToken = credential.SecurityToken
-	return nil
+	return credential, nil
 }
 
 func (c *Config) NewObjectStorageClient(region string) (*obs.ObsClient, error) {
-	if err := c.setupTemporaryCredentials(); err != nil {
+	cred, err := c.issueTemporaryCredentials()
+	if err != nil {
 		return nil, fmt.Errorf("failed to construct OBS client without AK/SK: %s", err)
 	}
 
@@ -628,7 +630,7 @@ func (c *Config) NewObjectStorageClient(region string) (*obs.ObsClient, error) {
 
 	setUpOBSLogging()
 
-	return obs.New(c.AccessKey, c.SecretKey, client.Endpoint, obs.WithSecurityToken(c.SecurityToken))
+	return obs.New(cred.AccessKey, cred.SecretKey, client.Endpoint, obs.WithSecurityToken(cred.SecurityToken))
 }
 
 func (c *Config) blockStorageV1Client(region string) (*golangsdk.ServiceClient, error) {
