@@ -39,6 +39,7 @@ func ResourceWafDomainV1() *schema.Resource {
 			"hostname": {
 				Type:     schema.TypeString,
 				Required: true,
+				ForceNew: true,
 			},
 			"certificate_id": {
 				Type:     schema.TypeString,
