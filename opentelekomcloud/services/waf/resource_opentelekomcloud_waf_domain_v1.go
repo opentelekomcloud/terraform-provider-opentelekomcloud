@@ -11,7 +11,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
-	golangsdk "github.com/opentelekomcloud/gophertelekomcloud"
+	"github.com/opentelekomcloud/gophertelekomcloud"
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/waf/v1/domains"
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/waf/v1/policies"
 
@@ -84,6 +84,17 @@ func ResourceWafDomainV1() *schema.Resource {
 						},
 					},
 				},
+			},
+			"tls": {
+				Type:     schema.TypeString,
+				Optional: true,
+			},
+			"cipher": {
+				Type:     schema.TypeString,
+				Optional: true,
+				// ValidateFunc: validation.StringInSlice([]string{
+				// 	"cipher_default", "cipher_1", "cipher_2", "cipher_3",
+				// }, false),
 			},
 			"proxy": {
 				Type:     schema.TypeBool,
@@ -175,9 +186,8 @@ func getAllServers(d *schema.ResourceData) ([]domains.ServerOpts, error) {
 func resourceWafDomainV1Create(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*cfg.Config)
 	wafClient, err := config.WafV1Client(config.GetRegion(d))
-
 	if err != nil {
-		return fmterr.Errorf("error creating OpenTelekomcomCloud WAF Client: %s", err)
+		return fmterr.Errorf("error creating OpenTelekomCloud WAF Client: %s", err)
 	}
 
 	var hosts []string
@@ -206,6 +216,8 @@ func resourceWafDomainV1Create(ctx context.Context, d *schema.ResourceData, meta
 		CertificateId: d.Get("certificate_id").(string),
 		Server:        servers,
 		Proxy:         &proxy,
+		TLS:           d.Get("tls").(string),
+		Cipher:        d.Get("cipher").(string),
 		SipHeaderName: d.Get("sip_header_name").(string),
 		SipHeaderList: headers,
 	}
@@ -263,6 +275,8 @@ func resourceWafDomainV1Read(_ context.Context, d *schema.ResourceData, meta int
 		d.Set("cname", n.Cname),
 		d.Set("txt_code", n.TxtCode),
 		d.Set("sub_domain", n.SubDomain),
+		d.Set("cipher", n.Cipher),
+		d.Set("tls", n.TLS),
 	)
 	if n.PolicyID != "" {
 		mErr = multierror.Append(mErr, d.Set("policy_id", n.PolicyID))
@@ -321,6 +335,14 @@ func resourceWafDomainV1Update(ctx context.Context, d *schema.ResourceData, meta
 			headers[i] = v.(string)
 		}
 		updateOpts.SipHeaderList = headers
+	}
+	if d.HasChange("cipher") {
+		cipher := d.Get("cipher").(string)
+		updateOpts.Cipher = cipher
+	}
+	if d.HasChange("tls") {
+		tls := d.Get("tls").(string)
+		updateOpts.TLS = tls
 	}
 	log.Printf("[DEBUG] updateOpts: %#v", updateOpts)
 
