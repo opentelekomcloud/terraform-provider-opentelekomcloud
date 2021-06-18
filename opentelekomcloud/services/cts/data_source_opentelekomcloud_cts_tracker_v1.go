@@ -4,6 +4,7 @@ import (
 	"context"
 	"log"
 
+	"github.com/hashicorp/go-multierror"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/cts/v1/tracker"
@@ -81,7 +82,7 @@ func dataSourceCTSTrackerV1Read(_ context.Context, d *schema.ResourceData, meta 
 	config := meta.(*cfg.Config)
 	ctsClient, err := config.CtsV1Client(config.GetProjectName(d))
 	if err != nil {
-		return fmterr.Errorf("error creating cts v1 client: %s", err)
+		return fmterr.Errorf(clientError, err)
 	}
 
 	listOpts := tracker.ListOpts{
@@ -93,7 +94,7 @@ func dataSourceCTSTrackerV1Read(_ context.Context, d *schema.ResourceData, meta 
 
 	refinedTrackers, err := tracker.List(ctsClient, listOpts)
 	if err != nil {
-		return fmterr.Errorf("Unable to retrieve cts tracker: %s", err)
+		return fmterr.Errorf("unable to retrieve cts tracker: %s", err)
 	}
 
 	if len(refinedTrackers) < 1 {
@@ -112,17 +113,21 @@ func dataSourceCTSTrackerV1Read(_ context.Context, d *schema.ResourceData, meta 
 
 	d.SetId(trackers.TrackerName)
 
-	d.Set("tracker_name", trackers.TrackerName)
-	d.Set("bucket_name", trackers.BucketName)
-	d.Set("file_prefix_name", trackers.FilePrefixName)
-	d.Set("status", trackers.Status)
-	d.Set("is_support_smn", trackers.SimpleMessageNotification.IsSupportSMN)
-	d.Set("topic_id", trackers.SimpleMessageNotification.TopicID)
-	d.Set("is_send_all_key_operation", trackers.SimpleMessageNotification.IsSendAllKeyOperation)
-	d.Set("operations", trackers.SimpleMessageNotification.Operations)
-	d.Set("need_notify_user_list", trackers.SimpleMessageNotification.NeedNotifyUserList)
-
-	d.Set("region", config.GetRegion(d))
+	mErr := multierror.Append(
+		d.Set("tracker_name", trackers.TrackerName),
+		d.Set("bucket_name", trackers.BucketName),
+		d.Set("file_prefix_name", trackers.FilePrefixName),
+		d.Set("status", trackers.Status),
+		d.Set("is_support_smn", trackers.SimpleMessageNotification.IsSupportSMN),
+		d.Set("topic_id", trackers.SimpleMessageNotification.TopicID),
+		d.Set("is_send_all_key_operation", trackers.SimpleMessageNotification.IsSendAllKeyOperation),
+		d.Set("operations", trackers.SimpleMessageNotification.Operations),
+		d.Set("need_notify_user_list", trackers.SimpleMessageNotification.NeedNotifyUserList),
+		d.Set("region", config.GetRegion(d)),
+	)
+	if err := mErr.ErrorOrNil(); err != nil {
+		return diag.FromErr(err)
+	}
 
 	return nil
 }
