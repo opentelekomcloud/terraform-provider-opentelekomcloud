@@ -235,8 +235,7 @@ func resourceCTSTrackerDelete(ctx context.Context, d *schema.ResourceData, meta 
 		return fmterr.Errorf(clientError, err)
 	}
 
-	result := tracker.Delete(client)
-	if err := result.Err; err != nil {
+	if err := tracker.Delete(client).ExtractErr(); err != nil {
 		return diag.FromErr(err)
 	}
 	log.Printf("[DEBUG] Successfully deleted cts tracker %s", d.Id())
@@ -272,5 +271,3 @@ func resourceCTSNeedNotifyUserList(d *schema.ResourceData) []string {
 	}
 	return notify
 }
-
-const clientError = "error creating cts Client: %w"
