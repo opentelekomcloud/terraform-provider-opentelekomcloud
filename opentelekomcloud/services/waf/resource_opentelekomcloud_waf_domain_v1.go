@@ -92,9 +92,9 @@ func ResourceWafDomainV1() *schema.Resource {
 				Type:     schema.TypeString,
 				Optional: true,
 				Computed: true,
-				// ValidateFunc: validation.StringInSlice([]string{
-				// 	"cipher_default", "cipher_1", "cipher_2", "cipher_3",
-				// }, false),
+				ValidateFunc: validation.StringInSlice([]string{
+					"cipher_default", "cipher_1", "cipher_2", "cipher_3",
+				}, false),
 			},
 			"proxy": {
 				Type:     schema.TypeBool,
