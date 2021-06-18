@@ -39,17 +39,14 @@ func ResourceWafDomainV1() *schema.Resource {
 			"hostname": {
 				Type:     schema.TypeString,
 				Required: true,
-				ForceNew: true,
 			},
 			"certificate_id": {
 				Type:     schema.TypeString,
 				Optional: true,
-				ForceNew: false,
 			},
 			"server": {
 				Type:     schema.TypeList,
 				Required: true,
-				ForceNew: false,
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
 						"front_protocol": {
@@ -88,10 +85,12 @@ func ResourceWafDomainV1() *schema.Resource {
 			"tls": {
 				Type:     schema.TypeString,
 				Optional: true,
+				Computed: true,
 			},
 			"cipher": {
 				Type:     schema.TypeString,
 				Optional: true,
+				Computed: true,
 				// ValidateFunc: validation.StringInSlice([]string{
 				// 	"cipher_default", "cipher_1", "cipher_2", "cipher_3",
 				// }, false),
@@ -99,18 +98,17 @@ func ResourceWafDomainV1() *schema.Resource {
 			"proxy": {
 				Type:     schema.TypeBool,
 				Required: true,
-				ForceNew: false,
 			},
 			"sip_header_name": {
-				Type:         schema.TypeString,
-				Optional:     true,
-				ForceNew:     false,
-				ValidateFunc: validation.StringInSlice([]string{"", "default", "cloudflare", "akamai", "custom"}, true),
+				Type:     schema.TypeString,
+				Optional: true,
+				ValidateFunc: validation.StringInSlice([]string{
+					"", "default", "cloudflare", "akamai", "custom",
+				}, true),
 			},
 			"sip_header_list": {
 				Type:     schema.TypeList,
 				Optional: true,
-				ForceNew: false,
 				Elem: &schema.Schema{
 					Type: schema.TypeString,
 				},
@@ -170,13 +168,13 @@ func getAllServers(d *schema.ResourceData) ([]domains.ServerOpts, error) {
 		if err != nil {
 			return nil, fmt.Errorf("invalid WAF domain server port: %s", err)
 		}
-		v := domains.ServerOpts{
+		serverOpt := domains.ServerOpts{
 			ClientProtocol: cProtocol.(string),
 			ServerProtocol: sProtocol.(string),
 			Address:        server["address"].(string),
 			Port:           port,
 		}
-		serverOpts = append(serverOpts, v)
+		serverOpts = append(serverOpts, serverOpt)
 	}
 
 	log.Printf("[DEBUG] getAllServers: %#v", serverOpts)
@@ -185,31 +183,31 @@ func getAllServers(d *schema.ResourceData) ([]domains.ServerOpts, error) {
 
 func resourceWafDomainV1Create(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*cfg.Config)
-	wafClient, err := config.WafV1Client(config.GetRegion(d))
+	client, err := config.WafV1Client(config.GetRegion(d))
 	if err != nil {
-		return fmterr.Errorf("error creating OpenTelekomCloud WAF Client: %s", err)
+		return fmterr.Errorf(wafClientError, err)
 	}
 
 	var hosts []string
 	if v, ok := d.GetOk("policy_id"); ok {
-		policyId := v.(string)
-		policy, err := policies.Get(wafClient, policyId).Extract()
+		policyID := v.(string)
+		policy, err := policies.Get(client, policyID).Extract()
 		if err != nil {
-			return fmterr.Errorf("error retrieving OpenTelekomCloud Waf Policy %s: %s", policyId, err)
+			return fmterr.Errorf("error retrieving OpenTelekomCloud Waf Policy %s: %w", policyID, err)
 		}
 		hosts = append(hosts, policy.Hosts...)
 	}
 
-	v := d.Get("sip_header_list").([]interface{})
-	headers := make([]string, len(v))
-	for i, v := range v {
-		headers[i] = v.(string)
+	sipHeaderList := d.Get("sip_header_list").([]interface{})
+	headers := make([]string, len(sipHeaderList))
+	for i, header := range sipHeaderList {
+		headers[i] = header.(string)
 	}
 
 	proxy := d.Get("proxy").(bool)
 	servers, err := getAllServers(d)
 	if err != nil {
-		return fmterr.Errorf("error parsing servers: %s", err)
+		return fmterr.Errorf("error parsing servers: %w", err)
 	}
 	createOpts := domains.CreateOpts{
 		HostName:      d.Get("hostname").(string),
@@ -223,12 +221,11 @@ func resourceWafDomainV1Create(ctx context.Context, d *schema.ResourceData, meta
 	}
 	log.Printf("[DEBUG] CreateOpts: %#v", createOpts)
 
-	domain, err := domains.Create(wafClient, createOpts).Extract()
+	domain, err := domains.Create(client, createOpts).Extract()
 	if err != nil {
-		return fmterr.Errorf("error creating OpenTelekomcomCloud WAF Domain: %s", err)
+		return fmterr.Errorf("error creating OpenTelekomCloud WAF Domain: %w", err)
 	}
 
-	log.Printf("[DEBUG] Waf domain created: %#v", domain)
 	d.SetId(domain.Id)
 
 	if v, ok := d.GetOk("policy_id"); ok {
@@ -238,9 +235,9 @@ func resourceWafDomainV1Create(ctx context.Context, d *schema.ResourceData, meta
 		updateHostsOpts.Hosts = hosts
 		log.Printf("[DEBUG] Waf policy update Hosts: %#v", hosts)
 
-		_, err = policies.UpdateHosts(wafClient, policyId, updateHostsOpts).Extract()
+		_, err = policies.UpdateHosts(client, policyId, updateHostsOpts).Extract()
 		if err != nil {
-			return fmterr.Errorf("error updating OpenTelekomCloud WAF Policy Hosts: %s", err)
+			return fmterr.Errorf("error updating OpenTelekomCloud WAF Policy Hosts: %w", err)
 		}
 	}
 
@@ -248,13 +245,12 @@ func resourceWafDomainV1Create(ctx context.Context, d *schema.ResourceData, meta
 }
 
 func resourceWafDomainV1Read(_ context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-
 	config := meta.(*cfg.Config)
-	wafClient, err := config.WafV1Client(config.GetRegion(d))
+	client, err := config.WafV1Client(config.GetRegion(d))
 	if err != nil {
-		return fmterr.Errorf("error creating OpenTelekomCloud WAF client: %s", err)
+		return fmterr.Errorf(wafClientError, err)
 	}
-	n, err := domains.Get(wafClient, d.Id()).Extract()
+	n, err := domains.Get(client, d.Id()).Extract()
 
 	if err != nil {
 		if _, ok := err.(golangsdk.ErrDefault404); ok {
@@ -262,7 +258,7 @@ func resourceWafDomainV1Read(_ context.Context, d *schema.ResourceData, meta int
 			return nil
 		}
 
-		return fmterr.Errorf("error retrieving OpenTelekomCloud Waf Domain: %s", err)
+		return fmterr.Errorf("error retrieving OpenTelekomCloud Waf Domain: %w", err)
 	}
 
 	mErr := multierror.Append(nil,
@@ -286,9 +282,6 @@ func resourceWafDomainV1Read(_ context.Context, d *schema.ResourceData, meta int
 		d.Set("access_status", n.AccessStatus),
 		d.Set("protocol", n.Protocol),
 	)
-	if err := mErr.ErrorOrNil(); err != nil {
-		return fmterr.Errorf("error setting WAF fields: %s", err)
-	}
 
 	servers := make([]map[string]interface{}, len(n.Server))
 	for i, server := range n.Server {
@@ -300,14 +293,21 @@ func resourceWafDomainV1Read(_ context.Context, d *schema.ResourceData, meta int
 		servers[i]["address"] = server.Address
 		servers[i]["port"] = strconv.Itoa(server.Port)
 	}
-	return diag.FromErr(d.Set("server", servers))
+	mErr = multierror.Append(mErr,
+		d.Set("server", servers),
+	)
+	if err := mErr.ErrorOrNil(); err != nil {
+		return fmterr.Errorf("error setting WAF fields: %w", err)
+	}
+
+	return nil
 }
 
 func resourceWafDomainV1Update(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*cfg.Config)
-	wafClient, err := config.WafV1Client(config.GetRegion(d))
+	client, err := config.WafV1Client(config.GetRegion(d))
 	if err != nil {
-		return fmterr.Errorf("error creating OpenTelekomCloud WAF Client: %s", err)
+		return fmterr.Errorf(wafClientError, err)
 	}
 	var updateOpts domains.UpdateOpts
 
@@ -317,7 +317,7 @@ func resourceWafDomainV1Update(ctx context.Context, d *schema.ResourceData, meta
 	if d.HasChange("server") {
 		servers, err := getAllServers(d)
 		if err != nil {
-			return fmterr.Errorf("error parsing servers: %s", err)
+			return fmterr.Errorf("error parsing servers: %w", err)
 		}
 		updateOpts.Server = servers
 	}
@@ -329,10 +329,10 @@ func resourceWafDomainV1Update(ctx context.Context, d *schema.ResourceData, meta
 		updateOpts.SipHeaderName = d.Get("sip_header_name").(string)
 	}
 	if d.HasChange("sip_header_list") {
-		v := d.Get("sip_header_list").([]interface{})
-		headers := make([]string, len(v))
-		for i, v := range v {
-			headers[i] = v.(string)
+		sipHeaderList := d.Get("sip_header_list").([]interface{})
+		headers := make([]string, len(sipHeaderList))
+		for i, header := range sipHeaderList {
+			headers[i] = header.(string)
 		}
 		updateOpts.SipHeaderList = headers
 	}
@@ -346,23 +346,22 @@ func resourceWafDomainV1Update(ctx context.Context, d *schema.ResourceData, meta
 	}
 	log.Printf("[DEBUG] updateOpts: %#v", updateOpts)
 
-	_, err = domains.Update(wafClient, d.Id(), updateOpts).Extract()
+	_, err = domains.Update(client, d.Id(), updateOpts).Extract()
 	if err != nil {
-		return fmterr.Errorf("error updating OpenTelekomCloud WAF Domain: %s", err)
+		return fmterr.Errorf("error updating OpenTelekomCloud WAF Domain: %w", err)
 	}
 	return resourceWafDomainV1Read(ctx, d, meta)
 }
 
 func resourceWafDomainV1Delete(_ context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*cfg.Config)
-	wafClient, err := config.WafV1Client(config.GetRegion(d))
+	client, err := config.WafV1Client(config.GetRegion(d))
 	if err != nil {
-		return fmterr.Errorf("error creating OpenTelekomCloud WAF client: %s", err)
+		return fmterr.Errorf(wafClientError, err)
 	}
 
-	err = domains.Delete(wafClient, d.Id()).ExtractErr()
-	if err != nil {
-		return fmterr.Errorf("error deleting OpenTelekomCloud WAF Domain: %s", err)
+	if err := domains.Delete(client, d.Id()).ExtractErr(); err != nil {
+		return fmterr.Errorf("error deleting OpenTelekomCloud WAF Domain: %w", err)
 	}
 
 	d.SetId("")
