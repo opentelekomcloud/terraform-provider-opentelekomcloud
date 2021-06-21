@@ -9,7 +9,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
-	golangsdk "github.com/opentelekomcloud/gophertelekomcloud"
+	"github.com/opentelekomcloud/gophertelekomcloud"
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/common/tags"
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/compute/v2/extensions/secgroups"
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/compute/v2/servers"
@@ -142,6 +142,12 @@ func ResourceEcsInstanceV1() *schema.Resource {
 							Type:     schema.TypeInt,
 							Required: true,
 							ForceNew: true,
+						},
+						"kms_id": {
+							Type:        schema.TypeString,
+							Optional:    true,
+							ForceNew:    true,
+							DefaultFunc: schema.EnvDefaultFunc("OS_KMS_ID", nil),
 						},
 						"snapshot_id": {
 							Type:     schema.TypeString,
@@ -423,11 +429,11 @@ func resourceEcsInstanceV1Update(ctx context.Context, d *schema.ResourceData, me
 	return resourceEcsInstanceV1Read(ctx, d, meta)
 }
 
-func resourceEcsInstanceV1Delete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceEcsInstanceV1Delete(_ context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*cfg.Config)
 	client, err := config.ComputeV1Client(config.GetRegion(d))
 	if err != nil {
-		return fmterr.Errorf("error creating OpenTelekomCloud ComputeV1 client: %s", err)
+		return fmterr.Errorf("error creating OpenTelekomCloud ComputeV1 client: %w", err)
 	}
 
 	var serverRequests []cloudservers.Server
@@ -492,6 +498,12 @@ func resourceInstanceDataVolumesV1(d *schema.ResourceData) []cloudservers.DataVo
 		volRequest := cloudservers.DataVolume{
 			VolumeType: vol["type"].(string),
 			Size:       vol["size"].(int),
+		}
+		if kmsID := vol["kms_id"]; kmsID != "" {
+			volRequest.Metadata = map[string]interface{}{
+				"__system__cmkid":     kmsID,
+				"__system__encrypted": "1",
+			}
 		}
 		if vol["snapshot_id"] != "" {
 			extendParam := cloudservers.VolumeExtendParam{
