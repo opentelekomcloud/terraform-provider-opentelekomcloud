@@ -14,6 +14,7 @@ import (
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/compute/v2/extensions/secgroups"
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/compute/v2/servers"
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/ecs/v1/cloudservers"
+	"github.com/opentelekomcloud/gophertelekomcloud/openstack/evs/v3/volumes"
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/networking/v2/ports"
 
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common"
@@ -117,11 +118,13 @@ func ResourceEcsInstanceV1() *schema.Resource {
 				Type:     schema.TypeString,
 				Optional: true,
 				ForceNew: true,
+				Computed: true,
 			},
 			"system_disk_size": {
 				Type:     schema.TypeInt,
 				Optional: true,
 				ForceNew: true,
+				Computed: true,
 			},
 			"data_disks": {
 				Type:     schema.TypeList,
@@ -270,6 +273,33 @@ func resourceEcsInstanceV1Read(ctx context.Context, d *schema.ResourceData, meta
 	}
 	mErr = multierror.Append(mErr,
 		d.Set("security_groups", secGrpIDs),
+	)
+	evsClient, err := config.BlockStorageV3Client(config.GetRegion(d))
+	if err != nil {
+		return fmterr.Errorf("error creating OpenTelekomCloud EVSv3 client: %w", err)
+	}
+	var volumeList []map[string]interface{}
+	for _, v := range server.VolumeAttached {
+		disk, err := volumes.Get(evsClient, v.ID).Extract()
+		if err != nil {
+			return diag.FromErr(err)
+		}
+		if disk.Bootable == "true" {
+			mErr = multierror.Append(mErr,
+				d.Set("system_disk_size", disk.Size),
+				d.Set("system_disk_type", disk.VolumeType),
+			)
+			continue
+		}
+		dataVolume := make(map[string]interface{})
+		dataVolume["type"] = disk.VolumeType
+		dataVolume["size"] = disk.Size
+		dataVolume["kms_id"] = disk.Metadata["__system__cmkid"]
+		dataVolume["snapshot_id"] = disk.SnapshotID
+		volumeList = append(volumeList, dataVolume)
+	}
+	mErr = multierror.Append(mErr,
+		d.Set("data_disks", volumeList),
 	)
 
 	// Get the instance network and address information

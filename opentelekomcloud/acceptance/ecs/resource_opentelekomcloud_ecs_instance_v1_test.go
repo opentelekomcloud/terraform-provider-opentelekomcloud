@@ -15,7 +15,7 @@ import (
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common/cfg"
 )
 
-func TestAccEcsV1Instance_basic(t *testing.T) {
+func TestAccEcsV1InstanceBasic(t *testing.T) {
 	var instance cloudservers.CloudServer
 	resourceName := "opentelekomcloud_ecs_instance_v1.instance_1"
 
@@ -25,7 +25,7 @@ func TestAccEcsV1Instance_basic(t *testing.T) {
 		CheckDestroy:      testAccCheckEcsV1InstanceDestroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccEcsV1Instance_basic,
+				Config: testAccEcsV1InstanceBasic,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckEcsV1InstanceExists(resourceName, &instance),
 					resource.TestCheckResourceAttr(resourceName, "availability_zone", env.OS_AVAILABILITY_ZONE),
@@ -35,7 +35,7 @@ func TestAccEcsV1Instance_basic(t *testing.T) {
 				),
 			},
 			{
-				Config: testAccEcsV1Instance_update,
+				Config: testAccEcsV1InstanceUpdate,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckEcsV1InstanceExists(resourceName, &instance),
 					resource.TestCheckResourceAttr(resourceName, "availability_zone", env.OS_AVAILABILITY_ZONE),
@@ -48,23 +48,23 @@ func TestAccEcsV1Instance_basic(t *testing.T) {
 	})
 }
 
-func TestAccEcsV1Instance_diskTypeValidation(t *testing.T) {
+func TestAccEcsV1InstanceDiskTypeValidation(t *testing.T) {
 	resource.Test(t, resource.TestCase{
 		PreCheck:          func() { common.TestAccPreCheck(t) },
 		ProviderFactories: common.TestAccProviderFactories,
 		Steps: []resource.TestStep{
 			{
-				Config:      testAccEcsV1Instance_invalidTypeForAZ,
+				Config:      testAccEcsV1InstanceInvalidTypeForAZ,
 				PlanOnly:    true,
 				ExpectError: regexp.MustCompile(`volume type .+ is not supported in`),
 			},
 			{
-				Config:      testAccEcsV1Instance_invalidType,
+				Config:      testAccEcsV1InstanceInvalidType,
 				PlanOnly:    true,
 				ExpectError: regexp.MustCompile(`volume type .+ doesn't exist`),
 			},
 			{
-				Config:      testAccEcsV1Instance_invalidDataDisk,
+				Config:      testAccEcsV1InstanceInvalidDataDisk,
 				PlanOnly:    true,
 				ExpectError: regexp.MustCompile(`volume type .+ doesn't exist`),
 			},
@@ -72,18 +72,37 @@ func TestAccEcsV1Instance_diskTypeValidation(t *testing.T) {
 	})
 }
 
-func TestAccEcsV1Instance_VPCValidation(t *testing.T) {
+func TestAccEcsV1InstanceVPCValidation(t *testing.T) {
 	resource.Test(t, resource.TestCase{
 		PreCheck:          func() { common.TestAccPreCheck(t) },
 		ProviderFactories: common.TestAccProviderFactories,
 		Steps: []resource.TestStep{
 			{
-				Config:      testAccEcsV1Instance_invalidVPC,
+				Config:      testAccEcsV1InstanceInvalidVPC,
 				PlanOnly:    true,
 				ExpectError: regexp.MustCompile(`can't find VPC`),
 			},
 			{
-				Config: testAccEcsV1Instance_computedVPC,
+				Config: testAccEcsV1InstanceComputedVPC,
+			},
+		},
+	})
+}
+
+func TestAccEcsV1InstanceEncryption(t *testing.T) {
+	var instance cloudservers.CloudServer
+	resourceName := "opentelekomcloud_ecs_instance_v1.instance_1"
+
+	resource.Test(t, resource.TestCase{
+		PreCheck:          func() { common.TestAccPreCheck(t) },
+		ProviderFactories: common.TestAccProviderFactories,
+		CheckDestroy:      testAccCheckEcsV1InstanceDestroy,
+		Steps: []resource.TestStep{
+			{
+				Config: testAccEcsV1InstanceDataVolumeEncryption,
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckEcsV1InstanceExists(resourceName, &instance),
+				),
 			},
 		},
 	})
@@ -143,7 +162,7 @@ func testAccCheckEcsV1InstanceExists(n string, instance *cloudservers.CloudServe
 	}
 }
 
-var testAccEcsV1Instance_basic = fmt.Sprintf(`
+var testAccEcsV1InstanceBasic = fmt.Sprintf(`
 resource "opentelekomcloud_ecs_instance_v1" "instance_1" {
   name     = "server_1"
   image_id = "%s"
@@ -165,7 +184,7 @@ resource "opentelekomcloud_ecs_instance_v1" "instance_1" {
 }
 `, env.OS_IMAGE_ID, env.OS_VPC_ID, env.OS_NETWORK_ID, env.OS_AVAILABILITY_ZONE)
 
-var testAccEcsV1Instance_update = fmt.Sprintf(`
+var testAccEcsV1InstanceUpdate = fmt.Sprintf(`
 resource "opentelekomcloud_compute_secgroup_v2" "secgroup_1" {
   name        = "secgroup_ecs"
   description = "a security group"
@@ -193,7 +212,7 @@ resource "opentelekomcloud_ecs_instance_v1" "instance_1" {
 }
 `, env.OS_IMAGE_ID, env.OS_VPC_ID, env.OS_NETWORK_ID, env.OS_AVAILABILITY_ZONE)
 
-var testAccEcsV1Instance_invalidTypeForAZ = fmt.Sprintf(`
+var testAccEcsV1InstanceInvalidTypeForAZ = fmt.Sprintf(`
 resource "opentelekomcloud_ecs_instance_v1" "instance_1" {
   name     = "server_1"
   image_id = "%s"
@@ -217,7 +236,7 @@ resource "opentelekomcloud_ecs_instance_v1" "instance_1" {
 }
 `, env.OS_IMAGE_ID, env.OS_VPC_ID, env.OS_NETWORK_ID)
 
-var testAccEcsV1Instance_invalidType = fmt.Sprintf(`
+var testAccEcsV1InstanceInvalidType = fmt.Sprintf(`
 resource "opentelekomcloud_ecs_instance_v1" "instance_1" {
   name     = "server_1"
   image_id = "%s"
@@ -241,7 +260,7 @@ resource "opentelekomcloud_ecs_instance_v1" "instance_1" {
 }
 `, env.OS_IMAGE_ID, env.OS_VPC_ID, env.OS_NETWORK_ID)
 
-var testAccEcsV1Instance_invalidDataDisk = fmt.Sprintf(`
+var testAccEcsV1InstanceInvalidDataDisk = fmt.Sprintf(`
 resource "opentelekomcloud_ecs_instance_v1" "instance_1" {
   name     = "server_1"
   image_id = "%s"
@@ -268,7 +287,7 @@ resource "opentelekomcloud_ecs_instance_v1" "instance_1" {
 }
 `, env.OS_IMAGE_ID, env.OS_VPC_ID, env.OS_NETWORK_ID)
 
-var testAccEcsV1Instance_invalidVPC = fmt.Sprintf(`
+var testAccEcsV1InstanceInvalidVPC = fmt.Sprintf(`
 resource "opentelekomcloud_ecs_instance_v1" "instance_1" {
   name     = "server_1"
   image_id = "%s"
@@ -292,7 +311,7 @@ resource "opentelekomcloud_ecs_instance_v1" "instance_1" {
 }
 `, env.OS_IMAGE_ID, env.OS_NETWORK_ID)
 
-var testAccEcsV1Instance_computedVPC = fmt.Sprintf(`
+var testAccEcsV1InstanceComputedVPC = fmt.Sprintf(`
 resource "opentelekomcloud_vpc_v1" "vpc" {
   cidr = "192.168.0.0/16"
   name = "vpc-ecs-test"
@@ -327,3 +346,26 @@ resource "opentelekomcloud_ecs_instance_v1" "instance_1" {
   }
 }
 `, env.OS_IMAGE_ID)
+
+var testAccEcsV1InstanceDataVolumeEncryption = fmt.Sprintf(`
+resource "opentelekomcloud_ecs_instance_v1" "instance_1" {
+  name     = "server_1"
+  image_id = "%s"
+  flavor   = "s2.medium.1"
+  vpc_id   = "%s"
+
+  nics {
+    network_id = "%s"
+  }
+
+  password          = "Password@123"
+  availability_zone = "%s"
+  auto_recovery     = true
+
+  data_disks {
+    size   = 10
+    type   = "SAS"
+    kms_id = "%s"
+  }
+}
+`, env.OS_IMAGE_ID, env.OS_VPC_ID, env.OS_NETWORK_ID, env.OS_AVAILABILITY_ZONE, env.OS_KMS_ID)
