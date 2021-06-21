@@ -238,13 +238,14 @@ The `data_disks` block supports:
 * `size` - (Required) The size of the data disk in GB. The value range is 10 to 32768.
   Changing this creates a new server.
 
+* `kms_id` - (Optional) The Encryption KMS ID of the data disk.
+
 * `snapshot_id` - (Optional) Specifies the snapshot ID or ID of the original data disk contained in the full-ECS image.
   Changing this creates a new server.
 
-
 ## Attributes Reference
 
-The following attributes are exported:
+In addition to all arguments above, the following attributes are exported:
 
 * `id` - The ID of the server.
 * `nics/mac_address` - The MAC address of the NIC on that network.

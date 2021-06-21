@@ -102,6 +102,7 @@ func TestAccEcsV1InstanceEncryption(t *testing.T) {
 				Config: testAccEcsV1InstanceDataVolumeEncryption,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckEcsV1InstanceExists(resourceName, &instance),
+					resource.TestCheckResourceAttr(resourceName, "data_disks.0.kms_id", env.OS_KMS_ID),
 				),
 			},
 		},
