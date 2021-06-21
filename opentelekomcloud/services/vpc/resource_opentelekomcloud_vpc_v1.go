@@ -154,6 +154,8 @@ func resourceVirtualPrivateCloudV1Create(ctx context.Context, d *schema.Resource
 		return diag.FromErr(err)
 	}
 
+	d.SetId(n.ID)
+
 	return resourceVirtualPrivateCloudV1Read(ctx, d, meta)
 
 }
@@ -175,7 +177,6 @@ func resourceVirtualPrivateCloudV1Read(_ context.Context, d *schema.ResourceData
 		return fmterr.Errorf("error retrieving OpenTelekomCloud Vpc: %s", err)
 	}
 
-	d.Set("id", n.ID)
 	d.Set("name", n.Name)
 	d.Set("cidr", n.CIDR)
 	d.Set("status", n.Status)
