@@ -188,7 +188,7 @@ func resourceEcsInstanceV1Create(ctx context.Context, d *schema.ResourceData, me
 	config := meta.(*cfg.Config)
 	client, err := config.ComputeV1Client(config.GetRegion(d))
 	if err != nil {
-		return fmterr.Errorf(ecsClientError, err)
+		return fmterr.Errorf(errCreateClient, err)
 	}
 
 	createOpts := &cloudservers.CreateOpts{
@@ -250,7 +250,7 @@ func resourceEcsInstanceV1Read(ctx context.Context, d *schema.ResourceData, meta
 	config := meta.(*cfg.Config)
 	client, err := config.ComputeV1Client(config.GetRegion(d))
 	if err != nil {
-		return fmterr.Errorf(ecsClientError, err)
+		return fmterr.Errorf(errCreateClient, err)
 	}
 
 	server, err := cloudservers.Get(client, d.Id()).Extract()
@@ -291,11 +291,12 @@ func resourceEcsInstanceV1Read(ctx context.Context, d *schema.ResourceData, meta
 			)
 			continue
 		}
-		dataVolume := make(map[string]interface{})
-		dataVolume["type"] = disk.VolumeType
-		dataVolume["size"] = disk.Size
-		dataVolume["kms_id"] = disk.Metadata["__system__cmkid"]
-		dataVolume["snapshot_id"] = disk.SnapshotID
+		dataVolume := map[string]interface{}{
+			"type":        disk.VolumeType,
+			"size":        disk.Size,
+			"kms_id":      disk.Metadata["__system__cmkid"],
+			"snapshot_id": disk.SnapshotID,
+		}
 		volumeList = append(volumeList, dataVolume)
 	}
 	mErr = multierror.Append(mErr,
@@ -436,7 +437,7 @@ func resourceEcsInstanceV1Update(ctx context.Context, d *schema.ResourceData, me
 	if d.HasChange("tags") {
 		computeClient, err := config.ComputeV1Client(config.GetRegion(d))
 		if err != nil {
-			return fmterr.Errorf(ecsClientError, err)
+			return fmterr.Errorf(errCreateClient, err)
 		}
 		if err := common.UpdateResourceTags(computeClient, d, "cloudservers", d.Id()); err != nil {
 			return fmterr.Errorf("error updating tags of CloudServer %s: %w", d.Id(), err)
@@ -458,7 +459,7 @@ func resourceEcsInstanceV1Delete(_ context.Context, d *schema.ResourceData, meta
 	config := meta.(*cfg.Config)
 	client, err := config.ComputeV1Client(config.GetRegion(d))
 	if err != nil {
-		return fmterr.Errorf(ecsClientError, err)
+		return fmterr.Errorf(errCreateClient, err)
 	}
 
 	var serverRequests []cloudservers.Server
