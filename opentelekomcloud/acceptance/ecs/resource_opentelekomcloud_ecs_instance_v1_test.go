@@ -174,6 +174,11 @@ resource "opentelekomcloud_ecs_instance_v1" "instance_1" {
     network_id = "%s"
   }
 
+  data_disks {
+    size = 10
+    type = "SAS"
+  }
+
   password          = "Password@123"
   availability_zone = "%s"
   auto_recovery     = true
@@ -199,6 +204,11 @@ resource "opentelekomcloud_ecs_instance_v1" "instance_1" {
 
   nics {
     network_id = "%s"
+  }
+
+  data_disks {
+    size = 10
+    type = "SAS"
   }
 
   password                    = "Password@123"
