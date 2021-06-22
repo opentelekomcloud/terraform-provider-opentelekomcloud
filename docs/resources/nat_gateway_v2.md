@@ -31,7 +31,7 @@ The following arguments are supported:
 * `tenant_id` - (Optional) The target tenant ID in which to allocate the nat
   gateway. Changing this creates a new nat gateway.
 
-* `router_id` - (Required) ID of the router this nat gateway belongs to. Changing
+* `router_id` - (Required) ID of the router (or VPC) this nat gateway belongs to. Changing
   this creates a new nat gateway.
 
 * `internal_network_id` - (Required) ID of the network this nat gateway connects to.
