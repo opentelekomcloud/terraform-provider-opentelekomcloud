@@ -115,7 +115,7 @@ func TestAccObsBucketObject_nothing(t *testing.T) {
 				PreConfig:   func() {},
 				Config:      testAccObsBucketObject_configNothing(rInt),
 				PlanOnly:    true,
-				ExpectError: regexp.MustCompile("-.+one\\sof\\s`content,source`\\smust\\sbe\\sspecified\\n"),
+				ExpectError: regexp.MustCompile("one of `content,source` must be specified"),
 			},
 		},
 	})
