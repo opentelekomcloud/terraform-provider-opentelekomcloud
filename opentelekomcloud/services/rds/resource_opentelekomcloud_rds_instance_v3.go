@@ -766,6 +766,7 @@ func resourceRdsInstanceV3Read(_ context.Context, d *schema.ResourceData, meta i
 	}
 
 	var nodesList []map[string]interface{}
+	var availabilityZones []string
 	for _, nodeObj := range rdsInstance.Nodes {
 		node := make(map[string]interface{})
 		node["id"] = nodeObj.Id
@@ -774,9 +775,13 @@ func resourceRdsInstanceV3Read(_ context.Context, d *schema.ResourceData, meta i
 		node["availability_zone"] = nodeObj.AvailabilityZone
 		node["status"] = nodeObj.Status
 		nodesList = append(nodesList, node)
+		availabilityZones = append(availabilityZones, nodeObj.AvailabilityZone)
 	}
 	if err := d.Set("nodes", nodesList); err != nil {
 		return fmterr.Errorf("error setting node list: %s", err)
+	}
+	if err := d.Set("availability_zone", availabilityZones); err != nil {
+		return diag.FromErr(err)
 	}
 
 	var backupStrategyList []map[string]interface{}
