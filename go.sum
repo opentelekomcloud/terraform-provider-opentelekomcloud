@@ -284,8 +284,8 @@ github.com/nsf/jsondiff v0.0.0-20200515183724-f29ed568f4ce h1:RPclfga2SEJmgMmz2k
 github.com/nsf/jsondiff v0.0.0-20200515183724-f29ed568f4ce/go.mod h1:uFMI8w+ref4v2r9jz+c9i1IfIttS/OkmLfrk1jne5hs=
 github.com/oklog/run v1.0.0 h1:Ru7dDtJNOyC66gQ5dQmaCa0qIsAUFY3sFpK1Xk8igrw=
 github.com/oklog/run v1.0.0/go.mod h1:dlhp/R75TPv97u0XWUtDeV/lRKWPKSdTuV0TZvrmrQA=
-github.com/opentelekomcloud/gophertelekomcloud v0.4.2-0.20210618152005-46781edf65ae h1:RSozA5I98/YXi8fhkL13EP9zuVvGJYM5yugtXryKJxU=
-github.com/opentelekomcloud/gophertelekomcloud v0.4.2-0.20210618152005-46781edf65ae/go.mod h1:pzEP1kduNwv+hrI9R6/DFU/NiX7Kr9NiFjpQ7kJQTsM=
+github.com/opentelekomcloud/gophertelekomcloud v0.4.2-0.20210622094501-cd9fc52405ca h1:Xuys88S5TAQ1RTZv35hb/Y+c6Y6LVPGbNRRMNgOgaSk=
+github.com/opentelekomcloud/gophertelekomcloud v0.4.2-0.20210622094501-cd9fc52405ca/go.mod h1:pzEP1kduNwv+hrI9R6/DFU/NiX7Kr9NiFjpQ7kJQTsM=
 github.com/pierrec/lz4 v2.0.5+incompatible/go.mod h1:pdkljMzZIN41W+lC3N2tnIh5sFi+IEE17M5jbnwPHcY=
 github.com/pkg/errors v0.8.1/go.mod h1:bwawxfHBFNV+L2hUp1rHADufV3IMtnDRdf1r5NINEl0=
 github.com/pkg/errors v0.9.1 h1:FEBLx1zS214owpjy7qsBeixbURkuhQAwrK5UwLGTwt4=

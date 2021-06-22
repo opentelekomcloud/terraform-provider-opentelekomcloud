@@ -95,11 +95,16 @@ func ResourceObsBucket() *schema.Resource {
 						"expiration": {
 							Type:     schema.TypeSet,
 							Optional: true,
+							MaxItems: 1,
 							Elem: &schema.Resource{
 								Schema: map[string]*schema.Schema{
 									"days": {
 										Type:     schema.TypeInt,
-										Required: true,
+										Optional: true,
+									},
+									"expired_object_delete_marker": {
+										Type:     schema.TypeBool,
+										Optional: true,
 									},
 								},
 							},
@@ -602,6 +607,8 @@ func mapToRule(src map[string]interface{}) (rule obs.LifecycleRule) {
 
 		if val, ok := raw["days"].(int); ok && val > 0 {
 			exp.Days = val
+		} else if val, ok := raw["expired_object_delete_marker"].(bool); ok && val {
+			exp.ExpiredObjectDeleteMarker = true
 		}
 	}
 
@@ -920,6 +927,10 @@ func ruleToMap(src obs.LifecycleRule) map[string]interface{} {
 	if days := src.Expiration.Days; days > 0 {
 		expiration := make(map[string]interface{})
 		expiration["days"] = days
+		rule["expiration"] = schema.NewSet(s3.ExpirationHash, []interface{}{expiration})
+	} else if src.Expiration.ExpiredObjectDeleteMarker {
+		expiration := make(map[string]interface{})
+		expiration["expired_object_delete_marker"] = true
 		rule["expiration"] = schema.NewSet(s3.ExpirationHash, []interface{}{expiration})
 	}
 	// transition

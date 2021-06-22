@@ -419,6 +419,20 @@ resource "opentelekomcloud_obs_bucket" "bucket" {
       storage_class = "COLD"
     }
   }
+
+  lifecycle_rule {
+    name    = "rule-delete"
+    prefix  = "logs"
+    enabled = true
+
+    expiration {
+      expired_object_delete_marker = true
+    }
+
+    noncurrent_version_expiration {
+      days = 30
+    }
+  }
 }
 `, randInt)
 }
