@@ -285,7 +285,7 @@ func resourceObsBucketCreate(ctx context.Context, d *schema.ResourceData, meta i
 		ACL:          obs.AclType(acl),
 		StorageClass: obs.StorageClassType(class),
 	}
-	opts.Location = d.Get("region").(string)
+	opts.Location = config.GetRegion(d)
 	log.Printf("[DEBUG] OBS bucket create opts: %#v", opts)
 
 	_, err = client.CreateBucket(opts)
