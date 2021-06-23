@@ -412,7 +412,93 @@ func resourceRdsInstanceV3Create(ctx context.Context, d *schema.ResourceData, me
 		}
 	}
 
+	if err := assureTemplateApplied(client, d); err != nil {
+		return fmterr.Errorf("error making sure configuration template is applied: %w", err)
+	}
+
 	return resourceRdsInstanceV3Read(ctx, d, meta)
+}
+
+func assureTemplateApplied(client *golangsdk.ServiceClient, d *schema.ResourceData) error {
+	templateID := d.Get("param_group_id").(string)
+	if templateID == "" {
+		return nil
+	}
+
+	applied, err := configurations.Get(client, templateID).Extract()
+	if err != nil {
+		return fmt.Errorf("error getting parameter template %s: %w", templateID, err)
+	}
+	// convert to the map
+	appliedParams := make(map[string]configurations.Parameter, len(applied.Parameters))
+	for _, param := range applied.Parameters {
+		appliedParams[param.Name] = param
+	}
+
+	current, err := configurations.GetForInstance(client, d.Id()).Extract()
+	if err != nil {
+		return fmt.Errorf("error getting configuration of instance %s: %w", d.Id(), err)
+	}
+
+	needsReapply := false
+	for _, val := range current.Parameters {
+		param, ok := appliedParams[val.Name]
+		if !ok { // than it's not from the template
+			continue
+		}
+		if val.Value != param.Value {
+			needsReapply = true
+			break // that's enough
+		}
+	}
+	if !needsReapply {
+		return nil
+	}
+
+	return applyAndRestart(client, d)
+}
+
+func applyAndRestart(client *golangsdk.ServiceClient, d *schema.ResourceData) error {
+	templateID := d.Get("param_group_id").(string)
+	applyResult, err := configurations.Apply(client, templateID, configurations.ApplyOpts{
+		InstanceIDs: []string{d.Id()},
+	}).Extract()
+	if err != nil {
+		return fmt.Errorf("error applying configuration %s to instance %s: %w", templateID, d.Id(), err)
+	}
+	restartRequired := false
+	switch l := len(applyResult.ApplyResults); l {
+	case 0:
+		return fmt.Errorf("empty appply results")
+	case 1:
+		result := applyResult.ApplyResults[0]
+		if !result.Success {
+			return fmt.Errorf("unsuccessful apply of template instance %s", result.InstanceID)
+		}
+		restartRequired = result.RestartRequired
+	default:
+		return fmt.Errorf("more that one apply result returned: %#v", applyResult.ApplyResults)
+	}
+
+	if !restartRequired {
+		return nil
+	}
+
+	waitSeconds := int(d.Timeout(schema.TimeoutCreate).Seconds())
+	err = instances.WaitForStateAvailable(client, waitSeconds, d.Id())
+	if err != nil {
+		return err
+	}
+
+	job, err := instances.Restart(client, instances.RestartRdsInstanceOpts{Restart: "{}"}, d.Id()).Extract()
+	if err != nil {
+		return fmt.Errorf("error restarting RDS instance: %w", err)
+	}
+	timeout := d.Timeout(schema.TimeoutCreate)
+	if err := instances.WaitForJobCompleted(client, int(timeout.Seconds()), job.JobId); err != nil {
+		return fmt.Errorf("error waiting for instance to reboot: %w", err)
+	}
+	return nil
 }
 
 func GetRdsInstance(rdsClient *golangsdk.ServiceClient, rdsId string) (*instances.RdsInstanceResponse, error) {
@@ -688,7 +774,6 @@ func resourceRdsInstanceV3Update(ctx context.Context, d *schema.ResourceData, me
 		switch len(newIPs) {
 		case 0:
 			err = unAssignEipFromInstance(nwClient, oldIPs[0].(string)) // if it become 0, it was 1 before
-			break
 		case 1:
 			if len(oldIPs) > 0 {
 				err = unAssignEipFromInstance(nwClient, oldIPs[0].(string))
@@ -702,7 +787,6 @@ func resourceRdsInstanceV3Update(ctx context.Context, d *schema.ResourceData, me
 				return diag.FromErr(err)
 			}
 			err = assignEipToInstance(nwClient, newIPs[0].(string), privateIP, subnetID)
-			break
 		default:
 			return fmterr.Errorf("RDS instance can't have more than one public IP")
 		}

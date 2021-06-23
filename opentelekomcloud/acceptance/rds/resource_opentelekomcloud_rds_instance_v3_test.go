@@ -444,24 +444,24 @@ func testAccRdsInstanceV3ConfigTemplateBasic(postfix string) string {
 resource "opentelekomcloud_rds_parametergroup_v3" "pg" {
 	name = "pg-rds-test"
 	values = {
-		max_connections = "10"
+		max_connections = "100"
 		autocommit = "OFF"
 	}
 	datastore {
 		type = "postgresql"
-		version = "10"
+		version = "12"
 	}
 }
 
 resource "opentelekomcloud_rds_parametergroup_v3" "pg2" {
 	name = "pg-rds-test-2"
 	values = {
-		max_connections = "10"
+		max_connections = "100"
 		autocommit = "OFF"
 	}
 	datastore {
 		type = "postgresql"
-		version = "10"
+		version = "12"
 	}
 }
 
@@ -475,7 +475,7 @@ resource "opentelekomcloud_rds_instance_v3" "instance" {
   db {
     password = "Postgres!120521"
     type     = "PostgreSQL"
-    version  = "10"
+    version  = "12"
   }
   security_group_id  = opentelekomcloud_networking_secgroup_v2.sg.id
   subnet_id          = "%s"
@@ -495,7 +495,7 @@ func testAccRdsInstanceV3ConfigTemplateUpdate(postfix string) string {
 resource "opentelekomcloud_rds_parametergroup_v3" "pg" {
 	name = "pg-rds-test"
 	values = {
-		max_connections = "10"
+		max_connections = "100"
 		autocommit = "OFF"
 	}
 	datastore {
@@ -507,7 +507,7 @@ resource "opentelekomcloud_rds_parametergroup_v3" "pg" {
 resource "opentelekomcloud_rds_parametergroup_v3" "pg2" {
 	name = "pg-rds-test-2"
 	values = {
-		max_connections = "10"
+		max_connections = "100"
 		autocommit = "OFF"
 	}
 	datastore {
@@ -526,7 +526,7 @@ resource "opentelekomcloud_rds_instance_v3" "instance" {
   db {
     password = "Postgres!120521"
     type     = "PostgreSQL"
-    version  = "10"
+    version  = "12"
   }
   security_group_id  = opentelekomcloud_networking_secgroup_v2.sg.id
   subnet_id          = "%s"
