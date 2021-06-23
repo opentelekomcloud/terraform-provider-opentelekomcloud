@@ -18,10 +18,10 @@ const resourceName = "opentelekomcloud_images_member_v2.member_1"
 func TestAccImagesMemberV2Basic(t *testing.T) {
 	var member members.Member
 
-	var projectName2 = os.Getenv("OS_PROJECT_NAME_2")
+	var shareProjectID = os.Getenv("OS_PROJECT_ID_2")
 	var privateImageID = os.Getenv("OS_PRIVATE_IMAGE_ID")
-	if projectName2 == "" || privateImageID == "" {
-		t.Skip("OS_PROJECT_NAME_2 or OS_PRIVATE_IMAGE_ID are empty")
+	if shareProjectID == "" || privateImageID == "" {
+		t.Skip("OS_PROJECT_ID_2 or OS_PRIVATE_IMAGE_ID are empty")
 	}
 	resource.Test(t, resource.TestCase{
 		PreCheck:          func() { common.TestAccPreCheck(t) },
@@ -29,7 +29,7 @@ func TestAccImagesMemberV2Basic(t *testing.T) {
 		CheckDestroy:      testAccCheckImagesMemberV2Destroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccImagesMemberV2Basic(projectName2, privateImageID),
+				Config: testAccImagesMemberV2Basic(shareProjectID, privateImageID),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckImagesMemberV2Exists(resourceName, &member),
 					resource.TestCheckResourceAttr(resourceName, "status", "pending"),
