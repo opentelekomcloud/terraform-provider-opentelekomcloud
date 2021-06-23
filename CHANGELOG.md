@@ -1,5 +1,19 @@
 ## 1.25.0 (Unreleased)
 
+## 1.24.2 (June 23 2021)
+
+ENHANCEMENTS:
+* `resource/opentelekomcloud_waf_certificate_v1`: Add possibility to configure TLS ([#1132](https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/issues/1132))
+* `resource/opentelekomcloud_ecs_instance_v1`: Add possibility to encrypt `data_volumes` ([#1135](https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/issues/1135))
+
+BUG FIXES:
+* `provider`: Store temporary AK/SK in OBS client only ([#1133](https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/issues/1133))
+* `resource/opentelekomcloud_rds_instance_v3`: Fix not setting `availability_zone` during import/refresh ([#1137](https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/issues/1137))
+* `resource/opentelekomcloud_obs_bucket`: Fix not creating bucket for `eu-nl` region ([#1139](https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/issues/1139))
+* `resource/opentelekomcloud_rds_instance_v3`: Fix configuration template applied partially ([#1150](https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/issues/1150))
+
+DOCUMENTATION:
+* `resources/opentelekomcloud_nat_gateway_v2`: Note that `router_id` can be a VPC ID ([#1140](https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/issues/1140))
 
 ## 1.24.1 (June 17, 2021)
 
