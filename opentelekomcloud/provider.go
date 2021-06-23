@@ -342,6 +342,7 @@ func Provider() *schema.Provider {
 			"opentelekomcloud_identity_role_assignment_v3":        iam.ResourceIdentityRoleAssignmentV3(),
 			"opentelekomcloud_identity_user_v3":                   iam.ResourceIdentityUserV3(),
 			"opentelekomcloud_images_image_v2":                    ims.ResourceImagesImageV2(),
+			"opentelekomcloud_images_member_v2":                   ims.ResourceImagesMemberV2(),
 			"opentelekomcloud_ims_data_image_v2":                  ims.ResourceImsDataImageV2(),
 			"opentelekomcloud_ims_image_v2":                       ims.ResourceImsImageV2(),
 			"opentelekomcloud_kms_key_v1":                         kms.ResourceKmsKeyV1(),
