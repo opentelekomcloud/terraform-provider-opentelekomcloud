@@ -2,6 +2,7 @@ package acceptance
 
 import (
 	"fmt"
+	"os"
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
@@ -14,6 +15,12 @@ import (
 
 func TestAccImagesImageAccessAcceptV2_basic(t *testing.T) {
 	var member members.Member
+	acceptResourceName := "opentelekomcloud_images_image_access_accept_v2.accept_1"
+	privateImageID := os.Getenv("OS_PRIVATE_IMAGE_ID")
+	shareProjectID := os.Getenv("OS_PROJECT_ID_2")
+	if privateImageID == "" || shareProjectID == "" {
+		t.Skip("OS_PRIVATE_IMAGE_ID or OS_PROJECT_ID_2 are empty, but test requires")
+	}
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:          func() { common.TestAccPreCheck(t) },
@@ -21,23 +28,19 @@ func TestAccImagesImageAccessAcceptV2_basic(t *testing.T) {
 		CheckDestroy:      testAccCheckImagesImageAccessAcceptV2Destroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccImagesImageAccessAcceptV2Basic(),
+				Config: testAccImagesImageAccessAcceptV2Basic(privateImageID, shareProjectID),
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckImagesImageAccessV2Exists("openstack_images_image_access_accept_v2.image_access_accept_1", &member),
-					resource.TestCheckResourceAttrPtr(
-						"openstack_images_image_access_accept_v2.image_access_accept_1", "status", &member.Status),
-					resource.TestCheckResourceAttr(
-						"openstack_images_image_access_accept_v2.image_access_accept_1", "status", "accepted"),
+					testAccCheckImagesImageAccessV2Exists(acceptResourceName, &member),
+					resource.TestCheckResourceAttrPtr(acceptResourceName, "status", &member.Status),
+					resource.TestCheckResourceAttr(acceptResourceName, "status", "accepted"),
 				),
 			},
 			{
-				Config: testAccImagesImageAccessAcceptV2Update(),
+				Config: testAccImagesImageAccessAcceptV2Update(privateImageID, shareProjectID),
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckImagesImageAccessV2Exists("openstack_images_image_access_accept_v2.image_access_accept_1", &member),
-					resource.TestCheckResourceAttrPtr(
-						"openstack_images_image_access_accept_v2.image_access_accept_1", "status", &member.Status),
-					resource.TestCheckResourceAttr(
-						"openstack_images_image_access_accept_v2.image_access_accept_1", "status", "rejected"),
+					testAccCheckImagesImageAccessV2Exists(acceptResourceName, &member),
+					resource.TestCheckResourceAttrPtr(acceptResourceName, "status", &member.Status),
+					resource.TestCheckResourceAttr(acceptResourceName, "status", "rejected"),
 				),
 			},
 		},
@@ -48,11 +51,11 @@ func testAccCheckImagesImageAccessAcceptV2Destroy(s *terraform.State) error {
 	config := common.TestAccProvider.Meta().(*cfg.Config)
 	client, err := config.ImageV2Client(env.OS_REGION_NAME)
 	if err != nil {
-		return fmt.Errorf("error creating OpenStack IMSv2: %w", err)
+		return fmt.Errorf("error creating OpenTelekomCloud IMSv2: %w", err)
 	}
 
 	for _, rs := range s.RootModule().Resources {
-		if rs.Type != "openstack_images_image_access_accept_v2" {
+		if rs.Type != "opentelekomcloud_images_image_access_accept_v2" {
 			continue
 		}
 
@@ -70,42 +73,30 @@ func testAccCheckImagesImageAccessAcceptV2Destroy(s *terraform.State) error {
 	return nil
 }
 
-const testAccImagesImageAccessAcceptV2 = `
-data "openstack_identity_auth_scope_v3" "scope" {
-  name = "scope"
-}
-resource "openstack_images_image_v2" "image_1" {
-  name   = "CirrOS-tf_1"
-  image_source_url = "http://download.cirros-cloud.net/0.3.5/cirros-0.3.5-x86_64-disk.img"
-  container_format = "bare"
-  disk_format = "qcow2"
-  visibility = "shared"
-  timeouts {
-    create = "10m"
-  }
-}
-resource "openstack_images_image_access_v2" "image_access_1" {
-  image_id  = "${openstack_images_image_v2.image_1.id}"
-  member_id = "${data.openstack_identity_auth_scope_v3.scope.project_id}"
-}
-`
-
-func testAccImagesImageAccessAcceptV2Basic() string {
+func testAccImagesImageAccessAcceptV2Basic(privateImageID, projectToShare string) string {
 	return fmt.Sprintf(`
-%s
-resource "openstack_images_image_access_accept_v2" "image_access_accept_1" {
-  image_id  = "${openstack_images_image_access_v2.image_access_1.image_id}"
+resource "opentelekomcloud_images_image_access_v2" "access_1" {
+  image_id  = "%[1]s"
+  member_id = "%s"
+}
+
+resource "opentelekomcloud_images_image_access_accept_v2" "accept_1" {
+  image_id  = "%[1]s"
   status    = "accepted"
 }
-`, testAccImagesImageAccessAcceptV2)
+`, privateImageID, projectToShare)
 }
 
-func testAccImagesImageAccessAcceptV2Update() string {
+func testAccImagesImageAccessAcceptV2Update(privateImageID, projectToShare string) string {
 	return fmt.Sprintf(`
-%s
-resource "openstack_images_image_access_accept_v2" "image_access_accept_1" {
-  image_id  = "${openstack_images_image_access_v2.image_access_1.image_id}"
+resource "opentelekomcloud_images_image_access_v2" "access_1" {
+  image_id  = "%[1]s"
+  member_id = "%s"
+}
+
+resource "opentelekomcloud_images_image_access_accept_v2" "accept_1" {
+  image_id  = "%[1]s"
   status    = "rejected"
 }
-`, testAccImagesImageAccessAcceptV2)
+`, privateImageID, projectToShare)
 }

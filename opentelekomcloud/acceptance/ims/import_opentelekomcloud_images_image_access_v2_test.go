@@ -12,7 +12,7 @@ import (
 func TestAccImagesImageAccessV2ImportBasic(t *testing.T) {
 	memberName := "data.opentelekomcloud_identity_auth_scope_v3.scope"
 	imageName := "opentelekomcloud_images_image_v2.image_1"
-	resourceName := "opentelekomcloud_images_image_access_v2.image_access_1"
+	accessResourceName := "opentelekomcloud_images_image_access_v2.access_1"
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:          func() { common.TestAccPreCheck(t) },
@@ -23,7 +23,7 @@ func TestAccImagesImageAccessV2ImportBasic(t *testing.T) {
 				Config: testAccImagesImageAccessV2Basic(),
 			},
 			{
-				ResourceName:      resourceName,
+				ResourceName:      accessResourceName,
 				ImportState:       true,
 				ImportStateVerify: true,
 				ImportStateIdFunc: testAccImagesImageAccessV2ImportID(imageName, memberName),

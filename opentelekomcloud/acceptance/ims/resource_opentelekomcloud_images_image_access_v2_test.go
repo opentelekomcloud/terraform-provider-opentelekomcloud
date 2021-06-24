@@ -2,7 +2,7 @@ package acceptance
 
 import (
 	"fmt"
-	"strings"
+	"os"
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
@@ -13,10 +13,15 @@ import (
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common/cfg"
 )
 
-const resourceName = "opentelekomcloud_images_image_access_v2.image_access_1"
-
 func TestAccImagesImageAccessV2_basic(t *testing.T) {
 	var member members.Member
+	accessResourceName := "opentelekomcloud_images_image_access_v2.access_1"
+
+	privateImageID := os.Getenv("OS_PRIVATE_IMAGE_ID")
+	shareProjectID := os.Getenv("OS_PROJECT_ID_2")
+	if privateImageID == "" || shareProjectID == "" {
+		t.Skip("OS_PRIVATE_IMAGE_ID or OS_PROJECT_ID_2 are empty, but test requires")
+	}
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:          func() { common.TestAccPreCheck(t) },
@@ -24,19 +29,19 @@ func TestAccImagesImageAccessV2_basic(t *testing.T) {
 		CheckDestroy:      testAccCheckImagesImageAccessV2Destroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccImagesImageAccessV2Basic(),
+				Config: testAccImagesImageAccessV2Basic(privateImageID, shareProjectID),
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckImagesImageAccessV2Exists(resourceName, &member),
-					resource.TestCheckResourceAttrPtr(resourceName, "status", &member.Status),
-					resource.TestCheckResourceAttr(resourceName, "status", "pending"),
+					testAccCheckImagesImageAccessV2Exists(accessResourceName, &member),
+					resource.TestCheckResourceAttrPtr(accessResourceName, "status", &member.Status),
+					resource.TestCheckResourceAttr(accessResourceName, "status", "pending"),
 				),
 			},
 			{
-				Config: testAccImagesImageAccessV2Update(),
+				Config: testAccImagesImageAccessV2Update(privateImageID, shareProjectID),
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckImagesImageAccessV2Exists(resourceName, &member),
-					resource.TestCheckResourceAttrPtr(resourceName, "status", &member.Status),
-					resource.TestCheckResourceAttr(resourceName, "status", "accepted"),
+					testAccCheckImagesImageAccessV2Exists(accessResourceName, &member),
+					resource.TestCheckResourceAttrPtr(accessResourceName, "status", &member.Status),
+					resource.TestCheckResourceAttr(accessResourceName, "status", "accepted"),
 				),
 			},
 		},
@@ -107,47 +112,21 @@ func testAccCheckImagesImageAccessV2Exists(n string, member *members.Member) res
 	}
 }
 
-const testAccImagesImageAccessV2 = `
-data "opentelekomcloud_identity_auth_scope_v3" "scope" {
-  name = "scope"
-}
-resource "opentelekomcloud_images_image_v2" "image_1" {
-  name             = "CirrOS-tf_1"
-  image_source_url = "https://download.cirros-cloud.net/0.3.5/cirros-0.3.5-x86_64-disk.img"
-  container_format = "bare"
-  disk_format      = "qcow2"
-  visibility       = "shared"
-}`
-
-func testAccImagesImageAccessV2Basic() string {
+func testAccImagesImageAccessV2Basic(privateImageID, projectToShare string) string {
 	return fmt.Sprintf(`
-%s
-resource "opentelekomcloud_images_image_access_v2" "image_access_1" {
-  image_id  = opentelekomcloud_images_image_v2.image_1.id
-  member_id = data.opentelekomcloud_identity_auth_scope_v3.scope.project_id
+resource "opentelekomcloud_images_image_access_v2" "access_1" {
+  image_id  = "%s"
+  member_id = "%s"
 }
-`, testAccImagesImageAccessV2)
+`, privateImageID, projectToShare)
 }
 
-func testAccImagesImageAccessV2Update() string {
+func testAccImagesImageAccessV2Update(privateImageID, projectToShare string) string {
 	return fmt.Sprintf(`
-%s
-resource "opentelekomcloud_images_image_access_v2" "image_access_1" {
-  image_id  = openstack_images_image_v2.image_1.id
-  member_id = data.opentelekomcloud_identity_auth_scope_v3.scope.project_id
+resource "opentelekomcloud_images_image_access_v2" "access_1" {
+  image_id  = "%s"
+  member_id = "%s"
   status    = "accepted"
 }
-`, testAccImagesImageAccessV2)
-}
-
-func resourceImagesImageAccessV2ParseID(id string) (string, string, error) {
-	idParts := strings.Split(id, "/")
-	if len(idParts) < 2 {
-		return "", "", fmt.Errorf("unable to determine image share access ID")
-	}
-
-	imageID := idParts[0]
-	memberID := idParts[1]
-
-	return imageID, memberID, nil
+`, privateImageID, projectToShare)
 }
