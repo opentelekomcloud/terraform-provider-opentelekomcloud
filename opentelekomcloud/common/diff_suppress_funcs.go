@@ -95,7 +95,7 @@ func SuppressStrippedNewLines(_, old, new string, _ *schema.ResourceData) bool {
 	return strings.Trim(old, newline) == strings.Trim(new, newline)
 }
 
-func SuppressEmptyLineSHA(k, old, new string, d *schema.ResourceData) bool {
+func SuppressEmptyStringSHA(k, old, new string, d *schema.ResourceData) bool {
 	// Sometimes the API responds with the equivalent, empty SHA1 sum
 	// echo -n "" | shasum
 	if (old == "da39a3ee5e6b4b0d3255bfef95601890afd80709" && new == "") ||
