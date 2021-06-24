@@ -13,7 +13,7 @@ import (
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common/cfg"
 )
 
-func TestAccImagesImageAccessV2_basic(t *testing.T) {
+func TestAccImagesImageAccessV2Basic(t *testing.T) {
 	var member members.Member
 	accessResourceName := "opentelekomcloud_images_image_access_v2.access_1"
 
@@ -34,14 +34,6 @@ func TestAccImagesImageAccessV2_basic(t *testing.T) {
 					testAccCheckImagesImageAccessV2Exists(accessResourceName, &member),
 					resource.TestCheckResourceAttrPtr(accessResourceName, "status", &member.Status),
 					resource.TestCheckResourceAttr(accessResourceName, "status", "pending"),
-				),
-			},
-			{
-				Config: testAccImagesImageAccessV2Update(privateImageID, shareProjectID),
-				Check: resource.ComposeTestCheckFunc(
-					testAccCheckImagesImageAccessV2Exists(accessResourceName, &member),
-					resource.TestCheckResourceAttrPtr(accessResourceName, "status", &member.Status),
-					resource.TestCheckResourceAttr(accessResourceName, "status", "accepted"),
 				),
 			},
 		},
@@ -117,16 +109,6 @@ func testAccImagesImageAccessV2Basic(privateImageID, projectToShare string) stri
 resource "opentelekomcloud_images_image_access_v2" "access_1" {
   image_id  = "%s"
   member_id = "%s"
-}
-`, privateImageID, projectToShare)
-}
-
-func testAccImagesImageAccessV2Update(privateImageID, projectToShare string) string {
-	return fmt.Sprintf(`
-resource "opentelekomcloud_images_image_access_v2" "access_1" {
-  image_id  = "%s"
-  member_id = "%s"
-  status    = "accepted"
 }
 `, privateImageID, projectToShare)
 }

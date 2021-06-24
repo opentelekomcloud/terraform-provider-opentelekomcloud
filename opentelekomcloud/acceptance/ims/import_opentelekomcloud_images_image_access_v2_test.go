@@ -1,18 +1,21 @@
 package acceptance
 
 import (
-	"fmt"
+	"os"
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
-	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/acceptance/common"
 )
 
 func TestAccImagesImageAccessV2ImportBasic(t *testing.T) {
-	memberName := "data.opentelekomcloud_identity_auth_scope_v3.scope"
-	imageName := "opentelekomcloud_images_image_v2.image_1"
 	accessResourceName := "opentelekomcloud_images_image_access_v2.access_1"
+
+	privateImageID := os.Getenv("OS_PRIVATE_IMAGE_ID")
+	shareProjectID := os.Getenv("OS_PROJECT_ID_2")
+	if privateImageID == "" || shareProjectID == "" {
+		t.Skip("OS_PRIVATE_IMAGE_ID or OS_PROJECT_ID_2 are empty, but test requires")
+	}
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:          func() { common.TestAccPreCheck(t) },
@@ -20,30 +23,13 @@ func TestAccImagesImageAccessV2ImportBasic(t *testing.T) {
 		CheckDestroy:      testAccCheckImagesImageAccessV2Destroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccImagesImageAccessV2Basic(),
+				Config: testAccImagesImageAccessV2Basic(privateImageID, shareProjectID),
 			},
 			{
 				ResourceName:      accessResourceName,
 				ImportState:       true,
 				ImportStateVerify: true,
-				ImportStateIdFunc: testAccImagesImageAccessV2ImportID(imageName, memberName),
 			},
 		},
 	})
-}
-
-func testAccImagesImageAccessV2ImportID(imageName, memberName string) resource.ImportStateIdFunc {
-	return func(s *terraform.State) (string, error) {
-		image, ok := s.RootModule().Resources[imageName]
-		if !ok {
-			return "", fmt.Errorf("image not found: %s", imageName)
-		}
-
-		member, ok := s.RootModule().Resources[memberName]
-		if !ok {
-			return "", fmt.Errorf("member not found: %s", memberName)
-		}
-
-		return fmt.Sprintf("%s/%s", image.Primary.ID, member.Primary.Attributes["project_id"]), nil
-	}
 }
