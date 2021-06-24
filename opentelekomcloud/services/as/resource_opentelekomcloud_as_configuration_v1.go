@@ -65,9 +65,10 @@ func ResourceASConfiguration() *schema.Resource {
 							Required: true,
 						},
 						"user_data": {
-							Type:     schema.TypeString,
-							Optional: true,
-							ForceNew: true,
+							Type:             schema.TypeString,
+							Optional:         true,
+							ForceNew:         true,
+							DiffSuppressFunc: common.SuppressEmptyStringSHA,
 							// just stash the hash for state & diff comparisons
 							StateFunc: func(v interface{}) string {
 								switch v.(type) {
