@@ -350,7 +350,7 @@ func resourceCCENodePoolV3Create(ctx context.Context, d *schema.ResourceData, me
 	d.SetId(pool.Metadata.Id)
 
 	stateConf := &resource.StateChangeConf{
-		Pending:      []string{"Synchronizing"},
+		Pending:      []string{"Synchronizing", "Synchronized"},
 		Target:       []string{""},
 		Refresh:      waitForCceNodePoolActive(nodePoolClient, clusterId, d.Id()),
 		Timeout:      d.Timeout(schema.TimeoutCreate),
@@ -483,7 +483,7 @@ func resourceCCENodePoolV3Update(ctx context.Context, d *schema.ResourceData, me
 		return fmterr.Errorf("error updating Open Telekom Cloud CCE Node Pool: %w", err)
 	}
 	stateConf := &resource.StateChangeConf{
-		Pending:    []string{"Synchronizing"},
+		Pending:    []string{"Synchronizing", "Synchronized"},
 		Target:     []string{""},
 		Refresh:    waitForCceNodePoolActive(nodePoolClient, clusterId, d.Id()),
 		Timeout:    d.Timeout(schema.TimeoutCreate),
