@@ -91,7 +91,7 @@ func resourceImagesImageAccessAcceptV2Read(_ context.Context, d *schema.Resource
 		return fmterr.Errorf(errCreationClient, err)
 	}
 
-	imageID, memberID, err := resourceImagesImageAccessV2ParseID(d.Id())
+	imageID, memberID, err := ResourceImagesImageAccessV2ParseID(d.Id())
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -123,7 +123,7 @@ func resourceImagesImageAccessAcceptV2Update(ctx context.Context, d *schema.Reso
 		return fmterr.Errorf(errCreationClient, err)
 	}
 
-	imageID, memberID, err := resourceImagesImageAccessV2ParseID(d.Id())
+	imageID, memberID, err := ResourceImagesImageAccessV2ParseID(d.Id())
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -146,7 +146,7 @@ func resourceImagesImageAccessAcceptV2Delete(_ context.Context, d *schema.Resour
 		return fmterr.Errorf(errCreationClient, err)
 	}
 
-	imageID, memberID, err := resourceImagesImageAccessV2ParseID(d.Id())
+	imageID, memberID, err := ResourceImagesImageAccessV2ParseID(d.Id())
 	if err != nil {
 		return diag.FromErr(err)
 	}

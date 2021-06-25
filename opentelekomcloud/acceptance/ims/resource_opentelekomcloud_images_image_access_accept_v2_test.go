@@ -11,6 +11,7 @@ import (
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/acceptance/common"
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/acceptance/env"
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common/cfg"
+	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/services/ims"
 )
 
 func TestAccImagesImageAccessAcceptV2_basic(t *testing.T) {
@@ -59,7 +60,7 @@ func testAccCheckImagesImageAccessAcceptV2Destroy(s *terraform.State) error {
 			continue
 		}
 
-		imageID, memberID, err := resourceImagesImageAccessV2ParseID(rs.Primary.ID)
+		imageID, memberID, err := ims.ResourceImagesImageAccessV2ParseID(rs.Primary.ID)
 		if err != nil {
 			return err
 		}

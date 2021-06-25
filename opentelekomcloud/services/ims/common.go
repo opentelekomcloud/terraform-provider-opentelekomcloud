@@ -9,7 +9,7 @@ const (
 	errCreationClient = "error creating OpenTelekomCloud IMSv2 client: %w"
 )
 
-func resourceImagesImageAccessV2ParseID(id string) (string, string, error) {
+func ResourceImagesImageAccessV2ParseID(id string) (string, string, error) {
 	idParts := strings.Split(id, "/")
 	if len(idParts) < 2 {
 		return "", "", fmt.Errorf("unable to determine image share access ID")
