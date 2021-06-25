@@ -73,6 +73,17 @@ func resourceImagesImageAccessAcceptV2Create(ctx context.Context, d *schema.Reso
 
 	// accept status on the consumer side
 	status := d.Get("status").(string)
+	pendingStatus := "pending"
+	shareState := &resource.StateChangeConf{
+		Target:  []string{pendingStatus},
+		Refresh: waitForImageRequestStatus(client, imageID, memberID, pendingStatus),
+		Timeout: 1 * time.Minute,
+	}
+	_, err = shareState.WaitForStateContext(ctx)
+	if err != nil {
+		return fmterr.Errorf("error waiting for `%s` status: %w", pendingStatus, err)
+	}
+
 	opts := members.UpdateOpts{
 		Status: status,
 	}
