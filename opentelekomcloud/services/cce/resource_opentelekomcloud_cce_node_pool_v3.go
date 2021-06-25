@@ -123,6 +123,12 @@ func ResourceCCENodePoolV3() *schema.Resource {
 							Type:     schema.TypeString,
 							Required: true,
 						},
+						"kms_id": {
+							Type:        schema.TypeString,
+							Optional:    true,
+							ForceNew:    true,
+							DefaultFunc: schema.EnvDefaultFunc("OS_KMS_ID", nil),
+						},
 						"extend_param": {
 							Type:     schema.TypeString,
 							Optional: true,
@@ -415,6 +421,9 @@ func resourceCCENodePoolV3Read(_ context.Context, d *schema.ResourceData, meta i
 			"size":         pairObject.Size,
 			"volumetype":   pairObject.VolumeType,
 			"extend_param": pairObject.ExtendParam,
+		}
+		if pairObject.Metadata != nil {
+			volume["kms_id"] = pairObject.Metadata["__system__cmkid"]
 		}
 		volumes = append(volumes, volume)
 	}
