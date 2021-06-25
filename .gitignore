@@ -27,3 +27,4 @@ localrc
 !command/test-fixtures/**/.terraform/
 
 dist
+releasenotes/build
