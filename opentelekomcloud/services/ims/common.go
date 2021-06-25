@@ -3,6 +3,10 @@ package ims
 import (
 	"fmt"
 	"strings"
+
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
+	golangsdk "github.com/opentelekomcloud/gophertelekomcloud"
+	"github.com/opentelekomcloud/gophertelekomcloud/openstack/imageservice/v2/members"
 )
 
 const (
@@ -19,4 +23,18 @@ func ResourceImagesImageAccessV2ParseID(id string) (string, string, error) {
 	memberID := idParts[1]
 
 	return imageID, memberID, nil
+}
+
+func waitForImageRequestStatus(client *golangsdk.ServiceClient, imageID, memberID, status string) resource.StateRefreshFunc {
+	return func() (interface{}, string, error) {
+		n, err := members.Get(client, imageID, memberID).Extract()
+		if err != nil {
+			return nil, "", err
+		}
+		if status == n.Status {
+			return n, n.Status, nil
+		}
+
+		return n, n.Status, nil
+	}
 }

@@ -3,9 +3,11 @@ package ims
 import (
 	"context"
 	"fmt"
+	"time"
 
 	"github.com/hashicorp/go-multierror"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/imageservice/v2/members"
@@ -78,6 +80,16 @@ func resourceImagesImageAccessV2Create(ctx context.Context, d *schema.ResourceDa
 		return fmterr.Errorf("error requesting share for private image: %w", err)
 	}
 
+	state := &resource.StateChangeConf{
+		Target:  []string{"pending"},
+		Refresh: waitForImageRequestStatus(client, imageID, memberID, "pending"),
+		Timeout: 1 * time.Minute,
+	}
+	_, err = state.WaitForStateContext(ctx)
+	if err != nil {
+		return fmterr.Errorf("error waiting for `pending` status: %w", err)
+	}
+
 	id := fmt.Sprintf("%s/%s", imageID, memberID)
 	d.SetId(id)
 
@@ -90,6 +102,15 @@ func resourceImagesImageAccessV2Create(ctx context.Context, d *schema.ResourceDa
 		_, err := members.Update(client, imageID, memberID, opts).Extract()
 		if err != nil {
 			return fmterr.Errorf("error updating the image status: %w", err)
+		}
+		state := &resource.StateChangeConf{
+			Target:  []string{status},
+			Refresh: waitForImageRequestStatus(client, imageID, memberID, status),
+			Timeout: 1 * time.Minute,
+		}
+		_, err = state.WaitForStateContext(ctx)
+		if err != nil {
+			return fmterr.Errorf("error waiting for `%s` status: %w", status, err)
 		}
 	}
 
@@ -141,13 +162,23 @@ func resourceImagesImageAccessV2Update(ctx context.Context, d *schema.ResourceDa
 		return diag.FromErr(err)
 	}
 
+	status := d.Get("status").(string)
 	updateOpts := members.UpdateOpts{
-		Status: d.Get("status").(string),
+		Status: status,
 	}
 
 	_, err = members.Update(client, imageID, memberID, updateOpts).Extract()
 	if err != nil {
 		return fmterr.Errorf("error updating share request: %w", err)
+	}
+	stateCluster := &resource.StateChangeConf{
+		Target:  []string{status},
+		Refresh: waitForImageRequestStatus(client, imageID, memberID, status),
+		Timeout: 1 * time.Minute,
+	}
+	_, err = stateCluster.WaitForStateContext(ctx)
+	if err != nil {
+		return fmterr.Errorf("error waiting for `%s` status: %w", status, err)
 	}
 
 	return resourceImagesImageAccessV2Read(ctx, d, meta)

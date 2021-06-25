@@ -3,9 +3,11 @@ package ims
 import (
 	"context"
 	"fmt"
+	"time"
 
 	"github.com/hashicorp/go-multierror"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/imageservice/v2/members"
@@ -70,12 +72,22 @@ func resourceImagesImageAccessAcceptV2Create(ctx context.Context, d *schema.Reso
 	memberID := d.Get("member_id").(string)
 
 	// accept status on the consumer side
+	status := d.Get("status").(string)
 	opts := members.UpdateOpts{
-		Status: d.Get("status").(string),
+		Status: status,
 	}
 	_, err = members.Update(client, imageID, memberID, opts).Extract()
 	if err != nil {
 		return fmterr.Errorf("error setting a member status to the image share: %w", err)
+	}
+	state := &resource.StateChangeConf{
+		Target:  []string{status},
+		Refresh: waitForImageRequestStatus(client, imageID, memberID, status),
+		Timeout: 1 * time.Minute,
+	}
+	_, err = state.WaitForStateContext(ctx)
+	if err != nil {
+		return fmterr.Errorf("error waiting for `%s` status: %w", status, err)
 	}
 
 	id := fmt.Sprintf("%s/%s", imageID, memberID)
@@ -128,18 +140,28 @@ func resourceImagesImageAccessAcceptV2Update(ctx context.Context, d *schema.Reso
 		return diag.FromErr(err)
 	}
 
+	status := d.Get("status").(string)
 	opts := members.UpdateOpts{
-		Status: d.Get("status").(string),
+		Status: status,
 	}
 	_, err = members.Update(client, imageID, memberID, opts).Extract()
 	if err != nil {
 		return fmterr.Errorf("Error updating the image with the member: %w", err)
 	}
+	state := &resource.StateChangeConf{
+		Target:  []string{status},
+		Refresh: waitForImageRequestStatus(client, imageID, memberID, status),
+		Timeout: 1 * time.Minute,
+	}
+	_, err = state.WaitForStateContext(ctx)
+	if err != nil {
+		return fmterr.Errorf("error waiting for `%s` status: %w", status, err)
+	}
 
 	return resourceImagesImageAccessAcceptV2Read(ctx, d, meta)
 }
 
-func resourceImagesImageAccessAcceptV2Delete(_ context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceImagesImageAccessAcceptV2Delete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*cfg.Config)
 	client, err := config.ImageV2Client(config.GetRegion(d))
 	if err != nil {
@@ -152,11 +174,21 @@ func resourceImagesImageAccessAcceptV2Delete(_ context.Context, d *schema.Resour
 	}
 
 	// reject status on the consumer side
+	status := "rejected"
 	opts := members.UpdateOpts{
-		Status: "rejected",
+		Status: status,
 	}
 	if err := members.Update(client, imageID, memberID, opts).Err; err != nil {
 		return diag.FromErr(common.CheckDeleted(d, err, "image_access_accept_v2"))
+	}
+	state := &resource.StateChangeConf{
+		Target:  []string{status},
+		Refresh: waitForImageRequestStatus(client, imageID, memberID, status),
+		Timeout: 1 * time.Minute,
+	}
+	_, err = state.WaitForStateContext(ctx)
+	if err != nil {
+		return fmterr.Errorf("error waiting for `%s` status: %w", status, err)
 	}
 
 	return nil
