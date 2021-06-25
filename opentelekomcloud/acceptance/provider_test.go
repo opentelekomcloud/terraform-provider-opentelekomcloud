@@ -10,9 +10,11 @@ import (
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/acctest"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 	"github.com/opentelekomcloud/gophertelekomcloud/acceptance/tools"
 	th "github.com/opentelekomcloud/gophertelekomcloud/testhelper"
+	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/acceptance/common"
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/helper/pathorcontents"
 
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud"
@@ -262,4 +264,32 @@ func TestLoadAndValidate_errors(t *testing.T) {
 			}
 		})
 	}
+}
+
+func TestAltProvider(t *testing.T) {
+	if os.Getenv("OS_CLOUD_2") == "" &&
+		os.Getenv("OS_PROJECT_ID_2") == "" &&
+		os.Getenv("OS_PROJECT_NAME_2") == "" {
+		t.Skip("missing alternative provider configuration")
+	}
+
+	config := fmt.Sprintf(`
+%s
+
+data "opentelekomcloud_networking_network_v2" "ext" {
+  provider = "%s"
+
+  name = "admin_external_net"
+}
+`, common.AlternativeProviderConfig, common.AlternativeProviderAlias)
+
+	resource.Test(t, resource.TestCase{
+		PreCheck:          func() { common.TestAccPreCheck(t) },
+		ProviderFactories: common.TestAccProviderFactories,
+		Steps: []resource.TestStep{
+			{
+				Config: config,
+			},
+		},
+	})
 }
