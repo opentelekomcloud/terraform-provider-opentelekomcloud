@@ -105,7 +105,6 @@ func resourceImagesImageAccessAcceptV2Read(_ context.Context, d *schema.Resource
 		d.Set("status", member.Status),
 		d.Set("member_id", member.MemberID),
 		d.Set("created_at", member.CreatedAt),
-		d.Set("update_at", member.UpdatedAt),
 		d.Set("image_id", member.ImageID),
 		d.Set("schema", member.Schema),
 	)

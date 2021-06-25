@@ -77,26 +77,40 @@ func testAccImagesImageAccessAcceptV2Basic(privateImageID, projectToShare string
 	return fmt.Sprintf(`
 resource "opentelekomcloud_images_image_access_v2" "access_1" {
   image_id  = "%[1]s"
-  member_id = "%s"
+  member_id = "%[2]s"
 }
 
+%[3]s
+
 resource "opentelekomcloud_images_image_access_accept_v2" "accept_1" {
+  provider =  "%s"
+
+  depends_on = [opentelekomcloud_images_image_access_v2.access_1]
+
   image_id  = "%[1]s"
+  member_id = "%[2]s"
   status    = "accepted"
 }
-`, privateImageID, projectToShare)
+`, privateImageID, projectToShare, common.AlternativeProviderConfig, common.AlternativeProviderAlias)
 }
 
 func testAccImagesImageAccessAcceptV2Update(privateImageID, projectToShare string) string {
 	return fmt.Sprintf(`
 resource "opentelekomcloud_images_image_access_v2" "access_1" {
   image_id  = "%[1]s"
-  member_id = "%s"
+  member_id = "%[2]s"
 }
 
+%[3]s
+
 resource "opentelekomcloud_images_image_access_accept_v2" "accept_1" {
+  provider =  "%[4]s"
+
+  depends_on = [opentelekomcloud_images_image_access_v2.access_1]
+
   image_id  = "%[1]s"
+  member_id = "%[2]s"
   status    = "rejected"
 }
-`, privateImageID, projectToShare)
+`, privateImageID, projectToShare, common.AlternativeProviderConfig, common.AlternativeProviderAlias)
 }
