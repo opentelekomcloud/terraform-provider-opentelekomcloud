@@ -9,7 +9,6 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 	golangsdk "github.com/opentelekomcloud/gophertelekomcloud"
-
 	acc "github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/acceptance/common"
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/acceptance/env"
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common"
@@ -19,6 +18,7 @@ import (
 func TestAccCssClusterV1_basic(t *testing.T) {
 	name := fmt.Sprintf("css-%s", acctest.RandString(10))
 	resourceName := "opentelekomcloud_css_cluster_v1.cluster"
+	originalID := ""
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:          func() { acc.TestAccPreCheck(t) },
@@ -28,16 +28,25 @@ func TestAccCssClusterV1_basic(t *testing.T) {
 			{
 				Config: testAccCssClusterV1_basic(name),
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckCssClusterV1Exists(),
+					testAccCheckCssClusterV1Exists(&originalID),
 					resource.TestCheckResourceAttr(resourceName, "nodes.#", "1"),
 				),
 			},
 			{
-				Config: testAccCssClusterV1_extend(name),
+				Config: testAccCssClusterV1Extend(name),
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckCssClusterV1Exists(),
+					testAccCheckCssClusterV1Persists(originalID),
 					resource.TestCheckResourceAttr(resourceName, "expect_node_num", "2"),
 					resource.TestCheckResourceAttr(resourceName, "nodes.#", "2"),
+				),
+			},
+			{
+				Config: testAccCssClusterV1ExtendDisk(name),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckCssClusterV1Persists(originalID),
+					resource.TestCheckResourceAttr(resourceName, "expect_node_num", "2"),
+					resource.TestCheckResourceAttr(resourceName, "nodes.#", "2"),
+					resource.TestCheckResourceAttr(resourceName, "node_config.0.volume.0.size", "200"),
 				),
 			},
 		},
@@ -197,7 +206,7 @@ resource "opentelekomcloud_css_cluster_v1" "cluster" {
 `, name, env.OS_NETWORK_ID, env.OS_VPC_ID, env.OS_AVAILABILITY_ZONE)
 }
 
-func testAccCssClusterV1_extend(name string) string {
+func testAccCssClusterV1Extend(name string) string {
 	return fmt.Sprintf(`
 data "opentelekomcloud_networking_secgroup_v2" "secgroup" {
   name = "default"
@@ -216,6 +225,36 @@ resource "opentelekomcloud_css_cluster_v1" "cluster" {
     volume {
       volume_type = "COMMON"
       size        = 40
+    }
+
+    availability_zone = "%s"
+  }
+
+  enable_https     = true
+  enable_authority = true
+  admin_pass       = "QwertyUI!"
+}
+`, name, env.OS_NETWORK_ID, env.OS_VPC_ID, env.OS_AVAILABILITY_ZONE)
+}
+func testAccCssClusterV1ExtendDisk(name string) string {
+	return fmt.Sprintf(`
+data "opentelekomcloud_networking_secgroup_v2" "secgroup" {
+  name = "default"
+}
+
+resource "opentelekomcloud_css_cluster_v1" "cluster" {
+  expect_node_num = 2
+  name            = "%[1]s"
+  node_config {
+    flavor = "css.medium.8"
+    network_info {
+      security_group_id = data.opentelekomcloud_networking_secgroup_v2.secgroup.id
+      network_id        = "%s"
+      vpc_id            = "%s"
+    }
+    volume {
+      volume_type = "COMMON"
+      size        = 200
     }
 
     availability_zone = "%s"
@@ -256,7 +295,7 @@ func testAccCheckCssClusterV1Destroy(s *terraform.State) error {
 	return nil
 }
 
-func testAccCheckCssClusterV1Exists() resource.TestCheckFunc {
+func testAccCheckCssClusterV1Exists(id *string) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
 		config := acc.TestAccProvider.Meta().(*cfg.Config)
 		client, err := config.CssV1Client(env.OS_REGION_NAME)
@@ -282,6 +321,18 @@ func testAccCheckCssClusterV1Exists() resource.TestCheckFunc {
 				return fmt.Errorf("opentelekomcloud_css_cluster_v1.cluster is not exist")
 			}
 			return fmt.Errorf("error checking opentelekomcloud_css_cluster_v1.cluster exist, err=send request failed: %s", err)
+		}
+		*id = rs.Primary.ID
+		return nil
+	}
+}
+
+func testAccCheckCssClusterV1Persists(expected string) resource.TestCheckFunc {
+	actual := ""
+	testAccCheckCssClusterV1Exists(&actual)
+	return func(_ *terraform.State) error {
+		if expected != actual {
+			return fmt.Errorf("CSS cluster was created")
 		}
 		return nil
 	}

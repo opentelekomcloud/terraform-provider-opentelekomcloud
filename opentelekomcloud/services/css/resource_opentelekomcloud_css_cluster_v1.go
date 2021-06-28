@@ -8,11 +8,13 @@ import (
 
 	"github.com/hashicorp/go-multierror"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/customdiff"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	golangsdk "github.com/opentelekomcloud/gophertelekomcloud"
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/css/v1/clusters"
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/css/v1/flavors"
+	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common"
 
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common/cfg"
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common/fmterr"
@@ -30,7 +32,10 @@ func ResourceCssClusterV1() *schema.Resource {
 			Update: schema.DefaultTimeout(30 * time.Minute),
 		},
 
-		CustomizeDiff: checkCssClusterFlavorRestrictions,
+		CustomizeDiff: customdiff.All(
+			checkCssClusterFlavorRestrictions,
+			customdiff.ForceNewIfChange("node_config.0.volume.0.size", common.IsDownScale),
+		),
 
 		Schema: map[string]*schema.Schema{
 			"name": {
@@ -86,7 +91,6 @@ func ResourceCssClusterV1() *schema.Resource {
 									"size": {
 										Type:     schema.TypeInt,
 										Required: true,
-										ForceNew: true,
 									},
 									"volume_type": {
 										Type:     schema.TypeString,
@@ -319,6 +323,21 @@ func resourceCssClusterV1Update(ctx context.Context, d *schema.ResourceData, met
 	client, err := config.CssV1Client(config.GetRegion(d))
 	if err != nil {
 		return fmterr.Errorf("error creating CSS v1 client: %s", err)
+	}
+
+	volSize := "node_config.0.volume.0.size"
+	if d.HasChange(volSize) {
+		oldSize, newSize := d.GetChange(volSize)
+		if oldSize.(int) > newSize.(int) {
+			return fmterr.Errorf("new size in less than the old one")
+		}
+		_, err := clusters.ExtendCluster(client, d.Id(), clusters.ClusterExtendSpecialOpts{
+			Type:     "css",
+			DiskSize: newSize.(int),
+		}).Extract()
+		if err != nil {
+			return fmterr.Errorf("error extending cluster disk: %w", err)
+		}
 	}
 
 	if !d.HasChange("expect_node_num") {

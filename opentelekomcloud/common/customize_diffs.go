@@ -152,3 +152,7 @@ func MultipleCustomizeDiffs(funcs ...schema.CustomizeDiffFunc) schema.CustomizeD
 		return mErr.ErrorOrNil()
 	}
 }
+
+func IsDownScale(_ context.Context, old, new, _ interface{}) bool {
+	return old.(int) > new.(int)
+}

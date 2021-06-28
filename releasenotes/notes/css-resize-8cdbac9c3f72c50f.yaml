@@ -1,0 +1,4 @@
+---
+features:
+  - |
+    [CSS] Allow increasing cluster node volume size without recreation ([#1173](https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/1173))
