@@ -4,7 +4,7 @@ subcategory: "Cloud Container Engine (CCE)"
 
 # opentelekomcloud_cce_addon_v3
 
-Provides a cluster addon management.
+Manages a V3 CCE Addon resource within OpenTelekomCloud.
 
 ## Example Usage
 
@@ -26,14 +26,14 @@ resource "opentelekomcloud_cce_cluster_v3" "cluster_1" {
 
 resource "opentelekomcloud_cce_addon_v3" "addon" {
   template_name    = "metrics-server"
-  template_version = "1.0.3"
+  template_version = "1.0.6"
   cluster_id       = opentelekomcloud_cce_cluster_v3.cluster_1.id
 
   values {
     basic = {
-      euleros_version = "2.2.5"
-      swr_addr        = "100.125.7.25:20202"
-      swr_user        = "hwofficial"
+      "image_version": "v0.3.7",
+      "swr_addr": "100.125.7.25:20202",
+      "swr_user": "hwofficial"
     }
     custom = {}
   }

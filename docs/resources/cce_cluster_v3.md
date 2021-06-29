@@ -96,7 +96,7 @@ The following arguments are supported:
   * `cce.t2.medium` - medium-scale HA physical machine cluster (up to 100 nodes).
   * `cce.t2.large` - large-scale HA physical machine cluster (up to 500 nodes).
 
-* `cluster_version` - (Optional) For the cluster version, possible values are `v1.13.10-r0`, `v1.15.6-r1`.
+* `cluster_version` - (Optional) For the cluster version, possible values are `v1.17.9-r0`, `v1.19.8-r0`.
   Changing this parameter will create a new cluster resource. [OTC-API](https://docs.otc.t-systems.com/en-us/api2/cce/cce_02_0236.html)
 
 * `cluster_type` - (Required) Cluster Type, possible values are `VirtualMachine` and `BareMetal`. Changing this parameter will create a new cluster resource.
