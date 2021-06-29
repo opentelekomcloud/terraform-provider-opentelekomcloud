@@ -105,28 +105,33 @@ resource "opentelekomcloud_cce_addon_v3" "autoscaler" {
     basic  = {
       "cceEndpoint": "https://cce.eu-de.otc.t-systems.com",
       "ecsEndpoint": "https://ecs.eu-de.otc.t-systems.com",
-      "euleros_version": "2.2.5",
+      "image_version": "1.19.1",
+      "platform": "linux-amd64",
       "region": "eu-de",
       "swr_addr": "100.125.7.25:20202",
       "swr_user": "hwofficial"
     }
     custom = {
+      "cluster_id": opentelekomcloud_cce_cluster_v3.cluster_1.id,
       "coresTotal": 32000,
+      "expander": "priority",
+      "logLevel": 4,
       "maxEmptyBulkDeleteFlag": 10,
+      "maxNodeProvisionTime": 15,
       "maxNodesTotal": 1000,
       "memoryTotal": 128000,
-      "scaleDownDelayAfterAdd": 11,
+      "scaleDownDelayAfterAdd": 10,
       "scaleDownDelayAfterDelete": 11,
       "scaleDownDelayAfterFailure": 3,
       "scaleDownEnabled": true,
       "scaleDownUnneededTime": 10,
-      "scaleDownUtilizationThreshold": 0.25,
-      "scaleUpCpuUtilizationThreshold": 0.8,
-      "scaleUpMemUtilizationThreshold": 0.8,
+      "scaleDownUtilizationThreshold": 0.5,
+      "scaleUpCpuUtilizationThreshold": 1,
+      "scaleUpMemUtilizationThreshold": 1,
       "scaleUpUnscheduledPodEnabled": true,
       "scaleUpUtilizationEnabled": true,
-      "unremovableNodeRecheckTimeout": 5,
-      "tenant_id": "%s"
+      "tenant_id": "%s",
+      "unremovableNodeRecheckTimeout": 5
     }
   }
 }
@@ -149,31 +154,36 @@ resource "opentelekomcloud_cce_addon_v3" "autoscaler" {
   cluster_id       = opentelekomcloud_cce_cluster_v3.cluster_1.id
 
   values {
-    basic  = {
+    basic = {
       "cceEndpoint": "https://cce.eu-de.otc.t-systems.com",
       "ecsEndpoint": "https://ecs.eu-de.otc.t-systems.com",
-      "euleros_version": "2.2.5",
+      "image_version": "1.19.1",
+      "platform": "linux-amd64",
       "region": "eu-de",
       "swr_addr": "100.125.7.25:20202",
       "swr_user": "hwofficial"
     }
     custom = {
+      "cluster_id": opentelekomcloud_cce_cluster_v3.cluster_1.id,
       "coresTotal": 32000,
+      "expander": "priority",
+      "logLevel": 4,
       "maxEmptyBulkDeleteFlag": 10,
-      "maxNodesTotal": 100,
+      "maxNodeProvisionTime": 15,
+      "maxNodesTotal": 1000,
       "memoryTotal": 128000,
-      "scaleDownDelayAfterAdd": 9,
+      "scaleDownDelayAfterAdd": 10,
       "scaleDownDelayAfterDelete": 8,
-      "scaleDownDelayAfterFailure": 4,
+      "scaleDownDelayAfterFailure": 3,
       "scaleDownEnabled": false,
       "scaleDownUnneededTime": 10,
-      "scaleDownUtilizationThreshold": 0.25,
-      "scaleUpCpuUtilizationThreshold": 0.8,
-      "scaleUpMemUtilizationThreshold": 0.8,
+      "scaleDownUtilizationThreshold": 0.5,
+      "scaleUpCpuUtilizationThreshold": 1,
+      "scaleUpMemUtilizationThreshold": 1,
       "scaleUpUnscheduledPodEnabled": true,
       "scaleUpUtilizationEnabled": true,
-      "unremovableNodeRecheckTimeout": 5,
-      "tenant_id": "%s"
+      "tenant_id": "%s",
+      "unremovableNodeRecheckTimeout": 5
     }
   }
 }
@@ -199,7 +209,8 @@ resource "opentelekomcloud_cce_addon_v3" "autoscaler" {
     basic  = {
       "cceEndpoint": "https://cce.eu-de.otc.t-systems.com",
       "ecsEndpoint": "https://ecs.eu-de.otc.t-systems.com",
-      "euleros_version": "2.2.5",
+      "image_version": "1.19.1",
+      "platform": "linux-amd64",
       "region": "eu-de",
       "swr_addr": "100.125.7.25:20202",
       "swr_user": "hwofficial"
