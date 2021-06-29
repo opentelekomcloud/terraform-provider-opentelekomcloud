@@ -1,6 +1,9 @@
 ---
 - project:
     merge-mode: squash-merge
+    default-branch: devel
+    templates:
+      - release-notes-jobs
     check:
       jobs:
         - golang-make-test
