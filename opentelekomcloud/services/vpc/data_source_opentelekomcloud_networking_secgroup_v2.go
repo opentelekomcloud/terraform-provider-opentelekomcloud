@@ -4,6 +4,7 @@ import (
 	"context"
 	"log"
 
+	"github.com/hashicorp/go-multierror"
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/networking/v2/extensions/security/groups"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
@@ -36,6 +37,10 @@ func DataSourceNetworkingSecGroupV2() *schema.Resource {
 				Type:     schema.TypeString,
 				Optional: true,
 				ForceNew: true,
+				Computed: true,
+			},
+			"description": {
+				Type:     schema.TypeString,
 				Computed: true,
 			},
 		},
@@ -75,10 +80,15 @@ func dataSourceNetworkingSecGroupV2Read(_ context.Context, d *schema.ResourceDat
 	log.Printf("[DEBUG] Retrieved Security Group %s: %+v", secGroup.ID, secGroup)
 	d.SetId(secGroup.ID)
 
-	d.Set("name", secGroup.Name)
-	d.Set("description", secGroup.Description)
-	d.Set("tenant_id", secGroup.TenantID)
-	d.Set("region", config.GetRegion(d))
+	mErr := multierror.Append(
+		d.Set("name", secGroup.Name),
+		d.Set("description", secGroup.Description),
+		d.Set("tenant_id", secGroup.TenantID),
+		d.Set("region", config.GetRegion(d)),
+	)
+	if err := mErr.ErrorOrNil(); err != nil {
+		return fmterr.Errorf("error setting security group fields: %w", err)
+	}
 
 	return nil
 }

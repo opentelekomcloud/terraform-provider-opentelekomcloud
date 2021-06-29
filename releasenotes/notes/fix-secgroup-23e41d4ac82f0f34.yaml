@@ -1,0 +1,4 @@
+---
+fixes:
+  - |
+    Fix panic when using `opentelekomcloud_networking_secgroup_v2` data source ([#1176](https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/1176))
