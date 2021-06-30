@@ -1,0 +1,7 @@
+---
+issues:
+  - |
+    Fix not encyrpting OBS bucket with `kms` algorythm
+upgrade:
+  - |
+    `aws:kms` algorythm stop working for OBS bucket encryption
