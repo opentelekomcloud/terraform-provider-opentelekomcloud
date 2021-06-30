@@ -1,0 +1,4 @@
+---
+fixes:
+  - |
+    [ECS] Don't read `image_name` if it's set in `resource/opentelekomcloud_compute_instance_v2` `#1181 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/1181>`_
