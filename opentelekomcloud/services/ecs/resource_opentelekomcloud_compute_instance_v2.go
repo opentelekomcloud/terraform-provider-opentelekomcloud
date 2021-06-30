@@ -1085,16 +1085,19 @@ func setImageInformation(client *golangsdk.ServiceClient, server *servers.Server
 		if err := d.Set("image_id", imageId); err != nil {
 			return err
 		}
-		if image, err := images.Get(client, imageId).Extract(); err != nil {
-			if _, ok := err.(golangsdk.ErrDefault404); ok {
-				// If the image name can't be found, don't set name.
-				// The most likely scenario is that the image no longer exists in the Image Service
-				// but the instance still has a record from when it existed.
-				return d.Set("image_name", "Not Found")
+		imageName := d.Get("image_name").(string)
+		if imageName == "" {
+			if image, err := images.Get(client, imageId).Extract(); err != nil {
+				if _, ok := err.(golangsdk.ErrDefault404); ok {
+					// If the image name can't be found, don't set name.
+					// The most likely scenario is that the image no longer exists in the Image Service
+					// but the instance still has a record from when it existed.
+					return d.Set("image_name", "Not Found")
+				}
+				return err
+			} else {
+				return d.Set("image_name", image.Name)
 			}
-			return err
-		} else {
-			return d.Set("image_name", image.Name)
 		}
 	}
 
