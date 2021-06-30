@@ -1085,8 +1085,8 @@ func setImageInformation(client *golangsdk.ServiceClient, server *servers.Server
 		if err := d.Set("image_id", imageId); err != nil {
 			return err
 		}
-		imageName := d.Get("image_name").(string)
-		if imageName == "" {
+
+		if imageName := d.Get("image_name").(string); imageName == "" {
 			if image, err := images.Get(client, imageId).Extract(); err != nil {
 				if _, ok := err.(golangsdk.ErrDefault404); ok {
 					// If the image name can't be found, don't set name.
