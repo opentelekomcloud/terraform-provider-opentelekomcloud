@@ -42,3 +42,5 @@ func expandCssClusterV1ExtendClusterNodeNum(d interface{}, _ map[string]int) (in
 	}
 	return v, nil
 }
+
+const clientError = `error creating CSSv1 client: %w`

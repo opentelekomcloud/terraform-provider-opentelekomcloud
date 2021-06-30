@@ -313,6 +313,7 @@ func Provider() *schema.Provider {
 			"opentelekomcloud_csbs_backup_policy_v1":              csbs.ResourceCSBSBackupPolicyV1(),
 			"opentelekomcloud_cts_tracker_v1":                     cts.ResourceCTSTrackerV1(),
 			"opentelekomcloud_css_cluster_v1":                     css.ResourceCssClusterV1(),
+			"opentelekomcloud_css_snapshot_configuration_v1":      css.ResourceCssSnapshotConfigurationV1(),
 			"opentelekomcloud_dcs_instance_v1":                    dcs.ResourceDcsInstanceV1(),
 			"opentelekomcloud_dds_instance_v3":                    dds.ResourceDdsInstanceV3(),
 			"opentelekomcloud_deh_host_v1":                        deh.ResourceDeHHostV1(),
