@@ -327,7 +327,7 @@ resource "opentelekomcloud_obs_bucket" "bucket" {
   acl           = "public-read"
 
   server_side_encryption {
-    algorithm  = "aws:kms"
+    algorithm  = "kms"
     kms_key_id = "%s"
   }
 }
