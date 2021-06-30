@@ -1,5 +1,25 @@
 ## 1.25.0 (Unreleased)
 
+## 1.24.3 (June 30 2021)
+
+NOTES/DEPRECATIONS:
+From now our CHANGELOG can be found [here](https://docs.otc-service.com/releasenotes/terraform-provider-opentelekomcloud/index.html). ([#1164](https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/1164))
+
+FEATURES:
+* **New Resource:** `opentelekomcloud_images_image_access_v2` ([#1153](https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/1153))
+* **New Resource:** `opentelekomcloud_images_image_access_accept_v2` ([#1153](https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/1153))
+
+BUG FIXES:
+* `resource/opentelekomcloud_as_configuration_v1`: Recreate resource when any field was changed ([#1156](https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/1156))
+* `resource/opentelekomcloud_as_configuration_v1`: Fix wrong SHA1 calculation of `user_data` ([#1159](https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/1159))
+* `resource/opentelekomcloud_cce_node_pool_v3`: Add missing KMS config parameter ([#1165](https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/1165))
+* `data_source/opentelekomcloud_networking_secgroup_v2`: Fix panic in Read operation ([#1176](https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/1176))
+* `resource/opentelekomcloud_compute_instance_v2`: Don't read `image_name` if it's set ([#1181](https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/1181))
+
+DOCUMENTATION:
+* `resource/opentelekomcloud_cce_addon_v3`: Add template for new k8s version ([#1172](https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/1172))
+
+
 ## 1.24.2 (June 23 2021)
 
 ENHANCEMENTS:
