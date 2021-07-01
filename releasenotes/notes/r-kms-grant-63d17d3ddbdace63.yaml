@@ -1,4 +1,4 @@
 ---
 features:
   - |
-    [KMS] Add new `resource/opentelekomcloud_kms_grant_v1` (`#1185 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/1185>`_)
+    **New Resource:** ``opentelekomcloud_kms_grant_v1`` (`#1185 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/1185>`_)
