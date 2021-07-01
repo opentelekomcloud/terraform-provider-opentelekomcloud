@@ -3,7 +3,6 @@ package kms
 import (
 	"context"
 	"fmt"
-	"strings"
 
 	"github.com/hashicorp/go-multierror"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
@@ -102,7 +101,7 @@ func resourceKmsGrantV1Read(_ context.Context, d *schema.ResourceData, meta inte
 		return fmterr.Errorf(errCreationClient, err)
 	}
 
-	kmsID, grantID, err := resourceKMSGrantV1ParseID(d.Id())
+	kmsID, grantID, err := ResourceKMSGrantV1ParseID(d.Id())
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -151,7 +150,7 @@ func resourceKmsGrantV1Delete(_ context.Context, d *schema.ResourceData, meta in
 		return fmterr.Errorf(errCreationClient, err)
 	}
 
-	kmsID, grantID, err := resourceKMSGrantV1ParseID(d.Id())
+	kmsID, grantID, err := ResourceKMSGrantV1ParseID(d.Id())
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -167,16 +166,4 @@ func resourceKmsGrantV1Delete(_ context.Context, d *schema.ResourceData, meta in
 
 	d.SetId("")
 	return nil
-}
-
-func resourceKMSGrantV1ParseID(componentID string) (string, string, error) {
-	parts := strings.Split(componentID, "/")
-	if len(parts) != 2 {
-		return "", "", fmt.Errorf("unable to determine KMS Grant ID")
-	}
-
-	kmsID := parts[0]
-	grantID := parts[1]
-
-	return kmsID, grantID, nil
 }
