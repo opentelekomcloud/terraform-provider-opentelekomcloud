@@ -346,6 +346,7 @@ func Provider() *schema.Provider {
 			"opentelekomcloud_images_image_v2":                    ims.ResourceImagesImageV2(),
 			"opentelekomcloud_ims_data_image_v2":                  ims.ResourceImsDataImageV2(),
 			"opentelekomcloud_ims_image_v2":                       ims.ResourceImsImageV2(),
+			"opentelekomcloud_kms_grant_v1":                       kms.ResourceKmsGrantV1(),
 			"opentelekomcloud_kms_key_v1":                         kms.ResourceKmsKeyV1(),
 			"opentelekomcloud_lb_certificate_v2":                  elb.ResourceCertificateV2(),
 			"opentelekomcloud_lb_l7policy_v2":                     elb.ResourceL7PolicyV2(),
