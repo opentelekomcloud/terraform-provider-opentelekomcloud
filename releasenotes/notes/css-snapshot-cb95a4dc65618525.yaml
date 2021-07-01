@@ -1,4 +1,4 @@
 ---
 features:
   - |
-    **New Resource:** `opentelekomcloud_css_snapshot_configuration_v1` (`#1183 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/1183>`_)
+    **New Resource:** ``opentelekomcloud_css_snapshot_configuration_v1`` (`#1183 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/1183>`_)

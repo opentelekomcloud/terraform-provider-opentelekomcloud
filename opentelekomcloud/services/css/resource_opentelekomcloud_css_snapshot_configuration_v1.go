@@ -121,7 +121,7 @@ func readResourceCssSnapshotConfigurationV1(_ context.Context, d *schema.Resourc
 	configuration := []map[string]interface{}{{
 		"bucket": info.Bucket,
 		"agency": info.Agency,
-		"kms_id": d.Get("configuration.0.kms_id"),
+		"kms_id": info.SnapshotCmkID,
 	}}
 	creation := []map[string]interface{}{{
 		"prefix":      info.Prefix,
