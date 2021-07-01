@@ -44,7 +44,7 @@ func TestAccObsBucket_basic(t *testing.T) {
 				Config: testAccObsBucketSSE(rInt),
 				Check: resource.ComposeTestCheckFunc(testAccCheckObsBucketExists(resourceName),
 					resource.TestCheckResourceAttr(resourceName, "server_side_encryption.0.kms_key_id", env.OS_KMS_ID),
-					resource.TestCheckResourceAttr(resourceName, "server_side_encryption.0.algorithm", "aws:kms"),
+					resource.TestCheckResourceAttr(resourceName, "server_side_encryption.0.algorithm", "kms"),
 				),
 			},
 		},
