@@ -14,7 +14,7 @@ import (
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common/cfg"
 )
 
-func TestAccNetworkingV2RouterBasic(t *testing.T) {
+func TestAccNetworkingV2Router_basic(t *testing.T) {
 	var router routers.Router
 	resourceName := "opentelekomcloud_networking_router_v2.router_1"
 
@@ -39,7 +39,7 @@ func TestAccNetworkingV2RouterBasic(t *testing.T) {
 	})
 }
 
-func TestAccNetworkingV2RouterUpdateExternalGw(t *testing.T) {
+func TestAccNetworkingV2Router_update_external_gw(t *testing.T) {
 	var router routers.Router
 	resourceName := "opentelekomcloud_networking_router_v2.router_1"
 

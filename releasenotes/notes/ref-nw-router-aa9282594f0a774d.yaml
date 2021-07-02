@@ -1,4 +1,4 @@
 ---
 other:
   - |
-    [Networking] Refcatoring of ``resource/opentelekomcloud_netwroking_router_v2``
+    [Networking] Refaсtoring of ``resource/opentelekomcloud_networking_router_v2`` (`#1190 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/1190>`_)
