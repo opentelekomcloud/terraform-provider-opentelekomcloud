@@ -5,11 +5,11 @@ import (
 	"log"
 	"time"
 
+	"github.com/hashicorp/go-multierror"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
-
-	golangsdk "github.com/opentelekomcloud/gophertelekomcloud"
+	"github.com/opentelekomcloud/gophertelekomcloud"
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/networking/v2/extensions/layer3/routers"
 
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common"
@@ -39,12 +39,10 @@ func ResourceNetworkingRouterV2() *schema.Resource {
 			"name": {
 				Type:     schema.TypeString,
 				Optional: true,
-				ForceNew: false,
 			},
 			"admin_state_up": {
 				Type:     schema.TypeBool,
 				Optional: true,
-				ForceNew: false,
 				Computed: true,
 			},
 			"distributed": {
@@ -56,14 +54,13 @@ func ResourceNetworkingRouterV2() *schema.Resource {
 			"external_gateway": {
 				Type:             schema.TypeString,
 				Optional:         true,
-				ForceNew:         false,
 				DiffSuppressFunc: common.SuppressExternalGateway,
 			},
 			"enable_snat": {
-				Type:     schema.TypeBool,
-				Optional: true,
-				ForceNew: false,
-				Computed: true,
+				Type:         schema.TypeBool,
+				Optional:     true,
+				Computed:     true,
+				RequiredWith: []string{"external_gateway"},
 			},
 			"tenant_id": {
 				Type:     schema.TypeString,
@@ -82,9 +79,9 @@ func ResourceNetworkingRouterV2() *schema.Resource {
 
 func resourceNetworkingRouterV2Create(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*cfg.Config)
-	networkingClient, err := config.NetworkingV2Client(config.GetRegion(d))
+	client, err := config.NetworkingV2Client(config.GetRegion(d))
 	if err != nil {
-		return fmterr.Errorf("error creating OpenTelekomCloud networking client: %s", err)
+		return fmterr.Errorf(errCreationV2Client, err)
 	}
 
 	createOpts := RouterCreateOpts{
@@ -106,84 +103,81 @@ func resourceNetworkingRouterV2Create(ctx context.Context, d *schema.ResourceDat
 	}
 
 	externalGateway := d.Get("external_gateway").(string)
+	snat := d.Get("enable_snat").(bool)
 	if externalGateway != "" {
-		gatewayInfo := routers.GatewayInfo{
-			NetworkID: externalGateway,
+		createOpts.GatewayInfo = &routers.GatewayInfo{
+			NetworkID:  externalGateway,
+			EnableSNAT: &snat,
 		}
-		createOpts.GatewayInfo = &gatewayInfo
-	}
-
-	if esRaw, ok := d.GetOk("enable_snat"); ok {
-		if externalGateway == "" {
-			return fmterr.Errorf("setting enable_snat requires external_gateway to be set")
-		}
-		es := esRaw.(bool)
-		createOpts.GatewayInfo.EnableSNAT = &es
 	}
 
 	log.Printf("[DEBUG] Create Options: %#v", createOpts)
-	n, err := routers.Create(networkingClient, createOpts).Extract()
+	router, err := routers.Create(client, createOpts).Extract()
 	if err != nil {
 		return fmterr.Errorf("error creating OpenTelekomCloud Neutron router: %s", err)
 	}
-	log.Printf("[INFO] Router ID: %s", n.ID)
+	log.Printf("[INFO] Router ID: %s", router.ID)
 
-	log.Printf("[DEBUG] Waiting for OpenTelekomCloud Neutron Router (%s) to become available", n.ID)
+	log.Printf("[DEBUG] Waiting for OpenTelekomCloud Neutron Router (%s) to become available", router.ID)
 	stateConf := &resource.StateChangeConf{
 		Pending:    []string{"BUILD", "PENDING_CREATE", "PENDING_UPDATE"},
 		Target:     []string{"ACTIVE"},
-		Refresh:    waitForRouterActive(networkingClient, n.ID),
+		Refresh:    resourceNetworkingRouterV2StateRefreshFunc(client, router.ID),
 		Timeout:    d.Timeout(schema.TimeoutCreate),
 		Delay:      5 * time.Second,
 		MinTimeout: 3 * time.Second,
 	}
 
 	_, err = stateConf.WaitForStateContext(ctx)
+	if err != nil {
+		return fmterr.Errorf("error waiting Neutron Router to become available: %w", err)
+	}
 
-	d.SetId(n.ID)
+	d.SetId(router.ID)
 
 	return resourceNetworkingRouterV2Read(ctx, d, meta)
 }
 
 func resourceNetworkingRouterV2Read(_ context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*cfg.Config)
-	networkingClient, err := config.NetworkingV2Client(config.GetRegion(d))
+	client, err := config.NetworkingV2Client(config.GetRegion(d))
 	if err != nil {
-		return fmterr.Errorf("error creating OpenTelekomCloud networking client: %s", err)
+		return fmterr.Errorf(errCreationV2Client, err)
 	}
 
-	n, err := routers.Get(networkingClient, d.Id()).Extract()
+	router, err := routers.Get(client, d.Id()).Extract()
 	if err != nil {
 		if _, ok := err.(golangsdk.ErrDefault404); ok {
 			d.SetId("")
 			return nil
 		}
 
-		return fmterr.Errorf("error retrieving OpenTelekomCloud Neutron Router: %s", err)
+		return fmterr.Errorf("error retrieving OpenTelekomCloud Neutron Router: %w", err)
 	}
 
-	log.Printf("[DEBUG] Retrieved Router %s: %+v", d.Id(), n)
+	log.Printf("[DEBUG] Retrieved Router %s: %+v", d.Id(), router)
+	mErr := multierror.Append(
+		d.Set("name", router.Name),
+		d.Set("admin_state_up", router.AdminStateUp),
+		d.Set("distributed", router.Distributed),
+		d.Set("tenant_id", router.TenantID),
+		d.Set("external_gateway", router.GatewayInfo.NetworkID),
+		d.Set("enable_snat", router.GatewayInfo.EnableSNAT),
+		d.Set("region", config.GetRegion(d)),
+	)
 
-	d.Set("name", n.Name)
-	d.Set("admin_state_up", n.AdminStateUp)
-	d.Set("distributed", n.Distributed)
-	d.Set("tenant_id", n.TenantID)
-	d.Set("external_gateway", n.GatewayInfo.NetworkID)
-	d.Set("enable_snat", n.GatewayInfo.EnableSNAT)
-	d.Set("region", config.GetRegion(d))
+	if err := mErr.ErrorOrNil(); err != nil {
+		return diag.FromErr(err)
+	}
 
 	return nil
 }
 
 func resourceNetworkingRouterV2Update(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	routerId := d.Id()
-	osMutexKV.Lock(routerId)
-	defer osMutexKV.Unlock(routerId)
-
 	config := meta.(*cfg.Config)
-	networkingClient, err := config.NetworkingV2Client(config.GetRegion(d))
+	client, err := config.NetworkingV2Client(config.GetRegion(d))
 	if err != nil {
-		return fmterr.Errorf("error creating OpenTelekomCloud networking client: %s", err)
+		return fmterr.Errorf(errCreationV2Client, err)
 	}
 
 	var updateOpts routers.UpdateOpts
@@ -200,22 +194,15 @@ func resourceNetworkingRouterV2Update(ctx context.Context, d *schema.ResourceDat
 	var externalGateway string
 	gatewayInfo := routers.GatewayInfo{}
 
-	if v := d.Get("external_gateway").(string); v != "" {
-		externalGateway = v
-	}
-
-	if externalGateway != "" {
-		gatewayInfo.NetworkID = externalGateway
-	}
 	if d.HasChange("external_gateway") {
 		updateGatewaySettings = true
+
+		externalGateway = d.Get("external_gateway").(string)
+		gatewayInfo.NetworkID = externalGateway
 	}
 
 	if d.HasChange("enable_snat") {
 		updateGatewaySettings = true
-		if externalGateway == "" {
-			return fmterr.Errorf("setting enable_snat requires external_gateway to be set")
-		}
 
 		enableSNAT := d.Get("enable_snat").(bool)
 		gatewayInfo.EnableSNAT = &enableSNAT
@@ -227,9 +214,9 @@ func resourceNetworkingRouterV2Update(ctx context.Context, d *schema.ResourceDat
 
 	log.Printf("[DEBUG] Updating Router %s with options: %+v", d.Id(), updateOpts)
 
-	_, err = routers.Update(networkingClient, d.Id(), updateOpts).Extract()
+	_, err = routers.Update(client, d.Id(), updateOpts).Extract()
 	if err != nil {
-		return fmterr.Errorf("error updating OpenTelekomCloud Neutron Router: %s", err)
+		return fmterr.Errorf("error updating OpenTelekomCloud Neutron Router: %w", err)
 	}
 
 	return resourceNetworkingRouterV2Read(ctx, d, meta)
@@ -237,15 +224,19 @@ func resourceNetworkingRouterV2Update(ctx context.Context, d *schema.ResourceDat
 
 func resourceNetworkingRouterV2Delete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*cfg.Config)
-	networkingClient, err := config.NetworkingV2Client(config.GetRegion(d))
+	client, err := config.NetworkingV2Client(config.GetRegion(d))
 	if err != nil {
-		return fmterr.Errorf("error creating OpenTelekomCloud networking client: %s", err)
+		return fmterr.Errorf(errCreationV2Client, err)
+	}
+
+	if err := routers.Delete(client, d.Id()).ExtractErr(); err != nil {
+		return diag.FromErr(common.CheckDeleted(d, err, "networking_router_v2"))
 	}
 
 	stateConf := &resource.StateChangeConf{
 		Pending:    []string{"ACTIVE"},
 		Target:     []string{"DELETED"},
-		Refresh:    waitForRouterDelete(networkingClient, d.Id()),
+		Refresh:    resourceNetworkingRouterV2StateRefreshFunc(client, d.Id()),
 		Timeout:    d.Timeout(schema.TimeoutDelete),
 		Delay:      5 * time.Second,
 		MinTimeout: 3 * time.Second,
@@ -253,48 +244,24 @@ func resourceNetworkingRouterV2Delete(ctx context.Context, d *schema.ResourceDat
 
 	_, err = stateConf.WaitForStateContext(ctx)
 	if err != nil {
-		return fmterr.Errorf("error deleting OpenTelekomCloud Neutron Router: %s", err)
+		return fmterr.Errorf("error deleting OpenTelekomCloud Neutron Router: %w", err)
 	}
 
 	d.SetId("")
 	return nil
 }
 
-func waitForRouterActive(networkingClient *golangsdk.ServiceClient, routerId string) resource.StateRefreshFunc {
+func resourceNetworkingRouterV2StateRefreshFunc(client *golangsdk.ServiceClient, routerID string) resource.StateRefreshFunc {
 	return func() (interface{}, string, error) {
-		r, err := routers.Get(networkingClient, routerId).Extract()
-		if err != nil {
-			return nil, r.Status, err
-		}
-
-		log.Printf("[DEBUG] OpenTelekomCloud Neutron Router: %+v", r)
-		return r, r.Status, nil
-	}
-}
-
-func waitForRouterDelete(networkingClient *golangsdk.ServiceClient, routerId string) resource.StateRefreshFunc {
-	return func() (interface{}, string, error) {
-		log.Printf("[DEBUG] Attempting to delete OpenTelekomCloud Router %s.\n", routerId)
-
-		r, err := routers.Get(networkingClient, routerId).Extract()
+		n, err := routers.Get(client, routerID).Extract()
 		if err != nil {
 			if _, ok := err.(golangsdk.ErrDefault404); ok {
-				log.Printf("[DEBUG] Successfully deleted OpenTelekomCloud Router %s", routerId)
-				return r, "DELETED", nil
+				return n, "DELETED", nil
 			}
-			return r, "ACTIVE", err
+
+			return n, "", err
 		}
 
-		err = routers.Delete(networkingClient, routerId).ExtractErr()
-		if err != nil {
-			if _, ok := err.(golangsdk.ErrDefault404); ok {
-				log.Printf("[DEBUG] Successfully deleted OpenTelekomCloud Router %s", routerId)
-				return r, "DELETED", nil
-			}
-			return r, "ACTIVE", err
-		}
-
-		log.Printf("[DEBUG] OpenTelekomCloud Router %s still active.\n", routerId)
-		return r, "ACTIVE", nil
+		return n, n.Status, nil
 	}
 }
