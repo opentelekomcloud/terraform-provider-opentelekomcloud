@@ -1,0 +1,4 @@
+---
+other:
+  - |
+    [Networking] Refcatoring of ``resource/opentelekomcloud_netwroking_router_v2``
