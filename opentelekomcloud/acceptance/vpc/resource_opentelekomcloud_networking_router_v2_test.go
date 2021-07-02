@@ -14,8 +14,9 @@ import (
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common/cfg"
 )
 
-func TestAccNetworkingV2Router_basic(t *testing.T) {
+func TestAccNetworkingV2RouterBasic(t *testing.T) {
 	var router routers.Router
+	resourceName := "opentelekomcloud_networking_router_v2.router_1"
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:          func() { common.TestAccPreCheck(t) },
@@ -23,24 +24,24 @@ func TestAccNetworkingV2Router_basic(t *testing.T) {
 		CheckDestroy:      testAccCheckNetworkingV2RouterDestroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccNetworkingV2Router_basic,
+				Config: testAccNetworkingV2RouterBasic,
 				Check: resource.ComposeTestCheckFunc(
-					TestAccCheckNetworkingV2RouterExists("opentelekomcloud_networking_router_v2.router_1", &router),
+					TestAccCheckNetworkingV2RouterExists(resourceName, &router),
 				),
 			},
 			{
-				Config: testAccNetworkingV2Router_update,
+				Config: testAccNetworkingV2RouterUpdate,
 				Check: resource.ComposeTestCheckFunc(
-					resource.TestCheckResourceAttr(
-						"opentelekomcloud_networking_router_v2.router_1", "name", "router_2"),
+					resource.TestCheckResourceAttr(resourceName, "name", "router_2"),
 				),
 			},
 		},
 	})
 }
 
-func TestAccNetworkingV2Router_update_external_gw(t *testing.T) {
+func TestAccNetworkingV2RouterUpdateExternalGw(t *testing.T) {
 	var router routers.Router
+	resourceName := "opentelekomcloud_networking_router_v2.router_1"
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:          func() { common.TestAccPreCheck(t) },
@@ -48,16 +49,15 @@ func TestAccNetworkingV2Router_update_external_gw(t *testing.T) {
 		CheckDestroy:      testAccCheckNetworkingV2RouterDestroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccNetworkingV2Router_update_external_gw_1,
+				Config: testAccNetworkingV2RouterBasic,
 				Check: resource.ComposeTestCheckFunc(
-					TestAccCheckNetworkingV2RouterExists("opentelekomcloud_networking_router_v2.router_1", &router),
+					TestAccCheckNetworkingV2RouterExists(resourceName, &router),
 				),
 			},
 			{
-				Config: testAccNetworkingV2Router_update_external_gw_2,
+				Config: testAccNetworkingV2RouterUpdateExternalGw,
 				Check: resource.ComposeTestCheckFunc(
-					resource.TestCheckResourceAttr(
-						"opentelekomcloud_networking_router_v2.router_1", "external_gateway", env.OS_EXTGW_ID),
+					resource.TestCheckResourceAttr(resourceName, "external_gateway", env.OS_EXTGW_ID),
 				),
 			},
 		},
@@ -66,6 +66,7 @@ func TestAccNetworkingV2Router_update_external_gw(t *testing.T) {
 
 func TestAccNetworkingV2Router_timeout(t *testing.T) {
 	var router routers.Router
+	resourceName := "opentelekomcloud_networking_router_v2.router_1"
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:          func() { common.TestAccPreCheck(t) },
@@ -73,9 +74,9 @@ func TestAccNetworkingV2Router_timeout(t *testing.T) {
 		CheckDestroy:      testAccCheckNetworkingV2RouterDestroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccNetworkingV2Router_timeout,
+				Config: testAccNetworkingV2RouterTimeout,
 				Check: resource.ComposeTestCheckFunc(
-					TestAccCheckNetworkingV2RouterExists("opentelekomcloud_networking_router_v2.router_1", &router),
+					TestAccCheckNetworkingV2RouterExists(resourceName, &router),
 				),
 			},
 		},
@@ -84,9 +85,9 @@ func TestAccNetworkingV2Router_timeout(t *testing.T) {
 
 func testAccCheckNetworkingV2RouterDestroy(s *terraform.State) error {
 	config := common.TestAccProvider.Meta().(*cfg.Config)
-	networkingClient, err := config.NetworkingV2Client(env.OS_REGION_NAME)
+	client, err := config.NetworkingV2Client(env.OS_REGION_NAME)
 	if err != nil {
-		return fmt.Errorf("error creating OpenTelekomCloud networking client: %s", err)
+		return fmt.Errorf("error creating OpenTelekomCloud NetworkingV2 client: %w", err)
 	}
 
 	for _, rs := range s.RootModule().Resources {
@@ -94,53 +95,45 @@ func testAccCheckNetworkingV2RouterDestroy(s *terraform.State) error {
 			continue
 		}
 
-		_, err := routers.Get(networkingClient, rs.Primary.ID).Extract()
+		_, err := routers.Get(client, rs.Primary.ID).Extract()
 		if err == nil {
-			return fmt.Errorf("Router still exists")
+			return fmt.Errorf("router still exists")
 		}
 	}
 
 	return nil
 }
 
-const testAccNetworkingV2Router_basic = `
+const testAccNetworkingV2RouterBasic = `
 resource "opentelekomcloud_networking_router_v2" "router_1" {
-	name = "router_1"
-	admin_state_up = "true"
-	distributed = "false"
+  name           = "router_1"
+  admin_state_up = true
+  distributed    = false
 }
 `
 
-const testAccNetworkingV2Router_update = `
+const testAccNetworkingV2RouterUpdate = `
 resource "opentelekomcloud_networking_router_v2" "router_1" {
-	name = "router_2"
-	admin_state_up = "true"
-	distributed = "false"
+  name           = "router_2"
+  admin_state_up = true
+  distributed    = false
 }
 `
 
-const testAccNetworkingV2Router_update_external_gw_1 = `
+var testAccNetworkingV2RouterUpdateExternalGw = fmt.Sprintf(`
 resource "opentelekomcloud_networking_router_v2" "router_1" {
-	name = "router"
-	admin_state_up = "true"
-	distributed = "false"
-}
-`
-
-var testAccNetworkingV2Router_update_external_gw_2 = fmt.Sprintf(`
-resource "opentelekomcloud_networking_router_v2" "router_1" {
-	name = "router"
-	admin_state_up = "true"
-	distributed = "false"
-	external_gateway = "%s"
+  name             = "router_1"
+  admin_state_up   = true
+  distributed      = false
+  external_gateway = "%s"
 }
 `, env.OS_EXTGW_ID)
 
-const testAccNetworkingV2Router_timeout = `
+const testAccNetworkingV2RouterTimeout = `
 resource "opentelekomcloud_networking_router_v2" "router_1" {
-	name = "router_1"
-	admin_state_up = "true"
-	distributed = "false"
+  name           = "router_1"
+  admin_state_up = true
+  distributed    = false
 
   timeouts {
     create = "5m"
