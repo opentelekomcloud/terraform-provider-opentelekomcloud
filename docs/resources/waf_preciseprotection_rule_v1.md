@@ -18,7 +18,7 @@ resource "opentelekomcloud_waf_preciseprotection_rule_v1" "rule_1" {
   name      = "rule_1"
 
   conditions {
-    category = "url"
+    category = "path"
     contents = ["/login"]
     logic    = "contain"
   }
@@ -63,7 +63,7 @@ The following arguments are supported:
 
 The `conditions` block supports:
 
-* `category` - (Required) Specifies the condition type. The value can be url, user-agent, ip, params, cookie, referer, or header.
+* `category` - (Required) Specifies the condition type. The value can be path, user-agent, ip, params, cookie, referer, or header.
 
 * `index` - (Optional) If `category` is set to cookie, index indicates cookie name, if set to params, index indicates param name,
   if set to header, index indicates an option in the header.
