@@ -805,6 +805,13 @@ func (c *Config) AutoscalingV1Client(region string) (*golangsdk.ServiceClient, e
 	})
 }
 
+func (c *Config) AutoscalingV2Client(region string) (*golangsdk.ServiceClient, error) {
+	return openstack.NewAutoScalingV2(c.HwClient, golangsdk.EndpointOpts{
+		Region:       region,
+		Availability: c.getEndpointType(),
+	})
+}
+
 func (c *Config) CsbsV1Client(region string) (*golangsdk.ServiceClient, error) {
 	return openstack.NewCSBSService(c.HwClient, golangsdk.EndpointOpts{
 		Region:       region,
