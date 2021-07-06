@@ -8,6 +8,7 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 	golangsdk "github.com/opentelekomcloud/gophertelekomcloud"
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/waf/v1/preciseprotection_rules"
 
@@ -64,9 +65,10 @@ func ResourceWafPreciseProtectionRuleV1() *schema.Resource {
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
 						"category": {
-							Type:     schema.TypeString,
-							Required: true,
-							ForceNew: true,
+							Type:         schema.TypeString,
+							Required:     true,
+							ForceNew:     true,
+							ValidateFunc: validation.StringInSlice([]string{"path", "user-agent", "ip", "params", "cookie", "referer", "header"}, false),
 						},
 						"index": {
 							Type:     schema.TypeString,
@@ -74,9 +76,12 @@ func ResourceWafPreciseProtectionRuleV1() *schema.Resource {
 							ForceNew: true,
 						},
 						"logic": {
-							Type:     schema.TypeInt,
+							Type:     schema.TypeString,
 							Required: true,
 							ForceNew: true,
+							ValidateFunc: validation.StringInSlice([]string{
+								"contain", "not_contain", "equal", "not_equal", "prefix", "not_prefix", "suffix", "not_suffix",
+							}, false),
 						},
 						"contents": {
 							Type:     schema.TypeList,
@@ -119,7 +124,7 @@ func getConditions(d *schema.ResourceData) []preciseprotection_rules.Condition {
 		condition := preciseprotection_rules.Condition{
 			Category: cond["category"].(string),
 			Index:    cond["index"].(string),
-			Logic:    cond["logic"].(int),
+			Logic:    cond["logic"].(string),
 			Contents: contents,
 		}
 		conditionOpts = append(conditionOpts, condition)

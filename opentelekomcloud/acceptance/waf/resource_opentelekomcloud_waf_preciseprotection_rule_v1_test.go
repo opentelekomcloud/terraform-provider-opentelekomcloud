@@ -96,14 +96,14 @@ resource "opentelekomcloud_waf_preciseprotection_rule_v1" "rule_1" {
 	policy_id = opentelekomcloud_waf_policy_v1.policy_1.id
 	name = "rule_1"
 	conditions {
-		category = "url"
+		category = "path"
 		contents = ["/login"]
-		logic = 1
+		logic = "contain"
 	}
 	conditions {
 		category = "ip"
 		contents = ["192.168.1.1"]
-		logic = 3
+		logic = "equal"
 	}
 	action_category = "block"
 	priority = 10
