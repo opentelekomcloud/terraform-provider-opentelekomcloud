@@ -292,6 +292,7 @@ func Provider() *schema.Provider {
 			"opentelekomcloud_as_configuration_v1":                as.ResourceASConfiguration(),
 			"opentelekomcloud_as_group_v1":                        as.ResourceASGroup(),
 			"opentelekomcloud_as_policy_v1":                       as.ResourceASPolicy(),
+			"opentelekomcloud_as_policy_v2":                       as.ResourceASPolicyV2(),
 			"opentelekomcloud_blockstorage_volume_v2":             evs.ResourceBlockStorageVolumeV2(),
 			"opentelekomcloud_cbr_policy_v3":                      cbr.ResourceCBRPolicyV3(),
 			"opentelekomcloud_cbr_vault_v3":                       cbr.ResourceCBRVaultV3(),
