@@ -9,9 +9,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/identity/v3/federation/protocols"
-	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/acceptance/env"
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common"
-	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common/cfg"
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common/fmterr"
 )
 
@@ -50,12 +48,10 @@ func ResourceIdentityProtocolV3() *schema.Resource {
 }
 
 func resourceIdentityProtocolV3Create(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	config := meta.(*cfg.Config)
-	client, err := config.IdentityV3Client(env.OS_REGION_NAME)
+	client, err := clientFromCtx(ctx, d, meta)
 	if err != nil {
-		return fmterr.Errorf(clientCreationFail, err)
+		return diag.FromErr(err)
 	}
-	clientCtx := ctxWithClient(ctx, client)
 
 	provider := d.Get("provider_id").(string)
 	protocol := d.Get("protocol").(string)
@@ -70,11 +66,12 @@ func resourceIdentityProtocolV3Create(ctx context.Context, d *schema.ResourceDat
 
 	d.SetId(fmt.Sprintf("%s/%s", provider, protocol))
 
+	clientCtx := ctxWithClient(ctx, client)
 	return resourceIdentityProtocolV3Read(clientCtx, d, meta)
 }
 
 func resourceIdentityProtocolV3Read(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client, err := clientFromCtx(ctx, meta)
+	client, err := clientFromCtx(ctx, d, meta)
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -101,11 +98,10 @@ func resourceIdentityProtocolV3Read(ctx context.Context, d *schema.ResourceData,
 }
 
 func resourceIdentityProtocolV3Update(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client, err := clientFromCtx(ctx, meta)
+	client, err := clientFromCtx(ctx, d, meta)
 	if err != nil {
 		return diag.FromErr(err)
 	}
-	clientCtx := ctxWithClient(ctx, client)
 
 	if d.HasChange("mapping_id") {
 		provider := d.Get("provider_id").(string)
@@ -120,11 +116,12 @@ func resourceIdentityProtocolV3Update(ctx context.Context, d *schema.ResourceDat
 		}
 	}
 
+	clientCtx := ctxWithClient(ctx, client)
 	return resourceIdentityProtocolV3Read(clientCtx, d, meta)
 }
 
 func resourceIdentityProtocolV3Delete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client, err := clientFromCtx(ctx, meta)
+	client, err := clientFromCtx(ctx, d, meta)
 	if err != nil {
 		return diag.FromErr(err)
 	}
