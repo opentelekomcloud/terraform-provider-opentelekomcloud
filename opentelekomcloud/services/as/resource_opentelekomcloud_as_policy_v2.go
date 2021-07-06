@@ -87,14 +87,12 @@ func ResourceASPolicyV2() *schema.Resource {
 							Optional: true,
 						},
 						"start_time": {
-							Type:         schema.TypeString,
-							Optional:     true,
-							ValidateFunc: validation.IsRFC3339Time,
+							Type:     schema.TypeString,
+							Optional: true,
 						},
 						"end_time": {
-							Type:         schema.TypeString,
-							Optional:     true,
-							ValidateFunc: validation.IsRFC3339Time,
+							Type:     schema.TypeString,
+							Optional: true,
 						},
 					},
 				},
@@ -132,6 +130,30 @@ func ResourceASPolicyV2() *schema.Resource {
 				Type:         schema.TypeInt,
 				Optional:     true,
 				ValidateFunc: validation.IntBetween(0, 86400),
+			},
+			"create_time": {
+				Type:     schema.TypeString,
+				Computed: true,
+			},
+			"metadata": {
+				Type:     schema.TypeSet,
+				Computed: true,
+				Elem: &schema.Resource{
+					Schema: map[string]*schema.Schema{
+						"bandwidth_share_type": {
+							Type:     schema.TypeString,
+							Computed: true,
+						},
+						"eip_id": {
+							Type:     schema.TypeString,
+							Computed: true,
+						},
+						"eip_address": {
+							Type:     schema.TypeString,
+							Computed: true,
+						},
+					},
+				},
 			},
 		},
 	}
@@ -191,7 +213,7 @@ func resourceASPolicyV2Create(ctx context.Context, d *schema.ResourceData, meta 
 	}
 	d.SetId(asPolicyID)
 
-	return resourceASPolicyRead(ctx, d, meta)
+	return resourceASPolicyV2Read(ctx, d, meta)
 }
 
 func resourceASPolicyV2Read(_ context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
@@ -264,7 +286,7 @@ func resourceASPolicyV2Update(ctx context.Context, d *schema.ResourceData, meta 
 		return fmterr.Errorf("error updating ASPolicy %q: %w", asPolicyID, err)
 	}
 
-	return resourceASPolicyRead(ctx, d, meta)
+	return resourceASPolicyV2Read(ctx, d, meta)
 }
 
 func resourceASPolicyV2Delete(_ context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
