@@ -72,9 +72,8 @@ func ResourceASPolicyV2() *schema.Resource {
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
 						"launch_time": {
-							Type:         schema.TypeString,
-							Required:     true,
-							ValidateFunc: validation.IsRFC3339Time,
+							Type:     schema.TypeString,
+							Required: true,
 						},
 						"recurrence_type": {
 							Type:     schema.TypeString,
