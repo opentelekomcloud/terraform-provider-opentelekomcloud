@@ -13,9 +13,7 @@ require (
 	github.com/jen20/awspolicyequivalence v1.1.0
 	github.com/jinzhu/copier v0.2.3
 	github.com/mitchellh/go-homedir v1.1.0
-	github.com/opentelekomcloud/gophertelekomcloud v0.4.2-0.20210701133301-ff440d0416c5
+	github.com/opentelekomcloud/gophertelekomcloud v0.4.2-0.20210706104800-139ff6a496bc
 	github.com/unknwon/com v1.0.1
 	gopkg.in/yaml.v2 v2.4.0
 )
-
-replace github.com/opentelekomcloud/gophertelekomcloud => github.com/cgroschupp/gophertelekomcloud v0.4.2-0.20210706083832-e9426a54199c
