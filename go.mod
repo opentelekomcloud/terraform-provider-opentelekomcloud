@@ -17,3 +17,5 @@ require (
 	github.com/unknwon/com v1.0.1
 	gopkg.in/yaml.v2 v2.4.0
 )
+
+replace github.com/opentelekomcloud/gophertelekomcloud => github.com/cgroschupp/gophertelekomcloud v0.4.2-0.20210706083832-e9426a54199c
