@@ -260,9 +260,18 @@ func resourceASPolicyV2Read(_ context.Context, d *schema.ResourceData, meta inte
 			"limits":     asPolicy.PolicyAction.Limits,
 		},
 	}
+
+	metadata := []map[string]interface{}{
+		{
+			"bandwidth_share_type": asPolicy.Metadata.BandwidthShareType,
+			"eip_id":               asPolicy.Metadata.EipID,
+			"eip_address":          asPolicy.Metadata.EipAddress,
+		},
+	}
 	mErr = multierror.Append(mErr,
 		d.Set("scheduled_policy", scheduledPolicy),
 		d.Set("scaling_policy_action", policyAction),
+		d.Set("metadata", metadata),
 	)
 
 	if err := mErr.ErrorOrNil(); err != nil {

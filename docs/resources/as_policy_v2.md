@@ -148,3 +148,13 @@ In addition to all arguments above, the following attributes are exported:
 
 * `create_time` - Specifies the time when an AS policy was created. The time format complies with UTC.
 
+* `metadata` - Provides additional information. The `metadata` structure is documented below.
+
+The `metadata` block supports:
+
+* `bandwidth_share_type` - Specifies the bandwidth sharing type in the bandwidth scaling policy.
+
+* `eip_id` - Specifies the EIP ID for the bandwidth in the bandwidth scaling policy.
+
+* `eip_address` - Specifies the EIP for the bandwidth in the bandwidth scaling policy.
+
