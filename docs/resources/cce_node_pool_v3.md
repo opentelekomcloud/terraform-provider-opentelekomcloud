@@ -15,7 +15,7 @@ variable "availability_zone" {}
 
 resource "opentelekomcloud_cce_node_pool_v3" "node_pool_1" {
   cluster_id         = var.cluster_id
-  name               = "opentelekomcloud-cce-node-pool_test"
+  name               = "opentelekomcloud-cce-node-pool-test"
   os                 = "EulerOS 2.5"
   flavor             = "s2.xlarge.2"
   initial_node_count = 2
