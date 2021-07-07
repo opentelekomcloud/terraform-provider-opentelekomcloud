@@ -8,6 +8,7 @@ import (
 	"github.com/hashicorp/go-multierror"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"github.com/opentelekomcloud/gophertelekomcloud/openstack/identity/v3/federation/metadata"
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/identity/v3/federation/protocols"
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common"
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common/fmterr"
@@ -43,6 +44,31 @@ func ResourceIdentityProtocolV3() *schema.Resource {
 				Type:     schema.TypeMap,
 				Computed: true,
 			},
+
+			"metadata": {
+				Type:     schema.TypeList,
+				Optional: true,
+				Computed: true,
+				MaxItems: 1,
+				Elem: &schema.Resource{
+					Schema: map[string]*schema.Schema{
+						"xaccount_type": {
+							Type:     schema.TypeString,
+							Optional: true,
+							Default:  "",
+						},
+						"domain_id": {
+							Type:     schema.TypeString,
+							Required: true,
+						},
+						"metadata": {
+							Type:      schema.TypeString,
+							Required:  true,
+							StateFunc: common.GetHashOrEmpty,
+						},
+					},
+				},
+			},
 		},
 	}
 }
@@ -53,18 +79,21 @@ func resourceIdentityProtocolV3Create(ctx context.Context, d *schema.ResourceDat
 		return diag.FromErr(err)
 	}
 
-	provider := d.Get("provider_id").(string)
-	protocol := d.Get("protocol").(string)
-
 	opts := protocols.CreateOpts{
 		MappingID: d.Get("mapping_id").(string),
 	}
-	_, err = protocols.Create(client, provider, protocol, opts).Extract()
+	_, err = protocols.Create(client, provider(d), protocol(d), opts).Extract()
 	if err != nil {
 		return fmterr.Errorf("error registering protocol: %w", err)
 	}
 
-	d.SetId(fmt.Sprintf("%s/%s", provider, protocol))
+	d.SetId(fmt.Sprintf("%s/%s", provider(d), protocol(d)))
+
+	if d.Get("metadata.#") != 0 {
+		if err := uploadMetadata(d, meta); err != nil {
+			return fmterr.Errorf("error uploading metadata: %w", err)
+		}
+	}
 
 	clientCtx := ctxWithClient(ctx, client)
 	return resourceIdentityProtocolV3Read(clientCtx, d, meta)
@@ -79,19 +108,21 @@ func resourceIdentityProtocolV3Read(ctx context.Context, d *schema.ResourceData,
 	if err := setProviderAndProtocol(d); err != nil {
 		return diag.FromErr(err)
 	}
-	protocol, err := protocols.Get(client,
-		d.Get("provider_id").(string),
-		d.Get("protocol").(string),
-	).Extract()
+	protocol, err := protocols.Get(client, provider(d), protocol(d)).Extract()
 	if err != nil {
 		return fmterr.Errorf("error reading protocol: %w", err)
 	}
+
 	mErr := multierror.Append(
 		d.Set("mapping_id", protocol.MappingID),
 		d.Set("links", protocol.Links),
 	)
 	if err := mErr.ErrorOrNil(); err != nil {
 		return fmterr.Errorf("error setting protocol attributes: %w", err)
+	}
+
+	if err := setMetadata(d, meta); err != nil {
+		return fmterr.Errorf("error downloading metadata: %w", err)
 	}
 
 	return nil
@@ -104,13 +135,10 @@ func resourceIdentityProtocolV3Update(ctx context.Context, d *schema.ResourceDat
 	}
 
 	if d.HasChange("mapping_id") {
-		provider := d.Get("provider_id").(string)
-		protocol := d.Get("protocol").(string)
-
 		opts := protocols.UpdateOpts{
 			MappingID: d.Get("mapping_id").(string),
 		}
-		_, err = protocols.Update(client, provider, protocol, opts).Extract()
+		_, err = protocols.Update(client, provider(d), protocol(d), opts).Extract()
 		if err != nil {
 			return fmterr.Errorf("error updating protocol: %w", err)
 		}
@@ -125,7 +153,7 @@ func resourceIdentityProtocolV3Delete(ctx context.Context, d *schema.ResourceDat
 	if err != nil {
 		return diag.FromErr(err)
 	}
-	err = protocols.Delete(client, d.Get("provider_id").(string), d.Get("protocol").(string)).ExtractErr()
+	err = protocols.Delete(client, provider(d), protocol(d)).ExtractErr()
 	return diag.FromErr(err)
 }
 
@@ -136,4 +164,46 @@ func setProviderAndProtocol(d *schema.ResourceData) error {
 		d.Set("protocol", parts[1]),
 	)
 	return mErr.ErrorOrNil()
+}
+
+func uploadMetadata(d *schema.ResourceData, meta interface{}) error {
+	client, err := identityExtClient(d, meta)
+	if err != nil {
+		return err
+	}
+	opts := metadata.ImportOpts{
+		XAccountType: d.Get("metadata.0.xaccount_type").(string),
+		DomainID:     d.Get("metadata.0.domain_id").(string),
+		Metadata:     d.Get("metadata.0.metadata").(string),
+	}
+	err = metadata.Import(client, provider(d), protocol(d), opts).ExtractErr()
+	if err != nil {
+		return fmt.Errorf("error importing metadata file: %w", err)
+	}
+	return nil
+}
+
+func setMetadata(d *schema.ResourceData, meta interface{}) error {
+	client, err := identityExtClient(d, meta)
+	if err != nil {
+		return err
+	}
+	md, err := metadata.Get(client, provider(d), protocol(d)).Extract()
+	if err != nil {
+		return err
+	}
+	value := []map[string]interface{}{{
+		"xaccount_type": md.XAccountType,
+		"domain_id":     md.DomainID,
+		"metadata":      common.GetHashOrEmpty(md.Data),
+	}}
+	return d.Set("metadata", value)
+}
+
+func provider(d *schema.ResourceData) string {
+	return d.Get("provider_id").(string)
+}
+
+func protocol(d *schema.ResourceData) string {
+	return d.Get("protocol").(string)
 }
