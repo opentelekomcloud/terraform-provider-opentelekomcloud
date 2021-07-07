@@ -28,6 +28,7 @@ func TestAccASPolicyV2_basic(t *testing.T) {
 					resource.TestCheckResourceAttr(resourceName, "scaling_policy_action.0.operation", "ADD"),
 					resource.TestCheckResourceAttr(resourceName, "scaling_policy_action.0.percentage", "15"),
 					resource.TestCheckResourceAttr(resourceName, "scaling_policy_name", "policy_create"),
+					resource.TestCheckResourceAttr(resourceName, "cool_down_time", "300"),
 				),
 			},
 			{
@@ -36,6 +37,7 @@ func TestAccASPolicyV2_basic(t *testing.T) {
 					testAccCheckASV2PolicyExists(resourceName, &asPolicy),
 					resource.TestCheckResourceAttr(resourceName, "scaling_policy_action.0.percentage", "30"),
 					resource.TestCheckResourceAttr(resourceName, "scaling_policy_name", "policy_update"),
+					resource.TestCheckResourceAttr(resourceName, "cool_down_time", "100"),
 				),
 			},
 		},
