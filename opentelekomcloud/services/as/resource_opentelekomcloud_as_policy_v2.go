@@ -89,6 +89,7 @@ func ResourceASPolicyV2() *schema.Resource {
 						"start_time": {
 							Type:     schema.TypeString,
 							Optional: true,
+							Computed: true,
 						},
 						"end_time": {
 							Type:     schema.TypeString,
@@ -112,16 +113,19 @@ func ResourceASPolicyV2() *schema.Resource {
 						"size": {
 							Type:         schema.TypeInt,
 							Optional:     true,
+							Computed:     true,
 							ValidateFunc: validation.IntBetween(0, 300),
 						},
 						"percentage": {
 							Type:         schema.TypeInt,
 							Optional:     true,
+							Computed:     true,
 							ValidateFunc: validation.IntBetween(0, 20000),
 						},
 						"limits": {
 							Type:     schema.TypeInt,
 							Optional: true,
+							Computed: true,
 						},
 					},
 				},
@@ -129,6 +133,7 @@ func ResourceASPolicyV2() *schema.Resource {
 			"cool_down_time": {
 				Type:         schema.TypeInt,
 				Optional:     true,
+				Computed:     true,
 				ValidateFunc: validation.IntBetween(0, 86400),
 			},
 			"create_time": {
@@ -237,19 +242,23 @@ func resourceASPolicyV2Read(_ context.Context, d *schema.ResourceData, meta inte
 		d.Set("cool_down_time", asPolicy.CoolDownTime),
 	)
 
-	scheduledPolicy := map[string]interface{}{
-		"launch_time":      asPolicy.SchedulePolicy.LaunchTime,
-		"recurrence_type":  asPolicy.SchedulePolicy.RecurrenceType,
-		"recurrence_value": asPolicy.SchedulePolicy.RecurrenceValue,
-		"start_time":       asPolicy.SchedulePolicy.StartTime,
-		"end_time":         asPolicy.SchedulePolicy.EndTime,
+	scheduledPolicy := []map[string]interface{}{
+		{
+			"launch_time":      asPolicy.SchedulePolicy.LaunchTime,
+			"recurrence_type":  asPolicy.SchedulePolicy.RecurrenceType,
+			"recurrence_value": asPolicy.SchedulePolicy.RecurrenceValue,
+			"start_time":       asPolicy.SchedulePolicy.StartTime,
+			"end_time":         asPolicy.SchedulePolicy.EndTime,
+		},
 	}
 
-	policyAction := map[string]interface{}{
-		"operation":  asPolicy.PolicyAction.Operation,
-		"size":       asPolicy.PolicyAction.Size,
-		"percentage": asPolicy.PolicyAction.Percentage,
-		"limits":     asPolicy.PolicyAction.Limits,
+	policyAction := []map[string]interface{}{
+		{
+			"operation":  asPolicy.PolicyAction.Operation,
+			"size":       asPolicy.PolicyAction.Size,
+			"percentage": asPolicy.PolicyAction.Percentage,
+			"limits":     asPolicy.PolicyAction.Limits,
+		},
 	}
 	mErr = multierror.Append(mErr,
 		d.Set("scheduled_policy", scheduledPolicy),

@@ -25,8 +25,8 @@ func TestAccASPolicyV2_basic(t *testing.T) {
 				Config: testASPolicyV2Basic,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckASV2PolicyExists(resourceName, &asPolicy),
-					resource.TestCheckResourceAttr(resourceName, "scaling_policy_action.operation", "ADD"),
-					resource.TestCheckResourceAttr(resourceName, "scaling_policy_action.percentage", "15"),
+					resource.TestCheckResourceAttr(resourceName, "scaling_policy_action.0.operation", "ADD"),
+					resource.TestCheckResourceAttr(resourceName, "scaling_policy_action.0.percentage", "15"),
 					resource.TestCheckResourceAttr(resourceName, "scaling_policy_name", "policy_create"),
 				),
 			},
@@ -34,7 +34,7 @@ func TestAccASPolicyV2_basic(t *testing.T) {
 				Config: testASPolicyV2Update,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckASV2PolicyExists(resourceName, &asPolicy),
-					resource.TestCheckResourceAttr(resourceName, "scaling_policy_action.percentage", "30"),
+					resource.TestCheckResourceAttr(resourceName, "scaling_policy_action.0.percentage", "30"),
 					resource.TestCheckResourceAttr(resourceName, "scaling_policy_name", "policy_update"),
 				),
 			},
@@ -200,6 +200,6 @@ resource "opentelekomcloud_as_policy_v2" "policy_1"{
     recurrence_value = "1,3,5"
     end_time         = "2040-12-31T10:30Z"
   }
-  cool_down_time = 0
+  cool_down_time = 100
 }
 `, env.OS_IMAGE_ID, env.OS_NETWORK_ID, env.OS_VPC_ID)
