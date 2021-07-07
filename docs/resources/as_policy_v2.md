@@ -110,10 +110,12 @@ The `scheduled_policy` block supports:
 The `scaling_policy_action` block supports:
 
 * `operation` - (Optional) The operation to be performed.
-  If scaling_resource_type is set to `SCALING_GROUP`, the following operations are supported:
+
+  If `scaling_resource_type` is set to `SCALING_GROUP`, the following operations are supported:
   * `ADD`: indicates adding instances.
   * `REMOVE`/`REDUCE`: indicates removing or reducing instances.
   * `SET`: indicates setting the number of instances to a specified value.
+
   If `scaling_resource_type` is set to `BANDWIDTH`, the following operations are supported:
   * `ADD`: indicates adding instances.
   * `REDUCE`: indicates reducing instances.
