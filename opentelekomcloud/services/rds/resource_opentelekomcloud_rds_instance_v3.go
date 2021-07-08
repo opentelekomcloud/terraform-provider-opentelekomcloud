@@ -865,14 +865,27 @@ func resourceRdsInstanceV3Read(_ context.Context, d *schema.ResourceData, meta i
 	}
 
 	availabilityZones := make([]string, len(rdsInstance.Nodes))
-	if len(rdsInstance.Nodes) == 1 {
-		availabilityZones[0] = rdsInstance.Nodes[0].AvailabilityZone
-	} else if rdsInstance.Nodes[0].Role == "master" {
-		availabilityZones[0] = rdsInstance.Nodes[0].AvailabilityZone
-		availabilityZones[1] = rdsInstance.Nodes[1].AvailabilityZone
-	} else {
-		availabilityZones[0] = rdsInstance.Nodes[1].AvailabilityZone
-		availabilityZones[1] = rdsInstance.Nodes[0].AvailabilityZone
+	switch n := len(rdsInstance.Nodes); n {
+	case 0:
+		return fmterr.Errorf("RDSv3 instance doesn't have nodes")
+	case 1:
+		availabilityZones = []string{
+			rdsInstance.Nodes[0].AvailabilityZone,
+		}
+	case 2:
+		if rdsInstance.Nodes[0].Role == "master" {
+			availabilityZones = []string{
+				rdsInstance.Nodes[0].AvailabilityZone,
+				rdsInstance.Nodes[1].AvailabilityZone,
+			}
+		} else {
+			availabilityZones = []string{
+				rdsInstance.Nodes[1].AvailabilityZone,
+				rdsInstance.Nodes[0].AvailabilityZone,
+			}
+		}
+	default:
+		fmterr.Errorf("RDSv3 instance has more than 2 nodes")
 	}
 
 	if err := d.Set("availability_zone", availabilityZones); err != nil {
