@@ -1,0 +1,4 @@
+---
+fixes:
+  - |
+    [RDS] Fix wrong order of AZs in ``resource/opentelekomcloud_rds_instance_v3`` (`#1203 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/1203>`_)
