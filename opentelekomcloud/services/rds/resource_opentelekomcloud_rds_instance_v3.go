@@ -850,7 +850,6 @@ func resourceRdsInstanceV3Read(_ context.Context, d *schema.ResourceData, meta i
 	}
 
 	var nodesList []map[string]interface{}
-	var availabilityZones []string
 	for _, nodeObj := range rdsInstance.Nodes {
 		node := make(map[string]interface{})
 		node["id"] = nodeObj.Id
@@ -859,11 +858,26 @@ func resourceRdsInstanceV3Read(_ context.Context, d *schema.ResourceData, meta i
 		node["availability_zone"] = nodeObj.AvailabilityZone
 		node["status"] = nodeObj.Status
 		nodesList = append(nodesList, node)
-		availabilityZones = append(availabilityZones, nodeObj.AvailabilityZone)
 	}
+
 	if err := d.Set("nodes", nodesList); err != nil {
 		return fmterr.Errorf("error setting node list: %s", err)
 	}
+
+	availabilityZones := make([]string, len(rdsInstance.Nodes))
+	if len(rdsInstance.Nodes) == 1 {
+		az1 := rdsInstance.Nodes[0].AvailabilityZone
+		availabilityZones = append(availabilityZones, az1)
+	} else if rdsInstance.Nodes[0].Role == "master" {
+		az1 := rdsInstance.Nodes[0].AvailabilityZone
+		az2 := rdsInstance.Nodes[1].AvailabilityZone
+		availabilityZones = append(availabilityZones, az1, az2)
+	} else {
+		az1 := rdsInstance.Nodes[0].AvailabilityZone
+		az2 := rdsInstance.Nodes[1].AvailabilityZone
+		availabilityZones = append(availabilityZones, az2, az1)
+	}
+
 	if err := d.Set("availability_zone", availabilityZones); err != nil {
 		return diag.FromErr(err)
 	}
