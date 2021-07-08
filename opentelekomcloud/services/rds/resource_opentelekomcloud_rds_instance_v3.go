@@ -866,16 +866,13 @@ func resourceRdsInstanceV3Read(_ context.Context, d *schema.ResourceData, meta i
 
 	availabilityZones := make([]string, len(rdsInstance.Nodes))
 	if len(rdsInstance.Nodes) == 1 {
-		az1 := rdsInstance.Nodes[0].AvailabilityZone
-		availabilityZones = append(availabilityZones, az1)
+		availabilityZones[0] = rdsInstance.Nodes[0].AvailabilityZone
 	} else if rdsInstance.Nodes[0].Role == "master" {
-		az1 := rdsInstance.Nodes[0].AvailabilityZone
-		az2 := rdsInstance.Nodes[1].AvailabilityZone
-		availabilityZones = append(availabilityZones, az1, az2)
+		availabilityZones[0] = rdsInstance.Nodes[0].AvailabilityZone
+		availabilityZones[1] = rdsInstance.Nodes[1].AvailabilityZone
 	} else {
-		az1 := rdsInstance.Nodes[0].AvailabilityZone
-		az2 := rdsInstance.Nodes[1].AvailabilityZone
-		availabilityZones = append(availabilityZones, az2, az1)
+		availabilityZones[0] = rdsInstance.Nodes[1].AvailabilityZone
+		availabilityZones[1] = rdsInstance.Nodes[0].AvailabilityZone
 	}
 
 	if err := d.Set("availability_zone", availabilityZones); err != nil {
