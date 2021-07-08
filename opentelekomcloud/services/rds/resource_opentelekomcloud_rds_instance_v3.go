@@ -883,7 +883,7 @@ func resourceRdsInstanceV3Read(_ context.Context, d *schema.ResourceData, meta i
 			}
 		}
 	default:
-		fmterr.Errorf("RDSv3 instance expects 1 or 2 nodes")
+		fmterr.Errorf("RDSv3 instance expects 1 or 2 nodes, but got %d", n)
 	}
 
 	if err := d.Set("availability_zone", availabilityZones); err != nil {
