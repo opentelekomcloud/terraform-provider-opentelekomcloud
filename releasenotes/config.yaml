@@ -1,0 +1,12 @@
+---
+sections:
+  # The prelude section is implicitly included.
+  - [features, New Features]
+  - [enhancements, Enhancements]
+  - [fixes, Bug Fixes]
+  - [issues, Known Issues]
+  - [upgrade, Upgrade Notes]
+  - [deprecations, Deprecations]
+  - [critical, Critical Fixes]
+  - [security, Security Issues]
+  - [other, Other]

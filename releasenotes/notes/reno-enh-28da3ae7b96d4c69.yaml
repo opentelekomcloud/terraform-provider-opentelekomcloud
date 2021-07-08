@@ -1,0 +1,4 @@
+---
+enhancements:
+  - |
+    Add enhancements section to the release notes (`#1207 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/1207>`_)
