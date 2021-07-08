@@ -864,10 +864,8 @@ func resourceRdsInstanceV3Read(_ context.Context, d *schema.ResourceData, meta i
 		return fmterr.Errorf("error setting node list: %s", err)
 	}
 
-	availabilityZones := make([]string, len(rdsInstance.Nodes))
+	var availabilityZones []string
 	switch n := len(rdsInstance.Nodes); n {
-	case 0:
-		return fmterr.Errorf("RDSv3 instance doesn't have nodes")
 	case 1:
 		availabilityZones = []string{
 			rdsInstance.Nodes[0].AvailabilityZone,
@@ -885,7 +883,7 @@ func resourceRdsInstanceV3Read(_ context.Context, d *schema.ResourceData, meta i
 			}
 		}
 	default:
-		fmterr.Errorf("RDSv3 instance has more than 2 nodes")
+		fmterr.Errorf("RDSv3 instance expects 1 or 2 nodes")
 	}
 
 	if err := d.Set("availability_zone", availabilityZones); err != nil {
