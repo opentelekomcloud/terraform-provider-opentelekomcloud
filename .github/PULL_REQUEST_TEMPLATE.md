@@ -7,6 +7,7 @@
 * [ ] Tests added/passed.
 * [ ] Documentation updated.
 * [ ] Schema updated.
+* [ ] Release notes added.
 
 ## Acceptance Steps Performed
 
