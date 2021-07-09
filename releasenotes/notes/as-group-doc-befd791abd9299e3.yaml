@@ -1,0 +1,7 @@
+---
+deprecations:
+  - |
+    [AS] Deprecate ``lb_listener_id`` in ``resource/opentelekomcloud_as_group_v1`` (`#1212 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/1212>`_)
+other:
+  - |
+    [AS] Update doc examples in ``resource/opentelekomcloud_as_group_v1`` (`#1212 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/1212>`_)
