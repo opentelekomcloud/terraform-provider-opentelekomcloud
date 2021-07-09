@@ -44,6 +44,19 @@ resource "opentelekomcloud_lb_loadbalancer_v2" "lb_1" {
 }
 ```
 
+### Public load balancer (with floating IP)
+
+```hcl
+resource "opentelekomcloud_lb_loadbalancer_v2" "lb_1" {
+  name          = "example-loadbalancer"
+  vip_subnet_id = "d9415786-5f1a-428b-b35f-2f1523e146d2"
+}
+
+resource "opentelekomcloud_networking_floatingip_associate_v2" "associate" {
+  floating_ip = var.floating_ip_address
+  port_id     = opentelekomcloud_lb_loadbalancer_v2.lb_1.vip_port_id
+}
+```
 
 ## Argument Reference
 
