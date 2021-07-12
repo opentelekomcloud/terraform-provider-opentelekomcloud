@@ -57,6 +57,8 @@ The following arguments are supported:
 
 * `name` - (Optional) Node Name.
 
+* `subnet_id` - (Optional) The ID of the subnet to which the NIC belongs. Changing this parameter will create a new resource.
+
 * `labels` - (Optional) Node tag, key/value pair format. Changing this parameter will create a new resource.
 
 * `tags` - (Optional) The field is alternative to `labels`, key/value pair format.
