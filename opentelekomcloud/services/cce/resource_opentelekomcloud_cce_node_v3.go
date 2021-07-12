@@ -581,7 +581,6 @@ func resourceCCENodeV3Read(_ context.Context, d *schema.ResourceData, meta inter
 		d.Set("private_ip", node.Status.PrivateIP),
 		d.Set("public_ip", node.Status.PublicIP),
 		d.Set("status", node.Status.Phase),
-		d.Set("subnet_id", node.Spec.NodeNicSpec.PrimaryNic.SubnetId),
 	)
 	if err := me.ErrorOrNil(); err != nil {
 		return fmterr.Errorf("[DEBUG] Error saving IP conf to state for OpenTelekomCloud Node (%s): %s", d.Id(), err)
