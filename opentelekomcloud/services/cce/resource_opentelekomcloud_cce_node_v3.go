@@ -41,6 +41,12 @@ func ResourceCCENodeV3() *schema.Resource {
 			Delete: schema.DefaultTimeout(10 * time.Minute),
 		},
 
+		CustomizeDiff: common.MultipleCustomizeDiffs(
+			common.ValidateVolumeType("root_volume.*.volumetype"),
+			common.ValidateVolumeType("data_volumes.*.volumetype"),
+			common.ValidateSubnet("subnet_id"),
+		),
+
 		Schema: map[string]*schema.Schema{
 			"region": {
 				Type:     schema.TypeString,
@@ -186,6 +192,12 @@ func ResourceCCENodeV3() *schema.Resource {
 				Optional:      true,
 				ConflictsWith: []string{"eip_ids"},
 				ValidateFunc:  validation.IntAtLeast(1),
+			},
+			"subnet_id": {
+				Type:     schema.TypeString,
+				Optional: true,
+				Computed: true,
+				ForceNew: true,
 			},
 			"billing_mode": {
 				Type:     schema.TypeInt,
@@ -418,6 +430,11 @@ func resourceCCENodeV3Create(ctx context.Context, d *schema.ResourceData, meta i
 					},
 				},
 			},
+			NodeNicSpec: nodes.NodeNicSpec{
+				PrimaryNic: nodes.PrimaryNic{
+					SubnetId: d.Get("subnet_id").(string),
+				},
+			},
 			BillingMode: d.Get("billing_mode").(int),
 			Count:       1,
 			ExtendParam: nodes.ExtendParam{
@@ -565,6 +582,7 @@ func resourceCCENodeV3Read(_ context.Context, d *schema.ResourceData, meta inter
 		d.Set("private_ip", node.Status.PrivateIP),
 		d.Set("public_ip", node.Status.PublicIP),
 		d.Set("status", node.Status.Phase),
+		d.Set("subnet_id", node.Spec.NodeNicSpec.PrimaryNic.SubnetId),
 	)
 	if err := me.ErrorOrNil(); err != nil {
 		return fmterr.Errorf("[DEBUG] Error saving IP conf to state for OpenTelekomCloud Node (%s): %s", d.Id(), err)
