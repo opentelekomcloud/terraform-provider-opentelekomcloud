@@ -70,7 +70,7 @@ func ResourceCTSTrackerV1() *schema.Resource {
 			},
 			"topic_id": {
 				Type:     schema.TypeString,
-				Required: true,
+				Optional: true,
 			},
 			"operations": {
 				Type:     schema.TypeSet,
@@ -80,7 +80,7 @@ func ResourceCTSTrackerV1() *schema.Resource {
 			},
 			"is_send_all_key_operation": {
 				Type:     schema.TypeBool,
-				Required: true,
+				Optional: true,
 			},
 			"need_notify_user_list": {
 				Type:     schema.TypeSet,

@@ -260,13 +260,10 @@ resource "opentelekomcloud_obs_bucket" "bucket" {
 }
 
 resource "opentelekomcloud_cts_tracker_v1" "tracker_v1" {
-  bucket_name               = opentelekomcloud_obs_bucket.bucket.bucket
-  file_prefix_name          = "yO8Q"
-  topic_id                  = ""
-  is_send_all_key_operation = false
-  is_support_smn            = false
-  project_name              = local.project_name
-  operations                = []
+  bucket_name      = opentelekomcloud_obs_bucket.bucket.bucket
+  file_prefix_name = "yO8Q"
+  project_name     = local.project_name
+  is_support_smn   = false
 }
 `, projectName, bucketName)
 }

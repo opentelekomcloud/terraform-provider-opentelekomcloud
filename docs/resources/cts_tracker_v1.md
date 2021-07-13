@@ -34,12 +34,12 @@ The following arguments are supported:
 * `is_support_smn` - (Required) Specifies whether SMN is supported. When the value is `false`,
   `topic_id` and `operations` can be left empty.
 
-* `topic_id` - (Required)The theme of the SMN service, Is obtained from SMN and in the format of
+* `topic_id` - (Optional) The theme of the SMN service, Is obtained from SMN and in the format of
   `urn:smn:([a-z]|[A-Z]|[0-9]|\-){1,32}:([a-z]|[A-Z]|[0-9]){32}:([a-z]|[A-Z]|[0-9]|\-|\_){1,256}`.
 
 * `operations` - (Optional) Trigger conditions for sending a notification.
 
-* `is_send_all_key_operation` - (Required) When the value is `false`, `operations` cannot be left empty.
+* `is_send_all_key_operation` - (Optional) When the value is `false`, `operations` cannot be left empty.
 
 * `need_notify_user_list` - (Optional) The users using the login function. When these users log in,
   notifications will be sent.
