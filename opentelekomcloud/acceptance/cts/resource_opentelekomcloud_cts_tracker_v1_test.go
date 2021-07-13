@@ -64,6 +64,25 @@ func TestAccCTSTrackerV1_timeout(t *testing.T) {
 	})
 }
 
+func TestAccCTSTrackerV1_KeyOperations(t *testing.T) {
+	var track tracker.Tracker
+	var bucketName = fmt.Sprintf("terra-test-%s", acctest.RandString(5))
+
+	resource.Test(t, resource.TestCase{
+		PreCheck:          func() { common.TestAccPreCheck(t) },
+		ProviderFactories: common.TestAccProviderFactories,
+		CheckDestroy:      testAccCheckCTSTrackerV1Destroy,
+		Steps: []resource.TestStep{
+			{
+				Config: testAccCTSTrackerV1AllOperations(bucketName),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckCTSTrackerV1Exists(trackerResource, &track, env.OS_TENANT_NAME),
+				),
+			},
+		},
+	})
+}
+
 func TestAccCTSTrackerV1_schemaProjectName(t *testing.T) {
 	var ctsTracker tracker.Tracker
 	var bucketName = fmt.Sprintf("terra-test-%s", acctest.RandString(5))
@@ -122,26 +141,26 @@ func testAccCheckCTSTrackerV1Exists(n string, trackers *tracker.Tracker, project
 	return func(s *terraform.State) error {
 		rs, ok := s.RootModule().Resources[n]
 		if !ok {
-			return fmt.Errorf("Not found: %s", n)
+			return fmt.Errorf("not found: %s", n)
 		}
 
 		if rs.Primary.ID == "" {
-			return fmt.Errorf("No ID is set")
+			return fmt.Errorf("no ID is set")
 		}
 
 		config := common.TestAccProvider.Meta().(*cfg.Config)
-		ctsClient, err := config.CtsV1Client(projectName)
+		client, err := config.CtsV1Client(projectName)
 		if err != nil {
 			return fmt.Errorf("error creating cts client: %s", err)
 		}
 
-		trackerList, err := tracker.List(ctsClient, tracker.ListOpts{TrackerName: rs.Primary.ID})
+		trackerList, err := tracker.List(client, tracker.ListOpts{TrackerName: rs.Primary.ID})
 		if err != nil {
 			return err
 		}
 		found := trackerList[0]
 		if found.TrackerName != rs.Primary.ID {
-			return fmt.Errorf("cts tracker not found")
+			return fmt.Errorf("CTS tracker not found")
 		}
 
 		*trackers = found
@@ -250,4 +269,27 @@ resource "opentelekomcloud_cts_tracker_v1" "tracker_v1" {
   operations                = []
 }
 `, projectName, bucketName)
+}
+
+func testAccCTSTrackerV1AllOperations(bucketName string) string {
+	return fmt.Sprintf(`
+resource "opentelekomcloud_obs_bucket" "bucket" {
+  bucket        = "%s"
+  acl           = "public-read"
+  force_destroy = true
+}
+
+resource "opentelekomcloud_smn_topic_v2" "topic_1" {
+  name         = "topic_check"
+  display_name = "The display name of topic_check"
+}
+
+resource "opentelekomcloud_cts_tracker_v1" "tracker_v1" {
+  bucket_name               = opentelekomcloud_obs_bucket.bucket.bucket
+  file_prefix_name          = "yO8Q"
+  is_support_smn            = true
+  topic_id                  = opentelekomcloud_smn_topic_v2.topic_1.id
+  is_send_all_key_operation = true
+}
+`, bucketName)
 }
