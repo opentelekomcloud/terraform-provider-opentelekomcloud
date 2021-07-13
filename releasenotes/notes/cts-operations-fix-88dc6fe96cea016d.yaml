@@ -1,0 +1,4 @@
+---
+fixes:
+  - |
+    **[CTS]** Make ``operations`` field ``Optional`` in ``resource/opentelekomcloud_cts_tracker_v1`` (`#1215 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/1215>`_)
