@@ -70,17 +70,17 @@ func ResourceCTSTrackerV1() *schema.Resource {
 			},
 			"topic_id": {
 				Type:     schema.TypeString,
-				Required: true,
+				Optional: true,
 			},
 			"operations": {
 				Type:     schema.TypeSet,
-				Required: true,
+				Optional: true,
 				Elem:     &schema.Schema{Type: schema.TypeString},
 				Set:      schema.HashString,
 			},
 			"is_send_all_key_operation": {
 				Type:     schema.TypeBool,
-				Required: true,
+				Optional: true,
 			},
 			"need_notify_user_list": {
 				Type:     schema.TypeSet,
@@ -113,12 +113,12 @@ func resourceCTSTrackerCreate(ctx context.Context, d *schema.ResourceData, meta 
 		},
 	}
 
-	trackers, err := tracker.Create(client, createOpts).Extract()
+	ctsTracker, err := tracker.Create(client, createOpts).Extract()
 	if err != nil {
 		return fmterr.Errorf("error creating CTS tracker: %w", err)
 	}
 
-	d.SetId(trackers.TrackerName)
+	d.SetId(ctsTracker.TrackerName)
 
 	stateConf := &resource.StateChangeConf{
 		Refresh: refreshCTSTrackerState(d, client),
@@ -154,7 +154,7 @@ func refreshCTSTrackerState(d *schema.ResourceData, client *golangsdk.ServiceCli
 
 func resourceCTSTrackerRead(_ context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*cfg.Config)
-	ctsClient, err := config.CtsV1Client(config.GetProjectName(d))
+	client, err := config.CtsV1Client(config.GetProjectName(d))
 	if err != nil {
 		return fmterr.Errorf(clientError, err)
 	}
@@ -165,7 +165,7 @@ func resourceCTSTrackerRead(_ context.Context, d *schema.ResourceData, meta inte
 		FilePrefixName: d.Get("file_prefix_name").(string),
 		Status:         d.Get("status").(string),
 	}
-	trackers, err := tracker.List(ctsClient, listOpts)
+	trackers, err := tracker.List(client, listOpts)
 	if err != nil {
 		return fmterr.Errorf("error retrieving cts tracker: %w", err)
 	}
@@ -199,7 +199,7 @@ func resourceCTSTrackerRead(_ context.Context, d *schema.ResourceData, meta inte
 
 func resourceCTSTrackerUpdate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*cfg.Config)
-	ctsClient, err := config.CtsV1Client(config.GetProjectName(d))
+	client, err := config.CtsV1Client(config.GetProjectName(d))
 	if err != nil {
 		return fmterr.Errorf(clientError, err)
 	}
@@ -221,9 +221,9 @@ func resourceCTSTrackerUpdate(ctx context.Context, d *schema.ResourceData, meta 
 		updateOpts.Status = d.Get("status").(string)
 	}
 
-	_, err = tracker.Update(ctsClient, updateOpts).Extract()
+	_, err = tracker.Update(client, updateOpts).Extract()
 	if err != nil {
-		return fmterr.Errorf("error updating cts tracker: %w", err)
+		return fmterr.Errorf("error updating CTS tracker: %w", err)
 	}
 	return resourceCTSTrackerRead(ctx, d, meta)
 }
