@@ -12,6 +12,7 @@ import (
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common/cfg"
 )
 
+// NOTE: Sometimes SMN resources are not created XAAS-8823
 func TestAccSMNV2TopicAttribute_basic(t *testing.T) {
 	resourceName := "opentelekomcloud_smn_topic_attribute_v2.attribute_1"
 
