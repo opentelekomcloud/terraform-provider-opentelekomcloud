@@ -39,6 +39,8 @@ are no unneeded nodes.
 }
 ```
 
+See the [OTC Cloud Container Enging Addon Documentation](https://docs.otc.t-systems.com/en-us/usermanual2/cce/cce_01_0154.html) for more information.
+
 ##### `custom`
 
 ```json
