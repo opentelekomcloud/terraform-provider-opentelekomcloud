@@ -12,18 +12,18 @@ import (
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common/cfg"
 )
 
-func TestAccSMNV2TopicAttributes_basic(t *testing.T) {
+func TestAccSMNV2TopicAttribute_basic(t *testing.T) {
 	resourceName := "opentelekomcloud_smn_topic_attributes_v2.attribute_1"
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:          func() { common.TestAccPreCheck(t) },
 		ProviderFactories: common.TestAccProviderFactories,
-		CheckDestroy:      testAccCheckSMNTopicAttributesV2Destroy,
+		CheckDestroy:      testAccCheckSMNTopicAttributeV2Destroy,
 		Steps: []resource.TestStep{
 			{
-				Config: TestAccSMNV2TopicAttributesConfigBasic,
+				Config: TestAccSMNV2TopicAttributeConfigBasic,
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckSMNV2TopicAttributesExists(resourceName),
+					testAccCheckSMNV2TopicAttributeExists(resourceName),
 					resource.TestCheckResourceAttr(resourceName, "attribute_name", "access_policy"),
 				),
 			},
@@ -31,7 +31,7 @@ func TestAccSMNV2TopicAttributes_basic(t *testing.T) {
 	})
 }
 
-func testAccCheckSMNTopicAttributesV2Destroy(s *terraform.State) error {
+func testAccCheckSMNTopicAttributeV2Destroy(s *terraform.State) error {
 	config := common.TestAccProvider.Meta().(*cfg.Config)
 	client, err := config.SmnV2Client(env.OS_TENANT_NAME)
 	if err != nil {
@@ -39,7 +39,7 @@ func testAccCheckSMNTopicAttributesV2Destroy(s *terraform.State) error {
 	}
 
 	for _, rs := range s.RootModule().Resources {
-		if rs.Type != "opentelekomcloud_smn_topic_attributes_v2" {
+		if rs.Type != "opentelekomcloud_smn_topic_attribute_v2" {
 			continue
 		}
 
@@ -59,7 +59,7 @@ func testAccCheckSMNTopicAttributesV2Destroy(s *terraform.State) error {
 	return nil
 }
 
-func testAccCheckSMNV2TopicAttributesExists(n string) resource.TestCheckFunc {
+func testAccCheckSMNV2TopicAttributeExists(n string) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
 		rs, ok := s.RootModule().Resources[n]
 		if !ok {
@@ -88,13 +88,13 @@ func testAccCheckSMNV2TopicAttributesExists(n string) resource.TestCheckFunc {
 	}
 }
 
-var TestAccSMNV2TopicAttributesConfigBasic = fmt.Sprintf(`
+var TestAccSMNV2TopicAttributeConfigBasic = fmt.Sprintf(`
 resource "opentelekomcloud_smn_topic_v2" "topic_1" {
   name		   = "topic_1"
   display_name = "The display name of topic_1"
 }
 
-resource "opentelekomcloud_smn_topic_attributes_v2" "attribute_1" {
+resource "opentelekomcloud_smn_topic_attribute_v2" "attribute_1" {
   topic_urn      = opentelekomcloud_smn_topic_v2.topic_1.topic_urn
   attribute_name = "access_policy"
   topic_policy   = <<EOF

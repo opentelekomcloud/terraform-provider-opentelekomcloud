@@ -16,18 +16,18 @@ import (
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common/fmterr"
 )
 
-func ResourceSMNTopicAttributesV2() *schema.Resource {
+func ResourceSMNTopicAttributeV2() *schema.Resource {
 	return &schema.Resource{
-		CreateContext: resourceSMNTopicAttributesV2Create,
-		ReadContext:   resourceSMNTopicAttributesV2Read,
-		DeleteContext: resourceSMNTopicAttributesV2Delete,
+		CreateContext: resourceSMNTopicAttributeV2Create,
+		ReadContext:   resourceSMNTopicAttributeV2Read,
+		DeleteContext: resourceSMNTopicAttributeV2Delete,
 
 		Importer: &schema.ResourceImporter{
 			StateContext: common.ImportByPath("topic_urn", "attribute_name"),
 		},
 
 		Schema: map[string]*schema.Schema{
-			"topic_policy": {
+			"topic_attribute": {
 				Type:         schema.TypeString,
 				Required:     true,
 				ForceNew:     true,
@@ -54,7 +54,7 @@ func ResourceSMNTopicAttributesV2() *schema.Resource {
 	}
 }
 
-func resourceSMNTopicAttributesV2Create(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceSMNTopicAttributeV2Create(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*cfg.Config)
 	client, err := config.SmnV2Client(config.GetProjectName(d))
 	if err != nil {
@@ -65,7 +65,7 @@ func resourceSMNTopicAttributesV2Create(ctx context.Context, d *schema.ResourceD
 	attributeName := d.Get("attribute_name").(string)
 
 	createOpts := topicattributes.UpdateOpts{
-		Value: d.Get("topic_policy").(string),
+		Value: d.Get("topic_attribute").(string),
 	}
 
 	if err := topicattributes.Update(client, topicURN, attributeName, createOpts).ExtractErr(); err != nil {
@@ -73,10 +73,10 @@ func resourceSMNTopicAttributesV2Create(ctx context.Context, d *schema.ResourceD
 	}
 
 	d.SetId(fmt.Sprintf("%s/%s", topicURN, attributeName))
-	return resourceSMNTopicAttributesV2Read(ctx, d, meta)
+	return resourceSMNTopicAttributeV2Read(ctx, d, meta)
 }
 
-func resourceSMNTopicAttributesV2Read(_ context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceSMNTopicAttributeV2Read(_ context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*cfg.Config)
 	client, err := config.SmnV2Client(config.GetProjectName(d))
 	if err != nil {
@@ -102,14 +102,14 @@ func resourceSMNTopicAttributesV2Read(_ context.Context, d *schema.ResourceData,
 		return diag.FromErr(err)
 	}
 
-	if err := d.Set("topic_policy", normalizePolicy); err != nil {
+	if err := d.Set("topic_attribute", normalizePolicy); err != nil {
 		return diag.FromErr(err)
 	}
 
 	return nil
 }
 
-func resourceSMNTopicAttributesV2Delete(_ context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceSMNTopicAttributeV2Delete(_ context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*cfg.Config)
 	client, err := config.SmnV2Client(config.GetProjectName(d))
 	if err != nil {
