@@ -13,7 +13,7 @@ import (
 )
 
 func TestAccSMNV2TopicAttribute_basic(t *testing.T) {
-	resourceName := "opentelekomcloud_smn_topic_attributes_v2.attribute_1"
+	resourceName := "opentelekomcloud_smn_topic_attribute_v2.attribute_1"
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:          func() { common.TestAccPreCheck(t) },
@@ -26,6 +26,26 @@ func TestAccSMNV2TopicAttribute_basic(t *testing.T) {
 					testAccCheckSMNV2TopicAttributeExists(resourceName),
 					resource.TestCheckResourceAttr(resourceName, "attribute_name", "access_policy"),
 				),
+			},
+		},
+	})
+}
+
+func TestAccSMNV2TopicAttribute_import(t *testing.T) {
+	resourceName := "opentelekomcloud_smn_topic_attribute_v2.attribute_1"
+
+	resource.Test(t, resource.TestCase{
+		PreCheck:          func() { common.TestAccPreCheck(t) },
+		ProviderFactories: common.TestAccProviderFactories,
+		CheckDestroy:      testAccCheckSMNTopicAttributeV2Destroy,
+		Steps: []resource.TestStep{
+			{
+				Config: TestAccSMNV2TopicAttributeConfigBasic,
+			},
+			{
+				ResourceName:      resourceName,
+				ImportState:       true,
+				ImportStateVerify: true,
 			},
 		},
 	})
@@ -95,9 +115,9 @@ resource "opentelekomcloud_smn_topic_v2" "topic_1" {
 }
 
 resource "opentelekomcloud_smn_topic_attribute_v2" "attribute_1" {
-  topic_urn      = opentelekomcloud_smn_topic_v2.topic_1.topic_urn
-  attribute_name = "access_policy"
-  topic_policy   = <<EOF
+  topic_urn       = opentelekomcloud_smn_topic_v2.topic_1.topic_urn
+  attribute_name  = "access_policy"
+  topic_attribute = <<EOF
 {
   "Version": "2016-09-07",
   "Id": "__default_policy_ID",

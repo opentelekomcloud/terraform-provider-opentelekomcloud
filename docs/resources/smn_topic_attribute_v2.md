@@ -15,9 +15,9 @@ resource "opentelekomcloud_smn_topic_v2" "topic_1" {
 }
 
 resource "opentelekomcloud_smn_topic_attribute_v2" "attribute_1" {
-  topic_urn      = opentelekomcloud_smn_topic_v2.topic_1.topic_urn
-  attribute_name = "access_policy"
-  topic_policy   = <<EOF
+  topic_urn       = opentelekomcloud_smn_topic_v2.topic_1.topic_urn
+  attribute_name  = "access_policy"
+  topic_attribute = <<EOF
 {
   "Version": "2016-09-07",
   "Id": "__default_policy_ID",
