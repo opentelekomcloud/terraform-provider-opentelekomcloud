@@ -13,7 +13,7 @@ import (
 )
 
 func TestAccSMNV2TopicAttributes_basic(t *testing.T) {
-	resourceName := "opentelekomcloud_smn_topic_attribute_v2.attribute_1"
+	resourceName := "opentelekomcloud_smn_topic_attributes_v2.attribute_1"
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:          func() { common.TestAccPreCheck(t) },
@@ -39,7 +39,7 @@ func testAccCheckSMNTopicAttributesV2Destroy(s *terraform.State) error {
 	}
 
 	for _, rs := range s.RootModule().Resources {
-		if rs.Type != "opentelekomcloud_smn_topic_attribute_v2" {
+		if rs.Type != "opentelekomcloud_smn_topic_attributes_v2" {
 			continue
 		}
 
@@ -94,7 +94,7 @@ resource "opentelekomcloud_smn_topic_v2" "topic_1" {
   display_name = "The display name of topic_1"
 }
 
-resource "opentelekomcloud_smn_topic_attribute_v2" "attribute_1" {
+resource "opentelekomcloud_smn_topic_attributes_v2" "attribute_1" {
   topic_urn      = opentelekomcloud_smn_topic_v2.topic_1.topic_urn
   attribute_name = "access_policy"
   topic_policy   = <<EOF
