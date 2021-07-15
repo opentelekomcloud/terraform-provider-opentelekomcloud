@@ -44,8 +44,6 @@ func TestAccEvsStorageV3Volume_basic(t *testing.T) {
 }
 
 func TestAccEvsStorageV3Volume_tags(t *testing.T) {
-	resNameTags := "opentelekomcloud_evs_volume_v3.volume_tags"
-
 	resource.Test(t, resource.TestCase{
 		PreCheck:          func() { common.TestAccPreCheck(t) },
 		ProviderFactories: common.TestAccProviderFactories,
@@ -54,15 +52,13 @@ func TestAccEvsStorageV3Volume_tags(t *testing.T) {
 			{
 				Config: testAccEvsStorageV3VolumeTags,
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckEvsStorageV3VolumeTags(resNameTags, "foo", "bar"),
-					testAccCheckEvsStorageV3VolumeTags(resNameTags, "key", "value"),
+					resource.TestCheckResourceAttr(resourceName, "tags.muh", "value-create"),
 				),
 			},
 			{
 				Config: testAccEvsStorageV3VolumeTagsUpdate,
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckEvsStorageV3VolumeTags(resNameTags, "foo2", "bar2"),
-					testAccCheckEvsStorageV3VolumeTags(resNameTags, "key2", "value2"),
+					resource.TestCheckResourceAttr(resourceName, "tags.muh", "value-update"),
 				),
 			},
 		},
@@ -236,50 +232,6 @@ func testAccCheckEvsStorageV3VolumePersists(n string, volume, oldVolume *volumes
 	}
 }
 
-func testAccCheckEvsStorageV3VolumeTags(n string, k string, v string) resource.TestCheckFunc {
-	return func(s *terraform.State) error {
-		rs, ok := s.RootModule().Resources[n]
-		if !ok {
-			return fmt.Errorf("not found: %s", n)
-		}
-
-		if rs.Primary.ID == "" {
-			return fmt.Errorf("no ID is set")
-		}
-
-		config := common.TestAccProvider.Meta().(*cfg.Config)
-		blockStorageClient, err := config.BlockStorageV3Client(env.OS_REGION_NAME)
-		if err != nil {
-			return fmt.Errorf("error creating OpenTelekomCloud block storage client: %s", err)
-		}
-
-		found, err := volumes.Get(blockStorageClient, rs.Primary.ID).Extract()
-		if err != nil {
-			return err
-		}
-
-		if found.ID != rs.Primary.ID {
-			return fmt.Errorf("volume not found")
-		}
-
-		if found.Tags == nil {
-			return fmt.Errorf("no Tags")
-		}
-
-		for key, value := range found.Tags {
-			if k != key {
-				continue
-			}
-
-			if v == value {
-				return nil
-			}
-			return fmt.Errorf("bad value for %s: %s", k, value)
-		}
-		return fmt.Errorf("tag not found: %s", k)
-	}
-}
-
 var (
 	testAccEvsStorageV3VolumeBasic = fmt.Sprintf(`
 resource "opentelekomcloud_evs_volume_v3" "volume_1" {
@@ -300,27 +252,26 @@ resource "opentelekomcloud_evs_volume_v3" "volume_1" {
 }
 `, env.OS_AVAILABILITY_ZONE)
 	testAccEvsStorageV3VolumeTags = fmt.Sprintf(`
-resource "opentelekomcloud_evs_volume_v3" "volume_tags" {
+resource "opentelekomcloud_evs_volume_v3" "volume_1" {
   name              = "volume_tags"
   description       = "test volume with tags"
   availability_zone = "%s"
   volume_type       = "SATA"
   tags = {
-    foo = "bar"
-    key = "value"
+    muh = "value-create"
+    kuh = "value-create"
   }
   size = 12
 }
 `, env.OS_AVAILABILITY_ZONE)
 	testAccEvsStorageV3VolumeTagsUpdate = fmt.Sprintf(`
-resource "opentelekomcloud_evs_volume_v3" "volume_tags" {
+resource "opentelekomcloud_evs_volume_v3" "volume_1" {
   name              = "volume_tags-updated"
   description       = "test volume with tags"
   availability_zone = "%s"
   volume_type       = "SATA"
   tags = {
-    foo2 = "bar2"
-    key2 = "value2"
+    muh = "value-update"
   }
   size = 12
 }
