@@ -1,0 +1,4 @@
+---
+other:
+  - |
+    **[IAM]** Clarify usage of ``data_source/opentelekomcloud_identity_auth_scope_v3`` (`#1219 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/1219>`_)
