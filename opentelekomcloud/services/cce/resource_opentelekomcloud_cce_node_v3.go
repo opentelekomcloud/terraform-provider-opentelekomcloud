@@ -293,6 +293,36 @@ func ResourceCCENodeV3() *schema.Resource {
 					Type: schema.TypeString,
 				},
 			},
+			"taints": {
+				Type:     schema.TypeList,
+				Optional: true,
+				ForceNew: true,
+				Elem: &schema.Resource{
+					Schema: map[string]*schema.Schema{
+						"key": {
+							Type:     schema.TypeString,
+							Required: true,
+							ValidateFunc: validation.StringMatch(clusterPoolTaintRegex, "Invalid key. "+
+								"Cluster pool taint key is 1 to 63 characters starting with a letter or digit. "+
+								"Only lowercase letters, digits, and hyphens (-) are allowed."),
+						},
+						"value": {
+							Type:     schema.TypeString,
+							Required: true,
+							ValidateFunc: validation.StringMatch(clusterPoolTaintRegex, "Invalid value. "+
+								"Cluster pool taint value is 1 to 63 characters starting with a letter or digit. "+
+								"Only letters, digits, hyphens (-), underscores (_), and periods (.) are allowed."),
+						},
+						"effect": {
+							Type:     schema.TypeString,
+							Required: true,
+							ValidateFunc: validation.StringInSlice([]string{
+								"NoSchedule", "PreferNoSchedule", "NoExecute",
+							}, false),
+						},
+					},
+				},
+			},
 		},
 	}
 }
@@ -449,6 +479,7 @@ func resourceCCENodeV3Create(ctx context.Context, d *schema.ResourceData, meta i
 			},
 			UserTags: resourceCCENodeTags(d),
 			K8sTags:  resourceCCENodeK8sTags(d),
+			Taints:   resourceCCENodeTaints(d),
 		},
 	}
 
