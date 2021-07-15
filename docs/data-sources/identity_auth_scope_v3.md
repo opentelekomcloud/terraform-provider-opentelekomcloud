@@ -22,7 +22,7 @@ data "opentelekomcloud_identity_auth_scope_v3" "scope" {
   only used as a unique identifier so an actual token isn't used as the ID.
 
 -> This data source requires `token` in order to get authentication information.
-You need to specify `OS_TOKEN` env variable or set it in terraform config.
+You need to set `OS_TOKEN` env variable or fill it in terraform config.
 
 ## Attributes Reference
 
