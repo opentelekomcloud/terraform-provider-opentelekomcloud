@@ -249,6 +249,27 @@ func TestAccCCENodesV3EncryptedVolume(t *testing.T) {
 	})
 }
 
+func TestAccCCENodesV3Taints(t *testing.T) {
+	var node nodes.Nodes
+
+	resource.Test(t, resource.TestCase{
+		PreCheck:          func() { testAccCCEKeyPairPreCheck(t) },
+		ProviderFactories: common.TestAccProviderFactories,
+		CheckDestroy:      testAccCheckCCENodeV3Destroy,
+		Steps: []resource.TestStep{
+			{
+				Config: testAccCCENodeV3Taints,
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckCCENodeV3Exists(resourceNameNode, "opentelekomcloud_cce_cluster_v3.cluster_1", &node),
+					resource.TestCheckResourceAttr(resourceNameNode, "taints.0.key", "dedicated"),
+					resource.TestCheckResourceAttr(resourceNameNode, "taints.0.value", "database"),
+					resource.TestCheckResourceAttr(resourceNameNode, "taints.0.effect", "NoSchedule"),
+				),
+			},
+		},
+	})
+}
+
 func testAccCheckCCENodeV3Destroy(s *terraform.State) error {
 	config := common.TestAccProvider.Meta().(*cfg.Config)
 	client, err := config.CceV3Client(env.OS_REGION_NAME)
@@ -729,4 +750,37 @@ resource "opentelekomcloud_cce_node_v3" "node_1" {
   }
 }
 `, env.OS_VPC_ID, env.OS_NETWORK_ID, env.OS_AVAILABILITY_ZONE, env.OS_KEYPAIR_NAME, env.OS_KMS_ID)
+
+	testAccCCENodeV3Taints = fmt.Sprintf(`
+resource "opentelekomcloud_cce_cluster_v3" "cluster_1" {
+  name         = "opentelekomcloud-cce"
+  cluster_type = "VirtualMachine"
+  flavor_id    = "cce.s1.small"
+  vpc_id       = "%s"
+  subnet_id    = "%s"
+  container_network_type = "overlay_l2"
+  authentication_mode    = "rbac"
+}
+resource "opentelekomcloud_cce_node_v3" "node_1" {
+  cluster_id = opentelekomcloud_cce_cluster_v3.cluster_1.id
+  name       = "test-node"
+  flavor_id  = "s2.xlarge.2"
+  availability_zone = "%s"
+  key_pair          = "%s"
+  root_volume {
+    size       = 40
+    volumetype = "SATA"
+  }
+  data_volumes {
+    size       = 100
+    volumetype = "SATA"
+  }
+  taints {
+    key    = "dedicated"
+    value  = "database"
+    effect = "NoSchedule"
+  }
+  private_ip = "%s"
+}
+`, env.OS_VPC_ID, env.OS_NETWORK_ID, env.OS_AVAILABILITY_ZONE, env.OS_KEYPAIR_NAME, privateIP)
 )
