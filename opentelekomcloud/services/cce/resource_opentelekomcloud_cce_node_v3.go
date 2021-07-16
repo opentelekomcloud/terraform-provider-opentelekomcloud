@@ -12,6 +12,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 	"github.com/opentelekomcloud/gophertelekomcloud"
+	nodesv1 "github.com/opentelekomcloud/gophertelekomcloud/openstack/cce/v1/nodes"
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/cce/v3/clusters"
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/cce/v3/nodes"
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/common/tags"
@@ -561,9 +562,10 @@ func resourceCCENodeV3Read(_ context.Context, d *schema.ResourceData, meta inter
 			d.SetId("")
 			return nil
 		}
-		return fmterr.Errorf("error retrieving OpenTelekomCloud Node: %s", err)
+		return fmterr.Errorf("error retrieving OpenTelekomCloud Node: %w", err)
 	}
 
+	serverID := node.Status.ServerID
 	mErr := multierror.Append(
 		d.Set("region", config.GetRegion(d)),
 		d.Set("name", node.Metadata.Name),
@@ -573,9 +575,14 @@ func resourceCCENodeV3Read(_ context.Context, d *schema.ResourceData, meta inter
 		d.Set("billing_mode", node.Spec.BillingMode),
 		d.Set("key_pair", node.Spec.Login.SshKey),
 		d.Set("k8s_tags", node.Spec.K8sTags),
+		d.Set("server_id", serverID),
+		d.Set("private_ip", node.Status.PrivateIP),
+		d.Set("public_ip", node.Status.PublicIP),
+		d.Set("status", node.Status.Phase),
+		d.Set("subnet_id", node.Spec.NodeNicSpec.PrimaryNic.SubnetId),
 	)
 	if err := mErr.ErrorOrNil(); err != nil {
-		return fmterr.Errorf("[DEBUG] Error saving main conf to state for OpenTelekomCloud Node (%s): %s", d.Id(), err)
+		return fmterr.Errorf("[DEBUG] Error saving main conf to state for OpenTelekomCloud Node (%s): %w", d.Id(), err)
 	}
 
 	var volumes []map[string]interface{}
@@ -590,7 +597,7 @@ func resourceCCENodeV3Read(_ context.Context, d *schema.ResourceData, meta inter
 		volumes = append(volumes, volume)
 	}
 	if err := d.Set("data_volumes", volumes); err != nil {
-		return fmterr.Errorf("[DEBUG] Error saving dataVolumes to state for OpenTelekomCloud Node (%s): %s", d.Id(), err)
+		return fmterr.Errorf("[DEBUG] Error saving dataVolumes to state for OpenTelekomCloud Node (%s): %w", d.Id(), err)
 	}
 
 	rootVolume := []map[string]interface{}{
@@ -602,42 +609,49 @@ func resourceCCENodeV3Read(_ context.Context, d *schema.ResourceData, meta inter
 	}
 
 	if err := d.Set("root_volume", rootVolume); err != nil {
-		return fmterr.Errorf("[DEBUG] Error saving root Volume to state for OpenTelekomCloud Node (%s): %s", d.Id(), err)
-	}
-
-	// set computed attributes
-	serverId := node.Status.ServerID
-	mErr = multierror.Append(mErr,
-		d.Set("server_id", serverId),
-		d.Set("private_ip", node.Status.PrivateIP),
-		d.Set("public_ip", node.Status.PublicIP),
-		d.Set("status", node.Status.Phase),
-		d.Set("subnet_id", node.Spec.NodeNicSpec.PrimaryNic.SubnetId),
-	)
-	if err := mErr.ErrorOrNil(); err != nil {
-		return fmterr.Errorf("[DEBUG] Error saving IP conf to state for OpenTelekomCloud Node (%s): %s", d.Id(), err)
+		return fmterr.Errorf("[DEBUG] Error saving root Volume to state for OpenTelekomCloud Node (%s): %w", d.Id(), err)
 	}
 
 	// fetch tags from ECS instance
 	computeClient, err := config.ComputeV1Client(config.GetRegion(d))
 	if err != nil {
-		return fmterr.Errorf("error creating OpenTelekomCloud compute client: %s", err)
+		return fmterr.Errorf("error creating OpenTelekomCloud ComputeV1 client: %w", err)
 	}
 
-	resourceTags, err := tags.Get(computeClient, "cloudservers", serverId).Extract()
+	resourceTags, err := tags.Get(computeClient, "cloudservers", serverID).Extract()
 	if err != nil {
 		if _, ok := err.(golangsdk.ErrDefault404); ok {
 			d.SetId("")
 			return nil
 		}
-		return fmterr.Errorf("error fetching OpenTelekomCloud instance tags: %s", err)
+		return fmterr.Errorf("error fetching OpenTelekomCloud instance tags: %w", err)
 	}
 
 	tagMap := common.TagsToMap(resourceTags)
 	// ignore "CCE-Dynamic-Provisioning-Node"
 	delete(tagMap, "CCE-Dynamic-Provisioning-Node")
 	if err := d.Set("tags", tagMap); err != nil {
-		return fmterr.Errorf("error saving tags of CCE node: %s", err)
+		return fmterr.Errorf("error saving tags of CCE node: %w", err)
+	}
+
+	v1Client, err := config.CceV1Client(config.GetRegion(d))
+	if err != nil {
+		return fmterr.Errorf("error creating OpenTelekomCloud CCEv1 client: %w", err)
+	}
+	k8Node, err := nodesv1.Get(v1Client, clusterID, node.Status.PrivateIP).Extract()
+	if err != nil {
+		return fmterr.Errorf("error retrieving CCE node: %w", err)
+	}
+	taints := make([]map[string]interface{}, len(k8Node.Spec.Taints))
+	for i, v := range k8Node.Spec.Taints {
+		taints[i] = map[string]interface{}{
+			"key":    v.Key,
+			"value":  v.Value,
+			"effect": v.Effect,
+		}
+	}
+	if err := d.Set("taints", taints); err != nil {
+		return fmterr.Errorf("error setting taints for CCE Node: %w", err)
 	}
 
 	return nil
