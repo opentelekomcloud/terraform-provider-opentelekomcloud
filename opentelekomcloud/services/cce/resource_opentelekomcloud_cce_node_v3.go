@@ -19,11 +19,31 @@ import (
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/compute/v2/extensions/floatingips"
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/networking/v1/bandwidths"
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/networking/v1/eips"
+	"github.com/unknwon/com"
 
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common"
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common/cfg"
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common/fmterr"
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/services/vpc"
+)
+
+var (
+	predefinedTags = []string{
+		"beta.kubernetes.io/arch",
+		"beta.kubernetes.io/os",
+		"failure-domain.beta.kubernetes.io/region",
+		"failure-domain.beta.kubernetes.io/zone",
+		"kubernetes.io/arch",
+		"kubernetes.io/hostname",
+		"kubernetes.io/os",
+		"node.kubernetes.io/baremetal",
+		"node.kubernetes.io/subnetid",
+		"os.architecture",
+		"os.name",
+		"os.version",
+		"topology.kubernetes.io/region",
+		"topology.kubernetes.io/zone",
+	}
 )
 
 func ResourceCCENodeV3() *schema.Resource {
@@ -574,7 +594,6 @@ func resourceCCENodeV3Read(_ context.Context, d *schema.ResourceData, meta inter
 		d.Set("availability_zone", node.Spec.Az),
 		d.Set("billing_mode", node.Spec.BillingMode),
 		d.Set("key_pair", node.Spec.Login.SshKey),
-		d.Set("k8s_tags", node.Spec.K8sTags),
 		d.Set("server_id", serverID),
 		d.Set("private_ip", node.Status.PrivateIP),
 		d.Set("public_ip", node.Status.PublicIP),
@@ -653,7 +672,16 @@ func resourceCCENodeV3Read(_ context.Context, d *schema.ResourceData, meta inter
 	if err := d.Set("taints", taints); err != nil {
 		return fmterr.Errorf("error setting taints for CCE Node: %w", err)
 	}
-
+	k8sTags := make(map[string]interface{})
+	for key, value := range k8Node.Metadata.Labels {
+		if com.IsSliceContainsStr(predefinedTags, key) {
+			continue
+		}
+		k8sTags[key] = value
+	}
+	if err := d.Set("k8s_tags", k8sTags); err != nil {
+		return fmterr.Errorf("error setting k8s_tags for CCE Node: %w", err)
+	}
 	return nil
 }
 

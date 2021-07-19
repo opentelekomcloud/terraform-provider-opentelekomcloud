@@ -249,7 +249,7 @@ func TestAccCCENodesV3EncryptedVolume(t *testing.T) {
 	})
 }
 
-func TestAccCCENodesV3Taints(t *testing.T) {
+func TestAccCCENodesV3TaintsK8sTags(t *testing.T) {
 	var node nodes.Nodes
 
 	resource.Test(t, resource.TestCase{
@@ -258,12 +258,13 @@ func TestAccCCENodesV3Taints(t *testing.T) {
 		CheckDestroy:      testAccCheckCCENodeV3Destroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccCCENodeV3Taints,
+				Config: testAccCCENodeV3TaintsK8sTags,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckCCENodeV3Exists(resourceNameNode, "opentelekomcloud_cce_cluster_v3.cluster_1", &node),
 					resource.TestCheckResourceAttr(resourceNameNode, "taints.0.key", "dedicated"),
 					resource.TestCheckResourceAttr(resourceNameNode, "taints.0.value", "database"),
 					resource.TestCheckResourceAttr(resourceNameNode, "taints.0.effect", "NoSchedule"),
+					resource.TestCheckResourceAttr(resourceNameNode, "k8s_tags.app", "sometag"),
 				),
 			},
 		},
@@ -751,7 +752,7 @@ resource "opentelekomcloud_cce_node_v3" "node_1" {
 }
 `, env.OS_VPC_ID, env.OS_NETWORK_ID, env.OS_AVAILABILITY_ZONE, env.OS_KEYPAIR_NAME, env.OS_KMS_ID)
 
-	testAccCCENodeV3Taints = fmt.Sprintf(`
+	testAccCCENodeV3TaintsK8sTags = fmt.Sprintf(`
 resource "opentelekomcloud_cce_cluster_v3" "cluster_1" {
   name         = "opentelekomcloud-cce"
   cluster_type = "VirtualMachine"
@@ -779,6 +780,10 @@ resource "opentelekomcloud_cce_node_v3" "node_1" {
     key    = "dedicated"
     value  = "database"
     effect = "NoSchedule"
+  }
+
+  k8s_tags = {
+    "app" = "sometag"
   }
   private_ip = "%s"
 }
