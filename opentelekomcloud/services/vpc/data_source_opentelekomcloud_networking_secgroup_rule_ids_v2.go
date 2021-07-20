@@ -78,8 +78,8 @@ func dataSourceNetworkingSecGroupIdsV2Read(_ context.Context, d *schema.Resource
 		d.Set("region", config.GetRegion(d)),
 	)
 
-	if mErr.ErrorOrNil() != nil {
-		return diag.FromErr(mErr)
+	if err := mErr.ErrorOrNil(); err != nil {
+		return diag.FromErr(err)
 	}
 
 	return nil
