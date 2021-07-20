@@ -468,9 +468,7 @@ func resourceCCEClusterV3Read(_ context.Context, d *schema.ResourceData, meta in
 	if err != nil {
 		return fmterr.Errorf("error creating OpenTelekomCloud NetworkingV2 client: %w", err)
 	}
-	securityGroupPages, err := groups.List(nwV2Client, groups.ListOpts{
-		Name: "",
-	}).AllPages()
+	securityGroupPages, err := groups.List(nwV2Client, groups.ListOpts{}).AllPages()
 	if err != nil {
 		return diag.FromErr(err)
 	}
