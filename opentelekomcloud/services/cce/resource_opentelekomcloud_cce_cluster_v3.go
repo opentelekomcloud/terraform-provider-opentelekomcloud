@@ -480,6 +480,9 @@ func resourceCCEClusterV3Read(_ context.Context, d *schema.ResourceData, meta in
 	var controlSecGroupID string
 	var nodeSecGroupID string
 	for _, v := range securityGroups {
+		if controlSecGroupID != "" && nodeSecGroupID != "" {
+			break
+		}
 		if !strings.Contains(v.Description, d.Id()) {
 			continue
 		}
