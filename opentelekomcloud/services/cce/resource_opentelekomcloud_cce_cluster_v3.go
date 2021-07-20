@@ -7,6 +7,7 @@ import (
 	"log"
 	"net/url"
 	"regexp"
+	"strings"
 	"time"
 
 	"github.com/hashicorp/go-multierror"
@@ -20,6 +21,7 @@ import (
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/networking/v1/subnets"
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/networking/v1/vpcs"
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/networking/v2/extensions/layer3/floatingips"
+	"github.com/opentelekomcloud/gophertelekomcloud/openstack/networking/v2/extensions/security/groups"
 
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common"
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common/cfg"
@@ -231,6 +233,14 @@ func ResourceCCEClusterV3() *schema.Resource {
 				Computed: true,
 				Elem:     &schema.Schema{Type: schema.TypeString},
 				Set:      schema.HashString,
+			},
+			"security_group_control": {
+				Type:     schema.TypeString,
+				Computed: true,
+			},
+			"security_group_node": {
+				Type:     schema.TypeString,
+				Computed: true,
 			},
 		},
 	}
@@ -452,6 +462,44 @@ func resourceCCEClusterV3Read(_ context.Context, d *schema.ResourceData, meta in
 	}
 	if err := d.Set("installed_addons", installedAddons); err != nil {
 		return fmterr.Errorf("error setting installed addons: %w", err)
+	}
+
+	nwV2Client, err := config.NetworkingV2Client(config.GetRegion(d))
+	if err != nil {
+		return fmterr.Errorf("error creating OpenTelekomCloud NetworkingV2 client: %w", err)
+	}
+	securityGroupPages, err := groups.List(nwV2Client, groups.ListOpts{
+		Name: "",
+	}).AllPages()
+	if err != nil {
+		return diag.FromErr(err)
+	}
+	securityGroups, err := groups.ExtractGroups(securityGroupPages)
+	if err != nil {
+		return diag.FromErr(err)
+	}
+
+	var controlSecGroupID string
+	var nodeSecGroupID string
+	for _, v := range securityGroups {
+		if !strings.Contains(v.Description, d.Id()) {
+			continue
+		}
+		if strings.Contains(v.Description, "master port") {
+			controlSecGroupID = v.ID
+			continue
+		}
+		if strings.Contains(v.Description, "node") {
+			nodeSecGroupID = v.ID
+			continue
+		}
+	}
+
+	if err := d.Set("security_group_control", controlSecGroupID); err != nil {
+		return diag.FromErr(err)
+	}
+	if err := d.Set("security_group_node", nodeSecGroupID); err != nil {
+		return diag.FromErr(err)
 	}
 
 	return nil
