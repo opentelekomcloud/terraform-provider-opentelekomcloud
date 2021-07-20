@@ -38,9 +38,9 @@ func DataSourceNetworkingSecGroupRuleIdsV2() *schema.Resource {
 
 func dataSourceNetworkingSecGroupIdsV2Read(_ context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*cfg.Config)
-	client, err := config.NetworkingV1Client(config.GetRegion(d))
+	client, err := config.NetworkingV2Client(config.GetRegion(d))
 	if err != nil {
-		return fmterr.Errorf(errCreationV1Client, err)
+		return fmterr.Errorf(errCreationV2Client, err)
 	}
 
 	secGroupID := d.Get("security_group_id").(string)
