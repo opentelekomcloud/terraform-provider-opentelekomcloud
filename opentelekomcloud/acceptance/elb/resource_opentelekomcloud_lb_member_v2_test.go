@@ -14,6 +14,8 @@ import (
 )
 
 func TestAccLBV2Member_basic(t *testing.T) {
+	resourceMemberName1 := "opentelekomcloud_lb_member_v2.member_1"
+	resourceMemberName2 := "opentelekomcloud_lb_member_v2.member_2"
 	var member1 pools.Member
 	var member2 pools.Member
 
@@ -26,16 +28,16 @@ func TestAccLBV2Member_basic(t *testing.T) {
 				Config:             TestAccLBV2MemberConfigBasic,
 				ExpectNonEmptyPlan: true, // Because admin_state_up remains false, unfinished elb?
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckLBV2MemberExists("opentelekomcloud_lb_member_v2.member1", &member1),
-					testAccCheckLBV2MemberExists("opentelekomcloud_lb_member_v2.member2", &member2),
+					testAccCheckLBV2MemberExists(resourceMemberName1, &member1),
+					testAccCheckLBV2MemberExists(resourceMemberName2, &member2),
 				),
 			},
 			{
 				Config:             TestAccLBV2MemberConfigUpdate,
 				ExpectNonEmptyPlan: true, // Because admin_state_up remains false, unfinished elb?
 				Check: resource.ComposeTestCheckFunc(
-					resource.TestCheckResourceAttr("opentelekomcloud_lb_member_v2.member1", "weight", "10"),
-					resource.TestCheckResourceAttr("opentelekomcloud_lb_member_v2.member2", "weight", "15"),
+					resource.TestCheckResourceAttr(resourceMemberName2, "weight", "10"),
+					resource.TestCheckResourceAttr(resourceMemberName2, "weight", "15"),
 				),
 			},
 		},
@@ -66,7 +68,8 @@ func testAccCheckLBV2MemberDestroy(s *terraform.State) error {
 
 func testAccCheckLBV2MemberExists(n string, member *pools.Member) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
-		rs, ok := s.RootModule().Resources[n]
+		rootModule := s.RootModule()
+		rs, ok := rootModule.Resources[n]
 		if !ok {
 			return fmt.Errorf("not found: %s", n)
 		}
@@ -78,11 +81,11 @@ func testAccCheckLBV2MemberExists(n string, member *pools.Member) resource.TestC
 		config := common.TestAccProvider.Meta().(*cfg.Config)
 		client, err := config.NetworkingV2Client(env.OS_REGION_NAME)
 		if err != nil {
-			return fmt.Errorf("error creating OpenTelekomCloud Networking client: %w", err)
+			return fmt.Errorf("error creating OpenTelekomCloud NetworkingV2 client: %w", err)
 		}
 
-		poolId := rs.Primary.Attributes["pool_id"]
-		found, err := pools.GetMember(client, poolId, rs.Primary.ID).Extract()
+		poolID := rs.Primary.Attributes["pool_id"]
+		found, err := pools.GetMember(client, poolID, rs.Primary.ID).Extract()
 		if err != nil {
 			return err
 		}
@@ -99,29 +102,29 @@ func testAccCheckLBV2MemberExists(n string, member *pools.Member) resource.TestC
 
 var TestAccLBV2MemberConfigBasic = fmt.Sprintf(`
 resource "opentelekomcloud_lb_loadbalancer_v2" "loadbalancer_1" {
-  name = "loadbalancer_1"
+  name          = "loadbalancer_1"
   vip_subnet_id = "%[1]s"
 }
 
 resource "opentelekomcloud_lb_listener_v2" "listener_1" {
-  name = "listener_1"
-  protocol = "HTTP"
-  protocol_port = 8080
+  name            = "listener_1"
+  protocol        = "HTTP"
+  protocol_port   = 8080
   loadbalancer_id = opentelekomcloud_lb_loadbalancer_v2.loadbalancer_1.id
 }
 
 resource "opentelekomcloud_lb_pool_v2" "pool_1" {
-  name = "pool_1"
-  protocol = "HTTP"
-  lb_method = "ROUND_ROBIN"
+  name        = "pool_1"
+  protocol    = "HTTP"
+  lb_method   = "ROUND_ROBIN"
   listener_id = opentelekomcloud_lb_listener_v2.listener_1.id
 }
 
 resource "opentelekomcloud_lb_member_v2" "member_1" {
-  address = "192.168.0.10"
+  address       = "192.168.0.10"
   protocol_port = 8080
-  pool_id = opentelekomcloud_lb_pool_v2.pool_1.id
-  subnet_id = "%[1]s"
+  pool_id       = opentelekomcloud_lb_pool_v2.pool_1.id
+  subnet_id     = "%[1]s"
 
   timeouts {
     create = "5m"
@@ -131,10 +134,10 @@ resource "opentelekomcloud_lb_member_v2" "member_1" {
 }
 
 resource "opentelekomcloud_lb_member_v2" "member_2" {
-  address = "192.168.0.11"
+  address       = "192.168.0.11"
   protocol_port = 8080
-  pool_id = opentelekomcloud_lb_pool_v2.pool_1.id
-  subnet_id = "%[1]s"
+  pool_id       = opentelekomcloud_lb_pool_v2.pool_1.id
+  subnet_id     = "%[1]s"
 
   timeouts {
     create = "5m"
@@ -146,31 +149,31 @@ resource "opentelekomcloud_lb_member_v2" "member_2" {
 
 var TestAccLBV2MemberConfigUpdate = fmt.Sprintf(`
 resource "opentelekomcloud_lb_loadbalancer_v2" "loadbalancer_1" {
-  name = "loadbalancer_1"
+  name          = "loadbalancer_1"
   vip_subnet_id = "%[1]s"
 }
 
 resource "opentelekomcloud_lb_listener_v2" "listener_1" {
-  name = "listener_1"
-  protocol = "HTTP"
-  protocol_port = 8080
+  name            = "listener_1"
+  protocol        = "HTTP"
+  protocol_port   = 8080
   loadbalancer_id = opentelekomcloud_lb_loadbalancer_v2.loadbalancer_1.id
 }
 
 resource "opentelekomcloud_lb_pool_v2" "pool_1" {
-  name = "pool_1"
-  protocol = "HTTP"
-  lb_method = "ROUND_ROBIN"
+  name        = "pool_1"
+  protocol    = "HTTP"
+  lb_method   = "ROUND_ROBIN"
   listener_id = opentelekomcloud_lb_listener_v2.listener_1.id
 }
 
 resource "opentelekomcloud_lb_member_v2" "member_1" {
-  address = "192.168.0.10"
-  protocol_port = 8080
-  weight = 10
+  address        = "192.168.0.10"
+  protocol_port  = 8080
+  weight         = 10
   admin_state_up = "true"
-  pool_id = opentelekomcloud_lb_pool_v2.pool_1.id
-  subnet_id = "%[1]s"
+  pool_id        = opentelekomcloud_lb_pool_v2.pool_1.id
+  subnet_id      = "%[1]s"
 
   timeouts {
     create = "5m"
@@ -180,12 +183,12 @@ resource "opentelekomcloud_lb_member_v2" "member_1" {
 }
 
 resource "opentelekomcloud_lb_member_v2" "member_2" {
-  address = "192.168.0.11"
-  protocol_port = 8080
-  weight = 15
+  address        = "192.168.0.11"
+  protocol_port  = 8080
+  weight         = 15
   admin_state_up = "true"
-  pool_id = opentelekomcloud_lb_pool_v2.pool_1.id
-  subnet_id = "%[1]s"
+  pool_id        = opentelekomcloud_lb_pool_v2.pool_1.id
+  subnet_id      = "%[1]s"
 
   timeouts {
     create = "5m"
