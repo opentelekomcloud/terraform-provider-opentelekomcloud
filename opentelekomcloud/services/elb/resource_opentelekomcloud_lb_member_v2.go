@@ -156,7 +156,6 @@ func resourceMemberV2Read(_ context.Context, d *schema.ResourceData, meta interf
 		d.Set("subnet_id", member.SubnetID),
 		d.Set("address", member.Address),
 		d.Set("protocol_port", member.ProtocolPort),
-		d.Set("pool_id", member.PoolID),
 		d.Set("region", config.GetRegion(d)),
 	)
 

@@ -68,8 +68,7 @@ func testAccCheckLBV2MemberDestroy(s *terraform.State) error {
 
 func testAccCheckLBV2MemberExists(n string, member *pools.Member) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
-		rootModule := s.RootModule()
-		rs, ok := rootModule.Resources[n]
+		rs, ok := s.RootModule().Resources[n]
 		if !ok {
 			return fmt.Errorf("not found: %s", n)
 		}
