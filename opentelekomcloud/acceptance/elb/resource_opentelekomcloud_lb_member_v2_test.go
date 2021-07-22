@@ -14,8 +14,8 @@ import (
 )
 
 func TestAccLBV2Member_basic(t *testing.T) {
-	var member_1 pools.Member
-	var member_2 pools.Member
+	var member1 pools.Member
+	var member2 pools.Member
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:          func() { common.TestAccPreCheck(t) },
@@ -23,19 +23,19 @@ func TestAccLBV2Member_basic(t *testing.T) {
 		CheckDestroy:      testAccCheckLBV2MemberDestroy,
 		Steps: []resource.TestStep{
 			{
-				Config:             TestAccLBV2MemberConfig_basic,
+				Config:             TestAccLBV2MemberConfigBasic,
 				ExpectNonEmptyPlan: true, // Because admin_state_up remains false, unfinished elb?
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckLBV2MemberExists("opentelekomcloud_lb_member_v2.member_1", &member_1),
-					testAccCheckLBV2MemberExists("opentelekomcloud_lb_member_v2.member_2", &member_2),
+					testAccCheckLBV2MemberExists("opentelekomcloud_lb_member_v2.member1", &member1),
+					testAccCheckLBV2MemberExists("opentelekomcloud_lb_member_v2.member2", &member2),
 				),
 			},
 			{
-				Config:             TestAccLBV2MemberConfig_update,
+				Config:             TestAccLBV2MemberConfigUpdate,
 				ExpectNonEmptyPlan: true, // Because admin_state_up remains false, unfinished elb?
 				Check: resource.ComposeTestCheckFunc(
-					resource.TestCheckResourceAttr("opentelekomcloud_lb_member_v2.member_1", "weight", "10"),
-					resource.TestCheckResourceAttr("opentelekomcloud_lb_member_v2.member_2", "weight", "15"),
+					resource.TestCheckResourceAttr("opentelekomcloud_lb_member_v2.member1", "weight", "10"),
+					resource.TestCheckResourceAttr("opentelekomcloud_lb_member_v2.member2", "weight", "15"),
 				),
 			},
 		},
@@ -44,9 +44,9 @@ func TestAccLBV2Member_basic(t *testing.T) {
 
 func testAccCheckLBV2MemberDestroy(s *terraform.State) error {
 	config := common.TestAccProvider.Meta().(*cfg.Config)
-	networkingClient, err := config.NetworkingV2Client(env.OS_REGION_NAME)
+	client, err := config.NetworkingV2Client(env.OS_REGION_NAME)
 	if err != nil {
-		return fmt.Errorf("error creating OpenTelekomCloud networking client: %s", err)
+		return fmt.Errorf("error creating OpenTelekomCloud NetworkingV2 client: %w", err)
 	}
 
 	for _, rs := range s.RootModule().Resources {
@@ -54,10 +54,10 @@ func testAccCheckLBV2MemberDestroy(s *terraform.State) error {
 			continue
 		}
 
-		poolId := rs.Primary.Attributes["pool_id"]
-		_, err := pools.GetMember(networkingClient, poolId, rs.Primary.ID).Extract()
+		poolID := rs.Primary.Attributes["pool_id"]
+		_, err := pools.GetMember(client, poolID, rs.Primary.ID).Extract()
 		if err == nil {
-			return fmt.Errorf("Member still exists: %s", rs.Primary.ID)
+			return fmt.Errorf("member still exists: %s", rs.Primary.ID)
 		}
 	}
 
@@ -68,27 +68,27 @@ func testAccCheckLBV2MemberExists(n string, member *pools.Member) resource.TestC
 	return func(s *terraform.State) error {
 		rs, ok := s.RootModule().Resources[n]
 		if !ok {
-			return fmt.Errorf("Not found: %s", n)
+			return fmt.Errorf("not found: %s", n)
 		}
 
 		if rs.Primary.ID == "" {
-			return fmt.Errorf("No ID is set")
+			return fmt.Errorf("no ID is set")
 		}
 
 		config := common.TestAccProvider.Meta().(*cfg.Config)
-		networkingClient, err := config.NetworkingV2Client(env.OS_REGION_NAME)
+		client, err := config.NetworkingV2Client(env.OS_REGION_NAME)
 		if err != nil {
-			return fmt.Errorf("error creating OpenTelekomCloud networking client: %s", err)
+			return fmt.Errorf("error creating OpenTelekomCloud Networking client: %w", err)
 		}
 
 		poolId := rs.Primary.Attributes["pool_id"]
-		found, err := pools.GetMember(networkingClient, poolId, rs.Primary.ID).Extract()
+		found, err := pools.GetMember(client, poolId, rs.Primary.ID).Extract()
 		if err != nil {
 			return err
 		}
 
 		if found.ID != rs.Primary.ID {
-			return fmt.Errorf("Member not found")
+			return fmt.Errorf("member not found")
 		}
 
 		*member = *found
@@ -97,7 +97,7 @@ func testAccCheckLBV2MemberExists(n string, member *pools.Member) resource.TestC
 	}
 }
 
-var TestAccLBV2MemberConfig_basic = fmt.Sprintf(`
+var TestAccLBV2MemberConfigBasic = fmt.Sprintf(`
 resource "opentelekomcloud_lb_loadbalancer_v2" "loadbalancer_1" {
   name = "loadbalancer_1"
   vip_subnet_id = "%[1]s"
@@ -144,7 +144,7 @@ resource "opentelekomcloud_lb_member_v2" "member_2" {
 }
 `, env.OS_SUBNET_ID)
 
-var TestAccLBV2MemberConfig_update = fmt.Sprintf(`
+var TestAccLBV2MemberConfigUpdate = fmt.Sprintf(`
 resource "opentelekomcloud_lb_loadbalancer_v2" "loadbalancer_1" {
   name = "loadbalancer_1"
   vip_subnet_id = "%[1]s"

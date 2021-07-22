@@ -62,7 +62,7 @@ func ResourceMemberV2() *schema.Resource {
 				Type:         schema.TypeInt,
 				Optional:     true,
 				Computed:     true,
-				ValidateFunc: validation.IntBetween(0, 100),
+				ValidateFunc: validation.IntBetween(1, 100),
 			},
 			"subnet_id": {
 				Type:     schema.TypeString,
