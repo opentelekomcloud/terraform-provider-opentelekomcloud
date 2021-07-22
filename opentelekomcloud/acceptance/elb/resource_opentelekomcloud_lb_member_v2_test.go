@@ -36,7 +36,7 @@ func TestAccLBV2Member_basic(t *testing.T) {
 				Config:             TestAccLBV2MemberConfigUpdate,
 				ExpectNonEmptyPlan: true, // Because admin_state_up remains false, unfinished elb?
 				Check: resource.ComposeTestCheckFunc(
-					resource.TestCheckResourceAttr(resourceMemberName2, "weight", "10"),
+					resource.TestCheckResourceAttr(resourceMemberName1, "weight", "10"),
 					resource.TestCheckResourceAttr(resourceMemberName2, "weight", "15"),
 				),
 			},
