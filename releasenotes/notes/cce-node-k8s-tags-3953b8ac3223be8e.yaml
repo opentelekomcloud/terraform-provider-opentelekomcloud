@@ -1,4 +1,4 @@
 ---
 fixes:
   - |
-    **[CCE]** Read ``taints`` in ``resource/opentelekomcloud_cce_node_v3`` (`#1223 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/1223>`_)
+    **[CCE]** Read ``k8s_tags`` in ``resource/opentelekomcloud_cce_node_v3`` (`#1223 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/1223>`_)
