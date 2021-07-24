@@ -25,6 +25,8 @@ A component that automatically adjusts the size of a Kubernetes Cluster so that 
 are no unneeded nodes.
 `template_version`: `1.19.1`
 
+See the [OTC Cloud Container Engine Addon Documentation](https://docs.otc.t-systems.com/en-us/usermanual2/cce/cce_01_0154.html) for more information.
+
 ##### `basic`
 
 ```json
@@ -71,6 +73,8 @@ are no unneeded nodes.
 CoreDNS is a DNS server that chains plugins and provides Kubernetes DNS Services.
 `template_version`: `1.17.4`
 
+See the [OTC Cloud Container Engine Addon Documentation](https://docs.otc.t-systems.com/en-us/usermanual2/cce/cce_01_0129.html) for more information.
+
 ##### `basic`
 
 ```json
@@ -96,6 +100,8 @@ CoreDNS is a DNS server that chains plugins and provides Kubernetes DNS Services
 
 Everest is a cloud native container storage system based on CSI, used to support cloud storages services for Kubernetes.
 `template_version`: `1.2.2`
+
+See the [OTC Cloud Container Engine Addon Documentation](https://docs.otc.t-systems.com/en-us/usermanual2/cce/cce_01_0066.html) for more information.
 
 ##### `basic`
 
@@ -133,6 +139,8 @@ Everest is a cloud native container storage system based on CSI, used to support
 Metrics Server is a cluster-level resource usage data aggregator.
 `template_version`: `1.0.6`
 
+See the [OTC Cloud Container Engine Addon Documentation](https://docs.otc.t-systems.com/en-us/usermanual2/cce/cce_01_0205.html) for more information.
+
 ##### `basic`
 
 ```json
@@ -151,6 +159,8 @@ _Not supported_
 
 A device plugin for nvidia.com/gpu resource on nvidia driver.
 `template_version`: `1.1.19`
+
+See the [OTC Cloud Container Engine Addon Documentation](https://docs.otc.t-systems.com/en-us/usermanual2/cce/cce_01_0141.html) for more information.
 
 ##### `basic`
 
