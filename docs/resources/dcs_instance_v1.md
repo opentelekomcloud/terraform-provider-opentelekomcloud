@@ -65,7 +65,7 @@ The following arguments are supported:
 
 * `capacity` - (Required) Indicates the Cache capacity. Unit: GB.
   For a DCS Redis or Memcached instance in single-node or master/standby mode, the cache
-  capacity can be `2` GB, `4` GB, `8` GB, `16` GB, `32` GB, or `64` GB.
+  capacity can be `2`, `4`, `8`, `16`, `32`, or `64` GB.
   For a DCS Redis instance in cluster mode, the cache capacity can be `64`, `128`, `256`, `512` GB.
   Changing this creates a new instance.
 
