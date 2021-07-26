@@ -1,0 +1,4 @@
+---
+features:
+  - |
+    **New Data Source:** ``data_source/opentelekomcloud_networking_secgroup_rule_ids_v2`` (`#1226 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/1226>`_)
