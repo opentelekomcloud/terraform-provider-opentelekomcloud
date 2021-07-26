@@ -9,7 +9,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
-	golangsdk "github.com/opentelekomcloud/gophertelekomcloud"
+	"github.com/opentelekomcloud/gophertelekomcloud"
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/dcs/v1/instances"
 
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common"
@@ -167,6 +167,50 @@ func ResourceDcsInstanceV1() *schema.Resource {
 						},
 					},
 				},
+			},
+			"configuration": {
+				Type:     schema.TypeMap,
+				Optional: true,
+				Elem: &schema.Resource{
+					Schema: map[string]*schema.Schema{
+						"parameter_id": {
+							Type:     schema.TypeString,
+							Required: true,
+						},
+						"parameter_name": {
+							Type:     schema.TypeString,
+							Required: true,
+						},
+						"parameter_value": {
+							Type:     schema.TypeString,
+							Required: true,
+						},
+						"default_value": {
+							Type:     schema.TypeString,
+							Computed: true,
+						},
+						"value_type": {
+							Type:     schema.TypeString,
+							Computed: true,
+						},
+						"value_range": {
+							Type:     schema.TypeString,
+							Computed: true,
+						},
+						"description": {
+							Type:     schema.TypeString,
+							Computed: true,
+						},
+					},
+				},
+			},
+			"configuration_status": {
+				Type:     schema.TypeString,
+				Computed: true,
+			},
+			"configuration_time": {
+				Type:     schema.TypeString,
+				Computed: true,
 			},
 			"order_id": {
 				Type:     schema.TypeString,
