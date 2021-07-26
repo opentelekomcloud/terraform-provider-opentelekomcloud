@@ -381,7 +381,7 @@ func resourceDcsInstancesV1Create(ctx context.Context, d *schema.ResourceData, m
 
 		_, err = stateConf.WaitForStateContext(ctx)
 		if err != nil {
-			return fmterr.Errorf("Error waiting for instance (%s) to delete: %w", d.Id(), err)
+			return fmterr.Errorf("error waiting for instance (%s) to delete: %w", d.Id(), err)
 		}
 	}
 
@@ -485,7 +485,7 @@ func resourceDcsInstancesV1Update(ctx context.Context, d *schema.ResourceData, m
 
 		_, err = stateConf.WaitForStateContext(ctx)
 		if err != nil {
-			return fmterr.Errorf("Error waiting for instance (%s) to delete: %w", d.Id(), err)
+			return fmterr.Errorf("error waiting for instance (%s) to delete: %w", d.Id(), err)
 		}
 	}
 
