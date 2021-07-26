@@ -4,13 +4,14 @@ subcategory: "Distributed Cache Service (DCS)"
 
 # opentelekomcloud_dcs_instance_v1
 
-Manages a DCS instance in the OpenTelekomCloud DCS Service.
+Manages a DCSv1 instance in the OpenTelekomCloud DCS Service.
 
 ## Example Usage
 
-### Automatically detect the correct network
-
 ```hcl
+variable "network_id" {}
+variable "vpc_id" {}
+
 resource "opentelekomcloud_networking_secgroup_v2" "secgroup_1" {
   name        = "secgroup_1"
   description = "secgroup_1"
@@ -30,10 +31,10 @@ resource "opentelekomcloud_dcs_instance_v1" "instance_1" {
   password       = "0TCTestP@ssw0rd"
   engine         = "Redis"
   capacity       = 2
-  vpc_id         = "1477393a-29c9-4de5-843f-18ef51257c7e"
+  vpc_id         = var.vpc_id
 
   security_group_id = opentelekomcloud_networking_secgroup_v2.secgroup_1.id
-  subnet_id         = "27d99e17-42f2-4751-818f-5c8c6c03ff15"
+  subnet_id         = var.network_id
   available_zones   = [data.opentelekomcloud_dcs_az_v1.az_1.id]
   product_id        = data.opentelekomcloud_dcs_product_v1.product_1.id
   backup_policy {
@@ -43,8 +44,6 @@ resource "opentelekomcloud_dcs_instance_v1" "instance_1" {
     period_type = "weekly"
     backup_at   = [1, 2, 4, 6]
   }
-  depends_on  = [data.opentelekomcloud_dcs_product_v1.product_1,
-                 opentelekomcloud_networking_secgroup_v2.secgroup_1]
 }
 ```
 
@@ -53,86 +52,79 @@ resource "opentelekomcloud_dcs_instance_v1" "instance_1" {
 The following arguments are supported:
 
 * `name` - (Required) Indicates the name of an instance. An instance name starts with a letter,
-  consists of 4 to 64 characters, and supports only letters, digits, and hyphens (-).
+  consists of `4` to `64` characters, and supports only letters, digits, and hyphens (-).
 
 * `description` - (Optional) Indicates the description of an instance. It is a character
-  string containing not more than 1024 characters.
+  string containing not more than `1024` characters.
 
-* `engine` - (Required) Indicates a cache engine. Only Redis is supported. Changing this
+* `engine` - (Required) Indicates a cache engine. Only `Redis` is supported. Changing this
   creates a new instance.
 
-* `engine_version` - (Required) Indicates the version of a cache engine, which is 3.0.7.
+* `engine_version` - (Required) Indicates the version of a cache engine, which is `3.0.7`.
   Changing this creates a new instance.
 
 * `capacity` - (Required) Indicates the Cache capacity. Unit: GB.
   For a DCS Redis or Memcached instance in single-node or master/standby mode, the cache
-  capacity can be 2 GB, 4 GB, 8 GB, 16 GB, 32 GB, or 64 GB.
-  For a DCS Redis instance in cluster mode, the cache capacity can be 64, 128, 256, 512GB.
+  capacity can be `2` GB, `4` GB, `8` GB, `16` GB, `32` GB, or `64` GB.
+  For a DCS Redis instance in cluster mode, the cache capacity can be `64`, `128`, `256`, `512` GB.
   Changing this creates a new instance.
 
 * `access_user` - (Optional) Username used for accessing a DCS instance after password
-  authentication. A username starts with a letter, consists of 1 to 64 characters,
-  and supports only letters, digits, and hyphens (-).
+  authentication. A username starts with a letter, consists of `1` to `64` characters,
+  and supports only letters, digits, and hyphens (-). Changing this creates a new instance.
+
+* `password` - (Required) Indicates the password of an instance. An instance password
+  must meet the following complexity requirements: Must be 8 to 32 characters long.
+  Must contain at least 3 of the following character types: lowercase letters, uppercase
+  letters, digits, and special characters (`~!@#$%^&*()-_=+\|[{}]:'",<.>/?).
   Changing this creates a new instance.
 
-* `password` - (Required) Password of a DCS instance.
-  The password of a DCS Redis instance must meet the following complexity requirements:
-  Changing this creates a new instance.
+* `vpc_id` - (Required) Specifies the VPC ID. Changing this creates a new instance.
 
-* `vpc_id` - (Required) Tenant's VPC ID. For details on how to create VPCs, see the
-  Virtual Private Cloud API Reference.
-  Changing this creates a new instance.
+* `security_group_id` - (Required) Security group ID.
 
-* `security_group_id` - (Required) Tenant's security group ID. For details on how to
-  create security groups, see the Virtual Private Cloud API Reference.
-
-* `subnet_id` - (Required) Subnet ID. For details on how to create subnets, see the
-  Virtual Private Cloud API Reference.
-  Changing this creates a new instance.
+* `subnet_id` - (Required) Specifies the subnet Network ID. Changing this creates a new instance.
 
 * `available_zones` - (Required) IDs of the AZs where cache nodes reside. For details
-  on how to query AZs, see Querying AZ Information. Changing this creates a new instance.
+  on how to query AZs, see [Querying AZ Information](https://docs.otc.t-systems.com/en-us/api/dcs/dcs-api-0312039.html).
+  Changing this creates a new instance.
 
 * `product_id` - (Required) Product ID used to differentiate DCS instance types.
   Changing this creates a new instance.
 
 * `maintain_begin` - (Optional) Indicates the time at which a maintenance time window starts.
-  Format: HH:mm:ss.
-  The start time and end time of a maintenance time window must indicate the time segment of
-  a supported maintenance time window. For details, see section Querying Maintenance Time Windows.
-  The start time must be set to 22:00, 02:00, 06:00, 10:00, 14:00, or 18:00.
-  Parameters maintain_begin and maintain_end must be set in pairs. If parameter maintain_begin
-  is left blank, parameter maintain_end is also blank. In this case, the system automatically
-  allocates the default start time 02:00.
+  Format: `HH:mm:ss`. The start time and end time of a maintenance time window must indicate the time segment of
+  a supported maintenance time window. For details, see section
+  [Querying Maintenance Time Windows](https://docs.otc.t-systems.com/api/dcs/dcs-api-0312041.html).
+  The start time must be set to `22:00`, `02:00`, `06:00`, `10:00`, `14:00`, or `18:00`.
 
 * `maintain_end` - (Optional) Indicates the time at which a maintenance time window ends.
-  Format: HH:mm:ss.
-  The start time and end time of a maintenance time window must indicate the time segment of
-  a supported maintenance time window. For details, see section Querying Maintenance Time Windows.
-  The end time is four hours later than the start time. For example, if the start time is 22:00,
-  the end time is 02:00.
-  Parameters maintain_begin and maintain_end must be set in pairs. If parameter maintain_end is left
-  blank, parameter maintain_begin is also blank. In this case, the system automatically allocates
-  the default end time 06:00.
+  Format: `HH:mm:ss`. The start time and end time of a maintenance time window must indicate the time segment of
+  a supported maintenance time window. For details, see section
+  [Querying Maintenance Time Windows](https://docs.otc.t-systems.com/api/dcs/dcs-api-0312041.html).
+  The end time is four hours later than the start time. For example, if the start time is `22:00`,
+  the end time is `02:00`.
+
+-> Parameters `maintain_begin` and `maintain_end` must be set in pairs. If parameter `maintain_end` is left
+blank, parameter `maintain_begin` is also blank. In this case, the system automatically allocates
+the default start time `02:00` and the default end time `06:00`.
 
 * `backup_policy` - (Optional) Describes the backup configuration to be used with the instance.
+  * `save_days` - (Optional) Retention time. Unit: day. Range: `1`–`7`.
+  * `backup_type` - (Optional) Backup type. Valid values are: `auto` automatic backup,
+    `manual` manual backup (default).
+  * `begin_at` - (Required) Time at which backup starts. `00:00-01:00` indicates that backup
+    starts at `00:00:00`.
+  * `period_type` - (Required) Interval at which backup is performed.
+    Currently, only weekly backup is supported.
+  * `backup_at` - (Required) Day in a week on which backup starts. Range: `1`–`7`. Where: `1`
+    indicates Monday; `7` indicates Sunday.
 
-    * `save_days` - (Optional) Retention time. Unit: day. Range: 1–7.
-
-    * `backup_type` - (Optional) Backup type.
-
-      Options:
-      * `auto`: automatic backup
-      * `manual`: manual backup (default)
-
-    * `begin_at` - (Required) Time at which backup starts. "00:00-01:00" indicates that backup
-      starts at `00:00:00`.
-
-    * `period_type` - (Required) Interval at which backup is performed.
-      Currently, only weekly backup is supported.
-
-    * `backup_at` - (Required) Day in a week on which backup starts. Range: 1–7. Where: 1
-      indicates Monday; 7 indicates Sunday.
+* `configuration` - (Optional) Describes the array of configuration items of the DCS instance.
+  Configured values can be found [here](https://docs.otc.t-systems.com/en-us/api/dcs/dcs-api-0312015.html#dcs-api-0312015__table1439111281351).
+  * `parameter_id` - (Required) Configuration item ID.
+  * `parameter_name` - (Required) Configuration item name.
+  * `parameter_value` - (Required) Value of the configuration item.
 
 ## Attributes Reference
 
