@@ -1,0 +1,4 @@
+---
+enhancements:
+  - |
+    **[DCS]** Allow to change configuration parameters in ``resource/opentelekomcloud_dcs_instance_v1`` (`#1232 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/1232>`_)
