@@ -10,6 +10,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/opentelekomcloud/gophertelekomcloud"
+	"github.com/opentelekomcloud/gophertelekomcloud/openstack/dcs/v1/configs"
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/dcs/v1/instances"
 
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common"
@@ -25,6 +26,12 @@ func ResourceDcsInstanceV1() *schema.Resource {
 		DeleteContext: resourceDcsInstancesV1Delete,
 		Importer: &schema.ResourceImporter{
 			StateContext: schema.ImportStatePassthroughContext,
+		},
+
+		Timeouts: &schema.ResourceTimeout{
+			Create: schema.DefaultTimeout(10 * time.Minute),
+			Update: schema.DefaultTimeout(10 * time.Minute),
+			Delete: schema.DefaultTimeout(10 * time.Minute),
 		},
 
 		Schema: map[string]*schema.Schema{
@@ -169,7 +176,7 @@ func ResourceDcsInstanceV1() *schema.Resource {
 				},
 			},
 			"configuration": {
-				Type:     schema.TypeMap,
+				Type:     schema.TypeList,
 				Optional: true,
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
@@ -185,32 +192,8 @@ func ResourceDcsInstanceV1() *schema.Resource {
 							Type:     schema.TypeString,
 							Required: true,
 						},
-						"default_value": {
-							Type:     schema.TypeString,
-							Computed: true,
-						},
-						"value_type": {
-							Type:     schema.TypeString,
-							Computed: true,
-						},
-						"value_range": {
-							Type:     schema.TypeString,
-							Computed: true,
-						},
-						"description": {
-							Type:     schema.TypeString,
-							Computed: true,
-						},
 					},
 				},
-			},
-			"configuration_status": {
-				Type:     schema.TypeString,
-				Computed: true,
-			},
-			"configuration_time": {
-				Type:     schema.TypeString,
-				Computed: true,
 			},
 			"order_id": {
 				Type:     schema.TypeString,
@@ -310,6 +293,25 @@ func getInstanceBackupPolicy(d *schema.ResourceData) *instances.InstanceBackupPo
 	return instanceBackupPolicy
 }
 
+func getInstanceRedisConfiguration(d *schema.ResourceData) []configs.RedisConfig {
+	redisConfigRaw := d.Get("configuration").([]interface{})
+	if len(redisConfigRaw) == 0 {
+		return nil
+	}
+	var redisConfigList []configs.RedisConfig
+	for _, v := range redisConfigRaw {
+		configuration := v.(map[string]interface{})
+		redisConfig := configs.RedisConfig{
+			ParamID:    configuration["parameter_id"].(string),
+			ParamName:  configuration["parameter_name"].(string),
+			ParamValue: configuration["parameter_value"].(string),
+		}
+		redisConfigList = append(redisConfigList, redisConfig)
+	}
+
+	return redisConfigList
+}
+
 func resourceDcsInstancesV1Create(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*cfg.Config)
 	client, err := config.DcsV1Client(config.GetRegion(d))
@@ -363,6 +365,26 @@ func resourceDcsInstancesV1Create(ctx context.Context, d *schema.ResourceData, m
 	// Store the instance ID now
 	d.SetId(v.InstanceID)
 
+	updateOpts := configs.UpdateOpts{
+		RedisConfigs: getInstanceRedisConfiguration(d),
+	}
+	if len(updateOpts.RedisConfigs) > 0 {
+		if err := configs.Update(client, d.Id(), updateOpts).ExtractErr(); err != nil {
+			return fmterr.Errorf("error updating redis configuration of DCS instance: %w", err)
+		}
+		stateConf := &resource.StateChangeConf{
+			Pending: []string{"UPDATING"},
+			Target:  []string{"SUCCESS"},
+			Refresh: dcsInstanceV1ConfigStateRefreshFunc(client, d.Id()),
+			Timeout: d.Timeout(schema.TimeoutCreate),
+		}
+
+		_, err = stateConf.WaitForStateContext(ctx)
+		if err != nil {
+			return fmterr.Errorf("Error waiting for instance (%s) to delete: %w", d.Id(), err)
+		}
+	}
+
 	return resourceDcsInstancesV1Read(ctx, d, meta)
 }
 
@@ -379,7 +401,6 @@ func resourceDcsInstancesV1Read(_ context.Context, d *schema.ResourceData, meta 
 
 	log.Printf("[DEBUG] DCS instance %s: %+v", d.Id(), v)
 
-	d.SetId(v.InstanceID)
 	mErr := multierror.Append(
 		d.Set("name", v.Name),
 		d.Set("engine", v.Engine),
@@ -407,7 +428,12 @@ func resourceDcsInstancesV1Read(_ context.Context, d *schema.ResourceData, meta 
 		d.Set("access_user", v.AccessUser),
 		d.Set("ip", v.IP),
 	)
-	return diag.FromErr(mErr.ErrorOrNil())
+
+	if err := mErr.ErrorOrNil(); err != nil {
+		return diag.FromErr(err)
+	}
+
+	return nil
 }
 
 func resourceDcsInstancesV1Update(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
@@ -442,6 +468,27 @@ func resourceDcsInstancesV1Update(ctx context.Context, d *schema.ResourceData, m
 		return fmterr.Errorf("error updating DCS Instance: %w", err)
 	}
 
+	var updateConfigOpts configs.UpdateOpts
+	if d.HasChange("configuration") {
+		updateConfigOpts.RedisConfigs = getInstanceRedisConfiguration(d)
+	}
+	if len(updateConfigOpts.RedisConfigs) > 0 {
+		if err := configs.Update(client, d.Id(), updateConfigOpts).ExtractErr(); err != nil {
+			return fmterr.Errorf("error updating redis config of DCS instance: %w", err)
+		}
+		stateConf := &resource.StateChangeConf{
+			Pending: []string{"UPDATING"},
+			Target:  []string{"SUCCESS"},
+			Refresh: dcsInstanceV1ConfigStateRefreshFunc(client, d.Id()),
+			Timeout: d.Timeout(schema.TimeoutUpdate),
+		}
+
+		_, err = stateConf.WaitForStateContext(ctx)
+		if err != nil {
+			return fmterr.Errorf("Error waiting for instance (%s) to delete: %w", d.Id(), err)
+		}
+	}
+
 	return resourceDcsInstancesV1Read(ctx, d, meta)
 }
 
@@ -459,7 +506,7 @@ func resourceDcsInstancesV1Delete(ctx context.Context, d *schema.ResourceData, m
 
 	err = instances.Delete(client, d.Id()).ExtractErr()
 	if err != nil {
-		return fmterr.Errorf("error deleting instance: %w", err)
+		return fmterr.Errorf("error deleting DCS instance: %w", err)
 	}
 
 	// Wait for the instance to delete before moving on.
@@ -495,5 +542,15 @@ func dcsInstancesV1StateRefreshFunc(client *golangsdk.ServiceClient, instanceID 
 		}
 
 		return v, v.Status, nil
+	}
+}
+
+func dcsInstanceV1ConfigStateRefreshFunc(client *golangsdk.ServiceClient, instanceID string) resource.StateRefreshFunc {
+	return func() (interface{}, string, error) {
+		v, err := configs.List(client, instanceID).Extract()
+		if err != nil {
+			return nil, "", err
+		}
+		return v, v.ConfigStatus, nil
 	}
 }
