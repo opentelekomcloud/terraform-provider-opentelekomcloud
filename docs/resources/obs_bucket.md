@@ -154,6 +154,67 @@ resource "opentelekomcloud_obs_bucket" "bucket" {
 }
 ```
 
+### Using event notifications
+
+```hcl
+resource "opentelekomcloud_smn_topic_v2" "topic" {
+  name         = "obs-notifications"
+  display_name = "The display name of topic_1"
+}
+
+resource "opentelekomcloud_smn_topic_attribute_v2" "policy" {
+  topic_urn       = opentelekomcloud_smn_topic_v2.topic.id
+  attribute_name  = "access_policy"
+  topic_attribute = <<EOF
+{
+  "Version": "2016-09-07",
+  "Id": "__default_policy_ID",
+  "Statement": [
+    {
+      "Sid": "__service_pub_0",
+      "Effect": "Allow",
+      "Principal": {
+        "Service": [
+          "obs",
+          "s3"
+        ]
+      },
+      "Action": [
+        "SMN:Publish",
+        "SMN:QueryTopicDetail"
+      ],
+      "Resource": "${opentelekomcloud_smn_topic_v2.topic.id}"
+    }
+  ]
+}
+EOF
+
+}
+
+resource "opentelekomcloud_obs_bucket" "bucket" {
+  bucket = "tf-test-bucket-%[1]d"
+  acl    = "private"
+
+  event_notifications {
+    topic  = opentelekomcloud_smn_topic_v2.topic.id
+    events = [
+      "ObjectCreated:*",
+      "ObjectRemoved:*",
+    ]
+    filter_rule {
+      name  = "prefix"
+      value = "smn"
+    }
+    filter_rule {
+      name  = "suffix"
+      value = ".jpg"
+    }
+  }
+
+  depends_on = [ opentelekomcloud_smn_topic_attribute_v2.policy ]
+}
+```
+
 ## Argument Reference
 
 The following arguments are supported:
@@ -189,6 +250,8 @@ The following arguments are supported:
 * `lifecycle_rule` - (Optional) A configuration of object lifecycle management (documented below).
 
 * `server_side_encryption` - (Optional) A configuration of server side encryption (documented below).
+
+* `event_notifications` - (Optional) A configuration of bucket event notifications (documented below).
 
 * `force_destroy` - (Optional) A boolean that indicates all objects should be deleted from the bucket so that the
   bucket can be destroyed without error. Default to `false`.
@@ -299,6 +362,27 @@ The `server_side_encryption` object supports the following
 * `kms_key_id` - (Required) The ID of KMS key used for the encryption.
 
 ~> Only base project (e.g. `eu-de`) KMS keys can be used for the encryption
+
+The `event_notifications` object supports the following
+
+* `id` - (Optional) Unique ID of the event notification. If the user does not specify an ID, the system assigns an ID automatically.
+
+* `topic` - (Required) URN of the event notification topic. After detecting a specific event, OBS sends a message to the topic.
+
+-> Topic should exist and be authorized to be used by OBS.
+
+* `events` - (Required) Type of events that need to be notified.
+
+-> Events should not have `s3:` prefix, e.g. `"ObjectCreated:*"` is valid value, but `"s3:ObjectCreated:*"` is not.
+
+* `filter_rule` - (Optional) Filtering rules. The rules filter objects based on the prefixes and suffixes of object names.
+
+The `filter_rule` object supports the following
+
+* `name` - (Optional) Specifies the prefix or suffix of object names for filtering. Valid values are `prefix` and `suffix`.
+
+* `value` - (Optional) Specifies keywords of object names so that objects can be filtered based on the prefixes or suffixes.
+  The value contains a maximum of `1024` characters.
 
 ## Attributes Reference
 

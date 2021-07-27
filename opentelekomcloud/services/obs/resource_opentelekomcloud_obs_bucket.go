@@ -266,6 +266,51 @@ func ResourceObsBucket() *schema.Resource {
 					},
 				},
 			},
+			"event_notifications": {
+				Type:     schema.TypeList,
+				Optional: true,
+				Elem: &schema.Resource{
+					Schema: map[string]*schema.Schema{
+						"topic": {
+							Type:     schema.TypeString,
+							Required: true,
+						},
+						"id": {
+							Type:     schema.TypeString,
+							Optional: true,
+							Computed: true,
+						},
+						"events": {
+							Type:     schema.TypeSet,
+							Required: true,
+							Elem: &schema.Schema{
+								Type: schema.TypeString,
+							},
+							Set: schema.HashString,
+						},
+						"filter_rule": {
+							Type:     schema.TypeSet,
+							Optional: true,
+							Elem: &schema.Resource{
+								Schema: map[string]*schema.Schema{
+									"name": {
+										Type:     schema.TypeString,
+										Optional: true,
+										ValidateFunc: validation.StringInSlice(
+											[]string{"prefix", "suffix"}, false,
+										),
+									},
+									"value": {
+										Type:         schema.TypeString,
+										Optional:     true,
+										ValidateFunc: validation.StringLenBetween(1, 1024),
+									},
+								},
+							},
+						},
+					},
+				},
+			},
 		},
 	}
 }
@@ -363,6 +408,12 @@ func resourceObsBucketUpdate(ctx context.Context, d *schema.ResourceData, meta i
 		}
 	}
 
+	if d.HasChange("event_notifications") {
+		if err := resourceObsBucketNotificationUpdate(client, d); err != nil {
+			return diag.FromErr(err)
+		}
+	}
+
 	return resourceObsBucketRead(ctx, d, meta)
 }
 
@@ -438,6 +489,11 @@ func resourceObsBucketRead(_ context.Context, d *schema.ResourceData, meta inter
 
 	// Read SSE settings
 	if err := setObsBucketEncryption(client, d); err != nil {
+		return diag.FromErr(err)
+	}
+
+	// Read notifications settings
+	if err := setObsBucketNotifications(client, d); err != nil {
 		return diag.FromErr(err)
 	}
 
@@ -1272,4 +1328,90 @@ func setObsBucketEncryption(client *obs.ObsClient, d *schema.ResourceData) error
 		"algorithm":  config.SSEAlgorithm,
 	}}
 	return d.Set("server_side_encryption", value)
+}
+
+func resourceObsBucketNotificationUpdate(client *obs.ObsClient, d *schema.ResourceData) error {
+	notifications := d.Get("event_notifications").([]interface{})
+
+	configs := make([]obs.TopicConfiguration, len(notifications))
+	for i, n := range notifications {
+		notification := n.(map[string]interface{})
+		config := obs.TopicConfiguration{
+			Topic:       notification["topic"].(string),
+			ID:          notification["id"].(string),
+			Events:      toEventSlice(notification["events"]),
+			FilterRules: toFilterRules(notification["filter_rule"]),
+		}
+		configs[i] = config
+	}
+
+	opts := &obs.SetBucketNotificationInput{
+		Bucket:             d.Get("bucket").(string),
+		BucketNotification: obs.BucketNotification{TopicConfigurations: configs},
+	}
+
+	if _, err := client.SetBucketNotification(opts); err != nil {
+		return fmt.Errorf("error setting notification for bucket: %w", err)
+	}
+	return nil
+}
+
+func setObsBucketNotifications(client *obs.ObsClient, d *schema.ResourceData) error {
+	bucket := d.Get("bucket").(string)
+	notifications, err := client.GetBucketNotification(bucket)
+	if err != nil {
+		return fmt.Errorf("error reading bucket notification configuration: %w", err)
+	}
+
+	configs := make([]interface{}, len(notifications.TopicConfigurations))
+	for i, v := range notifications.TopicConfigurations {
+		configs[i] = map[string]interface{}{
+			"topic":       v.Topic,
+			"id":          v.ID,
+			"events":      eventsToStrSlice(v.Events),
+			"filter_rule": filterRulesToMapSlice(v.FilterRules),
+		}
+	}
+	return d.Set("event_notifications", configs)
+}
+
+func filterRulesToMapSlice(src []obs.FilterRule) []interface{} {
+	res := make([]interface{}, len(src))
+	for i, v := range src {
+		res[i] = map[string]interface{}{
+			"name":  v.Name,
+			"value": v.Value,
+		}
+	}
+	return res
+}
+
+func toFilterRules(src interface{}) []obs.FilterRule {
+	rules := src.(*schema.Set)
+	res := make([]obs.FilterRule, rules.Len())
+	for i, v := range rules.List() {
+		rule := v.(map[string]interface{})
+		res[i] = obs.FilterRule{
+			Name:  rule["name"].(string),
+			Value: rule["value"].(string),
+		}
+	}
+	return res
+}
+
+func eventsToStrSlice(src []obs.EventType) []string {
+	res := make([]string, len(src))
+	for i, v := range src {
+		res[i] = string(v)
+	}
+	return res
+}
+
+func toEventSlice(src interface{}) []obs.EventType {
+	events := src.(*schema.Set)
+	res := make([]obs.EventType, events.Len())
+	for i, v := range events.List() {
+		res[i] = obs.EventType(v.(string))
+	}
+	return res
 }
