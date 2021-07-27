@@ -1,4 +1,4 @@
-## 1.25.0 (Unreleased)
+> **_NOTE:_** We are moved to `releasenotes`. The latest CHANGELOG could be found [here](https://docs.otc-service.com/releasenotes/terraform-provider-opentelekomcloud/).
 
 ## 1.24.3 (June 30 2021)
 
