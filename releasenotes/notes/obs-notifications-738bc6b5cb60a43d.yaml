@@ -1,0 +1,4 @@
+---
+enhancements:
+  - |
+    **[OBS]** Add ``event_notifications`` to ``resource/opentelekomcloud_obs_bucket`` (`#1235 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/1235>`_)

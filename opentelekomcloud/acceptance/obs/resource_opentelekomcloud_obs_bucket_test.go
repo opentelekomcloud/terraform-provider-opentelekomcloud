@@ -193,6 +193,27 @@ func TestAccObsBucket_cors(t *testing.T) {
 	})
 }
 
+func TestAccObsBucket_notifications(t *testing.T) {
+	rInt := acctest.RandInt()
+	resourceName := "opentelekomcloud_obs_bucket.bucket"
+	resource.Test(t, resource.TestCase{
+		PreCheck:          func() { common.TestAccPreCheck(t) },
+		ProviderFactories: common.TestAccProviderFactories,
+		CheckDestroy:      testAccCheckObsBucketDestroy,
+		Steps: []resource.TestStep{
+			{
+				Config: testAccObsBucketConfigWithNotifications(rInt),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckObsBucketExists(resourceName),
+					resource.TestCheckResourceAttr(resourceName, "event_notifications.#", "1"),
+					resource.TestCheckResourceAttr(resourceName, "event_notifications.0.events.#", "2"),
+					resource.TestCheckResourceAttr(resourceName, "event_notifications.0.filter_rule.#", "2"),
+				),
+			},
+		},
+	})
+}
+
 func testAccCheckObsBucketDestroy(s *terraform.State) error {
 	config := common.TestAccProvider.Meta().(*cfg.Config)
 	client, err := config.NewObjectStorageClient(env.OS_REGION_NAME)
@@ -460,6 +481,68 @@ resource "opentelekomcloud_obs_bucket" "bucket" {
     expose_headers  = ["x-amz-server-side-encryption", "ETag"]
     max_age_seconds = 3000
   }
+}
+`, randInt)
+}
+
+func testAccObsBucketConfigWithNotifications(randInt int) string {
+	return fmt.Sprintf(`
+resource "opentelekomcloud_smn_topic_v2" "topic" {
+  name         = "obs-notifications"
+  display_name = "The display name of topic_1"
+}
+
+resource "opentelekomcloud_smn_topic_attribute_v2" "policy" {
+  topic_urn       = opentelekomcloud_smn_topic_v2.topic.id
+  attribute_name  = "access_policy"
+  topic_attribute = <<EOF
+{
+  "Version": "2016-09-07",
+  "Id": "__default_policy_ID",
+  "Statement": [
+    {
+      "Sid": "__service_pub_0",
+      "Effect": "Allow",
+      "Principal": {
+        "Service": [
+          "obs",
+          "s3"
+        ]
+      },
+      "Action": [
+        "SMN:Publish",
+        "SMN:QueryTopicDetail"
+      ],
+      "Resource": "${opentelekomcloud_smn_topic_v2.topic.id}"
+    }
+  ]
+}
+EOF
+
+  depends_on = [opentelekomcloud_smn_topic_v2.topic]
+}
+
+resource "opentelekomcloud_obs_bucket" "bucket" {
+  bucket = "tf-test-bucket-%[1]d"
+  acl    = "private"
+
+  event_notifications {
+    topic  = opentelekomcloud_smn_topic_v2.topic.id
+    events = [
+      "ObjectCreated:*",
+      "ObjectRemoved:*",
+    ]
+    filter_rule {
+      name  = "prefix"
+      value = "smn"
+    }
+    filter_rule {
+      name  = "suffix"
+      value = ".jpg"
+    }
+  }
+
+  depends_on = [ opentelekomcloud_smn_topic_attribute_v2.policy ]
 }
 `, randInt)
 }
