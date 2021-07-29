@@ -6,12 +6,13 @@ subcategory: "Virtual Private Cloud (VPC)"
 
 Use this data source to get details about a specific VPC.
 
-This data source can prove useful when a module accepts a VPC id as an input variable and needs to, for example, determine the CIDR block of that VPC.
+This data source can prove useful when a module accepts a VPC id as an input variable and needs to, for example,
+determine the CIDR block of that VPC.
 
 ## Example Usage
 
 ```hcl
-variable "vpc_name" { }
+variable "vpc_name" {}
 
 data "opentelekomcloud_vpc_v1" "vpc" {
   name   = var.vpc_name
@@ -35,8 +36,6 @@ The given filters must match exactly one VPC whose data will be exported as attr
 * `cidr` - (Optional) The cidr block of the desired VPC.
 
 * `shared` - (Optional) Enable SNAT (In order to let instances without an EIP access the internet).
-
-
 
 ## Attributes Reference
 
