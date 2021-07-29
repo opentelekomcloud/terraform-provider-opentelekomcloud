@@ -1,0 +1,4 @@
+---
+fixes:
+  - |
+    **[VPC]** Fix issue with setting ``id`` in ``data_source/opentelekomcloud_vpc_v1`` (`#1237 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/1237>`_)
