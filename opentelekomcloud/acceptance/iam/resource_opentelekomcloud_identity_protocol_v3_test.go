@@ -38,6 +38,26 @@ func TestAccIdentityV3Protocol_basic(t *testing.T) {
 	})
 }
 
+func TestAccIdentityV3Protocol_metadata(t *testing.T) {
+	resource.Test(t, resource.TestCase{
+		PreCheck: func() {
+			common.TestAccPreCheck(t)
+			common.TestAccPreCheckAdminOnly(t)
+		},
+		ProviderFactories: common.TestAccProviderFactories,
+		CheckDestroy:      testAccCheckIdentityV3ProtocolDestroy,
+		Steps: []resource.TestStep{
+			{
+				Config: testAccIdentityV3ProtocolMetadata,
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttrSet(protocolResourceName, "metadata.0.metadata"),
+					resource.TestCheckResourceAttrSet(protocolResourceName, "metadata.0.domain_id"),
+				),
+			},
+		},
+	})
+}
+
 func TestAccIdentityV3Protocol_import(t *testing.T) {
 	resource.Test(t, resource.TestCase{
 		PreCheck: func() {
@@ -92,6 +112,21 @@ resource "opentelekomcloud_identity_protocol_v3" "saml" {
   protocol    = "%s"
   provider_id = opentelekomcloud_identity_provider_v3.provider.id
   mapping_id  = opentelekomcloud_identity_mapping_v3.mapping.id
+}
+`, testAccIdentityV3ProviderBasic, testAccIdentityV3MappingBasic(mapping), protocolName)
+	testAccIdentityV3ProtocolMetadata = fmt.Sprintf(`
+%s
+
+%s
+
+resource "opentelekomcloud_identity_protocol_v3" "saml" {
+  protocol    = "%s"
+  provider_id = opentelekomcloud_identity_provider_v3.provider.id
+  mapping_id  = opentelekomcloud_identity_mapping_v3.mapping.id
+
+  metadata {
+    metadata = file("saml-metadata.xml")
+  }
 }
 `, testAccIdentityV3ProviderBasic, testAccIdentityV3MappingBasic(mapping), protocolName)
 )

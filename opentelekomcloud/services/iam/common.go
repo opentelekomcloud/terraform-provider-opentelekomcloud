@@ -3,6 +3,7 @@ package iam
 import (
 	"context"
 	"fmt"
+	"strings"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/opentelekomcloud/gophertelekomcloud"
@@ -26,4 +27,14 @@ func clientFromCtx(ctx context.Context, d *schema.ResourceData, meta interface{}
 		return nil, fmt.Errorf(clientCreationFail, err)
 	}
 	return client.(*golangsdk.ServiceClient), nil
+}
+
+func identityExtClient(d *schema.ResourceData, meta interface{}) (*golangsdk.ServiceClient, error) {
+	config := meta.(*cfg.Config)
+	client, err := config.IdentityV3Client(config.GetRegion(d))
+	if err != nil {
+		return nil, fmt.Errorf("error creating identity v3-ext client: %w", err)
+	}
+	client.Endpoint = strings.Replace(client.Endpoint, "/v3/", "/v3-ext/", 1)
+	return client, nil
 }
