@@ -326,7 +326,7 @@ But due to some attributes missing from the API response, it's required to ignor
 
 ```hcl
 resource "opentelekomcloud_rds_instance_v3" "instance_1" {
-  ...
+  # ...
 
   lifecycle {
     ignore_changes = [

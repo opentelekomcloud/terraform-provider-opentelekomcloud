@@ -28,8 +28,6 @@ if ${error}; then
   exit 1
 fi
 
-exit 0
-
 }
 
 function tfDocsLint {
@@ -59,8 +57,6 @@ if ${error}; then
   echo ""
   exit 1
 fi
-
-exit 0
 
 }
 
