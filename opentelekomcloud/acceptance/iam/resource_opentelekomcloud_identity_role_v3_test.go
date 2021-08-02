@@ -47,8 +47,8 @@ func TestAccIdentityRoleV3_basic(t *testing.T) {
 func testAccIdentityRoleV3_basic(val string) string {
 	return fmt.Sprintf(`
 resource "opentelekomcloud_identity_role_v3" "role" {
-  description = "role"
-  display_name = "custom_role%s"
+  description   = "role"
+  display_name  = "custom_role%s"
   display_layer = "domain"
   statement {
     effect = "Allow"

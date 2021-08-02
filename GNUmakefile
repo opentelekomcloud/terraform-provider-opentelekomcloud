@@ -47,5 +47,14 @@ test-compile:
 	fi
 	go test -c $(TEST)
 
+tflint:
+	./scripts/run-tflint.sh
+
+tffmtfix:
+	@echo "==> Fixing acceptance test terraform blocks code with terrafmt..."
+	@find opentelekomcloud/acceptance | egrep "_test.go" | sort | while read f; do terrafmt fmt -f $$f; done
+	@echo "==> Fixing docs terraform blocks code with terrafmt..."
+	@find docs | egrep ".md" | sort | while read f; do terrafmt fmt $$f; done
+
 .PHONY: build test testacc vet fmt fmtcheck errcheck test-compile
 

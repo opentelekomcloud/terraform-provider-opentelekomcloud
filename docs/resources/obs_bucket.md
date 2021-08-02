@@ -196,7 +196,7 @@ resource "opentelekomcloud_obs_bucket" "bucket" {
   acl    = "private"
 
   event_notifications {
-    topic  = opentelekomcloud_smn_topic_v2.topic.id
+    topic = opentelekomcloud_smn_topic_v2.topic.id
     events = [
       "ObjectCreated:*",
       "ObjectRemoved:*",
@@ -211,7 +211,7 @@ resource "opentelekomcloud_obs_bucket" "bucket" {
     }
   }
 
-  depends_on = [ opentelekomcloud_smn_topic_attribute_v2.policy ]
+  depends_on = [opentelekomcloud_smn_topic_attribute_v2.policy]
 }
 ```
 

@@ -15,7 +15,7 @@ resource "opentelekomcloud_ims_data_image_v2" "ims_test" {
   name        = "imt_test"
   volume_id   = "54a6c3a4-8511-4d01-818f-3fe5177cbb06"
   description = "Create an image using an ECS."
-  
+
   tags = {
     foo = "bar"
     key = "value"
@@ -32,7 +32,7 @@ resource "opentelekomcloud_ims_data_image_v2" "ims_test_file" {
   min_disk    = 40
   os_type     = "Linux"
   description = "Create an image using a file in the OBS bucket."
-  
+
   tags = {
     foo = "bar1"
     key = "value"

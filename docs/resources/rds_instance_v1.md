@@ -36,7 +36,7 @@ resource "opentelekomcloud_rds_instance_v1" "instance" {
     type = "COMMON"
     size = 200
   }
-  vpc = "c1095fe7-03df-4205-ad2d-6f4c181d436e"
+  vpc    = "c1095fe7-03df-4205-ad2d-6f4c181d436e"
   dbrtpd = "P@ssw0rd1!9851"
   dbport = "8635"
 
@@ -78,10 +78,10 @@ resource "opentelekomcloud_compute_secgroup_v2" "secgrp_rds" {
 resource "opentelekomcloud_rds_instance_v1" "instance" {
   name             = "rds-instance"
   availabilityzone = "eu-de-01"
-  flavorref = data.opentelekomcloud_rds_flavors_v1.flavor.id
-  vpc = "c1095fe7-03df-4205-ad2d-6f4c181d436e"
-  dbport = "8635"
-  dbrtpd = "P@ssw0rd1!9851"
+  flavorref        = data.opentelekomcloud_rds_flavors_v1.flavor.id
+  vpc              = "c1095fe7-03df-4205-ad2d-6f4c181d436e"
+  dbport           = "8635"
+  dbrtpd           = "P@ssw0rd1!9851"
 
   datastore {
     type    = "SQLServer"
@@ -108,9 +108,9 @@ resource "opentelekomcloud_rds_instance_v1" "instance" {
 ### Creating a MySQL RDS instance
 ```hcl
 data "opentelekomcloud_rds_flavors_v1" "flavor" {
-  datastore_name = "MySQL"
+  datastore_name    = "MySQL"
   datastore_version = "5.6.33"
-  speccode = "rds.mysql.s1.medium"
+  speccode          = "rds.mysql.s1.medium"
 }
 
 resource "opentelekomcloud_compute_secgroup_v2" "secgrp_rds" {

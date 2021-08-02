@@ -84,7 +84,7 @@ resource "opentelekomcloud_images_image_access_v2" "access_1" {
 %[3]s
 
 resource "opentelekomcloud_images_image_access_accept_v2" "accept_1" {
-  provider =  "%s"
+  provider = "%s"
 
   depends_on = [opentelekomcloud_images_image_access_v2.access_1]
 
@@ -105,7 +105,7 @@ resource "opentelekomcloud_images_image_access_v2" "access_1" {
 %[3]s
 
 resource "opentelekomcloud_images_image_access_accept_v2" "accept_1" {
-  provider =  "%[4]s"
+  provider = "%[4]s"
 
   depends_on = [opentelekomcloud_images_image_access_v2.access_1]
 

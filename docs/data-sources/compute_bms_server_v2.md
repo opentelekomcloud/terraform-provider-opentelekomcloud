@@ -9,8 +9,8 @@ Use this data source to get details about a BMS or BMSs from OpenTelekomCloud.
 ## Example Usage
 
 ```hcl
-variable "bms_id" { }
-variable "bms_name" { }
+variable "bms_id" {}
+variable "bms_name" {}
 
 data "opentelekomcloud_compute_bms_server_v2" "query_bms" {
   id   = var.bms_id

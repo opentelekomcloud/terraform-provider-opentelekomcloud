@@ -9,8 +9,8 @@ Use this data source to get details about the server on a specified Dedicated Ho
 ## Example Usage
 
 ```hcl
-variable "deh_id" { }
-variable "server_id" { }
+variable "deh_id" {}
+variable "server_id" {}
 
 data "opentelekomcloud_deh_server_v1" "deh_server" {
   id        = var.deh_id

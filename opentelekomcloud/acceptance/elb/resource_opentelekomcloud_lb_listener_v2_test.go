@@ -526,8 +526,8 @@ resource "opentelekomcloud_lb_listener_v2" "elb_listener" {
   http2_enable              = true
   tls_ciphers_policy        = "tls-1-0"
   default_tls_container_ref = opentelekomcloud_lb_certificate_v2.elb_certificates[0].id
-  sni_container_refs        = [
-  for s in opentelekomcloud_lb_certificate_v2.elb_certificates: s.id
+  sni_container_refs = [
+    for s in opentelekomcloud_lb_certificate_v2.elb_certificates : s.id
   ]
 }
 `, env.OS_SUBNET_ID, count)

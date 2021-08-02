@@ -42,17 +42,17 @@ resource "opentelekomcloud_mrs_cluster_v1" "cluster1" {
     component_name = "Hive"
   }
   bootstrap_scripts {
-  name = "Modify os config"
-  uri = "s3a://bootstrap/modify_os_config.sh"
-  parameters = "param1 param2"
-  nodes = ["master", "core", "task"]
-	active_master = true
-	before_component_start = true
-  fail_action = "continue"
+    name                   = "Modify os config"
+    uri                    = "s3a://bootstrap/modify_os_config.sh"
+    parameters             = "param1 param2"
+    nodes                  = ["master", "core", "task"]
+    active_master          = true
+    before_component_start = true
+    fail_action            = "continue"
   }
   tags = {
-  foo = "bar"
-  key = "value"
+    foo = "bar"
+    key = "value"
   }
 }
 ```

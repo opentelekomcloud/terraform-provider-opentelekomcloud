@@ -9,7 +9,7 @@ Use this data source to get a list of availability zones from OpenTelekomCloud.
 ## Example Usage
 
 ```hcl
-data "opentelekomcloud_compute_availability_zones_v2" "zones" { }
+data "opentelekomcloud_compute_availability_zones_v2" "zones" {}
 ```
 
 ## Argument Reference

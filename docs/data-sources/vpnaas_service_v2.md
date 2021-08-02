@@ -9,7 +9,7 @@ Use this data source to get details about a specific VPN.
 ## Example Usage
 
 ```hcl
-variable "vpn_name" { }
+variable "vpn_name" {}
 
 data "opentelekomcloud_vpnaas_service_v2" "vpn" {
   name           = var.vpn_name

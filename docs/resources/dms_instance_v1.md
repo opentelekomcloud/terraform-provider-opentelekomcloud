@@ -45,8 +45,8 @@ resource "opentelekomcloud_dms_instance_v1" "instance_1" {
   access_user       = var.the_access_user
   password          = var.your_password
 
-  depends_on        = [data.opentelekomcloud_dms_product_v1.product_1,
-    opentelekomcloud_networking_secgroup_v2.secgroup_1]
+  depends_on = [data.opentelekomcloud_dms_product_v1.product_1,
+  opentelekomcloud_networking_secgroup_v2.secgroup_1]
 }
 ```
 

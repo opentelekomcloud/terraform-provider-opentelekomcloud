@@ -9,7 +9,7 @@ Anti-DDoS monitors the service traffic from the Internet to ECSs, ELB instances,
 ## Example Usage
 
 ```hcl
-variable "eip_id" { }
+variable "eip_id" {}
 
 resource "opentelekomcloud_antiddos_v1" "myantiddos" {
   floating_ip_id         = var.eip_id

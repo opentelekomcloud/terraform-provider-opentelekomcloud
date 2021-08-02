@@ -9,8 +9,8 @@ Provides an VBS Backup resource within OpenTelekomCloud.
 ## Example Usage
 
 ```hcl
-variable "backup_name" { }
-variable "volume_id" { }
+variable "backup_name" {}
+variable "volume_id" {}
 
 resource "opentelekomcloud_vbs_backup_v2" "mybackup" {
   volume_id = var.volume_id

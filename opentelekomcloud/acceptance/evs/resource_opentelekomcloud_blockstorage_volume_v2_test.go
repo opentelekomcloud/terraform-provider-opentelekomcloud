@@ -369,23 +369,23 @@ resource "opentelekomcloud_blockstorage_volume_v2" "volume_1" {
 func testAccBlockStorageV2Volume_assigned(size int) string {
 	return fmt.Sprintf(`
 resource "opentelekomcloud_blockstorage_volume_v2" "volume_1" {
-  name = "volume_1"
-  size = %d
+  name     = "volume_1"
+  size     = %d
   image_id = "%s"
 }
 
 resource "opentelekomcloud_compute_instance_v2" "instance_1" {
-  name = "instance_1"
+  name            = "instance_1"
   security_groups = ["default"]
   network {
-	uuid = "%s"
+    uuid = "%s"
   }
   block_device {
-	uuid = opentelekomcloud_blockstorage_volume_v2.volume_1.id
-	source_type = "volume"
-	boot_index = 0
-	destination_type = "volume"
-	delete_on_termination = true
+    uuid                  = opentelekomcloud_blockstorage_volume_v2.volume_1.id
+    source_type           = "volume"
+    boot_index            = 0
+    destination_type      = "volume"
+    delete_on_termination = true
   }
 }
 `, size, env.OS_IMAGE_ID, env.OS_NETWORK_ID)
@@ -471,8 +471,8 @@ resource "opentelekomcloud_blockstorage_volume_v2" "volume" {
   availability_zone = data.opentelekomcloud_compute_availability_zones_v2.available.names[count.index]
   name              = "test-vol0${count.index + 1}-datadisk"
   size              = 40
-  tags              =   {
-    generator   = "terraform"
+  tags = {
+    generator = "terraform"
   }
   metadata = {
     __system__encrypted = "1"
@@ -514,8 +514,8 @@ resource "opentelekomcloud_blockstorage_volume_v2" "volume" {
   availability_zone = data.opentelekomcloud_compute_availability_zones_v2.available.names[count.index]
   name              = "test-vol0${count.index + 1}-datadisk"
   size              = 60
-  tags              =   {
-    generator   = "terraform"
+  tags = {
+    generator = "terraform"
   }
   metadata = {
     __system__encrypted = "1"

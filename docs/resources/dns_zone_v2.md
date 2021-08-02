@@ -36,8 +36,8 @@ resource "opentelekomcloud_dns_zone_v2" "private_example_com" {
   type        = "private"
 
   router {
-     router_id     = var.vpc_id
-     router_region = var.region
+    router_id     = var.vpc_id
+    router_region = var.region
   }
   tags = {
     foo = "bar"

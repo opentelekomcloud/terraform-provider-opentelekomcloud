@@ -60,10 +60,10 @@ func testAccCheckIdentityV3ProjectDataSourceID(n string) resource.TestCheckFunc 
 
 func testAccOpenStackIdentityProjectV3DataSource_project(name, description string) string {
 	return fmt.Sprintf(`
-	resource "opentelekomcloud_identity_project_v3" "project_1" {
-	  name = "%s"
-	  description = "%s"
-	}
+resource "opentelekomcloud_identity_project_v3" "project_1" {
+  name        = "%s"
+  description = "%s"
+}
 `, name, description)
 }
 
@@ -71,8 +71,8 @@ func testAccOpenStackIdentityProjectV3DataSource_basic(name, description string)
 	return fmt.Sprintf(`
 	%s
 
-	data "opentelekomcloud_identity_project_v3" "project_1" {
-      name = opentelekomcloud_identity_project_v3.project_1.name
-	}
+data "opentelekomcloud_identity_project_v3" "project_1" {
+  name = opentelekomcloud_identity_project_v3.project_1.name
+}
 `, testAccOpenStackIdentityProjectV3DataSource_project(name, description))
 }

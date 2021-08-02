@@ -8,7 +8,7 @@ Use this data source to get details about OpenTelekomCloud Cloud Trace Service.
 
 ## Example Usage
 ```hcl
-variable "bucket_name" { }
+variable "bucket_name" {}
 
 data "opentelekomcloud_cts_tracker_v1" "tracker_v1" {
   bucket_name = var.bucket_name

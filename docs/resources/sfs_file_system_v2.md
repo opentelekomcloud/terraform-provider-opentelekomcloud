@@ -14,10 +14,10 @@ variable "share_name" {}
 variable "share_description" {}
 
 resource "opentelekomcloud_sfs_file_system_v2" "share-file" {
-  name         = var.share_name
-  size         = 50
-  description  = var.share_description
-  share_proto  = "NFS"
+  name        = var.share_name
+  size        = 50
+  description = var.share_description
+  share_proto = "NFS"
 
   tags = {
     muh = "kuh"

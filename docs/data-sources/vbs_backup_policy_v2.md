@@ -9,8 +9,8 @@ Use this data source to get details about a specific VBS backup policy.
 ## Example Usage
 
 ```hcl
-variable "policy_name" { }
-variable "policy_id" { }
+variable "policy_name" {}
+variable "policy_id" {}
 
 data "opentelekomcloud_vbs_backup_policy_v2" "policies" {
   name = var.policy_name

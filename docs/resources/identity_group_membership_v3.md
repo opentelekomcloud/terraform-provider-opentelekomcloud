@@ -31,7 +31,7 @@ resource "opentelekomcloud_identity_user_v3" "user_2" {
 resource "opentelekomcloud_identity_group_membership_v3" "membership_1" {
   group = opentelekomcloud_identity_group_v3.group_1.id
   users = [opentelekomcloud_identity_user_v3.user_1.id,
-           opentelekomcloud_identity_user_v3.user_2.id]
+  opentelekomcloud_identity_user_v3.user_2.id]
 }
 ```
 

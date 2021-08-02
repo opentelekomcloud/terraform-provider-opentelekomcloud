@@ -9,7 +9,7 @@ Use this data source to get details about a specific RTS Software Deployment.
 ## Example Usage
 
 ```hcl
-variable "deployment_id" { }
+variable "deployment_id" {}
 
 data "opentelekomcloud_rts_software_deployment_v1" "mydeployment" {
   id = var.deployment_id

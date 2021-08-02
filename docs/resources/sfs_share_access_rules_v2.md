@@ -14,20 +14,20 @@ variable "share_name" {}
 variable "share_description" {}
 
 resource "opentelekomcloud_vpc_v1" "vpc_1" {
-  name   = "sfs_share_vpc_1"
-  cidr   = "192.168.0.0/16"
+  name = "sfs_share_vpc_1"
+  cidr = "192.168.0.0/16"
 }
 
 resource "opentelekomcloud_vpc_v1" "vpc_2" {
-  name   = "sfs_share_vpc_2"
-  cidr   = "192.168.0.0/16"
+  name = "sfs_share_vpc_2"
+  cidr = "192.168.0.0/16"
 }
 
 resource "opentelekomcloud_sfs_file_system_v2" "sfs_1" {
-  name         = var.share_name
-  size         = 50
-  description  = var.share_description
-  share_proto  = "NFS"
+  name        = var.share_name
+  size        = 50
+  description = var.share_description
+  share_proto = "NFS"
 }
 
 resource "opentelekomcloud_sfs_share_access_rules_v2" "sfs_rules" {

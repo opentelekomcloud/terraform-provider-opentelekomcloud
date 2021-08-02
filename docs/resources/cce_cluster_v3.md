@@ -19,9 +19,9 @@ Provides a cluster resource management.
 ### Simple cluster
 
 ```hcl
-variable "flavor_id" { }
-variable "vpc_id" { }
-variable "subnet_id" { }
+variable "flavor_id" {}
+variable "vpc_id" {}
+variable "subnet_id" {}
 
 resource "opentelekomcloud_cce_cluster_v3" "cluster_1" {
   name        = "cluster"
@@ -50,7 +50,7 @@ resource "opentelekomcloud_identity_agency_v3" "enable_cce_auto_creation" {
     for_each = var.projects
     content {
       project = project_role.value
-      roles   = [
+      roles = [
         "Tenant Administrator"
       ]
     }

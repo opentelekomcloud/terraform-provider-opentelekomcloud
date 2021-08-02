@@ -33,7 +33,7 @@ resource "opentelekomcloud_vpc_subnet_v1" "private" {
   cidr       = cidrsubnet(opentelekomcloud_vpc_v1.main.cidr, 8, 0)
   vpc_id     = opentelekomcloud_vpc_v1.main.id
   gateway_ip = cidrhost(cidrsubnet(opentelekomcloud_vpc_v1.main.cidr, 8, 0), 1)
-  dns_list   = [
+  dns_list = [
     "1.1.1.1",
     "8.8.8.8",
   ]

@@ -872,8 +872,8 @@ func testAccS3BucketPolicy(randInt int) string {
 func testAccS3BucketConfig(randInt int) string {
 	return fmt.Sprintf(`
 resource "opentelekomcloud_s3_bucket" "bucket" {
-	bucket = "tf-test-bucket-%d"
-	acl = "public-read"
+  bucket = "tf-test-bucket-%d"
+  acl    = "public-read"
 }
 `, randInt)
 }
@@ -949,14 +949,14 @@ resource "opentelekomcloud_s3_bucket" "bucket6" {
 func testAccS3BucketConfigWithRegion(randInt int) string {
 	return fmt.Sprintf(`
 provider "opentelekomcloud" {
-	alias = "reg1"
-	region = "%s"
+  alias  = "reg1"
+  region = "%s"
 }
 
 resource "opentelekomcloud_s3_bucket" "bucket" {
-	provider = "reg1"
-	bucket = "tf-test-bucket-%d"
-	region = "%s"
+  provider = "reg1"
+  bucket   = "tf-test-bucket-%d"
+  region   = "%s"
 }
 `, env.OS_REGION_NAME, randInt, env.OS_REGION_NAME)
 }
@@ -964,12 +964,12 @@ resource "opentelekomcloud_s3_bucket" "bucket" {
 func testAccS3BucketWebsiteConfig(randInt int) string {
 	return fmt.Sprintf(`
 resource "opentelekomcloud_s3_bucket" "bucket" {
-	bucket = "tf-test-bucket-%d"
-	acl = "public-read"
+  bucket = "tf-test-bucket-%d"
+  acl    = "public-read"
 
-	website {
-		index_document = "index.html"
-	}
+  website {
+    index_document = "index.html"
+  }
 }
 `, randInt)
 }
@@ -977,13 +977,13 @@ resource "opentelekomcloud_s3_bucket" "bucket" {
 func testAccS3BucketWebsiteConfigWithError(randInt int) string {
 	return fmt.Sprintf(`
 resource "opentelekomcloud_s3_bucket" "bucket" {
-	bucket = "tf-test-bucket-%d"
-	acl = "public-read"
+  bucket = "tf-test-bucket-%d"
+  acl    = "public-read"
 
-	website {
-		index_document = "index.html"
-		error_document = "error.html"
-	}
+  website {
+    index_document = "index.html"
+    error_document = "error.html"
+  }
 }
 `, randInt)
 }
@@ -991,12 +991,12 @@ resource "opentelekomcloud_s3_bucket" "bucket" {
 func testAccS3BucketWebsiteConfigWithRedirect(randInt int) string {
 	return fmt.Sprintf(`
 resource "opentelekomcloud_s3_bucket" "bucket" {
-	bucket = "tf-test-bucket-%d"
-	acl = "public-read"
+  bucket = "tf-test-bucket-%d"
+  acl    = "public-read"
 
-	website {
-		redirect_all_requests_to = "hashicorp.com"
-	}
+  website {
+    redirect_all_requests_to = "hashicorp.com"
+  }
 }
 `, randInt)
 }
@@ -1004,12 +1004,12 @@ resource "opentelekomcloud_s3_bucket" "bucket" {
 func testAccS3BucketWebsiteConfigWithHttpsRedirect(randInt int) string {
 	return fmt.Sprintf(`
 resource "opentelekomcloud_s3_bucket" "bucket" {
-	bucket = "tf-test-bucket-%d"
-	acl = "public-read"
+  bucket = "tf-test-bucket-%d"
+  acl    = "public-read"
 
-	website {
-		redirect_all_requests_to = "https://hashicorp.com"
-	}
+  website {
+    redirect_all_requests_to = "https://hashicorp.com"
+  }
 }
 `, randInt)
 }
@@ -1017,13 +1017,13 @@ resource "opentelekomcloud_s3_bucket" "bucket" {
 func testAccS3BucketWebsiteConfigWithRoutingRules(randInt int) string {
 	return fmt.Sprintf(`
 resource "opentelekomcloud_s3_bucket" "bucket" {
-	bucket = "tf-test-bucket-%d"
-	acl = "public-read"
+  bucket = "tf-test-bucket-%d"
+  acl    = "public-read"
 
-	website {
-		index_document = "index.html"
-		error_document = "error.html"
-		routing_rules = <<EOF
+  website {
+    index_document = "index.html"
+    error_document = "error.html"
+    routing_rules  = <<EOF
 [{
 	"Condition": {
 		"KeyPrefixEquals": "docs/"
@@ -1033,7 +1033,7 @@ resource "opentelekomcloud_s3_bucket" "bucket" {
 	}
 }]
 EOF
-	}
+  }
 }
 `, randInt)
 }
@@ -1041,9 +1041,9 @@ EOF
 func testAccS3BucketConfigWithPolicy(randInt int) string {
 	return fmt.Sprintf(`
 resource "opentelekomcloud_s3_bucket" "bucket" {
-	bucket = "tf-test-bucket-%d"
-	acl = "public-read"
-	policy = %s
+  bucket = "tf-test-bucket-%d"
+  acl    = "public-read"
+  policy = %s
 }
 `, randInt, strconv.Quote(testAccS3BucketPolicy(randInt)))
 }
@@ -1051,8 +1051,8 @@ resource "opentelekomcloud_s3_bucket" "bucket" {
 func testAccS3BucketDestroyedConfig(randInt int) string {
 	return fmt.Sprintf(`
 resource "opentelekomcloud_s3_bucket" "bucket" {
-	bucket = "tf-test-bucket-%d"
-	acl = "public-read"
+  bucket = "tf-test-bucket-%d"
+  acl    = "public-read"
 }
 `, randInt)
 }
@@ -1060,9 +1060,9 @@ resource "opentelekomcloud_s3_bucket" "bucket" {
 func testAccS3BucketConfigWithEmptyPolicy(randInt int) string {
 	return fmt.Sprintf(`
 resource "opentelekomcloud_s3_bucket" "bucket" {
-	bucket = "tf-test-bucket-%d"
-	acl = "public-read"
-	policy = ""
+  bucket = "tf-test-bucket-%d"
+  acl    = "public-read"
+  policy = ""
 }
 `, randInt)
 }
@@ -1070,11 +1070,11 @@ resource "opentelekomcloud_s3_bucket" "bucket" {
 func testAccS3BucketConfigWithVersioning(randInt int) string {
 	return fmt.Sprintf(`
 resource "opentelekomcloud_s3_bucket" "bucket" {
-	bucket = "tf-test-bucket-%d"
-	acl = "public-read"
-	versioning {
-	  enabled = true
-	}
+  bucket = "tf-test-bucket-%d"
+  acl    = "public-read"
+  versioning {
+    enabled = true
+  }
 }
 `, randInt)
 }
@@ -1082,11 +1082,11 @@ resource "opentelekomcloud_s3_bucket" "bucket" {
 func testAccS3BucketConfigWithDisableVersioning(randInt int) string {
 	return fmt.Sprintf(`
 resource "opentelekomcloud_s3_bucket" "bucket" {
-	bucket = "tf-test-bucket-%d"
-	acl = "public-read"
-	versioning {
-	  enabled = false
-	}
+  bucket = "tf-test-bucket-%d"
+  acl    = "public-read"
+  versioning {
+    enabled = false
+  }
 }
 `, randInt)
 }
@@ -1094,15 +1094,15 @@ resource "opentelekomcloud_s3_bucket" "bucket" {
 func testAccS3BucketConfigWithCORS(randInt int) string {
 	return fmt.Sprintf(`
 resource "opentelekomcloud_s3_bucket" "bucket" {
-	bucket = "tf-test-bucket-%d"
-	acl = "public-read"
-	cors_rule {
-			allowed_headers = ["*"]
-			allowed_methods = ["PUT","POST"]
-			allowed_origins = ["https://www.example.com"]
-			expose_headers = ["x-amz-server-side-encryption","ETag"]
-			max_age_seconds = 3000
-	}
+  bucket = "tf-test-bucket-%d"
+  acl    = "public-read"
+  cors_rule {
+    allowed_headers = ["*"]
+    allowed_methods = ["PUT", "POST"]
+    allowed_origins = ["https://www.example.com"]
+    expose_headers  = ["x-amz-server-side-encryption", "ETag"]
+    max_age_seconds = 3000
+  }
 }
 `, randInt)
 }
@@ -1110,17 +1110,17 @@ resource "opentelekomcloud_s3_bucket" "bucket" {
 func testAccS3BucketConfigWithLogging(randInt int) string {
 	return fmt.Sprintf(`
 resource "opentelekomcloud_s3_bucket" "log_bucket" {
-	bucket = "tf-test-log-bucket-%d"
-	acl = "log-delivery-write"
-	force_destroy = "true"
+  bucket        = "tf-test-log-bucket-%d"
+  acl           = "log-delivery-write"
+  force_destroy = "true"
 }
 resource "opentelekomcloud_s3_bucket" "bucket" {
-	bucket = "tf-test-bucket-%d"
-	acl = "private"
-	logging {
-		target_bucket = opentelekomcloud_s3_bucket.log_bucket.id
-		target_prefix = "log/"
-	}
+  bucket = "tf-test-bucket-%d"
+  acl    = "private"
+  logging {
+    target_bucket = opentelekomcloud_s3_bucket.log_bucket.id
+    target_prefix = "log/"
+  }
 }
 `, randInt, randInt)
 }
@@ -1128,44 +1128,44 @@ resource "opentelekomcloud_s3_bucket" "bucket" {
 func testAccS3BucketConfigWithLifecycle(randInt int) string {
 	return fmt.Sprintf(`
 resource "opentelekomcloud_s3_bucket" "bucket" {
-	bucket = "tf-test-bucket-%d"
-	acl = "private"
-	lifecycle_rule {
-		id = "id1"
-		prefix = "path1/"
-		enabled = true
+  bucket = "tf-test-bucket-%d"
+  acl    = "private"
+  lifecycle_rule {
+    id      = "id1"
+    prefix  = "path1/"
+    enabled = true
 
-		expiration {
-			days = 365
-		}
-	}
-	lifecycle_rule {
-		id = "id2"
-		prefix = "path2/"
-		enabled = true
+    expiration {
+      days = 365
+    }
+  }
+  lifecycle_rule {
+    id      = "id2"
+    prefix  = "path2/"
+    enabled = true
 
-		expiration {
-			date = "2016-01-12"
-		}
-	}
-	lifecycle_rule {
-		id = "id3"
-		prefix = "path3/"
-		enabled = true
+    expiration {
+      date = "2016-01-12"
+    }
+  }
+  lifecycle_rule {
+    id      = "id3"
+    prefix  = "path3/"
+    enabled = true
 
-		expiration {
-			days = "30"
-		}
-	}
-	lifecycle_rule {
-		id = "id4"
-		prefix = "path4/"
-		enabled = true
+    expiration {
+      days = "30"
+    }
+  }
+  lifecycle_rule {
+    id      = "id4"
+    prefix  = "path4/"
+    enabled = true
 
-		expiration {
-			date = "2016-01-12"
-		}
-	}
+    expiration {
+      date = "2016-01-12"
+    }
+  }
 }
 `, randInt)
 }
@@ -1173,38 +1173,38 @@ resource "opentelekomcloud_s3_bucket" "bucket" {
 func testAccS3BucketConfigWithVersioningLifecycle(randInt int) string {
 	return fmt.Sprintf(`
 resource "opentelekomcloud_s3_bucket" "bucket" {
-	bucket = "tf-test-bucket-%d"
-	acl = "private"
-	versioning {
-	  enabled = false
-	}
-	lifecycle_rule {
-		id = "id1"
-		prefix = "path1/"
-		enabled = true
+  bucket = "tf-test-bucket-%d"
+  acl    = "private"
+  versioning {
+    enabled = false
+  }
+  lifecycle_rule {
+    id      = "id1"
+    prefix  = "path1/"
+    enabled = true
 
-		noncurrent_version_expiration {
-			days = 365
-		}
-	}
-	lifecycle_rule {
-		id = "id2"
-		prefix = "path2/"
-		enabled = false
+    noncurrent_version_expiration {
+      days = 365
+    }
+  }
+  lifecycle_rule {
+    id      = "id2"
+    prefix  = "path2/"
+    enabled = false
 
-		noncurrent_version_expiration {
-			days = 365
-		}
-	}
-	lifecycle_rule {
-		id = "id3"
-		prefix = "path3/"
-		enabled = true
+    noncurrent_version_expiration {
+      days = 365
+    }
+  }
+  lifecycle_rule {
+    id      = "id3"
+    prefix  = "path3/"
+    enabled = true
 
-		noncurrent_version_expiration {
-			days = 30
-		}
-	}
+    noncurrent_version_expiration {
+      days = 30
+    }
+  }
 }
 `, randInt)
 }
