@@ -6,12 +6,16 @@
       - release-notes-jobs
     check:
       jobs:
+        - golangci-lint:
+            voting: false
         - golang-make-test
         - golang-make-vet
         - goreleaser-build:
             nodeset: fedora-32-large
     gate:
       jobs:
+        - golangci-lint:
+            voting: false
         - golang-make-test
         - golang-make-vet
         - goreleaser-build:
