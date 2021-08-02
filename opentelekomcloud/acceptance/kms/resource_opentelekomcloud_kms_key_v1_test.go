@@ -156,7 +156,7 @@ resource "opentelekomcloud_kms_key_v1" "key_1" {
     kuh = "value-create"
   }
 }
-	`, rName)
+`, rName)
 }
 
 func testAccKmsV1Key_update(rName string) string {
@@ -168,7 +168,7 @@ resource "opentelekomcloud_kms_key_v1" "key_1" {
     muh = "value-update"
   }
 }
-	`, rName)
+`, rName)
 }
 
 func testAccKmsKey_enabled(prefix string) string {
@@ -177,7 +177,8 @@ resource "opentelekomcloud_kms_key_v1" "bar" {
   key_alias       = "tf-acc-test-kms-key-%[1]s"
   key_description = "Terraform acc test is_enabled %[1]s"
   pending_days    = "7"
-}`, prefix)
+}
+`, prefix)
 }
 
 func testAccKmsKey_disabled(prefix string) string {
@@ -187,5 +188,6 @@ resource "opentelekomcloud_kms_key_v1" "bar" {
   pending_days    = "7"
   key_alias       = "tf-acc-test-kms-key-%[1]s"
   is_enabled      = false
-}`, prefix)
+}
+`, prefix)
 }

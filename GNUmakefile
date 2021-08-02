@@ -56,5 +56,4 @@ tffmtfix:
 	@echo "==> Fixing docs terraform blocks code with terrafmt..."
 	@find docs | egrep ".md" | sort | while read f; do terrafmt fmt $$f; done
 
-.PHONY: build test testacc vet fmt fmtcheck errcheck test-compile
-
+.PHONY: build test testacc vet fmt fmtcheck errcheck test-compile tflint tffmtfix
