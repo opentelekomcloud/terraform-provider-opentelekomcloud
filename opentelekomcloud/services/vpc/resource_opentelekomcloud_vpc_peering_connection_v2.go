@@ -5,6 +5,7 @@ import (
 	"log"
 	"time"
 
+	"github.com/hashicorp/go-multierror"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
@@ -133,13 +134,17 @@ func resourceVPCPeeringV2Read(_ context.Context, d *schema.ResourceData, meta in
 		return fmterr.Errorf("error retrieving OpenTelekomCloud Vpc Peering Connection: %s", err)
 	}
 
-	d.Set("id", n.ID)
-	d.Set("name", n.Name)
-	d.Set("status", n.Status)
-	d.Set("vpc_id", n.RequestVpcInfo.VpcId)
-	d.Set("peer_vpc_id", n.AcceptVpcInfo.VpcId)
-	d.Set("peer_tenant_id", n.AcceptVpcInfo.TenantId)
-	d.Set("region", config.GetRegion(d))
+	mErr := multierror.Append(
+		d.Set("name", n.Name),
+		d.Set("status", n.Status),
+		d.Set("vpc_id", n.RequestVpcInfo.VpcId),
+		d.Set("peer_vpc_id", n.AcceptVpcInfo.VpcId),
+		d.Set("peer_tenant_id", n.AcceptVpcInfo.TenantId),
+		d.Set("region", config.GetRegion(d)),
+	)
+	if err := mErr.ErrorOrNil(); err != nil {
+		return fmterr.Errorf("error setting VPC peering attributes: %w", err)
+	}
 
 	return nil
 }
