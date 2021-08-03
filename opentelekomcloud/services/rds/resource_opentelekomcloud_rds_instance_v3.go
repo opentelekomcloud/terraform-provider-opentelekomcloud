@@ -430,8 +430,11 @@ func resourceRdsInstanceV3Create(ctx context.Context, d *schema.ResourceData, me
 	}
 
 	if templateRestart || paramRestart {
+		if err := instances.WaitForStateAvailable(client, 1200, d.Id()); err != nil {
+			return fmterr.Errorf("error waiting for instance to become available: %w", err)
+		}
 		if err := restartInstance(d, client); err != nil {
-			return fmterr.Errorf("error restarting instance: %w", err)
+			return diag.FromErr(err)
 		}
 	}
 
@@ -512,8 +515,7 @@ func applyTemplate(d *schema.ResourceData, client *golangsdk.ServiceClient) (boo
 	}
 
 	waitSeconds := int(d.Timeout(schema.TimeoutCreate).Seconds())
-	err = instances.WaitForStateAvailable(client, waitSeconds, d.Id())
-	if err != nil {
+	if err := instances.WaitForStateAvailable(client, waitSeconds, d.Id()); err != nil {
 		return false, err
 	}
 
@@ -787,15 +789,21 @@ func resourceRdsInstanceV3Update(ctx context.Context, d *schema.ResourceData, me
 
 	if d.HasChange("public_ips") {
 		nwClient, err := config.NetworkingV2Client(config.GetRegion(d))
+		if err != nil {
+			return fmterr.Errorf("error creating networking V2 client: %w", err)
+		}
 		oldPublicIps, newPublicIps := d.GetChange("public_ips")
 		oldIPs := oldPublicIps.([]interface{})
 		newIPs := newPublicIps.([]interface{})
 		switch len(newIPs) {
 		case 0:
-			err = unAssignEipFromInstance(nwClient, oldIPs[0].(string)) // if it become 0, it was 1 before
+			err := unAssignEipFromInstance(nwClient, oldIPs[0].(string)) // if it become 0, it was 1 before
+			if err != nil {
+				return diag.FromErr(err)
+			}
 		case 1:
 			if len(oldIPs) > 0 {
-				err = unAssignEipFromInstance(nwClient, oldIPs[0].(string))
+				err := unAssignEipFromInstance(nwClient, oldIPs[0].(string))
 				if err != nil {
 					return diag.FromErr(err)
 				}
@@ -805,7 +813,9 @@ func resourceRdsInstanceV3Update(ctx context.Context, d *schema.ResourceData, me
 			if err != nil {
 				return diag.FromErr(err)
 			}
-			err = assignEipToInstance(nwClient, newIPs[0].(string), privateIP, subnetID)
+			if err := assignEipToInstance(nwClient, newIPs[0].(string), privateIP, subnetID); err != nil {
+				return diag.FromErr(err)
+			}
 		default:
 			return fmterr.Errorf("RDS instance can't have more than one public IP")
 		}
@@ -840,12 +850,11 @@ func resourceRdsInstanceV3Update(ctx context.Context, d *schema.ResourceData, me
 
 	if restartRequired {
 		if err := restartInstance(d, client); err != nil {
-			return fmterr.Errorf("error restarting instance: %w", err)
+			return diag.FromErr(err)
 		}
 		waitSeconds := int(d.Timeout(schema.TimeoutUpdate).Seconds())
-		err = instances.WaitForStateAvailable(client, waitSeconds, d.Id())
-		if err != nil {
-			return fmterr.Errorf("error waiting for instance to become available: ", err)
+		if err := instances.WaitForStateAvailable(client, waitSeconds, d.Id()); err != nil {
+			return fmterr.Errorf("error waiting for instance to become available: %w", err)
 		}
 	}
 
