@@ -38,6 +38,8 @@ fmtcheck:
 errcheck:
 	@sh -c "'$(CURDIR)/scripts/errcheck.sh'"
 
+lint:
+	golangci-lint run ./...
 
 test-compile:
 	@if [ "$(TEST)" = "./..." ]; then \
@@ -47,5 +49,4 @@ test-compile:
 	fi
 	go test -c $(TEST)
 
-.PHONY: build test testacc vet fmt fmtcheck errcheck test-compile
-
+.PHONY: build test testacc vet fmt fmtcheck errcheck test-compile lint
