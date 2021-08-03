@@ -38,6 +38,8 @@ fmtcheck:
 errcheck:
 	@sh -c "'$(CURDIR)/scripts/errcheck.sh'"
 
+lint:
+	golangci-lint run ./...
 
 test-compile:
 	@if [ "$(TEST)" = "./..." ]; then \
@@ -60,4 +62,4 @@ tffmtfix: tools
 	@echo "==> Fixing docs terraform blocks code with terrafmt..."
 	@find ./docs -type f -name "*.md" | sort | while read f; do terrafmt fmt $$f; done
 
-.PHONY: build test testacc vet fmt fmtcheck errcheck test-compile tflint tffmtfix
+.PHONY: build test testacc vet fmt fmtcheck errcheck test-compile tflint tffmtfix lint

@@ -4,6 +4,7 @@ import (
 	"context"
 	"log"
 
+	"github.com/hashicorp/go-multierror"
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/networking/v2/peerings"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
@@ -89,13 +90,17 @@ func dataSourceVpcPeeringConnectionV2Read(_ context.Context, d *schema.ResourceD
 	log.Printf("[INFO] Retrieved Vpc peering Connections using given filter %s: %+v", Peering.ID, Peering)
 	d.SetId(Peering.ID)
 
-	d.Set("id", Peering.ID)
-	d.Set("name", Peering.Name)
-	d.Set("status", Peering.Status)
-	d.Set("vpc_id", Peering.RequestVpcInfo.VpcId)
-	d.Set("peer_vpc_id", Peering.AcceptVpcInfo.VpcId)
-	d.Set("peer_tenant_id", Peering.AcceptVpcInfo.TenantId)
-	d.Set("region", config.GetRegion(d))
+	mErr := multierror.Append(
+		d.Set("name", Peering.Name),
+		d.Set("status", Peering.Status),
+		d.Set("vpc_id", Peering.RequestVpcInfo.VpcId),
+		d.Set("peer_vpc_id", Peering.AcceptVpcInfo.VpcId),
+		d.Set("peer_tenant_id", Peering.AcceptVpcInfo.TenantId),
+		d.Set("region", config.GetRegion(d)),
+	)
+	if err := mErr.ErrorOrNil(); err != nil {
+		return fmterr.Errorf("error setting VPC peering attributes: %w", err)
+	}
 
 	return nil
 }

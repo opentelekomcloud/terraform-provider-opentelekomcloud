@@ -6,12 +6,20 @@
       - release-notes-jobs
     check:
       jobs:
+        - golangci-lint:
+            voting: false
+            vars:
+              golangci_lint_version: 1.41.1
         - golang-make-test
         - golang-make-vet
         - goreleaser-build:
             nodeset: fedora-32-large
     gate:
-      jobs:
+      jobs: 
+        - golangci-lint:
+            voting: false
+            vars:
+              golangci_lint_version: 1.41.1
         - golang-make-test
         - golang-make-vet
         - goreleaser-build:
