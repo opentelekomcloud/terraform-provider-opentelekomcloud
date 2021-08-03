@@ -7,8 +7,9 @@
     check:
       jobs:
         - golangci-lint:
-            golangci_lint_version: v1.41.1
             voting: false
+            vars:
+              golangci_lint_version: v1.41.1
         - golang-make-test
         - golang-make-vet
         - goreleaser-build:
@@ -16,8 +17,9 @@
     gate:
       jobs: 
         - golangci-lint:
-            golangci_lint_version: v1.41.1
             voting: false
+            vars:
+              golangci_lint_version: v1.41.1
         - golang-make-test
         - golang-make-vet
         - goreleaser-build:
