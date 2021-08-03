@@ -158,7 +158,7 @@ locals {
 }
 
 resource "opentelekomcloud_smn_topic_v2" "topic_1" {
-  name		   = "topic_1"
+  name         = "topic_1"
   display_name = "The display name of topic_1"
   project_name = local.project_name
 }

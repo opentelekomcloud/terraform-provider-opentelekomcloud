@@ -9,8 +9,8 @@ Provides an OpenTelekomCloud Backup of Resources.
 ## Example Usage
 
 ```hcl
-variable "backup_name" { }
-variable "resource_id" { }
+variable "backup_name" {}
+variable "resource_id" {}
 
 resource "opentelekomcloud_csbs_backup_v1" "backup_v1" {
   backup_name   = var.backup_name

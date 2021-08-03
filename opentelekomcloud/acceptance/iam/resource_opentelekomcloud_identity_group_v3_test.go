@@ -110,18 +110,18 @@ func testAccCheckIdentityV3GroupExists(n string, group *groups.Group) resource.T
 
 func testAccIdentityV3Group_basic(groupName string) string {
 	return fmt.Sprintf(`
-    resource "opentelekomcloud_identity_group_v3" "group_1" {
-      name = "%s"
-      description = "A ACC test group"
-    }
+resource "opentelekomcloud_identity_group_v3" "group_1" {
+  name        = "%s"
+  description = "A ACC test group"
+}
   `, groupName)
 }
 
 func testAccIdentityV3Group_update(groupName string) string {
 	return fmt.Sprintf(`
-    resource "opentelekomcloud_identity_group_v3" "group_1" {
-      name = "%s"
-      description = "Some Group"
-    }
+resource "opentelekomcloud_identity_group_v3" "group_1" {
+  name        = "%s"
+  description = "Some Group"
+}
   `, groupName)
 }

@@ -79,8 +79,8 @@ resource "opentelekomcloud_ecs_instance_v1" "basic" {
   }
 
   delete_disks_on_termination = true
-  availability_zone = "eu-de-01"
-  key_name          = "KeyPair-test"
+  availability_zone           = "eu-de-01"
+  key_name                    = "KeyPair-test"
 }
 ```
 
@@ -115,7 +115,7 @@ resource "opentelekomcloud_compute_volume_attach_v2" "attached" {
 ### Instance With Multiple Networks
 
 ```hcl
-resource "opentelekomcloud_networking_floatingip_v2" "myip" { }
+resource "opentelekomcloud_networking_floatingip_v2" "myip" {}
 
 resource "opentelekomcloud_ecs_instance_v1" "multi-net" {
   name     = "server_1"
@@ -155,8 +155,8 @@ resource "opentelekomcloud_ecs_instance_v1" "basic" {
     network_id = "55534eaa-533a-419d-9b40-ec427ea7195a"
   }
 
-  user_data         = "#cloud-config\nhostname: server_1.example.com\nfqdn: server_1.example.com"
-  key_name          = "KeyPair-test"
+  user_data = "#cloud-config\nhostname: server_1.example.com\nfqdn: server_1.example.com"
+  key_name  = "KeyPair-test"
 }
 ```
 

@@ -10,8 +10,8 @@ Use this data source to get details about a specific VPC peering connection.
 
 ```hcl
 data "opentelekomcloud_vpc_peering_connection_v2" "peering" {
-   vpc_id      = opentelekomcloud_vpc_v1.vpc.id
-   peer_vpc_id = opentelekomcloud_vpc_v1.peer_vpc.id
+  vpc_id      = opentelekomcloud_vpc_v1.vpc.id
+  peer_vpc_id = opentelekomcloud_vpc_v1.peer_vpc.id
 }
 
 

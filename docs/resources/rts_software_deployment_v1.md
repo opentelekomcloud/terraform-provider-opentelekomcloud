@@ -9,8 +9,8 @@ Provides an RTS software deployment resource within OpenTelekomCloud.
 ## Example Usage
 
 ```hcl
-variable "config_id" { }
-variable "server_id" { }
+variable "config_id" {}
+variable "server_id" {}
 
 resource "opentelekomcloud_rts_software_deployment_v1" "mydeployment" {
   config_id = var.config_id

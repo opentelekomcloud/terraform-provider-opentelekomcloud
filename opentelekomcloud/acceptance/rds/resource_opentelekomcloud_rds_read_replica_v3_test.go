@@ -56,8 +56,8 @@ resource "opentelekomcloud_rds_instance_v3" "instance" {
     port     = "8635"
   }
   security_group_id = opentelekomcloud_networking_secgroup_v2.sg.id
-  subnet_id = "%s"
-  vpc_id    = "%s"
+  subnet_id         = "%s"
+  vpc_id            = "%s"
   volume {
     type = "COMMON"
     size = 40
@@ -74,9 +74,9 @@ resource "opentelekomcloud_rds_instance_v3" "instance" {
 }
 
 resource "opentelekomcloud_rds_read_replica_v3" "replica" {
-  name = "test-replica"
+  name          = "test-replica"
   replica_of_id = opentelekomcloud_rds_instance_v3.instance.id
-  flavor_ref = "${opentelekomcloud_rds_instance_v3.instance.flavor}.rr"
+  flavor_ref    = "${opentelekomcloud_rds_instance_v3.instance.flavor}.rr"
 
   availability_zone = "eu-de-02"
 

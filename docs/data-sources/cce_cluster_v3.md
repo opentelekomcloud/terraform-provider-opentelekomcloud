@@ -9,9 +9,9 @@ Use this data source to get details about all clusters and obtains the certifica
 ## Example Usage
 
 ```hcl
-variable "cluster_name" { }
-variable "cluster_id" { }
-variable "vpc_id" { }
+variable "cluster_name" {}
+variable "cluster_id" {}
+variable "vpc_id" {}
 
 data "opentelekomcloud_cce_cluster_v3" "cluster" {
   name   = var.cluster_name

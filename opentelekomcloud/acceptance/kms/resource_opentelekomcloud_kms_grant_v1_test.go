@@ -131,5 +131,6 @@ resource "opentelekomcloud_kms_grant_v1" "grant_1" {
   name              = "my_grant"
   grantee_principal = "%s"
   operations        = ["describe-key", "create-datakey", "encrypt-datakey"]
-}`, env.OS_KMS_ID, granteePrincipal)
+}
+`, env.OS_KMS_ID, granteePrincipal)
 }

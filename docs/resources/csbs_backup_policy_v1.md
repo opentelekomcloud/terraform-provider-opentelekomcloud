@@ -11,9 +11,9 @@ Provides an OpenTelekomCloud Backup Policy of Resources.
 ### Basic example
 
 ```hcl
-variable "name" { }
-variable "id" { }
-variable "resource_name" { }
+variable "name" {}
+variable "id" {}
+variable "resource_name" {}
 
 resource "opentelekomcloud_csbs_backup_policy_v1" "backup_policy_v1" {
   name = var.name

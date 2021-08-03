@@ -211,8 +211,8 @@ resource "opentelekomcloud_obs_bucket" "object_bucket" {
   bucket = "tf-object-test-bucket-%d"
 }
 resource "opentelekomcloud_obs_bucket_object" "object" {
-  bucket       = opentelekomcloud_obs_bucket.object_bucket.bucket
-  key          = "test-key"
+  bucket = opentelekomcloud_obs_bucket.object_bucket.bucket
+  key    = "test-key"
 }
 `, randInt)
 }

@@ -114,18 +114,18 @@ func testAccCheckIdentityV3ProjectExists(n string, project *projects.Project) re
 
 func testAccIdentityV3Project_basic(projectName string) string {
 	return fmt.Sprintf(`
-    resource "opentelekomcloud_identity_project_v3" "project_1" {
-      name = "%s"
-      description = "A project"
-    }
+resource "opentelekomcloud_identity_project_v3" "project_1" {
+  name        = "%s"
+  description = "A project"
+}
   `, projectName)
 }
 
 func testAccIdentityV3Project_update(projectName string) string {
 	return fmt.Sprintf(`
-    resource "opentelekomcloud_identity_project_v3" "project_1" {
-      name = "%s"
-      description = "Some project"
-    }
+resource "opentelekomcloud_identity_project_v3" "project_1" {
+  name        = "%s"
+  description = "Some project"
+}
   `, projectName)
 }

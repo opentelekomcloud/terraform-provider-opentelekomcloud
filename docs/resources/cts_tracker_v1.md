@@ -9,8 +9,8 @@ Allows you to collect, store, and query cloud resource operation records.
 ## Example Usage
 
 ```hcl
-variable "bucket_name" { }
-variable "topic_id" { }
+variable "bucket_name" {}
+variable "topic_id" {}
 
 resource "opentelekomcloud_cts_tracker_v1" "tracker_v1" {
   bucket_name               = var.bucket_name

@@ -9,7 +9,7 @@ Manages the SWR image sharing domain resource within Open Telekom Cloud.
 ## Example Usage
 
 ```hcl
-variable "access_domain" { }
+variable "access_domain" {}
 
 resource opentelekomcloud_swr_organization_v2 org_1 {
   name = "organization_1"

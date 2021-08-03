@@ -11,11 +11,11 @@ Manages a BMS Server resource within OpenTelekomCloud.
 ### Basic Instance
 
 ```hcl
-variable "image_id" { }
-variable "flavor_id" { }
-variable "keypair_name" { }
-variable "network_id" { }
-variable "availability_zone" { }
+variable "image_id" {}
+variable "flavor_id" {}
+variable "keypair_name" {}
+variable "network_id" {}
+variable "availability_zone" {}
 
 resource "opentelekomcloud_compute_bms_server_v2" "basic" {
   name              = "basic"
@@ -37,10 +37,10 @@ resource "opentelekomcloud_compute_bms_server_v2" "basic" {
 ### Instance Boot From Volume Image
 
 ```hcl
-variable "flavor_id" { }
-variable "keypair_name" { }
-variable "network_id" { }
-variable "availability_zone" { }
+variable "flavor_id" {}
+variable "keypair_name" {}
+variable "network_id" {}
+variable "availability_zone" {}
 
 resource "opentelekomcloud_compute_bms_server_v2" "basic" {
   name              = "basic"
@@ -57,14 +57,14 @@ resource "opentelekomcloud_compute_bms_server_v2" "basic" {
   }
 
   block_device {
-	uuid                  = var.image_id
-	source_type           = "image"
-	volume_type           = "SATA"
-	volume_size           = 100
-	boot_index            = 0
-	destination_type      = "volume"
-	delete_on_termination = true
-	device_name           = "/dev/sda"
+    uuid                  = var.image_id
+    source_type           = "image"
+    volume_type           = "SATA"
+    volume_size           = 100
+    boot_index            = 0
+    destination_type      = "volume"
+    delete_on_termination = true
+    device_name           = "/dev/sda"
   }
 }
 ```

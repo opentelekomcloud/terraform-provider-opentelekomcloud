@@ -13,7 +13,7 @@ resource "opentelekomcloud_rds_parametergroup_v3" "pg_1" {
   name        = "pg_1"
   description = "some description here"
 
-   values = {
+  values = {
     max_connections = "10"
     autocommit      = "OFF"
   }

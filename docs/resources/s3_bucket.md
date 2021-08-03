@@ -107,7 +107,7 @@ resource "opentelekomcloud_s3_bucket" "bucket" {
     id      = "log"
     enabled = true
 
-    prefix  = "log/"
+    prefix = "log/"
     expiration {
       days = 90
     }

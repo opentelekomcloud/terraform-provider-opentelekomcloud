@@ -49,4 +49,17 @@ test-compile:
 	fi
 	go test -c $(TEST)
 
-.PHONY: build test testacc vet fmt fmtcheck errcheck test-compile lint
+tools:
+	@echo "==> installing required tooling..."
+	go install github.com/katbyte/terrafmt
+
+tflint: tools
+	./scripts/run-tflint.sh
+
+tffmtfix: tools
+	@echo "==> Fixing acceptance test terraform blocks code with terrafmt..."
+	@find ./opentelekomcloud/acceptance -type f -name "*_test.go" | sort | while read f; do terrafmt fmt -f $$f; done
+	@echo "==> Fixing docs terraform blocks code with terrafmt..."
+	@find ./docs -type f -name "*.md" | sort | while read f; do terrafmt fmt $$f; done
+
+.PHONY: build test testacc vet fmt fmtcheck errcheck test-compile tflint tffmtfix lint

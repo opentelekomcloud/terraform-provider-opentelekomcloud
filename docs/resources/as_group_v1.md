@@ -87,11 +87,11 @@ resource "opentelekomcloud_as_group_v1" "as_group_with_elb" {
 }
 
 resource "opentelekomcloud_lb_listener_v2" "as_listener" {
-  name             = "as_listener"
-  description      = "as test listener"
-  protocol         = "TCP"
-  protocol_port    = 80
-  loadbalancer_id  = "cba48790-baf5-4446-adb3-02069a916e97"
+  name            = "as_listener"
+  description     = "as test listener"
+  protocol        = "TCP"
+  protocol_port   = 80
+  loadbalancer_id = "cba48790-baf5-4446-adb3-02069a916e97"
 }
 
 resource "opentelekomcloud_lb_pool_v2" "pool_1" {

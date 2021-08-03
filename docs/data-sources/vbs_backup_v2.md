@@ -9,7 +9,7 @@ Use this data source to get details about a specific VBS Backup.
 ## Example Usage
 
 ```hcl
-variable "backup_id" { }
+variable "backup_id" {}
 
 data "opentelekomcloud_vbs_backup_v2" "mybackup" {
   id = var.backup_id

@@ -9,7 +9,7 @@ Use this data source to get info of the OpenTelekomCloud DDS instance.
 ## Example Usage
 
 ```hcl
-variable "instance_id" { }
+variable "instance_id" {}
 
 data "opentelekomcloud_dds_instance_v3" "instance" {
   instance_id = var.instance_id

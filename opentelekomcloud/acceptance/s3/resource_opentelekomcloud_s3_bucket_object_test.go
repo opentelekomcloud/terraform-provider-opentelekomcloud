@@ -466,13 +466,13 @@ func testAccCheckS3BucketObjectSSE(n, expectedSSE string) resource.TestCheckFunc
 func testAccS3BucketObjectConfigSource(randInt int, source string) string {
 	return fmt.Sprintf(`
 resource "opentelekomcloud_s3_bucket" "object_bucket" {
-    bucket = "tf-object-test-bucket-%d"
+  bucket = "tf-object-test-bucket-%d"
 }
 resource "opentelekomcloud_s3_bucket_object" "object" {
-	bucket = opentelekomcloud_s3_bucket.object_bucket.bucket
-	key = "test-key"
-	source = "%s"
-	content_type = "binary/octet-stream"
+  bucket       = opentelekomcloud_s3_bucket.object_bucket.bucket
+  key          = "test-key"
+  source       = "%s"
+  content_type = "binary/octet-stream"
 }
 `, randInt, source)
 }
@@ -480,16 +480,16 @@ resource "opentelekomcloud_s3_bucket_object" "object" {
 func testAccS3BucketObjectConfig_withContentCharacteristics(randInt int, source string) string {
 	return fmt.Sprintf(`
 resource "opentelekomcloud_s3_bucket" "object_bucket_2" {
-	bucket = "tf-object-test-bucket-%d"
+  bucket = "tf-object-test-bucket-%d"
 }
 
 resource "opentelekomcloud_s3_bucket_object" "object" {
-	bucket = opentelekomcloud_s3_bucket.object_bucket_2.bucket
-	key = "test-key"
-	source = "%s"
-	content_language = "en"
-	content_type = "binary/octet-stream"
-	website_redirect = "http://google.com"
+  bucket           = opentelekomcloud_s3_bucket.object_bucket_2.bucket
+  key              = "test-key"
+  source           = "%s"
+  content_language = "en"
+  content_type     = "binary/octet-stream"
+  website_redirect = "http://google.com"
 }
 `, randInt, source)
 }
@@ -497,12 +497,12 @@ resource "opentelekomcloud_s3_bucket_object" "object" {
 func testAccS3BucketObjectConfigContent(randInt int) string {
 	return fmt.Sprintf(`
 resource "opentelekomcloud_s3_bucket" "object_bucket" {
-        bucket = "tf-object-test-bucket-%d"
+  bucket = "tf-object-test-bucket-%d"
 }
 resource "opentelekomcloud_s3_bucket_object" "object" {
-        bucket = opentelekomcloud_s3_bucket.object_bucket.bucket
-        key = "test-key"
-        content = "some_bucket_content"
+  bucket  = opentelekomcloud_s3_bucket.object_bucket.bucket
+  key     = "test-key"
+  content = "some_bucket_content"
 }
 `, randInt)
 }
@@ -510,14 +510,14 @@ resource "opentelekomcloud_s3_bucket_object" "object" {
 func testAccS3BucketObjectConfig_updates(randInt int, source string) string {
 	return fmt.Sprintf(`
 resource "opentelekomcloud_s3_bucket" "object_bucket_3" {
-	bucket = "tf-object-test-bucket-%d"
+  bucket = "tf-object-test-bucket-%d"
 }
 
 resource "opentelekomcloud_s3_bucket_object" "object" {
-	bucket = opentelekomcloud_s3_bucket.object_bucket_3.bucket
-	key = "updateable-key"
-	source = "%s"
-	etag = md5(file("%s"))
+  bucket = opentelekomcloud_s3_bucket.object_bucket_3.bucket
+  key    = "updateable-key"
+  source = "%s"
+  etag   = md5(file("%s"))
 }
 `, randInt, source, source)
 }
@@ -525,17 +525,17 @@ resource "opentelekomcloud_s3_bucket_object" "object" {
 func testAccS3BucketObjectConfig_updatesWithVersioning(randInt int, source string) string {
 	return fmt.Sprintf(`
 resource "opentelekomcloud_s3_bucket" "object_bucket_3" {
-	bucket = "tf-object-test-bucket-%d"
-	versioning {
-		enabled = true
-	}
+  bucket = "tf-object-test-bucket-%d"
+  versioning {
+    enabled = true
+  }
 }
 
 resource "opentelekomcloud_s3_bucket_object" "object" {
-	bucket = opentelekomcloud_s3_bucket.object_bucket_3.bucket
-	key = "updateable-key"
-	source = "%s"
-	etag = md5(file("%s"))
+  bucket = opentelekomcloud_s3_bucket.object_bucket_3.bucket
+  key    = "updateable-key"
+  source = "%s"
+  etag   = md5(file("%s"))
 }
 `, randInt, source, source)
 }
@@ -543,14 +543,14 @@ resource "opentelekomcloud_s3_bucket_object" "object" {
 func testAccS3BucketObjectConfig_withSSE(randInt int, source string) string {
 	return fmt.Sprintf(`
 resource "opentelekomcloud_s3_bucket" "object_bucket" {
-	bucket = "tf-object-test-bucket-%d"
+  bucket = "tf-object-test-bucket-%d"
 }
 
 resource "opentelekomcloud_s3_bucket_object" "object" {
-	bucket = opentelekomcloud_s3_bucket.object_bucket.bucket
-	key = "test-key"
-	source = "%s"
-	server_side_encryption = "aws:kms"
+  bucket                 = opentelekomcloud_s3_bucket.object_bucket.bucket
+  key                    = "test-key"
+  source                 = "%s"
+  server_side_encryption = "aws:kms"
 }
 `, randInt, source)
 }
@@ -558,13 +558,13 @@ resource "opentelekomcloud_s3_bucket_object" "object" {
 func testAccS3BucketObjectConfig_acl(randInt int, acl string) string {
 	return fmt.Sprintf(`
 resource "opentelekomcloud_s3_bucket" "object_bucket" {
-        bucket = "tf-object-test-bucket-%d"
+  bucket = "tf-object-test-bucket-%d"
 }
 resource "opentelekomcloud_s3_bucket_object" "object" {
-        bucket = opentelekomcloud_s3_bucket.object_bucket.bucket
-        key = "test-key"
-        content = "some_bucket_content"
-        acl = "%s"
+  bucket  = opentelekomcloud_s3_bucket.object_bucket.bucket
+  key     = "test-key"
+  content = "some_bucket_content"
+  acl     = "%s"
 }
 `, randInt, acl)
 }

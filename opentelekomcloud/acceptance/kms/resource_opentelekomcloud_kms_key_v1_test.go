@@ -149,26 +149,26 @@ func testAccCheckKmsKeyIsEnabled(key *keys.Key, isEnabled bool) resource.TestChe
 
 func testAccKmsV1Key_basic(rName string) string {
 	return fmt.Sprintf(`
-		resource "opentelekomcloud_kms_key_v1" "key_1" {
-		  key_alias = "%s"
-          tags = {
-            muh = "value-create"
-            kuh = "value-create"
-          }
-		}
-	`, rName)
+resource "opentelekomcloud_kms_key_v1" "key_1" {
+  key_alias = "%s"
+  tags = {
+    muh = "value-create"
+    kuh = "value-create"
+  }
+}
+`, rName)
 }
 
 func testAccKmsV1Key_update(rName string) string {
 	return fmt.Sprintf(`
-		resource "opentelekomcloud_kms_key_v1" "key_1" {
-          key_alias       = "%s"
-          key_description = "key update description"
-          tags = {
-            muh = "value-update"
-          }
-		}
-	`, rName)
+resource "opentelekomcloud_kms_key_v1" "key_1" {
+  key_alias       = "%s"
+  key_description = "key update description"
+  tags = {
+    muh = "value-update"
+  }
+}
+`, rName)
 }
 
 func testAccKmsKey_enabled(prefix string) string {
@@ -177,7 +177,8 @@ resource "opentelekomcloud_kms_key_v1" "bar" {
   key_alias       = "tf-acc-test-kms-key-%[1]s"
   key_description = "Terraform acc test is_enabled %[1]s"
   pending_days    = "7"
-}`, prefix)
+}
+`, prefix)
 }
 
 func testAccKmsKey_disabled(prefix string) string {
@@ -187,5 +188,6 @@ resource "opentelekomcloud_kms_key_v1" "bar" {
   pending_days    = "7"
   key_alias       = "tf-acc-test-kms-key-%[1]s"
   is_enabled      = false
-}`, prefix)
+}
+`, prefix)
 }

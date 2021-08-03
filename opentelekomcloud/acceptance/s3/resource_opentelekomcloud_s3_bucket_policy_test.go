@@ -116,12 +116,12 @@ func testAccCheckS3BucketHasPolicy(n string, expectedPolicyText string) resource
 func testAccS3BucketPolicyConfig(bucketName string) string {
 	return fmt.Sprintf(`
 resource "opentelekomcloud_s3_bucket" "bucket" {
-	bucket = "%s"
+  bucket = "%s"
 }
 
 resource "opentelekomcloud_s3_bucket_policy" "bucket" {
-	bucket = opentelekomcloud_s3_bucket.bucket.bucket
-	policy =<<POLICY
+  bucket = opentelekomcloud_s3_bucket.bucket.bucket
+  policy = <<POLICY
 {
 	"Version": "2008-10-17",
 	"Statement": [{
@@ -146,12 +146,12 @@ POLICY
 func testAccS3BucketPolicyConfig_updated(bucketName string) string {
 	return fmt.Sprintf(`
 resource "opentelekomcloud_s3_bucket" "bucket" {
-	bucket = "%s"
+  bucket = "%s"
 }
 
 resource "opentelekomcloud_s3_bucket_policy" "bucket" {
-	bucket = opentelekomcloud_s3_bucket.bucket.bucket
-	policy =<<POLICY
+  bucket = opentelekomcloud_s3_bucket.bucket.bucket
+  policy = <<POLICY
 {
 	"Version": "2008-10-17",
 	"Statement": [{

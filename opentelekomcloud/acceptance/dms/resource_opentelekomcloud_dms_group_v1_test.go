@@ -106,12 +106,12 @@ func testAccCheckDmsV1GroupExists(n string, group groups.Group) resource.TestChe
 
 func testAccDmsV1Group_basic(groupName string, queueName string) string {
 	return fmt.Sprintf(`
-		resource "opentelekomcloud_dms_queue_v1" "queue_1" {
-			name  = "%s"
-		}
-		resource "opentelekomcloud_dms_group_v1" "group_1" {
-			name = "%s"
-			queue_id = opentelekomcloud_dms_queue_v1.queue_1.id
-		}
+resource "opentelekomcloud_dms_queue_v1" "queue_1" {
+  name = "%s"
+}
+resource "opentelekomcloud_dms_group_v1" "group_1" {
+  name     = "%s"
+  queue_id = opentelekomcloud_dms_queue_v1.queue_1.id
+}
 	`, queueName, groupName)
 }

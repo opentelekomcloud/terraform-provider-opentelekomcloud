@@ -9,9 +9,9 @@ Manages a V3 CCE Addon resource within OpenTelekomCloud.
 ## Example Usage
 
 ```hcl
-variable "flavor_id" { }
-variable "vpc_id" { }
-variable "subnet_id" { }
+variable "flavor_id" {}
+variable "vpc_id" {}
+variable "subnet_id" {}
 
 resource "opentelekomcloud_cce_cluster_v3" "cluster_1" {
   name                    = "cce-cluster-1"
@@ -31,9 +31,9 @@ resource "opentelekomcloud_cce_addon_v3" "addon" {
 
   values {
     basic = {
-      "image_version": "v0.3.7",
-      "swr_addr": "100.125.7.25:20202",
-      "swr_user": "hwofficial"
+      "image_version" : "v0.3.7",
+      "swr_addr" : "100.125.7.25:20202",
+      "swr_user" : "hwofficial"
     }
     custom = {}
   }

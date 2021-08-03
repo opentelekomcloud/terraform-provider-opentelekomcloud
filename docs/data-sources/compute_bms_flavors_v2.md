@@ -9,8 +9,8 @@ Use this data source to get details about flavors of BMSs from OpenTelekomCloud.
 ## Example Usage
 
 ```hcl
-variable "flavor_id" { }
-variable "disk_size" { }
+variable "flavor_id" {}
+variable "disk_size" {}
 
 data "opentelekomcloud_compute_bms_flavors_v2" "query_bms_flavors" {
   id       = var.bms_id

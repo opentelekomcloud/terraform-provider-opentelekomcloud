@@ -11,7 +11,7 @@ Manages a V2 AS Policy resource within OpenTelekomCloud.
 ### AS Recurrence Policy
 
 ```hcl
-resource "opentelekomcloud_as_policy_v2" "policy_1"{
+resource "opentelekomcloud_as_policy_v2" "policy_1" {
   scaling_policy_name   = "policy_create"
   scaling_policy_type   = "RECURRENCE"
   scaling_resource_id   = var.as_group
@@ -33,7 +33,7 @@ resource "opentelekomcloud_as_policy_v2" "policy_1"{
 ### AS Alarm Policy
 
 ```hcl
-resource "opentelekomcloud_as_policy_v2" "policy_1"{
+resource "opentelekomcloud_as_policy_v2" "policy_1" {
   scaling_policy_name   = "policy_create"
   scaling_policy_type   = "ALARM"
   scaling_resource_id   = var.as_group

@@ -12,7 +12,7 @@ but only compute floating IPs can be used with compute instances.
 ## Example Usage
 
 ```hcl
-resource "opentelekomcloud_networking_floatingip_v2" "floatip_1" { }
+resource "opentelekomcloud_networking_floatingip_v2" "floatip_1" {}
 ```
 
 ## Argument Reference
