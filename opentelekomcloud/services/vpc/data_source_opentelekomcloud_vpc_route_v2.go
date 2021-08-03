@@ -4,6 +4,7 @@ import (
 	"context"
 	"log"
 
+	"github.com/hashicorp/go-multierror"
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/networking/v2/routes"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
@@ -89,13 +90,17 @@ func dataSourceVpcRouteV2Read(_ context.Context, d *schema.ResourceData, meta in
 	log.Printf("[INFO] Retrieved Vpc Route using given filter %s: %+v", Route.RouteID, Route)
 	d.SetId(Route.RouteID)
 
-	d.Set("type", Route.Type)
-	d.Set("nexthop", Route.NextHop)
-	d.Set("destination", Route.Destination)
-	d.Set("tenant_id", Route.Tenant_Id)
-	d.Set("vpc_id", Route.VPC_ID)
-	d.Set("id", Route.RouteID)
-	d.Set("region", config.GetRegion(d))
+	mErr := multierror.Append(
+		d.Set("type", Route.Type),
+		d.Set("nexthop", Route.NextHop),
+		d.Set("destination", Route.Destination),
+		d.Set("tenant_id", Route.Tenant_Id),
+		d.Set("vpc_id", Route.VPC_ID),
+		d.Set("region", config.GetRegion(d)),
+	)
+	if err := mErr.ErrorOrNil(); err != nil {
+		return fmterr.Errorf("error setting VPC route attributes: %w", err)
+	}
 
 	return nil
 }

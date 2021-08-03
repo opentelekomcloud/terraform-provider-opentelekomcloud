@@ -1,0 +1,4 @@
+---
+fixes:
+  - |
+    **[VPC]** Fix panic when using ``data_source/opentelekomcloud_vpc_route_v2`` (`#1240 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/1240>`_)
