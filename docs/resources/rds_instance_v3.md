@@ -177,6 +177,50 @@ resource "opentelekomcloud_rds_instance_v3" "instance" {
 }
 ```
 
+### Overriding parameters from template
+
+```hcl
+resource "opentelekomcloud_networking_secgroup_v2" "sg" {
+  name = "sg-rds-test"
+}
+
+resource "opentelekomcloud_rds_parametergroup_v3" "pg" {
+  name = "pg-rds-test"
+  values = {
+    autocommit      = "OFF"
+  }
+  datastore {
+    type    = "postgresql"
+    version = "10"
+  }
+}
+
+resource "opentelekomcloud_rds_instance_v3" "instance" {
+  name              = "tf_rds_instance_%s"
+  availability_zone = [var.availability_zone]
+
+  db {
+    password = "Postgres!120521"
+    type     = "PostgreSQL"
+    version  = "10"
+    port     = "8635"
+  }
+
+  security_group_id = opentelekomcloud_networking_secgroup_v2.sg.id
+  subnet_id         = var.subnet_id
+  vpc_id            = var.vpc_id
+  flavor            = "rds.pg.c2.medium"
+  volume {
+    type = "COMMON"
+    size = 40
+  }
+
+  parameters = {
+    max_connections = "37",
+  }
+}
+```
+
 ## Argument Reference
 
 The following arguments are supported:
@@ -212,6 +256,9 @@ The following arguments are supported:
   replication mode.  Changing this parameter will create a new resource.
 
 * `param_group_id` - (Optional) Specifies the parameter group ID.
+
+* `parameters` - (Optional) Map of additional configuration parameters. Values should be strings. Parameters set here
+  overrides values from configuration template (parameter group).
 
 * `public_ips` - (Optional) Specifies floating IP to be assigned to the instance.
   This should be a list with single element only.
