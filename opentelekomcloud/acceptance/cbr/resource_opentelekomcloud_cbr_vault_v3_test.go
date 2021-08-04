@@ -10,6 +10,8 @@ import (
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/acceptance/env"
 )
 
+const vaultResourceName = "opentelekomcloud_cbr_vault_v3.vault"
+
 func TestAccCBRVaultV3_basic(t *testing.T) {
 	resource.Test(t, resource.TestCase{
 		PreCheck:          func() { common.TestAccFlavorPreCheck(t) },
@@ -17,24 +19,24 @@ func TestAccCBRVaultV3_basic(t *testing.T) {
 		CheckDestroy:      testAccCheckCBRPolicyV3Destroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testCBRVaultV3_basic,
+				Config: testCBRVaultV3BasicVolumes,
 				Check: resource.ComposeTestCheckFunc(
-					resource.TestCheckResourceAttr("opentelekomcloud_cbr_vault_v3.vault", "resource.#", "1"),
-					resource.TestCheckResourceAttr("opentelekomcloud_cbr_vault_v3.vault", "resource.0.name", "cbr-test-volume"),
-					resource.TestCheckResourceAttrSet("opentelekomcloud_cbr_vault_v3.vault", "backup_policy_id"),
+					resource.TestCheckResourceAttr(vaultResourceName, "resource.#", "2"),
+					resource.TestCheckResourceAttr(vaultResourceName, "resource.0.name", "cbr-test-volume"),
+					resource.TestCheckResourceAttrSet(vaultResourceName, "backup_policy_id"),
 				),
 			},
 			{
-				Config: testCBRVaultV3_noResource,
+				Config: testCBRVaultV3NoResource,
 				Check: resource.ComposeAggregateTestCheckFunc(
-					resource.TestCheckResourceAttr("opentelekomcloud_cbr_vault_v3.vault", "resource.#", "0"),
-					resource.TestCheckNoResourceAttr("opentelekomcloud_cbr_vault_v3.vault", "backup_policy_id"),
+					resource.TestCheckResourceAttr(vaultResourceName, "resource.#", "0"),
+					resource.TestCheckNoResourceAttr(vaultResourceName, "backup_policy_id"),
 				),
 			},
 			{
-				Config: testCBRVaultV3_noResourceResize,
+				Config: testCBRVaultV3NoResourceResize,
 				Check: resource.ComposeAggregateTestCheckFunc(
-					resource.TestCheckResourceAttr("opentelekomcloud_cbr_vault_v3.vault", "billing.0.size", "120"),
+					resource.TestCheckResourceAttr(vaultResourceName, "billing.0.size", "120"),
 				),
 			},
 		},
@@ -48,13 +50,13 @@ func TestAccCBRVaultV3_unassign(t *testing.T) {
 		CheckDestroy:      testAccCheckCBRPolicyV3Destroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testCBRVaultV3_basic,
+				Config: testCBRVaultV3BasicVolumes,
 			},
 			{
-				Config: testCBRVaultV3_unassign,
+				Config: testCBRVaultV3Unassign,
 				Check: resource.ComposeTestCheckFunc(
-					resource.TestCheckResourceAttr("opentelekomcloud_cbr_vault_v3.vault", "backup_policy_id", ""),
-					resource.TestCheckResourceAttr("opentelekomcloud_cbr_vault_v3.vault", "resource.#", "0"),
+					resource.TestCheckResourceAttr(vaultResourceName, "backup_policy_id", ""),
+					resource.TestCheckResourceAttr(vaultResourceName, "resource.#", "0"),
 				),
 			},
 		},
@@ -68,17 +70,17 @@ func TestAccCBRVaultV3_instance(t *testing.T) {
 		CheckDestroy:      testAccCheckCBRPolicyV3Destroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testCBRVaultV3_basicInstance,
+				Config: testCBRVaultV3BasicInstance,
 				Check: resource.ComposeAggregateTestCheckFunc(
-					resource.TestCheckResourceAttr("opentelekomcloud_cbr_vault_v3.vault", "resource.#", "1"),
-					resource.TestCheckResourceAttr("opentelekomcloud_cbr_vault_v3.vault", "resource.0.name", "tf-crb-test-instance"),
-					resource.TestCheckResourceAttr("opentelekomcloud_cbr_vault_v3.vault", "billing.0.size", "100"),
+					resource.TestCheckResourceAttr(vaultResourceName, "resource.#", "1"),
+					resource.TestCheckResourceAttr(vaultResourceName, "resource.0.name", "tf-crb-test-instance"),
+					resource.TestCheckResourceAttr(vaultResourceName, "billing.0.size", "100"),
 				),
 			},
 			{
-				Config: testCBRVaultV3_noResource,
+				Config: testCBRVaultV3NoResource,
 				Check: resource.ComposeAggregateTestCheckFunc(
-					resource.TestCheckResourceAttr("opentelekomcloud_cbr_vault_v3.vault", "resource.#", "0"),
+					resource.TestCheckResourceAttr(vaultResourceName, "resource.#", "0"),
 				),
 			},
 		},
@@ -86,7 +88,7 @@ func TestAccCBRVaultV3_instance(t *testing.T) {
 }
 
 var (
-	testCBRVaultV3_basicInstance = fmt.Sprintf(`
+	testCBRVaultV3BasicInstance = fmt.Sprintf(`
 resource "opentelekomcloud_compute_instance_v2" "instance" {
   name = "tf-crb-test-instance"
 
@@ -121,9 +123,15 @@ resource "opentelekomcloud_cbr_vault_v3" "vault" {
 )
 
 const (
-	testCBRVaultV3_basic = `
+	testCBRVaultV3BasicVolumes = `
 resource "opentelekomcloud_blockstorage_volume_v2" "volume" {
   name = "cbr-test-volume"
+  size = 10
+
+  volume_type = "SSD"
+}
+resource "opentelekomcloud_blockstorage_volume_v2" "volume2" {
+  name = "cbr-test-volume-2"
   size = 10
 
   volume_type = "SSD"
@@ -168,10 +176,15 @@ resource "opentelekomcloud_cbr_vault_v3" "vault" {
     id   = opentelekomcloud_blockstorage_volume_v2.volume.id
     type = "OS::Cinder::Volume"
   }
+
+  resource {
+    id   = opentelekomcloud_blockstorage_volume_v2.volume2.id
+    type = "OS::Cinder::Volume"
+  }
 }
 `
 
-	testCBRVaultV3_unassign = `
+	testCBRVaultV3Unassign = `
 resource "opentelekomcloud_blockstorage_volume_v2" "volume" {
   name = "cbr-test-volume"
   size = 10
@@ -216,7 +229,7 @@ resource "opentelekomcloud_cbr_vault_v3" "vault" {
 }
 `
 
-	testCBRVaultV3_noResource = `
+	testCBRVaultV3NoResource = `
 resource "opentelekomcloud_cbr_vault_v3" "vault" {
   name = "cbr-vault-test"
 
@@ -230,7 +243,7 @@ resource "opentelekomcloud_cbr_vault_v3" "vault" {
   }
 }
 `
-	testCBRVaultV3_noResourceResize = `
+	testCBRVaultV3NoResourceResize = `
 resource "opentelekomcloud_cbr_vault_v3" "vault" {
   name = "cbr-vault-test-2"
 
