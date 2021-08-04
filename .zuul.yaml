@@ -1,10 +1,9 @@
 ---
-- jobs:
-    - job:
-        name: tflint
-        parent: golang-make
-        vars:
-          make_command: vet
+- job:
+    name: tflint
+    parent: golang-make
+    vars:
+      make_command: vet
 
 - project:
     merge-mode: squash-merge
