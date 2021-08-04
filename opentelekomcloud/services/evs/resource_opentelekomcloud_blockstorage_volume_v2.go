@@ -291,7 +291,7 @@ OUTER:
 	if err != nil {
 		return fmterr.Errorf("error fetching tags for volume (%s): %s", v.ID, err)
 	}
-	d.Set("tags", taglist)
+	d.Set("tags", taglist.Tags)
 
 	// This is useful for import
 	if d.Get("device_type").(string) == "" {

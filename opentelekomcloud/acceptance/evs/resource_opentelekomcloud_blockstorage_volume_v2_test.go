@@ -112,7 +112,7 @@ func TestAccBlockStorageV2Volume_policy(t *testing.T) {
 
 func testPolicyPreCheck(t *testing.T) {
 	if os.Getenv("OS_KMS_KEY") == "" {
-		t.Errorf("OS_KMS_KEY should be set for this test to existing KMS key alias")
+		t.Skipf("OS_KMS_KEY should be set for this test to existing KMS key alias")
 	}
 }
 
