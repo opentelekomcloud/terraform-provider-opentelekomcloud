@@ -187,7 +187,7 @@ resource "opentelekomcloud_networking_secgroup_v2" "sg" {
 resource "opentelekomcloud_rds_parametergroup_v3" "pg" {
   name = "pg-rds-test"
   values = {
-    autocommit      = "OFF"
+    autocommit = "OFF"
   }
   datastore {
     type    = "postgresql"
