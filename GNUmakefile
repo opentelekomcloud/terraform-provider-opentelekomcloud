@@ -51,7 +51,7 @@ test-compile:
 
 tools:
 	@echo "==> installing required tooling..."
-	go install github.com/katbyte/terrafmt
+	go install github.com/katbyte/terrafmt@latest
 
 tflint: tools
 	./scripts/run-tflint.sh
