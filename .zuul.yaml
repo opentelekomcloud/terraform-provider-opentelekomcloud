@@ -1,4 +1,11 @@
 ---
+- jobs:
+    - job:
+        name: tflint
+        parent: golang-make
+        vars:
+          make_command: vet
+
 - project:
     merge-mode: squash-merge
     default-branch: devel
@@ -12,16 +19,18 @@
               golangci_lint_version: 1.41.1
         - golang-make-test
         - golang-make-vet
+        - tflint
         - goreleaser-build:
             nodeset: fedora-32-large
     gate:
-      jobs: 
+      jobs:
         - golangci-lint:
             voting: false
             vars:
               golangci_lint_version: 1.41.1
         - golang-make-test
         - golang-make-vet
+        - tflint
         - goreleaser-build:
             nodeset: fedora-32-large
     tag:
