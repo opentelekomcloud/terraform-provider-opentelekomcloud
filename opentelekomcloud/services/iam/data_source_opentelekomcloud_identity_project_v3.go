@@ -4,6 +4,7 @@ import (
 	"context"
 	"log"
 
+	"github.com/hashicorp/go-multierror"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/identity/v3/projects"
@@ -66,22 +67,22 @@ func dataSourceIdentityProjectV3Read(_ context.Context, d *schema.ResourceData, 
 	var project projects.Project
 	allPages, err := projects.List(identityClient, listOpts).AllPages()
 	if err != nil {
-		return fmterr.Errorf("Unable to query projects: %s", err)
+		return fmterr.Errorf("unable to query projects: %s", err)
 	}
 
 	allProjects, err := projects.ExtractProjects(allPages)
 	if err != nil {
-		return fmterr.Errorf("Unable to retrieve projects: %s", err)
+		return fmterr.Errorf("unable to retrieve projects: %s", err)
 	}
 
 	if len(allProjects) < 1 {
-		return fmterr.Errorf("Your query returned no results. " +
+		return fmterr.Errorf("your query returned no results. " +
 			"Please change your search criteria and try again.")
 	}
 
 	if len(allProjects) > 1 {
 		log.Printf("[DEBUG] Multiple results found: %#v", allProjects)
-		return fmterr.Errorf("Your query returned more than one result")
+		return fmterr.Errorf("your query returned more than one result")
 	}
 	project = allProjects[0]
 
@@ -94,12 +95,18 @@ func dataSourceIdentityProjectV3Attributes(d *schema.ResourceData, project *proj
 	log.Printf("[DEBUG] opentelekomcloud_identity_project_v3 details: %#v", project)
 
 	d.SetId(project.ID)
-	d.Set("is_domain", project.IsDomain)
-	d.Set("description", project.Description)
-	d.Set("domain_id", project.DomainID)
-	d.Set("enabled", project.Enabled)
-	d.Set("name", project.Name)
-	d.Set("parent_id", project.ParentID)
+	mErr := multierror.Append(
+		d.Set("is_domain", project.IsDomain),
+		d.Set("description", project.Description),
+		d.Set("domain_id", project.DomainID),
+		d.Set("enabled", project.Enabled),
+		d.Set("name", project.Name),
+		d.Set("parent_id", project.ParentID),
+	)
+
+	if err := mErr.ErrorOrNil(); err != nil {
+		return err
+	}
 
 	return nil
 }

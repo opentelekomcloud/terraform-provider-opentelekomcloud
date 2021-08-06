@@ -6,18 +6,23 @@ import (
 	"strings"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
-	"github.com/opentelekomcloud/gophertelekomcloud"
+	golangsdk "github.com/opentelekomcloud/gophertelekomcloud"
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common/cfg"
 )
 
-const clientCreationFail = "error creating OpenTelekomCloud identity v3 client: %w"
+type ContextKey string
+
+const (
+	clientCreationFail = "error creating OpenTelekomCloud identity v3 client: %w"
+	keyClient          = ContextKey("client")
+)
 
 func ctxWithClient(parent context.Context, client *golangsdk.ServiceClient) context.Context {
-	return context.WithValue(parent, "client", client)
+	return context.WithValue(parent, keyClient, client)
 }
 
 func clientFromCtx(ctx context.Context, d *schema.ResourceData, meta interface{}) (*golangsdk.ServiceClient, error) {
-	client := ctx.Value("client")
+	client := ctx.Value(keyClient)
 	if client != nil {
 		return client.(*golangsdk.ServiceClient), nil
 	}

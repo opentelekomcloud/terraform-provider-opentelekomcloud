@@ -47,11 +47,11 @@ func testAccCheckIdentityV3ProjectDataSourceID(n string) resource.TestCheckFunc 
 	return func(s *terraform.State) error {
 		rs, ok := s.RootModule().Resources[n]
 		if !ok {
-			return fmt.Errorf("Can't find project data source: %s", n)
+			return fmt.Errorf("can't find project data source: %s", n)
 		}
 
 		if rs.Primary.ID == "" {
-			return fmt.Errorf("Project data source ID not set")
+			return fmt.Errorf("project data source ID not set")
 		}
 
 		return nil

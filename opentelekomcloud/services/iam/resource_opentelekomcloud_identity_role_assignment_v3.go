@@ -6,6 +6,7 @@ import (
 	"log"
 	"strings"
 
+	"github.com/hashicorp/go-multierror"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	golangsdk "github.com/opentelekomcloud/gophertelekomcloud"
@@ -106,12 +107,17 @@ func resourceIdentityRoleAssignmentV3Read(_ context.Context, d *schema.ResourceD
 	domainID, projectID, groupID, userID, _ := ExtractRoleAssignmentID(d.Id())
 
 	log.Printf("[DEBUG] Retrieved OpenStack role assignment: %#v", roleAssignment)
-	d.Set("domain_id", domainID)
-	d.Set("project_id", projectID)
-	d.Set("group_id", groupID)
-	d.Set("user_id", userID)
-	d.Set("role_id", roleAssignment.ID)
-	d.Set("region", config.GetRegion(d))
+	mErr := multierror.Append(
+		d.Set("domain_id", domainID),
+		d.Set("project_id", projectID),
+		d.Set("group_id", groupID),
+		d.Set("user_id", userID),
+		d.Set("role_id", roleAssignment.ID),
+		d.Set("region", config.GetRegion(d)),
+	)
+	if err := mErr.ErrorOrNil(); err != nil {
+		return diag.FromErr(err)
+	}
 
 	return nil
 }
@@ -124,14 +130,13 @@ func resourceIdentityRoleAssignmentV3Delete(_ context.Context, d *schema.Resourc
 	}
 
 	domainID, projectID, groupID, userID, roleID := ExtractRoleAssignmentID(d.Id())
-	var opts roles.UnassignOpts
-	opts = roles.UnassignOpts{
+	opts := roles.UnassignOpts{
 		DomainID:  domainID,
 		GroupID:   groupID,
 		ProjectID: projectID,
 		UserID:    userID,
 	}
-	roles.Unassign(identityClient, roleID, opts).ExtractErr()
+	err = roles.Unassign(identityClient, roleID, opts).ExtractErr()
 	if err != nil {
 		return fmterr.Errorf("error unassigning role: %s", err)
 	}
@@ -142,8 +147,7 @@ func resourceIdentityRoleAssignmentV3Delete(_ context.Context, d *schema.Resourc
 func getRoleAssignment(identityClient *golangsdk.ServiceClient, d *schema.ResourceData) (roles.RoleAssignment, error) {
 	domainID, projectID, groupID, userID, roleID := ExtractRoleAssignmentID(d.Id())
 
-	var opts roles.ListAssignmentsOpts
-	opts = roles.ListAssignmentsOpts{
+	opts := roles.ListAssignmentsOpts{
 		GroupID:        groupID,
 		ScopeDomainID:  domainID,
 		ScopeProjectID: projectID,

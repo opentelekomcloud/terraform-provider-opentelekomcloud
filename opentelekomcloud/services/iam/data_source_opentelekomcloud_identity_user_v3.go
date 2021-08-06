@@ -2,11 +2,10 @@ package iam
 
 import (
 	"context"
-	"fmt"
 	"log"
-	"strings"
 	"time"
 
+	"github.com/hashicorp/go-multierror"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/identity/v3/users"
@@ -67,22 +66,22 @@ func dataSourceIdentityUserV3Read(_ context.Context, d *schema.ResourceData, met
 	var user users.User
 	allPages, err := users.List(identityClient, listOpts).AllPages()
 	if err != nil {
-		return fmterr.Errorf("Unable to query users: %s", err)
+		return fmterr.Errorf("unable to query users: %s", err)
 	}
 
 	allUsers, err := users.ExtractUsers(allPages)
 	if err != nil {
-		return fmterr.Errorf("Unable to retrieve users: %s", err)
+		return fmterr.Errorf("unable to retrieve users: %s", err)
 	}
 
 	if len(allUsers) < 1 {
-		return fmterr.Errorf("Your query returned no results. " +
+		return fmterr.Errorf("your query returned no results. " +
 			"Please change your search criteria and try again.")
 	}
 
 	if len(allUsers) > 1 {
 		log.Printf("[DEBUG] Multiple results found: %#v", allUsers)
-		return fmterr.Errorf("Your query returned more than one result")
+		return fmterr.Errorf("your query returned more than one result")
 	}
 	user = allUsers[0]
 
@@ -95,44 +94,16 @@ func dataSourceIdentityUserV3Attributes(d *schema.ResourceData, user *users.User
 	log.Printf("[DEBUG] opentelekomcloud_identity_user_v3 details: %#v", user)
 
 	d.SetId(user.ID)
-	d.Set("default_project_id", user.DefaultProjectID)
-	d.Set("domain_id", user.DomainID)
-	d.Set("enabled", user.Enabled)
-	d.Set("name", user.Name)
-	d.Set("password_expires_at", user.PasswordExpiresAt.Format(time.RFC3339))
+	mErr := multierror.Append(
+		d.Set("default_project_id", user.DefaultProjectID),
+		d.Set("domain_id", user.DomainID),
+		d.Set("enabled", user.Enabled),
+		d.Set("name", user.Name),
+		d.Set("password_expires_at", user.PasswordExpiresAt.Format(time.RFC3339)),
+	)
 
+	if err := mErr.ErrorOrNil(); err != nil {
+		return err
+	}
 	return nil
-}
-
-// Ensure that password_expires_at query matches format explained in
-// https://developer.openstack.org/api-ref/identity/v3/#list-users
-func validatePasswordExpiresAtQuery(v interface{}, k string) (ws []string, errors []error) {
-	value := v.(string)
-	values := strings.SplitN(value, ":", 2)
-	if len(values) != 2 {
-		err := fmt.Errorf("%s '%s' does not match expected format: {operator}:{timestamp}", k, value)
-		errors = append(errors, err)
-	}
-	operator, timestamp := values[0], values[1]
-
-	validOperators := map[string]bool{
-		"lt":  true,
-		"lte": true,
-		"gt":  true,
-		"gte": true,
-		"eq":  true,
-		"neq": true,
-	}
-	if !validOperators[operator] {
-		err := fmt.Errorf("'%s' is not a valid operator for %s. Choose one of 'lt', 'lte', 'gt', 'gte', 'eq', 'neq'", operator, k)
-		errors = append(errors, err)
-	}
-
-	_, err := time.Parse(time.RFC3339, timestamp)
-	if err != nil {
-		err = fmt.Errorf("'%s' is not a valid timestamp for %s. It should be in the form 'YYYY-MM-DDTHH:mm:ssZ'", timestamp, k)
-		errors = append(errors, err)
-	}
-
-	return
 }

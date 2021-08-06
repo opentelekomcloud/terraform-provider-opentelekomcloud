@@ -62,7 +62,7 @@ func testAccCheckIdentityV3RoleAssignmentDestroy(s *terraform.State) error {
 
 		_, err := roles.Get(identityClient, rs.Primary.ID).Extract()
 		if err == nil {
-			return fmt.Errorf("Role assignment still exists")
+			return fmt.Errorf("role assignment still exists")
 		}
 	}
 
@@ -73,11 +73,11 @@ func testAccCheckIdentityV3RoleAssignmentExists(n string, role *roles.Role, grou
 	return func(s *terraform.State) error {
 		rs, ok := s.RootModule().Resources[n]
 		if !ok {
-			return fmt.Errorf("Not found: %s", n)
+			return fmt.Errorf("not found: %s", n)
 		}
 
 		if rs.Primary.ID == "" {
-			return fmt.Errorf("No ID is set")
+			return fmt.Errorf("no ID is set")
 		}
 
 		config := common.TestAccProvider.Meta().(*cfg.Config)
@@ -88,8 +88,7 @@ func testAccCheckIdentityV3RoleAssignmentExists(n string, role *roles.Role, grou
 
 		domainID, projectID, groupID, userID, roleID := iam.ExtractRoleAssignmentID(rs.Primary.ID)
 
-		var opts roles.ListAssignmentsOpts
-		opts = roles.ListAssignmentsOpts{
+		opts := roles.ListAssignmentsOpts{
 			GroupID:        groupID,
 			ScopeDomainID:  domainID,
 			ScopeProjectID: projectID,
@@ -120,17 +119,17 @@ func testAccCheckIdentityV3RoleAssignmentExists(n string, role *roles.Role, grou
 
 		p, err := projects.Get(identityClient, projectID).Extract()
 		if err != nil {
-			return fmt.Errorf("Project not found")
+			return fmt.Errorf("project not found")
 		}
 		*project = *p
 		g, err := groups.Get(identityClient, groupID).Extract()
 		if err != nil {
-			return fmt.Errorf("Group not found")
+			return fmt.Errorf("group not found")
 		}
 		*group = *g
 		r, err := roles.Get(identityClient, assignment.ID).Extract()
 		if err != nil {
-			return fmt.Errorf("Role not found")
+			return fmt.Errorf("role not found")
 		}
 		*role = *r
 

@@ -34,11 +34,11 @@ func testAccCheckIdentityV3DataSourceID(n string) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
 		rs, ok := s.RootModule().Resources[n]
 		if !ok {
-			return fmt.Errorf("Can't find role data source: %s", n)
+			return fmt.Errorf("can't find role data source: %s", n)
 		}
 
 		if rs.Primary.ID == "" {
-			return fmt.Errorf("Role data source ID not set")
+			return fmt.Errorf("role data source ID not set")
 		}
 
 		return nil

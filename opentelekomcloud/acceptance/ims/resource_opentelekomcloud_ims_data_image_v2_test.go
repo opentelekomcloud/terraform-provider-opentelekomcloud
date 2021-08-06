@@ -62,7 +62,7 @@ func testAccCheckImsDataImageV2Destroy(s *terraform.State) error {
 
 		_, err := ims.GetCloudImage(imageClient, rs.Primary.ID)
 		if err == nil {
-			return fmt.Errorf("Image still exists")
+			return fmt.Errorf("image still exists")
 		}
 	}
 
@@ -73,11 +73,11 @@ func testAccCheckImsDataImageV2Exists(n string, image *cloudimages.Image) resour
 	return func(s *terraform.State) error {
 		rs, ok := s.RootModule().Resources[n]
 		if !ok {
-			return fmt.Errorf("Not found: %s", n)
+			return fmt.Errorf("not found: %s", n)
 		}
 
 		if rs.Primary.ID == "" {
-			return fmt.Errorf("No ID is set")
+			return fmt.Errorf("no ID is set")
 		}
 
 		config := common.TestAccProvider.Meta().(*cfg.Config)
