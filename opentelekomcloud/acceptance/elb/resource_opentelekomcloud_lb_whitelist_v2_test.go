@@ -51,7 +51,7 @@ func testAccCheckLBV2WhitelistDestroy(s *terraform.State) error {
 
 		_, err := whitelists.Get(networkingClient, rs.Primary.ID).Extract()
 		if err == nil {
-			return fmt.Errorf("Whitelist still exists: %s", rs.Primary.ID)
+			return fmt.Errorf("whitelist still exists: %s", rs.Primary.ID)
 		}
 	}
 
@@ -62,11 +62,11 @@ func testAccCheckLBV2WhitelistExists(n string, whitelist *whitelists.Whitelist) 
 	return func(s *terraform.State) error {
 		rs, ok := s.RootModule().Resources[n]
 		if !ok {
-			return fmt.Errorf("Not found: %s", n)
+			return fmt.Errorf("not found: %s", n)
 		}
 
 		if rs.Primary.ID == "" {
-			return fmt.Errorf("No ID is set")
+			return fmt.Errorf("no ID is set")
 		}
 
 		config := common.TestAccProvider.Meta().(*cfg.Config)
@@ -81,7 +81,7 @@ func testAccCheckLBV2WhitelistExists(n string, whitelist *whitelists.Whitelist) 
 		}
 
 		if found.ID != rs.Primary.ID {
-			return fmt.Errorf("Whitelist not found")
+			return fmt.Errorf("whitelist not found")
 		}
 
 		*whitelist = *found

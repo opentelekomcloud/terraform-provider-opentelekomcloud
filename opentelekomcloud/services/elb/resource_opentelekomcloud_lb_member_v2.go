@@ -202,7 +202,7 @@ func resourceMemberV2Update(ctx context.Context, d *schema.ResourceData, meta in
 	})
 
 	if err != nil {
-		return fmterr.Errorf("Unable to update member %s: %w", d.Id(), err)
+		return fmterr.Errorf("unable to update member %s: %w", d.Id(), err)
 	}
 
 	if err := waitForLBV2viaPool(ctx, client, poolID, "ACTIVE", timeout); err != nil {
@@ -235,7 +235,7 @@ func resourceMemberV2Delete(ctx context.Context, d *schema.ResourceData, meta in
 		return nil
 	})
 	if err != nil {
-		return fmterr.Errorf("Unable to delete member %s: %w", d.Id(), err)
+		return fmterr.Errorf("unable to delete member %s: %w", d.Id(), err)
 	}
 
 	// Wait for LB to become ACTIVE

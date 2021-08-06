@@ -80,7 +80,7 @@ func testAccCheckLBV2L7RuleDestroy(s *terraform.State) error {
 		}
 
 		if l7policyID == "" {
-			return fmt.Errorf("Unable to find l7policy_id")
+			return fmt.Errorf("unable to find l7policy_id")
 		}
 
 		_, err := l7rules.GetRule(lbClient, l7policyID, rs.Primary.ID).Extract()
@@ -96,11 +96,11 @@ func testAccCheckLBV2L7RuleExists(n string, l7rule *l7rules.Rule) resource.TestC
 	return func(s *terraform.State) error {
 		rs, ok := s.RootModule().Resources[n]
 		if !ok {
-			return fmt.Errorf("Not found: %s", n)
+			return fmt.Errorf("not found: %s", n)
 		}
 
 		if rs.Primary.ID == "" {
-			return fmt.Errorf("No ID is set")
+			return fmt.Errorf("no ID is set")
 		}
 
 		config := common.TestAccProvider.Meta().(*cfg.Config)
@@ -118,7 +118,7 @@ func testAccCheckLBV2L7RuleExists(n string, l7rule *l7rules.Rule) resource.TestC
 		}
 
 		if l7policyID == "" {
-			return fmt.Errorf("Unable to find l7policy_id")
+			return fmt.Errorf("unable to find l7policy_id")
 		}
 
 		found, err := l7rules.GetRule(lbClient, l7policyID, rs.Primary.ID).Extract()
@@ -127,7 +127,7 @@ func testAccCheckLBV2L7RuleExists(n string, l7rule *l7rules.Rule) resource.TestC
 		}
 
 		if found.ID != rs.Primary.ID {
-			return fmt.Errorf("Policy not found")
+			return fmt.Errorf("policy not found")
 		}
 
 		*l7rule = *found

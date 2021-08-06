@@ -128,11 +128,9 @@ func resourcePoolV2Persistence(d *schema.ResourceData) (*pools.SessionPersistenc
 					"set if using 'APP_COOKIE' persistence type")
 			}
 			persistence.CookieName = persistenceInfo["cookie_name"].(string)
-		} else {
-			if persistenceInfo["cookie_name"].(string) != "" {
-				return nil, fmt.Errorf("persistence cookie_name can only be " +
-					"set if using 'APP_COOKIE' persistence type")
-			}
+		} else if persistenceInfo["cookie_name"].(string) != "" {
+			return nil, fmt.Errorf("persistence cookie_name can only be " +
+				"set if using 'APP_COOKIE' persistence type")
 		}
 		return &persistence, nil
 	}

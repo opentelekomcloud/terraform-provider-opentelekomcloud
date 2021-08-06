@@ -55,7 +55,7 @@ func testAccCheckELBHealthDestroy(s *terraform.State) error {
 
 		_, err := healthcheck.Get(networkingClient, rs.Primary.ID).Extract()
 		if err == nil {
-			return fmt.Errorf("Health still exists: %s", rs.Primary.ID)
+			return fmt.Errorf("health still exists: %s", rs.Primary.ID)
 		}
 	}
 
@@ -67,11 +67,11 @@ func testAccCheckELBHealthExists(t *testing.T, n string, health *healthcheck.Hea
 		log.Printf("[DEBUG] testAccCheckELBHealthExists resources %+v.\n", s.RootModule().Resources)
 		rs, ok := s.RootModule().Resources[n]
 		if !ok {
-			return fmt.Errorf("Not found: %s", n)
+			return fmt.Errorf("not found: %s", n)
 		}
 
 		if rs.Primary.ID == "" {
-			return fmt.Errorf("No ID is set")
+			return fmt.Errorf("no ID is set")
 		}
 
 		config := common.TestAccProvider.Meta().(*cfg.Config)
@@ -87,7 +87,7 @@ func testAccCheckELBHealthExists(t *testing.T, n string, health *healthcheck.Hea
 		log.Printf("[DEBUG] testAccCheckELBHealthExists found %+v.\n", found)
 
 		if found.ID != rs.Primary.ID {
-			return fmt.Errorf("Health not found")
+			return fmt.Errorf("health not found")
 		}
 
 		*health = *found

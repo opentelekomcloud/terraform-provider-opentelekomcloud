@@ -5,6 +5,7 @@ import (
 	"log"
 	"time"
 
+	"github.com/hashicorp/go-multierror"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/networking/v2/extensions/lbaas_v2/whitelists"
@@ -95,10 +96,16 @@ func resourceWhitelistV2Read(_ context.Context, d *schema.ResourceData, meta int
 	log.Printf("[DEBUG] Retrieved whitelist %s: %#v", d.Id(), wl)
 
 	d.SetId(wl.ID)
-	d.Set("tenant_id", wl.TenantId)
-	d.Set("listener_id", wl.ListenerId)
-	d.Set("enable_whitelist", wl.EnableWhitelist)
-	d.Set("whitelist", wl.Whitelist)
+	mErr := multierror.Append(
+		d.Set("tenant_id", wl.TenantId),
+		d.Set("listener_id", wl.ListenerId),
+		d.Set("enable_whitelist", wl.EnableWhitelist),
+		d.Set("whitelist", wl.Whitelist),
+	)
+
+	if err := mErr.ErrorOrNil(); err != nil {
+		return diag.FromErr(err)
+	}
 
 	return nil
 }
@@ -122,7 +129,7 @@ func resourceWhitelistV2Update(ctx context.Context, d *schema.ResourceData, meta
 	log.Printf("[DEBUG] Updating whitelist %s with options: %#v", d.Id(), updateOpts)
 	_, err = whitelists.Update(networkingClient, d.Id(), updateOpts).Extract()
 	if err != nil {
-		return fmterr.Errorf("Unable to update whitelist %s: %s", d.Id(), err)
+		return fmterr.Errorf("unable to update whitelist %s: %s", d.Id(), err)
 	}
 
 	return resourceWhitelistV2Read(ctx, d, meta)

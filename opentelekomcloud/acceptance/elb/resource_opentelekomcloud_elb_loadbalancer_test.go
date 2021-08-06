@@ -15,7 +15,6 @@ import (
 )
 
 func TestAccELBLoadBalancer_basic(t *testing.T) {
-
 	var lb loadbalancer_elbs.LoadBalancer
 
 	resource.Test(t, resource.TestCase{
@@ -24,13 +23,13 @@ func TestAccELBLoadBalancer_basic(t *testing.T) {
 		CheckDestroy:      testAccCheckELBLoadBalancerDestroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccELBLoadBalancerConfig_basic,
+				Config: testAccELBLoadBalancerConfigBasic,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckELBLoadBalancerExists("opentelekomcloud_elb_loadbalancer.loadbalancer_1", &lb),
 				),
 			},
 			{
-				Config: testAccELBLoadBalancerConfig_update,
+				Config: testAccELBLoadBalancerConfigUpdate,
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr(
 						"opentelekomcloud_elb_loadbalancer.loadbalancer_1", "name", "loadbalancer_1_updated"),
@@ -54,7 +53,7 @@ func testAccCheckELBLoadBalancerDestroy(s *terraform.State) error {
 
 		_, err := loadbalancer_elbs.Get(networkingClient, rs.Primary.ID).Extract()
 		if err == nil {
-			return fmt.Errorf("LoadBalancer still exists: %s", rs.Primary.ID)
+			return fmt.Errorf("loadBalancer still exists: %s", rs.Primary.ID)
 		}
 	}
 
@@ -64,14 +63,13 @@ func testAccCheckELBLoadBalancerDestroy(s *terraform.State) error {
 func testAccCheckELBLoadBalancerExists(
 	n string, lb *loadbalancer_elbs.LoadBalancer) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
-
 		rs, ok := s.RootModule().Resources[n]
 		if !ok {
-			return fmt.Errorf("Not found: %s", n)
+			return fmt.Errorf("not found: %s", n)
 		}
 
 		if rs.Primary.ID == "" {
-			return fmt.Errorf("No ID is set")
+			return fmt.Errorf("no ID is set")
 		}
 
 		config := common.TestAccProvider.Meta().(*cfg.Config)
@@ -87,16 +85,15 @@ func testAccCheckELBLoadBalancerExists(
 		}
 
 		if found.ID != rs.Primary.ID {
-			return fmt.Errorf("Member not found")
+			return fmt.Errorf("member not found")
 		}
-
 		*lb = *found
 
 		return nil
 	}
 }
 
-var testAccELBLoadBalancerConfig_basic = fmt.Sprintf(`
+var testAccELBLoadBalancerConfigBasic = fmt.Sprintf(`
 resource "opentelekomcloud_elb_loadbalancer" "loadbalancer_1" {
   name = "loadbalancer_1"
   vpc_id = "%s"
@@ -111,7 +108,7 @@ resource "opentelekomcloud_elb_loadbalancer" "loadbalancer_1" {
 }
 `, env.OS_VPC_ID)
 
-var testAccELBLoadBalancerConfig_update = fmt.Sprintf(`
+var testAccELBLoadBalancerConfigUpdate = fmt.Sprintf(`
 resource "opentelekomcloud_elb_loadbalancer" "loadbalancer_1" {
   name = "loadbalancer_1_updated"
   admin_state_up = "true"
