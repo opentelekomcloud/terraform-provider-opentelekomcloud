@@ -94,7 +94,7 @@ func testAccCheckComputeV2BmsInstanceDestroy(s *terraform.State) error {
 		server, err := servers.Get(computeClient, rs.Primary.ID).Extract()
 		if err == nil {
 			if server.Status != "SOFT_DELETED" {
-				return fmt.Errorf("Instance still exists")
+				return fmt.Errorf("instance still exists")
 			}
 		}
 	}
@@ -106,11 +106,11 @@ func testAccCheckComputeV2BmsInstanceExists(n string, instance *servers.Server) 
 	return func(s *terraform.State) error {
 		rs, ok := s.RootModule().Resources[n]
 		if !ok {
-			return fmt.Errorf("Not found: %s", n)
+			return fmt.Errorf("not found: %s", n)
 		}
 
 		if rs.Primary.ID == "" {
-			return fmt.Errorf("No ID is set")
+			return fmt.Errorf("no ID is set")
 		}
 
 		config := common.TestAccProvider.Meta().(*cfg.Config)
@@ -125,7 +125,7 @@ func testAccCheckComputeV2BmsInstanceExists(n string, instance *servers.Server) 
 		}
 
 		if found.ID != rs.Primary.ID {
-			return fmt.Errorf("Bms Instance not found")
+			return fmt.Errorf("bms Instance not found")
 		}
 
 		*instance = *found
