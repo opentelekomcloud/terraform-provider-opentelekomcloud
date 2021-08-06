@@ -4,6 +4,7 @@ import (
 	"context"
 	"log"
 
+	"github.com/hashicorp/go-multierror"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	golangsdk "github.com/opentelekomcloud/gophertelekomcloud"
@@ -90,7 +91,6 @@ func ResourceFWRuleV2() *schema.Resource {
 }
 
 func resourceFWRuleV2Create(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-
 	config := meta.(*cfg.Config)
 	networkingClient, err := config.NetworkingV2Client(config.GetRegion(d))
 	if err != nil {
@@ -149,23 +149,30 @@ func resourceFWRuleV2Read(_ context.Context, d *schema.ResourceData, meta interf
 
 	log.Printf("[DEBUG] Read OpenTelekomCloud Firewall Rule %s: %#v", d.Id(), rule)
 
-	d.Set("action", rule.Action)
-	d.Set("name", rule.Name)
-	d.Set("description", rule.Description)
-	d.Set("ip_version", rule.IPVersion)
-	d.Set("source_ip_address", rule.SourceIPAddress)
-	d.Set("destination_ip_address", rule.DestinationIPAddress)
-	d.Set("source_port", rule.SourcePort)
-	d.Set("destination_port", rule.DestinationPort)
-	d.Set("enabled", rule.Enabled)
-
+	var protocol string
 	if rule.Protocol == "" {
-		d.Set("protocol", "any")
+		protocol = "any"
 	} else {
-		d.Set("protocol", rule.Protocol)
+		protocol = rule.Protocol
 	}
 
-	d.Set("region", config.GetRegion(d))
+	mErr := multierror.Append(
+		d.Set("action", rule.Action),
+		d.Set("name", rule.Name),
+		d.Set("description", rule.Description),
+		d.Set("ip_version", rule.IPVersion),
+		d.Set("source_ip_address", rule.SourceIPAddress),
+		d.Set("destination_ip_address", rule.DestinationIPAddress),
+		d.Set("source_port", rule.SourcePort),
+		d.Set("destination_port", rule.DestinationPort),
+		d.Set("enabled", rule.Enabled),
+		d.Set("protocol", protocol),
+		d.Set("region", config.GetRegion(d)),
+	)
+
+	if err := mErr.ErrorOrNil(); err != nil {
+		return diag.FromErr(err)
+	}
 
 	return nil
 }

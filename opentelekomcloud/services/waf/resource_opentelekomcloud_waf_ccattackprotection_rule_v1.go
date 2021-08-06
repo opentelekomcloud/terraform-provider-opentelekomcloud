@@ -5,6 +5,7 @@ import (
 	"log"
 	"time"
 
+	"github.com/hashicorp/go-multierror"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	golangsdk "github.com/opentelekomcloud/gophertelekomcloud"
@@ -193,19 +194,25 @@ func resourceWafCcAttackProtectionRuleV1Read(_ context.Context, d *schema.Resour
 	}
 
 	d.SetId(n.Id)
-	d.Set("policy_id", n.PolicyID)
-	d.Set("url", n.Url)
-	d.Set("limit_num", n.LimitNum)
-	d.Set("limit_period", n.LimitPeriod)
-	d.Set("lock_time", n.LockTime)
-	d.Set("tag_type", n.TagType)
-	d.Set("tag_index", n.TagIndex)
-	d.Set("tag_category", n.TagCondition.Category)
-	d.Set("tag_contents", n.TagCondition.Contents)
-	d.Set("action_category", n.Action.Category)
-	d.Set("block_content_type", n.Action.Detail.Response.ContentType)
-	d.Set("block_content", n.Action.Detail.Response.Content)
-	d.Set("default", n.Default)
+	mErr := multierror.Append(
+		d.Set("policy_id", n.PolicyID),
+		d.Set("url", n.Url),
+		d.Set("limit_num", n.LimitNum),
+		d.Set("limit_period", n.LimitPeriod),
+		d.Set("lock_time", n.LockTime),
+		d.Set("tag_type", n.TagType),
+		d.Set("tag_index", n.TagIndex),
+		d.Set("tag_category", n.TagCondition.Category),
+		d.Set("tag_contents", n.TagCondition.Contents),
+		d.Set("action_category", n.Action.Category),
+		d.Set("block_content_type", n.Action.Detail.Response.ContentType),
+		d.Set("block_content", n.Action.Detail.Response.Content),
+		d.Set("default", n.Default),
+	)
+
+	if err := mErr.ErrorOrNil(); err != nil {
+		return diag.FromErr(err)
+	}
 
 	return nil
 }

@@ -146,7 +146,7 @@ func testAccCheckFWFirewallGroupV2Destroy(s *terraform.State) error {
 
 		_, err = firewall_groups.Get(networkingClient, rs.Primary.ID).Extract()
 		if err == nil {
-			return fmt.Errorf("Firewall group (%s) still exists.", rs.Primary.ID)
+			return fmt.Errorf("firewall group (%s) still exists.", rs.Primary.ID)
 		}
 		if _, ok := err.(golangsdk.ErrDefault404); !ok {
 			return err
@@ -159,17 +159,17 @@ func testAccCheckFWFirewallGroupV2Exists(n string, firewall_group *fw.FirewallGr
 	return func(s *terraform.State) error {
 		rs, ok := s.RootModule().Resources[n]
 		if !ok {
-			return fmt.Errorf("Not found: %s", n)
+			return fmt.Errorf("not found: %s", n)
 		}
 
 		if rs.Primary.ID == "" {
-			return fmt.Errorf("No ID is set")
+			return fmt.Errorf("no ID is set")
 		}
 
 		config := common.TestAccProvider.Meta().(*cfg.Config)
 		networkingClient, err := config.NetworkingV2Client(env.OS_REGION_NAME)
 		if err != nil {
-			return fmt.Errorf("Exists) Error creating OpenTelekomCloud networking client: %s", err)
+			return fmt.Errorf("exists) Error creating OpenTelekomCloud networking client: %s", err)
 		}
 
 		var found fw.FirewallGroup
@@ -179,7 +179,7 @@ func testAccCheckFWFirewallGroupV2Exists(n string, firewall_group *fw.FirewallGr
 		}
 
 		if found.ID != rs.Primary.ID {
-			return fmt.Errorf("Firewall group not found")
+			return fmt.Errorf("firewall group not found")
 		}
 
 		*firewall_group = found
@@ -191,7 +191,7 @@ func testAccCheckFWFirewallGroupV2Exists(n string, firewall_group *fw.FirewallGr
 func testAccCheckFWFirewallPortCount(firewall_group *fw.FirewallGroup, expected int) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
 		if len(firewall_group.PortIDs) != expected {
-			return fmt.Errorf("Expected %d Ports, got %d", expected, len(firewall_group.PortIDs))
+			return fmt.Errorf("expected %d Ports, got %d", expected, len(firewall_group.PortIDs))
 		}
 
 		return nil
@@ -202,17 +202,17 @@ func testAccCheckFWFirewallGroupV2(n, expectedName, expectedDescription string, 
 	return func(s *terraform.State) error {
 		rs, ok := s.RootModule().Resources[n]
 		if !ok {
-			return fmt.Errorf("Not found: %s", n)
+			return fmt.Errorf("not found: %s", n)
 		}
 
 		if rs.Primary.ID == "" {
-			return fmt.Errorf("No ID is set")
+			return fmt.Errorf("no ID is set")
 		}
 
 		config := common.TestAccProvider.Meta().(*cfg.Config)
 		networkingClient, err := config.NetworkingV2Client(env.OS_REGION_NAME)
 		if err != nil {
-			return fmt.Errorf("Exists) Error creating OpenTelekomCloud networking client: %s", err)
+			return fmt.Errorf("exists) Error creating OpenTelekomCloud networking client: %s", err)
 		}
 
 		var found *firewall_groups.FirewallGroup
@@ -232,19 +232,19 @@ func testAccCheckFWFirewallGroupV2(n, expectedName, expectedDescription string, 
 
 		switch {
 		case found.Name != expectedName:
-			err = fmt.Errorf("Expected Name to be <%s> but found <%s>", expectedName, found.Name)
+			err = fmt.Errorf("expected Name to be <%s> but found <%s>", expectedName, found.Name)
 		case found.Description != expectedDescription:
-			err = fmt.Errorf("Expected Description to be <%s> but found <%s>",
+			err = fmt.Errorf("expected Description to be <%s> but found <%s>",
 				expectedDescription, found.Description)
 		case found.IngressPolicyID == "":
-			err = fmt.Errorf("Ingress Policy should not be empty")
+			err = fmt.Errorf("ingress Policy should not be empty")
 		case found.EgressPolicyID == "":
-			err = fmt.Errorf("Egress Policy should not be empty")
+			err = fmt.Errorf("egress Policy should not be empty")
 		case ipolicyID != nil && found.IngressPolicyID == *ipolicyID:
-			err = fmt.Errorf("Ingress Policy had not been correctly updated. Went from <%s> to <%s>",
+			err = fmt.Errorf("ingress Policy had not been correctly updated. Went from <%s> to <%s>",
 				expectedName, found.Name)
 		case epolicyID != nil && found.EgressPolicyID == *epolicyID:
-			err = fmt.Errorf("Egress Policy had not been correctly updated. Went from <%s> to <%s>",
+			err = fmt.Errorf("egress Policy had not been correctly updated. Went from <%s> to <%s>",
 				expectedName, found.Name)
 		}
 

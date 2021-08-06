@@ -5,6 +5,7 @@ import (
 	"log"
 	"time"
 
+	"github.com/hashicorp/go-multierror"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
@@ -139,15 +140,18 @@ func resourceFWPolicyV2Read(_ context.Context, d *schema.ResourceData, meta inte
 
 	log.Printf("[DEBUG] Read OpenTelekomCloud Firewall Policy %s: %#v", d.Id(), policy)
 
-	d.Set("name", policy.Name)
-	d.Set("description", policy.Description)
-	d.Set("shared", policy.Shared)
-	d.Set("audited", policy.Audited)
-	d.Set("tenant_id", policy.TenantID)
-	if err := d.Set("rules", policy.Rules); err != nil {
-		return fmterr.Errorf("[DEBUG] Error saving rules to state for OpenTelekomCloud firewall policy (%s): %s", d.Id(), err)
+	mErr := multierror.Append(
+		d.Set("name", policy.Name),
+		d.Set("description", policy.Description),
+		d.Set("shared", policy.Shared),
+		d.Set("audited", policy.Audited),
+		d.Set("tenant_id", policy.TenantID),
+		d.Set("rules", policy.Rules),
+		d.Set("region", config.GetRegion(d)),
+	)
+	if err := mErr.ErrorOrNil(); err != nil {
+		return diag.FromErr(err)
 	}
-	d.Set("region", config.GetRegion(d))
 
 	return nil
 }

@@ -5,6 +5,7 @@ import (
 	"log"
 	"time"
 
+	"github.com/hashicorp/go-multierror"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	golangsdk "github.com/opentelekomcloud/gophertelekomcloud"
@@ -62,8 +63,8 @@ func resourceWafWebTamperProtectionRuleV1Create(ctx context.Context, d *schema.R
 		Url:      d.Get("url").(string),
 	}
 
-	policy_id := d.Get("policy_id").(string)
-	rule, err := webtamperprotection_rules.Create(wafClient, policy_id, createOpts).Extract()
+	policyID := d.Get("policy_id").(string)
+	rule, err := webtamperprotection_rules.Create(wafClient, policyID, createOpts).Extract()
 	if err != nil {
 		return fmterr.Errorf("error creating OpenTelekomcomCloud WAF Web Tamper Protection Rule: %s", err)
 	}
@@ -80,8 +81,8 @@ func resourceWafWebTamperProtectionRuleV1Read(_ context.Context, d *schema.Resou
 	if err != nil {
 		return fmterr.Errorf("error creating OpenTelekomCloud WAF client: %s", err)
 	}
-	policy_id := d.Get("policy_id").(string)
-	n, err := webtamperprotection_rules.Get(wafClient, policy_id, d.Id()).Extract()
+	policyID := d.Get("policy_id").(string)
+	n, err := webtamperprotection_rules.Get(wafClient, policyID, d.Id()).Extract()
 
 	if err != nil {
 		if _, ok := err.(golangsdk.ErrDefault404); ok {
@@ -93,9 +94,14 @@ func resourceWafWebTamperProtectionRuleV1Read(_ context.Context, d *schema.Resou
 	}
 
 	d.SetId(n.Id)
-	d.Set("hostname", n.Hostname)
-	d.Set("url", n.Url)
-	d.Set("policy_id", n.PolicyID)
+	mErr := multierror.Append(
+		d.Set("hostname", n.Hostname),
+		d.Set("url", n.Url),
+		d.Set("policy_id", n.PolicyID),
+	)
+	if err := mErr.ErrorOrNil(); err != nil {
+		return diag.FromErr(err)
+	}
 
 	return nil
 }
@@ -107,8 +113,8 @@ func resourceWafWebTamperProtectionRuleV1Delete(_ context.Context, d *schema.Res
 		return fmterr.Errorf("error creating OpenTelekomCloud WAF client: %s", err)
 	}
 
-	policy_id := d.Get("policy_id").(string)
-	err = webtamperprotection_rules.Delete(wafClient, policy_id, d.Id()).ExtractErr()
+	policyID := d.Get("policy_id").(string)
+	err = webtamperprotection_rules.Delete(wafClient, policyID, d.Id()).ExtractErr()
 	if err != nil {
 		return fmterr.Errorf("error deleting OpenTelekomCloud WAF Web Tamper Protection Rule: %s", err)
 	}
