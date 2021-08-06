@@ -68,7 +68,7 @@ func testAccCSBSBackupV1Destroy(s *terraform.State) error {
 
 		_, err := backup.Get(backupClient, rs.Primary.ID).ExtractBackup()
 		if err == nil {
-			return fmt.Errorf("Backup still exists")
+			return fmt.Errorf("backup still exists")
 		}
 	}
 
@@ -79,11 +79,11 @@ func testAccCSBSBackupV1Exists(n string, backups *backup.Backup) resource.TestCh
 	return func(s *terraform.State) error {
 		rs, ok := s.RootModule().Resources[n]
 		if !ok {
-			return fmt.Errorf("Backup not found: %s", n)
+			return fmt.Errorf("backup not found: %s", n)
 		}
 
 		if rs.Primary.ID == "" {
-			return fmt.Errorf("No ID is set")
+			return fmt.Errorf("no ID is set")
 		}
 
 		config := common.TestAccProvider.Meta().(*cfg.Config)

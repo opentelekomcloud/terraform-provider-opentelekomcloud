@@ -53,7 +53,7 @@ func testCESAlarmRuleDestroy(s *terraform.State) error {
 		id := rs.Primary.ID
 		_, err := alarmrule.Get(networkingClient, id).Extract()
 		if err == nil {
-			return fmt.Errorf("Alarm rule still exists")
+			return fmt.Errorf("alarm rule still exists")
 		}
 	}
 
@@ -64,11 +64,11 @@ func testCESAlarmRuleExists(n string, ar *alarmrule.AlarmRule) resource.TestChec
 	return func(s *terraform.State) error {
 		rs, ok := s.RootModule().Resources[n]
 		if !ok {
-			return fmt.Errorf("Not found: %s", n)
+			return fmt.Errorf("not found: %s", n)
 		}
 
 		if rs.Primary.ID == "" {
-			return fmt.Errorf("No ID is set")
+			return fmt.Errorf("no ID is set")
 		}
 
 		config := common.TestAccProvider.Meta().(*cfg.Config)
