@@ -5,6 +5,7 @@ import (
 	"log"
 	"time"
 
+	"github.com/hashicorp/go-multierror"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/antiddos/v1/antiddos"
@@ -133,13 +134,19 @@ func resourceAntiDdosV1Read(_ context.Context, d *schema.ResourceData, meta inte
 		return fmterr.Errorf("error retrieving AntiDdos: %s", err)
 	}
 
-	d.Set("floating_ip_id", d.Id())
-	d.Set("enable_l7", n.EnableL7)
-	d.Set("app_type_id", n.AppTypeId)
-	d.Set("cleaning_access_pos_id", n.CleaningAccessPosId)
-	d.Set("traffic_pos_id", n.TrafficPosId)
-	d.Set("http_request_pos_id", n.HttpRequestPosId)
-	d.Set("region", config.GetRegion(d))
+	mErr := multierror.Append(
+		d.Set("floating_ip_id", d.Id()),
+		d.Set("enable_l7", n.EnableL7),
+		d.Set("app_type_id", n.AppTypeId),
+		d.Set("cleaning_access_pos_id", n.CleaningAccessPosId),
+		d.Set("traffic_pos_id", n.TrafficPosId),
+		d.Set("http_request_pos_id", n.HttpRequestPosId),
+		d.Set("region", config.GetRegion(d)),
+	)
+
+	if err := mErr.ErrorOrNil(); err != nil {
+		return diag.FromErr(err)
+	}
 
 	return nil
 }
@@ -219,7 +226,6 @@ func waitForAntiDdosActive(antiddosClient *golangsdk.ServiceClient, antiddosId s
 
 func waitForAntiDdosDelete(antiddosClient *golangsdk.ServiceClient, antiddosId string) resource.StateRefreshFunc {
 	return func() (interface{}, string, error) {
-
 		ddosstatus, err := antiddos.ListStatus(antiddosClient, antiddos.ListStatusOpts{FloatingIpId: antiddosId})
 		if err != nil {
 			if _, ok := err.(golangsdk.ErrDefault403); ok {
