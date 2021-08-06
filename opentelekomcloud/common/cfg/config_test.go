@@ -30,7 +30,7 @@ func checkConfigField(t *testing.T, act *Config, excp *Config, fieldName string)
 	actual := reflect.ValueOf(*act).FieldByName(fieldName).String()
 	expected := reflect.ValueOf(*excp).FieldByName(fieldName).String()
 	if actual != expected {
-		t.Errorf("Field %s: expected %s, got %s", fieldName, expected, actual)
+		t.Errorf("field %s: expected %s, got %s", fieldName, expected, actual)
 	}
 }
 

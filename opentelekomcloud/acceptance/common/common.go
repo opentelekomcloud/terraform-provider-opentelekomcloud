@@ -97,7 +97,6 @@ func TestAccPreCheckRequiredEnvVars(t *testing.T) {
 	if env.OS_EXTGW_ID == "" {
 		t.Fatal("OS_EXTGW_ID must be set for acceptance tests")
 	}
-
 }
 
 func TestAccPreCheck(t *testing.T) {
@@ -128,5 +127,4 @@ func TestAccVBSBackupShareCheck(t *testing.T) {
 	if env.OS_TO_TENANT_ID == "" {
 		t.Skip("OS_TO_TENANT_ID must be set for acceptance tests")
 	}
-
 }

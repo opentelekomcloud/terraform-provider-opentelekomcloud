@@ -38,7 +38,7 @@ func NormalizeJsonString(jsonString interface{}) (string, error) {
 	// This covers any interpolated values
 	bytes, _ := json.Marshal(j)
 
-	return string(bytes[:]), nil
+	return string(bytes), nil
 }
 
 // Takes a value containing YAML string and passes it through

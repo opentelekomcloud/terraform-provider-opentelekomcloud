@@ -2,14 +2,11 @@ package common
 
 import (
 	"fmt"
-	"net/url"
 	"reflect"
 	"regexp"
 	"strconv"
 	"strings"
-	"time"
 
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 )
@@ -33,20 +30,7 @@ func IsEmptyValue(v reflect.Value) (bool, error) {
 	case reflect.Invalid:
 		return true, nil
 	}
-	return false, fmt.Errorf("IsEmptyValue:: unknown type")
-}
-
-func addQueryParams(rawurl string, params map[string]string) (string, error) {
-	u, err := url.Parse(rawurl)
-	if err != nil {
-		return "", err
-	}
-	q := u.Query()
-	for k, v := range params {
-		q.Set(k, v)
-	}
-	u.RawQuery = q.Encode()
-	return u.String(), nil
+	return false, fmt.Errorf("isEmptyValue:: unknown type")
 }
 
 func ReplaceVars(d *schema.ResourceData, linkTmpl string, kv map[string]string) (string, error) {
@@ -148,26 +132,11 @@ func NavigateValue(d interface{}, index []string, arrayIndex map[string]int) (in
 func convertToStr(v interface{}) (string, error) {
 	if s, ok := v.(string); ok {
 		return s, nil
-
 	} else if i, ok := v.(int); ok {
 		return strconv.Itoa(i), nil
-
 	} else if b, ok := v.(bool); ok {
 		return strconv.FormatBool(b), nil
 	}
 
 	return "", fmt.Errorf("can't convert to string")
-}
-
-func WaitToFinish(target, pending []string, timeout, interval time.Duration, f resource.StateRefreshFunc) (interface{}, error) {
-	stateConf := &resource.StateChangeConf{
-		Target:     target,
-		Pending:    pending,
-		Refresh:    f,
-		Timeout:    timeout,
-		Delay:      5 * time.Second,
-		MinTimeout: interval,
-	}
-
-	return stateConf.WaitForState()
 }
