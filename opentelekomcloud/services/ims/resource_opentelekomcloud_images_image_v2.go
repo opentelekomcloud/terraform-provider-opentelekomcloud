@@ -12,6 +12,7 @@ import (
 	"path/filepath"
 	"time"
 
+	"github.com/hashicorp/go-multierror"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 	golangsdk "github.com/opentelekomcloud/gophertelekomcloud"
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/imageservice/v2/imagedata"
@@ -214,7 +215,6 @@ func resourceImagesImageV2Create(ctx context.Context, d *schema.ResourceData, me
 	imgFilePath, err := resourceImagesImageV2File(d)
 	if err != nil {
 		return fmterr.Errorf("error opening file for Image: %s", err)
-
 	}
 	fileSize, fileChecksum, err := resourceImagesImageV2FileProps(imgFilePath)
 	if err != nil {
@@ -226,7 +226,9 @@ func resourceImagesImageV2Create(ctx context.Context, d *schema.ResourceData, me
 	if err != nil {
 		return fmterr.Errorf("error opening file %q: %s", imgFilePath, err)
 	}
-	defer imgFile.Close()
+	defer func() {
+		_ = imgFile.Close()
+	}()
 	log.Printf("[WARN] Uploading image %s (%d bytes). This can be pretty long.", d.Id(), fileSize)
 
 	res := imagedata.Upload(imageClient, d.Id(), imgFile)
@@ -267,30 +269,32 @@ func resourceImagesImageV2Read(_ context.Context, d *schema.ResourceData, meta i
 
 	log.Printf("[DEBUG] Retrieved Image %s: %#v", d.Id(), img)
 
-	d.Set("owner", img.Owner)
-	d.Set("status", img.Status)
-	d.Set("file", img.File)
-	d.Set("schema", img.Schema)
-	d.Set("checksum", img.Checksum)
-	d.Set("size_bytes", img.SizeBytes)
-	if err := d.Set("metadata", img.Metadata); err != nil {
-		return fmterr.Errorf("[DEBUG] Error saving metadata to state for OpenTelekomCloud image (%s): %s", d.Id(), err)
+	mErr := multierror.Append(
+		d.Set("owner", img.Owner),
+		d.Set("status", img.Status),
+		d.Set("file", img.File),
+		d.Set("schema", img.Schema),
+		d.Set("checksum", img.Checksum),
+		d.Set("size_bytes", img.SizeBytes),
+		d.Set("metadata", img.Metadata),
+		d.Set("created_at", img.CreatedAt),
+		d.Set("update_at", img.UpdatedAt),
+		d.Set("container_format", img.ContainerFormat),
+		d.Set("disk_format", img.DiskFormat),
+		d.Set("min_disk_gb", img.MinDiskGigabytes),
+		d.Set("min_ram_mb", img.MinRAMMegabytes),
+		d.Set("file", img.File),
+		d.Set("name", img.Name),
+		d.Set("protected", img.Protected),
+		d.Set("size_bytes", img.SizeBytes),
+		d.Set("tags", img.Tags),
+		d.Set("visibility", img.Visibility),
+		d.Set("region", config.GetRegion(d)),
+	)
+
+	if err := mErr.ErrorOrNil(); err != nil {
+		return diag.FromErr(err)
 	}
-	d.Set("created_at", img.CreatedAt)
-	d.Set("update_at", img.UpdatedAt)
-	d.Set("container_format", img.ContainerFormat)
-	d.Set("disk_format", img.DiskFormat)
-	d.Set("min_disk_gb", img.MinDiskGigabytes)
-	d.Set("min_ram_mb", img.MinRAMMegabytes)
-	d.Set("file", img.File)
-	d.Set("name", img.Name)
-	d.Set("protected", img.Protected)
-	d.Set("size_bytes", img.SizeBytes)
-	if err := d.Set("tags", img.Tags); err != nil {
-		return fmterr.Errorf("[DEBUG] Error saving tags to state for OpenTelekomCloud image (%s): %s", d.Id(), err)
-	}
-	d.Set("visibility", img.Visibility)
-	d.Set("region", config.GetRegion(d))
 
 	return nil
 }
@@ -420,14 +424,13 @@ func fileMD5Checksum(f *os.File) (string, error) {
 
 func resourceImagesImageV2FileProps(filename string) (int64, string, error) {
 	var filesize int64
-	var filechecksum string
+	var fileChecksum string
 
 	file, err := os.Open(filename)
 	if err != nil {
 		return -1, "", fmt.Errorf("error opening file for Image: %s", err)
-
 	}
-	defer file.Close()
+	defer func() { _ = file.Close() }()
 
 	fstat, err := file.Stat()
 	if err != nil {
@@ -435,13 +438,13 @@ func resourceImagesImageV2FileProps(filename string) (int64, string, error) {
 	}
 
 	filesize = fstat.Size()
-	filechecksum, err = fileMD5Checksum(file)
+	fileChecksum, err = fileMD5Checksum(file)
 
 	if err != nil {
 		return -1, "", fmt.Errorf("error computing image file %q checksum: %s", file.Name(), err)
 	}
 
-	return filesize, filechecksum, nil
+	return filesize, fileChecksum, nil
 }
 
 func resourceImagesImageV2File(d *schema.ResourceData) (string, error) {
@@ -449,7 +452,7 @@ func resourceImagesImageV2File(d *schema.ResourceData) (string, error) {
 		return filename, nil
 	} else if furl := d.Get("image_source_url").(string); furl != "" {
 		dir := d.Get("image_cache_path").(string)
-		os.MkdirAll(dir, 0700)
+		_ = os.MkdirAll(dir, 0700)
 		filename := filepath.Join(dir, fmt.Sprintf("%x.img", md5.Sum([]byte(furl))))
 
 		if _, err := os.Stat(filename); err != nil {
@@ -461,13 +464,12 @@ func resourceImagesImageV2File(d *schema.ResourceData) (string, error) {
 			if err != nil {
 				return "", fmt.Errorf("error creating file %q: %s", filename, err)
 			}
-			defer file.Close()
+			defer func() { _ = file.Close() }()
 			resp, err := http.Get(furl)
 			if err != nil {
 				return "", fmt.Errorf("error downloading image from %q", furl)
 			}
-			defer resp.Body.Close()
-
+			defer func() { _ = resp.Body.Close() }()
 			if _, err = io.Copy(file, resp.Body); err != nil {
 				return "", fmt.Errorf("error downloading image %q to file %q: %s", furl, filename, err)
 			}
@@ -481,7 +483,7 @@ func resourceImagesImageV2File(d *schema.ResourceData) (string, error) {
 	}
 }
 
-func resourceImagesImageV2RefreshFunc(client *golangsdk.ServiceClient, id string, fileSize int64, checksum string) resource.StateRefreshFunc {
+func resourceImagesImageV2RefreshFunc(client *golangsdk.ServiceClient, id string, _ int64, _ string) resource.StateRefreshFunc {
 	return func() (interface{}, string, error) {
 		img, err := images.Get(client, id).Extract()
 		if err != nil {
@@ -495,7 +497,7 @@ func resourceImagesImageV2RefreshFunc(client *golangsdk.ServiceClient, id string
 				return img, fmt.Sprintf("%s", img.Status), fmt.Errorf("error wrong size %v or checksum %q", img.SizeBytes, img.Checksum)
 			}
 		*/
-		return img, fmt.Sprintf("%s", img.Status), nil
+		return img, string(img.Status), nil
 	}
 }
 

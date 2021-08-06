@@ -47,11 +47,11 @@ func testAccCheckIdentityUserV3DataSourceID(n string) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
 		rs, ok := s.RootModule().Resources[n]
 		if !ok {
-			return fmt.Errorf("Can't find user data source: %s", n)
+			return fmt.Errorf("can't find user data source: %s", n)
 		}
 
 		if rs.Primary.ID == "" {
-			return fmt.Errorf("User data source ID not set")
+			return fmt.Errorf("user data source ID not set")
 		}
 
 		return nil
@@ -62,24 +62,24 @@ func testAccCheckIdentityUserV3DataSourceDefaultProjectID(n1, n2 string) resourc
 	return func(s *terraform.State) error {
 		ds1, ok := s.RootModule().Resources[n1]
 		if !ok {
-			return fmt.Errorf("Can't find user data source: %s", n1)
+			return fmt.Errorf("can't find user data source: %s", n1)
 		}
 
 		if ds1.Primary.ID == "" {
-			return fmt.Errorf("User data source ID not set")
+			return fmt.Errorf("user data source ID not set")
 		}
 
 		rs2, ok := s.RootModule().Resources[n2]
 		if !ok {
-			return fmt.Errorf("Can't find project resource: %s", n2)
+			return fmt.Errorf("can't find project resource: %s", n2)
 		}
 
 		if rs2.Primary.ID == "" {
-			return fmt.Errorf("Project resource ID not set")
+			return fmt.Errorf("project resource ID not set")
 		}
 
 		if rs2.Primary.ID != ds1.Primary.Attributes["default_project_id"] {
-			return fmt.Errorf("Project id and user default_project_id don't match")
+			return fmt.Errorf("project id and user default_project_id don't match")
 		}
 
 		return nil

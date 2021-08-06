@@ -4,6 +4,7 @@ import (
 	"context"
 	"log"
 
+	"github.com/hashicorp/go-multierror"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/identity/v3/groups"
@@ -89,10 +90,15 @@ func resourceIdentityGroupV3Read(_ context.Context, d *schema.ResourceData, meta
 
 	log.Printf("[DEBUG] Retrieved OpenTelekomCloud Group: %#v", group)
 
-	d.Set("domain_id", group.DomainID)
-	d.Set("description", group.Description)
-	d.Set("name", group.Name)
-	d.Set("region", config.GetRegion(d))
+	mErr := multierror.Append(
+		d.Set("domain_id", group.DomainID),
+		d.Set("description", group.Description),
+		d.Set("name", group.Name),
+		d.Set("region", config.GetRegion(d)),
+	)
+	if err := mErr.ErrorOrNil(); err != nil {
+		return diag.FromErr(err)
+	}
 
 	return nil
 }

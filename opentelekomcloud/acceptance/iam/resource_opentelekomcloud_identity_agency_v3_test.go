@@ -56,7 +56,7 @@ func testAccCheckIdentityV3AgencyDestroy(s *terraform.State) error {
 
 		_, err := agency.Get(identityClient, rs.Primary.ID).Extract()
 		if err == nil {
-			return fmt.Errorf("Agency still exists")
+			return fmt.Errorf("agency still exists")
 		}
 	}
 
@@ -67,11 +67,11 @@ func testAccCheckIdentityV3AgencyExists(n string, a *agency.Agency) resource.Tes
 	return func(s *terraform.State) error {
 		rs, ok := s.RootModule().Resources[n]
 		if !ok {
-			return fmt.Errorf("Not found: %s", n)
+			return fmt.Errorf("not found: %s", n)
 		}
 
 		if rs.Primary.ID == "" {
-			return fmt.Errorf("No ID is set")
+			return fmt.Errorf("no ID is set")
 		}
 
 		config := common.TestAccProvider.Meta().(*cfg.Config)
@@ -86,7 +86,7 @@ func testAccCheckIdentityV3AgencyExists(n string, a *agency.Agency) resource.Tes
 		}
 
 		if found.ID != rs.Primary.ID {
-			return fmt.Errorf("Agency not found")
+			return fmt.Errorf("agency not found")
 		}
 
 		*a = *found

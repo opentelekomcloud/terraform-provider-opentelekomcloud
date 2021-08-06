@@ -157,7 +157,7 @@ func resourceImagesImageAccessAcceptV2Update(ctx context.Context, d *schema.Reso
 	}
 	_, err = members.Update(client, imageID, memberID, opts).Extract()
 	if err != nil {
-		return fmterr.Errorf("Error updating the image with the member: %w", err)
+		return fmterr.Errorf("error updating the image with the member: %w", err)
 	}
 	state := &resource.StateChangeConf{
 		Target:  []string{status},

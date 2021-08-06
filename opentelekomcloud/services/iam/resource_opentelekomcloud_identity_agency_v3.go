@@ -8,6 +8,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/hashicorp/go-multierror"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
@@ -135,12 +136,12 @@ func listProjectsOfDomain(domainID string, client *golangsdk.ServiceClient) (map
 	}
 	allPages, err := sdkprojects.List(client, &opts).AllPages()
 	if err != nil {
-		return nil, fmt.Errorf("List projects failed, err=%s", err)
+		return nil, fmt.Errorf("list projects failed, err=%s", err)
 	}
 
 	all, err := sdkprojects.ExtractProjects(allPages)
 	if err != nil {
-		return nil, fmt.Errorf("Extract projects failed, err=%s", err)
+		return nil, fmt.Errorf("extract projects failed, err=%s", err)
 	}
 
 	r := make(map[string]string, len(all))
@@ -161,12 +162,12 @@ func listRolesOfDomain(domainID string, client *golangsdk.ServiceClient) (map[st
 	}
 	allPages, err := sdkroles.List(client, &opts).AllPages()
 	if err != nil {
-		return nil, fmt.Errorf("List roles failed, err=%s", err)
+		return nil, fmt.Errorf("list roles failed, err=%s", err)
 	}
 
 	all, err := sdkroles.ExtractRoles(allPages)
 	if err != nil {
-		return nil, fmt.Errorf("Extract roles failed, err=%s", err)
+		return nil, fmt.Errorf("extract roles failed, err=%s", err)
 	}
 	if len(all) == 0 {
 		return nil, nil
@@ -217,7 +218,7 @@ func getDomainID(config *cfg.Config, client *golangsdk.ServiceClient) (string, e
 
 	name := config.DomainName
 	if name == "" {
-		return "", fmt.Errorf("The required domain name was missed")
+		return "", fmt.Errorf("the required domain name was missed")
 	}
 
 	old := client.Endpoint
@@ -229,12 +230,12 @@ func getDomainID(config *cfg.Config, client *golangsdk.ServiceClient) (string, e
 	}
 	allPages, err := domains.List(client, &opts).AllPages()
 	if err != nil {
-		return "", fmt.Errorf("List domains failed, err=%s", err)
+		return "", fmt.Errorf("list domains failed, err=%s", err)
 	}
 
 	all, err := domains.ExtractDomains(allPages)
 	if err != nil {
-		return "", fmt.Errorf("Extract domains failed, err=%s", err)
+		return "", fmt.Errorf("extract domains failed, err=%s", err)
 	}
 
 	count := len(all)
@@ -294,7 +295,7 @@ func resourceIdentityAgencyV3Create(ctx context.Context, d *schema.ResourceData,
 	prs := d.Get("project_role").(*schema.Set)
 	drs := d.Get("domain_roles").(*schema.Set)
 	if prs.Len() == 0 && drs.Len() == 0 {
-		return fmterr.Errorf("One or both of project_role and domain_roles must be input")
+		return fmterr.Errorf("one or both of project_role and domain_roles must be input")
 	}
 
 	config := meta.(*cfg.Config)
@@ -338,7 +339,7 @@ func resourceIdentityAgencyV3Create(ctx context.Context, d *schema.ResourceData,
 		pn := pr["project"].(string)
 		pid, ok := projects[pn]
 		if !ok {
-			return fmterr.Errorf("The project(%s) is not exist", pn)
+			return fmterr.Errorf("the project(%s) is not exist", pn)
 		}
 
 		rs := pr["roles"].(*schema.Set)
@@ -346,7 +347,7 @@ func resourceIdentityAgencyV3Create(ctx context.Context, d *schema.ResourceData,
 			r := role.(string)
 			rid, ok := roles[r]
 			if !ok {
-				return fmterr.Errorf("The role(%s) is not exist", r)
+				return fmterr.Errorf("the role(%s) is not exist", r)
 			}
 
 			err = agency.AttachRoleByProject(client, agencyID, pid, rid).ExtractErr()
@@ -361,7 +362,7 @@ func resourceIdentityAgencyV3Create(ctx context.Context, d *schema.ResourceData,
 		r := role.(string)
 		rid, ok := roles[r]
 		if !ok {
-			return fmterr.Errorf("The role(%s) is not exist", r)
+			return fmterr.Errorf("the role(%s) is not exist", r)
 		}
 
 		err = agency.AttachRoleByDomain(client, agencyID, domainID, rid).ExtractErr()
@@ -387,12 +388,17 @@ func resourceIdentityAgencyV3Read(_ context.Context, d *schema.ResourceData, met
 	}
 	log.Printf("[DEBUG] Retrieved Identity-Agency %s: %#v", d.Id(), a)
 
-	d.Set("name", a.Name)
-	d.Set("delegated_domain_name", a.DelegatedDomainName)
-	d.Set("description", a.Description)
-	d.Set("duration", a.Duration)
-	d.Set("expire_time", a.ExpireTime)
-	d.Set("create_time", a.CreateTime)
+	mErr := multierror.Append(
+		d.Set("name", a.Name),
+		d.Set("delegated_domain_name", a.DelegatedDomainName),
+		d.Set("description", a.Description),
+		d.Set("duration", a.Duration),
+		d.Set("expire_time", a.ExpireTime),
+		d.Set("create_time", a.CreateTime),
+	)
+	if err := mErr.ErrorOrNil(); err != nil {
+		return diag.FromErr(err)
+	}
 
 	projects, err := listProjectsOfDomain(a.DomainID, client)
 	if err != nil {
@@ -494,11 +500,11 @@ func resourceIdentityAgencyV3Update(ctx context.Context, d *schema.ResourceData,
 			pr := strings.Split(v, "|")
 			pid, ok := projects[pr[0]]
 			if !ok {
-				return fmterr.Errorf("The project(%s) is not exist", pr[0])
+				return fmterr.Errorf("the project(%s) is not exist", pr[0])
 			}
 			rid, ok := roles[pr[1]]
 			if !ok {
-				return fmterr.Errorf("The role(%s) is not exist", pr[1])
+				return fmterr.Errorf("the role(%s) is not exist", pr[1])
 			}
 
 			err = agency.DetachRoleByProject(client, aID, pid, rid).ExtractErr()
@@ -512,11 +518,11 @@ func resourceIdentityAgencyV3Update(ctx context.Context, d *schema.ResourceData,
 			pr := strings.Split(v, "|")
 			pid, ok := projects[pr[0]]
 			if !ok {
-				return fmterr.Errorf("The project(%s) is not exist", pr[0])
+				return fmterr.Errorf("the project(%s) is not exist", pr[0])
 			}
 			rid, ok := roles[pr[1]]
 			if !ok {
-				return fmterr.Errorf("The role(%s) is not exist", pr[1])
+				return fmterr.Errorf("the role(%s) is not exist", pr[1])
 			}
 
 			err = agency.AttachRoleByProject(client, aID, pid, rid).ExtractErr()
@@ -535,7 +541,7 @@ func resourceIdentityAgencyV3Update(ctx context.Context, d *schema.ResourceData,
 		for _, r := range oldr.Difference(newr).List() {
 			rid, ok := roles[r.(string)]
 			if !ok {
-				return fmterr.Errorf("The role(%s) is not exist", r.(string))
+				return fmterr.Errorf("the role(%s) is not exist", r.(string))
 			}
 
 			err = agency.DetachRoleByDomain(client, aID, domainID, rid).ExtractErr()
@@ -548,7 +554,7 @@ func resourceIdentityAgencyV3Update(ctx context.Context, d *schema.ResourceData,
 		for _, r := range newr.Difference(oldr).List() {
 			rid, ok := roles[r.(string)]
 			if !ok {
-				return fmterr.Errorf("The role(%s) is not exist", r.(string))
+				return fmterr.Errorf("the role(%s) is not exist", r.(string))
 			}
 
 			err = agency.AttachRoleByDomain(client, aID, domainID, rid).ExtractErr()
