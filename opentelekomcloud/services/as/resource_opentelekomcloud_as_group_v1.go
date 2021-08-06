@@ -528,7 +528,6 @@ func resourceASGroupUpdate(ctx context.Context, d *schema.ResourceData, meta int
 		if desireNum < minNum || desireNum > maxNum {
 			return fmterr.Errorf("invalid parameters: it should be min_instance_number<=desire_instance_number<=max_instance_number")
 		}
-
 	}
 
 	networks := getAllNetworks(d)
