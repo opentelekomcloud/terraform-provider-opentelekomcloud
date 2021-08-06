@@ -93,7 +93,6 @@ resource "opentelekomcloud_css_snapshot_configuration_v1" "config" {
   }
 }
 `, name, env.OS_NETWORK_ID, env.OS_VPC_ID, env.OS_AVAILABILITY_ZONE, osAgency)
-
 }
 
 func testResourceCSSSnapshotConfigurationV1Updated(name string) string {
@@ -145,5 +144,4 @@ resource "opentelekomcloud_css_snapshot_configuration_v1" "config" {
   }
 }
 `, name, env.OS_NETWORK_ID, env.OS_VPC_ID, env.OS_AVAILABILITY_ZONE, osAgency)
-
 }

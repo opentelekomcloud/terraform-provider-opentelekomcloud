@@ -46,8 +46,8 @@ func TestAccCSSFlavorV1DataSource_byName(t *testing.T) {
 	})
 }
 
-var (
-	testAccCSSFlavorV1DataSource = fmt.Sprintf(`
+const (
+	testAccCSSFlavorV1DataSource = `
 data "opentelekomcloud_css_flavor_v1" "flavor" {
   min_cpu = 4
   min_ram = 32
@@ -57,7 +57,7 @@ data "opentelekomcloud_css_flavor_v1" "flavor" {
     min_to   = 800
   }
 }
-`)
+`
 
 	testAccCSSFlavorV1DataSourceByName = `
 data "opentelekomcloud_css_flavor_v1" "flavor" {
@@ -70,7 +70,7 @@ func testAccCheckCSSFlavorV1DataSourceID(name string) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
 		rs, ok := s.RootModule().Resources[name]
 		if !ok {
-			return fmt.Errorf("Can't find backup data source: %s ", name)
+			return fmt.Errorf("can't find backup data source: %s ", name)
 		}
 
 		if rs.Primary.ID == "" {

@@ -98,12 +98,12 @@ func dataSourceCTSTrackerV1Read(_ context.Context, d *schema.ResourceData, meta 
 	}
 
 	if len(refinedTrackers) < 1 {
-		return fmterr.Errorf("Your query returned no results. " +
+		return fmterr.Errorf("your query returned no results. " +
 			"Please change your search criteria and try again.")
 	}
 
 	if len(refinedTrackers) > 1 {
-		return fmterr.Errorf("Your query returned more than one result." +
+		return fmterr.Errorf("your query returned more than one result." +
 			" Please try a more specific search criteria")
 	}
 

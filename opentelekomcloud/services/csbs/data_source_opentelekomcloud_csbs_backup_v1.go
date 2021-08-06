@@ -4,6 +4,7 @@ import (
 	"context"
 	"log"
 
+	"github.com/hashicorp/go-multierror"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/csbs/v1/backup"
@@ -204,6 +205,9 @@ func DataSourceCSBSBackupV1() *schema.Resource {
 func dataSourceCSBSBackupV1Read(_ context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*cfg.Config)
 	backupClient, err := config.CsbsV1Client(config.GetRegion(d))
+	if err != nil {
+		return fmterr.Errorf("error creating CSBSv1 client: %w", err)
+	}
 
 	listOpts := backup.ListOpts{
 		ID:           d.Id(),
@@ -219,16 +223,16 @@ func dataSourceCSBSBackupV1Read(_ context.Context, d *schema.ResourceData, meta 
 
 	refinedbackups, err := backup.List(backupClient, listOpts)
 	if err != nil {
-		return fmterr.Errorf("Unable to retrieve backup: %s", err)
+		return fmterr.Errorf("unable to retrieve backup: %s", err)
 	}
 
 	if len(refinedbackups) < 1 {
-		return fmterr.Errorf("Your query returned no results. " +
+		return fmterr.Errorf("your query returned no results. " +
 			"Please change your search criteria and try again.")
 	}
 
 	if len(refinedbackups) > 1 {
-		return fmterr.Errorf("Your query returned more than one result." +
+		return fmterr.Errorf("your query returned more than one result." +
 			" Please try a more specific search criteria")
 	}
 
@@ -237,24 +241,29 @@ func dataSourceCSBSBackupV1Read(_ context.Context, d *schema.ResourceData, meta 
 
 	d.SetId(backupObject.Id)
 
-	d.Set("backup_record_id", backupObject.CheckpointId)
-	d.Set("backup_name", backupObject.Name)
-	d.Set("resource_id", backupObject.ResourceId)
-	d.Set("status", backupObject.Status)
-	d.Set("description", backupObject.Description)
-	d.Set("resource_type", backupObject.ResourceType)
-	d.Set("auto_trigger", backupObject.ExtendInfo.AutoTrigger)
-	d.Set("average_speed", backupObject.ExtendInfo.AverageSpeed)
-	d.Set("resource_name", backupObject.ExtendInfo.ResourceName)
-	d.Set("size", backupObject.ExtendInfo.Size)
-	d.Set("volume_backups", flattenCSBSVolumeBackups(&backupObject))
-	d.Set("vm_metadata", flattenCSBSVMMetadata(&backupObject))
+	mErr := multierror.Append(
+		d.Set("backup_record_id", backupObject.CheckpointId),
+		d.Set("backup_name", backupObject.Name),
+		d.Set("resource_id", backupObject.ResourceId),
+		d.Set("status", backupObject.Status),
+		d.Set("description", backupObject.Description),
+		d.Set("resource_type", backupObject.ResourceType),
+		d.Set("auto_trigger", backupObject.ExtendInfo.AutoTrigger),
+		d.Set("average_speed", backupObject.ExtendInfo.AverageSpeed),
+		d.Set("resource_name", backupObject.ExtendInfo.ResourceName),
+		d.Set("size", backupObject.ExtendInfo.Size),
+		d.Set("volume_backups", flattenCSBSVolumeBackups(&backupObject)),
+		d.Set("vm_metadata", flattenCSBSVMMetadata(&backupObject)),
+		d.Set("region", config.GetRegion(d)),
+	)
+
+	if err := mErr.ErrorOrNil(); err != nil {
+		return diag.FromErr(err)
+	}
 
 	if err := d.Set("tags", flattenCSBSTags(&backupObject)); err != nil {
 		return diag.FromErr(err)
 	}
-
-	d.Set("region", config.GetRegion(d))
 
 	return nil
 }
