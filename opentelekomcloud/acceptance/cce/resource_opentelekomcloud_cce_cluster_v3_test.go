@@ -80,7 +80,6 @@ func TestAccCCEClusterV3_invalidNetwork(t *testing.T) {
 }
 
 func TestAccCCEClusterV3_proxyAuth(t *testing.T) {
-
 	resource.Test(t, resource.TestCase{
 		PreCheck:          func() { common.TestAccPreCheck(t) },
 		ProviderFactories: common.TestAccProviderFactories,

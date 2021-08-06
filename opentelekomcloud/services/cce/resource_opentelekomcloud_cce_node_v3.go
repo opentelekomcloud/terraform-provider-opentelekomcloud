@@ -11,7 +11,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
-	"github.com/opentelekomcloud/gophertelekomcloud"
+	golangsdk "github.com/opentelekomcloud/gophertelekomcloud"
 	nodesv1 "github.com/opentelekomcloud/gophertelekomcloud/openstack/cce/v1/nodes"
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/cce/v3/clusters"
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/cce/v3/nodes"
@@ -261,9 +261,9 @@ func ResourceCCENodeV3() *schema.Resource {
 				Optional: true,
 				ForceNew: true,
 				StateFunc: func(v interface{}) string {
-					switch v.(type) {
+					switch v := v.(type) {
 					case string:
-						return common.InstallScriptHashSum(v.(string))
+						return common.InstallScriptHashSum(v)
 					default:
 						return ""
 					}
@@ -274,9 +274,9 @@ func ResourceCCENodeV3() *schema.Resource {
 				Optional: true,
 				ForceNew: true,
 				StateFunc: func(v interface{}) string {
-					switch v.(type) {
+					switch v := v.(type) {
 					case string:
-						return common.InstallScriptHashSum(v.(string))
+						return common.InstallScriptHashSum(v)
 					default:
 						return ""
 					}
@@ -517,22 +517,27 @@ func resourceCCENodeV3Create(ctx context.Context, d *schema.ResourceData, meta i
 		MinTimeout: 3 * time.Second,
 	}
 	_, err = stateCluster.WaitForStateContext(ctx)
-
-	log.Printf("[DEBUG] Create Options: %#v", createOpts)
-	s, err := nodes.Create(client, clusterID, createOpts).Extract()
 	if err != nil {
-		if _, ok := err.(golangsdk.ErrDefault403); ok {
-			retryNode, err := recursiveCreate(ctx, client, createOpts, clusterID, 403)
-			if err == "fail" {
-				return fmterr.Errorf("error creating OpenTelekomCloud Node")
-			}
-			s = retryNode
-		} else {
-			return fmterr.Errorf("error creating OpenTelekomCloud Node: %s", err)
-		}
+		return fmterr.Errorf("error waiting cluster to become available: %w", err)
 	}
 
-	job, err := nodes.GetJobDetails(client, s.Status.JobID).ExtractJob()
+	log.Printf("[DEBUG] Create Options: %#v", createOpts)
+	_, err = nodes.Create(client, clusterID, createOpts).Extract()
+	var node *nodes.Nodes
+	switch err.(type) {
+	case golangsdk.ErrDefault403:
+		retryNode, err := recursiveCreate(ctx, client, createOpts, clusterID, 403)
+		if err == "fail" {
+			return fmterr.Errorf("error creating OpenTelekomCloud Node")
+		}
+		node = retryNode
+	case nil:
+		break
+	default:
+		return fmterr.Errorf("error creating OpenTelekomCloud Node: %s", err)
+	}
+
+	job, err := nodes.GetJobDetails(client, node.Status.JobID).ExtractJob()
 	if err != nil {
 		return fmterr.Errorf("error fetching OpenTelekomCloud Job Details: %s", err)
 	}
@@ -551,7 +556,7 @@ func resourceCCENodeV3Create(ctx context.Context, d *schema.ResourceData, meta i
 		}
 	}
 
-	log.Printf("[DEBUG] Waiting for CCE Node (%s) to become available", s.Metadata.Name)
+	log.Printf("[DEBUG] Waiting for CCE Node (%s) to become available", node.Metadata.Name)
 	stateConf := &resource.StateChangeConf{
 		Pending:    []string{"Build", "Installing"},
 		Target:     []string{"Active"},

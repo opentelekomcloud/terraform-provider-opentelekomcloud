@@ -332,21 +332,21 @@ func resourceCCENodePoolV3Create(ctx context.Context, d *schema.ResourceData, me
 
 	log.Printf("[DEBUG] Create Options: %#v", createOpts)
 	pool, err := nodepools.Create(nodePoolClient, clusterId, createOpts).Extract()
-	if err != nil {
-		if _, ok := err.(golangsdk.ErrDefault403); ok {
-			if _, err := stateCluster.WaitForStateContext(ctx); err != nil {
-				return fmterr.Errorf("error waiting for cluster to be available: %w", err)
-			}
-			retried, err := nodepools.Create(nodePoolClient, clusterId, createOpts).Extract()
-			if err != nil {
-				return fmterr.Errorf(createError, err)
-			}
-			pool = retried
-		} else {
+	switch err.(type) {
+	case golangsdk.ErrDefault403:
+		if _, err := stateCluster.WaitForStateContext(ctx); err != nil {
+			return fmterr.Errorf("error waiting for cluster to be available: %w", err)
+		}
+		retried, err := nodepools.Create(nodePoolClient, clusterId, createOpts).Extract()
+		if err != nil {
 			return fmterr.Errorf(createError, err)
 		}
+		pool = retried
+	case nil:
+		break
+	default:
+		return fmterr.Errorf(createError, err)
 	}
-
 	d.SetId(pool.Metadata.Id)
 
 	stateConf := &resource.StateChangeConf{
