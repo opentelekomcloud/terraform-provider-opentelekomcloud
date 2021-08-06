@@ -6,6 +6,7 @@ import (
 	"log"
 	"strings"
 
+	"github.com/hashicorp/go-multierror"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	golangsdk "github.com/opentelekomcloud/gophertelekomcloud"
@@ -152,10 +153,15 @@ func resourceComputeFloatingIPAssociateV2Read(_ context.Context, d *schema.Resou
 	}
 
 	// Set the attributes pulled from the composed resource ID
-	d.Set("floating_ip", floatingIP)
-	d.Set("instance_id", instanceId)
-	d.Set("fixed_ip", fixedIP)
-	d.Set("region", config.GetRegion(d))
+	mErr := multierror.Append(
+		d.Set("floating_ip", floatingIP),
+		d.Set("instance_id", instanceId),
+		d.Set("fixed_ip", fixedIP),
+		d.Set("region", config.GetRegion(d)),
+	)
+	if err := mErr.ErrorOrNil(); err != nil {
+		return diag.FromErr(err)
+	}
 
 	return nil
 }
@@ -186,7 +192,7 @@ func resourceComputeFloatingIPAssociateV2Delete(_ context.Context, d *schema.Res
 func ParseComputeFloatingIPAssociateId(id string) (string, string, string, error) {
 	idParts := strings.Split(id, "/")
 	if len(idParts) < 3 {
-		return "", "", "", fmt.Errorf("Unable to determine floating ip association ID")
+		return "", "", "", fmt.Errorf("unable to determine floating ip association ID")
 	}
 
 	floatingIP := idParts[0]
@@ -211,7 +217,7 @@ func resourceComputeFloatingIPAssociateV2NetworkExists(networkClient *golangsdk.
 	}
 
 	if len(allFips) > 1 {
-		return false, "", fmt.Errorf("There was a problem retrieving the floating IP")
+		return false, "", fmt.Errorf("there was a problem retrieving the floating IP")
 	}
 
 	if len(allFips) == 0 {

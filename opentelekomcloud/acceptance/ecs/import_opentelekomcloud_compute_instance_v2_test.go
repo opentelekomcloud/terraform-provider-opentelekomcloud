@@ -17,7 +17,7 @@ func TestAccComputeV2InstanceImportBasic(t *testing.T) {
 		CheckDestroy:      TestAccCheckComputeV2InstanceDestroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccComputeV2Instance_basic,
+				Config: testAccComputeV2InstanceBasic,
 			},
 			{
 				ResourceName:      resourceName,
@@ -41,7 +41,7 @@ func TestAccComputeV2InstanceImportBootFromVolumeImage(t *testing.T) {
 		CheckDestroy:      TestAccCheckComputeV2InstanceDestroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccComputeV2Instance_bootFromVolumeImage,
+				Config: testAccComputeV2InstanceBootFromVolumeImage,
 			},
 			{
 				ResourceName:      resourceName,

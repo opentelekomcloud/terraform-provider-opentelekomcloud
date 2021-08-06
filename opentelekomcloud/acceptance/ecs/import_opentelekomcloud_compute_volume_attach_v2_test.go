@@ -17,7 +17,7 @@ func TestAccComputeV2VolumeAttach_importBasic(t *testing.T) {
 		CheckDestroy:      testAccCheckComputeV2VolumeAttachDestroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccComputeV2VolumeAttach_basic,
+				Config: testAccComputeV2VolumeAttachBasic,
 			},
 
 			{

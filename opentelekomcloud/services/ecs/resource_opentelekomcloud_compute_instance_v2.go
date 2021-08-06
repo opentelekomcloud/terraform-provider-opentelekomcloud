@@ -94,9 +94,9 @@ func ResourceComputeInstanceV2() *schema.Resource {
 				ForceNew: true,
 				// just stash the hash for state & diff comparisons
 				StateFunc: func(v interface{}) string {
-					switch v.(type) {
+					switch v := v.(type) {
 					case string:
-						return common.InstallScriptHashSum(v.(string))
+						return common.InstallScriptHashSum(v)
 					default:
 						return ""
 					}
