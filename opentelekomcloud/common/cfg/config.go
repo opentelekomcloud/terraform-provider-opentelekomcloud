@@ -264,7 +264,11 @@ func (c *Config) GetCredentials() (*awsCredentials.Credentials, error) {
 	// Real AWS should reply to a simple metadata request.
 	// We check it actually does to ensure something else didn't just
 	// happen to be listening on the same IP:Port
-	metadataClient := ec2metadata.New(session.New(config))
+	sess, err := session.NewSession(config)
+	if err != nil {
+		return nil, err
+	}
+	metadataClient := ec2metadata.New(sess)
 	if metadataClient.Available() {
 		providers = append(providers, &ec2rolecreds.EC2RoleProvider{
 			Client: metadataClient,
@@ -631,13 +635,6 @@ func (c *Config) NewObjectStorageClient(region string) (*obs.ObsClient, error) {
 	setUpOBSLogging()
 
 	return obs.New(cred.AccessKey, cred.SecretKey, client.Endpoint, obs.WithSecurityToken(cred.SecurityToken))
-}
-
-func (c *Config) blockStorageV1Client(region string) (*golangsdk.ServiceClient, error) {
-	return openstack.NewBlockStorageV1(c.HwClient, golangsdk.EndpointOpts{
-		Region:       region,
-		Availability: c.getEndpointType(),
-	})
 }
 
 func (c *Config) BlockStorageV2Client(region string) (*golangsdk.ServiceClient, error) {

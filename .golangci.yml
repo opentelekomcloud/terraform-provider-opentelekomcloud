@@ -29,3 +29,8 @@ linters:
     - vet
     - vetshadow
     - whitespace
+
+linters-settings:
+  misspell:
+    ignore-words:
+      - unknwon

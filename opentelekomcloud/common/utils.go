@@ -5,7 +5,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"log"
-	"reflect"
 	"regexp"
 	"sort"
 	"strings"
@@ -18,20 +17,6 @@ import (
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common/cfg"
 )
 
-func jsonBytesEqual(b1, b2 []byte) bool {
-	var o1 interface{}
-	if err := json.Unmarshal(b1, &o1); err != nil {
-		return false
-	}
-
-	var o2 interface{}
-	if err := json.Unmarshal(b2, &o2); err != nil {
-		return false
-	}
-
-	return reflect.DeepEqual(o1, o2)
-}
-
 // ConvertStructToMap converts an instance of struct to a map object, and
 // changes each key of fields to the value of 'nameMap' if the key in it
 // or to its corresponding lowercase.
@@ -41,14 +26,11 @@ func ConvertStructToMap(obj interface{}, nameMap map[string]string) (map[string]
 		return nil, fmt.Errorf("error converting struct to map, marshal failed:%v", err)
 	}
 
-	m, err := regexp.Compile(`"[a-z0-9A-Z_]+":`)
-	if err != nil {
-		return nil, fmt.Errorf("error converting struct to map, compile regular express failed")
-	}
+	m := regexp.MustCompile(`"[a-z0-9A-Z_]+":`)
 	nb := m.ReplaceAllFunc(
 		b,
 		func(src []byte) []byte {
-			k := fmt.Sprintf("%s", src[1:len(src)-2])
+			k := string(src[1 : len(src)-2])
 			v, ok := nameMap[k]
 			if !ok {
 				v = strings.ToLower(k)

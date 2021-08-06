@@ -39,7 +39,7 @@ func retryTimeout(count int) time.Duration {
 func (lrt *RoundTripper) RoundTrip(request *http.Request) (*http.Response, error) {
 	defer func() {
 		if request.Body != nil {
-			request.Body.Close()
+			_ = request.Body.Close()
 		}
 	}()
 
@@ -64,12 +64,11 @@ func (lrt *RoundTripper) RoundTrip(request *http.Request) (*http.Response, error
 	// Retrying connection
 	retry := 1
 	for response == nil {
-
 		if retry > lrt.MaxRetries {
 			if lrt.OsDebug {
 				log.Printf("[DEBUG] OpenTelecomCloud connection error, retries exhausted. Aborting")
 			}
-			err = fmt.Errorf("OpenTelecomCloud connection error, retries exhausted. Aborting. Last error was: %s", err)
+			err = fmt.Errorf("openTelecomCloud connection error, retries exhausted. Aborting. Last error was: %s", err)
 			return nil, err
 		}
 
@@ -94,7 +93,7 @@ func (lrt *RoundTripper) RoundTrip(request *http.Request) (*http.Response, error
 // logRequest will log the HTTP Request details.
 // If the body is JSON, it will attempt to be pretty-formatted.
 func (lrt *RoundTripper) logRequest(original io.ReadCloser, contentType string) (io.ReadCloser, error) {
-	defer original.Close()
+	defer func() { _ = original.Close() }()
 
 	var bs bytes.Buffer
 	_, err := io.Copy(&bs, original)
@@ -118,7 +117,7 @@ func (lrt *RoundTripper) logRequest(original io.ReadCloser, contentType string) 
 func (lrt *RoundTripper) logResponse(original io.ReadCloser, contentType string) (io.ReadCloser, error) {
 	if strings.HasPrefix(contentType, "application/json") {
 		var bs bytes.Buffer
-		defer original.Close()
+		defer func() { _ = original.Close() }()
 		_, err := io.Copy(&bs, original)
 		if err != nil {
 			return nil, err
@@ -131,14 +130,13 @@ func (lrt *RoundTripper) logResponse(original io.ReadCloser, contentType string)
 	}
 
 	var buf bytes.Buffer
-	defer original.Close()
+	defer func() { _ = original.Close() }()
 	if _, err := io.Copy(&buf, original); err != nil {
 		return nil, err
 	}
 	log.Printf("[DEBUG] the response is: %s", buf.String())
 	log.Printf("[DEBUG] Not logging because OpenTelekomCloud response body isn't JSON")
 	return ioutil.NopCloser(strings.NewReader(buf.String())), nil
-
 }
 
 // formatJSON will try to pretty-format a JSON body.

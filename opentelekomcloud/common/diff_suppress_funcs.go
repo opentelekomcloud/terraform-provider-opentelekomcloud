@@ -7,7 +7,7 @@ import (
 	"strings"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
-	"github.com/jen20/awspolicyequivalence"
+	awspolicy "github.com/jen20/awspolicyequivalence"
 )
 
 func SuppressEquivalentAwsPolicyDiffs(_, old, new string, _ *schema.ResourceData) bool {
@@ -81,7 +81,7 @@ func SuppressSmartVersionDiff(_, old, new string, _ *schema.ResourceData) bool {
 }
 
 func SuppressCaseInsensitive(_, old, new string, _ *schema.ResourceData) bool {
-	return strings.ToLower(old) == strings.ToLower(new)
+	return strings.EqualFold(old, new)
 }
 
 func SuppressEqualZoneNames(_, old, new string, _ *schema.ResourceData) bool {
