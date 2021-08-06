@@ -31,11 +31,11 @@ func testAccCheckAntiDdosV1DataSourceID(n string) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
 		rs, ok := s.RootModule().Resources[n]
 		if !ok {
-			return fmt.Errorf("Can't find defense status of EIP data source: %s ", n)
+			return fmt.Errorf("can't find defense status of EIP data source: %s ", n)
 		}
 
 		if rs.Primary.ID == "" {
-			return fmt.Errorf("Defense status of EIP data source ID not set")
+			return fmt.Errorf("defense status of EIP data source ID not set")
 		}
 
 		return nil
