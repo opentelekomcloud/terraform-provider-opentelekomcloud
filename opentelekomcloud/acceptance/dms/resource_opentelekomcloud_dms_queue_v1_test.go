@@ -81,7 +81,7 @@ func testAccCheckDmsV1QueueDestroy(s *terraform.State) error {
 
 		_, err := queues.Get(dmsClient, rs.Primary.ID, false).Extract()
 		if err == nil {
-			return fmt.Errorf("The Dms queue still exists.")
+			return fmt.Errorf("the Dms queue still exists.")
 		}
 	}
 	return nil
@@ -91,11 +91,11 @@ func testAccCheckDmsV1QueueExists(n string, queue queues.Queue) resource.TestChe
 	return func(s *terraform.State) error {
 		rs, ok := s.RootModule().Resources[n]
 		if !ok {
-			return fmt.Errorf("Not found: %s", n)
+			return fmt.Errorf("not found: %s", n)
 		}
 
 		if rs.Primary.ID == "" {
-			return fmt.Errorf("No ID is set")
+			return fmt.Errorf("no ID is set")
 		}
 
 		config := common.TestAccProvider.Meta().(*cfg.Config)
@@ -109,7 +109,7 @@ func testAccCheckDmsV1QueueExists(n string, queue queues.Queue) resource.TestChe
 			return fmt.Errorf("error getting OpenTelekomCloud queue: %s, err: %s", rs.Primary.ID, err)
 		}
 		if v.ID != rs.Primary.ID {
-			return fmt.Errorf("The Dms queue not found.")
+			return fmt.Errorf("the Dms queue not found.")
 		}
 		queue = *v
 		return nil

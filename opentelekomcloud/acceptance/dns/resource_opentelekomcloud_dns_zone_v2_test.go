@@ -158,7 +158,7 @@ func testAccCheckDNSV2ZoneDestroy(s *terraform.State) error {
 
 		_, err := zones.Get(dnsClient, rs.Primary.ID).Extract()
 		if err == nil {
-			return fmt.Errorf("Zone still exists")
+			return fmt.Errorf("zone still exists")
 		}
 	}
 
@@ -169,11 +169,11 @@ func testAccCheckDNSV2ZoneExists(n string, zone *zones.Zone) resource.TestCheckF
 	return func(s *terraform.State) error {
 		rs, ok := s.RootModule().Resources[n]
 		if !ok {
-			return fmt.Errorf("Not found: %s", n)
+			return fmt.Errorf("not found: %s", n)
 		}
 
 		if rs.Primary.ID == "" {
-			return fmt.Errorf("No ID is set")
+			return fmt.Errorf("no ID is set")
 		}
 
 		config := common.TestAccProvider.Meta().(*cfg.Config)
@@ -188,7 +188,7 @@ func testAccCheckDNSV2ZoneExists(n string, zone *zones.Zone) resource.TestCheckF
 		}
 
 		if found.ID != rs.Primary.ID {
-			return fmt.Errorf("Zone not found")
+			return fmt.Errorf("zone not found")
 		}
 
 		*zone = *found

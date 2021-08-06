@@ -172,7 +172,7 @@ func dataSourceDdsInstanceV3Read(_ context.Context, d *schema.ResourceData, meta
 	if err != nil {
 		return fmterr.Errorf("error extracting DDS instance: %s", err)
 	}
-	if len(instancesList.Instances) < 0 {
+	if len(instancesList.Instances) < 1 {
 		return fmterr.Errorf("your query returned no results. Please change your search criteria and try again")
 	}
 

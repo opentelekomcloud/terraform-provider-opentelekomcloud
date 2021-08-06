@@ -9,7 +9,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
-	"github.com/opentelekomcloud/gophertelekomcloud"
+	golangsdk "github.com/opentelekomcloud/gophertelekomcloud"
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/dcs/v1/configs"
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/dcs/v1/instances"
 
@@ -272,6 +272,7 @@ func getInstanceBackupPolicy(d *schema.ResourceData) *instances.InstanceBackupPo
 				BackupAt:   formatAts(backupAts),
 			},
 		}
+		return instanceBackupPolicy
 	}
 
 	backupPolicyList := d.Get("backup_policy").([]interface{})
@@ -523,7 +524,7 @@ func resourceDcsInstancesV1Delete(ctx context.Context, d *schema.ResourceData, m
 
 	_, err = stateConf.WaitForStateContext(ctx)
 	if err != nil {
-		return fmterr.Errorf("Error waiting for instance (%s) to delete: %w", d.Id(), err)
+		return fmterr.Errorf("error waiting for instance (%s) to delete: %w", d.Id(), err)
 	}
 
 	log.Printf("[DEBUG] DCS instance %s deactivated.", d.Id())

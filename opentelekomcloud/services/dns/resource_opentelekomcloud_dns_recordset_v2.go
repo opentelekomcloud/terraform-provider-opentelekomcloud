@@ -427,11 +427,11 @@ func getExistingRecordSetID(d cfg.SchemaOrDiff, meta interface{}) (id string, er
 	for _, set := range sets {
 		if set.Name == expectedName {
 			id = set.ID
-			return
+			return id, err
 		}
 	}
 
-	return
+	return id, err
 }
 
 func useSharedRecordSet(_ context.Context, d *schema.ResourceDiff, meta interface{}) (err error) {

@@ -27,7 +27,7 @@ func (opts RecordSetCreateOpts) ToRecordSetCreateMap() (map[string]interface{}, 
 		return m, nil
 	}
 
-	return nil, fmt.Errorf("Expected map but got %T", b[""])
+	return nil, fmt.Errorf("expected map but got %T", b[""])
 }
 
 // ZoneCreateOpts represents the attributes used when creating a new DNS zone.
@@ -52,5 +52,5 @@ func (opts ZoneCreateOpts) ToZoneCreateMap() (map[string]interface{}, error) {
 		return m, nil
 	}
 
-	return nil, fmt.Errorf("Expected map but got %T", b[""])
+	return nil, fmt.Errorf("expected map but got %T", b[""])
 }

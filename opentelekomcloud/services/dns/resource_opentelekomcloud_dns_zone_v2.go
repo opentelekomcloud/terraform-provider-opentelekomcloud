@@ -6,6 +6,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/hashicorp/go-multierror"
 	golangsdk "github.com/opentelekomcloud/gophertelekomcloud"
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/common/tags"
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/dns/v2/zones"
@@ -135,7 +136,7 @@ func resourceDNSZoneV2Create(ctx context.Context, d *schema.ResourceData, meta i
 	// router is required when creating private zone
 	if zone_type == "private" {
 		if len(router) < 1 {
-			return fmterr.Errorf("The argument (router) is required when creating OpenTelekomCloud DNS private zone")
+			return fmterr.Errorf("the argument (router) is required when creating OpenTelekomCloud DNS private zone")
 		}
 	}
 	vs := common.MapResourceProp(d, "value_specs")
@@ -242,15 +243,21 @@ func resourceDNSZoneV2Read(_ context.Context, d *schema.ResourceData, meta inter
 
 	log.Printf("[DEBUG] Retrieved Zone %s: %#v", d.Id(), n)
 
-	d.Set("name", n.Name)
-	d.Set("email", n.Email)
-	d.Set("description", n.Description)
-	d.Set("ttl", n.TTL)
-	d.Set("type", n.ZoneType)
+	mErr := multierror.Append(
+		d.Set("name", n.Name),
+		d.Set("email", n.Email),
+		d.Set("description", n.Description),
+		d.Set("ttl", n.TTL),
+		d.Set("type", n.ZoneType),
+		d.Set("region", config.GetRegion(d)),
+	)
+
+	if err := mErr.ErrorOrNil(); err != nil {
+		return diag.FromErr(err)
+	}
 	if err = d.Set("masters", n.Masters); err != nil {
 		return fmterr.Errorf("[DEBUG] Error saving masters to state for OpenTelekomCloud DNS zone (%s): %s", d.Id(), err)
 	}
-	d.Set("region", config.GetRegion(d))
 
 	// save tags
 	resourceTags, err := tags.Get(dnsClient, serviceMap[n.ZoneType], d.Id()).Extract()
@@ -279,7 +286,7 @@ func resourceDNSZoneV2Update(ctx context.Context, d *schema.ResourceData, meta i
 	// router is required when updating private zone
 	if zone_type == "private" {
 		if len(router) < 1 {
-			return fmterr.Errorf("The argument (router) is required when updating OpenTelekomCloud DNS private zone")
+			return fmterr.Errorf("the argument (router) is required when updating OpenTelekomCloud DNS private zone")
 		}
 	}
 
@@ -312,6 +319,9 @@ func resourceDNSZoneV2Update(ctx context.Context, d *schema.ResourceData, meta i
 	}
 
 	_, err = stateConf.WaitForStateContext(ctx)
+	if err != nil {
+		return fmterr.Errorf("error waiting for DNS zone to be active: %w", err)
+	}
 
 	if d.HasChange("router") {
 		// when updating private zone

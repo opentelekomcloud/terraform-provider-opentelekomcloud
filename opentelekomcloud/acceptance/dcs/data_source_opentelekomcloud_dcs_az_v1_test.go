@@ -32,11 +32,11 @@ func testAccCheckDcsAZV1DataSourceID(n string) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
 		rs, ok := s.RootModule().Resources[n]
 		if !ok {
-			return fmt.Errorf("Can't find Dcs az data source: %s", n)
+			return fmt.Errorf("can't find Dcs az data source: %s", n)
 		}
 
 		if rs.Primary.ID == "" {
-			return fmt.Errorf("Dcs az data source ID not set")
+			return fmt.Errorf("dcs az data source ID not set")
 		}
 
 		return nil

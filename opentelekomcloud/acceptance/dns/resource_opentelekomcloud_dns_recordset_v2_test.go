@@ -187,7 +187,7 @@ func testAccCheckDNSV2RecordSetDestroy(s *terraform.State) error {
 
 		_, err = recordsets.Get(dnsClient, zoneID, recordsetID).Extract()
 		if err == nil {
-			return fmt.Errorf("Record set still exists")
+			return fmt.Errorf("record set still exists")
 		}
 	}
 
@@ -198,11 +198,11 @@ func testAccCheckDNSV2RecordSetExists(n string, recordset *recordsets.RecordSet)
 	return func(s *terraform.State) error {
 		rs, ok := s.RootModule().Resources[n]
 		if !ok {
-			return fmt.Errorf("Not found: %s", n)
+			return fmt.Errorf("not found: %s", n)
 		}
 
 		if rs.Primary.ID == "" {
-			return fmt.Errorf("No ID is set")
+			return fmt.Errorf("no ID is set")
 		}
 
 		config := common.TestAccProvider.Meta().(*cfg.Config)
@@ -222,7 +222,7 @@ func testAccCheckDNSV2RecordSetExists(n string, recordset *recordsets.RecordSet)
 		}
 
 		if found.ID != recordsetID {
-			return fmt.Errorf("Record set not found")
+			return fmt.Errorf("record set not found")
 		}
 
 		*recordset = *found

@@ -5,6 +5,7 @@ import (
 	"log"
 	"time"
 
+	"github.com/hashicorp/go-multierror"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
@@ -159,16 +160,15 @@ func resourceDeHHostV1Create(ctx context.Context, d *schema.ResourceData, meta i
 		Delay:      5 * time.Second,
 		MinTimeout: 3 * time.Second,
 	}
-	_, Stateerr := stateConf.WaitForStateContext(ctx)
-	if Stateerr != nil {
-		return fmterr.Errorf("error creating OpenTelekomCloud Dedicated Host : %s", Stateerr)
+	_, stateErr := stateConf.WaitForStateContext(ctx)
+	if stateErr != nil {
+		return fmterr.Errorf("error creating OpenTelekomCloud Dedicated Host : %s", stateErr)
 	}
 
 	return resourceDeHHostV1Read(ctx, d, meta)
 }
 
 func resourceDeHHostV1Read(_ context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-
 	config := meta.(*cfg.Config)
 	dehClient, err := config.DehV1Client(config.GetRegion(d))
 	if err != nil {
@@ -181,27 +181,30 @@ func resourceDeHHostV1Read(_ context.Context, d *schema.ResourceData, meta inter
 			d.SetId("")
 			return nil
 		}
-
 		return fmterr.Errorf("error retrieving OpenTelekomCloud Dedicated Host: %s", err)
 	}
-
-	d.Set("id", n.ID)
-	d.Set("name", n.Name)
-	d.Set("status", n.State)
-	d.Set("dedicated_host_id", n.ID)
-	d.Set("auto_placement", n.AutoPlacement)
-	d.Set("availability_zone", n.Az)
-	d.Set("available_vcpus", n.AvailableVcpus)
-	d.Set("available_memory", n.AvailableMemory)
-	d.Set("instance_total", n.InstanceTotal)
-	d.Set("instance_uuids", n.InstanceUuids)
-	d.Set("host_type", n.HostProperties.HostType)
-	d.Set("host_type_name", n.HostProperties.HostTypeName)
-	d.Set("vcpus", n.HostProperties.Vcpus)
-	d.Set("cores", n.HostProperties.Cores)
-	d.Set("sockets", n.HostProperties.Sockets)
-	d.Set("memory", n.HostProperties.Memory)
-	d.Set("available_instance_capacities", getInstanceProperties(n))
+	mErr := multierror.Append(
+		d.Set("id", n.ID),
+		d.Set("name", n.Name),
+		d.Set("status", n.State),
+		d.Set("dedicated_host_id", n.ID),
+		d.Set("auto_placement", n.AutoPlacement),
+		d.Set("availability_zone", n.Az),
+		d.Set("available_vcpus", n.AvailableVcpus),
+		d.Set("available_memory", n.AvailableMemory),
+		d.Set("instance_total", n.InstanceTotal),
+		d.Set("instance_uuids", n.InstanceUuids),
+		d.Set("host_type", n.HostProperties.HostType),
+		d.Set("host_type_name", n.HostProperties.HostTypeName),
+		d.Set("vcpus", n.HostProperties.Vcpus),
+		d.Set("cores", n.HostProperties.Cores),
+		d.Set("sockets", n.HostProperties.Sockets),
+		d.Set("memory", n.HostProperties.Memory),
+		d.Set("available_instance_capacities", getInstanceProperties(n)),
+	)
+	if err := mErr.ErrorOrNil(); err != nil {
+		return diag.FromErr(err)
+	}
 
 	return nil
 }
@@ -283,6 +286,7 @@ func waitForDeHDelete(dehClient *golangsdk.ServiceClient, dehID string) resource
 				log.Printf("[DEBUG] Successfully deleted OpenTelekomCloud Dedicated Host %s", dehID)
 				return r, "deleted", nil
 			}
+			return nil, "", err
 		}
 		if r.State == "deleting" {
 			return r, "deleting", nil
