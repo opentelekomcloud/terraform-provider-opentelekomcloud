@@ -12,6 +12,7 @@ import (
 	"path/filepath"
 	"time"
 
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 	golangsdk "github.com/opentelekomcloud/gophertelekomcloud"
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/imageservice/v2/imagedata"
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/imageservice/v2/images"
@@ -106,7 +107,7 @@ func ResourceImagesImageV2() *schema.Resource {
 				Type:             schema.TypeInt,
 				Optional:         true,
 				ForceNew:         true,
-				ValidateFunc:     common.ValidatePositiveInt,
+				ValidateFunc:     validation.IntAtLeast(1),
 				Default:          0,
 				DiffSuppressFunc: common.SuppressMinDisk,
 			},
@@ -115,7 +116,7 @@ func ResourceImagesImageV2() *schema.Resource {
 				Type:         schema.TypeInt,
 				Optional:     true,
 				ForceNew:     true,
-				ValidateFunc: common.ValidatePositiveInt,
+				ValidateFunc: validation.IntAtLeast(1),
 				Default:      0,
 			},
 
