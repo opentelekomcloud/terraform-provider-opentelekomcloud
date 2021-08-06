@@ -68,7 +68,7 @@ func testAccCheckComputeV2ServerGroupDestroy(s *terraform.State) error {
 
 		_, err := servergroups.Get(computeClient, rs.Primary.ID).Extract()
 		if err == nil {
-			return fmt.Errorf("ServerGroup still exists")
+			return fmt.Errorf("serverGroup still exists")
 		}
 	}
 
@@ -79,11 +79,11 @@ func testAccCheckComputeV2ServerGroupExists(n string, kp *servergroups.ServerGro
 	return func(s *terraform.State) error {
 		rs, ok := s.RootModule().Resources[n]
 		if !ok {
-			return fmt.Errorf("Not found: %s", n)
+			return fmt.Errorf("not found: %s", n)
 		}
 
 		if rs.Primary.ID == "" {
-			return fmt.Errorf("No ID is set")
+			return fmt.Errorf("no ID is set")
 		}
 
 		config := common.TestAccProvider.Meta().(*cfg.Config)
@@ -98,7 +98,7 @@ func testAccCheckComputeV2ServerGroupExists(n string, kp *servergroups.ServerGro
 		}
 
 		if found.ID != rs.Primary.ID {
-			return fmt.Errorf("ServerGroup not found")
+			return fmt.Errorf("serverGroup not found")
 		}
 
 		*kp = *found
@@ -117,7 +117,7 @@ func testAccCheckComputeV2InstanceInServerGroup(instance *servers.Server, sg *se
 			}
 		}
 
-		return fmt.Errorf("Instance %s is not part of Server Group %s", instance.ID, sg.ID)
+		return fmt.Errorf("instance %s is not part of Server Group %s", instance.ID, sg.ID)
 	}
 }
 

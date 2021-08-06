@@ -29,7 +29,7 @@ func TestAccComputeV2FloatingIPAssociate_basic(t *testing.T) {
 		CheckDestroy:      testAccCheckComputeV2FloatingIPAssociateDestroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccComputeV2FloatingIPAssociate_basic,
+				Config: testAccComputeV2FloatingIPAssociateBasic,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckComputeV2InstanceExists("opentelekomcloud_compute_instance_v2.instance_1", &instance),
 					vpc.TestAccCheckNetworkingV2FloatingIPExists("opentelekomcloud_networking_floatingip_v2.fip_1", &fip),
@@ -50,7 +50,7 @@ func TestAccComputeV2FloatingIPAssociate_fixedIP(t *testing.T) {
 		CheckDestroy:      testAccCheckComputeV2FloatingIPAssociateDestroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccComputeV2FloatingIPAssociate_fixedIP,
+				Config: testAccComputeV2FloatingIPAssociateFixedIP,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckComputeV2InstanceExists("opentelekomcloud_compute_instance_v2.instance_1", &instance),
 					vpc.TestAccCheckNetworkingV2FloatingIPExists("opentelekomcloud_networking_floatingip_v2.fip_1", &fip),
@@ -71,7 +71,7 @@ func TestAccComputeV2FloatingIPAssociate_attachToFirstNetwork(t *testing.T) {
 		CheckDestroy:      testAccCheckComputeV2FloatingIPAssociateDestroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccComputeV2FloatingIPAssociate_attachToFirstNetwork,
+				Config: testAccComputeV2FloatingIPAssociateAttachToFirstNetwork,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckComputeV2InstanceExists("opentelekomcloud_compute_instance_v2.instance_1", &instance),
 					vpc.TestAccCheckNetworkingV2FloatingIPExists("opentelekomcloud_networking_floatingip_v2.fip_1", &fip),
@@ -84,8 +84,8 @@ func TestAccComputeV2FloatingIPAssociate_attachToFirstNetwork(t *testing.T) {
 
 func TestAccComputeV2FloatingIPAssociate_attachNew(t *testing.T) {
 	var instance servers.Server
-	var fip_1 floatingips.FloatingIP
-	var fip_2 floatingips.FloatingIP
+	var fip1 floatingips.FloatingIP
+	var fip2 floatingips.FloatingIP
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:          func() { common.TestAccPreCheck(t) },
@@ -93,21 +93,21 @@ func TestAccComputeV2FloatingIPAssociate_attachNew(t *testing.T) {
 		CheckDestroy:      testAccCheckComputeV2FloatingIPAssociateDestroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccComputeV2FloatingIPAssociate_attachNew_1,
+				Config: testAccComputeV2FloatingIPAssociateAttachNew1,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckComputeV2InstanceExists("opentelekomcloud_compute_instance_v2.instance_1", &instance),
-					vpc.TestAccCheckNetworkingV2FloatingIPExists("opentelekomcloud_networking_floatingip_v2.fip_1", &fip_1),
-					vpc.TestAccCheckNetworkingV2FloatingIPExists("opentelekomcloud_networking_floatingip_v2.fip_2", &fip_2),
-					testAccCheckComputeV2FloatingIPAssociateAssociated(&fip_1, &instance, 1),
+					vpc.TestAccCheckNetworkingV2FloatingIPExists("opentelekomcloud_networking_floatingip_v2.fip_1", &fip1),
+					vpc.TestAccCheckNetworkingV2FloatingIPExists("opentelekomcloud_networking_floatingip_v2.fip_2", &fip2),
+					testAccCheckComputeV2FloatingIPAssociateAssociated(&fip1, &instance, 1),
 				),
 			},
 			{
-				Config: testAccComputeV2FloatingIPAssociate_attachNew_2,
+				Config: testAccComputeV2FloatingIPAssociateAttachNew2,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckComputeV2InstanceExists("opentelekomcloud_compute_instance_v2.instance_1", &instance),
-					vpc.TestAccCheckNetworkingV2FloatingIPExists("opentelekomcloud_networking_floatingip_v2.fip_1", &fip_1),
-					vpc.TestAccCheckNetworkingV2FloatingIPExists("opentelekomcloud_networking_floatingip_v2.fip_2", &fip_2),
-					testAccCheckComputeV2FloatingIPAssociateAssociated(&fip_2, &instance, 1),
+					vpc.TestAccCheckNetworkingV2FloatingIPExists("opentelekomcloud_networking_floatingip_v2.fip_1", &fip1),
+					vpc.TestAccCheckNetworkingV2FloatingIPExists("opentelekomcloud_networking_floatingip_v2.fip_2", &fip2),
+					testAccCheckComputeV2FloatingIPAssociateAssociated(&fip2, &instance, 1),
 				),
 			},
 		},
@@ -147,7 +147,7 @@ func testAccCheckComputeV2FloatingIPAssociateDestroy(s *terraform.State) error {
 			for _, element := range networkAddresses.([]interface{}) {
 				address := element.(map[string]interface{})
 				if address["OS-EXT-IPS:type"] == "floating" || address["OS-EXT-IPS:type"] == "fixed" {
-					return fmt.Errorf("Floating IP %s is still attached to instance %s", floatingIP, instanceId)
+					return fmt.Errorf("floating IP %s is still attached to instance %s", floatingIP, instanceId)
 				}
 			}
 		}
@@ -161,6 +161,9 @@ func testAccCheckComputeV2FloatingIPAssociateAssociated(
 	return func(s *terraform.State) error {
 		config := common.TestAccProvider.Meta().(*cfg.Config)
 		computeClient, err := config.ComputeV2Client(env.OS_REGION_NAME)
+		if err != nil {
+			return fmt.Errorf("error creating compute v2 client: %w", err)
+		}
 
 		newInstance, err := servers.Get(computeClient, instance.ID).Extract()
 		if err != nil {
@@ -182,11 +185,11 @@ func testAccCheckComputeV2FloatingIPAssociateAssociated(
 				}
 			}
 		}
-		return fmt.Errorf("Floating IP %s was not attached to instance %s", fip.FloatingIP, instance.ID)
+		return fmt.Errorf("floating IP %s was not attached to instance %s", fip.FloatingIP, instance.ID)
 	}
 }
 
-var testAccComputeV2FloatingIPAssociate_basic = fmt.Sprintf(`
+var testAccComputeV2FloatingIPAssociateBasic = fmt.Sprintf(`
 resource "opentelekomcloud_compute_instance_v2" "instance_1" {
   name = "instance_1"
   security_groups = ["default"]
@@ -204,7 +207,7 @@ resource "opentelekomcloud_compute_floatingip_associate_v2" "fip_1" {
 }
 `, env.OS_NETWORK_ID)
 
-var testAccComputeV2FloatingIPAssociate_fixedIP = fmt.Sprintf(`
+var testAccComputeV2FloatingIPAssociateFixedIP = fmt.Sprintf(`
 resource "opentelekomcloud_compute_instance_v2" "instance_1" {
   name = "instance_1"
   security_groups = ["default"]
@@ -223,7 +226,7 @@ resource "opentelekomcloud_compute_floatingip_associate_v2" "fip_1" {
 }
 `, env.OS_NETWORK_ID)
 
-var testAccComputeV2FloatingIPAssociate_attachToFirstNetwork = fmt.Sprintf(`
+var testAccComputeV2FloatingIPAssociateAttachToFirstNetwork = fmt.Sprintf(`
 resource "opentelekomcloud_compute_instance_v2" "instance_1" {
   name = "instance_1"
   security_groups = ["default"]
@@ -243,44 +246,7 @@ resource "opentelekomcloud_compute_floatingip_associate_v2" "fip_1" {
 }
 `, env.OS_NETWORK_ID)
 
-var testAccComputeV2FloatingIPAssociate_attachToSecondNetwork = fmt.Sprintf(`
-resource "opentelekomcloud_networking_network_v2" "network_1" {
-  name = "network_1"
-}
-
-resource "opentelekomcloud_networking_subnet_v2" "subnet_1" {
-  name = "subnet_1"
-  network_id = opentelekomcloud_networking_network_v2.network_1.id
-  cidr = "192.168.1.0/24"
-  ip_version = 4
-  enable_dhcp = true
-  no_gateway = true
-}
-
-resource "opentelekomcloud_compute_instance_v2" "instance_1" {
-  name = "instance_1"
-  security_groups = ["default"]
-
-  network {
-    uuid = opentelekomcloud_networking_network_v2.network_1.id
-  }
-
-  network {
-    uuid = "%s"
-  }
-}
-
-resource "opentelekomcloud_networking_floatingip_v2" "fip_1" {
-}
-
-resource "opentelekomcloud_compute_floatingip_associate_v2" "fip_1" {
-  floating_ip = opentelekomcloud_networking_floatingip_v2.fip_1.address
-  instance_id = opentelekomcloud_compute_instance_v2.instance_1.id
-  fixed_ip = opentelekomcloud_compute_instance_v2.instance_1.network.1.fixed_ip_v4
-}
-`, env.OS_NETWORK_ID)
-
-var testAccComputeV2FloatingIPAssociate_attachNew_1 = fmt.Sprintf(`
+var testAccComputeV2FloatingIPAssociateAttachNew1 = fmt.Sprintf(`
 resource "opentelekomcloud_compute_instance_v2" "instance_1" {
   name = "instance_1"
   security_groups = ["default"]
@@ -301,7 +267,7 @@ resource "opentelekomcloud_compute_floatingip_associate_v2" "fip_1" {
 }
 `, env.OS_NETWORK_ID)
 
-var testAccComputeV2FloatingIPAssociate_attachNew_2 = fmt.Sprintf(`
+var testAccComputeV2FloatingIPAssociateAttachNew2 = fmt.Sprintf(`
 resource "opentelekomcloud_compute_instance_v2" "instance_1" {
   name = "instance_1"
   security_groups = ["default"]

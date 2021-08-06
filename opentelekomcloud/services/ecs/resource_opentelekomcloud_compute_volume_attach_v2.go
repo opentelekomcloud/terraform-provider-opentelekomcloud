@@ -7,6 +7,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/hashicorp/go-multierror"
 	golangsdk "github.com/opentelekomcloud/gophertelekomcloud"
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/compute/v2/extensions/volumeattach"
 
@@ -133,10 +134,15 @@ func resourceComputeVolumeAttachV2Read(_ context.Context, d *schema.ResourceData
 
 	log.Printf("[DEBUG] Retrieved volume attachment: %#v", attachment)
 
-	d.Set("instance_id", attachment.ServerID)
-	d.Set("volume_id", attachment.VolumeID)
-	d.Set("device", attachment.Device)
-	d.Set("region", config.GetRegion(d))
+	mErr := multierror.Append(
+		d.Set("instance_id", attachment.ServerID),
+		d.Set("volume_id", attachment.VolumeID),
+		d.Set("device", attachment.Device),
+		d.Set("region", config.GetRegion(d)),
+	)
+	if err := mErr.ErrorOrNil(); err != nil {
+		return diag.FromErr(err)
+	}
 
 	return nil
 }
@@ -219,7 +225,7 @@ func resourceComputeVolumeAttachV2DetachFunc(
 func ParseComputeVolumeAttachmentId(id string) (string, string, error) {
 	idParts := strings.Split(id, "/")
 	if len(idParts) < 2 {
-		return "", "", fmt.Errorf("Unable to determine volume attachment ID")
+		return "", "", fmt.Errorf("unable to determine volume attachment ID")
 	}
 
 	instanceId := idParts[0]

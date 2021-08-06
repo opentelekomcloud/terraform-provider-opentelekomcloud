@@ -16,7 +16,7 @@ import (
 	"os"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
-	"github.com/opentelekomcloud/gophertelekomcloud"
+	golangsdk "github.com/opentelekomcloud/gophertelekomcloud"
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/compute/v2/extensions/tenantnetworks"
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/compute/v2/servers"
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/networking/v2/networks"
@@ -152,9 +152,7 @@ func getAllInstanceNetworks(d *schema.ResourceData, meta interface{}) ([]Instanc
 //
 // If OS_NOVA_NETWORK is set, query nova-network even if Neutron is available.
 // This is to be able to explicitly test the nova-network API.
-func GetInstanceNetworkInfo(
-	d *schema.ResourceData, meta interface{}, queryType, queryTerm string) (map[string]interface{}, error) {
-
+func GetInstanceNetworkInfo(d *schema.ResourceData, meta interface{}, queryType, queryTerm string) (map[string]interface{}, error) {
 	config := meta.(*cfg.Config)
 
 	if _, ok := os.LookupEnv("OS_NOVA_NETWORK"); !ok {
@@ -186,9 +184,7 @@ func GetInstanceNetworkInfo(
 
 // getInstanceNetworkInfoNovaNet will query the os-tenant-networks API for
 // the network information.
-func getInstanceNetworkInfoNovaNet(
-	client *golangsdk.ServiceClient, queryType, queryTerm string) (map[string]interface{}, error) {
-
+func getInstanceNetworkInfoNovaNet(client *golangsdk.ServiceClient, queryType, queryTerm string) (map[string]interface{}, error) {
 	// If somehow a port ended up here, we should just error out.
 	if queryType == "port" {
 		return nil, fmt.Errorf("unable to query a port (%s) using the Nova API", queryTerm)
@@ -236,9 +232,7 @@ func getInstanceNetworkInfoNovaNet(
 
 // getInstanceNetworkInfoNeutron will query the neutron API for the network
 // information.
-func getInstanceNetworkInfoNeutron(
-	client *golangsdk.ServiceClient, queryType, queryTerm string) (map[string]interface{}, error) {
-
+func getInstanceNetworkInfoNeutron(client *golangsdk.ServiceClient, queryType, queryTerm string) (map[string]interface{}, error) {
 	// If a port was specified, use it to look up the network ID
 	// and then query the network as if a network ID was originally used.
 	if queryType == "port" {
@@ -383,9 +377,7 @@ func expandInstanceNetworks(allInstanceNetworks []InstanceNetwork) []servers.Net
 
 // FlattenInstanceNetworks collects instance network information from different
 // sources and aggregates it all together into a map array.
-func FlattenInstanceNetworks(
-	d *schema.ResourceData, meta interface{}) ([]map[string]interface{}, error) {
-
+func FlattenInstanceNetworks(d *schema.ResourceData, meta interface{}) ([]map[string]interface{}, error) {
 	config := meta.(*cfg.Config)
 	computeClient, err := config.ComputeV2Client(config.GetRegion(d))
 	if err != nil {

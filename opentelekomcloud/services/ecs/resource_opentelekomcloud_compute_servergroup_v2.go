@@ -4,6 +4,7 @@ import (
 	"context"
 	"log"
 
+	"github.com/hashicorp/go-multierror"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/compute/v2/extensions/servergroups"
@@ -96,28 +97,16 @@ func resourceComputeServerGroupV2Read(_ context.Context, d *schema.ResourceData,
 
 	log.Printf("[DEBUG] Retrieved ServerGroup %s: %+v", d.Id(), sg)
 
-	// Set the name
-	d.Set("name", sg.Name)
+	mErr := multierror.Append(
+		d.Set("name", sg.Name),
+		d.Set("policies", sg.Policies),
+		d.Set("members", sg.Members),
+		d.Set("region", config.GetRegion(d)),
+	)
 
-	// Set the policies
-	policies := []string{}
-	for _, p := range sg.Policies {
-		policies = append(policies, p)
+	if err := mErr.ErrorOrNil(); err != nil {
+		return diag.FromErr(err)
 	}
-	if err := d.Set("policies", policies); err != nil {
-		return fmterr.Errorf("[DEBUG] Error saving policies to state for OpenTelekomCloud server group (%s): %s", d.Id(), err)
-	}
-
-	// Set the members
-	members := []string{}
-	for _, m := range sg.Members {
-		members = append(members, m)
-	}
-	if err := d.Set("members", members); err != nil {
-		return fmterr.Errorf("[DEBUG] Error saving members to state for OpenTelekomCloud server group (%s): %s", d.Id(), err)
-	}
-
-	d.Set("region", config.GetRegion(d))
 
 	return nil
 }
