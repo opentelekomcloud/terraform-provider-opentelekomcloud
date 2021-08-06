@@ -16,7 +16,7 @@ func TestAccDmsProductV1DataSource_basic(t *testing.T) {
 		ProviderFactories: common.TestAccProviderFactories,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccDmsProductV1DataSource_basic,
+				Config: testAccDmsProductV1DataSourceBasic,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckDmsProductV1DataSourceID("data.opentelekomcloud_dms_product_v1.product1"),
 					resource.TestCheckResourceAttr(
@@ -37,7 +37,7 @@ func TestAccDmsProductV1DataSource_rabbitmqSingle(t *testing.T) {
 		ProviderFactories: common.TestAccProviderFactories,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccDmsProductV1DataSource_rabbitmqSingle,
+				Config: testAccDmsProductV1DataSourceRabbitmqSingle,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckDmsProductV1DataSourceID("data.opentelekomcloud_dms_product_v1.product1"),
 					resource.TestCheckResourceAttr(
@@ -60,7 +60,7 @@ func TestAccDmsProductV1DataSource_rabbitmqCluster(t *testing.T) {
 		ProviderFactories: common.TestAccProviderFactories,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccDmsProductV1DataSource_rabbitmqCluster,
+				Config: testAccDmsProductV1DataSourceRabbitmqCluster,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckDmsProductV1DataSourceID("data.opentelekomcloud_dms_product_v1.product1"),
 					resource.TestCheckResourceAttr(
@@ -83,18 +83,19 @@ func testAccCheckDmsProductV1DataSourceID(n string) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
 		rs, ok := s.RootModule().Resources[n]
 		if !ok {
-			return fmt.Errorf("Can't find Dms product data source: %s", n)
+			return fmt.Errorf("can't find Dms product data source: %s", n)
 		}
 
 		if rs.Primary.ID == "" {
-			return fmt.Errorf("Dms product data source ID not set")
+			return fmt.Errorf("dms product data source ID not set")
 		}
 
 		return nil
 	}
 }
 
-var testAccDmsProductV1DataSource_basic = fmt.Sprintf(`
+const (
+	testAccDmsProductV1DataSourceBasic = `
 data "opentelekomcloud_dms_product_v1" "product1" {
   engine = "kafka"
   version = "2.3.0"
@@ -103,9 +104,8 @@ data "opentelekomcloud_dms_product_v1" "product1" {
   storage = 600
   storage_spec_code = "dms.physical.storage.high"
 }
-`)
-
-var testAccDmsProductV1DataSource_rabbitmqSingle = fmt.Sprintf(`
+`
+	testAccDmsProductV1DataSourceRabbitmqSingle = `
 data "opentelekomcloud_dms_product_v1" "product1" {
   engine = "rabbitmq"
   version = "3.7.0"
@@ -114,9 +114,8 @@ data "opentelekomcloud_dms_product_v1" "product1" {
   storage = 100
   storage_spec_code = "dms.physical.storage.normal"
 }
-`)
-
-var testAccDmsProductV1DataSource_rabbitmqCluster = fmt.Sprintf(`
+`
+	testAccDmsProductV1DataSourceRabbitmqCluster = `
 data "opentelekomcloud_dms_product_v1" "product1" {
   engine = "rabbitmq"
   version = "3.7.0"
@@ -125,4 +124,5 @@ data "opentelekomcloud_dms_product_v1" "product1" {
   storage = 500
   storage_spec_code = "dms.physical.storage.high"
 }
-`)
+`
+)

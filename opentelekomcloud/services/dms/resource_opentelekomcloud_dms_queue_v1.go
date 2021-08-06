@@ -4,6 +4,7 @@ import (
 	"context"
 	"log"
 
+	"github.com/hashicorp/go-multierror"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/dms/v1/queues"
@@ -126,16 +127,22 @@ func resourceDmsQueuesV1Read(_ context.Context, d *schema.ResourceData, meta int
 	log.Printf("[DEBUG] Dms queue %s: %+v", d.Id(), v)
 
 	d.SetId(v.ID)
-	d.Set("name", v.Name)
-	d.Set("created", v.Created)
-	d.Set("description", v.Description)
-	d.Set("queue_mode", v.QueueMode)
-	d.Set("reservation", v.Reservation)
-	d.Set("max_msg_size_byte", v.MaxMsgSizeByte)
-	d.Set("produced_messages", v.ProducedMessages)
-	d.Set("redrive_policy", v.RedrivePolicy)
-	d.Set("max_consume_count", v.MaxConsumeCount)
-	d.Set("group_count", v.GroupCount)
+	mErr := multierror.Append(
+		d.Set("name", v.Name),
+		d.Set("created", v.Created),
+		d.Set("description", v.Description),
+		d.Set("queue_mode", v.QueueMode),
+		d.Set("reservation", v.Reservation),
+		d.Set("max_msg_size_byte", v.MaxMsgSizeByte),
+		d.Set("produced_messages", v.ProducedMessages),
+		d.Set("redrive_policy", v.RedrivePolicy),
+		d.Set("max_consume_count", v.MaxConsumeCount),
+		d.Set("group_count", v.GroupCount),
+	)
+
+	if err := mErr.ErrorOrNil(); err != nil {
+		return diag.FromErr(err)
+	}
 
 	return nil
 }

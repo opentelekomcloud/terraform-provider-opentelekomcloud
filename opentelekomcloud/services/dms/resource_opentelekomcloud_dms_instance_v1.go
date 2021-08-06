@@ -5,6 +5,7 @@ import (
 	"log"
 	"time"
 
+	"github.com/hashicorp/go-multierror"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
@@ -195,7 +196,7 @@ func resourceDmsInstancesV1Create(ctx context.Context, d *schema.ResourceData, m
 	stateConf := &resource.StateChangeConf{
 		Pending:    []string{"CREATING"},
 		Target:     []string{"RUNNING"},
-		Refresh:    DmsInstancesV1StateRefreshFunc(DmsV1Client, v.InstanceID),
+		Refresh:    instancesV1StateRefreshFunc(DmsV1Client, v.InstanceID),
 		Timeout:    d.Timeout(schema.TimeoutCreate),
 		Delay:      10 * time.Second,
 		MinTimeout: 3 * time.Second,
@@ -228,32 +229,37 @@ func resourceDmsInstancesV1Read(_ context.Context, d *schema.ResourceData, meta 
 	log.Printf("[DEBUG] Dms instance %s: %+v", d.Id(), v)
 
 	d.SetId(v.InstanceID)
-	d.Set("name", v.Name)
-	d.Set("engine", v.Engine)
-	d.Set("engine_version", v.EngineVersion)
-	d.Set("specification", v.Specification)
-	d.Set("used_storage_space", v.UsedStorageSpace)
-	d.Set("connect_address", v.ConnectAddress)
-	d.Set("port", v.Port)
-	d.Set("status", v.Status)
-	d.Set("description", v.Description)
-	d.Set("instance_id", v.InstanceID)
-	d.Set("resource_spec_code", v.ResourceSpecCode)
-	d.Set("type", v.Type)
-	d.Set("vpc_id", v.VPCID)
-	d.Set("vpc_name", v.VPCName)
-	d.Set("created_at", v.CreatedAt)
-	d.Set("product_id", v.ProductID)
-	d.Set("security_group_id", v.SecurityGroupID)
-	d.Set("security_group_name", v.SecurityGroupName)
-	d.Set("subnet_id", v.SubnetID)
-	d.Set("subnet_name", v.SubnetName)
-	d.Set("user_id", v.UserID)
-	d.Set("user_name", v.UserName)
-	d.Set("order_id", v.OrderID)
-	d.Set("maintain_begin", v.MaintainBegin)
-	d.Set("maintain_end", v.MaintainEnd)
+	mErr := multierror.Append(
+		d.Set("name", v.Name),
+		d.Set("engine", v.Engine),
+		d.Set("engine_version", v.EngineVersion),
+		d.Set("specification", v.Specification),
+		d.Set("used_storage_space", v.UsedStorageSpace),
+		d.Set("connect_address", v.ConnectAddress),
+		d.Set("port", v.Port),
+		d.Set("status", v.Status),
+		d.Set("description", v.Description),
+		d.Set("instance_id", v.InstanceID),
+		d.Set("resource_spec_code", v.ResourceSpecCode),
+		d.Set("type", v.Type),
+		d.Set("vpc_id", v.VPCID),
+		d.Set("vpc_name", v.VPCName),
+		d.Set("created_at", v.CreatedAt),
+		d.Set("product_id", v.ProductID),
+		d.Set("security_group_id", v.SecurityGroupID),
+		d.Set("security_group_name", v.SecurityGroupName),
+		d.Set("subnet_id", v.SubnetID),
+		d.Set("subnet_name", v.SubnetName),
+		d.Set("user_id", v.UserID),
+		d.Set("user_name", v.UserName),
+		d.Set("order_id", v.OrderID),
+		d.Set("maintain_begin", v.MaintainBegin),
+		d.Set("maintain_end", v.MaintainEnd),
+	)
 
+	if err := mErr.ErrorOrNil(); err != nil {
+		return diag.FromErr(err)
+	}
 	return nil
 }
 
@@ -272,16 +278,16 @@ func resourceDmsInstancesV1Update(ctx context.Context, d *schema.ResourceData, m
 		updateOpts.Description = &description
 	}
 	if d.HasChange("maintain_begin") {
-		maintain_begin := d.Get("maintain_begin").(string)
-		updateOpts.MaintainBegin = maintain_begin
+		maintainBegin := d.Get("maintain_begin").(string)
+		updateOpts.MaintainBegin = maintainBegin
 	}
 	if d.HasChange("maintain_end") {
-		maintain_end := d.Get("maintain_end").(string)
-		updateOpts.MaintainEnd = maintain_end
+		maintainEnd := d.Get("maintain_end").(string)
+		updateOpts.MaintainEnd = maintainEnd
 	}
 	if d.HasChange("security_group_id") {
-		security_group_id := d.Get("security_group_id").(string)
-		updateOpts.SecurityGroupID = security_group_id
+		securityGroupID := d.Get("security_group_id").(string)
+		updateOpts.SecurityGroupID = securityGroupID
 	}
 
 	err = instances.Update(DmsV1Client, d.Id(), updateOpts).Err
@@ -315,7 +321,7 @@ func resourceDmsInstancesV1Delete(ctx context.Context, d *schema.ResourceData, m
 	stateConf := &resource.StateChangeConf{
 		Pending:    []string{"DELETING", "RUNNING"},
 		Target:     []string{"DELETED"},
-		Refresh:    DmsInstancesV1StateRefreshFunc(DmsV1Client, d.Id()),
+		Refresh:    instancesV1StateRefreshFunc(DmsV1Client, d.Id()),
 		Timeout:    d.Timeout(schema.TimeoutDelete),
 		Delay:      10 * time.Second,
 		MinTimeout: 3 * time.Second,
@@ -333,7 +339,7 @@ func resourceDmsInstancesV1Delete(ctx context.Context, d *schema.ResourceData, m
 	return nil
 }
 
-func DmsInstancesV1StateRefreshFunc(client *golangsdk.ServiceClient, instanceID string) resource.StateRefreshFunc {
+func instancesV1StateRefreshFunc(client *golangsdk.ServiceClient, instanceID string) resource.StateRefreshFunc {
 	return func() (interface{}, string, error) {
 		v, err := instances.Get(client, instanceID).Extract()
 		if err != nil {

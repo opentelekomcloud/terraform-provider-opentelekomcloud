@@ -4,6 +4,7 @@ import (
 	"context"
 	"log"
 
+	"github.com/hashicorp/go-multierror"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/deh/v1/hosts"
@@ -108,6 +109,9 @@ func DataSourceDEHHostV1() *schema.Resource {
 func dataSourceDEHHostV1Read(_ context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*cfg.Config)
 	dehClient, err := config.DehV1Client(config.GetRegion(d))
+	if err != nil {
+		return fmterr.Errorf("error creating DEHv1 client: %w", err)
+	}
 
 	listOpts := hosts.ListOpts{
 		ID:    d.Id(),
@@ -117,18 +121,21 @@ func dataSourceDEHHostV1Read(_ context.Context, d *schema.ResourceData, meta int
 	}
 
 	deh, err := hosts.List(dehClient, listOpts).AllPages()
+	if err != nil {
+		return fmterr.Errorf("error listing DEH hosts: %w", err)
+	}
 	refinedDeh, err := hosts.ExtractHosts(deh)
 	if err != nil {
-		return fmterr.Errorf("Unable to retrieve dedicated hosts: %s", err)
+		return fmterr.Errorf("unable to retrieve dedicated hosts: %s", err)
 	}
 
 	if len(refinedDeh) < 1 {
-		return fmterr.Errorf("Your query returned no results. " +
+		return fmterr.Errorf("your query returned no results. " +
 			"Please change your search criteria and try again.")
 	}
 
 	if len(refinedDeh) > 1 {
-		return fmterr.Errorf("Your query returned more than one result." +
+		return fmterr.Errorf("your query returned more than one result." +
 			" Please try a more specific search criteria")
 	}
 
@@ -137,23 +144,28 @@ func dataSourceDEHHostV1Read(_ context.Context, d *schema.ResourceData, meta int
 	log.Printf("[INFO] Retrieved Deh using given filter %s: %+v", Deh.ID, Deh)
 	d.SetId(Deh.ID)
 
-	d.Set("name", Deh.Name)
-	d.Set("id", Deh.ID)
-	d.Set("auto_placement", Deh.AutoPlacement)
-	d.Set("availability_zone", Deh.Az)
-	d.Set("tenant_id", Deh.TenantId)
-	d.Set("status", Deh.State)
-	d.Set("available_vcpus", Deh.AvailableVcpus)
-	d.Set("available_memory", Deh.AvailableMemory)
-	d.Set("instance_total", Deh.InstanceTotal)
-	d.Set("host_type_name", Deh.HostProperties.HostTypeName)
-	d.Set("host_type", Deh.HostProperties.HostType)
-	d.Set("cores", Deh.HostProperties.Cores)
-	d.Set("sockets", Deh.HostProperties.Sockets)
-	d.Set("vcpus", Deh.HostProperties.Vcpus)
-	d.Set("memory", Deh.HostProperties.Memory)
-	d.Set("available_instance_capacities", getInstanceProperties(&Deh))
-	d.Set("instance_uuids", Deh.InstanceUuids)
-	d.Set("region", config.GetRegion(d))
+	mErr := multierror.Append(
+		d.Set("name", Deh.Name),
+		d.Set("id", Deh.ID),
+		d.Set("auto_placement", Deh.AutoPlacement),
+		d.Set("availability_zone", Deh.Az),
+		d.Set("tenant_id", Deh.TenantId),
+		d.Set("status", Deh.State),
+		d.Set("available_vcpus", Deh.AvailableVcpus),
+		d.Set("available_memory", Deh.AvailableMemory),
+		d.Set("instance_total", Deh.InstanceTotal),
+		d.Set("host_type_name", Deh.HostProperties.HostTypeName),
+		d.Set("host_type", Deh.HostProperties.HostType),
+		d.Set("cores", Deh.HostProperties.Cores),
+		d.Set("sockets", Deh.HostProperties.Sockets),
+		d.Set("vcpus", Deh.HostProperties.Vcpus),
+		d.Set("memory", Deh.HostProperties.Memory),
+		d.Set("available_instance_capacities", getInstanceProperties(&Deh)),
+		d.Set("instance_uuids", Deh.InstanceUuids),
+		d.Set("region", config.GetRegion(d)),
+	)
+	if err := mErr.ErrorOrNil(); err != nil {
+		return diag.FromErr(err)
+	}
 	return nil
 }

@@ -40,20 +40,20 @@ func dataSourceDcsProductV1Read(_ context.Context, d *schema.ResourceData, meta 
 	log.Printf("[DEBUG] Dcs get products : %+v", v)
 	var FilteredPd []products.Product
 	for _, pd := range v.Products {
-		spec_code := d.Get("spec_code").(string)
-		if spec_code != "" && pd.SpecCode != spec_code {
+		specCode := d.Get("spec_code").(string)
+		if specCode != "" && pd.SpecCode != specCode {
 			continue
 		}
 		FilteredPd = append(FilteredPd, pd)
 	}
 
 	if len(FilteredPd) < 1 {
-		return fmterr.Errorf("Your query returned no results. Please change your filters and try again.")
+		return fmterr.Errorf("your query returned no results. Please change your filters and try again.")
 	}
 
 	pd := FilteredPd[0]
 	d.SetId(pd.ProductID)
-	d.Set("spec_code", pd.SpecCode)
+	_ = d.Set("spec_code", pd.SpecCode)
 	log.Printf("[DEBUG] Dcs product : %+v", pd)
 
 	return nil

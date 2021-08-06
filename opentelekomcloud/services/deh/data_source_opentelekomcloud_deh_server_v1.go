@@ -4,6 +4,7 @@ import (
 	"context"
 	"log"
 
+	"github.com/hashicorp/go-multierror"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/deh/v1/hosts"
@@ -84,6 +85,9 @@ func DataSourceDEHServersV1() *schema.Resource {
 func dataSourceDEHServersV1Read(_ context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*cfg.Config)
 	dehClient, err := config.DehV1Client(config.GetRegion(d))
+	if err != nil {
+		return fmterr.Errorf("error creating DEHv1 client: %w", err)
+	}
 
 	listServerOpts := hosts.ListServerOpts{
 		ID:     d.Get("server_id").(string),
@@ -92,17 +96,16 @@ func dataSourceDEHServersV1Read(_ context.Context, d *schema.ResourceData, meta 
 		UserID: d.Get("user_id").(string),
 	}
 	pages, err := hosts.ListServer(dehClient, d.Get("dedicated_host_id").(string), listServerOpts)
-
 	if err != nil {
-		return fmterr.Errorf("Unable to retrieve deh server: %s", err)
+		return fmterr.Errorf("unable to retrieve deh server: %s", err)
 	}
 
 	if len(pages) < 1 {
-		return fmterr.Errorf("Your query returned no results. " +
-			"Please change your search criteria and try again.")
+		return fmterr.Errorf("your query returned no results. " +
+			"Please change your search criteria and try again")
 	}
 	if len(pages) > 1 {
-		return fmterr.Errorf("Your query returned more than one result." +
+		return fmterr.Errorf("your query returned more than one result." +
 			" Please try a more specific search criteria")
 	}
 
@@ -111,15 +114,22 @@ func dataSourceDEHServersV1Read(_ context.Context, d *schema.ResourceData, meta 
 	log.Printf("[INFO] Retrieved Deh Server using given filter %s: %+v", DehServer.ID, DehServer)
 	d.SetId(DehServer.ID)
 
-	d.Set("server_id", DehServer.ID)
-	d.Set("user_id", DehServer.UserID)
-	d.Set("name", DehServer.Name)
-	d.Set("status", DehServer.Status)
-	d.Set("flavor", DehServer.Flavor)
-	d.Set("addresses", DehServer.Addresses)
-	d.Set("metadata", DehServer.Metadata)
-	d.Set("tenant_id", DehServer.TenantID)
-	d.Set("region", config.GetRegion(d))
+	mErr := multierror.Append(
+		d.Set("server_id", DehServer.ID),
+		d.Set("user_id", DehServer.UserID),
+		d.Set("name", DehServer.Name),
+		d.Set("status", DehServer.Status),
+		d.Set("flavor", DehServer.Flavor),
+		d.Set("addresses", DehServer.Addresses),
+		d.Set("metadata", DehServer.Metadata),
+		d.Set("tenant_id", DehServer.TenantID),
+		d.Set("region", config.GetRegion(d)),
+	)
+
+	if err := mErr.ErrorOrNil(); err != nil {
+		return diag.FromErr(err)
+	}
+
 	networks, err := flattenInstanceNetwork(d, meta)
 	if err != nil {
 		return diag.FromErr(err)
@@ -129,5 +139,4 @@ func dataSourceDEHServersV1Read(_ context.Context, d *schema.ResourceData, meta 
 	}
 
 	return nil
-
 }

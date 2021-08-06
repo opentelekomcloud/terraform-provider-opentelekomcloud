@@ -32,7 +32,7 @@ func testAccCheckDedicatedHostServerV1DataSourceID(n string) resource.TestCheckF
 	return func(s *terraform.State) error {
 		rs, ok := s.RootModule().Resources[n]
 		if !ok {
-			return fmt.Errorf("Can't find servers data source: %s ", n)
+			return fmt.Errorf("can't find servers data source: %s ", n)
 		}
 
 		if rs.Primary.ID == "" {

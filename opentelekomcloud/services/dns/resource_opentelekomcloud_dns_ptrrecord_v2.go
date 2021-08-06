@@ -171,16 +171,6 @@ func resourceDNSPtrRecordV2Update(ctx context.Context, d *schema.ResourceData, m
 		return fmterr.Errorf("error creating OpenTelekomCloud DNS client: %s", err)
 	}
 
-	tagMap := d.Get("tags").(map[string]interface{})
-	var tagList []tags.ResourceTag
-	for k, v := range tagMap {
-		tag := tags.ResourceTag{
-			Key:   k,
-			Value: v.(string),
-		}
-		tagList = append(tagList, tag)
-	}
-
 	createOpts := ptrrecords.CreateOpts{
 		PtrName:     d.Get("name").(string),
 		Description: d.Get("description").(string),
@@ -219,7 +209,6 @@ func resourceDNSPtrRecordV2Update(ctx context.Context, d *schema.ResourceData, m
 
 	log.Printf("[DEBUG] Updated OpenTelekomCloud DNS PTR record %s: %#v", ptr.ID, ptr)
 	return resourceDNSPtrRecordV2Read(ctx, d, meta)
-
 }
 
 func resourceDNSPtrRecordV2Delete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {

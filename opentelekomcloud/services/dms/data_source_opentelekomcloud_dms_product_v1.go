@@ -4,6 +4,7 @@ import (
 	"context"
 	"log"
 
+	"github.com/hashicorp/go-multierror"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/dms/v1/products"
@@ -67,21 +68,21 @@ func DataSourceDmsProductV1() *schema.Resource {
 	}
 }
 
-func getIObyIOtype(d *schema.ResourceData, IOs []products.IO) []products.IO {
-	io_type := d.Get("io_type").(string)
-	storage_spec_code := d.Get("storage_spec_code").(string)
+func getIObyIOtype(d *schema.ResourceData, ios []products.IO) []products.IO {
+	ioType := d.Get("io_type").(string)
+	storageSpecCode := d.Get("storage_spec_code").(string)
 
-	if io_type != "" || storage_spec_code != "" {
+	if ioType != "" || storageSpecCode != "" {
 		var getIOs []products.IO
-		for _, io := range IOs {
-			if io_type == io.IOType || storage_spec_code == io.StorageSpecCode {
+		for _, io := range ios {
+			if ioType == io.IOType || storageSpecCode == io.StorageSpecCode {
 				getIOs = append(getIOs, io)
 			}
 		}
 		return getIOs
 	}
 
-	return IOs
+	return ios
 }
 
 func dataSourceDmsProductV1Read(_ context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
@@ -91,23 +92,23 @@ func dataSourceDmsProductV1Read(_ context.Context, d *schema.ResourceData, meta 
 		return fmterr.Errorf("error get OpenTelekomCloud dms product client: %s", err)
 	}
 
-	instance_engine := d.Get("engine").(string)
-	if instance_engine != "rabbitmq" && instance_engine != "kafka" {
-		return fmterr.Errorf("The instance_engine value should be 'rabbitmq' or 'kafka', not: %s", instance_engine)
+	instanceEngine := d.Get("engine").(string)
+	if instanceEngine != "rabbitmq" && instanceEngine != "kafka" {
+		return fmterr.Errorf("the instance_engine value should be 'rabbitmq' or 'kafka', not: %s", instanceEngine)
 	}
 
-	v, err := products.Get(DmsV1Client, instance_engine).Extract()
+	v, err := products.Get(DmsV1Client, instanceEngine).Extract()
 	if err != nil {
 		return diag.FromErr(err)
 	}
 	Products := v.Hourly
 
 	log.Printf("[DEBUG] Dms get products : %+v", Products)
-	instance_type := d.Get("instance_type").(string)
-	if instance_type != "single" && instance_type != "cluster" {
-		return fmterr.Errorf("The instance_type value should be 'single' or 'cluster', not: %s", instance_type)
+	instanceType := d.Get("instance_type").(string)
+	if instanceType != "single" && instanceType != "cluster" {
+		return fmterr.Errorf("the instance_type value should be 'single' or 'cluster', not: %s", instanceType)
 	}
-	var FilteredPd []products.Detail
+	var filteredPd []products.Detail
 	var FilteredPdInfo []products.ProductInfo
 	for _, pd := range Products {
 		version := d.Get("version").(string)
@@ -116,12 +117,12 @@ func dataSourceDmsProductV1Read(_ context.Context, d *schema.ResourceData, meta 
 		}
 
 		for _, value := range pd.Values {
-			if value.Name != instance_type {
+			if value.Name != instanceType {
 				continue
 			}
 			for _, detail := range value.Details {
-				vm_specification := d.Get("vm_specification").(string)
-				if vm_specification != "" && detail.VMSpecification != vm_specification {
+				vmSpecification := d.Get("vm_specification").(string)
+				if vmSpecification != "" && detail.VMSpecification != vmSpecification {
 					continue
 				}
 				bandwidth := d.Get("bandwidth").(string)
@@ -129,7 +130,7 @@ func dataSourceDmsProductV1Read(_ context.Context, d *schema.ResourceData, meta 
 					continue
 				}
 
-				if instance_type == "single" || instance_engine == "kafka" {
+				if instanceType == "single" || instanceEngine == "kafka" {
 					storage := d.Get("storage").(string)
 					if storage != "" && detail.Storage != storage {
 						continue
@@ -145,16 +146,16 @@ func dataSourceDmsProductV1Read(_ context.Context, d *schema.ResourceData, meta 
 						if storage != "" && pdInfo.Storage != storage {
 							continue
 						}
-						node_num := d.Get("node_num").(string)
-						if node_num != "" && pdInfo.NodeNum != node_num {
+						nodeNum := d.Get("node_num").(string)
+						if nodeNum != "" && pdInfo.NodeNum != nodeNum {
 							continue
 						}
 
-						IOs := getIObyIOtype(d, pdInfo.IOs)
-						if len(IOs) == 0 {
+						ios := getIObyIOtype(d, pdInfo.IOs)
+						if len(ios) == 0 {
 							continue
 						}
-						pdInfo.IOs = IOs
+						pdInfo.IOs = ios
 						FilteredPdInfo = append(FilteredPdInfo, pdInfo)
 					}
 					if len(FilteredPdInfo) == 0 {
@@ -162,36 +163,45 @@ func dataSourceDmsProductV1Read(_ context.Context, d *schema.ResourceData, meta 
 					}
 					detail.ProductInfos = FilteredPdInfo
 				}
-				FilteredPd = append(FilteredPd, detail)
+				filteredPd = append(filteredPd, detail)
 			}
 		}
 	}
 
-	if len(FilteredPd) < 1 {
-		return fmterr.Errorf("Your query returned no results. Please change your filters and try again.")
+	if len(filteredPd) < 1 {
+		return fmterr.Errorf("your query returned no results. Please change your filters and try again.")
 	}
 
-	pd := FilteredPd[0]
-	d.Set("vm_specification", pd.VMSpecification)
-	if instance_type == "single" || instance_engine == "kafka" {
+	pd := filteredPd[0]
+	mErr := multierror.Append(d.Set("vm_specification", pd.VMSpecification))
+
+	if instanceType == "single" || instanceEngine == "kafka" {
 		d.SetId(pd.ProductID)
-		d.Set("storage", pd.Storage)
-		d.Set("partition_num", pd.PartitionNum)
-		d.Set("bandwidth", pd.Bandwidth)
-		d.Set("storage_spec_code", pd.IOs[0].StorageSpecCode)
-		d.Set("io_type", pd.IOs[0].IOType)
+		mErr = multierror.Append(mErr,
+			d.Set("storage", pd.Storage),
+			d.Set("partition_num", pd.PartitionNum),
+			d.Set("bandwidth", pd.Bandwidth),
+			d.Set("storage_spec_code", pd.IOs[0].StorageSpecCode),
+			d.Set("io_type", pd.IOs[0].IOType),
+		)
 		log.Printf("[DEBUG] Dms product : %+v", pd)
 	} else {
 		if len(pd.ProductInfos) < 1 {
-			return fmterr.Errorf("Your query returned no results. Please change your filters and try again.")
+			return fmterr.Errorf("your query returned no results. Please change your filters and try again.")
 		}
 		pdInfo := pd.ProductInfos[0]
 		d.SetId(pdInfo.ProductID)
-		d.Set("storage", pdInfo.Storage)
-		d.Set("io_type", pdInfo.IOs[0].IOType)
-		d.Set("node_num", pdInfo.NodeNum)
-		d.Set("storage_spec_code", pdInfo.IOs[0].StorageSpecCode)
+		mErr = multierror.Append(mErr,
+			d.Set("storage", pdInfo.Storage),
+			d.Set("io_type", pdInfo.IOs[0].IOType),
+			d.Set("node_num", pdInfo.NodeNum),
+			d.Set("storage_spec_code", pdInfo.IOs[0].StorageSpecCode),
+		)
 		log.Printf("[DEBUG] Dms product : %+v", pdInfo)
+	}
+
+	if err := mErr.ErrorOrNil(); err != nil {
+		return diag.FromErr(err)
 	}
 
 	return nil

@@ -4,6 +4,7 @@ import (
 	"context"
 	"log"
 
+	"github.com/hashicorp/go-multierror"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/dms/v1/availablezones"
@@ -75,16 +76,22 @@ func dataSourceDmsAZV1Read(_ context.Context, d *schema.ResourceData, meta inter
 	}
 
 	if len(filteredAZs) < 1 {
-		return fmterr.Errorf("Not found any available zones")
+		return fmterr.Errorf("not found any available zones")
 	}
 
 	az := filteredAZs[0]
 	log.Printf("[DEBUG] Dms az : %+v", az)
 
 	d.SetId(az.ID)
-	d.Set("code", az.Code)
-	d.Set("name", az.Name)
-	d.Set("port", az.Port)
+	mErr := multierror.Append(
+		d.Set("code", az.Code),
+		d.Set("name", az.Name),
+		d.Set("port", az.Port),
+	)
+
+	if err := mErr.ErrorOrNil(); err != nil {
+		return diag.FromErr(err)
+	}
 
 	return nil
 }
