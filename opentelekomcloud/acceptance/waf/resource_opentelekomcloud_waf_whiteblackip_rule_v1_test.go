@@ -59,7 +59,7 @@ func testAccCheckWafWhiteBlackIpRuleV1Destroy(s *terraform.State) error {
 
 		_, err := whiteblackip_rules.Get(wafClient, rs.Primary.Attributes["policy_id"], rs.Primary.ID).Extract()
 		if err == nil {
-			return fmt.Errorf("Waf rule still exists")
+			return fmt.Errorf("waf rule still exists")
 		}
 	}
 
@@ -70,11 +70,11 @@ func testAccCheckWafWhiteBlackIpRuleV1Exists(n string, rule *whiteblackip_rules.
 	return func(s *terraform.State) error {
 		rs, ok := s.RootModule().Resources[n]
 		if !ok {
-			return fmt.Errorf("Not found: %s", n)
+			return fmt.Errorf("not found: %s", n)
 		}
 
 		if rs.Primary.ID == "" {
-			return fmt.Errorf("No ID is set")
+			return fmt.Errorf("no ID is set")
 		}
 
 		config := common.TestAccProvider.Meta().(*cfg.Config)
@@ -89,7 +89,7 @@ func testAccCheckWafWhiteBlackIpRuleV1Exists(n string, rule *whiteblackip_rules.
 		}
 
 		if found.Id != rs.Primary.ID {
-			return fmt.Errorf("Waf whiteblackip rule not found")
+			return fmt.Errorf("waf whiteblackip rule not found")
 		}
 
 		*rule = *found

@@ -6,6 +6,7 @@ import (
 	"strconv"
 	"time"
 
+	"github.com/hashicorp/go-multierror"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
@@ -114,10 +115,10 @@ func getConditions(d *schema.ResourceData) []preciseprotection_rules.Condition {
 	conditions := d.Get("conditions").([]interface{})
 	for _, v := range conditions {
 		cond := v.(map[string]interface{})
-		contents_raw := cond["contents"].([]interface{})
-		contents := make([]string, len(contents_raw))
+		contentsRaw := cond["contents"].([]interface{})
+		contents := make([]string, len(contentsRaw))
 
-		for i, v := range contents_raw {
+		for i, v := range contentsRaw {
 			contents[i] = v.(string)
 		}
 
@@ -175,8 +176,8 @@ func resourceWafPreciseProtectionRuleV1Create(ctx context.Context, d *schema.Res
 		createOpts.End = end
 	}
 
-	policy_id := d.Get("policy_id").(string)
-	rule, err := preciseprotection_rules.Create(wafClient, policy_id, createOpts).Extract()
+	policyID := d.Get("policy_id").(string)
+	rule, err := preciseprotection_rules.Create(wafClient, policyID, createOpts).Extract()
 	if err != nil {
 		return fmterr.Errorf("error creating OpenTelekomcomCloud WAF Precise Protection Rule: %s", err)
 	}
@@ -193,8 +194,8 @@ func resourceWafPreciseProtectionRuleV1Read(_ context.Context, d *schema.Resourc
 	if err != nil {
 		return fmterr.Errorf("error creating OpenTelekomCloud WAF client: %s", err)
 	}
-	policy_id := d.Get("policy_id").(string)
-	n, err := preciseprotection_rules.Get(wafClient, policy_id, d.Id()).Extract()
+	policyID := d.Get("policy_id").(string)
+	n, err := preciseprotection_rules.Get(wafClient, policyID, d.Id()).Extract()
 
 	if err != nil {
 		if _, ok := err.(golangsdk.ErrDefault404); ok {
@@ -206,12 +207,13 @@ func resourceWafPreciseProtectionRuleV1Read(_ context.Context, d *schema.Resourc
 	}
 
 	d.SetId(n.Id)
-	d.Set("policy_id", n.PolicyID)
-	d.Set("name", n.Name)
-	d.Set("time", n.Time)
-	d.Set("start", strconv.FormatInt(n.Start, 10))
-	d.Set("end", strconv.FormatInt(n.End, 10))
-
+	mErr := multierror.Append(
+		d.Set("policy_id", n.PolicyID),
+		d.Set("name", n.Name),
+		d.Set("time", n.Time),
+		d.Set("start", strconv.FormatInt(n.Start, 10)),
+		d.Set("end", strconv.FormatInt(n.End, 10)),
+	)
 	conditions := make([]map[string]interface{}, len(n.Conditions))
 	for i, condition := range n.Conditions {
 		conditions[i] = make(map[string]interface{})
@@ -220,9 +222,15 @@ func resourceWafPreciseProtectionRuleV1Read(_ context.Context, d *schema.Resourc
 		conditions[i]["logic"] = condition.Logic
 		conditions[i]["contents"] = condition.Contents
 	}
-	d.Set("conditions", conditions)
-	d.Set("action_category", n.Action.Category)
-	d.Set("priority", n.Priority)
+	mErr = multierror.Append(mErr,
+		d.Set("conditions", conditions),
+		d.Set("action_category", n.Action.Category),
+		d.Set("priority", n.Priority),
+	)
+
+	if err := mErr.ErrorOrNil(); err != nil {
+		return diag.FromErr(err)
+	}
 
 	return nil
 }
@@ -234,8 +242,8 @@ func resourceWafPreciseProtectionRuleV1Delete(_ context.Context, d *schema.Resou
 		return fmterr.Errorf("error creating OpenTelekomCloud WAF client: %s", err)
 	}
 
-	policy_id := d.Get("policy_id").(string)
-	err = preciseprotection_rules.Delete(wafClient, policy_id, d.Id()).ExtractErr()
+	policyID := d.Get("policy_id").(string)
+	err = preciseprotection_rules.Delete(wafClient, policyID, d.Id()).ExtractErr()
 	if err != nil {
 		return fmterr.Errorf("error deleting OpenTelekomCloud WAF Precise Protection Rule: %s", err)
 	}

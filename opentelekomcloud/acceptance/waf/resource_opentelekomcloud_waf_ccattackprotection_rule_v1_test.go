@@ -48,7 +48,7 @@ func testAccCheckWafCcAttackProtectionRuleV1Destroy(s *terraform.State) error {
 
 		_, err := ccattackprotection_rules.Get(wafClient, rs.Primary.Attributes["policy_id"], rs.Primary.ID).Extract()
 		if err == nil {
-			return fmt.Errorf("Waf rule still exists")
+			return fmt.Errorf("waf rule still exists")
 		}
 	}
 
@@ -59,11 +59,11 @@ func testAccCheckWafCcAttackProtectionRuleV1Exists(n string, rule *ccattackprote
 	return func(s *terraform.State) error {
 		rs, ok := s.RootModule().Resources[n]
 		if !ok {
-			return fmt.Errorf("Not found: %s", n)
+			return fmt.Errorf("not found: %s", n)
 		}
 
 		if rs.Primary.ID == "" {
-			return fmt.Errorf("No ID is set")
+			return fmt.Errorf("no ID is set")
 		}
 
 		config := common.TestAccProvider.Meta().(*cfg.Config)
@@ -78,7 +78,7 @@ func testAccCheckWafCcAttackProtectionRuleV1Exists(n string, rule *ccattackprote
 		}
 
 		if found.Id != rs.Primary.ID {
-			return fmt.Errorf("Waf rule not found")
+			return fmt.Errorf("waf rule not found")
 		}
 
 		*rule = *found

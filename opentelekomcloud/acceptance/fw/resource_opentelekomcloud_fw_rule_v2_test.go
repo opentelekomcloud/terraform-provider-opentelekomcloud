@@ -117,7 +117,7 @@ func testAccCheckFWRuleV2Destroy(s *terraform.State) error {
 		}
 		_, err = rules.Get(networkingClient, rs.Primary.ID).Extract()
 		if err == nil {
-			return fmt.Errorf("Firewall rule (%s) still exists.", rs.Primary.ID)
+			return fmt.Errorf("firewall rule (%s) still exists.", rs.Primary.ID)
 		}
 		if _, ok := err.(golangsdk.ErrDefault404); !ok {
 			return err
@@ -130,11 +130,11 @@ func testAccCheckFWRuleV2Exists(n string, expected *rules.Rule) resource.TestChe
 	return func(s *terraform.State) error {
 		rs, ok := s.RootModule().Resources[n]
 		if !ok {
-			return fmt.Errorf("Not found: %s", n)
+			return fmt.Errorf("not found: %s", n)
 		}
 
 		if rs.Primary.ID == "" {
-			return fmt.Errorf("No ID is set")
+			return fmt.Errorf("no ID is set")
 		}
 
 		config := common.TestAccProvider.Meta().(*cfg.Config)
@@ -164,7 +164,7 @@ func testAccCheckFWRuleV2Exists(n string, expected *rules.Rule) resource.TestChe
 		found.TenantID = ""
 
 		if !reflect.DeepEqual(expected, found) {
-			return fmt.Errorf("Expected:\n%#v\nFound:\n%#v", expected, found)
+			return fmt.Errorf("expected:\n%#v\nFound:\n%#v", expected, found)
 		}
 
 		return nil

@@ -5,6 +5,7 @@ import (
 	"log"
 	"time"
 
+	"github.com/hashicorp/go-multierror"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/waf/v1/falsealarmmasking_rules"
@@ -61,8 +62,8 @@ func resourceWafFalseAlarmMaskingRuleV1Create(ctx context.Context, d *schema.Res
 		Rule: d.Get("rule").(string),
 	}
 
-	policy_id := d.Get("policy_id").(string)
-	rule, err := falsealarmmasking_rules.Create(wafClient, policy_id, createOpts).Extract()
+	policyID := d.Get("policy_id").(string)
+	rule, err := falsealarmmasking_rules.Create(wafClient, policyID, createOpts).Extract()
 	if err != nil {
 		return fmterr.Errorf("error creating OpenTelekomcomCloud WAF False Alarm Masking Rule: %s", err)
 	}
@@ -79,8 +80,8 @@ func resourceWafFalseAlarmMaskingRuleV1Read(_ context.Context, d *schema.Resourc
 	if err != nil {
 		return fmterr.Errorf("error creating OpenTelekomCloud WAF client: %s", err)
 	}
-	policy_id := d.Get("policy_id").(string)
-	rules, err := falsealarmmasking_rules.List(wafClient, policy_id).Extract()
+	policyID := d.Get("policy_id").(string)
+	rules, err := falsealarmmasking_rules.List(wafClient, policyID).Extract()
 
 	if err != nil {
 		return fmterr.Errorf("error retrieving OpenTelekomCloud Waf False Alarm Masking Rule: %s", err)
@@ -88,9 +89,14 @@ func resourceWafFalseAlarmMaskingRuleV1Read(_ context.Context, d *schema.Resourc
 	for _, r := range rules {
 		if r.Id == d.Id() {
 			d.SetId(r.Id)
-			d.Set("url", r.Url)
-			d.Set("rule", r.Rule)
-			d.Set("policy_id", r.PolicyID)
+			mErr := multierror.Append(
+				d.Set("url", r.Url),
+				d.Set("rule", r.Rule),
+				d.Set("policy_id", r.PolicyID),
+			)
+			if err := mErr.ErrorOrNil(); err != nil {
+				return diag.FromErr(err)
+			}
 			return nil
 		}
 	}
@@ -106,8 +112,8 @@ func resourceWafFalseAlarmMaskingRuleV1Delete(_ context.Context, d *schema.Resou
 		return fmterr.Errorf("error creating OpenTelekomCloud WAF client: %s", err)
 	}
 
-	policy_id := d.Get("policy_id").(string)
-	err = falsealarmmasking_rules.Delete(wafClient, policy_id, d.Id()).ExtractErr()
+	policyID := d.Get("policy_id").(string)
+	err = falsealarmmasking_rules.Delete(wafClient, policyID, d.Id()).ExtractErr()
 	if err != nil {
 		return fmterr.Errorf("error deleting OpenTelekomCloud WAF False Alarm Masking Rule: %s", err)
 	}

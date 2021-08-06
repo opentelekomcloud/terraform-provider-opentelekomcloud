@@ -5,6 +5,7 @@ import (
 	"log"
 	"time"
 
+	"github.com/hashicorp/go-multierror"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
@@ -162,13 +163,13 @@ func ResourceWafPolicyV1() *schema.Resource {
 func getOptions(d *schema.ResourceData) *policies.Options {
 	optionsRaw := d.Get("options").([]interface{})
 	rawMap := optionsRaw[0].(map[string]interface{})
-	webattack := rawMap["webattack"].(bool)
-	common := rawMap["common"].(bool)
+	webAttack := rawMap["webattack"].(bool)
+	comm := rawMap["common"].(bool)
 	crawler := rawMap["crawler"].(bool)
-	crawler_engine := rawMap["crawler_engine"].(bool)
-	crawler_scanner := rawMap["crawler_scanner"].(bool)
-	crawler_script := rawMap["crawler_script"].(bool)
-	crawler_other := rawMap["crawler_other"].(bool)
+	crawlerEngine := rawMap["crawler_engine"].(bool)
+	crawlerScanner := rawMap["crawler_scanner"].(bool)
+	crawlerScript := rawMap["crawler_script"].(bool)
+	crawlerOther := rawMap["crawler_other"].(bool)
 	webshell := rawMap["webshell"].(bool)
 	cc := rawMap["cc"].(bool)
 	custom := rawMap["custom"].(bool)
@@ -178,13 +179,13 @@ func getOptions(d *schema.ResourceData) *policies.Options {
 	antitamper := rawMap["antitamper"].(bool)
 
 	options := &policies.Options{
-		WebAttack:      &webattack,
-		Common:         &common,
+		WebAttack:      &webAttack,
+		Common:         &comm,
 		Crawler:        &crawler,
-		CrawlerEngine:  &crawler_engine,
-		CrawlerScanner: &crawler_scanner,
-		CrawlerScript:  &crawler_script,
-		CrawlerOther:   &crawler_other,
+		CrawlerEngine:  &crawlerEngine,
+		CrawlerScanner: &crawlerScanner,
+		CrawlerScript:  &crawlerScript,
+		CrawlerOther:   &crawlerOther,
 		WebShell:       &webshell,
 		Cc:             &cc,
 		Custom:         &custom,
@@ -277,7 +278,6 @@ func resourceWafPolicyV1Create(ctx context.Context, d *schema.ResourceData, meta
 }
 
 func resourceWafPolicyV1Read(_ context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-
 	config := meta.(*cfg.Config)
 	wafClient, err := config.WafV1Client(config.GetRegion(d))
 	if err != nil {
@@ -295,17 +295,10 @@ func resourceWafPolicyV1Read(_ context.Context, d *schema.ResourceData, meta int
 	}
 
 	d.SetId(n.Id)
-	d.Set("name", n.Name)
-	d.Set("level", n.Level)
-	d.Set("full_detection", n.FullDetection)
-	d.Set("hosts", n.Hosts)
 
-	action := []map[string]string{
-		{
-			"category": n.Action.Category,
-		},
-	}
-	d.Set("action", action)
+	action := []map[string]string{{
+		"category": n.Action.Category,
+	}}
 
 	options := []map[string]interface{}{
 		{
@@ -325,7 +318,19 @@ func resourceWafPolicyV1Read(_ context.Context, d *schema.ResourceData, meta int
 			"antitamper":      *n.Options.AntiTamper,
 		},
 	}
-	d.Set("options", options)
+
+	mErr := multierror.Append(
+		d.Set("name", n.Name),
+		d.Set("level", n.Level),
+		d.Set("full_detection", n.FullDetection),
+		d.Set("hosts", n.Hosts),
+		d.Set("action", action),
+		d.Set("options", options),
+	)
+	if err := mErr.ErrorOrNil(); err != nil {
+		return diag.FromErr(err)
+	}
+
 	return nil
 }
 
@@ -353,8 +358,8 @@ func resourceWafPolicyV1Update(ctx context.Context, d *schema.ResourceData, meta
 		updateOpts.Level = d.Get("level").(int)
 	}
 	if d.HasChange("full_detection") {
-		full_detection := d.Get("full_detection").(bool)
-		updateOpts.FullDetection = &full_detection
+		fullDetection := d.Get("full_detection").(bool)
+		updateOpts.FullDetection = &fullDetection
 	}
 	log.Printf("[DEBUG] updateOpts: %#v", updateOpts)
 

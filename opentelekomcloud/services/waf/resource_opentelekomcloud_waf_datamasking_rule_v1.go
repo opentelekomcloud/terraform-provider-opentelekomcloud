@@ -5,6 +5,7 @@ import (
 	"log"
 	"time"
 
+	"github.com/hashicorp/go-multierror"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	golangsdk "github.com/opentelekomcloud/gophertelekomcloud"
@@ -100,10 +101,15 @@ func resourceWafDataMaskingRuleV1Read(_ context.Context, d *schema.ResourceData,
 	}
 
 	d.SetId(n.Id)
-	d.Set("url", n.Url)
-	d.Set("category", n.Category)
-	d.Set("index", n.Index)
-	d.Set("policy_id", n.PolicyID)
+	mErr := multierror.Append(
+		d.Set("url", n.Url),
+		d.Set("category", n.Category),
+		d.Set("index", n.Index),
+		d.Set("policy_id", n.PolicyID),
+	)
+	if err := mErr.ErrorOrNil(); err != nil {
+		return diag.FromErr(err)
+	}
 
 	return nil
 }

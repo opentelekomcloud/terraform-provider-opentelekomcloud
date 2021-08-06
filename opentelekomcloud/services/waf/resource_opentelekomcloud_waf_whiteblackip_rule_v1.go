@@ -5,6 +5,7 @@ import (
 	"log"
 	"time"
 
+	"github.com/hashicorp/go-multierror"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	golangsdk "github.com/opentelekomcloud/gophertelekomcloud"
@@ -95,9 +96,14 @@ func resourceWafWhiteBlackIpRuleV1Read(_ context.Context, d *schema.ResourceData
 	}
 
 	d.SetId(n.Id)
-	d.Set("addr", n.Addr)
-	d.Set("white", n.White)
-	d.Set("policy_id", n.PolicyID)
+	mErr := multierror.Append(
+		d.Set("addr", n.Addr),
+		d.Set("white", n.White),
+		d.Set("policy_id", n.PolicyID),
+	)
+	if err := mErr.ErrorOrNil(); err != nil {
+		return diag.FromErr(err)
+	}
 
 	return nil
 }
@@ -118,8 +124,8 @@ func resourceWafWhiteBlackIpRuleV1Update(ctx context.Context, d *schema.Resource
 	log.Printf("[DEBUG] updateOpts: %#v", updateOpts)
 
 	if updateOpts != (whiteblackip_rules.UpdateOpts{}) {
-		policy_id := d.Get("policy_id").(string)
-		_, err = whiteblackip_rules.Update(wafClient, policy_id, d.Id(), updateOpts).Extract()
+		policyID := d.Get("policy_id").(string)
+		_, err = whiteblackip_rules.Update(wafClient, policyID, d.Id(), updateOpts).Extract()
 		if err != nil {
 			return fmterr.Errorf("error updating OpenTelekomCloud WAF WhiteBlackIP Rule: %s", err)
 		}
@@ -135,8 +141,8 @@ func resourceWafWhiteBlackIpRuleV1Delete(_ context.Context, d *schema.ResourceDa
 		return fmterr.Errorf("error creating OpenTelekomCloud WAF client: %s", err)
 	}
 
-	policy_id := d.Get("policy_id").(string)
-	err = whiteblackip_rules.Delete(wafClient, policy_id, d.Id()).ExtractErr()
+	policyID := d.Get("policy_id").(string)
+	err = whiteblackip_rules.Delete(wafClient, policyID, d.Id()).ExtractErr()
 	if err != nil {
 		return fmterr.Errorf("error deleting OpenTelekomCloud WAF WhiteBlackIP Rule: %s", err)
 	}
