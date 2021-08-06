@@ -4,6 +4,7 @@ import (
 	"context"
 	"log"
 
+	"github.com/hashicorp/go-multierror"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
@@ -106,11 +107,11 @@ func dataSourceBMSFlavorV2Read(_ context.Context, d *schema.ResourceData, meta i
 	var flavor flavors.Flavor
 	refinedflavors, err := flavors.List(flavorClient, listOpts)
 	if err != nil {
-		return fmterr.Errorf("Unable to retrieve flavors: %s", err)
+		return fmterr.Errorf("unable to retrieve flavors: %s", err)
 	}
 
 	if len(refinedflavors) < 1 {
-		return fmterr.Errorf("Your query returned no results. " +
+		return fmterr.Errorf("your query returned no results. " +
 			"Please change your search criteria and try again.")
 	} else {
 		flavor = refinedflavors[0]
@@ -118,14 +119,20 @@ func dataSourceBMSFlavorV2Read(_ context.Context, d *schema.ResourceData, meta i
 
 	log.Printf("[DEBUG] Single Flavor found: %s", flavor.ID)
 	d.SetId(flavor.ID)
-	d.Set("name", flavor.Name)
-	d.Set("disk", flavor.Disk)
-	d.Set("min_disk", flavor.MinDisk)
-	d.Set("min_ram", flavor.MinRAM)
-	d.Set("ram", flavor.RAM)
-	d.Set("rx_tx_factor", flavor.RxTxFactor)
-	d.Set("swap", flavor.Swap)
-	d.Set("vcpus", flavor.VCPUs)
+	mErr := multierror.Append(
+		d.Set("name", flavor.Name),
+		d.Set("disk", flavor.Disk),
+		d.Set("min_disk", flavor.MinDisk),
+		d.Set("min_ram", flavor.MinRAM),
+		d.Set("ram", flavor.RAM),
+		d.Set("rx_tx_factor", flavor.RxTxFactor),
+		d.Set("swap", flavor.Swap),
+		d.Set("vcpus", flavor.VCPUs),
+	)
+
+	if err := mErr.ErrorOrNil(); err != nil {
+		return diag.FromErr(err)
+	}
 
 	return nil
 }

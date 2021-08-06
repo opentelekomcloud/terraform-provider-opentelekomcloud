@@ -6,6 +6,7 @@ import (
 	"log"
 	"time"
 
+	"github.com/hashicorp/go-multierror"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
@@ -88,9 +89,9 @@ func ResourceComputeBMSInstanceV2() *schema.Resource {
 				ForceNew: true,
 				// just stash the hash for state & diff comparisons
 				StateFunc: func(v interface{}) string {
-					switch v.(type) {
+					switch v := v.(type) {
 					case string:
-						return common.InstallScriptHashSum(v.(string))
+						return common.InstallScriptHashSum(v)
 					default:
 						return ""
 					}
@@ -276,7 +277,6 @@ func ResourceComputeBMSInstanceV2() *schema.Resource {
 }
 
 func bmsTagsCreate(client *golangsdk.ServiceClient, server_id string) error {
-
 	createOpts := tags.CreateOpts{
 		Tag: []string{"__type_baremetal"},
 	}
@@ -387,7 +387,7 @@ func resourceComputeBMSInstanceV2Create(ctx context.Context, d *schema.ResourceD
 	stateConf := &resource.StateChangeConf{
 		Pending:    []string{"BUILD"},
 		Target:     []string{"ACTIVE"},
-		Refresh:    BmsServerV2StateRefreshFunc(computeClient, server.ID),
+		Refresh:    serverV2StateRefreshFunc(computeClient, server.ID),
 		Timeout:    d.Timeout(schema.TimeoutCreate),
 		Delay:      10 * time.Second,
 		MinTimeout: 3 * time.Second,
@@ -426,7 +426,9 @@ func resourceComputeBMSInstanceV2Read(_ context.Context, d *schema.ResourceData,
 
 	log.Printf("[DEBUG] Retrieved Server %s: %+v", d.Id(), server)
 
-	d.Set("name", server.Name)
+	mErr := multierror.Append(
+		d.Set("name", server.Name),
+	)
 
 	// Get the instance network and address information
 	networks, err := ecs.FlattenInstanceNetworks(d, meta)
@@ -446,10 +448,11 @@ func resourceComputeBMSInstanceV2Read(_ context.Context, d *schema.ResourceData,
 	if server.AccessIPv6 != "" && hostv6 == "" {
 		hostv6 = server.AccessIPv6
 	}
-
-	d.Set("network", networks)
-	d.Set("access_ip_v4", hostv4)
-	d.Set("access_ip_v6", hostv6)
+	mErr = multierror.Append(mErr,
+		d.Set("network", networks),
+		d.Set("access_ip_v4", hostv4),
+		d.Set("access_ip_v6", hostv6),
+	)
 
 	// Determine the best IP address to use for SSH connectivity.
 	// Prefer IPv4 over IPv6.
@@ -468,27 +471,35 @@ func resourceComputeBMSInstanceV2Read(_ context.Context, d *schema.ResourceData,
 		})
 	}
 
-	d.Set("metadata", server.Metadata)
-	d.Set("flavor_id", server.Flavor.ID)
+	mErr = multierror.Append(mErr,
+		d.Set("metadata", server.Metadata),
+		d.Set("flavor_id", server.Flavor.ID),
+	)
 
 	flavor, err := flavors.Get(computeClient, server.Flavor.ID).Extract()
 	if err != nil {
 		return diag.FromErr(err)
 	}
-	d.Set("flavor_name", flavor.Name)
+	mErr = multierror.Append(mErr, d.Set("flavor_name", flavor.Name))
 
 	// Set the instance's image information appropriately
 	if err := setImageInformations(computeClient, server, d); err != nil {
 		return diag.FromErr(err)
 	}
 
-	d.Set("availability_zone", server.AvailabilityZone)
-	d.Set("tenant_id", server.TenantID)
-	d.Set("host_status", server.HostStatus)
-	d.Set("host_id", server.HostID)
-	d.Set("kernel_id", server.KernelId)
-	d.Set("user_id", server.UserID)
-	d.Set("region", config.GetRegion(d))
+	mErr = multierror.Append(mErr,
+		d.Set("availability_zone", server.AvailabilityZone),
+		d.Set("tenant_id", server.TenantID),
+		d.Set("host_status", server.HostStatus),
+		d.Set("host_id", server.HostID),
+		d.Set("kernel_id", server.KernelId),
+		d.Set("user_id", server.UserID),
+		d.Set("region", config.GetRegion(d)),
+	)
+
+	if err := mErr.ErrorOrNil(); err != nil {
+		return diag.FromErr(err)
+	}
 
 	return nil
 }
@@ -508,7 +519,7 @@ func resourceComputeBMSInstanceV2Delete(ctx context.Context, d *schema.ResourceD
 			stopStateConf := &resource.StateChangeConf{
 				Pending:    []string{"ACTIVE"},
 				Target:     []string{"SHUTOFF"},
-				Refresh:    BmsServerV2StateRefreshFunc(computeClient, d.Id()),
+				Refresh:    serverV2StateRefreshFunc(computeClient, d.Id()),
 				Timeout:    3 * time.Minute,
 				Delay:      10 * time.Second,
 				MinTimeout: 3 * time.Second,
@@ -533,7 +544,7 @@ func resourceComputeBMSInstanceV2Delete(ctx context.Context, d *schema.ResourceD
 	stateConf := &resource.StateChangeConf{
 		Pending:    []string{"ACTIVE", "SHUTOFF"},
 		Target:     []string{"DELETED", "SOFT_DELETED"},
-		Refresh:    BmsServerV2StateRefreshFunc(computeClient, d.Id()),
+		Refresh:    serverV2StateRefreshFunc(computeClient, d.Id()),
 		Timeout:    d.Timeout(schema.TimeoutDelete),
 		Delay:      10 * time.Second,
 		MinTimeout: 3 * time.Second,
@@ -706,7 +717,7 @@ func resourceComputeBMSInstanceV2Update(ctx context.Context, d *schema.ResourceD
 		stateConf := &resource.StateChangeConf{
 			Pending:    []string{"RESIZE"},
 			Target:     []string{"VERIFY_RESIZE"},
-			Refresh:    BmsServerV2StateRefreshFunc(computeClient, d.Id()),
+			Refresh:    serverV2StateRefreshFunc(computeClient, d.Id()),
 			Timeout:    d.Timeout(schema.TimeoutUpdate),
 			Delay:      10 * time.Second,
 			MinTimeout: 3 * time.Second,
@@ -727,7 +738,7 @@ func resourceComputeBMSInstanceV2Update(ctx context.Context, d *schema.ResourceD
 		stateConf = &resource.StateChangeConf{
 			Pending:    []string{"VERIFY_RESIZE"},
 			Target:     []string{"ACTIVE"},
-			Refresh:    BmsServerV2StateRefreshFunc(computeClient, d.Id()),
+			Refresh:    serverV2StateRefreshFunc(computeClient, d.Id()),
 			Timeout:    d.Timeout(schema.TimeoutUpdate),
 			Delay:      10 * time.Second,
 			MinTimeout: 3 * time.Second,
@@ -742,9 +753,9 @@ func resourceComputeBMSInstanceV2Update(ctx context.Context, d *schema.ResourceD
 	return resourceComputeBMSInstanceV2Read(ctx, d, meta)
 }
 
-// ServerV2StateRefreshFunc returns a resource.StateRefreshFunc that is used to watch
+// serverV2StateRefreshFunc returns a resource.StateRefreshFunc that is used to watch
 // an OpenTelekomCloud instance.
-func BmsServerV2StateRefreshFunc(client *golangsdk.ServiceClient, instanceID string) resource.StateRefreshFunc {
+func serverV2StateRefreshFunc(client *golangsdk.ServiceClient, instanceID string) resource.StateRefreshFunc {
 	return func() (interface{}, string, error) {
 		s, err := servers.Get(client, instanceID).Extract()
 		if err != nil {
@@ -760,11 +771,11 @@ func BmsServerV2StateRefreshFunc(client *golangsdk.ServiceClient, instanceID str
 
 func resourceBmsInstanceSecGroupsV2(d *schema.ResourceData) []string {
 	rawSecGroups := d.Get("security_groups").(*schema.Set).List()
-	secgroups := make([]string, len(rawSecGroups))
+	secGroups := make([]string, len(rawSecGroups))
 	for i, raw := range rawSecGroups {
-		secgroups[i] = raw.(string)
+		secGroups[i] = raw.(string)
 	}
-	return secgroups
+	return secGroups
 }
 
 func resourceBmsInstanceMetadataV2(d *schema.ResourceData) map[string]string {
@@ -809,18 +820,18 @@ func getImageId(computeClient *golangsdk.ServiceClient, d *schema.ResourceData) 
 func setImageInformations(computeClient *golangsdk.ServiceClient, server *bms.Server, d *schema.ResourceData) error {
 	imageId := server.Image.ID
 	if imageId != "" {
-		d.Set("image_id", imageId)
+		_ = d.Set("image_id", imageId)
 		if image, err := images.Get(computeClient, imageId).Extract(); err != nil {
 			if _, ok := err.(golangsdk.ErrDefault404); ok {
 				// If the image name can't be found, set the value to "Image not found".
 				// The most likely scenario is that the image no longer exists in the Image Service
 				// but the instance still has a record from when it existed.
-				d.Set("image_name", "Image not found")
+				_ = d.Set("image_name", "Image not found")
 				return nil
 			}
 			return err
 		} else {
-			d.Set("image_name", image.Name)
+			_ = d.Set("image_name", image.Name)
 		}
 	}
 
