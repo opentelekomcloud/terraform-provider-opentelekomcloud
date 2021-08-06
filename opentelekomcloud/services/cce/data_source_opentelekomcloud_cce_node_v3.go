@@ -4,6 +4,7 @@ import (
 	"context"
 	"log"
 
+	"github.com/hashicorp/go-multierror"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/cce/v3/nodes"
@@ -132,7 +133,7 @@ func dataSourceCceNodesV3Read(_ context.Context, d *schema.ResourceData, meta in
 	config := meta.(*cfg.Config)
 	cceClient, err := config.CceV3Client(config.GetRegion(d))
 	if err != nil {
-		return fmterr.Errorf("Unable to create opentelekomcloud CCE client : %s", err)
+		return fmterr.Errorf("unable to create opentelekomcloud CCE client : %s", err)
 	}
 
 	listOpts := nodes.ListOpts{
@@ -156,16 +157,16 @@ func dataSourceCceNodesV3Read(_ context.Context, d *schema.ResourceData, meta in
 	refinedNodes, err := nodes.List(cceClient, d.Get("cluster_id").(string), listOpts)
 
 	if err != nil {
-		return fmterr.Errorf("Unable to retrieve Nodes: %s", err)
+		return fmterr.Errorf("unable to retrieve Nodes: %s", err)
 	}
 
 	if len(refinedNodes) < 1 {
-		return fmterr.Errorf("Your query returned no results. " +
+		return fmterr.Errorf("your query returned no results. " +
 			"Please change your search criteria and try again.")
 	}
 
 	if len(refinedNodes) > 1 {
-		return fmterr.Errorf("Your query returned more than one result." +
+		return fmterr.Errorf("your query returned more than one result." +
 			" Please try a more specific search criteria")
 	}
 
@@ -173,7 +174,6 @@ func dataSourceCceNodesV3Read(_ context.Context, d *schema.ResourceData, meta in
 
 	var v []map[string]interface{}
 	for _, volume := range Node.Spec.DataVolumes {
-
 		mapping := map[string]interface{}{
 			"disk_size":   volume.Size,
 			"volume_type": volume.VolumeType,
@@ -181,34 +181,34 @@ func dataSourceCceNodesV3Read(_ context.Context, d *schema.ResourceData, meta in
 		v = append(v, mapping)
 	}
 
-	pids := Node.Spec.PublicIP.Ids
-	PublicIDs := make([]string, len(pids))
-	for i, val := range pids {
-		PublicIDs[i] = val
-	}
 	log.Printf("[DEBUG] Retrieved Nodes using given filter %s: %+v", Node.Metadata.Id, Node)
 	d.SetId(Node.Metadata.Id)
-	d.Set("node_id", Node.Metadata.Id)
-	d.Set("name", Node.Metadata.Name)
-	d.Set("flavor_id", Node.Spec.Flavor)
-	d.Set("availability_zone", Node.Spec.Az)
-	d.Set("billing_mode", Node.Spec.BillingMode)
-	d.Set("status", Node.Status.Phase)
-	d.Set("data_volumes", v)
-	d.Set("disk_size", Node.Spec.RootVolume.Size)
-	d.Set("volume_type", Node.Spec.RootVolume.VolumeType)
-	d.Set("extend_param", Node.Spec.RootVolume.ExtendParam)
-	d.Set("key_pair", Node.Spec.Login.SshKey)
-	d.Set("charge_mode", Node.Spec.PublicIP.Eip.Bandwidth.ChargeMode)
-	d.Set("bandwidth_size", Node.Spec.PublicIP.Eip.Bandwidth.Size)
-	d.Set("share_type", Node.Spec.PublicIP.Eip.Bandwidth.ShareType)
-	d.Set("ip_type", Node.Spec.PublicIP.Eip.IpType)
-	d.Set("server_id", Node.Status.ServerID)
-	d.Set("public_ip", Node.Status.PublicIP)
-	d.Set("private_ip", Node.Status.PrivateIP)
-	d.Set("spec_extend_param", Node.Spec.ExtendParam)
-	d.Set("eip_count", Node.Spec.PublicIP.Count)
-	d.Set("eip_ids", PublicIDs)
+	mErr := multierror.Append(
+		d.Set("node_id", Node.Metadata.Id),
+		d.Set("name", Node.Metadata.Name),
+		d.Set("flavor_id", Node.Spec.Flavor),
+		d.Set("availability_zone", Node.Spec.Az),
+		d.Set("billing_mode", Node.Spec.BillingMode),
+		d.Set("status", Node.Status.Phase),
+		d.Set("data_volumes", v),
+		d.Set("disk_size", Node.Spec.RootVolume.Size),
+		d.Set("volume_type", Node.Spec.RootVolume.VolumeType),
+		d.Set("extend_param", Node.Spec.RootVolume.ExtendParam),
+		d.Set("key_pair", Node.Spec.Login.SshKey),
+		d.Set("charge_mode", Node.Spec.PublicIP.Eip.Bandwidth.ChargeMode),
+		d.Set("bandwidth_size", Node.Spec.PublicIP.Eip.Bandwidth.Size),
+		d.Set("share_type", Node.Spec.PublicIP.Eip.Bandwidth.ShareType),
+		d.Set("ip_type", Node.Spec.PublicIP.Eip.IpType),
+		d.Set("server_id", Node.Status.ServerID),
+		d.Set("public_ip", Node.Status.PublicIP),
+		d.Set("private_ip", Node.Status.PrivateIP),
+		d.Set("spec_extend_param", Node.Spec.ExtendParam),
+		d.Set("eip_count", Node.Spec.PublicIP.Count),
+		d.Set("eip_ids", Node.Spec.PublicIP.Ids),
+	)
 
+	if err := mErr.ErrorOrNil(); err != nil {
+		return diag.FromErr(err)
+	}
 	return nil
 }

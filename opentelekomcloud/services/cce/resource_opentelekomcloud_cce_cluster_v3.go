@@ -31,7 +31,7 @@ import (
 var (
 	// Cluster name is 4 to 128 characters starting with a letter and not ending with a hyphen (-).
 	// Only lowercase letters, digits, and hyphens (-) are allowed
-	clusterNameRegex, _ = regexp.Compile("^[a-z][a-z0-9-]{2,126}[a-z0-9]$")
+	clusterNameRegex = regexp.MustCompile("^[a-z][a-z0-9-]{2,126}[a-z0-9]$")
 )
 
 func ResourceCCEClusterV3() *schema.Resource {
@@ -265,7 +265,7 @@ func resourceClusterExtendParamV3(d *schema.ResourceData) map[string]string {
 	for key, val := range d.Get("extend_param").(map[string]interface{}) {
 		m[key] = val.(string)
 	}
-	if multiAZ, ok := d.GetOk("multi_az"); ok && multiAZ == true {
+	if multiAZ, ok := d.GetOk("multi_az"); ok && multiAZ.(bool) {
 		m["clusterAZ"] = "multi_az"
 	}
 	if eip, ok := d.GetOk("eip"); ok {
