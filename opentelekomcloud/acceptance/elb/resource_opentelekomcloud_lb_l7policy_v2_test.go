@@ -69,11 +69,11 @@ func testAccCheckLBV2L7PolicyExists(n string, l7Policy *l7policies.L7Policy) res
 	return func(s *terraform.State) error {
 		rs, ok := s.RootModule().Resources[n]
 		if !ok {
-			return fmt.Errorf("Not found: %s", n)
+			return fmt.Errorf("not found: %s", n)
 		}
 
 		if rs.Primary.ID == "" {
-			return fmt.Errorf("No ID is set")
+			return fmt.Errorf("no ID is set")
 		}
 
 		config := common.TestAccProvider.Meta().(*cfg.Config)
@@ -88,7 +88,7 @@ func testAccCheckLBV2L7PolicyExists(n string, l7Policy *l7policies.L7Policy) res
 		}
 
 		if found.ID != rs.Primary.ID {
-			return fmt.Errorf("Policy not found")
+			return fmt.Errorf("policy not found")
 		}
 
 		*l7Policy = *found

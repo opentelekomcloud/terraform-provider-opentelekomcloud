@@ -5,6 +5,7 @@ import (
 	"log"
 	"time"
 
+	"github.com/hashicorp/go-multierror"
 	// "github.com/hashicorp/terraform/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
@@ -77,6 +78,9 @@ func resourceBackendCreate(ctx context.Context, d *schema.ResourceData, meta int
 	}
 
 	entity, err := golangsdk.GetJobEntity(client, job.URI, "members")
+	if err != nil {
+		return fmterr.Errorf("error getting job entity: %w", err)
+	}
 
 	if members, ok := entity.([]interface{}); ok {
 		if len(members) > 0 {
@@ -111,10 +115,15 @@ func resourceBackendRead(_ context.Context, d *schema.ResourceData, meta interfa
 	log.Printf("[DEBUG] Retrieved backend member %s: %#v", id, backend)
 
 	b := backend[0]
-	d.Set("server_id", b.ServerID)
-	d.Set("address", b.ServerAddress)
+	mErr := multierror.Append(
+		d.Set("server_id", b.ServerID),
+		d.Set("address", b.ServerAddress),
+		d.Set("region", config.GetRegion(d)),
+	)
 
-	d.Set("region", config.GetRegion(d))
+	if err := mErr.ErrorOrNil(); err != nil {
+		return diag.FromErr(err)
+	}
 
 	return nil
 }

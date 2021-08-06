@@ -5,6 +5,7 @@ import (
 	"log"
 	"time"
 
+	"github.com/hashicorp/go-multierror"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
@@ -231,28 +232,33 @@ func resourceEListenerRead(_ context.Context, d *schema.ResourceData, meta inter
 
 	log.Printf("[DEBUG] Retrieved listener %s: %#v", d.Id(), listener)
 
-	d.Set("backend_port", listener.BackendProtocolPort)
-	d.Set("backend_protocol", listener.BackendProtocol)
-	d.Set("session_sticky_type", listener.StickySessionType)
-	d.Set("description", listener.Description)
-	d.Set("load_balancer_id", listener.LoadbalancerID)
-	d.Set("protocol", listener.Protocol)
-	d.Set("protocol_port", listener.ProtocolPort)
-	d.Set("cookie_timeout", listener.CookieTimeout)
-	d.Set("admin_state_up", listener.AdminStateUp)
-	d.Set("session_sticky", listener.SessionSticky)
-	d.Set("lb_algorithm", listener.Algorithm)
-	d.Set("name", listener.Name)
-	d.Set("certificate_id", listener.CertificateID)
-	d.Set("certificates", listener.Certificates)
-	d.Set("tcp_timeout", listener.TcpTimeout)
-	d.Set("udp_timeout", listener.UDPTimeout)
-	d.Set("ssl_protocols", listener.SSLProtocols)
-	d.Set("ssl_ciphers", listener.SSLCiphers)
-	d.Set("tcp_draining", listener.TcpDraining)
-	d.Set("tcp_draining_timeout", listener.TcpDrainingTimeout)
+	mErr := multierror.Append(
+		d.Set("backend_port", listener.BackendProtocolPort),
+		d.Set("backend_protocol", listener.BackendProtocol),
+		d.Set("session_sticky_type", listener.StickySessionType),
+		d.Set("description", listener.Description),
+		d.Set("load_balancer_id", listener.LoadbalancerID),
+		d.Set("protocol", listener.Protocol),
+		d.Set("protocol_port", listener.ProtocolPort),
+		d.Set("cookie_timeout", listener.CookieTimeout),
+		d.Set("admin_state_up", listener.AdminStateUp),
+		d.Set("session_sticky", listener.SessionSticky),
+		d.Set("lb_algorithm", listener.Algorithm),
+		d.Set("name", listener.Name),
+		d.Set("certificate_id", listener.CertificateID),
+		d.Set("certificates", listener.Certificates),
+		d.Set("tcp_timeout", listener.TcpTimeout),
+		d.Set("udp_timeout", listener.UDPTimeout),
+		d.Set("ssl_protocols", listener.SSLProtocols),
+		d.Set("ssl_ciphers", listener.SSLCiphers),
+		d.Set("tcp_draining", listener.TcpDraining),
+		d.Set("tcp_draining_timeout", listener.TcpDrainingTimeout),
+		d.Set("region", config.GetRegion(d)),
+	)
 
-	d.Set("region", config.GetRegion(d))
+	if err := mErr.ErrorOrNil(); err != nil {
+		return diag.FromErr(err)
+	}
 
 	return nil
 }
@@ -305,7 +311,6 @@ func resourceEListenerUpdate(ctx context.Context, d *schema.ResourceData, meta i
 	}
 
 	return resourceEListenerRead(ctx, d, meta)
-
 }
 
 func resourceEListenerDelete(_ context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {

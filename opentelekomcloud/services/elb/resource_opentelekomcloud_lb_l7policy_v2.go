@@ -6,6 +6,7 @@ import (
 	"log"
 	"time"
 
+	"github.com/hashicorp/go-multierror"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
@@ -121,7 +122,7 @@ func resourceL7PolicyV2Create(ctx context.Context, d *schema.ResourceData, meta 
 	// Ensure the right combination of options have been specified.
 	err = checkL7PolicyAction(action, redirectListenerID, redirectPoolID)
 	if err != nil {
-		return fmterr.Errorf("Unable to create L7 Policy: %s", err)
+		return fmterr.Errorf("unable to create L7 Policy: %s", err)
 	}
 
 	adminStateUp := d.Get("admin_state_up").(bool)
@@ -148,7 +149,7 @@ func resourceL7PolicyV2Create(ctx context.Context, d *schema.ResourceData, meta 
 	if redirectPoolID != "" {
 		pool, err := pools.Get(lbClient, redirectPoolID).Extract()
 		if err != nil {
-			return fmterr.Errorf("Unable to retrieve %s: %s", redirectPoolID, err)
+			return fmterr.Errorf("unable to retrieve %s: %s", redirectPoolID, err)
 		}
 
 		err = waitForLBV2Pool(ctx, lbClient, pool.ID, "ACTIVE", lbPendingStatuses, timeout)
@@ -160,7 +161,7 @@ func resourceL7PolicyV2Create(ctx context.Context, d *schema.ResourceData, meta 
 	// Get a clean copy of the parent listener.
 	parentListener, err := listeners.Get(lbClient, listenerID).Extract()
 	if err != nil {
-		return fmterr.Errorf("Unable to retrieve listener %s: %s", listenerID, err)
+		return fmterr.Errorf("unable to retrieve listener %s: %s", listenerID, err)
 	}
 
 	// Wait for parent Listener to become active before continuing.
@@ -208,15 +209,21 @@ func resourceL7PolicyV2Read(_ context.Context, d *schema.ResourceData, meta inte
 
 	log.Printf("[DEBUG] Retrieved L7 Policy %s: %#v", d.Id(), l7Policy)
 
-	d.Set("action", l7Policy.Action)
-	d.Set("description", l7Policy.Description)
-	d.Set("tenant_id", l7Policy.TenantID)
-	d.Set("name", l7Policy.Name)
-	d.Set("position", int(l7Policy.Position))
-	d.Set("redirect_listener_id", l7Policy.RedirectListenerID)
-	d.Set("redirect_pool_id", l7Policy.RedirectPoolID)
-	d.Set("region", config.GetRegion(d))
-	d.Set("admin_state_up", l7Policy.AdminStateUp)
+	mErr := multierror.Append(
+		d.Set("action", l7Policy.Action),
+		d.Set("description", l7Policy.Description),
+		d.Set("tenant_id", l7Policy.TenantID),
+		d.Set("name", l7Policy.Name),
+		d.Set("position", int(l7Policy.Position)),
+		d.Set("redirect_listener_id", l7Policy.RedirectListenerID),
+		d.Set("redirect_pool_id", l7Policy.RedirectPoolID),
+		d.Set("region", config.GetRegion(d)),
+		d.Set("admin_state_up", l7Policy.AdminStateUp),
+	)
+
+	if err := mErr.ErrorOrNil(); err != nil {
+		return diag.FromErr(err)
+	}
 
 	return nil
 }
@@ -265,7 +272,7 @@ func resourceL7PolicyV2Update(ctx context.Context, d *schema.ResourceData, meta 
 	if redirectPoolID != "" {
 		pool, err := pools.Get(lbClient, redirectPoolID).Extract()
 		if err != nil {
-			return fmterr.Errorf("Unable to retrieve %s: %s", redirectPoolID, err)
+			return fmterr.Errorf("unable to retrieve %s: %s", redirectPoolID, err)
 		}
 
 		err = waitForLBV2Pool(ctx, lbClient, pool.ID, "ACTIVE", lbPendingStatuses, timeout)
@@ -277,13 +284,13 @@ func resourceL7PolicyV2Update(ctx context.Context, d *schema.ResourceData, meta 
 	// Get a clean copy of the parent listener.
 	parentListener, err := listeners.Get(lbClient, listenerID).Extract()
 	if err != nil {
-		return fmterr.Errorf("Unable to retrieve parent listener %s: %s", listenerID, err)
+		return fmterr.Errorf("unable to retrieve parent listener %s: %s", listenerID, err)
 	}
 
 	// Get a clean copy of the L7 Policy.
 	l7Policy, err := l7policies.Get(lbClient, d.Id()).Extract()
 	if err != nil {
-		return fmterr.Errorf("Unable to retrieve L7 Policy: %s: %s", d.Id(), err)
+		return fmterr.Errorf("unable to retrieve L7 Policy: %s: %s", d.Id(), err)
 	}
 
 	// Wait for parent Listener to become active before continuing.
@@ -308,7 +315,7 @@ func resourceL7PolicyV2Update(ctx context.Context, d *schema.ResourceData, meta 
 	})
 
 	if err != nil {
-		return fmterr.Errorf("Unable to update L7 Policy %s: %s", d.Id(), err)
+		return fmterr.Errorf("unable to update L7 Policy %s: %s", d.Id(), err)
 	}
 
 	// Wait for L7 Policy to become active before continuing
@@ -333,7 +340,7 @@ func resourceL7PolicyV2Delete(ctx context.Context, d *schema.ResourceData, meta 
 	// Get a clean copy of the listener.
 	listener, err := listeners.Get(lbClient, listenerID).Extract()
 	if err != nil {
-		return fmterr.Errorf("Unable to retrieve parent listener (%s) for the L7 Policy: %s", listenerID, err)
+		return fmterr.Errorf("unable to retrieve parent listener (%s) for the L7 Policy: %s", listenerID, err)
 	}
 
 	// Get a clean copy of the L7 Policy.
@@ -383,15 +390,19 @@ func resourceL7PolicyV2Import(_ context.Context, d *schema.ResourceData, meta in
 
 	log.Printf("[DEBUG] Retrieved L7 Policy %s during the import: %#v", d.Id(), l7Policy)
 
+	var listenerID string
 	if l7Policy.ListenerID != "" {
-		d.Set("listener_id", l7Policy.ListenerID)
+		listenerID = l7Policy.ListenerID
 	} else {
 		// Fallback for the Neutron LBaaSv2 extension
-		listenerID, err := getListenerIDForL7Policy(lbClient, d.Id())
+		var err error
+		listenerID, err = getListenerIDForL7Policy(lbClient, d.Id())
 		if err != nil {
 			return nil, err
 		}
-		d.Set("listener_id", listenerID)
+	}
+	if err := d.Set("listener_id", listenerID); err != nil {
+		return nil, err
 	}
 
 	return []*schema.ResourceData{d}, nil

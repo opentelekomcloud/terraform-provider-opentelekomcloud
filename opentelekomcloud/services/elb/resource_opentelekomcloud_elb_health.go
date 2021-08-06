@@ -5,6 +5,7 @@ import (
 	"log"
 	"time"
 
+	"github.com/hashicorp/go-multierror"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
@@ -133,16 +134,21 @@ func resourceHealthRead(_ context.Context, d *schema.ResourceData, meta interfac
 
 	log.Printf("[DEBUG] Retrieved health %s: %+v", d.Id(), health)
 
-	d.Set("listener_id", health.ListenerID)
-	d.Set("healthcheck_protocol", health.HealthcheckProtocol)
-	d.Set("healthcheck_uri", health.HealthcheckUri)
-	d.Set("healtcheck_connect_port", health.HealthcheckConnectPort)
-	d.Set("healthy_threshold", health.HealthyThreshold)
-	d.Set("unhealthy_threshold", health.UnhealthyThreshold)
-	d.Set("healthcheck_timeout", health.HealthcheckTimeout)
-	d.Set("healthcheck_interval", health.HealthcheckInterval)
+	mErr := multierror.Append(
+		d.Set("listener_id", health.ListenerID),
+		d.Set("healthcheck_protocol", health.HealthcheckProtocol),
+		d.Set("healthcheck_uri", health.HealthcheckUri),
+		d.Set("healtcheck_connect_port", health.HealthcheckConnectPort),
+		d.Set("healthy_threshold", health.HealthyThreshold),
+		d.Set("unhealthy_threshold", health.UnhealthyThreshold),
+		d.Set("healthcheck_timeout", health.HealthcheckTimeout),
+		d.Set("healthcheck_interval", health.HealthcheckInterval),
+		d.Set("region", config.GetRegion(d)),
+	)
 
-	d.Set("region", config.GetRegion(d))
+	if err := mErr.ErrorOrNil(); err != nil {
+		return diag.FromErr(err)
+	}
 
 	return nil
 }

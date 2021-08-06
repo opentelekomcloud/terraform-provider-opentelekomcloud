@@ -54,7 +54,7 @@ func testAccCheckLBV2LoadBalancerDestroy(s *terraform.State) error {
 
 		_, err := loadbalancers.Get(client, rs.Primary.ID).Extract()
 		if err == nil {
-			return fmt.Errorf("LoadBalancer still exists: %s", rs.Primary.ID)
+			return fmt.Errorf("loadBalancer still exists: %s", rs.Primary.ID)
 		}
 	}
 
