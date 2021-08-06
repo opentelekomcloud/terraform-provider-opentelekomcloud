@@ -17,7 +17,7 @@ func TestAccBlockStorageV2Volume_importBasic(t *testing.T) {
 		CheckDestroy:      testAccCheckBlockStorageV2VolumeDestroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccBlockStorageV2Volume_basic,
+				Config: testAccBlockStorageV2VolumeBasic,
 			},
 
 			{
