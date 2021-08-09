@@ -180,11 +180,9 @@ func resourceVBSBackupPolicyV2Create(ctx context.Context, d *schema.ResourceData
 	}
 
 	return resourceVBSBackupPolicyV2Read(ctx, d, meta)
-
 }
 
 func resourceVBSBackupPolicyV2Read(_ context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-
 	config := meta.(*cfg.Config)
 	vbsClient, err := config.VbsV2Client(config.GetRegion(d))
 	if err != nil {
@@ -366,7 +364,6 @@ func resourceVBSBackupPolicyV2Delete(_ context.Context, d *schema.ResourceData, 
 	if err != nil {
 		if _, ok := err.(golangsdk.ErrDefault404); ok {
 			log.Printf("[INFO] Successfully deleted OpenTelekomCloud VBS Backup Policy %s", d.Id())
-
 		}
 		if errCode, ok := err.(golangsdk.ErrUnexpectedResponseCode); ok {
 			if errCode.Actual == 409 {

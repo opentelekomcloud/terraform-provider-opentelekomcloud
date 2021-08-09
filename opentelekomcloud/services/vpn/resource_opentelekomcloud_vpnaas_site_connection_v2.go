@@ -6,6 +6,7 @@ import (
 	"log"
 	"time"
 
+	"github.com/hashicorp/go-multierror"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
@@ -149,7 +150,6 @@ func ResourceVpnSiteConnectionV2() *schema.Resource {
 }
 
 func resourceVpnSiteConnectionV2Create(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-
 	config := meta.(*cfg.Config)
 	networkingClient, err := config.NetworkingV2Client(config.GetRegion(d))
 	if err != nil {
@@ -245,33 +245,36 @@ func resourceVpnSiteConnectionV2Read(_ context.Context, d *schema.ResourceData, 
 
 	log.Printf("[DEBUG] Read OpenTelekomCloud SiteConnection %s: %#v", d.Id(), conn)
 
-	d.Set("name", conn.Name)
-	d.Set("description", conn.Description)
-	d.Set("admin_state_up", conn.AdminStateUp)
-	d.Set("tenant_id", conn.TenantID)
-	d.Set("initiator", conn.Initiator)
-	d.Set("ikepolicy_id", conn.IKEPolicyID)
-	d.Set("peer_id", conn.PeerID)
-	d.Set("peer_address", conn.PeerAddress)
-	d.Set("local_id", conn.LocalID)
-	d.Set("peer_ep_group_id", conn.PeerEPGroupID)
-	d.Set("vpnservice_id", conn.VPNServiceID)
-	d.Set("local_ep_group_id", conn.LocalEPGroupID)
-	d.Set("ipsecpolicy_id", conn.IPSecPolicyID)
-	// Do not set psk here as the response value is not same with the requested
-	// d.Set("psk", conn.PSK)
-	d.Set("mtu", conn.MTU)
-	d.Set("peer_cidrs", conn.PeerCIDRs)
+	mErr := multierror.Append(
+		d.Set("name", conn.Name),
+		d.Set("description", conn.Description),
+		d.Set("admin_state_up", conn.AdminStateUp),
+		d.Set("tenant_id", conn.TenantID),
+		d.Set("initiator", conn.Initiator),
+		d.Set("ikepolicy_id", conn.IKEPolicyID),
+		d.Set("peer_id", conn.PeerID),
+		d.Set("peer_address", conn.PeerAddress),
+		d.Set("local_id", conn.LocalID),
+		d.Set("peer_ep_group_id", conn.PeerEPGroupID),
+		d.Set("vpnservice_id", conn.VPNServiceID),
+		d.Set("local_ep_group_id", conn.LocalEPGroupID),
+		d.Set("ipsecpolicy_id", conn.IPSecPolicyID),
+		// Do not set psk here as the response value is not same with the requested
+		// d.Set("psk", conn.PSK)
+		d.Set("mtu", conn.MTU),
+		d.Set("peer_cidrs", conn.PeerCIDRs),
+	)
+
+	if err := mErr.ErrorOrNil(); err != nil {
+		return diag.FromErr(err)
+	}
 
 	// Set the dpd
-	var dpdMap map[string]interface{}
-	dpdMap = make(map[string]interface{})
-	dpdMap["action"] = conn.DPD.Action
-	dpdMap["interval"] = conn.DPD.Interval
-	dpdMap["timeout"] = conn.DPD.Timeout
-
-	var dpd []map[string]interface{}
-	dpd = append(dpd, dpdMap)
+	dpd := []map[string]interface{}{{
+		"action":   conn.DPD.Action,
+		"interval": conn.DPD.Interval,
+		"timeout":  conn.DPD.Timeout,
+	}}
 	if err := d.Set("dpd", &dpd); err != nil {
 		log.Printf("[WARN] unable to set Site connection DPD")
 	}
@@ -370,14 +373,10 @@ func resourceVpnSiteConnectionV2Update(ctx context.Context, d *schema.ResourceDa
 		opts.DPD = &dpdUpdateOpts
 		hasChange = true
 	}
-
-	var updateOpts siteconnections.UpdateOptsBuilder
-	updateOpts = opts
-
-	log.Printf("[DEBUG] Updating site connection with id %s: %#v", d.Id(), updateOpts)
+	log.Printf("[DEBUG] Updating site connection with id %s: %#v", d.Id(), opts)
 
 	if hasChange {
-		conn, err := siteconnections.Update(networkingClient, d.Id(), updateOpts).Extract()
+		conn, err := siteconnections.Update(networkingClient, d.Id(), opts).Extract()
 		if err != nil {
 			return diag.FromErr(err)
 		}
@@ -437,7 +436,6 @@ func resourceVpnSiteConnectionV2Delete(ctx context.Context, d *schema.ResourceDa
 }
 
 func waitForSiteConnectionDeletion(networkingClient *golangsdk.ServiceClient, id string) resource.StateRefreshFunc {
-
 	return func() (interface{}, string, error) {
 		conn, err := siteconnections.Get(networkingClient, id).Extract()
 		log.Printf("[DEBUG] Got site connection %s => %#v", id, conn)
@@ -447,7 +445,7 @@ func waitForSiteConnectionDeletion(networkingClient *golangsdk.ServiceClient, id
 				log.Printf("[DEBUG] SiteConnection %s is actually deleted", id)
 				return "", "DELETED", nil
 			}
-			return nil, "", fmt.Errorf("Unexpected error: %s", err)
+			return nil, "", fmt.Errorf("unexpected error: %s", err)
 		}
 
 		log.Printf("[DEBUG] SiteConnection %s deletion is pending", id)

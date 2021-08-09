@@ -4,6 +4,7 @@ import (
 	"context"
 	"log"
 
+	"github.com/hashicorp/go-multierror"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/networking/v2/extensions/vpnaas/services"
@@ -104,9 +105,7 @@ func dataSourceVpnServiceV2Read(_ context.Context, d *schema.ResourceData, meta 
 		if err != nil {
 			return false, err
 		}
-		for _, vpn := range vpnList {
-			refinedVpns = append(refinedVpns, vpn)
-		}
+		refinedVpns = append(refinedVpns, vpnList...)
 		return true, nil
 	})
 	if err != nil {
@@ -114,30 +113,35 @@ func dataSourceVpnServiceV2Read(_ context.Context, d *schema.ResourceData, meta 
 	}
 
 	if len(refinedVpns) < 1 {
-		return fmterr.Errorf("Your query returned zero results. Please change your search criteria and try again.")
+		return fmterr.Errorf("your query returned zero results. Please change your search criteria and try again.")
 	}
 
 	if len(refinedVpns) > 1 {
-		return fmterr.Errorf("Your query returned more than one result. Please try a more specific search criteria")
+		return fmterr.Errorf("your query returned more than one result. Please try a more specific search criteria")
 	}
 	Vpn := refinedVpns[0]
 
 	log.Printf("[INFO] Retrieved Vpn using given filter %s: %+v", Vpn.ID, Vpn)
 	d.SetId(Vpn.ID)
 
-	d.Set("id", Vpn.ID)
-	d.Set("tenant_id", Vpn.TenantID)
-	d.Set("name", Vpn.Name)
-	d.Set("subnet_id", Vpn.SubnetID)
-	d.Set("admin_state_up", Vpn.AdminStateUp)
-	d.Set("external_v4_ip", Vpn.ExternalV4IP)
-	d.Set("external_v6_ip", Vpn.ExternalV6IP)
-	d.Set("project_id", Vpn.ProjectID)
-	d.Set("router_id", Vpn.RouterID)
-	d.Set("flavor_id", Vpn.FlavorID)
-	d.Set("status", Vpn.Status)
-	d.Set("description", Vpn.Description)
-	d.Set("region", config.GetRegion(d))
+	mErr := multierror.Append(
+		d.Set("id", Vpn.ID),
+		d.Set("tenant_id", Vpn.TenantID),
+		d.Set("name", Vpn.Name),
+		d.Set("subnet_id", Vpn.SubnetID),
+		d.Set("admin_state_up", Vpn.AdminStateUp),
+		d.Set("external_v4_ip", Vpn.ExternalV4IP),
+		d.Set("external_v6_ip", Vpn.ExternalV6IP),
+		d.Set("project_id", Vpn.ProjectID),
+		d.Set("router_id", Vpn.RouterID),
+		d.Set("flavor_id", Vpn.FlavorID),
+		d.Set("status", Vpn.Status),
+		d.Set("description", Vpn.Description),
+		d.Set("region", config.GetRegion(d)),
+	)
+	if err := mErr.ErrorOrNil(); err != nil {
+		return diag.FromErr(err)
+	}
 
 	return nil
 }
