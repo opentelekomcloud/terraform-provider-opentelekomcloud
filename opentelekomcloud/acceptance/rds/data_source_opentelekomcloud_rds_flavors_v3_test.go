@@ -29,11 +29,11 @@ func testAccCheckRdsFlavorV3DataSourceID(n string) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
 		rs, ok := s.RootModule().Resources[n]
 		if !ok {
-			return fmt.Errorf("Can't find rds data source: %s ", n)
+			return fmt.Errorf("can't find rds data source: %s ", n)
 		}
 
 		if rs.Primary.ID == "" {
-			return fmt.Errorf("Rds data source ID not set ")
+			return fmt.Errorf("rds data source ID not set ")
 		}
 
 		return nil

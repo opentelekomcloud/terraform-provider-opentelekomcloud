@@ -86,7 +86,7 @@ func testAccCheckOTCRTSStackV1Destroy(s *terraform.State) error {
 
 		if err == nil {
 			if stack.Status != "DELETE_COMPLETE" {
-				return fmt.Errorf("Stack still exists")
+				return fmt.Errorf("stack still exists")
 			}
 		}
 	}
@@ -98,11 +98,11 @@ func testAccCheckOTCRTSStackV1Exists(n string, stack *stacks.RetrievedStack) res
 	return func(s *terraform.State) error {
 		rs, ok := s.RootModule().Resources[n]
 		if !ok {
-			return fmt.Errorf("Not found: %s", n)
+			return fmt.Errorf("not found: %s", n)
 		}
 
 		if rs.Primary.ID == "" {
-			return fmt.Errorf("No ID is set")
+			return fmt.Errorf("no ID is set")
 		}
 
 		config := common.TestAccProvider.Meta().(*cfg.Config)

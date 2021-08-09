@@ -3,6 +3,7 @@ package rts
 import (
 	"context"
 
+	"github.com/hashicorp/go-multierror"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/rts/v1/softwaredeployment"
@@ -61,6 +62,9 @@ func DataSourceRtsSoftwareDeploymentV1() *schema.Resource {
 func dataSourceRTSSoftwareDeploymentV1Read(_ context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*cfg.Config)
 	orchestrationClient, err := config.OrchestrationV1Client(config.GetRegion(d))
+	if err != nil {
+		return fmterr.Errorf("error creating RTS client: %w", err)
+	}
 
 	listOpts := softwaredeployment.ListOpts{
 		Id:       d.Id(),
@@ -72,29 +76,35 @@ func dataSourceRTSSoftwareDeploymentV1Read(_ context.Context, d *schema.Resource
 
 	refinedDeployments, err := softwaredeployment.List(orchestrationClient, listOpts)
 	if err != nil {
-		return fmterr.Errorf("Unable to retrieve RTS Software Deployment: %s", err)
+		return fmterr.Errorf("unable to retrieve RTS Software Deployment: %s", err)
 	}
 
 	if len(refinedDeployments) < 1 {
-		return fmterr.Errorf("No matching resource found. " +
+		return fmterr.Errorf("no matching resource found. " +
 			"Please change your search criteria and try again.")
 	}
 
 	if len(refinedDeployments) > 1 {
-		return fmterr.Errorf("Multiple resources matched; use additional constraints to reduce matches to a single resource")
+		return fmterr.Errorf("multiple resources matched; use additional constraints to reduce matches to a single resource")
 	}
 
 	stackResource := refinedDeployments[0]
 	d.SetId(stackResource.Id)
 
-	d.Set("id", stackResource.Id)
-	d.Set("status", stackResource.Status)
-	d.Set("server_id", stackResource.ServerId)
-	d.Set("config_id", stackResource.ConfigId)
-	d.Set("status_reason", stackResource.StatusReason)
-	d.Set("action", stackResource.Action)
-	d.Set("output_values", stackResource.OutputValues)
-	d.Set("input_values", stackResource.InputValues)
-	d.Set("region", config.GetRegion(d))
+	mErr := multierror.Append(
+		d.Set("id", stackResource.Id),
+		d.Set("status", stackResource.Status),
+		d.Set("server_id", stackResource.ServerId),
+		d.Set("config_id", stackResource.ConfigId),
+		d.Set("status_reason", stackResource.StatusReason),
+		d.Set("action", stackResource.Action),
+		d.Set("output_values", stackResource.OutputValues),
+		d.Set("input_values", stackResource.InputValues),
+		d.Set("region", config.GetRegion(d)),
+	)
+
+	if err := mErr.ErrorOrNil(); err != nil {
+		return diag.FromErr(err)
+	}
 	return nil
 }
