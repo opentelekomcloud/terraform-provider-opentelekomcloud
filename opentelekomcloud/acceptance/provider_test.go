@@ -47,13 +47,15 @@ func TestAccProvider_caCertFile(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	defer os.Remove(caFile)
+	defer func() {
+		_ = os.Remove(caFile)
+	}()
 
 	raw := map[string]interface{}{
 		"cacert_file": caFile,
 	}
 
-	if p.Configure(nil, terraform.NewResourceConfigRaw(raw)).HasError() {
+	if p.Configure(context.TODO(), terraform.NewResourceConfigRaw(raw)).HasError() {
 		t.Fatalf("Unexpected err when specifying OpenTelekomCloud CA by file: %s", err)
 	}
 }
@@ -76,7 +78,7 @@ func TestAccProvider_caCertString(t *testing.T) {
 		"cacert_file": caContents,
 	}
 
-	if p.Configure(nil, terraform.NewResourceConfigRaw(raw)).HasError() {
+	if p.Configure(context.TODO(), terraform.NewResourceConfigRaw(raw)).HasError() {
 		t.Fatalf("Unexpected err when specifying OpenTelekomCloud CA by string: %s", err)
 	}
 }

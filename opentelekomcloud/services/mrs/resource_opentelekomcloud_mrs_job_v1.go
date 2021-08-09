@@ -5,6 +5,7 @@ import (
 	"log"
 	"time"
 
+	"github.com/hashicorp/go-multierror"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
@@ -110,21 +111,7 @@ func JobStateRefreshFunc(client *golangsdk.ServiceClient, jobID string) resource
 			return nil, "", err
 		}
 		log.Printf("[DEBUG] JobStateRefreshFunc: %#v", jobGet)
-		jobState := "Starting"
-		if jobGet.JobState == -1 {
-			jobState = "Terminated"
-		} else if jobGet.JobState == 1 {
-			jobState = "Starting"
-		} else if jobGet.JobState == 2 {
-			jobState = "Running"
-		} else if jobGet.JobState == 3 {
-			jobState = "Completed"
-		} else if jobGet.JobState == 4 {
-			jobState = "Abnormal"
-		} else if jobGet.JobState == 5 {
-			jobState = "Error"
-		}
-		return jobGet, jobState, nil
+		return jobGet, stateValue(jobGet.JobState), nil
 	}
 }
 
@@ -169,7 +156,7 @@ func resourceMRSJobV1Create(ctx context.Context, d *schema.ResourceData, meta in
 	_, err = stateConf.WaitForStateContext(ctx)
 	if err != nil {
 		return fmterr.Errorf(
-			"Error waiting for job (%s) to become ready: %s ",
+			"error waiting for job (%s) to become ready: %s ",
 			jobCreate.ID, err)
 	}
 
@@ -189,37 +176,47 @@ func resourceMRSJobV1Read(_ context.Context, d *schema.ResourceData, meta interf
 	}
 	log.Printf("[DEBUG] Retrieved MRS Job %s: %#v", d.Id(), jobGet)
 
-	d.Set("region", config.GetRegion(d))
 	d.SetId(jobGet.ID)
-	d.Set("job_type", jobGet.JobType)
-	d.Set("job_name", jobGet.JobName)
-	d.Set("cluster_id", jobGet.ClusterID)
-	d.Set("jar_path", jobGet.JarPath)
-	d.Set("arguments", jobGet.Arguments)
-	d.Set("input", jobGet.Input)
-	d.Set("output", jobGet.Output)
-	d.Set("job_log", jobGet.JobLog)
-	d.Set("hive_script_path", jobGet.HiveScriptPath)
+	mErr := multierror.Append(
+		d.Set("region", config.GetRegion(d)),
+		d.Set("job_type", jobGet.JobType),
+		d.Set("job_name", jobGet.JobName),
+		d.Set("cluster_id", jobGet.ClusterID),
+		d.Set("jar_path", jobGet.JarPath),
+		d.Set("arguments", jobGet.Arguments),
+		d.Set("input", jobGet.Input),
+		d.Set("output", jobGet.Output),
+		d.Set("job_log", jobGet.JobLog),
+		d.Set("hive_script_path", jobGet.HiveScriptPath),
+		d.Set("job_state", stateValue(jobGet.JobState)),
+	)
 
-	jobState := "Starting"
-	if jobGet.JobState == -1 {
-		jobState = "Terminated"
-	} else if jobGet.JobState == 1 {
-		jobState = "Starting"
-	} else if jobGet.JobState == 2 {
-		jobState = "Running"
-	} else if jobGet.JobState == 3 {
-		jobState = "Completed"
-	} else if jobGet.JobState == 4 {
-		jobState = "Abnormal"
-	} else if jobGet.JobState == 5 {
-		jobState = "Error"
+	if err := mErr.ErrorOrNil(); err != nil {
+		return diag.FromErr(err)
 	}
-	d.Set("job_state", jobState)
 	return nil
 }
 
-func resourceMRSJobV1Delete(_ context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func stateValue(state int) string {
+	switch state {
+	case -1:
+		return "Terminated"
+	case 1:
+		return "Starting"
+	case 2:
+		return "Running"
+	case 3:
+		return "Completed"
+	case 4:
+		return "Abnormal"
+	case 5:
+		return "Error"
+	default:
+		return "Starting"
+	}
+}
+
+func resourceMRSJobV1Delete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*cfg.Config)
 	client, err := config.MrsV1Client(config.GetRegion(d))
 	if err != nil {
@@ -230,7 +227,7 @@ func resourceMRSJobV1Delete(_ context.Context, d *schema.ResourceData, meta inte
 	log.Printf("[DEBUG] Deleting MRS Job %s", rId)
 
 	timeout := d.Timeout(schema.TimeoutDelete)
-	err = resource.Retry(timeout, func() *resource.RetryError {
+	err = resource.RetryContext(ctx, timeout, func() *resource.RetryError {
 		err := job.Delete(client, rId).ExtractErr()
 		if err != nil {
 			return common.CheckForRetryableError(err)

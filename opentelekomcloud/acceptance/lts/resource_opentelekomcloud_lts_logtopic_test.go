@@ -49,7 +49,7 @@ func testAccCheckLogTankTopicV2Destroy(s *terraform.State) error {
 		group_id := rs.Primary.Attributes["group_id"]
 		_, err = logtopics.Get(ltsclient, group_id, rs.Primary.ID).Extract()
 		if err == nil {
-			return fmt.Errorf("Log topic (%s) still exists.", rs.Primary.ID)
+			return fmt.Errorf("log topic (%s) still exists.", rs.Primary.ID)
 		}
 		if _, ok := err.(golangsdk.ErrDefault404); !ok {
 			return err
@@ -62,11 +62,11 @@ func testAccCheckLogTankTopicV2Exists(n string, topic *logtopics.LogTopic) resou
 	return func(s *terraform.State) error {
 		rs, ok := s.RootModule().Resources[n]
 		if !ok {
-			return fmt.Errorf("Not found: %s", n)
+			return fmt.Errorf("not found: %s", n)
 		}
 
 		if rs.Primary.ID == "" {
-			return fmt.Errorf("No ID is set")
+			return fmt.Errorf("no ID is set")
 		}
 
 		config := common.TestAccProvider.Meta().(*cfg.Config)

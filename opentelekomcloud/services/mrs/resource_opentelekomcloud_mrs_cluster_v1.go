@@ -7,6 +7,7 @@ import (
 	"strconv"
 	"time"
 
+	"github.com/hashicorp/go-multierror"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
@@ -677,12 +678,15 @@ func resourceClusterV1Read(_ context.Context, d *schema.ResourceData, meta inter
 	}
 	log.Printf("[DEBUG] Retrieved Cluster %s: %#v", d.Id(), clusterGet)
 	d.SetId(clusterGet.Clusterid)
-	d.Set("region", config.GetRegion(d))
-	d.Set("order_id", clusterGet.Orderid)
-	d.Set("cluster_id", clusterGet.Clusterid)
-	d.Set("available_zone_name", clusterGet.Azname)
-	d.Set("available_zone_id", clusterGet.Azid)
-	d.Set("cluster_version", clusterGet.Clusterversion)
+
+	mErr := multierror.Append(
+		d.Set("region", config.GetRegion(d)),
+		d.Set("order_id", clusterGet.Orderid),
+		d.Set("cluster_id", clusterGet.Clusterid),
+		d.Set("available_zone_name", clusterGet.Azname),
+		d.Set("available_zone_id", clusterGet.Azid),
+		d.Set("cluster_version", clusterGet.Clusterversion),
+	)
 
 	masterNodeNum, err := strconv.Atoi(clusterGet.Masternodenum)
 	if err != nil {
@@ -692,41 +696,44 @@ func resourceClusterV1Read(_ context.Context, d *schema.ResourceData, meta inter
 	if err != nil {
 		return fmterr.Errorf("error converting Corenodenum: %s", err)
 	}
-	d.Set("master_node_num", masterNodeNum)
-	d.Set("core_node_num", coreNodeNum)
-	d.Set("cluster_name", clusterGet.Clustername)
-	d.Set("core_node_size", clusterGet.Corenodesize)
-	d.Set("volume_size", clusterGet.Volumesize)
-	d.Set("master_data_volume_type", clusterGet.MasterDataVolumeType)
-	d.Set("master_data_volume_size", clusterGet.MasterDataVolumeSize)
-	d.Set("master_data_volume_count", clusterGet.MasterDataVolumeCount)
-	d.Set("core_data_volume_type", clusterGet.CoreDataVolumeType)
-	d.Set("core_data_volume_size", clusterGet.CoreDataVolumeSize)
-	d.Set("core_data_volume_count", clusterGet.CoreDataVolumeCount)
-	d.Set("node_public_cert_name", clusterGet.Nodepubliccertname)
-	d.Set("safe_mode", clusterGet.Safemode)
-	d.Set("master_node_size", clusterGet.Masternodesize)
-	d.Set("instance_id", clusterGet.Instanceid)
-	d.Set("hadoop_version", clusterGet.Hadoopversion)
-	d.Set("master_node_ip", clusterGet.Masternodeip)
-	d.Set("external_ip", clusterGet.Externalip)
-	d.Set("private_ip_first", clusterGet.Privateipfirst)
-	d.Set("internal_ip", clusterGet.Internalip)
-	d.Set("slave_security_groups_id", clusterGet.Slavesecuritygroupsid)
-	d.Set("security_groups_id", clusterGet.Securitygroupsid)
-	d.Set("external_alternate_ip", clusterGet.Externalalternateip)
-	d.Set("master_node_spec_id", clusterGet.Masternodespecid)
-	d.Set("core_node_spec_id", clusterGet.Corenodespecid)
-	d.Set("master_node_product_id", clusterGet.Masternodeproductid)
-	d.Set("core_node_product_id", clusterGet.Corenodeproductid)
-	d.Set("duration", clusterGet.Duration)
-	d.Set("vnc", clusterGet.Vnc)
-	d.Set("fee", clusterGet.Fee)
-	d.Set("deployment_id", clusterGet.Deploymentid)
-	d.Set("cluster_state", clusterGet.Clusterstate)
-	d.Set("error_info", clusterGet.Errorinfo)
-	d.Set("remark", clusterGet.Remark)
-	d.Set("tenant_id", clusterGet.Tenantid)
+
+	mErr = multierror.Append(mErr,
+		d.Set("master_node_num", masterNodeNum),
+		d.Set("core_node_num", coreNodeNum),
+		d.Set("cluster_name", clusterGet.Clustername),
+		d.Set("core_node_size", clusterGet.Corenodesize),
+		d.Set("volume_size", clusterGet.Volumesize),
+		d.Set("master_data_volume_type", clusterGet.MasterDataVolumeType),
+		d.Set("master_data_volume_size", clusterGet.MasterDataVolumeSize),
+		d.Set("master_data_volume_count", clusterGet.MasterDataVolumeCount),
+		d.Set("core_data_volume_type", clusterGet.CoreDataVolumeType),
+		d.Set("core_data_volume_size", clusterGet.CoreDataVolumeSize),
+		d.Set("core_data_volume_count", clusterGet.CoreDataVolumeCount),
+		d.Set("node_public_cert_name", clusterGet.Nodepubliccertname),
+		d.Set("safe_mode", clusterGet.Safemode),
+		d.Set("master_node_size", clusterGet.Masternodesize),
+		d.Set("instance_id", clusterGet.Instanceid),
+		d.Set("hadoop_version", clusterGet.Hadoopversion),
+		d.Set("master_node_ip", clusterGet.Masternodeip),
+		d.Set("external_ip", clusterGet.Externalip),
+		d.Set("private_ip_first", clusterGet.Privateipfirst),
+		d.Set("internal_ip", clusterGet.Internalip),
+		d.Set("slave_security_groups_id", clusterGet.Slavesecuritygroupsid),
+		d.Set("security_groups_id", clusterGet.Securitygroupsid),
+		d.Set("external_alternate_ip", clusterGet.Externalalternateip),
+		d.Set("master_node_spec_id", clusterGet.Masternodespecid),
+		d.Set("core_node_spec_id", clusterGet.Corenodespecid),
+		d.Set("master_node_product_id", clusterGet.Masternodeproductid),
+		d.Set("core_node_product_id", clusterGet.Corenodeproductid),
+		d.Set("duration", clusterGet.Duration),
+		d.Set("vnc", clusterGet.Vnc),
+		d.Set("fee", clusterGet.Fee),
+		d.Set("deployment_id", clusterGet.Deploymentid),
+		d.Set("cluster_state", clusterGet.Clusterstate),
+		d.Set("error_info", clusterGet.Errorinfo),
+		d.Set("remark", clusterGet.Remark),
+		d.Set("tenant_id", clusterGet.Tenantid),
+	)
 
 	updateAt, err := strconv.ParseInt(clusterGet.Updateat, 10, 64)
 	if err != nil {
@@ -746,10 +753,12 @@ func resourceClusterV1Read(_ context.Context, d *schema.ResourceData, meta inter
 	}
 	chargingStartTimeTm := time.Unix(chargingStartTime, 0)
 
-	d.Set("update_at", updateAtTm)
-	d.Set("create_at", createAtTm)
-	d.Set("charging_start_time", chargingStartTimeTm)
-	d.Set("component_list", clusterGet.Duration)
+	mErr = multierror.Append(mErr,
+		d.Set("update_at", updateAtTm),
+		d.Set("create_at", createAtTm),
+		d.Set("charging_start_time", chargingStartTimeTm),
+		d.Set("component_list", clusterGet.Duration),
+	)
 
 	components := make([]map[string]interface{}, len(clusterGet.Componentlist))
 	for i, attachment := range clusterGet.Componentlist {
@@ -760,7 +769,7 @@ func resourceClusterV1Read(_ context.Context, d *schema.ResourceData, meta inter
 		components[i]["component_desc"] = attachment.Componentdesc
 		log.Printf("[DEBUG] components: %v", components)
 	}
-	d.Set("component_list", components)
+	mErr = multierror.Append(mErr, d.Set("component_list", components))
 
 	scripts := make([]map[string]interface{}, len(clusterGet.BootstrapScripts))
 	for i, script := range clusterGet.BootstrapScripts {
@@ -774,7 +783,11 @@ func resourceClusterV1Read(_ context.Context, d *schema.ResourceData, meta inter
 		scripts[i]["fail_action"] = script.FailAction
 		log.Printf("[DEBUG] bootstrap_scripts: %v", scripts)
 	}
-	d.Set("bootstrap_scripts", scripts)
+	mErr = multierror.Append(mErr, d.Set("bootstrap_scripts", scripts))
+
+	if err := mErr.ErrorOrNil(); err != nil {
+		return diag.FromErr(err)
+	}
 
 	// Set instance tags
 	Taglist, err := tags.Get(client, d.Id()).Extract()

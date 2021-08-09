@@ -64,7 +64,7 @@ func testAccCheckNatV2GatewayDestroy(s *terraform.State) error {
 
 		_, err := natgateways.Get(natClient, rs.Primary.ID).Extract()
 		if err == nil {
-			return fmt.Errorf("Nat gateway still exists")
+			return fmt.Errorf("nat gateway still exists")
 		}
 	}
 
@@ -75,11 +75,11 @@ func testAccCheckNatV2GatewayExists(n string) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
 		rs, ok := s.RootModule().Resources[n]
 		if !ok {
-			return fmt.Errorf("Not found: %s", n)
+			return fmt.Errorf("not found: %s", n)
 		}
 
 		if rs.Primary.ID == "" {
-			return fmt.Errorf("No ID is set")
+			return fmt.Errorf("no ID is set")
 		}
 
 		config := common.TestAccProvider.Meta().(*cfg.Config)
@@ -94,7 +94,7 @@ func testAccCheckNatV2GatewayExists(n string) resource.TestCheckFunc {
 		}
 
 		if found.ID != rs.Primary.ID {
-			return fmt.Errorf("Nat gateway not found")
+			return fmt.Errorf("nat gateway not found")
 		}
 
 		return nil

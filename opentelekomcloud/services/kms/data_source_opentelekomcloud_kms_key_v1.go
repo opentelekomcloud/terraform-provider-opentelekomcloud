@@ -5,6 +5,7 @@ import (
 	"log"
 	"reflect"
 
+	"github.com/hashicorp/go-multierror"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
@@ -157,12 +158,12 @@ func dataSourceKmsKeyV1Read(_ context.Context, d *schema.ResourceData, meta inte
 	}
 
 	if len(allKeys) < 1 {
-		return fmterr.Errorf("Your query returned no results. " +
+		return fmterr.Errorf("your query returned no results. " +
 			"Please change your search criteria and try again.")
 	}
 
 	if len(allKeys) > 1 {
-		return fmterr.Errorf("Your query returned more than one result." +
+		return fmterr.Errorf("your query returned more than one result." +
 			" Please try a more specific search criteria")
 	}
 
@@ -170,17 +171,22 @@ func dataSourceKmsKeyV1Read(_ context.Context, d *schema.ResourceData, meta inte
 	log.Printf("[DEBUG] Kms key : %+v", key)
 
 	d.SetId(key.KeyID)
-	d.Set("key_id", key.KeyID)
-	d.Set("domain_id", key.DomainID)
-	d.Set("key_alias", key.KeyAlias)
-	d.Set("realm", key.Realm)
-	d.Set("key_description", key.KeyDescription)
-	d.Set("creation_date", key.CreationDate)
-	d.Set("scheduled_deletion_date", key.ScheduledDeletionDate)
-	d.Set("key_state", key.KeyState)
-	d.Set("default_key_flag", key.DefaultKeyFlag)
-	d.Set("expiration_time", key.ExpirationTime)
-	d.Set("origin", key.Origin)
+	mErr := multierror.Append(
+		d.Set("key_id", key.KeyID),
+		d.Set("domain_id", key.DomainID),
+		d.Set("key_alias", key.KeyAlias),
+		d.Set("realm", key.Realm),
+		d.Set("key_description", key.KeyDescription),
+		d.Set("creation_date", key.CreationDate),
+		d.Set("scheduled_deletion_date", key.ScheduledDeletionDate),
+		d.Set("key_state", key.KeyState),
+		d.Set("default_key_flag", key.DefaultKeyFlag),
+		d.Set("expiration_time", key.ExpirationTime),
+		d.Set("origin", key.Origin),
+	)
+	if err := mErr.ErrorOrNil(); err != nil {
+		return diag.FromErr(err)
+	}
 
 	return nil
 }

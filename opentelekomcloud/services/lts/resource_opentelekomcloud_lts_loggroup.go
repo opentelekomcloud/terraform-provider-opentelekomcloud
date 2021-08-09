@@ -4,6 +4,7 @@ import (
 	"context"
 	"log"
 
+	"github.com/hashicorp/go-multierror"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/lts/v2/loggroups"
@@ -73,8 +74,13 @@ func resourceGroupV2Read(_ context.Context, d *schema.ResourceData, meta interfa
 
 	log.Printf("[DEBUG] Retrieved Cluster %s: %#v", d.Id(), group)
 	d.SetId(group.ID)
-	d.Set("group_name", group.Name)
-	d.Set("ttl_in_days", group.TTLinDays)
+	mErr := multierror.Append(
+		d.Set("group_name", group.Name),
+		d.Set("ttl_in_days", group.TTLinDays),
+	)
+	if err := mErr.ErrorOrNil(); err != nil {
+		return diag.FromErr(err)
+	}
 	return nil
 }
 
