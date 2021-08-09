@@ -17,7 +17,7 @@ func TestAccVBSBackupPolicyV2_importBasic(t *testing.T) {
 		CheckDestroy:      testAccVBSBackupPolicyV2Destroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccVBSBackupPolicyV2_basic,
+				Config: testAccVBSBackupPolicyV2Basic,
 			},
 
 			{

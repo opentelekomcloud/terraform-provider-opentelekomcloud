@@ -4,6 +4,7 @@ import (
 	"context"
 	"log"
 
+	"github.com/hashicorp/go-multierror"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/vbs/v2/backups"
@@ -83,6 +84,9 @@ func DataSourceVBSBackupV2() *schema.Resource {
 func dataSourceVBSBackupV2Read(_ context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*cfg.Config)
 	vbsClient, err := config.VbsV2Client(config.GetRegion(d))
+	if err != nil {
+		return fmterr.Errorf("error creating OpenTelekomCloud Vbs client: %s", err)
+	}
 
 	listBackupOpts := backups.ListOpts{
 		Id:         d.Id(),
@@ -94,16 +98,16 @@ func dataSourceVBSBackupV2Read(_ context.Context, d *schema.ResourceData, meta i
 
 	refinedBackups, err := backups.List(vbsClient, listBackupOpts)
 	if err != nil {
-		return fmterr.Errorf("Unable to retrieve backups: %s", err)
+		return fmterr.Errorf("unable to retrieve backups: %s", err)
 	}
 
 	if len(refinedBackups) < 1 {
-		return fmterr.Errorf("Your query returned no results. " +
+		return fmterr.Errorf("your query returned no results. " +
 			"Please change your search criteria and try again.")
 	}
 
 	if len(refinedBackups) > 1 {
-		return fmterr.Errorf("Your query returned more than one result." +
+		return fmterr.Errorf("your query returned more than one result." +
 			" Please try a more specific search criteria")
 	}
 
@@ -112,28 +116,32 @@ func dataSourceVBSBackupV2Read(_ context.Context, d *schema.ResourceData, meta i
 	log.Printf("[INFO] Retrieved Backup using given filter %s: %+v", Backup.Id, Backup)
 	d.SetId(Backup.Id)
 
-	d.Set("name", Backup.Name)
-	d.Set("description", Backup.Description)
-	d.Set("status", Backup.Status)
-	d.Set("availability_zone", Backup.AvailabilityZone)
-	d.Set("snapshot_id", Backup.SnapshotId)
-	d.Set("service_metadata", Backup.ServiceMetadata)
-	d.Set("size", Backup.Size)
-	d.Set("container", Backup.Container)
-	d.Set("volume_id", Backup.VolumeId)
-	d.Set("region", config.GetRegion(d))
-
 	listShareOpts := shares.ListOpts{
 		BackupID: d.Id(),
 	}
 
-	shares, err := shares.List(vbsClient, listShareOpts)
+	shareList, err := shares.List(vbsClient, listShareOpts)
 	if err != nil {
-		return fmterr.Errorf("Unable to retrieve shares: %s", err)
+		return fmterr.Errorf("unable to retrieve shares: %s", err)
 	}
 
-	d.Set("to_project_ids", resourceToProjectIdsV2(shares))
-	d.Set("share_ids", resourceShareIDsV2(shares))
+	mErr := multierror.Append(
+		d.Set("name", Backup.Name),
+		d.Set("description", Backup.Description),
+		d.Set("status", Backup.Status),
+		d.Set("availability_zone", Backup.AvailabilityZone),
+		d.Set("snapshot_id", Backup.SnapshotId),
+		d.Set("service_metadata", Backup.ServiceMetadata),
+		d.Set("size", Backup.Size),
+		d.Set("container", Backup.Container),
+		d.Set("volume_id", Backup.VolumeId),
+		d.Set("region", config.GetRegion(d)),
+		d.Set("to_project_ids", resourceToProjectIdsV2(shareList)),
+		d.Set("share_ids", resourceShareIDsV2(shareList)),
+	)
+	if err := mErr.ErrorOrNil(); err != nil {
+		return diag.FromErr(err)
+	}
 
 	return nil
 }

@@ -6,6 +6,7 @@ import (
 	"log"
 	"time"
 
+	"github.com/hashicorp/go-multierror"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
@@ -92,7 +93,6 @@ func ResourceVpnServiceV2() *schema.Resource {
 }
 
 func resourceVpnServiceV2Create(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-
 	config := meta.(*cfg.Config)
 	networkingClient, err := config.NetworkingV2Client(config.GetRegion(d))
 	if err != nil {
@@ -158,16 +158,22 @@ func resourceVpnServiceV2Read(_ context.Context, d *schema.ResourceData, meta in
 
 	log.Printf("[DEBUG] Read OpenTelekomCloud Service %s: %#v", d.Id(), service)
 
-	d.Set("name", service.Name)
-	d.Set("description", service.Description)
-	d.Set("subnet_id", service.SubnetID)
-	d.Set("admin_state_up", service.AdminStateUp)
-	d.Set("tenant_id", service.TenantID)
-	d.Set("router_id", service.RouterID)
-	d.Set("status", service.Status)
-	d.Set("external_v6_ip", service.ExternalV6IP)
-	d.Set("external_v4_ip", service.ExternalV4IP)
-	d.Set("region", config.GetRegion(d))
+	mErr := multierror.Append(
+		d.Set("name", service.Name),
+		d.Set("description", service.Description),
+		d.Set("subnet_id", service.SubnetID),
+		d.Set("admin_state_up", service.AdminStateUp),
+		d.Set("tenant_id", service.TenantID),
+		d.Set("router_id", service.RouterID),
+		d.Set("status", service.Status),
+		d.Set("external_v6_ip", service.ExternalV6IP),
+		d.Set("external_v4_ip", service.ExternalV4IP),
+		d.Set("region", config.GetRegion(d)),
+	)
+
+	if err := mErr.ErrorOrNil(); err != nil {
+		return diag.FromErr(err)
+	}
 
 	return nil
 }
@@ -201,13 +207,10 @@ func resourceVpnServiceV2Update(ctx context.Context, d *schema.ResourceData, met
 		hasChange = true
 	}
 
-	var updateOpts services.UpdateOptsBuilder
-	updateOpts = opts
-
-	log.Printf("[DEBUG] Updating service with id %s: %#v", d.Id(), updateOpts)
+	log.Printf("[DEBUG] Updating service with id %s: %#v", d.Id(), opts)
 
 	if hasChange {
-		service, err := services.Update(networkingClient, d.Id(), updateOpts).Extract()
+		service, err := services.Update(networkingClient, d.Id(), opts).Extract()
 		if err != nil {
 			return diag.FromErr(err)
 		}
@@ -270,7 +273,7 @@ func waitForServiceDeletion(networkingClient *golangsdk.ServiceClient, id string
 				log.Printf("[DEBUG] Service %s is actually deleted", id)
 				return "", "DELETED", nil
 			}
-			return nil, "", fmt.Errorf("Unexpected error: %s", err)
+			return nil, "", fmt.Errorf("unexpected error: %s", err)
 		}
 
 		log.Printf("[DEBUG] Service %s deletion is pending", id)

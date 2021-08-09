@@ -23,7 +23,7 @@ func TestAccVBSBackupPolicyV2_basic(t *testing.T) {
 		CheckDestroy:      testAccVBSBackupPolicyV2Destroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccVBSBackupPolicyV2_basic,
+				Config: testAccVBSBackupPolicyV2Basic,
 				Check: resource.ComposeTestCheckFunc(
 					testAccVBSBackupPolicyV2Exists("opentelekomcloud_vbs_backup_policy_v2.vbs", &policy),
 					resource.TestCheckResourceAttr(
@@ -33,7 +33,7 @@ func TestAccVBSBackupPolicyV2_basic(t *testing.T) {
 				),
 			},
 			{
-				Config: testAccVBSBackupPolicyV2_update,
+				Config: testAccVBSBackupPolicyV2Update,
 				Check: resource.ComposeTestCheckFunc(
 					testAccVBSBackupPolicyV2Exists("opentelekomcloud_vbs_backup_policy_v2.vbs", &policy),
 					resource.TestCheckResourceAttr(
@@ -55,7 +55,7 @@ func TestAccVBSBackupPolicyV2_rentention_day(t *testing.T) {
 		CheckDestroy:      testAccVBSBackupPolicyV2Destroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccVBSBackupPolicyV2_rentention_day,
+				Config: testAccVBSBackupPolicyV2RententionDay,
 				Check: resource.ComposeTestCheckFunc(
 					testAccVBSBackupPolicyV2Exists("opentelekomcloud_vbs_backup_policy_v2.vbs", &policy),
 					resource.TestCheckResourceAttr(
@@ -123,7 +123,7 @@ func testAccVBSBackupPolicyV2Exists(n string, policy *policies.Policy) resource.
 	}
 }
 
-var testAccVBSBackupPolicyV2_basic = fmt.Sprintf(`
+const testAccVBSBackupPolicyV2Basic = `
 resource "opentelekomcloud_vbs_backup_policy_v2" "vbs" {
   name                = "policy_001"
   start_time          = "12:00"
@@ -136,9 +136,9 @@ resource "opentelekomcloud_vbs_backup_policy_v2" "vbs" {
     value = "v2"
   }
 }
-`)
+`
 
-var testAccVBSBackupPolicyV2_update = fmt.Sprintf(`
+const testAccVBSBackupPolicyV2Update = `
 resource "opentelekomcloud_vbs_backup_policy_v2" "vbs" {
   name                = "policy_001_update"
   start_time          = "12:00"
@@ -151,9 +151,9 @@ resource "opentelekomcloud_vbs_backup_policy_v2" "vbs" {
     value = "v2"
   }
 }
-`)
+`
 
-var testAccVBSBackupPolicyV2_rentention_day = fmt.Sprintf(`
+const testAccVBSBackupPolicyV2RententionDay = `
 resource "opentelekomcloud_vbs_backup_policy_v2" "vbs" {
   name                = "policy_002"
   start_time          = "00:00,12:00"
@@ -161,4 +161,4 @@ resource "opentelekomcloud_vbs_backup_policy_v2" "vbs" {
   rentention_day      = 30
   week_frequency      = ["MON", "WED", "SAT"]
 }
-`)
+`

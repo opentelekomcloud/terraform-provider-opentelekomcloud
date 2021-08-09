@@ -55,7 +55,7 @@ func testAccCheckEndpointGroupV2Destroy(s *terraform.State) error {
 		}
 		_, err = endpointgroups.Get(networkingClient, rs.Primary.ID).Extract()
 		if err == nil {
-			return fmt.Errorf("EndpointGroup (%s) still exists.", rs.Primary.ID)
+			return fmt.Errorf("endpointGroup (%s) still exists.", rs.Primary.ID)
 		}
 		if _, ok := err.(golangsdk.ErrDefault404); !ok {
 			return err
@@ -68,11 +68,11 @@ func testAccCheckEndpointGroupV2Exists(n string, group *endpointgroups.EndpointG
 	return func(s *terraform.State) error {
 		rs, ok := s.RootModule().Resources[n]
 		if !ok {
-			return fmt.Errorf("Not found: %s", n)
+			return fmt.Errorf("not found: %s", n)
 		}
 
 		if rs.Primary.ID == "" {
-			return fmt.Errorf("No ID is set")
+			return fmt.Errorf("no ID is set")
 		}
 
 		config := common.TestAccProvider.Meta().(*cfg.Config)

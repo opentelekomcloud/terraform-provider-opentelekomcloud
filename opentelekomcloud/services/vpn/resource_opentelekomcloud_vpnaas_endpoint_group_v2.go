@@ -6,6 +6,7 @@ import (
 	"log"
 	"time"
 
+	"github.com/hashicorp/go-multierror"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
@@ -76,7 +77,6 @@ func ResourceVpnEndpointGroupV2() *schema.Resource {
 }
 
 func resourceVpnEndpointGroupV2Create(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-
 	config := meta.(*cfg.Config)
 	networkingClient, err := config.NetworkingV2Client(config.GetRegion(d))
 	if err != nil {
@@ -147,12 +147,18 @@ func resourceVpnEndpointGroupV2Read(_ context.Context, d *schema.ResourceData, m
 
 	log.Printf("[DEBUG] Read OpenTelekomCloud Endpoint EndpointGroup %s: %#v", d.Id(), group)
 
-	d.Set("name", group.Name)
-	d.Set("description", group.Description)
-	d.Set("tenant_id", group.TenantID)
-	d.Set("type", group.Type)
-	d.Set("endpoints", group.Endpoints)
-	d.Set("region", config.GetRegion(d))
+	mErr := multierror.Append(
+		d.Set("name", group.Name),
+		d.Set("description", group.Description),
+		d.Set("tenant_id", group.TenantID),
+		d.Set("type", group.Type),
+		d.Set("endpoints", group.Endpoints),
+		d.Set("region", config.GetRegion(d)),
+	)
+
+	if err := mErr.ErrorOrNil(); err != nil {
+		return diag.FromErr(err)
+	}
 
 	return nil
 }
@@ -180,13 +186,10 @@ func resourceVpnEndpointGroupV2Update(ctx context.Context, d *schema.ResourceDat
 		hasChange = true
 	}
 
-	var updateOpts endpointgroups.UpdateOptsBuilder
-	updateOpts = opts
-
-	log.Printf("[DEBUG] Updating endpoint group with id %s: %#v", d.Id(), updateOpts)
+	log.Printf("[DEBUG] Updating endpoint group with id %s: %#v", d.Id(), opts)
 
 	if hasChange {
-		group, err := endpointgroups.Update(networkingClient, d.Id(), updateOpts).Extract()
+		group, err := endpointgroups.Update(networkingClient, d.Id(), opts).Extract()
 		if err != nil {
 			return diag.FromErr(err)
 		}
@@ -235,12 +238,10 @@ func resourceVpnEndpointGroupV2Delete(ctx context.Context, d *schema.ResourceDat
 	}
 
 	_, err = stateConf.WaitForStateContext(ctx)
-
 	return diag.FromErr(err)
 }
 
 func waitForEndpointGroupDeletion(networkingClient *golangsdk.ServiceClient, id string) resource.StateRefreshFunc {
-
 	return func() (interface{}, string, error) {
 		group, err := endpointgroups.Get(networkingClient, id).Extract()
 		log.Printf("[DEBUG] Got group %s => %#v", id, group)
@@ -250,7 +251,7 @@ func waitForEndpointGroupDeletion(networkingClient *golangsdk.ServiceClient, id 
 				log.Printf("[DEBUG] EndpointGroup %s is actually deleted", id)
 				return "", "DELETED", nil
 			}
-			return nil, "", fmt.Errorf("Unexpected error: %s", err)
+			return nil, "", fmt.Errorf("unexpected error: %s", err)
 		}
 
 		log.Printf("[DEBUG] EndpointGroup %s deletion is pending", id)
@@ -279,18 +280,17 @@ func waitForEndpointGroupUpdate(networkingClient *golangsdk.ServiceClient, id st
 }
 
 func resourceVpnEndpointGroupV2EndpointType(epType string) endpointgroups.EndpointType {
-	var et endpointgroups.EndpointType
 	switch epType {
 	case "subnet":
-		et = endpointgroups.TypeSubnet
+		return endpointgroups.TypeSubnet
 	case "cidr":
-		et = endpointgroups.TypeCIDR
+		return endpointgroups.TypeCIDR
 	case "vlan":
-		et = endpointgroups.TypeVLAN
+		return endpointgroups.TypeVLAN
 	case "router":
-		et = endpointgroups.TypeRouter
+		return endpointgroups.TypeRouter
 	case "network":
-		et = endpointgroups.TypeNetwork
+		return endpointgroups.TypeNetwork
 	}
-	return et
+	return ""
 }

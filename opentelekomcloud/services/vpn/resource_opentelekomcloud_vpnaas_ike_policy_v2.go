@@ -170,6 +170,9 @@ func resourceVpnIKEPolicyV2Create(ctx context.Context, d *schema.ResourceData, m
 		MinTimeout: 2 * time.Second,
 	}
 	_, err = stateConf.WaitForStateContext(ctx)
+	if err != nil {
+		return fmterr.Errorf("error waiting for IKE policy to become active: %w", err)
+	}
 
 	log.Printf("[DEBUG] IKE policy created: %#v", policy)
 
