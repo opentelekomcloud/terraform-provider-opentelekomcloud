@@ -7,6 +7,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/hashicorp/go-multierror"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
@@ -104,7 +105,6 @@ func ResourceNetworkingSecGroupRuleV2() *schema.Resource {
 }
 
 func resourceNetworkingSecGroupRuleV2Create(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-
 	config := meta.(*cfg.Config)
 	networkingClient, err := config.NetworkingV2Client(config.GetRegion(d))
 	if err != nil {
@@ -137,8 +137,8 @@ func resourceNetworkingSecGroupRuleV2Create(ctx context.Context, d *schema.Resou
 	}
 
 	if v, ok := d.GetOk("ethertype"); ok {
-		ethertype := resourceNetworkingSecGroupRuleV2DetermineEtherType(v.(string))
-		opts.EtherType = ethertype
+		etherType := resourceNetworkingSecGroupRuleV2DetermineEtherType(v.(string))
+		opts.EtherType = etherType
 	}
 
 	if v, ok := d.GetOk("protocol"); ok {
@@ -148,14 +148,14 @@ func resourceNetworkingSecGroupRuleV2Create(ctx context.Context, d *schema.Resou
 
 	log.Printf("[DEBUG] Create OpenTelekomCloud Neutron security group: %#v", opts)
 
-	security_group_rule, err := rules.Create(networkingClient, opts).Extract()
+	securityGroupRule, err := rules.Create(networkingClient, opts).Extract()
 	if err != nil {
 		return diag.FromErr(err)
 	}
 
-	log.Printf("[DEBUG] OpenTelekomCloud Neutron Security Group Rule created: %#v", security_group_rule)
+	log.Printf("[DEBUG] OpenTelekomCloud Neutron Security Group Rule created: %#v", securityGroupRule)
 
-	d.SetId(security_group_rule.ID)
+	d.SetId(securityGroupRule.ID)
 
 	return resourceNetworkingSecGroupRuleV2Read(ctx, d, meta)
 }
@@ -169,23 +169,28 @@ func resourceNetworkingSecGroupRuleV2Read(_ context.Context, d *schema.ResourceD
 		return fmterr.Errorf("error creating OpenTelekomCloud networking client: %s", err)
 	}
 
-	security_group_rule, err := rules.Get(networkingClient, d.Id()).Extract()
+	securityGroupRule, err := rules.Get(networkingClient, d.Id()).Extract()
 
 	if err != nil {
 		return diag.FromErr(common.CheckDeleted(d, err, "OpenTelekomCloud Security Group Rule"))
 	}
 
-	d.Set("description", security_group_rule.Description)
-	d.Set("direction", security_group_rule.Direction)
-	d.Set("ethertype", security_group_rule.EtherType)
-	d.Set("protocol", security_group_rule.Protocol)
-	d.Set("port_range_min", security_group_rule.PortRangeMin)
-	d.Set("port_range_max", security_group_rule.PortRangeMax)
-	d.Set("remote_group_id", security_group_rule.RemoteGroupID)
-	d.Set("remote_ip_prefix", security_group_rule.RemoteIPPrefix)
-	d.Set("security_group_id", security_group_rule.SecGroupID)
-	d.Set("tenant_id", security_group_rule.TenantID)
-	d.Set("region", config.GetRegion(d))
+	mErr := multierror.Append(
+		d.Set("description", securityGroupRule.Description),
+		d.Set("direction", securityGroupRule.Direction),
+		d.Set("ethertype", securityGroupRule.EtherType),
+		d.Set("protocol", securityGroupRule.Protocol),
+		d.Set("port_range_min", securityGroupRule.PortRangeMin),
+		d.Set("port_range_max", securityGroupRule.PortRangeMax),
+		d.Set("remote_group_id", securityGroupRule.RemoteGroupID),
+		d.Set("remote_ip_prefix", securityGroupRule.RemoteIPPrefix),
+		d.Set("security_group_id", securityGroupRule.SecGroupID),
+		d.Set("tenant_id", securityGroupRule.TenantID),
+		d.Set("region", config.GetRegion(d)),
+	)
+	if err := mErr.ErrorOrNil(); err != nil {
+		return diag.FromErr(err)
+	}
 
 	return nil
 }

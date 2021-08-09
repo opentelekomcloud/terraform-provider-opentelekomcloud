@@ -41,7 +41,7 @@ func TestAccNetworkingV2VIPAssociate_basic(t *testing.T) {
 	})
 }
 
-// testAccCheckNetworkingV2VIPAssociateDestroy checks destory.
+// testAccCheckNetworkingV2VIPAssociateDestroy checks destroy.
 func testAccCheckNetworkingV2VIPAssociateDestroy(s *terraform.State) error {
 	config := common.TestAccProvider.Meta().(*cfg.Config)
 	networkingClient, err := config.NetworkingV2Client(env.OS_REGION_NAME)

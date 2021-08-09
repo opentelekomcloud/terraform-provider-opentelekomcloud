@@ -16,10 +16,10 @@ import (
 )
 
 func TestAccNetworkingV2SecGroupRule_basic(t *testing.T) {
-	var secgroup_1 groups.SecGroup
-	var secgroup_2 groups.SecGroup
-	var secgroup_rule_1 rules.SecGroupRule
-	var secgroup_rule_2 rules.SecGroupRule
+	var secgroup1 groups.SecGroup
+	var secgroup2 groups.SecGroup
+	var secgroupRule1 rules.SecGroupRule
+	var secgroupRule2 rules.SecGroupRule
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:          func() { common.TestAccPreCheck(t) },
@@ -27,16 +27,16 @@ func TestAccNetworkingV2SecGroupRule_basic(t *testing.T) {
 		CheckDestroy:      testAccCheckNetworkingV2SecGroupRuleDestroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccNetworkingV2SecGroupRule_basic,
+				Config: testAccNetworkingV2SecGroupRuleBasic,
 				Check: resource.ComposeTestCheckFunc(
 					TestAccCheckNetworkingV2SecGroupExists(
-						"opentelekomcloud_networking_secgroup_v2.secgroup_1", &secgroup_1),
+						"opentelekomcloud_networking_secgroup_v2.secgroup_1", &secgroup1),
 					TestAccCheckNetworkingV2SecGroupExists(
-						"opentelekomcloud_networking_secgroup_v2.secgroup_2", &secgroup_2),
+						"opentelekomcloud_networking_secgroup_v2.secgroup_2", &secgroup2),
 					testAccCheckNetworkingV2SecGroupRuleExists(
-						"opentelekomcloud_networking_secgroup_rule_v2.secgroup_rule_1", &secgroup_rule_1),
+						"opentelekomcloud_networking_secgroup_rule_v2.secgroup_rule_1", &secgroupRule1),
 					testAccCheckNetworkingV2SecGroupRuleExists(
-						"opentelekomcloud_networking_secgroup_rule_v2.secgroup_rule_2", &secgroup_rule_2),
+						"opentelekomcloud_networking_secgroup_rule_v2.secgroup_rule_2", &secgroupRule2),
 					resource.TestCheckResourceAttr(
 						"opentelekomcloud_networking_secgroup_rule_v2.secgroup_rule_1", "description", "test secgroup rule"),
 				),
@@ -55,7 +55,7 @@ func TestAccNetworkingV2SecGroupRule_timeout(t *testing.T) {
 		CheckDestroy:      testAccCheckNetworkingV2SecGroupRuleDestroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccNetworkingV2SecGroupRule_timeout,
+				Config: testAccNetworkingV2SecGroupRuleTimeout,
 				Check: resource.ComposeTestCheckFunc(
 					TestAccCheckNetworkingV2SecGroupExists(
 						"opentelekomcloud_networking_secgroup_v2.secgroup_1", &secgroup_1),
@@ -68,8 +68,8 @@ func TestAccNetworkingV2SecGroupRule_timeout(t *testing.T) {
 }
 
 func TestAccNetworkingV2SecGroupRule_numericProtocol(t *testing.T) {
-	var secgroup_1 groups.SecGroup
-	var secgroup_rule_1 rules.SecGroupRule
+	var secgroup1 groups.SecGroup
+	var secgroupRule1 rules.SecGroupRule
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:          func() { common.TestAccPreCheck(t) },
@@ -77,12 +77,12 @@ func TestAccNetworkingV2SecGroupRule_numericProtocol(t *testing.T) {
 		CheckDestroy:      testAccCheckNetworkingV2SecGroupRuleDestroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccNetworkingV2SecGroupRule_numericProtocol,
+				Config: testAccNetworkingV2SecGroupRuleNumericProtocol,
 				Check: resource.ComposeTestCheckFunc(
 					TestAccCheckNetworkingV2SecGroupExists(
-						"opentelekomcloud_networking_secgroup_v2.secgroup_1", &secgroup_1),
+						"opentelekomcloud_networking_secgroup_v2.secgroup_1", &secgroup1),
 					testAccCheckNetworkingV2SecGroupRuleExists(
-						"opentelekomcloud_networking_secgroup_rule_v2.secgroup_rule_1", &secgroup_rule_1),
+						"opentelekomcloud_networking_secgroup_rule_v2.secgroup_rule_1", &secgroupRule1),
 					resource.TestCheckResourceAttr(
 						"opentelekomcloud_networking_secgroup_rule_v2.secgroup_rule_1", "protocol", "115"),
 				),
@@ -105,22 +105,22 @@ func testAccCheckNetworkingV2SecGroupRuleDestroy(s *terraform.State) error {
 
 		_, err := rules.Get(networkingClient, rs.Primary.ID).Extract()
 		if err == nil {
-			return fmt.Errorf("Security group rule still exists")
+			return fmt.Errorf("security group rule still exists")
 		}
 	}
 
 	return nil
 }
 
-func testAccCheckNetworkingV2SecGroupRuleExists(n string, security_group_rule *rules.SecGroupRule) resource.TestCheckFunc {
+func testAccCheckNetworkingV2SecGroupRuleExists(n string, securityGroupRule *rules.SecGroupRule) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
 		rs, ok := s.RootModule().Resources[n]
 		if !ok {
-			return fmt.Errorf("Not found: %s", n)
+			return fmt.Errorf("not found: %s", n)
 		}
 
 		if rs.Primary.ID == "" {
-			return fmt.Errorf("No ID is set")
+			return fmt.Errorf("no ID is set")
 		}
 
 		config := common.TestAccProvider.Meta().(*cfg.Config)
@@ -135,16 +135,16 @@ func testAccCheckNetworkingV2SecGroupRuleExists(n string, security_group_rule *r
 		}
 
 		if found.ID != rs.Primary.ID {
-			return fmt.Errorf("Security group rule not found")
+			return fmt.Errorf("security group rule not found")
 		}
 
-		*security_group_rule = *found
+		*securityGroupRule = *found
 
 		return nil
 	}
 }
 
-const testAccNetworkingV2SecGroupRule_basic = `
+const testAccNetworkingV2SecGroupRuleBasic = `
 resource "opentelekomcloud_networking_secgroup_v2" "secgroup_1" {
   name = "secgroup_1"
   description = "terraform security group rule acceptance test"
@@ -177,24 +177,7 @@ resource "opentelekomcloud_networking_secgroup_rule_v2" "secgroup_rule_2" {
 }
 `
 
-const testAccNetworkingV2SecGroupRule_lowerCaseCIDR = `
-resource "opentelekomcloud_networking_secgroup_v2" "secgroup_1" {
-  name = "secgroup_1"
-  description = "terraform security group rule acceptance test"
-}
-
-resource "opentelekomcloud_networking_secgroup_rule_v2" "secgroup_rule_1" {
-  direction = "ingress"
-  ethertype = "IPv6"
-  port_range_max = 22
-  port_range_min = 22
-  protocol = "tcp"
-  remote_ip_prefix = "2001:558:FC00::/39"
-  security_group_id = opentelekomcloud_networking_secgroup_v2.secgroup_1.id
-}
-`
-
-const testAccNetworkingV2SecGroupRule_timeout = `
+const testAccNetworkingV2SecGroupRuleTimeout = `
 resource "opentelekomcloud_networking_secgroup_v2" "secgroup_1" {
   name = "secgroup_1"
   description = "terraform security group rule acceptance test"
@@ -234,176 +217,7 @@ resource "opentelekomcloud_networking_secgroup_rule_v2" "secgroup_rule_2" {
 }
 `
 
-const testAccNetworkingV2SecGroupRule_protocols = `
-resource "opentelekomcloud_networking_secgroup_v2" "secgroup_1" {
-  name = "secgroup_1"
-  description = "terraform security group rule acceptance test"
-}
-
-# NOT SUPPORTED
-#resource "opentelekomcloud_networking_secgroup_rule_v2" "secgroup_rule_ah" {
-#  direction = "ingress"
-#  ethertype = "IPv4"
-#  protocol = "ah"
-#  remote_ip_prefix = "0.0.0.0/0"
-#  security_group_id = opentelekomcloud_networking_secgroup_v2.secgroup_1.id
-#}
-
-# NOT SUPPORTED
-#resource "opentelekomcloud_networking_secgroup_rule_v2" "secgroup_rule_dccp" {
-#  direction = "ingress"
-#  ethertype = "IPv4"
-#  protocol = "dccp"
-#  remote_ip_prefix = "0.0.0.0/0"
-#  security_group_id = opentelekomcloud_networking_secgroup_v2.secgroup_1.id
-#}
-
-# NOT SUPPORTED
-#resource "opentelekomcloud_networking_secgroup_rule_v2" "secgroup_rule_egp" {
-#  direction = "ingress"
-#  ethertype = "IPv4"
-#  protocol = "egp"
-#  remote_ip_prefix = "0.0.0.0/0"
-#  security_group_id = opentelekomcloud_networking_secgroup_v2.secgroup_1.id
-#}
-
-# NOT SUPPORTED
-#resource "opentelekomcloud_networking_secgroup_rule_v2" "secgroup_rule_esp" {
-#  direction = "ingress"
-#  ethertype = "IPv4"
-#  protocol = "esp"
-#  remote_ip_prefix = "0.0.0.0/0"
-#  security_group_id = opentelekomcloud_networking_secgroup_v2.secgroup_1.id
-#}
-
-# NOT SUPPORTED
-#resource "opentelekomcloud_networking_secgroup_rule_v2" "secgroup_rule_gre" {
-#  direction = "ingress"
-#  ethertype = "IPv4"
-#  protocol = "gre"
-#  remote_ip_prefix = "0.0.0.0/0"
-#  security_group_id = opentelekomcloud_networking_secgroup_v2.secgroup_1.id
-#}
-
-# NOT SUPPORTED
-#resource "opentelekomcloud_networking_secgroup_rule_v2" "secgroup_rule_igmp" {
-#  direction = "ingress"
-#  ethertype = "IPv4"
-#  protocol = "igmp"
-#  remote_ip_prefix = "0.0.0.0/0"
-#  security_group_id = opentelekomcloud_networking_secgroup_v2.secgroup_1.id
-#}
-
-# NOT SUPPORTED
-#resource "opentelekomcloud_networking_secgroup_rule_v2" "secgroup_rule_ipv6_encap" {
-#  direction = "ingress"
-#  ethertype = "IPv6"
-#  protocol = "ipv6-encap"
-#  remote_ip_prefix = "::/0"
-#  security_group_id = opentelekomcloud_networking_secgroup_v2.secgroup_1.id
-#}
-
-# NOT SUPPORTED
-#resource "opentelekomcloud_networking_secgroup_rule_v2" "secgroup_rule_ipv6_frag" {
-#  direction = "ingress"
-#  ethertype = "IPv6"
-#  protocol = "ipv6-frag"
-#  remote_ip_prefix = "::/0"
-#  security_group_id = opentelekomcloud_networking_secgroup_v2.secgroup_1.id
-#}
-
-# NOT SUPPORTED
-#resource "opentelekomcloud_networking_secgroup_rule_v2" "secgroup_rule_ipv6_icmp" {
-#  direction = "ingress"
-#  ethertype = "IPv6"
-#  protocol = "ipv6-icmp"
-#  remote_ip_prefix = "::/0"
-#  security_group_id = opentelekomcloud_networking_secgroup_v2.secgroup_1.id
-#}
-
-# NOT SUPPORTED
-#resource "opentelekomcloud_networking_secgroup_rule_v2" "secgroup_rule_ipv6_nonxt" {
-#  direction = "ingress"
-#  ethertype = "IPv6"
-#  protocol = "ipv6-nonxt"
-#  remote_ip_prefix = "::/0"
-#  security_group_id = opentelekomcloud_networking_secgroup_v2.secgroup_1.id
-#}
-
-# NOT SUPPORTED
-#resource "opentelekomcloud_networking_secgroup_rule_v2" "secgroup_rule_ipv6_opts" {
-#  direction = "ingress"
-#  ethertype = "IPv6"
-#  protocol = "ipv6-opts"
-#  remote_ip_prefix = "::/0"
-#  security_group_id = opentelekomcloud_networking_secgroup_v2.secgroup_1.id
-#}
-
-# NOT SUPPORTED
-#resource "opentelekomcloud_networking_secgroup_rule_v2" "secgroup_rule_ipv6_route" {
-#  direction = "ingress"
-#  ethertype = "IPv6"
-#  protocol = "ipv6-route"
-#  remote_ip_prefix = "::/0"
-#  security_group_id = opentelekomcloud_networking_secgroup_v2.secgroup_1.id
-#}
-
-# NOT SUPPORTED
-#resource "opentelekomcloud_networking_secgroup_rule_v2" "secgroup_rule_ospf" {
-#  direction = "ingress"
-#  ethertype = "IPv4"
-#  protocol = "ospf"
-#  remote_ip_prefix = "0.0.0.0/0"
-#  security_group_id = opentelekomcloud_networking_secgroup_v2.secgroup_1.id
-#}
-
-# NOT SUPPORTED
-#resource "opentelekomcloud_networking_secgroup_rule_v2" "secgroup_rule_pgm" {
-#  direction = "ingress"
-#  ethertype = "IPv4"
-#  protocol = "pgm"
-#  remote_ip_prefix = "0.0.0.0/0"
-#  security_group_id = opentelekomcloud_networking_secgroup_v2.secgroup_1.id
-#}
-
-# NOT SUPPORTED
-#resource "opentelekomcloud_networking_secgroup_rule_v2" "secgroup_rule_rsvp" {
-#  direction = "ingress"
-#  ethertype = "IPv4"
-#  protocol = "rsvp"
-#  remote_ip_prefix = "0.0.0.0/0"
-#  security_group_id = opentelekomcloud_networking_secgroup_v2.secgroup_1.id
-#}
-
-# NOT SUPPORTED
-#resource "opentelekomcloud_networking_secgroup_rule_v2" "secgroup_rule_sctp" {
-#  direction = "ingress"
-#  ethertype = "IPv4"
-#  protocol = "sctp"
-#  remote_ip_prefix = "0.0.0.0/0"
-#  security_group_id = opentelekomcloud_networking_secgroup_v2.secgroup_1.id
-#}
-
-# NOT SUPPORTED
-#resource "opentelekomcloud_networking_secgroup_rule_v2" "secgroup_rule_udplite" {
-#  direction = "ingress"
-#  ethertype = "IPv4"
-#  protocol = "udplite"
-#  remote_ip_prefix = "0.0.0.0/0"
-#  security_group_id = opentelekomcloud_networking_secgroup_v2.secgroup_1.id
-#}
-
-# NOT SUPPORTED
-#resource "opentelekomcloud_networking_secgroup_rule_v2" "secgroup_rule_vrrp" {
-#  direction = "ingress"
-#  ethertype = "IPv4"
-#  protocol = "vrrp"
-#  remote_ip_prefix = "0.0.0.0/0"
-#  security_group_id = opentelekomcloud_networking_secgroup_v2.secgroup_1.id
-#}
-`
-
-const testAccNetworkingV2SecGroupRule_numericProtocol = `
+const testAccNetworkingV2SecGroupRuleNumericProtocol = `
 resource "opentelekomcloud_networking_secgroup_v2" "secgroup_1" {
   name = "secgroup_1"
   description = "terraform security group rule acceptance test"

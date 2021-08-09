@@ -72,16 +72,16 @@ func dataSourceVpcPeeringConnectionV2Read(_ context.Context, d *schema.ResourceD
 
 	refinedPeering, err := peerings.List(peeringClient, listOpts)
 	if err != nil {
-		return fmterr.Errorf("Unable to retrieve vpc peering connections: %s", err)
+		return fmterr.Errorf("unable to retrieve vpc peering connections: %s", err)
 	}
 
 	if len(refinedPeering) < 1 {
-		return fmterr.Errorf("Your query returned no results. " +
+		return fmterr.Errorf("your query returned no results. " +
 			"Please change your search criteria and try again.")
 	}
 
 	if len(refinedPeering) > 1 {
-		return fmterr.Errorf("Multiple VPC peering connections matched." +
+		return fmterr.Errorf("multiple VPC peering connections matched." +
 			" Use additional constraints to reduce matches to a single VPC peering connection")
 	}
 

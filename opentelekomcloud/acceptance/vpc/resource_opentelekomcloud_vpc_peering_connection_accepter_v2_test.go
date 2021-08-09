@@ -10,15 +10,14 @@ import (
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/acceptance/common"
 )
 
-func TestAccOTCVpcPeeringConnectionAccepterV2_basic(t *testing.T) {
-
+func TestAccVpcPeeringConnectionAccepterV2_basic(t *testing.T) {
 	resource.Test(t, resource.TestCase{
 		PreCheck:          func() { common.TestAccPreCheck(t) },
 		ProviderFactories: common.TestAccProviderFactories,
 		CheckDestroy:      testAccCheckOTCVpcPeeringConnectionAccepterDestroy,
 		Steps: []resource.TestStep{
 			{
-				Config:      testAccOTCVpcPeeringConnectionAccepterV2_basic, // TODO: Research why normal scenario with peer tenant id is not working in acceptance tests
+				Config:      testAccVpcPeeringConnectionAccepterV2_basic, // TODO: Research why normal scenario with peer tenant id is not working in acceptance tests
 				ExpectError: regexp.MustCompile(`VPC peering action not permitted: Can not accept/reject peering request not in PENDING_ACCEPTANCE state.`),
 			},
 		},
@@ -30,7 +29,7 @@ func testAccCheckOTCVpcPeeringConnectionAccepterDestroy(_ *terraform.State) erro
 	return nil
 }
 
-const testAccOTCVpcPeeringConnectionAccepterV2_basic = `
+const testAccVpcPeeringConnectionAccepterV2_basic = `
 resource "opentelekomcloud_vpc_v1" "vpc_1" {
   name = "otc_vpc_1"
   cidr = "192.168.0.0/16"

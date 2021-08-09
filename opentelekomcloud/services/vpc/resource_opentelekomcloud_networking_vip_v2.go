@@ -5,6 +5,7 @@ import (
 	"log"
 	"time"
 
+	"github.com/hashicorp/go-multierror"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
@@ -66,7 +67,7 @@ func resourceNetworkingVIPV2Create(ctx context.Context, d *schema.ResourceData, 
 		return fmterr.Errorf("error creating OpenTelekomCloud networking client: %s", err)
 	}
 
-	// Contruct CreateOpts
+	// Construct CreateOpts
 	fixip := make([]ports.IP, 1)
 	fixip[0] = ports.IP{
 		SubnetID:  d.Get("subnet_id").(string),
@@ -95,6 +96,9 @@ func resourceNetworkingVIPV2Create(ctx context.Context, d *schema.ResourceData, 
 	}
 
 	_, err = stateConf.WaitForStateContext(ctx)
+	if err != nil {
+		return fmterr.Errorf("error waiting for VIP to become active: %w", err)
+	}
 
 	d.SetId(vip.ID)
 
@@ -116,19 +120,28 @@ func resourceNetworkingVIPV2Read(_ context.Context, d *schema.ResourceData, meta
 	log.Printf("[DEBUG] Retrieved VIP %s: %+v", d.Id(), vip)
 
 	// Computed values
-	d.Set("network_id", vip.NetworkID)
+	mErr := multierror.Append(
+		d.Set("network_id", vip.NetworkID),
+		d.Set("name", vip.Name),
+		d.Set("status", vip.Status),
+		d.Set("id", vip.ID),
+		d.Set("tenant_id", vip.TenantID),
+		d.Set("device_owner", vip.DeviceOwner),
+	)
 	if len(vip.FixedIPs) > 0 {
-		d.Set("subnet_id", vip.FixedIPs[0].SubnetID)
-		d.Set("ip_address", vip.FixedIPs[0].IPAddress)
+		mErr = multierror.Append(mErr,
+			d.Set("subnet_id", vip.FixedIPs[0].SubnetID),
+			d.Set("ip_address", vip.FixedIPs[0].IPAddress),
+		)
 	} else {
-		d.Set("subnet_id", "")
-		d.Set("ip_address", "")
+		mErr = multierror.Append(mErr,
+			d.Set("subnet_id", ""),
+			d.Set("ip_address", ""),
+		)
 	}
-	d.Set("name", vip.Name)
-	d.Set("status", vip.Status)
-	d.Set("id", vip.ID)
-	d.Set("tenant_id", vip.TenantID)
-	d.Set("device_owner", vip.DeviceOwner)
+	if err := mErr.ErrorOrNil(); err != nil {
+		return diag.FromErr(err)
+	}
 
 	return nil
 }

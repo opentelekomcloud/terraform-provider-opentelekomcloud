@@ -94,7 +94,6 @@ func resourceVpcRouteV2Create(ctx context.Context, d *schema.ResourceData, meta 
 	d.SetId(route.RouteID)
 
 	return resourceVpcRouteV2Read(ctx, d, meta)
-
 }
 
 func resourceVpcRouteV2Read(_ context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {

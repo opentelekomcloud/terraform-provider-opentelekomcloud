@@ -8,7 +8,7 @@ import (
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/acceptance/common"
 )
 
-func TestAccOTCVpcV1_importBasic(t *testing.T) {
+func TestAccVpcV1_importBasic(t *testing.T) {
 	resourceName := "opentelekomcloud_vpc_v1.vpc_1"
 
 	resource.Test(t, resource.TestCase{

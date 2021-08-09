@@ -26,13 +26,13 @@ func TestAccNetworkingV2Network_basic(t *testing.T) {
 		CheckDestroy:      testAccCheckNetworkingV2NetworkDestroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccNetworkingV2Network_basic,
+				Config: testAccNetworkingV2NetworkBasic,
 				Check: resource.ComposeTestCheckFunc(
 					TestAccCheckNetworkingV2NetworkExists("opentelekomcloud_networking_network_v2.network_1", &network),
 				),
 			},
 			{
-				Config: testAccNetworkingV2Network_update,
+				Config: testAccNetworkingV2NetworkUpdate,
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr(
 						"opentelekomcloud_networking_network_v2.network_1", "name", "network_2"),
@@ -53,7 +53,7 @@ func TestAccNetworkingV2Network_netstack(t *testing.T) {
 		CheckDestroy:      testAccCheckNetworkingV2NetworkDestroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccNetworkingV2Network_netstack,
+				Config: testAccNetworkingV2NetworkNetstack,
 				Check: resource.ComposeTestCheckFunc(
 					TestAccCheckNetworkingV2NetworkExists("opentelekomcloud_networking_network_v2.network_1", &network),
 					TestAccCheckNetworkingV2SubnetExists("opentelekomcloud_networking_subnet_v2.subnet_1", &subnet),
@@ -75,7 +75,7 @@ func TestAccNetworkingV2Network_timeout(t *testing.T) {
 		CheckDestroy:      testAccCheckNetworkingV2NetworkDestroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccNetworkingV2Network_timeout,
+				Config: testAccNetworkingV2NetworkTimeout,
 				Check: resource.ComposeTestCheckFunc(
 					TestAccCheckNetworkingV2NetworkExists("opentelekomcloud_networking_network_v2.network_1", &network),
 				),
@@ -97,7 +97,7 @@ func TestAccNetworkingV2Network_multipleSegmentMappings(t *testing.T) {
 		CheckDestroy:      testAccCheckNetworkingV2NetworkDestroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccNetworkingV2Network_multipleSegmentMappings,
+				Config: testAccNetworkingV2NetworkMultipleSegmentMappings,
 				Check: resource.ComposeTestCheckFunc(
 					TestAccCheckNetworkingV2NetworkExists("opentelekomcloud_networking_network_v2.network_1", &network),
 				),
@@ -121,21 +121,21 @@ func testAccCheckNetworkingV2NetworkDestroy(s *terraform.State) error {
 		_, id := vpc.ExtractValFromNid(rs.Primary.ID)
 		_, err := networks.Get(networkingClient, id).Extract()
 		if err == nil {
-			return fmt.Errorf("Network still exists")
+			return fmt.Errorf("network still exists")
 		}
 	}
 
 	return nil
 }
 
-const testAccNetworkingV2Network_basic = `
+const testAccNetworkingV2NetworkBasic = `
 resource "opentelekomcloud_networking_network_v2" "network_1" {
   name = "network_1"
   admin_state_up = "true"
 }
 `
 
-const testAccNetworkingV2Network_update = `
+const testAccNetworkingV2NetworkUpdate = `
 resource "opentelekomcloud_networking_network_v2" "network_1" {
   name = "network_2"
   # Can't do this to a network on OTC
@@ -143,7 +143,7 @@ resource "opentelekomcloud_networking_network_v2" "network_1" {
 }
 `
 
-const testAccNetworkingV2Network_netstack = `
+const testAccNetworkingV2NetworkNetstack = `
 resource "opentelekomcloud_networking_network_v2" "network_1" {
   name = "network_1"
   admin_state_up = "true"
@@ -166,53 +166,7 @@ resource "opentelekomcloud_networking_router_interface_v2" "ri_1" {
 }
 `
 
-const testAccNetworkingV2Network_fullstack = `
-resource "opentelekomcloud_networking_network_v2" "network_1" {
-  name = "network_1"
-  admin_state_up = "true"
-}
-
-resource "opentelekomcloud_networking_subnet_v2" "subnet_1" {
-  name = "subnet_1"
-  cidr = "192.168.199.0/24"
-  ip_version = 4
-  network_id = opentelekomcloud_networking_network_v2.network_1.id
-}
-
-resource "opentelekomcloud_compute_secgroup_v2" "secgroup_1" {
-  name = "secgroup_1"
-  description = "a security group"
-  rule {
-    from_port = 22
-    to_port = 22
-    ip_protocol = "tcp"
-    cidr = "0.0.0.0/0"
-  }
-}
-
-resource "opentelekomcloud_networking_port_v2" "port_1" {
-  name = "port_1"
-  admin_state_up = "true"
-  security_group_ids = [opentelekomcloud_compute_secgroup_v2.secgroup_1.id]
-  network_id = opentelekomcloud_networking_network_v2.network_1.id
-
-  fixed_ip {
-    "subnet_id" =  opentelekomcloud_networking_subnet_v2.subnet_1.id
-    "ip_address" =  "192.168.199.23"
-  }
-}
-
-resource "opentelekomcloud_compute_instance_v2" "instance_1" {
-  name = "instance_1"
-  security_groups = [opentelekomcloud_compute_secgroup_v2.secgroup_1.name]
-
-  network {
-    port = opentelekomcloud_networking_port_v2.port_1.id
-  }
-}
-`
-
-const testAccNetworkingV2Network_timeout = `
+const testAccNetworkingV2NetworkTimeout = `
 resource "opentelekomcloud_networking_network_v2" "network_1" {
   name = "network_1"
   admin_state_up = "true"
@@ -224,7 +178,7 @@ resource "opentelekomcloud_networking_network_v2" "network_1" {
 }
 `
 
-const testAccNetworkingV2Network_multipleSegmentMappings = `
+const testAccNetworkingV2NetworkMultipleSegmentMappings = `
 resource "opentelekomcloud_networking_network_v2" "network_1" {
   name = "network_1"
   segments =[

@@ -2,12 +2,12 @@ package vpc
 
 import (
 	"context"
-	"fmt"
 	"log"
 	"strconv"
 	"strings"
 	"time"
 
+	"github.com/hashicorp/go-multierror"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
@@ -40,16 +40,16 @@ func ExtractValFromNid(s string) (bool, string) {
 	return asu, id
 }
 
-func FormatNidFromValS(asu string, id string) string {
+func FormatNidFromValS(_ string, id string) string {
 	// Causing problems with instance network lookups right now
 	// return fmt.Sprintf("%s:%s", asu, id)
-	return fmt.Sprintf("%s", id)
+	return id
 }
 
 func suppressAsuDiff(k, old, new string, d *schema.ResourceData) bool {
-	_, id_old := ExtractValSFromNid(old)
-	_, id_new := ExtractValSFromNid(new)
-	return id_old == id_new
+	_, idOld := ExtractValSFromNid(old)
+	_, idNew := ExtractValSFromNid(new)
+	return idOld == idNew
 }
 
 func ResourceNetworkingNetworkV2() *schema.Resource {
@@ -169,7 +169,7 @@ func resourceNetworkingNetworkV2Create(ctx context.Context, d *schema.ResourceDa
 
 	segments := resourceNetworkingNetworkV2Segments(d)
 
-	n := &networks.Network{}
+	var n *networks.Network
 	if len(segments) > 0 {
 		providerCreateOpts := provider.CreateOptsExt{
 			CreateOptsBuilder: createOpts,
@@ -201,6 +201,9 @@ func resourceNetworkingNetworkV2Create(ctx context.Context, d *schema.ResourceDa
 	}
 
 	_, err = stateConf.WaitForStateContext(ctx)
+	if err != nil {
+		return fmterr.Errorf("error waiting for network to become active: %w", err)
+	}
 
 	d.SetId(FormatNidFromValS(strconv.FormatBool(asu), n.ID))
 
@@ -222,13 +225,17 @@ func resourceNetworkingNetworkV2Read(_ context.Context, d *schema.ResourceData, 
 
 	log.Printf("[DEBUG] Retrieved Network %s: %+v", d.Id(), n)
 
-	d.Set("name", n.Name)
-	d.Set("admin_state_up", asu)
-	d.Set("shared", strconv.FormatBool(n.Shared))
-	d.Set("tenant_id", n.TenantID)
-	d.Set("region", config.GetRegion(d))
-
 	d.SetId(FormatNidFromValS(asu, n.ID))
+	mErr := multierror.Append(
+		d.Set("name", n.Name),
+		d.Set("admin_state_up", asu),
+		d.Set("shared", strconv.FormatBool(n.Shared)),
+		d.Set("tenant_id", n.TenantID),
+		d.Set("region", config.GetRegion(d)),
+	)
+	if err := mErr.ErrorOrNil(); err != nil {
+		return diag.FromErr(err)
+	}
 	return nil
 }
 
@@ -247,11 +254,11 @@ func resourceNetworkingNetworkV2Update(ctx context.Context, d *schema.ResourceDa
 	if d.HasChange("admin_state_up") {
 		asuRaw := d.Get("admin_state_up").(string)
 		if asuRaw != "" {
-			asuT, err := strconv.ParseBool(asuRaw)
+			asuT, err := strconv.ParseBool(asuRaw) // nolint:staticcheck
 			if err != nil {
 				return fmterr.Errorf("admin_state_up, if provided, must be either 'true' or 'false'")
 			}
-			asu = asuT
+			asu = asuT // nolint:ineffassign,staticcheck
 			// asuFake := true
 			// updateOpts.AdminStateUp = &asuFake //&asu
 		}

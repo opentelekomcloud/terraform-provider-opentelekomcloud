@@ -5,6 +5,7 @@ import (
 	"log"
 	"strconv"
 
+	"github.com/hashicorp/go-multierror"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 
@@ -64,6 +65,9 @@ func DataSourceNetworkingNetworkV2() *schema.Resource {
 func dataSourceNetworkingNetworkV2Read(_ context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*cfg.Config)
 	networkingClient, err := config.NetworkingV2Client(config.GetRegion(d))
+	if err != nil {
+		return fmterr.Errorf("error creating networking client: %w", err)
+	}
 
 	_, id := ExtractValSFromNid(d.Get("network_id").(string))
 	listOpts := networks.ListOpts{
@@ -80,7 +84,7 @@ func dataSourceNetworkingNetworkV2Read(_ context.Context, d *schema.ResourceData
 
 	allNetworks, err := networks.ExtractNetworks(pages)
 	if err != nil {
-		return fmterr.Errorf("Unable to retrieve networks: %s", err)
+		return fmterr.Errorf("unable to retrieve networks: %s", err)
 	}
 
 	var refinedNetworks []networks.Network
@@ -92,7 +96,7 @@ func dataSourceNetworkingNetworkV2Read(_ context.Context, d *schema.ResourceData
 					if _, ok := err.(golangsdk.ErrDefault404); ok {
 						continue
 					}
-					return fmterr.Errorf("Unable to retrieve network subnet: %s", err)
+					return fmterr.Errorf("unable to retrieve network subnet: %s", err)
 				}
 				if cidr == subnet.CIDR {
 					refinedNetworks = append(refinedNetworks, n)
@@ -104,12 +108,12 @@ func dataSourceNetworkingNetworkV2Read(_ context.Context, d *schema.ResourceData
 	}
 
 	if len(refinedNetworks) < 1 {
-		return fmterr.Errorf("Your query returned no results. " +
+		return fmterr.Errorf("your query returned no results. " +
 			"Please change your search criteria and try again.")
 	}
 
 	if len(refinedNetworks) > 1 {
-		return fmterr.Errorf("Your query returned more than one result." +
+		return fmterr.Errorf("your query returned more than one result." +
 			" Please try a more specific search criteria")
 	}
 
@@ -118,11 +122,17 @@ func dataSourceNetworkingNetworkV2Read(_ context.Context, d *schema.ResourceData
 	log.Printf("[DEBUG] Retrieved Network %s: %+v", network.ID, network)
 	d.SetId(network.ID)
 
-	d.Set("name", network.Name)
-	d.Set("admin_state_up", strconv.FormatBool(network.AdminStateUp))
-	d.Set("shared", strconv.FormatBool(network.Shared))
-	d.Set("tenant_id", network.TenantID)
-	d.Set("region", config.GetRegion(d))
+	mErr := multierror.Append(
+		d.Set("name", network.Name),
+		d.Set("admin_state_up", strconv.FormatBool(network.AdminStateUp)),
+		d.Set("shared", strconv.FormatBool(network.Shared)),
+		d.Set("tenant_id", network.TenantID),
+		d.Set("region", config.GetRegion(d)),
+	)
+
+	if err := mErr.ErrorOrNil(); err != nil {
+		return diag.FromErr(err)
+	}
 
 	return nil
 }

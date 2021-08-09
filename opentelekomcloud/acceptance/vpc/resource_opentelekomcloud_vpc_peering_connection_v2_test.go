@@ -13,7 +13,7 @@ import (
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common/cfg"
 )
 
-func TestAccOTCVpcPeeringConnectionV2_basic(t *testing.T) {
+func TestAccVpcPeeringConnectionV2_basic(t *testing.T) {
 	var peering peerings.Peering
 
 	resource.Test(t, resource.TestCase{
@@ -22,7 +22,7 @@ func TestAccOTCVpcPeeringConnectionV2_basic(t *testing.T) {
 		CheckDestroy:      testAccCheckOTCVpcPeeringConnectionV2Destroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccOTCVpcPeeringConnectionV2_basic,
+				Config: testAccVpcPeeringConnectionV2_basic,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckOTCVpcPeeringConnectionV2Exists("opentelekomcloud_vpc_peering_connection_v2.peering_1", &peering),
 					resource.TestCheckResourceAttr(
@@ -32,7 +32,7 @@ func TestAccOTCVpcPeeringConnectionV2_basic(t *testing.T) {
 				),
 			},
 			{
-				Config: testAccOTCVpcPeeringConnectionV2_update,
+				Config: testAccVpcPeeringConnectionV2_update,
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr(
 						"opentelekomcloud_vpc_peering_connection_v2.peering_1", "name", "opentelekomcloud_peering_1"),
@@ -42,7 +42,7 @@ func TestAccOTCVpcPeeringConnectionV2_basic(t *testing.T) {
 	})
 }
 
-func TestAccOTCVpcPeeringConnectionV2_timeout(t *testing.T) {
+func TestAccVpcPeeringConnectionV2_timeout(t *testing.T) {
 	var peering peerings.Peering
 
 	resource.Test(t, resource.TestCase{
@@ -51,7 +51,7 @@ func TestAccOTCVpcPeeringConnectionV2_timeout(t *testing.T) {
 		CheckDestroy:      testAccCheckOTCVpcPeeringConnectionV2Destroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccOTCVpcPeeringConnectionV2_timeout,
+				Config: testAccVpcPeeringConnectionV2_timeout,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckOTCVpcPeeringConnectionV2Exists("opentelekomcloud_vpc_peering_connection_v2.peering_1", &peering),
 				),
@@ -74,7 +74,7 @@ func testAccCheckOTCVpcPeeringConnectionV2Destroy(s *terraform.State) error {
 
 		_, err := peerings.Get(peeringClient, rs.Primary.ID).Extract()
 		if err == nil {
-			return fmt.Errorf("Vpc Peering Connection still exists")
+			return fmt.Errorf("vpc Peering Connection still exists")
 		}
 	}
 
@@ -85,11 +85,11 @@ func testAccCheckOTCVpcPeeringConnectionV2Exists(n string, peering *peerings.Pee
 	return func(s *terraform.State) error {
 		rs, ok := s.RootModule().Resources[n]
 		if !ok {
-			return fmt.Errorf("Not found: %s", n)
+			return fmt.Errorf("not found: %s", n)
 		}
 
 		if rs.Primary.ID == "" {
-			return fmt.Errorf("No ID is set")
+			return fmt.Errorf("no ID is set")
 		}
 
 		config := common.TestAccProvider.Meta().(*cfg.Config)
@@ -104,7 +104,7 @@ func testAccCheckOTCVpcPeeringConnectionV2Exists(n string, peering *peerings.Pee
 		}
 
 		if found.ID != rs.Primary.ID {
-			return fmt.Errorf("Vpc peering Connection not found")
+			return fmt.Errorf("vpc peering Connection not found")
 		}
 
 		*peering = *found
@@ -113,7 +113,7 @@ func testAccCheckOTCVpcPeeringConnectionV2Exists(n string, peering *peerings.Pee
 	}
 }
 
-const testAccOTCVpcPeeringConnectionV2_basic = `
+const testAccVpcPeeringConnectionV2_basic = `
 resource "opentelekomcloud_vpc_v1" "vpc_1" {
   name = "vpc_test"
   cidr = "192.168.0.0/16"
@@ -130,7 +130,7 @@ resource "opentelekomcloud_vpc_peering_connection_v2" "peering_1" {
   peer_vpc_id = opentelekomcloud_vpc_v1.vpc_2.id
 }
 `
-const testAccOTCVpcPeeringConnectionV2_update = `
+const testAccVpcPeeringConnectionV2_update = `
 resource "opentelekomcloud_vpc_v1" "vpc_1" {
   name = "vpc_test"
   cidr = "192.168.0.0/16"
@@ -147,7 +147,7 @@ resource "opentelekomcloud_vpc_peering_connection_v2" "peering_1" {
   peer_vpc_id = opentelekomcloud_vpc_v1.vpc_2.id
 }
 `
-const testAccOTCVpcPeeringConnectionV2_timeout = `
+const testAccVpcPeeringConnectionV2_timeout = `
 resource "opentelekomcloud_vpc_v1" "vpc_1" {
   name = "vpc_test"
   cidr = "192.168.0.0/16"

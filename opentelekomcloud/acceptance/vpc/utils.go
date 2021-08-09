@@ -22,11 +22,11 @@ func TestAccCheckNetworkingNetworkV2DataSourceID(n string) resource.TestCheckFun
 	return func(s *terraform.State) error {
 		rs, ok := s.RootModule().Resources[n]
 		if !ok {
-			return fmt.Errorf("Can't find network data source: %s", n)
+			return fmt.Errorf("can't find network data source: %s", n)
 		}
 
 		if rs.Primary.ID == "" {
-			return fmt.Errorf("Network data source ID not set")
+			return fmt.Errorf("network data source ID not set")
 		}
 
 		return nil
@@ -37,11 +37,11 @@ func TestAccCheckNetworkingV2NetworkExists(n string, network *networks.Network) 
 	return func(s *terraform.State) error {
 		rs, ok := s.RootModule().Resources[n]
 		if !ok {
-			return fmt.Errorf("Not found: %s", n)
+			return fmt.Errorf("not found: %s", n)
 		}
 
 		if rs.Primary.ID == "" {
-			return fmt.Errorf("No ID is set")
+			return fmt.Errorf("no ID is set")
 		}
 
 		config := common.TestAccProvider.Meta().(*cfg.Config)
@@ -57,7 +57,7 @@ func TestAccCheckNetworkingV2NetworkExists(n string, network *networks.Network) 
 		}
 
 		if found.ID != id {
-			return fmt.Errorf("Network not found")
+			return fmt.Errorf("network not found")
 		}
 
 		*network = *found
@@ -70,11 +70,11 @@ func TestAccCheckNetworkingV2SubnetExists(n string, subnet *subnets.Subnet) reso
 	return func(s *terraform.State) error {
 		rs, ok := s.RootModule().Resources[n]
 		if !ok {
-			return fmt.Errorf("Not found: %s", n)
+			return fmt.Errorf("not found: %s", n)
 		}
 
 		if rs.Primary.ID == "" {
-			return fmt.Errorf("No ID is set")
+			return fmt.Errorf("no ID is set")
 		}
 
 		config := common.TestAccProvider.Meta().(*cfg.Config)
@@ -89,7 +89,7 @@ func TestAccCheckNetworkingV2SubnetExists(n string, subnet *subnets.Subnet) reso
 		}
 
 		if found.ID != rs.Primary.ID {
-			return fmt.Errorf("Subnet not found")
+			return fmt.Errorf("subnet not found")
 		}
 
 		*subnet = *found
@@ -102,11 +102,11 @@ func TestAccCheckNetworkingV2RouterExists(n string, router *routers.Router) reso
 	return func(s *terraform.State) error {
 		rs, ok := s.RootModule().Resources[n]
 		if !ok {
-			return fmt.Errorf("Not found: %s", n)
+			return fmt.Errorf("not found: %s", n)
 		}
 
 		if rs.Primary.ID == "" {
-			return fmt.Errorf("No ID is set")
+			return fmt.Errorf("no ID is set")
 		}
 
 		config := common.TestAccProvider.Meta().(*cfg.Config)
@@ -121,7 +121,7 @@ func TestAccCheckNetworkingV2RouterExists(n string, router *routers.Router) reso
 		}
 
 		if found.ID != rs.Primary.ID {
-			return fmt.Errorf("Router not found")
+			return fmt.Errorf("router not found")
 		}
 
 		*router = *found
@@ -134,11 +134,11 @@ func TestAccCheckNetworkingV2FloatingIPExists(n string, kp *floatingips.Floating
 	return func(s *terraform.State) error {
 		rs, ok := s.RootModule().Resources[n]
 		if !ok {
-			return fmt.Errorf("Not found: %s", n)
+			return fmt.Errorf("not found: %s", n)
 		}
 
 		if rs.Primary.ID == "" {
-			return fmt.Errorf("No ID is set")
+			return fmt.Errorf("no ID is set")
 		}
 
 		config := common.TestAccProvider.Meta().(*cfg.Config)
@@ -153,7 +153,7 @@ func TestAccCheckNetworkingV2FloatingIPExists(n string, kp *floatingips.Floating
 		}
 
 		if found.ID != rs.Primary.ID {
-			return fmt.Errorf("FloatingIP not found")
+			return fmt.Errorf("floatingIP not found")
 		}
 
 		*kp = *found
@@ -166,11 +166,11 @@ func TestAccCheckNetworkingV2RouterInterfaceExists(n string) resource.TestCheckF
 	return func(s *terraform.State) error {
 		rs, ok := s.RootModule().Resources[n]
 		if !ok {
-			return fmt.Errorf("Not found: %s", n)
+			return fmt.Errorf("not found: %s", n)
 		}
 
 		if rs.Primary.ID == "" {
-			return fmt.Errorf("No ID is set")
+			return fmt.Errorf("no ID is set")
 		}
 
 		config := common.TestAccProvider.Meta().(*cfg.Config)
@@ -185,7 +185,7 @@ func TestAccCheckNetworkingV2RouterInterfaceExists(n string) resource.TestCheckF
 		}
 
 		if found.ID != rs.Primary.ID {
-			return fmt.Errorf("Router interface not found")
+			return fmt.Errorf("router interface not found")
 		}
 
 		return nil

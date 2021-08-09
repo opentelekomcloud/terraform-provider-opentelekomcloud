@@ -10,8 +10,7 @@ import (
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/acceptance/common"
 )
 
-func TestAccOTCVpcRouteV2DataSource_basic(t *testing.T) {
-
+func TestAccVpcRouteV2DataSource_basic(t *testing.T) {
 	resource.Test(t, resource.TestCase{
 		PreCheck:          func() { common.TestAccPreCheck(t) },
 		ProviderFactories: common.TestAccProviderFactories,
@@ -19,12 +18,12 @@ func TestAccOTCVpcRouteV2DataSource_basic(t *testing.T) {
 			{
 				Config: testAccDataSourceRouteV2Config,
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckOTCRouteV2DataSourceID("data.opentelekomcloud_vpc_route_v2.by_id"),
+					testAccCheckRouteV2DataSourceID("data.opentelekomcloud_vpc_route_v2.by_id"),
 					resource.TestCheckResourceAttr(
 						"data.opentelekomcloud_vpc_route_v2.by_id", "type", "peering"),
 					resource.TestCheckResourceAttr(
 						"data.opentelekomcloud_vpc_route_v2.by_id", "destination", "192.168.0.0/16"),
-					testAccCheckOTCRouteV2DataSourceID("data.opentelekomcloud_vpc_route_v2.by_vpc_id"),
+					testAccCheckRouteV2DataSourceID("data.opentelekomcloud_vpc_route_v2.by_vpc_id"),
 					resource.TestCheckResourceAttr(
 						"data.opentelekomcloud_vpc_route_v2.by_vpc_id", "type", "peering"),
 					resource.TestCheckResourceAttr(
@@ -35,11 +34,11 @@ func TestAccOTCVpcRouteV2DataSource_basic(t *testing.T) {
 	})
 }
 
-func testAccCheckOTCRouteV2DataSourceID(n string) resource.TestCheckFunc {
+func testAccCheckRouteV2DataSourceID(n string) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
 		rs, ok := s.RootModule().Resources[n]
 		if !ok {
-			return fmt.Errorf("Can't find vpc route connection data source: %s", n)
+			return fmt.Errorf("can't find vpc route connection data source: %s", n)
 		}
 
 		if rs.Primary.ID == "" {

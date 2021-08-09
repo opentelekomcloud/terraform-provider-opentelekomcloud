@@ -3,6 +3,7 @@ package vpc
 import (
 	"context"
 
+	"github.com/hashicorp/go-multierror"
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/networking/v2/routes"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
@@ -49,10 +50,13 @@ func dataSourceVpcRouteIdsV2Read(_ context.Context, d *schema.ResourceData, meta
 	}
 
 	pages, err := routes.List(vpcRouteClient, listOpts).AllPages()
-	refinedRoutes, err := routes.ExtractRoutes(pages)
-
 	if err != nil {
-		return fmterr.Errorf("Unable to retrieve vpc Routes: %s", err)
+		return fmterr.Errorf("unable to list vpc Routes: %s", err)
+	}
+
+	refinedRoutes, err := routes.ExtractRoutes(pages)
+	if err != nil {
+		return fmterr.Errorf("unable to retrieve vpc Routes: %s", err)
 	}
 
 	if len(refinedRoutes) == 0 {
@@ -63,12 +67,17 @@ func dataSourceVpcRouteIdsV2Read(_ context.Context, d *schema.ResourceData, meta
 
 	for _, route := range refinedRoutes {
 		listRoutes = append(listRoutes, route.RouteID)
-
 	}
 
 	d.SetId(d.Get("vpc_id").(string))
-	d.Set("ids", listRoutes)
-	d.Set("region", config.GetRegion(d))
+	mErr := multierror.Append(
+		d.Set("ids", listRoutes),
+		d.Set("region", config.GetRegion(d)),
+	)
+
+	if err := mErr.ErrorOrNil(); err != nil {
+		return diag.FromErr(err)
+	}
 
 	return nil
 }
