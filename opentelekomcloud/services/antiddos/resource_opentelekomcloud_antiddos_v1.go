@@ -25,7 +25,7 @@ func ResourceAntiDdosV1() *schema.Resource {
 		UpdateContext: resourceAntiDdosV1Update,
 		DeleteContext: resourceAntiDdosV1Delete,
 
-		DeprecationMessage: "AntiDDoS protection for elasticIP is provided by default and shouldn't be created manually.",
+		DeprecationMessage: "AntiDDoS protection for Elastic IP is provided by default and shouldn't be created manually.",
 
 		Importer: &schema.ResourceImporter{
 			StateContext: schema.ImportStatePassthroughContext,
