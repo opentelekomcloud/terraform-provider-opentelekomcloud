@@ -87,7 +87,7 @@ func testAccCheckSMNTopicV2Destroy(s *terraform.State) error {
 
 		_, err := topics.Get(smnClient, rs.Primary.ID).Extract()
 		if err == nil {
-			return fmt.Errorf("Topic still exists")
+			return fmt.Errorf("topic still exists")
 		}
 	}
 
@@ -98,11 +98,11 @@ func testAccCheckSMNV2TopicExists(n string, topic *topics.TopicGet, projectName 
 	return func(s *terraform.State) error {
 		rs, ok := s.RootModule().Resources[n]
 		if !ok {
-			return fmt.Errorf("Not found: %s", n)
+			return fmt.Errorf("not found: %s", n)
 		}
 
 		if rs.Primary.ID == "" {
-			return fmt.Errorf("No ID is set")
+			return fmt.Errorf("no ID is set")
 		}
 
 		config := common.TestAccProvider.Meta().(*cfg.Config)
@@ -117,7 +117,7 @@ func testAccCheckSMNV2TopicExists(n string, topic *topics.TopicGet, projectName 
 		}
 
 		if found.TopicUrn != rs.Primary.ID {
-			return fmt.Errorf("Topic not found")
+			return fmt.Errorf("topic not found")
 		}
 
 		*topic = *found

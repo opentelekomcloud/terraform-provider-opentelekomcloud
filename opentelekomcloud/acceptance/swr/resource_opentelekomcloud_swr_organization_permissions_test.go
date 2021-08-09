@@ -56,7 +56,7 @@ func testSwrOrganizationPermissionsV2Destroy(s *terraform.State) error {
 			if _, ok := err.(golangsdk.ErrDefault404); ok {
 				return nil // no permissions at all exist for the organization
 			}
-			return fmt.Errorf("error retriving organization permissions: %w", err)
+			return fmt.Errorf("error retrieving organization permissions: %w", err)
 		}
 
 		for _, a := range perms.OthersAuth {

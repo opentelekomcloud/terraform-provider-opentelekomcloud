@@ -52,12 +52,12 @@ func dataSourceSdrsDomainV1Read(_ context.Context, d *schema.ResourceData, meta 
 		filteredDomains = append(filteredDomains, dm)
 	}
 	if len(filteredDomains) < 1 {
-		return fmterr.Errorf("Your query returned no results. Please change your filters and try again.")
+		return fmterr.Errorf("your query returned no results. Please change your filters and try again.")
 	}
 	dm := filteredDomains[0]
 	d.SetId(dm.Id)
-	d.Set("name", dm.Name)
-	d.Set("description", dm.Description)
+	_ = d.Set("name", dm.Name)
+	_ = d.Set("description", dm.Description)
 	log.Printf("[DEBUG] SDRS Domain : %+v", dm)
 
 	return nil

@@ -23,7 +23,7 @@ func TestAccSFSFileSystemV2_basic(t *testing.T) {
 		CheckDestroy:      testAccCheckSFSFileSystemV2Destroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccSFSFileSystemV2_basic,
+				Config: testAccSFSFileSystemV2Basic,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckSFSFileSystemV2Exists(resourceName, &share),
 					resource.TestCheckResourceAttr(resourceName, "name", "sfs-test1"),
@@ -37,7 +37,7 @@ func TestAccSFSFileSystemV2_basic(t *testing.T) {
 				),
 			},
 			{
-				Config: testAccSFSFileSystemV2_update,
+				Config: testAccSFSFileSystemV2Update,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckSFSFileSystemV2Exists(resourceName, &share),
 					resource.TestCheckResourceAttr(resourceName, "name", "sfs-test2"),
@@ -64,7 +64,7 @@ func TestAccSFSFileSystemV2_timeout(t *testing.T) {
 		CheckDestroy:      testAccCheckSFSFileSystemV2Destroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccSFSFileSystemV2_timeout,
+				Config: testAccSFSFileSystemV2Timeout,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckSFSFileSystemV2Exists(resourceName, &share),
 				),
@@ -83,13 +83,13 @@ func TestAccSFSFileSystemV2_clean(t *testing.T) {
 		CheckDestroy:      testAccCheckSFSFileSystemV2Destroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccSFSFileSystemV2_clean,
+				Config: testAccSFSFileSystemV2Clean,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckSFSFileSystemV2Exists(resourceName, &share),
 				),
 			},
 			{
-				Config: testAccSFSFileSystemV2_basic,
+				Config: testAccSFSFileSystemV2Basic,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckSFSFileSystemV2Exists("opentelekomcloud_sfs_file_system_v2.sfs_1", &share),
 					resource.TestCheckResourceAttr(resourceName, "access_level", "rw"),
@@ -98,7 +98,7 @@ func TestAccSFSFileSystemV2_clean(t *testing.T) {
 				),
 			},
 			{
-				Config: testAccSFSFileSystemV2_clean,
+				Config: testAccSFSFileSystemV2Clean,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckSFSFileSystemV2Exists(resourceName, &share),
 				),
@@ -160,7 +160,7 @@ func testAccCheckSFSFileSystemV2Exists(n string, share *shares.Share) resource.T
 	}
 }
 
-var testAccSFSFileSystemV2_basic = fmt.Sprintf(`
+var testAccSFSFileSystemV2Basic = fmt.Sprintf(`
 resource "opentelekomcloud_sfs_file_system_v2" "sfs_1" {
   share_proto       = "NFS"
   size              = 1
@@ -178,7 +178,7 @@ resource "opentelekomcloud_sfs_file_system_v2" "sfs_1" {
 }
 `, env.OS_VPC_ID)
 
-var testAccSFSFileSystemV2_update = fmt.Sprintf(`
+var testAccSFSFileSystemV2Update = fmt.Sprintf(`
 resource "opentelekomcloud_sfs_file_system_v2" "sfs_1" {
   share_proto       = "NFS"
   size              = 2
@@ -195,7 +195,7 @@ resource "opentelekomcloud_sfs_file_system_v2" "sfs_1" {
 }
 `, env.OS_VPC_ID)
 
-var testAccSFSFileSystemV2_timeout = fmt.Sprintf(`
+var testAccSFSFileSystemV2Timeout = fmt.Sprintf(`
 resource "opentelekomcloud_sfs_file_system_v2" "sfs_1" {
   share_proto  = "NFS"
   size         = 1
@@ -211,11 +211,11 @@ resource "opentelekomcloud_sfs_file_system_v2" "sfs_1" {
   }
 }`, env.OS_VPC_ID)
 
-var testAccSFSFileSystemV2_clean = fmt.Sprintf(`
+const testAccSFSFileSystemV2Clean = `
 resource "opentelekomcloud_sfs_file_system_v2" "sfs_1" {
   share_proto       = "NFS"
   size              = 1
   name              = "sfs-test1"
   availability_zone = "eu-de-01"
 }
-`)
+`

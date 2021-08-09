@@ -254,7 +254,6 @@ func resourceSFSTurboShareV1Update(ctx context.Context, d *schema.ResourceData, 
 		if err != nil {
 			return fmterr.Errorf("error updating OpenTelekomCloud SFS Turbo: %s", err)
 		}
-
 	}
 
 	return resourceSFSTurboShareV1Read(ctx, d, meta)
