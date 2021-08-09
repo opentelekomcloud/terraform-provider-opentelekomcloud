@@ -701,7 +701,7 @@ func mapToRule(src map[string]interface{}) (rule obs.LifecycleRule) {
 		}
 	}
 	rule.NoncurrentVersionTransitions = ncList
-	return
+	return rule
 }
 
 func resourceObsBucketLifecycleUpdate(client *obs.ObsClient, d *schema.ResourceData) error {
@@ -1207,10 +1207,8 @@ func deleteAllBucketObjects(client *obs.ObsClient, bucket string) error {
 	output, err := client.DeleteObjects(deleteOpts)
 	if err != nil {
 		return GetObsError("error deleting all objects of OBS bucket", bucket, err)
-	} else {
-		if len(output.Errors) > 0 {
-			return fmt.Errorf("error some objects are still exist in %s: %#v", bucket, output.Errors)
-		}
+	} else if len(output.Errors) > 0 {
+		return fmt.Errorf("error some objects are still exist in %s: %#v", bucket, output.Errors)
 	}
 	return nil
 }

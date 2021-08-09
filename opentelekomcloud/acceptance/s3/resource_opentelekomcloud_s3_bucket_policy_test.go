@@ -78,11 +78,11 @@ func testAccCheckS3BucketHasPolicy(n string, expectedPolicyText string) resource
 	return func(s *terraform.State) error {
 		rs, ok := s.RootModule().Resources[n]
 		if !ok {
-			return fmt.Errorf("Not found: %s", n)
+			return fmt.Errorf("not found: %s", n)
 		}
 
 		if rs.Primary.ID == "" {
-			return fmt.Errorf("No S3 Bucket ID is set")
+			return fmt.Errorf("no S3 Bucket ID is set")
 		}
 
 		config := common.TestAccProvider.Meta().(*cfg.Config)
@@ -95,7 +95,7 @@ func testAccCheckS3BucketHasPolicy(n string, expectedPolicyText string) resource
 			Bucket: aws.String(rs.Primary.ID),
 		})
 		if err != nil {
-			return fmt.Errorf("GetBucketPolicy error: %v", err)
+			return fmt.Errorf("getBucketPolicy error: %v", err)
 		}
 
 		actualPolicyText := *policy.Policy
@@ -105,7 +105,7 @@ func testAccCheckS3BucketHasPolicy(n string, expectedPolicyText string) resource
 			return fmt.Errorf("error testing policy equivalence: %s", err)
 		}
 		if !equivalent {
-			return fmt.Errorf("Non-equivalent policy error:\n\nexpected: %s\n\n     got: %s\n",
+			return fmt.Errorf("non-equivalent policy error:\n\nexpected: %s\n\n     got: %s\n",
 				expectedPolicyText, actualPolicyText)
 		}
 

@@ -41,7 +41,7 @@ func ResourceS3BucketPolicy() *schema.Resource {
 	}
 }
 
-func resourceS3BucketPolicyPut(_ context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceS3BucketPolicyPut(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*cfg.Config)
 	s3conn, err := config.S3Client(config.GetRegion(d))
 	if err != nil {
@@ -60,11 +60,11 @@ func resourceS3BucketPolicyPut(_ context.Context, d *schema.ResourceData, meta i
 		Policy: aws.String(policy),
 	}
 
-	err = resource.Retry(1*time.Minute, func() *resource.RetryError {
+	err = resource.RetryContext(ctx, 1*time.Minute, func() *resource.RetryError {
 		if _, err := s3conn.PutBucketPolicy(params); err != nil {
-			if awserr, ok := err.(awserr.Error); ok {
-				if awserr.Code() == "MalformedPolicy" {
-					return resource.RetryableError(awserr)
+			if awsErr, ok := err.(awserr.Error); ok {
+				if awsErr.Code() == "MalformedPolicy" {
+					return resource.RetryableError(awsErr)
 				}
 			}
 			return resource.NonRetryableError(err)

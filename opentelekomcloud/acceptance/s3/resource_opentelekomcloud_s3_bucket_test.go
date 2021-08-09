@@ -615,7 +615,7 @@ func testAccCheckS3DestroyBucket(n string) resource.TestCheckFunc {
 
 func testAccCheckS3BucketPolicy(n string, policy string) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
-		rs, _ := s.RootModule().Resources[n]
+		rs := s.RootModule().Resources[n]
 		config := common.TestAccProvider.Meta().(*cfg.Config)
 		conn, err := config.S3Client(env.OS_REGION_NAME)
 		if err != nil {
@@ -634,11 +634,11 @@ func testAccCheckS3BucketPolicy(n string, policy string) resource.TestCheckFunc 
 			if err == nil {
 				return fmt.Errorf("expected no policy, got: %#v", *out.Policy)
 			} else {
-				return fmt.Errorf("GetBucketPolicy error: %v, expected %s", err, policy)
+				return fmt.Errorf("getBucketPolicy error: %v, expected %s", err, policy)
 			}
 		}
 		if err != nil {
-			return fmt.Errorf("GetBucketPolicy error: %v, expected %s", err, policy)
+			return fmt.Errorf("getBucketPolicy error: %v, expected %s", err, policy)
 		}
 
 		if v := out.Policy; v == nil {
@@ -666,7 +666,7 @@ func testAccCheckS3BucketPolicy(n string, policy string) resource.TestCheckFunc 
 
 func testAccCheckS3BucketWebsite(n string, indexDoc string, errorDoc string, redirectProtocol string, redirectTo string) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
-		rs, _ := s.RootModule().Resources[n]
+		rs := s.RootModule().Resources[n]
 		config := common.TestAccProvider.Meta().(*cfg.Config)
 		client, err := config.S3Client(env.OS_REGION_NAME)
 		if err != nil {
@@ -726,7 +726,7 @@ func testAccCheckS3BucketWebsite(n string, indexDoc string, errorDoc string, red
 
 func testAccCheckS3BucketWebsiteRoutingRules(n string, routingRules []*s3.RoutingRule) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
-		rs, _ := s.RootModule().Resources[n]
+		rs := s.RootModule().Resources[n]
 		config := common.TestAccProvider.Meta().(*cfg.Config)
 		client, err := config.S3Client(env.OS_REGION_NAME)
 		if err != nil {
@@ -741,7 +741,7 @@ func testAccCheckS3BucketWebsiteRoutingRules(n string, routingRules []*s3.Routin
 			if routingRules == nil {
 				return nil
 			}
-			return fmt.Errorf("GetBucketWebsite error: %v", err)
+			return fmt.Errorf("getBucketWebsite error: %v", err)
 		}
 
 		if !reflect.DeepEqual(out.RoutingRules, routingRules) {
@@ -754,7 +754,7 @@ func testAccCheckS3BucketWebsiteRoutingRules(n string, routingRules []*s3.Routin
 
 func testAccCheckS3BucketVersioning(n string, versioningStatus string) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
-		rs, _ := s.RootModule().Resources[n]
+		rs := s.RootModule().Resources[n]
 		config := common.TestAccProvider.Meta().(*cfg.Config)
 		client, err := config.S3Client(env.OS_REGION_NAME)
 		if err != nil {
@@ -766,7 +766,7 @@ func testAccCheckS3BucketVersioning(n string, versioningStatus string) resource.
 		})
 
 		if err != nil {
-			return fmt.Errorf("GetBucketVersioning error: %v", err)
+			return fmt.Errorf("getBucketVersioning error: %v", err)
 		}
 
 		if v := out.Status; v == nil {
@@ -785,7 +785,7 @@ func testAccCheckS3BucketVersioning(n string, versioningStatus string) resource.
 
 func testAccCheckS3BucketCors(n string, corsRules []*s3.CORSRule) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
-		rs, _ := s.RootModule().Resources[n]
+		rs := s.RootModule().Resources[n]
 		config := common.TestAccProvider.Meta().(*cfg.Config)
 		client, err := config.S3Client(env.OS_REGION_NAME)
 		if err != nil {
@@ -797,7 +797,7 @@ func testAccCheckS3BucketCors(n string, corsRules []*s3.CORSRule) resource.TestC
 		})
 
 		if err != nil {
-			return fmt.Errorf("GetBucketCors error: %v", err)
+			return fmt.Errorf("getBucketCors error: %v", err)
 		}
 
 		if !reflect.DeepEqual(out.CORSRules, corsRules) {
@@ -810,7 +810,7 @@ func testAccCheckS3BucketCors(n string, corsRules []*s3.CORSRule) resource.TestC
 
 func testAccCheckS3BucketLogging(n, b, p string) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
-		rs, _ := s.RootModule().Resources[n]
+		rs := s.RootModule().Resources[n]
 		config := common.TestAccProvider.Meta().(*cfg.Config)
 		client, err := config.S3Client(env.OS_REGION_NAME)
 		if err != nil {
@@ -822,10 +822,10 @@ func testAccCheckS3BucketLogging(n, b, p string) resource.TestCheckFunc {
 		})
 
 		if err != nil {
-			return fmt.Errorf("GetBucketLogging error: %v", err)
+			return fmt.Errorf("getBucketLogging error: %v", err)
 		}
 
-		tb, _ := s.RootModule().Resources[b]
+		tb := s.RootModule().Resources[b]
 
 		if v := out.LoggingEnabled.TargetBucket; v == nil {
 			if tb.Primary.ID != "" {
@@ -942,7 +942,7 @@ resource "opentelekomcloud_s3_bucket" "bucket6" {
 }
 `))
 	var doc bytes.Buffer
-	t.Execute(&doc, struct{ GUID int }{GUID: randInt})
+	_ = t.Execute(&doc, struct{ GUID int }{GUID: randInt})
 	return doc.String()
 }
 

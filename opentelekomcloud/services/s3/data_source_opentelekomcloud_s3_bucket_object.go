@@ -10,6 +10,7 @@ import (
 
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/service/s3"
+	"github.com/hashicorp/go-multierror"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 
@@ -134,10 +135,10 @@ func dataSourceS3BucketObjectRead(_ context.Context, d *schema.ResourceData, met
 	log.Printf("[DEBUG] Reading S3 object: %s", input)
 	out, err := conn.HeadObject(&input)
 	if err != nil {
-		return fmterr.Errorf("Failed getting S3 object: %s Bucket: %q Object: %q", err, bucket, key)
+		return fmterr.Errorf("failed getting S3 object: %s Bucket: %q Object: %q", err, bucket, key)
 	}
-	if out.DeleteMarker != nil && *out.DeleteMarker == true {
-		return fmterr.Errorf("Requested S3 object %q%s has been deleted",
+	if out.DeleteMarker != nil && *out.DeleteMarker {
+		return fmterr.Errorf("requested S3 object %q%s has been deleted",
 			bucket+key, versionText)
 	}
 
@@ -145,24 +146,30 @@ func dataSourceS3BucketObjectRead(_ context.Context, d *schema.ResourceData, met
 
 	d.SetId(uniqueId)
 
-	d.Set("cache_control", out.CacheControl)
-	d.Set("content_disposition", out.ContentDisposition)
-	d.Set("content_encoding", out.ContentEncoding)
-	d.Set("content_language", out.ContentLanguage)
-	d.Set("content_length", out.ContentLength)
-	d.Set("content_type", out.ContentType)
-	// See https://forums.aws.amazon.com/thread.jspa?threadID=44003
-	d.Set("etag", strings.Trim(*out.ETag, `"`))
-	d.Set("expiration", out.Expiration)
-	d.Set("expires", out.Expires)
-	d.Set("last_modified", out.LastModified.Format(time.RFC1123))
+	mErr := multierror.Append(
+		d.Set("cache_control", out.CacheControl),
+		d.Set("content_disposition", out.ContentDisposition),
+		d.Set("content_encoding", out.ContentEncoding),
+		d.Set("content_language", out.ContentLanguage),
+		d.Set("content_length", out.ContentLength),
+		d.Set("content_type", out.ContentType),
+		// See https://forums.aws.amazon.com/thread.jspa?threadID=44003,
+		d.Set("etag", strings.Trim(*out.ETag, `"`)),
+		d.Set("expiration", out.Expiration),
+		d.Set("expires", out.Expires),
+		d.Set("last_modified", out.LastModified.Format(time.RFC1123)),
+		d.Set("server_side_encryption", out.ServerSideEncryption),
+		d.Set("sse_kms_key_id", out.SSEKMSKeyId),
+		d.Set("version_id", out.VersionId),
+		d.Set("website_redirect_location", out.WebsiteRedirectLocation),
+	)
+	if err := mErr.ErrorOrNil(); err != nil {
+		return diag.FromErr(err)
+	}
+
 	if err := d.Set("metadata", pointersMapToStringList(out.Metadata)); err != nil {
 		return fmterr.Errorf("[DEBUG] Error saving metadata to state for OpenTelekomCloud S3 object (%s): %s", d.Id(), err)
 	}
-	d.Set("server_side_encryption", out.ServerSideEncryption)
-	d.Set("sse_kms_key_id", out.SSEKMSKeyId)
-	d.Set("version_id", out.VersionId)
-	d.Set("website_redirect_location", out.WebsiteRedirectLocation)
 
 	if IsContentTypeAllowed(out.ContentType) {
 		input := s3.GetObjectInput{
@@ -177,17 +184,17 @@ func dataSourceS3BucketObjectRead(_ context.Context, d *schema.ResourceData, met
 		}
 		out, err := conn.GetObject(&input)
 		if err != nil {
-			return fmterr.Errorf("Failed getting S3 object: %s", err)
+			return fmterr.Errorf("failed getting S3 object: %s", err)
 		}
 
 		buf := new(bytes.Buffer)
 		bytesRead, err := buf.ReadFrom(out.Body)
 		if err != nil {
-			return fmterr.Errorf("Failed reading content of S3 object (%s): %s",
+			return fmterr.Errorf("failed reading content of S3 object (%s): %s",
 				uniqueId, err)
 		}
 		log.Printf("[INFO] Saving %d bytes from S3 object %s", bytesRead, uniqueId)
-		d.Set("body", buf.String())
+		_ = d.Set("body", buf.String())
 	} else {
 		contentType := ""
 		if out.ContentType == nil {

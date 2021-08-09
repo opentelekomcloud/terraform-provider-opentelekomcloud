@@ -1,15 +1,16 @@
 package s3
 
 import (
+	"context"
 	"time"
 
 	"github.com/aws/aws-sdk-go/aws/awserr"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 )
 
-func retryOnAwsCode(code string, f func() (interface{}, error)) (interface{}, error) {
+func retryOnAwsCode(ctx context.Context, code string, f func() (interface{}, error)) (interface{}, error) {
 	var resp interface{}
-	err := resource.Retry(1*time.Minute, func() *resource.RetryError {
+	err := resource.RetryContext(ctx, 1*time.Minute, func() *resource.RetryError {
 		var err error
 		resp, err = f()
 		if err != nil {
@@ -24,9 +25,9 @@ func retryOnAwsCode(code string, f func() (interface{}, error)) (interface{}, er
 	return resp, err
 }
 
-func retryOnAwsCodes(codes []string, f func() (interface{}, error)) (interface{}, error) {
+func retryOnAwsCodes(ctx context.Context, codes []string, f func() (interface{}, error)) (interface{}, error) {
 	var resp interface{}
-	err := resource.Retry(1*time.Minute, func() *resource.RetryError {
+	err := resource.RetryContext(ctx, 1*time.Minute, func() *resource.RetryError {
 		var err error
 		resp, err = f()
 		if err != nil {

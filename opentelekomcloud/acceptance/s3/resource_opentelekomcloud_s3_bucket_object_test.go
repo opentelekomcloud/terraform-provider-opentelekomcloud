@@ -26,7 +26,7 @@ func TestAccS3BucketObject_source(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	defer os.Remove(tmpFile.Name())
+	defer func() { _ = os.Remove(tmpFile.Name()) }()
 
 	rInt := acctest.RandInt()
 	// first write some data to the tempfile just so it's not 0 bytes.
@@ -72,7 +72,7 @@ func TestAccS3BucketObject_withContentCharacteristics(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	defer os.Remove(tmpFile.Name())
+	defer func() { _ = os.Remove(tmpFile.Name()) }()
 
 	rInt := acctest.RandInt()
 	// first write some data to the tempfile just so it's not 0 bytes.
@@ -89,7 +89,7 @@ func TestAccS3BucketObject_withContentCharacteristics(t *testing.T) {
 		CheckDestroy:      testAccCheckS3BucketObjectDestroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccS3BucketObjectConfig_withContentCharacteristics(rInt, tmpFile.Name()),
+				Config: testAccS3BucketObjectConfigWithContentCharacteristics(rInt, tmpFile.Name()),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckS3BucketObjectExists("opentelekomcloud_s3_bucket_object.object", &obj),
 					resource.TestCheckResourceAttr(
@@ -107,7 +107,7 @@ func TestAccS3BucketObject_updates(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	defer os.Remove(tmpFile.Name())
+	defer func() { _ = os.Remove(tmpFile.Name()) }()
 
 	rInt := acctest.RandInt()
 	err = ioutil.WriteFile(tmpFile.Name(), []byte("initial object state"), 0644)
@@ -122,7 +122,7 @@ func TestAccS3BucketObject_updates(t *testing.T) {
 		CheckDestroy:      testAccCheckS3BucketObjectDestroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccS3BucketObjectConfig_updates(rInt, tmpFile.Name()),
+				Config: testAccS3BucketObjectConfigUpdates(rInt, tmpFile.Name()),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckS3BucketObjectExists("opentelekomcloud_s3_bucket_object.object", &obj),
 					resource.TestCheckResourceAttr("opentelekomcloud_s3_bucket_object.object", "etag", "647d1d58e1011c743ec67d5e8af87b53"),
@@ -135,7 +135,7 @@ func TestAccS3BucketObject_updates(t *testing.T) {
 						t.Fatal(err)
 					}
 				},
-				Config: testAccS3BucketObjectConfig_updates(rInt, tmpFile.Name()),
+				Config: testAccS3BucketObjectConfigUpdates(rInt, tmpFile.Name()),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckS3BucketObjectExists("opentelekomcloud_s3_bucket_object.object", &obj),
 					resource.TestCheckResourceAttr("opentelekomcloud_s3_bucket_object.object", "etag", "1c7fd13df1515c2a13ad9eb068931f09"),
@@ -150,7 +150,7 @@ func TestAccS3BucketObject_updatesWithVersioning(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	defer os.Remove(tmpFile.Name())
+	defer func() { _ = os.Remove(tmpFile.Name()) }()
 
 	rInt := acctest.RandInt()
 	err = ioutil.WriteFile(tmpFile.Name(), []byte("initial versioned object state"), 0644)
@@ -166,7 +166,7 @@ func TestAccS3BucketObject_updatesWithVersioning(t *testing.T) {
 		CheckDestroy:      testAccCheckS3BucketObjectDestroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccS3BucketObjectConfig_updatesWithVersioning(rInt, tmpFile.Name()),
+				Config: testAccS3BucketObjectConfigUpdatesWithVersioning(rInt, tmpFile.Name()),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckS3BucketObjectExists("opentelekomcloud_s3_bucket_object.object", &originalObj),
 					resource.TestCheckResourceAttr("opentelekomcloud_s3_bucket_object.object", "etag", "cee4407fa91906284e2a5e5e03e86b1b"),
@@ -179,7 +179,7 @@ func TestAccS3BucketObject_updatesWithVersioning(t *testing.T) {
 						t.Fatal(err)
 					}
 				},
-				Config: testAccS3BucketObjectConfig_updatesWithVersioning(rInt, tmpFile.Name()),
+				Config: testAccS3BucketObjectConfigUpdatesWithVersioning(rInt, tmpFile.Name()),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckS3BucketObjectExists("opentelekomcloud_s3_bucket_object.object", &modifiedObj),
 					resource.TestCheckResourceAttr("opentelekomcloud_s3_bucket_object.object", "etag", "00b8c73b1b50e7cc932362c7225b8e29"),
@@ -193,14 +193,14 @@ func TestAccS3BucketObject_updatesWithVersioning(t *testing.T) {
 func testAccCheckS3BucketObjectVersionIdDiffers(first, second *s3.GetObjectOutput) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
 		if first.VersionId == nil {
-			return fmt.Errorf("Expected first object to have VersionId: %s", first)
+			return fmt.Errorf("expected first object to have VersionId: %s", first)
 		}
 		if second.VersionId == nil {
-			return fmt.Errorf("Expected second object to have VersionId: %s", second)
+			return fmt.Errorf("expected second object to have VersionId: %s", second)
 		}
 
 		if *first.VersionId == *second.VersionId {
-			return fmt.Errorf("Expected Version IDs to differ, but they are equal (%s)", *first.VersionId)
+			return fmt.Errorf("expected Version IDs to differ, but they are equal (%s)", *first.VersionId)
 		}
 
 		return nil
@@ -226,7 +226,7 @@ func testAccCheckS3BucketObjectDestroy(s *terraform.State) error {
 				IfMatch: aws.String(rs.Primary.Attributes["etag"]),
 			})
 		if err == nil {
-			return fmt.Errorf("Swift S3 Object still exists: %s", rs.Primary.ID)
+			return fmt.Errorf("swift S3 Object still exists: %s", rs.Primary.ID)
 		}
 	}
 	return nil
@@ -236,11 +236,11 @@ func testAccCheckS3BucketObjectExists(n string, obj *s3.GetObjectOutput) resourc
 	return func(s *terraform.State) error {
 		rs, ok := s.RootModule().Resources[n]
 		if !ok {
-			return fmt.Errorf("Not Found: %s", n)
+			return fmt.Errorf("not Found: %s", n)
 		}
 
 		if rs.Primary.ID == "" {
-			return fmt.Errorf("No S3 Bucket Object ID is set")
+			return fmt.Errorf("no S3 Bucket Object ID is set")
 		}
 
 		config := common.TestAccProvider.Meta().(*cfg.Config)
@@ -269,7 +269,7 @@ func TestAccS3BucketObject_sse(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	defer os.Remove(tmpFile.Name())
+	defer func() { _ = os.Remove(tmpFile.Name()) }()
 
 	// first write some data to the tempfile just so it's not 0 bytes.
 	err = ioutil.WriteFile(tmpFile.Name(), []byte("{anything will do}"), 0644)
@@ -287,7 +287,7 @@ func TestAccS3BucketObject_sse(t *testing.T) {
 		Steps: []resource.TestStep{
 			{
 				PreConfig: func() {},
-				Config:    testAccS3BucketObjectConfig_withSSE(rInt, tmpFile.Name()),
+				Config:    testAccS3BucketObjectConfigWithSSE(rInt, tmpFile.Name()),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckS3BucketObjectExists(
 						"opentelekomcloud_s3_bucket_object.object",
@@ -311,7 +311,7 @@ func TestAccS3BucketObject_acl(t *testing.T) {
 		CheckDestroy:      testAccCheckS3BucketObjectDestroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccS3BucketObjectConfig_acl(rInt, "private"),
+				Config: testAccS3BucketObjectConfigAcl(rInt, "private"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckS3BucketObjectExists(
 						"opentelekomcloud_s3_bucket_object.object", &obj),
@@ -325,7 +325,7 @@ func TestAccS3BucketObject_acl(t *testing.T) {
 				),
 			},
 			{
-				Config: testAccS3BucketObjectConfig_acl(rInt, "public-read"),
+				Config: testAccS3BucketObjectConfigAcl(rInt, "public-read"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckS3BucketObjectExists(
 						"opentelekomcloud_s3_bucket_object.object",
@@ -345,7 +345,7 @@ func TestAccS3BucketObject_acl(t *testing.T) {
 
 func testAccCheckS3BucketObjectAcl(n string, expectedPerms []string) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
-		rs, _ := s.RootModule().Resources[n]
+		rs := s.RootModule().Resources[n]
 		config := common.TestAccProvider.Meta().(*cfg.Config)
 		s3conn, err := config.S3Client(env.OS_REGION_NAME)
 		if err != nil {
@@ -358,7 +358,7 @@ func testAccCheckS3BucketObjectAcl(n string, expectedPerms []string) resource.Te
 		})
 
 		if err != nil {
-			return fmt.Errorf("GetObjectAcl error: %v", err)
+			return fmt.Errorf("getObjectAcl error: %v", err)
 		}
 
 		var perms []string
@@ -368,7 +368,7 @@ func testAccCheckS3BucketObjectAcl(n string, expectedPerms []string) resource.Te
 		sort.Strings(perms)
 
 		if !reflect.DeepEqual(perms, expectedPerms) {
-			return fmt.Errorf("Expected ACL permissions to be %v, got %v", expectedPerms, perms)
+			return fmt.Errorf("expected ACL permissions to be %v, got %v", expectedPerms, perms)
 		}
 
 		return nil
@@ -433,7 +433,7 @@ func TestResourceS3BucketObjectStorageClass_validation(t *testing.T) {
 
 func testAccCheckS3BucketObjectSSE(n, expectedSSE string) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
-		rs, _ := s.RootModule().Resources[n]
+		rs := s.RootModule().Resources[n]
 		config := common.TestAccProvider.Meta().(*cfg.Config)
 		s3conn, err := config.S3Client(env.OS_REGION_NAME)
 		if err != nil {
@@ -446,16 +446,16 @@ func testAccCheckS3BucketObjectSSE(n, expectedSSE string) resource.TestCheckFunc
 		})
 
 		if err != nil {
-			return fmt.Errorf("HeadObject error: %v", err)
+			return fmt.Errorf("headObject error: %v", err)
 		}
 
 		if out.ServerSideEncryption == nil {
-			return fmt.Errorf("Expected a non %v Server Side Encryption.", out.ServerSideEncryption)
+			return fmt.Errorf("expected a non %v Server Side Encryption.", out.ServerSideEncryption)
 		}
 
 		sse := *out.ServerSideEncryption
 		if sse != expectedSSE {
-			return fmt.Errorf("Expected Server Side Encryption %v, got %v.",
+			return fmt.Errorf("expected Server Side Encryption %v, got %v.",
 				expectedSSE, sse)
 		}
 
@@ -477,7 +477,7 @@ resource "opentelekomcloud_s3_bucket_object" "object" {
 `, randInt, source)
 }
 
-func testAccS3BucketObjectConfig_withContentCharacteristics(randInt int, source string) string {
+func testAccS3BucketObjectConfigWithContentCharacteristics(randInt int, source string) string {
 	return fmt.Sprintf(`
 resource "opentelekomcloud_s3_bucket" "object_bucket_2" {
   bucket = "tf-object-test-bucket-%d"
@@ -507,7 +507,7 @@ resource "opentelekomcloud_s3_bucket_object" "object" {
 `, randInt)
 }
 
-func testAccS3BucketObjectConfig_updates(randInt int, source string) string {
+func testAccS3BucketObjectConfigUpdates(randInt int, source string) string {
 	return fmt.Sprintf(`
 resource "opentelekomcloud_s3_bucket" "object_bucket_3" {
   bucket = "tf-object-test-bucket-%d"
@@ -522,7 +522,7 @@ resource "opentelekomcloud_s3_bucket_object" "object" {
 `, randInt, source, source)
 }
 
-func testAccS3BucketObjectConfig_updatesWithVersioning(randInt int, source string) string {
+func testAccS3BucketObjectConfigUpdatesWithVersioning(randInt int, source string) string {
 	return fmt.Sprintf(`
 resource "opentelekomcloud_s3_bucket" "object_bucket_3" {
   bucket = "tf-object-test-bucket-%d"
@@ -540,7 +540,7 @@ resource "opentelekomcloud_s3_bucket_object" "object" {
 `, randInt, source, source)
 }
 
-func testAccS3BucketObjectConfig_withSSE(randInt int, source string) string {
+func testAccS3BucketObjectConfigWithSSE(randInt int, source string) string {
 	return fmt.Sprintf(`
 resource "opentelekomcloud_s3_bucket" "object_bucket" {
   bucket = "tf-object-test-bucket-%d"
@@ -555,7 +555,7 @@ resource "opentelekomcloud_s3_bucket_object" "object" {
 `, randInt, source)
 }
 
-func testAccS3BucketObjectConfig_acl(randInt int, acl string) string {
+func testAccS3BucketObjectConfigAcl(randInt int, acl string) string {
 	return fmt.Sprintf(`
 resource "opentelekomcloud_s3_bucket" "object_bucket" {
   bucket = "tf-object-test-bucket-%d"
