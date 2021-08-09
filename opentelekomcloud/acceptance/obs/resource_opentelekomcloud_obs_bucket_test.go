@@ -228,7 +228,7 @@ func testAccCheckObsBucketDestroy(s *terraform.State) error {
 
 		_, err := client.HeadBucket(rs.Primary.ID)
 		if err == nil {
-			return fmt.Errorf("OpenTelekomCloud OBS Bucket %s still exists", rs.Primary.ID)
+			return fmt.Errorf("bucket %s still exists", rs.Primary.ID)
 		}
 	}
 	return nil
@@ -253,7 +253,7 @@ func testAccCheckObsBucketExists(n string) resource.TestCheckFunc {
 
 		_, err = client.HeadBucket(rs.Primary.ID)
 		if err != nil {
-			return fmt.Errorf("OpenTelekomCloud OBS Bucket not found: %v", err)
+			return fmt.Errorf("bucket not found: %v", err)
 		}
 		return nil
 	}

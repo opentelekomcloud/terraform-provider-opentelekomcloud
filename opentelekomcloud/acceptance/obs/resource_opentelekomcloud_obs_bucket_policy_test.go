@@ -110,7 +110,7 @@ func testAccCheckObsBucketHasPolicy(n string, expectedPolicyText string) resourc
 
 		policy, err := client.GetBucketPolicy(rs.Primary.ID)
 		if err != nil {
-			return fmt.Errorf("GetBucketPolicy error: %v", err)
+			return fmt.Errorf("getBucketPolicy error: %v", err)
 		}
 
 		equivalent, err := awspolicy.PoliciesAreEquivalent(policy.Policy, expectedPolicyText)

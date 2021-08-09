@@ -12,6 +12,7 @@ import (
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/awserr"
 	"github.com/aws/aws-sdk-go/service/s3"
+	"github.com/hashicorp/go-multierror"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
@@ -288,7 +289,7 @@ func resourceS3BucketCreate(ctx context.Context, d *schema.ResourceData, meta in
 	} else {
 		bucket = resource.UniqueId()
 	}
-	d.Set("bucket", bucket)
+	_ = d.Set("bucket", bucket)
 	acl := d.Get("acl").(string)
 
 	log.Printf("[DEBUG] S3 bucket create: %s, ACL: %s", bucket, acl)
@@ -300,7 +301,7 @@ func resourceS3BucketCreate(ctx context.Context, d *schema.ResourceData, meta in
 
 	log.Printf("[DEBUG] S3 bucket create: %s, using region: %s", bucket, region)
 
-	err = resource.Retry(5*time.Minute, func() *resource.RetryError {
+	err = resource.RetryContext(ctx, 5*time.Minute, func() *resource.RetryError {
 		log.Printf("[DEBUG] Trying to create new S3 bucket: %q", bucket)
 		_, err := client.CreateBucket(createOpts)
 		if awsErr, ok := err.(awserr.Error); ok {
@@ -331,24 +332,24 @@ func resourceS3BucketUpdate(ctx context.Context, d *schema.ResourceData, meta in
 		return fmterr.Errorf("error creating OpenTelekomCloud S3 client: %s", err)
 	}
 
-	if err := setTagsS3(client, d); err != nil {
+	if err := setTagsS3(ctx, client, d); err != nil {
 		return fmterr.Errorf("%q: %s", d.Get("bucket").(string), err)
 	}
 
 	if d.HasChange("policy") {
-		if err := resourceS3BucketPolicyUpdate(client, d); err != nil {
+		if err := resourceS3BucketPolicyUpdate(ctx, client, d); err != nil {
 			return diag.FromErr(err)
 		}
 	}
 
 	if d.HasChange("cors_rule") {
-		if err := resourceS3BucketCorsUpdate(client, d); err != nil {
+		if err := resourceS3BucketCorsUpdate(ctx, client, d); err != nil {
 			return diag.FromErr(err)
 		}
 	}
 
 	if d.HasChange("website") {
-		if err := resourceS3BucketWebsiteUpdate(client, d); err != nil {
+		if err := resourceS3BucketWebsiteUpdate(ctx, client, d); err != nil {
 			return diag.FromErr(err)
 		}
 	}
@@ -358,7 +359,7 @@ func resourceS3BucketUpdate(ctx context.Context, d *schema.ResourceData, meta in
 			enabled := d.Get("versioning.0.enabled").(bool)
 
 			if enabled || !d.IsNewResource() {
-				if err := resourceS3BucketVersioningUpdate(client, d); err != nil {
+				if err := resourceS3BucketVersioningUpdate(ctx, client, d); err != nil {
 					return diag.FromErr(err)
 				}
 			}
@@ -366,19 +367,19 @@ func resourceS3BucketUpdate(ctx context.Context, d *schema.ResourceData, meta in
 	}
 
 	if d.HasChange("acl") {
-		if err := resourceS3BucketAclUpdate(client, d); err != nil {
+		if err := resourceS3BucketAclUpdate(ctx, client, d); err != nil {
 			return diag.FromErr(err)
 		}
 	}
 
 	if d.HasChange("logging") {
-		if err := resourceS3BucketLoggingUpdate(client, d); err != nil {
+		if err := resourceS3BucketLoggingUpdate(ctx, client, d); err != nil {
 			return diag.FromErr(err)
 		}
 	}
 
 	if d.HasChange("lifecycle_rule") {
-		if err := resourceAwsS3BucketLifecycleUpdate(client, d); err != nil {
+		if err := resourceAwsS3BucketLifecycleUpdate(ctx, client, d); err != nil {
 			return diag.FromErr(err)
 		}
 	}
@@ -386,14 +387,14 @@ func resourceS3BucketUpdate(ctx context.Context, d *schema.ResourceData, meta in
 	return resourceS3BucketRead(ctx, d, meta)
 }
 
-func resourceS3BucketRead(_ context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceS3BucketRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*cfg.Config)
 	client, err := config.S3Client(config.GetRegion(d))
 	if err != nil {
 		return fmterr.Errorf("error creating OpenTelekomCloud S3 client: %s", err)
 	}
 
-	_, err = retryOnAwsCode("NoSuchBucket", func() (interface{}, error) {
+	_, err = retryOnAwsCode(ctx, "NoSuchBucket", func() (interface{}, error) {
 		return client.HeadBucket(&s3.HeadBucketInput{
 			Bucket: aws.String(d.Id()),
 		})
@@ -412,15 +413,14 @@ func resourceS3BucketRead(_ context.Context, d *schema.ResourceData, meta interf
 
 	// In the import case, we won't have this
 	if _, ok := d.GetOk("bucket"); !ok {
-		d.Set("bucket", d.Id())
+		_ = d.Set("bucket", d.Id())
 	}
 	domainName := BucketDomainName(d.Get("bucket").(string), config.GetRegion(d))
-	d.Set("bucket_domain_name", domainName)
+	_ = d.Set("bucket_domain_name", domainName)
 
 	// Read the policy
 	if _, ok := d.GetOk("policy"); ok {
-
-		pol, err := retryOnAwsCode("NoSuchBucket", func() (interface{}, error) {
+		pol, err := retryOnAwsCode(ctx, "NoSuchBucket", func() (interface{}, error) {
 			return client.GetBucketPolicy(&s3.GetBucketPolicyInput{
 				Bucket: aws.String(d.Id()),
 			})
@@ -440,13 +440,13 @@ func resourceS3BucketRead(_ context.Context, d *schema.ResourceData, meta interf
 				if err != nil {
 					return fmterr.Errorf("policy contains an invalid JSON: %w", err)
 				}
-				d.Set("policy", policy)
+				_ = d.Set("policy", policy)
 			}
 		}
 	}
 
 	// Read the CORS
-	corsResponse, err := retryOnAwsCode("NoSuchBucket", func() (interface{}, error) {
+	corsResponse, err := retryOnAwsCode(ctx, "NoSuchBucket", func() (interface{}, error) {
 		return client.GetBucketCors(&s3.GetBucketCorsInput{
 			Bucket: aws.String(d.Id()),
 		})
@@ -482,7 +482,7 @@ func resourceS3BucketRead(_ context.Context, d *schema.ResourceData, meta interf
 	}
 
 	// Read the website configuration
-	wsResponse, err := retryOnAwsCode("NoSuchBucket", func() (interface{}, error) {
+	wsResponse, err := retryOnAwsCode(ctx, "NoSuchBucket", func() (interface{}, error) {
 		return client.GetBucketWebsite(&s3.GetBucketWebsiteInput{
 			Bucket: aws.String(d.Id()),
 		})
@@ -537,7 +537,7 @@ func resourceS3BucketRead(_ context.Context, d *schema.ResourceData, meta interf
 		return diag.FromErr(err)
 	}
 
-	versioningResponse, err := retryOnAwsCode("NoSuchBucket", func() (interface{}, error) {
+	versioningResponse, err := retryOnAwsCode(ctx, "NoSuchBucket", func() (interface{}, error) {
 		return client.GetBucketVersioning(&s3.GetBucketVersioningInput{
 			Bucket: aws.String(d.Id()),
 		})
@@ -568,7 +568,7 @@ func resourceS3BucketRead(_ context.Context, d *schema.ResourceData, meta interf
 	}
 
 	// Read the logging configuration
-	loggingResponse, err := retryOnAwsCode("NoSuchBucket", func() (interface{}, error) {
+	loggingResponse, err := retryOnAwsCode(ctx, "NoSuchBucket", func() (interface{}, error) {
 		return client.GetBucketLogging(&s3.GetBucketLoggingInput{
 			Bucket: aws.String(d.Id()),
 		})
@@ -596,7 +596,7 @@ func resourceS3BucketRead(_ context.Context, d *schema.ResourceData, meta interf
 
 	// Read the lifecycle configuration
 
-	lifecycleResponse, err := retryOnAwsCode("NoSuchBucket", func() (interface{}, error) {
+	lifecycleResponse, err := retryOnAwsCode(ctx, "NoSuchBucket", func() (interface{}, error) {
 		return client.GetBucketLifecycleConfiguration(&s3.GetBucketLifecycleConfigurationInput{
 			Bucket: aws.String(d.Id()),
 		})
@@ -632,7 +632,7 @@ func resourceS3BucketRead(_ context.Context, d *schema.ResourceData, meta interf
 					}
 				}
 			} else {
-				if lifecycleRule.Prefix != nil {
+				if lifecycleRule.Prefix != nil { // nolint:staticcheck
 					rule["prefix"] = *lifecycleRule.Prefix
 				}
 			}
@@ -657,7 +657,7 @@ func resourceS3BucketRead(_ context.Context, d *schema.ResourceData, meta interf
 			if lifecycleRule.Expiration != nil {
 				e := make(map[string]interface{})
 				if lifecycleRule.Expiration.Date != nil {
-					e["date"] = (*lifecycleRule.Expiration.Date).Format("2006-01-02")
+					e["date"] = lifecycleRule.Expiration.Date.Format("2006-01-02")
 				}
 				if lifecycleRule.Expiration.Days != nil {
 					e["days"] = int(*lifecycleRule.Expiration.Days)
@@ -681,7 +681,7 @@ func resourceS3BucketRead(_ context.Context, d *schema.ResourceData, meta interf
 				for _, v := range lifecycleRule.Transitions {
 					t := make(map[string]interface{})
 					if v.Date != nil {
-						t["date"] = (*v.Date).Format("2006-01-02")
+						t["date"] = v.Date.Format("2006-01-02")
 					}
 					if v.Days != nil {
 						t["days"] = int(*v.Days)
@@ -719,7 +719,7 @@ func resourceS3BucketRead(_ context.Context, d *schema.ResourceData, meta interf
 
 	// Add the region as an attribute
 
-	locationResponse, err := retryOnAwsCode("NoSuchBucket", func() (interface{}, error) {
+	locationResponse, err := retryOnAwsCode(ctx, "NoSuchBucket", func() (interface{}, error) {
 		return client.GetBucketLocation(
 			&s3.GetBucketLocationInput{
 				Bucket: aws.String(d.Id()),
@@ -748,7 +748,7 @@ func resourceS3BucketRead(_ context.Context, d *schema.ResourceData, meta interf
 	*/
 
 	// Add website_endpoint as an attribute
-	websiteEndpoint, err := websiteEndpoint(client, d)
+	websiteEndpoint, err := websiteEndpoint(ctx, client, d)
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -808,7 +808,6 @@ func resourceS3BucketDelete(ctx context.Context, d *schema.ResourceData, meta in
 				objectsToDelete := make([]*s3.ObjectIdentifier, 0)
 
 				if len(resp.DeleteMarkers) != 0 {
-
 					for _, v := range resp.DeleteMarkers {
 						objectsToDelete = append(objectsToDelete, &s3.ObjectIdentifier{
 							Key:       v.Key,
@@ -848,7 +847,7 @@ func resourceS3BucketDelete(ctx context.Context, d *schema.ResourceData, meta in
 	return nil
 }
 
-func resourceS3BucketPolicyUpdate(s3conn *s3.S3, d *schema.ResourceData) error {
+func resourceS3BucketPolicyUpdate(ctx context.Context, s3conn *s3.S3, d *schema.ResourceData) error {
 	bucket := d.Get("bucket").(string)
 	policy := d.Get("policy").(string)
 
@@ -860,11 +859,11 @@ func resourceS3BucketPolicyUpdate(s3conn *s3.S3, d *schema.ResourceData) error {
 			Policy: aws.String(policy),
 		}
 
-		err := resource.Retry(1*time.Minute, func() *resource.RetryError {
+		err := resource.RetryContext(ctx, 1*time.Minute, func() *resource.RetryError {
 			if _, err := s3conn.PutBucketPolicy(params); err != nil {
-				if awserr, ok := err.(awserr.Error); ok {
-					if awserr.Code() == "MalformedPolicy" || awserr.Code() == "NoSuchBucket" {
-						return resource.RetryableError(awserr)
+				if awsErr, ok := err.(awserr.Error); ok {
+					if awsErr.Code() == "MalformedPolicy" || awsErr.Code() == "NoSuchBucket" {
+						return resource.RetryableError(awsErr)
 					}
 				}
 				return resource.NonRetryableError(err)
@@ -877,7 +876,7 @@ func resourceS3BucketPolicyUpdate(s3conn *s3.S3, d *schema.ResourceData) error {
 		}
 	} else {
 		log.Printf("[DEBUG] S3 bucket: %s, delete policy: %s", bucket, policy)
-		_, err := retryOnAwsCode("NoSuchBucket", func() (interface{}, error) {
+		_, err := retryOnAwsCode(ctx, "NoSuchBucket", func() (interface{}, error) {
 			return s3conn.DeleteBucketPolicy(&s3.DeleteBucketPolicyInput{
 				Bucket: aws.String(bucket),
 			})
@@ -891,7 +890,7 @@ func resourceS3BucketPolicyUpdate(s3conn *s3.S3, d *schema.ResourceData) error {
 	return nil
 }
 
-func resourceS3BucketCorsUpdate(s3conn *s3.S3, d *schema.ResourceData) error {
+func resourceS3BucketCorsUpdate(ctx context.Context, s3conn *s3.S3, d *schema.ResourceData) error {
 	bucket := d.Get("bucket").(string)
 	rawCors := d.Get("cors_rule").([]interface{})
 
@@ -899,7 +898,7 @@ func resourceS3BucketCorsUpdate(s3conn *s3.S3, d *schema.ResourceData) error {
 		// Delete CORS
 		log.Printf("[DEBUG] S3 bucket: %s, delete CORS", bucket)
 
-		_, err := retryOnAwsCode("NoSuchBucket", func() (interface{}, error) {
+		_, err := retryOnAwsCode(ctx, "NoSuchBucket", func() (interface{}, error) {
 			return s3conn.DeleteBucketCors(&s3.DeleteBucketCorsInput{
 				Bucket: aws.String(bucket),
 			})
@@ -945,7 +944,7 @@ func resourceS3BucketCorsUpdate(s3conn *s3.S3, d *schema.ResourceData) error {
 		}
 		log.Printf("[DEBUG] S3 bucket: %s, put CORS: %#v", bucket, corsInput)
 
-		_, err := retryOnAwsCode("NoSuchBucket", func() (interface{}, error) {
+		_, err := retryOnAwsCode(ctx, "NoSuchBucket", func() (interface{}, error) {
 			return s3conn.PutBucketCors(corsInput)
 		})
 		if err != nil {
@@ -956,25 +955,25 @@ func resourceS3BucketCorsUpdate(s3conn *s3.S3, d *schema.ResourceData) error {
 	return nil
 }
 
-func resourceS3BucketWebsiteUpdate(s3conn *s3.S3, d *schema.ResourceData) error {
+func resourceS3BucketWebsiteUpdate(ctx context.Context, s3conn *s3.S3, d *schema.ResourceData) error {
 	ws := d.Get("website").([]interface{})
-
-	if len(ws) == 1 {
+	switch len(ws) {
+	case 1:
 		var w map[string]interface{}
 		if ws[0] != nil {
 			w = ws[0].(map[string]interface{})
 		} else {
 			w = make(map[string]interface{})
 		}
-		return resourceS3BucketWebsitePut(s3conn, d, w)
-	} else if len(ws) == 0 {
-		return resourceS3BucketWebsiteDelete(s3conn, d)
-	} else {
+		return resourceS3BucketWebsitePut(ctx, s3conn, d, w)
+	case 2:
+		return resourceS3BucketWebsiteDelete(ctx, s3conn, d)
+	default:
 		return fmt.Errorf("cannot specify more than one website")
 	}
 }
 
-func resourceS3BucketWebsitePut(s3conn *s3.S3, d *schema.ResourceData, website map[string]interface{}) error {
+func resourceS3BucketWebsitePut(ctx context.Context, s3conn *s3.S3, d *schema.ResourceData, website map[string]interface{}) error {
 	bucket := d.Get("bucket").(string)
 
 	var indexDocument, errorDocument, redirectAllRequestsTo, routingRules string
@@ -1034,7 +1033,7 @@ func resourceS3BucketWebsitePut(s3conn *s3.S3, d *schema.ResourceData, website m
 
 	log.Printf("[DEBUG] S3 put bucket website: %#v", putInput)
 
-	_, err := retryOnAwsCode("NoSuchBucket", func() (interface{}, error) {
+	_, err := retryOnAwsCode(ctx, "NoSuchBucket", func() (interface{}, error) {
 		return s3conn.PutBucketWebsite(putInput)
 	})
 	if err != nil {
@@ -1044,26 +1043,31 @@ func resourceS3BucketWebsitePut(s3conn *s3.S3, d *schema.ResourceData, website m
 	return nil
 }
 
-func resourceS3BucketWebsiteDelete(s3conn *s3.S3, d *schema.ResourceData) error {
+func resourceS3BucketWebsiteDelete(ctx context.Context, s3conn *s3.S3, d *schema.ResourceData) error {
 	bucket := d.Get("bucket").(string)
 	deleteInput := &s3.DeleteBucketWebsiteInput{Bucket: aws.String(bucket)}
 
 	log.Printf("[DEBUG] S3 delete bucket website: %#v", deleteInput)
 
-	_, err := retryOnAwsCode("NoSuchBucket", func() (interface{}, error) {
+	_, err := retryOnAwsCode(ctx, "NoSuchBucket", func() (interface{}, error) {
 		return s3conn.DeleteBucketWebsite(deleteInput)
 	})
 	if err != nil {
 		return fmt.Errorf("error deleting S3 website: %s", err)
 	}
 
-	d.Set("website_endpoint", "")
-	d.Set("website_domain", "")
+	mErr := multierror.Append(
+		d.Set("website_endpoint", ""),
+		d.Set("website_domain", ""),
+	)
+	if err := mErr.ErrorOrNil(); err != nil {
+		return err
+	}
 
 	return nil
 }
 
-func websiteEndpoint(s3conn *s3.S3, d *schema.ResourceData) (*Website, error) {
+func websiteEndpoint(ctx context.Context, s3conn *s3.S3, d *schema.ResourceData) (*Website, error) {
 	// If the bucket doesn't have a website configuration, return an empty
 	// endpoint
 	if _, ok := d.GetOk("website"); !ok {
@@ -1074,7 +1078,7 @@ func websiteEndpoint(s3conn *s3.S3, d *schema.ResourceData) (*Website, error) {
 
 	// Lookup the region for this bucket
 
-	locationResponse, err := retryOnAwsCode("NoSuchBucket", func() (interface{}, error) {
+	locationResponse, err := retryOnAwsCode(ctx, "NoSuchBucket", func() (interface{}, error) {
 		return s3conn.GetBucketLocation(
 			&s3.GetBucketLocationInput{
 				Bucket: aws.String(bucket),
@@ -1102,7 +1106,7 @@ func WebsiteDomainUrl(region string) string {
 	return fmt.Sprintf("s3-website.%s.amazonaws.com", region)
 }
 
-func resourceS3BucketAclUpdate(s3conn *s3.S3, d *schema.ResourceData) error {
+func resourceS3BucketAclUpdate(ctx context.Context, s3conn *s3.S3, d *schema.ResourceData) error {
 	acl := d.Get("acl").(string)
 	bucket := d.Get("bucket").(string)
 
@@ -1112,7 +1116,7 @@ func resourceS3BucketAclUpdate(s3conn *s3.S3, d *schema.ResourceData) error {
 	}
 	log.Printf("[DEBUG] S3 put bucket ACL: %#v", i)
 
-	_, err := retryOnAwsCode("NoSuchBucket", func() (interface{}, error) {
+	_, err := retryOnAwsCode(ctx, "NoSuchBucket", func() (interface{}, error) {
 		return s3conn.PutBucketAcl(i)
 	})
 	if err != nil {
@@ -1122,7 +1126,7 @@ func resourceS3BucketAclUpdate(s3conn *s3.S3, d *schema.ResourceData) error {
 	return nil
 }
 
-func resourceS3BucketVersioningUpdate(s3conn *s3.S3, d *schema.ResourceData) error {
+func resourceS3BucketVersioningUpdate(ctx context.Context, s3conn *s3.S3, d *schema.ResourceData) error {
 	v := d.Get("versioning").([]interface{})
 	bucket := d.Get("bucket").(string)
 	vc := &s3.VersioningConfiguration{}
@@ -1141,7 +1145,6 @@ func resourceS3BucketVersioningUpdate(s3conn *s3.S3, d *schema.ResourceData) err
 		} else {
 			vc.MFADelete = aws.String(s3.MFADeleteDisabled)
 		}
-
 	} else {
 		vc.Status = aws.String(s3.BucketVersioningStatusSuspended)
 	}
@@ -1152,7 +1155,7 @@ func resourceS3BucketVersioningUpdate(s3conn *s3.S3, d *schema.ResourceData) err
 	}
 	log.Printf("[DEBUG] S3 put bucket versioning: %#v", i)
 
-	_, err := retryOnAwsCode("NoSuchBucket", func() (interface{}, error) {
+	_, err := retryOnAwsCode(ctx, "NoSuchBucket", func() (interface{}, error) {
 		return s3conn.PutBucketVersioning(i)
 	})
 	if err != nil {
@@ -1162,7 +1165,7 @@ func resourceS3BucketVersioningUpdate(s3conn *s3.S3, d *schema.ResourceData) err
 	return nil
 }
 
-func resourceS3BucketLoggingUpdate(s3conn *s3.S3, d *schema.ResourceData) error {
+func resourceS3BucketLoggingUpdate(ctx context.Context, s3conn *s3.S3, d *schema.ResourceData) error {
 	logging := d.Get("logging").(*schema.Set).List()
 	bucket := d.Get("bucket").(string)
 	loggingStatus := &s3.BucketLoggingStatus{}
@@ -1187,7 +1190,7 @@ func resourceS3BucketLoggingUpdate(s3conn *s3.S3, d *schema.ResourceData) error 
 	}
 	log.Printf("[DEBUG] S3 put bucket logging: %#v", i)
 
-	_, err := retryOnAwsCode("NoSuchBucket", func() (interface{}, error) {
+	_, err := retryOnAwsCode(ctx, "NoSuchBucket", func() (interface{}, error) {
 		return s3conn.PutBucketLogging(i)
 	})
 	if err != nil {
@@ -1197,7 +1200,7 @@ func resourceS3BucketLoggingUpdate(s3conn *s3.S3, d *schema.ResourceData) error 
 	return nil
 }
 
-func resourceAwsS3BucketLifecycleUpdate(s3conn *s3.S3, d *schema.ResourceData) error {
+func resourceAwsS3BucketLifecycleUpdate(ctx context.Context, s3conn *s3.S3, d *schema.ResourceData) error {
 	bucket := d.Get("bucket").(string)
 
 	lifecycleRules := d.Get("lifecycle_rule").([]interface{})
@@ -1208,7 +1211,7 @@ func resourceAwsS3BucketLifecycleUpdate(s3conn *s3.S3, d *schema.ResourceData) e
 			Bucket: aws.String(bucket),
 		}
 
-		err := resource.Retry(1*time.Minute, func() *resource.RetryError {
+		err := resource.RetryContext(ctx, 1*time.Minute, func() *resource.RetryError {
 			if _, err := s3conn.DeleteBucketLifecycle(i); err != nil {
 				return resource.NonRetryableError(err)
 			}
@@ -1295,7 +1298,7 @@ func resourceAwsS3BucketLifecycleUpdate(s3conn *s3.S3, d *schema.ResourceData) e
 	}
 	// fmt.Printf("PutBucketLifecycleConfigurationInput=%+v.\n", i)
 
-	err := resource.Retry(1*time.Minute, func() *resource.RetryError {
+	err := resource.RetryContext(ctx, 1*time.Minute, func() *resource.RetryError {
 		if _, err := s3conn.PutBucketLifecycleConfiguration(i); err != nil {
 			return resource.NonRetryableError(err)
 		}
@@ -1352,8 +1355,7 @@ type Website struct {
 }
 
 func resourceS3BucketImportState(_ context.Context, d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
-
-	results := make([]*schema.ResourceData, 1, 1)
+	results := make([]*schema.ResourceData, 1)
 	results[0] = d
 
 	config := meta.(*cfg.Config)
@@ -1376,8 +1378,8 @@ func resourceS3BucketImportState(_ context.Context, d *schema.ResourceData, meta
 	pData := policy.Data(nil)
 	pData.SetId(d.Id())
 	pData.SetType("opentelekomcloud_s3_bucket_policy")
-	pData.Set("bucket", d.Id())
-	pData.Set("policy", pol)
+	_ = pData.Set("bucket", d.Id())
+	_ = pData.Set("policy", pol)
 	results = append(results, pData)
 
 	return results, nil

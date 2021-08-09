@@ -40,9 +40,9 @@ func RemoveNil(data map[string]interface{}) map[string]interface{} {
 			continue
 		}
 
-		switch v.(type) {
+		switch v := v.(type) {
 		case map[string]interface{}:
-			withoutNil[k] = RemoveNil(v.(map[string]interface{}))
+			withoutNil[k] = RemoveNil(v)
 		default:
 			withoutNil[k] = v
 		}
