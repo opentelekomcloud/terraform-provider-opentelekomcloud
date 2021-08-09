@@ -214,7 +214,6 @@ func TestAccRdsInstanceV3_configurationParameters(t *testing.T) {
 			},
 		},
 	})
-
 }
 
 func testAccCheckRdsInstanceV3Destroy(s *terraform.State) error {

@@ -6,6 +6,7 @@ import (
 	"reflect"
 	"unsafe"
 
+	"github.com/hashicorp/go-multierror"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/rts/v1/stacks"
@@ -84,23 +85,24 @@ func dataSourceRTSStackV1Read(_ context.Context, d *schema.ResourceData, meta in
 
 	stack, err := stacks.Get(orchestrationClient, stackName).Extract()
 	if err != nil {
-		return fmterr.Errorf("Unable to retrieve stack %s: %s", stackName, err)
+		return fmterr.Errorf("unable to retrieve stack %s: %s", stackName, err)
 	}
 
 	log.Printf("[INFO] Retrieved Stack %s", stackName)
 	d.SetId(stack.ID)
 
-	d.Set("disable_rollback", stack.DisableRollback)
-
-	d.Set("parameters", stack.Parameters)
-	d.Set("status_reason", stack.StatusReason)
-	d.Set("name", stack.Name)
-	d.Set("outputs", flattenStackOutputs(stack.Outputs))
-	d.Set("capabilities", stack.Capabilities)
-	d.Set("notification_topics", stack.NotificationTopics)
-	d.Set("timeout_mins", stack.Timeout)
-	d.Set("status", stack.Status)
-	d.Set("region", config.GetRegion(d))
+	mErr := multierror.Append(
+		d.Set("disable_rollback", stack.DisableRollback),
+		d.Set("parameters", stack.Parameters),
+		d.Set("status_reason", stack.StatusReason),
+		d.Set("name", stack.Name),
+		d.Set("outputs", flattenStackOutputs(stack.Outputs)),
+		d.Set("capabilities", stack.Capabilities),
+		d.Set("notification_topics", stack.NotificationTopics),
+		d.Set("timeout_mins", stack.Timeout),
+		d.Set("status", stack.Status),
+		d.Set("region", config.GetRegion(d)),
+	)
 
 	out, err := stacktemplates.Get(orchestrationClient, stack.Name, stack.ID).Extract()
 	if err != nil {
@@ -112,13 +114,20 @@ func dataSourceRTSStackV1Read(_ context.Context, d *schema.ResourceData, meta in
 	if err != nil {
 		return fmterr.Errorf("template body contains an invalid JSON or YAML: %w", err)
 	}
-	d.Set("template_body", template)
+	mErr = multierror.Append(mErr, d.Set("template_body", template))
+
+	if err := mErr.ErrorOrNil(); err != nil {
+		return diag.FromErr(err)
+	}
 
 	return nil
 }
 
 func BytesToString(b []byte) string {
-	bh := (*reflect.SliceHeader)(unsafe.Pointer(&b))
-	sh := reflect.StringHeader{Data: bh.Data, Len: bh.Len}
-	return *(*string)(unsafe.Pointer(&sh))
+	sliceHeader := (*reflect.SliceHeader)(unsafe.Pointer(&b))
+	var s string
+	sh := (*reflect.StringHeader)(unsafe.Pointer(&s))
+	sh.Data = sliceHeader.Data
+	sh.Len = sliceHeader.Len
+	return s
 }

@@ -6,13 +6,13 @@ import (
 	"log"
 	"time"
 
+	"github.com/hashicorp/go-multierror"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	golangsdk "github.com/opentelekomcloud/gophertelekomcloud"
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/rts/v1/stacks"
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/rts/v1/stacktemplates"
-
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common"
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common/cfg"
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common/fmterr"
@@ -125,7 +125,6 @@ func resourceTemplateOptsV1(d *schema.ResourceData) *stacks.Template {
 	if _, ok := d.GetOk("template_url"); ok {
 		rawTemplateUrl := d.Get("template_url").(string)
 		template.URL = rawTemplateUrl
-
 	}
 	if _, ok := d.GetOk("files"); ok {
 		rawFiles := make(map[string]string)
@@ -133,7 +132,6 @@ func resourceTemplateOptsV1(d *schema.ResourceData) *stacks.Template {
 			rawFiles[key] = val.(string)
 		}
 		template.Files = rawFiles
-
 	}
 	return template
 }
@@ -156,11 +154,11 @@ func resourceRTSStackV1Create(ctx context.Context, d *schema.ResourceData, meta 
 	config := meta.(*cfg.Config)
 
 	stackName := d.Get("name").(string)
-	_, body_ok := d.GetOk("template_body")
-	_, url_ok := d.GetOk("template_url")
+	_, bodyOk := d.GetOk("template_body")
+	_, urlOk := d.GetOk("template_url")
 
-	if !body_ok && !url_ok {
-		return fmterr.Errorf("Both template_body and template_url are empty, must specify one of them.")
+	if !bodyOk && !urlOk {
+		return fmterr.Errorf("both template_body and template_url are empty, must specify one of them.")
 	}
 
 	orchestrationClient, err := config.OrchestrationV1Client(config.GetRegion(d))
@@ -178,11 +176,11 @@ func resourceRTSStackV1Create(ctx context.Context, d *schema.ResourceData, meta 
 		Timeout:         d.Get("timeout_mins").(int),
 	}
 
-	n, err := stacks.Create(orchestrationClient, createOpts).Extract()
+	stack, err := stacks.Create(orchestrationClient, createOpts).Extract()
 	if err != nil {
 		return fmterr.Errorf("error creating stack: %s", err)
 	}
-	d.SetId(n.ID)
+	d.SetId(stack.ID)
 
 	log.Printf("[INFO] Stack %s created successfully", stackName)
 
@@ -204,7 +202,6 @@ func resourceRTSStackV1Create(ctx context.Context, d *schema.ResourceData, meta 
 	}
 
 	return resourceRTSStackV1Read(ctx, d, meta)
-
 }
 
 func resourceRTSStackV1Read(_ context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
@@ -216,15 +213,12 @@ func resourceRTSStackV1Read(_ context.Context, d *schema.ResourceData, meta inte
 
 	stack, err := stacks.Get(orchestrationClient, d.Id()).Extract()
 	if err != nil {
-
 		if _, ok := err.(golangsdk.ErrDefault404); ok {
 			log.Printf("[WARN] Removing stack %s as it's already gone", d.Id())
 			d.SetId("")
 			return nil
 		}
-
 		return fmterr.Errorf("error retrieving Stack: %s", err)
-
 	}
 
 	// Checking for stack status explicitly as Get API reports 404 or
@@ -238,22 +232,11 @@ func resourceRTSStackV1Read(_ context.Context, d *schema.ResourceData, meta inte
 	// setting id again to manage import as import is better done using stackname for user's ease
 	d.SetId(stack.ID)
 
-	d.Set("disable_rollback", stack.DisableRollback)
-
 	originalParams := d.Get("parameters").(map[string]interface{})
 	err = d.Set("parameters", flattenStackParameters(stack.Parameters, originalParams))
 	if err != nil {
 		return diag.FromErr(err)
 	}
-
-	d.Set("status_reason", stack.StatusReason)
-	d.Set("name", stack.Name)
-	d.Set("outputs", flattenStackOutputs(stack.Outputs))
-	d.Set("capabilities", stack.Capabilities)
-	d.Set("notification_topics", stack.NotificationTopics)
-	d.Set("timeout_mins", stack.Timeout)
-	d.Set("status", stack.Status)
-	d.Set("region", config.GetRegion(d))
 
 	out, err := stacktemplates.Get(orchestrationClient, stack.Name, stack.ID).Extract()
 	if err != nil {
@@ -265,7 +248,23 @@ func resourceRTSStackV1Read(_ context.Context, d *schema.ResourceData, meta inte
 	if err != nil {
 		return fmterr.Errorf("template body contains an invalid JSON or YAML: %w", err)
 	}
-	d.Set("template_body", template)
+
+	mErr := multierror.Append(
+		d.Set("disable_rollback", stack.DisableRollback),
+		d.Set("status_reason", stack.StatusReason),
+		d.Set("name", stack.Name),
+		d.Set("outputs", flattenStackOutputs(stack.Outputs)),
+		d.Set("capabilities", stack.Capabilities),
+		d.Set("notification_topics", stack.NotificationTopics),
+		d.Set("timeout_mins", stack.Timeout),
+		d.Set("status", stack.Status),
+		d.Set("region", config.GetRegion(d)),
+		d.Set("template_body", template),
+	)
+
+	if err := mErr.ErrorOrNil(); err != nil {
+		return diag.FromErr(err)
+	}
 
 	return nil
 }
@@ -276,11 +275,11 @@ func resourceRTSStackV1Update(ctx context.Context, d *schema.ResourceData, meta 
 	if err != nil {
 		return fmterr.Errorf("error creating RTS Client: %s", err)
 	}
-	_, body_ok := d.GetOk("template_body")
-	_, url_ok := d.GetOk("template_url")
+	_, bodyOk := d.GetOk("template_body")
+	_, urlOk := d.GetOk("template_url")
 
-	if !body_ok && !url_ok {
-		return fmterr.Errorf("Both template_body and template_url are empty, must specify one of them.")
+	if !bodyOk && !urlOk {
+		return fmterr.Errorf("both template_body and template_url are empty, must specify one of them.")
 	}
 
 	var updateOpts stacks.UpdateOpts
@@ -290,11 +289,9 @@ func resourceRTSStackV1Update(ctx context.Context, d *schema.ResourceData, meta 
 	updateOpts.Parameters = resourceParametersV1(d)
 
 	if d.HasChange("timeout_mins") {
-
 		updateOpts.Timeout = d.Get("timeout_mins").(int)
 	}
 	if d.HasChange("disable_rollback") {
-
 		rollback := d.Get("disable_rollback").(bool)
 		updateOpts.DisableRollback = &rollback
 	}
@@ -327,7 +324,6 @@ func resourceRTSStackV1Update(ctx context.Context, d *schema.ResourceData, meta 
 }
 
 func resourceRTSStackV1Delete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-
 	config := meta.(*cfg.Config)
 	orchestrationClient, err := config.OrchestrationV1Client(config.GetRegion(d))
 	if err != nil {
@@ -428,10 +424,8 @@ func waitForRTSStackUpdate(orchestrationClient *golangsdk.ServiceClient, stackNa
 			return n, "UPDATE_IN_PROGRESS", nil
 		}
 		if n.Status == "ROLLBACK_COMPLETE" || n.Status == "ROLLBACK_FAILED" || n.Status == "UPDATE_FAILED" {
-
 			return nil, "", fmt.Errorf("%s: %s", n.Status, n.StatusReason)
 		}
-
 		return n, n.Status, nil
 	}
 }

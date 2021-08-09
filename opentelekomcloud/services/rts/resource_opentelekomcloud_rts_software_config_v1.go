@@ -5,6 +5,7 @@ import (
 	"log"
 	"time"
 
+	"github.com/hashicorp/go-multierror"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	golangsdk "github.com/opentelekomcloud/gophertelekomcloud"
@@ -136,12 +137,18 @@ func resourceSoftwareConfigV1Read(_ context.Context, d *schema.ResourceData, met
 		return fmterr.Errorf("error retrieving OpenTelekomCloud Vpc: %s", err)
 	}
 
-	d.Set("id", n.Id)
-	d.Set("name", n.Name)
-	d.Set("config", n.Config)
-	d.Set("group", n.Group)
-	d.Set("options", n.Options)
-	d.Set("region", config.GetRegion(d))
+	mErr := multierror.Append(
+		d.Set("id", n.Id),
+		d.Set("name", n.Name),
+		d.Set("config", n.Config),
+		d.Set("group", n.Group),
+		d.Set("options", n.Options),
+		d.Set("region", config.GetRegion(d)),
+	)
+
+	if err := mErr.ErrorOrNil(); err != nil {
+		return diag.FromErr(err)
+	}
 	if err := d.Set("input_values", n.Inputs); err != nil {
 		return fmterr.Errorf("[DEBUG] Error saving inputs to state for OpenTelekomCloud RTS Software Config (%s): %s", d.Id(), err)
 	}
@@ -162,7 +169,6 @@ func resourceSoftwareConfigV1Delete(_ context.Context, d *schema.ResourceData, m
 	if err != nil {
 		if _, ok := err.(golangsdk.ErrDefault404); ok {
 			log.Printf("[INFO] Successfully deleted OpenTelekomCloud RTS Software Config %s", d.Id())
-
 		}
 		if errCode, ok := err.(golangsdk.ErrUnexpectedResponseCode); ok {
 			if errCode.Actual == 409 {

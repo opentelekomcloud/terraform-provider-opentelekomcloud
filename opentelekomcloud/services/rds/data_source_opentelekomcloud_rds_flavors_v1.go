@@ -4,6 +4,7 @@ import (
 	"context"
 	"log"
 
+	"github.com/hashicorp/go-multierror"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/rds/v1/datastores"
@@ -59,11 +60,11 @@ func dataSourcedataSourceRdsFlavorV1Read(_ context.Context, d *schema.ResourceDa
 
 	datastoresList, err := datastores.List(rdsClient, d.Get("datastore_name").(string)).Extract()
 	if err != nil {
-		return fmterr.Errorf("Unable to retrieve datastores: %s ", err)
+		return fmterr.Errorf("unable to retrieve datastores: %s ", err)
 	}
 
 	if len(datastoresList) < 1 {
-		return fmterr.Errorf("Returned no datastore result. ")
+		return fmterr.Errorf("returned no datastore result. ")
 	}
 	var datastoreId string
 	for _, datastore := range datastoresList {
@@ -73,16 +74,16 @@ func dataSourcedataSourceRdsFlavorV1Read(_ context.Context, d *schema.ResourceDa
 		}
 	}
 	if datastoreId == "" {
-		return fmterr.Errorf("Returned no datastore ID. ")
+		return fmterr.Errorf("returned no datastore ID. ")
 	}
 	log.Printf("[DEBUG] Received datastore Id: %s", datastoreId)
 
 	flavorsList, err := flavors.List(rdsClient, datastoreId, d.Get("region").(string)).Extract()
 	if err != nil {
-		return fmterr.Errorf("Unable to retrieve flavors: %s", err)
+		return fmterr.Errorf("unable to retrieve flavors: %s", err)
 	}
 	if len(flavorsList) < 1 {
-		return fmterr.Errorf("Returned no flavor result. ")
+		return fmterr.Errorf("returned no flavor result. ")
 	}
 
 	var rdsFlavor flavors.Flavor
@@ -98,15 +99,19 @@ func dataSourcedataSourceRdsFlavorV1Read(_ context.Context, d *schema.ResourceDa
 	}
 	log.Printf("[DEBUG] Retrieved flavorId %s: %+v ", rdsFlavor.ID, rdsFlavor)
 	if rdsFlavor.ID == "" {
-		return fmterr.Errorf("Returned no flavor Id. ")
+		return fmterr.Errorf("returned no flavor Id. ")
 	}
 
 	d.SetId(rdsFlavor.ID)
 
-	d.Set("name", rdsFlavor.Name)
-	d.Set("ram", rdsFlavor.Ram)
-	d.Set("speccode", rdsFlavor.SpecCode)
-	d.Set("region", config.GetRegion(d))
-
+	mErr := multierror.Append(
+		d.Set("name", rdsFlavor.Name),
+		d.Set("ram", rdsFlavor.Ram),
+		d.Set("speccode", rdsFlavor.SpecCode),
+		d.Set("region", config.GetRegion(d)),
+	)
+	if err := mErr.ErrorOrNil(); err != nil {
+		return diag.FromErr(err)
+	}
 	return nil
 }
