@@ -6,6 +6,7 @@ import (
 	"log"
 	"strings"
 
+	"github.com/hashicorp/go-multierror"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/lts/v2/loggroups"
@@ -86,8 +87,14 @@ func resourceTopicV2Read(_ context.Context, d *schema.ResourceData, meta interfa
 	if topic.ID != "" {
 		d.SetId(topic.ID)
 	}
-	d.Set("topic_name", topic.Name)
-	d.Set("index_enabled", topic.IndexEnabled)
+	mErr := multierror.Append(
+		d.Set("topic_name", topic.Name),
+		d.Set("index_enabled", topic.IndexEnabled),
+	)
+
+	if err := mErr.ErrorOrNil(); err != nil {
+		return diag.FromErr(err)
+	}
 	return nil
 }
 
@@ -111,7 +118,7 @@ func resourceTopicV2Delete(_ context.Context, d *schema.ResourceData, meta inter
 func resourceTopicV2Import(_ context.Context, d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
 	parts := strings.SplitN(d.Id(), "/", 2)
 	if len(parts) != 2 {
-		err := fmt.Errorf("Invalid format specified for logtank topic. Format must be <group id>/<topic id>")
+		err := fmt.Errorf("invalid format specified for logtank topic. Format must be <group id>/<topic id>")
 		return nil, err
 	}
 
@@ -132,7 +139,10 @@ func resourceTopicV2Import(_ context.Context, d *schema.ResourceData, meta inter
 	}
 
 	d.SetId(topicId)
-	d.Set("group_id", groupId)
+
+	if err := d.Set("group_id", groupId); err != nil {
+		return nil, err
+	}
 
 	return []*schema.ResourceData{d}, nil
 }
