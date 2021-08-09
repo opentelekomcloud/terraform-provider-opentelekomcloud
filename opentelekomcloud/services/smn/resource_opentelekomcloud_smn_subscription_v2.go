@@ -4,6 +4,7 @@ import (
 	"context"
 	"log"
 
+	"github.com/hashicorp/go-multierror"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 
@@ -87,11 +88,11 @@ func resourceSubscriptionCreate(ctx context.Context, d *schema.ResourceData, met
 	log.Printf("[DEBUG] Create : subscription.SubscriptionUrn %s", subscription.SubscriptionUrn)
 	if subscription.SubscriptionUrn != "" {
 		d.SetId(subscription.SubscriptionUrn)
-		d.Set("subscription_urn", subscription.SubscriptionUrn)
+		_ = d.Set("subscription_urn", subscription.SubscriptionUrn)
 		return resourceSubscriptionRead(ctx, d, meta)
 	}
 
-	return fmterr.Errorf("Unexpected conversion error in resourceSubscriptionCreate.")
+	return fmterr.Errorf("unexpected conversion error in resourceSubscriptionCreate.")
 }
 
 func resourceSubscriptionDelete(_ context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
@@ -131,13 +132,19 @@ func resourceSubscriptionRead(_ context.Context, d *schema.ResourceData, meta in
 	for _, subscription := range subscriptionsList {
 		if subscription.SubscriptionUrn == id {
 			log.Printf("[DEBUG] subscription: %#v", subscription)
-			d.Set("topic_urn", subscription.TopicUrn)
-			d.Set("endpoint", subscription.Endpoint)
-			d.Set("protocol", subscription.Protocol)
-			d.Set("subscription_urn", subscription.SubscriptionUrn)
-			d.Set("owner", subscription.Owner)
-			d.Set("remark", subscription.Remark)
-			d.Set("status", subscription.Status)
+			mErr := multierror.Append(
+				d.Set("topic_urn", subscription.TopicUrn),
+				d.Set("endpoint", subscription.Endpoint),
+				d.Set("protocol", subscription.Protocol),
+				d.Set("subscription_urn", subscription.SubscriptionUrn),
+				d.Set("owner", subscription.Owner),
+				d.Set("remark", subscription.Remark),
+				d.Set("status", subscription.Status),
+			)
+
+			if err := mErr.ErrorOrNil(); err != nil {
+				return diag.FromErr(err)
+			}
 		}
 	}
 

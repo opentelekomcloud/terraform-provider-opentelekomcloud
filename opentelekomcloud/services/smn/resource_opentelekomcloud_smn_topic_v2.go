@@ -4,6 +4,7 @@ import (
 	"context"
 	"log"
 
+	"github.com/hashicorp/go-multierror"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 
@@ -81,7 +82,7 @@ func resourceTopicCreate(ctx context.Context, d *schema.ResourceData, meta inter
 		return resourceTopicRead(ctx, d, meta)
 	}
 
-	return fmterr.Errorf("Unexpected conversion error in resourceTopicCreate.")
+	return fmterr.Errorf("unexpected conversion error in resourceTopicCreate.")
 }
 
 func resourceTopicRead(_ context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
@@ -99,12 +100,18 @@ func resourceTopicRead(_ context.Context, d *schema.ResourceData, meta interface
 
 	log.Printf("[DEBUG] Retrieved topic %s: %#v", topicUrn, topicGet)
 
-	d.Set("topic_urn", topicGet.TopicUrn)
-	d.Set("display_name", topicGet.DisplayName)
-	d.Set("name", topicGet.Name)
-	d.Set("push_policy", topicGet.PushPolicy)
-	d.Set("update_time", topicGet.UpdateTime)
-	d.Set("create_time", topicGet.CreateTime)
+	mErr := multierror.Append(
+		d.Set("topic_urn", topicGet.TopicUrn),
+		d.Set("display_name", topicGet.DisplayName),
+		d.Set("name", topicGet.Name),
+		d.Set("push_policy", topicGet.PushPolicy),
+		d.Set("update_time", topicGet.UpdateTime),
+		d.Set("create_time", topicGet.CreateTime),
+	)
+
+	if err := mErr.ErrorOrNil(); err != nil {
+		return diag.FromErr(err)
+	}
 
 	return nil
 }

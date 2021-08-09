@@ -17,7 +17,7 @@ func TestAccOTCSFSFileSystemV2_importBasic(t *testing.T) {
 		CheckDestroy:      testAccCheckSFSFileSystemV2Destroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccSFSFileSystemV2_basic,
+				Config: testAccSFSFileSystemV2Basic,
 			},
 
 			{

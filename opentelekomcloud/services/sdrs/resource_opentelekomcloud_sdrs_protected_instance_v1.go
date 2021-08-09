@@ -135,7 +135,6 @@ func resourceSdrsProtectedInstanceV1Create(ctx context.Context, d *schema.Resour
 		}
 	}
 	return resourceSdrsProtectedInstanceV1Read(ctx, d, meta)
-
 }
 
 func resourceSdrsProtectedInstanceV1Read(_ context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {

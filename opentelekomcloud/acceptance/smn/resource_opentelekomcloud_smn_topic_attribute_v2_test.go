@@ -109,7 +109,7 @@ func testAccCheckSMNV2TopicAttributeExists(n string) resource.TestCheckFunc {
 	}
 }
 
-var TestAccSMNV2TopicAttributeConfigBasic = fmt.Sprintf(`
+const TestAccSMNV2TopicAttributeConfigBasic = `
 resource "opentelekomcloud_smn_topic_v2" "topic_1" {
   name		   = "topic_1"
   display_name = "The display name of topic_1"
@@ -141,4 +141,4 @@ resource "opentelekomcloud_smn_topic_attribute_v2" "attribute_1" {
 }
 EOF
 }
-`)
+`
