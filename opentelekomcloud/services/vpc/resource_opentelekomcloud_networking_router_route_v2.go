@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"log"
 
+	"github.com/hashicorp/go-multierror"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	golangsdk "github.com/opentelekomcloud/gophertelekomcloud"
@@ -48,7 +49,6 @@ func ResourceNetworkingRouterRouteV2() *schema.Resource {
 }
 
 func resourceNetworkingRouterRouteV2Create(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-
 	routerId := d.Get("router_id").(string)
 	osMutexKV.Lock(routerId)
 	defer osMutexKV.Unlock(routerId)
@@ -77,7 +77,6 @@ func resourceNetworkingRouterRouteV2Create(ctx context.Context, d *schema.Resour
 
 	var rts []routers.Route = n.Routes
 	for _, r := range rts {
-
 		if r.DestinationCIDR == destCidr && r.NextHop == nextHop {
 			routeExists = true
 			break
@@ -85,7 +84,6 @@ func resourceNetworkingRouterRouteV2Create(ctx context.Context, d *schema.Resour
 	}
 
 	if !routeExists {
-
 		if destCidr != "" && nextHop != "" {
 			r := routers.Route{DestinationCIDR: destCidr, NextHop: nextHop}
 			log.Printf(
@@ -102,7 +100,6 @@ func resourceNetworkingRouterRouteV2Create(ctx context.Context, d *schema.Resour
 			return fmterr.Errorf("error updating OpenTelekomCloud Neutron Router: %s", err)
 		}
 		d.SetId(fmt.Sprintf("%s-route-%s-%s", routerId, destCidr, nextHop))
-
 	} else {
 		log.Printf("[DEBUG] Router %s has route already", routerId)
 	}
@@ -111,7 +108,6 @@ func resourceNetworkingRouterRouteV2Create(ctx context.Context, d *schema.Resour
 }
 
 func resourceNetworkingRouterRouteV2Read(_ context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-
 	routerId := d.Get("router_id").(string)
 
 	config := meta.(*cfg.Config)
@@ -135,25 +131,30 @@ func resourceNetworkingRouterRouteV2Read(_ context.Context, d *schema.ResourceDa
 	var destCidr string = d.Get("destination_cidr").(string)
 	var nextHop string = d.Get("next_hop").(string)
 
-	d.Set("next_hop", "")
-	d.Set("destination_cidr", "")
+	mErr := multierror.Append(
+		d.Set("next_hop", ""),
+		d.Set("destination_cidr", ""),
+		d.Set("region", config.GetRegion(d)),
+	)
 
 	for _, r := range n.Routes {
-
 		if r.DestinationCIDR == destCidr && r.NextHop == nextHop {
-			d.Set("destination_cidr", destCidr)
-			d.Set("next_hop", nextHop)
+			mErr = multierror.Append(mErr,
+				d.Set("destination_cidr", destCidr),
+				d.Set("next_hop", nextHop),
+			)
 			break
 		}
 	}
 
-	d.Set("region", config.GetRegion(d))
+	if err := mErr.ErrorOrNil(); err != nil {
+		return diag.FromErr(err)
+	}
 
 	return nil
 }
 
 func resourceNetworkingRouterRouteV2Delete(_ context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-
 	routerId := d.Get("router_id").(string)
 	osMutexKV.Lock(routerId)
 	defer osMutexKV.Unlock(routerId)
@@ -183,7 +184,6 @@ func resourceNetworkingRouterRouteV2Delete(_ context.Context, d *schema.Resource
 	var newRts []routers.Route
 
 	for _, r := range oldRts {
-
 		if r.DestinationCIDR != destCidr || r.NextHop != nextHop {
 			newRts = append(newRts, r)
 		}
@@ -202,7 +202,7 @@ func resourceNetworkingRouterRouteV2Delete(_ context.Context, d *schema.Resource
 			return fmterr.Errorf("error updating OpenTelekomCloud Neutron Router: %s", err)
 		}
 	} else {
-		return fmterr.Errorf("Route did not exist already")
+		return fmterr.Errorf("route did not exist already")
 	}
 
 	return nil

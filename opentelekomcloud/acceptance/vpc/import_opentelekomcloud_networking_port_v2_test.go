@@ -17,7 +17,7 @@ func TestAccNetworkingV2Port_importBasic(t *testing.T) {
 		CheckDestroy:      testAccCheckNetworkingV2PortDestroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccNetworkingV2Port_basic,
+				Config: testAccNetworkingV2PortBasic,
 			},
 
 			{

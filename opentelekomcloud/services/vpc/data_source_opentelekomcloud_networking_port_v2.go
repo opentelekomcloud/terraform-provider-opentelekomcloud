@@ -4,6 +4,7 @@ import (
 	"context"
 	"log"
 
+	"github.com/hashicorp/go-multierror"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
@@ -122,7 +123,7 @@ func dataSourceNetworkingPortV2Read(_ context.Context, d *schema.ResourceData, m
 		listOpts.Name = v.(string)
 	}
 
-	if v, ok := d.GetOkExists("admin_state_up"); ok {
+	if v, ok := d.GetOk("admin_state_up"); ok {
 		asu := v.(bool)
 		listOpts.AdminStateUp = &asu
 	}
@@ -157,18 +158,18 @@ func dataSourceNetworkingPortV2Read(_ context.Context, d *schema.ResourceData, m
 
 	allPages, err := ports.List(networkingClient, listOpts).AllPages()
 	if err != nil {
-		return fmterr.Errorf("Unable to list opentelekomcloud_networking_ports_v2: %s", err)
+		return fmterr.Errorf("unable to list opentelekomcloud_networking_ports_v2: %s", err)
 	}
 
 	var allPorts []ports.Port
 
 	err = ports.ExtractPortsInto(allPages, &allPorts)
 	if err != nil {
-		return fmterr.Errorf("Unable to retrieve opentelekomcloud_networking_ports_v2: %s", err)
+		return fmterr.Errorf("unable to retrieve opentelekomcloud_networking_ports_v2: %s", err)
 	}
 
 	if len(allPorts) == 0 {
-		return fmterr.Errorf("No opentelekomcloud_networking_port_v2 found")
+		return fmterr.Errorf("no opentelekomcloud_networking_port_v2 found")
 	}
 
 	var portsList []ports.Port
@@ -184,7 +185,7 @@ func dataSourceNetworkingPortV2Read(_ context.Context, d *schema.ResourceData, m
 		}
 		if len(portsList) == 0 {
 			log.Printf("No opentelekomcloud_networking_port_v2 found after the 'fixed_ip' filter")
-			return fmterr.Errorf("No opentelekomcloud_networking_port_v2 found")
+			return fmterr.Errorf("no opentelekomcloud_networking_port_v2 found")
 		}
 	} else {
 		portsList = allPorts
@@ -202,13 +203,13 @@ func dataSourceNetworkingPortV2Read(_ context.Context, d *schema.ResourceData, m
 		}
 		if len(sgPorts) == 0 {
 			log.Printf("[DEBUG] No opentelekomcloud_networking_port_v2 found after the 'security_group_ids' filter")
-			return fmterr.Errorf("No opentelekomcloud_networking_port_v2 found")
+			return fmterr.Errorf("no opentelekomcloud_networking_port_v2 found")
 		}
 		portsList = sgPorts
 	}
 
 	if len(portsList) > 1 {
-		return fmterr.Errorf("More than one opentelekomcloud_networking_port_v2 found (%d)", len(portsList))
+		return fmterr.Errorf("more than one opentelekomcloud_networking_port_v2 found (%d)", len(portsList))
 	}
 
 	port := portsList[0]
@@ -216,18 +217,24 @@ func dataSourceNetworkingPortV2Read(_ context.Context, d *schema.ResourceData, m
 	log.Printf("[DEBUG] Retrieved opentelekomcloud_networking_port_v2 %s: %+v", port.ID, port)
 	d.SetId(port.ID)
 
-	d.Set("port_id", port.ID)
-	d.Set("name", port.Name)
-	d.Set("admin_state_up", port.AdminStateUp)
-	d.Set("network_id", port.NetworkID)
-	d.Set("tenant_id", port.TenantID)
-	d.Set("project_id", port.ProjectID)
-	d.Set("device_owner", port.DeviceOwner)
-	d.Set("mac_address", port.MACAddress)
-	d.Set("device_id", port.DeviceID)
-	d.Set("region", config.GetRegion(d))
-	d.Set("all_security_group_ids", port.SecurityGroups)
-	d.Set("all_fixed_ips", expandNetworkingPortFixedIPToStringSlice(port.FixedIPs))
+	mErr := multierror.Append(
+		d.Set("port_id", port.ID),
+		d.Set("name", port.Name),
+		d.Set("admin_state_up", port.AdminStateUp),
+		d.Set("network_id", port.NetworkID),
+		d.Set("tenant_id", port.TenantID),
+		d.Set("project_id", port.ProjectID),
+		d.Set("device_owner", port.DeviceOwner),
+		d.Set("mac_address", port.MACAddress),
+		d.Set("device_id", port.DeviceID),
+		d.Set("region", config.GetRegion(d)),
+		d.Set("all_security_group_ids", port.SecurityGroups),
+		d.Set("all_fixed_ips", expandNetworkingPortFixedIPToStringSlice(port.FixedIPs)),
+	)
+
+	if err := mErr.ErrorOrNil(); err != nil {
+		return diag.FromErr(err)
+	}
 
 	return nil
 }

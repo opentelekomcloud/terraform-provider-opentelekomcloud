@@ -10,40 +10,40 @@ import (
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/acceptance/common"
 )
 
-func TestAccOTCVpcSubnetIdsV2DataSource_basic(t *testing.T) {
+func TestAccVpcSubnetIdsV2DataSource_basic(t *testing.T) {
 	resource.Test(t, resource.TestCase{
 		PreCheck:          func() { common.TestAccPreCheck(t) },
 		ProviderFactories: common.TestAccProviderFactories,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccOTCSubnetIdV2DataSource_vpcsubnet,
+				Config: testAccSubnetIdV2DataSource_vpcsubnet,
 			},
 			{
-				Config: testAccOTCSubnetIdV2DataSource_basic,
+				Config: testAccSubnetIdV2DataSource_basic,
 				Check: resource.ComposeTestCheckFunc(
-					testAccOTCSubnetIdV2DataSourceID("data.opentelekomcloud_vpc_subnet_ids_v1.subnet_ids"),
+					testAccSubnetIdV2DataSourceID("data.opentelekomcloud_vpc_subnet_ids_v1.subnet_ids"),
 					resource.TestCheckResourceAttr("data.opentelekomcloud_vpc_subnet_ids_v1.subnet_ids", "ids.#", "1"),
 				),
 			},
 		},
 	})
 }
-func testAccOTCSubnetIdV2DataSourceID(n string) resource.TestCheckFunc {
+func testAccSubnetIdV2DataSourceID(n string) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
 		rs, ok := s.RootModule().Resources[n]
 		if !ok {
-			return fmt.Errorf("Can't find vpc subnet data source: %s", n)
+			return fmt.Errorf("can't find vpc subnet data source: %s", n)
 		}
 
 		if rs.Primary.ID == "" {
-			return fmt.Errorf("Vpc Subnet data source ID not set")
+			return fmt.Errorf("vpc Subnet data source ID not set")
 		}
 
 		return nil
 	}
 }
 
-const testAccOTCSubnetIdV2DataSource_vpcsubnet = `
+const testAccSubnetIdV2DataSource_vpcsubnet = `
 resource "opentelekomcloud_vpc_v1" "vpc_1" {
 	name = "test_vpc"
 	cidr= "192.168.0.0/16"
@@ -57,9 +57,9 @@ resource "opentelekomcloud_vpc_subnet_v1" "subnet_1" {
 }
 `
 
-var testAccOTCSubnetIdV2DataSource_basic = fmt.Sprintf(`
+var testAccSubnetIdV2DataSource_basic = fmt.Sprintf(`
 %s
 data "opentelekomcloud_vpc_subnet_ids_v1" "subnet_ids" {
   vpc_id = opentelekomcloud_vpc_v1.vpc_1.id
 }
-`, testAccOTCSubnetIdV2DataSource_vpcsubnet)
+`, testAccSubnetIdV2DataSource_vpcsubnet)

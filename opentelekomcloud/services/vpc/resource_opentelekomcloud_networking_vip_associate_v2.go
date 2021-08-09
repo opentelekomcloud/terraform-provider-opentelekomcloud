@@ -6,6 +6,7 @@ import (
 	"log"
 	"strings"
 
+	"github.com/hashicorp/go-multierror"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/networking/v2/ports"
@@ -49,7 +50,7 @@ func ResourceNetworkingVIPAssociateV2() *schema.Resource {
 func ParseNetworkingVIPAssociateID(id string) (string, []string, error) {
 	idParts := strings.Split(id, "/")
 	if len(idParts) < 2 {
-		return "", nil, fmt.Errorf("Unable to determine vip association ID")
+		return "", nil, fmt.Errorf("unable to determine vip association ID")
 	}
 
 	vipid := idParts[0]
@@ -78,7 +79,7 @@ func resourceNetworkingVIPAssociateV2Create(ctx context.Context, d *schema.Resou
 	}
 
 	// port by port
-	fauxid := fmt.Sprintf("%s", vipid)
+	fauxid := vipid
 	for _, portid := range portids {
 		// First get the port information
 		fauxid = fmt.Sprintf("%s/%s", fauxid, portid)
@@ -210,10 +211,15 @@ func resourceNetworkingVIPAssociateV2Read(_ context.Context, d *schema.ResourceD
 	}
 
 	// Set the attributes pulled from the composed resource ID
-	d.Set("vip_id", vipid)
-	d.Set("port_ids", newresults)
-	d.Set("vip_subnet_id", vip.FixedIPs[0].SubnetID)
-	d.Set("vip_ip_address", vip.FixedIPs[0].IPAddress)
+	mErr := multierror.Append(
+		d.Set("vip_id", vipid),
+		d.Set("port_ids", newresults),
+		d.Set("vip_subnet_id", vip.FixedIPs[0].SubnetID),
+		d.Set("vip_ip_address", vip.FixedIPs[0].IPAddress),
+	)
+	if err := mErr.ErrorOrNil(); err != nil {
+		return diag.FromErr(err)
+	}
 
 	return nil
 }

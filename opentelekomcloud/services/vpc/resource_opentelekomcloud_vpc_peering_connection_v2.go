@@ -111,10 +111,13 @@ func resourceVPCPeeringV2Create(ctx context.Context, d *schema.ResourceData, met
 	}
 
 	_, err = stateConf.WaitForStateContext(ctx)
+	if err != nil {
+		return fmterr.Errorf("error waiting for VIP to become active: %w", err)
+	}
+
 	d.SetId(n.ID)
 
 	return resourceVPCPeeringV2Read(ctx, d, meta)
-
 }
 
 func resourceVPCPeeringV2Read(_ context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
@@ -169,7 +172,6 @@ func resourceVPCPeeringV2Update(ctx context.Context, d *schema.ResourceData, met
 }
 
 func resourceVPCPeeringV2Delete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-
 	config := meta.(*cfg.Config)
 	peeringClient, err := config.NetworkingV2Client(config.GetRegion(d))
 	if err != nil {
@@ -211,7 +213,6 @@ func waitForVpcPeeringActive(peeringClient *golangsdk.ServiceClient, peeringId s
 
 func waitForVpcPeeringDelete(peeringClient *golangsdk.ServiceClient, peeringId string) resource.StateRefreshFunc {
 	return func() (interface{}, string, error) {
-
 		r, err := peerings.Get(peeringClient, peeringId).Extract()
 
 		if err != nil {

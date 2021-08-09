@@ -202,6 +202,9 @@ func resourceNetworkingSubnetV2Create(ctx context.Context, d *schema.ResourceDat
 	}
 
 	_, err = stateConf.WaitForStateContext(ctx)
+	if err != nil {
+		return fmterr.Errorf("error waiting for subnet to become active: %w", err)
+	}
 
 	d.SetId(s.ID)
 

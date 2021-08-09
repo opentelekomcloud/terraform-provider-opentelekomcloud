@@ -14,7 +14,7 @@ import (
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common/cfg"
 )
 
-func TestAccOTCVpcV1_basic(t *testing.T) {
+func TestAccVpcV1_basic(t *testing.T) {
 	var vpc vpcs.Vpc
 
 	resource.Test(t, resource.TestCase{
@@ -44,7 +44,7 @@ func TestAccOTCVpcV1_basic(t *testing.T) {
 	})
 }
 
-func TestAccOTCVpcV1_update(t *testing.T) {
+func TestAccVpcV1_update(t *testing.T) {
 	var vpc vpcs.Vpc
 
 	resource.Test(t, resource.TestCase{
@@ -80,7 +80,7 @@ func TestAccOTCVpcV1_update(t *testing.T) {
 	})
 }
 
-func TestAccOTCVpcV1_timeout(t *testing.T) {
+func TestAccVpcV1_timeout(t *testing.T) {
 	var vpc vpcs.Vpc
 
 	resource.Test(t, resource.TestCase{
@@ -112,7 +112,7 @@ func testAccCheckOTCVpcV1Destroy(s *terraform.State) error {
 
 		_, err := vpcs.Get(vpcClient, rs.Primary.ID).Extract()
 		if err == nil {
-			return fmt.Errorf("Vpc still exists")
+			return fmt.Errorf("vpc still exists")
 		}
 	}
 
@@ -123,11 +123,11 @@ func testAccCheckOTCVpcV1Exists(n string, vpc *vpcs.Vpc) resource.TestCheckFunc 
 	return func(s *terraform.State) error {
 		rs, ok := s.RootModule().Resources[n]
 		if !ok {
-			return fmt.Errorf("Not found: %s", n)
+			return fmt.Errorf("not found: %s", n)
 		}
 
 		if rs.Primary.ID == "" {
-			return fmt.Errorf("No ID is set")
+			return fmt.Errorf("no ID is set")
 		}
 
 		config := common.TestAccProvider.Meta().(*cfg.Config)

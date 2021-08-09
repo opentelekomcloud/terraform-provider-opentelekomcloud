@@ -187,7 +187,6 @@ func resourceVpcSubnetV1Create(ctx context.Context, d *schema.ResourceData, meta
 	d.SetId(subnet.ID)
 
 	return resourceVpcSubnetV1Read(ctx, d, config)
-
 }
 
 func resourceVpcSubnetV1Read(_ context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {

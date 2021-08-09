@@ -5,6 +5,7 @@ import (
 	"log"
 	"time"
 
+	"github.com/hashicorp/go-multierror"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
@@ -91,21 +92,17 @@ func resourceVPCPeeringAccepterV2Create(ctx context.Context, d *schema.ResourceD
 	var expectedStatus string
 
 	if _, ok := d.GetOk("accept"); ok {
-
 		expectedStatus = "ACTIVE"
 		_, err := peerings.Accept(peeringClient, id).ExtractResult()
 
 		if err != nil {
-			return fmterr.Errorf("Unable to accept VPC Peering Connection: %w", err)
+			return fmterr.Errorf("unable to accept VPC Peering Connection: %w", err)
 		}
-
 	} else {
 		expectedStatus = "REJECTED"
-
 		_, err := peerings.Reject(peeringClient, id).ExtractResult()
-
 		if err != nil {
-			return fmterr.Errorf("Unable to reject VPC Peering Connection: %w", err)
+			return fmterr.Errorf("unable to reject VPC Peering Connection: %w", err)
 		}
 	}
 
@@ -119,11 +116,14 @@ func resourceVPCPeeringAccepterV2Create(ctx context.Context, d *schema.ResourceD
 	}
 
 	_, err = stateConf.WaitForStateContext(ctx)
+	if err != nil {
+		return fmterr.Errorf("error waiting for perring connection to become %s: %w", expectedStatus, err)
+	}
+
 	d.SetId(n.ID)
 	log.Printf("[INFO] VPC Peering Connection status: %s", expectedStatus)
 
 	return resourceVpcPeeringAccepterRead(ctx, d, meta)
-
 }
 
 func resourceVpcPeeringAccepterRead(_ context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
@@ -143,19 +143,22 @@ func resourceVpcPeeringAccepterRead(_ context.Context, d *schema.ResourceData, m
 		return fmterr.Errorf("error retrieving OpenTelekomCloud Vpc Peering Connection: %s", err)
 	}
 
-	d.Set("id", n.ID)
-	d.Set("name", n.Name)
-	d.Set("status", n.Status)
-	d.Set("vpc_id", n.RequestVpcInfo.VpcId)
-	d.Set("peer_vpc_id", n.AcceptVpcInfo.VpcId)
-	d.Set("peer_tenant_id", n.AcceptVpcInfo.TenantId)
-	d.Set("region", config.GetRegion(d))
+	mErr := multierror.Append(
+		d.Set("name", n.Name),
+		d.Set("status", n.Status),
+		d.Set("vpc_id", n.RequestVpcInfo.VpcId),
+		d.Set("peer_vpc_id", n.AcceptVpcInfo.VpcId),
+		d.Set("peer_tenant_id", n.AcceptVpcInfo.TenantId),
+		d.Set("region", config.GetRegion(d)),
+	)
+	if err := mErr.ErrorOrNil(); err != nil {
+		return diag.FromErr(err)
+	}
 
 	return nil
 }
 
 func resourceVPCPeeringAccepterUpdate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-
 	if d.HasChange("accept") {
 		return fmterr.Errorf("VPC peering action not permitted: Can not accept/reject peering request not in pending_acceptance state.'")
 	}

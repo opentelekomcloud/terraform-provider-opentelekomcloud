@@ -108,7 +108,7 @@ func dataSourceVpcSubnetV1Read(_ context.Context, d *schema.ResourceData, meta i
 		return fmterr.Errorf("unable to retrieve subnets: %w", err)
 	}
 
-	if refinedSubnets == nil || len(refinedSubnets) == 0 {
+	if len(refinedSubnets) == 0 {
 		return fmterr.Errorf("no matching subnet found. Please change your search criteria and try again")
 	}
 

@@ -68,11 +68,11 @@ func testAccCheckNetworkingV2RouterRouteEmpty(n string) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
 		rs, ok := s.RootModule().Resources[n]
 		if !ok {
-			return fmt.Errorf("Not found: %s", n)
+			return fmt.Errorf("not found: %s", n)
 		}
 
 		if rs.Primary.ID == "" {
-			return fmt.Errorf("No ID is set")
+			return fmt.Errorf("no ID is set")
 		}
 
 		config := common.TestAccProvider.Meta().(*cfg.Config)
@@ -87,11 +87,11 @@ func testAccCheckNetworkingV2RouterRouteEmpty(n string) resource.TestCheckFunc {
 		}
 
 		if router.ID != rs.Primary.ID {
-			return fmt.Errorf("Router not found")
+			return fmt.Errorf("router not found")
 		}
 
 		if len(router.Routes) != 0 {
-			return fmt.Errorf("Invalid number of route entries: %d", len(router.Routes))
+			return fmt.Errorf("invalid number of route entries: %d", len(router.Routes))
 		}
 
 		return nil
@@ -102,11 +102,11 @@ func testAccCheckNetworkingV2RouterRouteExists(n string) resource.TestCheckFunc 
 	return func(s *terraform.State) error {
 		rs, ok := s.RootModule().Resources[n]
 		if !ok {
-			return fmt.Errorf("Not found: %s", n)
+			return fmt.Errorf("not found: %s", n)
 		}
 
 		if rs.Primary.ID == "" {
-			return fmt.Errorf("No ID is set")
+			return fmt.Errorf("no ID is set")
 		}
 
 		config := common.TestAccProvider.Meta().(*cfg.Config)
@@ -121,56 +121,21 @@ func testAccCheckNetworkingV2RouterRouteExists(n string) resource.TestCheckFunc 
 		}
 
 		if router.ID != rs.Primary.Attributes["router_id"] {
-			return fmt.Errorf("Router for route not found")
+			return fmt.Errorf("router for route not found")
 		}
 
-		var found bool = false
+		var found bool
 		for _, r := range router.Routes {
 			if r.DestinationCIDR == rs.Primary.Attributes["destination_cidr"] && r.NextHop == rs.Primary.Attributes["next_hop"] {
 				found = true
 			}
 		}
 		if !found {
-			return fmt.Errorf("Could not find route for destination CIDR: %s, next hop: %s", rs.Primary.Attributes["destination_cidr"], rs.Primary.Attributes["next_hop"])
+			return fmt.Errorf("could not find route for destination CIDR: %s, next hop: %s", rs.Primary.Attributes["destination_cidr"], rs.Primary.Attributes["next_hop"])
 		}
 
 		return nil
 	}
-}
-
-func testAccCheckNetworkingV2RouterRouteDestroy(s *terraform.State) error {
-	config := common.TestAccProvider.Meta().(*cfg.Config)
-	networkingClient, err := config.NetworkingV2Client(env.OS_REGION_NAME)
-	if err != nil {
-		return fmt.Errorf("error creating OpenTelekomCloud networking client: %s", err)
-	}
-
-	for _, rs := range s.RootModule().Resources {
-		if rs.Type != "opentelekomcloud_networking_router_route_v2" {
-			continue
-		}
-
-		var routeExists = false
-
-		router, err := routers.Get(networkingClient, rs.Primary.Attributes["router_id"]).Extract()
-		if err == nil {
-
-			var rts = router.Routes
-			for _, r := range rts {
-
-				if r.DestinationCIDR == rs.Primary.Attributes["destination_cidr"] && r.NextHop == rs.Primary.Attributes["next_hop"] {
-					routeExists = true
-					break
-				}
-			}
-		}
-
-		if routeExists {
-			return fmt.Errorf("Route still exists")
-		}
-	}
-
-	return nil
 }
 
 const testAccNetworkingV2RouterRoute_create = `

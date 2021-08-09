@@ -80,16 +80,16 @@ func dataSourceVirtualPrivateCloudV1Read(_ context.Context, d *schema.ResourceDa
 
 	refinedVPCs, err := vpcs.List(client, listOpts)
 	if err != nil {
-		return fmterr.Errorf("Unable to retrieve VPCs: %w", err)
+		return fmterr.Errorf("unable to retrieve VPCs: %w", err)
 	}
 
 	if len(refinedVPCs) < 1 {
-		return fmterr.Errorf("Your query returned no results. " +
+		return fmterr.Errorf("your query returned no results. " +
 			"Please change your search criteria and try again.")
 	}
 
 	if len(refinedVPCs) > 1 {
-		return fmterr.Errorf("Your query returned more than one result. " +
+		return fmterr.Errorf("your query returned more than one result. " +
 			"Please try a more specific search criteria.")
 	}
 

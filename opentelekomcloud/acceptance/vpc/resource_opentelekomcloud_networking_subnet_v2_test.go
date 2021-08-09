@@ -23,7 +23,7 @@ func TestAccNetworkingV2Subnet_basic(t *testing.T) {
 		CheckDestroy:      testAccCheckNetworkingV2SubnetDestroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccNetworkingV2Subnet_basic,
+				Config: testAccNetworkingV2SubnetBasic,
 				Check: resource.ComposeTestCheckFunc(
 					TestAccCheckNetworkingV2SubnetExists("opentelekomcloud_networking_subnet_v2.subnet_1", &subnet),
 					resource.TestCheckResourceAttr(
@@ -31,7 +31,7 @@ func TestAccNetworkingV2Subnet_basic(t *testing.T) {
 				),
 			},
 			{
-				Config: testAccNetworkingV2Subnet_update,
+				Config: testAccNetworkingV2SubnetUpdate,
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr(
 						"opentelekomcloud_networking_subnet_v2.subnet_1", "name", "subnet_1"),
@@ -56,7 +56,7 @@ func TestAccNetworkingV2Subnet_enableDHCP(t *testing.T) {
 		CheckDestroy:      testAccCheckNetworkingV2SubnetDestroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccNetworkingV2Subnet_enableDHCP,
+				Config: testAccNetworkingV2SubnetEnableDHCP,
 				Check: resource.ComposeTestCheckFunc(
 					TestAccCheckNetworkingV2SubnetExists("opentelekomcloud_networking_subnet_v2.subnet_1", &subnet),
 					resource.TestCheckResourceAttr(
@@ -76,7 +76,7 @@ func TestAccNetworkingV2Subnet_noGateway(t *testing.T) {
 		CheckDestroy:      testAccCheckNetworkingV2SubnetDestroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccNetworkingV2Subnet_noGateway,
+				Config: testAccNetworkingV2SubnetNoGateway,
 				Check: resource.ComposeTestCheckFunc(
 					TestAccCheckNetworkingV2SubnetExists("opentelekomcloud_networking_subnet_v2.subnet_1", &subnet),
 					resource.TestCheckResourceAttr(
@@ -96,7 +96,7 @@ func TestAccNetworkingV2Subnet_impliedGateway(t *testing.T) {
 		CheckDestroy:      testAccCheckNetworkingV2SubnetDestroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccNetworkingV2Subnet_impliedGateway,
+				Config: testAccNetworkingV2SubnetImpliedGateway,
 				Check: resource.ComposeTestCheckFunc(
 					TestAccCheckNetworkingV2SubnetExists("opentelekomcloud_networking_subnet_v2.subnet_1", &subnet),
 					resource.TestCheckResourceAttr(
@@ -116,7 +116,7 @@ func TestAccNetworkingV2Subnet_timeout(t *testing.T) {
 		CheckDestroy:      testAccCheckNetworkingV2SubnetDestroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccNetworkingV2Subnet_timeout,
+				Config: testAccNetworkingV2SubnetTimeout,
 				Check: resource.ComposeTestCheckFunc(
 					TestAccCheckNetworkingV2SubnetExists("opentelekomcloud_networking_subnet_v2.subnet_1", &subnet),
 				),
@@ -139,14 +139,14 @@ func testAccCheckNetworkingV2SubnetDestroy(s *terraform.State) error {
 
 		_, err := subnets.Get(networkingClient, rs.Primary.ID).Extract()
 		if err == nil {
-			return fmt.Errorf("Subnet still exists")
+			return fmt.Errorf("subnet still exists")
 		}
 	}
 
 	return nil
 }
 
-const testAccNetworkingV2Subnet_basic = `
+const testAccNetworkingV2SubnetBasic = `
 resource "opentelekomcloud_networking_network_v2" "network_1" {
   name = "network_1"
   admin_state_up = "true"
@@ -163,7 +163,7 @@ resource "opentelekomcloud_networking_subnet_v2" "subnet_1" {
 }
 `
 
-const testAccNetworkingV2Subnet_update = `
+const testAccNetworkingV2SubnetUpdate = `
 resource "opentelekomcloud_networking_network_v2" "network_1" {
   name = "network_1"
   admin_state_up = "true"
@@ -182,7 +182,7 @@ resource "opentelekomcloud_networking_subnet_v2" "subnet_1" {
 }
 `
 
-const testAccNetworkingV2Subnet_enableDHCP = `
+const testAccNetworkingV2SubnetEnableDHCP = `
 resource "opentelekomcloud_networking_network_v2" "network_1" {
   name = "network_1"
   admin_state_up = "true"
@@ -197,21 +197,7 @@ resource "opentelekomcloud_networking_subnet_v2" "subnet_1" {
 }
 `
 
-const testAccNetworkingV2Subnet_disableDHCP = `
-resource "opentelekomcloud_networking_network_v2" "network_1" {
-  name = "network_1"
-  admin_state_up = "true"
-}
-
-resource "opentelekomcloud_networking_subnet_v2" "subnet_1" {
-  name = "subnet_1"
-  cidr = "192.168.199.0/24"
-  enable_dhcp = false
-  network_id = opentelekomcloud_networking_network_v2.network_1.id
-}
-`
-
-const testAccNetworkingV2Subnet_noGateway = `
+const testAccNetworkingV2SubnetNoGateway = `
 resource "opentelekomcloud_networking_network_v2" "network_1" {
   name = "network_1"
   admin_state_up = "true"
@@ -225,7 +211,7 @@ resource "opentelekomcloud_networking_subnet_v2" "subnet_1" {
 }
 `
 
-const testAccNetworkingV2Subnet_impliedGateway = `
+const testAccNetworkingV2SubnetImpliedGateway = `
 resource "opentelekomcloud_networking_network_v2" "network_1" {
   name = "network_1"
   admin_state_up = "true"
@@ -237,7 +223,7 @@ resource "opentelekomcloud_networking_subnet_v2" "subnet_1" {
 }
 `
 
-const testAccNetworkingV2Subnet_timeout = `
+const testAccNetworkingV2SubnetTimeout = `
 resource "opentelekomcloud_networking_network_v2" "network_1" {
   name = "network_1"
   admin_state_up = "true"

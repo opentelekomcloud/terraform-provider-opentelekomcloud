@@ -8,7 +8,7 @@ import (
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/acceptance/common"
 )
 
-func TestAccOTCVpcPeeringConnectionV1_importBasic(t *testing.T) {
+func TestAccVpcPeeringConnectionV1_importBasic(t *testing.T) {
 	resourceName := "opentelekomcloud_vpc_peering_connection_v2.peering_1"
 
 	resource.Test(t, resource.TestCase{
@@ -17,7 +17,7 @@ func TestAccOTCVpcPeeringConnectionV1_importBasic(t *testing.T) {
 		CheckDestroy:      testAccCheckOTCVpcPeeringConnectionV2Destroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccOTCVpcPeeringConnectionV2_basic,
+				Config: testAccVpcPeeringConnectionV2_basic,
 			},
 
 			{

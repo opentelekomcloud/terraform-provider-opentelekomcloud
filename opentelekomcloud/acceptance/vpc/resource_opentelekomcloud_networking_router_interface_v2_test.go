@@ -102,7 +102,7 @@ func testAccCheckNetworkingV2RouterInterfaceDestroy(s *terraform.State) error {
 
 		_, err := ports.Get(networkingClient, rs.Primary.ID).Extract()
 		if err == nil {
-			return fmt.Errorf("Router interface still exists")
+			return fmt.Errorf("router interface still exists")
 		}
 	}
 

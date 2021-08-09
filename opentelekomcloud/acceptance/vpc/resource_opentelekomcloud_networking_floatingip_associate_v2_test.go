@@ -24,7 +24,7 @@ func TestAccNetworkingV2FloatingIPAssociate_basic(t *testing.T) {
 		CheckDestroy:      testAccCheckNetworkingV2FloatingIPAssociateDestroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccNetworkingV2FloatingIPAssociate_basic,
+				Config: testAccNetworkingV2FloatingIPAssociateBasic,
 				Check: resource.ComposeTestCheckFunc(
 					TestAccCheckNetworkingV2FloatingIPExists(
 						"opentelekomcloud_networking_floatingip_associate_v2.fip_1", &fip),
@@ -67,39 +67,7 @@ func testAccCheckNetworkingV2FloatingIPAssociateDestroy(s *terraform.State) erro
 	return nil
 }
 
-func testAccCheckNetworkingV2FloatingIPAssociateExists(n string, fip *floatingips.FloatingIP) resource.TestCheckFunc {
-	return func(s *terraform.State) error {
-		rs, ok := s.RootModule().Resources[n]
-		if !ok {
-			return fmt.Errorf("Not found: %s", n)
-		}
-
-		if rs.Primary.ID == "" {
-			return fmt.Errorf("No ID is set")
-		}
-
-		config := common.TestAccProvider.Meta().(*cfg.Config)
-		networkClient, err := config.NetworkingV2Client(env.OS_REGION_NAME)
-		if err != nil {
-			return fmt.Errorf("error creating OpenTelekomCloud networking client: %s", err)
-		}
-
-		found, err := floatingips.Get(networkClient, rs.Primary.ID).Extract()
-		if err != nil {
-			return err
-		}
-
-		if found.ID != rs.Primary.ID {
-			return fmt.Errorf("FloatingIP not found")
-		}
-
-		*fip = *found
-
-		return nil
-	}
-}
-
-const testAccNetworkingV2FloatingIPAssociate_basic = `
+const testAccNetworkingV2FloatingIPAssociateBasic = `
 resource "opentelekomcloud_networking_network_v2" "network_1" {
   name = "network_1"
   admin_state_up = "true"

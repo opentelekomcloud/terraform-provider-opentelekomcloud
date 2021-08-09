@@ -33,7 +33,7 @@ func TestAccNetworkingV2VIP_basic(t *testing.T) {
 	})
 }
 
-// testAccCheckNetworkingV2VIPDestroy checks destory.
+// testAccCheckNetworkingV2VIPDestroy checks destroy.
 func testAccCheckNetworkingV2VIPDestroy(s *terraform.State) error {
 	config := common.TestAccProvider.Meta().(*cfg.Config)
 	networkingClient, err := config.NetworkingV2Client(env.OS_REGION_NAME)
@@ -62,11 +62,11 @@ func testAccCheckNetworkingV2VIPExists(n string, vip *ports.Port) resource.TestC
 	return func(s *terraform.State) error {
 		rs, ok := s.RootModule().Resources[n]
 		if !ok {
-			return fmt.Errorf("Not found: %s", n)
+			return fmt.Errorf("not found: %s", n)
 		}
 
 		if rs.Primary.ID == "" {
-			return fmt.Errorf("No ID is set")
+			return fmt.Errorf("no ID is set")
 		}
 
 		config := common.TestAccProvider.Meta().(*cfg.Config)
