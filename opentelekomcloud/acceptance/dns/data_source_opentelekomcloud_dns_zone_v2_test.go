@@ -21,10 +21,10 @@ func TestAccOpenStackDNSZoneV2DataSource_basic(t *testing.T) {
 		CheckDestroy:      testAccCheckDNSV2ZoneDestroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccOpenStackDNSZoneV2DataSource_zone(zone, randZoneTag),
+				Config: testAccOpenStackDNSZoneV2DataSourceZone(zone, randZoneTag),
 			},
 			{
-				Config: testAccOpenStackDNSZoneV2DataSource_basic(zone, randZoneTag),
+				Config: testAccOpenStackDNSZoneV2DataSourceBasic(zone, randZoneTag),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckDNSZoneV2DataSourceID("data.opentelekomcloud_dns_zone_v2.z1"),
 					resource.TestCheckResourceAttr(
@@ -36,14 +36,15 @@ func TestAccOpenStackDNSZoneV2DataSource_basic(t *testing.T) {
 				),
 			},
 			{
-				Config: testAccOpenStackDNSZoneV2DataSource_zone(zone, randZoneTag),
+				Config: testAccOpenStackDNSZoneV2DataSourceZone(zone, randZoneTag),
 			},
 		},
 	})
 }
 
 func TestAccOpenStackDNSZoneV2DataSource_byTag(t *testing.T) {
-	zone := randomZoneName()
+	zone1 := randomZoneName()
+	zone2 := randomZoneName()
 	randZoneTag := fmt.Sprintf("value-%s", acctest.RandString(5))
 
 	resource.Test(t, resource.TestCase{
@@ -52,10 +53,10 @@ func TestAccOpenStackDNSZoneV2DataSource_byTag(t *testing.T) {
 		CheckDestroy:      testAccCheckDNSV2ZoneDestroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccOpenStackDNSZoneV2DataSource_zone(zone, randZoneTag),
+				Config: testAccOpenStackDNSZoneV2DataSourceZone2(zone1, zone2, randZoneTag),
 			},
 			{
-				Config: testAccOpenStackDNSZoneV2DataSource_byTag(zone, randZoneTag),
+				Config: testAccOpenStackDNSZoneV2DataSourceByTag(zone1, zone2, randZoneTag),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckDNSZoneV2DataSourceID("data.opentelekomcloud_dns_zone_v2.z1"),
 				),
@@ -93,12 +94,21 @@ resource "opentelekomcloud_dns_zone_v2" "zone_1" {
 }
 `
 
-func testAccOpenStackDNSZoneV2DataSource_zone(zoneName, zoneTagValue string) string {
+const zoneTemplateNoTags = `resource "opentelekomcloud_dns_zone_v2" "zone_2" {
+  name        = "%s"
+  email       = "email1@example.com"
+  description = "a public zone"
+  ttl         = 3000
+  type        = "public"
+}
+`
+
+func testAccOpenStackDNSZoneV2DataSourceZone(zoneName, zoneTagValue string) string {
 	return fmt.Sprintf(zoneTemplate, zoneName, zoneTagValue)
 }
 
-func testAccOpenStackDNSZoneV2DataSource_basic(zoneName, zoneTagValue string) string {
-	base := testAccOpenStackDNSZoneV2DataSource_zone(zoneName, zoneTagValue)
+func testAccOpenStackDNSZoneV2DataSourceBasic(zoneName, zoneTagValue string) string {
+	base := testAccOpenStackDNSZoneV2DataSourceZone(zoneName, zoneTagValue)
 	return fmt.Sprintf(`
 %s
 data "opentelekomcloud_dns_zone_v2" "z1" {
@@ -107,8 +117,17 @@ data "opentelekomcloud_dns_zone_v2" "z1" {
 `, base, zoneName)
 }
 
-func testAccOpenStackDNSZoneV2DataSource_byTag(zoneName, zoneTagValue string) string {
-	base := testAccOpenStackDNSZoneV2DataSource_zone(zoneName, zoneTagValue)
+func testAccOpenStackDNSZoneV2DataSourceZone2(zoneName, zone2Name, zoneTagValue string) string {
+	zone1 := testAccOpenStackDNSZoneV2DataSourceZone(zoneName, zoneTagValue)
+	zone2 := fmt.Sprintf(zoneTemplateNoTags, zone2Name)
+	return fmt.Sprintf(`
+%s
+%s
+`, zone1, zone2)
+}
+
+func testAccOpenStackDNSZoneV2DataSourceByTag(zoneName, zone2Name, zoneTagValue string) string {
+	base := testAccOpenStackDNSZoneV2DataSourceZone2(zoneName, zone2Name, zoneTagValue)
 	return fmt.Sprintf(`
 %s
 data "opentelekomcloud_dns_zone_v2" "z1" {
@@ -116,5 +135,5 @@ data "opentelekomcloud_dns_zone_v2" "z1" {
     key = "%s"
   }
 }
-`, base, zoneName)
+`, base, zoneTagValue)
 }
