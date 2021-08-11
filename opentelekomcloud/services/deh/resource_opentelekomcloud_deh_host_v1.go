@@ -184,7 +184,6 @@ func resourceDeHHostV1Read(_ context.Context, d *schema.ResourceData, meta inter
 		return fmterr.Errorf("error retrieving OpenTelekomCloud Dedicated Host: %s", err)
 	}
 	mErr := multierror.Append(
-		d.Set("id", n.ID),
 		d.Set("name", n.Name),
 		d.Set("status", n.State),
 		d.Set("dedicated_host_id", n.ID),
