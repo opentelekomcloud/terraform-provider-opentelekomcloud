@@ -124,7 +124,6 @@ func resourceNetworkingVIPV2Read(_ context.Context, d *schema.ResourceData, meta
 		d.Set("network_id", vip.NetworkID),
 		d.Set("name", vip.Name),
 		d.Set("status", vip.Status),
-		d.Set("id", vip.ID),
 		d.Set("tenant_id", vip.TenantID),
 		d.Set("device_owner", vip.DeviceOwner),
 	)
