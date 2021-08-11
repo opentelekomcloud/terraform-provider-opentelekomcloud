@@ -138,7 +138,6 @@ func resourceSoftwareConfigV1Read(_ context.Context, d *schema.ResourceData, met
 	}
 
 	mErr := multierror.Append(
-		d.Set("id", n.Id),
 		d.Set("name", n.Name),
 		d.Set("config", n.Config),
 		d.Set("group", n.Group),
