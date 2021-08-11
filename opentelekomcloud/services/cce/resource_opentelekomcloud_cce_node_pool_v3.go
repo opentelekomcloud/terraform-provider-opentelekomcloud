@@ -387,7 +387,6 @@ func resourceCCENodePoolV3Read(_ context.Context, d *schema.ResourceData, meta i
 		d.Set("availability_zone", s.Spec.NodeTemplate.Az),
 		d.Set("os", s.Spec.NodeTemplate.Os),
 		d.Set("key_pair", s.Spec.NodeTemplate.Login.SshKey),
-		d.Set("initial_node_count", s.Spec.InitialNodeCount),
 		d.Set("scale_enable", s.Spec.Autoscaling.Enable),
 	)
 
