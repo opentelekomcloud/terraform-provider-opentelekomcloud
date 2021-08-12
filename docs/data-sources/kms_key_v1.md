@@ -37,7 +37,7 @@ data "opentelekomcloud_kms_key_v1" "key_1" {
 
 * `key_state` - (Optional) The state of a key. `1` indicates that the key is waiting to be activated.
   `2` indicates that the key is enabled. `3` indicates that the key is disabled. `4` indicates that
-  the key is scheduled for deletion. Changing this gets a new key.
+  the key is scheduled for deletion. `5` indicates that the key waiting to be imported. Changing this gets a new key.
 
 * `domain_id` - (Optional) ID of a user domain for the key. Changing this gets a new key.
 
