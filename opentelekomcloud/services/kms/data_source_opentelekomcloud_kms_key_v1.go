@@ -23,23 +23,22 @@ func DataSourceKmsKeyV1() *schema.Resource {
 			"key_alias": {
 				Type:     schema.TypeString,
 				Optional: true,
-				ForceNew: true,
+				Computed: true,
 			},
 			"key_id": {
 				Type:     schema.TypeString,
 				Optional: true,
-				ForceNew: true,
+				Computed: true,
 			},
 			"key_description": {
 				Type:     schema.TypeString,
 				Optional: true,
-				ForceNew: true,
+				Computed: true,
 			},
 			"realm": {
 				Type:     schema.TypeString,
 				Optional: true,
 				Computed: true,
-				ForceNew: true,
 			},
 			"domain_id": {
 				Type:     schema.TypeString,
@@ -50,24 +49,19 @@ func DataSourceKmsKeyV1() *schema.Resource {
 				Type:     schema.TypeString,
 				Optional: true,
 				Computed: true,
-				ForceNew: true,
 				ValidateFunc: validation.StringInSlice([]string{
-					string(EnabledState),
-					string(DisabledState),
-					string(PendingDeletionState),
+					WaitingForEnableState, EnabledState, DisabledState, PendingDeletionState, WaitingImportState,
 				}, true),
 			},
 			"default_key_flag": {
 				Type:     schema.TypeString,
 				Optional: true,
 				Computed: true,
-				ForceNew: true,
 			},
 			"origin": {
 				Type:     schema.TypeString,
 				Optional: true,
 				Computed: true,
-				ForceNew: true,
 			},
 			"creation_date": {
 				Type:     schema.TypeString,
@@ -77,34 +71,37 @@ func DataSourceKmsKeyV1() *schema.Resource {
 				Type:     schema.TypeString,
 				Computed: true,
 			},
+			"expiration_time": {
+				Type:     schema.TypeString,
+				Computed: true,
+			},
 		},
 	}
 }
 
 func dataSourceKmsKeyV1Read(_ context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*cfg.Config)
-	KmsKeyV1Client, err := config.KmsKeyV1Client(config.GetRegion(d))
+	client, err := config.KmsKeyV1Client(config.GetRegion(d))
 	if err != nil {
-		return fmterr.Errorf("error creating OpenTelekomCloud kms key client: %s", err)
+		return fmterr.Errorf(errCreationClient, err)
 	}
 
-	is_list_key := true
-	next_marker := ""
-	allKeys := []keys.Key{}
-	for is_list_key {
+	isListKey := true
+	nextMarker := ""
+	var allKeys []keys.Key
+	for isListKey {
 		req := &keys.ListOpts{
 			KeyState: d.Get("key_state").(string),
-			Limit:    "",
-			Marker:   next_marker,
+			Marker:   nextMarker,
 		}
 
-		v, err := keys.List(KmsKeyV1Client, req).ExtractListKey()
+		v, err := keys.List(client, req).ExtractListKey()
 		if err != nil {
 			return diag.FromErr(err)
 		}
 
-		is_list_key = v.Truncated == "true"
-		next_marker = v.NextMarker
+		isListKey = v.Truncated == "true"
+		nextMarker = v.NextMarker
 		allKeys = append(allKeys, v.KeyDetails...)
 	}
 
@@ -163,12 +160,12 @@ func dataSourceKmsKeyV1Read(_ context.Context, d *schema.ResourceData, meta inte
 	}
 
 	if len(allKeys) > 1 {
-		return fmterr.Errorf("your query returned more than one result." +
-			" Please try a more specific search criteria")
+		return fmterr.Errorf("your query returned more than one result. " +
+			"Please try a more specific search criteria.")
 	}
 
 	key := allKeys[0]
-	log.Printf("[DEBUG] Kms key : %+v", key)
+	log.Printf("[DEBUG] KMS key: %+v", key)
 
 	d.SetId(key.KeyID)
 	mErr := multierror.Append(
