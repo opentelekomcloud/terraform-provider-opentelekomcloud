@@ -1,0 +1,4 @@
+---
+fixes:
+  - |
+    **[KMS]** Add missing field ``expiration_time`` in schema (#1284 `https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/1284`_)
