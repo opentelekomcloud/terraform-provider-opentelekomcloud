@@ -50,7 +50,11 @@ func DataSourceKmsKeyV1() *schema.Resource {
 				Optional: true,
 				Computed: true,
 				ValidateFunc: validation.StringInSlice([]string{
-					WaitingForEnableState, EnabledState, DisabledState, PendingDeletionState, WaitingImportState,
+					WaitingForEnableState,
+					EnabledState,
+					DisabledState,
+					PendingDeletionState,
+					WaitingImportState,
 				}, true),
 			},
 			"default_key_flag": {

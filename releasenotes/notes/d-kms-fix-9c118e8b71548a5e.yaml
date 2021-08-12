@@ -2,3 +2,6 @@
 fixes:
   - |
     **[KMS]** Add missing field ``expiration_time`` in ``data_source/opentelekomcloud_kms_key_v1`` (#1284 `https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/1284`_)
+other:
+  - |
+    **[KMS]** Remove ``ForceNew`` in ``data_source/opentelekomcloud_kms_key_v1`` (#1284 `https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/1284`_)
