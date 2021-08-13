@@ -9,6 +9,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 
 	golangsdk "github.com/opentelekomcloud/gophertelekomcloud"
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/networking/v2/extensions/snatrules"
@@ -37,20 +38,22 @@ func ResourceNatSnatRuleV2() *schema.Resource {
 				ForceNew: true,
 			},
 			"nat_gateway_id": {
-				Type:     schema.TypeString,
-				Required: true,
-				ForceNew: true,
+				Type:         schema.TypeString,
+				Required:     true,
+				ForceNew:     true,
+				ValidateFunc: validation.IsUUID,
 			},
 			"network_id": {
-				Type:     schema.TypeString,
-				Optional: true,
-				ForceNew: true,
+				Type:         schema.TypeString,
+				Optional:     true,
+				ForceNew:     true,
+				ValidateFunc: validation.IsUUID,
 			},
 			"cidr": {
 				Type:         schema.TypeString,
 				Optional:     true,
 				ForceNew:     true,
-				ValidateFunc: common.ValidateCIDR,
+				ValidateFunc: validation.IsCIDR,
 			},
 			"source_type": {
 				Type:     schema.TypeInt,
@@ -58,9 +61,10 @@ func ResourceNatSnatRuleV2() *schema.Resource {
 				ForceNew: true,
 			},
 			"floating_ip_id": {
-				Type:     schema.TypeString,
-				Required: true,
-				ForceNew: true,
+				Type:         schema.TypeString,
+				Required:     true,
+				ForceNew:     true,
+				ValidateFunc: validation.IsUUID,
 			},
 		},
 	}
@@ -68,15 +72,15 @@ func ResourceNatSnatRuleV2() *schema.Resource {
 
 func resourceNatSnatRuleV2Create(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*cfg.Config)
+	client, err := config.NatV2Client(config.GetRegion(d))
+	if err != nil {
+		return fmterr.Errorf(errCreationClient, err)
+	}
+
 	networkID, netOk := d.GetOk("network_id")
 	cidr, cidrOk := d.GetOk("cidr")
-
 	if !netOk && !cidrOk {
-		return fmterr.Errorf("both network_id and cidr are empty, must specify one of them.")
-	}
-	NatV2Client, err := config.NatV2Client(config.GetRegion(d))
-	if err != nil {
-		return fmterr.Errorf("error creating OpenTelekomCloud nat client: %s", err)
+		return fmterr.Errorf("both `network_id` and `cidr` are empty, must specify one of them.")
 	}
 
 	createOpts := &snatrules.CreateOpts{
@@ -88,16 +92,16 @@ func resourceNatSnatRuleV2Create(ctx context.Context, d *schema.ResourceData, me
 	}
 
 	log.Printf("[DEBUG] Create Options: %#v", createOpts)
-	snatRule, err := snatrules.Create(NatV2Client, createOpts).Extract()
+	snatRule, err := snatrules.Create(client, createOpts).Extract()
 	if err != nil {
-		return fmterr.Errorf("error creatting Snat Rule: %s", err)
+		return fmterr.Errorf("error creating SNAT Rule: %s", err)
 	}
 
 	log.Printf("[DEBUG] Waiting for OpenTelekomCloud Snat Rule (%s) to become available.", snatRule.ID)
 
 	stateConf := &resource.StateChangeConf{
 		Target:     []string{"ACTIVE"},
-		Refresh:    waitForSnatRuleActive(NatV2Client, snatRule.ID),
+		Refresh:    waitForSnatRuleActive(client, snatRule.ID),
 		Timeout:    d.Timeout(schema.TimeoutCreate),
 		Delay:      5 * time.Second,
 		MinTimeout: 3 * time.Second,
@@ -105,7 +109,7 @@ func resourceNatSnatRuleV2Create(ctx context.Context, d *schema.ResourceData, me
 
 	_, err = stateConf.WaitForStateContext(ctx)
 	if err != nil {
-		return fmterr.Errorf("error creating OpenTelekomCloud Snat Rule: %s", err)
+		return fmterr.Errorf("error creating OpenTelekomCloud SNAT Rule: %w", err)
 	}
 
 	d.SetId(snatRule.ID)
@@ -115,12 +119,12 @@ func resourceNatSnatRuleV2Create(ctx context.Context, d *schema.ResourceData, me
 
 func resourceNatSnatRuleV2Read(_ context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*cfg.Config)
-	NatV2Client, err := config.NatV2Client(config.GetRegion(d))
+	client, err := config.NatV2Client(config.GetRegion(d))
 	if err != nil {
-		return fmterr.Errorf("error creating OpenTelekomCloud nat client: %s", err)
+		return fmterr.Errorf(errCreationClient, err)
 	}
 
-	snatRule, err := snatrules.Get(NatV2Client, d.Id()).Extract()
+	snatRule, err := snatrules.Get(client, d.Id()).Extract()
 	if err != nil {
 		return diag.FromErr(common.CheckDeleted(d, err, "Snat Rule"))
 	}
@@ -143,15 +147,15 @@ func resourceNatSnatRuleV2Read(_ context.Context, d *schema.ResourceData, meta i
 
 func resourceNatSnatRuleV2Delete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*cfg.Config)
-	NatV2Client, err := config.NatV2Client(config.GetRegion(d))
+	client, err := config.NatV2Client(config.GetRegion(d))
 	if err != nil {
-		return fmterr.Errorf("error creating OpenTelekomCloud nat client: %s", err)
+		return fmterr.Errorf(errCreationClient, err)
 	}
 
 	stateConf := &resource.StateChangeConf{
 		Pending:    []string{"ACTIVE"},
 		Target:     []string{"DELETED"},
-		Refresh:    waitForSnatRuleDelete(NatV2Client, d.Id()),
+		Refresh:    waitForSnatRuleDelete(client, d.Id()),
 		Timeout:    d.Timeout(schema.TimeoutDelete),
 		Delay:      5 * time.Second,
 		MinTimeout: 3 * time.Second,
@@ -159,21 +163,21 @@ func resourceNatSnatRuleV2Delete(ctx context.Context, d *schema.ResourceData, me
 
 	_, err = stateConf.WaitForStateContext(ctx)
 	if err != nil {
-		return fmterr.Errorf("error deleting OpenTelekomCloud Snat Rule: %s", err)
+		return fmterr.Errorf("error deleting OpenTelekomCloud SNAT Rule: %w", err)
 	}
 
 	d.SetId("")
 	return nil
 }
 
-func waitForSnatRuleActive(client *golangsdk.ServiceClient, nId string) resource.StateRefreshFunc {
+func waitForSnatRuleActive(client *golangsdk.ServiceClient, snatRuleID string) resource.StateRefreshFunc {
 	return func() (interface{}, string, error) {
-		n, err := snatrules.Get(client, nId).Extract()
+		n, err := snatrules.Get(client, snatRuleID).Extract()
 		if err != nil {
 			return nil, "", err
 		}
 
-		log.Printf("[DEBUG] OpenTelekomCloud Snat Rule: %+v", n)
+		log.Printf("[DEBUG] OpenTelekomCloud SNAT Rule: %+v", n)
 		if n.Status == "ACTIVE" {
 			return n, "ACTIVE", nil
 		}
@@ -182,29 +186,29 @@ func waitForSnatRuleActive(client *golangsdk.ServiceClient, nId string) resource
 	}
 }
 
-func waitForSnatRuleDelete(client *golangsdk.ServiceClient, nId string) resource.StateRefreshFunc {
+func waitForSnatRuleDelete(client *golangsdk.ServiceClient, snatRuleID string) resource.StateRefreshFunc {
 	return func() (interface{}, string, error) {
-		log.Printf("[DEBUG] Attempting to delete OpenTelekomCloud Snat Rule %s.\n", nId)
+		log.Printf("[DEBUG] Attempting to delete OpenTelekomCloud SNAT Rule %s.\n", snatRuleID)
 
-		n, err := snatrules.Get(client, nId).Extract()
+		n, err := snatrules.Get(client, snatRuleID).Extract()
 		if err != nil {
 			if _, ok := err.(golangsdk.ErrDefault404); ok {
-				log.Printf("[DEBUG] Successfully deleted OpenTelekomCloud Snat Rule %s", nId)
+				log.Printf("[DEBUG] Successfully deleted OpenTelekomCloud SNAT Rule %s", snatRuleID)
 				return n, "DELETED", nil
 			}
 			return n, "ACTIVE", err
 		}
 
-		err = snatrules.Delete(client, nId).ExtractErr()
+		err = snatrules.Delete(client, snatRuleID).ExtractErr()
 		if err != nil {
 			if _, ok := err.(golangsdk.ErrDefault404); ok {
-				log.Printf("[DEBUG] Successfully deleted OpenTelekomCloud Snat Rule %s", nId)
+				log.Printf("[DEBUG] Successfully deleted OpenTelekomCloud SNAT Rule %s", snatRuleID)
 				return n, "DELETED", nil
 			}
 			return n, "ACTIVE", err
 		}
 
-		log.Printf("[DEBUG] OpenTelekomCloud Snat Rule %s still active.\n", nId)
+		log.Printf("[DEBUG] OpenTelekomCloud SNAT Rule %s still active.\n", snatRuleID)
 		return n, "ACTIVE", nil
 	}
 }
