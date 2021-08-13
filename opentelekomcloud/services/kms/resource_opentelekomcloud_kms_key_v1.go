@@ -23,6 +23,7 @@ const (
 	EnabledState          = "2"
 	DisabledState         = "3"
 	PendingDeletionState  = "4"
+	WaitingImportState    = "5"
 )
 
 func ResourceKmsKeyV1() *schema.Resource {
