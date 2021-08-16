@@ -273,7 +273,7 @@ func resourceDmsInstancesV1Read(_ context.Context, d *schema.ResourceData, meta 
 		d.Set("engine_version", v.EngineVersion),
 		d.Set("specification", v.Specification),
 		d.Set("used_storage_space", v.UsedStorageSpace),
-		d.Set("storage_space", v.StorageSpace),
+		d.Set("storage_space", v.TotalStorageSpace),
 		d.Set("connect_address", v.ConnectAddress),
 		d.Set("port", v.Port),
 		d.Set("status", v.Status),
