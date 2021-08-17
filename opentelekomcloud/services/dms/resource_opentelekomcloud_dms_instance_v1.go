@@ -262,7 +262,7 @@ func resourceDmsInstancesV1Read(_ context.Context, d *schema.ResourceData, meta 
 	}
 	v, err := instances.Get(client, d.Id()).Extract()
 	if err != nil {
-		return diag.FromErr(err)
+		return diag.FromErr(common.CheckDeleted(d, err, "DMS instance"))
 	}
 
 	log.Printf("[DEBUG] DMS instance %s: %+v", d.Id(), v)
