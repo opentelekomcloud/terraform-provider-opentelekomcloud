@@ -62,7 +62,7 @@ func testAccCheckObsBucketDataSourceExists(n string, obj *obs.BaseModel) resourc
 			return fmt.Errorf("failed getting OBS Bucket (%s): %s", rs.Primary.ID, err)
 		}
 
-		*obj = *out
+		obj = out
 
 		return nil
 	}

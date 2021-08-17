@@ -25,6 +25,10 @@ func DataSourceObsBucket() *schema.Resource {
 				Type:     schema.TypeString,
 				Required: true,
 			},
+			"bucket_domain_name": {
+				Type:     schema.TypeString,
+				Computed: true,
+			},
 			"storage_class": {
 				Type:     schema.TypeString,
 				Computed: true,
