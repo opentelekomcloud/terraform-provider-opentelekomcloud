@@ -1,0 +1,10 @@
+---
+features:
+  - |
+    **[DMS]** Add possibility to set ``retention_policy`` in ``resource/opentelekomcloud_dms_instance_v1`` (`#1289 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/1289>`_)
+fixes:
+  - |
+    **[DMS]** Fix ``port`` type in ``resource/opentelekomcloud_dms_instance_v1`` (`#1289 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/1289>`_)
+other:
+  - |
+    **[DMS]** Add validations for UUIDs and ``name`` in ``resource/opentelekomcloud_dms_instance_v1`` (`#1289 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/1289>`_)

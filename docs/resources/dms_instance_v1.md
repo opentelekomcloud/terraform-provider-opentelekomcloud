@@ -40,13 +40,10 @@ resource "opentelekomcloud_dms_instance_v1" "instance_1" {
   storage_space     = data.opentelekomcloud_dms_product_v1.product_1.storage
   available_zones   = [data.opentelekomcloud_dms_az_v1.az_1.id]
   security_group_id = opentelekomcloud_networking_secgroup_v2.secgroup_1.id
-  vpc_id            = var.your_vpc_id
-  subnet_id         = var.your_subnet_id
-  access_user       = var.the_access_user
-  password          = var.your_password
-
-  depends_on = [data.opentelekomcloud_dms_product_v1.product_1,
-  opentelekomcloud_networking_secgroup_v2.secgroup_1]
+  vpc_id            = var.vpc_id
+  subnet_id         = var.subnet_id
+  access_user       = var.access_user
+  password          = var.password
 }
 ```
 
@@ -60,27 +57,28 @@ The following arguments are supported:
 * `description` - (Optional) Indicates the description of an instance. It is a character
   string containing not more than 1024 characters.
 
-* `engine` - (Optional) Indicates a message engine. Only "kafka" is supported now.
+* `engine` - (Required) Indicates a message engine. Only `kafka` is supported now.
 
-* `engine_version` - (Optional) Indicates the version of a message engine.
-  Only "2.3.0" is supported now.
+* `engine_version` - (Required) Indicates the version of a message engine.
+  Only `2.3.0` is supported now.
 
-* `specification` - (Optional) This parameter is mandatory if the engine is kafka.
+* `specification` - (Optional) This parameter is mandatory if the engine is `kafka`.
   Indicates the baseline bandwidth of a Kafka instance, that is, the maximum amount
-  of data transferred per unit time. Unit: byte/s. Options: 100MB, 300MB, 600MB, 1200MB.
+  of data transferred per unit time. Unit: `byte/s`. Options: `100MB`, `300MB`,
+  `600MB`, `1200MB`.
 
 * `storage_space` - (Required) Indicates the message storage space. Value range:
-  * Kafka instance with specification being 100 MB: 600–90000 GB
-  * Kafka instance with specification being 300 MB: 1200–90000 GB
-  * Kafka instance with specification being 600 MB: 2400–90000 GB
-  * Kafka instance with specification being 1200 MB: 4800–90000 GB
+  * Kafka instance with `specification` being `100MB`: `600`–`90000` GB
+  * Kafka instance with `specification` being `300MB`: `1200`–`90000` GB
+  * Kafka instance with `specification` being `600MB`: `2400`–`90000` GB
+  * Kafka instance with `specification` being `1200MB`: `4800`–`90000` GB
 
-* `partition_num` - (Optional) This parameter is mandatory when a Kafka instance is created.
+* `partition_num` - (Optional) This parameter is mandatory when a `kafka` instance is created.
   Indicates the maximum number of topics in a Kafka instance.
-  * When specification is 100 MB: 300
-  * When specification is 300 MB: 900
-  * When specification is 600 MB: 1800
-  * When specification is 1200 MB: 1800
+  * When `specification` is `100MB`: `300`
+  * When `specification` is `300MB`: `900`
+  * When `specification` is `600MB`: `1800`
+  * When `specification` is `1200MB`: `1800`
 
 * `access_user` - (Optional) Indicates a username. A username consists of 4 to 64 characters
   and supports only letters, digits, and hyphens (-).
@@ -88,43 +86,49 @@ The following arguments are supported:
 * `password` - (Optional) Indicates the password of an instance. An instance password
   must meet the following complexity requirements: Must be 8 to 32 characters long.
   Must contain at least 2 of the following character types: lowercase letters, uppercase
-  letters, digits, and special characters (`~!@#$%^&*()-_=+\|[{}]:'",<.>/?).
+  letters, digits, and special characters (`~!@#$%^&*()-_=+\|[{}]:'",<.>/?`).
 
-* `vpc_id` - (Required) Indicates the ID of a VPC.
+* `vpc_id` - (Required) Indicates the ID of a VPC (OpenStack router ID).
 
 * `security_group_id` - (Required) Indicates the ID of a security group.
 
-* `subnet_id` - (Required) Indicates the ID of a subnet.
+* `subnet_id` - (Required) Indicates the ID of the subnet (OpenStack network ID).
 
 * `available_zones` - (Required) Indicates the ID of an AZ. The parameter value can not be
-  left blank or an empty array. For details, see section Querying AZ Information.
+  left blank or an empty array. For details, see section
+  [Querying AZ Information](https://docs.otc.t-systems.com/en-us/api/dms/dms-api-180514008.html).
 
 * `product_id` - (Required) Indicates a product ID.
 
 * `maintain_begin` - (Optional) Indicates the time at which a maintenance time window starts.
-  Format: HH:mm.
+  Format: `HH:mm`.
   * The start time and end time of a maintenance time window must indicate the time segment of
   a supported maintenance time window.
-  * The start time must be set to 22:00, 02:00, 06:00, 10:00, 14:00, or 18:00.
-  * Parameters maintain_begin and maintain_end must be set in pairs. If parameter maintain_begin
-  is left blank, parameter maintain_end is also blank. In this case, the system automatically
-  allocates the default start time 02:00.
+  * The start time must be set to `22:00`, `02:00`, `06:00`, `10:00`, `14:00`, or `18:00`.
+  * Parameters `maintain_begin` and `maintain_end` must be set in pairs. If parameter `maintain_begin`
+  is left blank, parameter `maintain_end` is also blank. In this case, the system automatically
+  allocates the default start time `02:00`.
 
 * `maintain_end` - (Optional) Indicates the time at which a maintenance time window ends.
-  Format: HH:mm.
+  Format: `HH:mm`.
   * The start time and end time of a maintenance time window must indicate the time segment of
   a supported maintenance time window.
-  * The end time is four hours later than the start time. For example, if the start time is 22:00,
-  the end time is 02:00.
-  * Parameters maintain_begin and maintain_end must be set in pairs. If parameter maintain_end is left
-  blank, parameter maintain_begin is also blank. In this case, the system automatically allocates
-  the default end time 06:00.
+  * The end time is four hours later than the start time. For example, if the start time is `22:00`,
+  the end time is `02:00`.
+  * Parameters `maintain_begin` and `maintain_end` must be set in pairs. If parameter `maintain_end` is left
+  blank, parameter `maintain_begin` is also blank. In this case, the system automatically allocates
+  the default end time `06:00`.
 
-* `storage_spec_code` - (Optional) Indicates the storage I/O specification. Options for a Kafka instance:
-  * When specification is 100 MB: dms.physical.storage.high or dms.physical.storage.ultra
-  * When specification is 300 MB: dms.physical.storage.high or dms.physical.storage.ultra
-  * When specification is 600 MB: dms.physical.storage.ultra
-  * When specification is 1200 MB: dms.physical.storage.ultra
+* `storage_spec_code` - (Required) Indicates the storage I/O specification. Options for a Kafka instance:
+  * When `specification` is `100MB`: `dms.physical.storage.high` or `dms.physical.storage.ultra`
+  * When `specification` is `300MB`: `dms.physical.storage.high` or `dms.physical.storage.ultra`
+  * When `specification` is `600MB`: `dms.physical.storage.ultra`
+  * When `specification` is `1200MB`: `dms.physical.storage.ultra`
+
+* `retention_policy` - (Optional) Indicates the action to be taken when the memory usage reaches
+  the disk capacity threshold. The possible values are:
+  * `produce_reject`: New messages cannot be created
+  * `time_base`: The earliest messages are deleted.
 
 ## Attributes Reference
 
@@ -140,7 +144,7 @@ The following attributes are exported:
 
 * `specification` - See Argument Reference above.
 
-* `storage_space` - Indicates the time when a instance is created.
+* `storage_space` - Indicates the time when an instance is created.
 
 * `partition_num` - See Argument Reference above.
 
@@ -182,7 +186,7 @@ The following attributes are exported:
 
 * `resource_spec_code` - Indicates a resource specifications identifier.
 
-* `type` - Indicates an instance type. Options: "single" and "cluster"
+* `type` - Indicates an instance type. Options: `single` and `cluster`.
 
 * `created_at` - Indicates the time when an instance is created. The time is in the format
   of timestamp, that is, the offset milliseconds from 1970-01-01 00:00:00 UTC to the specified time.
