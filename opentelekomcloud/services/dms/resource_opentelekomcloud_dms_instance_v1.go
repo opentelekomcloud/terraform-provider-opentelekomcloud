@@ -70,6 +70,7 @@ func ResourceDmsInstancesV1() *schema.Resource {
 			"password": {
 				Type:      schema.TypeString,
 				Sensitive: true,
+				ForceNew:  true,
 				Optional:  true,
 			},
 			"access_user": {
