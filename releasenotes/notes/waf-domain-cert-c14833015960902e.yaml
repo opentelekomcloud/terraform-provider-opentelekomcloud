@@ -1,0 +1,4 @@
+---
+fixes:
+  - |
+    **[WAF]** Fix ``certificate_id`` change not applied in ``resource/opentelekomcloud_waf_domain_v1`` (`#1294 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/1294>`_)
