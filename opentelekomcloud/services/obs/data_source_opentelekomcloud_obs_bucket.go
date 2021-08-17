@@ -17,6 +17,10 @@ func DataSourceObsBucket() *schema.Resource {
 		ReadContext: dataSourceObsBucketRead,
 
 		Schema: map[string]*schema.Schema{
+			"region": {
+				Type:     schema.TypeString,
+				Computed: true,
+			},
 			"bucket": {
 				Type:     schema.TypeString,
 				Required: true,
