@@ -92,7 +92,7 @@ The following arguments are supported:
 
 * `security_group_id` - (Required) Indicates the ID of a security group.
 
-* `subnet_id` - (Required) Indicates the ID of a subnet.
+* `subnet_id` - (Required) Specifies the network ID of the subnet.
 
 * `available_zones` - (Required) Indicates the ID of an AZ. The parameter value can not be
   left blank or an empty array. For details, see section
