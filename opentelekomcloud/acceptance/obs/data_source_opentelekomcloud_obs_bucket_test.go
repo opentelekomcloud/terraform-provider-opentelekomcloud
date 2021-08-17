@@ -14,7 +14,7 @@ import (
 )
 
 func TestAccDataSourceObsBucket_basic(t *testing.T) {
-	randomName := acctest.RandomWithPrefix("tf-test-")
+	randomName := acctest.RandomWithPrefix("tf-test")
 	dataSourceName := "data.opentelekomcloud_obs_bucket.bucket"
 
 	var bucket *obs.BaseModel
@@ -27,7 +27,7 @@ func TestAccDataSourceObsBucket_basic(t *testing.T) {
 			{
 				Config: testAccDataSourceObsBucketInit(randomName),
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckObsBucketObjectExists("opentelekomcloud_obs_bucket_object.object"),
+					testAccCheckObsBucketExists("opentelekomcloud_obs_bucket.bucket"),
 				),
 			},
 			{
