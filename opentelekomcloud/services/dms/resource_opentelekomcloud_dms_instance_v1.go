@@ -36,7 +36,7 @@ func ResourceDmsInstancesV1() *schema.Resource {
 				ValidateFunc: validation.All(
 					validation.StringLenBetween(4, 64),
 					validation.StringMatch(
-						regexp.MustCompile(`^[a-z][a-z0-9._-]+[a-z0-9]+$`),
+						regexp.MustCompile(`^[\w\-.]+$`),
 						"Only lowercase letters, digits, periods (.), underscores (_), and hyphens (-) are allowed.",
 					),
 					validation.StringDoesNotMatch(

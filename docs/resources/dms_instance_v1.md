@@ -88,11 +88,11 @@ The following arguments are supported:
   Must contain at least 2 of the following character types: lowercase letters, uppercase
   letters, digits, and special characters (`~!@#$%^&*()-_=+\|[{}]:'",<.>/?`).
 
-* `vpc_id` - (Required) Indicates the ID of a VPC.
+* `vpc_id` - (Required) Indicates the ID of a VPC (OpenStack router ID).
 
 * `security_group_id` - (Required) Indicates the ID of a security group.
 
-* `subnet_id` - (Required) Specifies the network ID of the subnet.
+* `subnet_id` - (Required) Indicates the ID of the subnet (OpenStack network ID).
 
 * `available_zones` - (Required) Indicates the ID of an AZ. The parameter value can not be
   left blank or an empty array. For details, see section
