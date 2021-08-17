@@ -125,6 +125,11 @@ The following arguments are supported:
   * When `specification` is `600MB`: `dms.physical.storage.ultra`
   * When `specification` is `1200MB`: `dms.physical.storage.ultra`
 
+* `retention_policy` - (Optional) Indicates the action to be taken when the memory usage reaches
+  the disk capacity threshold. The possible values are:
+  * `produce_reject`: New messages cannot be created
+  * `time_base`: The earliest messages are deleted.
+
 ## Attributes Reference
 
 The following attributes are exported:
@@ -139,7 +144,7 @@ The following attributes are exported:
 
 * `specification` - See Argument Reference above.
 
-* `storage_space` - Indicates the time when a instance is created.
+* `storage_space` - Indicates the time when an instance is created.
 
 * `partition_num` - See Argument Reference above.
 
@@ -181,7 +186,7 @@ The following attributes are exported:
 
 * `resource_spec_code` - Indicates a resource specifications identifier.
 
-* `type` - Indicates an instance type. Options: "single" and "cluster"
+* `type` - Indicates an instance type. Options: `single` and `cluster`.
 
 * `created_at` - Indicates the time when an instance is created. The time is in the format
   of timestamp, that is, the offset milliseconds from 1970-01-01 00:00:00 UTC to the specified time.
