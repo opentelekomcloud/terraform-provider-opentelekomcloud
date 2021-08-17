@@ -264,6 +264,7 @@ func Provider() *schema.Provider {
 			"opentelekomcloud_networking_port_v2":              vpc.DataSourceNetworkingPortV2(),
 			"opentelekomcloud_networking_secgroup_v2":          vpc.DataSourceNetworkingSecGroupV2(),
 			"opentelekomcloud_networking_secgroup_rule_ids_v2": vpc.DataSourceNetworkingSecGroupRuleIdsV2(),
+			"opentelekomcloud_obs_bucket":                      obs.DataSourceObsBucket(),
 			"opentelekomcloud_obs_bucket_object":               obs.DataSourceObsBucketObject(),
 			"opentelekomcloud_rds_flavors_v1":                  rds.DataSourceRdsFlavorV1(),
 			"opentelekomcloud_rds_flavors_v3":                  rds.DataSourceRdsFlavorV3(),
