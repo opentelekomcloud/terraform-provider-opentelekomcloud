@@ -1,0 +1,4 @@
+---
+features:
+  - |
+    **New Data Source:** ``data_source/opentelekomcloud_obs_bucket`` (`#1293 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/1293>`_)
