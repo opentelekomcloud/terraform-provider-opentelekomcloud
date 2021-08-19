@@ -66,6 +66,9 @@ The following arguments are supported:
 * `region` - (Optional) Specifies the region of the replica instance. Changing this parameter will create a new
   resource.
 
+* `public_ips` - (Optional) Specifies floating IP to be assigned to the instance.
+  This should be a list with single element only.
+
 * `volume` - Specifies the volume information. Structure is documented below.
 
 The `volume` block supports:
@@ -97,8 +100,6 @@ The following attributes are exported:
 * `vpc_id` - Indicates the VPC ID (OpenStack router ID).
 
 * `private_ips` - Indicates the private IP address list.
-
-* `public_ips` - Indicates the public IP address list.
 
 The `db` block supports:
 

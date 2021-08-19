@@ -2,12 +2,14 @@ package rds
 
 import (
 	"context"
+	"fmt"
 	"log"
 	"time"
 
 	"github.com/hashicorp/go-multierror"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"github.com/opentelekomcloud/gophertelekomcloud/openstack/networking/v2/extensions/layer3/floatingips"
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/rds/v3/instances"
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common"
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common/cfg"
@@ -91,11 +93,13 @@ func ResourceRdsReadReplicaV3() *schema.Resource {
 			},
 			"public_ips": {
 				Type:     schema.TypeSet,
+				Optional: true,
 				Computed: true,
 				Elem: &schema.Schema{
 					Type: schema.TypeString,
 				},
-				Set: schema.HashString,
+				MaxItems: 1,
+				Set:      schema.HashString,
 			},
 			"security_group_id": {
 				Type:     schema.TypeString,
@@ -168,7 +172,32 @@ func resourceRdsReadReplicaV3Create(ctx context.Context, d *schema.ResourceData,
 		return fmterr.Errorf("error waiting for read replica to complete creation: %w", err)
 	}
 
+	if ip := getReplicaPublicIP(d); ip != "" {
+		if err := resourceRdsReadReplicaV3Read(ctx, d, meta); err != nil {
+			return err
+		}
+		nw, err := config.NetworkingV2Client(config.GetRegion(d))
+		if err != nil {
+			return diag.FromErr(err)
+		}
+		subnetID, err := getSubnetSubnetID(d, config)
+		if err != nil {
+			return diag.FromErr(err)
+		}
+		if err := assignEipToInstance(nw, ip, getReplicaPrivateIP(d), subnetID); err != nil {
+			log.Printf("[WARN] failed to assign public IP: %s", err)
+		}
+	}
+
 	return resourceRdsReadReplicaV3Read(ctx, d, meta)
+}
+
+func getReplicaPublicIP(d *schema.ResourceData) string {
+	return d.Get("public_ips").(*schema.Set).List()[0].(string)
+}
+
+func getReplicaPrivateIP(d *schema.ResourceData) string {
+	return d.Get("private_ips").(*schema.Set).List()[0].(string)
 }
 
 func resourceRdsReadReplicaV3Read(_ context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
@@ -209,7 +238,7 @@ func resourceRdsReadReplicaV3Read(_ context.Context, d *schema.ResourceData, met
 		d.Set("vpc_id", replica.VpcId),
 		d.Set("private_ips", replica.PrivateIps),
 		d.Set("region", replica.Region),
-		d.Set("public_ips", replica.PublicIps),
+		setReplicaPrivateIPs(d, meta, replica.PrivateIps),
 	)
 	if err := mErr.ErrorOrNil(); err != nil {
 		return fmterr.Errorf("error setting replica fields: %w", err)
@@ -237,6 +266,36 @@ func resourceRdsReadReplicaV3Read(_ context.Context, d *schema.ResourceData, met
 	return nil
 }
 
+func setReplicaPrivateIPs(d *schema.ResourceData, meta interface{}, privateIPs []string) error {
+	if len(privateIPs) == 0 {
+		return nil
+	}
+
+	config := meta.(*cfg.Config)
+	client, err := config.NetworkingV2Client(config.GetRegion(d))
+	if err != nil {
+		return fmt.Errorf("error creating networking client: %w", err)
+	}
+	listOpts := floatingips.ListOpts{
+		FixedIP: privateIPs[0],
+	}
+
+	pages, err := floatingips.List(client, listOpts).AllPages()
+	if err != nil {
+		return fmt.Errorf("error listing floating IPs: %w", err)
+	}
+	floatingIPs, err := floatingips.ExtractFloatingIPs(pages)
+	if err != nil {
+		return fmt.Errorf("error listing floating IPs: %w", err)
+	}
+	addresses := make([]string, len(floatingIPs))
+	for i, eip := range floatingIPs {
+		addresses[i] = eip.FloatingIP
+	}
+
+	return d.Set("public_ips", addresses)
+}
+
 func resourceRdsReadReplicaV3Update(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*cfg.Config)
 	client, err := config.RdsV3Client(config.GetRegion(d))
@@ -254,6 +313,37 @@ func resourceRdsReadReplicaV3Update(ctx context.Context, d *schema.ResourceData,
 		_, err := instances.Resize(client, resizeOpts, d.Id()).Extract()
 		if err != nil {
 			return fmterr.Errorf("error resizing read replica: %w", err)
+		}
+	}
+
+	if d.HasChange("public_ips") {
+		nwClient, err := config.NetworkingV2Client(config.GetRegion(d))
+		if err != nil {
+			return fmterr.Errorf("error creating networking V2 client: %w", err)
+		}
+		oldPublicIps, newPublicIps := d.GetChange("public_ips")
+		oldIPs := oldPublicIps.(*schema.Set)
+		newIPs := newPublicIps.(*schema.Set)
+
+		removeIPs := oldIPs.Difference(newIPs)
+		addIPs := newIPs.Difference(oldIPs)
+
+		for _, ip := range removeIPs.List() {
+			err := unAssignEipFromInstance(nwClient, ip.(string)) // if it become 0, it was 1 before
+			if err != nil {
+				return diag.FromErr(err)
+			}
+		}
+
+		privateIP := getReplicaPrivateIP(d)
+		subnetID, err := getSubnetSubnetID(d, config)
+		for _, ip := range addIPs.List() {
+			if err != nil {
+				return diag.FromErr(err)
+			}
+			if err := assignEipToInstance(nwClient, ip.(string), privateIP, subnetID); err != nil {
+				return diag.FromErr(err)
+			}
 		}
 	}
 
