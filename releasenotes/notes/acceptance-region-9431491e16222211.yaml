@@ -1,4 +1,0 @@
----
-other:
-  - |
-    **[Acceptance]** Set ``Region`` while client is generating (`#1298 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/1298>`_)
