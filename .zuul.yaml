@@ -20,6 +20,9 @@
         - tflint
         - goreleaser-build:
             nodeset: fedora-32-large
+    check-post:
+      jobs:
+        - golang-make-functional
     gate:
       jobs:
         - golangci-lint:

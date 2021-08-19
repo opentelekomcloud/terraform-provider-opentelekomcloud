@@ -17,7 +17,7 @@ snapshot:
 test: fmtcheck
 	go test -v ./...
 
-testacc: fmtcheck
+acceptance: fmtcheck
 	@TF_ACC=1 go test $(TEST) -v -timeout 720m
 
 vet:
@@ -62,4 +62,4 @@ tffmtfix: tools
 	@echo "==> Fixing docs terraform blocks code with terrafmt..."
 	@find ./docs -type f -name "*.md" | sort | while read f; do terrafmt fmt $$f; done
 
-.PHONY: build test testacc vet fmt fmtcheck errcheck test-compile tflint tffmtfix lint
+.PHONY: build test acceptance vet fmt fmtcheck errcheck test-compile tflint tffmtfix lint
