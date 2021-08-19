@@ -539,6 +539,8 @@ func (c *Config) genClient(ao golangsdk.AuthOptionsProvider) (*golangsdk.Provide
 		}
 	}
 
+	c.Region = client.RegionID
+
 	return client, nil
 }
 
