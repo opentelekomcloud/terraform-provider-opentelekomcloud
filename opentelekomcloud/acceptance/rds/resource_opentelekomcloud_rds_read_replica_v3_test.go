@@ -34,6 +34,24 @@ func TestAccRdsReadReplicaV3Basic(t *testing.T) {
 					testAccCheckRdsInstanceV3Exists(resName, &rdsInstance),
 					resource.TestCheckResourceAttr(resName, "availability_zone", secondAZ),
 					resource.TestCheckResourceAttr(resName, "volume.0.size", "40"),
+					resource.TestCheckResourceAttr(resName, "public_ips.#", "1"),
+				),
+			},
+			{
+				Config: testAccRdsReadReplicaV3BasicNoIP(postfix),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckRdsInstanceV3Exists(resName, &rdsInstance),
+					resource.TestCheckResourceAttr(resName, "availability_zone", secondAZ),
+					resource.TestCheckResourceAttr(resName, "volume.0.size", "40"),
+				),
+			},
+			{ // and assign it back
+				Config: testAccRdsReadReplicaV3Basic(postfix),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckRdsInstanceV3Exists(resName, &rdsInstance),
+					resource.TestCheckResourceAttr(resName, "availability_zone", secondAZ),
+					resource.TestCheckResourceAttr(resName, "volume.0.size", "40"),
+					resource.TestCheckResourceAttr(resName, "public_ips.#", "1"),
 				),
 			},
 		},
@@ -41,6 +59,59 @@ func TestAccRdsReadReplicaV3Basic(t *testing.T) {
 }
 
 func testAccRdsReadReplicaV3Basic(postfix string) string {
+	return fmt.Sprintf(`
+resource "opentelekomcloud_networking_secgroup_v2" "sg" {
+  name = "sg-rds-replica-test"
+}
+
+resource "opentelekomcloud_rds_instance_v3" "instance" {
+  name = "tf_rds_instance_%s"
+  availability_zone = [
+  "%s"]
+  db {
+    password = "Postgres!120521"
+    type     = "PostgreSQL"
+    version  = "10"
+    port     = "8635"
+  }
+  security_group_id = opentelekomcloud_networking_secgroup_v2.sg.id
+  subnet_id         = "%s"
+  vpc_id            = "%s"
+  volume {
+    type = "COMMON"
+    size = 40
+  }
+  flavor = "rds.pg.c2.medium"
+  backup_strategy {
+    start_time = "08:00-09:00"
+    keep_days  = 1
+  }
+  tag = {
+    foo = "bar"
+    key = "value"
+  }
+}
+
+resource "opentelekomcloud_compute_floatingip_v2" "eip" {}
+
+resource "opentelekomcloud_rds_read_replica_v3" "replica" {
+  name          = "test-replica"
+  replica_of_id = opentelekomcloud_rds_instance_v3.instance.id
+  flavor_ref    = "${opentelekomcloud_rds_instance_v3.instance.flavor}.rr"
+
+  availability_zone = "eu-de-02"
+
+  public_ips = [opentelekomcloud_compute_floatingip_v2.eip.address]
+
+  volume {
+    type = "COMMON"
+  }
+}
+
+`, postfix, env.OS_AVAILABILITY_ZONE, env.OS_NETWORK_ID, env.OS_VPC_ID)
+}
+
+func testAccRdsReadReplicaV3BasicNoIP(postfix string) string {
 	return fmt.Sprintf(`
 resource "opentelekomcloud_networking_secgroup_v2" "sg" {
   name = "sg-rds-replica-test"
@@ -73,12 +144,16 @@ resource "opentelekomcloud_rds_instance_v3" "instance" {
   }
 }
 
+resource "opentelekomcloud_compute_floatingip_v2" "eip" {}
+
 resource "opentelekomcloud_rds_read_replica_v3" "replica" {
   name          = "test-replica"
   replica_of_id = opentelekomcloud_rds_instance_v3.instance.id
   flavor_ref    = "${opentelekomcloud_rds_instance_v3.instance.flavor}.rr"
 
   availability_zone = "eu-de-02"
+
+  public_ips = []
 
   volume {
     type = "COMMON"

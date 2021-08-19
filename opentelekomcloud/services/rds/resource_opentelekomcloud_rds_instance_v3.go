@@ -572,7 +572,7 @@ func findFloatingIP(client *golangsdk.ServiceClient, address string) (id string,
 		if address != ip.FloatingIP {
 			continue
 		}
-		return floatingIPs[0].ID, nil
+		return ip.ID, nil
 	}
 	return
 }
@@ -630,6 +630,9 @@ func unAssignEipFromInstance(client *golangsdk.ServiceClient, oldPublicIP string
 	ipID, err := findFloatingIP(client, oldPublicIP)
 	if err != nil {
 		return err
+	}
+	if ipID == "" {
+		return nil
 	}
 	return floatingips.Update(client, ipID, floatingips.UpdateOpts{PortID: nil}).Err
 }
@@ -886,7 +889,7 @@ func resourceRdsInstanceV3Read(_ context.Context, d *schema.ResourceData, meta i
 		return nil
 	}
 
-	me := multierror.Append(nil,
+	me := multierror.Append(
 		d.Set("flavor", rdsInstance.FlavorRef),
 		d.Set("name", rdsInstance.Name),
 		d.Set("security_group_id", rdsInstance.SecurityGroupId),
