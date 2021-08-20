@@ -130,7 +130,7 @@ resource "opentelekomcloud_as_policy_v1" "hth_as_policy"{
     instance_number = 1
   }
   scheduled_policy {
-    launch_time = "2020-12-22T12:00Z"
+    launch_time = "2022-12-22T12:00Z"
   }
 }
 `, env.OS_IMAGE_ID, env.OS_NETWORK_ID, env.OS_VPC_ID)

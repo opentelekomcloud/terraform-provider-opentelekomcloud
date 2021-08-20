@@ -61,11 +61,6 @@ func init() {
 }
 
 func TestAccPreCheckRequiredEnvVars(t *testing.T) {
-	v := os.Getenv("OS_AUTH_URL")
-	if v == "" {
-		t.Fatal("OS_AUTH_URL must be set for acceptance tests")
-	}
-
 	if env.OS_POOL_NAME == "" {
 		t.Fatal("OS_POOL_NAME must be set for acceptance tests")
 	}
