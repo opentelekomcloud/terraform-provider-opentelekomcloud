@@ -77,7 +77,7 @@ func resourceNetworkingRouterInterfaceV2Create(ctx context.Context, d *schema.Re
 
 	stateConf := &resource.StateChangeConf{
 		Pending:    []string{"BUILD", "PENDING_CREATE", "PENDING_UPDATE"},
-		Target:     []string{"ACTIVE"},
+		Target:     []string{"ACTIVE", "DOWN"},
 		Refresh:    waitForRouterInterfaceActive(networkingClient, n.PortID),
 		Timeout:    d.Timeout(schema.TimeoutCreate),
 		Delay:      5 * time.Second,

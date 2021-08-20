@@ -1,0 +1,4 @@
+---
+fixes:
+  - |
+    **[VPC]** Fix failing wait after creation in ``resource/opentelekomcloud_networking_router_interface_v2`` (`#1302 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/1302>`_)
