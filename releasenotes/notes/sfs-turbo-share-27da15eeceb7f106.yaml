@@ -1,0 +1,4 @@
+---
+features:
+  - |
+    **New Data Source:** ``opentelekomcloud_sfs_turbo_share_v1`` (`#1299 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/1299>`_)

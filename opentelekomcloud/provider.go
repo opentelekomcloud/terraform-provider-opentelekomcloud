@@ -275,6 +275,7 @@ func Provider() *schema.Provider {
 			"opentelekomcloud_rts_stack_v1":                    rts.DataSourceRTSStackV1(),
 			"opentelekomcloud_s3_bucket_object":                s3.DataSourceS3BucketObject(),
 			"opentelekomcloud_sfs_file_system_v2":              sfs.DataSourceSFSFileSystemV2(),
+			"opentelekomcloud_sfs_turbo_share_v1":              sfs.DataSourceSFSTurboShareV1(),
 			"opentelekomcloud_sdrs_domain_v1":                  sdrs.DataSourceSdrsDomainV1(),
 			"opentelekomcloud_vpc_eip_v1":                      vpc.DataSourceVPCEipV1(),
 			"opentelekomcloud_vpc_v1":                          vpc.DataSourceVirtualPrivateCloudVpcV1(),
