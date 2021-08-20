@@ -78,7 +78,7 @@ func resourceNetworkingFloatingIPAssociateV2Create(ctx context.Context, d *schem
 
 	d.SetId(floatingIPID)
 
-	return resourceNetworkFloatingIPV2Read(ctx, d, meta)
+	return resourceNetworkingFloatingIPAssociateV2Read(ctx, d, meta)
 }
 
 func resourceNetworkingFloatingIPAssociateV2Read(_ context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
