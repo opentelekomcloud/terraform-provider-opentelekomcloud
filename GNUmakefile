@@ -17,8 +17,8 @@ snapshot:
 test: fmtcheck
 	go test -v ./...
 
-testacc: fmtcheck
-	@TF_ACC=1 go test $(TEST) -v -timeout 720m
+acceptance: fmtcheck
+	@bash "$(CURDIR)/scripts/run-acceptance.sh"
 
 vet:
 	@echo "go vet ."
