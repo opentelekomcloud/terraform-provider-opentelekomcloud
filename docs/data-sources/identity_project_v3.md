@@ -34,12 +34,4 @@ The following arguments are supported:
 
 * `description` - The description of the project.
 
-* `domain_id` - See Argument Reference above.
-
-* `enabled` - See Argument Reference above.
-
-* `is_domain` - See Argument Reference above.
-
-* `name` - See Argument Reference above.
-
-* `parent_id` - See Argument Reference above.
+* `region` - Indicates the region where the project is present.
