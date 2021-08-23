@@ -94,16 +94,13 @@ func dataSourceIdentityProjectV3Read(_ context.Context, d *schema.ResourceData, 
 		isDomain = rawIsDomain.(bool)
 	}
 	for _, v := range allProjects {
-		if eOk {
-			if v.Enabled == enabled {
-				filteredProjects = append(filteredProjects, v)
-			}
+		if eOk && v.Enabled != enabled {
+			continue
 		}
-		if dOk {
-			if v.IsDomain == isDomain {
-				filteredProjects = append(filteredProjects, v)
-			}
+		if dOk && v.IsDomain != isDomain {
+			continue
 		}
+		filteredProjects = append(filteredProjects, v)
 	}
 
 	if len(filteredProjects) < 1 {
