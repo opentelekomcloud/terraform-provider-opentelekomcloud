@@ -20,13 +20,13 @@ The following arguments are supported:
 
 * `domain_id` - (Optional) The domain this project belongs to.
 
-* `name` - (Optional) The name of the project.
-
-* `parent_id` - (Optional) The parent of this project.
-
 * `enabled` - (Optional) Whether the project is enabled or disabled. Valid values are `true` and `false`.
 
 * `is_domain` - (Optional) Whether this project is a domain. Valid values are `true` and `false`.
+
+* `name` - (Optional) The name of the project.
+
+* `parent_id` - (Optional) The parent of this project.
 
 ## Attributes Reference
 
