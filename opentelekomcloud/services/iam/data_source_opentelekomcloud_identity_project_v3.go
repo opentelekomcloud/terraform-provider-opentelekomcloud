@@ -27,22 +27,27 @@ func DataSourceIdentityProjectV3() *schema.Resource {
 				Optional: true,
 				Computed: true,
 			},
-
 			"name": {
 				Type:     schema.TypeString,
 				Optional: true,
 			},
-
 			"parent_id": {
 				Type:     schema.TypeString,
 				Optional: true,
 			},
-
 			"region": {
 				Type:     schema.TypeString,
 				Optional: true,
 				Computed: true,
 				ForceNew: true,
+			},
+			"enabled": {
+				Type:     schema.TypeBool,
+				Computed: true,
+			},
+			"is_domain": {
+				Type:     schema.TypeBool,
+				Computed: true,
 			},
 		},
 	}
@@ -51,9 +56,9 @@ func DataSourceIdentityProjectV3() *schema.Resource {
 // dataSourceIdentityProjectV3Read performs the project lookup.
 func dataSourceIdentityProjectV3Read(_ context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*cfg.Config)
-	identityClient, err := config.IdentityV3Client(config.GetRegion(d))
+	client, err := config.IdentityV3Client(config.GetRegion(d))
 	if err != nil {
-		return fmterr.Errorf("error creating OpenStack identity client: %s", err)
+		return fmterr.Errorf(clientCreationFail, err)
 	}
 
 	listOpts := projects.ListOpts{
@@ -65,7 +70,7 @@ func dataSourceIdentityProjectV3Read(_ context.Context, d *schema.ResourceData, 
 	log.Printf("[DEBUG] List Options: %#v", listOpts)
 
 	var project projects.Project
-	allPages, err := projects.List(identityClient, listOpts).AllPages()
+	allPages, err := projects.List(client, listOpts).AllPages()
 	if err != nil {
 		return fmterr.Errorf("unable to query projects: %s", err)
 	}
@@ -87,12 +92,6 @@ func dataSourceIdentityProjectV3Read(_ context.Context, d *schema.ResourceData, 
 	project = allProjects[0]
 
 	log.Printf("[DEBUG] Single project found: %s", project.ID)
-	return diag.FromErr(dataSourceIdentityProjectV3Attributes(d, &project))
-}
-
-// dataSourceIdentityProjectV3Attributes populates the fields of an Project resource.
-func dataSourceIdentityProjectV3Attributes(d *schema.ResourceData, project *projects.Project) error {
-	log.Printf("[DEBUG] opentelekomcloud_identity_project_v3 details: %#v", project)
 
 	d.SetId(project.ID)
 	mErr := multierror.Append(
@@ -102,10 +101,11 @@ func dataSourceIdentityProjectV3Attributes(d *schema.ResourceData, project *proj
 		d.Set("enabled", project.Enabled),
 		d.Set("name", project.Name),
 		d.Set("parent_id", project.ParentID),
+		d.Set("region", config.GetRegion(d)),
 	)
 
 	if err := mErr.ErrorOrNil(); err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 
 	return nil
