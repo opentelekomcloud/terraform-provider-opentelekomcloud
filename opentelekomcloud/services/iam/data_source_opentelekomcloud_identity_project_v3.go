@@ -37,9 +37,7 @@ func DataSourceIdentityProjectV3() *schema.Resource {
 			},
 			"region": {
 				Type:     schema.TypeString,
-				Optional: true,
 				Computed: true,
-				ForceNew: true,
 			},
 			"enabled": {
 				Type:     schema.TypeBool,
