@@ -43,10 +43,12 @@ func DataSourceIdentityProjectV3() *schema.Resource {
 			},
 			"enabled": {
 				Type:     schema.TypeBool,
+				Optional: true,
 				Computed: true,
 			},
 			"is_domain": {
 				Type:     schema.TypeBool,
+				Optional: true,
 				Computed: true,
 			},
 		},
@@ -80,16 +82,40 @@ func dataSourceIdentityProjectV3Read(_ context.Context, d *schema.ResourceData, 
 		return fmterr.Errorf("unable to retrieve projects: %s", err)
 	}
 
-	if len(allProjects) < 1 {
+	var filteredProjects []projects.Project
+	var enabled bool
+	rawEnabled, eOk := d.GetOk("enabled")
+	if eOk {
+		enabled = rawEnabled.(bool)
+	}
+	var isDomain bool
+	rawIsDomain, dOk := d.GetOk("is_domain")
+	if dOk {
+		isDomain = rawIsDomain.(bool)
+	}
+	for _, v := range allProjects {
+		if eOk {
+			if v.Enabled == enabled {
+				filteredProjects = append(filteredProjects, v)
+			}
+		}
+		if dOk {
+			if v.IsDomain == isDomain {
+				filteredProjects = append(filteredProjects, v)
+			}
+		}
+	}
+
+	if len(filteredProjects) < 1 {
 		return fmterr.Errorf("your query returned no results. " +
 			"Please change your search criteria and try again.")
 	}
 
-	if len(allProjects) > 1 {
+	if len(filteredProjects) > 1 {
 		log.Printf("[DEBUG] Multiple results found: %#v", allProjects)
 		return fmterr.Errorf("your query returned more than one result")
 	}
-	project = allProjects[0]
+	project = filteredProjects[0]
 
 	log.Printf("[DEBUG] Single project found: %s", project.ID)
 
