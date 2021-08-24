@@ -38,7 +38,7 @@ func ResourceAlarmRule() *schema.Resource {
 				ValidateFunc: validation.All(
 					validation.StringLenBetween(1, 128),
 					validation.StringMatch(
-						regexp.MustCompile(`^[a-zA-Z][a-z0-9._-]+[a-z0-9]+$`),
+						regexp.MustCompile(`^[\w-]+$`),
 						"Only lowercase/uppercase letters, digits, periods (.), underscores (_), and hyphens (-) are allowed and must start with a letter.",
 					),
 				),
@@ -75,8 +75,11 @@ func ResourceAlarmRule() *schema.Resource {
 							ValidateFunc: validation.All(
 								validation.StringLenBetween(1, 64),
 								validation.StringMatch(
-									regexp.MustCompile(`^[a-zA-Z][a-z0-9._-]+[a-z0-9]+$`),
-									"Only lowercase/uppercase letters, digits, periods (.), underscores (_), and hyphens (-) are allowed and must start with a letter.",
+									regexp.MustCompile(`^[a-zA-Z].+`),
+									"Must start with a letter."),
+								validation.StringMatch(
+									regexp.MustCompile(`^\w+$`),
+									"Only lowercase/uppercase letters, digits, periods (.), underscores (_), and hyphens (-) are allowed.",
 								),
 							),
 						},
@@ -93,16 +96,28 @@ func ResourceAlarmRule() *schema.Resource {
 										ValidateFunc: validation.All(
 											validation.StringLenBetween(1, 32),
 											validation.StringMatch(
-												regexp.MustCompile(`^[a-zA-Z][a-z0-9._-]+[a-z0-9]+$`),
-												"Only lowercase/uppercase letters, digits, periods (.), underscores (_), and hyphens (-) are allowed and must start with a letter.",
+												regexp.MustCompile(`^[a-zA-Z].+`),
+												"Must start with a letter."),
+											validation.StringMatch(
+												regexp.MustCompile(`^[\w-]+$`),
+												"Only lowercase/uppercase letters, digits, periods (.), underscores (_), and hyphens (-) are allowed.",
 											),
 										),
 									},
 									"value": {
-										Type:         schema.TypeString,
-										Required:     true,
-										ForceNew:     true,
-										ValidateFunc: validation.IsUUID,
+										Type:     schema.TypeString,
+										Required: true,
+										ForceNew: true,
+										ValidateFunc: validation.All(
+											validation.StringLenBetween(1, 256),
+											validation.StringMatch(
+												regexp.MustCompile(`^[a-zA-Z0-9].+`),
+												"Must start with a letter."),
+											validation.StringMatch(
+												regexp.MustCompile(`^[\w-]+$`),
+												"Only lowercase/uppercase letters, digits, periods (.), underscores (_), and hyphens (-) are allowed.",
+											),
+										),
 									},
 								},
 							},

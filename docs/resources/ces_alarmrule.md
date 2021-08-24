@@ -4,12 +4,12 @@ subcategory: "Cloud Eye (CES)"
 
 # opentelekomcloud_ces_alarmrule
 
-Manages a V2 topic resource within OpenTelekomCloud.
+Manages a V1 CES Alarm Rule resource within OpenTelekomCloud.
 
 ## Example Usage
 
 ```hcl
-variable webserver_id {}
+variable server_id {}
 variable smn_topic_id {}
 
 resource "opentelekomcloud_ces_alarmrule" "alarm_rule" {
@@ -20,7 +20,7 @@ resource "opentelekomcloud_ces_alarmrule" "alarm_rule" {
     metric_name = "network_outgoing_bytes_rate_inband"
     dimensions {
       name  = "instance_id"
-      value = var.webserver_id
+      value = var.server_id
     }
   }
   condition {
@@ -44,13 +44,13 @@ resource "opentelekomcloud_ces_alarmrule" "alarm_rule" {
 The following arguments are supported:
 
 * `alarm_name` - (Required) Specifies the name of an alarm rule. The value can
-  be a string of 1 to 128 characters that can consist of numbers, lowercase letters,
+  be a string of `1` to `128` characters that can consist of numbers, lowercase letters,
   uppercase letters, underscores (_), or hyphens (-).
 
-* `alarm_description` - (Optional) The value can be a string of 0 to 256 characters.
+* `alarm_description` - (Optional) Alarm description. The value can be a string of `0` to `256` characters.
 
-* `alarm_level` - (Optional) Specifies the alarm severity. The value can be 1, 2, 3 or 4,
-  which indicates critical, major, minor, and informational. The default value is 2.
+* `alarm_level` - (Optional) Specifies the alarm severity. The value can be `1`, `2`, `3` or `4`,
+  which indicates `critical`, `major`, `minor`, and `informational`. The default value is `2`.
 
 * `metric` - (Required) Specifies the alarm metrics. The structure is described below.
 
@@ -67,97 +67,99 @@ The following arguments are supported:
   an alarm. The structure is described below.
 
 * `alarm_enabled` - (Optional) Specifies whether to enable the alarm. The default
-  value is true.
+  value is `true`.
 
 * `alarm_action_enabled` - (Optional) Specifies whether to enable the action
-  to be triggered by an alarm. The default value is true.
+  to be triggered by an alarm. The default value is `true`.
 
--> **Note:** If alarm_action_enabled is set to true, at least one of the following
-  parameters alarm_actions, insufficientdata_actions, and ok_actions cannot
-  be empty. If alarm_actions, insufficientdata_actions, and ok_actions coexist,
-  their corresponding notification_list must be of the same value.
+-> If `alarm_action_enabled` is set to `true`, at least one of the following
+  parameters `alarm_actions`, `insufficientdata_actions` (deprecated, no need to configure),
+  and `ok_actions` cannot be empty. If `alarm_actions`, `insufficientdata_actions`
+  (deprecated, no need to configure), and `ok_actions` coexist, their corresponding
+  `notification_list` must be of the same value.
 
 The `metric` block supports:
 
-* `namespace` - (Required) Specifies the namespace in service.item format. service.item
-  can be a string of 3 to 32 characters that must start with a letter and can
+* `namespace` - (Required) Specifies the namespace in `service.item` format. `service.item`
+  can be a string of `3` to `32` characters that must start with a letter and can
   consists of uppercase letters, lowercase letters, numbers, or underscores (_).
 
 * `metric_name` - (Required) Specifies the metric name. The value can be a string
-  of 1 to 64 characters that must start with a letter and can consists of uppercase
+  of `1` to `64` characters that must start with a letter and can consists of uppercase
   letters, lowercase letters, numbers, or underscores (_).
 
 * `dimensions` - (Required) Specifies the list of metric dimensions. Currently,
-  the maximum length of the dimesion list that are supported is 3. The structure
+  the maximum length of the dimension list that are supported is `3`. The structure
   is described below.
 
 The `dimensions` block supports:
 
 * `name` - (Required) Specifies the dimension name. The value can be a string
-  of 1 to 32 characters that must start with a letter and can consists of uppercase
+  of `1` to `32` characters that must start with a letter and can consists of uppercase
   letters, lowercase letters, numbers, underscores (_), or hyphens (-).
 
 * `value` - (Required) Specifies the dimension value. The value can be a string
-  of 1 to 64 characters that must start with a letter or a number and can consists
+  of `1` to `64` characters that must start with a letter or a number and can consists
   of uppercase letters, lowercase letters, numbers, underscores (_), or hyphens (-).
 
 The `condition` block supports:
 
 * `period` - (Required) Specifies the alarm checking period in seconds. The
-  value can be 1, 300, 1200, 3600, 14400, and 86400.
+  value can be `1`, `300`, `1200`, `3600`, `14400`, and `86400`.
 
--> **Note:** If period is set to 1, the raw metric data is used to determine
+-> If `period` is set to `1`, the raw metric data is used to determine
   whether to generate an alarm.
 
 * `filter` - (Required) Specifies the data rollup methods. The value can be
-  max, min, average, sum, and vaiance.
+  `max`, `min`, `average`, `sum`, and `variance`.
 
 * `comparison_operator` - (Required) Specifies the comparison condition of alarm
-  thresholds. The value can be >, =, <, >=, or <=.
+  thresholds. The value can be `>`, `=`, `<`, `>=`, or `<=`.
 
 * `value` - (Required) Specifies the alarm threshold. The value ranges from
-  0 to Number of 1.7976931348623157e+308.
+  `0` to `Number.MAX_VALUE` of `1.7976931348623157e+108`.
 
 * `unit` - (Optional) Specifies the data unit.
 
 * `count` - (Required) Specifies the number of consecutive occurrence times.
-  The value ranges from 1 to 5.
+  The value ranges from `1` to `5`.
 
 the `alarm_actions` block supports:
 
-* `type` - (Optional) specifies the type of action triggered by an alarm. the
+* `type` - (Optional) Specifies the type of action triggered by an alarm. The
   value can be notification or autoscaling.
   * `notification`: indicates that a notification will be sent to the user.
   * `autoscaling`: indicates that a scaling action will be triggered.
 
-* `notification_list` - (Required) specifies the topic urn list of the target
-  notification objects. the maximum length is 5. the topic urn list can be
-  obtained from simple message notification (smn) and in the following format:
-  urn: smn:([a-z]|[a-z]|[0-9]|\-){1,32}:([a-z]|[a-z]|[0-9]){32}:([a-z]|[a-z]|[0-9]|\-|\_){1,256}.
-  if type is set to notification, the value of notification_list cannot be
-  empty. if type is set to autoscaling, the value of notification_list must
-  be [] and the value of namespace must be sys.as.
+* `notification_list` - (Required) Specifies the topic urn list of the target
+  notification objects. The maximum length is `5`. The topic urn list can be
+  obtained from simple message notification (SMN) and in the following format:
+  `urn:smn:([a-z]|[a-z]|[0-9]|\-){1,32}:([a-z]|[a-z]|[0-9]){32}:([a-z]|[a-z]|[0-9]|\-|\_){1,256}`.
+  If `type` is set to `notification`, the value of `notification_list` cannot be
+  empty. If `type` is set to `autoscaling`, the value of `notification_list` must
+  be `[]`.
 
--> **Note:** to enable the as alarm rules take effect, you must bind scaling
-  policies. for details, see the auto scaling api reference.
+-> To enable the AS alarm rules take effect, you must bind scaling
+  policies. For details, see the [AutoScaling API Reference](https://docs.otc.t-systems.com/en-us/api/as/en-us_topic_0045219159.html).
 
 The `insufficientdata_actions` block supports:
 
-* `type` - (Optional) specifies the type of action triggered by an alarm. the
-  value is notification.
+* `type` - (Optional) Specifies the type of action triggered by an alarm.
   * `notification`: indicates that a notification will be sent to the user.
+  * `autoscaling`: indicates that a scaling action will be triggered.
 
-* `notification_list` - (Optional) indicates the list of objects to be notified
-  if the alarm status changes. the maximum length is 5.
+* `notification_list` - (Optional) Indicates the list of objects to be notified
+  if the alarm status changes. The maximum length is `5`.
 
 The `ok_actions` block supports:
 
 * `type` - (Optional) specifies the type of action triggered by an alarm. the
   value is notification.
   * `notification`: indicates that a notification will be sent to the user.
+  * `autoscaling`: indicates that a scaling action will be triggered.
 
-* `notification_list` - (Optional) indicates the list of objects to be notified
-  if the alarm status changes. the maximum length is 5.
+* `notification_list` - (Optional) Indicates the list of objects to be notified
+  if the alarm status changes. The maximum length is `5`.
 
 ## Attributes Reference
 
