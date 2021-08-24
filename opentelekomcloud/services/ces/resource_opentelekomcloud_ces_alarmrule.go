@@ -36,9 +36,12 @@ func ResourceAlarmRule() *schema.Resource {
 				Type:     schema.TypeString,
 				Required: true,
 				ForceNew: true,
-				ValidateFunc: validation.StringMatch(
-					regexp.MustCompile("^[a-zA-Z0-9][a-zA-Z0-9-]{0,63}$"),
-					"`alarm_name` must be a string of 1 to 64 characters that starts with a letter or digit and consists of uppercase/lowercase letters, digits and hyphens(-)",
+				ValidateFunc: validation.All(
+					validation.StringLenBetween(1, 64),
+					validation.StringMatch(
+						regexp.MustCompile(`^[a-zA-Z][a-z0-9._-]+[a-z0-9]+$`),
+						"Only lowercase/uppercase letters, digits, periods (.), underscores (_), and hyphens (-) are allowed and must start with a letter.",
+					),
 				),
 			},
 			"alarm_description": {
@@ -68,9 +71,12 @@ func ResourceAlarmRule() *schema.Resource {
 						"metric_name": {
 							Type:     schema.TypeString,
 							Required: true,
-							ValidateFunc: validation.StringMatch(
-								regexp.MustCompile("^[a-zA-Z0-9][a-zA-Z0-9-]{0,63}$"),
-								"`alarm_name` must be a string of 1 to 64 characters that starts with a letter or digit and consists of uppercase/lowercase letters, digits and hyphens(-)",
+							ValidateFunc: validation.All(
+								validation.StringLenBetween(1, 64),
+								validation.StringMatch(
+									regexp.MustCompile(`^[a-zA-Z][a-z0-9._-]+[a-z0-9]+$`),
+									"Only lowercase/uppercase letters, digits, periods (.), underscores (_), and hyphens (-) are allowed and must start with a letter.",
+								),
 							),
 						},
 						"dimensions": {
@@ -82,17 +88,23 @@ func ResourceAlarmRule() *schema.Resource {
 									"name": {
 										Type:     schema.TypeString,
 										Required: true,
-										ValidateFunc: validation.StringMatch(
-											regexp.MustCompile("^[a-zA-Z][a-zA-Z0-9_]{0,31}$"),
-											"`name` must be a string of 1 to 32 characters that starts with a letter and consists of uppercase/lowercase letters, digits and underscores(_)",
+										ValidateFunc: validation.All(
+											validation.StringLenBetween(1, 32),
+											validation.StringMatch(
+												regexp.MustCompile(`^[a-zA-Z][a-z0-9._-]+[a-z0-9]+$`),
+												"Only lowercase/uppercase letters, digits, periods (.), underscores (_), and hyphens (-) are allowed and must start with a letter.",
+											),
 										),
 									},
 									"value": {
 										Type:     schema.TypeString,
 										Required: true,
-										ValidateFunc: validation.StringMatch(
-											regexp.MustCompile("^[a-zA-Z0-9][a-zA-Z0-9-]{0,255}$"),
-											"`value` must be a string of 1 to 256 characters that starts with a letter or digit and consists of uppercase/lowercase letters, digits and hyphens(-)",
+										ValidateFunc: validation.All(
+											validation.StringLenBetween(1, 256),
+											validation.StringMatch(
+												regexp.MustCompile(`^[a-zA-Z][a-z0-9._-]+[a-z0-9]+$`),
+												"Only lowercase/uppercase letters, digits, periods (.), underscores (_), and hyphens (-) are allowed and must start with a letter.",
+											),
 										),
 									},
 								},

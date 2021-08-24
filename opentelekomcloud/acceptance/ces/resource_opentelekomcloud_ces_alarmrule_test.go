@@ -15,6 +15,7 @@ import (
 
 func TestCESAlarmRule_basic(t *testing.T) {
 	var ar alarmrule.AlarmRule
+	resourceName := "opentelekomcloud_ces_alarmrule.alarmrule_1"
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:          func() { common.TestAccPreCheck(t) },
@@ -22,16 +23,15 @@ func TestCESAlarmRule_basic(t *testing.T) {
 		CheckDestroy:      testCESAlarmRuleDestroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testCESAlarmRule_basic,
+				Config: testCESAlarmRuleBasic,
 				Check: resource.ComposeTestCheckFunc(
-					testCESAlarmRuleExists("opentelekomcloud_ces_alarmrule.alarmrule_1", &ar),
+					testCESAlarmRuleExists(resourceName, &ar),
 				),
 			},
 			{
-				Config: testCESAlarmRule_update,
+				Config: testCESAlarmRuleUpdate,
 				Check: resource.ComposeTestCheckFunc(
-					resource.TestCheckResourceAttr(
-						"opentelekomcloud_ces_alarmrule.alarmrule_1", "alarm_enabled", "false"),
+					resource.TestCheckResourceAttr(resourceName, "alarm_enabled", "false"),
 				),
 			},
 		},
@@ -40,9 +40,9 @@ func TestCESAlarmRule_basic(t *testing.T) {
 
 func testCESAlarmRuleDestroy(s *terraform.State) error {
 	config := common.TestAccProvider.Meta().(*cfg.Config)
-	networkingClient, err := config.CesV1Client(env.OS_REGION_NAME)
+	client, err := config.CesV1Client(env.OS_REGION_NAME)
 	if err != nil {
-		return fmt.Errorf("error creating OpenTelekomCloud ces client: %s", err)
+		return fmt.Errorf("error creating OpenTelekomCloud CESv1 client: %w", err)
 	}
 
 	for _, rs := range s.RootModule().Resources {
@@ -51,7 +51,7 @@ func testCESAlarmRuleDestroy(s *terraform.State) error {
 		}
 
 		id := rs.Primary.ID
-		_, err := alarmrule.Get(networkingClient, id).Extract()
+		_, err := alarmrule.Get(client, id).Extract()
 		if err == nil {
 			return fmt.Errorf("alarm rule still exists")
 		}
@@ -72,13 +72,13 @@ func testCESAlarmRuleExists(n string, ar *alarmrule.AlarmRule) resource.TestChec
 		}
 
 		config := common.TestAccProvider.Meta().(*cfg.Config)
-		networkingClient, err := config.CesV1Client(env.OS_REGION_NAME)
+		client, err := config.CesV1Client(env.OS_REGION_NAME)
 		if err != nil {
-			return fmt.Errorf("error creating OpenTelekomCloud ces client: %s", err)
+			return fmt.Errorf("error creating OpenTelekomCloud CESv1 client: %w", err)
 		}
 
 		id := rs.Primary.ID
-		found, err := alarmrule.Get(networkingClient, id).Extract()
+		found, err := alarmrule.Get(client, id).Extract()
 		if err != nil {
 			return err
 		}
@@ -89,7 +89,7 @@ func testCESAlarmRuleExists(n string, ar *alarmrule.AlarmRule) resource.TestChec
 	}
 }
 
-var testCESAlarmRule_basic = fmt.Sprintf(`
+var testCESAlarmRuleBasic = fmt.Sprintf(`
 resource "opentelekomcloud_compute_instance_v2" "vm_1" {
   name = "instance_1"
   network {
@@ -98,33 +98,33 @@ resource "opentelekomcloud_compute_instance_v2" "vm_1" {
 }
 
 resource "opentelekomcloud_smn_topic_v2" "topic_1" {
-  name		  = "topic_1"
-  display_name    = "The display name of topic_1"
+  name		   = "topic_1"
+  display_name = "The display name of topic_1"
 }
 
 resource "opentelekomcloud_ces_alarmrule" "alarmrule_1" {
   alarm_name = "alarm_rule1"
 
   metric {
-    namespace = "SYS.ECS"
+    namespace   = "SYS.ECS"
     metric_name = "network_outgoing_bytes_rate_inband"
     dimensions {
-        name = "instance_id"
+        name  = "instance_id"
         value = opentelekomcloud_compute_instance_v2.vm_1.id
     }
   }
   condition  {
-    period = 300
-    filter = "average"
+    period              = 300
+    filter              = "average"
     comparison_operator = ">"
-    value = 6
-    unit = "B/s"
-    count = 1
+    value               = 6
+    unit                = "B/s"
+    count               = 1
   }
   alarm_action_enabled = false
 
   alarm_actions {
-    type = "notification"
+    type              = "notification"
     notification_list = [
       opentelekomcloud_smn_topic_v2.topic_1.topic_urn
     ]
@@ -132,7 +132,7 @@ resource "opentelekomcloud_ces_alarmrule" "alarmrule_1" {
 }
 `, env.OS_NETWORK_ID)
 
-var testCESAlarmRule_update = fmt.Sprintf(`
+var testCESAlarmRuleUpdate = fmt.Sprintf(`
 resource "opentelekomcloud_compute_instance_v2" "vm_1" {
   name = "instance_1"
   network {
@@ -141,34 +141,34 @@ resource "opentelekomcloud_compute_instance_v2" "vm_1" {
 }
 
 resource "opentelekomcloud_smn_topic_v2" "topic_1" {
-  name		  = "topic_1"
-  display_name    = "The display name of topic_1"
+  name		   = "topic_1"
+  display_name = "The display name of topic_1"
 }
 
 resource "opentelekomcloud_ces_alarmrule" "alarmrule_1" {
   alarm_name = "alarm_rule1"
 
   metric {
-    namespace = "SYS.ECS"
+    namespace   = "SYS.ECS"
     metric_name = "network_outgoing_bytes_rate_inband"
     dimensions {
-        name = "instance_id"
+        name  = "instance_id"
         value = opentelekomcloud_compute_instance_v2.vm_1.id
     }
   }
   condition  {
-    period = 300
-    filter = "average"
+    period              = 300
+    filter              = "average"
     comparison_operator = ">"
-    value = 6
-    unit = "B/s"
-    count = 1
+    value               = 6
+    unit                = "B/s"
+    count               = 1
   }
   alarm_action_enabled = false
-  alarm_enabled = false
+  alarm_enabled        = false
 
   alarm_actions {
-    type = "notification"
+    type              = "notification"
     notification_list = [
       opentelekomcloud_smn_topic_v2.topic_1.topic_urn
     ]
