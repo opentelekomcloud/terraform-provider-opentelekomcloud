@@ -24,23 +24,26 @@ func DataSourceIdentityUserV3() *schema.Resource {
 				Optional: true,
 				Computed: true,
 			},
-
 			"enabled": {
 				Type:     schema.TypeBool,
 				Optional: true,
 				Default:  true,
 			},
-
 			"name": {
 				Type:     schema.TypeString,
 				Optional: true,
 			},
-
 			"region": {
 				Type:     schema.TypeString,
 				Optional: true,
+			},
+			"default_project_id": {
+				Type:     schema.TypeString,
 				Computed: true,
-				ForceNew: true,
+			},
+			"password_expires_at": {
+				Type:     schema.TypeString,
+				Computed: true,
 			},
 		},
 	}
@@ -49,9 +52,9 @@ func DataSourceIdentityUserV3() *schema.Resource {
 // dataSourceIdentityUserV3Read performs the user lookup.
 func dataSourceIdentityUserV3Read(_ context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*cfg.Config)
-	identityClient, err := config.IdentityV3Client(config.GetRegion(d))
+	client, err := config.IdentityV3Client(config.GetRegion(d))
 	if err != nil {
-		return fmterr.Errorf("error creating OpenStack identity client: %s", err)
+		return fmterr.Errorf("error creating identity client: %s", err)
 	}
 
 	enabled := d.Get("enabled").(bool)
@@ -63,8 +66,7 @@ func dataSourceIdentityUserV3Read(_ context.Context, d *schema.ResourceData, met
 
 	log.Printf("[DEBUG] List Options: %#v", listOpts)
 
-	var user users.User
-	allPages, err := users.List(identityClient, listOpts).AllPages()
+	allPages, err := users.List(client, listOpts).AllPages()
 	if err != nil {
 		return fmterr.Errorf("unable to query users: %s", err)
 	}
@@ -83,15 +85,10 @@ func dataSourceIdentityUserV3Read(_ context.Context, d *schema.ResourceData, met
 		log.Printf("[DEBUG] Multiple results found: %#v", allUsers)
 		return fmterr.Errorf("your query returned more than one result")
 	}
-	user = allUsers[0]
+
+	user := allUsers[0]
 
 	log.Printf("[DEBUG] Single user found: %s", user.ID)
-	return diag.FromErr(dataSourceIdentityUserV3Attributes(d, &user))
-}
-
-// dataSourceIdentityUserV3Attributes populates the fields of an User resource.
-func dataSourceIdentityUserV3Attributes(d *schema.ResourceData, user *users.User) error {
-	log.Printf("[DEBUG] opentelekomcloud_identity_user_v3 details: %#v", user)
 
 	d.SetId(user.ID)
 	mErr := multierror.Append(
@@ -103,7 +100,7 @@ func dataSourceIdentityUserV3Attributes(d *schema.ResourceData, user *users.User
 	)
 
 	if err := mErr.ErrorOrNil(); err != nil {
-		return err
+		return fmterr.Errorf("error setting user fields: %s", err)
 	}
 	return nil
 }
