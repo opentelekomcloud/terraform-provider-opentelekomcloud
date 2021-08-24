@@ -127,7 +127,7 @@ resource "opentelekomcloud_as_group_v1" "group_1"{
   security_groups {
     id = data.opentelekomcloud_networking_secgroup_v2.sg_1.id
   }
-  vpc_id = "%s"
+  router_id = "%s"
 }
 
 resource "opentelekomcloud_as_policy_v2" "policy_1"{
@@ -183,7 +183,7 @@ resource "opentelekomcloud_as_group_v1" "group_1"{
   security_groups {
     id = data.opentelekomcloud_networking_secgroup_v2.sg_1.id
   }
-  vpc_id = "%s"
+  router_id = "%s"
 }
 
 resource "opentelekomcloud_as_policy_v2" "policy_1"{

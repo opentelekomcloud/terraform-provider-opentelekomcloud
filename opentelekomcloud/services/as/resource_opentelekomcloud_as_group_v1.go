@@ -134,7 +134,7 @@ func ResourceASGroup() *schema.Resource {
 					},
 				},
 			},
-			"vpc_id": {
+			"router_id": {
 				Type:     schema.TypeString,
 				Required: true,
 				ForceNew: true,
@@ -377,7 +377,7 @@ func resourceASGroupCreate(ctx context.Context, d *schema.ResourceData, meta int
 		AvailableZones:            common.GetAllAvailableZones(d),
 		Networks:                  networks,
 		SecurityGroup:             secGroups,
-		VpcID:                     d.Get("vpc_id").(string),
+		VpcID:                     d.Get("router_id").(string),
 		HealthPeriodicAuditMethod: d.Get("health_periodic_audit_method").(string),
 		HealthPeriodicAuditTime:   d.Get("health_periodic_audit_time").(int),
 		HealthPeriodicAuditGrace:  d.Get("health_periodic_audit_grace_period").(int),
