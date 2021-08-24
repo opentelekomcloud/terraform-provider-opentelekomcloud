@@ -36,7 +36,7 @@ func ResourceAlarmRule() *schema.Resource {
 				Required: true,
 				ForceNew: true,
 				ValidateFunc: validation.All(
-					validation.StringLenBetween(1, 64),
+					validation.StringLenBetween(1, 128),
 					validation.StringMatch(
 						regexp.MustCompile(`^[a-zA-Z][a-z0-9._-]+[a-z0-9]+$`),
 						"Only lowercase/uppercase letters, digits, periods (.), underscores (_), and hyphens (-) are allowed and must start with a letter.",
@@ -66,10 +66,12 @@ func ResourceAlarmRule() *schema.Resource {
 						"namespace": {
 							Type:     schema.TypeString,
 							Required: true,
+							ForceNew: true,
 						},
 						"metric_name": {
 							Type:     schema.TypeString,
 							Required: true,
+							ForceNew: true,
 							ValidateFunc: validation.All(
 								validation.StringLenBetween(1, 64),
 								validation.StringMatch(
@@ -87,6 +89,7 @@ func ResourceAlarmRule() *schema.Resource {
 									"name": {
 										Type:     schema.TypeString,
 										Required: true,
+										ForceNew: true,
 										ValidateFunc: validation.All(
 											validation.StringLenBetween(1, 32),
 											validation.StringMatch(
@@ -98,6 +101,7 @@ func ResourceAlarmRule() *schema.Resource {
 									"value": {
 										Type:         schema.TypeString,
 										Required:     true,
+										ForceNew:     true,
 										ValidateFunc: validation.IsUUID,
 									},
 								},
@@ -116,6 +120,7 @@ func ResourceAlarmRule() *schema.Resource {
 						"period": {
 							Type:     schema.TypeInt,
 							Required: true,
+							ForceNew: true,
 							ValidateFunc: validation.IntInSlice([]int{
 								1, 300, 1200, 3600, 14400, 86400,
 							}),
@@ -123,6 +128,7 @@ func ResourceAlarmRule() *schema.Resource {
 						"filter": {
 							Type:     schema.TypeString,
 							Required: true,
+							ForceNew: true,
 							ValidateFunc: validation.StringInSlice([]string{
 								"max", "min", "average", "sum", "variance",
 							}, false),
@@ -130,6 +136,7 @@ func ResourceAlarmRule() *schema.Resource {
 						"comparison_operator": {
 							Type:     schema.TypeString,
 							Required: true,
+							ForceNew: true,
 							ValidateFunc: validation.StringInSlice([]string{
 								">", "=", "<", ">=", "<=",
 							}, false),
@@ -137,15 +144,19 @@ func ResourceAlarmRule() *schema.Resource {
 						"value": {
 							Type:         schema.TypeInt,
 							Required:     true,
+							ForceNew:     true,
 							ValidateFunc: validation.IntAtLeast(0),
 						},
 						"unit": {
-							Type:     schema.TypeString,
-							Optional: true,
+							Type:         schema.TypeString,
+							Optional:     true,
+							ForceNew:     true,
+							ValidateFunc: validation.StringLenBetween(0, 32),
 						},
 						"count": {
 							Type:         schema.TypeInt,
 							Required:     true,
+							ForceNew:     true,
 							ValidateFunc: validation.IntBetween(1, 5),
 						},
 					},
@@ -160,6 +171,7 @@ func ResourceAlarmRule() *schema.Resource {
 						"type": {
 							Type:     schema.TypeString,
 							Required: true,
+							ForceNew: true,
 							ValidateFunc: validation.StringInSlice([]string{
 								"notification", "autoscaling",
 							}, false),
@@ -167,6 +179,7 @@ func ResourceAlarmRule() *schema.Resource {
 						"notification_list": {
 							Type:     schema.TypeList,
 							Required: true,
+							ForceNew: true,
 							MaxItems: 5,
 							Elem:     &schema.Schema{Type: schema.TypeString},
 						},
@@ -182,6 +195,7 @@ func ResourceAlarmRule() *schema.Resource {
 						"type": {
 							Type:     schema.TypeString,
 							Required: true,
+							ForceNew: true,
 							ValidateFunc: validation.StringInSlice([]string{
 								"notification", "autoscaling",
 							}, false),
@@ -189,6 +203,7 @@ func ResourceAlarmRule() *schema.Resource {
 						"notification_list": {
 							Type:     schema.TypeList,
 							Required: true,
+							ForceNew: true,
 							MaxItems: 5,
 							Elem:     &schema.Schema{Type: schema.TypeString},
 						},
@@ -204,6 +219,7 @@ func ResourceAlarmRule() *schema.Resource {
 						"type": {
 							Type:     schema.TypeString,
 							Required: true,
+							ForceNew: true,
 							ValidateFunc: validation.StringInSlice([]string{
 								"notification", "autoscaling",
 							}, false),
@@ -211,6 +227,7 @@ func ResourceAlarmRule() *schema.Resource {
 						"notification_list": {
 							Type:     schema.TypeList,
 							Required: true,
+							ForceNew: true,
 							MaxItems: 5,
 							Elem:     &schema.Schema{Type: schema.TypeString},
 						},
@@ -230,12 +247,10 @@ func ResourceAlarmRule() *schema.Resource {
 			},
 			"update_time": {
 				Type:     schema.TypeInt,
-				Optional: true,
 				Computed: true,
 			},
 			"alarm_state": {
 				Type:     schema.TypeString,
-				Optional: true,
 				Computed: true,
 			},
 		},
