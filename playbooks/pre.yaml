@@ -1,0 +1,7 @@
+---
+- hosts: all
+  tasks:
+    - name: Create router
+      os_router:
+        name: "test"+hex.
+        state: present

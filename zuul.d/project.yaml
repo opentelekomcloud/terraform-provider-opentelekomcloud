@@ -1,10 +1,4 @@
 ---
-- job:
-    name: tflint
-    parent: golang-make
-    vars:
-      make_command: vet
-
 - project:
     merge-mode: squash-merge
     default-branch: devel

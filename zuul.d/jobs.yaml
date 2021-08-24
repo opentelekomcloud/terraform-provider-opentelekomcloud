@@ -1,0 +1,15 @@
+---
+- job:
+    name: tflint
+    parent: golang-make
+    vars:
+      make_command: vet
+
+- job:
+    name: provider-acceptance
+    parent: golang-make-functional
+    pre-run: "playbooks/pre.yaml"
+    run: "playbooks/run.yaml"
+    post-run: "playbooks/post.yaml"
+    vars:
+        functest_project_name: "eu-de_zuul_tf"
