@@ -18,34 +18,19 @@ data "opentelekomcloud_identity_user_v3" "user_1" {
 
 The following arguments are supported:
 
-* `description` - (Optional) A description of the user.
-
-* `default_project_id` - (Optional) The default project this user belongs to.
-
 * `domain_id` - (Optional) The domain this user belongs to.
 
 * `enabled` - (Optional) Whether the user is enabled or disabled. Valid values are `true` and `false`.
-
-* `idp_id` - (Optional) The identity provider ID of the user.
+  Default value is `true`.
 
 * `name` - (Optional) The name of the user.
 
-* `password_expires_at` - (Optional) Query for expired passwords. See the [OpenTelekomCloud API docs](https://docs.otc.t-systems.com/en-us/api/iam/en-us_topic_0057845638.html)
-  for more information on the query format.
-
+* `region` - (Optional) The region this user belongs to.
 
 ## Attributes Reference
 
-The following attributes are exported:
+In addition to all arguments above, the following attributes are exported:
 
-* `default_project_id` - See Argument Reference above.
+* `default_project_id` - The default project this user belongs to.
 
-* `domain_id` - See Argument Reference above.
-
-* `enabled` - See Argument Reference above.
-
-* `idp_id` - See Argument Reference above.
-
-* `name` - See Argument Reference above.
-
-* `password_expires_at` - See Argument Reference above.
+* `password_expires_at` - Password expiration date of the user.
