@@ -29,7 +29,7 @@ func TestAccASV1Group_basic(t *testing.T) {
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckASV1GroupExists(resourceName, &asGroup),
 					resource.TestCheckResourceAttr(resourceName, "lbaas_listeners.0.protocol_port", "8080"),
-					resource.TestCheckResourceAttr(resourceName, "vpc_id", env.OsRouterID),
+					resource.TestCheckResourceAttr(resourceName, "router_id", env.OsRouterID),
 					resource.TestCheckResourceAttr(resourceName, "lbaas_listeners.0.protocol_port", "8080"),
 					resource.TestCheckResourceAttr(resourceName, "health_periodic_audit_grace_period", "700"),
 					resource.TestCheckResourceAttr(resourceName, "tags.muh", "value-create"),
@@ -195,7 +195,7 @@ resource "opentelekomcloud_as_group_v1" "hth_as_group"{
     pool_id =       opentelekomcloud_lb_pool_v2.pool_1.id
     protocol_port = opentelekomcloud_lb_listener_v2.listener_1.protocol_port
   }
-  vpc_id = "%s"
+  router_id = "%s"
 
   health_periodic_audit_grace_period = 700
 
@@ -256,7 +256,7 @@ resource "opentelekomcloud_as_group_v1" "hth_as_group"{
     pool_id =       opentelekomcloud_lb_pool_v2.pool_1.id
     protocol_port = opentelekomcloud_lb_listener_v2.listener_1.protocol_port
   }
-  vpc_id = "%s"
+  router_id = "%s"
 
   health_periodic_audit_grace_period = 500
 
@@ -301,7 +301,7 @@ resource "opentelekomcloud_as_group_v1" "proxy_group" {
   desire_instance_number   = 3
   min_instance_number      = 1
   max_instance_number      = 10
-  vpc_id                   = "%s"
+  router_id                   = "%s"
   delete_publicip          = true
   delete_instances         = "yes"
 
@@ -350,7 +350,7 @@ resource "opentelekomcloud_as_group_v1" "proxy_group" {
   desire_instance_number   = 3
   min_instance_number      = 1
   max_instance_number      = 10
-  vpc_id                   = "%s"
+  router_id                   = "%s"
   delete_publicip          = true
   delete_instances         = "yes"
 

@@ -118,7 +118,7 @@ resource "opentelekomcloud_as_group_v1" "hth_as_group"{
   security_groups {
     id = opentelekomcloud_networking_secgroup_v2.secgroup.id
   }
-  vpc_id = "%s"
+  router_id = "%s"
 }
 
 resource "opentelekomcloud_as_policy_v1" "hth_as_policy"{

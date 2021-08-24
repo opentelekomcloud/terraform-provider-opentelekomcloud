@@ -26,7 +26,7 @@ resource "opentelekomcloud_as_group_v1" "as_group" {
     id = "45e4c6de-6bf0-4843-8953-2babde3d4810"
   }
 
-  vpc_id           = "1d8f7e7c-fe04-4cf5-85ac-08b478c290e9"
+  router_id        = "1d8f7e7c-fe04-4cf5-85ac-08b478c290e9"
   delete_publicip  = true
   delete_instances = "yes"
 
@@ -53,7 +53,7 @@ resource "opentelekomcloud_as_group_v1" "as_group_only_remove_members" {
     id = "45e4c6de-6bf0-4843-8953-2babde3d4810"
   }
 
-  vpc_id           = "1d8f7e7c-fe04-4cf5-85ac-08b478c290e9"
+  router_id        = "1d8f7e7c-fe04-4cf5-85ac-08b478c290e9"
   delete_publicip  = true
   delete_instances = "no"
 }
@@ -76,7 +76,7 @@ resource "opentelekomcloud_as_group_v1" "as_group_with_elb" {
     id = "45e4c6de-6bf0-4843-8953-2babde3d4810"
   }
 
-  vpc_id           = "1d8f7e7c-fe04-4cf5-85ac-08b478c290e9"
+  router_id        = "1d8f7e7c-fe04-4cf5-85ac-08b478c290e9"
   delete_publicip  = true
   delete_instances = "yes"
 
@@ -146,7 +146,7 @@ The following arguments are supported:
   A maximum of one security group can be selected. The `security_groups` object structure is
   documented below.
 
-* `vpc_id` - (Required) The VPC ID. Changing this creates a new group.
+* `router_id` - (Required) The router ID (VPC ID). Changing this creates a new group.
 
 * `health_periodic_audit_method` - (Optional) The health check method for instances
   in the AS group. The health check methods include `ELB_AUDIT` and `NOVA_AUDIT`.

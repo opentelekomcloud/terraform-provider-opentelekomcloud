@@ -77,7 +77,7 @@ resource "opentelekomcloud_vpc_subnet_v1" "subnet_as" {
   name          = var.subnet_name1_as
   cidr          = var.subnet_cidr1_as
   gateway_ip    = var.subnet_gateway_ip1_as
-  vpc_id        = opentelekomcloud_vpc_v1.vpc_as.id
+  router_id     = opentelekomcloud_vpc_v1.vpc_as.id
   primary_dns   = var.primary_dns_as
   secondary_dns = var.secondary_dns_as
 }
@@ -100,7 +100,7 @@ resource "opentelekomcloud_networking_secgroup_rule_v2" "secgroup_rule_as" {
 resource "opentelekomcloud_elb_loadbalancer" "elb_as" {
   name           = "elb_as"
   type           = "External"
-  vpc_id         = opentelekomcloud_vpc_v1.vpc_as.id
+  router_id      = opentelekomcloud_vpc_v1.vpc_as.id
   admin_state_up = "true"
   #vip_subnet_id  = opentelekomcloud_vpc_subnet_v1.subnet_as.subnet_id
 
@@ -132,7 +132,7 @@ resource "opentelekomcloud_as_group_v1" "my_as_group" {
   lb_listener_id   = opentelekomcloud_elb_listener.listener_as.id
   networks         = [{ id = opentelekomcloud_vpc_subnet_v1.subnet_as.id }]
   security_groups  = [{ id = opentelekomcloud_networking_secgroup_v2.secgroup_as.id }]
-  vpc_id           = opentelekomcloud_vpc_v1.vpc_as.id
+  router_id        = opentelekomcloud_vpc_v1.vpc_as.id
   delete_publicip  = true
   delete_instances = "yes"
   available_zones  = [var.availability_zone_as]
@@ -145,7 +145,7 @@ resource "opentelekomcloud_as_group_v1" "my_as_group2" {
   scaling_group_name       = "as_group_required"
   networks                 = [{ id = opentelekomcloud_vpc_subnet_v1.subnet_as.id }]
   security_groups          = [{ id = opentelekomcloud_networking_secgroup_v2.secgroup_as.id }]
-  vpc_id                   = opentelekomcloud_vpc_v1.vpc_as.id
+  router_id                = opentelekomcloud_vpc_v1.vpc_as.id
   scaling_configuration_id = opentelekomcloud_as_configuration_v1.as_config.id
 }
 
