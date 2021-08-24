@@ -18,14 +18,14 @@ resource "opentelekomcloud_waf_preciseprotection_rule_v1" "rule_1" {
   name      = "rule_1"
 
   conditions {
-    category = "url"
+    category = "path"
     contents = ["/login"]
-    logic    = 1
+    logic    = "contain"
   }
   conditions {
     category = "ip"
     contents = ["192.168.1.1"]
-    logic    = 3
+    logic    = "equal"
   }
 
   action_category = "block"
@@ -63,13 +63,12 @@ The following arguments are supported:
 
 The `conditions` block supports:
 
-* `category` - (Required) Specifies the condition type. The value can be url, user-agent, ip, params, cookie, referer, or header.
+* `category` - (Required) Specifies the condition type. The value can be path, user-agent, ip, params, cookie, referer, or header.
 
 * `index` - (Optional) If `category` is set to cookie, index indicates cookie name, if set to params, index indicates param name,
   if set to header, index indicates an option in the header.
 
-* `logic` - (Required) 1,2,3,4,5,6,7, and 8 indicate include, exclude, equal to, not equal to, prefix is, prefix is not, suffix is,
-  and suffix is not, respectively. If `category` is set to ip, logic can only be 3 or 4.
+* `logic` - (Required) contain, not_contain, equal, not_equal, prefix, not_prefix, suffix, and not_suffix indicate Include, Exclude, Equal to, Not equal to, Prefix is, Prefix is not, Suffix is, and Suffix is not respectively. If category is set to ip, logic can only be equal or not_equal.
 
 * `contents` - (Required) Specifies a list of content matching the condition. Currently, only one value is accepted.
 

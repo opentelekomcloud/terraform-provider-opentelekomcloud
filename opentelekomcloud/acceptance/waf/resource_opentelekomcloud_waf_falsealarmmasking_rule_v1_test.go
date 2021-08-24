@@ -53,7 +53,7 @@ func testAccCheckWafFalseAlarmMaskingRuleV1Destroy(s *terraform.State) error {
 		}
 		for _, r := range rules {
 			if r.Id == rs.Primary.ID {
-				return fmt.Errorf("Waf rule still exists")
+				return fmt.Errorf("waf rule still exists")
 			}
 		}
 	}
@@ -65,11 +65,11 @@ func testAccCheckWafFalseAlarmMaskingRuleV1Exists(n string, rule *falsealarmmask
 	return func(s *terraform.State) error {
 		rs, ok := s.RootModule().Resources[n]
 		if !ok {
-			return fmt.Errorf("Not found: %s", n)
+			return fmt.Errorf("not found: %s", n)
 		}
 
 		if rs.Primary.ID == "" {
-			return fmt.Errorf("No ID is set")
+			return fmt.Errorf("no ID is set")
 		}
 
 		config := common.TestAccProvider.Meta().(*cfg.Config)
@@ -89,7 +89,7 @@ func testAccCheckWafFalseAlarmMaskingRuleV1Exists(n string, rule *falsealarmmask
 			}
 		}
 
-		return fmt.Errorf("Waf falsealarmmasking rule not found")
+		return fmt.Errorf("waf falsealarmmasking rule not found")
 	}
 }
 

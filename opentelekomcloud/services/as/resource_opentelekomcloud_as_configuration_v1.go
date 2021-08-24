@@ -2,8 +2,6 @@ package as
 
 import (
 	"context"
-	"crypto/sha1"
-	"encoding/hex"
 	"fmt"
 	"log"
 
@@ -51,31 +49,35 @@ func ResourceASConfiguration() *schema.Resource {
 						"instance_id": {
 							Type:     schema.TypeString,
 							Optional: true,
+							ForceNew: true,
 						},
 						"flavor": {
 							Type:        schema.TypeString,
 							Optional:    true,
+							ForceNew:    true,
 							DefaultFunc: schema.EnvDefaultFunc("OS_FLAVOR_ID", nil),
 						},
 						"image": {
 							Type:        schema.TypeString,
 							Optional:    true,
+							ForceNew:    true,
 							DefaultFunc: schema.EnvDefaultFunc("OS_IMAGE_ID", nil),
 						},
 						"key_name": {
 							Type:     schema.TypeString,
 							Required: true,
+							ForceNew: true,
 						},
 						"user_data": {
-							Type:     schema.TypeString,
-							Optional: true,
-							ForceNew: true,
+							Type:             schema.TypeString,
+							Optional:         true,
+							ForceNew:         true,
+							DiffSuppressFunc: common.SuppressEmptyStringSHA,
 							// just stash the hash for state & diff comparisons
 							StateFunc: func(v interface{}) string {
-								switch v.(type) {
+								switch v := v.(type) {
 								case string:
-									hash := sha1.Sum([]byte(v.(string)))
-									return hex.EncodeToString(hash[:])
+									return common.InstallScriptHashSum(v)
 								default:
 									return ""
 								}
@@ -84,15 +86,18 @@ func ResourceASConfiguration() *schema.Resource {
 						"disk": {
 							Type:     schema.TypeList,
 							Optional: true,
+							ForceNew: true,
 							Elem: &schema.Resource{
 								Schema: map[string]*schema.Schema{
 									"size": {
 										Type:     schema.TypeInt,
 										Required: true,
+										ForceNew: true,
 									},
 									"volume_type": {
 										Type:     schema.TypeString,
 										Required: true,
+										ForceNew: true,
 										ValidateFunc: validation.StringInSlice([]string{
 											"SATA", "SAS", "SSD", "co-p1", "uh-l1",
 										}, false),
@@ -100,6 +105,7 @@ func ResourceASConfiguration() *schema.Resource {
 									"disk_type": {
 										Type:     schema.TypeString,
 										Required: true,
+										ForceNew: true,
 										ValidateFunc: validation.StringInSlice([]string{
 											"DATA", "SYS",
 										}, false),
@@ -116,15 +122,18 @@ func ResourceASConfiguration() *schema.Resource {
 							Type:     schema.TypeList,
 							Optional: true,
 							MaxItems: 5,
+							ForceNew: true,
 							Elem: &schema.Resource{
 								Schema: map[string]*schema.Schema{
 									"path": {
 										Type:     schema.TypeString,
 										Required: true,
+										ForceNew: true,
 									},
 									"content": {
 										Type:     schema.TypeString,
 										Required: true,
+										ForceNew: true,
 									},
 								},
 							},
@@ -133,17 +142,20 @@ func ResourceASConfiguration() *schema.Resource {
 							Type:     schema.TypeList,
 							Optional: true,
 							MaxItems: 1,
+							ForceNew: true,
 							Elem: &schema.Resource{
 								Schema: map[string]*schema.Schema{
 									"eip": {
 										Type:     schema.TypeList,
 										MaxItems: 1,
 										Required: true,
+										ForceNew: true,
 										Elem: &schema.Resource{
 											Schema: map[string]*schema.Schema{
 												"ip_type": {
 													Type:     schema.TypeString,
 													Required: true,
+													ForceNew: true,
 													ValidateFunc: validation.StringInSlice([]string{
 														"5_bgp", "5_mailbgp",
 													}, false),
@@ -152,16 +164,19 @@ func ResourceASConfiguration() *schema.Resource {
 													Type:     schema.TypeList,
 													MaxItems: 1,
 													Required: true,
+													ForceNew: true,
 													Elem: &schema.Resource{
 														Schema: map[string]*schema.Schema{
 															"size": {
 																Type:         schema.TypeInt,
 																Required:     true,
+																ForceNew:     true,
 																ValidateFunc: validation.IntBetween(1, 500),
 															},
 															"share_type": {
 																Type:     schema.TypeString,
 																Required: true,
+																ForceNew: true,
 																ValidateFunc: validation.StringInSlice([]string{
 																	"PER",
 																}, false),
@@ -169,6 +184,7 @@ func ResourceASConfiguration() *schema.Resource {
 															"charging_mode": {
 																Type:     schema.TypeString,
 																Required: true,
+																ForceNew: true,
 																ValidateFunc: validation.StringInSlice([]string{
 																	"traffic",
 																}, false),
@@ -185,10 +201,12 @@ func ResourceASConfiguration() *schema.Resource {
 						"metadata": {
 							Type:     schema.TypeMap,
 							Optional: true,
+							ForceNew: true,
 						},
 						"security_groups": {
 							Type:     schema.TypeSet,
 							Optional: true,
+							ForceNew: true,
 							Elem:     &schema.Schema{Type: schema.TypeString},
 							Set:      schema.HashString,
 						},
@@ -346,7 +364,7 @@ func resourceASConfigurationRead(_ context.Context, d *schema.ResourceData, meta
 	instanceConfigInfo["flavor"] = asConfig.InstanceConfig.FlavorRef
 	instanceConfigInfo["image"] = asConfig.InstanceConfig.ImageRef
 	instanceConfigInfo["key_name"] = asConfig.InstanceConfig.SSHKey
-	instanceConfigInfo["user_data"] = asConfig.InstanceConfig.UserData
+	instanceConfigInfo["user_data"] = common.InstallScriptHashSum(asConfig.InstanceConfig.UserData)
 
 	var secGrpIDs []string
 	for _, sg := range asConfig.InstanceConfig.SecurityGroups {

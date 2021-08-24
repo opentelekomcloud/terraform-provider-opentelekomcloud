@@ -4,6 +4,7 @@ import (
 	"context"
 	"sort"
 
+	"github.com/hashicorp/go-multierror"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
@@ -71,8 +72,14 @@ func dataSourceComputeAvailabilityZonesV2Read(_ context.Context, d *schema.Resou
 	sort.Strings(zones)
 
 	d.SetId(hashcode.Strings(zones))
-	d.Set("names", zones)
-	d.Set("region", region)
+	mErr := multierror.Append(
+		d.Set("names", zones),
+		d.Set("region", region),
+	)
+
+	if err := mErr.ErrorOrNil(); err != nil {
+		return diag.FromErr(err)
+	}
 
 	return nil
 }

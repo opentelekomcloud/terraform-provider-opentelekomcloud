@@ -17,7 +17,7 @@ func TestAccSFSShareAccessRulesV2_importBasic(t *testing.T) {
 		CheckDestroy:      testAccCheckSFSShareAccessRulesV2Destroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccSFSShareAccessRulesV2_basic,
+				Config: testAccSFSShareAccessRulesV2Basic,
 			},
 			{
 				ResourceName:      resourceName,

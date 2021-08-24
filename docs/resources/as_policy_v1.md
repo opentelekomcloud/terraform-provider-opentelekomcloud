@@ -11,7 +11,7 @@ Manages a V1 AS Policy resource within OpenTelekomCloud.
 ### AS Recurrence Policy
 
 ```hcl
-resource "opentelekomcloud_as_policy_v1" "hth_aspolicy"{
+resource "opentelekomcloud_as_policy_v1" "hth_aspolicy" {
   scaling_policy_name = "hth_aspolicy"
   scaling_group_id    = "4579f2f5-cbe8-425a-8f32-53dcb9d9053a"
   cool_down_time      = 900
@@ -34,14 +34,14 @@ resource "opentelekomcloud_as_policy_v1" "hth_aspolicy"{
 ### AS Scheduled Policy
 
 ```hcl
-resource "opentelekomcloud_as_policy_v1" "hth_aspolicy_1"{
+resource "opentelekomcloud_as_policy_v1" "hth_aspolicy_1" {
   scaling_policy_name = "hth_aspolicy_1"
   scaling_group_id    = "4579f2f5-cbe8-425a-8f32-53dcb9d9053a"
   cool_down_time      = 900
   scaling_policy_type = "SCHEDULED"
 
   scaling_policy_action {
-    operation = "REMOVE"
+    operation       = "REMOVE"
     instance_number = 1
   }
 
@@ -56,13 +56,13 @@ resource "opentelekomcloud_as_policy_v1" "hth_aspolicy_1"{
 ### AS Alarm Policy
 
 ```hcl
-resource "opentelekomcloud_as_policy_v1" "hth_aspolicy_2"{
+resource "opentelekomcloud_as_policy_v1" "hth_aspolicy_2" {
   scaling_policy_name = "hth_aspolicy_2"
   scaling_group_id    = "4579f2f5-cbe8-425a-8f32-53dcb9d9053a"
   cool_down_time      = 900
   scaling_policy_type = "ALARM"
   alarm_id            = "37e310f5-db9d-446e-9135-c625f9c2bbfc"
-  
+
   scaling_policy_action {
     operation       = "ADD"
     instance_number = 1

@@ -4,6 +4,7 @@ import (
 	"context"
 	"log"
 
+	"github.com/hashicorp/go-multierror"
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/sfs/v2/shares"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
@@ -125,6 +126,9 @@ func DataSourceSFSFileSystemV2() *schema.Resource {
 func dataSourceSFSFileSystemV2Read(_ context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*cfg.Config)
 	sfsClient, err := config.SfsV2Client(config.GetRegion(d))
+	if err != nil {
+		return fmterr.Errorf("error creating SFSv2 client: %w", err)
+	}
 
 	listOpts := shares.ListOpts{
 		ID:     d.Id(),
@@ -134,16 +138,16 @@ func dataSourceSFSFileSystemV2Read(_ context.Context, d *schema.ResourceData, me
 
 	refinedSfs, err := shares.List(sfsClient, listOpts)
 	if err != nil {
-		return fmterr.Errorf("Unable to retrieve shares: %s", err)
+		return fmterr.Errorf("unable to retrieve shares: %s", err)
 	}
 
 	if len(refinedSfs) < 1 {
-		return fmterr.Errorf("Your query returned no results. " +
+		return fmterr.Errorf("your query returned no results. " +
 			"Please change your search criteria and try again.")
 	}
 
 	if len(refinedSfs) > 1 {
-		return fmterr.Errorf("Your query returned more than one result." +
+		return fmterr.Errorf("your query returned more than one result." +
 			" Please try a more specific search criteria")
 	}
 
@@ -152,38 +156,50 @@ func dataSourceSFSFileSystemV2Read(_ context.Context, d *schema.ResourceData, me
 	log.Printf("[INFO] Retrieved Shares using given filter %s: %+v", share.ID, share)
 	d.SetId(share.ID)
 
-	d.Set("availability_zone", share.AvailabilityZone)
-	d.Set("description", share.Description)
-	d.Set("host", share.Host)
-	d.Set("id", share.ID)
-	d.Set("is_public", share.IsPublic)
-	d.Set("name", share.Name)
-	d.Set("project_id", share.ProjectID)
-	d.Set("share_proto", share.ShareProto)
-	d.Set("share_type", share.ShareType)
-	d.Set("size", share.Size)
-	d.Set("status", share.Status)
-	d.Set("volume_type", share.VolumeType)
-	d.Set("export_location", share.ExportLocation)
-	d.Set("export_locations", share.ExportLocations)
-	d.Set("metadata", share.Metadata)
-	d.Set("region", config.GetRegion(d))
-
-	n, err := shares.ListAccessRights(sfsClient, share.ID).ExtractAccessRights()
-	shareaccess := n[0]
-
-	d.Set("access_type", shareaccess.AccessType)
-	d.Set("access_to", shareaccess.AccessTo)
-	d.Set("access_level", shareaccess.AccessLevel)
-	d.Set("state", shareaccess.State)
-	d.Set("share_access_id", shareaccess.ID)
-
 	mount, err := shares.GetExportLocations(sfsClient, share.ID).ExtractExportLocations()
+	if err != nil {
+		return fmterr.Errorf("error getting export locations: %w", err)
+	}
 	MountTarget := mount[0]
 
-	d.Set("mount_id", MountTarget.ID)
-	d.Set("preferred", MountTarget.Preferred)
-	d.Set("share_instance_id", MountTarget.ShareInstanceID)
+	n, err := shares.ListAccessRights(sfsClient, share.ID).ExtractAccessRights()
+	if err != nil {
+		return fmterr.Errorf("error listing access rights: %w", err)
+	}
+	shareaccess := n[0]
 
+	mErr := multierror.Append(
+
+		d.Set("availability_zone", share.AvailabilityZone),
+		d.Set("description", share.Description),
+		d.Set("host", share.Host),
+		d.Set("id", share.ID),
+		d.Set("is_public", share.IsPublic),
+		d.Set("name", share.Name),
+		d.Set("project_id", share.ProjectID),
+		d.Set("share_proto", share.ShareProto),
+		d.Set("share_type", share.ShareType),
+		d.Set("size", share.Size),
+		d.Set("status", share.Status),
+		d.Set("volume_type", share.VolumeType),
+		d.Set("export_location", share.ExportLocation),
+		d.Set("export_locations", share.ExportLocations),
+		d.Set("metadata", share.Metadata),
+		d.Set("region", config.GetRegion(d)),
+
+		d.Set("access_type", shareaccess.AccessType),
+		d.Set("access_to", shareaccess.AccessTo),
+		d.Set("access_level", shareaccess.AccessLevel),
+		d.Set("state", shareaccess.State),
+		d.Set("share_access_id", shareaccess.ID),
+
+		d.Set("mount_id", MountTarget.ID),
+		d.Set("preferred", MountTarget.Preferred),
+		d.Set("share_instance_id", MountTarget.ShareInstanceID),
+	)
+
+	if err := mErr.ErrorOrNil(); err != nil {
+		return diag.FromErr(err)
+	}
 	return nil
 }

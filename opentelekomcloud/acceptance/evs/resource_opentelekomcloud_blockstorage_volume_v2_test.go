@@ -7,8 +7,6 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
-
-	golangsdk "github.com/opentelekomcloud/gophertelekomcloud"
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/blockstorage/v2/volumes"
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/evs/v2/tags"
 
@@ -26,7 +24,7 @@ func TestAccBlockStorageV2Volume_basic(t *testing.T) {
 		CheckDestroy:      testAccCheckBlockStorageV2VolumeDestroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccBlockStorageV2Volume_basic,
+				Config: testAccBlockStorageV2VolumeBasic,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckBlockStorageV2VolumeExists("opentelekomcloud_blockstorage_volume_v2.volume_1", &volume),
 					testAccCheckBlockStorageV2VolumeMetadata(&volume, "foo", "bar"),
@@ -35,7 +33,7 @@ func TestAccBlockStorageV2Volume_basic(t *testing.T) {
 				),
 			},
 			{
-				Config: testAccBlockStorageV2Volume_update,
+				Config: testAccBlockStorageV2VolumeUpdate,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckBlockStorageV2VolumeExists("opentelekomcloud_blockstorage_volume_v2.volume_1", &volume),
 					testAccCheckBlockStorageV2VolumeMetadata(&volume, "foo", "bar"),
@@ -56,15 +54,15 @@ func TestAccBlockStorageV2Volume_upscaleDownScale(t *testing.T) {
 		CheckDestroy:      testAccCheckBlockStorageV2VolumeDestroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccBlockStorageV2Volume_basic,
+				Config: testAccBlockStorageV2VolumeBasic,
 				Check:  testAccCheckBlockStorageV2VolumeExists("opentelekomcloud_blockstorage_volume_v2.volume_1", &volume),
 			},
 			{
-				Config: testAccBlockStorageV2Volume_bigger,
+				Config: testAccBlockStorageV2VolumeBigger,
 				Check:  testAccCheckBlockStorageV2VolumeSame("opentelekomcloud_blockstorage_volume_v2.volume_1", &volume),
 			},
 			{
-				Config: testAccBlockStorageV2Volume_basic,
+				Config: testAccBlockStorageV2VolumeBasic,
 				Check:  testAccCheckBlockStorageV2VolumeNew("opentelekomcloud_blockstorage_volume_v2.volume_1", &volume),
 			},
 		},
@@ -79,15 +77,15 @@ func TestAccBlockStorageV2Volume_upscaleDownScaleAssigned(t *testing.T) {
 		CheckDestroy:      testAccCheckBlockStorageV2VolumeDestroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccBlockStorageV2Volume_assigned(10),
+				Config: testAccBlockStorageV2VolumeAssigned(10),
 				Check:  testAccCheckBlockStorageV2VolumeExists("opentelekomcloud_blockstorage_volume_v2.volume_1", &volume),
 			},
 			{
-				Config: testAccBlockStorageV2Volume_assigned(12),
+				Config: testAccBlockStorageV2VolumeAssigned(12),
 				Check:  testAccCheckBlockStorageV2VolumeSame("opentelekomcloud_blockstorage_volume_v2.volume_1", &volume),
 			},
 			{
-				Config: testAccBlockStorageV2Volume_assigned(10),
+				Config: testAccBlockStorageV2VolumeAssigned(10),
 				Check:  testAccCheckBlockStorageV2VolumeNew("opentelekomcloud_blockstorage_volume_v2.volume_1", &volume),
 			},
 		},
@@ -104,7 +102,7 @@ func TestAccBlockStorageV2Volume_policy(t *testing.T) {
 		CheckDestroy:      testAccCheckBlockStorageV2VolumeDestroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccBlockStorageV2Volume_policy(os.Getenv("OS_KMS_KEY")),
+				Config: testAccBlockStorageV2VolumePolicy(os.Getenv("OS_KMS_KEY")),
 			},
 		},
 	})
@@ -112,7 +110,7 @@ func TestAccBlockStorageV2Volume_policy(t *testing.T) {
 
 func testPolicyPreCheck(t *testing.T) {
 	if os.Getenv("OS_KMS_KEY") == "" {
-		t.Errorf("OS_KMS_KEY should be set for this test to existing KMS key alias")
+		t.Skipf("OS_KMS_KEY should be set for this test to existing KMS key alias")
 	}
 }
 
@@ -123,14 +121,14 @@ func TestAccBlockStorageV2Volume_tags(t *testing.T) {
 		CheckDestroy:      testAccCheckBlockStorageV2VolumeDestroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccBlockStorageV2Volume_tags,
+				Config: testAccBlockStorageV2VolumeTags,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckBlockStorageV2VolumeTags("opentelekomcloud_blockstorage_volume_v2.volume_1", "foo", "bar"),
 					testAccCheckBlockStorageV2VolumeTags("opentelekomcloud_blockstorage_volume_v2.volume_1", "key", "value"),
 				),
 			},
 			{
-				Config: testAccBlockStorageV2Volume_tags_update,
+				Config: testAccBlockStorageV2VolumeTagsUpdate,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckBlockStorageV2VolumeTags("opentelekomcloud_blockstorage_volume_v2.volume_1", "foo2", "bar2"),
 					testAccCheckBlockStorageV2VolumeTags("opentelekomcloud_blockstorage_volume_v2.volume_1", "key2", "value2"),
@@ -149,7 +147,7 @@ func TestAccBlockStorageV2Volume_image(t *testing.T) {
 		CheckDestroy:      testAccCheckBlockStorageV2VolumeDestroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccBlockStorageV2Volume_image,
+				Config: testAccBlockStorageV2VolumeImage,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckBlockStorageV2VolumeExists("opentelekomcloud_blockstorage_volume_v2.volume_1", &volume),
 					resource.TestCheckResourceAttr(
@@ -169,7 +167,7 @@ func TestAccBlockStorageV2Volume_timeout(t *testing.T) {
 		CheckDestroy:      testAccCheckBlockStorageV2VolumeDestroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccBlockStorageV2Volume_timeout,
+				Config: testAccBlockStorageV2VolumeTimeout,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckBlockStorageV2VolumeExists("opentelekomcloud_blockstorage_volume_v2.volume_1", &volume),
 				),
@@ -192,7 +190,7 @@ func testAccCheckBlockStorageV2VolumeDestroy(s *terraform.State) error {
 
 		_, err := volumes.Get(blockStorageClient, rs.Primary.ID).Extract()
 		if err == nil {
-			return fmt.Errorf("Volume still exists")
+			return fmt.Errorf("volume still exists")
 		}
 	}
 
@@ -203,11 +201,11 @@ func testAccCheckBlockStorageV2VolumeExists(n string, volume *volumes.Volume) re
 	return func(s *terraform.State) error {
 		rs, ok := s.RootModule().Resources[n]
 		if !ok {
-			return fmt.Errorf("Not found: %s", n)
+			return fmt.Errorf("not found: %s", n)
 		}
 
 		if rs.Primary.ID == "" {
-			return fmt.Errorf("No ID is set")
+			return fmt.Errorf("no ID is set")
 		}
 
 		config := common.TestAccProvider.Meta().(*cfg.Config)
@@ -222,7 +220,7 @@ func testAccCheckBlockStorageV2VolumeExists(n string, volume *volumes.Volume) re
 		}
 
 		if found.ID != rs.Primary.ID {
-			return fmt.Errorf("Volume not found")
+			return fmt.Errorf("volume not found")
 		}
 
 		*volume = *found
@@ -231,31 +229,11 @@ func testAccCheckBlockStorageV2VolumeExists(n string, volume *volumes.Volume) re
 	}
 }
 
-func testAccCheckBlockStorageV2VolumeDoesNotExist(t *testing.T, n string, volume *volumes.Volume) resource.TestCheckFunc {
-	return func(s *terraform.State) error {
-		config := common.TestAccProvider.Meta().(*cfg.Config)
-		blockStorageClient, err := config.BlockStorageV2Client(env.OS_REGION_NAME)
-		if err != nil {
-			return fmt.Errorf("error creating OpenTelekomCloud block storage client: %s", err)
-		}
-
-		_, err = volumes.Get(blockStorageClient, volume.ID).Extract()
-		if err != nil {
-			if _, ok := err.(golangsdk.ErrDefault404); ok {
-				return nil
-			}
-			return err
-		}
-
-		return fmt.Errorf("Volume still exists")
-	}
-}
-
 func testAccCheckBlockStorageV2VolumeMetadata(
 	volume *volumes.Volume, k string, v string) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
 		if volume.Metadata == nil {
-			return fmt.Errorf("No metadata")
+			return fmt.Errorf("no metadata")
 		}
 
 		for key, value := range volume.Metadata {
@@ -267,10 +245,10 @@ func testAccCheckBlockStorageV2VolumeMetadata(
 				return nil
 			}
 
-			return fmt.Errorf("Bad value for %s: %s", k, value)
+			return fmt.Errorf("bad value for %s: %s", k, value)
 		}
 
-		return fmt.Errorf("Metadata not found: %s", k)
+		return fmt.Errorf("metadata not found: %s", k)
 	}
 }
 
@@ -278,11 +256,11 @@ func testAccCheckBlockStorageV2VolumeTags(n string, k string, v string) resource
 	return func(s *terraform.State) error {
 		rs, ok := s.RootModule().Resources[n]
 		if !ok {
-			return fmt.Errorf("Not found: %s", n)
+			return fmt.Errorf("not found: %s", n)
 		}
 
 		if rs.Primary.ID == "" {
-			return fmt.Errorf("No ID is set")
+			return fmt.Errorf("no ID is set")
 		}
 
 		config := common.TestAccProvider.Meta().(*cfg.Config)
@@ -297,7 +275,7 @@ func testAccCheckBlockStorageV2VolumeTags(n string, k string, v string) resource
 		}
 
 		if found.ID != rs.Primary.ID {
-			return fmt.Errorf("Volume not found")
+			return fmt.Errorf("volume not found")
 		}
 
 		client, err := config.BlockStorageV2Client(env.OS_REGION_NAME)
@@ -305,6 +283,9 @@ func testAccCheckBlockStorageV2VolumeTags(n string, k string, v string) resource
 			return fmt.Errorf("error creating OpenTelekomCloud block storage client: %s", err)
 		}
 		taglist, err := tags.Get(client, "volumes", found.ID).Extract()
+		if err != nil {
+			return fmt.Errorf("error creating tags for the volume: %w", err)
+		}
 		for key, value := range taglist.Tags {
 			if k != key {
 				continue
@@ -314,10 +295,10 @@ func testAccCheckBlockStorageV2VolumeTags(n string, k string, v string) resource
 				return nil
 			}
 
-			return fmt.Errorf("Bad value for %s: %s", k, value)
+			return fmt.Errorf("bad value for %s: %s", k, value)
 		}
 
-		return fmt.Errorf("Tag not found: %s", k)
+		return fmt.Errorf("tag not found: %s", k)
 	}
 }
 
@@ -344,54 +325,33 @@ func testAccCheckBlockStorageV2VolumeNew(n string, volume *volumes.Volume) resou
 	}
 }
 
-const testAccBlockStorageV2Volume_basic = `
-resource "opentelekomcloud_blockstorage_volume_v2" "volume_1" {
-  name = "volume_1"
-  description = "first test volume"
-  metadata = {
-    foo = "bar"
-  }
-  size = 1
-}
-`
-
-const testAccBlockStorageV2Volume_bigger = `
-resource "opentelekomcloud_blockstorage_volume_v2" "volume_1" {
-  name = "volume_1"
-  description = "first test volume"
-  metadata = {
-    foo = "bar"
-  }
-  size = 2
-}
-`
-
-func testAccBlockStorageV2Volume_assigned(size int) string {
+func testAccBlockStorageV2VolumeAssigned(size int) string {
 	return fmt.Sprintf(`
 resource "opentelekomcloud_blockstorage_volume_v2" "volume_1" {
-  name = "volume_1"
-  size = %d
+  name     = "volume_1"
+  size     = %d
   image_id = "%s"
 }
 
 resource "opentelekomcloud_compute_instance_v2" "instance_1" {
-  name = "instance_1"
+  name            = "instance_1"
   security_groups = ["default"]
   network {
-	uuid = "%s"
+    uuid = "%s"
   }
   block_device {
-	uuid = opentelekomcloud_blockstorage_volume_v2.volume_1.id
-	source_type = "volume"
-	boot_index = 0
-	destination_type = "volume"
-	delete_on_termination = true
+    uuid                  = opentelekomcloud_blockstorage_volume_v2.volume_1.id
+    source_type           = "volume"
+    boot_index            = 0
+    destination_type      = "volume"
+    delete_on_termination = true
   }
 }
 `, size, env.OS_IMAGE_ID, env.OS_NETWORK_ID)
 }
 
-const testAccBlockStorageV2Volume_update = `
+const (
+	testAccBlockStorageV2VolumeUpdate = `
 resource "opentelekomcloud_blockstorage_volume_v2" "volume_1" {
   name = "volume_1-updated"
   description = "first test volume"
@@ -401,8 +361,7 @@ resource "opentelekomcloud_blockstorage_volume_v2" "volume_1" {
   size = 1
 }
 `
-
-const testAccBlockStorageV2Volume_tags = `
+	testAccBlockStorageV2VolumeTags = `
 resource "opentelekomcloud_blockstorage_volume_v2" "volume_1" {
   name = "volume_1"
   description = "first test volume"
@@ -417,7 +376,7 @@ resource "opentelekomcloud_blockstorage_volume_v2" "volume_1" {
 }
 `
 
-const testAccBlockStorageV2Volume_tags_update = `
+	testAccBlockStorageV2VolumeTagsUpdate = `
 resource "opentelekomcloud_blockstorage_volume_v2" "volume_1" {
   name = "volume_1-updated"
   description = "first test volume"
@@ -431,16 +390,7 @@ resource "opentelekomcloud_blockstorage_volume_v2" "volume_1" {
   size = 1
 }
 `
-
-var testAccBlockStorageV2Volume_image = fmt.Sprintf(`
-resource "opentelekomcloud_blockstorage_volume_v2" "volume_1" {
-  name = "volume_1"
-  size = 12
-  image_id = "%s"
-}
-`, env.OS_IMAGE_ID)
-
-const testAccBlockStorageV2Volume_timeout = `
+	testAccBlockStorageV2VolumeTimeout = `
 resource "opentelekomcloud_blockstorage_volume_v2" "volume_1" {
   name = "volume_1"
   description = "first test volume"
@@ -453,8 +403,38 @@ resource "opentelekomcloud_blockstorage_volume_v2" "volume_1" {
   }
 }
 `
+	testAccBlockStorageV2VolumeBasic = `
+resource "opentelekomcloud_blockstorage_volume_v2" "volume_1" {
+  name = "volume_1"
+  description = "first test volume"
+  metadata = {
+    foo = "bar"
+  }
+  size = 1
+}
+`
 
-func testAccBlockStorageV2Volume_policy(kmsKeyAlias string) string {
+	testAccBlockStorageV2VolumeBigger = `
+resource "opentelekomcloud_blockstorage_volume_v2" "volume_1" {
+  name = "volume_1"
+  description = "first test volume"
+  metadata = {
+    foo = "bar"
+  }
+  size = 2
+}
+`
+)
+
+var testAccBlockStorageV2VolumeImage = fmt.Sprintf(`
+resource "opentelekomcloud_blockstorage_volume_v2" "volume_1" {
+  name = "volume_1"
+  size = 12
+  image_id = "%s"
+}
+`, env.OS_IMAGE_ID)
+
+func testAccBlockStorageV2VolumePolicy(kmsKeyAlias string) string {
 	return fmt.Sprintf(`
 data "opentelekomcloud_kms_key_v1" key {
   key_alias = "%s"
@@ -471,51 +451,8 @@ resource "opentelekomcloud_blockstorage_volume_v2" "volume" {
   availability_zone = data.opentelekomcloud_compute_availability_zones_v2.available.names[count.index]
   name              = "test-vol0${count.index + 1}-datadisk"
   size              = 40
-  tags              =   {
-    generator   = "terraform"
-  }
-  metadata = {
-    __system__encrypted = "1"
-    __system__cmkid     = data.opentelekomcloud_kms_key_v1.key.id
-    attached_mode       = "rw"
-    readonly            = "False"
-  }
-}
-
-resource "opentelekomcloud_vbs_backup_policy_v2" "vbs_policy1" {
-  name   = "policy_001"
-  status = "ON"
-
-  start_time          = "12:00"
-  retain_first_backup = "N"
-  rentention_num      = 7
-  frequency           = 1
-
-  resources = opentelekomcloud_blockstorage_volume_v2.volume[*].id
-
-}
-`, kmsKeyAlias)
-}
-
-func testAccBlockStorageV2Volume_policyUpdate(kmsKeyAlias string) string {
-	return fmt.Sprintf(`
-data "opentelekomcloud_kms_key_v1" key {
-  key_alias = "%s"
-}
-
-data opentelekomcloud_compute_availability_zones_v2 available {}
-
-locals {
-  count = 1
-}
-
-resource "opentelekomcloud_blockstorage_volume_v2" "volume" {
-  count             = local.count
-  availability_zone = data.opentelekomcloud_compute_availability_zones_v2.available.names[count.index]
-  name              = "test-vol0${count.index + 1}-datadisk"
-  size              = 60
-  tags              =   {
-    generator   = "terraform"
+  tags = {
+    generator = "terraform"
   }
   metadata = {
     __system__encrypted = "1"

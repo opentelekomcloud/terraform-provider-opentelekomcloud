@@ -158,7 +158,7 @@ func testAccCheckDNSV2ZoneDestroy(s *terraform.State) error {
 
 		_, err := zones.Get(dnsClient, rs.Primary.ID).Extract()
 		if err == nil {
-			return fmt.Errorf("Zone still exists")
+			return fmt.Errorf("zone still exists")
 		}
 	}
 
@@ -169,11 +169,11 @@ func testAccCheckDNSV2ZoneExists(n string, zone *zones.Zone) resource.TestCheckF
 	return func(s *terraform.State) error {
 		rs, ok := s.RootModule().Resources[n]
 		if !ok {
-			return fmt.Errorf("Not found: %s", n)
+			return fmt.Errorf("not found: %s", n)
 		}
 
 		if rs.Primary.ID == "" {
-			return fmt.Errorf("No ID is set")
+			return fmt.Errorf("no ID is set")
 		}
 
 		config := common.TestAccProvider.Meta().(*cfg.Config)
@@ -188,7 +188,7 @@ func testAccCheckDNSV2ZoneExists(n string, zone *zones.Zone) resource.TestCheckF
 		}
 
 		if found.ID != rs.Primary.ID {
-			return fmt.Errorf("Zone not found")
+			return fmt.Errorf("zone not found")
 		}
 
 		*zone = *found
@@ -200,11 +200,11 @@ func testAccCheckDNSV2ZoneExists(n string, zone *zones.Zone) resource.TestCheckF
 func testAccDNSV2Zone_basic(zoneName string) string {
 	return fmt.Sprintf(`
 resource "opentelekomcloud_dns_zone_v2" "zone_1" {
-  name = "%s"
-  email = "email1@example.com"
+  name        = "%s"
+  email       = "email1@example.com"
   description = "a public zone"
-  ttl = 3000
-  type = "public"
+  ttl         = 3000
+  type        = "public"
 
   tags = {
     foo = "bar"
@@ -217,14 +217,14 @@ resource "opentelekomcloud_dns_zone_v2" "zone_1" {
 func testAccDNSV2Zone_private(zoneName string) string {
 	return fmt.Sprintf(`
 resource "opentelekomcloud_dns_zone_v2" "zone_1" {
-  name = "%s"
-  email = "email1@example.com"
+  name        = "%s"
+  email       = "email1@example.com"
   description = "a private zone"
-  ttl = 3000
-  type = "private"
+  ttl         = 3000
+  type        = "private"
 
   router {
-    router_id = "%s"
+    router_id     = "%s"
     router_region = "%s"
   }
   tags = {
@@ -238,11 +238,11 @@ resource "opentelekomcloud_dns_zone_v2" "zone_1" {
 func testAccDNSV2Zone_update(zoneName string) string {
 	return fmt.Sprintf(`
 resource "opentelekomcloud_dns_zone_v2" "zone_1" {
-  name = "%s"
-  email = "email2@example.com"
+  name        = "%s"
+  email       = "email2@example.com"
   description = "an updated zone"
-  ttl = 6000
-  type = "public"
+  ttl         = 6000
+  type        = "public"
 
   tags = {
     foo = "bar"
@@ -255,7 +255,7 @@ resource "opentelekomcloud_dns_zone_v2" "zone_1" {
 func testAccDNSV2Zone_readTTL(zoneName string) string {
 	return fmt.Sprintf(`
 resource "opentelekomcloud_dns_zone_v2" "zone_1" {
-  name = "%s"
+  name  = "%s"
   email = "email1@example.com"
 }
 `, zoneName)
@@ -264,9 +264,9 @@ resource "opentelekomcloud_dns_zone_v2" "zone_1" {
 func testAccDNSV2Zone_timeout(zoneName string) string {
 	return fmt.Sprintf(`
 resource "opentelekomcloud_dns_zone_v2" "zone_1" {
-  name = "%s"
+  name  = "%s"
   email = "email@example.com"
-  ttl = 3000
+  ttl   = 3000
 
   timeouts {
     create = "5m"

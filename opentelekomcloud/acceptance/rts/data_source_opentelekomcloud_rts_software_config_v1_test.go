@@ -31,7 +31,7 @@ func testAccCheckRtsSoftwareConfigV1DataSourceID(n string) resource.TestCheckFun
 	return func(s *terraform.State) error {
 		rs, ok := s.RootModule().Resources[n]
 		if !ok {
-			return fmt.Errorf("Can't find software config data source: %s ", n)
+			return fmt.Errorf("can't find software config data source: %s ", n)
 		}
 
 		if rs.Primary.ID == "" {

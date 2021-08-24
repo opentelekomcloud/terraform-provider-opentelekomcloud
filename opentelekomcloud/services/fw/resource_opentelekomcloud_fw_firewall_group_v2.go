@@ -6,6 +6,7 @@ import (
 	"log"
 	"time"
 
+	"github.com/hashicorp/go-multierror"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
@@ -85,7 +86,6 @@ func ResourceFWFirewallGroupV2() *schema.Resource {
 }
 
 func resourceFWFirewallGroupV2Create(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-
 	config := meta.(*cfg.Config)
 	networkingClient, err := config.NetworkingV2Client(config.GetRegion(d))
 	if err != nil {
@@ -141,6 +141,9 @@ func resourceFWFirewallGroupV2Create(ctx context.Context, d *schema.ResourceData
 	}
 
 	_, err = stateConf.WaitForStateContext(ctx)
+	if err != nil {
+		return fmterr.Errorf("error waiting for FW group to be active: %w", err)
+	}
 	log.Printf("[DEBUG] Firewall group (%s) is active.", firewall_group.ID)
 
 	d.SetId(firewall_group.ID)
@@ -157,24 +160,30 @@ func resourceFWFirewallGroupV2Read(_ context.Context, d *schema.ResourceData, me
 		return fmterr.Errorf("error creating OpenTelekomCloud networking client: %s", err)
 	}
 
-	var firewall_group FirewallGroup
-	err = firewall_groups.Get(networkingClient, d.Id()).ExtractInto(&firewall_group)
+	var firewallGroup FirewallGroup
+	err = firewall_groups.Get(networkingClient, d.Id()).ExtractInto(&firewallGroup)
 	if err != nil {
 		return diag.FromErr(common.CheckDeleted(d, err, "firewall"))
 	}
 
-	log.Printf("[DEBUG] Read OpenTelekomCloud Firewall group %s: %#v", d.Id(), firewall_group)
+	log.Printf("[DEBUG] Read OpenTelekomCloud Firewall group %s: %#v", d.Id(), firewallGroup)
 
-	d.Set("name", firewall_group.Name)
-	d.Set("description", firewall_group.Description)
-	d.Set("ingress_policy_id", firewall_group.IngressPolicyID)
-	d.Set("egress_policy_id", firewall_group.EgressPolicyID)
-	d.Set("admin_state_up", firewall_group.AdminStateUp)
-	d.Set("tenant_id", firewall_group.TenantID)
-	if err := d.Set("ports", firewall_group.PortIDs); err != nil {
+	mErr := multierror.Append(
+		d.Set("name", firewallGroup.Name),
+		d.Set("description", firewallGroup.Description),
+		d.Set("ingress_policy_id", firewallGroup.IngressPolicyID),
+		d.Set("egress_policy_id", firewallGroup.EgressPolicyID),
+		d.Set("admin_state_up", firewallGroup.AdminStateUp),
+		d.Set("tenant_id", firewallGroup.TenantID),
+		d.Set("region", config.GetRegion(d)),
+	)
+
+	if err := mErr.ErrorOrNil(); err != nil {
+		return diag.FromErr(err)
+	}
+	if err := d.Set("ports", firewallGroup.PortIDs); err != nil {
 		return fmterr.Errorf("[DEBUG] Error saving ports to state for OpenTelekomCloud firewall group (%s): %s", d.Id(), err)
 	}
-	d.Set("region", config.GetRegion(d))
 
 	return nil
 }
@@ -239,6 +248,9 @@ func resourceFWFirewallGroupV2Update(ctx context.Context, d *schema.ResourceData
 	}
 
 	_, err = stateConf.WaitForStateContext(ctx)
+	if err != nil {
+		return fmterr.Errorf("error waiting for firewall group to become active: %w", err)
+	}
 
 	return resourceFWFirewallGroupV2Read(ctx, d, meta)
 }
@@ -263,6 +275,9 @@ func resourceFWFirewallGroupV2Delete(ctx context.Context, d *schema.ResourceData
 	}
 
 	_, err = stateConf.WaitForStateContext(ctx)
+	if err != nil {
+		return fmterr.Errorf("error waiting for FW group to be active: %w", err)
+	}
 
 	err = firewall_groups.Delete(networkingClient, d.Id()).Err
 
@@ -285,10 +300,8 @@ func resourceFWFirewallGroupV2Delete(ctx context.Context, d *schema.ResourceData
 }
 
 func waitForFirewallGroupActive(networkingClient *golangsdk.ServiceClient, id string) resource.StateRefreshFunc {
-
 	return func() (interface{}, string, error) {
 		var fw FirewallGroup
-
 		err := firewall_groups.Get(networkingClient, id).ExtractInto(&fw)
 		if err != nil {
 			return nil, "", err
@@ -307,7 +320,7 @@ func waitForFirewallGroupDeletion(networkingClient *golangsdk.ServiceClient, id 
 				log.Printf("[DEBUG] Firewall group %s is actually deleted", id)
 				return "", "DELETED", nil
 			}
-			return nil, "", fmt.Errorf("Unexpected error: %s", err)
+			return nil, "", fmt.Errorf("unexpected error: %s", err)
 		}
 
 		log.Printf("[DEBUG] Firewall group %s deletion is pending", id)

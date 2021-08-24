@@ -36,7 +36,7 @@ resource "opentelekomcloud_networking_port_v2" "port_1" {
   admin_state_up = "true"
   network_id     = opentelekomcloud_networking_network_v2.network_1.id
   fixed_ip {
-    subnet_id =  opentelekomcloud_networking_subnet_v2.subnet_1.id
+    subnet_id = opentelekomcloud_networking_subnet_v2.subnet_1.id
   }
 }
 
@@ -54,7 +54,7 @@ resource "opentelekomcloud_networking_port_v2" "port_2" {
   admin_state_up = "true"
   network_id     = opentelekomcloud_networking_network_v2.network_1.id
   fixed_ip {
-    subnet_id =  opentelekomcloud_networking_subnet_v2.subnet_1.id
+    subnet_id = opentelekomcloud_networking_subnet_v2.subnet_1.id
   }
 }
 
@@ -73,9 +73,9 @@ resource "opentelekomcloud_networking_vip_v2" "vip_1" {
 }
 
 resource "opentelekomcloud_networking_vip_associate_v2" "vip_associate_1" {
-  vip_id   = opentelekomcloud_networking_vip_v2.vip_1.id
+  vip_id = opentelekomcloud_networking_vip_v2.vip_1.id
   port_ids = [opentelekomcloud_networking_port_v2.port_1.id,
-              opentelekomcloud_networking_port_v2.port_2.id]
+  opentelekomcloud_networking_port_v2.port_2.id]
 }
 ```
 

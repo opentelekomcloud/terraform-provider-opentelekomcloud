@@ -22,13 +22,13 @@ func TestAccSFSShareAccessRulesV2_basic(t *testing.T) {
 		CheckDestroy:      testAccCheckSFSShareAccessRulesV2Destroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccSFSShareAccessRulesV2_basic,
+				Config: testAccSFSShareAccessRulesV2Basic,
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr(resourceName, "access_rule.#", "2"),
 				),
 			},
 			{
-				Config: testAccSFSShareAccessRulesV2_update,
+				Config: testAccSFSShareAccessRulesV2Update,
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr(resourceName, "access_rule.#", "1"),
 				),
@@ -58,7 +58,7 @@ func testAccCheckSFSShareAccessRulesV2Destroy(s *terraform.State) error {
 	return nil
 }
 
-var testAccSFSShareAccessRulesV2_basic = fmt.Sprintf(`
+const testAccSFSShareAccessRulesV2Basic = `
 resource "opentelekomcloud_vpc_v1" "vpc_1" {
   name   = "sfs_share_vpc_1"
   cidr   = "192.168.0.0/16"
@@ -91,9 +91,9 @@ resource "opentelekomcloud_sfs_share_access_rules_v2" "sfs_rules" {
     access_level = "rw"
   }
 }
-`)
+`
 
-var testAccSFSShareAccessRulesV2_update = fmt.Sprintf(`
+const testAccSFSShareAccessRulesV2Update = `
 resource "opentelekomcloud_vpc_v1" "vpc_1" {
   name   = "sfs_share_vpc_1"
   cidr   = "192.168.0.0/16"
@@ -120,4 +120,4 @@ resource "opentelekomcloud_sfs_share_access_rules_v2" "sfs_rules" {
     access_level = "rw"
   }
 }
-`)
+`

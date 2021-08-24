@@ -6,7 +6,6 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
-
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/cce/v3/nodepools"
 
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/acceptance/common"
@@ -25,7 +24,7 @@ func TestAccCCENodePoolsV3_basic(t *testing.T) {
 		CheckDestroy:      testAccCheckCCENodePoolV3Destroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccCCENodePoolV3_basic,
+				Config: testAccCCENodePoolV3Basic,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckCCENodePoolV3Exists(nodePoolName, clusterName, &nodePool),
 					resource.TestCheckResourceAttr(nodePoolName, "name", "opentelekomcloud-cce-node-pool"),
@@ -35,7 +34,7 @@ func TestAccCCENodePoolsV3_basic(t *testing.T) {
 				),
 			},
 			{
-				Config: testAccCCENodePoolV3_update,
+				Config: testAccCCENodePoolV3Update,
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr(nodePoolName, "initial_node_count", "2"),
 					resource.TestCheckResourceAttr(nodePoolName, "k8s_tags.kubelet.kubernetes.io/namespace", "kuh"),
@@ -56,10 +55,31 @@ func TestAccCCENodePoolsV3_randomAZ(t *testing.T) {
 		CheckDestroy:      testAccCheckCCENodePoolV3Destroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccCCENodePoolV3_RandomAZ,
+				Config: testAccCCENodePoolV3RandomAZ,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckCCENodePoolV3Exists(nodePoolName, clusterName, &nodePool),
 					resource.TestCheckResourceAttr(nodePoolName, "availability_zone", "random"),
+				),
+			},
+		},
+	})
+}
+
+func TestAccCCENodePoolsV3EncryptedVolume(t *testing.T) {
+	var nodePool nodepools.NodePool
+	nodePoolName := "opentelekomcloud_cce_node_pool_v3.node_pool"
+	clusterName := "opentelekomcloud_cce_cluster_v3.cluster"
+
+	resource.Test(t, resource.TestCase{
+		PreCheck:          func() { testAccCCEKeyPairPreCheck(t) },
+		ProviderFactories: common.TestAccProviderFactories,
+		CheckDestroy:      testAccCheckCCENodeV3Destroy,
+		Steps: []resource.TestStep{
+			{
+				Config: testAccCCENodePoolV3Encrypted,
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckCCENodePoolV3Exists(nodePoolName, clusterName, &nodePool),
+					resource.TestCheckResourceAttr(nodePoolName, "data_volumes.0.kms_id", env.OS_KMS_ID),
 				),
 			},
 		},
@@ -133,7 +153,7 @@ func testAccCheckCCENodePoolV3Exists(n string, cluster string, nodePool *nodepoo
 }
 
 var (
-	testAccCCENodePoolV3_basic = fmt.Sprintf(`
+	testAccCCENodePoolV3Basic = fmt.Sprintf(`
 resource "opentelekomcloud_cce_cluster_v3" "cluster" {
   name         = "opentelekomcloud-cce-np"
   cluster_type = "VirtualMachine"
@@ -174,7 +194,7 @@ resource "opentelekomcloud_cce_node_pool_v3" "node_pool" {
   }
 }`, env.OS_VPC_ID, env.OS_NETWORK_ID, env.OS_AVAILABILITY_ZONE, env.OS_KEYPAIR_NAME)
 
-	testAccCCENodePoolV3_update = fmt.Sprintf(`
+	testAccCCENodePoolV3Update = fmt.Sprintf(`
 resource "opentelekomcloud_cce_cluster_v3" "cluster" {
   name         = "opentelekomcloud-cce-np"
   cluster_type = "VirtualMachine"
@@ -215,7 +235,7 @@ resource "opentelekomcloud_cce_node_pool_v3" "node_pool" {
   }
 }`, env.OS_VPC_ID, env.OS_NETWORK_ID, env.OS_AVAILABILITY_ZONE, env.OS_KEYPAIR_NAME)
 
-	testAccCCENodePoolV3_RandomAZ = fmt.Sprintf(`
+	testAccCCENodePoolV3RandomAZ = fmt.Sprintf(`
 resource "opentelekomcloud_cce_cluster_v3" "cluster" {
   name         = "opentelekomcloud-cce-np"
   cluster_type = "VirtualMachine"
@@ -251,4 +271,42 @@ resource "opentelekomcloud_cce_node_pool_v3" "node_pool" {
     volumetype = "SSD"
   }
 }`, env.OS_VPC_ID, env.OS_NETWORK_ID, env.OS_KEYPAIR_NAME)
+
+	testAccCCENodePoolV3Encrypted = fmt.Sprintf(`
+resource "opentelekomcloud_cce_cluster_v3" "cluster" {
+  name         = "opentelekomcloud-cce-np"
+  cluster_type = "VirtualMachine"
+  flavor_id    = "cce.s1.small"
+  vpc_id       = "%s"
+  subnet_id    = "%s"
+
+  container_network_type = "overlay_l2"
+  authentication_mode    = "rbac"
+}
+
+resource "opentelekomcloud_cce_node_pool_v3" "node_pool" {
+  cluster_id         = opentelekomcloud_cce_cluster_v3.cluster.id
+  name               = "opentelekomcloud-cce-node-pool"
+  os                 = "EulerOS 2.5"
+  flavor             = "s2.xlarge.2"
+  initial_node_count = 1
+  key_pair           = "%s"
+  availability_zone  = "random"
+
+  scale_enable             = false
+  min_node_count           = 0
+  max_node_count           = 0
+  scale_down_cooldown_time = 0
+  priority                 = 0
+
+  root_volume {
+    size       = 40
+    volumetype = "SSD"
+  }
+  data_volumes {
+    size       = 100
+    volumetype = "SSD"
+    kms_id     = "%s"
+  }
+}`, env.OS_VPC_ID, env.OS_NETWORK_ID, env.OS_KEYPAIR_NAME, env.OS_KMS_ID)
 )

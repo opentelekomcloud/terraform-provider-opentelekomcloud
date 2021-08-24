@@ -9,11 +9,11 @@ require (
 	github.com/hashicorp/go-cty v1.4.1-0.20200414143053-d3edf31b6320
 	github.com/hashicorp/go-multierror v1.1.0
 	github.com/hashicorp/go-version v1.3.0
-	github.com/hashicorp/terraform-plugin-sdk/v2 v2.6.1
+	github.com/hashicorp/terraform-plugin-sdk/v2 v2.7.0
 	github.com/jen20/awspolicyequivalence v1.1.0
 	github.com/jinzhu/copier v0.2.3
 	github.com/mitchellh/go-homedir v1.1.0
-	github.com/opentelekomcloud/gophertelekomcloud v0.4.2-0.20210611075415-18454cd1ce33
+	github.com/opentelekomcloud/gophertelekomcloud v0.5.2-0.20210819114616-4d61c7161bd9
 	github.com/unknwon/com v1.0.1
 	gopkg.in/yaml.v2 v2.4.0
 )

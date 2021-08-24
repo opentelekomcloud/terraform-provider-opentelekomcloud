@@ -10,9 +10,9 @@ Use this data source to get details about a specific RTS Software Config.
 
 
 ```hcl
-variable "config_name" { }
+variable "config_name" {}
 
-variable "server_id" { }
+variable "server_id" {}
 
 data "opentelekomcloud_rts_software_config_v1" "myconfig" {
   id = var.config_name

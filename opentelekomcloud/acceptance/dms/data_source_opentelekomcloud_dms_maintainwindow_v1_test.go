@@ -16,7 +16,7 @@ func TestAccDmsMaintainWindowV1DataSource_basic(t *testing.T) {
 		ProviderFactories: common.TestAccProviderFactories,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccDmsMaintainWindowV1DataSource_basic,
+				Config: testAccDmsMaintainWindowV1DataSourceBasic,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckDmsMaintainWindowV1DataSourceID("data.opentelekomcloud_dms_maintainwindow_v1.maintainwindow1"),
 					resource.TestCheckResourceAttr(
@@ -33,19 +33,19 @@ func testAccCheckDmsMaintainWindowV1DataSourceID(n string) resource.TestCheckFun
 	return func(s *terraform.State) error {
 		rs, ok := s.RootModule().Resources[n]
 		if !ok {
-			return fmt.Errorf("Can't find Dms maintainwindow data source: %s", n)
+			return fmt.Errorf("can't find Dms maintainwindow data source: %s", n)
 		}
 
 		if rs.Primary.ID == "" {
-			return fmt.Errorf("Dms maintainwindow data source ID not set")
+			return fmt.Errorf("dms maintainwindow data source ID not set")
 		}
 
 		return nil
 	}
 }
 
-var testAccDmsMaintainWindowV1DataSource_basic = fmt.Sprintf(`
+const testAccDmsMaintainWindowV1DataSourceBasic = `
 data "opentelekomcloud_dms_maintainwindow_v1" "maintainwindow1" {
   seq = 1
 }
-`)
+`

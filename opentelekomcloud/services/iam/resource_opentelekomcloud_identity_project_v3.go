@@ -5,6 +5,7 @@ import (
 	"log"
 	"time"
 
+	"github.com/hashicorp/go-multierror"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/identity/v3/projects"
@@ -94,6 +95,7 @@ func resourceIdentityProjectV3Create(ctx context.Context, d *schema.ResourceData
 		_, err := projects.Get(identityClient, d.Id()).Extract()
 		if err != nil {
 			time.Sleep(5 * time.Second)
+			continue
 		}
 		break
 	}
@@ -115,13 +117,18 @@ func resourceIdentityProjectV3Read(_ context.Context, d *schema.ResourceData, me
 
 	log.Printf("[DEBUG] Retrieved OpenStack project: %#v", project)
 
-	d.Set("description", project.Description)
-	d.Set("domain_id", project.DomainID)
-	d.Set("enabled", project.Enabled)
-	d.Set("is_domain", project.IsDomain)
-	d.Set("name", project.Name)
-	d.Set("parent_id", project.ParentID)
-	d.Set("region", config.GetRegion(d))
+	mErr := multierror.Append(
+		d.Set("description", project.Description),
+		d.Set("domain_id", project.DomainID),
+		d.Set("enabled", project.Enabled),
+		d.Set("is_domain", project.IsDomain),
+		d.Set("name", project.Name),
+		d.Set("parent_id", project.ParentID),
+		d.Set("region", config.GetRegion(d)),
+	)
+	if err := mErr.ErrorOrNil(); err != nil {
+		return diag.FromErr(err)
+	}
 
 	return nil
 }

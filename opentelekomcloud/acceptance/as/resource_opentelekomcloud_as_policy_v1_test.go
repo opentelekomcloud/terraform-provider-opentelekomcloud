@@ -60,11 +60,11 @@ func testAccCheckASV1PolicyExists(n string, policy *policies.Policy) resource.Te
 	return func(s *terraform.State) error {
 		rs, ok := s.RootModule().Resources[n]
 		if !ok {
-			return fmt.Errorf("Not found: %s", n)
+			return fmt.Errorf("not found: %s", n)
 		}
 
 		if rs.Primary.ID == "" {
-			return fmt.Errorf("No ID is set")
+			return fmt.Errorf("no ID is set")
 		}
 
 		config := common.TestAccProvider.Meta().(*cfg.Config)
@@ -130,7 +130,7 @@ resource "opentelekomcloud_as_policy_v1" "hth_as_policy"{
     instance_number = 1
   }
   scheduled_policy {
-    launch_time = "2020-12-22T12:00Z"
+    launch_time = "2022-12-22T12:00Z"
   }
 }
 `, env.OS_IMAGE_ID, env.OS_NETWORK_ID, env.OS_VPC_ID)

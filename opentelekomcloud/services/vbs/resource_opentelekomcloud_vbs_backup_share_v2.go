@@ -5,6 +5,7 @@ import (
 	"log"
 	"time"
 
+	"github.com/hashicorp/go-multierror"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	golangsdk "github.com/opentelekomcloud/gophertelekomcloud"
@@ -148,19 +149,25 @@ func resourceVBSBackupShareV2Read(_ context.Context, d *schema.ResourceData, met
 
 	n := backups[0]
 
-	d.Set("backup_id", n.BackupID)
-	d.Set("backup_name", n.Backup.Name)
-	d.Set("backup_status", n.Backup.Status)
-	d.Set("description", n.Backup.Description)
-	d.Set("availability_zone", n.Backup.AvailabilityZone)
-	d.Set("volume_id", n.Backup.VolumeID)
-	d.Set("size", n.Backup.Size)
-	d.Set("service_metadata", n.Backup.ServiceMetadata)
-	d.Set("container", n.Backup.Container)
-	d.Set("snapshot_id", n.Backup.SnapshotID)
-	d.Set("region", config.GetRegion(d))
-	d.Set("to_project_ids", resourceToProjectIdsV2(backups))
-	d.Set("share_ids", resourceShareIDsV2(backups))
+	mErr := multierror.Append(
+		d.Set("backup_id", n.BackupID),
+		d.Set("backup_name", n.Backup.Name),
+		d.Set("backup_status", n.Backup.Status),
+		d.Set("description", n.Backup.Description),
+		d.Set("availability_zone", n.Backup.AvailabilityZone),
+		d.Set("volume_id", n.Backup.VolumeID),
+		d.Set("size", n.Backup.Size),
+		d.Set("service_metadata", n.Backup.ServiceMetadata),
+		d.Set("container", n.Backup.Container),
+		d.Set("snapshot_id", n.Backup.SnapshotID),
+		d.Set("region", config.GetRegion(d)),
+		d.Set("to_project_ids", resourceToProjectIdsV2(backups)),
+		d.Set("share_ids", resourceShareIDsV2(backups)),
+	)
+
+	if err := mErr.ErrorOrNil(); err != nil {
+		return diag.FromErr(err)
+	}
 
 	return nil
 }
@@ -178,7 +185,6 @@ func resourceVBSBackupShareV2Delete(_ context.Context, d *schema.ResourceData, m
 	if err != nil {
 		if _, ok := err.(golangsdk.ErrDefault404); ok {
 			log.Printf("[INFO] Successfully deleted OpenTelekomCloud Vbs Backup Share %s", d.Id())
-
 		}
 		if errCode, ok := err.(golangsdk.ErrUnexpectedResponseCode); ok {
 			if errCode.Actual == 409 {

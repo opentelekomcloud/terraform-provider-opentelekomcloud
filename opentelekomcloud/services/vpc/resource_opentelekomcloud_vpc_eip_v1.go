@@ -226,7 +226,6 @@ func resourceVpcEIPV1Update(ctx context.Context, d *schema.ResourceData, meta in
 		if err != nil {
 			return fmterr.Errorf("error updating bandwidth: %s", err)
 		}
-
 	}
 
 	// Update publicip change
@@ -242,7 +241,6 @@ func resourceVpcEIPV1Update(ctx context.Context, d *schema.ResourceData, meta in
 		if err != nil {
 			return fmterr.Errorf("error updating publicip: %s", err)
 		}
-
 	}
 
 	// update tags

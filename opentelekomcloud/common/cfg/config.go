@@ -264,7 +264,11 @@ func (c *Config) GetCredentials() (*awsCredentials.Credentials, error) {
 	// Real AWS should reply to a simple metadata request.
 	// We check it actually does to ensure something else didn't just
 	// happen to be listening on the same IP:Port
-	metadataClient := ec2metadata.New(session.New(config))
+	sess, err := session.NewSession(config)
+	if err != nil {
+		return nil, err
+	}
+	metadataClient := ec2metadata.New(sess)
 	if metadataClient.Available() {
 		providers = append(providers, &ec2rolecreds.EC2RoleProvider{
 			Client: metadataClient,
@@ -535,6 +539,8 @@ func (c *Config) genClient(ao golangsdk.AuthOptionsProvider) (*golangsdk.Provide
 		}
 	}
 
+	c.Region = client.RegionID
+
 	return client, nil
 }
 
@@ -591,30 +597,32 @@ func setUpOBSLogging() {
 	}
 }
 
-// setupTemporaryCredentials creates temporary AK/SK, which can be used to auth in OBS when AK/SK is not provided
-func (c *Config) setupTemporaryCredentials() error {
-	if c.SecurityToken != "" || (c.AccessKey != "" && c.SecretKey != "") {
-		return nil
+// issueTemporaryCredentials creates temporary AK/SK, which can be used to auth in OBS when AK/SK is not provided
+func (c *Config) issueTemporaryCredentials() (*credentials.TemporaryCredential, error) {
+	if c.AccessKey != "" && c.SecretKey != "" {
+		return &credentials.TemporaryCredential{
+			AccessKey:     c.AccessKey,
+			SecretKey:     c.SecretKey,
+			SecurityToken: c.SecurityToken,
+		}, nil
 	}
 	client, err := c.IdentityV3Client()
 	if err != nil {
-		return fmt.Errorf("error creating identity v3 domain client: %s", err)
+		return nil, fmt.Errorf("error creating identity v3 domain client: %s", err)
 	}
 	credential, err := credentials.CreateTemporary(client, credentials.CreateTemporaryOpts{
 		Methods: []string{"token"},
 		Token:   client.Token(),
 	}).Extract()
 	if err != nil {
-		return fmt.Errorf("error creating temporary AK/SK: %s", err)
+		return nil, fmt.Errorf("error creating temporary AK/SK: %s", err)
 	}
-	c.AccessKey = credential.AccessKey
-	c.SecretKey = credential.SecretKey
-	c.SecurityToken = credential.SecurityToken
-	return nil
+	return credential, nil
 }
 
 func (c *Config) NewObjectStorageClient(region string) (*obs.ObsClient, error) {
-	if err := c.setupTemporaryCredentials(); err != nil {
+	cred, err := c.issueTemporaryCredentials()
+	if err != nil {
 		return nil, fmt.Errorf("failed to construct OBS client without AK/SK: %s", err)
 	}
 
@@ -628,14 +636,7 @@ func (c *Config) NewObjectStorageClient(region string) (*obs.ObsClient, error) {
 
 	setUpOBSLogging()
 
-	return obs.New(c.AccessKey, c.SecretKey, client.Endpoint, obs.WithSecurityToken(c.SecurityToken))
-}
-
-func (c *Config) blockStorageV1Client(region string) (*golangsdk.ServiceClient, error) {
-	return openstack.NewBlockStorageV1(c.HwClient, golangsdk.EndpointOpts{
-		Region:       region,
-		Availability: c.getEndpointType(),
-	})
+	return obs.New(cred.AccessKey, cred.SecretKey, client.Endpoint, obs.WithSecurityToken(cred.SecurityToken))
 }
 
 func (c *Config) BlockStorageV2Client(region string) (*golangsdk.ServiceClient, error) {
@@ -803,6 +804,13 @@ func (c *Config) AutoscalingV1Client(region string) (*golangsdk.ServiceClient, e
 	})
 }
 
+func (c *Config) AutoscalingV2Client(region string) (*golangsdk.ServiceClient, error) {
+	return openstack.NewAutoScalingV2(c.HwClient, golangsdk.EndpointOpts{
+		Region:       region,
+		Availability: c.getEndpointType(),
+	})
+}
+
 func (c *Config) CsbsV1Client(region string) (*golangsdk.ServiceClient, error) {
 	return openstack.NewCSBSService(c.HwClient, golangsdk.EndpointOpts{
 		Region:       region,
@@ -865,6 +873,13 @@ func (c *Config) CtsV1Client(projectName ProjectName) (*golangsdk.ServiceClient,
 
 func (c *Config) CssV1Client(region string) (*golangsdk.ServiceClient, error) {
 	return openstack.NewCSSService(c.HwClient, golangsdk.EndpointOpts{
+		Region:       region,
+		Availability: c.getEndpointType(),
+	})
+}
+
+func (c *Config) CceV1Client(region string) (*golangsdk.ServiceClient, error) {
+	return openstack.NewCCEv1(c.HwClient, golangsdk.EndpointOpts{
 		Region:       region,
 		Availability: c.getEndpointType(),
 	})

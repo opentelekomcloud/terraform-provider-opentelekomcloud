@@ -16,7 +16,7 @@ func TestAccDcsProductV1DataSource_basic(t *testing.T) {
 		ProviderFactories: common.TestAccProviderFactories,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccDcsProductV1DataSource_basic,
+				Config: testAccDcsProductV1DataSourceBasic,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckDcsProductV1DataSourceID("data.opentelekomcloud_dcs_product_v1.product1"),
 					resource.TestCheckResourceAttr(
@@ -31,19 +31,19 @@ func testAccCheckDcsProductV1DataSourceID(n string) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
 		rs, ok := s.RootModule().Resources[n]
 		if !ok {
-			return fmt.Errorf("Can't find Dcs product data source: %s", n)
+			return fmt.Errorf("can't find Dcs product data source: %s", n)
 		}
 
 		if rs.Primary.ID == "" {
-			return fmt.Errorf("Dcs product data source ID not set")
+			return fmt.Errorf("DCS product data source ID not set")
 		}
 
 		return nil
 	}
 }
 
-var testAccDcsProductV1DataSource_basic = fmt.Sprintf(`
+const testAccDcsProductV1DataSourceBasic = `
 data "opentelekomcloud_dcs_product_v1" "product1" {
   spec_code = "dcs.single_node"
 }
-`)
+`

@@ -116,6 +116,9 @@ func DataSourceAntiDdosV1() *schema.Resource {
 func dataSourceAntiDdosV1Read(_ context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*cfg.Config)
 	antiddosClient, err := config.AntiddosV1Client(config.GetRegion(d))
+	if err != nil {
+		return fmterr.Errorf("error creating anti-DDoS client: %w", err)
+	}
 
 	listStatusOpts := antiddos.ListStatusOpts{
 		FloatingIpId: d.Get("floating_ip_id").(string),
@@ -125,7 +128,7 @@ func dataSourceAntiDdosV1Read(_ context.Context, d *schema.ResourceData, meta in
 
 	refinedAntiddos, err := antiddos.ListStatus(antiddosClient, listStatusOpts)
 	if err != nil {
-		return fmterr.Errorf("Unable to retrieve the defense status of  EIP, defense is not configured.: %s", err)
+		return fmterr.Errorf("unable to retrieve the defense status of  EIP, defense is not configured.: %s", err)
 	}
 
 	if len(refinedAntiddos) < 1 {
@@ -150,9 +153,6 @@ func dataSourceAntiDdosV1Read(_ context.Context, d *schema.ResourceData, meta in
 
 		d.Set("region", config.GetRegion(d)),
 	)
-	if err = me.ErrorOrNil(); err != nil {
-		return fmterr.Errorf("[DEBUG] Error saving main conf to state for AntiDdos data-source (%s): %s", d.Id(), err)
-	}
 
 	traffic, err := antiddos.DailyReport(antiddosClient, ddosStatus.FloatingIpId).Extract()
 	log.Printf("traffic %#v", traffic)
@@ -164,43 +164,43 @@ func dataSourceAntiDdosV1Read(_ context.Context, d *schema.ResourceData, meta in
 	for _, param := range traffic {
 		periodStart = append(periodStart, param.PeriodStart)
 	}
-	d.Set("period_start", periodStart)
+	me = multierror.Append(me, d.Set("period_start", periodStart))
 
 	bpsIn := make([]int, 0)
 	for _, param := range traffic {
 		bpsIn = append(bpsIn, param.BpsIn)
 	}
-	d.Set("bps_in", bpsIn)
+	me = multierror.Append(me, d.Set("bps_in", bpsIn))
 
 	bpsAttack := make([]int, 0)
 	for _, param := range traffic {
 		bpsAttack = append(bpsAttack, param.BpsAttack)
 	}
-	d.Set("bps_attack", bpsAttack)
+	me = multierror.Append(me, d.Set("bps_attack", bpsAttack))
 
 	totalBps := make([]int, 0)
 	for _, param := range traffic {
 		totalBps = append(totalBps, param.TotalBps)
 	}
-	d.Set("total_bps", totalBps)
+	me = multierror.Append(me, d.Set("total_bps", totalBps))
 
 	ppsIn := make([]int, 0)
 	for _, param := range traffic {
 		ppsIn = append(ppsIn, param.PpsIn)
 	}
-	d.Set("pps_in", ppsIn)
+	me = multierror.Append(me, d.Set("pps_in", ppsIn))
 
 	ppsAttack := make([]int, 0)
 	for _, param := range traffic {
 		ppsAttack = append(ppsAttack, param.PpsAttack)
 	}
-	d.Set("pps_attack", ppsAttack)
+	me = multierror.Append(me, d.Set("pps_attack", ppsAttack))
 
 	totalPps := make([]int, 0)
 	for _, param := range traffic {
 		totalPps = append(totalPps, param.TotalPps)
 	}
-	d.Set("total_pps", totalPps)
+	me = multierror.Append(me, d.Set("total_pps", totalPps))
 
 	listEventOpts := antiddos.ListLogsOpts{}
 	event, err := antiddos.ListLogs(antiddosClient, ddosStatus.FloatingIpId, listEventOpts).Extract()
@@ -213,37 +213,41 @@ func dataSourceAntiDdosV1Read(_ context.Context, d *schema.ResourceData, meta in
 	for _, param := range event {
 		startTime = append(startTime, param.StartTime)
 	}
-	d.Set("start_time", startTime)
+	me = multierror.Append(me, d.Set("start_time", startTime))
 
 	endTime := make([]int, 0)
 	for _, param := range event {
 		endTime = append(endTime, param.EndTime)
 	}
-	d.Set("end_time", endTime)
+	me = multierror.Append(me, d.Set("end_time", endTime))
 
 	cleaningStatus := make([]int, 0)
 	for _, param := range event {
 		cleaningStatus = append(cleaningStatus, param.Status)
 	}
-	d.Set("traffic_cleaning_status", cleaningStatus)
+	me = multierror.Append(me, d.Set("traffic_cleaning_status", cleaningStatus))
 
 	triggerBps := make([]int, 0)
 	for _, param := range event {
 		triggerBps = append(triggerBps, param.TriggerBps)
 	}
-	d.Set("trigger_bps", triggerBps)
+	me = multierror.Append(me, d.Set("trigger_bps", triggerBps))
 
 	triggerPps := make([]int, 0)
 	for _, param := range event {
 		triggerPps = append(triggerPps, param.TriggerPps)
 	}
-	d.Set("trigger_pps", triggerPps)
+	me = multierror.Append(me, d.Set("trigger_pps", triggerPps))
 
 	triggerHttpPps := make([]int, 0)
 	for _, param := range event {
 		triggerHttpPps = append(triggerHttpPps, param.TriggerHttpPps)
 	}
-	d.Set("trigger_http_pps", triggerHttpPps)
+	me = multierror.Append(me, d.Set("trigger_http_pps", triggerHttpPps))
+
+	if err = me.ErrorOrNil(); err != nil {
+		return fmterr.Errorf("[DEBUG] Error saving main conf to state for AntiDdos data-source (%s): %s", d.Id(), err)
+	}
 
 	return nil
 }

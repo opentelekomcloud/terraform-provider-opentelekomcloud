@@ -17,8 +17,8 @@ snapshot:
 test: fmtcheck
 	go test -v ./...
 
-testacc: fmtcheck
-	@TF_ACC=1 go test $(TEST) -v -timeout 720m
+acceptance: fmtcheck
+	@bash "$(CURDIR)/scripts/run-acceptance.sh"
 
 vet:
 	@echo "go vet ."
@@ -38,6 +38,8 @@ fmtcheck:
 errcheck:
 	@sh -c "'$(CURDIR)/scripts/errcheck.sh'"
 
+lint:
+	golangci-lint run ./...
 
 test-compile:
 	@if [ "$(TEST)" = "./..." ]; then \
@@ -47,5 +49,17 @@ test-compile:
 	fi
 	go test -c $(TEST)
 
-.PHONY: build test testacc vet fmt fmtcheck errcheck test-compile
+tools:
+	@echo "==> installing required tooling..."
+	go install github.com/katbyte/terrafmt@latest
 
+tflint: tools
+	./scripts/run-tflint.sh
+
+tffmtfix: tools
+	@echo "==> Fixing acceptance test terraform blocks code with terrafmt..."
+	@find ./opentelekomcloud/acceptance -type f -name "*_test.go" | sort | while read f; do terrafmt fmt -f $$f; done
+	@echo "==> Fixing docs terraform blocks code with terrafmt..."
+	@find ./docs -type f -name "*.md" | sort | while read f; do terrafmt fmt $$f; done
+
+.PHONY: build test acceptance vet fmt fmtcheck errcheck test-compile tflint tffmtfix lint

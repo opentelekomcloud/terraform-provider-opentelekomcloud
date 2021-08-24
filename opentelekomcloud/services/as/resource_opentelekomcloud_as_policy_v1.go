@@ -8,6 +8,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/hashicorp/go-multierror"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/autoscaling/v1/policies"
@@ -138,12 +139,12 @@ func validateParameters(d *schema.ResourceData) error {
 	log.Printf("[DEBUG] validateParameters scheduledPolicy is :%#v", scheduledPolicy)
 	if policyType == "ALARM" {
 		if alarmId == "" {
-			return fmt.Errorf("Parameter alarm_id should be set if policy type is ALARM.")
+			return fmt.Errorf("parameter alarm_id should be set if policy type is ALARM")
 		}
 	}
 	if policyType == "SCHEDULED" || policyType == "RECURRENCE" {
 		if len(scheduledPolicy) == 0 {
-			return fmt.Errorf("Parameter scheduled_policy should be set if policy type is RECURRENCE or SCHEDULED.")
+			return fmt.Errorf("parameter scheduled_policy should be set if policy type is RECURRENCE or SCHEDULED")
 		}
 	}
 
@@ -155,10 +156,10 @@ func validateParameters(d *schema.ResourceData) error {
 		log.Printf("[DEBUG] validateParameters recurrenceType is :%#v", recurrenceType)
 		if policyType == "RECURRENCE" {
 			if recurrenceType == "" {
-				return fmt.Errorf("Parameter recurrence_type should be set if policy type is RECURRENCE.")
+				return fmt.Errorf("parameter recurrence_type should be set if policy type is RECURRENCE")
 			}
 			if endTime == "" {
-				return fmt.Errorf("Parameter end_time should be set if policy type is RECURRENCE.")
+				return fmt.Errorf("parameter end_time should be set if policy type is RECURRENCE")
 			}
 		}
 	}
@@ -239,18 +240,20 @@ func resourceASPolicyRead(_ context.Context, d *schema.ResourceData, meta interf
 	}
 
 	log.Printf("[DEBUG] Retrieved ASPolicy %q: %+v", d.Id(), asPolicy)
-	d.Set("scaling_policy_name", asPolicy.Name)
-	d.Set("scaling_policy_type", asPolicy.Type)
-	d.Set("alarm_id", asPolicy.AlarmID)
-	d.Set("cool_down_time", asPolicy.CoolDownTime)
+	mErr := multierror.Append(
+		d.Set("scaling_policy_name", asPolicy.Name),
+		d.Set("scaling_policy_type", asPolicy.Type),
+		d.Set("alarm_id", asPolicy.AlarmID),
+		d.Set("cool_down_time", asPolicy.CoolDownTime),
+		d.Set("region", config.GetRegion(d)),
+	)
 
 	policyActionInfo := asPolicy.Action
 	policyAction := map[string]interface{}{}
 	policyAction["operation"] = policyActionInfo.Operation
 	policyAction["instance_number"] = policyActionInfo.InstanceNum
-	policyActionList := []map[string]interface{}{}
-	policyActionList = append(policyActionList, policyAction)
-	d.Set("scaling_policy_action", policyActionList)
+	policyActionList := []interface{}{policyAction}
+	mErr = multierror.Append(mErr, d.Set("scaling_policy_action", policyActionList))
 
 	scheduledPolicyInfo := asPolicy.SchedulePolicy
 	scheduledPolicy := map[string]interface{}{}
@@ -259,11 +262,12 @@ func resourceASPolicyRead(_ context.Context, d *schema.ResourceData, meta interf
 	scheduledPolicy["recurrence_value"] = scheduledPolicyInfo.RecurrenceValue
 	scheduledPolicy["start_time"] = scheduledPolicyInfo.StartTime
 	scheduledPolicy["end_time"] = scheduledPolicyInfo.EndTime
-	scheduledPolicies := []map[string]interface{}{}
-	scheduledPolicies = append(scheduledPolicies, scheduledPolicy)
-	d.Set("scheduled_policy", scheduledPolicies)
+	scheduledPolicies := []interface{}{scheduledPolicy}
+	mErr = multierror.Append(mErr, d.Set("scheduled_policy", scheduledPolicies))
 
-	d.Set("region", config.GetRegion(d))
+	if err := mErr.ErrorOrNil(); err != nil {
+		return diag.FromErr(err)
+	}
 
 	return nil
 }

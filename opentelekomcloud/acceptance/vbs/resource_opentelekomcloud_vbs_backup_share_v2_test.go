@@ -66,7 +66,7 @@ func testAccVBSBackupShareV2Destroy(s *terraform.State) error {
 
 		_, err := shares.List(vbsClient, shares.ListOpts{BackupID: rs.Primary.ID})
 		if err != nil {
-			return fmt.Errorf("Backup share still exists")
+			return fmt.Errorf("backup share still exists")
 		}
 	}
 
@@ -77,11 +77,11 @@ func testAccVBSBackupShareV2Exists(n string, share *shares.Share) resource.TestC
 	return func(s *terraform.State) error {
 		rs, ok := s.RootModule().Resources[n]
 		if !ok {
-			return fmt.Errorf("Not found: %s", n)
+			return fmt.Errorf("not found: %s", n)
 		}
 
 		if rs.Primary.ID == "" {
-			return fmt.Errorf("No ID is set")
+			return fmt.Errorf("no ID is set")
 		}
 
 		config := common.TestAccProvider.Meta().(*cfg.Config)

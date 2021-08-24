@@ -5,6 +5,7 @@ import (
 	"log"
 	"time"
 
+	"github.com/hashicorp/go-multierror"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
@@ -110,10 +111,13 @@ func resourceVPCPeeringV2Create(ctx context.Context, d *schema.ResourceData, met
 	}
 
 	_, err = stateConf.WaitForStateContext(ctx)
+	if err != nil {
+		return fmterr.Errorf("error waiting for VIP to become active: %w", err)
+	}
+
 	d.SetId(n.ID)
 
 	return resourceVPCPeeringV2Read(ctx, d, meta)
-
 }
 
 func resourceVPCPeeringV2Read(_ context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
@@ -133,13 +137,17 @@ func resourceVPCPeeringV2Read(_ context.Context, d *schema.ResourceData, meta in
 		return fmterr.Errorf("error retrieving OpenTelekomCloud Vpc Peering Connection: %s", err)
 	}
 
-	d.Set("id", n.ID)
-	d.Set("name", n.Name)
-	d.Set("status", n.Status)
-	d.Set("vpc_id", n.RequestVpcInfo.VpcId)
-	d.Set("peer_vpc_id", n.AcceptVpcInfo.VpcId)
-	d.Set("peer_tenant_id", n.AcceptVpcInfo.TenantId)
-	d.Set("region", config.GetRegion(d))
+	mErr := multierror.Append(
+		d.Set("name", n.Name),
+		d.Set("status", n.Status),
+		d.Set("vpc_id", n.RequestVpcInfo.VpcId),
+		d.Set("peer_vpc_id", n.AcceptVpcInfo.VpcId),
+		d.Set("peer_tenant_id", n.AcceptVpcInfo.TenantId),
+		d.Set("region", config.GetRegion(d)),
+	)
+	if err := mErr.ErrorOrNil(); err != nil {
+		return fmterr.Errorf("error setting VPC peering attributes: %w", err)
+	}
 
 	return nil
 }
@@ -164,7 +172,6 @@ func resourceVPCPeeringV2Update(ctx context.Context, d *schema.ResourceData, met
 }
 
 func resourceVPCPeeringV2Delete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-
 	config := meta.(*cfg.Config)
 	peeringClient, err := config.NetworkingV2Client(config.GetRegion(d))
 	if err != nil {
@@ -206,7 +213,6 @@ func waitForVpcPeeringActive(peeringClient *golangsdk.ServiceClient, peeringId s
 
 func waitForVpcPeeringDelete(peeringClient *golangsdk.ServiceClient, peeringId string) resource.StateRefreshFunc {
 	return func() (interface{}, string, error) {
-
 		r, err := peerings.Get(peeringClient, peeringId).Extract()
 
 		if err != nil {

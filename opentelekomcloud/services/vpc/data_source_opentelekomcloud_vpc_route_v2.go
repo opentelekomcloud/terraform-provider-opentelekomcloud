@@ -4,6 +4,7 @@ import (
 	"context"
 	"log"
 
+	"github.com/hashicorp/go-multierror"
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/networking/v2/routes"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
@@ -68,19 +69,21 @@ func dataSourceVpcRouteV2Read(_ context.Context, d *schema.ResourceData, meta in
 	}
 
 	pages, err := routes.List(vpcRouteClient, listOpts).AllPages()
-	refinedRoutes, err := routes.ExtractRoutes(pages)
-
 	if err != nil {
-		return fmterr.Errorf("Unable to retrieve vpc routes: %s", err)
+		return fmterr.Errorf("unable to list vpc Routes: %s", err)
+	}
+	refinedRoutes, err := routes.ExtractRoutes(pages)
+	if err != nil {
+		return fmterr.Errorf("unable to retrieve vpc routes: %s", err)
 	}
 
 	if len(refinedRoutes) < 1 {
-		return fmterr.Errorf("Your query returned no results. " +
+		return fmterr.Errorf("your query returned no results. " +
 			"Please change your search criteria and try again.")
 	}
 
 	if len(refinedRoutes) > 1 {
-		return fmterr.Errorf("Your query returned more than one result." +
+		return fmterr.Errorf("your query returned more than one result." +
 			" Please try a more specific search criteria")
 	}
 
@@ -89,13 +92,17 @@ func dataSourceVpcRouteV2Read(_ context.Context, d *schema.ResourceData, meta in
 	log.Printf("[INFO] Retrieved Vpc Route using given filter %s: %+v", Route.RouteID, Route)
 	d.SetId(Route.RouteID)
 
-	d.Set("type", Route.Type)
-	d.Set("nexthop", Route.NextHop)
-	d.Set("destination", Route.Destination)
-	d.Set("tenant_id", Route.Tenant_Id)
-	d.Set("vpc_id", Route.VPC_ID)
-	d.Set("id", Route.RouteID)
-	d.Set("region", config.GetRegion(d))
+	mErr := multierror.Append(
+		d.Set("type", Route.Type),
+		d.Set("nexthop", Route.NextHop),
+		d.Set("destination", Route.Destination),
+		d.Set("tenant_id", Route.Tenant_Id),
+		d.Set("vpc_id", Route.VPC_ID),
+		d.Set("region", config.GetRegion(d)),
+	)
+	if err := mErr.ErrorOrNil(); err != nil {
+		return fmterr.Errorf("error setting VPC route attributes: %w", err)
+	}
 
 	return nil
 }

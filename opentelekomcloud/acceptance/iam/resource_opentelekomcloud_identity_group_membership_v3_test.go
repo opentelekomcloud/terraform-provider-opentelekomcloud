@@ -65,7 +65,7 @@ func testAccCheckIdentityV3GroupMembershipDestroy(s *terraform.State) error {
 		_, err := users.ListInGroup(identityClient, rs.Primary.Attributes["group"], nil).AllPages()
 
 		if err == nil {
-			return fmt.Errorf("User still exists")
+			return fmt.Errorf("user still exists")
 		}
 	}
 
@@ -76,11 +76,11 @@ func testAccCheckIdentityV3GroupMembershipExists(n string, us []string) resource
 	return func(s *terraform.State) error {
 		rs, ok := s.RootModule().Resources[n]
 		if !ok {
-			return fmt.Errorf("Not found: %s", n)
+			return fmt.Errorf("not found: %s", n)
 		}
 
 		if rs.Primary.ID == "" {
-			return fmt.Errorf("No ID is set")
+			return fmt.Errorf("no ID is set")
 		}
 
 		config := common.TestAccProvider.Meta().(*cfg.Config)
@@ -90,7 +90,7 @@ func testAccCheckIdentityV3GroupMembershipExists(n string, us []string) resource
 		}
 		group := rs.Primary.Attributes["group"]
 		if group == "" {
-			return fmt.Errorf("No group is set")
+			return fmt.Errorf("no group is set")
 		}
 
 		pages, err := users.ListInGroup(identityClient, group, nil).AllPages()
@@ -113,7 +113,7 @@ func testAccCheckIdentityV3GroupMembershipExists(n string, us []string) resource
 		}
 
 		if uc > 0 {
-			return fmt.Errorf("Bad group membership compare, excepted(%d), but(%d)", len(us), len(founds))
+			return fmt.Errorf("bad group membership compare, excepted(%d), but(%d)", len(us), len(founds))
 		}
 
 		return nil
@@ -122,66 +122,66 @@ func testAccCheckIdentityV3GroupMembershipExists(n string, us []string) resource
 
 func testAccIdentityV3GroupMembership_basic(groupName, userName string) string {
 	return fmt.Sprintf(`
-    resource "opentelekomcloud_identity_group_v3" "group_1" {
-      name = "%s"
-    }
+resource "opentelekomcloud_identity_group_v3" "group_1" {
+  name = "%s"
+}
 
-    resource "opentelekomcloud_identity_user_v3" "user_1" {
-      name = "%s"
-      password = "password123@#"
-      enabled = true
-    }
+resource "opentelekomcloud_identity_user_v3" "user_1" {
+  name     = "%s"
+  password = "password123@#"
+  enabled  = true
+}
 
-    resource "opentelekomcloud_identity_group_membership_v3" "membership_1" {
-        group = opentelekomcloud_identity_group_v3.group_1.id
-        users = [opentelekomcloud_identity_user_v3.user_1.id]
-    }
+resource "opentelekomcloud_identity_group_membership_v3" "membership_1" {
+  group = opentelekomcloud_identity_group_v3.group_1.id
+  users = [opentelekomcloud_identity_user_v3.user_1.id]
+}
   `, groupName, userName)
 }
 
 func testAccIdentityV3GroupMembership_update(groupName, userName string, userName2 string) string {
 	return fmt.Sprintf(`
-    resource "opentelekomcloud_identity_group_v3" "group_1" {
-      name = "%s"
-    }
+resource "opentelekomcloud_identity_group_v3" "group_1" {
+  name = "%s"
+}
 
-    resource "opentelekomcloud_identity_user_v3" "user_1" {
-      name = "%s"
-      password = "password123@#"
-      enabled = true
-    }
+resource "opentelekomcloud_identity_user_v3" "user_1" {
+  name     = "%s"
+  password = "password123@#"
+  enabled  = true
+}
 
-    resource "opentelekomcloud_identity_user_v3" "user_2" {
-      name = "%s"
-      password = "password123@#"
-      enabled = true
-    }
+resource "opentelekomcloud_identity_user_v3" "user_2" {
+  name     = "%s"
+  password = "password123@#"
+  enabled  = true
+}
 
 
-    resource "opentelekomcloud_identity_group_membership_v3" "membership_1" {
-        group = opentelekomcloud_identity_group_v3.group_1.id
-        users = [opentelekomcloud_identity_user_v3.user_1.id,
-                opentelekomcloud_identity_user_v3.user_2.id]
-    }
+resource "opentelekomcloud_identity_group_membership_v3" "membership_1" {
+  group = opentelekomcloud_identity_group_v3.group_1.id
+  users = [opentelekomcloud_identity_user_v3.user_1.id,
+  opentelekomcloud_identity_user_v3.user_2.id]
+}
   `, groupName, userName, userName2)
 }
 
 func testAccIdentityV3GroupMembership_updatedown(groupName, userName string) string {
 	return fmt.Sprintf(`
-    resource "opentelekomcloud_identity_group_v3" "group_1" {
-      name = "%s"
-    }
+resource "opentelekomcloud_identity_group_v3" "group_1" {
+  name = "%s"
+}
 
-    resource "opentelekomcloud_identity_user_v3" "user_2" {
-      name = "%s"
-      password = "password123@#"
-      enabled = true
-    }
+resource "opentelekomcloud_identity_user_v3" "user_2" {
+  name     = "%s"
+  password = "password123@#"
+  enabled  = true
+}
 
 
-    resource "opentelekomcloud_identity_group_membership_v3" "membership_1" {
-        group = opentelekomcloud_identity_group_v3.group_1.id
-        users = [opentelekomcloud_identity_user_v3.user_2.id]
-    }
+resource "opentelekomcloud_identity_group_membership_v3" "membership_1" {
+  group = opentelekomcloud_identity_group_v3.group_1.id
+  users = [opentelekomcloud_identity_user_v3.user_2.id]
+}
   `, groupName, userName)
 }

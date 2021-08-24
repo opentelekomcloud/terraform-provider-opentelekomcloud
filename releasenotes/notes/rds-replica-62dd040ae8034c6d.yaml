@@ -1,0 +1,4 @@
+---
+enhancements:
+  - |
+    **[RDS]** Allow setting ``public_ips`` for ``resource/opentelekomcloud_rds_read_replica_v3`` (`#1296 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/1296>`_)

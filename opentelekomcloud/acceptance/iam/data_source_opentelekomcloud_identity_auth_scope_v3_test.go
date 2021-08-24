@@ -37,11 +37,11 @@ func testAccCheckIdentityAuthScopeV3DataSourceID(n string) resource.TestCheckFun
 	return func(s *terraform.State) error {
 		rs, ok := s.RootModule().Resources[n]
 		if !ok {
-			return fmt.Errorf("Can't find token data source: %s", n)
+			return fmt.Errorf("can't find token data source: %s", n)
 		}
 
 		if rs.Primary.ID == "" {
-			return fmt.Errorf("Token data source ID not set")
+			return fmt.Errorf("token data source ID not set")
 		}
 
 		return nil

@@ -234,6 +234,13 @@ func ResourceRdsInstanceV3() *schema.Resource {
 					ValidateFunc: common.ValidateIP,
 				},
 			},
+			"parameters": {
+				Type:     schema.TypeMap,
+				Optional: true,
+				Elem: &schema.Schema{
+					Type: schema.TypeString,
+				},
+			},
 		},
 	}
 }
@@ -412,7 +419,107 @@ func resourceRdsInstanceV3Create(ctx context.Context, d *schema.ResourceData, me
 		}
 	}
 
+	templateRestart, err := assureTemplateApplied(d, client)
+	if err != nil {
+		return fmterr.Errorf("error making sure configuration template is applied: %w", err)
+	}
+
+	paramRestart, err := updateInstanceParameters(d, client)
+	if err != nil {
+		return fmterr.Errorf("error applying parameters to the instance: %w", err)
+	}
+
+	if templateRestart || paramRestart {
+		if err := instances.WaitForStateAvailable(client, 1200, d.Id()); err != nil {
+			return fmterr.Errorf("error waiting for instance to become available: %w", err)
+		}
+		if err := restartInstance(d, client); err != nil {
+			return diag.FromErr(err)
+		}
+	}
+
 	return resourceRdsInstanceV3Read(ctx, d, meta)
+}
+
+func assureTemplateApplied(d *schema.ResourceData, client *golangsdk.ServiceClient) (bool, error) {
+	templateID := d.Get("param_group_id").(string)
+	if templateID == "" {
+		return false, nil
+	}
+
+	applied, err := configurations.Get(client, templateID).Extract()
+	if err != nil {
+		return false, fmt.Errorf("error getting parameter template %s: %w", templateID, err)
+	}
+	// convert to the map
+	appliedParams := make(map[string]configurations.Parameter, len(applied.Parameters))
+	for _, param := range applied.Parameters {
+		appliedParams[param.Name] = param
+	}
+
+	current, err := configurations.GetForInstance(client, d.Id()).Extract()
+	if err != nil {
+		return false, fmt.Errorf("error getting configuration of instance %s: %w", d.Id(), err)
+	}
+
+	needsReapply := false
+	for _, val := range current.Parameters {
+		param, ok := appliedParams[val.Name]
+		if !ok { // than it's not from the template
+			continue
+		}
+		if val.Value != param.Value {
+			needsReapply = true
+			break // that's enough
+		}
+	}
+	if !needsReapply {
+		return false, nil
+	}
+
+	return applyTemplate(d, client)
+}
+
+func restartInstance(d *schema.ResourceData, client *golangsdk.ServiceClient) error {
+	job, err := instances.Restart(client, instances.RestartRdsInstanceOpts{Restart: "{}"}, d.Id()).Extract()
+	if err != nil {
+		return fmt.Errorf("error restarting RDS instance: %w", err)
+	}
+	timeout := d.Timeout(schema.TimeoutCreate)
+	if err := instances.WaitForJobCompleted(client, int(timeout.Seconds()), job.JobId); err != nil {
+		return fmt.Errorf("error waiting for instance to reboot: %w", err)
+	}
+	return nil
+}
+
+func applyTemplate(d *schema.ResourceData, client *golangsdk.ServiceClient) (bool, error) {
+	templateID := d.Get("param_group_id").(string)
+	applyResult, err := configurations.Apply(client, templateID, configurations.ApplyOpts{
+		InstanceIDs: []string{d.Id()},
+	}).Extract()
+	if err != nil {
+		return false, fmt.Errorf("error applying configuration %s to instance %s: %w", templateID, d.Id(), err)
+	}
+	restartRequired := false
+	switch l := len(applyResult.ApplyResults); l {
+	case 0:
+		return false, fmt.Errorf("empty appply results")
+	case 1:
+		result := applyResult.ApplyResults[0]
+		if !result.Success {
+			return false, fmt.Errorf("unsuccessful apply of template instance %s", result.InstanceID)
+		}
+		restartRequired = result.RestartRequired
+	default:
+		return false, fmt.Errorf("more that one apply result returned: %#v", applyResult.ApplyResults)
+	}
+
+	waitSeconds := int(d.Timeout(schema.TimeoutCreate).Seconds())
+	if err := instances.WaitForStateAvailable(client, waitSeconds, d.Id()); err != nil {
+		return false, err
+	}
+
+	return restartRequired, nil
 }
 
 func GetRdsInstance(rdsClient *golangsdk.ServiceClient, rdsId string) (*instances.RdsInstanceResponse, error) {
@@ -465,7 +572,7 @@ func findFloatingIP(client *golangsdk.ServiceClient, address string) (id string,
 		if address != ip.FloatingIP {
 			continue
 		}
-		return floatingIPs[0].ID, nil
+		return ip.ID, nil
 	}
 	return
 }
@@ -523,6 +630,9 @@ func unAssignEipFromInstance(client *golangsdk.ServiceClient, oldPublicIP string
 	ipID, err := findFloatingIP(client, oldPublicIP)
 	if err != nil {
 		return err
+	}
+	if ipID == "" {
+		return nil
 	}
 	return floatingips.Update(client, ipID, floatingips.UpdateOpts{PortID: nil}).Err
 }
@@ -682,16 +792,21 @@ func resourceRdsInstanceV3Update(ctx context.Context, d *schema.ResourceData, me
 
 	if d.HasChange("public_ips") {
 		nwClient, err := config.NetworkingV2Client(config.GetRegion(d))
+		if err != nil {
+			return fmterr.Errorf("error creating networking V2 client: %w", err)
+		}
 		oldPublicIps, newPublicIps := d.GetChange("public_ips")
 		oldIPs := oldPublicIps.([]interface{})
 		newIPs := newPublicIps.([]interface{})
 		switch len(newIPs) {
 		case 0:
-			err = unAssignEipFromInstance(nwClient, oldIPs[0].(string)) // if it become 0, it was 1 before
-			break
+			err := unAssignEipFromInstance(nwClient, oldIPs[0].(string)) // if it become 0, it was 1 before
+			if err != nil {
+				return diag.FromErr(err)
+			}
 		case 1:
 			if len(oldIPs) > 0 {
-				err = unAssignEipFromInstance(nwClient, oldIPs[0].(string))
+				err := unAssignEipFromInstance(nwClient, oldIPs[0].(string))
 				if err != nil {
 					return diag.FromErr(err)
 				}
@@ -701,25 +816,48 @@ func resourceRdsInstanceV3Update(ctx context.Context, d *schema.ResourceData, me
 			if err != nil {
 				return diag.FromErr(err)
 			}
-			err = assignEipToInstance(nwClient, newIPs[0].(string), privateIP, subnetID)
-			break
+			if err := assignEipToInstance(nwClient, newIPs[0].(string), privateIP, subnetID); err != nil {
+				return diag.FromErr(err)
+			}
 		default:
 			return fmterr.Errorf("RDS instance can't have more than one public IP")
 		}
 	}
+
+	var restartRequired bool
 
 	if d.HasChange("param_group_id") {
 		newParamGroupID := d.Get("param_group_id").(string)
 		if len(newParamGroupID) == 0 {
 			return fmterr.Errorf("you can't remove `param_group_id` without recreation")
 		}
-		applyOpts := configurations.ApplyOpts{
-			InstanceIDs: []string{
-				d.Id(),
-			},
+		templateRestart, err := applyTemplate(d, client)
+		if err != nil {
+			return fmterr.Errorf("error applying parameter template: %w", err)
 		}
-		if err := configurations.Apply(client, newParamGroupID, applyOpts).Err; err != nil {
-			return fmterr.Errorf("error during apply new configuration: %s", err)
+		restartRequired = restartRequired || templateRestart
+	}
+
+	if d.HasChange("parameters") {
+		paramRestart, err := updateInstanceParameters(d, client)
+		if err != nil {
+			return fmterr.Errorf("error applying parameters to the instance: %w", err)
+		}
+		restartRequired = restartRequired || paramRestart
+	}
+
+	err = instances.WaitForStateAvailable(client, 1200, d.Id())
+	if err != nil {
+		return fmterr.Errorf("error waiting for instance to become available: %w", err)
+	}
+
+	if restartRequired {
+		if err := restartInstance(d, client); err != nil {
+			return diag.FromErr(err)
+		}
+		waitSeconds := int(d.Timeout(schema.TimeoutUpdate).Seconds())
+		if err := instances.WaitForStateAvailable(client, waitSeconds, d.Id()); err != nil {
+			return fmterr.Errorf("error waiting for instance to become available: %w", err)
 		}
 	}
 
@@ -751,7 +889,7 @@ func resourceRdsInstanceV3Read(_ context.Context, d *schema.ResourceData, meta i
 		return nil
 	}
 
-	me := multierror.Append(nil,
+	me := multierror.Append(
 		d.Set("flavor", rdsInstance.FlavorRef),
 		d.Set("name", rdsInstance.Name),
 		d.Set("security_group_id", rdsInstance.SecurityGroupId),
@@ -775,8 +913,35 @@ func resourceRdsInstanceV3Read(_ context.Context, d *schema.ResourceData, meta i
 		node["status"] = nodeObj.Status
 		nodesList = append(nodesList, node)
 	}
+
 	if err := d.Set("nodes", nodesList); err != nil {
 		return fmterr.Errorf("error setting node list: %s", err)
+	}
+
+	var availabilityZones []string
+	switch n := len(rdsInstance.Nodes); n {
+	case 1:
+		availabilityZones = []string{
+			rdsInstance.Nodes[0].AvailabilityZone,
+		}
+	case 2:
+		if rdsInstance.Nodes[0].Role == "master" {
+			availabilityZones = []string{
+				rdsInstance.Nodes[0].AvailabilityZone,
+				rdsInstance.Nodes[1].AvailabilityZone,
+			}
+		} else {
+			availabilityZones = []string{
+				rdsInstance.Nodes[1].AvailabilityZone,
+				rdsInstance.Nodes[0].AvailabilityZone,
+			}
+		}
+	default:
+		fmterr.Errorf("RDSv3 instance expects 1 or 2 nodes, but got %d", n)
+	}
+
+	if err := d.Set("availability_zone", availabilityZones); err != nil {
+		return diag.FromErr(err)
 	}
 
 	var backupStrategyList []map[string]interface{}
@@ -919,4 +1084,19 @@ func validateRDSv3Version(argumentName string) schema.CustomizeDiffFunc {
 
 		return nil
 	}
+}
+
+func updateInstanceParameters(d *schema.ResourceData, client *golangsdk.ServiceClient) (bool, error) {
+	if _, ok := d.GetOk("parameters"); !ok {
+		return false, nil
+	}
+
+	opts := instances.UpdateInstanceConfigurationOpts{
+		Values: d.Get("parameters").(map[string]interface{}),
+	}
+	status, err := instances.UpdateInstanceConfigurationParameters(client, d.Id(), opts).Extract()
+	if err != nil {
+		return false, fmt.Errorf("error applying configuration parameters: %w", err)
+	}
+	return status.RestartRequired, err
 }

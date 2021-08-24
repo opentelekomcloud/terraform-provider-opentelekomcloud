@@ -1,7 +1,6 @@
 package acceptance
 
 import (
-	"fmt"
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
@@ -45,7 +44,7 @@ func TestAccVpnServiceV2DataSource_byName(t *testing.T) {
 	})
 }
 
-var testAccDataSourceVpnServiceV2ConfigById = fmt.Sprintf(`
+const testAccDataSourceVpnServiceV2ConfigById = `
 resource "opentelekomcloud_networking_router_v2" "router_1" {
   name           = "router_1"
   admin_state_up = "true"
@@ -61,9 +60,9 @@ data "opentelekomcloud_vpnaas_service_v2" "by_id" {
   router_id = opentelekomcloud_vpnaas_service_v2.service_1.router_id
   admin_state_up = "true"
 }
-`)
+`
 
-var testAccDataSourceVpnServiceV2ConfigByName = fmt.Sprintf(`
+const testAccDataSourceVpnServiceV2ConfigByName = `
 resource "opentelekomcloud_networking_router_v2" "router_2" {
   name           = "router_2"
   admin_state_up = "true"
@@ -78,4 +77,4 @@ resource "opentelekomcloud_vpnaas_service_v2" "service_2" {
 data "opentelekomcloud_vpnaas_service_v2" "by_name" {
   name = opentelekomcloud_vpnaas_service_v2.service_2.name
 }
-`)
+`

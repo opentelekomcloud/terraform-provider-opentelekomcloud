@@ -2,6 +2,7 @@ package common
 
 import (
 	"context"
+	"fmt"
 	"os"
 	"testing"
 
@@ -13,9 +14,24 @@ import (
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common/cfg"
 )
 
+const AlternativeProviderAlias = "opentelekomcloud.alternative"
+
 var (
 	TestAccProviderFactories map[string]func() (*schema.Provider, error)
 	TestAccProvider          *schema.Provider
+
+	altCloud                  = os.Getenv("OS_CLOUD_2")
+	altProjectID              = os.Getenv("OS_PROJECT_ID_2")
+	altProjectName            = os.Getenv("OS_PROJECT_NAME_2")
+	AlternativeProviderConfig = fmt.Sprintf(`
+provider opentelekomcloud {
+  alias = "alternative"
+
+  cloud       = "%s"
+  tenant_id   = "%s"
+  tenant_name = "%s"
+}
+`, altCloud, altProjectID, altProjectName)
 )
 
 func init() {
@@ -23,6 +39,17 @@ func init() {
 	TestAccProviderFactories = map[string]func() (*schema.Provider, error){
 		"opentelekomcloud": func() (*schema.Provider, error) {
 			return TestAccProvider, nil
+		},
+		"opentelekomcloudalternative": func() (*schema.Provider, error) {
+			provider := opentelekomcloud.Provider()
+			provider.Configure(context.Background(), &terraform.ResourceConfig{
+				Config: map[string]interface{}{
+					"cloud":       altCloud,
+					"tenant_id":   altProjectID,
+					"tenant_name": altProjectName,
+				},
+			})
+			return provider, nil
 		},
 	}
 
@@ -34,11 +61,6 @@ func init() {
 }
 
 func TestAccPreCheckRequiredEnvVars(t *testing.T) {
-	v := os.Getenv("OS_AUTH_URL")
-	if v == "" {
-		t.Fatal("OS_AUTH_URL must be set for acceptance tests")
-	}
-
 	if env.OS_POOL_NAME == "" {
 		t.Fatal("OS_POOL_NAME must be set for acceptance tests")
 	}
@@ -70,7 +92,6 @@ func TestAccPreCheckRequiredEnvVars(t *testing.T) {
 	if env.OS_EXTGW_ID == "" {
 		t.Fatal("OS_EXTGW_ID must be set for acceptance tests")
 	}
-
 }
 
 func TestAccPreCheck(t *testing.T) {
@@ -101,5 +122,4 @@ func TestAccVBSBackupShareCheck(t *testing.T) {
 	if env.OS_TO_TENANT_ID == "" {
 		t.Skip("OS_TO_TENANT_ID must be set for acceptance tests")
 	}
-
 }

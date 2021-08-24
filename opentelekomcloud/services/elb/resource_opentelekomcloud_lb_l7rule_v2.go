@@ -7,6 +7,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/hashicorp/go-multierror"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
@@ -124,7 +125,7 @@ func resourceL7RuleV2Create(ctx context.Context, d *schema.ResourceData, meta in
 	// Ensure the right combination of options have been specified.
 	err = checkL7RuleType(ruleType, key)
 	if err != nil {
-		return fmterr.Errorf("Unable to create L7 Rule: %s", err)
+		return fmterr.Errorf("unable to create L7 Rule: %s", err)
 	}
 
 	createOpts := l7policies.CreateRuleOpts{
@@ -143,7 +144,7 @@ func resourceL7RuleV2Create(ctx context.Context, d *schema.ResourceData, meta in
 	// Get a clean copy of the parent L7 Policy.
 	parentL7Policy, err := l7policies.Get(lbClient, l7policyID).Extract()
 	if err != nil {
-		return fmterr.Errorf("Unable to get parent L7 Policy: %s", err)
+		return fmterr.Errorf("unable to get parent L7 Policy: %s", err)
 	}
 
 	if parentL7Policy.ListenerID != "" {
@@ -159,7 +160,7 @@ func resourceL7RuleV2Create(ctx context.Context, d *schema.ResourceData, meta in
 	// Get a clean copy of the parent listener.
 	parentListener, err := listeners.Get(lbClient, listenerID).Extract()
 	if err != nil {
-		return fmterr.Errorf("Unable to retrieve listener %s: %s", listenerID, err)
+		return fmterr.Errorf("unable to retrieve listener %s: %s", listenerID, err)
 	}
 
 	// Wait for parent L7 Policy to become active before continuing
@@ -189,7 +190,7 @@ func resourceL7RuleV2Create(ctx context.Context, d *schema.ResourceData, meta in
 	}
 
 	d.SetId(l7Rule.ID)
-	d.Set("listener_id", listenerID)
+	_ = d.Set("listener_id", listenerID)
 
 	return resourceL7RuleV2Read(ctx, d, meta)
 }
@@ -210,13 +211,19 @@ func resourceL7RuleV2Read(_ context.Context, d *schema.ResourceData, meta interf
 
 	log.Printf("[DEBUG] Retrieved L7 Rule %s: %#v", d.Id(), l7Rule)
 
-	d.Set("l7policy_id", l7policyID)
-	d.Set("type", l7Rule.RuleType)
-	d.Set("compare_type", l7Rule.CompareType)
-	d.Set("tenant_id", l7Rule.TenantID)
-	d.Set("value", l7Rule.Value)
-	d.Set("key", l7Rule.Key)
-	d.Set("admin_state_up", l7Rule.AdminStateUp)
+	mErr := multierror.Append(
+		d.Set("l7policy_id", l7policyID),
+		d.Set("type", l7Rule.RuleType),
+		d.Set("compare_type", l7Rule.CompareType),
+		d.Set("tenant_id", l7Rule.TenantID),
+		d.Set("value", l7Rule.Value),
+		d.Set("key", l7Rule.Key),
+		d.Set("admin_state_up", l7Rule.AdminStateUp),
+	)
+
+	if err := mErr.ErrorOrNil(); err != nil {
+		return diag.FromErr(err)
+	}
 
 	return nil
 }
@@ -261,19 +268,19 @@ func resourceL7RuleV2Update(ctx context.Context, d *schema.ResourceData, meta in
 	// Get a clean copy of the parent listener.
 	parentListener, err := listeners.Get(lbClient, listenerID).Extract()
 	if err != nil {
-		return fmterr.Errorf("Unable to retrieve listener %s: %s", listenerID, err)
+		return fmterr.Errorf("unable to retrieve listener %s: %s", listenerID, err)
 	}
 
 	// Get a clean copy of the parent L7 Policy.
 	parentL7Policy, err := l7policies.Get(lbClient, l7policyID).Extract()
 	if err != nil {
-		return fmterr.Errorf("Unable to get parent L7 Policy: %s", err)
+		return fmterr.Errorf("unable to get parent L7 Policy: %s", err)
 	}
 
 	// Get a clean copy of the L7 Rule.
 	l7Rule, err := l7policies.GetRule(lbClient, l7policyID, d.Id()).Extract()
 	if err != nil {
-		return fmterr.Errorf("Unable to get L7 Rule: %s", err)
+		return fmterr.Errorf("unable to get L7 Rule: %s", err)
 	}
 
 	// Wait for parent L7 Policy to become active before continuing
@@ -298,7 +305,7 @@ func resourceL7RuleV2Update(ctx context.Context, d *schema.ResourceData, meta in
 	})
 
 	if err != nil {
-		return fmterr.Errorf("Unable to update L7 Rule %s: %s", d.Id(), err)
+		return fmterr.Errorf("unable to update L7 Rule %s: %s", d.Id(), err)
 	}
 
 	// Wait for L7 Rule to become active before continuing
@@ -325,13 +332,13 @@ func resourceL7RuleV2Delete(ctx context.Context, d *schema.ResourceData, meta in
 	// Get a clean copy of the parent listener.
 	parentListener, err := listeners.Get(lbClient, listenerID).Extract()
 	if err != nil {
-		return fmterr.Errorf("Unable to retrieve parent listener (%s) for the L7 Rule: %s", listenerID, err)
+		return fmterr.Errorf("unable to retrieve parent listener (%s) for the L7 Rule: %s", listenerID, err)
 	}
 
 	// Get a clean copy of the parent L7 Policy.
 	parentL7Policy, err := l7policies.Get(lbClient, l7policyID).Extract()
 	if err != nil {
-		return fmterr.Errorf("Unable to retrieve parent L7 Policy (%s) for the L7 Rule: %s", l7policyID, err)
+		return fmterr.Errorf("unable to retrieve parent L7 Policy (%s) for the L7 Rule: %s", l7policyID, err)
 	}
 
 	// Get a clean copy of the L7 Rule.
@@ -370,7 +377,7 @@ func resourceL7RuleV2Delete(ctx context.Context, d *schema.ResourceData, meta in
 func resourceL7RuleV2Import(_ context.Context, d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
 	parts := strings.SplitN(d.Id(), "/", 2)
 	if len(parts) != 2 {
-		err := fmt.Errorf("Invalid format specified for L7 Rule. Format must be <policy id>/<rule id>")
+		err := fmt.Errorf("invalid format specified for L7 Rule. Format must be <policy id>/<rule id>")
 		return nil, err
 	}
 
@@ -387,7 +394,7 @@ func resourceL7RuleV2Import(_ context.Context, d *schema.ResourceData, meta inte
 	// Get a clean copy of the parent L7 Policy.
 	parentL7Policy, err := l7policies.Get(lbClient, l7policyID).Extract()
 	if err != nil {
-		return nil, fmt.Errorf("Unable to get parent L7 Policy: %s", err)
+		return nil, fmt.Errorf("unable to get parent L7 Policy: %s", err)
 	}
 
 	if parentL7Policy.ListenerID != "" {
@@ -401,8 +408,14 @@ func resourceL7RuleV2Import(_ context.Context, d *schema.ResourceData, meta inte
 	}
 
 	d.SetId(l7ruleID)
-	d.Set("l7policy_id", l7policyID)
-	d.Set("listener_id", listenerID)
+	mErr := multierror.Append(
+		d.Set("l7policy_id", l7policyID),
+		d.Set("listener_id", listenerID),
+	)
+
+	if err := mErr.ErrorOrNil(); err != nil {
+		return nil, err
+	}
 
 	return []*schema.ResourceData{d}, nil
 }

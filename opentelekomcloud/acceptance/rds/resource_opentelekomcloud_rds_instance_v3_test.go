@@ -196,6 +196,26 @@ func TestAccRdsInstanceV3InvalidDBVersion(t *testing.T) {
 	})
 }
 
+func TestAccRdsInstanceV3_configurationParameters(t *testing.T) {
+	postfix := acctest.RandString(3)
+	var rdsInstance instances.RdsInstanceResponse
+
+	resource.Test(t, resource.TestCase{
+		PreCheck:          func() { common.TestAccPreCheck(t) },
+		ProviderFactories: common.TestAccProviderFactories,
+		CheckDestroy:      testAccCheckRdsInstanceV3Destroy,
+		Steps: []resource.TestStep{
+			{
+				Config: testAccRdsInstanceV3ConfigurationOverride(postfix),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckRdsInstanceV3Exists(resourceName, &rdsInstance),
+					resource.TestCheckResourceAttr(resourceName, "parameters.max_connections", "37"),
+				),
+			},
+		},
+	})
+}
+
 func testAccCheckRdsInstanceV3Destroy(s *terraform.State) error {
 	config := common.TestAccProvider.Meta().(*cfg.Config)
 	client, err := config.RdsV3Client(env.OS_REGION_NAME)
@@ -262,8 +282,8 @@ resource "opentelekomcloud_rds_instance_v3" "instance" {
     port     = "8635"
   }
   security_group_id = opentelekomcloud_networking_secgroup_v2.sg.id
-  subnet_id = "%s"
-  vpc_id    = "%s"
+  subnet_id         = "%s"
+  vpc_id            = "%s"
   volume {
     type = "COMMON"
     size = 40
@@ -297,8 +317,8 @@ resource "opentelekomcloud_rds_instance_v3" "instance" {
     port     = "8635"
   }
   security_group_id = opentelekomcloud_networking_secgroup_v2.sg.id
-  subnet_id = "%s"
-  vpc_id    = "%s"
+  subnet_id         = "%s"
+  vpc_id            = "%s"
   volume {
     type = "COMMON"
     size = 100
@@ -332,9 +352,9 @@ resource "opentelekomcloud_rds_instance_v3" "instance" {
     version  = "10"
     port     = "8635"
   }
-  security_group_id  = opentelekomcloud_networking_secgroup_v2.sg.id
-  subnet_id          = "%s"
-  vpc_id             = "%s"
+  security_group_id = opentelekomcloud_networking_secgroup_v2.sg.id
+  subnet_id         = "%s"
+  vpc_id            = "%s"
   volume {
     type = "COMMON"
     size = 40
@@ -365,9 +385,9 @@ resource "opentelekomcloud_rds_instance_v3" "instance" {
     version  = "5.6"
     port     = "8635"
   }
-  security_group_id  = opentelekomcloud_networking_secgroup_v2.sg.id
-  subnet_id          = "%s"
-  vpc_id             = "%s"
+  security_group_id = opentelekomcloud_networking_secgroup_v2.sg.id
+  subnet_id         = "%s"
+  vpc_id            = "%s"
   volume {
     type = "ULTRAHIGH"
     size = 100
@@ -396,9 +416,9 @@ resource "opentelekomcloud_rds_instance_v3" "instance" {
     type     = "PostgreSQL"
     version  = "10"
   }
-  security_group_id  = opentelekomcloud_networking_secgroup_v2.sg.id
-  subnet_id          = "%s"
-  vpc_id             = "%s"
+  security_group_id = opentelekomcloud_networking_secgroup_v2.sg.id
+  subnet_id         = "%s"
+  vpc_id            = "%s"
   volume {
     type = "COMMON"
     size = 100
@@ -422,9 +442,9 @@ resource "opentelekomcloud_rds_instance_v3" "instance" {
     type     = "PostgreSQL"
     version  = "10"
   }
-  security_group_id  = opentelekomcloud_networking_secgroup_v2.sg.id
-  subnet_id          = "%s"
-  vpc_id             = "%s"
+  security_group_id = opentelekomcloud_networking_secgroup_v2.sg.id
+  subnet_id         = "%s"
+  vpc_id            = "%s"
   volume {
     type = "COMMON"
     size = 100
@@ -442,27 +462,27 @@ resource "opentelekomcloud_rds_instance_v3" "instance" {
 func testAccRdsInstanceV3ConfigTemplateBasic(postfix string) string {
 	return fmt.Sprintf(`
 resource "opentelekomcloud_rds_parametergroup_v3" "pg" {
-	name = "pg-rds-test"
-	values = {
-		max_connections = "10"
-		autocommit = "OFF"
-	}
-	datastore {
-		type = "postgresql"
-		version = "10"
-	}
+  name = "pg-rds-test"
+  values = {
+    max_connections = "100"
+    autocommit      = "OFF"
+  }
+  datastore {
+    type    = "postgresql"
+    version = "12"
+  }
 }
 
 resource "opentelekomcloud_rds_parametergroup_v3" "pg2" {
-	name = "pg-rds-test-2"
-	values = {
-		max_connections = "10"
-		autocommit = "OFF"
-	}
-	datastore {
-		type = "postgresql"
-		version = "10"
-	}
+  name = "pg-rds-test-2"
+  values = {
+    max_connections = "100"
+    autocommit      = "OFF"
+  }
+  datastore {
+    type    = "postgresql"
+    version = "12"
+  }
 }
 
 resource "opentelekomcloud_networking_secgroup_v2" "sg" {
@@ -475,11 +495,11 @@ resource "opentelekomcloud_rds_instance_v3" "instance" {
   db {
     password = "Postgres!120521"
     type     = "PostgreSQL"
-    version  = "10"
+    version  = "12"
   }
-  security_group_id  = opentelekomcloud_networking_secgroup_v2.sg.id
-  subnet_id          = "%s"
-  vpc_id             = "%s"
+  security_group_id = opentelekomcloud_networking_secgroup_v2.sg.id
+  subnet_id         = "%s"
+  vpc_id            = "%s"
   volume {
     type = "COMMON"
     size = 40
@@ -493,27 +513,27 @@ resource "opentelekomcloud_rds_instance_v3" "instance" {
 func testAccRdsInstanceV3ConfigTemplateUpdate(postfix string) string {
 	return fmt.Sprintf(`
 resource "opentelekomcloud_rds_parametergroup_v3" "pg" {
-	name = "pg-rds-test"
-	values = {
-		max_connections = "10"
-		autocommit = "OFF"
-	}
-	datastore {
-		type = "postgresql"
-		version = "10"
-	}
+  name = "pg-rds-test"
+  values = {
+    max_connections = "100"
+    autocommit      = "OFF"
+  }
+  datastore {
+    type    = "postgresql"
+    version = "10"
+  }
 }
 
 resource "opentelekomcloud_rds_parametergroup_v3" "pg2" {
-	name = "pg-rds-test-2"
-	values = {
-		max_connections = "10"
-		autocommit = "OFF"
-	}
-	datastore {
-		type = "postgresql"
-		version = "10"
-	}
+  name = "pg-rds-test-2"
+  values = {
+    max_connections = "100"
+    autocommit      = "OFF"
+  }
+  datastore {
+    type    = "postgresql"
+    version = "10"
+  }
 }
 
 resource "opentelekomcloud_networking_secgroup_v2" "sg" {
@@ -526,11 +546,11 @@ resource "opentelekomcloud_rds_instance_v3" "instance" {
   db {
     password = "Postgres!120521"
     type     = "PostgreSQL"
-    version  = "10"
+    version  = "12"
   }
-  security_group_id  = opentelekomcloud_networking_secgroup_v2.sg.id
-  subnet_id          = "%s"
-  vpc_id             = "%s"
+  security_group_id = opentelekomcloud_networking_secgroup_v2.sg.id
+  subnet_id         = "%s"
+  vpc_id            = "%s"
   volume {
     type = "COMMON"
     size = 40
@@ -557,13 +577,57 @@ resource "opentelekomcloud_rds_instance_v3" "instance" {
     port     = "8635"
   }
   security_group_id = opentelekomcloud_networking_secgroup_v2.sg.id
-  subnet_id = "%s"
-  vpc_id    = "%s"
+  subnet_id         = "%s"
+  vpc_id            = "%s"
   volume {
     type = "COMMON"
     size = 40
   }
   flavor = "rds.pg.c2.medium"
+}
+`, postfix, env.OS_AVAILABILITY_ZONE, env.OS_NETWORK_ID, env.OS_VPC_ID)
+}
+
+func testAccRdsInstanceV3ConfigurationOverride(postfix string) string {
+	return fmt.Sprintf(`
+resource "opentelekomcloud_networking_secgroup_v2" "sg" {
+  name = "sg-rds-test"
+}
+
+resource "opentelekomcloud_rds_parametergroup_v3" "pg" {
+  name = "pg-rds-test"
+  values = {
+    autocommit = "OFF"
+  }
+  datastore {
+    type    = "postgresql"
+    version = "10"
+  }
+}
+
+resource "opentelekomcloud_rds_instance_v3" "instance" {
+  name              = "tf_rds_instance_%s"
+  availability_zone = ["%s"]
+
+  db {
+    password = "Postgres!120521"
+    type     = "PostgreSQL"
+    version  = "10"
+    port     = "8635"
+  }
+
+  security_group_id = opentelekomcloud_networking_secgroup_v2.sg.id
+  subnet_id         = "%s"
+  vpc_id            = "%s"
+  flavor            = "rds.pg.c2.medium"
+  volume {
+    type = "COMMON"
+    size = 40
+  }
+
+  parameters = {
+    max_connections = "37",
+  }
 }
 `, postfix, env.OS_AVAILABILITY_ZONE, env.OS_NETWORK_ID, env.OS_VPC_ID)
 }

@@ -5,6 +5,7 @@ import (
 	"log"
 	"time"
 
+	"github.com/hashicorp/go-multierror"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
@@ -117,6 +118,9 @@ func resourceNetworkFloatingIPV2Create(ctx context.Context, d *schema.ResourceDa
 	}
 
 	_, err = stateConf.WaitForStateContext(ctx)
+	if err != nil {
+		return fmterr.Errorf("error waiting for floating IP to become active: %w", err)
+	}
 
 	d.SetId(floatingIP.ID)
 
@@ -135,13 +139,18 @@ func resourceNetworkFloatingIPV2Read(_ context.Context, d *schema.ResourceData, 
 		return diag.FromErr(common.CheckDeleted(d, err, "floating IP"))
 	}
 
-	d.Set("address", floatingIP.FloatingIP)
-	d.Set("port_id", floatingIP.PortID)
-	d.Set("fixed_ip", floatingIP.FixedIP)
-	d.Set("tenant_id", floatingIP.TenantID)
-	d.Set("pool", PoolName)
+	mErr := multierror.Append(
+		d.Set("address", floatingIP.FloatingIP),
+		d.Set("port_id", floatingIP.PortID),
+		d.Set("fixed_ip", floatingIP.FixedIP),
+		d.Set("tenant_id", floatingIP.TenantID),
+		d.Set("pool", PoolName),
+		d.Set("region", config.GetRegion(d)),
+	)
 
-	d.Set("region", config.GetRegion(d))
+	if err := mErr.ErrorOrNil(); err != nil {
+		return diag.FromErr(err)
+	}
 
 	return nil
 }

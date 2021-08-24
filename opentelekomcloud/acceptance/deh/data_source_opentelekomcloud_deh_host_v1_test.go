@@ -32,7 +32,7 @@ func testAccCheckDedicatedHostV1DataSourceID(n string) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
 		rs, ok := s.RootModule().Resources[n]
 		if !ok {
-			return fmt.Errorf("Can't find deh data source: %s ", n)
+			return fmt.Errorf("can't find deh data source: %s ", n)
 		}
 
 		if rs.Primary.ID == "" {

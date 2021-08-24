@@ -1,0 +1,4 @@
+---
+fixes:
+  - |
+    **[CCE]** Read ``taints`` in ``resource/opentelekomcloud_cce_node_v3`` (`#1221 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/1221>`_)

@@ -1,6 +1,7 @@
 package s3
 
 import (
+	"context"
 	"log"
 	"regexp"
 
@@ -12,7 +13,7 @@ import (
 
 // setTags is a helper to set the tags for a resource. It expects the
 // tags field to be named "tags"
-func setTagsS3(conn *s3.S3, d *schema.ResourceData) error {
+func setTagsS3(ctx context.Context, conn *s3.S3, d *schema.ResourceData) error {
 	if d.HasChange("tags") {
 		oraw, nraw := d.GetChange("tags")
 		o := oraw.(map[string]interface{})
@@ -22,7 +23,7 @@ func setTagsS3(conn *s3.S3, d *schema.ResourceData) error {
 		// Set tags
 		if len(remove) > 0 {
 			log.Printf("[DEBUG] Removing tags: %#v", remove)
-			_, err := retryOnAwsCodes([]string{"NoSuchBucket", "OperationAborted"}, func() (interface{}, error) {
+			_, err := retryOnAwsCodes(ctx, []string{"NoSuchBucket", "OperationAborted"}, func() (interface{}, error) {
 				return conn.DeleteBucketTagging(&s3.DeleteBucketTaggingInput{
 					Bucket: aws.String(d.Get("bucket").(string)),
 				})
@@ -40,7 +41,7 @@ func setTagsS3(conn *s3.S3, d *schema.ResourceData) error {
 				},
 			}
 
-			_, err := retryOnAwsCodes([]string{"NoSuchBucket", "OperationAborted"}, func() (interface{}, error) {
+			_, err := retryOnAwsCodes(ctx, []string{"NoSuchBucket", "OperationAborted"}, func() (interface{}, error) {
 				return conn.PutBucketTagging(req)
 			})
 			if err != nil {
@@ -128,7 +129,7 @@ func tagIgnoredS3(t *s3.Tag) bool {
 	filter := []string{"^aws:"}
 	for _, v := range filter {
 		log.Printf("[DEBUG] Matching %v with %v\n", v, *t.Key)
-		if r, _ := regexp.MatchString(v, *t.Key); r == true {
+		if r, _ := regexp.MatchString(v, *t.Key); r {
 			log.Printf("[DEBUG] Found AWS specific tag %s (val: %s), ignoring.\n", *t.Key, *t.Value)
 			return true
 		}

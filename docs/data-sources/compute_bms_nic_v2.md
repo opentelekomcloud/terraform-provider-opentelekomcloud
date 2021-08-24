@@ -9,8 +9,8 @@ Use this data source to get details about a BMS NIC based on the NIC ID from Ope
 ## Example Usage
 
 ```hcl
-variable "bms_id" { }
-variable "nic_id" { }
+variable "bms_id" {}
+variable "nic_id" {}
 
 data "opentelekomcloud_compute_bms_nic_v2" "query_bms_nic" {
   server_id = var.bms_id

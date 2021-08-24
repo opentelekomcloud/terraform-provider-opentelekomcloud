@@ -246,6 +246,71 @@ func ResourceObsBucket() *schema.Resource {
 				Type:     schema.TypeString,
 				Computed: true,
 			},
+			"server_side_encryption": {
+				Type:     schema.TypeList,
+				Optional: true,
+				MaxItems: 1,
+				Elem: &schema.Resource{
+					Schema: map[string]*schema.Schema{
+						"kms_key_id": {
+							Type:     schema.TypeString,
+							Required: true,
+						},
+						"algorithm": {
+							Type:     schema.TypeString,
+							Required: true,
+							ValidateDiagFunc: validation.ToDiagFunc(
+								validation.StringInSlice([]string{"aws:kms"}, false),
+							),
+						},
+					},
+				},
+			},
+			"event_notifications": {
+				Type:     schema.TypeList,
+				Optional: true,
+				Elem: &schema.Resource{
+					Schema: map[string]*schema.Schema{
+						"topic": {
+							Type:     schema.TypeString,
+							Required: true,
+						},
+						"id": {
+							Type:     schema.TypeString,
+							Optional: true,
+							Computed: true,
+						},
+						"events": {
+							Type:     schema.TypeSet,
+							Required: true,
+							Elem: &schema.Schema{
+								Type: schema.TypeString,
+							},
+							Set: schema.HashString,
+						},
+						"filter_rule": {
+							Type:     schema.TypeSet,
+							Optional: true,
+							Elem: &schema.Resource{
+								Schema: map[string]*schema.Schema{
+									"name": {
+										Type:     schema.TypeString,
+										Optional: true,
+										ValidateFunc: validation.StringInSlice(
+											[]string{"prefix", "suffix"}, false,
+										),
+									},
+									"value": {
+										Type:         schema.TypeString,
+										Optional:     true,
+										ValidateFunc: validation.StringLenBetween(1, 1024),
+									},
+								},
+							},
+						},
+					},
+				},
+			},
 		},
 	}
 }
@@ -265,7 +330,7 @@ func resourceObsBucketCreate(ctx context.Context, d *schema.ResourceData, meta i
 		ACL:          obs.AclType(acl),
 		StorageClass: obs.StorageClassType(class),
 	}
-	opts.Location = d.Get("region").(string)
+	opts.Location = config.GetRegion(d)
 	log.Printf("[DEBUG] OBS bucket create opts: %#v", opts)
 
 	_, err = client.CreateBucket(opts)
@@ -333,6 +398,18 @@ func resourceObsBucketUpdate(ctx context.Context, d *schema.ResourceData, meta i
 
 	if d.HasChange("cors_rule") {
 		if err := resourceObsBucketCorsUpdate(client, d); err != nil {
+			return diag.FromErr(err)
+		}
+	}
+
+	if d.HasChange("server_side_encryption") {
+		if err := resourceObsBucketEncryptionUpdate(client, d); err != nil {
+			return diag.FromErr(err)
+		}
+	}
+
+	if d.HasChange("event_notifications") {
+		if err := resourceObsBucketNotificationUpdate(client, d); err != nil {
 			return diag.FromErr(err)
 		}
 	}
@@ -407,6 +484,16 @@ func resourceObsBucketRead(_ context.Context, d *schema.ResourceData, meta inter
 
 	// Read the tags
 	if err := setObsBucketTags(client, d); err != nil {
+		return diag.FromErr(err)
+	}
+
+	// Read SSE settings
+	if err := setObsBucketEncryption(client, d); err != nil {
+		return diag.FromErr(err)
+	}
+
+	// Read notifications settings
+	if err := setObsBucketNotifications(client, d); err != nil {
 		return diag.FromErr(err)
 	}
 
@@ -614,7 +701,7 @@ func mapToRule(src map[string]interface{}) (rule obs.LifecycleRule) {
 		}
 	}
 	rule.NoncurrentVersionTransitions = ncList
-	return
+	return rule
 }
 
 func resourceObsBucketLifecycleUpdate(client *obs.ObsClient, d *schema.ResourceData) error {
@@ -1120,10 +1207,8 @@ func deleteAllBucketObjects(client *obs.ObsClient, bucket string) error {
 	output, err := client.DeleteObjects(deleteOpts)
 	if err != nil {
 		return GetObsError("error deleting all objects of OBS bucket", bucket, err)
-	} else {
-		if len(output.Errors) > 0 {
-			return fmt.Errorf("error some objects are still exist in %s: %#v", bucket, output.Errors)
-		}
+	} else if len(output.Errors) > 0 {
+		return fmt.Errorf("error some objects are still exist in %s: %#v", bucket, output.Errors)
 	}
 	return nil
 }
@@ -1207,4 +1292,124 @@ type Redirect struct {
 type WebsiteRoutingRule struct {
 	Condition Condition `json:"Condition,omitempty"`
 	Redirect  Redirect  `json:"Redirect"`
+}
+
+func resourceObsBucketEncryptionUpdate(client *obs.ObsClient, d *schema.ResourceData) error {
+	if d.Get("server_side_encryption.#") == 0 {
+		return nil
+	}
+	_, err := client.SetBucketEncryption(&obs.SetBucketEncryptionInput{
+		Bucket: d.Id(),
+		BucketEncryptionConfiguration: obs.BucketEncryptionConfiguration{
+			SSEAlgorithm:   d.Get("server_side_encryption.0.algorithm").(string),
+			KMSMasterKeyID: d.Get("server_side_encryption.0.kms_key_id").(string),
+		},
+	})
+	if err != nil {
+		return fmt.Errorf("error setting bucket encryption: %w", err)
+	}
+	return nil
+}
+
+func setObsBucketEncryption(client *obs.ObsClient, d *schema.ResourceData) error {
+	config, err := client.GetBucketEncryption(d.Id())
+	if err != nil {
+		if oErr, ok := err.(obs.ObsError); ok {
+			if oErr.BaseModel.StatusCode == 404 {
+				return nil
+			}
+		}
+		return fmt.Errorf("error reading bucket encryption: %w", err)
+	}
+	value := []map[string]interface{}{{
+		"kms_key_id": config.KMSMasterKeyID,
+		"algorithm":  config.SSEAlgorithm,
+	}}
+	return d.Set("server_side_encryption", value)
+}
+
+func resourceObsBucketNotificationUpdate(client *obs.ObsClient, d *schema.ResourceData) error {
+	notifications := d.Get("event_notifications").([]interface{})
+
+	configs := make([]obs.TopicConfiguration, len(notifications))
+	for i, n := range notifications {
+		notification := n.(map[string]interface{})
+		config := obs.TopicConfiguration{
+			Topic:       notification["topic"].(string),
+			ID:          notification["id"].(string),
+			Events:      toEventSlice(notification["events"]),
+			FilterRules: toFilterRules(notification["filter_rule"]),
+		}
+		configs[i] = config
+	}
+
+	opts := &obs.SetBucketNotificationInput{
+		Bucket:             d.Get("bucket").(string),
+		BucketNotification: obs.BucketNotification{TopicConfigurations: configs},
+	}
+
+	if _, err := client.SetBucketNotification(opts); err != nil {
+		return fmt.Errorf("error setting notification for bucket: %w", err)
+	}
+	return nil
+}
+
+func setObsBucketNotifications(client *obs.ObsClient, d *schema.ResourceData) error {
+	bucket := d.Get("bucket").(string)
+	notifications, err := client.GetBucketNotification(bucket)
+	if err != nil {
+		return fmt.Errorf("error reading bucket notification configuration: %w", err)
+	}
+
+	configs := make([]interface{}, len(notifications.TopicConfigurations))
+	for i, v := range notifications.TopicConfigurations {
+		configs[i] = map[string]interface{}{
+			"topic":       v.Topic,
+			"id":          v.ID,
+			"events":      eventsToStrSlice(v.Events),
+			"filter_rule": filterRulesToMapSlice(v.FilterRules),
+		}
+	}
+	return d.Set("event_notifications", configs)
+}
+
+func filterRulesToMapSlice(src []obs.FilterRule) []interface{} {
+	res := make([]interface{}, len(src))
+	for i, v := range src {
+		res[i] = map[string]interface{}{
+			"name":  v.Name,
+			"value": v.Value,
+		}
+	}
+	return res
+}
+
+func toFilterRules(src interface{}) []obs.FilterRule {
+	rules := src.(*schema.Set)
+	res := make([]obs.FilterRule, rules.Len())
+	for i, v := range rules.List() {
+		rule := v.(map[string]interface{})
+		res[i] = obs.FilterRule{
+			Name:  rule["name"].(string),
+			Value: rule["value"].(string),
+		}
+	}
+	return res
+}
+
+func eventsToStrSlice(src []obs.EventType) []string {
+	res := make([]string, len(src))
+	for i, v := range src {
+		res[i] = string(v)
+	}
+	return res
+}
+
+func toEventSlice(src interface{}) []obs.EventType {
+	events := src.(*schema.Set)
+	res := make([]obs.EventType, events.Len())
+	for i, v := range events.List() {
+		res[i] = obs.EventType(v.(string))
+	}
+	return res
 }

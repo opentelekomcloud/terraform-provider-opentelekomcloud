@@ -9,8 +9,8 @@ Use this data source to get the specified node in a cluster from OpenTelekomClou
 ## Example Usage
 
 ```hcl
-variable "cluster_id" { }
-variable "node_id" { }
+variable "cluster_id" {}
+variable "node_id" {}
 
 data "opentelekomcloud_cce_node_v3" "node" {
   cluster_id = var.cluster_id

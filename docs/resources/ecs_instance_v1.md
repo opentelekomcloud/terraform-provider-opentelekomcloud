@@ -79,8 +79,8 @@ resource "opentelekomcloud_ecs_instance_v1" "basic" {
   }
 
   delete_disks_on_termination = true
-  availability_zone = "eu-de-01"
-  key_name          = "KeyPair-test"
+  availability_zone           = "eu-de-01"
+  key_name                    = "KeyPair-test"
 }
 ```
 
@@ -115,7 +115,7 @@ resource "opentelekomcloud_compute_volume_attach_v2" "attached" {
 ### Instance With Multiple Networks
 
 ```hcl
-resource "opentelekomcloud_networking_floatingip_v2" "myip" { }
+resource "opentelekomcloud_networking_floatingip_v2" "myip" {}
 
 resource "opentelekomcloud_ecs_instance_v1" "multi-net" {
   name     = "server_1"
@@ -155,8 +155,8 @@ resource "opentelekomcloud_ecs_instance_v1" "basic" {
     network_id = "55534eaa-533a-419d-9b40-ec427ea7195a"
   }
 
-  user_data         = "#cloud-config\nhostname: server_1.example.com\nfqdn: server_1.example.com"
-  key_name          = "KeyPair-test"
+  user_data = "#cloud-config\nhostname: server_1.example.com\nfqdn: server_1.example.com"
+  key_name  = "KeyPair-test"
 }
 ```
 
@@ -238,13 +238,14 @@ The `data_disks` block supports:
 * `size` - (Required) The size of the data disk in GB. The value range is 10 to 32768.
   Changing this creates a new server.
 
+* `kms_id` - (Optional) The Encryption KMS ID of the data disk.
+
 * `snapshot_id` - (Optional) Specifies the snapshot ID or ID of the original data disk contained in the full-ECS image.
   Changing this creates a new server.
 
-
 ## Attributes Reference
 
-The following attributes are exported:
+In addition to all arguments above, the following attributes are exported:
 
 * `id` - The ID of the server.
 * `nics/mac_address` - The MAC address of the NIC on that network.

@@ -4,16 +4,19 @@ subcategory: "Elastic Load Balance (ELB)"
 
 # opentelekomcloud_lb_member_v2
 
-Manages an Enhanced LB member resource within OpenTelekomCloud.
+Manages an Enhanced Load Balancer member resource within OpenTelekomCloud.
 
 ## Example Usage
 
 ```hcl
-resource "opentelekomcloud_lb_member_v2" "member_1" {
+variable "pool_id" {}
+variable "subnet_id" {}
+
+resource "opentelekomcloud_lb_member_v2" "member1" {
   address       = "192.168.199.23"
   protocol_port = 8080
-  pool_id       = POOL_ID
-  subnet_id     = SUBNET_ID
+  pool_id       = var.pool_id
+  subnet_id     = var.subnet_id
 }
 ```
 
@@ -40,11 +43,11 @@ The following arguments are supported:
 
 * `weight` - (Optional)  A positive integer value that indicates the relative
   portion of traffic that this member should receive from the pool. For
-  example, a member with a weight of 10 receives five times as much traffic
-  as a member with a weight of 2.
+  example, a member with a `weight` of `10` receives five times as much traffic
+  as a member with a `weight` of `2`.
 
 * `admin_state_up` - (Optional) The administrative state of the member.
-  A valid value is true (UP) or false (DOWN).
+  A valid value is `true` (UP) or `false` (DOWN).
 
 ## Attributes Reference
 

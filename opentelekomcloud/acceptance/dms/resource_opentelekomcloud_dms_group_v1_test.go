@@ -26,7 +26,7 @@ func TestAccDmsGroupsV1_basic(t *testing.T) {
 		CheckDestroy:      testAccCheckDmsV1GroupDestroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccDmsV1Group_basic(groupName, queueName),
+				Config: testAccDmsV1GroupBasic(groupName, queueName),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckDmsV1GroupExists("opentelekomcloud_dms_group_v1.group_1", group),
 					resource.TestCheckResourceAttr(
@@ -59,7 +59,7 @@ func testAccCheckDmsV1GroupDestroy(s *terraform.State) error {
 			if len(groupsList) > 0 {
 				for _, group := range groupsList {
 					if group.ID == rs.Primary.ID {
-						return fmt.Errorf("The Dms group still exists.")
+						return fmt.Errorf("the Dms group still exists.")
 					}
 				}
 			}
@@ -72,11 +72,11 @@ func testAccCheckDmsV1GroupExists(n string, group groups.Group) resource.TestChe
 	return func(s *terraform.State) error {
 		rs, ok := s.RootModule().Resources[n]
 		if !ok {
-			return fmt.Errorf("Not found: %s", n)
+			return fmt.Errorf("not found: %s", n)
 		}
 
 		if rs.Primary.ID == "" {
-			return fmt.Errorf("No ID is set")
+			return fmt.Errorf("no ID is set")
 		}
 
 		config := common.TestAccProvider.Meta().(*cfg.Config)
@@ -92,6 +92,9 @@ func testAccCheckDmsV1GroupExists(n string, group groups.Group) resource.TestChe
 		}
 
 		groupsList, err := groups.ExtractGroups(page)
+		if err != nil {
+			return fmt.Errorf("error extracting groups: %w", err)
+		}
 		if len(groupsList) > 0 {
 			for _, found := range groupsList {
 				if found.ID == rs.Primary.ID {
@@ -100,18 +103,18 @@ func testAccCheckDmsV1GroupExists(n string, group groups.Group) resource.TestChe
 				}
 			}
 		}
-		return fmt.Errorf("The Dms group not found.")
+		return fmt.Errorf("the DMS group not found")
 	}
 }
 
-func testAccDmsV1Group_basic(groupName string, queueName string) string {
+func testAccDmsV1GroupBasic(groupName string, queueName string) string {
 	return fmt.Sprintf(`
-		resource "opentelekomcloud_dms_queue_v1" "queue_1" {
-			name  = "%s"
-		}
-		resource "opentelekomcloud_dms_group_v1" "group_1" {
-			name = "%s"
-			queue_id = opentelekomcloud_dms_queue_v1.queue_1.id
-		}
+resource "opentelekomcloud_dms_queue_v1" "queue_1" {
+  name = "%s"
+}
+resource "opentelekomcloud_dms_group_v1" "group_1" {
+  name     = "%s"
+  queue_id = opentelekomcloud_dms_queue_v1.queue_1.id
+}
 	`, queueName, groupName)
 }

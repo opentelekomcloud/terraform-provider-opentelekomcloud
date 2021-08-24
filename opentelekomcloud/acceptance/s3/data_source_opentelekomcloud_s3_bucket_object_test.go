@@ -134,7 +134,7 @@ func testAccCheckAwsS3ObjectDataSourceExists(n string, obj *s3.GetObjectOutput) 
 	return func(s *terraform.State) error {
 		rs, ok := s.RootModule().Resources[n]
 		if !ok {
-			return fmt.Errorf("Can't find S3 object data source: %s", n)
+			return fmt.Errorf("can't find S3 object data source: %s", n)
 		}
 
 		if rs.Primary.ID == "" {
@@ -152,7 +152,7 @@ func testAccCheckAwsS3ObjectDataSourceExists(n string, obj *s3.GetObjectOutput) 
 				Key:    aws.String(rs.Primary.Attributes["key"]),
 			})
 		if err != nil {
-			return fmt.Errorf("Failed getting S3 Object from %s: %s",
+			return fmt.Errorf("failed getting S3 Object from %s: %s",
 				rs.Primary.Attributes["bucket"]+"/"+rs.Primary.Attributes["key"], err)
 		}
 

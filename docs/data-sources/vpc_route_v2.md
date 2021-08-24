@@ -9,7 +9,7 @@ Use this data source to get details about a specific VPC route.
 ## Example Usage
 
 ```hcl
-variable "route_id" { }
+variable "route_id" {}
 
 data "opentelekomcloud_vpc_route_v2" "vpc_route" {
   id = var.route_id

@@ -31,9 +31,9 @@ resource "opentelekomcloud_elb_listener" "listener" {
   lb_algorithm     = "roundrobin"
   loadbalancer_id  = opentelekomcloud_elb_loadbalancer.elb.id
   timeouts {
-	create = "5m"
-	update = "5m"
-	delete = "5m"
+    create = "5m"
+    update = "5m"
+    delete = "5m"
   }
 }
 

@@ -1,0 +1,4 @@
+---
+fixes:
+  - |
+    **[WAF]** Fix use of ``logic`` field in ``resource/opentelekomcloud_waf_preciseprotection_rule_v1`` (`#1193 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/1193>`_)

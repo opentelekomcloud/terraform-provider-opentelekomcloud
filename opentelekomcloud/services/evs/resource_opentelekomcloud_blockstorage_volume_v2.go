@@ -253,6 +253,7 @@ func resourceBlockStorageVolumeV2Read(_ context.Context, d *schema.ResourceData,
 		d.Set("snapshot_id", v.SnapshotID),
 		d.Set("source_vol_id", v.SourceVolID),
 		d.Set("volume_type", v.VolumeType),
+		d.Set("region", config.GetRegion(d)),
 	)
 	if mErr.ErrorOrNil() != nil {
 		return diag.FromErr(mErr)
@@ -274,7 +275,6 @@ OUTER:
 	if err := d.Set("metadata", md); err != nil {
 		return fmterr.Errorf("[DEBUG] Error saving metadata to state for OpenTelekomCloud block storage (%s): %s", d.Id(), err)
 	}
-	d.Set("region", config.GetRegion(d))
 
 	attachments := make([]map[string]interface{}, len(v.Attachments))
 	for i, attachment := range v.Attachments {
@@ -291,11 +291,11 @@ OUTER:
 	if err != nil {
 		return fmterr.Errorf("error fetching tags for volume (%s): %s", v.ID, err)
 	}
-	d.Set("tags", taglist)
+	mErr = multierror.Append(mErr, d.Set("tags", taglist.Tags))
 
 	// This is useful for import
 	if d.Get("device_type").(string) == "" {
-		d.Set("device_type", "VBD")
+		mErr = multierror.Append(mErr, d.Set("device_type", "VBD"))
 	}
 
 	if d.Get("device_type").(string) == "SCSI" {
@@ -311,7 +311,11 @@ OUTER:
 
 		log.Printf("[DEBUG] Retrieved volume %s: %+v", d.Id(), v)
 
-		d.Set("wwn", v.WWN)
+		mErr = multierror.Append(mErr, d.Set("wwn", v.WWN))
+	}
+
+	if err := mErr.ErrorOrNil(); err != nil {
+		return diag.FromErr(err)
 	}
 
 	return nil
@@ -339,6 +343,9 @@ func resourceBlockStorageVolumeV2Update(ctx context.Context, d *schema.ResourceD
 	}
 	if d.HasChange("tags") {
 		_, err = resourceEVSTagV2Create(ctx, d, meta, "volumes", d.Id(), resourceContainerTags(d))
+		if err != nil {
+			return fmterr.Errorf("error creating tags for the volume: %w", err)
+		}
 	}
 
 	if d.HasChange("size") {
@@ -477,9 +484,9 @@ func VolumeV2StateRefreshFunc(client *golangsdk.ServiceClient, volumeID string) 
 		}
 
 		if v.Status == "error" {
-			return v, v.Status, fmt.Errorf("There was an error creating the volume. " +
+			return v, v.Status, fmt.Errorf("there was an error creating the volume. " +
 				"Please check with your cloud admin or check the Block Storage " +
-				"API logs to see why this error occurred.")
+				"API logs to see why this error occurred")
 		}
 
 		return v, v.Status, nil

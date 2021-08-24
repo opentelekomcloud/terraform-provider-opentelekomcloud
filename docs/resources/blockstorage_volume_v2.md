@@ -18,7 +18,7 @@ resource "opentelekomcloud_blockstorage_volume_v2" "volume_1" {
     foo = "bar"
     key = "value"
   }
-  metadata    = {
+  metadata = {
     __system__encrypted = "1"
     __system__cmkid     = "kms_id"
   }

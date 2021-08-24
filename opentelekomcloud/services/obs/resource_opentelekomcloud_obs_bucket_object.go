@@ -113,11 +113,17 @@ func resourceObsBucketObjectPut(ctx context.Context, d *schema.ResourceData, met
 
 		// put source file
 		resp, err = putFileToObject(client, d)
+		if err != nil {
+			return diag.FromErr(err)
+		}
 	}
 
 	if _, ok := d.GetOk("content"); ok {
 		// put content
 		resp, err = putContentToObject(client, d)
+		if err != nil {
+			return diag.FromErr(err)
+		}
 	}
 
 	bucket := d.Get("bucket").(string)

@@ -6,6 +6,7 @@ import (
 	"log"
 	"time"
 
+	"github.com/hashicorp/go-multierror"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
@@ -218,7 +219,6 @@ func resourceCSBSBackupV1Create(ctx context.Context, d *schema.ResourceData, met
 	}
 
 	if query[0].Result {
-
 		createOpts := backup.CreateOpts{
 			BackupName:   d.Get("backup_name").(string),
 			Description:  d.Get("description").(string),
@@ -239,7 +239,7 @@ func resourceCSBSBackupV1Create(ctx context.Context, d *schema.ResourceData, met
 		}
 
 		if len(backupItems) == 0 {
-			return fmterr.Errorf("Not able to find created Backup: %s", err)
+			return fmterr.Errorf("not able to find created Backup: %s", err)
 		}
 
 		backupObject := backupItems[0]
@@ -262,17 +262,14 @@ func resourceCSBSBackupV1Create(ctx context.Context, d *schema.ResourceData, met
 				"Error waiting for Backup (%s) to become available: %s",
 				backupObject.Id, stateErr)
 		}
-
 	} else {
 		return fmterr.Errorf("error code: %s\n Error msg: %s", query[0].ErrorCode, query[0].ErrorMsg)
 	}
 
 	return resourceCSBSBackupV1Read(ctx, d, meta)
-
 }
 
 func resourceCSBSBackupV1Read(_ context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-
 	config := meta.(*cfg.Config)
 	backupClient, err := config.CsbsV1Client(config.GetRegion(d))
 	if err != nil {
@@ -282,7 +279,6 @@ func resourceCSBSBackupV1Read(_ context.Context, d *schema.ResourceData, meta in
 	backupObject, err := backup.Get(backupClient, d.Id()).ExtractBackup()
 
 	if err != nil {
-
 		if _, ok := err.(golangsdk.ErrDefault404); ok {
 			log.Printf("[WARN] Removing backup %s as it's already gone", d.Id())
 			d.SetId("")
@@ -290,23 +286,26 @@ func resourceCSBSBackupV1Read(_ context.Context, d *schema.ResourceData, meta in
 		}
 
 		return fmterr.Errorf("error retrieving backup: %s", err)
-
 	}
+	mErr := multierror.Append(
+		d.Set("resource_id", backupObject.ResourceId),
+		d.Set("backup_name", backupObject.Name),
+		d.Set("description", backupObject.Description),
+		d.Set("resource_type", backupObject.ResourceType),
+		d.Set("status", backupObject.Status),
+		d.Set("volume_backups", flattenCSBSVolumeBackups(backupObject)),
+		d.Set("vm_metadata", flattenCSBSVMMetadata(backupObject)),
+		d.Set("backup_record_id", backupObject.CheckpointId),
+		d.Set("region", config.GetRegion(d)),
+	)
 
-	d.Set("resource_id", backupObject.ResourceId)
-	d.Set("backup_name", backupObject.Name)
-	d.Set("description", backupObject.Description)
-	d.Set("resource_type", backupObject.ResourceType)
-	d.Set("status", backupObject.Status)
-	d.Set("volume_backups", flattenCSBSVolumeBackups(backupObject))
-	d.Set("vm_metadata", flattenCSBSVMMetadata(backupObject))
-	d.Set("backup_record_id", backupObject.CheckpointId)
+	if err := mErr.ErrorOrNil(); err != nil {
+		return diag.FromErr(err)
+	}
 
 	if err := d.Set("tags", flattenCSBSTags(backupObject)); err != nil {
 		return diag.FromErr(err)
 	}
-
-	d.Set("region", config.GetRegion(d))
 
 	return nil
 }
@@ -344,7 +343,7 @@ func waitForCSBSBackupActive(backupClient *golangsdk.ServiceClient, backupId str
 		}
 
 		if n.Id == "error" {
-			return nil, "", fmt.Errorf("Backup status: %s", n.Status)
+			return nil, "", fmt.Errorf("backup status: %s", n.Status)
 		}
 
 		return n, n.Status, nil
@@ -353,7 +352,6 @@ func waitForCSBSBackupActive(backupClient *golangsdk.ServiceClient, backupId str
 
 func waitForCSBSBackupDelete(backupClient *golangsdk.ServiceClient, backupId string, backupRecordID string) resource.StateRefreshFunc {
 	return func() (interface{}, string, error) {
-
 		r, err := backup.Get(backupClient, backupId).ExtractBackup()
 		if err != nil {
 			if _, ok := err.(golangsdk.ErrDefault404); ok {
@@ -366,7 +364,6 @@ func waitForCSBSBackupDelete(backupClient *golangsdk.ServiceClient, backupId str
 		err = backup.Delete(backupClient, backupRecordID).Err
 
 		if err != nil {
-
 			if _, ok := err.(golangsdk.ErrDefault404); ok {
 				log.Printf("[INFO] Successfully deleted OpenTelekomCloud Backup %s", backupId)
 				return r, "deleted", nil
@@ -442,7 +439,6 @@ func flattenCSBSVMMetadata(backupObject *backup.Backup) []map[string]interface{}
 	vmMetadata = append(vmMetadata, mapping)
 
 	return vmMetadata
-
 }
 
 func flattenCSBSTags(backupObject *backup.Backup) []map[string]interface{} {

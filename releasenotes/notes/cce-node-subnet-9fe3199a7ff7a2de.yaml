@@ -1,0 +1,4 @@
+---
+features:
+  - |
+    **[CCE]** Add possibility to set ``subnet_id`` in ``resource/opentelekomcloud_cce_node_v3`` (`#1214 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/1214>`_)

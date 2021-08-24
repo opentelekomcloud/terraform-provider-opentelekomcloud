@@ -23,7 +23,7 @@ The following arguments are supported:
   updates the `name` of an existing router.
 
 * `admin_state_up` - (Optional) Administrative up/down status for the router
-  (must be "true" or "false" if provided). Changing this updates the
+  (must be `true` or `false` if provided). Changing this updates the
   `admin_state_up` of an existing router.
 
 * `distributed` - (Optional) Indicates whether or not to create a
@@ -36,7 +36,7 @@ The following arguments are supported:
   updates the `external_gateway` of an existing router.
 
 * `enable_snat` - (Optional) Enable Source NAT for the router. Valid values are
-  "true" or "false". An `external_gateway` has to be set in order to set this
+  `true` or `false`. An `external_gateway` has to be set in order to set this
   property. Changing this updates the `enable_snat` of the router.
 
 * `tenant_id` - (Optional) The owner of the floating IP. Required if admin wants

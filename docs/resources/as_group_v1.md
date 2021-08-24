@@ -77,26 +77,28 @@ resource "opentelekomcloud_as_group_v1" "as_group_with_elb" {
   }
 
   vpc_id           = "1d8f7e7c-fe04-4cf5-85ac-08b478c290e9"
-  lb_listener_id   = opentelekomcloud_elb_listener.as_listener.id
   delete_publicip  = true
   delete_instances = "yes"
+
+  lbaas_listeners {
+    pool_id       = opentelekomcloud_lb_pool_v2.pool_1.id
+    protocol_port = opentelekomcloud_lb_listener_v2.as_listener.protocol_port
+  }
 }
 
-resource "opentelekomcloud_elb_listener" "as_listener" {
-  name             = "as_listener"
-  description      = "as test listener"
-  protocol         = "TCP"
-  backend_protocol = "TCP"
-  port             = 12345
-  backend_port     = 21345
-  lb_algorithm     = "roundrobin"
-  loadbalancer_id  = "cba48790-baf5-4446-adb3-02069a916e97"
+resource "opentelekomcloud_lb_listener_v2" "as_listener" {
+  name            = "as_listener"
+  description     = "as test listener"
+  protocol        = "TCP"
+  protocol_port   = 80
+  loadbalancer_id = "cba48790-baf5-4446-adb3-02069a916e97"
+}
 
-  timeouts {
-    create = "5m"
-    update = "5m"
-    delete = "5m"
-  }
+resource "opentelekomcloud_lb_pool_v2" "pool_1" {
+  name        = "pool_1"
+  protocol    = "HTTP"
+  lb_method   = "ROUND_ROBIN"
+  listener_id = opentelekomcloud_lb_listener_v2.as_listener.id
 }
 ```
 
@@ -123,12 +125,12 @@ The following arguments are supported:
 * `cool_down_time` - (Optional) The cooling duration (in seconds). The value ranges
   from 0 to 86400, and is 900 by default.
 
-* `lb_listener_id` - (Optional) The ELB listener IDs. The system supports up to
-  three ELB listeners, the IDs of which are separated using a comma (,).
+* `lb_listener_id` **DEPRECATED** - (Optional) The Classic LB listener IDs. The system
+  supports up to six Classic LB listeners, the IDs of which are separated using a comma (,).
   This parameter is alternative to `lbaas_listeners`.
 
-* `lbaas_listeners` - (Optional) An array of one or more enhanced load balancer.
-  The system supports the binding of up to three load balancers. The field is
+* `lbaas_listeners` - (Optional) An array of one or more Enhanced Load Balancer.
+  The system supports the binding of up to six Enhanced Load Balancers. The field is
   alternative to `lb_listener_id`. The `lbaas_listeners` object structure is
   documented below.
 

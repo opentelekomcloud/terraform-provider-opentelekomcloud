@@ -4,6 +4,7 @@ import (
 	"context"
 	"log"
 
+	"github.com/hashicorp/go-multierror"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/identity/v3/groups"
@@ -56,22 +57,22 @@ func dataSourceIdentityGroupV3Read(_ context.Context, d *schema.ResourceData, me
 	var group groups.Group
 	allPages, err := groups.List(identityClient, listOpts).AllPages()
 	if err != nil {
-		return fmterr.Errorf("Unable to query groups: %s", err)
+		return fmterr.Errorf("unable to query groups: %s", err)
 	}
 
 	allGroups, err := groups.ExtractGroups(allPages)
 	if err != nil {
-		return fmterr.Errorf("Unable to retrieve roles: %s", err)
+		return fmterr.Errorf("unable to retrieve roles: %s", err)
 	}
 
 	if len(allGroups) < 1 {
-		return fmterr.Errorf("Your query returned no results. " +
+		return fmterr.Errorf("your query returned no results. " +
 			"Please change your search criteria and try again.")
 	}
 
 	if len(allGroups) > 1 {
 		log.Printf("[DEBUG] Multiple results found: %#v", allGroups)
-		return fmterr.Errorf("Your query returned more than one result. Please try a more " +
+		return fmterr.Errorf("your query returned more than one result. Please try a more " +
 			"specific search criteria, or set `most_recent` attribute to true.")
 	}
 	group = allGroups[0]
@@ -85,9 +86,14 @@ func dataSourceIdentityGroupV3Attributes(d *schema.ResourceData, config *cfg.Con
 	log.Printf("[DEBUG] opentelekomcloud_identity_group_v3 details: %#v", group)
 
 	d.SetId(group.ID)
-	d.Set("name", group.Name)
-	d.Set("domain_id", group.DomainID)
-	d.Set("region", config.GetRegion(d))
+	mErr := multierror.Append(
+		d.Set("name", group.Name),
+		d.Set("domain_id", group.DomainID),
+		d.Set("region", config.GetRegion(d)),
+	)
+	if err := mErr.ErrorOrNil(); err != nil {
+		return err
+	}
 
 	return nil
 }

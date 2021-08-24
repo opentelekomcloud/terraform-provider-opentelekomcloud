@@ -9,8 +9,8 @@ Use this data source to get details about an Scalabe File Service.
 ## Example Usage
 
 ```hcl
-variable "share_name" { }
-variable "share_id" { }
+variable "share_name" {}
+variable "share_id" {}
 
 data "opentelekomcloud_sfs_file_system_v2" "shared_file" {
   name = var.share_name

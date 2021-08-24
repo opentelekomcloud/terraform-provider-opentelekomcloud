@@ -123,6 +123,12 @@ func ResourceCCENodePoolV3() *schema.Resource {
 							Type:     schema.TypeString,
 							Required: true,
 						},
+						"kms_id": {
+							Type:        schema.TypeString,
+							Optional:    true,
+							ForceNew:    true,
+							DefaultFunc: schema.EnvDefaultFunc("OS_KMS_ID", nil),
+						},
 						"extend_param": {
 							Type:     schema.TypeString,
 							Optional: true,
@@ -326,25 +332,25 @@ func resourceCCENodePoolV3Create(ctx context.Context, d *schema.ResourceData, me
 
 	log.Printf("[DEBUG] Create Options: %#v", createOpts)
 	pool, err := nodepools.Create(nodePoolClient, clusterId, createOpts).Extract()
-	if err != nil {
-		if _, ok := err.(golangsdk.ErrDefault403); ok {
-			if _, err := stateCluster.WaitForStateContext(ctx); err != nil {
-				return fmterr.Errorf("error waiting for cluster to be available: %w", err)
-			}
-			retried, err := nodepools.Create(nodePoolClient, clusterId, createOpts).Extract()
-			if err != nil {
-				return fmterr.Errorf(createError, err)
-			}
-			pool = retried
-		} else {
+	switch err.(type) {
+	case golangsdk.ErrDefault403:
+		if _, err := stateCluster.WaitForStateContext(ctx); err != nil {
+			return fmterr.Errorf("error waiting for cluster to be available: %w", err)
+		}
+		retried, err := nodepools.Create(nodePoolClient, clusterId, createOpts).Extract()
+		if err != nil {
 			return fmterr.Errorf(createError, err)
 		}
+		pool = retried
+	case nil:
+		break
+	default:
+		return fmterr.Errorf(createError, err)
 	}
-
 	d.SetId(pool.Metadata.Id)
 
 	stateConf := &resource.StateChangeConf{
-		Pending:      []string{"Synchronizing"},
+		Pending:      []string{"Synchronizing", "Synchronized"},
 		Target:       []string{""},
 		Refresh:      waitForCceNodePoolActive(nodePoolClient, clusterId, d.Id()),
 		Timeout:      d.Timeout(schema.TimeoutCreate),
@@ -381,7 +387,6 @@ func resourceCCENodePoolV3Read(_ context.Context, d *schema.ResourceData, meta i
 		d.Set("availability_zone", s.Spec.NodeTemplate.Az),
 		d.Set("os", s.Spec.NodeTemplate.Os),
 		d.Set("key_pair", s.Spec.NodeTemplate.Login.SshKey),
-		d.Set("initial_node_count", s.Spec.InitialNodeCount),
 		d.Set("scale_enable", s.Spec.Autoscaling.Enable),
 	)
 
@@ -415,6 +420,9 @@ func resourceCCENodePoolV3Read(_ context.Context, d *schema.ResourceData, meta i
 			"size":         pairObject.Size,
 			"volumetype":   pairObject.VolumeType,
 			"extend_param": pairObject.ExtendParam,
+		}
+		if pairObject.Metadata != nil {
+			volume["kms_id"] = pairObject.Metadata["__system__cmkid"]
 		}
 		volumes = append(volumes, volume)
 	}
@@ -474,7 +482,7 @@ func resourceCCENodePoolV3Update(ctx context.Context, d *schema.ResourceData, me
 		return fmterr.Errorf("error updating Open Telekom Cloud CCE Node Pool: %w", err)
 	}
 	stateConf := &resource.StateChangeConf{
-		Pending:    []string{"Synchronizing"},
+		Pending:    []string{"Synchronizing", "Synchronized"},
 		Target:     []string{""},
 		Refresh:    waitForCceNodePoolActive(nodePoolClient, clusterId, d.Id()),
 		Timeout:    d.Timeout(schema.TimeoutCreate),

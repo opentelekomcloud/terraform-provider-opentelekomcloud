@@ -32,7 +32,7 @@ func TestAccNetworkingV2Port_basic(t *testing.T) {
 		CheckDestroy:      testAccCheckNetworkingV2PortDestroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccNetworkingV2Port_basic,
+				Config: testAccNetworkingV2PortBasic,
 				Check: resource.ComposeTestCheckFunc(
 					TestAccCheckNetworkingV2SubnetExists("opentelekomcloud_networking_subnet_v2.subnet_1", &subnet),
 					TestAccCheckNetworkingV2NetworkExists("opentelekomcloud_networking_network_v2.network_1", &network),
@@ -54,7 +54,7 @@ func TestAccNetworkingV2Port_noip(t *testing.T) {
 		CheckDestroy:      testAccCheckNetworkingV2PortDestroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccNetworkingV2Port_noip,
+				Config: testAccNetworkingV2PortNoIP,
 				Check: resource.ComposeTestCheckFunc(
 					TestAccCheckNetworkingV2SubnetExists("opentelekomcloud_networking_subnet_v2.subnet_1", &subnet),
 					TestAccCheckNetworkingV2NetworkExists("opentelekomcloud_networking_network_v2.network_1", &network),
@@ -77,7 +77,7 @@ func TestAccNetworkingV2Port_allowedAddressPairs(t *testing.T) {
 		CheckDestroy:      testAccCheckNetworkingV2PortDestroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccNetworkingV2Port_allowedAddressPairs,
+				Config: testAccNetworkingV2PortAllowedAddressPairs,
 				Check: resource.ComposeTestCheckFunc(
 					TestAccCheckNetworkingV2SubnetExists("opentelekomcloud_networking_subnet_v2.vrrp_subnet", &subnet),
 					TestAccCheckNetworkingV2NetworkExists("opentelekomcloud_networking_network_v2.vrrp_network", &network),
@@ -130,7 +130,7 @@ func TestAccNetworkingV2Port_timeout(t *testing.T) {
 		CheckDestroy:      testAccCheckNetworkingV2PortDestroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccNetworkingV2Port_timeout,
+				Config: testAccNetworkingV2PortTimeout,
 				Check: resource.ComposeTestCheckFunc(
 					TestAccCheckNetworkingV2SubnetExists("opentelekomcloud_networking_subnet_v2.subnet_1", &subnet),
 					TestAccCheckNetworkingV2NetworkExists("opentelekomcloud_networking_network_v2.network_1", &network),
@@ -237,16 +237,6 @@ func testAccCheckNetworkingV2PortCountFixedIPs(port *ports.Port, expected int) r
 	}
 }
 
-func testAccCheckNetworkingV2PortCountSecurityGroups(port *ports.Port, expected int) resource.TestCheckFunc {
-	return func(s *terraform.State) error {
-		if len(port.SecurityGroups) != expected {
-			return fmt.Errorf("expected %d Security Groups, got %d", expected, len(port.SecurityGroups))
-		}
-
-		return nil
-	}
-}
-
 func testAccCheckNetworkingV2PortPortSecurity(port *testPortWithExtensions, expected bool) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
 		if port.PortSecurityEnabled != expected {
@@ -257,7 +247,7 @@ func testAccCheckNetworkingV2PortPortSecurity(port *testPortWithExtensions, expe
 	}
 }
 
-const testAccNetworkingV2Port_basic = `
+const testAccNetworkingV2PortBasic = `
 resource "opentelekomcloud_networking_network_v2" "network_1" {
   name = "network_1"
   admin_state_up = "true"
@@ -282,7 +272,7 @@ resource "opentelekomcloud_networking_port_v2" "port_1" {
 }
 `
 
-const testAccNetworkingV2Port_noip = `
+const testAccNetworkingV2PortNoIP = `
 resource "opentelekomcloud_networking_network_v2" "network_1" {
   name = "network_1"
   admin_state_up = "true"
@@ -306,39 +296,7 @@ resource "opentelekomcloud_networking_port_v2" "port_1" {
 }
 `
 
-const testAccNetworkingV2Port_multipleNoIP = `
-resource "opentelekomcloud_networking_network_v2" "network_1" {
-  name = "network_1"
-  admin_state_up = "true"
-}
-
-resource "opentelekomcloud_networking_subnet_v2" "subnet_1" {
-  name = "subnet_1"
-  cidr = "192.168.199.0/24"
-  ip_version = 4
-  network_id = opentelekomcloud_networking_network_v2.network_1.id
-}
-
-resource "opentelekomcloud_networking_port_v2" "port_1" {
-  name = "port_1"
-  admin_state_up = "true"
-  network_id = opentelekomcloud_networking_network_v2.network_1.id
-
-  fixed_ip {
-    subnet_id =  opentelekomcloud_networking_subnet_v2.subnet_1.id
-  }
-
-  fixed_ip {
-    subnet_id =  opentelekomcloud_networking_subnet_v2.subnet_1.id
-  }
-
-  fixed_ip {
-    subnet_id =  opentelekomcloud_networking_subnet_v2.subnet_1.id
-  }
-}
-`
-
-const testAccNetworkingV2Port_allowedAddressPairs = `
+const testAccNetworkingV2PortAllowedAddressPairs = `
 resource "opentelekomcloud_networking_network_v2" "vrrp_network" {
   name = "vrrp_network"
   admin_state_up = "true"
@@ -404,41 +362,6 @@ resource "opentelekomcloud_networking_port_v2" "instance_port" {
 }
 `
 
-const testAccNetworkingV2Port_multipleFixedIPs = `
-resource "opentelekomcloud_networking_network_v2" "network_1" {
-  name = "network_1"
-  admin_state_up = "true"
-}
-
-resource "opentelekomcloud_networking_subnet_v2" "subnet_1" {
-  name = "subnet_1"
-  cidr = "192.168.199.0/24"
-  ip_version = 4
-  network_id = opentelekomcloud_networking_network_v2.network_1.id
-}
-
-resource "opentelekomcloud_networking_port_v2" "port_1" {
-  name = "port_1"
-  admin_state_up = "true"
-  network_id = opentelekomcloud_networking_network_v2.network_1.id
-
-  fixed_ip {
-    subnet_id =  opentelekomcloud_networking_subnet_v2.subnet_1.id
-    ip_address = "192.168.199.23"
-  }
-
-  fixed_ip {
-    subnet_id =  opentelekomcloud_networking_subnet_v2.subnet_1.id
-    ip_address = "192.168.199.20"
-  }
-
-  fixed_ip {
-    subnet_id =  opentelekomcloud_networking_subnet_v2.subnet_1.id
-    ip_address = "192.168.199.40"
-  }
-}
-`
-
 const testAccNetworkingV2PortSecurityDisabled = `
 resource "opentelekomcloud_networking_network_v2" "network_1" {
   name = "network_1"
@@ -485,7 +408,7 @@ resource "opentelekomcloud_networking_port_v2" "port_1" {
 }
 `
 
-const testAccNetworkingV2Port_timeout = `
+const testAccNetworkingV2PortTimeout = `
 resource "opentelekomcloud_networking_network_v2" "network_1" {
   name = "network_1"
   admin_state_up = "true"
@@ -511,159 +434,6 @@ resource "opentelekomcloud_networking_port_v2" "port_1" {
   timeouts {
     create = "5m"
     delete = "5m"
-  }
-}
-`
-
-const testAccNetworkingV2Port_fixedIPs = `
-resource "opentelekomcloud_networking_network_v2" "network_1" {
-  name = "network_1"
-  admin_state_up = "true"
-}
-
-resource "opentelekomcloud_networking_subnet_v2" "subnet_1" {
-  name = "subnet_1"
-  cidr = "192.168.199.0/24"
-  ip_version = 4
-  network_id = opentelekomcloud_networking_network_v2.network_1.id
-}
-
-resource "opentelekomcloud_networking_port_v2" "port_1" {
-  name = "port_1"
-  admin_state_up = "true"
-  network_id = opentelekomcloud_networking_network_v2.network_1.id
-
-  fixed_ip {
-    subnet_id =  opentelekomcloud_networking_subnet_v2.subnet_1.id
-    ip_address = "192.168.199.24"
-  }
-
-  fixed_ip {
-    subnet_id =  opentelekomcloud_networking_subnet_v2.subnet_1.id
-    ip_address = "192.168.199.23"
-  }
-}
-`
-
-const testAccNetworkingV2Port_updateSecurityGroups_1 = `
-resource "opentelekomcloud_networking_network_v2" "network_1" {
-  name = "network_1"
-  admin_state_up = "true"
-}
-
-resource "opentelekomcloud_networking_subnet_v2" "subnet_1" {
-  name = "subnet_1"
-  cidr = "192.168.199.0/24"
-  ip_version = 4
-  network_id = opentelekomcloud_networking_network_v2.network_1.id
-}
-
-resource "opentelekomcloud_networking_secgroup_v2" "secgroup_1" {
-  name = "security_group"
-  description = "terraform security group acceptance test"
-}
-
-resource "opentelekomcloud_networking_port_v2" "port_1" {
-  name = "port_1"
-  admin_state_up = "true"
-  network_id = opentelekomcloud_networking_network_v2.network_1.id
-
-  fixed_ip {
-    subnet_id =  opentelekomcloud_networking_subnet_v2.subnet_1.id
-    ip_address = "192.168.199.23"
-  }
-}
-`
-
-const testAccNetworkingV2Port_updateSecurityGroups_2 = `
-resource "opentelekomcloud_networking_network_v2" "network_1" {
-  name = "network_1"
-  admin_state_up = "true"
-}
-
-resource "opentelekomcloud_networking_subnet_v2" "subnet_1" {
-  name = "subnet_1"
-  cidr = "192.168.199.0/24"
-  ip_version = 4
-  network_id = opentelekomcloud_networking_network_v2.network_1.id
-}
-
-resource "opentelekomcloud_networking_secgroup_v2" "secgroup_1" {
-  name = "security_group"
-  description = "terraform security group acceptance test"
-}
-
-resource "opentelekomcloud_networking_port_v2" "port_1" {
-  name = "port_1"
-  admin_state_up = "true"
-  network_id = opentelekomcloud_networking_network_v2.network_1.id
-  security_group_ids = [opentelekomcloud_networking_secgroup_v2.secgroup_1.id]
-
-  fixed_ip {
-    subnet_id =  opentelekomcloud_networking_subnet_v2.subnet_1.id
-    ip_address = "192.168.199.23"
-  }
-}
-`
-
-const testAccNetworkingV2Port_updateSecurityGroups_3 = `
-resource "opentelekomcloud_networking_network_v2" "network_1" {
-  name = "network_1"
-  admin_state_up = "true"
-}
-
-resource "opentelekomcloud_networking_subnet_v2" "subnet_1" {
-  name = "subnet_1"
-  cidr = "192.168.199.0/24"
-  ip_version = 4
-  network_id = opentelekomcloud_networking_network_v2.network_1.id
-}
-
-resource "opentelekomcloud_networking_secgroup_v2" "secgroup_1" {
-  name = "security_group_1"
-  description = "terraform security group acceptance test"
-}
-
-resource "opentelekomcloud_networking_port_v2" "port_1" {
-  name = "port_1"
-  admin_state_up = "true"
-  network_id = opentelekomcloud_networking_network_v2.network_1.id
-  security_group_ids = [opentelekomcloud_networking_secgroup_v2.secgroup_1.id]
-
-  fixed_ip {
-    subnet_id =  opentelekomcloud_networking_subnet_v2.subnet_1.id
-    ip_address = "192.168.199.23"
-  }
-}
-`
-
-const testAccNetworkingV2Port_updateSecurityGroups_4 = `
-resource "opentelekomcloud_networking_network_v2" "network_1" {
-  name = "network_1"
-  admin_state_up = "true"
-}
-
-resource "opentelekomcloud_networking_subnet_v2" "subnet_1" {
-  name = "subnet_1"
-  cidr = "192.168.199.0/24"
-  ip_version = 4
-  network_id = opentelekomcloud_networking_network_v2.network_1.id
-}
-
-resource "opentelekomcloud_networking_secgroup_v2" "secgroup_1" {
-  name = "security_group"
-  description = "terraform security group acceptance test"
-}
-
-resource "opentelekomcloud_networking_port_v2" "port_1" {
-  name = "port_1"
-  admin_state_up = "true"
-  network_id = opentelekomcloud_networking_network_v2.network_1.id
-	security_group_ids = []
-
-  fixed_ip {
-    subnet_id =  opentelekomcloud_networking_subnet_v2.subnet_1.id
-    ip_address = "192.168.199.23"
   }
 }
 `

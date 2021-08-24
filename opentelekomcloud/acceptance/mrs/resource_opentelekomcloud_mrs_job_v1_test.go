@@ -66,11 +66,11 @@ func testAccCheckMRSV1JobExists(n string, jobGet *job.Job) resource.TestCheckFun
 	return func(s *terraform.State) error {
 		rs, ok := s.RootModule().Resources[n]
 		if !ok {
-			return fmt.Errorf("Not found: %s. ", n)
+			return fmt.Errorf("not found: %s. ", n)
 		}
 
 		if rs.Primary.ID == "" {
-			return fmt.Errorf("No ID is set. ")
+			return fmt.Errorf("no ID is set. ")
 		}
 
 		config := common.TestAccProvider.Meta().(*cfg.Config)
@@ -85,7 +85,7 @@ func testAccCheckMRSV1JobExists(n string, jobGet *job.Job) resource.TestCheckFun
 		}
 
 		if found.ID != rs.Primary.ID {
-			return fmt.Errorf("Job not found. ")
+			return fmt.Errorf("job not found. ")
 		}
 
 		*jobGet = *found

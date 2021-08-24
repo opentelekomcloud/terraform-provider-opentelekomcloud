@@ -14,7 +14,7 @@ resource "opentelekomcloud_vpc_route_v2" "vpc_route" {
   nexthop     = var.nexthop
   destination = "192.168.0.0/16"
   vpc_id      = var.vpc_id
- }
+}
 ```
 
 ## Argument Reference

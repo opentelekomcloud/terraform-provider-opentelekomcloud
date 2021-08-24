@@ -86,7 +86,7 @@ func testAccCheckOTCRtsSoftwareDeploymentV1Destroy(s *terraform.State) error {
 
 		if err == nil {
 			if stack.Status != "DELETE_COMPLETE" {
-				return fmt.Errorf("Deployment still exists")
+				return fmt.Errorf("deployment still exists")
 			}
 		}
 	}
@@ -98,11 +98,11 @@ func testAccCheckOTCRtsSoftwareDeploymentV1Exists(n string, stack *softwaredeplo
 	return func(s *terraform.State) error {
 		rs, ok := s.RootModule().Resources[n]
 		if !ok {
-			return fmt.Errorf("Not found: %s", n)
+			return fmt.Errorf("not found: %s", n)
 		}
 
 		if rs.Primary.ID == "" {
-			return fmt.Errorf("No ID is set")
+			return fmt.Errorf("no ID is set")
 		}
 
 		config := common.TestAccProvider.Meta().(*cfg.Config)

@@ -2,13 +2,14 @@ package elb
 
 import (
 	"context"
-	"fmt"
 	"log"
 	"time"
 
+	"github.com/hashicorp/go-multierror"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/networking/v2/extensions/lbaas_v2/pools"
 
@@ -37,57 +38,42 @@ func ResourceMemberV2() *schema.Resource {
 				Computed: true,
 				ForceNew: true,
 			},
-
 			"name": {
 				Type:     schema.TypeString,
 				Optional: true,
 			},
-
 			"tenant_id": {
 				Type:     schema.TypeString,
 				Optional: true,
 				Computed: true,
 				ForceNew: true,
 			},
-
 			"address": {
 				Type:     schema.TypeString,
 				Required: true,
 				ForceNew: true,
 			},
-
 			"protocol_port": {
 				Type:     schema.TypeInt,
 				Required: true,
 				ForceNew: true,
 			},
-
 			"weight": {
-				Type:     schema.TypeInt,
-				Optional: true,
-				Computed: true,
-				ValidateFunc: func(v interface{}, k string) (ws []string, errors []error) {
-					value := v.(int)
-					if value < 1 {
-						errors = append(errors, fmt.Errorf(
-							"Only numbers greater than 0 are supported values for 'weight'"))
-					}
-					return
-				},
+				Type:         schema.TypeInt,
+				Optional:     true,
+				Computed:     true,
+				ValidateFunc: validation.IntBetween(1, 100),
 			},
-
 			"subnet_id": {
 				Type:     schema.TypeString,
 				Required: true,
 				ForceNew: true,
 			},
-
 			"admin_state_up": {
 				Type:     schema.TypeBool,
-				Default:  true,
 				Optional: true,
+				Default:  true,
 			},
-
 			"pool_id": {
 				Type:     schema.TypeString,
 				Required: true,
@@ -99,24 +85,20 @@ func ResourceMemberV2() *schema.Resource {
 
 func resourceMemberV2Create(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*cfg.Config)
-	networkingClient, err := config.NetworkingV2Client(config.GetRegion(d))
+	client, err := config.NetworkingV2Client(config.GetRegion(d))
 	if err != nil {
-		return fmterr.Errorf("error creating OpenTelekomCloud networking client: %s", err)
+		return fmterr.Errorf(errCreationClient, err)
 	}
 
 	adminStateUp := d.Get("admin_state_up").(bool)
 	createOpts := pools.CreateMemberOpts{
-		Name:         d.Get("name").(string),
-		TenantID:     d.Get("tenant_id").(string),
 		Address:      d.Get("address").(string),
 		ProtocolPort: d.Get("protocol_port").(int),
+		Name:         d.Get("name").(string),
+		TenantID:     d.Get("tenant_id").(string),
 		Weight:       d.Get("weight").(int),
+		SubnetID:     d.Get("subnet_id").(string),
 		AdminStateUp: &adminStateUp,
-	}
-
-	// Must omit if not set
-	if v, ok := d.GetOk("subnet_id"); ok {
-		createOpts.SubnetID = v.(string)
 	}
 
 	log.Printf("[DEBUG] Create Options: %#v", createOpts)
@@ -124,36 +106,27 @@ func resourceMemberV2Create(ctx context.Context, d *schema.ResourceData, meta in
 	// Wait for LB to become active before continuing
 	poolID := d.Get("pool_id").(string)
 	timeout := d.Timeout(schema.TimeoutCreate)
-	err = waitForLBV2viaPool(ctx, networkingClient, poolID, "ACTIVE", timeout)
-	if err != nil {
+	if err := waitForLBV2viaPool(ctx, client, poolID, "ACTIVE", timeout); err != nil {
 		return diag.FromErr(err)
 	}
 
 	log.Printf("[DEBUG] Attempting to create member")
 	var member *pools.Member
 	err = resource.RetryContext(ctx, timeout, func() *resource.RetryError {
-		member, err = pools.CreateMember(networkingClient, poolID, createOpts).Extract()
+		member, err = pools.CreateMember(client, poolID, createOpts).Extract()
 		if err != nil {
 			return common.CheckForRetryableError(err)
 		}
 		return nil
 	})
-
 	if err != nil {
-		return fmterr.Errorf("error creating member: %s", err)
+		return fmterr.Errorf("error creating member: %w", err)
 	}
 
 	// Wait for LB to become ACTIVE again
-	err = waitForLBV2viaPool(ctx, networkingClient, poolID, "ACTIVE", timeout)
-	if err != nil {
+	if err := waitForLBV2viaPool(ctx, client, poolID, "ACTIVE", timeout); err != nil {
 		return diag.FromErr(err)
 	}
-	// Wait for LB member to become ACTIVE too
-	/*
-		err = waitForLBV2Member(networkingClient, poolID, "admin_state_up", "true", nil, timeout)
-		if err != nil {
-			return err
-		} */
 
 	d.SetId(member.ID)
 
@@ -162,36 +135,42 @@ func resourceMemberV2Create(ctx context.Context, d *schema.ResourceData, meta in
 
 func resourceMemberV2Read(_ context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*cfg.Config)
-	networkingClient, err := config.NetworkingV2Client(config.GetRegion(d))
+	client, err := config.NetworkingV2Client(config.GetRegion(d))
 	if err != nil {
-		return fmterr.Errorf("error creating OpenTelekomCloud networking client: %s", err)
+		return fmterr.Errorf(errCreationClient, err)
 	}
 
-	member, err := pools.GetMember(networkingClient, d.Get("pool_id").(string), d.Id()).Extract()
+	poolID := d.Get("pool_id").(string)
+	member, err := pools.GetMember(client, poolID, d.Id()).Extract()
 	if err != nil {
 		return diag.FromErr(common.CheckDeleted(d, err, "member"))
 	}
 
 	log.Printf("[DEBUG] Retrieved member %s: %#v", d.Id(), member)
 
-	d.Set("name", member.Name)
-	d.Set("weight", member.Weight)
-	d.Set("admin_state_up", member.AdminStateUp)
-	d.Set("tenant_id", member.TenantID)
-	d.Set("subnet_id", member.SubnetID)
-	d.Set("address", member.Address)
-	d.Set("protocol_port", member.ProtocolPort)
-	d.Set("id", member.ID)
-	d.Set("region", config.GetRegion(d))
+	mErr := multierror.Append(
+		d.Set("name", member.Name),
+		d.Set("weight", member.Weight),
+		d.Set("admin_state_up", member.AdminStateUp),
+		d.Set("tenant_id", member.TenantID),
+		d.Set("subnet_id", member.SubnetID),
+		d.Set("address", member.Address),
+		d.Set("protocol_port", member.ProtocolPort),
+		d.Set("region", config.GetRegion(d)),
+	)
+
+	if err := mErr.ErrorOrNil(); err != nil {
+		return diag.FromErr(err)
+	}
 
 	return nil
 }
 
 func resourceMemberV2Update(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*cfg.Config)
-	networkingClient, err := config.NetworkingV2Client(config.GetRegion(d))
+	client, err := config.NetworkingV2Client(config.GetRegion(d))
 	if err != nil {
-		return fmterr.Errorf("error creating OpenTelekomCloud networking client: %s", err)
+		return fmterr.Errorf(errCreationClient, err)
 	}
 
 	var updateOpts pools.UpdateMemberOpts
@@ -209,14 +188,13 @@ func resourceMemberV2Update(ctx context.Context, d *schema.ResourceData, meta in
 	// Wait for LB to become active before continuing
 	poolID := d.Get("pool_id").(string)
 	timeout := d.Timeout(schema.TimeoutUpdate)
-	err = waitForLBV2viaPool(ctx, networkingClient, poolID, "ACTIVE", timeout)
-	if err != nil {
+	if err := waitForLBV2viaPool(ctx, client, poolID, "ACTIVE", timeout); err != nil {
 		return diag.FromErr(err)
 	}
 
 	log.Printf("[DEBUG] Updating member %s with options: %#v", d.Id(), updateOpts)
 	err = resource.RetryContext(ctx, timeout, func() *resource.RetryError {
-		_, err = pools.UpdateMember(networkingClient, poolID, d.Id(), updateOpts).Extract()
+		_, err = pools.UpdateMember(client, poolID, d.Id(), updateOpts).Extract()
 		if err != nil {
 			return common.CheckForRetryableError(err)
 		}
@@ -224,11 +202,10 @@ func resourceMemberV2Update(ctx context.Context, d *schema.ResourceData, meta in
 	})
 
 	if err != nil {
-		return fmterr.Errorf("Unable to update member %s: %s", d.Id(), err)
+		return fmterr.Errorf("unable to update member %s: %w", d.Id(), err)
 	}
 
-	err = waitForLBV2viaPool(ctx, networkingClient, poolID, "ACTIVE", timeout)
-	if err != nil {
+	if err := waitForLBV2viaPool(ctx, client, poolID, "ACTIVE", timeout); err != nil {
 		return diag.FromErr(err)
 	}
 
@@ -237,34 +214,32 @@ func resourceMemberV2Update(ctx context.Context, d *schema.ResourceData, meta in
 
 func resourceMemberV2Delete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*cfg.Config)
-	networkingClient, err := config.NetworkingV2Client(config.GetRegion(d))
+	client, err := config.NetworkingV2Client(config.GetRegion(d))
 	if err != nil {
-		return fmterr.Errorf("error creating OpenTelekomCloud networking client: %s", err)
+		return fmterr.Errorf(errCreationClient, err)
 	}
 
 	// Wait for Pool to become active before continuing
 	poolID := d.Get("pool_id").(string)
 	timeout := d.Timeout(schema.TimeoutDelete)
-	err = waitForLBV2viaPool(ctx, networkingClient, poolID, "ACTIVE", timeout)
-	if err != nil {
+	if err := waitForLBV2viaPool(ctx, client, poolID, "ACTIVE", timeout); err != nil {
 		return diag.FromErr(err)
 	}
 
 	log.Printf("[DEBUG] Attempting to delete member %s", d.Id())
 	err = resource.RetryContext(ctx, timeout, func() *resource.RetryError {
-		err = pools.DeleteMember(networkingClient, poolID, d.Id()).ExtractErr()
+		err = pools.DeleteMember(client, poolID, d.Id()).ExtractErr()
 		if err != nil {
 			return common.CheckForRetryableError(err)
 		}
 		return nil
 	})
 	if err != nil {
-		return fmterr.Errorf("Unable to delete member %s: %s", d.Id(), err)
+		return fmterr.Errorf("unable to delete member %s: %w", d.Id(), err)
 	}
 
 	// Wait for LB to become ACTIVE
-	err = waitForLBV2viaPool(ctx, networkingClient, poolID, "ACTIVE", timeout)
-	if err != nil {
+	if err := waitForLBV2viaPool(ctx, client, poolID, "ACTIVE", timeout); err != nil {
 		return diag.FromErr(err)
 	}
 

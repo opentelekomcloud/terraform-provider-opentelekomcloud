@@ -6,10 +6,14 @@ subcategory: "Anti-DDoS"
 
 Anti-DDoS monitors the service traffic from the Internet to ECSs, ELB instances, and BMSs to detect attack traffic in real time. It then cleans attack traffic according to user-configured defense policies so that services run as normal.
 
+~>
+AntiDDoS protection for Elastic IP is provided by default and shouldn't be created manually.
+
+
 ## Example Usage
 
 ```hcl
-variable "eip_id" { }
+variable "eip_id" {}
 
 resource "opentelekomcloud_antiddos_v1" "myantiddos" {
   floating_ip_id         = var.eip_id

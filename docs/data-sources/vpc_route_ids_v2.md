@@ -11,7 +11,7 @@ This resource can be useful for getting back a list of route ids for a vpc.
 ## Example Usage
 
 ```hcl
-variable "vpc_id" { }
+variable "vpc_id" {}
 
 data "opentelekomcloud_vpc_route_ids_v2" "example" {
   vpc_id = var.vpc_id

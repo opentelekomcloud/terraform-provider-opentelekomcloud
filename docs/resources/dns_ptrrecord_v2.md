@@ -9,7 +9,7 @@ Manages a DNS PTR record in the OpenTelekomCloud DNS Service.
 ## Example Usage
 
 ```hcl
-resource "opentelekomcloud_networking_floatingip_v2" "fip_1" { }
+resource "opentelekomcloud_networking_floatingip_v2" "fip_1" {}
 
 resource "opentelekomcloud_dns_ptrrecord_v2" "ptr_1" {
   name          = "ptr.example.com."

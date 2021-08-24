@@ -9,8 +9,8 @@ Manages a V2 topic resource within OpenTelekomCloud.
 ## Example Usage
 
 ```hcl
-variable webserver_id { }
-variable smn_topic_id { }
+variable webserver_id {}
+variable smn_topic_id {}
 
 resource "opentelekomcloud_ces_alarmrule" "alarm_rule" {
   alarm_name = "alarm_rule"
@@ -19,8 +19,8 @@ resource "opentelekomcloud_ces_alarmrule" "alarm_rule" {
     namespace   = "SYS.ECS"
     metric_name = "network_outgoing_bytes_rate_inband"
     dimensions {
-        name = "instance_id"
-        value = var.webserver_id
+      name  = "instance_id"
+      value = var.webserver_id
     }
   }
   condition {

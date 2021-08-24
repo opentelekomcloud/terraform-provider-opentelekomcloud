@@ -18,7 +18,7 @@ func TestAccCCENodePoolV3ImportBasic(t *testing.T) {
 		CheckDestroy:      testAccCheckCCENodePoolV3Destroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccCCENodePoolV3_basic,
+				Config: testAccCCENodePoolV3Basic,
 			},
 
 			{

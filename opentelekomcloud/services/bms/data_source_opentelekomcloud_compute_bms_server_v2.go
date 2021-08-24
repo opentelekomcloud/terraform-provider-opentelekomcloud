@@ -4,6 +4,7 @@ import (
 	"context"
 	"log"
 
+	"github.com/hashicorp/go-multierror"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/bms/v2/servers"
@@ -160,6 +161,9 @@ func DataSourceBMSServersV2() *schema.Resource {
 func dataSourceBMSServersV2Read(_ context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*cfg.Config)
 	bmsClient, err := config.ComputeV2Client(config.GetRegion(d))
+	if err != nil {
+		return fmterr.Errorf("error creating compute v2 client: %w", err)
+	}
 
 	listServerOpts := servers.ListOpts{
 		ID:         d.Id(),
@@ -174,15 +178,15 @@ func dataSourceBMSServersV2Read(_ context.Context, d *schema.ResourceData, meta 
 	pages, err := servers.List(bmsClient, listServerOpts)
 
 	if err != nil {
-		return fmterr.Errorf("Unable to retrieve bms server: %s", err)
+		return fmterr.Errorf("unable to retrieve bms server: %s", err)
 	}
 
 	if len(pages) < 1 {
-		return fmterr.Errorf("Your query returned no results. " +
+		return fmterr.Errorf("your query returned no results. " +
 			"Please change your search criteria and try again.")
 	}
 	if len(pages) > 1 {
-		return fmterr.Errorf("Your query returned more than one result." +
+		return fmterr.Errorf("your query returned more than one result." +
 			" Please try a more specific search criteria")
 	}
 	server := pages[0]
@@ -198,31 +202,37 @@ func dataSourceBMSServersV2Read(_ context.Context, d *schema.ResourceData, meta 
 		secGroups = append(secGroups, mapping)
 	}
 
-	d.Set("server_id", server.ID)
-	d.Set("user_id", server.UserID)
-	d.Set("name", server.Name)
-	d.Set("status", server.Status)
-	d.Set("host_status", server.HostStatus)
-	d.Set("host_id", server.HostID)
-	d.Set("flavor_id", server.Flavor.ID)
-	d.Set("network", server.Addresses)
-	d.Set("metadata", server.Metadata)
-	d.Set("tenant_id", server.TenantID)
-	d.Set("image_id", server.Image.ID)
-	d.Set("access_ip_v4", server.AccessIPv4)
-	d.Set("access_ip_v6", server.AccessIPv6)
-	d.Set("progress", server.Progress)
-	d.Set("key_name", server.KeyName)
-	d.Set("security_groups", secGroups)
-	d.Set("locked", server.Locked)
-	d.Set("config_drive", server.ConfigDrive)
-	d.Set("availability_zone", server.AvailabilityZone)
-	d.Set("description", server.Description)
-	d.Set("kernel_id", server.KernelId)
-	d.Set("hypervisor_hostname", server.HypervisorHostName)
-	d.Set("instance_name", server.InstanceName)
-	d.Set("tags", server.Tags)
-	d.Set("region", config.GetRegion(d))
+	mErr := multierror.Append(
+		d.Set("server_id", server.ID),
+		d.Set("user_id", server.UserID),
+		d.Set("name", server.Name),
+		d.Set("status", server.Status),
+		d.Set("host_status", server.HostStatus),
+		d.Set("host_id", server.HostID),
+		d.Set("flavor_id", server.Flavor.ID),
+		d.Set("network", server.Addresses),
+		d.Set("metadata", server.Metadata),
+		d.Set("tenant_id", server.TenantID),
+		d.Set("image_id", server.Image.ID),
+		d.Set("access_ip_v4", server.AccessIPv4),
+		d.Set("access_ip_v6", server.AccessIPv6),
+		d.Set("progress", server.Progress),
+		d.Set("key_name", server.KeyName),
+		d.Set("security_groups", secGroups),
+		d.Set("locked", server.Locked),
+		d.Set("config_drive", server.ConfigDrive),
+		d.Set("availability_zone", server.AvailabilityZone),
+		d.Set("description", server.Description),
+		d.Set("kernel_id", server.KernelId),
+		d.Set("hypervisor_hostname", server.HypervisorHostName),
+		d.Set("instance_name", server.InstanceName),
+		d.Set("tags", server.Tags),
+		d.Set("region", config.GetRegion(d)),
+	)
+
+	if err := mErr.ErrorOrNil(); err != nil {
+		return diag.FromErr(err)
+	}
 	networks, err := flattenServerNetwork(d, meta)
 	if err != nil {
 		return diag.FromErr(err)

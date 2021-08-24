@@ -19,9 +19,9 @@ resource "opentelekomcloud_vbs_backup_policy_v2" "vbs_policy1" {
   retain_first_backup = "N"
   rentention_num      = 7
   frequency           = 1
-  
+
   tags = {
-    key = "k1"
+    key   = "k1"
     value = "v1"
   }
 }
@@ -30,7 +30,7 @@ resource "opentelekomcloud_vbs_backup_policy_v2" "vbs_policy1" {
 ### Backup Policy with EVS Disks
 
 ```hcl
-variable "volume_id" { }
+variable "volume_id" {}
 
 resource "opentelekomcloud_vbs_backup_policy_v2" "vbs_policy2" {
   name   = "policy_002"

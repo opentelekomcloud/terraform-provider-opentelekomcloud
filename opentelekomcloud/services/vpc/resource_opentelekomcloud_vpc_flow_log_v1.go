@@ -5,6 +5,7 @@ import (
 	"log"
 	"time"
 
+	"github.com/hashicorp/go-multierror"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
@@ -135,15 +136,20 @@ func resourceVpcFlowLogV1Read(_ context.Context, d *schema.ResourceData, meta in
 		return fmterr.Errorf("error retrieving OpenTelekomCloud flowlog: %s", err)
 	}
 
-	d.Set("name", fl.Name)
-	d.Set("description", fl.Description)
-	d.Set("resource_type", fl.ResourceType)
-	d.Set("resource_id", fl.ResourceID)
-	d.Set("traffic_type", fl.TrafficType)
-	d.Set("log_group_id", fl.LogGroupID)
-	d.Set("log_topic_id", fl.LogTopicID)
-	d.Set("admin_state", fl.AdminState)
-	d.Set("status", fl.Status)
+	mErr := multierror.Append(
+		d.Set("name", fl.Name),
+		d.Set("description", fl.Description),
+		d.Set("resource_type", fl.ResourceType),
+		d.Set("resource_id", fl.ResourceID),
+		d.Set("traffic_type", fl.TrafficType),
+		d.Set("log_group_id", fl.LogGroupID),
+		d.Set("log_topic_id", fl.LogTopicID),
+		d.Set("admin_state", fl.AdminState),
+		d.Set("status", fl.Status),
+	)
+	if err := mErr.ErrorOrNil(); err != nil {
+		return diag.FromErr(err)
+	}
 
 	return nil
 }

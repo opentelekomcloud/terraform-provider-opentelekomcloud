@@ -24,7 +24,7 @@ func TestAccComputeV2VolumeAttach_basic(t *testing.T) {
 		CheckDestroy:      testAccCheckComputeV2VolumeAttachDestroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccComputeV2VolumeAttach_basic,
+				Config: testAccComputeV2VolumeAttachBasic,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckComputeV2VolumeAttachExists("opentelekomcloud_compute_volume_attach_v2.va_1", &va),
 				),
@@ -42,7 +42,7 @@ func TestAccComputeV2VolumeAttach_device(t *testing.T) {
 		CheckDestroy:      testAccCheckComputeV2VolumeAttachDestroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccComputeV2VolumeAttach_device,
+				Config: testAccComputeV2VolumeAttachDevice,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckComputeV2VolumeAttachExists("opentelekomcloud_compute_volume_attach_v2.va_1", &va),
 					// testAccCheckComputeV2VolumeAttachDevice(&va, "/dev/vdc"),
@@ -61,7 +61,7 @@ func TestAccComputeV2VolumeAttach_timeout(t *testing.T) {
 		CheckDestroy:      testAccCheckComputeV2VolumeAttachDestroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccComputeV2VolumeAttach_timeout,
+				Config: testAccComputeV2VolumeAttachTimeout,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckComputeV2VolumeAttachExists("opentelekomcloud_compute_volume_attach_v2.va_1", &va),
 				),
@@ -89,7 +89,7 @@ func testAccCheckComputeV2VolumeAttachDestroy(s *terraform.State) error {
 
 		_, err = volumeattach.Get(computeClient, instanceId, volumeId).Extract()
 		if err == nil {
-			return fmt.Errorf("Volume attachment still exists")
+			return fmt.Errorf("volume attachment still exists")
 		}
 	}
 
@@ -100,11 +100,11 @@ func testAccCheckComputeV2VolumeAttachExists(n string, va *volumeattach.VolumeAt
 	return func(s *terraform.State) error {
 		rs, ok := s.RootModule().Resources[n]
 		if !ok {
-			return fmt.Errorf("Not found: %s", n)
+			return fmt.Errorf("not found: %s", n)
 		}
 
 		if rs.Primary.ID == "" {
-			return fmt.Errorf("No ID is set")
+			return fmt.Errorf("no ID is set")
 		}
 
 		config := common.TestAccProvider.Meta().(*cfg.Config)
@@ -124,7 +124,7 @@ func testAccCheckComputeV2VolumeAttachExists(n string, va *volumeattach.VolumeAt
 		}
 
 		if found.ServerID != instanceId || found.VolumeID != volumeId {
-			return fmt.Errorf("VolumeAttach not found")
+			return fmt.Errorf("volumeAttach not found")
 		}
 
 		*va = *found
@@ -133,19 +133,7 @@ func testAccCheckComputeV2VolumeAttachExists(n string, va *volumeattach.VolumeAt
 	}
 }
 
-func testAccCheckComputeV2VolumeAttachDevice(
-	va *volumeattach.VolumeAttachment, device string) resource.TestCheckFunc {
-	return func(s *terraform.State) error {
-		if va.Device != device {
-			return fmt.Errorf("Requested device of volume attachment (%s) does not match: %s",
-				device, va.Device)
-		}
-
-		return nil
-	}
-}
-
-var testAccComputeV2VolumeAttach_basic = fmt.Sprintf(`
+var testAccComputeV2VolumeAttachBasic = fmt.Sprintf(`
 resource "opentelekomcloud_blockstorage_volume_v2" "volume_1" {
   name = "volume_1"
   size = 1
@@ -165,7 +153,7 @@ resource "opentelekomcloud_compute_volume_attach_v2" "va_1" {
 }
 `, env.OS_NETWORK_ID)
 
-var testAccComputeV2VolumeAttach_device = fmt.Sprintf(`
+var testAccComputeV2VolumeAttachDevice = fmt.Sprintf(`
 resource "opentelekomcloud_blockstorage_volume_v2" "volume_1" {
   name = "volume_1"
   size = 1
@@ -186,7 +174,7 @@ resource "opentelekomcloud_compute_volume_attach_v2" "va_1" {
 }
 `, env.OS_NETWORK_ID)
 
-var testAccComputeV2VolumeAttach_timeout = fmt.Sprintf(`
+var testAccComputeV2VolumeAttachTimeout = fmt.Sprintf(`
 resource "opentelekomcloud_blockstorage_volume_v2" "volume_1" {
   name = "volume_1"
   size = 1

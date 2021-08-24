@@ -40,14 +40,14 @@ func TestAccCCEClusterV3_basic(t *testing.T) {
 					resource.TestCheckResourceAttr(resourceName, "authentication_mode", "x509"),
 					resource.TestCheckResourceAttr(resourceName, "kube_proxy_mode", "iptables"),
 					resource.TestCheckResourceAttr(resourceName, "kubernetes_svc_ip_range", "10.247.0.0/16"),
-					resource.TestCheckResourceAttr(resourceName, "installed_addons.#", "2"),
+					resource.TestCheckResourceAttrSet(resourceName, "security_group_control"),
+					resource.TestCheckResourceAttrSet(resourceName, "security_group_node"),
 				),
 			},
 			{
 				Config: testAccCCEClusterV3Update,
 				Check: resource.ComposeTestCheckFunc(
-					resource.TestCheckResourceAttr(
-						resourceName, "description", "new description"),
+					resource.TestCheckResourceAttr(resourceName, "description", "new description"),
 				),
 			},
 		},
@@ -80,7 +80,6 @@ func TestAccCCEClusterV3_invalidNetwork(t *testing.T) {
 }
 
 func TestAccCCEClusterV3_proxyAuth(t *testing.T) {
-
 	resource.Test(t, resource.TestCase{
 		PreCheck:          func() { common.TestAccPreCheck(t) },
 		ProviderFactories: common.TestAccProviderFactories,

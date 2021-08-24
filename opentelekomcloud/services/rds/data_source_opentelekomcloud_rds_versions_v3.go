@@ -46,6 +46,9 @@ func dataSourceRdsVersionsV3Read(_ context.Context, d *schema.ResourceData, meta
 	}
 	name := d.Get("database_name").(string)
 	stores, err := getRdsV3VersionList(client, name)
+	if err != nil {
+		return diag.FromErr(err)
+	}
 
 	if err := d.Set("versions", stores); err != nil {
 		return fmterr.Errorf("error setting version list: %s", err)

@@ -1,0 +1,4 @@
+---
+fixes:
+  - |
+    **[CCE]** Fix ``apply`` reverting autoscaling for ``resource/opentelekomcloud_cce_node_pool_v3`` (`#1279 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/1279>`_)

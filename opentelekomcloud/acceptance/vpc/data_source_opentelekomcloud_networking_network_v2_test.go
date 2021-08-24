@@ -47,27 +47,27 @@ func TestAccNetworkingNetworkV2DataSource_basic(t *testing.T) {
 func testAccNetworkingNetworkV2DataSource_basic(name, cidr string) string {
 	return fmt.Sprintf(`
 resource "opentelekomcloud_networking_network_v2" "net" {
-  name = "%s"
+  name           = "%s"
   admin_state_up = "true"
 }
 
 resource "opentelekomcloud_networking_subnet_v2" "subnet" {
-  name = "opentelekomcloud_test_subnet"
-  cidr = "%s"
+  name       = "opentelekomcloud_test_subnet"
+  cidr       = "%s"
   no_gateway = true
   network_id = opentelekomcloud_networking_network_v2.net.id
 }
 
 data "opentelekomcloud_networking_network_v2" "net_by_name" {
-	name = opentelekomcloud_networking_network_v2.net.name
+  name = opentelekomcloud_networking_network_v2.net.name
 }
 
 data "opentelekomcloud_networking_network_v2" "net_by_id" {
-	network_id = opentelekomcloud_networking_network_v2.net.id
+  network_id = opentelekomcloud_networking_network_v2.net.id
 }
 
 data "opentelekomcloud_networking_network_v2" "net_by_cidr" {
-	matching_subnet_cidr = opentelekomcloud_networking_subnet_v2.subnet.cidr
+  matching_subnet_cidr = opentelekomcloud_networking_subnet_v2.subnet.cidr
 }
 `, name, cidr)
 }

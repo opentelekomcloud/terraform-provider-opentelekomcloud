@@ -271,10 +271,9 @@ func expandIdentityRoleV3CreatePolicy(d interface{}, arrayIndex map[string]int) 
 
 func expandIdentityRoleV3CreatePolicyStatement(d interface{}, arrayIndex map[string]int) (interface{}, error) {
 	newArrayIndex := make(map[string]int)
-	if arrayIndex != nil {
-		for k, v := range arrayIndex {
-			newArrayIndex[k] = v
-		}
+
+	for k, v := range arrayIndex {
+		newArrayIndex[k] = v
 	}
 
 	v, err := common.NavigateValue(d, []string{"statement"}, newArrayIndex)
@@ -432,10 +431,8 @@ func expandIdentityRoleV3UpdatePolicy(d interface{}, arrayIndex map[string]int) 
 
 func expandIdentityRoleV3UpdatePolicyStatement(d interface{}, arrayIndex map[string]int) (interface{}, error) {
 	newArrayIndex := make(map[string]int)
-	if arrayIndex != nil {
-		for k, v := range arrayIndex {
-			newArrayIndex[k] = v
-		}
+	for k, v := range arrayIndex {
+		newArrayIndex[k] = v
 	}
 
 	v, err := common.NavigateValue(d, []string{"statement"}, newArrayIndex)
@@ -519,7 +516,7 @@ func readIdentityRoleV3Read(_ context.Context, d *schema.ResourceData, client *g
 func setIdentityRoleV3Properties(d *schema.ResourceData, response map[string]interface{}) error {
 	opts := resourceIdentityRoleV3UserInputParams(d)
 
-	statementProp, _ := opts["statement"]
+	statementProp := opts["statement"]
 	statementProp, err := flattenIdentityRoleV3Statement(response, nil, statementProp)
 	if err != nil {
 		return fmt.Errorf("error reading Role:statement, err: %s", err)
@@ -544,7 +541,7 @@ func setIdentityRoleV3Properties(d *schema.ResourceData, response map[string]int
 		return fmt.Errorf("error setting Role:description, err: %s", err)
 	}
 
-	displayLayerProp, _ := opts["display_layer"]
+	displayLayerProp := opts["display_layer"]
 	displayLayerProp, err = flattenIdentityRoleV3DisplayLayer(response, nil, displayLayerProp)
 	if err != nil {
 		return fmt.Errorf("error reading Role:display_layer, err: %s", err)
@@ -588,14 +585,12 @@ func flattenIdentityRoleV3Statement(d interface{}, arrayIndex map[string]int, cu
 			return nil, err
 		}
 		n := len(v.([]interface{}))
-		result = make([]interface{}, n, n)
+		result = make([]interface{}, n)
 	}
 
 	newArrayIndex := make(map[string]int)
-	if arrayIndex != nil {
-		for k, v := range arrayIndex {
-			newArrayIndex[k] = v
-		}
+	for k, v := range arrayIndex {
+		newArrayIndex[k] = v
 	}
 
 	for i := 0; i < len(result); i++ {

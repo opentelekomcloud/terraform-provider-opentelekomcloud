@@ -442,7 +442,7 @@ The following example shows how to create an instance with multiple ephemeral di
 
 ```hcl
 resource "opentelekomcloud_compute_instance_v2" "foo" {
-  name            = "terraform-test"
+  name = "terraform-test"
 
   block_device {
     boot_index            = 0
@@ -598,10 +598,10 @@ bootable device as block_device. The other volumes can be specified as `opentele
 
 ```hcl
 resource "opentelekomcloud_compute_instance_v2" "instance_2" {
-  name            = "instance_2"
-  image_id        = var.image_id
-  flavor_id       = var.flavor_id
-  key_pair        = var.key_pair
+  name      = "instance_2"
+  image_id  = var.image_id
+  flavor_id = var.flavor_id
+  key_pair  = var.key_pair
 
   block_device {
     uuid                  = var.image_id

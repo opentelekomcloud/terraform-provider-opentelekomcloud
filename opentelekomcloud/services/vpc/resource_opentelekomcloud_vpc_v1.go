@@ -6,6 +6,7 @@ import (
 	"log"
 	"time"
 
+	"github.com/hashicorp/go-multierror"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
@@ -154,8 +155,9 @@ func resourceVirtualPrivateCloudV1Create(ctx context.Context, d *schema.Resource
 		return diag.FromErr(err)
 	}
 
-	return resourceVirtualPrivateCloudV1Read(ctx, d, meta)
+	d.SetId(n.ID)
 
+	return resourceVirtualPrivateCloudV1Read(ctx, d, meta)
 }
 
 func resourceVirtualPrivateCloudV1Read(_ context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
@@ -175,12 +177,16 @@ func resourceVirtualPrivateCloudV1Read(_ context.Context, d *schema.ResourceData
 		return fmterr.Errorf("error retrieving OpenTelekomCloud Vpc: %s", err)
 	}
 
-	d.Set("id", n.ID)
-	d.Set("name", n.Name)
-	d.Set("cidr", n.CIDR)
-	d.Set("status", n.Status)
-	d.Set("shared", n.EnableSharedSnat)
-	d.Set("region", config.GetRegion(d))
+	mErr := multierror.Append(
+		d.Set("name", n.Name),
+		d.Set("cidr", n.CIDR),
+		d.Set("status", n.Status),
+		d.Set("shared", n.EnableSharedSnat),
+		d.Set("region", config.GetRegion(d)),
+	)
+	if err := mErr.ErrorOrNil(); err != nil {
+		return diag.FromErr(err)
+	}
 
 	if err := readNetworkingTags(d, config, "vpcs"); err != nil {
 		return diag.FromErr(err)
@@ -231,7 +237,6 @@ func resourceVirtualPrivateCloudV1Update(ctx context.Context, d *schema.Resource
 }
 
 func resourceVirtualPrivateCloudV1Delete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-
 	config := meta.(*cfg.Config)
 	vpcClient, err := config.NetworkingV1Client(config.GetRegion(d))
 	if err != nil {
@@ -269,7 +274,7 @@ func waitForVpcActive(vpcClient *golangsdk.ServiceClient, vpcId string) resource
 
 		// If vpc status is other than Ok, send error
 		if n.Status == "DOWN" {
-			return nil, "", fmt.Errorf("Vpc status: '%s'", n.Status)
+			return nil, "", fmt.Errorf("vpc status: '%s'", n.Status)
 		}
 
 		return n, n.Status, nil
@@ -278,7 +283,6 @@ func waitForVpcActive(vpcClient *golangsdk.ServiceClient, vpcId string) resource
 
 func waitForVpcDelete(vpcClient *golangsdk.ServiceClient, vpcId string) resource.StateRefreshFunc {
 	return func() (interface{}, string, error) {
-
 		r, err := vpcs.Get(vpcClient, vpcId).Extract()
 		if err != nil {
 			if _, ok := err.(golangsdk.ErrDefault404); ok {

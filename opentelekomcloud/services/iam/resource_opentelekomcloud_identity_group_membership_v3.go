@@ -75,14 +75,13 @@ func resourceIdentityGroupMembershipV3Read(_ context.Context, d *schema.Resource
 		if _, b := err.(golangsdk.ErrDefault404); b {
 			d.SetId("")
 			return nil
-		} else {
-			return fmterr.Errorf("Unable to query groups: %s", err)
 		}
+		return fmterr.Errorf("unable to query groups: %s", err)
 	}
 
 	allUsers, err := users.ExtractUsers(allPages)
 	if err != nil {
-		return fmterr.Errorf("Unable to retrieve users: %s", err)
+		return fmterr.Errorf("unable to retrieve users: %s", err)
 	}
 
 	for _, u := range allUsers {

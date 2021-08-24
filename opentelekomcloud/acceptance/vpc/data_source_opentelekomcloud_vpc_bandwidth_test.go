@@ -56,8 +56,8 @@ func testAccCheckBandWidthDataSourceExists(n string) resource.TestCheckFunc {
 func testAccBandWidthDataSource_basic(rName string) string {
 	return fmt.Sprintf(`
 resource "opentelekomcloud_vpc_bandwidth" "test" {
-	name = "%s"
-	size = 10
+  name = "%s"
+  size = 10
 }
 
 data "opentelekomcloud_vpc_bandwidth" "test" {

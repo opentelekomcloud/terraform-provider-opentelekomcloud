@@ -73,7 +73,7 @@ func testAccCheckIdentityV3ProjectDestroy(s *terraform.State) error {
 
 		_, err := projects.Get(identityClient, rs.Primary.ID).Extract()
 		if err == nil {
-			return fmt.Errorf("Project still exists")
+			return fmt.Errorf("project still exists")
 		}
 	}
 
@@ -84,11 +84,11 @@ func testAccCheckIdentityV3ProjectExists(n string, project *projects.Project) re
 	return func(s *terraform.State) error {
 		rs, ok := s.RootModule().Resources[n]
 		if !ok {
-			return fmt.Errorf("Not found: %s", n)
+			return fmt.Errorf("not found: %s", n)
 		}
 
 		if rs.Primary.ID == "" {
-			return fmt.Errorf("No ID is set")
+			return fmt.Errorf("no ID is set")
 		}
 
 		config := common.TestAccProvider.Meta().(*cfg.Config)
@@ -103,7 +103,7 @@ func testAccCheckIdentityV3ProjectExists(n string, project *projects.Project) re
 		}
 
 		if (found.ID != rs.Primary.ID) || (found.Enabled == false) {
-			return fmt.Errorf("Project not found")
+			return fmt.Errorf("project not found")
 		}
 
 		*project = *found
@@ -114,18 +114,18 @@ func testAccCheckIdentityV3ProjectExists(n string, project *projects.Project) re
 
 func testAccIdentityV3Project_basic(projectName string) string {
 	return fmt.Sprintf(`
-    resource "opentelekomcloud_identity_project_v3" "project_1" {
-      name = "%s"
-      description = "A project"
-    }
+resource "opentelekomcloud_identity_project_v3" "project_1" {
+  name        = "%s"
+  description = "A project"
+}
   `, projectName)
 }
 
 func testAccIdentityV3Project_update(projectName string) string {
 	return fmt.Sprintf(`
-    resource "opentelekomcloud_identity_project_v3" "project_1" {
-      name = "%s"
-      description = "Some project"
-    }
+resource "opentelekomcloud_identity_project_v3" "project_1" {
+  name        = "%s"
+  description = "Some project"
+}
   `, projectName)
 }

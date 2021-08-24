@@ -5,6 +5,7 @@ import (
 	"log"
 	"time"
 
+	"github.com/hashicorp/go-multierror"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	golangsdk "github.com/opentelekomcloud/gophertelekomcloud"
@@ -126,7 +127,6 @@ func resourceRtsSoftwareDeploymentV1Create(ctx context.Context, d *schema.Resour
 	log.Printf("[INFO] Software Deployment ID: %s", n.Id)
 
 	return resourceRtsSoftwareDeploymentV1Read(ctx, d, meta)
-
 }
 
 func resourceRtsSoftwareDeploymentV1Read(_ context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
@@ -142,19 +142,23 @@ func resourceRtsSoftwareDeploymentV1Read(_ context.Context, d *schema.ResourceDa
 			d.SetId("")
 			return nil
 		}
-
 		return fmterr.Errorf("error retrieving OpenTelekomCloud RTS Software Deployment: %s", err)
 	}
 
-	d.Set("id", n.Id)
-	d.Set("config_id", n.ConfigId)
-	d.Set("status", n.Status)
-	d.Set("status_reason", n.StatusReason)
-	d.Set("server_id", n.ServerId)
-	d.Set("output_values", n.OutputValues)
-	d.Set("input_values", n.InputValues)
-	d.Set("action", n.Action)
-	d.Set("region", config.GetRegion(d))
+	mErr := multierror.Append(
+		d.Set("config_id", n.ConfigId),
+		d.Set("status", n.Status),
+		d.Set("status_reason", n.StatusReason),
+		d.Set("server_id", n.ServerId),
+		d.Set("output_values", n.OutputValues),
+		d.Set("input_values", n.InputValues),
+		d.Set("action", n.Action),
+		d.Set("region", config.GetRegion(d)),
+	)
+
+	if err := mErr.ErrorOrNil(); err != nil {
+		return diag.FromErr(err)
+	}
 
 	return nil
 }
@@ -203,7 +207,6 @@ func resourceRtsSoftwareDeploymentV1Delete(_ context.Context, d *schema.Resource
 	if err != nil {
 		if _, ok := err.(golangsdk.ErrDefault404); ok {
 			log.Printf("[INFO] Successfully deleted OpenTelekomCloud RTS Software Deployment %s", d.Id())
-
 		}
 		if errCode, ok := err.(golangsdk.ErrUnexpectedResponseCode); ok {
 			if errCode.Actual == 409 {

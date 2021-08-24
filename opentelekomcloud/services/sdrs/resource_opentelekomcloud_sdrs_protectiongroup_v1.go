@@ -5,6 +5,7 @@ import (
 	"log"
 	"time"
 
+	"github.com/hashicorp/go-multierror"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	golangsdk "github.com/opentelekomcloud/gophertelekomcloud"
@@ -108,11 +109,10 @@ func resourceSdrsProtectiongroupV1Create(ctx context.Context, d *schema.Resource
 		return resourceSdrsProtectiongroupV1Read(ctx, d, meta)
 	}
 
-	return fmterr.Errorf("Unexpected conversion error in resourceSdrsProtectiongroupV1Create.")
+	return fmterr.Errorf("unexpected conversion error in resourceSdrsProtectiongroupV1Create.")
 }
 
 func resourceSdrsProtectiongroupV1Read(_ context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-
 	config := meta.(*cfg.Config)
 	sdrsClient, err := config.SdrsV1Client(config.GetRegion(d))
 	if err != nil {
@@ -128,14 +128,19 @@ func resourceSdrsProtectiongroupV1Read(_ context.Context, d *schema.ResourceData
 
 		return fmterr.Errorf("error retrieving OpenTelekomCloud SDRS Protectiongroup: %s", err)
 	}
+	mErr := multierror.Append(
+		d.Set("name", n.Name),
+		d.Set("description", n.Description),
+		d.Set("source_availability_zone", n.SourceAZ),
+		d.Set("target_availability_zone", n.TargetAZ),
+		d.Set("domain_id", n.DomainID),
+		d.Set("source_vpc_id", n.SourceVpcID),
+		d.Set("dr_type", n.DrType),
+	)
 
-	d.Set("name", n.Name)
-	d.Set("description", n.Description)
-	d.Set("source_availability_zone", n.SourceAZ)
-	d.Set("target_availability_zone", n.TargetAZ)
-	d.Set("domain_id", n.DomainID)
-	d.Set("source_vpc_id", n.SourceVpcID)
-	d.Set("dr_type", n.DrType)
+	if err := mErr.ErrorOrNil(); err != nil {
+		return diag.FromErr(err)
+	}
 
 	return nil
 }

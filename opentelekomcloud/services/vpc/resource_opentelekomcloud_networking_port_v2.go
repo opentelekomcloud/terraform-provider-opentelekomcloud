@@ -3,7 +3,6 @@ package vpc
 import (
 	"bytes"
 	"context"
-	"fmt"
 	"log"
 	"time"
 
@@ -207,7 +206,7 @@ func resourceNetworkingPortV2Create(ctx context.Context, d *schema.ResourceData,
 	finalCreateOpts = createOpts
 
 	// Add the port security attribute if specified.
-	if v, ok := d.GetOkExists("port_security_enabled"); ok {
+	if v, ok := d.GetOk("port_security_enabled"); ok {
 		portSecurityEnabled := v.(bool)
 		finalCreateOpts = portsecurity.PortCreateOptsExt{
 			CreateOptsBuilder:   finalCreateOpts,
@@ -460,18 +459,16 @@ func resourceAllowedAddressPairsV2(d *schema.ResourceData) []ports.AddressPair {
 
 func resourcePortAdminStateUpV2(d *schema.ResourceData) *bool {
 	value := false
-
-	if raw, ok := d.GetOk("admin_state_up"); ok && raw == true {
+	if up, ok := d.GetOk("admin_state_up"); ok && up.(bool) {
 		value = true
 	}
-
 	return &value
 }
 
 func allowedAddressPairsHash(v interface{}) int {
 	var buf bytes.Buffer
 	m := v.(map[string]interface{})
-	buf.WriteString(fmt.Sprintf("%s", m["ip_address"].(string)))
+	buf.WriteString(m["ip_address"].(string))
 
 	return hashcode.String(buf.String())
 }

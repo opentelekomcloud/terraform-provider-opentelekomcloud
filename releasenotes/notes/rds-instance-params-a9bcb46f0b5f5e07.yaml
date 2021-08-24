@@ -1,0 +1,4 @@
+---
+enhancements:
+  - |
+    **[RDS]** Add ``parameters`` argument to ``resource/opentelekomcloud_rds_instance_v3`` (`#1244 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/1244>`_)

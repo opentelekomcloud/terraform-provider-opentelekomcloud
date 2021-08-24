@@ -33,7 +33,7 @@ resource "opentelekomcloud_vpc_subnet_v1" "private" {
   cidr       = cidrsubnet(opentelekomcloud_vpc_v1.main.cidr, 8, 0)
   vpc_id     = opentelekomcloud_vpc_v1.main.id
   gateway_ip = cidrhost(cidrsubnet(opentelekomcloud_vpc_v1.main.cidr, 8, 0), 1)
-  dns_list   = [
+  dns_list = [
     "1.1.1.1",
     "8.8.8.8",
   ]
@@ -44,6 +44,19 @@ resource "opentelekomcloud_lb_loadbalancer_v2" "lb_1" {
 }
 ```
 
+### Public load balancer (with floating IP)
+
+```hcl
+resource "opentelekomcloud_lb_loadbalancer_v2" "lb_1" {
+  name          = "example-loadbalancer"
+  vip_subnet_id = "d9415786-5f1a-428b-b35f-2f1523e146d2"
+}
+
+resource "opentelekomcloud_networking_floatingip_associate_v2" "associate" {
+  floating_ip = var.floating_ip_address
+  port_id     = opentelekomcloud_lb_loadbalancer_v2.lb_1.vip_port_id
+}
+```
 
 ## Argument Reference
 

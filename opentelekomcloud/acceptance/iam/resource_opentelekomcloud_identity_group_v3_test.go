@@ -69,7 +69,7 @@ func testAccCheckIdentityV3GroupDestroy(s *terraform.State) error {
 
 		_, err := groups.Get(identityClient, rs.Primary.ID).Extract()
 		if err == nil {
-			return fmt.Errorf("Group still exists")
+			return fmt.Errorf("group still exists")
 		}
 	}
 
@@ -80,11 +80,11 @@ func testAccCheckIdentityV3GroupExists(n string, group *groups.Group) resource.T
 	return func(s *terraform.State) error {
 		rs, ok := s.RootModule().Resources[n]
 		if !ok {
-			return fmt.Errorf("Not found: %s", n)
+			return fmt.Errorf("not found: %s", n)
 		}
 
 		if rs.Primary.ID == "" {
-			return fmt.Errorf("No ID is set")
+			return fmt.Errorf("no ID is set")
 		}
 
 		config := common.TestAccProvider.Meta().(*cfg.Config)
@@ -99,7 +99,7 @@ func testAccCheckIdentityV3GroupExists(n string, group *groups.Group) resource.T
 		}
 
 		if found.ID != rs.Primary.ID {
-			return fmt.Errorf("Group not found")
+			return fmt.Errorf("group not found")
 		}
 
 		*group = *found
@@ -110,18 +110,18 @@ func testAccCheckIdentityV3GroupExists(n string, group *groups.Group) resource.T
 
 func testAccIdentityV3Group_basic(groupName string) string {
 	return fmt.Sprintf(`
-    resource "opentelekomcloud_identity_group_v3" "group_1" {
-      name = "%s"
-      description = "A ACC test group"
-    }
+resource "opentelekomcloud_identity_group_v3" "group_1" {
+  name        = "%s"
+  description = "A ACC test group"
+}
   `, groupName)
 }
 
 func testAccIdentityV3Group_update(groupName string) string {
 	return fmt.Sprintf(`
-    resource "opentelekomcloud_identity_group_v3" "group_1" {
-      name = "%s"
-      description = "Some Group"
-    }
+resource "opentelekomcloud_identity_group_v3" "group_1" {
+  name        = "%s"
+  description = "Some Group"
+}
   `, groupName)
 }

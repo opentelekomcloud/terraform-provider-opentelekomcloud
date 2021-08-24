@@ -9,7 +9,7 @@ Use this data source to get details about the allocated dedicated hosts from Ope
 ## Example Usage
 
 ```hcl
-variable "deh_id" { }
+variable "deh_id" {}
 
 data "opentelekomcloud_deh_host_v1" "deh_host" {
   id = var.deh_id

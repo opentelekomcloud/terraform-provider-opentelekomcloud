@@ -23,7 +23,7 @@ func TestAccRDSV1Instance_basic(t *testing.T) {
 		CheckDestroy:      testAccCheckRDSV1InstanceDestroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccSInstanceV1Config_basic,
+				Config: testAccSInstanceV1ConfigBasic,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckRDSV1InstanceExists("opentelekomcloud_rds_instance_v1.instance", &instance),
 					resource.TestCheckResourceAttr(
@@ -37,7 +37,7 @@ func TestAccRDSV1Instance_basic(t *testing.T) {
 				),
 			},
 			{
-				Config: testAccSInstanceV1Config_updatetag,
+				Config: testAccSInstanceV1ConfigUpdatetag,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckRDSV1InstanceExists("opentelekomcloud_rds_instance_v1.instance", &instance),
 					testAccCheckRDSV1InstanceTag(&instance, "foo2", "bar2"),
@@ -45,14 +45,14 @@ func TestAccRDSV1Instance_basic(t *testing.T) {
 				),
 			},
 			{
-				Config: testAccSInstanceV1Config_notags,
+				Config: testAccSInstanceV1ConfigNoTags,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckRDSV1InstanceExists("opentelekomcloud_rds_instance_v1.instance", &instance),
 					testAccCheckRDSV1InstanceNoTag(&instance),
 				),
 			},
 			{
-				Config: testAccSInstanceV1Config_basic,
+				Config: testAccSInstanceV1ConfigBasic,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckRDSV1InstanceExists("opentelekomcloud_rds_instance_v1.instance", &instance),
 					testAccCheckRDSV1InstanceTag(&instance, "foo", "bar"),
@@ -77,7 +77,7 @@ func testAccCheckRDSV1InstanceDestroy(s *terraform.State) error {
 
 		_, err := instances.Get(rdsClient, rs.Primary.ID).Extract()
 		if err == nil {
-			return fmt.Errorf("Instance still exists. ")
+			return fmt.Errorf("instance still exists. ")
 		}
 	}
 
@@ -88,11 +88,11 @@ func testAccCheckRDSV1InstanceExists(n string, instance *instances.Instance) res
 	return func(s *terraform.State) error {
 		rs, ok := s.RootModule().Resources[n]
 		if !ok {
-			return fmt.Errorf("Not found: %s. ", n)
+			return fmt.Errorf("not found: %s. ", n)
 		}
 
 		if rs.Primary.ID == "" {
-			return fmt.Errorf("No ID is set. ")
+			return fmt.Errorf("no ID is set. ")
 		}
 
 		config := common.TestAccProvider.Meta().(*cfg.Config)
@@ -107,7 +107,7 @@ func testAccCheckRDSV1InstanceExists(n string, instance *instances.Instance) res
 		}
 
 		if found.ID != rs.Primary.ID {
-			return fmt.Errorf("Instance not found. ")
+			return fmt.Errorf("instance not found. ")
 		}
 
 		*instance = *found
@@ -126,6 +126,9 @@ func testAccCheckRDSV1InstanceTag(
 		}
 
 		taglist, err := tags.Get(tagClient, instance.ID).Extract()
+		if err != nil {
+			return fmt.Errorf("error getting tags for intance: %w", err)
+		}
 		for _, val := range taglist.Tags {
 			if k != val.Key {
 				continue
@@ -135,10 +138,10 @@ func testAccCheckRDSV1InstanceTag(
 				return nil
 			}
 
-			return fmt.Errorf("Bad value for %s: %s", k, val.Value)
+			return fmt.Errorf("bad value for %s: %s", k, val.Value)
 		}
 
-		return fmt.Errorf("Tag not found: %s", k)
+		return fmt.Errorf("tag not found: %s", k)
 	}
 }
 
@@ -152,6 +155,9 @@ func testAccCheckRDSV1InstanceNoTag(
 		}
 
 		taglist, err := tags.Get(tagClient, instance.ID).Extract()
+		if err != nil {
+			return fmt.Errorf("error getting tags: %w", err)
+		}
 
 		if taglist.Tags == nil {
 			return nil
@@ -160,11 +166,11 @@ func testAccCheckRDSV1InstanceNoTag(
 			return nil
 		}
 
-		return fmt.Errorf("Expected no tags, but found %v", taglist.Tags)
+		return fmt.Errorf("expected no tags, but found %v", taglist.Tags)
 	}
 }
 
-var testAccSInstanceV1Config_basic = fmt.Sprintf(`
+var testAccSInstanceV1ConfigBasic = fmt.Sprintf(`
 data "opentelekomcloud_rds_flavors_v1" "flavor" {
     region = "eu-de"
     datastore_name = "PostgreSQL"
@@ -213,7 +219,7 @@ resource "opentelekomcloud_rds_instance_v1" "instance" {
   depends_on = ["opentelekomcloud_networking_secgroup_v2.sg"]
 }`, env.OS_VPC_ID, env.OS_NETWORK_ID)
 
-var testAccSInstanceV1Config_updatetag = fmt.Sprintf(`
+var testAccSInstanceV1ConfigUpdatetag = fmt.Sprintf(`
 data "opentelekomcloud_rds_flavors_v1" "flavor" {
     region = "eu-de"
     datastore_name = "PostgreSQL"
@@ -262,7 +268,7 @@ resource "opentelekomcloud_rds_instance_v1" "instance" {
   depends_on = ["opentelekomcloud_networking_secgroup_v2.sg"]
 }`, env.OS_VPC_ID, env.OS_NETWORK_ID)
 
-var testAccSInstanceV1Config_notags = fmt.Sprintf(`
+var testAccSInstanceV1ConfigNoTags = fmt.Sprintf(`
 data "opentelekomcloud_rds_flavors_v1" "flavor" {
     region = "eu-de"
     datastore_name = "PostgreSQL"

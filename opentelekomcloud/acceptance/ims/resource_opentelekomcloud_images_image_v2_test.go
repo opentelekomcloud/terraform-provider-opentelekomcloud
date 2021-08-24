@@ -171,7 +171,7 @@ func testAccCheckImagesImageV2Destroy(s *terraform.State) error {
 
 		_, err := images.Get(imageClient, rs.Primary.ID).Extract()
 		if err == nil {
-			return fmt.Errorf("Image still exists")
+			return fmt.Errorf("image still exists")
 		}
 	}
 
@@ -182,11 +182,11 @@ func testAccCheckImagesImageV2Exists(n string, image *images.Image) resource.Tes
 	return func(s *terraform.State) error {
 		rs, ok := s.RootModule().Resources[n]
 		if !ok {
-			return fmt.Errorf("Not found: %s", n)
+			return fmt.Errorf("not found: %s", n)
 		}
 
 		if rs.Primary.ID == "" {
-			return fmt.Errorf("No ID is set")
+			return fmt.Errorf("no ID is set")
 		}
 
 		config := common.TestAccProvider.Meta().(*cfg.Config)
@@ -201,7 +201,7 @@ func testAccCheckImagesImageV2Exists(n string, image *images.Image) resource.Tes
 		}
 
 		if found.ID != rs.Primary.ID {
-			return fmt.Errorf("Image not found")
+			return fmt.Errorf("image not found")
 		}
 
 		*image = *found
@@ -214,11 +214,11 @@ func testAccCheckImagesImageV2HasTag(n, tag string) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
 		rs, ok := s.RootModule().Resources[n]
 		if !ok {
-			return fmt.Errorf("Not found: %s", n)
+			return fmt.Errorf("not found: %s", n)
 		}
 
 		if rs.Primary.ID == "" {
-			return fmt.Errorf("No ID is set")
+			return fmt.Errorf("no ID is set")
 		}
 
 		config := common.TestAccProvider.Meta().(*cfg.Config)
@@ -233,7 +233,7 @@ func testAccCheckImagesImageV2HasTag(n, tag string) resource.TestCheckFunc {
 		}
 
 		if found.ID != rs.Primary.ID {
-			return fmt.Errorf("Image not found")
+			return fmt.Errorf("image not found")
 		}
 
 		for _, v := range found.Tags {
@@ -242,7 +242,7 @@ func testAccCheckImagesImageV2HasTag(n, tag string) resource.TestCheckFunc {
 			}
 		}
 
-		return fmt.Errorf("Tag not found: %s", tag)
+		return fmt.Errorf("tag not found: %s", tag)
 	}
 }
 
@@ -250,11 +250,11 @@ func testAccCheckImagesImageV2TagCount(n string, expected int) resource.TestChec
 	return func(s *terraform.State) error {
 		rs, ok := s.RootModule().Resources[n]
 		if !ok {
-			return fmt.Errorf("Not found: %s", n)
+			return fmt.Errorf("not found: %s", n)
 		}
 
 		if rs.Primary.ID == "" {
-			return fmt.Errorf("No ID is set")
+			return fmt.Errorf("no ID is set")
 		}
 
 		config := common.TestAccProvider.Meta().(*cfg.Config)
@@ -269,11 +269,11 @@ func testAccCheckImagesImageV2TagCount(n string, expected int) resource.TestChec
 		}
 
 		if found.ID != rs.Primary.ID {
-			return fmt.Errorf("Image not found")
+			return fmt.Errorf("image not found")
 		}
 
 		if len(found.Tags) != expected {
-			return fmt.Errorf("Expecting %d tags, found %d", expected, len(found.Tags))
+			return fmt.Errorf("expecting %d tags, found %d", expected, len(found.Tags))
 		}
 
 		return nil

@@ -324,7 +324,6 @@ func resourceListenerV2Update(ctx context.Context, d *schema.ResourceData, meta 
 	}
 
 	return resourceListenerV2Read(ctx, d, meta)
-
 }
 
 func resourceListenerV2Delete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {

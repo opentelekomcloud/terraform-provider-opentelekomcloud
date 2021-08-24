@@ -6,6 +6,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/hashicorp/go-multierror"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
@@ -264,7 +265,6 @@ func resourceInstanceSecurityGroup(d *schema.ResourceData) instances.SecurityGro
 	}
 	log.Printf("[DEBUG] securityGroup: %+v", securityGroup)
 	return securityGroup
-
 }
 
 func resourceInstanceBackupStrategy(d *schema.ResourceData) instances.BackupStrategyOps {
@@ -288,7 +288,7 @@ func resourceInstanceHa(d *schema.ResourceData) instances.HaOps {
 	log.Printf("[DEBUG] haRaw: %+v", haRaw)
 	if len(haRaw) == 1 {
 		ha.Enable = haRaw[0].(map[string]interface{})["enable"].(bool)
-		if ha.Enable == true {
+		if ha.Enable {
 			ha.ReplicationMode = haRaw[0].(map[string]interface{})["replicationmode"].(string)
 		}
 	} else {
@@ -381,7 +381,7 @@ func resourceInstanceCreate(ctx context.Context, d *schema.ResourceData, meta in
 	if instance.ID != "" {
 		return resourceInstanceRead(ctx, d, meta)
 	}
-	return fmterr.Errorf("Unexpected conversion error in resourceInstanceCreate. ")
+	return fmterr.Errorf("unexpected conversion error in resourceInstanceCreate. ")
 }
 
 func resourceInstanceRead(_ context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
@@ -403,16 +403,17 @@ func resourceInstanceRead(_ context.Context, d *schema.ResourceData, meta interf
 		nameList := strings.Split(instance.Name, "-"+instance.DataStore.Type)
 		log.Printf("[DEBUG] Retrieved nameList %#v", nameList)
 		if len(nameList) > 0 {
-			d.Set("name", nameList[0])
+			_ = d.Set("name", nameList[0])
 		}
 	}
-
-	d.Set("hostname", instance.HostName)
-	d.Set("type", instance.Type)
-	d.Set("region", instance.Region)
-	d.Set("availabilityzone", instance.AvailabilityZone)
-	d.Set("vpc", instance.Vpc)
-	d.Set("status", instance.Status)
+	mErr := multierror.Append(
+		d.Set("hostname", instance.HostName),
+		d.Set("type", instance.Type),
+		d.Set("region", instance.Region),
+		d.Set("availabilityzone", instance.AvailabilityZone),
+		d.Set("vpc", instance.Vpc),
+		d.Set("status", instance.Status),
+	)
 
 	nicsList := make([]map[string]interface{}, 0, 1)
 	nics := map[string]interface{}{
@@ -434,7 +435,7 @@ func resourceInstanceRead(_ context.Context, d *schema.ResourceData, meta interf
 		return fmterr.Errorf("[DEBUG] Error saving securitygroup to Rds instance (%s): %s", d.Id(), err)
 	}
 
-	d.Set("flavorref", instance.Flavor.Id)
+	mErr = multierror.Append(mErr, d.Set("flavorref", instance.Flavor.Id))
 
 	volumeList := make([]map[string]interface{}, 0, 1)
 	volume := map[string]interface{}{
@@ -447,7 +448,7 @@ func resourceInstanceRead(_ context.Context, d *schema.ResourceData, meta interf
 			"[DEBUG] Error saving volume to Rds instance (%s): %s", d.Id(), err)
 	}
 
-	d.Set("dbport", instance.DbPort)
+	mErr = multierror.Append(mErr, d.Set("dbport", instance.DbPort))
 
 	datastoreList := make([]map[string]interface{}, 0, 1)
 	datastore := map[string]interface{}{
@@ -460,8 +461,14 @@ func resourceInstanceRead(_ context.Context, d *schema.ResourceData, meta interf
 			"[DEBUG] Error saving datastore to Rds instance (%s): %s", d.Id(), err)
 	}
 
-	d.Set("updated", instance.Updated)
-	d.Set("created", instance.Created)
+	mErr = multierror.Append(mErr,
+		d.Set("updated", instance.Updated),
+		d.Set("created", instance.Created),
+	)
+
+	if err := mErr.ErrorOrNil(); err != nil {
+		return diag.FromErr(err)
+	}
 
 	// set instance tag
 	if _, ok := d.GetOk("tag"); ok {
@@ -537,7 +544,7 @@ func instanceStateUpdateRefreshFunc(client *golangsdk.ServiceClient, instanceID 
 	}
 }
 
-func instanceStateFlavorUpdateRefreshFunc(client *golangsdk.ServiceClient, instanceID string, flavorID string) resource.StateRefreshFunc {
+func instanceStateFlavorUpdateRefreshFunc(client *golangsdk.ServiceClient, instanceID string, _ string) resource.StateRefreshFunc {
 	return func() (interface{}, string, error) {
 		instance, err := instances.Get(client, instanceID).Extract()
 		if err != nil {
@@ -634,7 +641,6 @@ func resourceInstanceUpdate(ctx context.Context, d *schema.ResourceData, meta in
 				updatepolicyOpts.StartTime = m["starttime"].(string)
 				updatepolicyOpts.KeepDays = m["keepdays"].(int)
 			}
-
 		}
 		log.Printf("[DEBUG] updatepolicyOpts: %+v", updatepolicyOpts)
 		_, err = instances.UpdatePolicy(client, updatepolicyOpts, id).Extract()

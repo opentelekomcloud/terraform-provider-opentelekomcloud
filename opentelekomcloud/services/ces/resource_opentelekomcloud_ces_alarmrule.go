@@ -7,6 +7,7 @@ import (
 	"regexp"
 	"time"
 
+	"github.com/hashicorp/go-multierror"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
@@ -55,7 +56,7 @@ func ResourceAlarmRule() *schema.Resource {
 				ValidateFunc: func(v interface{}, k string) (ws []string, errors []error) {
 					value := v.(string)
 					if len(value) > 256 {
-						errors = append(errors, fmt.Errorf("The length of %s must be in [0, 256]", k))
+						errors = append(errors, fmt.Errorf("the length of %s must be in [0, 256]", k))
 					}
 					return
 				},
@@ -455,18 +456,25 @@ func resourceAlarmRuleRead(_ context.Context, d *schema.ResourceData, meta inter
 	if err != nil {
 		return diag.FromErr(err)
 	}
-	d.Set("alarm_name", m["alarm_name"])
-	d.Set("alarm_description", m["alarm_description"])
-	d.Set("alarm_level", m["alarm_level"])
-	d.Set("metric", m["metric"])
-	d.Set("condition", m["condition"])
-	d.Set("alarm_actions", m["alarm_actions"])
-	d.Set("insufficientdata_actions", m["insufficientdata_actions"])
-	d.Set("ok_actions", m["ok_actions"])
-	d.Set("alarm_enabled", m["alarm_enabled"])
-	d.Set("alarm_action_enabled", m["alarm_action_enabled"])
-	d.Set("update_time", m["update_time"])
-	d.Set("alarm_state", m["alarm_state"])
+	mErr := multierror.Append(
+		d.Set("alarm_name", m["alarm_name"]),
+		d.Set("alarm_description", m["alarm_description"]),
+		d.Set("alarm_level", m["alarm_level"]),
+		d.Set("metric", m["metric"]),
+		d.Set("condition", m["condition"]),
+		d.Set("alarm_actions", m["alarm_actions"]),
+		d.Set("insufficientdata_actions", m["insufficientdata_actions"]),
+		d.Set("ok_actions", m["ok_actions"]),
+		d.Set("alarm_enabled", m["alarm_enabled"]),
+		d.Set("alarm_action_enabled", m["alarm_action_enabled"]),
+		d.Set("update_time", m["update_time"]),
+		d.Set("alarm_state", m["alarm_state"]),
+	)
+
+	if err := mErr.ErrorOrNil(); err != nil {
+		return diag.FromErr(err)
+	}
+
 	return nil
 }
 

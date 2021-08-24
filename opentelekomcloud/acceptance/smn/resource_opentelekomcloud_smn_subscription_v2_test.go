@@ -100,11 +100,11 @@ func testAccCheckSMNV2SubscriptionExists(n string, subscription *subscriptions.S
 	return func(s *terraform.State) error {
 		rs, ok := s.RootModule().Resources[n]
 		if !ok {
-			return fmt.Errorf("Not found: %s", n)
+			return fmt.Errorf("not found: %s", n)
 		}
 
 		if rs.Primary.ID == "" {
-			return fmt.Errorf("No ID is set")
+			return fmt.Errorf("no ID is set")
 		}
 
 		config := common.TestAccProvider.Meta().(*cfg.Config)
@@ -158,7 +158,7 @@ locals {
 }
 
 resource "opentelekomcloud_smn_topic_v2" "topic_1" {
-  name		   = "topic_1"
+  name         = "topic_1"
   display_name = "The display name of topic_1"
   project_name = local.project_name
 }

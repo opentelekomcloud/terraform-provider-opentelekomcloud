@@ -110,7 +110,7 @@ func testAccCheckObsBucketHasPolicy(n string, expectedPolicyText string) resourc
 
 		policy, err := client.GetBucketPolicy(rs.Primary.ID)
 		if err != nil {
-			return fmt.Errorf("GetBucketPolicy error: %v", err)
+			return fmt.Errorf("getBucketPolicy error: %v", err)
 		}
 
 		equivalent, err := awspolicy.PoliciesAreEquivalent(policy.Policy, expectedPolicyText)
@@ -134,7 +134,7 @@ resource "opentelekomcloud_obs_bucket" "bucket" {
 
 resource "opentelekomcloud_obs_bucket_policy" "bucket" {
   bucket = opentelekomcloud_obs_bucket.bucket.bucket
-  policy =<<POLICY
+  policy = <<POLICY
 {
 	"Version": "2008-10-17",
 	"Statement": [{
@@ -164,7 +164,7 @@ resource "opentelekomcloud_obs_bucket" "bucket" {
 
 resource "opentelekomcloud_obs_bucket_policy" "bucket" {
   bucket = opentelekomcloud_obs_bucket.bucket.bucket
-  policy =<<POLICY
+  policy = <<POLICY
 {
 	"Version": "2008-10-17",
 	"Statement": [{
@@ -196,7 +196,7 @@ resource "opentelekomcloud_obs_bucket" "bucket" {
 
 resource "opentelekomcloud_obs_bucket_policy" "bucket" {
   bucket = opentelekomcloud_obs_bucket.bucket.bucket
-  policy =<<POLICY
+  policy = <<POLICY
 {
     "Id": "BUCKET_POLICY",
     "Statement": [

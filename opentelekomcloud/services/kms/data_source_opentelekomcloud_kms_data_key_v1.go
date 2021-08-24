@@ -5,6 +5,7 @@ import (
 	"log"
 	"time"
 
+	"github.com/hashicorp/go-multierror"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/kms/v1/keys"
@@ -65,8 +66,13 @@ func dataSourceKmsDataKeyV1Read(_ context.Context, d *schema.ResourceData, meta 
 	}
 
 	d.SetId(time.Now().UTC().String())
-	d.Set("plain_text", v.PlainText)
-	d.Set("cipher_text", v.CipherText)
+	mErr := multierror.Append(
+		d.Set("plain_text", v.PlainText),
+		d.Set("cipher_text", v.CipherText),
+	)
+	if err := mErr.ErrorOrNil(); err != nil {
+		return diag.FromErr(err)
+	}
 
 	return nil
 }

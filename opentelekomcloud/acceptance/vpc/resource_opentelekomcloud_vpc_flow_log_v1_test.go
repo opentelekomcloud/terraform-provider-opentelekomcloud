@@ -28,7 +28,7 @@ func TestAccVpcFlowLogV1_basic(t *testing.T) {
 		CheckDestroy:      testAccCheckVpcFlowLogV1Destroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccOTCVpcFlowLogV1_basic,
+				Config: testAccVpcFlowLogV1_basic,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckVpcFlowLogV1Exists("opentelekomcloud_vpc_flow_log_v1.flow_logl", &flowlog),
 					resource.TestCheckResourceAttr(
@@ -40,7 +40,7 @@ func TestAccVpcFlowLogV1_basic(t *testing.T) {
 				),
 			},
 			{
-				Config: testAccOTCVpcFlowLogV1_update,
+				Config: testAccVpcFlowLogV1_update,
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr(
 						"opentelekomcloud_vpc_flow_log_v1.flow_logl", "name", fl_update_name),
@@ -75,11 +75,11 @@ func testAccCheckVpcFlowLogV1Exists(n string, flowlog *flowlogs.FlowLog) resourc
 	return func(s *terraform.State) error {
 		rs, ok := s.RootModule().Resources[n]
 		if !ok {
-			return fmt.Errorf("Not found: %s", n)
+			return fmt.Errorf("not found: %s", n)
 		}
 
 		if rs.Primary.ID == "" {
-			return fmt.Errorf("No ID is set")
+			return fmt.Errorf("no ID is set")
 		}
 
 		config := common.TestAccProvider.Meta().(*cfg.Config)
@@ -103,7 +103,7 @@ func testAccCheckVpcFlowLogV1Exists(n string, flowlog *flowlogs.FlowLog) resourc
 	}
 }
 
-var testAccOTCVpcFlowLogV1_basic = fmt.Sprintf(`
+var testAccVpcFlowLogV1_basic = fmt.Sprintf(`
 resource "opentelekomcloud_logtank_group_v2" "log_group1" {
   group_name  = "vpc_group"
 }
@@ -129,7 +129,7 @@ resource "opentelekomcloud_vpc_flow_log_v1" "flow_logl" {
 }
 `, fl_name)
 
-var testAccOTCVpcFlowLogV1_update = fmt.Sprintf(`
+var testAccVpcFlowLogV1_update = fmt.Sprintf(`
 resource "opentelekomcloud_logtank_group_v2" "log_group1" {
   group_name  = "vpc_group"
 }

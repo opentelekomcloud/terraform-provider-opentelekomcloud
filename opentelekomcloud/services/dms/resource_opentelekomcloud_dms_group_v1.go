@@ -4,6 +4,7 @@ import (
 	"context"
 	"log"
 
+	"github.com/hashicorp/go-multierror"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/dms/v1/groups"
@@ -84,7 +85,6 @@ func resourceDmsGroupsV1Create(ctx context.Context, d *schema.ResourceData, meta
 
 	// Store the group ID now
 	d.SetId(v[0].ID)
-	d.Set("queue_id", d.Get("queue_id").(string))
 
 	return resourceDmsGroupsV1Read(ctx, d, meta)
 }
@@ -104,24 +104,32 @@ func resourceDmsGroupsV1Read(_ context.Context, d *schema.ResourceData, meta int
 	}
 
 	groupsList, err := groups.ExtractGroups(page)
+	if err != nil {
+		return fmterr.Errorf("error extracting groups: %w", err)
+	}
 	if len(groupsList) < 1 {
-		return fmterr.Errorf("No matching resource found.")
+		return fmterr.Errorf("no matching resource found")
 	}
 
 	if len(groupsList) > 1 {
-		return fmterr.Errorf("Multiple resources matched;")
+		return fmterr.Errorf("multiple resources matched")
 	}
 
 	group := groupsList[0]
 	log.Printf("[DEBUG] Dms group %s: %+v", d.Id(), group)
 
 	d.SetId(group.ID)
-	d.Set("name", group.Name)
-	d.Set("consumed_messages", group.ConsumedMessages)
-	d.Set("available_messages", group.AvailableMessages)
-	d.Set("produced_messages", group.ProducedMessages)
-	d.Set("produced_deadletters", group.ProducedDeadletters)
-	d.Set("available_deadletters", group.AvailableDeadletters)
+	mErr := multierror.Append(
+		d.Set("name", group.Name),
+		d.Set("consumed_messages", group.ConsumedMessages),
+		d.Set("available_messages", group.AvailableMessages),
+		d.Set("produced_messages", group.ProducedMessages),
+		d.Set("produced_deadletters", group.ProducedDeadletters),
+		d.Set("available_deadletters", group.AvailableDeadletters),
+	)
+	if err := mErr.ErrorOrNil(); err != nil {
+		return diag.FromErr(err)
+	}
 
 	return nil
 }

@@ -1,0 +1,4 @@
+---
+fixes:
+  - |
+    **[RTS]** Fix issue with setting ``id`` in ``resource/opentelekomcloud_rts_software_config_host_v1`` (`#1281 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/1281>`_)

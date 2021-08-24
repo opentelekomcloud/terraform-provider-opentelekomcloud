@@ -8,7 +8,7 @@ Use this data source to get details about backup Policy resources from OpenTelek
 
 ## Example Usage
 ```hcl
-variable "policy_id" { }
+variable "policy_id" {}
 
 data "opentelekomcloud_csbs_backup_policy_v1" "csbs_policy" {
   id = var.policy_id

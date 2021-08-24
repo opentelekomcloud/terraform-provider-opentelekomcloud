@@ -9,7 +9,7 @@ Use this data source to get details about backup resources from OpenTelekomCloud
 ## Example Usage
 
 ```hcl
-variable "backup_name" { }
+variable "backup_name" {}
 
 data "opentelekomcloud_csbs_backup_v1" "csbs" {
   backup_name = var.backup_name

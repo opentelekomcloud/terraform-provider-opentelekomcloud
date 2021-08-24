@@ -1,0 +1,4 @@
+---
+fixes:
+  - |
+    **[IAM]** Fix crash when using ``data_source/opentelekomcloud_identity_user_v3`` (`#1310 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/1310>`_)

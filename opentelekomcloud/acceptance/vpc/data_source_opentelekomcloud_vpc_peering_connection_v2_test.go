@@ -10,8 +10,7 @@ import (
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/acceptance/common"
 )
 
-func TestAccOTCVpcPeeringConnectionV2DataSource_basic(t *testing.T) {
-
+func TestAccVpcPeeringConnectionV2DataSource_basic(t *testing.T) {
 	resource.Test(t, resource.TestCase{
 		PreCheck:          func() { common.TestAccPreCheck(t) },
 		ProviderFactories: common.TestAccProviderFactories,
@@ -19,22 +18,22 @@ func TestAccOTCVpcPeeringConnectionV2DataSource_basic(t *testing.T) {
 			{
 				Config: testAccDataSourceOTCVpcPeeringConnectionV2Config,
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckOTCVpcPeeringConnectionV2DataSourceID("data.opentelekomcloud_vpc_peering_connection_v2.by_id"),
+					testAccCheckVpcPeeringConnectionV2DataSourceID("data.opentelekomcloud_vpc_peering_connection_v2.by_id"),
 					resource.TestCheckResourceAttr(
 						"data.opentelekomcloud_vpc_peering_connection_v2.by_id", "name", "opentelekomcloud_peering"),
 					resource.TestCheckResourceAttr(
 						"data.opentelekomcloud_vpc_peering_connection_v2.by_id", "status", "ACTIVE"),
-					testAccCheckOTCVpcPeeringConnectionV2DataSourceID("data.opentelekomcloud_vpc_peering_connection_v2.by_vpc_id"),
+					testAccCheckVpcPeeringConnectionV2DataSourceID("data.opentelekomcloud_vpc_peering_connection_v2.by_vpc_id"),
 					resource.TestCheckResourceAttr(
 						"data.opentelekomcloud_vpc_peering_connection_v2.by_vpc_id", "name", "opentelekomcloud_peering"),
 					resource.TestCheckResourceAttr(
 						"data.opentelekomcloud_vpc_peering_connection_v2.by_vpc_id", "status", "ACTIVE"),
-					testAccCheckOTCVpcPeeringConnectionV2DataSourceID("data.opentelekomcloud_vpc_peering_connection_v2.by_peer_vpc_id"),
+					testAccCheckVpcPeeringConnectionV2DataSourceID("data.opentelekomcloud_vpc_peering_connection_v2.by_peer_vpc_id"),
 					resource.TestCheckResourceAttr(
 						"data.opentelekomcloud_vpc_peering_connection_v2.by_peer_vpc_id", "name", "opentelekomcloud_peering"),
 					resource.TestCheckResourceAttr(
 						"data.opentelekomcloud_vpc_peering_connection_v2.by_peer_vpc_id", "status", "ACTIVE"),
-					testAccCheckOTCVpcPeeringConnectionV2DataSourceID("data.opentelekomcloud_vpc_peering_connection_v2.by_vpc_ids"),
+					testAccCheckVpcPeeringConnectionV2DataSourceID("data.opentelekomcloud_vpc_peering_connection_v2.by_vpc_ids"),
 					resource.TestCheckResourceAttr(
 						"data.opentelekomcloud_vpc_peering_connection_v2.by_vpc_ids", "name", "opentelekomcloud_peering"),
 					resource.TestCheckResourceAttr(
@@ -45,11 +44,11 @@ func TestAccOTCVpcPeeringConnectionV2DataSource_basic(t *testing.T) {
 	})
 }
 
-func testAccCheckOTCVpcPeeringConnectionV2DataSourceID(n string) resource.TestCheckFunc {
+func testAccCheckVpcPeeringConnectionV2DataSourceID(n string) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
 		rs, ok := s.RootModule().Resources[n]
 		if !ok {
-			return fmt.Errorf("Can't find vpc peering connection data source: %s", n)
+			return fmt.Errorf("can't find vpc peering connection data source: %s", n)
 		}
 
 		if rs.Primary.ID == "" {

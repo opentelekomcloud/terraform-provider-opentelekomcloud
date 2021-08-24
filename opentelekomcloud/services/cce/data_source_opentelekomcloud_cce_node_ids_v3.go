@@ -3,6 +3,7 @@ package cce
 import (
 	"context"
 
+	"github.com/hashicorp/go-multierror"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/cce/v3/nodes"
@@ -59,8 +60,14 @@ func dataSourceCceNodeIdsV3Read(_ context.Context, d *schema.ResourceData, meta 
 	}
 
 	d.SetId(d.Get("cluster_id").(string))
-	d.Set("ids", Nodes)
-	d.Set("region", config.GetRegion(d))
+	mErr := multierror.Append(
+		d.Set("ids", Nodes),
+		d.Set("region", config.GetRegion(d)),
+	)
+
+	if err := mErr.ErrorOrNil(); err != nil {
+		return diag.FromErr(err)
+	}
 
 	return nil
 }

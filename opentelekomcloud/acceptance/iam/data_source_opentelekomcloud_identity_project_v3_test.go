@@ -47,11 +47,11 @@ func testAccCheckIdentityV3ProjectDataSourceID(n string) resource.TestCheckFunc 
 	return func(s *terraform.State) error {
 		rs, ok := s.RootModule().Resources[n]
 		if !ok {
-			return fmt.Errorf("Can't find project data source: %s", n)
+			return fmt.Errorf("can't find project data source: %s", n)
 		}
 
 		if rs.Primary.ID == "" {
-			return fmt.Errorf("Project data source ID not set")
+			return fmt.Errorf("project data source ID not set")
 		}
 
 		return nil
@@ -60,10 +60,10 @@ func testAccCheckIdentityV3ProjectDataSourceID(n string) resource.TestCheckFunc 
 
 func testAccOpenStackIdentityProjectV3DataSource_project(name, description string) string {
 	return fmt.Sprintf(`
-	resource "opentelekomcloud_identity_project_v3" "project_1" {
-	  name = "%s"
-	  description = "%s"
-	}
+resource "opentelekomcloud_identity_project_v3" "project_1" {
+  name        = "%s"
+  description = "%s"
+}
 `, name, description)
 }
 
@@ -71,8 +71,8 @@ func testAccOpenStackIdentityProjectV3DataSource_basic(name, description string)
 	return fmt.Sprintf(`
 	%s
 
-	data "opentelekomcloud_identity_project_v3" "project_1" {
-      name = opentelekomcloud_identity_project_v3.project_1.name
-	}
+data "opentelekomcloud_identity_project_v3" "project_1" {
+  name = opentelekomcloud_identity_project_v3.project_1.name
+}
 `, testAccOpenStackIdentityProjectV3DataSource_project(name, description))
 }

@@ -1,0 +1,4 @@
+---
+fixes:
+  - |
+    **[CCE]** Add new addon template spec for ``v1.19.8`` k8s version (`#1172 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/1172>`_)

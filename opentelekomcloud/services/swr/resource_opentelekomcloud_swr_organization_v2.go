@@ -66,7 +66,7 @@ func resourceOrganizationCreate(ctx context.Context, d *schema.ResourceData, met
 	config := meta.(*cfg.Config)
 	client, err := config.SwrV2Client(config.GetRegion(d))
 	if err != nil {
-		return fmterr.Errorf(SwrClientError, err)
+		return fmterr.Errorf(ClientError, err)
 	}
 	name := d.Get("name").(string)
 	opts := organizations.CreateOpts{
@@ -85,7 +85,7 @@ func resourceOrganizationRead(_ context.Context, d *schema.ResourceData, meta in
 	config := meta.(*cfg.Config)
 	client, err := config.SwrV2Client(config.GetRegion(d))
 	if err != nil {
-		return fmterr.Errorf(SwrClientError, err)
+		return fmterr.Errorf(ClientError, err)
 	}
 	org, err := organizations.Get(client, d.Id()).Extract()
 	if err != nil {
@@ -107,7 +107,7 @@ func resourceOrganizationDelete(_ context.Context, d *schema.ResourceData, meta 
 	config := meta.(*cfg.Config)
 	client, err := config.SwrV2Client(config.GetRegion(d))
 	if err != nil {
-		return fmterr.Errorf(SwrClientError, err)
+		return fmterr.Errorf(ClientError, err)
 	}
 	err = organizations.Delete(client, d.Id()).ExtractErr()
 	if err != nil {

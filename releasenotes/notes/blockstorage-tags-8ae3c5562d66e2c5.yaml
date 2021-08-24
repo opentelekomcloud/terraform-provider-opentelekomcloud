@@ -1,0 +1,4 @@
+---
+fixes:
+  - |
+    **[EVS]** Fix panic when using ``resource/opentelekomcloud_blockstorage_volume_v2`` (`#1249 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/1249>`_)

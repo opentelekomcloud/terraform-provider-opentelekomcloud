@@ -147,7 +147,6 @@ func getInstancesAddress(addresses map[string]interface{}) []InstancesAddress {
 
 		instanceNIC := InstanceNICS{}
 		for _, v := range v.([]interface{}) {
-
 			v := v.(map[string]interface{})
 
 			if v["OS-EXT-IPS:type"] == "fixed" {
@@ -163,7 +162,6 @@ func getInstancesAddress(addresses map[string]interface{}) []InstancesAddress {
 		}
 
 		allInstanceAddresses = append(allInstanceAddresses, instanceAddresses)
-
 	}
 
 	log.Printf("[DEBUG] Addresses: %#v", addresses)
@@ -175,7 +173,6 @@ func getInstancesAddress(addresses map[string]interface{}) []InstancesAddress {
 // flattenInstanceNetworks collects instance network information from different
 // sources and aggregates it all together into a map array.
 func flattenInstanceNetwork(d *schema.ResourceData, meta interface{}) ([]map[string]interface{}, error) {
-
 	config := meta.(*cfg.Config)
 	computeClient, err := config.ComputeV2Client(config.GetRegion(d))
 	if err != nil {

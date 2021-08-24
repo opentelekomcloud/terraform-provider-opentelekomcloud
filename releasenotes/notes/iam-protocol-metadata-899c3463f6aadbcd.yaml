@@ -1,0 +1,4 @@
+---
+enhancements:
+  - |
+    **[IAM]** Add ``metadata`` argument to ``resource/opentelekomcloud_identity_protocol_v3`` (`#1197 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/1197>`_)

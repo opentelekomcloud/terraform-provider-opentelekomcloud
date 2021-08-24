@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"log"
 
+	"github.com/hashicorp/go-multierror"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	golangsdk "github.com/opentelekomcloud/gophertelekomcloud"
@@ -60,7 +61,7 @@ func resourceNetworkingFloatingIPAssociateV2Create(ctx context.Context, d *schem
 
 	floatingIPID, err := resourceNetworkingFloatingIPAssociateV2IP2ID(networkingClient, floatingIP)
 	if err != nil {
-		return fmterr.Errorf("Unable to get ID of floating IP: %s", err)
+		return fmterr.Errorf("unable to get ID of floating IP: %s", err)
 	}
 
 	updateOpts := floatingips.UpdateOpts{
@@ -77,7 +78,7 @@ func resourceNetworkingFloatingIPAssociateV2Create(ctx context.Context, d *schem
 
 	d.SetId(floatingIPID)
 
-	return resourceNetworkFloatingIPV2Read(ctx, d, meta)
+	return resourceNetworkingFloatingIPAssociateV2Read(ctx, d, meta)
 }
 
 func resourceNetworkingFloatingIPAssociateV2Read(_ context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
@@ -92,9 +93,14 @@ func resourceNetworkingFloatingIPAssociateV2Read(_ context.Context, d *schema.Re
 		return diag.FromErr(common.CheckDeleted(d, err, "floating IP"))
 	}
 
-	d.Set("floating_ip", floatingIP.FloatingIP)
-	d.Set("port_id", floatingIP.PortID)
-	d.Set("region", config.GetRegion(d))
+	mErr := multierror.Append(
+		d.Set("floating_ip", floatingIP.FloatingIP),
+		d.Set("port_id", floatingIP.PortID),
+		d.Set("region", config.GetRegion(d)),
+	)
+	if err := mErr.ErrorOrNil(); err != nil {
+		return diag.FromErr(err)
+	}
 
 	return nil
 }

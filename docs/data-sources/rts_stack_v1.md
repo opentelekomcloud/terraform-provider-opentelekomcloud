@@ -9,7 +9,7 @@ Use this data source to get details about RTS outputs and other useful data incl
 ## Example Usage
 
 ```hcl
-variable "stack_name" { }
+variable "stack_name" {}
 
 data "opentelekomcloud_rts_stack_v1" "mystack" {
   name = var.stack_name

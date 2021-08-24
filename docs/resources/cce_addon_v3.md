@@ -4,14 +4,14 @@ subcategory: "Cloud Container Engine (CCE)"
 
 # opentelekomcloud_cce_addon_v3
 
-Provides a cluster addon management.
+Manages a V3 CCE Addon resource within OpenTelekomCloud.
 
 ## Example Usage
 
 ```hcl
-variable "flavor_id" { }
-variable "vpc_id" { }
-variable "subnet_id" { }
+variable "flavor_id" {}
+variable "vpc_id" {}
+variable "subnet_id" {}
 
 resource "opentelekomcloud_cce_cluster_v3" "cluster_1" {
   name                    = "cce-cluster-1"
@@ -26,14 +26,14 @@ resource "opentelekomcloud_cce_cluster_v3" "cluster_1" {
 
 resource "opentelekomcloud_cce_addon_v3" "addon" {
   template_name    = "metrics-server"
-  template_version = "1.0.3"
+  template_version = "1.0.6"
   cluster_id       = opentelekomcloud_cce_cluster_v3.cluster_1.id
 
   values {
     basic = {
-      euleros_version = "2.2.5"
-      swr_addr        = "100.125.7.25:20202"
-      swr_user        = "hwofficial"
+      "image_version" : "v0.3.7",
+      "swr_addr" : "100.125.7.25:20202",
+      "swr_user" : "hwofficial"
     }
     custom = {}
   }
@@ -57,7 +57,8 @@ The following arguments are supported:
     * `custom` - (Required) Custom parameters of the add-on.
 
 Arguments which can be passed to the `basic` and `custom` addon parameters depends on the addon type and version.
-For more detailed description see [addons description](https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/blob/devel/opentelekomcloud/services/cce/addon-templates.md).
+For more detailed description of addons for k8s version `v1.17.9` see [addons description](https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/blob/devel/opentelekomcloud/services/cce/addon-templates-v1.17.9.md).
+For more detailed description of addons for k8s version `v1.19.8` see [addons description](https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/blob/devel/opentelekomcloud/services/cce/addon-templates-v1.19.8.md).
 
 ## Attributes Reference
 

@@ -4,6 +4,7 @@ import (
 	"context"
 	"log"
 
+	"github.com/hashicorp/go-multierror"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/csbs/v1/policies"
@@ -149,6 +150,9 @@ func DataSourceCSBSBackupPolicyV1() *schema.Resource {
 func dataSourceCSBSBackupPolicyV1Read(_ context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*cfg.Config)
 	policyClient, err := config.CsbsV1Client(config.GetRegion(d))
+	if err != nil {
+		return fmterr.Errorf("error creating CSBSv1 client: %w", err)
+	}
 
 	listOpts := policies.ListOpts{
 		ID:     d.Id(),
@@ -159,16 +163,16 @@ func dataSourceCSBSBackupPolicyV1Read(_ context.Context, d *schema.ResourceData,
 	refinedPolicies, err := policies.List(policyClient, listOpts)
 
 	if err != nil {
-		return fmterr.Errorf("Unable to retrieve backup policies: %s", err)
+		return fmterr.Errorf("unable to retrieve backup policies: %s", err)
 	}
 
 	if len(refinedPolicies) < 1 {
-		return fmterr.Errorf("Your query returned no results. " +
+		return fmterr.Errorf("your query returned no results. " +
 			"Please change your search criteria and try again.")
 	}
 
 	if len(refinedPolicies) > 1 {
-		return fmterr.Errorf("Your query returned more than one result." +
+		return fmterr.Errorf("your query returned more than one result." +
 			" Please try a more specific search criteria")
 	}
 
@@ -190,14 +194,19 @@ func dataSourceCSBSBackupPolicyV1Read(_ context.Context, d *schema.ResourceData,
 		return diag.FromErr(err)
 	}
 
-	d.Set("name", backupPolicy.Name)
-	d.Set("id", backupPolicy.ID)
-	d.Set("common", backupPolicy.Parameters.Common)
-	d.Set("status", backupPolicy.Status)
-	d.Set("description", backupPolicy.Description)
-	d.Set("provider_id", backupPolicy.ProviderId)
+	mErr := multierror.Append(
+		d.Set("name", backupPolicy.Name),
+		d.Set("id", backupPolicy.ID),
+		d.Set("common", backupPolicy.Parameters.Common),
+		d.Set("status", backupPolicy.Status),
+		d.Set("description", backupPolicy.Description),
+		d.Set("provider_id", backupPolicy.ProviderId),
+		d.Set("region", config.GetRegion(d)),
+	)
 
-	d.Set("region", config.GetRegion(d))
+	if err := mErr.ErrorOrNil(); err != nil {
+		return diag.FromErr(err)
+	}
 
 	return nil
 }

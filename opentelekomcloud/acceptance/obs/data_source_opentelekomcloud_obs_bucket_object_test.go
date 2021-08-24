@@ -17,7 +17,7 @@ import (
 
 func TestAccDataSourceObsBucketObject_basic(t *testing.T) {
 	rInt := acctest.RandInt()
-	resourceOnlyConf, conf := testAccDataSourceObsObjectConfig_basic(rInt)
+	resourceOnlyConf, conf := testAccDataSourceObsObjectConfigBasic(rInt)
 
 	var dsObj obs.GetObjectOutput
 
@@ -50,7 +50,7 @@ func TestAccDataSourceObsBucketObject_basic(t *testing.T) {
 
 func TestAccDataSourceObsBucketObject_readableBody(t *testing.T) {
 	rInt := acctest.RandInt()
-	resourceOnlyConf, conf := testAccDataSourceObsObjectConfig_readableBody(rInt)
+	resourceOnlyConf, conf := testAccDataSourceObsObjectConfigReadableBody(rInt)
 
 	var dsObj obs.GetObjectOutput
 
@@ -85,7 +85,7 @@ func TestAccDataSourceObsBucketObject_allParams(t *testing.T) {
 	t.Skip("Removing versioned bucket is broken, see GH-779")
 
 	rInt := acctest.RandInt()
-	resourceOnlyConf, conf := testAccDataSourceObsObjectConfig_allParams(rInt)
+	resourceOnlyConf, conf := testAccDataSourceObsObjectConfigAllParams(rInt)
 
 	var dsObj obs.GetObjectOutput
 
@@ -156,7 +156,7 @@ func testAccCheckObsObjectDataSourceExists(n string, obj *obs.GetObjectOutput) r
 	}
 }
 
-func testAccDataSourceObsObjectConfig_basic(randInt int) (string, string) {
+func testAccDataSourceObsObjectConfigBasic(randInt int) (string, string) {
 	resources := fmt.Sprintf(`
 resource "opentelekomcloud_obs_bucket" "object_bucket" {
 	bucket = "tf-object-test-bucket-%d"
@@ -177,7 +177,7 @@ data "opentelekomcloud_obs_bucket_object" "obj" {
 	return resources, both
 }
 
-func testAccDataSourceObsObjectConfig_readableBody(randInt int) (string, string) {
+func testAccDataSourceObsObjectConfigReadableBody(randInt int) (string, string) {
 	resources := fmt.Sprintf(`
 resource "opentelekomcloud_obs_bucket" "object_bucket" {
 	bucket = "tf-object-test-bucket-%d"
@@ -199,7 +199,7 @@ data "opentelekomcloud_obs_bucket_object" "obj" {
 	return resources, both
 }
 
-func testAccDataSourceObsObjectConfig_allParams(randInt int) (string, string) {
+func testAccDataSourceObsObjectConfigAllParams(randInt int) (string, string) { // nolint:unused
 	resources := fmt.Sprintf(`
 resource "opentelekomcloud_obs_bucket" "object_bucket" {
 	bucket = "tf-object-test-bucket-%[1]d"

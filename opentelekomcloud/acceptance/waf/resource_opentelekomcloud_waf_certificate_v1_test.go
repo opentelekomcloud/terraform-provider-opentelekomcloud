@@ -43,7 +43,6 @@ func TestAccWafCertificateV1_basic(t *testing.T) {
 }
 
 func TestAccWafCertificateV1_validation(t *testing.T) {
-
 	resource.Test(t, resource.TestCase{
 		PreCheck:          func() { common.TestAccPreCheck(t) },
 		ProviderFactories: common.TestAccProviderFactories,
@@ -71,7 +70,7 @@ func testAccCheckWafCertificateV1Destroy(s *terraform.State) error {
 
 		_, err := certificates.Get(wafClient, rs.Primary.ID).Extract()
 		if err == nil {
-			return fmt.Errorf("Waf certificate still exists")
+			return fmt.Errorf("waf certificate still exists")
 		}
 	}
 
@@ -82,11 +81,11 @@ func testAccCheckWafCertificateV1Exists(n string, certificate *certificates.Cert
 	return func(s *terraform.State) error {
 		rs, ok := s.RootModule().Resources[n]
 		if !ok {
-			return fmt.Errorf("Not found: %s", n)
+			return fmt.Errorf("not found: %s", n)
 		}
 
 		if rs.Primary.ID == "" {
-			return fmt.Errorf("No ID is set")
+			return fmt.Errorf("no ID is set")
 		}
 
 		config := common.TestAccProvider.Meta().(*cfg.Config)
@@ -101,7 +100,7 @@ func testAccCheckWafCertificateV1Exists(n string, certificate *certificates.Cert
 		}
 
 		if found.Id != rs.Primary.ID {
-			return fmt.Errorf("Waf certificate not found")
+			return fmt.Errorf("waf certificate not found")
 		}
 
 		*certificate = *found

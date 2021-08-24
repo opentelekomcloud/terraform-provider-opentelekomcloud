@@ -17,7 +17,7 @@ func TestAccEcsV1Instance_importBasic(t *testing.T) {
 		CheckDestroy:      testAccCheckEcsV1InstanceDestroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccEcsV1Instance_basic,
+				Config: testAccEcsV1InstanceBasic,
 			},
 
 			{

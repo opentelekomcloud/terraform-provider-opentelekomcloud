@@ -77,7 +77,7 @@ func resourceNetworkingRouterInterfaceV2Create(ctx context.Context, d *schema.Re
 
 	stateConf := &resource.StateChangeConf{
 		Pending:    []string{"BUILD", "PENDING_CREATE", "PENDING_UPDATE"},
-		Target:     []string{"ACTIVE"},
+		Target:     []string{"ACTIVE", "DOWN"},
 		Refresh:    waitForRouterInterfaceActive(networkingClient, n.PortID),
 		Timeout:    d.Timeout(schema.TimeoutCreate),
 		Delay:      5 * time.Second,
@@ -85,6 +85,9 @@ func resourceNetworkingRouterInterfaceV2Create(ctx context.Context, d *schema.Re
 	}
 
 	_, err = stateConf.WaitForStateContext(ctx)
+	if err != nil {
+		return fmterr.Errorf("error waiting for router interface to become active: %w", err)
+	}
 
 	d.SetId(n.PortID)
 
@@ -110,7 +113,7 @@ func resourceNetworkingRouterInterfaceV2Read(_ context.Context, d *schema.Resour
 
 	log.Printf("[DEBUG] Retrieved Router Interface %s: %+v", d.Id(), n)
 
-	d.Set("region", config.GetRegion(d))
+	_ = d.Set("region", config.GetRegion(d))
 
 	return nil
 }

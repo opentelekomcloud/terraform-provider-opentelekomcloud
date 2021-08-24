@@ -9,7 +9,7 @@ Provides an RTS software config resource within OpenTelekomCloud.
 ## Example Usage
 
 ```hcl
-variable "config_name" { }
+variable "config_name" {}
 
 resource "opentelekomcloud_rts_software_config_v1" "myconfig" {
   name = var.config_name

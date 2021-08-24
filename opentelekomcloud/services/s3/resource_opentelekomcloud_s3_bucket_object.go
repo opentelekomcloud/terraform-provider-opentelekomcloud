@@ -10,6 +10,7 @@ import (
 	"sort"
 	"strings"
 
+	"github.com/hashicorp/go-multierror"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/mitchellh/go-homedir"
@@ -150,7 +151,7 @@ func resourceS3BucketObjectPut(ctx context.Context, d *schema.ResourceData, meta
 		content := v.(string)
 		body = bytes.NewReader([]byte(content))
 	} else {
-		return fmterr.Errorf("Must specify \"source\" or \"content\" field")
+		return fmterr.Errorf("must specify \"source\" or \"content\" field")
 	}
 
 	bucket := d.Get("bucket").(string)
@@ -200,11 +201,16 @@ func resourceS3BucketObjectPut(ctx context.Context, d *schema.ResourceData, meta
 		return fmterr.Errorf("error putting object in S3 bucket (%s): %s", bucket, err)
 	}
 
-	// See https://forums.aws.amazon.com/thread.jspa?threadID=44003
-	d.Set("etag", strings.Trim(*resp.ETag, `"`))
-
-	d.Set("version_id", resp.VersionId)
 	d.SetId(key)
+	// See https://forums.aws.amazon.com/thread.jspa?threadID=44003
+	mErr := multierror.Append(
+		d.Set("etag", strings.Trim(*resp.ETag, `"`)),
+		d.Set("version_id", resp.VersionId),
+	)
+
+	if err := mErr.ErrorOrNil(); err != nil {
+		return diag.FromErr(err)
+	}
 	return resourceS3BucketObjectRead(ctx, d, meta)
 }
 
@@ -237,17 +243,21 @@ func resourceS3BucketObjectRead(_ context.Context, d *schema.ResourceData, meta 
 	}
 	log.Printf("[DEBUG] Reading S3 Bucket Object meta: %s", resp)
 
-	d.Set("cache_control", resp.CacheControl)
-	d.Set("content_disposition", resp.ContentDisposition)
-	d.Set("content_encoding", resp.ContentEncoding)
-	d.Set("content_language", resp.ContentLanguage)
-	d.Set("content_type", resp.ContentType)
-	d.Set("version_id", resp.VersionId)
-	d.Set("server_side_encryption", resp.ServerSideEncryption)
-	d.Set("website_redirect", resp.WebsiteRedirectLocation)
-	d.Set("sse_kms_key_id", resp.SSEKMSKeyId)
-
-	d.Set("etag", strings.Trim(*resp.ETag, `"`))
+	mErr := multierror.Append(
+		d.Set("cache_control", resp.CacheControl),
+		d.Set("content_disposition", resp.ContentDisposition),
+		d.Set("content_encoding", resp.ContentEncoding),
+		d.Set("content_language", resp.ContentLanguage),
+		d.Set("content_type", resp.ContentType),
+		d.Set("version_id", resp.VersionId),
+		d.Set("server_side_encryption", resp.ServerSideEncryption),
+		d.Set("website_redirect", resp.WebsiteRedirectLocation),
+		d.Set("sse_kms_key_id", resp.SSEKMSKeyId),
+		d.Set("etag", strings.Trim(*resp.ETag, `"`)),
+	)
+	if err := mErr.ErrorOrNil(); err != nil {
+		return diag.FromErr(err)
+	}
 
 	return nil
 }
@@ -270,7 +280,7 @@ func resourceS3BucketObjectDelete(_ context.Context, d *schema.ResourceData, met
 		}
 		out, err := s3conn.ListObjectVersions(&vInput)
 		if err != nil {
-			return fmterr.Errorf("Failed listing S3 object versions: %s", err)
+			return fmterr.Errorf("failed listing S3 object versions: %s", err)
 		}
 
 		for _, v := range out.Versions {
@@ -333,7 +343,7 @@ func ValidateS3BucketObjectAclType(v interface{}, k string) (ws []string, errors
 			"%q contains an invalid canned ACL type %q. Valid types are either %s",
 			k, value, sentenceJoin(cannedAcls)))
 	}
-	return
+	return ws, errors
 }
 
 func validateS3BucketObjectServerSideEncryption(v interface{}, k string) (ws []string, errors []error) {

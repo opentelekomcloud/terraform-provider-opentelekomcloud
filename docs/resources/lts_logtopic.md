@@ -10,7 +10,7 @@ Manage a log topic resource within OpenTelekomCloud.
 
 ```hcl
 resource "opentelekomcloud_logtank_group_v2" "test_group" {
-  topic_name  = "test_group"
+  topic_name = "test_group"
 }
 
 resource "opentelekomcloud_logtank_topic_v2" "test_topic" {

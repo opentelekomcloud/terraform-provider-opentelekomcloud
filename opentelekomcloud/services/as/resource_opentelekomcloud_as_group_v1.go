@@ -73,14 +73,18 @@ func ResourceASGroup() *schema.Resource {
 				Description:  "The cooling duration, in seconds.",
 			},
 			"lb_listener_id": {
-				Type:         schema.TypeString,
-				Optional:     true,
-				ValidateFunc: common.ValidateASGroupListenerID,
-				Description:  "The system supports the binding of up to three ELB listeners, the IDs of which are separated using a comma.",
+				Type:          schema.TypeString,
+				Optional:      true,
+				ValidateFunc:  common.ValidateASGroupListenerID,
+				Description:   "The system supports the binding of up to six classic LB listeners, the IDs of which are separated using a comma.",
+				Deprecated:    "Please use `lbaas_listeners` instead",
+				ConflictsWith: []string{"lbaas_listeners"},
 			},
 			"lbaas_listeners": {
-				Type:     schema.TypeList,
-				Optional: true,
+				Type:          schema.TypeList,
+				Optional:      true,
+				MaxItems:      6,
+				ConflictsWith: []string{"lb_listener_id"},
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
 						"pool_id": {
@@ -524,7 +528,6 @@ func resourceASGroupUpdate(ctx context.Context, d *schema.ResourceData, meta int
 		if desireNum < minNum || desireNum > maxNum {
 			return fmterr.Errorf("invalid parameters: it should be min_instance_number<=desire_instance_number<=max_instance_number")
 		}
-
 	}
 
 	networks := getAllNetworks(d)

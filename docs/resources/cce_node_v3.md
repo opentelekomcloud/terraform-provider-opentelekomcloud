@@ -57,13 +57,20 @@ The following arguments are supported:
 
 * `name` - (Optional) Node Name.
 
+* `subnet_id` - (Optional) The ID of the subnet to which the NIC belongs. Changing this parameter will create a new resource.
+
 * `labels` - (Optional) Node tag, key/value pair format. Changing this parameter will create a new resource.
 
 * `tags` - (Optional) The field is alternative to `labels`, key/value pair format.
 
 * `k8s_tags` - (Optional) Tags of a Kubernetes node, key/value pair format.
 
-* `annotations` - (Optional) Node annotation, key/value pair format. Changing this parameter will create a new resource.
+* `annotations` - (Optional) Node annotation, key/value pair format. Changing this parameter will create a new resource
+
+* `taints` - (Optional) Taints to created nodes to configure anti-affinity.
+  * `key` - (Required) A key must contain 1 to 63 characters starting with a letter or digit. Only letters, digits, hyphens (-), underscores (_), and periods (.) are allowed. A DNS subdomain name can be used as the prefix of a key.
+  * `value` - (Required) A value must start with a letter or digit and can contain a maximum of 63 characters, including letters, digits, hyphens (-), underscores (_), and periods (.).
+  * `effect` - (Optional) Available options are `NoSchedule`, `PreferNoSchedule`, and `NoExecute`.
 
 * `taints` - (Optional) Taints to created nodes to configure anti-affinity.
   * `key` - (Required) A key must contain 1 to 63 characters starting with a letter or digit. Only letters, digits, hyphens (-), underscores (_), and periods (.) are allowed. A DNS subdomain name can be used as the prefix of a key.

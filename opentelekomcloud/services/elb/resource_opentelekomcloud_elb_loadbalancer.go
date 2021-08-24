@@ -5,6 +5,7 @@ import (
 	"log"
 	"time"
 
+	"github.com/hashicorp/go-multierror"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
@@ -139,6 +140,9 @@ func resourceELoadBalancerCreate(ctx context.Context, d *schema.ResourceData, me
 	}
 
 	entity, err := golangsdk.GetJobEntity(client, job.URI, "elb")
+	if err != nil {
+		return fmterr.Errorf("error getting job entity: %w", err)
+	}
 
 	if mlb, ok := entity.(map[string]interface{}); ok {
 		if vid, ok := mlb["id"]; ok {
@@ -150,7 +154,7 @@ func resourceELoadBalancerCreate(ctx context.Context, d *schema.ResourceData, me
 		}
 	}
 
-	return fmterr.Errorf("Unexpected conversion error in resourceELoadBalancerCreate.")
+	return fmterr.Errorf("unexpected conversion error in resourceELoadBalancerCreate.")
 }
 
 func resourceELoadBalancerRead(_ context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
@@ -167,22 +171,29 @@ func resourceELoadBalancerRead(_ context.Context, d *schema.ResourceData, meta i
 
 	log.Printf("[DEBUG] Retrieved loadbalancer %s: %#v", d.Id(), lb)
 
-	d.Set("name", lb.Name)
-	d.Set("description", lb.Description)
-	d.Set("vpc_id", lb.VpcID)
-	d.Set("bandwidth", lb.Bandwidth)
-	d.Set("type", lb.Type)
 	basu := false
 	// Can be 0 (not up) or 2 (frozen)
 	if lb.AdminStateUp == 1 {
 		basu = true
 	}
-	d.Set("admin_state_up", basu)
-	d.Set("vip_subnet_id", lb.VipSubnetID)
-	d.Set("az", lb.AZ)
-	d.Set("vip_address", lb.VipAddress)
-	d.Set("security_group_id", lb.SecurityGroupID)
-	d.Set("region", config.GetRegion(d))
+
+	mErr := multierror.Append(
+		d.Set("name", lb.Name),
+		d.Set("description", lb.Description),
+		d.Set("vpc_id", lb.VpcID),
+		d.Set("bandwidth", lb.Bandwidth),
+		d.Set("type", lb.Type),
+		d.Set("admin_state_up", basu),
+		d.Set("vip_subnet_id", lb.VipSubnetID),
+		d.Set("az", lb.AZ),
+		d.Set("vip_address", lb.VipAddress),
+		d.Set("security_group_id", lb.SecurityGroupID),
+		d.Set("region", config.GetRegion(d)),
+	)
+
+	if err := mErr.ErrorOrNil(); err != nil {
+		return diag.FromErr(err)
+	}
 
 	return nil
 }
@@ -211,6 +222,9 @@ func resourceELoadBalancerUpdate(ctx context.Context, d *schema.ResourceData, me
 
 	log.Printf("[DEBUG] Updating loadbalancer %s with options: %#v", d.Id(), updateOpts)
 	job, err := loadbalancer_elbs.Update(client, d.Id(), updateOpts).ExtractJobResponse()
+	if err != nil {
+		return fmterr.Errorf("error getting job entity: %w", err)
+	}
 	if err := golangsdk.WaitForJobSuccess(client, job.URI, int(d.Timeout(schema.TimeoutUpdate)/time.Second)); err != nil {
 		return diag.FromErr(err)
 	}

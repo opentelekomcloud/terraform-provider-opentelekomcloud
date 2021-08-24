@@ -1,0 +1,5 @@
+---
+
+enhancements:
+  - |
+    **[CCE]** Add possibility to set ``taints`` in ``resource/opentelekomcloud_cce_node_v3`` (`#1191 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/1191>`_)

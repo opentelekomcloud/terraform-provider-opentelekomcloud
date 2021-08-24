@@ -53,7 +53,7 @@ resource "opentelekomcloud_rds_instance_v3" "instance" {
 
 ```hcl
 resource "opentelekomcloud_networking_secgroup_v2" "secgroup" {
-  name = "terraform_test_security_group"
+  name        = "terraform_test_security_group"
   description = "terraform security group acceptance test"
 }
 
@@ -101,7 +101,7 @@ resource "opentelekomcloud_networking_secgroup_v2" "secgroup" {
 resource "opentelekomcloud_compute_floatingip_v2" "ip" {}
 
 resource "opentelekomcloud_rds_instance_v3" "instance" {
-  availability_zone   = [
+  availability_zone = [
     var.availability_zone_1,
     var.availability_zone_2
   ]
@@ -111,10 +111,10 @@ resource "opentelekomcloud_rds_instance_v3" "instance" {
     version  = "9.5"
     port     = "8635"
   }
-  name                = "terraform_test_rds_instance"
-  security_group_id   = opentelekomcloud_networking_secgroup_v2.secgroup.id
-  subnet_id           = var.subnet_id
-  vpc_id              = var.vpc_id
+  name              = "terraform_test_rds_instance"
+  security_group_id = opentelekomcloud_networking_secgroup_v2.secgroup.id
+  subnet_id         = var.subnet_id
+  vpc_id            = var.vpc_id
   volume {
     type = "COMMON"
     size = 100
@@ -177,6 +177,50 @@ resource "opentelekomcloud_rds_instance_v3" "instance" {
 }
 ```
 
+### Overriding parameters from template
+
+```hcl
+resource "opentelekomcloud_networking_secgroup_v2" "sg" {
+  name = "sg-rds-test"
+}
+
+resource "opentelekomcloud_rds_parametergroup_v3" "pg" {
+  name = "pg-rds-test"
+  values = {
+    autocommit = "OFF"
+  }
+  datastore {
+    type    = "postgresql"
+    version = "10"
+  }
+}
+
+resource "opentelekomcloud_rds_instance_v3" "instance" {
+  name              = "tf_rds_instance_%s"
+  availability_zone = [var.availability_zone]
+
+  db {
+    password = "Postgres!120521"
+    type     = "PostgreSQL"
+    version  = "10"
+    port     = "8635"
+  }
+
+  security_group_id = opentelekomcloud_networking_secgroup_v2.sg.id
+  subnet_id         = var.subnet_id
+  vpc_id            = var.vpc_id
+  flavor            = "rds.pg.c2.medium"
+  volume {
+    type = "COMMON"
+    size = 40
+  }
+
+  parameters = {
+    max_connections = "37",
+  }
+}
+```
+
 ## Argument Reference
 
 The following arguments are supported:
@@ -212,6 +256,9 @@ The following arguments are supported:
   replication mode.  Changing this parameter will create a new resource.
 
 * `param_group_id` - (Optional) Specifies the parameter group ID.
+
+* `parameters` - (Optional) Map of additional configuration parameters. Values should be strings. Parameters set here
+  overrides values from configuration template (parameter group).
 
 * `public_ips` - (Optional) Specifies floating IP to be assigned to the instance.
   This should be a list with single element only.
@@ -326,7 +373,7 @@ But due to some attributes missing from the API response, it's required to ignor
 
 ```hcl
 resource "opentelekomcloud_rds_instance_v3" "instance_1" {
-  ...
+  # ...
 
   lifecycle {
     ignore_changes = [

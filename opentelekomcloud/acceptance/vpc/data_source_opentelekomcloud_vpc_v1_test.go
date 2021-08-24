@@ -4,40 +4,41 @@ import (
 	"fmt"
 	"math/rand"
 	"testing"
-	"time"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
+	"github.com/opentelekomcloud/gophertelekomcloud/acceptance/tools"
 
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/acceptance/common"
 )
 
-func TestAccOTCVpcV1DataSource_basic(t *testing.T) {
-	rand.Seed(time.Now().UTC().UnixNano())
-	rInt := rand.Intn(50)
-	cidr := fmt.Sprintf("172.16.%d.0/24", rInt)
-	name := fmt.Sprintf("terraform-testacc-vpc-data-source-%d", rInt)
+func TestAccVpcV1DataSource_basic(t *testing.T) {
+	dataSourceNameByID := "data.opentelekomcloud_vpc_v1.by_id"
+	dataSourceNameByCidr := "data.opentelekomcloud_vpc_v1.by_cidr"
+	dataSourceNameByName := "data.opentelekomcloud_vpc_v1.by_name"
+
+	cidr := fmt.Sprintf("172.16.%d.0/24", rand.Intn(50))
+	name := tools.RandomString("vpc-test-", 3)
+
 	resource.Test(t, resource.TestCase{
 		PreCheck:          func() { common.TestAccPreCheck(t) },
 		ProviderFactories: common.TestAccProviderFactories,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccDataSourceOTCVpcV1Config(name, cidr),
+				Config: testAccDataSourceVpcV1Config(name, cidr),
 				Check: resource.ComposeTestCheckFunc(
-					testAccDataSourceOTCVpcV1Check("data.opentelekomcloud_vpc_v1.by_id", name, cidr),
-					testAccDataSourceOTCVpcV1Check("data.opentelekomcloud_vpc_v1.by_cidr", name, cidr),
-					testAccDataSourceOTCVpcV1Check("data.opentelekomcloud_vpc_v1.by_name", name, cidr),
-					resource.TestCheckResourceAttr(
-						"data.opentelekomcloud_vpc_v1.by_id", "shared", "false"),
-					resource.TestCheckResourceAttr(
-						"data.opentelekomcloud_vpc_v1.by_id", "status", "OK"),
+					testAccDataSourceVpcV1Check(dataSourceNameByID, name, cidr),
+					testAccDataSourceVpcV1Check(dataSourceNameByCidr, name, cidr),
+					testAccDataSourceVpcV1Check(dataSourceNameByName, name, cidr),
+					resource.TestCheckResourceAttr(dataSourceNameByID, "shared", "false"),
+					resource.TestCheckResourceAttr(dataSourceNameByID, "status", "OK"),
 				),
 			},
 		},
 	})
 }
 
-func testAccDataSourceOTCVpcV1Check(n, name, cidr string) resource.TestCheckFunc {
+func testAccDataSourceVpcV1Check(n, name, cidr string) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
 		rs, ok := s.RootModule().Resources[n]
 		if !ok {
@@ -52,29 +53,25 @@ func testAccDataSourceOTCVpcV1Check(n, name, cidr string) resource.TestCheckFunc
 		attr := rs.Primary.Attributes
 
 		if attr["id"] != vpcRs.Primary.Attributes["id"] {
-			return fmt.Errorf(
-				"id is %s; want %s",
-				attr["id"],
-				vpcRs.Primary.Attributes["id"],
-			)
+			return fmt.Errorf("ID is: %s, expected: %s", attr["id"], vpcRs.Primary.Attributes["id"])
 		}
 
 		if attr["cidr"] != cidr {
-			return fmt.Errorf("bad vpc cidr %s, expected: %s", attr["cidr"], cidr)
+			return fmt.Errorf("bad VPC cidr: %s, expected: %s", attr["cidr"], cidr)
 		}
 		if attr["name"] != name {
-			return fmt.Errorf("bad vpc name %s", attr["name"])
+			return fmt.Errorf("bad VPC name: %s, expected: %s", attr["name"], name)
 		}
 
 		return nil
 	}
 }
 
-func testAccDataSourceOTCVpcV1Config(name, cidr string) string {
+func testAccDataSourceVpcV1Config(name, cidr string) string {
 	return fmt.Sprintf(`
 resource "opentelekomcloud_vpc_v1" "vpc_1" {
-	name = "%s"
-	cidr= "%s"
+  name = "%s"
+  cidr = "%s"
 }
 
 data "opentelekomcloud_vpc_v1" "by_id" {
@@ -86,7 +83,7 @@ data "opentelekomcloud_vpc_v1" "by_cidr" {
 }
 
 data "opentelekomcloud_vpc_v1" "by_name" {
-	name = opentelekomcloud_vpc_v1.vpc_1.name
+  name = opentelekomcloud_vpc_v1.vpc_1.name
 }
 `, name, cidr)
 }

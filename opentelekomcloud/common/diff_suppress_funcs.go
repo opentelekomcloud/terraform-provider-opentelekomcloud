@@ -7,7 +7,7 @@ import (
 	"strings"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
-	"github.com/jen20/awspolicyequivalence"
+	awspolicy "github.com/jen20/awspolicyequivalence"
 )
 
 func SuppressEquivalentAwsPolicyDiffs(_, old, new string, _ *schema.ResourceData) bool {
@@ -81,7 +81,7 @@ func SuppressSmartVersionDiff(_, old, new string, _ *schema.ResourceData) bool {
 }
 
 func SuppressCaseInsensitive(_, old, new string, _ *schema.ResourceData) bool {
-	return strings.ToLower(old) == strings.ToLower(new)
+	return strings.EqualFold(old, new)
 }
 
 func SuppressEqualZoneNames(_, old, new string, _ *schema.ResourceData) bool {
@@ -93,4 +93,14 @@ func SuppressEqualZoneNames(_, old, new string, _ *schema.ResourceData) bool {
 func SuppressStrippedNewLines(_, old, new string, _ *schema.ResourceData) bool {
 	newline := "\n"
 	return strings.Trim(old, newline) == strings.Trim(new, newline)
+}
+
+func SuppressEmptyStringSHA(k, old, new string, d *schema.ResourceData) bool {
+	// Sometimes the API responds with the equivalent, empty SHA1 sum
+	// echo -n "" | shasum
+	if (old == "da39a3ee5e6b4b0d3255bfef95601890afd80709" && new == "") ||
+		(old == "" && new == "da39a3ee5e6b4b0d3255bfef95601890afd80709") {
+		return true
+	}
+	return false
 }

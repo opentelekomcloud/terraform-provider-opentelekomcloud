@@ -4,6 +4,7 @@ import (
 	"context"
 	"log"
 
+	"github.com/hashicorp/go-multierror"
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/networking/v1/vpcs"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
@@ -22,7 +23,6 @@ func DataSourceVirtualPrivateCloudVpcV1() *schema.Resource {
 				Type:     schema.TypeString,
 				Optional: true,
 				Computed: true,
-				ForceNew: true,
 			},
 			"id": {
 				Type:     schema.TypeString,
@@ -66,7 +66,7 @@ func DataSourceVirtualPrivateCloudVpcV1() *schema.Resource {
 
 func dataSourceVirtualPrivateCloudV1Read(_ context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*cfg.Config)
-	vpcClient, err := config.NetworkingV1Client(config.GetRegion(d))
+	client, err := config.NetworkingV1Client(config.GetRegion(d))
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -78,42 +78,45 @@ func dataSourceVirtualPrivateCloudV1Read(_ context.Context, d *schema.ResourceDa
 		CIDR:   d.Get("cidr").(string),
 	}
 
-	refinedVpcs, err := vpcs.List(vpcClient, listOpts)
+	refinedVPCs, err := vpcs.List(client, listOpts)
 	if err != nil {
-		return fmterr.Errorf("Unable to retrieve vpcs: %s", err)
+		return fmterr.Errorf("unable to retrieve VPCs: %w", err)
 	}
 
-	if len(refinedVpcs) < 1 {
-		return fmterr.Errorf("Your query returned no results. " +
+	if len(refinedVPCs) < 1 {
+		return fmterr.Errorf("your query returned no results. " +
 			"Please change your search criteria and try again.")
 	}
 
-	if len(refinedVpcs) > 1 {
-		return fmterr.Errorf("Your query returned more than one result." +
-			" Please try a more specific search criteria")
+	if len(refinedVPCs) > 1 {
+		return fmterr.Errorf("your query returned more than one result. " +
+			"Please try a more specific search criteria.")
 	}
 
-	Vpc := refinedVpcs[0]
+	singleVpc := refinedVPCs[0]
 
-	var s []map[string]interface{}
-	for _, route := range Vpc.Routes {
+	var routes []map[string]interface{}
+	for _, route := range singleVpc.Routes {
 		mapping := map[string]interface{}{
 			"destination": route.DestinationCIDR,
 			"nexthop":     route.NextHop,
 		}
-		s = append(s, mapping)
+		routes = append(routes, mapping)
 	}
 
-	log.Printf("[INFO] Retrieved Vpc using given filter %s: %+v", Vpc.ID, Vpc)
-	d.SetId(Vpc.ID)
+	log.Printf("[INFO] Retrieved Vpc using given filter %s: %+v", singleVpc.ID, singleVpc)
+	d.SetId(singleVpc.ID)
 
-	d.Set("name", Vpc.Name)
-	d.Set("cidr", Vpc.CIDR)
-	d.Set("status", Vpc.Status)
-	d.Set("id", Vpc.ID)
-	d.Set("shared", Vpc.EnableSharedSnat)
-	d.Set("region", config.GetRegion(d))
-	if err := d.Set("routes", s); err != nil {
+	mErr := multierror.Append(
+		d.Set("name", singleVpc.Name),
+		d.Set("cidr", singleVpc.CIDR),
+		d.Set("status", singleVpc.Status),
+		d.Set("shared", singleVpc.EnableSharedSnat),
+		d.Set("region", config.GetRegion(d)),
+		d.Set("routes", routes),
+	)
+
+	if err := mErr.ErrorOrNil(); err != nil {
 		return diag.FromErr(err)
 	}
 

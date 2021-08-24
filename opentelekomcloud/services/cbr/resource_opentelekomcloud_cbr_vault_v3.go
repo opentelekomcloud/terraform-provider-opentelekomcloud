@@ -11,6 +11,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 	golangsdk "github.com/opentelekomcloud/gophertelekomcloud"
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/cbr/v3/vaults"
+	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/helper/hashcode"
 
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common"
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common/cfg"
@@ -39,10 +40,11 @@ func ResourceCBRVaultV3() *schema.Resource {
 				ValidateFunc: validation.StringLenBetween(1, 64),
 			},
 			"resource": {
-				Type:       schema.TypeList,
+				Type:       schema.TypeSet,
 				Optional:   true,
 				Computed:   true,
 				ConfigMode: schema.SchemaConfigModeAttr, // see ConfigMode documentation for the reasoning
+				Set:        hashID,
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
 						"id": {
@@ -359,10 +361,6 @@ func resourceCBRVaultV3Create(ctx context.Context, d *schema.ResourceData, meta 
 	return resourceCBRVaultV3Read(ctx, d, meta)
 }
 
-func resFieldName(i int, field string) string {
-	return fmt.Sprintf("resource.%d.%s", i, field)
-}
-
 func resourceExtraMapToExtra(src map[string]interface{}) (*vaults.ResourceExtraInfo, error) {
 	if src == nil {
 		return nil, nil
@@ -380,19 +378,20 @@ func resourceExtraMapToExtra(src map[string]interface{}) (*vaults.ResourceExtraI
 }
 
 func cbrVaultResourcesCreate(d *schema.ResourceData) (res []vaults.ResourceCreate, err error) {
-	resourceCount := d.Get("resource.#").(int)
-	res = make([]vaults.ResourceCreate, resourceCount)
-	for i := 0; i < resourceCount; i++ {
-		rawExtra := d.Get(resFieldName(i, "extra_info")).(map[string]interface{})
-		resourceID := d.Get(resFieldName(i, "id")).(string)
+	resources := d.Get("resource").(*schema.Set)
+	res = make([]vaults.ResourceCreate, resources.Len())
+	for i, v := range resources.List() {
+		resource := v.(map[string]interface{})
+		rawExtra := resource["extra_info"].(map[string]interface{})
+		resourceID := resource["id"].(string)
 		extra, err := resourceExtraMapToExtra(rawExtra)
 		if err != nil {
 			return nil, fmt.Errorf("error converting \"%s\" resource extra: %v", resourceID, rawExtra)
 		}
 		res[i] = vaults.ResourceCreate{
 			ID:        resourceID,
-			Type:      d.Get(resFieldName(i, "type")).(string),
-			Name:      d.Get(resFieldName(i, "name")).(string),
+			Type:      resource["type"].(string),
+			Name:      resource["name"].(string),
 			ExtraInfo: extra,
 		}
 	}
@@ -473,62 +472,52 @@ func cbrVaultTags(d *schema.ResourceData) []vaults.Tag {
 	return tagSlice
 }
 
-func vaultAddedResources(d *schema.ResourceData) (res []vaults.ResourceCreate, err error) {
+func vaultAddedResources(d *schema.ResourceData) ([]vaults.ResourceCreate, error) {
 	oldR, newR := d.GetChange("resource")
-	oldSlice := oldR.([]interface{})
-	newSlice := newR.([]interface{})
+	oldSet := oldR.(*schema.Set)
+	newSet := newR.(*schema.Set)
 
-	oldIDs := common.NewStringSearcher()
-	for _, oldOne := range oldSlice {
-		oldMap := oldOne.(map[string]interface{})
-		oldIDs.AddToIndex(oldMap["id"].(string))
-	}
-
-	for _, newOne := range newSlice {
-		newMap := newOne.(map[string]interface{})
-		newID := newMap["id"].(string)
-		if !oldIDs.Contains(newID) {
-			newResource := vaults.ResourceCreate{
-				ID:   newID,
-				Type: newMap["type"].(string),
-				Name: newMap["name"].(string),
-			}
-			extraMap, ok := newMap["extra"].(map[string]interface{})
-			if ok {
-				extra, err := resourceExtraMapToExtra(extraMap)
-				if err != nil {
-					return nil, err
-				}
-				newResource.ExtraInfo = extra
-			}
-			res = append(res, newResource)
+	addedSet := newSet.Difference(oldSet)
+	res := make([]vaults.ResourceCreate, addedSet.Len())
+	for i, v := range newSet.List() {
+		newMap := v.(map[string]interface{})
+		newResource := vaults.ResourceCreate{
+			ID:   newMap["id"].(string),
+			Type: newMap["type"].(string),
+			Name: newMap["name"].(string),
 		}
+		extraMap, ok := newMap["extra"].(map[string]interface{})
+		if ok {
+			extra, err := resourceExtraMapToExtra(extraMap)
+			if err != nil {
+				return nil, err
+			}
+			newResource.ExtraInfo = extra
+		}
+		res[i] = newResource
 	}
-	return
+	return res, nil
 }
 
-func vaultRemovedResources(d *schema.ResourceData) (ids []string) {
+func vaultRemovedResources(d *schema.ResourceData) []string {
 	oldR, newR := d.GetChange("resource")
 
-	oldSlice := oldR.([]interface{})
-	newSlice := newR.([]interface{})
+	oldSet := oldR.(*schema.Set)
+	newSet := newR.(*schema.Set)
 
-	newIDs := common.NewStringSearcher()
-	for _, newOne := range newSlice {
-		newIDs.AddToIndex(newOne.(map[string]interface{})["id"].(string))
-	}
+	removedSet := oldSet.Difference(newSet)
 
-	for _, oldOne := range oldSlice {
-		oldID := oldOne.(map[string]interface{})["id"].(string)
-		if !newIDs.Contains(oldID) {
-			ids = append(ids, oldID)
-		}
+	ids := make([]string, removedSet.Len())
+	for i, v := range removedSet.List() {
+		removed := v.(map[string]interface{})
+		ids[i] = removed["id"].(string)
 	}
-	return
+	return ids
 }
 
 func updateResources(d *schema.ResourceData, client *golangsdk.ServiceClient) error {
-	if removedIDs := vaultRemovedResources(d); removedIDs != nil {
+	removedIDs := vaultRemovedResources(d)
+	if len(removedIDs) > 0 {
 		_, err := vaults.DissociateResources(client, d.Id(), vaults.DissociateResourcesOpts{
 			ResourceIDs: removedIDs,
 		}).Extract()
@@ -541,7 +530,7 @@ func updateResources(d *schema.ResourceData, client *golangsdk.ServiceClient) er
 	if err != nil {
 		return err
 	}
-	if addedResources != nil {
+	if len(addedResources) > 0 {
 		_, err := vaults.AssociateResources(client, d.Id(), vaults.AssociateResourcesOpts{
 			Resources: addedResources,
 		}).Extract()
@@ -671,4 +660,9 @@ func cbrVaultRequiredFields(_ context.Context, d *schema.ResourceDiff, _ interfa
 		}
 	}
 	return nil
+}
+
+func hashID(v interface{}) int {
+	res := v.(map[string]interface{})
+	return hashcode.String(res["id"].(string))
 }

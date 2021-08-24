@@ -4,6 +4,7 @@ import (
 	"context"
 	"log"
 
+	"github.com/hashicorp/go-multierror"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/identity/v3/projects"
@@ -26,22 +27,27 @@ func DataSourceIdentityProjectV3() *schema.Resource {
 				Optional: true,
 				Computed: true,
 			},
-
 			"name": {
 				Type:     schema.TypeString,
 				Optional: true,
 			},
-
 			"parent_id": {
 				Type:     schema.TypeString,
 				Optional: true,
 			},
-
 			"region": {
 				Type:     schema.TypeString,
+				Computed: true,
+			},
+			"enabled": {
+				Type:     schema.TypeBool,
 				Optional: true,
 				Computed: true,
-				ForceNew: true,
+			},
+			"is_domain": {
+				Type:     schema.TypeBool,
+				Optional: true,
+				Computed: true,
 			},
 		},
 	}
@@ -50,9 +56,9 @@ func DataSourceIdentityProjectV3() *schema.Resource {
 // dataSourceIdentityProjectV3Read performs the project lookup.
 func dataSourceIdentityProjectV3Read(_ context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*cfg.Config)
-	identityClient, err := config.IdentityV3Client(config.GetRegion(d))
+	client, err := config.IdentityV3Client(config.GetRegion(d))
 	if err != nil {
-		return fmterr.Errorf("error creating OpenStack identity client: %s", err)
+		return fmterr.Errorf(clientCreationFail, err)
 	}
 
 	listOpts := projects.ListOpts{
@@ -64,42 +70,64 @@ func dataSourceIdentityProjectV3Read(_ context.Context, d *schema.ResourceData, 
 	log.Printf("[DEBUG] List Options: %#v", listOpts)
 
 	var project projects.Project
-	allPages, err := projects.List(identityClient, listOpts).AllPages()
+	allPages, err := projects.List(client, listOpts).AllPages()
 	if err != nil {
-		return fmterr.Errorf("Unable to query projects: %s", err)
+		return fmterr.Errorf("unable to query projects: %s", err)
 	}
 
 	allProjects, err := projects.ExtractProjects(allPages)
 	if err != nil {
-		return fmterr.Errorf("Unable to retrieve projects: %s", err)
+		return fmterr.Errorf("unable to retrieve projects: %s", err)
 	}
 
-	if len(allProjects) < 1 {
-		return fmterr.Errorf("Your query returned no results. " +
+	var filteredProjects []projects.Project
+	var enabled bool
+	rawEnabled, eOk := d.GetOk("enabled")
+	if eOk {
+		enabled = rawEnabled.(bool)
+	}
+	var isDomain bool
+	rawIsDomain, dOk := d.GetOk("is_domain")
+	if dOk {
+		isDomain = rawIsDomain.(bool)
+	}
+	for _, v := range allProjects {
+		if eOk && v.Enabled != enabled {
+			continue
+		}
+		if dOk && v.IsDomain != isDomain {
+			continue
+		}
+		filteredProjects = append(filteredProjects, v)
+	}
+
+	if len(filteredProjects) < 1 {
+		return fmterr.Errorf("your query returned no results. " +
 			"Please change your search criteria and try again.")
 	}
 
-	if len(allProjects) > 1 {
+	if len(filteredProjects) > 1 {
 		log.Printf("[DEBUG] Multiple results found: %#v", allProjects)
-		return fmterr.Errorf("Your query returned more than one result")
+		return fmterr.Errorf("your query returned more than one result")
 	}
-	project = allProjects[0]
+	project = filteredProjects[0]
 
 	log.Printf("[DEBUG] Single project found: %s", project.ID)
-	return diag.FromErr(dataSourceIdentityProjectV3Attributes(d, &project))
-}
-
-// dataSourceIdentityProjectV3Attributes populates the fields of an Project resource.
-func dataSourceIdentityProjectV3Attributes(d *schema.ResourceData, project *projects.Project) error {
-	log.Printf("[DEBUG] opentelekomcloud_identity_project_v3 details: %#v", project)
 
 	d.SetId(project.ID)
-	d.Set("is_domain", project.IsDomain)
-	d.Set("description", project.Description)
-	d.Set("domain_id", project.DomainID)
-	d.Set("enabled", project.Enabled)
-	d.Set("name", project.Name)
-	d.Set("parent_id", project.ParentID)
+	mErr := multierror.Append(
+		d.Set("is_domain", project.IsDomain),
+		d.Set("description", project.Description),
+		d.Set("domain_id", project.DomainID),
+		d.Set("enabled", project.Enabled),
+		d.Set("name", project.Name),
+		d.Set("parent_id", project.ParentID),
+		d.Set("region", config.GetRegion(d)),
+	)
+
+	if err := mErr.ErrorOrNil(); err != nil {
+		return diag.FromErr(err)
+	}
 
 	return nil
 }

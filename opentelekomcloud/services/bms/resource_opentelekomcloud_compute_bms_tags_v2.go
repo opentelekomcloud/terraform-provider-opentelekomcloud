@@ -5,6 +5,7 @@ import (
 	"log"
 	"time"
 
+	"github.com/hashicorp/go-multierror"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	golangsdk "github.com/opentelekomcloud/gophertelekomcloud"
@@ -53,11 +54,11 @@ func ResourceBMSTagsV2() *schema.Resource {
 
 func resourceTagsV2(d *schema.ResourceData) []string {
 	rawTAGS := d.Get("tags").(*schema.Set)
-	tags := make([]string, rawTAGS.Len())
+	tagList := make([]string, rawTAGS.Len())
 	for i, raw := range rawTAGS.List() {
-		tags[i] = raw.(string)
+		tagList[i] = raw.(string)
 	}
-	return tags
+	return tagList
 }
 
 func resourceBMSTagsV2Create(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
@@ -82,7 +83,6 @@ func resourceBMSTagsV2Create(ctx context.Context, d *schema.ResourceData, meta i
 	log.Printf("[INFO] Server ID: %s", d.Id())
 
 	return resourceBMSTagsV2Read(ctx, d, meta)
-
 }
 
 func resourceBMSTagsV2Read(_ context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
@@ -102,9 +102,15 @@ func resourceBMSTagsV2Read(_ context.Context, d *schema.ResourceData, meta inter
 		return fmterr.Errorf("error retrieving OpenTelekomCloud tags: %s", err)
 	}
 
-	d.Set("tags", n.Tags)
-	d.Set("region", config.GetRegion(d))
-	d.Set("server_id", d.Id())
+	mErr := multierror.Append(
+		d.Set("tags", n.Tags),
+		d.Set("region", config.GetRegion(d)),
+		d.Set("server_id", d.Id()),
+	)
+
+	if err := mErr.ErrorOrNil(); err != nil {
+		return diag.FromErr(err)
+	}
 
 	return nil
 }

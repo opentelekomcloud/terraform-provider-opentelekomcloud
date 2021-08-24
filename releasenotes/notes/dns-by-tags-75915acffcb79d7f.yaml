@@ -1,0 +1,4 @@
+---
+fixes:
+  - |
+    **[DNS]** Fix not working ``tags`` in ``data_source/opentelekomcloud_dns_zone_v2`` (`#1277 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/1277>`_)

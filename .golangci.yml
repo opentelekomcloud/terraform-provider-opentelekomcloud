@@ -1,0 +1,36 @@
+run:
+  deadline: 12m10s
+  modules-download-mode: readonly
+
+issues:
+  max-per-linter: 0
+  max-same-issues: 0
+
+linters:
+  disable-all: true
+  enable:
+    - asciicheck
+    - deadcode
+    - errcheck
+    - gocritic
+    - gofmt
+    - goimports
+    - gosimple
+    - govet
+    - ineffassign
+    - nakedret
+    - misspell
+    - staticcheck
+    - structcheck
+    - typecheck
+    - unused
+    - unconvert
+    - varcheck
+    - vet
+    - vetshadow
+    - whitespace
+
+linters-settings:
+  misspell:
+    ignore-words:
+      - unknwon

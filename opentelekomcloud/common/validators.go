@@ -319,7 +319,7 @@ func ValidateK8sTagsMap(v interface{}, k string) (ws []string, errors []error) {
 		}
 	}
 
-	return
+	return ws, errors
 }
 
 func ValidateDDSStartTime(v interface{}, _ string) (ws []string, errors []error) {
@@ -351,7 +351,7 @@ func ValidateDDSStartTime(v interface{}, _ string) (ws []string, errors []error)
 		errors = append(errors, fmt.Errorf("%q must be int convertable: %s", paramsMap["MM"], err))
 	}
 	if len(errors) != 0 {
-		return
+		return ws, nil
 	}
 	if startHour+1 != endHour {
 		errors = append(errors, fmt.Errorf("the `HH` value must be 1 greater than the `hh` value: %s", v))
@@ -363,7 +363,7 @@ func ValidateDDSStartTime(v interface{}, _ string) (ws []string, errors []error)
 		errors = append(errors, fmt.Errorf("the values from `mm` and `MM` must be set to any of the 00, 15, 30, or 45: %s", v))
 	}
 
-	return
+	return ws, errors
 }
 
 func ValidateASGroupListenerID(v interface{}, k string) (ws []string, errors []error) {
@@ -373,17 +373,5 @@ func ValidateASGroupListenerID(v interface{}, k string) (ws []string, errors []e
 		return
 	}
 	errors = append(errors, fmt.Errorf("%q supports binding up to 3 ELB listeners which are separated by a comma", k))
-	return
-}
-
-// ValidatePositiveInt
-// Deprecated
-// Use validation.IntAtLeast instead
-func ValidatePositiveInt(v interface{}, k string) (ws []string, errors []error) {
-	value := v.(int)
-	if value > 0 {
-		return
-	}
-	errors = append(errors, fmt.Errorf("%q must be a positive integer", k))
 	return
 }

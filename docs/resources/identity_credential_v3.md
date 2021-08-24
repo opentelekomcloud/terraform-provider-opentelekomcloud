@@ -22,7 +22,7 @@ resource opentelekomcloud_identity_user_v3 user {
 }
 
 resource opentelekomcloud_identity_credential_v3 aksk {
-  user_id = opentelekomcloud_identity_user_v3.user.id
+  user_id     = opentelekomcloud_identity_user_v3.user.id
   description = "Created by administrator"
 }
 ```
