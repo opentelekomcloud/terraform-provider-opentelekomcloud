@@ -45,7 +45,7 @@ func TestAccCheckNetworkingV2NetworkExists(n string, network *networks.Network) 
 		}
 
 		config := common.TestAccProvider.Meta().(*cfg.Config)
-		networkingClient, err := config.NetworkingV2Client(env.OS_REGION_NAME)
+		networkingClient, err := config.NetworkingV2Client(env.OsRegionName)
 		if err != nil {
 			return fmt.Errorf("error creating OpenTelekomCloud networking client: %s", err)
 		}
@@ -78,7 +78,7 @@ func TestAccCheckNetworkingV2SubnetExists(n string, subnet *subnets.Subnet) reso
 		}
 
 		config := common.TestAccProvider.Meta().(*cfg.Config)
-		networkingClient, err := config.NetworkingV2Client(env.OS_REGION_NAME)
+		networkingClient, err := config.NetworkingV2Client(env.OsRegionName)
 		if err != nil {
 			return fmt.Errorf("error creating OpenTelekomCloud networking client: %s", err)
 		}
@@ -110,7 +110,7 @@ func TestAccCheckNetworkingV2RouterExists(n string, router *routers.Router) reso
 		}
 
 		config := common.TestAccProvider.Meta().(*cfg.Config)
-		networkingClient, err := config.NetworkingV2Client(env.OS_REGION_NAME)
+		networkingClient, err := config.NetworkingV2Client(env.OsRegionName)
 		if err != nil {
 			return fmt.Errorf("error creating OpenTelekomCloud networking client: %s", err)
 		}
@@ -142,7 +142,7 @@ func TestAccCheckNetworkingV2FloatingIPExists(n string, kp *floatingips.Floating
 		}
 
 		config := common.TestAccProvider.Meta().(*cfg.Config)
-		networkClient, err := config.NetworkingV2Client(env.OS_REGION_NAME)
+		networkClient, err := config.NetworkingV2Client(env.OsRegionName)
 		if err != nil {
 			return fmt.Errorf("error creating OpenTelekomCloud networking client: %s", err)
 		}
@@ -174,7 +174,7 @@ func TestAccCheckNetworkingV2RouterInterfaceExists(n string) resource.TestCheckF
 		}
 
 		config := common.TestAccProvider.Meta().(*cfg.Config)
-		networkingClient, err := config.NetworkingV2Client(env.OS_REGION_NAME)
+		networkingClient, err := config.NetworkingV2Client(env.OsRegionName)
 		if err != nil {
 			return fmt.Errorf("error creating OpenTelekomCloud networking client: %s", err)
 		}
@@ -204,7 +204,7 @@ func TestAccCheckNetworkingV2SecGroupExists(n string, securityGroup *groups.SecG
 		}
 
 		config := common.TestAccProvider.Meta().(*cfg.Config)
-		networkingClient, err := config.NetworkingV2Client(env.OS_REGION_NAME)
+		networkingClient, err := config.NetworkingV2Client(env.OsRegionName)
 		if err != nil {
 			return fmt.Errorf("error creating OpenTelekomCloud networking client: %s", err)
 		}

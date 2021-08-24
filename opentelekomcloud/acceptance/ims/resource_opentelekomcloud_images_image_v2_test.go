@@ -159,7 +159,7 @@ func TestAccImagesImageV2_timeout(t *testing.T) {
 
 func testAccCheckImagesImageV2Destroy(s *terraform.State) error {
 	config := common.TestAccProvider.Meta().(*cfg.Config)
-	imageClient, err := config.ImageV2Client(env.OS_REGION_NAME)
+	imageClient, err := config.ImageV2Client(env.OsRegionName)
 	if err != nil {
 		return fmt.Errorf("error creating OpenTelekomCloud Image: %s", err)
 	}
@@ -190,7 +190,7 @@ func testAccCheckImagesImageV2Exists(n string, image *images.Image) resource.Tes
 		}
 
 		config := common.TestAccProvider.Meta().(*cfg.Config)
-		imageClient, err := config.ImageV2Client(env.OS_REGION_NAME)
+		imageClient, err := config.ImageV2Client(env.OsRegionName)
 		if err != nil {
 			return fmt.Errorf("error creating OpenTelekomCloud Image: %s", err)
 		}
@@ -222,7 +222,7 @@ func testAccCheckImagesImageV2HasTag(n, tag string) resource.TestCheckFunc {
 		}
 
 		config := common.TestAccProvider.Meta().(*cfg.Config)
-		imageClient, err := config.ImageV2Client(env.OS_REGION_NAME)
+		imageClient, err := config.ImageV2Client(env.OsRegionName)
 		if err != nil {
 			return fmt.Errorf("error creating OpenTelekomCloud Image: %s", err)
 		}
@@ -258,7 +258,7 @@ func testAccCheckImagesImageV2TagCount(n string, expected int) resource.TestChec
 		}
 
 		config := common.TestAccProvider.Meta().(*cfg.Config)
-		imageClient, err := config.ImageV2Client(env.OS_REGION_NAME)
+		imageClient, err := config.ImageV2Client(env.OsRegionName)
 		if err != nil {
 			return fmt.Errorf("error creating OpenTelekomCloud Image: %s", err)
 		}

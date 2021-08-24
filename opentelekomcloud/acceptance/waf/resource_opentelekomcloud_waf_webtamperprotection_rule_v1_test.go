@@ -38,7 +38,7 @@ func TestAccWebTamperProtectionRuleV1_basic(t *testing.T) {
 
 func testAccCheckWafWebTamperProtectionRuleV1Destroy(s *terraform.State) error {
 	config := common.TestAccProvider.Meta().(*cfg.Config)
-	wafClient, err := config.WafV1Client(env.OS_REGION_NAME)
+	wafClient, err := config.WafV1Client(env.OsRegionName)
 	if err != nil {
 		return fmt.Errorf("error creating OpenTelekomCloud WAF client: %s", err)
 	}
@@ -68,7 +68,7 @@ func testAccCheckWebTamperProtectionRuleV1Exists(n string, rule *webtamperprotec
 		}
 
 		config := common.TestAccProvider.Meta().(*cfg.Config)
-		wafClient, err := config.WafV1Client(env.OS_REGION_NAME)
+		wafClient, err := config.WafV1Client(env.OsRegionName)
 		if err != nil {
 			return fmt.Errorf("error creating OpenTelekomCloud WAF client: %s", err)
 		}

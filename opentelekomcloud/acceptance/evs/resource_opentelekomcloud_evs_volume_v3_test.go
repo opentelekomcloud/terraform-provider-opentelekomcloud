@@ -146,7 +146,7 @@ func TestAccEvsStorageV3Volume_resize(t *testing.T) {
 
 func testAccCheckEvsStorageV3VolumeDestroy(s *terraform.State) error {
 	config := common.TestAccProvider.Meta().(*cfg.Config)
-	blockStorageClient, err := config.BlockStorageV3Client(env.OS_REGION_NAME)
+	blockStorageClient, err := config.BlockStorageV3Client(env.OsRegionName)
 	if err != nil {
 		return fmt.Errorf("error creating OpenTelekomCloud evs storage client: %s", err)
 	}
@@ -177,7 +177,7 @@ func testAccCheckEvsStorageV3VolumeExists(n string, volume *volumes.Volume) reso
 		}
 
 		config := common.TestAccProvider.Meta().(*cfg.Config)
-		blockStorageClient, err := config.BlockStorageV3Client(env.OS_REGION_NAME)
+		blockStorageClient, err := config.BlockStorageV3Client(env.OsRegionName)
 		if err != nil {
 			return fmt.Errorf("error creating OpenTelekomCloud evs storage client: %s", err)
 		}
@@ -208,7 +208,7 @@ func testAccCheckEvsStorageV3VolumePersists(n string, volume, oldVolume *volumes
 		}
 
 		config := common.TestAccProvider.Meta().(*cfg.Config)
-		client, err := config.BlockStorageV3Client(env.OS_REGION_NAME)
+		client, err := config.BlockStorageV3Client(env.OsRegionName)
 		if err != nil {
 			return fmt.Errorf("error creating OpenTelekomCloud evs storage client: %s", err)
 		}
@@ -241,7 +241,7 @@ resource "opentelekomcloud_evs_volume_v3" "volume_1" {
   volume_type       = "SATA"
   size              = 12
 }
-`, env.OS_AVAILABILITY_ZONE)
+`, env.OsAvailabilityZone)
 	testAccEvsStorageV3VolumeUpdate = fmt.Sprintf(`
 resource "opentelekomcloud_evs_volume_v3" "volume_1" {
   name              = "volume_1-updated"
@@ -250,7 +250,7 @@ resource "opentelekomcloud_evs_volume_v3" "volume_1" {
   volume_type       = "SATA"
   size              = 12
 }
-`, env.OS_AVAILABILITY_ZONE)
+`, env.OsAvailabilityZone)
 	testAccEvsStorageV3VolumeTags = fmt.Sprintf(`
 resource "opentelekomcloud_evs_volume_v3" "volume_1" {
   name              = "volume_tags"
@@ -263,7 +263,7 @@ resource "opentelekomcloud_evs_volume_v3" "volume_1" {
   }
   size = 12
 }
-`, env.OS_AVAILABILITY_ZONE)
+`, env.OsAvailabilityZone)
 	testAccEvsStorageV3VolumeTagsUpdate = fmt.Sprintf(`
 resource "opentelekomcloud_evs_volume_v3" "volume_1" {
   name              = "volume_tags-updated"
@@ -275,7 +275,7 @@ resource "opentelekomcloud_evs_volume_v3" "volume_1" {
   }
   size = 12
 }
-`, env.OS_AVAILABILITY_ZONE)
+`, env.OsAvailabilityZone)
 	testAccEvsStorageV3VolumeImage = fmt.Sprintf(`
 resource "opentelekomcloud_evs_volume_v3" "volume_1" {
   name              = "volume_1"
@@ -284,7 +284,7 @@ resource "opentelekomcloud_evs_volume_v3" "volume_1" {
   size              = 12
   image_id          = "%s"
 }
-`, env.OS_AVAILABILITY_ZONE, env.OS_IMAGE_ID)
+`, env.OsAvailabilityZone, env.OsImageID)
 	testAccEvsStorageV3VolumeTimeout = fmt.Sprintf(`
 resource "opentelekomcloud_evs_volume_v3" "volume_1" {
   name              = "volume_1"
@@ -298,7 +298,7 @@ resource "opentelekomcloud_evs_volume_v3" "volume_1" {
     delete = "5m"
   }
 }
-`, env.OS_AVAILABILITY_ZONE)
+`, env.OsAvailabilityZone)
 
 	testAccEvsStorageV3VolumeVolumeType = fmt.Sprintf(`
 resource "opentelekomcloud_evs_volume_v3" "volume_1" {
@@ -308,7 +308,7 @@ resource "opentelekomcloud_evs_volume_v3" "volume_1" {
   volume_type       = "asfddasf"
   size              = 12
 }
-`, env.OS_AVAILABILITY_ZONE)
+`, env.OsAvailabilityZone)
 	testAccEvsStorageV3VolumeUpscale = fmt.Sprintf(`
 resource "opentelekomcloud_evs_volume_v3" "volume_1" {
   name              = "volume_1"
@@ -317,5 +317,5 @@ resource "opentelekomcloud_evs_volume_v3" "volume_1" {
   volume_type       = "SATA"
   size              = 20
 }
-`, env.OS_AVAILABILITY_ZONE)
+`, env.OsAvailabilityZone)
 )

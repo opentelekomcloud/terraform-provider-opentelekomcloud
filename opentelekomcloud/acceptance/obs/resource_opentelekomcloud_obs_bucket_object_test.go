@@ -123,7 +123,7 @@ func TestAccObsBucketObject_nothing(t *testing.T) {
 
 func testAccCheckObsBucketObjectDestroy(s *terraform.State) error {
 	config := common.TestAccProvider.Meta().(*cfg.Config)
-	obsClient, err := config.NewObjectStorageClient(env.OS_REGION_NAME)
+	obsClient, err := config.NewObjectStorageClient(env.OsRegionName)
 	if err != nil {
 		return fmt.Errorf("error creating OpenTelekomCloud OBS client: %s", err)
 	}
@@ -174,7 +174,7 @@ func testAccCheckObsBucketObjectExists(n string) resource.TestCheckFunc {
 		}
 
 		config := common.TestAccProvider.Meta().(*cfg.Config)
-		obsClient, err := config.NewObjectStorageClient(env.OS_REGION_NAME)
+		obsClient, err := config.NewObjectStorageClient(env.OsRegionName)
 		if err != nil {
 			return fmt.Errorf("error creating OpenTelekomCloud OBS client: %s", err)
 		}

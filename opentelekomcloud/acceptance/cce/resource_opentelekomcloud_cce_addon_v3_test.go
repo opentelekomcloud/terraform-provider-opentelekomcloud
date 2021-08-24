@@ -65,7 +65,7 @@ func TestAccCCEAddonV3ForceNewCCE(t *testing.T) {
 
 func testAccCheckCCEAddonV3Destroy(s *terraform.State) error {
 	config := common.TestAccProvider.Meta().(*cfg.Config)
-	cceClient, err := config.CceV3Client(env.OS_REGION_NAME)
+	cceClient, err := config.CceV3Client(env.OsRegionName)
 	if err != nil {
 		return fmt.Errorf("error creating opentelekomcloud CCE client: %w", err)
 	}
@@ -135,7 +135,7 @@ resource "opentelekomcloud_cce_addon_v3" "autoscaler" {
     }
   }
 }
-`, clusterName, env.OS_VPC_ID, env.OS_NETWORK_ID, env.OS_TENANT_ID)
+`, clusterName, env.OsRouterID, env.OsNetworkID, env.OsTenantID)
 
 	testAccCCEAddonV3Updated = fmt.Sprintf(`
 resource opentelekomcloud_cce_cluster_v3 cluster_1 {
@@ -187,7 +187,7 @@ resource "opentelekomcloud_cce_addon_v3" "autoscaler" {
     }
   }
 }
-`, clusterName, env.OS_VPC_ID, env.OS_NETWORK_ID, env.OS_TENANT_ID)
+`, clusterName, env.OsRouterID, env.OsNetworkID, env.OsTenantID)
 
 	testAccCCEAddonV3ForceNew = fmt.Sprintf(`
 resource opentelekomcloud_cce_cluster_v3 cluster_1 {
@@ -235,7 +235,7 @@ resource "opentelekomcloud_cce_addon_v3" "autoscaler" {
     }
   }
 }
-`, clusterName, env.OS_VPC_ID, env.OS_NETWORK_ID, env.OS_TENANT_ID)
+`, clusterName, env.OsRouterID, env.OsNetworkID, env.OsTenantID)
 )
 
 func checkScaleDownForAutoscaler(name string, enabled bool) resource.TestCheckFunc {
@@ -250,7 +250,7 @@ func checkScaleDownForAutoscaler(name string, enabled bool) resource.TestCheckFu
 		}
 
 		config := common.TestAccProvider.Meta().(*cfg.Config)
-		client, err := config.CceV3AddonClient(env.OS_REGION_NAME)
+		client, err := config.CceV3AddonClient(env.OsRegionName)
 		if err != nil {
 			return fmt.Errorf("error creating opentelekomcloud CCE client: %w", err)
 		}

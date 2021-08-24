@@ -42,7 +42,7 @@ func TestAccLBV2LoadBalancer_basic(t *testing.T) {
 
 func testAccCheckLBV2LoadBalancerDestroy(s *terraform.State) error {
 	config := common.TestAccProvider.Meta().(*cfg.Config)
-	client, err := config.NetworkingV2Client(env.OS_REGION_NAME)
+	client, err := config.NetworkingV2Client(env.OsRegionName)
 	if err != nil {
 		return fmt.Errorf("error creating OpenTelekomCloud NetworkingV2 client: %s", err)
 	}
@@ -73,7 +73,7 @@ func testAccCheckLBV2LoadBalancerExists(n string, lb *loadbalancers.LoadBalancer
 		}
 
 		config := common.TestAccProvider.Meta().(*cfg.Config)
-		client, err := config.NetworkingV2Client(env.OS_REGION_NAME)
+		client, err := config.NetworkingV2Client(env.OsRegionName)
 		if err != nil {
 			return fmt.Errorf("error creating OpenTelekomCloud NetworkingV2 client: %s", err)
 		}
@@ -109,7 +109,7 @@ resource "opentelekomcloud_lb_loadbalancer_v2" "loadbalancer_1" {
     delete = "5m"
   }
 }
-`, env.OS_SUBNET_ID)
+`, env.OsSubnetID)
 
 var testAccLBV2LoadBalancerConfig_update = fmt.Sprintf(`
 resource "opentelekomcloud_lb_loadbalancer_v2" "loadbalancer_1" {
@@ -127,4 +127,4 @@ resource "opentelekomcloud_lb_loadbalancer_v2" "loadbalancer_1" {
     delete = "5m"
   }
 }
-`, env.OS_SUBNET_ID)
+`, env.OsSubnetID)

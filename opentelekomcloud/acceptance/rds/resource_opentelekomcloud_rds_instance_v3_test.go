@@ -218,7 +218,7 @@ func TestAccRdsInstanceV3_configurationParameters(t *testing.T) {
 
 func testAccCheckRdsInstanceV3Destroy(s *terraform.State) error {
 	config := common.TestAccProvider.Meta().(*cfg.Config)
-	client, err := config.RdsV3Client(env.OS_REGION_NAME)
+	client, err := config.RdsV3Client(env.OsRegionName)
 	if err != nil {
 		return fmt.Errorf("error creating RDSv3 client: %s", err)
 	}
@@ -247,7 +247,7 @@ func testAccCheckRdsInstanceV3Exists(n string, rdsInstance *instances.RdsInstanc
 			return fmt.Errorf("no ID is set")
 		}
 		config := common.TestAccProvider.Meta().(*cfg.Config)
-		client, err := config.RdsV3Client(env.OS_REGION_NAME)
+		client, err := config.RdsV3Client(env.OsRegionName)
 		if err != nil {
 			return fmt.Errorf("error creating RDSv3 client: %s", err)
 		}
@@ -298,7 +298,7 @@ resource "opentelekomcloud_rds_instance_v3" "instance" {
     kuh = "value-create"
   }
 }
-`, postfix, env.OS_AVAILABILITY_ZONE, env.OS_NETWORK_ID, env.OS_VPC_ID)
+`, postfix, env.OsAvailabilityZone, env.OsNetworkID, env.OsRouterID)
 }
 
 func testAccRdsInstanceV3Update(postfix string) string {
@@ -332,7 +332,7 @@ resource "opentelekomcloud_rds_instance_v3" "instance" {
     muh = "value-update"
   }
 }
-`, postfix, env.OS_AVAILABILITY_ZONE, env.OS_NETWORK_ID, env.OS_VPC_ID)
+`, postfix, env.OsAvailabilityZone, env.OsNetworkID, env.OsRouterID)
 }
 
 func testAccRdsInstanceV3ElasticIP(postfix string) string {
@@ -367,7 +367,7 @@ resource "opentelekomcloud_rds_instance_v3" "instance" {
 
   public_ips = [opentelekomcloud_networking_floatingip_v2.fip_1.address]
 }
-`, postfix, env.OS_AVAILABILITY_ZONE, env.OS_NETWORK_ID, env.OS_VPC_ID)
+`, postfix, env.OsAvailabilityZone, env.OsNetworkID, env.OsRouterID)
 }
 
 func testAccRdsInstanceV3HA(postfix string, az2 string) string {
@@ -399,7 +399,7 @@ resource "opentelekomcloud_rds_instance_v3" "instance" {
   }
   ha_replication_mode = "semisync"
 }
-`, postfix, env.OS_AVAILABILITY_ZONE, az2, env.OS_NETWORK_ID, env.OS_VPC_ID)
+`, postfix, env.OsAvailabilityZone, az2, env.OsNetworkID, env.OsRouterID)
 }
 
 func testAccRdsInstanceV3OptionalParams(postfix string) string {
@@ -425,7 +425,7 @@ resource "opentelekomcloud_rds_instance_v3" "instance" {
   }
   flavor = "rds.pg.c2.medium"
 }
-`, postfix, env.OS_AVAILABILITY_ZONE, env.OS_NETWORK_ID, env.OS_VPC_ID)
+`, postfix, env.OsAvailabilityZone, env.OsNetworkID, env.OsRouterID)
 }
 
 func testAccRdsInstanceV3Backup(postfix string) string {
@@ -456,7 +456,7 @@ resource "opentelekomcloud_rds_instance_v3" "instance" {
   }
 
 }
-`, postfix, env.OS_AVAILABILITY_ZONE, env.OS_NETWORK_ID, env.OS_VPC_ID)
+`, postfix, env.OsAvailabilityZone, env.OsNetworkID, env.OsRouterID)
 }
 
 func testAccRdsInstanceV3ConfigTemplateBasic(postfix string) string {
@@ -507,7 +507,7 @@ resource "opentelekomcloud_rds_instance_v3" "instance" {
   flavor         = "rds.pg.c2.medium"
   param_group_id = opentelekomcloud_rds_parametergroup_v3.pg.id
 }
-`, postfix, env.OS_AVAILABILITY_ZONE, env.OS_NETWORK_ID, env.OS_VPC_ID)
+`, postfix, env.OsAvailabilityZone, env.OsNetworkID, env.OsRouterID)
 }
 
 func testAccRdsInstanceV3ConfigTemplateUpdate(postfix string) string {
@@ -558,7 +558,7 @@ resource "opentelekomcloud_rds_instance_v3" "instance" {
   flavor         = "rds.pg.c2.medium"
   param_group_id = opentelekomcloud_rds_parametergroup_v3.pg2.id
 }
-`, postfix, env.OS_AVAILABILITY_ZONE, env.OS_NETWORK_ID, env.OS_VPC_ID)
+`, postfix, env.OsAvailabilityZone, env.OsNetworkID, env.OsRouterID)
 }
 
 func testAccRdsInstanceV3InvalidDBVersion(postfix string) string {
@@ -585,7 +585,7 @@ resource "opentelekomcloud_rds_instance_v3" "instance" {
   }
   flavor = "rds.pg.c2.medium"
 }
-`, postfix, env.OS_AVAILABILITY_ZONE, env.OS_NETWORK_ID, env.OS_VPC_ID)
+`, postfix, env.OsAvailabilityZone, env.OsNetworkID, env.OsRouterID)
 }
 
 func testAccRdsInstanceV3ConfigurationOverride(postfix string) string {
@@ -629,5 +629,5 @@ resource "opentelekomcloud_rds_instance_v3" "instance" {
     max_connections = "37",
   }
 }
-`, postfix, env.OS_AVAILABILITY_ZONE, env.OS_NETWORK_ID, env.OS_VPC_ID)
+`, postfix, env.OsAvailabilityZone, env.OsNetworkID, env.OsRouterID)
 }

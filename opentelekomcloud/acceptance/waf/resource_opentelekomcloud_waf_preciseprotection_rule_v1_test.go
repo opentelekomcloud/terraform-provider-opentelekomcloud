@@ -36,7 +36,7 @@ func TestAccWafPreciseProtectionRuleV1_basic(t *testing.T) {
 
 func testAccCheckWafPreciseProtectionRuleV1Destroy(s *terraform.State) error {
 	config := common.TestAccProvider.Meta().(*cfg.Config)
-	wafClient, err := config.WafV1Client(env.OS_REGION_NAME)
+	wafClient, err := config.WafV1Client(env.OsRegionName)
 	if err != nil {
 		return fmt.Errorf("error creating OpenTelekomCloud WAF client: %s", err)
 	}
@@ -67,7 +67,7 @@ func testAccCheckWafPreciseProtectionRuleV1Exists(n string, rule *preciseprotect
 		}
 
 		config := common.TestAccProvider.Meta().(*cfg.Config)
-		wafClient, err := config.WafV1Client(env.OS_REGION_NAME)
+		wafClient, err := config.WafV1Client(env.OsRegionName)
 		if err != nil {
 			return fmt.Errorf("error creating OpenTelekomCloud WAF client: %s", err)
 		}

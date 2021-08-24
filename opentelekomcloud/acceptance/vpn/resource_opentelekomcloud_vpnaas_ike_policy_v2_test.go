@@ -88,7 +88,7 @@ func TestAccVpnIKEPolicyV2_withNewParams(t *testing.T) {
 
 func testAccCheckIKEPolicyV2Destroy(s *terraform.State) error {
 	config := common.TestAccProvider.Meta().(*cfg.Config)
-	networkingClient, err := config.NetworkingV2Client(env.OS_REGION_NAME)
+	networkingClient, err := config.NetworkingV2Client(env.OsRegionName)
 	if err != nil {
 		return fmt.Errorf("error creating OpenTelekomCloud networking client: %s", err)
 	}
@@ -119,7 +119,7 @@ func testAccCheckIKEPolicyV2Exists(n string, policy *ikepolicies.Policy) resourc
 		}
 
 		config := common.TestAccProvider.Meta().(*cfg.Config)
-		networkingClient, err := config.NetworkingV2Client(env.OS_REGION_NAME)
+		networkingClient, err := config.NetworkingV2Client(env.OsRegionName)
 		if err != nil {
 			return fmt.Errorf("error creating OpenTelekomCloud NetworkingV2 client: %s", err)
 		}

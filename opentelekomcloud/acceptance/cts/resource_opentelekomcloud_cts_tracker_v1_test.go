@@ -29,7 +29,7 @@ func TestAccCTSTrackerV1_basic(t *testing.T) {
 			{
 				Config: testAccCTSTrackerV1Basic(bucketName),
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckCTSTrackerV1Exists(trackerResource, &ctsTracker, env.OS_TENANT_NAME),
+					testAccCheckCTSTrackerV1Exists(trackerResource, &ctsTracker, env.OsTenantName),
 					resource.TestCheckResourceAttr(trackerResource, "bucket_name", bucketName),
 					resource.TestCheckResourceAttr(trackerResource, "file_prefix_name", "yO8Q"),
 				),
@@ -37,7 +37,7 @@ func TestAccCTSTrackerV1_basic(t *testing.T) {
 			{
 				Config: testAccCTSTrackerV1Update(bucketName),
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckCTSTrackerV1Exists(trackerResource, &ctsTracker, env.OS_TENANT_NAME),
+					testAccCheckCTSTrackerV1Exists(trackerResource, &ctsTracker, env.OsTenantName),
 					resource.TestCheckResourceAttr(trackerResource, "file_prefix_name", "yO8Q1"),
 				),
 			},
@@ -57,7 +57,7 @@ func TestAccCTSTrackerV1_timeout(t *testing.T) {
 			{
 				Config: testAccCTSTrackerV1Timeout(bucketName),
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckCTSTrackerV1Exists(trackerResource, &track, env.OS_TENANT_NAME),
+					testAccCheckCTSTrackerV1Exists(trackerResource, &track, env.OsTenantName),
 				),
 			},
 		},
@@ -76,7 +76,7 @@ func TestAccCTSTrackerV1_KeyOperations(t *testing.T) {
 			{
 				Config: testAccCTSTrackerV1AllOperations(bucketName),
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckCTSTrackerV1Exists(trackerResource, &track, env.OS_TENANT_NAME),
+					testAccCheckCTSTrackerV1Exists(trackerResource, &track, env.OsTenantName),
 				),
 			},
 		},
@@ -105,12 +105,12 @@ func TestAccCTSTrackerV1_schemaProjectName(t *testing.T) {
 			},
 		},
 	})
-	env.OS_TENANT_NAME = env.GetTenantName()
+	env.OsTenantName = env.GetTenantName()
 }
 
 func testAccCheckCTSTrackerV1Destroy(s *terraform.State) error {
 	config := common.TestAccProvider.Meta().(*cfg.Config)
-	ctsClient, err := config.CtsV1Client(env.OS_TENANT_NAME)
+	ctsClient, err := config.CtsV1Client(env.OsTenantName)
 	if err != nil {
 		return fmt.Errorf("error creating cts client: %s", err)
 	}

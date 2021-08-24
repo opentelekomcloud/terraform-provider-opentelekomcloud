@@ -56,7 +56,7 @@ func TestAccComputeV2ServerGroup_affinity(t *testing.T) {
 
 func testAccCheckComputeV2ServerGroupDestroy(s *terraform.State) error {
 	config := common.TestAccProvider.Meta().(*cfg.Config)
-	computeClient, err := config.ComputeV2Client(env.OS_REGION_NAME)
+	computeClient, err := config.ComputeV2Client(env.OsRegionName)
 	if err != nil {
 		return fmt.Errorf("error creating OpenTelekomCloud compute client: %s", err)
 	}
@@ -87,7 +87,7 @@ func testAccCheckComputeV2ServerGroupExists(n string, kp *servergroups.ServerGro
 		}
 
 		config := common.TestAccProvider.Meta().(*cfg.Config)
-		computeClient, err := config.ComputeV2Client(env.OS_REGION_NAME)
+		computeClient, err := config.ComputeV2Client(env.OsRegionName)
 		if err != nil {
 			return fmt.Errorf("error creating OpenTelekomCloud compute client: %s", err)
 		}
@@ -144,4 +144,4 @@ resource "opentelekomcloud_compute_instance_v2" "instance_1" {
     group = opentelekomcloud_compute_servergroup_v2.sg_1.id
   }
 }
-`, env.OS_NETWORK_ID)
+`, env.OsNetworkID)

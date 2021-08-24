@@ -35,7 +35,7 @@ func TestAccNatSnatRule_basic(t *testing.T) {
 
 func testAccCheckNatV2SnatRuleDestroy(s *terraform.State) error {
 	config := common.TestAccProvider.Meta().(*cfg.Config)
-	client, err := config.NatV2Client(env.OS_REGION_NAME)
+	client, err := config.NatV2Client(env.OsRegionName)
 	if err != nil {
 		return fmt.Errorf("error creating OpenTelekomCloud NATv2 client: %w", err)
 	}
@@ -66,7 +66,7 @@ func testAccCheckNatV2SnatRuleExists(n string) resource.TestCheckFunc {
 		}
 
 		config := common.TestAccProvider.Meta().(*cfg.Config)
-		client, err := config.NatV2Client(env.OS_REGION_NAME)
+		client, err := config.NatV2Client(env.OsRegionName)
 		if err != nil {
 			return fmt.Errorf("error creating OpenTelekomCloud NATv2 client: %w", err)
 		}
@@ -102,5 +102,5 @@ resource "opentelekomcloud_nat_snat_rule_v2" "snat_1" {
   cidr           = "192.168.0.0/24"
   source_type    = 0
 }
-`, env.OS_NETWORK_ID, env.OS_VPC_ID)
+`, env.OsNetworkID, env.OsRouterID)
 }

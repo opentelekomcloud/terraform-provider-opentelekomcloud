@@ -72,7 +72,7 @@ func TestAccVBSBackupPolicyV2_rentention_day(t *testing.T) {
 
 func testAccVBSBackupPolicyV2Destroy(s *terraform.State) error {
 	config := common.TestAccProvider.Meta().(*cfg.Config)
-	vbsClient, err := config.VbsV2Client(env.OS_REGION_NAME)
+	vbsClient, err := config.VbsV2Client(env.OsRegionName)
 	if err != nil {
 		return fmt.Errorf("error creating opentelekomcloud sfs client: %s", err)
 	}
@@ -103,7 +103,7 @@ func testAccVBSBackupPolicyV2Exists(n string, policy *policies.Policy) resource.
 		}
 
 		config := common.TestAccProvider.Meta().(*cfg.Config)
-		vbsClient, err := config.VbsV2Client(env.OS_REGION_NAME)
+		vbsClient, err := config.VbsV2Client(env.OsRegionName)
 		if err != nil {
 			return fmt.Errorf("error creating opentelekomcloud vbs client: %s", err)
 		}

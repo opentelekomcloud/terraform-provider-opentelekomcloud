@@ -38,7 +38,7 @@ func TestAccS3Bucket_basic(t *testing.T) {
 				Config: testAccS3BucketConfig(rInt),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckS3BucketExists(resourceName),
-					resource.TestCheckResourceAttr(resourceName, "region", env.OS_REGION_NAME),
+					resource.TestCheckResourceAttr(resourceName, "region", env.OsRegionName),
 					resource.TestCheckNoResourceAttr(resourceName, "website_endpoint"),
 					resource.TestCheckResourceAttr(resourceName, "bucket", testAccBucketName(rInt)),
 					resource.TestCheckResourceAttr(resourceName, "bucket_domain_name", testAccBucketDomainName(rInt)),
@@ -112,7 +112,7 @@ func TestAccS3Bucket_region(t *testing.T) {
 				Config: testAccS3BucketConfigWithRegion(rInt),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckS3BucketExists(resourceName),
-					resource.TestCheckResourceAttr(resourceName, "region", env.OS_REGION_NAME),
+					resource.TestCheckResourceAttr(resourceName, "region", env.OsRegionName),
 				),
 			},
 		},
@@ -395,7 +395,7 @@ func TestAccS3Bucket_Cors(t *testing.T) {
 			}
 
 			config := common.TestAccProvider.Meta().(*cfg.Config)
-			client, err := config.S3Client(env.OS_REGION_NAME)
+			client, err := config.S3Client(env.OsRegionName)
 			if err != nil {
 				return fmt.Errorf("error creating OpenTelekomCloud S3 client: %s", err)
 			}
@@ -568,7 +568,7 @@ func testAccCheckS3BucketExistsWithProviders(n string, providers *[]*schema.Prov
 			}
 
 			config := common.TestAccProvider.Meta().(*cfg.Config)
-			conn, err := config.S3Client(env.OS_REGION_NAME)
+			conn, err := config.S3Client(env.OsRegionName)
 			if err != nil {
 				return fmt.Errorf("error creating OpenTelekomCloud S3 client: %s", err)
 			}
@@ -598,7 +598,7 @@ func testAccCheckS3DestroyBucket(n string) resource.TestCheckFunc {
 		}
 
 		config := common.TestAccProvider.Meta().(*cfg.Config)
-		conn, err := config.S3Client(env.OS_REGION_NAME)
+		conn, err := config.S3Client(env.OsRegionName)
 		if err != nil {
 			return fmt.Errorf("error creating OpenTelekomCloud s3 client: %s", err)
 		}
@@ -617,7 +617,7 @@ func testAccCheckS3BucketPolicy(n string, policy string) resource.TestCheckFunc 
 	return func(s *terraform.State) error {
 		rs := s.RootModule().Resources[n]
 		config := common.TestAccProvider.Meta().(*cfg.Config)
-		conn, err := config.S3Client(env.OS_REGION_NAME)
+		conn, err := config.S3Client(env.OsRegionName)
 		if err != nil {
 			return fmt.Errorf("error creating OpenTelekomCloud s3 client: %s", err)
 		}
@@ -668,7 +668,7 @@ func testAccCheckS3BucketWebsite(n string, indexDoc string, errorDoc string, red
 	return func(s *terraform.State) error {
 		rs := s.RootModule().Resources[n]
 		config := common.TestAccProvider.Meta().(*cfg.Config)
-		client, err := config.S3Client(env.OS_REGION_NAME)
+		client, err := config.S3Client(env.OsRegionName)
 		if err != nil {
 			return fmt.Errorf("error creating OpenTelekomCloud s3 client: %s", err)
 		}
@@ -728,7 +728,7 @@ func testAccCheckS3BucketWebsiteRoutingRules(n string, routingRules []*s3.Routin
 	return func(s *terraform.State) error {
 		rs := s.RootModule().Resources[n]
 		config := common.TestAccProvider.Meta().(*cfg.Config)
-		client, err := config.S3Client(env.OS_REGION_NAME)
+		client, err := config.S3Client(env.OsRegionName)
 		if err != nil {
 			return fmt.Errorf("error creating OpenTelekomCloud s3 client: %s", err)
 		}
@@ -756,7 +756,7 @@ func testAccCheckS3BucketVersioning(n string, versioningStatus string) resource.
 	return func(s *terraform.State) error {
 		rs := s.RootModule().Resources[n]
 		config := common.TestAccProvider.Meta().(*cfg.Config)
-		client, err := config.S3Client(env.OS_REGION_NAME)
+		client, err := config.S3Client(env.OsRegionName)
 		if err != nil {
 			return fmt.Errorf("error creating OpenTelekomCloud s3 client: %s", err)
 		}
@@ -787,7 +787,7 @@ func testAccCheckS3BucketCors(n string, corsRules []*s3.CORSRule) resource.TestC
 	return func(s *terraform.State) error {
 		rs := s.RootModule().Resources[n]
 		config := common.TestAccProvider.Meta().(*cfg.Config)
-		client, err := config.S3Client(env.OS_REGION_NAME)
+		client, err := config.S3Client(env.OsRegionName)
 		if err != nil {
 			return fmt.Errorf("error creating OpenTelekomCloud s3 client: %s", err)
 		}
@@ -812,7 +812,7 @@ func testAccCheckS3BucketLogging(n, b, p string) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
 		rs := s.RootModule().Resources[n]
 		config := common.TestAccProvider.Meta().(*cfg.Config)
-		client, err := config.S3Client(env.OS_REGION_NAME)
+		client, err := config.S3Client(env.OsRegionName)
 		if err != nil {
 			return fmt.Errorf("error creating OpenTelekomCloud s3 client: %s", err)
 		}
@@ -862,7 +862,7 @@ func testAccBucketDomainName(randInt int) string {
 }
 
 func testAccWebsiteEndpoint(randInt int) string {
-	return fmt.Sprintf("tf-test-bucket-%d.s3-website.%s.amazonaws.com", randInt, env.OS_REGION_NAME)
+	return fmt.Sprintf("tf-test-bucket-%d.s3-website.%s.amazonaws.com", randInt, env.OsRegionName)
 }
 
 func testAccS3BucketPolicy(randInt int) string {
@@ -958,7 +958,7 @@ resource "opentelekomcloud_s3_bucket" "bucket" {
   bucket   = "tf-test-bucket-%d"
   region   = "%s"
 }
-`, env.OS_REGION_NAME, randInt, env.OS_REGION_NAME)
+`, env.OsRegionName, randInt, env.OsRegionName)
 }
 
 func testAccS3BucketWebsiteConfig(randInt int) string {

@@ -35,7 +35,7 @@ func TestAccASV1Policy_basic(t *testing.T) {
 
 func testAccCheckASV1PolicyDestroy(s *terraform.State) error {
 	config := common.TestAccProvider.Meta().(*cfg.Config)
-	asClient, err := config.AutoscalingV1Client(env.OS_REGION_NAME)
+	asClient, err := config.AutoscalingV1Client(env.OsRegionName)
 	if err != nil {
 		return fmt.Errorf("error creating opentelekomcloud autoscaling client: %s", err)
 	}
@@ -68,7 +68,7 @@ func testAccCheckASV1PolicyExists(n string, policy *policies.Policy) resource.Te
 		}
 
 		config := common.TestAccProvider.Meta().(*cfg.Config)
-		asClient, err := config.AutoscalingV1Client(env.OS_REGION_NAME)
+		asClient, err := config.AutoscalingV1Client(env.OsRegionName)
 		if err != nil {
 			return fmt.Errorf("error creating opentelekomcloud autoscaling client: %s", err)
 		}
@@ -133,4 +133,4 @@ resource "opentelekomcloud_as_policy_v1" "hth_as_policy"{
     launch_time = "2022-12-22T12:00Z"
   }
 }
-`, env.OS_IMAGE_ID, env.OS_NETWORK_ID, env.OS_VPC_ID)
+`, env.OsImageID, env.OsNetworkID, env.OsRouterID)

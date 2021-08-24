@@ -86,7 +86,7 @@ func testAccCheckS3BucketHasPolicy(n string, expectedPolicyText string) resource
 		}
 
 		config := common.TestAccProvider.Meta().(*cfg.Config)
-		conn, err := config.S3Client(env.OS_REGION_NAME)
+		conn, err := config.S3Client(env.OsRegionName)
 		if err != nil {
 			return fmt.Errorf("error creating OpenTelekomCloud s3 client: %s", err)
 		}

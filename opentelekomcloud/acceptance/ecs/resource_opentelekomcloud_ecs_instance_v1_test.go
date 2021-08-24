@@ -28,7 +28,7 @@ func TestAccEcsV1InstanceBasic(t *testing.T) {
 				Config: testAccEcsV1InstanceBasic,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckEcsV1InstanceExists(resourceName, &instance),
-					resource.TestCheckResourceAttr(resourceName, "availability_zone", env.OS_AVAILABILITY_ZONE),
+					resource.TestCheckResourceAttr(resourceName, "availability_zone", env.OsAvailabilityZone),
 					resource.TestCheckResourceAttr(resourceName, "auto_recovery", "true"),
 					resource.TestCheckResourceAttr(resourceName, "security_groups.#", "1"),
 					resource.TestCheckResourceAttr(resourceName, "tags.muh", "value-create"),
@@ -38,7 +38,7 @@ func TestAccEcsV1InstanceBasic(t *testing.T) {
 				Config: testAccEcsV1InstanceUpdate,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckEcsV1InstanceExists(resourceName, &instance),
-					resource.TestCheckResourceAttr(resourceName, "availability_zone", env.OS_AVAILABILITY_ZONE),
+					resource.TestCheckResourceAttr(resourceName, "availability_zone", env.OsAvailabilityZone),
 					resource.TestCheckResourceAttr(resourceName, "auto_recovery", "false"),
 					resource.TestCheckResourceAttr(resourceName, "security_groups.#", "1"),
 					resource.TestCheckResourceAttr(resourceName, "tags.muh", "value-update"),
@@ -102,7 +102,7 @@ func TestAccEcsV1InstanceEncryption(t *testing.T) {
 				Config: testAccEcsV1InstanceDataVolumeEncryption,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckEcsV1InstanceExists(resourceName, &instance),
-					resource.TestCheckResourceAttr(resourceName, "data_disks.0.kms_id", env.OS_KMS_ID),
+					resource.TestCheckResourceAttr(resourceName, "data_disks.0.kms_id", env.OsKmsID),
 				),
 			},
 		},
@@ -111,7 +111,7 @@ func TestAccEcsV1InstanceEncryption(t *testing.T) {
 
 func testAccCheckEcsV1InstanceDestroy(s *terraform.State) error {
 	config := common.TestAccProvider.Meta().(*cfg.Config)
-	client, err := config.ComputeV1Client(env.OS_REGION_NAME)
+	client, err := config.ComputeV1Client(env.OsRegionName)
 	if err != nil {
 		return fmt.Errorf("error creating OpenTelekomCloud compute client: %s", err)
 	}
@@ -144,7 +144,7 @@ func testAccCheckEcsV1InstanceExists(n string, instance *cloudservers.CloudServe
 		}
 
 		config := common.TestAccProvider.Meta().(*cfg.Config)
-		client, err := config.ComputeV1Client(env.OS_REGION_NAME)
+		client, err := config.ComputeV1Client(env.OsRegionName)
 		if err != nil {
 			return fmt.Errorf("error creating OpenTelekomCloud ComputeV1 client: %s", err)
 		}
@@ -188,7 +188,7 @@ resource "opentelekomcloud_ecs_instance_v1" "instance_1" {
     kuh = "value-create"
   }
 }
-`, env.OS_IMAGE_ID, env.OS_VPC_ID, env.OS_NETWORK_ID, env.OS_AVAILABILITY_ZONE)
+`, env.OsImageID, env.OsRouterID, env.OsNetworkID, env.OsAvailabilityZone)
 
 var testAccEcsV1InstanceUpdate = fmt.Sprintf(`
 resource "opentelekomcloud_compute_secgroup_v2" "secgroup_1" {
@@ -221,7 +221,7 @@ resource "opentelekomcloud_ecs_instance_v1" "instance_1" {
     muh = "value-update"
   }
 }
-`, env.OS_IMAGE_ID, env.OS_VPC_ID, env.OS_NETWORK_ID, env.OS_AVAILABILITY_ZONE)
+`, env.OsImageID, env.OsRouterID, env.OsNetworkID, env.OsAvailabilityZone)
 
 var testAccEcsV1InstanceInvalidTypeForAZ = fmt.Sprintf(`
 resource "opentelekomcloud_ecs_instance_v1" "instance_1" {
@@ -245,7 +245,7 @@ resource "opentelekomcloud_ecs_instance_v1" "instance_1" {
     key = "value"
   }
 }
-`, env.OS_IMAGE_ID, env.OS_VPC_ID, env.OS_NETWORK_ID)
+`, env.OsImageID, env.OsRouterID, env.OsNetworkID)
 
 var testAccEcsV1InstanceInvalidType = fmt.Sprintf(`
 resource "opentelekomcloud_ecs_instance_v1" "instance_1" {
@@ -269,7 +269,7 @@ resource "opentelekomcloud_ecs_instance_v1" "instance_1" {
     key = "value"
   }
 }
-`, env.OS_IMAGE_ID, env.OS_VPC_ID, env.OS_NETWORK_ID)
+`, env.OsImageID, env.OsRouterID, env.OsNetworkID)
 
 var testAccEcsV1InstanceInvalidDataDisk = fmt.Sprintf(`
 resource "opentelekomcloud_ecs_instance_v1" "instance_1" {
@@ -296,7 +296,7 @@ resource "opentelekomcloud_ecs_instance_v1" "instance_1" {
     key = "value"
   }
 }
-`, env.OS_IMAGE_ID, env.OS_VPC_ID, env.OS_NETWORK_ID)
+`, env.OsImageID, env.OsRouterID, env.OsNetworkID)
 
 var testAccEcsV1InstanceInvalidVPC = fmt.Sprintf(`
 resource "opentelekomcloud_ecs_instance_v1" "instance_1" {
@@ -320,7 +320,7 @@ resource "opentelekomcloud_ecs_instance_v1" "instance_1" {
     key = "value"
   }
 }
-`, env.OS_IMAGE_ID, env.OS_NETWORK_ID)
+`, env.OsImageID, env.OsNetworkID)
 
 var testAccEcsV1InstanceComputedVPC = fmt.Sprintf(`
 resource "opentelekomcloud_vpc_v1" "vpc" {
@@ -356,7 +356,7 @@ resource "opentelekomcloud_ecs_instance_v1" "instance_1" {
     key = "value"
   }
 }
-`, env.OS_IMAGE_ID)
+`, env.OsImageID)
 
 var testAccEcsV1InstanceDataVolumeEncryption = fmt.Sprintf(`
 resource "opentelekomcloud_ecs_instance_v1" "instance_1" {
@@ -379,4 +379,4 @@ resource "opentelekomcloud_ecs_instance_v1" "instance_1" {
     kms_id = "%s"
   }
 }
-`, env.OS_IMAGE_ID, env.OS_VPC_ID, env.OS_NETWORK_ID, env.OS_AVAILABILITY_ZONE, env.OS_KMS_ID)
+`, env.OsImageID, env.OsRouterID, env.OsNetworkID, env.OsAvailabilityZone, env.OsKmsID)

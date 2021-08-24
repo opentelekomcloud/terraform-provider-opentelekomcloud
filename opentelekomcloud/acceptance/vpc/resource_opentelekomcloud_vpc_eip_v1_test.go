@@ -64,7 +64,7 @@ func TestAccVpcV1EIP_timeout(t *testing.T) {
 
 func testAccCheckVpcV1EIPDestroy(s *terraform.State) error {
 	config := common.TestAccProvider.Meta().(*cfg.Config)
-	networkingClient, err := config.NetworkingV1Client(env.OS_REGION_NAME)
+	networkingClient, err := config.NetworkingV1Client(env.OsRegionName)
 	if err != nil {
 		return fmt.Errorf("eror creating NetworkingV1 client: %s", err)
 	}
@@ -95,7 +95,7 @@ func testAccCheckVpcV1EIPExists(n string, eip *eips.PublicIp) resource.TestCheck
 		}
 
 		config := common.TestAccProvider.Meta().(*cfg.Config)
-		client, err := config.NetworkingV1Client(env.OS_REGION_NAME)
+		client, err := config.NetworkingV1Client(env.OsRegionName)
 		if err != nil {
 			return fmt.Errorf("error creating networkingV1 client: %s", err)
 		}

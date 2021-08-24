@@ -39,7 +39,7 @@ func TestAccLBV2Whitelist_basic(t *testing.T) {
 
 func testAccCheckLBV2WhitelistDestroy(s *terraform.State) error {
 	config := common.TestAccProvider.Meta().(*cfg.Config)
-	networkingClient, err := config.NetworkingV2Client(env.OS_REGION_NAME)
+	networkingClient, err := config.NetworkingV2Client(env.OsRegionName)
 	if err != nil {
 		return fmt.Errorf("error creating OpenTelekomCloud networking client: %s", err)
 	}
@@ -70,7 +70,7 @@ func testAccCheckLBV2WhitelistExists(n string, whitelist *whitelists.Whitelist) 
 		}
 
 		config := common.TestAccProvider.Meta().(*cfg.Config)
-		networkingClient, err := config.NetworkingV2Client(env.OS_REGION_NAME)
+		networkingClient, err := config.NetworkingV2Client(env.OsRegionName)
 		if err != nil {
 			return fmt.Errorf("error creating OpenTelekomCloud networking client: %s", err)
 		}
@@ -108,7 +108,7 @@ resource "opentelekomcloud_lb_whitelist_v2" "whitelist_1" {
   whitelist = "192.168.11.1,192.168.0.1/24"
   listener_id = opentelekomcloud_lb_listener_v2.listener_1.id
 }
-`, env.OS_SUBNET_ID)
+`, env.OsSubnetID)
 
 var TestAccLBV2WhitelistConfig_update = fmt.Sprintf(`
 resource "opentelekomcloud_lb_loadbalancer_v2" "loadbalancer_1" {
@@ -128,4 +128,4 @@ resource "opentelekomcloud_lb_whitelist_v2" "whitelist_1" {
   whitelist = "192.168.11.1,192.168.0.1/24,192.168.201.18/8"
   listener_id = opentelekomcloud_lb_listener_v2.listener_1.id
 }
-`, env.OS_SUBNET_ID)
+`, env.OsSubnetID)

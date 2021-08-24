@@ -143,7 +143,7 @@ func TestAccNetworkingV2Port_timeout(t *testing.T) {
 
 func testAccCheckNetworkingV2PortDestroy(s *terraform.State) error {
 	config := common.TestAccProvider.Meta().(*cfg.Config)
-	client, err := config.NetworkingV2Client(env.OS_REGION_NAME)
+	client, err := config.NetworkingV2Client(env.OsRegionName)
 	if err != nil {
 		return fmt.Errorf("error creating OpenTelekomCloud NetworkingV2 client: %w", err)
 	}
@@ -174,7 +174,7 @@ func testAccCheckNetworkingV2PortExists(n string, port *ports.Port) resource.Tes
 		}
 
 		config := common.TestAccProvider.Meta().(*cfg.Config)
-		client, err := config.NetworkingV2Client(env.OS_REGION_NAME)
+		client, err := config.NetworkingV2Client(env.OsRegionName)
 		if err != nil {
 			return fmt.Errorf("error creating OpenTelekomCloud NetworkingV2 client: %w", err)
 		}
@@ -206,7 +206,7 @@ func testAccCheckNetworkingV2PortWithExtensionsExists(n string, port *testPortWi
 		}
 
 		config := common.TestAccProvider.Meta().(*cfg.Config)
-		client, err := config.NetworkingV2Client(env.OS_REGION_NAME)
+		client, err := config.NetworkingV2Client(env.OsRegionName)
 		if err != nil {
 			return fmt.Errorf("error creating OpenTelekomCloud NetworkingV2 client: %s", err)
 		}

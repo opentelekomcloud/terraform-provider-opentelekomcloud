@@ -112,7 +112,7 @@ func TestAccFWPolicyV2_removeSingleRule(t *testing.T) {
 
 func testAccCheckFWPolicyV2Destroy(s *terraform.State) error {
 	config := common.TestAccProvider.Meta().(*cfg.Config)
-	networkingClient, err := config.NetworkingV2Client(env.OS_REGION_NAME)
+	networkingClient, err := config.NetworkingV2Client(env.OsRegionName)
 	if err != nil {
 		return fmt.Errorf("error creating OpenTelekomCloud networking client: %s", err)
 	}
@@ -143,7 +143,7 @@ func testAccCheckFWPolicyV2Exists(n, name, description string, ruleCount int) re
 		}
 
 		config := common.TestAccProvider.Meta().(*cfg.Config)
-		networkingClient, err := config.NetworkingV2Client(env.OS_REGION_NAME)
+		networkingClient, err := config.NetworkingV2Client(env.OsRegionName)
 		if err != nil {
 			return fmt.Errorf("error creating OpenTelekomCloud networking client: %s", err)
 		}

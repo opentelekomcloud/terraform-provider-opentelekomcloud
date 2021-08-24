@@ -75,7 +75,7 @@ func TestAccAntiDdosV1_timeout(t *testing.T) {
 
 func testAccCheckAntiDdosV1Destroy(s *terraform.State) error {
 	config := common.TestAccProvider.Meta().(*cfg.Config)
-	antiddosClient, err := config.AntiddosV1Client(env.OS_REGION_NAME)
+	antiddosClient, err := config.AntiddosV1Client(env.OsRegionName)
 	if err != nil {
 		return fmt.Errorf("error creating antiddos client: %s", err)
 	}
@@ -106,7 +106,7 @@ func testAccCheckAntiDdosV1Exists(n string, ddos *antiddos.GetResponse) resource
 		}
 
 		config := common.TestAccProvider.Meta().(*cfg.Config)
-		antiddosClient, err := config.AntiddosV1Client(env.OS_REGION_NAME)
+		antiddosClient, err := config.AntiddosV1Client(env.OsRegionName)
 		if err != nil {
 			return fmt.Errorf("error creating antiddos client: %s", err)
 		}

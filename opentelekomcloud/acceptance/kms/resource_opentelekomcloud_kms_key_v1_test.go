@@ -49,7 +49,7 @@ func TestAccKmsKeyV1_basic(t *testing.T) {
 
 func testAccCheckKmsV1KeyDestroy(s *terraform.State) error {
 	config := common.TestAccProvider.Meta().(*cfg.Config)
-	client, err := config.KmsKeyV1Client(env.OS_REGION_NAME)
+	client, err := config.KmsKeyV1Client(env.OsRegionName)
 	if err != nil {
 		return fmt.Errorf("error creating OpenTelekomCloud KMSv1 client: %s", err)
 	}
@@ -81,7 +81,7 @@ func testAccCheckKmsV1KeyExists(n string, key *keys.Key) resource.TestCheckFunc 
 		}
 
 		config := common.TestAccProvider.Meta().(*cfg.Config)
-		client, err := config.KmsKeyV1Client(env.OS_REGION_NAME)
+		client, err := config.KmsKeyV1Client(env.OsRegionName)
 		if err != nil {
 			return fmt.Errorf("error creating OpenTelekomCloud KMSv1 client: %s", err)
 		}

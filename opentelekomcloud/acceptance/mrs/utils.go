@@ -10,7 +10,7 @@ import (
 func testAccPreCheckMrs(t *testing.T) {
 	common.TestAccPreCheckRequiredEnvVars(t)
 
-	if env.OS_MRS_ENVIRONMENT == "" {
+	if env.OsMrsEnvironment == "" {
 		t.Skip("This environment does not support MRS tests")
 	}
 }

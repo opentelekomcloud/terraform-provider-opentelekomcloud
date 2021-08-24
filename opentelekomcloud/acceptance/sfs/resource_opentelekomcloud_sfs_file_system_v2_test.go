@@ -31,7 +31,7 @@ func TestAccSFSFileSystemV2_basic(t *testing.T) {
 					resource.TestCheckResourceAttr(resourceName, "status", "available"),
 					resource.TestCheckResourceAttr(resourceName, "size", "1"),
 					resource.TestCheckResourceAttr(resourceName, "access_level", "rw"),
-					resource.TestCheckResourceAttr(resourceName, "access_to", env.OS_VPC_ID),
+					resource.TestCheckResourceAttr(resourceName, "access_to", env.OsRouterID),
 					resource.TestCheckResourceAttr(resourceName, "access_type", "cert"),
 					resource.TestCheckResourceAttr(resourceName, "tags.muh", "value-create"),
 				),
@@ -45,7 +45,7 @@ func TestAccSFSFileSystemV2_basic(t *testing.T) {
 					resource.TestCheckResourceAttr(resourceName, "status", "available"),
 					resource.TestCheckResourceAttr(resourceName, "size", "2"),
 					resource.TestCheckResourceAttr(resourceName, "access_level", "rw"),
-					resource.TestCheckResourceAttr(resourceName, "access_to", env.OS_VPC_ID),
+					resource.TestCheckResourceAttr(resourceName, "access_to", env.OsRouterID),
 					resource.TestCheckResourceAttr(resourceName, "access_type", "cert"),
 					resource.TestCheckResourceAttr(resourceName, "tags.muh", "value-update"),
 				),
@@ -93,7 +93,7 @@ func TestAccSFSFileSystemV2_clean(t *testing.T) {
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckSFSFileSystemV2Exists("opentelekomcloud_sfs_file_system_v2.sfs_1", &share),
 					resource.TestCheckResourceAttr(resourceName, "access_level", "rw"),
-					resource.TestCheckResourceAttr(resourceName, "access_to", env.OS_VPC_ID),
+					resource.TestCheckResourceAttr(resourceName, "access_to", env.OsRouterID),
 					resource.TestCheckResourceAttr(resourceName, "access_type", "cert"),
 				),
 			},
@@ -109,7 +109,7 @@ func TestAccSFSFileSystemV2_clean(t *testing.T) {
 
 func testAccCheckSFSFileSystemV2Destroy(s *terraform.State) error {
 	config := common.TestAccProvider.Meta().(*cfg.Config)
-	client, err := config.SfsV2Client(env.OS_REGION_NAME)
+	client, err := config.SfsV2Client(env.OsRegionName)
 	if err != nil {
 		return fmt.Errorf("error creating OpenTelekomCloud SFSv2 client: %s", err)
 	}
@@ -140,7 +140,7 @@ func testAccCheckSFSFileSystemV2Exists(n string, share *shares.Share) resource.T
 		}
 
 		config := common.TestAccProvider.Meta().(*cfg.Config)
-		client, err := config.SfsV2Client(env.OS_REGION_NAME)
+		client, err := config.SfsV2Client(env.OsRegionName)
 		if err != nil {
 			return fmt.Errorf("error creating opentelekomcloud sfs client: %s", err)
 		}
@@ -176,7 +176,7 @@ resource "opentelekomcloud_sfs_file_system_v2" "sfs_1" {
     kuh = "value-create"
   }
 }
-`, env.OS_VPC_ID)
+`, env.OsRouterID)
 
 var testAccSFSFileSystemV2Update = fmt.Sprintf(`
 resource "opentelekomcloud_sfs_file_system_v2" "sfs_1" {
@@ -193,7 +193,7 @@ resource "opentelekomcloud_sfs_file_system_v2" "sfs_1" {
     muh = "value-update"
   }
 }
-`, env.OS_VPC_ID)
+`, env.OsRouterID)
 
 var testAccSFSFileSystemV2Timeout = fmt.Sprintf(`
 resource "opentelekomcloud_sfs_file_system_v2" "sfs_1" {
@@ -209,7 +209,7 @@ resource "opentelekomcloud_sfs_file_system_v2" "sfs_1" {
     create = "5m"
     delete = "5m"
   }
-}`, env.OS_VPC_ID)
+}`, env.OsRouterID)
 
 const testAccSFSFileSystemV2Clean = `
 resource "opentelekomcloud_sfs_file_system_v2" "sfs_1" {

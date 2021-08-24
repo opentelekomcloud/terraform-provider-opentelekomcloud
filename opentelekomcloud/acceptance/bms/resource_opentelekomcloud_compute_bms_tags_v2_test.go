@@ -54,7 +54,7 @@ func TestAccOTCBMSTagsV2_timeout(t *testing.T) {
 
 func testAccCheckOTCBMSTagsV2Destroy(s *terraform.State) error {
 	config := common.TestAccProvider.Meta().(*cfg.Config)
-	bmsClient, err := config.ComputeV2Client(env.OS_REGION_NAME)
+	bmsClient, err := config.ComputeV2Client(env.OsRegionName)
 	if err != nil {
 		return fmt.Errorf("error creating OpenTelekomCloud bms client: %s", err)
 	}
@@ -85,7 +85,7 @@ func testAccCheckOTCBMSTagsV2Exists(n string, tag *tags.Tags) resource.TestCheck
 		}
 
 		config := common.TestAccProvider.Meta().(*cfg.Config)
-		bmsClient, err := config.ComputeV2Client(env.OS_REGION_NAME)
+		bmsClient, err := config.ComputeV2Client(env.OsRegionName)
 		if err != nil {
 			return fmt.Errorf("error creating OpenTelekomCloud bms client: %s", err)
 		}
@@ -120,7 +120,7 @@ resource "opentelekomcloud_compute_instance_v2" "instance_1" {
 resource "opentelekomcloud_compute_bms_tags_v2" "tags_1" {
   server_id = opentelekomcloud_compute_instance_v2.instance_1.id
   tags = ["foo","bar"]
-}`, env.OS_IMAGE_ID, env.OS_AVAILABILITY_ZONE, env.OS_NETWORK_ID)
+}`, env.OsImageID, env.OsAvailabilityZone, env.OsNetworkID)
 
 var testAccBMSTagsV2_timeout = fmt.Sprintf(`
 resource "opentelekomcloud_compute_instance_v2" "instance_1" {
@@ -146,4 +146,4 @@ resource "opentelekomcloud_compute_bms_tags_v2" "tags_1" {
     delete = "5m"
   }
 }
-`, env.OS_IMAGE_ID, env.OS_AVAILABILITY_ZONE, env.OS_NETWORK_ID)
+`, env.OsImageID, env.OsAvailabilityZone, env.OsNetworkID)

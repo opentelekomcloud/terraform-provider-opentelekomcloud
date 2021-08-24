@@ -52,7 +52,7 @@ func TestAccVpcFlowLogV1_basic(t *testing.T) {
 
 func testAccCheckVpcFlowLogV1Destroy(s *terraform.State) error {
 	config := common.TestAccProvider.Meta().(*cfg.Config)
-	vpcClient, err := config.NetworkingV1Client(env.OS_REGION_NAME)
+	vpcClient, err := config.NetworkingV1Client(env.OsRegionName)
 	if err != nil {
 		return fmt.Errorf("error creating OpenTelekomCloud vpc client: %s", err)
 	}
@@ -83,7 +83,7 @@ func testAccCheckVpcFlowLogV1Exists(n string, flowlog *flowlogs.FlowLog) resourc
 		}
 
 		config := common.TestAccProvider.Meta().(*cfg.Config)
-		vpcClient, err := config.NetworkingV1Client(env.OS_REGION_NAME)
+		vpcClient, err := config.NetworkingV1Client(env.OsRegionName)
 		if err != nil {
 			return fmt.Errorf("error creating OpenTelekomCloud Vpc client: %s", err)
 		}

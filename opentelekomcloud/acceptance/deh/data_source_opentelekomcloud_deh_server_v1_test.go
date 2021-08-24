@@ -72,4 +72,4 @@ data "opentelekomcloud_deh_server_v1" "servers" {
   dedicated_host_id  = opentelekomcloud_deh_host_v1.deh1.id
   server_id = opentelekomcloud_compute_instance_v2.instance_1.id
 }
-`, env.OS_AVAILABILITY_ZONE, env.OS_AVAILABILITY_ZONE, env.OS_NETWORK_ID)
+`, env.OsAvailabilityZone, env.OsAvailabilityZone, env.OsNetworkID)

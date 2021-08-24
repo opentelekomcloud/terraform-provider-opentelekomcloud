@@ -56,7 +56,7 @@ func TestAccCSBSBackupV1_timeout(t *testing.T) {
 
 func testAccCSBSBackupV1Destroy(s *terraform.State) error {
 	config := common.TestAccProvider.Meta().(*cfg.Config)
-	backupClient, err := config.CsbsV1Client(env.OS_REGION_NAME)
+	backupClient, err := config.CsbsV1Client(env.OsRegionName)
 	if err != nil {
 		return fmt.Errorf("error creating csbs client: %s", err)
 	}
@@ -87,7 +87,7 @@ func testAccCSBSBackupV1Exists(n string, backups *backup.Backup) resource.TestCh
 		}
 
 		config := common.TestAccProvider.Meta().(*cfg.Config)
-		backupClient, err := config.CsbsV1Client(env.OS_REGION_NAME)
+		backupClient, err := config.CsbsV1Client(env.OsRegionName)
 		if err != nil {
 			return fmt.Errorf("error creating csbs client: %s", err)
 		}
@@ -127,7 +127,7 @@ resource "opentelekomcloud_csbs_backup_v1" "csbs" {
   resource_id = opentelekomcloud_compute_instance_v2.instance_1.id
   resource_type = "OS::Nova::Server"
 }
-`, env.OS_IMAGE_ID, env.OS_AVAILABILITY_ZONE, env.OS_FLAVOR_ID, env.OS_NETWORK_ID)
+`, env.OsImageID, env.OsAvailabilityZone, env.OsFlavorID, env.OsNetworkID)
 
 var testAccCSBSBackupV1_timeout = fmt.Sprintf(`
 resource "opentelekomcloud_compute_instance_v2" "instance_1" {
@@ -149,4 +149,4 @@ resource "opentelekomcloud_csbs_backup_v1" "csbs" {
   resource_id = opentelekomcloud_compute_instance_v2.instance_1.id
   resource_type = "OS::Nova::Server"
 }
-`, env.OS_IMAGE_ID, env.OS_AVAILABILITY_ZONE, env.OS_FLAVOR_ID, env.OS_NETWORK_ID)
+`, env.OsImageID, env.OsAvailabilityZone, env.OsFlavorID, env.OsNetworkID)

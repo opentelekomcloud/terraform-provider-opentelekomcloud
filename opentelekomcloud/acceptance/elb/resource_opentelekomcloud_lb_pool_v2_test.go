@@ -64,7 +64,7 @@ func TestAccLBV2Pool_persistenceNull(t *testing.T) {
 
 func testAccCheckLBV2PoolDestroy(s *terraform.State) error {
 	config := common.TestAccProvider.Meta().(*cfg.Config)
-	client, err := config.NetworkingV2Client(env.OS_REGION_NAME)
+	client, err := config.NetworkingV2Client(env.OsRegionName)
 	if err != nil {
 		return fmt.Errorf("error creating OpenTelekomCloud NetworkingV2 client: %w", err)
 	}
@@ -95,7 +95,7 @@ func testAccCheckLBV2PoolExists(n string, pool *pools.Pool) resource.TestCheckFu
 		}
 
 		config := common.TestAccProvider.Meta().(*cfg.Config)
-		client, err := config.NetworkingV2Client(env.OS_REGION_NAME)
+		client, err := config.NetworkingV2Client(env.OsRegionName)
 		if err != nil {
 			return fmt.Errorf("error creating OpenTelekomCloud NetworkingV2 client: %w", err)
 		}
@@ -140,7 +140,7 @@ resource "opentelekomcloud_lb_pool_v2" "pool_1" {
     delete = "5m"
   }
 }
-`, env.OS_SUBNET_ID)
+`, env.OsSubnetID)
 
 var TestAccLBV2PoolConfig_update = fmt.Sprintf(`
 resource "opentelekomcloud_lb_loadbalancer_v2" "loadbalancer_1" {
@@ -168,7 +168,7 @@ resource "opentelekomcloud_lb_pool_v2" "pool_1" {
     delete = "5m"
   }
 }
-`, env.OS_SUBNET_ID)
+`, env.OsSubnetID)
 
 var TestAccLBV2PoolConfig_persistence = fmt.Sprintf(`
 resource "opentelekomcloud_lb_loadbalancer_v2" "loadbalancer_1" {
@@ -194,4 +194,4 @@ resource "opentelekomcloud_lb_pool_v2" "pool_1" {
     cookie_name = null
   }
 }
-`, env.OS_SUBNET_ID)
+`, env.OsSubnetID)

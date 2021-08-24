@@ -72,7 +72,7 @@ func TestAccOTCRtsSoftwareDeploymentV1_timeout(t *testing.T) {
 
 func testAccCheckOTCRtsSoftwareDeploymentV1Destroy(s *terraform.State) error {
 	config := common.TestAccProvider.Meta().(*cfg.Config)
-	orchestrationClient, err := config.OrchestrationV1Client(env.OS_REGION_NAME)
+	orchestrationClient, err := config.OrchestrationV1Client(env.OsRegionName)
 	if err != nil {
 		return fmt.Errorf("error creating RTS client: %s", err)
 	}
@@ -106,7 +106,7 @@ func testAccCheckOTCRtsSoftwareDeploymentV1Exists(n string, stack *softwaredeplo
 		}
 
 		config := common.TestAccProvider.Meta().(*cfg.Config)
-		orchestrationClient, err := config.OrchestrationV1Client(env.OS_REGION_NAME)
+		orchestrationClient, err := config.OrchestrationV1Client(env.OsRegionName)
 		if err != nil {
 			return fmt.Errorf("error creating RTS Client : %s", err)
 		}
@@ -146,7 +146,7 @@ resource "opentelekomcloud_rts_software_deployment_v1" "deployment_1" {
   action= "CREATE"
   status_reason= "Deploy data"
 }
-`, env.OS_IMAGE_ID, env.OS_FLAVOR_ID, env.OS_NETWORK_ID)
+`, env.OsImageID, env.OsFlavorID, env.OsNetworkID)
 
 var testAccRtsSoftwareDeploymentV1_update = fmt.Sprintf(`
 resource "opentelekomcloud_compute_instance_v2" "vm_1" {
@@ -171,7 +171,7 @@ resource "opentelekomcloud_rts_software_deployment_v1" "deployment_1" {
   action= "CREATE"
   status_reason= "Outputs received"
 }
-`, env.OS_IMAGE_ID, env.OS_FLAVOR_ID, env.OS_NETWORK_ID)
+`, env.OsImageID, env.OsFlavorID, env.OsNetworkID)
 
 var testAccRtsSoftwareDeploymentV1_timeout = fmt.Sprintf(`
 resource "opentelekomcloud_compute_instance_v2" "vm_1" {
@@ -198,4 +198,4 @@ resource "opentelekomcloud_rts_software_deployment_v1" "deployment_1" {
     delete = "10m"
   }
 }
-`, env.OS_IMAGE_ID, env.OS_FLAVOR_ID, env.OS_NETWORK_ID)
+`, env.OsImageID, env.OsFlavorID, env.OsNetworkID)

@@ -47,8 +47,8 @@ func TestAccASV1Configuration_publicIP(t *testing.T) {
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckASV1ConfigurationExists(resourceName, &asConfig),
 					resource.TestCheckResourceAttr(resourceName, "scaling_configuration_name", "as_config"),
-					resource.TestCheckResourceAttr(resourceName, "instance_config.0.image", env.OS_IMAGE_ID),
-					resource.TestCheckResourceAttr(resourceName, "instance_config.0.key_name", env.OS_KEYPAIR_NAME),
+					resource.TestCheckResourceAttr(resourceName, "instance_config.0.image", env.OsImageID),
+					resource.TestCheckResourceAttr(resourceName, "instance_config.0.key_name", env.OsKeypairName),
 				),
 			},
 		},
@@ -92,7 +92,7 @@ func TestAccASV1Configuration_multipleSecurityGroups(t *testing.T) {
 
 func testAccCheckASV1ConfigurationDestroy(s *terraform.State) error {
 	config := common.TestAccProvider.Meta().(*cfg.Config)
-	asClient, err := config.AutoscalingV1Client(env.OS_REGION_NAME)
+	asClient, err := config.AutoscalingV1Client(env.OsRegionName)
 	if err != nil {
 		return fmt.Errorf("error creating OpenTelekomCloud AutoScaling client: %s", err)
 	}
@@ -123,7 +123,7 @@ func testAccCheckASV1ConfigurationExists(n string, configuration *configurations
 		}
 
 		config := common.TestAccProvider.Meta().(*cfg.Config)
-		asClient, err := config.AutoscalingV1Client(env.OS_REGION_NAME)
+		asClient, err := config.AutoscalingV1Client(env.OsRegionName)
 		if err != nil {
 			return fmt.Errorf("error creating OpenTelekomCloud AutoScaling client: %s", err)
 		}
@@ -161,7 +161,7 @@ resource "opentelekomcloud_as_configuration_v1" "hth_as_config"{
     user_data = "#! /bin/bash"
   }
 }
-`, env.OS_IMAGE_ID, env.OS_KEYPAIR_NAME)
+`, env.OsImageID, env.OsKeypairName)
 
 var testAccASV1Configuration_publicIP = fmt.Sprintf(`
 resource "opentelekomcloud_as_configuration_v1" "as_config"{
@@ -196,7 +196,7 @@ resource "opentelekomcloud_as_configuration_v1" "as_config"{
     }
   }
 }
-`, env.OS_IMAGE_ID, env.OS_KEYPAIR_NAME)
+`, env.OsImageID, env.OsKeypairName)
 
 var testAccASV1Configuration_invalidDiskSize = fmt.Sprintf(`
 resource "opentelekomcloud_as_configuration_v1" "as_config"{
@@ -216,7 +216,7 @@ resource "opentelekomcloud_as_configuration_v1" "as_config"{
     key_name = "%s"
   }
 }
-`, env.OS_IMAGE_ID, env.OS_KEYPAIR_NAME)
+`, env.OsImageID, env.OsKeypairName)
 
 var testAccASV1Configuration_multipleSecurityGroups = fmt.Sprintf(`
 resource "opentelekomcloud_compute_secgroup_v2" "secgroup_1" {
@@ -255,4 +255,4 @@ resource "opentelekomcloud_as_configuration_v1" "as_config"{
     ]
   }
 }
-`, env.OS_KEYPAIR_NAME)
+`, env.OsKeypairName)

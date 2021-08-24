@@ -146,7 +146,7 @@ func TestAccDNSV2Zone_timeout(t *testing.T) {
 
 func testAccCheckDNSV2ZoneDestroy(s *terraform.State) error {
 	config := common.TestAccProvider.Meta().(*cfg.Config)
-	dnsClient, err := config.DnsV2Client(env.OS_REGION_NAME)
+	dnsClient, err := config.DnsV2Client(env.OsRegionName)
 	if err != nil {
 		return fmt.Errorf("error creating OpenTelekomCloud DNS client: %s", err)
 	}
@@ -177,7 +177,7 @@ func testAccCheckDNSV2ZoneExists(n string, zone *zones.Zone) resource.TestCheckF
 		}
 
 		config := common.TestAccProvider.Meta().(*cfg.Config)
-		dnsClient, err := config.DnsV2Client(env.OS_REGION_NAME)
+		dnsClient, err := config.DnsV2Client(env.OsRegionName)
 		if err != nil {
 			return fmt.Errorf("error creating OpenTelekomCloud DNS client: %s", err)
 		}
@@ -232,7 +232,7 @@ resource "opentelekomcloud_dns_zone_v2" "zone_1" {
     key = "value"
   }
 }
-`, zoneName, env.OS_VPC_ID, env.OS_REGION_NAME)
+`, zoneName, env.OsRouterID, env.OsRegionName)
 }
 
 func testAccDNSV2Zone_update(zoneName string) string {

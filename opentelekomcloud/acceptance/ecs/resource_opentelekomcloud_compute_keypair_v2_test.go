@@ -81,7 +81,7 @@ func TestAccComputeV2Keypair_private(t *testing.T) {
 
 func testAccCheckComputeV2KeypairDestroy(s *terraform.State) error {
 	config := common.TestAccProvider.Meta().(*cfg.Config)
-	client, err := config.ComputeV2Client(env.OS_REGION_NAME)
+	client, err := config.ComputeV2Client(env.OsRegionName)
 	if err != nil {
 		return fmt.Errorf("error creating OpenTelekomCloud ComputeV2 client: %s", err)
 	}
@@ -112,7 +112,7 @@ func testAccCheckComputeV2KeypairExists(n string, kp *keypairs.KeyPair) resource
 		}
 
 		config := common.TestAccProvider.Meta().(*cfg.Config)
-		client, err := config.ComputeV2Client(env.OS_REGION_NAME)
+		client, err := config.ComputeV2Client(env.OsRegionName)
 		if err != nil {
 			return fmt.Errorf("error creating OpenTelekomCloud ComputeV2 client: %s", err)
 		}

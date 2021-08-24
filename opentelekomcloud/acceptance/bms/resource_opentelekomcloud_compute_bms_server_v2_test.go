@@ -27,7 +27,7 @@ func TestAccComputeV2BmsInstance_basic(t *testing.T) {
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckComputeV2BmsInstanceExists("opentelekomcloud_compute_bms_server_v2.instance_1", &instance),
 					resource.TestCheckResourceAttr(
-						"opentelekomcloud_compute_bms_server_v2.instance_1", "availability_zone", env.OS_AVAILABILITY_ZONE),
+						"opentelekomcloud_compute_bms_server_v2.instance_1", "availability_zone", env.OsAvailabilityZone),
 				),
 			},
 			{
@@ -81,7 +81,7 @@ func TestAccComputeV2BmsInstance_timeout(t *testing.T) {
 
 func testAccCheckComputeV2BmsInstanceDestroy(s *terraform.State) error {
 	config := common.TestAccProvider.Meta().(*cfg.Config)
-	computeClient, err := config.ComputeV2Client(env.OS_REGION_NAME)
+	computeClient, err := config.ComputeV2Client(env.OsRegionName)
 	if err != nil {
 		return fmt.Errorf("error creating OpenTelekomCloud compute client: %s", err)
 	}
@@ -114,7 +114,7 @@ func testAccCheckComputeV2BmsInstanceExists(n string, instance *servers.Server) 
 		}
 
 		config := common.TestAccProvider.Meta().(*cfg.Config)
-		computeClient, err := config.ComputeV2Client(env.OS_REGION_NAME)
+		computeClient, err := config.ComputeV2Client(env.OsRegionName)
 		if err != nil {
 			return fmt.Errorf("error creating OpenTelekomCloud compute client: %s", err)
 		}
@@ -148,7 +148,7 @@ resource "opentelekomcloud_compute_bms_server_v2" "instance_1" {
     uuid = "%s"
   }
 }
-`, env.OS_AVAILABILITY_ZONE, env.OS_NETWORK_ID)
+`, env.OsAvailabilityZone, env.OsNetworkID)
 
 var testAccComputeV2BmsInstance_update = fmt.Sprintf(`
 resource "opentelekomcloud_compute_bms_server_v2" "instance_1" {
@@ -164,7 +164,7 @@ resource "opentelekomcloud_compute_bms_server_v2" "instance_1" {
     uuid = "%s"
   }
 }
-`, env.OS_AVAILABILITY_ZONE, env.OS_NETWORK_ID)
+`, env.OsAvailabilityZone, env.OsNetworkID)
 
 var testAccComputeV2BmsInstance_timeout = fmt.Sprintf(`
 resource "opentelekomcloud_compute_bms_server_v2" "instance_1" {
@@ -181,7 +181,7 @@ resource "opentelekomcloud_compute_bms_server_v2" "instance_1" {
     create = "20m"
   }
 }
-`, env.OS_AVAILABILITY_ZONE, env.OS_NETWORK_ID)
+`, env.OsAvailabilityZone, env.OsNetworkID)
 
 var testAccComputeV2BmsInstance_bootFromVolumeImage = fmt.Sprintf(`
 resource "opentelekomcloud_compute_bms_server_v2" "instance_1" {
@@ -208,4 +208,4 @@ resource "opentelekomcloud_compute_bms_server_v2" "instance_1" {
     create = "20m"
   }
 }
-`, env.OS_AVAILABILITY_ZONE, env.OS_NETWORK_ID)
+`, env.OsAvailabilityZone, env.OsNetworkID)

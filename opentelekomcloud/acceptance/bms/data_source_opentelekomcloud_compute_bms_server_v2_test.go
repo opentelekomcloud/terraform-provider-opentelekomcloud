@@ -61,4 +61,4 @@ resource "opentelekomcloud_compute_instance_v2" "instance_1" {
 data "opentelekomcloud_compute_bms_server_v2" "server1" {
   id = opentelekomcloud_compute_instance_v2.instance_1.id
 }
-`, env.OS_IMAGE_ID, env.OS_AVAILABILITY_ZONE, env.OS_NETWORK_ID)
+`, env.OsImageID, env.OsAvailabilityZone, env.OsNetworkID)

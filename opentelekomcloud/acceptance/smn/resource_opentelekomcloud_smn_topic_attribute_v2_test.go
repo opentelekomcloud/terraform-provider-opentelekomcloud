@@ -54,7 +54,7 @@ func TestAccSMNV2TopicAttribute_import(t *testing.T) {
 
 func testAccCheckSMNTopicAttributeV2Destroy(s *terraform.State) error {
 	config := common.TestAccProvider.Meta().(*cfg.Config)
-	client, err := config.SmnV2Client(env.OS_TENANT_NAME)
+	client, err := config.SmnV2Client(env.OsTenantName)
 	if err != nil {
 		return fmt.Errorf("error creating OpenTelekomCloud SMNv2 client: %w", err)
 	}
@@ -92,7 +92,7 @@ func testAccCheckSMNV2TopicAttributeExists(n string) resource.TestCheckFunc {
 		}
 
 		config := common.TestAccProvider.Meta().(*cfg.Config)
-		client, err := config.SmnV2Client(env.OS_TENANT_NAME)
+		client, err := config.SmnV2Client(env.OsTenantName)
 		if err != nil {
 			return fmt.Errorf("error creating OpenTelekomCloud SMNv2 client: %w", err)
 		}

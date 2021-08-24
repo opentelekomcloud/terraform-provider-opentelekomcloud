@@ -46,7 +46,7 @@ func TestAccASPolicyV2_basic(t *testing.T) {
 
 func testAccCheckASV2PolicyDestroy(s *terraform.State) error {
 	config := common.TestAccProvider.Meta().(*cfg.Config)
-	client, err := config.AutoscalingV2Client(env.OS_REGION_NAME)
+	client, err := config.AutoscalingV2Client(env.OsRegionName)
 	if err != nil {
 		return fmt.Errorf("error creating OpenTelekomCloud AutoScalingV2 client: %w", err)
 	}
@@ -77,7 +77,7 @@ func testAccCheckASV2PolicyExists(n string, policy *policies.Policy) resource.Te
 		}
 
 		config := common.TestAccProvider.Meta().(*cfg.Config)
-		asClient, err := config.AutoscalingV2Client(env.OS_REGION_NAME)
+		asClient, err := config.AutoscalingV2Client(env.OsRegionName)
 		if err != nil {
 			return fmt.Errorf("error creating OpenTelekomCloud AutoScalingV2 client: %w", err)
 		}
@@ -147,7 +147,7 @@ resource "opentelekomcloud_as_policy_v2" "policy_1"{
     end_time         = "2040-12-31T10:30Z"
   }
 }
-`, env.OS_IMAGE_ID, env.OS_NETWORK_ID, env.OS_VPC_ID)
+`, env.OsImageID, env.OsNetworkID, env.OsRouterID)
 
 var testASPolicyV2Update = fmt.Sprintf(`
 data "opentelekomcloud_networking_secgroup_v2" "sg_1" {
@@ -204,4 +204,4 @@ resource "opentelekomcloud_as_policy_v2" "policy_1"{
   }
   cool_down_time = 100
 }
-`, env.OS_IMAGE_ID, env.OS_NETWORK_ID, env.OS_VPC_ID)
+`, env.OsImageID, env.OsNetworkID, env.OsRouterID)

@@ -41,7 +41,7 @@ func TestAccELBLoadBalancer_basic(t *testing.T) {
 
 func testAccCheckELBLoadBalancerDestroy(s *terraform.State) error {
 	config := common.TestAccProvider.Meta().(*cfg.Config)
-	networkingClient, err := config.ElbV1Client(env.OS_REGION_NAME)
+	networkingClient, err := config.ElbV1Client(env.OsRegionName)
 	if err != nil {
 		return fmt.Errorf("error creating OpenTelekomCloud networking client: %s", err)
 	}
@@ -73,7 +73,7 @@ func testAccCheckELBLoadBalancerExists(
 		}
 
 		config := common.TestAccProvider.Meta().(*cfg.Config)
-		networkingClient, err := config.ElbV1Client(env.OS_REGION_NAME)
+		networkingClient, err := config.ElbV1Client(env.OsRegionName)
 		if err != nil {
 			return fmt.Errorf("error creating OpenTelekomCloud networking client: %s", err)
 		}
@@ -106,7 +106,7 @@ resource "opentelekomcloud_elb_loadbalancer" "loadbalancer_1" {
     delete = "5m"
   }
 }
-`, env.OS_VPC_ID)
+`, env.OsRouterID)
 
 var testAccELBLoadBalancerConfigUpdate = fmt.Sprintf(`
 resource "opentelekomcloud_elb_loadbalancer" "loadbalancer_1" {
@@ -122,4 +122,4 @@ resource "opentelekomcloud_elb_loadbalancer" "loadbalancer_1" {
     delete = "5m"
   }
 }
-`, env.OS_VPC_ID)
+`, env.OsRouterID)

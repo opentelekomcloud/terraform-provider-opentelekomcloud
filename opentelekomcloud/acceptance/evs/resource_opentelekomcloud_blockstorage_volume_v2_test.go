@@ -178,7 +178,7 @@ func TestAccBlockStorageV2Volume_timeout(t *testing.T) {
 
 func testAccCheckBlockStorageV2VolumeDestroy(s *terraform.State) error {
 	config := common.TestAccProvider.Meta().(*cfg.Config)
-	blockStorageClient, err := config.BlockStorageV2Client(env.OS_REGION_NAME)
+	blockStorageClient, err := config.BlockStorageV2Client(env.OsRegionName)
 	if err != nil {
 		return fmt.Errorf("error creating OpenTelekomCloud block storage client: %s", err)
 	}
@@ -209,7 +209,7 @@ func testAccCheckBlockStorageV2VolumeExists(n string, volume *volumes.Volume) re
 		}
 
 		config := common.TestAccProvider.Meta().(*cfg.Config)
-		blockStorageClient, err := config.BlockStorageV2Client(env.OS_REGION_NAME)
+		blockStorageClient, err := config.BlockStorageV2Client(env.OsRegionName)
 		if err != nil {
 			return fmt.Errorf("error creating OpenTelekomCloud block storage client: %s", err)
 		}
@@ -264,7 +264,7 @@ func testAccCheckBlockStorageV2VolumeTags(n string, k string, v string) resource
 		}
 
 		config := common.TestAccProvider.Meta().(*cfg.Config)
-		blockStorageClient, err := config.BlockStorageV2Client(env.OS_REGION_NAME)
+		blockStorageClient, err := config.BlockStorageV2Client(env.OsRegionName)
 		if err != nil {
 			return fmt.Errorf("error creating OpenTelekomCloud block storage client: %s", err)
 		}
@@ -278,7 +278,7 @@ func testAccCheckBlockStorageV2VolumeTags(n string, k string, v string) resource
 			return fmt.Errorf("volume not found")
 		}
 
-		client, err := config.BlockStorageV2Client(env.OS_REGION_NAME)
+		client, err := config.BlockStorageV2Client(env.OsRegionName)
 		if err != nil {
 			return fmt.Errorf("error creating OpenTelekomCloud block storage client: %s", err)
 		}
@@ -347,7 +347,7 @@ resource "opentelekomcloud_compute_instance_v2" "instance_1" {
     delete_on_termination = true
   }
 }
-`, size, env.OS_IMAGE_ID, env.OS_NETWORK_ID)
+`, size, env.OsImageID, env.OsNetworkID)
 }
 
 const (
@@ -432,7 +432,7 @@ resource "opentelekomcloud_blockstorage_volume_v2" "volume_1" {
   size = 12
   image_id = "%s"
 }
-`, env.OS_IMAGE_ID)
+`, env.OsImageID)
 
 func testAccBlockStorageV2VolumePolicy(kmsKeyAlias string) string {
 	return fmt.Sprintf(`

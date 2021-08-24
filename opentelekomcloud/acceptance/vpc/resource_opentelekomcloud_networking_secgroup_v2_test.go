@@ -79,7 +79,7 @@ func TestAccNetworkingV2SecGroup_timeout(t *testing.T) {
 
 func testAccCheckNetworkingV2SecGroupDestroy(s *terraform.State) error {
 	config := common.TestAccProvider.Meta().(*cfg.Config)
-	networkingClient, err := config.NetworkingV2Client(env.OS_REGION_NAME)
+	networkingClient, err := config.NetworkingV2Client(env.OsRegionName)
 	if err != nil {
 		return fmt.Errorf("error creating OpenTelekomCloud Networkingv2 client: %s", err)
 	}

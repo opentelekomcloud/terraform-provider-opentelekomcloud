@@ -65,7 +65,7 @@ func TestAccRDSV1Instance_basic(t *testing.T) {
 
 func testAccCheckRDSV1InstanceDestroy(s *terraform.State) error {
 	config := common.TestAccProvider.Meta().(*cfg.Config)
-	rdsClient, err := config.RdsV1Client(env.OS_REGION_NAME)
+	rdsClient, err := config.RdsV1Client(env.OsRegionName)
 	if err != nil {
 		return fmt.Errorf("error creating OpenTelekomCloud rds: %s", err)
 	}
@@ -96,7 +96,7 @@ func testAccCheckRDSV1InstanceExists(n string, instance *instances.Instance) res
 		}
 
 		config := common.TestAccProvider.Meta().(*cfg.Config)
-		rdsClient, err := config.RdsV1Client(env.OS_REGION_NAME)
+		rdsClient, err := config.RdsV1Client(env.OsRegionName)
 		if err != nil {
 			return fmt.Errorf("error creating OpenTelekomCloud rds client: %s ", err)
 		}
@@ -120,7 +120,7 @@ func testAccCheckRDSV1InstanceTag(
 	instance *instances.Instance, k, v string) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
 		config := common.TestAccProvider.Meta().(*cfg.Config)
-		tagClient, err := config.RdsTagV1Client(env.OS_REGION_NAME)
+		tagClient, err := config.RdsTagV1Client(env.OsRegionName)
 		if err != nil {
 			return fmt.Errorf("error creating OpenTelekomCloud rds client: %s ", err)
 		}
@@ -149,7 +149,7 @@ func testAccCheckRDSV1InstanceNoTag(
 	instance *instances.Instance) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
 		config := common.TestAccProvider.Meta().(*cfg.Config)
-		tagClient, err := config.RdsTagV1Client(env.OS_REGION_NAME)
+		tagClient, err := config.RdsTagV1Client(env.OsRegionName)
 		if err != nil {
 			return fmt.Errorf("error creating OpenTelekomCloud rds client: %s ", err)
 		}
@@ -217,7 +217,7 @@ resource "opentelekomcloud_rds_instance_v1" "instance" {
     key = "value"
   }
   depends_on = ["opentelekomcloud_networking_secgroup_v2.sg"]
-}`, env.OS_VPC_ID, env.OS_NETWORK_ID)
+}`, env.OsRouterID, env.OsNetworkID)
 
 var testAccSInstanceV1ConfigUpdatetag = fmt.Sprintf(`
 data "opentelekomcloud_rds_flavors_v1" "flavor" {
@@ -266,7 +266,7 @@ resource "opentelekomcloud_rds_instance_v1" "instance" {
     key = "value2"
   }
   depends_on = ["opentelekomcloud_networking_secgroup_v2.sg"]
-}`, env.OS_VPC_ID, env.OS_NETWORK_ID)
+}`, env.OsRouterID, env.OsNetworkID)
 
 var testAccSInstanceV1ConfigNoTags = fmt.Sprintf(`
 data "opentelekomcloud_rds_flavors_v1" "flavor" {
@@ -311,4 +311,4 @@ resource "opentelekomcloud_rds_instance_v1" "instance" {
     replicationmode = "async"
   }
   depends_on = ["opentelekomcloud_networking_secgroup_v2.sg"]
-}`, env.OS_VPC_ID, env.OS_NETWORK_ID)
+}`, env.OsRouterID, env.OsNetworkID)

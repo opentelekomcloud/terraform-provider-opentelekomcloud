@@ -116,7 +116,7 @@ func TestAccComputeV2FloatingIPAssociate_attachNew(t *testing.T) {
 
 func testAccCheckComputeV2FloatingIPAssociateDestroy(s *terraform.State) error {
 	config := common.TestAccProvider.Meta().(*cfg.Config)
-	computeClient, err := config.ComputeV2Client(env.OS_REGION_NAME)
+	computeClient, err := config.ComputeV2Client(env.OsRegionName)
 	if err != nil {
 		return fmt.Errorf("error creating OpenTelekomCloud compute client: %s", err)
 	}
@@ -160,7 +160,7 @@ func testAccCheckComputeV2FloatingIPAssociateAssociated(
 	fip *floatingips.FloatingIP, instance *servers.Server, n int) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
 		config := common.TestAccProvider.Meta().(*cfg.Config)
-		computeClient, err := config.ComputeV2Client(env.OS_REGION_NAME)
+		computeClient, err := config.ComputeV2Client(env.OsRegionName)
 		if err != nil {
 			return fmt.Errorf("error creating compute v2 client: %w", err)
 		}
@@ -205,7 +205,7 @@ resource "opentelekomcloud_compute_floatingip_associate_v2" "fip_1" {
   floating_ip = opentelekomcloud_networking_floatingip_v2.fip_1.address
   instance_id = opentelekomcloud_compute_instance_v2.instance_1.id
 }
-`, env.OS_NETWORK_ID)
+`, env.OsNetworkID)
 
 var testAccComputeV2FloatingIPAssociateFixedIP = fmt.Sprintf(`
 resource "opentelekomcloud_compute_instance_v2" "instance_1" {
@@ -224,7 +224,7 @@ resource "opentelekomcloud_compute_floatingip_associate_v2" "fip_1" {
   instance_id = opentelekomcloud_compute_instance_v2.instance_1.id
   fixed_ip = opentelekomcloud_compute_instance_v2.instance_1.access_ip_v4
 }
-`, env.OS_NETWORK_ID)
+`, env.OsNetworkID)
 
 var testAccComputeV2FloatingIPAssociateAttachToFirstNetwork = fmt.Sprintf(`
 resource "opentelekomcloud_compute_instance_v2" "instance_1" {
@@ -244,7 +244,7 @@ resource "opentelekomcloud_compute_floatingip_associate_v2" "fip_1" {
   instance_id = opentelekomcloud_compute_instance_v2.instance_1.id
   fixed_ip = opentelekomcloud_compute_instance_v2.instance_1.network.0.fixed_ip_v4
 }
-`, env.OS_NETWORK_ID)
+`, env.OsNetworkID)
 
 var testAccComputeV2FloatingIPAssociateAttachNew1 = fmt.Sprintf(`
 resource "opentelekomcloud_compute_instance_v2" "instance_1" {
@@ -265,7 +265,7 @@ resource "opentelekomcloud_compute_floatingip_associate_v2" "fip_1" {
   floating_ip = opentelekomcloud_networking_floatingip_v2.fip_1.address
   instance_id = opentelekomcloud_compute_instance_v2.instance_1.id
 }
-`, env.OS_NETWORK_ID)
+`, env.OsNetworkID)
 
 var testAccComputeV2FloatingIPAssociateAttachNew2 = fmt.Sprintf(`
 resource "opentelekomcloud_compute_instance_v2" "instance_1" {
@@ -286,4 +286,4 @@ resource "opentelekomcloud_compute_floatingip_associate_v2" "fip_1" {
   floating_ip = opentelekomcloud_networking_floatingip_v2.fip_2.address
   instance_id = opentelekomcloud_compute_instance_v2.instance_1.id
 }
-`, env.OS_NETWORK_ID)
+`, env.OsNetworkID)

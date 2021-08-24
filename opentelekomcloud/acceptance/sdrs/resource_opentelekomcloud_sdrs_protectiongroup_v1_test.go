@@ -44,7 +44,7 @@ func TestAccSdrsProtectiongroupV1_basic(t *testing.T) {
 
 func testAccCheckSdrsProtectiongroupV1Destroy(s *terraform.State) error {
 	config := common.TestAccProvider.Meta().(*cfg.Config)
-	sdrsClient, err := config.SdrsV1Client(env.OS_REGION_NAME)
+	sdrsClient, err := config.SdrsV1Client(env.OsRegionName)
 	if err != nil {
 		return fmt.Errorf("error creating OpenTelekomCloud SDRS client: %s", err)
 	}
@@ -75,7 +75,7 @@ func testAccCheckSdrsProtectiongroupV1Exists(n string, group *protectiongroups.G
 		}
 
 		config := common.TestAccProvider.Meta().(*cfg.Config)
-		sdrsClient, err := config.SdrsV1Client(env.OS_REGION_NAME)
+		sdrsClient, err := config.SdrsV1Client(env.OsRegionName)
 		if err != nil {
 			return fmt.Errorf("error creating OpenTelekomCloud SDRS client: %s", err)
 		}
@@ -104,7 +104,7 @@ resource "opentelekomcloud_sdrs_protectiongroup_v1" "group_1" {
 	domain_id = "cdba26b2-cc35-4988-a904-82b7abf20094"
 	source_vpc_id = "%s"
 	dr_type = "migration"
-}`, env.OS_VPC_ID)
+}`, env.OsRouterID)
 
 var testAccSdrsProtectiongroupV1_update = fmt.Sprintf(`
 resource "opentelekomcloud_sdrs_protectiongroup_v1" "group_1" {
@@ -115,4 +115,4 @@ resource "opentelekomcloud_sdrs_protectiongroup_v1" "group_1" {
 	domain_id = "cdba26b2-cc35-4988-a904-82b7abf20094"
 	source_vpc_id = "%s"
 	dr_type = "migration"
-}`, env.OS_VPC_ID)
+}`, env.OsRouterID)

@@ -108,7 +108,7 @@ func TestAccNetworkingV2Network_multipleSegmentMappings(t *testing.T) {
 
 func testAccCheckNetworkingV2NetworkDestroy(s *terraform.State) error {
 	config := common.TestAccProvider.Meta().(*cfg.Config)
-	networkingClient, err := config.NetworkingV2Client(env.OS_REGION_NAME)
+	networkingClient, err := config.NetworkingV2Client(env.OsRegionName)
 	if err != nil {
 		return fmt.Errorf("error creating OpenTelekomCloud networking client: %s", err)
 	}

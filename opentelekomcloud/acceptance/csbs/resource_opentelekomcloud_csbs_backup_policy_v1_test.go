@@ -81,7 +81,7 @@ func TestAccCSBSBackupPolicyV1_weekMonth(t *testing.T) {
 
 func testAccCheckCSBSBackupPolicyV1Destroy(s *terraform.State) error {
 	config := common.TestAccProvider.Meta().(*cfg.Config)
-	policyClient, err := config.CsbsV1Client(env.OS_REGION_NAME)
+	policyClient, err := config.CsbsV1Client(env.OsRegionName)
 	if err != nil {
 		return fmt.Errorf("error creating csbs client: %s", err)
 	}
@@ -112,7 +112,7 @@ func testAccCheckCSBSBackupPolicyV1Exists(n string, policy *policies.BackupPolic
 		}
 
 		config := common.TestAccProvider.Meta().(*cfg.Config)
-		policyClient, err := config.CsbsV1Client(env.OS_REGION_NAME)
+		policyClient, err := config.CsbsV1Client(env.OsRegionName)
 		if err != nil {
 			return fmt.Errorf("error creating CSBS client: %s", err)
 		}
@@ -163,7 +163,7 @@ resource "opentelekomcloud_csbs_backup_policy_v1" "backup_policy_v1" {
     trigger_pattern = "BEGIN:VCALENDAR\r\nBEGIN:VEVENT\r\nRRULE:FREQ=WEEKLY;BYDAY=TH;BYHOUR=12;BYMINUTE=27\r\nEND:VEVENT\r\nEND:VCALENDAR\r\n"
   }
 }
-`, env.OS_IMAGE_ID, env.OS_AVAILABILITY_ZONE, env.OS_FLAVOR_ID, env.OS_NETWORK_ID)
+`, env.OsImageID, env.OsAvailabilityZone, env.OsFlavorID, env.OsNetworkID)
 
 var testAccCSBSBackupPolicyV1_update = fmt.Sprintf(`
 resource "opentelekomcloud_compute_instance_v2" "instance_1" {
@@ -197,7 +197,7 @@ resource "opentelekomcloud_csbs_backup_policy_v1" "backup_policy_v1" {
     trigger_pattern = "BEGIN:VCALENDAR\r\nBEGIN:VEVENT\r\nRRULE:FREQ=WEEKLY;BYDAY=TH;BYHOUR=12;BYMINUTE=27\r\nEND:VEVENT\r\nEND:VCALENDAR\r\n"
   }
 }
-`, env.OS_IMAGE_ID, env.OS_AVAILABILITY_ZONE, env.OS_FLAVOR_ID, env.OS_NETWORK_ID)
+`, env.OsImageID, env.OsAvailabilityZone, env.OsFlavorID, env.OsNetworkID)
 
 var testAccCSBSBackupPolicyV1_timeout = fmt.Sprintf(`
 resource "opentelekomcloud_compute_instance_v2" "instance_1" {
@@ -235,7 +235,7 @@ resource "opentelekomcloud_csbs_backup_policy_v1" "backup_policy_v1" {
     delete = "5m"
   }
 }
-`, env.OS_IMAGE_ID, env.OS_AVAILABILITY_ZONE, env.OS_FLAVOR_ID, env.OS_NETWORK_ID)
+`, env.OsImageID, env.OsAvailabilityZone, env.OsFlavorID, env.OsNetworkID)
 
 var testAccCSBSBackupPolicyV1_weekMonth = fmt.Sprintf(`
 resource "opentelekomcloud_compute_instance_v2" "instance_1" {
@@ -271,4 +271,4 @@ resource "opentelekomcloud_csbs_backup_policy_v1" "backup_policy_v1" {
     timezone        = "UTC+03:00"
   }
 }
-`, env.OS_IMAGE_ID, env.OS_AVAILABILITY_ZONE, env.OS_FLAVOR_ID, env.OS_NETWORK_ID)
+`, env.OsImageID, env.OsAvailabilityZone, env.OsFlavorID, env.OsNetworkID)
