@@ -242,7 +242,7 @@ func TestAccCCENodesV3EncryptedVolume(t *testing.T) {
 				Config: testAccCCENodeV3EncryptedVolume,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckCCENodeV3Exists(resourceNameNode, "opentelekomcloud_cce_cluster_v3.cluster_1", &node),
-					resource.TestCheckResourceAttr(resourceNameNode, "data_volumes.0.kms_id", env.OS_KMS_ID),
+					resource.TestCheckResourceAttr(resourceNameNode, "data_volumes.0.kms_id", env.OsKmsID),
 				),
 			},
 		},
@@ -273,7 +273,7 @@ func TestAccCCENodesV3TaintsK8sTags(t *testing.T) {
 
 func testAccCheckCCENodeV3Destroy(s *terraform.State) error {
 	config := common.TestAccProvider.Meta().(*cfg.Config)
-	client, err := config.CceV3Client(env.OS_REGION_NAME)
+	client, err := config.CceV3Client(env.OsRegionName)
 	if err != nil {
 		return fmt.Errorf("error creating OpenTelekomCloud CCE client: %s", err)
 	}
@@ -316,7 +316,7 @@ func testAccCheckCCENodeV3Exists(n string, cluster string, node *nodes.Nodes) re
 		}
 
 		config := common.TestAccProvider.Meta().(*cfg.Config)
-		client, err := config.CceV3Client(env.OS_REGION_NAME)
+		client, err := config.CceV3Client(env.OsRegionName)
 		if err != nil {
 			return fmt.Errorf("error creating OpenTelekomCloud CCE client: %s", err)
 		}
@@ -389,7 +389,7 @@ resource "opentelekomcloud_cce_node_v3" "node_2" {
   }
 }
 
-`, env.OS_VPC_ID, env.OS_NETWORK_ID, env.OS_AVAILABILITY_ZONE, env.OS_KEYPAIR_NAME)
+`, env.OsRouterID, env.OsNetworkID, env.OsAvailabilityZone, env.OsKeypairName)
 
 	testAccCCENodeV3Basic = fmt.Sprintf(`
 resource "opentelekomcloud_cce_cluster_v3" "cluster_1" {
@@ -422,7 +422,7 @@ resource "opentelekomcloud_cce_node_v3" "node_1" {
   }
 
   private_ip = "%s"
-}`, env.OS_VPC_ID, env.OS_NETWORK_ID, env.OS_AVAILABILITY_ZONE, env.OS_KEYPAIR_NAME, privateIP)
+}`, env.OsRouterID, env.OsNetworkID, env.OsAvailabilityZone, env.OsKeypairName, privateIP)
 
 	testAccCCENodeV3Update = fmt.Sprintf(`
 resource "opentelekomcloud_cce_cluster_v3" "cluster_1" {
@@ -454,7 +454,7 @@ resource "opentelekomcloud_cce_node_v3" "node_1" {
   }
 
   private_ip = "%s"
-}`, env.OS_VPC_ID, env.OS_NETWORK_ID, env.OS_AVAILABILITY_ZONE, env.OS_KEYPAIR_NAME, privateIP)
+}`, env.OsRouterID, env.OsNetworkID, env.OsAvailabilityZone, env.OsKeypairName, privateIP)
 
 	testAccCCENodeV3Timeout = fmt.Sprintf(`
 resource "opentelekomcloud_cce_cluster_v3" "cluster_1" {
@@ -488,7 +488,7 @@ resource "opentelekomcloud_cce_node_v3" "node_1" {
     delete = "10m"
   }
 }
-`, env.OS_VPC_ID, env.OS_NETWORK_ID, env.OS_AVAILABILITY_ZONE, env.OS_KEYPAIR_NAME)
+`, env.OsRouterID, env.OsNetworkID, env.OsAvailabilityZone, env.OsKeypairName)
 
 	testAccCCENodeV3Ip = fmt.Sprintf(`
 resource "opentelekomcloud_cce_cluster_v3" "cluster_1" {
@@ -520,7 +520,7 @@ resource "opentelekomcloud_cce_node_v3" "node_1" {
     volumetype = "SATA"
   }
 }
-`, env.OS_VPC_ID, env.OS_NETWORK_ID, env.OS_AVAILABILITY_ZONE, env.OS_KEYPAIR_NAME)
+`, env.OsRouterID, env.OsNetworkID, env.OsAvailabilityZone, env.OsKeypairName)
 
 	testAccCCENodeV3BandWidthResize = fmt.Sprintf(`
 resource "opentelekomcloud_cce_cluster_v3" "cluster_1" {
@@ -552,7 +552,7 @@ resource "opentelekomcloud_cce_node_v3" "node_1" {
     volumetype = "SATA"
   }
 }
-`, env.OS_VPC_ID, env.OS_NETWORK_ID, env.OS_AVAILABILITY_ZONE, env.OS_KEYPAIR_NAME)
+`, env.OsRouterID, env.OsNetworkID, env.OsAvailabilityZone, env.OsKeypairName)
 
 	testAccCCENodeV3IpUnset = fmt.Sprintf(`
 resource "opentelekomcloud_cce_cluster_v3" "cluster_1" {
@@ -582,7 +582,7 @@ resource "opentelekomcloud_cce_node_v3" "node_1" {
     volumetype = "SATA"
   }
 }
-`, env.OS_VPC_ID, env.OS_NETWORK_ID, env.OS_AVAILABILITY_ZONE, env.OS_KEYPAIR_NAME)
+`, env.OsRouterID, env.OsNetworkID, env.OsAvailabilityZone, env.OsKeypairName)
 
 	testAccCCENodeV3IpParams = fmt.Sprintf(`
 resource "opentelekomcloud_cce_cluster_v3" "cluster_1" {
@@ -616,7 +616,7 @@ resource "opentelekomcloud_cce_node_v3" "node_1" {
     volumetype = "SATA"
   }
 }
-`, env.OS_VPC_ID, env.OS_NETWORK_ID, env.OS_AVAILABILITY_ZONE, env.OS_KEYPAIR_NAME)
+`, env.OsRouterID, env.OsNetworkID, env.OsAvailabilityZone, env.OsKeypairName)
 
 	testAccCCENodeV3IpNull = fmt.Sprintf(`
 resource "opentelekomcloud_cce_cluster_v3" "cluster_1" {
@@ -650,7 +650,7 @@ resource "opentelekomcloud_cce_node_v3" "node_1" {
     volumetype = "SATA"
   }
 }
-`, env.OS_VPC_ID, env.OS_NETWORK_ID, env.OS_AVAILABILITY_ZONE, env.OS_KEYPAIR_NAME)
+`, env.OsRouterID, env.OsNetworkID, env.OsAvailabilityZone, env.OsKeypairName)
 
 	testAccCCENodeV3IpIDs = fmt.Sprintf(`
 resource "opentelekomcloud_networking_floatingip_v2" "fip_1" {}
@@ -685,7 +685,7 @@ resource "opentelekomcloud_cce_node_v3" "node_1" {
     volumetype = "SATA"
   }
 }
-`, env.OS_VPC_ID, env.OS_NETWORK_ID, env.OS_AVAILABILITY_ZONE, env.OS_KEYPAIR_NAME)
+`, env.OsRouterID, env.OsNetworkID, env.OsAvailabilityZone, env.OsKeypairName)
 
 	testAccCCENodeV3IpIDsUnset = fmt.Sprintf(`
 resource "opentelekomcloud_networking_floatingip_v2" "fip_1" {}
@@ -719,7 +719,7 @@ resource "opentelekomcloud_cce_node_v3" "node_1" {
     volumetype = "SATA"
   }
 }
-`, env.OS_VPC_ID, env.OS_NETWORK_ID, env.OS_AVAILABILITY_ZONE, env.OS_KEYPAIR_NAME)
+`, env.OsRouterID, env.OsNetworkID, env.OsAvailabilityZone, env.OsKeypairName)
 
 	testAccCCENodeV3EncryptedVolume = fmt.Sprintf(`
 resource "opentelekomcloud_cce_cluster_v3" "cluster_1" {
@@ -750,7 +750,7 @@ resource "opentelekomcloud_cce_node_v3" "node_1" {
     kms_id     = "%s"
   }
 }
-`, env.OS_VPC_ID, env.OS_NETWORK_ID, env.OS_AVAILABILITY_ZONE, env.OS_KEYPAIR_NAME, env.OS_KMS_ID)
+`, env.OsRouterID, env.OsNetworkID, env.OsAvailabilityZone, env.OsKeypairName, env.OsKmsID)
 
 	testAccCCENodeV3TaintsK8sTags = fmt.Sprintf(`
 resource "opentelekomcloud_cce_cluster_v3" "cluster_1" {
@@ -787,5 +787,5 @@ resource "opentelekomcloud_cce_node_v3" "node_1" {
   }
   private_ip = "%s"
 }
-`, env.OS_VPC_ID, env.OS_NETWORK_ID, env.OS_AVAILABILITY_ZONE, env.OS_KEYPAIR_NAME, privateIP)
+`, env.OsRouterID, env.OsNetworkID, env.OsAvailabilityZone, env.OsKeypairName, privateIP)
 )

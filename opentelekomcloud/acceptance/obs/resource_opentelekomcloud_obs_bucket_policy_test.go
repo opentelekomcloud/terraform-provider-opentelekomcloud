@@ -103,7 +103,7 @@ func testAccCheckObsBucketHasPolicy(n string, expectedPolicyText string) resourc
 		}
 
 		config := common.TestAccProvider.Meta().(*cfg.Config)
-		client, err := config.NewObjectStorageClient(env.OS_REGION_NAME)
+		client, err := config.NewObjectStorageClient(env.OsRegionName)
 		if err != nil {
 			return fmt.Errorf("error creating OBS client: %s", err)
 		}

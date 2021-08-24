@@ -21,7 +21,7 @@ func TestAccOTCBMSV2KeyPairDataSource_basic(t *testing.T) {
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckBMSV2KeyPairDataSourceID("data.opentelekomcloud_compute_bms_keypairs_v2.keypair"),
 					resource.TestCheckResourceAttr(
-						"data.opentelekomcloud_compute_bms_keypairs_v2.keypair", "name", env.OS_KEYPAIR_NAME),
+						"data.opentelekomcloud_compute_bms_keypairs_v2.keypair", "name", env.OsKeypairName),
 				),
 			},
 		},
@@ -47,11 +47,11 @@ var testAccBMSV2KeyPairDataSource_basic = fmt.Sprintf(`
 data "opentelekomcloud_compute_bms_keypairs_v2" "keypair" {
   name = "%s"
 }
-`, env.OS_KEYPAIR_NAME)
+`, env.OsKeypairName)
 
 func testAccBmsKeyPairPreCheck(t *testing.T) {
 	common.TestAccPreCheckRequiredEnvVars(t)
-	if env.OS_KEYPAIR_NAME == "" {
+	if env.OsKeypairName == "" {
 		t.Skip("Provide the key pair name")
 	}
 }

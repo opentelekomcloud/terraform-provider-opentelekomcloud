@@ -54,7 +54,7 @@ func TestAccVBSBackupShareV2_timeout(t *testing.T) {
 
 func testAccVBSBackupShareV2Destroy(s *terraform.State) error {
 	config := common.TestAccProvider.Meta().(*cfg.Config)
-	vbsClient, err := config.VbsV2Client(env.OS_REGION_NAME)
+	vbsClient, err := config.VbsV2Client(env.OsRegionName)
 	if err != nil {
 		return fmt.Errorf("error creating opentelekomcloud vbs client: %s", err)
 	}
@@ -85,7 +85,7 @@ func testAccVBSBackupShareV2Exists(n string, share *shares.Share) resource.TestC
 		}
 
 		config := common.TestAccProvider.Meta().(*cfg.Config)
-		vbsClient, err := config.VbsV2Client(env.OS_REGION_NAME)
+		vbsClient, err := config.VbsV2Client(env.OsRegionName)
 		if err != nil {
 			return fmt.Errorf("error creating opentelekomcloud vbs client: %s", err)
 		}
@@ -120,7 +120,7 @@ resource "opentelekomcloud_vbs_backup_share_v2" "share" {
   backup_id =opentelekomcloud_vbs_backup_v2.backup_1.id
   to_project_ids = ["%s"]
 }
-`, env.OS_TO_TENANT_ID)
+`, env.OsToTenantID)
 
 var testAccVBSBackupShareV2_timeout = fmt.Sprintf(`
 resource "opentelekomcloud_blockstorage_volume_v2" "volume_1" {
@@ -146,4 +146,4 @@ timeouts {
   }
 
 }
-`, env.OS_TO_TENANT_ID)
+`, env.OsToTenantID)

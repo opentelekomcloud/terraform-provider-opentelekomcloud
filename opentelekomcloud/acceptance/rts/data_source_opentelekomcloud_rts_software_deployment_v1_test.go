@@ -68,4 +68,4 @@ resource "opentelekomcloud_rts_software_deployment_v1" "deployment_1" {
 data "opentelekomcloud_rts_software_deployment_v1" "deployment_1" {
   id = opentelekomcloud_rts_software_deployment_v1.deployment_1.id
  }
-`, env.OS_IMAGE_ID, env.OS_FLAVOR_ID, env.OS_NETWORK_ID)
+`, env.OsImageID, env.OsFlavorID, env.OsNetworkID)

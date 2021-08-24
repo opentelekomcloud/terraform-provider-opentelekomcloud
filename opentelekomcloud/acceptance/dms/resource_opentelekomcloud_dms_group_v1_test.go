@@ -39,7 +39,7 @@ func TestAccDmsGroupsV1_basic(t *testing.T) {
 
 func testAccCheckDmsV1GroupDestroy(s *terraform.State) error {
 	config := common.TestAccProvider.Meta().(*cfg.Config)
-	dmsClient, err := config.DmsV1Client(env.OS_REGION_NAME)
+	dmsClient, err := config.DmsV1Client(env.OsRegionName)
 	if err != nil {
 		return fmt.Errorf("error creating OpenTelekomCloud group client: %s", err)
 	}
@@ -80,7 +80,7 @@ func testAccCheckDmsV1GroupExists(n string, group groups.Group) resource.TestChe
 		}
 
 		config := common.TestAccProvider.Meta().(*cfg.Config)
-		dmsClient, err := config.DmsV1Client(env.OS_REGION_NAME)
+		dmsClient, err := config.DmsV1Client(env.OsRegionName)
 		if err != nil {
 			return fmt.Errorf("error creating OpenTelekomCloud group client: %s", err)
 		}

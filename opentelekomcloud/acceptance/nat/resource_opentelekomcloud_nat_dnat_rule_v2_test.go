@@ -102,12 +102,12 @@ resource "opentelekomcloud_nat_dnat_rule_v2" "dnat" {
   external_service_port = 242
   depends_on            = [opentelekomcloud_compute_instance_v2.instance_1]
 }
-`, env.OS_AVAILABILITY_ZONE)
+`, env.OsAvailabilityZone)
 }
 
 func testAccCheckNatDnatDestroy(s *terraform.State) error {
 	config := acc.TestAccProvider.Meta().(*cfg.Config)
-	client, err := config.NatV2Client(env.OS_REGION_NAME)
+	client, err := config.NatV2Client(env.OsRegionName)
 	if err != nil {
 		return fmt.Errorf("error creating sdk client, err=%s", err)
 	}
@@ -137,7 +137,7 @@ func testAccCheckNatDnatDestroy(s *terraform.State) error {
 func testAccCheckNatDnatExists() resource.TestCheckFunc {
 	return func(s *terraform.State) error {
 		config := acc.TestAccProvider.Meta().(*cfg.Config)
-		client, err := config.NatV2Client(env.OS_REGION_NAME)
+		client, err := config.NatV2Client(env.OsRegionName)
 		if err != nil {
 			return fmt.Errorf("error creating sdk client, err=%s", err)
 		}

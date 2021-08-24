@@ -170,7 +170,7 @@ func TestAccDNSV2RecordSet_shared(t *testing.T) {
 
 func testAccCheckDNSV2RecordSetDestroy(s *terraform.State) error {
 	config := common.TestAccProvider.Meta().(*cfg.Config)
-	dnsClient, err := config.DnsV2Client(env.OS_REGION_NAME)
+	dnsClient, err := config.DnsV2Client(env.OsRegionName)
 	if err != nil {
 		return fmt.Errorf("error creating OpenTelekomCloud DNS client: %s", err)
 	}
@@ -206,7 +206,7 @@ func testAccCheckDNSV2RecordSetExists(n string, recordset *recordsets.RecordSet)
 		}
 
 		config := common.TestAccProvider.Meta().(*cfg.Config)
-		dnsClient, err := config.DnsV2Client(env.OS_REGION_NAME)
+		dnsClient, err := config.DnsV2Client(env.OsRegionName)
 		if err != nil {
 			return fmt.Errorf("error creating OpenTelekomCloud DNS client: %s", err)
 		}

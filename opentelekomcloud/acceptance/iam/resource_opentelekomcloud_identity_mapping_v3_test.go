@@ -41,7 +41,7 @@ func TestAccIdentityV3MappingBasic(t *testing.T) {
 
 func testAccCheckIdentityV3MappingDestroy(s *terraform.State) error {
 	config := common.TestAccProvider.Meta().(*cfg.Config)
-	client, err := config.IdentityV3Client(env.OS_REGION_NAME)
+	client, err := config.IdentityV3Client(env.OsRegionName)
 	if err != nil {
 		return fmt.Errorf("error creating OpenTelekomCloud identity v3 client: %w", err)
 	}

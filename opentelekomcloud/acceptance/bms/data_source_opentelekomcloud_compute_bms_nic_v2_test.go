@@ -60,12 +60,12 @@ resource "opentelekomcloud_compute_instance_v2" "instance_1" {
 data "opentelekomcloud_compute_bms_nic_v2" "nic_1" {
   server_id = opentelekomcloud_compute_instance_v2.instance_1.id
 }
-`, env.OS_IMAGE_ID, env.OS_AVAILABILITY_ZONE, env.OS_NETWORK_ID)
+`, env.OsImageID, env.OsAvailabilityZone, env.OsNetworkID)
 
 func testAccPreCheckBMSNic(t *testing.T) {
 	common.TestAccPreCheckRequiredEnvVars(t)
 
-	if env.OS_NIC_ID == "" {
+	if env.OsNicID == "" {
 		t.Skip("OS_NIC_ID must be set for NIC acceptance tests")
 	}
 }

@@ -51,7 +51,7 @@ func TestAccImsImageV2_basic(t *testing.T) {
 
 func testAccCheckImsImageV2Destroy(s *terraform.State) error {
 	config := common.TestAccProvider.Meta().(*cfg.Config)
-	imageClient, err := config.ImageV2Client(env.OS_REGION_NAME)
+	imageClient, err := config.ImageV2Client(env.OsRegionName)
 	if err != nil {
 		return fmt.Errorf("error creating OpenTelekomCloud Image: %s", err)
 	}
@@ -82,7 +82,7 @@ func testAccCheckImsImageV2Exists(n string, image *cloudimages.Image) resource.T
 		}
 
 		config := common.TestAccProvider.Meta().(*cfg.Config)
-		imageClient, err := config.ImageV2Client(env.OS_REGION_NAME)
+		imageClient, err := config.ImageV2Client(env.OsRegionName)
 		if err != nil {
 			return fmt.Errorf("error creating OpenTelekomCloud Image: %s", err)
 		}
@@ -109,7 +109,7 @@ func testAccCheckImsImageV2Tags(n string, k string, v string) resource.TestCheck
 		}
 
 		config := common.TestAccProvider.Meta().(*cfg.Config)
-		imageClient, err := config.ImageV2Client(env.OS_REGION_NAME)
+		imageClient, err := config.ImageV2Client(env.OsRegionName)
 		if err != nil {
 			return fmt.Errorf("error creating OpenTelekomCloud image client: %s", err)
 		}
@@ -159,7 +159,7 @@ resource "opentelekomcloud_ims_image_v2" "image_1" {
     key = "value"
   }
 }
-`, env.OS_AVAILABILITY_ZONE, env.OS_NETWORK_ID)
+`, env.OsAvailabilityZone, env.OsNetworkID)
 
 var testAccImsImageV2_update = fmt.Sprintf(`
 resource "opentelekomcloud_compute_instance_v2" "instance_1" {
@@ -184,4 +184,4 @@ resource "opentelekomcloud_ims_image_v2" "image_1" {
     key2 = "value2"
   }
 }
-`, env.OS_AVAILABILITY_ZONE, env.OS_NETWORK_ID)
+`, env.OsAvailabilityZone, env.OsNetworkID)

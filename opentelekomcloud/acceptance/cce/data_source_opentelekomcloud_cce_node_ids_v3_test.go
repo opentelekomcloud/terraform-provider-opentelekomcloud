@@ -75,5 +75,5 @@ resource "opentelekomcloud_cce_node_v3" "node_1" {
 data "opentelekomcloud_cce_node_ids_v3" "node_ids" {
   cluster_id = opentelekomcloud_cce_cluster_v3.cluster_1.id
 }
-`, cceName, env.OS_VPC_ID, env.OS_NETWORK_ID, cceNodeName, env.OS_AVAILABILITY_ZONE, env.OS_KEYPAIR_NAME)
+`, cceName, env.OsRouterID, env.OsNetworkID, cceNodeName, env.OsAvailabilityZone, env.OsKeypairName)
 }

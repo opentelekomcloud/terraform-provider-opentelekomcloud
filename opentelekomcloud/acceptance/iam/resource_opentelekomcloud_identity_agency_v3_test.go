@@ -43,7 +43,7 @@ func TestAccIdentityV3Agency_basic(t *testing.T) {
 
 func testAccCheckIdentityV3AgencyDestroy(s *terraform.State) error {
 	config := common.TestAccProvider.Meta().(*cfg.Config)
-	identityClient, err := config.IdentityV3Client(env.OS_REGION_NAME)
+	identityClient, err := config.IdentityV3Client(env.OsRegionName)
 	if err != nil {
 		return fmt.Errorf("error creating OpenTelekomcloud identity client: %s", err)
 	}
@@ -75,7 +75,7 @@ func testAccCheckIdentityV3AgencyExists(n string, a *agency.Agency) resource.Tes
 		}
 
 		config := common.TestAccProvider.Meta().(*cfg.Config)
-		identityClient, err := config.IdentityV3Client(env.OS_REGION_NAME)
+		identityClient, err := config.IdentityV3Client(env.OsRegionName)
 		if err != nil {
 			return fmt.Errorf("error creating OpenTelekomcloud identity client: %s", err)
 		}
@@ -107,4 +107,4 @@ var testAccIdentityV3Agency_basic = fmt.Sprintf(`
       		]
     	}
 		]
-    }`, env.OS_TENANT_NAME)
+    }`, env.OsTenantName)

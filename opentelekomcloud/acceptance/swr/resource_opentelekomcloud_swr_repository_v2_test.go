@@ -31,7 +31,7 @@ func TestSwrRepositoryV2_basic(t *testing.T) {
 
 func testSwrRepositoryV2Destroy(s *terraform.State) error {
 	config := common.TestAccProvider.Meta().(*cfg.Config)
-	client, err := config.SwrV2Client(env.OS_REGION_NAME)
+	client, err := config.SwrV2Client(env.OsRegionName)
 	if err != nil {
 		return fmt.Errorf(swr.ClientError, err)
 	}

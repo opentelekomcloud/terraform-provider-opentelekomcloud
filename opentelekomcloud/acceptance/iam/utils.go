@@ -7,7 +7,7 @@ import (
 )
 
 func TestAccIdentityV3AgencyPreCheck(t *testing.T) {
-	if env.OS_TENANT_NAME == "" {
+	if env.OsTenantName == "" {
 		t.Skip("OS_TENANT_NAME must be set for acceptance tests")
 	}
 }

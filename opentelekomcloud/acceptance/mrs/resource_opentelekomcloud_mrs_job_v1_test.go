@@ -37,7 +37,7 @@ func TestAccMRSV1Job_basic(t *testing.T) {
 
 func testAccCheckMRSV1JobDestroy(s *terraform.State) error {
 	config := common.TestAccProvider.Meta().(*cfg.Config)
-	mrsClient, err := config.MrsV1Client(env.OS_REGION_NAME)
+	mrsClient, err := config.MrsV1Client(env.OsRegionName)
 	if err != nil {
 		return fmt.Errorf("error creating opentelekomcloud mrs: %s", err)
 	}
@@ -74,7 +74,7 @@ func testAccCheckMRSV1JobExists(n string, jobGet *job.Job) resource.TestCheckFun
 		}
 
 		config := common.TestAccProvider.Meta().(*cfg.Config)
-		mrsClient, err := config.MrsV1Client(env.OS_REGION_NAME)
+		mrsClient, err := config.MrsV1Client(env.OsRegionName)
 		if err != nil {
 			return fmt.Errorf("error creating opentelekomcloud mrs client: %s ", err)
 		}
@@ -133,4 +133,4 @@ resource "opentelekomcloud_mrs_job_v1" "job1" {
   output = "s3a://tf-mrs-test/output/"
   job_log = "s3a://tf-mrs-test/joblog/"
   arguments = "wordcount"
-}`, env.OS_AVAILABILITY_ZONE, env.OS_VPC_ID, env.OS_NETWORK_ID)
+}`, env.OsAvailabilityZone, env.OsRouterID, env.OsNetworkID)

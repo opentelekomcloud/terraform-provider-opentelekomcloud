@@ -61,7 +61,7 @@ func TestAccLBV2L7Rule_basic(t *testing.T) {
 
 func testAccCheckLBV2L7RuleDestroy(s *terraform.State) error {
 	config := common.TestAccProvider.Meta().(*cfg.Config)
-	lbClient, err := config.NetworkingV2Client(env.OS_REGION_NAME)
+	lbClient, err := config.NetworkingV2Client(env.OsRegionName)
 	if err != nil {
 		return fmt.Errorf("error creating OpenTelekomCloud load balancing client: %s", err)
 	}
@@ -104,7 +104,7 @@ func testAccCheckLBV2L7RuleExists(n string, l7rule *l7rules.Rule) resource.TestC
 		}
 
 		config := common.TestAccProvider.Meta().(*cfg.Config)
-		lbClient, err := config.NetworkingV2Client(env.OS_REGION_NAME)
+		lbClient, err := config.NetworkingV2Client(env.OsRegionName)
 		if err != nil {
 			return fmt.Errorf("error creating OpenTelekomCloud load balancing client: %s", err)
 		}
@@ -164,7 +164,7 @@ resource "opentelekomcloud_lb_l7policy_v2" "l7policy_1" {
   listener_id  = opentelekomcloud_lb_listener_v2.listener_1.id
   redirect_pool_id = opentelekomcloud_lb_pool_v2.pool_1.id
 }
-`, env.OS_SUBNET_ID)
+`, env.OsSubnetID)
 
 var testAccCheckLBV2L7RuleConfig_basic = fmt.Sprintf(`
 %s

@@ -10,7 +10,7 @@ import (
 func testAccPreCheckDms(t *testing.T) {
 	common.TestAccPreCheckRequiredEnvVars(t)
 
-	if env.OS_DMS_ENVIRONMENT == "" {
+	if env.OsDmsEnvironment == "" {
 		t.Skip("This environment does not support DMS tests")
 	}
 }

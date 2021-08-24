@@ -50,7 +50,7 @@ func TestAccIdentityV3RoleAssignment_basic(t *testing.T) {
 
 func testAccCheckIdentityV3RoleAssignmentDestroy(s *terraform.State) error {
 	config := common.TestAccProvider.Meta().(*cfg.Config)
-	identityClient, err := config.IdentityV3Client(env.OS_REGION_NAME)
+	identityClient, err := config.IdentityV3Client(env.OsRegionName)
 	if err != nil {
 		return fmt.Errorf("error creating OpenTelekomCloud identity client: %s", err)
 	}
@@ -81,7 +81,7 @@ func testAccCheckIdentityV3RoleAssignmentExists(n string, role *roles.Role, grou
 		}
 
 		config := common.TestAccProvider.Meta().(*cfg.Config)
-		identityClient, err := config.IdentityV3Client(env.OS_REGION_NAME)
+		identityClient, err := config.IdentityV3Client(env.OsRegionName)
 		if err != nil {
 			return fmt.Errorf("error creating OpenTelekomCloud identity client: %s", err)
 		}

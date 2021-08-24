@@ -30,7 +30,7 @@ func TestAccObsBucket_basic(t *testing.T) {
 					resource.TestCheckResourceAttr(resourceName, "bucket_domain_name", testAccObsBucketDomainName(rInt)),
 					resource.TestCheckResourceAttr(resourceName, "acl", "private"),
 					resource.TestCheckResourceAttr(resourceName, "storage_class", "STANDARD"),
-					resource.TestCheckResourceAttr(resourceName, "region", env.OS_REGION_NAME),
+					resource.TestCheckResourceAttr(resourceName, "region", env.OsRegionName),
 				),
 			},
 			{
@@ -43,7 +43,7 @@ func TestAccObsBucket_basic(t *testing.T) {
 			{
 				Config: testAccObsBucketSSE(rInt),
 				Check: resource.ComposeTestCheckFunc(testAccCheckObsBucketExists(resourceName),
-					resource.TestCheckResourceAttr(resourceName, "server_side_encryption.0.kms_key_id", env.OS_KMS_ID),
+					resource.TestCheckResourceAttr(resourceName, "server_side_encryption.0.kms_key_id", env.OsKmsID),
 					resource.TestCheckResourceAttr(resourceName, "server_side_encryption.0.algorithm", "aws:kms"),
 				),
 			},
@@ -216,7 +216,7 @@ func TestAccObsBucket_notifications(t *testing.T) {
 
 func testAccCheckObsBucketDestroy(s *terraform.State) error {
 	config := common.TestAccProvider.Meta().(*cfg.Config)
-	client, err := config.NewObjectStorageClient(env.OS_REGION_NAME)
+	client, err := config.NewObjectStorageClient(env.OsRegionName)
 	if err != nil {
 		return fmt.Errorf("error creating OpenTelekomCloud OBS client: %s", err)
 	}
@@ -246,7 +246,7 @@ func testAccCheckObsBucketExists(n string) resource.TestCheckFunc {
 		}
 
 		config := common.TestAccProvider.Meta().(*cfg.Config)
-		client, err := config.NewObjectStorageClient(env.OS_REGION_NAME)
+		client, err := config.NewObjectStorageClient(env.OsRegionName)
 		if err != nil {
 			return fmt.Errorf("error creating OpenTelekomCloud OBS client: %s", err)
 		}
@@ -267,7 +267,7 @@ func testAccCheckObsBucketLogging(name, target, prefix string) resource.TestChec
 		}
 
 		config := common.TestAccProvider.Meta().(*cfg.Config)
-		client, err := config.NewObjectStorageClient(env.OS_REGION_NAME)
+		client, err := config.NewObjectStorageClient(env.OsRegionName)
 		if err != nil {
 			return fmt.Errorf("error creating OpenTelekomCloud OBS client: %s", err)
 		}
@@ -296,7 +296,7 @@ func testAccObsBucketName(randInt int) string {
 }
 
 func testAccObsBucketDomainName(randInt int) string {
-	return fmt.Sprintf("tf-test-bucket-%d.obs.%s.otc.t-systems.com", randInt, env.OS_REGION_NAME)
+	return fmt.Sprintf("tf-test-bucket-%d.obs.%s.otc.t-systems.com", randInt, env.OsRegionName)
 }
 
 func testAccObsBucketBasic(randInt int) string {
@@ -331,7 +331,7 @@ resource "opentelekomcloud_obs_bucket" "bucket" {
     kms_key_id = "%s"
   }
 }
-`, randInt, env.OS_KMS_ID)
+`, randInt, env.OsKmsID)
 }
 
 func testAccObsBucketConfigWithTags(randInt int) string {

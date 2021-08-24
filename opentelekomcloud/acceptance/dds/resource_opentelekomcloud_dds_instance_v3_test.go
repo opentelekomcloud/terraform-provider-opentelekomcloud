@@ -50,7 +50,7 @@ func TestAccDDSV3Instance_minConfig(t *testing.T) {
 
 func testAccCheckDDSV3InstanceDestroy(s *terraform.State) error {
 	config := common.TestAccProvider.Meta().(*cfg.Config)
-	client, err := config.DdsV3Client(env.OS_REGION_NAME)
+	client, err := config.DdsV3Client(env.OsRegionName)
 	if err != nil {
 		return fmt.Errorf("error creating OpenTelekomCloud DDSv3 client: %s", err)
 	}
@@ -91,7 +91,7 @@ func testAccCheckDDSV3InstanceExists(n string) resource.TestCheckFunc {
 			return fmt.Errorf("no ID is set")
 		}
 		config := common.TestAccProvider.Meta().(*cfg.Config)
-		client, err := config.DdsV3Client(env.OS_REGION_NAME)
+		client, err := config.DdsV3Client(env.OsRegionName)
 		if err != nil {
 			return fmt.Errorf("error creating OpenTelekomCloud DDSv3 client: %s ", err)
 		}
@@ -144,7 +144,7 @@ resource "opentelekomcloud_dds_instance_v3" "instance" {
     start_time = "08:00-09:00"
     keep_days = "1"
   }
-}`, env.OS_AVAILABILITY_ZONE, env.OS_REGION_NAME, env.OS_VPC_ID, env.OS_NETWORK_ID)
+}`, env.OsAvailabilityZone, env.OsRegionName, env.OsRouterID, env.OsNetworkID)
 
 var TestAccDDSInstanceV3Config_minConfig = fmt.Sprintf(`
 resource "opentelekomcloud_networking_secgroup_v2" "sg_acc" {
@@ -169,4 +169,4 @@ resource "opentelekomcloud_dds_instance_v3" "instance" {
     size = 20
     spec_code = "dds.mongodb.s2.medium.4.repset"
   }
-}`, env.OS_AVAILABILITY_ZONE, env.OS_VPC_ID, env.OS_NETWORK_ID)
+}`, env.OsAvailabilityZone, env.OsRouterID, env.OsNetworkID)

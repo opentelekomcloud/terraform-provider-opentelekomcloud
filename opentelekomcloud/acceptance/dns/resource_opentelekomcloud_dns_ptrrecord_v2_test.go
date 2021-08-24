@@ -65,7 +65,7 @@ func TestAccDNSV2PtrRecord_undotted(t *testing.T) {
 
 func testAccCheckDNSV2PtrRecordDestroy(s *terraform.State) error {
 	config := common.TestAccProvider.Meta().(*cfg.Config)
-	client, err := config.DnsV2Client(env.OS_REGION_NAME)
+	client, err := config.DnsV2Client(env.OsRegionName)
 	if err != nil {
 		return fmt.Errorf("error creating OpenTelekomCloud DNS client: %s", err)
 	}
@@ -96,7 +96,7 @@ func testAccCheckDNSV2PtrRecordExists(n string, ptr *ptrrecords.Ptr) resource.Te
 		}
 
 		config := common.TestAccProvider.Meta().(*cfg.Config)
-		client, err := config.DnsV2Client(env.OS_REGION_NAME)
+		client, err := config.DnsV2Client(env.OsRegionName)
 		if err != nil {
 			return fmt.Errorf("error creating OpenTelekomCloud DNS client: %s", err)
 		}

@@ -25,7 +25,7 @@ func TestAccSMNV2Topic_basic(t *testing.T) {
 			{
 				Config: TestAccSMNV2TopicConfig_basic,
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckSMNV2TopicExists("opentelekomcloud_smn_topic_v2.topic_1", &topic, env.OS_TENANT_NAME),
+					testAccCheckSMNV2TopicExists("opentelekomcloud_smn_topic_v2.topic_1", &topic, env.OsTenantName),
 					resource.TestCheckResourceAttr(
 						"opentelekomcloud_smn_topic_v2.topic_1", "name", "topic_1"),
 					resource.TestCheckResourceAttr(
@@ -53,7 +53,7 @@ func TestAccSMNV2Topic_schemaProjectName(t *testing.T) {
 	if projectName2 == "" {
 		t.Skip("OS_PROJECT_NAME_2 should be set in order to run test")
 	}
-	env.OS_TENANT_NAME = cfg.ProjectName(projectName2)
+	env.OsTenantName = cfg.ProjectName(projectName2)
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:          func() { common.TestAccPreCheck(t) },
@@ -61,21 +61,21 @@ func TestAccSMNV2Topic_schemaProjectName(t *testing.T) {
 		CheckDestroy:      testAccCheckSMNTopicV2Destroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccSMNV2TopicConfig_projectName(env.OS_TENANT_NAME),
+				Config: testAccSMNV2TopicConfig_projectName(env.OsTenantName),
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckSMNV2TopicExists("opentelekomcloud_smn_topic_v2.topic_1", &topic, env.OS_TENANT_NAME),
+					testAccCheckSMNV2TopicExists("opentelekomcloud_smn_topic_v2.topic_1", &topic, env.OsTenantName),
 					resource.TestCheckResourceAttr(
-						"opentelekomcloud_smn_topic_v2.topic_1", "project_name", string(env.OS_TENANT_NAME)),
+						"opentelekomcloud_smn_topic_v2.topic_1", "project_name", string(env.OsTenantName)),
 				),
 			},
 		},
 	})
-	env.OS_TENANT_NAME = env.GetTenantName()
+	env.OsTenantName = env.GetTenantName()
 }
 
 func testAccCheckSMNTopicV2Destroy(s *terraform.State) error {
 	config := common.TestAccProvider.Meta().(*cfg.Config)
-	smnClient, err := config.SmnV2Client(env.OS_TENANT_NAME)
+	smnClient, err := config.SmnV2Client(env.OsTenantName)
 	if err != nil {
 		return fmt.Errorf("error creating OpenTelekomCloud smn: %s", err)
 	}

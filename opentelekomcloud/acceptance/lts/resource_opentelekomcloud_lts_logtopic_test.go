@@ -36,7 +36,7 @@ func TestAccLogTankTopicV2_basic(t *testing.T) {
 
 func testAccCheckLogTankTopicV2Destroy(s *terraform.State) error {
 	config := common.TestAccProvider.Meta().(*cfg.Config)
-	ltsclient, err := config.LtsV2Client(env.OS_REGION_NAME)
+	ltsclient, err := config.LtsV2Client(env.OsRegionName)
 	if err != nil {
 		return fmt.Errorf("error creating OpenTelekomCloud LTS client: %s", err)
 	}
@@ -70,7 +70,7 @@ func testAccCheckLogTankTopicV2Exists(n string, topic *logtopics.LogTopic) resou
 		}
 
 		config := common.TestAccProvider.Meta().(*cfg.Config)
-		ltsclient, err := config.LtsV2Client(env.OS_REGION_NAME)
+		ltsclient, err := config.LtsV2Client(env.OsRegionName)
 		if err != nil {
 			return fmt.Errorf("error creating OpenTelekomCloud LTS client: %s", err)
 		}

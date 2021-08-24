@@ -21,7 +21,7 @@ func TestAccDDSInstanceV3DataSource_basic(t *testing.T) {
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckDDSInstanceV3DataSourceID("data.opentelekomcloud_dds_instance_v3.instances"),
 					resource.TestCheckResourceAttr("data.opentelekomcloud_dds_instance_v3.instances", "name", "dds-instance"),
-					resource.TestCheckResourceAttr("data.opentelekomcloud_dds_instance_v3.instances", "vpc_id", env.OS_VPC_ID),
+					resource.TestCheckResourceAttr("data.opentelekomcloud_dds_instance_v3.instances", "vpc_id", env.OsRouterID),
 					resource.TestCheckResourceAttr("data.opentelekomcloud_dds_instance_v3.instances", "mode", "ReplicaSet"),
 					resource.TestCheckResourceAttr("data.opentelekomcloud_dds_instance_v3.instances", "datastore.0.type", "DDS-Community"),
 				),
@@ -73,4 +73,4 @@ resource "opentelekomcloud_dds_instance_v3" "instance_1" {
 data "opentelekomcloud_dds_instance_v3" "instances" {
   instance_id = opentelekomcloud_dds_instance_v3.instance_1.id
 }
-`, env.OS_AVAILABILITY_ZONE, env.OS_VPC_ID, env.OS_NETWORK_ID)
+`, env.OsAvailabilityZone, env.OsRouterID, env.OsNetworkID)

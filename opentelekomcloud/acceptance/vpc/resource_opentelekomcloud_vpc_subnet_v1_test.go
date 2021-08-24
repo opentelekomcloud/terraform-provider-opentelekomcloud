@@ -88,7 +88,7 @@ func TestAccVpcSubnetV1DnsList(t *testing.T) {
 
 func testAccCheckVpcSubnetV1Destroy(s *terraform.State) error {
 	config := common.TestAccProvider.Meta().(*cfg.Config)
-	client, err := config.NetworkingV1Client(env.OS_REGION_NAME)
+	client, err := config.NetworkingV1Client(env.OsRegionName)
 	if err != nil {
 		return fmt.Errorf("error creating OpenTelekomCloud NetworkingV1 client: %w", err)
 	}
@@ -118,7 +118,7 @@ func testAccCheckVpcSubnetV1Exists(n string, subnet *subnets.Subnet) resource.Te
 		}
 
 		config := common.TestAccProvider.Meta().(*cfg.Config)
-		client, err := config.NetworkingV1Client(env.OS_REGION_NAME)
+		client, err := config.NetworkingV1Client(env.OsRegionName)
 		if err != nil {
 			return fmt.Errorf("error creating OpenTelekomCloud NetworkingV1 client: %w", err)
 		}

@@ -21,7 +21,7 @@ func TestAccOTCBMSV2FlavorDataSource_basic(t *testing.T) {
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckBMSV2FlavorDataSourceID("data.opentelekomcloud_compute_bms_flavors_v2.flavor"),
 					resource.TestCheckResourceAttr(
-						"data.opentelekomcloud_compute_bms_flavors_v2.flavor", "name", env.OS_BMS_FLAVOR_NAME),
+						"data.opentelekomcloud_compute_bms_flavors_v2.flavor", "name", env.OsBmsFlavorName),
 				),
 			},
 		},
@@ -47,4 +47,4 @@ var testAccBMSV2FlavorDataSource_basic = fmt.Sprintf(`
 data "opentelekomcloud_compute_bms_flavors_v2" "flavor" {
   name = "%s"
 }
-`, env.OS_BMS_FLAVOR_NAME)
+`, env.OsBmsFlavorName)

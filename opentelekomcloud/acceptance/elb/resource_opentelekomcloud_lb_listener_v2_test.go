@@ -105,7 +105,7 @@ func TestAccLBV2ListenerSni(t *testing.T) {
 
 func testAccCheckLBV2ListenerDestroy(s *terraform.State) error {
 	config := common.TestAccProvider.Meta().(*cfg.Config)
-	networkingClient, err := config.NetworkingV2Client(env.OS_REGION_NAME)
+	networkingClient, err := config.NetworkingV2Client(env.OsRegionName)
 	if err != nil {
 		return fmt.Errorf("error creating OpenTelekomCloud networking client: %s", err)
 	}
@@ -136,7 +136,7 @@ func testAccCheckLBV2ListenerExists(n string, listener *listeners.Listener) reso
 		}
 
 		config := common.TestAccProvider.Meta().(*cfg.Config)
-		networkingClient, err := config.NetworkingV2Client(env.OS_REGION_NAME)
+		networkingClient, err := config.NetworkingV2Client(env.OsRegionName)
 		if err != nil {
 			return fmt.Errorf("error creating OpenTelekomCloud networking client: %s", err)
 		}
@@ -180,7 +180,7 @@ resource "opentelekomcloud_lb_listener_v2" "listener_1" {
     delete = "5m"
   }
 }
-`, env.OS_SUBNET_ID)
+`, env.OsSubnetID)
 
 	testAccLBV2ListenerConfigUpdate = fmt.Sprintf(`
 resource "opentelekomcloud_lb_loadbalancer_v2" "loadbalancer_1" {
@@ -206,7 +206,7 @@ resource "opentelekomcloud_lb_listener_v2" "listener_1" {
     delete = "5m"
   }
 }
-`, env.OS_SUBNET_ID)
+`, env.OsSubnetID)
 	testAccLBV2ListenerConfigHTTP2 = fmt.Sprintf(`
 resource "opentelekomcloud_lb_certificate_v2" "certificate_tls" {
   name        = "certificate_tls"
@@ -330,7 +330,7 @@ resource "opentelekomcloud_lb_listener_v2" "listener_tls" {
     delete = "5m"
   }
 }
-`, env.OS_SUBNET_ID)
+`, env.OsSubnetID)
 
 	testAccLBV2ListenerConfigUpdateHTTP2 = fmt.Sprintf(`
 resource "opentelekomcloud_lb_loadbalancer_v2" "loadbalancer_tls" {
@@ -447,7 +447,7 @@ resource "opentelekomcloud_lb_listener_v2" "listener_tls" {
     delete = "5m"
   }
 }
-`, env.OS_SUBNET_ID)
+`, env.OsSubnetID)
 )
 
 func testAccLBV2ListenerConfigCert(count int) string {
@@ -530,5 +530,5 @@ resource "opentelekomcloud_lb_listener_v2" "elb_listener" {
     for s in opentelekomcloud_lb_certificate_v2.elb_certificates : s.id
   ]
 }
-`, env.OS_SUBNET_ID, count)
+`, env.OsSubnetID, count)
 }

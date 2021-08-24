@@ -56,7 +56,7 @@ func TestAccOTCRtsSoftwareConfigV1_timeout(t *testing.T) {
 
 func testAccCheckRtsSoftwareConfigV1Destroy(s *terraform.State) error {
 	config := common.TestAccProvider.Meta().(*cfg.Config)
-	orchestrationClient, err := config.OrchestrationV1Client(env.OS_REGION_NAME)
+	orchestrationClient, err := config.OrchestrationV1Client(env.OsRegionName)
 	if err != nil {
 		return fmt.Errorf("error creating OpenTelekomCloud orchestration client: %s", err)
 	}
@@ -87,7 +87,7 @@ func testAccCheckRtsSoftwareConfigV1Exists(n string, configs *softwareconfig.Sof
 		}
 
 		config := common.TestAccProvider.Meta().(*cfg.Config)
-		orchestrationClient, err := config.OrchestrationV1Client(env.OS_REGION_NAME)
+		orchestrationClient, err := config.OrchestrationV1Client(env.OsRegionName)
 		if err != nil {
 			return fmt.Errorf("error creating OpenTelekomCloud orchestration client: %s", err)
 		}

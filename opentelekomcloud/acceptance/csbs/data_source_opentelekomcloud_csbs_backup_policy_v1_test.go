@@ -76,4 +76,4 @@ resource "opentelekomcloud_csbs_backup_policy_v1" "backup_policy_v1" {
 data "opentelekomcloud_csbs_backup_policy_v1" "csbs_policy" {
   id = opentelekomcloud_csbs_backup_policy_v1.backup_policy_v1.id
 }
-`, env.OS_IMAGE_ID, env.OS_AVAILABILITY_ZONE, env.OS_FLAVOR_ID, env.OS_NETWORK_ID)
+`, env.OsImageID, env.OsAvailabilityZone, env.OsFlavorID, env.OsNetworkID)

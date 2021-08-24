@@ -45,7 +45,7 @@ func TestAccSdrsProtectedInstanceV1_basic(t *testing.T) {
 
 func testAccSdrsProtectedInstanceV1Destroy(s *terraform.State) error {
 	config := common.TestAccProvider.Meta().(*cfg.Config)
-	client, err := config.SdrsV1Client(env.OS_REGION_NAME)
+	client, err := config.SdrsV1Client(env.OsRegionName)
 	if err != nil {
 		return fmt.Errorf("error creating OpenTelekomCloud SDRS client: %s", err)
 	}
@@ -76,7 +76,7 @@ func testAccSdrsProtectedInstanceV1Exists(n string, instance *protectedinstances
 		}
 
 		config := common.TestAccProvider.Meta().(*cfg.Config)
-		client, err := config.SdrsV1Client(env.OS_REGION_NAME)
+		client, err := config.SdrsV1Client(env.OsRegionName)
 		if err != nil {
 			return fmt.Errorf("error creating OpenTelekomCloud SDRS client: %s", err)
 		}
@@ -131,7 +131,7 @@ resource "opentelekomcloud_sdrs_protected_instance_v1" "instance_1" {
     kuh = "value-create"
   }
 }
-`, env.OS_AVAILABILITY_ZONE, env.OS_VPC_ID, env.OS_IMAGE_ID, env.OS_NETWORK_ID)
+`, env.OsAvailabilityZone, env.OsRouterID, env.OsImageID, env.OsNetworkID)
 
 var testAccSdrsProtectedInstanceV1_update = fmt.Sprintf(`
 resource "opentelekomcloud_sdrs_protectiongroup_v1" "group_1" {
@@ -167,4 +167,4 @@ resource "opentelekomcloud_sdrs_protected_instance_v1" "instance_1" {
     muh = "value-update"
   }
 }
-`, env.OS_AVAILABILITY_ZONE, env.OS_VPC_ID, env.OS_IMAGE_ID, env.OS_NETWORK_ID)
+`, env.OsAvailabilityZone, env.OsRouterID, env.OsImageID, env.OsNetworkID)

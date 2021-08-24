@@ -119,7 +119,7 @@ resource "opentelekomcloud_cbr_vault_v3" "vault" {
     type = "OS::Nova::Server"
   }
 }
-`, env.OS_IMAGE_ID, env.OS_FLAVOR_NAME, env.OS_NETWORK_ID)
+`, env.OsImageID, env.OsFlavorName, env.OsNetworkID)
 )
 
 const (

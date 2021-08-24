@@ -57,7 +57,7 @@ func TestAccNetworkingV2Router_update_external_gw(t *testing.T) {
 			{
 				Config: testAccNetworkingV2RouterUpdateExternalGw,
 				Check: resource.ComposeTestCheckFunc(
-					resource.TestCheckResourceAttr(resourceName, "external_gateway", env.OS_EXTGW_ID),
+					resource.TestCheckResourceAttr(resourceName, "external_gateway", env.OsExtGwID),
 				),
 			},
 		},
@@ -85,7 +85,7 @@ func TestAccNetworkingV2Router_timeout(t *testing.T) {
 
 func testAccCheckNetworkingV2RouterDestroy(s *terraform.State) error {
 	config := common.TestAccProvider.Meta().(*cfg.Config)
-	client, err := config.NetworkingV2Client(env.OS_REGION_NAME)
+	client, err := config.NetworkingV2Client(env.OsRegionName)
 	if err != nil {
 		return fmt.Errorf("error creating OpenTelekomCloud NetworkingV2 client: %w", err)
 	}
@@ -127,7 +127,7 @@ resource "opentelekomcloud_networking_router_v2" "router_1" {
   distributed      = false
   external_gateway = "%s"
 }
-`, env.OS_EXTGW_ID)
+`, env.OsExtGwID)
 
 const testAccNetworkingV2RouterTimeout = `
 resource "opentelekomcloud_networking_router_v2" "router_1" {

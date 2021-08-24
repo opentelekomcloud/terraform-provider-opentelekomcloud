@@ -103,7 +103,7 @@ resource "opentelekomcloud_css_cluster_v1" "cluster" {
   enable_authority = true
   admin_pass       = "QwertyUI!"
 }
-`, name, env.OS_NETWORK_ID, env.OS_VPC_ID, env.OS_AVAILABILITY_ZONE)
+`, name, env.OsNetworkID, env.OsRouterID, env.OsAvailabilityZone)
 }
 func testAccCssClusterV1_tooSmall(name string) string {
 	return fmt.Sprintf(`
@@ -133,7 +133,7 @@ resource "opentelekomcloud_css_cluster_v1" "cluster" {
   enable_authority = true
   admin_pass       = "QwertyUI!"
 }
-`, name, env.OS_NETWORK_ID, env.OS_VPC_ID, env.OS_AVAILABILITY_ZONE)
+`, name, env.OsNetworkID, env.OsRouterID, env.OsAvailabilityZone)
 }
 func testAccCssClusterV1_tooBig(name string) string {
 	return fmt.Sprintf(`
@@ -163,7 +163,7 @@ resource "opentelekomcloud_css_cluster_v1" "cluster" {
   enable_authority = true
   admin_pass       = "QwertyUI!"
 }
-`, name, env.OS_NETWORK_ID, env.OS_VPC_ID, env.OS_AVAILABILITY_ZONE)
+`, name, env.OsNetworkID, env.OsRouterID, env.OsAvailabilityZone)
 }
 
 func testAccCssClusterV1FlavorName(name string) string {
@@ -194,7 +194,7 @@ resource "opentelekomcloud_css_cluster_v1" "cluster" {
   enable_authority = true
   admin_pass       = "QwertyUI!"
 }
-`, name, env.OS_NETWORK_ID, env.OS_VPC_ID, env.OS_AVAILABILITY_ZONE)
+`, name, env.OsNetworkID, env.OsRouterID, env.OsAvailabilityZone)
 }
 
 func testAccCssClusterV1_extend(name string) string {
@@ -225,12 +225,12 @@ resource "opentelekomcloud_css_cluster_v1" "cluster" {
   enable_authority = true
   admin_pass       = "QwertyUI!"
 }
-`, name, env.OS_NETWORK_ID, env.OS_VPC_ID, env.OS_AVAILABILITY_ZONE)
+`, name, env.OsNetworkID, env.OsRouterID, env.OsAvailabilityZone)
 }
 
 func testAccCheckCssClusterV1Destroy(s *terraform.State) error {
 	config := acc.TestAccProvider.Meta().(*cfg.Config)
-	client, err := config.CssV1Client(env.OS_REGION_NAME)
+	client, err := config.CssV1Client(env.OsRegionName)
 	if err != nil {
 		return fmt.Errorf("error creating sdk client, err=%s", err)
 	}
@@ -259,7 +259,7 @@ func testAccCheckCssClusterV1Destroy(s *terraform.State) error {
 func testAccCheckCssClusterV1Exists() resource.TestCheckFunc {
 	return func(s *terraform.State) error {
 		config := acc.TestAccProvider.Meta().(*cfg.Config)
-		client, err := config.CssV1Client(env.OS_REGION_NAME)
+		client, err := config.CssV1Client(env.OsRegionName)
 		if err != nil {
 			return fmt.Errorf("error creating sdk client, err=%s", err)
 		}

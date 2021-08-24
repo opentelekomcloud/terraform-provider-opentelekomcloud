@@ -72,7 +72,7 @@ func TestAccCBRPolicyV3_minConfig(t *testing.T) {
 
 func testAccCheckCBRPolicyV3Destroy(s *terraform.State) error {
 	config := common.TestAccProvider.Meta().(*cfg.Config)
-	asClient, err := config.CbrV3Client(env.OS_REGION_NAME)
+	asClient, err := config.CbrV3Client(env.OsRegionName)
 	if err != nil {
 		return fmt.Errorf("error creating OpenTelekomCloud CBRv3 client: %s", err)
 	}
@@ -103,7 +103,7 @@ func testAccCheckCBRPolicyV3Exists(n string, group *policies.Policy) resource.Te
 		}
 
 		config := common.TestAccProvider.Meta().(*cfg.Config)
-		client, err := config.CbrV3Client(env.OS_REGION_NAME)
+		client, err := config.CbrV3Client(env.OsRegionName)
 		if err != nil {
 			return fmt.Errorf("error creating OpenTelekomCloud CBRv3 client: %s", err)
 		}

@@ -133,7 +133,7 @@ func TestAccCCEClusterV3NoAddons(t *testing.T) {
 
 func testAccCheckCCEClusterV3Destroy(s *terraform.State) error {
 	config := common.TestAccProvider.Meta().(*cfg.Config)
-	cceClient, err := config.CceV3Client(env.OS_REGION_NAME)
+	cceClient, err := config.CceV3Client(env.OsRegionName)
 	if err != nil {
 		return fmt.Errorf("error creating opentelekomcloud CCE client: %s", err)
 	}
@@ -164,7 +164,7 @@ func testAccCheckCCEClusterV3Exists(n string, cluster *clusters.Clusters) resour
 		}
 
 		config := common.TestAccProvider.Meta().(*cfg.Config)
-		cceClient, err := config.CceV3Client(env.OS_REGION_NAME)
+		cceClient, err := config.CceV3Client(env.OsRegionName)
 		if err != nil {
 			return fmt.Errorf("error creating opentelekomcloud CCE client: %s", err)
 		}
@@ -214,7 +214,7 @@ resource "opentelekomcloud_cce_cluster_v3" "cluster_1" {
   subnet_id               = "%s"
   container_network_type  = "overlay_l2"
   kubernetes_svc_ip_range = "10.247.0.0/16"
-}`, clusterName, env.OS_VPC_ID, env.OS_NETWORK_ID)
+}`, clusterName, env.OsRouterID, env.OsNetworkID)
 
 	testAccCCEClusterV3Update = fmt.Sprintf(`
 resource "opentelekomcloud_cce_cluster_v3" "cluster_1" {
@@ -226,7 +226,7 @@ resource "opentelekomcloud_cce_cluster_v3" "cluster_1" {
   container_network_type  = "overlay_l2"
   description             = "new description"
   kubernetes_svc_ip_range = "10.247.0.0/16"
-}`, clusterName, env.OS_VPC_ID, env.OS_NETWORK_ID)
+}`, clusterName, env.OsRouterID, env.OsNetworkID)
 
 	testAccCCEClusterV3Timeout = fmt.Sprintf(`
 resource "opentelekomcloud_networking_floatingip_v2" "fip_1" {
@@ -248,7 +248,7 @@ resource "opentelekomcloud_cce_cluster_v3" "cluster_1" {
 
   multi_az = true
 }
-`, clusterName, env.OS_VPC_ID, env.OS_NETWORK_ID)
+`, clusterName, env.OsRouterID, env.OsNetworkID)
 
 	testAccCCEClusterV3WithInvalidVersion = fmt.Sprintf(`
 resource "opentelekomcloud_cce_cluster_v3" "cluster_1" {
@@ -260,7 +260,7 @@ resource "opentelekomcloud_cce_cluster_v3" "cluster_1" {
   subnet_id              = "%s"
   container_network_type = "overlay_l2"
   description            = "new description"
-}`, clusterName, env.OS_VPC_ID, env.OS_NETWORK_ID)
+}`, clusterName, env.OsRouterID, env.OsNetworkID)
 
 	testAccCCEClusterV3AuthProxy = fmt.Sprintf(`
 resource "opentelekomcloud_cce_cluster_v3" "cluster_1" {
@@ -296,7 +296,7 @@ i34R7EQDtFeiSvBdeKRsPp8c0KT8H1B4lXNkkCQs2WX5p4lm99+ZtLD4glw8x6Ic
 i1YhgnQbn5E0hz55OLu5jvOkKQjPCW+9Aa==
 -----END CERTIFICATE-----
 EOT
-}`, clusterName, env.OS_VPC_ID, env.OS_NETWORK_ID)
+}`, clusterName, env.OsRouterID, env.OsNetworkID)
 
 	testAccCCEClusterV3InvalidSubnet = fmt.Sprintf(`
 resource "opentelekomcloud_vpc_v1" "vpc" {
@@ -383,5 +383,5 @@ resource "opentelekomcloud_cce_cluster_v3" "cluster_1" {
   container_network_type  = "overlay_l2"
   kubernetes_svc_ip_range = "10.247.0.0/16"
   no_addons               = true
-}`, clusterName, env.OS_VPC_ID, env.OS_NETWORK_ID)
+}`, clusterName, env.OsRouterID, env.OsNetworkID)
 )

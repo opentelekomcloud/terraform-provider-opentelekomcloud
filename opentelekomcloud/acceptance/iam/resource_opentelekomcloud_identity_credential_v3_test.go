@@ -54,7 +54,7 @@ func TestAccIdentityV3Credential_basic(t *testing.T) {
 
 func testAccIdentityV3CredentialDestroy(s *terraform.State) error {
 	config := common.TestAccProvider.Meta().(*cfg.Config)
-	client, err := config.IdentityV3Client(env.OS_REGION_NAME)
+	client, err := config.IdentityV3Client(env.OsRegionName)
 	if err != nil {
 		return fmt.Errorf("error creating identity v3 client: %s", err)
 	}
@@ -75,7 +75,7 @@ func testAccIdentityV3CredentialDestroy(s *terraform.State) error {
 }
 
 func checkAKSKUnset(t *testing.T) {
-	if env.OS_SECRET_KEY != "" && env.OS_ACCESS_KEY != "" {
+	if env.OsSecretKey != "" && env.OsAccessKey != "" {
 		t.Error("AK/SK should not be set for AK/SK creation test")
 	}
 }

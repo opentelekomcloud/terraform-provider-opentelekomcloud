@@ -27,9 +27,9 @@ func TestAccSMNV2Subscription_basic(t *testing.T) {
 				Config: TestAccSMNV2SubscriptionConfig_basic,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckSMNV2SubscriptionExists(
-						"opentelekomcloud_smn_subscription_v2.subscription_1", &subscription1, env.OS_TENANT_NAME),
+						"opentelekomcloud_smn_subscription_v2.subscription_1", &subscription1, env.OsTenantName),
 					testAccCheckSMNV2SubscriptionExists(
-						"opentelekomcloud_smn_subscription_v2.subscription_2", &subscription2, env.OS_TENANT_NAME),
+						"opentelekomcloud_smn_subscription_v2.subscription_2", &subscription2, env.OsTenantName),
 					resource.TestCheckResourceAttr(
 						"opentelekomcloud_smn_subscription_v2.subscription_1", "endpoint", "mailtest@gmail.com"),
 					resource.TestCheckResourceAttr(
@@ -47,7 +47,7 @@ func TestAccSMNV2Subscription_schemaProjectName(t *testing.T) {
 	if projectName2 == "" {
 		t.Skip("OS_PROJECT_NAME_2 should be set in order to run test")
 	}
-	env.OS_TENANT_NAME = cfg.ProjectName(projectName2)
+	env.OsTenantName = cfg.ProjectName(projectName2)
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:          func() { common.TestAccPreCheck(t) },
@@ -55,22 +55,22 @@ func TestAccSMNV2Subscription_schemaProjectName(t *testing.T) {
 		CheckDestroy:      testAccCheckSMNSubscriptionV2Destroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccSMNV2SubscriptionConfig_projectName(env.OS_TENANT_NAME),
+				Config: testAccSMNV2SubscriptionConfig_projectName(env.OsTenantName),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckSMNV2SubscriptionExists(
-						"opentelekomcloud_smn_subscription_v2.subscription_1", &subscription1, env.OS_TENANT_NAME),
+						"opentelekomcloud_smn_subscription_v2.subscription_1", &subscription1, env.OsTenantName),
 					resource.TestCheckResourceAttr(
-						"opentelekomcloud_smn_subscription_v2.subscription_1", "project_name", string(env.OS_TENANT_NAME)),
+						"opentelekomcloud_smn_subscription_v2.subscription_1", "project_name", string(env.OsTenantName)),
 				),
 			},
 		},
 	})
-	env.OS_TENANT_NAME = env.GetTenantName()
+	env.OsTenantName = env.GetTenantName()
 }
 
 func testAccCheckSMNSubscriptionV2Destroy(s *terraform.State) error {
 	config := common.TestAccProvider.Meta().(*cfg.Config)
-	smnClient, err := config.SmnV2Client(env.OS_TENANT_NAME)
+	smnClient, err := config.SmnV2Client(env.OsTenantName)
 	if err != nil {
 		return fmt.Errorf("error creating OpenTelekomCloud smn: %s", err)
 	}

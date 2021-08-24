@@ -39,7 +39,7 @@ func TestAccSFSShareAccessRulesV2_basic(t *testing.T) {
 
 func testAccCheckSFSShareAccessRulesV2Destroy(s *terraform.State) error {
 	config := common.TestAccProvider.Meta().(*cfg.Config)
-	client, err := config.SfsV2Client(env.OS_REGION_NAME)
+	client, err := config.SfsV2Client(env.OsRegionName)
 	if err != nil {
 		return fmt.Errorf("error creating OpenTelekomCloud SFSv2 client: %s", err)
 	}

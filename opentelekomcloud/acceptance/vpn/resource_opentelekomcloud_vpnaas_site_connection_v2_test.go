@@ -45,7 +45,7 @@ func TestAccVpnSiteConnectionV2_basic(t *testing.T) {
 
 func testAccCheckSiteConnectionV2Destroy(s *terraform.State) error {
 	config := common.TestAccProvider.Meta().(*cfg.Config)
-	networkingClient, err := config.NetworkingV2Client(env.OS_REGION_NAME)
+	networkingClient, err := config.NetworkingV2Client(env.OsRegionName)
 	if err != nil {
 		return fmt.Errorf("error creating OpenTelekomCloud networking client: %s", err)
 	}
@@ -76,7 +76,7 @@ func testAccCheckSiteConnectionV2Exists(n string, conn *siteconnections.Connecti
 		}
 
 		config := common.TestAccProvider.Meta().(*cfg.Config)
-		networkingClient, err := config.NetworkingV2Client(env.OS_REGION_NAME)
+		networkingClient, err := config.NetworkingV2Client(env.OsRegionName)
 		if err != nil {
 			return fmt.Errorf("error creating OpenTelekomCloud networking client: %s", err)
 		}
@@ -153,4 +153,4 @@ var testAccSiteConnectionV2_basic = fmt.Sprintf(`
 
 		depends_on = ["opentelekomcloud_networking_router_interface_v2.router_interface_1"]
 	}
-	`, env.OS_EXTGW_ID)
+	`, env.OsExtGwID)

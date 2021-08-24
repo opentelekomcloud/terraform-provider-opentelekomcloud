@@ -69,7 +69,7 @@ func TestAccDmsQueuesV1_FIFOmode(t *testing.T) {
 
 func testAccCheckDmsV1QueueDestroy(s *terraform.State) error {
 	config := common.TestAccProvider.Meta().(*cfg.Config)
-	dmsClient, err := config.DmsV1Client(env.OS_REGION_NAME)
+	dmsClient, err := config.DmsV1Client(env.OsRegionName)
 	if err != nil {
 		return fmt.Errorf("error creating OpenTelekomCloud queue client: %s", err)
 	}
@@ -99,7 +99,7 @@ func testAccCheckDmsV1QueueExists(n string, queue queues.Queue) resource.TestChe
 		}
 
 		config := common.TestAccProvider.Meta().(*cfg.Config)
-		dmsClient, err := config.DmsV1Client(env.OS_REGION_NAME)
+		dmsClient, err := config.DmsV1Client(env.OsRegionName)
 		if err != nil {
 			return fmt.Errorf("error creating OpenTelekomCloud queue client: %s", err)
 		}

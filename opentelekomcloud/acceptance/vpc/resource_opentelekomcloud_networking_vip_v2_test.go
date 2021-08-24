@@ -36,7 +36,7 @@ func TestAccNetworkingV2VIP_basic(t *testing.T) {
 // testAccCheckNetworkingV2VIPDestroy checks destroy.
 func testAccCheckNetworkingV2VIPDestroy(s *terraform.State) error {
 	config := common.TestAccProvider.Meta().(*cfg.Config)
-	networkingClient, err := config.NetworkingV2Client(env.OS_REGION_NAME)
+	networkingClient, err := config.NetworkingV2Client(env.OsRegionName)
 	if err != nil {
 		return fmt.Errorf("error creating OpenTelekomCloud networking client: %s", err)
 	}
@@ -70,7 +70,7 @@ func testAccCheckNetworkingV2VIPExists(n string, vip *ports.Port) resource.TestC
 		}
 
 		config := common.TestAccProvider.Meta().(*cfg.Config)
-		networkingClient, err := config.NetworkingV2Client(env.OS_REGION_NAME)
+		networkingClient, err := config.NetworkingV2Client(env.OsRegionName)
 		if err != nil {
 			return fmt.Errorf("error creating OpenTelekomCloud networking client: %s", err)
 		}
@@ -118,4 +118,4 @@ resource "opentelekomcloud_networking_vip_v2" "vip_1" {
   network_id = opentelekomcloud_networking_network_v2.network_1.id
   subnet_id = opentelekomcloud_networking_subnet_v2.subnet_1.id
 }
-`, env.OS_EXTGW_ID)
+`, env.OsExtGwID)

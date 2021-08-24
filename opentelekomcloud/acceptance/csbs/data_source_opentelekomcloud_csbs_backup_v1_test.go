@@ -66,4 +66,4 @@ resource "opentelekomcloud_csbs_backup_v1" "csbs" {
 data "opentelekomcloud_csbs_backup_v1" "csbs" {
   id = opentelekomcloud_csbs_backup_v1.csbs.id
 }
-`, env.OS_IMAGE_ID, env.OS_AVAILABILITY_ZONE, env.OS_FLAVOR_ID, env.OS_NETWORK_ID)
+`, env.OsImageID, env.OsAvailabilityZone, env.OsFlavorID, env.OsNetworkID)

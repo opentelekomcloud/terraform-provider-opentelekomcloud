@@ -92,7 +92,7 @@ func TestAccOTCDedicatedHostV1_timeout(t *testing.T) {
 
 func testAccCheckOTCDeHV1Destroy(s *terraform.State) error {
 	config := common.TestAccProvider.Meta().(*cfg.Config)
-	dehClient, err := config.DehV1Client(env.OS_REGION_NAME)
+	dehClient, err := config.DehV1Client(env.OsRegionName)
 	if err != nil {
 		return fmt.Errorf("error creating OpenTelekomCloud deh client: %s", err)
 	}
@@ -123,7 +123,7 @@ func testAccCheckOTCDeHV1Exists(n string, host *hosts.Host) resource.TestCheckFu
 		}
 
 		config := common.TestAccProvider.Meta().(*cfg.Config)
-		dehClient, err := config.DehV1Client(env.OS_REGION_NAME)
+		dehClient, err := config.DehV1Client(env.OsRegionName)
 		if err != nil {
 			return fmt.Errorf("error creating OpenTelekomCloud DeH client: %s", err)
 		}
@@ -150,7 +150,7 @@ resource "opentelekomcloud_deh_host_v1" "deh1" {
      host_type= "h1"
 	name = "test-deh-1"
 }
-`, env.OS_AVAILABILITY_ZONE)
+`, env.OsAvailabilityZone)
 
 var testAccDeHV1_update = fmt.Sprintf(`
 resource "opentelekomcloud_deh_host_v1" "deh1" {
@@ -159,7 +159,7 @@ resource "opentelekomcloud_deh_host_v1" "deh1" {
      host_type= "h1"
 	name = "test-deh-2"
 }
-`, env.OS_AVAILABILITY_ZONE)
+`, env.OsAvailabilityZone)
 
 var testAccDeHV1_timeout = fmt.Sprintf(`
 resource "opentelekomcloud_deh_host_v1" "deh1" {
@@ -171,4 +171,4 @@ resource "opentelekomcloud_deh_host_v1" "deh1" {
     create = "5m"
     delete = "5m"
   }
-}`, env.OS_AVAILABILITY_ZONE)
+}`, env.OsAvailabilityZone)

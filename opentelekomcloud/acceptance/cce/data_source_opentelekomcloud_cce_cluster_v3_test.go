@@ -57,4 +57,4 @@ resource "opentelekomcloud_cce_cluster_v3" "cluster_1" {
 data "opentelekomcloud_cce_cluster_v3" "clusters" {
   name = opentelekomcloud_cce_cluster_v3.cluster_1.name
 }
-`, env.OS_VPC_ID, env.OS_NETWORK_ID)
+`, env.OsRouterID, env.OsNetworkID)

@@ -17,7 +17,7 @@ import (
 
 func TestAccIdentityV3Project_basic(t *testing.T) {
 	var project projects.Project
-	var projectName = fmt.Sprintf("%s_%s", env.OS_REGION_NAME, acctest.RandString(5))
+	var projectName = fmt.Sprintf("%s_%s", env.OsRegionName, acctest.RandString(5))
 
 	resource.Test(t, resource.TestCase{
 		PreCheck: func() {
@@ -61,7 +61,7 @@ func TestAccIdentityV3Project_basic(t *testing.T) {
 
 func testAccCheckIdentityV3ProjectDestroy(s *terraform.State) error {
 	config := common.TestAccProvider.Meta().(*cfg.Config)
-	identityClient, err := config.IdentityV3Client(env.OS_REGION_NAME)
+	identityClient, err := config.IdentityV3Client(env.OsRegionName)
 	if err != nil {
 		return fmt.Errorf("error creating OpenStack identity client: %s", err)
 	}
@@ -92,7 +92,7 @@ func testAccCheckIdentityV3ProjectExists(n string, project *projects.Project) re
 		}
 
 		config := common.TestAccProvider.Meta().(*cfg.Config)
-		identityClient, err := config.IdentityV3Client(env.OS_REGION_NAME)
+		identityClient, err := config.IdentityV3Client(env.OsRegionName)
 		if err != nil {
 			return fmt.Errorf("error creating OpenStack identity client: %s", err)
 		}

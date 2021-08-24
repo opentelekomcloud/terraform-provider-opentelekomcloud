@@ -48,7 +48,7 @@ func TestAccWafWhiteBlackIpRuleV1_basic(t *testing.T) {
 
 func testAccCheckWafWhiteBlackIpRuleV1Destroy(s *terraform.State) error {
 	config := common.TestAccProvider.Meta().(*cfg.Config)
-	wafClient, err := config.WafV1Client(env.OS_REGION_NAME)
+	wafClient, err := config.WafV1Client(env.OsRegionName)
 	if err != nil {
 		return fmt.Errorf("error creating OpenTelekomCloud WAF client: %s", err)
 	}
@@ -78,7 +78,7 @@ func testAccCheckWafWhiteBlackIpRuleV1Exists(n string, rule *whiteblackip_rules.
 		}
 
 		config := common.TestAccProvider.Meta().(*cfg.Config)
-		wafClient, err := config.WafV1Client(env.OS_REGION_NAME)
+		wafClient, err := config.WafV1Client(env.OsRegionName)
 		if err != nil {
 			return fmt.Errorf("error creating OpenTelekomCloud WAF client: %s", err)
 		}

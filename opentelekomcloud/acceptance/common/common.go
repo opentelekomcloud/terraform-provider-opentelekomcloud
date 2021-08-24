@@ -56,40 +56,40 @@ func init() {
 	err := TestAccProvider.Configure(context.Background(), terraform.NewResourceConfigRaw(nil))
 	if err == nil {
 		config := TestAccProvider.Meta().(*cfg.Config)
-		env.OS_REGION_NAME = config.GetRegion(nil)
+		env.OsRegionName = config.GetRegion(nil)
 	}
 }
 
 func TestAccPreCheckRequiredEnvVars(t *testing.T) {
-	if env.OS_POOL_NAME == "" {
+	if env.OsPoolName == "" {
 		t.Fatal("OS_POOL_NAME must be set for acceptance tests")
 	}
 
-	if env.OS_REGION_NAME == "" {
+	if env.OsRegionName == "" {
 		t.Fatal("OS_TENANT_NAME or OS_PROJECT_NAME must be set for acceptance tests")
 	}
 
-	if env.OS_FLAVOR_ID == "" && env.OS_FLAVOR_NAME == "" {
+	if env.OsFlavorID == "" && env.OsFlavorName == "" {
 		t.Fatal("OS_FLAVOR_ID or OS_FLAVOR_NAME must be set for acceptance tests")
 	}
 
-	if env.OS_NETWORK_ID == "" {
+	if env.OsNetworkID == "" {
 		t.Fatal("OS_NETWORK_ID must be set for acceptance tests")
 	}
 
-	if env.OS_VPC_ID == "" {
+	if env.OsRouterID == "" {
 		t.Fatal("OS_VPC_ID must be set for acceptance tests")
 	}
 
-	if env.OS_AVAILABILITY_ZONE == "" {
+	if env.OsAvailabilityZone == "" {
 		t.Fatal("OS_AVAILABILITY_ZONE must be set for acceptance tests")
 	}
 
-	if env.OS_SUBNET_ID == "" {
+	if env.OsSubnetID == "" {
 		t.Fatal("OS_SUBNET_ID must be set for acceptance tests")
 	}
 
-	if env.OS_EXTGW_ID == "" {
+	if env.OsExtGwID == "" {
 		t.Fatal("OS_EXTGW_ID must be set for acceptance tests")
 	}
 }
@@ -98,7 +98,7 @@ func TestAccPreCheck(t *testing.T) {
 	TestAccPreCheckRequiredEnvVars(t)
 
 	// Do not run the test if this is a deprecated testing environment.
-	if env.OS_DEPRECATED_ENVIRONMENT != "" {
+	if env.OsDeprecatedEnvironment != "" {
 		t.Skip("This environment only runs deprecated tests")
 	}
 }
@@ -112,14 +112,14 @@ func TestAccPreCheckAdminOnly(t *testing.T) {
 
 func TestAccFlavorPreCheck(t *testing.T) {
 	TestAccPreCheckRequiredEnvVars(t)
-	if env.OS_FLAVOR_ID == "" {
+	if env.OsFlavorID == "" {
 		t.Skip("OS_FLAVOR_ID must be set for acceptance tests")
 	}
 }
 
 func TestAccVBSBackupShareCheck(t *testing.T) {
 	TestAccPreCheckRequiredEnvVars(t)
-	if env.OS_TO_TENANT_ID == "" {
+	if env.OsToTenantID == "" {
 		t.Skip("OS_TO_TENANT_ID must be set for acceptance tests")
 	}
 }

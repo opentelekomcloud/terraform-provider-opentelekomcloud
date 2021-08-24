@@ -52,7 +52,7 @@ func TestAccWafDataMaskingRuleV1_basic(t *testing.T) {
 
 func testAccCheckWafDataMaskingRuleV1Destroy(s *terraform.State) error {
 	config := common.TestAccProvider.Meta().(*cfg.Config)
-	wafClient, err := config.WafV1Client(env.OS_REGION_NAME)
+	wafClient, err := config.WafV1Client(env.OsRegionName)
 	if err != nil {
 		return fmt.Errorf("error creating OpenTelekomCloud WAF client: %s", err)
 	}
@@ -82,7 +82,7 @@ func testAccCheckWafDataMaskingRuleV1Exists(n string, rule *datamasking_rules.Da
 		}
 
 		config := common.TestAccProvider.Meta().(*cfg.Config)
-		wafClient, err := config.WafV1Client(env.OS_REGION_NAME)
+		wafClient, err := config.WafV1Client(env.OsRegionName)
 		if err != nil {
 			return fmt.Errorf("error creating OpenTelekomCloud WAF client: %s", err)
 		}

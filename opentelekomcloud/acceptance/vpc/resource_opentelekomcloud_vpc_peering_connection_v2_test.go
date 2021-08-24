@@ -62,7 +62,7 @@ func TestAccVpcPeeringConnectionV2_timeout(t *testing.T) {
 
 func testAccCheckOTCVpcPeeringConnectionV2Destroy(s *terraform.State) error {
 	config := common.TestAccProvider.Meta().(*cfg.Config)
-	peeringClient, err := config.NetworkingV2Client(env.OS_REGION_NAME)
+	peeringClient, err := config.NetworkingV2Client(env.OsRegionName)
 	if err != nil {
 		return fmt.Errorf("error creating OpenTelekomCloud Peering client: %s", err)
 	}
@@ -93,7 +93,7 @@ func testAccCheckOTCVpcPeeringConnectionV2Exists(n string, peering *peerings.Pee
 		}
 
 		config := common.TestAccProvider.Meta().(*cfg.Config)
-		peeringClient, err := config.NetworkingV2Client(env.OS_REGION_NAME)
+		peeringClient, err := config.NetworkingV2Client(env.OsRegionName)
 		if err != nil {
 			return fmt.Errorf("error creating OpenTelekomCloud Peering client: %s", err)
 		}

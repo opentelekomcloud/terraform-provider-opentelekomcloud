@@ -49,7 +49,7 @@ func TestAccDmsInstancesV1_basic(t *testing.T) {
 
 func testAccCheckDmsV1InstanceDestroy(s *terraform.State) error {
 	config := common.TestAccProvider.Meta().(*cfg.Config)
-	client, err := config.DmsV1Client(env.OS_REGION_NAME)
+	client, err := config.DmsV1Client(env.OsRegionName)
 	if err != nil {
 		return fmt.Errorf("error creating OpenTelekomCloud DMSv1 client: %w", err)
 	}
@@ -79,7 +79,7 @@ func testAccCheckDmsV1InstanceExists(n string, instance instances.Instance) reso
 		}
 
 		config := common.TestAccProvider.Meta().(*cfg.Config)
-		client, err := config.DmsV1Client(env.OS_REGION_NAME)
+		client, err := config.DmsV1Client(env.OsRegionName)
 		if err != nil {
 			return fmt.Errorf("error creating OpenTelekomCloud DMSv1 client: %w", err)
 		}
@@ -125,7 +125,7 @@ resource "opentelekomcloud_dms_instance_v1" "instance_1" {
   engine_version    = data.opentelekomcloud_dms_product_v1.product_1.version
   storage_spec_code = data.opentelekomcloud_dms_product_v1.product_1.storage_spec_code
 }
-`, instanceName, env.OS_VPC_ID, env.OS_NETWORK_ID)
+`, instanceName, env.OsRouterID, env.OsNetworkID)
 }
 
 func testAccDmsV1InstanceUpdate(instanceUpdate string) string {
@@ -158,5 +158,5 @@ resource "opentelekomcloud_dms_instance_v1" "instance_1" {
   engine_version    = data.opentelekomcloud_dms_product_v1.product_1.version
   storage_spec_code = data.opentelekomcloud_dms_product_v1.product_1.storage_spec_code
 }
-`, instanceUpdate, env.OS_VPC_ID, env.OS_NETWORK_ID)
+`, instanceUpdate, env.OsRouterID, env.OsNetworkID)
 }

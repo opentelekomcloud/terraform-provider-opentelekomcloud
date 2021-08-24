@@ -142,7 +142,7 @@ func testAccCheckAwsS3ObjectDataSourceExists(n string, obj *s3.GetObjectOutput) 
 		}
 
 		config := common.TestAccProvider.Meta().(*cfg.Config)
-		s3conn, err := config.S3Client(env.OS_REGION_NAME)
+		s3conn, err := config.S3Client(env.OsRegionName)
 		if err != nil {
 			return fmt.Errorf("error creating OpenTelekomCloud s3 client: %s", err)
 		}

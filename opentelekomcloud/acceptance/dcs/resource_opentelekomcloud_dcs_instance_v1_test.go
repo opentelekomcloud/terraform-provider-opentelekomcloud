@@ -56,7 +56,7 @@ func TestAccDcsInstancesV1_basic(t *testing.T) {
 
 func testAccCheckDcsV1InstanceDestroy(s *terraform.State) error {
 	config := common.TestAccProvider.Meta().(*cfg.Config)
-	client, err := config.DcsV1Client(env.OS_REGION_NAME)
+	client, err := config.DcsV1Client(env.OsRegionName)
 	if err != nil {
 		return fmt.Errorf("error creating DCSv1 client: %w", err)
 	}
@@ -86,7 +86,7 @@ func testAccCheckDcsV1InstanceExists(n string, instance instances.Instance) reso
 		}
 
 		config := common.TestAccProvider.Meta().(*cfg.Config)
-		dcsClient, err := config.DcsV1Client(env.OS_REGION_NAME)
+		dcsClient, err := config.DcsV1Client(env.OsRegionName)
 		if err != nil {
 			return fmt.Errorf("error creating DCSv1 client: %w", err)
 		}
@@ -143,7 +143,7 @@ resource "opentelekomcloud_dcs_instance_v1" "instance_1" {
     parameter_value = "100"
   }
 }
-`, env.OS_AVAILABILITY_ZONE, instanceName, env.OS_VPC_ID, env.OS_NETWORK_ID)
+`, env.OsAvailabilityZone, instanceName, env.OsRouterID, env.OsNetworkID)
 }
 func testAccDcsV1InstanceUpdated(instanceName string) string {
 	return fmt.Sprintf(`
@@ -183,7 +183,7 @@ resource "opentelekomcloud_dcs_instance_v1" "instance_1" {
     parameter_value = "200"
   }
 }
-`, env.OS_AVAILABILITY_ZONE, instanceName, env.OS_VPC_ID, env.OS_NETWORK_ID)
+`, env.OsAvailabilityZone, instanceName, env.OsRouterID, env.OsNetworkID)
 }
 
 func testAccDcsV1InstanceSingle(instanceName string) string {
@@ -211,5 +211,5 @@ resource "opentelekomcloud_dcs_instance_v1" "instance_1" {
   available_zones   = [data.opentelekomcloud_dcs_az_v1.az_1.id]
   product_id        = data.opentelekomcloud_dcs_product_v1.product_1.id
 }
-`, env.OS_AVAILABILITY_ZONE, instanceName, env.OS_VPC_ID, env.OS_NETWORK_ID)
+`, env.OsAvailabilityZone, instanceName, env.OsRouterID, env.OsNetworkID)
 }

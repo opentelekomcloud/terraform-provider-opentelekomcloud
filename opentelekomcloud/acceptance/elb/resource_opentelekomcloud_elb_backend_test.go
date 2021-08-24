@@ -34,7 +34,7 @@ func TestAccELBBackend_basic(t *testing.T) {
 
 func testAccCheckELBBackendDestroy(s *terraform.State) error {
 	config := common.TestAccProvider.Meta().(*cfg.Config)
-	client, err := config.ElbV1Client(env.OS_REGION_NAME)
+	client, err := config.ElbV1Client(env.OsRegionName)
 	if err != nil {
 		return fmt.Errorf("error creating OpenTelekomCloud ELBv1 client: %s", err)
 	}
@@ -65,7 +65,7 @@ func testAccCheckELBBackendExists(n string, backend *backendmember.Backend) reso
 		}
 
 		config := common.TestAccProvider.Meta().(*cfg.Config)
-		client, err := config.ElbV1Client(env.OS_REGION_NAME)
+		client, err := config.ElbV1Client(env.OsRegionName)
 		if err != nil {
 			return fmt.Errorf("error creating OpenTelekomCloud networking client: %s", err)
 		}
@@ -138,4 +138,4 @@ resource "opentelekomcloud_elb_backend" "backend_1" {
     delete = "5m"
   }
 }
-`, env.OS_AVAILABILITY_ZONE, env.OS_NETWORK_ID, env.OS_VPC_ID)
+`, env.OsAvailabilityZone, env.OsNetworkID, env.OsRouterID)

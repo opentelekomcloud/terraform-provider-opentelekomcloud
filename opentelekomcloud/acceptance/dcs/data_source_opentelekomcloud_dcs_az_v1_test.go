@@ -48,4 +48,4 @@ data "opentelekomcloud_dcs_az_v1" "az1" {
   code = "%s"
   port = "8002"
 }
-`, env.OS_AVAILABILITY_ZONE)
+`, env.OsAvailabilityZone)

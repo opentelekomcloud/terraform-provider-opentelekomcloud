@@ -19,7 +19,7 @@ func TestAccRdsReadReplicaV3Basic(t *testing.T) {
 
 	secondAZ := "eu-de-02"
 
-	if env.OS_AVAILABILITY_ZONE == secondAZ {
+	if env.OsAvailabilityZone == secondAZ {
 		t.Skip("OS_AVAILABILITY_ZONE should be set to value !=", secondAZ)
 	}
 
@@ -108,7 +108,7 @@ resource "opentelekomcloud_rds_read_replica_v3" "replica" {
   }
 }
 
-`, postfix, env.OS_AVAILABILITY_ZONE, env.OS_NETWORK_ID, env.OS_VPC_ID)
+`, postfix, env.OsAvailabilityZone, env.OsNetworkID, env.OsRouterID)
 }
 
 func testAccRdsReadReplicaV3BasicNoIP(postfix string) string {
@@ -159,5 +159,5 @@ resource "opentelekomcloud_rds_read_replica_v3" "replica" {
     type = "COMMON"
   }
 }
-`, postfix, env.OS_AVAILABILITY_ZONE, env.OS_NETWORK_ID, env.OS_VPC_ID)
+`, postfix, env.OsAvailabilityZone, env.OsNetworkID, env.OsRouterID)
 }

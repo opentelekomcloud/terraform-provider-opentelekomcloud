@@ -56,7 +56,7 @@ func TestAccWafDomainV1Basic(t *testing.T) {
 
 func testAccCheckWafDomainV1Destroy(s *terraform.State) error {
 	config := common.TestAccProvider.Meta().(*cfg.Config)
-	wafClient, err := config.WafV1Client(env.OS_REGION_NAME)
+	wafClient, err := config.WafV1Client(env.OsRegionName)
 	if err != nil {
 		return fmt.Errorf("error creating OpenTelekomCloud WAF client: %w", err)
 	}
@@ -87,7 +87,7 @@ func testAccCheckWafDomainV1Exists(n string, domain *domains.Domain) resource.Te
 		}
 
 		config := common.TestAccProvider.Meta().(*cfg.Config)
-		client, err := config.WafV1Client(env.OS_REGION_NAME)
+		client, err := config.WafV1Client(env.OsRegionName)
 		if err != nil {
 			return fmt.Errorf("error creating OpenTelekomCloud WAF client: %w", err)
 		}
@@ -119,7 +119,7 @@ func testAccCheckWafDomainV1CertificateChanged(n string, domain *domains.Domain)
 		}
 
 		config := common.TestAccProvider.Meta().(*cfg.Config)
-		client, err := config.WafV1Client(env.OS_REGION_NAME)
+		client, err := config.WafV1Client(env.OsRegionName)
 		if err != nil {
 			return fmt.Errorf("error creating OpenTelekomCloud WAF client: %w", err)
 		}

@@ -21,11 +21,11 @@ func TestAccDmsAZV1DataSource_basic(t *testing.T) {
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckDmsAZV1DataSourceID("data.opentelekomcloud_dms_az_v1.az1"),
 					resource.TestCheckResourceAttr(
-						"data.opentelekomcloud_dms_az_v1.az1", "name", env.OS_AVAILABILITY_ZONE),
+						"data.opentelekomcloud_dms_az_v1.az1", "name", env.OsAvailabilityZone),
 					resource.TestCheckResourceAttr(
 						"data.opentelekomcloud_dms_az_v1.az1", "port", "8002"),
 					resource.TestCheckResourceAttr(
-						"data.opentelekomcloud_dms_az_v1.az1", "code", env.OS_AVAILABILITY_ZONE),
+						"data.opentelekomcloud_dms_az_v1.az1", "code", env.OsAvailabilityZone),
 				),
 			},
 		},
@@ -52,4 +52,4 @@ data "opentelekomcloud_dms_az_v1" "az1" {
   name = "%s"
   port = "8002"
 }
-`, env.OS_AVAILABILITY_ZONE)
+`, env.OsAvailabilityZone)

@@ -79,7 +79,7 @@ func TestAccCCENodePoolsV3EncryptedVolume(t *testing.T) {
 				Config: testAccCCENodePoolV3Encrypted,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckCCENodePoolV3Exists(nodePoolName, clusterName, &nodePool),
-					resource.TestCheckResourceAttr(nodePoolName, "data_volumes.0.kms_id", env.OS_KMS_ID),
+					resource.TestCheckResourceAttr(nodePoolName, "data_volumes.0.kms_id", env.OsKmsID),
 				),
 			},
 		},
@@ -88,7 +88,7 @@ func TestAccCCENodePoolsV3EncryptedVolume(t *testing.T) {
 
 func testAccCheckCCENodePoolV3Destroy(s *terraform.State) error {
 	config := common.TestAccProvider.Meta().(*cfg.Config)
-	cceClient, err := config.CceV3Client(env.OS_REGION_NAME)
+	cceClient, err := config.CceV3Client(env.OsRegionName)
 	if err != nil {
 		return fmt.Errorf("error creating OpenTelekomCloud CCE client: %s", err)
 	}
@@ -132,7 +132,7 @@ func testAccCheckCCENodePoolV3Exists(n string, cluster string, nodePool *nodepoo
 		}
 
 		config := common.TestAccProvider.Meta().(*cfg.Config)
-		cceClient, err := config.CceV3Client(env.OS_REGION_NAME)
+		cceClient, err := config.CceV3Client(env.OsRegionName)
 		if err != nil {
 			return fmt.Errorf("error creating OpenTelekomCloud CCE client: %s", err)
 		}
@@ -192,7 +192,7 @@ resource "opentelekomcloud_cce_node_pool_v3" "node_pool" {
   k8s_tags = {
     "kubelet.kubernetes.io/namespace" = "muh"
   }
-}`, env.OS_VPC_ID, env.OS_NETWORK_ID, env.OS_AVAILABILITY_ZONE, env.OS_KEYPAIR_NAME)
+}`, env.OsRouterID, env.OsNetworkID, env.OsAvailabilityZone, env.OsKeypairName)
 
 	testAccCCENodePoolV3Update = fmt.Sprintf(`
 resource "opentelekomcloud_cce_cluster_v3" "cluster" {
@@ -233,7 +233,7 @@ resource "opentelekomcloud_cce_node_pool_v3" "node_pool" {
   k8s_tags = {
     "kubelet.kubernetes.io/namespace" = "kuh"
   }
-}`, env.OS_VPC_ID, env.OS_NETWORK_ID, env.OS_AVAILABILITY_ZONE, env.OS_KEYPAIR_NAME)
+}`, env.OsRouterID, env.OsNetworkID, env.OsAvailabilityZone, env.OsKeypairName)
 
 	testAccCCENodePoolV3RandomAZ = fmt.Sprintf(`
 resource "opentelekomcloud_cce_cluster_v3" "cluster" {
@@ -270,7 +270,7 @@ resource "opentelekomcloud_cce_node_pool_v3" "node_pool" {
     size       = 100
     volumetype = "SSD"
   }
-}`, env.OS_VPC_ID, env.OS_NETWORK_ID, env.OS_KEYPAIR_NAME)
+}`, env.OsRouterID, env.OsNetworkID, env.OsKeypairName)
 
 	testAccCCENodePoolV3Encrypted = fmt.Sprintf(`
 resource "opentelekomcloud_cce_cluster_v3" "cluster" {
@@ -308,5 +308,5 @@ resource "opentelekomcloud_cce_node_pool_v3" "node_pool" {
     volumetype = "SSD"
     kms_id     = "%s"
   }
-}`, env.OS_VPC_ID, env.OS_NETWORK_ID, env.OS_KEYPAIR_NAME, env.OS_KMS_ID)
+}`, env.OsRouterID, env.OsNetworkID, env.OsKeypairName, env.OsKmsID)
 )

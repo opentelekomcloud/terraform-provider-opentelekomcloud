@@ -64,7 +64,7 @@ func TestAccRdsConfigurationV3_invalidDbVersion(t *testing.T) {
 
 func testAccCheckRdsConfigV3Destroy(s *terraform.State) error {
 	config := common.TestAccProvider.Meta().(*cfg.Config)
-	rdsClient, err := config.RdsV3Client(env.OS_REGION_NAME)
+	rdsClient, err := config.RdsV3Client(env.OsRegionName)
 	if err != nil {
 		return fmt.Errorf("error creating OpenTelekomCloud RDSv3 client: %s", err)
 	}
@@ -95,7 +95,7 @@ func testAccCheckRdsConfigV3Exists(n string, configuration *configurations.Confi
 		}
 
 		config := common.TestAccProvider.Meta().(*cfg.Config)
-		client, err := config.RdsV3Client(env.OS_REGION_NAME)
+		client, err := config.RdsV3Client(env.OsRegionName)
 		if err != nil {
 			return fmt.Errorf("error creating OpenTelekomCloud RDSv3 client: %s", err)
 		}

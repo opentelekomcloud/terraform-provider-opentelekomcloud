@@ -34,7 +34,7 @@ func TestAccComputeV2Instance_basic(t *testing.T) {
 					testAccCheckComputeV2InstanceMetadata(&instance, "foo", "bar"),
 					resource.TestCheckResourceAttr(resourceName, "all_metadata.foo", "bar"),
 					resource.TestCheckResourceAttr(resourceName, "name", "instance_1"),
-					resource.TestCheckResourceAttr(resourceName, "availability_zone", env.OS_AVAILABILITY_ZONE),
+					resource.TestCheckResourceAttr(resourceName, "availability_zone", env.OsAvailabilityZone),
 					resource.TestCheckResourceAttr(resourceName, "tags.muh", "value-create"),
 				),
 			},
@@ -372,7 +372,7 @@ func testAccCheckComputeV2InstanceExists(n string, instance *servers.Server) res
 		}
 
 		config := common.TestAccProvider.Meta().(*cfg.Config)
-		client, err := config.ComputeV2Client(env.OS_REGION_NAME)
+		client, err := config.ComputeV2Client(env.OsRegionName)
 		if err != nil {
 			return fmt.Errorf("error creating OpenTelekomCloud ComputeV2 client: %s", err)
 		}
@@ -433,7 +433,7 @@ func testAccCheckComputeV2InstanceBootVolumeAttachment(instance *servers.Server)
 		var attachments []volumeattach.VolumeAttachment
 
 		config := common.TestAccProvider.Meta().(*cfg.Config)
-		computeClient, err := config.ComputeV2Client(env.OS_REGION_NAME)
+		computeClient, err := config.ComputeV2Client(env.OsRegionName)
 		if err != nil {
 			return err
 		}
@@ -476,7 +476,7 @@ resource "opentelekomcloud_compute_instance_v2" "instance_1" {
     kuh = "value-create"
   }
 }
-`, env.OS_AVAILABILITY_ZONE, env.OS_NETWORK_ID)
+`, env.OsAvailabilityZone, env.OsNetworkID)
 
 var testAccComputeV2InstanceUpdate = fmt.Sprintf(`
 resource "opentelekomcloud_compute_instance_v2" "instance_1" {
@@ -492,7 +492,7 @@ resource "opentelekomcloud_compute_instance_v2" "instance_1" {
     muh = "value-update"
   }
 }
-`, env.OS_AVAILABILITY_ZONE, env.OS_NETWORK_ID)
+`, env.OsAvailabilityZone, env.OsNetworkID)
 
 var testAccComputeV2InstanceMultiSecgroup = fmt.Sprintf(`
 resource "opentelekomcloud_compute_secgroup_v2" "secgroup_1" {
@@ -524,7 +524,7 @@ resource "opentelekomcloud_compute_instance_v2" "instance_1" {
     uuid = "%s"
   }
 }
-`, env.OS_NETWORK_ID)
+`, env.OsNetworkID)
 
 var testAccComputeV2InstanceMultiSecgroupUpdate = fmt.Sprintf(`
 resource "opentelekomcloud_compute_secgroup_v2" "secgroup_1" {
@@ -560,7 +560,7 @@ resource "opentelekomcloud_compute_instance_v2" "instance_1" {
     uuid = "%s"
   }
 }
-`, env.OS_NETWORK_ID)
+`, env.OsNetworkID)
 
 var testAccComputeV2InstanceBootFromVolumeImage = fmt.Sprintf(`
 resource "opentelekomcloud_compute_instance_v2" "instance_1" {
@@ -579,7 +579,7 @@ resource "opentelekomcloud_compute_instance_v2" "instance_1" {
     delete_on_termination = true
   }
 }
-`, env.OS_AVAILABILITY_ZONE, env.OS_NETWORK_ID, env.OS_IMAGE_ID)
+`, env.OsAvailabilityZone, env.OsNetworkID, env.OsImageID)
 
 var testAccComputeV2InstanceBootFromVolumeVolume = fmt.Sprintf(`
 resource "opentelekomcloud_blockstorage_volume_v2" "vol_1" {
@@ -602,7 +602,7 @@ resource "opentelekomcloud_compute_instance_v2" "instance_1" {
     delete_on_termination = true
   }
 }
-`, env.OS_IMAGE_ID, env.OS_NETWORK_ID)
+`, env.OsImageID, env.OsNetworkID)
 
 var testAccComputeV2InstanceBootFromVolume = fmt.Sprintf(`
 resource "opentelekomcloud_compute_instance_v2" "instance_1" {
@@ -620,7 +620,7 @@ resource "opentelekomcloud_compute_instance_v2" "instance_1" {
     delete_on_termination = true
   }
 }
-`, env.OS_NETWORK_ID, env.OS_IMAGE_ID)
+`, env.OsNetworkID, env.OsImageID)
 
 var testAccComputeV2InstanceFixedIP = fmt.Sprintf(`
 resource "opentelekomcloud_compute_instance_v2" "instance_1" {
@@ -631,7 +631,7 @@ resource "opentelekomcloud_compute_instance_v2" "instance_1" {
     fixed_ip_v4 = "192.168.0.24"
   }
 }
-`, env.OS_NETWORK_ID)
+`, env.OsNetworkID)
 
 var testAccComputeV2InstanceStopBeforeDestroy = fmt.Sprintf(`
 resource "opentelekomcloud_compute_instance_v2" "instance_1" {
@@ -642,7 +642,7 @@ resource "opentelekomcloud_compute_instance_v2" "instance_1" {
   }
   stop_before_destroy = true
 }
-`, env.OS_NETWORK_ID)
+`, env.OsNetworkID)
 
 var testAccComputeV2InstanceMetadata = fmt.Sprintf(`
 resource "opentelekomcloud_compute_instance_v2" "instance_1" {
@@ -656,7 +656,7 @@ resource "opentelekomcloud_compute_instance_v2" "instance_1" {
     abc = "def"
   }
 }
-`, env.OS_NETWORK_ID)
+`, env.OsNetworkID)
 
 var testAccComputeV2InstanceMetadataUpdate = fmt.Sprintf(`
 resource "opentelekomcloud_compute_instance_v2" "instance_1" {
@@ -670,7 +670,7 @@ resource "opentelekomcloud_compute_instance_v2" "instance_1" {
     ghi = "jkl"
   }
 }
-`, env.OS_NETWORK_ID)
+`, env.OsNetworkID)
 
 var testAccComputeV2InstanceTimeout = fmt.Sprintf(`
 resource "opentelekomcloud_compute_instance_v2" "instance_1" {
@@ -684,7 +684,7 @@ resource "opentelekomcloud_compute_instance_v2" "instance_1" {
     create = "10m"
   }
 }
-`, env.OS_NETWORK_ID)
+`, env.OsNetworkID)
 
 var testAccComputeV2InstanceAutoRecovery = fmt.Sprintf(`
 resource "opentelekomcloud_compute_instance_v2" "instance_1" {
@@ -699,7 +699,7 @@ resource "opentelekomcloud_compute_instance_v2" "instance_1" {
   }
   auto_recovery = false
 }
-`, env.OS_AVAILABILITY_ZONE, env.OS_NETWORK_ID)
+`, env.OsAvailabilityZone, env.OsNetworkID)
 
 var testAccComputeV2InstanceCrazyNICs = fmt.Sprintf(`
 resource "opentelekomcloud_networking_network_v2" "network_1" {
@@ -802,7 +802,7 @@ resource "opentelekomcloud_compute_instance_v2" "instance_1" {
     port = opentelekomcloud_networking_port_v2.port_4.id
   }
 }
-`, env.OS_NETWORK_ID)
+`, env.OsNetworkID)
 
 var testAccComputeV2InstanceActive = fmt.Sprintf(`
 resource "opentelekomcloud_compute_instance_v2" "instance_1" {
@@ -813,7 +813,7 @@ resource "opentelekomcloud_compute_instance_v2" "instance_1" {
     uuid = "%s"
   }
 }
-`, env.OS_NETWORK_ID)
+`, env.OsNetworkID)
 
 var testAccComputeV2InstanceShutoff = fmt.Sprintf(`
 resource "opentelekomcloud_compute_instance_v2" "instance_1" {
@@ -824,7 +824,7 @@ resource "opentelekomcloud_compute_instance_v2" "instance_1" {
     uuid = "%s"
   }
 }
-`, env.OS_NETWORK_ID)
+`, env.OsNetworkID)
 
 func testAccCheckComputeV2InstanceState(
 	instance *servers.Server, state string) resource.TestCheckFunc {

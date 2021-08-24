@@ -73,7 +73,7 @@ func TestAccSFSTurboShareV1_withKMS(t *testing.T) {
 
 func testAccCheckSFSTurboShareV1Destroy(s *terraform.State) error {
 	config := common.TestAccProvider.Meta().(*cfg.Config)
-	client, err := config.SfsTurboV1Client(env.OS_REGION_NAME)
+	client, err := config.SfsTurboV1Client(env.OsRegionName)
 	if err != nil {
 		return fmt.Errorf("error creating OpenTelekomCloud SFSTurboV1 client: %s", err)
 	}
@@ -104,7 +104,7 @@ func testAccCheckSFSTurboShareV1Exists(n string, share *shares.Turbo) resource.T
 		}
 
 		config := common.TestAccProvider.Meta().(*cfg.Config)
-		client, err := config.SfsTurboV1Client(env.OS_REGION_NAME)
+		client, err := config.SfsTurboV1Client(env.OsRegionName)
 		if err != nil {
 			return fmt.Errorf("error creating OpenTelekomCloud SFSTurboV1 client: %s", err)
 		}
@@ -139,7 +139,7 @@ resource "opentelekomcloud_sfs_turbo_share_v1" "sfs-turbo" {
   security_group_id = opentelekomcloud_networking_secgroup_v2.sg.id
   availability_zone = "%s"
 }
-`, shareName, env.OS_VPC_ID, env.OS_NETWORK_ID, env.OS_AVAILABILITY_ZONE)
+`, shareName, env.OsRouterID, env.OsNetworkID, env.OsAvailabilityZone)
 }
 
 func testAccSFSTurboShareV1_update(shareName string) string {
@@ -158,7 +158,7 @@ resource "opentelekomcloud_sfs_turbo_share_v1" "sfs-turbo" {
   security_group_id = opentelekomcloud_networking_secgroup_v2.sg.id
   availability_zone = "%s"
 }
-`, shareName, env.OS_VPC_ID, env.OS_NETWORK_ID, env.OS_AVAILABILITY_ZONE)
+`, shareName, env.OsRouterID, env.OsNetworkID, env.OsAvailabilityZone)
 }
 
 func testAccSFSTurboV1_crypt(postfix string) string {
@@ -183,5 +183,5 @@ resource "opentelekomcloud_sfs_turbo_share_v1" "sfs-turbo" {
   availability_zone = "%s"
   crypt_key_id      = opentelekomcloud_kms_key_v1.key_1.id
 }
-`, postfix, env.OS_VPC_ID, env.OS_NETWORK_ID, env.OS_AVAILABILITY_ZONE)
+`, postfix, env.OsRouterID, env.OsNetworkID, env.OsAvailabilityZone)
 }

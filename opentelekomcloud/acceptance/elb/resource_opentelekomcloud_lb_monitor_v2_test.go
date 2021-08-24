@@ -75,7 +75,7 @@ func TestAccLBV2Monitor_minConfig(t *testing.T) {
 
 func testAccCheckLBV2MonitorDestroy(s *terraform.State) error {
 	config := common.TestAccProvider.Meta().(*cfg.Config)
-	client, err := config.NetworkingV2Client(env.OS_REGION_NAME)
+	client, err := config.NetworkingV2Client(env.OsRegionName)
 	if err != nil {
 		return fmt.Errorf("error creating OpenTelekomCloud networking client: %s", err)
 	}
@@ -106,7 +106,7 @@ func testAccCheckLBV2MonitorExists(n string, monitor *monitors.Monitor) resource
 		}
 
 		config := common.TestAccProvider.Meta().(*cfg.Config)
-		client, err := config.NetworkingV2Client(env.OS_REGION_NAME)
+		client, err := config.NetworkingV2Client(env.OsRegionName)
 		if err != nil {
 			return fmt.Errorf("error creating OpenTelekomCloud NetworkingV2 client: %s", err)
 		}
@@ -161,7 +161,7 @@ resource "opentelekomcloud_lb_monitor_v2" "monitor_1" {
     delete = "5m"
   }
 }
-`, env.OS_SUBNET_ID)
+`, env.OsSubnetID)
 
 var TestAccLBV2MonitorConfig_update = fmt.Sprintf(`
 resource "opentelekomcloud_lb_loadbalancer_v2" "loadbalancer_1" {
@@ -200,7 +200,7 @@ resource "opentelekomcloud_lb_monitor_v2" "monitor_1" {
     delete = "5m"
   }
 }
-`, env.OS_SUBNET_ID)
+`, env.OsSubnetID)
 
 var TestAccLBV2MonitorConfig_minConfig = fmt.Sprintf(`
 resource "opentelekomcloud_lb_loadbalancer_v2" "loadbalancer_1" {
@@ -229,4 +229,4 @@ resource "opentelekomcloud_lb_monitor_v2" "monitor_1" {
   max_retries  = 5
   pool_id      = opentelekomcloud_lb_pool_v2.pool_1.id
 }
-`, env.OS_SUBNET_ID)
+`, env.OsSubnetID)

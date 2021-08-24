@@ -9,7 +9,7 @@ import (
 
 func testAccCCEKeyPairPreCheck(t *testing.T) {
 	common.TestAccPreCheckRequiredEnvVars(t)
-	if env.OS_KEYPAIR_NAME == "" {
+	if env.OsKeypairName == "" {
 		t.Skip("OS_KEYPAIR_NAME must be set for acceptance tests")
 	}
 }

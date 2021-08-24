@@ -32,7 +32,7 @@ func TestAccKmsGrantV1Basic(t *testing.T) {
 				Config: testAccKmsGrantV1Basic(granteePrincipal),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckKmsV1GrantExists(resourceName, &grant),
-					resource.TestCheckResourceAttr(resourceName, "key_id", env.OS_KMS_ID),
+					resource.TestCheckResourceAttr(resourceName, "key_id", env.OsKmsID),
 					resource.TestCheckResourceAttr(resourceName, "name", "my_grant"),
 				),
 			},
@@ -42,7 +42,7 @@ func TestAccKmsGrantV1Basic(t *testing.T) {
 
 func testAccCheckKmsV1GrantDestroy(s *terraform.State) error {
 	config := common.TestAccProvider.Meta().(*cfg.Config)
-	client, err := config.KmsKeyV1Client(env.OS_REGION_NAME)
+	client, err := config.KmsKeyV1Client(env.OsRegionName)
 	if err != nil {
 		return fmt.Errorf("error creating OpenTelekomCloud KMSv1 client: %w", err)
 	}
@@ -90,7 +90,7 @@ func testAccCheckKmsV1GrantExists(n string, grant *grants.Grant) resource.TestCh
 		}
 
 		config := common.TestAccProvider.Meta().(*cfg.Config)
-		client, err := config.KmsKeyV1Client(env.OS_REGION_NAME)
+		client, err := config.KmsKeyV1Client(env.OsRegionName)
 		if err != nil {
 			return fmt.Errorf("error creating OpenTelekomCloud KMSv1 client: %w", err)
 		}
@@ -132,5 +132,5 @@ resource "opentelekomcloud_kms_grant_v1" "grant_1" {
   grantee_principal = "%s"
   operations        = ["describe-key", "create-datakey", "encrypt-datakey"]
 }
-`, env.OS_KMS_ID, granteePrincipal)
+`, env.OsKmsID, granteePrincipal)
 }

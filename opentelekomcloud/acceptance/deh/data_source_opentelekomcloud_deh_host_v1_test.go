@@ -53,4 +53,4 @@ resource "opentelekomcloud_deh_host_v1" "deh1" {
 data "opentelekomcloud_deh_host_v1" "hosts" {
   id = opentelekomcloud_deh_host_v1.deh1.id
 }
-`, env.OS_AVAILABILITY_ZONE)
+`, env.OsAvailabilityZone)

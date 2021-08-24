@@ -29,7 +29,7 @@ func TestAccASV1Group_basic(t *testing.T) {
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckASV1GroupExists(resourceName, &asGroup),
 					resource.TestCheckResourceAttr(resourceName, "lbaas_listeners.0.protocol_port", "8080"),
-					resource.TestCheckResourceAttr(resourceName, "vpc_id", env.OS_VPC_ID),
+					resource.TestCheckResourceAttr(resourceName, "vpc_id", env.OsRouterID),
 					resource.TestCheckResourceAttr(resourceName, "lbaas_listeners.0.protocol_port", "8080"),
 					resource.TestCheckResourceAttr(resourceName, "health_periodic_audit_grace_period", "700"),
 					resource.TestCheckResourceAttr(resourceName, "tags.muh", "value-create"),
@@ -92,7 +92,7 @@ func TestAccASV1Group_WithoutSecurityGroups(t *testing.T) {
 
 func testAccCheckASV1GroupDestroy(s *terraform.State) error {
 	config := common.TestAccProvider.Meta().(*cfg.Config)
-	asClient, err := config.AutoscalingV1Client(env.OS_REGION_NAME)
+	asClient, err := config.AutoscalingV1Client(env.OsRegionName)
 	if err != nil {
 		return fmt.Errorf("error creating opentelekomcloud autoscaling client: %s", err)
 	}
@@ -125,7 +125,7 @@ func testAccCheckASV1GroupExists(n string, group *groups.Group) resource.TestChe
 		}
 
 		config := common.TestAccProvider.Meta().(*cfg.Config)
-		client, err := config.AutoscalingV1Client(env.OS_REGION_NAME)
+		client, err := config.AutoscalingV1Client(env.OsRegionName)
 		if err != nil {
 			return fmt.Errorf("error creating opentelekomcloud autoscaling client: %s", err)
 		}
@@ -204,7 +204,7 @@ resource "opentelekomcloud_as_group_v1" "hth_as_group"{
     kuh = "value-create"
   }
 }
-`, env.OS_SUBNET_ID, env.OS_IMAGE_ID, env.OS_KEYPAIR_NAME, env.OS_NETWORK_ID, env.OS_VPC_ID)
+`, env.OsSubnetID, env.OsImageID, env.OsKeypairName, env.OsNetworkID, env.OsRouterID)
 
 var testASV1Group_update = fmt.Sprintf(`
 resource "opentelekomcloud_networking_secgroup_v2" "secgroup" {
@@ -264,7 +264,7 @@ resource "opentelekomcloud_as_group_v1" "hth_as_group"{
     muh = "value-update"
   }
 }
-`, env.OS_SUBNET_ID, env.OS_IMAGE_ID, env.OS_KEYPAIR_NAME, env.OS_NETWORK_ID, env.OS_VPC_ID)
+`, env.OsSubnetID, env.OsImageID, env.OsKeypairName, env.OsNetworkID, env.OsRouterID)
 
 var testASV1Group_removeWithSetMinNumber = fmt.Sprintf(`
 resource "opentelekomcloud_compute_secgroup_v2" "secgroup" {
@@ -318,7 +318,7 @@ resource "opentelekomcloud_as_group_v1" "proxy_group" {
     ]
   }
 }
-`, env.OS_IMAGE_ID, env.OS_KEYPAIR_NAME, env.OS_AVAILABILITY_ZONE, env.OS_VPC_ID, env.OS_NETWORK_ID)
+`, env.OsImageID, env.OsKeypairName, env.OsAvailabilityZone, env.OsRouterID, env.OsNetworkID)
 
 var testASV1Group_withoutSGs = fmt.Sprintf(`
 # Proxy AS configuration
@@ -358,4 +358,4 @@ resource "opentelekomcloud_as_group_v1" "proxy_group" {
     id = "%s"
   }
 }
-`, env.OS_IMAGE_ID, env.OS_KEYPAIR_NAME, env.OS_AVAILABILITY_ZONE, env.OS_VPC_ID, env.OS_NETWORK_ID)
+`, env.OsImageID, env.OsKeypairName, env.OsAvailabilityZone, env.OsRouterID, env.OsNetworkID)

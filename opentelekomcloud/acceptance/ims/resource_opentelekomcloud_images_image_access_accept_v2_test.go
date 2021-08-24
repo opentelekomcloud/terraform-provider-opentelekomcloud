@@ -50,7 +50,7 @@ func TestAccImagesImageAccessAcceptV2_basic(t *testing.T) {
 
 func testAccCheckImagesImageAccessAcceptV2Destroy(s *terraform.State) error {
 	config := common.TestAccProvider.Meta().(*cfg.Config)
-	client, err := config.ImageV2Client(env.OS_REGION_NAME)
+	client, err := config.ImageV2Client(env.OsRegionName)
 	if err != nil {
 		return fmt.Errorf("error creating OpenTelekomCloud IMSv2: %w", err)
 	}

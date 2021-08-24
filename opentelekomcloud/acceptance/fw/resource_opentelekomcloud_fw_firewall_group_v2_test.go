@@ -135,7 +135,7 @@ func TestAccFWFirewallGroupV2_port_remove(t *testing.T) {
 
 func testAccCheckFWFirewallGroupV2Destroy(s *terraform.State) error {
 	config := common.TestAccProvider.Meta().(*cfg.Config)
-	networkingClient, err := config.NetworkingV2Client(env.OS_REGION_NAME)
+	networkingClient, err := config.NetworkingV2Client(env.OsRegionName)
 	if err != nil {
 		return fmt.Errorf("error creating OpenTelekomCloud networking client: %s", err)
 	}
@@ -167,7 +167,7 @@ func testAccCheckFWFirewallGroupV2Exists(n string, firewall_group *fw.FirewallGr
 		}
 
 		config := common.TestAccProvider.Meta().(*cfg.Config)
-		networkingClient, err := config.NetworkingV2Client(env.OS_REGION_NAME)
+		networkingClient, err := config.NetworkingV2Client(env.OsRegionName)
 		if err != nil {
 			return fmt.Errorf("exists) Error creating OpenTelekomCloud networking client: %s", err)
 		}
@@ -210,7 +210,7 @@ func testAccCheckFWFirewallGroupV2(n, expectedName, expectedDescription string, 
 		}
 
 		config := common.TestAccProvider.Meta().(*cfg.Config)
-		networkingClient, err := config.NetworkingV2Client(env.OS_REGION_NAME)
+		networkingClient, err := config.NetworkingV2Client(env.OsRegionName)
 		if err != nil {
 			return fmt.Errorf("exists) Error creating OpenTelekomCloud networking client: %s", err)
 		}
@@ -346,7 +346,7 @@ resource "opentelekomcloud_fw_firewall_group_v2" "fw_1" {
   ]
   depends_on = ["opentelekomcloud_networking_router_interface_v2.router_interface_1"]
 }
-`, env.OS_EXTGW_ID)
+`, env.OsExtGwID)
 
 var testAccFWFirewallV2_port_add = fmt.Sprintf(`
 resource "opentelekomcloud_networking_network_v2" "network_1" {
@@ -432,7 +432,7 @@ resource "opentelekomcloud_fw_firewall_group_v2" "fw_1" {
   ]
   depends_on = ["opentelekomcloud_networking_router_interface_v2.router_interface_1", "opentelekomcloud_networking_router_interface_v2.router_interface_2"]
 }
-`, env.OS_EXTGW_ID, env.OS_EXTGW_ID)
+`, env.OsExtGwID, env.OsExtGwID)
 
 const testAccFWFirewallV2_port_remove = `
 resource "opentelekomcloud_fw_policy_v2" "policy_1" {
