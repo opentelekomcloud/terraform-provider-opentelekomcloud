@@ -522,11 +522,10 @@ func resourceCCENodeV3Create(ctx context.Context, d *schema.ResourceData, meta i
 	}
 
 	log.Printf("[DEBUG] Create Options: %#v", createOpts)
-	_, err = nodes.Create(client, clusterID, createOpts).Extract()
-	var node *nodes.Nodes
+	node, err := nodes.Create(client, clusterID, createOpts).Extract()
 	switch err.(type) {
 	case golangsdk.ErrDefault403:
-		retryNode, err := recursiveCreate(ctx, client, createOpts, clusterID, 403)
+		retryNode, err := recursiveCreate(ctx, client, createOpts, clusterID)
 		if err == "fail" {
 			return fmterr.Errorf("error creating OpenTelekomCloud Node")
 		}
@@ -999,29 +998,24 @@ func waitForClusterAvailable(cceClient *golangsdk.ServiceClient, clusterId strin
 	}
 }
 
-func recursiveCreate(ctx context.Context, client *golangsdk.ServiceClient, opts nodes.CreateOptsBuilder, clusterID string, errCode int) (*nodes.Nodes, string) {
-	if errCode == 403 {
-		stateCluster := &resource.StateChangeConf{
-			Target:     []string{"Available"},
-			Refresh:    waitForClusterAvailable(client, clusterID),
-			Timeout:    15 * time.Minute,
-			Delay:      15 * time.Second,
-			MinTimeout: 3 * time.Second,
-		}
-		_, stateErr := stateCluster.WaitForStateContext(ctx)
-		if stateErr != nil {
-			log.Printf("[INFO] Cluster Unavailable %s.\n", stateErr)
-		}
-		s, err := nodes.Create(client, clusterID, opts).Extract()
-		if err != nil {
-			if _, ok := err.(golangsdk.ErrDefault403); ok {
-				return recursiveCreate(ctx, client, opts, clusterID, 403)
-			} else {
-				return s, "fail"
-			}
-		} else {
-			return s, "success"
-		}
+func recursiveCreate(ctx context.Context, client *golangsdk.ServiceClient, opts nodes.CreateOptsBuilder, clusterID string) (*nodes.Nodes, string) {
+	stateCluster := &resource.StateChangeConf{
+		Target:     []string{"Available"},
+		Refresh:    waitForClusterAvailable(client, clusterID),
+		Timeout:    15 * time.Minute,
+		Delay:      15 * time.Second,
+		MinTimeout: 3 * time.Second,
 	}
-	return nil, "fail"
+	_, stateErr := stateCluster.WaitForStateContext(ctx)
+	if stateErr != nil {
+		log.Printf("[INFO] Cluster Unavailable %s.\n", stateErr)
+	}
+	node, err := nodes.Create(client, clusterID, opts).Extract()
+	if err != nil {
+		if _, ok := err.(golangsdk.ErrDefault403); ok {
+			return recursiveCreate(ctx, client, opts, clusterID)
+		}
+		return node, "fail"
+	}
+	return node, "success"
 }
