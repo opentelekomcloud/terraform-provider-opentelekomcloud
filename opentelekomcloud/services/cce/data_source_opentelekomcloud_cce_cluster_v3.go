@@ -48,15 +48,15 @@ func DataSourceCCEClusterV3() *schema.Resource {
 				Type:     schema.TypeInt,
 				Computed: true,
 			},
-			"vpc_id": {
+			"router_id": {
 				Type:     schema.TypeString,
 				Optional: true,
 			},
-			"subnet_id": {
+			"network_id": {
 				Type:     schema.TypeString,
 				Computed: true,
 			},
-			"highway_subnet_id": {
+			"highway_network_id": {
 				Type:     schema.TypeString,
 				Computed: true,
 			},
@@ -145,7 +145,7 @@ func dataSourceCCEClusterV3Read(_ context.Context, d *schema.ResourceData, meta 
 		Name:  d.Get("name").(string),
 		Type:  d.Get("cluster_type").(string),
 		Phase: d.Get("status").(string),
-		VpcID: d.Get("vpc_id").(string),
+		VpcID: d.Get("router_id").(string),
 	}
 
 	refinedClusters, err := clusters.List(cceClient, listOpts)
@@ -177,9 +177,9 @@ func dataSourceCCEClusterV3Read(_ context.Context, d *schema.ResourceData, meta 
 		d.Set("cluster_version", cluster.Spec.Version),
 		d.Set("cluster_type", cluster.Spec.Type),
 		d.Set("billing_mode", cluster.Spec.BillingMode),
-		d.Set("vpc_id", cluster.Spec.HostNetwork.VpcId),
-		d.Set("subnet_id", cluster.Spec.HostNetwork.SubnetId),
-		d.Set("highway_subnet_id", cluster.Spec.HostNetwork.HighwaySubnet),
+		d.Set("router_id", cluster.Spec.HostNetwork.VpcId),
+		d.Set("network_id", cluster.Spec.HostNetwork.SubnetId),
+		d.Set("highway_network_id", cluster.Spec.HostNetwork.HighwaySubnet),
 		d.Set("container_network_cidr", cluster.Spec.ContainerNetwork.Cidr),
 		d.Set("container_network_type", cluster.Spec.ContainerNetwork.Mode),
 		d.Set("authentication_mode", cluster.Spec.Authentication.Mode),

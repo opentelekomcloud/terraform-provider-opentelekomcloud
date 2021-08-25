@@ -20,8 +20,8 @@ Provides a cluster resource management.
 
 ```hcl
 variable "flavor_id" {}
-variable "vpc_id" {}
-variable "subnet_id" {}
+variable "router_id" {}
+variable "network_id" {}
 
 resource "opentelekomcloud_cce_cluster_v3" "cluster_1" {
   name        = "cluster"
@@ -29,8 +29,8 @@ resource "opentelekomcloud_cce_cluster_v3" "cluster_1" {
 
   cluster_type           = "VirtualMachine"
   flavor_id              = var.flavor_id
-  vpc_id                 = var.vpc_id
-  subnet_id              = var.subnet_id
+  router_id              = var.router_id
+  network_id             = var.network_id
   container_network_type = "overlay_l2"
   authentication_mode    = "rbac"
 }
@@ -63,8 +63,8 @@ resource "opentelekomcloud_cce_cluster_v3" "cluster_1" {
 
   cluster_type           = "VirtualMachine"
   flavor_id              = var.flavor_id
-  vpc_id                 = var.vpc_id
-  subnet_id              = var.subnet_id
+  router_id              = var.router_id
+  network_id             = var.network_id
   container_network_type = "overlay_l2"
   authentication_mode    = "rbac"
 
@@ -107,11 +107,11 @@ The following arguments are supported:
 
 * `extend_param` - (Optional) Extended parameter. Changing this parameter will create a new cluster resource.
 
-* `vpc_id` - (Required) The ID of the VPC used to create the node. Changing this parameter will create a new cluster resource.
+* `router_id` - (Required) The ID of the router (VPC) used to create the node. Changing this parameter will create a new cluster resource.
 
-* `subnet_id` - (Required) The Network ID of the subnet used to create the node. Changing this parameter will create a new cluster resource.
+* `network_id` - (Required) The Network ID of the subnet used to create the node. Changing this parameter will create a new cluster resource.
 
-* `highway_subnet_id` - (Optional) The ID of the high speed network used to create bare metal nodes. Changing this parameter will create a new cluster resource.
+* `highway_network_id` - (Optional) The ID of the high speed network used to create bare metal nodes. Changing this parameter will create a new cluster resource.
 
 * `container_network_type` - (Required) Container network type.
   * `overlay_l2` - An overlay_l2 network built for containers by using Open vSwitch(OVS)

@@ -10,14 +10,14 @@ Manages a V3 CCE Addon resource within OpenTelekomCloud.
 
 ```hcl
 variable "flavor_id" {}
-variable "vpc_id" {}
+variable "router_id" {}
 variable "subnet_id" {}
 
 resource "opentelekomcloud_cce_cluster_v3" "cluster_1" {
   name                    = "cce-cluster-1"
   cluster_type            = "VirtualMachine"
   flavor_id               = var.flavor_id
-  vpc_id                  = var.vpc_id
+  router_id               = var.router_id
   subnet_id               = var.subnet_id
   container_network_type  = "overlay_l2"
   kubernetes_svc_ip_range = "10.247.0.0/16"

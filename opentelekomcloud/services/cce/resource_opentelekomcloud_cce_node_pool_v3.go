@@ -57,7 +57,7 @@ func ResourceCCENodePoolV3() *schema.Resource {
 		CustomizeDiff: common.MultipleCustomizeDiffs(
 			common.ValidateVolumeType("root_volume.*.volumetype"),
 			common.ValidateVolumeType("data_volumes.*.volumetype"),
-			common.ValidateSubnet("subnet_id"),
+			common.ValidateSubnet("network_id"),
 		),
 
 		Schema: map[string]*schema.Schema{
@@ -193,7 +193,7 @@ func ResourceCCENodePoolV3() *schema.Resource {
 				Sensitive:    true,
 				ExactlyOneOf: []string{"password", "key_pair"},
 			},
-			"subnet_id": {
+			"network_id": {
 				Type:     schema.TypeString,
 				Optional: true,
 				ForceNew: true,
@@ -304,7 +304,7 @@ func resourceCCENodePoolV3Create(ctx context.Context, d *schema.ResourceData, me
 				Count:       1,
 				NodeNicSpec: nodes.NodeNicSpec{
 					PrimaryNic: nodes.PrimaryNic{
-						SubnetId: d.Get("subnet_id").(string),
+						SubnetId: d.Get("network_id").(string),
 					},
 				},
 				ExtendParam: nodes.ExtendParam{

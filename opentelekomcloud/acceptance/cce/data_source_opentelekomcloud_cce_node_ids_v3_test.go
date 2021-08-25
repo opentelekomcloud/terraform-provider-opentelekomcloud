@@ -51,8 +51,8 @@ resource "opentelekomcloud_cce_cluster_v3" "cluster_1" {
   name                   = "%s"
   cluster_type           = "VirtualMachine"
   flavor_id              = "cce.s1.small"
-  vpc_id                 = "%s"
-  subnet_id              = "%s"
+  router_id              = "%s"
+  network_id             = "%s"
   container_network_type = "overlay_l2"
 }
 

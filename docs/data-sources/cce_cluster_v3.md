@@ -11,7 +11,6 @@ Use this data source to get details about all clusters and obtains the certifica
 ```hcl
 variable "cluster_name" {}
 variable "cluster_id" {}
-variable "vpc_id" {}
 
 data "opentelekomcloud_cce_cluster_v3" "cluster" {
   name   = var.cluster_name
@@ -28,6 +27,8 @@ The following arguments are supported:
 * `status` - (Optional) The state of the cluster.
 
 * `cluster_type` - (Optional) Type of the cluster. Possible values: `VirtualMachine`, `BareMetal` or `Windows`.
+
+* `router_id` - (Optional) ID of the router (VPC).
 
 ## Attributes Reference
 
@@ -51,9 +52,9 @@ All above argument parameters can be exported as attribute parameters along with
 
 * `authentication_mode` - (Optional) Authentication mode of the cluster, possible values are `rbac` and `authenticating_proxy`.
 
-* `subnet_id` - The ID of the subnet used to create the node.
+* `network_id` - The ID of the subnet used to create the node.
 
-* `highway_subnet_id` - The ID of the high speed network used to create bare metal nodes.
+* `highway_network_id` - The ID of the high speed network used to create bare metal nodes.
 
 * `internal` - The internal network address.
 
