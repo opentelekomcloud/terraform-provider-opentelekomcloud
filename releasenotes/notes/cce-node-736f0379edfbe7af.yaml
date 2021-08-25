@@ -1,0 +1,4 @@
+---
+fixes:
+  - |
+    **[CCE]** Fix panic at ``resource/opentelekomcloud_cce_node_v3`` creation (`#1319 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/1319>`_)
