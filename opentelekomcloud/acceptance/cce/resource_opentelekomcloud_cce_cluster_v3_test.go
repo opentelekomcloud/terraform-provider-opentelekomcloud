@@ -210,8 +210,8 @@ resource "opentelekomcloud_cce_cluster_v3" "cluster_1" {
   name                    = "%s"
   cluster_type            = "VirtualMachine"
   flavor_id               = "cce.s1.small"
-  vpc_id                  = "%s"
-  subnet_id               = "%s"
+  router_id               = "%s"
+  network_id              = "%s"
   container_network_type  = "overlay_l2"
   kubernetes_svc_ip_range = "10.247.0.0/16"
 }`, clusterName, env.OsRouterID, env.OsNetworkID)
@@ -221,8 +221,8 @@ resource "opentelekomcloud_cce_cluster_v3" "cluster_1" {
   name                    = "%s"
   cluster_type            = "VirtualMachine"
   flavor_id               = "cce.s1.small"
-  vpc_id                  = "%s"
-  subnet_id               = "%s"
+  router_id               = "%s"
+  network_id              = "%s"
   container_network_type  = "overlay_l2"
   description             = "new description"
   kubernetes_svc_ip_range = "10.247.0.0/16"
@@ -236,8 +236,8 @@ resource "opentelekomcloud_cce_cluster_v3" "cluster_1" {
   name                   = "%s"
   cluster_type           = "VirtualMachine"
   flavor_id              = "cce.s2.small"
-  vpc_id                 = "%s"
-  subnet_id              = "%s"
+  router_id              = "%s"
+  network_id             = "%s"
   eip                    = opentelekomcloud_networking_floatingip_v2.fip_1.address
   container_network_type = "overlay_l2"
   authentication_mode    = "rbac"
@@ -256,8 +256,8 @@ resource "opentelekomcloud_cce_cluster_v3" "cluster_1" {
   cluster_type           = "VirtualMachine"
   flavor_id              = "cce.s1.small"
   cluster_version        = "v1.9.2"
-  vpc_id                 = "%s"
-  subnet_id              = "%s"
+  router_id              = "%s"
+  network_id             = "%s"
   container_network_type = "overlay_l2"
   description            = "new description"
 }`, clusterName, env.OsRouterID, env.OsNetworkID)
@@ -267,8 +267,8 @@ resource "opentelekomcloud_cce_cluster_v3" "cluster_1" {
   name                    = "%s"
   cluster_type            = "VirtualMachine"
   flavor_id               = "cce.s1.small"
-  vpc_id                  = "%s"
-  subnet_id               = "%s"
+  router_id               = "%s"
+  network_id              = "%s"
   container_network_type  = "overlay_l2"
   kubernetes_svc_ip_range = "10.247.0.0/16"
   authentication_mode     = "authenticating_proxy"
@@ -308,8 +308,8 @@ resource "opentelekomcloud_cce_cluster_v3" "cluster_1" {
   name                    = "%s"
   cluster_type            = "VirtualMachine"
   flavor_id               = "cce.s1.small"
-  vpc_id                  = opentelekomcloud_vpc_v1.vpc.id
-  subnet_id               = "abc"
+  router_id               = opentelekomcloud_vpc_v1.vpc.id
+  network_id              = "abc"
   container_network_type  = "overlay_l2"
   kubernetes_svc_ip_range = "10.247.0.0/16"
 }
@@ -330,15 +330,15 @@ resource "opentelekomcloud_vpc_subnet_v1" "subnet" {
   cidr       = local.subnet_cidr
   gateway_ip = local.subnet_gw_ip
   name       = "cce-test"
-  vpc_id     = opentelekomcloud_vpc_v1.vpc.id
+  router_id     = opentelekomcloud_vpc_v1.vpc.id
 }
 
 resource "opentelekomcloud_cce_cluster_v3" "cluster_1" {
   name                    = "%s"
   cluster_type            = "VirtualMachine"
   flavor_id               = "cce.s1.small"
-  vpc_id                  = "abc"
-  subnet_id               = opentelekomcloud_vpc_subnet_v1.subnet.id
+  router_id               = "abc"
+  network_id              = opentelekomcloud_vpc_subnet_v1.subnet.id
   container_network_type  = "overlay_l2"
   kubernetes_svc_ip_range = "10.247.0.0/16"
 }
@@ -359,15 +359,15 @@ resource "opentelekomcloud_vpc_subnet_v1" "subnet" {
   cidr       = local.subnet_cidr
   gateway_ip = local.subnet_gw_ip
   name       = "cce-test"
-  vpc_id     = opentelekomcloud_vpc_v1.vpc.id
+  router_id  = opentelekomcloud_vpc_v1.vpc.id
 }
 
 resource "opentelekomcloud_cce_cluster_v3" "cluster_1" {
   name                    = "%s"
   cluster_type            = "VirtualMachine"
   flavor_id               = "cce.s1.small"
-  vpc_id                  = opentelekomcloud_vpc_v1.vpc.id
-  subnet_id               = opentelekomcloud_vpc_subnet_v1.subnet.id
+  router_id               = opentelekomcloud_vpc_v1.vpc.id
+  network_id              = opentelekomcloud_vpc_subnet_v1.subnet.id
   container_network_type  = "overlay_l2"
   kubernetes_svc_ip_range = "10.247.0.0/16"
 }
@@ -378,8 +378,8 @@ resource "opentelekomcloud_cce_cluster_v3" "cluster_1" {
   name                    = "%s"
   cluster_type            = "VirtualMachine"
   flavor_id               = "cce.s1.small"
-  vpc_id                  = "%s"
-  subnet_id               = "%s"
+  router_id               = "%s"
+  network_id              = "%s"
   container_network_type  = "overlay_l2"
   kubernetes_svc_ip_range = "10.247.0.0/16"
   no_addons               = true

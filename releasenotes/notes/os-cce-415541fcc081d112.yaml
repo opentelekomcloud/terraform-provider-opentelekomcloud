@@ -1,0 +1,9 @@
+---
+upgrade:
+  - |
+    **[CCE]** ``vpc_id`` was replaced with ``router_id`` in ``resource/opentelekomcloud_cce_cluster_v3``,
+    ``data_source/opentelekomcloud_cce_cluster_v3`` (`#1317 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/1317>`_)
+  - |
+    **[CCE]** ``subnet_id`` was replaced with ``network_id`` in ``resource/opentelekomcloud_cce_cluster_v3``,
+    ``resource/opentelekomcloud_cce_node_v3``, ``resource/opentelekomcloud_cce_node_pool_v3``,
+    ``data_source/opentelekomcloud_cce_cluster_v3`` (`#1317 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/1317>`_)

@@ -104,17 +104,17 @@ func ResourceCCEClusterV3() *schema.Resource {
 				Computed: true,
 				ForceNew: true,
 			},
-			"vpc_id": {
+			"router_id": {
 				Type:     schema.TypeString,
 				Required: true,
 				ForceNew: true,
 			},
-			"subnet_id": {
+			"network_id": {
 				Type:     schema.TypeString,
 				Required: true,
 				ForceNew: true,
 			},
-			"highway_subnet_id": {
+			"highway_network_id": {
 				Type:     schema.TypeString,
 				Optional: true,
 				Computed: true,
@@ -310,9 +310,9 @@ func resourceCCEClusterV3Create(ctx context.Context, d *schema.ResourceData, met
 			Version:     d.Get("cluster_version").(string),
 			Description: d.Get("description").(string),
 			HostNetwork: clusters.HostNetworkSpec{
-				VpcId:         d.Get("vpc_id").(string),
-				SubnetId:      d.Get("subnet_id").(string),
-				HighwaySubnet: d.Get("highway_subnet_id").(string),
+				VpcId:         d.Get("router_id").(string),
+				SubnetId:      d.Get("network_id").(string),
+				HighwaySubnet: d.Get("highway_network_id").(string),
 			},
 			ContainerNetwork: clusters.ContainerNetworkSpec{
 				Mode: d.Get("container_network_type").(string),
@@ -401,9 +401,9 @@ func resourceCCEClusterV3Read(_ context.Context, d *schema.ResourceData, meta in
 		d.Set("cluster_version", cluster.Spec.Version),
 		d.Set("description", cluster.Spec.Description),
 		d.Set("billing_mode", cluster.Spec.BillingMode),
-		d.Set("vpc_id", cluster.Spec.HostNetwork.VpcId),
-		d.Set("subnet_id", cluster.Spec.HostNetwork.SubnetId),
-		d.Set("highway_subnet_id", cluster.Spec.HostNetwork.HighwaySubnet),
+		d.Set("router_id", cluster.Spec.HostNetwork.VpcId),
+		d.Set("network_id", cluster.Spec.HostNetwork.SubnetId),
+		d.Set("highway_network_id", cluster.Spec.HostNetwork.HighwaySubnet),
 		d.Set("container_network_type", cluster.Spec.ContainerNetwork.Mode),
 		d.Set("container_network_cidr", cluster.Spec.ContainerNetwork.Cidr),
 		d.Set("authentication_mode", cluster.Spec.Authentication.Mode),
@@ -659,15 +659,15 @@ func validateCCEClusterNetwork(_ context.Context, d *schema.ResourceDiff, meta i
 		return fmt.Errorf(cceClientError, err)
 	}
 
-	if vpcID := d.Get("vpc_id").(string); vpcID != "" {
+	if vpcID := d.Get("router_id").(string); vpcID != "" {
 		if err = vpcs.Get(vpcClient, vpcID).Err; err != nil {
-			return fmt.Errorf("can't find VPC `%s`: %w", vpcID, err)
+			return fmt.Errorf("can't find router `%s`: %w", vpcID, err)
 		}
 	}
 
-	if subnetID := d.Get("subnet_id").(string); subnetID != "" {
-		if err = subnets.Get(vpcClient, subnetID).Err; err != nil {
-			return fmt.Errorf("can't find subnet `%s`: %w", subnetID, err)
+	if networkID := d.Get("network_id").(string); networkID != "" {
+		if err = subnets.Get(vpcClient, networkID).Err; err != nil {
+			return fmt.Errorf("can't find network `%s`: %w", networkID, err)
 		}
 	}
 
