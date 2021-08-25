@@ -1,0 +1,7 @@
+---
+enhancements:
+  - |
+    **[CES]** Improve validations in ``resource/opentelekomcloud_ces_alarmrule`` (`#1313 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/1313>`_)
+fixes:
+  - |
+    **[CES]** Fix issue with wrong types of ``metric`` and ``condition`` in ``resource/opentelekomcloud_ces_alarmrule`` (`#1313 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/1313>`_)
