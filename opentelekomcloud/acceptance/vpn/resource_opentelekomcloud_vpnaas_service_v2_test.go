@@ -23,7 +23,7 @@ func TestAccVpnServiceV2_basic(t *testing.T) {
 		CheckDestroy:      testAccCheckVpnServiceV2Destroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccVpnServiceV2_basic,
+				Config: testAccVpnServiceV2Basic,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckVpnServiceV2Exists(
 						"opentelekomcloud_vpnaas_service_v2.service_1", &service),
@@ -85,14 +85,17 @@ func testAccCheckVpnServiceV2Exists(n string, serv *services.Service) resource.T
 	}
 }
 
-var testAccVpnServiceV2_basic = fmt.Sprintf(`
-	resource "opentelekomcloud_networking_router_v2" "router_1" {
-	  name = "router_1"
-	  admin_state_up = "true"
-	  external_gateway = "%s"
-	}
-	resource "opentelekomcloud_vpnaas_service_v2" "service_1" {
-		router_id = opentelekomcloud_networking_router_v2.router_1.id
-		admin_state_up = "false"
-	}
-	`, env.OS_EXTGW_ID)
+var testAccVpnServiceV2Basic = fmt.Sprintf(`
+%s
+
+resource "opentelekomcloud_networking_router_v2" "router_1" {
+  name             = "router_1"
+  admin_state_up   = "true"
+  external_gateway = data.opentelekomcloud_networking_network_v2.ext_network.id
+}
+
+resource "opentelekomcloud_vpnaas_service_v2" "service_1" {
+  router_id      = opentelekomcloud_networking_router_v2.router_1.id
+  admin_state_up = "false"
+}
+`, common.DataSourceExtNetwork)

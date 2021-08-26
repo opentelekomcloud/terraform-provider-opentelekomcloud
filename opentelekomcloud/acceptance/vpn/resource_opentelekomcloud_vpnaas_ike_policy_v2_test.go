@@ -22,7 +22,7 @@ func TestAccVpnIKEPolicyV2_basic(t *testing.T) {
 		CheckDestroy:      testAccCheckIKEPolicyV2Destroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccIKEPolicyV2_basic,
+				Config: testAccIKEPolicyV2Basic,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckIKEPolicyV2Exists("opentelekomcloud_vpnaas_ike_policy_v2.policy_1", &policy),
 					resource.TestCheckResourceAttrPtr("opentelekomcloud_vpnaas_ike_policy_v2.policy_1", "name", &policy.Name),
@@ -31,7 +31,7 @@ func TestAccVpnIKEPolicyV2_basic(t *testing.T) {
 				),
 			},
 			{
-				Config: testAccIKEPolicyV2_Update,
+				Config: testAccIKEPolicyV2Update,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckIKEPolicyV2Exists("opentelekomcloud_vpnaas_ike_policy_v2.policy_1", &policy),
 					resource.TestCheckResourceAttrPtr("opentelekomcloud_vpnaas_ike_policy_v2.policy_1", "name", &policy.Name),
@@ -49,7 +49,7 @@ func TestAccVpnIKEPolicyV2_withLifetime(t *testing.T) {
 		CheckDestroy:      testAccCheckIKEPolicyV2Destroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccIKEPolicyV2_withLifetime,
+				Config: testAccIKEPolicyV2WithLifetime,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckIKEPolicyV2Exists("opentelekomcloud_vpnaas_ike_policy_v2.policy_1", &policy),
 					resource.TestCheckResourceAttrPtr("opentelekomcloud_vpnaas_ike_policy_v2.policy_1", "auth_algorithm", &policy.AuthAlgorithm),
@@ -57,7 +57,7 @@ func TestAccVpnIKEPolicyV2_withLifetime(t *testing.T) {
 				),
 			},
 			{
-				Config: testAccIKEPolicyV2_withLifetimeUpdate,
+				Config: testAccIKEPolicyV2WithLifetimeUpdate,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckIKEPolicyV2Exists("opentelekomcloud_vpnaas_ike_policy_v2.policy_1", &policy),
 				),
@@ -74,7 +74,7 @@ func TestAccVpnIKEPolicyV2_withNewParams(t *testing.T) {
 		CheckDestroy:      testAccCheckIKEPolicyV2Destroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccIKEPolicyV2_withNewParams,
+				Config: testAccIKEPolicyV2WithNewParams,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckIKEPolicyV2Exists("opentelekomcloud_vpnaas_ike_policy_v2.policy_1", &policy),
 					resource.TestCheckResourceAttr("opentelekomcloud_vpnaas_ike_policy_v2.policy_1", "ike_version", "v2"),
@@ -134,17 +134,17 @@ func testAccCheckIKEPolicyV2Exists(n string, policy *ikepolicies.Policy) resourc
 	}
 }
 
-const testAccIKEPolicyV2_basic = `
+const testAccIKEPolicyV2Basic = `
 resource "opentelekomcloud_vpnaas_ike_policy_v2" "policy_1" {}
 `
 
-const testAccIKEPolicyV2_Update = `
+const testAccIKEPolicyV2Update = `
 resource "opentelekomcloud_vpnaas_ike_policy_v2" "policy_1" {
   name = "updatedname"
 }
 `
 
-const testAccIKEPolicyV2_withLifetime = `
+const testAccIKEPolicyV2WithLifetime = `
 resource "opentelekomcloud_vpnaas_ike_policy_v2" "policy_1" {
   auth_algorithm = "sha2-256"
   pfs            = "group14"
@@ -155,7 +155,7 @@ resource "opentelekomcloud_vpnaas_ike_policy_v2" "policy_1" {
 }
 `
 
-const testAccIKEPolicyV2_withLifetimeUpdate = `
+const testAccIKEPolicyV2WithLifetimeUpdate = `
 resource "opentelekomcloud_vpnaas_ike_policy_v2" "policy_1" {
   auth_algorithm = "sha2-256"
   pfs            = "group14"
@@ -166,7 +166,7 @@ resource "opentelekomcloud_vpnaas_ike_policy_v2" "policy_1" {
 }
 `
 
-const testAccIKEPolicyV2_withNewParams = `
+const testAccIKEPolicyV2WithNewParams = `
 resource "opentelekomcloud_vpnaas_ike_policy_v2" "policy_1" {
   auth_algorithm = "sha2-256"
   pfs            = "group16"

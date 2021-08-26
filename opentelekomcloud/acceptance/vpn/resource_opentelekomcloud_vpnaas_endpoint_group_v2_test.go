@@ -94,19 +94,17 @@ func testAccCheckEndpointGroupV2Exists(n string, group *endpointgroups.EndpointG
 }
 
 var testAccEndpointGroupV2_basic = `
-	resource "opentelekomcloud_vpnaas_endpoint_group_v2" "group_1" {
-		name = "Group 1"
-		type = "cidr"
-		endpoints = ["10.3.0.0/24",
-			"10.2.0.0/24",]
-	}
+resource "opentelekomcloud_vpnaas_endpoint_group_v2" "group_1" {
+  name      = "Group 1"
+  type      = "cidr"
+  endpoints = ["10.3.0.0/24", "10.2.0.0/24"]
+}
 `
 
 var testAccEndpointGroupV2_update = `
-	resource "opentelekomcloud_vpnaas_endpoint_group_v2" "group_1" {
-		name = "Updated Group 1"
-		type = "cidr"
-		endpoints = ["10.2.0.0/24",
-			"10.3.0.0/24",]
-	}
+resource "opentelekomcloud_vpnaas_endpoint_group_v2" "group_1" {
+  name      = "Updated Group 1"
+  type      = "cidr"
+  endpoints = ["10.2.0.0/24", "10.3.0.0/24"]
+}
 `

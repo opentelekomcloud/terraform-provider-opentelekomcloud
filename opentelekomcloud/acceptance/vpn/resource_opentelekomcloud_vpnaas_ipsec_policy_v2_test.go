@@ -24,7 +24,7 @@ func TestAccVpnIPSecPolicyV2_basic(t *testing.T) {
 		CheckDestroy:      testAccCheckIPSecPolicyV2Destroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccIPSecPolicyV2_basic,
+				Config: testAccIPSecPolicyV2Basic,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckIPSecPolicyV2Exists(resourceName, &policy),
 					resource.TestCheckResourceAttrPtr(resourceName, "name", &policy.Name),
@@ -38,7 +38,7 @@ func TestAccVpnIPSecPolicyV2_basic(t *testing.T) {
 				),
 			},
 			{
-				Config: testAccIPSecPolicyV2_update,
+				Config: testAccIPSecPolicyV2Update,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckIPSecPolicyV2Exists(resourceName, &policy),
 					resource.TestCheckResourceAttrPtr(resourceName, "name", &policy.Name),
@@ -58,7 +58,7 @@ func TestAccVpnIPSecPolicyV2_withLifetime(t *testing.T) {
 		CheckDestroy:      testAccCheckIPSecPolicyV2Destroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccIPSecPolicyV2_withLifetime,
+				Config: testAccIPSecPolicyV2WithLifetime,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckIPSecPolicyV2Exists(resourceName, &policy),
 					resource.TestCheckResourceAttrPtr(resourceName, "auth_algorithm", &policy.AuthAlgorithm),
@@ -66,7 +66,7 @@ func TestAccVpnIPSecPolicyV2_withLifetime(t *testing.T) {
 				),
 			},
 			{
-				Config: testAccIPSecPolicyV2_withLifetimeUpdate,
+				Config: testAccIPSecPolicyV2WithLifetimeUpdate,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckIPSecPolicyV2Exists(resourceName, &policy),
 				),
@@ -123,17 +123,17 @@ func testAccCheckIPSecPolicyV2Exists(n string, policy *ipsecpolicies.Policy) res
 	}
 }
 
-const testAccIPSecPolicyV2_basic = `
+const testAccIPSecPolicyV2Basic = `
 resource "opentelekomcloud_vpnaas_ipsec_policy_v2" "policy_1" { }
 `
 
-const testAccIPSecPolicyV2_update = `
+const testAccIPSecPolicyV2Update = `
 resource "opentelekomcloud_vpnaas_ipsec_policy_v2" "policy_1" {
   name = "updatedname"
 }
 `
 
-const testAccIPSecPolicyV2_withLifetime = `
+const testAccIPSecPolicyV2WithLifetime = `
 resource "opentelekomcloud_vpnaas_ipsec_policy_v2" "policy_1" {
   auth_algorithm = "md5"
   pfs            = "group14"
@@ -144,7 +144,7 @@ resource "opentelekomcloud_vpnaas_ipsec_policy_v2" "policy_1" {
 }
 `
 
-const testAccIPSecPolicyV2_withLifetimeUpdate = `
+const testAccIPSecPolicyV2WithLifetimeUpdate = `
 resource "opentelekomcloud_vpnaas_ipsec_policy_v2" "policy_1" {
   auth_algorithm = "md5"
   pfs            = "group14"
