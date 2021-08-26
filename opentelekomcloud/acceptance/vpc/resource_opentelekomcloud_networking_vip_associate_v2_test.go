@@ -28,7 +28,7 @@ func TestAccNetworkingV2VIPAssociate_basic(t *testing.T) {
 		CheckDestroy:      testAccCheckNetworkingV2VIPAssociateDestroy,
 		Steps: []resource.TestStep{
 			{
-				Config: TestAccNetworkingV2VIPAssociateConfig_basic,
+				Config: TestAccNetworkingV2VIPAssociateConfigBasic,
 				Check: resource.ComposeTestCheckFunc(
 					// testAccCheckNetworkingV2PortExists("opentelekomcloud_networking_port_v2.port_1", &port1),
 					// testAccCheckNetworkingV2PortExists("opentelekomcloud_networking_port_v2.port_2", &port2),
@@ -137,8 +137,10 @@ func testAccCheckNetworkingV2VIPAssociateAssociated(p *ports.Port, vip *ports.Po
 	}
 }
 
-// TestAccNetworkingV2VIPAssociateConfig_basic is used to create.
-var TestAccNetworkingV2VIPAssociateConfig_basic = fmt.Sprintf(`
+// TestAccNetworkingV2VIPAssociateConfigBasic is used to create.
+var TestAccNetworkingV2VIPAssociateConfigBasic = fmt.Sprintf(`
+%s
+
 resource "opentelekomcloud_networking_network_v2" "network_1" {
   name = "network_1"
   admin_state_up = "true"
@@ -158,7 +160,7 @@ resource "opentelekomcloud_networking_router_interface_v2" "router_interface_1" 
 
 resource "opentelekomcloud_networking_router_v2" "router_1" {
   name = "router_1"
-  external_gateway = "%s"
+  external_gateway = data.opentelekomcloud_networking_network_v2.ext_network.id
 }
 
 resource "opentelekomcloud_networking_port_v2" "port_1" {
@@ -206,4 +208,4 @@ resource "opentelekomcloud_networking_vip_associate_v2" "vip_associate_1" {
   vip_id = opentelekomcloud_networking_vip_v2.vip_1.id
   port_ids = [opentelekomcloud_networking_port_v2.port_1.id, opentelekomcloud_networking_port_v2.port_2.id]
 }
-`, env.OS_EXTGW_ID)
+`, common.DataSourceExtNetwork)

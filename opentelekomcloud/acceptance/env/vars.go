@@ -7,7 +7,6 @@ import (
 )
 
 var (
-	OS_EXTGW_ID          = os.Getenv("OS_EXTGW_ID")
 	OS_FLAVOR_ID         = os.Getenv("OS_FLAVOR_ID")
 	OS_FLAVOR_NAME       = os.Getenv("OS_FLAVOR_NAME")
 	OS_IMAGE_ID          = os.Getenv("OS_IMAGE_ID")
