@@ -13,7 +13,7 @@ var (
 	OS_IMAGE_ID          = os.Getenv("OS_IMAGE_ID")
 	OS_NETWORK_ID        = os.Getenv("OS_NETWORK_ID")
 	OsNetworkName        = os.Getenv("OS_NETWORK_NAME")
-	OsExtNetworkName     = os.Getenv("OS_EXT_NETWORK_NAME")
+	OsExtNetworkName     = extNetworkName()
 	OS_REGION_NAME       string
 	OS_ACCESS_KEY        = os.Getenv("OS_ACCESS_KEY")
 	OS_SECRET_KEY        = os.Getenv("OS_SECRET_KEY")
@@ -30,6 +30,13 @@ var (
 	OS_TENANT_NAME       = GetTenantName()
 	OS_TENANT_ID         = os.Getenv("OS_TENANT_ID")
 )
+
+func extNetworkName() string {
+	if nw := os.Getenv("OS_EXT_NETWORK_NAME"); nw != "" {
+		return nw
+	}
+	return "admin_external_net" // value valid for OTC PROD, both eu-de and eu-nl
+}
 
 func GetTenantName() cfg.ProjectName {
 	tn := os.Getenv("OS_TENANT_NAME")
