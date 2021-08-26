@@ -17,3 +17,9 @@ data "opentelekomcloud_subnet_v1" "shared_subnet"  {
   name = "%s"
 }
 `, env.OsSubnetName)
+
+var DataSourceExtNetwork = fmt.Sprintf(`
+data "opentelekomcloud_network_network_v2" "ext_network" {
+  name = "%s"
+}
+`, env.OsExtNetworkName)
