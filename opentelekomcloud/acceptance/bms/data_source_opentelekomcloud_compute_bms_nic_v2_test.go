@@ -64,8 +64,4 @@ data "opentelekomcloud_compute_bms_nic_v2" "nic_1" {
 
 func testAccPreCheckBMSNic(t *testing.T) {
 	common.TestAccPreCheckRequiredEnvVars(t)
-
-	if env.OS_NIC_ID == "" {
-		t.Skip("OS_NIC_ID must be set for NIC acceptance tests")
-	}
 }

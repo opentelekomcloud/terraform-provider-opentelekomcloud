@@ -76,7 +76,7 @@ func testAccIdentityV3CredentialDestroy(s *terraform.State) error {
 
 func checkAKSKUnset(t *testing.T) {
 	if env.OS_SECRET_KEY != "" && env.OS_ACCESS_KEY != "" {
-		t.Error("AK/SK should not be set for AK/SK creation test")
+		t.Skip("AK/SK should not be set for AK/SK creation test")
 	}
 }
 

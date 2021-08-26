@@ -61,10 +61,6 @@ func init() {
 }
 
 func TestAccPreCheckRequiredEnvVars(t *testing.T) {
-	if env.OS_POOL_NAME == "" {
-		t.Fatal("OS_POOL_NAME must be set for acceptance tests")
-	}
-
 	if env.OS_REGION_NAME == "" {
 		t.Fatal("OS_TENANT_NAME or OS_PROJECT_NAME must be set for acceptance tests")
 	}
@@ -96,11 +92,6 @@ func TestAccPreCheckRequiredEnvVars(t *testing.T) {
 
 func TestAccPreCheck(t *testing.T) {
 	TestAccPreCheckRequiredEnvVars(t)
-
-	// Do not run the test if this is a deprecated testing environment.
-	if env.OS_DEPRECATED_ENVIRONMENT != "" {
-		t.Skip("This environment only runs deprecated tests")
-	}
 }
 
 func TestAccPreCheckAdminOnly(t *testing.T) {
