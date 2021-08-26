@@ -6,7 +6,7 @@ import (
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/acceptance/env"
 )
 
-var DataSourceVPC = fmt.Sprintf(`
+var DataSourceRouter = fmt.Sprintf(`
 data "opentelekomcloud_vpc_v1" "shared_vpc"  {
   name = "%s"
 }
