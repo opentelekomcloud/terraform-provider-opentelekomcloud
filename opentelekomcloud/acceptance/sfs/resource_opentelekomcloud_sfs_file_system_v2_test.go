@@ -31,7 +31,6 @@ func TestAccSFSFileSystemV2_basic(t *testing.T) {
 					resource.TestCheckResourceAttr(resourceName, "status", "available"),
 					resource.TestCheckResourceAttr(resourceName, "size", "1"),
 					resource.TestCheckResourceAttr(resourceName, "access_level", "rw"),
-					resource.TestCheckResourceAttr(resourceName, "access_to", env.OS_VPC_ID),
 					resource.TestCheckResourceAttr(resourceName, "access_type", "cert"),
 					resource.TestCheckResourceAttr(resourceName, "tags.muh", "value-create"),
 				),
@@ -45,7 +44,6 @@ func TestAccSFSFileSystemV2_basic(t *testing.T) {
 					resource.TestCheckResourceAttr(resourceName, "status", "available"),
 					resource.TestCheckResourceAttr(resourceName, "size", "2"),
 					resource.TestCheckResourceAttr(resourceName, "access_level", "rw"),
-					resource.TestCheckResourceAttr(resourceName, "access_to", env.OS_VPC_ID),
 					resource.TestCheckResourceAttr(resourceName, "access_type", "cert"),
 					resource.TestCheckResourceAttr(resourceName, "tags.muh", "value-update"),
 				),
@@ -93,7 +91,6 @@ func TestAccSFSFileSystemV2_clean(t *testing.T) {
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckSFSFileSystemV2Exists("opentelekomcloud_sfs_file_system_v2.sfs_1", &share),
 					resource.TestCheckResourceAttr(resourceName, "access_level", "rw"),
-					resource.TestCheckResourceAttr(resourceName, "access_to", env.OS_VPC_ID),
 					resource.TestCheckResourceAttr(resourceName, "access_type", "cert"),
 				),
 			},
@@ -161,12 +158,14 @@ func testAccCheckSFSFileSystemV2Exists(n string, share *shares.Share) resource.T
 }
 
 var testAccSFSFileSystemV2Basic = fmt.Sprintf(`
+%s
+
 resource "opentelekomcloud_sfs_file_system_v2" "sfs_1" {
   share_proto       = "NFS"
   size              = 1
   name              = "sfs-test1"
   availability_zone = "eu-de-01"
-  access_to         = "%s"
+  access_to         = data.opentelekomcloud_vpc_v1.shared_vpc.id
   access_type       = "cert"
   access_level      = "rw"
   description       = "sfs_c2c_test-file"
@@ -176,15 +175,17 @@ resource "opentelekomcloud_sfs_file_system_v2" "sfs_1" {
     kuh = "value-create"
   }
 }
-`, env.OS_VPC_ID)
+`, common.DataSourceVPC)
 
 var testAccSFSFileSystemV2Update = fmt.Sprintf(`
+%s
+
 resource "opentelekomcloud_sfs_file_system_v2" "sfs_1" {
   share_proto       = "NFS"
   size              = 2
   name              = "sfs-test2"
   availability_zone = "eu-de-01"
-  access_to         = "%s"
+  access_to         = data.opentelekomcloud_vpc_v1.shared_vpc.id
   access_type       = "cert"
   access_level      = "rw"
   description       = "sfs_c2c_test-file"
@@ -193,14 +194,16 @@ resource "opentelekomcloud_sfs_file_system_v2" "sfs_1" {
     muh = "value-update"
   }
 }
-`, env.OS_VPC_ID)
+`, common.DataSourceVPC)
 
 var testAccSFSFileSystemV2Timeout = fmt.Sprintf(`
+%s
+
 resource "opentelekomcloud_sfs_file_system_v2" "sfs_1" {
   share_proto  = "NFS"
   size         = 1
   name         = "sfs-test1"
-  access_to    = "%s"
+  access_to    = data.opentelekomcloud_vpc_v1.shared_vpc.id
   access_type  = "cert"
   access_level = "rw"
   description  = "sfs_c2c_test-file"
@@ -209,7 +212,7 @@ resource "opentelekomcloud_sfs_file_system_v2" "sfs_1" {
     create = "5m"
     delete = "5m"
   }
-}`, env.OS_VPC_ID)
+}`, common.DataSourceVPC)
 
 const testAccSFSFileSystemV2Clean = `
 resource "opentelekomcloud_sfs_file_system_v2" "sfs_1" {

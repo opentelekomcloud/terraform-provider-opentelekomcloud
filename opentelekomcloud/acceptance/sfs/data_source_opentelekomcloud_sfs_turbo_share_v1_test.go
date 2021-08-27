@@ -17,7 +17,7 @@ func TestAccSFSTurboShareV1DataSource_basic(t *testing.T) {
 		ProviderFactories: common.TestAccProviderFactories,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccSFSTurboShareV1_basic(name),
+				Config: testAccSFSTurboShareV1Basic(name),
 			},
 			{
 				Config: testAccSFSTurboShareV1DataSourceBasic(name),
@@ -39,5 +39,5 @@ func testAccSFSTurboShareV1DataSourceBasic(name string) string {
 data "opentelekomcloud_sfs_turbo_share_v1" "share" {
   name = "%s"
 }
-`, testAccSFSTurboShareV1_basic(name), name)
+`, testAccSFSTurboShareV1Basic(name), name)
 }

@@ -21,9 +21,10 @@ func TestAccOTCSFSFileSystemV2_importBasic(t *testing.T) {
 			},
 
 			{
-				ResourceName:      resourceName,
-				ImportState:       true,
-				ImportStateVerify: true,
+				ResourceName:            resourceName,
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"access_level", "access_to", "access_type"},
 			},
 		},
 	})
