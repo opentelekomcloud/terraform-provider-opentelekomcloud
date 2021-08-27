@@ -13,7 +13,7 @@ data "opentelekomcloud_vpc_v1" "shared_vpc"  {
 `, env.OsRouterName)
 
 var DataSourceSubnet = fmt.Sprintf(`
-data "opentelekomcloud_subnet_v1" "shared_subnet"  {
+data "opentelekomcloud_vpc_subnet_v1" "shared_subnet"  {
   name = "%s"
 }
 `, env.OsSubnetName)
@@ -23,3 +23,16 @@ data "opentelekomcloud_networking_network_v2" "ext_network" {
   name = "%s"
 }
 `, env.OsExtNetworkName)
+
+var DataSourceImage = fmt.Sprintf(`
+data "opentelekomcloud_images_image_v2" "latest_image" {
+  name        = "%s"
+  most_recent = true
+}
+`, env.OsImageName)
+
+var DataSourceSecGroupDefault = fmt.Sprintf(`
+data "opentelekomcloud_networking_secgroup_v2" "default_secgroup" {
+  name = "default"
+}
+`)
