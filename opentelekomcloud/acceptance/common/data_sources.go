@@ -31,7 +31,7 @@ data "opentelekomcloud_images_image_v2" "latest_image" {
 }
 `, env.OsImageName)
 
-var DataSourceSecGroupDefault = fmt.Sprintf(`
+var DataSourceSecGroupDefault = fmt.Sprint(`
 data "opentelekomcloud_networking_secgroup_v2" "default_secgroup" {
   name = "default"
 }
