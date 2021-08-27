@@ -153,7 +153,7 @@ var testAccASV1GroupBasic = fmt.Sprintf(`
 
 resource "opentelekomcloud_lb_loadbalancer_v2" "loadbalancer_1" {
   name          = "loadbalancer_1"
-  vip_subnet_id = data.opentelekomcloud_subnet_v1.shared_subnet.id
+  vip_subnet_id = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.subnet_id
 }
 
 resource "opentelekomcloud_lb_listener_v2" "listener_1" {
@@ -211,9 +211,6 @@ var testAccASV1GroupUpdate = fmt.Sprintf(`
 // default SecGroup data-source
 %s
 
-// default Subnet data-source
-%s
-
 // default Image data-source
 %s
 
@@ -225,7 +222,7 @@ var testAccASV1GroupUpdate = fmt.Sprintf(`
 
 resource "opentelekomcloud_lb_loadbalancer_v2" "loadbalancer_1" {
   name          = "loadbalancer_1"
-  vip_subnet_id = data.opentelekomcloud_subnet_v1.shared_subnet.id
+  vip_subnet_id = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.subnet_id
 }
 
 resource "opentelekomcloud_lb_listener_v2" "listener_1" {
@@ -276,7 +273,7 @@ resource "opentelekomcloud_as_group_v1" "as_group"{
     muh = "value-update"
   }
 }
-`, common.DataSourceSecGroupDefault, common.DataSourceSubnet, common.DataSourceImage, common.DataSourceSubnet, common.DataSourceVPC, env.OS_KEYPAIR_NAME)
+`, common.DataSourceSecGroupDefault, common.DataSourceImage, common.DataSourceSubnet, common.DataSourceVPC, env.OS_KEYPAIR_NAME)
 
 var testAccASV1GroupRemoveWithSetMinNumber = fmt.Sprintf(`
 // default SecGroup data-source
