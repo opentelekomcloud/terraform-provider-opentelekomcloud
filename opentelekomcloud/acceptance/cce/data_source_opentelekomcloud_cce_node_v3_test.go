@@ -66,7 +66,7 @@ resource "opentelekomcloud_cce_cluster_v3" "cluster_1" {
 resource "opentelekomcloud_cce_node_v3" "node_1" {
   cluster_id        = opentelekomcloud_cce_cluster_v3.cluster_1.id
   name              = "%s"
-  flavor_id         = "s1.medium"
+  flavor_id         = "s2.large.2"
   availability_zone = "%s"
   key_pair          = "%s"
   root_volume {

@@ -44,8 +44,7 @@ func dataSourceCceNodeIdsV3Read(_ context.Context, d *schema.ResourceData, meta 
 		return fmterr.Errorf("unable to create opentelekomcloud CCE client : %s", err)
 	}
 
-	var listOpts nodes.ListOpts
-	refinedNodes, err := nodes.List(cceClient, d.Get("cluster_id").(string), listOpts)
+	refinedNodes, err := nodes.List(cceClient, d.Get("cluster_id").(string), nodes.ListOpts{})
 	if err != nil {
 		return fmterr.Errorf("unable to retrieve Nodes: %s", err)
 	}
