@@ -16,7 +16,7 @@ import (
 
 func TestAccASV1Configuration_basic(t *testing.T) {
 	var asConfig configurations.Configuration
-	resourceName := "opentelekomcloud_as_configuration_v1.hth_as_config"
+	resourceName := "opentelekomcloud_as_configuration_v1.as_config"
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:          func() { common.TestAccFlavorPreCheck(t) },
@@ -24,7 +24,7 @@ func TestAccASV1Configuration_basic(t *testing.T) {
 		CheckDestroy:      testAccCheckASV1ConfigurationDestroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccASV1Configuration_basic,
+				Config: testAccASV1ConfigurationBasic,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckASV1ConfigurationExists(resourceName, &asConfig),
 				),
@@ -43,11 +43,10 @@ func TestAccASV1Configuration_publicIP(t *testing.T) {
 		CheckDestroy:      testAccCheckASV1ConfigurationDestroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccASV1Configuration_publicIP,
+				Config: testAccASV1ConfigurationPublicIP,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckASV1ConfigurationExists(resourceName, &asConfig),
 					resource.TestCheckResourceAttr(resourceName, "scaling_configuration_name", "as_config"),
-					resource.TestCheckResourceAttr(resourceName, "instance_config.0.image", env.OS_IMAGE_ID),
 					resource.TestCheckResourceAttr(resourceName, "instance_config.0.key_name", env.OS_KEYPAIR_NAME),
 				),
 			},
@@ -62,7 +61,7 @@ func TestAccASV1Configuration_invalidDiskSize(t *testing.T) {
 		CheckDestroy:      testAccCheckASV1ConfigurationDestroy,
 		Steps: []resource.TestStep{
 			{
-				Config:      testAccASV1Configuration_invalidDiskSize,
+				Config:      testAccASV1ConfigurationInvalidDiskSize,
 				PlanOnly:    true,
 				ExpectError: regexp.MustCompile(`for system disk size should be.+`),
 			},
@@ -80,7 +79,7 @@ func TestAccASV1Configuration_multipleSecurityGroups(t *testing.T) {
 		CheckDestroy:      testAccCheckASV1ConfigurationDestroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccASV1Configuration_multipleSecurityGroups,
+				Config: testAccASV1ConfigurationMultipleSecurityGroups,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckASV1ConfigurationExists(resourceName, &asConfig),
 					resource.TestCheckResourceAttr(resourceName, "instance_config.0.security_groups.#", "3"),
@@ -92,9 +91,9 @@ func TestAccASV1Configuration_multipleSecurityGroups(t *testing.T) {
 
 func testAccCheckASV1ConfigurationDestroy(s *terraform.State) error {
 	config := common.TestAccProvider.Meta().(*cfg.Config)
-	asClient, err := config.AutoscalingV1Client(env.OS_REGION_NAME)
+	client, err := config.AutoscalingV1Client(env.OS_REGION_NAME)
 	if err != nil {
-		return fmt.Errorf("error creating OpenTelekomCloud AutoScaling client: %s", err)
+		return fmt.Errorf("error creating OpenTelekomCloud AutoScalingV1 client: %w", err)
 	}
 
 	for _, rs := range s.RootModule().Resources {
@@ -102,7 +101,7 @@ func testAccCheckASV1ConfigurationDestroy(s *terraform.State) error {
 			continue
 		}
 
-		_, err := configurations.Get(asClient, rs.Primary.ID).Extract()
+		_, err := configurations.Get(client, rs.Primary.ID).Extract()
 		if err == nil {
 			return fmt.Errorf("AS configuration still exists")
 		}
@@ -123,12 +122,12 @@ func testAccCheckASV1ConfigurationExists(n string, configuration *configurations
 		}
 
 		config := common.TestAccProvider.Meta().(*cfg.Config)
-		asClient, err := config.AutoscalingV1Client(env.OS_REGION_NAME)
+		client, err := config.AutoscalingV1Client(env.OS_REGION_NAME)
 		if err != nil {
-			return fmt.Errorf("error creating OpenTelekomCloud AutoScaling client: %s", err)
+			return fmt.Errorf("error creating OpenTelekomCloud AutoScalingV1 client: %w", err)
 		}
 
-		found, err := configurations.Get(asClient, rs.Primary.ID).Extract()
+		found, err := configurations.Get(client, rs.Primary.ID).Extract()
 		if err != nil {
 			return err
 		}
@@ -142,11 +141,13 @@ func testAccCheckASV1ConfigurationExists(n string, configuration *configurations
 	}
 }
 
-var testAccASV1Configuration_basic = fmt.Sprintf(`
-resource "opentelekomcloud_as_configuration_v1" "hth_as_config"{
+var testAccASV1ConfigurationBasic = fmt.Sprintf(`
+%s
+
+resource "opentelekomcloud_as_configuration_v1" "as_config"{
   scaling_configuration_name = "hth_as_config"
   instance_config {
-    image = "%s"
+    image = data.opentelekomcloud_images_image_v2.latest_image.id
     disk {
       size        = 40
       volume_type = "SATA"
@@ -161,13 +162,15 @@ resource "opentelekomcloud_as_configuration_v1" "hth_as_config"{
     user_data = "#! /bin/bash"
   }
 }
-`, env.OS_IMAGE_ID, env.OS_KEYPAIR_NAME)
+`, common.DataSourceImage, env.OS_KEYPAIR_NAME)
 
-var testAccASV1Configuration_publicIP = fmt.Sprintf(`
+var testAccASV1ConfigurationPublicIP = fmt.Sprintf(`
+%s
+
 resource "opentelekomcloud_as_configuration_v1" "as_config"{
   scaling_configuration_name = "as_config"
   instance_config {
-    image = "%s"
+    image = data.opentelekomcloud_images_image_v2.latest_image.id
     disk {
       size        = 32768
       volume_type = "uh-l1"
@@ -196,13 +199,15 @@ resource "opentelekomcloud_as_configuration_v1" "as_config"{
     }
   }
 }
-`, env.OS_IMAGE_ID, env.OS_KEYPAIR_NAME)
+`, common.DataSourceImage, env.OS_KEYPAIR_NAME)
 
-var testAccASV1Configuration_invalidDiskSize = fmt.Sprintf(`
+var testAccASV1ConfigurationInvalidDiskSize = fmt.Sprintf(`
+%s
+
 resource "opentelekomcloud_as_configuration_v1" "as_config"{
   scaling_configuration_name = "as_config"
   instance_config {
-    image = "%s"
+    image = data.opentelekomcloud_images_image_v2.latest_image.id
     disk {
       size        = 1
       volume_type = "uh-l1"
@@ -216,9 +221,11 @@ resource "opentelekomcloud_as_configuration_v1" "as_config"{
     key_name = "%s"
   }
 }
-`, env.OS_IMAGE_ID, env.OS_KEYPAIR_NAME)
+`, common.DataSourceImage, env.OS_KEYPAIR_NAME)
 
-var testAccASV1Configuration_multipleSecurityGroups = fmt.Sprintf(`
+var testAccASV1ConfigurationMultipleSecurityGroups = fmt.Sprintf(`
+%s
+
 resource "opentelekomcloud_compute_secgroup_v2" "secgroup_1" {
   name        = "acc-test-sg-1"
   description = "Security group for AS config tf test"
@@ -237,6 +244,7 @@ resource "opentelekomcloud_compute_secgroup_v2" "secgroup_3" {
 resource "opentelekomcloud_as_configuration_v1" "as_config"{
   scaling_configuration_name = "as_config"
   instance_config {
+    image = data.opentelekomcloud_images_image_v2.latest_image.id
     disk {
       size        = 40
       volume_type = "SATA"
@@ -255,4 +263,4 @@ resource "opentelekomcloud_as_configuration_v1" "as_config"{
     ]
   }
 }
-`, env.OS_KEYPAIR_NAME)
+`, common.DataSourceImage, env.OS_KEYPAIR_NAME)

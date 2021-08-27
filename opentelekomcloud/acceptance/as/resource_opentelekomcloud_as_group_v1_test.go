@@ -2,7 +2,6 @@ package acceptance
 
 import (
 	"fmt"
-	"log"
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
@@ -16,8 +15,7 @@ import (
 
 func TestAccASV1Group_basic(t *testing.T) {
 	var asGroup groups.Group
-
-	resourceName := "opentelekomcloud_as_group_v1.hth_as_group"
+	resourceName := "opentelekomcloud_as_group_v1.as_group"
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:          func() { common.TestAccFlavorPreCheck(t) },
@@ -25,7 +23,7 @@ func TestAccASV1Group_basic(t *testing.T) {
 		CheckDestroy:      testAccCheckASV1GroupDestroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testASV1Group_basic,
+				Config: testAccASV1GroupBasic,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckASV1GroupExists(resourceName, &asGroup),
 					resource.TestCheckResourceAttr(resourceName, "lbaas_listeners.0.protocol_port", "8080"),
@@ -49,8 +47,7 @@ func TestAccASV1Group_basic(t *testing.T) {
 
 func TestAccASV1Group_RemoveWithSetMinNumber(t *testing.T) {
 	var asGroup groups.Group
-
-	resourceName := "opentelekomcloud_as_group_v1.proxy_group"
+	resourceName := "opentelekomcloud_as_group_v1.as_group"
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:          func() { common.TestAccFlavorPreCheck(t) },
@@ -72,7 +69,7 @@ func TestAccASV1Group_RemoveWithSetMinNumber(t *testing.T) {
 func TestAccASV1Group_WithoutSecurityGroups(t *testing.T) {
 	var asGroup groups.Group
 
-	resourceName := "opentelekomcloud_as_group_v1.proxy_group"
+	resourceName := "opentelekomcloud_as_group_v1.as_group"
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:          func() { common.TestAccFlavorPreCheck(t) },
@@ -92,9 +89,9 @@ func TestAccASV1Group_WithoutSecurityGroups(t *testing.T) {
 
 func testAccCheckASV1GroupDestroy(s *terraform.State) error {
 	config := common.TestAccProvider.Meta().(*cfg.Config)
-	asClient, err := config.AutoscalingV1Client(env.OS_REGION_NAME)
+	client, err := config.AutoscalingV1Client(env.OS_REGION_NAME)
 	if err != nil {
-		return fmt.Errorf("error creating opentelekomcloud autoscaling client: %s", err)
+		return fmt.Errorf("error creating OpenTelekomCloud AutoScalingV1 client: %w", err)
 	}
 
 	for _, rs := range s.RootModule().Resources {
@@ -102,13 +99,11 @@ func testAccCheckASV1GroupDestroy(s *terraform.State) error {
 			continue
 		}
 
-		_, err := groups.Get(asClient, rs.Primary.ID).Extract()
+		_, err := groups.Get(client, rs.Primary.ID).Extract()
 		if err == nil {
 			return fmt.Errorf("AS group still exists")
 		}
 	}
-
-	log.Printf("[DEBUG] testCheckASV1GroupDestroy success!")
 
 	return nil
 }
@@ -127,7 +122,7 @@ func testAccCheckASV1GroupExists(n string, group *groups.Group) resource.TestChe
 		config := common.TestAccProvider.Meta().(*cfg.Config)
 		client, err := config.AutoscalingV1Client(env.OS_REGION_NAME)
 		if err != nil {
-			return fmt.Errorf("error creating opentelekomcloud autoscaling client: %s", err)
+			return fmt.Errorf("error creating OpenTelekomCloud AutoScalingV1 client: %w", err)
 		}
 
 		found, err := groups.Get(client, rs.Primary.ID).Extract()
@@ -136,23 +131,24 @@ func testAccCheckASV1GroupExists(n string, group *groups.Group) resource.TestChe
 		}
 
 		if found.ID != rs.Primary.ID {
-			return fmt.Errorf("autoscaling Group not found")
+			return fmt.Errorf("AS group not found")
 		}
-		log.Printf("[DEBUG] test found is: %#v", found)
 		group = found
 
 		return nil
 	}
 }
 
-var testASV1Group_basic = fmt.Sprintf(`
-resource "opentelekomcloud_networking_secgroup_v2" "secgroup" {
-  name = "test-acc"
-}
+var testAccASV1GroupBasic = fmt.Sprintf(`
+//default SecGroup data-source
+%s
+
+//default Subnet data-source
+%s
 
 resource "opentelekomcloud_lb_loadbalancer_v2" "loadbalancer_1" {
   name          = "loadbalancer_1"
-  vip_subnet_id = "%s"
+  vip_subnet_id = data.opentelekomcloud_subnet_v1.shared_subnet.id
 }
 
 resource "opentelekomcloud_lb_listener_v2" "listener_1" {
@@ -169,7 +165,7 @@ resource "opentelekomcloud_lb_pool_v2" "pool_1" {
   listener_id = opentelekomcloud_lb_listener_v2.listener_1.id
 }
 
-resource "opentelekomcloud_as_configuration_v1" "hth_as_config"{
+resource "opentelekomcloud_as_configuration_v1" "as_config"{
   scaling_configuration_name = "hth_as_config"
   instance_config {
     image = "%s"
@@ -182,9 +178,9 @@ resource "opentelekomcloud_as_configuration_v1" "hth_as_config"{
   }
 }
 
-resource "opentelekomcloud_as_group_v1" "hth_as_group"{
+resource "opentelekomcloud_as_group_v1" "as_group"{
   scaling_group_name       = "hth_as_group"
-  scaling_configuration_id = opentelekomcloud_as_configuration_v1.hth_as_config.id
+  scaling_configuration_id = opentelekomcloud_as_configuration_v1.as_config.id
   networks {
     id = "%s"
   }
@@ -204,7 +200,7 @@ resource "opentelekomcloud_as_group_v1" "hth_as_group"{
     kuh = "value-create"
   }
 }
-`, env.OS_SUBNET_ID, env.OS_IMAGE_ID, env.OS_KEYPAIR_NAME, env.OS_NETWORK_ID, env.OS_VPC_ID)
+`, common.DataSourceSecGroupDefault, common.DataSourceSubnet, env.OS_IMAGE_ID, env.OS_KEYPAIR_NAME, env.OS_NETWORK_ID, env.OS_VPC_ID)
 
 var testASV1Group_update = fmt.Sprintf(`
 resource "opentelekomcloud_networking_secgroup_v2" "secgroup" {
