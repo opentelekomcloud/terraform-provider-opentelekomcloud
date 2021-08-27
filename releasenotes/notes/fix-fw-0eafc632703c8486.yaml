@@ -1,0 +1,6 @@
+---
+fixes:
+  - |
+    **[FW]** Fix errors when creating/updating/deleting ``resource/opentelekomcloud_fw_firewall_group_v2`` (`#1329 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/1329>`_)
+  - |
+    **[FW]** Fix incorrect wait for ``resource/opentelekomcloud_fw_policy_v2`` deletion (`#1329 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/1329>`_)

@@ -133,7 +133,7 @@ func resourceFWFirewallGroupV2Create(ctx context.Context, d *schema.ResourceData
 
 	stateConf := &resource.StateChangeConf{
 		Pending:    []string{"PENDING_CREATE"},
-		Target:     []string{"ACTIVE"},
+		Target:     []string{"ACTIVE", "INACTIVE"},
 		Refresh:    waitForFirewallGroupActive(networkingClient, firewall_group.ID),
 		Timeout:    d.Timeout(schema.TimeoutCreate),
 		Delay:      0,
@@ -240,7 +240,7 @@ func resourceFWFirewallGroupV2Update(ctx context.Context, d *schema.ResourceData
 
 	stateConf := &resource.StateChangeConf{
 		Pending:    []string{"PENDING_CREATE", "PENDING_UPDATE"},
-		Target:     []string{"ACTIVE"},
+		Target:     []string{"ACTIVE", "INACTIVE"},
 		Refresh:    waitForFirewallGroupActive(networkingClient, d.Id()),
 		Timeout:    d.Timeout(schema.TimeoutUpdate),
 		Delay:      0,
@@ -267,7 +267,7 @@ func resourceFWFirewallGroupV2Delete(ctx context.Context, d *schema.ResourceData
 	// Ensure the firewall group was fully created/updated before being deleted.
 	stateConf := &resource.StateChangeConf{
 		Pending:    []string{"PENDING_CREATE", "PENDING_UPDATE"},
-		Target:     []string{"ACTIVE"},
+		Target:     []string{"ACTIVE", "INACTIVE"},
 		Refresh:    waitForFirewallGroupActive(networkingClient, d.Id()),
 		Timeout:    d.Timeout(schema.TimeoutUpdate),
 		Delay:      0,
