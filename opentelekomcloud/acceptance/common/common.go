@@ -84,10 +84,6 @@ func TestAccPreCheckRequiredEnvVars(t *testing.T) {
 	if env.OS_SUBNET_ID == "" {
 		t.Fatal("OS_SUBNET_ID must be set for acceptance tests")
 	}
-
-	if env.OS_EXTGW_ID == "" {
-		t.Fatal("OS_EXTGW_ID must be set for acceptance tests")
-	}
 }
 
 func TestAccPreCheck(t *testing.T) {

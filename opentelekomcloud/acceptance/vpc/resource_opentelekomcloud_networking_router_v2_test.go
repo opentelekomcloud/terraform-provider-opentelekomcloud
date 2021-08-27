@@ -57,7 +57,7 @@ func TestAccNetworkingV2Router_update_external_gw(t *testing.T) {
 			{
 				Config: testAccNetworkingV2RouterUpdateExternalGw,
 				Check: resource.ComposeTestCheckFunc(
-					resource.TestCheckResourceAttr(resourceName, "external_gateway", env.OS_EXTGW_ID),
+					resource.TestCheckResourceAttrSet(resourceName, "external_gateway"),
 				),
 			},
 		},
@@ -121,13 +121,15 @@ resource "opentelekomcloud_networking_router_v2" "router_1" {
 `
 
 var testAccNetworkingV2RouterUpdateExternalGw = fmt.Sprintf(`
+%s
+
 resource "opentelekomcloud_networking_router_v2" "router_1" {
   name             = "router_1"
   admin_state_up   = true
   distributed      = false
-  external_gateway = "%s"
+  external_gateway = data.opentelekomcloud_networking_network_v2.ext_network.id
 }
-`, env.OS_EXTGW_ID)
+`, common.DataSourceExtNetwork)
 
 const testAccNetworkingV2RouterTimeout = `
 resource "opentelekomcloud_networking_router_v2" "router_1" {

@@ -17,7 +17,7 @@ func TestAccFWFirewallV2_importBasic(t *testing.T) {
 		CheckDestroy:      testAccCheckFWFirewallGroupV2Destroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccFWFirewallGroupV2_basic_1,
+				Config: testAccFWFirewallGroupV2Basic1,
 			},
 
 			{

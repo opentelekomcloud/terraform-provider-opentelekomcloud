@@ -26,13 +26,13 @@ func TestAccFWFirewallGroupV2_basic(t *testing.T) {
 		CheckDestroy:      testAccCheckFWFirewallGroupV2Destroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccFWFirewallGroupV2_basic_1,
+				Config: testAccFWFirewallGroupV2Basic1,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckFWFirewallGroupV2("opentelekomcloud_fw_firewall_group_v2.fw_1", "", "", ipolicyID, epolicyID),
 				),
 			},
 			{
-				Config: testAccFWFirewallGroupV2_basic_2,
+				Config: testAccFWFirewallGroupV2Basic2,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckFWFirewallGroupV2(
 						"opentelekomcloud_fw_firewall_group_v2.fw_1", "fw_1", "terraform acceptance test", ipolicyID, epolicyID),
@@ -43,7 +43,7 @@ func TestAccFWFirewallGroupV2_basic(t *testing.T) {
 }
 
 func TestAccFWFirewallGroupV2_port0(t *testing.T) {
-	var firewall_group fw.FirewallGroup
+	var firewallGroup fw.FirewallGroup
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:          func() { common.TestAccPreCheck(t) },
@@ -51,10 +51,10 @@ func TestAccFWFirewallGroupV2_port0(t *testing.T) {
 		CheckDestroy:      testAccCheckFWFirewallGroupV2Destroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccFWFirewallV2_port,
+				Config: testAccFWFirewallV2Port,
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckFWFirewallGroupV2Exists("opentelekomcloud_fw_firewall_group_v2.fw_1", &firewall_group),
-					testAccCheckFWFirewallPortCount(&firewall_group, 1),
+					testAccCheckFWFirewallGroupV2Exists("opentelekomcloud_fw_firewall_group_v2.fw_1", &firewallGroup),
+					testAccCheckFWFirewallPortCount(&firewallGroup, 1),
 				),
 			},
 		},
@@ -62,7 +62,7 @@ func TestAccFWFirewallGroupV2_port0(t *testing.T) {
 }
 
 func TestAccFWFirewallGroupV2_no_ports(t *testing.T) {
-	var firewall_group fw.FirewallGroup
+	var firewallGroup fw.FirewallGroup
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:          func() { common.TestAccPreCheck(t) },
@@ -70,11 +70,11 @@ func TestAccFWFirewallGroupV2_no_ports(t *testing.T) {
 		CheckDestroy:      testAccCheckFWFirewallGroupV2Destroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccFWFirewallV2_no_ports,
+				Config: testAccFWFirewallV2NoPorts,
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckFWFirewallGroupV2Exists("opentelekomcloud_fw_firewall_group_v2.fw_1", &firewall_group),
+					testAccCheckFWFirewallGroupV2Exists("opentelekomcloud_fw_firewall_group_v2.fw_1", &firewallGroup),
 					resource.TestCheckResourceAttr("opentelekomcloud_fw_firewall_group_v2.fw_1", "description", "firewall router test"),
-					testAccCheckFWFirewallPortCount(&firewall_group, 0),
+					testAccCheckFWFirewallPortCount(&firewallGroup, 0),
 				),
 			},
 		},
@@ -82,7 +82,7 @@ func TestAccFWFirewallGroupV2_no_ports(t *testing.T) {
 }
 
 func TestAccFWFirewallGroupV2_port_update(t *testing.T) {
-	var firewall_group fw.FirewallGroup
+	var firewallGroup fw.FirewallGroup
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:          func() { common.TestAccPreCheck(t) },
@@ -90,17 +90,17 @@ func TestAccFWFirewallGroupV2_port_update(t *testing.T) {
 		CheckDestroy:      testAccCheckFWFirewallGroupV2Destroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccFWFirewallV2_port,
+				Config: testAccFWFirewallV2Port,
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckFWFirewallGroupV2Exists("opentelekomcloud_fw_firewall_group_v2.fw_1", &firewall_group),
-					testAccCheckFWFirewallPortCount(&firewall_group, 1),
+					testAccCheckFWFirewallGroupV2Exists("opentelekomcloud_fw_firewall_group_v2.fw_1", &firewallGroup),
+					testAccCheckFWFirewallPortCount(&firewallGroup, 1),
 				),
 			},
 			{
-				Config: testAccFWFirewallV2_port_add,
+				Config: testAccFWFirewallV2PortAdd,
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckFWFirewallGroupV2Exists("opentelekomcloud_fw_firewall_group_v2.fw_1", &firewall_group),
-					testAccCheckFWFirewallPortCount(&firewall_group, 2),
+					testAccCheckFWFirewallGroupV2Exists("opentelekomcloud_fw_firewall_group_v2.fw_1", &firewallGroup),
+					testAccCheckFWFirewallPortCount(&firewallGroup, 2),
 				),
 			},
 		},
@@ -108,7 +108,7 @@ func TestAccFWFirewallGroupV2_port_update(t *testing.T) {
 }
 
 func TestAccFWFirewallGroupV2_port_remove(t *testing.T) {
-	var firewall_group fw.FirewallGroup
+	var firewallGroup fw.FirewallGroup
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:          func() { common.TestAccPreCheck(t) },
@@ -116,17 +116,17 @@ func TestAccFWFirewallGroupV2_port_remove(t *testing.T) {
 		CheckDestroy:      testAccCheckFWFirewallGroupV2Destroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccFWFirewallV2_port,
+				Config: testAccFWFirewallV2Port,
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckFWFirewallGroupV2Exists("opentelekomcloud_fw_firewall_group_v2.fw_1", &firewall_group),
-					testAccCheckFWFirewallPortCount(&firewall_group, 1),
+					testAccCheckFWFirewallGroupV2Exists("opentelekomcloud_fw_firewall_group_v2.fw_1", &firewallGroup),
+					testAccCheckFWFirewallPortCount(&firewallGroup, 1),
 				),
 			},
 			{
-				Config: testAccFWFirewallV2_port_remove,
+				Config: testAccFWFirewallV2PortRemove,
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckFWFirewallGroupV2Exists("opentelekomcloud_fw_firewall_group_v2.fw_1", &firewall_group),
-					testAccCheckFWFirewallPortCount(&firewall_group, 0),
+					testAccCheckFWFirewallGroupV2Exists("opentelekomcloud_fw_firewall_group_v2.fw_1", &firewallGroup),
+					testAccCheckFWFirewallPortCount(&firewallGroup, 0),
 				),
 			},
 		},
@@ -146,7 +146,7 @@ func testAccCheckFWFirewallGroupV2Destroy(s *terraform.State) error {
 
 		_, err = firewall_groups.Get(networkingClient, rs.Primary.ID).Extract()
 		if err == nil {
-			return fmt.Errorf("firewall group (%s) still exists.", rs.Primary.ID)
+			return fmt.Errorf("firewall group (%s) still exists", rs.Primary.ID)
 		}
 		if _, ok := err.(golangsdk.ErrDefault404); !ok {
 			return err
@@ -155,7 +155,7 @@ func testAccCheckFWFirewallGroupV2Destroy(s *terraform.State) error {
 	return nil
 }
 
-func testAccCheckFWFirewallGroupV2Exists(n string, firewall_group *fw.FirewallGroup) resource.TestCheckFunc {
+func testAccCheckFWFirewallGroupV2Exists(n string, firewallGroup *fw.FirewallGroup) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
 		rs, ok := s.RootModule().Resources[n]
 		if !ok {
@@ -182,16 +182,16 @@ func testAccCheckFWFirewallGroupV2Exists(n string, firewall_group *fw.FirewallGr
 			return fmt.Errorf("firewall group not found")
 		}
 
-		*firewall_group = found
+		*firewallGroup = found
 
 		return nil
 	}
 }
 
-func testAccCheckFWFirewallPortCount(firewall_group *fw.FirewallGroup, expected int) resource.TestCheckFunc {
+func testAccCheckFWFirewallPortCount(firewallGroup *fw.FirewallGroup, expected int) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
-		if len(firewall_group.PortIDs) != expected {
-			return fmt.Errorf("expected %d Ports, got %d", expected, len(firewall_group.PortIDs))
+		if len(firewallGroup.PortIDs) != expected {
+			return fmt.Errorf("expected %d Ports, got %d", expected, len(firewallGroup.PortIDs))
 		}
 
 		return nil
@@ -259,7 +259,7 @@ func testAccCheckFWFirewallGroupV2(n, expectedName, expectedDescription string, 
 	}
 }
 
-const testAccFWFirewallGroupV2_basic_1 = `
+const testAccFWFirewallGroupV2Basic1 = `
 resource "opentelekomcloud_fw_firewall_group_v2" "fw_1" {
   ingress_policy_id = opentelekomcloud_fw_policy_v2.policy_1.id
   egress_policy_id = opentelekomcloud_fw_policy_v2.policy_1.id
@@ -276,7 +276,7 @@ resource "opentelekomcloud_fw_policy_v2" "policy_1" {
 }
 `
 
-const testAccFWFirewallGroupV2_basic_2 = `
+const testAccFWFirewallGroupV2Basic2 = `
 resource "opentelekomcloud_fw_firewall_group_v2" "fw_1" {
   name = "fw_1"
   description = "terraform acceptance test"
@@ -294,7 +294,9 @@ resource "opentelekomcloud_fw_policy_v2" "policy_2" {
 }
 `
 
-var testAccFWFirewallV2_port = fmt.Sprintf(`
+var testAccFWFirewallV2Port = fmt.Sprintf(`
+%s
+
 resource "opentelekomcloud_networking_network_v2" "network_1" {
   name = "network_1"
   admin_state_up = "true"
@@ -311,7 +313,7 @@ resource "opentelekomcloud_networking_subnet_v2" "subnet_1" {
 resource "opentelekomcloud_networking_router_v2" "router_1" {
   name = "router_1"
   admin_state_up = "true"
-  external_gateway = "%s"
+  external_gateway = data.opentelekomcloud_networking_network_v2.ext_network.id
 }
 
 resource "opentelekomcloud_networking_port_v2" "port_1" {
@@ -340,13 +342,15 @@ resource "opentelekomcloud_fw_firewall_group_v2" "fw_1" {
   ingress_policy_id = opentelekomcloud_fw_policy_v2.policy_1.id
   #egress_policy_id = opentelekomcloud_fw_policy_v2.policy_1.id
   ports = [
-	opentelekomcloud_networking_port_v2.port_1.id
+    opentelekomcloud_networking_port_v2.port_1.id
   ]
   depends_on = ["opentelekomcloud_networking_router_interface_v2.router_interface_1"]
 }
-`, env.OS_EXTGW_ID)
+`, common.DataSourceExtNetwork)
 
-var testAccFWFirewallV2_port_add = fmt.Sprintf(`
+var testAccFWFirewallV2PortAdd = fmt.Sprintf(`
+%s
+
 resource "opentelekomcloud_networking_network_v2" "network_1" {
   name = "network_1"
   admin_state_up = "true"
@@ -374,13 +378,13 @@ resource "opentelekomcloud_networking_subnet_v2" "subnet_2" {
 resource "opentelekomcloud_networking_router_v2" "router_1" {
   name = "router_1"
   admin_state_up = "true"
-  external_gateway = "%s"
+  external_gateway = data.opentelekomcloud_networking_network_v2.ext_network.id
 }
 
 resource "opentelekomcloud_networking_router_v2" "router_2" {
   name = "router_2"
   admin_state_up = "true"
-  external_gateway = "%s"
+  external_gateway = data.opentelekomcloud_networking_network_v2.ext_network.id
 }
 
 resource "opentelekomcloud_networking_port_v2" "port_1" {
@@ -425,14 +429,14 @@ resource "opentelekomcloud_fw_firewall_group_v2" "fw_1" {
   ingress_policy_id = opentelekomcloud_fw_policy_v2.policy_1.id
   egress_policy_id = opentelekomcloud_fw_policy_v2.policy_1.id
   ports = [
-	opentelekomcloud_networking_port_v2.port_1.id,
-	opentelekomcloud_networking_port_v2.port_2.id
+    opentelekomcloud_networking_port_v2.port_1.id,
+    opentelekomcloud_networking_port_v2.port_2.id
   ]
   depends_on = ["opentelekomcloud_networking_router_interface_v2.router_interface_1", "opentelekomcloud_networking_router_interface_v2.router_interface_2"]
 }
-`, env.OS_EXTGW_ID, env.OS_EXTGW_ID)
+`, common.DataSourceExtNetwork)
 
-const testAccFWFirewallV2_port_remove = `
+const testAccFWFirewallV2PortRemove = `
 resource "opentelekomcloud_fw_policy_v2" "policy_1" {
   name = "policy_1"
 }
@@ -445,7 +449,7 @@ resource "opentelekomcloud_fw_firewall_group_v2" "fw_1" {
 }
 `
 
-const testAccFWFirewallV2_no_ports = `
+const testAccFWFirewallV2NoPorts = `
 resource "opentelekomcloud_fw_policy_v2" "policy_1" {
   name = "policy_1"
 }
