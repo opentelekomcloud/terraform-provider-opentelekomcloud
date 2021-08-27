@@ -347,7 +347,7 @@ resource "opentelekomcloud_cce_cluster_v3" "cluster_1" {
   cluster_type = "VirtualMachine"
   flavor_id    = "cce.s1.small"
   vpc_id       = data.opentelekomcloud_vpc_v1.shared_vpc.id
-  subnet_id    = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.network_id
+  subnet_id    = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.id
 
   container_network_type = "overlay_l2"
   authentication_mode    = "rbac"
@@ -405,7 +405,7 @@ resource "opentelekomcloud_cce_cluster_v3" "cluster_1" {
   cluster_type = "VirtualMachine"
   flavor_id    = "cce.s1.small"
   vpc_id       = data.opentelekomcloud_vpc_v1.shared_vpc.id
-  subnet_id    = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.network_id
+  subnet_id    = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.id
 
   container_network_type = "overlay_l2"
   authentication_mode    = "rbac"
@@ -442,7 +442,7 @@ resource "opentelekomcloud_cce_cluster_v3" "cluster_1" {
   cluster_type = "VirtualMachine"
   flavor_id    = "cce.s1.small"
   vpc_id       = data.opentelekomcloud_vpc_v1.shared_vpc.id
-  subnet_id    = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.network_id
+  subnet_id    = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.id
 
   container_network_type = "overlay_l2"
   authentication_mode    = "rbac"
@@ -478,7 +478,7 @@ resource "opentelekomcloud_cce_cluster_v3" "cluster_1" {
   cluster_type = "VirtualMachine"
   flavor_id    = "cce.s1.small"
   vpc_id       = data.opentelekomcloud_vpc_v1.shared_vpc.id
-  subnet_id    = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.network_id
+  subnet_id    = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.id
 
   container_network_type = "overlay_l2"
   authentication_mode    = "rbac"
@@ -516,7 +516,7 @@ resource "opentelekomcloud_cce_cluster_v3" "cluster_1" {
   cluster_type = "VirtualMachine"
   flavor_id    = "cce.s1.small"
   vpc_id       = data.opentelekomcloud_vpc_v1.shared_vpc.id
-  subnet_id    = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.network_id
+  subnet_id    = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.id
 
   container_network_type = "overlay_l2"
   authentication_mode    = "rbac"
@@ -552,7 +552,7 @@ resource "opentelekomcloud_cce_cluster_v3" "cluster_1" {
   cluster_type = "VirtualMachine"
   flavor_id    = "cce.s1.small"
   vpc_id       = data.opentelekomcloud_vpc_v1.shared_vpc.id
-  subnet_id    = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.network_id
+  subnet_id    = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.id
 
   container_network_type = "overlay_l2"
   authentication_mode    = "rbac"
@@ -588,7 +588,7 @@ resource "opentelekomcloud_cce_cluster_v3" "cluster_1" {
   cluster_type = "VirtualMachine"
   flavor_id    = "cce.s1.small"
   vpc_id       = data.opentelekomcloud_vpc_v1.shared_vpc.id
-  subnet_id    = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.network_id
+  subnet_id    = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.id
 
   container_network_type = "overlay_l2"
   authentication_mode    = "rbac"
@@ -622,7 +622,7 @@ resource "opentelekomcloud_cce_cluster_v3" "cluster_1" {
   cluster_type = "VirtualMachine"
   flavor_id    = "cce.s1.small"
   vpc_id       = data.opentelekomcloud_vpc_v1.shared_vpc.id
-  subnet_id    = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.network_id
+  subnet_id    = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.id
 
   container_network_type = "overlay_l2"
   authentication_mode    = "rbac"
@@ -660,7 +660,7 @@ resource "opentelekomcloud_cce_cluster_v3" "cluster_1" {
   cluster_type = "VirtualMachine"
   flavor_id    = "cce.s1.small"
   vpc_id       = data.opentelekomcloud_vpc_v1.shared_vpc.id
-  subnet_id    = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.network_id
+  subnet_id    = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.id
 
   container_network_type = "overlay_l2"
   authentication_mode    = "rbac"
@@ -701,7 +701,7 @@ resource "opentelekomcloud_cce_cluster_v3" "cluster_1" {
   cluster_type = "VirtualMachine"
   flavor_id    = "cce.s1.small"
   vpc_id       = data.opentelekomcloud_vpc_v1.shared_vpc.id
-  subnet_id    = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.network_id
+  subnet_id    = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.id
 
   container_network_type = "overlay_l2"
   authentication_mode    = "rbac"
@@ -740,7 +740,7 @@ resource "opentelekomcloud_cce_cluster_v3" "cluster_1" {
   cluster_type = "VirtualMachine"
   flavor_id    = "cce.s1.small"
   vpc_id       = data.opentelekomcloud_vpc_v1.shared_vpc.id
-  subnet_id    = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.network_id
+  subnet_id    = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.id
 
   container_network_type = "overlay_l2"
   authentication_mode    = "rbac"
@@ -775,7 +775,7 @@ resource "opentelekomcloud_cce_cluster_v3" "cluster_1" {
   cluster_type = "VirtualMachine"
   flavor_id    = "cce.s1.small"
   vpc_id       = data.opentelekomcloud_vpc_v1.shared_vpc.id
-  subnet_id    = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.network_id
+  subnet_id    = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.id
 
   container_network_type = "overlay_l2"
   authentication_mode    = "rbac"
@@ -810,7 +810,7 @@ resource "opentelekomcloud_cce_cluster_v3" "cluster_1" {
   cluster_type = "VirtualMachine"
   flavor_id    = "cce.s1.small"
   vpc_id       = data.opentelekomcloud_vpc_v1.shared_vpc.id
-  subnet_id    = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.network_id
+  subnet_id    = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.id
   container_network_type = "overlay_l2"
   authentication_mode    = "rbac"
 }

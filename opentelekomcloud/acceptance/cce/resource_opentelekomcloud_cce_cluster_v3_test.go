@@ -215,7 +215,7 @@ resource "opentelekomcloud_cce_cluster_v3" "cluster_1" {
   cluster_type            = "VirtualMachine"
   flavor_id               = "cce.s1.small"
   vpc_id                  = data.opentelekomcloud_vpc_v1.shared_vpc.id
-  subnet_id               = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.network_id
+  subnet_id               = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.id
   container_network_type  = "overlay_l2"
   kubernetes_svc_ip_range = "10.247.0.0/16"
 }`, common.DataSourceVPC, common.DataSourceSubnet, clusterName)
@@ -230,7 +230,7 @@ resource "opentelekomcloud_cce_cluster_v3" "cluster_1" {
   cluster_type            = "VirtualMachine"
   flavor_id               = "cce.s1.small"
   vpc_id                  = data.opentelekomcloud_vpc_v1.shared_vpc.id
-  subnet_id               = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.network_id
+  subnet_id               = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.id
   container_network_type  = "overlay_l2"
   description             = "new description"
   kubernetes_svc_ip_range = "10.247.0.0/16"
@@ -248,7 +248,7 @@ resource "opentelekomcloud_cce_cluster_v3" "cluster_1" {
   cluster_type           = "VirtualMachine"
   flavor_id              = "cce.s2.small"
   vpc_id                 = data.opentelekomcloud_vpc_v1.shared_vpc.id
-  subnet_id              = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.network_id
+  subnet_id              = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.id
   eip                    = opentelekomcloud_networking_floatingip_v2.fip_1.address
   container_network_type = "overlay_l2"
   authentication_mode    = "rbac"
@@ -272,13 +272,13 @@ resource "opentelekomcloud_cce_cluster_v3" "cluster_1" {
   flavor_id              = "cce.s1.small"
   cluster_version        = "v1.9.2"
   vpc_id                 = data.opentelekomcloud_vpc_v1.shared_vpc.id
-  subnet_id              = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.network_id
+  subnet_id              = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.id
   container_network_type = "overlay_l2"
   description            = "new description"
 }`, common.DataSourceVPC, common.DataSourceSubnet, clusterName)
 
 	testAccCCEClusterV3AuthProxy = fmt.Sprintf(`
-%
+%s
 
 %s
 
@@ -287,7 +287,7 @@ resource "opentelekomcloud_cce_cluster_v3" "cluster_1" {
   cluster_type            = "VirtualMachine"
   flavor_id               = "cce.s1.small"
   vpc_id                  = data.opentelekomcloud_vpc_v1.shared_vpc.id
-  subnet_id               = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.network_id
+  subnet_id               = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.id
   container_network_type  = "overlay_l2"
   kubernetes_svc_ip_range = "10.247.0.0/16"
   authentication_mode     = "authenticating_proxy"
