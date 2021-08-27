@@ -2,7 +2,6 @@ package acceptance
 
 import (
 	"fmt"
-	"log"
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
@@ -24,9 +23,9 @@ func TestAccASV1Policy_basic(t *testing.T) {
 		CheckDestroy:      testAccCheckASV1PolicyDestroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testASV1Policy_basic,
+				Config: testAccASV1PolicyBasic,
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckASV1PolicyExists("opentelekomcloud_as_policy_v1.hth_as_policy", &asPolicy),
+					testAccCheckASV1PolicyExists("opentelekomcloud_as_policy_v1.as_policy", &asPolicy),
 				),
 			},
 		},
@@ -35,9 +34,9 @@ func TestAccASV1Policy_basic(t *testing.T) {
 
 func testAccCheckASV1PolicyDestroy(s *terraform.State) error {
 	config := common.TestAccProvider.Meta().(*cfg.Config)
-	asClient, err := config.AutoscalingV1Client(env.OS_REGION_NAME)
+	client, err := config.AutoscalingV1Client(env.OS_REGION_NAME)
 	if err != nil {
-		return fmt.Errorf("error creating opentelekomcloud autoscaling client: %s", err)
+		return fmt.Errorf("error creating OpenTelekomCloud AutoScalingV1 client: %w", err)
 	}
 
 	for _, rs := range s.RootModule().Resources {
@@ -45,13 +44,11 @@ func testAccCheckASV1PolicyDestroy(s *terraform.State) error {
 			continue
 		}
 
-		_, err := policies.Get(asClient, rs.Primary.ID).Extract()
+		_, err := policies.Get(client, rs.Primary.ID).Extract()
 		if err == nil {
 			return fmt.Errorf("AS policy still exists")
 		}
 	}
-
-	log.Printf("[DEBUG] testCheckASV1PolicyDestroy success!")
 
 	return nil
 }
@@ -68,69 +65,70 @@ func testAccCheckASV1PolicyExists(n string, policy *policies.Policy) resource.Te
 		}
 
 		config := common.TestAccProvider.Meta().(*cfg.Config)
-		asClient, err := config.AutoscalingV1Client(env.OS_REGION_NAME)
+		client, err := config.AutoscalingV1Client(env.OS_REGION_NAME)
 		if err != nil {
-			return fmt.Errorf("error creating opentelekomcloud autoscaling client: %s", err)
+			return fmt.Errorf("error creating OpenTelekomCloud AutoScalingV1 client: %w", err)
 		}
 
-		found, err := policies.Get(asClient, rs.Primary.ID).Extract()
+		found, err := policies.Get(client, rs.Primary.ID).Extract()
 		if err != nil {
 			return err
 		}
 
-		log.Printf("[DEBUG] test found is: %#v", found)
 		policy = &found
 
 		return nil
 	}
 }
 
-var testASV1Policy_basic = fmt.Sprintf(`
-resource "opentelekomcloud_networking_secgroup_v2" "secgroup" {
-  name        = "terraform"
-  description = "This is a terraform test security group"
-}
+var testAccASV1PolicyBasic = fmt.Sprintf(`
+// default SecGroup data-source
+%s
 
-resource "opentelekomcloud_compute_keypair_v2" "hth_key" {
-  name = "hth_key"
-  public_key = "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQDAjpC1hwiOCCmKEWxJ4qzTTsJbKzndLo1BCz5PcwtUnflmU+gHJtWMZKpuEGVi29h0A/+ydKek1O18k10Ff+4tyFjiHDQAT9+OfgWf7+b1yK+qDip3X1C0UPMbwHlTfSGWLGZquwhvEFx9k3h/M+VtMvwR1lJ9LUyTAImnNjWG7TAIPmui30HvM2UiFEmqkr4ijq45MyX2+fLIePLRIFuu1p4whjHAQYufqyno3BS48icQb4p6iVEZPo4AE2o9oIyQvj2mx4dk5Y8CgSETOZTYDOR3rU2fZTRDRgPJDH9FWvQjF5tA0p3d9CoWWd2s6GKKbfoUIi8R/Db1BSPJwkqB jrp-hp-pc"
-}
+// default Image data-source
+%s
 
-resource "opentelekomcloud_as_configuration_v1" "hth_as_config"{
-  scaling_configuration_name = "hth_as_config"
+// default Subnet data-source
+%s
+
+// default VPC data-source
+%s
+
+resource "opentelekomcloud_as_configuration_v1" "as_config"{
+  scaling_configuration_name = "as_config"
   instance_config {
-    image = "%s"
+    image = data.opentelekomcloud_images_image_v2.latest_image.id
     disk {
-      size = 40
+      size        = 40
       volume_type = "SATA"
-      disk_type = "SYS"
+      disk_type   = "SYS"
     }
-    key_name = opentelekomcloud_compute_keypair_v2.hth_key.id
+    key_name = "%s"
   }
 }
 
-resource "opentelekomcloud_as_group_v1" "hth_as_group"{
-  scaling_group_name = "hth_as_group"
-  scaling_configuration_id = opentelekomcloud_as_configuration_v1.hth_as_config.id
+resource "opentelekomcloud_as_group_v1" "as_group"{
+  scaling_group_name       = "as_group"
+  scaling_configuration_id = opentelekomcloud_as_configuration_v1.as_config.id
   networks {
-    id = "%s"
+    id = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.id
   }
   security_groups {
-    id = opentelekomcloud_networking_secgroup_v2.secgroup.id
+    id = data.opentelekomcloud_networking_secgroup_v2.default_secgroup.id
   }
-  vpc_id = "%s"
+  vpc_id = data.opentelekomcloud_vpc_v1.shared_vpc.id
 }
 
-resource "opentelekomcloud_as_policy_v1" "hth_as_policy"{
-  scaling_policy_name = "terraform"
-  scaling_group_id = opentelekomcloud_as_group_v1.hth_as_group.id
+resource "opentelekomcloud_as_policy_v1" "as_policy"{
+  scaling_policy_name = "as_policy"
+  scaling_group_id    = opentelekomcloud_as_group_v1.as_group.id
   scaling_policy_type = "SCHEDULED"
   scaling_policy_action {
-    operation = "ADD"
+    operation       = "ADD"
     instance_number = 1
   }
   scheduled_policy {
     launch_time = "2022-12-22T12:00Z"
   }
 }
-`, env.OS_IMAGE_ID, env.OS_NETWORK_ID, env.OS_VPC_ID)
+`, common.DataSourceSecGroupDefault, common.DataSourceImage, common.DataSourceSubnet, common.DataSourceVPC, env.OS_KEYPAIR_NAME)
