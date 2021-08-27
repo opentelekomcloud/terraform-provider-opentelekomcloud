@@ -10,7 +10,7 @@ import (
 )
 
 func TestAccCCEAddonV3ImportBasic(t *testing.T) {
-	resourceName := "opentelekomcloud_cce_addon_v3.autoscaler"
+	addonResourceName := "opentelekomcloud_cce_addon_v3.autoscaler"
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:          func() { common.TestAccPreCheck(t) },
@@ -21,7 +21,7 @@ func TestAccCCEAddonV3ImportBasic(t *testing.T) {
 				Config: testAccCCEAddonV3Basic,
 			},
 			{
-				ResourceName:      resourceName,
+				ResourceName:      addonResourceName,
 				ImportState:       true,
 				ImportStateVerify: true,
 				ImportStateIdFunc: testAccCCEAddonV3ImportStateIdFunc(),

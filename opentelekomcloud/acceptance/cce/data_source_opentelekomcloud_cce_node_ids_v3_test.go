@@ -15,15 +15,17 @@ import (
 func TestAccCceNodeIdsV3DataSource_basic(t *testing.T) {
 	var cceName = fmt.Sprintf("cce-test-%s", acctest.RandString(5))
 	var cceNodeName = fmt.Sprintf("node-test-%s", acctest.RandString(5))
+	dataSourceName := "data.opentelekomcloud_cce_node_ids_v3.node_ids"
+
 	resource.Test(t, resource.TestCase{
 		PreCheck:          func() { common.TestAccPreCheck(t) },
 		ProviderFactories: common.TestAccProviderFactories,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccCceNodeIdsV3DataSource_basic(cceName, cceNodeName),
+				Config: testAccCceNodeIdsV3DataSourceBasic(cceName, cceNodeName),
 				Check: resource.ComposeTestCheckFunc(
-					testAccCceNodeIdsV3DataSourceID("data.opentelekomcloud_cce_node_ids_v3.node_ids"),
-					resource.TestCheckResourceAttr("data.opentelekomcloud_cce_node_ids_v3.node_ids", "ids.#", "1"),
+					testAccCceNodeIdsV3DataSourceID(dataSourceName),
+					resource.TestCheckResourceAttr(dataSourceName, "ids.#", "1"),
 				),
 			},
 		},
@@ -45,14 +47,18 @@ func testAccCceNodeIdsV3DataSourceID(n string) resource.TestCheckFunc {
 	}
 }
 
-func testAccCceNodeIdsV3DataSource_basic(cceName string, cceNodeName string) string {
+func testAccCceNodeIdsV3DataSourceBasic(cceName string, cceNodeName string) string {
 	return fmt.Sprintf(`
+%s
+
+%s
+
 resource "opentelekomcloud_cce_cluster_v3" "cluster_1" {
   name                   = "%s"
   cluster_type           = "VirtualMachine"
   flavor_id              = "cce.s1.small"
-  vpc_id                 = "%s"
-  subnet_id              = "%s"
+  vpc_id                 = data.opentelekomcloud_vpc_v1.shared_vpc.id
+  subnet_id              = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.network_id
   container_network_type = "overlay_l2"
 }
 
@@ -75,5 +81,5 @@ resource "opentelekomcloud_cce_node_v3" "node_1" {
 data "opentelekomcloud_cce_node_ids_v3" "node_ids" {
   cluster_id = opentelekomcloud_cce_cluster_v3.cluster_1.id
 }
-`, cceName, env.OS_VPC_ID, env.OS_NETWORK_ID, cceNodeName, env.OS_AVAILABILITY_ZONE, env.OS_KEYPAIR_NAME)
+`, common.DataSourceVPC, common.DataSourceSubnet, cceName, cceNodeName, env.OS_AVAILABILITY_ZONE, env.OS_KEYPAIR_NAME)
 }

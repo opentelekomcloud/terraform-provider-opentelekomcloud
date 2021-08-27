@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"testing"
 
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/acctest"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 
@@ -12,16 +13,20 @@ import (
 )
 
 func TestAccCCENodesV3DataSource_basic(t *testing.T) {
+	var cceName = fmt.Sprintf("cce-test-%s", acctest.RandString(5))
+	var cceNodeName = fmt.Sprintf("node-test-%s", acctest.RandString(5))
+	dataSourceName := "data.opentelekomcloud_cce_node_v3.nodes"
+
 	resource.Test(t, resource.TestCase{
 		PreCheck:          func() { testAccCCEKeyPairPreCheck(t) },
 		ProviderFactories: common.TestAccProviderFactories,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccCCENodeV3DataSource_basic,
+				Config: testAccCCENodeV3DataSourceBasic(cceName, cceNodeName),
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckCCENodeV3DataSourceID("data.opentelekomcloud_cce_node_v3.nodes"),
-					resource.TestCheckResourceAttr("data.opentelekomcloud_cce_node_v3.nodes", "name", "test-node"),
-					resource.TestCheckResourceAttr("data.opentelekomcloud_cce_node_v3.nodes", "flavor_id", "s1.medium"),
+					testAccCheckCCENodeV3DataSourceID(dataSourceName),
+					resource.TestCheckResourceAttr(dataSourceName, "name", "test-node"),
+					resource.TestCheckResourceAttr(dataSourceName, "flavor_id", "s1.medium"),
 				),
 			},
 		},
@@ -43,19 +48,24 @@ func testAccCheckCCENodeV3DataSourceID(n string) resource.TestCheckFunc {
 	}
 }
 
-var testAccCCENodeV3DataSource_basic = fmt.Sprintf(`
+func testAccCCENodeV3DataSourceBasic(cceName string, cceNodeName string) string {
+	return fmt.Sprintf(`
+%s
+
+%s
+
 resource "opentelekomcloud_cce_cluster_v3" "cluster_1" {
-  name                   = "opentelekomcloud-cce"
+  name                   = "%s"
   cluster_type           = "VirtualMachine"
   flavor_id              = "cce.s1.small"
-  vpc_id                 = "%s"
-  subnet_id              = "%s"
+  vpc_id                 = data.opentelekomcloud_vpc_v1.shared_vpc.id
+  subnet_id              = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.network_id
   container_network_type = "overlay_l2"
 }
 
 resource "opentelekomcloud_cce_node_v3" "node_1" {
   cluster_id        = opentelekomcloud_cce_cluster_v3.cluster_1.id
-  name              = "test-node"
+  name              = "%s"
   flavor_id         = "s1.medium"
   availability_zone = "%s"
   key_pair          = "%s"
@@ -72,4 +82,5 @@ data "opentelekomcloud_cce_node_v3" "nodes" {
   cluster_id = opentelekomcloud_cce_cluster_v3.cluster_1.id
   node_id    = opentelekomcloud_cce_node_v3.node_1.id
 }
-`, env.OS_VPC_ID, env.OS_NETWORK_ID, env.OS_AVAILABILITY_ZONE, env.OS_KEYPAIR_NAME)
+`, common.DataSourceVPC, common.DataSourceSubnet, cceName, cceNodeName, env.OS_AVAILABILITY_ZONE, env.OS_KEYPAIR_NAME)
+}

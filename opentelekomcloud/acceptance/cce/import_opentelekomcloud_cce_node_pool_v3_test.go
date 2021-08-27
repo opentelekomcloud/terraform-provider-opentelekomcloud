@@ -20,7 +20,6 @@ func TestAccCCENodePoolV3ImportBasic(t *testing.T) {
 			{
 				Config: testAccCCENodePoolV3Basic,
 			},
-
 			{
 				ResourceName:      resourceName,
 				ImportState:       true,

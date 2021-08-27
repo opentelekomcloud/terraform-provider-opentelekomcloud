@@ -338,12 +338,16 @@ func testAccCheckCCENodeV3Exists(n string, cluster string, node *nodes.Nodes) re
 
 var (
 	testAccCCENodeV3OS = fmt.Sprintf(`
+%s
+
+%s
+
 resource "opentelekomcloud_cce_cluster_v3" "cluster_1" {
   name         = "opentelekomcloud-cce"
   cluster_type = "VirtualMachine"
   flavor_id    = "cce.s1.small"
-  vpc_id       = "%s"
-  subnet_id    = "%s"
+  vpc_id       = data.opentelekomcloud_vpc_v1.shared_vpc.id
+  subnet_id    = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.network_id
 
   container_network_type = "overlay_l2"
   authentication_mode    = "rbac"
@@ -389,15 +393,19 @@ resource "opentelekomcloud_cce_node_v3" "node_2" {
   }
 }
 
-`, env.OS_VPC_ID, env.OS_NETWORK_ID, env.OS_AVAILABILITY_ZONE, env.OS_KEYPAIR_NAME)
+`, common.DataSourceVPC, common.DataSourceSubnet, env.OS_AVAILABILITY_ZONE, env.OS_KEYPAIR_NAME)
 
 	testAccCCENodeV3Basic = fmt.Sprintf(`
+%s
+
+%s
+
 resource "opentelekomcloud_cce_cluster_v3" "cluster_1" {
   name         = "opentelekomcloud-cce"
   cluster_type = "VirtualMachine"
   flavor_id    = "cce.s1.small"
-  vpc_id       = "%s"
-  subnet_id    = "%s"
+  vpc_id       = data.opentelekomcloud_vpc_v1.shared_vpc.id
+  subnet_id    = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.network_id
 
   container_network_type = "overlay_l2"
   authentication_mode    = "rbac"
@@ -422,15 +430,19 @@ resource "opentelekomcloud_cce_node_v3" "node_1" {
   }
 
   private_ip = "%s"
-}`, env.OS_VPC_ID, env.OS_NETWORK_ID, env.OS_AVAILABILITY_ZONE, env.OS_KEYPAIR_NAME, privateIP)
+}`, common.DataSourceVPC, common.DataSourceSubnet, env.OS_AVAILABILITY_ZONE, env.OS_KEYPAIR_NAME, privateIP)
 
 	testAccCCENodeV3Update = fmt.Sprintf(`
+%s
+
+%s
+
 resource "opentelekomcloud_cce_cluster_v3" "cluster_1" {
   name         = "opentelekomcloud-cce"
   cluster_type = "VirtualMachine"
   flavor_id    = "cce.s1.small"
-  vpc_id       = "%s"
-  subnet_id    = "%s"
+  vpc_id       = data.opentelekomcloud_vpc_v1.shared_vpc.id
+  subnet_id    = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.network_id
 
   container_network_type = "overlay_l2"
   authentication_mode    = "rbac"
@@ -454,15 +466,19 @@ resource "opentelekomcloud_cce_node_v3" "node_1" {
   }
 
   private_ip = "%s"
-}`, env.OS_VPC_ID, env.OS_NETWORK_ID, env.OS_AVAILABILITY_ZONE, env.OS_KEYPAIR_NAME, privateIP)
+}`, common.DataSourceVPC, common.DataSourceSubnet, env.OS_AVAILABILITY_ZONE, env.OS_KEYPAIR_NAME, privateIP)
 
 	testAccCCENodeV3Timeout = fmt.Sprintf(`
+%s
+
+%s
+
 resource "opentelekomcloud_cce_cluster_v3" "cluster_1" {
   name         = "opentelekomcloud-cce"
   cluster_type = "VirtualMachine"
   flavor_id    = "cce.s1.small"
-  vpc_id       = "%s"
-  subnet_id    = "%s"
+  vpc_id       = data.opentelekomcloud_vpc_v1.shared_vpc.id
+  subnet_id    = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.network_id
 
   container_network_type = "overlay_l2"
   authentication_mode    = "rbac"
@@ -488,15 +504,19 @@ resource "opentelekomcloud_cce_node_v3" "node_1" {
     delete = "10m"
   }
 }
-`, env.OS_VPC_ID, env.OS_NETWORK_ID, env.OS_AVAILABILITY_ZONE, env.OS_KEYPAIR_NAME)
+`, common.DataSourceVPC, common.DataSourceSubnet, env.OS_AVAILABILITY_ZONE, env.OS_KEYPAIR_NAME)
 
 	testAccCCENodeV3Ip = fmt.Sprintf(`
+%s
+
+%s
+
 resource "opentelekomcloud_cce_cluster_v3" "cluster_1" {
   name         = "opentelekomcloud-cce"
   cluster_type = "VirtualMachine"
   flavor_id    = "cce.s1.small"
-  vpc_id       = "%s"
-  subnet_id    = "%s"
+  vpc_id       = data.opentelekomcloud_vpc_v1.shared_vpc.id
+  subnet_id    = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.network_id
 
   container_network_type = "overlay_l2"
   authentication_mode    = "rbac"
@@ -520,15 +540,19 @@ resource "opentelekomcloud_cce_node_v3" "node_1" {
     volumetype = "SATA"
   }
 }
-`, env.OS_VPC_ID, env.OS_NETWORK_ID, env.OS_AVAILABILITY_ZONE, env.OS_KEYPAIR_NAME)
+`, common.DataSourceVPC, common.DataSourceSubnet, env.OS_AVAILABILITY_ZONE, env.OS_KEYPAIR_NAME)
 
 	testAccCCENodeV3BandWidthResize = fmt.Sprintf(`
+%s
+
+%s
+
 resource "opentelekomcloud_cce_cluster_v3" "cluster_1" {
   name         = "opentelekomcloud-cce"
   cluster_type = "VirtualMachine"
   flavor_id    = "cce.s1.small"
-  vpc_id       = "%s"
-  subnet_id    = "%s"
+  vpc_id       = data.opentelekomcloud_vpc_v1.shared_vpc.id
+  subnet_id    = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.network_id
 
   container_network_type = "overlay_l2"
   authentication_mode    = "rbac"
@@ -552,15 +576,19 @@ resource "opentelekomcloud_cce_node_v3" "node_1" {
     volumetype = "SATA"
   }
 }
-`, env.OS_VPC_ID, env.OS_NETWORK_ID, env.OS_AVAILABILITY_ZONE, env.OS_KEYPAIR_NAME)
+`, common.DataSourceVPC, common.DataSourceSubnet, env.OS_AVAILABILITY_ZONE, env.OS_KEYPAIR_NAME)
 
 	testAccCCENodeV3IpUnset = fmt.Sprintf(`
+%s
+
+%s
+
 resource "opentelekomcloud_cce_cluster_v3" "cluster_1" {
   name         = "opentelekomcloud-cce"
   cluster_type = "VirtualMachine"
   flavor_id    = "cce.s1.small"
-  vpc_id       = "%s"
-  subnet_id    = "%s"
+  vpc_id       = data.opentelekomcloud_vpc_v1.shared_vpc.id
+  subnet_id    = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.network_id
 
   container_network_type = "overlay_l2"
   authentication_mode    = "rbac"
@@ -582,15 +610,19 @@ resource "opentelekomcloud_cce_node_v3" "node_1" {
     volumetype = "SATA"
   }
 }
-`, env.OS_VPC_ID, env.OS_NETWORK_ID, env.OS_AVAILABILITY_ZONE, env.OS_KEYPAIR_NAME)
+`, common.DataSourceVPC, common.DataSourceSubnet, env.OS_AVAILABILITY_ZONE, env.OS_KEYPAIR_NAME)
 
 	testAccCCENodeV3IpParams = fmt.Sprintf(`
+%s
+
+%s
+
 resource "opentelekomcloud_cce_cluster_v3" "cluster_1" {
   name         = "opentelekomcloud-cce"
   cluster_type = "VirtualMachine"
   flavor_id    = "cce.s1.small"
-  vpc_id       = "%s"
-  subnet_id    = "%s"
+  vpc_id       = data.opentelekomcloud_vpc_v1.shared_vpc.id
+  subnet_id    = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.network_id
 
   container_network_type = "overlay_l2"
   authentication_mode    = "rbac"
@@ -616,15 +648,19 @@ resource "opentelekomcloud_cce_node_v3" "node_1" {
     volumetype = "SATA"
   }
 }
-`, env.OS_VPC_ID, env.OS_NETWORK_ID, env.OS_AVAILABILITY_ZONE, env.OS_KEYPAIR_NAME)
+`, common.DataSourceVPC, common.DataSourceSubnet, env.OS_AVAILABILITY_ZONE, env.OS_KEYPAIR_NAME)
 
 	testAccCCENodeV3IpNull = fmt.Sprintf(`
+%s
+
+%s
+
 resource "opentelekomcloud_cce_cluster_v3" "cluster_1" {
   name         = "opentelekomcloud-cce"
   cluster_type = "VirtualMachine"
   flavor_id    = "cce.s1.small"
-  vpc_id       = "%s"
-  subnet_id    = "%s"
+  vpc_id       = data.opentelekomcloud_vpc_v1.shared_vpc.id
+  subnet_id    = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.network_id
 
   container_network_type = "overlay_l2"
   authentication_mode    = "rbac"
@@ -650,9 +686,13 @@ resource "opentelekomcloud_cce_node_v3" "node_1" {
     volumetype = "SATA"
   }
 }
-`, env.OS_VPC_ID, env.OS_NETWORK_ID, env.OS_AVAILABILITY_ZONE, env.OS_KEYPAIR_NAME)
+`, common.DataSourceVPC, common.DataSourceSubnet, env.OS_AVAILABILITY_ZONE, env.OS_KEYPAIR_NAME)
 
 	testAccCCENodeV3IpIDs = fmt.Sprintf(`
+%s
+
+%s
+
 resource "opentelekomcloud_networking_floatingip_v2" "fip_1" {}
 resource "opentelekomcloud_networking_floatingip_v2" "fip_2" {}
 
@@ -660,8 +700,8 @@ resource "opentelekomcloud_cce_cluster_v3" "cluster_1" {
   name         = "opentelekomcloud-cce-ids"
   cluster_type = "VirtualMachine"
   flavor_id    = "cce.s1.small"
-  vpc_id       = "%s"
-  subnet_id    = "%s"
+  vpc_id       = data.opentelekomcloud_vpc_v1.shared_vpc.id
+  subnet_id    = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.network_id
 
   container_network_type = "overlay_l2"
   authentication_mode    = "rbac"
@@ -685,9 +725,13 @@ resource "opentelekomcloud_cce_node_v3" "node_1" {
     volumetype = "SATA"
   }
 }
-`, env.OS_VPC_ID, env.OS_NETWORK_ID, env.OS_AVAILABILITY_ZONE, env.OS_KEYPAIR_NAME)
+`, common.DataSourceVPC, common.DataSourceSubnet, env.OS_AVAILABILITY_ZONE, env.OS_KEYPAIR_NAME)
 
 	testAccCCENodeV3IpIDsUnset = fmt.Sprintf(`
+%s
+
+%s
+
 resource "opentelekomcloud_networking_floatingip_v2" "fip_1" {}
 resource "opentelekomcloud_networking_floatingip_v2" "fip_2" {}
 
@@ -695,8 +739,8 @@ resource "opentelekomcloud_cce_cluster_v3" "cluster_1" {
   name         = "opentelekomcloud-cce-ids"
   cluster_type = "VirtualMachine"
   flavor_id    = "cce.s1.small"
-  vpc_id       = "%s"
-  subnet_id    = "%s"
+  vpc_id       = data.opentelekomcloud_vpc_v1.shared_vpc.id
+  subnet_id    = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.network_id
 
   container_network_type = "overlay_l2"
   authentication_mode    = "rbac"
@@ -719,15 +763,19 @@ resource "opentelekomcloud_cce_node_v3" "node_1" {
     volumetype = "SATA"
   }
 }
-`, env.OS_VPC_ID, env.OS_NETWORK_ID, env.OS_AVAILABILITY_ZONE, env.OS_KEYPAIR_NAME)
+`, common.DataSourceVPC, common.DataSourceSubnet, env.OS_AVAILABILITY_ZONE, env.OS_KEYPAIR_NAME)
 
 	testAccCCENodeV3EncryptedVolume = fmt.Sprintf(`
+%s
+
+%s
+
 resource "opentelekomcloud_cce_cluster_v3" "cluster_1" {
   name         = "opentelekomcloud-cce-encryption"
   cluster_type = "VirtualMachine"
   flavor_id    = "cce.s1.small"
-  vpc_id       = "%s"
-  subnet_id    = "%s"
+  vpc_id       = data.opentelekomcloud_vpc_v1.shared_vpc.id
+  subnet_id    = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.network_id
 
   container_network_type = "overlay_l2"
   authentication_mode    = "rbac"
@@ -750,15 +798,19 @@ resource "opentelekomcloud_cce_node_v3" "node_1" {
     kms_id     = "%s"
   }
 }
-`, env.OS_VPC_ID, env.OS_NETWORK_ID, env.OS_AVAILABILITY_ZONE, env.OS_KEYPAIR_NAME, env.OS_KMS_ID)
+`, common.DataSourceVPC, common.DataSourceSubnet, env.OS_AVAILABILITY_ZONE, env.OS_KEYPAIR_NAME, env.OS_KMS_ID)
 
 	testAccCCENodeV3TaintsK8sTags = fmt.Sprintf(`
+%s
+
+%s
+
 resource "opentelekomcloud_cce_cluster_v3" "cluster_1" {
   name         = "opentelekomcloud-cce"
   cluster_type = "VirtualMachine"
   flavor_id    = "cce.s1.small"
-  vpc_id       = "%s"
-  subnet_id    = "%s"
+  vpc_id       = data.opentelekomcloud_vpc_v1.shared_vpc.id
+  subnet_id    = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.network_id
   container_network_type = "overlay_l2"
   authentication_mode    = "rbac"
 }
@@ -787,5 +839,5 @@ resource "opentelekomcloud_cce_node_v3" "node_1" {
   }
   private_ip = "%s"
 }
-`, env.OS_VPC_ID, env.OS_NETWORK_ID, env.OS_AVAILABILITY_ZONE, env.OS_KEYPAIR_NAME, privateIP)
+`, common.DataSourceVPC, common.DataSourceSubnet, env.OS_AVAILABILITY_ZONE, env.OS_KEYPAIR_NAME, privateIP)
 )
