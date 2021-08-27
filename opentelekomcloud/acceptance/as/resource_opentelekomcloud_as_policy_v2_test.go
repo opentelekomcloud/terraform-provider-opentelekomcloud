@@ -122,7 +122,7 @@ resource "opentelekomcloud_as_configuration_v1" "as_config"{
 
 resource "opentelekomcloud_as_group_v1" "as_group"{
   scaling_group_name       = "as_group"
-  scaling_configuration_id = opentelekomcloud_as_configuration_v1.config_1.id
+  scaling_configuration_id = opentelekomcloud_as_configuration_v1.as_config.id
 
   networks {
     id = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.id
@@ -181,7 +181,7 @@ resource "opentelekomcloud_as_configuration_v1" "as_config"{
 
 resource "opentelekomcloud_as_group_v1" "as_group"{
   scaling_group_name       = "as_group"
-  scaling_configuration_id = opentelekomcloud_as_configuration_v1.config_1.id
+  scaling_configuration_id = opentelekomcloud_as_configuration_v1.as_config.id
 
   networks {
     id = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.id
@@ -195,7 +195,7 @@ resource "opentelekomcloud_as_group_v1" "as_group"{
 resource "opentelekomcloud_as_policy_v2" "as_policy"{
   scaling_policy_name   = "as_policy_update"
   scaling_policy_type   = "RECURRENCE"
-  scaling_resource_id   = opentelekomcloud_as_group_v1.group_1.id
+  scaling_resource_id   = opentelekomcloud_as_group_v1.as_group.id
   scaling_resource_type = "SCALING_GROUP"
 
   scaling_policy_action {
