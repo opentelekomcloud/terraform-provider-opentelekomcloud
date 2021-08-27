@@ -26,7 +26,7 @@ func TestAccSFSTurboShareV1_basic(t *testing.T) {
 		CheckDestroy:      testAccCheckSFSTurboShareV1Destroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccSFSTurboShareV1_basic(shareName),
+				Config: testAccSFSTurboShareV1Basic(shareName),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckSFSTurboShareV1Exists(resourceName, &turbo),
 					resource.TestCheckResourceAttr(resourceName, "name", shareName),
@@ -36,7 +36,7 @@ func TestAccSFSTurboShareV1_basic(t *testing.T) {
 				),
 			},
 			{
-				Config: testAccSFSTurboShareV1_update(shareName),
+				Config: testAccSFSTurboShareV1Update(shareName),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckSFSTurboShareV1Exists(resourceName, &turbo),
 					resource.TestCheckResourceAttr(resourceName, "size", "600"),
@@ -57,7 +57,7 @@ func TestAccSFSTurboShareV1_withKMS(t *testing.T) {
 		CheckDestroy:      testAccCheckSFSTurboShareV1Destroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccSFSTurboV1_crypt(postfix),
+				Config: testAccSFSTurboV1Crypt(postfix),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckSFSTurboShareV1Exists(resourceName, &turbo),
 					resource.TestCheckResourceAttr(resourceName, "name", "sfs-turbo-"+postfix),
@@ -123,8 +123,11 @@ func testAccCheckSFSTurboShareV1Exists(n string, share *shares.Turbo) resource.T
 	}
 }
 
-func testAccSFSTurboShareV1_basic(shareName string) string {
+func testAccSFSTurboShareV1Basic(shareName string) string {
 	return fmt.Sprintf(`
+%s
+%s
+
 resource "opentelekomcloud_networking_secgroup_v2" "sg" {
   name = "sg-sfs-turbo-acc"
 }
@@ -133,17 +136,20 @@ resource "opentelekomcloud_sfs_turbo_share_v1" "sfs-turbo" {
   name        = "%s"
   size        = 500
   share_proto = "NFS"
-  vpc_id      = "%s"
-  subnet_id   = "%s"
+  vpc_id      = data.opentelekomcloud_vpc_v1.shared_vpc.id
+  subnet_id   = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.id
 
   security_group_id = opentelekomcloud_networking_secgroup_v2.sg.id
   availability_zone = "%s"
 }
-`, shareName, env.OS_VPC_ID, env.OS_NETWORK_ID, env.OS_AVAILABILITY_ZONE)
+`, common.DataSourceVPC, common.DataSourceSubnet, shareName, env.OS_AVAILABILITY_ZONE)
 }
 
-func testAccSFSTurboShareV1_update(shareName string) string {
+func testAccSFSTurboShareV1Update(shareName string) string {
 	return fmt.Sprintf(`
+%s
+%s
+
 resource "opentelekomcloud_networking_secgroup_v2" "sg" {
   name = "sg-sfs-turbo-acc"
 }
@@ -152,36 +158,39 @@ resource "opentelekomcloud_sfs_turbo_share_v1" "sfs-turbo" {
   name        = "%s"
   size        = 600
   share_proto = "NFS"
-  vpc_id      = "%s"
-  subnet_id   = "%s"
+  vpc_id      = data.opentelekomcloud_vpc_v1.shared_vpc.id
+  subnet_id   = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.id
 
   security_group_id = opentelekomcloud_networking_secgroup_v2.sg.id
   availability_zone = "%s"
 }
-`, shareName, env.OS_VPC_ID, env.OS_NETWORK_ID, env.OS_AVAILABILITY_ZONE)
+`, common.DataSourceVPC, common.DataSourceSubnet, shareName, env.OS_AVAILABILITY_ZONE)
 }
 
-func testAccSFSTurboV1_crypt(postfix string) string {
+func testAccSFSTurboV1Crypt(postfix string) string {
 	return fmt.Sprintf(`
+%s
+%s
+
 resource "opentelekomcloud_networking_secgroup_v2" "sg" {
   name = "sg-sfs-turbo-acc"
 }
 
 resource "opentelekomcloud_kms_key_v1" "key_1" {
-  key_alias    = "kms-sfs-turbo-%[1]s"
+  key_alias    = "kms-sfs-turbo-%[3]s"
   pending_days = "7"
 }
 
 resource "opentelekomcloud_sfs_turbo_share_v1" "sfs-turbo" {
-  name        = "sfs-turbo-%[1]s"
+  name        = "sfs-turbo-%[3]s"
   size        = 500
   share_proto = "NFS"
-  vpc_id      = "%s"
-  subnet_id   = "%s"
+  vpc_id      = data.opentelekomcloud_vpc_v1.shared_vpc.id
+  subnet_id   = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.id
 
   security_group_id = opentelekomcloud_networking_secgroup_v2.sg.id
   availability_zone = "%s"
   crypt_key_id      = opentelekomcloud_kms_key_v1.key_1.id
 }
-`, postfix, env.OS_VPC_ID, env.OS_NETWORK_ID, env.OS_AVAILABILITY_ZONE)
+`, common.DataSourceVPC, common.DataSourceSubnet, postfix, env.OS_AVAILABILITY_ZONE)
 }

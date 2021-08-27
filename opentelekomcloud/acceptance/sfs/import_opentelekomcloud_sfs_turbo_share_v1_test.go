@@ -19,7 +19,7 @@ func TestAccSFSTurboShareV1_importBasic(t *testing.T) {
 		CheckDestroy:      testAccCheckSFSTurboShareV1Destroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccSFSTurboShareV1_basic(shareName),
+				Config: testAccSFSTurboShareV1Basic(shareName),
 			},
 			{
 				ResourceName:      resourceName,
