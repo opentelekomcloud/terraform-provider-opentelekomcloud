@@ -34,7 +34,7 @@ func TestAccASV1Group_basic(t *testing.T) {
 				),
 			},
 			{
-				Config: testASV1Group_update,
+				Config: testAccASV1GroupUpdate,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckASV1GroupExists(resourceName, &asGroup),
 					resource.TestCheckResourceAttr(resourceName, "health_periodic_audit_grace_period", "500"),
@@ -55,7 +55,7 @@ func TestAccASV1Group_RemoveWithSetMinNumber(t *testing.T) {
 		CheckDestroy:      testAccCheckASV1GroupDestroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testASV1Group_removeWithSetMinNumber,
+				Config: testAccASV1GroupRemoveWithSetMinNumber,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckASV1GroupExists(resourceName, &asGroup),
 					resource.TestCheckResourceAttr(resourceName, "delete_publicip", "true"),
@@ -77,7 +77,7 @@ func TestAccASV1Group_WithoutSecurityGroups(t *testing.T) {
 		CheckDestroy:      testAccCheckASV1GroupDestroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testASV1Group_withoutSGs,
+				Config: testAccASV1GroupWithoutSGs,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckASV1GroupExists(resourceName, &asGroup),
 					resource.TestCheckResourceAttr(resourceName, "security_groups.#", "0"),
@@ -140,10 +140,19 @@ func testAccCheckASV1GroupExists(n string, group *groups.Group) resource.TestChe
 }
 
 var testAccASV1GroupBasic = fmt.Sprintf(`
-//default SecGroup data-source
+// default SecGroup data-source
 %s
 
-//default Subnet data-source
+// default Subnet data-source
+%s
+
+// default Image data-source
+%s
+
+// default Subnet data-source
+%s
+
+// default VPC data-source
 %s
 
 resource "opentelekomcloud_lb_loadbalancer_v2" "loadbalancer_1" {
@@ -166,9 +175,9 @@ resource "opentelekomcloud_lb_pool_v2" "pool_1" {
 }
 
 resource "opentelekomcloud_as_configuration_v1" "as_config"{
-  scaling_configuration_name = "hth_as_config"
+  scaling_configuration_name = "as_config"
   instance_config {
-    image = "%s"
+    image = data.opentelekomcloud_images_image_v2.latest_image.id
     disk {
       size        = 40
       volume_type = "SATA"
@@ -179,10 +188,10 @@ resource "opentelekomcloud_as_configuration_v1" "as_config"{
 }
 
 resource "opentelekomcloud_as_group_v1" "as_group"{
-  scaling_group_name       = "hth_as_group"
+  scaling_group_name       = "as_group"
   scaling_configuration_id = opentelekomcloud_as_configuration_v1.as_config.id
   networks {
-    id = "%s"
+    id = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.id
   }
   security_groups {
     id = opentelekomcloud_networking_secgroup_v2.secgroup.id
@@ -191,7 +200,7 @@ resource "opentelekomcloud_as_group_v1" "as_group"{
     pool_id =       opentelekomcloud_lb_pool_v2.pool_1.id
     protocol_port = opentelekomcloud_lb_listener_v2.listener_1.protocol_port
   }
-  vpc_id = "%s"
+  vpc_id = data.opentelekomcloud_vpc_v1.shared_vpc.id
 
   health_periodic_audit_grace_period = 700
 
@@ -200,16 +209,27 @@ resource "opentelekomcloud_as_group_v1" "as_group"{
     kuh = "value-create"
   }
 }
-`, common.DataSourceSecGroupDefault, common.DataSourceSubnet, env.OS_IMAGE_ID, env.OS_KEYPAIR_NAME, env.OS_NETWORK_ID, env.OS_VPC_ID)
+`, common.DataSourceSecGroupDefault, common.DataSourceSubnet, common.DataSourceImage, common.DataSourceSubnet, common.DataSourceVPC, env.OS_KEYPAIR_NAME)
 
-var testASV1Group_update = fmt.Sprintf(`
-resource "opentelekomcloud_networking_secgroup_v2" "secgroup" {
-  name = "test-acc"
-}
+var testAccASV1GroupUpdate = fmt.Sprintf(`
+// default SecGroup data-source
+%s
+
+// default Subnet data-source
+%s
+
+// default Image data-source
+%s
+
+// default Subnet data-source
+%s
+
+// default VPC data-source
+%s
 
 resource "opentelekomcloud_lb_loadbalancer_v2" "loadbalancer_1" {
   name          = "loadbalancer_1"
-  vip_subnet_id = "%s"
+  vip_subnet_id = data.opentelekomcloud_subnet_v1.shared_subnet.id
 }
 
 resource "opentelekomcloud_lb_listener_v2" "listener_1" {
@@ -226,10 +246,10 @@ resource "opentelekomcloud_lb_pool_v2" "pool_1" {
   listener_id = opentelekomcloud_lb_listener_v2.listener_1.id
 }
 
-resource "opentelekomcloud_as_configuration_v1" "hth_as_config"{
-  scaling_configuration_name = "hth_as_config"
+resource "opentelekomcloud_as_configuration_v1" "as_config"{
+  scaling_configuration_name = "as_config"
   instance_config {
-    image = "%s"
+    image = data.opentelekomcloud_images_image_v2.latest_image.id
     disk {
       size        = 40
       volume_type = "SATA"
@@ -239,11 +259,11 @@ resource "opentelekomcloud_as_configuration_v1" "hth_as_config"{
   }
 }
 
-resource "opentelekomcloud_as_group_v1" "hth_as_group"{
-  scaling_group_name       = "hth_as_group"
-  scaling_configuration_id = opentelekomcloud_as_configuration_v1.hth_as_config.id
+resource "opentelekomcloud_as_group_v1" "as_group"{
+  scaling_group_name       = "as_group"
+  scaling_configuration_id = opentelekomcloud_as_configuration_v1.as_config.id
   networks {
-    id = "%s"
+    id = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.id
   }
   security_groups {
     id = opentelekomcloud_networking_secgroup_v2.secgroup.id
@@ -252,7 +272,7 @@ resource "opentelekomcloud_as_group_v1" "hth_as_group"{
     pool_id =       opentelekomcloud_lb_pool_v2.pool_1.id
     protocol_port = opentelekomcloud_lb_listener_v2.listener_1.protocol_port
   }
-  vpc_id = "%s"
+  vpc_id = data.opentelekomcloud_vpc_v1.shared_vpc.id
 
   health_periodic_audit_grace_period = 500
 
@@ -260,19 +280,25 @@ resource "opentelekomcloud_as_group_v1" "hth_as_group"{
     muh = "value-update"
   }
 }
-`, env.OS_SUBNET_ID, env.OS_IMAGE_ID, env.OS_KEYPAIR_NAME, env.OS_NETWORK_ID, env.OS_VPC_ID)
+`, common.DataSourceSecGroupDefault, common.DataSourceSubnet, common.DataSourceImage, common.DataSourceSubnet, common.DataSourceVPC, env.OS_KEYPAIR_NAME)
 
-var testASV1Group_removeWithSetMinNumber = fmt.Sprintf(`
-resource "opentelekomcloud_compute_secgroup_v2" "secgroup" {
-  name        = "acc-test-sg"
-  description = "Security group for AS tf test"
-}
+var testAccASV1GroupRemoveWithSetMinNumber = fmt.Sprintf(`
+// default SecGroup data-source
+%s
 
-# Proxy AS configuration
-resource "opentelekomcloud_as_configuration_v1" "proxy_config" {
-  scaling_configuration_name = "proxy-test-asg"
+// default Image data-source
+%s
+
+// default VPC data-source
+%s
+
+// default Subnet data-source
+%s
+
+resource "opentelekomcloud_as_configuration_v1" "as_config" {
+  scaling_configuration_name = "as_config"
   instance_config {
-    image     = "%s"
+    image     = data.opentelekomcloud_images_image_v2.latest_image.id
     key_name  = "%s"
     disk {
       size        = 40
@@ -290,19 +316,19 @@ resource "opentelekomcloud_as_configuration_v1" "proxy_config" {
   }
 }
 
-resource "opentelekomcloud_as_group_v1" "proxy_group" {
-  scaling_group_name       = "proxy-test-asg"
-  scaling_configuration_id = opentelekomcloud_as_configuration_v1.proxy_config.id
+resource "opentelekomcloud_as_group_v1" "as_group" {
+  scaling_group_name       = "as_group"
+  scaling_configuration_id = opentelekomcloud_as_configuration_v1.as_config.id
   available_zones          = ["%s"]
   desire_instance_number   = 3
   min_instance_number      = 1
   max_instance_number      = 10
-  vpc_id                   = "%s"
+  vpc_id                   = data.opentelekomcloud_vpc_v1.shared_vpc.id
   delete_publicip          = true
   delete_instances         = "yes"
 
   networks {
-    id = "%s"
+    id = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.id
   }
   security_groups {
     id = opentelekomcloud_compute_secgroup_v2.secgroup.id
@@ -314,14 +340,22 @@ resource "opentelekomcloud_as_group_v1" "proxy_group" {
     ]
   }
 }
-`, env.OS_IMAGE_ID, env.OS_KEYPAIR_NAME, env.OS_AVAILABILITY_ZONE, env.OS_VPC_ID, env.OS_NETWORK_ID)
+`, common.DataSourceSecGroupDefault, common.DataSourceImage, common.DataSourceVPC, common.DataSourceSubnet, env.OS_KEYPAIR_NAME, env.OS_AVAILABILITY_ZONE)
 
-var testASV1Group_withoutSGs = fmt.Sprintf(`
-# Proxy AS configuration
-resource "opentelekomcloud_as_configuration_v1" "proxy_config" {
-  scaling_configuration_name = "proxy-test-asg"
+var testAccASV1GroupWithoutSGs = fmt.Sprintf(`
+// default Image data-source
+%s
+
+// default VPC data-source
+%s
+
+// default Subnet data-source
+%s
+
+resource "opentelekomcloud_as_configuration_v1" "as_config" {
+  scaling_configuration_name = "as_config"
   instance_config {
-    image     = "%s"
+    image     = data.opentelekomcloud_images_image_v2.latest_image.id
     key_name  = "%s"
     disk {
       size        = 40
@@ -339,19 +373,19 @@ resource "opentelekomcloud_as_configuration_v1" "proxy_config" {
   }
 }
 
-resource "opentelekomcloud_as_group_v1" "proxy_group" {
-  scaling_group_name       = "proxy-test-asg"
-  scaling_configuration_id = opentelekomcloud_as_configuration_v1.proxy_config.id
+resource "opentelekomcloud_as_group_v1" "as_group" {
+  scaling_group_name       = "as_group"
+  scaling_configuration_id = opentelekomcloud_as_configuration_v1.as_config.id
   available_zones          = ["%s"]
   desire_instance_number   = 3
   min_instance_number      = 1
   max_instance_number      = 10
-  vpc_id                   = "%s"
+  vpc_id                   = data.opentelekomcloud_vpc_v1.shared_vpc.id
   delete_publicip          = true
   delete_instances         = "yes"
 
   networks {
-    id = "%s"
+    id = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.id
   }
 }
-`, env.OS_IMAGE_ID, env.OS_KEYPAIR_NAME, env.OS_AVAILABILITY_ZONE, env.OS_VPC_ID, env.OS_NETWORK_ID)
+`, common.DataSourceImage, common.DataSourceVPC, common.DataSourceSubnet, env.OS_KEYPAIR_NAME, env.OS_AVAILABILITY_ZONE)
