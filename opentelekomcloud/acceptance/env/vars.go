@@ -11,6 +11,7 @@ var (
 	OS_FLAVOR_ID         = os.Getenv("OS_FLAVOR_ID")
 	OS_FLAVOR_NAME       = os.Getenv("OS_FLAVOR_NAME")
 	OS_IMAGE_ID          = os.Getenv("OS_IMAGE_ID")
+	OsImageName          = imageName()
 	OS_NETWORK_ID        = os.Getenv("OS_NETWORK_ID")
 	OsNetworkName        = os.Getenv("OS_NETWORK_NAME")
 	OsExtNetworkName     = extNetworkName()
@@ -36,6 +37,13 @@ func extNetworkName() string {
 		return nw
 	}
 	return "admin_external_net" // value valid for OTC PROD, both eu-de and eu-nl
+}
+
+func imageName() string {
+	if image := os.Getenv("OS_IMAGE_NAME"); image != "" {
+		return image
+	}
+	return "Standard_Debian_10_latest" // value valid for OTC PROD, both eu-de and eu-nl
 }
 
 func GetTenantName() cfg.ProjectName {
