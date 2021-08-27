@@ -29,6 +29,7 @@ func ResourceFWPolicyV2() *schema.Resource {
 
 		Timeouts: &schema.ResourceTimeout{
 			Create: schema.DefaultTimeout(10 * time.Minute),
+			Delete: schema.DefaultTimeout(2 * time.Minute),
 		},
 
 		Schema: map[string]*schema.Schema{
@@ -209,13 +210,12 @@ func resourceFWPolicyV2Delete(ctx context.Context, d *schema.ResourceData, meta 
 		Pending:    []string{"ACTIVE"},
 		Target:     []string{"DELETED"},
 		Refresh:    waitForFirewallPolicyDeletion(networkingClient, d.Id()),
-		Timeout:    d.Timeout(schema.TimeoutCreate),
-		Delay:      0,
+		Timeout:    d.Timeout(schema.TimeoutDelete),
 		MinTimeout: 2 * time.Second,
 	}
 
 	if _, err = stateConf.WaitForStateContext(ctx); err != nil {
-		return diag.FromErr(err)
+		return fmterr.Errorf("error waiting for FW policy to be deleted: %w", err)
 	}
 
 	return nil
@@ -223,20 +223,13 @@ func resourceFWPolicyV2Delete(ctx context.Context, d *schema.ResourceData, meta 
 
 func waitForFirewallPolicyDeletion(networkingClient *golangsdk.ServiceClient, id string) resource.StateRefreshFunc {
 	return func() (interface{}, string, error) {
-		err := policies.Delete(networkingClient, id).Err
+		err := policies.Delete(networkingClient, id).ExtractErr()
 		if err == nil {
 			return "", "DELETED", nil
 		}
-
-		if errCode, ok := err.(golangsdk.ErrUnexpectedResponseCode); ok {
-			if errCode.Actual == 409 {
-				// This error usually means that the policy is attached
-				// to a firewall. At this point, the firewall is probably
-				// being delete. So, we retry a few times.
-				return nil, "ACTIVE", nil
-			}
+		if _, ok := err.(golangsdk.ErrDefault409); ok {
+			return nil, "ACTIVE", nil
 		}
-
 		return nil, "ACTIVE", err
 	}
 }

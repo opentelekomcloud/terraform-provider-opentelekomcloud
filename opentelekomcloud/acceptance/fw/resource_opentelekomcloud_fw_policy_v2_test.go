@@ -2,7 +2,6 @@ package acceptance
 
 import (
 	"fmt"
-	"regexp"
 	"testing"
 	"time"
 
@@ -85,7 +84,6 @@ func TestAccFWPolicyV2_timeout(t *testing.T) {
 }
 
 func TestAccFWPolicyV2_removeSingleRule(t *testing.T) {
-	notEmptyPlan := regexp.MustCompile(".+?plan was not empty:")
 	resource.Test(t, resource.TestCase{
 		PreCheck:          func() { common.TestAccPreCheck(t) },
 		ProviderFactories: common.TestAccProviderFactories,
@@ -102,9 +100,6 @@ func TestAccFWPolicyV2_removeSingleRule(t *testing.T) {
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckFWPolicyV2Exists("opentelekomcloud_fw_policy_v2.policy_1", "policy_1", "", 0),
 				),
-				// There is non-empty plan before refresh and empty one after
-				// So `ExpectNonEmptyPlan: true` won't work
-				ExpectError: notEmptyPlan,
 			},
 		},
 	})

@@ -283,12 +283,10 @@ resource "opentelekomcloud_fw_firewall_group_v2" "fw_1" {
   ingress_policy_id = opentelekomcloud_fw_policy_v2.policy_2.id
   egress_policy_id = opentelekomcloud_fw_policy_v2.policy_2.id
   admin_state_up = true
+}
 
-  timeouts {
-    create = "5m"
-    update = "5m"
-    delete = "5m"
-  }
+resource "opentelekomcloud_fw_policy_v2" "policy_1" {
+  name = "policy_1"
 }
 
 resource "opentelekomcloud_fw_policy_v2" "policy_2" {
