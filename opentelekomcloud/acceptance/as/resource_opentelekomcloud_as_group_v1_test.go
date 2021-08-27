@@ -142,9 +142,6 @@ var testAccASV1GroupBasic = fmt.Sprintf(`
 // default SecGroup data-source
 %s
 
-// default Subnet data-source
-%s
-
 // default Image data-source
 %s
 
@@ -208,7 +205,7 @@ resource "opentelekomcloud_as_group_v1" "as_group"{
     kuh = "value-create"
   }
 }
-`, common.DataSourceSecGroupDefault, common.DataSourceSubnet, common.DataSourceImage, common.DataSourceSubnet, common.DataSourceVPC, env.OS_KEYPAIR_NAME)
+`, common.DataSourceSecGroupDefault, common.DataSourceImage, common.DataSourceSubnet, common.DataSourceVPC, env.OS_KEYPAIR_NAME)
 
 var testAccASV1GroupUpdate = fmt.Sprintf(`
 // default SecGroup data-source
