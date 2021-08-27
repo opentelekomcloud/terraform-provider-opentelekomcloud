@@ -26,8 +26,7 @@ func TestAccASV1Group_basic(t *testing.T) {
 				Config: testAccASV1GroupBasic,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckASV1GroupExists(resourceName, &asGroup),
-					resource.TestCheckResourceAttr(resourceName, "lbaas_listeners.0.protocol_port", "8080"),
-					resource.TestCheckResourceAttr(resourceName, "vpc_id", env.OS_VPC_ID),
+					resource.TestCheckResourceAttrSet(resourceName, "vpc_id"),
 					resource.TestCheckResourceAttr(resourceName, "lbaas_listeners.0.protocol_port", "8080"),
 					resource.TestCheckResourceAttr(resourceName, "health_periodic_audit_grace_period", "700"),
 					resource.TestCheckResourceAttr(resourceName, "tags.muh", "value-create"),
@@ -59,7 +58,7 @@ func TestAccASV1Group_RemoveWithSetMinNumber(t *testing.T) {
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckASV1GroupExists(resourceName, &asGroup),
 					resource.TestCheckResourceAttr(resourceName, "delete_publicip", "true"),
-					resource.TestCheckResourceAttr(resourceName, "scaling_group_name", "proxy-test-asg"),
+					resource.TestCheckResourceAttr(resourceName, "scaling_group_name", "as_group"),
 				),
 			},
 		},
@@ -194,10 +193,10 @@ resource "opentelekomcloud_as_group_v1" "as_group"{
     id = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.id
   }
   security_groups {
-    id = opentelekomcloud_networking_secgroup_v2.secgroup.id
+    id = data.opentelekomcloud_networking_secgroup_v2.default_secgroup.id
   }
   lbaas_listeners {
-    pool_id =       opentelekomcloud_lb_pool_v2.pool_1.id
+    pool_id       = opentelekomcloud_lb_pool_v2.pool_1.id
     protocol_port = opentelekomcloud_lb_listener_v2.listener_1.protocol_port
   }
   vpc_id = data.opentelekomcloud_vpc_v1.shared_vpc.id
@@ -266,10 +265,10 @@ resource "opentelekomcloud_as_group_v1" "as_group"{
     id = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.id
   }
   security_groups {
-    id = opentelekomcloud_networking_secgroup_v2.secgroup.id
+    id = data.opentelekomcloud_networking_secgroup_v2.default_secgroup.id
   }
   lbaas_listeners {
-    pool_id =       opentelekomcloud_lb_pool_v2.pool_1.id
+    pool_id       = opentelekomcloud_lb_pool_v2.pool_1.id
     protocol_port = opentelekomcloud_lb_listener_v2.listener_1.protocol_port
   }
   vpc_id = data.opentelekomcloud_vpc_v1.shared_vpc.id
@@ -331,7 +330,7 @@ resource "opentelekomcloud_as_group_v1" "as_group" {
     id = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.id
   }
   security_groups {
-    id = opentelekomcloud_compute_secgroup_v2.secgroup.id
+    id = data.opentelekomcloud_networking_secgroup_v2.default_secgroup.id
   }
 
   lifecycle {

@@ -14,7 +14,7 @@ import (
 
 func TestAccASPolicyV2_basic(t *testing.T) {
 	var asPolicy policies.Policy
-	resourceName := "opentelekomcloud_as_policy_v2.policy_1"
+	resourceName := "opentelekomcloud_as_policy_v2.as_policy"
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:          func() { common.TestAccFlavorPreCheck(t) },
@@ -22,21 +22,21 @@ func TestAccASPolicyV2_basic(t *testing.T) {
 		CheckDestroy:      testAccCheckASV2PolicyDestroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testASPolicyV2Basic,
+				Config: testAccASPolicyV2Basic,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckASV2PolicyExists(resourceName, &asPolicy),
 					resource.TestCheckResourceAttr(resourceName, "scaling_policy_action.0.operation", "ADD"),
 					resource.TestCheckResourceAttr(resourceName, "scaling_policy_action.0.percentage", "15"),
-					resource.TestCheckResourceAttr(resourceName, "scaling_policy_name", "policy_create"),
+					resource.TestCheckResourceAttr(resourceName, "scaling_policy_name", "as_policy"),
 					resource.TestCheckResourceAttr(resourceName, "cool_down_time", "300"),
 				),
 			},
 			{
-				Config: testASPolicyV2Update,
+				Config: testAccASPolicyV2Update,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckASV2PolicyExists(resourceName, &asPolicy),
 					resource.TestCheckResourceAttr(resourceName, "scaling_policy_action.0.percentage", "30"),
-					resource.TestCheckResourceAttr(resourceName, "scaling_policy_name", "policy_update"),
+					resource.TestCheckResourceAttr(resourceName, "scaling_policy_name", "as_policy_update"),
 					resource.TestCheckResourceAttr(resourceName, "cool_down_time", "100"),
 				),
 			},
@@ -93,47 +93,50 @@ func testAccCheckASV2PolicyExists(n string, policy *policies.Policy) resource.Te
 	}
 }
 
-var testASPolicyV2Basic = fmt.Sprintf(`
-data "opentelekomcloud_networking_secgroup_v2" "sg_1" {
-  name = "default"
-}
+var testAccASPolicyV2Basic = fmt.Sprintf(`
+// default SecGroup data-source
+%s
 
-resource "opentelekomcloud_compute_keypair_v2" "key_1" {
-  name       = "key_1"
-  public_key = "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQDAjpC1hwiOCCmKEWxJ4qzTTsJbKzndLo1BCz5PcwtUnflmU+gHJtWMZKpuEGVi29h0A/+ydKek1O18k10Ff+4tyFjiHDQAT9+OfgWf7+b1yK+qDip3X1C0UPMbwHlTfSGWLGZquwhvEFx9k3h/M+VtMvwR1lJ9LUyTAImnNjWG7TAIPmui30HvM2UiFEmqkr4ijq45MyX2+fLIePLRIFuu1p4whjHAQYufqyno3BS48icQb4p6iVEZPo4AE2o9oIyQvj2mx4dk5Y8CgSETOZTYDOR3rU2fZTRDRgPJDH9FWvQjF5tA0p3d9CoWWd2s6GKKbfoUIi8R/Db1BSPJwkqB jrp-hp-pc"
-}
+// default Image data-source
+%s
 
-resource "opentelekomcloud_as_configuration_v1" "config_1"{
-  scaling_configuration_name = "config_1"
+// default Subnet data-source
+%s
+
+// default VPC data-source
+%s
+
+resource "opentelekomcloud_as_configuration_v1" "as_config"{
+  scaling_configuration_name = "as_config"
 
   instance_config {
-    image = "%s"
+    image = data.opentelekomcloud_images_image_v2.latest_image.id
     disk {
       size        = 40
       volume_type = "SATA"
       disk_type   = "SYS"
     }
-    key_name = opentelekomcloud_compute_keypair_v2.key_1.id
+    key_name = "%s"
   }
 }
 
-resource "opentelekomcloud_as_group_v1" "group_1"{
-  scaling_group_name       = "group_1"
+resource "opentelekomcloud_as_group_v1" "as_group"{
+  scaling_group_name       = "as_group"
   scaling_configuration_id = opentelekomcloud_as_configuration_v1.config_1.id
 
   networks {
-    id = "%s"
+    id = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.id
   }
   security_groups {
-    id = data.opentelekomcloud_networking_secgroup_v2.sg_1.id
+    id = data.opentelekomcloud_networking_secgroup_v2.default_secgroup.id
   }
-  vpc_id = "%s"
+  vpc_id = data.opentelekomcloud_vpc_v1.shared_vpc.id
 }
 
-resource "opentelekomcloud_as_policy_v2" "policy_1"{
-  scaling_policy_name   = "policy_create"
+resource "opentelekomcloud_as_policy_v2" "as_policy"{
+  scaling_policy_name   = "as_policy"
   scaling_policy_type   = "RECURRENCE"
-  scaling_resource_id   = opentelekomcloud_as_group_v1.group_1.id
+  scaling_resource_id   = opentelekomcloud_as_group_v1.as_group.id
   scaling_resource_type = "SCALING_GROUP"
 
   scaling_policy_action {
@@ -147,47 +150,50 @@ resource "opentelekomcloud_as_policy_v2" "policy_1"{
     end_time         = "2040-12-31T10:30Z"
   }
 }
-`, env.OS_IMAGE_ID, env.OS_NETWORK_ID, env.OS_VPC_ID)
+`, common.DataSourceSecGroupDefault, common.DataSourceImage, common.DataSourceSubnet, common.DataSourceVPC, env.OS_KEYPAIR_NAME)
 
-var testASPolicyV2Update = fmt.Sprintf(`
-data "opentelekomcloud_networking_secgroup_v2" "sg_1" {
-  name = "default"
-}
+var testAccASPolicyV2Update = fmt.Sprintf(`
+// default SecGroup data-source
+%s
 
-resource "opentelekomcloud_compute_keypair_v2" "key_1" {
-  name       = "key_1"
-  public_key = "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQDAjpC1hwiOCCmKEWxJ4qzTTsJbKzndLo1BCz5PcwtUnflmU+gHJtWMZKpuEGVi29h0A/+ydKek1O18k10Ff+4tyFjiHDQAT9+OfgWf7+b1yK+qDip3X1C0UPMbwHlTfSGWLGZquwhvEFx9k3h/M+VtMvwR1lJ9LUyTAImnNjWG7TAIPmui30HvM2UiFEmqkr4ijq45MyX2+fLIePLRIFuu1p4whjHAQYufqyno3BS48icQb4p6iVEZPo4AE2o9oIyQvj2mx4dk5Y8CgSETOZTYDOR3rU2fZTRDRgPJDH9FWvQjF5tA0p3d9CoWWd2s6GKKbfoUIi8R/Db1BSPJwkqB jrp-hp-pc"
-}
+// default Image data-source
+%s
 
-resource "opentelekomcloud_as_configuration_v1" "config_1"{
-  scaling_configuration_name = "config_1"
+// default Subnet data-source
+%s
+
+// default VPC data-source
+%s
+
+resource "opentelekomcloud_as_configuration_v1" "as_config"{
+  scaling_configuration_name = "as_config"
 
   instance_config {
-    image = "%s"
+    image = data.opentelekomcloud_images_image_v2.latest_image.id
     disk {
       size        = 40
       volume_type = "SATA"
       disk_type   = "SYS"
     }
-    key_name = opentelekomcloud_compute_keypair_v2.key_1.id
+    key_name = "%s"
   }
 }
 
-resource "opentelekomcloud_as_group_v1" "group_1"{
-  scaling_group_name       = "group_1"
+resource "opentelekomcloud_as_group_v1" "as_group"{
+  scaling_group_name       = "as_group"
   scaling_configuration_id = opentelekomcloud_as_configuration_v1.config_1.id
 
   networks {
-    id = "%s"
+    id = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.id
   }
   security_groups {
-    id = data.opentelekomcloud_networking_secgroup_v2.sg_1.id
+    id = data.opentelekomcloud_networking_secgroup_v2.default_secgroup.id
   }
-  vpc_id = "%s"
+  vpc_id = data.opentelekomcloud_vpc_v1.shared_vpc.id
 }
 
-resource "opentelekomcloud_as_policy_v2" "policy_1"{
-  scaling_policy_name   = "policy_update"
+resource "opentelekomcloud_as_policy_v2" "as_policy"{
+  scaling_policy_name   = "as_policy_update"
   scaling_policy_type   = "RECURRENCE"
   scaling_resource_id   = opentelekomcloud_as_group_v1.group_1.id
   scaling_resource_type = "SCALING_GROUP"
@@ -204,4 +210,4 @@ resource "opentelekomcloud_as_policy_v2" "policy_1"{
   }
   cool_down_time = 100
 }
-`, env.OS_IMAGE_ID, env.OS_NETWORK_ID, env.OS_VPC_ID)
+`, common.DataSourceSecGroupDefault, common.DataSourceImage, common.DataSourceSubnet, common.DataSourceVPC, env.OS_KEYPAIR_NAME)
