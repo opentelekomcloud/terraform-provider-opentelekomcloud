@@ -62,8 +62,6 @@ All above argument parameters can be exported as attribute parameters along with
 
 * `share_type` - The bandwidth sharing type.
 
-* `spec_extend_param` - Extended parameters of the Node.
-
 * `data_volumes` - Represents the data disks configuration.
   * `size` - Disk size in GB.
   * `volumetype` - Disk type.
