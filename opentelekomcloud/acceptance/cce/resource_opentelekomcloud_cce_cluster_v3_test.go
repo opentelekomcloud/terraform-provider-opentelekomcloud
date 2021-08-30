@@ -133,7 +133,7 @@ func TestAccCCEClusterV3NoAddons(t *testing.T) {
 
 func testAccCheckCCEClusterV3Destroy(s *terraform.State) error {
 	config := common.TestAccProvider.Meta().(*cfg.Config)
-	cceClient, err := config.CceV3Client(env.OS_REGION_NAME)
+	client, err := config.CceV3Client(env.OS_REGION_NAME)
 	if err != nil {
 		return fmt.Errorf("error creating opentelekomcloud CCE client: %s", err)
 	}
@@ -143,7 +143,7 @@ func testAccCheckCCEClusterV3Destroy(s *terraform.State) error {
 			continue
 		}
 
-		_, err := clusters.Get(cceClient, rs.Primary.ID).Extract()
+		_, err := clusters.Get(client, rs.Primary.ID).Extract()
 		if err == nil {
 			return fmt.Errorf("cluster still exists")
 		}
@@ -164,12 +164,12 @@ func testAccCheckCCEClusterV3Exists(n string, cluster *clusters.Clusters) resour
 		}
 
 		config := common.TestAccProvider.Meta().(*cfg.Config)
-		cceClient, err := config.CceV3Client(env.OS_REGION_NAME)
+		client, err := config.CceV3Client(env.OS_REGION_NAME)
 		if err != nil {
-			return fmt.Errorf("error creating opentelekomcloud CCE client: %s", err)
+			return fmt.Errorf("error creating OpenTelekomCloud CCE client: %s", err)
 		}
 
-		found, err := clusters.Get(cceClient, rs.Primary.ID).Extract()
+		found, err := clusters.Get(client, rs.Primary.ID).Extract()
 		if err != nil {
 			return err
 		}
@@ -206,38 +206,49 @@ func TestAccCCEClusterV3_withVersionDiff(t *testing.T) {
 
 var (
 	testAccCCEClusterV3Basic = fmt.Sprintf(`
+%s
+
+%s
+
 resource "opentelekomcloud_cce_cluster_v3" "cluster_1" {
   name                    = "%s"
   cluster_type            = "VirtualMachine"
   flavor_id               = "cce.s1.small"
-  vpc_id                  = "%s"
-  subnet_id               = "%s"
+  vpc_id                  = data.opentelekomcloud_vpc_v1.shared_vpc.id
+  subnet_id               = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.id
   container_network_type  = "overlay_l2"
   kubernetes_svc_ip_range = "10.247.0.0/16"
-}`, clusterName, env.OS_VPC_ID, env.OS_NETWORK_ID)
+}`, common.DataSourceVPC, common.DataSourceSubnet, clusterName)
 
 	testAccCCEClusterV3Update = fmt.Sprintf(`
+%s
+
+%s
+
 resource "opentelekomcloud_cce_cluster_v3" "cluster_1" {
   name                    = "%s"
   cluster_type            = "VirtualMachine"
   flavor_id               = "cce.s1.small"
-  vpc_id                  = "%s"
-  subnet_id               = "%s"
+  vpc_id                  = data.opentelekomcloud_vpc_v1.shared_vpc.id
+  subnet_id               = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.id
   container_network_type  = "overlay_l2"
   description             = "new description"
   kubernetes_svc_ip_range = "10.247.0.0/16"
-}`, clusterName, env.OS_VPC_ID, env.OS_NETWORK_ID)
+}`, common.DataSourceVPC, common.DataSourceSubnet, clusterName)
 
 	testAccCCEClusterV3Timeout = fmt.Sprintf(`
-resource "opentelekomcloud_networking_floatingip_v2" "fip_1" {
-}
+%s
+
+%s
+
+resource "opentelekomcloud_networking_floatingip_v2" "fip_1" {}
 
 resource "opentelekomcloud_cce_cluster_v3" "cluster_1" {
   name                   = "%s"
   cluster_type           = "VirtualMachine"
   flavor_id              = "cce.s2.small"
-  vpc_id                 = "%s"
-  subnet_id              = "%s"
+  vpc_id                 = data.opentelekomcloud_vpc_v1.shared_vpc.id
+  subnet_id              = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.id
   eip                    = opentelekomcloud_networking_floatingip_v2.fip_1.address
   container_network_type = "overlay_l2"
   authentication_mode    = "rbac"
@@ -248,27 +259,35 @@ resource "opentelekomcloud_cce_cluster_v3" "cluster_1" {
 
   multi_az = true
 }
-`, clusterName, env.OS_VPC_ID, env.OS_NETWORK_ID)
+`, common.DataSourceVPC, common.DataSourceSubnet, clusterName)
 
 	testAccCCEClusterV3WithInvalidVersion = fmt.Sprintf(`
+%s
+
+%s
+
 resource "opentelekomcloud_cce_cluster_v3" "cluster_1" {
   name                   = "%s"
   cluster_type           = "VirtualMachine"
   flavor_id              = "cce.s1.small"
   cluster_version        = "v1.9.2"
-  vpc_id                 = "%s"
-  subnet_id              = "%s"
+  vpc_id                 = data.opentelekomcloud_vpc_v1.shared_vpc.id
+  subnet_id              = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.id
   container_network_type = "overlay_l2"
   description            = "new description"
-}`, clusterName, env.OS_VPC_ID, env.OS_NETWORK_ID)
+}`, common.DataSourceVPC, common.DataSourceSubnet, clusterName)
 
 	testAccCCEClusterV3AuthProxy = fmt.Sprintf(`
+%s
+
+%s
+
 resource "opentelekomcloud_cce_cluster_v3" "cluster_1" {
   name                    = "%s"
   cluster_type            = "VirtualMachine"
   flavor_id               = "cce.s1.small"
-  vpc_id                  = "%s"
-  subnet_id               = "%s"
+  vpc_id                  = data.opentelekomcloud_vpc_v1.shared_vpc.id
+  subnet_id               = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.id
   container_network_type  = "overlay_l2"
   kubernetes_svc_ip_range = "10.247.0.0/16"
   authentication_mode     = "authenticating_proxy"
@@ -296,24 +315,21 @@ i34R7EQDtFeiSvBdeKRsPp8c0KT8H1B4lXNkkCQs2WX5p4lm99+ZtLD4glw8x6Ic
 i1YhgnQbn5E0hz55OLu5jvOkKQjPCW+9Aa==
 -----END CERTIFICATE-----
 EOT
-}`, clusterName, env.OS_VPC_ID, env.OS_NETWORK_ID)
+}`, common.DataSourceVPC, common.DataSourceSubnet, clusterName)
 
 	testAccCCEClusterV3InvalidSubnet = fmt.Sprintf(`
-resource "opentelekomcloud_vpc_v1" "vpc" {
-  cidr = "192.168.0.0/16"
-  name = "cce-test"
-}
+%s
 
 resource "opentelekomcloud_cce_cluster_v3" "cluster_1" {
   name                    = "%s"
   cluster_type            = "VirtualMachine"
   flavor_id               = "cce.s1.small"
-  vpc_id                  = opentelekomcloud_vpc_v1.vpc.id
+  vpc_id                  = data.opentelekomcloud_vpc_v1.shared_vpc.id
   subnet_id               = "abc"
   container_network_type  = "overlay_l2"
   kubernetes_svc_ip_range = "10.247.0.0/16"
 }
-`, clusterName)
+`, common.DataSourceVPC, clusterName)
 
 	testAccCCEClusterV3InvalidVPC = fmt.Sprintf(`
 resource "opentelekomcloud_vpc_v1" "vpc" {
@@ -374,14 +390,18 @@ resource "opentelekomcloud_cce_cluster_v3" "cluster_1" {
 `, clusterName)
 
 	testAccCCEClusterV3NoAddons = fmt.Sprintf(`
+%s
+
+%s
+
 resource "opentelekomcloud_cce_cluster_v3" "cluster_1" {
   name                    = "%s"
   cluster_type            = "VirtualMachine"
   flavor_id               = "cce.s1.small"
-  vpc_id                  = "%s"
-  subnet_id               = "%s"
+  vpc_id                  = data.opentelekomcloud_vpc_v1.shared_vpc.id
+  subnet_id               = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.id
   container_network_type  = "overlay_l2"
   kubernetes_svc_ip_range = "10.247.0.0/16"
   no_addons               = true
-}`, clusterName, env.OS_VPC_ID, env.OS_NETWORK_ID)
+}`, common.DataSourceVPC, common.DataSourceSubnet, clusterName)
 )
