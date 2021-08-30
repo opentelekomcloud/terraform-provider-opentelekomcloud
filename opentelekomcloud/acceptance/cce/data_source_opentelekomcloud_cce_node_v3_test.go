@@ -22,11 +22,14 @@ func TestAccCCENodesV3DataSource_basic(t *testing.T) {
 		ProviderFactories: common.TestAccProviderFactories,
 		Steps: []resource.TestStep{
 			{
+				Config: testAccCCENodeV3DataSourceInit(cceName, cceNodeName),
+			},
+			{
 				Config: testAccCCENodeV3DataSourceBasic(cceName, cceNodeName),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckCCENodeV3DataSourceID(dataSourceName),
-					resource.TestCheckResourceAttr(dataSourceName, "name", "test-node"),
-					resource.TestCheckResourceAttr(dataSourceName, "flavor_id", "s1.medium"),
+					resource.TestCheckResourceAttr(dataSourceName, "name", cceNodeName),
+					resource.TestCheckResourceAttr(dataSourceName, "flavor_id", "s2.large.2"),
 				),
 			},
 		},
@@ -46,6 +49,39 @@ func testAccCheckCCENodeV3DataSourceID(n string) resource.TestCheckFunc {
 
 		return nil
 	}
+}
+
+func testAccCCENodeV3DataSourceInit(cceName string, cceNodeName string) string {
+	return fmt.Sprintf(`
+%s
+
+%s
+
+resource "opentelekomcloud_cce_cluster_v3" "cluster_1" {
+  name                   = "%s"
+  cluster_type           = "VirtualMachine"
+  flavor_id              = "cce.s1.small"
+  vpc_id                 = data.opentelekomcloud_vpc_v1.shared_vpc.id
+  subnet_id              = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.id
+  container_network_type = "overlay_l2"
+}
+
+resource "opentelekomcloud_cce_node_v3" "node_1" {
+  cluster_id        = opentelekomcloud_cce_cluster_v3.cluster_1.id
+  name              = "%s"
+  flavor_id         = "s2.large.2"
+  availability_zone = "%s"
+  key_pair          = "%s"
+  root_volume {
+    size       = 40
+    volumetype = "SATA"
+  }
+  data_volumes {
+    size       = 100
+    volumetype = "SATA"
+  }
+}
+`, common.DataSourceVPC, common.DataSourceSubnet, cceName, cceNodeName, env.OS_AVAILABILITY_ZONE, env.OS_KEYPAIR_NAME)
 }
 
 func testAccCCENodeV3DataSourceBasic(cceName string, cceNodeName string) string {

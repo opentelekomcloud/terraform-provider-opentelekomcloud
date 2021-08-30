@@ -72,10 +72,6 @@ func DataSourceCceNodesV3() *schema.Resource {
 				Type:     schema.TypeString,
 				Computed: true,
 			},
-			"extend_param": {
-				Type:     schema.TypeString,
-				Computed: true,
-			},
 			"data_volumes": {
 				Type:     schema.TypeList,
 				Computed: true,
@@ -86,6 +82,14 @@ func DataSourceCceNodesV3() *schema.Resource {
 							Computed: true,
 						},
 						"volume_type": {
+							Type:     schema.TypeString,
+							Computed: true,
+						},
+						"extend_param": {
+							Type:     schema.TypeString,
+							Computed: true,
+						},
+						"kms_id": {
 							Type:     schema.TypeString,
 							Computed: true,
 						},
@@ -117,10 +121,6 @@ func DataSourceCceNodesV3() *schema.Resource {
 				Computed: true,
 				Elem:     &schema.Schema{Type: schema.TypeString},
 			},
-			"spec_extend_param": {
-				Type:     schema.TypeString,
-				Computed: true,
-			},
 			"eip_count": {
 				Type:     schema.TypeInt,
 				Computed: true,
@@ -131,9 +131,9 @@ func DataSourceCceNodesV3() *schema.Resource {
 
 func dataSourceCceNodesV3Read(_ context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*cfg.Config)
-	cceClient, err := config.CceV3Client(config.GetRegion(d))
+	client, err := config.CceV3Client(config.GetRegion(d))
 	if err != nil {
-		return fmterr.Errorf("unable to create opentelekomcloud CCE client : %s", err)
+		return fmterr.Errorf(cceClientError, err)
 	}
 
 	listOpts := nodes.ListOpts{
@@ -154,7 +154,7 @@ func dataSourceCceNodesV3Read(_ context.Context, d *schema.ResourceData, meta in
 		listOpts.Phase = v.(string)
 	}
 
-	refinedNodes, err := nodes.List(cceClient, d.Get("cluster_id").(string), listOpts)
+	refinedNodes, err := nodes.List(client, d.Get("cluster_id").(string), listOpts)
 
 	if err != nil {
 		return fmterr.Errorf("unable to retrieve Nodes: %s", err)
@@ -172,17 +172,20 @@ func dataSourceCceNodesV3Read(_ context.Context, d *schema.ResourceData, meta in
 
 	Node := refinedNodes[0]
 
-	var v []map[string]interface{}
+	var dataVolumes []map[string]interface{}
 	for _, volume := range Node.Spec.DataVolumes {
 		mapping := map[string]interface{}{
-			"disk_size":   volume.Size,
-			"volume_type": volume.VolumeType,
+			"disk_size":    volume.Size,
+			"volume_type":  volume.VolumeType,
+			"extend_param": volume.ExtendParam,
+			"kms_id":       volume.Metadata["__system__cmkid"],
 		}
-		v = append(v, mapping)
+		dataVolumes = append(dataVolumes, mapping)
 	}
 
 	log.Printf("[DEBUG] Retrieved Nodes using given filter %s: %+v", Node.Metadata.Id, Node)
 	d.SetId(Node.Metadata.Id)
+
 	mErr := multierror.Append(
 		d.Set("node_id", Node.Metadata.Id),
 		d.Set("name", Node.Metadata.Name),
@@ -190,10 +193,9 @@ func dataSourceCceNodesV3Read(_ context.Context, d *schema.ResourceData, meta in
 		d.Set("availability_zone", Node.Spec.Az),
 		d.Set("billing_mode", Node.Spec.BillingMode),
 		d.Set("status", Node.Status.Phase),
-		d.Set("data_volumes", v),
+		d.Set("data_volumes", dataVolumes),
 		d.Set("disk_size", Node.Spec.RootVolume.Size),
 		d.Set("volume_type", Node.Spec.RootVolume.VolumeType),
-		d.Set("extend_param", Node.Spec.RootVolume.ExtendParam),
 		d.Set("key_pair", Node.Spec.Login.SshKey),
 		d.Set("charge_mode", Node.Spec.PublicIP.Eip.Bandwidth.ChargeMode),
 		d.Set("bandwidth_size", Node.Spec.PublicIP.Eip.Bandwidth.Size),
@@ -202,7 +204,6 @@ func dataSourceCceNodesV3Read(_ context.Context, d *schema.ResourceData, meta in
 		d.Set("server_id", Node.Status.ServerID),
 		d.Set("public_ip", Node.Status.PublicIP),
 		d.Set("private_ip", Node.Status.PrivateIP),
-		d.Set("spec_extend_param", Node.Spec.ExtendParam),
 		d.Set("eip_count", Node.Spec.PublicIP.Count),
 		d.Set("eip_ids", Node.Spec.PublicIP.Ids),
 	)

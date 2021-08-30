@@ -40,13 +40,15 @@ All above argument parameters can be exported as attribute parameters along with
 
 * `key_pair` - Key pair name when logging in to select the key pair mode.
 
-* `billing_mode` - Node's billing mode: The value is 0 (on demand).
+* `billing_mode` - Node's billing mode: The value is `0` (on demand).
 
 * `charge_mode` - Bandwidth billing type.
 
-* `bandwidth_size` - Bandwidth (Mbit/s), in the range of [1, 2000].
+* `bandwidth_size` - Bandwidth (Mbit/s), in the range of `[1, 2000]`.
 
-* `extendparam` - Extended parameters.
+* `disk_size` - Root volume disk size in GB.
+
+* `volume_type` - Root volume disk type.
 
 * `eip_ids` - List of existing elastic IP IDs.
 
@@ -60,18 +62,8 @@ All above argument parameters can be exported as attribute parameters along with
 
 * `share_type` - The bandwidth sharing type.
 
--> **Note:** This parameter is mandatory when share_type is set to PER and is optional when share_type is set to WHOLE with an ID specified.
-
-Enumerated values: PER (indicates exclusive bandwidth) and WHOLE (indicates sharing)
-
-The `root_volumes` block supports the following arguments:
-
-* `disk_size` - Disk size in GB.
-
-* `volumetype` - Disk type.
-
-The `data_volumes` block supports the following arguments:
-
-* `disk_size` - Disk size in GB.
-
-* `volumetype` - Disk type.
+* `data_volumes` - Represents the data disks configuration.
+  * `size` - Disk size in GB.
+  * `volumetype` - Disk type.
+  * `extend_param` - Disk expansion parameters.
+  * `kms_id` - The Encryption KMS ID of the data volume.
