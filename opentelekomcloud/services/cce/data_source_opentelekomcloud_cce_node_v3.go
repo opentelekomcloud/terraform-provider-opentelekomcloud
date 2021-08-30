@@ -118,8 +118,44 @@ func DataSourceCceNodesV3() *schema.Resource {
 				Elem:     &schema.Schema{Type: schema.TypeString},
 			},
 			"spec_extend_param": {
-				Type:     schema.TypeMap,
+				Type:     schema.TypeList,
 				Computed: true,
+				Elem: &schema.Resource{
+					Schema: map[string]*schema.Schema{
+						"charging_mode": {
+							Type:     schema.TypeInt,
+							Computed: true,
+						},
+						"ecs_performance_type": {
+							Type:     schema.TypeString,
+							Computed: true,
+						},
+						"order_id": {
+							Type:     schema.TypeString,
+							Computed: true,
+						},
+						"product_id": {
+							Type:     schema.TypeString,
+							Computed: true,
+						},
+						"public_key": {
+							Type:     schema.TypeString,
+							Computed: true,
+						},
+						"max_pods": {
+							Type:     schema.TypeString,
+							Computed: true,
+						},
+						"pre_install": {
+							Type:     schema.TypeInt,
+							Computed: true,
+						},
+						"post_install": {
+							Type:     schema.TypeString,
+							Computed: true,
+						},
+					},
+				},
 			},
 			"eip_count": {
 				Type:     schema.TypeInt,
@@ -184,15 +220,17 @@ func dataSourceCceNodesV3Read(_ context.Context, d *schema.ResourceData, meta in
 	log.Printf("[DEBUG] Retrieved Nodes using given filter %s: %+v", Node.Metadata.Id, Node)
 	d.SetId(Node.Metadata.Id)
 
-	specExtendParam := map[string]interface{}{
-		"charging_mode":        Node.Spec.ExtendParam.ChargingMode,
-		"ecs_performance_type": Node.Spec.ExtendParam.EcsPerformanceType,
-		"order_id":             Node.Spec.ExtendParam.OrderID,
-		"product_id":           Node.Spec.ExtendParam.ProductID,
-		"public_key":           Node.Spec.ExtendParam.PublicKey,
-		"max_pods":             Node.Spec.ExtendParam.MaxPods,
-		"pre_install":          Node.Spec.ExtendParam.PreInstall,
-		"post_install":         Node.Spec.ExtendParam.PostInstall,
+	specExtendParam := []map[string]interface{}{
+		{
+			"charging_mode":        Node.Spec.ExtendParam.ChargingMode,
+			"ecs_performance_type": Node.Spec.ExtendParam.EcsPerformanceType,
+			"order_id":             Node.Spec.ExtendParam.OrderID,
+			"product_id":           Node.Spec.ExtendParam.ProductID,
+			"public_key":           Node.Spec.ExtendParam.PublicKey,
+			"max_pods":             Node.Spec.ExtendParam.MaxPods,
+			"pre_install":          Node.Spec.ExtendParam.PreInstall,
+			"post_install":         Node.Spec.ExtendParam.PostInstall,
+		},
 	}
 
 	mErr := multierror.Append(
