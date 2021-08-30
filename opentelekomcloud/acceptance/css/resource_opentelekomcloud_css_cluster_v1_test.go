@@ -26,7 +26,7 @@ func TestAccCssClusterV1_basic(t *testing.T) {
 		CheckDestroy:      testAccCheckCssClusterV1Destroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccCssClusterV1_basic(name),
+				Config: testAccCssClusterV1Basic(name),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckCssClusterV1Exists(),
 					resource.TestCheckResourceAttr(resourceName, "nodes.#", "1"),
@@ -52,12 +52,12 @@ func TestAccCssClusterV1_validateDiskandFlavor(t *testing.T) {
 		ProviderFactories: acc.TestAccProviderFactories,
 		Steps: []resource.TestStep{
 			{
-				Config:      testAccCssClusterV1_tooSmall(name),
+				Config:      testAccCssClusterV1TooSmall(name),
 				ExpectError: regexp.MustCompile(`invalid disk size.+`),
 				PlanOnly:    true,
 			},
 			{
-				Config:      testAccCssClusterV1_tooBig(name),
+				Config:      testAccCssClusterV1TooBig(name),
 				ExpectError: regexp.MustCompile(`invalid disk size.+`),
 				PlanOnly:    true,
 			},
@@ -67,7 +67,7 @@ func TestAccCssClusterV1_validateDiskandFlavor(t *testing.T) {
 				PlanOnly:    true,
 			},
 			{
-				Config:             testAccCssClusterV1_basic(name),
+				Config:             testAccCssClusterV1Basic(name),
 				PlanOnly:           true,
 				ExpectNonEmptyPlan: true,
 			},
@@ -75,7 +75,31 @@ func TestAccCssClusterV1_validateDiskandFlavor(t *testing.T) {
 	})
 }
 
-func testAccCssClusterV1_basic(name string) string {
+func TestAccCssClusterV1_encrypted(t *testing.T) {
+	name := fmt.Sprintf("css-%s", acctest.RandString(10))
+	resourceName := "opentelekomcloud_css_cluster_v1.cluster"
+	if env.OS_KMS_ID == "" {
+		t.Skip("KMS key ID is not set")
+	}
+
+	resource.Test(t, resource.TestCase{
+		PreCheck:          func() { acc.TestAccPreCheck(t) },
+		ProviderFactories: acc.TestAccProviderFactories,
+		CheckDestroy:      testAccCheckCssClusterV1Destroy,
+		Steps: []resource.TestStep{
+			{
+				Config: testAccCssClusterV1Encrypted(name),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckCssClusterV1Exists(),
+					resource.TestCheckResourceAttr(resourceName, "nodes.#", "1"),
+					resource.TestCheckResourceAttr(resourceName, "node_config.0.volume.0.encryption_key", env.OS_KMS_ID),
+				),
+			},
+		},
+	})
+}
+
+func testAccCssClusterV1Basic(name string) string {
 	return fmt.Sprintf(`
 data "opentelekomcloud_networking_secgroup_v2" "secgroup" {
   name = "default"
@@ -98,14 +122,16 @@ resource "opentelekomcloud_css_cluster_v1" "cluster" {
 
     availability_zone = "%s"
   }
-
+  datastore {
+    version = "7.6.2"
+  }
   enable_https     = true
   enable_authority = true
   admin_pass       = "QwertyUI!"
 }
 `, name, env.OS_NETWORK_ID, env.OS_VPC_ID, env.OS_AVAILABILITY_ZONE)
 }
-func testAccCssClusterV1_tooSmall(name string) string {
+func testAccCssClusterV1TooSmall(name string) string {
 	return fmt.Sprintf(`
 data "opentelekomcloud_networking_secgroup_v2" "secgroup" {
   name = "default"
@@ -128,14 +154,16 @@ resource "opentelekomcloud_css_cluster_v1" "cluster" {
 
     availability_zone = "%s"
   }
-
+  datastore {
+    version = "7.6.2"
+  }
   enable_https     = true
   enable_authority = true
   admin_pass       = "QwertyUI!"
 }
 `, name, env.OS_NETWORK_ID, env.OS_VPC_ID, env.OS_AVAILABILITY_ZONE)
 }
-func testAccCssClusterV1_tooBig(name string) string {
+func testAccCssClusterV1TooBig(name string) string {
 	return fmt.Sprintf(`
 data "opentelekomcloud_networking_secgroup_v2" "secgroup" {
   name = "default"
@@ -158,7 +186,9 @@ resource "opentelekomcloud_css_cluster_v1" "cluster" {
 
     availability_zone = "%s"
   }
-
+  datastore {
+    version = "7.6.2"
+  }
   enable_https     = true
   enable_authority = true
   admin_pass       = "QwertyUI!"
@@ -189,7 +219,9 @@ resource "opentelekomcloud_css_cluster_v1" "cluster" {
 
     availability_zone = "%s"
   }
-
+  datastore {
+    version = "7.6.2"
+  }
   enable_https     = true
   enable_authority = true
   admin_pass       = "QwertyUI!"
@@ -220,12 +252,48 @@ resource "opentelekomcloud_css_cluster_v1" "cluster" {
 
     availability_zone = "%s"
   }
-
+  datastore {
+    version = "7.6.2"
+  }
   enable_https     = true
   enable_authority = true
   admin_pass       = "QwertyUI!"
 }
 `, name, env.OS_NETWORK_ID, env.OS_VPC_ID, env.OS_AVAILABILITY_ZONE)
+}
+
+func testAccCssClusterV1Encrypted(name string) string {
+	return fmt.Sprintf(`
+data "opentelekomcloud_networking_secgroup_v2" "secgroup" {
+  name = "default"
+}
+
+resource "opentelekomcloud_css_cluster_v1" "cluster" {
+  expect_node_num = 1
+  name            = "%[1]s"
+  node_config {
+    flavor = "css.medium.8"
+    network_info {
+      security_group_id = data.opentelekomcloud_networking_secgroup_v2.secgroup.id
+      network_id        = "%s"
+      vpc_id            = "%s"
+    }
+    volume {
+      volume_type    = "COMMON"
+      size           = 40
+      encryption_key = "%s"
+    }
+
+    availability_zone = "%s"
+  }
+  datastore {
+    version = "7.6.2"
+  }
+  enable_https     = true
+  enable_authority = true
+  admin_pass       = "QwertyUI!"
+}
+`, name, env.OS_NETWORK_ID, env.OS_VPC_ID, env.OS_KMS_ID, env.OS_AVAILABILITY_ZONE)
 }
 
 func testAccCheckCssClusterV1Destroy(s *terraform.State) error {
