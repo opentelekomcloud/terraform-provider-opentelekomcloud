@@ -1,0 +1,4 @@
+---
+fixes:
+  - |
+    **[VPC]** Fix wrong ``network_id`` setting in ``resource/opentelekomcloud_vpc_subnet_v1`` (`#1341 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/1341>`_)
