@@ -28,8 +28,8 @@ func TestAccCCENodesV3DataSource_basic(t *testing.T) {
 				Config: testAccCCENodeV3DataSourceBasic(cceName, cceNodeName),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckCCENodeV3DataSourceID(dataSourceName),
-					resource.TestCheckResourceAttr(dataSourceName, "name", "test-node"),
-					resource.TestCheckResourceAttr(dataSourceName, "flavor_id", "s1.medium"),
+					resource.TestCheckResourceAttr(dataSourceName, "name", cceNodeName),
+					resource.TestCheckResourceAttr(dataSourceName, "flavor_id", "s2.large.2"),
 				),
 			},
 		},
