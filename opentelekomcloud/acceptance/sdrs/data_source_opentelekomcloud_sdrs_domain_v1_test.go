@@ -10,6 +10,8 @@ import (
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/acceptance/common"
 )
 
+const domainDataName = "data.opentelekomcloud_sdrs_domain_v1.domain_1"
+
 func TestAccSdrsDomainV1DataSource_basic(t *testing.T) {
 	resource.Test(t, resource.TestCase{
 		PreCheck:          func() { common.TestAccPreCheck(t) },
@@ -18,9 +20,8 @@ func TestAccSdrsDomainV1DataSource_basic(t *testing.T) {
 			{
 				Config: testAccSdrsDomainV1DataSource_basic,
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckSdrsDomainV1DataSourceID("data.opentelekomcloud_sdrs_domain_v1.domain_1"),
-					resource.TestCheckResourceAttr(
-						"data.opentelekomcloud_sdrs_domain_v1.domain_1", "name", "domain_001"),
+					testAccCheckSdrsDomainV1DataSourceID(domainDataName),
+					resource.TestCheckResourceAttr(domainDataName, "name", "domain_001"),
 				),
 			},
 		},
@@ -44,6 +45,6 @@ func testAccCheckSdrsDomainV1DataSourceID(n string) resource.TestCheckFunc {
 
 const testAccSdrsDomainV1DataSource_basic = `
 data "opentelekomcloud_sdrs_domain_v1" "domain_1" {
-	name = "domain_001"
+  name = "domain_001"
 }
 `

@@ -14,37 +14,37 @@ import (
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common/cfg"
 )
 
-func TestAccSdrsProtectiongroupV1_basic(t *testing.T) {
+const pgResourceName = "opentelekomcloud_sdrs_protectiongroup_v1.group_1"
+
+func TestAccSdrsProtectionGroupV1_basic(t *testing.T) {
 	var group protectiongroups.Group
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:          func() { common.TestAccPreCheck(t) },
 		ProviderFactories: common.TestAccProviderFactories,
-		CheckDestroy:      testAccCheckSdrsProtectiongroupV1Destroy,
+		CheckDestroy:      testAccCheckSdrsProtectionGroupV1Destroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccSdrsProtectiongroupV1_basic,
+				Config: testAccSdrsProtectionGroupV1Basic,
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckSdrsProtectiongroupV1Exists("opentelekomcloud_sdrs_protectiongroup_v1.group_1", &group),
-					resource.TestCheckResourceAttr(
-						"opentelekomcloud_sdrs_protectiongroup_v1.group_1", "name", "group_1"),
+					testAccCheckSdrsProtectionGroupV1Exists(pgResourceName, &group),
+					resource.TestCheckResourceAttr(pgResourceName, "name", "group_1"),
 				),
 			},
 			{
-				Config: testAccSdrsProtectiongroupV1_update,
+				Config: testAccSdrsProtectionGroupV1Update,
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckSdrsProtectiongroupV1Exists("opentelekomcloud_sdrs_protectiongroup_v1.group_1", &group),
-					resource.TestCheckResourceAttr(
-						"opentelekomcloud_sdrs_protectiongroup_v1.group_1", "name", "group_updated"),
+					testAccCheckSdrsProtectionGroupV1Exists(pgResourceName, &group),
+					resource.TestCheckResourceAttr(pgResourceName, "name", "group_updated"),
 				),
 			},
 		},
 	})
 }
 
-func testAccCheckSdrsProtectiongroupV1Destroy(s *terraform.State) error {
+func testAccCheckSdrsProtectionGroupV1Destroy(s *terraform.State) error {
 	config := common.TestAccProvider.Meta().(*cfg.Config)
-	sdrsClient, err := config.SdrsV1Client(env.OS_REGION_NAME)
+	client, err := config.SdrsV1Client(env.OS_REGION_NAME)
 	if err != nil {
 		return fmt.Errorf("error creating OpenTelekomCloud SDRS client: %s", err)
 	}
@@ -54,7 +54,7 @@ func testAccCheckSdrsProtectiongroupV1Destroy(s *terraform.State) error {
 			continue
 		}
 
-		_, err := protectiongroups.Get(sdrsClient, rs.Primary.ID).Extract()
+		_, err := protectiongroups.Get(client, rs.Primary.ID).Extract()
 		if err == nil {
 			return fmt.Errorf("SDRS protectiongroup still exists")
 		}
@@ -63,7 +63,7 @@ func testAccCheckSdrsProtectiongroupV1Destroy(s *terraform.State) error {
 	return nil
 }
 
-func testAccCheckSdrsProtectiongroupV1Exists(n string, group *protectiongroups.Group) resource.TestCheckFunc {
+func testAccCheckSdrsProtectionGroupV1Exists(n string, group *protectiongroups.Group) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
 		rs, ok := s.RootModule().Resources[n]
 		if !ok {
@@ -75,12 +75,12 @@ func testAccCheckSdrsProtectiongroupV1Exists(n string, group *protectiongroups.G
 		}
 
 		config := common.TestAccProvider.Meta().(*cfg.Config)
-		sdrsClient, err := config.SdrsV1Client(env.OS_REGION_NAME)
+		client, err := config.SdrsV1Client(env.OS_REGION_NAME)
 		if err != nil {
 			return fmt.Errorf("error creating OpenTelekomCloud SDRS client: %s", err)
 		}
 
-		found, err := protectiongroups.Get(sdrsClient, rs.Primary.ID).Extract()
+		found, err := protectiongroups.Get(client, rs.Primary.ID).Extract()
 		if err != nil {
 			return err
 		}
@@ -95,24 +95,30 @@ func testAccCheckSdrsProtectiongroupV1Exists(n string, group *protectiongroups.G
 	}
 }
 
-var testAccSdrsProtectiongroupV1_basic = fmt.Sprintf(`
-resource "opentelekomcloud_sdrs_protectiongroup_v1" "group_1" {
-	name = "group_1"
-	description = "test description"
-	source_availability_zone = "eu-de-02"
-	target_availability_zone = "eu-de-01"
-	domain_id = "cdba26b2-cc35-4988-a904-82b7abf20094"
-	source_vpc_id = "%s"
-	dr_type = "migration"
-}`, env.OS_VPC_ID)
+var testAccSdrsProtectionGroupV1Basic = fmt.Sprintf(`
+%s
 
-var testAccSdrsProtectiongroupV1_update = fmt.Sprintf(`
 resource "opentelekomcloud_sdrs_protectiongroup_v1" "group_1" {
-	name = "group_updated"
-	description = "test description"
-	source_availability_zone = "eu-de-02"
-	target_availability_zone = "eu-de-01"
-	domain_id = "cdba26b2-cc35-4988-a904-82b7abf20094"
-	source_vpc_id = "%s"
-	dr_type = "migration"
-}`, env.OS_VPC_ID)
+  name                     = "group_1"
+  description              = "test description"
+  source_availability_zone = "eu-de-02"
+  target_availability_zone = "eu-de-01"
+  domain_id                = "cdba26b2-cc35-4988-a904-82b7abf20094"
+  source_vpc_id            = data.opentelekomcloud_vpc_v1.shared_vpc.id
+  dr_type                  = "migration"
+}
+`, common.DataSourceVPC)
+
+var testAccSdrsProtectionGroupV1Update = fmt.Sprintf(`
+%s
+
+resource "opentelekomcloud_sdrs_protectiongroup_v1" "group_1" {
+  name                     = "group_updated"
+  description              = "test description"
+  source_availability_zone = "eu-de-02"
+  target_availability_zone = "eu-de-01"
+  domain_id                = "cdba26b2-cc35-4988-a904-82b7abf20094"
+  source_vpc_id            = data.opentelekomcloud_vpc_v1.shared_vpc.id
+  dr_type                  = "migration"
+}
+`, common.DataSourceVPC)

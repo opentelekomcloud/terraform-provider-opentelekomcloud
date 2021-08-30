@@ -14,7 +14,7 @@ import (
 )
 
 func TestAccSdrsProtectedInstanceV1_basic(t *testing.T) {
-	var intance protectedinstances.Instance
+	var instance protectedinstances.Instance
 	resourceName := "opentelekomcloud_sdrs_protected_instance_v1.instance_1"
 
 	resource.Test(t, resource.TestCase{
@@ -23,18 +23,18 @@ func TestAccSdrsProtectedInstanceV1_basic(t *testing.T) {
 		CheckDestroy:      testAccSdrsProtectedInstanceV1Destroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccSdrsProtectedInstanceV1_basic,
+				Config: testAccSdrsProtectedInstanceV1Basic,
 				Check: resource.ComposeTestCheckFunc(
-					testAccSdrsProtectedInstanceV1Exists(resourceName, &intance),
+					testAccSdrsProtectedInstanceV1Exists(resourceName, &instance),
 					resource.TestCheckResourceAttr(resourceName, "name", "instance_create"),
 					resource.TestCheckResourceAttr(resourceName, "description", "some interesting description"),
 					resource.TestCheckResourceAttr(resourceName, "tags.muh", "value-create"),
 				),
 			},
 			{
-				Config: testAccSdrsProtectedInstanceV1_update,
+				Config: testAccSdrsProtectedInstanceV1Update,
 				Check: resource.ComposeTestCheckFunc(
-					testAccSdrsProtectedInstanceV1Exists(resourceName, &intance),
+					testAccSdrsProtectedInstanceV1Exists(resourceName, &instance),
 					resource.TestCheckResourceAttr(resourceName, "name", "instance_update"),
 					resource.TestCheckResourceAttr(resourceName, "tags.muh", "value-update"),
 				),
@@ -96,27 +96,35 @@ func testAccSdrsProtectedInstanceV1Exists(n string, instance *protectedinstances
 	}
 }
 
-var testAccSdrsProtectedInstanceV1_basic = fmt.Sprintf(`
+var testAccSdrsProtectedInstanceV1Basic = fmt.Sprintf(`
+%s
+%s
+%s
+
+locals {
+  az = "%s"
+}
+
 resource "opentelekomcloud_sdrs_protectiongroup_v1" "group_1" {
   name                     = "group_1"
-  source_availability_zone = "%[1]s"
+  source_availability_zone = local.az
   target_availability_zone = "eu-de-01"
   domain_id                = "cdba26b2-cc35-4988-a904-82b7abf20094"
-  source_vpc_id            = "%[2]s"
+  source_vpc_id            = data.opentelekomcloud_vpc_v1.shared_vpc.id
   dr_type                  = "migration"
 }
 
 resource "opentelekomcloud_ecs_instance_v1" "instance_1" {
   name     = "server_1"
-  image_id = "%[3]s"
+  image_id = data.opentelekomcloud_images_image_v2.latest_image.id
   flavor   = "s2.medium.1"
-  vpc_id   = "%[2]s"
+  vpc_id   = data.opentelekomcloud_vpc_v1.shared_vpc.id
 
   nics {
-    network_id = "%[4]s"
+    network_id = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.network_id
   }
 
-  availability_zone = "%[1]s"
+  availability_zone = local.az
 }
 
 resource "opentelekomcloud_sdrs_protected_instance_v1" "instance_1" {
@@ -131,29 +139,37 @@ resource "opentelekomcloud_sdrs_protected_instance_v1" "instance_1" {
     kuh = "value-create"
   }
 }
-`, env.OS_AVAILABILITY_ZONE, env.OS_VPC_ID, env.OS_IMAGE_ID, env.OS_NETWORK_ID)
+`, common.DataSourceVPC, common.DataSourceSubnet, common.DataSourceImage, env.OS_AVAILABILITY_ZONE)
 
-var testAccSdrsProtectedInstanceV1_update = fmt.Sprintf(`
+var testAccSdrsProtectedInstanceV1Update = fmt.Sprintf(`
+%s
+%s
+%s
+
+locals {
+  az = "%s"
+}
+
 resource "opentelekomcloud_sdrs_protectiongroup_v1" "group_1" {
   name                     = "group_1"
-  source_availability_zone = "%[1]s"
+  source_availability_zone = local.az
   target_availability_zone = "eu-de-01"
   domain_id                = "cdba26b2-cc35-4988-a904-82b7abf20094"
-  source_vpc_id            = "%[2]s"
+  source_vpc_id            = data.opentelekomcloud_vpc_v1.shared_vpc.id
   dr_type                  = "migration"
 }
 
 resource "opentelekomcloud_ecs_instance_v1" "instance_1" {
   name     = "server_1"
-  image_id = "%[3]s"
+  image_id = data.opentelekomcloud_images_image_v2.latest_image.id
   flavor   = "s2.medium.1"
-  vpc_id   = "%[2]s"
+  vpc_id   = data.opentelekomcloud_vpc_v1.shared_vpc.id
 
   nics {
-    network_id = "%[4]s"
+    network_id = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.network_id
   }
 
-  availability_zone = "%[1]s"
+  availability_zone = local.az
 }
 
 resource "opentelekomcloud_sdrs_protected_instance_v1" "instance_1" {
@@ -167,4 +183,4 @@ resource "opentelekomcloud_sdrs_protected_instance_v1" "instance_1" {
     muh = "value-update"
   }
 }
-`, env.OS_AVAILABILITY_ZONE, env.OS_VPC_ID, env.OS_IMAGE_ID, env.OS_NETWORK_ID)
+`, common.DataSourceVPC, common.DataSourceSubnet, common.DataSourceImage, env.OS_AVAILABILITY_ZONE)

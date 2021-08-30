@@ -17,7 +17,7 @@ func TestAccSdrsProtectedInstanceV1_importBasic(t *testing.T) {
 		CheckDestroy:      testAccSdrsProtectedInstanceV1Destroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccSdrsProtectedInstanceV1_basic,
+				Config: testAccSdrsProtectedInstanceV1Basic,
 			},
 
 			{
