@@ -88,7 +88,7 @@ func dataSourceVpcSubnetV1Read(_ context.Context, d *schema.ResourceData, meta i
 	config := meta.(*cfg.Config)
 	client, err := config.NetworkingV1Client(config.GetRegion(d))
 	if err != nil {
-		return fmterr.Errorf("error creating OpenTelekomCloud NetworkingV1 client: %w", err)
+		return fmterr.Errorf(errCreationV1Client, err)
 	}
 
 	listOpts := subnets.ListOpts{
@@ -133,7 +133,7 @@ func dataSourceVpcSubnetV1Read(_ context.Context, d *schema.ResourceData, meta i
 		d.Set("availability_zone", subnet.AvailabilityZone),
 		d.Set("vpc_id", subnet.VpcID),
 		d.Set("subnet_id", subnet.SubnetID),
-		d.Set("network_id", subnet.SubnetID),
+		d.Set("network_id", subnet.NetworkID),
 		d.Set("region", config.GetRegion(d)),
 	)
 	if mErr.ErrorOrNil() != nil {
