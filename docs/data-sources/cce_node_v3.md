@@ -48,8 +48,6 @@ All above argument parameters can be exported as attribute parameters along with
 
 * `disk_size` - Root volume disk size in GB.
 
-* `extend_param` - Root volume extended parameters.
-
 * `volume_type` - Root volume disk type.
 
 * `eip_ids` - List of existing elastic IP IDs.

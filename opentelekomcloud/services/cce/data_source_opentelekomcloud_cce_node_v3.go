@@ -72,10 +72,6 @@ func DataSourceCceNodesV3() *schema.Resource {
 				Type:     schema.TypeString,
 				Computed: true,
 			},
-			"extend_param": {
-				Type:     schema.TypeString,
-				Computed: true,
-			},
 			"data_volumes": {
 				Type:     schema.TypeList,
 				Computed: true,
@@ -253,7 +249,6 @@ func dataSourceCceNodesV3Read(_ context.Context, d *schema.ResourceData, meta in
 		d.Set("data_volumes", dataVolumes),
 		d.Set("disk_size", Node.Spec.RootVolume.Size),
 		d.Set("volume_type", Node.Spec.RootVolume.VolumeType),
-		d.Set("extend_param", Node.Spec.RootVolume.ExtendParam),
 		d.Set("key_pair", Node.Spec.Login.SshKey),
 		d.Set("charge_mode", Node.Spec.PublicIP.Eip.Bandwidth.ChargeMode),
 		d.Set("bandwidth_size", Node.Spec.PublicIP.Eip.Bandwidth.Size),
