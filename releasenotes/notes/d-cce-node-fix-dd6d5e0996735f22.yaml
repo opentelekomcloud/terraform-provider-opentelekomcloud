@@ -1,0 +1,7 @@
+---
+enhancements:
+  - |
+    **[CCE]** Add missing fields in ``data_volumes`` schema in ``data_source/opentelekomcloud_cce_node_v3`` (`#1342 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/1342>`_)
+fixes:
+  - |
+    **[CCE]** Fix issue with wrong schema of ``spec_extend_param`` in ``data_source/opentelekomcloud_cce_node_v3`` (`#1342 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/1342>`_)
