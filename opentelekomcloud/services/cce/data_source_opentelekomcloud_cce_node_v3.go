@@ -118,7 +118,7 @@ func DataSourceCceNodesV3() *schema.Resource {
 				Elem:     &schema.Schema{Type: schema.TypeString},
 			},
 			"spec_extend_param": {
-				Type:     schema.TypeString,
+				Type:     schema.TypeMap,
 				Computed: true,
 			},
 			"eip_count": {
@@ -183,6 +183,18 @@ func dataSourceCceNodesV3Read(_ context.Context, d *schema.ResourceData, meta in
 
 	log.Printf("[DEBUG] Retrieved Nodes using given filter %s: %+v", Node.Metadata.Id, Node)
 	d.SetId(Node.Metadata.Id)
+
+	specExtendParam := map[string]interface{}{
+		"charging_mode":        Node.Spec.ExtendParam.ChargingMode,
+		"ecs_performance_type": Node.Spec.ExtendParam.EcsPerformanceType,
+		"order_id":             Node.Spec.ExtendParam.OrderID,
+		"product_id":           Node.Spec.ExtendParam.ProductID,
+		"public_key":           Node.Spec.ExtendParam.PublicKey,
+		"max_pods":             Node.Spec.ExtendParam.MaxPods,
+		"pre_install":          Node.Spec.ExtendParam.PreInstall,
+		"post_install":         Node.Spec.ExtendParam.PostInstall,
+	}
+
 	mErr := multierror.Append(
 		d.Set("node_id", Node.Metadata.Id),
 		d.Set("name", Node.Metadata.Name),
@@ -202,7 +214,7 @@ func dataSourceCceNodesV3Read(_ context.Context, d *schema.ResourceData, meta in
 		d.Set("server_id", Node.Status.ServerID),
 		d.Set("public_ip", Node.Status.PublicIP),
 		d.Set("private_ip", Node.Status.PrivateIP),
-		d.Set("spec_extend_param", Node.Spec.ExtendParam),
+		d.Set("spec_extend_param", specExtendParam),
 		d.Set("eip_count", Node.Spec.PublicIP.Count),
 		d.Set("eip_ids", Node.Spec.PublicIP.Ids),
 	)
