@@ -89,6 +89,14 @@ func DataSourceCceNodesV3() *schema.Resource {
 							Type:     schema.TypeString,
 							Computed: true,
 						},
+						"extend_param": {
+							Type:     schema.TypeString,
+							Computed: true,
+						},
+						"kms_id": {
+							Type:     schema.TypeString,
+							Computed: true,
+						},
 					},
 				},
 			},
@@ -143,11 +151,11 @@ func DataSourceCceNodesV3() *schema.Resource {
 							Computed: true,
 						},
 						"max_pods": {
-							Type:     schema.TypeString,
+							Type:     schema.TypeInt,
 							Computed: true,
 						},
 						"pre_install": {
-							Type:     schema.TypeInt,
+							Type:     schema.TypeString,
 							Computed: true,
 						},
 						"post_install": {
@@ -208,13 +216,15 @@ func dataSourceCceNodesV3Read(_ context.Context, d *schema.ResourceData, meta in
 
 	Node := refinedNodes[0]
 
-	var v []map[string]interface{}
+	var dataVolumes []map[string]interface{}
 	for _, volume := range Node.Spec.DataVolumes {
 		mapping := map[string]interface{}{
-			"disk_size":   volume.Size,
-			"volume_type": volume.VolumeType,
+			"disk_size":    volume.Size,
+			"volume_type":  volume.VolumeType,
+			"extend_param": volume.ExtendParam,
+			"kms_id":       volume.Metadata["__system__cmkid"],
 		}
-		v = append(v, mapping)
+		dataVolumes = append(dataVolumes, mapping)
 	}
 
 	log.Printf("[DEBUG] Retrieved Nodes using given filter %s: %+v", Node.Metadata.Id, Node)
@@ -240,7 +250,7 @@ func dataSourceCceNodesV3Read(_ context.Context, d *schema.ResourceData, meta in
 		d.Set("availability_zone", Node.Spec.Az),
 		d.Set("billing_mode", Node.Spec.BillingMode),
 		d.Set("status", Node.Status.Phase),
-		d.Set("data_volumes", v),
+		d.Set("data_volumes", dataVolumes),
 		d.Set("disk_size", Node.Spec.RootVolume.Size),
 		d.Set("volume_type", Node.Spec.RootVolume.VolumeType),
 		d.Set("extend_param", Node.Spec.RootVolume.ExtendParam),
