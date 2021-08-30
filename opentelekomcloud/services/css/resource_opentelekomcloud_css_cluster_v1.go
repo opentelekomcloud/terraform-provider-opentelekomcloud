@@ -234,7 +234,7 @@ func resourceCssClusterV1Create(ctx context.Context, d *schema.ResourceData, met
 	if enable, ok := d.GetOk("enable_https"); ok {
 		opts.HttpsEnabled = fmt.Sprint(enable.(bool))
 	}
-	if cmkID, ok := d.GetOk("node_config.0.volume.encryption_key"); ok {
+	if cmkID, ok := d.GetOk("node_config.0.volume.0.encryption_key"); ok {
 		opts.DiskEncryption = &clusters.DiskEncryption{
 			Encrypted: "1",
 			CmkID:     cmkID.(string),

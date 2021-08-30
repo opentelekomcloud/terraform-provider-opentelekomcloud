@@ -1,0 +1,4 @@
+---
+fixes:
+  - |
+    **[CSS]** Fix incorrect usage of ``encryption_key`` in ``resource/opentelekomcloud_css_cluster_v1`` (`#1343 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/1343>`_)
