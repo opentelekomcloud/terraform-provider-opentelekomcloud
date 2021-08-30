@@ -175,9 +175,9 @@ func DataSourceCceNodesV3() *schema.Resource {
 
 func dataSourceCceNodesV3Read(_ context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*cfg.Config)
-	cceClient, err := config.CceV3Client(config.GetRegion(d))
+	client, err := config.CceV3Client(config.GetRegion(d))
 	if err != nil {
-		return fmterr.Errorf("unable to create opentelekomcloud CCE client : %s", err)
+		return fmterr.Errorf(cceClientError, err)
 	}
 
 	listOpts := nodes.ListOpts{
@@ -198,7 +198,7 @@ func dataSourceCceNodesV3Read(_ context.Context, d *schema.ResourceData, meta in
 		listOpts.Phase = v.(string)
 	}
 
-	refinedNodes, err := nodes.List(cceClient, d.Get("cluster_id").(string), listOpts)
+	refinedNodes, err := nodes.List(client, d.Get("cluster_id").(string), listOpts)
 
 	if err != nil {
 		return fmterr.Errorf("unable to retrieve Nodes: %s", err)
