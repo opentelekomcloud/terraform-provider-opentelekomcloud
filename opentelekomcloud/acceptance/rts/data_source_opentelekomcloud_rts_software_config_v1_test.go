@@ -10,17 +10,19 @@ import (
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/acceptance/common"
 )
 
-func TestAccOTCRtsSoftwareConfigV1DataSource_basic(t *testing.T) {
+const configDataName = "data.opentelekomcloud_rts_software_config_v1.configs"
+
+func TestAccRTSSoftwareConfigV1DataSource_basic(t *testing.T) {
 	resource.Test(t, resource.TestCase{
 		PreCheck:          func() { common.TestAccPreCheck(t) },
 		ProviderFactories: common.TestAccProviderFactories,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccRtsSoftwareConfigV1DataSource_basic,
+				Config: testAccRtsSoftwareConfigV1DataSourceBasic,
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckRtsSoftwareConfigV1DataSourceID("data.opentelekomcloud_rts_software_config_v1.configs"),
-					resource.TestCheckResourceAttr("data.opentelekomcloud_rts_software_config_v1.configs", "name", "opentelekomcloud-config"),
-					resource.TestCheckResourceAttr("data.opentelekomcloud_rts_software_config_v1.configs", "group", "script"),
+					testAccCheckRtsSoftwareConfigV1DataSourceID(configDataName),
+					resource.TestCheckResourceAttr(configDataName, "name", "opentelekomcloud-config"),
+					resource.TestCheckResourceAttr(configDataName, "group", "script"),
 				),
 			},
 		},
@@ -42,7 +44,7 @@ func testAccCheckRtsSoftwareConfigV1DataSourceID(n string) resource.TestCheckFun
 	}
 }
 
-var testAccRtsSoftwareConfigV1DataSource_basic = `
+const testAccRtsSoftwareConfigV1DataSourceBasic = `
 resource "opentelekomcloud_rts_software_config_v1" "config_1" {
   name = "opentelekomcloud-config"
   output_values = [{

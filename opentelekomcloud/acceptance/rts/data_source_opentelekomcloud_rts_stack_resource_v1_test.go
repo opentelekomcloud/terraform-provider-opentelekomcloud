@@ -10,28 +10,27 @@ import (
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/acceptance/common"
 )
 
-func TestAccOTCRTSStackResourcesV1DataSource_basic(t *testing.T) {
+const resourceDataName = "data.opentelekomcloud_rts_stack_resource_v1.resource_1"
+
+func TestAccRTSStackResourcesV1DataSource_basic(t *testing.T) {
 	resource.Test(t, resource.TestCase{
 		PreCheck:          func() { common.TestAccPreCheck(t) },
 		ProviderFactories: common.TestAccProviderFactories,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccDataSourceOTCRTSStackResourcesV1Config,
+				Config: testAccDataSourceRTSStackResourcesV1Config,
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckOTCRTSStackResourcesV1DataSourceID("data.opentelekomcloud_rts_stack_resource_v1.resource_1"),
-					resource.TestCheckResourceAttr(
-						"data.opentelekomcloud_rts_stack_resource_v1.resource_1", "resource_name", "random"),
-					resource.TestCheckResourceAttr(
-						"data.opentelekomcloud_rts_stack_resource_v1.resource_1", "resource_type", "OS::Heat::RandomString"),
-					resource.TestCheckResourceAttr(
-						"data.opentelekomcloud_rts_stack_resource_v1.resource_1", "resource_status", "CREATE_COMPLETE"),
+					testAccCheckRTSStackResourcesV1DataSourceID(resourceDataName),
+					resource.TestCheckResourceAttr(resourceDataName, "resource_name", "random"),
+					resource.TestCheckResourceAttr(resourceDataName, "resource_type", "OS::Heat::RandomString"),
+					resource.TestCheckResourceAttr(resourceDataName, "resource_status", "CREATE_COMPLETE"),
 				),
 			},
 		},
 	})
 }
 
-func testAccCheckOTCRTSStackResourcesV1DataSourceID(n string) resource.TestCheckFunc {
+func testAccCheckRTSStackResourcesV1DataSourceID(n string) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
 		rs, ok := s.RootModule().Resources[n]
 		if !ok {
@@ -46,7 +45,7 @@ func testAccCheckOTCRTSStackResourcesV1DataSourceID(n string) resource.TestCheck
 	}
 }
 
-const testAccDataSourceOTCRTSStackResourcesV1Config = `
+const testAccDataSourceRTSStackResourcesV1Config = `
 
 resource "opentelekomcloud_rts_stack_v1" "stack_1" {
   name = "opentelekomcloud_rts_stack"

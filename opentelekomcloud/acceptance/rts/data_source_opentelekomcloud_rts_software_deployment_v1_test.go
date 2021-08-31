@@ -6,20 +6,20 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
+	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/acceptance/env"
 
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/acceptance/common"
-	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/acceptance/env"
 )
 
-func TestAccOTCRtsSoftwareDeploymentV1DataSource_basic(t *testing.T) {
+func TestAccRTSSoftwareDeploymentV1DataSource_basic(t *testing.T) {
 	resource.Test(t, resource.TestCase{
 		PreCheck:          func() { common.TestAccPreCheck(t) },
 		ProviderFactories: common.TestAccProviderFactories,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccOTCRtsSoftwareDeploymentV1DataSource_basic,
+				Config: testAccRTSSoftwareDeploymentV1DataSourceBasic,
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckOTCRtsSoftwareDeploymentV1DataSourceID("data.opentelekomcloud_rts_software_deployment_v1.deployment_1"),
+					testAccCheckRTSSoftwareDeploymentV1DataSourceID("data.opentelekomcloud_rts_software_deployment_v1.deployment_1"),
 					resource.TestCheckResourceAttr("data.opentelekomcloud_rts_software_deployment_v1.deployment_1", "status_reason", "Deploy data"),
 					resource.TestCheckResourceAttr("data.opentelekomcloud_rts_software_deployment_v1.deployment_1", "action", "CREATE"),
 					resource.TestCheckResourceAttr("data.opentelekomcloud_rts_software_deployment_v1.deployment_1", "status", "COMPLETE"),
@@ -29,7 +29,7 @@ func TestAccOTCRtsSoftwareDeploymentV1DataSource_basic(t *testing.T) {
 	})
 }
 
-func testAccCheckOTCRtsSoftwareDeploymentV1DataSourceID(n string) resource.TestCheckFunc {
+func testAccCheckRTSSoftwareDeploymentV1DataSourceID(n string) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
 		rs, ok := s.RootModule().Resources[n]
 		if !ok {
@@ -44,13 +44,16 @@ func testAccCheckOTCRtsSoftwareDeploymentV1DataSourceID(n string) resource.TestC
 	}
 }
 
-var testAccOTCRtsSoftwareDeploymentV1DataSource_basic = fmt.Sprintf(`
+var testAccRTSSoftwareDeploymentV1DataSourceBasic = fmt.Sprintf(`
+%s
+%s
+
 resource "opentelekomcloud_compute_instance_v2" "vm_1" {
   name = "instance_1"
-  image_id = "%s"
+  image_id = data.opentelekomcloud_images_image_v2.latest_image.id
   flavor_id = "%s"
   network {
-    uuid = "%s"
+    uuid = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.network_id
   }
 }
 resource "opentelekomcloud_rts_software_config_v1" "config_1" {
@@ -68,4 +71,4 @@ resource "opentelekomcloud_rts_software_deployment_v1" "deployment_1" {
 data "opentelekomcloud_rts_software_deployment_v1" "deployment_1" {
   id = opentelekomcloud_rts_software_deployment_v1.deployment_1.id
  }
-`, env.OS_IMAGE_ID, env.OS_FLAVOR_ID, env.OS_NETWORK_ID)
+`, common.DataSourceSubnet, common.DataSourceImage, env.OsFlavorID)
