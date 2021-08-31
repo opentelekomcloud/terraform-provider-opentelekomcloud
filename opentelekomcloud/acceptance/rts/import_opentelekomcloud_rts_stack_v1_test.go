@@ -8,16 +8,16 @@ import (
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/acceptance/common"
 )
 
-func TestAccOTCRTSStackV1_importBasic(t *testing.T) {
+func TestAccRTSStackV1_importBasic(t *testing.T) {
 	resourceName := "opentelekomcloud_rts_stack_v1.stack_1"
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:          func() { common.TestAccPreCheck(t) },
 		ProviderFactories: common.TestAccProviderFactories,
-		CheckDestroy:      testAccCheckOTCRTSStackV1Destroy,
+		CheckDestroy:      testAccCheckRTSStackV1Destroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccRTSStackV1_basic,
+				Config: testAccRTSStackV1Basic,
 			},
 
 			{

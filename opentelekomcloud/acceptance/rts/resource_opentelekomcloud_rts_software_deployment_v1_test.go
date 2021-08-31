@@ -14,63 +14,59 @@ import (
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common/cfg"
 )
 
-func TestAccOTCRtsSoftwareDeploymentV1_basic(t *testing.T) {
+const deploymentResourceName = "opentelekomcloud_rts_software_deployment_v1.deployment_1"
+
+func TestAccRTSSoftwareDeploymentV1_basic(t *testing.T) {
 	var deployments softwaredeployment.Deployment
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:          func() { common.TestAccPreCheck(t) },
 		ProviderFactories: common.TestAccProviderFactories,
-		CheckDestroy:      testAccCheckOTCRtsSoftwareDeploymentV1Destroy,
+		CheckDestroy:      testAccCheckRTSSoftwareDeploymentV1Destroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccRtsSoftwareDeploymentV1_basic,
+				Config: testAccRtsSoftwareDeploymentV1Basic,
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckOTCRtsSoftwareDeploymentV1Exists("opentelekomcloud_rts_software_deployment_v1.deployment_1", &deployments),
-					resource.TestCheckResourceAttr(
-						"opentelekomcloud_rts_software_deployment_v1.deployment_1", "status_reason", "Deploy data"),
-					resource.TestCheckResourceAttr(
-						"opentelekomcloud_rts_software_deployment_v1.deployment_1", "status", "IN_PROGRESS"),
-					resource.TestCheckResourceAttr(
-						"opentelekomcloud_rts_software_deployment_v1.deployment_1", "action", "CREATE"),
+					testAccCheckRTSSoftwareDeploymentV1Exists(deploymentResourceName, &deployments),
+					resource.TestCheckResourceAttr(deploymentResourceName, "status_reason", "Deploy data"),
+					resource.TestCheckResourceAttr(deploymentResourceName, "status", "IN_PROGRESS"),
+					resource.TestCheckResourceAttr(deploymentResourceName, "action", "CREATE"),
 				),
 			},
 			{
-				Config: testAccRtsSoftwareDeploymentV1_update,
+				Config: testAccRtsSoftwareDeploymentV1Update,
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckOTCRtsSoftwareDeploymentV1Exists("opentelekomcloud_rts_software_deployment_v1.deployment_1", &deployments),
-					resource.TestCheckResourceAttr(
-						"opentelekomcloud_rts_software_deployment_v1.deployment_1", "output_values.%", "1"),
-					resource.TestCheckResourceAttr(
-						"opentelekomcloud_rts_software_deployment_v1.deployment_1", "output_values.deploy_stdout", "Writing to /tmp/baaaaa\nWritten to /tmp/baaaaa\n"),
-					resource.TestCheckResourceAttr(
-						"opentelekomcloud_rts_software_deployment_v1.deployment_1", "status_reason", "Outputs received"),
-					resource.TestCheckResourceAttr(
-						"opentelekomcloud_rts_software_deployment_v1.deployment_1", "status", "COMPLETE"),
+					testAccCheckRTSSoftwareDeploymentV1Exists(deploymentResourceName, &deployments),
+					resource.TestCheckResourceAttr(deploymentResourceName, "output_values.%", "1"),
+					resource.TestCheckResourceAttr(deploymentResourceName, "output_values.deploy_stdout",
+						"Writing to /tmp/baaaaa\nWritten to /tmp/baaaaa\n"),
+					resource.TestCheckResourceAttr(deploymentResourceName, "status_reason", "Outputs received"),
+					resource.TestCheckResourceAttr(deploymentResourceName, "status", "COMPLETE"),
 				),
 			},
 		},
 	})
 }
 
-func TestAccOTCRtsSoftwareDeploymentV1_timeout(t *testing.T) {
+func TestAccRTSSoftwareDeploymentV1_timeout(t *testing.T) {
 	var deployments softwaredeployment.Deployment
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:          func() { common.TestAccPreCheck(t) },
 		ProviderFactories: common.TestAccProviderFactories,
-		CheckDestroy:      testAccCheckOTCRtsSoftwareDeploymentV1Destroy,
+		CheckDestroy:      testAccCheckRTSSoftwareDeploymentV1Destroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccRtsSoftwareDeploymentV1_timeout,
+				Config: testAccRtsSoftwareDeploymentV1Timeout,
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckOTCRtsSoftwareDeploymentV1Exists("opentelekomcloud_rts_software_deployment_v1.deployment_1", &deployments),
+					testAccCheckRTSSoftwareDeploymentV1Exists(deploymentResourceName, &deployments),
 				),
 			},
 		},
 	})
 }
 
-func testAccCheckOTCRtsSoftwareDeploymentV1Destroy(s *terraform.State) error {
+func testAccCheckRTSSoftwareDeploymentV1Destroy(s *terraform.State) error {
 	config := common.TestAccProvider.Meta().(*cfg.Config)
 	orchestrationClient, err := config.OrchestrationV1Client(env.OS_REGION_NAME)
 	if err != nil {
@@ -94,7 +90,7 @@ func testAccCheckOTCRtsSoftwareDeploymentV1Destroy(s *terraform.State) error {
 	return nil
 }
 
-func testAccCheckOTCRtsSoftwareDeploymentV1Exists(n string, stack *softwaredeployment.Deployment) resource.TestCheckFunc {
+func testAccCheckRTSSoftwareDeploymentV1Exists(n string, stack *softwaredeployment.Deployment) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
 		rs, ok := s.RootModule().Resources[n]
 		if !ok {
@@ -126,13 +122,16 @@ func testAccCheckOTCRtsSoftwareDeploymentV1Exists(n string, stack *softwaredeplo
 	}
 }
 
-var testAccRtsSoftwareDeploymentV1_basic = fmt.Sprintf(`
+var testAccRtsSoftwareDeploymentV1Basic = fmt.Sprintf(`
+%s
+%s
+
 resource "opentelekomcloud_compute_instance_v2" "vm_1" {
   name = "instance_1"
-  image_id = "%s"
+  image_id = data.opentelekomcloud_images_image_v2.latest_image.id
   flavor_id = "%s"
   network {
-    uuid = "%s"
+    uuid = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.network_id
   }
 }
 resource "opentelekomcloud_rts_software_config_v1" "config_1" {
@@ -146,15 +145,18 @@ resource "opentelekomcloud_rts_software_deployment_v1" "deployment_1" {
   action= "CREATE"
   status_reason= "Deploy data"
 }
-`, env.OS_IMAGE_ID, env.OS_FLAVOR_ID, env.OS_NETWORK_ID)
+`, common.DataSourceImage, common.DataSourceSubnet, env.OS_FLAVOR_ID)
 
-var testAccRtsSoftwareDeploymentV1_update = fmt.Sprintf(`
+var testAccRtsSoftwareDeploymentV1Update = fmt.Sprintf(`
+%s
+%s
+
 resource "opentelekomcloud_compute_instance_v2" "vm_1" {
   name = "instance_1"
-  image_id = "%s"
+  image_id = data.opentelekomcloud_images_image_v2.latest_image.id
   flavor_id = "%s"
   network {
-    uuid = "%s"
+    uuid = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.network_id
   }
 }
 resource "opentelekomcloud_rts_software_config_v1" "config_1" {
@@ -171,15 +173,18 @@ resource "opentelekomcloud_rts_software_deployment_v1" "deployment_1" {
   action= "CREATE"
   status_reason= "Outputs received"
 }
-`, env.OS_IMAGE_ID, env.OS_FLAVOR_ID, env.OS_NETWORK_ID)
+`, common.DataSourceImage, common.DataSourceSubnet, env.OsFlavorID)
 
-var testAccRtsSoftwareDeploymentV1_timeout = fmt.Sprintf(`
+var testAccRtsSoftwareDeploymentV1Timeout = fmt.Sprintf(`
+%s
+%s
+
 resource "opentelekomcloud_compute_instance_v2" "vm_1" {
   name = "instance_1"
-  image_id = "%s"
+  image_id = data.opentelekomcloud_images_image_v2.latest_image.id
   flavor_id = "%s"
   network {
-    uuid = "%s"
+    uuid = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.network_id
   }
 }
 resource "opentelekomcloud_rts_software_config_v1" "config_1" {
@@ -198,4 +203,4 @@ resource "opentelekomcloud_rts_software_deployment_v1" "deployment_1" {
     delete = "10m"
   }
 }
-`, env.OS_IMAGE_ID, env.OS_FLAVOR_ID, env.OS_NETWORK_ID)
+`, common.DataSourceImage, common.DataSourceSubnet, env.OS_FLAVOR_ID)

@@ -14,63 +14,58 @@ import (
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common/cfg"
 )
 
-func TestAccOTCRTSStackV1_basic(t *testing.T) {
-	var stacks stacks.RetrievedStack
+const stackResourceName = "opentelekomcloud_rts_stack_v1.stack_1"
+
+func TestAccRTSStackV1_basic(t *testing.T) {
+	var stack stacks.RetrievedStack
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:          func() { common.TestAccPreCheck(t) },
 		ProviderFactories: common.TestAccProviderFactories,
-		CheckDestroy:      testAccCheckOTCRTSStackV1Destroy,
+		CheckDestroy:      testAccCheckRTSStackV1Destroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccRTSStackV1_basic,
+				Config: testAccRTSStackV1Basic,
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckOTCRTSStackV1Exists("opentelekomcloud_rts_stack_v1.stack_1", &stacks),
-					resource.TestCheckResourceAttr(
-						"opentelekomcloud_rts_stack_v1.stack_1", "name", "terraform_provider_stack"),
-					resource.TestCheckResourceAttr(
-						"opentelekomcloud_rts_stack_v1.stack_1", "status", "CREATE_COMPLETE"),
-					resource.TestCheckResourceAttr(
-						"opentelekomcloud_rts_stack_v1.stack_1", "disable_rollback", "true"),
-					resource.TestCheckResourceAttr(
-						"opentelekomcloud_rts_stack_v1.stack_1", "timeout_mins", "60"),
+					testAccCheckRTSStackV1Exists(stackResourceName, &stack),
+					resource.TestCheckResourceAttr(stackResourceName, "name", "terraform_provider_stack"),
+					resource.TestCheckResourceAttr(stackResourceName, "status", "CREATE_COMPLETE"),
+					resource.TestCheckResourceAttr(stackResourceName, "disable_rollback", "true"),
+					resource.TestCheckResourceAttr(stackResourceName, "timeout_mins", "60"),
 				),
 			},
 			{
-				Config: testAccRTSStackV1_update,
+				Config: testAccRTSStackV1Update,
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckOTCRTSStackV1Exists("opentelekomcloud_rts_stack_v1.stack_1", &stacks),
-					resource.TestCheckResourceAttr(
-						"opentelekomcloud_rts_stack_v1.stack_1", "disable_rollback", "false"),
-					resource.TestCheckResourceAttr(
-						"opentelekomcloud_rts_stack_v1.stack_1", "timeout_mins", "50"),
-					resource.TestCheckResourceAttr(
-						"opentelekomcloud_rts_stack_v1.stack_1", "status", "UPDATE_COMPLETE"),
+					testAccCheckRTSStackV1Exists(stackResourceName, &stack),
+					resource.TestCheckResourceAttr(stackResourceName, "disable_rollback", "false"),
+					resource.TestCheckResourceAttr(stackResourceName, "timeout_mins", "50"),
+					resource.TestCheckResourceAttr(stackResourceName, "status", "UPDATE_COMPLETE"),
 				),
 			},
 		},
 	})
 }
 
-func TestAccOTCRTSStackV1_timeout(t *testing.T) {
-	var stacks stacks.RetrievedStack
+func TestAccRTSStackV1_timeout(t *testing.T) {
+	var stack stacks.RetrievedStack
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:          func() { common.TestAccPreCheck(t) },
 		ProviderFactories: common.TestAccProviderFactories,
-		CheckDestroy:      testAccCheckOTCRTSStackV1Destroy,
+		CheckDestroy:      testAccCheckRTSStackV1Destroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccRTSStackV1_timeout,
+				Config: testAccRTSStackV1Timeout,
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckOTCRTSStackV1Exists("opentelekomcloud_rts_stack_v1.stack_1", &stacks),
+					testAccCheckRTSStackV1Exists(stackResourceName, &stack),
 				),
 			},
 		},
 	})
 }
 
-func testAccCheckOTCRTSStackV1Destroy(s *terraform.State) error {
+func testAccCheckRTSStackV1Destroy(s *terraform.State) error {
 	config := common.TestAccProvider.Meta().(*cfg.Config)
 	orchestrationClient, err := config.OrchestrationV1Client(env.OS_REGION_NAME)
 	if err != nil {
@@ -94,7 +89,7 @@ func testAccCheckOTCRTSStackV1Destroy(s *terraform.State) error {
 	return nil
 }
 
-func testAccCheckOTCRTSStackV1Exists(n string, stack *stacks.RetrievedStack) resource.TestCheckFunc {
+func testAccCheckRTSStackV1Exists(n string, stack *stacks.RetrievedStack) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
 		rs, ok := s.RootModule().Resources[n]
 		if !ok {
@@ -126,7 +121,8 @@ func testAccCheckOTCRTSStackV1Exists(n string, stack *stacks.RetrievedStack) res
 	}
 }
 
-const testAccRTSStackV1_basic = `
+const (
+	testAccRTSStackV1Basic = `
 resource "opentelekomcloud_rts_stack_v1" "stack_1" {
   name = "terraform_provider_stack"
   disable_rollback= true
@@ -146,7 +142,7 @@ resource "opentelekomcloud_rts_stack_v1" "stack_1" {
     "parameters": {
       "key_name": {
         "type": "string",
-  		"default": "keysclick",
+        "default": "keysclick",
         "description": "Name of existing key pair for the instance to be created."
       }
     },
@@ -163,8 +159,7 @@ JSON
 
 }
 `
-
-const testAccRTSStackV1_update = `
+	testAccRTSStackV1Update = `
 resource "opentelekomcloud_rts_stack_v1" "stack_1" {
   name = "terraform_provider_stack"
   disable_rollback= false
@@ -184,7 +179,7 @@ resource "opentelekomcloud_rts_stack_v1" "stack_1" {
     "parameters": {
       "key_name": {
         "type": "string",
-  		"default": "keysclick",
+        "default": "keysclick",
         "description": "Name of existing key pair for the instance to be created."
       }
     },
@@ -201,7 +196,7 @@ JSON
 
 }
 `
-const testAccRTSStackV1_timeout = `
+	testAccRTSStackV1Timeout = `
 resource "opentelekomcloud_rts_stack_v1" "stack_1" {
   name = "terraform_provider_stack"
   disable_rollback= true
@@ -222,7 +217,7 @@ resource "opentelekomcloud_rts_stack_v1" "stack_1" {
     "parameters": {
       "key_name": {
         "type": "string",
-  		"default": "keysclick",
+        "default": "keysclick",
         "description": "Name of existing key pair for the instance to be created."
       }
     },
@@ -243,3 +238,4 @@ JSON
   }
 }
 `
+)

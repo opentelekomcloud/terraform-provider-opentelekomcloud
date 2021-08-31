@@ -14,7 +14,9 @@ import (
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common/cfg"
 )
 
-func TestAccOTCRtsSoftwareConfigV1_basic(t *testing.T) {
+const configResourceName = "opentelekomcloud_rts_software_config_v1.config_1"
+
+func TestAccRTSSoftwareConfigV1_basic(t *testing.T) {
 	var config softwareconfig.SoftwareConfig
 
 	resource.Test(t, resource.TestCase{
@@ -23,20 +25,18 @@ func TestAccOTCRtsSoftwareConfigV1_basic(t *testing.T) {
 		CheckDestroy:      testAccCheckRtsSoftwareConfigV1Destroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccRtsSoftwareConfigV1_basic,
+				Config: testAccRtsSoftwareConfigV1Basic,
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckRtsSoftwareConfigV1Exists("opentelekomcloud_rts_software_config_v1.config_1", &config),
-					resource.TestCheckResourceAttr(
-						"opentelekomcloud_rts_software_config_v1.config_1", "name", "opentelekomcloud-config"),
-					resource.TestCheckResourceAttr(
-						"opentelekomcloud_rts_software_config_v1.config_1", "group", "script"),
+					testAccCheckRtsSoftwareConfigV1Exists(configResourceName, &config),
+					resource.TestCheckResourceAttr(configResourceName, "name", "opentelekomcloud-config"),
+					resource.TestCheckResourceAttr(configResourceName, "group", "script"),
 				),
 			},
 		},
 	})
 }
 
-func TestAccOTCRtsSoftwareConfigV1_timeout(t *testing.T) {
+func TestAccRTSSoftwareConfigV1_timeout(t *testing.T) {
 	var config softwareconfig.SoftwareConfig
 
 	resource.Test(t, resource.TestCase{
@@ -45,9 +45,9 @@ func TestAccOTCRtsSoftwareConfigV1_timeout(t *testing.T) {
 		CheckDestroy:      testAccCheckRtsSoftwareConfigV1Destroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccRtsSoftwareConfigV1_timeout,
+				Config: testAccRtsSoftwareConfigV1Timeout,
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckRtsSoftwareConfigV1Exists("opentelekomcloud_rts_software_config_v1.config_1", &config),
+					testAccCheckRtsSoftwareConfigV1Exists(configResourceName, &config),
 				),
 			},
 		},
@@ -107,7 +107,8 @@ func testAccCheckRtsSoftwareConfigV1Exists(n string, configs *softwareconfig.Sof
 	}
 }
 
-const testAccRtsSoftwareConfigV1_basic = `
+const (
+	testAccRtsSoftwareConfigV1Basic = `
 resource "opentelekomcloud_rts_software_config_v1" "config_1" {
   name = "opentelekomcloud-config"
   output_values = [{
@@ -125,8 +126,7 @@ resource "opentelekomcloud_rts_software_config_v1" "config_1" {
   group = "script"
 }
 `
-
-const testAccRtsSoftwareConfigV1_timeout = `
+	testAccRtsSoftwareConfigV1Timeout = `
 resource "opentelekomcloud_rts_software_config_v1" "config_1" {
   name = "opentelekomcloud-config"
   output_values = [{
@@ -148,3 +148,4 @@ resource "opentelekomcloud_rts_software_config_v1" "config_1" {
   }
 }
 `
+)
