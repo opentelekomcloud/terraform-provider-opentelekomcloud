@@ -236,6 +236,7 @@ func Provider() *schema.Provider {
 			"opentelekomcloud_compute_bms_keypairs_v2":         bms.DataSourceBMSKeyPairV2(),
 			"opentelekomcloud_compute_bms_nic_v2":              bms.DataSourceBMSNicV2(),
 			"opentelekomcloud_compute_bms_server_v2":           bms.DataSourceBMSServersV2(),
+			"opentelekomcloud_compute_flavor_v2":               ecs.DataSourceComputeFlavorV2(),
 			"opentelekomcloud_csbs_backup_v1":                  csbs.DataSourceCSBSBackupV1(),
 			"opentelekomcloud_csbs_backup_policy_v1":           csbs.DataSourceCSBSBackupPolicyV1(),
 			"opentelekomcloud_css_flavor_v1":                   css.DataSourceCSSFlavorV1(),
