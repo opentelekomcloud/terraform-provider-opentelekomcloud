@@ -2,7 +2,9 @@ package ecs
 
 import (
 	"context"
+	"fmt"
 	"log"
+	"strings"
 
 	"github.com/hashicorp/go-multierror"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
@@ -65,6 +67,10 @@ func DataSourceComputeFlavorV2() *schema.Resource {
 			},
 			"is_public": {
 				Type:     schema.TypeBool,
+				Optional: true,
+			},
+			"availability_zone": {
+				Type:     schema.TypeString,
 				Optional: true,
 			},
 			"extra_specs": {
@@ -156,6 +162,23 @@ func dataSourceComputeFlavorV2Read(_ context.Context, d *schema.ResourceData, me
 				if flavor.RxTxFactor != v.(float64) {
 					continue
 				}
+			}
+
+			if v, ok := d.GetOk("availability_zone"); ok {
+				es, err := flavors.ListExtraSpecs(client, flavor.ID).Extract()
+				if err != nil {
+					return diag.FromErr(err)
+				}
+				if azAvailability, okCond := es["cond:operation:az"]; okCond {
+					zones := strings.Split(azAvailability, ",")
+					for _, zone := range zones {
+						if zone != fmt.Sprintf("%s(normal)", v.(string)) {
+							continue
+						}
+						break
+					}
+				}
+				continue
 			}
 
 			filteredFlavors = append(filteredFlavors, flavor)
