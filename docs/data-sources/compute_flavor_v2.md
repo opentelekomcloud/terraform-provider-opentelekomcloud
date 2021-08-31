@@ -9,9 +9,10 @@ Use this data source to get the ID of an available OpenTelekomCloud flavor.
 ## Example Usage
 
 ```hcl
-data "opentelekomcloud_compute_flavor_v2" "small" {
-  vcpus = 1
-  ram   = 4096
+data "opentelekomcloud_compute_flavor_v2" "medium-s2" {
+  vcpus         = 1
+  ram           = 4096
+  resource_type = "IOoptimizedS2"
 }
 ```
 
@@ -34,6 +35,8 @@ data "opentelekomcloud_compute_flavor_v2" "small" {
   with the `flavor_id`.
 
 * `availability_zone` - (Optional) Whether flavor should be in `normal` state.
+
+* `resource_type` - (Optional) Flavor resource type.
 
 * `disk` - (Optional) The exact amount of disk (in gigabytes).
 

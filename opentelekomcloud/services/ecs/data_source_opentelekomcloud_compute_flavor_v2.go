@@ -73,6 +73,10 @@ func DataSourceComputeFlavorV2() *schema.Resource {
 				Type:     schema.TypeString,
 				Optional: true,
 			},
+			"resource_type": {
+				Type:     schema.TypeString,
+				Optional: true,
+			},
 			"extra_specs": {
 				Type:     schema.TypeMap,
 				Computed: true,
@@ -164,11 +168,20 @@ func dataSourceComputeFlavorV2Read(_ context.Context, d *schema.ResourceData, me
 				}
 			}
 
-			if v, ok := d.GetOk("availability_zone"); ok {
-				es, err := flavors.ListExtraSpecs(client, flavor.ID).Extract()
-				if err != nil {
-					return diag.FromErr(err)
+			es, err := flavors.ListExtraSpecs(client, flavor.ID).Extract()
+			if err != nil {
+				return diag.FromErr(err)
+			}
+
+			if v, ok := d.GetOk("resource_type"); ok {
+				if resourceType, okType := es["resource_type"]; okType {
+					if resourceType != v.(string) {
+						continue
+					}
 				}
+			}
+
+			if v, ok := d.GetOk("availability_zone"); ok {
 				if azAvailability, okCond := es["cond:operation:az"]; okCond {
 					zones := strings.Split(azAvailability, ",")
 					for _, zone := range zones {
