@@ -205,12 +205,6 @@ func dataSourceComputeFlavorV2Read(_ context.Context, d *schema.ResourceData, me
 			"Please change your search criteria and try again.")
 	}
 
-	if len(allFlavors) > 1 {
-		log.Printf("[DEBUG] Multiple results found: %#v", allFlavors)
-		return fmterr.Errorf("Your query returned more than one result. " +
-			"Please try a more specific search criteria")
-	}
-
 	flavor := allFlavors[0]
 
 	log.Printf("[DEBUG] Retrieved opentelekomcloud_compute_flavor_v2 %s: %#v", flavor.ID, flavor)
