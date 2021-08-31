@@ -18,6 +18,8 @@ data "opentelekomcloud_compute_flavor_v2" "medium-s2" {
 
 ## Argument Reference
 
+-> If multiple flavors have found only the first will be returned.
+
 * `region` - (Optional) The region in which to obtain the V2 Compute client.
   If omitted, the `region` argument of the provider is used.
 
