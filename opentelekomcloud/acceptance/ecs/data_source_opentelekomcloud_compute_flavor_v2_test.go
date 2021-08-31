@@ -25,7 +25,6 @@ func TestAccComputeV2FlavorDataSource_basic(t *testing.T) {
 					resource.TestCheckResourceAttr(dataFlavorName, "disk", "40"),
 					resource.TestCheckResourceAttr(dataFlavorName, "vcpus", "32"),
 					resource.TestCheckResourceAttr(dataFlavorName, "rx_tx_factor", "1"),
-					resource.TestCheckResourceAttr(dataFlavorName, "is_public", "true"),
 				),
 			},
 		},
@@ -46,7 +45,6 @@ func TestAccComputeV2FlavorDataSource_testQueries(t *testing.T) {
 					resource.TestCheckResourceAttr(dataFlavorName, "disk", "40"),
 					resource.TestCheckResourceAttr(dataFlavorName, "vcpus", "32"),
 					resource.TestCheckResourceAttr(dataFlavorName, "rx_tx_factor", "1"),
-					resource.TestCheckResourceAttr(dataFlavorName, "is_public", "true"),
 				),
 			},
 			{
@@ -58,7 +56,6 @@ func TestAccComputeV2FlavorDataSource_testQueries(t *testing.T) {
 					resource.TestCheckResourceAttr(dataFlavorName, "disk", "40"),
 					resource.TestCheckResourceAttr(dataFlavorName, "vcpus", "32"),
 					resource.TestCheckResourceAttr(dataFlavorName, "rx_tx_factor", "1"),
-					resource.TestCheckResourceAttr(dataFlavorName, "is_public", "true"),
 				),
 			},
 			{
@@ -70,7 +67,6 @@ func TestAccComputeV2FlavorDataSource_testQueries(t *testing.T) {
 					resource.TestCheckResourceAttr(dataFlavorName, "disk", "40"),
 					resource.TestCheckResourceAttr(dataFlavorName, "vcpus", "32"),
 					resource.TestCheckResourceAttr(dataFlavorName, "rx_tx_factor", "1"),
-					resource.TestCheckResourceAttr(dataFlavorName, "is_public", "true"),
 				),
 			},
 			{
@@ -82,7 +78,6 @@ func TestAccComputeV2FlavorDataSource_testQueries(t *testing.T) {
 					resource.TestCheckResourceAttr(dataFlavorName, "disk", "40"),
 					resource.TestCheckResourceAttr(dataFlavorName, "vcpus", "32"),
 					resource.TestCheckResourceAttr(dataFlavorName, "rx_tx_factor", "1"),
-					resource.TestCheckResourceAttr(dataFlavorName, "is_public", "true"),
 				),
 			},
 		},

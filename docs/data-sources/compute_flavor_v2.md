@@ -46,8 +46,6 @@ data "opentelekomcloud_compute_flavor_v2" "medium-s2" {
 
 * `rx_tx_factor` - (Optional) The `rx_tx_factor` of the flavor.
 
-* `is_public` - (Optional) The flavor visibility.
-
 ## Attributes Reference
 
 `id` is set to the ID of the found flavor. In addition, the following attributes

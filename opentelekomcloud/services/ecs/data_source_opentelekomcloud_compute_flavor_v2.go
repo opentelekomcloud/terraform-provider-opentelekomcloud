@@ -65,10 +65,6 @@ func DataSourceComputeFlavorV2() *schema.Resource {
 				Type:     schema.TypeFloat,
 				Optional: true,
 			},
-			"is_public": {
-				Type:     schema.TypeBool,
-				Optional: true,
-			},
 			"availability_zone": {
 				Type:     schema.TypeString,
 				Optional: true,
@@ -83,6 +79,22 @@ func DataSourceComputeFlavorV2() *schema.Resource {
 			},
 		},
 	}
+}
+
+func checkAZExtraOption(es map[string]string, az string) bool {
+	zoneNormalState := fmt.Sprintf("%s(normal)", az)
+
+	if azProperty, ok := es["cond:operation:az"]; ok {
+		zones := strings.Split(azProperty, ",")
+		for _, zone := range zones {
+			if zone != zoneNormalState {
+				continue
+			}
+			return true
+		}
+	}
+
+	return false
 }
 
 func dataSourceComputeFlavorV2Read(_ context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
@@ -104,14 +116,9 @@ func dataSourceComputeFlavorV2Read(_ context.Context, d *schema.ResourceData, me
 
 		allFlavors = append(allFlavors, *flavor)
 	} else {
-		accessType := flavors.AllAccess
-		if isPublic, ok := d.GetOk("is_public"); ok {
-			accessType = isPublic.(flavors.AccessType)
-		}
 		listOpts := flavors.ListOpts{
-			MinDisk:    d.Get("min_disk").(int),
-			MinRAM:     d.Get("min_ram").(int),
-			AccessType: accessType,
+			MinDisk: d.Get("min_disk").(int),
+			MinRAM:  d.Get("min_ram").(int),
 		}
 
 		log.Printf("[DEBUG] opentelekoncloud_compute_flavor_v2 ListOpts: %#v", listOpts)
@@ -182,16 +189,9 @@ func dataSourceComputeFlavorV2Read(_ context.Context, d *schema.ResourceData, me
 			}
 
 			if v, ok := d.GetOk("availability_zone"); ok {
-				if azAvailability, okCond := es["cond:operation:az"]; okCond {
-					zones := strings.Split(azAvailability, ",")
-					for _, zone := range zones {
-						if zone != fmt.Sprintf("%s(normal)", v.(string)) {
-							continue
-						}
-						break
-					}
+				if !checkAZExtraOption(es, v.(string)) {
+					continue
 				}
-				continue
 			}
 
 			filteredFlavors = append(filteredFlavors, flavor)
@@ -224,7 +224,6 @@ func dataSourceComputeFlavorV2Read(_ context.Context, d *schema.ResourceData, me
 		d.Set("rx_tx_factor", flavor.RxTxFactor),
 		d.Set("swap", flavor.Swap),
 		d.Set("vcpus", flavor.VCPUs),
-		d.Set("is_public", flavor.IsPublic),
 	)
 	if err := mErr.ErrorOrNil(); err != nil {
 		return diag.FromErr(err)
