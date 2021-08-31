@@ -90,10 +90,12 @@ func testCESAlarmRuleExists(n string, ar *alarmrule.AlarmRule) resource.TestChec
 }
 
 var testCESAlarmRuleBasic = fmt.Sprintf(`
+%s
+
 resource "opentelekomcloud_compute_instance_v2" "vm_1" {
   name = "instance_1"
   network {
-    uuid = "%s"
+    uuid = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.network_id
   }
 }
 
@@ -130,13 +132,15 @@ resource "opentelekomcloud_ces_alarmrule" "alarmrule_1" {
     ]
   }
 }
-`, env.OS_NETWORK_ID)
+`, common.DataSourceSubnet)
 
 var testCESAlarmRuleUpdate = fmt.Sprintf(`
+%s
+
 resource "opentelekomcloud_compute_instance_v2" "vm_1" {
   name = "instance_1"
   network {
-    uuid = "%s"
+    uuid = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.network_id
   }
 }
 
@@ -174,4 +178,4 @@ resource "opentelekomcloud_ces_alarmrule" "alarmrule_1" {
     ]
   }
 }
-`, env.OS_NETWORK_ID)
+`, common.DataSourceSubnet)
