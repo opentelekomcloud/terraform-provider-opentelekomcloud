@@ -11,7 +11,7 @@ Use this data source to get the ID of an available OpenTelekomCloud flavor.
 ```hcl
 data "opentelekomcloud_compute_flavor_v2" "small" {
   vcpus = 1
-  ram   = 512
+  ram   = 4096
 }
 ```
 
@@ -33,6 +33,8 @@ data "opentelekomcloud_compute_flavor_v2" "small" {
 * `min_disk` - (Optional) The minimum amount of disk (in gigabytes). Conflicts
   with the `flavor_id`.
 
+* `availability_zone` - (Optional) Whether flavor should be in `normal` state.
+
 * `disk` - (Optional) The exact amount of disk (in gigabytes).
 
 * `vcpus` - (Optional) The amount of VCPUs.
@@ -42,7 +44,6 @@ data "opentelekomcloud_compute_flavor_v2" "small" {
 * `rx_tx_factor` - (Optional) The `rx_tx_factor` of the flavor.
 
 * `is_public` - (Optional) The flavor visibility.
-
 
 ## Attributes Reference
 
