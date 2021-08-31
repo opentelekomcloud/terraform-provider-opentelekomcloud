@@ -9,6 +9,7 @@ import (
 var (
 	OS_FLAVOR_ID         = os.Getenv("OS_FLAVOR_ID")
 	OS_FLAVOR_NAME       = os.Getenv("OS_FLAVOR_NAME")
+	OsFlavorID           = flavorID()
 	OS_IMAGE_ID          = os.Getenv("OS_IMAGE_ID")
 	OsImageName          = imageName()
 	OS_NETWORK_ID        = os.Getenv("OS_NETWORK_ID")
@@ -30,6 +31,13 @@ var (
 	OS_TENANT_NAME       = GetTenantName()
 	OS_TENANT_ID         = os.Getenv("OS_TENANT_ID")
 )
+
+func flavorID() string {
+	if f := os.Getenv("OS_FLAVOR_ID"); f != "" {
+		return f
+	}
+	return "s2.xlarge.4" // 4 vCPUs + 16GB RAM
+}
 
 func extNetworkName() string {
 	if nw := os.Getenv("OS_EXT_NETWORK_NAME"); nw != "" {
