@@ -53,7 +53,7 @@ func TestAccComputeV2FlavorDataSource_testQueries(t *testing.T) {
 				Config: testAccComputeV2FlavorDataSourceQueryMinDisk,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckComputeV2FlavorDataSourceID(dataFlavorName),
-					resource.TestCheckResourceAttr(dataFlavorName, "name", "m1.acctest"),
+					resource.TestCheckResourceAttr(dataFlavorName, "name", "hl1.8xlarge.8"),
 					resource.TestCheckResourceAttr(dataFlavorName, "ram", "262144"),
 					resource.TestCheckResourceAttr(dataFlavorName, "disk", "40"),
 					resource.TestCheckResourceAttr(dataFlavorName, "vcpus", "32"),
