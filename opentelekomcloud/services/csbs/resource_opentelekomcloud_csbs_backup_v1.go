@@ -11,6 +11,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	golangsdk "github.com/opentelekomcloud/gophertelekomcloud"
+	"github.com/opentelekomcloud/gophertelekomcloud/openstack/common/tags"
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/csbs/v1/backup"
 
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common/cfg"
@@ -195,8 +196,7 @@ func ResourceCSBSBackupV1() *schema.Resource {
 
 func resourceCSBSBackupV1Create(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*cfg.Config)
-	backupClient, err := config.CsbsV1Client(config.GetRegion(d))
-
+	client, err := config.CsbsV1Client(config.GetRegion(d))
 	if err != nil {
 		return fmterr.Errorf("error creating csbs client: %s", err)
 	}
@@ -213,7 +213,7 @@ func resourceCSBSBackupV1Create(ctx context.Context, d *schema.ResourceData, met
 		},
 	}
 
-	query, err := backup.QueryResourceBackupCapability(backupClient, queryOpts).ExtractQueryResponse()
+	query, err := backup.QueryResourceBackupCapability(client, queryOpts).ExtractQueryResponse()
 	if err != nil {
 		return fmterr.Errorf("error querying resource backup capability: %s", err)
 	}
@@ -226,14 +226,13 @@ func resourceCSBSBackupV1Create(ctx context.Context, d *schema.ResourceData, met
 			Tags:         resourceCSBSTagsV1(d),
 		}
 
-		checkpoint, err := backup.Create(backupClient, resourceID, createOpts).Extract()
+		checkpoint, err := backup.Create(client, resourceID, createOpts).Extract()
 		if err != nil {
 			return fmterr.Errorf("error creating backup: %s", err)
 		}
 
 		backupOpts := backup.ListOpts{CheckpointId: checkpoint.Id}
-		backupItems, err := backup.List(backupClient, backupOpts)
-
+		backupItems, err := backup.List(client, backupOpts)
 		if err != nil {
 			return fmterr.Errorf("error listing Backup: %s", err)
 		}
@@ -251,7 +250,7 @@ func resourceCSBSBackupV1Create(ctx context.Context, d *schema.ResourceData, met
 		stateConf := &resource.StateChangeConf{
 			Pending:    []string{"protecting"},
 			Target:     []string{"available"},
-			Refresh:    waitForCSBSBackupActive(backupClient, d.Id()),
+			Refresh:    waitForCSBSBackupActive(client, d.Id()),
 			Timeout:    d.Timeout(schema.TimeoutCreate),
 			Delay:      3 * time.Minute,
 			MinTimeout: 3 * time.Minute,
@@ -271,12 +270,12 @@ func resourceCSBSBackupV1Create(ctx context.Context, d *schema.ResourceData, met
 
 func resourceCSBSBackupV1Read(_ context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*cfg.Config)
-	backupClient, err := config.CsbsV1Client(config.GetRegion(d))
+	client, err := config.CsbsV1Client(config.GetRegion(d))
 	if err != nil {
 		return fmterr.Errorf("error creating csbs client: %s", err)
 	}
 
-	backupObject, err := backup.Get(backupClient, d.Id()).ExtractBackup()
+	backupObject, err := backup.Get(client, d.Id()).Extract()
 
 	if err != nil {
 		if _, ok := err.(golangsdk.ErrDefault404); ok {
@@ -312,7 +311,7 @@ func resourceCSBSBackupV1Read(_ context.Context, d *schema.ResourceData, meta in
 
 func resourceCSBSBackupV1Delete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*cfg.Config)
-	backupClient, err := config.CsbsV1Client(config.GetRegion(d))
+	client, err := config.CsbsV1Client(config.GetRegion(d))
 	if err != nil {
 		return fmterr.Errorf("error creating csbs client: %s", err)
 	}
@@ -320,7 +319,7 @@ func resourceCSBSBackupV1Delete(ctx context.Context, d *schema.ResourceData, met
 	stateConf := &resource.StateChangeConf{
 		Pending:    []string{"available", "deleting"},
 		Target:     []string{"deleted"},
-		Refresh:    waitForCSBSBackupDelete(backupClient, d.Id(), d.Get("backup_record_id").(string)),
+		Refresh:    waitForCSBSBackupDelete(client, d.Id(), d.Get("backup_record_id").(string)),
 		Timeout:    d.Timeout(schema.TimeoutDelete),
 		Delay:      5 * time.Second,
 		MinTimeout: 3 * time.Second,
@@ -335,9 +334,9 @@ func resourceCSBSBackupV1Delete(ctx context.Context, d *schema.ResourceData, met
 	return nil
 }
 
-func waitForCSBSBackupActive(backupClient *golangsdk.ServiceClient, backupId string) resource.StateRefreshFunc {
+func waitForCSBSBackupActive(client *golangsdk.ServiceClient, backupId string) resource.StateRefreshFunc {
 	return func() (interface{}, string, error) {
-		n, err := backup.Get(backupClient, backupId).ExtractBackup()
+		n, err := backup.Get(client, backupId).Extract()
 		if err != nil {
 			return nil, "", err
 		}
@@ -350,9 +349,9 @@ func waitForCSBSBackupActive(backupClient *golangsdk.ServiceClient, backupId str
 	}
 }
 
-func waitForCSBSBackupDelete(backupClient *golangsdk.ServiceClient, backupId string, backupRecordID string) resource.StateRefreshFunc {
+func waitForCSBSBackupDelete(client *golangsdk.ServiceClient, backupId string, backupRecordID string) resource.StateRefreshFunc {
 	return func() (interface{}, string, error) {
-		r, err := backup.Get(backupClient, backupId).ExtractBackup()
+		r, err := backup.Get(client, backupId).Extract()
 		if err != nil {
 			if _, ok := err.(golangsdk.ErrDefault404); ok {
 				log.Printf("[INFO] Successfully deleted csbs backup %s", backupId)
@@ -361,7 +360,7 @@ func waitForCSBSBackupDelete(backupClient *golangsdk.ServiceClient, backupId str
 			return r, "deleting", err
 		}
 
-		err = backup.Delete(backupClient, backupRecordID).Err
+		err = backup.Delete(client, backupRecordID).Err
 
 		if err != nil {
 			if _, ok := err.(golangsdk.ErrDefault404); ok {
@@ -384,17 +383,17 @@ func waitForCSBSBackupDelete(backupClient *golangsdk.ServiceClient, backupId str
 	}
 }
 
-func resourceCSBSTagsV1(d *schema.ResourceData) []backup.ResourceTag {
+func resourceCSBSTagsV1(d *schema.ResourceData) []tags.ResourceTag {
 	rawTags := d.Get("tags").(*schema.Set).List()
-	tags := make([]backup.ResourceTag, len(rawTags))
+	tagList := make([]tags.ResourceTag, len(rawTags))
 	for i, raw := range rawTags {
 		rawMap := raw.(map[string]interface{})
-		tags[i] = backup.ResourceTag{
+		tagList[i] = tags.ResourceTag{
 			Key:   rawMap["key"].(string),
 			Value: rawMap["value"].(string),
 		}
 	}
-	return tags
+	return tagList
 }
 
 func flattenCSBSVolumeBackups(backupObject *backup.Backup) []map[string]interface{} {
