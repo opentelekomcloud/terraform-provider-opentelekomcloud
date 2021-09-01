@@ -3,6 +3,7 @@ package rds
 import (
 	"context"
 	"log"
+	"strconv"
 	"strings"
 	"time"
 
@@ -448,7 +449,7 @@ func resourceInstanceRead(_ context.Context, d *schema.ResourceData, meta interf
 			"[DEBUG] Error saving volume to Rds instance (%s): %s", d.Id(), err)
 	}
 
-	mErr = multierror.Append(mErr, d.Set("dbport", instance.DbPort))
+	mErr = multierror.Append(mErr, d.Set("dbport", strconv.Itoa(instance.DbPort)))
 
 	datastoreList := make([]map[string]interface{}, 0, 1)
 	datastore := map[string]interface{}{
