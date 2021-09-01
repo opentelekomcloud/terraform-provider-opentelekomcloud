@@ -14,6 +14,8 @@ import (
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common/cfg"
 )
 
+const instanceV1ResourceName = "opentelekomcloud_rds_instance_v1.instance"
+
 func TestAccRDSV1Instance_basic(t *testing.T) {
 	var instance instances.Instance
 
@@ -25,13 +27,10 @@ func TestAccRDSV1Instance_basic(t *testing.T) {
 			{
 				Config: testAccSInstanceV1ConfigBasic,
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckRDSV1InstanceExists("opentelekomcloud_rds_instance_v1.instance", &instance),
-					resource.TestCheckResourceAttr(
-						"opentelekomcloud_rds_instance_v1.instance", "status", "ACTIVE"),
-					resource.TestCheckResourceAttr(
-						"opentelekomcloud_rds_instance_v1.instance", "region", "eu-de"),
-					resource.TestCheckResourceAttr(
-						"opentelekomcloud_rds_instance_v1.instance", "availabilityzone", "eu-de-01"),
+					testAccCheckRDSV1InstanceExists(instanceV1ResourceName, &instance),
+					resource.TestCheckResourceAttr(instanceV1ResourceName, "status", "ACTIVE"),
+					resource.TestCheckResourceAttr(instanceV1ResourceName, "region", "eu-de"),
+					resource.TestCheckResourceAttr(instanceV1ResourceName, "availabilityzone", "eu-de-01"),
 					testAccCheckRDSV1InstanceTag(&instance, "foo", "bar"),
 					testAccCheckRDSV1InstanceTag(&instance, "key", "value"),
 				),
@@ -39,7 +38,7 @@ func TestAccRDSV1Instance_basic(t *testing.T) {
 			{
 				Config: testAccSInstanceV1ConfigUpdatetag,
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckRDSV1InstanceExists("opentelekomcloud_rds_instance_v1.instance", &instance),
+					testAccCheckRDSV1InstanceExists(instanceV1ResourceName, &instance),
 					testAccCheckRDSV1InstanceTag(&instance, "foo2", "bar2"),
 					testAccCheckRDSV1InstanceTag(&instance, "key", "value2"),
 				),
@@ -47,14 +46,14 @@ func TestAccRDSV1Instance_basic(t *testing.T) {
 			{
 				Config: testAccSInstanceV1ConfigNoTags,
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckRDSV1InstanceExists("opentelekomcloud_rds_instance_v1.instance", &instance),
+					testAccCheckRDSV1InstanceExists(instanceV1ResourceName, &instance),
 					testAccCheckRDSV1InstanceNoTag(&instance),
 				),
 			},
 			{
 				Config: testAccSInstanceV1ConfigBasic,
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckRDSV1InstanceExists("opentelekomcloud_rds_instance_v1.instance", &instance),
+					testAccCheckRDSV1InstanceExists(instanceV1ResourceName, &instance),
 					testAccCheckRDSV1InstanceTag(&instance, "foo", "bar"),
 					testAccCheckRDSV1InstanceTag(&instance, "key", "value"),
 				),
@@ -171,6 +170,9 @@ func testAccCheckRDSV1InstanceNoTag(
 }
 
 var testAccSInstanceV1ConfigBasic = fmt.Sprintf(`
+%s
+%s
+
 data "opentelekomcloud_rds_flavors_v1" "flavor" {
     region = "eu-de"
     datastore_name = "PostgreSQL"
@@ -195,9 +197,9 @@ resource "opentelekomcloud_rds_instance_v1" "instance" {
   }
   region = "eu-de"
   availabilityzone = "eu-de-01"
-  vpc = "%s"
+  vpc = data.opentelekomcloud_vpc_v1.shared_vpc.id
   nics {
-    subnetid = "%s"
+    subnetid = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.id
   }
   securitygroup {
     id = opentelekomcloud_networking_secgroup_v2.sg.id
@@ -217,9 +219,12 @@ resource "opentelekomcloud_rds_instance_v1" "instance" {
     key = "value"
   }
   depends_on = ["opentelekomcloud_networking_secgroup_v2.sg"]
-}`, env.OS_VPC_ID, env.OS_NETWORK_ID)
+}`, common.DataSourceVPC, common.DataSourceSubnet)
 
 var testAccSInstanceV1ConfigUpdatetag = fmt.Sprintf(`
+%s
+%s
+
 data "opentelekomcloud_rds_flavors_v1" "flavor" {
     region = "eu-de"
     datastore_name = "PostgreSQL"
@@ -244,9 +249,9 @@ resource "opentelekomcloud_rds_instance_v1" "instance" {
   }
   region = "eu-de"
   availabilityzone = "eu-de-01"
-  vpc = "%s"
+  vpc = data.opentelekomcloud_vpc_v1.shared_vpc.id
   nics {
-    subnetid = "%s"
+    subnetid = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.id
   }
   securitygroup {
     id = opentelekomcloud_networking_secgroup_v2.sg.id
@@ -266,9 +271,12 @@ resource "opentelekomcloud_rds_instance_v1" "instance" {
     key = "value2"
   }
   depends_on = ["opentelekomcloud_networking_secgroup_v2.sg"]
-}`, env.OS_VPC_ID, env.OS_NETWORK_ID)
+}`, common.DataSourceVPC, common.DataSourceSubnet)
 
 var testAccSInstanceV1ConfigNoTags = fmt.Sprintf(`
+%s
+%s
+
 data "opentelekomcloud_rds_flavors_v1" "flavor" {
     region = "eu-de"
     datastore_name = "PostgreSQL"
@@ -293,9 +301,9 @@ resource "opentelekomcloud_rds_instance_v1" "instance" {
   }
   region = "eu-de"
   availabilityzone = "eu-de-01"
-  vpc = "%s"
+  vpc = data.opentelekomcloud_vpc_v1.shared_vpc.id
   nics {
-    subnetid = "%s"
+    subnetid = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.id
   }
   securitygroup {
     id = opentelekomcloud_networking_secgroup_v2.sg.id
@@ -311,4 +319,4 @@ resource "opentelekomcloud_rds_instance_v1" "instance" {
     replicationmode = "async"
   }
   depends_on = ["opentelekomcloud_networking_secgroup_v2.sg"]
-}`, env.OS_VPC_ID, env.OS_NETWORK_ID)
+}`, common.DataSourceVPC, common.DataSourceSubnet)

@@ -15,6 +15,8 @@ import (
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common/cfg"
 )
 
+const pgResourceName = "opentelekomcloud_rds_parametergroup_v3.pg_1"
+
 func TestAccRdsConfigurationV3_basic(t *testing.T) {
 	var config configurations.Configuration
 
@@ -24,23 +26,19 @@ func TestAccRdsConfigurationV3_basic(t *testing.T) {
 		CheckDestroy:      testAccCheckRdsConfigV3Destroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccRdsConfigV3_basic,
+				Config: testAccRdsConfigV3Basic,
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckRdsConfigV3Exists("opentelekomcloud_rds_parametergroup_v3.pg_1", &config),
-					resource.TestCheckResourceAttr(
-						"opentelekomcloud_rds_parametergroup_v3.pg_1", "name", "pg_create"),
-					resource.TestCheckResourceAttr(
-						"opentelekomcloud_rds_parametergroup_v3.pg_1", "description", "some description"),
+					testAccCheckRdsConfigV3Exists(pgResourceName, &config),
+					resource.TestCheckResourceAttr(pgResourceName, "name", "pg_create"),
+					resource.TestCheckResourceAttr(pgResourceName, "description", "some description"),
 				),
 			},
 			{
-				Config: testAccRdsConfigV3_update,
+				Config: testAccRdsConfigV3Update,
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckRdsConfigV3Exists("opentelekomcloud_rds_parametergroup_v3.pg_1", &config),
-					resource.TestCheckResourceAttr(
-						"opentelekomcloud_rds_parametergroup_v3.pg_1", "name", "pg_update"),
-					resource.TestCheckResourceAttr(
-						"opentelekomcloud_rds_parametergroup_v3.pg_1", "description", "updated description"),
+					testAccCheckRdsConfigV3Exists(pgResourceName, &config),
+					resource.TestCheckResourceAttr(pgResourceName, "name", "pg_update"),
+					resource.TestCheckResourceAttr(pgResourceName, "description", "updated description"),
 				),
 			},
 		},
@@ -54,7 +52,7 @@ func TestAccRdsConfigurationV3_invalidDbVersion(t *testing.T) {
 		CheckDestroy:      testAccCheckRdsConfigV3Destroy,
 		Steps: []resource.TestStep{
 			{
-				Config:      testAccRdsConfigV3_invalidDataStoreVersion,
+				Config:      testAccRdsConfigV3InvalidDataStoreVersion,
 				PlanOnly:    true,
 				ExpectError: regexp.MustCompile(`can't find version.+`),
 			},
@@ -115,7 +113,8 @@ func testAccCheckRdsConfigV3Exists(n string, configuration *configurations.Confi
 	}
 }
 
-const testAccRdsConfigV3_basic = `
+const (
+	testAccRdsConfigV3Basic = `
 resource "opentelekomcloud_rds_parametergroup_v3" "pg_1" {
   name        = "pg_create"
   description = "some description"
@@ -131,8 +130,7 @@ resource "opentelekomcloud_rds_parametergroup_v3" "pg_1" {
   }
 }
 `
-
-const testAccRdsConfigV3_update = `
+	testAccRdsConfigV3Update = `
 resource "opentelekomcloud_rds_parametergroup_v3" "pg_1" {
   name        = "pg_update"
   description = "updated description"
@@ -148,8 +146,7 @@ resource "opentelekomcloud_rds_parametergroup_v3" "pg_1" {
   }
 }
 `
-
-const testAccRdsConfigV3_invalidDataStoreVersion = `
+	testAccRdsConfigV3InvalidDataStoreVersion = `
 resource "opentelekomcloud_rds_parametergroup_v3" "pg_1" {
   name        = "pg_update"
   description = "updated description"
@@ -165,3 +162,4 @@ resource "opentelekomcloud_rds_parametergroup_v3" "pg_1" {
   }
 }
 `
+)

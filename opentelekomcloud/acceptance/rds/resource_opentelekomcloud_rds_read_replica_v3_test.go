@@ -60,14 +60,16 @@ func TestAccRdsReadReplicaV3Basic(t *testing.T) {
 
 func testAccRdsReadReplicaV3Basic(postfix string) string {
 	return fmt.Sprintf(`
+%s
+%s
+
 resource "opentelekomcloud_networking_secgroup_v2" "sg" {
   name = "sg-rds-replica-test"
 }
 
 resource "opentelekomcloud_rds_instance_v3" "instance" {
   name = "tf_rds_instance_%s"
-  availability_zone = [
-  "%s"]
+  availability_zone = ["%s"]
   db {
     password = "Postgres!120521"
     type     = "PostgreSQL"
@@ -75,8 +77,8 @@ resource "opentelekomcloud_rds_instance_v3" "instance" {
     port     = "8635"
   }
   security_group_id = opentelekomcloud_networking_secgroup_v2.sg.id
-  subnet_id         = "%s"
-  vpc_id            = "%s"
+  subnet_id         = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.id
+  vpc_id            = data.opentelekomcloud_vpc_v1.shared_vpc.id
   volume {
     type = "COMMON"
     size = 40
@@ -108,11 +110,14 @@ resource "opentelekomcloud_rds_read_replica_v3" "replica" {
   }
 }
 
-`, postfix, env.OS_AVAILABILITY_ZONE, env.OS_NETWORK_ID, env.OS_VPC_ID)
+`, common.DataSourceVPC, common.DataSourceSubnet, postfix, env.OS_AVAILABILITY_ZONE)
 }
 
 func testAccRdsReadReplicaV3BasicNoIP(postfix string) string {
 	return fmt.Sprintf(`
+%s
+%s
+
 resource "opentelekomcloud_networking_secgroup_v2" "sg" {
   name = "sg-rds-replica-test"
 }
@@ -127,8 +132,8 @@ resource "opentelekomcloud_rds_instance_v3" "instance" {
     port     = "8635"
   }
   security_group_id = opentelekomcloud_networking_secgroup_v2.sg.id
-  subnet_id         = "%s"
-  vpc_id            = "%s"
+  subnet_id         = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.id
+  vpc_id            = data.opentelekomcloud_vpc_v1.shared_vpc.id
   volume {
     type = "COMMON"
     size = 40
@@ -159,5 +164,5 @@ resource "opentelekomcloud_rds_read_replica_v3" "replica" {
     type = "COMMON"
   }
 }
-`, postfix, env.OS_AVAILABILITY_ZONE, env.OS_NETWORK_ID, env.OS_VPC_ID)
+`, common.DataSourceVPC, common.DataSourceSubnet, postfix, env.OS_AVAILABILITY_ZONE)
 }

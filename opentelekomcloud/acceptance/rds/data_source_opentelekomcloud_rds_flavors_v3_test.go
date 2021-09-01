@@ -16,7 +16,7 @@ func TestAccOpenTelekomCloudRdsFlavorV3DataSource_basic(t *testing.T) {
 		ProviderFactories: common.TestAccProviderFactories,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccOpenTelekomCloudRdsFlavorV3DataSource_basic,
+				Config: testAccOpenTelekomCloudRdsFlavorV3DataSourceBasic,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckRdsFlavorV3DataSourceID("data.opentelekomcloud_rds_flavors_v3.flavor"),
 				),
@@ -40,7 +40,7 @@ func testAccCheckRdsFlavorV3DataSourceID(n string) resource.TestCheckFunc {
 	}
 }
 
-var testAccOpenTelekomCloudRdsFlavorV3DataSource_basic = `
+const testAccOpenTelekomCloudRdsFlavorV3DataSourceBasic = `
 
 data "opentelekomcloud_rds_flavors_v3" "flavor" {
   db_type = "PostgreSQL"

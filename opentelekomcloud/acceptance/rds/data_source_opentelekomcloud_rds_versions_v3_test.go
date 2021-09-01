@@ -14,7 +14,7 @@ func TestRDSVersionsV3_basic(t *testing.T) {
 		ProviderFactories: common.TestAccProviderFactories,
 		Steps: []resource.TestStep{
 			{
-				Config: testRDSVersionsV3_basic,
+				Config: testRDSVersionsV3Basic,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckRdsFlavorV3DataSourceID("data.opentelekomcloud_rds_versions_v3.sqls_versions"),
 					testAccCheckRdsFlavorV3DataSourceID("data.opentelekomcloud_rds_versions_v3.mysql_versions"),
@@ -25,7 +25,7 @@ func TestRDSVersionsV3_basic(t *testing.T) {
 	})
 }
 
-var testRDSVersionsV3_basic = `
+const testRDSVersionsV3Basic = `
 data "opentelekomcloud_rds_versions_v3" "sqls_versions" {
   database_name = "sqlserver"
 }
