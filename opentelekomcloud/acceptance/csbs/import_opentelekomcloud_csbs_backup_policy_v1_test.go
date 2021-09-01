@@ -9,7 +9,6 @@ import (
 )
 
 func TestAccCSBSBackupPolicyV1_importWeekMonth(t *testing.T) {
-
 	resource.Test(t, resource.TestCase{
 		PreCheck:          func() { common.TestAccPreCheck(t) },
 		ProviderFactories: common.TestAccProviderFactories,
