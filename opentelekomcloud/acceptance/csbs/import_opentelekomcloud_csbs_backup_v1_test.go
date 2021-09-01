@@ -9,19 +9,16 @@ import (
 )
 
 func TestAccCSBSBackupV1_importBasic(t *testing.T) {
-	resourceName := "opentelekomcloud_csbs_backup_v1.csbs"
-
 	resource.Test(t, resource.TestCase{
 		PreCheck:          func() { common.TestAccPreCheck(t) },
 		ProviderFactories: common.TestAccProviderFactories,
 		CheckDestroy:      testAccCSBSBackupV1Destroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccCSBSBackupV1_basic,
+				Config: testAccCSBSBackupV1Basic,
 			},
-
 			{
-				ResourceName:      resourceName,
+				ResourceName:      resourceBackupName,
 				ImportState:       true,
 				ImportStateVerify: false,
 			},
