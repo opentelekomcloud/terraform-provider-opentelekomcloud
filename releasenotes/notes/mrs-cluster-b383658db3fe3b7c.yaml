@@ -1,0 +1,4 @@
+---
+fixes:
+  - |
+    **[MRS]** Fix panic creating ``resource/opentelekomcloud_mrs_cluster_v1`` (`#1362 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/1362>`_)

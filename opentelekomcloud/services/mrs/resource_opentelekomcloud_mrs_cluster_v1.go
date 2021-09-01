@@ -593,6 +593,7 @@ func resourceClusterV1Create(ctx context.Context, d *schema.ResourceData, meta i
 		ComponentList:         getAllClusterComponents(d),
 		AddJobs:               getAllClusterJobs(d),
 		BootstrapScripts:      getAllClusterScripts(d),
+		LoginMode:             1,
 	}
 
 	log.Printf("[DEBUG] Create Options: %#v", createOpts)
@@ -754,10 +755,10 @@ func resourceClusterV1Read(_ context.Context, d *schema.ResourceData, meta inter
 	chargingStartTimeTm := time.Unix(chargingStartTime, 0)
 
 	mErr = multierror.Append(mErr,
-		d.Set("update_at", updateAtTm),
-		d.Set("create_at", createAtTm),
-		d.Set("charging_start_time", chargingStartTimeTm),
-		d.Set("component_list", clusterGet.Duration),
+		d.Set("update_at", updateAtTm.String()),
+		d.Set("create_at", createAtTm.String()),
+		d.Set("charging_start_time", chargingStartTimeTm.String()),
+		d.Set("duration", clusterGet.Duration),
 	)
 
 	components := make([]map[string]interface{}, len(clusterGet.Componentlist))
@@ -781,8 +782,8 @@ func resourceClusterV1Read(_ context.Context, d *schema.ResourceData, meta inter
 		scripts[i]["active_master"] = script.ActiveMaster
 		scripts[i]["before_component_start"] = script.BeforeComponentStart
 		scripts[i]["fail_action"] = script.FailAction
-		log.Printf("[DEBUG] bootstrap_scripts: %v", scripts)
 	}
+	log.Printf("[DEBUG] bootstrap_scripts: %v", scripts)
 	mErr = multierror.Append(mErr, d.Set("bootstrap_scripts", scripts))
 
 	if err := mErr.ErrorOrNil(); err != nil {
@@ -790,16 +791,16 @@ func resourceClusterV1Read(_ context.Context, d *schema.ResourceData, meta inter
 	}
 
 	// Set instance tags
-	Taglist, err := tags.Get(client, d.Id()).Extract()
+	tagList, err := tags.Get(client, d.Id()).Extract()
 	if err != nil {
 		return fmterr.Errorf("error fetching OpenTelekomCloud MRS cluster tags: %s", err)
 	}
 
-	tagmap := make(map[string]string)
-	for _, val := range Taglist.Tags {
-		tagmap[val.Key] = val.Value
+	tagMap := make(map[string]string)
+	for _, val := range tagList.Tags {
+		tagMap[val.Key] = val.Value
 	}
-	if err := d.Set("tags", tagmap); err != nil {
+	if err := d.Set("tags", tagMap); err != nil {
 		return fmterr.Errorf("[DEBUG] Error saving tag to state for OpenTelekomCloud MRS cluster (%s): %s", d.Id(), err)
 	}
 	return nil
