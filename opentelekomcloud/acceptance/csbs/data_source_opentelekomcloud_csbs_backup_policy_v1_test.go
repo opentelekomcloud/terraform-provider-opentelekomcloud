@@ -60,7 +60,7 @@ resource "opentelekomcloud_compute_instance_v2" "instance_1" {
     foo = "bar"
   }
   network {
-    uuid = data.opentelekomcloud_images_image_v2.latest_image.network_id
+    uuid = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.network_id
   }
 }
 
