@@ -19,10 +19,13 @@ import (
 	"fmt"
 	"log"
 	"reflect"
+	"time"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	golangsdk "github.com/opentelekomcloud/gophertelekomcloud"
+	"github.com/opentelekomcloud/gophertelekomcloud/openstack/networking/v2/ports"
 
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common"
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common/cfg"
@@ -119,6 +122,43 @@ func resourceNatDnatUserInputParams(d *schema.ResourceData) map[string]interface
 	}
 }
 
+func waitForPortToActivate(ctx context.Context, d *schema.ResourceData, meta interface{}, portID string) error {
+	config := meta.(*cfg.Config)
+	client, err := config.NetworkingV2Client(config.GetRegion(d))
+	if err != nil {
+		return fmt.Errorf("error creating NetworkingV2 client: %w", err)
+	}
+	stateConf := &resource.StateChangeConf{
+		Target:     []string{"ACTIVE"},
+		Refresh:    getNetworkPortState(client, portID),
+		Timeout:    d.Timeout(schema.TimeoutCreate),
+		Delay:      5 * time.Second,
+		MinTimeout: 3 * time.Second,
+	}
+
+	_, err = stateConf.WaitForStateContext(ctx)
+	if err != nil {
+		return fmt.Errorf("error waiting for OpenTelekomCloud Neutron port to activate: %w", err)
+	}
+	return nil
+}
+
+func getNetworkPortState(client *golangsdk.ServiceClient, portId string) resource.StateRefreshFunc {
+	return func() (interface{}, string, error) {
+		p, err := ports.Get(client, portId).Extract()
+		if err != nil {
+			return nil, "", err
+		}
+
+		log.Printf("[DEBUG] OpenTelekomCloud Neutron Port: %+v", p)
+		if p.Status == "DOWN" || p.Status == "ACTIVE" {
+			return p, "ACTIVE", nil
+		}
+
+		return p, p.Status, nil
+	}
+}
+
 func resourceNatDnatRuleCreate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*cfg.Config)
 	client, err := config.NatV2Client(config.GetRegion(d))
@@ -188,6 +228,9 @@ func resourceNatDnatRuleCreate(ctx context.Context, d *schema.ResourceData, meta
 	}
 	if !e {
 		params["port_id"] = portIDProp
+		if err := waitForPortToActivate(ctx, d, meta, portIDProp.(string)); err != nil {
+			return diag.FromErr(err)
+		}
 	}
 
 	privateIPProp, err := common.NavigateValue(opts, []string{"private_ip"}, nil)

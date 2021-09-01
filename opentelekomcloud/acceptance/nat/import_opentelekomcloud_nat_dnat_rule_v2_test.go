@@ -17,7 +17,7 @@ func TestAccNatDnat_importBasic(t *testing.T) {
 		CheckDestroy:      testAccCheckNatDnatDestroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccNatDnat_basic(),
+				Config: testAccNatDnatBasic,
 			},
 
 			{

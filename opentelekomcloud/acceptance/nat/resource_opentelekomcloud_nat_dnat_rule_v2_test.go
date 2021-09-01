@@ -36,7 +36,7 @@ func TestAccNatDnat_basic(t *testing.T) {
 		CheckDestroy:      testAccCheckNatDnatDestroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccNatDnat_basic(),
+				Config: testAccNatDnatBasic,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckNatDnatExists(),
 				),
@@ -45,8 +45,62 @@ func TestAccNatDnat_basic(t *testing.T) {
 	})
 }
 
-func testAccNatDnat_basic() string {
-	return fmt.Sprintf(`
+func TestAccNatDnatRule_withPort(t *testing.T) {
+	resource.Test(t, resource.TestCase{
+		PreCheck:          func() { acc.TestAccPreCheck(t) },
+		ProviderFactories: acc.TestAccProviderFactories,
+		CheckDestroy:      testAccCheckNatDnatDestroy,
+		Steps: []resource.TestStep{
+			{
+				Config: testAccNatDnatRuleWithPort,
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckNatDnatExists(),
+				),
+			},
+		},
+	})
+}
+
+var testAccNatDnatRuleWithPort = fmt.Sprintf(`
+%s
+
+resource "opentelekomcloud_networking_port_v2" "this" {
+  name       = "test"
+  network_id = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.network_id
+  fixed_ip {
+    subnet_id = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.subnet_id
+  }
+}
+
+resource "opentelekomcloud_nat_gateway_v2" "this" {
+  name                = "test"
+  spec                = "1"
+  router_id           = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.vpc_id
+  internal_network_id = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.network_id
+}
+
+resource "opentelekomcloud_networking_floatingip_v2" "eip" {}
+
+resource "opentelekomcloud_compute_instance_v2" "instance_1" {
+  name              = "instance_1"
+  security_groups   = ["default"]
+  availability_zone = "%s"
+  network {
+    port = opentelekomcloud_networking_port_v2.this.id
+  }
+}
+
+resource "opentelekomcloud_nat_dnat_rule_v2" "dnat" {
+  floating_ip_id        = opentelekomcloud_networking_floatingip_v2.eip.id
+  nat_gateway_id        = opentelekomcloud_nat_gateway_v2.this.id
+  external_service_port = 80
+  protocol              = "tcp"
+  port_id               = opentelekomcloud_networking_port_v2.this.id
+  internal_service_port = 80
+}
+`, acc.DataSourceSubnet, env.OS_AVAILABILITY_ZONE)
+
+var testAccNatDnatBasic = fmt.Sprintf(`
 resource "opentelekomcloud_networking_router_v2" "router_1" {
   name           = "router_1"
   admin_state_up = "true"
@@ -103,7 +157,6 @@ resource "opentelekomcloud_nat_dnat_rule_v2" "dnat" {
   depends_on            = [opentelekomcloud_compute_instance_v2.instance_1]
 }
 `, env.OS_AVAILABILITY_ZONE)
-}
 
 func testAccCheckNatDnatDestroy(s *terraform.State) error {
 	config := acc.TestAccProvider.Meta().(*cfg.Config)
