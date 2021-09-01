@@ -11,21 +11,20 @@ import (
 	vpc "github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/acceptance/vpc"
 )
 
+const flavorDataName = "data.opentelekomcloud_rds_flavors_v1.flavor"
+
 func TestAccOpenTelekomCloudRdsFlavorV1DataSource_basic(t *testing.T) {
 	resource.Test(t, resource.TestCase{
 		PreCheck:          func() { common.TestAccPreCheck(t) },
 		ProviderFactories: common.TestAccProviderFactories,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccOpenTelekomCloudRdsFlavorV1DataSource_basic,
+				Config: testAccOpenTelekomCloudRdsFlavorV1DataSourceBasic,
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckRdsFlavorV1DataSourceID("data.opentelekomcloud_rds_flavors_v1.flavor"),
-					resource.TestCheckResourceAttrSet(
-						"data.opentelekomcloud_rds_flavors_v1.flavor", "name"),
-					resource.TestCheckResourceAttrSet(
-						"data.opentelekomcloud_rds_flavors_v1.flavor", "id"),
-					resource.TestCheckResourceAttrSet(
-						"data.opentelekomcloud_rds_flavors_v1.flavor", "speccode"),
+					testAccCheckRdsFlavorV1DataSourceID(flavorDataName),
+					resource.TestCheckResourceAttrSet(flavorDataName, "name"),
+					resource.TestCheckResourceAttrSet(flavorDataName, "id"),
+					resource.TestCheckResourceAttrSet(flavorDataName, "speccode"),
 				),
 			},
 		},
@@ -38,13 +37,11 @@ func TestAccOpenTelekomCloudRdsFlavorV1DataSource_speccode(t *testing.T) {
 		ProviderFactories: common.TestAccProviderFactories,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccOpenTelekomCloudRdsFlavorV1DataSource_speccode,
+				Config: testAccOpenTelekomCloudRdsFlavorV1DataSourceSpeccode,
 				Check: resource.ComposeTestCheckFunc(
-					vpc.TestAccCheckNetworkingNetworkV2DataSourceID("data.opentelekomcloud_rds_flavors_v1.flavor"),
-					resource.TestCheckResourceAttr(
-						"data.opentelekomcloud_rds_flavors_v1.flavor", "name", "OTC_PGCM_XLARGE"),
-					resource.TestCheckResourceAttr(
-						"data.opentelekomcloud_rds_flavors_v1.flavor", "speccode", "rds.pg.s1.xlarge"),
+					vpc.TestAccCheckNetworkingNetworkV2DataSourceID(flavorDataName),
+					resource.TestCheckResourceAttr(flavorDataName, "name", "OTC_PGCM_XLARGE"),
+					resource.TestCheckResourceAttr(flavorDataName, "speccode", "rds.pg.s1.xlarge"),
 				),
 			},
 		},
@@ -66,21 +63,19 @@ func testAccCheckRdsFlavorV1DataSourceID(n string) resource.TestCheckFunc {
 	}
 }
 
-var testAccOpenTelekomCloudRdsFlavorV1DataSource_basic = `
-
+const testAccOpenTelekomCloudRdsFlavorV1DataSourceBasic = `
 data "opentelekomcloud_rds_flavors_v1" "flavor" {
-    region = "eu-de"
-	datastore_name = "PostgreSQL"
-    datastore_version = "9.5.5"
+  region            = "eu-de"
+  datastore_name    = "PostgreSQL"
+  datastore_version = "9.5.5"
 }
 `
 
-var testAccOpenTelekomCloudRdsFlavorV1DataSource_speccode = `
-
+const testAccOpenTelekomCloudRdsFlavorV1DataSourceSpeccode = `
 data "opentelekomcloud_rds_flavors_v1" "flavor" {
-    region = "eu-de"
-	datastore_name = "PostgreSQL"
-    datastore_version = "9.5.5"
-    speccode = "rds.pg.s1.xlarge"
+  region            = "eu-de"
+  datastore_name    = "PostgreSQL"
+  datastore_version = "9.5.5"
+  speccode          = "rds.pg.s1.xlarge"
 }
 `

@@ -18,7 +18,7 @@ import (
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/services/rds"
 )
 
-const resourceName = "opentelekomcloud_rds_instance_v3.instance"
+const instanceV3ResourceName = "opentelekomcloud_rds_instance_v3.instance"
 
 func TestAccRdsInstanceV3Basic(t *testing.T) {
 	postfix := acctest.RandString(3)
@@ -32,23 +32,23 @@ func TestAccRdsInstanceV3Basic(t *testing.T) {
 			{
 				Config: testAccRdsInstanceV3Basic(postfix),
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckRdsInstanceV3Exists(resourceName, &rdsInstance),
-					resource.TestCheckResourceAttr(resourceName, "flavor", "rds.pg.c2.medium"),
-					resource.TestCheckResourceAttr(resourceName, "db.0.port", "8635"),
-					resource.TestCheckResourceAttr(resourceName, "name", "tf_rds_instance_"+postfix),
-					resource.TestCheckResourceAttr(resourceName, "db.0.type", "PostgreSQL"),
-					resource.TestCheckResourceAttr(resourceName, "volume.0.size", "40"),
-					resource.TestCheckResourceAttr(resourceName, "backup_strategy.0.keep_days", "1"),
-					resource.TestCheckResourceAttr(resourceName, "tags.muh", "value-create"),
-					resource.TestCheckResourceAttr(resourceName, "tags.kuh", "value-create"),
+					testAccCheckRdsInstanceV3Exists(instanceV3ResourceName, &rdsInstance),
+					resource.TestCheckResourceAttr(instanceV3ResourceName, "flavor", "rds.pg.c2.medium"),
+					resource.TestCheckResourceAttr(instanceV3ResourceName, "db.0.port", "8635"),
+					resource.TestCheckResourceAttr(instanceV3ResourceName, "name", "tf_rds_instance_"+postfix),
+					resource.TestCheckResourceAttr(instanceV3ResourceName, "db.0.type", "PostgreSQL"),
+					resource.TestCheckResourceAttr(instanceV3ResourceName, "volume.0.size", "40"),
+					resource.TestCheckResourceAttr(instanceV3ResourceName, "backup_strategy.0.keep_days", "1"),
+					resource.TestCheckResourceAttr(instanceV3ResourceName, "tags.muh", "value-create"),
+					resource.TestCheckResourceAttr(instanceV3ResourceName, "tags.kuh", "value-create"),
 				),
 			},
 			{
 				Config: testAccRdsInstanceV3Update(postfix),
 				Check: resource.ComposeTestCheckFunc(
-					resource.TestCheckResourceAttr(resourceName, "flavor", "rds.pg.c2.large"),
-					resource.TestCheckResourceAttr(resourceName, "volume.0.size", "100"),
-					resource.TestCheckResourceAttr(resourceName, "tags.muh", "value-update"),
+					resource.TestCheckResourceAttr(instanceV3ResourceName, "flavor", "rds.pg.c2.large"),
+					resource.TestCheckResourceAttr(instanceV3ResourceName, "volume.0.size", "100"),
+					resource.TestCheckResourceAttr(instanceV3ResourceName, "tags.muh", "value-update"),
 				),
 			},
 		},
@@ -67,17 +67,17 @@ func TestAccRdsInstanceV3ElasticIP(t *testing.T) {
 			{
 				Config: testAccRdsInstanceV3ElasticIP(postfix),
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckRdsInstanceV3Exists(resourceName, &rdsInstance),
-					resource.TestCheckResourceAttr(resourceName, "name", "tf_rds_instance_"+postfix),
-					resource.TestCheckResourceAttr(resourceName, "db.0.version", "10"),
-					resource.TestCheckResourceAttr(resourceName, "public_ips.#", "1"),
+					testAccCheckRdsInstanceV3Exists(instanceV3ResourceName, &rdsInstance),
+					resource.TestCheckResourceAttr(instanceV3ResourceName, "name", "tf_rds_instance_"+postfix),
+					resource.TestCheckResourceAttr(instanceV3ResourceName, "db.0.version", "10"),
+					resource.TestCheckResourceAttr(instanceV3ResourceName, "public_ips.#", "1"),
 				),
 			},
 			{
 				Config: testAccRdsInstanceV3Basic(postfix),
 				Check: resource.ComposeTestCheckFunc(
-					resource.TestCheckResourceAttr(resourceName, "db.0.version", "10"),
-					resource.TestCheckResourceAttr(resourceName, "public_ips.#", "0"),
+					resource.TestCheckResourceAttr(instanceV3ResourceName, "db.0.version", "10"),
+					resource.TestCheckResourceAttr(instanceV3ResourceName, "public_ips.#", "0"),
 				),
 			},
 		},
@@ -101,11 +101,11 @@ func TestAccRdsInstanceV3HA(t *testing.T) {
 			{
 				Config: testAccRdsInstanceV3HA(postfix, availabilityZone2),
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckRdsInstanceV3Exists(resourceName, &rdsInstance),
-					resource.TestCheckResourceAttr(resourceName, "name", "tf_rds_instance_"+postfix),
-					resource.TestCheckResourceAttr(resourceName, "ha_replication_mode", "semisync"),
-					resource.TestCheckResourceAttr(resourceName, "volume.0.type", "ULTRAHIGH"),
-					resource.TestCheckResourceAttr(resourceName, "db.0.type", "MySQL"),
+					testAccCheckRdsInstanceV3Exists(instanceV3ResourceName, &rdsInstance),
+					resource.TestCheckResourceAttr(instanceV3ResourceName, "name", "tf_rds_instance_"+postfix),
+					resource.TestCheckResourceAttr(instanceV3ResourceName, "ha_replication_mode", "semisync"),
+					resource.TestCheckResourceAttr(instanceV3ResourceName, "volume.0.type", "ULTRAHIGH"),
+					resource.TestCheckResourceAttr(instanceV3ResourceName, "db.0.type", "MySQL"),
 				),
 			},
 		},
@@ -124,8 +124,8 @@ func TestAccRdsInstanceV3OptionalParams(t *testing.T) {
 			{
 				Config: testAccRdsInstanceV3OptionalParams(postfix),
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckRdsInstanceV3Exists(resourceName, &rdsInstance),
-					resource.TestCheckResourceAttr(resourceName, "name", "tf_rds_instance_"+postfix),
+					testAccCheckRdsInstanceV3Exists(instanceV3ResourceName, &rdsInstance),
+					resource.TestCheckResourceAttr(instanceV3ResourceName, "name", "tf_rds_instance_"+postfix),
 				),
 			},
 		},
@@ -144,8 +144,8 @@ func TestAccRdsInstanceV3Backup(t *testing.T) {
 			{
 				Config: testAccRdsInstanceV3Backup(postfix),
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckRdsInstanceV3Exists(resourceName, &rdsInstance),
-					resource.TestCheckResourceAttr(resourceName, "name", "tf_rds_instance_"+postfix),
+					testAccCheckRdsInstanceV3Exists(instanceV3ResourceName, &rdsInstance),
+					resource.TestCheckResourceAttr(instanceV3ResourceName, "name", "tf_rds_instance_"+postfix),
 				),
 			},
 		},
@@ -164,15 +164,15 @@ func TestAccRdsInstanceV3TemplateConfig(t *testing.T) {
 			{
 				Config: testAccRdsInstanceV3ConfigTemplateBasic(postfix),
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckRdsInstanceV3Exists(resourceName, &rdsInstance),
-					resource.TestCheckResourceAttr(resourceName, "name", "tf_rds_instance_"+postfix),
+					testAccCheckRdsInstanceV3Exists(instanceV3ResourceName, &rdsInstance),
+					resource.TestCheckResourceAttr(instanceV3ResourceName, "name", "tf_rds_instance_"+postfix),
 				),
 			},
 			{
 				Config: testAccRdsInstanceV3ConfigTemplateUpdate(postfix),
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckRdsInstanceV3Exists(resourceName, &rdsInstance),
-					resource.TestCheckResourceAttr(resourceName, "name", "tf_rds_instance_"+postfix),
+					testAccCheckRdsInstanceV3Exists(instanceV3ResourceName, &rdsInstance),
+					resource.TestCheckResourceAttr(instanceV3ResourceName, "name", "tf_rds_instance_"+postfix),
 				),
 			},
 		},
@@ -208,8 +208,8 @@ func TestAccRdsInstanceV3_configurationParameters(t *testing.T) {
 			{
 				Config: testAccRdsInstanceV3ConfigurationOverride(postfix),
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckRdsInstanceV3Exists(resourceName, &rdsInstance),
-					resource.TestCheckResourceAttr(resourceName, "parameters.max_connections", "37"),
+					testAccCheckRdsInstanceV3Exists(instanceV3ResourceName, &rdsInstance),
+					resource.TestCheckResourceAttr(instanceV3ResourceName, "parameters.max_connections", "37"),
 				),
 			},
 		},
@@ -268,6 +268,9 @@ func testAccCheckRdsInstanceV3Exists(n string, rdsInstance *instances.RdsInstanc
 
 func testAccRdsInstanceV3Basic(postfix string) string {
 	return fmt.Sprintf(`
+%s
+%s
+
 resource "opentelekomcloud_networking_secgroup_v2" "sg" {
   name = "sg-rds-test"
 }
@@ -282,8 +285,8 @@ resource "opentelekomcloud_rds_instance_v3" "instance" {
     port     = "8635"
   }
   security_group_id = opentelekomcloud_networking_secgroup_v2.sg.id
-  subnet_id         = "%s"
-  vpc_id            = "%s"
+  subnet_id         = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.id
+  vpc_id            = data.opentelekomcloud_vpc_v1.shared_vpc.id
   volume {
     type = "COMMON"
     size = 40
@@ -298,11 +301,14 @@ resource "opentelekomcloud_rds_instance_v3" "instance" {
     kuh = "value-create"
   }
 }
-`, postfix, env.OS_AVAILABILITY_ZONE, env.OS_NETWORK_ID, env.OS_VPC_ID)
+`, common.DataSourceVPC, common.DataSourceSubnet, postfix, env.OS_AVAILABILITY_ZONE)
 }
 
 func testAccRdsInstanceV3Update(postfix string) string {
 	return fmt.Sprintf(`
+%s
+%s
+
 resource opentelekomcloud_networking_secgroup_v2 sg {
   name = "sg-rds-test"
 }
@@ -317,8 +323,8 @@ resource "opentelekomcloud_rds_instance_v3" "instance" {
     port     = "8635"
   }
   security_group_id = opentelekomcloud_networking_secgroup_v2.sg.id
-  subnet_id         = "%s"
-  vpc_id            = "%s"
+  subnet_id         = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.id
+  vpc_id            = data.opentelekomcloud_vpc_v1.shared_vpc.id
   volume {
     type = "COMMON"
     size = 100
@@ -332,11 +338,14 @@ resource "opentelekomcloud_rds_instance_v3" "instance" {
     muh = "value-update"
   }
 }
-`, postfix, env.OS_AVAILABILITY_ZONE, env.OS_NETWORK_ID, env.OS_VPC_ID)
+`, common.DataSourceVPC, common.DataSourceSubnet, postfix, env.OS_AVAILABILITY_ZONE)
 }
 
 func testAccRdsInstanceV3ElasticIP(postfix string) string {
 	return fmt.Sprintf(`
+%s
+%s
+
 resource "opentelekomcloud_networking_floatingip_v2" "fip_1" {}
 
 resource "opentelekomcloud_networking_secgroup_v2" "sg" {
@@ -353,8 +362,8 @@ resource "opentelekomcloud_rds_instance_v3" "instance" {
     port     = "8635"
   }
   security_group_id = opentelekomcloud_networking_secgroup_v2.sg.id
-  subnet_id         = "%s"
-  vpc_id            = "%s"
+  subnet_id         = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.id
+  vpc_id            = data.opentelekomcloud_vpc_v1.shared_vpc.id
   volume {
     type = "COMMON"
     size = 40
@@ -367,11 +376,14 @@ resource "opentelekomcloud_rds_instance_v3" "instance" {
 
   public_ips = [opentelekomcloud_networking_floatingip_v2.fip_1.address]
 }
-`, postfix, env.OS_AVAILABILITY_ZONE, env.OS_NETWORK_ID, env.OS_VPC_ID)
+`, common.DataSourceVPC, common.DataSourceSubnet, postfix, env.OS_AVAILABILITY_ZONE)
 }
 
 func testAccRdsInstanceV3HA(postfix string, az2 string) string {
 	return fmt.Sprintf(`
+%s
+%s
+
 resource "opentelekomcloud_networking_secgroup_v2" "sg" {
   name = "sg-rds-test"
 }
@@ -386,8 +398,8 @@ resource "opentelekomcloud_rds_instance_v3" "instance" {
     port     = "8635"
   }
   security_group_id = opentelekomcloud_networking_secgroup_v2.sg.id
-  subnet_id         = "%s"
-  vpc_id            = "%s"
+  subnet_id         = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.id
+  vpc_id            = data.opentelekomcloud_vpc_v1.shared_vpc.id
   volume {
     type = "ULTRAHIGH"
     size = 100
@@ -399,11 +411,14 @@ resource "opentelekomcloud_rds_instance_v3" "instance" {
   }
   ha_replication_mode = "semisync"
 }
-`, postfix, env.OS_AVAILABILITY_ZONE, az2, env.OS_NETWORK_ID, env.OS_VPC_ID)
+`, common.DataSourceVPC, common.DataSourceSubnet, postfix, env.OS_AVAILABILITY_ZONE, az2)
 }
 
 func testAccRdsInstanceV3OptionalParams(postfix string) string {
 	return fmt.Sprintf(`
+%s
+%s
+
 resource "opentelekomcloud_networking_secgroup_v2" "sg" {
   name = "sg-rds-test"
 }
@@ -417,19 +432,22 @@ resource "opentelekomcloud_rds_instance_v3" "instance" {
     version  = "10"
   }
   security_group_id = opentelekomcloud_networking_secgroup_v2.sg.id
-  subnet_id         = "%s"
-  vpc_id            = "%s"
+  subnet_id         = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.id
+  vpc_id            = data.opentelekomcloud_vpc_v1.shared_vpc.id
   volume {
     type = "COMMON"
     size = 100
   }
   flavor = "rds.pg.c2.medium"
 }
-`, postfix, env.OS_AVAILABILITY_ZONE, env.OS_NETWORK_ID, env.OS_VPC_ID)
+`, common.DataSourceVPC, common.DataSourceSubnet, postfix, env.OS_AVAILABILITY_ZONE)
 }
 
 func testAccRdsInstanceV3Backup(postfix string) string {
 	return fmt.Sprintf(`
+%s
+%s
+
 resource "opentelekomcloud_networking_secgroup_v2" "sg" {
   name = "sg-rds-test"
 }
@@ -443,8 +461,8 @@ resource "opentelekomcloud_rds_instance_v3" "instance" {
     version  = "10"
   }
   security_group_id = opentelekomcloud_networking_secgroup_v2.sg.id
-  subnet_id         = "%s"
-  vpc_id            = "%s"
+  subnet_id         = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.id
+  vpc_id            = data.opentelekomcloud_vpc_v1.shared_vpc.id
   volume {
     type = "COMMON"
     size = 100
@@ -456,15 +474,18 @@ resource "opentelekomcloud_rds_instance_v3" "instance" {
   }
 
 }
-`, postfix, env.OS_AVAILABILITY_ZONE, env.OS_NETWORK_ID, env.OS_VPC_ID)
+`, common.DataSourceVPC, common.DataSourceSubnet, postfix, env.OS_AVAILABILITY_ZONE)
 }
 
 func testAccRdsInstanceV3ConfigTemplateBasic(postfix string) string {
 	return fmt.Sprintf(`
+%s
+%s
+
 resource "opentelekomcloud_rds_parametergroup_v3" "pg" {
   name = "pg-rds-test"
   values = {
-    max_connections = "100"
+    max_connections = "1200"
     autocommit      = "OFF"
   }
   datastore {
@@ -476,7 +497,7 @@ resource "opentelekomcloud_rds_parametergroup_v3" "pg" {
 resource "opentelekomcloud_rds_parametergroup_v3" "pg2" {
   name = "pg-rds-test-2"
   values = {
-    max_connections = "100"
+    max_connections = "1200"
     autocommit      = "OFF"
   }
   datastore {
@@ -498,8 +519,8 @@ resource "opentelekomcloud_rds_instance_v3" "instance" {
     version  = "12"
   }
   security_group_id = opentelekomcloud_networking_secgroup_v2.sg.id
-  subnet_id         = "%s"
-  vpc_id            = "%s"
+  subnet_id         = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.id
+  vpc_id            = data.opentelekomcloud_vpc_v1.shared_vpc.id
   volume {
     type = "COMMON"
     size = 40
@@ -507,15 +528,18 @@ resource "opentelekomcloud_rds_instance_v3" "instance" {
   flavor         = "rds.pg.c2.medium"
   param_group_id = opentelekomcloud_rds_parametergroup_v3.pg.id
 }
-`, postfix, env.OS_AVAILABILITY_ZONE, env.OS_NETWORK_ID, env.OS_VPC_ID)
+`, common.DataSourceVPC, common.DataSourceSubnet, postfix, env.OS_AVAILABILITY_ZONE)
 }
 
 func testAccRdsInstanceV3ConfigTemplateUpdate(postfix string) string {
 	return fmt.Sprintf(`
+%s
+%s
+
 resource "opentelekomcloud_rds_parametergroup_v3" "pg" {
   name = "pg-rds-test"
   values = {
-    max_connections = "100"
+    max_connections = "1200"
     autocommit      = "OFF"
   }
   datastore {
@@ -527,12 +551,12 @@ resource "opentelekomcloud_rds_parametergroup_v3" "pg" {
 resource "opentelekomcloud_rds_parametergroup_v3" "pg2" {
   name = "pg-rds-test-2"
   values = {
-    max_connections = "100"
+    max_connections = "1200"
     autocommit      = "OFF"
   }
   datastore {
     type    = "postgresql"
-    version = "10"
+    version = "12"
   }
 }
 
@@ -549,8 +573,8 @@ resource "opentelekomcloud_rds_instance_v3" "instance" {
     version  = "12"
   }
   security_group_id = opentelekomcloud_networking_secgroup_v2.sg.id
-  subnet_id         = "%s"
-  vpc_id            = "%s"
+  subnet_id         = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.id
+  vpc_id            = data.opentelekomcloud_vpc_v1.shared_vpc.id
   volume {
     type = "COMMON"
     size = 40
@@ -558,11 +582,14 @@ resource "opentelekomcloud_rds_instance_v3" "instance" {
   flavor         = "rds.pg.c2.medium"
   param_group_id = opentelekomcloud_rds_parametergroup_v3.pg2.id
 }
-`, postfix, env.OS_AVAILABILITY_ZONE, env.OS_NETWORK_ID, env.OS_VPC_ID)
+`, common.DataSourceVPC, common.DataSourceSubnet, postfix, env.OS_AVAILABILITY_ZONE)
 }
 
 func testAccRdsInstanceV3InvalidDBVersion(postfix string) string {
 	return fmt.Sprintf(`
+%s
+%s
+
 resource "opentelekomcloud_networking_secgroup_v2" "sg" {
   name = "sg-rds-test"
 }
@@ -577,19 +604,22 @@ resource "opentelekomcloud_rds_instance_v3" "instance" {
     port     = "8635"
   }
   security_group_id = opentelekomcloud_networking_secgroup_v2.sg.id
-  subnet_id         = "%s"
-  vpc_id            = "%s"
+  subnet_id         = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.id
+  vpc_id            = data.opentelekomcloud_vpc_v1.shared_vpc.id
   volume {
     type = "COMMON"
     size = 40
   }
   flavor = "rds.pg.c2.medium"
 }
-`, postfix, env.OS_AVAILABILITY_ZONE, env.OS_NETWORK_ID, env.OS_VPC_ID)
+`, common.DataSourceVPC, common.DataSourceSubnet, postfix, env.OS_AVAILABILITY_ZONE)
 }
 
 func testAccRdsInstanceV3ConfigurationOverride(postfix string) string {
 	return fmt.Sprintf(`
+%s
+%s
+
 resource "opentelekomcloud_networking_secgroup_v2" "sg" {
   name = "sg-rds-test"
 }
@@ -617,8 +647,8 @@ resource "opentelekomcloud_rds_instance_v3" "instance" {
   }
 
   security_group_id = opentelekomcloud_networking_secgroup_v2.sg.id
-  subnet_id         = "%s"
-  vpc_id            = "%s"
+  subnet_id         = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.id
+  vpc_id            = data.opentelekomcloud_vpc_v1.shared_vpc.id
   flavor            = "rds.pg.c2.medium"
   volume {
     type = "COMMON"
@@ -629,5 +659,5 @@ resource "opentelekomcloud_rds_instance_v3" "instance" {
     max_connections = "37",
   }
 }
-`, postfix, env.OS_AVAILABILITY_ZONE, env.OS_NETWORK_ID, env.OS_VPC_ID)
+`, common.DataSourceVPC, common.DataSourceSubnet, postfix, env.OS_AVAILABILITY_ZONE)
 }
