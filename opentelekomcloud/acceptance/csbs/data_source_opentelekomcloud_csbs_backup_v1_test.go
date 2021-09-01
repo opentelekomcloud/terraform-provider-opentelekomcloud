@@ -11,17 +11,19 @@ import (
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/acceptance/env"
 )
 
+const dataBackupName = "data.opentelekomcloud_csbs_backup_v1.csbs"
+
 func TestAccCSBSBackupV1DataSource_basic(t *testing.T) {
 	resource.Test(t, resource.TestCase{
 		PreCheck:          func() { common.TestAccPreCheck(t) },
 		ProviderFactories: common.TestAccProviderFactories,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccCSBSBackupV1DataSource_basic,
+				Config: testAccCSBSBackupV1DataSourceBasic,
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckCSBSBackupV1DataSourceID("data.opentelekomcloud_csbs_backup_v1.csbs"),
-					resource.TestCheckResourceAttr("data.opentelekomcloud_csbs_backup_v1.csbs", "backup_name", "csbs-test"),
-					resource.TestCheckResourceAttr("data.opentelekomcloud_csbs_backup_v1.csbs", "resource_name", "instance_1"),
+					testAccCheckCSBSBackupV1DataSourceID(dataBackupName),
+					resource.TestCheckResourceAttr(dataBackupName, "backup_name", "csbs-test"),
+					resource.TestCheckResourceAttr(dataBackupName, "resource_name", "instance_1"),
 				),
 			},
 		},
@@ -43,10 +45,14 @@ func testAccCheckCSBSBackupV1DataSourceID(n string) resource.TestCheckFunc {
 	}
 }
 
-var testAccCSBSBackupV1DataSource_basic = fmt.Sprintf(`
+var testAccCSBSBackupV1DataSourceBasic = fmt.Sprintf(`
+%s
+
+%s
+
 resource "opentelekomcloud_compute_instance_v2" "instance_1" {
   name              = "instance_1"
-  image_id          = "%s"
+  image_id          = data.opentelekomcloud_images_image_v2.latest_image.id
   security_groups   = ["default"]
   availability_zone = "%s"
   flavor_id         = "%s"
@@ -54,7 +60,7 @@ resource "opentelekomcloud_compute_instance_v2" "instance_1" {
     foo = "bar"
   }
   network {
-    uuid = "%s"
+    uuid = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.network_id
   }
 }
 resource "opentelekomcloud_csbs_backup_v1" "csbs" {
@@ -66,4 +72,4 @@ resource "opentelekomcloud_csbs_backup_v1" "csbs" {
 data "opentelekomcloud_csbs_backup_v1" "csbs" {
   id = opentelekomcloud_csbs_backup_v1.csbs.id
 }
-`, env.OS_IMAGE_ID, env.OS_AVAILABILITY_ZONE, env.OS_FLAVOR_ID, env.OS_NETWORK_ID)
+`, common.DataSourceImage, common.DataSourceSubnet, env.OS_AVAILABILITY_ZONE, env.OsFlavorID)

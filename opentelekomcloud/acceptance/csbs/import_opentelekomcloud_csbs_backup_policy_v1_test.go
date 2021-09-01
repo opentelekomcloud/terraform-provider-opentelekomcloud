@@ -9,18 +9,16 @@ import (
 )
 
 func TestAccCSBSBackupPolicyV1_importWeekMonth(t *testing.T) {
-	resourceName := "opentelekomcloud_csbs_backup_policy_v1.backup_policy_v1"
-
 	resource.Test(t, resource.TestCase{
 		PreCheck:          func() { common.TestAccPreCheck(t) },
 		ProviderFactories: common.TestAccProviderFactories,
 		CheckDestroy:      testAccCheckCSBSBackupPolicyV1Destroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccCSBSBackupPolicyV1_weekMonth,
+				Config: testAccCSBSBackupPolicyV1WeekMonth,
 			},
 			{
-				ResourceName:      resourceName,
+				ResourceName:      resourcePolicyName,
 				ImportState:       true,
 				ImportStateVerify: true,
 				ImportStateVerifyIgnore: []string{

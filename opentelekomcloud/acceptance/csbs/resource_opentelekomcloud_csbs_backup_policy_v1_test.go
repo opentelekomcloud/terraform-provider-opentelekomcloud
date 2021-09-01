@@ -13,6 +13,8 @@ import (
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common/cfg"
 )
 
+const resourcePolicyName = "opentelekomcloud_csbs_backup_policy_v1.backup_policy_v1"
+
 func TestAccCSBSBackupPolicyV1_basic(t *testing.T) {
 	var policy policies.BackupPolicy
 
@@ -22,21 +24,18 @@ func TestAccCSBSBackupPolicyV1_basic(t *testing.T) {
 		CheckDestroy:      testAccCheckCSBSBackupPolicyV1Destroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccCSBSBackupPolicyV1_basic,
+				Config: testAccCSBSBackupPolicyV1Basic,
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckCSBSBackupPolicyV1Exists("opentelekomcloud_csbs_backup_policy_v1.backup_policy_v1", &policy),
-					resource.TestCheckResourceAttr(
-						"opentelekomcloud_csbs_backup_policy_v1.backup_policy_v1", "name", "backup-policy"),
-					resource.TestCheckResourceAttr(
-						"opentelekomcloud_csbs_backup_policy_v1.backup_policy_v1", "status", "suspended"),
+					testAccCheckCSBSBackupPolicyV1Exists(resourcePolicyName, &policy),
+					resource.TestCheckResourceAttr(resourcePolicyName, "name", "backup-policy"),
+					resource.TestCheckResourceAttr(resourcePolicyName, "status", "suspended"),
 				),
 			},
 			{
-				Config: testAccCSBSBackupPolicyV1_update,
+				Config: testAccCSBSBackupPolicyV1Update,
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckCSBSBackupPolicyV1Exists("opentelekomcloud_csbs_backup_policy_v1.backup_policy_v1", &policy),
-					resource.TestCheckResourceAttr(
-						"opentelekomcloud_csbs_backup_policy_v1.backup_policy_v1", "name", "backup-policy-update"),
+					testAccCheckCSBSBackupPolicyV1Exists(resourcePolicyName, &policy),
+					resource.TestCheckResourceAttr(resourcePolicyName, "name", "backup-policy-update"),
 				),
 			},
 		},
@@ -52,9 +51,9 @@ func TestAccCSBSBackupPolicyV1_timeout(t *testing.T) {
 		CheckDestroy:      testAccCheckCSBSBackupPolicyV1Destroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccCSBSBackupPolicyV1_timeout,
+				Config: testAccCSBSBackupPolicyV1Timeout,
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckCSBSBackupPolicyV1Exists("opentelekomcloud_csbs_backup_policy_v1.backup_policy_v1", &policy),
+					testAccCheckCSBSBackupPolicyV1Exists(resourcePolicyName, &policy),
 				),
 			},
 		},
@@ -70,9 +69,9 @@ func TestAccCSBSBackupPolicyV1_weekMonth(t *testing.T) {
 		CheckDestroy:      testAccCheckCSBSBackupPolicyV1Destroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccCSBSBackupPolicyV1_weekMonth,
+				Config: testAccCSBSBackupPolicyV1WeekMonth,
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckCSBSBackupPolicyV1Exists("opentelekomcloud_csbs_backup_policy_v1.backup_policy_v1", &policy),
+					testAccCheckCSBSBackupPolicyV1Exists(resourcePolicyName, &policy),
 				),
 			},
 		},
@@ -81,9 +80,9 @@ func TestAccCSBSBackupPolicyV1_weekMonth(t *testing.T) {
 
 func testAccCheckCSBSBackupPolicyV1Destroy(s *terraform.State) error {
 	config := common.TestAccProvider.Meta().(*cfg.Config)
-	policyClient, err := config.CsbsV1Client(env.OS_REGION_NAME)
+	client, err := config.CsbsV1Client(env.OS_REGION_NAME)
 	if err != nil {
-		return fmt.Errorf("error creating csbs client: %s", err)
+		return fmt.Errorf("error creating CSBSv1 client: %w", err)
 	}
 
 	for _, rs := range s.RootModule().Resources {
@@ -91,7 +90,7 @@ func testAccCheckCSBSBackupPolicyV1Destroy(s *terraform.State) error {
 			continue
 		}
 
-		_, err := policies.Get(policyClient, rs.Primary.ID).Extract()
+		_, err := policies.Get(client, rs.Primary.ID).Extract()
 		if err == nil {
 			return fmt.Errorf("backup policy still exists")
 		}
@@ -112,12 +111,12 @@ func testAccCheckCSBSBackupPolicyV1Exists(n string, policy *policies.BackupPolic
 		}
 
 		config := common.TestAccProvider.Meta().(*cfg.Config)
-		policyClient, err := config.CsbsV1Client(env.OS_REGION_NAME)
+		client, err := config.CsbsV1Client(env.OS_REGION_NAME)
 		if err != nil {
-			return fmt.Errorf("error creating CSBS client: %s", err)
+			return fmt.Errorf("error creating CSBSv1 client: %w", err)
 		}
 
-		found, err := policies.Get(policyClient, rs.Primary.ID).Extract()
+		found, err := policies.Get(client, rs.Primary.ID).Extract()
 		if err != nil {
 			return err
 		}
@@ -132,10 +131,14 @@ func testAccCheckCSBSBackupPolicyV1Exists(n string, policy *policies.BackupPolic
 	}
 }
 
-var testAccCSBSBackupPolicyV1_basic = fmt.Sprintf(`
+var testAccCSBSBackupPolicyV1Basic = fmt.Sprintf(`
+%s
+
+%s
+
 resource "opentelekomcloud_compute_instance_v2" "instance_1" {
   name              = "instance_1"
-  image_id          = "%s"
+  image_id          = data.opentelekomcloud_images_image_v2.latest_image.id
   security_groups   = ["default"]
   availability_zone = "%s"
   flavor_id         = "%s"
@@ -144,7 +147,7 @@ resource "opentelekomcloud_compute_instance_v2" "instance_1" {
     foo = "bar"
   }
   network {
-    uuid = "%s"
+    uuid = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.network_id
   }
 }
 resource "opentelekomcloud_csbs_backup_policy_v1" "backup_policy_v1" {
@@ -163,12 +166,16 @@ resource "opentelekomcloud_csbs_backup_policy_v1" "backup_policy_v1" {
     trigger_pattern = "BEGIN:VCALENDAR\r\nBEGIN:VEVENT\r\nRRULE:FREQ=WEEKLY;BYDAY=TH;BYHOUR=12;BYMINUTE=27\r\nEND:VEVENT\r\nEND:VCALENDAR\r\n"
   }
 }
-`, env.OS_IMAGE_ID, env.OS_AVAILABILITY_ZONE, env.OS_FLAVOR_ID, env.OS_NETWORK_ID)
+`, common.DataSourceImage, common.DataSourceSubnet, env.OS_AVAILABILITY_ZONE, env.OsFlavorID)
 
-var testAccCSBSBackupPolicyV1_update = fmt.Sprintf(`
+var testAccCSBSBackupPolicyV1Update = fmt.Sprintf(`
+%s
+
+%s
+
 resource "opentelekomcloud_compute_instance_v2" "instance_1" {
   name              = "instance_1"
-  image_id          = "%s"
+  image_id          = data.opentelekomcloud_images_image_v2.latest_image.id
   security_groups   = ["default"]
   availability_zone = "%s"
   flavor_id         = "%s"
@@ -177,7 +184,7 @@ resource "opentelekomcloud_compute_instance_v2" "instance_1" {
     foo = "bar"
   }
   network {
-    uuid = "%s"
+    uuid = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.network_id
   }
 }
 
@@ -197,12 +204,16 @@ resource "opentelekomcloud_csbs_backup_policy_v1" "backup_policy_v1" {
     trigger_pattern = "BEGIN:VCALENDAR\r\nBEGIN:VEVENT\r\nRRULE:FREQ=WEEKLY;BYDAY=TH;BYHOUR=12;BYMINUTE=27\r\nEND:VEVENT\r\nEND:VCALENDAR\r\n"
   }
 }
-`, env.OS_IMAGE_ID, env.OS_AVAILABILITY_ZONE, env.OS_FLAVOR_ID, env.OS_NETWORK_ID)
+`, common.DataSourceImage, common.DataSourceSubnet, env.OS_AVAILABILITY_ZONE, env.OsFlavorID)
 
-var testAccCSBSBackupPolicyV1_timeout = fmt.Sprintf(`
+var testAccCSBSBackupPolicyV1Timeout = fmt.Sprintf(`
+%s
+
+%s
+
 resource "opentelekomcloud_compute_instance_v2" "instance_1" {
   name              = "instance_1"
-  image_id          = "%s"
+  image_id          = data.opentelekomcloud_images_image_v2.latest_image.id
   security_groups   = ["default"]
   availability_zone = "%s"
   flavor_id         = "%s"
@@ -211,7 +222,7 @@ resource "opentelekomcloud_compute_instance_v2" "instance_1" {
     foo = "bar"
   }
   network {
-    uuid = "%s"
+    uuid = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.network_id
   }
 }
 resource "opentelekomcloud_csbs_backup_policy_v1" "backup_policy_v1" {
@@ -235,12 +246,16 @@ resource "opentelekomcloud_csbs_backup_policy_v1" "backup_policy_v1" {
     delete = "5m"
   }
 }
-`, env.OS_IMAGE_ID, env.OS_AVAILABILITY_ZONE, env.OS_FLAVOR_ID, env.OS_NETWORK_ID)
+`, common.DataSourceImage, common.DataSourceSubnet, env.OS_AVAILABILITY_ZONE, env.OsFlavorID)
 
-var testAccCSBSBackupPolicyV1_weekMonth = fmt.Sprintf(`
+var testAccCSBSBackupPolicyV1WeekMonth = fmt.Sprintf(`
+%s
+
+%s
+
 resource "opentelekomcloud_compute_instance_v2" "instance_1" {
   name              = "instance_1"
-  image_id          = "%s"
+  image_id          = data.opentelekomcloud_images_image_v2.latest_image.id
   security_groups   = ["default"]
   availability_zone = "%s"
   flavor_id         = "%s"
@@ -249,7 +264,7 @@ resource "opentelekomcloud_compute_instance_v2" "instance_1" {
     foo = "bar"
   }
   network {
-    uuid = "%s"
+    uuid = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.id
   }
 }
 resource "opentelekomcloud_csbs_backup_policy_v1" "backup_policy_v1" {
@@ -271,4 +286,4 @@ resource "opentelekomcloud_csbs_backup_policy_v1" "backup_policy_v1" {
     timezone        = "UTC+03:00"
   }
 }
-`, env.OS_IMAGE_ID, env.OS_AVAILABILITY_ZONE, env.OS_FLAVOR_ID, env.OS_NETWORK_ID)
+`, common.DataSourceImage, common.DataSourceSubnet, env.OS_AVAILABILITY_ZONE, env.OsFlavorID)

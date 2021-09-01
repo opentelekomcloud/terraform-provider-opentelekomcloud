@@ -11,17 +11,19 @@ import (
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/acceptance/env"
 )
 
+const dataPolicyName = "data.opentelekomcloud_csbs_backup_policy_v1.csbs_policy"
+
 func TestAccCSBSBackupPolicyV1DataSource_basic(t *testing.T) {
 	resource.Test(t, resource.TestCase{
 		PreCheck:          func() { common.TestAccPreCheck(t) },
 		ProviderFactories: common.TestAccProviderFactories,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccCSBSBackupPolicyV1DataSource_basic,
+				Config: testAccCSBSBackupPolicyV1DataSourceBasic,
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckCSBSBackupPolicyV1DataSourceID("data.opentelekomcloud_csbs_backup_policy_v1.csbs_policy"),
-					resource.TestCheckResourceAttr("data.opentelekomcloud_csbs_backup_policy_v1.csbs_policy", "name", "backup-policy"),
-					resource.TestCheckResourceAttr("data.opentelekomcloud_csbs_backup_policy_v1.csbs_policy", "status", "suspended"),
+					testAccCheckCSBSBackupPolicyV1DataSourceID(dataPolicyName),
+					resource.TestCheckResourceAttr(dataPolicyName, "name", "backup-policy"),
+					resource.TestCheckResourceAttr(dataPolicyName, "status", "suspended"),
 				),
 			},
 		},
@@ -36,17 +38,21 @@ func testAccCheckCSBSBackupPolicyV1DataSourceID(n string) resource.TestCheckFunc
 		}
 
 		if rs.Primary.ID == "" {
-			return fmt.Errorf("backup data source ID not set ")
+			return fmt.Errorf("backup data source ID not set")
 		}
 
 		return nil
 	}
 }
 
-var testAccCSBSBackupPolicyV1DataSource_basic = fmt.Sprintf(`
+var testAccCSBSBackupPolicyV1DataSourceBasic = fmt.Sprintf(`
+%s
+
+%s
+
 resource "opentelekomcloud_compute_instance_v2" "instance_1" {
   name              = "instance_1"
-  image_id          = "%s"
+  image_id          = data.opentelekomcloud_images_image_v2.latest_image.id
   security_groups   = ["default"]
   availability_zone = "%s"
   flavor_id         = "%s"
@@ -54,9 +60,10 @@ resource "opentelekomcloud_compute_instance_v2" "instance_1" {
     foo = "bar"
   }
   network {
-    uuid = "%s"
+    uuid = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.network_id
   }
 }
+
 resource "opentelekomcloud_csbs_backup_policy_v1" "backup_policy_v1" {
   name = "backup-policy"
   resource {
@@ -76,4 +83,4 @@ resource "opentelekomcloud_csbs_backup_policy_v1" "backup_policy_v1" {
 data "opentelekomcloud_csbs_backup_policy_v1" "csbs_policy" {
   id = opentelekomcloud_csbs_backup_policy_v1.backup_policy_v1.id
 }
-`, env.OS_IMAGE_ID, env.OS_AVAILABILITY_ZONE, env.OS_FLAVOR_ID, env.OS_NETWORK_ID)
+`, common.DataSourceImage, common.DataSourceSubnet, env.OS_AVAILABILITY_ZONE, env.OsFlavorID)
