@@ -19,12 +19,12 @@ func TestAccMRSV1Cluster_basic(t *testing.T) {
 	var clusterGet cluster.Cluster
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:          func() { testAccPreCheckMrs(t) },
+		PreCheck:          func() { common.TestAccPreCheckRequiredEnvVars(t) },
 		ProviderFactories: common.TestAccProviderFactories,
 		CheckDestroy:      testAccCheckMRSV1ClusterDestroy,
 		Steps: []resource.TestStep{
 			{
-				Config: TestAccMRSV1ClusterConfig_basic,
+				Config: testAccMRSV1ClusterConfigBasic,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckMRSV1ClusterExists("opentelekomcloud_mrs_cluster_v1.cluster1", &clusterGet),
 					resource.TestCheckResourceAttr(
@@ -95,48 +95,55 @@ func testAccCheckMRSV1ClusterExists(n string, clusterGet *cluster.Cluster) resou
 	}
 }
 
-var TestAccMRSV1ClusterConfig_basic = fmt.Sprintf(`
+var testAccMRSV1ClusterConfigBasic = fmt.Sprintf(`
+%s
+
 resource "opentelekomcloud_mrs_cluster_v1" "cluster1" {
-  cluster_name = "mrs-cluster-acc"
-  billing_type = 12
-  master_node_num = 2
-  core_node_num = 3
-  master_node_size = "h1.2xlarge.4.linux.mrs"
-  core_node_size = "h1.2xlarge.4.linux.mrs"
-  available_zone_id = "%s"
-  vpc_id = "%s"
-  subnet_id = "%s"
-  cluster_version = "MRS 1.7.2"
-  master_data_volume_type = "SAS"
-  master_data_volume_size = 100
+  cluster_name             = "mrs-cluster-acc"
+  billing_type             = 12
+  master_node_num          = 1
+  core_node_num            = 1
+  master_node_size         = "c3.2xlarge.4.linux.mrs"
+  core_node_size           = "c3.2xlarge.4.linux.mrs"
+  available_zone_id        = "%s"
+  vpc_id                   = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.vpc_id
+  subnet_id                = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.id
+  cluster_version          = "MRS 1.7.2"
+  master_data_volume_type  = "SAS"
+  master_data_volume_size  = 100
   master_data_volume_count = 1
-  core_data_volume_type = "SATA"
-  core_data_volume_size = 100
-  core_data_volume_count = 2
-  safe_mode = 0
-  cluster_type = 0
-  node_public_cert_name = "KeyPair-ci"
-  cluster_admin_secret = ""
+  core_data_volume_type    = "SATA"
+  core_data_volume_size    = 100
+  core_data_volume_count   = 2
+  safe_mode                = 0
+  cluster_type             = 0
+  node_public_cert_name    = "%s"
+  cluster_admin_secret     = "Qwert!123"
   component_list {
-      component_name = "Hadoop"
+    component_name = "Hadoop"
   }
   component_list {
-      component_name = "Spark"
+    component_name = "Spark"
   }
   component_list {
-      component_name = "Hive"
+    component_name = "Hive"
   }
   bootstrap_scripts {
-    name = "Modify os config"
-    uri = "s3a://bootstrap/modify_os_config.sh"
+    name       = "Modify os config"
+    uri        = "s3a://bootstrap/modify_os_config.sh"
     parameters = "param1 param2"
-    nodes = ["master", "core", "task"]
-	active_master = true
-	before_component_start = true
-    fail_action = "continue"
+    nodes = [
+      "master",
+      "core",
+      "task",
+    ]
+    active_master          = true
+    before_component_start = true
+    fail_action            = "continue"
   }
   tags = {
     foo = "bar"
     key = "value"
   }
-}`, env.OS_AVAILABILITY_ZONE, env.OS_VPC_ID, env.OS_NETWORK_ID)
+}
+`, common.DataSourceSubnet, env.OS_AVAILABILITY_ZONE, env.OS_KEYPAIR_NAME)
