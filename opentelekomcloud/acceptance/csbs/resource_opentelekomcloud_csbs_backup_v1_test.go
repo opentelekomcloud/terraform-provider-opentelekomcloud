@@ -66,7 +66,7 @@ func testAccCSBSBackupV1Destroy(s *terraform.State) error {
 			continue
 		}
 
-		_, err := backup.Get(client, rs.Primary.ID).ExtractBackup()
+		_, err := backup.Get(client, rs.Primary.ID).Extract()
 		if err == nil {
 			return fmt.Errorf("backup still exists")
 		}
@@ -92,7 +92,7 @@ func testAccCSBSBackupV1Exists(n string, backups *backup.Backup) resource.TestCh
 			return fmt.Errorf("error creating CSBSv1 client: %s", err)
 		}
 
-		found, err := backup.Get(client, rs.Primary.ID).ExtractBackup()
+		found, err := backup.Get(client, rs.Primary.ID).Extract()
 		if err != nil {
 			return err
 		}
