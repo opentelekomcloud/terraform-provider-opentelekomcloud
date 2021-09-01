@@ -1,0 +1,4 @@
+---
+fixes:
+  - |
+    **[CSBS]** Fix broken CRUD workflow in ``resource/opentelekomcloud_csbs_backup_v1`` (`#1359 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/1359>`_)
