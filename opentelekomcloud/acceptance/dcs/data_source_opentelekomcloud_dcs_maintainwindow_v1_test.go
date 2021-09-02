@@ -10,6 +10,8 @@ import (
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/acceptance/common"
 )
 
+const dataMaintainWindowName = "data.opentelekomcloud_dcs_maintainwindow_v1.maintainwindow1"
+
 func TestAccDcsMaintainWindowV1DataSource_basic(t *testing.T) {
 	resource.Test(t, resource.TestCase{
 		PreCheck:          func() { common.TestAccPreCheck(t) },
@@ -18,11 +20,9 @@ func TestAccDcsMaintainWindowV1DataSource_basic(t *testing.T) {
 			{
 				Config: testAccDcsMaintainWindowV1DataSourceBasic,
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckDcsMaintainWindowV1DataSourceID("data.opentelekomcloud_dcs_maintainwindow_v1.maintainwindow1"),
-					resource.TestCheckResourceAttr(
-						"data.opentelekomcloud_dcs_maintainwindow_v1.maintainwindow1", "seq", "1"),
-					resource.TestCheckResourceAttr(
-						"data.opentelekomcloud_dcs_maintainwindow_v1.maintainwindow1", "begin", "22"),
+					testAccCheckDcsMaintainWindowV1DataSourceID(dataMaintainWindowName),
+					resource.TestCheckResourceAttr(dataMaintainWindowName, "seq", "1"),
+					resource.TestCheckResourceAttr(dataMaintainWindowName, "begin", "22"),
 				),
 			},
 		},
@@ -33,7 +33,7 @@ func testAccCheckDcsMaintainWindowV1DataSourceID(n string) resource.TestCheckFun
 	return func(s *terraform.State) error {
 		rs, ok := s.RootModule().Resources[n]
 		if !ok {
-			return fmt.Errorf("can't find Dcs maintainwindow data source: %s", n)
+			return fmt.Errorf("can't find DCS maintainwindow data source: %s", n)
 		}
 
 		if rs.Primary.ID == "" {
