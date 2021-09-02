@@ -190,6 +190,7 @@ resource "opentelekomcloud_css_cluster_v1" "cluster" {
 }
 `, acc.DataSourceSecGroupDefault, acc.DataSourceSubnet, name, env.OS_AVAILABILITY_ZONE)
 }
+
 func testAccCssClusterV1TooSmall(name string) string {
 	return fmt.Sprintf(`
 %s
@@ -222,6 +223,7 @@ resource "opentelekomcloud_css_cluster_v1" "cluster" {
 }
 `, acc.DataSourceSecGroupDefault, acc.DataSourceSubnet, name, env.OS_AVAILABILITY_ZONE)
 }
+
 func testAccCssClusterV1TooBig(name string) string {
 	return fmt.Sprintf(`
 %s
