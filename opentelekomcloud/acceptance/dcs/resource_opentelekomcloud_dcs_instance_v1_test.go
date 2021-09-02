@@ -15,10 +15,11 @@ import (
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common/cfg"
 )
 
+const resourceInstanceName = "opentelekomcloud_dcs_instance_v1.instance_1"
+
 func TestAccDcsInstancesV1_basic(t *testing.T) {
 	var instance instances.Instance
 	var instanceName = fmt.Sprintf("dcs_instance_%s", acctest.RandString(5))
-	resourceName := "opentelekomcloud_dcs_instance_v1.instance_1"
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:          func() { common.TestAccPreCheck(t) },
@@ -28,26 +29,26 @@ func TestAccDcsInstancesV1_basic(t *testing.T) {
 			{
 				Config: testAccDcsV1InstanceBasic(instanceName),
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckDcsV1InstanceExists(resourceName, instance),
-					resource.TestCheckResourceAttr(resourceName, "name", instanceName),
-					resource.TestCheckResourceAttr(resourceName, "engine", "Redis"),
+					testAccCheckDcsV1InstanceExists(resourceInstanceName, instance),
+					resource.TestCheckResourceAttr(resourceInstanceName, "name", instanceName),
+					resource.TestCheckResourceAttr(resourceInstanceName, "engine", "Redis"),
 				),
 			},
 			{
 				Config: testAccDcsV1InstanceUpdated(instanceName),
 				Check: resource.ComposeTestCheckFunc(
-					resource.TestCheckResourceAttr(resourceName, "backup_policy.0.begin_at", "01:00-02:00"),
-					resource.TestCheckResourceAttr(resourceName, "backup_policy.0.save_days", "2"),
-					resource.TestCheckResourceAttr(resourceName, "backup_policy.0.backup_at.#", "3"),
+					resource.TestCheckResourceAttr(resourceInstanceName, "backup_policy.0.begin_at", "01:00-02:00"),
+					resource.TestCheckResourceAttr(resourceInstanceName, "backup_policy.0.save_days", "2"),
+					resource.TestCheckResourceAttr(resourceInstanceName, "backup_policy.0.backup_at.#", "3"),
 				),
 			},
 			{
 				Config: testAccDcsV1InstanceSingle(instanceName),
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckDcsV1InstanceExists(resourceName, instance),
-					resource.TestCheckResourceAttr(resourceName, "name", instanceName),
-					resource.TestCheckResourceAttr(resourceName, "engine", "Redis"),
-					resource.TestCheckResourceAttr(resourceName, "resource_spec_code", "dcs.single_node"),
+					testAccCheckDcsV1InstanceExists(resourceInstanceName, instance),
+					resource.TestCheckResourceAttr(resourceInstanceName, "name", instanceName),
+					resource.TestCheckResourceAttr(resourceInstanceName, "engine", "Redis"),
+					resource.TestCheckResourceAttr(resourceInstanceName, "resource_spec_code", "dcs.single_node"),
 				),
 			},
 		},
@@ -106,14 +107,15 @@ func testAccCheckDcsV1InstanceExists(n string, instance instances.Instance) reso
 
 func testAccDcsV1InstanceBasic(instanceName string) string {
 	return fmt.Sprintf(`
-resource "opentelekomcloud_networking_secgroup_v2" "secgroup_1" {
-  name        = "secgroup_1"
-  description = "secgroup_1"
-}
+%s
+
+%s
+
 data "opentelekomcloud_dcs_az_v1" "az_1" {
   port = "8002"
   code = "%s"
 }
+
 data "opentelekomcloud_dcs_product_v1" "product_1" {
   spec_code = "dcs.master_standby"
 }
@@ -124,9 +126,9 @@ resource "opentelekomcloud_dcs_instance_v1" "instance_1" {
   password          = "Hungarian_rapsody"
   engine            = "Redis"
   capacity          = 2
-  vpc_id            = "%s"
-  security_group_id = opentelekomcloud_networking_secgroup_v2.secgroup_1.id
-  subnet_id         = "%s"
+  vpc_id            = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.vpc_id
+  security_group_id = data.opentelekomcloud_networking_secgroup_v2.default_secgroup.id
+  subnet_id         = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.network_id
   available_zones   = [data.opentelekomcloud_dcs_az_v1.az_1.id]
   product_id        = data.opentelekomcloud_dcs_product_v1.product_1.id
   backup_policy {
@@ -143,30 +145,32 @@ resource "opentelekomcloud_dcs_instance_v1" "instance_1" {
     parameter_value = "100"
   }
 }
-`, env.OS_AVAILABILITY_ZONE, instanceName, env.OS_VPC_ID, env.OS_NETWORK_ID)
+`, common.DataSourceSecGroupDefault, common.DataSourceSubnet, env.OS_AVAILABILITY_ZONE, instanceName)
 }
 func testAccDcsV1InstanceUpdated(instanceName string) string {
 	return fmt.Sprintf(`
-resource "opentelekomcloud_networking_secgroup_v2" "secgroup_1" {
-  name        = "secgroup_1"
-  description = "secgroup_1"
-}
+%s
+
+%s
+
 data "opentelekomcloud_dcs_az_v1" "az_1" {
   port = "8002"
   code = "%s"
 }
+
 data "opentelekomcloud_dcs_product_v1" "product_1" {
   spec_code = "dcs.master_standby"
 }
+
 resource "opentelekomcloud_dcs_instance_v1" "instance_1" {
   name              = "%s"
   engine_version    = "3.0"
   password          = "Hungarian_rapsody"
   engine            = "Redis"
   capacity          = 2
-  vpc_id            = "%s"
-  security_group_id = opentelekomcloud_networking_secgroup_v2.secgroup_1.id
-  subnet_id         = "%s"
+  vpc_id            = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.vpc_id
+  security_group_id = data.opentelekomcloud_networking_secgroup_v2.default_secgroup.id
+  subnet_id         = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.network_id
   available_zones   = [data.opentelekomcloud_dcs_az_v1.az_1.id]
   product_id        = data.opentelekomcloud_dcs_product_v1.product_1.id
   backup_policy {
@@ -183,33 +187,35 @@ resource "opentelekomcloud_dcs_instance_v1" "instance_1" {
     parameter_value = "200"
   }
 }
-`, env.OS_AVAILABILITY_ZONE, instanceName, env.OS_VPC_ID, env.OS_NETWORK_ID)
+`, common.DataSourceSecGroupDefault, common.DataSourceSubnet, env.OS_AVAILABILITY_ZONE, instanceName)
 }
 
 func testAccDcsV1InstanceSingle(instanceName string) string {
 	return fmt.Sprintf(`
-resource "opentelekomcloud_networking_secgroup_v2" "secgroup_1" {
-  name        = "secgroup_1"
-  description = "secgroup_1"
-}
+%s
+
+%s
+
 data "opentelekomcloud_dcs_az_v1" "az_1" {
   port = "8002"
   code = "%s"
 }
+
 data "opentelekomcloud_dcs_product_v1" "product_1" {
   spec_code = "dcs.single_node"
 }
+
 resource "opentelekomcloud_dcs_instance_v1" "instance_1" {
   name              = "%s"
   engine_version    = "3.0.7"
   password          = "Hungarian_rapsody"
   engine            = "Redis"
   capacity          = 2
-  vpc_id            = "%s"
-  security_group_id = opentelekomcloud_networking_secgroup_v2.secgroup_1.id
-  subnet_id         = "%s"
+  vpc_id            = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.vpc_id
+  security_group_id = data.opentelekomcloud_networking_secgroup_v2.default_secgroup.id
+  subnet_id         = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.network_id
   available_zones   = [data.opentelekomcloud_dcs_az_v1.az_1.id]
   product_id        = data.opentelekomcloud_dcs_product_v1.product_1.id
 }
-`, env.OS_AVAILABILITY_ZONE, instanceName, env.OS_VPC_ID, env.OS_NETWORK_ID)
+`, common.DataSourceSecGroupDefault, common.DataSourceSubnet, env.OS_AVAILABILITY_ZONE, instanceName)
 }
