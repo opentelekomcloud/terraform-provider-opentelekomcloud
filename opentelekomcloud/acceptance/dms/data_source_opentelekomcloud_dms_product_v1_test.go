@@ -10,21 +10,20 @@ import (
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/acceptance/common"
 )
 
+const dataProductName = "data.opentelekomcloud_dms_product_v1.product1"
+
 func TestAccDmsProductV1DataSource_basic(t *testing.T) {
 	resource.Test(t, resource.TestCase{
-		PreCheck:          func() { testAccPreCheckDms(t) },
+		PreCheck:          func() { common.TestAccPreCheck(t) },
 		ProviderFactories: common.TestAccProviderFactories,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccDmsProductV1DataSourceBasic,
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckDmsProductV1DataSourceID("data.opentelekomcloud_dms_product_v1.product1"),
-					resource.TestCheckResourceAttr(
-						"data.opentelekomcloud_dms_product_v1.product1", "engine", "kafka"),
-					resource.TestCheckResourceAttr(
-						"data.opentelekomcloud_dms_product_v1.product1", "partition_num", "300"),
-					resource.TestCheckResourceAttr(
-						"data.opentelekomcloud_dms_product_v1.product1", "storage", "600"),
+					testAccCheckDmsProductV1DataSourceID(dataProductName),
+					resource.TestCheckResourceAttr(dataProductName, "engine", "kafka"),
+					resource.TestCheckResourceAttr(dataProductName, "partition_num", "300"),
+					resource.TestCheckResourceAttr(dataProductName, "storage", "600"),
 				),
 			},
 		},
@@ -33,21 +32,17 @@ func TestAccDmsProductV1DataSource_basic(t *testing.T) {
 
 func TestAccDmsProductV1DataSource_rabbitmqSingle(t *testing.T) {
 	resource.Test(t, resource.TestCase{
-		PreCheck:          func() { testAccPreCheckDms(t) },
+		PreCheck:          func() { common.TestAccPreCheck(t) },
 		ProviderFactories: common.TestAccProviderFactories,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccDmsProductV1DataSourceRabbitmqSingle,
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckDmsProductV1DataSourceID("data.opentelekomcloud_dms_product_v1.product1"),
-					resource.TestCheckResourceAttr(
-						"data.opentelekomcloud_dms_product_v1.product1", "engine", "rabbitmq"),
-					resource.TestCheckResourceAttr(
-						"data.opentelekomcloud_dms_product_v1.product1", "node_num", "3"),
-					resource.TestCheckResourceAttr(
-						"data.opentelekomcloud_dms_product_v1.product1", "io_type", "normal"),
-					resource.TestCheckResourceAttr(
-						"data.opentelekomcloud_dms_product_v1.product1", "storage", "100"),
+					testAccCheckDmsProductV1DataSourceID(dataProductName),
+					resource.TestCheckResourceAttr(dataProductName, "engine", "rabbitmq"),
+					resource.TestCheckResourceAttr(dataProductName, "node_num", "3"),
+					resource.TestCheckResourceAttr(dataProductName, "io_type", "normal"),
+					resource.TestCheckResourceAttr(dataProductName, "storage", "100"),
 				),
 			},
 		},
@@ -56,23 +51,18 @@ func TestAccDmsProductV1DataSource_rabbitmqSingle(t *testing.T) {
 
 func TestAccDmsProductV1DataSource_rabbitmqCluster(t *testing.T) {
 	resource.Test(t, resource.TestCase{
-		PreCheck:          func() { testAccPreCheckDms(t) },
+		PreCheck:          func() { common.TestAccPreCheck(t) },
 		ProviderFactories: common.TestAccProviderFactories,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccDmsProductV1DataSourceRabbitmqCluster,
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckDmsProductV1DataSourceID("data.opentelekomcloud_dms_product_v1.product1"),
-					resource.TestCheckResourceAttr(
-						"data.opentelekomcloud_dms_product_v1.product1", "engine", "rabbitmq"),
-					resource.TestCheckResourceAttr(
-						"data.opentelekomcloud_dms_product_v1.product1", "node_num", "5"),
-					resource.TestCheckResourceAttr(
-						"data.opentelekomcloud_dms_product_v1.product1", "storage", "500"),
-					resource.TestCheckResourceAttr(
-						"data.opentelekomcloud_dms_product_v1.product1", "io_type", "high"),
-					resource.TestCheckResourceAttr(
-						"data.opentelekomcloud_dms_product_v1.product1", "storage_spec_code", "dms.physical.storage.high"),
+					testAccCheckDmsProductV1DataSourceID(dataProductName),
+					resource.TestCheckResourceAttr(dataProductName, "engine", "rabbitmq"),
+					resource.TestCheckResourceAttr(dataProductName, "node_num", "5"),
+					resource.TestCheckResourceAttr(dataProductName, "storage", "500"),
+					resource.TestCheckResourceAttr(dataProductName, "io_type", "high"),
+					resource.TestCheckResourceAttr(dataProductName, "storage_spec_code", "dms.physical.storage.high"),
 				),
 			},
 		},
@@ -83,7 +73,7 @@ func testAccCheckDmsProductV1DataSourceID(n string) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
 		rs, ok := s.RootModule().Resources[n]
 		if !ok {
-			return fmt.Errorf("can't find Dms product data source: %s", n)
+			return fmt.Errorf("can't find dms product data source: %s", n)
 		}
 
 		if rs.Primary.ID == "" {
@@ -97,31 +87,31 @@ func testAccCheckDmsProductV1DataSourceID(n string) resource.TestCheckFunc {
 const (
 	testAccDmsProductV1DataSourceBasic = `
 data "opentelekomcloud_dms_product_v1" "product1" {
-  engine = "kafka"
-  version = "2.3.0"
-  instance_type = "cluster"
-  partition_num = 300
-  storage = 600
+  engine            = "kafka"
+  version           = "2.3.0"
+  instance_type     = "cluster"
+  partition_num     = 300
+  storage           = 600
   storage_spec_code = "dms.physical.storage.high"
 }
 `
 	testAccDmsProductV1DataSourceRabbitmqSingle = `
 data "opentelekomcloud_dms_product_v1" "product1" {
-  engine = "rabbitmq"
-  version = "3.7.0"
-  instance_type = "single"
-  node_num = 3
-  storage = 100
+  engine            = "rabbitmq"
+  version           = "3.7.0"
+  instance_type     = "single"
+  node_num          = 3
+  storage           = 100
   storage_spec_code = "dms.physical.storage.normal"
 }
 `
 	testAccDmsProductV1DataSourceRabbitmqCluster = `
 data "opentelekomcloud_dms_product_v1" "product1" {
-  engine = "rabbitmq"
-  version = "3.7.0"
-  instance_type = "cluster"
-  node_num = 5
-  storage = 500
+  engine            = "rabbitmq"
+  version           = "3.7.0"
+  instance_type     = "cluster"
+  node_num          = 5
+  storage           = 500
   storage_spec_code = "dms.physical.storage.high"
 }
 `

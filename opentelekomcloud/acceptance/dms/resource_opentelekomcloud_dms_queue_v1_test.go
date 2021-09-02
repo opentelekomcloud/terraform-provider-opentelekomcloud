@@ -15,6 +15,8 @@ import (
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common/cfg"
 )
 
+const resourceQueueName = "opentelekomcloud_dms_queue_v1.queue_1"
+
 func TestAccDmsQueuesV1_basic(t *testing.T) {
 	var queue queues.Queue
 	var queueName = fmt.Sprintf("dms_queue_%s", acctest.RandString(5))
@@ -25,20 +27,18 @@ func TestAccDmsQueuesV1_basic(t *testing.T) {
 		CheckDestroy:      testAccCheckDmsV1QueueDestroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccDmsV1Queue_basic(queueName),
+				Config: testAccDmsV1QueueBasic(queueName),
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckDmsV1QueueExists("opentelekomcloud_dms_queue_v1.queue_1", queue),
-					resource.TestCheckResourceAttr(
-						"opentelekomcloud_dms_queue_v1.queue_1", "name", queueName),
-					resource.TestCheckResourceAttr(
-						"opentelekomcloud_dms_queue_v1.queue_1", "queue_mode", "NORMAL"),
+					testAccCheckDmsV1QueueExists(resourceQueueName, queue),
+					resource.TestCheckResourceAttr(resourceQueueName, "name", queueName),
+					resource.TestCheckResourceAttr(resourceQueueName, "queue_mode", "NORMAL"),
 				),
 			},
 		},
 	})
 }
 
-func TestAccDmsQueuesV1_FIFOmode(t *testing.T) {
+func TestAccDmsQueuesV1_FIFOMode(t *testing.T) {
 	var queue queues.Queue
 	var queueName = fmt.Sprintf("dms_queue_%s", acctest.RandString(5))
 
@@ -48,19 +48,14 @@ func TestAccDmsQueuesV1_FIFOmode(t *testing.T) {
 		CheckDestroy:      testAccCheckDmsV1QueueDestroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccDmsV1Queue_FIFOmode(queueName),
+				Config: testAccDmsV1QueueFIFOMode(queueName),
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckDmsV1QueueExists("opentelekomcloud_dms_queue_v1.queue_1", queue),
-					resource.TestCheckResourceAttr(
-						"opentelekomcloud_dms_queue_v1.queue_1", "name", queueName),
-					resource.TestCheckResourceAttr(
-						"opentelekomcloud_dms_queue_v1.queue_1", "description", "test create dms queue"),
-					resource.TestCheckResourceAttr(
-						"opentelekomcloud_dms_queue_v1.queue_1", "queue_mode", "FIFO"),
-					resource.TestCheckResourceAttr(
-						"opentelekomcloud_dms_queue_v1.queue_1", "redrive_policy", "enable"),
-					resource.TestCheckResourceAttr(
-						"opentelekomcloud_dms_queue_v1.queue_1", "max_consume_count", "80"),
+					testAccCheckDmsV1QueueExists(resourceQueueName, queue),
+					resource.TestCheckResourceAttr(resourceQueueName, "name", queueName),
+					resource.TestCheckResourceAttr(resourceQueueName, "description", "test create dms queue"),
+					resource.TestCheckResourceAttr(resourceQueueName, "queue_mode", "FIFO"),
+					resource.TestCheckResourceAttr(resourceQueueName, "redrive_policy", "enable"),
+					resource.TestCheckResourceAttr(resourceQueueName, "max_consume_count", "80"),
 				),
 			},
 		},
@@ -69,9 +64,9 @@ func TestAccDmsQueuesV1_FIFOmode(t *testing.T) {
 
 func testAccCheckDmsV1QueueDestroy(s *terraform.State) error {
 	config := common.TestAccProvider.Meta().(*cfg.Config)
-	dmsClient, err := config.DmsV1Client(env.OS_REGION_NAME)
+	client, err := config.DmsV1Client(env.OS_REGION_NAME)
 	if err != nil {
-		return fmt.Errorf("error creating OpenTelekomCloud queue client: %s", err)
+		return fmt.Errorf("error creating OpenTelekomCloud DMSv1 client: %w", err)
 	}
 
 	for _, rs := range s.RootModule().Resources {
@@ -79,9 +74,9 @@ func testAccCheckDmsV1QueueDestroy(s *terraform.State) error {
 			continue
 		}
 
-		_, err := queues.Get(dmsClient, rs.Primary.ID, false).Extract()
+		_, err := queues.Get(client, rs.Primary.ID, false).Extract()
 		if err == nil {
-			return fmt.Errorf("the Dms queue still exists.")
+			return fmt.Errorf("dms queue still exists")
 		}
 	}
 	return nil
@@ -99,32 +94,32 @@ func testAccCheckDmsV1QueueExists(n string, queue queues.Queue) resource.TestChe
 		}
 
 		config := common.TestAccProvider.Meta().(*cfg.Config)
-		dmsClient, err := config.DmsV1Client(env.OS_REGION_NAME)
+		client, err := config.DmsV1Client(env.OS_REGION_NAME)
 		if err != nil {
-			return fmt.Errorf("error creating OpenTelekomCloud queue client: %s", err)
+			return fmt.Errorf("error creating OpenTelekomCloud DMSv1 client: %w", err)
 		}
 
-		v, err := queues.Get(dmsClient, rs.Primary.ID, false).Extract()
+		v, err := queues.Get(client, rs.Primary.ID, false).Extract()
 		if err != nil {
-			return fmt.Errorf("error getting OpenTelekomCloud queue: %s, err: %s", rs.Primary.ID, err)
+			return fmt.Errorf("error getting OpenTelekomCloud DMS queue: %w", err)
 		}
 		if v.ID != rs.Primary.ID {
-			return fmt.Errorf("the Dms queue not found.")
+			return fmt.Errorf("dms queue not found")
 		}
 		queue = *v
 		return nil
 	}
 }
 
-func testAccDmsV1Queue_basic(queueName string) string {
+func testAccDmsV1QueueBasic(queueName string) string {
 	return fmt.Sprintf(`
 resource "opentelekomcloud_dms_queue_v1" "queue_1" {
   name = "%s"
 }
-	`, queueName)
+`, queueName)
 }
 
-func testAccDmsV1Queue_FIFOmode(queueName string) string {
+func testAccDmsV1QueueFIFOMode(queueName string) string {
 	return fmt.Sprintf(`
 resource "opentelekomcloud_dms_queue_v1" "queue_1" {
   name              = "%s"
@@ -133,5 +128,5 @@ resource "opentelekomcloud_dms_queue_v1" "queue_1" {
   redrive_policy    = "enable"
   max_consume_count = 80
 }
-	`, queueName)
+`, queueName)
 }

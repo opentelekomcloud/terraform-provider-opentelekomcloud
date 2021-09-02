@@ -15,12 +15,12 @@ import (
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common/cfg"
 )
 
+const resourceInstanceName = "opentelekomcloud_dms_instance_v1.instance_1"
+
 func TestAccDmsInstancesV1_basic(t *testing.T) {
 	var instance instances.Instance
 	var instanceName = fmt.Sprintf("dms_instance_%s", acctest.RandString(5))
 	var instanceUpdate = fmt.Sprintf("dms_instance_update_%s", acctest.RandString(5))
-
-	resourceName := "opentelekomcloud_dms_instance_v1.instance_1"
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:          func() { common.TestAccPreCheck(t) },
@@ -30,17 +30,17 @@ func TestAccDmsInstancesV1_basic(t *testing.T) {
 			{
 				Config: testAccDmsV1InstanceBasic(instanceName),
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckDmsV1InstanceExists(resourceName, instance),
-					resource.TestCheckResourceAttr(resourceName, "name", instanceName),
-					resource.TestCheckResourceAttr(resourceName, "engine", "kafka"),
+					testAccCheckDmsV1InstanceExists(resourceInstanceName, instance),
+					resource.TestCheckResourceAttr(resourceInstanceName, "name", instanceName),
+					resource.TestCheckResourceAttr(resourceInstanceName, "engine", "kafka"),
 				),
 			},
 			{
 				Config: testAccDmsV1InstanceUpdate(instanceUpdate),
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckDmsV1InstanceExists(resourceName, instance),
-					resource.TestCheckResourceAttr(resourceName, "name", instanceUpdate),
-					resource.TestCheckResourceAttr(resourceName, "description", "instance update description"),
+					testAccCheckDmsV1InstanceExists(resourceInstanceName, instance),
+					resource.TestCheckResourceAttr(resourceInstanceName, "name", instanceUpdate),
+					resource.TestCheckResourceAttr(resourceInstanceName, "description", "instance update description"),
 				),
 			},
 		},
@@ -99,10 +99,9 @@ func testAccCheckDmsV1InstanceExists(n string, instance instances.Instance) reso
 
 func testAccDmsV1InstanceBasic(instanceName string) string {
 	return fmt.Sprintf(`
-resource "opentelekomcloud_networking_secgroup_v2" "secgroup_1" {
-  name        = "secgroup_1"
-  description = "secgroup_1"
-}
+%s
+
+%s
 
 data "opentelekomcloud_dms_az_v1" "az_1" {}
 
@@ -111,29 +110,29 @@ data "opentelekomcloud_dms_product_v1" "product_1" {
   instance_type = "cluster"
   version       = "2.3.0"
 }
+
 resource "opentelekomcloud_dms_instance_v1" "instance_1" {
   name              = "%s"
   engine            = "kafka"
   storage_space     = data.opentelekomcloud_dms_product_v1.product_1.storage
   access_user       = "user"
   password          = "Dmstest@123"
-  vpc_id            = "%s"
-  security_group_id = opentelekomcloud_networking_secgroup_v2.secgroup_1.id
-  subnet_id         = "%s"
+  vpc_id            = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.vpc_id
+  security_group_id = data.opentelekomcloud_networking_secgroup_v2.default_secgroup.id
+  subnet_id         = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.network_id
   available_zones   = [data.opentelekomcloud_dms_az_v1.az_1.id]
   product_id        = data.opentelekomcloud_dms_product_v1.product_1.id
   engine_version    = data.opentelekomcloud_dms_product_v1.product_1.version
   storage_spec_code = data.opentelekomcloud_dms_product_v1.product_1.storage_spec_code
 }
-`, instanceName, env.OS_VPC_ID, env.OS_NETWORK_ID)
+`, common.DataSourceSecGroupDefault, common.DataSourceSubnet, instanceName)
 }
 
 func testAccDmsV1InstanceUpdate(instanceUpdate string) string {
 	return fmt.Sprintf(`
-resource "opentelekomcloud_networking_secgroup_v2" "secgroup_1" {
-  name        = "secgroup_1"
-  description = "secgroup_1"
-}
+%s
+
+%s
 
 data "opentelekomcloud_dms_az_v1" "az_1" {}
 
@@ -150,13 +149,13 @@ resource "opentelekomcloud_dms_instance_v1" "instance_1" {
   storage_space     = data.opentelekomcloud_dms_product_v1.product_1.storage
   access_user       = "user"
   password          = "Dmstest@123"
-  vpc_id            = "%s"
-  security_group_id = opentelekomcloud_networking_secgroup_v2.secgroup_1.id
-  subnet_id         = "%s"
+  vpc_id            = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.vpc_id
+  security_group_id = data.opentelekomcloud_networking_secgroup_v2.default_secgroup.id
+  subnet_id         = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.network_id
   available_zones   = [data.opentelekomcloud_dms_az_v1.az_1.id]
   product_id        = data.opentelekomcloud_dms_product_v1.product_1.id
   engine_version    = data.opentelekomcloud_dms_product_v1.product_1.version
   storage_spec_code = data.opentelekomcloud_dms_product_v1.product_1.storage_spec_code
 }
-`, instanceUpdate, env.OS_VPC_ID, env.OS_NETWORK_ID)
+`, common.DataSourceSecGroupDefault, common.DataSourceSubnet, instanceUpdate)
 }

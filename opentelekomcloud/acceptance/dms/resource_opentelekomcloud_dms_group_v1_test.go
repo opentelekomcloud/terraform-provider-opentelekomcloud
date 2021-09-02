@@ -15,6 +15,8 @@ import (
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common/cfg"
 )
 
+const resourceGroupName = "opentelekomcloud_dms_group_v1.group_1"
+
 func TestAccDmsGroupsV1_basic(t *testing.T) {
 	var group groups.Group
 	var groupName = fmt.Sprintf("dms_group_%s", acctest.RandString(5))
@@ -28,9 +30,8 @@ func TestAccDmsGroupsV1_basic(t *testing.T) {
 			{
 				Config: testAccDmsV1GroupBasic(groupName, queueName),
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckDmsV1GroupExists("opentelekomcloud_dms_group_v1.group_1", group),
-					resource.TestCheckResourceAttr(
-						"opentelekomcloud_dms_group_v1.group_1", "name", groupName),
+					testAccCheckDmsV1GroupExists(resourceGroupName, group),
+					resource.TestCheckResourceAttr(resourceGroupName, "name", groupName),
 				),
 			},
 		},
@@ -39,9 +40,9 @@ func TestAccDmsGroupsV1_basic(t *testing.T) {
 
 func testAccCheckDmsV1GroupDestroy(s *terraform.State) error {
 	config := common.TestAccProvider.Meta().(*cfg.Config)
-	dmsClient, err := config.DmsV1Client(env.OS_REGION_NAME)
+	client, err := config.DmsV1Client(env.OS_REGION_NAME)
 	if err != nil {
-		return fmt.Errorf("error creating OpenTelekomCloud group client: %s", err)
+		return fmt.Errorf("error creating OpenTelekomCloud DMSv1 client: %w", err)
 	}
 
 	for _, rs := range s.RootModule().Resources {
@@ -50,7 +51,7 @@ func testAccCheckDmsV1GroupDestroy(s *terraform.State) error {
 		}
 
 		queueID := rs.Primary.Attributes["queue_id"]
-		page, err := groups.List(dmsClient, queueID, false).AllPages()
+		page, err := groups.List(client, queueID, false).AllPages()
 		if err == nil {
 			groupsList, err := groups.ExtractGroups(page)
 			if err != nil {
@@ -59,7 +60,7 @@ func testAccCheckDmsV1GroupDestroy(s *terraform.State) error {
 			if len(groupsList) > 0 {
 				for _, group := range groupsList {
 					if group.ID == rs.Primary.ID {
-						return fmt.Errorf("the Dms group still exists.")
+						return fmt.Errorf("dms group still exists")
 					}
 				}
 			}
@@ -80,13 +81,13 @@ func testAccCheckDmsV1GroupExists(n string, group groups.Group) resource.TestChe
 		}
 
 		config := common.TestAccProvider.Meta().(*cfg.Config)
-		dmsClient, err := config.DmsV1Client(env.OS_REGION_NAME)
+		client, err := config.DmsV1Client(env.OS_REGION_NAME)
 		if err != nil {
-			return fmt.Errorf("error creating OpenTelekomCloud group client: %s", err)
+			return fmt.Errorf("error creating OpenTelekomCloud DMSv1 client: %w", err)
 		}
 
 		queueID := rs.Primary.Attributes["queue_id"]
-		page, err := groups.List(dmsClient, queueID, false).AllPages()
+		page, err := groups.List(client, queueID, false).AllPages()
 		if err != nil {
 			return fmt.Errorf("error getting groups in queue %s: %s", queueID, err)
 		}
@@ -103,7 +104,7 @@ func testAccCheckDmsV1GroupExists(n string, group groups.Group) resource.TestChe
 				}
 			}
 		}
-		return fmt.Errorf("the DMS group not found")
+		return fmt.Errorf("dms group not found")
 	}
 }
 
@@ -116,5 +117,5 @@ resource "opentelekomcloud_dms_group_v1" "group_1" {
   name     = "%s"
   queue_id = opentelekomcloud_dms_queue_v1.queue_1.id
 }
-	`, queueName, groupName)
+`, queueName, groupName)
 }
