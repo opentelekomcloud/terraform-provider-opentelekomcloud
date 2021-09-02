@@ -1,0 +1,4 @@
+---
+fixes:
+  - |
+    **[DMS]** Fix panic produced by wrong type of ``created`` in ``resource/opentelekomcloud_dms_queue_v1`` (`#1374 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/1374>`_)

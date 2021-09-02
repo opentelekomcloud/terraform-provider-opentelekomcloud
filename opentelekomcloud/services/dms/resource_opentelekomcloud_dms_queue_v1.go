@@ -60,7 +60,7 @@ func ResourceDmsQueuesV1() *schema.Resource {
 				ForceNew: true,
 			},
 			"created": {
-				Type:     schema.TypeString,
+				Type:     schema.TypeFloat,
 				Computed: true,
 			},
 			"reservation": {

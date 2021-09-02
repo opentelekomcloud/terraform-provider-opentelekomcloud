@@ -11,21 +11,20 @@ import (
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/acceptance/env"
 )
 
+const dataAzName = "data.opentelekomcloud_dms_az_v1.az1"
+
 func TestAccDmsAZV1DataSource_basic(t *testing.T) {
 	resource.Test(t, resource.TestCase{
-		PreCheck:          func() { testAccPreCheckDms(t) },
+		PreCheck:          func() { common.TestAccPreCheck(t) },
 		ProviderFactories: common.TestAccProviderFactories,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccDmsAZV1DataSource_basic,
+				Config: testAccDmsAZV1DataSourceBasic,
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckDmsAZV1DataSourceID("data.opentelekomcloud_dms_az_v1.az1"),
-					resource.TestCheckResourceAttr(
-						"data.opentelekomcloud_dms_az_v1.az1", "name", env.OS_AVAILABILITY_ZONE),
-					resource.TestCheckResourceAttr(
-						"data.opentelekomcloud_dms_az_v1.az1", "port", "8002"),
-					resource.TestCheckResourceAttr(
-						"data.opentelekomcloud_dms_az_v1.az1", "code", env.OS_AVAILABILITY_ZONE),
+					testAccCheckDmsAZV1DataSourceID(dataAzName),
+					resource.TestCheckResourceAttr(dataAzName, "name", env.OS_AVAILABILITY_ZONE),
+					resource.TestCheckResourceAttr(dataAzName, "port", "8002"),
+					resource.TestCheckResourceAttr(dataAzName, "code", env.OS_AVAILABILITY_ZONE),
 				),
 			},
 		},
@@ -36,7 +35,7 @@ func testAccCheckDmsAZV1DataSourceID(n string) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
 		rs, ok := s.RootModule().Resources[n]
 		if !ok {
-			return fmt.Errorf("can't find Dms az data source: %s", n)
+			return fmt.Errorf("can't find dms az data source: %s", n)
 		}
 
 		if rs.Primary.ID == "" {
@@ -47,7 +46,7 @@ func testAccCheckDmsAZV1DataSourceID(n string) resource.TestCheckFunc {
 	}
 }
 
-var testAccDmsAZV1DataSource_basic = fmt.Sprintf(`
+var testAccDmsAZV1DataSourceBasic = fmt.Sprintf(`
 data "opentelekomcloud_dms_az_v1" "az1" {
   name = "%s"
   port = "8002"
