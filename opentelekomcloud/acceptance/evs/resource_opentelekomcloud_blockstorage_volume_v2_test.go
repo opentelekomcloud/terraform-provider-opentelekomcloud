@@ -15,6 +15,8 @@ import (
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common/cfg"
 )
 
+const resourceVolumeName = "opentelekomcloud_blockstorage_volume_v2.volume_1"
+
 func TestAccBlockStorageV2Volume_basic(t *testing.T) {
 	var volume volumes.Volume
 
@@ -26,19 +28,17 @@ func TestAccBlockStorageV2Volume_basic(t *testing.T) {
 			{
 				Config: testAccBlockStorageV2VolumeBasic,
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckBlockStorageV2VolumeExists("opentelekomcloud_blockstorage_volume_v2.volume_1", &volume),
+					testAccCheckBlockStorageV2VolumeExists(resourceVolumeName, &volume),
 					testAccCheckBlockStorageV2VolumeMetadata(&volume, "foo", "bar"),
-					resource.TestCheckResourceAttr(
-						"opentelekomcloud_blockstorage_volume_v2.volume_1", "name", "volume_1"),
+					resource.TestCheckResourceAttr(resourceVolumeName, "name", "volume_1"),
 				),
 			},
 			{
 				Config: testAccBlockStorageV2VolumeUpdate,
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckBlockStorageV2VolumeExists("opentelekomcloud_blockstorage_volume_v2.volume_1", &volume),
+					testAccCheckBlockStorageV2VolumeExists(resourceVolumeName, &volume),
 					testAccCheckBlockStorageV2VolumeMetadata(&volume, "foo", "bar"),
-					resource.TestCheckResourceAttr(
-						"opentelekomcloud_blockstorage_volume_v2.volume_1", "name", "volume_1-updated"),
+					resource.TestCheckResourceAttr(resourceVolumeName, "name", "volume_1-updated"),
 				),
 			},
 		},
@@ -55,15 +55,15 @@ func TestAccBlockStorageV2Volume_upscaleDownScale(t *testing.T) {
 		Steps: []resource.TestStep{
 			{
 				Config: testAccBlockStorageV2VolumeBasic,
-				Check:  testAccCheckBlockStorageV2VolumeExists("opentelekomcloud_blockstorage_volume_v2.volume_1", &volume),
+				Check:  testAccCheckBlockStorageV2VolumeExists(resourceVolumeName, &volume),
 			},
 			{
 				Config: testAccBlockStorageV2VolumeBigger,
-				Check:  testAccCheckBlockStorageV2VolumeSame("opentelekomcloud_blockstorage_volume_v2.volume_1", &volume),
+				Check:  testAccCheckBlockStorageV2VolumeSame(resourceVolumeName, &volume),
 			},
 			{
 				Config: testAccBlockStorageV2VolumeBasic,
-				Check:  testAccCheckBlockStorageV2VolumeNew("opentelekomcloud_blockstorage_volume_v2.volume_1", &volume),
+				Check:  testAccCheckBlockStorageV2VolumeNew(resourceVolumeName, &volume),
 			},
 		},
 	})
@@ -78,15 +78,15 @@ func TestAccBlockStorageV2Volume_upscaleDownScaleAssigned(t *testing.T) {
 		Steps: []resource.TestStep{
 			{
 				Config: testAccBlockStorageV2VolumeAssigned(10),
-				Check:  testAccCheckBlockStorageV2VolumeExists("opentelekomcloud_blockstorage_volume_v2.volume_1", &volume),
+				Check:  testAccCheckBlockStorageV2VolumeExists(resourceVolumeName, &volume),
 			},
 			{
 				Config: testAccBlockStorageV2VolumeAssigned(12),
-				Check:  testAccCheckBlockStorageV2VolumeSame("opentelekomcloud_blockstorage_volume_v2.volume_1", &volume),
+				Check:  testAccCheckBlockStorageV2VolumeSame(resourceVolumeName, &volume),
 			},
 			{
 				Config: testAccBlockStorageV2VolumeAssigned(10),
-				Check:  testAccCheckBlockStorageV2VolumeNew("opentelekomcloud_blockstorage_volume_v2.volume_1", &volume),
+				Check:  testAccCheckBlockStorageV2VolumeNew(resourceVolumeName, &volume),
 			},
 		},
 	})
@@ -102,15 +102,15 @@ func TestAccBlockStorageV2Volume_policy(t *testing.T) {
 		CheckDestroy:      testAccCheckBlockStorageV2VolumeDestroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccBlockStorageV2VolumePolicy(os.Getenv("OS_KMS_KEY")),
+				Config: testAccBlockStorageV2VolumePolicy,
 			},
 		},
 	})
 }
 
 func testPolicyPreCheck(t *testing.T) {
-	if os.Getenv("OS_KMS_KEY") == "" {
-		t.Skipf("OS_KMS_KEY should be set for this test to existing KMS key alias")
+	if os.Getenv("OS_KMS_NAME") == "" {
+		t.Skipf("OS_KMS_NAME should be set for this test to existing KMS key alias")
 	}
 }
 
@@ -123,15 +123,15 @@ func TestAccBlockStorageV2Volume_tags(t *testing.T) {
 			{
 				Config: testAccBlockStorageV2VolumeTags,
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckBlockStorageV2VolumeTags("opentelekomcloud_blockstorage_volume_v2.volume_1", "foo", "bar"),
-					testAccCheckBlockStorageV2VolumeTags("opentelekomcloud_blockstorage_volume_v2.volume_1", "key", "value"),
+					testAccCheckBlockStorageV2VolumeTags(resourceVolumeName, "foo", "bar"),
+					testAccCheckBlockStorageV2VolumeTags(resourceVolumeName, "key", "value"),
 				),
 			},
 			{
 				Config: testAccBlockStorageV2VolumeTagsUpdate,
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckBlockStorageV2VolumeTags("opentelekomcloud_blockstorage_volume_v2.volume_1", "foo2", "bar2"),
-					testAccCheckBlockStorageV2VolumeTags("opentelekomcloud_blockstorage_volume_v2.volume_1", "key2", "value2"),
+					testAccCheckBlockStorageV2VolumeTags(resourceVolumeName, "foo2", "bar2"),
+					testAccCheckBlockStorageV2VolumeTags(resourceVolumeName, "key2", "value2"),
 				),
 			},
 		},
@@ -149,9 +149,9 @@ func TestAccBlockStorageV2Volume_image(t *testing.T) {
 			{
 				Config: testAccBlockStorageV2VolumeImage,
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckBlockStorageV2VolumeExists("opentelekomcloud_blockstorage_volume_v2.volume_1", &volume),
+					testAccCheckBlockStorageV2VolumeExists(resourceVolumeName, &volume),
 					resource.TestCheckResourceAttr(
-						"opentelekomcloud_blockstorage_volume_v2.volume_1", "name", "volume_1"),
+						resourceVolumeName, "name", "volume_1"),
 				),
 			},
 		},
@@ -169,7 +169,7 @@ func TestAccBlockStorageV2Volume_timeout(t *testing.T) {
 			{
 				Config: testAccBlockStorageV2VolumeTimeout,
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckBlockStorageV2VolumeExists("opentelekomcloud_blockstorage_volume_v2.volume_1", &volume),
+					testAccCheckBlockStorageV2VolumeExists(resourceVolumeName, &volume),
 				),
 			},
 		},
@@ -434,11 +434,8 @@ resource "opentelekomcloud_blockstorage_volume_v2" "volume_1" {
 }
 `, env.OS_IMAGE_ID)
 
-func testAccBlockStorageV2VolumePolicy(kmsKeyAlias string) string {
-	return fmt.Sprintf(`
-data "opentelekomcloud_kms_key_v1" key {
-  key_alias = "%s"
-}
+var testAccBlockStorageV2VolumePolicy = fmt.Sprintf(`
+%s
 
 data opentelekomcloud_compute_availability_zones_v2 available {}
 
@@ -456,7 +453,7 @@ resource "opentelekomcloud_blockstorage_volume_v2" "volume" {
   }
   metadata = {
     __system__encrypted = "1"
-    __system__cmkid     = data.opentelekomcloud_kms_key_v1.key.id
+    __system__cmkid     = data.opentelekomcloud_kms_key_v1.default_key.id
     attached_mode       = "rw"
     readonly            = "False"
   }
@@ -474,5 +471,4 @@ resource "opentelekomcloud_vbs_backup_policy_v2" "vbs_policy1" {
   resources = opentelekomcloud_blockstorage_volume_v2.volume[*].id
 
 }
-`, kmsKeyAlias)
-}
+`, common.DataSourceKMSKey)

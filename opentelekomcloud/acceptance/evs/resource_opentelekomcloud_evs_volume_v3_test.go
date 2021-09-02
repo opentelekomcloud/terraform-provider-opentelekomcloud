@@ -277,14 +277,16 @@ resource "opentelekomcloud_evs_volume_v3" "volume_1" {
 }
 `, env.OS_AVAILABILITY_ZONE)
 	testAccEvsStorageV3VolumeImage = fmt.Sprintf(`
+%s
+
 resource "opentelekomcloud_evs_volume_v3" "volume_1" {
   name              = "volume_1"
   availability_zone = "%s"
   volume_type       = "SATA"
   size              = 12
-  image_id          = "%s"
+  image_id          = data.opentelekomcloud_images_image_v2.latest_image.id
 }
-`, env.OS_AVAILABILITY_ZONE, env.OS_IMAGE_ID)
+`, common.DataSourceImage, env.OS_AVAILABILITY_ZONE)
 	testAccEvsStorageV3VolumeTimeout = fmt.Sprintf(`
 resource "opentelekomcloud_evs_volume_v3" "volume_1" {
   name              = "volume_1"

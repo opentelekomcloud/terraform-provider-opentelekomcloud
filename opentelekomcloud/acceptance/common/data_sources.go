@@ -35,6 +35,13 @@ data "opentelekomcloud_images_image_v2" "latest_image" {
 }
 `, env.OsImageName)
 
+// DataSourceKMSKey can be referred as `data.opentelekomcloud_kms_key_v1.default_key`
+var DataSourceKMSKey = fmt.Sprintf(`
+data "opentelekomcloud_kms_key_v1" "default_key" {
+  key_alias = "%s"
+}
+`, env.OsKmsName)
+
 // DataSourceSecGroupDefault can be referred as `data.opentelekomcloud_networking_secgroup_v2.default_secgroup`
 const DataSourceSecGroupDefault = `
 data "opentelekomcloud_networking_secgroup_v2" "default_secgroup" {
