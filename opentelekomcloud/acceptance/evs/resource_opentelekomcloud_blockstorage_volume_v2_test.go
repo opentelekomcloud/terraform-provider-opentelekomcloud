@@ -435,9 +435,7 @@ resource "opentelekomcloud_blockstorage_volume_v2" "volume_1" {
 `, env.OS_IMAGE_ID)
 
 var testAccBlockStorageV2VolumePolicy = fmt.Sprintf(`
-data "opentelekomcloud_kms_key_v1" key {
-  key_alias = "%s"
-}
+%s
 
 data opentelekomcloud_compute_availability_zones_v2 available {}
 
@@ -455,7 +453,7 @@ resource "opentelekomcloud_blockstorage_volume_v2" "volume" {
   }
   metadata = {
     __system__encrypted = "1"
-    __system__cmkid     = data.opentelekomcloud_kms_key_v1.key.id
+    __system__cmkid     = data.opentelekomcloud_kms_key_v1.default_key.id
     attached_mode       = "rw"
     readonly            = "False"
   }
@@ -473,4 +471,4 @@ resource "opentelekomcloud_vbs_backup_policy_v2" "vbs_policy1" {
   resources = opentelekomcloud_blockstorage_volume_v2.volume[*].id
 
 }
-`, env.OsKmsName)
+`, common.DataSourceKMSKey)
