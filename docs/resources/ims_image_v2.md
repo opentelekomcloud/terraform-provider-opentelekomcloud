@@ -121,6 +121,8 @@ The following attributes are exported:
 
 * `image_size` - The size(bytes) of the image file format.
 
+* `file` - The URL for uploading and downloading the image file.
+
 ## Import
 
 Images can be imported using the `id`, e.g.

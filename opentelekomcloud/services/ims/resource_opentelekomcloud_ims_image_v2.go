@@ -124,6 +124,10 @@ func ResourceImsImageV2() *schema.Resource {
 				Type:     schema.TypeString,
 				Computed: true,
 			},
+			"file": {
+				Type:     schema.TypeString,
+				Computed: true,
+			},
 		},
 	}
 }
@@ -259,7 +263,6 @@ func resourceImsImageV2Read(_ context.Context, d *schema.ResourceData, meta inte
 		d.Set("name", img.Name),
 		d.Set("visibility", img.Visibility),
 		d.Set("file", img.File),
-		d.Set("schema", img.Schema),
 		d.Set("data_origin", img.DataOrigin),
 		d.Set("disk_format", img.DiskFormat),
 		d.Set("image_size", img.ImageSize),
