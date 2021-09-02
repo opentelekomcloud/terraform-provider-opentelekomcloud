@@ -16,6 +16,8 @@ import (
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/services/ims"
 )
 
+const resourceImageName = "opentelekomcloud_ims_image_v2.image_1"
+
 func TestAccImsImageV2_basic(t *testing.T) {
 	var image cloudimages.Image
 
@@ -25,24 +27,22 @@ func TestAccImsImageV2_basic(t *testing.T) {
 		CheckDestroy:      testAccCheckImsImageV2Destroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccImsImageV2_basic,
+				Config: testAccImsImageV2Basic,
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckImsImageV2Exists("opentelekomcloud_ims_image_v2.image_1", &image),
-					testAccCheckImsImageV2Tags("opentelekomcloud_ims_image_v2.image_1", "foo", "bar"),
-					testAccCheckImsImageV2Tags("opentelekomcloud_ims_image_v2.image_1", "key", "value"),
-					resource.TestCheckResourceAttr(
-						"opentelekomcloud_ims_image_v2.image_1", "name", "TFTest_image"),
+					testAccCheckImsImageV2Exists(resourceImageName, &image),
+					testAccCheckImsImageV2Tags(resourceImageName, "foo", "bar"),
+					testAccCheckImsImageV2Tags(resourceImageName, "key", "value"),
+					resource.TestCheckResourceAttr(resourceImageName, "name", "TFTest_image"),
 				),
 			},
 			{
-				Config: testAccImsImageV2_update,
+				Config: testAccImsImageV2Update,
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckImsImageV2Exists("opentelekomcloud_ims_image_v2.image_1", &image),
-					testAccCheckImsImageV2Tags("opentelekomcloud_ims_image_v2.image_1", "foo", "bar"),
-					testAccCheckImsImageV2Tags("opentelekomcloud_ims_image_v2.image_1", "key", "value1"),
-					testAccCheckImsImageV2Tags("opentelekomcloud_ims_image_v2.image_1", "key2", "value2"),
-					resource.TestCheckResourceAttr(
-						"opentelekomcloud_ims_image_v2.image_1", "name", "TFTest_image_update"),
+					testAccCheckImsImageV2Exists(resourceImageName, &image),
+					testAccCheckImsImageV2Tags(resourceImageName, "foo", "bar"),
+					testAccCheckImsImageV2Tags(resourceImageName, "key", "value1"),
+					testAccCheckImsImageV2Tags(resourceImageName, "key2", "value2"),
+					resource.TestCheckResourceAttr(resourceImageName, "name", "TFTest_image_update"),
 				),
 			},
 		},
@@ -137,21 +137,23 @@ func testAccCheckImsImageV2Tags(n string, k string, v string) resource.TestCheck
 	}
 }
 
-var testAccImsImageV2_basic = fmt.Sprintf(`
+var testAccImsImageV2Basic = fmt.Sprintf(`
+%s
+
 resource "opentelekomcloud_compute_instance_v2" "instance_1" {
-  name = "instance_1"
-  security_groups = ["default"]
+  name              = "instance_1"
+  security_groups   = ["default"]
   availability_zone = "%s"
   metadata = {
     foo = "bar"
   }
   network {
-    uuid = "%s"
+    uuid = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.network_id
   }
 }
 
 resource "opentelekomcloud_ims_image_v2" "image_1" {
-  name   = "TFTest_image"
+  name        = "TFTest_image"
   instance_id = opentelekomcloud_compute_instance_v2.instance_1.id
   description = "created by TerraformAccTest"
   tags = {
@@ -159,23 +161,25 @@ resource "opentelekomcloud_ims_image_v2" "image_1" {
     key = "value"
   }
 }
-`, env.OS_AVAILABILITY_ZONE, env.OS_NETWORK_ID)
+`, common.DataSourceSubnet, env.OS_AVAILABILITY_ZONE)
 
-var testAccImsImageV2_update = fmt.Sprintf(`
+var testAccImsImageV2Update = fmt.Sprintf(`
+%s
+
 resource "opentelekomcloud_compute_instance_v2" "instance_1" {
-  name = "instance_1"
-  security_groups = ["default"]
+  name              = "instance_1"
+  security_groups   = ["default"]
   availability_zone = "%s"
   metadata = {
     foo = "bar"
   }
   network {
-    uuid = "%s"
+    uuid = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.network_id
   }
 }
 
 resource "opentelekomcloud_ims_image_v2" "image_1" {
-  name   = "TFTest_image_update"
+  name        = "TFTest_image_update"
   instance_id = opentelekomcloud_compute_instance_v2.instance_1.id
   description = "created by TerraformAccTest"
   tags = {
@@ -184,4 +188,4 @@ resource "opentelekomcloud_ims_image_v2" "image_1" {
     key2 = "value2"
   }
 }
-`, env.OS_AVAILABILITY_ZONE, env.OS_NETWORK_ID)
+`, common.DataSourceSubnet, env.OS_AVAILABILITY_ZONE)

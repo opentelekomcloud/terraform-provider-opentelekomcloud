@@ -15,6 +15,8 @@ import (
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/services/ims"
 )
 
+const resourceDataImageName = "opentelekomcloud_ims_data_image_v2.image_1"
+
 func TestAccImsDataImageV2_basic(t *testing.T) {
 	var image cloudimages.Image
 
@@ -24,24 +26,22 @@ func TestAccImsDataImageV2_basic(t *testing.T) {
 		CheckDestroy:      testAccCheckImsDataImageV2Destroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccImsDataImageV2_basic,
+				Config: testAccImsDataImageV2Basic,
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckImsDataImageV2Exists("opentelekomcloud_ims_data_image_v2.image_1", &image),
-					testAccCheckImsImageV2Tags("opentelekomcloud_ims_data_image_v2.image_1", "foo", "bar"),
-					testAccCheckImsImageV2Tags("opentelekomcloud_ims_data_image_v2.image_1", "key", "value"),
-					resource.TestCheckResourceAttr(
-						"opentelekomcloud_ims_data_image_v2.image_1", "name", "TFTest_data_image"),
+					testAccCheckImsDataImageV2Exists(resourceDataImageName, &image),
+					testAccCheckImsImageV2Tags(resourceDataImageName, "foo", "bar"),
+					testAccCheckImsImageV2Tags(resourceDataImageName, "key", "value"),
+					resource.TestCheckResourceAttr(resourceDataImageName, "name", "TFTest_data_image"),
 				),
 			},
 			{
-				Config: testAccImsDataImageV2_update,
+				Config: testAccImsDataImageV2Update,
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckImsDataImageV2Exists("opentelekomcloud_ims_data_image_v2.image_1", &image),
-					testAccCheckImsImageV2Tags("opentelekomcloud_ims_data_image_v2.image_1", "foo", "bar"),
-					testAccCheckImsImageV2Tags("opentelekomcloud_ims_data_image_v2.image_1", "key", "value1"),
-					testAccCheckImsImageV2Tags("opentelekomcloud_ims_data_image_v2.image_1", "key2", "value2"),
-					resource.TestCheckResourceAttr(
-						"opentelekomcloud_ims_data_image_v2.image_1", "name", "TFTest_data_image_update"),
+					testAccCheckImsDataImageV2Exists(resourceDataImageName, &image),
+					testAccCheckImsImageV2Tags(resourceDataImageName, "foo", "bar"),
+					testAccCheckImsImageV2Tags(resourceDataImageName, "key", "value1"),
+					testAccCheckImsImageV2Tags(resourceDataImageName, "key2", "value2"),
+					resource.TestCheckResourceAttr(resourceDataImageName, "name", "TFTest_data_image_update"),
 				),
 			},
 		},
@@ -96,81 +96,87 @@ func testAccCheckImsDataImageV2Exists(n string, image *cloudimages.Image) resour
 	}
 }
 
-var testAccImsDataImageV2_basic = fmt.Sprintf(`
+var testAccImsDataImageV2Basic = fmt.Sprintf(`
+%s
+%s
+
 resource "opentelekomcloud_compute_instance_v2" "instance_1" {
-  name = "instance_1"
-  security_groups = ["default"]
+  name              = "instance_1"
+  security_groups   = ["default"]
   availability_zone = "%s"
   metadata = {
     foo = "bar"
   }
   network {
-    uuid = "%s"
+    uuid = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.network_id
   }
   block_device {
-    boot_index = 0
+    boot_index            = 0
     delete_on_termination = true
-    destination_type = "volume"
-	volume_size = 40
-    source_type = "image"
-    uuid = "%s"
+    destination_type      = "volume"
+    volume_size           = 40
+    source_type           = "image"
+    uuid                  = data.opentelekomcloud_images_image_v2.latest_image.id
   }
   block_device {
-    boot_index = 1
+    boot_index            = 1
     delete_on_termination = true
-    destination_type = "volume"
-    source_type = "blank"
-    volume_size = 1
+    destination_type      = "volume"
+    source_type           = "blank"
+    volume_size           = 1
   }
 }
 
 resource "opentelekomcloud_ims_data_image_v2" "image_1" {
-  name   = "TFTest_data_image"
+  name        = "TFTest_data_image"
   description = "created by TerraformAccTest"
-  volume_id = opentelekomcloud_compute_instance_v2.instance_1.volume_attached.1.id
+  volume_id   = opentelekomcloud_compute_instance_v2.instance_1.volume_attached.1.id
   tags = {
     foo = "bar"
     key = "value"
   }
 }
-`, env.OS_AVAILABILITY_ZONE, env.OS_NETWORK_ID, env.OS_IMAGE_ID)
+`, common.DataSourceSubnet, common.DataSourceImage, env.OS_AVAILABILITY_ZONE)
 
-var testAccImsDataImageV2_update = fmt.Sprintf(`
+var testAccImsDataImageV2Update = fmt.Sprintf(`
+%s
+%s
+
 resource "opentelekomcloud_compute_instance_v2" "instance_1" {
-  name = "instance_1"
-  security_groups = ["default"]
+  name              = "instance_1"
+  security_groups   = ["default"]
   availability_zone = "%s"
   metadata = {
     foo = "bar"
   }
   network {
-    uuid = "%s"
+    uuid = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.network_id
   }
   block_device {
-    boot_index = 0
+    boot_index            = 0
     delete_on_termination = true
-    destination_type = "volume"
-	volume_size = 40
-    source_type = "image"
-    uuid = "%s"
+    destination_type      = "volume"
+    volume_size           = 40
+    source_type           = "image"
+    uuid                  = data.opentelekomcloud_images_image_v2.latest_image.id
   }
   block_device {
-    boot_index = 1
+    boot_index            = 1
     delete_on_termination = true
-    destination_type = "volume"
-    source_type = "blank"
-    volume_size = 1
+    destination_type      = "volume"
+    source_type           = "blank"
+    volume_size           = 1
   }
 }
 
 resource "opentelekomcloud_ims_data_image_v2" "image_1" {
-  name   = "TFTest_data_image_update"
+  name        = "TFTest_data_image_update"
   description = "created by TerraformAccTest"
-  volume_id = opentelekomcloud_compute_instance_v2.instance_1.volume_attached.1.id
+  volume_id   = opentelekomcloud_compute_instance_v2.instance_1.volume_attached.1.id
   tags = {
     foo  = "bar"
     key  = "value1"
     key2 = "value2"
   }
 }
-`, env.OS_AVAILABILITY_ZONE, env.OS_NETWORK_ID, env.OS_IMAGE_ID)
+`, common.DataSourceSubnet, common.DataSourceImage, env.OS_AVAILABILITY_ZONE)
