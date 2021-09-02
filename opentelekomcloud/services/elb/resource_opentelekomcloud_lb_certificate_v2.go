@@ -194,16 +194,13 @@ func resourceCertificateV2Delete(ctx context.Context, d *schema.ResourceData, me
 	}
 
 	log.Printf("[DEBUG] Deleting certificate %s", d.Id())
-	timeout := d.Timeout(schema.TimeoutDelete)
-	err = resource.RetryContext(ctx, timeout, func() *resource.RetryError {
-		err := certificates.Delete(client, d.Id()).ExtractErr()
-		if err != nil {
-			return common.CheckForRetryableError(err)
-		}
-		return nil
-	})
-	if err != nil {
-		return diag.FromErr(handleCertificateDeletionError(ctx, d, client, err))
+	if err := certificates.Delete(client, d.Id()).ExtractErr(); err != nil {
+		return diag.FromErr(resource.RetryContext(ctx, d.Timeout(schema.TimeoutDelete), func() *resource.RetryError {
+			if err := handleCertificateDeletionError(ctx, d, client, err); err != nil {
+				return resource.RetryableError(err)
+			}
+			return nil
+		}))
 	}
 
 	return nil
@@ -215,46 +212,36 @@ func handleCertificateDeletionError(ctx context.Context, d *schema.ResourceData,
 		return nil
 	}
 
-	if err409, ok := err.(golangsdk.ErrDefault409); ok { // certificate in use
-		var dep struct {
-			ListenerIDs []string `json:"listener_ids"`
-		}
-		if err := json.Unmarshal(err409.Body, &dep); err != nil {
-			return fmt.Errorf("error loading assigned listeners: %w", err)
-		}
-
-		mErr := new(multierror.Error)
-		for _, listenerID := range dep.ListenerIDs {
-			mErr = multierror.Append(mErr, unassignCertWithRetry(ctx, client, d.Timeout(schema.TimeoutUpdate), d.Id(), listenerID))
-		}
-		if mErr.ErrorOrNil() != nil {
-			return mErr
-		}
-
-		log.Printf("[DEBUG] Retry deleting certificate %s", d.Id())
-		timeout := d.Timeout(schema.TimeoutDelete)
-		err := resource.RetryContext(ctx, timeout, func() *resource.RetryError {
-			err := certificates.Delete(client, d.Id()).ExtractErr()
-			if err != nil {
-				return common.CheckForRetryableError(err)
-			}
-			return nil
-		})
-		if err != nil {
-			return fmt.Errorf("error retrying certificate delition: %w", err)
-		}
-		return nil
+	err409, ok := err.(golangsdk.ErrDefault409)
+	if !ok {
+		return fmt.Errorf("error deleting certificate %s: %w", d.Id(), err)
 	}
-	return fmt.Errorf("error deleting certificate %s: %w", d.Id(), err)
+	var dep struct {
+		ListenerIDs []string `json:"listener_ids"`
+	}
+	if err := json.Unmarshal(err409.Body, &dep); err != nil {
+		return fmt.Errorf("error loading assigned listeners: %w", err)
+	}
+
+	mErr := new(multierror.Error)
+	for _, listenerID := range dep.ListenerIDs {
+		mErr = multierror.Append(mErr, unassignCert(ctx, client, d.Timeout(schema.TimeoutDelete), d.Id(), listenerID))
+	}
+	if mErr.ErrorOrNil() != nil {
+		return mErr
+	}
+
+	log.Printf("[DEBUG] Retry deleting certificate %s", d.Id())
+	return certificates.Delete(client, d.Id()).ExtractErr()
 }
 
-func unassignCertWithRetry(ctx context.Context, client *golangsdk.ServiceClient, timeout time.Duration, certID, listenerID string) error {
+func unassignCert(_ context.Context, client *golangsdk.ServiceClient, timeout time.Duration, certID, listenerID string) error {
 	listener, err := listeners.Get(client, listenerID).Extract()
 	if err != nil {
 		return fmt.Errorf("failed to get listener %s: %w", listenerID, err)
 	}
 
-	var otherCerts []string
+	otherCerts := make([]string, 0)
 	for _, cert := range listener.SniContainerRefs {
 		if cert != certID {
 			otherCerts = append(otherCerts, cert)
@@ -263,13 +250,7 @@ func unassignCertWithRetry(ctx context.Context, client *golangsdk.ServiceClient,
 	opts := listeners.UpdateOpts{
 		SniContainerRefs: otherCerts,
 	}
-	err = resource.RetryContext(ctx, timeout, func() *resource.RetryError {
-		_, err := listeners.Update(client, listener.ID, opts).Extract()
-		if err != nil {
-			return common.CheckForRetryableError(err)
-		}
-		return nil
-	})
+	_, err = listeners.Update(client, listener.ID, opts).Extract()
 	if err != nil {
 		return fmt.Errorf("error unassigning certificate %s from listener %s: %w", certID, listener.ID, err)
 	}
