@@ -46,9 +46,9 @@ var osAgency = os.Getenv("OS_AGENCY")
 
 func testResourceCSSSnapshotConfigurationV1Basic(name string) string {
 	return fmt.Sprintf(`
-data "opentelekomcloud_networking_secgroup_v2" "secgroup" {
-  name = "default"
-}
+%s
+
+%s
 
 resource "opentelekomcloud_css_cluster_v1" "cluster" {
   expect_node_num = 1
@@ -56,9 +56,9 @@ resource "opentelekomcloud_css_cluster_v1" "cluster" {
   node_config {
     flavor = "css.medium.8"
     network_info {
-      security_group_id = data.opentelekomcloud_networking_secgroup_v2.secgroup.id
-      network_id        = "%s"
-      vpc_id            = "%s"
+      security_group_id = data.opentelekomcloud_networking_secgroup_v2.default_secgroup.id
+      network_id        = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.network_id
+      vpc_id            = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.vpc_id
     }
     volume {
       volume_type = "COMMON"
@@ -92,14 +92,13 @@ resource "opentelekomcloud_css_snapshot_configuration_v1" "config" {
     delete_auto = true
   }
 }
-`, name, env.OS_NETWORK_ID, env.OS_VPC_ID, env.OS_AVAILABILITY_ZONE, osAgency)
+`, acc.DataSourceSecGroupDefault, acc.DataSourceSubnet, name, env.OS_AVAILABILITY_ZONE, osAgency)
 }
 
 func testResourceCSSSnapshotConfigurationV1Updated(name string) string {
 	return fmt.Sprintf(`
-data "opentelekomcloud_networking_secgroup_v2" "secgroup" {
-  name = "default"
-}
+%s
+%s
 
 resource "opentelekomcloud_css_cluster_v1" "cluster" {
   expect_node_num = 1
@@ -107,9 +106,9 @@ resource "opentelekomcloud_css_cluster_v1" "cluster" {
   node_config {
     flavor = "css.medium.8"
     network_info {
-      security_group_id = data.opentelekomcloud_networking_secgroup_v2.secgroup.id
-      network_id        = "%s"
-      vpc_id            = "%s"
+      security_group_id = data.opentelekomcloud_networking_secgroup_v2.default_secgroup.id
+      network_id        = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.network_id
+      vpc_id            = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.vpc_id
     }
     volume {
       volume_type = "COMMON"
@@ -143,5 +142,5 @@ resource "opentelekomcloud_css_snapshot_configuration_v1" "config" {
     delete_auto = true
   }
 }
-`, name, env.OS_NETWORK_ID, env.OS_VPC_ID, env.OS_AVAILABILITY_ZONE, osAgency)
+`, acc.DataSourceSecGroupDefault, acc.DataSourceSubnet, name, env.OS_AVAILABILITY_ZONE, osAgency)
 }
