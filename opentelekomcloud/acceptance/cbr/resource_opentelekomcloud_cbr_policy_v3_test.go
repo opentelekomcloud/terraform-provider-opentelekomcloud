@@ -13,6 +13,8 @@ import (
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common/cfg"
 )
 
+const resourcePolicyName = "opentelekomcloud_cbr_policy_v3.policy"
+
 func TestAccCBRPolicyV3_basic(t *testing.T) {
 	var cbrPolicy policies.Policy
 
@@ -22,20 +24,20 @@ func TestAccCBRPolicyV3_basic(t *testing.T) {
 		CheckDestroy:      testAccCheckCBRPolicyV3Destroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testCBRPolicyV3_basic,
+				Config: testAccCBRPolicyV3Basic,
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckCBRPolicyV3Exists("opentelekomcloud_cbr_policy_v3.policy", &cbrPolicy),
-					resource.TestCheckResourceAttr("opentelekomcloud_cbr_policy_v3.policy", "name", "test-policy"),
-					resource.TestCheckResourceAttr("opentelekomcloud_cbr_policy_v3.policy", "operation_type", "backup"),
-					resource.TestCheckResourceAttr("opentelekomcloud_cbr_policy_v3.policy", "enabled", "true"),
+					testAccCheckCBRPolicyV3Exists(resourcePolicyName, &cbrPolicy),
+					resource.TestCheckResourceAttr(resourcePolicyName, "name", "test-policy"),
+					resource.TestCheckResourceAttr(resourcePolicyName, "operation_type", "backup"),
+					resource.TestCheckResourceAttr(resourcePolicyName, "enabled", "true"),
 				),
 			},
 			{
-				Config: testCBRPolicyV3_update,
+				Config: testAccCBRPolicyV3Update,
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckCBRPolicyV3Exists("opentelekomcloud_cbr_policy_v3.policy", &cbrPolicy),
-					resource.TestCheckResourceAttr("opentelekomcloud_cbr_policy_v3.policy", "name", "name2"),
-					resource.TestCheckResourceAttr("opentelekomcloud_cbr_policy_v3.policy", "enabled", "false"),
+					testAccCheckCBRPolicyV3Exists(resourcePolicyName, &cbrPolicy),
+					resource.TestCheckResourceAttr(resourcePolicyName, "name", "name2"),
+					resource.TestCheckResourceAttr(resourcePolicyName, "enabled", "false"),
 				),
 			},
 		},
@@ -44,7 +46,6 @@ func TestAccCBRPolicyV3_basic(t *testing.T) {
 
 func TestAccCBRPolicyV3_minConfig(t *testing.T) {
 	var cbrPolicy policies.Policy
-	policyRes := "opentelekomcloud_cbr_policy_v3.policy"
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:          func() { common.TestAccFlavorPreCheck(t) },
@@ -52,18 +53,18 @@ func TestAccCBRPolicyV3_minConfig(t *testing.T) {
 		CheckDestroy:      testAccCheckCBRPolicyV3Destroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testCBRPolicyV3_minConfig,
+				Config: testAccCBRPolicyV3MinConfig,
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckCBRPolicyV3Exists(policyRes, &cbrPolicy),
-					resource.TestCheckResourceAttr(policyRes, "name", "some-policy-min"),
-					resource.TestCheckResourceAttr(policyRes, "operation_type", "backup"),
-					resource.TestCheckResourceAttr(policyRes, "enabled", "true"),
+					testAccCheckCBRPolicyV3Exists(resourcePolicyName, &cbrPolicy),
+					resource.TestCheckResourceAttr(resourcePolicyName, "name", "some-policy-min"),
+					resource.TestCheckResourceAttr(resourcePolicyName, "operation_type", "backup"),
+					resource.TestCheckResourceAttr(resourcePolicyName, "enabled", "true"),
 				),
 			},
 			{
-				Config: testCBRPolicyV3_minOperationDef,
+				Config: testAccCBRPolicyV3MinOperationDef,
 				Check: resource.ComposeTestCheckFunc(
-					resource.TestCheckResourceAttr(policyRes, "operation_definition.0.timezone", "UTC+03:00"),
+					resource.TestCheckResourceAttr(resourcePolicyName, "operation_definition.0.timezone", "UTC+03:00"),
 				),
 			},
 		},
@@ -72,7 +73,7 @@ func TestAccCBRPolicyV3_minConfig(t *testing.T) {
 
 func testAccCheckCBRPolicyV3Destroy(s *terraform.State) error {
 	config := common.TestAccProvider.Meta().(*cfg.Config)
-	asClient, err := config.CbrV3Client(env.OS_REGION_NAME)
+	client, err := config.CbrV3Client(env.OS_REGION_NAME)
 	if err != nil {
 		return fmt.Errorf("error creating OpenTelekomCloud CBRv3 client: %s", err)
 	}
@@ -82,7 +83,7 @@ func testAccCheckCBRPolicyV3Destroy(s *terraform.State) error {
 			continue
 		}
 
-		_, err := policies.Get(asClient, rs.Primary.ID).Extract()
+		_, err := policies.Get(client, rs.Primary.ID).Extract()
 		if err == nil {
 			return fmt.Errorf("CBRv3 policy still exists")
 		}
@@ -122,7 +123,7 @@ func testAccCheckCBRPolicyV3Exists(n string, group *policies.Policy) resource.Te
 }
 
 const (
-	testCBRPolicyV3_basic = `
+	testAccCBRPolicyV3Basic = `
 resource opentelekomcloud_cbr_policy_v3 policy {
   name                 = "test-policy"
   operation_type       = "backup"
@@ -138,7 +139,7 @@ resource opentelekomcloud_cbr_policy_v3 policy {
   enabled = "true"
 }
 `
-	testCBRPolicyV3_update = `
+	testAccCBRPolicyV3Update = `
 resource opentelekomcloud_cbr_policy_v3 policy {
   name                 = "name2"
   operation_type       = "backup"
@@ -154,7 +155,7 @@ resource opentelekomcloud_cbr_policy_v3 policy {
   enabled = "false"
 }
 `
-	testCBRPolicyV3_minConfig = `
+	testAccCBRPolicyV3MinConfig = `
 resource opentelekomcloud_cbr_policy_v3 policy {
   name            = "some-policy-min"
   operation_type  = "backup"
@@ -162,12 +163,11 @@ resource opentelekomcloud_cbr_policy_v3 policy {
 }
 `
 
-	testCBRPolicyV3_minOperationDef = `
+	testAccCBRPolicyV3MinOperationDef = `
 resource opentelekomcloud_cbr_policy_v3 policy {
   name            = "some-policy-min"
   operation_type  = "backup"
   trigger_pattern = ["FREQ=WEEKLY;BYDAY=MO,TU,WE,TH,FR,SA,SU;BYHOUR=14;BYMINUTE=00"]
-
 
   operation_definition {
     timezone                = "UTC+03:00"

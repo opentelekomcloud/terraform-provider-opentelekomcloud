@@ -5,12 +5,12 @@ import (
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
+	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/acceptance/env"
 
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/acceptance/common"
-	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/acceptance/env"
 )
 
-const vaultResourceName = "opentelekomcloud_cbr_vault_v3.vault"
+const resourceVaultName = "opentelekomcloud_cbr_vault_v3.vault"
 
 func TestAccCBRVaultV3_basic(t *testing.T) {
 	resource.Test(t, resource.TestCase{
@@ -21,22 +21,22 @@ func TestAccCBRVaultV3_basic(t *testing.T) {
 			{
 				Config: testCBRVaultV3BasicVolumes,
 				Check: resource.ComposeTestCheckFunc(
-					resource.TestCheckResourceAttr(vaultResourceName, "resource.#", "2"),
-					resource.TestCheckResourceAttr(vaultResourceName, "resource.0.name", "cbr-test-volume"),
-					resource.TestCheckResourceAttrSet(vaultResourceName, "backup_policy_id"),
+					resource.TestCheckResourceAttr(resourceVaultName, "resource.#", "2"),
+					resource.TestCheckResourceAttr(resourceVaultName, "resource.0.name", "cbr-test-volume"),
+					resource.TestCheckResourceAttrSet(resourceVaultName, "backup_policy_id"),
 				),
 			},
 			{
 				Config: testCBRVaultV3NoResource,
 				Check: resource.ComposeAggregateTestCheckFunc(
-					resource.TestCheckResourceAttr(vaultResourceName, "resource.#", "0"),
-					resource.TestCheckNoResourceAttr(vaultResourceName, "backup_policy_id"),
+					resource.TestCheckResourceAttr(resourceVaultName, "resource.#", "0"),
+					resource.TestCheckNoResourceAttr(resourceVaultName, "backup_policy_id"),
 				),
 			},
 			{
 				Config: testCBRVaultV3NoResourceResize,
 				Check: resource.ComposeAggregateTestCheckFunc(
-					resource.TestCheckResourceAttr(vaultResourceName, "billing.0.size", "120"),
+					resource.TestCheckResourceAttr(resourceVaultName, "billing.0.size", "120"),
 				),
 			},
 		},
@@ -55,8 +55,8 @@ func TestAccCBRVaultV3_unassign(t *testing.T) {
 			{
 				Config: testCBRVaultV3Unassign,
 				Check: resource.ComposeTestCheckFunc(
-					resource.TestCheckResourceAttr(vaultResourceName, "backup_policy_id", ""),
-					resource.TestCheckResourceAttr(vaultResourceName, "resource.#", "0"),
+					resource.TestCheckResourceAttr(resourceVaultName, "backup_policy_id", ""),
+					resource.TestCheckResourceAttr(resourceVaultName, "resource.#", "0"),
 				),
 			},
 		},
@@ -72,15 +72,15 @@ func TestAccCBRVaultV3_instance(t *testing.T) {
 			{
 				Config: testCBRVaultV3BasicInstance,
 				Check: resource.ComposeAggregateTestCheckFunc(
-					resource.TestCheckResourceAttr(vaultResourceName, "resource.#", "1"),
-					resource.TestCheckResourceAttr(vaultResourceName, "resource.0.name", "tf-crb-test-instance"),
-					resource.TestCheckResourceAttr(vaultResourceName, "billing.0.size", "100"),
+					resource.TestCheckResourceAttr(resourceVaultName, "resource.#", "1"),
+					resource.TestCheckResourceAttr(resourceVaultName, "resource.0.name", "tf-crb-test-instance"),
+					resource.TestCheckResourceAttr(resourceVaultName, "billing.0.size", "100"),
 				),
 			},
 			{
 				Config: testCBRVaultV3NoResource,
 				Check: resource.ComposeAggregateTestCheckFunc(
-					resource.TestCheckResourceAttr(vaultResourceName, "resource.#", "0"),
+					resource.TestCheckResourceAttr(resourceVaultName, "resource.#", "0"),
 				),
 			},
 		},
@@ -89,14 +89,18 @@ func TestAccCBRVaultV3_instance(t *testing.T) {
 
 var (
 	testCBRVaultV3BasicInstance = fmt.Sprintf(`
+%s
+
+%s
+
 resource "opentelekomcloud_compute_instance_v2" "instance" {
   name = "tf-crb-test-instance"
 
-  image_id    = "%s"
+  image_id    = data.opentelekomcloud_images_image_v2.latest_image.id
   flavor_name = "%s"
 
   network {
-    uuid = "%s"
+    uuid = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.network_id
   }
 }
 
@@ -119,7 +123,7 @@ resource "opentelekomcloud_cbr_vault_v3" "vault" {
     type = "OS::Nova::Server"
   }
 }
-`, env.OS_IMAGE_ID, env.OS_FLAVOR_NAME, env.OS_NETWORK_ID)
+`, common.DataSourceImage, common.DataSourceSubnet, env.OsFlavorID)
 )
 
 const (
