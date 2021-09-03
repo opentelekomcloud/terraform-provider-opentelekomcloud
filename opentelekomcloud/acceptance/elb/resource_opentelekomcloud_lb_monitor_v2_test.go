@@ -13,9 +13,10 @@ import (
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common/cfg"
 )
 
+const resourceMonitorName = "opentelekomcloud_lb_monitor_v2.monitor_1"
+
 func TestAccLBV2Monitor_basic(t *testing.T) {
 	var monitor monitors.Monitor
-	resourceName := "opentelekomcloud_lb_monitor_v2.monitor_1"
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:          func() { common.TestAccPreCheck(t) },
@@ -23,22 +24,22 @@ func TestAccLBV2Monitor_basic(t *testing.T) {
 		CheckDestroy:      testAccCheckLBV2MonitorDestroy,
 		Steps: []resource.TestStep{
 			{
-				Config: TestAccLBV2MonitorConfig_basic,
+				Config: testAccLBV2MonitorConfigBasic,
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckLBV2MonitorExists(resourceName, &monitor),
-					resource.TestCheckResourceAttr(resourceName, "monitor_port", "112"),
-					resource.TestCheckResourceAttr(resourceName, "delay", "20"),
-					resource.TestCheckResourceAttr(resourceName, "timeout", "10"),
+					testAccCheckLBV2MonitorExists(resourceMonitorName, &monitor),
+					resource.TestCheckResourceAttr(resourceMonitorName, "monitor_port", "112"),
+					resource.TestCheckResourceAttr(resourceMonitorName, "delay", "20"),
+					resource.TestCheckResourceAttr(resourceMonitorName, "timeout", "10"),
 				),
 			},
 			{
-				Config: TestAccLBV2MonitorConfig_update,
+				Config: testAccLBV2MonitorConfigUpdate,
 				Check: resource.ComposeTestCheckFunc(
-					resource.TestCheckResourceAttr(resourceName, "name", "monitor_1_updated"),
-					resource.TestCheckResourceAttr(resourceName, "delay", "30"),
-					resource.TestCheckResourceAttr(resourceName, "timeout", "15"),
-					resource.TestCheckResourceAttr(resourceName, "monitor_port", "120"),
-					resource.TestCheckResourceAttr(resourceName, "domain_name", "www.test.com"),
+					resource.TestCheckResourceAttr(resourceMonitorName, "name", "monitor_1_updated"),
+					resource.TestCheckResourceAttr(resourceMonitorName, "delay", "30"),
+					resource.TestCheckResourceAttr(resourceMonitorName, "timeout", "15"),
+					resource.TestCheckResourceAttr(resourceMonitorName, "monitor_port", "120"),
+					resource.TestCheckResourceAttr(resourceMonitorName, "domain_name", "www.test.com"),
 				),
 			},
 		},
@@ -55,7 +56,7 @@ func TestAccLBV2Monitor_minConfig(t *testing.T) {
 		CheckDestroy:      testAccCheckLBV2MonitorDestroy,
 		Steps: []resource.TestStep{
 			{
-				Config: TestAccLBV2MonitorConfig_minConfig,
+				Config: testAccLBV2MonitorConfigMinConfig,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckLBV2MonitorExists(resourceName, &monitor),
 					resource.TestCheckResourceAttr(resourceName, "delay", "20"),
@@ -63,7 +64,7 @@ func TestAccLBV2Monitor_minConfig(t *testing.T) {
 				),
 			},
 			{
-				Config: TestAccLBV2MonitorConfig_update,
+				Config: testAccLBV2MonitorConfigUpdate,
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr(resourceName, "name", "monitor_1_updated"),
 					resource.TestCheckResourceAttr(resourceName, "monitor_port", "120"),
@@ -126,10 +127,12 @@ func testAccCheckLBV2MonitorExists(n string, monitor *monitors.Monitor) resource
 	}
 }
 
-var TestAccLBV2MonitorConfig_basic = fmt.Sprintf(`
+var testAccLBV2MonitorConfigBasic = fmt.Sprintf(`
+%s
+
 resource "opentelekomcloud_lb_loadbalancer_v2" "loadbalancer_1" {
   name          = "loadbalancer_1"
-  vip_subnet_id = "%s"
+  vip_subnet_id = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.subnet_id
 }
 
 resource "opentelekomcloud_lb_listener_v2" "listener_1" {
@@ -161,12 +164,14 @@ resource "opentelekomcloud_lb_monitor_v2" "monitor_1" {
     delete = "5m"
   }
 }
-`, env.OS_SUBNET_ID)
+`, common.DataSourceSubnet)
 
-var TestAccLBV2MonitorConfig_update = fmt.Sprintf(`
+var testAccLBV2MonitorConfigUpdate = fmt.Sprintf(`
+%s
+
 resource "opentelekomcloud_lb_loadbalancer_v2" "loadbalancer_1" {
   name          = "loadbalancer_1"
-  vip_subnet_id = "%s"
+  vip_subnet_id = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.subnet_id
 }
 
 resource "opentelekomcloud_lb_listener_v2" "listener_1" {
@@ -200,12 +205,14 @@ resource "opentelekomcloud_lb_monitor_v2" "monitor_1" {
     delete = "5m"
   }
 }
-`, env.OS_SUBNET_ID)
+`, common.DataSourceSubnet)
 
-var TestAccLBV2MonitorConfig_minConfig = fmt.Sprintf(`
+var testAccLBV2MonitorConfigMinConfig = fmt.Sprintf(`
+%s
+
 resource "opentelekomcloud_lb_loadbalancer_v2" "loadbalancer_1" {
   name          = "loadbalancer_1"
-  vip_subnet_id = "%s"
+  vip_subnet_id = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.subnet_id
 }
 
 resource "opentelekomcloud_lb_listener_v2" "listener_1" {
@@ -229,4 +236,4 @@ resource "opentelekomcloud_lb_monitor_v2" "monitor_1" {
   max_retries  = 5
   pool_id      = opentelekomcloud_lb_pool_v2.pool_1.id
 }
-`, env.OS_SUBNET_ID)
+`, common.DataSourceSubnet)

@@ -14,9 +14,10 @@ import (
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common/cfg"
 )
 
+const resourceLBName = "opentelekomcloud_lb_loadbalancer_v2.loadbalancer_1"
+
 func TestAccLBV2LoadBalancer_basic(t *testing.T) {
 	var lb loadbalancers.LoadBalancer
-	resourceName := "opentelekomcloud_lb_loadbalancer_v2.loadbalancer_1"
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:          func() { common.TestAccPreCheck(t) },
@@ -24,16 +25,16 @@ func TestAccLBV2LoadBalancer_basic(t *testing.T) {
 		CheckDestroy:      testAccCheckLBV2LoadBalancerDestroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccLBV2LoadBalancerConfig_basic,
+				Config: testAccLBV2LoadBalancerConfigBasic,
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckLBV2LoadBalancerExists(resourceName, &lb),
+					testAccCheckLBV2LoadBalancerExists(resourceLBName, &lb),
 				),
 			},
 			{
-				Config: testAccLBV2LoadBalancerConfig_update,
+				Config: testAccLBV2LoadBalancerConfigUpdate,
 				Check: resource.ComposeTestCheckFunc(
-					resource.TestCheckResourceAttr(resourceName, "name", "loadbalancer_1_updated"),
-					resource.TestMatchResourceAttr(resourceName, "vip_port_id", regexp.MustCompile("^[a-f0-9-]+")),
+					resource.TestCheckResourceAttr(resourceLBName, "name", "loadbalancer_1_updated"),
+					resource.TestMatchResourceAttr(resourceLBName, "vip_port_id", regexp.MustCompile("^[a-f0-9-]+")),
 				),
 			},
 		},
@@ -93,10 +94,12 @@ func testAccCheckLBV2LoadBalancerExists(n string, lb *loadbalancers.LoadBalancer
 	}
 }
 
-var testAccLBV2LoadBalancerConfig_basic = fmt.Sprintf(`
+var testAccLBV2LoadBalancerConfigBasic = fmt.Sprintf(`
+%s
+
 resource "opentelekomcloud_lb_loadbalancer_v2" "loadbalancer_1" {
   name          = "loadbalancer_1"
-  vip_subnet_id = "%s"
+  vip_subnet_id = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.subnet_id
 
   tags = {
     muh = "value-create"
@@ -109,13 +112,15 @@ resource "opentelekomcloud_lb_loadbalancer_v2" "loadbalancer_1" {
     delete = "5m"
   }
 }
-`, env.OS_SUBNET_ID)
+`, common.DataSourceSubnet)
 
-var testAccLBV2LoadBalancerConfig_update = fmt.Sprintf(`
+var testAccLBV2LoadBalancerConfigUpdate = fmt.Sprintf(`
+%s
+
 resource "opentelekomcloud_lb_loadbalancer_v2" "loadbalancer_1" {
   name           = "loadbalancer_1_updated"
   admin_state_up = "true"
-  vip_subnet_id  = "%s"
+  vip_subnet_id  = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.subnet_id
 
   tags = {
     muh = "value-update"
@@ -127,4 +132,4 @@ resource "opentelekomcloud_lb_loadbalancer_v2" "loadbalancer_1" {
     delete = "5m"
   }
 }
-`, env.OS_SUBNET_ID)
+`, common.DataSourceSubnet)

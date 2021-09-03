@@ -13,6 +13,8 @@ import (
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common/cfg"
 )
 
+const resourceWhitelistName = "opentelekomcloud_lb_whitelist_v2.whitelist_1"
+
 func TestAccLBV2Whitelist_basic(t *testing.T) {
 	var whitelist whitelists.Whitelist
 
@@ -22,15 +24,15 @@ func TestAccLBV2Whitelist_basic(t *testing.T) {
 		CheckDestroy:      testAccCheckLBV2WhitelistDestroy,
 		Steps: []resource.TestStep{
 			{
-				Config: TestAccLBV2WhitelistConfig_basic,
+				Config: testAccLBV2WhitelistConfigBasic,
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckLBV2WhitelistExists("opentelekomcloud_lb_whitelist_v2.whitelist_1", &whitelist),
+					testAccCheckLBV2WhitelistExists(resourceWhitelistName, &whitelist),
 				),
 			},
 			{
-				Config: TestAccLBV2WhitelistConfig_update,
+				Config: testAccLBV2WhitelistConfigUpdate,
 				Check: resource.ComposeTestCheckFunc(
-					resource.TestCheckResourceAttr("opentelekomcloud_lb_whitelist_v2.whitelist_1", "enable_whitelist", "true"),
+					resource.TestCheckResourceAttr(resourceWhitelistName, "enable_whitelist", "true"),
 				),
 			},
 		},
@@ -90,10 +92,12 @@ func testAccCheckLBV2WhitelistExists(n string, whitelist *whitelists.Whitelist) 
 	}
 }
 
-var TestAccLBV2WhitelistConfig_basic = fmt.Sprintf(`
+var testAccLBV2WhitelistConfigBasic = fmt.Sprintf(`
+%s
+
 resource "opentelekomcloud_lb_loadbalancer_v2" "loadbalancer_1" {
   name = "loadbalancer_1"
-  vip_subnet_id = "%s"
+  vip_subnet_id = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.subnet_id
 }
 
 resource "opentelekomcloud_lb_listener_v2" "listener_1" {
@@ -108,12 +112,14 @@ resource "opentelekomcloud_lb_whitelist_v2" "whitelist_1" {
   whitelist = "192.168.11.1,192.168.0.1/24"
   listener_id = opentelekomcloud_lb_listener_v2.listener_1.id
 }
-`, env.OS_SUBNET_ID)
+`, common.DataSourceSubnet)
 
-var TestAccLBV2WhitelistConfig_update = fmt.Sprintf(`
+var testAccLBV2WhitelistConfigUpdate = fmt.Sprintf(`
+%s
+
 resource "opentelekomcloud_lb_loadbalancer_v2" "loadbalancer_1" {
   name = "loadbalancer_1"
-  vip_subnet_id = "%s"
+  vip_subnet_id = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.subnet_id
 }
 
 resource "opentelekomcloud_lb_listener_v2" "listener_1" {
@@ -128,4 +134,4 @@ resource "opentelekomcloud_lb_whitelist_v2" "whitelist_1" {
   whitelist = "192.168.11.1,192.168.0.1/24,192.168.201.18/8"
   listener_id = opentelekomcloud_lb_listener_v2.listener_1.id
 }
-`, env.OS_SUBNET_ID)
+`, common.DataSourceSubnet)

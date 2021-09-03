@@ -100,9 +100,11 @@ func testAccCheckLBV2MemberExists(n string, member *pools.Member) resource.TestC
 }
 
 var TestAccLBV2MemberConfigBasic = fmt.Sprintf(`
+%s
+
 resource "opentelekomcloud_lb_loadbalancer_v2" "loadbalancer_1" {
   name          = "loadbalancer_1"
-  vip_subnet_id = "%[1]s"
+  vip_subnet_id = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.subnet_id
 }
 
 resource "opentelekomcloud_lb_listener_v2" "listener_1" {
@@ -123,7 +125,7 @@ resource "opentelekomcloud_lb_member_v2" "member_1" {
   address       = "192.168.0.10"
   protocol_port = 8080
   pool_id       = opentelekomcloud_lb_pool_v2.pool_1.id
-  subnet_id     = "%[1]s"
+  subnet_id     = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.subnet_id
 
   timeouts {
     create = "5m"
@@ -136,7 +138,7 @@ resource "opentelekomcloud_lb_member_v2" "member_2" {
   address       = "192.168.0.11"
   protocol_port = 8080
   pool_id       = opentelekomcloud_lb_pool_v2.pool_1.id
-  subnet_id     = "%[1]s"
+  subnet_id     = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.subnet_id
 
   timeouts {
     create = "5m"
@@ -144,12 +146,14 @@ resource "opentelekomcloud_lb_member_v2" "member_2" {
     delete = "5m"
   }
 }
-`, env.OS_SUBNET_ID)
+`, common.DataSourceSubnet)
 
 var TestAccLBV2MemberConfigUpdate = fmt.Sprintf(`
+%s
+
 resource "opentelekomcloud_lb_loadbalancer_v2" "loadbalancer_1" {
   name          = "loadbalancer_1"
-  vip_subnet_id = "%[1]s"
+  vip_subnet_id = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.subnet_id
 }
 
 resource "opentelekomcloud_lb_listener_v2" "listener_1" {
@@ -172,7 +176,7 @@ resource "opentelekomcloud_lb_member_v2" "member_1" {
   weight         = 10
   admin_state_up = "true"
   pool_id        = opentelekomcloud_lb_pool_v2.pool_1.id
-  subnet_id      = "%[1]s"
+  subnet_id      = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.subnet_id
 
   timeouts {
     create = "5m"
@@ -187,7 +191,7 @@ resource "opentelekomcloud_lb_member_v2" "member_2" {
   weight         = 15
   admin_state_up = "true"
   pool_id        = opentelekomcloud_lb_pool_v2.pool_1.id
-  subnet_id      = "%[1]s"
+  subnet_id      = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.subnet_id
 
   timeouts {
     create = "5m"
@@ -195,4 +199,4 @@ resource "opentelekomcloud_lb_member_v2" "member_2" {
     delete = "5m"
   }
 }
-`, env.OS_SUBNET_ID)
+`, common.DataSourceSubnet)

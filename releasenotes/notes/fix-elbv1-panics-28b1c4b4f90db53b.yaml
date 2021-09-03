@@ -1,0 +1,7 @@
+---
+fixes:
+  - |
+    **[ELB]** Fix panics in deprecated ``ELBv1`` resources: ``resource/opentelekomcloud_elb_loadbalancer``,
+    ``resource/opentelekomcloud_elb_listener``, ``resource/opentelekomcloud_elb_health``,
+    ``resource/opentelekomcloud_elb_backend`` (`#1378 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/1378>`_)
+

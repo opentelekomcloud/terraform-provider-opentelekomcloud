@@ -14,6 +14,8 @@ import (
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common/cfg"
 )
 
+const resourceHealthName = "opentelekomcloud_elb_health.health_1"
+
 func TestAccELBHealth_basic(t *testing.T) {
 	var health healthcheck.Health
 
@@ -23,18 +25,18 @@ func TestAccELBHealth_basic(t *testing.T) {
 		CheckDestroy:      testAccCheckELBHealthDestroy,
 		Steps: []resource.TestStep{
 			{
-				Config: TestAccELBHealthConfig_basic,
+				Config: testAccELBHealthConfigBasic,
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckELBHealthExists(t, "opentelekomcloud_elb_health.health_1", &health),
-					resource.TestCheckResourceAttr("opentelekomcloud_elb_health.health_1", "healthy_threshold", "3"),
-					resource.TestCheckResourceAttr("opentelekomcloud_elb_health.health_1", "healthcheck_timeout", "10"),
+					testAccCheckELBHealthExists(t, resourceHealthName, &health),
+					resource.TestCheckResourceAttr(resourceHealthName, "healthy_threshold", "3"),
+					resource.TestCheckResourceAttr(resourceHealthName, "healthcheck_timeout", "10"),
 				),
 			},
 			{
-				Config: TestAccELBHealthConfig_update,
+				Config: testAccELBHealthConfigUpdate,
 				Check: resource.ComposeTestCheckFunc(
-					resource.TestCheckResourceAttr("opentelekomcloud_elb_health.health_1", "healthy_threshold", "5"),
-					resource.TestCheckResourceAttr("opentelekomcloud_elb_health.health_1", "healthcheck_timeout", "15"),
+					resource.TestCheckResourceAttr(resourceHealthName, "healthy_threshold", "5"),
+					resource.TestCheckResourceAttr(resourceHealthName, "healthcheck_timeout", "15"),
 				),
 			},
 		},
@@ -96,27 +98,29 @@ func testAccCheckELBHealthExists(t *testing.T, n string, health *healthcheck.Hea
 	}
 }
 
-var TestAccELBHealthConfig_basic = fmt.Sprintf(`
+var testAccELBHealthConfigBasic = fmt.Sprintf(`
+%s
+
 resource "opentelekomcloud_elb_loadbalancer" "loadbalancer_1" {
-  name = "loadbalancer_1"
-  vpc_id = "%s"
-  type = "External"
+  name      = "loadbalancer_1"
+  vpc_id    = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.vpc_id
+  type      = "External"
   bandwidth = 5
 }
 
 resource "opentelekomcloud_elb_listener" "listener_1" {
-  name = "listener_1"
-  protocol = "TCP"
-  protocol_port = 8080
+  name             = "listener_1"
+  protocol         = "TCP"
+  protocol_port    = 8080
   backend_protocol = "TCP"
-  backend_port = 8080
-  lb_algorithm = "roundrobin"
-  loadbalancer_id = opentelekomcloud_elb_loadbalancer.loadbalancer_1.id
+  backend_port     = 8080
+  lb_algorithm     = "roundrobin"
+  loadbalancer_id  = opentelekomcloud_elb_loadbalancer.loadbalancer_1.id
 }
 
 
 resource "opentelekomcloud_elb_health" "health_1" {
-  listener_id = opentelekomcloud_elb_listener.listener_1.id
+  listener_id       = opentelekomcloud_elb_listener.listener_1.id
   #healthcheck_protocol = "HTTP"
   healthy_threshold = 3
   #healthcheck_timeout = 10
@@ -128,32 +132,34 @@ resource "opentelekomcloud_elb_health" "health_1" {
     delete = "5m"
   }
 }
-`, env.OS_VPC_ID)
+`, common.DataSourceSubnet)
 
-var TestAccELBHealthConfig_update = fmt.Sprintf(`
+var testAccELBHealthConfigUpdate = fmt.Sprintf(`
+%s
+
 resource "opentelekomcloud_elb_loadbalancer" "loadbalancer_1" {
-  name = "loadbalancer_1"
-  vpc_id = "%s"
-  type = "External"
+  name      = "loadbalancer_1"
+  vpc_id    = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.vpc_id
+  type      = "External"
   bandwidth = 5
 }
 
 resource "opentelekomcloud_elb_listener" "listener_1" {
-  name = "listener_1"
-  protocol = "TCP"
-  protocol_port = 8080
+  name             = "listener_1"
+  protocol         = "TCP"
+  protocol_port    = 8080
   backend_protocol = "TCP"
-  backend_port = 8080
-  lb_algorithm = "roundrobin"
-  loadbalancer_id = opentelekomcloud_elb_loadbalancer.loadbalancer_1.id
+  backend_port     = 8080
+  lb_algorithm     = "roundrobin"
+  loadbalancer_id  = opentelekomcloud_elb_loadbalancer.loadbalancer_1.id
 }
 
 
 resource "opentelekomcloud_elb_health" "health_1" {
-  listener_id = opentelekomcloud_elb_listener.listener_1.id
+  listener_id          = opentelekomcloud_elb_listener.listener_1.id
   healthcheck_protocol = "HTTP"
-  healthy_threshold = 5
-  healthcheck_timeout = 15
+  healthy_threshold    = 5
+  healthcheck_timeout  = 15
   healthcheck_interval = 3
 
   timeouts {
@@ -162,4 +168,4 @@ resource "opentelekomcloud_elb_health" "health_1" {
     delete = "5m"
   }
 }
-`, env.OS_VPC_ID)
+`, common.DataSourceSubnet)

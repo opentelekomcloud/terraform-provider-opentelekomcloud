@@ -23,26 +23,26 @@ func TestAccLBV2Certificate_basic(t *testing.T) {
 		CheckDestroy:      testAccCheckLBV2CertificateDestroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccLBV2CertificateConfig_basic,
+				Config: testAccLBV2CertificateConfigBasic,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckLBV2CertificateExists("opentelekomcloud_lb_certificate_v2.certificate_1", &c),
 				),
 			},
 			{
-				Config: testAccLBV2ClientCertificateConfig_basic,
+				Config: testAccLBV2ClientCertificateConfigBasic,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckLBV2CertificateExists("opentelekomcloud_lb_certificate_v2.certificate_ca", &c),
 				),
 			},
 			{
-				Config: testAccLBV2CertificateConfig_update,
+				Config: testAccLBV2CertificateConfigUpdate,
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr(
 						"opentelekomcloud_lb_certificate_v2.certificate_1", "name", "certificate_1_updated"),
 				),
 			},
 			{
-				Config: testAccLBV2ClientCertificateConfig_update,
+				Config: testAccLBV2ClientCertificateConfigUpdate,
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr(
 						"opentelekomcloud_lb_certificate_v2.certificate_ca", "name", "certificate_client_updated"),
@@ -106,7 +106,7 @@ func testAccCheckLBV2CertificateExists(
 	}
 }
 
-const testAccLBV2CertificateConfig_basic = `
+const testAccLBV2CertificateConfigBasic = `
 resource "opentelekomcloud_lb_certificate_v2" "certificate_1" {
   name = "certificate_1"
   description = "terraform test certificate"
@@ -174,7 +174,7 @@ EOT
 }
 `
 
-const testAccLBV2ClientCertificateConfig_basic = `
+const testAccLBV2ClientCertificateConfigBasic = `
 resource "opentelekomcloud_lb_certificate_v2" "certificate_ca" {
   name        = "certificate_client"
   description = "terraform ca test certificate"
@@ -212,7 +212,7 @@ EOT
 }
 `
 
-const testAccLBV2CertificateConfig_update = `
+const testAccLBV2CertificateConfigUpdate = `
 resource "opentelekomcloud_lb_certificate_v2" "certificate_1" {
   name = "certificate_1_updated"
   description = "terraform test certificate"
@@ -280,7 +280,7 @@ EOT
 }
 `
 
-const testAccLBV2ClientCertificateConfig_update = `
+const testAccLBV2ClientCertificateConfigUpdate = `
 resource "opentelekomcloud_lb_certificate_v2" "certificate_ca" {
   name        = "certificate_client_updated"
   description = "terraform ca test certificate"

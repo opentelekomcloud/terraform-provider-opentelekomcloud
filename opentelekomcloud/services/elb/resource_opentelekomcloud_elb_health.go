@@ -138,7 +138,7 @@ func resourceHealthRead(_ context.Context, d *schema.ResourceData, meta interfac
 		d.Set("listener_id", health.ListenerID),
 		d.Set("healthcheck_protocol", health.HealthcheckProtocol),
 		d.Set("healthcheck_uri", health.HealthcheckUri),
-		d.Set("healtcheck_connect_port", health.HealthcheckConnectPort),
+		d.Set("healthcheck_connect_port", health.HealthcheckConnectPort),
 		d.Set("healthy_threshold", health.HealthyThreshold),
 		d.Set("unhealthy_threshold", health.UnhealthyThreshold),
 		d.Set("healthcheck_timeout", health.HealthcheckTimeout),

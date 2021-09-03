@@ -118,7 +118,6 @@ func resourceBackendRead(_ context.Context, d *schema.ResourceData, meta interfa
 	mErr := multierror.Append(
 		d.Set("server_id", b.ServerID),
 		d.Set("address", b.ServerAddress),
-		d.Set("region", config.GetRegion(d)),
 	)
 
 	if err := mErr.ErrorOrNil(); err != nil {
