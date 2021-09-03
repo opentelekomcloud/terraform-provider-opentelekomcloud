@@ -15,7 +15,7 @@ import (
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common/cfg"
 )
 
-const resourceName = "opentelekomcloud_evs_volume_v3.volume_1"
+const resourceVolumeV3Name = "opentelekomcloud_evs_volume_v3.volume_1"
 
 func TestAccEvsStorageV3Volume_basic(t *testing.T) {
 	var volume volumes.Volume
@@ -28,15 +28,15 @@ func TestAccEvsStorageV3Volume_basic(t *testing.T) {
 			{
 				Config: testAccEvsStorageV3VolumeBasic,
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckEvsStorageV3VolumeExists(resourceName, &volume),
-					resource.TestCheckResourceAttr(resourceName, "name", "volume_1"),
+					testAccCheckEvsStorageV3VolumeExists(resourceVolumeV3Name, &volume),
+					resource.TestCheckResourceAttr(resourceVolumeV3Name, "name", "volume_1"),
 				),
 			},
 			{
 				Config: testAccEvsStorageV3VolumeUpdate,
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckEvsStorageV3VolumeExists(resourceName, &volume),
-					resource.TestCheckResourceAttr(resourceName, "name", "volume_1-updated"),
+					testAccCheckEvsStorageV3VolumeExists(resourceVolumeV3Name, &volume),
+					resource.TestCheckResourceAttr(resourceVolumeV3Name, "name", "volume_1-updated"),
 				),
 			},
 		},
@@ -52,13 +52,13 @@ func TestAccEvsStorageV3Volume_tags(t *testing.T) {
 			{
 				Config: testAccEvsStorageV3VolumeTags,
 				Check: resource.ComposeTestCheckFunc(
-					resource.TestCheckResourceAttr(resourceName, "tags.muh", "value-create"),
+					resource.TestCheckResourceAttr(resourceVolumeV3Name, "tags.muh", "value-create"),
 				),
 			},
 			{
 				Config: testAccEvsStorageV3VolumeTagsUpdate,
 				Check: resource.ComposeTestCheckFunc(
-					resource.TestCheckResourceAttr(resourceName, "tags.muh", "value-update"),
+					resource.TestCheckResourceAttr(resourceVolumeV3Name, "tags.muh", "value-update"),
 				),
 			},
 		},
@@ -76,8 +76,8 @@ func TestAccEvsStorageV3Volume_image(t *testing.T) {
 			{
 				Config: testAccEvsStorageV3VolumeImage,
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckEvsStorageV3VolumeExists(resourceName, &volume),
-					resource.TestCheckResourceAttr(resourceName, "name", "volume_1"),
+					testAccCheckEvsStorageV3VolumeExists(resourceVolumeV3Name, &volume),
+					resource.TestCheckResourceAttr(resourceVolumeV3Name, "name", "volume_1"),
 				),
 			},
 		},
@@ -95,7 +95,7 @@ func TestAccEvsStorageV3Volume_timeout(t *testing.T) {
 			{
 				Config: testAccEvsStorageV3VolumeTimeout,
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckEvsStorageV3VolumeExists(resourceName, &volume),
+					testAccCheckEvsStorageV3VolumeExists(resourceVolumeV3Name, &volume),
 				),
 			},
 		},
@@ -119,7 +119,7 @@ func TestAccEvsStorageV3Volume_volumeType(t *testing.T) {
 
 func TestAccEvsStorageV3Volume_resize(t *testing.T) {
 	var volume volumes.Volume
-	var volumeUpscaled volumes.Volume
+	var volumeUpScaled volumes.Volume
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:          func() { common.TestAccPreCheck(t) },
@@ -129,15 +129,15 @@ func TestAccEvsStorageV3Volume_resize(t *testing.T) {
 			{
 				Config: testAccEvsStorageV3VolumeBasic,
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckEvsStorageV3VolumeExists(resourceName, &volume),
-					resource.TestCheckResourceAttr(resourceName, "name", "volume_1"),
+					testAccCheckEvsStorageV3VolumeExists(resourceVolumeV3Name, &volume),
+					resource.TestCheckResourceAttr(resourceVolumeV3Name, "name", "volume_1"),
 				),
 			},
 			{
 				Config: testAccEvsStorageV3VolumeUpscale,
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckEvsStorageV3VolumePersists(resourceName, &volumeUpscaled, &volume),
-					resource.TestCheckResourceAttr(resourceName, "size", "20"),
+					testAccCheckEvsStorageV3VolumePersists(resourceVolumeV3Name, &volumeUpScaled, &volume),
+					resource.TestCheckResourceAttr(resourceVolumeV3Name, "size", "20"),
 				),
 			},
 		},
@@ -146,9 +146,9 @@ func TestAccEvsStorageV3Volume_resize(t *testing.T) {
 
 func testAccCheckEvsStorageV3VolumeDestroy(s *terraform.State) error {
 	config := common.TestAccProvider.Meta().(*cfg.Config)
-	blockStorageClient, err := config.BlockStorageV3Client(env.OS_REGION_NAME)
+	client, err := config.BlockStorageV3Client(env.OS_REGION_NAME)
 	if err != nil {
-		return fmt.Errorf("error creating OpenTelekomCloud evs storage client: %s", err)
+		return fmt.Errorf("error creating OpenTelekomCloud BlockStorageV3 client: %s", err)
 	}
 
 	for _, rs := range s.RootModule().Resources {
@@ -156,7 +156,7 @@ func testAccCheckEvsStorageV3VolumeDestroy(s *terraform.State) error {
 			continue
 		}
 
-		_, err := volumes.Get(blockStorageClient, rs.Primary.ID).Extract()
+		_, err := volumes.Get(client, rs.Primary.ID).Extract()
 		if err == nil {
 			return fmt.Errorf("volume still exists")
 		}
@@ -177,12 +177,12 @@ func testAccCheckEvsStorageV3VolumeExists(n string, volume *volumes.Volume) reso
 		}
 
 		config := common.TestAccProvider.Meta().(*cfg.Config)
-		blockStorageClient, err := config.BlockStorageV3Client(env.OS_REGION_NAME)
+		client, err := config.BlockStorageV3Client(env.OS_REGION_NAME)
 		if err != nil {
-			return fmt.Errorf("error creating OpenTelekomCloud evs storage client: %s", err)
+			return fmt.Errorf("error creating OpenTelekomCloud BlockStorageV3 client: %s", err)
 		}
 
-		found, err := volumes.Get(blockStorageClient, rs.Primary.ID).Extract()
+		found, err := volumes.Get(client, rs.Primary.ID).Extract()
 		if err != nil {
 			return err
 		}
@@ -210,7 +210,7 @@ func testAccCheckEvsStorageV3VolumePersists(n string, volume, oldVolume *volumes
 		config := common.TestAccProvider.Meta().(*cfg.Config)
 		client, err := config.BlockStorageV3Client(env.OS_REGION_NAME)
 		if err != nil {
-			return fmt.Errorf("error creating OpenTelekomCloud evs storage client: %s", err)
+			return fmt.Errorf("error creating OpenTelekomCloud BlockStorageV3 client: %s", err)
 		}
 
 		found, err := volumes.Get(client, rs.Primary.ID).Extract()

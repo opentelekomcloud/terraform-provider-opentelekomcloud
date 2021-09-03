@@ -9,8 +9,6 @@ import (
 )
 
 func TestAccBlockStorageV2Volume_importBasic(t *testing.T) {
-	resourceName := "opentelekomcloud_blockstorage_volume_v2.volume_1"
-
 	resource.Test(t, resource.TestCase{
 		PreCheck:          func() { common.TestAccPreCheck(t) },
 		ProviderFactories: common.TestAccProviderFactories,
@@ -19,9 +17,8 @@ func TestAccBlockStorageV2Volume_importBasic(t *testing.T) {
 			{
 				Config: testAccBlockStorageV2VolumeBasic,
 			},
-
 			{
-				ResourceName:      resourceName,
+				ResourceName:      resourceVolumeV2Name,
 				ImportState:       true,
 				ImportStateVerify: true,
 				ImportStateVerifyIgnore: []string{

@@ -15,7 +15,7 @@ import (
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common/cfg"
 )
 
-const resourceVolumeName = "opentelekomcloud_blockstorage_volume_v2.volume_1"
+const resourceVolumeV2Name = "opentelekomcloud_blockstorage_volume_v2.volume_1"
 
 func TestAccBlockStorageV2Volume_basic(t *testing.T) {
 	var volume volumes.Volume
@@ -28,17 +28,17 @@ func TestAccBlockStorageV2Volume_basic(t *testing.T) {
 			{
 				Config: testAccBlockStorageV2VolumeBasic,
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckBlockStorageV2VolumeExists(resourceVolumeName, &volume),
+					testAccCheckBlockStorageV2VolumeExists(resourceVolumeV2Name, &volume),
 					testAccCheckBlockStorageV2VolumeMetadata(&volume, "foo", "bar"),
-					resource.TestCheckResourceAttr(resourceVolumeName, "name", "volume_1"),
+					resource.TestCheckResourceAttr(resourceVolumeV2Name, "name", "volume_1"),
 				),
 			},
 			{
 				Config: testAccBlockStorageV2VolumeUpdate,
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckBlockStorageV2VolumeExists(resourceVolumeName, &volume),
+					testAccCheckBlockStorageV2VolumeExists(resourceVolumeV2Name, &volume),
 					testAccCheckBlockStorageV2VolumeMetadata(&volume, "foo", "bar"),
-					resource.TestCheckResourceAttr(resourceVolumeName, "name", "volume_1-updated"),
+					resource.TestCheckResourceAttr(resourceVolumeV2Name, "name", "volume_1-updated"),
 				),
 			},
 		},
@@ -55,15 +55,15 @@ func TestAccBlockStorageV2Volume_upscaleDownScale(t *testing.T) {
 		Steps: []resource.TestStep{
 			{
 				Config: testAccBlockStorageV2VolumeBasic,
-				Check:  testAccCheckBlockStorageV2VolumeExists(resourceVolumeName, &volume),
+				Check:  testAccCheckBlockStorageV2VolumeExists(resourceVolumeV2Name, &volume),
 			},
 			{
 				Config: testAccBlockStorageV2VolumeBigger,
-				Check:  testAccCheckBlockStorageV2VolumeSame(resourceVolumeName, &volume),
+				Check:  testAccCheckBlockStorageV2VolumeSame(resourceVolumeV2Name, &volume),
 			},
 			{
 				Config: testAccBlockStorageV2VolumeBasic,
-				Check:  testAccCheckBlockStorageV2VolumeNew(resourceVolumeName, &volume),
+				Check:  testAccCheckBlockStorageV2VolumeNew(resourceVolumeV2Name, &volume),
 			},
 		},
 	})
@@ -78,15 +78,15 @@ func TestAccBlockStorageV2Volume_upscaleDownScaleAssigned(t *testing.T) {
 		Steps: []resource.TestStep{
 			{
 				Config: testAccBlockStorageV2VolumeAssigned(10),
-				Check:  testAccCheckBlockStorageV2VolumeExists(resourceVolumeName, &volume),
+				Check:  testAccCheckBlockStorageV2VolumeExists(resourceVolumeV2Name, &volume),
 			},
 			{
 				Config: testAccBlockStorageV2VolumeAssigned(12),
-				Check:  testAccCheckBlockStorageV2VolumeSame(resourceVolumeName, &volume),
+				Check:  testAccCheckBlockStorageV2VolumeSame(resourceVolumeV2Name, &volume),
 			},
 			{
 				Config: testAccBlockStorageV2VolumeAssigned(10),
-				Check:  testAccCheckBlockStorageV2VolumeNew(resourceVolumeName, &volume),
+				Check:  testAccCheckBlockStorageV2VolumeNew(resourceVolumeV2Name, &volume),
 			},
 		},
 	})
@@ -123,15 +123,15 @@ func TestAccBlockStorageV2Volume_tags(t *testing.T) {
 			{
 				Config: testAccBlockStorageV2VolumeTags,
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckBlockStorageV2VolumeTags(resourceVolumeName, "foo", "bar"),
-					testAccCheckBlockStorageV2VolumeTags(resourceVolumeName, "key", "value"),
+					testAccCheckBlockStorageV2VolumeTags(resourceVolumeV2Name, "foo", "bar"),
+					testAccCheckBlockStorageV2VolumeTags(resourceVolumeV2Name, "key", "value"),
 				),
 			},
 			{
 				Config: testAccBlockStorageV2VolumeTagsUpdate,
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckBlockStorageV2VolumeTags(resourceVolumeName, "foo2", "bar2"),
-					testAccCheckBlockStorageV2VolumeTags(resourceVolumeName, "key2", "value2"),
+					testAccCheckBlockStorageV2VolumeTags(resourceVolumeV2Name, "foo2", "bar2"),
+					testAccCheckBlockStorageV2VolumeTags(resourceVolumeV2Name, "key2", "value2"),
 				),
 			},
 		},
@@ -149,9 +149,9 @@ func TestAccBlockStorageV2Volume_image(t *testing.T) {
 			{
 				Config: testAccBlockStorageV2VolumeImage,
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckBlockStorageV2VolumeExists(resourceVolumeName, &volume),
+					testAccCheckBlockStorageV2VolumeExists(resourceVolumeV2Name, &volume),
 					resource.TestCheckResourceAttr(
-						resourceVolumeName, "name", "volume_1"),
+						resourceVolumeV2Name, "name", "volume_1"),
 				),
 			},
 		},
@@ -169,7 +169,7 @@ func TestAccBlockStorageV2Volume_timeout(t *testing.T) {
 			{
 				Config: testAccBlockStorageV2VolumeTimeout,
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckBlockStorageV2VolumeExists(resourceVolumeName, &volume),
+					testAccCheckBlockStorageV2VolumeExists(resourceVolumeV2Name, &volume),
 				),
 			},
 		},
@@ -327,17 +327,21 @@ func testAccCheckBlockStorageV2VolumeNew(n string, volume *volumes.Volume) resou
 
 func testAccBlockStorageV2VolumeAssigned(size int) string {
 	return fmt.Sprintf(`
+%s
+
+%s
+
 resource "opentelekomcloud_blockstorage_volume_v2" "volume_1" {
   name     = "volume_1"
   size     = %d
-  image_id = "%s"
+  image_id = data.opentelekomcloud_images_image_v2.latest_image.id
 }
 
 resource "opentelekomcloud_compute_instance_v2" "instance_1" {
   name            = "instance_1"
   security_groups = ["default"]
   network {
-    uuid = "%s"
+    uuid = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.network_id
   }
   block_device {
     uuid                  = opentelekomcloud_blockstorage_volume_v2.volume_1.id
@@ -347,13 +351,13 @@ resource "opentelekomcloud_compute_instance_v2" "instance_1" {
     delete_on_termination = true
   }
 }
-`, size, env.OS_IMAGE_ID, env.OS_NETWORK_ID)
+`, common.DataSourceImage, common.DataSourceSubnet, size)
 }
 
 const (
 	testAccBlockStorageV2VolumeUpdate = `
 resource "opentelekomcloud_blockstorage_volume_v2" "volume_1" {
-  name = "volume_1-updated"
+  name        = "volume_1-updated"
   description = "first test volume"
   metadata = {
     foo = "bar"
@@ -363,7 +367,7 @@ resource "opentelekomcloud_blockstorage_volume_v2" "volume_1" {
 `
 	testAccBlockStorageV2VolumeTags = `
 resource "opentelekomcloud_blockstorage_volume_v2" "volume_1" {
-  name = "volume_1"
+  name        = "volume_1"
   description = "first test volume"
   metadata = {
     foo = "bar"
@@ -378,7 +382,7 @@ resource "opentelekomcloud_blockstorage_volume_v2" "volume_1" {
 
 	testAccBlockStorageV2VolumeTagsUpdate = `
 resource "opentelekomcloud_blockstorage_volume_v2" "volume_1" {
-  name = "volume_1-updated"
+  name        = "volume_1-updated"
   description = "first test volume"
   metadata = {
     foo = "bar"
@@ -392,7 +396,7 @@ resource "opentelekomcloud_blockstorage_volume_v2" "volume_1" {
 `
 	testAccBlockStorageV2VolumeTimeout = `
 resource "opentelekomcloud_blockstorage_volume_v2" "volume_1" {
-  name = "volume_1"
+  name        = "volume_1"
   description = "first test volume"
   size = 1
   device_type = "SCSI"
@@ -405,7 +409,7 @@ resource "opentelekomcloud_blockstorage_volume_v2" "volume_1" {
 `
 	testAccBlockStorageV2VolumeBasic = `
 resource "opentelekomcloud_blockstorage_volume_v2" "volume_1" {
-  name = "volume_1"
+  name        = "volume_1"
   description = "first test volume"
   metadata = {
     foo = "bar"
@@ -416,7 +420,7 @@ resource "opentelekomcloud_blockstorage_volume_v2" "volume_1" {
 
 	testAccBlockStorageV2VolumeBigger = `
 resource "opentelekomcloud_blockstorage_volume_v2" "volume_1" {
-  name = "volume_1"
+  name        = "volume_1"
   description = "first test volume"
   metadata = {
     foo = "bar"
@@ -427,12 +431,13 @@ resource "opentelekomcloud_blockstorage_volume_v2" "volume_1" {
 )
 
 var testAccBlockStorageV2VolumeImage = fmt.Sprintf(`
+%s
 resource "opentelekomcloud_blockstorage_volume_v2" "volume_1" {
-  name = "volume_1"
-  size = 12
-  image_id = "%s"
+  name     = "volume_1"
+  size     = 12
+  image_id = data.opentelekomcloud_images_image_v2.latest_image.id
 }
-`, env.OS_IMAGE_ID)
+`, common.DataSourceImage)
 
 var testAccBlockStorageV2VolumePolicy = fmt.Sprintf(`
 %s
