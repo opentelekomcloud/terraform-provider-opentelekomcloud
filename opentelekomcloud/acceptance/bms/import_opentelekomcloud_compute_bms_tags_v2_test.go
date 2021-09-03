@@ -8,20 +8,17 @@ import (
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/acceptance/common"
 )
 
-func TestAccOTCBMSTagsV2_importBasic(t *testing.T) {
-	resourceName := "opentelekomcloud_compute_bms_tags_v2.tags_1"
-
+func TestAccBMSTagsV2_importBasic(t *testing.T) {
 	resource.Test(t, resource.TestCase{
-		PreCheck:          func() { testAccBmsFlavorPreCheck(t) },
+		PreCheck:          func() { common.TestAccPreCheck(t) },
 		ProviderFactories: common.TestAccProviderFactories,
-		CheckDestroy:      testAccCheckOTCBMSTagsV2Destroy,
+		CheckDestroy:      testAccCheckBMSTagsV2Destroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccBMSTagsV2_basic,
+				Config: testAccBMSTagsV2Basic,
 			},
-
 			{
-				ResourceName:      resourceName,
+				ResourceName:      resourceTagsName,
 				ImportState:       true,
 				ImportStateVerify: true,
 			},

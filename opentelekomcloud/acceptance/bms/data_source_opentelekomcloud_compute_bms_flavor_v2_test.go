@@ -11,17 +11,18 @@ import (
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/acceptance/env"
 )
 
-func TestAccOTCBMSV2FlavorDataSource_basic(t *testing.T) {
+const dataFlavorName = "data.opentelekomcloud_compute_bms_flavors_v2.flavor"
+
+func TestAccBMSV2FlavorDataSource_basic(t *testing.T) {
 	resource.Test(t, resource.TestCase{
 		PreCheck:          func() { testAccBmsFlavorPreCheck(t) },
 		ProviderFactories: common.TestAccProviderFactories,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccBMSV2FlavorDataSource_basic,
+				Config: testAccBMSV2FlavorDataSourceBasic,
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckBMSV2FlavorDataSourceID("data.opentelekomcloud_compute_bms_flavors_v2.flavor"),
-					resource.TestCheckResourceAttr(
-						"data.opentelekomcloud_compute_bms_flavors_v2.flavor", "name", env.OS_BMS_FLAVOR_NAME),
+					testAccCheckBMSV2FlavorDataSourceID(dataFlavorName),
+					resource.TestCheckResourceAttr(dataFlavorName, "name", env.OS_BMS_FLAVOR_NAME),
 				),
 			},
 		},
@@ -43,7 +44,7 @@ func testAccCheckBMSV2FlavorDataSourceID(n string) resource.TestCheckFunc {
 	}
 }
 
-var testAccBMSV2FlavorDataSource_basic = fmt.Sprintf(`
+var testAccBMSV2FlavorDataSourceBasic = fmt.Sprintf(`
 data "opentelekomcloud_compute_bms_flavors_v2" "flavor" {
   name = "%s"
 }
