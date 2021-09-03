@@ -11,16 +11,18 @@ import (
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/acceptance/env"
 )
 
-func TestAccOTCBMSServerV2DataSource_basic(t *testing.T) {
+const dataServerName = "data.opentelekomcloud_compute_bms_server_v2.server1"
+
+func TestAccBMSServerV2DataSource_basic(t *testing.T) {
 	resource.Test(t, resource.TestCase{
-		PreCheck:          func() { testAccBmsFlavorPreCheck(t) },
+		PreCheck:          func() { common.TestAccPreCheck(t) },
 		ProviderFactories: common.TestAccProviderFactories,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccOTCBMSServerV2DataSource_basic,
+				Config: testAccBMSServerV2DataSourceBasic,
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckBMSServerV2DataSourceID("data.opentelekomcloud_compute_bms_server_v2.server1"),
-					resource.TestCheckResourceAttr("data.opentelekomcloud_compute_bms_server_v2.server1", "status", "ACTIVE"),
+					testAccCheckBMSServerV2DataSourceID(dataServerName),
+					resource.TestCheckResourceAttr(dataServerName, "status", "ACTIVE"),
 				),
 			},
 		},
@@ -42,10 +44,14 @@ func testAccCheckBMSServerV2DataSourceID(n string) resource.TestCheckFunc {
 	}
 }
 
-var testAccOTCBMSServerV2DataSource_basic = fmt.Sprintf(`
+var testAccBMSServerV2DataSourceBasic = fmt.Sprintf(`
+%s
+
+%s
+
 resource "opentelekomcloud_compute_instance_v2" "instance_1" {
   name              = "BMSinstance_1"
-  image_id          = "%s"
+  image_id          = data.opentelekomcloud_images_image_v2.latest_image.id
   security_groups   = ["default"]
   availability_zone = "%s"
   flavor_id         = "physical.o2.medium"
@@ -54,11 +60,11 @@ resource "opentelekomcloud_compute_instance_v2" "instance_1" {
     foo = "bar"
   }
   network {
-    uuid = "%s"
+    uuid = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.network_id
   }
 }
 
 data "opentelekomcloud_compute_bms_server_v2" "server1" {
   id = opentelekomcloud_compute_instance_v2.instance_1.id
 }
-`, env.OS_IMAGE_ID, env.OS_AVAILABILITY_ZONE, env.OS_NETWORK_ID)
+`, common.DataSourceImage, common.DataSourceSubnet, env.OS_AVAILABILITY_ZONE)

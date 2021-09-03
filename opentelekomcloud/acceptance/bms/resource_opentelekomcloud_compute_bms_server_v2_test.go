@@ -14,28 +14,28 @@ import (
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common/cfg"
 )
 
+const resourceServerName = "opentelekomcloud_compute_bms_server_v2.instance_1"
+
 func TestAccComputeV2BmsInstance_basic(t *testing.T) {
 	var instance servers.Server
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:          func() { testAccBmsFlavorPreCheck(t) },
+		PreCheck:          func() { common.TestAccPreCheck(t) },
 		ProviderFactories: common.TestAccProviderFactories,
 		CheckDestroy:      testAccCheckComputeV2BmsInstanceDestroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccComputeV2BmsInstance_basic,
+				Config: testAccComputeV2BmsInstanceBasic,
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckComputeV2BmsInstanceExists("opentelekomcloud_compute_bms_server_v2.instance_1", &instance),
-					resource.TestCheckResourceAttr(
-						"opentelekomcloud_compute_bms_server_v2.instance_1", "availability_zone", env.OS_AVAILABILITY_ZONE),
+					testAccCheckComputeV2BmsInstanceExists(resourceServerName, &instance),
+					resource.TestCheckResourceAttr(resourceServerName, "availability_zone", env.OS_AVAILABILITY_ZONE),
 				),
 			},
 			{
-				Config: testAccComputeV2BmsInstance_update,
+				Config: testAccComputeV2BmsInstanceUpdate,
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckComputeV2BmsInstanceExists("opentelekomcloud_compute_bms_server_v2.instance_1", &instance),
-					resource.TestCheckResourceAttr(
-						"opentelekomcloud_compute_bms_server_v2.instance_1", "name", "instance_2"),
+					testAccCheckComputeV2BmsInstanceExists(resourceServerName, &instance),
+					resource.TestCheckResourceAttr(resourceServerName, "name", "instance_2"),
 				),
 			},
 		},
@@ -46,16 +46,15 @@ func TestAccComputeV2BmsInstance_bootFromVolumeImage(t *testing.T) {
 	var instance servers.Server
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:          func() { testAccBmsFlavorPreCheck(t) },
+		PreCheck:          func() { common.TestAccPreCheck(t) },
 		ProviderFactories: common.TestAccProviderFactories,
 		CheckDestroy:      testAccCheckComputeV2BmsInstanceDestroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccComputeV2BmsInstance_bootFromVolumeImage,
+				Config: testAccComputeV2BmsInstanceBootFromVolumeImage,
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckComputeV2BmsInstanceExists("opentelekomcloud_compute_bms_server_v2.instance_1", &instance),
-					resource.TestCheckResourceAttr(
-						"opentelekomcloud_compute_bms_server_v2.instance_1", "name", "instance_1"),
+					testAccCheckComputeV2BmsInstanceExists(resourceServerName, &instance),
+					resource.TestCheckResourceAttr(resourceServerName, "name", "instance_1"),
 				),
 			},
 		},
@@ -65,14 +64,14 @@ func TestAccComputeV2BmsInstance_bootFromVolumeImage(t *testing.T) {
 func TestAccComputeV2BmsInstance_timeout(t *testing.T) {
 	var instance servers.Server
 	resource.Test(t, resource.TestCase{
-		PreCheck:          func() { testAccBmsFlavorPreCheck(t) },
+		PreCheck:          func() { common.TestAccPreCheck(t) },
 		ProviderFactories: common.TestAccProviderFactories,
 		CheckDestroy:      ecs.TestAccCheckComputeV2InstanceDestroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccComputeV2BmsInstance_timeout,
+				Config: testAccComputeV2BmsInstanceTimeout,
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckComputeV2BmsInstanceExists("opentelekomcloud_compute_bms_server_v2.instance_1", &instance),
+					testAccCheckComputeV2BmsInstanceExists(resourceServerName, &instance),
 				),
 			},
 		},
@@ -81,9 +80,9 @@ func TestAccComputeV2BmsInstance_timeout(t *testing.T) {
 
 func testAccCheckComputeV2BmsInstanceDestroy(s *terraform.State) error {
 	config := common.TestAccProvider.Meta().(*cfg.Config)
-	computeClient, err := config.ComputeV2Client(env.OS_REGION_NAME)
+	client, err := config.ComputeV2Client(env.OS_REGION_NAME)
 	if err != nil {
-		return fmt.Errorf("error creating OpenTelekomCloud compute client: %s", err)
+		return fmt.Errorf("error creating OpenTelekomCloud ComputeV2 client: %s", err)
 	}
 
 	for _, rs := range s.RootModule().Resources {
@@ -91,7 +90,7 @@ func testAccCheckComputeV2BmsInstanceDestroy(s *terraform.State) error {
 			continue
 		}
 
-		server, err := servers.Get(computeClient, rs.Primary.ID).Extract()
+		server, err := servers.Get(client, rs.Primary.ID).Extract()
 		if err == nil {
 			if server.Status != "SOFT_DELETED" {
 				return fmt.Errorf("instance still exists")
@@ -114,12 +113,12 @@ func testAccCheckComputeV2BmsInstanceExists(n string, instance *servers.Server) 
 		}
 
 		config := common.TestAccProvider.Meta().(*cfg.Config)
-		computeClient, err := config.ComputeV2Client(env.OS_REGION_NAME)
+		client, err := config.ComputeV2Client(env.OS_REGION_NAME)
 		if err != nil {
-			return fmt.Errorf("error creating OpenTelekomCloud compute client: %s", err)
+			return fmt.Errorf("error creating OpenTelekomCloud ComputeV2 client: %s", err)
 		}
 
-		found, err := servers.Get(computeClient, rs.Primary.ID).Extract()
+		found, err := servers.Get(client, rs.Primary.ID).Extract()
 		if err != nil {
 			return err
 		}
@@ -134,7 +133,9 @@ func testAccCheckComputeV2BmsInstanceExists(n string, instance *servers.Server) 
 	}
 }
 
-var testAccComputeV2BmsInstance_basic = fmt.Sprintf(`
+var testAccComputeV2BmsInstanceBasic = fmt.Sprintf(`
+%s
+
 resource "opentelekomcloud_compute_bms_server_v2" "instance_1" {
   name = "instance_1"
   flavor_id = "physical.o2.medium"
@@ -145,12 +146,14 @@ resource "opentelekomcloud_compute_bms_server_v2" "instance_1" {
     foo = "bar"
   }
   network {
-    uuid = "%s"
+    uuid = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.network_id
   }
 }
-`, env.OS_AVAILABILITY_ZONE, env.OS_NETWORK_ID)
+`, common.DataSourceSubnet, env.OS_AVAILABILITY_ZONE)
 
-var testAccComputeV2BmsInstance_update = fmt.Sprintf(`
+var testAccComputeV2BmsInstanceUpdate = fmt.Sprintf(`
+%s
+
 resource "opentelekomcloud_compute_bms_server_v2" "instance_1" {
   name = "instance_2"
   flavor_id = "physical.o2.medium"
@@ -161,12 +164,14 @@ resource "opentelekomcloud_compute_bms_server_v2" "instance_1" {
     foo = "bar"
   }
   network {
-    uuid = "%s"
+    uuid = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.network_id
   }
 }
-`, env.OS_AVAILABILITY_ZONE, env.OS_NETWORK_ID)
+`, common.DataSourceSubnet, env.OS_AVAILABILITY_ZONE)
 
-var testAccComputeV2BmsInstance_timeout = fmt.Sprintf(`
+var testAccComputeV2BmsInstanceTimeout = fmt.Sprintf(`
+%s
+
 resource "opentelekomcloud_compute_bms_server_v2" "instance_1" {
   name = "instance_1"
   flavor_id = "physical.o2.medium"
@@ -174,16 +179,18 @@ resource "opentelekomcloud_compute_bms_server_v2" "instance_1" {
   security_groups = ["default"]
   availability_zone = "%s"
   network {
-    uuid = "%s"
+    uuid = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.network_id
   }
 
   timeouts {
     create = "20m"
   }
 }
-`, env.OS_AVAILABILITY_ZONE, env.OS_NETWORK_ID)
+`, common.DataSourceSubnet, env.OS_AVAILABILITY_ZONE)
 
-var testAccComputeV2BmsInstance_bootFromVolumeImage = fmt.Sprintf(`
+var testAccComputeV2BmsInstanceBootFromVolumeImage = fmt.Sprintf(`
+%s
+
 resource "opentelekomcloud_compute_bms_server_v2" "instance_1" {
   name = "instance_1"
   flavor_id = "physical.h2.large"
@@ -191,7 +198,7 @@ resource "opentelekomcloud_compute_bms_server_v2" "instance_1" {
   security_groups = ["default"]
   availability_zone = "%s"
   network {
-    uuid = "%s"
+    uuid = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.network_id
   }
 
   block_device {
@@ -208,4 +215,4 @@ resource "opentelekomcloud_compute_bms_server_v2" "instance_1" {
     create = "20m"
   }
 }
-`, env.OS_AVAILABILITY_ZONE, env.OS_NETWORK_ID)
+`, common.DataSourceSubnet, env.OS_AVAILABILITY_ZONE)
