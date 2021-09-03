@@ -8,19 +8,17 @@ import (
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/acceptance/common"
 )
 
-func TestAccOTCDedicatedHostV1_importBasic(t *testing.T) {
-	resourceName := "opentelekomcloud_deh_host_v1.deh1"
-
+func TestAccDedicatedHostV1_importBasic(t *testing.T) {
 	resource.Test(t, resource.TestCase{
 		PreCheck:          func() { common.TestAccPreCheck(t) },
 		ProviderFactories: common.TestAccProviderFactories,
-		CheckDestroy:      testAccCheckOTCDeHV1Destroy,
+		CheckDestroy:      testAccCheckDeHV1Destroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccDeHV1_basic,
+				Config: testAccDeHV1Basic,
 			},
 			{
-				ResourceName:      resourceName,
+				ResourceName:      resourceHostName,
 				ImportState:       true,
 				ImportStateVerify: true,
 			},
