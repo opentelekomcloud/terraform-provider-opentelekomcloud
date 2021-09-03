@@ -11,17 +11,19 @@ import (
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/acceptance/env"
 )
 
-func TestAccOTCDedicatedHostV1DataSource_basic(t *testing.T) {
+const dataHostName = "data.opentelekomcloud_deh_host_v1.hosts"
+
+func TestAccDedicatedHostV1DataSource_basic(t *testing.T) {
 	resource.Test(t, resource.TestCase{
 		PreCheck:          func() { common.TestAccPreCheck(t) },
 		ProviderFactories: common.TestAccProviderFactories,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccOTCDedicatedHostV1DataSource_basic,
+				Config: testAccDedicatedHostV1DataSourceBasic,
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckDedicatedHostV1DataSourceID("data.opentelekomcloud_deh_host_v1.hosts"),
-					resource.TestCheckResourceAttr("data.opentelekomcloud_deh_host_v1.hosts", "name", "test-deh-1"),
-					resource.TestCheckResourceAttr("data.opentelekomcloud_deh_host_v1.hosts", "auto_placement", "on"),
+					testAccCheckDedicatedHostV1DataSourceID(dataHostName),
+					resource.TestCheckResourceAttr(dataHostName, "name", "test-deh-1"),
+					resource.TestCheckResourceAttr(dataHostName, "auto_placement", "on"),
 				),
 			},
 		},
@@ -43,12 +45,12 @@ func testAccCheckDedicatedHostV1DataSourceID(n string) resource.TestCheckFunc {
 	}
 }
 
-var testAccOTCDedicatedHostV1DataSource_basic = fmt.Sprintf(`
+var testAccDedicatedHostV1DataSourceBasic = fmt.Sprintf(`
 resource "opentelekomcloud_deh_host_v1" "deh1" {
-	 availability_zone= "%s"
-     auto_placement= "on"
-     host_type= "h1"
-	 name = "test-deh-1"
+  availability_zone = "%s"
+  auto_placement    = "on"
+  host_type         = "h1"
+  name              = "test-deh-1"
 }
 data "opentelekomcloud_deh_host_v1" "hosts" {
   id = opentelekomcloud_deh_host_v1.deh1.id

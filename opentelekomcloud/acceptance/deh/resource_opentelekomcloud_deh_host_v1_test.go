@@ -13,86 +13,79 @@ import (
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common/cfg"
 )
 
-func TestAccOTCDedicatedHostV1_basic(t *testing.T) {
+const resourceHostName = "opentelekomcloud_deh_host_v1.deh1"
+
+func TestAccDedicatedHostV1_basic(t *testing.T) {
 	var host hosts.Host
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:          func() { common.TestAccPreCheck(t) },
 		ProviderFactories: common.TestAccProviderFactories,
-		CheckDestroy:      testAccCheckOTCDeHV1Destroy,
+		CheckDestroy:      testAccCheckDeHV1Destroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccDeHV1_basic,
+				Config: testAccDeHV1Basic,
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckOTCDeHV1Exists("opentelekomcloud_deh_host_v1.deh1", &host),
-					resource.TestCheckResourceAttr(
-						"opentelekomcloud_deh_host_v1.deh1", "name", "test-deh-1"),
-					resource.TestCheckResourceAttr(
-						"opentelekomcloud_deh_host_v1.deh1", "auto_placement", "off"),
-					resource.TestCheckResourceAttr(
-						"opentelekomcloud_deh_host_v1.deh1", "host_type", "h1"),
+					testAccCheckDeHV1Exists(resourceHostName, &host),
+					resource.TestCheckResourceAttr(resourceHostName, "name", "test-deh-1"),
+					resource.TestCheckResourceAttr(resourceHostName, "auto_placement", "off"),
+					resource.TestCheckResourceAttr(resourceHostName, "host_type", "h1"),
 				),
 			},
 		},
 	})
 }
 
-func TestAccOTCDedicatedHostV1_update(t *testing.T) {
+func TestAccDedicatedHostV1_update(t *testing.T) {
 	var host hosts.Host
 	resource.Test(t, resource.TestCase{
 		PreCheck:          func() { common.TestAccPreCheck(t) },
 		ProviderFactories: common.TestAccProviderFactories,
-		CheckDestroy:      testAccCheckOTCDeHV1Destroy,
+		CheckDestroy:      testAccCheckDeHV1Destroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccDeHV1_basic,
+				Config: testAccDeHV1Basic,
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckOTCDeHV1Exists("opentelekomcloud_deh_host_v1.deh1", &host),
-					resource.TestCheckResourceAttr(
-						"opentelekomcloud_deh_host_v1.deh1", "name", "test-deh-1"),
-					resource.TestCheckResourceAttr(
-						"opentelekomcloud_deh_host_v1.deh1", "auto_placement", "off"),
-					resource.TestCheckResourceAttr(
-						"opentelekomcloud_deh_host_v1.deh1", "host_type", "h1"),
+					testAccCheckDeHV1Exists(resourceHostName, &host),
+					resource.TestCheckResourceAttr(resourceHostName, "name", "test-deh-1"),
+					resource.TestCheckResourceAttr(resourceHostName, "auto_placement", "off"),
+					resource.TestCheckResourceAttr(resourceHostName, "host_type", "h1"),
 				),
 			},
 			{
-				Config: testAccDeHV1_update,
+				Config: testAccDeHV1Update,
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckOTCDeHV1Exists("opentelekomcloud_deh_host_v1.deh1", &host),
-					resource.TestCheckResourceAttr(
-						"opentelekomcloud_deh_host_v1.deh1", "name", "test-deh-2"),
-					resource.TestCheckResourceAttr(
-						"opentelekomcloud_deh_host_v1.deh1", "auto_placement", "on"),
-					resource.TestCheckResourceAttr(
-						"opentelekomcloud_deh_host_v1.deh1", "host_type", "h1"),
+					testAccCheckDeHV1Exists(resourceHostName, &host),
+					resource.TestCheckResourceAttr(resourceHostName, "name", "test-deh-2"),
+					resource.TestCheckResourceAttr(resourceHostName, "auto_placement", "on"),
+					resource.TestCheckResourceAttr(resourceHostName, "host_type", "h1"),
 				),
 			},
 		},
 	})
 }
 
-func TestAccOTCDedicatedHostV1_timeout(t *testing.T) {
+func TestAccDedicatedHostV1_timeout(t *testing.T) {
 	var host hosts.Host
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:          func() { common.TestAccPreCheck(t) },
 		ProviderFactories: common.TestAccProviderFactories,
-		CheckDestroy:      testAccCheckOTCDeHV1Destroy,
+		CheckDestroy:      testAccCheckDeHV1Destroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccDeHV1_timeout,
+				Config: testAccDeHV1Timeout,
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckOTCDeHV1Exists("opentelekomcloud_deh_host_v1.deh1", &host),
+					testAccCheckDeHV1Exists("opentelekomcloud_deh_host_v1.deh1", &host),
 				),
 			},
 		},
 	})
 }
 
-func testAccCheckOTCDeHV1Destroy(s *terraform.State) error {
+func testAccCheckDeHV1Destroy(s *terraform.State) error {
 	config := common.TestAccProvider.Meta().(*cfg.Config)
-	dehClient, err := config.DehV1Client(env.OS_REGION_NAME)
+	client, err := config.DehV1Client(env.OS_REGION_NAME)
 	if err != nil {
 		return fmt.Errorf("error creating OpenTelekomCloud deh client: %s", err)
 	}
@@ -102,7 +95,7 @@ func testAccCheckOTCDeHV1Destroy(s *terraform.State) error {
 			continue
 		}
 
-		_, err := hosts.Get(dehClient, rs.Primary.ID).Extract()
+		_, err := hosts.Get(client, rs.Primary.ID).Extract()
 		if err == nil {
 			return fmt.Errorf("dedicated Host still exists")
 		}
@@ -111,7 +104,7 @@ func testAccCheckOTCDeHV1Destroy(s *terraform.State) error {
 	return nil
 }
 
-func testAccCheckOTCDeHV1Exists(n string, host *hosts.Host) resource.TestCheckFunc {
+func testAccCheckDeHV1Exists(n string, host *hosts.Host) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
 		rs, ok := s.RootModule().Resources[n]
 		if !ok {
@@ -123,12 +116,12 @@ func testAccCheckOTCDeHV1Exists(n string, host *hosts.Host) resource.TestCheckFu
 		}
 
 		config := common.TestAccProvider.Meta().(*cfg.Config)
-		dehClient, err := config.DehV1Client(env.OS_REGION_NAME)
+		client, err := config.DehV1Client(env.OS_REGION_NAME)
 		if err != nil {
 			return fmt.Errorf("error creating OpenTelekomCloud DeH client: %s", err)
 		}
 
-		found, err := hosts.Get(dehClient, rs.Primary.ID).Extract()
+		found, err := hosts.Get(client, rs.Primary.ID).Extract()
 		if err != nil {
 			return err
 		}
@@ -143,30 +136,30 @@ func testAccCheckOTCDeHV1Exists(n string, host *hosts.Host) resource.TestCheckFu
 	}
 }
 
-var testAccDeHV1_basic = fmt.Sprintf(`
+var testAccDeHV1Basic = fmt.Sprintf(`
 resource "opentelekomcloud_deh_host_v1" "deh1" {
-	 availability_zone= "%s"
-     auto_placement= "off"
-     host_type= "h1"
-	name = "test-deh-1"
+  availability_zone= "%s"
+  auto_placement= "off"
+  host_type= "h1"
+  name = "test-deh-1"
 }
 `, env.OS_AVAILABILITY_ZONE)
 
-var testAccDeHV1_update = fmt.Sprintf(`
+var testAccDeHV1Update = fmt.Sprintf(`
 resource "opentelekomcloud_deh_host_v1" "deh1" {
-	 availability_zone= "%s"
-     auto_placement= "on"
-     host_type= "h1"
-	name = "test-deh-2"
+  availability_zone= "%s"
+  auto_placement= "on"
+  host_type= "h1"
+  name = "test-deh-2"
 }
 `, env.OS_AVAILABILITY_ZONE)
 
-var testAccDeHV1_timeout = fmt.Sprintf(`
+var testAccDeHV1Timeout = fmt.Sprintf(`
 resource "opentelekomcloud_deh_host_v1" "deh1" {
-	 availability_zone= "%s"
-     auto_placement= "off"
-     host_type= "h1"
-	name = "test-deh-1"
+  availability_zone= "%s"
+  auto_placement= "off"
+  host_type= "h1"
+  name = "test-deh-1"
   timeouts {
     create = "5m"
     delete = "5m"
