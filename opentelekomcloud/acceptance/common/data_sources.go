@@ -6,13 +6,6 @@ import (
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/acceptance/env"
 )
 
-// DataSourceVPC can be referred as `data.opentelekomcloud_vpc_v1.shared_vpc`
-var DataSourceVPC = fmt.Sprintf(`
-data "opentelekomcloud_vpc_v1" "shared_vpc"  {
-  name = "%s"
-}
-`, env.OsRouterName)
-
 // DataSourceSubnet can be referred as `data.opentelekomcloud_vpc_subnet_v1.shared_subnet`
 var DataSourceSubnet = fmt.Sprintf(`
 data "opentelekomcloud_vpc_subnet_v1" "shared_subnet"  {

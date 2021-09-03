@@ -122,14 +122,12 @@ var (
 	testAccCCEAddonV3Basic = fmt.Sprintf(`
 %s
 
-%s
-
 resource opentelekomcloud_cce_cluster_v3 cluster_1 {
   name                    = "%s"
   cluster_type            = "VirtualMachine"
   flavor_id               = "cce.s1.small"
-  vpc_id                  = data.opentelekomcloud_vpc_v1.shared_vpc.id
-  subnet_id               = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.id
+  vpc_id                  = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.vpc_id
+  subnet_id               = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.network_id
   container_network_type  = "overlay_l2"
   kubernetes_svc_ip_range = "10.247.0.0/16"
 }
@@ -173,19 +171,17 @@ resource "opentelekomcloud_cce_addon_v3" "autoscaler" {
     }
   }
 }
-`, common.DataSourceVPC, common.DataSourceSubnet, clusterName, env.OS_TENANT_ID)
+`, common.DataSourceSubnet, clusterName, env.OS_TENANT_ID)
 
 	testAccCCEAddonV3Updated = fmt.Sprintf(`
-%s
-
 %s
 
 resource opentelekomcloud_cce_cluster_v3 cluster_1 {
   name                    = "%s"
   cluster_type            = "VirtualMachine"
   flavor_id               = "cce.s1.small"
-  vpc_id                  = data.opentelekomcloud_vpc_v1.shared_vpc.id
-  subnet_id               = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.id
+  vpc_id                  = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.vpc_id
+  subnet_id               = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.network_id
   container_network_type  = "overlay_l2"
   kubernetes_svc_ip_range = "10.247.0.0/16"
 }
@@ -229,19 +225,17 @@ resource "opentelekomcloud_cce_addon_v3" "autoscaler" {
     }
   }
 }
-`, common.DataSourceVPC, common.DataSourceSubnet, clusterName, env.OS_TENANT_ID)
+`, common.DataSourceSubnet, clusterName, env.OS_TENANT_ID)
 
 	testAccCCEAddonV3ForceNew = fmt.Sprintf(`
-%s
-
 %s
 
 resource opentelekomcloud_cce_cluster_v3 cluster_1 {
   name                    = "%s"
   cluster_type            = "VirtualMachine"
   flavor_id               = "cce.s1.medium"
-  vpc_id                  = data.opentelekomcloud_vpc_v1.shared_vpc.id
-  subnet_id               = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.id
+  vpc_id                  = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.vpc_id
+  subnet_id               = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.network_id
   container_network_type  = "overlay_l2"
   kubernetes_svc_ip_range = "10.247.0.0/16"
 }
@@ -281,5 +275,5 @@ resource "opentelekomcloud_cce_addon_v3" "autoscaler" {
     }
   }
 }
-`, common.DataSourceVPC, common.DataSourceSubnet, clusterName, env.OS_TENANT_ID)
+`, common.DataSourceSubnet, clusterName, env.OS_TENANT_ID)
 )

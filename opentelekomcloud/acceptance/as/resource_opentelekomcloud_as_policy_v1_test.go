@@ -91,9 +91,6 @@ var testAccASV1PolicyBasic = fmt.Sprintf(`
 // default Subnet data-source
 %s
 
-// default VPC data-source
-%s
-
 resource "opentelekomcloud_as_configuration_v1" "as_config"{
   scaling_configuration_name = "as_config"
   instance_config {
@@ -111,12 +108,12 @@ resource "opentelekomcloud_as_group_v1" "as_group"{
   scaling_group_name       = "as_group"
   scaling_configuration_id = opentelekomcloud_as_configuration_v1.as_config.id
   networks {
-    id = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.id
+    id = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.network_id
   }
   security_groups {
     id = data.opentelekomcloud_networking_secgroup_v2.default_secgroup.id
   }
-  vpc_id = data.opentelekomcloud_vpc_v1.shared_vpc.id
+  vpc_id = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.vpc_id
 }
 
 resource "opentelekomcloud_as_policy_v1" "as_policy"{
@@ -131,4 +128,4 @@ resource "opentelekomcloud_as_policy_v1" "as_policy"{
     launch_time = "2022-12-22T12:00Z"
   }
 }
-`, common.DataSourceSecGroupDefault, common.DataSourceImage, common.DataSourceSubnet, common.DataSourceVPC, env.OS_KEYPAIR_NAME)
+`, common.DataSourceSecGroupDefault, common.DataSourceImage, common.DataSourceSubnet, env.OS_KEYPAIR_NAME)

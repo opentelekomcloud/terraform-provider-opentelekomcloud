@@ -61,11 +61,8 @@ func TestAccRdsReadReplicaV3Basic(t *testing.T) {
 func testAccRdsReadReplicaV3Basic(postfix string) string {
 	return fmt.Sprintf(`
 %s
-%s
 
-resource "opentelekomcloud_networking_secgroup_v2" "sg" {
-  name = "sg-rds-replica-test"
-}
+%s
 
 resource "opentelekomcloud_rds_instance_v3" "instance" {
   name = "tf_rds_instance_%s"
@@ -76,9 +73,9 @@ resource "opentelekomcloud_rds_instance_v3" "instance" {
     version  = "10"
     port     = "8635"
   }
-  security_group_id = opentelekomcloud_networking_secgroup_v2.sg.id
-  subnet_id         = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.id
-  vpc_id            = data.opentelekomcloud_vpc_v1.shared_vpc.id
+  security_group_id = data.opentelekomcloud_networking_secgroup_v2.default_secgroup.id
+  vpc_id            = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.vpc_id
+  subnet_id         = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.network_id
   volume {
     type = "COMMON"
     size = 40
@@ -110,17 +107,14 @@ resource "opentelekomcloud_rds_read_replica_v3" "replica" {
   }
 }
 
-`, common.DataSourceVPC, common.DataSourceSubnet, postfix, env.OS_AVAILABILITY_ZONE)
+`, common.DataSourceSecGroupDefault, common.DataSourceSubnet, postfix, env.OS_AVAILABILITY_ZONE)
 }
 
 func testAccRdsReadReplicaV3BasicNoIP(postfix string) string {
 	return fmt.Sprintf(`
 %s
-%s
 
-resource "opentelekomcloud_networking_secgroup_v2" "sg" {
-  name = "sg-rds-replica-test"
-}
+%s
 
 resource "opentelekomcloud_rds_instance_v3" "instance" {
   name              = "tf_rds_instance_%s"
@@ -131,9 +125,9 @@ resource "opentelekomcloud_rds_instance_v3" "instance" {
     version  = "10"
     port     = "8635"
   }
-  security_group_id = opentelekomcloud_networking_secgroup_v2.sg.id
-  subnet_id         = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.id
-  vpc_id            = data.opentelekomcloud_vpc_v1.shared_vpc.id
+  security_group_id = data.opentelekomcloud_networking_secgroup_v2.default_secgroup.id
+  vpc_id            = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.vpc_id
+  subnet_id         = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.network_id
   volume {
     type = "COMMON"
     size = 40
@@ -164,5 +158,5 @@ resource "opentelekomcloud_rds_read_replica_v3" "replica" {
     type = "COMMON"
   }
 }
-`, common.DataSourceVPC, common.DataSourceSubnet, postfix, env.OS_AVAILABILITY_ZONE)
+`, common.DataSourceSecGroupDefault, common.DataSourceSubnet, postfix, env.OS_AVAILABILITY_ZONE)
 }

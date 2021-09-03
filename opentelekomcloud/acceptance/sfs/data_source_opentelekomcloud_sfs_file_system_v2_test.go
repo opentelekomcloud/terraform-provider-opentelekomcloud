@@ -51,7 +51,7 @@ resource "opentelekomcloud_sfs_file_system_v2" "sfs_1" {
   size              = 1
   name              = "sfs-c2c-1"
   availability_zone = "eu-de-01"
-  access_to         = data.opentelekomcloud_vpc_v1.shared_vpc.id
+  access_to         = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.vpc_id
   access_type       = "cert"
   access_level      = "rw"
   description       = "sfs_c2c_test-file"
@@ -60,4 +60,4 @@ resource "opentelekomcloud_sfs_file_system_v2" "sfs_1" {
 data "opentelekomcloud_sfs_file_system_v2" "shares" {
   id = opentelekomcloud_sfs_file_system_v2.sfs_1.id
 }
-`, common.DataSourceVPC)
+`, common.DataSourceSubnet)

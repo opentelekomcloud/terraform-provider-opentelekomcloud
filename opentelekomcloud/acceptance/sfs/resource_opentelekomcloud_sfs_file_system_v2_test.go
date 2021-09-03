@@ -165,7 +165,7 @@ resource "opentelekomcloud_sfs_file_system_v2" "sfs_1" {
   size              = 1
   name              = "sfs-test1"
   availability_zone = "eu-de-01"
-  access_to         = data.opentelekomcloud_vpc_v1.shared_vpc.id
+  access_to         = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.vpc_id
   access_type       = "cert"
   access_level      = "rw"
   description       = "sfs_c2c_test-file"
@@ -175,7 +175,7 @@ resource "opentelekomcloud_sfs_file_system_v2" "sfs_1" {
     kuh = "value-create"
   }
 }
-`, common.DataSourceVPC)
+`, common.DataSourceSubnet)
 
 var testAccSFSFileSystemV2Update = fmt.Sprintf(`
 %s
@@ -185,7 +185,7 @@ resource "opentelekomcloud_sfs_file_system_v2" "sfs_1" {
   size              = 2
   name              = "sfs-test2"
   availability_zone = "eu-de-01"
-  access_to         = data.opentelekomcloud_vpc_v1.shared_vpc.id
+  access_to         = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.vpc_id
   access_type       = "cert"
   access_level      = "rw"
   description       = "sfs_c2c_test-file"
@@ -194,7 +194,7 @@ resource "opentelekomcloud_sfs_file_system_v2" "sfs_1" {
     muh = "value-update"
   }
 }
-`, common.DataSourceVPC)
+`, common.DataSourceSubnet)
 
 var testAccSFSFileSystemV2Timeout = fmt.Sprintf(`
 %s
@@ -203,7 +203,7 @@ resource "opentelekomcloud_sfs_file_system_v2" "sfs_1" {
   share_proto  = "NFS"
   size         = 1
   name         = "sfs-test1"
-  access_to    = data.opentelekomcloud_vpc_v1.shared_vpc.id
+  access_to    = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.vpc_id
   access_type  = "cert"
   access_level = "rw"
   description  = "sfs_c2c_test-file"
@@ -212,7 +212,7 @@ resource "opentelekomcloud_sfs_file_system_v2" "sfs_1" {
     create = "5m"
     delete = "5m"
   }
-}`, common.DataSourceVPC)
+}`, common.DataSourceSubnet)
 
 const testAccSFSFileSystemV2Clean = `
 resource "opentelekomcloud_sfs_file_system_v2" "sfs_1" {

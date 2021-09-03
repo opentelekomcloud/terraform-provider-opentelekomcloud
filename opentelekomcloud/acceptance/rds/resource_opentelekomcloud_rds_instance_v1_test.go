@@ -180,10 +180,6 @@ data "opentelekomcloud_rds_flavors_v1" "flavor" {
     speccode = "rds.pg.s1.medium.ha"
 }
 
-resource opentelekomcloud_networking_secgroup_v2 sg {
-  name = "sg-rds-test"
-}
-
 resource "opentelekomcloud_rds_instance_v1" "instance" {
   name = "rds-instance"
   datastore {
@@ -197,12 +193,12 @@ resource "opentelekomcloud_rds_instance_v1" "instance" {
   }
   region = "eu-de"
   availabilityzone = "eu-de-01"
-  vpc = data.opentelekomcloud_vpc_v1.shared_vpc.id
+  vpc = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.vpc_id
   nics {
-    subnetid = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.id
+    subnetid = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.network_id
   }
   securitygroup {
-    id = opentelekomcloud_networking_secgroup_v2.sg.id
+    id = data.opentelekomcloud_networking_secgroup_v2.default_secgroup.id
   }
   dbport = "8635"
   backupstrategy {
@@ -218,8 +214,7 @@ resource "opentelekomcloud_rds_instance_v1" "instance" {
     foo = "bar"
     key = "value"
   }
-  depends_on = ["opentelekomcloud_networking_secgroup_v2.sg"]
-}`, common.DataSourceVPC, common.DataSourceSubnet)
+}`, common.DataSourceSecGroupDefault, common.DataSourceSubnet)
 
 var testAccSInstanceV1ConfigUpdatetag = fmt.Sprintf(`
 %s
@@ -230,10 +225,6 @@ data "opentelekomcloud_rds_flavors_v1" "flavor" {
     datastore_name = "PostgreSQL"
     datastore_version = "9.5.5"
     speccode = "rds.pg.s1.medium.ha"
-}
-
-resource opentelekomcloud_networking_secgroup_v2 sg {
-  name = "sg-rds-test"
 }
 
 resource "opentelekomcloud_rds_instance_v1" "instance" {
@@ -249,12 +240,12 @@ resource "opentelekomcloud_rds_instance_v1" "instance" {
   }
   region = "eu-de"
   availabilityzone = "eu-de-01"
-  vpc = data.opentelekomcloud_vpc_v1.shared_vpc.id
+  vpc = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.vpc_id
   nics {
-    subnetid = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.id
+    subnetid = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.network_id
   }
   securitygroup {
-    id = opentelekomcloud_networking_secgroup_v2.sg.id
+    id = data.opentelekomcloud_networking_secgroup_v2.default_secgroup.id
   }
   dbport = "8635"
   backupstrategy {
@@ -270,8 +261,7 @@ resource "opentelekomcloud_rds_instance_v1" "instance" {
     foo2 = "bar2"
     key = "value2"
   }
-  depends_on = ["opentelekomcloud_networking_secgroup_v2.sg"]
-}`, common.DataSourceVPC, common.DataSourceSubnet)
+}`, common.DataSourceSecGroupDefault, common.DataSourceSubnet)
 
 var testAccSInstanceV1ConfigNoTags = fmt.Sprintf(`
 %s
@@ -282,10 +272,6 @@ data "opentelekomcloud_rds_flavors_v1" "flavor" {
     datastore_name = "PostgreSQL"
     datastore_version = "9.5.5"
     speccode = "rds.pg.s1.medium.ha"
-}
-
-resource opentelekomcloud_networking_secgroup_v2 sg {
-  name = "sg-rds-test"
 }
 
 resource "opentelekomcloud_rds_instance_v1" "instance" {
@@ -301,12 +287,12 @@ resource "opentelekomcloud_rds_instance_v1" "instance" {
   }
   region = "eu-de"
   availabilityzone = "eu-de-01"
-  vpc = data.opentelekomcloud_vpc_v1.shared_vpc.id
+  vpc = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.vpc_id
   nics {
-    subnetid = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.id
+    subnetid = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.network_id
   }
   securitygroup {
-    id = opentelekomcloud_networking_secgroup_v2.sg.id
+    id = data.opentelekomcloud_networking_secgroup_v2.default_secgroup.id
   }
   dbport = "8635"
   backupstrategy {
@@ -318,5 +304,4 @@ resource "opentelekomcloud_rds_instance_v1" "instance" {
     enable = true
     replicationmode = "async"
   }
-  depends_on = ["opentelekomcloud_networking_secgroup_v2.sg"]
-}`, common.DataSourceVPC, common.DataSourceSubnet)
+}`, common.DataSourceSecGroupDefault, common.DataSourceSubnet)

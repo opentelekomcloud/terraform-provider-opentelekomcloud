@@ -51,14 +51,12 @@ func testAccCceNodeIdsV3DataSourceBasic(cceName string, cceNodeName string) stri
 	return fmt.Sprintf(`
 %s
 
-%s
-
 resource "opentelekomcloud_cce_cluster_v3" "cluster_1" {
   name                   = "%s"
   cluster_type           = "VirtualMachine"
   flavor_id              = "cce.s1.small"
-  vpc_id                 = data.opentelekomcloud_vpc_v1.shared_vpc.id
-  subnet_id              = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.id
+  vpc_id                 = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.vpc_id
+  subnet_id              = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.network_id
   container_network_type = "overlay_l2"
 }
 
@@ -81,5 +79,5 @@ resource "opentelekomcloud_cce_node_v3" "node_1" {
 data "opentelekomcloud_cce_node_ids_v3" "node_ids" {
   cluster_id = opentelekomcloud_cce_cluster_v3.cluster_1.id
 }
-`, common.DataSourceVPC, common.DataSourceSubnet, cceName, cceNodeName, env.OS_AVAILABILITY_ZONE, env.OS_KEYPAIR_NAME)
+`, common.DataSourceSubnet, cceName, cceNodeName, env.OS_AVAILABILITY_ZONE, env.OS_KEYPAIR_NAME)
 }

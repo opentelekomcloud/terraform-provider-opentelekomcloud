@@ -104,10 +104,10 @@ resource "opentelekomcloud_sdrs_protectiongroup_v1" "group_1" {
   source_availability_zone = "eu-de-02"
   target_availability_zone = "eu-de-01"
   domain_id                = "cdba26b2-cc35-4988-a904-82b7abf20094"
-  source_vpc_id            = data.opentelekomcloud_vpc_v1.shared_vpc.id
+  source_vpc_id            = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.vpc_id
   dr_type                  = "migration"
 }
-`, common.DataSourceVPC)
+`, common.DataSourceSubnet)
 
 var testAccSdrsProtectionGroupV1Update = fmt.Sprintf(`
 %s
@@ -118,7 +118,7 @@ resource "opentelekomcloud_sdrs_protectiongroup_v1" "group_1" {
   source_availability_zone = "eu-de-02"
   target_availability_zone = "eu-de-01"
   domain_id                = "cdba26b2-cc35-4988-a904-82b7abf20094"
-  source_vpc_id            = data.opentelekomcloud_vpc_v1.shared_vpc.id
+  source_vpc_id            = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.vpc_id
   dr_type                  = "migration"
 }
-`, common.DataSourceVPC)
+`, common.DataSourceSubnet)

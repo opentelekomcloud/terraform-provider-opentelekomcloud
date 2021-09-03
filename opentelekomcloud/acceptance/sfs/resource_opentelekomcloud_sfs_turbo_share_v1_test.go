@@ -128,21 +128,17 @@ func testAccSFSTurboShareV1Basic(shareName string) string {
 %s
 %s
 
-resource "opentelekomcloud_networking_secgroup_v2" "sg" {
-  name = "sg-sfs-turbo-acc"
-}
-
 resource "opentelekomcloud_sfs_turbo_share_v1" "sfs-turbo" {
   name        = "%s"
   size        = 500
   share_proto = "NFS"
-  vpc_id      = data.opentelekomcloud_vpc_v1.shared_vpc.id
-  subnet_id   = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.id
+  vpc_id      = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.vpc_id
+  subnet_id   = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.network_id
 
-  security_group_id = opentelekomcloud_networking_secgroup_v2.sg.id
+  security_group_id = data.opentelekomcloud_networking_secgroup_v2.default_secgroup.id
   availability_zone = "%s"
 }
-`, common.DataSourceVPC, common.DataSourceSubnet, shareName, env.OS_AVAILABILITY_ZONE)
+`, common.DataSourceSecGroupDefault, common.DataSourceSubnet, shareName, env.OS_AVAILABILITY_ZONE)
 }
 
 func testAccSFSTurboShareV1Update(shareName string) string {
@@ -150,31 +146,23 @@ func testAccSFSTurboShareV1Update(shareName string) string {
 %s
 %s
 
-resource "opentelekomcloud_networking_secgroup_v2" "sg" {
-  name = "sg-sfs-turbo-acc"
-}
-
 resource "opentelekomcloud_sfs_turbo_share_v1" "sfs-turbo" {
   name        = "%s"
   size        = 600
   share_proto = "NFS"
-  vpc_id      = data.opentelekomcloud_vpc_v1.shared_vpc.id
-  subnet_id   = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.id
+  vpc_id      = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.vpc_id
+  subnet_id   = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.network_id
 
-  security_group_id = opentelekomcloud_networking_secgroup_v2.sg.id
+  security_group_id = data.opentelekomcloud_networking_secgroup_v2.default_secgroup
   availability_zone = "%s"
 }
-`, common.DataSourceVPC, common.DataSourceSubnet, shareName, env.OS_AVAILABILITY_ZONE)
+`, common.DataSourceSecGroupDefault, common.DataSourceSubnet, shareName, env.OS_AVAILABILITY_ZONE)
 }
 
 func testAccSFSTurboV1Crypt(postfix string) string {
 	return fmt.Sprintf(`
 %s
 %s
-
-resource "opentelekomcloud_networking_secgroup_v2" "sg" {
-  name = "sg-sfs-turbo-acc"
-}
 
 resource "opentelekomcloud_kms_key_v1" "key_1" {
   key_alias    = "kms-sfs-turbo-%[3]s"
@@ -185,12 +173,12 @@ resource "opentelekomcloud_sfs_turbo_share_v1" "sfs-turbo" {
   name        = "sfs-turbo-%[3]s"
   size        = 500
   share_proto = "NFS"
-  vpc_id      = data.opentelekomcloud_vpc_v1.shared_vpc.id
-  subnet_id   = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.id
+  vpc_id      = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.vpc_id
+  subnet_id   = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.network_id
 
-  security_group_id = opentelekomcloud_networking_secgroup_v2.sg.id
+  security_group_id = data.opentelekomcloud_networking_secgroup_v2.default_secgroup.id
   availability_zone = "%s"
   crypt_key_id      = opentelekomcloud_kms_key_v1.key_1.id
 }
-`, common.DataSourceVPC, common.DataSourceSubnet, postfix, env.OS_AVAILABILITY_ZONE)
+`, common.DataSourceSecGroupDefault, common.DataSourceSubnet, postfix, env.OS_AVAILABILITY_ZONE)
 }

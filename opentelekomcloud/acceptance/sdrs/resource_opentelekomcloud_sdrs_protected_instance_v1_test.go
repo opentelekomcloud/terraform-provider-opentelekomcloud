@@ -99,7 +99,6 @@ func testAccSdrsProtectedInstanceV1Exists(n string, instance *protectedinstances
 var testAccSdrsProtectedInstanceV1Basic = fmt.Sprintf(`
 %s
 %s
-%s
 
 locals {
   az = "%s"
@@ -110,7 +109,7 @@ resource "opentelekomcloud_sdrs_protectiongroup_v1" "group_1" {
   source_availability_zone = local.az
   target_availability_zone = "eu-de-01"
   domain_id                = "cdba26b2-cc35-4988-a904-82b7abf20094"
-  source_vpc_id            = data.opentelekomcloud_vpc_v1.shared_vpc.id
+  source_vpc_id            = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.vpc_id
   dr_type                  = "migration"
 }
 
@@ -118,7 +117,7 @@ resource "opentelekomcloud_ecs_instance_v1" "instance_1" {
   name     = "server_1"
   image_id = data.opentelekomcloud_images_image_v2.latest_image.id
   flavor   = "s2.medium.1"
-  vpc_id   = data.opentelekomcloud_vpc_v1.shared_vpc.id
+  vpc_id   = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.vpc_id
 
   nics {
     network_id = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.network_id
@@ -139,10 +138,9 @@ resource "opentelekomcloud_sdrs_protected_instance_v1" "instance_1" {
     kuh = "value-create"
   }
 }
-`, common.DataSourceVPC, common.DataSourceSubnet, common.DataSourceImage, env.OS_AVAILABILITY_ZONE)
+`, common.DataSourceSubnet, common.DataSourceImage, env.OS_AVAILABILITY_ZONE)
 
 var testAccSdrsProtectedInstanceV1Update = fmt.Sprintf(`
-%s
 %s
 %s
 
@@ -155,7 +153,7 @@ resource "opentelekomcloud_sdrs_protectiongroup_v1" "group_1" {
   source_availability_zone = local.az
   target_availability_zone = "eu-de-01"
   domain_id                = "cdba26b2-cc35-4988-a904-82b7abf20094"
-  source_vpc_id            = data.opentelekomcloud_vpc_v1.shared_vpc.id
+  source_vpc_id            = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.vpc_id
   dr_type                  = "migration"
 }
 
@@ -163,7 +161,7 @@ resource "opentelekomcloud_ecs_instance_v1" "instance_1" {
   name     = "server_1"
   image_id = data.opentelekomcloud_images_image_v2.latest_image.id
   flavor   = "s2.medium.1"
-  vpc_id   = data.opentelekomcloud_vpc_v1.shared_vpc.id
+  vpc_id   = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.vpc_id
 
   nics {
     network_id = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.network_id
@@ -183,4 +181,4 @@ resource "opentelekomcloud_sdrs_protected_instance_v1" "instance_1" {
     muh = "value-update"
   }
 }
-`, common.DataSourceVPC, common.DataSourceSubnet, common.DataSourceImage, env.OS_AVAILABILITY_ZONE)
+`, common.DataSourceSubnet, common.DataSourceImage, env.OS_AVAILABILITY_ZONE)
