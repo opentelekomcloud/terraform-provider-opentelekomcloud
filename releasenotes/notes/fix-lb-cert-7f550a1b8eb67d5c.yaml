@@ -1,0 +1,4 @@
+---
+fixes:
+  - |
+    **[ELB]** Fix timeout during deletion of ``resource/opentelekomcloud_lb_certificate_v2`` bound to a listener (`#1377 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/1377>`_)
