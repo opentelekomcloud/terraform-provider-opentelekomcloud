@@ -271,10 +271,6 @@ func testAccRdsInstanceV3Basic(postfix string) string {
 %s
 %s
 
-resource "opentelekomcloud_networking_secgroup_v2" "sg" {
-  name = "sg-rds-test"
-}
-
 resource "opentelekomcloud_rds_instance_v3" "instance" {
   name              = "tf_rds_instance_%s"
   availability_zone = ["%s"]
@@ -284,9 +280,9 @@ resource "opentelekomcloud_rds_instance_v3" "instance" {
     version  = "10"
     port     = "8635"
   }
-  security_group_id = opentelekomcloud_networking_secgroup_v2.sg.id
-  subnet_id         = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.id
-  vpc_id            = data.opentelekomcloud_vpc_v1.shared_vpc.id
+  security_group_id = data.opentelekomcloud_networking_secgroup_v2.default_secgroup.id
+  subnet_id         = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.network_id
+  vpc_id            = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.vpc_id
   volume {
     type = "COMMON"
     size = 40
@@ -301,17 +297,13 @@ resource "opentelekomcloud_rds_instance_v3" "instance" {
     kuh = "value-create"
   }
 }
-`, common.DataSourceVPC, common.DataSourceSubnet, postfix, env.OS_AVAILABILITY_ZONE)
+`, common.DataSourceSecGroupDefault, common.DataSourceSubnet, postfix, env.OS_AVAILABILITY_ZONE)
 }
 
 func testAccRdsInstanceV3Update(postfix string) string {
 	return fmt.Sprintf(`
 %s
 %s
-
-resource opentelekomcloud_networking_secgroup_v2 sg {
-  name = "sg-rds-test"
-}
 
 resource "opentelekomcloud_rds_instance_v3" "instance" {
   name              = "tf_rds_instance_%s"
@@ -322,9 +314,9 @@ resource "opentelekomcloud_rds_instance_v3" "instance" {
     version  = "10"
     port     = "8635"
   }
-  security_group_id = opentelekomcloud_networking_secgroup_v2.sg.id
-  subnet_id         = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.id
-  vpc_id            = data.opentelekomcloud_vpc_v1.shared_vpc.id
+  security_group_id = data.opentelekomcloud_networking_secgroup_v2.default_secgroup.id
+  subnet_id         = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.network_id
+  vpc_id            = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.vpc_id
   volume {
     type = "COMMON"
     size = 100
@@ -338,7 +330,7 @@ resource "opentelekomcloud_rds_instance_v3" "instance" {
     muh = "value-update"
   }
 }
-`, common.DataSourceVPC, common.DataSourceSubnet, postfix, env.OS_AVAILABILITY_ZONE)
+`, common.DataSourceSecGroupDefault, common.DataSourceSubnet, postfix, env.OS_AVAILABILITY_ZONE)
 }
 
 func testAccRdsInstanceV3ElasticIP(postfix string) string {
@@ -347,10 +339,6 @@ func testAccRdsInstanceV3ElasticIP(postfix string) string {
 %s
 
 resource "opentelekomcloud_networking_floatingip_v2" "fip_1" {}
-
-resource "opentelekomcloud_networking_secgroup_v2" "sg" {
-  name = "sg-rds-test"
-}
 
 resource "opentelekomcloud_rds_instance_v3" "instance" {
   name              = "tf_rds_instance_%s"
@@ -361,9 +349,9 @@ resource "opentelekomcloud_rds_instance_v3" "instance" {
     version  = "10"
     port     = "8635"
   }
-  security_group_id = opentelekomcloud_networking_secgroup_v2.sg.id
-  subnet_id         = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.id
-  vpc_id            = data.opentelekomcloud_vpc_v1.shared_vpc.id
+  security_group_id = data.opentelekomcloud_networking_secgroup_v2.default_secgroup.id
+  subnet_id         = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.network_id
+  vpc_id            = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.vpc_id
   volume {
     type = "COMMON"
     size = 40
@@ -376,17 +364,13 @@ resource "opentelekomcloud_rds_instance_v3" "instance" {
 
   public_ips = [opentelekomcloud_networking_floatingip_v2.fip_1.address]
 }
-`, common.DataSourceVPC, common.DataSourceSubnet, postfix, env.OS_AVAILABILITY_ZONE)
+`, common.DataSourceSecGroupDefault, common.DataSourceSubnet, postfix, env.OS_AVAILABILITY_ZONE)
 }
 
 func testAccRdsInstanceV3HA(postfix string, az2 string) string {
 	return fmt.Sprintf(`
 %s
 %s
-
-resource "opentelekomcloud_networking_secgroup_v2" "sg" {
-  name = "sg-rds-test"
-}
 
 resource "opentelekomcloud_rds_instance_v3" "instance" {
   name              = "tf_rds_instance_%s"
@@ -397,9 +381,9 @@ resource "opentelekomcloud_rds_instance_v3" "instance" {
     version  = "5.6"
     port     = "8635"
   }
-  security_group_id = opentelekomcloud_networking_secgroup_v2.sg.id
-  subnet_id         = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.id
-  vpc_id            = data.opentelekomcloud_vpc_v1.shared_vpc.id
+  security_group_id = data.opentelekomcloud_networking_secgroup_v2.default_secgroup.id
+  subnet_id         = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.network_id
+  vpc_id            = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.vpc_id
   volume {
     type = "ULTRAHIGH"
     size = 100
@@ -411,17 +395,13 @@ resource "opentelekomcloud_rds_instance_v3" "instance" {
   }
   ha_replication_mode = "semisync"
 }
-`, common.DataSourceVPC, common.DataSourceSubnet, postfix, env.OS_AVAILABILITY_ZONE, az2)
+`, common.DataSourceSecGroupDefault, common.DataSourceSubnet, postfix, env.OS_AVAILABILITY_ZONE, az2)
 }
 
 func testAccRdsInstanceV3OptionalParams(postfix string) string {
 	return fmt.Sprintf(`
 %s
 %s
-
-resource "opentelekomcloud_networking_secgroup_v2" "sg" {
-  name = "sg-rds-test"
-}
 
 resource "opentelekomcloud_rds_instance_v3" "instance" {
   name              = "tf_rds_instance_%s"
@@ -431,26 +411,22 @@ resource "opentelekomcloud_rds_instance_v3" "instance" {
     type     = "PostgreSQL"
     version  = "10"
   }
-  security_group_id = opentelekomcloud_networking_secgroup_v2.sg.id
-  subnet_id         = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.id
-  vpc_id            = data.opentelekomcloud_vpc_v1.shared_vpc.id
+  security_group_id = data.opentelekomcloud_networking_secgroup_v2.default_secgroup.id
+  subnet_id         = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.network_id
+  vpc_id            = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.vpc_id
   volume {
     type = "COMMON"
     size = 100
   }
   flavor = "rds.pg.c2.medium"
 }
-`, common.DataSourceVPC, common.DataSourceSubnet, postfix, env.OS_AVAILABILITY_ZONE)
+`, common.DataSourceSecGroupDefault, common.DataSourceSubnet, postfix, env.OS_AVAILABILITY_ZONE)
 }
 
 func testAccRdsInstanceV3Backup(postfix string) string {
 	return fmt.Sprintf(`
 %s
 %s
-
-resource "opentelekomcloud_networking_secgroup_v2" "sg" {
-  name = "sg-rds-test"
-}
 
 resource "opentelekomcloud_rds_instance_v3" "instance" {
   name              = "tf_rds_instance_%s"
@@ -474,7 +450,7 @@ resource "opentelekomcloud_rds_instance_v3" "instance" {
   }
 
 }
-`, common.DataSourceVPC, common.DataSourceSubnet, postfix, env.OS_AVAILABILITY_ZONE)
+`, common.DataSourceSecGroupDefault, common.DataSourceSubnet, postfix, env.OS_AVAILABILITY_ZONE)
 }
 
 func testAccRdsInstanceV3ConfigTemplateBasic(postfix string) string {
@@ -506,10 +482,6 @@ resource "opentelekomcloud_rds_parametergroup_v3" "pg2" {
   }
 }
 
-resource "opentelekomcloud_networking_secgroup_v2" "sg" {
-  name = "sg-rds-test"
-}
-
 resource "opentelekomcloud_rds_instance_v3" "instance" {
   name              = "tf_rds_instance_%s"
   availability_zone = ["%s"]
@@ -518,9 +490,9 @@ resource "opentelekomcloud_rds_instance_v3" "instance" {
     type     = "PostgreSQL"
     version  = "12"
   }
-  security_group_id = opentelekomcloud_networking_secgroup_v2.sg.id
-  subnet_id         = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.id
-  vpc_id            = data.opentelekomcloud_vpc_v1.shared_vpc.id
+  security_group_id = data.opentelekomcloud_networking_secgroup_v2.default_secgroup.id
+  subnet_id         = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.network_id
+  vpc_id            = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.vpc_id
   volume {
     type = "COMMON"
     size = 40
@@ -528,7 +500,7 @@ resource "opentelekomcloud_rds_instance_v3" "instance" {
   flavor         = "rds.pg.c2.medium"
   param_group_id = opentelekomcloud_rds_parametergroup_v3.pg.id
 }
-`, common.DataSourceVPC, common.DataSourceSubnet, postfix, env.OS_AVAILABILITY_ZONE)
+`, common.DataSourceSecGroupDefault, common.DataSourceSubnet, postfix, env.OS_AVAILABILITY_ZONE)
 }
 
 func testAccRdsInstanceV3ConfigTemplateUpdate(postfix string) string {
@@ -560,10 +532,6 @@ resource "opentelekomcloud_rds_parametergroup_v3" "pg2" {
   }
 }
 
-resource "opentelekomcloud_networking_secgroup_v2" "sg" {
-  name = "sg-rds-test"
-}
-
 resource "opentelekomcloud_rds_instance_v3" "instance" {
   name              = "tf_rds_instance_%s"
   availability_zone = ["%s"]
@@ -572,9 +540,9 @@ resource "opentelekomcloud_rds_instance_v3" "instance" {
     type     = "PostgreSQL"
     version  = "12"
   }
-  security_group_id = opentelekomcloud_networking_secgroup_v2.sg.id
-  subnet_id         = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.id
-  vpc_id            = data.opentelekomcloud_vpc_v1.shared_vpc.id
+  security_group_id = data.opentelekomcloud_networking_secgroup_v2.default_secgroup.id
+  subnet_id         = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.network_id
+  vpc_id            = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.vpc_id
   volume {
     type = "COMMON"
     size = 40
@@ -582,17 +550,13 @@ resource "opentelekomcloud_rds_instance_v3" "instance" {
   flavor         = "rds.pg.c2.medium"
   param_group_id = opentelekomcloud_rds_parametergroup_v3.pg2.id
 }
-`, common.DataSourceVPC, common.DataSourceSubnet, postfix, env.OS_AVAILABILITY_ZONE)
+`, common.DataSourceSecGroupDefault, common.DataSourceSubnet, postfix, env.OS_AVAILABILITY_ZONE)
 }
 
 func testAccRdsInstanceV3InvalidDBVersion(postfix string) string {
 	return fmt.Sprintf(`
 %s
 %s
-
-resource "opentelekomcloud_networking_secgroup_v2" "sg" {
-  name = "sg-rds-test"
-}
 
 resource "opentelekomcloud_rds_instance_v3" "instance" {
   name              = "tf_rds_instance_%s"
@@ -603,26 +567,22 @@ resource "opentelekomcloud_rds_instance_v3" "instance" {
     version  = "5.6"
     port     = "8635"
   }
-  security_group_id = opentelekomcloud_networking_secgroup_v2.sg.id
-  subnet_id         = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.id
-  vpc_id            = data.opentelekomcloud_vpc_v1.shared_vpc.id
+  security_group_id = data.opentelekomcloud_networking_secgroup_v2.default_secgroup.id
+  subnet_id         = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.network_id
+  vpc_id            = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.vpc_id
   volume {
     type = "COMMON"
     size = 40
   }
   flavor = "rds.pg.c2.medium"
 }
-`, common.DataSourceVPC, common.DataSourceSubnet, postfix, env.OS_AVAILABILITY_ZONE)
+`, common.DataSourceSecGroupDefault, common.DataSourceSubnet, postfix, env.OS_AVAILABILITY_ZONE)
 }
 
 func testAccRdsInstanceV3ConfigurationOverride(postfix string) string {
 	return fmt.Sprintf(`
 %s
 %s
-
-resource "opentelekomcloud_networking_secgroup_v2" "sg" {
-  name = "sg-rds-test"
-}
 
 resource "opentelekomcloud_rds_parametergroup_v3" "pg" {
   name = "pg-rds-test"
@@ -646,9 +606,9 @@ resource "opentelekomcloud_rds_instance_v3" "instance" {
     port     = "8635"
   }
 
-  security_group_id = opentelekomcloud_networking_secgroup_v2.sg.id
-  subnet_id         = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.id
-  vpc_id            = data.opentelekomcloud_vpc_v1.shared_vpc.id
+  security_group_id = data.opentelekomcloud_networking_secgroup_v2.default_secgroup.id
+  subnet_id         = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.network_id
+  vpc_id            = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.vpc_id
   flavor            = "rds.pg.c2.medium"
   volume {
     type = "COMMON"
@@ -659,5 +619,5 @@ resource "opentelekomcloud_rds_instance_v3" "instance" {
     max_connections = "37",
   }
 }
-`, common.DataSourceVPC, common.DataSourceSubnet, postfix, env.OS_AVAILABILITY_ZONE)
+`, common.DataSourceSecGroupDefault, common.DataSourceSubnet, postfix, env.OS_AVAILABILITY_ZONE)
 }

@@ -148,8 +148,6 @@ var testAccASV1GroupBasic = fmt.Sprintf(`
 // default Subnet data-source
 %s
 
-// default VPC data-source
-%s
 
 resource "opentelekomcloud_lb_loadbalancer_v2" "loadbalancer_1" {
   name          = "loadbalancer_1"
@@ -187,16 +185,16 @@ resource "opentelekomcloud_as_group_v1" "as_group"{
   scaling_group_name       = "as_group"
   scaling_configuration_id = opentelekomcloud_as_configuration_v1.as_config.id
   networks {
-    id = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.id
+    id = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.network_id
   }
   security_groups {
-    id = data.opentelekomcloud_networking_secgroup_v2.default_secgroup.id
+    id = opentelekomcloud_networking_secgroup_v2.default_secgroup.id
   }
   lbaas_listeners {
     pool_id       = opentelekomcloud_lb_pool_v2.pool_1.id
     protocol_port = opentelekomcloud_lb_listener_v2.listener_1.protocol_port
   }
-  vpc_id = data.opentelekomcloud_vpc_v1.shared_vpc.id
+  vpc_id = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.vpc_id
 
   health_periodic_audit_grace_period = 700
 
@@ -205,7 +203,7 @@ resource "opentelekomcloud_as_group_v1" "as_group"{
     kuh = "value-create"
   }
 }
-`, common.DataSourceSecGroupDefault, common.DataSourceImage, common.DataSourceSubnet, common.DataSourceVPC, env.OS_KEYPAIR_NAME)
+`, common.DataSourceSecGroupDefault, common.DataSourceImage, common.DataSourceSubnet, env.OS_KEYPAIR_NAME)
 
 var testAccASV1GroupUpdate = fmt.Sprintf(`
 // default SecGroup data-source
@@ -217,9 +215,6 @@ var testAccASV1GroupUpdate = fmt.Sprintf(`
 // default Subnet data-source
 %s
 
-// default VPC data-source
-%s
-
 resource "opentelekomcloud_lb_loadbalancer_v2" "loadbalancer_1" {
   name          = "loadbalancer_1"
   vip_subnet_id = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.subnet_id
@@ -256,7 +251,7 @@ resource "opentelekomcloud_as_group_v1" "as_group"{
   scaling_group_name       = "as_group"
   scaling_configuration_id = opentelekomcloud_as_configuration_v1.as_config.id
   networks {
-    id = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.id
+    id = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.network_id
   }
   security_groups {
     id = data.opentelekomcloud_networking_secgroup_v2.default_secgroup.id
@@ -265,7 +260,7 @@ resource "opentelekomcloud_as_group_v1" "as_group"{
     pool_id       = opentelekomcloud_lb_pool_v2.pool_1.id
     protocol_port = opentelekomcloud_lb_listener_v2.listener_1.protocol_port
   }
-  vpc_id = data.opentelekomcloud_vpc_v1.shared_vpc.id
+  vpc_id = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.vpc_id
 
   health_periodic_audit_grace_period = 500
 
@@ -273,16 +268,13 @@ resource "opentelekomcloud_as_group_v1" "as_group"{
     muh = "value-update"
   }
 }
-`, common.DataSourceSecGroupDefault, common.DataSourceImage, common.DataSourceSubnet, common.DataSourceVPC, env.OS_KEYPAIR_NAME)
+`, common.DataSourceSecGroupDefault, common.DataSourceImage, common.DataSourceSubnet, env.OS_KEYPAIR_NAME)
 
 var testAccASV1GroupRemoveWithSetMinNumber = fmt.Sprintf(`
 // default SecGroup data-source
 %s
 
 // default Image data-source
-%s
-
-// default VPC data-source
 %s
 
 // default Subnet data-source
@@ -316,12 +308,12 @@ resource "opentelekomcloud_as_group_v1" "as_group" {
   desire_instance_number   = 3
   min_instance_number      = 1
   max_instance_number      = 10
-  vpc_id                   = data.opentelekomcloud_vpc_v1.shared_vpc.id
+  vpc_id                   = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.vpc_id
   delete_publicip          = true
   delete_instances         = "yes"
 
   networks {
-    id = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.id
+    id = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.network_id
   }
   security_groups {
     id = data.opentelekomcloud_networking_secgroup_v2.default_secgroup.id
@@ -333,13 +325,10 @@ resource "opentelekomcloud_as_group_v1" "as_group" {
     ]
   }
 }
-`, common.DataSourceSecGroupDefault, common.DataSourceImage, common.DataSourceVPC, common.DataSourceSubnet, env.OS_KEYPAIR_NAME, env.OS_AVAILABILITY_ZONE)
+`, common.DataSourceSecGroupDefault, common.DataSourceImage, common.DataSourceSubnet, env.OS_KEYPAIR_NAME, env.OS_AVAILABILITY_ZONE)
 
 var testAccASV1GroupWithoutSGs = fmt.Sprintf(`
 // default Image data-source
-%s
-
-// default VPC data-source
 %s
 
 // default Subnet data-source
@@ -373,12 +362,12 @@ resource "opentelekomcloud_as_group_v1" "as_group" {
   desire_instance_number   = 3
   min_instance_number      = 1
   max_instance_number      = 10
-  vpc_id                   = data.opentelekomcloud_vpc_v1.shared_vpc.id
+  vpc_id                   = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.vpc_id
   delete_publicip          = true
   delete_instances         = "yes"
 
   networks {
-    id = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.id
+    id = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.network_id
   }
 }
-`, common.DataSourceImage, common.DataSourceVPC, common.DataSourceSubnet, env.OS_KEYPAIR_NAME, env.OS_AVAILABILITY_ZONE)
+`, common.DataSourceImage, common.DataSourceSubnet, env.OS_KEYPAIR_NAME, env.OS_AVAILABILITY_ZONE)

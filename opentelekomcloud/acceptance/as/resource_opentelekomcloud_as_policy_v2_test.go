@@ -103,9 +103,6 @@ var testAccASPolicyV2Basic = fmt.Sprintf(`
 // default Subnet data-source
 %s
 
-// default VPC data-source
-%s
-
 resource "opentelekomcloud_as_configuration_v1" "as_config"{
   scaling_configuration_name = "as_config"
 
@@ -125,12 +122,12 @@ resource "opentelekomcloud_as_group_v1" "as_group"{
   scaling_configuration_id = opentelekomcloud_as_configuration_v1.as_config.id
 
   networks {
-    id = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.id
+    id = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.network_id
   }
   security_groups {
     id = data.opentelekomcloud_networking_secgroup_v2.default_secgroup.id
   }
-  vpc_id = data.opentelekomcloud_vpc_v1.shared_vpc.id
+  vpc_id = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.vpc_id
 }
 
 resource "opentelekomcloud_as_policy_v2" "as_policy"{
@@ -150,7 +147,7 @@ resource "opentelekomcloud_as_policy_v2" "as_policy"{
     end_time         = "2040-12-31T10:30Z"
   }
 }
-`, common.DataSourceSecGroupDefault, common.DataSourceImage, common.DataSourceSubnet, common.DataSourceVPC, env.OS_KEYPAIR_NAME)
+`, common.DataSourceSecGroupDefault, common.DataSourceImage, common.DataSourceSubnet, env.OS_KEYPAIR_NAME)
 
 var testAccASPolicyV2Update = fmt.Sprintf(`
 // default SecGroup data-source
@@ -160,9 +157,6 @@ var testAccASPolicyV2Update = fmt.Sprintf(`
 %s
 
 // default Subnet data-source
-%s
-
-// default VPC data-source
 %s
 
 resource "opentelekomcloud_as_configuration_v1" "as_config"{
@@ -184,12 +178,12 @@ resource "opentelekomcloud_as_group_v1" "as_group"{
   scaling_configuration_id = opentelekomcloud_as_configuration_v1.as_config.id
 
   networks {
-    id = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.id
+    id = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.network_id
   }
   security_groups {
     id = data.opentelekomcloud_networking_secgroup_v2.default_secgroup.id
   }
-  vpc_id = data.opentelekomcloud_vpc_v1.shared_vpc.id
+  vpc_id = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.vpc_id
 }
 
 resource "opentelekomcloud_as_policy_v2" "as_policy"{
@@ -210,4 +204,4 @@ resource "opentelekomcloud_as_policy_v2" "as_policy"{
   }
   cool_down_time = 100
 }
-`, common.DataSourceSecGroupDefault, common.DataSourceImage, common.DataSourceSubnet, common.DataSourceVPC, env.OS_KEYPAIR_NAME)
+`, common.DataSourceSecGroupDefault, common.DataSourceImage, common.DataSourceSubnet, env.OS_KEYPAIR_NAME)
