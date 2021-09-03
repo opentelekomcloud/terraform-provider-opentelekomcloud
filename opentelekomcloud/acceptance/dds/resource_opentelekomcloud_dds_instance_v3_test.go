@@ -13,6 +13,8 @@ import (
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common/cfg"
 )
 
+const resourceInstanceName = "opentelekomcloud_dds_instance_v3.instance"
+
 func TestAccDDSV3Instance_basic(t *testing.T) {
 	resource.Test(t, resource.TestCase{
 		PreCheck:          func() { common.TestAccPreCheck(t) },
@@ -20,12 +22,12 @@ func TestAccDDSV3Instance_basic(t *testing.T) {
 		CheckDestroy:      testAccCheckDDSV3InstanceDestroy,
 		Steps: []resource.TestStep{
 			{
-				Config: TestAccDDSInstanceV3Config_basic,
+				Config: TestAccDDSInstanceV3ConfigBasic,
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckDDSV3InstanceExists("opentelekomcloud_dds_instance_v3.instance"),
-					resource.TestCheckResourceAttr("opentelekomcloud_dds_instance_v3.instance", "name", "dds-instance"),
-					resource.TestCheckResourceAttr("opentelekomcloud_dds_instance_v3.instance", "mode", "ReplicaSet"),
-					resource.TestCheckResourceAttr("opentelekomcloud_dds_instance_v3.instance", "ssl", "true"),
+					testAccCheckDDSV3InstanceExists(resourceInstanceName),
+					resource.TestCheckResourceAttr(resourceInstanceName, "name", "dds-instance"),
+					resource.TestCheckResourceAttr(resourceInstanceName, "mode", "ReplicaSet"),
+					resource.TestCheckResourceAttr(resourceInstanceName, "ssl", "true"),
 				),
 			},
 		},
@@ -39,9 +41,9 @@ func TestAccDDSV3Instance_minConfig(t *testing.T) {
 		CheckDestroy:      testAccCheckDDSV3InstanceDestroy,
 		Steps: []resource.TestStep{
 			{
-				Config: TestAccDDSInstanceV3Config_minConfig,
+				Config: TestAccDDSInstanceV3ConfigMinConfig,
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckDDSV3InstanceExists("opentelekomcloud_dds_instance_v3.instance"),
+					testAccCheckDDSV3InstanceExists(resourceInstanceName),
 				),
 			},
 		},
@@ -115,22 +117,22 @@ func testAccCheckDDSV3InstanceExists(n string) resource.TestCheckFunc {
 	}
 }
 
-var TestAccDDSInstanceV3Config_basic = fmt.Sprintf(`
-resource "opentelekomcloud_networking_secgroup_v2" "sg_acc" {
-  name = "secgroup_acc"
-}
+var TestAccDDSInstanceV3ConfigBasic = fmt.Sprintf(`
+%s
+
+%s
+
 resource "opentelekomcloud_dds_instance_v3" "instance" {
   name              = "dds-instance"
   availability_zone = "%s"
-  region            = "%s"
   datastore {
     type           = "DDS-Community"
     version        = "3.4"
     storage_engine = "wiredTiger"
   }
-  vpc_id            = "%s"
-  subnet_id         = "%s"
-  security_group_id = opentelekomcloud_networking_secgroup_v2.sg_acc.id
+  vpc_id            = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.vpc_id
+  subnet_id         = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.network_id
+  security_group_id = data.opentelekomcloud_networking_secgroup_v2.default_secgroup.id
   password          = "5ecuredPa55w0rd@"
   mode              = "ReplicaSet"
   flavor {
@@ -144,12 +146,13 @@ resource "opentelekomcloud_dds_instance_v3" "instance" {
     start_time = "08:00-09:00"
     keep_days = "1"
   }
-}`, env.OS_AVAILABILITY_ZONE, env.OS_REGION_NAME, env.OS_VPC_ID, env.OS_NETWORK_ID)
+}`, common.DataSourceSecGroupDefault, common.DataSourceSubnet, env.OS_AVAILABILITY_ZONE)
 
-var TestAccDDSInstanceV3Config_minConfig = fmt.Sprintf(`
-resource "opentelekomcloud_networking_secgroup_v2" "sg_acc" {
-  name = "secgroup_acc"
-}
+var TestAccDDSInstanceV3ConfigMinConfig = fmt.Sprintf(`
+%s
+
+%s
+
 resource "opentelekomcloud_dds_instance_v3" "instance" {
   name              = "dds-instance"
   availability_zone = "%s"
@@ -158,9 +161,9 @@ resource "opentelekomcloud_dds_instance_v3" "instance" {
     version        = "3.4"
     storage_engine = "wiredTiger"
   }
-  vpc_id            = "%s"
-  subnet_id         = "%s"
-  security_group_id = opentelekomcloud_networking_secgroup_v2.sg_acc.id
+  vpc_id            = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.vpc_id
+  subnet_id         = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.network_id
+  security_group_id = data.opentelekomcloud_networking_secgroup_v2.default_secgroup.id
   password          = "5ecuredPa55w0rd@"
   mode              = "ReplicaSet"
   flavor {
@@ -169,4 +172,4 @@ resource "opentelekomcloud_dds_instance_v3" "instance" {
     size = 20
     spec_code = "dds.mongodb.s2.medium.4.repset"
   }
-}`, env.OS_AVAILABILITY_ZONE, env.OS_VPC_ID, env.OS_NETWORK_ID)
+}`, common.DataSourceSecGroupDefault, common.DataSourceSubnet, env.OS_AVAILABILITY_ZONE)
