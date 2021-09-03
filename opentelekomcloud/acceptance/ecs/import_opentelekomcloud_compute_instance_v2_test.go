@@ -9,8 +9,6 @@ import (
 )
 
 func TestAccComputeV2InstanceImportBasic(t *testing.T) {
-	resourceName := "opentelekomcloud_compute_instance_v2.instance_1"
-
 	resource.Test(t, resource.TestCase{
 		PreCheck:          func() { common.TestAccPreCheck(t) },
 		ProviderFactories: common.TestAccProviderFactories,
@@ -20,7 +18,7 @@ func TestAccComputeV2InstanceImportBasic(t *testing.T) {
 				Config: testAccComputeV2InstanceBasic,
 			},
 			{
-				ResourceName:      resourceName,
+				ResourceName:      resourceInstanceV2Name,
 				ImportState:       true,
 				ImportStateVerify: true,
 				ImportStateVerifyIgnore: []string{
@@ -33,8 +31,6 @@ func TestAccComputeV2InstanceImportBasic(t *testing.T) {
 }
 
 func TestAccComputeV2InstanceImportBootFromVolumeImage(t *testing.T) {
-	resourceName := "opentelekomcloud_compute_instance_v2.instance_1"
-
 	resource.Test(t, resource.TestCase{
 		PreCheck:          func() { common.TestAccPreCheck(t) },
 		ProviderFactories: common.TestAccProviderFactories,
@@ -44,7 +40,7 @@ func TestAccComputeV2InstanceImportBootFromVolumeImage(t *testing.T) {
 				Config: testAccComputeV2InstanceBootFromVolumeImage,
 			},
 			{
-				ResourceName:      resourceName,
+				ResourceName:      resourceInstanceV2Name,
 				ImportState:       true,
 				ImportStateVerify: true,
 				ImportStateVerifyIgnore: []string{

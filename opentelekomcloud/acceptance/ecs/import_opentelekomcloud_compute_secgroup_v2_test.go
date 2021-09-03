@@ -9,8 +9,6 @@ import (
 )
 
 func TestAccComputeV2SecGroup_importBasic(t *testing.T) {
-	resourceName := "opentelekomcloud_compute_secgroup_v2.sg_1"
-
 	resource.Test(t, resource.TestCase{
 		PreCheck:          func() { common.TestAccPreCheck(t) },
 		ProviderFactories: common.TestAccProviderFactories,
@@ -19,9 +17,8 @@ func TestAccComputeV2SecGroup_importBasic(t *testing.T) {
 			{
 				Config: testAccComputeV2SecGroupBasicOrig,
 			},
-
 			{
-				ResourceName:      resourceName,
+				ResourceName:      resourceSecGroupName,
 				ImportState:       true,
 				ImportStateVerify: true,
 			},

@@ -15,6 +15,8 @@ import (
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common/cfg"
 )
 
+const resourceServerGroupName = "opentelekomcloud_compute_servergroup_v2.sg_1"
+
 func TestAccComputeV2ServerGroup_basic(t *testing.T) {
 	var sg servergroups.ServerGroup
 
@@ -24,9 +26,9 @@ func TestAccComputeV2ServerGroup_basic(t *testing.T) {
 		CheckDestroy:      testAccCheckComputeV2ServerGroupDestroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccComputeV2ServerGroup_basic,
+				Config: testAccComputeV2ServerGroupBasic,
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckComputeV2ServerGroupExists("opentelekomcloud_compute_servergroup_v2.sg_1", &sg),
+					testAccCheckComputeV2ServerGroupExists(resourceServerGroupName, &sg),
 				),
 			},
 		},
@@ -43,10 +45,10 @@ func TestAccComputeV2ServerGroup_affinity(t *testing.T) {
 		CheckDestroy:      testAccCheckComputeV2ServerGroupDestroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccComputeV2ServerGroup_affinity,
+				Config: testAccComputeV2ServerGroupAffinity,
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckComputeV2ServerGroupExists("opentelekomcloud_compute_servergroup_v2.sg_1", &sg),
-					testAccCheckComputeV2InstanceExists("opentelekomcloud_compute_instance_v2.instance_1", &instance),
+					testAccCheckComputeV2ServerGroupExists(resourceServerGroupName, &sg),
+					testAccCheckComputeV2InstanceExists(resourceInstanceV1Name, &instance),
 					testAccCheckComputeV2InstanceInServerGroup(&instance, &sg),
 				),
 			},
@@ -56,9 +58,9 @@ func TestAccComputeV2ServerGroup_affinity(t *testing.T) {
 
 func testAccCheckComputeV2ServerGroupDestroy(s *terraform.State) error {
 	config := common.TestAccProvider.Meta().(*cfg.Config)
-	computeClient, err := config.ComputeV2Client(env.OS_REGION_NAME)
+	client, err := config.ComputeV2Client(env.OS_REGION_NAME)
 	if err != nil {
-		return fmt.Errorf("error creating OpenTelekomCloud compute client: %s", err)
+		return fmt.Errorf("error creating OpenTelekomCloud ComputeV2 client: %s", err)
 	}
 
 	for _, rs := range s.RootModule().Resources {
@@ -66,7 +68,7 @@ func testAccCheckComputeV2ServerGroupDestroy(s *terraform.State) error {
 			continue
 		}
 
-		_, err := servergroups.Get(computeClient, rs.Primary.ID).Extract()
+		_, err := servergroups.Get(client, rs.Primary.ID).Extract()
 		if err == nil {
 			return fmt.Errorf("serverGroup still exists")
 		}
@@ -87,12 +89,12 @@ func testAccCheckComputeV2ServerGroupExists(n string, kp *servergroups.ServerGro
 		}
 
 		config := common.TestAccProvider.Meta().(*cfg.Config)
-		computeClient, err := config.ComputeV2Client(env.OS_REGION_NAME)
+		client, err := config.ComputeV2Client(env.OS_REGION_NAME)
 		if err != nil {
-			return fmt.Errorf("error creating OpenTelekomCloud compute client: %s", err)
+			return fmt.Errorf("error creating OpenTelekomCloud ComputeV2 client: %s", err)
 		}
 
-		found, err := servergroups.Get(computeClient, rs.Primary.ID).Extract()
+		found, err := servergroups.Get(client, rs.Primary.ID).Extract()
 		if err != nil {
 			return err
 		}
@@ -121,27 +123,29 @@ func testAccCheckComputeV2InstanceInServerGroup(instance *servers.Server, sg *se
 	}
 }
 
-const testAccComputeV2ServerGroup_basic = `
+const testAccComputeV2ServerGroupBasic = `
 resource "opentelekomcloud_compute_servergroup_v2" "sg_1" {
-  name = "sg_1"
+  name     = "sg_1"
   policies = ["affinity"]
 }
 `
 
-var testAccComputeV2ServerGroup_affinity = fmt.Sprintf(`
+var testAccComputeV2ServerGroupAffinity = fmt.Sprintf(`
+%s
+
 resource "opentelekomcloud_compute_servergroup_v2" "sg_1" {
-  name = "sg_1"
+  name     = "sg_1"
   policies = ["affinity"]
 }
 
 resource "opentelekomcloud_compute_instance_v2" "instance_1" {
-  name = "instance_1"
+  name            = "instance_1"
   security_groups = ["default"]
   network {
-    uuid = "%s"
+    uuid = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.network_id
   }
   scheduler_hints {
     group = opentelekomcloud_compute_servergroup_v2.sg_1.id
   }
 }
-`, env.OS_NETWORK_ID)
+`, common.DataSourceSubnet)

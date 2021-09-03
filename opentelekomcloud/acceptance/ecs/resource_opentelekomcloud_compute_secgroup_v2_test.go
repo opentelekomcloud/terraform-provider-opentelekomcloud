@@ -14,6 +14,8 @@ import (
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common/cfg"
 )
 
+const resourceSecGroupName = "opentelekomcloud_compute_secgroup_v2.sg_1"
+
 func TestAccComputeV2SecGroup_basic(t *testing.T) {
 	var secGroup secgroups.SecurityGroup
 
@@ -25,7 +27,7 @@ func TestAccComputeV2SecGroup_basic(t *testing.T) {
 			{
 				Config: testAccComputeV2SecGroupBasicOrig,
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckComputeV2SecGroupExists("opentelekomcloud_compute_secgroup_v2.sg_1", &secGroup),
+					testAccCheckComputeV2SecGroupExists(resourceSecGroupName, &secGroup),
 				),
 			},
 		},
@@ -43,13 +45,13 @@ func TestAccComputeV2SecGroup_update(t *testing.T) {
 			{
 				Config: testAccComputeV2SecGroupBasicOrig,
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckComputeV2SecGroupExists("opentelekomcloud_compute_secgroup_v2.sg_1", &secGroup),
+					testAccCheckComputeV2SecGroupExists(resourceSecGroupName, &secGroup),
 				),
 			},
 			{
 				Config: testAccComputeV2SecGroupBasicUpdate,
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckComputeV2SecGroupExists("opentelekomcloud_compute_secgroup_v2.sg_1", &secGroup),
+					testAccCheckComputeV2SecGroupExists(resourceSecGroupName, &secGroup),
 					testAccCheckComputeV2SecGroupRuleCount(&secGroup, 2),
 				),
 			},
@@ -59,6 +61,8 @@ func TestAccComputeV2SecGroup_update(t *testing.T) {
 
 func TestAccComputeV2SecGroup_groupID(t *testing.T) {
 	var secgroup1, secGroup2, secgroup3 secgroups.SecurityGroup
+	resourceSecGroup2Name := "opentelekomcloud_compute_secgroup_v2.sg_2"
+	resourceSecGroup3Name := "opentelekomcloud_compute_secgroup_v2.sg_3"
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:          func() { common.TestAccPreCheck(t) },
@@ -68,18 +72,18 @@ func TestAccComputeV2SecGroup_groupID(t *testing.T) {
 			{
 				Config: testAccComputeV2SecGroupGroupIDOrig,
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckComputeV2SecGroupExists("opentelekomcloud_compute_secgroup_v2.sg_1", &secgroup1),
-					testAccCheckComputeV2SecGroupExists("opentelekomcloud_compute_secgroup_v2.sg_2", &secGroup2),
-					testAccCheckComputeV2SecGroupExists("opentelekomcloud_compute_secgroup_v2.sg_3", &secgroup3),
+					testAccCheckComputeV2SecGroupExists(resourceSecGroupName, &secgroup1),
+					testAccCheckComputeV2SecGroupExists(resourceSecGroup2Name, &secGroup2),
+					testAccCheckComputeV2SecGroupExists(resourceSecGroup3Name, &secgroup3),
 					testAccCheckComputeV2SecGroupGroupIDMatch(&secgroup1, &secgroup3),
 				),
 			},
 			{
 				Config: testAccComputeV2SecGroupGroupIDUpdate,
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckComputeV2SecGroupExists("opentelekomcloud_compute_secgroup_v2.sg_1", &secgroup1),
-					testAccCheckComputeV2SecGroupExists("opentelekomcloud_compute_secgroup_v2.sg_2", &secGroup2),
-					testAccCheckComputeV2SecGroupExists("opentelekomcloud_compute_secgroup_v2.sg_3", &secgroup3),
+					testAccCheckComputeV2SecGroupExists(resourceSecGroupName, &secgroup1),
+					testAccCheckComputeV2SecGroupExists(resourceSecGroup2Name, &secGroup2),
+					testAccCheckComputeV2SecGroupExists(resourceSecGroup3Name, &secgroup3),
 					testAccCheckComputeV2SecGroupGroupIDMatch(&secGroup2, &secgroup3),
 				),
 			},
@@ -98,12 +102,10 @@ func TestAccComputeV2SecGroup_self(t *testing.T) {
 			{
 				Config: testAccComputeV2SecGroupSelf,
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckComputeV2SecGroupExists("opentelekomcloud_compute_secgroup_v2.sg_1", &secGroup),
+					testAccCheckComputeV2SecGroupExists(resourceSecGroupName, &secGroup),
 					testAccCheckComputeV2SecGroupGroupIDMatch(&secGroup, &secGroup),
-					resource.TestCheckResourceAttr(
-						"opentelekomcloud_compute_secgroup_v2.sg_1", "rule.3170486100.self", "true"),
-					resource.TestCheckResourceAttr(
-						"opentelekomcloud_compute_secgroup_v2.sg_1", "rule.3170486100.from_group_id", ""),
+					resource.TestCheckResourceAttr(resourceSecGroupName, "rule.3170486100.self", "true"),
+					resource.TestCheckResourceAttr(resourceSecGroupName, "rule.3170486100.from_group_id", ""),
 				),
 			},
 		},
@@ -121,7 +123,7 @@ func TestAccComputeV2SecGroup_icmpZero(t *testing.T) {
 			{
 				Config: testAccComputeV2SecGroupIcmpZero,
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckComputeV2SecGroupExists("opentelekomcloud_compute_secgroup_v2.sg_1", &secGroup),
+					testAccCheckComputeV2SecGroupExists(resourceSecGroupName, &secGroup),
 				),
 			},
 		},
@@ -139,7 +141,7 @@ func TestAccComputeV2SecGroup_timeout(t *testing.T) {
 			{
 				Config: testAccComputeV2SecGroupTimeout,
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckComputeV2SecGroupExists("opentelekomcloud_compute_secgroup_v2.sg_1", &secGroup),
+					testAccCheckComputeV2SecGroupExists(resourceSecGroupName, &secGroup),
 				),
 			},
 		},
@@ -148,9 +150,9 @@ func TestAccComputeV2SecGroup_timeout(t *testing.T) {
 
 func testAccCheckComputeV2SecGroupDestroy(s *terraform.State) error {
 	config := common.TestAccProvider.Meta().(*cfg.Config)
-	computeClient, err := config.ComputeV2Client(env.OS_REGION_NAME)
+	client, err := config.ComputeV2Client(env.OS_REGION_NAME)
 	if err != nil {
-		return fmt.Errorf("error creating OpenTelekomCloud compute client: %s", err)
+		return fmt.Errorf("error creating OpenTelekomCloud ComputeV2 client: %s", err)
 	}
 
 	for _, rs := range s.RootModule().Resources {
@@ -158,7 +160,7 @@ func testAccCheckComputeV2SecGroupDestroy(s *terraform.State) error {
 			continue
 		}
 
-		_, err := secgroups.Get(computeClient, rs.Primary.ID).Extract()
+		_, err := secgroups.Get(client, rs.Primary.ID).Extract()
 		if err == nil {
 			return fmt.Errorf("security group still exists")
 		}
@@ -179,12 +181,12 @@ func testAccCheckComputeV2SecGroupExists(n string, secgroup *secgroups.SecurityG
 		}
 
 		config := common.TestAccProvider.Meta().(*cfg.Config)
-		computeClient, err := config.ComputeV2Client(env.OS_REGION_NAME)
+		client, err := config.ComputeV2Client(env.OS_REGION_NAME)
 		if err != nil {
-			return fmt.Errorf("error creating OpenTelekomCloud compute client: %s", err)
+			return fmt.Errorf("error creating OpenTelekomCloud ComputeV2 client: %s", err)
 		}
 
-		found, err := secgroups.Get(computeClient, rs.Primary.ID).Extract()
+		found, err := secgroups.Get(client, rs.Primary.ID).Extract()
 		if err != nil {
 			return err
 		}
@@ -202,7 +204,7 @@ func testAccCheckComputeV2SecGroupExists(n string, secgroup *secgroups.SecurityG
 func testAccCheckComputeV2SecGroupRuleCount(secgroup *secgroups.SecurityGroup, count int) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
 		if len(secgroup.Rules) != count {
-			return fmt.Errorf("security group rule count does not match. Expected %d, got %d", count, len(secgroup.Rules))
+			return fmt.Errorf("SG rule count does not match. Expected %d, got %d", count, len(secgroup.Rules))
 		}
 
 		return nil

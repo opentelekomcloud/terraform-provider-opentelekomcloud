@@ -9,6 +9,8 @@ import (
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/acceptance/common"
 )
 
+const dataAzName = "data.opentelekomcloud_compute_availability_zones_v2.zones"
+
 func TestAccOpenStackAvailabilityZonesV2_basic(t *testing.T) {
 	resource.Test(t, resource.TestCase{
 		PreCheck:          func() { common.TestAccPreCheck(t) },
@@ -17,7 +19,7 @@ func TestAccOpenStackAvailabilityZonesV2_basic(t *testing.T) {
 			{
 				Config: testAccOpenStackAvailabilityZonesConfig,
 				Check: resource.ComposeTestCheckFunc(
-					resource.TestMatchResourceAttr("data.opentelekomcloud_compute_availability_zones_v2.zones", "names.#", regexp.MustCompile(`[1-9]\d*`)),
+					resource.TestMatchResourceAttr(dataAzName, "names.#", regexp.MustCompile(`[1-9]\d*`)),
 				),
 			},
 		},

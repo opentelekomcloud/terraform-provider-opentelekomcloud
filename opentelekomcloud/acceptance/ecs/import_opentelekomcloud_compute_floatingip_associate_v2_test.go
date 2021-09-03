@@ -8,9 +8,9 @@ import (
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/acceptance/common"
 )
 
-func TestAccComputeV2FloatingIPAssociate_importBasic(t *testing.T) {
-	resourceName := "opentelekomcloud_compute_floatingip_associate_v2.fip_1"
+const resourceFloatingIpAssociateName = "opentelekomcloud_compute_floatingip_associate_v2.fip_1"
 
+func TestAccComputeV2FloatingIPAssociate_importBasic(t *testing.T) {
 	resource.Test(t, resource.TestCase{
 		PreCheck:          func() { common.TestAccPreCheck(t) },
 		ProviderFactories: common.TestAccProviderFactories,
@@ -19,9 +19,8 @@ func TestAccComputeV2FloatingIPAssociate_importBasic(t *testing.T) {
 			{
 				Config: testAccComputeV2FloatingIPAssociateBasic,
 			},
-
 			{
-				ResourceName:      resourceName,
+				ResourceName:      resourceFloatingIpAssociateName,
 				ImportState:       true,
 				ImportStateVerify: true,
 			},
