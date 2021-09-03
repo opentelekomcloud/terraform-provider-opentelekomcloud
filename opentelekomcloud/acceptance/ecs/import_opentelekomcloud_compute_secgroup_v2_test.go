@@ -9,7 +9,6 @@ import (
 )
 
 func TestAccComputeV2SecGroup_importBasic(t *testing.T) {
-
 	resource.Test(t, resource.TestCase{
 		PreCheck:          func() { common.TestAccPreCheck(t) },
 		ProviderFactories: common.TestAccProviderFactories,
