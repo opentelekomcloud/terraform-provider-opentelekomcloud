@@ -188,7 +188,7 @@ resource "opentelekomcloud_as_group_v1" "as_group"{
     id = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.network_id
   }
   security_groups {
-    id = opentelekomcloud_networking_secgroup_v2.default_secgroup.id
+    id = data.opentelekomcloud_networking_secgroup_v2.default_secgroup.id
   }
   lbaas_listeners {
     pool_id       = opentelekomcloud_lb_pool_v2.pool_1.id

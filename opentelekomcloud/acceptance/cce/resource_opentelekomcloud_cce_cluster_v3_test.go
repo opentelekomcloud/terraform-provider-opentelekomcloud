@@ -319,7 +319,7 @@ resource "opentelekomcloud_cce_cluster_v3" "cluster_1" {
   container_network_type  = "overlay_l2"
   kubernetes_svc_ip_range = "10.247.0.0/16"
 }
-`, clusterName)
+`, common.DataSourceSubnet, clusterName)
 
 	testAccCCEClusterV3InvalidVPC = fmt.Sprintf(`
 resource "opentelekomcloud_vpc_v1" "vpc" {
