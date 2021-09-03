@@ -158,9 +158,11 @@ func testAccCheckLBV2ListenerExists(n string, listener *listeners.Listener) reso
 
 var (
 	testAccLBV2ListenerConfigBasic = fmt.Sprintf(`
+%s
+
 resource "opentelekomcloud_lb_loadbalancer_v2" "loadbalancer_1" {
   name = "loadbalancer_1"
-  vip_subnet_id = "%s"
+  vip_subnet_id = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.subnet_id
 }
 
 resource "opentelekomcloud_lb_listener_v2" "listener_1" {
@@ -180,12 +182,14 @@ resource "opentelekomcloud_lb_listener_v2" "listener_1" {
     delete = "5m"
   }
 }
-`, env.OS_SUBNET_ID)
+`, common.DataSourceSubnet)
 
 	testAccLBV2ListenerConfigUpdate = fmt.Sprintf(`
+%s
+
 resource "opentelekomcloud_lb_loadbalancer_v2" "loadbalancer_1" {
   name = "loadbalancer_1"
-  vip_subnet_id = "%s"
+  vip_subnet_id = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.subnet_id
 }
 
 resource "opentelekomcloud_lb_listener_v2" "listener_1" {
@@ -206,8 +210,10 @@ resource "opentelekomcloud_lb_listener_v2" "listener_1" {
     delete = "5m"
   }
 }
-`, env.OS_SUBNET_ID)
+`, common.DataSourceSubnet)
 	testAccLBV2ListenerConfigHTTP2 = fmt.Sprintf(`
+%s
+
 resource "opentelekomcloud_lb_certificate_v2" "certificate_tls" {
   name        = "certificate_tls"
   type        = "server"
@@ -310,7 +316,7 @@ EOT
 
 resource "opentelekomcloud_lb_loadbalancer_v2" "loadbalancer_tls" {
   name          = "loadbalancer_tls"
-  vip_subnet_id = "%s"
+  vip_subnet_id = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.subnet_id
 }
 
 resource "opentelekomcloud_lb_listener_v2" "listener_tls" {
@@ -330,12 +336,14 @@ resource "opentelekomcloud_lb_listener_v2" "listener_tls" {
     delete = "5m"
   }
 }
-`, env.OS_SUBNET_ID)
+`, common.DataSourceSubnet)
 
 	testAccLBV2ListenerConfigUpdateHTTP2 = fmt.Sprintf(`
+%s
+
 resource "opentelekomcloud_lb_loadbalancer_v2" "loadbalancer_tls" {
   name          = "loadbalancer_tls"
-  vip_subnet_id = "%s"
+  vip_subnet_id = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.subnet_id
 }
 
 resource "opentelekomcloud_lb_certificate_v2" "certificate_tls" {
@@ -447,13 +455,15 @@ resource "opentelekomcloud_lb_listener_v2" "listener_tls" {
     delete = "5m"
   }
 }
-`, env.OS_SUBNET_ID)
+`, common.DataSourceSubnet)
 )
 
 func testAccLBV2ListenerConfigCert(count int) string {
 	return fmt.Sprintf(`
+%s
+
 resource "opentelekomcloud_lb_loadbalancer_v2" "elb_public" {
-  vip_subnet_id = "%s"
+  vip_subnet_id = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.subnet_id
 }
 
 resource "opentelekomcloud_lb_certificate_v2" "elb_certificates" {
@@ -530,5 +540,5 @@ resource "opentelekomcloud_lb_listener_v2" "elb_listener" {
     for s in opentelekomcloud_lb_certificate_v2.elb_certificates : s.id
   ]
 }
-`, env.OS_SUBNET_ID, count)
+`, common.DataSourceSubnet, count)
 }
