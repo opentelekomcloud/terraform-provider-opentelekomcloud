@@ -9,19 +9,17 @@ import (
 )
 
 func TestAccComputeV2Keypair_importBasic(t *testing.T) {
-	resourceName := "opentelekomcloud_compute_keypair_v2.kp_1"
-
 	resource.Test(t, resource.TestCase{
 		PreCheck:          func() { common.TestAccPreCheck(t) },
 		ProviderFactories: common.TestAccProviderFactories,
 		CheckDestroy:      testAccCheckComputeV2KeypairDestroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccComputeV2Keypair_basic,
+				Config: testAccComputeV2KeypairBasic,
 			},
 
 			{
-				ResourceName:      resourceName,
+				ResourceName:      resourceKeyPairName,
 				ImportState:       true,
 				ImportStateVerify: true,
 			},

@@ -18,9 +18,10 @@ import (
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common/cfg"
 )
 
+const resourceInstanceV2Name = "opentelekomcloud_compute_instance_v2.instance_1"
+
 func TestAccComputeV2Instance_basic(t *testing.T) {
 	var instance servers.Server
-	resourceName := "opentelekomcloud_compute_instance_v2.instance_1"
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:          func() { common.TestAccPreCheck(t) },
@@ -30,20 +31,20 @@ func TestAccComputeV2Instance_basic(t *testing.T) {
 			{
 				Config: testAccComputeV2InstanceBasic,
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckComputeV2InstanceExists(resourceName, &instance),
+					testAccCheckComputeV2InstanceExists(resourceInstanceV2Name, &instance),
 					testAccCheckComputeV2InstanceMetadata(&instance, "foo", "bar"),
-					resource.TestCheckResourceAttr(resourceName, "all_metadata.foo", "bar"),
-					resource.TestCheckResourceAttr(resourceName, "name", "instance_1"),
-					resource.TestCheckResourceAttr(resourceName, "availability_zone", env.OS_AVAILABILITY_ZONE),
-					resource.TestCheckResourceAttr(resourceName, "tags.muh", "value-create"),
+					resource.TestCheckResourceAttr(resourceInstanceV2Name, "all_metadata.foo", "bar"),
+					resource.TestCheckResourceAttr(resourceInstanceV2Name, "name", "instance_1"),
+					resource.TestCheckResourceAttr(resourceInstanceV2Name, "availability_zone", env.OS_AVAILABILITY_ZONE),
+					resource.TestCheckResourceAttr(resourceInstanceV2Name, "tags.muh", "value-create"),
 				),
 			},
 			{
 				Config: testAccComputeV2InstanceUpdate,
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckComputeV2InstanceExists(resourceName, &instance),
-					resource.TestCheckResourceAttr(resourceName, "name", "instance_2"),
-					resource.TestCheckResourceAttr(resourceName, "tags.muh", "value-update"),
+					testAccCheckComputeV2InstanceExists(resourceInstanceV2Name, &instance),
+					resource.TestCheckResourceAttr(resourceInstanceV2Name, "name", "instance_2"),
+					resource.TestCheckResourceAttr(resourceInstanceV2Name, "tags.muh", "value-update"),
 				),
 			},
 		},
@@ -53,7 +54,6 @@ func TestAccComputeV2Instance_basic(t *testing.T) {
 func TestAccComputeV2Instance_multiSecgroup(t *testing.T) {
 	var instance servers.Server
 	var secGroup1, secGroup2 secgroups.SecurityGroup
-	resourceName := "opentelekomcloud_compute_instance_v2.instance_1"
 	secGroupName1 := "opentelekomcloud_compute_secgroup_v2.secgroup_1"
 	secGroupName2 := "opentelekomcloud_compute_secgroup_v2.secgroup_2"
 
@@ -67,7 +67,7 @@ func TestAccComputeV2Instance_multiSecgroup(t *testing.T) {
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckComputeV2SecGroupExists(secGroupName1, &secGroup1),
 					testAccCheckComputeV2SecGroupExists(secGroupName2, &secGroup2),
-					testAccCheckComputeV2InstanceExists(resourceName, &instance),
+					testAccCheckComputeV2InstanceExists(resourceInstanceV2Name, &instance),
 				),
 			},
 			{
@@ -75,7 +75,7 @@ func TestAccComputeV2Instance_multiSecgroup(t *testing.T) {
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckComputeV2SecGroupExists(secGroupName1, &secGroup1),
 					testAccCheckComputeV2SecGroupExists(secGroupName2, &secGroup2),
-					testAccCheckComputeV2InstanceExists(resourceName, &instance),
+					testAccCheckComputeV2InstanceExists(resourceInstanceV2Name, &instance),
 				),
 			},
 		},
@@ -84,7 +84,6 @@ func TestAccComputeV2Instance_multiSecgroup(t *testing.T) {
 
 func TestAccComputeV2Instance_bootFromImage(t *testing.T) {
 	var instance servers.Server
-	resourceName := "opentelekomcloud_compute_instance_v2.instance_1"
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:          func() { common.TestAccPreCheck(t) },
@@ -94,7 +93,7 @@ func TestAccComputeV2Instance_bootFromImage(t *testing.T) {
 			{
 				Config: testAccComputeV2InstanceBootFromVolumeImage,
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckComputeV2InstanceExists(resourceName, &instance),
+					testAccCheckComputeV2InstanceExists(resourceInstanceV2Name, &instance),
 					testAccCheckComputeV2InstanceBootVolumeAttachment(&instance),
 				),
 			},
@@ -104,7 +103,6 @@ func TestAccComputeV2Instance_bootFromImage(t *testing.T) {
 
 func TestAccComputeV2Instance_bootFromVolume(t *testing.T) {
 	var instance servers.Server
-	resourceName := "opentelekomcloud_compute_instance_v2.instance_1"
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:          func() { common.TestAccPreCheck(t) },
@@ -114,7 +112,7 @@ func TestAccComputeV2Instance_bootFromVolume(t *testing.T) {
 			{
 				Config: testAccComputeV2InstanceBootFromVolume,
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckComputeV2InstanceExists(resourceName, &instance),
+					testAccCheckComputeV2InstanceExists(resourceInstanceV2Name, &instance),
 				),
 			},
 		},
@@ -132,8 +130,7 @@ func TestAccComputeV2Instance_changeFixedIP(t *testing.T) {
 			{
 				Config: testAccComputeV2InstanceFixedIP,
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckComputeV2InstanceExists(
-						"opentelekomcloud_compute_instance_v2.instance_1", &instance),
+					testAccCheckComputeV2InstanceExists(resourceInstanceV2Name, &instance),
 				),
 			},
 		},
@@ -142,7 +139,6 @@ func TestAccComputeV2Instance_changeFixedIP(t *testing.T) {
 
 func TestAccComputeV2Instance_bootFromVolumeVolume(t *testing.T) {
 	var instance servers.Server
-	resourceName := "opentelekomcloud_compute_instance_v2.instance_1"
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:          func() { common.TestAccPreCheck(t) },
@@ -152,7 +148,7 @@ func TestAccComputeV2Instance_bootFromVolumeVolume(t *testing.T) {
 			{
 				Config: testAccComputeV2InstanceBootFromVolumeVolume,
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckComputeV2InstanceExists(resourceName, &instance),
+					testAccCheckComputeV2InstanceExists(resourceInstanceV2Name, &instance),
 					testAccCheckComputeV2InstanceBootVolumeAttachment(&instance),
 				),
 			},
@@ -162,7 +158,6 @@ func TestAccComputeV2Instance_bootFromVolumeVolume(t *testing.T) {
 
 func TestAccComputeV2Instance_stopBeforeDestroy(t *testing.T) {
 	var instance servers.Server
-	resourceName := "opentelekomcloud_compute_instance_v2.instance_1"
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:          func() { common.TestAccPreCheck(t) },
@@ -172,7 +167,7 @@ func TestAccComputeV2Instance_stopBeforeDestroy(t *testing.T) {
 			{
 				Config: testAccComputeV2InstanceStopBeforeDestroy,
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckComputeV2InstanceExists(resourceName, &instance),
+					testAccCheckComputeV2InstanceExists(resourceInstanceV2Name, &instance),
 				),
 			},
 		},
@@ -181,7 +176,6 @@ func TestAccComputeV2Instance_stopBeforeDestroy(t *testing.T) {
 
 func TestAccComputeV2Instance_metadata(t *testing.T) {
 	var instance servers.Server
-	resourceName := "opentelekomcloud_compute_instance_v2.instance_1"
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:          func() { common.TestAccPreCheck(t) },
@@ -191,22 +185,22 @@ func TestAccComputeV2Instance_metadata(t *testing.T) {
 			{
 				Config: testAccComputeV2InstanceMetadata,
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckComputeV2InstanceExists(resourceName, &instance),
+					testAccCheckComputeV2InstanceExists(resourceInstanceV2Name, &instance),
 					testAccCheckComputeV2InstanceMetadata(&instance, "foo", "bar"),
 					testAccCheckComputeV2InstanceMetadata(&instance, "abc", "def"),
-					resource.TestCheckResourceAttr(resourceName, "all_metadata.foo", "bar"),
-					resource.TestCheckResourceAttr(resourceName, "all_metadata.abc", "def"),
+					resource.TestCheckResourceAttr(resourceInstanceV2Name, "all_metadata.foo", "bar"),
+					resource.TestCheckResourceAttr(resourceInstanceV2Name, "all_metadata.abc", "def"),
 				),
 			},
 			{
 				Config: testAccComputeV2InstanceMetadataUpdate,
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckComputeV2InstanceExists(resourceName, &instance),
+					testAccCheckComputeV2InstanceExists(resourceInstanceV2Name, &instance),
 					testAccCheckComputeV2InstanceMetadata(&instance, "foo", "bar"),
 					testAccCheckComputeV2InstanceMetadata(&instance, "ghi", "jkl"),
 					testAccCheckComputeV2InstanceNoMetadataKey(&instance, "abc"),
-					resource.TestCheckResourceAttr(resourceName, "all_metadata.foo", "bar"),
-					resource.TestCheckResourceAttr(resourceName, "all_metadata.ghi", "jkl"),
+					resource.TestCheckResourceAttr(resourceInstanceV2Name, "all_metadata.foo", "bar"),
+					resource.TestCheckResourceAttr(resourceInstanceV2Name, "all_metadata.ghi", "jkl"),
 				),
 			},
 		},
@@ -215,7 +209,6 @@ func TestAccComputeV2Instance_metadata(t *testing.T) {
 
 func TestAccComputeV2Instance_timeout(t *testing.T) {
 	var instance servers.Server
-	resourceName := "opentelekomcloud_compute_instance_v2.instance_1"
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:          func() { common.TestAccPreCheck(t) },
@@ -225,7 +218,7 @@ func TestAccComputeV2Instance_timeout(t *testing.T) {
 			{
 				Config: testAccComputeV2InstanceTimeout,
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckComputeV2InstanceExists(resourceName, &instance),
+					testAccCheckComputeV2InstanceExists(resourceInstanceV2Name, &instance),
 				),
 			},
 		},
@@ -234,7 +227,6 @@ func TestAccComputeV2Instance_timeout(t *testing.T) {
 
 func TestAccComputeV2Instance_autoRecovery(t *testing.T) {
 	var instance servers.Server
-	resourceName := "opentelekomcloud_compute_instance_v2.instance_1"
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:          func() { common.TestAccPreCheck(t) },
@@ -244,15 +236,15 @@ func TestAccComputeV2Instance_autoRecovery(t *testing.T) {
 			{
 				Config: testAccComputeV2InstanceBasic,
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckComputeV2InstanceExists(resourceName, &instance),
-					resource.TestCheckResourceAttr(resourceName, "auto_recovery", "true"),
+					testAccCheckComputeV2InstanceExists(resourceInstanceV2Name, &instance),
+					resource.TestCheckResourceAttr(resourceInstanceV2Name, "auto_recovery", "true"),
 				),
 			},
 			{
 				Config: testAccComputeV2InstanceAutoRecovery,
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckComputeV2InstanceExists(resourceName, &instance),
-					resource.TestCheckResourceAttr(resourceName, "auto_recovery", "false"),
+					testAccCheckComputeV2InstanceExists(resourceInstanceV2Name, &instance),
+					resource.TestCheckResourceAttr(resourceInstanceV2Name, "auto_recovery", "false"),
 				),
 			},
 		},
@@ -261,7 +253,6 @@ func TestAccComputeV2Instance_autoRecovery(t *testing.T) {
 
 func TestAccComputeV2Instance_crazyNICs(t *testing.T) {
 	var instance servers.Server
-	resourceName := "opentelekomcloud_compute_instance_v2.instance_1"
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:          func() { common.TestAccPreCheck(t) },
@@ -271,7 +262,7 @@ func TestAccComputeV2Instance_crazyNICs(t *testing.T) {
 			{
 				Config: testAccComputeV2InstanceCrazyNICs,
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckComputeV2InstanceExists(resourceName, &instance),
+					testAccCheckComputeV2InstanceExists(resourceInstanceV2Name, &instance),
 				),
 			},
 		},
@@ -291,27 +282,24 @@ func TestAccComputeV2Instance_initialStateActive(t *testing.T) {
 			{
 				Config: testAccComputeV2InstanceActive,
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckComputeV2InstanceExists("opentelekomcloud_compute_instance_v2.instance_1", &instance),
-					resource.TestCheckResourceAttr(
-						"opentelekomcloud_compute_instance_v2.instance_1", "power_state", "active"),
+					testAccCheckComputeV2InstanceExists(resourceInstanceV2Name, &instance),
+					resource.TestCheckResourceAttr(resourceInstanceV2Name, "power_state", "active"),
 					testAccCheckComputeV2InstanceState(&instance, "active"),
 				),
 			},
 			{
 				Config: testAccComputeV2InstanceShutoff,
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckComputeV2InstanceExists("opentelekomcloud_compute_instance_v2.instance_1", &instance),
-					resource.TestCheckResourceAttr(
-						"opentelekomcloud_compute_instance_v2.instance_1", "power_state", "shutoff"),
+					testAccCheckComputeV2InstanceExists(resourceInstanceV2Name, &instance),
+					resource.TestCheckResourceAttr(resourceInstanceV2Name, "power_state", "shutoff"),
 					testAccCheckComputeV2InstanceState(&instance, "shutoff"),
 				),
 			},
 			{
 				Config: testAccComputeV2InstanceActive,
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckComputeV2InstanceExists("opentelekomcloud_compute_instance_v2.instance_1", &instance),
-					resource.TestCheckResourceAttr(
-						"opentelekomcloud_compute_instance_v2.instance_1", "power_state", "active"),
+					testAccCheckComputeV2InstanceExists(resourceInstanceV2Name, &instance),
+					resource.TestCheckResourceAttr(resourceInstanceV2Name, "power_state", "active"),
 					testAccCheckComputeV2InstanceState(&instance, "active"),
 				),
 			},
@@ -332,27 +320,24 @@ func TestAccComputeV2Instance_initialStateShutoff(t *testing.T) {
 			{
 				Config: testAccComputeV2InstanceShutoff,
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckComputeV2InstanceExists("opentelekomcloud_compute_instance_v2.instance_1", &instance),
-					resource.TestCheckResourceAttr(
-						"opentelekomcloud_compute_instance_v2.instance_1", "power_state", "shutoff"),
+					testAccCheckComputeV2InstanceExists(resourceInstanceV2Name, &instance),
+					resource.TestCheckResourceAttr(resourceInstanceV2Name, "power_state", "shutoff"),
 					testAccCheckComputeV2InstanceState(&instance, "shutoff"),
 				),
 			},
 			{
 				Config: testAccComputeV2InstanceActive,
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckComputeV2InstanceExists("opentelekomcloud_compute_instance_v2.instance_1", &instance),
-					resource.TestCheckResourceAttr(
-						"opentelekomcloud_compute_instance_v2.instance_1", "power_state", "active"),
+					testAccCheckComputeV2InstanceExists(resourceInstanceV2Name, &instance),
+					resource.TestCheckResourceAttr(resourceInstanceV2Name, "power_state", "active"),
 					testAccCheckComputeV2InstanceState(&instance, "active"),
 				),
 			},
 			{
 				Config: testAccComputeV2InstanceShutoff,
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckComputeV2InstanceExists("opentelekomcloud_compute_instance_v2.instance_1", &instance),
-					resource.TestCheckResourceAttr(
-						"opentelekomcloud_compute_instance_v2.instance_1", "power_state", "shutoff"),
+					testAccCheckComputeV2InstanceExists(resourceInstanceV2Name, &instance),
+					resource.TestCheckResourceAttr(resourceInstanceV2Name, "power_state", "shutoff"),
 					testAccCheckComputeV2InstanceState(&instance, "shutoff"),
 				),
 			},
@@ -433,12 +418,12 @@ func testAccCheckComputeV2InstanceBootVolumeAttachment(instance *servers.Server)
 		var attachments []volumeattach.VolumeAttachment
 
 		config := common.TestAccProvider.Meta().(*cfg.Config)
-		computeClient, err := config.ComputeV2Client(env.OS_REGION_NAME)
+		client, err := config.ComputeV2Client(env.OS_REGION_NAME)
 		if err != nil {
-			return err
+			return fmt.Errorf("error creating OpenTelekomCloud ComputeV2 client: %s", err)
 		}
 
-		err = volumeattach.List(computeClient, instance.ID).EachPage(
+		err = volumeattach.List(client, instance.ID).EachPage(
 			func(page pagination.Page) (bool, error) {
 				actual, err := volumeattach.ExtractVolumeAttachments(page)
 				if err != nil {
@@ -461,6 +446,8 @@ func testAccCheckComputeV2InstanceBootVolumeAttachment(instance *servers.Server)
 }
 
 var testAccComputeV2InstanceBasic = fmt.Sprintf(`
+%s
+
 resource "opentelekomcloud_compute_instance_v2" "instance_1" {
   name              = "instance_1"
   availability_zone = "%s"
@@ -468,7 +455,7 @@ resource "opentelekomcloud_compute_instance_v2" "instance_1" {
     foo = "bar"
   }
   network {
-    uuid = "%s"
+    uuid = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.network_id
   }
 
   tags = {
@@ -476,25 +463,29 @@ resource "opentelekomcloud_compute_instance_v2" "instance_1" {
     kuh = "value-create"
   }
 }
-`, env.OS_AVAILABILITY_ZONE, env.OS_NETWORK_ID)
+`, common.DataSourceSubnet, env.OS_AVAILABILITY_ZONE)
 
 var testAccComputeV2InstanceUpdate = fmt.Sprintf(`
+%s
+
 resource "opentelekomcloud_compute_instance_v2" "instance_1" {
   name              = "instance_2"
   security_groups   = ["default"]
   availability_zone = "%s"
 
   network {
-    uuid = "%s"
+    uuid = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.network_id
   }
 
   tags = {
     muh = "value-update"
   }
 }
-`, env.OS_AVAILABILITY_ZONE, env.OS_NETWORK_ID)
+`, common.DataSourceSubnet, env.OS_AVAILABILITY_ZONE)
 
 var testAccComputeV2InstanceMultiSecgroup = fmt.Sprintf(`
+%s
+
 resource "opentelekomcloud_compute_secgroup_v2" "secgroup_1" {
   name        = "secgroup_1"
   description = "a security group"
@@ -521,12 +512,14 @@ resource "opentelekomcloud_compute_instance_v2" "instance_1" {
   name            = "instance_1"
   security_groups = ["default"]
   network {
-    uuid = "%s"
+    uuid = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.network_id
   }
 }
-`, env.OS_NETWORK_ID)
+`, common.DataSourceSubnet)
 
 var testAccComputeV2InstanceMultiSecgroupUpdate = fmt.Sprintf(`
+%s
+
 resource "opentelekomcloud_compute_secgroup_v2" "secgroup_1" {
   name        = "secgroup_1"
   description = "a security group"
@@ -554,24 +547,28 @@ resource "opentelekomcloud_compute_instance_v2" "instance_1" {
   security_groups = [
     "default",
     opentelekomcloud_compute_secgroup_v2.secgroup_1.name,
-    opentelekomcloud_compute_secgroup_v2.secgroup_2.name,
+    opentelekomcloud_compute_secgroup_v2.secgroup_2.name
   ]
   network {
-    uuid = "%s"
+    uuid = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.network_id
   }
 }
-`, env.OS_NETWORK_ID)
+`, common.DataSourceSubnet)
 
 var testAccComputeV2InstanceBootFromVolumeImage = fmt.Sprintf(`
+%s
+
+%s
+
 resource "opentelekomcloud_compute_instance_v2" "instance_1" {
   name              = "instance_1"
   security_groups   = ["default"]
   availability_zone = "%s"
   network {
-    uuid = "%s"
+    uuid = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.network_id
   }
   block_device {
-    uuid                  = "%s"
+    uuid                  = data.opentelekomcloud_images_image_v2.latest_image.id
     source_type           = "image"
     volume_size           = 50
     boot_index            = 0
@@ -579,20 +576,24 @@ resource "opentelekomcloud_compute_instance_v2" "instance_1" {
     delete_on_termination = true
   }
 }
-`, env.OS_AVAILABILITY_ZONE, env.OS_NETWORK_ID, env.OS_IMAGE_ID)
+`, common.DataSourceImage, common.DataSourceSubnet, env.OS_AVAILABILITY_ZONE)
 
 var testAccComputeV2InstanceBootFromVolumeVolume = fmt.Sprintf(`
+%s
+
+%s
+
 resource "opentelekomcloud_blockstorage_volume_v2" "vol_1" {
   name     = "vol_1"
   size     = 50
-  image_id = "%s"
+  image_id = data.opentelekomcloud_images_image_v2.latest_image.id
 }
 
 resource "opentelekomcloud_compute_instance_v2" "instance_1" {
   name            = "instance_1"
   security_groups = ["default"]
   network {
-    uuid = "%s"
+    uuid = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.network_id
   }
   block_device {
     uuid                  = opentelekomcloud_blockstorage_volume_v2.vol_1.id
@@ -602,17 +603,21 @@ resource "opentelekomcloud_compute_instance_v2" "instance_1" {
     delete_on_termination = true
   }
 }
-`, env.OS_IMAGE_ID, env.OS_NETWORK_ID)
+`, common.DataSourceImage, common.DataSourceSubnet)
 
 var testAccComputeV2InstanceBootFromVolume = fmt.Sprintf(`
+%s
+
+%s
+
 resource "opentelekomcloud_compute_instance_v2" "instance_1" {
   name            = "instance_1"
   security_groups = ["default"]
   network {
-    uuid = "%s"
+    uuid = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.network_id
   }
   block_device {
-    uuid                  = "%s"
+    uuid                  = data.opentelekomcloud_images_image_v2.latest_image.id
     source_type           = "image"
     volume_size           = 50
     boot_index            = 0
@@ -620,73 +625,85 @@ resource "opentelekomcloud_compute_instance_v2" "instance_1" {
     delete_on_termination = true
   }
 }
-`, env.OS_NETWORK_ID, env.OS_IMAGE_ID)
+`, common.DataSourceImage, common.DataSourceSubnet)
 
 var testAccComputeV2InstanceFixedIP = fmt.Sprintf(`
+%s
+
 resource "opentelekomcloud_compute_instance_v2" "instance_1" {
   name            = "instance_1"
   security_groups = ["default"]
   network {
-    uuid        = "%s"
+    uuid        = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.network_id
     fixed_ip_v4 = "192.168.0.24"
   }
 }
-`, env.OS_NETWORK_ID)
+`, common.DataSourceSubnet)
 
 var testAccComputeV2InstanceStopBeforeDestroy = fmt.Sprintf(`
+%s
+
 resource "opentelekomcloud_compute_instance_v2" "instance_1" {
   name            = "instance_1"
   security_groups = ["default"]
   network {
-    uuid = "%s"
+    uuid = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.network_id
   }
   stop_before_destroy = true
 }
-`, env.OS_NETWORK_ID)
+`, common.DataSourceSubnet)
 
 var testAccComputeV2InstanceMetadata = fmt.Sprintf(`
+%s
+
 resource "opentelekomcloud_compute_instance_v2" "instance_1" {
   name            = "instance_1"
   security_groups = ["default"]
   network {
-    uuid = "%s"
+    uuid = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.network_id
   }
   metadata = {
     foo = "bar"
     abc = "def"
   }
 }
-`, env.OS_NETWORK_ID)
+`, common.DataSourceSubnet)
 
 var testAccComputeV2InstanceMetadataUpdate = fmt.Sprintf(`
+%s
+
 resource "opentelekomcloud_compute_instance_v2" "instance_1" {
   name            = "instance_1"
   security_groups = ["default"]
   network {
-    uuid = "%s"
+    uuid = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.network_id
   }
   metadata = {
     foo = "bar"
     ghi = "jkl"
   }
 }
-`, env.OS_NETWORK_ID)
+`, common.DataSourceSubnet)
 
 var testAccComputeV2InstanceTimeout = fmt.Sprintf(`
+%s
+
 resource "opentelekomcloud_compute_instance_v2" "instance_1" {
   name            = "instance_1"
   security_groups = ["default"]
   network {
-    uuid = "%s"
+    uuid = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.network_id
   }
 
   timeouts {
     create = "10m"
   }
 }
-`, env.OS_NETWORK_ID)
+`, common.DataSourceSubnet)
 
 var testAccComputeV2InstanceAutoRecovery = fmt.Sprintf(`
+%s
+
 resource "opentelekomcloud_compute_instance_v2" "instance_1" {
   name              = "instance_1"
   security_groups   = ["default"]
@@ -695,13 +712,15 @@ resource "opentelekomcloud_compute_instance_v2" "instance_1" {
     foo = "bar"
   }
   network {
-    uuid = "%s"
+    uuid = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.network_id
   }
   auto_recovery = false
 }
-`, env.OS_AVAILABILITY_ZONE, env.OS_NETWORK_ID)
+`, common.DataSourceSubnet, env.OS_AVAILABILITY_ZONE)
 
 var testAccComputeV2InstanceCrazyNICs = fmt.Sprintf(`
+%s
+
 resource "opentelekomcloud_networking_network_v2" "network_1" {
   name = "network_1"
 }
@@ -764,14 +783,12 @@ resource "opentelekomcloud_compute_instance_v2" "instance_1" {
   depends_on = [
     "opentelekomcloud_networking_subnet_v2.subnet_1",
     "opentelekomcloud_networking_subnet_v2.subnet_2",
-    "opentelekomcloud_networking_port_v2.port_1",
-    "opentelekomcloud_networking_port_v2.port_2",
   ]
   name            = "instance_1"
   security_groups = ["default"]
 
   network {
-    uuid = "%s"
+    uuid = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.network_id
   }
   network {
     uuid        = opentelekomcloud_networking_network_v2.network_1.id
@@ -802,29 +819,33 @@ resource "opentelekomcloud_compute_instance_v2" "instance_1" {
     port = opentelekomcloud_networking_port_v2.port_4.id
   }
 }
-`, env.OS_NETWORK_ID)
+`, common.DataSourceSubnet)
 
 var testAccComputeV2InstanceActive = fmt.Sprintf(`
+%s
+
 resource "opentelekomcloud_compute_instance_v2" "instance_1" {
-  name = "instance_1"
+  name            = "instance_1"
   security_groups = ["default"]
-  power_state = "active"
+  power_state     = "active"
   network {
-    uuid = "%s"
+    uuid = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.network_id
   }
 }
-`, env.OS_NETWORK_ID)
+`, common.DataSourceSubnet)
 
 var testAccComputeV2InstanceShutoff = fmt.Sprintf(`
+%s
+
 resource "opentelekomcloud_compute_instance_v2" "instance_1" {
-  name = "instance_1"
+  name            = "instance_1"
   security_groups = ["default"]
-  power_state = "shutoff"
+  power_state     = "shutoff"
   network {
-    uuid = "%s"
+    uuid = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.network_id
   }
 }
-`, env.OS_NETWORK_ID)
+`, common.DataSourceSubnet)
 
 func testAccCheckComputeV2InstanceState(
 	instance *servers.Server, state string) resource.TestCheckFunc {

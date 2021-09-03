@@ -14,6 +14,8 @@ import (
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common/cfg"
 )
 
+const resourceFloatingIpName = "opentelekomcloud_compute_floatingip_v2.fip_1"
+
 func TestAccComputeV2FloatingIP_basic(t *testing.T) {
 	var fip floatingips.FloatingIP
 
@@ -23,9 +25,9 @@ func TestAccComputeV2FloatingIP_basic(t *testing.T) {
 		CheckDestroy:      testAccCheckComputeV2FloatingIPDestroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccComputeV2FloatingIP_basic,
+				Config: testAccComputeV2FloatingIPBasic,
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckComputeV2FloatingIPExists("opentelekomcloud_compute_floatingip_v2.fip_1", &fip),
+					testAccCheckComputeV2FloatingIPExists(resourceFloatingIpName, &fip),
 				),
 			},
 		},
@@ -34,9 +36,9 @@ func TestAccComputeV2FloatingIP_basic(t *testing.T) {
 
 func testAccCheckComputeV2FloatingIPDestroy(s *terraform.State) error {
 	config := common.TestAccProvider.Meta().(*cfg.Config)
-	computeClient, err := config.ComputeV2Client(env.OS_REGION_NAME)
+	client, err := config.ComputeV2Client(env.OS_REGION_NAME)
 	if err != nil {
-		return fmt.Errorf("error creating OpenTelekomCloud compute client: %s", err)
+		return fmt.Errorf("error creating OpenTelekomCloud ComputeV2 client: %s", err)
 	}
 
 	for _, rs := range s.RootModule().Resources {
@@ -44,7 +46,7 @@ func testAccCheckComputeV2FloatingIPDestroy(s *terraform.State) error {
 			continue
 		}
 
-		_, err := floatingips.Get(computeClient, rs.Primary.ID).Extract()
+		_, err := floatingips.Get(client, rs.Primary.ID).Extract()
 		if err == nil {
 			return fmt.Errorf("floatingIP still exists")
 		}
@@ -65,12 +67,12 @@ func testAccCheckComputeV2FloatingIPExists(n string, kp *floatingips.FloatingIP)
 		}
 
 		config := common.TestAccProvider.Meta().(*cfg.Config)
-		computeClient, err := config.ComputeV2Client(env.OS_REGION_NAME)
+		client, err := config.ComputeV2Client(env.OS_REGION_NAME)
 		if err != nil {
-			return fmt.Errorf("error creating OpenTelekomCloud compute client: %s", err)
+			return fmt.Errorf("error creating OpenTelekomCloud ComputeV2 client: %s", err)
 		}
 
-		found, err := floatingips.Get(computeClient, rs.Primary.ID).Extract()
+		found, err := floatingips.Get(client, rs.Primary.ID).Extract()
 		if err != nil {
 			return err
 		}
@@ -85,6 +87,6 @@ func testAccCheckComputeV2FloatingIPExists(n string, kp *floatingips.FloatingIP)
 	}
 }
 
-const testAccComputeV2FloatingIP_basic = `
+const testAccComputeV2FloatingIPBasic = `
 resource "opentelekomcloud_compute_floatingip_v2" "fip_1" {}
 `

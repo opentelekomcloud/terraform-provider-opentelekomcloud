@@ -15,9 +15,10 @@ import (
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common/cfg"
 )
 
+const resourceInstanceV1Name = "opentelekomcloud_ecs_instance_v1.instance_1"
+
 func TestAccEcsV1InstanceBasic(t *testing.T) {
 	var instance cloudservers.CloudServer
-	resourceName := "opentelekomcloud_ecs_instance_v1.instance_1"
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:          func() { common.TestAccPreCheck(t) },
@@ -27,21 +28,21 @@ func TestAccEcsV1InstanceBasic(t *testing.T) {
 			{
 				Config: testAccEcsV1InstanceBasic,
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckEcsV1InstanceExists(resourceName, &instance),
-					resource.TestCheckResourceAttr(resourceName, "availability_zone", env.OS_AVAILABILITY_ZONE),
-					resource.TestCheckResourceAttr(resourceName, "auto_recovery", "true"),
-					resource.TestCheckResourceAttr(resourceName, "security_groups.#", "1"),
-					resource.TestCheckResourceAttr(resourceName, "tags.muh", "value-create"),
+					testAccCheckEcsV1InstanceExists(resourceInstanceV1Name, &instance),
+					resource.TestCheckResourceAttr(resourceInstanceV1Name, "availability_zone", env.OS_AVAILABILITY_ZONE),
+					resource.TestCheckResourceAttr(resourceInstanceV1Name, "auto_recovery", "true"),
+					resource.TestCheckResourceAttr(resourceInstanceV1Name, "security_groups.#", "1"),
+					resource.TestCheckResourceAttr(resourceInstanceV1Name, "tags.muh", "value-create"),
 				),
 			},
 			{
 				Config: testAccEcsV1InstanceUpdate,
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckEcsV1InstanceExists(resourceName, &instance),
-					resource.TestCheckResourceAttr(resourceName, "availability_zone", env.OS_AVAILABILITY_ZONE),
-					resource.TestCheckResourceAttr(resourceName, "auto_recovery", "false"),
-					resource.TestCheckResourceAttr(resourceName, "security_groups.#", "1"),
-					resource.TestCheckResourceAttr(resourceName, "tags.muh", "value-update"),
+					testAccCheckEcsV1InstanceExists(resourceInstanceV1Name, &instance),
+					resource.TestCheckResourceAttr(resourceInstanceV1Name, "availability_zone", env.OS_AVAILABILITY_ZONE),
+					resource.TestCheckResourceAttr(resourceInstanceV1Name, "auto_recovery", "false"),
+					resource.TestCheckResourceAttr(resourceInstanceV1Name, "security_groups.#", "1"),
+					resource.TestCheckResourceAttr(resourceInstanceV1Name, "tags.muh", "value-update"),
 				),
 			},
 		},
@@ -91,7 +92,6 @@ func TestAccEcsV1InstanceVPCValidation(t *testing.T) {
 
 func TestAccEcsV1InstanceEncryption(t *testing.T) {
 	var instance cloudservers.CloudServer
-	resourceName := "opentelekomcloud_ecs_instance_v1.instance_1"
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:          func() { common.TestAccPreCheck(t) },
@@ -101,8 +101,8 @@ func TestAccEcsV1InstanceEncryption(t *testing.T) {
 			{
 				Config: testAccEcsV1InstanceDataVolumeEncryption,
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckEcsV1InstanceExists(resourceName, &instance),
-					resource.TestCheckResourceAttr(resourceName, "data_disks.0.kms_id", env.OS_KMS_ID),
+					testAccCheckEcsV1InstanceExists(resourceInstanceV1Name, &instance),
+					resource.TestCheckResourceAttr(resourceInstanceV1Name, "data_disks.0.kms_id", env.OS_KMS_ID),
 				),
 			},
 		},
@@ -113,7 +113,7 @@ func testAccCheckEcsV1InstanceDestroy(s *terraform.State) error {
 	config := common.TestAccProvider.Meta().(*cfg.Config)
 	client, err := config.ComputeV1Client(env.OS_REGION_NAME)
 	if err != nil {
-		return fmt.Errorf("error creating OpenTelekomCloud compute client: %s", err)
+		return fmt.Errorf("error creating OpenTelekomCloud ComputeV1 client: %w", err)
 	}
 
 	for _, rs := range s.RootModule().Resources {
@@ -146,7 +146,7 @@ func testAccCheckEcsV1InstanceExists(n string, instance *cloudservers.CloudServe
 		config := common.TestAccProvider.Meta().(*cfg.Config)
 		client, err := config.ComputeV1Client(env.OS_REGION_NAME)
 		if err != nil {
-			return fmt.Errorf("error creating OpenTelekomCloud ComputeV1 client: %s", err)
+			return fmt.Errorf("error creating OpenTelekomCloud ComputeV1 client: %w", err)
 		}
 
 		found, err := cloudservers.Get(client, rs.Primary.ID).Extract()
@@ -164,14 +164,18 @@ func testAccCheckEcsV1InstanceExists(n string, instance *cloudservers.CloudServe
 }
 
 var testAccEcsV1InstanceBasic = fmt.Sprintf(`
+%s
+
+%s
+
 resource "opentelekomcloud_ecs_instance_v1" "instance_1" {
   name     = "server_1"
-  image_id = "%s"
+  image_id = data.opentelekomcloud_images_image_v2.latest_image.id
   flavor   = "s2.medium.1"
-  vpc_id   = "%s"
+  vpc_id   = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.vpc_id
 
   nics {
-    network_id = "%s"
+    network_id = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.network_id
   }
 
   data_disks {
@@ -188,22 +192,23 @@ resource "opentelekomcloud_ecs_instance_v1" "instance_1" {
     kuh = "value-create"
   }
 }
-`, env.OS_IMAGE_ID, env.OS_VPC_ID, env.OS_NETWORK_ID, env.OS_AVAILABILITY_ZONE)
+`, common.DataSourceImage, common.DataSourceSubnet, env.OS_AVAILABILITY_ZONE)
 
 var testAccEcsV1InstanceUpdate = fmt.Sprintf(`
-resource "opentelekomcloud_compute_secgroup_v2" "secgroup_1" {
-  name        = "secgroup_ecs"
-  description = "a security group"
-}
+%s
+
+%s
+
+%s
 
 resource "opentelekomcloud_ecs_instance_v1" "instance_1" {
   name     = "server_updated"
-  image_id = "%s"
+  image_id = data.opentelekomcloud_images_image_v2.latest_image.id
   flavor   = "s2.medium.1"
-  vpc_id   = "%s"
+  vpc_id   = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.vpc_id
 
   nics {
-    network_id = "%s"
+    network_id = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.network_id
   }
 
   data_disks {
@@ -212,7 +217,7 @@ resource "opentelekomcloud_ecs_instance_v1" "instance_1" {
   }
 
   password                    = "Password@123"
-  security_groups             = [opentelekomcloud_compute_secgroup_v2.secgroup_1.id]
+  security_groups             = [data.opentelekomcloud_networking_secgroup_v2.default_secgroup.id]
   availability_zone           = "%s"
   auto_recovery               = false
   delete_disks_on_termination = true
@@ -221,17 +226,22 @@ resource "opentelekomcloud_ecs_instance_v1" "instance_1" {
     muh = "value-update"
   }
 }
-`, env.OS_IMAGE_ID, env.OS_VPC_ID, env.OS_NETWORK_ID, env.OS_AVAILABILITY_ZONE)
+`, common.DataSourceSecGroupDefault, common.DataSourceImage, common.DataSourceSubnet, env.OS_AVAILABILITY_ZONE)
 
 var testAccEcsV1InstanceInvalidTypeForAZ = fmt.Sprintf(`
+%s
+
+%s
+
+
 resource "opentelekomcloud_ecs_instance_v1" "instance_1" {
   name     = "server_1"
-  image_id = "%s"
+  image_id = data.opentelekomcloud_images_image_v2.latest_image.id
   flavor   = "s2.medium.1"
-  vpc_id   = "%s"
+  vpc_id   = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.vpc_id
 
   nics {
-    network_id = "%s"
+    network_id = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.network_id
   }
 
   system_disk_type = "uh-l1"
@@ -245,17 +255,21 @@ resource "opentelekomcloud_ecs_instance_v1" "instance_1" {
     key = "value"
   }
 }
-`, env.OS_IMAGE_ID, env.OS_VPC_ID, env.OS_NETWORK_ID)
+`, common.DataSourceImage, common.DataSourceSubnet)
 
 var testAccEcsV1InstanceInvalidType = fmt.Sprintf(`
+%s
+
+%s
+
 resource "opentelekomcloud_ecs_instance_v1" "instance_1" {
   name     = "server_1"
-  image_id = "%s"
+  image_id = data.opentelekomcloud_images_image_v2.latest_image.id
   flavor   = "s2.medium.1"
-  vpc_id   = "%s"
+  vpc_id   = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.vpc_id
 
   nics {
-    network_id = "%s"
+    network_id = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.network_id
   }
 
   system_disk_type = "asdfasd"
@@ -269,17 +283,21 @@ resource "opentelekomcloud_ecs_instance_v1" "instance_1" {
     key = "value"
   }
 }
-`, env.OS_IMAGE_ID, env.OS_VPC_ID, env.OS_NETWORK_ID)
+`, common.DataSourceImage, common.DataSourceSubnet)
 
 var testAccEcsV1InstanceInvalidDataDisk = fmt.Sprintf(`
+%s
+
+%s
+
 resource "opentelekomcloud_ecs_instance_v1" "instance_1" {
   name     = "server_1"
-  image_id = "%s"
+  image_id = data.opentelekomcloud_images_image_v2.latest_image.id
   flavor   = "s2.medium.1"
-  vpc_id   = "%s"
+  vpc_id   = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.vpc_id
 
   nics {
-    network_id = "%s"
+    network_id = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.network_id
   }
 
   data_disks {
@@ -296,17 +314,21 @@ resource "opentelekomcloud_ecs_instance_v1" "instance_1" {
     key = "value"
   }
 }
-`, env.OS_IMAGE_ID, env.OS_VPC_ID, env.OS_NETWORK_ID)
+`, common.DataSourceImage, common.DataSourceSubnet)
 
 var testAccEcsV1InstanceInvalidVPC = fmt.Sprintf(`
+%s
+
+%s
+
 resource "opentelekomcloud_ecs_instance_v1" "instance_1" {
   name     = "server_1"
-  image_id = "%s"
+  image_id = data.opentelekomcloud_images_image_v2.latest_image.id
   flavor   = "s2.medium.1"
   vpc_id   = "abs"
 
   nics {
-    network_id = "%s"
+    network_id = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.network_id
   }
 
   system_disk_type = "SSD"
@@ -320,9 +342,11 @@ resource "opentelekomcloud_ecs_instance_v1" "instance_1" {
     key = "value"
   }
 }
-`, env.OS_IMAGE_ID, env.OS_NETWORK_ID)
+`, common.DataSourceImage, common.DataSourceSubnet)
 
 var testAccEcsV1InstanceComputedVPC = fmt.Sprintf(`
+%s
+
 resource "opentelekomcloud_vpc_v1" "vpc" {
   cidr = "192.168.0.0/16"
   name = "vpc-ecs-test"
@@ -337,7 +361,7 @@ resource "opentelekomcloud_vpc_subnet_v1" "subnet" {
 
 resource "opentelekomcloud_ecs_instance_v1" "instance_1" {
   name     = "server_1"
-  image_id = "%s"
+  image_id = data.opentelekomcloud_images_image_v2.latest_image.id
   flavor   = "s2.medium.1"
   vpc_id   = opentelekomcloud_vpc_v1.vpc.id
 
@@ -356,17 +380,21 @@ resource "opentelekomcloud_ecs_instance_v1" "instance_1" {
     key = "value"
   }
 }
-`, env.OS_IMAGE_ID)
+`, common.DataSourceImage)
 
 var testAccEcsV1InstanceDataVolumeEncryption = fmt.Sprintf(`
+%s
+
+%s
+
 resource "opentelekomcloud_ecs_instance_v1" "instance_1" {
   name     = "server_1"
-  image_id = "%s"
+  image_id = data.opentelekomcloud_images_image_v2.latest_image.id
   flavor   = "s2.medium.1"
-  vpc_id   = "%s"
+  vpc_id   = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.vpc_id
 
   nics {
-    network_id = "%s"
+    network_id = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.network_id
   }
 
   password          = "Password@123"
@@ -379,4 +407,4 @@ resource "opentelekomcloud_ecs_instance_v1" "instance_1" {
     kms_id = "%s"
   }
 }
-`, env.OS_IMAGE_ID, env.OS_VPC_ID, env.OS_NETWORK_ID, env.OS_AVAILABILITY_ZONE, env.OS_KMS_ID)
+`, common.DataSourceImage, common.DataSourceSubnet, env.OS_AVAILABILITY_ZONE, env.OS_KMS_ID)

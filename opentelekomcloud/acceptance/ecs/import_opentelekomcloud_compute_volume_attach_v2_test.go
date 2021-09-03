@@ -9,8 +9,6 @@ import (
 )
 
 func TestAccComputeV2VolumeAttach_importBasic(t *testing.T) {
-	resourceName := "opentelekomcloud_compute_volume_attach_v2.va_1"
-
 	resource.Test(t, resource.TestCase{
 		PreCheck:          func() { common.TestAccPreCheck(t) },
 		ProviderFactories: common.TestAccProviderFactories,
@@ -21,7 +19,7 @@ func TestAccComputeV2VolumeAttach_importBasic(t *testing.T) {
 			},
 
 			{
-				ResourceName:      resourceName,
+				ResourceName:      resourceVolumeAttach,
 				ImportState:       true,
 				ImportStateVerify: true,
 			},

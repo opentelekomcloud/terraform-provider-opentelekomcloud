@@ -15,6 +15,8 @@ import (
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/services/ecs"
 )
 
+const resourceVolumeAttach = "opentelekomcloud_compute_volume_attach_v2.va_1"
+
 func TestAccComputeV2VolumeAttach_basic(t *testing.T) {
 	var va volumeattach.VolumeAttachment
 
@@ -26,7 +28,7 @@ func TestAccComputeV2VolumeAttach_basic(t *testing.T) {
 			{
 				Config: testAccComputeV2VolumeAttachBasic,
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckComputeV2VolumeAttachExists("opentelekomcloud_compute_volume_attach_v2.va_1", &va),
+					testAccCheckComputeV2VolumeAttachExists(resourceVolumeAttach, &va),
 				),
 			},
 		},
@@ -44,7 +46,7 @@ func TestAccComputeV2VolumeAttach_device(t *testing.T) {
 			{
 				Config: testAccComputeV2VolumeAttachDevice,
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckComputeV2VolumeAttachExists("opentelekomcloud_compute_volume_attach_v2.va_1", &va),
+					testAccCheckComputeV2VolumeAttachExists(resourceVolumeAttach, &va),
 					// testAccCheckComputeV2VolumeAttachDevice(&va, "/dev/vdc"),
 				),
 			},
@@ -63,7 +65,7 @@ func TestAccComputeV2VolumeAttach_timeout(t *testing.T) {
 			{
 				Config: testAccComputeV2VolumeAttachTimeout,
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckComputeV2VolumeAttachExists("opentelekomcloud_compute_volume_attach_v2.va_1", &va),
+					testAccCheckComputeV2VolumeAttachExists(resourceVolumeAttach, &va),
 				),
 			},
 		},
@@ -72,9 +74,9 @@ func TestAccComputeV2VolumeAttach_timeout(t *testing.T) {
 
 func testAccCheckComputeV2VolumeAttachDestroy(s *terraform.State) error {
 	config := common.TestAccProvider.Meta().(*cfg.Config)
-	computeClient, err := config.ComputeV2Client(env.OS_REGION_NAME)
+	client, err := config.ComputeV2Client(env.OS_REGION_NAME)
 	if err != nil {
-		return fmt.Errorf("error creating OpenTelekomCloud compute client: %s", err)
+		return fmt.Errorf("error creating OpenTelekomCloud ComputeV2 client: %s", err)
 	}
 
 	for _, rs := range s.RootModule().Resources {
@@ -87,7 +89,7 @@ func testAccCheckComputeV2VolumeAttachDestroy(s *terraform.State) error {
 			return err
 		}
 
-		_, err = volumeattach.Get(computeClient, instanceId, volumeId).Extract()
+		_, err = volumeattach.Get(client, instanceId, volumeId).Extract()
 		if err == nil {
 			return fmt.Errorf("volume attachment still exists")
 		}
@@ -108,22 +110,22 @@ func testAccCheckComputeV2VolumeAttachExists(n string, va *volumeattach.VolumeAt
 		}
 
 		config := common.TestAccProvider.Meta().(*cfg.Config)
-		computeClient, err := config.ComputeV2Client(env.OS_REGION_NAME)
+		client, err := config.ComputeV2Client(env.OS_REGION_NAME)
 		if err != nil {
-			return fmt.Errorf("error creating OpenTelekomCloud compute client: %s", err)
+			return fmt.Errorf("error creating OpenTelekomCloud ComputeV2 client: %s", err)
 		}
 
-		instanceId, volumeId, err := ecs.ParseComputeVolumeAttachmentId(rs.Primary.ID)
-		if err != nil {
-			return err
-		}
-
-		found, err := volumeattach.Get(computeClient, instanceId, volumeId).Extract()
+		instanceID, volumeId, err := ecs.ParseComputeVolumeAttachmentId(rs.Primary.ID)
 		if err != nil {
 			return err
 		}
 
-		if found.ServerID != instanceId || found.VolumeID != volumeId {
+		found, err := volumeattach.Get(client, instanceID, volumeId).Extract()
+		if err != nil {
+			return err
+		}
+
+		if found.ServerID != instanceID || found.VolumeID != volumeId {
 			return fmt.Errorf("volumeAttach not found")
 		}
 
@@ -134,6 +136,8 @@ func testAccCheckComputeV2VolumeAttachExists(n string, va *volumeattach.VolumeAt
 }
 
 var testAccComputeV2VolumeAttachBasic = fmt.Sprintf(`
+%s
+
 resource "opentelekomcloud_blockstorage_volume_v2" "volume_1" {
   name = "volume_1"
   size = 1
@@ -143,7 +147,7 @@ resource "opentelekomcloud_compute_instance_v2" "instance_1" {
   name = "instance_1"
   security_groups = ["default"]
   network {
-    uuid = "%s"
+    uuid = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.network_id
   }
 }
 
@@ -151,9 +155,11 @@ resource "opentelekomcloud_compute_volume_attach_v2" "va_1" {
   instance_id = opentelekomcloud_compute_instance_v2.instance_1.id
   volume_id = opentelekomcloud_blockstorage_volume_v2.volume_1.id
 }
-`, env.OS_NETWORK_ID)
+`, common.DataSourceSubnet)
 
 var testAccComputeV2VolumeAttachDevice = fmt.Sprintf(`
+%s
+
 resource "opentelekomcloud_blockstorage_volume_v2" "volume_1" {
   name = "volume_1"
   size = 1
@@ -163,7 +169,7 @@ resource "opentelekomcloud_compute_instance_v2" "instance_1" {
   name = "instance_1"
   security_groups = ["default"]
   network {
-    uuid = "%s"
+    uuid = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.network_id
   }
 }
 
@@ -172,9 +178,11 @@ resource "opentelekomcloud_compute_volume_attach_v2" "va_1" {
   volume_id = opentelekomcloud_blockstorage_volume_v2.volume_1.id
   device = "/dev/vdc"
 }
-`, env.OS_NETWORK_ID)
+`, common.DataSourceSubnet)
 
 var testAccComputeV2VolumeAttachTimeout = fmt.Sprintf(`
+%s
+
 resource "opentelekomcloud_blockstorage_volume_v2" "volume_1" {
   name = "volume_1"
   size = 1
@@ -184,7 +192,7 @@ resource "opentelekomcloud_compute_instance_v2" "instance_1" {
   name = "instance_1"
   security_groups = ["default"]
   network {
-    uuid = "%s"
+    uuid = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.network_id
   }
 }
 
@@ -197,4 +205,4 @@ resource "opentelekomcloud_compute_volume_attach_v2" "va_1" {
     delete = "5m"
   }
 }
-`, env.OS_NETWORK_ID)
+`, common.DataSourceSubnet)
