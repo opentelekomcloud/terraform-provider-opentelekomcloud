@@ -22,6 +22,7 @@ import (
 func TestAccComputeV2FloatingIPAssociate_basic(t *testing.T) {
 	var instance servers.Server
 	var fip floatingips.FloatingIP
+	resourceNwFloatingIpName := "opentelekomcloud_networking_floatingip_v2.fip_1"
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:          func() { common.TestAccPreCheck(t) },
@@ -32,7 +33,7 @@ func TestAccComputeV2FloatingIPAssociate_basic(t *testing.T) {
 				Config: testAccComputeV2FloatingIPAssociateBasic,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckComputeV2InstanceExists(resourceInstanceV2Name, &instance),
-					vpc.TestAccCheckNetworkingV2FloatingIPExists(resourceFloatingIpName, &fip),
+					vpc.TestAccCheckNetworkingV2FloatingIPExists(resourceNwFloatingIpName, &fip),
 					testAccCheckComputeV2FloatingIPAssociateAssociated(&fip, &instance, 1),
 				),
 			},
@@ -43,6 +44,7 @@ func TestAccComputeV2FloatingIPAssociate_basic(t *testing.T) {
 func TestAccComputeV2FloatingIPAssociate_fixedIP(t *testing.T) {
 	var instance servers.Server
 	var fip floatingips.FloatingIP
+	resourceNwFloatingIpName := "opentelekomcloud_networking_floatingip_v2.fip_1"
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:          func() { common.TestAccPreCheck(t) },
@@ -53,7 +55,7 @@ func TestAccComputeV2FloatingIPAssociate_fixedIP(t *testing.T) {
 				Config: testAccComputeV2FloatingIPAssociateFixedIP,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckComputeV2InstanceExists(resourceInstanceV2Name, &instance),
-					vpc.TestAccCheckNetworkingV2FloatingIPExists(resourceFloatingIpName, &fip),
+					vpc.TestAccCheckNetworkingV2FloatingIPExists(resourceNwFloatingIpName, &fip),
 					testAccCheckComputeV2FloatingIPAssociateAssociated(&fip, &instance, 1),
 				),
 			},
@@ -64,6 +66,7 @@ func TestAccComputeV2FloatingIPAssociate_fixedIP(t *testing.T) {
 func TestAccComputeV2FloatingIPAssociate_attachToFirstNetwork(t *testing.T) {
 	var instance servers.Server
 	var fip floatingips.FloatingIP
+	resourceNwFloatingIpName := "opentelekomcloud_networking_floatingip_v2.fip_1"
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:          func() { common.TestAccPreCheck(t) },
@@ -74,7 +77,7 @@ func TestAccComputeV2FloatingIPAssociate_attachToFirstNetwork(t *testing.T) {
 				Config: testAccComputeV2FloatingIPAssociateAttachToFirstNetwork,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckComputeV2InstanceExists(resourceInstanceV2Name, &instance),
-					vpc.TestAccCheckNetworkingV2FloatingIPExists(resourceFloatingIpName, &fip),
+					vpc.TestAccCheckNetworkingV2FloatingIPExists(resourceNwFloatingIpName, &fip),
 					testAccCheckComputeV2FloatingIPAssociateAssociated(&fip, &instance, 1),
 				),
 			},
@@ -86,7 +89,8 @@ func TestAccComputeV2FloatingIPAssociate_attachNew(t *testing.T) {
 	var instance servers.Server
 	var fip1 floatingips.FloatingIP
 	var fip2 floatingips.FloatingIP
-	resourceFloatingIp2Name := "opentelekomcloud_networking_floatingip_v2.fip_2"
+	resourceNwFloatingIpName := "opentelekomcloud_networking_floatingip_v2.fip_1"
+	resourceNwFloatingIp2Name := "opentelekomcloud_networking_floatingip_v2.fip_2"
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:          func() { common.TestAccPreCheck(t) },
@@ -97,8 +101,8 @@ func TestAccComputeV2FloatingIPAssociate_attachNew(t *testing.T) {
 				Config: testAccComputeV2FloatingIPAssociateAttachNew1,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckComputeV2InstanceExists(resourceInstanceV2Name, &instance),
-					vpc.TestAccCheckNetworkingV2FloatingIPExists(resourceFloatingIpName, &fip1),
-					vpc.TestAccCheckNetworkingV2FloatingIPExists(resourceFloatingIp2Name, &fip2),
+					vpc.TestAccCheckNetworkingV2FloatingIPExists(resourceNwFloatingIpName, &fip1),
+					vpc.TestAccCheckNetworkingV2FloatingIPExists(resourceNwFloatingIp2Name, &fip2),
 					testAccCheckComputeV2FloatingIPAssociateAssociated(&fip1, &instance, 1),
 				),
 			},
@@ -106,8 +110,8 @@ func TestAccComputeV2FloatingIPAssociate_attachNew(t *testing.T) {
 				Config: testAccComputeV2FloatingIPAssociateAttachNew2,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckComputeV2InstanceExists(resourceInstanceV2Name, &instance),
-					vpc.TestAccCheckNetworkingV2FloatingIPExists(resourceFloatingIpName, &fip1),
-					vpc.TestAccCheckNetworkingV2FloatingIPExists(resourceFloatingIp2Name, &fip2),
+					vpc.TestAccCheckNetworkingV2FloatingIPExists(resourceNwFloatingIpName, &fip1),
+					vpc.TestAccCheckNetworkingV2FloatingIPExists(resourceNwFloatingIp2Name, &fip2),
 					testAccCheckComputeV2FloatingIPAssociateAssociated(&fip2, &instance, 1),
 				),
 			},
