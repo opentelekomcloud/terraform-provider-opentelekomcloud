@@ -10,16 +10,18 @@ import (
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/acceptance/common"
 )
 
+const dataFlavorName = "data.opentelekomcloud_dds_flavors_v3.flavor"
+
 func TestAccDDSFlavorV3DataSource_basic(t *testing.T) {
 	resource.Test(t, resource.TestCase{
 		PreCheck:          func() { common.TestAccPreCheck(t) },
 		ProviderFactories: common.TestAccProviderFactories,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccDDSFlavorV3DataSource_basic,
+				Config: testAccDDSFlavorV3DataSourceBasic,
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckDDSFlavorV3DataSourceID("data.opentelekomcloud_dds_flavors_v3.flavor"),
-					resource.TestCheckResourceAttrSet("data.opentelekomcloud_dds_flavors_v3.flavor", "flavors.#"),
+					testAccCheckDDSFlavorV3DataSourceID(dataFlavorName),
+					resource.TestCheckResourceAttrSet(dataFlavorName, "flavors.#"),
 				),
 			},
 		},
@@ -41,7 +43,7 @@ func testAccCheckDDSFlavorV3DataSourceID(n string) resource.TestCheckFunc {
 	}
 }
 
-var testAccDDSFlavorV3DataSource_basic = `
+var testAccDDSFlavorV3DataSourceBasic = `
 data "opentelekomcloud_dds_flavors_v3" "flavor" {
   engine_name = "DDS-Community"
   vcpus       = 8
