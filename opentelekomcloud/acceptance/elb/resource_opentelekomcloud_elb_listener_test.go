@@ -13,6 +13,8 @@ import (
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common/cfg"
 )
 
+const resourceListenerV1Name = "opentelekomcloud_elb_listener.listener_1"
+
 func TestAccELBListener_basic(t *testing.T) {
 	var listener listeners.Listener
 
@@ -22,18 +24,16 @@ func TestAccELBListener_basic(t *testing.T) {
 		CheckDestroy:      testAccCheckELBListenerDestroy,
 		Steps: []resource.TestStep{
 			{
-				Config: TestAccELBListenerConfig_basic,
+				Config: testAccELBListenerConfigBasic,
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckELBListenerExists("opentelekomcloud_elb_listener.listener_1", &listener),
+					testAccCheckELBListenerExists(resourceListenerV1Name, &listener),
 				),
 			},
 			{
-				Config: TestAccELBListenerConfig_update,
+				Config: testAccELBListenerConfigUpdate,
 				Check: resource.ComposeTestCheckFunc(
-					resource.TestCheckResourceAttr(
-						"opentelekomcloud_elb_listener.listener_1", "name", "listener_1_updated"),
-					resource.TestCheckResourceAttr(
-						"opentelekomcloud_elb_listener.listener_1", "backend_port", "8088"),
+					resource.TestCheckResourceAttr(resourceListenerV1Name, "name", "listener_1_updated"),
+					resource.TestCheckResourceAttr(resourceListenerV1Name, "backend_port", "8088"),
 				),
 			},
 		},
@@ -93,52 +93,56 @@ func testAccCheckELBListenerExists(n string, listener *listeners.Listener) resou
 	}
 }
 
-var TestAccELBListenerConfig_basic = fmt.Sprintf(`
+var testAccELBListenerConfigBasic = fmt.Sprintf(`
+%s
+
 resource "opentelekomcloud_elb_loadbalancer" "loadbalancer_1" {
-  name = "loadbalancer_1"
-  vpc_id = "%s"
-  type = "External"
+  name      = "loadbalancer_1"
+  vpc_id    = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.vpc_id
+  type      = "External"
   bandwidth = 5
 }
 
 resource "opentelekomcloud_elb_listener" "listener_1" {
-  name = "listener_1"
-  protocol = "TCP"
-  protocol_port = 8080
+  name             = "listener_1"
+  protocol         = "TCP"
+  protocol_port    = 8080
   backend_protocol = "TCP"
-  backend_port = 8080
-  lb_algorithm = "roundrobin"
-  loadbalancer_id = opentelekomcloud_elb_loadbalancer.loadbalancer_1.id
+  backend_port     = 8080
+  lb_algorithm     = "roundrobin"
+  loadbalancer_id  = opentelekomcloud_elb_loadbalancer.loadbalancer_1.id
 
-	timeouts {
-		create = "5m"
-		update = "5m"
-		delete = "5m"
-	}
+  timeouts {
+    create = "5m"
+    update = "5m"
+    delete = "5m"
+  }
 }
-`, env.OS_VPC_ID)
+`, common.DataSourceSubnet)
 
-var TestAccELBListenerConfig_update = fmt.Sprintf(`
+var testAccELBListenerConfigUpdate = fmt.Sprintf(`
+%s
+
 resource "opentelekomcloud_elb_loadbalancer" "loadbalancer_1" {
-  name = "loadbalancer_1"
-  vpc_id = "%s"
-  type = "External"
+  name      = "loadbalancer_1"
+  vpc_id    = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.vpc_id
+  type      = "External"
   bandwidth = 5
 }
 
 resource "opentelekomcloud_elb_listener" "listener_1" {
-  name = "listener_1_updated"
-  protocol = "TCP"
-  protocol_port = 8080
+  name             = "listener_1_updated"
+  protocol         = "TCP"
+  protocol_port    = 8080
   backend_protocol = "TCP"
-  backend_port = 8088
-  lb_algorithm = "roundrobin"
-  loadbalancer_id = opentelekomcloud_elb_loadbalancer.loadbalancer_1.id
+  backend_port     = 8088
+  lb_algorithm     = "roundrobin"
+  loadbalancer_id  = opentelekomcloud_elb_loadbalancer.loadbalancer_1.id
 
-	timeouts {
-		create = "5m"
-		update = "5m"
-		delete = "5m"
-	}
+  timeouts {
+    create = "5m"
+    update = "5m"
+    delete = "5m"
+  }
 }
-`, env.OS_VPC_ID)
+`, common.DataSourceSubnet)

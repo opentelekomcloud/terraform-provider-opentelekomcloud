@@ -94,10 +94,12 @@ func testAccCheckELBLoadBalancerExists(
 }
 
 var testAccELBLoadBalancerConfigBasic = fmt.Sprintf(`
+%s
+
 resource "opentelekomcloud_elb_loadbalancer" "loadbalancer_1" {
-  name = "loadbalancer_1"
-  vpc_id = "%s"
-  type = "External"
+  name      = "loadbalancer_1"
+  vpc_id    = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.vpc_id
+  type      = "External"
   bandwidth = "5"
 
   timeouts {
@@ -106,15 +108,17 @@ resource "opentelekomcloud_elb_loadbalancer" "loadbalancer_1" {
     delete = "5m"
   }
 }
-`, env.OS_VPC_ID)
+`, common.DataSourceSubnet)
 
 var testAccELBLoadBalancerConfigUpdate = fmt.Sprintf(`
+%s
+
 resource "opentelekomcloud_elb_loadbalancer" "loadbalancer_1" {
-  name = "loadbalancer_1_updated"
+  name           = "loadbalancer_1_updated"
   admin_state_up = "true"
-  vpc_id = "%s"
-  type = "External"
-  bandwidth = 3
+  vpc_id         = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.vpc_id
+  type           = "External"
+  bandwidth      = 3
 
   timeouts {
     create = "5m"
@@ -122,4 +126,4 @@ resource "opentelekomcloud_elb_loadbalancer" "loadbalancer_1" {
     delete = "5m"
   }
 }
-`, env.OS_VPC_ID)
+`, common.DataSourceSubnet)

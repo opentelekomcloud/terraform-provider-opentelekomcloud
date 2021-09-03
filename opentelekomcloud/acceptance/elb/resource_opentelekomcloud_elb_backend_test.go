@@ -23,7 +23,7 @@ func TestAccELBBackend_basic(t *testing.T) {
 		CheckDestroy:      testAccCheckELBBackendDestroy,
 		Steps: []resource.TestStep{
 			{
-				Config: TestAccELBBackendConfig_basic,
+				Config: testAccELBBackendConfigBasic,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckELBBackendExists("opentelekomcloud_elb_backend.backend_1", &backend),
 				),
@@ -87,19 +87,21 @@ func testAccCheckELBBackendExists(n string, backend *backendmember.Backend) reso
 	}
 }
 
-var TestAccELBBackendConfig_basic = fmt.Sprintf(`
+var testAccELBBackendConfigBasic = fmt.Sprintf(`
+%s
+
 resource "opentelekomcloud_compute_instance_v2" "vm_1" {
   name              = "instance_1"
   availability_zone = "%s"
 
   network {
-    uuid = "%s"
+    uuid = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.network_id
   }
 }
 
 resource "opentelekomcloud_elb_loadbalancer" "loadbalancer_1" {
   name           = "loadbalancer_1"
-  vpc_id         = "%s"
+  vpc_id         = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.vpc_id
   type           = "External"
   bandwidth      = 5
   admin_state_up = true
@@ -138,4 +140,4 @@ resource "opentelekomcloud_elb_backend" "backend_1" {
     delete = "5m"
   }
 }
-`, env.OS_AVAILABILITY_ZONE, env.OS_NETWORK_ID, env.OS_VPC_ID)
+`, common.DataSourceSubnet, env.OS_AVAILABILITY_ZONE)

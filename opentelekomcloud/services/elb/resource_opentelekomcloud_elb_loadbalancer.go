@@ -2,6 +2,7 @@ package elb
 
 import (
 	"context"
+	"fmt"
 	"log"
 	"time"
 
@@ -135,11 +136,11 @@ func resourceELoadBalancerCreate(ctx context.Context, d *schema.ResourceData, me
 		return diag.FromErr(err)
 	}
 
-	if err := golangsdk.WaitForJobSuccess(client, job.URI, int(d.Timeout(schema.TimeoutCreate)/time.Second)); err != nil {
+	if err := waitForLBV1JobSuccess(client, job.URI, int(d.Timeout(schema.TimeoutCreate)/time.Second)); err != nil {
 		return diag.FromErr(err)
 	}
 
-	entity, err := golangsdk.GetJobEntity(client, job.URI, "elb")
+	entity, err := getLBV1JobEntity(client, job.URI, "elb")
 	if err != nil {
 		return fmterr.Errorf("error getting job entity: %w", err)
 	}
@@ -254,4 +255,40 @@ func resourceELoadBalancerDelete(_ context.Context, d *schema.ResourceData, meta
 
 	log.Printf("Successfully deleted loadbalancer %s", id)
 	return nil
+}
+
+func waitForLBV1JobSuccess(client *golangsdk.ServiceClient, uri string, secs int) error {
+	return golangsdk.WaitFor(secs, func() (bool, error) {
+		job := new(golangsdk.JobStatus)
+		_, err := client.Get(golangsdk.GetJobEndpoint(client.Endpoint)+uri, job, nil)
+		if err != nil {
+			return false, err
+		}
+
+		if job.Status == "SUCCESS" {
+			return true, nil
+		}
+		if job.Status == "FAIL" {
+			err = fmt.Errorf("Job failed with code %s: %s.\n", job.ErrorCode, job.FailReason)
+			return false, err
+		}
+
+		return false, nil
+	})
+}
+
+func getLBV1JobEntity(client *golangsdk.ServiceClient, uri string, label string) (interface{}, error) {
+	job := new(golangsdk.JobStatus)
+	_, err := client.Get(golangsdk.GetJobEndpoint(client.Endpoint)+uri, &job, nil)
+	if err != nil {
+		return nil, err
+	}
+
+	if job.Status == "SUCCESS" {
+		if e := job.Entities[label]; e != nil {
+			return e, nil
+		}
+	}
+
+	return nil, fmt.Errorf("unexpected conversion error in GetJobEntity")
 }

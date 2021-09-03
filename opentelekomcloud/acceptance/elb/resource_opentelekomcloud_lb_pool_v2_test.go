@@ -13,9 +13,10 @@ import (
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common/cfg"
 )
 
+const resourcePoolName = "opentelekomcloud_lb_pool_v2.pool_1"
+
 func TestAccLBV2Pool_basic(t *testing.T) {
 	var pool pools.Pool
-	resourceName := "opentelekomcloud_lb_pool_v2.pool_1"
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:          func() { common.TestAccPreCheck(t) },
@@ -23,19 +24,19 @@ func TestAccLBV2Pool_basic(t *testing.T) {
 		CheckDestroy:      testAccCheckLBV2PoolDestroy,
 		Steps: []resource.TestStep{
 			{
-				Config: TestAccLBV2PoolConfig_basic,
+				Config: testAccLBV2PoolConfigBasic,
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckLBV2PoolExists(resourceName, &pool),
-					resource.TestCheckResourceAttr(resourceName, "name", "pool_1"),
-					resource.TestCheckResourceAttr(resourceName, "lb_method", "ROUND_ROBIN"),
+					testAccCheckLBV2PoolExists(resourcePoolName, &pool),
+					resource.TestCheckResourceAttr(resourcePoolName, "name", "pool_1"),
+					resource.TestCheckResourceAttr(resourcePoolName, "lb_method", "ROUND_ROBIN"),
 				),
 			},
 			{
-				Config: TestAccLBV2PoolConfig_update,
+				Config: testAccLBV2PoolConfigUpdate,
 				Check: resource.ComposeTestCheckFunc(
-					resource.TestCheckResourceAttr(resourceName, "name", "pool_1_updated"),
-					resource.TestCheckResourceAttr(resourceName, "lb_method", "LEAST_CONNECTIONS"),
-					resource.TestCheckResourceAttr(resourceName, "admin_state_up", "true"),
+					resource.TestCheckResourceAttr(resourcePoolName, "name", "pool_1_updated"),
+					resource.TestCheckResourceAttr(resourcePoolName, "lb_method", "LEAST_CONNECTIONS"),
+					resource.TestCheckResourceAttr(resourcePoolName, "admin_state_up", "true"),
 				),
 			},
 		},
@@ -52,7 +53,7 @@ func TestAccLBV2Pool_persistenceNull(t *testing.T) {
 		CheckDestroy:      testAccCheckLBV2PoolDestroy,
 		Steps: []resource.TestStep{
 			{
-				Config: TestAccLBV2PoolConfig_persistence,
+				Config: testAccLBV2PoolConfigPersistence,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckLBV2PoolExists(resourceName, &pool),
 					resource.TestCheckResourceAttr(resourceName, "name", "pool_1"),
@@ -115,10 +116,12 @@ func testAccCheckLBV2PoolExists(n string, pool *pools.Pool) resource.TestCheckFu
 	}
 }
 
-var TestAccLBV2PoolConfig_basic = fmt.Sprintf(`
+var testAccLBV2PoolConfigBasic = fmt.Sprintf(`
+%s
+
 resource "opentelekomcloud_lb_loadbalancer_v2" "loadbalancer_1" {
   name          = "loadbalancer_1"
-  vip_subnet_id = "%s"
+  vip_subnet_id = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.subnet_id
 }
 
 resource "opentelekomcloud_lb_listener_v2" "listener_1" {
@@ -140,12 +143,14 @@ resource "opentelekomcloud_lb_pool_v2" "pool_1" {
     delete = "5m"
   }
 }
-`, env.OS_SUBNET_ID)
+`, common.DataSourceSubnet)
 
-var TestAccLBV2PoolConfig_update = fmt.Sprintf(`
+var testAccLBV2PoolConfigUpdate = fmt.Sprintf(`
+%s
+
 resource "opentelekomcloud_lb_loadbalancer_v2" "loadbalancer_1" {
   name          = "loadbalancer_1"
-  vip_subnet_id = "%s"
+  vip_subnet_id = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.subnet_id
 }
 
 resource "opentelekomcloud_lb_listener_v2" "listener_1" {
@@ -168,25 +173,27 @@ resource "opentelekomcloud_lb_pool_v2" "pool_1" {
     delete = "5m"
   }
 }
-`, env.OS_SUBNET_ID)
+`, common.DataSourceSubnet)
 
-var TestAccLBV2PoolConfig_persistence = fmt.Sprintf(`
+var testAccLBV2PoolConfigPersistence = fmt.Sprintf(`
+%s
+
 resource "opentelekomcloud_lb_loadbalancer_v2" "loadbalancer_1" {
-  name = "loadbalancer_1"
-  vip_subnet_id = "%s"
+  name          = "loadbalancer_1"
+  vip_subnet_id = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.subnet_id
 }
 
 resource "opentelekomcloud_lb_listener_v2" "listener_1" {
-  name = "listener_1"
-  protocol = "HTTP"
-  protocol_port = 8080
+  name            = "listener_1"
+  protocol        = "HTTP"
+  protocol_port   = 8080
   loadbalancer_id = opentelekomcloud_lb_loadbalancer_v2.loadbalancer_1.id
 }
 
 resource "opentelekomcloud_lb_pool_v2" "pool_1" {
-  name = "pool_1"
-  protocol = "HTTP"
-  lb_method = "ROUND_ROBIN"
+  name        = "pool_1"
+  protocol    = "HTTP"
+  lb_method   = "ROUND_ROBIN"
   listener_id = opentelekomcloud_lb_listener_v2.listener_1.id
 
   persistence {
@@ -194,4 +201,4 @@ resource "opentelekomcloud_lb_pool_v2" "pool_1" {
     cookie_name = null
   }
 }
-`, env.OS_SUBNET_ID)
+`, common.DataSourceSubnet)
