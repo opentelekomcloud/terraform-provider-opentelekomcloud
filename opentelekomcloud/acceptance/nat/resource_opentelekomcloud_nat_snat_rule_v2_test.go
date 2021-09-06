@@ -13,20 +13,19 @@ import (
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common/cfg"
 )
 
-func TestAccNatSnatRule_basic(t *testing.T) {
-	resourceName := "opentelekomcloud_nat_gateway_v2.nat_1"
-	snatResourceName := "opentelekomcloud_nat_snat_rule_v2.snat_1"
+const resourceSnatRuleName = "opentelekomcloud_nat_snat_rule_v2.snat_1"
 
+func TestAccNatSnatRule_basic(t *testing.T) {
 	resource.Test(t, resource.TestCase{
 		PreCheck:          func() { common.TestAccPreCheck(t) },
 		ProviderFactories: common.TestAccProviderFactories,
 		CheckDestroy:      testAccCheckNatV2SnatRuleDestroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccNatV2SnatRuleBasic(),
+				Config: testAccNatV2SnatRuleBasic,
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckNatV2GatewayExists(resourceName),
-					testAccCheckNatV2SnatRuleExists(snatResourceName),
+					testAccCheckNatV2GatewayExists(resourceGatewayName),
+					testAccCheckNatV2SnatRuleExists(resourceSnatRuleName),
 				),
 			},
 		},
@@ -84,16 +83,17 @@ func testAccCheckNatV2SnatRuleExists(n string) resource.TestCheckFunc {
 	}
 }
 
-func testAccNatV2SnatRuleBasic() string {
-	return fmt.Sprintf(`
+var testAccNatV2SnatRuleBasic = fmt.Sprintf(`
+%s
+
 resource "opentelekomcloud_networking_floatingip_v2" "fip_1" {}
 
 resource "opentelekomcloud_nat_gateway_v2" "nat_1" {
   name                = "nat_1"
   description         = "test for terraform"
   spec                = "1"
-  internal_network_id = "%s"
-  router_id           = "%s"
+  internal_network_id = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.network_id
+  router_id           = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.vpc_id
 }
 
 resource "opentelekomcloud_nat_snat_rule_v2" "snat_1" {
@@ -102,5 +102,4 @@ resource "opentelekomcloud_nat_snat_rule_v2" "snat_1" {
   cidr           = "192.168.0.0/24"
   source_type    = 0
 }
-`, env.OS_NETWORK_ID, env.OS_VPC_ID)
-}
+`, common.DataSourceSubnet)
