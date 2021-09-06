@@ -15,6 +15,8 @@ import (
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common/cfg"
 )
 
+const resourcePtrRecordName = "opentelekomcloud_dns_ptrrecord_v2.ptr_1"
+
 func TestAccDNSV2PtrRecord_basic(t *testing.T) {
 	var ptr ptrrecords.Ptr
 	ptrName := fmt.Sprintf("acc-test-%s.com.", acctest.RandString(3))
@@ -25,30 +27,26 @@ func TestAccDNSV2PtrRecord_basic(t *testing.T) {
 		CheckDestroy:      testAccCheckDNSV2PtrRecordDestroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccDNSV2PtrRecord_basic(ptrName),
+				Config: testAccDNSV2PtrRecordBasic(ptrName),
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckDNSV2PtrRecordExists("opentelekomcloud_dns_ptrrecord_v2.ptr_1", &ptr),
-					resource.TestCheckResourceAttr(
-						"opentelekomcloud_dns_ptrrecord_v2.ptr_1", "description", "a ptr record"),
-					resource.TestCheckResourceAttr(
-						"opentelekomcloud_dns_ptrrecord_v2.ptr_1", "tags.muh", "value-create"),
+					testAccCheckDNSV2PtrRecordExists(resourcePtrRecordName, &ptr),
+					resource.TestCheckResourceAttr(resourcePtrRecordName, "description", "a ptr record"),
+					resource.TestCheckResourceAttr(resourcePtrRecordName, "tags.muh", "value-create"),
 				),
 			},
 			{
-				Config: testAccDNSV2PtrRecord_update(ptrName),
+				Config: testAccDNSV2PtrRecordUpdate(ptrName),
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckDNSV2PtrRecordExists("opentelekomcloud_dns_ptrrecord_v2.ptr_1", &ptr),
-					resource.TestCheckResourceAttr(
-						"opentelekomcloud_dns_ptrrecord_v2.ptr_1", "description", "ptr record updated"),
-					resource.TestCheckResourceAttr(
-						"opentelekomcloud_dns_ptrrecord_v2.ptr_1", "tags.muh", "value-update"),
+					testAccCheckDNSV2PtrRecordExists(resourcePtrRecordName, &ptr),
+					resource.TestCheckResourceAttr(resourcePtrRecordName, "description", "ptr record updated"),
+					resource.TestCheckResourceAttr(resourcePtrRecordName, "tags.muh", "value-update"),
 				),
 			},
 		},
 	})
 }
 
-func TestAccDNSV2PtrRecord_undotted(t *testing.T) {
+func TestAccDNSV2PtrRecord_unDotted(t *testing.T) {
 	zoneName := randomZoneName()
 	zoneName = strings.TrimSuffix(zoneName, ".")
 	resource.Test(t, resource.TestCase{
@@ -57,7 +55,7 @@ func TestAccDNSV2PtrRecord_undotted(t *testing.T) {
 		CheckDestroy:      testAccCheckDNSV2PtrRecordDestroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccDNSV2PtrRecord_basic(zoneName),
+				Config: testAccDNSV2PtrRecordBasic(zoneName),
 			},
 		},
 	})
@@ -116,7 +114,7 @@ func testAccCheckDNSV2PtrRecordExists(n string, ptr *ptrrecords.Ptr) resource.Te
 	}
 }
 
-func testAccDNSV2PtrRecord_basic(ptrName string) string {
+func testAccDNSV2PtrRecordBasic(ptrName string) string {
 	return fmt.Sprintf(`
 resource "opentelekomcloud_networking_floatingip_v2" "fip_1" {}
 
@@ -133,7 +131,7 @@ resource "opentelekomcloud_dns_ptrrecord_v2" "ptr_1" {
 `, ptrName)
 }
 
-func testAccDNSV2PtrRecord_update(ptrName string) string {
+func testAccDNSV2PtrRecordUpdate(ptrName string) string {
 	return fmt.Sprintf(`
 resource "opentelekomcloud_networking_floatingip_v2" "fip_1" {}
 

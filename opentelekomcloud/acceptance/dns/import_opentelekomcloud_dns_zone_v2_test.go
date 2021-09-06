@@ -12,7 +12,6 @@ import (
 
 func TestAccDNSV2Zone_importBasic(t *testing.T) {
 	var zoneName = fmt.Sprintf("accepttest%s.com.", acctest.RandString(5))
-	resourceName := "opentelekomcloud_dns_zone_v2.zone_1"
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:          func() { common.TestAccPreCheck(t) },
@@ -20,11 +19,11 @@ func TestAccDNSV2Zone_importBasic(t *testing.T) {
 		CheckDestroy:      testAccCheckDNSV2ZoneDestroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccDNSV2Zone_basic(zoneName),
+				Config: testAccDNSV2ZoneBasic(zoneName),
 			},
 
 			{
-				ResourceName:      resourceName,
+				ResourceName:      resourceZoneName,
 				ImportState:       true,
 				ImportStateVerify: true,
 			},

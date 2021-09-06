@@ -11,6 +11,8 @@ import (
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/acceptance/common"
 )
 
+const dataZoneName = "data.opentelekomcloud_dns_zone_v2.z1"
+
 func TestAccOpenStackDNSZoneV2DataSource_basic(t *testing.T) {
 	zone := randomZoneName()
 	randZoneTag := fmt.Sprintf("value-%s", acctest.RandString(5))
@@ -26,13 +28,10 @@ func TestAccOpenStackDNSZoneV2DataSource_basic(t *testing.T) {
 			{
 				Config: testAccOpenStackDNSZoneV2DataSourceBasic(zone, randZoneTag),
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckDNSZoneV2DataSourceID("data.opentelekomcloud_dns_zone_v2.z1"),
-					resource.TestCheckResourceAttr(
-						"data.opentelekomcloud_dns_zone_v2.z1", "name", zone),
-					resource.TestCheckResourceAttr(
-						"data.opentelekomcloud_dns_zone_v2.z1", "ttl", "3000"),
-					resource.TestCheckResourceAttr(
-						"data.opentelekomcloud_dns_zone_v2.z1", "zone_type", "public"),
+					testAccCheckDNSZoneV2DataSourceID(dataZoneName),
+					resource.TestCheckResourceAttr(dataZoneName, "name", zone),
+					resource.TestCheckResourceAttr(dataZoneName, "ttl", "3000"),
+					resource.TestCheckResourceAttr(dataZoneName, "zone_type", "public"),
 				),
 			},
 			{
@@ -58,7 +57,7 @@ func TestAccOpenStackDNSZoneV2DataSource_byTag(t *testing.T) {
 			{
 				Config: testAccOpenStackDNSZoneV2DataSourceByTag(zone1, zone2, randZoneTag),
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckDNSZoneV2DataSourceID("data.opentelekomcloud_dns_zone_v2.z1"),
+					testAccCheckDNSZoneV2DataSourceID(dataZoneName),
 				),
 			},
 		},
@@ -94,7 +93,8 @@ resource "opentelekomcloud_dns_zone_v2" "zone_1" {
 }
 `
 
-const zoneTemplateNoTags = `resource "opentelekomcloud_dns_zone_v2" "zone_2" {
+const zoneTemplateNoTags = `
+resource "opentelekomcloud_dns_zone_v2" "zone_2" {
   name        = "%s"
   email       = "email1@example.com"
   description = "a public zone"
