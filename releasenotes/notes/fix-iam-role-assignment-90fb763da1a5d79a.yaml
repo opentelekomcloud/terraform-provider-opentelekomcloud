@@ -1,0 +1,4 @@
+---
+fixes:
+  - |
+    **[IAM]** Fix error reading ``resource/opentelekomcloud_identity_role_assignment_v3`` (`#1389 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/1389>`_)
