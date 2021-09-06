@@ -9,8 +9,6 @@ import (
 )
 
 func TestAccNatDnat_importBasic(t *testing.T) {
-	resourceName := "opentelekomcloud_nat_dnat_rule_v2.dnat"
-
 	resource.Test(t, resource.TestCase{
 		PreCheck:          func() { common.TestAccPreCheck(t) },
 		ProviderFactories: common.TestAccProviderFactories,
@@ -21,7 +19,7 @@ func TestAccNatDnat_importBasic(t *testing.T) {
 			},
 
 			{
-				ResourceName:      resourceName,
+				ResourceName:      resourceDnatRuleName,
 				ImportState:       true,
 				ImportStateVerify: true,
 			},
