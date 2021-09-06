@@ -85,6 +85,7 @@ resource "opentelekomcloud_nat_dnat_rule_v2" "dnat" {
   protocol              = "tcp"
   port_id               = opentelekomcloud_networking_port_v2.this.id
   internal_service_port = 80
+  depends_on            = [opentelekomcloud_compute_instance_v2.instance_1]
 }
 `, acc.DataSourceSubnet, env.OS_AVAILABILITY_ZONE)
 
