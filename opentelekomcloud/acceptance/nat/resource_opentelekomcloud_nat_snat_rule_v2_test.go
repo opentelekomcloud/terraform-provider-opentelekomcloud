@@ -22,7 +22,7 @@ func TestAccNatSnatRule_basic(t *testing.T) {
 		CheckDestroy:      testAccCheckNatV2SnatRuleDestroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccNatV2SnatRuleBasic(),
+				Config: testAccNatV2SnatRuleBasic,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckNatV2GatewayExists(resourceGatewayName),
 					testAccCheckNatV2SnatRuleExists(resourceSnatRuleName),
@@ -83,8 +83,7 @@ func testAccCheckNatV2SnatRuleExists(n string) resource.TestCheckFunc {
 	}
 }
 
-func testAccNatV2SnatRuleBasic() string {
-	return fmt.Sprintf(`
+var testAccNatV2SnatRuleBasic = fmt.Sprintf(`
 %s
 
 resource "opentelekomcloud_networking_floatingip_v2" "fip_1" {}
@@ -104,4 +103,3 @@ resource "opentelekomcloud_nat_snat_rule_v2" "snat_1" {
   source_type    = 0
 }
 `, common.DataSourceSubnet)
-}

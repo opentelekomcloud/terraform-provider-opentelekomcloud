@@ -22,7 +22,7 @@ func TestAccNatGateway_basic(t *testing.T) {
 		CheckDestroy:      testAccCheckNatV2GatewayDestroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccNatV2GatewayBasic(),
+				Config: testAccNatV2GatewayBasic,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckNatV2GatewayExists(resourceGatewayName),
 					resource.TestCheckResourceAttr(resourceGatewayName, "name", "nat_1"),
@@ -31,7 +31,7 @@ func TestAccNatGateway_basic(t *testing.T) {
 				),
 			},
 			{
-				Config: testAccNatV2GatewayUpdate(),
+				Config: testAccNatV2GatewayUpdate,
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr(resourceGatewayName, "name", "nat_1_updated"),
 					resource.TestCheckResourceAttr(resourceGatewayName, "description", "nat_1 updated description"),
@@ -93,8 +93,7 @@ func testAccCheckNatV2GatewayExists(n string) resource.TestCheckFunc {
 	}
 }
 
-func testAccNatV2GatewayBasic() string {
-	return fmt.Sprintf(`
+var testAccNatV2GatewayBasic = fmt.Sprintf(`
 %s
 
 resource "opentelekomcloud_nat_gateway_v2" "nat_1" {
@@ -105,10 +104,8 @@ resource "opentelekomcloud_nat_gateway_v2" "nat_1" {
   router_id           = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.vpc_id
 }
 `, common.DataSourceSubnet)
-}
 
-func testAccNatV2GatewayUpdate() string {
-	return fmt.Sprintf(`
+var testAccNatV2GatewayUpdate = fmt.Sprintf(`
 %s
 
 resource "opentelekomcloud_nat_gateway_v2" "nat_1" {
@@ -119,4 +116,3 @@ resource "opentelekomcloud_nat_gateway_v2" "nat_1" {
   router_id           = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.vpc_id
 }
 `, common.DataSourceSubnet)
-}
