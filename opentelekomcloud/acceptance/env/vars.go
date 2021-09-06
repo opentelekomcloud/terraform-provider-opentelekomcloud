@@ -8,17 +8,13 @@ import (
 
 var (
 	OS_FLAVOR_ID         = os.Getenv("OS_FLAVOR_ID")
-	OS_FLAVOR_NAME       = os.Getenv("OS_FLAVOR_NAME")
 	OsFlavorID           = flavorID()
 	OsImageName          = imageName()
-	OS_NETWORK_ID        = os.Getenv("OS_NETWORK_ID")
 	OsExtNetworkName     = extNetworkName()
 	OS_REGION_NAME       string
 	OS_ACCESS_KEY        = os.Getenv("OS_ACCESS_KEY")
 	OS_SECRET_KEY        = os.Getenv("OS_SECRET_KEY")
 	OS_AVAILABILITY_ZONE = os.Getenv("OS_AVAILABILITY_ZONE")
-	OS_VPC_ID            = os.Getenv("OS_VPC_ID")
-	OS_SUBNET_ID         = os.Getenv("OS_SUBNET_ID")
 	OsSubnetName         = os.Getenv("OS_SUBNET_NAME")
 	OS_KEYPAIR_NAME      = os.Getenv("OS_KEYPAIR_NAME")
 	OS_KMS_ID            = os.Getenv("OS_KMS_ID")
