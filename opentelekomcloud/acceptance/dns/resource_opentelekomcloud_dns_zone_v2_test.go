@@ -17,6 +17,8 @@ import (
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common/cfg"
 )
 
+const resourceZoneName = "opentelekomcloud_dns_zone_v2.zone_1"
+
 func TestAccDNSV2Zone_basic(t *testing.T) {
 	var zone zones.Zone
 	// TODO: Why does it lowercase names in back-end?
@@ -28,36 +30,31 @@ func TestAccDNSV2Zone_basic(t *testing.T) {
 		CheckDestroy:      testAccCheckDNSV2ZoneDestroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccDNSV2Zone_basic(zoneName),
+				Config: testAccDNSV2ZoneBasic(zoneName),
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckDNSV2ZoneExists("opentelekomcloud_dns_zone_v2.zone_1", &zone),
-					resource.TestCheckResourceAttr(
-						"opentelekomcloud_dns_zone_v2.zone_1", "description", "a public zone"),
-					resource.TestCheckResourceAttr(
-						"opentelekomcloud_dns_zone_v2.zone_1", "tags.foo", "bar"),
-					resource.TestCheckResourceAttr(
-						"opentelekomcloud_dns_zone_v2.zone_1", "tags.key", "value"),
+					testAccCheckDNSV2ZoneExists(resourceZoneName, &zone),
+					resource.TestCheckResourceAttr(resourceZoneName, "description", "a public zone"),
+					resource.TestCheckResourceAttr(resourceZoneName, "tags.foo", "bar"),
+					resource.TestCheckResourceAttr(resourceZoneName, "tags.key", "value"),
 				),
 			},
 			{
-				Config: testAccDNSV2Zone_update(zoneName),
+				Config: testAccDNSV2ZoneUpdate(zoneName),
 				Check: resource.ComposeTestCheckFunc(
-					resource.TestCheckResourceAttr("opentelekomcloud_dns_zone_v2.zone_1", "name", zoneName),
-					resource.TestCheckResourceAttr("opentelekomcloud_dns_zone_v2.zone_1", "email", "email2@example.com"),
-					resource.TestCheckResourceAttr("opentelekomcloud_dns_zone_v2.zone_1", "ttl", "6000"),
+					resource.TestCheckResourceAttr(resourceZoneName, "name", zoneName),
+					resource.TestCheckResourceAttr(resourceZoneName, "email", "email2@example.com"),
+					resource.TestCheckResourceAttr(resourceZoneName, "ttl", "6000"),
 					// TODO: research why this is blank...
-					// resource.TestCheckResourceAttr("opentelekomcloud_dns_zone_v2.zone_1", "type", "PRIMARY"),
-					resource.TestCheckResourceAttr(
-						"opentelekomcloud_dns_zone_v2.zone_1", "description", "an updated zone"),
-					resource.TestCheckResourceAttr(
-						"opentelekomcloud_dns_zone_v2.zone_1", "tags.key", "value_updated"),
+					// resource.TestCheckResourceAttr(resourceZoneName, "type", "PRIMARY"),
+					resource.TestCheckResourceAttr(resourceZoneName, "description", "an updated zone"),
+					resource.TestCheckResourceAttr(resourceZoneName, "tags.key", "value_updated"),
 				),
 			},
 		},
 	})
 }
 
-func TestAccDNSV2Zone_undotted(t *testing.T) {
+func TestAccDNSV2Zone_unDotted(t *testing.T) {
 	zoneName := randomZoneName()
 	zoneName = strings.TrimSuffix(zoneName, ".")
 	resource.Test(t, resource.TestCase{
@@ -66,7 +63,7 @@ func TestAccDNSV2Zone_undotted(t *testing.T) {
 		CheckDestroy:      testAccCheckDNSV2ZoneDestroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccDNSV2Zone_basic(zoneName),
+				Config: testAccDNSV2ZoneBasic(zoneName),
 			},
 		},
 	})
@@ -83,18 +80,14 @@ func TestAccDNSV2Zone_private(t *testing.T) {
 		CheckDestroy:      testAccCheckDNSV2ZoneDestroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccDNSV2Zone_private(zoneName),
+				Config: testAccDNSV2ZonePrivate(zoneName),
 				// ExpectNonEmptyPlan: true,
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckDNSV2ZoneExists("opentelekomcloud_dns_zone_v2.zone_1", &zone),
-					resource.TestCheckResourceAttr(
-						"opentelekomcloud_dns_zone_v2.zone_1", "description", "a private zone"),
-					resource.TestCheckResourceAttr(
-						"opentelekomcloud_dns_zone_v2.zone_1", "type", "private"),
-					resource.TestCheckResourceAttr(
-						"opentelekomcloud_dns_zone_v2.zone_1", "tags.foo", "bar"),
-					resource.TestCheckResourceAttr(
-						"opentelekomcloud_dns_zone_v2.zone_1", "tags.key", "value"),
+					testAccCheckDNSV2ZoneExists(resourceZoneName, &zone),
+					resource.TestCheckResourceAttr(resourceZoneName, "description", "a private zone"),
+					resource.TestCheckResourceAttr(resourceZoneName, "type", "private"),
+					resource.TestCheckResourceAttr(resourceZoneName, "tags.foo", "bar"),
+					resource.TestCheckResourceAttr(resourceZoneName, "tags.key", "value"),
 				),
 			},
 		},
@@ -111,13 +104,12 @@ func TestAccDNSV2Zone_readTTL(t *testing.T) {
 		CheckDestroy:      testAccCheckDNSV2ZoneDestroy,
 		Steps: []resource.TestStep{
 			{
-				Config:             testAccDNSV2Zone_readTTL(zoneName),
+				Config:             testAccDNSV2ZoneReadTTL(zoneName),
 				ExpectNonEmptyPlan: true,
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckDNSV2ZoneExists("opentelekomcloud_dns_zone_v2.zone_1", &zone),
-					// resource.TestCheckResourceAttr("opentelekomcloud_dns_zone_v2.zone_1", "type", "PRIMARY"),
-					resource.TestMatchResourceAttr(
-						"opentelekomcloud_dns_zone_v2.zone_1", "ttl", regexp.MustCompile("^[0-9]+$")),
+					testAccCheckDNSV2ZoneExists(resourceZoneName, &zone),
+					// resource.TestCheckResourceAttr(resourceZoneName, "type", "PRIMARY"),
+					resource.TestMatchResourceAttr(resourceZoneName, "ttl", regexp.MustCompile("^[0-9]+$")),
 				),
 			},
 		},
@@ -134,10 +126,10 @@ func TestAccDNSV2Zone_timeout(t *testing.T) {
 		CheckDestroy:      testAccCheckDNSV2ZoneDestroy,
 		Steps: []resource.TestStep{
 			{
-				Config:             testAccDNSV2Zone_timeout(zoneName),
+				Config:             testAccDNSV2ZoneTimeout(zoneName),
 				ExpectNonEmptyPlan: true,
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckDNSV2ZoneExists("opentelekomcloud_dns_zone_v2.zone_1", &zone),
+					testAccCheckDNSV2ZoneExists(resourceZoneName, &zone),
 				),
 			},
 		},
@@ -146,7 +138,7 @@ func TestAccDNSV2Zone_timeout(t *testing.T) {
 
 func testAccCheckDNSV2ZoneDestroy(s *terraform.State) error {
 	config := common.TestAccProvider.Meta().(*cfg.Config)
-	dnsClient, err := config.DnsV2Client(env.OS_REGION_NAME)
+	client, err := config.DnsV2Client(env.OS_REGION_NAME)
 	if err != nil {
 		return fmt.Errorf("error creating OpenTelekomCloud DNS client: %s", err)
 	}
@@ -156,7 +148,7 @@ func testAccCheckDNSV2ZoneDestroy(s *terraform.State) error {
 			continue
 		}
 
-		_, err := zones.Get(dnsClient, rs.Primary.ID).Extract()
+		_, err := zones.Get(client, rs.Primary.ID).Extract()
 		if err == nil {
 			return fmt.Errorf("zone still exists")
 		}
@@ -177,12 +169,12 @@ func testAccCheckDNSV2ZoneExists(n string, zone *zones.Zone) resource.TestCheckF
 		}
 
 		config := common.TestAccProvider.Meta().(*cfg.Config)
-		dnsClient, err := config.DnsV2Client(env.OS_REGION_NAME)
+		client, err := config.DnsV2Client(env.OS_REGION_NAME)
 		if err != nil {
 			return fmt.Errorf("error creating OpenTelekomCloud DNS client: %s", err)
 		}
 
-		found, err := zones.Get(dnsClient, rs.Primary.ID).Extract()
+		found, err := zones.Get(client, rs.Primary.ID).Extract()
 		if err != nil {
 			return err
 		}
@@ -197,7 +189,7 @@ func testAccCheckDNSV2ZoneExists(n string, zone *zones.Zone) resource.TestCheckF
 	}
 }
 
-func testAccDNSV2Zone_basic(zoneName string) string {
+func testAccDNSV2ZoneBasic(zoneName string) string {
 	return fmt.Sprintf(`
 resource "opentelekomcloud_dns_zone_v2" "zone_1" {
   name        = "%s"
@@ -214,8 +206,10 @@ resource "opentelekomcloud_dns_zone_v2" "zone_1" {
 `, zoneName)
 }
 
-func testAccDNSV2Zone_private(zoneName string) string {
+func testAccDNSV2ZonePrivate(zoneName string) string {
 	return fmt.Sprintf(`
+%s
+
 resource "opentelekomcloud_dns_zone_v2" "zone_1" {
   name        = "%s"
   email       = "email1@example.com"
@@ -224,7 +218,7 @@ resource "opentelekomcloud_dns_zone_v2" "zone_1" {
   type        = "private"
 
   router {
-    router_id     = "%s"
+    router_id     = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.vpc_id
     router_region = "%s"
   }
   tags = {
@@ -232,10 +226,10 @@ resource "opentelekomcloud_dns_zone_v2" "zone_1" {
     key = "value"
   }
 }
-`, zoneName, env.OS_VPC_ID, env.OS_REGION_NAME)
+`, common.DataSourceSubnet, zoneName, env.OS_REGION_NAME)
 }
 
-func testAccDNSV2Zone_update(zoneName string) string {
+func testAccDNSV2ZoneUpdate(zoneName string) string {
 	return fmt.Sprintf(`
 resource "opentelekomcloud_dns_zone_v2" "zone_1" {
   name        = "%s"
@@ -252,7 +246,7 @@ resource "opentelekomcloud_dns_zone_v2" "zone_1" {
 `, zoneName)
 }
 
-func testAccDNSV2Zone_readTTL(zoneName string) string {
+func testAccDNSV2ZoneReadTTL(zoneName string) string {
 	return fmt.Sprintf(`
 resource "opentelekomcloud_dns_zone_v2" "zone_1" {
   name  = "%s"
@@ -261,7 +255,7 @@ resource "opentelekomcloud_dns_zone_v2" "zone_1" {
 `, zoneName)
 }
 
-func testAccDNSV2Zone_timeout(zoneName string) string {
+func testAccDNSV2ZoneTimeout(zoneName string) string {
 	return fmt.Sprintf(`
 resource "opentelekomcloud_dns_zone_v2" "zone_1" {
   name  = "%s"

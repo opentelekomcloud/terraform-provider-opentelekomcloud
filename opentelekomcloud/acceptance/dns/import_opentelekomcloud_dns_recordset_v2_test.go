@@ -10,7 +10,6 @@ import (
 
 func TestAccDNSV2RecordSet_importBasic(t *testing.T) {
 	zoneName := randomZoneName()
-	resourceName := "opentelekomcloud_dns_recordset_v2.recordset_1"
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:          func() { common.TestAccPreCheck(t) },
@@ -18,10 +17,10 @@ func TestAccDNSV2RecordSet_importBasic(t *testing.T) {
 		CheckDestroy:      testAccCheckDNSV2RecordSetDestroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccDNSV2RecordSet_basic(zoneName),
+				Config: testAccDNSV2RecordSetBasic(zoneName),
 			},
 			{
-				ResourceName:      resourceName,
+				ResourceName:      resourceRecordSetName,
 				ImportState:       true,
 				ImportStateVerify: true,
 			},
