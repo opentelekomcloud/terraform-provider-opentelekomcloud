@@ -62,45 +62,50 @@ func init() {
 
 func TestAccPreCheckRequiredEnvVars(t *testing.T) {
 	if env.OS_REGION_NAME == "" {
-		t.Fatal("OS_TENANT_NAME or OS_PROJECT_NAME must be set for acceptance tests")
-	}
-
-	if env.OS_FLAVOR_ID == "" && env.OS_FLAVOR_NAME == "" {
-		t.Fatal("OS_FLAVOR_ID or OS_FLAVOR_NAME must be set for acceptance tests")
-	}
-
-	if env.OS_NETWORK_ID == "" {
-		t.Fatal("OS_NETWORK_ID must be set for acceptance tests")
-	}
-
-	if env.OS_VPC_ID == "" {
-		t.Fatal("OS_VPC_ID must be set for acceptance tests")
-	}
-
-	if env.OS_AVAILABILITY_ZONE == "" {
-		t.Fatal("OS_AVAILABILITY_ZONE must be set for acceptance tests")
-	}
-
-	if env.OS_SUBNET_ID == "" {
-		t.Fatal("OS_SUBNET_ID must be set for acceptance tests")
+		t.Skip("OS_TENANT_NAME, OS_PROJECT_NAME or OS_REGION_NAME must be set for acceptance tests")
 	}
 }
 
-func TestAccPreCheck(t *testing.T) {
-	TestAccPreCheckRequiredEnvVars(t)
-}
-
-func TestAccPreCheckAdminOnly(t *testing.T) {
+func TestAccPreCheckAdminOnly(t *testing.T) { // TODO: Revise this PreCheck
 	v := os.Getenv("OS_TENANT_ADMIN")
 	if v == "" {
 		t.Skip("Skipping test because it requires set OS_TENANT_ADMIN")
 	}
 }
 
-func TestAccFlavorPreCheck(t *testing.T) {
-	TestAccPreCheckRequiredEnvVars(t)
-	if env.OS_FLAVOR_ID == "" {
-		t.Skip("OS_FLAVOR_ID must be set for acceptance tests")
+func TestAccSubnetPreCheck(t *testing.T) {
+	if env.OsSubnetName == "" {
+		t.Skip("OS_SUBNET_NAME must be set for acceptance tests")
+	}
+}
+
+func TestAccAzPreCheck(t *testing.T) {
+	if env.OS_AVAILABILITY_ZONE == "" {
+		t.Skip("OS_AVAILABILITY_ZONE must be set for acceptance tests")
+	}
+}
+
+func TestAccImagePreCheck(t *testing.T) {
+	if env.OsImageName == "" {
+		t.Skip("OS_IMAGE_NAME must be set for acceptance tests")
+	}
+}
+
+func TestAccKeyPairPreCheck(t *testing.T) {
+	if env.OS_KEYPAIR_NAME == "" {
+		t.Skip("OS_KEYPAIR_NAME must be set for acceptance tests")
+	}
+}
+
+func TestAccTenantPreCheck(t *testing.T) {
+	if env.OS_TENANT_ID == "" {
+		t.Skip("OS_TENANT_ID must be set for acceptance tests")
+	}
+}
+
+func TestAccKMSPreCheck(t *testing.T) {
+	if env.OS_KMS_ID == "" {
+		t.Skip("OS_KMS_ID must be set for acceptance tests")
 	}
 }
 
