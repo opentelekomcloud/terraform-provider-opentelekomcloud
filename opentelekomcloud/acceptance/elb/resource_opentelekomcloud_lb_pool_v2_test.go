@@ -19,7 +19,10 @@ func TestAccLBV2Pool_basic(t *testing.T) {
 	var pool pools.Pool
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:          func() { common.TestAccPreCheck(t) },
+		PreCheck: func() {
+			common.TestAccPreCheckRequiredEnvVars(t)
+			common.TestAccSubnetPreCheck(t)
+		},
 		ProviderFactories: common.TestAccProviderFactories,
 		CheckDestroy:      testAccCheckLBV2PoolDestroy,
 		Steps: []resource.TestStep{
@@ -48,7 +51,10 @@ func TestAccLBV2Pool_persistenceNull(t *testing.T) {
 	resourceName := "opentelekomcloud_lb_pool_v2.pool_1"
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:          func() { common.TestAccPreCheck(t) },
+		PreCheck: func() {
+			common.TestAccPreCheckRequiredEnvVars(t)
+			common.TestAccSubnetPreCheck(t)
+		},
 		ProviderFactories: common.TestAccProviderFactories,
 		CheckDestroy:      testAccCheckLBV2PoolDestroy,
 		Steps: []resource.TestStep{

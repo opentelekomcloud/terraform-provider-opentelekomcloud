@@ -20,7 +20,11 @@ func TestAccComputeV2BmsInstance_basic(t *testing.T) {
 	var instance servers.Server
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:          func() { common.TestAccPreCheck(t) },
+		PreCheck: func() {
+			common.TestAccPreCheckRequiredEnvVars(t)
+			common.TestAccSubnetPreCheck(t)
+			common.TestAccAzPreCheck(t)
+		},
 		ProviderFactories: common.TestAccProviderFactories,
 		CheckDestroy:      testAccCheckComputeV2BmsInstanceDestroy,
 		Steps: []resource.TestStep{
@@ -46,7 +50,11 @@ func TestAccComputeV2BmsInstance_bootFromVolumeImage(t *testing.T) {
 	var instance servers.Server
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:          func() { common.TestAccPreCheck(t) },
+		PreCheck: func() {
+			common.TestAccPreCheckRequiredEnvVars(t)
+			common.TestAccSubnetPreCheck(t)
+			common.TestAccAzPreCheck(t)
+		},
 		ProviderFactories: common.TestAccProviderFactories,
 		CheckDestroy:      testAccCheckComputeV2BmsInstanceDestroy,
 		Steps: []resource.TestStep{
@@ -64,7 +72,11 @@ func TestAccComputeV2BmsInstance_bootFromVolumeImage(t *testing.T) {
 func TestAccComputeV2BmsInstance_timeout(t *testing.T) {
 	var instance servers.Server
 	resource.Test(t, resource.TestCase{
-		PreCheck:          func() { common.TestAccPreCheck(t) },
+		PreCheck: func() {
+			common.TestAccPreCheckRequiredEnvVars(t)
+			common.TestAccSubnetPreCheck(t)
+			common.TestAccAzPreCheck(t)
+		},
 		ProviderFactories: common.TestAccProviderFactories,
 		CheckDestroy:      ecs.TestAccCheckComputeV2InstanceDestroy,
 		Steps: []resource.TestStep{

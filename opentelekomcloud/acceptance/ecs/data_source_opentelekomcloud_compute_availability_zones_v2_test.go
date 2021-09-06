@@ -13,7 +13,7 @@ const dataAzName = "data.opentelekomcloud_compute_availability_zones_v2.zones"
 
 func TestAccOpenStackAvailabilityZonesV2_basic(t *testing.T) {
 	resource.Test(t, resource.TestCase{
-		PreCheck:          func() { common.TestAccPreCheck(t) },
+		PreCheck:          func() { common.TestAccPreCheckRequiredEnvVars(t) },
 		ProviderFactories: common.TestAccProviderFactories,
 		Steps: []resource.TestStep{
 			{

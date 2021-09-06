@@ -18,7 +18,12 @@ func TestAccASV1Policy_basic(t *testing.T) {
 	var asPolicy policies.Policy
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:          func() { common.TestAccFlavorPreCheck(t) },
+		PreCheck: func() {
+			common.TestAccPreCheckRequiredEnvVars(t)
+			common.TestAccImagePreCheck(t)
+			common.TestAccSubnetPreCheck(t)
+			common.TestAccKeyPairPreCheck(t)
+		},
 		ProviderFactories: common.TestAccProviderFactories,
 		CheckDestroy:      testAccCheckASV1PolicyDestroy,
 		Steps: []resource.TestStep{

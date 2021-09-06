@@ -23,7 +23,12 @@ func TestAccCCENodesV3Basic(t *testing.T) {
 	var node nodes.Nodes
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:          func() { testAccCCEKeyPairPreCheck(t) },
+		PreCheck: func() {
+			common.TestAccPreCheckRequiredEnvVars(t)
+			common.TestAccSubnetPreCheck(t)
+			common.TestAccAzPreCheck(t)
+			common.TestAccKeyPairPreCheck(t)
+		},
 		ProviderFactories: common.TestAccProviderFactories,
 		CheckDestroy:      testAccCheckCCENodeV3Destroy,
 		Steps: []resource.TestStep{
@@ -51,7 +56,12 @@ func TestAccCCENodesV3Timeout(t *testing.T) {
 	var node nodes.Nodes
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:          func() { testAccCCEKeyPairPreCheck(t) },
+		PreCheck: func() {
+			common.TestAccPreCheckRequiredEnvVars(t)
+			common.TestAccSubnetPreCheck(t)
+			common.TestAccAzPreCheck(t)
+			common.TestAccKeyPairPreCheck(t)
+		},
 		ProviderFactories: common.TestAccProviderFactories,
 		CheckDestroy:      testAccCheckCCENodeV3Destroy,
 		Steps: []resource.TestStep{
@@ -69,7 +79,12 @@ func TestAccCCENodesV3OS(t *testing.T) {
 	var node2 nodes.Nodes
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:          func() { testAccCCEKeyPairPreCheck(t) },
+		PreCheck: func() {
+			common.TestAccPreCheckRequiredEnvVars(t)
+			common.TestAccSubnetPreCheck(t)
+			common.TestAccAzPreCheck(t)
+			common.TestAccKeyPairPreCheck(t)
+		},
 		ProviderFactories: common.TestAccProviderFactories,
 		CheckDestroy:      testAccCheckCCENodeV3Destroy,
 		Steps: []resource.TestStep{
@@ -90,7 +105,12 @@ func TestAccCCENodesV3BandWidthResize(t *testing.T) {
 	var node nodes.Nodes
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:          func() { testAccCCEKeyPairPreCheck(t) },
+		PreCheck: func() {
+			common.TestAccPreCheckRequiredEnvVars(t)
+			common.TestAccSubnetPreCheck(t)
+			common.TestAccAzPreCheck(t)
+			common.TestAccKeyPairPreCheck(t)
+		},
 		ProviderFactories: common.TestAccProviderFactories,
 		CheckDestroy:      testAccCheckCCENodeV3Destroy,
 		Steps: []resource.TestStep{
@@ -120,7 +140,12 @@ func TestAccCCENodesV3_eipIds(t *testing.T) {
 	var node nodes.Nodes
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:          func() { testAccCCEKeyPairPreCheck(t) },
+		PreCheck: func() {
+			common.TestAccPreCheckRequiredEnvVars(t)
+			common.TestAccSubnetPreCheck(t)
+			common.TestAccAzPreCheck(t)
+			common.TestAccKeyPairPreCheck(t)
+		},
 		ProviderFactories: common.TestAccProviderFactories,
 		CheckDestroy:      testAccCheckCCENodeV3Destroy,
 		Steps: []resource.TestStep{
@@ -144,7 +169,12 @@ func TestAccCCENodesV3IpSetNull(t *testing.T) {
 	var node nodes.Nodes
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:          func() { testAccCCEKeyPairPreCheck(t) },
+		PreCheck: func() {
+			common.TestAccPreCheckRequiredEnvVars(t)
+			common.TestAccSubnetPreCheck(t)
+			common.TestAccAzPreCheck(t)
+			common.TestAccKeyPairPreCheck(t)
+		},
 		ProviderFactories: common.TestAccProviderFactories,
 		CheckDestroy:      testAccCheckCCENodeV3Destroy,
 		Steps: []resource.TestStep{
@@ -171,7 +201,12 @@ func TestAccCCENodesV3IpCreate(t *testing.T) {
 	var node nodes.Nodes
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:          func() { testAccCCEKeyPairPreCheck(t) },
+		PreCheck: func() {
+			common.TestAccPreCheckRequiredEnvVars(t)
+			common.TestAccSubnetPreCheck(t)
+			common.TestAccAzPreCheck(t)
+			common.TestAccKeyPairPreCheck(t)
+		},
 		ProviderFactories: common.TestAccProviderFactories,
 		CheckDestroy:      testAccCheckCCENodeV3Destroy,
 		Steps: []resource.TestStep{
@@ -195,7 +230,12 @@ func TestAccCCENodesV3IpWithExtendedParameters(t *testing.T) {
 	var node nodes.Nodes
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:          func() { testAccCCEKeyPairPreCheck(t) },
+		PreCheck: func() {
+			common.TestAccPreCheckRequiredEnvVars(t)
+			common.TestAccSubnetPreCheck(t)
+			common.TestAccAzPreCheck(t)
+			common.TestAccKeyPairPreCheck(t)
+		},
 		ProviderFactories: common.TestAccProviderFactories,
 		CheckDestroy:      testAccCheckCCENodeV3Destroy,
 		Steps: []resource.TestStep{
@@ -216,7 +256,12 @@ func TestAccCCENodesV3IpNulls(t *testing.T) {
 	var node nodes.Nodes
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:          func() { testAccCCEKeyPairPreCheck(t) },
+		PreCheck: func() {
+			common.TestAccPreCheckRequiredEnvVars(t)
+			common.TestAccSubnetPreCheck(t)
+			common.TestAccAzPreCheck(t)
+			common.TestAccKeyPairPreCheck(t)
+		},
 		ProviderFactories: common.TestAccProviderFactories,
 		CheckDestroy:      testAccCheckCCENodeV3Destroy,
 		Steps: []resource.TestStep{
@@ -234,7 +279,13 @@ func TestAccCCENodesV3EncryptedVolume(t *testing.T) {
 	var node nodes.Nodes
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:          func() { testAccCCEKeyPairPreCheck(t) },
+		PreCheck: func() {
+			common.TestAccPreCheckRequiredEnvVars(t)
+			common.TestAccSubnetPreCheck(t)
+			common.TestAccAzPreCheck(t)
+			common.TestAccKeyPairPreCheck(t)
+			common.TestAccKMSPreCheck(t)
+		},
 		ProviderFactories: common.TestAccProviderFactories,
 		CheckDestroy:      testAccCheckCCENodeV3Destroy,
 		Steps: []resource.TestStep{
@@ -253,7 +304,12 @@ func TestAccCCENodesV3TaintsK8sTags(t *testing.T) {
 	var node nodes.Nodes
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:          func() { testAccCCEKeyPairPreCheck(t) },
+		PreCheck: func() {
+			common.TestAccPreCheckRequiredEnvVars(t)
+			common.TestAccSubnetPreCheck(t)
+			common.TestAccAzPreCheck(t)
+			common.TestAccKeyPairPreCheck(t)
+		},
 		ProviderFactories: common.TestAccProviderFactories,
 		CheckDestroy:      testAccCheckCCENodeV3Destroy,
 		Steps: []resource.TestStep{

@@ -16,7 +16,7 @@ func TestAccIdentityV3Project_importBasic(t *testing.T) {
 
 	resource.Test(t, resource.TestCase{
 		PreCheck: func() {
-			common.TestAccPreCheck(t)
+			common.TestAccPreCheckRequiredEnvVars(t)
 			common.TestAccPreCheckAdminOnly(t)
 		},
 		ProviderFactories: common.TestAccProviderFactories,

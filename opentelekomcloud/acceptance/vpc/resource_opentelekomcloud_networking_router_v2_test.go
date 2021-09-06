@@ -19,7 +19,7 @@ func TestAccNetworkingV2Router_basic(t *testing.T) {
 	resourceName := "opentelekomcloud_networking_router_v2.router_1"
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:          func() { common.TestAccPreCheck(t) },
+		PreCheck:          func() { common.TestAccPreCheckRequiredEnvVars(t) },
 		ProviderFactories: common.TestAccProviderFactories,
 		CheckDestroy:      testAccCheckNetworkingV2RouterDestroy,
 		Steps: []resource.TestStep{
@@ -44,7 +44,7 @@ func TestAccNetworkingV2Router_update_external_gw(t *testing.T) {
 	resourceName := "opentelekomcloud_networking_router_v2.router_1"
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:          func() { common.TestAccPreCheck(t) },
+		PreCheck:          func() { common.TestAccPreCheckRequiredEnvVars(t) },
 		ProviderFactories: common.TestAccProviderFactories,
 		CheckDestroy:      testAccCheckNetworkingV2RouterDestroy,
 		Steps: []resource.TestStep{
@@ -69,7 +69,7 @@ func TestAccNetworkingV2Router_timeout(t *testing.T) {
 	resourceName := "opentelekomcloud_networking_router_v2.router_1"
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:          func() { common.TestAccPreCheck(t) },
+		PreCheck:          func() { common.TestAccPreCheckRequiredEnvVars(t) },
 		ProviderFactories: common.TestAccProviderFactories,
 		CheckDestroy:      testAccCheckNetworkingV2RouterDestroy,
 		Steps: []resource.TestStep{

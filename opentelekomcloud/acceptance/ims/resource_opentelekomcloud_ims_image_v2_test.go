@@ -22,7 +22,11 @@ func TestAccImsImageV2_basic(t *testing.T) {
 	var image cloudimages.Image
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:          func() { common.TestAccPreCheck(t) },
+		PreCheck: func() {
+			common.TestAccPreCheckRequiredEnvVars(t)
+			common.TestAccSubnetPreCheck(t)
+			common.TestAccAzPreCheck(t)
+		},
 		ProviderFactories: common.TestAccProviderFactories,
 		CheckDestroy:      testAccCheckImsImageV2Destroy,
 		Steps: []resource.TestStep{

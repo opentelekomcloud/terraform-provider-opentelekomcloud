@@ -12,7 +12,7 @@ func TestAccRTSStackV1_importBasic(t *testing.T) {
 	resourceName := "opentelekomcloud_rts_stack_v1.stack_1"
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:          func() { common.TestAccPreCheck(t) },
+		PreCheck:          func() { common.TestAccPreCheckRequiredEnvVars(t) },
 		ProviderFactories: common.TestAccProviderFactories,
 		CheckDestroy:      testAccCheckRTSStackV1Destroy,
 		Steps: []resource.TestStep{

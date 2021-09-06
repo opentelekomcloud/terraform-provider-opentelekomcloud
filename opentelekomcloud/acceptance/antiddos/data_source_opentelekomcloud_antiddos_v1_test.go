@@ -12,7 +12,7 @@ import (
 
 func TestAccAntiDdosV1DataSource_basic(t *testing.T) {
 	resource.Test(t, resource.TestCase{
-		PreCheck:          func() { common.TestAccPreCheck(t) },
+		PreCheck:          func() { common.TestAccPreCheckRequiredEnvVars(t) },
 		ProviderFactories: common.TestAccProviderFactories,
 		Steps: []resource.TestStep{
 			{

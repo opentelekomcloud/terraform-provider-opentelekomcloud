@@ -33,7 +33,7 @@ func TestAccObsBucketObject_source(t *testing.T) {
 	}
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:          func() { common.TestAccPreCheck(t) },
+		PreCheck:          func() { common.TestAccPreCheckRequiredEnvVars(t) },
 		ProviderFactories: common.TestAccProviderFactories,
 		CheckDestroy:      testAccCheckObsBucketObjectDestroy,
 		Steps: []resource.TestStep{
@@ -65,7 +65,7 @@ func TestAccObsBucketObject_content(t *testing.T) {
 	rInt := acctest.RandInt()
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:          func() { common.TestAccPreCheck(t) },
+		PreCheck:          func() { common.TestAccPreCheckRequiredEnvVars(t) },
 		ProviderFactories: common.TestAccProviderFactories,
 		CheckDestroy:      testAccCheckObsBucketObjectDestroy,
 		Steps: []resource.TestStep{
@@ -88,7 +88,7 @@ func TestAccObsBucketObject_withVersionedContent(t *testing.T) {
 	rInt := acctest.RandInt()
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:          func() { common.TestAccPreCheck(t) },
+		PreCheck:          func() { common.TestAccPreCheckRequiredEnvVars(t) },
 		ProviderFactories: common.TestAccProviderFactories,
 		CheckDestroy:      testAccCheckObsBucketObjectDestroy,
 		Steps: []resource.TestStep{
@@ -107,7 +107,7 @@ func TestAccObsBucketObject_nothing(t *testing.T) {
 	rInt := acctest.RandInt()
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:          func() { common.TestAccPreCheck(t) },
+		PreCheck:          func() { common.TestAccPreCheckRequiredEnvVars(t) },
 		ProviderFactories: common.TestAccProviderFactories,
 		CheckDestroy:      testAccCheckObsBucketObjectDestroy,
 		Steps: []resource.TestStep{

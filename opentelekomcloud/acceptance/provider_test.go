@@ -286,7 +286,7 @@ data "opentelekomcloud_networking_network_v2" "ext" {
 `, common.AlternativeProviderConfig, common.AlternativeProviderAlias)
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:          func() { common.TestAccPreCheck(t) },
+		PreCheck:          func() { common.TestAccPreCheckRequiredEnvVars(t) },
 		ProviderFactories: common.TestAccProviderFactories,
 		Steps: []resource.TestStep{
 			{

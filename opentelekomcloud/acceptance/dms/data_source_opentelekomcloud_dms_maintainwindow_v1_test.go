@@ -14,7 +14,7 @@ const dataMaintainWindowName = "data.opentelekomcloud_dms_maintainwindow_v1.main
 
 func TestAccDmsMaintainWindowV1DataSource_basic(t *testing.T) {
 	resource.Test(t, resource.TestCase{
-		PreCheck:          func() { common.TestAccPreCheck(t) },
+		PreCheck:          func() { common.TestAccPreCheckRequiredEnvVars(t) },
 		ProviderFactories: common.TestAccProviderFactories,
 		Steps: []resource.TestStep{
 			{

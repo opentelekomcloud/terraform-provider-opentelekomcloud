@@ -20,7 +20,12 @@ func TestAccCSBSBackupV1_basic(t *testing.T) {
 	var backups backup.Backup
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:          func() { common.TestAccPreCheck(t) },
+		PreCheck: func() {
+			common.TestAccPreCheckRequiredEnvVars(t)
+			common.TestAccSubnetPreCheck(t)
+			common.TestAccImagePreCheck(t)
+			common.TestAccAzPreCheck(t)
+		},
 		ProviderFactories: common.TestAccProviderFactories,
 		CheckDestroy:      testAccCSBSBackupV1Destroy,
 		Steps: []resource.TestStep{
@@ -40,7 +45,12 @@ func TestAccCSBSBackupV1_timeout(t *testing.T) {
 	var backups backup.Backup
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:          func() { common.TestAccPreCheck(t) },
+		PreCheck: func() {
+			common.TestAccPreCheckRequiredEnvVars(t)
+			common.TestAccSubnetPreCheck(t)
+			common.TestAccImagePreCheck(t)
+			common.TestAccAzPreCheck(t)
+		},
 		ProviderFactories: common.TestAccProviderFactories,
 		CheckDestroy:      testAccCSBSBackupV1Destroy,
 		Steps: []resource.TestStep{

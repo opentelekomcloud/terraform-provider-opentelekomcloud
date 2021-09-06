@@ -22,7 +22,7 @@ func TestAccKmsKeyV1_basic(t *testing.T) {
 	resourceName := "opentelekomcloud_kms_key_v1.key_1"
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:          func() { common.TestAccPreCheck(t) },
+		PreCheck:          func() { common.TestAccPreCheckRequiredEnvVars(t) },
 		ProviderFactories: common.TestAccProviderFactories,
 		CheckDestroy:      testAccCheckKmsV1KeyDestroy,
 		Steps: []resource.TestStep{
@@ -104,7 +104,7 @@ func TestAccKmsKey_isEnabled(t *testing.T) {
 	resourceName := "opentelekomcloud_kms_key_v1.bar"
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:          func() { common.TestAccPreCheck(t) },
+		PreCheck:          func() { common.TestAccPreCheckRequiredEnvVars(t) },
 		ProviderFactories: common.TestAccProviderFactories,
 		CheckDestroy:      testAccCheckKmsV1KeyDestroy,
 		Steps: []resource.TestStep{

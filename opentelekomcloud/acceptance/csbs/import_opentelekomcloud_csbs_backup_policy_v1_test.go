@@ -10,7 +10,12 @@ import (
 
 func TestAccCSBSBackupPolicyV1_importWeekMonth(t *testing.T) {
 	resource.Test(t, resource.TestCase{
-		PreCheck:          func() { common.TestAccPreCheck(t) },
+		PreCheck: func() {
+			common.TestAccPreCheckRequiredEnvVars(t)
+			common.TestAccSubnetPreCheck(t)
+			common.TestAccImagePreCheck(t)
+			common.TestAccAzPreCheck(t)
+		},
 		ProviderFactories: common.TestAccProviderFactories,
 		CheckDestroy:      testAccCheckCSBSBackupPolicyV1Destroy,
 		Steps: []resource.TestStep{

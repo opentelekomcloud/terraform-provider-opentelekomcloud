@@ -18,7 +18,12 @@ func TestAccCCENodesV3DataSource_basic(t *testing.T) {
 	dataSourceName := "data.opentelekomcloud_cce_node_v3.nodes"
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:          func() { testAccCCEKeyPairPreCheck(t) },
+		PreCheck: func() {
+			common.TestAccPreCheckRequiredEnvVars(t)
+			common.TestAccSubnetPreCheck(t)
+			common.TestAccAzPreCheck(t)
+			common.TestAccKeyPairPreCheck(t)
+		},
 		ProviderFactories: common.TestAccProviderFactories,
 		Steps: []resource.TestStep{
 			{

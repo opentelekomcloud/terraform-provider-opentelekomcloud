@@ -19,7 +19,10 @@ func TestAccLBV2Monitor_basic(t *testing.T) {
 	var monitor monitors.Monitor
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:          func() { common.TestAccPreCheck(t) },
+		PreCheck: func() {
+			common.TestAccPreCheckRequiredEnvVars(t)
+			common.TestAccSubnetPreCheck(t)
+		},
 		ProviderFactories: common.TestAccProviderFactories,
 		CheckDestroy:      testAccCheckLBV2MonitorDestroy,
 		Steps: []resource.TestStep{
@@ -51,7 +54,10 @@ func TestAccLBV2Monitor_minConfig(t *testing.T) {
 	resourceName := "opentelekomcloud_lb_monitor_v2.monitor_1"
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:          func() { common.TestAccPreCheck(t) },
+		PreCheck: func() {
+			common.TestAccPreCheckRequiredEnvVars(t)
+			common.TestAccSubnetPreCheck(t)
+		},
 		ProviderFactories: common.TestAccProviderFactories,
 		CheckDestroy:      testAccCheckLBV2MonitorDestroy,
 		Steps: []resource.TestStep{

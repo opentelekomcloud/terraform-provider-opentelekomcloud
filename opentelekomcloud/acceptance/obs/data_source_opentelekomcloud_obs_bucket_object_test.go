@@ -22,7 +22,7 @@ func TestAccDataSourceObsBucketObject_basic(t *testing.T) {
 	var dsObj obs.GetObjectOutput
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:                  func() { common.TestAccPreCheck(t) },
+		PreCheck:                  func() { common.TestAccPreCheckRequiredEnvVars(t) },
 		ProviderFactories:         common.TestAccProviderFactories,
 		PreventPostDestroyRefresh: true,
 		Steps: []resource.TestStep{
@@ -55,7 +55,7 @@ func TestAccDataSourceObsBucketObject_readableBody(t *testing.T) {
 	var dsObj obs.GetObjectOutput
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:                  func() { common.TestAccPreCheck(t) },
+		PreCheck:                  func() { common.TestAccPreCheckRequiredEnvVars(t) },
 		ProviderFactories:         common.TestAccProviderFactories,
 		PreventPostDestroyRefresh: true,
 		Steps: []resource.TestStep{
@@ -90,7 +90,7 @@ func TestAccDataSourceObsBucketObject_allParams(t *testing.T) {
 	var dsObj obs.GetObjectOutput
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:                  func() { common.TestAccPreCheck(t) },
+		PreCheck:                  func() { common.TestAccPreCheckRequiredEnvVars(t) },
 		ProviderFactories:         common.TestAccProviderFactories,
 		PreventPostDestroyRefresh: true,
 		Steps: []resource.TestStep{

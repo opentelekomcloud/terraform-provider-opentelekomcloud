@@ -19,7 +19,12 @@ func TestAccMRSV1Cluster_basic(t *testing.T) {
 	var clusterGet cluster.Cluster
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:          func() { common.TestAccPreCheckRequiredEnvVars(t) },
+		PreCheck: func() {
+			common.TestAccPreCheckRequiredEnvVars(t)
+			common.TestAccSubnetPreCheck(t)
+			common.TestAccAzPreCheck(t)
+			common.TestAccKeyPairPreCheck(t)
+		},
 		ProviderFactories: common.TestAccProviderFactories,
 		CheckDestroy:      testAccCheckMRSV1ClusterDestroy,
 		Steps: []resource.TestStep{

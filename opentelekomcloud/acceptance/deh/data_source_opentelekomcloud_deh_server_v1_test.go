@@ -15,7 +15,11 @@ const dataServerName = "data.opentelekomcloud_deh_server_v1.servers"
 
 func TestAccDedicatedHostServerV1DataSource_basic(t *testing.T) {
 	resource.Test(t, resource.TestCase{
-		PreCheck:          func() { common.TestAccPreCheck(t) },
+		PreCheck: func() {
+			common.TestAccPreCheckRequiredEnvVars(t)
+			common.TestAccSubnetPreCheck(t)
+			common.TestAccAzPreCheck(t)
+		},
 		ProviderFactories: common.TestAccProviderFactories,
 		Steps: []resource.TestStep{
 			{

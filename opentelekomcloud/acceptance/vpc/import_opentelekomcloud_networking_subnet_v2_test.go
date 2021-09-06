@@ -12,7 +12,7 @@ func TestAccNetworkingV2Subnet_importBasic(t *testing.T) {
 	resourceName := "opentelekomcloud_networking_subnet_v2.subnet_1"
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:          func() { common.TestAccPreCheck(t) },
+		PreCheck:          func() { common.TestAccPreCheckRequiredEnvVars(t) },
 		ProviderFactories: common.TestAccProviderFactories,
 		CheckDestroy:      testAccCheckNetworkingV2SubnetDestroy,
 		Steps: []resource.TestStep{

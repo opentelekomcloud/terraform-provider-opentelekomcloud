@@ -24,7 +24,10 @@ func TestAccCCEClusterV3_basic(t *testing.T) {
 	var cluster clusters.Clusters
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:          func() { common.TestAccPreCheck(t) },
+		PreCheck: func() {
+			common.TestAccPreCheckRequiredEnvVars(t)
+			common.TestAccSubnetPreCheck(t)
+		},
 		ProviderFactories: common.TestAccProviderFactories,
 		CheckDestroy:      testAccCheckCCEClusterV3Destroy,
 		Steps: []resource.TestStep{
@@ -56,7 +59,7 @@ func TestAccCCEClusterV3_basic(t *testing.T) {
 
 func TestAccCCEClusterV3_invalidNetwork(t *testing.T) {
 	resource.Test(t, resource.TestCase{
-		PreCheck:          func() { common.TestAccPreCheck(t) },
+		PreCheck:          func() { common.TestAccPreCheckRequiredEnvVars(t) },
 		ProviderFactories: common.TestAccProviderFactories,
 		CheckDestroy:      testAccCheckCCEClusterV3Destroy,
 		Steps: []resource.TestStep{
@@ -81,7 +84,10 @@ func TestAccCCEClusterV3_invalidNetwork(t *testing.T) {
 
 func TestAccCCEClusterV3_proxyAuth(t *testing.T) {
 	resource.Test(t, resource.TestCase{
-		PreCheck:          func() { common.TestAccPreCheck(t) },
+		PreCheck: func() {
+			common.TestAccPreCheckRequiredEnvVars(t)
+			common.TestAccSubnetPreCheck(t)
+		},
 		ProviderFactories: common.TestAccProviderFactories,
 		CheckDestroy:      testAccCheckCCEClusterV3Destroy,
 		Steps: []resource.TestStep{
@@ -97,7 +103,10 @@ func TestAccCCEClusterV3_timeout(t *testing.T) {
 	var cluster clusters.Clusters
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:          func() { common.TestAccPreCheck(t) },
+		PreCheck: func() {
+			common.TestAccPreCheckRequiredEnvVars(t)
+			common.TestAccSubnetPreCheck(t)
+		},
 		ProviderFactories: common.TestAccProviderFactories,
 		CheckDestroy:      testAccCheckCCEClusterV3Destroy,
 		Steps: []resource.TestStep{
@@ -116,7 +125,10 @@ func TestAccCCEClusterV3NoAddons(t *testing.T) {
 	var cluster clusters.Clusters
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:          func() { common.TestAccPreCheck(t) },
+		PreCheck: func() {
+			common.TestAccPreCheckRequiredEnvVars(t)
+			common.TestAccSubnetPreCheck(t)
+		},
 		ProviderFactories: common.TestAccProviderFactories,
 		CheckDestroy:      testAccCheckCCEClusterV3Destroy,
 		Steps: []resource.TestStep{
@@ -188,7 +200,10 @@ func TestAccCCEClusterV3_withVersionDiff(t *testing.T) {
 	var cluster clusters.Clusters
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:          func() { common.TestAccPreCheck(t) },
+		PreCheck: func() {
+			common.TestAccPreCheckRequiredEnvVars(t)
+			common.TestAccSubnetPreCheck(t)
+		},
 		ProviderFactories: common.TestAccProviderFactories,
 		CheckDestroy:      testAccCheckCCEClusterV3Destroy,
 		Steps: []resource.TestStep{

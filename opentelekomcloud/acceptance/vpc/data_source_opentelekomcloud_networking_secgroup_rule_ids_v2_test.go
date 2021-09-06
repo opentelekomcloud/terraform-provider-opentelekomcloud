@@ -12,7 +12,7 @@ func TestAccNetworkingSecGroupRuleIdsV2DataSource_basic(t *testing.T) {
 	dataSourceName := "data.opentelekomcloud_networking_secgroup_rule_ids_v2.secgroup_ids"
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:          func() { common.TestAccPreCheck(t) },
+		PreCheck:          func() { common.TestAccPreCheckRequiredEnvVars(t) },
 		ProviderFactories: common.TestAccProviderFactories,
 		Steps: []resource.TestStep{
 			{

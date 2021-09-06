@@ -19,7 +19,7 @@ func TestAccVpcSubnetV1Basic(t *testing.T) {
 	resourceName := "opentelekomcloud_vpc_subnet_v1.subnet_1"
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:          func() { common.TestAccPreCheck(t) },
+		PreCheck:          func() { common.TestAccPreCheckRequiredEnvVars(t) },
 		ProviderFactories: common.TestAccProviderFactories,
 		CheckDestroy:      testAccCheckVpcSubnetV1Destroy,
 		Steps: []resource.TestStep{
@@ -53,7 +53,7 @@ func TestAccVpcSubnetV1Timeout(t *testing.T) {
 	resourceName := "opentelekomcloud_vpc_subnet_v1.subnet_1"
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:          func() { common.TestAccPreCheck(t) },
+		PreCheck:          func() { common.TestAccPreCheckRequiredEnvVars(t) },
 		ProviderFactories: common.TestAccProviderFactories,
 		CheckDestroy:      testAccCheckVpcSubnetV1Destroy,
 		Steps: []resource.TestStep{
@@ -72,7 +72,7 @@ func TestAccVpcSubnetV1DnsList(t *testing.T) {
 	resourceName := "opentelekomcloud_vpc_subnet_v1.subnet_1"
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:          func() { common.TestAccPreCheck(t) },
+		PreCheck:          func() { common.TestAccPreCheckRequiredEnvVars(t) },
 		ProviderFactories: common.TestAccProviderFactories,
 		CheckDestroy:      testAccCheckVpcSubnetV1Destroy,
 		Steps: []resource.TestStep{

@@ -23,7 +23,7 @@ func TestAccDmsGroupsV1_basic(t *testing.T) {
 	var queueName = fmt.Sprintf("dms_queue_%s", acctest.RandString(5))
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:          func() { common.TestAccPreCheck(t) },
+		PreCheck:          func() { common.TestAccPreCheckRequiredEnvVars(t) },
 		ProviderFactories: common.TestAccProviderFactories,
 		CheckDestroy:      testAccCheckDmsV1GroupDestroy,
 		Steps: []resource.TestStep{

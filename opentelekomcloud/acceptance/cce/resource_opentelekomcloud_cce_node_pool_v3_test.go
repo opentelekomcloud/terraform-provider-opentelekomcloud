@@ -19,7 +19,12 @@ func TestAccCCENodePoolsV3_basic(t *testing.T) {
 	clusterName := "opentelekomcloud_cce_cluster_v3.cluster"
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:          func() { testAccCCEKeyPairPreCheck(t) },
+		PreCheck: func() {
+			common.TestAccPreCheckRequiredEnvVars(t)
+			common.TestAccSubnetPreCheck(t)
+			common.TestAccAzPreCheck(t)
+			common.TestAccKeyPairPreCheck(t)
+		},
 		ProviderFactories: common.TestAccProviderFactories,
 		CheckDestroy:      testAccCheckCCENodePoolV3Destroy,
 		Steps: []resource.TestStep{
@@ -50,7 +55,11 @@ func TestAccCCENodePoolsV3_randomAZ(t *testing.T) {
 	clusterName := "opentelekomcloud_cce_cluster_v3.cluster"
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:          func() { testAccCCEKeyPairPreCheck(t) },
+		PreCheck: func() {
+			common.TestAccPreCheckRequiredEnvVars(t)
+			common.TestAccSubnetPreCheck(t)
+			common.TestAccKeyPairPreCheck(t)
+		},
 		ProviderFactories: common.TestAccProviderFactories,
 		CheckDestroy:      testAccCheckCCENodePoolV3Destroy,
 		Steps: []resource.TestStep{
@@ -71,7 +80,12 @@ func TestAccCCENodePoolsV3EncryptedVolume(t *testing.T) {
 	clusterName := "opentelekomcloud_cce_cluster_v3.cluster"
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:          func() { testAccCCEKeyPairPreCheck(t) },
+		PreCheck: func() {
+			common.TestAccPreCheckRequiredEnvVars(t)
+			common.TestAccSubnetPreCheck(t)
+			common.TestAccKeyPairPreCheck(t)
+			common.TestAccKMSPreCheck(t)
+		},
 		ProviderFactories: common.TestAccProviderFactories,
 		CheckDestroy:      testAccCheckCCENodeV3Destroy,
 		Steps: []resource.TestStep{

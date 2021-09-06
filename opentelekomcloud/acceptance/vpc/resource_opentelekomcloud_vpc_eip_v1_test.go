@@ -18,7 +18,7 @@ func TestAccVpcV1EIP_basic(t *testing.T) {
 	var eip eips.PublicIp
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:          func() { common.TestAccPreCheck(t) },
+		PreCheck:          func() { common.TestAccPreCheckRequiredEnvVars(t) },
 		ProviderFactories: common.TestAccProviderFactories,
 		CheckDestroy:      testAccCheckVpcV1EIPDestroy,
 		Steps: []resource.TestStep{
@@ -48,7 +48,7 @@ func TestAccVpcV1EIP_timeout(t *testing.T) {
 	var eip eips.PublicIp
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:          func() { common.TestAccPreCheck(t) },
+		PreCheck:          func() { common.TestAccPreCheckRequiredEnvVars(t) },
 		ProviderFactories: common.TestAccProviderFactories,
 		CheckDestroy:      testAccCheckVpcV1EIPDestroy,
 		Steps: []resource.TestStep{

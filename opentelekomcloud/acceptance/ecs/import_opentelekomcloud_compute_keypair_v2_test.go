@@ -10,7 +10,7 @@ import (
 
 func TestAccComputeV2Keypair_importBasic(t *testing.T) {
 	resource.Test(t, resource.TestCase{
-		PreCheck:          func() { common.TestAccPreCheck(t) },
+		PreCheck:          func() { common.TestAccPreCheckRequiredEnvVars(t) },
 		ProviderFactories: common.TestAccProviderFactories,
 		CheckDestroy:      testAccCheckComputeV2KeypairDestroy,
 		Steps: []resource.TestStep{

@@ -14,7 +14,11 @@ func TestAccSFSTurboShareV1_importBasic(t *testing.T) {
 	resourceName := "opentelekomcloud_sfs_turbo_share_v1.sfs-turbo"
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:          func() { common.TestAccPreCheck(t) },
+		PreCheck: func() {
+			common.TestAccPreCheckRequiredEnvVars(t)
+			common.TestAccSubnetPreCheck(t)
+			common.TestAccAzPreCheck(t)
+		},
 		ProviderFactories: common.TestAccProviderFactories,
 		CheckDestroy:      testAccCheckSFSTurboShareV1Destroy,
 		Steps: []resource.TestStep{

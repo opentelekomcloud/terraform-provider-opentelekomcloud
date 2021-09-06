@@ -18,7 +18,7 @@ func TestAccVBSBackupV2_basic(t *testing.T) {
 	var config backups.Backup
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:          func() { common.TestAccPreCheck(t) },
+		PreCheck:          func() { common.TestAccPreCheckRequiredEnvVars(t) },
 		ProviderFactories: common.TestAccProviderFactories,
 		CheckDestroy:      testAccCheckVBSBackupV2Destroy,
 		Steps: []resource.TestStep{
@@ -42,7 +42,7 @@ func TestAccVBSBackupV2_timeout(t *testing.T) {
 	var config backups.Backup
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:          func() { common.TestAccPreCheck(t) },
+		PreCheck:          func() { common.TestAccPreCheckRequiredEnvVars(t) },
 		ProviderFactories: common.TestAccProviderFactories,
 		CheckDestroy:      testAccCheckVBSBackupV2Destroy,
 		Steps: []resource.TestStep{

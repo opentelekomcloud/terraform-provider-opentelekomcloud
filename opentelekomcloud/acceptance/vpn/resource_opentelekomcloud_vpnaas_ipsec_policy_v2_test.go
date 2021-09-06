@@ -19,7 +19,7 @@ func TestAccVpnIPSecPolicyV2_basic(t *testing.T) {
 	resourceName := "opentelekomcloud_vpnaas_ipsec_policy_v2.policy_1"
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:          func() { common.TestAccPreCheck(t) },
+		PreCheck:          func() { common.TestAccPreCheckRequiredEnvVars(t) },
 		ProviderFactories: common.TestAccProviderFactories,
 		CheckDestroy:      testAccCheckIPSecPolicyV2Destroy,
 		Steps: []resource.TestStep{
@@ -53,7 +53,7 @@ func TestAccVpnIPSecPolicyV2_withLifetime(t *testing.T) {
 	resourceName := "opentelekomcloud_vpnaas_ipsec_policy_v2.policy_1"
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:          func() { common.TestAccPreCheck(t) },
+		PreCheck:          func() { common.TestAccPreCheckRequiredEnvVars(t) },
 		ProviderFactories: common.TestAccProviderFactories,
 		CheckDestroy:      testAccCheckIPSecPolicyV2Destroy,
 		Steps: []resource.TestStep{

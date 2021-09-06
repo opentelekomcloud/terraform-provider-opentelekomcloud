@@ -22,7 +22,7 @@ func TestAccNetworkingV2SecGroupRule_basic(t *testing.T) {
 	var secgroupRule2 rules.SecGroupRule
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:          func() { common.TestAccPreCheck(t) },
+		PreCheck:          func() { common.TestAccPreCheckRequiredEnvVars(t) },
 		ProviderFactories: common.TestAccProviderFactories,
 		CheckDestroy:      testAccCheckNetworkingV2SecGroupRuleDestroy,
 		Steps: []resource.TestStep{
@@ -50,7 +50,7 @@ func TestAccNetworkingV2SecGroupRule_timeout(t *testing.T) {
 	var secgroup_2 groups.SecGroup
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:          func() { common.TestAccPreCheck(t) },
+		PreCheck:          func() { common.TestAccPreCheckRequiredEnvVars(t) },
 		ProviderFactories: common.TestAccProviderFactories,
 		CheckDestroy:      testAccCheckNetworkingV2SecGroupRuleDestroy,
 		Steps: []resource.TestStep{
@@ -72,7 +72,7 @@ func TestAccNetworkingV2SecGroupRule_numericProtocol(t *testing.T) {
 	var secgroupRule1 rules.SecGroupRule
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:          func() { common.TestAccPreCheck(t) },
+		PreCheck:          func() { common.TestAccPreCheckRequiredEnvVars(t) },
 		ProviderFactories: common.TestAccProviderFactories,
 		CheckDestroy:      testAccCheckNetworkingV2SecGroupRuleDestroy,
 		Steps: []resource.TestStep{

@@ -19,7 +19,7 @@ const protocolResourceName = "opentelekomcloud_identity_protocol_v3.saml"
 func TestAccIdentityV3Protocol_basic(t *testing.T) {
 	resource.Test(t, resource.TestCase{
 		PreCheck: func() {
-			common.TestAccPreCheck(t)
+			common.TestAccPreCheckRequiredEnvVars(t)
 			common.TestAccPreCheckAdminOnly(t)
 		},
 		ProviderFactories: common.TestAccProviderFactories,
@@ -41,7 +41,7 @@ func TestAccIdentityV3Protocol_basic(t *testing.T) {
 func TestAccIdentityV3Protocol_metadata(t *testing.T) {
 	resource.Test(t, resource.TestCase{
 		PreCheck: func() {
-			common.TestAccPreCheck(t)
+			common.TestAccPreCheckRequiredEnvVars(t)
 			common.TestAccPreCheckAdminOnly(t)
 		},
 		ProviderFactories: common.TestAccProviderFactories,
@@ -61,7 +61,7 @@ func TestAccIdentityV3Protocol_metadata(t *testing.T) {
 func TestAccIdentityV3Protocol_import(t *testing.T) {
 	resource.Test(t, resource.TestCase{
 		PreCheck: func() {
-			common.TestAccPreCheck(t)
+			common.TestAccPreCheckRequiredEnvVars(t)
 			common.TestAccPreCheckAdminOnly(t)
 		},
 		ProviderFactories: common.TestAccProviderFactories,

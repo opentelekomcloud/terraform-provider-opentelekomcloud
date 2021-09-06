@@ -13,7 +13,7 @@ const dataFlavorName = "data.opentelekomcloud_compute_flavor_v2.flavor_1"
 
 func TestAccComputeV2FlavorDataSource_basic(t *testing.T) {
 	resource.Test(t, resource.TestCase{
-		PreCheck:          func() { common.TestAccPreCheck(t) },
+		PreCheck:          func() { common.TestAccPreCheckRequiredEnvVars(t) },
 		ProviderFactories: common.TestAccProviderFactories,
 		Steps: []resource.TestStep{
 			{
@@ -33,7 +33,7 @@ func TestAccComputeV2FlavorDataSource_basic(t *testing.T) {
 
 func TestAccComputeV2FlavorDataSource_testQueries(t *testing.T) {
 	resource.Test(t, resource.TestCase{
-		PreCheck:          func() { common.TestAccPreCheck(t) },
+		PreCheck:          func() { common.TestAccPreCheckRequiredEnvVars(t) },
 		ProviderFactories: common.TestAccProviderFactories,
 		Steps: []resource.TestStep{
 			{

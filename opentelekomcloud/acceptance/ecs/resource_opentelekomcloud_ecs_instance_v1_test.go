@@ -21,7 +21,12 @@ func TestAccEcsV1InstanceBasic(t *testing.T) {
 	var instance cloudservers.CloudServer
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:          func() { common.TestAccPreCheck(t) },
+		PreCheck: func() {
+			common.TestAccPreCheckRequiredEnvVars(t)
+			common.TestAccImagePreCheck(t)
+			common.TestAccSubnetPreCheck(t)
+			common.TestAccAzPreCheck(t)
+		},
 		ProviderFactories: common.TestAccProviderFactories,
 		CheckDestroy:      testAccCheckEcsV1InstanceDestroy,
 		Steps: []resource.TestStep{
@@ -51,7 +56,11 @@ func TestAccEcsV1InstanceBasic(t *testing.T) {
 
 func TestAccEcsV1InstanceDiskTypeValidation(t *testing.T) {
 	resource.Test(t, resource.TestCase{
-		PreCheck:          func() { common.TestAccPreCheck(t) },
+		PreCheck: func() {
+			common.TestAccPreCheckRequiredEnvVars(t)
+			common.TestAccImagePreCheck(t)
+			common.TestAccSubnetPreCheck(t)
+		},
 		ProviderFactories: common.TestAccProviderFactories,
 		Steps: []resource.TestStep{
 			{
@@ -75,7 +84,11 @@ func TestAccEcsV1InstanceDiskTypeValidation(t *testing.T) {
 
 func TestAccEcsV1InstanceVPCValidation(t *testing.T) {
 	resource.Test(t, resource.TestCase{
-		PreCheck:          func() { common.TestAccPreCheck(t) },
+		PreCheck: func() {
+			common.TestAccPreCheckRequiredEnvVars(t)
+			common.TestAccImagePreCheck(t)
+			common.TestAccSubnetPreCheck(t)
+		},
 		ProviderFactories: common.TestAccProviderFactories,
 		Steps: []resource.TestStep{
 			{
@@ -94,7 +107,13 @@ func TestAccEcsV1InstanceEncryption(t *testing.T) {
 	var instance cloudservers.CloudServer
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:          func() { common.TestAccPreCheck(t) },
+		PreCheck: func() {
+			common.TestAccPreCheckRequiredEnvVars(t)
+			common.TestAccImagePreCheck(t)
+			common.TestAccSubnetPreCheck(t)
+			common.TestAccAzPreCheck(t)
+			common.TestAccKMSPreCheck(t)
+		},
 		ProviderFactories: common.TestAccProviderFactories,
 		CheckDestroy:      testAccCheckEcsV1InstanceDestroy,
 		Steps: []resource.TestStep{

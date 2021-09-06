@@ -21,7 +21,7 @@ func TestAccNetworkingV2Network_basic(t *testing.T) {
 	var network networks.Network
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:          func() { common.TestAccPreCheck(t) },
+		PreCheck:          func() { common.TestAccPreCheckRequiredEnvVars(t) },
 		ProviderFactories: common.TestAccProviderFactories,
 		CheckDestroy:      testAccCheckNetworkingV2NetworkDestroy,
 		Steps: []resource.TestStep{
@@ -48,7 +48,7 @@ func TestAccNetworkingV2Network_netstack(t *testing.T) {
 	var router routers.Router
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:          func() { common.TestAccPreCheck(t) },
+		PreCheck:          func() { common.TestAccPreCheckRequiredEnvVars(t) },
 		ProviderFactories: common.TestAccProviderFactories,
 		CheckDestroy:      testAccCheckNetworkingV2NetworkDestroy,
 		Steps: []resource.TestStep{
@@ -70,7 +70,7 @@ func TestAccNetworkingV2Network_timeout(t *testing.T) {
 	var network networks.Network
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:          func() { common.TestAccPreCheck(t) },
+		PreCheck:          func() { common.TestAccPreCheckRequiredEnvVars(t) },
 		ProviderFactories: common.TestAccProviderFactories,
 		CheckDestroy:      testAccCheckNetworkingV2NetworkDestroy,
 		Steps: []resource.TestStep{
@@ -90,7 +90,7 @@ func TestAccNetworkingV2Network_multipleSegmentMappings(t *testing.T) {
 
 	resource.Test(t, resource.TestCase{
 		PreCheck: func() {
-			common.TestAccPreCheck(t)
+			common.TestAccPreCheckRequiredEnvVars(t)
 			common.TestAccPreCheckAdminOnly(t)
 		},
 		ProviderFactories: common.TestAccProviderFactories,

@@ -18,7 +18,7 @@ func TestAccObsBucket_basic(t *testing.T) {
 	resourceName := "opentelekomcloud_obs_bucket.bucket"
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:          func() { common.TestAccPreCheck(t) },
+		PreCheck:          func() { common.TestAccPreCheckRequiredEnvVars(t) },
 		ProviderFactories: common.TestAccProviderFactories,
 		CheckDestroy:      testAccCheckObsBucketDestroy,
 		Steps: []resource.TestStep{
@@ -56,7 +56,7 @@ func TestAccObsBucket_tags(t *testing.T) {
 	resourceName := "opentelekomcloud_obs_bucket.bucket"
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:          func() { common.TestAccPreCheck(t) },
+		PreCheck:          func() { common.TestAccPreCheckRequiredEnvVars(t) },
 		ProviderFactories: common.TestAccProviderFactories,
 		Steps: []resource.TestStep{
 			{
@@ -76,7 +76,7 @@ func TestAccObsBucket_versioning(t *testing.T) {
 	resourceName := "opentelekomcloud_obs_bucket.bucket"
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:          func() { common.TestAccPreCheck(t) },
+		PreCheck:          func() { common.TestAccPreCheckRequiredEnvVars(t) },
 		ProviderFactories: common.TestAccProviderFactories,
 		CheckDestroy:      testAccCheckObsBucketDestroy,
 		Steps: []resource.TestStep{
@@ -104,7 +104,7 @@ func TestAccObsBucket_logging(t *testing.T) {
 	resourceName := "opentelekomcloud_obs_bucket.bucket"
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:          func() { common.TestAccPreCheck(t) },
+		PreCheck:          func() { common.TestAccPreCheckRequiredEnvVars(t) },
 		ProviderFactories: common.TestAccProviderFactories,
 		CheckDestroy:      testAccCheckObsBucketDestroy,
 		Steps: []resource.TestStep{
@@ -124,7 +124,7 @@ func TestAccObsBucket_lifecycle(t *testing.T) {
 	resourceName := "opentelekomcloud_obs_bucket.bucket"
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:          func() { common.TestAccPreCheck(t) },
+		PreCheck:          func() { common.TestAccPreCheckRequiredEnvVars(t) },
 		ProviderFactories: common.TestAccProviderFactories,
 		CheckDestroy:      testAccCheckObsBucketDestroy,
 		Steps: []resource.TestStep{
@@ -153,7 +153,7 @@ func TestAccObsBucket_website(t *testing.T) {
 	resourceName := "opentelekomcloud_obs_bucket.bucket"
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:          func() { common.TestAccPreCheck(t) },
+		PreCheck:          func() { common.TestAccPreCheckRequiredEnvVars(t) },
 		ProviderFactories: common.TestAccProviderFactories,
 		CheckDestroy:      testAccCheckObsBucketDestroy,
 		Steps: []resource.TestStep{
@@ -174,7 +174,7 @@ func TestAccObsBucket_cors(t *testing.T) {
 	resourceName := "opentelekomcloud_obs_bucket.bucket"
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:          func() { common.TestAccPreCheck(t) },
+		PreCheck:          func() { common.TestAccPreCheckRequiredEnvVars(t) },
 		ProviderFactories: common.TestAccProviderFactories,
 		CheckDestroy:      testAccCheckObsBucketDestroy,
 		Steps: []resource.TestStep{
@@ -197,7 +197,7 @@ func TestAccObsBucket_notifications(t *testing.T) {
 	rInt := acctest.RandInt()
 	resourceName := "opentelekomcloud_obs_bucket.bucket"
 	resource.Test(t, resource.TestCase{
-		PreCheck:          func() { common.TestAccPreCheck(t) },
+		PreCheck:          func() { common.TestAccPreCheckRequiredEnvVars(t) },
 		ProviderFactories: common.TestAccProviderFactories,
 		CheckDestroy:      testAccCheckObsBucketDestroy,
 		Steps: []resource.TestStep{

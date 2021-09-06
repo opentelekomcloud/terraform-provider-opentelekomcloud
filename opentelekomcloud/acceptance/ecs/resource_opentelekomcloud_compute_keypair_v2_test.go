@@ -20,7 +20,7 @@ func TestAccComputeV2Keypair_basic(t *testing.T) {
 	var keypair keypairs.KeyPair
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:          func() { common.TestAccPreCheck(t) },
+		PreCheck:          func() { common.TestAccPreCheckRequiredEnvVars(t) },
 		ProviderFactories: common.TestAccProviderFactories,
 		CheckDestroy:      testAccCheckComputeV2KeypairDestroy,
 		Steps: []resource.TestStep{
@@ -39,7 +39,7 @@ func TestAccComputeV2Keypair_shared(t *testing.T) {
 	resourceName2 := "opentelekomcloud_compute_keypair_v2.kp_2"
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:          func() { common.TestAccPreCheck(t) },
+		PreCheck:          func() { common.TestAccPreCheckRequiredEnvVars(t) },
 		ProviderFactories: common.TestAccProviderFactories,
 		CheckDestroy:      testAccCheckComputeV2KeypairDestroy,
 		Steps: []resource.TestStep{
@@ -63,7 +63,7 @@ func TestAccComputeV2Keypair_private(t *testing.T) {
 	var keypair keypairs.KeyPair
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:          func() { common.TestAccPreCheck(t) },
+		PreCheck:          func() { common.TestAccPreCheckRequiredEnvVars(t) },
 		ProviderFactories: common.TestAccProviderFactories,
 		CheckDestroy:      testAccCheckComputeV2KeypairDestroy,
 		Steps: []resource.TestStep{

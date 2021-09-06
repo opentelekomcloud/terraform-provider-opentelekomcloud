@@ -10,7 +10,10 @@ import (
 
 func TestAccCCEClusterV3_importBasic(t *testing.T) {
 	resource.Test(t, resource.TestCase{
-		PreCheck:          func() { common.TestAccPreCheck(t) },
+		PreCheck: func() {
+			common.TestAccPreCheckRequiredEnvVars(t)
+			common.TestAccSubnetPreCheck(t)
+		},
 		ProviderFactories: common.TestAccProviderFactories,
 		CheckDestroy:      testAccCheckCCEClusterV3Destroy,
 		Steps: []resource.TestStep{

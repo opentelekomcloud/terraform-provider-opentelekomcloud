@@ -18,7 +18,7 @@ func TestAccImagesImageV2_basic(t *testing.T) {
 	var image images.Image
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:          func() { common.TestAccPreCheck(t) },
+		PreCheck:          func() { common.TestAccPreCheckRequiredEnvVars(t) },
 		ProviderFactories: common.TestAccProviderFactories,
 		CheckDestroy:      testAccCheckImagesImageV2Destroy,
 		Steps: []resource.TestStep{
@@ -44,7 +44,7 @@ func TestAccImagesImageV2_name(t *testing.T) {
 	var image images.Image
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:          func() { common.TestAccPreCheck(t) },
+		PreCheck:          func() { common.TestAccPreCheckRequiredEnvVars(t) },
 		ProviderFactories: common.TestAccProviderFactories,
 		CheckDestroy:      testAccCheckImagesImageV2Destroy,
 		Steps: []resource.TestStep{
@@ -72,7 +72,7 @@ func TestAccImagesImageV2_tags(t *testing.T) {
 	var image images.Image
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:          func() { common.TestAccPreCheck(t) },
+		PreCheck:          func() { common.TestAccPreCheckRequiredEnvVars(t) },
 		ProviderFactories: common.TestAccProviderFactories,
 		CheckDestroy:      testAccCheckImagesImageV2Destroy,
 		Steps: []resource.TestStep{
@@ -113,7 +113,7 @@ func TestAccImagesImageV2_visibility(t *testing.T) {
 
 	resource.Test(t, resource.TestCase{
 		PreCheck: func() {
-			common.TestAccPreCheck(t)
+			common.TestAccPreCheckRequiredEnvVars(t)
 			common.TestAccPreCheckAdminOnly(t)
 		},
 		ProviderFactories: common.TestAccProviderFactories,
@@ -143,7 +143,7 @@ func TestAccImagesImageV2_timeout(t *testing.T) {
 	var image images.Image
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:          func() { common.TestAccPreCheck(t) },
+		PreCheck:          func() { common.TestAccPreCheckRequiredEnvVars(t) },
 		ProviderFactories: common.TestAccProviderFactories,
 		CheckDestroy:      testAccCheckImagesImageV2Destroy,
 		Steps: []resource.TestStep{

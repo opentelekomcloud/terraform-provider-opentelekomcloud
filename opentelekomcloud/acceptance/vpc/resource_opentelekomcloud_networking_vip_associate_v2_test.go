@@ -23,7 +23,7 @@ func TestAccNetworkingV2VIPAssociate_basic(t *testing.T) {
 	var port2 ports.Port
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:          func() { common.TestAccPreCheck(t) },
+		PreCheck:          func() { common.TestAccPreCheckRequiredEnvVars(t) },
 		ProviderFactories: common.TestAccProviderFactories,
 		CheckDestroy:      testAccCheckNetworkingV2VIPAssociateDestroy,
 		Steps: []resource.TestStep{

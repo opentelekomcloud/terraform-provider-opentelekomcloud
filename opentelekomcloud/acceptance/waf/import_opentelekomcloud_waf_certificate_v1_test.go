@@ -9,7 +9,7 @@ import (
 
 func TestAccWafCertificateV1_import(t *testing.T) {
 	resource.Test(t, resource.TestCase{
-		PreCheck:          func() { common.TestAccPreCheck(t) },
+		PreCheck:          func() { common.TestAccPreCheckRequiredEnvVars(t) },
 		ProviderFactories: common.TestAccProviderFactories,
 		CheckDestroy:      testAccCheckWafCertificateV1Destroy,
 		Steps: []resource.TestStep{

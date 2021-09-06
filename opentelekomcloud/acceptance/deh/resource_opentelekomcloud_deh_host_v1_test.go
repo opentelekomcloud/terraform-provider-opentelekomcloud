@@ -19,7 +19,10 @@ func TestAccDedicatedHostV1_basic(t *testing.T) {
 	var host hosts.Host
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:          func() { common.TestAccPreCheck(t) },
+		PreCheck: func() {
+			common.TestAccPreCheckRequiredEnvVars(t)
+			common.TestAccAzPreCheck(t)
+		},
 		ProviderFactories: common.TestAccProviderFactories,
 		CheckDestroy:      testAccCheckDeHV1Destroy,
 		Steps: []resource.TestStep{
@@ -39,7 +42,10 @@ func TestAccDedicatedHostV1_basic(t *testing.T) {
 func TestAccDedicatedHostV1_update(t *testing.T) {
 	var host hosts.Host
 	resource.Test(t, resource.TestCase{
-		PreCheck:          func() { common.TestAccPreCheck(t) },
+		PreCheck: func() {
+			common.TestAccPreCheckRequiredEnvVars(t)
+			common.TestAccAzPreCheck(t)
+		},
 		ProviderFactories: common.TestAccProviderFactories,
 		CheckDestroy:      testAccCheckDeHV1Destroy,
 		Steps: []resource.TestStep{
@@ -69,7 +75,10 @@ func TestAccDedicatedHostV1_timeout(t *testing.T) {
 	var host hosts.Host
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:          func() { common.TestAccPreCheck(t) },
+		PreCheck: func() {
+			common.TestAccPreCheckRequiredEnvVars(t)
+			common.TestAccAzPreCheck(t)
+		},
 		ProviderFactories: common.TestAccProviderFactories,
 		CheckDestroy:      testAccCheckDeHV1Destroy,
 		Steps: []resource.TestStep{

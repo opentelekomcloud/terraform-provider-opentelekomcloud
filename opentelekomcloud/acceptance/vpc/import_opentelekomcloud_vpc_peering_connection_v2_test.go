@@ -12,7 +12,7 @@ func TestAccVpcPeeringConnectionV1_importBasic(t *testing.T) {
 	resourceName := "opentelekomcloud_vpc_peering_connection_v2.peering_1"
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:          func() { common.TestAccPreCheck(t) },
+		PreCheck:          func() { common.TestAccPreCheckRequiredEnvVars(t) },
 		ProviderFactories: common.TestAccProviderFactories,
 		CheckDestroy:      testAccCheckOTCVpcPeeringConnectionV2Destroy,
 		Steps: []resource.TestStep{

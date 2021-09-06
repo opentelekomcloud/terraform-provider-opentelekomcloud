@@ -17,7 +17,7 @@ func TestAccKmsKeyV1DataSource_basic(t *testing.T) {
 	dataSourceName := "data.opentelekomcloud_kms_key_v1.key1"
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:          func() { common.TestAccPreCheck(t) },
+		PreCheck:          func() { common.TestAccPreCheckRequiredEnvVars(t) },
 		ProviderFactories: common.TestAccProviderFactories,
 		Steps: []resource.TestStep{
 			{

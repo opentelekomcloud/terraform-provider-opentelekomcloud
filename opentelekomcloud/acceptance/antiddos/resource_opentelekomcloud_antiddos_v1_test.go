@@ -18,7 +18,7 @@ func TestAccAntiDdosV1_basic(t *testing.T) {
 	var antiddosElement antiddos.GetResponse
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:          func() { common.TestAccPreCheck(t) },
+		PreCheck:          func() { common.TestAccPreCheckRequiredEnvVars(t) },
 		ProviderFactories: common.TestAccProviderFactories,
 		CheckDestroy:      testAccCheckAntiDdosV1Destroy,
 		Steps: []resource.TestStep{
@@ -59,7 +59,7 @@ func TestAccAntiDdosV1_timeout(t *testing.T) {
 	var antiddosElement antiddos.GetResponse
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:          func() { common.TestAccPreCheck(t) },
+		PreCheck:          func() { common.TestAccPreCheckRequiredEnvVars(t) },
 		ProviderFactories: common.TestAccProviderFactories,
 		CheckDestroy:      testAccCheckAntiDdosV1Destroy,
 		Steps: []resource.TestStep{

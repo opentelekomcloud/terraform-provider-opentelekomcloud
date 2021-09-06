@@ -17,7 +17,10 @@ const resourceSnatRuleName = "opentelekomcloud_nat_snat_rule_v2.snat_1"
 
 func TestAccNatSnatRule_basic(t *testing.T) {
 	resource.Test(t, resource.TestCase{
-		PreCheck:          func() { common.TestAccPreCheck(t) },
+		PreCheck: func() {
+			common.TestAccPreCheckRequiredEnvVars(t)
+			common.TestAccSubnetPreCheck(t)
+		},
 		ProviderFactories: common.TestAccProviderFactories,
 		CheckDestroy:      testAccCheckNatV2SnatRuleDestroy,
 		Steps: []resource.TestStep{

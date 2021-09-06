@@ -10,7 +10,12 @@ import (
 
 func TestAccComputeV2InstanceImportBasic(t *testing.T) {
 	resource.Test(t, resource.TestCase{
-		PreCheck:          func() { common.TestAccPreCheck(t) },
+		PreCheck: func() {
+			common.TestAccPreCheckRequiredEnvVars(t)
+			common.TestAccSubnetPreCheck(t)
+			common.TestAccImagePreCheck(t)
+			common.TestAccAzPreCheck(t)
+		},
 		ProviderFactories: common.TestAccProviderFactories,
 		CheckDestroy:      TestAccCheckComputeV2InstanceDestroy,
 		Steps: []resource.TestStep{
@@ -32,7 +37,12 @@ func TestAccComputeV2InstanceImportBasic(t *testing.T) {
 
 func TestAccComputeV2InstanceImportBootFromVolumeImage(t *testing.T) {
 	resource.Test(t, resource.TestCase{
-		PreCheck:          func() { common.TestAccPreCheck(t) },
+		PreCheck: func() {
+			common.TestAccPreCheckRequiredEnvVars(t)
+			common.TestAccSubnetPreCheck(t)
+			common.TestAccImagePreCheck(t)
+			common.TestAccAzPreCheck(t)
+		},
 		ProviderFactories: common.TestAccProviderFactories,
 		CheckDestroy:      TestAccCheckComputeV2InstanceDestroy,
 		Steps: []resource.TestStep{

@@ -12,7 +12,10 @@ func TestAccOTCSFSFileSystemV2_importBasic(t *testing.T) {
 	resourceName := "opentelekomcloud_sfs_file_system_v2.sfs_1"
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:          func() { common.TestAccPreCheck(t) },
+		PreCheck: func() {
+			common.TestAccPreCheckRequiredEnvVars(t)
+			common.TestAccSubnetPreCheck(t)
+		},
 		ProviderFactories: common.TestAccProviderFactories,
 		CheckDestroy:      testAccCheckSFSFileSystemV2Destroy,
 		Steps: []resource.TestStep{

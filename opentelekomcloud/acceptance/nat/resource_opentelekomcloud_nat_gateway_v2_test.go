@@ -17,7 +17,10 @@ const resourceGatewayName = "opentelekomcloud_nat_gateway_v2.nat_1"
 
 func TestAccNatGateway_basic(t *testing.T) {
 	resource.Test(t, resource.TestCase{
-		PreCheck:          func() { common.TestAccPreCheck(t) },
+		PreCheck: func() {
+			common.TestAccPreCheckRequiredEnvVars(t)
+			common.TestAccSubnetPreCheck(t)
+		},
 		ProviderFactories: common.TestAccProviderFactories,
 		CheckDestroy:      testAccCheckNatV2GatewayDestroy,
 		Steps: []resource.TestStep{

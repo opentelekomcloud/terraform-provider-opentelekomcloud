@@ -25,7 +25,7 @@ func TestAccObsBucketPolicyBasic(t *testing.T) {
 		name, name)
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:          func() { common.TestAccPreCheck(t) },
+		PreCheck:          func() { common.TestAccPreCheckRequiredEnvVars(t) },
 		ProviderFactories: common.TestAccProviderFactories,
 		CheckDestroy:      testAccCheckObsBucketDestroy,
 		Steps: []resource.TestStep{
@@ -52,7 +52,7 @@ func TestAccObsBucketPolicyUpdate(t *testing.T) {
 		name, name)
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:          func() { common.TestAccPreCheck(t) },
+		PreCheck:          func() { common.TestAccPreCheckRequiredEnvVars(t) },
 		ProviderFactories: common.TestAccProviderFactories,
 		CheckDestroy:      testAccCheckObsBucketDestroy,
 		Steps: []resource.TestStep{
@@ -79,7 +79,7 @@ func TestAccObsBucketPolicyMalformed(t *testing.T) {
 	name := fmt.Sprintf("tf-test-bucket-%d", acctest.RandInt())
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:          func() { common.TestAccPreCheck(t) },
+		PreCheck:          func() { common.TestAccPreCheckRequiredEnvVars(t) },
 		ProviderFactories: common.TestAccProviderFactories,
 		CheckDestroy:      testAccCheckObsBucketDestroy,
 		Steps: []resource.TestStep{

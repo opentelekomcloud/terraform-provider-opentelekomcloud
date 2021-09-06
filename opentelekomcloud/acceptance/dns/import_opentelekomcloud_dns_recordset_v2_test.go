@@ -12,7 +12,7 @@ func TestAccDNSV2RecordSet_importBasic(t *testing.T) {
 	zoneName := randomZoneName()
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:          func() { common.TestAccPreCheck(t) },
+		PreCheck:          func() { common.TestAccPreCheckRequiredEnvVars(t) },
 		ProviderFactories: common.TestAccProviderFactories,
 		CheckDestroy:      testAccCheckDNSV2RecordSetDestroy,
 		Steps: []resource.TestStep{

@@ -18,7 +18,7 @@ func TestAccNetworkingV2Subnet_basic(t *testing.T) {
 	var subnet subnets.Subnet
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:          func() { common.TestAccPreCheck(t) },
+		PreCheck:          func() { common.TestAccPreCheckRequiredEnvVars(t) },
 		ProviderFactories: common.TestAccProviderFactories,
 		CheckDestroy:      testAccCheckNetworkingV2SubnetDestroy,
 		Steps: []resource.TestStep{
@@ -51,7 +51,7 @@ func TestAccNetworkingV2Subnet_enableDHCP(t *testing.T) {
 	var subnet subnets.Subnet
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:          func() { common.TestAccPreCheck(t) },
+		PreCheck:          func() { common.TestAccPreCheckRequiredEnvVars(t) },
 		ProviderFactories: common.TestAccProviderFactories,
 		CheckDestroy:      testAccCheckNetworkingV2SubnetDestroy,
 		Steps: []resource.TestStep{
@@ -71,7 +71,7 @@ func TestAccNetworkingV2Subnet_noGateway(t *testing.T) {
 	var subnet subnets.Subnet
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:          func() { common.TestAccPreCheck(t) },
+		PreCheck:          func() { common.TestAccPreCheckRequiredEnvVars(t) },
 		ProviderFactories: common.TestAccProviderFactories,
 		CheckDestroy:      testAccCheckNetworkingV2SubnetDestroy,
 		Steps: []resource.TestStep{
@@ -91,7 +91,7 @@ func TestAccNetworkingV2Subnet_impliedGateway(t *testing.T) {
 	var subnet subnets.Subnet
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:          func() { common.TestAccPreCheck(t) },
+		PreCheck:          func() { common.TestAccPreCheckRequiredEnvVars(t) },
 		ProviderFactories: common.TestAccProviderFactories,
 		CheckDestroy:      testAccCheckNetworkingV2SubnetDestroy,
 		Steps: []resource.TestStep{
@@ -111,7 +111,7 @@ func TestAccNetworkingV2Subnet_timeout(t *testing.T) {
 	var subnet subnets.Subnet
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:          func() { common.TestAccPreCheck(t) },
+		PreCheck:          func() { common.TestAccPreCheckRequiredEnvVars(t) },
 		ProviderFactories: common.TestAccProviderFactories,
 		CheckDestroy:      testAccCheckNetworkingV2SubnetDestroy,
 		Steps: []resource.TestStep{

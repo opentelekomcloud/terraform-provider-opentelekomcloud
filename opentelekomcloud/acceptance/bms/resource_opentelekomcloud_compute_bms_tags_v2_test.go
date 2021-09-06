@@ -20,7 +20,12 @@ func TestAccBMSTagsV2_basic(t *testing.T) {
 	var tagList tags.Tags
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:          func() { common.TestAccPreCheck(t) },
+		PreCheck: func() {
+			common.TestAccPreCheckRequiredEnvVars(t)
+			common.TestAccImagePreCheck(t)
+			common.TestAccSubnetPreCheck(t)
+			common.TestAccAzPreCheck(t)
+		},
 		ProviderFactories: common.TestAccProviderFactories,
 		CheckDestroy:      testAccCheckBMSTagsV2Destroy,
 		Steps: []resource.TestStep{
@@ -39,7 +44,12 @@ func TestAccBMSTagsV2_timeout(t *testing.T) {
 	var tagList tags.Tags
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:          func() { common.TestAccPreCheck(t) },
+		PreCheck: func() {
+			common.TestAccPreCheckRequiredEnvVars(t)
+			common.TestAccImagePreCheck(t)
+			common.TestAccSubnetPreCheck(t)
+			common.TestAccAzPreCheck(t)
+		},
 		ProviderFactories: common.TestAccProviderFactories,
 		CheckDestroy:      testAccCheckBMSTagsV2Destroy,
 		Steps: []resource.TestStep{

@@ -20,7 +20,11 @@ func TestAccRTSSoftwareDeploymentV1_basic(t *testing.T) {
 	var deployments softwaredeployment.Deployment
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:          func() { common.TestAccPreCheck(t) },
+		PreCheck: func() {
+			common.TestAccPreCheckRequiredEnvVars(t)
+			common.TestAccImagePreCheck(t)
+			common.TestAccSubnetPreCheck(t)
+		},
 		ProviderFactories: common.TestAccProviderFactories,
 		CheckDestroy:      testAccCheckRTSSoftwareDeploymentV1Destroy,
 		Steps: []resource.TestStep{
@@ -52,7 +56,11 @@ func TestAccRTSSoftwareDeploymentV1_timeout(t *testing.T) {
 	var deployments softwaredeployment.Deployment
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:          func() { common.TestAccPreCheck(t) },
+		PreCheck: func() {
+			common.TestAccPreCheckRequiredEnvVars(t)
+			common.TestAccImagePreCheck(t)
+			common.TestAccSubnetPreCheck(t)
+		},
 		ProviderFactories: common.TestAccProviderFactories,
 		CheckDestroy:      testAccCheckRTSSoftwareDeploymentV1Destroy,
 		Steps: []resource.TestStep{

@@ -21,7 +21,7 @@ func TestAccRdsConfigurationV3_basic(t *testing.T) {
 	var config configurations.Configuration
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:          func() { common.TestAccPreCheck(t) },
+		PreCheck:          func() { common.TestAccPreCheckRequiredEnvVars(t) },
 		ProviderFactories: common.TestAccProviderFactories,
 		CheckDestroy:      testAccCheckRdsConfigV3Destroy,
 		Steps: []resource.TestStep{
@@ -47,7 +47,7 @@ func TestAccRdsConfigurationV3_basic(t *testing.T) {
 
 func TestAccRdsConfigurationV3_invalidDbVersion(t *testing.T) {
 	resource.Test(t, resource.TestCase{
-		PreCheck:          func() { common.TestAccPreCheck(t) },
+		PreCheck:          func() { common.TestAccPreCheckRequiredEnvVars(t) },
 		ProviderFactories: common.TestAccProviderFactories,
 		CheckDestroy:      testAccCheckRdsConfigV3Destroy,
 		Steps: []resource.TestStep{

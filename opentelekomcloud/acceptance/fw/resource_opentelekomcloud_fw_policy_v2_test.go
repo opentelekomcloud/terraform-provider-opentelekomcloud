@@ -17,7 +17,7 @@ import (
 
 func TestAccFWPolicyV2_basic(t *testing.T) {
 	resource.Test(t, resource.TestCase{
-		PreCheck:          func() { common.TestAccPreCheck(t) },
+		PreCheck:          func() { common.TestAccPreCheckRequiredEnvVars(t) },
 		ProviderFactories: common.TestAccProviderFactories,
 		CheckDestroy:      testAccCheckFWPolicyV2Destroy,
 		Steps: []resource.TestStep{
@@ -34,7 +34,7 @@ func TestAccFWPolicyV2_basic(t *testing.T) {
 
 func TestAccFWPolicyV2_addRules(t *testing.T) {
 	resource.Test(t, resource.TestCase{
-		PreCheck:          func() { common.TestAccPreCheck(t) },
+		PreCheck:          func() { common.TestAccPreCheckRequiredEnvVars(t) },
 		ProviderFactories: common.TestAccProviderFactories,
 		CheckDestroy:      testAccCheckFWPolicyV2Destroy,
 		Steps: []resource.TestStep{
@@ -51,7 +51,7 @@ func TestAccFWPolicyV2_addRules(t *testing.T) {
 
 func TestAccFWPolicyV2_deleteRules(t *testing.T) {
 	resource.Test(t, resource.TestCase{
-		PreCheck:          func() { common.TestAccPreCheck(t) },
+		PreCheck:          func() { common.TestAccPreCheckRequiredEnvVars(t) },
 		ProviderFactories: common.TestAccProviderFactories,
 		CheckDestroy:      testAccCheckFWPolicyV2Destroy,
 		Steps: []resource.TestStep{
@@ -68,7 +68,7 @@ func TestAccFWPolicyV2_deleteRules(t *testing.T) {
 
 func TestAccFWPolicyV2_timeout(t *testing.T) {
 	resource.Test(t, resource.TestCase{
-		PreCheck:          func() { common.TestAccPreCheck(t) },
+		PreCheck:          func() { common.TestAccPreCheckRequiredEnvVars(t) },
 		ProviderFactories: common.TestAccProviderFactories,
 		CheckDestroy:      testAccCheckFWPolicyV2Destroy,
 		Steps: []resource.TestStep{
@@ -85,7 +85,7 @@ func TestAccFWPolicyV2_timeout(t *testing.T) {
 
 func TestAccFWPolicyV2_removeSingleRule(t *testing.T) {
 	resource.Test(t, resource.TestCase{
-		PreCheck:          func() { common.TestAccPreCheck(t) },
+		PreCheck:          func() { common.TestAccPreCheckRequiredEnvVars(t) },
 		ProviderFactories: common.TestAccProviderFactories,
 		CheckDestroy:      testAccCheckFWPolicyV2Destroy,
 		Steps: []resource.TestStep{

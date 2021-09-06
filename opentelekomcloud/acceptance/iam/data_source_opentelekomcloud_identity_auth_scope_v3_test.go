@@ -16,7 +16,7 @@ func TestAccOpenTelekomCloudIdentityAuthScopeV3DataSource_basic(t *testing.T) {
 	projectName := os.Getenv("OS_PROJECT_NAME")
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:          func() { common.TestAccPreCheck(t) },
+		PreCheck:          func() { common.TestAccPreCheckRequiredEnvVars(t) },
 		ProviderFactories: common.TestAccProviderFactories,
 		Steps: []resource.TestStep{
 			{

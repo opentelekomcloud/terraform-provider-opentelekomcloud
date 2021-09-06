@@ -19,7 +19,12 @@ func TestAccMRSV1Job_basic(t *testing.T) {
 	var jobGet job.Job
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:          func() { common.TestAccPreCheckRequiredEnvVars(t) },
+		PreCheck: func() {
+			common.TestAccPreCheckRequiredEnvVars(t)
+			common.TestAccSubnetPreCheck(t)
+			common.TestAccAzPreCheck(t)
+			common.TestAccKeyPairPreCheck(t)
+		},
 		ProviderFactories: common.TestAccProviderFactories,
 		CheckDestroy:      testAccCheckMRSV1JobDestroy,
 		Steps: []resource.TestStep{

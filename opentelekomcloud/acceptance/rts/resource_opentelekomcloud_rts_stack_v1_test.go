@@ -20,7 +20,7 @@ func TestAccRTSStackV1_basic(t *testing.T) {
 	var stack stacks.RetrievedStack
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:          func() { common.TestAccPreCheck(t) },
+		PreCheck:          func() { common.TestAccPreCheckRequiredEnvVars(t) },
 		ProviderFactories: common.TestAccProviderFactories,
 		CheckDestroy:      testAccCheckRTSStackV1Destroy,
 		Steps: []resource.TestStep{
@@ -51,7 +51,7 @@ func TestAccRTSStackV1_timeout(t *testing.T) {
 	var stack stacks.RetrievedStack
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:          func() { common.TestAccPreCheck(t) },
+		PreCheck:          func() { common.TestAccPreCheckRequiredEnvVars(t) },
 		ProviderFactories: common.TestAccProviderFactories,
 		CheckDestroy:      testAccCheckRTSStackV1Destroy,
 		Steps: []resource.TestStep{

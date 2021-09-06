@@ -25,7 +25,10 @@ func TestAccComputeV2FloatingIPAssociate_basic(t *testing.T) {
 	resourceNwFloatingIpName := "opentelekomcloud_networking_floatingip_v2.fip_1"
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:          func() { common.TestAccPreCheck(t) },
+		PreCheck: func() {
+			common.TestAccPreCheckRequiredEnvVars(t)
+			common.TestAccSubnetPreCheck(t)
+		},
 		ProviderFactories: common.TestAccProviderFactories,
 		CheckDestroy:      testAccCheckComputeV2FloatingIPAssociateDestroy,
 		Steps: []resource.TestStep{
@@ -47,7 +50,10 @@ func TestAccComputeV2FloatingIPAssociate_fixedIP(t *testing.T) {
 	resourceNwFloatingIpName := "opentelekomcloud_networking_floatingip_v2.fip_1"
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:          func() { common.TestAccPreCheck(t) },
+		PreCheck: func() {
+			common.TestAccPreCheckRequiredEnvVars(t)
+			common.TestAccSubnetPreCheck(t)
+		},
 		ProviderFactories: common.TestAccProviderFactories,
 		CheckDestroy:      testAccCheckComputeV2FloatingIPAssociateDestroy,
 		Steps: []resource.TestStep{
@@ -69,7 +75,10 @@ func TestAccComputeV2FloatingIPAssociate_attachToFirstNetwork(t *testing.T) {
 	resourceNwFloatingIpName := "opentelekomcloud_networking_floatingip_v2.fip_1"
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:          func() { common.TestAccPreCheck(t) },
+		PreCheck: func() {
+			common.TestAccPreCheckRequiredEnvVars(t)
+			common.TestAccSubnetPreCheck(t)
+		},
 		ProviderFactories: common.TestAccProviderFactories,
 		CheckDestroy:      testAccCheckComputeV2FloatingIPAssociateDestroy,
 		Steps: []resource.TestStep{
@@ -93,7 +102,10 @@ func TestAccComputeV2FloatingIPAssociate_attachNew(t *testing.T) {
 	resourceNwFloatingIp2Name := "opentelekomcloud_networking_floatingip_v2.fip_2"
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:          func() { common.TestAccPreCheck(t) },
+		PreCheck: func() {
+			common.TestAccPreCheckRequiredEnvVars(t)
+			common.TestAccSubnetPreCheck(t)
+		},
 		ProviderFactories: common.TestAccProviderFactories,
 		CheckDestroy:      testAccCheckComputeV2FloatingIPAssociateDestroy,
 		Steps: []resource.TestStep{

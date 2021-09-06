@@ -14,7 +14,7 @@ const resourceDataName = "data.opentelekomcloud_rts_stack_resource_v1.resource_1
 
 func TestAccRTSStackResourcesV1DataSource_basic(t *testing.T) {
 	resource.Test(t, resource.TestCase{
-		PreCheck:          func() { common.TestAccPreCheck(t) },
+		PreCheck:          func() { common.TestAccPreCheckRequiredEnvVars(t) },
 		ProviderFactories: common.TestAccProviderFactories,
 		Steps: []resource.TestStep{
 			{

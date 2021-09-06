@@ -20,7 +20,10 @@ func TestAccLBV2LoadBalancer_basic(t *testing.T) {
 	var lb loadbalancers.LoadBalancer
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:          func() { common.TestAccPreCheck(t) },
+		PreCheck: func() {
+			common.TestAccPreCheckRequiredEnvVars(t)
+			common.TestAccSubnetPreCheck(t)
+		},
 		ProviderFactories: common.TestAccProviderFactories,
 		CheckDestroy:      testAccCheckLBV2LoadBalancerDestroy,
 		Steps: []resource.TestStep{

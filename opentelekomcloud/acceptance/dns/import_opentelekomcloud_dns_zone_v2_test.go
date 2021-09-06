@@ -14,7 +14,7 @@ func TestAccDNSV2Zone_importBasic(t *testing.T) {
 	var zoneName = fmt.Sprintf("accepttest%s.com.", acctest.RandString(5))
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:          func() { common.TestAccPreCheck(t) },
+		PreCheck:          func() { common.TestAccPreCheckRequiredEnvVars(t) },
 		ProviderFactories: common.TestAccProviderFactories,
 		CheckDestroy:      testAccCheckDNSV2ZoneDestroy,
 		Steps: []resource.TestStep{

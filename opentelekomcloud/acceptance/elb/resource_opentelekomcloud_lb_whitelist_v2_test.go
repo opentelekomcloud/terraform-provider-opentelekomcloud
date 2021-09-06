@@ -19,7 +19,10 @@ func TestAccLBV2Whitelist_basic(t *testing.T) {
 	var whitelist whitelists.Whitelist
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:          func() { common.TestAccPreCheck(t) },
+		PreCheck: func() {
+			common.TestAccPreCheckRequiredEnvVars(t)
+			common.TestAccSubnetPreCheck(t)
+		},
 		ProviderFactories: common.TestAccProviderFactories,
 		CheckDestroy:      testAccCheckLBV2WhitelistDestroy,
 		Steps: []resource.TestStep{

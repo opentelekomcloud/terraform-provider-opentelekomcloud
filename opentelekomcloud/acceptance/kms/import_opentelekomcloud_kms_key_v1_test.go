@@ -15,7 +15,7 @@ func TestAccKmsV1Key_importBasic(t *testing.T) {
 	var keyAlias = fmt.Sprintf("kms_%s", acctest.RandString(5))
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:          func() { common.TestAccPreCheck(t) },
+		PreCheck:          func() { common.TestAccPreCheckRequiredEnvVars(t) },
 		ProviderFactories: common.TestAccProviderFactories,
 		CheckDestroy:      testAccCheckKmsV1KeyDestroy,
 		Steps: []resource.TestStep{

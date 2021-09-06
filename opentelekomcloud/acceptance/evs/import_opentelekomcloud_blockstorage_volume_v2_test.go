@@ -10,7 +10,7 @@ import (
 
 func TestAccBlockStorageV2Volume_importBasic(t *testing.T) {
 	resource.Test(t, resource.TestCase{
-		PreCheck:          func() { common.TestAccPreCheck(t) },
+		PreCheck:          func() { common.TestAccPreCheckRequiredEnvVars(t) },
 		ProviderFactories: common.TestAccProviderFactories,
 		CheckDestroy:      testAccCheckBlockStorageV2VolumeDestroy,
 		Steps: []resource.TestStep{

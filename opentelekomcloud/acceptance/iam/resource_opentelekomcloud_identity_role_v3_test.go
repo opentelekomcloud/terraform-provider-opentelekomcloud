@@ -30,7 +30,7 @@ import (
 
 func TestAccIdentityRoleV3_basic(t *testing.T) {
 	resource.Test(t, resource.TestCase{
-		PreCheck:          func() { acc.TestAccPreCheck(t) },
+		PreCheck:          func() { acc.TestAccPreCheckRequiredEnvVars(t) },
 		ProviderFactories: acc.TestAccProviderFactories,
 		CheckDestroy:      testAccCheckIdentityRoleV3Destroy,
 		Steps: []resource.TestStep{

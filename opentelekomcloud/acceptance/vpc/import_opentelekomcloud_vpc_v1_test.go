@@ -12,7 +12,7 @@ func TestAccVpcV1_importBasic(t *testing.T) {
 	resourceName := "opentelekomcloud_vpc_v1.vpc_1"
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:          func() { common.TestAccPreCheck(t) },
+		PreCheck:          func() { common.TestAccPreCheckRequiredEnvVars(t) },
 		ProviderFactories: common.TestAccProviderFactories,
 		CheckDestroy:      testAccCheckOTCVpcV1Destroy,
 		Steps: []resource.TestStep{

@@ -12,7 +12,7 @@ import (
 
 func TestAccVpcPeeringConnectionAccepterV2_basic(t *testing.T) {
 	resource.Test(t, resource.TestCase{
-		PreCheck:          func() { common.TestAccPreCheck(t) },
+		PreCheck:          func() { common.TestAccPreCheckRequiredEnvVars(t) },
 		ProviderFactories: common.TestAccProviderFactories,
 		CheckDestroy:      testAccCheckOTCVpcPeeringConnectionAccepterDestroy,
 		Steps: []resource.TestStep{

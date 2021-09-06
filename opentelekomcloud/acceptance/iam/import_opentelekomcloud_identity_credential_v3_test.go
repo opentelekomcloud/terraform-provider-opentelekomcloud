@@ -11,7 +11,7 @@ import (
 func TestAccIdentityV3Credential_importBasic(t *testing.T) {
 	resource.Test(t, resource.TestCase{
 		PreCheck: func() {
-			common.TestAccPreCheck(t)
+			common.TestAccPreCheckRequiredEnvVars(t)
 		},
 		ProviderFactories: common.TestAccProviderFactories,
 		CheckDestroy:      testAccCheckIdentityV3UserDestroy,

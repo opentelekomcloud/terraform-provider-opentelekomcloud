@@ -17,7 +17,7 @@ import (
 func TestAccLogTankTopicV2_basic(t *testing.T) {
 	var topic logtopics.LogTopic
 	resource.Test(t, resource.TestCase{
-		PreCheck:          func() { common.TestAccPreCheck(t) },
+		PreCheck:          func() { common.TestAccPreCheckRequiredEnvVars(t) },
 		ProviderFactories: common.TestAccProviderFactories,
 		CheckDestroy:      testAccCheckLogTankTopicV2Destroy,
 		Steps: []resource.TestStep{

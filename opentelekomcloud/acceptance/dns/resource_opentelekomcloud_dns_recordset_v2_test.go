@@ -30,7 +30,7 @@ func TestAccDNSV2RecordSet_basic(t *testing.T) {
 	zoneName := randomZoneName()
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:          func() { common.TestAccPreCheck(t) },
+		PreCheck:          func() { common.TestAccPreCheckRequiredEnvVars(t) },
 		ProviderFactories: common.TestAccProviderFactories,
 		CheckDestroy:      testAccCheckDNSV2RecordSetDestroy,
 		Steps: []resource.TestStep{
@@ -61,7 +61,7 @@ func TestAccDNSV2RecordSet_unDotted(t *testing.T) {
 	zoneName := randomZoneName()
 	zoneName = strings.TrimSuffix(zoneName, ".")
 	resource.Test(t, resource.TestCase{
-		PreCheck:          func() { common.TestAccPreCheck(t) },
+		PreCheck:          func() { common.TestAccPreCheckRequiredEnvVars(t) },
 		ProviderFactories: common.TestAccProviderFactories,
 		CheckDestroy:      testAccCheckDNSV2RecordSetDestroy,
 		Steps: []resource.TestStep{
@@ -76,7 +76,7 @@ func TestAccDNSV2RecordSet_unDotted(t *testing.T) {
 func TestAccDNSV2RecordSet_childFirst(t *testing.T) {
 	zoneName := randomZoneName()
 	resource.Test(t, resource.TestCase{
-		PreCheck:          func() { common.TestAccPreCheck(t) },
+		PreCheck:          func() { common.TestAccPreCheckRequiredEnvVars(t) },
 		ProviderFactories: common.TestAccProviderFactories,
 		CheckDestroy:      testAccCheckDNSV2RecordSetDestroy,
 		Steps: []resource.TestStep{
@@ -95,7 +95,7 @@ func TestAccDNSV2RecordSet_readTTL(t *testing.T) {
 	zoneName := randomZoneName()
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:          func() { common.TestAccPreCheck(t) },
+		PreCheck:          func() { common.TestAccPreCheckRequiredEnvVars(t) },
 		ProviderFactories: common.TestAccProviderFactories,
 		CheckDestroy:      testAccCheckDNSV2RecordSetDestroy,
 		Steps: []resource.TestStep{
@@ -115,7 +115,7 @@ func TestAccDNSV2RecordSet_timeout(t *testing.T) {
 	zoneName := randomZoneName()
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:          func() { common.TestAccPreCheck(t) },
+		PreCheck:          func() { common.TestAccPreCheckRequiredEnvVars(t) },
 		ProviderFactories: common.TestAccProviderFactories,
 		CheckDestroy:      testAccCheckDNSV2RecordSetDestroy,
 		Steps: []resource.TestStep{
@@ -134,7 +134,7 @@ func TestAccDNSV2RecordSet_shared(t *testing.T) {
 	resourceRecordSet2Name := "opentelekomcloud_dns_recordset_v2.recordset_2"
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:          func() { common.TestAccPreCheck(t) },
+		PreCheck:          func() { common.TestAccPreCheckRequiredEnvVars(t) },
 		ProviderFactories: common.TestAccProviderFactories,
 		CheckDestroy:      testAccCheckDNSV2RecordSetDestroy,
 		Steps: []resource.TestStep{

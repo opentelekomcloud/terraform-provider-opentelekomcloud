@@ -12,7 +12,7 @@ func TestAccAntiDdosV1_importBasic(t *testing.T) {
 	resourceName := "opentelekomcloud_antiddos_v1.antiddos_1"
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:          func() { common.TestAccPreCheck(t) },
+		PreCheck:          func() { common.TestAccPreCheckRequiredEnvVars(t) },
 		ProviderFactories: common.TestAccProviderFactories,
 		CheckDestroy:      testAccCheckAntiDdosV1Destroy,
 		Steps: []resource.TestStep{

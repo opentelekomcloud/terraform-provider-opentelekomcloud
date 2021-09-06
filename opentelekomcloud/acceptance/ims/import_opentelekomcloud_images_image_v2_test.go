@@ -13,7 +13,7 @@ func TestAccImagesImageV2_importBasic(t *testing.T) {
 	resourceName := "opentelekomcloud_images_image_v2.image_1"
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:          func() { common.TestAccPreCheck(t) },
+		PreCheck:          func() { common.TestAccPreCheckRequiredEnvVars(t) },
 		ProviderFactories: common.TestAccProviderFactories,
 		CheckDestroy:      testAccCheckImagesImageV2Destroy,
 		Steps: []resource.TestStep{

@@ -13,7 +13,11 @@ func TestAccCCEAddonV3ImportBasic(t *testing.T) {
 	addonResourceName := "opentelekomcloud_cce_addon_v3.autoscaler"
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:          func() { common.TestAccPreCheck(t) },
+		PreCheck: func() {
+			common.TestAccPreCheckRequiredEnvVars(t)
+			common.TestAccSubnetPreCheck(t)
+			common.TestAccTenantPreCheck(t)
+		},
 		ProviderFactories: common.TestAccProviderFactories,
 		CheckDestroy:      testAccCheckCCEAddonV3Destroy,
 		Steps: []resource.TestStep{

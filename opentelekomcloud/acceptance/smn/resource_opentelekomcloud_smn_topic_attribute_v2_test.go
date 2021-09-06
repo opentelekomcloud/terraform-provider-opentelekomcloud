@@ -17,7 +17,7 @@ func TestAccSMNV2TopicAttribute_basic(t *testing.T) {
 	resourceName := "opentelekomcloud_smn_topic_attribute_v2.attribute_1"
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:          func() { common.TestAccPreCheck(t) },
+		PreCheck:          func() { common.TestAccPreCheckRequiredEnvVars(t) },
 		ProviderFactories: common.TestAccProviderFactories,
 		CheckDestroy:      testAccCheckSMNTopicAttributeV2Destroy,
 		Steps: []resource.TestStep{
@@ -36,7 +36,7 @@ func TestAccSMNV2TopicAttribute_import(t *testing.T) {
 	resourceName := "opentelekomcloud_smn_topic_attribute_v2.attribute_1"
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:          func() { common.TestAccPreCheck(t) },
+		PreCheck:          func() { common.TestAccPreCheckRequiredEnvVars(t) },
 		ProviderFactories: common.TestAccProviderFactories,
 		CheckDestroy:      testAccCheckSMNTopicAttributeV2Destroy,
 		Steps: []resource.TestStep{

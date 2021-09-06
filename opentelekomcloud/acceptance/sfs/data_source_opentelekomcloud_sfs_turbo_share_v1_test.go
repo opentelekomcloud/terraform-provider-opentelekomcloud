@@ -13,7 +13,11 @@ func TestAccSFSTurboShareV1DataSource_basic(t *testing.T) {
 	name := tools.RandomString("turbo-", 5)
 	dsName := "data.opentelekomcloud_sfs_turbo_share_v1.share"
 	resource.Test(t, resource.TestCase{
-		PreCheck:          func() { common.TestAccPreCheck(t) },
+		PreCheck: func() {
+			common.TestAccPreCheckRequiredEnvVars(t)
+			common.TestAccSubnetPreCheck(t)
+			common.TestAccAzPreCheck(t)
+		},
 		ProviderFactories: common.TestAccProviderFactories,
 		Steps: []resource.TestStep{
 			{

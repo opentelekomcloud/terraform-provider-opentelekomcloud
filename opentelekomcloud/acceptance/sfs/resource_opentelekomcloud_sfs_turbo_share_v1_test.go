@@ -21,7 +21,11 @@ func TestAccSFSTurboShareV1_basic(t *testing.T) {
 	var turbo shares.Turbo
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:          func() { common.TestAccPreCheck(t) },
+		PreCheck: func() {
+			common.TestAccPreCheckRequiredEnvVars(t)
+			common.TestAccSubnetPreCheck(t)
+			common.TestAccAzPreCheck(t)
+		},
 		ProviderFactories: common.TestAccProviderFactories,
 		CheckDestroy:      testAccCheckSFSTurboShareV1Destroy,
 		Steps: []resource.TestStep{
@@ -52,7 +56,12 @@ func TestAccSFSTurboShareV1_withKMS(t *testing.T) {
 	var turbo shares.Turbo
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:          func() { common.TestAccPreCheck(t) },
+		PreCheck: func() {
+			common.TestAccPreCheckRequiredEnvVars(t)
+			common.TestAccSubnetPreCheck(t)
+			common.TestAccAzPreCheck(t)
+			common.TestAccKMSPreCheck(t)
+		},
 		ProviderFactories: common.TestAccProviderFactories,
 		CheckDestroy:      testAccCheckSFSTurboShareV1Destroy,
 		Steps: []resource.TestStep{

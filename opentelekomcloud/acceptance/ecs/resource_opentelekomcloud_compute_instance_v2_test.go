@@ -24,7 +24,12 @@ func TestAccComputeV2Instance_basic(t *testing.T) {
 	var instance servers.Server
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:          func() { common.TestAccPreCheck(t) },
+		PreCheck: func() {
+			common.TestAccPreCheckRequiredEnvVars(t)
+			common.TestAccSubnetPreCheck(t)
+			common.TestAccAzPreCheck(t)
+			common.TestAccImagePreCheck(t)
+		},
 		ProviderFactories: common.TestAccProviderFactories,
 		CheckDestroy:      TestAccCheckComputeV2InstanceDestroy,
 		Steps: []resource.TestStep{
@@ -58,7 +63,11 @@ func TestAccComputeV2Instance_multiSecgroup(t *testing.T) {
 	secGroupName2 := "opentelekomcloud_compute_secgroup_v2.secgroup_2"
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:          func() { common.TestAccPreCheck(t) },
+		PreCheck: func() {
+			common.TestAccPreCheckRequiredEnvVars(t)
+			common.TestAccSubnetPreCheck(t)
+			common.TestAccImagePreCheck(t)
+		},
 		ProviderFactories: common.TestAccProviderFactories,
 		CheckDestroy:      TestAccCheckComputeV2InstanceDestroy,
 		Steps: []resource.TestStep{
@@ -86,7 +95,12 @@ func TestAccComputeV2Instance_bootFromImage(t *testing.T) {
 	var instance servers.Server
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:          func() { common.TestAccPreCheck(t) },
+		PreCheck: func() {
+			common.TestAccPreCheckRequiredEnvVars(t)
+			common.TestAccSubnetPreCheck(t)
+			common.TestAccImagePreCheck(t)
+			common.TestAccAzPreCheck(t)
+		},
 		ProviderFactories: common.TestAccProviderFactories,
 		CheckDestroy:      TestAccCheckComputeV2InstanceDestroy,
 		Steps: []resource.TestStep{
@@ -105,7 +119,11 @@ func TestAccComputeV2Instance_bootFromVolume(t *testing.T) {
 	var instance servers.Server
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:          func() { common.TestAccPreCheck(t) },
+		PreCheck: func() {
+			common.TestAccPreCheckRequiredEnvVars(t)
+			common.TestAccSubnetPreCheck(t)
+			common.TestAccImagePreCheck(t)
+		},
 		ProviderFactories: common.TestAccProviderFactories,
 		CheckDestroy:      TestAccCheckComputeV2InstanceDestroy,
 		Steps: []resource.TestStep{
@@ -123,7 +141,11 @@ func TestAccComputeV2Instance_changeFixedIP(t *testing.T) {
 	var instance servers.Server
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:          func() { common.TestAccPreCheck(t) },
+		PreCheck: func() {
+			common.TestAccPreCheckRequiredEnvVars(t)
+			common.TestAccSubnetPreCheck(t)
+			common.TestAccImagePreCheck(t)
+		},
 		ProviderFactories: common.TestAccProviderFactories,
 		CheckDestroy:      TestAccCheckComputeV2InstanceDestroy,
 		Steps: []resource.TestStep{
@@ -141,7 +163,11 @@ func TestAccComputeV2Instance_bootFromVolumeVolume(t *testing.T) {
 	var instance servers.Server
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:          func() { common.TestAccPreCheck(t) },
+		PreCheck: func() {
+			common.TestAccPreCheckRequiredEnvVars(t)
+			common.TestAccSubnetPreCheck(t)
+			common.TestAccImagePreCheck(t)
+		},
 		ProviderFactories: common.TestAccProviderFactories,
 		CheckDestroy:      TestAccCheckComputeV2InstanceDestroy,
 		Steps: []resource.TestStep{
@@ -160,7 +186,11 @@ func TestAccComputeV2Instance_stopBeforeDestroy(t *testing.T) {
 	var instance servers.Server
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:          func() { common.TestAccPreCheck(t) },
+		PreCheck: func() {
+			common.TestAccPreCheckRequiredEnvVars(t)
+			common.TestAccSubnetPreCheck(t)
+			common.TestAccImagePreCheck(t)
+		},
 		ProviderFactories: common.TestAccProviderFactories,
 		CheckDestroy:      TestAccCheckComputeV2InstanceDestroy,
 		Steps: []resource.TestStep{
@@ -178,7 +208,11 @@ func TestAccComputeV2Instance_metadata(t *testing.T) {
 	var instance servers.Server
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:          func() { common.TestAccPreCheck(t) },
+		PreCheck: func() {
+			common.TestAccPreCheckRequiredEnvVars(t)
+			common.TestAccSubnetPreCheck(t)
+			common.TestAccImagePreCheck(t)
+		},
 		ProviderFactories: common.TestAccProviderFactories,
 		CheckDestroy:      TestAccCheckComputeV2InstanceDestroy,
 		Steps: []resource.TestStep{
@@ -211,7 +245,11 @@ func TestAccComputeV2Instance_timeout(t *testing.T) {
 	var instance servers.Server
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:          func() { common.TestAccPreCheck(t) },
+		PreCheck: func() {
+			common.TestAccPreCheckRequiredEnvVars(t)
+			common.TestAccSubnetPreCheck(t)
+			common.TestAccImagePreCheck(t)
+		},
 		ProviderFactories: common.TestAccProviderFactories,
 		CheckDestroy:      TestAccCheckComputeV2InstanceDestroy,
 		Steps: []resource.TestStep{
@@ -229,7 +267,12 @@ func TestAccComputeV2Instance_autoRecovery(t *testing.T) {
 	var instance servers.Server
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:          func() { common.TestAccPreCheck(t) },
+		PreCheck: func() {
+			common.TestAccPreCheckRequiredEnvVars(t)
+			common.TestAccSubnetPreCheck(t)
+			common.TestAccImagePreCheck(t)
+			common.TestAccAzPreCheck(t)
+		},
 		ProviderFactories: common.TestAccProviderFactories,
 		CheckDestroy:      TestAccCheckComputeV2InstanceDestroy,
 		Steps: []resource.TestStep{
@@ -255,7 +298,11 @@ func TestAccComputeV2Instance_crazyNICs(t *testing.T) {
 	var instance servers.Server
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:          func() { common.TestAccPreCheck(t) },
+		PreCheck: func() {
+			common.TestAccPreCheckRequiredEnvVars(t)
+			common.TestAccSubnetPreCheck(t)
+			common.TestAccImagePreCheck(t)
+		},
 		ProviderFactories: common.TestAccProviderFactories,
 		CheckDestroy:      TestAccCheckComputeV2InstanceDestroy,
 		Steps: []resource.TestStep{
@@ -274,7 +321,9 @@ func TestAccComputeV2Instance_initialStateActive(t *testing.T) {
 
 	resource.Test(t, resource.TestCase{
 		PreCheck: func() {
-			common.TestAccPreCheck(t)
+			common.TestAccPreCheckRequiredEnvVars(t)
+			common.TestAccSubnetPreCheck(t)
+			common.TestAccImagePreCheck(t)
 		},
 		ProviderFactories: common.TestAccProviderFactories,
 		CheckDestroy:      TestAccCheckComputeV2InstanceDestroy,
@@ -312,7 +361,9 @@ func TestAccComputeV2Instance_initialStateShutoff(t *testing.T) {
 
 	resource.Test(t, resource.TestCase{
 		PreCheck: func() {
-			common.TestAccPreCheck(t)
+			common.TestAccPreCheckRequiredEnvVars(t)
+			common.TestAccSubnetPreCheck(t)
+			common.TestAccImagePreCheck(t)
 		},
 		ProviderFactories: common.TestAccProviderFactories,
 		CheckDestroy:      TestAccCheckComputeV2InstanceDestroy,

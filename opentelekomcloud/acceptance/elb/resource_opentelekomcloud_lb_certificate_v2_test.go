@@ -18,7 +18,7 @@ func TestAccLBV2Certificate_basic(t *testing.T) {
 	var c certificates.Certificate
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:          func() { common.TestAccPreCheck(t) },
+		PreCheck:          func() { common.TestAccPreCheckRequiredEnvVars(t) },
 		ProviderFactories: common.TestAccProviderFactories,
 		CheckDestroy:      testAccCheckLBV2CertificateDestroy,
 		Steps: []resource.TestStep{

@@ -20,7 +20,7 @@ func TestAccDataSourceObsBucket_basic(t *testing.T) {
 	var bucket *obs.BaseModel
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:                  func() { common.TestAccPreCheck(t) },
+		PreCheck:                  func() { common.TestAccPreCheckRequiredEnvVars(t) },
 		ProviderFactories:         common.TestAccProviderFactories,
 		PreventPostDestroyRefresh: true,
 		Steps: []resource.TestStep{

@@ -20,7 +20,7 @@ func TestAccComputeV2SecGroup_basic(t *testing.T) {
 	var secGroup secgroups.SecurityGroup
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:          func() { common.TestAccPreCheck(t) },
+		PreCheck:          func() { common.TestAccPreCheckRequiredEnvVars(t) },
 		ProviderFactories: common.TestAccProviderFactories,
 		CheckDestroy:      testAccCheckComputeV2SecGroupDestroy,
 		Steps: []resource.TestStep{
@@ -38,7 +38,7 @@ func TestAccComputeV2SecGroup_update(t *testing.T) {
 	var secGroup secgroups.SecurityGroup
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:          func() { common.TestAccPreCheck(t) },
+		PreCheck:          func() { common.TestAccPreCheckRequiredEnvVars(t) },
 		ProviderFactories: common.TestAccProviderFactories,
 		CheckDestroy:      testAccCheckComputeV2SecGroupDestroy,
 		Steps: []resource.TestStep{
@@ -65,7 +65,7 @@ func TestAccComputeV2SecGroup_groupID(t *testing.T) {
 	resourceSecGroup3Name := "opentelekomcloud_compute_secgroup_v2.sg_3"
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:          func() { common.TestAccPreCheck(t) },
+		PreCheck:          func() { common.TestAccPreCheckRequiredEnvVars(t) },
 		ProviderFactories: common.TestAccProviderFactories,
 		CheckDestroy:      testAccCheckComputeV2SecGroupDestroy,
 		Steps: []resource.TestStep{
@@ -95,7 +95,7 @@ func TestAccComputeV2SecGroup_self(t *testing.T) {
 	var secGroup secgroups.SecurityGroup
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:          func() { common.TestAccPreCheck(t) },
+		PreCheck:          func() { common.TestAccPreCheckRequiredEnvVars(t) },
 		ProviderFactories: common.TestAccProviderFactories,
 		CheckDestroy:      testAccCheckComputeV2SecGroupDestroy,
 		Steps: []resource.TestStep{
@@ -116,7 +116,7 @@ func TestAccComputeV2SecGroup_icmpZero(t *testing.T) {
 	var secGroup secgroups.SecurityGroup
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:          func() { common.TestAccPreCheck(t) },
+		PreCheck:          func() { common.TestAccPreCheckRequiredEnvVars(t) },
 		ProviderFactories: common.TestAccProviderFactories,
 		CheckDestroy:      testAccCheckComputeV2SecGroupDestroy,
 		Steps: []resource.TestStep{
@@ -134,7 +134,7 @@ func TestAccComputeV2SecGroup_timeout(t *testing.T) {
 	var secGroup secgroups.SecurityGroup
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:          func() { common.TestAccPreCheck(t) },
+		PreCheck:          func() { common.TestAccPreCheckRequiredEnvVars(t) },
 		ProviderFactories: common.TestAccProviderFactories,
 		CheckDestroy:      testAccCheckComputeV2SecGroupDestroy,
 		Steps: []resource.TestStep{

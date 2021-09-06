@@ -14,7 +14,11 @@ const resourceVaultName = "opentelekomcloud_cbr_vault_v3.vault"
 
 func TestAccCBRVaultV3_basic(t *testing.T) {
 	resource.Test(t, resource.TestCase{
-		PreCheck:          func() { common.TestAccFlavorPreCheck(t) },
+		PreCheck: func() {
+			common.TestAccPreCheckRequiredEnvVars(t)
+			common.TestAccImagePreCheck(t)
+			common.TestAccSubnetPreCheck(t)
+		},
 		ProviderFactories: common.TestAccProviderFactories,
 		CheckDestroy:      testAccCheckCBRPolicyV3Destroy,
 		Steps: []resource.TestStep{
@@ -45,7 +49,11 @@ func TestAccCBRVaultV3_basic(t *testing.T) {
 
 func TestAccCBRVaultV3_unAssign(t *testing.T) {
 	resource.Test(t, resource.TestCase{
-		PreCheck:          func() { common.TestAccFlavorPreCheck(t) },
+		PreCheck: func() {
+			common.TestAccPreCheckRequiredEnvVars(t)
+			common.TestAccImagePreCheck(t)
+			common.TestAccSubnetPreCheck(t)
+		},
 		ProviderFactories: common.TestAccProviderFactories,
 		CheckDestroy:      testAccCheckCBRPolicyV3Destroy,
 		Steps: []resource.TestStep{
@@ -65,7 +73,11 @@ func TestAccCBRVaultV3_unAssign(t *testing.T) {
 
 func TestAccCBRVaultV3_instance(t *testing.T) {
 	resource.Test(t, resource.TestCase{
-		PreCheck:          func() { common.TestAccFlavorPreCheck(t) },
+		PreCheck: func() {
+			common.TestAccPreCheckRequiredEnvVars(t)
+			common.TestAccImagePreCheck(t)
+			common.TestAccSubnetPreCheck(t)
+		},
 		ProviderFactories: common.TestAccProviderFactories,
 		CheckDestroy:      testAccCheckCBRPolicyV3Destroy,
 		Steps: []resource.TestStep{

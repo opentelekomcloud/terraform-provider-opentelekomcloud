@@ -27,7 +27,7 @@ func TestAccNetworkingV2Port_basic(t *testing.T) {
 	var subnet subnets.Subnet
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:          func() { common.TestAccPreCheck(t) },
+		PreCheck:          func() { common.TestAccPreCheckRequiredEnvVars(t) },
 		ProviderFactories: common.TestAccProviderFactories,
 		CheckDestroy:      testAccCheckNetworkingV2PortDestroy,
 		Steps: []resource.TestStep{
@@ -49,7 +49,7 @@ func TestAccNetworkingV2Port_noip(t *testing.T) {
 	var subnet subnets.Subnet
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:          func() { common.TestAccPreCheck(t) },
+		PreCheck:          func() { common.TestAccPreCheckRequiredEnvVars(t) },
 		ProviderFactories: common.TestAccProviderFactories,
 		CheckDestroy:      testAccCheckNetworkingV2PortDestroy,
 		Steps: []resource.TestStep{
@@ -72,7 +72,7 @@ func TestAccNetworkingV2Port_allowedAddressPairs(t *testing.T) {
 	var vrrpPort1, vrrpPort2, instancePort ports.Port
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:          func() { common.TestAccPreCheck(t) },
+		PreCheck:          func() { common.TestAccPreCheckRequiredEnvVars(t) },
 		ProviderFactories: common.TestAccProviderFactories,
 		CheckDestroy:      testAccCheckNetworkingV2PortDestroy,
 		Steps: []resource.TestStep{
@@ -95,7 +95,7 @@ func TestAccNetworkingV2Port_portSecurity_enabled(t *testing.T) {
 	resourceName := "opentelekomcloud_networking_port_v2.port_1"
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:          func() { common.TestAccPreCheck(t) },
+		PreCheck:          func() { common.TestAccPreCheckRequiredEnvVars(t) },
 		ProviderFactories: common.TestAccProviderFactories,
 		CheckDestroy:      testAccCheckNetworkingV2PortDestroy,
 		Steps: []resource.TestStep{
@@ -125,7 +125,7 @@ func TestAccNetworkingV2Port_timeout(t *testing.T) {
 	var subnet subnets.Subnet
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:          func() { common.TestAccPreCheck(t) },
+		PreCheck:          func() { common.TestAccPreCheckRequiredEnvVars(t) },
 		ProviderFactories: common.TestAccProviderFactories,
 		CheckDestroy:      testAccCheckNetworkingV2PortDestroy,
 		Steps: []resource.TestStep{

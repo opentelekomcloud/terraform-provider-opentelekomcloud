@@ -18,7 +18,7 @@ func TestAccWebTamperProtectionRuleV1_basic(t *testing.T) {
 	var rule webtamperprotection_rules.WebTamper
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:          func() { common.TestAccPreCheck(t) },
+		PreCheck:          func() { common.TestAccPreCheckRequiredEnvVars(t) },
 		ProviderFactories: common.TestAccProviderFactories,
 		CheckDestroy:      testAccCheckWafWebTamperProtectionRuleV1Destroy,
 		Steps: []resource.TestStep{

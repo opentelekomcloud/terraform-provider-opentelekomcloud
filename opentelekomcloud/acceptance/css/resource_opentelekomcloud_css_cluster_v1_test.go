@@ -22,7 +22,11 @@ func TestAccCssClusterV1_basic(t *testing.T) {
 	name := fmt.Sprintf("css-%s", acctest.RandString(10))
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:          func() { acc.TestAccPreCheck(t) },
+		PreCheck: func() {
+			acc.TestAccPreCheckRequiredEnvVars(t)
+			acc.TestAccSubnetPreCheck(t)
+			acc.TestAccAzPreCheck(t)
+		},
 		ProviderFactories: acc.TestAccProviderFactories,
 		CheckDestroy:      testAccCheckCssClusterV1Destroy,
 		Steps: []resource.TestStep{
@@ -49,7 +53,11 @@ func TestAccCssClusterV1_validateDiskAndFlavor(t *testing.T) {
 	name := fmt.Sprintf("css-%s", acctest.RandString(10))
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:          func() { acc.TestAccPreCheck(t) },
+		PreCheck: func() {
+			acc.TestAccPreCheckRequiredEnvVars(t)
+			acc.TestAccSubnetPreCheck(t)
+			acc.TestAccAzPreCheck(t)
+		},
 		ProviderFactories: acc.TestAccProviderFactories,
 		Steps: []resource.TestStep{
 			{
@@ -83,7 +91,12 @@ func TestAccCssClusterV1_encrypted(t *testing.T) {
 	}
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:          func() { acc.TestAccPreCheck(t) },
+		PreCheck: func() {
+			acc.TestAccPreCheckRequiredEnvVars(t)
+			acc.TestAccSubnetPreCheck(t)
+			acc.TestAccAzPreCheck(t)
+			acc.TestAccKMSPreCheck(t)
+		},
 		ProviderFactories: acc.TestAccProviderFactories,
 		CheckDestroy:      testAccCheckCssClusterV1Destroy,
 		Steps: []resource.TestStep{

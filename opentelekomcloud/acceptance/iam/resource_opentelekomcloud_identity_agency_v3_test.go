@@ -20,7 +20,7 @@ func TestAccIdentityV3Agency_basic(t *testing.T) {
 
 	resource.Test(t, resource.TestCase{
 		PreCheck: func() {
-			common.TestAccPreCheck(t)
+			common.TestAccPreCheckRequiredEnvVars(t)
 			TestAccIdentityV3AgencyPreCheck(t)
 			common.TestAccPreCheckAdminOnly(t)
 		},

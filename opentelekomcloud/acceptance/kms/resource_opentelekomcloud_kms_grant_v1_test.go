@@ -24,7 +24,10 @@ func TestAccKmsGrantV1Basic(t *testing.T) {
 	}
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:          func() { common.TestAccPreCheck(t) },
+		PreCheck: func() {
+			common.TestAccAzPreCheck(t)
+			common.TestAccKMSPreCheck(t)
+		},
 		ProviderFactories: common.TestAccProviderFactories,
 		CheckDestroy:      testAccCheckKmsV1GrantDestroy,
 		Steps: []resource.TestStep{

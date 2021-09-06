@@ -21,7 +21,7 @@ func TestAccVpcV1DataSource_basic(t *testing.T) {
 	name := tools.RandomString("vpc-test-", 3)
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:          func() { common.TestAccPreCheck(t) },
+		PreCheck:          func() { common.TestAccPreCheckRequiredEnvVars(t) },
 		ProviderFactories: common.TestAccProviderFactories,
 		Steps: []resource.TestStep{
 			{

@@ -18,7 +18,10 @@ func TestAccLBV2Listener_basic(t *testing.T) {
 	resourceName := "opentelekomcloud_lb_listener_v2.listener_1"
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:          func() { common.TestAccPreCheck(t) },
+		PreCheck: func() {
+			common.TestAccPreCheckRequiredEnvVars(t)
+			common.TestAccSubnetPreCheck(t)
+		},
 		ProviderFactories: common.TestAccProviderFactories,
 		CheckDestroy:      testAccCheckLBV2ListenerDestroy,
 		Steps: []resource.TestStep{
@@ -45,7 +48,10 @@ func TestAccLBV2Listener_tls(t *testing.T) {
 	resourceName := "opentelekomcloud_lb_listener_v2.listener_tls"
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:          func() { common.TestAccPreCheck(t) },
+		PreCheck: func() {
+			common.TestAccPreCheckRequiredEnvVars(t)
+			common.TestAccSubnetPreCheck(t)
+		},
 		ProviderFactories: common.TestAccProviderFactories,
 		CheckDestroy:      testAccCheckLBV2ListenerDestroy,
 		Steps: []resource.TestStep{
@@ -77,7 +83,10 @@ func TestAccLBV2ListenerSni(t *testing.T) {
 	resourceName := "opentelekomcloud_lb_listener_v2.elb_listener"
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:          func() { common.TestAccPreCheck(t) },
+		PreCheck: func() {
+			common.TestAccPreCheckRequiredEnvVars(t)
+			common.TestAccSubnetPreCheck(t)
+		},
 		ProviderFactories: common.TestAccProviderFactories,
 		CheckDestroy:      testAccCheckLBV2ListenerDestroy,
 		Steps: []resource.TestStep{

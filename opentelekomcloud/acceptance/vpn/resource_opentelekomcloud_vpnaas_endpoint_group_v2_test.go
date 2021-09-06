@@ -17,7 +17,7 @@ import (
 func TestAccVpnGroupV2_basic(t *testing.T) {
 	var group endpointgroups.EndpointGroup
 	resource.Test(t, resource.TestCase{
-		PreCheck:          func() { common.TestAccPreCheck(t) },
+		PreCheck:          func() { common.TestAccPreCheckRequiredEnvVars(t) },
 		ProviderFactories: common.TestAccProviderFactories,
 		CheckDestroy:      testAccCheckEndpointGroupV2Destroy,
 		Steps: []resource.TestStep{

@@ -17,7 +17,7 @@ import (
 func TestAccVpnIKEPolicyV2_basic(t *testing.T) {
 	var policy ikepolicies.Policy
 	resource.Test(t, resource.TestCase{
-		PreCheck:          func() { common.TestAccPreCheck(t) },
+		PreCheck:          func() { common.TestAccPreCheckRequiredEnvVars(t) },
 		ProviderFactories: common.TestAccProviderFactories,
 		CheckDestroy:      testAccCheckIKEPolicyV2Destroy,
 		Steps: []resource.TestStep{
@@ -44,7 +44,7 @@ func TestAccVpnIKEPolicyV2_basic(t *testing.T) {
 func TestAccVpnIKEPolicyV2_withLifetime(t *testing.T) {
 	var policy ikepolicies.Policy
 	resource.Test(t, resource.TestCase{
-		PreCheck:          func() { common.TestAccPreCheck(t) },
+		PreCheck:          func() { common.TestAccPreCheckRequiredEnvVars(t) },
 		ProviderFactories: common.TestAccProviderFactories,
 		CheckDestroy:      testAccCheckIKEPolicyV2Destroy,
 		Steps: []resource.TestStep{
@@ -69,7 +69,7 @@ func TestAccVpnIKEPolicyV2_withLifetime(t *testing.T) {
 func TestAccVpnIKEPolicyV2_withNewParams(t *testing.T) {
 	var policy ikepolicies.Policy
 	resource.Test(t, resource.TestCase{
-		PreCheck:          func() { common.TestAccPreCheck(t) },
+		PreCheck:          func() { common.TestAccPreCheckRequiredEnvVars(t) },
 		ProviderFactories: common.TestAccProviderFactories,
 		CheckDestroy:      testAccCheckIKEPolicyV2Destroy,
 		Steps: []resource.TestStep{

@@ -23,7 +23,7 @@ func TestAccVpcFlowLogV1_basic(t *testing.T) {
 	var flowlog flowlogs.FlowLog
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:          func() { common.TestAccPreCheck(t) },
+		PreCheck:          func() { common.TestAccPreCheckRequiredEnvVars(t) },
 		ProviderFactories: common.TestAccProviderFactories,
 		CheckDestroy:      testAccCheckVpcFlowLogV1Destroy,
 		Steps: []resource.TestStep{

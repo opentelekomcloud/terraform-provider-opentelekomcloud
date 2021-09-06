@@ -17,7 +17,7 @@ import (
 func TestAccVpnSiteConnectionV2_basic(t *testing.T) {
 	var conn siteconnections.Connection
 	resource.Test(t, resource.TestCase{
-		PreCheck:          func() { common.TestAccPreCheck(t) },
+		PreCheck:          func() { common.TestAccPreCheckRequiredEnvVars(t) },
 		ProviderFactories: common.TestAccProviderFactories,
 		CheckDestroy:      testAccCheckSiteConnectionV2Destroy,
 		Steps: []resource.TestStep{

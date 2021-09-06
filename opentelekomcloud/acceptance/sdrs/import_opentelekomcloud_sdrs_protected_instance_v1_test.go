@@ -12,7 +12,12 @@ func TestAccSdrsProtectedInstanceV1_importBasic(t *testing.T) {
 	resourceName := "opentelekomcloud_sdrs_protected_instance_v1.instance_1"
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:          func() { common.TestAccPreCheck(t) },
+		PreCheck: func() {
+			common.TestAccPreCheckRequiredEnvVars(t)
+			common.TestAccImagePreCheck(t)
+			common.TestAccSubnetPreCheck(t)
+			common.TestAccAzPreCheck(t)
+		},
 		ProviderFactories: common.TestAccProviderFactories,
 		CheckDestroy:      testAccSdrsProtectedInstanceV1Destroy,
 		Steps: []resource.TestStep{

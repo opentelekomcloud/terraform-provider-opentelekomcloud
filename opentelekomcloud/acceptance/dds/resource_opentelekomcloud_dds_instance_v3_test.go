@@ -17,7 +17,11 @@ const resourceInstanceName = "opentelekomcloud_dds_instance_v3.instance"
 
 func TestAccDDSV3Instance_basic(t *testing.T) {
 	resource.Test(t, resource.TestCase{
-		PreCheck:          func() { common.TestAccPreCheck(t) },
+		PreCheck: func() {
+			common.TestAccPreCheckRequiredEnvVars(t)
+			common.TestAccSubnetPreCheck(t)
+			common.TestAccAzPreCheck(t)
+		},
 		ProviderFactories: common.TestAccProviderFactories,
 		CheckDestroy:      testAccCheckDDSV3InstanceDestroy,
 		Steps: []resource.TestStep{
@@ -36,7 +40,11 @@ func TestAccDDSV3Instance_basic(t *testing.T) {
 
 func TestAccDDSV3Instance_minConfig(t *testing.T) {
 	resource.Test(t, resource.TestCase{
-		PreCheck:          func() { common.TestAccPreCheck(t) },
+		PreCheck: func() {
+			common.TestAccPreCheckRequiredEnvVars(t)
+			common.TestAccSubnetPreCheck(t)
+			common.TestAccAzPreCheck(t)
+		},
 		ProviderFactories: common.TestAccProviderFactories,
 		CheckDestroy:      testAccCheckDDSV3InstanceDestroy,
 		Steps: []resource.TestStep{

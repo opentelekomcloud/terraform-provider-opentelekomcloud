@@ -18,7 +18,10 @@ func TestCESAlarmRule_basic(t *testing.T) {
 	resourceName := "opentelekomcloud_ces_alarmrule.alarmrule_1"
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:          func() { common.TestAccPreCheck(t) },
+		PreCheck: func() {
+			common.TestAccPreCheckRequiredEnvVars(t)
+			common.TestAccSubnetPreCheck(t)
+		},
 		ProviderFactories: common.TestAccProviderFactories,
 		CheckDestroy:      testCESAlarmRuleDestroy,
 		Steps: []resource.TestStep{

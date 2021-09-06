@@ -20,7 +20,11 @@ func TestResourceCSSSnapshotConfigurationV1_basic(t *testing.T) {
 	resourceName := "opentelekomcloud_css_snapshot_configuration_v1.config"
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:          func() { acc.TestAccPreCheck(t) },
+		PreCheck: func() {
+			acc.TestAccPreCheckRequiredEnvVars(t)
+			acc.TestAccSubnetPreCheck(t)
+			acc.TestAccAzPreCheck(t)
+		},
 		ProviderFactories: acc.TestAccProviderFactories,
 		CheckDestroy:      testAccCheckCssClusterV1Destroy,
 		Steps: []resource.TestStep{

@@ -22,7 +22,11 @@ func TestAccDcsInstancesV1_basic(t *testing.T) {
 	var instanceName = fmt.Sprintf("dcs_instance_%s", acctest.RandString(5))
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:          func() { common.TestAccPreCheck(t) },
+		PreCheck: func() {
+			common.TestAccPreCheckRequiredEnvVars(t)
+			common.TestAccSubnetPreCheck(t)
+			common.TestAccAzPreCheck(t)
+		},
 		ProviderFactories: common.TestAccProviderFactories,
 		CheckDestroy:      testAccCheckDcsV1InstanceDestroy,
 		Steps: []resource.TestStep{

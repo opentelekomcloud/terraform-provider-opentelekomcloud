@@ -50,7 +50,7 @@ func TestAccVBSBackupPolicyV2_rentention_day(t *testing.T) {
 	var policy policies.Policy
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:          func() { common.TestAccPreCheck(t) },
+		PreCheck:          func() { common.TestAccPreCheckRequiredEnvVars(t) },
 		ProviderFactories: common.TestAccProviderFactories,
 		CheckDestroy:      testAccVBSBackupPolicyV2Destroy,
 		Steps: []resource.TestStep{

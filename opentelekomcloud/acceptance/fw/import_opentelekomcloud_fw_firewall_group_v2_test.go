@@ -12,7 +12,7 @@ func TestAccFWFirewallV2_importBasic(t *testing.T) {
 	resourceName := "opentelekomcloud_fw_firewall_group_v2.fw_1"
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:          func() { common.TestAccPreCheck(t) },
+		PreCheck:          func() { common.TestAccPreCheckRequiredEnvVars(t) },
 		ProviderFactories: common.TestAccProviderFactories,
 		CheckDestroy:      testAccCheckFWFirewallGroupV2Destroy,
 		Steps: []resource.TestStep{

@@ -18,7 +18,7 @@ func TestAccVpcV1_basic(t *testing.T) {
 	var vpc vpcs.Vpc
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:          func() { common.TestAccPreCheck(t) },
+		PreCheck:          func() { common.TestAccPreCheckRequiredEnvVars(t) },
 		ProviderFactories: common.TestAccProviderFactories,
 		CheckDestroy:      testAccCheckOTCVpcV1Destroy,
 		Steps: []resource.TestStep{
@@ -48,7 +48,7 @@ func TestAccVpcV1_update(t *testing.T) {
 	var vpc vpcs.Vpc
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:          func() { common.TestAccPreCheck(t) },
+		PreCheck:          func() { common.TestAccPreCheckRequiredEnvVars(t) },
 		ProviderFactories: common.TestAccProviderFactories,
 		CheckDestroy:      testAccCheckOTCVpcV1Destroy,
 		Steps: []resource.TestStep{
@@ -84,7 +84,7 @@ func TestAccVpcV1_timeout(t *testing.T) {
 	var vpc vpcs.Vpc
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:          func() { common.TestAccPreCheck(t) },
+		PreCheck:          func() { common.TestAccPreCheckRequiredEnvVars(t) },
 		ProviderFactories: common.TestAccProviderFactories,
 		CheckDestroy:      testAccCheckOTCVpcV1Destroy,
 		Steps: []resource.TestStep{

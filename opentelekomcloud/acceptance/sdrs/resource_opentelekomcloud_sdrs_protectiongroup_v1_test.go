@@ -20,7 +20,10 @@ func TestAccSdrsProtectionGroupV1_basic(t *testing.T) {
 	var group protectiongroups.Group
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:          func() { common.TestAccPreCheck(t) },
+		PreCheck: func() {
+			common.TestAccPreCheckRequiredEnvVars(t)
+			common.TestAccSubnetPreCheck(t)
+		},
 		ProviderFactories: common.TestAccProviderFactories,
 		CheckDestroy:      testAccCheckSdrsProtectionGroupV1Destroy,
 		Steps: []resource.TestStep{

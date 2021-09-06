@@ -19,7 +19,11 @@ const resourceDnatRuleName = "opentelekomcloud_nat_dnat_rule_v2.dnat"
 
 func TestAccNatDnat_basic(t *testing.T) {
 	resource.Test(t, resource.TestCase{
-		PreCheck:          func() { acc.TestAccPreCheck(t) },
+		PreCheck: func() {
+			acc.TestAccPreCheckRequiredEnvVars(t)
+			acc.TestAccSubnetPreCheck(t)
+			acc.TestAccAzPreCheck(t)
+		},
 		ProviderFactories: acc.TestAccProviderFactories,
 		CheckDestroy:      testAccCheckNatDnatDestroy,
 		Steps: []resource.TestStep{
@@ -35,7 +39,11 @@ func TestAccNatDnat_basic(t *testing.T) {
 
 func TestAccNatDnatRule_withPort(t *testing.T) {
 	resource.Test(t, resource.TestCase{
-		PreCheck:          func() { acc.TestAccPreCheck(t) },
+		PreCheck: func() {
+			acc.TestAccPreCheckRequiredEnvVars(t)
+			acc.TestAccSubnetPreCheck(t)
+			acc.TestAccAzPreCheck(t)
+		},
 		ProviderFactories: acc.TestAccProviderFactories,
 		CheckDestroy:      testAccCheckNatDnatDestroy,
 		Steps: []resource.TestStep{

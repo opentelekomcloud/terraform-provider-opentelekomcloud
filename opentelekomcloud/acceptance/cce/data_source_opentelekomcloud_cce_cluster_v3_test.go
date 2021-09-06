@@ -16,7 +16,10 @@ func TestAccCCEClusterV3DataSource_basic(t *testing.T) {
 	dataSourceName := "data.opentelekomcloud_cce_cluster_v3.clusters"
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:          func() { common.TestAccPreCheck(t) },
+		PreCheck: func() {
+			common.TestAccPreCheckRequiredEnvVars(t)
+			common.TestAccSubnetPreCheck(t)
+		},
 		ProviderFactories: common.TestAccProviderFactories,
 		Steps: []resource.TestStep{
 			{

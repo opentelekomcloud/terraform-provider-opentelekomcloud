@@ -23,7 +23,10 @@ func TestAccDmsInstancesV1_basic(t *testing.T) {
 	var instanceUpdate = fmt.Sprintf("dms_instance_update_%s", acctest.RandString(5))
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:          func() { common.TestAccPreCheck(t) },
+		PreCheck: func() {
+			common.TestAccPreCheckRequiredEnvVars(t)
+			common.TestAccSubnetPreCheck(t)
+		},
 		ProviderFactories: common.TestAccProviderFactories,
 		CheckDestroy:      testAccCheckDmsV1InstanceDestroy,
 		Steps: []resource.TestStep{

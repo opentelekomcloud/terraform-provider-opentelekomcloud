@@ -18,7 +18,7 @@ func TestAccWafWhiteBlackIpRuleV1_basic(t *testing.T) {
 	var rule whiteblackip_rules.WhiteBlackIP
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:          func() { common.TestAccPreCheck(t) },
+		PreCheck:          func() { common.TestAccPreCheckRequiredEnvVars(t) },
 		ProviderFactories: common.TestAccProviderFactories,
 		CheckDestroy:      testAccCheckWafWhiteBlackIpRuleV1Destroy,
 		Steps: []resource.TestStep{

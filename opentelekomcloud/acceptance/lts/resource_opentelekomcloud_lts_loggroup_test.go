@@ -17,7 +17,7 @@ import (
 func TestAccLogTankGroupV2_basic(t *testing.T) {
 	var group loggroups.LogGroup
 	resource.Test(t, resource.TestCase{
-		PreCheck:          func() { common.TestAccPreCheck(t) },
+		PreCheck:          func() { common.TestAccPreCheckRequiredEnvVars(t) },
 		ProviderFactories: common.TestAccProviderFactories,
 		CheckDestroy:      testAccCheckLogTankGroupV2Destroy,
 		Steps: []resource.TestStep{

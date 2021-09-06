@@ -20,7 +20,7 @@ func TestAccELBHealth_basic(t *testing.T) {
 	var health healthcheck.Health
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:          func() { common.TestAccPreCheck(t) },
+		PreCheck:          func() { common.TestAccPreCheckRequiredEnvVars(t) },
 		ProviderFactories: common.TestAccProviderFactories,
 		CheckDestroy:      testAccCheckELBHealthDestroy,
 		Steps: []resource.TestStep{

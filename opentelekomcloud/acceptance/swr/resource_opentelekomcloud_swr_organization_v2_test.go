@@ -17,7 +17,7 @@ import (
 
 func TestSwrOrganizationV2_basic(t *testing.T) {
 	resource.Test(t, resource.TestCase{
-		PreCheck:          func() { common.TestAccPreCheck(t) },
+		PreCheck:          func() { common.TestAccPreCheckRequiredEnvVars(t) },
 		ProviderFactories: common.TestAccProviderFactories,
 		CheckDestroy:      testSwrOrganizationV2Destroy,
 		Steps: []resource.TestStep{
@@ -43,7 +43,7 @@ func TestSwrOrganizationV2_validateName(t *testing.T) {
 	}
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:          func() { common.TestAccPreCheck(t) },
+		PreCheck:          func() { common.TestAccPreCheckRequiredEnvVars(t) },
 		ProviderFactories: common.TestAccProviderFactories,
 		CheckDestroy:      testSwrOrganizationV2Destroy,
 		Steps:             steps,

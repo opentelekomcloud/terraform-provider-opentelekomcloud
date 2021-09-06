@@ -15,7 +15,7 @@ const flavorDataName = "data.opentelekomcloud_rds_flavors_v1.flavor"
 
 func TestAccOpenTelekomCloudRdsFlavorV1DataSource_basic(t *testing.T) {
 	resource.Test(t, resource.TestCase{
-		PreCheck:          func() { common.TestAccPreCheck(t) },
+		PreCheck:          func() { common.TestAccPreCheckRequiredEnvVars(t) },
 		ProviderFactories: common.TestAccProviderFactories,
 		Steps: []resource.TestStep{
 			{
@@ -33,7 +33,7 @@ func TestAccOpenTelekomCloudRdsFlavorV1DataSource_basic(t *testing.T) {
 
 func TestAccOpenTelekomCloudRdsFlavorV1DataSource_speccode(t *testing.T) {
 	resource.Test(t, resource.TestCase{
-		PreCheck:          func() { common.TestAccPreCheck(t) },
+		PreCheck:          func() { common.TestAccPreCheckRequiredEnvVars(t) },
 		ProviderFactories: common.TestAccProviderFactories,
 		Steps: []resource.TestStep{
 			{

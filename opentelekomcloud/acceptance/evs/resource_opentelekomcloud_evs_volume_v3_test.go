@@ -21,7 +21,10 @@ func TestAccEvsStorageV3Volume_basic(t *testing.T) {
 	var volume volumes.Volume
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:          func() { common.TestAccPreCheck(t) },
+		PreCheck: func() {
+			common.TestAccPreCheckRequiredEnvVars(t)
+			common.TestAccAzPreCheck(t)
+		},
 		ProviderFactories: common.TestAccProviderFactories,
 		CheckDestroy:      testAccCheckEvsStorageV3VolumeDestroy,
 		Steps: []resource.TestStep{
@@ -45,7 +48,10 @@ func TestAccEvsStorageV3Volume_basic(t *testing.T) {
 
 func TestAccEvsStorageV3Volume_tags(t *testing.T) {
 	resource.Test(t, resource.TestCase{
-		PreCheck:          func() { common.TestAccPreCheck(t) },
+		PreCheck: func() {
+			common.TestAccPreCheckRequiredEnvVars(t)
+			common.TestAccAzPreCheck(t)
+		},
 		ProviderFactories: common.TestAccProviderFactories,
 		CheckDestroy:      testAccCheckEvsStorageV3VolumeDestroy,
 		Steps: []resource.TestStep{
@@ -69,7 +75,11 @@ func TestAccEvsStorageV3Volume_image(t *testing.T) {
 	var volume volumes.Volume
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:          func() { common.TestAccPreCheck(t) },
+		PreCheck: func() {
+			common.TestAccPreCheckRequiredEnvVars(t)
+			common.TestAccAzPreCheck(t)
+			common.TestAccImagePreCheck(t)
+		},
 		ProviderFactories: common.TestAccProviderFactories,
 		CheckDestroy:      testAccCheckEvsStorageV3VolumeDestroy,
 		Steps: []resource.TestStep{
@@ -88,7 +98,10 @@ func TestAccEvsStorageV3Volume_timeout(t *testing.T) {
 	var volume volumes.Volume
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:          func() { common.TestAccPreCheck(t) },
+		PreCheck: func() {
+			common.TestAccPreCheckRequiredEnvVars(t)
+			common.TestAccAzPreCheck(t)
+		},
 		ProviderFactories: common.TestAccProviderFactories,
 		CheckDestroy:      testAccCheckEvsStorageV3VolumeDestroy,
 		Steps: []resource.TestStep{
@@ -104,7 +117,10 @@ func TestAccEvsStorageV3Volume_timeout(t *testing.T) {
 
 func TestAccEvsStorageV3Volume_volumeType(t *testing.T) {
 	resource.Test(t, resource.TestCase{
-		PreCheck:          func() { common.TestAccPreCheck(t) },
+		PreCheck: func() {
+			common.TestAccPreCheckRequiredEnvVars(t)
+			common.TestAccAzPreCheck(t)
+		},
 		ProviderFactories: common.TestAccProviderFactories,
 		CheckDestroy:      testAccCheckEvsStorageV3VolumeDestroy,
 		Steps: []resource.TestStep{
@@ -122,7 +138,10 @@ func TestAccEvsStorageV3Volume_resize(t *testing.T) {
 	var volumeUpScaled volumes.Volume
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:          func() { common.TestAccPreCheck(t) },
+		PreCheck: func() {
+			common.TestAccPreCheckRequiredEnvVars(t)
+			common.TestAccAzPreCheck(t)
+		},
 		ProviderFactories: common.TestAccProviderFactories,
 		CheckDestroy:      testAccCheckEvsStorageV3VolumeDestroy,
 		Steps: []resource.TestStep{

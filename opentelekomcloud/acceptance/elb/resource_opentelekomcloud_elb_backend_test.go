@@ -18,7 +18,7 @@ func TestAccELBBackend_basic(t *testing.T) {
 	var backend backendmember.Backend
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:          func() { common.TestAccPreCheck(t) },
+		PreCheck:          func() { common.TestAccPreCheckRequiredEnvVars(t) },
 		ProviderFactories: common.TestAccProviderFactories,
 		CheckDestroy:      testAccCheckELBBackendDestroy,
 		Steps: []resource.TestStep{

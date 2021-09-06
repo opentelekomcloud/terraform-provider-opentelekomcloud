@@ -22,7 +22,7 @@ func TestAccDNSV2PtrRecord_basic(t *testing.T) {
 	ptrName := fmt.Sprintf("acc-test-%s.com.", acctest.RandString(3))
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:          func() { common.TestAccPreCheck(t) },
+		PreCheck:          func() { common.TestAccPreCheckRequiredEnvVars(t) },
 		ProviderFactories: common.TestAccProviderFactories,
 		CheckDestroy:      testAccCheckDNSV2PtrRecordDestroy,
 		Steps: []resource.TestStep{
@@ -50,7 +50,7 @@ func TestAccDNSV2PtrRecord_unDotted(t *testing.T) {
 	zoneName := randomZoneName()
 	zoneName = strings.TrimSuffix(zoneName, ".")
 	resource.Test(t, resource.TestCase{
-		PreCheck:          func() { common.TestAccPreCheck(t) },
+		PreCheck:          func() { common.TestAccPreCheckRequiredEnvVars(t) },
 		ProviderFactories: common.TestAccProviderFactories,
 		CheckDestroy:      testAccCheckDNSV2PtrRecordDestroy,
 		Steps: []resource.TestStep{

@@ -19,7 +19,7 @@ func TestAccWafCertificateV1_basic(t *testing.T) {
 	var certificate certificates.Certificate
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:          func() { common.TestAccPreCheck(t) },
+		PreCheck:          func() { common.TestAccPreCheckRequiredEnvVars(t) },
 		ProviderFactories: common.TestAccProviderFactories,
 		CheckDestroy:      testAccCheckWafCertificateV1Destroy,
 		Steps: []resource.TestStep{
@@ -44,7 +44,7 @@ func TestAccWafCertificateV1_basic(t *testing.T) {
 
 func TestAccWafCertificateV1_validation(t *testing.T) {
 	resource.Test(t, resource.TestCase{
-		PreCheck:          func() { common.TestAccPreCheck(t) },
+		PreCheck:          func() { common.TestAccPreCheckRequiredEnvVars(t) },
 		ProviderFactories: common.TestAccProviderFactories,
 		Steps: []resource.TestStep{
 			{
