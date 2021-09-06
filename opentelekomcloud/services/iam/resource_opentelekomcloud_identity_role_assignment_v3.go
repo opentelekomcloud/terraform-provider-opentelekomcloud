@@ -113,7 +113,6 @@ func resourceIdentityRoleAssignmentV3Read(_ context.Context, d *schema.ResourceD
 		d.Set("group_id", groupID),
 		d.Set("user_id", userID),
 		d.Set("role_id", roleAssignment.ID),
-		d.Set("region", config.GetRegion(d)),
 	)
 	if err := mErr.ErrorOrNil(); err != nil {
 		return diag.FromErr(err)
