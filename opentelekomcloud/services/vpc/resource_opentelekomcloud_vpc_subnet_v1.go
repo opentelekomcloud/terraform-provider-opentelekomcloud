@@ -366,20 +366,15 @@ func waitForVpcSubnetDelete(client *golangsdk.ServiceClient, vpcID string, subne
 		}
 
 		if err := subnets.Delete(client, vpcID, subnetID).ExtractErr(); err != nil {
-			if _, ok := err.(golangsdk.ErrDefault404); ok {
+			switch err.(type) {
+			case golangsdk.ErrDefault404, golangsdk.ErrDefault400:
 				log.Printf("[INFO] Successfully deleted OpenTelekomCloud subnet %s", subnetID)
 				return subnet, "DELETED", nil
+			case golangsdk.ErrDefault409, golangsdk.ErrDefault500:
+				return subnet, "ACTIVE", nil
+			default:
+				return subnet, "ACTIVE", err
 			}
-			if _, ok := err.(golangsdk.ErrDefault400); ok {
-				log.Printf("[INFO] Successfully deleted OpenTelekomCloud subnet %s", subnetID)
-				return subnet, "DELETED", nil
-			}
-			if errCode, ok := err.(golangsdk.ErrUnexpectedResponseCode); ok {
-				if errCode.Actual == 409 || errCode.Actual == 500 {
-					return subnet, "ACTIVE", nil
-				}
-			}
-			return subnet, "ACTIVE", err
 		}
 
 		return subnet, "ACTIVE", nil
