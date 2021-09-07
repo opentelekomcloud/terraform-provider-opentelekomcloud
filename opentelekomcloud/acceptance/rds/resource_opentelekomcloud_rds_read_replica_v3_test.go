@@ -29,6 +29,15 @@ func TestAccRdsReadReplicaV3Basic(t *testing.T) {
 		CheckDestroy:      testAccCheckRdsInstanceV3Destroy,
 		Steps: []resource.TestStep{
 			{
+				Config: testAccRdsReadReplicaV3BasicNoIP(postfix),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckRdsInstanceV3Exists(resName, &rdsInstance),
+					resource.TestCheckResourceAttr(resName, "availability_zone", secondAZ),
+					resource.TestCheckResourceAttr(resName, "volume.0.size", "40"),
+					resource.TestCheckResourceAttr(resName, "public_ips.#", "0"),
+				),
+			},
+			{
 				Config: testAccRdsReadReplicaV3Basic(postfix),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckRdsInstanceV3Exists(resName, &rdsInstance),
@@ -43,15 +52,6 @@ func TestAccRdsReadReplicaV3Basic(t *testing.T) {
 					testAccCheckRdsInstanceV3Exists(resName, &rdsInstance),
 					resource.TestCheckResourceAttr(resName, "availability_zone", secondAZ),
 					resource.TestCheckResourceAttr(resName, "volume.0.size", "40"),
-				),
-			},
-			{ // and assign it back
-				Config: testAccRdsReadReplicaV3Basic(postfix),
-				Check: resource.ComposeTestCheckFunc(
-					testAccCheckRdsInstanceV3Exists(resName, &rdsInstance),
-					resource.TestCheckResourceAttr(resName, "availability_zone", secondAZ),
-					resource.TestCheckResourceAttr(resName, "volume.0.size", "40"),
-					resource.TestCheckResourceAttr(resName, "public_ips.#", "1"),
 				),
 			},
 		},

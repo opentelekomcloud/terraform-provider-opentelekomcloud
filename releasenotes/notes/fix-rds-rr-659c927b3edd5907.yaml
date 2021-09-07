@@ -1,0 +1,4 @@
+---
+fixes:
+  - |
+    **[RDS]** Fix panic when creating ``resource/opentelekomcloud_rds_read_replica_v3`` with empty ``public_ips`` (`#1398 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/1398>`_)
