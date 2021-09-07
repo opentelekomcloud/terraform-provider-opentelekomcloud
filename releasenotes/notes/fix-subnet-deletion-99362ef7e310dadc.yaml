@@ -1,0 +1,4 @@
+---
+fixes:
+  - |
+    **[VPC]** Fix broken delete in ``resource/opentelekomcloud_vpc_subnet_v1`` (`#1394 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/1394>`_)
