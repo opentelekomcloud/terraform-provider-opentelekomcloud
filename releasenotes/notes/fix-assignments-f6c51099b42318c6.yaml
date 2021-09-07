@@ -1,0 +1,6 @@
+---
+fixes:
+  - |
+    **[BMS]** Fix potential panic in ``data_source/opentelekomcloud_compute_bms_server_v2`` (`#1396 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/1396>`_)
+  - |
+    **[DEH]** Fix potential panic in ``resource/opentelekomcloud_deh_host_v1`` (`#1396 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/1396>`_)

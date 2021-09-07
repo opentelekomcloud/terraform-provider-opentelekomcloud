@@ -184,7 +184,6 @@ func resourceDeHHostV1Read(_ context.Context, d *schema.ResourceData, meta inter
 	mErr := multierror.Append(
 		d.Set("name", n.Name),
 		d.Set("status", n.State),
-		d.Set("dedicated_host_id", n.ID),
 		d.Set("auto_placement", n.AutoPlacement),
 		d.Set("availability_zone", n.Az),
 		d.Set("available_vcpus", n.AvailableVcpus),

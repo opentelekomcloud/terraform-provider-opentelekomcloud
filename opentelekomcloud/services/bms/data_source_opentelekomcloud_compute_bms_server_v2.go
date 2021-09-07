@@ -203,7 +203,6 @@ func dataSourceBMSServersV2Read(_ context.Context, d *schema.ResourceData, meta 
 	}
 
 	mErr := multierror.Append(
-		d.Set("server_id", server.ID),
 		d.Set("user_id", server.UserID),
 		d.Set("name", server.Name),
 		d.Set("status", server.Status),

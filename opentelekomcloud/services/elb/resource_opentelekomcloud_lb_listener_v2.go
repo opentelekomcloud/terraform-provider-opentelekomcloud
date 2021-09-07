@@ -77,12 +77,6 @@ func ResourceListenerV2() *schema.Resource {
 				Type:     schema.TypeString,
 				Optional: true,
 			},
-			/*"connection_limit": &schema.Schema{
-				Type:     schema.TypeInt,
-				Optional: true,
-				Computed: true,
-				ForceNew: true,
-			}, */
 			// new feature 2020 to support https2
 			"http2_enable": {
 				Type:     schema.TypeBool,
@@ -152,11 +146,6 @@ func resourceListenerV2Create(ctx context.Context, d *schema.ResourceData, meta 
 		AdminStateUp:           &adminStateUp,
 	}
 
-	/*if v, ok := d.GetOk("connection_limit"); ok {
-		connectionLimit := v.(int)
-		createOpts.ConnLimit = &connectionLimit
-	} */
-
 	log.Printf("[DEBUG] Create Options: %#v", createOpts)
 
 	// Wait for LoadBalancer to become active before continuing
@@ -223,7 +212,6 @@ func resourceListenerV2Read(_ context.Context, d *schema.ResourceData, meta inte
 		d.Set("http2_enable", listener.Http2Enable),
 		d.Set("default_tls_container_ref", listener.DefaultTlsContainerRef),
 		d.Set("client_ca_tls_container_ref", listener.CAContainerRef),
-		// d.Set("connection_limit", listener.ConnLimit),
 		d.Set("sni_container_refs", listener.SniContainerRefs),
 		d.Set("tls_ciphers_policy", listener.TlsCiphersPolicy),
 		d.Set("admin_state_up", listener.AdminStateUp),
@@ -260,10 +248,6 @@ func resourceListenerV2Update(ctx context.Context, d *schema.ResourceData, meta 
 	if d.HasChange("description") {
 		updateOpts.Description = d.Get("description").(string)
 	}
-	/*if d.HasChange("connection_limit") {
-		connLimit := d.Get("connection_limit").(int)
-		updateOpts.ConnLimit = &connLimit
-	} */
 	if d.HasChange("http2_enable") {
 		http2Enable := d.Get("http2_enable").(bool)
 		updateOpts.Http2Enable = &http2Enable
