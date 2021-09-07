@@ -193,7 +193,11 @@ func resourceRdsReadReplicaV3Create(ctx context.Context, d *schema.ResourceData,
 }
 
 func getReplicaPublicIP(d *schema.ResourceData) string {
-	return d.Get("public_ips").(*schema.Set).List()[0].(string)
+	ips := d.Get("public_ips").(*schema.Set)
+	if ips.Len() == 0 {
+		return ""
+	}
+	return ips.List()[0].(string)
 }
 
 func getReplicaPrivateIP(d *schema.ResourceData) string {
