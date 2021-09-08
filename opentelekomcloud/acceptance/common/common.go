@@ -62,27 +62,15 @@ func init() {
 
 func TestAccPreCheckRequiredEnvVars(t *testing.T) {
 	if env.OS_REGION_NAME == "" {
-		t.Fatal("OS_TENANT_NAME or OS_PROJECT_NAME must be set for acceptance tests")
-	}
-
-	if env.OS_FLAVOR_ID == "" && env.OS_FLAVOR_NAME == "" {
-		t.Fatal("OS_FLAVOR_ID or OS_FLAVOR_NAME must be set for acceptance tests")
-	}
-
-	if env.OS_NETWORK_ID == "" {
-		t.Fatal("OS_NETWORK_ID must be set for acceptance tests")
-	}
-
-	if env.OS_VPC_ID == "" {
-		t.Fatal("OS_VPC_ID must be set for acceptance tests")
+		t.Skip("OS_TENANT_NAME or OS_PROJECT_NAME must be set for acceptance tests")
 	}
 
 	if env.OS_AVAILABILITY_ZONE == "" {
-		t.Fatal("OS_AVAILABILITY_ZONE must be set for acceptance tests")
+		t.Skip("OS_AVAILABILITY_ZONE must be set for acceptance tests")
 	}
 
-	if env.OS_SUBNET_ID == "" {
-		t.Fatal("OS_SUBNET_ID must be set for acceptance tests")
+	if env.OsSubnetName == "" {
+		t.Skip("OS_SUBNET_NAME must be set for acceptance tests")
 	}
 }
 
@@ -94,13 +82,6 @@ func TestAccPreCheckAdminOnly(t *testing.T) {
 	v := os.Getenv("OS_TENANT_ADMIN")
 	if v == "" {
 		t.Skip("Skipping test because it requires set OS_TENANT_ADMIN")
-	}
-}
-
-func TestAccFlavorPreCheck(t *testing.T) {
-	TestAccPreCheckRequiredEnvVars(t)
-	if env.OS_FLAVOR_ID == "" {
-		t.Skip("OS_FLAVOR_ID must be set for acceptance tests")
 	}
 }
 

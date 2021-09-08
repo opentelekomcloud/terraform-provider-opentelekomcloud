@@ -145,7 +145,7 @@ resource "opentelekomcloud_rts_software_deployment_v1" "deployment_1" {
   action= "CREATE"
   status_reason= "Deploy data"
 }
-`, common.DataSourceImage, common.DataSourceSubnet, env.OS_FLAVOR_ID)
+`, common.DataSourceImage, common.DataSourceSubnet, env.OsFlavorID)
 
 var testAccRtsSoftwareDeploymentV1Update = fmt.Sprintf(`
 %s
@@ -203,4 +203,4 @@ resource "opentelekomcloud_rts_software_deployment_v1" "deployment_1" {
     delete = "10m"
   }
 }
-`, common.DataSourceImage, common.DataSourceSubnet, env.OS_FLAVOR_ID)
+`, common.DataSourceImage, common.DataSourceSubnet, env.OsFlavorID)

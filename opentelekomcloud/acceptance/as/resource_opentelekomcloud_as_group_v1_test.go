@@ -18,7 +18,7 @@ func TestAccASV1Group_basic(t *testing.T) {
 	resourceName := "opentelekomcloud_as_group_v1.as_group"
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:          func() { common.TestAccFlavorPreCheck(t) },
+		PreCheck:          func() { common.TestAccPreCheck(t) },
 		ProviderFactories: common.TestAccProviderFactories,
 		CheckDestroy:      testAccCheckASV1GroupDestroy,
 		Steps: []resource.TestStep{
@@ -49,7 +49,7 @@ func TestAccASV1Group_RemoveWithSetMinNumber(t *testing.T) {
 	resourceName := "opentelekomcloud_as_group_v1.as_group"
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:          func() { common.TestAccFlavorPreCheck(t) },
+		PreCheck:          func() { common.TestAccPreCheck(t) },
 		ProviderFactories: common.TestAccProviderFactories,
 		CheckDestroy:      testAccCheckASV1GroupDestroy,
 		Steps: []resource.TestStep{
@@ -71,7 +71,7 @@ func TestAccASV1Group_WithoutSecurityGroups(t *testing.T) {
 	resourceName := "opentelekomcloud_as_group_v1.as_group"
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:          func() { common.TestAccFlavorPreCheck(t) },
+		PreCheck:          func() { common.TestAccPreCheck(t) },
 		ProviderFactories: common.TestAccProviderFactories,
 		CheckDestroy:      testAccCheckASV1GroupDestroy,
 		Steps: []resource.TestStep{
