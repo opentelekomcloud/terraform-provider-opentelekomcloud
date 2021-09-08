@@ -10,9 +10,9 @@ assignees: ''
 Hi there, thank you for opening an issue.
 -->
 
-# Terraform Version
+# Terraform provider version
 <!--
-Run `terraform -v` to show the version. If you are not running the latest version of Terraform,
+Run `terraform -v` to show the version of provider. If you are not running the latest version of Terraform Provider,
 please upgrade because your issue may have already been fixed.
 -->
 
