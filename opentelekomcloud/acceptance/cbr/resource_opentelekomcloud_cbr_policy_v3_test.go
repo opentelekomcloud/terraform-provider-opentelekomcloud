@@ -19,7 +19,7 @@ func TestAccCBRPolicyV3_basic(t *testing.T) {
 	var cbrPolicy policies.Policy
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:          func() { common.TestAccFlavorPreCheck(t) },
+		PreCheck:          func() { common.TestAccPreCheck(t) },
 		ProviderFactories: common.TestAccProviderFactories,
 		CheckDestroy:      testAccCheckCBRPolicyV3Destroy,
 		Steps: []resource.TestStep{
@@ -48,7 +48,7 @@ func TestAccCBRPolicyV3_minConfig(t *testing.T) {
 	var cbrPolicy policies.Policy
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:          func() { common.TestAccFlavorPreCheck(t) },
+		PreCheck:          func() { common.TestAccPreCheck(t) },
 		ProviderFactories: common.TestAccProviderFactories,
 		CheckDestroy:      testAccCheckCBRPolicyV3Destroy,
 		Steps: []resource.TestStep{

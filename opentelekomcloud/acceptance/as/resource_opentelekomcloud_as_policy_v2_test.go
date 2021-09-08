@@ -17,7 +17,7 @@ func TestAccASPolicyV2_basic(t *testing.T) {
 	resourceName := "opentelekomcloud_as_policy_v2.as_policy"
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:          func() { common.TestAccFlavorPreCheck(t) },
+		PreCheck:          func() { common.TestAccPreCheck(t) },
 		ProviderFactories: common.TestAccProviderFactories,
 		CheckDestroy:      testAccCheckASV2PolicyDestroy,
 		Steps: []resource.TestStep{
