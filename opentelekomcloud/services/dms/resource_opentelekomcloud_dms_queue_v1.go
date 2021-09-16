@@ -90,7 +90,7 @@ func resourceDmsQueuesV1Create(ctx context.Context, d *schema.ResourceData, meta
 		return fmterr.Errorf("error creating OpenTelekomCloud dms queue client: %s", err)
 	}
 
-	createOpts := &queues.CreateOps{
+	createOpts := &queues.CreateOpts{
 		Name:            d.Get("name").(string),
 		QueueMode:       d.Get("queue_mode").(string),
 		Description:     d.Get("description").(string),
