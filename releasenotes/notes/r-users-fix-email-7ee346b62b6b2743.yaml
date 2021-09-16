@@ -1,4 +1,4 @@
 ---
 fixes:
   - |
-    **[IAM]** Add missing `OkCode` in order to send `Welcome email` in ``resource/opentelekomcloud_identity_user_v3`` (`#1405 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/1405>`_)
+    **[IAM]** Fix broken sending of `Welcome email` in ``resource/opentelekomcloud_identity_user_v3`` (`#1405 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/1405>`_)
