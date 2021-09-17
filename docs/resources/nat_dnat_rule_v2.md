@@ -4,13 +4,19 @@ subcategory: "NAT"
 
 # opentelekomcloud_nat_dnat_rule_v2
 
+Manages a V2 DNAT rule resource within OpenTelekomCloud.
+
 ## Example Usage
 
 ```hcl
+variable "nat_gw_id" {}
+variable "floating_ip_id" {}
+variable "private_ip" {}
+
 resource "opentelekomcloud_nat_dnat_rule_v2" "dnat_1" {
-  floating_ip_id        = "2bd659ab-bbf7-43d7-928b-9ee6a10de3ef"
-  nat_gateway_id        = "bf99c679-9f41-4dac-8513-9c9228e713e1"
-  private_ip            = "10.0.0.12"
+  floating_ip_id        = var.floating_ip_id
+  nat_gateway_id        = var.nat_gw_id
+  private_ip            = var.private_id
   internal_service_port = 993
   protocol              = "tcp"
   external_service_port = 242
@@ -27,39 +33,42 @@ The following arguments are supported:
 * `internal_service_port` - (Required) Specifies port used by ECSs or BMSs
   to provide services for external systems. Changing this creates a new resource.
 
-* `nat_gateway_id` - (Required) ID of the nat gateway this dnat rule belongs to.
-   Changing this creates a new dnat rule.
+* `nat_gateway_id` - (Required) ID of the NAT gateway this DNAT rule belongs to.
+   Changing this creates a new DNAT rule.
+
+-> You can create a DNAT rule only when status of the NAT gateway is set to `ACTIVE`
+and `admin_state_up` of the NAT gateway administrator to `True`.
 
 * `port_id` - (Optional) Specifies the port ID of an ECS or a BMS.
-  This parameter and private_ip are alternative. Changing this creates a
-  new dnat rule.
+  This parameter and `private_ip` are alternative. Changing this creates a
+  new DNAT rule.
 
 * `private_ip` - (Optional) Specifies the private IP address of a
   user, for example, the IP address of a VPC for dedicated connection.
-  This parameter and port_id are alternative.
-  Changing this creates a new dnat rule.
+  This parameter and `port_id` are alternative. Changing this creates a new DNAT rule.
 
 * `protocol` - (Required) Specifies the protocol type. Currently,
-  TCP, UDP, and ANY are supported.
-  Changing this creates a new dnat rule.
+  `tcp`, `udp`, and `any` are supported. Changing this creates a new DNAT rule.
+
+-> If you create a rule that applies to all port types, set `internal_service_port` to `0`,
+`external_service_port` to `0`, and `protocol` to `any`.
 
 * `external_service_port` - (Required) Specifies port used by ECSs or
-  BMSs to provide services for external systems.
-  Changing this creates a new dnat rule.
+  BMSs to provide services for external systems. Changing this creates a new DNAT rule.
 
 ## Attributes Reference
 
 In addition to the arguments listed above, the following computed attributes are exported:
 
-* `created_at` - Dnat rule creation time.
+* `created_at` - DNAT rule creation time.
 
-* `status` - Dnat rule status.
+* `status` - DNAT rule status.
 
 * `floating_ip_address` - The actual floating IP address.
 
 ## Import
 
-Dnat can be imported using the following format:
+DNAT can be imported using the following format:
 
 ```sh
 terraform import opentelekomcloud_nat_dnat_rule_v2.dnat_1 f4f783a7-b908-4215-b018-724960e5df4a

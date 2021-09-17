@@ -46,7 +46,7 @@ func TestAccNatDnatRule_withPort(t *testing.T) {
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckNatDnatExists(resourceDnatRuleName),
 					resource.TestCheckResourceAttr(resourceDnatRuleName, "internal_service_port", "80"),
-					resource.TestCheckResourceAttr(resourceDnatRuleName, "protocl", "tcp"),
+					resource.TestCheckResourceAttr(resourceDnatRuleName, "protocol", "tcp"),
 					resource.TestCheckResourceAttrSet(resourceDnatRuleName, "port_id"),
 				),
 			},
