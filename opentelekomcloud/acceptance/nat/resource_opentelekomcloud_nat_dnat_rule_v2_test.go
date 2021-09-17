@@ -28,7 +28,7 @@ func TestAccNatDnat_basic(t *testing.T) {
 					resource.TestCheckResourceAttr(resourceDnatRuleName, "internal_service_port", "993"),
 					resource.TestCheckResourceAttr(resourceDnatRuleName, "external_service_port", "242"),
 					resource.TestCheckResourceAttr(resourceDnatRuleName, "protocol", "tcp"),
-					resource.TestCheckResourceAttrSet(resourceDnatRuleName, "private_id"),
+					resource.TestCheckResourceAttrSet(resourceDnatRuleName, "private_ip"),
 				),
 			},
 		},
