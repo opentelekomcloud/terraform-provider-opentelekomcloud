@@ -4,7 +4,7 @@ subcategory: "Relational Database Service (RDS)"
 
 # opentelekomcloud_rds_flavors_v3
 
-Use this data source to get available OpenTelekomCloud rds flavors.
+Use this data source to get available OpenTelekomCloud RDSv3 flavors.
 
 ## Example Usage
 
@@ -18,19 +18,21 @@ data "opentelekomcloud_rds_flavors_v3" "flavor" {
 
 ## Argument Reference
 
-* `db_type` - (Required) Specifies the DB engine. Value: MySQL, PostgreSQL, SQLServer.
+* `db_type` - (Required) Specifies the DB engine. Possible values are: `MySQL`, `PostgreSQL`, `SQLServer`.
 
-* `db_version` - (Required) Specifies the database version. MySQL databases support MySQL 5.6
-  and 5.7. PostgreSQL databases support PostgreSQL 9.5 and 9.6. Microsoft SQL Server
-  databases support 2014_SE, 2016_SE, and 2016_EE.
+* `db_version` - (Required) Specifies the database version. `MySQL` databases support `5.6`,
+  `5.7` and `8.0`. `PostgreSQL` databases support `9.5`, `9.6`, `10`, `11` and `12`.
+  `SQLServer` databases support `2014_SE`, `2016_SE`, `2016_EE` and `2017_SE`.
 
-* `instance_mode` - (Required) The mode of instance. Value: ha(indicates primary/standby instance), single(indicates single instance)
+* `instance_mode` - (Required) The mode of instance. Possible values are:
+  `ha` indicates primary/standby instance, `single` indicates single instance
+  and `replica` indicates read-replica instance.
 
 ## Attributes Reference
 
 In addition, the following attributes are exported:
 
-* `flavors` - Indicates the flavors information. Structure is documented below.
+* `flavors` - Indicates the `flavors` information. Structure is documented below.
 
 The `flavors` block contains:
 
@@ -40,4 +42,6 @@ The `flavors` block contains:
 
 * `memory` - Indicates the memory size in GB.
 
-* `mode` - See 'instance_mode' above.
+* `mode` - Indicates the DB instance type.
+
+* `az_status` - Indicates the status of the AZ to which the DB instance specifications belong.
