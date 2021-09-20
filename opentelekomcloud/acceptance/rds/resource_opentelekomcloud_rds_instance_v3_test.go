@@ -196,6 +196,23 @@ func TestAccRdsInstanceV3InvalidDBVersion(t *testing.T) {
 	})
 }
 
+func TestAccRdsInstanceV3InvalidFlavor(t *testing.T) {
+	postfix := acctest.RandString(3)
+
+	resource.Test(t, resource.TestCase{
+		PreCheck:          func() { common.TestAccPreCheck(t) },
+		ProviderFactories: common.TestAccProviderFactories,
+		CheckDestroy:      testAccCheckRdsInstanceV3Destroy,
+		Steps: []resource.TestStep{
+			{
+				Config:      testAccRdsInstanceV3InvalidFlavor(postfix),
+				PlanOnly:    true,
+				ExpectError: regexp.MustCompile(`can't find flavor.+`),
+			},
+		},
+	})
+}
+
 func TestAccRdsInstanceV3_configurationParameters(t *testing.T) {
 	postfix := acctest.RandString(3)
 	var rdsInstance instances.RdsInstanceResponse
@@ -436,9 +453,9 @@ resource "opentelekomcloud_rds_instance_v3" "instance" {
     type     = "PostgreSQL"
     version  = "10"
   }
-  security_group_id = opentelekomcloud_networking_secgroup_v2.sg.id
-  subnet_id         = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.id
-  vpc_id            = data.opentelekomcloud_vpc_v1.shared_vpc.id
+  security_group_id = data.opentelekomcloud_networking_secgroup_v2.default_secgroup.id
+  subnet_id         = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.network_id
+  vpc_id            = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.vpc_id
   volume {
     type = "COMMON"
     size = 100
@@ -448,7 +465,6 @@ resource "opentelekomcloud_rds_instance_v3" "instance" {
     start_time = "10:00-11:00"
     keep_days  = 5
   }
-
 }
 `, common.DataSourceSecGroupDefault, common.DataSourceSubnet, postfix, env.OS_AVAILABILITY_ZONE)
 }
@@ -618,6 +634,31 @@ resource "opentelekomcloud_rds_instance_v3" "instance" {
   parameters = {
     max_connections = "37",
   }
+}
+`, common.DataSourceSecGroupDefault, common.DataSourceSubnet, postfix, env.OS_AVAILABILITY_ZONE)
+}
+
+func testAccRdsInstanceV3InvalidFlavor(postfix string) string {
+	return fmt.Sprintf(`
+%s
+%s
+
+resource "opentelekomcloud_rds_instance_v3" "instance" {
+  name              = "tf_rds_instance_%s"
+  availability_zone = ["%s"]
+  db {
+    password = "Postgres!120521"
+    type     = "PostgreSQL"
+    version  = "10"
+  }
+  security_group_id = data.opentelekomcloud_networking_secgroup_v2.default_secgroup.id
+  subnet_id         = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.network_id
+  vpc_id            = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.vpc_id
+  volume {
+    type = "COMMON"
+    size = 40
+  }
+  flavor = "bla.bla.rds"
 }
 `, common.DataSourceSecGroupDefault, common.DataSourceSubnet, postfix, env.OS_AVAILABILITY_ZONE)
 }

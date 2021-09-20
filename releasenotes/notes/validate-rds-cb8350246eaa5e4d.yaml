@@ -1,0 +1,4 @@
+---
+other:
+  - |
+    **[RDS]** Add validation for ``flavor``, ``subnet_id`` and ``vpc_id`` in ``resource/opentelekomcloud_rds_instance_v3`` (`#1410 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/1410>`_)
