@@ -67,7 +67,7 @@ func DataSourceCSBSBackupV1() *schema.Resource {
 				Computed: true,
 			},
 			"average_speed": {
-				Type:     schema.TypeInt,
+				Type:     schema.TypeFloat,
 				Computed: true,
 			},
 			"size": {
