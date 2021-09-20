@@ -10,6 +10,7 @@ import (
 
 	"github.com/hashicorp/go-multierror"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/customdiff"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	golangsdk "github.com/opentelekomcloud/gophertelekomcloud"
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/common/tags"
@@ -43,7 +44,10 @@ func ResourceRdsInstanceV3() *schema.Resource {
 			Update: schema.DefaultTimeout(30 * time.Minute),
 		},
 
-		CustomizeDiff: validateRDSv3Version("db"),
+		CustomizeDiff: customdiff.All(
+			validateRDSv3Version("db"),
+			validateRDSv3Flavor("flavor"),
+		),
 
 		Schema: map[string]*schema.Schema{
 			"availability_zone": {
@@ -93,7 +97,6 @@ func ResourceRdsInstanceV3() *schema.Resource {
 			"flavor": {
 				Type:     schema.TypeString,
 				Required: true,
-				ForceNew: false,
 			},
 			"name": {
 				Type:     schema.TypeString,
@@ -314,7 +317,7 @@ func resourceRdsInstanceV3Create(ctx context.Context, d *schema.ResourceData, me
 	config := meta.(*cfg.Config)
 	client, err := config.RdsV3Client(config.GetRegion(d))
 	if err != nil {
-		return fmterr.Errorf("error creating RDSv3 client: %s", err)
+		return fmterr.Errorf(errCreateClient, err)
 	}
 
 	dbInfo := resourceRDSDbInfo(d)
@@ -641,7 +644,7 @@ func resourceRdsInstanceV3Update(ctx context.Context, d *schema.ResourceData, me
 	config := meta.(*cfg.Config)
 	client, err := config.RdsV3Client(config.GetRegion(d))
 	if err != nil {
-		return fmterr.Errorf("error creating OpenTelekomCloud RDSv3 Client: %s", err)
+		return fmterr.Errorf(errCreateClient, err)
 	}
 	var updateBackupOpts backups.UpdateOpts
 
@@ -705,41 +708,15 @@ func resourceRdsInstanceV3Update(ctx context.Context, d *schema.ResourceData, me
 	if d.HasChange("flavor") {
 		_, newFlavor := d.GetChange("flavor")
 
-		// Fetch flavor id
-		db := resourceRDSDbInfo(d)
-		datastoreType := db["type"].(string)
-		datastoreVersion := db["version"].(string)
-
-		dbFlavorsOpts := flavors.ListOpts{
-			VersionName: datastoreVersion,
-		}
-		flavorsPages, err := flavors.List(client, dbFlavorsOpts, datastoreType).AllPages()
-		if err != nil {
-			return fmterr.Errorf("unable to retrieve flavors all pages: %s", err)
-		}
-		flavorsList, err := flavors.ExtractDbFlavors(flavorsPages)
-		if err != nil {
-			return diag.FromErr(err)
-		}
-		if len(flavorsList) < 1 {
-			return fmterr.Errorf("no flavors returned")
-		}
-		var rdsFlavor flavors.Flavor
-		for _, flavor := range flavorsList {
-			if flavor.SpecCode == newFlavor.(string) {
-				rdsFlavor = flavor
-				break
-			}
-		}
 		updateFlavorOpts := instances.ResizeFlavorOpts{
 			ResizeFlavor: &instances.SpecCode{
-				Speccode: rdsFlavor.SpecCode,
+				Speccode: newFlavor.(string),
 			},
 		}
 
 		log.Printf("Update flavor could be done only in status `available`")
 		if err := instances.WaitForStateAvailable(client, 1200, d.Id()); err != nil {
-			log.Printf("Status available wasn't present")
+			return diag.FromErr(err)
 		}
 
 		log.Printf("[DEBUG] Update flavor: %s", newFlavor.(string))
@@ -750,7 +727,7 @@ func resourceRdsInstanceV3Update(ctx context.Context, d *schema.ResourceData, me
 
 		log.Printf("Waiting for RDSv3 become in status `available`")
 		if err := instances.WaitForStateAvailable(client, 1200, d.Id()); err != nil {
-			log.Printf("Status available wasn't present")
+			return diag.FromErr(err)
 		}
 
 		log.Printf("[DEBUG] Successfully updated instance %s flavor: %s", d.Id(), d.Get("flavor").(string))
@@ -775,14 +752,14 @@ func resourceRdsInstanceV3Update(ctx context.Context, d *schema.ResourceData, me
 
 		log.Printf("Update volume size could be done only in status `available`")
 		if err := instances.WaitForStateAvailable(client, 1200, d.Id()); err != nil {
-			log.Printf("Status available wasn't present")
+			return diag.FromErr(err)
 		}
 
 		updateResult, err := instances.EnlargeVolume(client, updateOpts, d.Id()).ExtractJobResponse()
 		if err != nil {
 			return fmterr.Errorf("error updating instance volume from result: %s", err)
 		}
-		timeout := d.Timeout(schema.TimeoutCreate)
+		timeout := d.Timeout(schema.TimeoutUpdate)
 		if err := instances.WaitForJobCompleted(client, int(timeout.Seconds()), updateResult.JobID); err != nil {
 			return diag.FromErr(err)
 		}
@@ -877,7 +854,7 @@ func resourceRdsInstanceV3Read(_ context.Context, d *schema.ResourceData, meta i
 	config := meta.(*cfg.Config)
 	client, err := config.RdsV3Client(config.GetRegion(d))
 	if err != nil {
-		return fmterr.Errorf("error creating RDSv3 client: %s", err)
+		return fmterr.Errorf(errCreateClient, err)
 	}
 
 	rdsInstance, err := GetRdsInstance(client, d.Id())
@@ -1039,7 +1016,7 @@ func resourceRdsInstanceV3Delete(_ context.Context, d *schema.ResourceData, meta
 	config := meta.(*cfg.Config)
 	client, err := config.RdsV3Client(config.GetRegion(d))
 	if err != nil {
-		return fmterr.Errorf("error creating OpenTelekomCloud RDSv3 client: %s", err)
+		return fmterr.Errorf(errCreateClient, err)
 	}
 
 	log.Printf("[DEBUG] Deleting Instance %s", d.Id())
@@ -1060,13 +1037,13 @@ func validateRDSv3Version(argumentName string) schema.CustomizeDiffFunc {
 			return fmt.Errorf("error retreiving configuration: can't convert %v to Config", meta)
 		}
 
-		rdsClient, err := config.RdsV3Client(config.GetRegion(d))
+		client, err := config.RdsV3Client(config.GetRegion(d))
 		if err != nil {
-			return fmt.Errorf("error creating OpenTelekomCloud RDSv3 Client: %s", err)
+			return fmt.Errorf(errCreateClient, err)
 		}
 
 		dataStoreInfo := d.Get(argumentName).([]interface{})[0].(map[string]interface{})
-		datastoreVersions, err := getRdsV3VersionList(rdsClient, dataStoreInfo["type"].(string))
+		datastoreVersions, err := getRdsV3VersionList(client, dataStoreInfo["type"].(string))
 		if err != nil {
 			return fmt.Errorf("unable to get datastore versions: %s", err)
 		}
@@ -1084,6 +1061,49 @@ func validateRDSv3Version(argumentName string) schema.CustomizeDiffFunc {
 
 		return nil
 	}
+}
+
+func validateRDSv3Flavor(argName string) schema.CustomizeDiffFunc {
+	return func(ctx context.Context, d *schema.ResourceDiff, meta interface{}) error {
+		config, ok := meta.(*cfg.Config)
+		if !ok {
+			return fmt.Errorf("error retreiving configuration: can't convert %v to Config", meta)
+		}
+
+		client, err := config.RdsV3Client(config.GetRegion(d))
+		if err != nil {
+			return fmt.Errorf(errCreateClient, err)
+		}
+		dataStoreInfo := d.Get("db").([]interface{})[0].(map[string]interface{})
+		flavor := d.Get(argName).(string)
+
+		listOpts := flavors.ListOpts{
+			VersionName: dataStoreInfo["version"].(string),
+		}
+		flavorPages, err := flavors.List(client, listOpts, dataStoreInfo["type"].(string)).AllPages()
+		if err != nil {
+			return fmt.Errorf("unable to get flavor pages: %w", err)
+		}
+		flavorList, err := flavors.ExtractDbFlavors(flavorPages)
+		if err != nil {
+			return fmt.Errorf("error extracting flavors: %w", err)
+		}
+		var matches = false
+		for _, flavorItem := range flavorList {
+			if flavorItem.SpecCode == flavor {
+				matches = true
+				break
+			}
+		}
+
+		if !matches {
+			return fmt.Errorf("can't find flavor `%s`", flavor)
+		}
+
+		return nil
+
+	}
+
 }
 
 func updateInstanceParameters(d *schema.ResourceData, client *golangsdk.ServiceClient) (bool, error) {
