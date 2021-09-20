@@ -10,15 +10,17 @@ import (
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/acceptance/common"
 )
 
-func TestAccOpenTelekomCloudRdsFlavorV3DataSource_basic(t *testing.T) {
+const dataFlavorName = "data.opentelekomcloud_rds_flavors_v3.flavor"
+
+func TestAccRdsFlavorV3DataSource_basic(t *testing.T) {
 	resource.Test(t, resource.TestCase{
 		PreCheck:          func() { common.TestAccPreCheck(t) },
 		ProviderFactories: common.TestAccProviderFactories,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccOpenTelekomCloudRdsFlavorV3DataSourceBasic,
+				Config: testAccRdsFlavorV3DataSourceBasic,
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckRdsFlavorV3DataSourceID("data.opentelekomcloud_rds_flavors_v3.flavor"),
+					testAccCheckRdsFlavorV3DataSourceID(dataFlavorName),
 				),
 			},
 		},
@@ -40,11 +42,10 @@ func testAccCheckRdsFlavorV3DataSourceID(n string) resource.TestCheckFunc {
 	}
 }
 
-const testAccOpenTelekomCloudRdsFlavorV3DataSourceBasic = `
-
+const testAccRdsFlavorV3DataSourceBasic = `
 data "opentelekomcloud_rds_flavors_v3" "flavor" {
-  db_type = "PostgreSQL"
-  db_version = "9.5"
+  db_type       = "PostgreSQL"
+  db_version    = "9.5"
   instance_mode = "ha"
 }
 `

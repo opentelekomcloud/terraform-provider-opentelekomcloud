@@ -710,8 +710,8 @@ func resourceRdsInstanceV3Update(ctx context.Context, d *schema.ResourceData, me
 		datastoreType := db["type"].(string)
 		datastoreVersion := db["version"].(string)
 
-		dbFlavorsOpts := flavors.DbFlavorsOpts{
-			Versionname: datastoreVersion,
+		dbFlavorsOpts := flavors.ListOpts{
+			VersionName: datastoreVersion,
 		}
 		flavorsPages, err := flavors.List(client, dbFlavorsOpts, datastoreType).AllPages()
 		if err != nil {
@@ -721,19 +721,19 @@ func resourceRdsInstanceV3Update(ctx context.Context, d *schema.ResourceData, me
 		if err != nil {
 			return diag.FromErr(err)
 		}
-		if len(flavorsList.Flavorslist) < 1 {
+		if len(flavorsList) < 1 {
 			return fmterr.Errorf("no flavors returned")
 		}
-		var rdsFlavor flavors.Flavors
-		for _, flavor := range flavorsList.Flavorslist {
-			if flavor.Speccode == newFlavor.(string) {
+		var rdsFlavor flavors.Flavor
+		for _, flavor := range flavorsList {
+			if flavor.SpecCode == newFlavor.(string) {
 				rdsFlavor = flavor
 				break
 			}
 		}
 		updateFlavorOpts := instances.ResizeFlavorOpts{
 			ResizeFlavor: &instances.SpecCode{
-				Speccode: rdsFlavor.Speccode,
+				Speccode: rdsFlavor.SpecCode,
 			},
 		}
 

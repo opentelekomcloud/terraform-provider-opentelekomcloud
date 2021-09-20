@@ -1,0 +1,7 @@
+---
+enhancements:
+  - |
+    **[RDS]** Add new field ``az_status`` in ``flavors`` schema in ``data_source/opentelekomcloud_rds_flavors_v3`` (`#1409 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/1409>`_)
+other:
+  - |
+    **[RDS]** Add validations in ``data_source/opentelekomcloud_rds_flavors_v3`` (`#1409 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/1409>`_)
