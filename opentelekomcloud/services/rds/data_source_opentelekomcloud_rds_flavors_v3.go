@@ -3,9 +3,9 @@ package rds
 import (
 	"context"
 
-	"github.com/hashicorp/go-multierror"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/rds/v3/flavors"
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common/cfg"
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common/fmterr"
@@ -19,6 +19,9 @@ func DataSourceRdsFlavorV3() *schema.Resource {
 			"db_type": {
 				Type:     schema.TypeString,
 				Required: true,
+				ValidateFunc: validation.StringInSlice([]string{
+					"MySQL", "PostgreSQL", "SQLServer",
+				}, false),
 			},
 			"db_version": {
 				Type:     schema.TypeString,
@@ -27,6 +30,9 @@ func DataSourceRdsFlavorV3() *schema.Resource {
 			"instance_mode": {
 				Type:     schema.TypeString,
 				Required: true,
+				ValidateFunc: validation.StringInSlice([]string{
+					"single", "ha", "replica",
+				}, false),
 			},
 			"flavors": {
 				Type:     schema.TypeList,
@@ -96,11 +102,7 @@ func dataSourceRdsFlavorV3Read(_ context.Context, d *schema.ResourceData, meta i
 		}
 	}
 
-	mErr := multierror.Append(
-		d.Set("flavors", refinedFlavors),
-	)
-
-	if err := mErr.ErrorOrNil(); err != nil {
+	if err := d.Set("flavors", refinedFlavors); err != nil {
 		return diag.FromErr(err)
 	}
 
