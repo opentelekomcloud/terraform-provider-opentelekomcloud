@@ -453,9 +453,9 @@ resource "opentelekomcloud_rds_instance_v3" "instance" {
     type     = "PostgreSQL"
     version  = "10"
   }
-  security_group_id = opentelekomcloud_networking_secgroup_v2.sg.id
-  subnet_id         = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.id
-  vpc_id            = data.opentelekomcloud_vpc_v1.shared_vpc.id
+  security_group_id = data.opentelekomcloud_networking_secgroup_v2.default_secgroup.id
+  subnet_id         = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.network_id
+  vpc_id            = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.vpc_id
   volume {
     type = "COMMON"
     size = 100
@@ -465,7 +465,6 @@ resource "opentelekomcloud_rds_instance_v3" "instance" {
     start_time = "10:00-11:00"
     keep_days  = 5
   }
-
 }
 `, common.DataSourceSecGroupDefault, common.DataSourceSubnet, postfix, env.OS_AVAILABILITY_ZONE)
 }
