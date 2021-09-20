@@ -12,6 +12,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/customdiff"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 	golangsdk "github.com/opentelekomcloud/gophertelekomcloud"
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/common/tags"
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/networking/v1/subnets"
@@ -47,6 +48,8 @@ func ResourceRdsInstanceV3() *schema.Resource {
 		CustomizeDiff: customdiff.All(
 			validateRDSv3Version("db"),
 			validateRDSv3Flavor("flavor"),
+			common.ValidateSubnet("subnet_id"),
+			common.ValidateVPC("vpc_id"),
 		),
 
 		Schema: map[string]*schema.Schema{
@@ -75,6 +78,9 @@ func ResourceRdsInstanceV3() *schema.Resource {
 							Type:     schema.TypeString,
 							Required: true,
 							ForceNew: true,
+							ValidateFunc: validation.StringInSlice([]string{
+								"PostgreSQL", "MySQL", "SQLServer",
+							}, false),
 						},
 						"version": {
 							Type:     schema.TypeString,
@@ -1101,9 +1107,7 @@ func validateRDSv3Flavor(argName string) schema.CustomizeDiffFunc {
 		}
 
 		return nil
-
 	}
-
 }
 
 func updateInstanceParameters(d *schema.ResourceData, client *golangsdk.ServiceClient) (bool, error) {
