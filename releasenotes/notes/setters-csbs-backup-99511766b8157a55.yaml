@@ -1,0 +1,4 @@
+---
+enhancements:
+  - |
+    **[CSBS]** Change type of the ``average_speed`` field of the ``data_source/opentelekomcloud_csbs_backup_v1`` to ``float`` (`#1411 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/1411>`_)
