@@ -120,7 +120,6 @@ func dataSourceDEHServersV1Read(_ context.Context, d *schema.ResourceData, meta 
 		d.Set("name", DehServer.Name),
 		d.Set("status", DehServer.Status),
 		d.Set("flavor", DehServer.Flavor),
-		d.Set("addresses", DehServer.Addresses),
 		d.Set("metadata", DehServer.Metadata),
 		d.Set("tenant_id", DehServer.TenantID),
 		d.Set("region", config.GetRegion(d)),
