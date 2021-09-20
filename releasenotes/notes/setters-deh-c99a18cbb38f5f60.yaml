@@ -1,0 +1,6 @@
+---
+fixes:
+  - |
+    **[DEH]** Fix invalid fields types in ``resource/opentelekomcloud_deh_host_v1`` (`#1412 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/1412>`_)
+  - |
+    **[DEH]** Remove faulty redundant setting of ``addresses`` in ``data_source/opentelekomcloud_deh_server_v1`` (`#1412 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/1412>`_)
