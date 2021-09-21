@@ -209,7 +209,6 @@ func dataSourceBMSServersV2Read(_ context.Context, d *schema.ResourceData, meta 
 		d.Set("host_status", server.HostStatus),
 		d.Set("host_id", server.HostID),
 		d.Set("flavor_id", server.Flavor.ID),
-		d.Set("network", server.Addresses),
 		d.Set("metadata", server.Metadata),
 		d.Set("tenant_id", server.TenantID),
 		d.Set("image_id", server.Image.ID),
