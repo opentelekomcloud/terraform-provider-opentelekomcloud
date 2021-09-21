@@ -190,7 +190,6 @@ resource "opentelekomcloud_css_cluster_v1" "cluster" {
 func testAccCssClusterV1TooSmall(name string) string {
 	return fmt.Sprintf(`
 %s
-
 %s
 
 resource "opentelekomcloud_css_cluster_v1" "cluster" {
