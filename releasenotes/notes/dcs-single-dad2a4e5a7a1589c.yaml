@@ -1,0 +1,4 @@
+---
+fixes:
+  - |
+    **[DCS]** Fix not creating single-node ``resource/opentelekomcloud_dcs_instance_v1`` (`#1415 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/1415>`_)
