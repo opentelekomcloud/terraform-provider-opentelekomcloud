@@ -42,6 +42,19 @@ func TestAccDcsInstancesV1_basic(t *testing.T) {
 					resource.TestCheckResourceAttr(resourceInstanceName, "backup_policy.0.backup_at.#", "3"),
 				),
 			},
+		},
+	})
+}
+
+func TestAccDcsInstancesV1_basicSingleInstance(t *testing.T) {
+	var instance instances.Instance
+	var instanceName = fmt.Sprintf("dcs_instance_%s", acctest.RandString(5))
+
+	resource.Test(t, resource.TestCase{
+		PreCheck:          func() { common.TestAccPreCheck(t) },
+		ProviderFactories: common.TestAccProviderFactories,
+		CheckDestroy:      testAccCheckDcsV1InstanceDestroy,
+		Steps: []resource.TestStep{
 			{
 				Config: testAccDcsV1InstanceSingle(instanceName),
 				Check: resource.ComposeTestCheckFunc(

@@ -263,6 +263,9 @@ func getInstanceBackupPolicy(d *schema.ResourceData) *instances.InstanceBackupPo
 	var instanceBackupPolicy *instances.InstanceBackupPolicy
 	if _, ok := d.GetOk("backup_policy"); !ok { // deprecated branch
 		backupAts := d.Get("backup_at").([]interface{})
+		if len(backupAts) == 0 {
+			return nil
+		}
 		instanceBackupPolicy = &instances.InstanceBackupPolicy{
 			SaveDays:   d.Get("save_days").(int),
 			BackupType: d.Get("backup_type").(string),
