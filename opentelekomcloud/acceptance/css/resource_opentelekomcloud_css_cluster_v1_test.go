@@ -116,7 +116,6 @@ func testAccCheckCssClusterV1Destroy(s *terraform.State) error {
 		if err == nil {
 			return fmt.Errorf("cluster still exists")
 		}
-
 	}
 
 	return nil
