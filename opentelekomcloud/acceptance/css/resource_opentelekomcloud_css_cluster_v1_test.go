@@ -8,11 +8,10 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/acctest"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
-	golangsdk "github.com/opentelekomcloud/gophertelekomcloud"
+	"github.com/opentelekomcloud/gophertelekomcloud/openstack/css/v1/clusters"
 
-	acc "github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/acceptance/common"
+	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/acceptance/common"
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/acceptance/env"
-	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common"
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common/cfg"
 )
 
@@ -20,23 +19,24 @@ const resourceClusterName = "opentelekomcloud_css_cluster_v1.cluster"
 
 func TestAccCssClusterV1_basic(t *testing.T) {
 	name := fmt.Sprintf("css-%s", acctest.RandString(10))
+	var cluster clusters.Cluster
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:          func() { acc.TestAccPreCheck(t) },
-		ProviderFactories: acc.TestAccProviderFactories,
+		PreCheck:          func() { common.TestAccPreCheck(t) },
+		ProviderFactories: common.TestAccProviderFactories,
 		CheckDestroy:      testAccCheckCssClusterV1Destroy,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccCssClusterV1Basic(name),
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckCssClusterV1Exists(),
+					testAccCheckCssClusterV1Exists(resourceClusterName, &cluster),
 					resource.TestCheckResourceAttr(resourceClusterName, "nodes.#", "1"),
 				),
 			},
 			{
 				Config: testAccCssClusterV1Extend(name),
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckCssClusterV1Exists(),
+					testAccCheckCssClusterV1Exists(resourceClusterName, &cluster),
 					resource.TestCheckResourceAttr(resourceClusterName, "expect_node_num", "2"),
 					resource.TestCheckResourceAttr(resourceClusterName, "nodes.#", "2"),
 				),
@@ -49,8 +49,8 @@ func TestAccCssClusterV1_validateDiskAndFlavor(t *testing.T) {
 	name := fmt.Sprintf("css-%s", acctest.RandString(10))
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:          func() { acc.TestAccPreCheck(t) },
-		ProviderFactories: acc.TestAccProviderFactories,
+		PreCheck:          func() { common.TestAccPreCheck(t) },
+		ProviderFactories: common.TestAccProviderFactories,
 		Steps: []resource.TestStep{
 			{
 				Config:      testAccCssClusterV1TooSmall(name),
@@ -77,20 +77,21 @@ func TestAccCssClusterV1_validateDiskAndFlavor(t *testing.T) {
 }
 
 func TestAccCssClusterV1_encrypted(t *testing.T) {
+	var cluster clusters.Cluster
 	name := fmt.Sprintf("css-%s", acctest.RandString(10))
 	if env.OS_KMS_ID == "" {
 		t.Skip("KMS key ID is not set")
 	}
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:          func() { acc.TestAccPreCheck(t) },
-		ProviderFactories: acc.TestAccProviderFactories,
+		PreCheck:          func() { common.TestAccPreCheck(t) },
+		ProviderFactories: common.TestAccProviderFactories,
 		CheckDestroy:      testAccCheckCssClusterV1Destroy,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccCssClusterV1Encrypted(name),
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckCssClusterV1Exists(),
+					testAccCheckCssClusterV1Exists(resourceClusterName, &cluster),
 					resource.TestCheckResourceAttr(resourceClusterName, "nodes.#", "1"),
 					resource.TestCheckResourceAttr(resourceClusterName, "node_config.0.volume.0.encryption_key", env.OS_KMS_ID),
 				),
@@ -100,7 +101,7 @@ func TestAccCssClusterV1_encrypted(t *testing.T) {
 }
 
 func testAccCheckCssClusterV1Destroy(s *terraform.State) error {
-	config := acc.TestAccProvider.Meta().(*cfg.Config)
+	config := common.TestAccProvider.Meta().(*cfg.Config)
 	client, err := config.CssV1Client(env.OS_REGION_NAME)
 	if err != nil {
 		return fmt.Errorf("error creating CSSv1 client: %w", err)
@@ -111,49 +112,44 @@ func testAccCheckCssClusterV1Destroy(s *terraform.State) error {
 			continue
 		}
 
-		url, err := common.ReplaceVarsForTest(rs, "clusters/{id}")
-		if err != nil {
-			return err
-		}
-		url = client.ServiceURL(url)
-
-		_, err = client.Get(url, nil, &golangsdk.RequestOpts{
-			MoreHeaders: map[string]string{"Content-Type": "application/json"}})
+		_, err := clusters.Get(client, rs.Primary.ID).Extract()
 		if err == nil {
-			return fmt.Errorf("opentelekomcloud_css_cluster_v1 still exists at %s", url)
+			return fmt.Errorf("cluster still exists")
 		}
+
 	}
 
 	return nil
 }
 
-func testAccCheckCssClusterV1Exists() resource.TestCheckFunc {
+func testAccCheckCssClusterV1Exists(n string, cluster *clusters.Cluster) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
-		config := acc.TestAccProvider.Meta().(*cfg.Config)
+		rs, ok := s.RootModule().Resources[n]
+		if !ok {
+			return fmt.Errorf("not found: %s", n)
+		}
+
+		if rs.Primary.ID == "" {
+			return fmt.Errorf("no ID is set")
+		}
+
+		config := common.TestAccProvider.Meta().(*cfg.Config)
 		client, err := config.CssV1Client(env.OS_REGION_NAME)
 		if err != nil {
 			return fmt.Errorf("error creating CSSv1 client: %w", err)
 		}
 
-		rs, ok := s.RootModule().Resources["opentelekomcloud_css_cluster_v1.cluster"]
-		if !ok {
-			return fmt.Errorf("error checking opentelekomcloud_css_cluster_v1.cluster exist, err=not found this resource")
+		found, err := clusters.Get(client, rs.Primary.ID).Extract()
+		if err != nil {
+			return err
 		}
 
-		url, err := common.ReplaceVarsForTest(rs, "clusters/{id}")
-		if err != nil {
-			return fmt.Errorf("error checking opentelekomcloud_css_cluster_v1.cluster exist, err=building url failed: %s", err)
+		if found.ID != rs.Primary.ID {
+			return fmt.Errorf("cluster not found")
 		}
-		url = client.ServiceURL(url)
 
-		_, err = client.Get(url, nil, &golangsdk.RequestOpts{
-			MoreHeaders: map[string]string{"Content-Type": "application/json"}})
-		if err != nil {
-			if _, ok := err.(golangsdk.ErrDefault404); ok {
-				return fmt.Errorf("opentelekomcloud_css_cluster_v1.cluster is not exist")
-			}
-			return fmt.Errorf("error checking opentelekomcloud_css_cluster_v1.cluster exist, err=send request failed: %s", err)
-		}
+		*cluster = *found
+
 		return nil
 	}
 }
@@ -188,7 +184,7 @@ resource "opentelekomcloud_css_cluster_v1" "cluster" {
   enable_authority = true
   admin_pass       = "QwertyUI!"
 }
-`, acc.DataSourceSecGroupDefault, acc.DataSourceSubnet, name, env.OS_AVAILABILITY_ZONE)
+`, common.DataSourceSecGroupDefault, common.DataSourceSubnet, name, env.OS_AVAILABILITY_ZONE)
 }
 
 func testAccCssClusterV1TooSmall(name string) string {
@@ -221,7 +217,7 @@ resource "opentelekomcloud_css_cluster_v1" "cluster" {
   enable_authority = true
   admin_pass       = "QwertyUI!"
 }
-`, acc.DataSourceSecGroupDefault, acc.DataSourceSubnet, name, env.OS_AVAILABILITY_ZONE)
+`, common.DataSourceSecGroupDefault, common.DataSourceSubnet, name, env.OS_AVAILABILITY_ZONE)
 }
 
 func testAccCssClusterV1TooBig(name string) string {
@@ -254,7 +250,7 @@ resource "opentelekomcloud_css_cluster_v1" "cluster" {
   enable_authority = true
   admin_pass       = "QwertyUI!"
 }
-`, acc.DataSourceSecGroupDefault, acc.DataSourceSubnet, name, env.OS_AVAILABILITY_ZONE)
+`, common.DataSourceSecGroupDefault, common.DataSourceSubnet, name, env.OS_AVAILABILITY_ZONE)
 }
 
 func testAccCssClusterV1FlavorName(name string) string {
@@ -287,7 +283,7 @@ resource "opentelekomcloud_css_cluster_v1" "cluster" {
   enable_authority = true
   admin_pass       = "QwertyUI!"
 }
-`, acc.DataSourceSecGroupDefault, acc.DataSourceSubnet, name, env.OS_AVAILABILITY_ZONE)
+`, common.DataSourceSecGroupDefault, common.DataSourceSubnet, name, env.OS_AVAILABILITY_ZONE)
 }
 
 func testAccCssClusterV1Extend(name string) string {
@@ -320,7 +316,7 @@ resource "opentelekomcloud_css_cluster_v1" "cluster" {
   enable_authority = true
   admin_pass       = "QwertyUI!"
 }
-`, acc.DataSourceSecGroupDefault, acc.DataSourceSubnet, name, env.OS_AVAILABILITY_ZONE)
+`, common.DataSourceSecGroupDefault, common.DataSourceSubnet, name, env.OS_AVAILABILITY_ZONE)
 }
 
 func testAccCssClusterV1Encrypted(name string) string {
@@ -354,5 +350,5 @@ resource "opentelekomcloud_css_cluster_v1" "cluster" {
   enable_authority = true
   admin_pass       = "QwertyUI!"
 }
-`, acc.DataSourceSecGroupDefault, acc.DataSourceSubnet, name, env.OS_KMS_ID, env.OS_AVAILABILITY_ZONE)
+`, common.DataSourceSecGroupDefault, common.DataSourceSubnet, name, env.OS_KMS_ID, env.OS_AVAILABILITY_ZONE)
 }
