@@ -195,9 +195,8 @@ func TestAccCCEClusterV3_withVersionDiff(t *testing.T) {
 			{
 				Config: testAccCCEClusterV3WithInvalidVersion,
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckCCEClusterV3Exists("opentelekomcloud_cce_cluster_v3.cluster_1", &cluster),
-					resource.TestCheckResourceAttr(
-						"opentelekomcloud_cce_cluster_v3.cluster_1", "name", clusterName),
+					testAccCheckCCEClusterV3Exists(resourceName, &cluster),
+					resource.TestCheckResourceAttr(resourceName, "name", clusterName),
 				),
 			},
 		},
@@ -262,7 +261,7 @@ resource "opentelekomcloud_cce_cluster_v3" "cluster_1" {
   name                   = "%s"
   cluster_type           = "VirtualMachine"
   flavor_id              = "cce.s1.small"
-  cluster_version        = "v1.9.2"
+  cluster_version        = "v1.19.8"
   vpc_id                 = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.vpc_id
   subnet_id              = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.network_id
   container_network_type = "overlay_l2"
