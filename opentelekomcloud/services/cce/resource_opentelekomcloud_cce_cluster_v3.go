@@ -12,6 +12,7 @@ import (
 
 	"github.com/hashicorp/go-multierror"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/customdiff"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
@@ -49,7 +50,10 @@ func ResourceCCEClusterV3() *schema.Resource {
 			Delete: schema.DefaultTimeout(30 * time.Minute),
 		},
 
-		CustomizeDiff: validateCCEClusterNetwork,
+		CustomizeDiff: customdiff.All(
+			validateCCEClusterNetwork,
+			validateAuthProxy,
+		),
 
 		Schema: map[string]*schema.Schema{
 			"region": {
@@ -142,10 +146,36 @@ func ResourceCCEClusterV3() *schema.Resource {
 				ForceNew: true,
 				Default:  "x509",
 			},
-			"authenticating_proxy_ca": {
-				Type:     schema.TypeString,
+			"authenticating_proxy": {
+				Type:     schema.TypeList,
 				Optional: true,
 				ForceNew: true,
+				MaxItems: 1,
+				Elem: &schema.Resource{
+					Schema: map[string]*schema.Schema{
+						"ca": {
+							Type:     schema.TypeString,
+							Required: true,
+							ForceNew: true,
+						},
+						"cert": {
+							Type:     schema.TypeString,
+							Required: true,
+							ForceNew: true,
+						},
+						"private_key": {
+							Type:     schema.TypeString,
+							Required: true,
+							ForceNew: true,
+						},
+					},
+				},
+			},
+			"authenticating_proxy_ca": {
+				Type:       schema.TypeString,
+				Optional:   true,
+				ForceNew:   true,
+				Deprecated: "Please use `authenticating_proxy` instead",
 			},
 			"kubernetes_svc_ip_range": {
 				Type:     schema.TypeString,
@@ -291,9 +321,13 @@ func resourceCCEClusterV3Create(ctx context.Context, d *schema.ResourceData, met
 		}
 	}
 
-	authProxy := make(map[string]string)
+	authProxy := map[string]string{}
 	if ca, ok := d.GetOk("authenticating_proxy_ca"); ok {
-		authProxy["ca"] = common.Base64IfNot(ca.(string))
+		authProxy = map[string]string{
+			"ca": common.Base64IfNot(ca.(string)),
+		}
+	} else if _, ok := d.GetOk("authenticating_proxy"); ok {
+		authProxy = getAuthProxy(d)
 	}
 
 	createOpts := clusters.CreateOpts{
@@ -765,4 +799,26 @@ func isAuthRequired(err error) bool {
 		}
 	}
 	return false
+}
+
+func getAuthProxy(d *schema.ResourceData) map[string]string {
+	if d.Get("authenticating_proxy.#").(int) == 0 {
+		return nil
+	}
+	resMap := map[string]string{
+		"ca":         common.Base64IfNot(d.Get("authenticating_proxy.0.ca").(string)),
+		"cert":       common.Base64IfNot(d.Get("authenticating_proxy.0.cert").(string)),
+		"privateKey": common.Base64IfNot(d.Get("authenticating_proxy.0.private_key").(string)),
+	}
+	return resMap
+}
+
+func validateAuthProxy(_ context.Context, d *schema.ResourceDiff, _ interface{}) error {
+	if d.Get("authentication_mode") != "authenticating_proxy" {
+		return nil
+	}
+	if d.Get("authenticating_proxy.#").(int) == 0 {
+		return fmt.Errorf("`authenticating_proxy` fields needs to be set if auth mode is `authenticating_proxy`")
+	}
+	return nil
 }

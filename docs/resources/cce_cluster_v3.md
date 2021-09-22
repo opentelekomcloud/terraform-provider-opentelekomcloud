@@ -124,6 +124,17 @@ The following arguments are supported:
   Defaults to `rbac`. Changing this parameter will create a new cluster resource.
 
 * `authenticating_proxy_ca` - (Optional) CA root certificate provided in the `authenticating_proxy` mode.
+  Deprecated, use `authenticating_proxy` instead.
+
+* `authenticating_proxy` - (Optional) Authenticating proxy configuration. Required if `authentication_mode` is set to `authenticating_proxy`.
+  * `ca` - X509 CA certificate configured in `authenticating_proxy` mode. The maximum size of the certificate is 1 MB.
+  * `cert` - Client certificate issued by the X509 CA certificate configured in `authenticating_proxy` mode.
+  This certificate is used for authentication from kube-apiserver to the extended API server.
+  * `private_key` - Private key of the client certificate issued by the X509 CA certificate configured in `authenticating_proxy` mode.
+  This key is used for authentication from kube-apiserver to the extended API server.
+
+~>
+  The private key used by the Kubernetes cluster does not support password encryption. Use an unencrypted private key.
 
 * `multi_az` - (Optional) Enable multiple AZs for the cluster, only when using HA flavors. Changing this parameter will create a new cluster resource.
 
