@@ -1,0 +1,39 @@
+---
+- hosts: localhost
+  tasks:
+    - name: Set initial facts
+      set_fact:
+        network_name: "network_default"
+        subnet_name: "subnet_default"
+        router_name: "router_default"
+
+    - name: Create a network
+      os_network:
+        cloud: tf
+        state: present
+        name: "{{ network_name }}"
+      register: test_network
+
+    - name: Create a subnet
+      os_subnet:
+        cloud: tf
+        state: present
+        name: "{{ subnet_name }}"
+        network_name: "{{ network_name }}"
+        cidr: 192.168.0.0/24
+        dns_nameservers:
+          - 100.125.4.25
+          - 1.1.1.1
+      register: test_subnet
+
+    - name: Create a router
+      os_router:
+        cloud: tf
+        name: "{{ router_name }}"
+        state: present
+        network: admin_external_net
+        enable_snat: true
+        interfaces:
+          - net: "{{ test_network.network.name }}"
+            subnet: "{{ test_subnet.subnet.name }}"
+      register: test_router
