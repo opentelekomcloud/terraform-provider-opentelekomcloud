@@ -1,0 +1,8 @@
+---
+enhancements:
+  - |
+    **[CCE]** Add ``authenticating_proxy`` argument to ``resource/opentelekomcloud_cce_cluster_v3`` (`#1418 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/1418>`_)
+deprecations:
+  - |
+    **[CCE]** Mark ``authenticating_proxy_ca`` argument of ``resource/opentelekomcloud_cce_cluster_v3`` as deprecated,
+    as passing only CA is not enough in current CCE version  (`#1418 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/1418>`_)
