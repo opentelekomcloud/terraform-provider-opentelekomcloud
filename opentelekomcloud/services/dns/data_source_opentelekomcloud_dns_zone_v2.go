@@ -31,12 +31,10 @@ func DataSourceDNSZoneV2() *schema.Resource {
 			},
 			"pool_id": {
 				Type:     schema.TypeString,
-				Optional: true,
 				Computed: true,
 			},
 			"project_id": {
 				Type:     schema.TypeString,
-				Optional: true,
 				Computed: true,
 			},
 			"email": {
@@ -61,28 +59,23 @@ func DataSourceDNSZoneV2() *schema.Resource {
 			},
 			"serial": {
 				Type:     schema.TypeInt,
-				Optional: true,
 				Computed: true,
 			},
 			"created_at": {
 				Type:     schema.TypeString,
-				Optional: true,
 				Computed: true,
 			},
 			"updated_at": {
 				Type:     schema.TypeString,
-				Optional: true,
 				Computed: true,
 			},
 			"masters": {
 				Type:     schema.TypeSet,
-				Optional: true,
 				Computed: true,
 				Elem:     &schema.Schema{Type: schema.TypeString},
 			},
 			"links": {
 				Type:     schema.TypeMap,
-				Optional: true,
 				Computed: true,
 				Elem:     &schema.Schema{Type: schema.TypeString},
 			},

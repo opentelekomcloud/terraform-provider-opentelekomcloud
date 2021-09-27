@@ -43,8 +43,6 @@ In addition to all arguments above, the following attributes are exported:
 
 * `updated_at` - The time the zone was last updated.
 
-* `version` - The version of the zone.
-
 * `serial` - The serial number of the zone.
 
 * `pool_id` - The ID of the pool hosting the zone.
