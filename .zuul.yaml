@@ -6,6 +6,10 @@
     parent: golang-make-functional
     pre-run: playbooks/infra-pre.yaml
     post-run: playbooks/infra-post.yaml
+    vars:
+      make_env:
+        OS_SUBNET_NAME: "subnet_default"
+        OS_CLOUD: "functest_cloud"
 
 - job:
     name: tflint

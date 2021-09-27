@@ -9,6 +9,4 @@ terraform {
   }
 }
 
-provider "opentelekomcloud" {
-  cloud = "functest_cloud"
-}
+provider "opentelekomcloud" {}
