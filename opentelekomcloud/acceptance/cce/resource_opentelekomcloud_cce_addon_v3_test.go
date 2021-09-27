@@ -8,54 +8,107 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/cce/v3/addons"
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/acceptance/common"
+	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/acceptance/common/quotas"
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/acceptance/env"
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common/cfg"
 )
 
+const resourceAddonName = "opentelekomcloud_cce_addon_v3.autoscaler"
+
 func TestAccCCEAddonV3Basic(t *testing.T) {
-	resName := "opentelekomcloud_cce_addon_v3.autoscaler"
+	clusterName := randClusterName()
+	t.Parallel()
+	quotas.BookOne(t, quotas.CCEClusterQuota)
+
 	resource.Test(t, resource.TestCase{
 		PreCheck:          func() { common.TestAccPreCheck(t) },
 		ProviderFactories: common.TestAccProviderFactories,
 		CheckDestroy:      testAccCheckCCEAddonV3Destroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccCCEAddonV3Basic,
+				Config: testAccCCEAddonV3Basic(clusterName),
 				Check: resource.ComposeTestCheckFunc(
-					checkScaleDownForAutoscaler(resName, true),
-					resource.TestCheckResourceAttr(resName, "values.0.custom.scaleDownDelayAfterDelete", "11"),
+					checkScaleDownForAutoscaler(resourceAddonName, true),
+					resource.TestCheckResourceAttr(resourceAddonName, "values.0.custom.scaleDownDelayAfterDelete", "11"),
 				),
 			},
 			{
-				Config: testAccCCEAddonV3Updated,
+				Config: testAccCCEAddonV3Updated(clusterName),
 				Check: resource.ComposeTestCheckFunc(
-					checkScaleDownForAutoscaler(resName, false),
-					resource.TestCheckResourceAttr(resName, "values.0.custom.scaleDownDelayAfterDelete", "8"),
+					checkScaleDownForAutoscaler(resourceAddonName, false),
+					resource.TestCheckResourceAttr(resourceAddonName, "values.0.custom.scaleDownDelayAfterDelete", "8"),
 				),
 			},
 		},
 	})
 }
 
-func TestAccCCEAddonV3ForceNewCCE(t *testing.T) {
-	resName := "opentelekomcloud_cce_addon_v3.autoscaler"
+func TestAccCCEAddonV3ImportBasic(t *testing.T) {
+	t.Parallel()
+	clusterName := randClusterName()
+	quotas.BookOne(t, quotas.CCEClusterQuota)
+
 	resource.Test(t, resource.TestCase{
 		PreCheck:          func() { common.TestAccPreCheck(t) },
 		ProviderFactories: common.TestAccProviderFactories,
 		CheckDestroy:      testAccCheckCCEAddonV3Destroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccCCEAddonV3Basic,
+				Config: testAccCCEAddonV3Basic(clusterName),
+			},
+			{
+				ResourceName:      resourceAddonName,
+				ImportState:       true,
+				ImportStateVerify: true,
+				ImportStateIdFunc: testAccCCEAddonV3ImportStateIdFunc(),
+				ImportStateVerifyIgnore: []string{
+					"values",
+				},
+			},
+		},
+	})
+}
+
+func testAccCCEAddonV3ImportStateIdFunc() resource.ImportStateIdFunc {
+	return func(s *terraform.State) (string, error) {
+		var clusterID string
+		var addonID string
+		for _, rs := range s.RootModule().Resources {
+			if rs.Type == "opentelekomcloud_cce_cluster_v3" {
+				clusterID = rs.Primary.ID
+			} else if rs.Type == "opentelekomcloud_cce_addon_v3" {
+				addonID = rs.Primary.ID
+			}
+		}
+		if clusterID == "" || addonID == "" {
+			return "", fmt.Errorf("resource not found: %s/%s", clusterID, addonID)
+		}
+		return fmt.Sprintf("%s/%s", clusterID, addonID), nil
+	}
+}
+
+func TestAccCCEAddonV3ForceNewCCE(t *testing.T) {
+	clusterName := randClusterName()
+	t.Parallel()
+	quotas.BookOne(t, quotas.CCEClusterQuota)
+
+	resource.Test(t, resource.TestCase{
+		PreCheck:          func() { common.TestAccPreCheck(t) },
+		ProviderFactories: common.TestAccProviderFactories,
+		CheckDestroy:      testAccCheckCCEAddonV3Destroy,
+		Steps: []resource.TestStep{
+			{
+				Config: testAccCCEAddonV3Basic(clusterName),
 				Check: resource.ComposeTestCheckFunc(
-					checkScaleDownForAutoscaler(resName, true),
-					resource.TestCheckResourceAttr(resName, "values.0.custom.scaleDownDelayAfterDelete", "11"),
+					checkScaleDownForAutoscaler(resourceAddonName, true),
+					resource.TestCheckResourceAttr(resourceAddonName, "values.0.custom.scaleDownDelayAfterDelete", "11"),
 				),
 			},
 			{
-				Config: testAccCCEAddonV3ForceNew,
+				Config: testAccCCEAddonV3ForceNew(clusterName),
 				Check: resource.ComposeTestCheckFunc(
-					checkScaleDownForAutoscaler(resName, true),
-					resource.TestCheckResourceAttr(resName, "values.0.custom.scaleDownDelayAfterDelete", "11"),
+					checkScaleDownForAutoscaler(resourceAddonName, true),
+					resource.TestCheckResourceAttr(resourceAddonName, "values.0.custom.scaleDownDelayAfterDelete", "11"),
 				),
 			},
 		},
@@ -117,8 +170,8 @@ func checkScaleDownForAutoscaler(name string, enabled bool) resource.TestCheckFu
 	}
 }
 
-var (
-	testAccCCEAddonV3Basic = fmt.Sprintf(`
+func testAccCCEAddonV3Basic(cName string) string {
+	return fmt.Sprintf(`
 %s
 %s
 
@@ -171,9 +224,11 @@ resource "opentelekomcloud_cce_addon_v3" "autoscaler" {
     }
   }
 }
-`, common.DataSourceSubnet, common.DataSourceProject, clusterName)
+`, common.DataSourceSubnet, common.DataSourceProject, cName)
+}
 
-	testAccCCEAddonV3Updated = fmt.Sprintf(`
+func testAccCCEAddonV3Updated(cName string) string {
+	return fmt.Sprintf(`
 %s
 %s
 
@@ -226,9 +281,11 @@ resource "opentelekomcloud_cce_addon_v3" "autoscaler" {
     }
   }
 }
-`, common.DataSourceSubnet, common.DataSourceProject, clusterName)
+`, common.DataSourceSubnet, common.DataSourceProject, cName)
+}
 
-	testAccCCEAddonV3ForceNew = fmt.Sprintf(`
+func testAccCCEAddonV3ForceNew(cName string) string {
+	return fmt.Sprintf(`
 %s
 %s
 
@@ -277,5 +334,5 @@ resource "opentelekomcloud_cce_addon_v3" "autoscaler" {
     }
   }
 }
-`, common.DataSourceSubnet, common.DataSourceProject, clusterName)
-)
+`, common.DataSourceSubnet, common.DataSourceProject, cName)
+}

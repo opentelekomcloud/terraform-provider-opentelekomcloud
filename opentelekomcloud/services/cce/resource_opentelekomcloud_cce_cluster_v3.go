@@ -382,7 +382,7 @@ func resourceCCEClusterV3Create(ctx context.Context, d *schema.ResourceData, met
 	stateConf := &resource.StateChangeConf{
 		Pending:    []string{"Creating"},
 		Target:     []string{"Available"},
-		Refresh:    waitForCCEClusterActive(cceClient, create.Metadata.Id),
+		Refresh:    WaitForCCEClusterActive(cceClient, create.Metadata.Id),
 		Timeout:    d.Timeout(schema.TimeoutCreate),
 		Delay:      5 * time.Second,
 		MinTimeout: 3 * time.Second,
@@ -617,7 +617,7 @@ func resourceCCEClusterV3Delete(ctx context.Context, d *schema.ResourceData, met
 	stateConf := &resource.StateChangeConf{
 		Pending:    []string{"Deleting", "Available", "Unavailable"},
 		Target:     []string{"Deleted"},
-		Refresh:    waitForCCEClusterDelete(cceClient, d.Id()),
+		Refresh:    WaitForCCEClusterDelete(cceClient, d.Id()),
 		Timeout:    d.Timeout(schema.TimeoutDelete),
 		Delay:      5 * time.Second,
 		MinTimeout: 3 * time.Second,
@@ -633,7 +633,7 @@ func resourceCCEClusterV3Delete(ctx context.Context, d *schema.ResourceData, met
 	return nil
 }
 
-func waitForCCEClusterActive(cceClient *golangsdk.ServiceClient, clusterId string) resource.StateRefreshFunc {
+func WaitForCCEClusterActive(cceClient *golangsdk.ServiceClient, clusterId string) resource.StateRefreshFunc {
 	return func() (interface{}, string, error) {
 		n, err := clusters.Get(cceClient, clusterId).Extract()
 		if err != nil {
@@ -644,7 +644,7 @@ func waitForCCEClusterActive(cceClient *golangsdk.ServiceClient, clusterId strin
 	}
 }
 
-func waitForCCEClusterDelete(cceClient *golangsdk.ServiceClient, clusterId string) resource.StateRefreshFunc {
+func WaitForCCEClusterDelete(cceClient *golangsdk.ServiceClient, clusterId string) resource.StateRefreshFunc {
 	return func() (interface{}, string, error) {
 		log.Printf("[DEBUG] Attempting to delete  CCE cluster %s.\n", clusterId)
 
