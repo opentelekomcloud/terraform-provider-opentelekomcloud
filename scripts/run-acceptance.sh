@@ -33,4 +33,5 @@ all_services=$(echo "${diffs}" | grep "${services_grep}" | grep -Po '(?<=service
 printf "The following services needs testing: \n%s\n" "${all_services}"
 
 all_modules=$(echo "${all_services}" | sed -r "s|(.*)|${base_test_path}\/\1\/...|" | xargs go list)
-TF_ACC=1 go test "${all_modules}" -v -timeout 720m
+
+TF_ACC=1 go test "${all_modules}" -count 1 -v -timeout 720m
