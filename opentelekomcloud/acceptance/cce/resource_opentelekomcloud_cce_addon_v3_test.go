@@ -39,7 +39,6 @@ func TestAccCCEAddonV3Basic(t *testing.T) {
 
 func TestAccCCEAddonV3ForceNewCCE(t *testing.T) {
 	resName := "opentelekomcloud_cce_addon_v3.autoscaler"
-
 	resource.Test(t, resource.TestCase{
 		PreCheck:          func() { common.TestAccPreCheck(t) },
 		ProviderFactories: common.TestAccProviderFactories,
@@ -121,6 +120,7 @@ func checkScaleDownForAutoscaler(name string, enabled bool) resource.TestCheckFu
 var (
 	testAccCCEAddonV3Basic = fmt.Sprintf(`
 %s
+%s
 
 resource opentelekomcloud_cce_cluster_v3 cluster_1 {
   name                    = "%s"
@@ -166,14 +166,15 @@ resource "opentelekomcloud_cce_addon_v3" "autoscaler" {
       "scaleUpMemUtilizationThreshold": 1,
       "scaleUpUnscheduledPodEnabled": true,
       "scaleUpUtilizationEnabled": true,
-      "tenant_id": "%s",
+      "tenant_id": data.opentelekomcloud_identity_project_v3.project.id,
       "unremovableNodeRecheckTimeout": 5
     }
   }
 }
-`, common.DataSourceSubnet, clusterName, env.OS_TENANT_ID)
+`, common.DataSourceSubnet, common.DataSourceProject, clusterName)
 
 	testAccCCEAddonV3Updated = fmt.Sprintf(`
+%s
 %s
 
 resource opentelekomcloud_cce_cluster_v3 cluster_1 {
@@ -220,14 +221,15 @@ resource "opentelekomcloud_cce_addon_v3" "autoscaler" {
       "scaleUpMemUtilizationThreshold": 1,
       "scaleUpUnscheduledPodEnabled": true,
       "scaleUpUtilizationEnabled": true,
-      "tenant_id": "%s",
+      "tenant_id": data.opentelekomcloud_identity_project_v3.project.id,
       "unremovableNodeRecheckTimeout": 5
     }
   }
 }
-`, common.DataSourceSubnet, clusterName, env.OS_TENANT_ID)
+`, common.DataSourceSubnet, common.DataSourceProject, clusterName)
 
 	testAccCCEAddonV3ForceNew = fmt.Sprintf(`
+%s
 %s
 
 resource opentelekomcloud_cce_cluster_v3 cluster_1 {
@@ -271,9 +273,9 @@ resource "opentelekomcloud_cce_addon_v3" "autoscaler" {
       "scaleUpUnscheduledPodEnabled": true,
       "scaleUpUtilizationEnabled": true,
       "unremovableNodeRecheckTimeout": 5,
-      "tenant_id": "%s"
+      "tenant_id": data.opentelekomcloud_identity_project_v3.project.id,
     }
   }
 }
-`, common.DataSourceSubnet, clusterName, env.OS_TENANT_ID)
+`, common.DataSourceSubnet, common.DataSourceProject, clusterName)
 )
