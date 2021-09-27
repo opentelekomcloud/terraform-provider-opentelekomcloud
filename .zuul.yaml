@@ -1,9 +1,11 @@
 ---
 - job:
-  name: terraform-functional
-  parent: golang-make-functional
-  pre-run: playbooks/infra-pre.yaml
-  post-run: playbooks/infra-post.yaml
+    name: terraform-functional
+    description: |
+      Run Terraform acceptance tests.
+    parent: golang-make-functional
+    pre-run: playbooks/infra-pre.yaml
+    post-run: playbooks/infra-post.yaml
 
 - job:
     name: tflint
