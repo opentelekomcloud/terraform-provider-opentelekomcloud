@@ -64,6 +64,27 @@ func TestAccOpenStackDNSZoneV2DataSource_byTag(t *testing.T) {
 	})
 }
 
+func TestAccOpenStackDNSZoneV2DataSource_private(t *testing.T) {
+	zone1 := randomZoneName()
+
+	resource.Test(t, resource.TestCase{
+		PreCheck:          func() { common.TestAccPreCheckRequiredEnvVars(t) },
+		ProviderFactories: common.TestAccProviderFactories,
+		CheckDestroy:      testAccCheckDNSV2ZoneDestroy,
+		Steps: []resource.TestStep{
+			{
+				Config: testAccDNSV2ZonePrivate(zone1),
+			},
+			{
+				Config: testAccOpenStackDNSZoneV2DataSourcePrivate(zone1),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckDNSZoneV2DataSourceID(dataZoneName),
+				),
+			},
+		},
+	})
+}
+
 func testAccCheckDNSZoneV2DataSourceID(n string) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
 		rs, ok := s.RootModule().Resources[n]
@@ -136,4 +157,16 @@ data "opentelekomcloud_dns_zone_v2" "z1" {
   }
 }
 `, base, zoneTagValue)
+}
+
+func testAccOpenStackDNSZoneV2DataSourcePrivate(zoneName string) string {
+	base := testAccDNSV2ZonePrivate(zoneName)
+	return fmt.Sprintf(`
+%s
+
+data "opentelekomcloud_dns_zone_v2" "z1" {
+  name      = "%s"
+  zone_type = "private"
+}
+`, base, zoneName)
 }

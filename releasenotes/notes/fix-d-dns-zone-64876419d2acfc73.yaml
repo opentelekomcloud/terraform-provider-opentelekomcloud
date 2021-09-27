@@ -1,0 +1,4 @@
+---
+other:
+  - |
+    **[DNS]** Remove redundant fields ``transferred_at``, ``attributes`` and `version` in ``data_source/opentelekomcloud_dns_zone_v2`` (`#1424 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/1424>`_)

@@ -10,15 +10,16 @@ Use this data source to get the ID of an available OpenStack DNS zone.
 
 ```hcl
 data "opentelekomcloud_dns_zone_v2" "zone_1" {
-  name = "example.com"
+  name = "example.com."
 }
 ```
 
 ## Argument Reference
 
-* `zone_type` - (Optional) The type of the zone: `private` or `public`. This argument is required to match private zones.
+* `zone_type` - (Optional) The type of the zone: `private` or `public`.
+  This argument is **required** to match `private` zones.
 
-* `name` - (Optional) The name of the zone.
+* `name` - (Optional) The name of the zone. A fuzzy search will be performed.
 
 * `description` - (Optional) A description of the zone.
 
@@ -34,20 +35,16 @@ data "opentelekomcloud_dns_zone_v2" "zone_1" {
 
 ## Attributes Reference
 
-`id` is set to the ID of the found zone. In addition, the following attributes
-are exported:
+In addition to all arguments above, the following attributes are exported:
 
-* `region` - See Argument Reference above.
-* `name` - See Argument Reference above.
-* `email` - See Argument Reference above.
-* `zone_type` - See Argument Reference above.
-* `ttl` - See Argument Reference above.
-* `description` - See Argument Reference above.
-* `status` - See Argument Reference above.
 * `masters` - An array of master DNS servers.
+
 * `created_at` - The time the zone was created.
+
 * `updated_at` - The time the zone was last updated.
-* `version` - The version of the zone.
+
 * `serial` - The serial number of the zone.
+
 * `pool_id` - The ID of the pool hosting the zone.
+
 * `project_id` - The project ID that owns the zone.
