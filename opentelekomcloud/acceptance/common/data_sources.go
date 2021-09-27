@@ -41,3 +41,10 @@ data "opentelekomcloud_networking_secgroup_v2" "default_secgroup" {
   name = "default"
 }
 `
+
+// DataSourceProject can be referred as `data.opentelekomcloud_identity_project_v3.project`
+var DataSourceProject = fmt.Sprintf(`
+data "opentelekomcloud_identity_project_v3" "project" {
+  name = "%s"
+}
+`, env.OS_TENANT_NAME)
