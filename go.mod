@@ -15,5 +15,6 @@ require (
 	github.com/mitchellh/go-homedir v1.1.0
 	github.com/opentelekomcloud/gophertelekomcloud v0.5.2-0.20210924153237-014b19bba497
 	github.com/unknwon/com v1.0.1
+	golang.org/x/sync v0.0.0-20200625203802-6e8e738ad208
 	gopkg.in/yaml.v2 v2.4.0
 )
