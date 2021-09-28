@@ -4,7 +4,7 @@ printf "\nStarting acceptance tests...\n"
 
 # First of all, locate packages required for the run
 
-base_branch="origin/devel"
+base_branch="devel"
 
 echo "Checking diff with \`$base_branch\`"
 total_grep="^diff --git a/opentelekomcloud/common"
