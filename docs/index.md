@@ -236,7 +236,8 @@ The following arguments are supported:
   variable is used. You must also set `username` to the Swauth/Swift username
   such as `username:project`. Set the `password` to the Swauth/Swift key.
   Finally, set `auth_url` as the location of the Swift service.
--> **Note:** This will only work when used with the OpenTelekomCloud Object Storage resources.
+
+-> This will only work when used with the OpenTelekomCloud Object Storage resources.
 
 * `agency_name` - (Optional) if authorized by assume role, it must be set. The
   name of agency.
