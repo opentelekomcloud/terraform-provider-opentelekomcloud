@@ -240,7 +240,7 @@ func TestLoadAndValidate_errors(t *testing.T) {
 				TenantID:         tools.RandomString("id-", 10),
 				TenantName:       tools.RandomString("name-", 10),
 			},
-			ErrorRegex: "no auth means provided",
+			ErrorRegex: "failed to authenticate",
 		},
 		"Invalid Endpoint": {
 			Config: cfg.Config{
