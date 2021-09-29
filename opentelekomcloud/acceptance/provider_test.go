@@ -226,7 +226,7 @@ func TestLoadAndValidate_errors(t *testing.T) {
 
 	cases := map[string]negativeConfig{
 		"No Identity Endpoint": {
-			ErrorRegex: `one of 'auth_url' or 'cloud' must be`,
+			ErrorRegex: `'auth_url' must be`,
 		},
 		"No Project ID/Name": {
 			Config: cfg.Config{
