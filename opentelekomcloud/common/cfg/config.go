@@ -74,14 +74,8 @@ func (c *Config) LoadAndValidate() error {
 		return fmt.Errorf("max_retries should be a positive value")
 	}
 
-	if c.IdentityEndpoint == "" && c.Cloud == "" {
-		return fmt.Errorf("one of 'auth_url' or 'cloud' must be specified")
-	}
-
-	if c.Cloud != "" {
-		if err := c.Load(); err != nil {
-			return err
-		}
+	if err := c.Load(); err != nil {
+		return err
 	}
 
 	if err := c.validateEndpoint(); err != nil {
