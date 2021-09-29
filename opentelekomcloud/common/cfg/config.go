@@ -74,14 +74,12 @@ func (c *Config) LoadAndValidate() error {
 		return fmt.Errorf("max_retries should be a positive value")
 	}
 
-	if c.IdentityEndpoint == "" && c.Cloud == "" {
-		return fmt.Errorf("one of 'auth_url' or 'cloud' must be specified")
+	if err := c.Load(); err != nil {
+		return err
 	}
 
-	if c.Cloud != "" {
-		if err := c.Load(); err != nil {
-			return err
-		}
+	if c.IdentityEndpoint == "" {
+		return fmt.Errorf("'auth_url' must be specified")
 	}
 
 	if err := c.validateEndpoint(); err != nil {
@@ -155,9 +153,9 @@ func (c *Config) Load() error {
 	// default domain
 	setIfEmpty(&c.DomainID, cloud.AuthInfo.DefaultDomain)
 
-	c.IdentityEndpoint = cloud.AuthInfo.AuthURL
-	c.Token = cloud.AuthInfo.Token
-	c.Password = cloud.AuthInfo.Password
+	setIfEmpty(&c.IdentityEndpoint, cloud.AuthInfo.AuthURL)
+	setIfEmpty(&c.Token, cloud.AuthInfo.Token)
+	setIfEmpty(&c.Password, cloud.AuthInfo.Password)
 
 	// General cloud info
 	setIfEmpty(&c.Region, cloud.RegionName)

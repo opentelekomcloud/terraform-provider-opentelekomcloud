@@ -1,0 +1,4 @@
+---
+enhancements:
+  - |
+    **[Provider]** Authenticate function uses the first cloud specified in ``clouds.yaml`` if ``OS_CLOUD`` not set (`#1431 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/1431>`_)
