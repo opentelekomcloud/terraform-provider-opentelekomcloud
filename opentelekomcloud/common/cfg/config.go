@@ -78,6 +78,10 @@ func (c *Config) LoadAndValidate() error {
 		return err
 	}
 
+	if c.IdentityEndpoint == "" && c.Cloud == "" {
+		return fmt.Errorf("one of 'auth_url' or 'cloud' must be specified")
+	}
+
 	if err := c.validateEndpoint(); err != nil {
 		return err
 	}
