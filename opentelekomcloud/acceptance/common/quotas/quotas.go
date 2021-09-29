@@ -2,25 +2,34 @@ package quotas
 
 import (
 	"context"
+	"fmt"
 	"log"
 	"os"
 	"strconv"
 	"time"
 
+	"github.com/hashicorp/go-multierror"
 	"golang.org/x/sync/semaphore"
+)
+
+const (
+	timeoutMsg = "reached timeout waiting for quota to be acquired"
+	tooManyMsg = "can't acquire more resources (%d) than exist (%d)"
 )
 
 // Quota is a wrapper around a semaphore providing simple control over shared resources with quotas
 type Quota struct {
-	sem *semaphore.Weighted
-	ctx context.Context
+	sem  *semaphore.Weighted
+	ctx  context.Context
+	size int64
 }
 
 // NewQuota creates a new Quota with persistent context inside
 func NewQuota(count int64) *Quota {
 	q := &Quota{
-		sem: semaphore.NewWeighted(count),
-		ctx: context.Background(),
+		sem:  semaphore.NewWeighted(count),
+		ctx:  context.Background(),
+		size: count,
 	}
 	return q
 }
@@ -29,8 +38,9 @@ func NewQuota(count int64) *Quota {
 func NewQuotaWithTimeout(count int64, timeout time.Duration) (*Quota, context.CancelFunc) {
 	ctx, cancelFunc := context.WithTimeout(context.Background(), timeout)
 	quota := &Quota{
-		sem: semaphore.NewWeighted(count),
-		ctx: ctx,
+		sem:  semaphore.NewWeighted(count),
+		ctx:  ctx,
+		size: count,
 	}
 	return quota, cancelFunc
 }
@@ -42,7 +52,15 @@ func (q *Quota) Acquire() error {
 
 // AcquireMultiple decrease count of available resources by n
 func (q *Quota) AcquireMultiple(n int64) error {
-	return q.sem.Acquire(q.ctx, n)
+	if n > q.size {
+		return fmt.Errorf(tooManyMsg, n, q.size)
+	}
+	if err := q.sem.Acquire(q.ctx, n); err != nil {
+		if err == context.DeadlineExceeded {
+			return fmt.Errorf(timeoutMsg)
+		}
+	}
+	return nil
 }
 
 // Release increase count of available resources by 1
@@ -86,3 +104,51 @@ var (
 	// Router - shared router(VPC) quota
 	Router = FromEnv("OS_ROUTER_QUOTA", 10)
 )
+
+// ExpectedQuota is a simple container of quota + count used for `Multiple` operations
+type ExpectedQuota struct {
+	Q     *Quota
+	Count int64
+}
+
+// AcquireMultipleQuotas tries to acquire all given quotas, reverting on failure
+func AcquireMultipleQuotas(e []*ExpectedQuota, interval time.Duration) error {
+	var acquired []*ExpectedQuota
+	repeated := false
+	// validate if all Count values of ExpectQuota are correct
+	var mErr *multierror.Error
+	for _, q := range e {
+		if q.Count > q.Q.size {
+			mErr = multierror.Append(mErr, fmt.Errorf(tooManyMsg, q.Count, q.Q.size))
+		}
+	}
+	if err := mErr.ErrorOrNil(); err != nil {
+		return err
+	}
+	for len(acquired) != len(e) {
+		ReleaseMultipleQuotas(acquired)
+		acquired = nil
+		if repeated {
+			time.Sleep(interval)
+		}
+		for _, q := range e {
+			if err := q.Q.ctx.Err(); err != nil {
+				if _, ok := q.Q.ctx.Deadline(); ok {
+					return fmt.Errorf(timeoutMsg)
+				}
+			}
+			ok := q.Q.sem.TryAcquire(q.Count)
+			if ok {
+				acquired = append(acquired, q)
+			}
+		}
+		repeated = true
+	}
+	return nil
+}
+
+func ReleaseMultipleQuotas(e []*ExpectedQuota) {
+	for _, q := range e {
+		q.Q.ReleaseMultiple(q.Count)
+	}
+}
