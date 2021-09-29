@@ -70,8 +70,8 @@ provider "opentelekomcloud" {
 }
 ```
 
--> **Note:** If token, AK/SK and password are set simultaneously, authentication will be done in the following order:
-  Token, AKSK, and Password.
+-> If token, AK/SK and password are set simultaneously, authentication will be done in the following order:
+  Token, AK/SK, and Password.
 
 ### Federated
 
@@ -103,13 +103,13 @@ provider "opentelekomcloud" {
 }
 ```
 
-#### User name + Password + TOTP
+#### User ID + Password + TOTP
 ```hcl
 provider "opentelekomcloud" {
   agency_name        = var.agency_name
   agency_domain_name = var.agency_domain_name
   delegated_project  = var.delegated_project
-  user_name          = var.user_name
+  user_id            = var.user_id
   password           = var.password
   domain_name        = var.domain_name
   auth_url           = "https://iam.eu-de.otc.t-systems.com/v3"
@@ -142,7 +142,7 @@ provider "opentelekomcloud" {
   auth_url           = "https://iam.eu-de.otc.t-systems.com/v3"
 }
 ```
-`token` specified is not the normal token, but must have the authority of 'Agent Operator'.
+`token` specified is not the normal token, but must have the authority of `Agent Operator`.
 
 ### OpenStack configuration file
 
@@ -228,7 +228,7 @@ The following arguments are supported:
   the key. If omitted the `OS_KEY` environment variable is used.
 
 * `endpoint_type` - (Optional) Specify which type of endpoint to use from the
-  service catalog. It can be set using the OS_ENDPOINT_TYPE environment
+  service catalog. It can be set using the `OS_ENDPOINT_TYPE` environment
   variable. If not set, public endpoints is used.
 
 * `swauth` - (Optional) Set to `true` to authenticate against Swauth, a
@@ -288,14 +288,3 @@ variables must also be set:
 
 You should be able to use any OpenTelekomCloud environment to develop on as long as the
 above environment variables are set.
-
-Most of Terraform's OpenTelekomCloud support is done in a standardized Packstack
-all-in-one environment. You can find the scripts to build this environment
-[here](https://github.com/jtopjian/terraform-devstack/tree/master/packstack-standard).
-The included `main.tf` file will need to be modified for your specific
-environment. Once it's up and running, you will have access to a standard,
-up-to-date OpenTelekomCloud environment with the latest OpenTelekomCloud services.
-
-If you require access to deprecated services, such as Keystone v2 and
-LBaaS v1, you can use the "legacy" environment
-[here](https://github.com/jtopjian/terraform-devstack/tree/master/packstack-legacy).
