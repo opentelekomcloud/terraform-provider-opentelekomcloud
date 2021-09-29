@@ -153,9 +153,9 @@ func (c *Config) Load() error {
 	// default domain
 	setIfEmpty(&c.DomainID, cloud.AuthInfo.DefaultDomain)
 
-	c.IdentityEndpoint = cloud.AuthInfo.AuthURL
-	c.Token = cloud.AuthInfo.Token
-	c.Password = cloud.AuthInfo.Password
+	setIfEmpty(&c.IdentityEndpoint, cloud.AuthInfo.AuthURL)
+	setIfEmpty(&c.Token, cloud.AuthInfo.Token)
+	setIfEmpty(&c.Password, cloud.AuthInfo.Password)
 
 	// General cloud info
 	setIfEmpty(&c.Region, cloud.RegionName)
