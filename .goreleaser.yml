@@ -60,5 +60,6 @@ release:
   github:
     owner: opentelekomcloud
     name: terraform-provider-opentelekomcloud
+  prerelease: auto
 changelog:
   skip: true
