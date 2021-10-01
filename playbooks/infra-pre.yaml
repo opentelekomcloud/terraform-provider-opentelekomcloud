@@ -1,0 +1,10 @@
+---
+- hosts: all
+  roles:
+    - role: ensure-terraform
+      vars:
+        terraform_version: "1.0.7"
+    - role: terraform
+      vars:
+        terraform_command: "apply"
+        zuul_work_dir: "{{ zuul.project.src_dir }}/infrastructure/"

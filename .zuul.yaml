@@ -1,5 +1,13 @@
 ---
 - job:
+    name: terraform-functional
+    description: |
+      Run Terraform acceptance tests.
+    parent: golang-make-functional
+    pre-run: playbooks/infra-pre.yaml
+    post-run: playbooks/infra-post.yaml
+
+- job:
     name: tflint
     parent: golang-make
     vars:
@@ -7,6 +15,8 @@
 
 - project:
     merge-mode: squash-merge
+    vars:
+      functest_project_name: "eu-de_zuul_tf"
     default-branch: devel
     templates:
       - release-notes-jobs
@@ -20,6 +30,9 @@
         - tflint
         - goreleaser-build:
             nodeset: fedora-32-large
+    check-post:
+      jobs:
+        - terraform-functional
     gate:
       jobs:
         - golangci-lint:

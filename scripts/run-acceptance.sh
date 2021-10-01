@@ -10,7 +10,6 @@ echo "Checking diff with \`$base_branch\`"
 total_grep="^diff --git a/opentelekomcloud/common"
 services_grep="^diff --git a/opentelekomcloud/services"
 
-git fetch
 diffs=$(git diff "${base_branch}")
 
 base_test_path=./opentelekomcloud/acceptance
