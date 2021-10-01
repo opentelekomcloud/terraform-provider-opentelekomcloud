@@ -133,7 +133,7 @@ func TestQuota_MultipleUnreleased(t *testing.T) {
 	qts := []*ExpectedQuota{{q1, 1}, {q2, 1}}
 
 	wg := sync.WaitGroup{}
-	wg.Add(3)
+	wg.Add(2)
 	go func() {
 		defer wg.Done()
 		th.AssertNoErr(t, q2.Acquire())
@@ -146,11 +146,7 @@ func TestQuota_MultipleUnreleased(t *testing.T) {
 		time.Sleep(1 * time.Millisecond)
 		th.AssertNoErr(t, AcquireMultipleQuotas(qts, 0))
 	}()
-	go func() {
-		defer wg.Done()
-		time.Sleep(2 * time.Millisecond)
-		err := AcquireMultipleQuotas(qts, 0)
-		th.AssertEquals(t, timeoutMsg, err.Error())
-	}()
 	wg.Wait()
+	err := AcquireMultipleQuotas(qts, 0)
+	th.AssertEquals(t, timeoutMsg, err.Error())
 }
