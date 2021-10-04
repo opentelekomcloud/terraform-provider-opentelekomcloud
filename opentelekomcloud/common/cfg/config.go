@@ -844,6 +844,13 @@ func (c *Config) ElbV1Client(region string) (*golangsdk.ServiceClient, error) {
 	})
 }
 
+func (c *Config) ElbV2Client(region string) (*golangsdk.ServiceClient, error) {
+	return openstack.NewELBV2(c.HwClient, golangsdk.EndpointOpts{
+		Region:       region,
+		Availability: c.getEndpointType(),
+	})
+}
+
 func (c *Config) RdsV1Client(region string) (*golangsdk.ServiceClient, error) {
 	return openstack.NewRDSV1(c.HwClient, golangsdk.EndpointOpts{
 		Region:       region,

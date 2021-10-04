@@ -85,9 +85,9 @@ func ResourceMemberV2() *schema.Resource {
 
 func resourceMemberV2Create(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*cfg.Config)
-	client, err := config.NetworkingV2Client(config.GetRegion(d))
+	client, err := config.ElbV2Client(config.GetRegion(d))
 	if err != nil {
-		return fmterr.Errorf(errCreationClient, err)
+		return fmterr.Errorf(ErrCreationV2Client, err)
 	}
 
 	adminStateUp := d.Get("admin_state_up").(bool)
@@ -135,9 +135,9 @@ func resourceMemberV2Create(ctx context.Context, d *schema.ResourceData, meta in
 
 func resourceMemberV2Read(_ context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*cfg.Config)
-	client, err := config.NetworkingV2Client(config.GetRegion(d))
+	client, err := config.ElbV2Client(config.GetRegion(d))
 	if err != nil {
-		return fmterr.Errorf(errCreationClient, err)
+		return fmterr.Errorf(ErrCreationV2Client, err)
 	}
 
 	poolID := d.Get("pool_id").(string)
@@ -168,9 +168,9 @@ func resourceMemberV2Read(_ context.Context, d *schema.ResourceData, meta interf
 
 func resourceMemberV2Update(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*cfg.Config)
-	client, err := config.NetworkingV2Client(config.GetRegion(d))
+	client, err := config.ElbV2Client(config.GetRegion(d))
 	if err != nil {
-		return fmterr.Errorf(errCreationClient, err)
+		return fmterr.Errorf(ErrCreationV2Client, err)
 	}
 
 	var updateOpts pools.UpdateMemberOpts
@@ -214,9 +214,9 @@ func resourceMemberV2Update(ctx context.Context, d *schema.ResourceData, meta in
 
 func resourceMemberV2Delete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*cfg.Config)
-	client, err := config.NetworkingV2Client(config.GetRegion(d))
+	client, err := config.ElbV2Client(config.GetRegion(d))
 	if err != nil {
-		return fmterr.Errorf(errCreationClient, err)
+		return fmterr.Errorf(ErrCreationV2Client, err)
 	}
 
 	// Wait for Pool to become active before continuing

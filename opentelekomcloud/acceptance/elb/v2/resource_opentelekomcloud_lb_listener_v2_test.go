@@ -7,6 +7,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/networking/v2/extensions/lbaas_v2/listeners"
+	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/services/elb"
 
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/acceptance/common"
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/acceptance/env"
@@ -105,9 +106,9 @@ func TestAccLBV2ListenerSni(t *testing.T) {
 
 func testAccCheckLBV2ListenerDestroy(s *terraform.State) error {
 	config := common.TestAccProvider.Meta().(*cfg.Config)
-	networkingClient, err := config.NetworkingV2Client(env.OS_REGION_NAME)
+	networkingClient, err := config.ElbV2Client(env.OS_REGION_NAME)
 	if err != nil {
-		return fmt.Errorf("error creating OpenTelekomCloud networking client: %s", err)
+		return fmt.Errorf(elb.ErrCreationV2Client, err)
 	}
 
 	for _, rs := range s.RootModule().Resources {
@@ -136,9 +137,9 @@ func testAccCheckLBV2ListenerExists(n string, listener *listeners.Listener) reso
 		}
 
 		config := common.TestAccProvider.Meta().(*cfg.Config)
-		networkingClient, err := config.NetworkingV2Client(env.OS_REGION_NAME)
+		networkingClient, err := config.ElbV2Client(env.OS_REGION_NAME)
 		if err != nil {
-			return fmt.Errorf("error creating OpenTelekomCloud networking client: %s", err)
+			return fmt.Errorf(elb.ErrCreationV2Client, err)
 		}
 
 		found, err := listeners.Get(networkingClient, rs.Primary.ID).Extract()

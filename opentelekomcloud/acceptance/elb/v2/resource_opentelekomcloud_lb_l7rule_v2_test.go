@@ -7,6 +7,7 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
+	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/services/elb"
 
 	l7rules "github.com/opentelekomcloud/gophertelekomcloud/openstack/networking/v2/extensions/lbaas_v2/l7policies"
 
@@ -53,9 +54,9 @@ func TestAccLBV2L7Rule_basic(t *testing.T) {
 
 func testAccCheckLBV2L7RuleDestroy(s *terraform.State) error {
 	config := common.TestAccProvider.Meta().(*cfg.Config)
-	lbClient, err := config.NetworkingV2Client(env.OS_REGION_NAME)
+	lbClient, err := config.ElbV2Client(env.OS_REGION_NAME)
 	if err != nil {
-		return fmt.Errorf("error creating OpenTelekomCloud load balancing client: %s", err)
+		return fmt.Errorf(elb.ErrCreationV2Client, err)
 	}
 
 	for _, rs := range s.RootModule().Resources {
@@ -96,9 +97,9 @@ func testAccCheckLBV2L7RuleExists(n string, l7rule *l7rules.Rule) resource.TestC
 		}
 
 		config := common.TestAccProvider.Meta().(*cfg.Config)
-		lbClient, err := config.NetworkingV2Client(env.OS_REGION_NAME)
+		lbClient, err := config.ElbV2Client(env.OS_REGION_NAME)
 		if err != nil {
-			return fmt.Errorf("error creating OpenTelekomCloud load balancing client: %s", err)
+			return fmt.Errorf(elb.ErrCreationV2Client, err)
 		}
 
 		l7policyID := ""

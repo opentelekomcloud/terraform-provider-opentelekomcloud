@@ -139,9 +139,9 @@ func resourcePoolV2Persistence(d *schema.ResourceData) (*pools.SessionPersistenc
 
 func resourceLBPoolV2Create(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*cfg.Config)
-	client, err := config.NetworkingV2Client(config.GetRegion(d))
+	client, err := config.ElbV2Client(config.GetRegion(d))
 	if err != nil {
-		return fmterr.Errorf("error creating OpenTelekomCloud NetworkingV2 client: %w", err)
+		return fmterr.Errorf(ErrCreationV2Client, err)
 	}
 
 	adminStateUp := d.Get("admin_state_up").(bool)
@@ -215,9 +215,9 @@ func resourceLBPoolV2Create(ctx context.Context, d *schema.ResourceData, meta in
 
 func resourceLBPoolV2Read(_ context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*cfg.Config)
-	client, err := config.NetworkingV2Client(config.GetRegion(d))
+	client, err := config.ElbV2Client(config.GetRegion(d))
 	if err != nil {
-		return fmterr.Errorf("error creating OpenTelekomCloud NetworkingV2 client: %w", err)
+		return fmterr.Errorf(ErrCreationV2Client, err)
 	}
 
 	pool, err := pools.Get(client, d.Id()).Extract()
@@ -250,9 +250,9 @@ func resourceLBPoolV2Read(_ context.Context, d *schema.ResourceData, meta interf
 
 func resourceLBPoolV2Update(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*cfg.Config)
-	client, err := config.NetworkingV2Client(config.GetRegion(d))
+	client, err := config.ElbV2Client(config.GetRegion(d))
 	if err != nil {
-		return fmterr.Errorf("error creating OpenTelekomCloud NetworkingV2 client: %w", err)
+		return fmterr.Errorf(ErrCreationV2Client, err)
 	}
 
 	var updateOpts pools.UpdateOpts
@@ -310,9 +310,9 @@ func resourceLBPoolV2Update(ctx context.Context, d *schema.ResourceData, meta in
 
 func resourceLBPoolV2Delete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*cfg.Config)
-	client, err := config.NetworkingV2Client(config.GetRegion(d))
+	client, err := config.ElbV2Client(config.GetRegion(d))
 	if err != nil {
-		return fmterr.Errorf("error creating OpenTelekomCloud NetworkingV2 client: %w", err)
+		return fmterr.Errorf(ErrCreationV2Client, err)
 	}
 
 	// Wait for LoadBalancer to become active before continuing

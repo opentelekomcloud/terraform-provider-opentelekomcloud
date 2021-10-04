@@ -92,9 +92,9 @@ func ResourceCertificateV2() *schema.Resource {
 
 func resourceCertificateV2Create(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*cfg.Config)
-	networkingClient, err := config.NetworkingV2Client(config.GetRegion(d))
+	networkingClient, err := config.ElbV2Client(config.GetRegion(d))
 	if err != nil {
-		return fmterr.Errorf("error creating OpenTelekomCloud networking client: %s", err)
+		return fmterr.Errorf(ErrCreationV2Client, err)
 	}
 
 	createOpts := certificates.CreateOpts{
@@ -120,9 +120,9 @@ func resourceCertificateV2Create(ctx context.Context, d *schema.ResourceData, me
 
 func resourceCertificateV2Read(_ context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*cfg.Config)
-	networkingClient, err := config.NetworkingV2Client(config.GetRegion(d))
+	networkingClient, err := config.ElbV2Client(config.GetRegion(d))
 	if err != nil {
-		return fmterr.Errorf("error creating OpenTelekomCloud networking client: %s", err)
+		return fmterr.Errorf(ErrCreationV2Client, err)
 	}
 
 	c, err := certificates.Get(networkingClient, d.Id()).Extract()
@@ -147,9 +147,9 @@ func resourceCertificateV2Read(_ context.Context, d *schema.ResourceData, meta i
 
 func resourceCertificateV2Update(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*cfg.Config)
-	networkingClient, err := config.NetworkingV2Client(config.GetRegion(d))
+	networkingClient, err := config.ElbV2Client(config.GetRegion(d))
 	if err != nil {
-		return fmterr.Errorf("error creating OpenTelekomCloud networking client: %s", err)
+		return fmterr.Errorf(ErrCreationV2Client, err)
 	}
 
 	var updateOpts certificates.UpdateOpts
@@ -188,9 +188,9 @@ func resourceCertificateV2Update(ctx context.Context, d *schema.ResourceData, me
 
 func resourceCertificateV2Delete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*cfg.Config)
-	client, err := config.NetworkingV2Client(config.GetRegion(d))
+	client, err := config.ElbV2Client(config.GetRegion(d))
 	if err != nil {
-		return fmterr.Errorf("error creating OpenTelekomCloud networking client: %s", err)
+		return fmterr.Errorf(ErrCreationV2Client, err)
 	}
 
 	log.Printf("[DEBUG] Deleting certificate %s", d.Id())

@@ -174,7 +174,7 @@ func resourceEListenerCreate(ctx context.Context, d *schema.ResourceData, meta i
 	config := meta.(*cfg.Config)
 	client, err := config.ElbV1Client(config.GetRegion(d))
 	if err != nil {
-		return fmterr.Errorf("error creating OpenTelekomCloud networking client: %s", err)
+		return fmterr.Errorf(ErrCreationV2Client, err)
 	}
 
 	var certificates []string
@@ -222,7 +222,7 @@ func resourceEListenerRead(_ context.Context, d *schema.ResourceData, meta inter
 	config := meta.(*cfg.Config)
 	client, err := config.ElbV1Client(config.GetRegion(d))
 	if err != nil {
-		return fmterr.Errorf("error creating OpenTelekomCloud networking client: %s", err)
+		return fmterr.Errorf(ErrCreationV2Client, err)
 	}
 
 	listener, err := listeners.Get(client, d.Id()).Extract()
@@ -266,7 +266,7 @@ func resourceEListenerUpdate(ctx context.Context, d *schema.ResourceData, meta i
 	config := meta.(*cfg.Config)
 	client, err := config.ElbV1Client(config.GetRegion(d))
 	if err != nil {
-		return fmterr.Errorf("error creating OpenTelekomCloud networking client: %s", err)
+		return fmterr.Errorf(ErrCreationV2Client, err)
 	}
 
 	var updateOpts listeners.UpdateOpts
@@ -316,7 +316,7 @@ func resourceEListenerDelete(_ context.Context, d *schema.ResourceData, meta int
 	config := meta.(*cfg.Config)
 	client, err := config.ElbV1Client(config.GetRegion(d))
 	if err != nil {
-		return fmterr.Errorf("error creating OpenTelekomCloud networking client: %s", err)
+		return fmterr.Errorf(ErrCreationV2Client, err)
 	}
 
 	id := d.Id()

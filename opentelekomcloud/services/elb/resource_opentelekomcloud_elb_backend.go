@@ -57,7 +57,7 @@ func resourceBackendCreate(ctx context.Context, d *schema.ResourceData, meta int
 	config := meta.(*cfg.Config)
 	client, err := config.ElbV1Client(config.GetRegion(d))
 	if err != nil {
-		return fmterr.Errorf("error creating OpenTelekomCloud networking client: %s", err)
+		return fmterr.Errorf(ErrCreationV2Client, err)
 	}
 
 	addOpts := backendmember.AddOpts{
@@ -102,7 +102,7 @@ func resourceBackendRead(_ context.Context, d *schema.ResourceData, meta interfa
 	config := meta.(*cfg.Config)
 	client, err := config.ElbV1Client(config.GetRegion(d))
 	if err != nil {
-		return fmterr.Errorf("error creating OpenTelekomCloud networking client: %s", err)
+		return fmterr.Errorf(ErrCreationV2Client, err)
 	}
 
 	listenerId := d.Get("listener_id").(string)
@@ -131,7 +131,7 @@ func resourceBackendDelete(_ context.Context, d *schema.ResourceData, meta inter
 	config := meta.(*cfg.Config)
 	client, err := config.ElbV1Client(config.GetRegion(d))
 	if err != nil {
-		return fmterr.Errorf("error creating OpenTelekomCloud networking client: %s", err)
+		return fmterr.Errorf(ErrCreationV2Client, err)
 	}
 
 	log.Printf("[DEBUG] Deleting backend member %s", d.Id())
