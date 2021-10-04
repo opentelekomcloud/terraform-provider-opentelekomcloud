@@ -1,0 +1,4 @@
+---
+fixes:
+  - |
+    **[SMN]** Fix broken ``Delete`` in ``resource/opentelekomcloud_smn_subscription_v2`` (`#1442 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/1442>`_)
