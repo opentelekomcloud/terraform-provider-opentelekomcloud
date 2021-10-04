@@ -15,6 +15,7 @@ import (
 )
 
 func TestAccLBV2Member_basic(t *testing.T) {
+	t.Parallel()
 	resourceMemberName1 := "opentelekomcloud_lb_member_v2.member_1"
 	resourceMemberName2 := "opentelekomcloud_lb_member_v2.member_2"
 	var member1 pools.Member

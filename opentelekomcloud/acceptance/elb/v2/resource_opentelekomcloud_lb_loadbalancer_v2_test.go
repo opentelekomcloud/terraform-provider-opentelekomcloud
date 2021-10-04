@@ -18,6 +18,7 @@ import (
 const resourceLBName = "opentelekomcloud_lb_loadbalancer_v2.loadbalancer_1"
 
 func TestAccLBV2LoadBalancer_basic(t *testing.T) {
+	t.Parallel()
 	var lb loadbalancers.LoadBalancer
 
 	resource.Test(t, resource.TestCase{

@@ -17,6 +17,7 @@ import (
 const resourceMonitorName = "opentelekomcloud_lb_monitor_v2.monitor_1"
 
 func TestAccLBV2Monitor_basic(t *testing.T) {
+	t.Parallel()
 	var monitor monitors.Monitor
 
 	resource.Test(t, resource.TestCase{
@@ -48,6 +49,7 @@ func TestAccLBV2Monitor_basic(t *testing.T) {
 }
 
 func TestAccLBV2Monitor_minConfig(t *testing.T) {
+	t.Parallel()
 	var monitor monitors.Monitor
 	resourceName := "opentelekomcloud_lb_monitor_v2.monitor_1"
 
