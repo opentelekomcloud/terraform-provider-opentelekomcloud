@@ -19,6 +19,7 @@ import (
 const resourcePolicyName = "opentelekomcloud_lb_l7policy_v2.l7policy_1"
 
 func TestAccLBV2L7Policy_basic(t *testing.T) {
+	t.Parallel()
 	var l7Policy l7policies.L7Policy
 
 	resource.Test(t, resource.TestCase{

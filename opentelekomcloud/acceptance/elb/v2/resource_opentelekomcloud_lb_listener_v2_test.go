@@ -15,6 +15,7 @@ import (
 )
 
 func TestAccLBV2Listener_basic(t *testing.T) {
+	t.Parallel()
 	var listener listeners.Listener
 	resourceName := "opentelekomcloud_lb_listener_v2.listener_1"
 
@@ -42,6 +43,7 @@ func TestAccLBV2Listener_basic(t *testing.T) {
 }
 
 func TestAccLBV2Listener_tls(t *testing.T) {
+	t.Parallel()
 	var listener listeners.Listener
 	resourceName := "opentelekomcloud_lb_listener_v2.listener_tls"
 
@@ -75,6 +77,7 @@ func TestAccLBV2Listener_tls(t *testing.T) {
 }
 
 func TestAccLBV2ListenerSni(t *testing.T) {
+	t.Parallel()
 	resourceName := "opentelekomcloud_lb_listener_v2.elb_listener"
 
 	resource.Test(t, resource.TestCase{

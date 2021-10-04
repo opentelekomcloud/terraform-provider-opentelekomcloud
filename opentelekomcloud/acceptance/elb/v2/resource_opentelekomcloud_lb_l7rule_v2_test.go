@@ -19,6 +19,7 @@ import (
 const resourceL7RuleName = "opentelekomcloud_lb_l7rule_v2.l7rule_1"
 
 func TestAccLBV2L7Rule_basic(t *testing.T) {
+	t.Parallel()
 	var l7rule l7rules.Rule
 
 	resource.Test(t, resource.TestCase{

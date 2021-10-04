@@ -17,6 +17,7 @@ import (
 const resourceWhitelistName = "opentelekomcloud_lb_whitelist_v2.whitelist_1"
 
 func TestAccLBV2Whitelist_basic(t *testing.T) {
+	t.Parallel()
 	var whitelist whitelists.Whitelist
 
 	resource.Test(t, resource.TestCase{

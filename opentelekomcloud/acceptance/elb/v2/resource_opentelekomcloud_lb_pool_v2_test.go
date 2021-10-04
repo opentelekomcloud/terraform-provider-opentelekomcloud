@@ -17,6 +17,7 @@ import (
 const resourcePoolName = "opentelekomcloud_lb_pool_v2.pool_1"
 
 func TestAccLBV2Pool_basic(t *testing.T) {
+	t.Parallel()
 	var pool pools.Pool
 
 	resource.Test(t, resource.TestCase{
@@ -45,6 +46,7 @@ func TestAccLBV2Pool_basic(t *testing.T) {
 }
 
 func TestAccLBV2Pool_persistenceNull(t *testing.T) {
+	t.Parallel()
 	var pool pools.Pool
 	resourceName := "opentelekomcloud_lb_pool_v2.pool_1"
 

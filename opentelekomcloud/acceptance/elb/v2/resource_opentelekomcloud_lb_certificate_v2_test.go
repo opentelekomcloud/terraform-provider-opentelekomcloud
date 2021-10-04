@@ -16,6 +16,7 @@ import (
 )
 
 func TestAccLBV2Certificate_basic(t *testing.T) {
+	t.Parallel()
 	var c certificates.Certificate
 
 	resource.Test(t, resource.TestCase{
