@@ -14,9 +14,12 @@ import (
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common/cfg"
 )
 
+const resourceSubscriptionName = "opentelekomcloud_smn_subscription_v2.subscription_1"
+
 func TestAccSMNV2Subscription_basic(t *testing.T) {
 	var subscription1 subscriptions.SubscriptionGet
 	var subscription2 subscriptions.SubscriptionGet
+	resourceSubscription2Name := "opentelekomcloud_smn_subscription_v2.subscription_2"
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:          func() { common.TestAccPreCheck(t) },
@@ -24,16 +27,12 @@ func TestAccSMNV2Subscription_basic(t *testing.T) {
 		CheckDestroy:      testAccCheckSMNSubscriptionV2Destroy,
 		Steps: []resource.TestStep{
 			{
-				Config: TestAccSMNV2SubscriptionConfig_basic,
+				Config: TestAccSMNV2SubscriptionConfigBasic,
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckSMNV2SubscriptionExists(
-						"opentelekomcloud_smn_subscription_v2.subscription_1", &subscription1, env.OS_TENANT_NAME),
-					testAccCheckSMNV2SubscriptionExists(
-						"opentelekomcloud_smn_subscription_v2.subscription_2", &subscription2, env.OS_TENANT_NAME),
-					resource.TestCheckResourceAttr(
-						"opentelekomcloud_smn_subscription_v2.subscription_1", "endpoint", "mailtest@gmail.com"),
-					resource.TestCheckResourceAttr(
-						"opentelekomcloud_smn_subscription_v2.subscription_2", "endpoint", "13600000000"),
+					testAccCheckSMNV2SubscriptionExists(resourceSubscriptionName, &subscription1, env.OS_TENANT_NAME),
+					testAccCheckSMNV2SubscriptionExists(resourceSubscription2Name, &subscription2, env.OS_TENANT_NAME),
+					resource.TestCheckResourceAttr(resourceSubscriptionName, "endpoint", "mailtest@gmail.com"),
+					resource.TestCheckResourceAttr(resourceSubscription2Name, "endpoint", "13600000000"),
 				),
 			},
 		},
@@ -55,12 +54,10 @@ func TestAccSMNV2Subscription_schemaProjectName(t *testing.T) {
 		CheckDestroy:      testAccCheckSMNSubscriptionV2Destroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccSMNV2SubscriptionConfig_projectName(env.OS_TENANT_NAME),
+				Config: testAccSMNV2SubscriptionConfigProjectName(env.OS_TENANT_NAME),
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckSMNV2SubscriptionExists(
-						"opentelekomcloud_smn_subscription_v2.subscription_1", &subscription1, env.OS_TENANT_NAME),
-					resource.TestCheckResourceAttr(
-						"opentelekomcloud_smn_subscription_v2.subscription_1", "project_name", string(env.OS_TENANT_NAME)),
+					testAccCheckSMNV2SubscriptionExists(resourceSubscriptionName, &subscription1, env.OS_TENANT_NAME),
+					resource.TestCheckResourceAttr(resourceSubscriptionName, "project_name", string(env.OS_TENANT_NAME)),
 				),
 			},
 		},
@@ -70,16 +67,16 @@ func TestAccSMNV2Subscription_schemaProjectName(t *testing.T) {
 
 func testAccCheckSMNSubscriptionV2Destroy(s *terraform.State) error {
 	config := common.TestAccProvider.Meta().(*cfg.Config)
-	smnClient, err := config.SmnV2Client(env.OS_TENANT_NAME)
+	client, err := config.SmnV2Client(env.OS_TENANT_NAME)
 	if err != nil {
-		return fmt.Errorf("error creating OpenTelekomCloud smn: %s", err)
+		return fmt.Errorf("error creating OpenTelekomCloud SMNv2 client: %w", err)
 	}
 	var subscription *subscriptions.SubscriptionGet
 	for _, rs := range s.RootModule().Resources {
 		if rs.Type != "opentelekomcloud_smn_subscription_v2" {
 			continue
 		}
-		foundList, err := subscriptions.List(smnClient).Extract()
+		foundList, err := subscriptions.List(client).Extract()
 		if err != nil {
 			return err
 		}
@@ -108,12 +105,12 @@ func testAccCheckSMNV2SubscriptionExists(n string, subscription *subscriptions.S
 		}
 
 		config := common.TestAccProvider.Meta().(*cfg.Config)
-		smnClient, err := config.SmnV2Client(projectName)
+		client, err := config.SmnV2Client(projectName)
 		if err != nil {
-			return fmt.Errorf("error creating OpenTelekomCloud smn client: %s", err)
+			return fmt.Errorf("error creating OpenTelekomCloud SMNv2 client: %s", err)
 		}
 
-		foundList, err := subscriptions.List(smnClient).Extract()
+		foundList, err := subscriptions.List(client).Extract()
 		if err != nil {
 			return err
 		}
@@ -130,7 +127,7 @@ func testAccCheckSMNV2SubscriptionExists(n string, subscription *subscriptions.S
 	}
 }
 
-var TestAccSMNV2SubscriptionConfig_basic = `
+var TestAccSMNV2SubscriptionConfigBasic = `
 resource "opentelekomcloud_smn_topic_v2" "topic_1" {
   name		   = "topic_1"
   display_name = "The display name of topic_1"
@@ -151,7 +148,7 @@ resource "opentelekomcloud_smn_subscription_v2" "subscription_2" {
 }
 `
 
-func testAccSMNV2SubscriptionConfig_projectName(projectName cfg.ProjectName) string {
+func testAccSMNV2SubscriptionConfigProjectName(projectName cfg.ProjectName) string {
 	return fmt.Sprintf(`
 locals {
   project_name = "%s"
