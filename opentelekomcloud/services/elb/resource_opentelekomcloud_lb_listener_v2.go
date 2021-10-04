@@ -117,9 +117,9 @@ func ResourceListenerV2() *schema.Resource {
 
 func resourceListenerV2Create(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*cfg.Config)
-	client, err := config.NetworkingV2Client(config.GetRegion(d))
+	client, err := config.ElbV2Client(config.GetRegion(d))
 	if err != nil {
-		return fmterr.Errorf("error creating OpenTelekomCloud NetworkingV2 client: %s", err)
+		return fmterr.Errorf(ErrCreationV2Client, err)
 	}
 
 	http2Enable := d.Get("http2_enable").(bool) // would prefer a fix in the gopher...
@@ -189,9 +189,9 @@ func resourceListenerV2Create(ctx context.Context, d *schema.ResourceData, meta 
 
 func resourceListenerV2Read(_ context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*cfg.Config)
-	client, err := config.NetworkingV2Client(config.GetRegion(d))
+	client, err := config.ElbV2Client(config.GetRegion(d))
 	if err != nil {
-		return fmterr.Errorf("error creating OpenTelekomCloud NetworkingV2 client: %s", err)
+		return fmterr.Errorf(ErrCreationV2Client, err)
 	}
 
 	listener, err := listeners.Get(client, d.Id()).Extract()
@@ -236,9 +236,9 @@ func resourceListenerV2Read(_ context.Context, d *schema.ResourceData, meta inte
 
 func resourceListenerV2Update(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*cfg.Config)
-	client, err := config.NetworkingV2Client(config.GetRegion(d))
+	client, err := config.ElbV2Client(config.GetRegion(d))
 	if err != nil {
-		return fmterr.Errorf("error creating OpenTelekomCloud NetworkingV2 client: %s", err)
+		return fmterr.Errorf(ErrCreationV2Client, err)
 	}
 
 	var updateOpts listeners.UpdateOpts
@@ -312,9 +312,9 @@ func resourceListenerV2Update(ctx context.Context, d *schema.ResourceData, meta 
 
 func resourceListenerV2Delete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*cfg.Config)
-	client, err := config.NetworkingV2Client(config.GetRegion(d))
+	client, err := config.ElbV2Client(config.GetRegion(d))
 	if err != nil {
-		return fmterr.Errorf("error creating OpenTelekomCloud NetworkingV2 client: %s", err)
+		return fmterr.Errorf(ErrCreationV2Client, err)
 	}
 
 	// Wait for LoadBalancer to become active before continuing

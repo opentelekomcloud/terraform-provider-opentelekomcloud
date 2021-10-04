@@ -1,5 +1,5 @@
 package elb
 
 const (
-	errCreationClient = "error creating OpenTelekomCloud NetworkingV2 client: %w"
+	ErrCreationV2Client = "error creating OpenTelekomCloud ELB V2 client: %w"
 )

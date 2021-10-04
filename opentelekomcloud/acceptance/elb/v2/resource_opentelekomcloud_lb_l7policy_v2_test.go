@@ -7,6 +7,7 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
+	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/services/elb"
 
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/networking/v2/extensions/lbaas_v2/l7policies"
 
@@ -26,7 +27,7 @@ func TestAccLBV2L7Policy_basic(t *testing.T) {
 		CheckDestroy:      testAccCheckLBV2L7PolicyDestroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccCheckLBV2L7PolicyConfig_basic,
+				Config: testAccCheckLBV2L7PolicyConfigBasic,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckLBV2L7PolicyExists(resourcePolicyName, &l7Policy),
 					resource.TestCheckResourceAttr(resourcePolicyName, "name", "test"),
@@ -34,7 +35,7 @@ func TestAccLBV2L7Policy_basic(t *testing.T) {
 					resource.TestCheckResourceAttr(resourcePolicyName, "action", "REDIRECT_TO_POOL"),
 					resource.TestCheckResourceAttr(resourcePolicyName, "position", "1"),
 					resource.TestMatchResourceAttr(resourcePolicyName, "listener_id",
-						regexp.MustCompile("^[a-fA-F0-9]{8}-[a-fA-F0-9]{4}-4[a-fA-F0-9]{3}-[8|9|aA|bB][a-fA-F0-9]{3}-[a-fA-F0-9]{12}$")),
+						regexp.MustCompile("^[a-fA-F0-9]{8}-[a-fA-F0-9]{4}-4[a-fA-F0-9]{3}-[8|9aAbB][a-fA-F0-9]{3}-[a-fA-F0-9]{12}$")),
 				),
 			},
 		},
@@ -43,9 +44,9 @@ func TestAccLBV2L7Policy_basic(t *testing.T) {
 
 func testAccCheckLBV2L7PolicyDestroy(s *terraform.State) error {
 	config := common.TestAccProvider.Meta().(*cfg.Config)
-	lbClient, err := config.NetworkingV2Client(env.OS_REGION_NAME)
+	lbClient, err := config.ElbV2Client(env.OS_REGION_NAME)
 	if err != nil {
-		return fmt.Errorf("error creating OpenTelekomCloud load balancing client: %s", err)
+		return fmt.Errorf(elb.ErrCreationV2Client, err)
 	}
 
 	for _, rs := range s.RootModule().Resources {
@@ -74,9 +75,9 @@ func testAccCheckLBV2L7PolicyExists(n string, l7Policy *l7policies.L7Policy) res
 		}
 
 		config := common.TestAccProvider.Meta().(*cfg.Config)
-		lbClient, err := config.NetworkingV2Client(env.OS_REGION_NAME)
+		lbClient, err := config.ElbV2Client(env.OS_REGION_NAME)
 		if err != nil {
-			return fmt.Errorf("error creating OpenTelekomCloud load balancing client: %s", err)
+			return fmt.Errorf(elb.ErrCreationV2Client, err)
 		}
 
 		found, err := l7policies.Get(lbClient, rs.Primary.ID).Extract()
@@ -94,7 +95,7 @@ func testAccCheckLBV2L7PolicyExists(n string, l7Policy *l7policies.L7Policy) res
 	}
 }
 
-var testAccCheckLBV2L7PolicyConfig_basic = fmt.Sprintf(`
+var testAccCheckLBV2L7PolicyConfigBasic = fmt.Sprintf(`
 %s
 
 resource "opentelekomcloud_lb_loadbalancer_v2" "loadbalancer_1" {

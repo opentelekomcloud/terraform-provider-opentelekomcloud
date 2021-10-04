@@ -94,7 +94,7 @@ func resourceHealthCreate(ctx context.Context, d *schema.ResourceData, meta inte
 	config := meta.(*cfg.Config)
 	client, err := config.ElbV1Client(config.GetRegion(d))
 	if err != nil {
-		return fmterr.Errorf("error creating OpenTelekomCloud networking client: %s", err)
+		return fmterr.Errorf(ErrCreationV2Client, err)
 	}
 
 	// adminStateUp := d.Get("admin_state_up").(bool)
@@ -124,7 +124,7 @@ func resourceHealthRead(_ context.Context, d *schema.ResourceData, meta interfac
 	config := meta.(*cfg.Config)
 	networkingClient, err := config.ElbV1Client(config.GetRegion(d))
 	if err != nil {
-		return fmterr.Errorf("error creating OpenTelekomCloud networking client: %s", err)
+		return fmterr.Errorf(ErrCreationV2Client, err)
 	}
 
 	health, err := healthcheck.Get(networkingClient, d.Id()).Extract()
@@ -157,7 +157,7 @@ func resourceHealthUpdate(ctx context.Context, d *schema.ResourceData, meta inte
 	config := meta.(*cfg.Config)
 	networkingClient, err := config.ElbV1Client(config.GetRegion(d))
 	if err != nil {
-		return fmterr.Errorf("error creating OpenTelekomCloud networking client: %s", err)
+		return fmterr.Errorf(ErrCreationV2Client, err)
 	}
 
 	var updateOpts healthcheck.UpdateOpts
@@ -197,7 +197,7 @@ func resourceHealthDelete(_ context.Context, d *schema.ResourceData, meta interf
 	config := meta.(*cfg.Config)
 	client, err := config.ElbV1Client(config.GetRegion(d))
 	if err != nil {
-		return fmterr.Errorf("error creating OpenTelekomCloud networking client: %s", err)
+		return fmterr.Errorf(ErrCreationV2Client, err)
 	}
 
 	id := d.Id()

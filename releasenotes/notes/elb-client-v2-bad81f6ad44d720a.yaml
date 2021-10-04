@@ -1,0 +1,4 @@
+---
+other:
+  - |
+    **[ELB]** Use loadbalancer-specific endpoint instead of networking one for ELB v2 resources (`#1443 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/1443>`_)

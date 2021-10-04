@@ -85,9 +85,9 @@ func ResourceLoadBalancerV2() *schema.Resource {
 
 func resourceLoadBalancerV2Create(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*cfg.Config)
-	client, err := config.NetworkingV2Client(config.GetRegion(d))
+	client, err := config.ElbV2Client(config.GetRegion(d))
 	if err != nil {
-		return fmterr.Errorf("error creating OpenTelekomCloud NetworkingV2 client: %s", err)
+		return fmterr.Errorf(ErrCreationV2Client, err)
 	}
 
 	var lbProvider string
@@ -136,9 +136,9 @@ func resourceLoadBalancerV2Create(ctx context.Context, d *schema.ResourceData, m
 
 func resourceLoadBalancerV2Read(_ context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*cfg.Config)
-	client, err := config.NetworkingV2Client(config.GetRegion(d))
+	client, err := config.ElbV2Client(config.GetRegion(d))
 	if err != nil {
-		return fmterr.Errorf("error creating OpenTelekomCloud NetworkingV2 client: %s", err)
+		return fmterr.Errorf(ErrCreationV2Client, err)
 	}
 
 	lb, err := loadbalancers.Get(client, d.Id()).Extract()
@@ -179,9 +179,9 @@ func resourceLoadBalancerV2Read(_ context.Context, d *schema.ResourceData, meta 
 
 func resourceLoadBalancerV2Update(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*cfg.Config)
-	client, err := config.NetworkingV2Client(config.GetRegion(d))
+	client, err := config.ElbV2Client(config.GetRegion(d))
 	if err != nil {
-		return fmterr.Errorf("error creating OpenTelekomCloud NetworkingV2 client: %s", err)
+		return fmterr.Errorf(ErrCreationV2Client, err)
 	}
 
 	var updateOpts loadbalancers.UpdateOpts
@@ -233,9 +233,9 @@ func resourceLoadBalancerV2Update(ctx context.Context, d *schema.ResourceData, m
 
 func resourceLoadBalancerV2Delete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*cfg.Config)
-	client, err := config.NetworkingV2Client(config.GetRegion(d))
+	client, err := config.ElbV2Client(config.GetRegion(d))
 	if err != nil {
-		return fmterr.Errorf("error creating OpenTelekomCloud NetworkingV2 client: %s", err)
+		return fmterr.Errorf(ErrCreationV2Client, err)
 	}
 
 	log.Printf("[DEBUG] Deleting loadbalancer %s", d.Id())
