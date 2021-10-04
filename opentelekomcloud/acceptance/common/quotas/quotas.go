@@ -103,6 +103,13 @@ var (
 	FloatingIP = FromEnv("OS_FLOATING_IP_QUOTA", 3)
 	// Router - shared router(VPC) quota
 	Router = FromEnv("OS_ROUTER_QUOTA", 10)
+
+	// Volumes
+
+	// Volume - quota for block storage volumes
+	Volume = FromEnv("OS_VOLUME_QUOTA", 50)
+	// VolumeSize - quota for block storage total size, GB
+	VolumeSize = FromEnv("OS_VOLUME_SIZE_QUOTA", 12500)
 )
 
 // ExpectedQuota is a simple container of quota + count used for `Multiple` operations
