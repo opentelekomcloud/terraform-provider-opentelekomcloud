@@ -41,8 +41,8 @@ The following arguments are supported:
   * For an email subscription, the endpoint is a mail address.
   * For an SMS message subscription, the endpoint is a phone number.
 
-* `protocol` - (Required) Specifies protocol of the message endpoint. Currently, email,
-  sms, http, and https are supported.
+* `protocol` - (Required) Specifies protocol of the message endpoint. Currently, `email`,
+  `sms`, `http`, and `https` are supported.
 
 * `remark` - (Optional) Specifies the remark information. The remarks must be a UTF-8-coded
   character string containing 128 bytes.
@@ -51,21 +51,13 @@ The following arguments are supported:
 
 ## Attributes Reference
 
-The following attributes are exported:
-
-* `topic_urn` - See Argument Reference above.
-
-* `endpoint` - See Argument Reference above.
-
-* `protocol` - See Argument Reference above.
-
-* `remark` - See Argument Reference above.
+In addition to all arguments above, the following attributes are exported:
 
 * `subscription_urn` - The resource identifier of a subscription.
 
 * `owner` - The project ID of the topic creator.
 
 * `status` - The subscription status.
-  * 0 indicates that the subscription is not confirmed.
-  * 1 indicates that the subscription is confirmed.
-  * 3 indicates that the subscription is canceled.
+  * `0` indicates that the subscription is not confirmed.
+  * `1` indicates that the subscription is confirmed.
+  * `3` indicates that the subscription is canceled.
