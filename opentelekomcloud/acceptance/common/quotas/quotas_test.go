@@ -1,6 +1,7 @@
 package quotas
 
 import (
+	"fmt"
 	"os"
 	"strconv"
 	"sync"
@@ -18,18 +19,20 @@ func TestQuota_Release(t *testing.T) {
 	th.AssertNoErr(t, q.Acquire())
 }
 
+var namelessTimeout = fmt.Sprintf(timeoutMsg, "")
+
 func TestQuota_Timeout(t *testing.T) {
 	t.Parallel()
 	q, _ := NewQuotaWithTimeout(1, 1*time.Millisecond)
 	th.AssertNoErr(t, q.Acquire())
 	err := q.Acquire()
-	th.AssertEquals(t, timeoutMsg, err.Error())
+	th.AssertEquals(t, namelessTimeout, err.Error())
 }
 
 func TestQuota_AcquireTooMuch(t *testing.T) {
 	q := NewQuota(1)
 	err := q.AcquireMultiple(2)
-	th.AssertEquals(t, "can't acquire more resources (2) than exist (1)", err.Error())
+	th.AssertEquals(t, "can't acquire more resources (2) than exist (1) for quota ", err.Error())
 }
 
 func TestFromEnv_Default(t *testing.T) {
@@ -66,14 +69,14 @@ func TestQuota_TimeoutDeadlock(t *testing.T) {
 		th.AssertNoErr(t, q1.Acquire())
 		time.Sleep(1 * time.Millisecond)
 		err := q2.Acquire()
-		th.AssertEquals(t, timeoutMsg, err.Error())
+		th.AssertEquals(t, namelessTimeout, err.Error())
 	}()
 	go func() {
 		defer wg.Done()
 		th.AssertNoErr(t, q2.Acquire())
 		time.Sleep(1 * time.Millisecond)
 		err := q1.Acquire()
-		th.AssertEquals(t, timeoutMsg, err.Error())
+		th.AssertEquals(t, namelessTimeout, err.Error())
 	}()
 	wg.Wait()
 }
@@ -120,7 +123,7 @@ func TestQuota_MultipleTooMany(t *testing.T) {
 
 	err := AcquireMultipleQuotas(qts, 0)
 	th.AssertEquals(t,
-		"2 errors occurred:\n\t* can't acquire more resources (10) than exist (1)\n\t* can't acquire more resources (10) than exist (2)\n\n",
+		"2 errors occurred:\n\t* can't acquire more resources (10) than exist (1) for quota \n\t* can't acquire more resources (10) than exist (2) for quota \n\n",
 		err.Error(),
 	)
 }
@@ -133,5 +136,5 @@ func TestQuota_MultipleUnreleased(t *testing.T) {
 	th.AssertNoErr(t, AcquireMultipleQuotas(qts, 0))
 
 	err := AcquireMultipleQuotas(qts, 0)
-	th.AssertEquals(t, timeoutMsg, err.Error())
+	th.AssertEquals(t, namelessTimeout, err.Error())
 }
