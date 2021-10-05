@@ -6,6 +6,7 @@ import (
 	"log"
 	"os"
 	"strconv"
+	"strings"
 	"time"
 
 	"github.com/hashicorp/go-multierror"
@@ -13,12 +14,14 @@ import (
 )
 
 const (
-	timeoutMsg = "reached timeout waiting for quota to be acquired"
-	tooManyMsg = "can't acquire more resources (%d) than exist (%d)"
+	timeoutMsg = "reached timeout waiting for quota `%s` to be acquired"
+	tooManyMsg = "can't acquire more resources (%d) than exist (%d) for quota %s"
 )
 
 // Quota is a wrapper around a semaphore providing simple control over shared resources with quotas
 type Quota struct {
+	Name string
+
 	sem  *semaphore.Weighted
 	ctx  context.Context
 	size int64
@@ -53,11 +56,11 @@ func (q *Quota) Acquire() error {
 // AcquireMultiple decrease count of available resources by n
 func (q *Quota) AcquireMultiple(n int64) error {
 	if n > q.size {
-		return fmt.Errorf(tooManyMsg, n, q.size)
+		return fmt.Errorf(tooManyMsg, n, q.size, q.Name)
 	}
 	if err := q.sem.Acquire(q.ctx, n); err != nil {
 		if err == context.DeadlineExceeded {
-			return fmt.Errorf(timeoutMsg)
+			return fmt.Errorf(timeoutMsg, q.Name)
 		}
 	}
 	return nil
@@ -84,7 +87,9 @@ func FromEnv(envVar string, def int64) *Quota {
 			log.Printf("failed to read env var %s, using default value %d: %s", envVar, def, err.Error())
 		}
 	}
-	return NewQuota(count)
+	q := NewQuota(count)
+	q.Name = strings.ToLower(envVar)
+	return q
 }
 
 // Shared quotas
@@ -95,7 +100,7 @@ var (
 	// Server - shared compute instance quota (number of instances only)
 	Server = FromEnv("OS_SERVER_QUOTA", 10)
 	CPU    = FromEnv("OS_CPU_QUOTA", 40)
-	RAM    = FromEnv("OS_RAM_QUOTA", 160)
+	RAM    = FromEnv("OS_RAM_QUOTA", 160*1024)
 
 	// Networking
 
@@ -126,7 +131,7 @@ func AcquireMultipleQuotas(e []*ExpectedQuota, interval time.Duration) error {
 	var mErr *multierror.Error
 	for _, q := range e {
 		if q.Count > q.Q.size {
-			mErr = multierror.Append(mErr, fmt.Errorf(tooManyMsg, q.Count, q.Q.size))
+			mErr = multierror.Append(mErr, fmt.Errorf(tooManyMsg, q.Count, q.Q.size, q.Q.Name))
 		}
 	}
 	if err := mErr.ErrorOrNil(); err != nil {
@@ -141,7 +146,7 @@ func AcquireMultipleQuotas(e []*ExpectedQuota, interval time.Duration) error {
 		for _, q := range e {
 			if err := q.Q.ctx.Err(); err != nil {
 				if _, ok := q.Q.ctx.Deadline(); ok {
-					return fmt.Errorf(timeoutMsg)
+					return fmt.Errorf(timeoutMsg, q.Q.Name)
 				}
 			}
 			ok := q.Q.sem.TryAcquire(q.Count)
