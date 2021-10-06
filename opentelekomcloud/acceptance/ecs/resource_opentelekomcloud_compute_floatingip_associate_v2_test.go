@@ -3,8 +3,11 @@ package acceptance
 import (
 	"fmt"
 	"testing"
+	"time"
 
 	golangsdk "github.com/opentelekomcloud/gophertelekomcloud"
+	th "github.com/opentelekomcloud/gophertelekomcloud/testhelper"
+	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/acceptance/common/quotas"
 
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/compute/v2/servers"
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/networking/v2/extensions/layer3/floatingips"
@@ -23,6 +26,10 @@ func TestAccComputeV2FloatingIPAssociate_basic(t *testing.T) {
 	var instance servers.Server
 	var fip floatingips.FloatingIP
 	resourceNwFloatingIpName := "opentelekomcloud_networking_floatingip_v2.fip_1"
+	t.Parallel()
+	qts := simpleServerWithIPQuotas(1)
+	th.AssertNoErr(t, quotas.AcquireMultipleQuotas(qts, 5*time.Second))
+	defer quotas.ReleaseMultipleQuotas(qts)
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:          func() { common.TestAccPreCheck(t) },
@@ -45,6 +52,10 @@ func TestAccComputeV2FloatingIPAssociate_fixedIP(t *testing.T) {
 	var instance servers.Server
 	var fip floatingips.FloatingIP
 	resourceNwFloatingIpName := "opentelekomcloud_networking_floatingip_v2.fip_1"
+	t.Parallel()
+	qts := simpleServerWithIPQuotas(1)
+	th.AssertNoErr(t, quotas.AcquireMultipleQuotas(qts, 5*time.Second))
+	defer quotas.ReleaseMultipleQuotas(qts)
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:          func() { common.TestAccPreCheck(t) },
@@ -67,6 +78,10 @@ func TestAccComputeV2FloatingIPAssociate_attachToFirstNetwork(t *testing.T) {
 	var instance servers.Server
 	var fip floatingips.FloatingIP
 	resourceNwFloatingIpName := "opentelekomcloud_networking_floatingip_v2.fip_1"
+	t.Parallel()
+	qts := simpleServerWithIPQuotas(1)
+	th.AssertNoErr(t, quotas.AcquireMultipleQuotas(qts, 5*time.Second))
+	defer quotas.ReleaseMultipleQuotas(qts)
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:          func() { common.TestAccPreCheck(t) },
@@ -91,6 +106,10 @@ func TestAccComputeV2FloatingIPAssociate_attachNew(t *testing.T) {
 	var fip2 floatingips.FloatingIP
 	resourceNwFloatingIpName := "opentelekomcloud_networking_floatingip_v2.fip_1"
 	resourceNwFloatingIp2Name := "opentelekomcloud_networking_floatingip_v2.fip_2"
+	t.Parallel()
+	qts := simpleServerWithIPQuotas(2)
+	th.AssertNoErr(t, quotas.AcquireMultipleQuotas(qts, 5*time.Second))
+	defer quotas.ReleaseMultipleQuotas(qts)
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:          func() { common.TestAccPreCheck(t) },

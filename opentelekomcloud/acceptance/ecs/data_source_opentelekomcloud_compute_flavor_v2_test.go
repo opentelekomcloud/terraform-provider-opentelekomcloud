@@ -12,6 +12,8 @@ import (
 const dataFlavorName = "data.opentelekomcloud_compute_flavor_v2.flavor_1"
 
 func TestAccComputeV2FlavorDataSource_basic(t *testing.T) {
+	t.Parallel()
+
 	resource.Test(t, resource.TestCase{
 		PreCheck:          func() { common.TestAccPreCheck(t) },
 		ProviderFactories: common.TestAccProviderFactories,

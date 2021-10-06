@@ -12,6 +12,8 @@ import (
 const dataAzName = "data.opentelekomcloud_compute_availability_zones_v2.zones"
 
 func TestAccOpenStackAvailabilityZonesV2_basic(t *testing.T) {
+	t.Parallel()
+
 	resource.Test(t, resource.TestCase{
 		PreCheck:          func() { common.TestAccPreCheck(t) },
 		ProviderFactories: common.TestAccProviderFactories,

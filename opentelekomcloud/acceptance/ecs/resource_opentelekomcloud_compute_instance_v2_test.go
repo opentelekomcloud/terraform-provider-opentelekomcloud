@@ -4,9 +4,12 @@ import (
 	"fmt"
 	"strings"
 	"testing"
+	"time"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
+	th "github.com/opentelekomcloud/gophertelekomcloud/testhelper"
+	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/acceptance/common/quotas"
 
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/compute/v2/extensions/secgroups"
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/compute/v2/extensions/volumeattach"
@@ -22,6 +25,10 @@ const resourceInstanceV2Name = "opentelekomcloud_compute_instance_v2.instance_1"
 
 func TestAccComputeV2Instance_basic(t *testing.T) {
 	var instance servers.Server
+	qts := serverQuotas(4, env.OsFlavorID)
+	t.Parallel()
+	th.AssertNoErr(t, quotas.AcquireMultipleQuotas(qts, 5*time.Second))
+	defer quotas.ReleaseMultipleQuotas(qts)
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:          func() { common.TestAccPreCheck(t) },
@@ -56,6 +63,10 @@ func TestAccComputeV2Instance_multiSecgroup(t *testing.T) {
 	var secGroup1, secGroup2 secgroups.SecurityGroup
 	secGroupName1 := "opentelekomcloud_compute_secgroup_v2.secgroup_1"
 	secGroupName2 := "opentelekomcloud_compute_secgroup_v2.secgroup_2"
+	qts := serverQuotas(4, env.OsFlavorID)
+	t.Parallel()
+	th.AssertNoErr(t, quotas.AcquireMultipleQuotas(qts, 5*time.Second))
+	defer quotas.ReleaseMultipleQuotas(qts)
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:          func() { common.TestAccPreCheck(t) },
@@ -84,6 +95,10 @@ func TestAccComputeV2Instance_multiSecgroup(t *testing.T) {
 
 func TestAccComputeV2Instance_bootFromImage(t *testing.T) {
 	var instance servers.Server
+	qts := serverQuotas(50, env.OsFlavorID)
+	t.Parallel()
+	th.AssertNoErr(t, quotas.AcquireMultipleQuotas(qts, 5*time.Second))
+	defer quotas.ReleaseMultipleQuotas(qts)
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:          func() { common.TestAccPreCheck(t) },
@@ -103,6 +118,10 @@ func TestAccComputeV2Instance_bootFromImage(t *testing.T) {
 
 func TestAccComputeV2Instance_bootFromVolume(t *testing.T) {
 	var instance servers.Server
+	qts := serverQuotas(50, env.OsFlavorID)
+	t.Parallel()
+	th.AssertNoErr(t, quotas.AcquireMultipleQuotas(qts, 5*time.Second))
+	defer quotas.ReleaseMultipleQuotas(qts)
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:          func() { common.TestAccPreCheck(t) },
@@ -121,6 +140,10 @@ func TestAccComputeV2Instance_bootFromVolume(t *testing.T) {
 
 func TestAccComputeV2Instance_changeFixedIP(t *testing.T) {
 	var instance servers.Server
+	qts := serverQuotas(4, env.OsFlavorID)
+	t.Parallel()
+	th.AssertNoErr(t, quotas.AcquireMultipleQuotas(qts, 5*time.Second))
+	defer quotas.ReleaseMultipleQuotas(qts)
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:          func() { common.TestAccPreCheck(t) },
@@ -139,6 +162,10 @@ func TestAccComputeV2Instance_changeFixedIP(t *testing.T) {
 
 func TestAccComputeV2Instance_bootFromVolumeVolume(t *testing.T) {
 	var instance servers.Server
+	qts := serverQuotas(50, env.OsFlavorID)
+	t.Parallel()
+	th.AssertNoErr(t, quotas.AcquireMultipleQuotas(qts, 5*time.Second))
+	defer quotas.ReleaseMultipleQuotas(qts)
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:          func() { common.TestAccPreCheck(t) },
@@ -158,6 +185,10 @@ func TestAccComputeV2Instance_bootFromVolumeVolume(t *testing.T) {
 
 func TestAccComputeV2Instance_stopBeforeDestroy(t *testing.T) {
 	var instance servers.Server
+	qts := serverQuotas(4, env.OsFlavorID)
+	t.Parallel()
+	th.AssertNoErr(t, quotas.AcquireMultipleQuotas(qts, 5*time.Second))
+	defer quotas.ReleaseMultipleQuotas(qts)
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:          func() { common.TestAccPreCheck(t) },
@@ -176,6 +207,10 @@ func TestAccComputeV2Instance_stopBeforeDestroy(t *testing.T) {
 
 func TestAccComputeV2Instance_metadata(t *testing.T) {
 	var instance servers.Server
+	qts := serverQuotas(4, env.OsFlavorID)
+	t.Parallel()
+	th.AssertNoErr(t, quotas.AcquireMultipleQuotas(qts, 5*time.Second))
+	defer quotas.ReleaseMultipleQuotas(qts)
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:          func() { common.TestAccPreCheck(t) },
@@ -209,6 +244,10 @@ func TestAccComputeV2Instance_metadata(t *testing.T) {
 
 func TestAccComputeV2Instance_timeout(t *testing.T) {
 	var instance servers.Server
+	qts := serverQuotas(4, env.OsFlavorID)
+	t.Parallel()
+	th.AssertNoErr(t, quotas.AcquireMultipleQuotas(qts, 5*time.Second))
+	defer quotas.ReleaseMultipleQuotas(qts)
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:          func() { common.TestAccPreCheck(t) },
@@ -227,6 +266,10 @@ func TestAccComputeV2Instance_timeout(t *testing.T) {
 
 func TestAccComputeV2Instance_autoRecovery(t *testing.T) {
 	var instance servers.Server
+	qts := serverQuotas(4, env.OsFlavorID)
+	t.Parallel()
+	th.AssertNoErr(t, quotas.AcquireMultipleQuotas(qts, 5*time.Second))
+	defer quotas.ReleaseMultipleQuotas(qts)
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:          func() { common.TestAccPreCheck(t) },
@@ -253,6 +296,10 @@ func TestAccComputeV2Instance_autoRecovery(t *testing.T) {
 
 func TestAccComputeV2Instance_crazyNICs(t *testing.T) {
 	var instance servers.Server
+	qts := serverQuotas(4, env.OsFlavorID)
+	t.Parallel()
+	th.AssertNoErr(t, quotas.AcquireMultipleQuotas(qts, 5*time.Second))
+	defer quotas.ReleaseMultipleQuotas(qts)
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:          func() { common.TestAccPreCheck(t) },
@@ -271,6 +318,10 @@ func TestAccComputeV2Instance_crazyNICs(t *testing.T) {
 
 func TestAccComputeV2Instance_initialStateActive(t *testing.T) {
 	var instance servers.Server
+	qts := serverQuotas(4, env.OsFlavorID)
+	t.Parallel()
+	th.AssertNoErr(t, quotas.AcquireMultipleQuotas(qts, 5*time.Second))
+	defer quotas.ReleaseMultipleQuotas(qts)
 
 	resource.Test(t, resource.TestCase{
 		PreCheck: func() {
@@ -309,6 +360,10 @@ func TestAccComputeV2Instance_initialStateActive(t *testing.T) {
 
 func TestAccComputeV2Instance_initialStateShutoff(t *testing.T) {
 	var instance servers.Server
+	qts := serverQuotas(4, env.OsFlavorID)
+	t.Parallel()
+	th.AssertNoErr(t, quotas.AcquireMultipleQuotas(qts, 5*time.Second))
+	defer quotas.ReleaseMultipleQuotas(qts)
 
 	resource.Test(t, resource.TestCase{
 		PreCheck: func() {

@@ -18,6 +18,7 @@ const resourceKeyPairName = "opentelekomcloud_compute_keypair_v2.kp_1"
 
 func TestAccComputeV2Keypair_basic(t *testing.T) {
 	var keypair keypairs.KeyPair
+	t.Parallel()
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:          func() { common.TestAccPreCheck(t) },
@@ -37,6 +38,7 @@ func TestAccComputeV2Keypair_basic(t *testing.T) {
 func TestAccComputeV2Keypair_shared(t *testing.T) {
 	var keypair keypairs.KeyPair
 	resourceName2 := "opentelekomcloud_compute_keypair_v2.kp_2"
+	t.Parallel()
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:          func() { common.TestAccPreCheck(t) },
@@ -44,7 +46,7 @@ func TestAccComputeV2Keypair_shared(t *testing.T) {
 		CheckDestroy:      testAccCheckComputeV2KeypairDestroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccComputeV2KeypairBasic,
+				Config: testAccComputeV2KeypairSharedPre,
 			},
 			{
 				Config: testAccComputeV2KeypairShared,
@@ -61,6 +63,7 @@ func TestAccComputeV2Keypair_shared(t *testing.T) {
 
 func TestAccComputeV2Keypair_private(t *testing.T) {
 	var keypair keypairs.KeyPair
+	t.Parallel()
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:          func() { common.TestAccPreCheck(t) },
@@ -134,14 +137,26 @@ func testAccCheckComputeV2KeypairExists(n string, kp *keypairs.KeyPair) resource
 const testAccComputeV2KeypairBasic = `
 resource "opentelekomcloud_compute_keypair_v2" "kp_1" {
   name       = "kp_1"
-  public_key = "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQDAjpC1hwiOCCmKEWxJ4qzTTsJbKzndLo1BCz5PcwtUnflmU+gHJtWMZKpuEGVi29h0A/+ydKek1O18k10Ff+4tyFjiHDQAT9+OfgWf7+b1yK+qDip3X1C0UPMbwHlTfSGWLGZquwhvEFx9k3h/M+VtMvwR1lJ9LUyTAImnNjWG7TAIPmui30HvM2UiFEmqkr4ijq45MyX2+fLIePLRIFuu1p4whjHAQYufqyno3BS48icQb4p6iVEZPo4AE2o9oIyQvj2mx4dk5Y8CgSETOZTYDOR3rU2fZTRDRgPJDH9FWvQjF5tA0p3d9CoWWd2s6GKKbfoUIi8R/Db1BSPJwkqB jrp-hp-pc"
+  public_key = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIALRzbIOR9HUYNwfKtII/et98eGXDJhf8YxHf9BtRdAU"
+}
+`
+
+const testAccComputeV2KeypairSharedPre = `
+locals {
+  public_name = "kp_1-shared"
+  public_key  = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAINnnG9HsMplxW056UKoJWeiWYEMBZ0fKQoMOaPFRA5Zp"
+}
+
+resource "opentelekomcloud_compute_keypair_v2" "kp_1" {
+  name       = local.public_name
+  public_key = local.public_key
 }
 `
 
 const testAccComputeV2KeypairShared = `
 locals {
-  public_name = "kp_1"
-  public_key  = "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQDAjpC1hwiOCCmKEWxJ4qzTTsJbKzndLo1BCz5PcwtUnflmU+gHJtWMZKpuEGVi29h0A/+ydKek1O18k10Ff+4tyFjiHDQAT9+OfgWf7+b1yK+qDip3X1C0UPMbwHlTfSGWLGZquwhvEFx9k3h/M+VtMvwR1lJ9LUyTAImnNjWG7TAIPmui30HvM2UiFEmqkr4ijq45MyX2+fLIePLRIFuu1p4whjHAQYufqyno3BS48icQb4p6iVEZPo4AE2o9oIyQvj2mx4dk5Y8CgSETOZTYDOR3rU2fZTRDRgPJDH9FWvQjF5tA0p3d9CoWWd2s6GKKbfoUIi8R/Db1BSPJwkqB jrp-hp-pc"
+  public_name = "kp_1-shared"
+  public_key  = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAINnnG9HsMplxW056UKoJWeiWYEMBZ0fKQoMOaPFRA5Zp"
 }
 
 resource "opentelekomcloud_compute_keypair_v2" "kp_1" {
@@ -159,6 +174,6 @@ resource "opentelekomcloud_compute_keypair_v2" "kp_2" {
 
 const testAccComputeV2KeypairPrivate = `
 resource "opentelekomcloud_compute_keypair_v2" "kp_1" {
-  name = "kp_1"
+  name = "kp_1-private"
 }
 `

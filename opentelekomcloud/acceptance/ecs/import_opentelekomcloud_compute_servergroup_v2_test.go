@@ -10,6 +10,7 @@ import (
 
 func TestAccComputeV2ServerGroup_importBasic(t *testing.T) {
 	resourceName := "opentelekomcloud_compute_servergroup_v2.sg_1"
+	t.Parallel()
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:          func() { common.TestAccPreCheck(t) },
