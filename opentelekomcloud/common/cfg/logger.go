@@ -68,7 +68,7 @@ func (lrt *RoundTripper) RoundTrip(request *http.Request) (*http.Response, error
 			if lrt.OsDebug {
 				log.Printf("[DEBUG] OpenTelecomCloud connection error, retries exhausted. Aborting")
 			}
-			err = fmt.Errorf("openTelecomCloud connection error, retries exhausted. Aborting. Last error was: %s", err)
+			err = fmt.Errorf("OpenTelecomCloud connection error, retries exhausted. Aborting. Last error was: %s", err)
 			return nil, err
 		}
 

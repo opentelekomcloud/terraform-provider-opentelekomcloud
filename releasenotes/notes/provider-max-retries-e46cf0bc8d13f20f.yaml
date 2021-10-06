@@ -1,0 +1,4 @@
+---
+other:
+  - |
+    **[Provider]** Increase default value for maximum retries for the requests to 2 (`#1448 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/1448>`_)

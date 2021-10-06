@@ -221,7 +221,7 @@ func Provider() *schema.Provider {
 			"max_retries": {
 				Type:        schema.TypeInt,
 				Optional:    true,
-				Default:     1,
+				Default:     2,
 				Description: common.Descriptions["max_retries"],
 			},
 		},
