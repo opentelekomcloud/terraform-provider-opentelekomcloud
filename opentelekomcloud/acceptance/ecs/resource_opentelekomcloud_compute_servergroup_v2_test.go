@@ -3,12 +3,14 @@ package acceptance
 import (
 	"fmt"
 	"testing"
+	"time"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
-
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/compute/v2/extensions/servergroups"
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/compute/v2/servers"
+	th "github.com/opentelekomcloud/gophertelekomcloud/testhelper"
+	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/acceptance/common/quotas"
 
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/acceptance/common"
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/acceptance/env"
@@ -19,6 +21,7 @@ const resourceServerGroupName = "opentelekomcloud_compute_servergroup_v2.sg_1"
 
 func TestAccComputeV2ServerGroup_basic(t *testing.T) {
 	var sg servergroups.ServerGroup
+	t.Parallel()
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:          func() { common.TestAccPreCheck(t) },
@@ -38,6 +41,10 @@ func TestAccComputeV2ServerGroup_basic(t *testing.T) {
 func TestAccComputeV2ServerGroup_affinity(t *testing.T) {
 	var instance servers.Server
 	var sg servergroups.ServerGroup
+	qts := serverQuotas(4, "s2.medium.1")
+	t.Parallel()
+	th.AssertNoErr(t, quotas.AcquireMultipleQuotas(qts, 5*time.Second))
+	defer quotas.ReleaseMultipleQuotas(qts)
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:          func() { common.TestAccPreCheck(t) },
@@ -48,7 +55,7 @@ func TestAccComputeV2ServerGroup_affinity(t *testing.T) {
 				Config: testAccComputeV2ServerGroupAffinity,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckComputeV2ServerGroupExists(resourceServerGroupName, &sg),
-					testAccCheckComputeV2InstanceExists(resourceInstanceV1Name, &instance),
+					testAccCheckComputeV2InstanceExists(resourceInstanceV2Name, &instance),
 					testAccCheckComputeV2InstanceInServerGroup(&instance, &sg),
 				),
 			},

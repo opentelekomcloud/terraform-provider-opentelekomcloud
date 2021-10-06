@@ -4,9 +4,12 @@ import (
 	"fmt"
 	"regexp"
 	"testing"
+	"time"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
+	th "github.com/opentelekomcloud/gophertelekomcloud/testhelper"
+	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/acceptance/common/quotas"
 
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/ecs/v1/cloudservers"
 
@@ -19,6 +22,10 @@ const resourceInstanceV1Name = "opentelekomcloud_ecs_instance_v1.instance_1"
 
 func TestAccEcsV1InstanceBasic(t *testing.T) {
 	var instance cloudservers.CloudServer
+	qts := serverQuotas(10+4, "s2.medium.1")
+	t.Parallel()
+	th.AssertNoErr(t, quotas.AcquireMultipleQuotas(qts, 5*time.Second))
+	defer quotas.ReleaseMultipleQuotas(qts)
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:          func() { common.TestAccPreCheck(t) },
@@ -50,6 +57,7 @@ func TestAccEcsV1InstanceBasic(t *testing.T) {
 }
 
 func TestAccEcsV1InstanceDiskTypeValidation(t *testing.T) {
+	t.Parallel()
 	resource.Test(t, resource.TestCase{
 		PreCheck:          func() { common.TestAccPreCheck(t) },
 		ProviderFactories: common.TestAccProviderFactories,
@@ -74,6 +82,11 @@ func TestAccEcsV1InstanceDiskTypeValidation(t *testing.T) {
 }
 
 func TestAccEcsV1InstanceVPCValidation(t *testing.T) {
+	qts := serverQuotas(4, "s2.medium.1")
+	t.Parallel()
+	th.AssertNoErr(t, quotas.AcquireMultipleQuotas(qts, 5*time.Second))
+	defer quotas.ReleaseMultipleQuotas(qts)
+
 	resource.Test(t, resource.TestCase{
 		PreCheck:          func() { common.TestAccPreCheck(t) },
 		ProviderFactories: common.TestAccProviderFactories,
@@ -92,6 +105,10 @@ func TestAccEcsV1InstanceVPCValidation(t *testing.T) {
 
 func TestAccEcsV1InstanceEncryption(t *testing.T) {
 	var instance cloudservers.CloudServer
+	qts := serverQuotas(10+4, "s2.medium.1")
+	t.Parallel()
+	th.AssertNoErr(t, quotas.AcquireMultipleQuotas(qts, 5*time.Second))
+	defer quotas.ReleaseMultipleQuotas(qts)
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:          func() { common.TestAccPreCheck(t) },
@@ -186,6 +203,7 @@ resource "opentelekomcloud_ecs_instance_v1" "instance_1" {
   password          = "Password@123"
   availability_zone = "%s"
   auto_recovery     = true
+  delete_disks_on_termination = true
 
   tags = {
     muh = "value-create"
@@ -304,6 +322,7 @@ resource "opentelekomcloud_ecs_instance_v1" "instance_1" {
     size = 10
     type = "invalid"
   }
+  delete_disks_on_termination = true
 
   password          = "Password@123"
   availability_zone = "eu-de-03"
@@ -406,5 +425,6 @@ resource "opentelekomcloud_ecs_instance_v1" "instance_1" {
     type   = "SAS"
     kms_id = "%s"
   }
+  delete_disks_on_termination = true
 }
 `, common.DataSourceImage, common.DataSourceSubnet, env.OS_AVAILABILITY_ZONE, env.OS_KMS_ID)

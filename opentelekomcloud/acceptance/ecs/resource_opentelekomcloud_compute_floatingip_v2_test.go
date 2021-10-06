@@ -6,6 +6,8 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
+	th "github.com/opentelekomcloud/gophertelekomcloud/testhelper"
+	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/acceptance/common/quotas"
 
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/compute/v2/extensions/floatingips"
 
@@ -18,6 +20,9 @@ const resourceFloatingIpName = "opentelekomcloud_compute_floatingip_v2.fip_1"
 
 func TestAccComputeV2FloatingIP_basic(t *testing.T) {
 	var fip floatingips.FloatingIP
+
+	th.AssertNoErr(t, quotas.FloatingIP.Acquire())
+	defer quotas.FloatingIP.Release()
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:          func() { common.TestAccPreCheck(t) },
