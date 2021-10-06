@@ -2,6 +2,7 @@ package acceptance
 
 import (
 	"fmt"
+	"os"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/compute/v2/flavors"
@@ -70,11 +71,13 @@ func getFlavors() (map[string][]*quotas.ExpectedQuota, error) {
 var flavorsQuota map[string][]*quotas.ExpectedQuota
 
 func init() {
-	qs, err := getFlavors()
-	if err != nil {
-		panic("failed to get server flavors")
+	if os.Getenv("TF_ACC") != "" { // this can be done only in acceptance
+		qs, err := getFlavors()
+		if err != nil {
+			panic("failed to get server flavors")
+		}
+		flavorsQuota = qs
 	}
-	flavorsQuota = qs
 }
 
 func quotasForFlavor(flavorRef string) []*quotas.ExpectedQuota {
