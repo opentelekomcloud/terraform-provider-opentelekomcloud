@@ -6,44 +6,38 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
+	th "github.com/opentelekomcloud/gophertelekomcloud/testhelper"
+	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/acceptance/common/quotas"
 
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/acceptance/common"
 )
 
 func TestAccOpenTelekomCloudNetworkingSecGroupV2DataSource_basic(t *testing.T) {
+	t.Parallel()
+	th.AssertNoErr(t, quotas.SecurityGroup.Acquire())
+	defer quotas.SecurityGroup.Release()
+
 	resource.Test(t, resource.TestCase{
 		PreCheck:          func() { common.TestAccPreCheck(t) },
 		ProviderFactories: common.TestAccProviderFactories,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccOpenTelekomCloudNetworkingSecGroupV2DataSource_group,
+				Config: testAccOpenTelekomCloudNetworkingSecGroupV2DataSourceGroup,
 			},
 			{
-				Config: testAccOpenTelekomCloudNetworkingSecGroupV2DataSource_basic,
+				Config: testAccOpenTelekomCloudNetworkingSecGroupV2DataSourceBasic,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckNetworkingSecGroupV2DataSourceID("data.opentelekomcloud_networking_secgroup_v2.secgroup_1"),
 					resource.TestCheckResourceAttr(
-						"data.opentelekomcloud_networking_secgroup_v2.secgroup_1", "name", "secgroup_1"),
+						"data.opentelekomcloud_networking_secgroup_v2.secgroup_1", "name", "secgroup_1_ds"),
 				),
 			},
-		},
-	})
-}
-
-func TestAccOpenTelekomCloudNetworkingSecGroupV2DataSource_secGroupID(t *testing.T) {
-	resource.Test(t, resource.TestCase{
-		PreCheck:          func() { common.TestAccPreCheck(t) },
-		ProviderFactories: common.TestAccProviderFactories,
-		Steps: []resource.TestStep{
 			{
-				Config: testAccOpenTelekomCloudNetworkingSecGroupV2DataSource_group,
-			},
-			{
-				Config: testAccOpenTelekomCloudNetworkingSecGroupV2DataSource_secGroupID,
+				Config: testAccOpenTelekomCloudNetworkingSecGroupV2DataSourceSecGroupID,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckNetworkingSecGroupV2DataSourceID("data.opentelekomcloud_networking_secgroup_v2.secgroup_1"),
 					resource.TestCheckResourceAttr(
-						"data.opentelekomcloud_networking_secgroup_v2.secgroup_1", "name", "secgroup_1"),
+						"data.opentelekomcloud_networking_secgroup_v2.secgroup_1", "name", "secgroup_1_ds"),
 				),
 			},
 		},
@@ -65,25 +59,25 @@ func testAccCheckNetworkingSecGroupV2DataSourceID(n string) resource.TestCheckFu
 	}
 }
 
-const testAccOpenTelekomCloudNetworkingSecGroupV2DataSource_group = `
+const testAccOpenTelekomCloudNetworkingSecGroupV2DataSourceGroup = `
 resource "opentelekomcloud_networking_secgroup_v2" "secgroup_1" {
-        name        = "secgroup_1"
-	description = "My neutron security group"
+  name        = "secgroup_1_ds"
+  description = "My neutron security group"
 }
 `
 
-var testAccOpenTelekomCloudNetworkingSecGroupV2DataSource_basic = fmt.Sprintf(`
+var testAccOpenTelekomCloudNetworkingSecGroupV2DataSourceBasic = fmt.Sprintf(`
 %s
 
 data "opentelekomcloud_networking_secgroup_v2" "secgroup_1" {
-	name = opentelekomcloud_networking_secgroup_v2.secgroup_1.name
+  name = opentelekomcloud_networking_secgroup_v2.secgroup_1.name
 }
-`, testAccOpenTelekomCloudNetworkingSecGroupV2DataSource_group)
+`, testAccOpenTelekomCloudNetworkingSecGroupV2DataSourceGroup)
 
-var testAccOpenTelekomCloudNetworkingSecGroupV2DataSource_secGroupID = fmt.Sprintf(`
+var testAccOpenTelekomCloudNetworkingSecGroupV2DataSourceSecGroupID = fmt.Sprintf(`
 %s
 
 data "opentelekomcloud_networking_secgroup_v2" "secgroup_1" {
-	secgroup_id = opentelekomcloud_networking_secgroup_v2.secgroup_1.id
+  secgroup_id = opentelekomcloud_networking_secgroup_v2.secgroup_1.id
 }
-`, testAccOpenTelekomCloudNetworkingSecGroupV2DataSource_group)
+`, testAccOpenTelekomCloudNetworkingSecGroupV2DataSourceGroup)

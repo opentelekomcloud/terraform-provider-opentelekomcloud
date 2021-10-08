@@ -6,6 +6,8 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
+	th "github.com/opentelekomcloud/gophertelekomcloud/testhelper"
+	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/acceptance/common/quotas"
 
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/networking/v1/vpcs"
 
@@ -14,8 +16,13 @@ import (
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common/cfg"
 )
 
+const resourceVPCName = "opentelekomcloud_vpc_v1.vpc_1"
+
 func TestAccVpcV1_basic(t *testing.T) {
 	var vpc vpcs.Vpc
+	t.Parallel()
+	th.AssertNoErr(t, quotas.Router.Acquire())
+	defer quotas.Router.Release()
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:          func() { common.TestAccPreCheck(t) },
@@ -23,57 +30,24 @@ func TestAccVpcV1_basic(t *testing.T) {
 		CheckDestroy:      testAccCheckOTCVpcV1Destroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccVpcV1_basic,
+				Config: testAccVpcV1Basic,
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckOTCVpcV1Exists("opentelekomcloud_vpc_v1.vpc_1", &vpc),
-					resource.TestCheckResourceAttr(
-						"opentelekomcloud_vpc_v1.vpc_1", "name", "terraform_provider_test"),
-					resource.TestCheckResourceAttr(
-						"opentelekomcloud_vpc_v1.vpc_1", "cidr", "192.168.0.0/16"),
-					resource.TestCheckResourceAttr(
-						"opentelekomcloud_vpc_v1.vpc_1", "status", "OK"),
-					resource.TestCheckResourceAttr(
-						"opentelekomcloud_vpc_v1.vpc_1", "shared", "true"),
-					resource.TestCheckResourceAttr(
-						"opentelekomcloud_vpc_v1.vpc_1", "tags.foo", "bar"),
-					resource.TestCheckResourceAttr(
-						"opentelekomcloud_vpc_v1.vpc_1", "tags.key", "value"),
-				),
-			},
-		},
-	})
-}
-
-func TestAccVpcV1_update(t *testing.T) {
-	var vpc vpcs.Vpc
-
-	resource.Test(t, resource.TestCase{
-		PreCheck:          func() { common.TestAccPreCheck(t) },
-		ProviderFactories: common.TestAccProviderFactories,
-		CheckDestroy:      testAccCheckOTCVpcV1Destroy,
-		Steps: []resource.TestStep{
-			{
-				Config: testAccVpcV1_basic,
-				Check: resource.ComposeTestCheckFunc(
-					testAccCheckOTCVpcV1Exists("opentelekomcloud_vpc_v1.vpc_1", &vpc),
-					resource.TestCheckResourceAttr(
-						"opentelekomcloud_vpc_v1.vpc_1", "name", "terraform_provider_test"),
-					resource.TestCheckResourceAttr(
-						"opentelekomcloud_vpc_v1.vpc_1", "shared", "true"),
-					resource.TestCheckResourceAttr(
-						"opentelekomcloud_vpc_v1.vpc_1", "tags.key", "value"),
+					testAccCheckOTCVpcV1Exists(resourceVPCName, &vpc),
+					resource.TestCheckResourceAttr(resourceVPCName, "name", "terraform_provider_test"),
+					resource.TestCheckResourceAttr(resourceVPCName, "cidr", "192.168.0.0/16"),
+					resource.TestCheckResourceAttr(resourceVPCName, "status", "OK"),
+					resource.TestCheckResourceAttr(resourceVPCName, "shared", "true"),
+					resource.TestCheckResourceAttr(resourceVPCName, "tags.foo", "bar"),
+					resource.TestCheckResourceAttr(resourceVPCName, "tags.key", "value"),
 				),
 			},
 			{
-				Config: testAccVpcV1_update,
+				Config: testAccVpcV1Update,
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckOTCVpcV1Exists("opentelekomcloud_vpc_v1.vpc_1", &vpc),
-					resource.TestCheckResourceAttr(
-						"opentelekomcloud_vpc_v1.vpc_1", "name", "terraform_provider_test1"),
-					resource.TestCheckResourceAttr(
-						"opentelekomcloud_vpc_v1.vpc_1", "shared", "false"),
-					resource.TestCheckResourceAttr(
-						"opentelekomcloud_vpc_v1.vpc_1", "tags.key", "value_update"),
+					testAccCheckOTCVpcV1Exists(resourceVPCName, &vpc),
+					resource.TestCheckResourceAttr(resourceVPCName, "name", "terraform_provider_test1"),
+					resource.TestCheckResourceAttr(resourceVPCName, "shared", "false"),
+					resource.TestCheckResourceAttr(resourceVPCName, "tags.key", "value_update"),
 				),
 			},
 		},
@@ -82,6 +56,9 @@ func TestAccVpcV1_update(t *testing.T) {
 
 func TestAccVpcV1_timeout(t *testing.T) {
 	var vpc vpcs.Vpc
+	t.Parallel()
+	th.AssertNoErr(t, quotas.Router.Acquire())
+	defer quotas.Router.Release()
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:          func() { common.TestAccPreCheck(t) },
@@ -89,10 +66,32 @@ func TestAccVpcV1_timeout(t *testing.T) {
 		CheckDestroy:      testAccCheckOTCVpcV1Destroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccVpcV1_timeout,
+				Config: testAccVpcV1Timeout,
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckOTCVpcV1Exists("opentelekomcloud_vpc_v1.vpc_1", &vpc),
+					testAccCheckOTCVpcV1Exists(resourceVPCName, &vpc),
 				),
+			},
+		},
+	})
+}
+
+func TestAccVpcV1_import(t *testing.T) {
+	t.Parallel()
+	th.AssertNoErr(t, quotas.Router.Acquire())
+	defer quotas.Router.Release()
+
+	resource.Test(t, resource.TestCase{
+		PreCheck:          func() { common.TestAccPreCheck(t) },
+		ProviderFactories: common.TestAccProviderFactories,
+		CheckDestroy:      testAccCheckOTCVpcV1Destroy,
+		Steps: []resource.TestStep{
+			{
+				Config: testAccVpcV1Import,
+			},
+			{
+				ResourceName:      resourceVPCName,
+				ImportState:       true,
+				ImportStateVerify: true,
 			},
 		},
 	})
@@ -151,7 +150,7 @@ func testAccCheckOTCVpcV1Exists(n string, vpc *vpcs.Vpc) resource.TestCheckFunc 
 	}
 }
 
-const testAccVpcV1_basic = `
+const testAccVpcV1Basic = `
 resource "opentelekomcloud_vpc_v1" "vpc_1" {
   name   = "terraform_provider_test"
   cidr   = "192.168.0.0/16"
@@ -164,7 +163,7 @@ resource "opentelekomcloud_vpc_v1" "vpc_1" {
 }
 `
 
-const testAccVpcV1_update = `
+const testAccVpcV1Update = `
 resource "opentelekomcloud_vpc_v1" "vpc_1" {
   name   = "terraform_provider_test1"
   cidr   = "192.168.0.0/16"
@@ -177,14 +176,27 @@ resource "opentelekomcloud_vpc_v1" "vpc_1" {
 }
 `
 
-const testAccVpcV1_timeout = `
+const testAccVpcV1Timeout = `
 resource "opentelekomcloud_vpc_v1" "vpc_1" {
-  name = "terraform_provider_test"
-  cidr="192.168.0.0/16"
+  name = "terraform_provider_test-t"
+  cidr = "192.168.0.0/16"
 
   timeouts {
     create = "5m"
     delete = "5m"
+  }
+}
+`
+
+const testAccVpcV1Import = `
+resource "opentelekomcloud_vpc_v1" "vpc_1" {
+  name   = "terraform_provider_test-imp"
+  cidr   = "192.168.0.0/16"
+  shared = true
+
+  tags = {
+    foo = "bar"
+    key = "value"
   }
 }
 `

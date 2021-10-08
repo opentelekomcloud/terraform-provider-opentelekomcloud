@@ -3,9 +3,12 @@ package acceptance
 import (
 	"fmt"
 	"testing"
+	"time"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
+	th "github.com/opentelekomcloud/gophertelekomcloud/testhelper"
+	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/acceptance/common/quotas"
 
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/networking/v2/extensions/layer3/routers"
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/networking/v2/networks"
@@ -17,8 +20,14 @@ import (
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/services/vpc"
 )
 
+const resourceNwNetworkName = "opentelekomcloud_networking_network_v2.network_1"
+
 func TestAccNetworkingV2Network_basic(t *testing.T) {
 	var network networks.Network
+
+	t.Parallel()
+	th.AssertNoErr(t, quotas.Network.Acquire())
+	defer quotas.Network.Release()
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:          func() { common.TestAccPreCheck(t) },
@@ -28,15 +37,33 @@ func TestAccNetworkingV2Network_basic(t *testing.T) {
 			{
 				Config: testAccNetworkingV2NetworkBasic,
 				Check: resource.ComposeTestCheckFunc(
-					TestAccCheckNetworkingV2NetworkExists("opentelekomcloud_networking_network_v2.network_1", &network),
+					TestAccCheckNetworkingV2NetworkExists(resourceNwNetworkName, &network),
 				),
 			},
 			{
 				Config: testAccNetworkingV2NetworkUpdate,
 				Check: resource.ComposeTestCheckFunc(
-					resource.TestCheckResourceAttr(
-						"opentelekomcloud_networking_network_v2.network_1", "name", "network_2"),
+					resource.TestCheckResourceAttr(resourceNwNetworkName, "name", "network_2"),
 				),
+			},
+		},
+	})
+}
+
+func TestAccNetworkingV2Network_importBasic(t *testing.T) {
+	resource.Test(t, resource.TestCase{
+		PreCheck:          func() { common.TestAccPreCheck(t) },
+		ProviderFactories: common.TestAccProviderFactories,
+		CheckDestroy:      testAccCheckNetworkingV2NetworkDestroy,
+		Steps: []resource.TestStep{
+			{
+				Config: testAccNetworkingV2NetworkImport,
+			},
+
+			{
+				ResourceName:      resourceNwNetworkName,
+				ImportState:       true,
+				ImportStateVerify: true,
 			},
 		},
 	})
@@ -47,6 +74,11 @@ func TestAccNetworkingV2Network_netstack(t *testing.T) {
 	var subnet subnets.Subnet
 	var router routers.Router
 
+	t.Parallel()
+	qts := vpcSubnetQuotas()
+	th.AssertNoErr(t, quotas.AcquireMultipleQuotas(qts, 5*time.Second))
+	defer quotas.ReleaseMultipleQuotas(qts)
+
 	resource.Test(t, resource.TestCase{
 		PreCheck:          func() { common.TestAccPreCheck(t) },
 		ProviderFactories: common.TestAccProviderFactories,
@@ -55,11 +87,10 @@ func TestAccNetworkingV2Network_netstack(t *testing.T) {
 			{
 				Config: testAccNetworkingV2NetworkNetstack,
 				Check: resource.ComposeTestCheckFunc(
-					TestAccCheckNetworkingV2NetworkExists("opentelekomcloud_networking_network_v2.network_1", &network),
-					TestAccCheckNetworkingV2SubnetExists("opentelekomcloud_networking_subnet_v2.subnet_1", &subnet),
-					TestAccCheckNetworkingV2RouterExists("opentelekomcloud_networking_router_v2.router_1", &router),
-					TestAccCheckNetworkingV2RouterInterfaceExists(
-						"opentelekomcloud_networking_router_interface_v2.ri_1"),
+					TestAccCheckNetworkingV2NetworkExists(resourceNwNetworkName, &network),
+					TestAccCheckNetworkingV2SubnetExists(resourceNwSubnetName, &subnet),
+					TestAccCheckNetworkingV2RouterExists(resourceRouterName, &router),
+					TestAccCheckNetworkingV2RouterInterfaceExists("opentelekomcloud_networking_router_interface_v2.ri_1"),
 				),
 			},
 		},
@@ -68,6 +99,9 @@ func TestAccNetworkingV2Network_netstack(t *testing.T) {
 
 func TestAccNetworkingV2Network_timeout(t *testing.T) {
 	var network networks.Network
+	t.Parallel()
+	th.AssertNoErr(t, quotas.Network.Acquire())
+	defer quotas.Network.Release()
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:          func() { common.TestAccPreCheck(t) },
@@ -77,16 +111,18 @@ func TestAccNetworkingV2Network_timeout(t *testing.T) {
 			{
 				Config: testAccNetworkingV2NetworkTimeout,
 				Check: resource.ComposeTestCheckFunc(
-					TestAccCheckNetworkingV2NetworkExists("opentelekomcloud_networking_network_v2.network_1", &network),
+					TestAccCheckNetworkingV2NetworkExists(resourceNwNetworkName, &network),
 				),
 			},
 		},
 	})
 }
 
-// SKIP needs admin user
 func TestAccNetworkingV2Network_multipleSegmentMappings(t *testing.T) {
 	var network networks.Network
+	t.Parallel()
+	th.AssertNoErr(t, quotas.Network.Acquire())
+	defer quotas.Network.Release()
 
 	resource.Test(t, resource.TestCase{
 		PreCheck: func() {
@@ -99,7 +135,7 @@ func TestAccNetworkingV2Network_multipleSegmentMappings(t *testing.T) {
 			{
 				Config: testAccNetworkingV2NetworkMultipleSegmentMappings,
 				Check: resource.ComposeTestCheckFunc(
-					TestAccCheckNetworkingV2NetworkExists("opentelekomcloud_networking_network_v2.network_1", &network),
+					TestAccCheckNetworkingV2NetworkExists(resourceNwNetworkName, &network),
 				),
 			},
 		},
@@ -131,6 +167,13 @@ func testAccCheckNetworkingV2NetworkDestroy(s *terraform.State) error {
 const testAccNetworkingV2NetworkBasic = `
 resource "opentelekomcloud_networking_network_v2" "network_1" {
   name = "network_1"
+  admin_state_up = "true"
+}
+`
+
+const testAccNetworkingV2NetworkImport = `
+resource "opentelekomcloud_networking_network_v2" "network_1" {
+  name = "network_1_imp"
   admin_state_up = "true"
 }
 `

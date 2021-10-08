@@ -7,6 +7,8 @@ import (
 	"time"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
+	th "github.com/opentelekomcloud/gophertelekomcloud/testhelper"
+	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/acceptance/common/quotas"
 
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/acceptance/common"
 )
@@ -16,12 +18,16 @@ func TestAccNetworkingNetworkV2DataSource_basic(t *testing.T) {
 	network := fmt.Sprintf("acc_test_network-%06x", rand.Int31n(1000000))
 	cidr := fmt.Sprintf("192.168.%d.0/24", rand.Intn(200))
 
+	t.Parallel()
+	th.AssertNoErr(t, quotas.Network.Acquire())
+	defer quotas.Network.Release()
+
 	resource.Test(t, resource.TestCase{
 		PreCheck:          func() { common.TestAccPreCheck(t) },
 		ProviderFactories: common.TestAccProviderFactories,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccNetworkingNetworkV2DataSource_basic(network, cidr),
+				Config: testAccNetworkingNetworkV2DataSourceBasic(network, cidr),
 				Check: resource.ComposeTestCheckFunc(
 					TestAccCheckNetworkingNetworkV2DataSourceID("data.opentelekomcloud_networking_network_v2.net_by_name"),
 					TestAccCheckNetworkingNetworkV2DataSourceID("data.opentelekomcloud_networking_network_v2.net_by_id"),
@@ -44,7 +50,7 @@ func TestAccNetworkingNetworkV2DataSource_basic(t *testing.T) {
 	})
 }
 
-func testAccNetworkingNetworkV2DataSource_basic(name, cidr string) string {
+func testAccNetworkingNetworkV2DataSourceBasic(name, cidr string) string {
 	return fmt.Sprintf(`
 resource "opentelekomcloud_networking_network_v2" "net" {
   name           = "%s"

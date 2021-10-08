@@ -3,9 +3,12 @@ package acceptance
 import (
 	"fmt"
 	"testing"
+	"time"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
+	th "github.com/opentelekomcloud/gophertelekomcloud/testhelper"
+	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/acceptance/common/quotas"
 
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/networking/v2/extensions/layer3/routers"
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/networking/v2/networks"
@@ -21,12 +24,21 @@ func TestAccNetworkingV2RouterRoute_basic(t *testing.T) {
 	var network [2]networks.Network
 	var subnet [2]subnets.Subnet
 
+	t.Parallel()
+	qts := []*quotas.ExpectedQuota{
+		{Q: quotas.Router, Count: 1},
+		{Q: quotas.Network, Count: 2},
+		{Q: quotas.Subnet, Count: 2},
+	}
+	th.AssertNoErr(t, quotas.AcquireMultipleQuotas(qts, 5*time.Second))
+	defer quotas.ReleaseMultipleQuotas(qts)
+
 	resource.Test(t, resource.TestCase{
 		PreCheck:          func() { common.TestAccPreCheck(t) },
 		ProviderFactories: common.TestAccProviderFactories,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccNetworkingV2RouterRoute_create,
+				Config: testAccNetworkingV2RouterRouteCreate,
 				Check: resource.ComposeTestCheckFunc(
 					TestAccCheckNetworkingV2RouterExists("opentelekomcloud_networking_router_v2.router_1", &router),
 					TestAccCheckNetworkingV2NetworkExists(
@@ -46,7 +58,7 @@ func TestAccNetworkingV2RouterRoute_basic(t *testing.T) {
 				),
 			},
 			{
-				Config: testAccNetworkingV2RouterRoute_update,
+				Config: testAccNetworkingV2RouterRouteUpdate,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckNetworkingV2RouterRouteExists(
 						"opentelekomcloud_networking_router_route_v2.router_route_1"),
@@ -55,7 +67,7 @@ func TestAccNetworkingV2RouterRoute_basic(t *testing.T) {
 				),
 			},
 			{
-				Config: testAccNetworkingV2RouterRoute_destroy,
+				Config: testAccNetworkingV2RouterRouteDestroy,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckNetworkingV2RouterRouteEmpty("opentelekomcloud_networking_router_v2.router_1"),
 				),
@@ -138,14 +150,14 @@ func testAccCheckNetworkingV2RouterRouteExists(n string) resource.TestCheckFunc 
 	}
 }
 
-const testAccNetworkingV2RouterRoute_create = `
+const testAccNetworkingV2RouterRouteCreate = `
 resource "opentelekomcloud_networking_router_v2" "router_1" {
-  name = "router_1"
+  name = "router_1_rr"
   admin_state_up = "true"
 }
 
 resource "opentelekomcloud_networking_network_v2" "network_1" {
-  name = "network_1"
+  name = "network_1_rr"
   admin_state_up = "true"
 }
 
@@ -172,7 +184,7 @@ resource "opentelekomcloud_networking_router_interface_v2" "int_1" {
 }
 
 resource "opentelekomcloud_networking_network_v2" "network_2" {
-  name = "network_2"
+  name = "network_2_rr"
   admin_state_up = "true"
 }
 
@@ -200,21 +212,21 @@ resource "opentelekomcloud_networking_router_interface_v2" "int_2" {
 
 resource "opentelekomcloud_networking_router_route_v2" "router_route_1" {
   destination_cidr = "10.0.1.0/24"
-  next_hop = "192.168.199.254"
+  next_hop = "192.168.199.250"
 
   depends_on = ["opentelekomcloud_networking_router_interface_v2.int_1"]
   router_id = opentelekomcloud_networking_router_v2.router_1.id
 }
 `
 
-const testAccNetworkingV2RouterRoute_update = `
+const testAccNetworkingV2RouterRouteUpdate = `
 resource "opentelekomcloud_networking_router_v2" "router_1" {
-  name = "router_1"
+  name = "router_1_rr"
   admin_state_up = "true"
 }
 
 resource "opentelekomcloud_networking_network_v2" "network_1" {
-  name = "network_1"
+  name = "network_1_rr"
   admin_state_up = "true"
 }
 
@@ -241,7 +253,7 @@ resource "opentelekomcloud_networking_router_interface_v2" "int_1" {
 }
 
 resource "opentelekomcloud_networking_network_v2" "network_2" {
-  name = "network_2"
+  name = "network_2_rr"
   admin_state_up = "true"
 }
 
@@ -269,7 +281,7 @@ resource "opentelekomcloud_networking_router_interface_v2" "int_2" {
 
 resource "opentelekomcloud_networking_router_route_v2" "router_route_1" {
   destination_cidr = "10.0.1.0/24"
-  next_hop = "192.168.199.254"
+  next_hop = "192.168.199.250"
 
   depends_on = ["opentelekomcloud_networking_router_interface_v2.int_1"]
   router_id = opentelekomcloud_networking_router_v2.router_1.id
@@ -277,21 +289,21 @@ resource "opentelekomcloud_networking_router_route_v2" "router_route_1" {
 
 resource "opentelekomcloud_networking_router_route_v2" "router_route_2" {
   destination_cidr = "10.0.2.0/24"
-  next_hop = "192.168.200.254"
+  next_hop = "192.168.200.250"
 
   depends_on = ["opentelekomcloud_networking_router_interface_v2.int_2"]
   router_id = opentelekomcloud_networking_router_v2.router_1.id
 }
 `
 
-const testAccNetworkingV2RouterRoute_destroy = `
+const testAccNetworkingV2RouterRouteDestroy = `
 resource "opentelekomcloud_networking_router_v2" "router_1" {
-  name = "router_1"
+  name = "router_1_rr"
   admin_state_up = "true"
 }
 
 resource "opentelekomcloud_networking_network_v2" "network_1" {
-  name = "network_1"
+  name = "network_1_rr"
   admin_state_up = "true"
 }
 
@@ -318,7 +330,7 @@ resource "opentelekomcloud_networking_router_interface_v2" "int_1" {
 }
 
 resource "opentelekomcloud_networking_network_v2" "network_2" {
-  name = "network_2"
+  name = "network_2_rr"
   admin_state_up = "true"
 }
 

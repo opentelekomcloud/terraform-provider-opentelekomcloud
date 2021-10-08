@@ -6,6 +6,8 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
+	th "github.com/opentelekomcloud/gophertelekomcloud/testhelper"
+	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/acceptance/common/quotas"
 
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/networking/v1/eips"
 
@@ -14,8 +16,13 @@ import (
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common/cfg"
 )
 
+const resourceVPCEIPName = "opentelekomcloud_vpc_eip_v1.eip_1"
+
 func TestAccVpcV1EIP_basic(t *testing.T) {
 	var eip eips.PublicIp
+	t.Parallel()
+	th.AssertNoErr(t, quotas.FloatingIP.Acquire())
+	defer quotas.FloatingIP.Release()
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:          func() { common.TestAccPreCheck(t) },
@@ -23,21 +30,18 @@ func TestAccVpcV1EIP_basic(t *testing.T) {
 		CheckDestroy:      testAccCheckVpcV1EIPDestroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccVpcV1EIP_basic,
+				Config: testAccVpcV1EIPBasic,
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckVpcV1EIPExists("opentelekomcloud_vpc_eip_v1.eip_1", &eip),
-					resource.TestCheckResourceAttr(
-						"opentelekomcloud_vpc_eip_v1.eip_1", "bandwidth.0.name", "acc-band"),
+					testAccCheckVpcV1EIPExists(resourceVPCEIPName, &eip),
+					resource.TestCheckResourceAttr(resourceVPCEIPName, "bandwidth.0.name", "acc-band"),
 				),
 			},
 			{
-				Config: testAccVpcV1EIP_update,
+				Config: testAccVpcV1EIPUpdate,
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckVpcV1EIPExists("opentelekomcloud_vpc_eip_v1.eip_1", &eip),
-					resource.TestCheckResourceAttr(
-						"opentelekomcloud_vpc_eip_v1.eip_1", "bandwidth.0.name", "acc-band-update"),
-					resource.TestCheckResourceAttr(
-						"opentelekomcloud_vpc_eip_v1.eip_1", "bandwidth.0.size", "25"),
+					testAccCheckVpcV1EIPExists(resourceVPCEIPName, &eip),
+					resource.TestCheckResourceAttr(resourceVPCEIPName, "bandwidth.0.name", "acc-band-update"),
+					resource.TestCheckResourceAttr(resourceVPCEIPName, "bandwidth.0.size", "25"),
 				),
 			},
 		},
@@ -46,6 +50,9 @@ func TestAccVpcV1EIP_basic(t *testing.T) {
 
 func TestAccVpcV1EIP_timeout(t *testing.T) {
 	var eip eips.PublicIp
+	t.Parallel()
+	th.AssertNoErr(t, quotas.FloatingIP.Acquire())
+	defer quotas.FloatingIP.Release()
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:          func() { common.TestAccPreCheck(t) },
@@ -53,9 +60,9 @@ func TestAccVpcV1EIP_timeout(t *testing.T) {
 		CheckDestroy:      testAccCheckVpcV1EIPDestroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccVpcV1EIP_timeouts,
+				Config: testAccVpcV1EIPTimeouts,
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckVpcV1EIPExists("opentelekomcloud_vpc_eip_v1.eip_1", &eip),
+					testAccCheckVpcV1EIPExists(resourceVPCEIPName, &eip),
 				),
 			},
 		},
@@ -115,7 +122,7 @@ func testAccCheckVpcV1EIPExists(n string, eip *eips.PublicIp) resource.TestCheck
 	}
 }
 
-const testAccVpcV1EIP_basic = `
+const testAccVpcV1EIPBasic = `
 resource "opentelekomcloud_vpc_eip_v1" "eip_1" {
   publicip {
     type = "5_bgp"
@@ -133,7 +140,7 @@ resource "opentelekomcloud_vpc_eip_v1" "eip_1" {
 }
 `
 
-const testAccVpcV1EIP_update = `
+const testAccVpcV1EIPUpdate = `
 resource "opentelekomcloud_vpc_eip_v1" "eip_1" {
   publicip {
     type = "5_bgp"
@@ -151,7 +158,7 @@ resource "opentelekomcloud_vpc_eip_v1" "eip_1" {
 }
 `
 
-const testAccVpcV1EIP_timeouts = `
+const testAccVpcV1EIPTimeouts = `
 resource "opentelekomcloud_vpc_eip_v1" "eip_1" {
   publicip {
     type = "5_bgp"

@@ -6,6 +6,8 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
+	th "github.com/opentelekomcloud/gophertelekomcloud/testhelper"
+	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/acceptance/common/quotas"
 
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/networking/v2/extensions/layer3/routers"
 
@@ -14,9 +16,13 @@ import (
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common/cfg"
 )
 
+const resourceRouterName = "opentelekomcloud_networking_router_v2.router_1"
+
 func TestAccNetworkingV2Router_basic(t *testing.T) {
 	var router routers.Router
-	resourceName := "opentelekomcloud_networking_router_v2.router_1"
+	t.Parallel()
+	th.AssertNoErr(t, quotas.Router.Acquire())
+	defer quotas.Router.Release()
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:          func() { common.TestAccPreCheck(t) },
@@ -26,13 +32,13 @@ func TestAccNetworkingV2Router_basic(t *testing.T) {
 			{
 				Config: testAccNetworkingV2RouterBasic,
 				Check: resource.ComposeTestCheckFunc(
-					TestAccCheckNetworkingV2RouterExists(resourceName, &router),
+					TestAccCheckNetworkingV2RouterExists(resourceRouterName, &router),
 				),
 			},
 			{
 				Config: testAccNetworkingV2RouterUpdate,
 				Check: resource.ComposeTestCheckFunc(
-					resource.TestCheckResourceAttr(resourceName, "name", "router_2"),
+					resource.TestCheckResourceAttr(resourceRouterName, "name", "router_2_b"),
 				),
 			},
 		},
@@ -41,7 +47,9 @@ func TestAccNetworkingV2Router_basic(t *testing.T) {
 
 func TestAccNetworkingV2Router_update_external_gw(t *testing.T) {
 	var router routers.Router
-	resourceName := "opentelekomcloud_networking_router_v2.router_1"
+	t.Parallel()
+	th.AssertNoErr(t, quotas.Router.Acquire())
+	defer quotas.Router.Release()
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:          func() { common.TestAccPreCheck(t) },
@@ -49,15 +57,15 @@ func TestAccNetworkingV2Router_update_external_gw(t *testing.T) {
 		CheckDestroy:      testAccCheckNetworkingV2RouterDestroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccNetworkingV2RouterBasic,
+				Config: testAccNetworkingV2RouterExternalGw,
 				Check: resource.ComposeTestCheckFunc(
-					TestAccCheckNetworkingV2RouterExists(resourceName, &router),
+					TestAccCheckNetworkingV2RouterExists(resourceRouterName, &router),
 				),
 			},
 			{
-				Config: testAccNetworkingV2RouterUpdateExternalGw,
+				Config: testAccNetworkingV2RouterExternalGwUpdate,
 				Check: resource.ComposeTestCheckFunc(
-					resource.TestCheckResourceAttrSet(resourceName, "external_gateway"),
+					resource.TestCheckResourceAttrSet(resourceRouterName, "external_gateway"),
 				),
 			},
 		},
@@ -66,7 +74,9 @@ func TestAccNetworkingV2Router_update_external_gw(t *testing.T) {
 
 func TestAccNetworkingV2Router_timeout(t *testing.T) {
 	var router routers.Router
-	resourceName := "opentelekomcloud_networking_router_v2.router_1"
+	t.Parallel()
+	th.AssertNoErr(t, quotas.Router.Acquire())
+	defer quotas.Router.Release()
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:          func() { common.TestAccPreCheck(t) },
@@ -76,7 +86,7 @@ func TestAccNetworkingV2Router_timeout(t *testing.T) {
 			{
 				Config: testAccNetworkingV2RouterTimeout,
 				Check: resource.ComposeTestCheckFunc(
-					TestAccCheckNetworkingV2RouterExists(resourceName, &router),
+					TestAccCheckNetworkingV2RouterExists(resourceRouterName, &router),
 				),
 			},
 		},
@@ -106,7 +116,7 @@ func testAccCheckNetworkingV2RouterDestroy(s *terraform.State) error {
 
 const testAccNetworkingV2RouterBasic = `
 resource "opentelekomcloud_networking_router_v2" "router_1" {
-  name           = "router_1"
+  name           = "router_1_b"
   admin_state_up = true
   distributed    = false
 }
@@ -114,17 +124,25 @@ resource "opentelekomcloud_networking_router_v2" "router_1" {
 
 const testAccNetworkingV2RouterUpdate = `
 resource "opentelekomcloud_networking_router_v2" "router_1" {
-  name           = "router_2"
+  name           = "router_2_b"
   admin_state_up = true
   distributed    = false
 }
 `
 
-var testAccNetworkingV2RouterUpdateExternalGw = fmt.Sprintf(`
+const testAccNetworkingV2RouterExternalGw = `
+resource "opentelekomcloud_networking_router_v2" "router_1" {
+  name           = "router_1_gw"
+  admin_state_up = true
+  distributed    = false
+}
+`
+
+var testAccNetworkingV2RouterExternalGwUpdate = fmt.Sprintf(`
 %s
 
 resource "opentelekomcloud_networking_router_v2" "router_1" {
-  name             = "router_1"
+  name             = "router_1_gw"
   admin_state_up   = true
   distributed      = false
   external_gateway = data.opentelekomcloud_networking_network_v2.ext_network.id
@@ -133,7 +151,7 @@ resource "opentelekomcloud_networking_router_v2" "router_1" {
 
 const testAccNetworkingV2RouterTimeout = `
 resource "opentelekomcloud_networking_router_v2" "router_1" {
-  name           = "router_1"
+  name           = "router_1_t"
   admin_state_up = true
   distributed    = false
 

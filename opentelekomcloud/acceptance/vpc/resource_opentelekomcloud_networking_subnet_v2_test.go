@@ -3,9 +3,12 @@ package acceptance
 import (
 	"fmt"
 	"testing"
+	"time"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
+	th "github.com/opentelekomcloud/gophertelekomcloud/testhelper"
+	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/acceptance/common/quotas"
 
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/networking/v2/subnets"
 
@@ -14,8 +17,14 @@ import (
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common/cfg"
 )
 
+const resourceNwSubnetName = "opentelekomcloud_networking_subnet_v2.subnet_1"
+
 func TestAccNetworkingV2Subnet_basic(t *testing.T) {
 	var subnet subnets.Subnet
+	t.Parallel()
+	qts := subnetQuotas()
+	th.AssertNoErr(t, quotas.AcquireMultipleQuotas(qts, 2*time.Second))
+	defer quotas.ReleaseMultipleQuotas(qts)
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:          func() { common.TestAccPreCheck(t) },
@@ -25,23 +34,42 @@ func TestAccNetworkingV2Subnet_basic(t *testing.T) {
 			{
 				Config: testAccNetworkingV2SubnetBasic,
 				Check: resource.ComposeTestCheckFunc(
-					TestAccCheckNetworkingV2SubnetExists("opentelekomcloud_networking_subnet_v2.subnet_1", &subnet),
-					resource.TestCheckResourceAttr(
-						"opentelekomcloud_networking_subnet_v2.subnet_1", "allocation_pools.0.start", "192.168.199.100"),
+					TestAccCheckNetworkingV2SubnetExists(resourceNwSubnetName, &subnet),
+					resource.TestCheckResourceAttr("opentelekomcloud_networking_subnet_v2.subnet_1", "allocation_pools.0.start", "192.168.199.100"),
 				),
 			},
 			{
 				Config: testAccNetworkingV2SubnetUpdate,
 				Check: resource.ComposeTestCheckFunc(
-					resource.TestCheckResourceAttr(
-						"opentelekomcloud_networking_subnet_v2.subnet_1", "name", "subnet_1"),
-					resource.TestCheckResourceAttr(
-						"opentelekomcloud_networking_subnet_v2.subnet_1", "gateway_ip", "192.168.199.1"),
-					resource.TestCheckResourceAttr(
-						"opentelekomcloud_networking_subnet_v2.subnet_1", "enable_dhcp", "true"),
-					resource.TestCheckResourceAttr(
-						"opentelekomcloud_networking_subnet_v2.subnet_1", "allocation_pools.0.start", "192.168.199.150"),
+					resource.TestCheckResourceAttr(resourceNwSubnetName, "name", "subnet_1"),
+					resource.TestCheckResourceAttr(resourceNwSubnetName, "gateway_ip", "192.168.199.1"),
+					resource.TestCheckResourceAttr(resourceNwSubnetName, "enable_dhcp", "true"),
+					resource.TestCheckResourceAttr(resourceNwSubnetName, "allocation_pools.0.start", "192.168.199.150"),
 				),
+			},
+		},
+	})
+}
+
+func TestAccNetworkingV2Subnet_import(t *testing.T) {
+	t.Parallel()
+	qts := subnetQuotas()
+	th.AssertNoErr(t, quotas.AcquireMultipleQuotas(qts, 2*time.Second))
+	defer quotas.ReleaseMultipleQuotas(qts)
+
+	resource.Test(t, resource.TestCase{
+		PreCheck:          func() { common.TestAccPreCheck(t) },
+		ProviderFactories: common.TestAccProviderFactories,
+		CheckDestroy:      testAccCheckNetworkingV2SubnetDestroy,
+		Steps: []resource.TestStep{
+			{
+				Config: testAccNetworkingV2SubnetImport,
+			},
+
+			{
+				ResourceName:      resourceNwSubnetName,
+				ImportState:       true,
+				ImportStateVerify: true,
 			},
 		},
 	})
@@ -49,6 +77,10 @@ func TestAccNetworkingV2Subnet_basic(t *testing.T) {
 
 func TestAccNetworkingV2Subnet_enableDHCP(t *testing.T) {
 	var subnet subnets.Subnet
+	t.Parallel()
+	qts := subnetQuotas()
+	th.AssertNoErr(t, quotas.AcquireMultipleQuotas(qts, 2*time.Second))
+	defer quotas.ReleaseMultipleQuotas(qts)
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:          func() { common.TestAccPreCheck(t) },
@@ -59,8 +91,7 @@ func TestAccNetworkingV2Subnet_enableDHCP(t *testing.T) {
 				Config: testAccNetworkingV2SubnetEnableDHCP,
 				Check: resource.ComposeTestCheckFunc(
 					TestAccCheckNetworkingV2SubnetExists("opentelekomcloud_networking_subnet_v2.subnet_1", &subnet),
-					resource.TestCheckResourceAttr(
-						"opentelekomcloud_networking_subnet_v2.subnet_1", "enable_dhcp", "true"),
+					resource.TestCheckResourceAttr(resourceNwSubnetName, "enable_dhcp", "true"),
 				),
 			},
 		},
@@ -69,6 +100,10 @@ func TestAccNetworkingV2Subnet_enableDHCP(t *testing.T) {
 
 func TestAccNetworkingV2Subnet_noGateway(t *testing.T) {
 	var subnet subnets.Subnet
+	t.Parallel()
+	qts := subnetQuotas()
+	th.AssertNoErr(t, quotas.AcquireMultipleQuotas(qts, 2*time.Second))
+	defer quotas.ReleaseMultipleQuotas(qts)
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:          func() { common.TestAccPreCheck(t) },
@@ -79,8 +114,7 @@ func TestAccNetworkingV2Subnet_noGateway(t *testing.T) {
 				Config: testAccNetworkingV2SubnetNoGateway,
 				Check: resource.ComposeTestCheckFunc(
 					TestAccCheckNetworkingV2SubnetExists("opentelekomcloud_networking_subnet_v2.subnet_1", &subnet),
-					resource.TestCheckResourceAttr(
-						"opentelekomcloud_networking_subnet_v2.subnet_1", "gateway_ip", ""),
+					resource.TestCheckResourceAttr(resourceNwSubnetName, "gateway_ip", ""),
 				),
 			},
 		},
@@ -89,6 +123,10 @@ func TestAccNetworkingV2Subnet_noGateway(t *testing.T) {
 
 func TestAccNetworkingV2Subnet_impliedGateway(t *testing.T) {
 	var subnet subnets.Subnet
+	t.Parallel()
+	qts := subnetQuotas()
+	th.AssertNoErr(t, quotas.AcquireMultipleQuotas(qts, 2*time.Second))
+	defer quotas.ReleaseMultipleQuotas(qts)
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:          func() { common.TestAccPreCheck(t) },
@@ -99,8 +137,7 @@ func TestAccNetworkingV2Subnet_impliedGateway(t *testing.T) {
 				Config: testAccNetworkingV2SubnetImpliedGateway,
 				Check: resource.ComposeTestCheckFunc(
 					TestAccCheckNetworkingV2SubnetExists("opentelekomcloud_networking_subnet_v2.subnet_1", &subnet),
-					resource.TestCheckResourceAttr(
-						"opentelekomcloud_networking_subnet_v2.subnet_1", "gateway_ip", "192.168.199.1"),
+					resource.TestCheckResourceAttr(resourceNwSubnetName, "gateway_ip", "192.168.199.1"),
 				),
 			},
 		},
@@ -109,6 +146,10 @@ func TestAccNetworkingV2Subnet_impliedGateway(t *testing.T) {
 
 func TestAccNetworkingV2Subnet_timeout(t *testing.T) {
 	var subnet subnets.Subnet
+	t.Parallel()
+	qts := subnetQuotas()
+	th.AssertNoErr(t, quotas.AcquireMultipleQuotas(qts, 2*time.Second))
+	defer quotas.ReleaseMultipleQuotas(qts)
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:          func() { common.TestAccPreCheck(t) },
@@ -162,6 +203,22 @@ resource "opentelekomcloud_networking_subnet_v2" "subnet_1" {
   }
 }
 `
+const testAccNetworkingV2SubnetImport = `
+resource "opentelekomcloud_networking_network_v2" "network_1" {
+  name = "network_1_i"
+  admin_state_up = "true"
+}
+
+resource "opentelekomcloud_networking_subnet_v2" "subnet_1" {
+  cidr = "192.168.199.0/24"
+  network_id = opentelekomcloud_networking_network_v2.network_1.id
+
+  allocation_pools {
+    start = "192.168.199.100"
+    end = "192.168.199.200"
+  }
+}
+`
 
 const testAccNetworkingV2SubnetUpdate = `
 resource "opentelekomcloud_networking_network_v2" "network_1" {
@@ -184,12 +241,12 @@ resource "opentelekomcloud_networking_subnet_v2" "subnet_1" {
 
 const testAccNetworkingV2SubnetEnableDHCP = `
 resource "opentelekomcloud_networking_network_v2" "network_1" {
-  name = "network_1"
+  name = "network_1_dhcp"
   admin_state_up = "true"
 }
 
 resource "opentelekomcloud_networking_subnet_v2" "subnet_1" {
-  name = "subnet_1"
+  name = "subnet_1_dhcp"
   cidr = "192.168.199.0/24"
   gateway_ip = "192.168.199.1"
   enable_dhcp = true
@@ -199,12 +256,12 @@ resource "opentelekomcloud_networking_subnet_v2" "subnet_1" {
 
 const testAccNetworkingV2SubnetNoGateway = `
 resource "opentelekomcloud_networking_network_v2" "network_1" {
-  name = "network_1"
+  name = "network_1_no_gw"
   admin_state_up = "true"
 }
 
 resource "opentelekomcloud_networking_subnet_v2" "subnet_1" {
-  name = "subnet_1"
+  name = "subnet_1_no_gw"
   cidr = "192.168.199.0/24"
   no_gateway = true
   network_id = opentelekomcloud_networking_network_v2.network_1.id
@@ -213,11 +270,11 @@ resource "opentelekomcloud_networking_subnet_v2" "subnet_1" {
 
 const testAccNetworkingV2SubnetImpliedGateway = `
 resource "opentelekomcloud_networking_network_v2" "network_1" {
-  name = "network_1"
+  name = "network_1_i_gw"
   admin_state_up = "true"
 }
 resource "opentelekomcloud_networking_subnet_v2" "subnet_1" {
-  name = "subnet_1"
+  name = "subnet_1_i_gw"
   cidr = "192.168.199.0/24"
   network_id = opentelekomcloud_networking_network_v2.network_1.id
 }
@@ -225,7 +282,7 @@ resource "opentelekomcloud_networking_subnet_v2" "subnet_1" {
 
 const testAccNetworkingV2SubnetTimeout = `
 resource "opentelekomcloud_networking_network_v2" "network_1" {
-  name = "network_1"
+  name = "network_1_t"
   admin_state_up = "true"
 }
 

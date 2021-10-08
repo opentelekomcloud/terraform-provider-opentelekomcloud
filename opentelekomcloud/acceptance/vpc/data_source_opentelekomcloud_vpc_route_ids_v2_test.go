@@ -6,20 +6,26 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
+	th "github.com/opentelekomcloud/gophertelekomcloud/testhelper"
+	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/acceptance/common/quotas"
 
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/acceptance/common"
 )
 
 func TestAccVpcRouteIdsV2DataSource_basic(t *testing.T) {
+	t.Parallel()
+	th.AssertNoErr(t, quotas.Router.AcquireMultiple(2))
+	defer quotas.Router.ReleaseMultiple(2)
+
 	resource.Test(t, resource.TestCase{
 		PreCheck:          func() { common.TestAccPreCheck(t) },
 		ProviderFactories: common.TestAccProviderFactories,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccRouteIdV2DataSource_vpcroute,
+				Config: testAccRouteIdV2DataSourceVpcRoute,
 			},
 			{
-				Config: testAccRouteIdV2DataSource_basic,
+				Config: testAccRouteIdV2DataSourceBasic,
 				Check: resource.ComposeTestCheckFunc(
 					testAccRouteIdV2DataSourceID("data.opentelekomcloud_vpc_route_ids_v2.route_ids"),
 					resource.TestCheckResourceAttr("data.opentelekomcloud_vpc_route_ids_v2.route_ids", "ids.#", "1"),
@@ -44,34 +50,34 @@ func testAccRouteIdV2DataSourceID(n string) resource.TestCheckFunc {
 	}
 }
 
-const testAccRouteIdV2DataSource_vpcroute = `
+const testAccRouteIdV2DataSourceVpcRoute = `
 resource "opentelekomcloud_vpc_v1" "vpc_1" {
-name = "vpc_test"
-cidr = "192.168.0.0/16"
+  name = "vpc_test_ds_ids"
+  cidr = "192.168.0.0/16"
 }
 
 resource "opentelekomcloud_vpc_v1" "vpc_2" {
-		name = "vpc_test1"
-        cidr = "192.168.0.0/16"
+  name = "vpc_test_ds_ids1"
+  cidr = "192.168.0.0/16"
 }
 
 resource "opentelekomcloud_vpc_peering_connection_v2" "peering_1" {
-		name = "opentelekomcloud_peering"
-		vpc_id = opentelekomcloud_vpc_v1.vpc_1.id
-		peer_vpc_id = opentelekomcloud_vpc_v1.vpc_2.id
+  name        = "opentelekomcloud_peering"
+  vpc_id      = opentelekomcloud_vpc_v1.vpc_1.id
+  peer_vpc_id = opentelekomcloud_vpc_v1.vpc_2.id
 }
 
 resource "opentelekomcloud_vpc_route_v2" "route_1" {
-   type = "peering"
-  nexthop = opentelekomcloud_vpc_peering_connection_v2.peering_1.id
+  type        = "peering"
+  nexthop     = opentelekomcloud_vpc_peering_connection_v2.peering_1.id
   destination = "192.168.0.0/16"
-  vpc_id =opentelekomcloud_vpc_v1.vpc_1.id
+  vpc_id      = opentelekomcloud_vpc_v1.vpc_1.id
 }
 `
 
-var testAccRouteIdV2DataSource_basic = fmt.Sprintf(`
+var testAccRouteIdV2DataSourceBasic = fmt.Sprintf(`
 %s
 data "opentelekomcloud_vpc_route_ids_v2" "route_ids" {
   vpc_id = opentelekomcloud_vpc_route_v2.route_1.vpc_id
 }
-`, testAccRouteIdV2DataSource_vpcroute)
+`, testAccRouteIdV2DataSourceVpcRoute)

@@ -12,6 +12,7 @@ import (
 )
 
 func TestAccBandWidthDataSource_basic(t *testing.T) {
+	t.Skip("VPC bandwidth creation is not supported")
 	rName := fmt.Sprintf("tf-acc-test-%s", acctest.RandString(5))
 	dataName := "data.opentelekomcloud_vpc_bandwidth.test"
 

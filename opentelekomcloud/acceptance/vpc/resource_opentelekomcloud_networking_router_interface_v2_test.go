@@ -3,9 +3,12 @@ package acceptance
 import (
 	"fmt"
 	"testing"
+	"time"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
+	th "github.com/opentelekomcloud/gophertelekomcloud/testhelper"
+	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/acceptance/common/quotas"
 
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/networking/v2/extensions/layer3/routers"
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/networking/v2/networks"
@@ -22,13 +25,18 @@ func TestAccNetworkingV2RouterInterface_basic_subnet(t *testing.T) {
 	var router routers.Router
 	var subnet subnets.Subnet
 
+	t.Parallel()
+	qts := vpcSubnetQuotas()
+	th.AssertNoErr(t, quotas.AcquireMultipleQuotas(qts, 5*time.Second))
+	defer quotas.ReleaseMultipleQuotas(qts)
+
 	resource.Test(t, resource.TestCase{
 		PreCheck:          func() { common.TestAccPreCheck(t) },
 		ProviderFactories: common.TestAccProviderFactories,
 		CheckDestroy:      testAccCheckNetworkingV2RouterInterfaceDestroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccNetworkingV2RouterInterface_basic_subnet,
+				Config: testAccNetworkingV2RouterInterfaceBasicSubnet,
 				Check: resource.ComposeTestCheckFunc(
 					TestAccCheckNetworkingV2NetworkExists("opentelekomcloud_networking_network_v2.network_1", &network),
 					TestAccCheckNetworkingV2SubnetExists("opentelekomcloud_networking_subnet_v2.subnet_1", &subnet),
@@ -46,13 +54,18 @@ func TestAccNetworkingV2RouterInterface_basic_port(t *testing.T) {
 	var router routers.Router
 	var subnet subnets.Subnet
 
+	t.Parallel()
+	qts := vpcSubnetQuotas()
+	th.AssertNoErr(t, quotas.AcquireMultipleQuotas(qts, 5*time.Second))
+	defer quotas.ReleaseMultipleQuotas(qts)
+
 	resource.Test(t, resource.TestCase{
 		PreCheck:          func() { common.TestAccPreCheck(t) },
 		ProviderFactories: common.TestAccProviderFactories,
 		CheckDestroy:      testAccCheckNetworkingV2RouterInterfaceDestroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccNetworkingV2RouterInterface_basic_port,
+				Config: testAccNetworkingV2RouterInterfaceBasicPort,
 				Check: resource.ComposeTestCheckFunc(
 					TestAccCheckNetworkingV2NetworkExists("opentelekomcloud_networking_network_v2.network_1", &network),
 					TestAccCheckNetworkingV2SubnetExists("opentelekomcloud_networking_subnet_v2.subnet_1", &subnet),
@@ -70,13 +83,18 @@ func TestAccNetworkingV2RouterInterface_timeout(t *testing.T) {
 	var router routers.Router
 	var subnet subnets.Subnet
 
+	t.Parallel()
+	qts := vpcSubnetQuotas()
+	th.AssertNoErr(t, quotas.AcquireMultipleQuotas(qts, 5*time.Second))
+	defer quotas.ReleaseMultipleQuotas(qts)
+
 	resource.Test(t, resource.TestCase{
 		PreCheck:          func() { common.TestAccPreCheck(t) },
 		ProviderFactories: common.TestAccProviderFactories,
 		CheckDestroy:      testAccCheckNetworkingV2RouterInterfaceDestroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccNetworkingV2RouterInterface_timeout,
+				Config: testAccNetworkingV2RouterInterfaceTimeout,
 				Check: resource.ComposeTestCheckFunc(
 					TestAccCheckNetworkingV2NetworkExists("opentelekomcloud_networking_network_v2.network_1", &network),
 					TestAccCheckNetworkingV2SubnetExists("opentelekomcloud_networking_subnet_v2.subnet_1", &subnet),
@@ -109,9 +127,9 @@ func testAccCheckNetworkingV2RouterInterfaceDestroy(s *terraform.State) error {
 	return nil
 }
 
-const testAccNetworkingV2RouterInterface_basic_subnet = `
+const testAccNetworkingV2RouterInterfaceBasicSubnet = `
 resource "opentelekomcloud_networking_router_v2" "router_1" {
-  name = "router_1"
+  name = "router_1_ri_sn"
   admin_state_up = "true"
 }
 
@@ -121,7 +139,7 @@ resource "opentelekomcloud_networking_router_interface_v2" "int_1" {
 }
 
 resource "opentelekomcloud_networking_network_v2" "network_1" {
-  name = "network_1"
+  name = "network_1_ri_sn"
   admin_state_up = "true"
 }
 
@@ -132,9 +150,9 @@ resource "opentelekomcloud_networking_subnet_v2" "subnet_1" {
 }
 `
 
-const testAccNetworkingV2RouterInterface_basic_port = `
+const testAccNetworkingV2RouterInterfaceBasicPort = `
 resource "opentelekomcloud_networking_router_v2" "router_1" {
-  name = "router_1"
+  name = "router_1_bp"
   admin_state_up = "true"
 }
 
@@ -144,7 +162,7 @@ resource "opentelekomcloud_networking_router_interface_v2" "int_1" {
 }
 
 resource "opentelekomcloud_networking_network_v2" "network_1" {
-  name = "network_1"
+  name = "network_1_ri_bp"
   admin_state_up = "true"
 }
 
@@ -155,7 +173,7 @@ resource "opentelekomcloud_networking_subnet_v2" "subnet_1" {
 }
 
 resource "opentelekomcloud_networking_port_v2" "port_1" {
-  name = "port_1"
+  name = "port_1_ri_bp"
   admin_state_up = "true"
   network_id = opentelekomcloud_networking_network_v2.network_1.id
 
@@ -166,9 +184,9 @@ resource "opentelekomcloud_networking_port_v2" "port_1" {
 }
 `
 
-const testAccNetworkingV2RouterInterface_timeout = `
+const testAccNetworkingV2RouterInterfaceTimeout = `
 resource "opentelekomcloud_networking_router_v2" "router_1" {
-  name = "router_1"
+  name = "router_1_ri_t"
   admin_state_up = "true"
 }
 
@@ -183,7 +201,7 @@ resource "opentelekomcloud_networking_router_interface_v2" "int_1" {
 }
 
 resource "opentelekomcloud_networking_network_v2" "network_1" {
-  name = "network_1"
+  name = "network_1_ri_t"
   admin_state_up = "true"
 }
 
