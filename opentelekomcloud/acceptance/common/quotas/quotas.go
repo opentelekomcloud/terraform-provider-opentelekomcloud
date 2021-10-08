@@ -7,6 +7,7 @@ import (
 	"os"
 	"strconv"
 	"strings"
+	"sync"
 	"time"
 
 	"github.com/hashicorp/go-multierror"
@@ -20,19 +21,21 @@ const (
 
 // Quota is a wrapper around a semaphore providing simple control over shared resources with quotas
 type Quota struct {
-	Name string
+	Name    string
+	Size    int64
+	Current int64
 
-	sem  *semaphore.Weighted
-	ctx  context.Context
-	size int64
+	sem *semaphore.Weighted
+	ctx context.Context
 }
 
 // NewQuota creates a new Quota with persistent context inside
 func NewQuota(count int64) *Quota {
 	q := &Quota{
-		sem:  semaphore.NewWeighted(count),
-		ctx:  context.Background(),
-		size: count,
+		sem:     semaphore.NewWeighted(count),
+		ctx:     context.Background(),
+		Size:    count,
+		Current: count,
 	}
 	return q
 }
@@ -41,9 +44,10 @@ func NewQuota(count int64) *Quota {
 func NewQuotaWithTimeout(count int64, timeout time.Duration) (*Quota, context.CancelFunc) {
 	ctx, cancelFunc := context.WithTimeout(context.Background(), timeout)
 	quota := &Quota{
-		sem:  semaphore.NewWeighted(count),
-		ctx:  ctx,
-		size: count,
+		sem:     semaphore.NewWeighted(count),
+		ctx:     ctx,
+		Size:    count,
+		Current: count,
 	}
 	return quota, cancelFunc
 }
@@ -55,14 +59,15 @@ func (q *Quota) Acquire() error {
 
 // AcquireMultiple decrease count of available resources by n
 func (q *Quota) AcquireMultiple(n int64) error {
-	if n > q.size {
-		return fmt.Errorf(tooManyMsg, n, q.size, q.Name)
+	if n > q.Size {
+		return fmt.Errorf(tooManyMsg, n, q.Size, q.Name)
 	}
 	if err := q.sem.Acquire(q.ctx, n); err != nil {
 		if err == context.DeadlineExceeded {
 			return fmt.Errorf(timeoutMsg, q.Name)
 		}
 	}
+	q.Current -= n
 	return nil
 }
 
@@ -74,6 +79,7 @@ func (q *Quota) Release() {
 // ReleaseMultiple increase count of available resources by n
 func (q *Quota) ReleaseMultiple(n int64) {
 	q.sem.Release(n)
+	q.Current += n
 }
 
 // FromEnv creates quota instance with limit set to env var or default value if the variable
@@ -125,38 +131,60 @@ type ExpectedQuota struct {
 
 // AcquireMultipleQuotas tries to acquire all given quotas, reverting on failure
 func AcquireMultipleQuotas(e []*ExpectedQuota, interval time.Duration) error {
-	var acquired []*ExpectedQuota
-	repeated := false
 	// validate if all Count values of ExpectQuota are correct
 	var mErr *multierror.Error
 	for _, q := range e {
-		if q.Count > q.Q.size {
-			mErr = multierror.Append(mErr, fmt.Errorf(tooManyMsg, q.Count, q.Q.size, q.Q.Name))
+		if q.Count > q.Q.Size {
+			mErr = multierror.Append(mErr, fmt.Errorf(tooManyMsg, q.Count, q.Q.Size, q.Q.Name))
 		}
 	}
 	if err := mErr.ErrorOrNil(); err != nil {
 		return err
 	}
-	for len(acquired) != len(e) {
-		ReleaseMultipleQuotas(acquired)
-		acquired = nil
-		if repeated {
-			time.Sleep(interval)
+	var ok bool
+	var err error
+	for !ok {
+		ok, err = tryAcquireMultiple(e)
+		if err != nil {
+			return err
 		}
-		for _, q := range e {
-			if err := q.Q.ctx.Err(); err != nil {
-				if _, ok := q.Q.ctx.Deadline(); ok {
-					return fmt.Errorf(timeoutMsg, q.Q.Name)
-				}
-			}
-			ok := q.Q.sem.TryAcquire(q.Count)
-			if ok {
-				acquired = append(acquired, q)
-			}
+		if !ok {
+			time.Sleep(interval) // successfully acquired all quotas
 		}
-		repeated = true
 	}
 	return nil
+}
+
+var multipleLock = &sync.Mutex{}
+
+func tryAcquireMultiple(e []*ExpectedQuota) (bool, error) {
+	multipleLock.Lock()
+	defer multipleLock.Unlock()
+
+	var acquired []*ExpectedQuota
+	var ok bool
+	defer func() {
+		if !ok {
+			ReleaseMultipleQuotas(acquired)
+		}
+	}()
+
+	for _, q := range e {
+		if err := q.Q.ctx.Err(); err != nil {
+			if _, ok := q.Q.ctx.Deadline(); ok {
+				return false, fmt.Errorf(timeoutMsg, q.Q.Name)
+			}
+			return false, fmt.Errorf("unknown error trying to obtain multiple quotas: %w", err)
+		}
+		if ok := q.Q.sem.TryAcquire(q.Count); ok {
+			q.Q.Current -= q.Count
+			acquired = append(acquired, q)
+		}
+	}
+	if len(acquired) == len(e) { // all quotas are acquired
+		ok = true
+	}
+	return ok, nil
 }
 
 func ReleaseMultipleQuotas(e []*ExpectedQuota) {
