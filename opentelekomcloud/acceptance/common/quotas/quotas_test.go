@@ -39,7 +39,7 @@ func TestFromEnv_Default(t *testing.T) {
 	vName := tools.RandomString("OS_", 10)
 	vDef := int64(tools.RandomInt(1, 100))
 	q := FromEnv(vName, vDef)
-	th.AssertEquals(t, q.size, vDef)
+	th.AssertEquals(t, q.Size, vDef)
 }
 
 func TestFromEnv(t *testing.T) {
@@ -47,7 +47,7 @@ func TestFromEnv(t *testing.T) {
 	vDef := int64(tools.RandomInt(1, 100))
 	_ = os.Setenv(vName, strconv.Itoa(int(vDef)))
 	q := FromEnv(vName, 0)
-	th.AssertEquals(t, q.size, vDef)
+	th.AssertEquals(t, q.Size, vDef)
 }
 
 func TestFromEnv_InvalidVar(t *testing.T) {
@@ -55,7 +55,7 @@ func TestFromEnv_InvalidVar(t *testing.T) {
 	vDef := int64(tools.RandomInt(1, 100))
 	_ = os.Setenv(vName, tools.RandomString("var", 3))
 	q := FromEnv(vName, vDef)
-	th.AssertEquals(t, q.size, vDef)
+	th.AssertEquals(t, q.Size, vDef)
 }
 
 // Check that deadlock really appears when using simple acquiring
@@ -82,8 +82,8 @@ func TestQuota_TimeoutDeadlock(t *testing.T) {
 }
 
 func TestQuota_Multiple(t *testing.T) {
-	q1, _ := NewQuotaWithTimeout(1, 10*time.Millisecond)
-	q2, _ := NewQuotaWithTimeout(2, 10*time.Millisecond)
+	q1, _ := NewQuotaWithTimeout(1, 10*time.Minute)
+	q2, _ := NewQuotaWithTimeout(2, 10*time.Minute)
 	qts := []*ExpectedQuota{{q1, 1}, {q2, 1}}
 
 	th.AssertNoErr(t, AcquireMultipleQuotas(qts, 0))
