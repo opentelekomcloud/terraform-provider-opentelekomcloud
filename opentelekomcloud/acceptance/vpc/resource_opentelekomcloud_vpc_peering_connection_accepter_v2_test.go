@@ -20,7 +20,7 @@ func TestAccVpcPeeringConnectionAcceptorV2_basic(t *testing.T) {
 	resource.Test(t, resource.TestCase{
 		PreCheck:          func() { common.TestAccPreCheck(t) },
 		ProviderFactories: common.TestAccProviderFactories,
-		CheckDestroy:      testAccCheckOTCVpcPeeringConnectionAcceptorDestroy,
+		CheckDestroy:      testAccCheckVpcPeeringConnectionAcceptorDestroy,
 		Steps: []resource.TestStep{
 			{
 				Config:      testAccVpcPeeringConnectionAcceptorV2Basic, // TODO: Research why normal scenario with peer tenant id is not working in acceptance tests
@@ -30,7 +30,7 @@ func TestAccVpcPeeringConnectionAcceptorV2_basic(t *testing.T) {
 	})
 }
 
-func testAccCheckOTCVpcPeeringConnectionAcceptorDestroy(_ *terraform.State) error {
+func testAccCheckVpcPeeringConnectionAcceptorDestroy(_ *terraform.State) error {
 	// We don't destroy the underlying VPC Peering Connection.
 	return nil
 }
