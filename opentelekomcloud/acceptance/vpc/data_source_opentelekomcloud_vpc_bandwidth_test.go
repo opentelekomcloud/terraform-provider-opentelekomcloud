@@ -7,11 +7,11 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/acctest"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
-
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/acceptance/common"
 )
 
 func TestAccBandWidthDataSource_basic(t *testing.T) {
+	t.Skip("VPC bandwidth creation is not supported")
 	rName := fmt.Sprintf("tf-acc-test-%s", acctest.RandString(5))
 	dataName := "data.opentelekomcloud_vpc_bandwidth.test"
 
@@ -31,7 +31,7 @@ func TestAccBandWidthDataSource_basic(t *testing.T) {
 	})
 }
 
-func testAccCheckBandWidthDataSourceExists(n string) resource.TestCheckFunc {
+func testAccCheckBandWidthDataSourceExists(n string) resource.TestCheckFunc { // nolint:unused
 	return func(s *terraform.State) error {
 		rs, ok := s.RootModule().Resources[n]
 		if !ok {
@@ -53,7 +53,7 @@ func testAccCheckBandWidthDataSourceExists(n string) resource.TestCheckFunc {
 	}
 }
 
-func testAccBandWidthDataSource_basic(rName string) string {
+func testAccBandWidthDataSource_basic(rName string) string { // nolint:unused
 	return fmt.Sprintf(`
 resource "opentelekomcloud_vpc_bandwidth" "test" {
   name = "%s"

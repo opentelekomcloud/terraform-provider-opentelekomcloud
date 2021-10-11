@@ -7,14 +7,21 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/networking/v2/peerings"
+	th "github.com/opentelekomcloud/gophertelekomcloud/testhelper"
+	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/acceptance/common/quotas"
 
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/acceptance/common"
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/acceptance/env"
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common/cfg"
 )
 
+const resourceVPCPeeringName = "opentelekomcloud_vpc_peering_connection_v2.peering_1"
+
 func TestAccVpcPeeringConnectionV2_basic(t *testing.T) {
 	var peering peerings.Peering
+	t.Parallel()
+	th.AssertNoErr(t, quotas.Router.AcquireMultiple(2))
+	defer quotas.Router.ReleaseMultiple(2)
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:          func() { common.TestAccPreCheck(t) },
@@ -22,21 +29,40 @@ func TestAccVpcPeeringConnectionV2_basic(t *testing.T) {
 		CheckDestroy:      testAccCheckOTCVpcPeeringConnectionV2Destroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccVpcPeeringConnectionV2_basic,
+				Config: testAccVpcPeeringConnectionV2Basic,
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckOTCVpcPeeringConnectionV2Exists("opentelekomcloud_vpc_peering_connection_v2.peering_1", &peering),
-					resource.TestCheckResourceAttr(
-						"opentelekomcloud_vpc_peering_connection_v2.peering_1", "name", "opentelekomcloud_peering"),
-					resource.TestCheckResourceAttr(
-						"opentelekomcloud_vpc_peering_connection_v2.peering_1", "status", "ACTIVE"),
+					testAccCheckOTCVpcPeeringConnectionV2Exists(resourceVPCPeeringName, &peering),
+					resource.TestCheckResourceAttr(resourceVPCPeeringName, "name", "opentelekomcloud_peering"),
+					resource.TestCheckResourceAttr(resourceVPCPeeringName, "status", "ACTIVE"),
 				),
 			},
 			{
-				Config: testAccVpcPeeringConnectionV2_update,
+				Config: testAccVpcPeeringConnectionV2Update,
 				Check: resource.ComposeTestCheckFunc(
-					resource.TestCheckResourceAttr(
-						"opentelekomcloud_vpc_peering_connection_v2.peering_1", "name", "opentelekomcloud_peering_1"),
+					resource.TestCheckResourceAttr(resourceVPCPeeringName, "name", "opentelekomcloud_peering_1"),
 				),
+			},
+		},
+	})
+}
+
+func TestAccVpcPeeringConnectionV2_import(t *testing.T) {
+	t.Parallel()
+	th.AssertNoErr(t, quotas.Router.AcquireMultiple(2))
+	defer quotas.Router.ReleaseMultiple(2)
+
+	resource.Test(t, resource.TestCase{
+		PreCheck:          func() { common.TestAccPreCheck(t) },
+		ProviderFactories: common.TestAccProviderFactories,
+		CheckDestroy:      testAccCheckOTCVpcPeeringConnectionV2Destroy,
+		Steps: []resource.TestStep{
+			{
+				Config: testAccVpcPeeringConnectionV2Import,
+			},
+			{
+				ResourceName:      resourceVPCPeeringName,
+				ImportState:       true,
+				ImportStateVerify: true,
 			},
 		},
 	})
@@ -44,6 +70,9 @@ func TestAccVpcPeeringConnectionV2_basic(t *testing.T) {
 
 func TestAccVpcPeeringConnectionV2_timeout(t *testing.T) {
 	var peering peerings.Peering
+	t.Parallel()
+	th.AssertNoErr(t, quotas.Router.AcquireMultiple(2))
+	defer quotas.Router.ReleaseMultiple(2)
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:          func() { common.TestAccPreCheck(t) },
@@ -51,7 +80,7 @@ func TestAccVpcPeeringConnectionV2_timeout(t *testing.T) {
 		CheckDestroy:      testAccCheckOTCVpcPeeringConnectionV2Destroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccVpcPeeringConnectionV2_timeout,
+				Config: testAccVpcPeeringConnectionV2Timeout,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckOTCVpcPeeringConnectionV2Exists("opentelekomcloud_vpc_peering_connection_v2.peering_1", &peering),
 				),
@@ -113,14 +142,14 @@ func testAccCheckOTCVpcPeeringConnectionV2Exists(n string, peering *peerings.Pee
 	}
 }
 
-const testAccVpcPeeringConnectionV2_basic = `
+const testAccVpcPeeringConnectionV2Basic = `
 resource "opentelekomcloud_vpc_v1" "vpc_1" {
-  name = "vpc_test"
+  name = "vpc_test_p"
   cidr = "192.168.0.0/16"
 }
 
 resource "opentelekomcloud_vpc_v1" "vpc_2" {
-  name = "vpc_test1"
+  name = "vpc_test_p1"
   cidr = "192.168.0.0/16"
 }
 
@@ -130,14 +159,31 @@ resource "opentelekomcloud_vpc_peering_connection_v2" "peering_1" {
   peer_vpc_id = opentelekomcloud_vpc_v1.vpc_2.id
 }
 `
-const testAccVpcPeeringConnectionV2_update = `
+const testAccVpcPeeringConnectionV2Import = `
 resource "opentelekomcloud_vpc_v1" "vpc_1" {
-  name = "vpc_test"
+  name = "vpc_test_p_imp"
   cidr = "192.168.0.0/16"
 }
 
 resource "opentelekomcloud_vpc_v1" "vpc_2" {
-  name = "vpc_test1"
+  name = "vpc_test_p_imp1"
+  cidr = "192.168.0.0/16"
+}
+
+resource "opentelekomcloud_vpc_peering_connection_v2" "peering_1" {
+  name = "opentelekomcloud_peering_imp"
+  vpc_id = opentelekomcloud_vpc_v1.vpc_1.id
+  peer_vpc_id = opentelekomcloud_vpc_v1.vpc_2.id
+}
+`
+const testAccVpcPeeringConnectionV2Update = `
+resource "opentelekomcloud_vpc_v1" "vpc_1" {
+  name = "vpc_test_p"
+  cidr = "192.168.0.0/16"
+}
+
+resource "opentelekomcloud_vpc_v1" "vpc_2" {
+  name = "vpc_test_p1"
   cidr = "192.168.0.0/16"
 }
 
@@ -147,14 +193,14 @@ resource "opentelekomcloud_vpc_peering_connection_v2" "peering_1" {
   peer_vpc_id = opentelekomcloud_vpc_v1.vpc_2.id
 }
 `
-const testAccVpcPeeringConnectionV2_timeout = `
+const testAccVpcPeeringConnectionV2Timeout = `
 resource "opentelekomcloud_vpc_v1" "vpc_1" {
-  name = "vpc_test"
+  name = "vpc_test_p_t"
   cidr = "192.168.0.0/16"
 }
 
 resource "opentelekomcloud_vpc_v1" "vpc_2" {
-  name = "vpc_test1"
+  name = "vpc_test_p_t1"
   cidr = "192.168.0.0/16"
 }
 

@@ -11,6 +11,7 @@ import (
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/networking/v2/networks"
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/networking/v2/ports"
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/networking/v2/subnets"
+	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/acceptance/common/quotas"
 
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/acceptance/common"
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/acceptance/env"
@@ -221,5 +222,20 @@ func TestAccCheckNetworkingV2SecGroupExists(n string, securityGroup *groups.SecG
 		*securityGroup = *found
 
 		return nil
+	}
+}
+
+func vpcSubnetQuotas() []*quotas.ExpectedQuota {
+	return []*quotas.ExpectedQuota{
+		{Q: quotas.Router, Count: 1},
+		{Q: quotas.Network, Count: 1},
+		{Q: quotas.Subnet, Count: 1},
+	}
+}
+
+func subnetQuotas() []*quotas.ExpectedQuota {
+	return []*quotas.ExpectedQuota{
+		{Q: quotas.Network, Count: 1},
+		{Q: quotas.Subnet, Count: 1},
 	}
 }

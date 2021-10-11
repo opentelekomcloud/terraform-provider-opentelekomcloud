@@ -3,9 +3,12 @@ package acceptance
 import (
 	"fmt"
 	"testing"
+	"time"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
+	th "github.com/opentelekomcloud/gophertelekomcloud/testhelper"
+	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/acceptance/common/quotas"
 
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/networking/v1/subnets"
 
@@ -14,9 +17,14 @@ import (
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common/cfg"
 )
 
+const resourceVPCSubnetName = "opentelekomcloud_vpc_subnet_v1.subnet_1"
+
 func TestAccVpcSubnetV1Basic(t *testing.T) {
 	var subnet subnets.Subnet
-	resourceName := "opentelekomcloud_vpc_subnet_v1.subnet_1"
+	t.Parallel()
+	qts := vpcSubnetQuotas()
+	th.AssertNoErr(t, quotas.AcquireMultipleQuotas(qts, 5*time.Second))
+	defer quotas.ReleaseMultipleQuotas(qts)
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:          func() { common.TestAccPreCheck(t) },
@@ -26,23 +34,46 @@ func TestAccVpcSubnetV1Basic(t *testing.T) {
 			{
 				Config: testAccVpcSubnetV1Basic,
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckVpcSubnetV1Exists(resourceName, &subnet),
-					resource.TestCheckResourceAttr(resourceName, "name", "opentelekomcloud_subnet"),
-					resource.TestCheckResourceAttr(resourceName, "cidr", "192.168.0.0/16"),
-					resource.TestCheckResourceAttr(resourceName, "gateway_ip", "192.168.0.1"),
-					resource.TestCheckResourceAttr(resourceName, "availability_zone", "eu-de-02"),
-					resource.TestCheckResourceAttr(resourceName, "ntp_addresses", "10.100.0.33,10.100.0.34"),
-					resource.TestCheckResourceAttr(resourceName, "tags.foo", "bar"),
-					resource.TestCheckResourceAttr(resourceName, "tags.key", "value"),
+					testAccCheckVpcSubnetV1Exists(resourceVPCSubnetName, &subnet),
+					resource.TestCheckResourceAttr(resourceVPCSubnetName, "name", "opentelekomcloud_subnet"),
+					resource.TestCheckResourceAttr(resourceVPCSubnetName, "cidr", "192.168.0.0/16"),
+					resource.TestCheckResourceAttr(resourceVPCSubnetName, "gateway_ip", "192.168.0.1"),
+					resource.TestCheckResourceAttr(resourceVPCSubnetName, "availability_zone", "eu-de-02"),
+					resource.TestCheckResourceAttr(resourceVPCSubnetName, "ntp_addresses", "10.100.0.33,10.100.0.34"),
+					resource.TestCheckResourceAttr(resourceVPCSubnetName, "tags.foo", "bar"),
+					resource.TestCheckResourceAttr(resourceVPCSubnetName, "tags.key", "value"),
 				),
 			},
 			{
 				Config: testAccVpcSubnetV1Update,
 				Check: resource.ComposeTestCheckFunc(
-					resource.TestCheckResourceAttr(resourceName, "name", "opentelekomcloud_subnet_1"),
-					resource.TestCheckResourceAttr(resourceName, "ntp_addresses", "10.100.0.35,10.100.0.36"),
-					resource.TestCheckResourceAttr(resourceName, "tags.key", "value_update"),
+					resource.TestCheckResourceAttr(resourceVPCSubnetName, "name", "opentelekomcloud_subnet_1"),
+					resource.TestCheckResourceAttr(resourceVPCSubnetName, "ntp_addresses", "10.100.0.35,10.100.0.36"),
+					resource.TestCheckResourceAttr(resourceVPCSubnetName, "tags.key", "value_update"),
 				),
+			},
+		},
+	})
+}
+
+func TestAccVpcSubnetV1Import(t *testing.T) {
+	t.Parallel()
+	qts := vpcSubnetQuotas()
+	th.AssertNoErr(t, quotas.AcquireMultipleQuotas(qts, 5*time.Second))
+	defer quotas.ReleaseMultipleQuotas(qts)
+
+	resource.Test(t, resource.TestCase{
+		PreCheck:          func() { common.TestAccPreCheck(t) },
+		ProviderFactories: common.TestAccProviderFactories,
+		CheckDestroy:      testAccCheckVpcSubnetV1Destroy,
+		Steps: []resource.TestStep{
+			{
+				Config: testAccVpcSubnetV1Import,
+			},
+			{
+				ResourceName:      resourceVPCSubnetName,
+				ImportState:       true,
+				ImportStateVerify: true,
 			},
 		},
 	})
@@ -50,7 +81,10 @@ func TestAccVpcSubnetV1Basic(t *testing.T) {
 
 func TestAccVpcSubnetV1Timeout(t *testing.T) {
 	var subnet subnets.Subnet
-	resourceName := "opentelekomcloud_vpc_subnet_v1.subnet_1"
+	t.Parallel()
+	qts := vpcSubnetQuotas()
+	th.AssertNoErr(t, quotas.AcquireMultipleQuotas(qts, 5*time.Second))
+	defer quotas.ReleaseMultipleQuotas(qts)
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:          func() { common.TestAccPreCheck(t) },
@@ -60,7 +94,7 @@ func TestAccVpcSubnetV1Timeout(t *testing.T) {
 			{
 				Config: testAccVpcSubnetV1Timeout,
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckVpcSubnetV1Exists(resourceName, &subnet),
+					testAccCheckVpcSubnetV1Exists(resourceVPCSubnetName, &subnet),
 				),
 			},
 		},
@@ -69,7 +103,10 @@ func TestAccVpcSubnetV1Timeout(t *testing.T) {
 
 func TestAccVpcSubnetV1DnsList(t *testing.T) {
 	var subnet subnets.Subnet
-	resourceName := "opentelekomcloud_vpc_subnet_v1.subnet_1"
+	t.Parallel()
+	qts := vpcSubnetQuotas()
+	th.AssertNoErr(t, quotas.AcquireMultipleQuotas(qts, 5*time.Second))
+	defer quotas.ReleaseMultipleQuotas(qts)
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:          func() { common.TestAccPreCheck(t) },
@@ -79,7 +116,7 @@ func TestAccVpcSubnetV1DnsList(t *testing.T) {
 			{
 				Config: testAccVpcSubnetV1DnsList,
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckVpcSubnetV1Exists(resourceName, &subnet),
+					testAccCheckVpcSubnetV1Exists(resourceVPCSubnetName, &subnet),
 				),
 			},
 		},
@@ -141,7 +178,7 @@ func testAccCheckVpcSubnetV1Exists(n string, subnet *subnets.Subnet) resource.Te
 const (
 	testAccVpcSubnetV1Basic = `
 resource "opentelekomcloud_vpc_v1" "vpc_1" {
-  name = "vpc_test"
+  name = "vpc_test_sn"
   cidr = "192.168.0.0/16"
 }
 
@@ -159,9 +196,29 @@ resource "opentelekomcloud_vpc_subnet_v1" "subnet_1" {
   }
 }
 `
+	testAccVpcSubnetV1Import = `
+resource "opentelekomcloud_vpc_v1" "vpc_1" {
+  name = "vpc_test_imp"
+  cidr = "192.168.0.0/16"
+}
+
+resource "opentelekomcloud_vpc_subnet_v1" "subnet_1" {
+  name              = "opentelekomcloud_subnet_imp"
+  cidr              = "192.168.0.0/16"
+  gateway_ip        = "192.168.0.1"
+  vpc_id            = opentelekomcloud_vpc_v1.vpc_1.id
+  availability_zone = "eu-de-02"
+  ntp_addresses     = "10.100.0.33,10.100.0.34"
+
+  tags = {
+    foo = "bar"
+    key = "value"
+  }
+}
+`
 	testAccVpcSubnetV1Update = `
 resource "opentelekomcloud_vpc_v1" "vpc_1" {
-  name = "vpc_test"
+  name = "vpc_test_sn"
   cidr = "192.168.0.0/16"
 }
 
@@ -182,7 +239,7 @@ resource "opentelekomcloud_vpc_subnet_v1" "subnet_1" {
 
 	testAccVpcSubnetV1Timeout = `
 resource "opentelekomcloud_vpc_v1" "vpc_1" {
-  name = "vpc_test"
+  name = "vpc_test_t"
   cidr = "192.168.0.0/16"
 }
 
@@ -202,7 +259,7 @@ resource "opentelekomcloud_vpc_subnet_v1" "subnet_1" {
 
 	testAccVpcSubnetV1DnsList = `
 resource "opentelekomcloud_vpc_v1" "vpc" {
-  name = "vpc_name"
+  name = "vpc_name_dns"
   cidr = "192.168.0.0/16"
 }
 

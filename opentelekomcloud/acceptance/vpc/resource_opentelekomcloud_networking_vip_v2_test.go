@@ -4,19 +4,28 @@ import (
 	"fmt"
 	"log"
 	"testing"
+	"time"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/networking/v2/ports"
+	th "github.com/opentelekomcloud/gophertelekomcloud/testhelper"
+	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/acceptance/common/quotas"
 
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/acceptance/common"
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/acceptance/env"
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common/cfg"
 )
 
+const resourceNetworkingVIPName = "opentelekomcloud_networking_vip_v2.vip_1"
+
 // TestAccNetworkingV2VIP_basic is basic acc test.
 func TestAccNetworkingV2VIP_basic(t *testing.T) {
 	var vip ports.Port
+	t.Parallel()
+	qts := vpcSubnetQuotas()
+	th.AssertNoErr(t, quotas.AcquireMultipleQuotas(qts, 5*time.Second))
+	defer quotas.ReleaseMultipleQuotas(qts)
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:          func() { common.TestAccPreCheck(t) },
@@ -26,7 +35,7 @@ func TestAccNetworkingV2VIP_basic(t *testing.T) {
 			{
 				Config: testAccNetworkingV2VIPConfigBasic,
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckNetworkingV2VIPExists("opentelekomcloud_networking_vip_v2.vip_1", &vip),
+					testAccCheckNetworkingV2VIPExists(resourceNetworkingVIPName, &vip),
 				),
 			},
 		},
@@ -95,12 +104,12 @@ var testAccNetworkingV2VIPConfigBasic = fmt.Sprintf(`
 %s
 
 resource "opentelekomcloud_networking_network_v2" "network_1" {
-  name = "network_1"
+  name = "network_1_vip"
   admin_state_up = "true"
 }
 
 resource "opentelekomcloud_networking_subnet_v2" "subnet_1" {
-  name = "subnet_1"
+  name = "subnet_1_vip"
   cidr = "192.168.199.0/24"
   ip_version = 4
   network_id = opentelekomcloud_networking_network_v2.network_1.id
@@ -112,7 +121,7 @@ resource "opentelekomcloud_networking_router_interface_v2" "router_interface_1" 
 }
 
 resource "opentelekomcloud_networking_router_v2" "router_1" {
-  name = "router_1"
+  name = "router_1_vip"
   external_gateway = data.opentelekomcloud_networking_network_v2.ext_network.id
 }
 

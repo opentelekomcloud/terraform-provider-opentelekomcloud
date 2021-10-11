@@ -6,6 +6,8 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
+	th "github.com/opentelekomcloud/gophertelekomcloud/testhelper"
+	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/acceptance/common/quotas"
 
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/networking/v2/extensions/security/groups"
 
@@ -14,8 +16,13 @@ import (
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common/cfg"
 )
 
+const resourceNwSecGroupName = "opentelekomcloud_networking_secgroup_v2.secgroup_1"
+
 func TestAccNetworkingV2SecGroup_basic(t *testing.T) {
 	var securityGroup groups.SecGroup
+	t.Parallel()
+	th.AssertNoErr(t, quotas.SecurityGroup.Acquire())
+	defer quotas.SecurityGroup.Release()
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:          func() { common.TestAccPreCheck(t) },
@@ -23,18 +30,40 @@ func TestAccNetworkingV2SecGroup_basic(t *testing.T) {
 		CheckDestroy:      testAccCheckNetworkingV2SecGroupDestroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccNetworkingV2SecGroup_basic,
+				Config: testAccNetworkingV2SecGroupBasic,
 				Check: resource.ComposeTestCheckFunc(
-					TestAccCheckNetworkingV2SecGroupExists("opentelekomcloud_networking_secgroup_v2.secgroup_1", &securityGroup),
+					TestAccCheckNetworkingV2SecGroupExists(resourceNwSecGroupName, &securityGroup),
 					testAccCheckNetworkingV2SecGroupRuleCount(&securityGroup, 2),
 				),
 			},
 			{
-				Config: testAccNetworkingV2SecGroup_update,
+				Config: testAccNetworkingV2SecGroupUpdate,
 				Check: resource.ComposeTestCheckFunc(
-					resource.TestCheckResourceAttrPtr("opentelekomcloud_networking_secgroup_v2.secgroup_1", "id", &securityGroup.ID),
-					resource.TestCheckResourceAttr("opentelekomcloud_networking_secgroup_v2.secgroup_1", "name", "security_group_2"),
+					resource.TestCheckResourceAttrPtr(resourceNwSecGroupName, "id", &securityGroup.ID),
+					resource.TestCheckResourceAttr(resourceNwSecGroupName, "name", "security_group_2"),
 				),
+			},
+		},
+	})
+}
+
+func TestAccNetworkingV2SecGroup_importBasic(t *testing.T) {
+	t.Parallel()
+	th.AssertNoErr(t, quotas.SecurityGroup.Acquire())
+	defer quotas.SecurityGroup.Release()
+
+	resource.Test(t, resource.TestCase{
+		PreCheck:          func() { common.TestAccPreCheck(t) },
+		ProviderFactories: common.TestAccProviderFactories,
+		CheckDestroy:      testAccCheckNetworkingV2SecGroupDestroy,
+		Steps: []resource.TestStep{
+			{
+				Config: testAccNetworkingV2SecGroupBasic,
+			},
+			{
+				ResourceName:      resourceNwSecGroupName,
+				ImportState:       true,
+				ImportStateVerify: true,
 			},
 		},
 	})
@@ -42,6 +71,9 @@ func TestAccNetworkingV2SecGroup_basic(t *testing.T) {
 
 func TestAccNetworkingV2SecGroup_noDefaultRules(t *testing.T) {
 	var securityGroup groups.SecGroup
+	t.Parallel()
+	th.AssertNoErr(t, quotas.SecurityGroup.Acquire())
+	defer quotas.SecurityGroup.Release()
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:          func() { common.TestAccPreCheck(t) },
@@ -49,9 +81,9 @@ func TestAccNetworkingV2SecGroup_noDefaultRules(t *testing.T) {
 		CheckDestroy:      testAccCheckNetworkingV2SecGroupDestroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccNetworkingV2SecGroup_noDefaultRules,
+				Config: testAccNetworkingV2SecGroupNoDefaultRules,
 				Check: resource.ComposeTestCheckFunc(
-					TestAccCheckNetworkingV2SecGroupExists("opentelekomcloud_networking_secgroup_v2.secgroup_1", &securityGroup),
+					TestAccCheckNetworkingV2SecGroupExists(resourceNwSecGroupName, &securityGroup),
 					testAccCheckNetworkingV2SecGroupRuleCount(&securityGroup, 0),
 				),
 			},
@@ -61,6 +93,9 @@ func TestAccNetworkingV2SecGroup_noDefaultRules(t *testing.T) {
 
 func TestAccNetworkingV2SecGroup_timeout(t *testing.T) {
 	var securityGroup groups.SecGroup
+	t.Parallel()
+	th.AssertNoErr(t, quotas.SecurityGroup.Acquire())
+	defer quotas.SecurityGroup.Release()
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:          func() { common.TestAccPreCheck(t) },
@@ -68,9 +103,9 @@ func TestAccNetworkingV2SecGroup_timeout(t *testing.T) {
 		CheckDestroy:      testAccCheckNetworkingV2SecGroupDestroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccNetworkingV2SecGroup_timeout,
+				Config: testAccNetworkingV2SecGroupTimeout,
 				Check: resource.ComposeTestCheckFunc(
-					TestAccCheckNetworkingV2SecGroupExists("opentelekomcloud_networking_secgroup_v2.secgroup_1", &securityGroup),
+					TestAccCheckNetworkingV2SecGroupExists(resourceNwSecGroupName, &securityGroup),
 				),
 			},
 		},
@@ -110,21 +145,21 @@ func testAccCheckNetworkingV2SecGroupRuleCount(
 	}
 }
 
-const testAccNetworkingV2SecGroup_basic = `
+const testAccNetworkingV2SecGroupBasic = `
 resource "opentelekomcloud_networking_secgroup_v2" "secgroup_1" {
   name        = "security_group"
   description = "terraform security group acceptance test"
 }
 `
 
-const testAccNetworkingV2SecGroup_update = `
+const testAccNetworkingV2SecGroupUpdate = `
 resource "opentelekomcloud_networking_secgroup_v2" "secgroup_1" {
   name        = "security_group_2"
   description = "terraform security group acceptance test"
 }
 `
 
-const testAccNetworkingV2SecGroup_noDefaultRules = `
+const testAccNetworkingV2SecGroupNoDefaultRules = `
 resource "opentelekomcloud_networking_secgroup_v2" "secgroup_1" {
   name                 = "security_group_1"
   description          = "terraform security group acceptance test"
@@ -132,7 +167,7 @@ resource "opentelekomcloud_networking_secgroup_v2" "secgroup_1" {
 }
 `
 
-const testAccNetworkingV2SecGroup_timeout = `
+const testAccNetworkingV2SecGroupTimeout = `
 resource "opentelekomcloud_networking_secgroup_v2" "secgroup_1" {
   name        = "security_group"
   description = "terraform security group acceptance test"

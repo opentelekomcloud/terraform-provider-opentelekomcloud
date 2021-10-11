@@ -6,6 +6,8 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
+	th "github.com/opentelekomcloud/gophertelekomcloud/testhelper"
+	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/acceptance/common/quotas"
 
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/networking/v2/routes"
 
@@ -14,8 +16,14 @@ import (
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common/cfg"
 )
 
+const resourceVPCRouteName = "opentelekomcloud_vpc_route_v2.route_1"
+
 func TestAccVpcRouteV2_basic(t *testing.T) {
 	var route routes.Route
+
+	t.Parallel()
+	th.AssertNoErr(t, quotas.Router.AcquireMultiple(2))
+	defer quotas.Router.ReleaseMultiple(2)
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:          func() { common.TestAccPreCheck(t) },
@@ -23,14 +31,33 @@ func TestAccVpcRouteV2_basic(t *testing.T) {
 		CheckDestroy:      testAccCheckRouteV2Destroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccRouteV2_basic,
+				Config: testAccRouteV2Basic,
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckRouteV2Exists("opentelekomcloud_vpc_route_v2.route_1", &route),
-					resource.TestCheckResourceAttr(
-						"opentelekomcloud_vpc_route_v2.route_1", "destination", "192.168.0.0/16"),
-					resource.TestCheckResourceAttr(
-						"opentelekomcloud_vpc_route_v2.route_1", "type", "peering"),
+					testAccCheckRouteV2Exists(resourceVPCRouteName, &route),
+					resource.TestCheckResourceAttr(resourceVPCRouteName, "destination", "192.168.0.0/16"),
+					resource.TestCheckResourceAttr(resourceVPCRouteName, "type", "peering"),
 				),
+			},
+		},
+	})
+}
+func TestAccVpcRouteV2_import(t *testing.T) {
+	t.Parallel()
+	th.AssertNoErr(t, quotas.Router.AcquireMultiple(2))
+	defer quotas.Router.ReleaseMultiple(2)
+
+	resource.Test(t, resource.TestCase{
+		PreCheck:          func() { common.TestAccPreCheck(t) },
+		ProviderFactories: common.TestAccProviderFactories,
+		CheckDestroy:      testAccCheckRouteV2Destroy,
+		Steps: []resource.TestStep{
+			{
+				Config: testAccRouteV2Import,
+			},
+			{
+				ResourceName:      resourceVPCRouteName,
+				ImportState:       true,
+				ImportStateVerify: true,
 			},
 		},
 	})
@@ -39,15 +66,19 @@ func TestAccVpcRouteV2_basic(t *testing.T) {
 func TestAccVpcRouteV2_timeout(t *testing.T) {
 	var route routes.Route
 
+	t.Parallel()
+	th.AssertNoErr(t, quotas.Router.AcquireMultiple(2))
+	defer quotas.Router.ReleaseMultiple(2)
+
 	resource.Test(t, resource.TestCase{
 		PreCheck:          func() { common.TestAccPreCheck(t) },
 		ProviderFactories: common.TestAccProviderFactories,
 		CheckDestroy:      testAccCheckRouteV2Destroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccRouteV2_timeout,
+				Config: testAccRouteV2Timeout,
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckRouteV2Exists("opentelekomcloud_vpc_route_v2.route_1", &route),
+					testAccCheckRouteV2Exists(resourceVPCRouteName, &route),
 				),
 			},
 		},
@@ -107,7 +138,7 @@ func testAccCheckRouteV2Exists(n string, route *routes.Route) resource.TestCheck
 	}
 }
 
-const testAccRouteV2_basic = `
+const testAccRouteV2Basic = `
 resource "opentelekomcloud_vpc_v1" "vpc_1" {
   name = "vpc_test"
   cidr = "192.168.0.0/16"
@@ -131,14 +162,39 @@ resource "opentelekomcloud_vpc_route_v2" "route_1" {
 }
 `
 
-const testAccRouteV2_timeout = `
+const testAccRouteV2Import = `
 resource "opentelekomcloud_vpc_v1" "vpc_1" {
-  name = "vpc_test"
+  name = "vpc_test_rt_imp"
   cidr = "192.168.0.0/16"
 }
 
 resource "opentelekomcloud_vpc_v1" "vpc_2" {
-  name = "vpc_test1"
+  name = "vpc_test_rt_imp1"
+  cidr = "192.168.0.0/16"
+}
+
+resource "opentelekomcloud_vpc_peering_connection_v2" "peering_1" {
+  name        = "opentelekomcloud_peering_imp"
+  vpc_id      = opentelekomcloud_vpc_v1.vpc_1.id
+  peer_vpc_id = opentelekomcloud_vpc_v1.vpc_2.id
+}
+
+resource "opentelekomcloud_vpc_route_v2" "route_1" {
+  type        = "peering"
+  nexthop     = opentelekomcloud_vpc_peering_connection_v2.peering_1.id
+  destination = "192.168.0.0/16"
+  vpc_id      = opentelekomcloud_vpc_v1.vpc_1.id
+}
+`
+
+const testAccRouteV2Timeout = `
+resource "opentelekomcloud_vpc_v1" "vpc_1" {
+  name = "vpc_test_rt_t"
+  cidr = "192.168.0.0/16"
+}
+
+resource "opentelekomcloud_vpc_v1" "vpc_2" {
+  name = "vpc_test_rt_t1"
   cidr = "192.168.0.0/16"
 }
 

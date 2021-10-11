@@ -4,13 +4,15 @@ import (
 	"fmt"
 	"log"
 	"testing"
+	"time"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 	golangsdk "github.com/opentelekomcloud/gophertelekomcloud"
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/networking/v2/ports"
-
+	th "github.com/opentelekomcloud/gophertelekomcloud/testhelper"
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/acceptance/common"
+	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/acceptance/common/quotas"
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/acceptance/env"
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common/cfg"
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/services/vpc"
@@ -18,9 +20,19 @@ import (
 
 // TestAccNetworkingV2VIPAssociate_basic is basic acc test.
 func TestAccNetworkingV2VIPAssociate_basic(t *testing.T) {
+	t.Skip("this test produces dangling resources")
 	var vip ports.Port
 	var port1 ports.Port
 	var port2 ports.Port
+	t.Parallel()
+	qts := vpcSubnetQuotas()
+	qts = append(qts,
+		&quotas.ExpectedQuota{Q: quotas.Volume, Count: 2},
+		&quotas.ExpectedQuota{Q: quotas.VolumeSize, Count: 4 + 4},
+		&quotas.ExpectedQuota{Q: quotas.Server, Count: 2},
+	)
+	th.AssertNoErr(t, quotas.AcquireMultipleQuotas(qts, 5*time.Second))
+	defer quotas.ReleaseMultipleQuotas(qts)
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:          func() { common.TestAccPreCheck(t) },
@@ -42,7 +54,7 @@ func TestAccNetworkingV2VIPAssociate_basic(t *testing.T) {
 }
 
 // testAccCheckNetworkingV2VIPAssociateDestroy checks destroy.
-func testAccCheckNetworkingV2VIPAssociateDestroy(s *terraform.State) error {
+func testAccCheckNetworkingV2VIPAssociateDestroy(s *terraform.State) error { // nolint:unused
 	config := common.TestAccProvider.Meta().(*cfg.Config)
 	networkingClient, err := config.NetworkingV2Client(env.OS_REGION_NAME)
 	if err != nil {
@@ -96,7 +108,7 @@ func testAccCheckNetworkingV2VIPAssociateDestroy(s *terraform.State) error {
 	return nil
 }
 
-func testAccCheckNetworkingV2VIPAssociateAssociated(p *ports.Port, vip *ports.Port) resource.TestCheckFunc {
+func testAccCheckNetworkingV2VIPAssociateAssociated(p *ports.Port, vip *ports.Port) resource.TestCheckFunc { // nolint:unused
 	return func(s *terraform.State) error {
 		config := common.TestAccProvider.Meta().(*cfg.Config)
 		networkingClient, err := config.NetworkingV2Client(env.OS_REGION_NAME)
@@ -142,12 +154,12 @@ var TestAccNetworkingV2VIPAssociateConfigBasic = fmt.Sprintf(`
 %s
 
 resource "opentelekomcloud_networking_network_v2" "network_1" {
-  name = "network_1"
+  name = "network_vip_ass_1"
   admin_state_up = "true"
 }
 
 resource "opentelekomcloud_networking_subnet_v2" "subnet_1" {
-  name = "subnet_1"
+  name = "subnet_vip_ass_1"
   cidr = "192.168.199.0/24"
   ip_version = 4
   network_id = opentelekomcloud_networking_network_v2.network_1.id
@@ -159,7 +171,7 @@ resource "opentelekomcloud_networking_router_interface_v2" "router_interface_1" 
 }
 
 resource "opentelekomcloud_networking_router_v2" "router_1" {
-  name = "router_1"
+  name = "router_vip_ass_1"
   external_gateway = data.opentelekomcloud_networking_network_v2.ext_network.id
 }
 
@@ -173,7 +185,7 @@ resource "opentelekomcloud_networking_port_v2" "port_1" {
 }
 
 resource "opentelekomcloud_compute_instance_v2" "instance_1" {
-  name = "instance_1"
+  name = "instance_vip_ass_1"
   security_groups = ["default"]
 
   network {
@@ -191,7 +203,7 @@ resource "opentelekomcloud_networking_port_v2" "port_2" {
 }
 
 resource "opentelekomcloud_compute_instance_v2" "instance_2" {
-  name = "instance_2"
+  name = "instance_vip_ass_2"
   security_groups = ["default"]
 
   network {

@@ -6,6 +6,8 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
+	th "github.com/opentelekomcloud/gophertelekomcloud/testhelper"
+	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/acceptance/common/quotas"
 
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/networking/v2/extensions/layer3/floatingips"
 
@@ -14,8 +16,13 @@ import (
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common/cfg"
 )
 
+const resourceFloatingIPName = "opentelekomcloud_networking_floatingip_v2.fip_1"
+
 func TestAccNetworkingV2FloatingIP_basic(t *testing.T) {
 	var fip floatingips.FloatingIP
+	t.Parallel()
+	th.AssertNoErr(t, quotas.FloatingIP.Acquire())
+	defer quotas.FloatingIP.Release()
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:          func() { common.TestAccPreCheck(t) },
@@ -25,7 +32,7 @@ func TestAccNetworkingV2FloatingIP_basic(t *testing.T) {
 			{
 				Config: testAccNetworkingV2FloatingIPBasic,
 				Check: resource.ComposeTestCheckFunc(
-					TestAccCheckNetworkingV2FloatingIPExists("opentelekomcloud_networking_floatingip_v2.fip_1", &fip),
+					TestAccCheckNetworkingV2FloatingIPExists(resourceFloatingIPName, &fip),
 				),
 			},
 		},
@@ -34,6 +41,9 @@ func TestAccNetworkingV2FloatingIP_basic(t *testing.T) {
 
 func TestAccNetworkingV2FloatingIP_timeout(t *testing.T) {
 	var fip floatingips.FloatingIP
+	t.Parallel()
+	th.AssertNoErr(t, quotas.FloatingIP.Acquire())
+	defer quotas.FloatingIP.Release()
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:          func() { common.TestAccPreCheck(t) },
@@ -43,8 +53,31 @@ func TestAccNetworkingV2FloatingIP_timeout(t *testing.T) {
 			{
 				Config: testAccNetworkingV2FloatingIPTimeout,
 				Check: resource.ComposeTestCheckFunc(
-					TestAccCheckNetworkingV2FloatingIPExists("opentelekomcloud_networking_floatingip_v2.fip_1", &fip),
+					TestAccCheckNetworkingV2FloatingIPExists(resourceFloatingIPName, &fip),
 				),
+			},
+		},
+	})
+}
+
+func TestAccNetworkingV2FloatingIP_importBasic(t *testing.T) {
+	t.Parallel()
+	th.AssertNoErr(t, quotas.FloatingIP.Acquire())
+	defer quotas.FloatingIP.Release()
+
+	resource.Test(t, resource.TestCase{
+		PreCheck:          func() { common.TestAccPreCheck(t) },
+		ProviderFactories: common.TestAccProviderFactories,
+		CheckDestroy:      testAccCheckNetworkingV2FloatingIPDestroy,
+		Steps: []resource.TestStep{
+			{
+				Config: testAccNetworkingV2FloatingIPBasic,
+			},
+
+			{
+				ResourceName:      resourceFloatingIPName,
+				ImportState:       true,
+				ImportStateVerify: true,
 			},
 		},
 	})

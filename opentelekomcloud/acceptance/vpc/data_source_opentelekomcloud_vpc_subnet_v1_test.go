@@ -3,9 +3,12 @@ package acceptance
 import (
 	"fmt"
 	"testing"
+	"time"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
+	th "github.com/opentelekomcloud/gophertelekomcloud/testhelper"
+	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/acceptance/common/quotas"
 
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/acceptance/common"
 )
@@ -15,6 +18,10 @@ func TestAccVpcSubnetV1DataSource_basic(t *testing.T) {
 	dataSourceNameByCIDR := "data.opentelekomcloud_vpc_subnet_v1.by_cidr"
 	dataSourceNameByName := "data.opentelekomcloud_vpc_subnet_v1.by_name"
 	dataSourceNameByVPC := "data.opentelekomcloud_vpc_subnet_v1.by_vpc_id"
+	t.Parallel()
+	qts := vpcSubnetQuotas()
+	th.AssertNoErr(t, quotas.AcquireMultipleQuotas(qts, 5*time.Second))
+	defer quotas.ReleaseMultipleQuotas(qts)
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:          func() { common.TestAccPreCheck(t) },
@@ -23,14 +30,14 @@ func TestAccVpcSubnetV1DataSource_basic(t *testing.T) {
 			{
 				Config: testAccDataSourceVpcSubnetV1Config,
 				Check: resource.ComposeTestCheckFunc(
-					testAccDataSourceVpcSubnetV1Check(dataSourceNameByID, "test_subnet", "10.0.0.0/24",
-						"10.0.0.1", "eu-de-02"),
-					testAccDataSourceVpcSubnetV1Check(dataSourceNameByCIDR, "test_subnet", "10.0.0.0/24",
-						"10.0.0.1", "eu-de-02"),
-					testAccDataSourceVpcSubnetV1Check(dataSourceNameByName, "test_subnet", "10.0.0.0/24",
-						"10.0.0.1", "eu-de-02"),
-					testAccDataSourceVpcSubnetV1Check(dataSourceNameByVPC, "test_subnet", "10.0.0.0/24",
-						"10.0.0.1", "eu-de-02"),
+					testAccDataSourceVpcSubnetV1Check(dataSourceNameByID, "test_subnet_ds_sn", "10.0.1.0/24",
+						"10.0.1.1", "eu-de-02"),
+					testAccDataSourceVpcSubnetV1Check(dataSourceNameByCIDR, "test_subnet_ds_sn", "10.0.1.0/24",
+						"10.0.1.1", "eu-de-02"),
+					testAccDataSourceVpcSubnetV1Check(dataSourceNameByName, "test_subnet_ds_sn", "10.0.1.0/24",
+						"10.0.1.1", "eu-de-02"),
+					testAccDataSourceVpcSubnetV1Check(dataSourceNameByVPC, "test_subnet_ds_sn", "10.0.1.0/24",
+						"10.0.1.1", "eu-de-02"),
 					resource.TestCheckResourceAttr(dataSourceNameByID, "status", "ACTIVE"),
 					resource.TestCheckResourceAttr(dataSourceNameByID, "dhcp_enable", "true"),
 				),
@@ -76,14 +83,14 @@ func testAccDataSourceVpcSubnetV1Check(n, name, cidr, gatewayIP, availabilityZon
 
 const testAccDataSourceVpcSubnetV1Config = `
 resource "opentelekomcloud_vpc_v1" "vpc_1" {
-  name = "test_vpc"
-  cidr= "10.0.0.0/24"
+  name = "test_vpc_ds_sn"
+  cidr= "10.0.1.0/24"
 }
 
 resource "opentelekomcloud_vpc_subnet_v1" "subnet_1" {
-  name              = "test_subnet"
-  cidr              = "10.0.0.0/24"
-  gateway_ip        = "10.0.0.1"
+  name              = "test_subnet_ds_sn"
+  cidr              = "10.0.1.0/24"
+  gateway_ip        = "10.0.1.1"
   vpc_id            = opentelekomcloud_vpc_v1.vpc_1.id
   availability_zone = "eu-de-02"
 }

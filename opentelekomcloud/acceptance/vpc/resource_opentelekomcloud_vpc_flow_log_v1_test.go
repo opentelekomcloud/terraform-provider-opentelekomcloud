@@ -6,6 +6,8 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
+	th "github.com/opentelekomcloud/gophertelekomcloud/testhelper"
+	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/acceptance/common/quotas"
 
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/networking/v1/flowlogs"
 
@@ -15,12 +17,16 @@ import (
 )
 
 const (
-	fl_name        = "vpc_flow_log1"
-	fl_update_name = "vpc_flow_log_update"
+	flName                 = "vpc_flow_log1"
+	flUpdateName           = "vpc_flow_log_update"
+	resourceVPCFlowLogName = "opentelekomcloud_vpc_flow_log_v1.flow_logl"
 )
 
 func TestAccVpcFlowLogV1_basic(t *testing.T) {
-	var flowlog flowlogs.FlowLog
+	var flowLog flowlogs.FlowLog
+	t.Parallel()
+	th.AssertNoErr(t, quotas.Router.Acquire())
+	defer quotas.Router.Release()
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:          func() { common.TestAccPreCheck(t) },
@@ -28,22 +34,18 @@ func TestAccVpcFlowLogV1_basic(t *testing.T) {
 		CheckDestroy:      testAccCheckVpcFlowLogV1Destroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccVpcFlowLogV1_basic,
+				Config: testAccVpcFlowLogV1Basic,
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckVpcFlowLogV1Exists("opentelekomcloud_vpc_flow_log_v1.flow_logl", &flowlog),
-					resource.TestCheckResourceAttr(
-						"opentelekomcloud_vpc_flow_log_v1.flow_logl", "name", fl_name),
-					resource.TestCheckResourceAttr(
-						"opentelekomcloud_vpc_flow_log_v1.flow_logl", "resource_type", "vpc"),
-					resource.TestCheckResourceAttr(
-						"opentelekomcloud_vpc_flow_log_v1.flow_logl", "traffic_type", "all"),
+					testAccCheckVpcFlowLogV1Exists(resourceVPCFlowLogName, &flowLog),
+					resource.TestCheckResourceAttr(resourceVPCFlowLogName, "name", flName),
+					resource.TestCheckResourceAttr(resourceVPCFlowLogName, "resource_type", "vpc"),
+					resource.TestCheckResourceAttr(resourceVPCFlowLogName, "traffic_type", "all"),
 				),
 			},
 			{
-				Config: testAccVpcFlowLogV1_update,
+				Config: testAccVpcFlowLogV1Update,
 				Check: resource.ComposeTestCheckFunc(
-					resource.TestCheckResourceAttr(
-						"opentelekomcloud_vpc_flow_log_v1.flow_logl", "name", fl_update_name),
+					resource.TestCheckResourceAttr(resourceVPCFlowLogName, "name", flUpdateName),
 				),
 			},
 		},
@@ -103,7 +105,7 @@ func testAccCheckVpcFlowLogV1Exists(n string, flowlog *flowlogs.FlowLog) resourc
 	}
 }
 
-var testAccVpcFlowLogV1_basic = fmt.Sprintf(`
+var testAccVpcFlowLogV1Basic = fmt.Sprintf(`
 resource "opentelekomcloud_logtank_group_v2" "log_group1" {
   group_name  = "vpc_group"
 }
@@ -114,7 +116,7 @@ resource "opentelekomcloud_logtank_topic_v2" "log_topic1" {
 }
 
 resource "opentelekomcloud_vpc_v1" "vpc_1" {
-  name = "vpc_test"
+  name = "vpc_test_fl"
   cidr = "172.16.0.0/16"
 }
 
@@ -127,9 +129,9 @@ resource "opentelekomcloud_vpc_flow_log_v1" "flow_logl" {
   log_group_id  = opentelekomcloud_logtank_group_v2.log_group1.id
   log_topic_id  = opentelekomcloud_logtank_topic_v2.log_topic1.id
 }
-`, fl_name)
+`, flName)
 
-var testAccVpcFlowLogV1_update = fmt.Sprintf(`
+var testAccVpcFlowLogV1Update = fmt.Sprintf(`
 resource "opentelekomcloud_logtank_group_v2" "log_group1" {
   group_name  = "vpc_group"
 }
@@ -140,7 +142,7 @@ resource "opentelekomcloud_logtank_topic_v2" "log_topic1" {
 }
 
 resource "opentelekomcloud_vpc_v1" "vpc_1" {
-  name = "vpc_test"
+  name = "vpc_test_fl"
   cidr = "172.16.0.0/16"
 }
 
@@ -153,4 +155,4 @@ resource "opentelekomcloud_vpc_flow_log_v1" "flow_logl" {
   log_group_id  = opentelekomcloud_logtank_group_v2.log_group1.id
   log_topic_id  = opentelekomcloud_logtank_topic_v2.log_topic1.id
 }
-`, fl_update_name)
+`, flUpdateName)

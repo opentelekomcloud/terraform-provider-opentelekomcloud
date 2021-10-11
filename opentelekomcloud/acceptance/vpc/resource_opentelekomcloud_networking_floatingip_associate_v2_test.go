@@ -3,10 +3,13 @@ package acceptance
 import (
 	"fmt"
 	"testing"
+	"time"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 	golangsdk "github.com/opentelekomcloud/gophertelekomcloud"
+	th "github.com/opentelekomcloud/gophertelekomcloud/testhelper"
+	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/acceptance/common/quotas"
 
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/networking/v2/extensions/layer3/floatingips"
 
@@ -15,8 +18,15 @@ import (
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common/cfg"
 )
 
+const resourceFloatingIPAssName = "opentelekomcloud_networking_floatingip_associate_v2.fip_1"
+
 func TestAccNetworkingV2FloatingIPAssociate_basic(t *testing.T) {
 	var fip floatingips.FloatingIP
+	t.Parallel()
+	qts := vpcSubnetQuotas()
+	qts = append(qts, &quotas.ExpectedQuota{Q: quotas.FloatingIP, Count: 1})
+	th.AssertNoErr(t, quotas.AcquireMultipleQuotas(qts, 5*time.Second))
+	defer quotas.ReleaseMultipleQuotas(qts)
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:          func() { common.TestAccPreCheck(t) },
@@ -26,12 +36,9 @@ func TestAccNetworkingV2FloatingIPAssociate_basic(t *testing.T) {
 			{
 				Config: testAccNetworkingV2FloatingIPAssociateBasic,
 				Check: resource.ComposeTestCheckFunc(
-					TestAccCheckNetworkingV2FloatingIPExists(
-						"opentelekomcloud_networking_floatingip_associate_v2.fip_1", &fip),
-					resource.TestCheckResourceAttrPtr(
-						"opentelekomcloud_networking_floatingip_associate_v2.fip_1", "floating_ip", &fip.FloatingIP),
-					resource.TestCheckResourceAttrPtr(
-						"opentelekomcloud_networking_floatingip_associate_v2.fip_1", "port_id", &fip.PortID),
+					TestAccCheckNetworkingV2FloatingIPExists(resourceFloatingIPAssName, &fip),
+					resource.TestCheckResourceAttrPtr(resourceFloatingIPAssName, "floating_ip", &fip.FloatingIP),
+					resource.TestCheckResourceAttrPtr(resourceFloatingIPAssName, "port_id", &fip.PortID),
 				),
 			},
 		},
@@ -69,12 +76,12 @@ func testAccCheckNetworkingV2FloatingIPAssociateDestroy(s *terraform.State) erro
 
 const testAccNetworkingV2FloatingIPAssociateBasic = `
 resource "opentelekomcloud_networking_network_v2" "network_1" {
-  name = "network_1"
+  name = "network_1_eip_ass"
   admin_state_up = "true"
 }
 
 resource "opentelekomcloud_networking_subnet_v2" "subnet_1" {
-  name = "subnet_1"
+  name = "subnet_1_eip_ass"
   cidr = "192.168.199.0/24"
   ip_version = 4
   network_id = opentelekomcloud_networking_network_v2.network_1.id
@@ -86,7 +93,7 @@ resource "opentelekomcloud_networking_router_interface_v2" "router_interface_1" 
 }
 
 resource "opentelekomcloud_networking_router_v2" "router_1" {
-  name = "router_1"
+  name = "router_1_eip_ass"
   admin_state_up = "true"
 }
 

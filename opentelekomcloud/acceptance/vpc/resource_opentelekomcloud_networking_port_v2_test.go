@@ -3,6 +3,7 @@ package acceptance
 import (
 	"fmt"
 	"testing"
+	"time"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
@@ -10,6 +11,8 @@ import (
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/networking/v2/networks"
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/networking/v2/ports"
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/networking/v2/subnets"
+	th "github.com/opentelekomcloud/gophertelekomcloud/testhelper"
+	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/acceptance/common/quotas"
 
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/acceptance/common"
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/acceptance/env"
@@ -21,10 +24,17 @@ type testPortWithExtensions struct {
 	portsecurity.PortSecurityExt
 }
 
+const resourceNwPortName = "opentelekomcloud_networking_port_v2.port_1"
+
 func TestAccNetworkingV2Port_basic(t *testing.T) {
 	var network networks.Network
 	var port ports.Port
 	var subnet subnets.Subnet
+
+	t.Parallel()
+	qts := subnetQuotas()
+	th.AssertNoErr(t, quotas.AcquireMultipleQuotas(qts, 5*time.Second))
+	defer quotas.ReleaseMultipleQuotas(qts)
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:          func() { common.TestAccPreCheck(t) },
@@ -34,10 +44,37 @@ func TestAccNetworkingV2Port_basic(t *testing.T) {
 			{
 				Config: testAccNetworkingV2PortBasic,
 				Check: resource.ComposeTestCheckFunc(
-					TestAccCheckNetworkingV2SubnetExists("opentelekomcloud_networking_subnet_v2.subnet_1", &subnet),
-					TestAccCheckNetworkingV2NetworkExists("opentelekomcloud_networking_network_v2.network_1", &network),
-					testAccCheckNetworkingV2PortExists("opentelekomcloud_networking_port_v2.port_1", &port),
+					TestAccCheckNetworkingV2SubnetExists(resourceNwSubnetName, &subnet),
+					TestAccCheckNetworkingV2NetworkExists(resourceNwNetworkName, &network),
+					testAccCheckNetworkingV2PortExists(resourceNwPortName, &port),
 				),
+			},
+		},
+	})
+}
+
+func TestAccNetworkingV2Port_importBasic(t *testing.T) {
+	t.Parallel()
+	qts := subnetQuotas()
+	th.AssertNoErr(t, quotas.AcquireMultipleQuotas(qts, 5*time.Second))
+	defer quotas.ReleaseMultipleQuotas(qts)
+
+	resource.Test(t, resource.TestCase{
+		PreCheck:          func() { common.TestAccPreCheck(t) },
+		ProviderFactories: common.TestAccProviderFactories,
+		CheckDestroy:      testAccCheckNetworkingV2PortDestroy,
+		Steps: []resource.TestStep{
+			{
+				Config: testAccNetworkingV2PortBasic,
+			},
+
+			{
+				ResourceName:      resourceNwPortName,
+				ImportState:       true,
+				ImportStateVerify: true,
+				ImportStateVerifyIgnore: []string{
+					"fixed_ip",
+				},
 			},
 		},
 	})
@@ -47,6 +84,10 @@ func TestAccNetworkingV2Port_noip(t *testing.T) {
 	var network networks.Network
 	var port ports.Port
 	var subnet subnets.Subnet
+	t.Parallel()
+	qts := subnetQuotas()
+	th.AssertNoErr(t, quotas.AcquireMultipleQuotas(qts, 5*time.Second))
+	defer quotas.ReleaseMultipleQuotas(qts)
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:          func() { common.TestAccPreCheck(t) },
@@ -56,9 +97,9 @@ func TestAccNetworkingV2Port_noip(t *testing.T) {
 			{
 				Config: testAccNetworkingV2PortNoIP,
 				Check: resource.ComposeTestCheckFunc(
-					TestAccCheckNetworkingV2SubnetExists("opentelekomcloud_networking_subnet_v2.subnet_1", &subnet),
-					TestAccCheckNetworkingV2NetworkExists("opentelekomcloud_networking_network_v2.network_1", &network),
-					testAccCheckNetworkingV2PortExists("opentelekomcloud_networking_port_v2.port_1", &port),
+					TestAccCheckNetworkingV2SubnetExists(resourceNwSubnetName, &subnet),
+					TestAccCheckNetworkingV2NetworkExists(resourceNwNetworkName, &network),
+					testAccCheckNetworkingV2PortExists(resourceNwPortName, &port),
 					testAccCheckNetworkingV2PortCountFixedIPs(&port, 1),
 				),
 			},
@@ -70,6 +111,10 @@ func TestAccNetworkingV2Port_allowedAddressPairs(t *testing.T) {
 	var network networks.Network
 	var subnet subnets.Subnet
 	var vrrpPort1, vrrpPort2, instancePort ports.Port
+	t.Parallel()
+	qts := subnetQuotas()
+	th.AssertNoErr(t, quotas.AcquireMultipleQuotas(qts, 5*time.Second))
+	defer quotas.ReleaseMultipleQuotas(qts)
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:          func() { common.TestAccPreCheck(t) },
@@ -93,6 +138,10 @@ func TestAccNetworkingV2Port_allowedAddressPairs(t *testing.T) {
 func TestAccNetworkingV2Port_portSecurity_enabled(t *testing.T) {
 	var port testPortWithExtensions
 	resourceName := "opentelekomcloud_networking_port_v2.port_1"
+	t.Parallel()
+	qts := subnetQuotas()
+	th.AssertNoErr(t, quotas.AcquireMultipleQuotas(qts, 5*time.Second))
+	defer quotas.ReleaseMultipleQuotas(qts)
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:          func() { common.TestAccPreCheck(t) },
@@ -123,6 +172,10 @@ func TestAccNetworkingV2Port_timeout(t *testing.T) {
 	var network networks.Network
 	var port ports.Port
 	var subnet subnets.Subnet
+	t.Parallel()
+	qts := subnetQuotas()
+	th.AssertNoErr(t, quotas.AcquireMultipleQuotas(qts, 5*time.Second))
+	defer quotas.ReleaseMultipleQuotas(qts)
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:          func() { common.TestAccPreCheck(t) },
