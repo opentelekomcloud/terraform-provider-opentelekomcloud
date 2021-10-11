@@ -26,7 +26,6 @@ func TestAccNetworkingV2FloatingIPAssociate_basic(t *testing.T) {
 	qts := vpcSubnetQuotas()
 	qts = append(qts, &quotas.ExpectedQuota{Q: quotas.FloatingIP, Count: 1})
 	th.AssertNoErr(t, quotas.AcquireMultipleQuotas(qts, 5*time.Second))
-	t.Log("")
 	defer quotas.ReleaseMultipleQuotas(qts)
 
 	resource.Test(t, resource.TestCase{
