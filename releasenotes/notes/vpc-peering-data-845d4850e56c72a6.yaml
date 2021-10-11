@@ -1,0 +1,4 @@
+---
+fixes:
+  - |
+    **[VPC]** Fix not working search by `id` in `data_source/opentelekomcloud_vpc_peering_connection_v2` (`#1455 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/1455>`_)
