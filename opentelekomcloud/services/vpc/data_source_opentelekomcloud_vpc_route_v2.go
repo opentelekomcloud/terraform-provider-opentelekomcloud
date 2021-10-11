@@ -65,7 +65,7 @@ func dataSourceVpcRouteV2Read(_ context.Context, d *schema.ResourceData, meta in
 		Destination: d.Get("destination").(string),
 		VPC_ID:      d.Get("vpc_id").(string),
 		Tenant_Id:   d.Get("tenant_id").(string),
-		RouteID:     d.Id(),
+		RouteID:     d.Get("id").(string), // d.Id() will return an empty string
 	}
 
 	pages, err := routes.List(vpcRouteClient, listOpts).AllPages()
@@ -87,17 +87,17 @@ func dataSourceVpcRouteV2Read(_ context.Context, d *schema.ResourceData, meta in
 			" Please try a more specific search criteria")
 	}
 
-	Route := refinedRoutes[0]
+	route := refinedRoutes[0]
 
-	log.Printf("[INFO] Retrieved Vpc Route using given filter %s: %+v", Route.RouteID, Route)
-	d.SetId(Route.RouteID)
+	log.Printf("[INFO] Retrieved Vpc Route using given filter %s: %+v", route.RouteID, route)
+	d.SetId(route.RouteID)
 
 	mErr := multierror.Append(
-		d.Set("type", Route.Type),
-		d.Set("nexthop", Route.NextHop),
-		d.Set("destination", Route.Destination),
-		d.Set("tenant_id", Route.Tenant_Id),
-		d.Set("vpc_id", Route.VPC_ID),
+		d.Set("type", route.Type),
+		d.Set("nexthop", route.NextHop),
+		d.Set("destination", route.Destination),
+		d.Set("tenant_id", route.Tenant_Id),
+		d.Set("vpc_id", route.VPC_ID),
 		d.Set("region", config.GetRegion(d)),
 	)
 	if err := mErr.ErrorOrNil(); err != nil {
