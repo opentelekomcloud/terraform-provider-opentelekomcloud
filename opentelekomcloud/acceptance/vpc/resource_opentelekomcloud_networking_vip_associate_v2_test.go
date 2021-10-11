@@ -54,7 +54,7 @@ func TestAccNetworkingV2VIPAssociate_basic(t *testing.T) {
 }
 
 // testAccCheckNetworkingV2VIPAssociateDestroy checks destroy.
-func testAccCheckNetworkingV2VIPAssociateDestroy(s *terraform.State) error {
+func testAccCheckNetworkingV2VIPAssociateDestroy(s *terraform.State) error { // nolint:unused
 	config := common.TestAccProvider.Meta().(*cfg.Config)
 	networkingClient, err := config.NetworkingV2Client(env.OS_REGION_NAME)
 	if err != nil {
@@ -108,7 +108,7 @@ func testAccCheckNetworkingV2VIPAssociateDestroy(s *terraform.State) error {
 	return nil
 }
 
-func testAccCheckNetworkingV2VIPAssociateAssociated(p *ports.Port, vip *ports.Port) resource.TestCheckFunc {
+func testAccCheckNetworkingV2VIPAssociateAssociated(p *ports.Port, vip *ports.Port) resource.TestCheckFunc { // nolint:unused
 	return func(s *terraform.State) error {
 		config := common.TestAccProvider.Meta().(*cfg.Config)
 		networkingClient, err := config.NetworkingV2Client(env.OS_REGION_NAME)

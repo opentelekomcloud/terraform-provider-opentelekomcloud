@@ -50,7 +50,6 @@ func TestAccNetworkingV2SecGroupRule_basic(t *testing.T) {
 }
 
 func TestAccNetworkingV2SecGroupRule_importBasic(t *testing.T) {
-
 	resource.Test(t, resource.TestCase{
 		PreCheck:          func() { common.TestAccPreCheck(t) },
 		ProviderFactories: common.TestAccProviderFactories,
