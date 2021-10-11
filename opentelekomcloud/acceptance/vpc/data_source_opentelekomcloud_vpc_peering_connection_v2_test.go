@@ -19,7 +19,6 @@ const (
 )
 
 func TestAccVpcPeeringConnectionV2DataSource_basic(t *testing.T) {
-	t.Skip("")
 	t.Parallel()
 	th.AssertNoErr(t, quotas.Router.AcquireMultiple(3))
 	defer quotas.Router.ReleaseMultiple(3)
