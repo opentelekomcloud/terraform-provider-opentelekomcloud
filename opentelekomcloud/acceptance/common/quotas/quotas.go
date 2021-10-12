@@ -132,6 +132,25 @@ type ExpectedQuota struct {
 	Count int64
 }
 
+// X multiples quota returning new `ExpectedQuota` instance
+func (q ExpectedQuota) X(multiplier int64) *ExpectedQuota {
+	return &ExpectedQuota{
+		Q:     q.Q,
+		Count: q.Count * multiplier,
+	}
+}
+
+type MultipleQuotas []*ExpectedQuota
+
+// X multiples quota returning new `MultipleQuotas` instance
+func (q MultipleQuotas) X(multiplier int64) MultipleQuotas {
+	newOne := make(MultipleQuotas, len(q))
+	for i, q := range q {
+		newOne[i] = q.X(multiplier)
+	}
+	return newOne
+}
+
 // AcquireMultipleQuotas tries to acquire all given quotas, reverting on failure
 func AcquireMultipleQuotas(e []*ExpectedQuota, interval time.Duration) error {
 	// validate if all Count values of ExpectQuota are correct

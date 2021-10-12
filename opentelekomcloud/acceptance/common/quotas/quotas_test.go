@@ -138,3 +138,19 @@ func TestQuota_MultipleUnreleased(t *testing.T) {
 	err := AcquireMultipleQuotas(qts, 0)
 	th.AssertEquals(t, namelessTimeout, err.Error())
 }
+
+func TestMultipleQuotas(t *testing.T) {
+	q1, _ := NewQuotaWithTimeout(3, 2*time.Millisecond)
+	q2, _ := NewQuotaWithTimeout(3, 2*time.Millisecond)
+	qtsOrig := MultipleQuotas{{q1, 1}, {q2, 1}}
+
+	qts := qtsOrig.X(2)
+
+	th.AssertEquals(t, qts[0].Q, qtsOrig[0].Q)
+	th.AssertEquals(t, qts[0].Count, qtsOrig[0].Count*2)
+
+	th.AssertNoErr(t, AcquireMultipleQuotas(qts, 0))     // -2
+	th.AssertNoErr(t, AcquireMultipleQuotas(qtsOrig, 0)) // -1
+	err := AcquireMultipleQuotas(qtsOrig, 0)
+	th.AssertEquals(t, namelessTimeout, err.Error())
+}
