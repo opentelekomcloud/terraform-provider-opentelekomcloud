@@ -186,7 +186,7 @@ func resourceWafDomainV1Create(ctx context.Context, d *schema.ResourceData, meta
 	config := meta.(*cfg.Config)
 	client, err := config.WafV1Client(config.GetRegion(d))
 	if err != nil {
-		return fmterr.Errorf(wafClientError, err)
+		return fmterr.Errorf(WafClientError, err)
 	}
 
 	var hosts []string
@@ -249,7 +249,7 @@ func resourceWafDomainV1Read(_ context.Context, d *schema.ResourceData, meta int
 	config := meta.(*cfg.Config)
 	client, err := config.WafV1Client(config.GetRegion(d))
 	if err != nil {
-		return fmterr.Errorf(wafClientError, err)
+		return fmterr.Errorf(WafClientError, err)
 	}
 	n, err := domains.Get(client, d.Id()).Extract()
 
@@ -308,7 +308,7 @@ func resourceWafDomainV1Update(ctx context.Context, d *schema.ResourceData, meta
 	config := meta.(*cfg.Config)
 	client, err := config.WafV1Client(config.GetRegion(d))
 	if err != nil {
-		return fmterr.Errorf(wafClientError, err)
+		return fmterr.Errorf(WafClientError, err)
 	}
 	var updateOpts domains.UpdateOpts
 
@@ -358,7 +358,7 @@ func resourceWafDomainV1Delete(_ context.Context, d *schema.ResourceData, meta i
 	config := meta.(*cfg.Config)
 	client, err := config.WafV1Client(config.GetRegion(d))
 	if err != nil {
-		return fmterr.Errorf(wafClientError, err)
+		return fmterr.Errorf(WafClientError, err)
 	}
 
 	if err := domains.Delete(client, d.Id()).ExtractErr(); err != nil {
