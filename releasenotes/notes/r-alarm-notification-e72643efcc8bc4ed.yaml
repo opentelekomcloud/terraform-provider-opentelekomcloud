@@ -1,0 +1,4 @@
+---
+features:
+  - |
+    **New Resource:** ``opentelekomcloud_waf_alarm_notification_v1`` (`#1458 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/1458>`_)
