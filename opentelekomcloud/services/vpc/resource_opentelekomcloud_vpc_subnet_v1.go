@@ -122,7 +122,7 @@ func resourceVpcSubnetV1Create(ctx context.Context, d *schema.ResourceData, meta
 
 	primaryDNS := d.Get("primary_dns").(string)
 	secondaryDNS := d.Get("secondary_dns").(string)
-	dnsList := common.ExpandStringList(d.Get("dns_list").([]interface{}))
+	dnsList := common.ExpandToStringSlice(d.Get("dns_list").([]interface{}))
 	if primaryDNS == "" && secondaryDNS == "" && len(dnsList) == 0 {
 		primaryDNS = defaultDNS[0]
 		secondaryDNS = defaultDNS[1]
@@ -270,7 +270,7 @@ func resourceVpcSubnetV1Update(ctx context.Context, d *schema.ResourceData, meta
 		updateOpts.SecondaryDNS = d.Get("secondary_dns").(string)
 	}
 	if d.HasChange("dns_list") {
-		updateOpts.DNSList = common.ExpandStringList(d.Get("dns_list").([]interface{}))
+		updateOpts.DNSList = common.ExpandToStringSlice(d.Get("dns_list").([]interface{}))
 	}
 	if d.HasChange("dhcp_enable") {
 		enableDHCP := d.Get("dhcp_enable").(bool)
