@@ -8,6 +8,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/waf/v1/alarmnotifications"
+	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common"
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common/cfg"
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common/fmterr"
 )
@@ -60,15 +61,6 @@ func ResourceWafAlarmNotificationV1() *schema.Resource {
 	}
 }
 
-func resourceWAFThreat(d *schema.ResourceData) []string {
-	threatRaw := d.Get("threat").(*schema.Set).List()
-	var threat []string
-	for _, v := range threatRaw {
-		threat = append(threat, v.(string))
-	}
-	return threat
-}
-
 func resourceWafAlarmNotificationV1Create(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*cfg.Config)
 	client, err := config.WafV1Client(config.GetRegion(d))
@@ -87,7 +79,7 @@ func resourceWafAlarmNotificationV1Create(ctx context.Context, d *schema.Resourc
 		TopicURN:      &topicURN,
 		SendFrequency: d.Get("send_frequency").(int),
 		Times:         d.Get("times").(int),
-		Threat:        resourceWAFThreat(d),
+		Threat:        common.ExpandToStringSlice(d.Get("threat").(*schema.Set).List()),
 		Locale:        d.Get("locale").(string),
 	}
 
@@ -113,17 +105,12 @@ func resourceWafAlarmNotificationV1Read(_ context.Context, d *schema.ResourceDat
 		return diag.FromErr(err)
 	}
 
-	var threat []string
-	for _, v := range alarmNotification.Threat {
-		threat = append(threat, v)
-	}
-
 	mErr := multierror.Append(
 		d.Set("enabled", alarmNotification.Enabled),
 		d.Set("topic_urn", alarmNotification.TopicURN),
 		d.Set("send_frequency", alarmNotification.SendFrequency),
 		d.Set("times", alarmNotification.Times),
-		d.Set("threat", threat),
+		d.Set("threat", alarmNotification.Threat),
 		d.Set("locale", alarmNotification.Locale),
 	)
 
@@ -148,7 +135,7 @@ func resourceWafAlarmNotificationV1Update(ctx context.Context, d *schema.Resourc
 		TopicURN:      &topicURN,
 		SendFrequency: d.Get("send_frequency").(int),
 		Times:         d.Get("times").(int),
-		Threat:        resourceWAFThreat(d),
+		Threat:        common.ExpandToStringSlice(d.Get("threat").(*schema.Set).List()),
 		Locale:        d.Get("locale").(string),
 	}
 
