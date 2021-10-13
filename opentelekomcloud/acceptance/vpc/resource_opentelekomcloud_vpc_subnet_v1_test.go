@@ -117,6 +117,16 @@ func TestAccVpcSubnetV1DnsList(t *testing.T) {
 				Config: testAccVpcSubnetV1DnsList,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckVpcSubnetV1Exists(resourceVPCSubnetName, &subnet),
+					resource.TestCheckResourceAttr(resourceVPCSubnetName, "dns_list.0", "100.125.4.25"),
+					resource.TestCheckResourceAttr(resourceVPCSubnetName, "dns_list.1", "8.8.8.8"),
+				),
+			},
+			{
+				Config: testAccVpcSubnetV1DnsListUpdate,
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckVpcSubnetV1Exists(resourceVPCSubnetName, &subnet),
+					resource.TestCheckResourceAttr(resourceVPCSubnetName, "dns_list.0", "100.125.4.25"),
+					resource.TestCheckResourceAttr(resourceVPCSubnetName, "dns_list.1", "1.1.1.1"),
 				),
 			},
 		},
@@ -269,6 +279,20 @@ resource "opentelekomcloud_vpc_subnet_v1" "subnet_1" {
   cidr       = cidrsubnet(opentelekomcloud_vpc_v1.vpc.cidr, 8, 0)
   gateway_ip = cidrhost(cidrsubnet(opentelekomcloud_vpc_v1.vpc.cidr, 8, 0), 1)
   dns_list   = ["100.125.4.25", "8.8.8.8"]
+}
+`
+	testAccVpcSubnetV1DnsListUpdate = `
+resource "opentelekomcloud_vpc_v1" "vpc" {
+  name = "vpc_name_dns"
+  cidr = "192.168.0.0/16"
+}
+
+resource "opentelekomcloud_vpc_subnet_v1" "subnet_1" {
+  name       = "subnet_name"
+  vpc_id     = opentelekomcloud_vpc_v1.vpc.id
+  cidr       = cidrsubnet(opentelekomcloud_vpc_v1.vpc.cidr, 8, 0)
+  gateway_ip = cidrhost(cidrsubnet(opentelekomcloud_vpc_v1.vpc.cidr, 8, 0), 1)
+  dns_list   = ["100.125.4.25", "1.1.1.1"]
 }
 `
 )
