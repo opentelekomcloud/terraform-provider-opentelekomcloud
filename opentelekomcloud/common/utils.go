@@ -151,7 +151,6 @@ func ExpandToStringSlice(v []interface{}) []string {
 			s[i] = strVal
 		}
 	}
-
 	return s
 }
 
