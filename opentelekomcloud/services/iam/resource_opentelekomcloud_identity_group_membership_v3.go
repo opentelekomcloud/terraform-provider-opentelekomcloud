@@ -49,7 +49,7 @@ func resourceIdentityGroupMembershipV3Create(ctx context.Context, d *schema.Reso
 	}
 
 	group := d.Get("group").(string)
-	userList := common.ExpandStringList(d.Get("users").(*schema.Set).List())
+	userList := common.ExpandToStringSlice(d.Get("users").(*schema.Set).List())
 
 	if err := addUsersToGroup(identityClient, group, userList); err != nil {
 		return diag.FromErr(err)
@@ -117,8 +117,8 @@ func resourceIdentityGroupMembershipV3Update(ctx context.Context, d *schema.Reso
 
 		os := o.(*schema.Set)
 		ns := n.(*schema.Set)
-		remove := common.ExpandStringList(os.Difference(ns).List())
-		add := common.ExpandStringList(ns.Difference(os).List())
+		remove := common.ExpandToStringSlice(os.Difference(ns).List())
+		add := common.ExpandToStringSlice(ns.Difference(os).List())
 
 		if err := removeUsersFromGroup(identityClient, group, remove); err != nil {
 			return fmterr.Errorf("error update user-group-membership: %s", err)
@@ -140,9 +140,9 @@ func resourceIdentityGroupMembershipV3Delete(_ context.Context, d *schema.Resour
 	}
 
 	group := d.Get("group").(string)
-	users := common.ExpandStringList(d.Get("users").(*schema.Set).List())
+	userSlice := common.ExpandToStringSlice(d.Get("users").(*schema.Set).List())
 
-	if err := removeUsersFromGroup(identityClient, group, users); err != nil {
+	if err := removeUsersFromGroup(identityClient, group, userSlice); err != nil {
 		return fmterr.Errorf("error delete user-group-membership: %s", err)
 	}
 
