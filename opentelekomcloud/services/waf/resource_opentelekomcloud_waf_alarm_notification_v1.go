@@ -40,7 +40,7 @@ func ResourceWafAlarmNotificationV1() *schema.Resource {
 				Required:     true,
 				ValidateFunc: validation.IntAtLeast(1),
 			},
-			"threats": {
+			"threat": {
 				Type:     schema.TypeSet,
 				Required: true,
 				Elem: &schema.Schema{
@@ -60,13 +60,13 @@ func ResourceWafAlarmNotificationV1() *schema.Resource {
 	}
 }
 
-func resourceWAFThreats(d *schema.ResourceData) []string {
-	threatsRaw := d.Get("threats").(*schema.Set).List()
-	var threats []string
-	for _, v := range threatsRaw {
-		threats = append(threats, v.(string))
+func resourceWAFThreat(d *schema.ResourceData) []string {
+	threatRaw := d.Get("threat").(*schema.Set).List()
+	var threat []string
+	for _, v := range threatRaw {
+		threat = append(threat, v.(string))
 	}
-	return threats
+	return threat
 }
 
 func resourceWafAlarmNotificationV1Create(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
@@ -87,7 +87,7 @@ func resourceWafAlarmNotificationV1Create(ctx context.Context, d *schema.Resourc
 		TopicURN:      &topicURN,
 		SendFrequency: d.Get("send_frequency").(int),
 		Times:         d.Get("times").(int),
-		Threat:        resourceWAFThreats(d),
+		Threat:        resourceWAFThreat(d),
 		Locale:        d.Get("locale").(string),
 	}
 
@@ -113,9 +113,9 @@ func resourceWafAlarmNotificationV1Read(_ context.Context, d *schema.ResourceDat
 		return diag.FromErr(err)
 	}
 
-	var threats []string
+	var threat []string
 	for _, v := range alarmNotification.Threat {
-		threats = append(threats, v)
+		threat = append(threat, v)
 	}
 
 	mErr := multierror.Append(
@@ -123,7 +123,7 @@ func resourceWafAlarmNotificationV1Read(_ context.Context, d *schema.ResourceDat
 		d.Set("topic_urn", alarmNotification.TopicURN),
 		d.Set("send_frequency", alarmNotification.SendFrequency),
 		d.Set("times", alarmNotification.Times),
-		d.Set("threats", threats),
+		d.Set("threat", threat),
 		d.Set("locale", alarmNotification.Locale),
 	)
 
@@ -148,7 +148,7 @@ func resourceWafAlarmNotificationV1Update(ctx context.Context, d *schema.Resourc
 		TopicURN:      &topicURN,
 		SendFrequency: d.Get("send_frequency").(int),
 		Times:         d.Get("times").(int),
-		Threat:        resourceWAFThreats(d),
+		Threat:        resourceWAFThreat(d),
 		Locale:        d.Get("locale").(string),
 	}
 

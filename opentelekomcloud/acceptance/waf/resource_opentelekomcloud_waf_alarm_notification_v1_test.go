@@ -113,7 +113,7 @@ resource "opentelekomcloud_waf_alarm_notification_v1" "notification_1" {
   topic_urn      = opentelekomcloud_smn_topic_v2.topic_1.id
   send_frequency = 30
   times          = 200
-  threats        = ["cc", "cmdi"]
+  threat         = ["cc", "cmdi"]
 }
 `
 
@@ -127,6 +127,6 @@ resource "opentelekomcloud_waf_alarm_notification_v1" "notification_1" {
   topic_urn      = opentelekomcloud_smn_topic_v2.topic_1.id
   send_frequency = 15
   times          = 100
-  threats        = ["all"]
+  threat         = ["all"]
 }
 `
