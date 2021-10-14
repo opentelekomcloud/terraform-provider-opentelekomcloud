@@ -1,3 +1,5 @@
+SHELL=/bin/bash
+
 export PATH:=/usr/local/go/bin:$(PATH)
 TEST?=$$(go list ./...)
 GOFMT_FILES?=$$(find . -name '*.go')
@@ -9,10 +11,10 @@ build: fmtcheck
 	go install
 
 release:
-	goreleaser release
+	goreleaser release --release-notes <(./scripts/changelog-link.sh)
 
 snapshot:
-	goreleaser release --snapshot --parallelism 2 --rm-dist
+	goreleaser release --snapshot --parallelism 2 --rm-dist --release-notes <(./scripts/changelog-link.sh)
 
 test: fmtcheck
 	go test -v ./...
