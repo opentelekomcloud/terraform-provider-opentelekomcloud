@@ -41,6 +41,7 @@ import (
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/services/swr"
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/services/vbs"
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/services/vpc"
+	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/services/vpcep"
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/services/vpn"
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/services/waf"
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/version"
@@ -410,6 +411,7 @@ func Provider() *schema.Provider {
 			"opentelekomcloud_vpc_v1":                             vpc.ResourceVirtualPrivateCloudV1(),
 			"opentelekomcloud_vpc_peering_connection_v2":          vpc.ResourceVpcPeeringConnectionV2(),
 			"opentelekomcloud_vpc_peering_connection_accepter_v2": vpc.ResourceVpcPeeringConnectionAccepterV2(),
+			"opentelekomcloud_vpcep_service_v1":                   vpcep.ResourceVPCEPServiceV1(),
 			"opentelekomcloud_vpc_route_v2":                       vpc.ResourceVPCRouteV2(),
 			"opentelekomcloud_vpc_subnet_v1":                      vpc.ResourceVpcSubnetV1(),
 			"opentelekomcloud_vpc_flow_log_v1":                    vpc.ResourceVpcFlowLogV1(),
