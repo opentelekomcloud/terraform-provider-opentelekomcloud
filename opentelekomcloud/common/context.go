@@ -7,7 +7,9 @@ import (
 	golangsdk "github.com/opentelekomcloud/gophertelekomcloud"
 )
 
-func CtxWithClient(parent context.Context, client *golangsdk.ServiceClient, keyClient string) context.Context {
+type ClientCtxKey string
+
+func CtxWithClient(parent context.Context, client *golangsdk.ServiceClient, keyClient ClientCtxKey) context.Context {
 	return context.WithValue(parent, keyClient, client)
 }
 
