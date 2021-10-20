@@ -9,10 +9,10 @@ import (
 	"strings"
 
 	ver "github.com/hashicorp/go-version"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	golangsdk "github.com/opentelekomcloud/gophertelekomcloud"
-
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common/cfg"
 )
 
@@ -188,3 +188,8 @@ func StringInSlice(str string, slice []string) bool {
 func BuildComponentID(parts ...string) string {
 	return strings.Join(parts, "/")
 }
+
+var (
+	DataSourceTooFewDiag  = diag.Errorf("your query returned no results. Please change your search criteria and try again.")
+	DataSourceTooManyDiag = diag.Errorf("your query returned more than one result. Please change your search criteria and try again.")
+)
