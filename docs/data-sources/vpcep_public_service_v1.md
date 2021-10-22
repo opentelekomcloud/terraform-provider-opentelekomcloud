@@ -2,7 +2,7 @@
 subcategory: "VPC Endpoint (VPCEP)"
 ---
 
-# opentelekomcloud_vpcep_service_v1
+# opentelekomcloud_vpcep_public_service_v1
 
 Use this data source to get details about a specific VPCEP public service.
 
