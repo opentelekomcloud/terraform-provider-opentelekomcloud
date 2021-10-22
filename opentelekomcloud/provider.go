@@ -283,6 +283,7 @@ func Provider() *schema.Provider {
 			"opentelekomcloud_vpc_v1":                          vpc.DataSourceVirtualPrivateCloudVpcV1(),
 			"opentelekomcloud_vpc_bandwidth":                   vpc.DataSourceBandWidth(),
 			"opentelekomcloud_vpcep_public_service_v1":         vpcep.DataSourceVPCEPPublicServiceV1(),
+			"opentelekomcloud_vpcep_service_v1":                vpcep.DataSourceVPCEPServiceV1(),
 			"opentelekomcloud_vbs_backup_v2":                   vbs.DataSourceVBSBackupV2(),
 			"opentelekomcloud_vbs_backup_policy_v2":            vbs.DataSourceVBSBackupPolicyV2(),
 			"opentelekomcloud_vpc_peering_connection_v2":       vpc.DataSourceVpcPeeringConnectionV2(),
