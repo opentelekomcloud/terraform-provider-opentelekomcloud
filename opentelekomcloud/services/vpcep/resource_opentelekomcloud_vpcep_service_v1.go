@@ -66,7 +66,7 @@ func ResourceVPCEPServiceV1() *schema.Resource {
 			"approval_enabled": {
 				Type:     schema.TypeBool,
 				Optional: true,
-				Computed: true,
+				Default:  true,
 			},
 			"service_type": {
 				Type:     schema.TypeString,
@@ -145,21 +145,19 @@ func resourceVPCEPServiceCreate(ctx context.Context, d *schema.ResourceData, met
 		return fmterr.Errorf(ErrClientCreate, err)
 	}
 
+	approvalEnabled := d.Get("approval_enabled").(bool)
 	opts := &services.CreateOpts{
-		PortID:      d.Get("port_id").(string),
-		PoolID:      d.Get("pool_id").(string),
-		VIPPortID:   d.Get("vip_port_id").(string),
-		ServiceName: d.Get("name").(string),
-		RouterID:    d.Get("vpc_id").(string),
-		ServiceType: services.ServiceType(d.Get("service_type").(string)),
-		ServerType:  services.ServerType(d.Get("server_type").(string)),
-		Ports:       getPorts(d),
-		TCPProxy:    d.Get("tcp_proxy").(string),
-		Tags:        common.ExpandResourceTags(d.Get("tags").(map[string]interface{})),
-	}
-	if v, ok := d.GetOk("approval_enabled"); ok {
-		enabled := v.(bool)
-		opts.ApprovalEnabled = &enabled
+		PortID:          d.Get("port_id").(string),
+		PoolID:          d.Get("pool_id").(string),
+		VIPPortID:       d.Get("vip_port_id").(string),
+		ServiceName:     d.Get("name").(string),
+		RouterID:        d.Get("vpc_id").(string),
+		ApprovalEnabled: &approvalEnabled,
+		ServiceType:     services.ServiceType(d.Get("service_type").(string)),
+		ServerType:      services.ServerType(d.Get("server_type").(string)),
+		Ports:           getPorts(d),
+		TCPProxy:        d.Get("tcp_proxy").(string),
+		Tags:            common.ExpandResourceTags(d.Get("tags").(map[string]interface{})),
 	}
 
 	svc, err := services.Create(client, opts).Extract()

@@ -143,6 +143,8 @@ resource "opentelekomcloud_vpcep_service_v1" "service" {
   vpc_id      = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.vpc_id
   server_type = "LB"
 
+  approval_enabled = false
+
   port {
     client_port = 80
     server_port = 8080
@@ -169,7 +171,7 @@ resource "opentelekomcloud_vpcep_service_v1" "service" {
   vpc_id      = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.vpc_id
   server_type = "LB"
 
-  approval_enabled = false
+  approval_enabled = true
 
   port {
     client_port = 80
