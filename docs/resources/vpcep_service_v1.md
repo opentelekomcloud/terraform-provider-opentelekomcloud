@@ -116,5 +116,5 @@ In addition to all arguments above, the following attributes are exported:
 VPC endpoint service can be imported using the `id`, e.g.
 
 ```sh
-terraform import opentelekomcloud_lb_loadbalancer_v2.service 71ba78a2-d847-4882-8fd0-42c5854c1cbc
+terraform import opentelekomcloud_vpcep_service_v1.service 71ba78a2-d847-4882-8fd0-42c5854c1cbc
 ```
