@@ -12,6 +12,7 @@ import (
 const dataSourcePublicService = "data.opentelekomcloud_vpcep_public_service_v1.obs"
 
 func TestDataSourcePublicService(t *testing.T) {
+	t.Parallel()
 	resource.Test(t, resource.TestCase{
 		PreCheck:          func() { common.TestAccPreCheck(t) },
 		ProviderFactories: common.TestAccProviderFactories,
