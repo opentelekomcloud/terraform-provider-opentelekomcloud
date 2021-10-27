@@ -562,19 +562,9 @@ func resourceCCENodePoolV3Import(ctx context.Context, d *schema.ResourceData, me
 	}
 	clusterID := parts[0]
 	nodePool := parts[1]
-
 	d.SetId(nodePool)
 	if err := d.Set("cluster_id", clusterID); err != nil {
 		return nil, err
 	}
-
-	results := make([]*schema.ResourceData, 1)
-
-	if diagRead := resourceCCENodePoolV3Read(ctx, d, meta); diagRead.HasError() {
-		return nil, fmt.Errorf("error reading opentelekomcloud_cce_node_pool_v3 %s: %s", d.Id(), diagRead[0].Summary)
-	}
-
-	results[0] = d
-
-	return results, nil
+	return schema.ImportStatePassthroughContext(ctx, d, meta)
 }

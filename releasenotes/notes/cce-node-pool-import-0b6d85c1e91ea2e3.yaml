@@ -1,0 +1,4 @@
+---
+fixes:
+  - |
+    **[CCE]** Fix import crash in ``resource/opentelekomcloud_cce_node_pool_v3`` (`#1478 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/1478>`_)
