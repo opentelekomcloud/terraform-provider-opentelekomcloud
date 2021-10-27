@@ -215,6 +215,7 @@ resource "opentelekomcloud_cce_cluster_v3" "cluster_1" {
   subnet_id               = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.network_id
   container_network_type  = "overlay_l2"
   kubernetes_svc_ip_range = "10.247.0.0/16"
+  ignore_addons           = true
 }`, common.DataSourceSubnet, clusterName)
 
 	testAccCCEClusterV3Update = fmt.Sprintf(`
@@ -229,6 +230,7 @@ resource "opentelekomcloud_cce_cluster_v3" "cluster_1" {
   container_network_type  = "overlay_l2"
   description             = "new description"
   kubernetes_svc_ip_range = "10.247.0.0/16"
+  ignore_addons           = true
 }`, common.DataSourceSubnet, clusterName)
 
 	testAccCCEClusterV3Timeout = fmt.Sprintf(`
