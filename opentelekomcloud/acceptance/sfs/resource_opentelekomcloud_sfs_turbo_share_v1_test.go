@@ -153,7 +153,7 @@ resource "opentelekomcloud_sfs_turbo_share_v1" "sfs-turbo" {
   vpc_id      = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.vpc_id
   subnet_id   = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.network_id
 
-  security_group_id = data.opentelekomcloud_networking_secgroup_v2.default_secgroup
+  security_group_id = data.opentelekomcloud_networking_secgroup_v2.default_secgroup.id
   availability_zone = "%s"
 }
 `, common.DataSourceSecGroupDefault, common.DataSourceSubnet, shareName, env.OS_AVAILABILITY_ZONE)
