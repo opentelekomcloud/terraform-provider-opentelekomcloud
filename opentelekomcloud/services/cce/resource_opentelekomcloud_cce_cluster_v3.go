@@ -258,6 +258,11 @@ func ResourceCCEClusterV3() *schema.Resource {
 				Optional: true,
 				ForceNew: true,
 			},
+			"ignore_addons": {
+				Type:          schema.TypeBool,
+				Optional:      true,
+				ConflictsWith: []string{"no_addons"},
+			},
 			"installed_addons": {
 				Type:     schema.TypeSet,
 				Computed: true,
@@ -389,13 +394,14 @@ func resourceCCEClusterV3Create(ctx context.Context, d *schema.ResourceData, met
 	}
 	d.SetId(create.Metadata.Id)
 
-	if err := waitForInstalledAddons(ctx, d, config); err != nil {
-		return fmterr.Errorf("error waiting for default addons to install")
-	}
-
-	if d.Get("no_addons").(bool) {
-		if err := removeAddons(ctx, d, config); err != nil {
-			return diag.FromErr(err)
+	if ignore := d.Get("ignore_addons").(bool); !ignore {
+		if err := waitForInstalledAddons(ctx, d, config); err != nil {
+			return fmterr.Errorf("error waiting for default addons to install")
+		}
+		if d.Get("no_addons").(bool) {
+			if err := removeAddons(ctx, d, config); err != nil {
+				return diag.FromErr(err)
+			}
 		}
 	}
 
@@ -486,16 +492,18 @@ func resourceCCEClusterV3Read(_ context.Context, d *schema.ResourceData, meta in
 		return diag.FromErr(err)
 	}
 
-	instances, err := listInstalledAddons(d, config)
-	if err != nil {
-		return fmterr.Errorf("error listing installed addons: %w", err)
-	}
-	installedAddons := make([]string, len(instances.Items))
-	for i, instance := range instances.Items {
-		installedAddons[i] = instance.Metadata.ID
-	}
-	if err := d.Set("installed_addons", installedAddons); err != nil {
-		return fmterr.Errorf("error setting installed addons: %w", err)
+	if ignore := d.Get("ignore_addons").(bool); !ignore {
+		instances, err := listInstalledAddons(d, config)
+		if err != nil {
+			return fmterr.Errorf("error listing installed addons: %w", err)
+		}
+		installedAddons := make([]string, len(instances.Items))
+		for i, instance := range instances.Items {
+			installedAddons[i] = instance.Metadata.ID
+		}
+		if err := d.Set("installed_addons", installedAddons); err != nil {
+			return fmterr.Errorf("error setting installed addons: %w", err)
+		}
 	}
 
 	nwV2Client, err := config.NetworkingV2Client(config.GetRegion(d))
