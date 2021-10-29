@@ -1,4 +1,4 @@
 ---
 features:
   - |
-    **New Data Source:** ``opentelekomcloud_vpcep_service_v1``
+    **New Data Source:** ``opentelekomcloud_vpcep_service_v1`` (`#1470 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/1470>`_)
