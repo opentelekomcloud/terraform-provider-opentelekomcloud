@@ -1,4 +1,4 @@
-package elb
+package v2
 
 import (
 	"context"
@@ -402,5 +402,3 @@ func waitForLBV2L7Rule(ctx context.Context, lbClient *golangsdk.ServiceClient, p
 
 	return nil
 }
-
-const classicLBDeprecated = "Classic load balancers are no longer provided. Please use elastic load balancers instead."
