@@ -22,7 +22,8 @@ import (
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/services/dms"
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/services/dns"
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/services/ecs"
-	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/services/elb"
+	elbv1 "github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/services/elb/v1"
+	elbv2 "github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/services/elb/v2"
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/services/evs"
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/services/fw"
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/services/iam"
@@ -332,10 +333,10 @@ func Provider() *schema.Provider {
 			"opentelekomcloud_dms_instance_v1":                    dms.ResourceDmsInstancesV1(),
 			"opentelekomcloud_dms_queue_v1":                       dms.ResourceDmsQueuesV1(),
 			"opentelekomcloud_ecs_instance_v1":                    ecs.ResourceEcsInstanceV1(),
-			"opentelekomcloud_elb_backend":                        elb.ResourceBackend(),
-			"opentelekomcloud_elb_health":                         elb.ResourceHealth(),
-			"opentelekomcloud_elb_loadbalancer":                   elb.ResourceELoadBalancer(),
-			"opentelekomcloud_elb_listener":                       elb.ResourceEListener(),
+			"opentelekomcloud_elb_backend":                        elbv1.ResourceBackend(),
+			"opentelekomcloud_elb_health":                         elbv1.ResourceHealth(),
+			"opentelekomcloud_elb_loadbalancer":                   elbv1.ResourceELoadBalancer(),
+			"opentelekomcloud_elb_listener":                       elbv1.ResourceEListener(),
 			"opentelekomcloud_evs_volume_v3":                      evs.ResourceEvsStorageVolumeV3(),
 			"opentelekomcloud_fw_firewall_group_v2":               fw.ResourceFWFirewallGroupV2(),
 			"opentelekomcloud_fw_policy_v2":                       fw.ResourceFWPolicyV2(),
@@ -358,15 +359,15 @@ func Provider() *schema.Provider {
 			"opentelekomcloud_ims_image_v2":                       ims.ResourceImsImageV2(),
 			"opentelekomcloud_kms_grant_v1":                       kms.ResourceKmsGrantV1(),
 			"opentelekomcloud_kms_key_v1":                         kms.ResourceKmsKeyV1(),
-			"opentelekomcloud_lb_certificate_v2":                  elb.ResourceCertificateV2(),
-			"opentelekomcloud_lb_l7policy_v2":                     elb.ResourceL7PolicyV2(),
-			"opentelekomcloud_lb_l7rule_v2":                       elb.ResourceL7RuleV2(),
-			"opentelekomcloud_lb_loadbalancer_v2":                 elb.ResourceLoadBalancerV2(),
-			"opentelekomcloud_lb_listener_v2":                     elb.ResourceListenerV2(),
-			"opentelekomcloud_lb_member_v2":                       elb.ResourceMemberV2(),
-			"opentelekomcloud_lb_monitor_v2":                      elb.ResourceMonitorV2(),
-			"opentelekomcloud_lb_pool_v2":                         elb.ResourceLBPoolV2(),
-			"opentelekomcloud_lb_whitelist_v2":                    elb.ResourceWhitelistV2(),
+			"opentelekomcloud_lb_certificate_v2":                  elbv2.ResourceCertificateV2(),
+			"opentelekomcloud_lb_l7policy_v2":                     elbv2.ResourceL7PolicyV2(),
+			"opentelekomcloud_lb_l7rule_v2":                       elbv2.ResourceL7RuleV2(),
+			"opentelekomcloud_lb_loadbalancer_v2":                 elbv2.ResourceLoadBalancerV2(),
+			"opentelekomcloud_lb_listener_v2":                     elbv2.ResourceListenerV2(),
+			"opentelekomcloud_lb_member_v2":                       elbv2.ResourceMemberV2(),
+			"opentelekomcloud_lb_monitor_v2":                      elbv2.ResourceMonitorV2(),
+			"opentelekomcloud_lb_pool_v2":                         elbv2.ResourceLBPoolV2(),
+			"opentelekomcloud_lb_whitelist_v2":                    elbv2.ResourceWhitelistV2(),
 			"opentelekomcloud_logtank_group_v2":                   lts.ResourceLTSGroupV2(),
 			"opentelekomcloud_logtank_topic_v2":                   lts.ResourceLTSTopicV2(),
 			"opentelekomcloud_mrs_cluster_v1":                     mrs.ResourceMRSClusterV1(),

@@ -1,4 +1,4 @@
-package elb
+package v1
 
 import (
 	"context"
@@ -6,7 +6,6 @@ import (
 	"time"
 
 	"github.com/hashicorp/go-multierror"
-	// "github.com/hashicorp/terraform/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	golangsdk "github.com/opentelekomcloud/gophertelekomcloud"
@@ -57,7 +56,7 @@ func resourceBackendCreate(ctx context.Context, d *schema.ResourceData, meta int
 	config := meta.(*cfg.Config)
 	client, err := config.ElbV1Client(config.GetRegion(d))
 	if err != nil {
-		return fmterr.Errorf(ErrCreationV2Client, err)
+		return fmterr.Errorf(errCreationV1Client, err)
 	}
 
 	addOpts := backendmember.AddOpts{
@@ -102,7 +101,7 @@ func resourceBackendRead(_ context.Context, d *schema.ResourceData, meta interfa
 	config := meta.(*cfg.Config)
 	client, err := config.ElbV1Client(config.GetRegion(d))
 	if err != nil {
-		return fmterr.Errorf(ErrCreationV2Client, err)
+		return fmterr.Errorf(errCreationV1Client, err)
 	}
 
 	listenerId := d.Get("listener_id").(string)
@@ -131,7 +130,7 @@ func resourceBackendDelete(_ context.Context, d *schema.ResourceData, meta inter
 	config := meta.(*cfg.Config)
 	client, err := config.ElbV1Client(config.GetRegion(d))
 	if err != nil {
-		return fmterr.Errorf(ErrCreationV2Client, err)
+		return fmterr.Errorf(errCreationV1Client, err)
 	}
 
 	log.Printf("[DEBUG] Deleting backend member %s", d.Id())

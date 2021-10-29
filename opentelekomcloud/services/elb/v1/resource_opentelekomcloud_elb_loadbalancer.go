@@ -1,4 +1,4 @@
-package elb
+package v1
 
 import (
 	"context"
@@ -112,7 +112,7 @@ func resourceELoadBalancerCreate(ctx context.Context, d *schema.ResourceData, me
 	config := meta.(*cfg.Config)
 	client, err := config.ElbV1Client(config.GetRegion(d))
 	if err != nil {
-		return fmterr.Errorf(ErrCreationV2Client, err)
+		return fmterr.Errorf(errCreationV1Client, err)
 	}
 
 	adminStateUp := d.Get("admin_state_up").(bool)
@@ -162,7 +162,7 @@ func resourceELoadBalancerRead(_ context.Context, d *schema.ResourceData, meta i
 	config := meta.(*cfg.Config)
 	networkingClient, err := config.ElbV1Client(config.GetRegion(d))
 	if err != nil {
-		return fmterr.Errorf(ErrCreationV2Client, err)
+		return fmterr.Errorf(errCreationV1Client, err)
 	}
 
 	lb, err := loadbalancer_elbs.Get(networkingClient, d.Id()).Extract()
@@ -203,7 +203,7 @@ func resourceELoadBalancerUpdate(ctx context.Context, d *schema.ResourceData, me
 	config := meta.(*cfg.Config)
 	client, err := config.ElbV1Client(config.GetRegion(d))
 	if err != nil {
-		return fmterr.Errorf(ErrCreationV2Client, err)
+		return fmterr.Errorf(errCreationV1Client, err)
 	}
 
 	var updateOpts loadbalancer_elbs.UpdateOpts
@@ -237,7 +237,7 @@ func resourceELoadBalancerDelete(_ context.Context, d *schema.ResourceData, meta
 	config := meta.(*cfg.Config)
 	client, err := config.ElbV1Client(config.GetRegion(d))
 	if err != nil {
-		return fmterr.Errorf(ErrCreationV2Client, err)
+		return fmterr.Errorf(errCreationV1Client, err)
 	}
 
 	id := d.Id()
