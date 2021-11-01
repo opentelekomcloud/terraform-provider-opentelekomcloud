@@ -3,12 +3,11 @@ package elb
 import (
 	"context"
 	"log"
-	"time"
 
 	"github.com/hashicorp/go-multierror"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/elb/v3/loadbalancers"
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common"
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common/cfg"
@@ -22,12 +21,6 @@ func ResourceLoadBalancerV3() *schema.Resource {
 		UpdateContext: resourceLoadBalancerV3Update,
 		DeleteContext: resourceLoadBalancerV3Delete,
 
-		Timeouts: &schema.ResourceTimeout{
-			Create: schema.DefaultTimeout(10 * time.Minute),
-			Update: schema.DefaultTimeout(10 * time.Minute),
-			Delete: schema.DefaultTimeout(10 * time.Minute),
-		},
-
 		Schema: map[string]*schema.Schema{
 			"region": {
 				Type:     schema.TypeString,
@@ -36,31 +29,24 @@ func ResourceLoadBalancerV3() *schema.Resource {
 				ForceNew: true,
 			},
 			"name": {
-				Type:     schema.TypeString,
-				Optional: true,
+				Type:         schema.TypeString,
+				Optional:     true,
+				ValidateFunc: validation.StringLenBetween(0, 255),
 			},
 			"description": {
-				Type:     schema.TypeString,
-				Optional: true,
-			},
-			"vip_subnet_id": {
-				Type:     schema.TypeString,
-				Required: true,
-				ForceNew: true,
+				Type:         schema.TypeString,
+				Optional:     true,
+				ValidateFunc: validation.StringLenBetween(0, 255),
 			},
 			"vip_address": {
 				Type:     schema.TypeString,
 				Optional: true,
 				Computed: true,
-				ForceNew: true,
 			},
-			"vip_port_id": {
-				Type:     schema.TypeString,
-				Computed: true,
-			},
-			"vpc_id": {
+			"router_id": {
 				Type:     schema.TypeString,
 				Required: true,
+				ForceNew: true,
 			},
 			"subnet_id": {
 				Type:     schema.TypeString,
@@ -68,43 +54,106 @@ func ResourceLoadBalancerV3() *schema.Resource {
 			},
 			"network_ids": {
 				Type:     schema.TypeSet,
-				Optional: true,
-				Computed: true,
+				Required: true,
 				Elem:     &schema.Schema{Type: schema.TypeString},
 				Set:      schema.HashString,
 			},
 			"ip_target_enable": {
 				Type:     schema.TypeBool,
 				Optional: true,
-			},
-			"guaranteed": {
-				Type:     schema.TypeBool,
-				Optional: true,
+				Computed: true,
 			},
 			"l4_flavor": {
 				Type:     schema.TypeString,
 				Optional: true,
+				Computed: true,
 			},
 			"l7_flavor": {
 				Type:     schema.TypeString,
 				Optional: true,
+				Computed: true,
 			},
 			"availability_zones": {
 				Type:     schema.TypeSet,
-				Optional: true,
-				Computed: true,
+				Required: true,
 				Elem:     &schema.Schema{Type: schema.TypeString},
 				Set:      schema.HashString,
 			},
 			"admin_state_up": {
 				Type:         schema.TypeBool,
-				Default:      true,
 				Optional:     true,
+				Default:      true,
 				ValidateFunc: common.ValidateTrueOnly,
 			},
+			"public_ip": {
+				Type:     schema.TypeList,
+				Optional: true,
+				MaxItems: 1,
+				Elem: &schema.Resource{
+					Schema: map[string]*schema.Schema{
+						"ip_type": {
+							Type:     schema.TypeString,
+							Required: true,
+							ValidateFunc: validation.StringInSlice([]string{
+								"5_bgp", "5_mailbgp", "5_gray",
+							}, false),
+						},
+						"bandwidth_size": {
+							Type:         schema.TypeInt,
+							Required:     true,
+							ValidateFunc: validation.IntBetween(0, 99999),
+						},
+						"bandwidth_charge_mode": {
+							Type:     schema.TypeString,
+							Optional: true,
+							Default:  "traffic",
+							ValidateFunc: validation.StringInSlice([]string{
+								"traffic",
+							}, false),
+						},
+						"bandwidth_share_type": {
+							Type:     schema.TypeString,
+							Required: true,
+							ValidateFunc: validation.StringInSlice([]string{
+								"PER", "WHOLE",
+							}, false),
+						},
+					},
+				},
+			},
 			"tags": common.TagsSchema(),
+			"vip_port_id": {
+				Type:     schema.TypeString,
+				Computed: true,
+			},
+			"created_at": {
+				Type:     schema.TypeString,
+				Computed: true,
+			},
+			"updated_at": {
+				Type:     schema.TypeString,
+				Computed: true,
+			},
 		},
 	}
+}
+
+func getPublicIp(d *schema.ResourceData) *loadbalancers.PublicIp {
+	publicIpRaw := d.Get("public_ip").([]interface{})
+	if len(publicIpRaw) == 0 {
+		return nil
+	}
+	publicIpElement := publicIpRaw[0].(map[string]interface{})
+
+	publicIpOpts := &loadbalancers.PublicIp{
+		NetworkType: publicIpElement["ip_type"].(string),
+		Bandwidth: loadbalancers.Bandwidth{
+			Size:       publicIpElement["bandwidth_size"].(int),
+			ChargeMode: publicIpElement["bandwidth_charge_mode"].(string),
+			ShareType:  publicIpElement["bandwidth_share_type"].(string),
+		},
+	}
+	return publicIpOpts
 }
 
 func resourceLoadBalancerV3Create(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
@@ -116,21 +165,18 @@ func resourceLoadBalancerV3Create(ctx context.Context, d *schema.ResourceData, m
 
 	adminStateUp := d.Get("admin_state_up").(bool)
 	ipTargetEnable := d.Get("ip_target_enable").(bool)
-	guaranteed := d.Get("guaranteed").(bool)
 	createOpts := loadbalancers.CreateOpts{
 		Name:                 d.Get("name").(string),
 		Description:          d.Get("description").(string),
 		VipAddress:           d.Get("vip_address").(string),
 		VipSubnetCidrID:      d.Get("subnet_id").(string),
 		L4Flavor:             d.Get("l4_flavor").(string),
-		Guaranteed:           &guaranteed,
-		VpcID:                d.Get("vpc_id").(string),
+		VpcID:                d.Get("router_id").(string),
 		AvailabilityZoneList: common.ExpandToStringSlice(d.Get("availability_zones").(*schema.Set).List()),
 		Tags:                 common.ExpandResourceTags(d.Get("tags").(map[string]interface{})),
 		AdminStateUp:         &adminStateUp,
 		L7Flavor:             d.Get("l7_flavor").(string),
-		PublicIpIDs:          nil,
-		PublicIp:             nil,
+		PublicIp:             getPublicIp(d),
 		ElbSubnetIDs:         common.ExpandToStringSlice(d.Get("network_ids").(*schema.Set).List()),
 		IpTargetEnable:       &ipTargetEnable,
 	}
@@ -138,17 +184,9 @@ func resourceLoadBalancerV3Create(ctx context.Context, d *schema.ResourceData, m
 	log.Printf("[DEBUG] Create Options: %#v", createOpts)
 	lb, err := loadbalancers.Create(client, createOpts).Extract()
 	if err != nil {
-		return fmterr.Errorf("error creating LoadBalancer: %s", err)
+		return fmterr.Errorf("error creating LoadBalancerV3: %w", err)
 	}
 
-	// Wait for LoadBalancer to become active before continuing
-	timeout := d.Timeout(schema.TimeoutCreate)
-	err = waitForLBV3LoadBalancer(ctx, client, lb.ID, "ACTIVE", nil, timeout)
-	if err != nil {
-		return diag.FromErr(err)
-	}
-
-	// If all has been successful, set the ID on the resource
 	d.SetId(lb.ID)
 
 	return resourceLoadBalancerV3Read(ctx, d, meta)
@@ -174,12 +212,25 @@ func resourceLoadBalancerV3Read(_ context.Context, d *schema.ResourceData, meta 
 		d.Set("vip_address", lb.VipAddress),
 		d.Set("vip_port_id", lb.VipPortID),
 		d.Set("admin_state_up", lb.AdminStateUp),
-		d.Set("loadbalancer_provider", lb.Provider),
+		d.Set("router_id", lb.VpcID),
+		d.Set("subnet_id", lb.VipSubnetCidrID),
+		d.Set("ip_target_enable", lb.IpTargetEnable),
+		d.Set("l4_flavor", lb.L4FlavorID),
+		d.Set("l7_flavor", lb.L7FlavorID),
+		d.Set("availability_zones", lb.AvailabilityZoneList),
+		d.Set("network_ids", lb.ElbSubnetIDs),
+		d.Set("created_at", lb.CreatedAt),
+		d.Set("updated_at", lb.UpdatedAt),
 		d.Set("region", config.GetRegion(d)),
 	)
 
-	if mErr.ErrorOrNil() != nil {
-		return diag.FromErr(mErr)
+	if err := mErr.ErrorOrNil(); err != nil {
+		return diag.FromErr(err)
+	}
+
+	tagMap := common.TagsToMap(lb.Tags)
+	if err := d.Set("tags", tagMap); err != nil {
+		return fmterr.Errorf("error saving tags for OpenTelekomCloud LoadBalancerV3: %s", err)
 	}
 
 	return nil
@@ -204,36 +255,41 @@ func resourceLoadBalancerV3Update(ctx context.Context, d *schema.ResourceData, m
 		adminStateUp := d.Get("admin_state_up").(bool)
 		updateOpts.AdminStateUp = &adminStateUp
 	}
-
-	// Wait for LoadBalancer to become active before continuing
-	timeout := d.Timeout(schema.TimeoutUpdate)
-	err = waitForLBV3LoadBalancer(ctx, client, d.Id(), "ACTIVE", nil, timeout)
-	if err != nil {
-		return diag.FromErr(err)
+	if d.HasChange("admin_state_up") {
+		adminStateUp := d.Get("admin_state_up").(bool)
+		updateOpts.AdminStateUp = &adminStateUp
+	}
+	if d.HasChange("network_ids") {
+		updateOpts.ElbSubnetIDs = common.ExpandToStringSlice(d.Get("network_ids").(*schema.Set).List())
+	}
+	if d.HasChange("vip_address") {
+		updateOpts.VipAddress = d.Get("vip_address").(string)
+	}
+	if d.HasChange("l7_flavor") {
+		updateOpts.L7Flavor = d.Get("l7_flavor").(string)
+	}
+	if d.HasChange("l4_flavor") {
+		updateOpts.L4Flavor = d.Get("l4_flavor").(string)
+	}
+	if d.HasChange("subnet_id") {
+		subnetID := d.Get("subnet_id").(string)
+		updateOpts.VipSubnetCidrID = &subnetID
+	}
+	if d.HasChange("ip_target_enable") {
+		ipTargetEnable := d.Get("ip_target_enable").(bool)
+		updateOpts.IpTargetEnable = &ipTargetEnable
 	}
 
 	log.Printf("[DEBUG] Updating loadbalancer %s with options: %#v", d.Id(), updateOpts)
-	err = resource.RetryContext(ctx, timeout, func() *resource.RetryError {
-		_, err = loadbalancers.Update(client, d.Id(), updateOpts).Extract()
-		if err != nil {
-			return common.CheckForRetryableError(err)
-		}
-		return nil
-	})
+	_, err = loadbalancers.Update(client, d.Id(), updateOpts).Extract()
 	if err != nil {
-		return fmterr.Errorf("unable to update loadbalancer %s: %s", d.Id(), err)
-	}
-
-	// Wait for LoadBalancer to become active before continuing
-	err = waitForLBV3LoadBalancer(ctx, client, d.Id(), "ACTIVE", nil, timeout)
-	if err != nil {
-		return diag.FromErr(err)
+		return fmterr.Errorf("unable to update LoadBalancerV3 %s: %s", d.Id(), err)
 	}
 
 	return resourceLoadBalancerV3Read(ctx, d, meta)
 }
 
-func resourceLoadBalancerV3Delete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceLoadBalancerV3Delete(_ context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*cfg.Config)
 	client, err := config.ElbV3Client(config.GetRegion(d))
 	if err != nil {
@@ -241,23 +297,8 @@ func resourceLoadBalancerV3Delete(ctx context.Context, d *schema.ResourceData, m
 	}
 
 	log.Printf("[DEBUG] Deleting loadbalancer %s", d.Id())
-	timeout := d.Timeout(schema.TimeoutDelete)
-	err = resource.RetryContext(ctx, timeout, func() *resource.RetryError {
-		err = loadbalancers.Delete(client, d.Id()).ExtractErr()
-		if err != nil {
-			return common.CheckForRetryableError(err)
-		}
-		return nil
-	})
-	if err != nil {
-		return fmterr.Errorf("unable to delete loadbalancer %s: %s", d.Id(), err)
-	}
-
-	// Wait for LoadBalancer to become delete
-	pending := []string{"PENDING_UPDATE", "PENDING_DELETE", "ACTIVE"}
-	err = waitForLBV3LoadBalancer(ctx, client, d.Id(), "DELETED", pending, timeout)
-	if err != nil {
-		return diag.FromErr(err)
+	if err := loadbalancers.Delete(client, d.Id()).ExtractErr(); err != nil {
+		return fmterr.Errorf("unable to delete LoadBalancerV3 %s: %s", d.Id(), err)
 	}
 
 	return nil
