@@ -3,11 +3,14 @@ package v3
 import (
 	"context"
 	"log"
+	"time"
 
 	"github.com/hashicorp/go-multierror"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
+	golangsdk "github.com/opentelekomcloud/gophertelekomcloud"
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/elb/v3/loadbalancers"
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common"
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common/fmterr"
@@ -19,6 +22,12 @@ func ResourceLoadBalancerV3() *schema.Resource {
 		ReadContext:   resourceLoadBalancerV3Read,
 		UpdateContext: resourceLoadBalancerV3Update,
 		DeleteContext: resourceLoadBalancerV3Delete,
+
+		Timeouts: &schema.ResourceTimeout{
+			Create: schema.DefaultTimeout(10 * time.Minute),
+			Update: schema.DefaultTimeout(10 * time.Minute),
+			Delete: schema.DefaultTimeout(10 * time.Minute),
+		},
 
 		Schema: map[string]*schema.Schema{
 			"name": {
@@ -190,6 +199,18 @@ func resourceLoadBalancerV3Create(ctx context.Context, d *schema.ResourceData, m
 		return fmterr.Errorf("error creating LoadBalancerV3: %w", err)
 	}
 
+	stateConf := &resource.StateChangeConf{
+		Target:       []string{"ACTIVE"},
+		Refresh:      resourceElbV3LoadBalancerRefreshFunc(client, lb.ID),
+		Timeout:      d.Timeout(schema.TimeoutCreate),
+		Delay:        5 * time.Second,
+		PollInterval: 1 * time.Second,
+	}
+	_, err = stateConf.WaitForStateContext(ctx)
+	if err != nil {
+		return diag.FromErr(err)
+	}
+
 	d.SetId(lb.ID)
 
 	clientCtx := ctxWithClient(ctx, client)
@@ -287,6 +308,18 @@ func resourceLoadBalancerV3Update(ctx context.Context, d *schema.ResourceData, m
 		return fmterr.Errorf("unable to update LoadBalancerV3 %s: %s", d.Id(), err)
 	}
 
+	stateConf := &resource.StateChangeConf{
+		Target:       []string{"ACTIVE"},
+		Refresh:      resourceElbV3LoadBalancerRefreshFunc(client, d.Id()),
+		Timeout:      d.Timeout(schema.TimeoutUpdate),
+		Delay:        5 * time.Second,
+		PollInterval: 1 * time.Second,
+	}
+	_, err = stateConf.WaitForStateContext(ctx)
+	if err != nil {
+		return diag.FromErr(err)
+	}
+
 	clientCtx := ctxWithClient(ctx, client)
 	return resourceLoadBalancerV3Read(clientCtx, d, meta)
 }
@@ -302,5 +335,32 @@ func resourceLoadBalancerV3Delete(ctx context.Context, d *schema.ResourceData, m
 		return fmterr.Errorf("unable to delete LoadBalancerV3 %s: %s", d.Id(), err)
 	}
 
+	stateConf := &resource.StateChangeConf{
+		Target:       []string{"DELETED"},
+		Pending:      []string{"PENDING_UPDATE", "PENDING_DELETE", "ACTIVE"},
+		Refresh:      resourceElbV3LoadBalancerRefreshFunc(client, d.Id()),
+		Timeout:      d.Timeout(schema.TimeoutDelete),
+		Delay:        5 * time.Second,
+		PollInterval: 1 * time.Second,
+	}
+	_, err = stateConf.WaitForStateContext(ctx)
+	if err != nil {
+		return diag.FromErr(err)
+	}
+
 	return nil
+}
+
+func resourceElbV3LoadBalancerRefreshFunc(client *golangsdk.ServiceClient, id string) resource.StateRefreshFunc {
+	return func() (interface{}, string, error) {
+		lb, err := loadbalancers.Get(client, id).Extract()
+		if err != nil {
+			if _, ok := err.(golangsdk.ErrDefault404); ok {
+				return lb, "DELETED", nil
+			}
+			return lb, "ACTIVE", err
+		}
+
+		return lb, lb.ProvisioningStatus, nil
+	}
 }

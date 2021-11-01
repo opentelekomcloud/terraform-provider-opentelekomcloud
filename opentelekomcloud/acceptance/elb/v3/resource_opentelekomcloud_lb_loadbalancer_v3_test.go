@@ -2,7 +2,6 @@ package acceptance
 
 import (
 	"fmt"
-	"regexp"
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
@@ -35,7 +34,6 @@ func TestAccLBV3LoadBalancer_basic(t *testing.T) {
 				Config: testAccLBV3LoadBalancerConfigUpdate,
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr(resourceLBName, "name", "loadbalancer_1_updated"),
-					resource.TestMatchResourceAttr(resourceLBName, "vip_port_id", regexp.MustCompile("^[a-f0-9-]+")),
 				),
 			},
 		},
@@ -106,6 +104,12 @@ resource "opentelekomcloud_lb_loadbalancer_v3" "loadbalancer_1" {
 
   availability_zones = ["%s"]
 
+  public_ip {
+    ip_type              = "5_bgp"
+    bandwidth_size       = 10
+    bandwidth_share_type = "PER"
+  }
+
   tags = {
     muh = "value-create"
     kuh = "value-create"
@@ -123,6 +127,12 @@ resource "opentelekomcloud_lb_loadbalancer_v3" "loadbalancer_1" {
   network_ids = [data.opentelekomcloud_vpc_subnet_v1.shared_subnet.network_id]
 
   availability_zones = ["%s"]
+
+  public_ip {
+    ip_type              = "5_bgp"
+    bandwidth_size       = 10
+    bandwidth_share_type = "PER"
+  }
 
   tags = {
     muh = "value-create"
