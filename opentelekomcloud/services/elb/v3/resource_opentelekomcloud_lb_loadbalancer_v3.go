@@ -76,6 +76,7 @@ func ResourceLoadBalancerV3() *schema.Resource {
 			"availability_zones": {
 				Type:     schema.TypeSet,
 				Required: true,
+				ForceNew: true,
 				Elem:     &schema.Schema{Type: schema.TypeString},
 				Set:      schema.HashString,
 			},
@@ -88,12 +89,14 @@ func ResourceLoadBalancerV3() *schema.Resource {
 			"public_ip": {
 				Type:     schema.TypeList,
 				Optional: true,
+				ForceNew: true,
 				MaxItems: 1,
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
 						"ip_type": {
 							Type:     schema.TypeString,
 							Required: true,
+							ForceNew: true,
 							ValidateFunc: validation.StringInSlice([]string{
 								"5_bgp", "5_mailbgp", "5_gray",
 							}, false),
@@ -101,11 +104,13 @@ func ResourceLoadBalancerV3() *schema.Resource {
 						"bandwidth_size": {
 							Type:         schema.TypeInt,
 							Required:     true,
+							ForceNew:     true,
 							ValidateFunc: validation.IntBetween(0, 99999),
 						},
 						"bandwidth_charge_mode": {
 							Type:     schema.TypeString,
 							Optional: true,
+							ForceNew: true,
 							Default:  "traffic",
 							ValidateFunc: validation.StringInSlice([]string{
 								"traffic",
@@ -114,6 +119,7 @@ func ResourceLoadBalancerV3() *schema.Resource {
 						"bandwidth_share_type": {
 							Type:     schema.TypeString,
 							Required: true,
+							ForceNew: true,
 							ValidateFunc: validation.StringInSlice([]string{
 								"PER", "WHOLE",
 							}, false),

@@ -100,7 +100,7 @@ var testAccLBV3LoadBalancerConfigBasic = fmt.Sprintf(`
 
 resource "opentelekomcloud_lb_loadbalancer_v3" "loadbalancer_1" {
   name        = "loadbalancer_1"
-  vpc_id      = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.vpc_id
+  router_id   = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.vpc_id
   subnet_id   = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.subnet_id
   network_ids = [data.opentelekomcloud_vpc_subnet_v1.shared_subnet.network_id]
 
@@ -118,7 +118,7 @@ var testAccLBV3LoadBalancerConfigUpdate = fmt.Sprintf(`
 
 resource "opentelekomcloud_lb_loadbalancer_v3" "loadbalancer_1" {
   name        = "loadbalancer_1_updated"
-  vpc_id      = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.vpc_id
+  router_id   = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.vpc_id
   subnet_id   = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.subnet_id
   network_ids = [data.opentelekomcloud_vpc_subnet_v1.shared_subnet.network_id]
 
