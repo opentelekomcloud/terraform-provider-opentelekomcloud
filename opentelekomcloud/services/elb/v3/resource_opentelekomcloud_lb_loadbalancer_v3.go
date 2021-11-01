@@ -12,7 +12,9 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 	golangsdk "github.com/opentelekomcloud/gophertelekomcloud"
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/elb/v3/loadbalancers"
+	"github.com/opentelekomcloud/gophertelekomcloud/openstack/networking/v2/extensions/layer3/floatingips"
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common"
+	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common/cfg"
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common/fmterr"
 )
 
@@ -336,6 +338,11 @@ func resourceLoadBalancerV3Delete(ctx context.Context, d *schema.ResourceData, m
 		return diag.FromErr(err)
 	}
 
+	lb, err := loadbalancers.Get(client, d.Id()).Extract()
+	if err != nil {
+		return diag.FromErr(err)
+	}
+
 	log.Printf("[DEBUG] Deleting loadbalancer %s", d.Id())
 	if err := loadbalancers.Delete(client, d.Id()).ExtractErr(); err != nil {
 		return fmterr.Errorf("unable to delete LoadBalancerV3 %s: %s", d.Id(), err)
@@ -352,6 +359,18 @@ func resourceLoadBalancerV3Delete(ctx context.Context, d *schema.ResourceData, m
 	_, err = stateConf.WaitForStateContext(ctx)
 	if err != nil {
 		return diag.FromErr(err)
+	}
+
+	if len(lb.PublicIps) > 0 {
+		config := meta.(*cfg.Config)
+		nwV2Client, err := config.NetworkingV2Client(config.GetRegion(d))
+		if err != nil {
+			diag.FromErr(err)
+		}
+		ipIdToDelete := lb.PublicIps[0].PublicIpID
+		if err := floatingips.Delete(nwV2Client, ipIdToDelete).ExtractErr(); err != nil {
+			return diag.FromErr(err)
+		}
 	}
 
 	return nil
