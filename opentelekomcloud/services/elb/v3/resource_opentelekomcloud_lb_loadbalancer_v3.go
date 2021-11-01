@@ -12,7 +12,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 	golangsdk "github.com/opentelekomcloud/gophertelekomcloud"
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/elb/v3/loadbalancers"
-	"github.com/opentelekomcloud/gophertelekomcloud/openstack/networking/v2/extensions/layer3/floatingips"
+	"github.com/opentelekomcloud/gophertelekomcloud/openstack/networking/v1/eips"
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common"
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common/cfg"
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common/fmterr"
@@ -285,10 +285,6 @@ func resourceLoadBalancerV3Update(ctx context.Context, d *schema.ResourceData, m
 		adminStateUp := d.Get("admin_state_up").(bool)
 		updateOpts.AdminStateUp = &adminStateUp
 	}
-	if d.HasChange("admin_state_up") {
-		adminStateUp := d.Get("admin_state_up").(bool)
-		updateOpts.AdminStateUp = &adminStateUp
-	}
 	if d.HasChange("network_ids") {
 		updateOpts.ElbSubnetIDs = common.ExpandToStringSlice(d.Get("network_ids").(*schema.Set).List())
 	}
@@ -363,12 +359,12 @@ func resourceLoadBalancerV3Delete(ctx context.Context, d *schema.ResourceData, m
 
 	if len(lb.PublicIps) > 0 {
 		config := meta.(*cfg.Config)
-		nwV2Client, err := config.NetworkingV2Client(config.GetRegion(d))
+		nwV1Client, err := config.NetworkingV1Client(config.GetRegion(d))
 		if err != nil {
 			diag.FromErr(err)
 		}
 		ipIdToDelete := lb.PublicIps[0].PublicIpID
-		if err := floatingips.Delete(nwV2Client, ipIdToDelete).ExtractErr(); err != nil {
+		if err := eips.Delete(nwV1Client, ipIdToDelete).ExtractErr(); err != nil {
 			return diag.FromErr(err)
 		}
 	}
