@@ -121,7 +121,12 @@ func ResourceLoadBalancerV3() *schema.Resource {
 					},
 				},
 			},
-			"tags": common.TagsSchema(),
+			"tags": {
+				Type:         schema.TypeMap,
+				Optional:     true,
+				ForceNew:     true,
+				ValidateFunc: common.ValidateTags,
+			},
 			"vip_port_id": {
 				Type:     schema.TypeString,
 				Computed: true,
@@ -160,7 +165,7 @@ func resourceLoadBalancerV3Create(ctx context.Context, d *schema.ResourceData, m
 	config := meta.(*cfg.Config)
 	client, err := config.ElbV3Client(config.GetRegion(d))
 	if err != nil {
-		return fmterr.Errorf(errCreateClient, err)
+		return fmterr.Errorf(ErrCreateClient, err)
 	}
 
 	adminStateUp := d.Get("admin_state_up").(bool)
@@ -196,7 +201,7 @@ func resourceLoadBalancerV3Read(_ context.Context, d *schema.ResourceData, meta 
 	config := meta.(*cfg.Config)
 	client, err := config.ElbV3Client(config.GetRegion(d))
 	if err != nil {
-		return fmterr.Errorf(errCreateClient, err)
+		return fmterr.Errorf(ErrCreateClient, err)
 	}
 
 	lb, err := loadbalancers.Get(client, d.Id()).Extract()
@@ -240,7 +245,7 @@ func resourceLoadBalancerV3Update(ctx context.Context, d *schema.ResourceData, m
 	config := meta.(*cfg.Config)
 	client, err := config.ElbV3Client(config.GetRegion(d))
 	if err != nil {
-		return fmterr.Errorf(errCreateClient, err)
+		return fmterr.Errorf(ErrCreateClient, err)
 	}
 
 	var updateOpts loadbalancers.UpdateOpts
@@ -293,7 +298,7 @@ func resourceLoadBalancerV3Delete(_ context.Context, d *schema.ResourceData, met
 	config := meta.(*cfg.Config)
 	client, err := config.ElbV3Client(config.GetRegion(d))
 	if err != nil {
-		return fmterr.Errorf(errCreateClient, err)
+		return fmterr.Errorf(ErrCreateClient, err)
 	}
 
 	log.Printf("[DEBUG] Deleting loadbalancer %s", d.Id())
