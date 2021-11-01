@@ -10,7 +10,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 	golangsdk "github.com/opentelekomcloud/gophertelekomcloud"
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/elb/v3/loadbalancers"
-	"github.com/opentelekomcloud/gophertelekomcloud/openstack/networking/v1/eips"
+	"github.com/opentelekomcloud/gophertelekomcloud/openstack/networking/v2/extensions/layer3/floatingips"
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common"
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common/cfg"
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common/fmterr"
@@ -89,6 +89,14 @@ func ResourceLoadBalancerV3() *schema.Resource {
 				MaxItems: 1,
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
+						"public_ip_id": {
+							Type:     schema.TypeString,
+							Computed: true,
+						},
+						"public_ip_address": {
+							Type:     schema.TypeString,
+							Computed: true,
+						},
 						"ip_type": {
 							Type:     schema.TypeString,
 							Required: true,
@@ -224,6 +232,14 @@ func resourceLoadBalancerV3Read(ctx context.Context, d *schema.ResourceData, met
 
 	log.Printf("[DEBUG] Retrieved loadbalancer %s: %#v", d.Id(), lb)
 
+	publicIpInfo := make([]map[string]interface{}, len(lb.PublicIps))
+	for i, v := range lb.PublicIps {
+		publicIpInfo[i] = map[string]interface{}{
+			"public_ip_id":      v.PublicIpID,
+			"public_ip_address": v.PublicIpAddress,
+		}
+	}
+
 	mErr := multierror.Append(
 		d.Set("name", lb.Name),
 		d.Set("description", lb.Description),
@@ -237,6 +253,7 @@ func resourceLoadBalancerV3Read(ctx context.Context, d *schema.ResourceData, met
 		d.Set("l7_flavor", lb.L7FlavorID),
 		d.Set("availability_zones", lb.AvailabilityZoneList),
 		d.Set("network_ids", lb.ElbSubnetIDs),
+		d.Set("public_ip", publicIpInfo),
 		d.Set("created_at", lb.CreatedAt),
 		d.Set("updated_at", lb.UpdatedAt),
 	)
@@ -326,12 +343,13 @@ func resourceLoadBalancerV3Delete(ctx context.Context, d *schema.ResourceData, m
 
 	if len(lb.PublicIps) > 0 {
 		config := meta.(*cfg.Config)
-		nwV1Client, err := config.NetworkingV1Client(config.GetRegion(d))
+		nwV1Client, err := config.NetworkingV2Client(config.GetRegion(d))
 		if err != nil {
 			return diag.FromErr(err)
 		}
-		ipIdToDelete := lb.PublicIps[0].PublicIpID
-		if err := eips.Delete(nwV1Client, ipIdToDelete).ExtractErr(); err != nil {
+		publicIpInfo := d.Get("public_ip").([]interface{})[0].(map[string]interface{})
+		ipIdToDelete := publicIpInfo["public_ip_id"].(string)
+		if err := floatingips.Delete(nwV1Client, ipIdToDelete).ExtractErr(); err != nil {
 			return diag.FromErr(err)
 		}
 	}
