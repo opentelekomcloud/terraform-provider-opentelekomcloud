@@ -1,4 +1,4 @@
-package elb
+package v3
 
 import (
 	"context"
@@ -160,7 +160,7 @@ func resourceLoadBalancerV3Create(ctx context.Context, d *schema.ResourceData, m
 	config := meta.(*cfg.Config)
 	client, err := config.ElbV3Client(config.GetRegion(d))
 	if err != nil {
-		return fmterr.Errorf(ErrCreationV3Client, err)
+		return fmterr.Errorf(errCreateClient, err)
 	}
 
 	adminStateUp := d.Get("admin_state_up").(bool)
@@ -196,7 +196,7 @@ func resourceLoadBalancerV3Read(_ context.Context, d *schema.ResourceData, meta 
 	config := meta.(*cfg.Config)
 	client, err := config.ElbV3Client(config.GetRegion(d))
 	if err != nil {
-		return fmterr.Errorf(ErrCreationV3Client, err)
+		return fmterr.Errorf(errCreateClient, err)
 	}
 
 	lb, err := loadbalancers.Get(client, d.Id()).Extract()
@@ -240,7 +240,7 @@ func resourceLoadBalancerV3Update(ctx context.Context, d *schema.ResourceData, m
 	config := meta.(*cfg.Config)
 	client, err := config.ElbV3Client(config.GetRegion(d))
 	if err != nil {
-		return fmterr.Errorf(ErrCreationV3Client, err)
+		return fmterr.Errorf(errCreateClient, err)
 	}
 
 	var updateOpts loadbalancers.UpdateOpts
@@ -293,7 +293,7 @@ func resourceLoadBalancerV3Delete(_ context.Context, d *schema.ResourceData, met
 	config := meta.(*cfg.Config)
 	client, err := config.ElbV3Client(config.GetRegion(d))
 	if err != nil {
-		return fmterr.Errorf(ErrCreationV3Client, err)
+		return fmterr.Errorf(errCreateClient, err)
 	}
 
 	log.Printf("[DEBUG] Deleting loadbalancer %s", d.Id())
