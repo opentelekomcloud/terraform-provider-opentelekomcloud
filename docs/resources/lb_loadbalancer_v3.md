@@ -75,10 +75,10 @@ resource "opentelekomcloud_lb_loadbalancer_v3" "lb_1" {
 
 The following arguments are supported:
 
-* `router_id` - (Required) ID of the router (or VPC) this LoadBalancer belongs to. Changing
+* `router_id` - (Optional) ID of the router (or VPC) this LoadBalancer belongs to. Changing
   this creates a new loadbalancer.
 
-* `subnet_id` - (Required) The ID of the subnet to which the LoadBalancer belongs.
+* `subnet_id` - (Optional) The ID of the subnet to which the LoadBalancer belongs.
 
 * `network_ids` - (Required) Specifies the subnet Network ID.
 

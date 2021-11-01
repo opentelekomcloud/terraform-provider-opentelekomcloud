@@ -41,18 +41,17 @@ func ResourceLoadBalancerV3() *schema.Resource {
 			},
 			"router_id": {
 				Type:     schema.TypeString,
-				Required: true,
+				Optional: true,
 				ForceNew: true,
 			},
 			"subnet_id": {
 				Type:     schema.TypeString,
-				Required: true,
+				Optional: true,
 			},
 			"network_ids": {
 				Type:     schema.TypeSet,
 				Required: true,
 				Elem:     &schema.Schema{Type: schema.TypeString},
-				Set:      schema.HashString,
 			},
 			"ip_target_enable": {
 				Type:     schema.TypeBool,
@@ -74,7 +73,6 @@ func ResourceLoadBalancerV3() *schema.Resource {
 				Required: true,
 				ForceNew: true,
 				Elem:     &schema.Schema{Type: schema.TypeString},
-				Set:      schema.HashString,
 			},
 			"admin_state_up": {
 				Type:         schema.TypeBool,
