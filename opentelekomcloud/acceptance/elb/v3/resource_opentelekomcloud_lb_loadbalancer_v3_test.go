@@ -106,6 +106,7 @@ resource "opentelekomcloud_lb_loadbalancer_v3" "loadbalancer_1" {
 
   public_ip {
     ip_type              = "5_bgp"
+    bandwidth_name       = "lb_band"
     bandwidth_size       = 10
     bandwidth_share_type = "PER"
   }
@@ -130,6 +131,7 @@ resource "opentelekomcloud_lb_loadbalancer_v3" "loadbalancer_1" {
 
   public_ip {
     ip_type              = "5_bgp"
+    bandwidth_name       = "lb_band"
     bandwidth_size       = 10
     bandwidth_share_type = "PER"
   }

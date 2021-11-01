@@ -106,6 +106,8 @@ The `public_ip` block supports:
 
 * `ip_type` - (Required) Elastic IP type. Possible values are: `5_bgp`, `5_mailbgp`, `5_gray`.
 
+* `bandwidth_name` - (Required) Bandwidth name.
+
 * `bandwidth_size` - (Required) Bandwidth size.
 
 * `bandwidth_charge_mode` - (Optional) Bandwidth billing type. Possible value is `traffic`.

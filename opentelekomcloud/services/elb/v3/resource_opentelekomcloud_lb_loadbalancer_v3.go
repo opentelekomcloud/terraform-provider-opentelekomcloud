@@ -103,6 +103,11 @@ func ResourceLoadBalancerV3() *schema.Resource {
 								"5_bgp", "5_mailbgp", "5_gray",
 							}, false),
 						},
+						"bandwidth_name": {
+							Type:     schema.TypeString,
+							Required: true,
+							ForceNew: true,
+						},
 						"bandwidth_size": {
 							Type:         schema.TypeInt,
 							Required:     true,
@@ -161,6 +166,7 @@ func getPublicIp(d *schema.ResourceData) *loadbalancers.PublicIp {
 	publicIpOpts := &loadbalancers.PublicIp{
 		NetworkType: publicIpElement["ip_type"].(string),
 		Bandwidth: loadbalancers.Bandwidth{
+			Name:       publicIpElement["bandwidth_name"].(string),
 			Size:       publicIpElement["bandwidth_size"].(int),
 			ChargeMode: publicIpElement["bandwidth_charge_mode"].(string),
 			ShareType:  publicIpElement["bandwidth_share_type"].(string),
