@@ -80,6 +80,8 @@ The following arguments are supported:
 
 * `subnet_id` - (Optional) The ID of the subnet to which the LoadBalancer belongs.
 
+-> `router_id` and `subnet_id` cannot be left blank at the same time.
+
 * `network_ids` - (Required) Specifies the subnet Network ID.
 
 * `name` - (Optional) Human-readable name for the LoadBalancer.

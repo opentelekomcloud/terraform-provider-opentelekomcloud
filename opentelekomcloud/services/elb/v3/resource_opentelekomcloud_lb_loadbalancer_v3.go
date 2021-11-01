@@ -40,13 +40,15 @@ func ResourceLoadBalancerV3() *schema.Resource {
 				Computed: true,
 			},
 			"router_id": {
-				Type:     schema.TypeString,
-				Optional: true,
-				ForceNew: true,
+				Type:         schema.TypeString,
+				Optional:     true,
+				ForceNew:     true,
+				AtLeastOneOf: []string{"subnet_id"},
 			},
 			"subnet_id": {
-				Type:     schema.TypeString,
-				Optional: true,
+				Type:         schema.TypeString,
+				Optional:     true,
+				AtLeastOneOf: []string{"router_id"},
 			},
 			"network_ids": {
 				Type:     schema.TypeSet,
