@@ -657,15 +657,24 @@ func resourceCCENodeV3Read(_ context.Context, d *schema.ResourceData, meta inter
 		return fmterr.Errorf("error saving tags of CCE node: %w", err)
 	}
 
+	if err := setK8sNodeFields(d, config, clusterID, node.Status.PrivateIP); err != nil {
+		return diag.FromErr(err)
+	}
+
+	return nil
+}
+
+func setK8sNodeFields(d *schema.ResourceData, config *cfg.Config, clusterID, privateIP string) error {
 	v1Client, err := config.CceV1Client(config.GetRegion(d))
 	if err != nil {
-		return fmterr.Errorf("error creating OpenTelekomCloud CCEv1 client: %w", err)
+		return fmt.Errorf("error creating OpenTelekomCloud CCEv1 client: %w", err)
 	}
-	k8Node, err := nodesv1.Get(v1Client, clusterID, node.Status.PrivateIP).Extract()
+	k8Node, err := nodesv1.Get(v1Client, clusterID, privateIP).Extract()
 	if err != nil {
-		return fmterr.Errorf("error retrieving CCE node: %w", err)
+		log.Printf("[WARN] error retrieving CCE node: %s", err.Error())
+		return nil
 	}
-	taints := make([]map[string]interface{}, len(k8Node.Spec.Taints))
+	taints := make([]interface{}, len(k8Node.Spec.Taints))
 	for i, v := range k8Node.Spec.Taints {
 		taints[i] = map[string]interface{}{
 			"key":    v.Key,
@@ -674,7 +683,7 @@ func resourceCCENodeV3Read(_ context.Context, d *schema.ResourceData, meta inter
 		}
 	}
 	if err := d.Set("taints", taints); err != nil {
-		return fmterr.Errorf("error setting taints for CCE Node: %w", err)
+		return fmt.Errorf("error setting taints for CCE Node: %w", err)
 	}
 	k8sTags := make(map[string]interface{})
 	for key, value := range k8Node.Metadata.Labels {
@@ -684,7 +693,7 @@ func resourceCCENodeV3Read(_ context.Context, d *schema.ResourceData, meta inter
 		k8sTags[key] = value
 	}
 	if err := d.Set("k8s_tags", k8sTags); err != nil {
-		return fmterr.Errorf("error setting k8s_tags for CCE Node: %w", err)
+		return fmt.Errorf("error setting k8s_tags for CCE Node: %w", err)
 	}
 	return nil
 }

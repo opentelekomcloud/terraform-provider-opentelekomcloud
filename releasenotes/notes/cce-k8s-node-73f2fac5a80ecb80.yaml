@@ -1,0 +1,5 @@
+---
+enhancements:
+  - |
+    [CCE] Avoid failing CCE node read if reading of k8s node fails in ``resource/opentelekomcloud_cce_node_v3``
+    (`#1503 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/1503>`_)
