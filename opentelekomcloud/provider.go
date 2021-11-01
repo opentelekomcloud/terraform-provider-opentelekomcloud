@@ -24,6 +24,7 @@ import (
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/services/ecs"
 	elbv1 "github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/services/elb/v1"
 	elbv2 "github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/services/elb/v2"
+	elbv3 "github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/services/elb/v3"
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/services/evs"
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/services/fw"
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/services/iam"
@@ -263,6 +264,7 @@ func Provider() *schema.Provider {
 			"opentelekomcloud_images_image_v2":                 ims.DataSourceImagesImageV2(),
 			"opentelekomcloud_kms_key_v1":                      kms.DataSourceKmsKeyV1(),
 			"opentelekomcloud_kms_data_key_v1":                 kms.DataSourceKmsDataKeyV1(),
+			"opentelekomcloud_lb_flavor_v3":                    elbv3.DataSourceLBFlavorV3(),
 			"opentelekomcloud_networking_network_v2":           vpc.DataSourceNetworkingNetworkV2(),
 			"opentelekomcloud_networking_port_v2":              vpc.DataSourceNetworkingPortV2(),
 			"opentelekomcloud_networking_secgroup_v2":          vpc.DataSourceNetworkingSecGroupV2(),
