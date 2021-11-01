@@ -10,7 +10,6 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/elb/v3/loadbalancers"
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common"
-	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common/cfg"
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common/fmterr"
 )
 
@@ -22,12 +21,6 @@ func ResourceLoadBalancerV3() *schema.Resource {
 		DeleteContext: resourceLoadBalancerV3Delete,
 
 		Schema: map[string]*schema.Schema{
-			"region": {
-				Type:     schema.TypeString,
-				Optional: true,
-				Computed: true,
-				ForceNew: true,
-			},
 			"name": {
 				Type:         schema.TypeString,
 				Optional:     true,
@@ -168,10 +161,9 @@ func getPublicIp(d *schema.ResourceData) *loadbalancers.PublicIp {
 }
 
 func resourceLoadBalancerV3Create(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	config := meta.(*cfg.Config)
-	client, err := config.ElbV3Client(config.GetRegion(d))
+	client, err := clientFromCtx(ctx, d, meta)
 	if err != nil {
-		return fmterr.Errorf(ErrCreateClient, err)
+		return diag.FromErr(err)
 	}
 
 	adminStateUp := d.Get("admin_state_up").(bool)
@@ -200,14 +192,14 @@ func resourceLoadBalancerV3Create(ctx context.Context, d *schema.ResourceData, m
 
 	d.SetId(lb.ID)
 
-	return resourceLoadBalancerV3Read(ctx, d, meta)
+	clientCtx := ctxWithClient(ctx, client)
+	return resourceLoadBalancerV3Read(clientCtx, d, meta)
 }
 
-func resourceLoadBalancerV3Read(_ context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	config := meta.(*cfg.Config)
-	client, err := config.ElbV3Client(config.GetRegion(d))
+func resourceLoadBalancerV3Read(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+	client, err := clientFromCtx(ctx, d, meta)
 	if err != nil {
-		return fmterr.Errorf(ErrCreateClient, err)
+		return diag.FromErr(err)
 	}
 
 	lb, err := loadbalancers.Get(client, d.Id()).Extract()
@@ -232,7 +224,6 @@ func resourceLoadBalancerV3Read(_ context.Context, d *schema.ResourceData, meta 
 		d.Set("network_ids", lb.ElbSubnetIDs),
 		d.Set("created_at", lb.CreatedAt),
 		d.Set("updated_at", lb.UpdatedAt),
-		d.Set("region", config.GetRegion(d)),
 	)
 
 	if err := mErr.ErrorOrNil(); err != nil {
@@ -248,10 +239,9 @@ func resourceLoadBalancerV3Read(_ context.Context, d *schema.ResourceData, meta 
 }
 
 func resourceLoadBalancerV3Update(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	config := meta.(*cfg.Config)
-	client, err := config.ElbV3Client(config.GetRegion(d))
+	client, err := clientFromCtx(ctx, d, meta)
 	if err != nil {
-		return fmterr.Errorf(ErrCreateClient, err)
+		return diag.FromErr(err)
 	}
 
 	var updateOpts loadbalancers.UpdateOpts
@@ -297,14 +287,14 @@ func resourceLoadBalancerV3Update(ctx context.Context, d *schema.ResourceData, m
 		return fmterr.Errorf("unable to update LoadBalancerV3 %s: %s", d.Id(), err)
 	}
 
-	return resourceLoadBalancerV3Read(ctx, d, meta)
+	clientCtx := ctxWithClient(ctx, client)
+	return resourceLoadBalancerV3Read(clientCtx, d, meta)
 }
 
-func resourceLoadBalancerV3Delete(_ context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	config := meta.(*cfg.Config)
-	client, err := config.ElbV3Client(config.GetRegion(d))
+func resourceLoadBalancerV3Delete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+	client, err := clientFromCtx(ctx, d, meta)
 	if err != nil {
-		return fmterr.Errorf(ErrCreateClient, err)
+		return diag.FromErr(err)
 	}
 
 	log.Printf("[DEBUG] Deleting loadbalancer %s", d.Id())
