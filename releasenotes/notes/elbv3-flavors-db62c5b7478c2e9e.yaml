@@ -1,0 +1,4 @@
+---
+features:
+  - |
+    **New Data Source:** ``opentelekomcloud_lb_flavor_v3`` (`#1502 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/1502>`_)
