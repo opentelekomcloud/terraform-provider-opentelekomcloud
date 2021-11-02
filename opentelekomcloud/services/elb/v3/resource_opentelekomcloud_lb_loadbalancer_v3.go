@@ -348,7 +348,7 @@ func resourceLoadBalancerV3Delete(ctx context.Context, d *schema.ResourceData, m
 			return diag.FromErr(err)
 		}
 		publicIpInfo := d.Get("public_ip.0").(map[string]interface{})
-		ipIdToDelete := publicIpInfo["public_ip_id"].(string)
+		ipIdToDelete := publicIpInfo["id"].(string)
 		if err := floatingips.Delete(nwV2Client, ipIdToDelete).ExtractErr(); err != nil {
 			return diag.FromErr(err)
 		}
