@@ -1,0 +1,334 @@
+package v3
+
+import (
+	"context"
+	"log"
+
+	"github.com/hashicorp/go-multierror"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
+	golangsdk "github.com/opentelekomcloud/gophertelekomcloud"
+	"github.com/opentelekomcloud/gophertelekomcloud/openstack/elb/v3/listeners"
+	"github.com/opentelekomcloud/gophertelekomcloud/openstack/elb/v3/loadbalancers"
+	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common"
+	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common/cfg"
+	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common/fmterr"
+)
+
+func ResourceListenerV3() *schema.Resource {
+	return &schema.Resource{
+		CreateContext: resourceListenerV3Create,
+		ReadContext:   resourceListenerV3Read,
+		UpdateContext: resourceListenerV3Update,
+		DeleteContext: resourceListenerV3Delete,
+
+		Schema: map[string]*schema.Schema{
+			"name": {
+				Type:         schema.TypeString,
+				Optional:     true,
+				ValidateFunc: validation.StringLenBetween(0, 255),
+			},
+			"description": {
+				Type:         schema.TypeString,
+				Optional:     true,
+				ValidateFunc: validation.StringLenBetween(0, 255),
+			},
+			"vip_address": {
+				Type:     schema.TypeString,
+				Optional: true,
+				Computed: true,
+			},
+			"router_id": {
+				Type:         schema.TypeString,
+				Optional:     true,
+				ForceNew:     true,
+				AtLeastOneOf: []string{"subnet_id"},
+			},
+			"subnet_id": {
+				Type:         schema.TypeString,
+				Optional:     true,
+				AtLeastOneOf: []string{"router_id"},
+			},
+			"network_ids": {
+				Type:     schema.TypeSet,
+				Required: true,
+				Elem:     &schema.Schema{Type: schema.TypeString},
+			},
+			"ip_target_enable": {
+				Type:     schema.TypeBool,
+				Optional: true,
+				Computed: true,
+			},
+			"l4_flavor": {
+				Type:     schema.TypeString,
+				Optional: true,
+				Computed: true,
+			},
+			"l7_flavor": {
+				Type:     schema.TypeString,
+				Optional: true,
+				Computed: true,
+			},
+			"availability_zones": {
+				Type:     schema.TypeSet,
+				Required: true,
+				ForceNew: true,
+				Elem:     &schema.Schema{Type: schema.TypeString},
+			},
+			"admin_state_up": {
+				Type:         schema.TypeBool,
+				Optional:     true,
+				Default:      true,
+				ValidateFunc: common.ValidateTrueOnly,
+			},
+			"public_ip": {
+				Type:     schema.TypeList,
+				Optional: true,
+				ForceNew: true,
+				MaxItems: 1,
+				Elem: &schema.Resource{
+					Schema: map[string]*schema.Schema{
+						"id": {
+							Type:     schema.TypeString,
+							Computed: true,
+						},
+						"address": {
+							Type:     schema.TypeString,
+							Computed: true,
+						},
+						"ip_type": {
+							Type:     schema.TypeString,
+							Required: true,
+							ForceNew: true,
+							ValidateFunc: validation.StringInSlice([]string{
+								"5_bgp", "5_mailbgp", "5_gray",
+							}, false),
+						},
+						"bandwidth_name": {
+							Type:     schema.TypeString,
+							Required: true,
+							ForceNew: true,
+						},
+						"bandwidth_size": {
+							Type:         schema.TypeInt,
+							Required:     true,
+							ForceNew:     true,
+							ValidateFunc: validation.IntBetween(0, 99999),
+						},
+						"bandwidth_charge_mode": {
+							Type:     schema.TypeString,
+							Optional: true,
+							ForceNew: true,
+							Default:  "traffic",
+							ValidateFunc: validation.StringInSlice([]string{
+								"traffic",
+							}, false),
+						},
+						"bandwidth_share_type": {
+							Type:     schema.TypeString,
+							Required: true,
+							ForceNew: true,
+							ValidateFunc: validation.StringInSlice([]string{
+								"PER", "WHOLE",
+							}, false),
+						},
+					},
+				},
+			},
+			"tags": {
+				Type:         schema.TypeMap,
+				Optional:     true,
+				ForceNew:     true,
+				ValidateFunc: common.ValidateTags,
+			},
+			"vip_port_id": {
+				Type:     schema.TypeString,
+				Computed: true,
+			},
+			"created_at": {
+				Type:     schema.TypeString,
+				Computed: true,
+			},
+			"updated_at": {
+				Type:     schema.TypeString,
+				Computed: true,
+			},
+		},
+	}
+}
+
+func resourceListenerV3Create(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+	config := meta.(*cfg.Config)
+	client, err := common.ClientFromCtx(ctx, keyClient, func() (*golangsdk.ServiceClient, error) {
+		return config.ElbV3Client(config.GetRegion(d))
+	})
+	if err != nil {
+		return diag.FromErr(err)
+	}
+
+	adminStateUp := d.Get("admin_state_up").(bool)
+	createOpts := listeners.CreateOpts{
+		AdminStateUp:           &adminStateUp,
+		CAContainerRef:         "",
+		DefaultPoolID:          "",
+		DefaultTlsContainerRef: "",
+		Description:            d.Get("description").(string),
+		Http2Enable:            nil,
+		LoadbalancerID:         "",
+		Name:                   d.Get("name").(string),
+		ProjectID:              "",
+		Protocol:               "",
+		ProtocolPort:           0,
+		SniContainerRefs:       nil,
+		Tags:                   common.ExpandResourceTags(d.Get("tags").(map[string]interface{})),
+		TlsCiphersPolicy:       "",
+		EnableMemberRetry:      nil,
+		KeepAliveTimeout:       nil,
+		ClientTimeout:          nil,
+		MemberTimeout:          nil,
+		IpGroup:                nil,
+		InsertHeaders:          nil,
+		TransparentClientIP:    nil,
+		EnhanceL7policy:        nil,
+	}
+
+	log.Printf("[DEBUG] Create Options: %#v", createOpts)
+	lb, err := listeners.Create(client, createOpts).Extract()
+	if err != nil {
+		return fmterr.Errorf("error creating LoadBalancerV3: %w", err)
+	}
+
+	d.SetId(lb.ID)
+
+	clientCtx := common.CtxWithClient(ctx, client, keyClient)
+	return resourceListenerV3Read(clientCtx, d, meta)
+}
+
+func resourceListenerV3Read(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+	config := meta.(*cfg.Config)
+	client, err := common.ClientFromCtx(ctx, keyClient, func() (*golangsdk.ServiceClient, error) {
+		return config.ElbV3Client(config.GetRegion(d))
+	})
+	if err != nil {
+		return diag.FromErr(err)
+	}
+
+	lb, err := listeners.Get(client, d.Id()).Extract()
+	if err != nil {
+		return diag.FromErr(common.CheckDeleted(d, err, "loadbalancerV3"))
+	}
+
+	log.Printf("[DEBUG] Retrieved loadbalancer %s: %#v", d.Id(), lb)
+
+	publicIpInfo := make([]map[string]interface{}, len(lb.PublicIps))
+	if len(lb.PublicIps) > 0 {
+		info := d.Get("public_ip.0").(map[string]interface{})
+		info["id"] = lb.PublicIps[0].PublicIpID
+		info["address"] = lb.PublicIps[0].PublicIpAddress
+		publicIpInfo[0] = info
+	}
+
+	mErr := multierror.Append(
+		d.Set("name", lb.Name),
+		d.Set("description", lb.Description),
+		d.Set("vip_address", lb.VipAddress),
+		d.Set("vip_port_id", lb.VipPortID),
+		d.Set("admin_state_up", lb.AdminStateUp),
+		d.Set("router_id", lb.VpcID),
+		d.Set("subnet_id", lb.VipSubnetCidrID),
+		d.Set("ip_target_enable", lb.IpTargetEnable),
+		d.Set("l4_flavor", lb.L4FlavorID),
+		d.Set("l7_flavor", lb.L7FlavorID),
+		d.Set("availability_zones", lb.AvailabilityZoneList),
+		d.Set("network_ids", lb.ElbSubnetIDs),
+		d.Set("public_ip", publicIpInfo),
+		d.Set("created_at", lb.CreatedAt),
+		d.Set("updated_at", lb.UpdatedAt),
+	)
+
+	if err := mErr.ErrorOrNil(); err != nil {
+		return diag.FromErr(err)
+	}
+
+	tagMap := common.TagsToMap(lb.Tags)
+	if err := d.Set("tags", tagMap); err != nil {
+		return fmterr.Errorf("error saving tags for OpenTelekomCloud LoadBalancerV3: %s", err)
+	}
+
+	return nil
+}
+
+func resourceListenerV3Update(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+	config := meta.(*cfg.Config)
+	client, err := common.ClientFromCtx(ctx, keyClient, func() (*golangsdk.ServiceClient, error) {
+		return config.ElbV3Client(config.GetRegion(d))
+	})
+	if err != nil {
+		return diag.FromErr(err)
+	}
+
+	var updateOpts listeners.UpdateOpts
+	if d.HasChange("name") {
+		updateOpts.Name = d.Get("name").(string)
+	}
+	if d.HasChange("description") {
+		description := d.Get("description").(string)
+		updateOpts.Description = &description
+	}
+	if d.HasChange("admin_state_up") {
+		adminStateUp := d.Get("admin_state_up").(bool)
+		updateOpts.AdminStateUp = &adminStateUp
+	}
+	if d.HasChange("network_ids") {
+		updateOpts.ElbSubnetIDs = common.ExpandToStringSlice(d.Get("network_ids").(*schema.Set).List())
+	}
+	if d.HasChange("vip_address") {
+		updateOpts.VipAddress = d.Get("vip_address").(string)
+	}
+	if d.HasChange("l7_flavor") {
+		updateOpts.L7Flavor = d.Get("l7_flavor").(string)
+	}
+	if d.HasChange("l4_flavor") {
+		updateOpts.L4Flavor = d.Get("l4_flavor").(string)
+	}
+	if d.HasChange("subnet_id") {
+		subnetID := d.Get("subnet_id").(string)
+		updateOpts.VipSubnetCidrID = &subnetID
+	}
+	if d.HasChange("ip_target_enable") {
+		ipTargetEnable := d.Get("ip_target_enable").(bool)
+		updateOpts.IpTargetEnable = &ipTargetEnable
+	}
+
+	log.Printf("[DEBUG] Updating loadbalancer %s with options: %#v", d.Id(), updateOpts)
+	_, err = listeners.Update(client, d.Id(), updateOpts).Extract()
+	if err != nil {
+		return fmterr.Errorf("unable to update LoadBalancerV3 %s: %s", d.Id(), err)
+	}
+
+	clientCtx := common.CtxWithClient(ctx, client, keyClient)
+	return resourceLoadBalancerV3Read(clientCtx, d, meta)
+}
+
+func resourceListenerV3Delete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+	config := meta.(*cfg.Config)
+	client, err := common.ClientFromCtx(ctx, keyClient, func() (*golangsdk.ServiceClient, error) {
+		return config.ElbV3Client(config.GetRegion(d))
+	})
+	if err != nil {
+		return diag.FromErr(err)
+	}
+
+	lb, err := listeners.Get(client, d.Id()).Extract()
+	if err != nil {
+		return diag.FromErr(err)
+	}
+
+	log.Printf("[DEBUG] Deleting loadbalancer %s", d.Id())
+	if err := listeners.Delete(client, d.Id()).ExtractErr(); err != nil {
+		return fmterr.Errorf("unable to delete LoadBalancerV3 %s: %s", d.Id(), err)
+	}
+
+	return nil
+}
