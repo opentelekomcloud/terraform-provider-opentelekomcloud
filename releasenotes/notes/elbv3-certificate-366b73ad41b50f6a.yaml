@@ -1,0 +1,4 @@
+---
+features:
+  - |
+    **New Resource:** ``opentelekomcloud_lb_certificate_v3`` (`#1505 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/1505>`_)
