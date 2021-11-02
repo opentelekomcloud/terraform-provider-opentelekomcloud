@@ -124,6 +124,9 @@ var (
 	Volume = FromEnv("OS_VOLUME_QUOTA", 50)
 	// VolumeSize - quota for block storage total size, GB
 	VolumeSize = FromEnv("OS_VOLUME_SIZE_QUOTA", 12500)
+
+	// LoadBalancer - quota for load balancer instances
+	LoadBalancer = FromEnv("OS_LB_QUOTA", 50)
 )
 
 // ExpectedQuota is a simple container of quota + count used for `Multiple` operations
