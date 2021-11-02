@@ -25,6 +25,7 @@
         - golangci-lint:
             vars:
               golangci_lint_version: 1.41.1
+            nodeset: fedora-pod
         - golang-make-test
         - golang-make-vet
         - tflint
@@ -38,6 +39,7 @@
         - golangci-lint:
             vars:
               golangci_lint_version: 1.41.1
+            nodeset: fedora-pod
         - golang-make-test
         - golang-make-vet
         - tflint
