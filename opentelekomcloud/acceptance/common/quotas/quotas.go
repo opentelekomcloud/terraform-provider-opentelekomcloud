@@ -127,6 +127,8 @@ var (
 
 	// LoadBalancer - quota for load balancer instances
 	LoadBalancer = FromEnv("OS_LB_QUOTA", 50)
+	// LbCertificate - quota for load balancer certificates
+	LbCertificate = FromEnv("OS_LB_CERTIFICATE_QUOTA", 120)
 )
 
 // ExpectedQuota is a simple container of quota + count used for `Multiple` operations
