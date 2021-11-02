@@ -132,8 +132,9 @@ func resourceCertificateV3Read(ctx context.Context, d *schema.ResourceData, meta
 		d.Set("certificate", cert.Certificate),
 		d.Set("private_key", cert.PrivateKey),
 		d.Set("type", cert.Type),
-		d.Set("created_at", cert.CreateTime),
-		d.Set("updated_at", cert.UpdateTime),
+		d.Set("created_at", cert.CreatedAt),
+		d.Set("updated_at", cert.UpdatedAt),
+		d.Set("expire_time", cert.ExpireTime),
 		d.Set("region", config.GetRegion(d)),
 	)
 
