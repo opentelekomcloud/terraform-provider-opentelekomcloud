@@ -75,6 +75,10 @@ func ResourceCertificateV3() *schema.Resource {
 				Type:     schema.TypeString,
 				Computed: true,
 			},
+			"expire_time": {
+				Type:     schema.TypeString,
+				Computed: true,
+			},
 		},
 	}
 }
