@@ -362,6 +362,7 @@ func Provider() *schema.Provider {
 			"opentelekomcloud_kms_grant_v1":                       kms.ResourceKmsGrantV1(),
 			"opentelekomcloud_kms_key_v1":                         kms.ResourceKmsKeyV1(),
 			"opentelekomcloud_lb_certificate_v2":                  elbv2.ResourceCertificateV2(),
+			"opentelekomcloud_lb_certificate_v3":                  elbv3.ResourceCertificateV3(),
 			"opentelekomcloud_lb_l7policy_v2":                     elbv2.ResourceL7PolicyV2(),
 			"opentelekomcloud_lb_l7rule_v2":                       elbv2.ResourceL7RuleV2(),
 			"opentelekomcloud_lb_loadbalancer_v2":                 elbv2.ResourceLoadBalancerV2(),
