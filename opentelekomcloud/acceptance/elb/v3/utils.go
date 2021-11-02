@@ -8,9 +8,3 @@ func lbQuotas() []*quotas.ExpectedQuota {
 		{Q: quotas.FloatingIP, Count: 1},
 	}
 }
-
-func lbCertificateQuotas() []*quotas.ExpectedQuota {
-	return []*quotas.ExpectedQuota{
-		{Q: quotas.LbCertificate, Count: 1},
-	}
-}

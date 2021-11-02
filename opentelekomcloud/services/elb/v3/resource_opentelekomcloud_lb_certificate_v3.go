@@ -2,19 +2,14 @@ package v3
 
 import (
 	"context"
-	"encoding/json"
-	"fmt"
 	"log"
-	"time"
 
 	"github.com/hashicorp/go-multierror"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
-	golangsdk "github.com/opentelekomcloud/gophertelekomcloud"
+	"github.com/opentelekomcloud/gophertelekomcloud"
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/elb/v3/certificates"
-	"github.com/opentelekomcloud/gophertelekomcloud/openstack/elb/v3/listeners"
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common"
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common/cfg"
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common/fmterr"
@@ -27,9 +22,8 @@ func ResourceCertificateV3() *schema.Resource {
 		UpdateContext: resourceCertificateV3Update,
 		DeleteContext: resourceCertificateV3Delete,
 
-		Timeouts: &schema.ResourceTimeout{
-			Update: schema.DefaultTimeout(10 * time.Minute),
-			Delete: schema.DefaultTimeout(10 * time.Minute),
+		Importer: &schema.ResourceImporter{
+			StateContext: schema.ImportStatePassthroughContext,
 		},
 
 		Schema: map[string]*schema.Schema{
@@ -91,7 +85,7 @@ func resourceCertificateV3Create(ctx context.Context, d *schema.ResourceData, me
 		return config.ElbV3Client(config.GetRegion(d))
 	})
 	if err != nil {
-		return diag.FromErr(err)
+		return fmterr.Errorf(ErrCreateClient, err)
 	}
 
 	createOpts := certificates.CreateOpts{
@@ -122,7 +116,7 @@ func resourceCertificateV3Read(ctx context.Context, d *schema.ResourceData, meta
 		return config.ElbV3Client(config.GetRegion(d))
 	})
 	if err != nil {
-		return diag.FromErr(err)
+		return fmterr.Errorf(ErrCreateClient, err)
 	}
 
 	cert, err := certificates.Get(client, d.Id()).Extract()
@@ -179,16 +173,9 @@ func resourceCertificateV3Update(ctx context.Context, d *schema.ResourceData, me
 
 	log.Printf("[DEBUG] Updating certificate %s with options: %#v", d.Id(), updateOpts)
 
-	timeout := d.Timeout(schema.TimeoutUpdate)
-	err = resource.RetryContext(ctx, timeout, func() *resource.RetryError {
-		_, err := certificates.Update(client, d.Id(), updateOpts).Extract()
-		if err != nil {
-			return common.CheckForRetryableError(err)
-		}
-		return nil
-	})
+	_, err = certificates.Update(client, d.Id(), updateOpts).Extract()
 	if err != nil {
-		return fmterr.Errorf("error updating certificate %s: %s", d.Id(), err)
+		return fmterr.Errorf("error updating the certificate: %w", err)
 	}
 
 	clientCtx := common.CtxWithClient(ctx, client, keyClient)
@@ -201,77 +188,13 @@ func resourceCertificateV3Delete(ctx context.Context, d *schema.ResourceData, me
 		return config.ElbV3Client(config.GetRegion(d))
 	})
 	if err != nil {
-		return diag.FromErr(err)
+		return fmterr.Errorf(ErrCreateClient, err)
 	}
 
 	log.Printf("[DEBUG] Deleting certificate: %s", d.Id())
-	timeout := d.Timeout(schema.TimeoutDelete)
 	if err := certificates.Delete(client, d.Id()).ExtractErr(); err != nil {
-		return diag.FromErr(resource.RetryContext(ctx, timeout, func() *resource.RetryError {
-			if err := handleCertificateDeletionError(ctx, d, client, err); err != nil {
-				return resource.RetryableError(err)
-			}
-			return nil
-		}))
+		return fmterr.Errorf("error deleting the certificate: %w", err)
 	}
 
-	return nil
-}
-
-func handleCertificateDeletionError(ctx context.Context, d *schema.ResourceData, client *golangsdk.ServiceClient, err error) error {
-	if common.IsResourceNotFound(err) {
-		log.Printf("[INFO] deleting an unavailable certificate: %s", d.Id())
-		return nil
-	}
-
-	err409, ok := err.(golangsdk.ErrDefault409)
-	if !ok {
-		return fmt.Errorf("error deleting certificate %s: %w", d.Id(), err)
-	}
-	var dep struct {
-		ListenerIDs []string `json:"listener_ids"`
-	}
-	if err := json.Unmarshal(err409.Body, &dep); err != nil {
-		return fmt.Errorf("error loading assigned listeners: %w", err)
-	}
-
-	mErr := new(multierror.Error)
-	for _, listenerID := range dep.ListenerIDs {
-		mErr = multierror.Append(mErr,
-			unAssignCert(ctx, client, d.Id(), listenerID),
-		)
-	}
-	if err := mErr.ErrorOrNil(); err != nil {
-		return err
-	}
-
-	log.Printf("[DEBUG] Retry deleting certificate %s", d.Id())
-
-	if err := certificates.Delete(client, d.Id()).ExtractErr(); err != nil {
-		return err
-	}
-
-	return nil
-}
-
-func unAssignCert(_ context.Context, client *golangsdk.ServiceClient, certID, listenerID string) error {
-	listener, err := listeners.Get(client, listenerID).Extract()
-	if err != nil {
-		return fmt.Errorf("failed to get listener %s: %w", listenerID, err)
-	}
-
-	otherCerts := make([]string, 0)
-	for _, cert := range listener.SniContainerRefs {
-		if cert != certID {
-			otherCerts = append(otherCerts, cert)
-		}
-	}
-	opts := listeners.UpdateOpts{
-		SniContainerRefs: &otherCerts,
-	}
-	_, err = listeners.Update(client, listener.ID, opts).Extract()
-	if err != nil {
-		return fmt.Errorf("error unassigning certificate %s from listener %s: %w", certID, listener.ID, err)
-	}
 	return nil
 }
