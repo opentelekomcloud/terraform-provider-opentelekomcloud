@@ -89,11 +89,11 @@ func ResourceLoadBalancerV3() *schema.Resource {
 				MaxItems: 1,
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
-						"public_ip_id": {
+						"id": {
 							Type:     schema.TypeString,
 							Computed: true,
 						},
-						"public_ip_address": {
+						"address": {
 							Type:     schema.TypeString,
 							Computed: true,
 						},
@@ -233,11 +233,11 @@ func resourceLoadBalancerV3Read(ctx context.Context, d *schema.ResourceData, met
 	log.Printf("[DEBUG] Retrieved loadbalancer %s: %#v", d.Id(), lb)
 
 	publicIpInfo := make([]map[string]interface{}, len(lb.PublicIps))
-	for i, v := range lb.PublicIps {
-		publicIpInfo[i] = map[string]interface{}{
-			"public_ip_id":      v.PublicIpID,
-			"public_ip_address": v.PublicIpAddress,
-		}
+	if len(lb.PublicIps) > 0 {
+		info := d.Get("public_ip.0").(map[string]interface{})
+		info["id"] = lb.PublicIps[0].PublicIpID
+		info["address"] = lb.PublicIps[0].PublicIpAddress
+		publicIpInfo[0] = info
 	}
 
 	mErr := multierror.Append(
@@ -343,13 +343,13 @@ func resourceLoadBalancerV3Delete(ctx context.Context, d *schema.ResourceData, m
 
 	if len(lb.PublicIps) > 0 {
 		config := meta.(*cfg.Config)
-		nwV1Client, err := config.NetworkingV2Client(config.GetRegion(d))
+		nwV2Client, err := config.NetworkingV2Client(config.GetRegion(d))
 		if err != nil {
 			return diag.FromErr(err)
 		}
-		publicIpInfo := d.Get("public_ip").([]interface{})[0].(map[string]interface{})
+		publicIpInfo := d.Get("public_ip.0").(map[string]interface{})
 		ipIdToDelete := publicIpInfo["public_ip_id"].(string)
-		if err := floatingips.Delete(nwV1Client, ipIdToDelete).ExtractErr(); err != nil {
+		if err := floatingips.Delete(nwV2Client, ipIdToDelete).ExtractErr(); err != nil {
 			return diag.FromErr(err)
 		}
 	}
