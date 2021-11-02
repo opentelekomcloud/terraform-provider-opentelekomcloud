@@ -77,3 +77,11 @@ In addition, the following attributes are exported:
 * `createa_at` - Indicates the creation time.
 
 * `expire_time` - Indicates the expiration time.
+
+## Import
+
+Certificates can be imported using the `id`, e.g.
+
+```shell
+terraform import opentelekomcloud_lb_certificate_v3.certificate_1 7117d38e-4c8f-4624-a505-bd96b97d024c
+```
