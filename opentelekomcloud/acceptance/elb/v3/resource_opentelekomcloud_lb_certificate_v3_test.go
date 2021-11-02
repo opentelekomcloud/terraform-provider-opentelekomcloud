@@ -91,7 +91,7 @@ func TestAccLBV3Certificate_basic(t *testing.T) {
 	})
 }
 
-func TestAccLBv3CertificateImportBasic(t *testing.T) {
+func TestAccLBv3Certificate_importBasic(t *testing.T) {
 	t.Parallel()
 	th.AssertNoErr(t, quotas.LbCertificate.Acquire())
 	defer quotas.LbCertificate.Release()
