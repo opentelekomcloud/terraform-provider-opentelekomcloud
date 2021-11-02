@@ -13,7 +13,6 @@ Manages a Dedicated loadbalancer resource within OpenTelekomCloud.
 ```hcl
 resource "opentelekomcloud_lb_loadbalancer_v3" "lb_1" {
   router_id   = var.router_id
-  subnet_id   = var.subnet_id
   network_ids = [var.network_id]
 
   availability_zones = [var.az]
@@ -44,7 +43,6 @@ resource "opentelekomcloud_vpc_subnet_v1" "this" {
 }
 
 resource "opentelekomcloud_lb_loadbalancer_v3" "lb_1" {
-  router_id   = opentelekomcloud_vpc_subnet_v1.this.vpc_id
   subnet_id   = opentelekomcloud_vpc_subnet_v1.this.subnet_id
   network_ids = [opentelekomcloud_vpc_subnet_v1.this.network_id]
 
@@ -57,7 +55,6 @@ resource "opentelekomcloud_lb_loadbalancer_v3" "lb_1" {
 ```hcl
 resource "opentelekomcloud_lb_loadbalancer_v3" "lb_1" {
   name        = "example-loadbalancer"
-  router_id   = var.router_id
   subnet_id   = var.subnet_id
   network_ids = [var.network_id]
 
@@ -76,7 +73,7 @@ resource "opentelekomcloud_lb_loadbalancer_v3" "lb_1" {
 The following arguments are supported:
 
 * `router_id` - (Optional) ID of the router (or VPC) this LoadBalancer belongs to. Changing
-  this creates a new loadbalancer.
+  this creates a new LoadBalancer.
 
 * `subnet_id` - (Optional) The ID of the subnet to which the LoadBalancer belongs.
 
@@ -90,6 +87,8 @@ The following arguments are supported:
 
 * `vip_address` - (Optional) The ip address of the LoadBalancer. Changing this creates a new LoadBalancer.
 
+-> Specify both `subnet_id` and `vip_address` if you want to bind a private IPv4 address to the load balancer.
+
 * `admin_state_up` - (Optional) The administrative state of the LoadBalancer. A valid value is only `true` (UP).
 
 * `ip_target_enable` - (Optional) The value can be `true` (enabled) or `false` (disabled).
@@ -99,10 +98,12 @@ The following arguments are supported:
 * `l7_flavor` - (Optional) The ID of the Layer-7 flavor.
 
 * `availability_zones` - (Required) Specifies the availability zones where the LoadBalancer will be located.
-  Changing this will create a new resource.
+  Changing this creates a new LoadBalancer.
 
 * `public_ip` - (Optional) The elastic IP address of the instance. The `public_ip` structure
-  is described below. Changing this will create a new resource.
+  is described below. Changing this creates a new LoadBalancer.
+
+-> Specify `public_ip` and either `router_id` or `subnet_id` if you want to bind a new IPv4 EIP to the load balancer.
 
 The `public_ip` block supports:
 
