@@ -73,7 +73,7 @@ The following arguments are supported:
 * `name` - (Optional) Human-readable name for the loadbalancer. Does not have
   to be unique.
 
-* `description` - (Optional) Human-readable description for the loadbalancer.
+* `description` - (Optional) Provides supplementary information about the load balancer.
 
 * `tenant_id` - (Optional) Required for admins. The UUID of the tenant who owns
   the Loadbalancer.  Only administrative users can specify a tenant UUID
