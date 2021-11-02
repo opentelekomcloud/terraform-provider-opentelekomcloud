@@ -61,7 +61,7 @@ func TestAccLBV3Certificate_basic(t *testing.T) {
 	resource.Test(t, resource.TestCase{
 		PreCheck:          func() { common.TestAccPreCheck(t) },
 		ProviderFactories: common.TestAccProviderFactories,
-		CheckDestroy:      testAccCheckLBV2CertificateDestroy,
+		CheckDestroy:      testAccCheckLBV3CertificateDestroy,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccLBv3CertificateConfigBasic,
@@ -91,7 +91,29 @@ func TestAccLBV3Certificate_basic(t *testing.T) {
 	})
 }
 
-func testAccCheckLBV2CertificateDestroy(s *terraform.State) error {
+func TestAccLBv3CertificateImportBasic(t *testing.T) {
+	t.Parallel()
+	th.AssertNoErr(t, quotas.LbCertificate.Acquire())
+	defer quotas.LbCertificate.Release()
+
+	resource.Test(t, resource.TestCase{
+		PreCheck:          func() { common.TestAccPreCheck(t) },
+		ProviderFactories: common.TestAccProviderFactories,
+		CheckDestroy:      testAccCheckLBV3CertificateDestroy,
+		Steps: []resource.TestStep{
+			{
+				Config: testAccLBv3CertificateConfigBasic,
+			},
+			{
+				ResourceName:      resourceCertificateName,
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+		},
+	})
+}
+
+func testAccCheckLBV3CertificateDestroy(s *terraform.State) error {
 	config := common.TestAccProvider.Meta().(*cfg.Config)
 	client, err := config.ElbV3Client(env.OS_REGION_NAME)
 	if err != nil {

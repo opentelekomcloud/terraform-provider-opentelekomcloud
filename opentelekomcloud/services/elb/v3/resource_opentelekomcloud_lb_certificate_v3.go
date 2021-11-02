@@ -150,7 +150,7 @@ func resourceCertificateV3Update(ctx context.Context, d *schema.ResourceData, me
 		return config.ElbV3Client(config.GetRegion(d))
 	})
 	if err != nil {
-		return diag.FromErr(err)
+		return fmterr.Errorf(ErrCreateClient, err)
 	}
 
 	var updateOpts certificates.UpdateOpts
