@@ -81,9 +81,9 @@ The following arguments are supported:
 
 * `network_ids` - (Required) Specifies the subnet Network ID.
 
-* `name` - (Optional) Human-readable name for the LoadBalancer.
+* `name` - (Optional) The LoadBalancer name.
 
-* `description` - (Optional) Human-readable description for the LoadBalancer.
+* `description` - (Optional) Provides supplementary information about the load balancer.
 
 * `vip_address` - (Optional) The ip address of the LoadBalancer. Changing this creates a new LoadBalancer.
 
