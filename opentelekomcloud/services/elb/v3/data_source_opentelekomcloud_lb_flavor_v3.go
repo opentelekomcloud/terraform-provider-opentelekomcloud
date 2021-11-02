@@ -59,7 +59,7 @@ func dataSourceLBFlavorV3Read(_ context.Context, d *schema.ResourceData, meta in
 	config := meta.(*cfg.Config)
 	client, err := config.ElbV3Client(config.GetRegion(d))
 	if err != nil {
-		return fmterr.Errorf(errCreateClient, err)
+		return fmterr.Errorf(ErrCreateClient, err)
 	}
 
 	id := d.Get("id").(string)
