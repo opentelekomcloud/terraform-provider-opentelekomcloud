@@ -1,0 +1,4 @@
+---
+features:
+  - |
+    **New Resource:** ``opentelekomcloud_lb_listener_v3`` (`#1508 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/1508>`_)

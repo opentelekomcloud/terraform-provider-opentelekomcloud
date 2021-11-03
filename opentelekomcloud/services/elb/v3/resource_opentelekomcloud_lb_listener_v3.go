@@ -78,7 +78,12 @@ func ResourceListenerV3() *schema.Resource {
 				ForceNew:     true,
 				ValidateFunc: validation.IsPortNumber,
 			},
-			"tls_cipher_policy": {
+			"sni_container_refs": {
+				Type:     schema.TypeSet,
+				Optional: true,
+				Elem:     &schema.Schema{Type: schema.TypeString},
+			},
+			"tls_ciphers_policy": {
 				Type:     schema.TypeString,
 				Optional: true,
 				ValidateFunc: validation.StringInSlice([]string{
@@ -176,9 +181,6 @@ func resourceListenerV3Create(ctx context.Context, d *schema.ResourceData, meta 
 	adminStateUp := d.Get("admin_state_up").(bool)
 	http2Enable := d.Get("http2_enable").(bool)
 	memoryRetryEnable := d.Get("memory_retry_enable").(bool)
-	keepAliveTimeout := d.Get("keep_alive_timeout").(int)
-	clientTimeout := d.Get("client_timeout").(int)
-	memberTimeout := d.Get("member_timeout").(int)
 	createOpts := listeners.CreateOpts{
 		AdminStateUp:           &adminStateUp,
 		CAContainerRef:         d.Get("client_ca_tls_container_ref").(string),
@@ -188,15 +190,15 @@ func resourceListenerV3Create(ctx context.Context, d *schema.ResourceData, meta 
 		Http2Enable:            &http2Enable,
 		LoadbalancerID:         d.Get("loadbalancer_id").(string),
 		Name:                   d.Get("name").(string),
-		Protocol:               d.Get("protocol").(listeners.Protocol),
+		Protocol:               listeners.Protocol(d.Get("protocol").(string)),
 		ProtocolPort:           d.Get("protocol_port").(int),
-		SniContainerRefs:       common.ExpandToStringSlice(d.Get("sni_container_ref").(*schema.Set).List()),
+		SniContainerRefs:       common.ExpandToStringSlice(d.Get("sni_container_refs").(*schema.Set).List()),
 		Tags:                   common.ExpandResourceTags(d.Get("tags").(map[string]interface{})),
-		TlsCiphersPolicy:       d.Get("tls_cipher_policy").(string),
+		TlsCiphersPolicy:       d.Get("tls_ciphers_policy").(string),
 		EnableMemberRetry:      &memoryRetryEnable,
-		KeepAliveTimeout:       &keepAliveTimeout,
-		ClientTimeout:          &clientTimeout,
-		MemberTimeout:          &memberTimeout,
+		KeepAliveTimeout:       d.Get("keep_alive_timeout").(int),
+		ClientTimeout:          d.Get("client_timeout").(int),
+		MemberTimeout:          d.Get("member_timeout").(int),
 		InsertHeaders:          getInsertHeaders(d),
 	}
 
@@ -281,7 +283,8 @@ func resourceListenerV3Update(ctx context.Context, d *schema.ResourceData, meta 
 
 	var updateOpts listeners.UpdateOpts
 	if d.HasChange("name") {
-		updateOpts.Name = d.Get("name").(string)
+		name := d.Get("name").(string)
+		updateOpts.Name = &name
 	}
 	if d.HasChange("description") {
 		description := d.Get("description").(string)
@@ -322,16 +325,14 @@ func resourceListenerV3Update(ctx context.Context, d *schema.ResourceData, meta 
 		updateOpts.EnableMemberRetry = &memberRetryEnable
 	}
 	if d.HasChange("keepalive_timeout") {
-		keepaliveTimeout := d.Get("keepalive_timeout").(int)
-		updateOpts.KeepAliveTimeout = &keepaliveTimeout
+		updateOpts.KeepAliveTimeout = d.Get("keepalive_timeout").(int)
 	}
 	if d.HasChange("client_timeout") {
-		clientTimeout := d.Get("client_timeout").(int)
-		updateOpts.ClientTimeout = &clientTimeout
+		updateOpts.ClientTimeout = d.Get("client_timeout").(int)
+
 	}
 	if d.HasChange("member_timeout") {
-		memberTimeout := d.Get("member_timeout").(int)
-		updateOpts.MemberTimeout = &memberTimeout
+		updateOpts.MemberTimeout = d.Get("member_timeout").(int)
 	}
 
 	log.Printf("[DEBUG] Updating listener %s with options: %#v", d.Id(), updateOpts)
