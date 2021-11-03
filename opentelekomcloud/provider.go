@@ -371,6 +371,7 @@ func Provider() *schema.Provider {
 			"opentelekomcloud_lb_member_v2":                       elbv2.ResourceMemberV2(),
 			"opentelekomcloud_lb_monitor_v2":                      elbv2.ResourceMonitorV2(),
 			"opentelekomcloud_lb_pool_v2":                         elbv2.ResourceLBPoolV2(),
+			"opentelekomcloud_lb_pool_v3":                         elbv3.ResourceLBPoolV3(),
 			"opentelekomcloud_lb_whitelist_v2":                    elbv2.ResourceWhitelistV2(),
 			"opentelekomcloud_logtank_group_v2":                   lts.ResourceLTSGroupV2(),
 			"opentelekomcloud_logtank_topic_v2":                   lts.ResourceLTSTopicV2(),
