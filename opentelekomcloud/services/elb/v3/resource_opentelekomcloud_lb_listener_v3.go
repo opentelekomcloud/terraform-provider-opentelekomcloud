@@ -329,8 +329,8 @@ func resourceListenerV3Update(ctx context.Context, d *schema.ResourceData, meta 
 		memberRetryEnable := d.Get("member_retry_enable").(bool)
 		updateOpts.EnableMemberRetry = &memberRetryEnable
 	}
-	if d.HasChange("keepalive_timeout") {
-		updateOpts.KeepAliveTimeout = d.Get("keepalive_timeout").(int)
+	if d.HasChange("keep_alive_timeout") {
+		updateOpts.KeepAliveTimeout = d.Get("keep_alive_timeout").(int)
 	}
 	if d.HasChange("client_timeout") {
 		updateOpts.ClientTimeout = d.Get("client_timeout").(int)
@@ -347,7 +347,7 @@ func resourceListenerV3Update(ctx context.Context, d *schema.ResourceData, meta 
 	}
 
 	clientCtx := common.CtxWithClient(ctx, client, keyClient)
-	return resourceLoadBalancerV3Read(clientCtx, d, meta)
+	return resourceListenerV3Read(clientCtx, d, meta)
 }
 
 func resourceListenerV3Delete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
