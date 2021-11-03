@@ -50,7 +50,7 @@ The following arguments are supported:
   * `forwarded_for_port` - (Optional) Specifies whether to transparently transmit the source port of
   the client to backend servers. If `forwarded_for_port` is set to `true`, the source port of the
   client will be stored in the HTTP header and passed to backend servers.
-  * `forwarded_host` - (Required) Specifies whether to rewrite the `X-Forwarded-Host` header.
+  * `forwarded_host` - (Optional) Specifies whether to rewrite the `X-Forwarded-Host` header.
   If `forwarded_host` is set to `true`, `X-Forwarded-Host` in the request header from the clients
   can be set to Host in the request header sent from the load balancer to backend servers.
 
