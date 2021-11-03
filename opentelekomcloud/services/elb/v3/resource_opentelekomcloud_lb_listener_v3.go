@@ -10,7 +10,6 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 	golangsdk "github.com/opentelekomcloud/gophertelekomcloud"
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/elb/v3/listeners"
-	"github.com/opentelekomcloud/gophertelekomcloud/openstack/elb/v3/loadbalancers"
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common"
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common/cfg"
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common/fmterr"
@@ -34,104 +33,94 @@ func ResourceListenerV3() *schema.Resource {
 				Optional:     true,
 				ValidateFunc: validation.StringLenBetween(0, 255),
 			},
-			"vip_address": {
-				Type:     schema.TypeString,
-				Optional: true,
-				Computed: true,
-			},
-			"router_id": {
-				Type:         schema.TypeString,
-				Optional:     true,
-				ForceNew:     true,
-				AtLeastOneOf: []string{"subnet_id"},
-			},
-			"subnet_id": {
-				Type:         schema.TypeString,
-				Optional:     true,
-				AtLeastOneOf: []string{"router_id"},
-			},
-			"network_ids": {
-				Type:     schema.TypeSet,
-				Required: true,
-				Elem:     &schema.Schema{Type: schema.TypeString},
-			},
-			"ip_target_enable": {
-				Type:     schema.TypeBool,
-				Optional: true,
-				Computed: true,
-			},
-			"l4_flavor": {
-				Type:     schema.TypeString,
-				Optional: true,
-				Computed: true,
-			},
-			"l7_flavor": {
-				Type:     schema.TypeString,
-				Optional: true,
-				Computed: true,
-			},
-			"availability_zones": {
-				Type:     schema.TypeSet,
-				Required: true,
-				ForceNew: true,
-				Elem:     &schema.Schema{Type: schema.TypeString},
-			},
 			"admin_state_up": {
 				Type:         schema.TypeBool,
 				Optional:     true,
 				Default:      true,
 				ValidateFunc: common.ValidateTrueOnly,
 			},
-			"public_ip": {
+			"client_ca_tls_container_ref": {
+				Type:     schema.TypeString,
+				Optional: true,
+			},
+			"default_pool_id": {
+				Type:     schema.TypeString,
+				Optional: true,
+			},
+			"default_tls_container_ref": {
+				Type:     schema.TypeString,
+				Optional: true,
+			},
+			"http2_enable": {
+				Type:     schema.TypeBool,
+				Optional: true,
+			},
+			"loadbalancer_id": {
+				Type:     schema.TypeString,
+				Required: true,
+				ForceNew: true,
+			},
+			"protocol": {
+				Type:     schema.TypeString,
+				Required: true,
+				ForceNew: true,
+				ValidateFunc: validation.StringInSlice([]string{
+					"TCP", "HTTP", "UDP", "HTTPS",
+				}, false),
+			},
+			"protocol_port": {
+				Type:         schema.TypeInt,
+				Required:     true,
+				ForceNew:     true,
+				ValidateFunc: validation.IsPortNumber,
+			},
+			"tls_cipher_policy": {
+				Type:     schema.TypeString,
+				Optional: true,
+				ValidateFunc: validation.StringInSlice([]string{
+					"tls-1-0", "tls-1-1", "tls-1-2", "tls-1-2-strict",
+				}, false),
+			},
+			"memory_retry_enable": {
+				Type:     schema.TypeBool,
+				Optional: true,
+			},
+			"keep_alive_timeout": {
+				Type:         schema.TypeInt,
+				Optional:     true,
+				ValidateFunc: validation.IntBetween(0, 4000),
+			},
+			"client_timeout": {
+				Type:         schema.TypeInt,
+				Optional:     true,
+				ValidateFunc: validation.IntBetween(1, 300),
+			},
+			"member_timeout": {
+				Type:         schema.TypeInt,
+				Optional:     true,
+				ValidateFunc: validation.IntBetween(1, 300),
+			},
+			"insert_headers": {
 				Type:     schema.TypeList,
 				Optional: true,
-				ForceNew: true,
 				MaxItems: 1,
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
-						"id": {
-							Type:     schema.TypeString,
-							Computed: true,
-						},
-						"address": {
-							Type:     schema.TypeString,
-							Computed: true,
-						},
-						"ip_type": {
-							Type:     schema.TypeString,
-							Required: true,
-							ForceNew: true,
-							ValidateFunc: validation.StringInSlice([]string{
-								"5_bgp", "5_mailbgp", "5_gray",
-							}, false),
-						},
-						"bandwidth_name": {
-							Type:     schema.TypeString,
-							Required: true,
-							ForceNew: true,
-						},
-						"bandwidth_size": {
-							Type:         schema.TypeInt,
-							Required:     true,
-							ForceNew:     true,
-							ValidateFunc: validation.IntBetween(0, 99999),
-						},
-						"bandwidth_charge_mode": {
-							Type:     schema.TypeString,
+						"forward_elb_ip": {
+							Type:     schema.TypeBool,
 							Optional: true,
-							ForceNew: true,
-							Default:  "traffic",
-							ValidateFunc: validation.StringInSlice([]string{
-								"traffic",
-							}, false),
 						},
-						"bandwidth_share_type": {
-							Type:     schema.TypeString,
+						"forwarded_port": {
+							Type:     schema.TypeBool,
+							Optional: true,
+						},
+						"forwarded_for_port": {
+							Type:     schema.TypeBool,
+							Optional: true,
+						},
+						"forwarded_host": {
+							Type:     schema.TypeBool,
 							Required: true,
-							ForceNew: true,
-							ValidateFunc: validation.StringInSlice([]string{
-								"PER", "WHOLE",
-							}, false),
 						},
 					},
 				},
@@ -141,10 +130,6 @@ func ResourceListenerV3() *schema.Resource {
 				Optional:     true,
 				ForceNew:     true,
 				ValidateFunc: common.ValidateTags,
-			},
-			"vip_port_id": {
-				Type:     schema.TypeString,
-				Computed: true,
 			},
 			"created_at": {
 				Type:     schema.TypeString,
@@ -158,6 +143,23 @@ func ResourceListenerV3() *schema.Resource {
 	}
 }
 
+func getInsertHeaders(d *schema.ResourceData) *listeners.InsertHeaders {
+	if d.Get("insert_headers.#").(int) == 0 {
+		return nil
+	}
+	insertHeaders := d.Get("insert_headers.0").(map[string]interface{})
+	forwardELBIp := insertHeaders["forward_elb_ip"].(bool)
+	forwardedPort := insertHeaders["forwarded_port"].(bool)
+	forwardedForPort := insertHeaders["forwarded_for_port"].(bool)
+	forwardedHost := insertHeaders["forwarded_host"].(bool)
+	return &listeners.InsertHeaders{
+		ForwardedELBIP:   &forwardELBIp,
+		ForwardedPort:    &forwardedPort,
+		ForwardedForPort: &forwardedForPort,
+		ForwardedHost:    &forwardedHost,
+	}
+}
+
 func resourceListenerV3Create(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*cfg.Config)
 	client, err := common.ClientFromCtx(ctx, keyClient, func() (*golangsdk.ServiceClient, error) {
@@ -168,29 +170,30 @@ func resourceListenerV3Create(ctx context.Context, d *schema.ResourceData, meta 
 	}
 
 	adminStateUp := d.Get("admin_state_up").(bool)
+	http2Enable := d.Get("http2_enable").(bool)
+	memoryRetryEnable := d.Get("memory_retry_enable").(bool)
+	keepAliveTimeout := d.Get("keep_alive_timeout").(int)
+	clientTimeout := d.Get("client_timeout").(int)
+	memberTimeout := d.Get("member_timeout").(int)
 	createOpts := listeners.CreateOpts{
 		AdminStateUp:           &adminStateUp,
-		CAContainerRef:         "",
-		DefaultPoolID:          "",
-		DefaultTlsContainerRef: "",
+		CAContainerRef:         d.Get("client_ca_tls_container_ref").(string),
+		DefaultPoolID:          d.Get("default_pool_id").(string),
+		DefaultTlsContainerRef: d.Get("default_tls_container_ref").(string),
 		Description:            d.Get("description").(string),
-		Http2Enable:            nil,
-		LoadbalancerID:         "",
+		Http2Enable:            &http2Enable,
+		LoadbalancerID:         d.Get("loadbalancer_id").(string),
 		Name:                   d.Get("name").(string),
-		ProjectID:              "",
-		Protocol:               "",
-		ProtocolPort:           0,
-		SniContainerRefs:       nil,
+		Protocol:               d.Get("protocol").(listeners.Protocol),
+		ProtocolPort:           d.Get("protocol_port").(int),
+		SniContainerRefs:       common.ExpandToStringSlice(d.Get("sni_container_ref").(*schema.Set).List()),
 		Tags:                   common.ExpandResourceTags(d.Get("tags").(map[string]interface{})),
-		TlsCiphersPolicy:       "",
-		EnableMemberRetry:      nil,
-		KeepAliveTimeout:       nil,
-		ClientTimeout:          nil,
-		MemberTimeout:          nil,
-		IpGroup:                nil,
-		InsertHeaders:          nil,
-		TransparentClientIP:    nil,
-		EnhanceL7policy:        nil,
+		TlsCiphersPolicy:       d.Get("tls_cipher_policy").(string),
+		EnableMemberRetry:      &memoryRetryEnable,
+		KeepAliveTimeout:       &keepAliveTimeout,
+		ClientTimeout:          &clientTimeout,
+		MemberTimeout:          &memberTimeout,
+		InsertHeaders:          getInsertHeaders(d),
 	}
 
 	log.Printf("[DEBUG] Create Options: %#v", createOpts)
@@ -214,46 +217,40 @@ func resourceListenerV3Read(ctx context.Context, d *schema.ResourceData, meta in
 		return diag.FromErr(err)
 	}
 
-	lb, err := listeners.Get(client, d.Id()).Extract()
+	listener, err := listeners.Get(client, d.Id()).Extract()
 	if err != nil {
-		return diag.FromErr(common.CheckDeleted(d, err, "loadbalancerV3"))
+		return diag.FromErr(common.CheckDeleted(d, err, "listenerV3"))
 	}
 
-	log.Printf("[DEBUG] Retrieved loadbalancer %s: %#v", d.Id(), lb)
-
-	publicIpInfo := make([]map[string]interface{}, len(lb.PublicIps))
-	if len(lb.PublicIps) > 0 {
-		info := d.Get("public_ip.0").(map[string]interface{})
-		info["id"] = lb.PublicIps[0].PublicIpID
-		info["address"] = lb.PublicIps[0].PublicIpAddress
-		publicIpInfo[0] = info
-	}
+	log.Printf("[DEBUG] Retrieved listener %s: %#v", d.Id(), listener)
 
 	mErr := multierror.Append(
-		d.Set("name", lb.Name),
-		d.Set("description", lb.Description),
-		d.Set("vip_address", lb.VipAddress),
-		d.Set("vip_port_id", lb.VipPortID),
-		d.Set("admin_state_up", lb.AdminStateUp),
-		d.Set("router_id", lb.VpcID),
-		d.Set("subnet_id", lb.VipSubnetCidrID),
-		d.Set("ip_target_enable", lb.IpTargetEnable),
-		d.Set("l4_flavor", lb.L4FlavorID),
-		d.Set("l7_flavor", lb.L7FlavorID),
-		d.Set("availability_zones", lb.AvailabilityZoneList),
-		d.Set("network_ids", lb.ElbSubnetIDs),
-		d.Set("public_ip", publicIpInfo),
-		d.Set("created_at", lb.CreatedAt),
-		d.Set("updated_at", lb.UpdatedAt),
+		d.Set("admin_state_up", listener.AdminStateUp),
+		d.Set("client_ca_tls_container_ref", listener.CAContainerRef),
+		d.Set("default_pool_id", listener.DefaultPoolID),
+		d.Set("default_tls_container_ref", listener.DefaultTlsContainerRef),
+		d.Set("description", listener.Description),
+		d.Set("http2_enable", listener.Http2Enable),
+		d.Set("name", listener.Name),
+		d.Set("protocol", listener.Protocol),
+		d.Set("protocol_port", listener.ProtocolPort),
+		d.Set("sni_container_refs", listener.SniContainerRefs),
+		d.Set("tls_ciphers_policy", listener.TlsCiphersPolicy),
+		d.Set("memory_retry_enable", listener.EnableMemberRetry),
+		d.Set("keepalive_timeout", listener.KeepAliveTimeout),
+		d.Set("client_timeout", listener.ClientTimeout),
+		d.Set("member_timeout", listener.MemberTimeout),
+		d.Set("created_at", listener.CreatedAt),
+		d.Set("updated_at", listener.UpdatedAt),
 	)
 
 	if err := mErr.ErrorOrNil(); err != nil {
 		return diag.FromErr(err)
 	}
 
-	tagMap := common.TagsToMap(lb.Tags)
+	tagMap := common.TagsToMap(listener.Tags)
 	if err := d.Set("tags", tagMap); err != nil {
-		return fmterr.Errorf("error saving tags for OpenTelekomCloud LoadBalancerV3: %s", err)
+		return fmterr.Errorf("error saving tags for OpenTelekomCloud Listener: %s", err)
 	}
 
 	return nil
@@ -280,31 +277,53 @@ func resourceListenerV3Update(ctx context.Context, d *schema.ResourceData, meta 
 		adminStateUp := d.Get("admin_state_up").(bool)
 		updateOpts.AdminStateUp = &adminStateUp
 	}
-	if d.HasChange("network_ids") {
-		updateOpts.ElbSubnetIDs = common.ExpandToStringSlice(d.Get("network_ids").(*schema.Set).List())
+	if d.HasChange("client_ca_tls_container_ref") {
+		clientCaTlsContainer := d.Get("client_ca_tls_container_ref").(string)
+		updateOpts.CAContainerRef = &clientCaTlsContainer
 	}
-	if d.HasChange("vip_address") {
-		updateOpts.VipAddress = d.Get("vip_address").(string)
+	if d.HasChange("default_pool_id") {
+		updateOpts.DefaultPoolID = d.Get("default_pool_id").(string)
 	}
-	if d.HasChange("l7_flavor") {
-		updateOpts.L7Flavor = d.Get("l7_flavor").(string)
+	if d.HasChange("default_tls_container_ref") {
+		defaultTlsContainerRef := d.Get("default_tls_container_ref").(string)
+		updateOpts.DefaultTlsContainerRef = &defaultTlsContainerRef
 	}
-	if d.HasChange("l4_flavor") {
-		updateOpts.L4Flavor = d.Get("l4_flavor").(string)
+	if d.HasChange("http2_enable") {
+		http2Enable := d.Get("http2_enable").(bool)
+		updateOpts.Http2Enable = &http2Enable
 	}
-	if d.HasChange("subnet_id") {
-		subnetID := d.Get("subnet_id").(string)
-		updateOpts.VipSubnetCidrID = &subnetID
+	if d.HasChange("tls_ciphers_policy") {
+		tlsCiphersPolicy := d.Get("tls_ciphers_policy").(string)
+		updateOpts.TlsCiphersPolicy = &tlsCiphersPolicy
 	}
-	if d.HasChange("ip_target_enable") {
-		ipTargetEnable := d.Get("ip_target_enable").(bool)
-		updateOpts.IpTargetEnable = &ipTargetEnable
+	if d.HasChange("sni_container_refs") {
+		sniContainerRefs := common.ExpandToStringSlice(d.Get("sni_container_refs").(*schema.Set).List())
+		updateOpts.SniContainerRefs = &sniContainerRefs
+	}
+	if d.HasChange("insert_headers") {
+		updateOpts.InsertHeaders = getInsertHeaders(d)
+	}
+	if d.HasChange("member_retry_enable") {
+		memberRetryEnable := d.Get("member_retry_enable").(bool)
+		updateOpts.EnableMemberRetry = &memberRetryEnable
+	}
+	if d.HasChange("keepalive_timeout") {
+		keepaliveTimeout := d.Get("keepalive_timeout").(int)
+		updateOpts.KeepAliveTimeout = &keepaliveTimeout
+	}
+	if d.HasChange("client_timeout") {
+		clientTimeout := d.Get("client_timeout").(int)
+		updateOpts.ClientTimeout = &clientTimeout
+	}
+	if d.HasChange("member_timeout") {
+		memberTimeout := d.Get("member_timeout").(int)
+		updateOpts.MemberTimeout = &memberTimeout
 	}
 
-	log.Printf("[DEBUG] Updating loadbalancer %s with options: %#v", d.Id(), updateOpts)
+	log.Printf("[DEBUG] Updating listener %s with options: %#v", d.Id(), updateOpts)
 	_, err = listeners.Update(client, d.Id(), updateOpts).Extract()
 	if err != nil {
-		return fmterr.Errorf("unable to update LoadBalancerV3 %s: %s", d.Id(), err)
+		return fmterr.Errorf("unable to update ListenerV3 %s: %s", d.Id(), err)
 	}
 
 	clientCtx := common.CtxWithClient(ctx, client, keyClient)
@@ -320,14 +339,9 @@ func resourceListenerV3Delete(ctx context.Context, d *schema.ResourceData, meta 
 		return diag.FromErr(err)
 	}
 
-	lb, err := listeners.Get(client, d.Id()).Extract()
-	if err != nil {
-		return diag.FromErr(err)
-	}
-
-	log.Printf("[DEBUG] Deleting loadbalancer %s", d.Id())
+	log.Printf("[DEBUG] Deleting listener: %s", d.Id())
 	if err := listeners.Delete(client, d.Id()).ExtractErr(); err != nil {
-		return fmterr.Errorf("unable to delete LoadBalancerV3 %s: %s", d.Id(), err)
+		return fmterr.Errorf("unable to delete ListenerV3 %s: %s", d.Id(), err)
 	}
 
 	return nil
