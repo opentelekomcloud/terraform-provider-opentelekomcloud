@@ -22,6 +22,10 @@ func ResourceListenerV3() *schema.Resource {
 		UpdateContext: resourceListenerV3Update,
 		DeleteContext: resourceListenerV3Delete,
 
+		Importer: &schema.ResourceImporter{
+			StateContext: schema.ImportStatePassthroughContext,
+		},
+
 		Schema: map[string]*schema.Schema{
 			"name": {
 				Type:         schema.TypeString,
@@ -224,6 +228,15 @@ func resourceListenerV3Read(ctx context.Context, d *schema.ResourceData, meta in
 
 	log.Printf("[DEBUG] Retrieved listener %s: %#v", d.Id(), listener)
 
+	insertHeaders := []map[string]interface{}{
+		{
+			"forward_elb_ip":     listener.InsertHeaders.ForwardedELBIP,
+			"forwarded_port":     listener.InsertHeaders.ForwardedPort,
+			"forwarded_for_port": listener.InsertHeaders.ForwardedForPort,
+			"forwarded_host":     listener.InsertHeaders.ForwardedHost,
+		},
+	}
+
 	mErr := multierror.Append(
 		d.Set("admin_state_up", listener.AdminStateUp),
 		d.Set("client_ca_tls_container_ref", listener.CAContainerRef),
@@ -233,6 +246,7 @@ func resourceListenerV3Read(ctx context.Context, d *schema.ResourceData, meta in
 		d.Set("http2_enable", listener.Http2Enable),
 		d.Set("name", listener.Name),
 		d.Set("protocol", listener.Protocol),
+		d.Set("insert_headers", insertHeaders),
 		d.Set("protocol_port", listener.ProtocolPort),
 		d.Set("sni_container_refs", listener.SniContainerRefs),
 		d.Set("tls_ciphers_policy", listener.TlsCiphersPolicy),
