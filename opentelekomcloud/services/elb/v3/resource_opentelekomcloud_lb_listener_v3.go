@@ -339,7 +339,6 @@ func resourceListenerV3Update(ctx context.Context, d *schema.ResourceData, meta 
 	}
 	if d.HasChange("client_timeout") {
 		updateOpts.ClientTimeout = d.Get("client_timeout").(int)
-
 	}
 	if d.HasChange("member_timeout") {
 		updateOpts.MemberTimeout = d.Get("member_timeout").(int)
