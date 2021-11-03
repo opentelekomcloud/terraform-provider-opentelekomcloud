@@ -253,9 +253,10 @@ func resourceListenerV3Read(ctx context.Context, d *schema.ResourceData, meta in
 		d.Set("sni_container_refs", listener.SniContainerRefs),
 		d.Set("tls_ciphers_policy", listener.TlsCiphersPolicy),
 		d.Set("memory_retry_enable", listener.EnableMemberRetry),
-		d.Set("keepalive_timeout", listener.KeepAliveTimeout),
+		d.Set("keep_alive_timeout", listener.KeepAliveTimeout),
 		d.Set("client_timeout", listener.ClientTimeout),
 		d.Set("member_timeout", listener.MemberTimeout),
+		d.Set("loadbalancer_id", listener.Loadbalancers[0].ID),
 		d.Set("created_at", listener.CreatedAt),
 		d.Set("updated_at", listener.UpdatedAt),
 	)
