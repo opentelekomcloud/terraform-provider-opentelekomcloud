@@ -24,7 +24,11 @@ func TestAccLBV3Listener_basic(t *testing.T) {
 	th.AssertNoErr(t, quotas.LbCertificate.Acquire())
 	th.AssertNoErr(t, quotas.LoadBalancer.Acquire())
 	th.AssertNoErr(t, quotas.LbListener.Acquire())
-	defer quotas.LbCertificate.Release()
+	defer func() {
+		quotas.LbListener.Release()
+		quotas.LoadBalancer.Release()
+		quotas.LbCertificate.Release()
+	}()
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:          func() { common.TestAccPreCheck(t) },
@@ -45,6 +49,34 @@ func TestAccLBV3Listener_basic(t *testing.T) {
 					resource.TestCheckResourceAttr(resourceListenerName, "name", "listener_1_updated"),
 					resource.TestCheckResourceAttr(resourceListenerName, "description", ""),
 				),
+			},
+		},
+	})
+}
+
+func TestAccLBV3Listener_import(t *testing.T) {
+	t.Parallel()
+	th.AssertNoErr(t, quotas.LbCertificate.Acquire())
+	th.AssertNoErr(t, quotas.LoadBalancer.Acquire())
+	th.AssertNoErr(t, quotas.LbListener.Acquire())
+	defer func() {
+		quotas.LbListener.Release()
+		quotas.LoadBalancer.Release()
+		quotas.LbCertificate.Release()
+	}()
+
+	resource.Test(t, resource.TestCase{
+		PreCheck:          func() { common.TestAccPreCheck(t) },
+		ProviderFactories: common.TestAccProviderFactories,
+		CheckDestroy:      testAccCheckLBV3ListenerDestroy,
+		Steps: []resource.TestStep{
+			{
+				Config: testAccLBV3ListenerConfigBasic,
+			},
+			{
+				ResourceName:      resourceListenerName,
+				ImportState:       true,
+				ImportStateVerify: true,
 			},
 		},
 	})

@@ -86,6 +86,7 @@ func ResourceListenerV3() *schema.Resource {
 			"tls_ciphers_policy": {
 				Type:     schema.TypeString,
 				Optional: true,
+				Computed: true,
 				ValidateFunc: validation.StringInSlice([]string{
 					"tls-1-0", "tls-1-1", "tls-1-2", "tls-1-2-strict",
 				}, false),
@@ -97,16 +98,19 @@ func ResourceListenerV3() *schema.Resource {
 			"keep_alive_timeout": {
 				Type:         schema.TypeInt,
 				Optional:     true,
+				Computed:     true,
 				ValidateFunc: validation.IntBetween(0, 4000),
 			},
 			"client_timeout": {
 				Type:         schema.TypeInt,
 				Optional:     true,
+				Computed:     true,
 				ValidateFunc: validation.IntBetween(1, 300),
 			},
 			"member_timeout": {
 				Type:         schema.TypeInt,
 				Optional:     true,
+				Computed:     true,
 				ValidateFunc: validation.IntBetween(1, 300),
 			},
 			"insert_headers": {
