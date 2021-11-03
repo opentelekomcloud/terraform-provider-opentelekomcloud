@@ -116,24 +116,29 @@ func ResourceListenerV3() *schema.Resource {
 			"insert_headers": {
 				Type:     schema.TypeList,
 				Optional: true,
+				Computed: true,
 				MaxItems: 1,
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
 						"forward_elb_ip": {
 							Type:     schema.TypeBool,
 							Optional: true,
+							Computed: true,
 						},
 						"forwarded_port": {
 							Type:     schema.TypeBool,
 							Optional: true,
+							Computed: true,
 						},
 						"forwarded_for_port": {
 							Type:     schema.TypeBool,
 							Optional: true,
+							Computed: true,
 						},
 						"forwarded_host": {
 							Type:     schema.TypeBool,
-							Required: true,
+							Optional: true,
+							Computed: true,
 						},
 					},
 				},
