@@ -74,7 +74,7 @@ func TestLBMemberV3_import(t *testing.T) {
 	})
 }
 
-func testLBMemberV3Exists(n string, pool *members.Member) resource.TestCheckFunc {
+func testLBMemberV3Exists(n string, member *members.Member) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
 		rs, ok := s.RootModule().Resources[n]
 		if !ok {
@@ -101,7 +101,7 @@ func testLBMemberV3Exists(n string, pool *members.Member) resource.TestCheckFunc
 			return fmt.Errorf("loadbalancer member not found")
 		}
 
-		*pool = *found
+		*member = *found
 
 		return nil
 	}
