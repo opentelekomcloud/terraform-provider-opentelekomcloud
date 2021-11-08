@@ -180,7 +180,7 @@ func resourceLBPolicyV3Read(ctx context.Context, d *schema.ResourceData, meta in
 	var ruleList []interface{}
 
 	for _, v := range policy.Rules {
-		rule, err := rules.Get(client, policy.ID, v.ID).Extract()
+		rule, err := rules.Get(client, d.Id(), v.ID).Extract()
 		if err != nil {
 			return fmterr.Errorf("error receiving policy rule: %w", err)
 		}
