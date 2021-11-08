@@ -40,10 +40,6 @@ resource "opentelekomcloud_lb_policy_v3" "this" {
 
 The following arguments are supported:
 
-* `region` - (Optional) The region in which to obtain the V3 ELB client.
-  If omitted, the `region` argument of the provider is used.
-  Changing this creates a new Policy.
-
 * `project_id` - (Optional) Required for admins. The UUID of the tenant who owns
   the Policy. Only administrative users can specify a tenant UUID other than
   their own. Changing this creates a new Policy.
