@@ -1,5 +1,5 @@
 ---
-subcategory: "Dedicated Load Balance (DLB)"
+subcategory: "Dedicated Load Balancer (DLB)"
 ---
 
 # opentelekomcloud_lb_member_v3
@@ -40,11 +40,11 @@ The following arguments are supported:
 
 * `address` - (Required) Specifies the IP address of the backend server.
 
-    * The IP address must be in the subnet specified by `subnet_id`, for example, `192.168.3.11`.
+  The IP address must be in the subnet specified by `subnet_id`, for example, `192.168.3.11`.
 
-    * The IP address can only be the IP address of the primary NIC.
+  The IP address can only be the IP address of the primary NIC.
 
-    * If `subnet_id` is left blank, cross-VPC backend is enabled. In this case, these servers must use IPv4 addresses.
+  If `subnet_id` is left blank, cross-VPC backend is enabled. In this case, these servers must use IPv4 addresses.
 
 * `protocol_port` - (Required) Specifies the port used by the backend server to receive requests. The value should be a
   valid port.
@@ -53,14 +53,11 @@ The following arguments are supported:
 
 * `project_id` - (Optional) Specifies the project ID.
 
-* `subnet_id` - (Optional) Specifies the ID of the subnet where the backend server works. This subnet must be in the
-  same VPC as the subnet of the load balancer with which the backend server is associated.
+* `subnet_id` - (Optional) Specifies the ID of the subnet where the backend server works.
+
+  This subnet must be in the same VPC as the subnet of the load balancer with which the backend server is associated.
 
   Only `IPv4` subnets are supported.
-
-  This parameter can be left blank, indicating that cross-VPC backend servers can be added. In this case, IP addresses
-  of these servers must be `IPv4` addresses, the protocol of the backend server group must be `TCP`, `HTTP`, or `HTTPS`,
-  and cross-VPC backend must have been enabled for the load balancer.
 
 * `weight` - (Optional) Specifies the weight of the backend server.
 
