@@ -180,8 +180,14 @@ func resourceLBPolicyV3Read(ctx context.Context, d *schema.ResourceData, meta in
 	var ruleList []interface{}
 
 	for _, v := range policy.Rules {
+		rule, err := rules.Get(client, policy.ID, v.ID).Extract()
+		if err != nil {
+			return fmterr.Errorf("error receiving policy rule: %w", err)
+		}
 		ruleList = append(ruleList, map[string]interface{}{
-			"id": v.ID,
+			"type":         rule.Type,
+			"compare_type": rule.CompareType,
+			"value":        rule.Value,
 		})
 	}
 
@@ -194,6 +200,7 @@ func resourceLBPolicyV3Read(ctx context.Context, d *schema.ResourceData, meta in
 		d.Set("redirect_listener_id", policy.RedirectListenerID),
 		d.Set("redirect_pool_id", policy.RedirectPoolID),
 		d.Set("position", policy.Position),
+		d.Set("rules", ruleList),
 		d.Set("listener_id", policy.Status),
 	)
 
@@ -238,7 +245,7 @@ func resourceLBPolicyV3Update(ctx context.Context, d *schema.ResourceData, meta 
 	}
 
 	clientCtx := common.CtxWithClient(ctx, client, keyClient)
-	return resourceLBPoolV3Read(clientCtx, d, meta)
+	return resourceLBPolicyV3Read(clientCtx, d, meta)
 }
 
 func resourceLBPolicyV3Delete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {

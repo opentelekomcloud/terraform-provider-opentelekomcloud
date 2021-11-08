@@ -15,7 +15,7 @@ import (
 	elbv3 "github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/services/elb/v3"
 )
 
-const resourcePolicyName = "opentelekomcloud_lb_policy_v3.policy_1"
+const resourcePolicyName = "opentelekomcloud_lb_policy_v3.this"
 
 func TestAccLBV3Policy_basic(t *testing.T) {
 	var policy *policies.Policy
