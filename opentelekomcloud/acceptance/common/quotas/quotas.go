@@ -129,7 +129,12 @@ var (
 	LoadBalancer = FromEnv("OS_LB_QUOTA", 50)
 	// LbCertificate - quota for load balancer certificates
 	LbCertificate = FromEnv("OS_LB_CERTIFICATE_QUOTA", 120)
-	LbListener    = FromEnv("OS_LB_LISTENER_QUOTA", 100)
+	// LbListener - quota for load balancer listeners
+	LbListener = FromEnv("OS_LB_LISTENER_QUOTA", 100)
+	// LbPool - quota for load balancer pools
+	LbPool = FromEnv("OS_LB_POOl_QUOTA", 500)
+	// LbPolicy - quota for load balancer policies
+	LbPolicy = FromEnv("OS_LB_POLICY_QUOTA", 500)
 )
 
 // ExpectedQuota is a simple container of quota + count used for `Multiple` operations
