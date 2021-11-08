@@ -1,0 +1,4 @@
+---
+features:
+  - |
+    **New Resource:** ``opentelekomcloud_lb_policy_v3`` (`#1518 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/1518>`_)
