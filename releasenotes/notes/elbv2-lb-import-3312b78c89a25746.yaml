@@ -1,0 +1,4 @@
+---
+enhancements:
+  - |
+    **[ELB]** Add import support for ``opentelekomcloud_lb_loadbalancer_v2`` resource (`#1516 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/1516>`_)

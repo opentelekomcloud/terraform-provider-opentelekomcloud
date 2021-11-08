@@ -112,3 +112,11 @@ The following attributes are exported:
 * `vip_port_id` - The Port ID of the Load Balancer IP.
 
 * `tags` - See Argument Reference above.
+
+## Import
+
+Load balancers can be imported using the `id`, e.g.
+
+```sh
+terraform import opentelekomcloud_lb_loadbalancer_v2.lb_1 ec2e6489-8415-4ec0-9934-540f98b0d594
+```

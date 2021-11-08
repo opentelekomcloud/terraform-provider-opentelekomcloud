@@ -7,6 +7,8 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
+	th "github.com/opentelekomcloud/gophertelekomcloud/testhelper"
+	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/acceptance/common/quotas"
 	elb "github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/services/elb/v2"
 
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/networking/v2/extensions/lbaas_v2/loadbalancers"
@@ -18,8 +20,11 @@ import (
 const resourceLBName = "opentelekomcloud_lb_loadbalancer_v2.loadbalancer_1"
 
 func TestAccLBV2LoadBalancer_basic(t *testing.T) {
-	t.Parallel()
 	var lb loadbalancers.LoadBalancer
+
+	t.Parallel()
+	th.AssertNoErr(t, quotas.LoadBalancer.Acquire())
+	defer quotas.LoadBalancer.Release()
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:          func() { common.TestAccPreCheck(t) },
@@ -38,6 +43,27 @@ func TestAccLBV2LoadBalancer_basic(t *testing.T) {
 					resource.TestCheckResourceAttr(resourceLBName, "name", "loadbalancer_1_updated"),
 					resource.TestMatchResourceAttr(resourceLBName, "vip_port_id", regexp.MustCompile("^[a-f0-9-]+")),
 				),
+			},
+		},
+	})
+}
+func TestAccLBV2LoadBalancer_import(t *testing.T) {
+	t.Parallel()
+	th.AssertNoErr(t, quotas.LoadBalancer.Acquire())
+	defer quotas.LoadBalancer.Release()
+
+	resource.Test(t, resource.TestCase{
+		PreCheck:          func() { common.TestAccPreCheck(t) },
+		ProviderFactories: common.TestAccProviderFactories,
+		CheckDestroy:      testAccCheckLBV2LoadBalancerDestroy,
+		Steps: []resource.TestStep{
+			{
+				Config: testAccLBV2LoadBalancerConfigBasic,
+			},
+			{
+				ResourceName:      resourceLBName,
+				ImportStateVerify: true,
+				ImportState:       true,
 			},
 		},
 	})
