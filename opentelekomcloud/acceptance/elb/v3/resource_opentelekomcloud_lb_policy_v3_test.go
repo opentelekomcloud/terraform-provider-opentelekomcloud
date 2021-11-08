@@ -3,6 +3,7 @@ package acceptance
 import (
 	"fmt"
 	"testing"
+	"time"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
@@ -19,17 +20,17 @@ const resourcePolicyName = "opentelekomcloud_lb_policy_v3.this"
 
 func TestAccLBV3Policy_basic(t *testing.T) {
 	var policy policies.Policy
+
 	t.Parallel()
-	th.AssertNoErr(t, quotas.LbPool.Acquire())
-	th.AssertNoErr(t, quotas.LbPolicy.Acquire())
-	th.AssertNoErr(t, quotas.LoadBalancer.Acquire())
-	th.AssertNoErr(t, quotas.LbListener.Acquire())
-	defer func() {
-		quotas.LbListener.Release()
-		quotas.LoadBalancer.Release()
-		quotas.LbPool.Release()
-		quotas.LbPolicy.Release()
-	}()
+	qts := []*quotas.ExpectedQuota{
+		{Q: quotas.LbPool, Count: 1},
+		{Q: quotas.LbPolicy, Count: 1},
+		{Q: quotas.LoadBalancer, Count: 1},
+		{Q: quotas.LbListener, Count: 1},
+		{Q: quotas.Server, Count: 1},
+	}
+	th.AssertNoErr(t, quotas.AcquireMultipleQuotas(qts, 5*time.Second))
+	defer quotas.ReleaseMultipleQuotas(qts)
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:          func() { common.TestAccPreCheck(t) },
@@ -54,16 +55,15 @@ func TestAccLBV3Policy_basic(t *testing.T) {
 
 func TestLBPolicyV3_import(t *testing.T) {
 	t.Parallel()
-	th.AssertNoErr(t, quotas.LbPool.Acquire())
-	th.AssertNoErr(t, quotas.LbPolicy.Acquire())
-	th.AssertNoErr(t, quotas.LoadBalancer.Acquire())
-	th.AssertNoErr(t, quotas.LbListener.Acquire())
-	defer func() {
-		quotas.LbListener.Release()
-		quotas.LoadBalancer.Release()
-		quotas.LbPool.Release()
-		quotas.LbPolicy.Release()
-	}()
+	qts := []*quotas.ExpectedQuota{
+		{Q: quotas.LbPool, Count: 1},
+		{Q: quotas.LbPolicy, Count: 1},
+		{Q: quotas.LoadBalancer, Count: 1},
+		{Q: quotas.LbListener, Count: 1},
+		{Q: quotas.Server, Count: 1},
+	}
+	th.AssertNoErr(t, quotas.AcquireMultipleQuotas(qts, 5*time.Second))
+	defer quotas.ReleaseMultipleQuotas(qts)
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:          func() { common.TestAccPreCheck(t) },
