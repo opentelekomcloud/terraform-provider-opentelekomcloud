@@ -53,7 +53,7 @@ func TestAccLBV3Policy_basic(t *testing.T) {
 	})
 }
 
-func TestLBPolicyV3_import(t *testing.T) {
+func TestAccLBPolicyV3_import(t *testing.T) {
 	t.Parallel()
 	qts := []*quotas.ExpectedQuota{
 		{Q: quotas.LbPool, Count: 1},
@@ -194,5 +194,11 @@ resource "opentelekomcloud_lb_policy_v3" "this" {
   listener_id      = opentelekomcloud_lb_listener_v3.this.id
   redirect_pool_id = opentelekomcloud_lb_pool_v3.this.id
   position         = 37
+
+  rules {
+    type         = "PATH"
+    compare_type = "EQUAL_TO"
+    value        = "abc.com"
+  }
 }
 `, common.DataSourceSubnet, env.OS_AVAILABILITY_ZONE)

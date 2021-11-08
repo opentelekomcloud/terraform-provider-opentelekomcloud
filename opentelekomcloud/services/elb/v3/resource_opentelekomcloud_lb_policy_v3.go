@@ -76,9 +76,10 @@ func ResourceLBPolicyV3() *schema.Resource {
 				ValidateFunc: validation.IntBetween(1, 100),
 			},
 			"rules": {
-				Type:     schema.TypeList,
+				Type:     schema.TypeSet,
 				Optional: true,
 				MaxItems: 10,
+				Computed: true,
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
 						"type": {
@@ -111,11 +112,7 @@ func ResourceLBPolicyV3() *schema.Resource {
 }
 
 func getRules(d *schema.ResourceData) []policies.Rule {
-	ruleListRaw := d.Get("rules").([]interface{})
-	if len(ruleListRaw) == 0 {
-		return nil
-	}
-
+	ruleListRaw := d.Get("rules").(*schema.Set).List()
 	var ruleList []policies.Rule
 
 	for _, rule := range ruleListRaw {
