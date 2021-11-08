@@ -196,9 +196,9 @@ resource "opentelekomcloud_lb_policy_v3" "this" {
   position         = 37
 
   rules {
-    type         = "PATH"
+    type         = "HOST_NAME"
     compare_type = "EQUAL_TO"
-    value        = "abc.com"
+    value        = "https://abc.com"
   }
 }
 `, common.DataSourceSubnet, env.OS_AVAILABILITY_ZONE)
