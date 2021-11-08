@@ -18,7 +18,7 @@ import (
 const resourcePolicyName = "opentelekomcloud_lb_policy_v3.this"
 
 func TestAccLBV3Policy_basic(t *testing.T) {
-	var policy *policies.Policy
+	var policy policies.Policy
 	t.Parallel()
 	th.AssertNoErr(t, quotas.LbPool.Acquire())
 	th.AssertNoErr(t, quotas.LbPolicy.Acquire())
@@ -39,7 +39,7 @@ func TestAccLBV3Policy_basic(t *testing.T) {
 			{
 				Config: testAccLBV3PolicyConfigBasic,
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckLBV3PolicyExists(resourcePolicyName, policy),
+					testAccCheckLBV3PolicyExists(resourcePolicyName, &policy),
 				),
 			},
 			{
@@ -47,6 +47,36 @@ func TestAccLBV3Policy_basic(t *testing.T) {
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr(resourcePolicyName, "name", "policy_updated"),
 				),
+			},
+		},
+	})
+}
+
+func TestLBPolicyV3_import(t *testing.T) {
+	t.Parallel()
+	th.AssertNoErr(t, quotas.LbPool.Acquire())
+	th.AssertNoErr(t, quotas.LbPolicy.Acquire())
+	th.AssertNoErr(t, quotas.LoadBalancer.Acquire())
+	th.AssertNoErr(t, quotas.LbListener.Acquire())
+	defer func() {
+		quotas.LbListener.Release()
+		quotas.LoadBalancer.Release()
+		quotas.LbPool.Release()
+		quotas.LbPolicy.Release()
+	}()
+
+	resource.Test(t, resource.TestCase{
+		PreCheck:          func() { common.TestAccPreCheck(t) },
+		ProviderFactories: common.TestAccProviderFactories,
+		CheckDestroy:      testAccCheckLBV3PolicyDestroy,
+		Steps: []resource.TestStep{
+			{
+				Config: testAccLBV3PolicyConfigBasic,
+			},
+			{
+				ResourceName:      resourcePolicyName,
+				ImportStateVerify: true,
+				ImportState:       true,
 			},
 		},
 	})
@@ -99,7 +129,7 @@ func testAccCheckLBV3PolicyExists(n string, policy *policies.Policy) resource.Te
 			return fmt.Errorf("policy not found")
 		}
 
-		*policy = *found
+		policy = found
 
 		return nil
 	}

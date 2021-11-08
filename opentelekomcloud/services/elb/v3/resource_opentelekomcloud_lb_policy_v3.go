@@ -201,7 +201,7 @@ func resourceLBPolicyV3Read(ctx context.Context, d *schema.ResourceData, meta in
 		d.Set("redirect_pool_id", policy.RedirectPoolID),
 		d.Set("position", policy.Position),
 		d.Set("rules", ruleList),
-		d.Set("listener_id", policy.Status),
+		d.Set("status", policy.Status),
 	)
 
 	if err := mErr.ErrorOrNil(); err != nil {
