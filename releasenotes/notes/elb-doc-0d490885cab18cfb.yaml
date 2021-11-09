@@ -1,0 +1,4 @@
+---
+enhancements:
+  - |
+    [ELB] Improve documentation of loadbalancer resources (`#1520 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/1520>`_)
