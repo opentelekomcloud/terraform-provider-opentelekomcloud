@@ -1,5 +1,5 @@
 ---
-subcategory: "Elastic Load Balance (ELB)"
+subcategory: "Classic Load Balancer (LB)"
 ---
 
 # opentelekomcloud_elb_backend
@@ -8,6 +8,7 @@ Manages a classic loadbalancer backend resource within OpenTelekomCloud.
 
 ~>
 Classic load balancers are no longer provided. Please use elastic load balancers instead.
+This resource was replaced with `opentelekomcloud_lb_member_v2`.
 
 ## Example Usage
 
