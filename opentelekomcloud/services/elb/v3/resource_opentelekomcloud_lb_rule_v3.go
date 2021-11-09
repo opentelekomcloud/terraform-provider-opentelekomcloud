@@ -54,8 +54,9 @@ func ResourceLBRuleV3() *schema.Resource {
 				ForceNew: true,
 			},
 			"value": {
-				Type:     schema.TypeString,
-				Required: true,
+				Type:         schema.TypeString,
+				Required:     true,
+				ValidateFunc: validation.StringLenBetween(1, 128),
 			},
 			"rule_id": {
 				Type:     schema.TypeString,
