@@ -21,7 +21,10 @@ const resourcePoolName = "opentelekomcloud_lb_pool_v3.pool"
 func TestLBPoolV3_basic(t *testing.T) {
 	var pool pools.Pool
 	t.Parallel()
-	qts := lbQuotas()
+	qts := []*quotas.ExpectedQuota{
+		{Q: quotas.LbPool, Count: 1},
+		{Q: quotas.LoadBalancer, Count: 1},
+	}
 	th.AssertNoErr(t, quotas.AcquireMultipleQuotas(qts, 5*time.Second))
 	defer quotas.ReleaseMultipleQuotas(qts)
 
@@ -52,7 +55,10 @@ func TestLBPoolV3_basic(t *testing.T) {
 
 func TestLBPoolV3_import(t *testing.T) {
 	t.Parallel()
-	qts := lbQuotas()
+	qts := []*quotas.ExpectedQuota{
+		{Q: quotas.LbPool, Count: 1},
+		{Q: quotas.LoadBalancer, Count: 1},
+	}
 	th.AssertNoErr(t, quotas.AcquireMultipleQuotas(qts, 5*time.Second))
 	defer quotas.ReleaseMultipleQuotas(qts)
 

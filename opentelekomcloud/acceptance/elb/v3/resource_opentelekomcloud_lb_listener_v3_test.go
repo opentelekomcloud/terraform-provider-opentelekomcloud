@@ -3,6 +3,7 @@ package acceptance
 import (
 	"fmt"
 	"testing"
+	"time"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
@@ -21,14 +22,13 @@ func TestAccLBV3Listener_basic(t *testing.T) {
 	var listener listeners.Listener
 
 	t.Parallel()
-	th.AssertNoErr(t, quotas.LbCertificate.Acquire())
-	th.AssertNoErr(t, quotas.LoadBalancer.Acquire())
-	th.AssertNoErr(t, quotas.LbListener.Acquire())
-	defer func() {
-		quotas.LbListener.Release()
-		quotas.LoadBalancer.Release()
-		quotas.LbCertificate.Release()
-	}()
+	qts := []*quotas.ExpectedQuota{
+		{Q: quotas.LbCertificate, Count: 1},
+		{Q: quotas.LoadBalancer, Count: 1},
+		{Q: quotas.LbListener, Count: 1},
+	}
+	th.AssertNoErr(t, quotas.AcquireMultipleQuotas(qts, 5*time.Second))
+	defer quotas.ReleaseMultipleQuotas(qts)
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:          func() { common.TestAccPreCheck(t) },
@@ -56,14 +56,13 @@ func TestAccLBV3Listener_basic(t *testing.T) {
 
 func TestAccLBV3Listener_import(t *testing.T) {
 	t.Parallel()
-	th.AssertNoErr(t, quotas.LbCertificate.Acquire())
-	th.AssertNoErr(t, quotas.LoadBalancer.Acquire())
-	th.AssertNoErr(t, quotas.LbListener.Acquire())
-	defer func() {
-		quotas.LbListener.Release()
-		quotas.LoadBalancer.Release()
-		quotas.LbCertificate.Release()
-	}()
+	qts := []*quotas.ExpectedQuota{
+		{Q: quotas.LbCertificate, Count: 1},
+		{Q: quotas.LoadBalancer, Count: 1},
+		{Q: quotas.LbListener, Count: 1},
+	}
+	th.AssertNoErr(t, quotas.AcquireMultipleQuotas(qts, 5*time.Second))
+	defer quotas.ReleaseMultipleQuotas(qts)
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:          func() { common.TestAccPreCheck(t) },
