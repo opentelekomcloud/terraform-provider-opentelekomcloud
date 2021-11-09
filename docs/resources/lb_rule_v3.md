@@ -2,9 +2,9 @@
 subcategory: "Dedicated Load Balancer (DLB)"
 ---
 
-# opentelekomcloud_lb_policy_v3
+# opentelekomcloud_lb_rule_v3
 
-Manages a Dedicated Load Balancer Policy resource within OpenTelekomCloud.
+Manages a Dedicated Load Balancer Rule resource within OpenTelekomCloud.
 
 ## Example Usage
 
@@ -33,6 +33,13 @@ resource "opentelekomcloud_lb_policy_v3" "this" {
   listener_id      = opentelekomcloud_lb_listener_v3.this.id
   redirect_pool_id = opentelekomcloud_lb_pool_v3.this.id
   position         = 37
+}
+
+resource "opentelekomcloud_lb_rule_v3" "this" {
+  type         = "PATH"
+  compare_type = "REGEX"
+  value        = "^.+$"
+  policy_id    = opentelekomcloud_lb_policy_v3.this.id
 }
 ```
 
