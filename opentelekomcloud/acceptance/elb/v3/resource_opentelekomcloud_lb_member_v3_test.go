@@ -22,7 +22,10 @@ const resourceMemberName = "opentelekomcloud_lb_member_v3.member"
 func TestLBMemberV3_basic(t *testing.T) {
 	var member members.Member
 	t.Parallel()
-	qts := lbQuotas()
+	qts := []*quotas.ExpectedQuota{
+		{Q: quotas.LbPool, Count: 1},
+		{Q: quotas.LoadBalancer, Count: 1},
+	}
 	th.AssertNoErr(t, quotas.AcquireMultipleQuotas(qts, 5*time.Second))
 	defer quotas.ReleaseMultipleQuotas(qts)
 
@@ -53,7 +56,10 @@ func TestLBMemberV3_basic(t *testing.T) {
 
 func TestLBMemberV3_import(t *testing.T) {
 	t.Parallel()
-	qts := lbQuotas()
+	qts := []*quotas.ExpectedQuota{
+		{Q: quotas.LbPool, Count: 1},
+		{Q: quotas.LoadBalancer, Count: 1},
+	}
 	th.AssertNoErr(t, quotas.AcquireMultipleQuotas(qts, 5*time.Second))
 	defer quotas.ReleaseMultipleQuotas(qts)
 

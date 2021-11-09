@@ -27,7 +27,6 @@ func TestAccLBV3Policy_basic(t *testing.T) {
 		{Q: quotas.LbPolicy, Count: 1},
 		{Q: quotas.LoadBalancer, Count: 1},
 		{Q: quotas.LbListener, Count: 1},
-		{Q: quotas.Server, Count: 1},
 	}
 	th.AssertNoErr(t, quotas.AcquireMultipleQuotas(qts, 5*time.Second))
 	defer quotas.ReleaseMultipleQuotas(qts)
@@ -60,7 +59,6 @@ func TestAccLBPolicyV3_import(t *testing.T) {
 		{Q: quotas.LbPolicy, Count: 1},
 		{Q: quotas.LoadBalancer, Count: 1},
 		{Q: quotas.LbListener, Count: 1},
-		{Q: quotas.Server, Count: 1},
 	}
 	th.AssertNoErr(t, quotas.AcquireMultipleQuotas(qts, 5*time.Second))
 	defer quotas.ReleaseMultipleQuotas(qts)
