@@ -53,6 +53,30 @@ func TestAccIdentityUserGroupMembershipV3_basic(t *testing.T) {
 	})
 }
 
+func TestAccIdentityUserGroupMembershipV3_import(t *testing.T) {
+	var groupName = fmt.Sprintf("ACCPTTEST-%s", acctest.RandString(5))
+	var userName = fmt.Sprintf("ACCPTTEST-%s", acctest.RandString(5))
+
+	resource.Test(t, resource.TestCase{
+		PreCheck: func() {
+			common.TestAccPreCheck(t)
+			common.TestAccPreCheckAdminOnly(t)
+		},
+		ProviderFactories: common.TestAccProviderFactories,
+		CheckDestroy:      testAccCheckIdentityV3UserGroupMembershipDestroy,
+		Steps: []resource.TestStep{
+			{
+				Config: testAccIdentityUserGroupMembershipV3Basic(userName, groupName),
+			},
+			{
+				ResourceName:      resourceUGMName,
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+		},
+	})
+}
+
 func testAccCheckIdentityV3UserGroupMembershipDestroy(s *terraform.State) error {
 	config := common.TestAccProvider.Meta().(*cfg.Config)
 	identityClient, err := config.IdentityV3Client(env.OS_REGION_NAME)
