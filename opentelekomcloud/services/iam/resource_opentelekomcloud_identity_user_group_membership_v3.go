@@ -71,7 +71,7 @@ func resourceIdentityUserGroupMembershipV3Create(ctx context.Context, d *schema.
 func resourceIdentityUserGroupMembershipV3Read(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*cfg.Config)
 	client, err := common.ClientFromCtx(ctx, iamClientKey, func() (*golangsdk.ServiceClient, error) {
-		return config.VpcEpV1Client(config.GetRegion(d))
+		return config.IdentityV3Client(config.GetRegion(d))
 	})
 	if err != nil {
 		return fmterr.Errorf(clientCreationFail, err)
