@@ -2,6 +2,7 @@ package v3
 
 import (
 	"context"
+	"fmt"
 	"log"
 
 	"github.com/hashicorp/go-multierror"
@@ -10,7 +11,8 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 	golangsdk "github.com/opentelekomcloud/gophertelekomcloud"
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/elb/v3/loadbalancers"
-	"github.com/opentelekomcloud/gophertelekomcloud/openstack/networking/v2/extensions/layer3/floatingips"
+	"github.com/opentelekomcloud/gophertelekomcloud/openstack/networking/v1/bandwidths"
+	"github.com/opentelekomcloud/gophertelekomcloud/openstack/networking/v1/eips"
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common"
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common/cfg"
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common/fmterr"
@@ -22,6 +24,10 @@ func ResourceLoadBalancerV3() *schema.Resource {
 		ReadContext:   resourceLoadBalancerV3Read,
 		UpdateContext: resourceLoadBalancerV3Update,
 		DeleteContext: resourceLoadBalancerV3Delete,
+
+		Importer: &schema.ResourceImporter{
+			StateContext: schema.ImportStatePassthroughContext,
+		},
 
 		Schema: map[string]*schema.Schema{
 			"name": {
@@ -234,9 +240,10 @@ func resourceLoadBalancerV3Read(ctx context.Context, d *schema.ResourceData, met
 
 	publicIpInfo := make([]map[string]interface{}, len(lb.PublicIps))
 	if len(lb.PublicIps) > 0 {
-		info := d.Get("public_ip.0").(map[string]interface{})
-		info["id"] = lb.PublicIps[0].PublicIpID
-		info["address"] = lb.PublicIps[0].PublicIpAddress
+		info, err := getPublicIpInfo(d, meta, lb.PublicIps[0].PublicIpID)
+		if err != nil {
+			return diag.FromErr(err)
+		}
 		publicIpInfo[0] = info
 	}
 
@@ -331,28 +338,48 @@ func resourceLoadBalancerV3Delete(ctx context.Context, d *schema.ResourceData, m
 		return diag.FromErr(err)
 	}
 
-	lb, err := loadbalancers.Get(client, d.Id()).Extract()
-	if err != nil {
-		return diag.FromErr(err)
-	}
-
 	log.Printf("[DEBUG] Deleting loadbalancer %s", d.Id())
 	if err := loadbalancers.Delete(client, d.Id()).ExtractErr(); err != nil {
 		return fmterr.Errorf("unable to delete LoadBalancerV3 %s: %s", d.Id(), err)
 	}
 
-	if len(lb.PublicIps) > 0 {
+	if d.Get("public_ip.#").(int) > 0 {
 		config := meta.(*cfg.Config)
-		nwV2Client, err := config.NetworkingV2Client(config.GetRegion(d))
+		nwV1Client, err := config.NetworkingV1Client(config.GetRegion(d))
 		if err != nil {
-			return diag.FromErr(err)
+			return fmterr.Errorf("error creating OpenTelekomCloud NetworkingV1 client: %w", err)
 		}
-		publicIpInfo := d.Get("public_ip.0").(map[string]interface{})
-		ipIdToDelete := publicIpInfo["id"].(string)
-		if err := floatingips.Delete(nwV2Client, ipIdToDelete).ExtractErr(); err != nil {
+		ipID := d.Get("public_ip.0.id").(string)
+		if err := eips.Delete(nwV1Client, ipID).ExtractErr(); err != nil {
 			return diag.FromErr(err)
 		}
 	}
 
 	return nil
+}
+
+func getPublicIpInfo(d *schema.ResourceData, meta interface{}, publicIpID string) (map[string]interface{}, error) {
+	config := meta.(*cfg.Config)
+	client, err := config.NetworkingV1Client(config.GetRegion(d))
+	if err != nil {
+		return nil, fmt.Errorf("error creating OpenTelekomCloud NetworkingV1 client: %w", err)
+	}
+	floatingIP, err := eips.Get(client, publicIpID).Extract()
+	if err != nil {
+		return nil, err
+	}
+	bandwidth, err := bandwidths.Get(client, floatingIP.BandwidthID).Extract()
+	if err != nil {
+		return nil, err
+	}
+
+	return map[string]interface{}{
+		"id":                    floatingIP.ID,
+		"address":               floatingIP.PublicAddress,
+		"ip_type":               floatingIP.Type,
+		"bandwidth_name":        bandwidth.Name,
+		"bandwidth_size":        bandwidth.Size,
+		"bandwidth_charge_mode": bandwidth.ChargeMode,
+		"bandwidth_share_type":  bandwidth.ShareType,
+	}, nil
 }

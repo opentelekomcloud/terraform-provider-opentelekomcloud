@@ -126,3 +126,11 @@ In addition to all arguments above, the following attributes are exported:
 * `created_at` - The time the LoadBalancer was created.
 
 * `updated_at` - The time the LoadBalancer was last updated.
+
+## Import
+
+Loadbalancers can be imported using the `id`, e.g.
+
+```sh
+terraform import opentelekomcloud_lb_loadbalancer_v3.lb_1 7b80e108-1636-44e5-aece-986b0052b7dd
+```
