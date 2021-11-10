@@ -126,7 +126,7 @@ func resourceIdentityUserGroupMembershipV3Update(ctx context.Context, d *schema.
 	return resourceIdentityUserGroupMembershipV3Read(clientCtx, d, meta)
 }
 
-func resourceIdentityUserGroupMembershipV3Delete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceIdentityUserGroupMembershipV3Delete(_ context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*cfg.Config)
 	client, err := config.IdentityV3Client(config.GetRegion(d))
 	if err != nil {
@@ -157,9 +157,11 @@ func addGroupsToUser(client *golangsdk.ServiceClient, userID string, groupIDs []
 func removeGroupsFromUser(client *golangsdk.ServiceClient, userID string, groupIDs []interface{}) error {
 	mErr := &multierror.Error{}
 	for _, group := range groupIDs {
-		mErr = multierror.Append(mErr,
-			users.RemoveFromGroup(client, group.(string), userID).ExtractErr(),
-		)
+		err := users.RemoveFromGroup(client, group.(string), userID).ExtractErr()
+		if _, ok := err.(golangsdk.ErrDefault404); ok { // group was already removed
+			continue
+		}
+		mErr = multierror.Append(mErr, err)
 	}
 	if err := mErr.ErrorOrNil(); err != nil {
 		return err
