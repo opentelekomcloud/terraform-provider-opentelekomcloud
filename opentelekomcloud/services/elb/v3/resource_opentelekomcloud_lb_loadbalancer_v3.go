@@ -10,6 +10,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 	golangsdk "github.com/opentelekomcloud/gophertelekomcloud"
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/elb/v3/loadbalancers"
+	"github.com/opentelekomcloud/gophertelekomcloud/openstack/networking/v2/bandwidths"
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/networking/v2/extensions/layer3/floatingips"
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common"
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common/cfg"
@@ -22,6 +23,10 @@ func ResourceLoadBalancerV3() *schema.Resource {
 		ReadContext:   resourceLoadBalancerV3Read,
 		UpdateContext: resourceLoadBalancerV3Update,
 		DeleteContext: resourceLoadBalancerV3Delete,
+
+		Importer: &schema.ResourceImporter{
+			StateContext: schema.ImportStatePassthroughContext,
+		},
 
 		Schema: map[string]*schema.Schema{
 			"name": {
@@ -234,9 +239,23 @@ func resourceLoadBalancerV3Read(ctx context.Context, d *schema.ResourceData, met
 
 	publicIpInfo := make([]map[string]interface{}, len(lb.PublicIps))
 	if len(lb.PublicIps) > 0 {
-		info := d.Get("public_ip.0").(map[string]interface{})
-		info["id"] = lb.PublicIps[0].PublicIpID
-		info["address"] = lb.PublicIps[0].PublicIpAddress
+		nwClient, err := config.NetworkingV2Client(config.GetRegion(d))
+		if err != nil {
+			return fmterr.Errorf("error creating OpenTelekomCloud NetworkingV2 client: %w", err)
+		}
+		bandwidth, err := bandwidths.Get(nwClient, lb.PublicIps[0].PublicIpID).Extract()
+		if err != nil {
+			return diag.FromErr(err)
+		}
+		info := map[string]interface{}{
+			"id":                    bandwidth.PublicIpInfo[0].ID,
+			"address":               bandwidth.PublicIpInfo[0].Address,
+			"ip_type":               bandwidth.PublicIpInfo[0].Type,
+			"bandwidth_name":        bandwidth.Name,
+			"bandwidth_size":        bandwidth.Size,
+			"bandwidth_charge_mode": bandwidth.ChargeMode,
+			"bandwidth_share_type":  bandwidth.ShareType,
+		}
 		publicIpInfo[0] = info
 	}
 

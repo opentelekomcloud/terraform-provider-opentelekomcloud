@@ -19,11 +19,12 @@ import (
 const resourceLBName = "opentelekomcloud_lb_loadbalancer_v3.loadbalancer_1"
 
 func TestAccLBV3LoadBalancer_basic(t *testing.T) {
+	var lb loadbalancers.LoadBalancer
+
 	qts := lbQuotas()
 	t.Parallel()
 	th.AssertNoErr(t, quotas.AcquireMultipleQuotas(qts, 5*time.Second))
 	defer quotas.ReleaseMultipleQuotas(qts)
-	var lb loadbalancers.LoadBalancer
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:          func() { common.TestAccPreCheck(t) },
@@ -41,6 +42,29 @@ func TestAccLBV3LoadBalancer_basic(t *testing.T) {
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr(resourceLBName, "name", "loadbalancer_1_updated"),
 				),
+			},
+		},
+	})
+}
+
+func TestAccLBV3LoadBalancer_import(t *testing.T) {
+	qts := lbQuotas()
+	t.Parallel()
+	th.AssertNoErr(t, quotas.AcquireMultipleQuotas(qts, 5*time.Second))
+	defer quotas.ReleaseMultipleQuotas(qts)
+
+	resource.Test(t, resource.TestCase{
+		PreCheck:          func() { common.TestAccPreCheck(t) },
+		ProviderFactories: common.TestAccProviderFactories,
+		CheckDestroy:      testLBPoolV3Destroy,
+		Steps: []resource.TestStep{
+			{
+				Config: testLBPoolV3Basic,
+			},
+			{
+				ResourceName:      resourceLBName,
+				ImportState:       true,
+				ImportStateVerify: true,
 			},
 		},
 	})
