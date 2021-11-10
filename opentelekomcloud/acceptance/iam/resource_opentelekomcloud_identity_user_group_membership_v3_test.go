@@ -116,7 +116,7 @@ func testAccCheckIdentityV3UserGroupMembershipExists(n string, us []string) reso
 		}
 
 		if uc > 0 {
-			return fmt.Errorf("bad group membership compare, excepted(%d), but(%d)", len(us), len(founds))
+			return fmt.Errorf("bad group membership compare, excepted \n%+v\nbut found\n%+v)", us, founds)
 		}
 
 		return nil
