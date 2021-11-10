@@ -34,13 +34,13 @@ func TestAccIdentityUserGroupMembershipV3_basic(t *testing.T) {
 			{
 				Config: testAccIdentityUserGroupMembershipV3Basic(userName, groupName),
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckIdentityV3UserGroupMembershipExists(resourceUGMName, []string{userName}),
+					testAccCheckIdentityV3UserGroupMembershipExists(resourceUGMName, []string{groupName}),
 				),
 			},
 			{
 				Config: testAccIdentityUserGroupMembershipV3Update(userName, groupName, groupName2),
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckIdentityV3UserGroupMembershipExists(resourceUGMName, []string{userName, groupName2}),
+					testAccCheckIdentityV3UserGroupMembershipExists(resourceUGMName, []string{groupName, groupName2}),
 				),
 			},
 			{
