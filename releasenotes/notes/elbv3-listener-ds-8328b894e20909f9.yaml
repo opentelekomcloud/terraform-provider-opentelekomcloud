@@ -1,0 +1,4 @@
+---
+features:
+  - |
+    **New Data Source:** ``opentelekomcloud_lb_listener_v3`` (`#1529 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/1529>`_)
