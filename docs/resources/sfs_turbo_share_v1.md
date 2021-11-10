@@ -84,6 +84,6 @@ This resource provides the following timeouts configuration options:
 
 SFS Turbo can be imported using the `id`, e.g.
 
-```
-$ terraform import opentelekomcloud_sfs_turbo_v1 9e3dd316-64g9-0245-8456-71e9387d71ab
+```shell
+terraform import opentelekomcloud_sfs_turbo_share_v1 9e3dd316-64g9-0245-8456-71e9387d71ab
 ```
