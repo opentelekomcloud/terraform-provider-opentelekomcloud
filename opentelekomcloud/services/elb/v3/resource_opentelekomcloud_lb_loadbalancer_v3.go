@@ -383,9 +383,9 @@ func getPublicIpInfo(d *schema.ResourceData, meta interface{}, publicIpID string
 	}
 
 	return map[string]interface{}{
-		"id":                    bandwidth.PublicipInfo[0].PublicipId,
-		"address":               bandwidth.PublicipInfo[0].PublicipAddress,
-		"ip_type":               bandwidth.PublicipInfo[0].PublicipType,
+		"id":                    floatingIP.ID,
+		"address":               floatingIP.PublicAddress,
+		"ip_type":               floatingIP.Type,
 		"bandwidth_name":        bandwidth.Name,
 		"bandwidth_size":        bandwidth.Size,
 		"bandwidth_charge_mode": bandwidth.ChargeMode,
