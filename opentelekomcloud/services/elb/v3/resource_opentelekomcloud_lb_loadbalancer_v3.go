@@ -10,6 +10,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 	golangsdk "github.com/opentelekomcloud/gophertelekomcloud"
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/elb/v3/loadbalancers"
+	"github.com/opentelekomcloud/gophertelekomcloud/openstack/networking/v1/eips"
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/networking/v2/bandwidths"
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/networking/v2/extensions/layer3/floatingips"
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common"
@@ -239,11 +240,19 @@ func resourceLoadBalancerV3Read(ctx context.Context, d *schema.ResourceData, met
 
 	publicIpInfo := make([]map[string]interface{}, len(lb.PublicIps))
 	if len(lb.PublicIps) > 0 {
-		nwClient, err := config.NetworkingV2Client(config.GetRegion(d))
+		nwV2Client, err := config.NetworkingV2Client(config.GetRegion(d))
 		if err != nil {
 			return fmterr.Errorf("error creating OpenTelekomCloud NetworkingV2 client: %w", err)
 		}
-		bandwidth, err := bandwidths.Get(nwClient, lb.PublicIps[0].PublicIpID).Extract()
+		nwV1Client, err := config.NetworkingV1Client(config.GetRegion(d))
+		if err != nil {
+			return fmterr.Errorf("error creating OpenTelekomCloud NetworkingV1 client: %w", err)
+		}
+		floatingIP, err := eips.Get(nwV1Client, lb.PublicIps[0].PublicIpID).Extract()
+		if err != nil {
+			return diag.FromErr(err)
+		}
+		bandwidth, err := bandwidths.Get(nwV2Client, floatingIP.BandwidthID).Extract()
 		if err != nil {
 			return diag.FromErr(err)
 		}
@@ -364,7 +373,7 @@ func resourceLoadBalancerV3Delete(ctx context.Context, d *schema.ResourceData, m
 		config := meta.(*cfg.Config)
 		nwV2Client, err := config.NetworkingV2Client(config.GetRegion(d))
 		if err != nil {
-			return diag.FromErr(err)
+			return fmterr.Errorf("error creating OpenTelekomCloud NetworkingV2 client: %w", err)
 		}
 		publicIpInfo := d.Get("public_ip.0").(map[string]interface{})
 		ipIdToDelete := publicIpInfo["id"].(string)
