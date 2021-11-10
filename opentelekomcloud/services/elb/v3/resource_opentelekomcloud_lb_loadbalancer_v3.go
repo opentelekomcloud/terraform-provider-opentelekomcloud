@@ -338,25 +338,19 @@ func resourceLoadBalancerV3Delete(ctx context.Context, d *schema.ResourceData, m
 		return diag.FromErr(err)
 	}
 
-	lb, err := loadbalancers.Get(client, d.Id()).Extract()
-	if err != nil {
-		return diag.FromErr(err)
-	}
-
 	log.Printf("[DEBUG] Deleting loadbalancer %s", d.Id())
 	if err := loadbalancers.Delete(client, d.Id()).ExtractErr(); err != nil {
 		return fmterr.Errorf("unable to delete LoadBalancerV3 %s: %s", d.Id(), err)
 	}
 
-	if len(lb.PublicIps) > 0 {
+	if d.Get("public_ip.#").(int) > 0 {
 		config := meta.(*cfg.Config)
 		nwV1Client, err := config.NetworkingV1Client(config.GetRegion(d))
 		if err != nil {
 			return fmterr.Errorf("error creating OpenTelekomCloud NetworkingV1 client: %w", err)
 		}
-		publicIpInfo := d.Get("public_ip.0").(map[string]interface{})
-		ipIdToDelete := publicIpInfo["id"].(string)
-		if err := eips.Delete(nwV1Client, ipIdToDelete).ExtractErr(); err != nil {
+		ipID := d.Get("public_ip.0.id").(string)
+		if err := eips.Delete(nwV1Client, ipID).ExtractErr(); err != nil {
 			return diag.FromErr(err)
 		}
 	}
