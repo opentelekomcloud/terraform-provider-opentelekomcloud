@@ -378,9 +378,6 @@ func getPublicIpInfo(d *schema.ResourceData, meta interface{}, publicIpID string
 	if err != nil {
 		return nil, err
 	}
-	if len(bandwidth.PublicipInfo) != 1 {
-		return nil, nil
-	}
 
 	return map[string]interface{}{
 		"id":                    floatingIP.ID,
