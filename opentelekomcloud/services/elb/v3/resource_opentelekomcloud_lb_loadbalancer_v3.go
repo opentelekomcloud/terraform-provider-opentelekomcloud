@@ -366,17 +366,20 @@ func resourceLoadBalancerV3Delete(ctx context.Context, d *schema.ResourceData, m
 
 func getPublicIpInfo(d *schema.ResourceData, meta interface{}, publicIpID string) (map[string]interface{}, error) {
 	config := meta.(*cfg.Config)
-	nwV1Client, err := config.NetworkingV1Client(config.GetRegion(d))
+	client, err := config.NetworkingV1Client(config.GetRegion(d))
 	if err != nil {
 		return nil, fmt.Errorf("error creating OpenTelekomCloud NetworkingV1 client: %w", err)
 	}
-	floatingIP, err := eips.Get(nwV1Client, publicIpID).Extract()
+	floatingIP, err := eips.Get(client, publicIpID).Extract()
 	if err != nil {
 		return nil, err
 	}
-	bandwidth, err := bandwidths.Get(nwV1Client, floatingIP.BandwidthID).Extract()
+	bandwidth, err := bandwidths.Get(client, floatingIP.BandwidthID).Extract()
 	if err != nil {
 		return nil, err
+	}
+	if len(bandwidth.PublicipInfo) != 1 {
+		return nil, nil
 	}
 
 	return map[string]interface{}{
