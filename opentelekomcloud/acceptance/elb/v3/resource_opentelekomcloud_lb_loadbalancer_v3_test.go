@@ -56,10 +56,10 @@ func TestAccLBV3LoadBalancer_import(t *testing.T) {
 	resource.Test(t, resource.TestCase{
 		PreCheck:          func() { common.TestAccPreCheck(t) },
 		ProviderFactories: common.TestAccProviderFactories,
-		CheckDestroy:      testLBPoolV3Destroy,
+		CheckDestroy:      testAccCheckLBV3LoadBalancerDestroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testLBPoolV3Basic,
+				Config: testAccLBV3LoadBalancerConfigBasic,
 			},
 			{
 				ResourceName:      resourceLBName,
