@@ -16,7 +16,7 @@ import (
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common/cfg"
 )
 
-const resourceUGMName = "opentelekomcloud_identity_group_membership_v3.membership_1"
+const resourceUGMName = "opentelekomcloud_identity_user_group_membership_v3.membership_1"
 
 func TestAccIdentityUserGroupMembershipV3_basic(t *testing.T) {
 	var groupName = fmt.Sprintf("ACCPTTEST-%s", acctest.RandString(5))
@@ -161,7 +161,7 @@ resource "opentelekomcloud_identity_group_v3" "group_2" {
   name = "%s"
 }
 
-resource "opentelekomcloud_identity_group_membership_v3" "membership_1" {
+resource "opentelekomcloud_identity_user_group_membership_v3" "membership_1" {
   user = opentelekomcloud_identity_user_v3.user_1.id
   groups = [
     opentelekomcloud_identity_group_v3.group_1.id,
