@@ -4,7 +4,7 @@ subcategory: "Identity and Access Management (IAM)"
 
 # opentelekomcloud_identity_group_membership_v3
 
-Manages a User Group Membership resource within OpenTelekomCloud IAM service.
+Manages a Group Membership resource within OpenTelekomCloud IAM service.
 
 -> **Note:** You _must_ have admin privileges in your OpenTelekomCloud cloud to use this resource.
 
