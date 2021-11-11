@@ -3,7 +3,6 @@ package v3
 import (
 	"context"
 
-	"github.com/hashicorp/go-multierror"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/elb/v3/loadbalancers"
@@ -27,28 +26,102 @@ func DataSourceLoadBalancerV3() *schema.Resource {
 				Optional: true,
 				Computed: true,
 			},
-			"type": {
+			"description": {
 				Type:     schema.TypeString,
 				Computed: true,
 			},
-			"shared": {
+			"vip_address": {
+				Type:     schema.TypeString,
+				Optional: true,
+				Computed: true,
+			},
+			"vip_port_id": {
+				Type:     schema.TypeString,
+				Optional: true,
+				Computed: true,
+			},
+			"router_id": {
+				Type:     schema.TypeString,
+				Optional: true,
+				Computed: true,
+			},
+			"subnet_id": {
+				Type:     schema.TypeString,
+				Optional: true,
+				Computed: true,
+			},
+			"network_ids": {
+				Type:     schema.TypeSet,
+				Computed: true,
+			},
+			"ip_target_enable": {
 				Type:     schema.TypeBool,
 				Computed: true,
 			},
-			"max_connections": {
-				Type:     schema.TypeInt,
+			"l4_flavor": {
+				Type:     schema.TypeString,
+				Optional: true,
 				Computed: true,
 			},
-			"cps": {
-				Type:     schema.TypeInt,
+			"l7_flavor": {
+				Type:     schema.TypeString,
+				Optional: true,
 				Computed: true,
 			},
-			"qps": {
-				Type:     schema.TypeInt,
+			"availability_zones": {
+				Type:     schema.TypeSet,
 				Computed: true,
 			},
-			"bandwidth": {
-				Type:     schema.TypeInt,
+			"admin_state_up": {
+				Type:     schema.TypeBool,
+				Computed: true,
+			},
+			"public_ip": {
+				Type:     schema.TypeList,
+				Computed: true,
+				Elem: &schema.Resource{
+					Schema: map[string]*schema.Schema{
+						"id": {
+							Type:     schema.TypeString,
+							Computed: true,
+						},
+						"address": {
+							Type:     schema.TypeString,
+							Computed: true,
+						},
+						"ip_type": {
+							Type:     schema.TypeString,
+							Computed: true,
+						},
+						"bandwidth_name": {
+							Type:     schema.TypeString,
+							Computed: true,
+						},
+						"bandwidth_size": {
+							Type:     schema.TypeInt,
+							Computed: true,
+						},
+						"bandwidth_charge_mode": {
+							Type:     schema.TypeString,
+							Computed: true,
+						},
+						"bandwidth_share_type": {
+							Type:     schema.TypeString,
+							Computed: true,
+						},
+					},
+				},
+			},
+			"tags": {
+				Type:     schema.TypeMap,
+				Computed: true,
+			},
+			"created_at": {
+				Type:     schema.TypeString,
+				Computed: true,
+			},
+			"updated_at": {
+				Type:     schema.TypeString,
 				Computed: true,
 			},
 		},
@@ -68,7 +141,7 @@ func dataSourceLoadBalancerV3Read(_ context.Context, d *schema.ResourceData, met
 		if err != nil {
 			return fmterr.Errorf("error getting ELBv3 Load Balancer: %w", err)
 		}
-		return setLoadBalancerFields(d, lb)
+		return setLoadBalancerFields(d, meta, lb)
 	}
 
 	listOpts := loadbalancers.ListOpts{}
@@ -86,6 +159,12 @@ func dataSourceLoadBalancerV3Read(_ context.Context, d *schema.ResourceData, met
 	}
 	if v, ok := d.GetOk("l4_flavor_id"); ok {
 		listOpts.L4FlavorID = []string{v.(string)}
+	}
+	if v, ok := d.GetOk("vip_address"); ok {
+		listOpts.VipAddress = []string{v.(string)}
+	}
+	if v, ok := d.GetOk("vip_port_id"); ok {
+		listOpts.VipPortID = []string{v.(string)}
 	}
 
 	pages, err := loadbalancers.List(client, listOpts).AllPages()
@@ -105,45 +184,5 @@ func dataSourceLoadBalancerV3Read(_ context.Context, d *schema.ResourceData, met
 	}
 
 	lb := &lbList[0]
-	return setLoadBalancerFields(d, lb)
-}
-
-func setLoadBalancerFields(d *schema.ResourceData, lb *loadbalancers.LoadBalancer) diag.Diagnostics {
-	d.SetId(lb.ID)
-	publicIpInfo := make([]map[string]interface{}, len(lb.PublicIps))
-	if len(lb.PublicIps) > 0 {
-		info := d.Get("public_ip.0").(map[string]interface{})
-		info["id"] = lb.PublicIps[0].PublicIpID
-		info["address"] = lb.PublicIps[0].PublicIpAddress
-		publicIpInfo[0] = info
-	}
-
-	mErr := multierror.Append(
-		d.Set("name", lb.Name),
-		d.Set("description", lb.Description),
-		d.Set("vip_address", lb.VipAddress),
-		d.Set("vip_port_id", lb.VipPortID),
-		d.Set("admin_state_up", lb.AdminStateUp),
-		d.Set("router_id", lb.VpcID),
-		d.Set("subnet_id", lb.VipSubnetCidrID),
-		d.Set("ip_target_enable", lb.IpTargetEnable),
-		d.Set("l4_flavor", lb.L4FlavorID),
-		d.Set("l7_flavor", lb.L7FlavorID),
-		d.Set("availability_zones", lb.AvailabilityZoneList),
-		d.Set("network_ids", lb.ElbSubnetIDs),
-		d.Set("public_ip", publicIpInfo),
-		d.Set("created_at", lb.CreatedAt),
-		d.Set("updated_at", lb.UpdatedAt),
-	)
-
-	if err := mErr.ErrorOrNil(); err != nil {
-		return diag.FromErr(err)
-	}
-
-	tagMap := common.TagsToMap(lb.Tags)
-	if err := d.Set("tags", tagMap); err != nil {
-		return fmterr.Errorf("error saving tags for OpenTelekomCloud LoadBalancerV3: %s", err)
-	}
-
-	return nil
+	return setLoadBalancerFields(d, meta, lb)
 }
