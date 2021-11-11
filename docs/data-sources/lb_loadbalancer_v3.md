@@ -36,14 +36,32 @@ data "opentelekomcloud_lb_loadbalancer_v3" "loadbalancer_1" {
 
 In addition, the following attributes are exported:
 
-* `type` - Specifies the flavor type.
+* `network_ids` - Specifies the subnet Network ID.
 
-* `shared` - Specifies whether the flavor is available to all users.
+* `description` - Specifies supplementary information about the load balancer.
 
-* `max_connections` - Specifies the maximum concurrent connections.
+* `admin_state_up` - The administrative state of the LoadBalancer.
 
-* `cps` - Specifies the number of new connections per second.
+* `ip_target_enable` - The value can be `true` (enabled) or `false` (disabled).
 
-* `qps` - Specifies the number of requests per second at Layer 7.
+* `availability_zones` - Specifies the availability zones where the LoadBalancer will be located.
 
-* `bandwidth` - Specifies the inbound and outbound bandwidth in the unit of Kbit/s.
+* `public_ip` - The elastic IP address of the instance.
+
+  * `id` - Elastic IP ID.
+
+  * `address` - Elastic IP address.
+
+  * `ip_type` - Elastic IP type.
+
+  * `bandwidth_name` - Bandwidth name.
+
+  * `bandwidth_size` - Bandwidth size.
+
+  * `bandwidth_charge_mode` - Bandwidth billing type.
+
+  * `bandwidth_share_type` - Bandwidth sharing type.
+
+* `created_at` - The time the LoadBalancer was created.
+
+* `updated_at` - The time the LoadBalancer was last updated.
