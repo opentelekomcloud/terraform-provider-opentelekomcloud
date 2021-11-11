@@ -332,6 +332,7 @@ func setLoadBalancerFields(d *schema.ResourceData, meta interface{}, lb *loadbal
 		}
 		publicIpInfo[0] = info
 	}
+	tagMap := common.TagsToMap(lb.Tags)
 
 	mErr := multierror.Append(
 		d.Set("name", lb.Name),
@@ -347,17 +348,13 @@ func setLoadBalancerFields(d *schema.ResourceData, meta interface{}, lb *loadbal
 		d.Set("availability_zones", lb.AvailabilityZoneList),
 		d.Set("network_ids", lb.ElbSubnetIDs),
 		d.Set("public_ip", publicIpInfo),
+		d.Set("tags", tagMap),
 		d.Set("created_at", lb.CreatedAt),
 		d.Set("updated_at", lb.UpdatedAt),
 	)
 
 	if err := mErr.ErrorOrNil(); err != nil {
 		return diag.FromErr(err)
-	}
-
-	tagMap := common.TagsToMap(lb.Tags)
-	if err := d.Set("tags", tagMap); err != nil {
-		return fmterr.Errorf("error saving tags for OpenTelekomCloud LoadBalancerV3: %s", err)
 	}
 
 	return nil
