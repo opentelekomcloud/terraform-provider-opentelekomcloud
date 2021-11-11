@@ -146,27 +146,14 @@ func dataSourceLoadBalancerV3Read(_ context.Context, d *schema.ResourceData, met
 		return setLoadBalancerFields(d, meta, lb)
 	}
 
-	listOpts := loadbalancers.ListOpts{}
-	if v, ok := d.GetOk("name"); ok {
-		listOpts.Name = []string{v.(string)}
-	}
-	if v, ok := d.GetOk("router_id"); ok {
-		listOpts.VpcID = []string{v.(string)}
-	}
-	if v, ok := d.GetOk("subnet_id"); ok {
-		listOpts.VipSubnetCidrID = []string{v.(string)}
-	}
-	if v, ok := d.GetOk("l7_flavor_id"); ok {
-		listOpts.L7FlavorID = []string{v.(string)}
-	}
-	if v, ok := d.GetOk("l4_flavor_id"); ok {
-		listOpts.L4FlavorID = []string{v.(string)}
-	}
-	if v, ok := d.GetOk("vip_address"); ok {
-		listOpts.VipAddress = []string{v.(string)}
-	}
-	if v, ok := d.GetOk("vip_port_id"); ok {
-		listOpts.VipPortID = []string{v.(string)}
+	listOpts := loadbalancers.ListOpts{
+		Name:            common.StrSlice(d.Get("name")),
+		VpcID:           common.StrSlice(d.Get("router_id")),
+		VipSubnetCidrID: common.StrSlice(d.Get("subnet_id")),
+		L7FlavorID:      common.StrSlice(d.Get("l7_flavor_id")),
+		L4FlavorID:      common.StrSlice(d.Get("l4_flavor_id")),
+		VipAddress:      common.StrSlice(d.Get("vip_address")),
+		VipPortID:       common.StrSlice(d.Get("vip_port_id")),
 	}
 
 	pages, err := loadbalancers.List(client, listOpts).AllPages()
