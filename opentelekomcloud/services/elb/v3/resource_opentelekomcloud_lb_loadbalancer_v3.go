@@ -238,43 +238,7 @@ func resourceLoadBalancerV3Read(ctx context.Context, d *schema.ResourceData, met
 
 	log.Printf("[DEBUG] Retrieved loadbalancer %s: %#v", d.Id(), lb)
 
-	publicIpInfo := make([]map[string]interface{}, len(lb.PublicIps))
-	if len(lb.PublicIps) > 0 {
-		info, err := getPublicIpInfo(d, meta, lb.PublicIps[0].PublicIpID)
-		if err != nil {
-			return diag.FromErr(err)
-		}
-		publicIpInfo[0] = info
-	}
-
-	mErr := multierror.Append(
-		d.Set("name", lb.Name),
-		d.Set("description", lb.Description),
-		d.Set("vip_address", lb.VipAddress),
-		d.Set("vip_port_id", lb.VipPortID),
-		d.Set("admin_state_up", lb.AdminStateUp),
-		d.Set("router_id", lb.VpcID),
-		d.Set("subnet_id", lb.VipSubnetCidrID),
-		d.Set("ip_target_enable", lb.IpTargetEnable),
-		d.Set("l4_flavor", lb.L4FlavorID),
-		d.Set("l7_flavor", lb.L7FlavorID),
-		d.Set("availability_zones", lb.AvailabilityZoneList),
-		d.Set("network_ids", lb.ElbSubnetIDs),
-		d.Set("public_ip", publicIpInfo),
-		d.Set("created_at", lb.CreatedAt),
-		d.Set("updated_at", lb.UpdatedAt),
-	)
-
-	if err := mErr.ErrorOrNil(); err != nil {
-		return diag.FromErr(err)
-	}
-
-	tagMap := common.TagsToMap(lb.Tags)
-	if err := d.Set("tags", tagMap); err != nil {
-		return fmterr.Errorf("error saving tags for OpenTelekomCloud LoadBalancerV3: %s", err)
-	}
-
-	return nil
+	return setLoadBalancerFields(d, meta, lb)
 }
 
 func resourceLoadBalancerV3Update(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
@@ -353,6 +317,44 @@ func resourceLoadBalancerV3Delete(ctx context.Context, d *schema.ResourceData, m
 		if err := eips.Delete(nwV1Client, ipID).ExtractErr(); err != nil {
 			return diag.FromErr(err)
 		}
+	}
+
+	return nil
+}
+
+func setLoadBalancerFields(d *schema.ResourceData, meta interface{}, lb *loadbalancers.LoadBalancer) diag.Diagnostics {
+	d.SetId(lb.ID)
+	publicIpInfo := make([]map[string]interface{}, len(lb.PublicIps))
+	if len(lb.PublicIps) > 0 {
+		info, err := getPublicIpInfo(d, meta, lb.PublicIps[0].PublicIpID)
+		if err != nil {
+			return diag.FromErr(err)
+		}
+		publicIpInfo[0] = info
+	}
+	tagMap := common.TagsToMap(lb.Tags)
+
+	mErr := multierror.Append(
+		d.Set("name", lb.Name),
+		d.Set("description", lb.Description),
+		d.Set("vip_address", lb.VipAddress),
+		d.Set("vip_port_id", lb.VipPortID),
+		d.Set("admin_state_up", lb.AdminStateUp),
+		d.Set("router_id", lb.VpcID),
+		d.Set("subnet_id", lb.VipSubnetCidrID),
+		d.Set("ip_target_enable", lb.IpTargetEnable),
+		d.Set("l4_flavor", lb.L4FlavorID),
+		d.Set("l7_flavor", lb.L7FlavorID),
+		d.Set("availability_zones", lb.AvailabilityZoneList),
+		d.Set("network_ids", lb.ElbSubnetIDs),
+		d.Set("public_ip", publicIpInfo),
+		d.Set("tags", tagMap),
+		d.Set("created_at", lb.CreatedAt),
+		d.Set("updated_at", lb.UpdatedAt),
+	)
+
+	if err := mErr.ErrorOrNil(); err != nil {
+		return diag.FromErr(err)
 	}
 
 	return nil

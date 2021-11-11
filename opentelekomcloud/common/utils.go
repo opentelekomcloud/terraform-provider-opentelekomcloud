@@ -189,6 +189,22 @@ func BuildComponentID(parts ...string) string {
 	return strings.Join(parts, "/")
 }
 
+// StrSlice is used to wrap single string element in slice
+func StrSlice(v interface{}) []string {
+	if v == "" {
+		return nil
+	}
+	return []string{v.(string)}
+}
+
+// IntSlice is used to wrap single integer element in slice
+func IntSlice(v interface{}) []int {
+	if v == 0 {
+		return nil
+	}
+	return []int{v.(int)}
+}
+
 var (
 	DataSourceTooFewDiag  = diag.Errorf("your query returned no results. Please change your search criteria and try again.")
 	DataSourceTooManyDiag = diag.Errorf("your query returned more than one result. Please change your search criteria and try again.")
