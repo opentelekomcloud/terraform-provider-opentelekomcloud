@@ -1,0 +1,4 @@
+---
+features:
+  - |
+    **New Data Source:** ``opentelekomcloud_lb_loadbalancer_v3`` (`#1526 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/1526>`_)
