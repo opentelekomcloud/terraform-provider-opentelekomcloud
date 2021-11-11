@@ -53,6 +53,7 @@ func DataSourceLoadBalancerV3() *schema.Resource {
 			"network_ids": {
 				Type:     schema.TypeSet,
 				Computed: true,
+				Elem:     &schema.Schema{Type: schema.TypeString},
 			},
 			"ip_target_enable": {
 				Type:     schema.TypeBool,
@@ -71,6 +72,7 @@ func DataSourceLoadBalancerV3() *schema.Resource {
 			"availability_zones": {
 				Type:     schema.TypeSet,
 				Computed: true,
+				Elem:     &schema.Schema{Type: schema.TypeString},
 			},
 			"admin_state_up": {
 				Type:     schema.TypeBool,

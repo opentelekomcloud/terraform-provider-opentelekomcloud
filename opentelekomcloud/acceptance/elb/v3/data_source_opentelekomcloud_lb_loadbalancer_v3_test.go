@@ -12,8 +12,6 @@ import (
 const dataLBName = "data.opentelekomcloud_lb_loadbalancer_v3.loadbalancer_1"
 
 func TestLoadBalancerV3_basic(t *testing.T) {
-	t.Parallel()
-
 	resource.Test(t, resource.TestCase{
 		PreCheck:          func() { common.TestAccPreCheck(t) },
 		ProviderFactories: common.TestAccProviderFactories,
@@ -25,9 +23,9 @@ func TestLoadBalancerV3_basic(t *testing.T) {
 				Config: testLoadBalancerV3ByID,
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttrSet(dataLBName, "id"),
+					resource.TestCheckResourceAttrSet(dataLBName, "router_id"),
 					resource.TestCheckResourceAttr(dataLBName, "availability_zones.#", "1"),
 					resource.TestCheckResourceAttr(dataLBName, "name", "loadbalancer_1"),
-					resource.TestCheckResourceAttrSet(dataLBName, "router_id"),
 				),
 			},
 		},
