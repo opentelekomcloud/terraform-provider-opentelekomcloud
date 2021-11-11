@@ -189,6 +189,7 @@ func BuildComponentID(parts ...string) string {
 	return strings.Join(parts, "/")
 }
 
+// StrSlice is used to wrap single string element in slice
 func StrSlice(v interface{}) []string {
 	if v == "" {
 		return nil
@@ -196,6 +197,7 @@ func StrSlice(v interface{}) []string {
 	return []string{v.(string)}
 }
 
+// IntSlice is used to wrap single integer element in slice
 func IntSlice(v interface{}) []int {
 	if v == 0 {
 		return nil
