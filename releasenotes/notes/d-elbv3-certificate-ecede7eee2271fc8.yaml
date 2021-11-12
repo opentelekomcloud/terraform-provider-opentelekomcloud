@@ -1,0 +1,4 @@
+---
+features:
+  - |
+    **New Data Source:** ``opentelekomcloud_lb_certificate_v3`` (`#1530 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/1530>`_)
