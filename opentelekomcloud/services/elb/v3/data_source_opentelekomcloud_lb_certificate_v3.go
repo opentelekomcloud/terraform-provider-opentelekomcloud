@@ -26,6 +26,7 @@ func DataSourceCertificateV3() *schema.Resource {
 			"name": {
 				Type:         schema.TypeString,
 				Optional:     true,
+				Computed:     true,
 				ValidateFunc: validation.StringLenBetween(0, 255),
 			},
 			"description": {
@@ -38,14 +39,12 @@ func DataSourceCertificateV3() *schema.Resource {
 				Computed: true,
 			},
 			"private_key": {
-				Type:             schema.TypeString,
-				Computed:         true,
-				DiffSuppressFunc: common.SuppressStrippedNewLines,
+				Type:     schema.TypeString,
+				Computed: true,
 			},
 			"certificate": {
-				Type:             schema.TypeString,
-				Computed:         true,
-				DiffSuppressFunc: common.SuppressStrippedNewLines,
+				Type:     schema.TypeString,
+				Computed: true,
 			},
 			"type": {
 				Type:     schema.TypeString,
