@@ -22,15 +22,15 @@ data "opentelekomcloud_lb_certificate_v3" "certificate_1" {
 
 * `domain` - (Optional) The domain of the Certificate.
 
-* `private_key` - (Optional) The private encrypted key of the Certificate, PEM format.
-
-* `certificate` - (Optional) The public encrypted key of the Certificate, PEM format.
-
 * `type`- (Optional) The type of certificate the container holds. Either `server` or `client`.
 
 ## Attributes Reference
 
 In addition, the following attributes are exported:
+
+* `private_key` - The private encrypted key of the Certificate, PEM format.
+
+* `certificate` - The public encrypted key of the Certificate, PEM format.
 
 * `description` - Provides supplementary information about the certificate.
 

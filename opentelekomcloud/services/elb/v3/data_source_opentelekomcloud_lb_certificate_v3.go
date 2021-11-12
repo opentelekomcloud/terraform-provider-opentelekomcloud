@@ -39,13 +39,11 @@ func DataSourceCertificateV3() *schema.Resource {
 			},
 			"private_key": {
 				Type:             schema.TypeString,
-				Optional:         true,
 				Computed:         true,
 				DiffSuppressFunc: common.SuppressStrippedNewLines,
 			},
 			"certificate": {
 				Type:             schema.TypeString,
-				Optional:         true,
 				Computed:         true,
 				DiffSuppressFunc: common.SuppressStrippedNewLines,
 			},
@@ -90,11 +88,9 @@ func dataSourceCertificateV3Read(_ context.Context, d *schema.ResourceData, meta
 	}
 
 	listOpts := certificates.ListOpts{
-		Name:        d.Get("name").(string),
-		Type:        d.Get("type").(string),
-		Domain:      d.Get("domain").(string),
-		PrivateKey:  d.Get("private_key").(string),
-		Certificate: d.Get("certificate").(string),
+		Name:   common.StrSlice(d.Get("name").(string)),
+		Type:   common.StrSlice(d.Get("type").(string)),
+		Domain: common.StrSlice(d.Get("domain").(string)),
 	}
 
 	pages, err := certificates.List(client, listOpts).AllPages()
