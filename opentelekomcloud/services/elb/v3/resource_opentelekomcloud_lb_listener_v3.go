@@ -239,6 +239,10 @@ func resourceListenerV3Read(ctx context.Context, d *schema.ResourceData, meta in
 
 	log.Printf("[DEBUG] Retrieved listener %s: %#v", d.Id(), listener)
 
+	return setLBListenerFields(d, listener)
+}
+
+func setLBListenerFields(d *schema.ResourceData, listener *listeners.Listener) diag.Diagnostics {
 	insertHeaders := []map[string]interface{}{
 		{
 			"forward_elb_ip":     listener.InsertHeaders.ForwardedELBIP,
@@ -247,7 +251,6 @@ func resourceListenerV3Read(ctx context.Context, d *schema.ResourceData, meta in
 			"forwarded_host":     listener.InsertHeaders.ForwardedHost,
 		},
 	}
-
 	mErr := multierror.Append(
 		d.Set("admin_state_up", listener.AdminStateUp),
 		d.Set("client_ca_tls_container_ref", listener.CAContainerRef),
@@ -268,15 +271,10 @@ func resourceListenerV3Read(ctx context.Context, d *schema.ResourceData, meta in
 		d.Set("loadbalancer_id", listener.Loadbalancers[0].ID),
 		d.Set("created_at", listener.CreatedAt),
 		d.Set("updated_at", listener.UpdatedAt),
+		d.Set("tags", common.TagsToMap(listener.Tags)),
 	)
-
 	if err := mErr.ErrorOrNil(); err != nil {
 		return diag.FromErr(err)
-	}
-
-	tagMap := common.TagsToMap(listener.Tags)
-	if err := d.Set("tags", tagMap); err != nil {
-		return fmterr.Errorf("error saving tags for OpenTelekomCloud Listener: %s", err)
 	}
 
 	return nil
