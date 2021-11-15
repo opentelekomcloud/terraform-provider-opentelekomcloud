@@ -1,0 +1,4 @@
+---
+fixes:
+  - |
+    **[ELB]** Fix wrong name of field ``member_retry_enable`` in ``resource/opentelekomcloud_lb_listener_v3`` (`#1532 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/1532>`_)
