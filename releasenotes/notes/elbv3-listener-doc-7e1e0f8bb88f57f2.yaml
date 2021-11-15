@@ -1,0 +1,4 @@
+---
+other:
+  - |
+    **[ELB]** Fix missprint in ``resource/opentelekomcloud_lb_listener_v3`` documentation (`#1531 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/1531>`_)
