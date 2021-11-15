@@ -91,7 +91,7 @@ func ResourceListenerV3() *schema.Resource {
 					"tls-1-0", "tls-1-1", "tls-1-2", "tls-1-2-strict",
 				}, false),
 			},
-			"memory_retry_enable": {
+			"member_retry_enable": {
 				Type:     schema.TypeBool,
 				Optional: true,
 			},
@@ -189,7 +189,7 @@ func resourceListenerV3Create(ctx context.Context, d *schema.ResourceData, meta 
 
 	adminStateUp := d.Get("admin_state_up").(bool)
 	http2Enable := d.Get("http2_enable").(bool)
-	memoryRetryEnable := d.Get("memory_retry_enable").(bool)
+	memberRetryEnable := d.Get("member_retry_enable").(bool)
 	createOpts := listeners.CreateOpts{
 		AdminStateUp:           &adminStateUp,
 		CAContainerRef:         d.Get("client_ca_tls_container_ref").(string),
@@ -204,7 +204,7 @@ func resourceListenerV3Create(ctx context.Context, d *schema.ResourceData, meta 
 		SniContainerRefs:       common.ExpandToStringSlice(d.Get("sni_container_refs").(*schema.Set).List()),
 		Tags:                   common.ExpandResourceTags(d.Get("tags").(map[string]interface{})),
 		TlsCiphersPolicy:       d.Get("tls_ciphers_policy").(string),
-		EnableMemberRetry:      &memoryRetryEnable,
+		EnableMemberRetry:      &memberRetryEnable,
 		KeepAliveTimeout:       d.Get("keep_alive_timeout").(int),
 		ClientTimeout:          d.Get("client_timeout").(int),
 		MemberTimeout:          d.Get("member_timeout").(int),
@@ -264,7 +264,7 @@ func setLBListenerFields(d *schema.ResourceData, listener *listeners.Listener) d
 		d.Set("protocol_port", listener.ProtocolPort),
 		d.Set("sni_container_refs", listener.SniContainerRefs),
 		d.Set("tls_ciphers_policy", listener.TlsCiphersPolicy),
-		d.Set("memory_retry_enable", listener.EnableMemberRetry),
+		d.Set("member_retry_enable", listener.EnableMemberRetry),
 		d.Set("keep_alive_timeout", listener.KeepAliveTimeout),
 		d.Set("client_timeout", listener.ClientTimeout),
 		d.Set("member_timeout", listener.MemberTimeout),
