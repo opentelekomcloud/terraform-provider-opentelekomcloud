@@ -1,0 +1,5 @@
+---
+enhancements:
+  - |
+    **[EVS]** Ignore changes of ``metadata.backupId`` in ``resource/opentelekomcloud_blockstorage_volume_v2``
+    (`#1533 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/1533>`_)
