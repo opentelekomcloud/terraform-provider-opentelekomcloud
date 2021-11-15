@@ -65,9 +65,6 @@ The following arguments are supported:
   Each SNI certificate can have up to 30 domain names, and each domain name in the SNI certificate must be unique.
   This parameter will be ignored and an empty array will be returned if the listener's protocol is not `HTTPS`.
 
-* `tls_ciphers_policy`- (Optional) Controls the TLS version used. Supported values are `tls-1-0`, `tls-1-1`,
-  `tls-1-2` and `tls-1-2-strict`. If not set, the loadbalancer uses `tls-1-0`.
-
 * `tls_ciphers_policy` - (Optional) Specifies the security policy that will be used by the listener.
   This parameter is available only for `HTTPS` listeners. An error will be returned if the protocol
   of the listener is not `HTTPS`. Possible values are: `tls-1-0`, `tls-1-1`, `tls-1-2`, `tls-1-2-strict`.
