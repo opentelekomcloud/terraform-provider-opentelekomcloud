@@ -75,7 +75,7 @@ func ResourceBlockStorageVolumeV2() *schema.Resource {
 				Optional:         true,
 				ForceNew:         false,
 				Computed:         true,
-				DiffSuppressFunc: suppressMetadataPolicy,
+				DiffSuppressFunc: suppressMetadataComputed,
 			},
 			"snapshot_id": {
 				Type:     schema.TypeString,
@@ -502,8 +502,13 @@ func resourceVolumeV2AttachmentHash(v interface{}) int {
 	return hashcode.String(buf.String())
 }
 
-func suppressMetadataPolicy(k, old, new string, _ *schema.ResourceData) bool {
-	if k == "metadata.policy" { // metadata.policy is set by service
+var suppressedVolumeFields = []string{
+	"metadata.policy",
+	"metadata.backupId",
+}
+
+func suppressMetadataComputed(k, old, new string, _ *schema.ResourceData) bool {
+	if common.StringInSlice(k, suppressedVolumeFields) {
 		return true
 	}
 	return old == new
