@@ -271,6 +271,24 @@ func TestAccCCENodesV3TaintsK8sTags(t *testing.T) {
 	})
 }
 
+func TestAccCCENodesV3_extendParams(t *testing.T) {
+	var node nodes.Nodes
+
+	resource.Test(t, resource.TestCase{
+		PreCheck:          func() { testAccCCEKeyPairPreCheck(t) },
+		ProviderFactories: common.TestAccProviderFactories,
+		CheckDestroy:      testAccCheckCCENodeV3Destroy,
+		Steps: []resource.TestStep{
+			{
+				Config: testAccCCENodeV3ExtendParams,
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckCCENodeV3Exists(resourceNameNode, "opentelekomcloud_cce_cluster_v3.cluster_1", &node),
+				),
+			},
+		},
+	})
+}
+
 func testAccCheckCCENodeV3Destroy(s *terraform.State) error {
 	config := common.TestAccProvider.Meta().(*cfg.Config)
 	client, err := config.CceV3Client(env.OS_REGION_NAME)
@@ -814,4 +832,40 @@ resource "opentelekomcloud_cce_node_v3" "node_1" {
   private_ip = "%s"
 }
 `, common.DataSourceSubnet, env.OS_AVAILABILITY_ZONE, env.OS_KEYPAIR_NAME, privateIP)
+
+	testAccCCENodeV3ExtendParams = fmt.Sprintf(`
+%s
+
+resource "opentelekomcloud_cce_cluster_v3" "cluster_1" {
+  name         = "opentelekomcloud-cce"
+  cluster_type = "VirtualMachine"
+  flavor_id    = "cce.s1.small"
+  vpc_id       = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.vpc_id
+  subnet_id    = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.network_id
+
+  container_network_type = "overlay_l2"
+  authentication_mode    = "rbac"
+}
+
+resource "opentelekomcloud_cce_node_v3" "node_1" {
+  cluster_id = opentelekomcloud_cce_cluster_v3.cluster_1.id
+  name       = "test-node"
+  flavor_id  = "s2.xlarge.2"
+
+  availability_zone = "%s"
+  key_pair          = "%s"
+
+  root_volume {
+    size       = 40
+    volumetype = "SATA"
+  }
+
+  data_volumes {
+    size       = 100
+    volumetype = "SATA"
+  }
+
+  max_pods         = 16
+  docker_base_size = 30
+}`, common.DataSourceSubnet, env.OS_AVAILABILITY_ZONE, env.OS_KEYPAIR_NAME)
 )

@@ -1,0 +1,5 @@
+---
+enhancements:
+  - |
+    **[CCE]** Add ``docker_base_size`` and ``docker_lvm_config_override`` arguments to ``resource/opentelekomcloud_cce_node_v3``
+    (`#1536 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/1536>`_)
