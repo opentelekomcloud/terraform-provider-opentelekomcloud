@@ -111,6 +111,23 @@ The following arguments are supported:
 * `postinstall` - (Optional) Script required after installation. The input value can be a Base64 encoded string or not.
   Changing this parameter will create a new resource.
 
+* `docker_base_size` - (Optional) Available disk space of a single Docker container on the node using the device mapper.
+
+* `docker_lvm_config_override` - (Optional) `ConfigMap` of the Docker data disk.
+
+  Example:
+
+  `dockerThinpool=vgpaas/90%VG;kubernetesLV=vgpaas/10%VG;diskType=evs;lvType=linear`
+
+  In this example:
+
+  - `userLV`: size of the user space, for example, vgpaas/20%VG.
+  - `userPath`: mount path of the user space, for example, /home/wqt-test.
+  - `diskType`: disk type. Currently, only the evs, hdd, and ssd are supported.
+  - `lvType`: type of a logic volume. Currently, the value can be linear or striped.
+  - `dockerThinpool`: Docker space size, for example, vgpaas/60%VG.
+  - `kubernetesLV`: kubelet space size, for example, vgpaas/20%VG.
+
 * `root_volume` - (Required) It corresponds to the system disk related configuration. Changing this parameter will create a new resource.
   * `size` - (Required) Disk size in GB.
   * `volumetype` - (Required) Disk type.
