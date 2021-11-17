@@ -1,0 +1,5 @@
+enhancements:
+  - |
+    **[CCE]** Add extend params to the ``resource/opentelekomcloud_cce_node_pool_v3``:
+    ``max_pods``, ``docker_base_size``, ``docker_lvm_config_override``
+    (`#1537 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/1537>`_)

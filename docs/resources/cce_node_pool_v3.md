@@ -73,6 +73,15 @@ The following arguments are supported:
 * `postinstall` - (Optional) Script required after installation. The input value can be a Base64 encoded string or not.
   Changing this parameter will create a new resource.
 
+* `max_pods` - (Optional) The maximum number of instances a node is allowed to create.
+  Changing this parameter will create a new node pool.
+
+* `docker_base_size` - (Optional) Available disk space of a single Docker container on the node using the device mapper.
+  Changing this parameter will create a new node pool.
+
+* `docker_lvm_config_override` - (Optional) `ConfigMap` of the Docker data disk.
+  Changing this parameter will create a new node.
+
 * `scale_enable` - (Optional) Whether to enable auto scaling. If Autoscaler is enabled, install the autoscaler add-on to use the auto scaling feature.
 
 * `min_node_count` - (Optional) Minimum number of nodes allowed if auto scaling is enabled.
