@@ -86,6 +86,26 @@ func TestAccCCENodePoolsV3EncryptedVolume(t *testing.T) {
 	})
 }
 
+func TestAccCCENodePoolsV3ExtendParams(t *testing.T) {
+	var nodePool nodepools.NodePool
+	nodePoolName := "opentelekomcloud_cce_node_pool_v3.node_pool"
+	clusterName := "opentelekomcloud_cce_cluster_v3.cluster"
+
+	resource.Test(t, resource.TestCase{
+		PreCheck:          func() { testAccCCEKeyPairPreCheck(t) },
+		ProviderFactories: common.TestAccProviderFactories,
+		CheckDestroy:      testAccCheckCCENodeV3Destroy,
+		Steps: []resource.TestStep{
+			{
+				Config: testAccCCENodePoolV3ExtendParams,
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckCCENodePoolV3Exists(nodePoolName, clusterName, &nodePool),
+				),
+			},
+		},
+	})
+}
+
 func testAccCheckCCENodePoolV3Destroy(s *terraform.State) error {
 	config := common.TestAccProvider.Meta().(*cfg.Config)
 	client, err := config.CceV3Client(env.OS_REGION_NAME)
@@ -317,4 +337,39 @@ resource "opentelekomcloud_cce_node_pool_v3" "node_pool" {
     kms_id     = "%s"
   }
 }`, common.DataSourceSubnet, env.OS_KEYPAIR_NAME, env.OS_KMS_ID)
+	testAccCCENodePoolV3ExtendParams = fmt.Sprintf(`
+%s
+
+resource "opentelekomcloud_cce_cluster_v3" "cluster" {
+  name         = "opentelekomcloud-cce-np"
+  cluster_type = "VirtualMachine"
+  flavor_id    = "cce.s1.small"
+  vpc_id       = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.vpc_id
+  subnet_id    = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.network_id
+
+  container_network_type = "overlay_l2"
+  authentication_mode    = "rbac"
+}
+
+resource "opentelekomcloud_cce_node_pool_v3" "node_pool" {
+  cluster_id         = opentelekomcloud_cce_cluster_v3.cluster.id
+  name               = "opentelekomcloud-cce-node-pool"
+  os                 = "EulerOS 2.5"
+  flavor             = "s2.xlarge.2"
+  initial_node_count = 1
+  key_pair           = "%s"
+  availability_zone  = "random"
+
+  root_volume {
+    size       = 40
+    volumetype = "SSD"
+  }
+  data_volumes {
+    size       = 100
+    volumetype = "SSD"
+  }
+
+  max_pods         = 16
+  docker_base_size = 32
+}`, common.DataSourceSubnet, env.OS_KEYPAIR_NAME)
 )

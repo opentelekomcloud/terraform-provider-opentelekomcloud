@@ -210,6 +210,21 @@ func ResourceCCENodePoolV3() *schema.Resource {
 				ForceNew:  true,
 				StateFunc: common.GetHashOrEmpty,
 			},
+			"max_pods": {
+				Type:     schema.TypeInt,
+				Optional: true,
+				ForceNew: true,
+			},
+			"docker_base_size": {
+				Type:     schema.TypeInt,
+				Optional: true,
+				ForceNew: true,
+			},
+			"docker_lvm_config_override": {
+				Type:     schema.TypeString,
+				Optional: true,
+				ForceNew: true,
+			},
 			"scale_enable": {
 				Type:     schema.TypeBool,
 				Optional: true,
@@ -308,8 +323,11 @@ func resourceCCENodePoolV3Create(ctx context.Context, d *schema.ResourceData, me
 					},
 				},
 				ExtendParam: nodes.ExtendParam{
-					PreInstall:  base64PreInstall,
-					PostInstall: base64PostInstall,
+					MaxPods:                 d.Get("max_pods").(int),
+					PreInstall:              base64PreInstall,
+					PostInstall:             base64PostInstall,
+					DockerBaseSize:          d.Get("docker_base_size").(int),
+					DockerLVMConfigOverride: d.Get("docker_lvm_config_override").(string),
 				},
 				Taints:   resourceCCENodeTaints(d),
 				K8sTags:  resourceCCENodeK8sTags(d),

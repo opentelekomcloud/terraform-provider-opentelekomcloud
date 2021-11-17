@@ -99,7 +99,7 @@ The following arguments are supported:
 
 * `product_id` - (Optional) The Product ID. Changing this parameter will create a new cluster resource.
 
-* `max_pods` - (Optional) The maximum number of instances a node is allowed to create. Changing this parameter will create a new cluster resource.
+* `max_pods` - (Optional) The maximum number of instances a node is allowed to create. Changing this parameter will create a new node resource.
 
 * `public_key` - (Optional) The Public key. Changing this parameter will create a new cluster resource.
 
@@ -112,8 +112,10 @@ The following arguments are supported:
   Changing this parameter will create a new resource.
 
 * `docker_base_size` - (Optional) Available disk space of a single Docker container on the node using the device mapper.
+  Changing this parameter will create a new node.
 
 * `docker_lvm_config_override` - (Optional) `ConfigMap` of the Docker data disk.
+  Changing this parameter will create a new node.
 
   Example:
 
