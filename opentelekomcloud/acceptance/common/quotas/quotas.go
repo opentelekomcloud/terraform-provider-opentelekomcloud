@@ -8,9 +8,11 @@ import (
 	"strconv"
 	"strings"
 	"sync"
+	"testing"
 	"time"
 
 	"github.com/hashicorp/go-multierror"
+	th "github.com/opentelekomcloud/gophertelekomcloud/testhelper"
 	"golang.org/x/sync/semaphore"
 )
 
@@ -53,12 +55,18 @@ func NewQuotaWithTimeout(count int64, timeout time.Duration) (*Quota, context.Ca
 }
 
 // Acquire decrease count of available resources by 1
+// Deprecated: use BookOne in tests instead
 func (q *Quota) Acquire() error {
-	return q.AcquireMultiple(1)
+	return q.acquireMultiple(1)
 }
 
 // AcquireMultiple decrease count of available resources by n
+// Deprecated: use BookMany in tests instead
 func (q *Quota) AcquireMultiple(n int64) error {
+	return q.acquireMultiple(n)
+}
+
+func (q *Quota) acquireMultiple(n int64) error {
 	if n > q.Size {
 		return fmt.Errorf(tooManyMsg, n, q.Size, q.Name)
 	}
@@ -72,12 +80,18 @@ func (q *Quota) AcquireMultiple(n int64) error {
 }
 
 // Release increase count of available resources by 1
+// Deprecated: use BookOne in tests instead
 func (q *Quota) Release() {
-	q.ReleaseMultiple(1)
+	q.releaseMultiple(1)
 }
 
 // ReleaseMultiple increase count of available resources by n
+// Deprecated: use BookMany in tests instead
 func (q *Quota) ReleaseMultiple(n int64) {
+	q.releaseMultiple(n)
+}
+
+func (q *Quota) releaseMultiple(n int64) {
 	q.sem.Release(n)
 	q.Current += n
 }
@@ -163,7 +177,12 @@ func (q MultipleQuotas) X(multiplier int64) MultipleQuotas {
 }
 
 // AcquireMultipleQuotas tries to acquire all given quotas, reverting on failure
+// Deprecated: use BookMany in tests instead
 func AcquireMultipleQuotas(e []*ExpectedQuota, interval time.Duration) error {
+	return acquireMultipleQuotas(e, interval)
+}
+
+func acquireMultipleQuotas(e []*ExpectedQuota, interval time.Duration) error {
 	// validate if all Count values of ExpectQuota are correct
 	var mErr *multierror.Error
 	for _, q := range e {
@@ -198,7 +217,7 @@ func tryAcquireMultiple(e []*ExpectedQuota) (bool, error) {
 	var ok bool
 	defer func() {
 		if !ok {
-			ReleaseMultipleQuotas(acquired)
+			releaseMultipleQuotas(acquired)
 		}
 	}()
 
@@ -220,8 +239,28 @@ func tryAcquireMultiple(e []*ExpectedQuota) (bool, error) {
 	return ok, nil
 }
 
+// ReleaseMultipleQuotas releases quotas acquired by AcquireMultipleQuotas
+// Deprecated: use BookMany in tests instead
 func ReleaseMultipleQuotas(e []*ExpectedQuota) {
+	releaseMultipleQuotas(e)
+}
+
+func releaseMultipleQuotas(e []*ExpectedQuota) {
 	for _, q := range e {
-		q.Q.ReleaseMultiple(q.Count)
+		q.Q.releaseMultiple(q.Count)
 	}
+}
+
+// BookMany acquires quotas at the beginning and release them on the end of the test
+func BookMany(t *testing.T, qts []*ExpectedQuota) {
+	t.Helper()
+	th.AssertNoErr(t, acquireMultipleQuotas(qts, 5*time.Second))
+	t.Cleanup(func() { releaseMultipleQuotas(qts) })
+}
+
+// BookOne acquires a quota at the beginning and release it on the end of the test
+func BookOne(t *testing.T, quota *Quota) {
+	t.Helper()
+	th.AssertNoErr(t, quota.acquireMultiple(1))
+	t.Cleanup(func() { quota.releaseMultiple(1) })
 }
