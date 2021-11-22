@@ -318,6 +318,7 @@ func ResourceCCENodeV3() *schema.Resource {
 			"k8s_tags": {
 				Type:         schema.TypeMap,
 				Optional:     true,
+				Computed:     true,
 				ForceNew:     true,
 				ValidateFunc: common.ValidateK8sTagsMap,
 				Elem: &schema.Schema{

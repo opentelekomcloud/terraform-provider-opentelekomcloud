@@ -142,6 +142,7 @@ func ResourceCCENodePoolV3() *schema.Resource {
 			"k8s_tags": {
 				Type:         schema.TypeMap,
 				Optional:     true,
+				Computed:     true,
 				ValidateFunc: common.ValidateK8sTagsMap,
 				Elem: &schema.Schema{
 					Type: schema.TypeString,
