@@ -275,7 +275,8 @@ resource "opentelekomcloud_cce_cluster_v3" "cluster_1" {
   description             = "new description"
   kubernetes_svc_ip_range = "10.247.0.0/16"
   ignore_addons           = true
-}`, common.DataSourceSubnet, clusterName)
+}
+`, common.DataSourceSubnet, clusterName)
 }
 
 func testAccCCEClusterV3Timeout(clusterName string) string {
@@ -313,7 +314,8 @@ resource "opentelekomcloud_cce_cluster_v3" "cluster_1" {
   subnet_id              = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.network_id
   container_network_type = "overlay_l2"
   description            = "new description"
-}`, common.DataSourceSubnet, clusterName)
+}
+`, common.DataSourceSubnet, clusterName)
 }
 
 func testAccCCEClusterV3AuthProxy(clusterName string) string {
@@ -330,7 +332,7 @@ resource "opentelekomcloud_cce_cluster_v3" "cluster_1" {
   kubernetes_svc_ip_range = "10.247.0.0/16"
   authentication_mode     = "authenticating_proxy"
   authenticating_proxy {
-    ca = <<EOT
+    ca          = <<EOT
 -----BEGIN CERTIFICATE-----
 MIICZjCCAc+gAwIBAgIUZtMIBg4MdR/h8yPITTx5+B0Xj0swDQYJKoZIhvcNAQEL
 BQAwRTELMAkGA1UEBhMCQVUxEzARBgNVBAgMClNvbWUtU3RhdGUxITAfBgNVBAoM
@@ -347,7 +349,7 @@ jgKvjKkLJaJnTp8V+YtO1xBhB272ZgWbr22Cer8TQZchNc16I2qLp+O9AQuPqVYO
 15xHZN4yCgCVYcSlUm/HW2tJ3lAmilxkEFvJJcK1uLh7vqMflmcPSLe5
 -----END CERTIFICATE-----
 EOT
-    cert = <<EOT
+    cert        = <<EOT
 -----BEGIN CERTIFICATE-----
 MIIByDCCATECFAzNYuav3B0dfSfIe7L8pDJ0t0LuMA0GCSqGSIb3DQEBCwUAMEUx
 CzAJBgNVBAYTAkFVMRMwEQYDVQQIDApTb21lLVN0YXRlMSEwHwYDVQQKDBhJbnRl
@@ -468,7 +470,8 @@ resource "opentelekomcloud_cce_cluster_v3" "cluster_1" {
   container_network_type  = "overlay_l2"
   kubernetes_svc_ip_range = "10.247.0.0/16"
   no_addons               = true
-}`, common.DataSourceSubnet, clusterName)
+}
+`, common.DataSourceSubnet, clusterName)
 }
 
 func randClusterName() string {

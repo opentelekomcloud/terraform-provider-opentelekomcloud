@@ -485,7 +485,8 @@ resource "opentelekomcloud_cce_node_v3" "node_1" {
   }
 
   private_ip = "%s"
-}`, shared.DataSourceCluster, env.OS_AVAILABILITY_ZONE, env.OS_KEYPAIR_NAME, privateIP)
+}
+`, shared.DataSourceCluster, env.OS_AVAILABILITY_ZONE, env.OS_KEYPAIR_NAME, privateIP)
 }
 
 func testAccCCENodeV3Update(privateIP string) string {
@@ -493,7 +494,7 @@ func testAccCCENodeV3Update(privateIP string) string {
 %s
 
 resource "opentelekomcloud_cce_node_v3" "node_1" {
-  cluster_id        = data.opentelekomcloud_cce_cluster_v3.cluster.id
+  cluster_id = data.opentelekomcloud_cce_cluster_v3.cluster.id
   name       = "test-node2"
   flavor_id  = "s2.xlarge.2"
 
@@ -510,7 +511,8 @@ resource "opentelekomcloud_cce_node_v3" "node_1" {
   }
 
   private_ip = "%s"
-}`, shared.DataSourceCluster, env.OS_AVAILABILITY_ZONE, env.OS_KEYPAIR_NAME, privateIP)
+}
+`, shared.DataSourceCluster, env.OS_AVAILABILITY_ZONE, env.OS_KEYPAIR_NAME, privateIP)
 }
 
 var testAccCCENodeV3Timeout = fmt.Sprintf(`
@@ -733,9 +735,9 @@ func testAccCCENodeV3TaintsK8sTags(privateIP string) string {
 %s
 
 resource "opentelekomcloud_cce_node_v3" "node_1" {
-  cluster_id = data.opentelekomcloud_cce_cluster_v3.cluster.id
-  name       = "test-node"
-  flavor_id  = "s2.xlarge.2"
+  cluster_id        = data.opentelekomcloud_cce_cluster_v3.cluster.id
+  name              = "test-node"
+  flavor_id         = "s2.xlarge.2"
   availability_zone = "%s"
   key_pair          = "%s"
   root_volume {

@@ -191,36 +191,36 @@ resource "opentelekomcloud_cce_addon_v3" "autoscaler" {
   cluster_id       = opentelekomcloud_cce_cluster_v3.cluster_1.id
 
   values {
-    basic  = {
-      "cceEndpoint": "https://cce.eu-de.otc.t-systems.com",
-      "ecsEndpoint": "https://ecs.eu-de.otc.t-systems.com",
-      "image_version": "1.19.1",
-      "platform": "linux-amd64",
-      "region": "eu-de",
-      "swr_addr": "100.125.7.25:20202",
-      "swr_user": "hwofficial"
+    basic = {
+      "cceEndpoint" : "https://cce.eu-de.otc.t-systems.com",
+      "ecsEndpoint" : "https://ecs.eu-de.otc.t-systems.com",
+      "image_version" : "1.19.1",
+      "platform" : "linux-amd64",
+      "region" : "eu-de",
+      "swr_addr" : "100.125.7.25:20202",
+      "swr_user" : "hwofficial"
     }
     custom = {
-      "cluster_id": opentelekomcloud_cce_cluster_v3.cluster_1.id,
-      "coresTotal": 32000,
-      "expander": "priority",
-      "logLevel": 4,
-      "maxEmptyBulkDeleteFlag": 10,
-      "maxNodeProvisionTime": 15,
-      "maxNodesTotal": 1000,
-      "memoryTotal": 128000,
-      "scaleDownDelayAfterAdd": 10,
-      "scaleDownDelayAfterDelete": 11,
-      "scaleDownDelayAfterFailure": 3,
-      "scaleDownEnabled": true,
-      "scaleDownUnneededTime": 10,
-      "scaleDownUtilizationThreshold": 0.5,
-      "scaleUpCpuUtilizationThreshold": 1,
-      "scaleUpMemUtilizationThreshold": 1,
-      "scaleUpUnscheduledPodEnabled": true,
-      "scaleUpUtilizationEnabled": true,
-      "tenant_id": data.opentelekomcloud_identity_project_v3.project.id,
-      "unremovableNodeRecheckTimeout": 5
+      "cluster_id" : opentelekomcloud_cce_cluster_v3.cluster_1.id,
+      "coresTotal" : 32000,
+      "expander" : "priority",
+      "logLevel" : 4,
+      "maxEmptyBulkDeleteFlag" : 10,
+      "maxNodeProvisionTime" : 15,
+      "maxNodesTotal" : 1000,
+      "memoryTotal" : 128000,
+      "scaleDownDelayAfterAdd" : 10,
+      "scaleDownDelayAfterDelete" : 11,
+      "scaleDownDelayAfterFailure" : 3,
+      "scaleDownEnabled" : true,
+      "scaleDownUnneededTime" : 10,
+      "scaleDownUtilizationThreshold" : 0.5,
+      "scaleUpCpuUtilizationThreshold" : 1,
+      "scaleUpMemUtilizationThreshold" : 1,
+      "scaleUpUnscheduledPodEnabled" : true,
+      "scaleUpUtilizationEnabled" : true,
+      "tenant_id" : data.opentelekomcloud_identity_project_v3.project.id,
+      "unremovableNodeRecheckTimeout" : 5
     }
   }
 }
@@ -249,35 +249,35 @@ resource "opentelekomcloud_cce_addon_v3" "autoscaler" {
 
   values {
     basic = {
-      "cceEndpoint": "https://cce.eu-de.otc.t-systems.com",
-      "ecsEndpoint": "https://ecs.eu-de.otc.t-systems.com",
-      "image_version": "1.19.1",
-      "platform": "linux-amd64",
-      "region": "eu-de",
-      "swr_addr": "100.125.7.25:20202",
-      "swr_user": "hwofficial"
+      "cceEndpoint" : "https://cce.eu-de.otc.t-systems.com",
+      "ecsEndpoint" : "https://ecs.eu-de.otc.t-systems.com",
+      "image_version" : "1.19.1",
+      "platform" : "linux-amd64",
+      "region" : "eu-de",
+      "swr_addr" : "100.125.7.25:20202",
+      "swr_user" : "hwofficial"
     }
     custom = {
-      "cluster_id": opentelekomcloud_cce_cluster_v3.cluster_1.id,
-      "coresTotal": 32000,
-      "expander": "priority",
-      "logLevel": 4,
-      "maxEmptyBulkDeleteFlag": 10,
-      "maxNodeProvisionTime": 15,
-      "maxNodesTotal": 1000,
-      "memoryTotal": 128000,
-      "scaleDownDelayAfterAdd": 10,
-      "scaleDownDelayAfterDelete": 8,
-      "scaleDownDelayAfterFailure": 3,
-      "scaleDownEnabled": false,
-      "scaleDownUnneededTime": 10,
-      "scaleDownUtilizationThreshold": 0.5,
-      "scaleUpCpuUtilizationThreshold": 1,
-      "scaleUpMemUtilizationThreshold": 1,
-      "scaleUpUnscheduledPodEnabled": true,
-      "scaleUpUtilizationEnabled": true,
-      "tenant_id": data.opentelekomcloud_identity_project_v3.project.id,
-      "unremovableNodeRecheckTimeout": 5
+      "cluster_id" : opentelekomcloud_cce_cluster_v3.cluster_1.id,
+      "coresTotal" : 32000,
+      "expander" : "priority",
+      "logLevel" : 4,
+      "maxEmptyBulkDeleteFlag" : 10,
+      "maxNodeProvisionTime" : 15,
+      "maxNodesTotal" : 1000,
+      "memoryTotal" : 128000,
+      "scaleDownDelayAfterAdd" : 10,
+      "scaleDownDelayAfterDelete" : 8,
+      "scaleDownDelayAfterFailure" : 3,
+      "scaleDownEnabled" : false,
+      "scaleDownUnneededTime" : 10,
+      "scaleDownUtilizationThreshold" : 0.5,
+      "scaleUpCpuUtilizationThreshold" : 1,
+      "scaleUpMemUtilizationThreshold" : 1,
+      "scaleUpUnscheduledPodEnabled" : true,
+      "scaleUpUtilizationEnabled" : true,
+      "tenant_id" : data.opentelekomcloud_identity_project_v3.project.id,
+      "unremovableNodeRecheckTimeout" : 5
     }
   }
 }
@@ -305,32 +305,32 @@ resource "opentelekomcloud_cce_addon_v3" "autoscaler" {
   cluster_id       = opentelekomcloud_cce_cluster_v3.cluster_1.id
 
   values {
-    basic  = {
-      "cceEndpoint": "https://cce.eu-de.otc.t-systems.com",
-      "ecsEndpoint": "https://ecs.eu-de.otc.t-systems.com",
-      "image_version": "1.19.1",
-      "platform": "linux-amd64",
-      "region": "eu-de",
-      "swr_addr": "100.125.7.25:20202",
-      "swr_user": "hwofficial"
+    basic = {
+      "cceEndpoint" : "https://cce.eu-de.otc.t-systems.com",
+      "ecsEndpoint" : "https://ecs.eu-de.otc.t-systems.com",
+      "image_version" : "1.19.1",
+      "platform" : "linux-amd64",
+      "region" : "eu-de",
+      "swr_addr" : "100.125.7.25:20202",
+      "swr_user" : "hwofficial"
     }
     custom = {
-      "coresTotal": 32000,
-      "maxEmptyBulkDeleteFlag": 10,
-      "maxNodesTotal": 1000,
-      "memoryTotal": 128000,
-      "scaleDownDelayAfterAdd": 11,
-      "scaleDownDelayAfterDelete": 11,
-      "scaleDownDelayAfterFailure": 3,
-      "scaleDownEnabled": true,
-      "scaleDownUnneededTime": 10,
-      "scaleDownUtilizationThreshold": 0.25,
-      "scaleUpCpuUtilizationThreshold": 0.8,
-      "scaleUpMemUtilizationThreshold": 0.8,
-      "scaleUpUnscheduledPodEnabled": true,
-      "scaleUpUtilizationEnabled": true,
-      "unremovableNodeRecheckTimeout": 5,
-      "tenant_id": data.opentelekomcloud_identity_project_v3.project.id,
+      "coresTotal" : 32000,
+      "maxEmptyBulkDeleteFlag" : 10,
+      "maxNodesTotal" : 1000,
+      "memoryTotal" : 128000,
+      "scaleDownDelayAfterAdd" : 11,
+      "scaleDownDelayAfterDelete" : 11,
+      "scaleDownDelayAfterFailure" : 3,
+      "scaleDownEnabled" : true,
+      "scaleDownUnneededTime" : 10,
+      "scaleDownUtilizationThreshold" : 0.25,
+      "scaleUpCpuUtilizationThreshold" : 0.8,
+      "scaleUpMemUtilizationThreshold" : 0.8,
+      "scaleUpUnscheduledPodEnabled" : true,
+      "scaleUpUtilizationEnabled" : true,
+      "unremovableNodeRecheckTimeout" : 5,
+      "tenant_id" : data.opentelekomcloud_identity_project_v3.project.id,
     }
   }
 }
