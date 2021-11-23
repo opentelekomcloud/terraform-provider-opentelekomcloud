@@ -3,6 +3,7 @@ package shared
 import (
 	"context"
 	"fmt"
+	"os"
 	"sync"
 	"sync/atomic"
 	"testing"
@@ -28,6 +29,10 @@ var (
 )
 
 func createSharedCluster(t *testing.T) string {
+	if os.Getenv("TF_ACC") == "" {
+		t.Skip("Shared cluster can only be used in acceptance tests")
+	}
+
 	t.Helper()
 	v := atomic.AddInt32(&sharedClusterUsages, 1)
 	t.Logf("Cluster is required by the test. %d test(s) are using cluster.", v)

@@ -2,6 +2,7 @@ package shared
 
 import (
 	"net"
+	"os"
 	"sync"
 	"testing"
 
@@ -17,6 +18,10 @@ var subnetOnce sync.Once
 var SubnetNet *net.IPNet
 
 func getSharedSubnet(t *testing.T) *subnets.Subnet {
+	if os.Getenv("TF_ACC") == "" {
+		t.Skip("Shared subnet can only be used in acceptance tests")
+	}
+
 	subnetOnce.Do(func() {
 		config := common.TestAccProvider.Meta().(*cfg.Config)
 		client, err := config.NetworkingV1Client(env.OS_REGION_NAME)
