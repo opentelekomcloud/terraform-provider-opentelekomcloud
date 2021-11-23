@@ -12,6 +12,7 @@
     parent: golang-make
     vars:
       make_command: tflint
+    nodeset: fedora-pod
 
 - project:
     merge-mode: squash-merge
