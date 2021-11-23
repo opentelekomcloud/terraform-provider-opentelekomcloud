@@ -57,13 +57,11 @@ if ${error}; then
   echo ""
   exit 1
 fi
-
 }
 
 function main {
   tfAccTestsLint
   tfDocsLint
-
 }
 
 main

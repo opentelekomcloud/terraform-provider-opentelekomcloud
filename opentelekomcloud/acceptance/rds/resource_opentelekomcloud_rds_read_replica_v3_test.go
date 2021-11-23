@@ -65,7 +65,7 @@ func testAccRdsReadReplicaV3Basic(postfix string) string {
 %s
 
 resource "opentelekomcloud_rds_instance_v3" "instance" {
-  name = "tf_rds_instance_%s"
+  name              = "tf_rds_instance_%s"
   availability_zone = ["%s"]
   db {
     password = "Postgres!120521"
