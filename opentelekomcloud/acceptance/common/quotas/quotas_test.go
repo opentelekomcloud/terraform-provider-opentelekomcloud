@@ -157,34 +157,48 @@ func TestMultipleQuotas(t *testing.T) {
 
 func TestBookOne(t *testing.T) {
 	q, _ := NewQuotaWithTimeout(1, 1*time.Millisecond)
-	t.Run("first", func(tt *testing.T) {
-		tt.Parallel()
-		tt.Logf("started first")
-		tt.Logf("quota len: %d", q.Current)
-		BookOne(tt, q)
-		tt.Logf("quota len: %d", q.Current)
-		time.Sleep(20 * time.Millisecond)
-	})
-	t.Run("second", func(tt *testing.T) {
-		tt.Parallel()
-		time.Sleep(10 * time.Millisecond)
+
+	errChan := make(chan error, 1)
+	go func() {
+		time.Sleep(5 * time.Millisecond)
+		t.Log("started second")
 		err := q.acquireMultiple(1)
-		th.AssertEquals(t, namelessTimeout, err.Error())
-	})
+		errChan <- err
+	}()
+
+	t.Logf("started first")
+	t.Logf("quota len: %d", q.Current)
+	BookOne(t, q)
+
+	err := <-errChan
+	if err == nil {
+		t.Fatal("expected to get error")
+	}
+
+	th.AssertEquals(t, namelessTimeout, err.Error())
+	t.Logf("quota len: %d", q.Current)
 }
 func TestBookMany(t *testing.T) {
 	q1, _ := NewQuotaWithTimeout(1, 1*time.Millisecond)
-	q2, _ := NewQuotaWithTimeout(1, 1*time.Millisecond)
-	qts := MultipleQuotas{{q1, 1}, {q2, 1}}
-	t.Run("first", func(tt *testing.T) {
-		tt.Parallel()
-		BookMany(tt, qts)
-		time.Sleep(20 * time.Millisecond)
-	})
-	t.Run("second", func(tt *testing.T) {
-		tt.Parallel()
-		time.Sleep(10 * time.Millisecond)
+	qts := MultipleQuotas{{q1, 1}}
+
+	errChan := make(chan error, 1)
+	go func() {
+		time.Sleep(5 * time.Millisecond)
+		t.Log("start second")
 		err := acquireMultipleQuotas(qts, 1*time.Millisecond)
-		th.AssertEquals(t, namelessTimeout, err.Error())
-	})
+		if err == nil {
+			errChan <- nil
+		}
+		errChan <- err
+	}()
+
+	t.Log("start first")
+	BookMany(t, qts)
+
+	err := <-errChan
+	if err == nil {
+		t.Fatal("expected to get error")
+	}
+	th.AssertEquals(t, namelessTimeout, err.Error())
 }
