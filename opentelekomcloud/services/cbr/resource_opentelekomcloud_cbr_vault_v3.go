@@ -474,12 +474,10 @@ func cbrVaultTags(d *schema.ResourceData) []vaults.Tag {
 
 func vaultAddedResources(d *schema.ResourceData) ([]vaults.ResourceCreate, error) {
 	oldR, newR := d.GetChange("resource")
-	oldSet := oldR.(*schema.Set)
-	newSet := newR.(*schema.Set)
+	addedSet := newR.(*schema.Set).Difference(oldR.(*schema.Set))
 
-	addedSet := newSet.Difference(oldSet)
 	res := make([]vaults.ResourceCreate, addedSet.Len())
-	for i, v := range newSet.List() {
+	for i, v := range addedSet.List() {
 		newMap := v.(map[string]interface{})
 		newResource := vaults.ResourceCreate{
 			ID:   newMap["id"].(string),
@@ -501,11 +499,7 @@ func vaultAddedResources(d *schema.ResourceData) ([]vaults.ResourceCreate, error
 
 func vaultRemovedResources(d *schema.ResourceData) []string {
 	oldR, newR := d.GetChange("resource")
-
-	oldSet := oldR.(*schema.Set)
-	newSet := newR.(*schema.Set)
-
-	removedSet := oldSet.Difference(newSet)
+	removedSet := oldR.(*schema.Set).Difference(newR.(*schema.Set))
 
 	ids := make([]string, removedSet.Len())
 	for i, v := range removedSet.List() {
