@@ -27,7 +27,7 @@ func TestAccCCENodePoolsV3_basic(t *testing.T) {
 		{Q: quotas.Volume, Count: 2},
 		{Q: quotas.VolumeSize, Count: 40 + 100},
 	}
-	qts = append(qts, ecs.QuotasForFlavor("s2.xlarge.2")...)
+	qts = append(qts, ecs.QuotasForFlavor("s2.large.2")...)
 	quotas.BookMany(t, qts)
 	shared.BookCluster(t)
 
@@ -41,7 +41,7 @@ func TestAccCCENodePoolsV3_basic(t *testing.T) {
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckCCENodePoolV3Exists(nodePoolResourceName, shared.DataSourceClusterName, &nodePool),
 					resource.TestCheckResourceAttr(nodePoolResourceName, "name", "opentelekomcloud-cce-node-pool"),
-					resource.TestCheckResourceAttr(nodePoolResourceName, "flavor", "s2.xlarge.2"),
+					resource.TestCheckResourceAttr(nodePoolResourceName, "flavor", "s2.large.2"),
 					resource.TestCheckResourceAttr(nodePoolResourceName, "os", "EulerOS 2.5"),
 					resource.TestCheckResourceAttr(nodePoolResourceName, "k8s_tags.kubelet.kubernetes.io/namespace", "muh"),
 				),
@@ -241,7 +241,7 @@ resource "opentelekomcloud_cce_node_pool_v3" "node_pool" {
   cluster_id         = data.opentelekomcloud_cce_cluster_v3.cluster.id
   name               = "opentelekomcloud-cce-node-pool"
   os                 = "EulerOS 2.5"
-  flavor             = "s2.xlarge.2"
+  flavor             = "s2.large.2"
   initial_node_count = 1
   availability_zone  = "%s"
   key_pair           = "%s"
@@ -273,7 +273,7 @@ resource "opentelekomcloud_cce_node_pool_v3" "node_pool" {
   cluster_id         = data.opentelekomcloud_cce_cluster_v3.cluster.id
   name               = "opentelekomcloud-cce-node-pool"
   os                 = "EulerOS 2.5"
-  flavor             = "s2.xlarge.2"
+  flavor             = "s3.medium.1"
   initial_node_count = 2
   availability_zone  = "%s"
   key_pair           = "%s"
@@ -305,7 +305,7 @@ resource "opentelekomcloud_cce_node_pool_v3" "node_pool" {
   cluster_id         = data.opentelekomcloud_cce_cluster_v3.cluster.id
   name               = "opentelekomcloud-cce-node-pool"
   os                 = "EulerOS 2.5"
-  flavor             = "s2.xlarge.2"
+  flavor             = "s3.medium.1"
   initial_node_count = 1
   key_pair           = "%s"
   availability_zone  = "random"
@@ -333,7 +333,7 @@ resource "opentelekomcloud_cce_node_pool_v3" "node_pool" {
   cluster_id         = data.opentelekomcloud_cce_cluster_v3.cluster.id
   name               = "opentelekomcloud-cce-node-pool"
   os                 = "EulerOS 2.5"
-  flavor             = "s2.xlarge.2"
+  flavor             = "s3.medium.1"
   initial_node_count = 1
   key_pair           = "%s"
   availability_zone  = "random"
@@ -362,7 +362,7 @@ resource "opentelekomcloud_cce_node_pool_v3" "node_pool" {
   cluster_id         = data.opentelekomcloud_cce_cluster_v3.cluster.id
   name               = "opentelekomcloud-cce-node-pool"
   os                 = "EulerOS 2.5"
-  flavor             = "s2.xlarge.2"
+  flavor             = "s3.medium.1"
   initial_node_count = 1
   key_pair           = "%s"
   availability_zone  = "random"

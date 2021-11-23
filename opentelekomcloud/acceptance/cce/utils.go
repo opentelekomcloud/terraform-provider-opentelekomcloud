@@ -18,7 +18,7 @@ func testAccCCEKeyPairPreCheck(t *testing.T) {
 
 var clusterNodesQuota = quotas.NewQuota(5)
 var singleNodeQuotas = func() quotas.MultipleQuotas {
-	qts := acceptance.QuotasForFlavor("s2.xlarge.2")
+	qts := acceptance.QuotasForFlavor("s3.medium.1")
 	qts = append(qts,
 		&quotas.ExpectedQuota{Q: clusterNodesQuota, Count: 1},
 		&quotas.ExpectedQuota{Q: quotas.Server, Count: 1},
