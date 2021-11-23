@@ -7,8 +7,8 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/acctest"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
-
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/acceptance/common"
+	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/acceptance/common/quotas"
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/acceptance/env"
 )
 
@@ -16,6 +16,10 @@ func TestAccCceNodeIdsV3DataSource_basic(t *testing.T) {
 	var cceName = fmt.Sprintf("cce-test-%s", acctest.RandString(5))
 	var cceNodeName = fmt.Sprintf("node-test-%s", acctest.RandString(5))
 	dataSourceName := "data.opentelekomcloud_cce_node_ids_v3.node_ids"
+
+	t.Parallel()
+	quotas.BookOne(t, quotas.CCEClusterQuota)
+	quotas.BookMany(t, singleNodeQuotas)
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:          func() { common.TestAccPreCheck(t) },
@@ -78,6 +82,8 @@ resource "opentelekomcloud_cce_node_v3" "node_1" {
 
 data "opentelekomcloud_cce_node_ids_v3" "node_ids" {
   cluster_id = opentelekomcloud_cce_cluster_v3.cluster_1.id
+
+  depends_on = [opentelekomcloud_cce_node_v3.node_1]
 }
 `, common.DataSourceSubnet, cceName, cceNodeName, env.OS_AVAILABILITY_ZONE, env.OS_KEYPAIR_NAME)
 }

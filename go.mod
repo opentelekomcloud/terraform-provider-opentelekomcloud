@@ -3,6 +3,7 @@ module github.com/opentelekomcloud/terraform-provider-opentelekomcloud
 go 1.14
 
 require (
+	github.com/apparentlymart/go-cidr v1.1.0
 	github.com/aws/aws-sdk-go v1.36.29
 	github.com/hashicorp/errwrap v1.1.0 // indirect
 	github.com/hashicorp/go-cleanhttp v0.5.2

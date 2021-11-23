@@ -8,20 +8,21 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/acctest"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
-
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/cce/v3/clusters"
+	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/acceptance/common/quotas"
 
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/acceptance/common"
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/acceptance/env"
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common/cfg"
 )
 
-var clusterName = fmt.Sprintf("cce-%s", acctest.RandString(5))
-
-const resourceName = "opentelekomcloud_cce_cluster_v3.cluster_1"
+const resourceClusterName = "opentelekomcloud_cce_cluster_v3.cluster_1"
 
 func TestAccCCEClusterV3_basic(t *testing.T) {
 	var cluster clusters.Clusters
+	clusterName := randClusterName()
+	t.Parallel()
+	quotas.BookOne(t, quotas.CCEClusterQuota)
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:          func() { common.TestAccPreCheck(t) },
@@ -29,49 +30,77 @@ func TestAccCCEClusterV3_basic(t *testing.T) {
 		CheckDestroy:      testAccCheckCCEClusterV3Destroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccCCEClusterV3Basic,
+				Config: testAccCCEClusterV3Basic(clusterName),
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckCCEClusterV3Exists(resourceName, &cluster),
-					resource.TestCheckResourceAttr(resourceName, "name", clusterName),
-					resource.TestCheckResourceAttr(resourceName, "status", "Available"),
-					resource.TestCheckResourceAttr(resourceName, "cluster_type", "VirtualMachine"),
-					resource.TestCheckResourceAttr(resourceName, "flavor_id", "cce.s1.small"),
-					resource.TestCheckResourceAttr(resourceName, "container_network_type", "overlay_l2"),
-					resource.TestCheckResourceAttr(resourceName, "authentication_mode", "x509"),
-					resource.TestCheckResourceAttr(resourceName, "kube_proxy_mode", "iptables"),
-					resource.TestCheckResourceAttr(resourceName, "kubernetes_svc_ip_range", "10.247.0.0/16"),
-					resource.TestCheckResourceAttrSet(resourceName, "security_group_control"),
-					resource.TestCheckResourceAttrSet(resourceName, "security_group_node"),
+					testAccCheckCCEClusterV3Exists(resourceClusterName, &cluster),
+					resource.TestCheckResourceAttr(resourceClusterName, "name", clusterName),
+					resource.TestCheckResourceAttr(resourceClusterName, "status", "Available"),
+					resource.TestCheckResourceAttr(resourceClusterName, "cluster_type", "VirtualMachine"),
+					resource.TestCheckResourceAttr(resourceClusterName, "flavor_id", "cce.s1.small"),
+					resource.TestCheckResourceAttr(resourceClusterName, "container_network_type", "overlay_l2"),
+					resource.TestCheckResourceAttr(resourceClusterName, "authentication_mode", "x509"),
+					resource.TestCheckResourceAttr(resourceClusterName, "kube_proxy_mode", "iptables"),
+					resource.TestCheckResourceAttr(resourceClusterName, "kubernetes_svc_ip_range", "10.247.0.0/16"),
+					resource.TestCheckResourceAttrSet(resourceClusterName, "security_group_control"),
+					resource.TestCheckResourceAttrSet(resourceClusterName, "security_group_node"),
 				),
 			},
 			{
-				Config: testAccCCEClusterV3Update,
+				Config: testAccCCEClusterV3Update(clusterName),
 				Check: resource.ComposeTestCheckFunc(
-					resource.TestCheckResourceAttr(resourceName, "description", "new description"),
+					resource.TestCheckResourceAttr(resourceClusterName, "description", "new description"),
 				),
 			},
 		},
 	})
 }
 
-func TestAccCCEClusterV3_invalidNetwork(t *testing.T) {
+func TestAccCCEClusterV3_importBasic(t *testing.T) {
+	clusterName := randClusterName()
+	t.Parallel()
+	quotas.BookOne(t, quotas.CCEClusterQuota)
+
 	resource.Test(t, resource.TestCase{
 		PreCheck:          func() { common.TestAccPreCheck(t) },
 		ProviderFactories: common.TestAccProviderFactories,
 		CheckDestroy:      testAccCheckCCEClusterV3Destroy,
 		Steps: []resource.TestStep{
 			{
-				Config:      testAccCCEClusterV3InvalidSubnet,
+				Config: testAccCCEClusterV3Basic(clusterName),
+			},
+			{
+				ResourceName:      resourceClusterName,
+				ImportState:       true,
+				ImportStateVerify: true,
+				ImportStateVerifyIgnore: []string{
+					"cluster_version", "installed_addons", "ignore_addons",
+				},
+			},
+		},
+	})
+}
+
+func TestAccCCEClusterV3_invalidNetwork(t *testing.T) {
+	clusterName := randClusterName()
+	t.Parallel()
+	quotas.BookOne(t, quotas.CCEClusterQuota)
+	resource.Test(t, resource.TestCase{
+		PreCheck:          func() { common.TestAccPreCheck(t) },
+		ProviderFactories: common.TestAccProviderFactories,
+		CheckDestroy:      testAccCheckCCEClusterV3Destroy,
+		Steps: []resource.TestStep{
+			{
+				Config:      testAccCCEClusterV3InvalidSubnet(clusterName),
 				PlanOnly:    true,
 				ExpectError: regexp.MustCompile(`can't find subnet.+`),
 			},
 			{
-				Config:      testAccCCEClusterV3InvalidVPC,
+				Config:      testAccCCEClusterV3InvalidVPC(clusterName),
 				PlanOnly:    true,
 				ExpectError: regexp.MustCompile(`can't find VPC.+`),
 			},
 			{
-				Config:             testAccCCEClusterV3Computed,
+				Config:             testAccCCEClusterV3Computed(clusterName),
 				PlanOnly:           true,
 				ExpectNonEmptyPlan: true,
 			},
@@ -80,14 +109,17 @@ func TestAccCCEClusterV3_invalidNetwork(t *testing.T) {
 }
 
 func TestAccCCEClusterV3_proxyAuth(t *testing.T) {
+	clusterName := randClusterName()
+	t.Parallel()
+	quotas.BookOne(t, quotas.CCEClusterQuota)
 	resource.Test(t, resource.TestCase{
 		PreCheck:          func() { common.TestAccPreCheck(t) },
 		ProviderFactories: common.TestAccProviderFactories,
 		CheckDestroy:      testAccCheckCCEClusterV3Destroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccCCEClusterV3AuthProxy,
-				Check:  resource.TestCheckResourceAttr(resourceName, "authentication_mode", "authenticating_proxy"),
+				Config: testAccCCEClusterV3AuthProxy(clusterName),
+				Check:  resource.TestCheckResourceAttr(resourceClusterName, "authentication_mode", "authenticating_proxy"),
 			},
 		},
 	})
@@ -95,6 +127,9 @@ func TestAccCCEClusterV3_proxyAuth(t *testing.T) {
 
 func TestAccCCEClusterV3_timeout(t *testing.T) {
 	var cluster clusters.Clusters
+	clusterName := randClusterName()
+	t.Parallel()
+	quotas.BookOne(t, quotas.CCEClusterQuota)
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:          func() { common.TestAccPreCheck(t) },
@@ -102,10 +137,10 @@ func TestAccCCEClusterV3_timeout(t *testing.T) {
 		CheckDestroy:      testAccCheckCCEClusterV3Destroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccCCEClusterV3Timeout,
+				Config: testAccCCEClusterV3Timeout(clusterName),
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckCCEClusterV3Exists(resourceName, &cluster),
-					resource.TestCheckResourceAttr(resourceName, "authentication_mode", "rbac"),
+					testAccCheckCCEClusterV3Exists(resourceClusterName, &cluster),
+					resource.TestCheckResourceAttr(resourceClusterName, "authentication_mode", "rbac"),
 				),
 			},
 		},
@@ -115,16 +150,19 @@ func TestAccCCEClusterV3_timeout(t *testing.T) {
 func TestAccCCEClusterV3NoAddons(t *testing.T) {
 	var cluster clusters.Clusters
 
+	t.Parallel()
+	quotas.BookOne(t, quotas.CCEClusterQuota)
+
 	resource.Test(t, resource.TestCase{
 		PreCheck:          func() { common.TestAccPreCheck(t) },
 		ProviderFactories: common.TestAccProviderFactories,
 		CheckDestroy:      testAccCheckCCEClusterV3Destroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccCCEClusterV3NoAddons,
+				Config: testAccCCEClusterV3NoAddons(randClusterName()),
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckCCEClusterV3Exists(resourceName, &cluster),
-					resource.TestCheckResourceAttr(resourceName, "installed_addons.#", "0"),
+					testAccCheckCCEClusterV3Exists(resourceClusterName, &cluster),
+					resource.TestCheckResourceAttr(resourceClusterName, "installed_addons.#", "0"),
 				),
 			},
 		},
@@ -186,6 +224,9 @@ func testAccCheckCCEClusterV3Exists(n string, cluster *clusters.Clusters) resour
 
 func TestAccCCEClusterV3_withVersionDiff(t *testing.T) {
 	var cluster clusters.Clusters
+	clusterName := randClusterName()
+	t.Parallel()
+	quotas.BookOne(t, quotas.CCEClusterQuota)
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:          func() { common.TestAccPreCheck(t) },
@@ -193,18 +234,18 @@ func TestAccCCEClusterV3_withVersionDiff(t *testing.T) {
 		CheckDestroy:      testAccCheckCCEClusterV3Destroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccCCEClusterV3WithInvalidVersion,
+				Config: testAccCCEClusterV3WithInvalidVersion(clusterName),
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckCCEClusterV3Exists(resourceName, &cluster),
-					resource.TestCheckResourceAttr(resourceName, "name", clusterName),
+					testAccCheckCCEClusterV3Exists(resourceClusterName, &cluster),
+					resource.TestCheckResourceAttr(resourceClusterName, "name", clusterName),
 				),
 			},
 		},
 	})
 }
 
-var (
-	testAccCCEClusterV3Basic = fmt.Sprintf(`
+func testAccCCEClusterV3Basic(clusterName string) string {
+	return fmt.Sprintf(`
 %s
 
 resource "opentelekomcloud_cce_cluster_v3" "cluster_1" {
@@ -216,9 +257,12 @@ resource "opentelekomcloud_cce_cluster_v3" "cluster_1" {
   container_network_type  = "overlay_l2"
   kubernetes_svc_ip_range = "10.247.0.0/16"
   ignore_addons           = true
-}`, common.DataSourceSubnet, clusterName)
+}
+`, common.DataSourceSubnet, clusterName)
+}
 
-	testAccCCEClusterV3Update = fmt.Sprintf(`
+func testAccCCEClusterV3Update(clusterName string) string {
+	return fmt.Sprintf(`
 %s
 
 resource "opentelekomcloud_cce_cluster_v3" "cluster_1" {
@@ -231,12 +275,13 @@ resource "opentelekomcloud_cce_cluster_v3" "cluster_1" {
   description             = "new description"
   kubernetes_svc_ip_range = "10.247.0.0/16"
   ignore_addons           = true
-}`, common.DataSourceSubnet, clusterName)
+}
+`, common.DataSourceSubnet, clusterName)
+}
 
-	testAccCCEClusterV3Timeout = fmt.Sprintf(`
+func testAccCCEClusterV3Timeout(clusterName string) string {
+	return fmt.Sprintf(`
 %s
-
-resource "opentelekomcloud_networking_floatingip_v2" "fip_1" {}
 
 resource "opentelekomcloud_cce_cluster_v3" "cluster_1" {
   name                   = "%s"
@@ -244,7 +289,6 @@ resource "opentelekomcloud_cce_cluster_v3" "cluster_1" {
   flavor_id              = "cce.s2.small"
   vpc_id                 = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.vpc_id
   subnet_id              = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.network_id
-  eip                    = opentelekomcloud_networking_floatingip_v2.fip_1.address
   container_network_type = "overlay_l2"
   authentication_mode    = "rbac"
   timeouts {
@@ -255,8 +299,10 @@ resource "opentelekomcloud_cce_cluster_v3" "cluster_1" {
   multi_az = true
 }
 `, common.DataSourceSubnet, clusterName)
+}
 
-	testAccCCEClusterV3WithInvalidVersion = fmt.Sprintf(`
+func testAccCCEClusterV3WithInvalidVersion(clusterName string) string {
+	return fmt.Sprintf(`
 %s
 
 resource "opentelekomcloud_cce_cluster_v3" "cluster_1" {
@@ -268,9 +314,12 @@ resource "opentelekomcloud_cce_cluster_v3" "cluster_1" {
   subnet_id              = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.network_id
   container_network_type = "overlay_l2"
   description            = "new description"
-}`, common.DataSourceSubnet, clusterName)
+}
+`, common.DataSourceSubnet, clusterName)
+}
 
-	testAccCCEClusterV3AuthProxy = fmt.Sprintf(`
+func testAccCCEClusterV3AuthProxy(clusterName string) string {
+	return fmt.Sprintf(`
 %s
 
 resource "opentelekomcloud_cce_cluster_v3" "cluster_1" {
@@ -283,7 +332,7 @@ resource "opentelekomcloud_cce_cluster_v3" "cluster_1" {
   kubernetes_svc_ip_range = "10.247.0.0/16"
   authentication_mode     = "authenticating_proxy"
   authenticating_proxy {
-    ca = <<EOT
+    ca          = <<EOT
 -----BEGIN CERTIFICATE-----
 MIICZjCCAc+gAwIBAgIUZtMIBg4MdR/h8yPITTx5+B0Xj0swDQYJKoZIhvcNAQEL
 BQAwRTELMAkGA1UEBhMCQVUxEzARBgNVBAgMClNvbWUtU3RhdGUxITAfBgNVBAoM
@@ -300,7 +349,7 @@ jgKvjKkLJaJnTp8V+YtO1xBhB272ZgWbr22Cer8TQZchNc16I2qLp+O9AQuPqVYO
 15xHZN4yCgCVYcSlUm/HW2tJ3lAmilxkEFvJJcK1uLh7vqMflmcPSLe5
 -----END CERTIFICATE-----
 EOT
-    cert = <<EOT
+    cert        = <<EOT
 -----BEGIN CERTIFICATE-----
 MIIByDCCATECFAzNYuav3B0dfSfIe7L8pDJ0t0LuMA0GCSqGSIb3DQEBCwUAMEUx
 CzAJBgNVBAYTAkFVMRMwEQYDVQQIDApTb21lLVN0YXRlMSEwHwYDVQQKDBhJbnRl
@@ -328,8 +377,10 @@ EOT
   }
 }
 `, common.DataSourceSubnet, clusterName)
+}
 
-	testAccCCEClusterV3InvalidSubnet = fmt.Sprintf(`
+func testAccCCEClusterV3InvalidSubnet(clusterName string) string {
+	return fmt.Sprintf(`
 %s
 
 resource "opentelekomcloud_cce_cluster_v3" "cluster_1" {
@@ -342,8 +393,10 @@ resource "opentelekomcloud_cce_cluster_v3" "cluster_1" {
   kubernetes_svc_ip_range = "10.247.0.0/16"
 }
 `, common.DataSourceSubnet, clusterName)
+}
 
-	testAccCCEClusterV3InvalidVPC = fmt.Sprintf(`
+func testAccCCEClusterV3InvalidVPC(clusterName string) string {
+	return fmt.Sprintf(`
 resource "opentelekomcloud_vpc_v1" "vpc" {
   cidr = "192.168.0.0/16"
   name = "cce-test"
@@ -371,8 +424,10 @@ resource "opentelekomcloud_cce_cluster_v3" "cluster_1" {
   kubernetes_svc_ip_range = "10.247.0.0/16"
 }
 `, clusterName)
+}
 
-	testAccCCEClusterV3Computed = fmt.Sprintf(`
+func testAccCCEClusterV3Computed(clusterName string) string {
+	return fmt.Sprintf(`
 resource "opentelekomcloud_vpc_v1" "vpc" {
   cidr = "192.168.0.0/16"
   name = "cce-test"
@@ -400,8 +455,10 @@ resource "opentelekomcloud_cce_cluster_v3" "cluster_1" {
   kubernetes_svc_ip_range = "10.247.0.0/16"
 }
 `, clusterName)
+}
 
-	testAccCCEClusterV3NoAddons = fmt.Sprintf(`
+func testAccCCEClusterV3NoAddons(clusterName string) string {
+	return fmt.Sprintf(`
 %s
 
 resource "opentelekomcloud_cce_cluster_v3" "cluster_1" {
@@ -413,5 +470,10 @@ resource "opentelekomcloud_cce_cluster_v3" "cluster_1" {
   container_network_type  = "overlay_l2"
   kubernetes_svc_ip_range = "10.247.0.0/16"
   no_addons               = true
-}`, common.DataSourceSubnet, clusterName)
-)
+}
+`, common.DataSourceSubnet, clusterName)
+}
+
+func randClusterName() string {
+	return fmt.Sprintf("cce-%s", acctest.RandString(5))
+}

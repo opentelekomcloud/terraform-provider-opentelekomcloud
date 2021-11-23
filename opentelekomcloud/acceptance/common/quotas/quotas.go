@@ -149,6 +149,9 @@ var (
 	LbPool = FromEnv("OS_LB_POOl_QUOTA", 500)
 	// LbPolicy - quota for load balancer policies
 	LbPolicy = FromEnv("OS_LB_POLICY_QUOTA", 500)
+
+	// CCEClusterQuota is a quota for controlling number of CCE clusters existing in the parallel
+	CCEClusterQuota = FromEnv("OS_CCE_CLUSTER_QUOTA", 5)
 )
 
 // ExpectedQuota is a simple container of quota + count used for `Multiple` operations

@@ -7,29 +7,32 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/acctest"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
-
+	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/acceptance/cce/shared"
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/acceptance/common"
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/acceptance/env"
 )
 
+const dataSourceNodesName = "data.opentelekomcloud_cce_node_v3.nodes"
+
 func TestAccCCENodesV3DataSource_basic(t *testing.T) {
-	var cceName = fmt.Sprintf("cce-test-%s", acctest.RandString(5))
 	var cceNodeName = fmt.Sprintf("node-test-%s", acctest.RandString(5))
-	dataSourceName := "data.opentelekomcloud_cce_node_v3.nodes"
+
+	t.Parallel()
+	shared.BookCluster(t)
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:          func() { testAccCCEKeyPairPreCheck(t) },
 		ProviderFactories: common.TestAccProviderFactories,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccCCENodeV3DataSourceInit(cceName, cceNodeName),
+				Config: testAccCCENodeV3DataSourceInit(cceNodeName),
 			},
 			{
-				Config: testAccCCENodeV3DataSourceBasic(cceName, cceNodeName),
+				Config: testAccCCENodeV3DataSourceBasic(cceNodeName),
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckCCENodeV3DataSourceID(dataSourceName),
-					resource.TestCheckResourceAttr(dataSourceName, "name", cceNodeName),
-					resource.TestCheckResourceAttr(dataSourceName, "flavor_id", "s2.large.2"),
+					testAccCheckCCENodeV3DataSourceID(dataSourceNodesName),
+					resource.TestCheckResourceAttr(dataSourceNodesName, "name", cceNodeName),
+					resource.TestCheckResourceAttr(dataSourceNodesName, "flavor_id", "s3.medium.1"),
 				),
 			},
 		},
@@ -51,23 +54,14 @@ func testAccCheckCCENodeV3DataSourceID(n string) resource.TestCheckFunc {
 	}
 }
 
-func testAccCCENodeV3DataSourceInit(cceName string, cceNodeName string) string {
+func testAccCCENodeV3DataSourceInit(cceNodeName string) string {
 	return fmt.Sprintf(`
 %s
 
-resource "opentelekomcloud_cce_cluster_v3" "cluster_1" {
-  name                   = "%s"
-  cluster_type           = "VirtualMachine"
-  flavor_id              = "cce.s1.small"
-  vpc_id                 = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.vpc_id
-  subnet_id              = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.network_id
-  container_network_type = "overlay_l2"
-}
-
 resource "opentelekomcloud_cce_node_v3" "node_1" {
-  cluster_id        = opentelekomcloud_cce_cluster_v3.cluster_1.id
+  cluster_id        = data.opentelekomcloud_cce_cluster_v3.cluster.id
   name              = "%s"
-  flavor_id         = "s2.large.2"
+  flavor_id         = "s3.medium.1"
   availability_zone = "%s"
   key_pair          = "%s"
   root_volume {
@@ -79,26 +73,17 @@ resource "opentelekomcloud_cce_node_v3" "node_1" {
     volumetype = "SATA"
   }
 }
-`, common.DataSourceSubnet, cceName, cceNodeName, env.OS_AVAILABILITY_ZONE, env.OS_KEYPAIR_NAME)
+`, shared.DataSourceCluster, cceNodeName, env.OS_AVAILABILITY_ZONE, env.OS_KEYPAIR_NAME)
 }
 
-func testAccCCENodeV3DataSourceBasic(cceName string, cceNodeName string) string {
+func testAccCCENodeV3DataSourceBasic(cceNodeName string) string {
 	return fmt.Sprintf(`
 %s
 
-resource "opentelekomcloud_cce_cluster_v3" "cluster_1" {
-  name                   = "%s"
-  cluster_type           = "VirtualMachine"
-  flavor_id              = "cce.s1.small"
-  vpc_id                 = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.vpc_id
-  subnet_id              = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.network_id
-  container_network_type = "overlay_l2"
-}
-
 resource "opentelekomcloud_cce_node_v3" "node_1" {
-  cluster_id        = opentelekomcloud_cce_cluster_v3.cluster_1.id
+  cluster_id        = data.opentelekomcloud_cce_cluster_v3.cluster.id
   name              = "%s"
-  flavor_id         = "s2.large.2"
+  flavor_id         = "s3.medium.1"
   availability_zone = "%s"
   key_pair          = "%s"
   root_volume {
@@ -111,8 +96,8 @@ resource "opentelekomcloud_cce_node_v3" "node_1" {
   }
 }
 data "opentelekomcloud_cce_node_v3" "nodes" {
-  cluster_id = opentelekomcloud_cce_cluster_v3.cluster_1.id
+  cluster_id = data.opentelekomcloud_cce_cluster_v3.cluster.id
   node_id    = opentelekomcloud_cce_node_v3.node_1.id
 }
-`, common.DataSourceSubnet, cceName, cceNodeName, env.OS_AVAILABILITY_ZONE, env.OS_KEYPAIR_NAME)
+`, shared.DataSourceCluster, cceNodeName, env.OS_AVAILABILITY_ZONE, env.OS_KEYPAIR_NAME)
 }

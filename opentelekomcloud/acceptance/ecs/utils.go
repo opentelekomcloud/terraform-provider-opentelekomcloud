@@ -80,12 +80,8 @@ func init() {
 	}
 }
 
-func quotasForFlavor(flavorRef string) []*quotas.ExpectedQuota {
-	var qts []*quotas.ExpectedQuota
-	qts = append(qts,
-		flavorsQuota[flavorRef]...,
-	)
-	return qts
+func QuotasForFlavor(flavorRef string) []*quotas.ExpectedQuota {
+	return flavorsQuota[flavorRef]
 }
 
 func serverQuotas(volume int64, flavor string) []*quotas.ExpectedQuota {
@@ -94,7 +90,7 @@ func serverQuotas(volume int64, flavor string) []*quotas.ExpectedQuota {
 		{Q: quotas.VolumeSize, Count: volume},
 		{Q: quotas.Server, Count: 1},
 	}
-	qts = append(qts, quotasForFlavor(flavor)...)
+	qts = append(qts, QuotasForFlavor(flavor)...)
 	return qts
 }
 

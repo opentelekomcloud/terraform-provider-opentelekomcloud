@@ -4,23 +4,32 @@ import (
 	"fmt"
 	"testing"
 
+	"github.com/apparentlymart/go-cidr/cidr"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
-
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/cce/v3/nodes"
+	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/acceptance/cce/shared"
+	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/acceptance/common/quotas"
 
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/acceptance/common"
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/acceptance/env"
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common/cfg"
 )
 
-var privateIP = "192.168.1.13"
-
-const resourceNameNode = "opentelekomcloud_cce_node_v3.node_1"
-const resourceNameNode2 = "opentelekomcloud_cce_node_v3.node_2"
+const (
+	resourceNameNode  = "opentelekomcloud_cce_node_v3.node_1"
+	resourceNameNode2 = "opentelekomcloud_cce_node_v3.node_2"
+)
 
 func TestAccCCENodesV3Basic(t *testing.T) {
 	var node nodes.Nodes
+
+	t.Parallel()
+	shared.BookCluster(t)
+	quotas.BookMany(t, singleNodeQuotas.X(2))
+
+	ip, _ := cidr.Host(shared.SubnetNet, 14)
+	privateIP := ip.String()
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:          func() { testAccCCEKeyPairPreCheck(t) },
@@ -28,17 +37,17 @@ func TestAccCCENodesV3Basic(t *testing.T) {
 		CheckDestroy:      testAccCheckCCENodeV3Destroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccCCENodeV3Basic,
+				Config: testAccCCENodeV3Basic(privateIP),
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckCCENodeV3Exists(resourceNameNode, "opentelekomcloud_cce_cluster_v3.cluster_1", &node),
+					testAccCheckCCENodeV3Exists(resourceNameNode, shared.DataSourceClusterName, &node),
 					resource.TestCheckResourceAttr(resourceNameNode, "name", "test-node"),
-					resource.TestCheckResourceAttr(resourceNameNode, "flavor_id", "s2.xlarge.2"),
+					resource.TestCheckResourceAttr(resourceNameNode, "flavor_id", "s3.medium.1"),
 					resource.TestCheckResourceAttr(resourceNameNode, "os", "EulerOS 2.5"),
 					resource.TestCheckResourceAttr(resourceNameNode, "private_ip", privateIP),
 				),
 			},
 			{
-				Config: testAccCCENodeV3Update,
+				Config: testAccCCENodeV3Update(privateIP),
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr(resourceNameNode, "name", "test-node2"),
 				),
@@ -50,6 +59,10 @@ func TestAccCCENodesV3Basic(t *testing.T) {
 func TestAccCCENodesV3Timeout(t *testing.T) {
 	var node nodes.Nodes
 
+	t.Parallel()
+	shared.BookCluster(t)
+	quotas.BookMany(t, singleNodeQuotas)
+
 	resource.Test(t, resource.TestCase{
 		PreCheck:          func() { testAccCCEKeyPairPreCheck(t) },
 		ProviderFactories: common.TestAccProviderFactories,
@@ -58,7 +71,7 @@ func TestAccCCENodesV3Timeout(t *testing.T) {
 			{
 				Config: testAccCCENodeV3Timeout,
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckCCENodeV3Exists(resourceNameNode, "opentelekomcloud_cce_cluster_v3.cluster_1", &node),
+					testAccCheckCCENodeV3Exists(resourceNameNode, shared.DataSourceClusterName, &node),
 				),
 			},
 		},
@@ -68,6 +81,10 @@ func TestAccCCENodesV3OS(t *testing.T) {
 	var node nodes.Nodes
 	var node2 nodes.Nodes
 
+	t.Parallel()
+	shared.BookCluster(t)
+	quotas.BookMany(t, singleNodeQuotas.X(2))
+
 	resource.Test(t, resource.TestCase{
 		PreCheck:          func() { testAccCCEKeyPairPreCheck(t) },
 		ProviderFactories: common.TestAccProviderFactories,
@@ -76,9 +93,9 @@ func TestAccCCENodesV3OS(t *testing.T) {
 			{
 				Config: testAccCCENodeV3OS,
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckCCENodeV3Exists(resourceNameNode, "opentelekomcloud_cce_cluster_v3.cluster_1", &node),
+					testAccCheckCCENodeV3Exists(resourceNameNode, shared.DataSourceClusterName, &node),
 					resource.TestCheckResourceAttr(resourceNameNode, "os", "EulerOS 2.5"),
-					testAccCheckCCENodeV3Exists(resourceNameNode2, "opentelekomcloud_cce_cluster_v3.cluster_1", &node2),
+					testAccCheckCCENodeV3Exists(resourceNameNode2, shared.DataSourceClusterName, &node2),
 					resource.TestCheckResourceAttr(resourceNameNode2, "os", "CentOS 7.7"),
 				),
 			},
@@ -89,6 +106,12 @@ func TestAccCCENodesV3OS(t *testing.T) {
 func TestAccCCENodesV3BandWidthResize(t *testing.T) {
 	var node nodes.Nodes
 
+	t.Parallel()
+	shared.BookCluster(t)
+	qts := quotas.MultipleQuotas{{Q: quotas.FloatingIP, Count: 1}}
+	qts = append(qts, singleNodeQuotas...)
+	quotas.BookMany(t, qts)
+
 	resource.Test(t, resource.TestCase{
 		PreCheck:          func() { testAccCCEKeyPairPreCheck(t) },
 		ProviderFactories: common.TestAccProviderFactories,
@@ -97,7 +120,7 @@ func TestAccCCENodesV3BandWidthResize(t *testing.T) {
 			{
 				Config: testAccCCENodeV3Ip,
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckCCENodeV3Exists(resourceNameNode, "opentelekomcloud_cce_cluster_v3.cluster_1", &node),
+					testAccCheckCCENodeV3Exists(resourceNameNode, shared.DataSourceClusterName, &node),
 					resource.TestCheckResourceAttr(resourceNameNode, "iptype", "5_bgp"),
 					resource.TestCheckResourceAttr(resourceNameNode, "sharetype", "PER"),
 					resource.TestCheckResourceAttr(resourceNameNode, "bandwidth_charge_mode", "traffic"),
@@ -107,7 +130,7 @@ func TestAccCCENodesV3BandWidthResize(t *testing.T) {
 			{
 				Config: testAccCCENodeV3BandWidthResize,
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckCCENodeV3Exists(resourceNameNode, "opentelekomcloud_cce_cluster_v3.cluster_1", &node),
+					testAccCheckCCENodeV3Exists(resourceNameNode, shared.DataSourceClusterName, &node),
 					resource.TestCheckResourceAttr(resourceNameNode, "bandwidth_size", "10"),
 				),
 			},
@@ -115,9 +138,14 @@ func TestAccCCENodesV3BandWidthResize(t *testing.T) {
 	})
 }
 
-// TODO: Need to be tested
 func TestAccCCENodesV3_eipIds(t *testing.T) {
 	var node nodes.Nodes
+
+	t.Parallel()
+	shared.BookCluster(t)
+	qts := []*quotas.ExpectedQuota{{Q: quotas.FloatingIP, Count: 2}}
+	qts = append(qts, singleNodeQuotas...)
+	quotas.BookMany(t, qts)
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:          func() { testAccCCEKeyPairPreCheck(t) },
@@ -127,13 +155,13 @@ func TestAccCCENodesV3_eipIds(t *testing.T) {
 			{
 				Config: testAccCCENodeV3IpIDs,
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckCCENodeV3Exists(resourceNameNode, "opentelekomcloud_cce_cluster_v3.cluster_1", &node),
+					testAccCheckCCENodeV3Exists(resourceNameNode, shared.DataSourceClusterName, &node),
 				),
 			},
 			{
 				Config: testAccCCENodeV3IpIDsUnset,
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckCCENodeV3Exists(resourceNameNode, "opentelekomcloud_cce_cluster_v3.cluster_1", &node),
+					testAccCheckCCENodeV3Exists(resourceNameNode, shared.DataSourceClusterName, &node),
 				),
 			},
 		},
@@ -143,6 +171,12 @@ func TestAccCCENodesV3_eipIds(t *testing.T) {
 func TestAccCCENodesV3IpSetNull(t *testing.T) {
 	var node nodes.Nodes
 
+	t.Parallel()
+	shared.BookCluster(t)
+	qts := []*quotas.ExpectedQuota{{Q: quotas.FloatingIP, Count: 2}}
+	qts = append(qts, singleNodeQuotas...)
+	quotas.BookMany(t, qts)
+
 	resource.Test(t, resource.TestCase{
 		PreCheck:          func() { testAccCCEKeyPairPreCheck(t) },
 		ProviderFactories: common.TestAccProviderFactories,
@@ -151,7 +185,7 @@ func TestAccCCENodesV3IpSetNull(t *testing.T) {
 			{
 				Config: testAccCCENodeV3Ip,
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckCCENodeV3Exists(resourceNameNode, "opentelekomcloud_cce_cluster_v3.cluster_1", &node),
+					testAccCheckCCENodeV3Exists(resourceNameNode, shared.DataSourceClusterName, &node),
 					resource.TestCheckResourceAttr(resourceNameNode, "iptype", "5_bgp"),
 					resource.TestCheckResourceAttr(resourceNameNode, "sharetype", "PER"),
 					resource.TestCheckResourceAttr(resourceNameNode, "bandwidth_charge_mode", "traffic"),
@@ -160,7 +194,7 @@ func TestAccCCENodesV3IpSetNull(t *testing.T) {
 			{
 				Config: testAccCCENodeV3IpUnset,
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckCCENodeV3Exists(resourceNameNode, "opentelekomcloud_cce_cluster_v3.cluster_1", &node),
+					testAccCheckCCENodeV3Exists(resourceNameNode, shared.DataSourceClusterName, &node),
 				),
 			},
 		},
@@ -170,6 +204,12 @@ func TestAccCCENodesV3IpSetNull(t *testing.T) {
 func TestAccCCENodesV3IpCreate(t *testing.T) {
 	var node nodes.Nodes
 
+	t.Parallel()
+	shared.BookCluster(t)
+	qts := []*quotas.ExpectedQuota{{Q: quotas.FloatingIP, Count: 1}}
+	qts = append(qts, singleNodeQuotas...)
+	quotas.BookMany(t, qts)
+
 	resource.Test(t, resource.TestCase{
 		PreCheck:          func() { testAccCCEKeyPairPreCheck(t) },
 		ProviderFactories: common.TestAccProviderFactories,
@@ -178,13 +218,13 @@ func TestAccCCENodesV3IpCreate(t *testing.T) {
 			{
 				Config: testAccCCENodeV3IpUnset,
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckCCENodeV3Exists(resourceNameNode, "opentelekomcloud_cce_cluster_v3.cluster_1", &node),
+					testAccCheckCCENodeV3Exists(resourceNameNode, shared.DataSourceClusterName, &node),
 				),
 			},
 			{
 				Config: testAccCCENodeV3Ip,
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckCCENodeV3Exists(resourceNameNode, "opentelekomcloud_cce_cluster_v3.cluster_1", &node),
+					testAccCheckCCENodeV3Exists(resourceNameNode, shared.DataSourceClusterName, &node),
 				),
 			},
 		},
@@ -194,6 +234,12 @@ func TestAccCCENodesV3IpCreate(t *testing.T) {
 func TestAccCCENodesV3IpWithExtendedParameters(t *testing.T) {
 	var node nodes.Nodes
 
+	t.Parallel()
+	shared.BookCluster(t)
+	qts := []*quotas.ExpectedQuota{{Q: quotas.FloatingIP, Count: 2}}
+	qts = append(qts, singleNodeQuotas...)
+	quotas.BookMany(t, qts)
+
 	resource.Test(t, resource.TestCase{
 		PreCheck:          func() { testAccCCEKeyPairPreCheck(t) },
 		ProviderFactories: common.TestAccProviderFactories,
@@ -202,7 +248,7 @@ func TestAccCCENodesV3IpWithExtendedParameters(t *testing.T) {
 			{
 				Config: testAccCCENodeV3IpParams,
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckCCENodeV3Exists(resourceNameNode, "opentelekomcloud_cce_cluster_v3.cluster_1", &node),
+					testAccCheckCCENodeV3Exists(resourceNameNode, shared.DataSourceClusterName, &node),
 					resource.TestCheckResourceAttr(resourceNameNode, "iptype", "5_bgp"),
 					resource.TestCheckResourceAttr(resourceNameNode, "sharetype", "PER"),
 					resource.TestCheckResourceAttr(resourceNameNode, "bandwidth_charge_mode", "traffic"),
@@ -215,6 +261,10 @@ func TestAccCCENodesV3IpWithExtendedParameters(t *testing.T) {
 func TestAccCCENodesV3IpNulls(t *testing.T) {
 	var node nodes.Nodes
 
+	t.Parallel()
+	shared.BookCluster(t)
+	quotas.BookMany(t, singleNodeQuotas)
+
 	resource.Test(t, resource.TestCase{
 		PreCheck:          func() { testAccCCEKeyPairPreCheck(t) },
 		ProviderFactories: common.TestAccProviderFactories,
@@ -223,7 +273,7 @@ func TestAccCCENodesV3IpNulls(t *testing.T) {
 			{
 				Config: testAccCCENodeV3IpNull,
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckCCENodeV3Exists(resourceNameNode, "opentelekomcloud_cce_cluster_v3.cluster_1", &node),
+					testAccCheckCCENodeV3Exists(resourceNameNode, shared.DataSourceClusterName, &node),
 				),
 			},
 		},
@@ -233,6 +283,10 @@ func TestAccCCENodesV3IpNulls(t *testing.T) {
 func TestAccCCENodesV3EncryptedVolume(t *testing.T) {
 	var node nodes.Nodes
 
+	t.Parallel()
+	shared.BookCluster(t)
+	quotas.BookMany(t, singleNodeQuotas)
+
 	resource.Test(t, resource.TestCase{
 		PreCheck:          func() { testAccCCEKeyPairPreCheck(t) },
 		ProviderFactories: common.TestAccProviderFactories,
@@ -241,7 +295,7 @@ func TestAccCCENodesV3EncryptedVolume(t *testing.T) {
 			{
 				Config: testAccCCENodeV3EncryptedVolume,
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckCCENodeV3Exists(resourceNameNode, "opentelekomcloud_cce_cluster_v3.cluster_1", &node),
+					testAccCheckCCENodeV3Exists(resourceNameNode, shared.DataSourceClusterName, &node),
 					resource.TestCheckResourceAttr(resourceNameNode, "data_volumes.0.kms_id", env.OS_KMS_ID),
 				),
 			},
@@ -252,15 +306,22 @@ func TestAccCCENodesV3EncryptedVolume(t *testing.T) {
 func TestAccCCENodesV3TaintsK8sTags(t *testing.T) {
 	var node nodes.Nodes
 
+	t.Parallel()
+	shared.BookCluster(t)
+	quotas.BookMany(t, singleNodeQuotas)
+
+	ip, _ := cidr.Host(shared.SubnetNet, 15)
+	privateIP := ip.String()
+
 	resource.Test(t, resource.TestCase{
 		PreCheck:          func() { testAccCCEKeyPairPreCheck(t) },
 		ProviderFactories: common.TestAccProviderFactories,
 		CheckDestroy:      testAccCheckCCENodeV3Destroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccCCENodeV3TaintsK8sTags,
+				Config: testAccCCENodeV3TaintsK8sTags(privateIP),
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckCCENodeV3Exists(resourceNameNode, "opentelekomcloud_cce_cluster_v3.cluster_1", &node),
+					testAccCheckCCENodeV3Exists(resourceNameNode, shared.DataSourceClusterName, &node),
 					resource.TestCheckResourceAttr(resourceNameNode, "taints.0.key", "dedicated"),
 					resource.TestCheckResourceAttr(resourceNameNode, "taints.0.value", "database"),
 					resource.TestCheckResourceAttr(resourceNameNode, "taints.0.effect", "NoSchedule"),
@@ -273,6 +334,9 @@ func TestAccCCENodesV3TaintsK8sTags(t *testing.T) {
 
 func TestAccCCENodesV3_extendParams(t *testing.T) {
 	var node nodes.Nodes
+	t.Parallel()
+	shared.BookCluster(t)
+	quotas.BookMany(t, singleNodeQuotas)
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:          func() { testAccCCEKeyPairPreCheck(t) },
@@ -282,7 +346,7 @@ func TestAccCCENodesV3_extendParams(t *testing.T) {
 			{
 				Config: testAccCCENodeV3ExtendParams,
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckCCENodeV3Exists(resourceNameNode, "opentelekomcloud_cce_cluster_v3.cluster_1", &node),
+					testAccCheckCCENodeV3Exists(resourceNameNode, shared.DataSourceClusterName, &node),
 				),
 			},
 		},
@@ -354,25 +418,13 @@ func testAccCheckCCENodeV3Exists(n string, cluster string, node *nodes.Nodes) re
 	}
 }
 
-var (
-	testAccCCENodeV3OS = fmt.Sprintf(`
+var testAccCCENodeV3OS = fmt.Sprintf(`
 %s
 
-resource "opentelekomcloud_cce_cluster_v3" "cluster_1" {
-  name         = "opentelekomcloud-cce"
-  cluster_type = "VirtualMachine"
-  flavor_id    = "cce.s1.small"
-  vpc_id       = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.vpc_id
-  subnet_id    = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.network_id
-
-  container_network_type = "overlay_l2"
-  authentication_mode    = "rbac"
-}
-
 resource "opentelekomcloud_cce_node_v3" "node_1" {
-  cluster_id = opentelekomcloud_cce_cluster_v3.cluster_1.id
+  cluster_id = data.opentelekomcloud_cce_cluster_v3.cluster.id
   name       = "test-node"
-  flavor_id  = "s2.large.2"
+  flavor_id  = "s3.medium.1"
   os         = "EulerOS 2.5"
 
   availability_zone = "%[2]s"
@@ -390,9 +442,9 @@ resource "opentelekomcloud_cce_node_v3" "node_1" {
 }
 
 resource "opentelekomcloud_cce_node_v3" "node_2" {
-  cluster_id = opentelekomcloud_cce_cluster_v3.cluster_1.id
+  cluster_id = data.opentelekomcloud_cce_cluster_v3.cluster.id
   name       = "test-node"
-  flavor_id  = "s2.large.2"
+  flavor_id  = "s3.medium.1"
   os         = "CentOS 7.7"
 
   availability_zone = "%[2]s"
@@ -408,27 +460,16 @@ resource "opentelekomcloud_cce_node_v3" "node_2" {
     volumetype = "SATA"
   }
 }
+`, shared.DataSourceCluster, env.OS_AVAILABILITY_ZONE, env.OS_KEYPAIR_NAME)
 
-`, common.DataSourceSubnet, env.OS_AVAILABILITY_ZONE, env.OS_KEYPAIR_NAME)
-
-	testAccCCENodeV3Basic = fmt.Sprintf(`
+func testAccCCENodeV3Basic(privateIP string) string {
+	return fmt.Sprintf(`
 %s
 
-resource "opentelekomcloud_cce_cluster_v3" "cluster_1" {
-  name         = "opentelekomcloud-cce"
-  cluster_type = "VirtualMachine"
-  flavor_id    = "cce.s1.small"
-  vpc_id       = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.vpc_id
-  subnet_id    = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.network_id
-
-  container_network_type = "overlay_l2"
-  authentication_mode    = "rbac"
-}
-
 resource "opentelekomcloud_cce_node_v3" "node_1" {
-  cluster_id = opentelekomcloud_cce_cluster_v3.cluster_1.id
+  cluster_id = data.opentelekomcloud_cce_cluster_v3.cluster.id
   name       = "test-node"
-  flavor_id  = "s2.xlarge.2"
+  flavor_id  = "s3.medium.1"
 
   availability_zone = "%s"
   key_pair          = "%s"
@@ -444,26 +485,18 @@ resource "opentelekomcloud_cce_node_v3" "node_1" {
   }
 
   private_ip = "%s"
-}`, common.DataSourceSubnet, env.OS_AVAILABILITY_ZONE, env.OS_KEYPAIR_NAME, privateIP)
-
-	testAccCCENodeV3Update = fmt.Sprintf(`
-%s
-
-resource "opentelekomcloud_cce_cluster_v3" "cluster_1" {
-  name         = "opentelekomcloud-cce"
-  cluster_type = "VirtualMachine"
-  flavor_id    = "cce.s1.small"
-  vpc_id       = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.vpc_id
-  subnet_id    = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.network_id
-
-  container_network_type = "overlay_l2"
-  authentication_mode    = "rbac"
+}
+`, shared.DataSourceCluster, env.OS_AVAILABILITY_ZONE, env.OS_KEYPAIR_NAME, privateIP)
 }
 
+func testAccCCENodeV3Update(privateIP string) string {
+	return fmt.Sprintf(`
+%s
+
 resource "opentelekomcloud_cce_node_v3" "node_1" {
-  cluster_id = opentelekomcloud_cce_cluster_v3.cluster_1.id
+  cluster_id = data.opentelekomcloud_cce_cluster_v3.cluster.id
   name       = "test-node2"
-  flavor_id  = "s2.xlarge.2"
+  flavor_id  = "s3.medium.1"
 
   availability_zone = "%s"
   key_pair          = "%s"
@@ -478,26 +511,17 @@ resource "opentelekomcloud_cce_node_v3" "node_1" {
   }
 
   private_ip = "%s"
-}`, common.DataSourceSubnet, env.OS_AVAILABILITY_ZONE, env.OS_KEYPAIR_NAME, privateIP)
-
-	testAccCCENodeV3Timeout = fmt.Sprintf(`
-%s
-
-resource "opentelekomcloud_cce_cluster_v3" "cluster_1" {
-  name         = "opentelekomcloud-cce"
-  cluster_type = "VirtualMachine"
-  flavor_id    = "cce.s1.small"
-  vpc_id       = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.vpc_id
-  subnet_id    = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.network_id
-
-  container_network_type = "overlay_l2"
-  authentication_mode    = "rbac"
+}
+`, shared.DataSourceCluster, env.OS_AVAILABILITY_ZONE, env.OS_KEYPAIR_NAME, privateIP)
 }
 
+var testAccCCENodeV3Timeout = fmt.Sprintf(`
+%s
+
 resource "opentelekomcloud_cce_node_v3" "node_1" {
-  cluster_id        = opentelekomcloud_cce_cluster_v3.cluster_1.id
+  cluster_id        = data.opentelekomcloud_cce_cluster_v3.cluster.id
   name              = "test-node1"
-  flavor_id         = "s2.xlarge.2"
+  flavor_id         = "s3.medium.1"
   availability_zone = "%s"
   key_pair          = "%s"
 
@@ -514,26 +538,15 @@ resource "opentelekomcloud_cce_node_v3" "node_1" {
     delete = "10m"
   }
 }
-`, common.DataSourceSubnet, env.OS_AVAILABILITY_ZONE, env.OS_KEYPAIR_NAME)
+`, shared.DataSourceCluster, env.OS_AVAILABILITY_ZONE, env.OS_KEYPAIR_NAME)
 
-	testAccCCENodeV3Ip = fmt.Sprintf(`
+var testAccCCENodeV3Ip = fmt.Sprintf(`
 %s
 
-resource "opentelekomcloud_cce_cluster_v3" "cluster_1" {
-  name         = "opentelekomcloud-cce"
-  cluster_type = "VirtualMachine"
-  flavor_id    = "cce.s1.small"
-  vpc_id       = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.vpc_id
-  subnet_id    = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.network_id
-
-  container_network_type = "overlay_l2"
-  authentication_mode    = "rbac"
-}
-
 resource "opentelekomcloud_cce_node_v3" "node_1" {
-  cluster_id        = opentelekomcloud_cce_cluster_v3.cluster_1.id
+  cluster_id        = data.opentelekomcloud_cce_cluster_v3.cluster.id
   name              = "cce-node-1"
-  flavor_id         = "s2.xlarge.2"
+  flavor_id         = "s3.medium.1"
   availability_zone = "%s"
   key_pair          = "%s"
   root_volume {
@@ -548,26 +561,15 @@ resource "opentelekomcloud_cce_node_v3" "node_1" {
     volumetype = "SATA"
   }
 }
-`, common.DataSourceSubnet, env.OS_AVAILABILITY_ZONE, env.OS_KEYPAIR_NAME)
+`, shared.DataSourceCluster, env.OS_AVAILABILITY_ZONE, env.OS_KEYPAIR_NAME)
 
-	testAccCCENodeV3BandWidthResize = fmt.Sprintf(`
+var testAccCCENodeV3BandWidthResize = fmt.Sprintf(`
 %s
 
-resource "opentelekomcloud_cce_cluster_v3" "cluster_1" {
-  name         = "opentelekomcloud-cce"
-  cluster_type = "VirtualMachine"
-  flavor_id    = "cce.s1.small"
-  vpc_id       = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.vpc_id
-  subnet_id    = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.network_id
-
-  container_network_type = "overlay_l2"
-  authentication_mode    = "rbac"
-}
-
 resource "opentelekomcloud_cce_node_v3" "node_1" {
-  cluster_id        = opentelekomcloud_cce_cluster_v3.cluster_1.id
+  cluster_id        = data.opentelekomcloud_cce_cluster_v3.cluster.id
   name              = "cce-node-1"
-  flavor_id         = "s2.xlarge.2"
+  flavor_id         = "s3.medium.1"
   availability_zone = "%s"
   key_pair          = "%s"
   root_volume {
@@ -582,26 +584,15 @@ resource "opentelekomcloud_cce_node_v3" "node_1" {
     volumetype = "SATA"
   }
 }
-`, common.DataSourceSubnet, env.OS_AVAILABILITY_ZONE, env.OS_KEYPAIR_NAME)
+`, shared.DataSourceCluster, env.OS_AVAILABILITY_ZONE, env.OS_KEYPAIR_NAME)
 
-	testAccCCENodeV3IpUnset = fmt.Sprintf(`
+var testAccCCENodeV3IpUnset = fmt.Sprintf(`
 %s
 
-resource "opentelekomcloud_cce_cluster_v3" "cluster_1" {
-  name         = "opentelekomcloud-cce"
-  cluster_type = "VirtualMachine"
-  flavor_id    = "cce.s1.small"
-  vpc_id       = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.vpc_id
-  subnet_id    = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.network_id
-
-  container_network_type = "overlay_l2"
-  authentication_mode    = "rbac"
-}
-
 resource "opentelekomcloud_cce_node_v3" "node_1" {
-  cluster_id        = opentelekomcloud_cce_cluster_v3.cluster_1.id
+  cluster_id        = data.opentelekomcloud_cce_cluster_v3.cluster.id
   name              = "cce-node-1"
-  flavor_id         = "s2.xlarge.2"
+  flavor_id         = "s3.medium.1"
   availability_zone = "%s"
   key_pair          = "%s"
   root_volume {
@@ -614,26 +605,15 @@ resource "opentelekomcloud_cce_node_v3" "node_1" {
     volumetype = "SATA"
   }
 }
-`, common.DataSourceSubnet, env.OS_AVAILABILITY_ZONE, env.OS_KEYPAIR_NAME)
+`, shared.DataSourceCluster, env.OS_AVAILABILITY_ZONE, env.OS_KEYPAIR_NAME)
 
-	testAccCCENodeV3IpParams = fmt.Sprintf(`
+var testAccCCENodeV3IpParams = fmt.Sprintf(`
 %s
 
-resource "opentelekomcloud_cce_cluster_v3" "cluster_1" {
-  name         = "opentelekomcloud-cce"
-  cluster_type = "VirtualMachine"
-  flavor_id    = "cce.s1.small"
-  vpc_id       = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.vpc_id
-  subnet_id    = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.network_id
-
-  container_network_type = "overlay_l2"
-  authentication_mode    = "rbac"
-}
-
 resource "opentelekomcloud_cce_node_v3" "node_1" {
-  cluster_id        = opentelekomcloud_cce_cluster_v3.cluster_1.id
+  cluster_id        = data.opentelekomcloud_cce_cluster_v3.cluster.id
   name              = "cce-node-1"
-  flavor_id         = "s2.xlarge.2"
+  flavor_id         = "s3.medium.1"
   availability_zone = "%s"
   key_pair          = "%s"
   root_volume {
@@ -650,26 +630,15 @@ resource "opentelekomcloud_cce_node_v3" "node_1" {
     volumetype = "SATA"
   }
 }
-`, common.DataSourceSubnet, env.OS_AVAILABILITY_ZONE, env.OS_KEYPAIR_NAME)
+`, shared.DataSourceCluster, env.OS_AVAILABILITY_ZONE, env.OS_KEYPAIR_NAME)
 
-	testAccCCENodeV3IpNull = fmt.Sprintf(`
+var testAccCCENodeV3IpNull = fmt.Sprintf(`
 %s
 
-resource "opentelekomcloud_cce_cluster_v3" "cluster_1" {
-  name         = "opentelekomcloud-cce"
-  cluster_type = "VirtualMachine"
-  flavor_id    = "cce.s1.small"
-  vpc_id       = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.vpc_id
-  subnet_id    = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.network_id
-
-  container_network_type = "overlay_l2"
-  authentication_mode    = "rbac"
-}
-
 resource "opentelekomcloud_cce_node_v3" "node_1" {
-  cluster_id        = opentelekomcloud_cce_cluster_v3.cluster_1.id
+  cluster_id        = data.opentelekomcloud_cce_cluster_v3.cluster.id
   name              = "cce-node-1"
-  flavor_id         = "s2.xlarge.2"
+  flavor_id         = "s3.medium.1"
   availability_zone = "%s"
   key_pair          = "%s"
   root_volume {
@@ -686,29 +655,18 @@ resource "opentelekomcloud_cce_node_v3" "node_1" {
     volumetype = "SATA"
   }
 }
-`, common.DataSourceSubnet, env.OS_AVAILABILITY_ZONE, env.OS_KEYPAIR_NAME)
+`, shared.DataSourceCluster, env.OS_AVAILABILITY_ZONE, env.OS_KEYPAIR_NAME)
 
-	testAccCCENodeV3IpIDs = fmt.Sprintf(`
+var testAccCCENodeV3IpIDs = fmt.Sprintf(`
 %s
 
 resource "opentelekomcloud_networking_floatingip_v2" "fip_1" {}
 resource "opentelekomcloud_networking_floatingip_v2" "fip_2" {}
 
-resource "opentelekomcloud_cce_cluster_v3" "cluster_1" {
-  name         = "opentelekomcloud-cce-ids"
-  cluster_type = "VirtualMachine"
-  flavor_id    = "cce.s1.small"
-  vpc_id       = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.vpc_id
-  subnet_id    = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.network_id
-
-  container_network_type = "overlay_l2"
-  authentication_mode    = "rbac"
-}
-
 resource "opentelekomcloud_cce_node_v3" "node_1" {
-  cluster_id        = opentelekomcloud_cce_cluster_v3.cluster_1.id
+  cluster_id        = data.opentelekomcloud_cce_cluster_v3.cluster.id
   name              = "cce-node-1"
-  flavor_id         = "s2.xlarge.2"
+  flavor_id         = "s3.medium.1"
   availability_zone = "%s"
   key_pair          = "%s"
   root_volume {
@@ -723,28 +681,17 @@ resource "opentelekomcloud_cce_node_v3" "node_1" {
     volumetype = "SATA"
   }
 }
-`, common.DataSourceSubnet, env.OS_AVAILABILITY_ZONE, env.OS_KEYPAIR_NAME)
+`, shared.DataSourceCluster, env.OS_AVAILABILITY_ZONE, env.OS_KEYPAIR_NAME)
 
-	testAccCCENodeV3IpIDsUnset = fmt.Sprintf(`
+var testAccCCENodeV3IpIDsUnset = fmt.Sprintf(`
 %s
 
 resource "opentelekomcloud_networking_floatingip_v2" "fip_1" {}
 resource "opentelekomcloud_networking_floatingip_v2" "fip_2" {}
 
-resource "opentelekomcloud_cce_cluster_v3" "cluster_1" {
-  name         = "opentelekomcloud-cce-ids"
-  cluster_type = "VirtualMachine"
-  flavor_id    = "cce.s1.small"
-  vpc_id       = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.vpc_id
-  subnet_id    = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.network_id
-
-  container_network_type = "overlay_l2"
-  authentication_mode    = "rbac"
-}
-
 resource "opentelekomcloud_cce_node_v3" "node_1" {
-  cluster_id        = opentelekomcloud_cce_cluster_v3.cluster_1.id
-  flavor_id         = "s2.xlarge.2"
+  cluster_id        = data.opentelekomcloud_cce_cluster_v3.cluster.id
+  flavor_id         = "s3.medium.1"
   availability_zone = "%s"
   key_pair          = "%s"
   root_volume {
@@ -759,25 +706,14 @@ resource "opentelekomcloud_cce_node_v3" "node_1" {
     volumetype = "SATA"
   }
 }
-`, common.DataSourceSubnet, env.OS_AVAILABILITY_ZONE, env.OS_KEYPAIR_NAME)
+`, shared.DataSourceCluster, env.OS_AVAILABILITY_ZONE, env.OS_KEYPAIR_NAME)
 
-	testAccCCENodeV3EncryptedVolume = fmt.Sprintf(`
+var testAccCCENodeV3EncryptedVolume = fmt.Sprintf(`
 %s
 
-resource "opentelekomcloud_cce_cluster_v3" "cluster_1" {
-  name         = "opentelekomcloud-cce-encryption"
-  cluster_type = "VirtualMachine"
-  flavor_id    = "cce.s1.small"
-  vpc_id       = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.vpc_id
-  subnet_id    = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.network_id
-
-  container_network_type = "overlay_l2"
-  authentication_mode    = "rbac"
-}
-
 resource "opentelekomcloud_cce_node_v3" "node_1" {
-  cluster_id        = opentelekomcloud_cce_cluster_v3.cluster_1.id
-  flavor_id         = "s2.xlarge.2"
+  cluster_id        = data.opentelekomcloud_cce_cluster_v3.cluster.id
+  flavor_id         = "s3.medium.1"
   availability_zone = "%s"
   key_pair          = "%s"
 
@@ -792,24 +728,16 @@ resource "opentelekomcloud_cce_node_v3" "node_1" {
     kms_id     = "%s"
   }
 }
-`, common.DataSourceSubnet, env.OS_AVAILABILITY_ZONE, env.OS_KEYPAIR_NAME, env.OS_KMS_ID)
+`, shared.DataSourceCluster, env.OS_AVAILABILITY_ZONE, env.OS_KEYPAIR_NAME, env.OS_KMS_ID)
 
-	testAccCCENodeV3TaintsK8sTags = fmt.Sprintf(`
+func testAccCCENodeV3TaintsK8sTags(privateIP string) string {
+	return fmt.Sprintf(`
 %s
 
-resource "opentelekomcloud_cce_cluster_v3" "cluster_1" {
-  name         = "opentelekomcloud-cce"
-  cluster_type = "VirtualMachine"
-  flavor_id    = "cce.s1.small"
-  vpc_id       = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.vpc_id
-  subnet_id    = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.network_id
-  container_network_type = "overlay_l2"
-  authentication_mode    = "rbac"
-}
 resource "opentelekomcloud_cce_node_v3" "node_1" {
-  cluster_id = opentelekomcloud_cce_cluster_v3.cluster_1.id
-  name       = "test-node"
-  flavor_id  = "s2.xlarge.2"
+  cluster_id        = data.opentelekomcloud_cce_cluster_v3.cluster.id
+  name              = "test-node"
+  flavor_id         = "s3.medium.1"
   availability_zone = "%s"
   key_pair          = "%s"
   root_volume {
@@ -831,26 +759,16 @@ resource "opentelekomcloud_cce_node_v3" "node_1" {
   }
   private_ip = "%s"
 }
-`, common.DataSourceSubnet, env.OS_AVAILABILITY_ZONE, env.OS_KEYPAIR_NAME, privateIP)
-
-	testAccCCENodeV3ExtendParams = fmt.Sprintf(`
-%s
-
-resource "opentelekomcloud_cce_cluster_v3" "cluster_1" {
-  name         = "opentelekomcloud-cce"
-  cluster_type = "VirtualMachine"
-  flavor_id    = "cce.s1.small"
-  vpc_id       = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.vpc_id
-  subnet_id    = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.network_id
-
-  container_network_type = "overlay_l2"
-  authentication_mode    = "rbac"
+`, shared.DataSourceCluster, env.OS_AVAILABILITY_ZONE, env.OS_KEYPAIR_NAME, privateIP)
 }
 
+var testAccCCENodeV3ExtendParams = fmt.Sprintf(`
+%s
+
 resource "opentelekomcloud_cce_node_v3" "node_1" {
-  cluster_id = opentelekomcloud_cce_cluster_v3.cluster_1.id
+  cluster_id = data.opentelekomcloud_cce_cluster_v3.cluster.id
   name       = "test-node"
-  flavor_id  = "s2.xlarge.2"
+  flavor_id  = "s3.medium.1"
 
   availability_zone = "%s"
   key_pair          = "%s"
@@ -867,5 +785,4 @@ resource "opentelekomcloud_cce_node_v3" "node_1" {
 
   max_pods         = 16
   docker_base_size = 30
-}`, common.DataSourceSubnet, env.OS_AVAILABILITY_ZONE, env.OS_KEYPAIR_NAME)
-)
+}`, shared.DataSourceCluster, env.OS_AVAILABILITY_ZONE, env.OS_KEYPAIR_NAME)

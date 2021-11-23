@@ -7,16 +7,29 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/cce/v3/nodepools"
+	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/acceptance/cce/shared"
+	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/acceptance/common/quotas"
+	ecs "github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/acceptance/ecs"
 
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/acceptance/common"
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/acceptance/env"
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common/cfg"
 )
 
+const nodePoolResourceName = "opentelekomcloud_cce_node_pool_v3.node_pool"
+
 func TestAccCCENodePoolsV3_basic(t *testing.T) {
 	var nodePool nodepools.NodePool
-	nodePoolName := "opentelekomcloud_cce_node_pool_v3.node_pool"
-	clusterName := "opentelekomcloud_cce_cluster_v3.cluster"
+
+	t.Parallel()
+	qts := []*quotas.ExpectedQuota{
+		{Q: quotas.Server, Count: 2},
+		{Q: quotas.Volume, Count: 2},
+		{Q: quotas.VolumeSize, Count: 40 + 100},
+	}
+	qts = append(qts, ecs.QuotasForFlavor("s2.large.2")...)
+	quotas.BookMany(t, qts)
+	shared.BookCluster(t)
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:          func() { testAccCCEKeyPairPreCheck(t) },
@@ -26,28 +39,73 @@ func TestAccCCENodePoolsV3_basic(t *testing.T) {
 			{
 				Config: testAccCCENodePoolV3Basic,
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckCCENodePoolV3Exists(nodePoolName, clusterName, &nodePool),
-					resource.TestCheckResourceAttr(nodePoolName, "name", "opentelekomcloud-cce-node-pool"),
-					resource.TestCheckResourceAttr(nodePoolName, "flavor", "s2.xlarge.2"),
-					resource.TestCheckResourceAttr(nodePoolName, "os", "EulerOS 2.5"),
-					resource.TestCheckResourceAttr(nodePoolName, "k8s_tags.kubelet.kubernetes.io/namespace", "muh"),
+					testAccCheckCCENodePoolV3Exists(nodePoolResourceName, shared.DataSourceClusterName, &nodePool),
+					resource.TestCheckResourceAttr(nodePoolResourceName, "name", "opentelekomcloud-cce-node-pool"),
+					resource.TestCheckResourceAttr(nodePoolResourceName, "flavor", "s2.large.2"),
+					resource.TestCheckResourceAttr(nodePoolResourceName, "os", "EulerOS 2.5"),
+					resource.TestCheckResourceAttr(nodePoolResourceName, "k8s_tags.kubelet.kubernetes.io/namespace", "muh"),
 				),
 			},
 			{
 				Config: testAccCCENodePoolV3Update,
 				Check: resource.ComposeTestCheckFunc(
-					resource.TestCheckResourceAttr(nodePoolName, "initial_node_count", "2"),
-					resource.TestCheckResourceAttr(nodePoolName, "k8s_tags.kubelet.kubernetes.io/namespace", "kuh"),
+					resource.TestCheckResourceAttr(nodePoolResourceName, "initial_node_count", "2"),
+					resource.TestCheckResourceAttr(nodePoolResourceName, "k8s_tags.kubelet.kubernetes.io/namespace", "kuh"),
 				),
 			},
 		},
 	})
 }
 
+func TestAccCCENodePoolV3ImportBasic(t *testing.T) {
+	t.Parallel()
+	shared.BookCluster(t)
+
+	resource.Test(t, resource.TestCase{
+		PreCheck:          func() { common.TestAccPreCheck(t) },
+		ProviderFactories: common.TestAccProviderFactories,
+		CheckDestroy:      testAccCheckCCENodePoolV3Destroy,
+		Steps: []resource.TestStep{
+			{
+				Config: testAccCCENodePoolV3Basic,
+			},
+			{
+				ResourceName:      nodePoolResourceName,
+				ImportState:       true,
+				ImportStateVerify: true,
+				ImportStateIdFunc: testAccCCENodePoolV3ImportStateIdFunc(),
+				ImportStateVerifyIgnore: []string{
+					"max_node_count", "min_node_count", "priority", "scale_down_cooldown_time", "initial_node_count",
+				},
+			},
+		},
+	})
+}
+
+func testAccCCENodePoolV3ImportStateIdFunc() resource.ImportStateIdFunc {
+	return func(s *terraform.State) (string, error) {
+		var clusterID string
+		var nodePoolID string
+		for _, rs := range s.RootModule().Resources {
+			if rs.Type == "opentelekomcloud_cce_cluster_v3" {
+				clusterID = rs.Primary.ID
+			} else if rs.Type == "opentelekomcloud_cce_node_pool_v3" {
+				nodePoolID = rs.Primary.ID
+			}
+		}
+		if clusterID == "" || nodePoolID == "" {
+			return "", fmt.Errorf("resource not found: %s/%s", clusterID, nodePoolID)
+		}
+		return fmt.Sprintf("%s/%s", clusterID, nodePoolID), nil
+	}
+}
+
 func TestAccCCENodePoolsV3_randomAZ(t *testing.T) {
 	var nodePool nodepools.NodePool
 	nodePoolName := "opentelekomcloud_cce_node_pool_v3.node_pool"
-	clusterName := "opentelekomcloud_cce_cluster_v3.cluster"
+
+	t.Parallel()
+	shared.BookCluster(t)
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:          func() { testAccCCEKeyPairPreCheck(t) },
@@ -57,7 +115,7 @@ func TestAccCCENodePoolsV3_randomAZ(t *testing.T) {
 			{
 				Config: testAccCCENodePoolV3RandomAZ,
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckCCENodePoolV3Exists(nodePoolName, clusterName, &nodePool),
+					testAccCheckCCENodePoolV3Exists(nodePoolName, shared.DataSourceClusterName, &nodePool),
 					resource.TestCheckResourceAttr(nodePoolName, "availability_zone", "random"),
 				),
 			},
@@ -68,7 +126,9 @@ func TestAccCCENodePoolsV3_randomAZ(t *testing.T) {
 func TestAccCCENodePoolsV3EncryptedVolume(t *testing.T) {
 	var nodePool nodepools.NodePool
 	nodePoolName := "opentelekomcloud_cce_node_pool_v3.node_pool"
-	clusterName := "opentelekomcloud_cce_cluster_v3.cluster"
+
+	t.Parallel()
+	shared.BookCluster(t)
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:          func() { testAccCCEKeyPairPreCheck(t) },
@@ -78,7 +138,7 @@ func TestAccCCENodePoolsV3EncryptedVolume(t *testing.T) {
 			{
 				Config: testAccCCENodePoolV3Encrypted,
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckCCENodePoolV3Exists(nodePoolName, clusterName, &nodePool),
+					testAccCheckCCENodePoolV3Exists(nodePoolName, shared.DataSourceClusterName, &nodePool),
 					resource.TestCheckResourceAttr(nodePoolName, "data_volumes.0.kms_id", env.OS_KMS_ID),
 				),
 			},
@@ -89,7 +149,9 @@ func TestAccCCENodePoolsV3EncryptedVolume(t *testing.T) {
 func TestAccCCENodePoolsV3ExtendParams(t *testing.T) {
 	var nodePool nodepools.NodePool
 	nodePoolName := "opentelekomcloud_cce_node_pool_v3.node_pool"
-	clusterName := "opentelekomcloud_cce_cluster_v3.cluster"
+
+	t.Parallel()
+	shared.BookCluster(t)
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:          func() { testAccCCEKeyPairPreCheck(t) },
@@ -99,7 +161,7 @@ func TestAccCCENodePoolsV3ExtendParams(t *testing.T) {
 			{
 				Config: testAccCCENodePoolV3ExtendParams,
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckCCENodePoolV3Exists(nodePoolName, clusterName, &nodePool),
+					testAccCheckCCENodePoolV3Exists(nodePoolName, shared.DataSourceClusterName, &nodePool),
 				),
 			},
 		},
@@ -172,26 +234,14 @@ func testAccCheckCCENodePoolV3Exists(n string, cluster string, nodePool *nodepoo
 	}
 }
 
-var (
-	testAccCCENodePoolV3Basic = fmt.Sprintf(`
+var testAccCCENodePoolV3Basic = fmt.Sprintf(`
 %s
 
-resource "opentelekomcloud_cce_cluster_v3" "cluster" {
-  name         = "opentelekomcloud-cce-np"
-  cluster_type = "VirtualMachine"
-  flavor_id    = "cce.s1.small"
-  vpc_id       = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.vpc_id
-  subnet_id    = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.network_id
-
-  container_network_type = "overlay_l2"
-  authentication_mode    = "rbac"
-}
-
 resource "opentelekomcloud_cce_node_pool_v3" "node_pool" {
-  cluster_id         = opentelekomcloud_cce_cluster_v3.cluster.id
+  cluster_id         = data.opentelekomcloud_cce_cluster_v3.cluster.id
   name               = "opentelekomcloud-cce-node-pool"
   os                 = "EulerOS 2.5"
-  flavor             = "s2.xlarge.2"
+  flavor             = "s2.large.2"
   initial_node_count = 1
   availability_zone  = "%s"
   key_pair           = "%s"
@@ -214,27 +264,16 @@ resource "opentelekomcloud_cce_node_pool_v3" "node_pool" {
   k8s_tags = {
     "kubelet.kubernetes.io/namespace" = "muh"
   }
-}`, common.DataSourceSubnet, env.OS_AVAILABILITY_ZONE, env.OS_KEYPAIR_NAME)
+}`, shared.DataSourceCluster, env.OS_AVAILABILITY_ZONE, env.OS_KEYPAIR_NAME)
 
-	testAccCCENodePoolV3Update = fmt.Sprintf(`
+var testAccCCENodePoolV3Update = fmt.Sprintf(`
 %s
 
-resource "opentelekomcloud_cce_cluster_v3" "cluster" {
-  name         = "opentelekomcloud-cce-np"
-  cluster_type = "VirtualMachine"
-  flavor_id    = "cce.s1.small"
-  vpc_id       = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.vpc_id
-  subnet_id    = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.network_id
-
-  container_network_type = "overlay_l2"
-  authentication_mode    = "rbac"
-}
-
 resource "opentelekomcloud_cce_node_pool_v3" "node_pool" {
-  cluster_id         = opentelekomcloud_cce_cluster_v3.cluster.id
+  cluster_id         = data.opentelekomcloud_cce_cluster_v3.cluster.id
   name               = "opentelekomcloud-cce-node-pool"
   os                 = "EulerOS 2.5"
-  flavor             = "s2.xlarge.2"
+  flavor             = "s3.medium.1"
   initial_node_count = 2
   availability_zone  = "%s"
   key_pair           = "%s"
@@ -257,27 +296,16 @@ resource "opentelekomcloud_cce_node_pool_v3" "node_pool" {
   k8s_tags = {
     "kubelet.kubernetes.io/namespace" = "kuh"
   }
-}`, common.DataSourceSubnet, env.OS_AVAILABILITY_ZONE, env.OS_KEYPAIR_NAME)
+}`, shared.DataSourceCluster, env.OS_AVAILABILITY_ZONE, env.OS_KEYPAIR_NAME)
 
-	testAccCCENodePoolV3RandomAZ = fmt.Sprintf(`
+var testAccCCENodePoolV3RandomAZ = fmt.Sprintf(`
 %s
 
-resource "opentelekomcloud_cce_cluster_v3" "cluster" {
-  name         = "opentelekomcloud-cce-np"
-  cluster_type = "VirtualMachine"
-  flavor_id    = "cce.s1.small"
-  vpc_id       = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.vpc_id
-  subnet_id    = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.network_id
-
-  container_network_type = "overlay_l2"
-  authentication_mode    = "rbac"
-}
-
 resource "opentelekomcloud_cce_node_pool_v3" "node_pool" {
-  cluster_id         = opentelekomcloud_cce_cluster_v3.cluster.id
+  cluster_id         = data.opentelekomcloud_cce_cluster_v3.cluster.id
   name               = "opentelekomcloud-cce-node-pool"
   os                 = "EulerOS 2.5"
-  flavor             = "s2.xlarge.2"
+  flavor             = "s3.medium.1"
   initial_node_count = 1
   key_pair           = "%s"
   availability_zone  = "random"
@@ -296,27 +324,16 @@ resource "opentelekomcloud_cce_node_pool_v3" "node_pool" {
     size       = 100
     volumetype = "SSD"
   }
-}`, common.DataSourceSubnet, env.OS_KEYPAIR_NAME)
+}`, shared.DataSourceCluster, env.OS_KEYPAIR_NAME)
 
-	testAccCCENodePoolV3Encrypted = fmt.Sprintf(`
+var testAccCCENodePoolV3Encrypted = fmt.Sprintf(`
 %s
 
-resource "opentelekomcloud_cce_cluster_v3" "cluster" {
-  name         = "opentelekomcloud-cce-np"
-  cluster_type = "VirtualMachine"
-  flavor_id    = "cce.s1.small"
-  vpc_id       = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.vpc_id
-  subnet_id    = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.network_id
-
-  container_network_type = "overlay_l2"
-  authentication_mode    = "rbac"
-}
-
 resource "opentelekomcloud_cce_node_pool_v3" "node_pool" {
-  cluster_id         = opentelekomcloud_cce_cluster_v3.cluster.id
+  cluster_id         = data.opentelekomcloud_cce_cluster_v3.cluster.id
   name               = "opentelekomcloud-cce-node-pool"
   os                 = "EulerOS 2.5"
-  flavor             = "s2.xlarge.2"
+  flavor             = "s3.medium.1"
   initial_node_count = 1
   key_pair           = "%s"
   availability_zone  = "random"
@@ -336,26 +353,16 @@ resource "opentelekomcloud_cce_node_pool_v3" "node_pool" {
     volumetype = "SSD"
     kms_id     = "%s"
   }
-}`, common.DataSourceSubnet, env.OS_KEYPAIR_NAME, env.OS_KMS_ID)
-	testAccCCENodePoolV3ExtendParams = fmt.Sprintf(`
+}`, shared.DataSourceCluster, env.OS_KEYPAIR_NAME, env.OS_KMS_ID)
+
+var testAccCCENodePoolV3ExtendParams = fmt.Sprintf(`
 %s
 
-resource "opentelekomcloud_cce_cluster_v3" "cluster" {
-  name         = "opentelekomcloud-cce-np"
-  cluster_type = "VirtualMachine"
-  flavor_id    = "cce.s1.small"
-  vpc_id       = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.vpc_id
-  subnet_id    = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.network_id
-
-  container_network_type = "overlay_l2"
-  authentication_mode    = "rbac"
-}
-
 resource "opentelekomcloud_cce_node_pool_v3" "node_pool" {
-  cluster_id         = opentelekomcloud_cce_cluster_v3.cluster.id
+  cluster_id         = data.opentelekomcloud_cce_cluster_v3.cluster.id
   name               = "opentelekomcloud-cce-node-pool"
   os                 = "EulerOS 2.5"
-  flavor             = "s2.xlarge.2"
+  flavor             = "s3.medium.1"
   initial_node_count = 1
   key_pair           = "%s"
   availability_zone  = "random"
@@ -371,5 +378,4 @@ resource "opentelekomcloud_cce_node_pool_v3" "node_pool" {
 
   max_pods         = 16
   docker_base_size = 32
-}`, common.DataSourceSubnet, env.OS_KEYPAIR_NAME)
-)
+}`, shared.DataSourceCluster, env.OS_KEYPAIR_NAME)
