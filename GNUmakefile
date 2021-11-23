@@ -55,7 +55,7 @@ tools:
 	@echo "==> installing required tooling..."
 	go install github.com/katbyte/terrafmt@latest
 
-tflint: tffmtfix
+tflint: tools
 	./scripts/run-tflint.sh
 
 tffmtfix: tools
