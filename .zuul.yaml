@@ -11,7 +11,7 @@
     name: tflint
     parent: golang-make
     vars:
-      make_command: vet
+      make_command: tflint
 
 - project:
     merge-mode: squash-merge
