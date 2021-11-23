@@ -1,6 +1,6 @@
 SHELL=/bin/bash
 
-export PATH:=/usr/local/go/bin:$(PATH)
+export PATH:=/usr/local/go/bin:~/go/bin/:$(PATH)
 TEST?=$$(go list ./...)
 GOFMT_FILES?=$$(find . -name '*.go')
 PKG_NAME=opentelekomcloud

@@ -84,7 +84,7 @@ resource "opentelekomcloud_vpcep_endpoint_v1" "endpoint" {
   enable_dns = true
 
   tags = {
-    "fizz": "buzz"
+    "fizz" : "buzz"
   }
 }
 `, testServiceBasic(name)) // without acceptance required
@@ -102,7 +102,7 @@ resource "opentelekomcloud_vpcep_endpoint_v1" "endpoint" {
   enable_dns = true
 
   tags = {
-    "fizz": "buzz"
+    "fizz" : "buzz"
   }
 }
 `, testServiceBasic(name)) // without acceptance required

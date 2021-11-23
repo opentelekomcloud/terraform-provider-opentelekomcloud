@@ -156,7 +156,7 @@ resource "opentelekomcloud_vpcep_service_v1" "service" {
   }
 
   tags = {
-    "key": "value",
+    "key" : "value",
   }
 }
 `, common.DataSourceSubnet, name)
@@ -190,7 +190,7 @@ resource "opentelekomcloud_vpcep_service_v1" "service" {
   }
 
   tags = {
-    "key": "value",
+    "key" : "value",
   }
 }
 `, common.DataSourceSubnet, name)
