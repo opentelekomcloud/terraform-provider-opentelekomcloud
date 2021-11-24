@@ -8,7 +8,7 @@ Provides a resource to create a shared bandwidth within OpenTelekomCloud.
 ## Example Usage
 
 ```hcl
-resource "opentelekomcloud_vpc_bandwidth_v2" "100mb" {
+resource "opentelekomcloud_vpc_bandwidth_v2" "band_100mb" {
   name = "shared-100Mbit"
   size = 100
 }
@@ -42,5 +42,5 @@ In addition, the following attributes are exported:
 VPC bandwidth can be imported using the `id`, e.g.
 
 ```sh
-terraform import opentelekomcloud_vpc_bandwidth_v2.100mb eb187fc8-e482-43eb-a18a-9da947ef89f6
+terraform import opentelekomcloud_vpc_bandwidth_v2.band_100mb eb187fc8-e482-43eb-a18a-9da947ef89f6
 ```
