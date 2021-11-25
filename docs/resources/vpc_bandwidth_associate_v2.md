@@ -18,7 +18,7 @@ resource "opentelekomcloud_vpc_bandwidth_v2" "band20m" {
 }
 
 resource "opentelekomcloud_vpc_bandwidth_associate_v2" "associate" {
-  bandwidth    = opentelekomcloud_vpc_bandwidth_v2.band20m.id
+  bandwidth = opentelekomcloud_vpc_bandwidth_v2.band20m.id
   floating_ips = [
     opentelekomcloud_networking_floatingip_v2.ip1.id,
     opentelekomcloud_networking_floatingip_v2.ip2.id,
@@ -57,5 +57,3 @@ VPC bandwidth association can be imported using the bandwidth `id`, e.g.
 ```sh
 terraform import opentelekomcloud_vpc_bandwidth_associate_v2.associate eb187fc8-e482-43eb-a18a-9da947ef89f6
 ```
-
-
