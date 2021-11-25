@@ -125,7 +125,8 @@ var (
 	// Networking
 
 	// FloatingIP - shared floating IP quota
-	FloatingIP = FromEnv("OS_FLOATING_IP_QUOTA", 3)
+	FloatingIP      = FromEnv("OS_FLOATING_IP_QUOTA", 3)
+	SharedBandwidth = FromEnv("OS_BANDWIDTH_QUOTA", 5)
 	// Router - shared router(VPC) quota
 	Router        = FromEnv("OS_ROUTER_QUOTA", 7) // safe value
 	Subnet        = FromEnv("OS_SUBNET_QUOTA", 50)
