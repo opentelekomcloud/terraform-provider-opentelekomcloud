@@ -209,3 +209,11 @@ var (
 	DataSourceTooFewDiag  = diag.Errorf("your query returned no results. Please change your search criteria and try again.")
 	DataSourceTooManyDiag = diag.Errorf("your query returned more than one result. Please change your search criteria and try again.")
 )
+
+// GetSetChanges returns a pair of sets describing removed and added items
+func GetSetChanges(d *schema.ResourceData, key string) (removed, added *schema.Set) {
+	oldOne, newOne := d.GetChange(key)
+	oldSet := oldOne.(*schema.Set)
+	newSet := newOne.(*schema.Set)
+	return oldSet.Difference(newSet), newSet.Difference(oldSet)
+}
