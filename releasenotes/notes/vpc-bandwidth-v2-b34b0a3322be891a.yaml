@@ -1,4 +1,4 @@
 ---
 features:
   - |
-    **New Resource:** ``opentelekomcloud_vpc_bandwidth_v2``
+    **New Resource:** ``opentelekomcloud_vpc_bandwidth_v2`` (`#1548 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/1548>`_)

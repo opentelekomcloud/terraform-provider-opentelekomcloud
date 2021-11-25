@@ -3,7 +3,7 @@ subcategory: "Virtual Private Cloud (VPC)"
 ---
 # opentelekomcloud_vpc_bandwidth_v2
 
-Provides a resource to create a shared bandwidth within OpenTelekomCloud.
+Provides a resource to create a shared bandwidth within Open Telekom Cloud.
 
 ## Example Usage
 
