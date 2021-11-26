@@ -47,9 +47,9 @@ func TestAccProvider_caCertFile(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	defer func() {
+	t.Cleanup(func() {
 		_ = os.Remove(caFile)
-	}()
+	})
 
 	raw := map[string]interface{}{
 		"cacert_file": caFile,
@@ -97,12 +97,12 @@ func TestAccProvider_clientCertFile(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	defer func() { _ = os.Remove(certFile) }()
+	t.Cleanup(func() { _ = os.Remove(certFile) })
 	keyFile, err := envVarFile("OS_KEY")
 	if err != nil {
 		t.Fatal(err)
 	}
-	defer func() { _ = os.Remove(keyFile) }()
+	t.Cleanup(func() { _ = os.Remove(keyFile) })
 
 	raw := map[string]interface{}{
 		"cert": certFile,
@@ -197,13 +197,13 @@ clouds:
 `, cloudName, password)
 
 	th.AssertNoErr(t, ioutil.WriteFile(cloudsYamlFile, []byte(cloudsConfig), 0755))
-	defer func() {
+	t.Cleanup(func() {
 		th.AssertNoErr(t, os.Remove(cloudsYamlFile))
-	}()
+	})
 	th.AssertNoErr(t, ioutil.WriteFile(secureYamlFile, []byte(secureConfig), 0755))
-	defer func() {
+	t.Cleanup(func() {
 		th.AssertNoErr(t, os.Remove(secureYamlFile))
-	}()
+	})
 
 	_ = os.Setenv("OS_CLIENT_CONFIG_FILE", cloudsYamlFile)
 	_ = os.Setenv("OS_CLIENT_SECURE_FILE", secureYamlFile)
