@@ -43,9 +43,15 @@ and `admin_state_up` of the NAT gateway administrator to `True`.
   This parameter and `private_ip` are alternative. Changing this creates a
   new DNAT rule.
 
+->
+When the DNAT rule is used in the **VPC** scenario, use `port_id` parameter.
+
 * `private_ip` - (Optional) Specifies the private IP address of a
   user, for example, the IP address of a VPC for dedicated connection.
   This parameter and `port_id` are alternative. Changing this creates a new DNAT rule.
+
+->
+When the DNAT rule is used in the **Direct Connect** scenario, use `private_ip` parameter.
 
 * `protocol` - (Required) Specifies the protocol type. Currently,
   `tcp`, `udp`, and `any` are supported. Changing this creates a new DNAT rule.
