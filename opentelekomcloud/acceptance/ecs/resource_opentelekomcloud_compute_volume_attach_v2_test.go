@@ -3,11 +3,9 @@ package acceptance
 import (
 	"fmt"
 	"testing"
-	"time"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
-	th "github.com/opentelekomcloud/gophertelekomcloud/testhelper"
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/acceptance/common/quotas"
 
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/compute/v2/extensions/volumeattach"
@@ -22,10 +20,9 @@ const resourceVolumeAttach = "opentelekomcloud_compute_volume_attach_v2.va_1"
 
 func TestAccComputeV2VolumeAttach_basic(t *testing.T) {
 	var va volumeattach.VolumeAttachment
-	qts := serverQuotas(4+1, "s2.medium.1")
+	qts := serverQuotas(4+1, env.OsFlavorID)
 	t.Parallel()
-	th.AssertNoErr(t, quotas.AcquireMultipleQuotas(qts, 5*time.Second))
-	defer quotas.ReleaseMultipleQuotas(qts)
+	quotas.BookMany(t, qts)
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:          func() { common.TestAccPreCheck(t) },
@@ -42,12 +39,33 @@ func TestAccComputeV2VolumeAttach_basic(t *testing.T) {
 	})
 }
 
+func TestAccComputeV2VolumeAttach_importBasic(t *testing.T) {
+	t.Parallel()
+	qts := serverQuotas(1+4, env.OsFlavorID)
+	quotas.BookMany(t, qts)
+
+	resource.Test(t, resource.TestCase{
+		PreCheck:          func() { common.TestAccPreCheck(t) },
+		ProviderFactories: common.TestAccProviderFactories,
+		CheckDestroy:      testAccCheckComputeV2VolumeAttachDestroy,
+		Steps: []resource.TestStep{
+			{
+				Config: testAccComputeV2VolumeAttachBasic,
+			},
+			{
+				ResourceName:      resourceVolumeAttach,
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+		},
+	})
+}
+
 func TestAccComputeV2VolumeAttach_device(t *testing.T) {
 	var va volumeattach.VolumeAttachment
-	qts := serverQuotas(4+1, "s2.medium.1")
+	qts := serverQuotas(4+1, env.OsFlavorID)
 	t.Parallel()
-	th.AssertNoErr(t, quotas.AcquireMultipleQuotas(qts, 5*time.Second))
-	defer quotas.ReleaseMultipleQuotas(qts)
+	quotas.BookMany(t, qts)
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:          func() { common.TestAccPreCheck(t) },
@@ -67,10 +85,9 @@ func TestAccComputeV2VolumeAttach_device(t *testing.T) {
 
 func TestAccComputeV2VolumeAttach_timeout(t *testing.T) {
 	var va volumeattach.VolumeAttachment
-	qts := serverQuotas(4+1, "s2.medium.1")
+	qts := serverQuotas(4+1, env.OsFlavorID)
 	t.Parallel()
-	th.AssertNoErr(t, quotas.AcquireMultipleQuotas(qts, 5*time.Second))
-	defer quotas.ReleaseMultipleQuotas(qts)
+	quotas.BookMany(t, qts)
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:          func() { common.TestAccPreCheck(t) },

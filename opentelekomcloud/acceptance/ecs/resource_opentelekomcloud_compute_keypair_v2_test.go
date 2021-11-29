@@ -35,6 +35,27 @@ func TestAccComputeV2Keypair_basic(t *testing.T) {
 	})
 }
 
+func TestAccComputeV2Keypair_importBasic(t *testing.T) {
+	t.Parallel()
+
+	resource.Test(t, resource.TestCase{
+		PreCheck:          func() { common.TestAccPreCheck(t) },
+		ProviderFactories: common.TestAccProviderFactories,
+		CheckDestroy:      testAccCheckComputeV2KeypairDestroy,
+		Steps: []resource.TestStep{
+			{
+				Config: testAccComputeV2KeypairImport,
+			},
+
+			{
+				ResourceName:      resourceKeyPairName,
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+		},
+	})
+}
+
 func TestAccComputeV2Keypair_shared(t *testing.T) {
 	var keypair keypairs.KeyPair
 	resourceName2 := "opentelekomcloud_compute_keypair_v2.kp_2"
@@ -137,6 +158,13 @@ func testAccCheckComputeV2KeypairExists(n string, kp *keypairs.KeyPair) resource
 const testAccComputeV2KeypairBasic = `
 resource "opentelekomcloud_compute_keypair_v2" "kp_1" {
   name       = "kp_1"
+  public_key = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIALRzbIOR9HUYNwfKtII/et98eGXDJhf8YxHf9BtRdAU"
+}
+`
+
+const testAccComputeV2KeypairImport = `
+resource "opentelekomcloud_compute_keypair_v2" "kp_1" {
+  name       = "kp_1_import"
   public_key = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIALRzbIOR9HUYNwfKtII/et98eGXDJhf8YxHf9BtRdAU"
 }
 `
