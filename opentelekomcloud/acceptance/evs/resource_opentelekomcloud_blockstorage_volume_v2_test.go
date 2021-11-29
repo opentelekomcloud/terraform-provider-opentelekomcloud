@@ -4,14 +4,13 @@ import (
 	"fmt"
 	"os"
 	"testing"
-	"time"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/blockstorage/v2/volumes"
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/evs/v2/tags"
-	th "github.com/opentelekomcloud/gophertelekomcloud/testhelper"
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/acceptance/common/quotas"
+	ecs "github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/acceptance/ecs"
 
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/acceptance/common"
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/acceptance/env"
@@ -23,9 +22,7 @@ const resourceVolumeV2Name = "opentelekomcloud_blockstorage_volume_v2.volume_1"
 func TestAccBlockStorageV2Volume_basic(t *testing.T) {
 	var volume volumes.Volume
 	t.Parallel()
-	qts := []*quotas.ExpectedQuota{{Q: quotas.Volume, Count: 1}, {Q: quotas.VolumeSize, Count: 1}}
-	th.AssertNoErr(t, quotas.AcquireMultipleQuotas(qts, 5*time.Second))
-	defer quotas.ReleaseMultipleQuotas(qts)
+	quotas.BookMany(t, volumeQuotas(1))
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:          func() { common.TestAccPreCheck(t) },
@@ -52,12 +49,34 @@ func TestAccBlockStorageV2Volume_basic(t *testing.T) {
 	})
 }
 
+func TestAccBlockStorageV2Volume_importBasic(t *testing.T) {
+	t.Parallel()
+	quotas.BookMany(t, volumeQuotas(1))
+
+	resource.Test(t, resource.TestCase{
+		PreCheck:          func() { common.TestAccPreCheck(t) },
+		ProviderFactories: common.TestAccProviderFactories,
+		CheckDestroy:      testAccCheckBlockStorageV2VolumeDestroy,
+		Steps: []resource.TestStep{
+			{
+				Config: testAccBlockStorageV2VolumeBasic,
+			},
+			{
+				ResourceName:      resourceVolumeV2Name,
+				ImportState:       true,
+				ImportStateVerify: true,
+				ImportStateVerifyIgnore: []string{
+					"cascade",
+				},
+			},
+		},
+	})
+}
+
 func TestAccBlockStorageV2Volume_upscaleDownScale(t *testing.T) {
 	var volume volumes.Volume
 	t.Parallel()
-	qts := []*quotas.ExpectedQuota{{Q: quotas.Volume, Count: 1}, {Q: quotas.VolumeSize, Count: 2}}
-	th.AssertNoErr(t, quotas.AcquireMultipleQuotas(qts, 5*time.Second))
-	defer quotas.ReleaseMultipleQuotas(qts)
+	quotas.BookMany(t, volumeQuotas(2))
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:          func() { common.TestAccPreCheck(t) },
@@ -82,9 +101,10 @@ func TestAccBlockStorageV2Volume_upscaleDownScale(t *testing.T) {
 func TestAccBlockStorageV2Volume_upscaleDownScaleAssigned(t *testing.T) {
 	var volume volumes.Volume
 	t.Parallel()
-	qts := []*quotas.ExpectedQuota{{Q: quotas.Volume, Count: 1}, {Q: quotas.VolumeSize, Count: 12}}
-	th.AssertNoErr(t, quotas.AcquireMultipleQuotas(qts, 5*time.Second))
-	defer quotas.ReleaseMultipleQuotas(qts)
+	qts := volumeQuotas(12)
+	qts = append(qts, ecs.QuotasForFlavor(env.OsFlavorID)...)
+	qts = append(qts, &quotas.ExpectedQuota{Q: quotas.Server, Count: 1})
+	quotas.BookMany(t, qts)
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:          func() { common.TestAccPreCheck(t) },
@@ -109,9 +129,8 @@ func TestAccBlockStorageV2Volume_upscaleDownScaleAssigned(t *testing.T) {
 
 func TestAccBlockStorageV2Volume_policy(t *testing.T) {
 	t.Parallel()
-	qts := []*quotas.ExpectedQuota{{Q: quotas.Volume, Count: 1}, {Q: quotas.VolumeSize, Count: 40}}
-	th.AssertNoErr(t, quotas.AcquireMultipleQuotas(qts, 5*time.Second))
-	defer quotas.ReleaseMultipleQuotas(qts)
+	quotas.BookMany(t, volumeQuotas(40))
+
 	resource.Test(t, resource.TestCase{
 		PreCheck: func() {
 			common.TestAccPreCheck(t)
@@ -162,8 +181,7 @@ func TestAccBlockStorageV2Volume_image(t *testing.T) {
 	var volume volumes.Volume
 	t.Parallel()
 	qts := []*quotas.ExpectedQuota{{Q: quotas.Volume, Count: 1}, {Q: quotas.VolumeSize, Count: 12}}
-	th.AssertNoErr(t, quotas.AcquireMultipleQuotas(qts, 5*time.Second))
-	defer quotas.ReleaseMultipleQuotas(qts)
+	quotas.BookMany(t, qts)
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:          func() { common.TestAccPreCheck(t) },
@@ -186,8 +204,7 @@ func TestAccBlockStorageV2Volume_timeout(t *testing.T) {
 	var volume volumes.Volume
 	t.Parallel()
 	qts := []*quotas.ExpectedQuota{{Q: quotas.Volume, Count: 1}, {Q: quotas.VolumeSize, Count: 1}}
-	th.AssertNoErr(t, quotas.AcquireMultipleQuotas(qts, 5*time.Second))
-	defer quotas.ReleaseMultipleQuotas(qts)
+	quotas.BookMany(t, qts)
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:          func() { common.TestAccPreCheck(t) },
