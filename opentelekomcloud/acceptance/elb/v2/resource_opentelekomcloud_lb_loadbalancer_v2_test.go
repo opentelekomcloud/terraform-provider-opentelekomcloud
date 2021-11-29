@@ -7,7 +7,6 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
-	th "github.com/opentelekomcloud/gophertelekomcloud/testhelper"
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/acceptance/common/quotas"
 	elb "github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/services/elb/v2"
 
@@ -23,8 +22,7 @@ func TestAccLBV2LoadBalancer_basic(t *testing.T) {
 	var lb loadbalancers.LoadBalancer
 
 	t.Parallel()
-	th.AssertNoErr(t, quotas.LoadBalancer.Acquire())
-	defer quotas.LoadBalancer.Release()
+	quotas.BookOne(t, quotas.FloatingIP)
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:          func() { common.TestAccPreCheck(t) },
@@ -49,8 +47,7 @@ func TestAccLBV2LoadBalancer_basic(t *testing.T) {
 }
 func TestAccLBV2LoadBalancer_import(t *testing.T) {
 	t.Parallel()
-	th.AssertNoErr(t, quotas.LoadBalancer.Acquire())
-	defer quotas.LoadBalancer.Release()
+	quotas.BookOne(t, quotas.FloatingIP)
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:          func() { common.TestAccPreCheck(t) },
