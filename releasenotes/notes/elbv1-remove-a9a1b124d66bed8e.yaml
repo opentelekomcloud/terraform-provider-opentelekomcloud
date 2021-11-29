@@ -1,0 +1,5 @@
+---
+other:
+  - |
+    **[ELB]** Classic load balancer resources are removed
+    (`#1558 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/1558>`_)
