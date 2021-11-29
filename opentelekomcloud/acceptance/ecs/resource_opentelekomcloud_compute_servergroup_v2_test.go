@@ -3,13 +3,11 @@ package acceptance
 import (
 	"fmt"
 	"testing"
-	"time"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/compute/v2/extensions/servergroups"
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/compute/v2/servers"
-	th "github.com/opentelekomcloud/gophertelekomcloud/testhelper"
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/acceptance/common/quotas"
 
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/acceptance/common"
@@ -38,13 +36,32 @@ func TestAccComputeV2ServerGroup_basic(t *testing.T) {
 	})
 }
 
+func TestAccComputeV2ServerGroup_import(t *testing.T) {
+	t.Parallel()
+
+	resource.Test(t, resource.TestCase{
+		PreCheck:          func() { common.TestAccPreCheck(t) },
+		ProviderFactories: common.TestAccProviderFactories,
+		CheckDestroy:      testAccCheckComputeV2ServerGroupDestroy,
+		Steps: []resource.TestStep{
+			{
+				Config: testAccComputeV2ServerGroupBasic,
+			},
+			{
+				ResourceName:      resourceServerGroupName,
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+		},
+	})
+}
+
 func TestAccComputeV2ServerGroup_affinity(t *testing.T) {
 	var instance servers.Server
 	var sg servergroups.ServerGroup
-	qts := serverQuotas(4, "s2.medium.1")
+	qts := serverQuotas(4, env.OsFlavorID)
 	t.Parallel()
-	th.AssertNoErr(t, quotas.AcquireMultipleQuotas(qts, 5*time.Second))
-	defer quotas.ReleaseMultipleQuotas(qts)
+	quotas.BookMany(t, qts)
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:          func() { common.TestAccPreCheck(t) },
