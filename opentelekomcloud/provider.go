@@ -22,7 +22,6 @@ import (
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/services/dms"
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/services/dns"
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/services/ecs"
-	elbv1 "github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/services/elb/v1"
 	elbv2 "github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/services/elb/v2"
 	elbv3 "github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/services/elb/v3"
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/services/evs"
@@ -338,10 +337,6 @@ func Provider() *schema.Provider {
 			"opentelekomcloud_dms_instance_v1":                    dms.ResourceDmsInstancesV1(),
 			"opentelekomcloud_dms_queue_v1":                       dms.ResourceDmsQueuesV1(),
 			"opentelekomcloud_ecs_instance_v1":                    ecs.ResourceEcsInstanceV1(),
-			"opentelekomcloud_elb_backend":                        elbv1.ResourceBackend(),
-			"opentelekomcloud_elb_health":                         elbv1.ResourceHealth(),
-			"opentelekomcloud_elb_loadbalancer":                   elbv1.ResourceELoadBalancer(),
-			"opentelekomcloud_elb_listener":                       elbv1.ResourceEListener(),
 			"opentelekomcloud_evs_volume_v3":                      evs.ResourceEvsStorageVolumeV3(),
 			"opentelekomcloud_fw_firewall_group_v2":               fw.ResourceFWFirewallGroupV2(),
 			"opentelekomcloud_fw_policy_v2":                       fw.ResourceFWPolicyV2(),
