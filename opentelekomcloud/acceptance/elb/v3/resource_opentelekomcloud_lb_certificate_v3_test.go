@@ -7,7 +7,6 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/elb/v3/certificates"
-	th "github.com/opentelekomcloud/gophertelekomcloud/testhelper"
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/acceptance/common"
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/acceptance/common/quotas"
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/acceptance/env"
@@ -55,8 +54,7 @@ func TestAccLBV3Certificate_basic(t *testing.T) {
 	var cert certificates.Certificate
 
 	t.Parallel()
-	th.AssertNoErr(t, quotas.LbCertificate.Acquire())
-	defer quotas.LbCertificate.Release()
+	quotas.BookOne(t, quotas.LbCertificate)
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:          func() { common.TestAccPreCheck(t) },
@@ -93,8 +91,7 @@ func TestAccLBV3Certificate_basic(t *testing.T) {
 
 func TestAccLBv3Certificate_importBasic(t *testing.T) {
 	t.Parallel()
-	th.AssertNoErr(t, quotas.LbCertificate.Acquire())
-	defer quotas.LbCertificate.Release()
+	quotas.BookOne(t, quotas.LbCertificate)
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:          func() { common.TestAccPreCheck(t) },

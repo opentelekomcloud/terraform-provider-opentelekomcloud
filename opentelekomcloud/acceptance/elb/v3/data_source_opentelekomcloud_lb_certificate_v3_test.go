@@ -5,7 +5,6 @@ import (
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
-	th "github.com/opentelekomcloud/gophertelekomcloud/testhelper"
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/acceptance/common"
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/acceptance/common/quotas"
 )
@@ -14,8 +13,7 @@ const dataCertificateName = "data.opentelekomcloud_lb_certificate_v3.certificate
 
 func TestAccLBCertificateV3_basic(t *testing.T) {
 	t.Parallel()
-	th.AssertNoErr(t, quotas.LbCertificate.Acquire())
-	defer quotas.LbCertificate.Release()
+	quotas.BookOne(t, quotas.LbCertificate)
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:          func() { common.TestAccPreCheck(t) },
