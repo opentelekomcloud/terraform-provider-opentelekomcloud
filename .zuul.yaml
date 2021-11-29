@@ -23,10 +23,7 @@
       - release-notes-jobs
     check:
       jobs:
-        - golangci-lint:
-            vars:
-              golangci_lint_version: 1.41.1
-            nodeset: fedora-pod
+        - otc-golangci-lint
         - golang-make-test
         - golang-make-vet
         - tflint
@@ -37,10 +34,7 @@
         - terraform-functional
     gate:
       jobs:
-        - golangci-lint:
-            vars:
-              golangci_lint_version: 1.41.1
-            nodeset: fedora-pod
+        - otc-golangci-lint
         - golang-make-test
         - golang-make-vet
         - tflint
