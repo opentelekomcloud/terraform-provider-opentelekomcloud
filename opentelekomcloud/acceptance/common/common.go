@@ -13,7 +13,10 @@ import (
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common/cfg"
 )
 
-const AlternativeProviderAlias = "opentelekomcloud.alternative"
+const (
+	AlternativeProviderAlias           = "opentelekomcloud.alternative"
+	AlternativeProviderWithRegionAlias = "opentelekomcloud.region"
+)
 
 var (
 	TestAccProviderFactories map[string]func() (*schema.Provider, error)
@@ -31,10 +34,18 @@ provider opentelekomcloud {
   tenant_name = "%s"
 }
 `, altCloud, altProjectID, altProjectName)
+	AlternativeProviderWithRegionConfig string
 )
 
 func init() {
 	TestAccProvider = opentelekomcloud.Provider()
+
+	err := TestAccProvider.Configure(context.Background(), terraform.NewResourceConfigRaw(nil))
+	if err == nil {
+		config := TestAccProvider.Meta().(*cfg.Config)
+		env.OS_REGION_NAME = config.GetRegion(nil)
+	}
+
 	TestAccProviderFactories = map[string]func() (*schema.Provider, error){
 		"opentelekomcloud": func() (*schema.Provider, error) {
 			return TestAccProvider, nil
@@ -50,13 +61,25 @@ func init() {
 			})
 			return provider, nil
 		},
+		"opentelekomcloudregion": func() (*schema.Provider, error) {
+			provider := opentelekomcloud.Provider()
+			provider.Configure(context.Background(), &terraform.ResourceConfig{
+				Config: map[string]interface{}{
+					"cloud":  altCloud,
+					"region": env.OS_REGION_NAME,
+				},
+			})
+			return provider, nil
+		},
 	}
 
-	err := TestAccProvider.Configure(context.Background(), terraform.NewResourceConfigRaw(nil))
-	if err == nil {
-		config := TestAccProvider.Meta().(*cfg.Config)
-		env.OS_REGION_NAME = config.GetRegion(nil)
-	}
+	AlternativeProviderWithRegionConfig = fmt.Sprintf(`
+provider opentelekomcloud {
+  alias = "region"
+
+  region = "%s"
+}
+`, env.OS_REGION_NAME)
 }
 
 func TestAccPreCheckRequiredEnvVars(t *testing.T) {

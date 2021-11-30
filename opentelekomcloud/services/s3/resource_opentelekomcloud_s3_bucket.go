@@ -958,6 +958,8 @@ func resourceS3BucketCorsUpdate(ctx context.Context, s3conn *s3.S3, d *schema.Re
 func resourceS3BucketWebsiteUpdate(ctx context.Context, s3conn *s3.S3, d *schema.ResourceData) error {
 	ws := d.Get("website").([]interface{})
 	switch len(ws) {
+	case 0:
+		return resourceS3BucketWebsiteDelete(ctx, s3conn, d)
 	case 1:
 		var w map[string]interface{}
 		if ws[0] != nil {
@@ -966,8 +968,6 @@ func resourceS3BucketWebsiteUpdate(ctx context.Context, s3conn *s3.S3, d *schema
 			w = make(map[string]interface{})
 		}
 		return resourceS3BucketWebsitePut(ctx, s3conn, d, w)
-	case 2:
-		return resourceS3BucketWebsiteDelete(ctx, s3conn, d)
 	default:
 		return fmt.Errorf("cannot specify more than one website")
 	}
