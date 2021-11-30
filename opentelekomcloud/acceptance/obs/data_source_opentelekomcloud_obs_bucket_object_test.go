@@ -21,7 +21,7 @@ func TestAccDataSourceObsBucketObject_basic(t *testing.T) {
 
 	var dsObj obs.GetObjectOutput
 
-	resource.Test(t, resource.TestCase{
+	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                  func() { common.TestAccPreCheck(t) },
 		ProviderFactories:         common.TestAccProviderFactories,
 		PreventPostDestroyRefresh: true,
@@ -54,7 +54,7 @@ func TestAccDataSourceObsBucketObject_readableBody(t *testing.T) {
 
 	var dsObj obs.GetObjectOutput
 
-	resource.Test(t, resource.TestCase{
+	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                  func() { common.TestAccPreCheck(t) },
 		ProviderFactories:         common.TestAccProviderFactories,
 		PreventPostDestroyRefresh: true,
@@ -82,14 +82,12 @@ func TestAccDataSourceObsBucketObject_readableBody(t *testing.T) {
 }
 
 func TestAccDataSourceObsBucketObject_allParams(t *testing.T) {
-	t.Skip("Removing versioned bucket is broken, see GH-779")
-
 	rInt := acctest.RandInt()
 	resourceOnlyConf, conf := testAccDataSourceObsObjectConfigAllParams(rInt)
 
 	var dsObj obs.GetObjectOutput
 
-	resource.Test(t, resource.TestCase{
+	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                  func() { common.TestAccPreCheck(t) },
 		ProviderFactories:         common.TestAccProviderFactories,
 		PreventPostDestroyRefresh: true,

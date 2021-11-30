@@ -17,7 +17,7 @@ func TestAccObsBucket_basic(t *testing.T) {
 	rInt := acctest.RandInt()
 	resourceName := "opentelekomcloud_obs_bucket.bucket"
 
-	resource.Test(t, resource.TestCase{
+	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:          func() { common.TestAccPreCheck(t) },
 		ProviderFactories: common.TestAccProviderFactories,
 		CheckDestroy:      testAccCheckObsBucketDestroy,
@@ -55,7 +55,7 @@ func TestAccObsBucket_tags(t *testing.T) {
 	rInt := acctest.RandInt()
 	resourceName := "opentelekomcloud_obs_bucket.bucket"
 
-	resource.Test(t, resource.TestCase{
+	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:          func() { common.TestAccPreCheck(t) },
 		ProviderFactories: common.TestAccProviderFactories,
 		Steps: []resource.TestStep{
@@ -75,7 +75,7 @@ func TestAccObsBucket_versioning(t *testing.T) {
 	rInt := acctest.RandInt()
 	resourceName := "opentelekomcloud_obs_bucket.bucket"
 
-	resource.Test(t, resource.TestCase{
+	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:          func() { common.TestAccPreCheck(t) },
 		ProviderFactories: common.TestAccProviderFactories,
 		CheckDestroy:      testAccCheckObsBucketDestroy,
@@ -103,7 +103,7 @@ func TestAccObsBucket_logging(t *testing.T) {
 	targetBucket := fmt.Sprintf("tf-test-log-bucket-%d", rInt)
 	resourceName := "opentelekomcloud_obs_bucket.bucket"
 
-	resource.Test(t, resource.TestCase{
+	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:          func() { common.TestAccPreCheck(t) },
 		ProviderFactories: common.TestAccProviderFactories,
 		CheckDestroy:      testAccCheckObsBucketDestroy,
@@ -123,7 +123,7 @@ func TestAccObsBucket_lifecycle(t *testing.T) {
 	rInt := acctest.RandInt()
 	resourceName := "opentelekomcloud_obs_bucket.bucket"
 
-	resource.Test(t, resource.TestCase{
+	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:          func() { common.TestAccPreCheck(t) },
 		ProviderFactories: common.TestAccProviderFactories,
 		CheckDestroy:      testAccCheckObsBucketDestroy,
@@ -152,7 +152,7 @@ func TestAccObsBucket_website(t *testing.T) {
 	rInt := acctest.RandInt()
 	resourceName := "opentelekomcloud_obs_bucket.bucket"
 
-	resource.Test(t, resource.TestCase{
+	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:          func() { common.TestAccPreCheck(t) },
 		ProviderFactories: common.TestAccProviderFactories,
 		CheckDestroy:      testAccCheckObsBucketDestroy,
@@ -173,7 +173,7 @@ func TestAccObsBucket_cors(t *testing.T) {
 	rInt := acctest.RandInt()
 	resourceName := "opentelekomcloud_obs_bucket.bucket"
 
-	resource.Test(t, resource.TestCase{
+	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:          func() { common.TestAccPreCheck(t) },
 		ProviderFactories: common.TestAccProviderFactories,
 		CheckDestroy:      testAccCheckObsBucketDestroy,
@@ -196,7 +196,7 @@ func TestAccObsBucket_cors(t *testing.T) {
 func TestAccObsBucket_notifications(t *testing.T) {
 	rInt := acctest.RandInt()
 	resourceName := "opentelekomcloud_obs_bucket.bucket"
-	resource.Test(t, resource.TestCase{
+	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:          func() { common.TestAccPreCheck(t) },
 		ProviderFactories: common.TestAccProviderFactories,
 		CheckDestroy:      testAccCheckObsBucketDestroy,
