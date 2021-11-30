@@ -9,8 +9,8 @@ import (
 	golangsdk "github.com/opentelekomcloud/gophertelekomcloud"
 	"github.com/opentelekomcloud/gophertelekomcloud/acceptance/tools"
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/vpcep/v1/services"
-	th "github.com/opentelekomcloud/gophertelekomcloud/testhelper"
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/acceptance/common"
+	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/acceptance/common/quotas"
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/acceptance/env"
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common/cfg"
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/services/vpcep"
@@ -23,8 +23,7 @@ func TestService_basic(t *testing.T) {
 	srvName := tools.RandomString("tf-test-", 4)
 	srvName2 := tools.RandomString("tf-test-", 4)
 	t.Parallel()
-	th.AssertNoErr(t, serviceQuota.Acquire())
-	defer serviceQuota.Release()
+	quotas.BookOne(t, serviceQuota)
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:          func() { common.TestAccPreCheck(t) },
@@ -56,8 +55,7 @@ func TestService_basic(t *testing.T) {
 func TestService_import(t *testing.T) {
 	srvName := tools.RandomString("tf-test-", 4)
 	t.Parallel()
-	th.AssertNoErr(t, serviceQuota.Acquire())
-	defer serviceQuota.Release()
+	quotas.BookOne(t, serviceQuota)
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:          func() { common.TestAccPreCheck(t) },
