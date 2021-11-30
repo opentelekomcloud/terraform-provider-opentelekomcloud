@@ -18,6 +18,8 @@ func DataSourceBandWidth() *schema.Resource {
 	return &schema.Resource{
 		ReadContext: dataSourceBandWidthRead,
 
+		DeprecationMessage: "please use `opentelekomcloud_vpc_bandwidth_v2` data source instead",
+
 		Schema: map[string]*schema.Schema{
 			"region": {
 				Type:     schema.TypeString,
