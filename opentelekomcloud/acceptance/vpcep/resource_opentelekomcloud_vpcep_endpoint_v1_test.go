@@ -3,14 +3,12 @@ package vpcep
 import (
 	"fmt"
 	"testing"
-	"time"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 	golangsdk "github.com/opentelekomcloud/gophertelekomcloud"
 	"github.com/opentelekomcloud/gophertelekomcloud/acceptance/tools"
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/vpcep/v1/endpoints"
-	th "github.com/opentelekomcloud/gophertelekomcloud/testhelper"
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/acceptance/common"
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/acceptance/common/quotas"
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/acceptance/env"
@@ -24,9 +22,7 @@ func TestEndpoint_basic(t *testing.T) {
 	var ep endpoints.Endpoint
 	name := tools.RandomString("tf-test-ep-", 4)
 	t.Parallel()
-	qts := endpointQuotas()
-	th.AssertNoErr(t, quotas.AcquireMultipleQuotas(qts, 5*time.Second))
-	defer quotas.ReleaseMultipleQuotas(qts)
+	quotas.BookMany(t, endpointQuotas())
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:          func() { common.TestAccPreCheck(t) },
@@ -51,9 +47,7 @@ func TestEndpoint_basic(t *testing.T) {
 func TestEndpoint_import(t *testing.T) {
 	name := tools.RandomString("tf-test-ep-", 4)
 	t.Parallel()
-	qts := endpointQuotas()
-	th.AssertNoErr(t, quotas.AcquireMultipleQuotas(qts, 5*time.Second))
-	defer quotas.ReleaseMultipleQuotas(qts)
+	quotas.BookMany(t, endpointQuotas())
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:          func() { common.TestAccPreCheck(t) },
