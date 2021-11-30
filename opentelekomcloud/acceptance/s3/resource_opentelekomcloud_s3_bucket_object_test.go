@@ -11,6 +11,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/acctest"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
+	th "github.com/opentelekomcloud/gophertelekomcloud/testhelper"
 
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/service/s3"
@@ -23,20 +24,18 @@ import (
 
 func TestAccS3BucketObject_source(t *testing.T) {
 	tmpFile, err := ioutil.TempFile("", "tf-acc-s3-obj-source")
-	if err != nil {
-		t.Fatal(err)
-	}
-	defer func() { _ = os.Remove(tmpFile.Name()) }()
+	th.AssertNoErr(t, err)
+	t.Cleanup(func() {
+		th.AssertNoErr(t, os.Remove(tmpFile.Name()))
+	})
 
 	rInt := acctest.RandInt()
 	// first write some data to the tempfile just so it's not 0 bytes.
 	err = ioutil.WriteFile(tmpFile.Name(), []byte("{anything will do }"), 0644)
-	if err != nil {
-		t.Fatal(err)
-	}
+	th.AssertNoErr(t, err)
 	var obj s3.GetObjectOutput
 
-	resource.Test(t, resource.TestCase{
+	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:          func() { testAccPreCheckS3(t) },
 		ProviderFactories: common.TestAccProviderFactories,
 		CheckDestroy:      testAccCheckS3BucketObjectDestroy,
@@ -53,7 +52,7 @@ func TestAccS3BucketObject_content(t *testing.T) {
 	rInt := acctest.RandInt()
 	var obj s3.GetObjectOutput
 
-	resource.Test(t, resource.TestCase{
+	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:          func() { testAccPreCheckS3(t) },
 		ProviderFactories: common.TestAccProviderFactories,
 		CheckDestroy:      testAccCheckS3BucketObjectDestroy,
@@ -69,21 +68,19 @@ func TestAccS3BucketObject_content(t *testing.T) {
 
 func TestAccS3BucketObject_withContentCharacteristics(t *testing.T) {
 	tmpFile, err := ioutil.TempFile("", "tf-acc-s3-obj-content-characteristics")
-	if err != nil {
-		t.Fatal(err)
-	}
-	defer func() { _ = os.Remove(tmpFile.Name()) }()
+	th.AssertNoErr(t, err)
+	t.Cleanup(func() {
+		th.AssertNoErr(t, os.Remove(tmpFile.Name()))
+	})
 
 	rInt := acctest.RandInt()
 	// first write some data to the tempfile just so it's not 0 bytes.
 	err = ioutil.WriteFile(tmpFile.Name(), []byte("{anything will do }"), 0644)
-	if err != nil {
-		t.Fatal(err)
-	}
+	th.AssertNoErr(t, err)
 
 	var obj s3.GetObjectOutput
 
-	resource.Test(t, resource.TestCase{
+	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:          func() { testAccPreCheckS3(t) },
 		ProviderFactories: common.TestAccProviderFactories,
 		CheckDestroy:      testAccCheckS3BucketObjectDestroy,
@@ -104,19 +101,17 @@ func TestAccS3BucketObject_withContentCharacteristics(t *testing.T) {
 
 func TestAccS3BucketObject_updates(t *testing.T) {
 	tmpFile, err := ioutil.TempFile("", "tf-acc-s3-obj-updates")
-	if err != nil {
-		t.Fatal(err)
-	}
-	defer func() { _ = os.Remove(tmpFile.Name()) }()
+	th.AssertNoErr(t, err)
+	t.Cleanup(func() {
+		th.AssertNoErr(t, os.Remove(tmpFile.Name()))
+	})
 
 	rInt := acctest.RandInt()
 	err = ioutil.WriteFile(tmpFile.Name(), []byte("initial object state"), 0644)
-	if err != nil {
-		t.Fatal(err)
-	}
+	th.AssertNoErr(t, err)
 	var obj s3.GetObjectOutput
 
-	resource.Test(t, resource.TestCase{
+	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:          func() { testAccPreCheckS3(t) },
 		ProviderFactories: common.TestAccProviderFactories,
 		CheckDestroy:      testAccCheckS3BucketObjectDestroy,
@@ -147,20 +142,18 @@ func TestAccS3BucketObject_updates(t *testing.T) {
 
 func TestAccS3BucketObject_updatesWithVersioning(t *testing.T) {
 	tmpFile, err := ioutil.TempFile("", "tf-acc-s3-obj-updates-w-versions")
-	if err != nil {
-		t.Fatal(err)
-	}
-	defer func() { _ = os.Remove(tmpFile.Name()) }()
+	th.AssertNoErr(t, err)
+	t.Cleanup(func() {
+		th.AssertNoErr(t, os.Remove(tmpFile.Name()))
+	})
 
 	rInt := acctest.RandInt()
 	err = ioutil.WriteFile(tmpFile.Name(), []byte("initial versioned object state"), 0644)
-	if err != nil {
-		t.Fatal(err)
-	}
+	th.AssertNoErr(t, err)
 
 	var originalObj, modifiedObj s3.GetObjectOutput
 
-	resource.Test(t, resource.TestCase{
+	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:          func() { testAccPreCheckS3(t) },
 		ProviderFactories: common.TestAccProviderFactories,
 		CheckDestroy:      testAccCheckS3BucketObjectDestroy,
@@ -266,21 +259,19 @@ func testAccCheckS3BucketObjectExists(n string, obj *s3.GetObjectOutput) resourc
 
 func TestAccS3BucketObject_sse(t *testing.T) {
 	tmpFile, err := ioutil.TempFile("", "tf-acc-s3-obj-source-sse")
-	if err != nil {
-		t.Fatal(err)
-	}
-	defer func() { _ = os.Remove(tmpFile.Name()) }()
+	th.AssertNoErr(t, err)
+	t.Cleanup(func() {
+		th.AssertNoErr(t, os.Remove(tmpFile.Name()))
+	})
 
 	// first write some data to the tempfile just so it's not 0 bytes.
 	err = ioutil.WriteFile(tmpFile.Name(), []byte("{anything will do}"), 0644)
-	if err != nil {
-		t.Fatal(err)
-	}
+	th.AssertNoErr(t, err)
 
 	rInt := acctest.RandInt()
 	var obj s3.GetObjectOutput
 
-	resource.Test(t, resource.TestCase{
+	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:          func() { testAccPreCheckS3(t) },
 		ProviderFactories: common.TestAccProviderFactories,
 		CheckDestroy:      testAccCheckS3BucketObjectDestroy,
@@ -305,7 +296,7 @@ func TestAccS3BucketObject_acl(t *testing.T) {
 	rInt := acctest.RandInt()
 	var obj s3.GetObjectOutput
 
-	resource.Test(t, resource.TestCase{
+	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:          func() { testAccPreCheckS3(t) },
 		ProviderFactories: common.TestAccProviderFactories,
 		CheckDestroy:      testAccCheckS3BucketObjectDestroy,
@@ -376,15 +367,16 @@ func testAccCheckS3BucketObjectAcl(n string, expectedPerms []string) resource.Te
 }
 
 func TestResourceS3BucketObjectAcl_validation(t *testing.T) {
-	_, errors := s3s.ValidateS3BucketObjectAclType("incorrect", "acl")
-	if len(errors) == 0 {
-		t.Fatalf("Expected to trigger a validation error")
-	}
+	t.Parallel()
 
 	var testCases = []struct {
 		Value    string
 		ErrCount int
 	}{
+		{
+			Value:    "incorrect",
+			ErrCount: 1,
+		},
 		{
 			Value:    "public-read",
 			ErrCount: 0,
@@ -396,23 +388,27 @@ func TestResourceS3BucketObjectAcl_validation(t *testing.T) {
 	}
 
 	for _, tc := range testCases {
-		_, errors := s3s.ValidateS3BucketObjectAclType(tc.Value, "acl")
-		if len(errors) != tc.ErrCount {
-			t.Fatalf("Expected not to trigger a validation error")
-		}
+		t.Run(tc.Value, func(t *testing.T) {
+			t.Parallel()
+			_, errors := s3s.ValidateS3BucketObjectAclType(tc.Value, "acl")
+			if len(errors) != tc.ErrCount {
+				t.Fatalf("Expected to trigger %d validation errors, but got %d", tc.ErrCount, len(errors))
+			}
+		})
 	}
 }
 
 func TestResourceS3BucketObjectStorageClass_validation(t *testing.T) {
-	_, errors := validateS3BucketObjectStorageClassType("incorrect", "storage_class")
-	if len(errors) == 0 {
-		t.Fatalf("Expected to trigger a validation error")
-	}
+	t.Parallel()
 
 	var testCases = []struct {
 		Value    string
 		ErrCount int
 	}{
+		{
+			Value:    "incorrect",
+			ErrCount: 1,
+		},
 		{
 			Value:    "STANDARD",
 			ErrCount: 0,
@@ -424,10 +420,13 @@ func TestResourceS3BucketObjectStorageClass_validation(t *testing.T) {
 	}
 
 	for _, tc := range testCases {
-		_, errors := validateS3BucketObjectStorageClassType(tc.Value, "storage_class")
-		if len(errors) != tc.ErrCount {
-			t.Fatalf("Expected not to trigger a validation error")
-		}
+		t.Run(tc.Value, func(t *testing.T) {
+			t.Parallel()
+			_, errors := validateS3BucketObjectStorageClassType(tc.Value, "storage_class")
+			if len(errors) != tc.ErrCount {
+				t.Fatalf("Expected not to trigger a validation error")
+			}
+		})
 	}
 }
 

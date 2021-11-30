@@ -48,9 +48,9 @@ func TestAccS3Bucket_basic(t *testing.T) {
 	})
 }
 
-func TestAccAWSS3MultiBucket_withTags(t *testing.T) {
+func TestAccS3MultiBucket_withTags(t *testing.T) {
 	rInt := acctest.RandInt()
-	resource.Test(t, resource.TestCase{
+	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:          func() { testAccPreCheckS3(t) },
 		ProviderFactories: common.TestAccProviderFactories,
 		CheckDestroy:      testAccCheckS3BucketDestroy,
@@ -65,7 +65,7 @@ func TestAccAWSS3MultiBucket_withTags(t *testing.T) {
 func TestAccS3Bucket_namePrefix(t *testing.T) {
 	resourceName := "opentelekomcloud_s3_bucket.test"
 
-	resource.Test(t, resource.TestCase{
+	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:          func() { testAccPreCheckS3(t) },
 		ProviderFactories: common.TestAccProviderFactories,
 		CheckDestroy:      testAccCheckS3BucketDestroy,
@@ -84,7 +84,7 @@ func TestAccS3Bucket_namePrefix(t *testing.T) {
 func TestAccS3Bucket_generatedName(t *testing.T) {
 	resourceName := "opentelekomcloud_s3_bucket.test"
 
-	resource.Test(t, resource.TestCase{
+	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:          func() { testAccPreCheckS3(t) },
 		ProviderFactories: common.TestAccProviderFactories,
 		CheckDestroy:      testAccCheckS3BucketDestroy,
@@ -103,7 +103,7 @@ func TestAccS3Bucket_region(t *testing.T) {
 	rInt := acctest.RandInt()
 	resourceName := "opentelekomcloud_s3_bucket.bucket"
 
-	resource.Test(t, resource.TestCase{
+	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:          func() { testAccPreCheckS3(t) },
 		ProviderFactories: common.TestAccProviderFactories,
 		CheckDestroy:      testAccCheckS3BucketDestroy,
@@ -123,7 +123,7 @@ func TestAccS3Bucket_Policy(t *testing.T) {
 	rInt := acctest.RandInt()
 	resourceName := "opentelekomcloud_s3_bucket.bucket"
 
-	resource.Test(t, resource.TestCase{
+	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:          func() { testAccPreCheckS3(t) },
 		ProviderFactories: common.TestAccProviderFactories,
 		CheckDestroy:      testAccCheckS3BucketDestroy,
@@ -159,7 +159,7 @@ func TestAccS3Bucket_UpdateAcl(t *testing.T) {
 	postConfig := fmt.Sprintf(testAccS3BucketConfigWithAclUpdate, ri)
 	resourceName := "opentelekomcloud_s3_bucket.bucket"
 
-	resource.Test(t, resource.TestCase{
+	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:          func() { testAccPreCheckS3(t) },
 		ProviderFactories: common.TestAccProviderFactories,
 		CheckDestroy:      testAccCheckS3BucketDestroy,
@@ -186,7 +186,7 @@ func TestAccS3Bucket_Website_Simple(t *testing.T) {
 	rInt := acctest.RandInt()
 	resourceName := "opentelekomcloud_s3_bucket.bucket"
 
-	resource.Test(t, resource.TestCase{
+	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:          func() { testAccPreCheckS3(t) },
 		ProviderFactories: common.TestAccProviderFactories,
 		CheckDestroy:      testAccCheckS3BucketDestroy,
@@ -223,7 +223,7 @@ func TestAccS3Bucket_WebsiteRedirect(t *testing.T) {
 	rInt := acctest.RandInt()
 	resourceName := "opentelekomcloud_s3_bucket.bucket"
 
-	resource.Test(t, resource.TestCase{
+	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:          func() { testAccPreCheckS3(t) },
 		ProviderFactories: common.TestAccProviderFactories,
 		CheckDestroy:      testAccCheckS3BucketDestroy,
@@ -260,7 +260,7 @@ func TestAccS3Bucket_WebsiteRoutingRules(t *testing.T) {
 	rInt := acctest.RandInt()
 	resourceName := "opentelekomcloud_s3_bucket.bucket"
 
-	resource.Test(t, resource.TestCase{
+	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:          func() { testAccPreCheckS3(t) },
 		ProviderFactories: common.TestAccProviderFactories,
 		CheckDestroy:      testAccCheckS3BucketDestroy,
@@ -305,7 +305,7 @@ func TestAccS3Bucket_shouldFailNotFound(t *testing.T) {
 	rInt := acctest.RandInt()
 	resourceName := "opentelekomcloud_s3_bucket.bucket"
 
-	resource.Test(t, resource.TestCase{
+	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:          func() { testAccPreCheckS3(t) },
 		ProviderFactories: common.TestAccProviderFactories,
 		CheckDestroy:      testAccCheckS3BucketDestroy,
@@ -326,7 +326,7 @@ func TestAccS3Bucket_Versioning(t *testing.T) {
 	rInt := acctest.RandInt()
 	resourceName := "opentelekomcloud_s3_bucket.bucket"
 
-	resource.Test(t, resource.TestCase{
+	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:          func() { testAccPreCheckS3(t) },
 		ProviderFactories: common.TestAccProviderFactories,
 		CheckDestroy:      testAccCheckS3BucketDestroy,
@@ -360,7 +360,7 @@ func TestAccS3Bucket_VersioningSecond(t *testing.T) {
 	rInt := acctest.RandInt()
 	resourceName := "opentelekomcloud_s3_bucket.bucket"
 
-	resource.Test(t, resource.TestCase{
+	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:          func() { testAccPreCheckS3(t) },
 		ProviderFactories: common.TestAccProviderFactories,
 		CheckDestroy:      testAccCheckS3BucketDestroy,
@@ -420,7 +420,7 @@ func TestAccS3Bucket_Cors(t *testing.T) {
 		}
 	}
 
-	resource.Test(t, resource.TestCase{
+	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:          func() { testAccPreCheckS3(t) },
 		ProviderFactories: common.TestAccProviderFactories,
 		CheckDestroy:      testAccCheckS3BucketDestroy,
@@ -469,7 +469,7 @@ func TestAccS3Bucket_Logging(t *testing.T) {
 	rInt := acctest.RandInt()
 	resourceName := "opentelekomcloud_s3_bucket.bucket"
 
-	resource.Test(t, resource.TestCase{
+	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:          func() { testAccPreCheckS3(t) },
 		ProviderFactories: common.TestAccProviderFactories,
 		CheckDestroy:      testAccCheckS3BucketDestroy,
@@ -489,7 +489,7 @@ func TestAccS3Bucket_Lifecycle(t *testing.T) {
 	rInt := acctest.RandInt()
 	resourceName := "opentelekomcloud_s3_bucket.bucket"
 
-	resource.Test(t, resource.TestCase{
+	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:          func() { testAccPreCheckS3(t) },
 		ProviderFactories: common.TestAccProviderFactories,
 		CheckDestroy:      testAccCheckS3BucketDestroy,
@@ -500,14 +500,10 @@ func TestAccS3Bucket_Lifecycle(t *testing.T) {
 					testAccCheckS3BucketExists(resourceName),
 					resource.TestCheckResourceAttr(resourceName, "lifecycle_rule.0.id", "id1"),
 					resource.TestCheckResourceAttr(resourceName, "lifecycle_rule.0.prefix", "path1/"),
-					resource.TestCheckResourceAttr(resourceName, "lifecycle_rule.0.expiration.2613713285.days", "365"),
-					resource.TestCheckResourceAttr(resourceName, "lifecycle_rule.0.expiration.2613713285.date", ""),
-					resource.TestCheckResourceAttr(resourceName, "lifecycle_rule.0.expiration.2613713285.expired_object_delete_marker", "false"),
+					resource.TestCheckResourceAttr(resourceName, "lifecycle_rule.0.expiration.0.days", "365"),
 					resource.TestCheckResourceAttr(resourceName, "lifecycle_rule.1.id", "id2"),
 					resource.TestCheckResourceAttr(resourceName, "lifecycle_rule.1.prefix", "path2/"),
-					resource.TestCheckResourceAttr(resourceName, "lifecycle_rule.1.expiration.2855832418.date", "2016-01-12"),
-					resource.TestCheckResourceAttr(resourceName, "lifecycle_rule.1.expiration.2855832418.days", "0"),
-					resource.TestCheckResourceAttr(resourceName, "lifecycle_rule.1.expiration.2855832418.expired_object_delete_marker", "false"),
+					resource.TestCheckResourceAttr(resourceName, "lifecycle_rule.1.expiration.0.date", "2016-01-12"),
 					resource.TestCheckResourceAttr(resourceName, "lifecycle_rule.2.id", "id3"),
 					resource.TestCheckResourceAttr(resourceName, "lifecycle_rule.2.prefix", "path3/"),
 					resource.TestCheckResourceAttr(resourceName, "lifecycle_rule.3.id", "id4"),
@@ -521,11 +517,11 @@ func TestAccS3Bucket_Lifecycle(t *testing.T) {
 					resource.TestCheckResourceAttr(resourceName, "lifecycle_rule.0.id", "id1"),
 					resource.TestCheckResourceAttr(resourceName, "lifecycle_rule.0.prefix", "path1/"),
 					resource.TestCheckResourceAttr(resourceName, "lifecycle_rule.0.enabled", "true"),
-					resource.TestCheckResourceAttr(resourceName, "lifecycle_rule.0.noncurrent_version_expiration.80908210.days", "365"),
+					resource.TestCheckResourceAttr(resourceName, "lifecycle_rule.0.noncurrent_version_expiration.0.days", "365"),
 					resource.TestCheckResourceAttr(resourceName, "lifecycle_rule.1.id", "id2"),
 					resource.TestCheckResourceAttr(resourceName, "lifecycle_rule.1.prefix", "path2/"),
 					resource.TestCheckResourceAttr(resourceName, "lifecycle_rule.1.enabled", "false"),
-					resource.TestCheckResourceAttr(resourceName, "lifecycle_rule.1.noncurrent_version_expiration.80908210.days", "365"),
+					resource.TestCheckResourceAttr(resourceName, "lifecycle_rule.1.noncurrent_version_expiration.0.days", "365"),
 					resource.TestCheckResourceAttr(resourceName, "lifecycle_rule.2.id", "id3"),
 					resource.TestCheckResourceAttr(resourceName, "lifecycle_rule.2.prefix", "path3/"),
 				),
