@@ -2,19 +2,16 @@
 subcategory: "Virtual Private Cloud (VPC)"
 ---
 
-# opentelekomcloud_vpc_bandwidth
+# opentelekomcloud_vpc_bandwidth_v2
 
 Provides details about a specific shared bandwidth.
-
-~>
-Deprecated, use `opentelekomcloud_vpc_bandwidth_v2` data source instead
 
 ## Example Usage
 
 ```hcl
 variable "bandwidth_name" {}
 
-data "opentelekomcloud_vpc_bandwidth" "bandwidth_1" {
+data "opentelekomcloud_vpc_bandwidth_v2" "bandwidth_1" {
   name = var.bandwidth_name
 }
 ```
@@ -24,11 +21,9 @@ data "opentelekomcloud_vpc_bandwidth" "bandwidth_1" {
 The arguments of this data source act as filters for querying the available
 bandwidth in the current tenant. The following arguments are supported:
 
-* `region` - (Optional) The region in which to obtain the bandwidth. If omitted, the provider-level region will be used.
+* `name` - (Optional) The name of the Shared Bandwidth to retrieve.
 
-* `name` - (Required) The name of the Shared Bandwidth to retrieve.
-
-* `size` - (Optional) The size of the Shared Bandwidth to retrieve. The value ranges from 5 Mbit/s to 2000 Mbit/s.
+* `size` - (Optional) The size of the Shared Bandwidth to retrieve.
 
 ## Attributes Reference
 

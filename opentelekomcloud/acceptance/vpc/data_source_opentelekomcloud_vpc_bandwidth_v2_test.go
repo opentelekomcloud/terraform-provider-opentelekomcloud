@@ -11,22 +11,21 @@ import (
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/acceptance/common/quotas"
 )
 
-func TestAccBandWidthDataSource_basic(t *testing.T) {
-	t.Skip("VPC bandwidth creation is not supported")
+func TestAccBandWidthV2DataSource_basic(t *testing.T) {
 	rName := fmt.Sprintf("tf-acc-test-%s", acctest.RandString(5))
-	dataName := "data.opentelekomcloud_vpc_bandwidth.test"
+	dataName := "data.opentelekomcloud_vpc_bandwidth_v2.test"
 
-	resource.ParallelTest(t, resource.TestCase{
-		PreCheck: func() {
-			common.TestAccPreCheck(t)
-			quotas.BookOne(t, quotas.SharedBandwidth)
-		},
+	t.Parallel()
+	quotas.BookOne(t, quotas.SharedBandwidth)
+
+	resource.Test(t, resource.TestCase{
+		PreCheck:          func() { common.TestAccPreCheck(t) },
 		ProviderFactories: common.TestAccProviderFactories,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccBandWidthDataSource_basic(rName),
+				Config: testAccBandWidthDataSourceV2Basic(rName),
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckBandWidthDataSourceExists(dataName),
+					testAccCheckBandWidthV2DataSourceExists(dataName),
 					resource.TestCheckResourceAttr(dataName, "name", rName),
 					resource.TestCheckResourceAttr(dataName, "size", "10"),
 				),
@@ -35,20 +34,20 @@ func TestAccBandWidthDataSource_basic(t *testing.T) {
 	})
 }
 
-func testAccCheckBandWidthDataSourceExists(n string) resource.TestCheckFunc { // nolint:unused
+func testAccCheckBandWidthV2DataSourceExists(n string) resource.TestCheckFunc { // nolint:unused
 	return func(s *terraform.State) error {
 		rs, ok := s.RootModule().Resources[n]
 		if !ok {
 			return fmt.Errorf("root module has no resource called %s", n)
 		}
 
-		bandwidthRs, ok := s.RootModule().Resources["opentelekomcloud_vpc_bandwidth.test"]
+		bandwidthRs, ok := s.RootModule().Resources["opentelekomcloud_vpc_bandwidth_v2.test"]
 		if !ok {
-			return fmt.Errorf("can't find opentelekomcloud_vpc_bandwidth.test in state")
+			return fmt.Errorf("can't find opentelekomcloud_vpc_bandwidth_v2.test in state")
 		}
 
 		attr := rs.Primary.Attributes
-		if attr["id"] != bandwidthRs.Primary.Attributes["id"] {
+		if attr["id"] != bandwidthRs.Primary.ID {
 			return fmt.Errorf("attribute 'id' expected %s; got %s",
 				bandwidthRs.Primary.Attributes["id"], attr["id"])
 		}
@@ -57,15 +56,15 @@ func testAccCheckBandWidthDataSourceExists(n string) resource.TestCheckFunc { //
 	}
 }
 
-func testAccBandWidthDataSource_basic(rName string) string { // nolint:unused
+func testAccBandWidthDataSourceV2Basic(rName string) string {
 	return fmt.Sprintf(`
-resource "opentelekomcloud_vpc_bandwidth" "test" {
+resource "opentelekomcloud_vpc_bandwidth_v2" "test" {
   name = "%s"
   size = 10
 }
 
-data "opentelekomcloud_vpc_bandwidth" "test" {
-  name = opentelekomcloud_vpc_bandwidth.test.name
+data "opentelekomcloud_vpc_bandwidth_v2" "test" {
+  name = opentelekomcloud_vpc_bandwidth_v2.test.name
 }
 `, rName)
 }
