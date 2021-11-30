@@ -6,7 +6,6 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
-	th "github.com/opentelekomcloud/gophertelekomcloud/testhelper"
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/acceptance/common/quotas"
 
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/networking/v2/extensions/layer3/routers"
@@ -21,8 +20,7 @@ const resourceRouterName = "opentelekomcloud_networking_router_v2.router_1"
 func TestAccNetworkingV2Router_basic(t *testing.T) {
 	var router routers.Router
 	t.Parallel()
-	th.AssertNoErr(t, quotas.Router.Acquire())
-	defer quotas.Router.Release()
+	quotas.BookOne(t, quotas.Router)
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:          func() { common.TestAccPreCheck(t) },
@@ -48,8 +46,7 @@ func TestAccNetworkingV2Router_basic(t *testing.T) {
 func TestAccNetworkingV2Router_update_external_gw(t *testing.T) {
 	var router routers.Router
 	t.Parallel()
-	th.AssertNoErr(t, quotas.Router.Acquire())
-	defer quotas.Router.Release()
+	quotas.BookOne(t, quotas.Router)
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:          func() { common.TestAccPreCheck(t) },
@@ -75,8 +72,7 @@ func TestAccNetworkingV2Router_update_external_gw(t *testing.T) {
 func TestAccNetworkingV2Router_timeout(t *testing.T) {
 	var router routers.Router
 	t.Parallel()
-	th.AssertNoErr(t, quotas.Router.Acquire())
-	defer quotas.Router.Release()
+	quotas.BookOne(t, quotas.Router)
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:          func() { common.TestAccPreCheck(t) },

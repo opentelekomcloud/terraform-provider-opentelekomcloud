@@ -8,7 +8,6 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 	"github.com/opentelekomcloud/gophertelekomcloud/acceptance/tools"
-	th "github.com/opentelekomcloud/gophertelekomcloud/testhelper"
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/acceptance/common/quotas"
 
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/acceptance/common"
@@ -23,8 +22,7 @@ func TestAccVpcV1DataSource_basic(t *testing.T) {
 	name := tools.RandomString("vpc-test-", 3)
 
 	t.Parallel()
-	th.AssertNoErr(t, quotas.Router.Acquire())
-	defer quotas.Router.Release()
+	quotas.BookOne(t, quotas.Router)
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:          func() { common.TestAccPreCheck(t) },

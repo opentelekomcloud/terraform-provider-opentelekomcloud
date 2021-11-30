@@ -6,7 +6,6 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
-	th "github.com/opentelekomcloud/gophertelekomcloud/testhelper"
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/acceptance/common/quotas"
 
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/networking/v1/flowlogs"
@@ -25,8 +24,7 @@ const (
 func TestAccVpcFlowLogV1_basic(t *testing.T) {
 	var flowLog flowlogs.FlowLog
 	t.Parallel()
-	th.AssertNoErr(t, quotas.Router.Acquire())
-	defer quotas.Router.Release()
+	quotas.BookOne(t, quotas.Router)
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:          func() { common.TestAccPreCheck(t) },

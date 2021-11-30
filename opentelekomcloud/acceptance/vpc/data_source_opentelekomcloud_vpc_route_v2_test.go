@@ -6,7 +6,6 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
-	th "github.com/opentelekomcloud/gophertelekomcloud/testhelper"
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/acceptance/common/quotas"
 
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/acceptance/common"
@@ -14,8 +13,10 @@ import (
 
 func TestAccVpcRouteV2DataSource_basic(t *testing.T) {
 	t.Parallel()
-	th.AssertNoErr(t, quotas.Router.AcquireMultiple(3))
-	defer quotas.Router.ReleaseMultiple(3)
+	qts := quotas.MultipleQuotas{
+		{Q: quotas.Router, Count: 3},
+	}
+	quotas.BookMany(t, qts)
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:          func() { common.TestAccPreCheck(t) },

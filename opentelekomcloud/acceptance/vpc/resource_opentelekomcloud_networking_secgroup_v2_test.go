@@ -6,7 +6,6 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
-	th "github.com/opentelekomcloud/gophertelekomcloud/testhelper"
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/acceptance/common/quotas"
 
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/networking/v2/extensions/security/groups"
@@ -21,8 +20,7 @@ const resourceNwSecGroupName = "opentelekomcloud_networking_secgroup_v2.secgroup
 func TestAccNetworkingV2SecGroup_basic(t *testing.T) {
 	var securityGroup groups.SecGroup
 	t.Parallel()
-	th.AssertNoErr(t, quotas.SecurityGroup.Acquire())
-	defer quotas.SecurityGroup.Release()
+	quotas.BookOne(t, quotas.SecurityGroup)
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:          func() { common.TestAccPreCheck(t) },
@@ -49,8 +47,7 @@ func TestAccNetworkingV2SecGroup_basic(t *testing.T) {
 
 func TestAccNetworkingV2SecGroup_importBasic(t *testing.T) {
 	t.Parallel()
-	th.AssertNoErr(t, quotas.SecurityGroup.Acquire())
-	defer quotas.SecurityGroup.Release()
+	quotas.BookOne(t, quotas.SecurityGroup)
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:          func() { common.TestAccPreCheck(t) },
@@ -72,8 +69,7 @@ func TestAccNetworkingV2SecGroup_importBasic(t *testing.T) {
 func TestAccNetworkingV2SecGroup_noDefaultRules(t *testing.T) {
 	var securityGroup groups.SecGroup
 	t.Parallel()
-	th.AssertNoErr(t, quotas.SecurityGroup.Acquire())
-	defer quotas.SecurityGroup.Release()
+	quotas.BookOne(t, quotas.SecurityGroup)
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:          func() { common.TestAccPreCheck(t) },
@@ -94,8 +90,7 @@ func TestAccNetworkingV2SecGroup_noDefaultRules(t *testing.T) {
 func TestAccNetworkingV2SecGroup_timeout(t *testing.T) {
 	var securityGroup groups.SecGroup
 	t.Parallel()
-	th.AssertNoErr(t, quotas.SecurityGroup.Acquire())
-	defer quotas.SecurityGroup.Release()
+	quotas.BookOne(t, quotas.SecurityGroup)
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:          func() { common.TestAccPreCheck(t) },

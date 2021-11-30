@@ -6,7 +6,6 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
-	th "github.com/opentelekomcloud/gophertelekomcloud/testhelper"
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/acceptance/common/quotas"
 
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/networking/v1/eips"
@@ -21,8 +20,7 @@ const resourceVPCEIPName = "opentelekomcloud_vpc_eip_v1.eip_1"
 func TestAccVpcV1EIP_basic(t *testing.T) {
 	var eip eips.PublicIp
 	t.Parallel()
-	th.AssertNoErr(t, quotas.FloatingIP.Acquire())
-	defer quotas.FloatingIP.Release()
+	quotas.BookOne(t, quotas.FloatingIP)
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:          func() { common.TestAccPreCheck(t) },
@@ -51,8 +49,7 @@ func TestAccVpcV1EIP_basic(t *testing.T) {
 func TestAccVpcV1EIP_timeout(t *testing.T) {
 	var eip eips.PublicIp
 	t.Parallel()
-	th.AssertNoErr(t, quotas.FloatingIP.Acquire())
-	defer quotas.FloatingIP.Release()
+	quotas.BookOne(t, quotas.FloatingIP)
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:          func() { common.TestAccPreCheck(t) },

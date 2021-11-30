@@ -6,7 +6,6 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
-	th "github.com/opentelekomcloud/gophertelekomcloud/testhelper"
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/acceptance/common/quotas"
 
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/networking/v1/vpcs"
@@ -21,8 +20,7 @@ const resourceVPCName = "opentelekomcloud_vpc_v1.vpc_1"
 func TestAccVpcV1_basic(t *testing.T) {
 	var vpc vpcs.Vpc
 	t.Parallel()
-	th.AssertNoErr(t, quotas.Router.Acquire())
-	defer quotas.Router.Release()
+	quotas.BookOne(t, quotas.Router)
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:          func() { common.TestAccPreCheck(t) },
@@ -57,8 +55,7 @@ func TestAccVpcV1_basic(t *testing.T) {
 func TestAccVpcV1_timeout(t *testing.T) {
 	var vpc vpcs.Vpc
 	t.Parallel()
-	th.AssertNoErr(t, quotas.Router.Acquire())
-	defer quotas.Router.Release()
+	quotas.BookOne(t, quotas.Router)
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:          func() { common.TestAccPreCheck(t) },
@@ -77,8 +74,7 @@ func TestAccVpcV1_timeout(t *testing.T) {
 
 func TestAccVpcV1_import(t *testing.T) {
 	t.Parallel()
-	th.AssertNoErr(t, quotas.Router.Acquire())
-	defer quotas.Router.Release()
+	quotas.BookOne(t, quotas.Router)
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:          func() { common.TestAccPreCheck(t) },

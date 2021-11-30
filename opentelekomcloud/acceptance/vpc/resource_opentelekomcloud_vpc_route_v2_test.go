@@ -6,7 +6,6 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
-	th "github.com/opentelekomcloud/gophertelekomcloud/testhelper"
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/acceptance/common/quotas"
 
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/networking/v2/routes"
@@ -22,8 +21,7 @@ func TestAccVpcRouteV2_basic(t *testing.T) {
 	var route routes.Route
 
 	t.Parallel()
-	th.AssertNoErr(t, quotas.Router.AcquireMultiple(2))
-	defer quotas.Router.ReleaseMultiple(2)
+	quotas.BookMany(t, multipleRouters(2))
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:          func() { common.TestAccPreCheck(t) },
@@ -43,8 +41,7 @@ func TestAccVpcRouteV2_basic(t *testing.T) {
 }
 func TestAccVpcRouteV2_import(t *testing.T) {
 	t.Parallel()
-	th.AssertNoErr(t, quotas.Router.AcquireMultiple(2))
-	defer quotas.Router.ReleaseMultiple(2)
+	quotas.BookMany(t, multipleRouters(2))
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:          func() { common.TestAccPreCheck(t) },
@@ -67,8 +64,7 @@ func TestAccVpcRouteV2_timeout(t *testing.T) {
 	var route routes.Route
 
 	t.Parallel()
-	th.AssertNoErr(t, quotas.Router.AcquireMultiple(2))
-	defer quotas.Router.ReleaseMultiple(2)
+	quotas.BookMany(t, multipleRouters(2))
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:          func() { common.TestAccPreCheck(t) },

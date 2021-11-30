@@ -2,10 +2,8 @@ package acceptance
 
 import (
 	"testing"
-	"time"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
-	th "github.com/opentelekomcloud/gophertelekomcloud/testhelper"
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/acceptance/common/quotas"
 
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/acceptance/common"
@@ -15,8 +13,7 @@ func TestAccNetworkingV2PortDataSource_basic(t *testing.T) {
 	t.Parallel()
 	qts := subnetQuotas()
 	qts = append(qts, &quotas.ExpectedQuota{Q: quotas.SecurityGroup, Count: 1})
-	th.AssertNoErr(t, quotas.AcquireMultipleQuotas(qts, 5*time.Second))
-	defer quotas.ReleaseMultipleQuotas(qts)
+	quotas.BookMany(t, qts)
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:          func() { common.TestAccPreCheck(t) },

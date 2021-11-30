@@ -3,12 +3,10 @@ package acceptance
 import (
 	"fmt"
 	"testing"
-	"time"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 	golangsdk "github.com/opentelekomcloud/gophertelekomcloud"
-	th "github.com/opentelekomcloud/gophertelekomcloud/testhelper"
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/acceptance/common/quotas"
 
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/networking/v2/extensions/layer3/floatingips"
@@ -25,8 +23,7 @@ func TestAccNetworkingV2FloatingIPAssociate_basic(t *testing.T) {
 	t.Parallel()
 	qts := vpcSubnetQuotas()
 	qts = append(qts, &quotas.ExpectedQuota{Q: quotas.FloatingIP, Count: 1})
-	th.AssertNoErr(t, quotas.AcquireMultipleQuotas(qts, 5*time.Second))
-	defer quotas.ReleaseMultipleQuotas(qts)
+	quotas.BookMany(t, qts)
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:          func() { common.TestAccPreCheck(t) },

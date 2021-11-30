@@ -6,7 +6,6 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
-	th "github.com/opentelekomcloud/gophertelekomcloud/testhelper"
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/acceptance/common/quotas"
 
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/networking/v2/extensions/security/groups"
@@ -25,8 +24,10 @@ func TestAccNetworkingV2SecGroupRule_basic(t *testing.T) {
 	var secgroupRule1 rules.SecGroupRule
 	var secgroupRule2 rules.SecGroupRule
 	t.Parallel()
-	th.AssertNoErr(t, quotas.SecurityGroup.AcquireMultiple(2))
-	defer quotas.SecurityGroup.ReleaseMultiple(2)
+	qts := quotas.MultipleQuotas{
+		{Q: quotas.SecurityGroup, Count: 2},
+	}
+	quotas.BookMany(t, qts)
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:          func() { common.TestAccPreCheck(t) },
@@ -50,15 +51,17 @@ func TestAccNetworkingV2SecGroupRule_basic(t *testing.T) {
 }
 
 func TestAccNetworkingV2SecGroupRule_importBasic(t *testing.T) {
+	t.Parallel()
+	quotas.BookOne(t, quotas.SecurityGroup)
+
 	resource.Test(t, resource.TestCase{
 		PreCheck:          func() { common.TestAccPreCheck(t) },
 		ProviderFactories: common.TestAccProviderFactories,
 		CheckDestroy:      testAccCheckNetworkingV2SecGroupRuleDestroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccNetworkingV2SecGroupRuleBasic,
+				Config: testAccNetworkingV2SecGroupRuleNumericProtocol,
 			},
-
 			{
 				ResourceName:      resourceNwSGRuleName,
 				ImportState:       true,
@@ -72,8 +75,10 @@ func TestAccNetworkingV2SecGroupRule_timeout(t *testing.T) {
 	var secgroup_1 groups.SecGroup
 	var secgroup_2 groups.SecGroup
 	t.Parallel()
-	th.AssertNoErr(t, quotas.SecurityGroup.AcquireMultiple(2))
-	defer quotas.SecurityGroup.ReleaseMultiple(2)
+	qts := quotas.MultipleQuotas{
+		{Q: quotas.SecurityGroup, Count: 2},
+	}
+	quotas.BookMany(t, qts)
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:          func() { common.TestAccPreCheck(t) },
@@ -96,8 +101,7 @@ func TestAccNetworkingV2SecGroupRule_numericProtocol(t *testing.T) {
 	var secgroup1 groups.SecGroup
 	var secgroupRule1 rules.SecGroupRule
 	t.Parallel()
-	th.AssertNoErr(t, quotas.SecurityGroup.AcquireMultiple(2))
-	defer quotas.SecurityGroup.ReleaseMultiple(2)
+	quotas.BookOne(t, quotas.SecurityGroup)
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:          func() { common.TestAccPreCheck(t) },

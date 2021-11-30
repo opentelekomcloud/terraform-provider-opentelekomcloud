@@ -5,7 +5,6 @@ import (
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
-	th "github.com/opentelekomcloud/gophertelekomcloud/testhelper"
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/acceptance/common"
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/acceptance/common/quotas"
 )
@@ -13,8 +12,7 @@ import (
 func TestAccNetworkingSecGroupRuleIdsV2DataSource_basic(t *testing.T) {
 	dataSourceName := "data.opentelekomcloud_networking_secgroup_rule_ids_v2.secgroup_ids"
 	t.Parallel()
-	th.AssertNoErr(t, quotas.SecurityGroup.Acquire())
-	defer quotas.SecurityGroup.Release()
+	quotas.BookOne(t, quotas.SecurityGroup)
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:          func() { common.TestAccPreCheck(t) },
