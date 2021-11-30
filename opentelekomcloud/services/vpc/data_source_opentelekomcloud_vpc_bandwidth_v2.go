@@ -20,10 +20,12 @@ func DataSourceBandWidthV2() *schema.Resource {
 			"name": {
 				Type:     schema.TypeString,
 				Optional: true,
+				Computed: true,
 			},
 			"size": {
 				Type:     schema.TypeInt,
 				Optional: true,
+				Computed: true,
 			},
 			"share_type": {
 				Type:     schema.TypeString,
@@ -47,9 +49,9 @@ func DataSourceBandWidthV2() *schema.Resource {
 
 func dataSourceBandWidthV2Read(_ context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*cfg.Config)
-	vpcClient, err := config.NetworkingV1Client(config.GetRegion(d))
+	vpcClient, err := config.NetworkingV2Client(config.GetRegion(d))
 	if err != nil {
-		return fmterr.Errorf("error creating OpenTelekomCloud vpc client: %s", err)
+		return fmterr.Errorf(errCreationV2Client, err)
 	}
 
 	pages, err := bandwidths.List(vpcClient).AllPages()
