@@ -19,7 +19,7 @@ func TestAccDataSourceObsBucket_basic(t *testing.T) {
 
 	var bucket *obs.BaseModel
 
-	resource.Test(t, resource.TestCase{
+	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:                  func() { common.TestAccPreCheck(t) },
 		ProviderFactories:         common.TestAccProviderFactories,
 		PreventPostDestroyRefresh: true,

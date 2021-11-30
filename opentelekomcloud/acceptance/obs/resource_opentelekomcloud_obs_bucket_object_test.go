@@ -11,6 +11,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/obs"
+	th "github.com/opentelekomcloud/gophertelekomcloud/testhelper"
 
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/acceptance/common"
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/acceptance/env"
@@ -23,7 +24,9 @@ func TestAccObsBucketObject_source(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	defer os.Remove(tmpFile.Name())
+	t.Cleanup(func() {
+		th.AssertNoErr(t, os.Remove(tmpFile.Name()))
+	})
 
 	rInt := acctest.RandInt()
 	// write some data to the tempfile
@@ -32,7 +35,7 @@ func TestAccObsBucketObject_source(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	resource.Test(t, resource.TestCase{
+	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:          func() { common.TestAccPreCheck(t) },
 		ProviderFactories: common.TestAccProviderFactories,
 		CheckDestroy:      testAccCheckObsBucketObjectDestroy,
@@ -64,7 +67,7 @@ func TestAccObsBucketObject_source(t *testing.T) {
 func TestAccObsBucketObject_content(t *testing.T) {
 	rInt := acctest.RandInt()
 
-	resource.Test(t, resource.TestCase{
+	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:          func() { common.TestAccPreCheck(t) },
 		ProviderFactories: common.TestAccProviderFactories,
 		CheckDestroy:      testAccCheckObsBucketObjectDestroy,
@@ -87,7 +90,7 @@ func TestAccObsBucketObject_content(t *testing.T) {
 func TestAccObsBucketObject_withVersionedContent(t *testing.T) {
 	rInt := acctest.RandInt()
 
-	resource.Test(t, resource.TestCase{
+	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:          func() { common.TestAccPreCheck(t) },
 		ProviderFactories: common.TestAccProviderFactories,
 		CheckDestroy:      testAccCheckObsBucketObjectDestroy,
@@ -106,7 +109,7 @@ func TestAccObsBucketObject_withVersionedContent(t *testing.T) {
 func TestAccObsBucketObject_nothing(t *testing.T) {
 	rInt := acctest.RandInt()
 
-	resource.Test(t, resource.TestCase{
+	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:          func() { common.TestAccPreCheck(t) },
 		ProviderFactories: common.TestAccProviderFactories,
 		CheckDestroy:      testAccCheckObsBucketObjectDestroy,
