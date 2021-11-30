@@ -948,17 +948,14 @@ resource "opentelekomcloud_s3_bucket" "bucket6" {
 
 func testAccS3BucketConfigWithRegion(randInt int) string {
 	return fmt.Sprintf(`
-provider "opentelekomcloud" {
-  alias  = "reg1"
-  region = "%s"
-}
+%s
 
 resource "opentelekomcloud_s3_bucket" "bucket" {
-  provider = "reg1"
+  provider = "%s"
   bucket   = "tf-test-bucket-%d"
   region   = "%s"
 }
-`, env.OS_REGION_NAME, randInt, env.OS_REGION_NAME)
+`, common.AlternativeProviderWithRegionConfig, common.AlternativeProviderWithRegionAlias, randInt, env.OS_REGION_NAME)
 }
 
 func testAccS3BucketWebsiteConfig(randInt int) string {

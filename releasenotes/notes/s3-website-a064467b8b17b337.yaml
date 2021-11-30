@@ -1,0 +1,4 @@
+---
+enhancements:
+  - |
+    **[S3]** Fix error on removing website from ``resource/opentelekomcloud_s3_bucket``
