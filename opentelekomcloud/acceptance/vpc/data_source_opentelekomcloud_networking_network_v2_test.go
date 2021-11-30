@@ -7,7 +7,6 @@ import (
 	"time"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
-	th "github.com/opentelekomcloud/gophertelekomcloud/testhelper"
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/acceptance/common/quotas"
 
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/acceptance/common"
@@ -19,8 +18,7 @@ func TestAccNetworkingNetworkV2DataSource_basic(t *testing.T) {
 	cidr := fmt.Sprintf("192.168.%d.0/24", rand.Intn(200))
 
 	t.Parallel()
-	th.AssertNoErr(t, quotas.Network.Acquire())
-	defer quotas.Network.Release()
+	quotas.BookOne(t, quotas.Network)
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:          func() { common.TestAccPreCheck(t) },

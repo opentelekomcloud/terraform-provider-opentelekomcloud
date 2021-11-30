@@ -3,7 +3,6 @@ package acceptance
 import (
 	"fmt"
 	"testing"
-	"time"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
@@ -11,7 +10,6 @@ import (
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/networking/v2/networks"
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/networking/v2/ports"
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/networking/v2/subnets"
-	th "github.com/opentelekomcloud/gophertelekomcloud/testhelper"
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/acceptance/common/quotas"
 
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/acceptance/common"
@@ -33,8 +31,7 @@ func TestAccNetworkingV2Port_basic(t *testing.T) {
 
 	t.Parallel()
 	qts := subnetQuotas()
-	th.AssertNoErr(t, quotas.AcquireMultipleQuotas(qts, 5*time.Second))
-	defer quotas.ReleaseMultipleQuotas(qts)
+	quotas.BookMany(t, qts)
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:          func() { common.TestAccPreCheck(t) },
@@ -56,8 +53,7 @@ func TestAccNetworkingV2Port_basic(t *testing.T) {
 func TestAccNetworkingV2Port_importBasic(t *testing.T) {
 	t.Parallel()
 	qts := subnetQuotas()
-	th.AssertNoErr(t, quotas.AcquireMultipleQuotas(qts, 5*time.Second))
-	defer quotas.ReleaseMultipleQuotas(qts)
+	quotas.BookMany(t, qts)
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:          func() { common.TestAccPreCheck(t) },
@@ -86,8 +82,7 @@ func TestAccNetworkingV2Port_noip(t *testing.T) {
 	var subnet subnets.Subnet
 	t.Parallel()
 	qts := subnetQuotas()
-	th.AssertNoErr(t, quotas.AcquireMultipleQuotas(qts, 5*time.Second))
-	defer quotas.ReleaseMultipleQuotas(qts)
+	quotas.BookMany(t, qts)
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:          func() { common.TestAccPreCheck(t) },
@@ -113,8 +108,7 @@ func TestAccNetworkingV2Port_allowedAddressPairs(t *testing.T) {
 	var vrrpPort1, vrrpPort2, instancePort ports.Port
 	t.Parallel()
 	qts := subnetQuotas()
-	th.AssertNoErr(t, quotas.AcquireMultipleQuotas(qts, 5*time.Second))
-	defer quotas.ReleaseMultipleQuotas(qts)
+	quotas.BookMany(t, qts)
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:          func() { common.TestAccPreCheck(t) },
@@ -140,8 +134,7 @@ func TestAccNetworkingV2Port_portSecurity_enabled(t *testing.T) {
 	resourceName := "opentelekomcloud_networking_port_v2.port_1"
 	t.Parallel()
 	qts := subnetQuotas()
-	th.AssertNoErr(t, quotas.AcquireMultipleQuotas(qts, 5*time.Second))
-	defer quotas.ReleaseMultipleQuotas(qts)
+	quotas.BookMany(t, qts)
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:          func() { common.TestAccPreCheck(t) },
@@ -174,8 +167,7 @@ func TestAccNetworkingV2Port_timeout(t *testing.T) {
 	var subnet subnets.Subnet
 	t.Parallel()
 	qts := subnetQuotas()
-	th.AssertNoErr(t, quotas.AcquireMultipleQuotas(qts, 5*time.Second))
-	defer quotas.ReleaseMultipleQuotas(qts)
+	quotas.BookMany(t, qts)
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:          func() { common.TestAccPreCheck(t) },

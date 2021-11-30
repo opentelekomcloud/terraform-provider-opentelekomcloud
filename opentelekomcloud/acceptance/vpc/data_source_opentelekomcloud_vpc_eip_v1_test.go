@@ -4,7 +4,6 @@ import (
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
-	th "github.com/opentelekomcloud/gophertelekomcloud/testhelper"
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/acceptance/common"
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/acceptance/common/quotas"
 )
@@ -13,8 +12,7 @@ func TestAccVpcEipV1DataSource_basic(t *testing.T) {
 	dataSourceNameByID := "data.opentelekomcloud_vpc_eip_v1.by_id"
 	dataSourceNameByTags := "data.opentelekomcloud_vpc_eip_v1.by_tags"
 	t.Parallel()
-	th.AssertNoErr(t, quotas.FloatingIP.Acquire())
-	defer quotas.FloatingIP.Release()
+	quotas.BookOne(t, quotas.FloatingIP)
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:          func() { common.TestAccPreCheck(t) },

@@ -4,13 +4,11 @@ import (
 	"fmt"
 	"log"
 	"testing"
-	"time"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 	golangsdk "github.com/opentelekomcloud/gophertelekomcloud"
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/networking/v2/ports"
-	th "github.com/opentelekomcloud/gophertelekomcloud/testhelper"
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/acceptance/common"
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/acceptance/common/quotas"
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/acceptance/env"
@@ -31,8 +29,7 @@ func TestAccNetworkingV2VIPAssociate_basic(t *testing.T) {
 		&quotas.ExpectedQuota{Q: quotas.VolumeSize, Count: 4 + 4},
 		&quotas.ExpectedQuota{Q: quotas.Server, Count: 2},
 	)
-	th.AssertNoErr(t, quotas.AcquireMultipleQuotas(qts, 5*time.Second))
-	defer quotas.ReleaseMultipleQuotas(qts)
+	quotas.BookMany(t, qts)
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:          func() { common.TestAccPreCheck(t) },

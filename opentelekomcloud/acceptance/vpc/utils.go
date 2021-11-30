@@ -239,3 +239,9 @@ func subnetQuotas() []*quotas.ExpectedQuota {
 		{Q: quotas.Subnet, Count: 1},
 	}
 }
+
+func multipleRouters(n int64) quotas.MultipleQuotas {
+	return quotas.MultipleQuotas{{
+		Q: quotas.Router, Count: n,
+	}}
+}
