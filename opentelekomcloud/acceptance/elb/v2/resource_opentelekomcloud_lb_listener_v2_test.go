@@ -7,6 +7,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/networking/v2/extensions/lbaas_v2/listeners"
+	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/acceptance/common/quotas"
 	elb "github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/services/elb/v2"
 
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/acceptance/common"
@@ -15,12 +16,18 @@ import (
 )
 
 func TestAccLBV2Listener_basic(t *testing.T) {
-	t.Parallel()
 	var listener listeners.Listener
 	resourceName := "opentelekomcloud_lb_listener_v2.listener_1"
 
-	resource.Test(t, resource.TestCase{
-		PreCheck:          func() { common.TestAccPreCheck(t) },
+	resource.ParallelTest(t, resource.TestCase{
+		PreCheck: func() {
+			common.TestAccPreCheck(t)
+			qts := quotas.MultipleQuotas{
+				{Q: quotas.LoadBalancer, Count: 1},
+				{Q: quotas.LbListener, Count: 1},
+			}
+			quotas.BookMany(t, qts)
+		},
 		ProviderFactories: common.TestAccProviderFactories,
 		CheckDestroy:      testAccCheckLBV2ListenerDestroy,
 		Steps: []resource.TestStep{
@@ -43,12 +50,19 @@ func TestAccLBV2Listener_basic(t *testing.T) {
 }
 
 func TestAccLBV2Listener_tls(t *testing.T) {
-	t.Parallel()
 	var listener listeners.Listener
 	resourceName := "opentelekomcloud_lb_listener_v2.listener_tls"
 
-	resource.Test(t, resource.TestCase{
-		PreCheck:          func() { common.TestAccPreCheck(t) },
+	resource.ParallelTest(t, resource.TestCase{
+		PreCheck: func() {
+			common.TestAccPreCheck(t)
+			qts := quotas.MultipleQuotas{
+				{Q: quotas.LoadBalancer, Count: 1},
+				{Q: quotas.LbListener, Count: 1},
+				{Q: quotas.LbCertificate, Count: 2},
+			}
+			quotas.BookMany(t, qts)
+		},
 		ProviderFactories: common.TestAccProviderFactories,
 		CheckDestroy:      testAccCheckLBV2ListenerDestroy,
 		Steps: []resource.TestStep{
@@ -77,11 +91,18 @@ func TestAccLBV2Listener_tls(t *testing.T) {
 }
 
 func TestAccLBV2ListenerSni(t *testing.T) {
-	t.Parallel()
 	resourceName := "opentelekomcloud_lb_listener_v2.elb_listener"
 
-	resource.Test(t, resource.TestCase{
-		PreCheck:          func() { common.TestAccPreCheck(t) },
+	resource.ParallelTest(t, resource.TestCase{
+		PreCheck: func() {
+			common.TestAccPreCheck(t)
+			qts := quotas.MultipleQuotas{
+				{Q: quotas.LoadBalancer, Count: 1},
+				{Q: quotas.LbListener, Count: 1},
+				{Q: quotas.LbCertificate, Count: 3},
+			}
+			quotas.BookMany(t, qts)
+		},
 		ProviderFactories: common.TestAccProviderFactories,
 		CheckDestroy:      testAccCheckLBV2ListenerDestroy,
 		Steps: []resource.TestStep{
