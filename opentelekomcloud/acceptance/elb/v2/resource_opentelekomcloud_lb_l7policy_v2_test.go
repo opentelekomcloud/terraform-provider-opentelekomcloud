@@ -7,6 +7,7 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
+	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/acceptance/common/quotas"
 	elb "github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/services/elb/v2"
 
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/networking/v2/extensions/lbaas_v2/l7policies"
@@ -19,11 +20,19 @@ import (
 const resourcePolicyName = "opentelekomcloud_lb_l7policy_v2.l7policy_1"
 
 func TestAccLBV2L7Policy_basic(t *testing.T) {
-	t.Parallel()
 	var l7Policy l7policies.L7Policy
 
-	resource.Test(t, resource.TestCase{
-		PreCheck:          func() { common.TestAccPreCheck(t) },
+	resource.ParallelTest(t, resource.TestCase{
+		PreCheck: func() {
+			common.TestAccPreCheck(t)
+			qts := quotas.MultipleQuotas{
+				{Q: quotas.LoadBalancer, Count: 1},
+				{Q: quotas.LbListener, Count: 1},
+				{Q: quotas.LbPool, Count: 1},
+				{Q: quotas.LbPolicy, Count: 1},
+			}
+			quotas.BookMany(t, qts)
+		},
 		ProviderFactories: common.TestAccProviderFactories,
 		CheckDestroy:      testAccCheckLBV2L7PolicyDestroy,
 		Steps: []resource.TestStep{

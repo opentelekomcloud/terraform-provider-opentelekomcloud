@@ -21,11 +21,11 @@ const resourceLBName = "opentelekomcloud_lb_loadbalancer_v2.loadbalancer_1"
 func TestAccLBV2LoadBalancer_basic(t *testing.T) {
 	var lb loadbalancers.LoadBalancer
 
-	t.Parallel()
-	quotas.BookOne(t, quotas.FloatingIP)
-
-	resource.Test(t, resource.TestCase{
-		PreCheck:          func() { common.TestAccPreCheck(t) },
+	resource.ParallelTest(t, resource.TestCase{
+		PreCheck: func() {
+			common.TestAccPreCheck(t)
+			quotas.BookOne(t, quotas.LoadBalancer)
+		},
 		ProviderFactories: common.TestAccProviderFactories,
 		CheckDestroy:      testAccCheckLBV2LoadBalancerDestroy,
 		Steps: []resource.TestStep{
@@ -46,11 +46,11 @@ func TestAccLBV2LoadBalancer_basic(t *testing.T) {
 	})
 }
 func TestAccLBV2LoadBalancer_import(t *testing.T) {
-	t.Parallel()
-	quotas.BookOne(t, quotas.FloatingIP)
-
-	resource.Test(t, resource.TestCase{
-		PreCheck:          func() { common.TestAccPreCheck(t) },
+	resource.ParallelTest(t, resource.TestCase{
+		PreCheck: func() {
+			common.TestAccPreCheck(t)
+			quotas.BookOne(t, quotas.LoadBalancer)
+		},
 		ProviderFactories: common.TestAccProviderFactories,
 		CheckDestroy:      testAccCheckLBV2LoadBalancerDestroy,
 		Steps: []resource.TestStep{
@@ -130,12 +130,6 @@ resource "opentelekomcloud_lb_loadbalancer_v2" "loadbalancer_1" {
     muh = "value-create"
     kuh = "value-create"
   }
-
-  timeouts {
-    create = "5m"
-    update = "5m"
-    delete = "5m"
-  }
 }
 `, common.DataSourceSubnet)
 
@@ -149,12 +143,6 @@ resource "opentelekomcloud_lb_loadbalancer_v2" "loadbalancer_1" {
 
   tags = {
     muh = "value-update"
-  }
-
-  timeouts {
-    create = "5m"
-    update = "5m"
-    delete = "5m"
   }
 }
 `, common.DataSourceSubnet)

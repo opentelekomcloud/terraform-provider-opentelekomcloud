@@ -7,6 +7,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/networking/v2/extensions/lbaas_v2/pools"
+	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/acceptance/common/quotas"
 	elb "github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/services/elb/v2"
 
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/acceptance/common"
@@ -15,19 +16,26 @@ import (
 )
 
 func TestAccLBV2Member_basic(t *testing.T) {
-	t.Parallel()
 	resourceMemberName1 := "opentelekomcloud_lb_member_v2.member_1"
 	resourceMemberName2 := "opentelekomcloud_lb_member_v2.member_2"
 	var member1 pools.Member
 	var member2 pools.Member
 
-	resource.Test(t, resource.TestCase{
-		PreCheck:          func() { common.TestAccPreCheck(t) },
+	resource.ParallelTest(t, resource.TestCase{
+		PreCheck: func() {
+			common.TestAccPreCheck(t)
+			qts := quotas.MultipleQuotas{
+				{Q: quotas.LoadBalancer, Count: 1},
+				{Q: quotas.LbListener, Count: 1},
+				{Q: quotas.LbPool, Count: 1},
+			}
+			quotas.BookMany(t, qts)
+		},
 		ProviderFactories: common.TestAccProviderFactories,
 		CheckDestroy:      testAccCheckLBV2MemberDestroy,
 		Steps: []resource.TestStep{
 			{
-				Config:             TestAccLBV2MemberConfigBasic,
+				Config:             testAccLBV2MemberConfigBasic,
 				ExpectNonEmptyPlan: true, // Because admin_state_up remains false, unfinished elb?
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckLBV2MemberExists(resourceMemberName1, &member1),
@@ -101,7 +109,7 @@ func testAccCheckLBV2MemberExists(n string, member *pools.Member) resource.TestC
 	}
 }
 
-var TestAccLBV2MemberConfigBasic = fmt.Sprintf(`
+var testAccLBV2MemberConfigBasic = fmt.Sprintf(`
 %s
 
 resource "opentelekomcloud_lb_loadbalancer_v2" "loadbalancer_1" {
@@ -128,12 +136,6 @@ resource "opentelekomcloud_lb_member_v2" "member_1" {
   protocol_port = 8080
   pool_id       = opentelekomcloud_lb_pool_v2.pool_1.id
   subnet_id     = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.subnet_id
-
-  timeouts {
-    create = "5m"
-    update = "5m"
-    delete = "5m"
-  }
 }
 
 resource "opentelekomcloud_lb_member_v2" "member_2" {
@@ -141,12 +143,6 @@ resource "opentelekomcloud_lb_member_v2" "member_2" {
   protocol_port = 8080
   pool_id       = opentelekomcloud_lb_pool_v2.pool_1.id
   subnet_id     = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.subnet_id
-
-  timeouts {
-    create = "5m"
-    update = "5m"
-    delete = "5m"
-  }
 }
 `, common.DataSourceSubnet)
 
@@ -176,29 +172,17 @@ resource "opentelekomcloud_lb_member_v2" "member_1" {
   address        = "192.168.0.10"
   protocol_port  = 8080
   weight         = 10
-  admin_state_up = "true"
+  admin_state_up = true
   pool_id        = opentelekomcloud_lb_pool_v2.pool_1.id
   subnet_id      = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.subnet_id
-
-  timeouts {
-    create = "5m"
-    update = "5m"
-    delete = "5m"
-  }
 }
 
 resource "opentelekomcloud_lb_member_v2" "member_2" {
   address        = "192.168.0.11"
   protocol_port  = 8080
   weight         = 15
-  admin_state_up = "true"
+  admin_state_up = true
   pool_id        = opentelekomcloud_lb_pool_v2.pool_1.id
   subnet_id      = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.subnet_id
-
-  timeouts {
-    create = "5m"
-    update = "5m"
-    delete = "5m"
-  }
 }
 `, common.DataSourceSubnet)

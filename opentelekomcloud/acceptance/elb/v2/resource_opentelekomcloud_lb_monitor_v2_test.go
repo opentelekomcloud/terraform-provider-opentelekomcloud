@@ -7,6 +7,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/networking/v2/extensions/lbaas_v2/monitors"
+	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/acceptance/common/quotas"
 	elb "github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/services/elb/v2"
 
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/acceptance/common"
@@ -17,11 +18,18 @@ import (
 const resourceMonitorName = "opentelekomcloud_lb_monitor_v2.monitor_1"
 
 func TestAccLBV2Monitor_basic(t *testing.T) {
-	t.Parallel()
 	var monitor monitors.Monitor
 
-	resource.Test(t, resource.TestCase{
-		PreCheck:          func() { common.TestAccPreCheck(t) },
+	resource.ParallelTest(t, resource.TestCase{
+		PreCheck: func() {
+			common.TestAccPreCheck(t)
+			qts := quotas.MultipleQuotas{
+				{Q: quotas.LoadBalancer, Count: 1},
+				{Q: quotas.LbListener, Count: 1},
+				{Q: quotas.LbPool, Count: 1},
+			}
+			quotas.BookMany(t, qts)
+		},
 		ProviderFactories: common.TestAccProviderFactories,
 		CheckDestroy:      testAccCheckLBV2MonitorDestroy,
 		Steps: []resource.TestStep{
@@ -49,28 +57,34 @@ func TestAccLBV2Monitor_basic(t *testing.T) {
 }
 
 func TestAccLBV2Monitor_minConfig(t *testing.T) {
-	t.Parallel()
 	var monitor monitors.Monitor
-	resourceName := "opentelekomcloud_lb_monitor_v2.monitor_1"
 
-	resource.Test(t, resource.TestCase{
-		PreCheck:          func() { common.TestAccPreCheck(t) },
+	resource.ParallelTest(t, resource.TestCase{
+		PreCheck: func() {
+			common.TestAccPreCheck(t)
+			qts := quotas.MultipleQuotas{
+				{Q: quotas.LoadBalancer, Count: 1},
+				{Q: quotas.LbListener, Count: 1},
+				{Q: quotas.LbPool, Count: 1},
+			}
+			quotas.BookMany(t, qts)
+		},
 		ProviderFactories: common.TestAccProviderFactories,
 		CheckDestroy:      testAccCheckLBV2MonitorDestroy,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccLBV2MonitorConfigMinConfig,
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckLBV2MonitorExists(resourceName, &monitor),
-					resource.TestCheckResourceAttr(resourceName, "delay", "20"),
-					resource.TestCheckResourceAttr(resourceName, "timeout", "10"),
+					testAccCheckLBV2MonitorExists(resourceMonitorName, &monitor),
+					resource.TestCheckResourceAttr(resourceMonitorName, "delay", "20"),
+					resource.TestCheckResourceAttr(resourceMonitorName, "timeout", "10"),
 				),
 			},
 			{
 				Config: testAccLBV2MonitorConfigUpdate,
 				Check: resource.ComposeTestCheckFunc(
-					resource.TestCheckResourceAttr(resourceName, "name", "monitor_1_updated"),
-					resource.TestCheckResourceAttr(resourceName, "monitor_port", "120"),
+					resource.TestCheckResourceAttr(resourceMonitorName, "name", "monitor_1_updated"),
+					resource.TestCheckResourceAttr(resourceMonitorName, "monitor_port", "120"),
 				),
 			},
 		},
