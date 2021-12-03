@@ -8,6 +8,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/autoscaling/v1/configurations"
+	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/acceptance/common/quotas"
 
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/acceptance/common"
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/acceptance/env"
@@ -18,8 +19,11 @@ func TestAccASV1Configuration_basic(t *testing.T) {
 	var asConfig configurations.Configuration
 	resourceName := "opentelekomcloud_as_configuration_v1.as_config"
 
-	resource.Test(t, resource.TestCase{
-		PreCheck:          func() { common.TestAccPreCheck(t) },
+	resource.ParallelTest(t, resource.TestCase{
+		PreCheck: func() {
+			common.TestAccPreCheck(t)
+			quotas.BookOne(t, quotas.ASConfiguration)
+		},
 		ProviderFactories: common.TestAccProviderFactories,
 		CheckDestroy:      testAccCheckASV1ConfigurationDestroy,
 		Steps: []resource.TestStep{
@@ -37,8 +41,11 @@ func TestAccASV1Configuration_publicIP(t *testing.T) {
 	var asConfig configurations.Configuration
 	resourceName := "opentelekomcloud_as_configuration_v1.as_config"
 
-	resource.Test(t, resource.TestCase{
-		PreCheck:          func() { common.TestAccPreCheck(t) },
+	resource.ParallelTest(t, resource.TestCase{
+		PreCheck: func() {
+			common.TestAccPreCheck(t)
+			quotas.BookOne(t, quotas.ASConfiguration)
+		},
 		ProviderFactories: common.TestAccProviderFactories,
 		CheckDestroy:      testAccCheckASV1ConfigurationDestroy,
 		Steps: []resource.TestStep{
@@ -56,8 +63,11 @@ func TestAccASV1Configuration_publicIP(t *testing.T) {
 }
 
 func TestAccASV1Configuration_invalidDiskSize(t *testing.T) {
-	resource.Test(t, resource.TestCase{
-		PreCheck:          func() { common.TestAccPreCheck(t) },
+	resource.ParallelTest(t, resource.TestCase{
+		PreCheck: func() {
+			common.TestAccPreCheck(t)
+			quotas.BookOne(t, quotas.ASConfiguration)
+		},
 		ProviderFactories: common.TestAccProviderFactories,
 		CheckDestroy:      testAccCheckASV1ConfigurationDestroy,
 		Steps: []resource.TestStep{
@@ -74,8 +84,15 @@ func TestAccASV1Configuration_multipleSecurityGroups(t *testing.T) {
 	var asConfig configurations.Configuration
 	resourceName := "opentelekomcloud_as_configuration_v1.as_config"
 
-	resource.Test(t, resource.TestCase{
-		PreCheck:          func() { common.TestAccPreCheck(t) },
+	resource.ParallelTest(t, resource.TestCase{
+		PreCheck: func() {
+			common.TestAccPreCheck(t)
+			qts := quotas.MultipleQuotas{
+				{Q: quotas.ASConfiguration, Count: 1},
+				{Q: quotas.SecurityGroup, Count: 3},
+			}
+			quotas.BookMany(t, qts)
+		},
 		ProviderFactories: common.TestAccProviderFactories,
 		CheckDestroy:      testAccCheckASV1ConfigurationDestroy,
 		Steps: []resource.TestStep{
