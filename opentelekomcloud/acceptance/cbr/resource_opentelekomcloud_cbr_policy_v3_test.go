@@ -7,6 +7,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/cbr/v3/policies"
+	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/acceptance/common/quotas"
 
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/acceptance/common"
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/acceptance/env"
@@ -18,8 +19,11 @@ const resourcePolicyName = "opentelekomcloud_cbr_policy_v3.policy"
 func TestAccCBRPolicyV3_basic(t *testing.T) {
 	var cbrPolicy policies.Policy
 
-	resource.Test(t, resource.TestCase{
-		PreCheck:          func() { common.TestAccPreCheck(t) },
+	resource.ParallelTest(t, resource.TestCase{
+		PreCheck: func() {
+			common.TestAccPreCheck(t)
+			quotas.BookOne(t, quotas.CBRPolicy)
+		},
 		ProviderFactories: common.TestAccProviderFactories,
 		CheckDestroy:      testAccCheckCBRPolicyV3Destroy,
 		Steps: []resource.TestStep{
@@ -47,8 +51,11 @@ func TestAccCBRPolicyV3_basic(t *testing.T) {
 func TestAccCBRPolicyV3_minConfig(t *testing.T) {
 	var cbrPolicy policies.Policy
 
-	resource.Test(t, resource.TestCase{
-		PreCheck:          func() { common.TestAccPreCheck(t) },
+	resource.ParallelTest(t, resource.TestCase{
+		PreCheck: func() {
+			common.TestAccPreCheck(t)
+			quotas.BookOne(t, quotas.CBRPolicy)
+		},
 		ProviderFactories: common.TestAccProviderFactories,
 		CheckDestroy:      testAccCheckCBRPolicyV3Destroy,
 		Steps: []resource.TestStep{

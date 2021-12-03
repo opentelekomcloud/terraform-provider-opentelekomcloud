@@ -5,6 +5,7 @@ import (
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
+	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/acceptance/common/quotas"
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/acceptance/env"
 
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/acceptance/common"
@@ -13,8 +14,16 @@ import (
 const resourceVaultName = "opentelekomcloud_cbr_vault_v3.vault"
 
 func TestAccCBRVaultV3_basic(t *testing.T) {
-	resource.Test(t, resource.TestCase{
-		PreCheck:          func() { common.TestAccPreCheck(t) },
+	resource.ParallelTest(t, resource.TestCase{
+		PreCheck: func() {
+			common.TestAccPreCheck(t)
+			qts := quotas.MultipleQuotas{
+				{Q: quotas.Volume, Count: 2},
+				{Q: quotas.VolumeSize, Count: 20},
+				{Q: quotas.CBRPolicy, Count: 1},
+			}
+			quotas.BookMany(t, qts)
+		},
 		ProviderFactories: common.TestAccProviderFactories,
 		CheckDestroy:      testAccCheckCBRPolicyV3Destroy,
 		Steps: []resource.TestStep{
@@ -22,7 +31,6 @@ func TestAccCBRVaultV3_basic(t *testing.T) {
 				Config: testAccCBRVaultV3BasicVolumes,
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr(resourceVaultName, "resource.#", "2"),
-					resource.TestCheckResourceAttr(resourceVaultName, "resource.0.name", "cbr-test-volume"),
 					resource.TestCheckResourceAttrSet(resourceVaultName, "backup_policy_id"),
 				),
 			},
@@ -44,8 +52,16 @@ func TestAccCBRVaultV3_basic(t *testing.T) {
 }
 
 func TestAccCBRVaultV3_unAssign(t *testing.T) {
-	resource.Test(t, resource.TestCase{
-		PreCheck:          func() { common.TestAccPreCheck(t) },
+	resource.ParallelTest(t, resource.TestCase{
+		PreCheck: func() {
+			common.TestAccPreCheck(t)
+			qts := quotas.MultipleQuotas{
+				{Q: quotas.Volume, Count: 2},
+				{Q: quotas.VolumeSize, Count: 20},
+				{Q: quotas.CBRPolicy, Count: 1},
+			}
+			quotas.BookMany(t, qts)
+		},
 		ProviderFactories: common.TestAccProviderFactories,
 		CheckDestroy:      testAccCheckCBRPolicyV3Destroy,
 		Steps: []resource.TestStep{
@@ -73,8 +89,16 @@ func TestAccCBRVaultV3_unAssign(t *testing.T) {
 }
 
 func TestAccCBRVaultV3_instance(t *testing.T) {
-	resource.Test(t, resource.TestCase{
-		PreCheck:          func() { common.TestAccPreCheck(t) },
+	resource.ParallelTest(t, resource.TestCase{
+		PreCheck: func() {
+			common.TestAccPreCheck(t)
+			qts := quotas.MultipleQuotas{
+				{Q: quotas.Volume, Count: 2},
+				{Q: quotas.VolumeSize, Count: 20},
+				{Q: quotas.CBRPolicy, Count: 1},
+			}
+			quotas.BookMany(t, qts)
+		},
 		ProviderFactories: common.TestAccProviderFactories,
 		CheckDestroy:      testAccCheckCBRPolicyV3Destroy,
 		Steps: []resource.TestStep{
