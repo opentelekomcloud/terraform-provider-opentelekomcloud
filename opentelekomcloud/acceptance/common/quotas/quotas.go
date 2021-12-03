@@ -153,6 +153,9 @@ var (
 
 	// CCEClusterQuota is a quota for controlling number of CCE clusters existing in the parallel
 	CCEClusterQuota = FromEnv("OS_CCE_CLUSTER_QUOTA", 5)
+
+	ASGroup         = FromEnv("OS_AS_GROUP_QUOTA", 25)
+	ASConfiguration = FromEnv("OS_AS_CONFIGURATION_QUOTA", 100)
 )
 
 // ExpectedQuota is a simple container of quota + count used for `Multiple` operations

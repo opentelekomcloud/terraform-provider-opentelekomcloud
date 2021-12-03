@@ -7,6 +7,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/autoscaling/v1/groups"
+	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/acceptance/common/quotas"
 
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/acceptance/common"
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/acceptance/env"
@@ -17,8 +18,17 @@ func TestAccASV1Group_basic(t *testing.T) {
 	var asGroup groups.Group
 	resourceName := "opentelekomcloud_as_group_v1.as_group"
 
-	resource.Test(t, resource.TestCase{
-		PreCheck:          func() { common.TestAccPreCheck(t) },
+	resource.ParallelTest(t, resource.TestCase{
+		PreCheck: func() {
+			common.TestAccPreCheck(t)
+			qts := quotas.MultipleQuotas{
+				{Q: quotas.LoadBalancer, Count: 1},
+				{Q: quotas.LbListener, Count: 1},
+				{Q: quotas.LbPool, Count: 1},
+				{Q: quotas.ASGroup, Count: 1},
+			}
+			quotas.BookMany(t, qts)
+		},
 		ProviderFactories: common.TestAccProviderFactories,
 		CheckDestroy:      testAccCheckASV1GroupDestroy,
 		Steps: []resource.TestStep{
@@ -48,8 +58,15 @@ func TestAccASV1Group_RemoveWithSetMinNumber(t *testing.T) {
 	var asGroup groups.Group
 	resourceName := "opentelekomcloud_as_group_v1.as_group"
 
-	resource.Test(t, resource.TestCase{
-		PreCheck:          func() { common.TestAccPreCheck(t) },
+	resource.ParallelTest(t, resource.TestCase{
+		PreCheck: func() {
+			common.TestAccPreCheck(t)
+			qts := quotas.MultipleQuotas{
+				{Q: quotas.ASGroup, Count: 1},
+				{Q: quotas.ASConfiguration, Count: 1},
+			}
+			quotas.BookMany(t, qts)
+		},
 		ProviderFactories: common.TestAccProviderFactories,
 		CheckDestroy:      testAccCheckASV1GroupDestroy,
 		Steps: []resource.TestStep{
@@ -70,8 +87,15 @@ func TestAccASV1Group_WithoutSecurityGroups(t *testing.T) {
 
 	resourceName := "opentelekomcloud_as_group_v1.as_group"
 
-	resource.Test(t, resource.TestCase{
-		PreCheck:          func() { common.TestAccPreCheck(t) },
+	resource.ParallelTest(t, resource.TestCase{
+		PreCheck: func() {
+			common.TestAccPreCheck(t)
+			qts := quotas.MultipleQuotas{
+				{Q: quotas.ASGroup, Count: 1},
+				{Q: quotas.ASConfiguration, Count: 1},
+			}
+			quotas.BookMany(t, qts)
+		},
 		ProviderFactories: common.TestAccProviderFactories,
 		CheckDestroy:      testAccCheckASV1GroupDestroy,
 		Steps: []resource.TestStep{
