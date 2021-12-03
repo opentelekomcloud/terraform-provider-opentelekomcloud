@@ -1,0 +1,6 @@
+---
+enhancements:
+  - |
+    **[CCE]** Improve documentation of ``random`` value of ``availability_zone`` for
+    ``resource/opentelekomcloud_cce_node_pool_v3``
+    (`#1573 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/1573>`_)

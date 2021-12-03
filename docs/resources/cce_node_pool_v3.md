@@ -50,6 +50,13 @@ The following arguments are supported:
   specified than `node_pool` will be in randomly selected AZ. The default value is `random`. Changing
   this parameter will create a new resource.
 
+->
+If AZ is set to `random`, when you create a node pool or update the number of nodes in a node pool, a scaling task is
+triggered. The system selects an AZ from all AZs where scaling is allowed to add nodes based on priorities. AZs with a
+smaller the number of existing nodes have a higher priority. If AZs have the same number of nodes, the system selects
+the AZ based on the AZ sequence. For more details see
+[API documentation](https://docs.otc.t-systems.com/en-us/api2/cce/cce_02_0354.html#cce_02_0354__table620623542313)
+
 * `key_pair` - (Optional) Key pair name when logging in to select the key pair mode.
   This parameter and password are alternative. Changing this parameter will create a new resource.
 
