@@ -156,6 +156,8 @@ var (
 
 	ASGroup         = FromEnv("OS_AS_GROUP_QUOTA", 25)
 	ASConfiguration = FromEnv("OS_AS_CONFIGURATION_QUOTA", 100)
+
+	CBRPolicy = FromEnv("OS_CBR_POLICY_QUOTA", 32)
 )
 
 // ExpectedQuota is a simple container of quota + count used for `Multiple` operations
