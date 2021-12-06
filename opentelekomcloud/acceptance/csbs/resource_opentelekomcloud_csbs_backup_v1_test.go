@@ -21,8 +21,11 @@ const resourceBackupName = "opentelekomcloud_csbs_backup_v1.csbs"
 func TestAccCSBSBackupV1_basic(t *testing.T) {
 	var backups backup.Backup
 
-	resource.Test(t, resource.TestCase{
-		PreCheck:          func() { common.TestAccPreCheck(t) },
+	resource.ParallelTest(t, resource.TestCase{
+		PreCheck: func() {
+			common.TestAccPreCheck(t)
+			quotas.BookMany(t, backupInstanceQuotas())
+		},
 		ProviderFactories: common.TestAccProviderFactories,
 		CheckDestroy:      testAccCSBSBackupV1Destroy,
 		Steps: []resource.TestStep{
@@ -38,11 +41,35 @@ func TestAccCSBSBackupV1_basic(t *testing.T) {
 	})
 }
 
+func TestAccCSBSBackupV1_importBasic(t *testing.T) {
+	resource.ParallelTest(t, resource.TestCase{
+		PreCheck: func() {
+			common.TestAccPreCheck(t)
+			quotas.BookMany(t, backupInstanceQuotas())
+		},
+		ProviderFactories: common.TestAccProviderFactories,
+		CheckDestroy:      testAccCSBSBackupV1Destroy,
+		Steps: []resource.TestStep{
+			{
+				Config: testAccCSBSBackupV1Basic,
+			},
+			{
+				ResourceName:      resourceBackupName,
+				ImportState:       true,
+				ImportStateVerify: false,
+			},
+		},
+	})
+}
+
 func TestAccCSBSBackupV1_timeout(t *testing.T) {
 	var backups backup.Backup
 
-	resource.Test(t, resource.TestCase{
-		PreCheck:          func() { common.TestAccPreCheck(t) },
+	resource.ParallelTest(t, resource.TestCase{
+		PreCheck: func() {
+			common.TestAccPreCheck(t)
+			quotas.BookMany(t, backupInstanceQuotas())
+		},
 		ProviderFactories: common.TestAccProviderFactories,
 		CheckDestroy:      testAccCSBSBackupV1Destroy,
 		Steps: []resource.TestStep{

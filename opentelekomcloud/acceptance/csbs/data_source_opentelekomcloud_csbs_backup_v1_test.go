@@ -15,7 +15,7 @@ import (
 const dataBackupName = "data.opentelekomcloud_csbs_backup_v1.csbs"
 
 func TestAccCSBSBackupV1DataSource_basic(t *testing.T) {
-	resource.Test(t, resource.TestCase{
+	resource.ParallelTest(t, resource.TestCase{
 		PreCheck: func() {
 			common.TestAccPreCheck(t)
 			quotas.BookMany(t, backupInstanceQuotas().X(2))
