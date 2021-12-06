@@ -9,6 +9,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/css/v1/clusters"
+	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/acceptance/common/quotas"
 
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/acceptance/common"
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/acceptance/env"
@@ -21,8 +22,11 @@ func TestAccCssClusterV1_basic(t *testing.T) {
 	name := fmt.Sprintf("css-%s", acctest.RandString(10))
 	var cluster clusters.Cluster
 
-	resource.Test(t, resource.TestCase{
-		PreCheck:          func() { common.TestAccPreCheck(t) },
+	resource.ParallelTest(t, resource.TestCase{
+		PreCheck: func() {
+			common.TestAccPreCheck(t)
+			quotas.BookMany(t, sharedFlavorQuotas(t, 2, 40))
+		},
 		ProviderFactories: common.TestAccProviderFactories,
 		CheckDestroy:      testAccCheckCssClusterV1Destroy,
 		Steps: []resource.TestStep{
@@ -48,7 +52,7 @@ func TestAccCssClusterV1_basic(t *testing.T) {
 func TestAccCssClusterV1_validateDiskAndFlavor(t *testing.T) {
 	name := fmt.Sprintf("css-%s", acctest.RandString(10))
 
-	resource.Test(t, resource.TestCase{
+	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:          func() { common.TestAccPreCheck(t) },
 		ProviderFactories: common.TestAccProviderFactories,
 		Steps: []resource.TestStep{
@@ -80,11 +84,14 @@ func TestAccCssClusterV1_encrypted(t *testing.T) {
 	var cluster clusters.Cluster
 	name := fmt.Sprintf("css-%s", acctest.RandString(10))
 	if env.OS_KMS_ID == "" {
-		t.Skip("KMS key ID is not set")
+		t.Skip("OS_KMS_ID is not set")
 	}
 
-	resource.Test(t, resource.TestCase{
-		PreCheck:          func() { common.TestAccPreCheck(t) },
+	resource.ParallelTest(t, resource.TestCase{
+		PreCheck: func() {
+			common.TestAccPreCheck(t)
+			quotas.BookMany(t, sharedFlavorQuotas(t, 1, 40))
+		},
 		ProviderFactories: common.TestAccProviderFactories,
 		CheckDestroy:      testAccCheckCssClusterV1Destroy,
 		Steps: []resource.TestStep{
