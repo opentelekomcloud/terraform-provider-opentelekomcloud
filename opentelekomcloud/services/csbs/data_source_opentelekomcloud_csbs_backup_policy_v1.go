@@ -8,6 +8,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/csbs/v1/policies"
+	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common"
 
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common/cfg"
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common/fmterr"
@@ -155,25 +156,22 @@ func dataSourceCSBSBackupPolicyV1Read(_ context.Context, d *schema.ResourceData,
 	}
 
 	listOpts := policies.ListOpts{
-		ID:     d.Id(),
+		ID:     d.Get("id").(string),
 		Name:   d.Get("name").(string),
 		Status: d.Get("status").(string),
 	}
 
 	refinedPolicies, err := policies.List(policyClient, listOpts)
-
 	if err != nil {
 		return fmterr.Errorf("unable to retrieve backup policies: %s", err)
 	}
 
 	if len(refinedPolicies) < 1 {
-		return fmterr.Errorf("your query returned no results. " +
-			"Please change your search criteria and try again.")
+		return common.DataSourceTooFewDiag
 	}
 
 	if len(refinedPolicies) > 1 {
-		return fmterr.Errorf("your query returned more than one result." +
-			" Please try a more specific search criteria")
+		return common.DataSourceTooManyDiag
 	}
 
 	backupPolicy := refinedPolicies[0]
@@ -181,19 +179,6 @@ func dataSourceCSBSBackupPolicyV1Read(_ context.Context, d *schema.ResourceData,
 	log.Printf("[INFO] Retrieved backup policy %s using given filter", backupPolicy.ID)
 
 	d.SetId(backupPolicy.ID)
-
-	if err := d.Set("resource", flattenCSBSPolicyResources(backupPolicy)); err != nil {
-		return diag.FromErr(err)
-	}
-
-	if err := d.Set("scheduled_operation", flattenCSBSScheduledOperations(backupPolicy)); err != nil {
-		return diag.FromErr(err)
-	}
-
-	if err := d.Set("tags", flattenCSBSPolicyTags(backupPolicy)); err != nil {
-		return diag.FromErr(err)
-	}
-
 	mErr := multierror.Append(
 		d.Set("name", backupPolicy.Name),
 		d.Set("id", backupPolicy.ID),
@@ -202,6 +187,9 @@ func dataSourceCSBSBackupPolicyV1Read(_ context.Context, d *schema.ResourceData,
 		d.Set("description", backupPolicy.Description),
 		d.Set("provider_id", backupPolicy.ProviderId),
 		d.Set("region", config.GetRegion(d)),
+		d.Set("resource", flattenCSBSPolicyResources(backupPolicy)),
+		d.Set("scheduled_operation", flattenCSBSScheduledOperations(backupPolicy)),
+		d.Set("tags", flattenCSBSPolicyTags(backupPolicy)),
 	)
 
 	if err := mErr.ErrorOrNil(); err != nil {
