@@ -20,8 +20,11 @@ const resourcePolicyName = "opentelekomcloud_csbs_backup_policy_v1.backup_policy
 func TestAccCSBSBackupPolicyV1_basic(t *testing.T) {
 	var policy policies.BackupPolicy
 
-	resource.Test(t, resource.TestCase{
-		PreCheck:          func() { common.TestAccPreCheck(t) },
+	resource.ParallelTest(t, resource.TestCase{
+		PreCheck: func() {
+			common.TestAccPreCheck(t)
+			quotas.BookMany(t, policyInstanceQuotas())
+		},
 		ProviderFactories: common.TestAccProviderFactories,
 		CheckDestroy:      testAccCheckCSBSBackupPolicyV1Destroy,
 		Steps: []resource.TestStep{
@@ -44,11 +47,38 @@ func TestAccCSBSBackupPolicyV1_basic(t *testing.T) {
 	})
 }
 
+func TestAccCSBSBackupPolicyV1_importWeekMonth(t *testing.T) {
+	resource.ParallelTest(t, resource.TestCase{
+		PreCheck: func() {
+			common.TestAccPreCheck(t)
+			quotas.BookMany(t, policyInstanceQuotas())
+		},
+		ProviderFactories: common.TestAccProviderFactories,
+		CheckDestroy:      testAccCheckCSBSBackupPolicyV1Destroy,
+		Steps: []resource.TestStep{
+			{
+				Config: testAccCSBSBackupPolicyV1WeekMonth,
+			},
+			{
+				ResourceName:      resourcePolicyName,
+				ImportState:       true,
+				ImportStateVerify: true,
+				ImportStateVerifyIgnore: []string{
+					"scheduled_operation",
+				},
+			},
+		},
+	})
+}
+
 func TestAccCSBSBackupPolicyV1_timeout(t *testing.T) {
 	var policy policies.BackupPolicy
 
-	resource.Test(t, resource.TestCase{
-		PreCheck:          func() { common.TestAccPreCheck(t) },
+	resource.ParallelTest(t, resource.TestCase{
+		PreCheck: func() {
+			common.TestAccPreCheck(t)
+			quotas.BookMany(t, policyInstanceQuotas())
+		},
 		ProviderFactories: common.TestAccProviderFactories,
 		CheckDestroy:      testAccCheckCSBSBackupPolicyV1Destroy,
 		Steps: []resource.TestStep{
@@ -65,8 +95,11 @@ func TestAccCSBSBackupPolicyV1_timeout(t *testing.T) {
 func TestAccCSBSBackupPolicyV1_weekMonth(t *testing.T) {
 	var policy policies.BackupPolicy
 
-	resource.Test(t, resource.TestCase{
-		PreCheck:          func() { common.TestAccPreCheck(t) },
+	resource.ParallelTest(t, resource.TestCase{
+		PreCheck: func() {
+			common.TestAccPreCheck(t)
+			quotas.BookMany(t, policyInstanceQuotas())
+		},
 		ProviderFactories: common.TestAccProviderFactories,
 		CheckDestroy:      testAccCheckCSBSBackupPolicyV1Destroy,
 		Steps: []resource.TestStep{

@@ -15,7 +15,7 @@ import (
 const dataPolicyName = "data.opentelekomcloud_csbs_backup_policy_v1.csbs_policy"
 
 func TestAccCSBSBackupPolicyV1DataSource_basic(t *testing.T) {
-	resource.Test(t, resource.TestCase{
+	resource.ParallelTest(t, resource.TestCase{
 		PreCheck: func() {
 			common.TestAccPreCheck(t)
 			quotas.BookMany(t, policyInstanceQuotas().X(2))
