@@ -8,6 +8,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/csbs/v1/backup"
+	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common"
 
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common/cfg"
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common/fmterr"
@@ -210,7 +211,7 @@ func dataSourceCSBSBackupV1Read(_ context.Context, d *schema.ResourceData, meta 
 	}
 
 	listOpts := backup.ListOpts{
-		ID:           d.Id(),
+		ID:           d.Get("id").(string),
 		Name:         d.Get("backup_name").(string),
 		Status:       d.Get("status").(string),
 		ResourceName: d.Get("resource_name").(string),
@@ -221,22 +222,20 @@ func dataSourceCSBSBackupV1Read(_ context.Context, d *schema.ResourceData, meta 
 		VmIp:         d.Get("vm_ip").(string),
 	}
 
-	refinedbackups, err := backup.List(backupClient, listOpts)
+	refinedBackups, err := backup.List(backupClient, listOpts)
 	if err != nil {
 		return fmterr.Errorf("unable to retrieve backup: %s", err)
 	}
 
-	if len(refinedbackups) < 1 {
-		return fmterr.Errorf("your query returned no results. " +
-			"Please change your search criteria and try again.")
+	if len(refinedBackups) < 1 {
+		return common.DataSourceTooFewDiag
 	}
 
-	if len(refinedbackups) > 1 {
-		return fmterr.Errorf("your query returned more than one result." +
-			" Please try a more specific search criteria")
+	if len(refinedBackups) > 1 {
+		return common.DataSourceTooManyDiag
 	}
 
-	backupObject := refinedbackups[0]
+	backupObject := refinedBackups[0]
 	log.Printf("[INFO] Retrieved backup %s using given filter", backupObject.Id)
 
 	d.SetId(backupObject.Id)
@@ -255,13 +254,10 @@ func dataSourceCSBSBackupV1Read(_ context.Context, d *schema.ResourceData, meta 
 		d.Set("volume_backups", flattenCSBSVolumeBackups(&backupObject)),
 		d.Set("vm_metadata", flattenCSBSVMMetadata(&backupObject)),
 		d.Set("region", config.GetRegion(d)),
+		d.Set("tags", flattenCSBSTags(&backupObject)),
 	)
 
 	if err := mErr.ErrorOrNil(); err != nil {
-		return diag.FromErr(err)
-	}
-
-	if err := d.Set("tags", flattenCSBSTags(&backupObject)); err != nil {
 		return diag.FromErr(err)
 	}
 

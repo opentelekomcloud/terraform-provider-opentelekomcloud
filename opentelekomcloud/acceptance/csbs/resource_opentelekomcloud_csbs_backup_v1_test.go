@@ -6,6 +6,8 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
+	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/acceptance/common/quotas"
+	ecs "github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/acceptance/ecs"
 
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/csbs/v1/backup"
 
@@ -158,3 +160,13 @@ resource "opentelekomcloud_csbs_backup_v1" "csbs" {
   resource_type = "OS::Nova::Server"
 }
 `, common.DataSourceImage, common.DataSourceSubnet, env.OS_AVAILABILITY_ZONE, env.OsFlavorID)
+
+func backupInstanceQuotas() quotas.MultipleQuotas {
+	qts := ecs.QuotasForFlavor(env.OsFlavorID)
+	qts = append(qts,
+		&quotas.ExpectedQuota{Q: quotas.Server, Count: 1},
+		&quotas.ExpectedQuota{Q: quotas.Volume, Count: 1},
+		&quotas.ExpectedQuota{Q: quotas.VolumeSize, Count: 4},
+	)
+	return qts
+}

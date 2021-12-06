@@ -1,0 +1,6 @@
+---
+fixes:
+  - |
+    **[CSBS]** Fix not working search by ID in ``data_source/opentelekomcloud_csbs_backup_v1`` and
+    ``data_source/opentelekomcloud_csbs_backup_policy_v1``
+    (`#1576 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/1576>`_)

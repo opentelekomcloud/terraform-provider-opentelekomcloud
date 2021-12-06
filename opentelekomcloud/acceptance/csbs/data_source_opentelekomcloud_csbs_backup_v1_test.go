@@ -6,6 +6,7 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
+	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/acceptance/common/quotas"
 
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/acceptance/common"
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/acceptance/env"
@@ -15,7 +16,10 @@ const dataBackupName = "data.opentelekomcloud_csbs_backup_v1.csbs"
 
 func TestAccCSBSBackupV1DataSource_basic(t *testing.T) {
 	resource.Test(t, resource.TestCase{
-		PreCheck:          func() { common.TestAccPreCheck(t) },
+		PreCheck: func() {
+			common.TestAccPreCheck(t)
+			quotas.BookMany(t, backupInstanceQuotas().X(2))
+		},
 		ProviderFactories: common.TestAccProviderFactories,
 		Steps: []resource.TestStep{
 			{
@@ -55,7 +59,6 @@ resource "opentelekomcloud_compute_instance_v2" "instance_1" {
   image_id          = data.opentelekomcloud_images_image_v2.latest_image.id
   security_groups   = ["default"]
   availability_zone = "%s"
-  flavor_id         = "%s"
   metadata = {
     foo = "bar"
   }
@@ -63,13 +66,35 @@ resource "opentelekomcloud_compute_instance_v2" "instance_1" {
     uuid = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.network_id
   }
 }
+
+resource "opentelekomcloud_compute_instance_v2" "instance_2" {
+  name              = "instance_2"
+  image_id          = data.opentelekomcloud_images_image_v2.latest_image.id
+  security_groups   = ["default"]
+  availability_zone = "%[3]s"
+  metadata = {
+    foo = "bar"
+  }
+  network {
+    uuid = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.network_id
+  }
+}
+
 resource "opentelekomcloud_csbs_backup_v1" "csbs" {
   backup_name   = "csbs-test"
   description   = "test-code"
   resource_id   = opentelekomcloud_compute_instance_v2.instance_1.id
   resource_type = "OS::Nova::Server"
 }
+
+resource "opentelekomcloud_csbs_backup_v1" "csbs_2" {
+  backup_name   = "csbs-test2"
+  description   = "test-code"
+  resource_id   = opentelekomcloud_compute_instance_v2.instance_2.id
+  resource_type = "OS::Nova::Server"
+}
+
 data "opentelekomcloud_csbs_backup_v1" "csbs" {
   id = opentelekomcloud_csbs_backup_v1.csbs.id
 }
-`, common.DataSourceImage, common.DataSourceSubnet, env.OS_AVAILABILITY_ZONE, env.OsFlavorID)
+`, common.DataSourceImage, common.DataSourceSubnet, env.OS_AVAILABILITY_ZONE)

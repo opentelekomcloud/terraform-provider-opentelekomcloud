@@ -6,6 +6,7 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
+	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/acceptance/common/quotas"
 
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/acceptance/common"
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/acceptance/env"
@@ -15,7 +16,10 @@ const dataPolicyName = "data.opentelekomcloud_csbs_backup_policy_v1.csbs_policy"
 
 func TestAccCSBSBackupPolicyV1DataSource_basic(t *testing.T) {
 	resource.Test(t, resource.TestCase{
-		PreCheck:          func() { common.TestAccPreCheck(t) },
+		PreCheck: func() {
+			common.TestAccPreCheck(t)
+			quotas.BookMany(t, policyInstanceQuotas().X(2))
+		},
 		ProviderFactories: common.TestAccProviderFactories,
 		Steps: []resource.TestStep{
 			{
@@ -55,10 +59,16 @@ resource "opentelekomcloud_compute_instance_v2" "instance_1" {
   image_id          = data.opentelekomcloud_images_image_v2.latest_image.id
   security_groups   = ["default"]
   availability_zone = "%s"
-  flavor_id         = "%s"
-  metadata          = {
-    foo = "bar"
+  network {
+    uuid = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.network_id
   }
+}
+
+resource "opentelekomcloud_compute_instance_v2" "instance_2" {
+  name              = "instance_2"
+  image_id          = data.opentelekomcloud_images_image_v2.latest_image.id
+  security_groups   = ["default"]
+  availability_zone = "%[3]s"
   network {
     uuid = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.network_id
   }
@@ -80,7 +90,23 @@ resource "opentelekomcloud_csbs_backup_policy_v1" "backup_policy_v1" {
   }
 }
 
+resource "opentelekomcloud_csbs_backup_policy_v1" "backup_policy_v1_2" {
+  name = "backup-policy2"
+  resource {
+    id   = opentelekomcloud_compute_instance_v2.instance_2.id
+    type = "OS::Nova::Server"
+    name = "resource5"
+  }
+  scheduled_operation {
+    name            = "mybackup"
+    enabled         = true
+    operation_type  = "backup"
+    max_backups     = "2"
+    trigger_pattern = "BEGIN:VCALENDAR\r\nBEGIN:VEVENT\r\nRRULE:FREQ=WEEKLY;BYDAY=TH;BYHOUR=12;BYMINUTE=27\r\nEND:VEVENT\r\nEND:VCALENDAR\r\n"
+  }
+}
+
 data "opentelekomcloud_csbs_backup_policy_v1" "csbs_policy" {
   id = opentelekomcloud_csbs_backup_policy_v1.backup_policy_v1.id
 }
-`, common.DataSourceImage, common.DataSourceSubnet, env.OS_AVAILABILITY_ZONE, env.OsFlavorID)
+`, common.DataSourceImage, common.DataSourceSubnet, env.OS_AVAILABILITY_ZONE)

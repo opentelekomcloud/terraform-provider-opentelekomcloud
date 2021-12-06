@@ -7,6 +7,8 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/csbs/v1/policies"
+	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/acceptance/common/quotas"
+	ecs "github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/acceptance/ecs"
 
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/acceptance/common"
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/acceptance/env"
@@ -287,3 +289,14 @@ resource "opentelekomcloud_csbs_backup_policy_v1" "backup_policy_v1" {
   }
 }
 `, common.DataSourceImage, common.DataSourceSubnet, env.OS_AVAILABILITY_ZONE, env.OsFlavorID)
+
+func policyInstanceQuotas() quotas.MultipleQuotas {
+	qts := ecs.QuotasForFlavor(env.OsFlavorID)
+	qts = append(qts,
+		&quotas.ExpectedQuota{Q: quotas.Server, Count: 1},
+		&quotas.ExpectedQuota{Q: quotas.Volume, Count: 1},
+		&quotas.ExpectedQuota{Q: quotas.VolumeSize, Count: 4},
+		&quotas.ExpectedQuota{Q: quotas.CBRPolicy, Count: 1}, // the quota is shared with CBR service
+	)
+	return qts
+}
