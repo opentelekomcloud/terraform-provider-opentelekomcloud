@@ -7,31 +7,43 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/cloudeyeservice/alarmrule"
+	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/acceptance/common/quotas"
+	ecs "github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/acceptance/ecs"
 
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/acceptance/common"
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/acceptance/env"
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common/cfg"
 )
 
+const resourceAlarmRuleName = "opentelekomcloud_ces_alarmrule.alarmrule_1"
+
 func TestCESAlarmRule_basic(t *testing.T) {
 	var ar alarmrule.AlarmRule
-	resourceName := "opentelekomcloud_ces_alarmrule.alarmrule_1"
 
-	resource.Test(t, resource.TestCase{
-		PreCheck:          func() { common.TestAccPreCheck(t) },
+	resource.ParallelTest(t, resource.TestCase{
+		PreCheck: func() {
+			common.TestAccPreCheck(t)
+			qts := ecs.QuotasForFlavor(env.OsFlavorID)
+			qts = append(qts,
+				&quotas.ExpectedQuota{Q: quotas.Server, Count: 1},
+				&quotas.ExpectedQuota{Q: quotas.Volume, Count: 1},
+				&quotas.ExpectedQuota{Q: quotas.VolumeSize, Count: 4},
+			)
+			quotas.BookMany(t, qts)
+		},
 		ProviderFactories: common.TestAccProviderFactories,
 		CheckDestroy:      testCESAlarmRuleDestroy,
 		Steps: []resource.TestStep{
 			{
 				Config: testCESAlarmRuleBasic,
 				Check: resource.ComposeTestCheckFunc(
-					testCESAlarmRuleExists(resourceName, &ar),
+					testCESAlarmRuleExists(resourceAlarmRuleName, &ar),
 				),
 			},
 			{
 				Config: testCESAlarmRuleUpdate,
 				Check: resource.ComposeTestCheckFunc(
-					resource.TestCheckResourceAttr(resourceName, "alarm_enabled", "false"),
+					resource.TestCheckResourceAttr(resourceAlarmRuleName, "alarm_enabled", "false"),
 				),
 			},
 		},
@@ -100,7 +112,7 @@ resource "opentelekomcloud_compute_instance_v2" "vm_1" {
 }
 
 resource "opentelekomcloud_smn_topic_v2" "topic_1" {
-  name		   = "topic_1"
+  name         = "topic_1"
   display_name = "The display name of topic_1"
 }
 
@@ -111,11 +123,11 @@ resource "opentelekomcloud_ces_alarmrule" "alarmrule_1" {
     namespace   = "SYS.ECS"
     metric_name = "network_outgoing_bytes_rate_inband"
     dimensions {
-        name  = "instance_id"
-        value = opentelekomcloud_compute_instance_v2.vm_1.id
+      name  = "instance_id"
+      value = opentelekomcloud_compute_instance_v2.vm_1.id
     }
   }
-  condition  {
+  condition {
     period              = 300
     filter              = "average"
     comparison_operator = ">"
@@ -145,7 +157,7 @@ resource "opentelekomcloud_compute_instance_v2" "vm_1" {
 }
 
 resource "opentelekomcloud_smn_topic_v2" "topic_1" {
-  name		   = "topic_1"
+  name         = "topic_1"
   display_name = "The display name of topic_1"
 }
 
@@ -156,11 +168,11 @@ resource "opentelekomcloud_ces_alarmrule" "alarmrule_1" {
     namespace   = "SYS.ECS"
     metric_name = "network_outgoing_bytes_rate_inband"
     dimensions {
-        name  = "instance_id"
-        value = opentelekomcloud_compute_instance_v2.vm_1.id
+      name  = "instance_id"
+      value = opentelekomcloud_compute_instance_v2.vm_1.id
     }
   }
-  condition  {
+  condition {
     period              = 300
     filter              = "average"
     comparison_operator = ">"
