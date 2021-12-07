@@ -16,6 +16,11 @@ import (
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common/cfg"
 )
 
+const (
+	resourceCertificateName   = "opentelekomcloud_lb_certificate_v2.certificate_1"
+	resourceCertificateCAName = "opentelekomcloud_lb_certificate_v2.certificate_ca"
+)
+
 func TestAccLBV2Certificate_basic(t *testing.T) {
 	var c certificates.Certificate
 
@@ -30,28 +35,48 @@ func TestAccLBV2Certificate_basic(t *testing.T) {
 			{
 				Config: testAccLBV2CertificateConfigBasic,
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckLBV2CertificateExists("opentelekomcloud_lb_certificate_v2.certificate_1", &c),
+					testAccCheckLBV2CertificateExists(resourceCertificateName, &c),
+					resource.TestCheckResourceAttrSet(resourceCertificateName, "expire_time"),
 				),
 			},
 			{
 				Config: testAccLBV2ClientCertificateConfigBasic,
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckLBV2CertificateExists("opentelekomcloud_lb_certificate_v2.certificate_ca", &c),
+					testAccCheckLBV2CertificateExists(resourceCertificateCAName, &c),
 				),
 			},
 			{
 				Config: testAccLBV2CertificateConfigUpdate,
 				Check: resource.ComposeTestCheckFunc(
-					resource.TestCheckResourceAttr(
-						"opentelekomcloud_lb_certificate_v2.certificate_1", "name", "certificate_1_updated"),
+					resource.TestCheckResourceAttr(resourceCertificateName, "name", "certificate_1_updated"),
 				),
 			},
 			{
 				Config: testAccLBV2ClientCertificateConfigUpdate,
 				Check: resource.ComposeTestCheckFunc(
-					resource.TestCheckResourceAttr(
-						"opentelekomcloud_lb_certificate_v2.certificate_ca", "name", "certificate_client_updated"),
+					resource.TestCheckResourceAttr(resourceCertificateCAName, "name", "certificate_client_updated"),
 				),
+			},
+		},
+	})
+}
+
+func TestAccLBV2Certificate_import(t *testing.T) {
+	resource.ParallelTest(t, resource.TestCase{
+		PreCheck: func() {
+			common.TestAccPreCheck(t)
+			quotas.BookOne(t, quotas.LbCertificate)
+		},
+		ProviderFactories: common.TestAccProviderFactories,
+		CheckDestroy:      testAccCheckLBV2CertificateDestroy,
+		Steps: []resource.TestStep{
+			{
+				Config: testAccLBV2CertificateConfigBasic,
+			},
+			{
+				ResourceName:      resourceCertificateName,
+				ImportState:       true,
+				ImportStateVerify: true,
 			},
 		},
 	})
@@ -171,11 +196,6 @@ i1YhgnQbn5E0hz55OLu5jvOkKQjPCW+8Kg==
 -----END CERTIFICATE-----
 EOT
 
-  timeouts {
-    create = "5m"
-    update = "5m"
-    delete = "5m"
-  }
 }
 `
 
@@ -209,11 +229,6 @@ i1YhgnQbn5E0hz55OLu5jvOkKQjPCW+9Aa==
 -----END CERTIFICATE-----
 EOT
 
-  timeouts {
-    create = "5m"
-    update = "5m"
-    delete = "5m"
-  }
 }
 `
 
@@ -277,11 +292,6 @@ i1YhgnQbn5E0hz55OLu5jvOkKQjPCW+9Aa==
 -----END CERTIFICATE-----
 EOT
 
-  timeouts {
-    create = "5m"
-    update = "5m"
-    delete = "5m"
-  }
 }
 `
 
@@ -315,10 +325,5 @@ i1YhgnQbn5E0hz55OLu5jvOkKQjPCW+9Aa==
 -----END CERTIFICATE-----
 EOT
 
-  timeouts {
-    create = "5m"
-    update = "5m"
-    delete = "5m"
-  }
 }
 `

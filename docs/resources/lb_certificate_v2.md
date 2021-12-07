@@ -88,7 +88,7 @@ The following arguments are supported:
 * `domain` - (Optional) The domain of the Certificate.
 
 * `private_key` - (Optional) The private encrypted key of the Certificate, PEM format.
-  Required for certifcates of type `server`.
+  Required for certificates of type `server`.
 
 * `certificate` - (Required) The public encrypted key of the Certificate, PEM format.
 
@@ -117,9 +117,19 @@ The following attributes are exported:
 
 * `create_time` - Indicates the creation time.
 
+* `expire_time` - Indicates certificate expiration time.
+
 ## Timeouts
 
-This resource provides the following timeouts configuration options:
+This resource provides the following timeout configuration options:
 - `create` - Default is 10 minutes.
 - `update` - Default is 10 minutes.
 - `delete` - Default is 5 minutes.
+
+## Import
+
+Certificates can be imported using the `id`, e.g.
+
+```shell
+terraform import opentelekomcloud_lb_certificate_v2.certificate_1 7117d38e-4c8f-4624-a505-bd96b97d024c
+```

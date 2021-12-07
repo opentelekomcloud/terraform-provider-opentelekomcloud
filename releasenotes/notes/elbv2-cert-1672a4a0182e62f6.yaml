@@ -1,0 +1,8 @@
+---
+enhancements:
+  - |
+    **[ELB]** Allow import of ``resource/opentelekomcloud_lb_certificate_v2``
+    (`#1580 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/1580>`_)
+  - |
+    **[ELB]** Add ``expire_time`` attribute to ``resource/opentelekomcloud_lb_certificate_v2``
+    (`#1580 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/1580>`_)
