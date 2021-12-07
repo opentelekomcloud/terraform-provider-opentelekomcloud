@@ -33,6 +33,10 @@ func ResourceCertificateV2() *schema.Resource {
 			Delete: schema.DefaultTimeout(5 * time.Minute),
 		},
 
+		Importer: &schema.ResourceImporter{
+			StateContext: schema.ImportStatePassthroughContext,
+		},
+
 		Schema: map[string]*schema.Schema{
 			"region": {
 				Type:     schema.TypeString,
@@ -83,6 +87,11 @@ func ResourceCertificateV2() *schema.Resource {
 			},
 
 			"create_time": {
+				Type:     schema.TypeString,
+				Computed: true,
+			},
+
+			"expire_time": {
 				Type:     schema.TypeString,
 				Computed: true,
 			},
@@ -140,9 +149,15 @@ func resourceCertificateV2Read(_ context.Context, d *schema.ResourceData, meta i
 		d.Set("type", c.Type),
 		d.Set("create_time", c.CreateTime),
 		d.Set("update_time", c.UpdateTime),
+		d.Set("expire_time", c.ExpireTime),
 		d.Set("region", config.GetRegion(d)),
 	)
-	return diag.FromErr(mErr.ErrorOrNil())
+
+	if err := mErr.ErrorOrNil(); err != nil {
+		return fmterr.Errorf("error setting certificate v2 fields: %w", err)
+	}
+
+	return nil
 }
 
 func resourceCertificateV2Update(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
