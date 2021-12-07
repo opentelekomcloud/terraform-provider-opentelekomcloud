@@ -7,21 +7,21 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/acctest"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
-	acc "github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/acceptance/common"
+	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/acceptance/common"
+	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/acceptance/common/quotas"
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/acceptance/env"
 )
 
 func TestResourceCSSSnapshotConfigurationV1_basic(t *testing.T) {
-	if osAgency == "" {
-		t.Skip("OS_AGENCY is required for the test")
-	}
-
 	name := fmt.Sprintf("css-%s", acctest.RandString(10))
 	resourceName := "opentelekomcloud_css_snapshot_configuration_v1.config"
 
-	resource.Test(t, resource.TestCase{
-		PreCheck:          func() { acc.TestAccPreCheck(t) },
-		ProviderFactories: acc.TestAccProviderFactories,
+	resource.ParallelTest(t, resource.TestCase{
+		PreCheck: func() {
+			common.TestAccPreCheck(t)
+			quotas.BookMany(t, sharedFlavorQuotas(t, 1, 100))
+		},
+		ProviderFactories: common.TestAccProviderFactories,
 		CheckDestroy:      testAccCheckCssClusterV1Destroy,
 		Steps: []resource.TestStep{
 			{
@@ -42,7 +42,15 @@ func TestResourceCSSSnapshotConfigurationV1_basic(t *testing.T) {
 	})
 }
 
-var osAgency = os.Getenv("OS_AGENCY")
+func getOsAgency() string {
+	agency := os.Getenv("OS_CSS_OBS_AGENCY")
+	if agency == "" {
+		agency = "css_obs_agency"
+	}
+	return agency
+}
+
+var osAgency = getOsAgency()
 
 func testResourceCSSSnapshotConfigurationV1Basic(name string) string {
 	return fmt.Sprintf(`
@@ -66,6 +74,9 @@ resource "opentelekomcloud_css_cluster_v1" "cluster" {
     }
 
     availability_zone = "%s"
+  }
+  datastore {
+    version = "7.6.2"
   }
 
   enable_https     = true
@@ -92,7 +103,7 @@ resource "opentelekomcloud_css_snapshot_configuration_v1" "config" {
     delete_auto = true
   }
 }
-`, acc.DataSourceSecGroupDefault, acc.DataSourceSubnet, name, env.OS_AVAILABILITY_ZONE, osAgency)
+`, common.DataSourceSecGroupDefault, common.DataSourceSubnet, name, env.OS_AVAILABILITY_ZONE, osAgency)
 }
 
 func testResourceCSSSnapshotConfigurationV1Updated(name string) string {
@@ -116,6 +127,9 @@ resource "opentelekomcloud_css_cluster_v1" "cluster" {
     }
 
     availability_zone = "%s"
+  }
+  datastore {
+    version = "7.6.2"
   }
 
   enable_https     = true
@@ -142,5 +156,5 @@ resource "opentelekomcloud_css_snapshot_configuration_v1" "config" {
     delete_auto = true
   }
 }
-`, acc.DataSourceSecGroupDefault, acc.DataSourceSubnet, name, env.OS_AVAILABILITY_ZONE, osAgency)
+`, common.DataSourceSecGroupDefault, common.DataSourceSubnet, name, env.OS_AVAILABILITY_ZONE, osAgency)
 }

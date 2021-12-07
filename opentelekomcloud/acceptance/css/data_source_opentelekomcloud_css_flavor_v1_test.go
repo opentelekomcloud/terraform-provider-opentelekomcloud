@@ -13,7 +13,7 @@ import (
 const dataFlavorName = "data.opentelekomcloud_css_flavor_v1.flavor"
 
 func TestAccCSSFlavorV1DataSource_basic(t *testing.T) {
-	resource.Test(t, resource.TestCase{
+	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:          func() { common.TestAccPreCheck(t) },
 		ProviderFactories: common.TestAccProviderFactories,
 		Steps: []resource.TestStep{
@@ -32,7 +32,7 @@ func TestAccCSSFlavorV1DataSource_basic(t *testing.T) {
 }
 
 func TestAccCSSFlavorV1DataSource_byName(t *testing.T) {
-	resource.Test(t, resource.TestCase{
+	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:          func() { common.TestAccPreCheck(t) },
 		ProviderFactories: common.TestAccProviderFactories,
 		Steps: []resource.TestStep{
