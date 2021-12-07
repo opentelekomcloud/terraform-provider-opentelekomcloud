@@ -21,7 +21,7 @@ func TestAccDcsInstancesV1_basic(t *testing.T) {
 	var instance instances.Instance
 	var instanceName = fmt.Sprintf("dcs_instance_%s", acctest.RandString(5))
 
-	resource.Test(t, resource.TestCase{
+	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:          func() { common.TestAccPreCheck(t) },
 		ProviderFactories: common.TestAccProviderFactories,
 		CheckDestroy:      testAccCheckDcsV1InstanceDestroy,
@@ -50,7 +50,7 @@ func TestAccDcsInstancesV1_basicSingleInstance(t *testing.T) {
 	var instance instances.Instance
 	var instanceName = fmt.Sprintf("dcs_instance_%s", acctest.RandString(5))
 
-	resource.Test(t, resource.TestCase{
+	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:          func() { common.TestAccPreCheck(t) },
 		ProviderFactories: common.TestAccProviderFactories,
 		CheckDestroy:      testAccCheckDcsV1InstanceDestroy,

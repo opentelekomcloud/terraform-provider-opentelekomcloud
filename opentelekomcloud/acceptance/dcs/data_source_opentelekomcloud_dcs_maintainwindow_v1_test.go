@@ -13,7 +13,7 @@ import (
 const dataMaintainWindowName = "data.opentelekomcloud_dcs_maintainwindow_v1.maintainwindow1"
 
 func TestAccDcsMaintainWindowV1DataSource_basic(t *testing.T) {
-	resource.Test(t, resource.TestCase{
+	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:          func() { common.TestAccPreCheck(t) },
 		ProviderFactories: common.TestAccProviderFactories,
 		Steps: []resource.TestStep{
