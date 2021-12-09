@@ -131,6 +131,10 @@ func TestAccEcsV1InstanceEncryption(t *testing.T) {
 	t.Parallel()
 	quotas.BookMany(t, qts)
 
+	if env.OS_KMS_ID == "" {
+		t.Skip("OS_KMS_ID is not set")
+	}
+
 	resource.Test(t, resource.TestCase{
 		PreCheck:          func() { common.TestAccPreCheck(t) },
 		ProviderFactories: common.TestAccProviderFactories,
