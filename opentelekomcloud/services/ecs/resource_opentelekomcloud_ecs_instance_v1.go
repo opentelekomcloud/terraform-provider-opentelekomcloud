@@ -127,10 +127,9 @@ func ResourceEcsInstanceV1() *schema.Resource {
 				Computed: true,
 			},
 			"system_disk_kms_id": {
-				Type:        schema.TypeString,
-				Optional:    true,
-				ForceNew:    true,
-				DefaultFunc: schema.EnvDefaultFunc("OS_KMS_ID", nil),
+				Type:     schema.TypeString,
+				Optional: true,
+				ForceNew: true,
 			},
 			"data_disks": {
 				Type:     schema.TypeList,
