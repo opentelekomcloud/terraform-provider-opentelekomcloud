@@ -438,15 +438,15 @@ resource "opentelekomcloud_ecs_instance_v1" "instance_1" {
     network_id = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.network_id
   }
 
-  password               = "Password@123"
-  availability_zone      = "%[3]s"
-  auto_recovery          = true
-  system_disk_encryption = ""
+  password           = "Password@123"
+  availability_zone  = "%s"
+  auto_recovery      = true
+  system_disk_kms_id = "%[4]s"
 
   data_disks {
     size   = 10
     type   = "SAS"
-    kms_id = "%[3]s"
+    kms_id = "%[4]s"
   }
   delete_disks_on_termination = true
 }
