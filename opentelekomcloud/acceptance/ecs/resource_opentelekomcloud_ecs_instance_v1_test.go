@@ -131,6 +131,10 @@ func TestAccEcsV1InstanceEncryption(t *testing.T) {
 	t.Parallel()
 	quotas.BookMany(t, qts)
 
+	if env.OS_KMS_ID == "" {
+		t.Skip("OS_KMS_ID is not set")
+	}
+
 	resource.Test(t, resource.TestCase{
 		PreCheck:          func() { common.TestAccPreCheck(t) },
 		ProviderFactories: common.TestAccProviderFactories,
@@ -141,6 +145,7 @@ func TestAccEcsV1InstanceEncryption(t *testing.T) {
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckEcsV1InstanceExists(resourceInstanceV1Name, &instance),
 					resource.TestCheckResourceAttr(resourceInstanceV1Name, "data_disks.0.kms_id", env.OS_KMS_ID),
+					resource.TestCheckResourceAttr(resourceInstanceV1Name, "system_disk_kms_id", env.OS_KMS_ID),
 				),
 			},
 		},
@@ -437,14 +442,15 @@ resource "opentelekomcloud_ecs_instance_v1" "instance_1" {
     network_id = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.network_id
   }
 
-  password          = "Password@123"
-  availability_zone = "%s"
-  auto_recovery     = true
+  password           = "Password@123"
+  availability_zone  = "%s"
+  auto_recovery      = true
+  system_disk_kms_id = "%[4]s"
 
   data_disks {
     size   = 10
     type   = "SAS"
-    kms_id = "%s"
+    kms_id = "%[4]s"
   }
   delete_disks_on_termination = true
 }

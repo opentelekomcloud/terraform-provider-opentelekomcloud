@@ -126,6 +126,11 @@ func ResourceEcsInstanceV1() *schema.Resource {
 				ForceNew: true,
 				Computed: true,
 			},
+			"system_disk_kms_id": {
+				Type:     schema.TypeString,
+				Optional: true,
+				ForceNew: true,
+			},
 			"data_disks": {
 				Type:     schema.TypeList,
 				Optional: true,
@@ -288,6 +293,7 @@ func resourceEcsInstanceV1Read(ctx context.Context, d *schema.ResourceData, meta
 			mErr = multierror.Append(mErr,
 				d.Set("system_disk_size", disk.Size),
 				d.Set("system_disk_type", disk.VolumeType),
+				d.Set("system_disk_kms_id", disk.Metadata["__system__cmkid"]),
 			)
 			continue
 		}
@@ -511,6 +517,12 @@ func resourceInstanceRootVolumeV1(d *schema.ResourceData) cloudservers.RootVolum
 	volRequest := cloudservers.RootVolume{
 		VolumeType: diskType,
 		Size:       d.Get("system_disk_size").(int),
+	}
+	if kmsID := d.Get("system_disk_kms_id").(string); kmsID != "" {
+		volRequest.Metadata = map[string]interface{}{
+			"__system__cmkid":     kmsID,
+			"__system__encrypted": "1",
+		}
 	}
 	return volRequest
 }

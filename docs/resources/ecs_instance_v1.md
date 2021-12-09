@@ -204,6 +204,9 @@ The following arguments are supported:
   instance. The `data_disks` object structure is documented below. Changing this
   creates a new server.
 
+* `system_disk_kms_id` - (Optional) The Encryption KMS ID of the system disk. Changing this
+  creates a new server.
+
 * `security_groups` - (Optional) An array of one or more security group IDs
   to associate with the server. If this parameter is left blank, the `default`
   security group is bound to the ECS by default.
@@ -238,7 +241,8 @@ The `data_disks` block supports:
 * `size` - (Required) The size of the data disk in GB. The value range is 10 to 32768.
   Changing this creates a new server.
 
-* `kms_id` - (Optional) The Encryption KMS ID of the data disk.
+* `kms_id` - (Optional) The Encryption KMS ID of the data disk. Changing this
+  creates a new server.
 
 * `snapshot_id` - (Optional) Specifies the snapshot ID or ID of the original data disk contained in the full-ECS image.
   Changing this creates a new server.
