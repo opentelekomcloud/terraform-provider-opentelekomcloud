@@ -109,7 +109,7 @@ func testAccCheckIdentityRoleV3Exists(s *terraform.State) error {
 		&golangsdk.RequestOpts{MoreHeaders: map[string]string{"Content-Type": "application/json"}})
 	if err != nil {
 		if _, ok := err.(golangsdk.ErrDefault404); ok {
-			return fmt.Errorf("opentelekomcloud_identity_role_v3.role is not exist")
+			return fmt.Errorf("opentelekomcloud_identity_role_v3.role does not exist")
 		}
 		return fmt.Errorf("error checking opentelekomcloud_identity_role_v3.role exist, err=send request failed: %s", err)
 	}

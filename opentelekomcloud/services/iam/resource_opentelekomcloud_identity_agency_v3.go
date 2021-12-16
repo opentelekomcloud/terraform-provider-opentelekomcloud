@@ -339,7 +339,7 @@ func resourceIdentityAgencyV3Create(ctx context.Context, d *schema.ResourceData,
 		pn := pr["project"].(string)
 		pid, ok := projects[pn]
 		if !ok {
-			return fmterr.Errorf("the project(%s) is not exist", pn)
+			return fmterr.Errorf("the project(%s) does not exist", pn)
 		}
 
 		rs := pr["roles"].(*schema.Set)
@@ -347,7 +347,7 @@ func resourceIdentityAgencyV3Create(ctx context.Context, d *schema.ResourceData,
 			r := role.(string)
 			rid, ok := roles[r]
 			if !ok {
-				return fmterr.Errorf("the role(%s) is not exist", r)
+				return fmterr.Errorf("the role(%s) does not exist", r)
 			}
 
 			err = agency.AttachRoleByProject(client, agencyID, pid, rid).ExtractErr()
@@ -362,7 +362,7 @@ func resourceIdentityAgencyV3Create(ctx context.Context, d *schema.ResourceData,
 		r := role.(string)
 		rid, ok := roles[r]
 		if !ok {
-			return fmterr.Errorf("the role(%s) is not exist", r)
+			return fmterr.Errorf("the role(%s) does not exist", r)
 		}
 
 		err = agency.AttachRoleByDomain(client, agencyID, domainID, rid).ExtractErr()
@@ -500,11 +500,11 @@ func resourceIdentityAgencyV3Update(ctx context.Context, d *schema.ResourceData,
 			pr := strings.Split(v, "|")
 			pid, ok := projects[pr[0]]
 			if !ok {
-				return fmterr.Errorf("the project(%s) is not exist", pr[0])
+				return fmterr.Errorf("the project(%s) does not exist", pr[0])
 			}
 			rid, ok := roles[pr[1]]
 			if !ok {
-				return fmterr.Errorf("the role(%s) is not exist", pr[1])
+				return fmterr.Errorf("the role(%s) does not exist", pr[1])
 			}
 
 			err = agency.DetachRoleByProject(client, aID, pid, rid).ExtractErr()
@@ -518,11 +518,11 @@ func resourceIdentityAgencyV3Update(ctx context.Context, d *schema.ResourceData,
 			pr := strings.Split(v, "|")
 			pid, ok := projects[pr[0]]
 			if !ok {
-				return fmterr.Errorf("the project(%s) is not exist", pr[0])
+				return fmterr.Errorf("the project(%s) does not exist", pr[0])
 			}
 			rid, ok := roles[pr[1]]
 			if !ok {
-				return fmterr.Errorf("the role(%s) is not exist", pr[1])
+				return fmterr.Errorf("the role(%s) does not exist", pr[1])
 			}
 
 			err = agency.AttachRoleByProject(client, aID, pid, rid).ExtractErr()
@@ -541,7 +541,7 @@ func resourceIdentityAgencyV3Update(ctx context.Context, d *schema.ResourceData,
 		for _, r := range oldr.Difference(newr).List() {
 			rid, ok := roles[r.(string)]
 			if !ok {
-				return fmterr.Errorf("the role(%s) is not exist", r.(string))
+				return fmterr.Errorf("the role(%s) does not exist", r.(string))
 			}
 
 			err = agency.DetachRoleByDomain(client, aID, domainID, rid).ExtractErr()
@@ -554,7 +554,7 @@ func resourceIdentityAgencyV3Update(ctx context.Context, d *schema.ResourceData,
 		for _, r := range newr.Difference(oldr).List() {
 			rid, ok := roles[r.(string)]
 			if !ok {
-				return fmterr.Errorf("the role(%s) is not exist", r.(string))
+				return fmterr.Errorf("the role(%s) does not exist", r.(string))
 			}
 
 			err = agency.AttachRoleByDomain(client, aID, domainID, rid).ExtractErr()
