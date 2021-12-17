@@ -7,11 +7,10 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
-	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/acceptance/common/quotas"
-
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/ecs/v1/cloudservers"
-
+	th "github.com/opentelekomcloud/gophertelekomcloud/testhelper"
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/acceptance/common"
+	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/acceptance/common/quotas"
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/acceptance/env"
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common/cfg"
 )
@@ -51,6 +50,48 @@ func TestAccEcsV1InstanceBasic(t *testing.T) {
 			},
 		},
 	})
+}
+func TestAccEcsV1InstanceDeleted(t *testing.T) {
+	var instance cloudservers.CloudServer
+	qts := serverQuotas(10+4, "s2.medium.1")
+	t.Parallel()
+	quotas.BookMany(t, qts)
+
+	resource.Test(t, resource.TestCase{
+		PreCheck:          func() { common.TestAccPreCheck(t) },
+		ProviderFactories: common.TestAccProviderFactories,
+		CheckDestroy:      testAccCheckEcsV1InstanceDestroy,
+		Steps: []resource.TestStep{
+			{
+				Config: testAccEcsV1InstanceBasic,
+				Check:  testAccCheckEcsV1InstanceExists(resourceInstanceV1Name, &instance),
+			},
+			{
+				PreConfig: func() {
+					testAccEcsV1InstanceDeleted(t, instance.ID)
+				},
+				Config: testAccEcsV1InstanceBasic,
+			},
+		},
+	})
+}
+
+func testAccEcsV1InstanceDeleted(t *testing.T, id string) {
+	config := common.TestAccProvider.Meta().(*cfg.Config)
+	client, err := config.ComputeV1Client(env.OS_REGION_NAME)
+	th.AssertNoErr(t, err)
+
+	serverRequests := []cloudservers.Server{{Id: id}}
+
+	deleteOpts := cloudservers.DeleteOpts{
+		Servers:      serverRequests,
+		DeleteVolume: true,
+	}
+
+	jobResponse, err := cloudservers.Delete(client, deleteOpts).ExtractJobResponse()
+	th.AssertNoErr(t, err)
+
+	th.AssertNoErr(t, cloudservers.WaitForJobSuccess(client, 120, jobResponse.JobID))
 }
 
 func TestAccEcsV1Instance_import(t *testing.T) {
