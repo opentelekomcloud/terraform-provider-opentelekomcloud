@@ -133,7 +133,7 @@ func resourceKmsGrantV1Read(_ context.Context, d *schema.ResourceData, meta inte
 		d.Set("name", createdGrant.Name),
 		d.Set("retiring_principal", createdGrant.RetiringPrincipal),
 		d.Set("creation_date", createdGrant.CreationDate),
-		d.Set("creation_date", createdGrant.IssuingPrincipal),
+		d.Set("issuing_principal", createdGrant.IssuingPrincipal),
 	)
 
 	if err := mErr.ErrorOrNil(); err != nil {
