@@ -14,9 +14,10 @@ import (
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/services/kms"
 )
 
+const resourceGrantName = "opentelekomcloud_kms_grant_v1.grant_1"
+
 func TestAccKmsGrantV1Basic(t *testing.T) {
 	var grant grants.Grant
-	resourceName := "opentelekomcloud_kms_grant_v1.grant_1"
 
 	granteePrincipal := os.Getenv("OS_USER_ID")
 	if granteePrincipal == "" {
@@ -31,10 +32,33 @@ func TestAccKmsGrantV1Basic(t *testing.T) {
 			{
 				Config: testAccKmsGrantV1Basic(granteePrincipal),
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckKmsV1GrantExists(resourceName, &grant),
-					resource.TestCheckResourceAttr(resourceName, "key_id", env.OS_KMS_ID),
-					resource.TestCheckResourceAttr(resourceName, "name", "my_grant"),
+					testAccCheckKmsV1GrantExists(resourceGrantName, &grant),
+					resource.TestCheckResourceAttr(resourceGrantName, "key_id", env.OS_KMS_ID),
+					resource.TestCheckResourceAttr(resourceGrantName, "name", "my_grant"),
 				),
+			},
+		},
+	})
+}
+
+func TestAccKmsV1GrantImportBasic(t *testing.T) {
+	granteePrincipal := os.Getenv("OS_USER_ID")
+	if granteePrincipal == "" {
+		t.Skip("OS_USER_ID must be set for acceptance test")
+	}
+
+	resource.Test(t, resource.TestCase{
+		PreCheck:          func() { common.TestAccPreCheck(t) },
+		ProviderFactories: common.TestAccProviderFactories,
+		CheckDestroy:      testAccCheckKmsV1GrantDestroy,
+		Steps: []resource.TestStep{
+			{
+				Config: testAccKmsGrantV1Basic(granteePrincipal),
+			},
+			{
+				ResourceName:      resourceGrantName,
+				ImportState:       true,
+				ImportStateVerify: true,
 			},
 		},
 	})
