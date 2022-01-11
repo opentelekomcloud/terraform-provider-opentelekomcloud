@@ -2,3 +2,5 @@
 fixes:
   - |
     **[KMS]** Fix reading of ``issuing_principal`` in ``resource/opentelekomcloud_kms_grant_v1`` (`#1593 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/1593>`_)
+  - |
+    **[KMS]** Fix init client in ``eu-nl`` region (`#1593 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/1593>`_)
