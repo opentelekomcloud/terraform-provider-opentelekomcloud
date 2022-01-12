@@ -6,6 +6,11 @@ subcategory: "Elastic Cloud Server (ECS)"
 
 Manages a V2 security group resource within OpenTelekomCloud.
 
+~>
+Security group compute APIs are marked as discarded in [documentation](https://docs.otc.t-systems.com/en-us/api/ecs/en-us_topic_0267427144.html).
+Please use `resource/opentelekomcloud_networking_secgroup_v2`
+
+
 ## Example Usage
 
 ```hcl
