@@ -28,6 +28,8 @@ func ResourceComputeSecGroupV2() *schema.Resource {
 		UpdateContext: resourceComputeSecGroupV2Update,
 		DeleteContext: resourceComputeSecGroupV2Delete,
 
+		DeprecationMessage: "please use `opentelekomcloud_networking_secgroup_v2` resource instead",
+
 		Importer: &schema.ResourceImporter{
 			StateContext: schema.ImportStatePassthroughContext,
 		},
