@@ -210,7 +210,12 @@ func ResourceCBRVaultV3() *schema.Resource {
 				Type:     schema.TypeString,
 				Optional: true,
 			},
-			"tags": common.TagsSchema(),
+			"tags": {
+				Type:         schema.TypeMap,
+				Optional:     true,
+				ForceNew:     true,
+				ValidateFunc: common.ValidateTags,
+			},
 			"enterprise_project_id": {
 				Type:     schema.TypeString,
 				Optional: true,
