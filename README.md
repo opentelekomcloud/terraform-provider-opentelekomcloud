@@ -2,6 +2,7 @@
     <img src=".github/terraform_logo.svg" alt="Terraform logo" title="Terraform" align="right" height="50" />
 </a>
 
+
 Terraform Open Telekom Cloud Provider
 =====================================
 [![Documentation](https://img.shields.io/badge/documentation-blue)](https://registry.terraform.io/providers/opentelekomcloud/opentelekomcloud/latest/docs)
