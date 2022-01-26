@@ -2,11 +2,13 @@ package acceptance
 
 import (
 	"fmt"
+	"os"
 	"strings"
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
+	th "github.com/opentelekomcloud/gophertelekomcloud/testhelper"
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/acceptance/common/quotas"
 
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/compute/v2/extensions/secgroups"
@@ -49,6 +51,35 @@ func TestAccComputeV2Instance_basic(t *testing.T) {
 					testAccCheckComputeV2InstanceExists(resourceInstanceV2Name, &instance),
 					resource.TestCheckResourceAttr(resourceInstanceV2Name, "name", "instance_2"),
 					resource.TestCheckResourceAttr(resourceInstanceV2Name, "tags.muh", "value-update"),
+				),
+			},
+		},
+	})
+}
+
+func TestAccComputeV2Instance_imageByName(t *testing.T) {
+	var instance servers.Server
+	qts := serverQuotas(4, env.OsFlavorID)
+
+	resource.Test(t, resource.TestCase{
+		PreCheck: func() {
+			common.TestAccPreCheck(t)
+			quotas.BookMany(t, qts)
+
+			imgID := os.Getenv("OS_IMAGE_ID")
+			th.AssertNoErr(t, os.Unsetenv("OS_IMAGE_ID"))
+			t.Cleanup(func() {
+				th.AssertNoErr(t, os.Setenv("OS_IMAGE_ID", imgID))
+			})
+		},
+		ProviderFactories: common.TestAccProviderFactories,
+		CheckDestroy:      TestAccCheckComputeV2InstanceDestroy,
+		Steps: []resource.TestStep{
+			{
+				Config: testAccComputeV2InstanceImageByName,
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckComputeV2InstanceExists(resourceInstanceV2Name, &instance),
+					resource.TestCheckResourceAttr(resourceInstanceV2Name, "availability_zone", env.OS_AVAILABILITY_ZONE),
 				),
 			},
 		},
@@ -553,6 +584,22 @@ resource "opentelekomcloud_compute_instance_v2" "instance_1" {
   tags = {
     muh = "value-create"
     kuh = "value-create"
+  }
+}
+`, common.DataSourceSubnet, env.OS_AVAILABILITY_ZONE)
+
+var testAccComputeV2InstanceImageByName = fmt.Sprintf(`
+%s
+
+resource "opentelekomcloud_compute_instance_v2" "instance_1" {
+  name              = "instance_1_ibn"
+  image_name        = "Standard_Debian_10_latest"
+  availability_zone = "%s"
+  metadata = {
+    foo = "bar"
+  }
+  network {
+    uuid = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.network_id
   }
 }
 `, common.DataSourceSubnet, env.OS_AVAILABILITY_ZONE)

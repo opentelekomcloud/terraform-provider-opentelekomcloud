@@ -1,0 +1,8 @@
+---
+fixes:
+  - |
+    **[ECS]** Find image by name using ``IMSv2`` API instead of discarded compute image API
+    (`#1609 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/1609>`_)
+  - |
+    **[BMS]** Find image by name using ``IMSv2`` API instead of discarded compute image API
+    (`#1609 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/1609>`_)

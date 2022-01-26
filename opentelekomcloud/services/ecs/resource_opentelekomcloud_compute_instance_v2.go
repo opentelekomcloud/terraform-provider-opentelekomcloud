@@ -3,6 +3,7 @@ package ecs
 import (
 	"bytes"
 	"context"
+	"errors"
 	"fmt"
 	"log"
 	"strings"
@@ -27,6 +28,7 @@ import (
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/compute/v2/servers"
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common/fmterr"
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/helper/hashcode"
+	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/services/ims"
 
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common"
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common/cfg"
@@ -356,7 +358,7 @@ func resourceComputeInstanceV2Create(ctx context.Context, d *schema.ResourceData
 	// If a bootable block_device was specified, ignore the image altogether.
 	// If an image_id was specified, use it.
 	// If an image_name was specified, look up the image ID, report if error.
-	imageID, err := getImageIDFromConfig(client, d)
+	imageID, err := getImageIDFromConfig(d, config)
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -1048,7 +1050,7 @@ func resourceInstanceSchedulerHintsV2(_ *schema.ResourceData, schedulerHintsRaw 
 	return schedulerHints
 }
 
-func getImageIDFromConfig(client *golangsdk.ServiceClient, d *schema.ResourceData) (string, error) {
+func getImageIDFromConfig(d *schema.ResourceData, config *cfg.Config) (string, error) {
 	// If block_device was used, an Image does not need to be specified, unless an image/local
 	// combination was used. This emulates normal boot behavior. Otherwise, ignore the image altogether.
 	if vL, ok := d.GetOk("block_device"); ok {
@@ -1069,14 +1071,10 @@ func getImageIDFromConfig(client *golangsdk.ServiceClient, d *schema.ResourceDat
 	}
 
 	if imageName := d.Get("image_name").(string); imageName != "" {
-		imageId, err := images.IDFromName(client, imageName)
-		if err != nil {
-			return "", err
-		}
-		return imageId, nil
+		return ims.GetImageByName(d, config, imageName)
 	}
 
-	return "", fmt.Errorf("neither a boot device, image ID, or image name were able to be determined")
+	return "", errors.New("neither a boot device, image ID, or image name were able to be determined")
 }
 
 func setImageInformation(client *golangsdk.ServiceClient, server *servers.Server, d *schema.ResourceData) error {

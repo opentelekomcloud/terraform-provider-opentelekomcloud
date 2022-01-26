@@ -21,6 +21,7 @@ import (
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/compute/v2/images"
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/compute/v2/servers"
 	ecstags "github.com/opentelekomcloud/gophertelekomcloud/openstack/ecs/v1/cloudservertags"
+	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/services/ims"
 
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common"
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common/cfg"
@@ -301,7 +302,7 @@ func resourceComputeBMSInstanceV2Create(ctx context.Context, d *schema.ResourceD
 	// Determines the Image ID using the following rules:
 	// If an image_id was specified, use it.
 	// If an image_name was specified, look up the image ID, report if error.
-	imageId, err := getImageId(computeClient, d)
+	imageId, err := getImageId(d, config)
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -786,7 +787,7 @@ func resourceBmsInstanceMetadataV2(d *schema.ResourceData) map[string]string {
 	return m
 }
 
-func getImageId(computeClient *golangsdk.ServiceClient, d *schema.ResourceData) (string, error) {
+func getImageId(d *schema.ResourceData, config *cfg.Config) (string, error) {
 	// If block_device was used, an Image does not need to be specified, unless an image/local
 	// combination was used. This emulates normal boot behavior. Otherwise, ignore the image altogether.
 	if vL, ok := d.GetOk("block_device"); ok {
@@ -807,11 +808,7 @@ func getImageId(computeClient *golangsdk.ServiceClient, d *schema.ResourceData) 
 	}
 
 	if imageName := d.Get("image_name").(string); imageName != "" {
-		imageId, err := images.IDFromName(computeClient, imageName)
-		if err != nil {
-			return "", err
-		}
-		return imageId, nil
+		return ims.GetImageByName(d, config, imageName)
 	}
 
 	return "", fmt.Errorf("neither an image ID, or image name were able to be determined")
