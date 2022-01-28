@@ -114,7 +114,7 @@ resource "opentelekomcloud_mrs_cluster_v1" "this" {
   cluster_type          = 0
   safe_mode             = 1
   node_public_cert_name = "%s"
-  cluster_admin_secret  = "Qwert!123"
+  cluster_admin_secret  = "Qwerty!123"
   component_list {
     component_name = "Presto"
   }

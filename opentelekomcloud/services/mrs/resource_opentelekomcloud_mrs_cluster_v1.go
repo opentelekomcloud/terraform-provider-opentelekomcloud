@@ -611,23 +611,6 @@ func resourceClusterV1Create(ctx context.Context, d *schema.ResourceData, meta i
 	return resourceClusterV1Read(ctx, d, meta)
 }
 
-func resourceClusterV1Update(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	config := meta.(*cfg.Config)
-	client, err := config.MrsV1Client(config.GetRegion(d))
-	if err != nil {
-		return fmterr.Errorf(ErrCreationClient, err)
-	}
-
-	// update tags
-	if d.HasChange("tags") {
-		if err := common.UpdateResourceTags(client, d, "clusters", d.Id()); err != nil {
-			return fmterr.Errorf("error updating tags of MRS cluster %s: %s", d.Id(), err)
-		}
-	}
-
-	return resourceClusterV1Read(ctx, d, meta)
-}
-
 func resourceClusterV1Read(_ context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*cfg.Config)
 	client, err := config.MrsV1Client(config.GetRegion(d))
@@ -661,7 +644,6 @@ func resourceClusterV1Read(_ context.Context, d *schema.ResourceData, meta inter
 		d.Set("core_node_num", coreNodeNum),
 		d.Set("cluster_name", mrsCluster.ClusterName),
 		d.Set("core_node_size", mrsCluster.CoreNodeSize),
-		d.Set("volume_size", mrsCluster.VolumeSize),
 		d.Set("master_data_volume_type", mrsCluster.MasterDataVolumeType),
 		d.Set("master_data_volume_size", mrsCluster.MasterDataVolumeSize),
 		d.Set("master_data_volume_count", mrsCluster.MasterDataVolumeCount),
@@ -757,6 +739,23 @@ func resourceClusterV1Read(_ context.Context, d *schema.ResourceData, meta inter
 	}
 
 	return nil
+}
+
+func resourceClusterV1Update(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+	config := meta.(*cfg.Config)
+	client, err := config.MrsV1Client(config.GetRegion(d))
+	if err != nil {
+		return fmterr.Errorf(ErrCreationClient, err)
+	}
+
+	// update tags
+	if d.HasChange("tags") {
+		if err := common.UpdateResourceTags(client, d, "clusters", d.Id()); err != nil {
+			return fmterr.Errorf("error updating tags of MRS cluster %s: %s", d.Id(), err)
+		}
+	}
+
+	return resourceClusterV1Read(ctx, d, meta)
 }
 
 func resourceClusterV1Delete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
