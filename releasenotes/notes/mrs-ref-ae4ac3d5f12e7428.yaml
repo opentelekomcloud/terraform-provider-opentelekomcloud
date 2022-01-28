@@ -1,0 +1,7 @@
+---
+fixes:
+  - |
+    **[MRS]** Fix creation process in ``resource/opentelekomcloud_mrs_cluster_v1`` (`#1603 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/1603>`_)
+other:
+  - |
+    **[MRS]** Update documentation in ``resource/opentelekomcloud_mrs_cluster_v1`` (`#1603 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/1603>`_)

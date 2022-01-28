@@ -2,7 +2,6 @@ package mrs
 
 import (
 	"context"
-	"fmt"
 	"log"
 	"strconv"
 	"time"
@@ -11,9 +10,10 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 	golangsdk "github.com/opentelekomcloud/gophertelekomcloud"
+	"github.com/opentelekomcloud/gophertelekomcloud/openstack/common/tags"
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/mrs/v1/cluster"
-	"github.com/opentelekomcloud/gophertelekomcloud/openstack/mrs/v1/tags"
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/networking/v1/subnets"
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/networking/v1/vpcs"
 
@@ -44,7 +44,6 @@ func ResourceMRSClusterV1() *schema.Resource {
 				ForceNew: true,
 				Computed: true,
 			},
-
 			"billing_type": {
 				Type:     schema.TypeInt,
 				Required: true,
@@ -92,9 +91,11 @@ func ResourceMRSClusterV1() *schema.Resource {
 			},
 			"cluster_version": {
 				Type:     schema.TypeString,
-				Optional: true,
-				Computed: true,
+				Required: true,
 				ForceNew: true,
+				ValidateFunc: validation.StringInSlice([]string{
+					"MRS 1.6.3", "MRS 1.7.2", "MRS 1.9.2", "MRS 2.1.0", "MRS 3.0.2",
+				}, false),
 			},
 			"cluster_type": {
 				Type:     schema.TypeInt,
@@ -107,9 +108,9 @@ func ResourceMRSClusterV1() *schema.Resource {
 				Optional: true,
 				Computed: true,
 				ForceNew: true,
-				ValidateFunc: func(v interface{}, k string) (ws []string, errors []error) {
-					return common.ValidateStringList(v, k, []string{"SATA", "SAS", "SSD"})
-				},
+				ValidateFunc: validation.StringInSlice([]string{
+					"SATA", "SAS", "SSD",
+				}, false),
 			},
 			"volume_size": {
 				Type:     schema.TypeInt,
@@ -122,9 +123,9 @@ func ResourceMRSClusterV1() *schema.Resource {
 				Optional: true,
 				Computed: true,
 				ForceNew: true,
-				ValidateFunc: func(v interface{}, k string) (ws []string, errors []error) {
-					return common.ValidateStringList(v, k, []string{"SATA", "SAS", "SSD"})
-				},
+				ValidateFunc: validation.StringInSlice([]string{
+					"SATA", "SAS", "SSD",
+				}, false),
 			},
 			"master_data_volume_size": {
 				Type:     schema.TypeInt,
@@ -143,9 +144,9 @@ func ResourceMRSClusterV1() *schema.Resource {
 				Optional: true,
 				Computed: true,
 				ForceNew: true,
-				ValidateFunc: func(v interface{}, k string) (ws []string, errors []error) {
-					return common.ValidateStringList(v, k, []string{"SATA", "SAS", "SSD"})
-				},
+				ValidateFunc: validation.StringInSlice([]string{
+					"SATA", "SAS", "SSD",
+				}, false),
 			},
 			"core_data_volume_size": {
 				Type:     schema.TypeInt,
@@ -334,11 +335,7 @@ func ResourceMRSClusterV1() *schema.Resource {
 					},
 				},
 			},
-			"tags": {
-				Type:         schema.TypeMap,
-				Optional:     true,
-				ValidateFunc: common.ValidateTags,
-			},
+			"tags": common.TagsSchema(),
 			"order_id": {
 				Type:     schema.TypeString,
 				Computed: true,
@@ -457,15 +454,12 @@ func getAllClusterComponents(d *schema.ResourceData) []cluster.ComponentOpts {
 	components := d.Get("component_list").([]interface{})
 	for _, v := range components {
 		component := v.(map[string]interface{})
-		component_name := component["component_name"].(string)
 
-		v := cluster.ComponentOpts{
-			ComponentName: component_name,
-		}
-		componentOpts = append(componentOpts, v)
+		componentOpts = append(componentOpts, cluster.ComponentOpts{
+			ComponentName: component["component_name"].(string),
+		})
 	}
 
-	log.Printf("[DEBUG] getAllClusterComponents: %#v", componentOpts)
 	return componentOpts
 }
 
@@ -476,7 +470,9 @@ func getAllClusterJobs(d *schema.ResourceData) []cluster.JobOpts {
 	for _, v := range jobs {
 		job := v.(map[string]interface{})
 
-		v := cluster.JobOpts{
+		shutDown := job["shutdown_cluster"].(bool)
+		submitJob := job["submit_job_once_cluster_run"].(bool)
+		jobOpts = append(jobOpts, cluster.JobOpts{
 			JobType:                 job["job_type"].(int),
 			JobName:                 job["job_name"].(string),
 			JarPath:                 job["jar_path"].(string),
@@ -484,16 +480,14 @@ func getAllClusterJobs(d *schema.ResourceData) []cluster.JobOpts {
 			Input:                   job["input"].(string),
 			Output:                  job["output"].(string),
 			JobLog:                  job["job_log"].(string),
-			ShutdownCluster:         job["shutdown_cluster"].(bool),
+			ShutdownCluster:         &shutDown,
 			FileAction:              job["file_action"].(string),
-			SubmitJobOnceClusterRun: job["submit_job_once_cluster_run"].(bool),
+			SubmitJobOnceClusterRun: &submitJob,
 			Hql:                     job["hql"].(string),
 			HiveScriptPath:          job["hive_script_path"].(string),
-		}
-		jobOpts = append(jobOpts, v)
+		})
 	}
 
-	log.Printf("[DEBUG] getAllClusterJobs: %#v", jobOpts)
 	return jobOpts
 }
 
@@ -504,61 +498,48 @@ func getAllClusterScripts(d *schema.ResourceData) []cluster.ScriptOpts {
 	for _, v := range scripts {
 		script := v.(map[string]interface{})
 
-		nodes := []string{}
-		if len(script["nodes"].([]interface{})) > 0 {
-			for _, n := range script["nodes"].([]interface{}) {
+		var nodes []string
+		nodesRaw := script["nodes"].([]interface{})
+		if len(nodesRaw) > 0 {
+			for _, n := range nodesRaw {
 				nodes = append(nodes, n.(string))
 			}
 		}
 
-		v := cluster.ScriptOpts{
+		activeMaster := script["active_master"].(bool)
+		beforeComponent := script["before_component_start"].(bool)
+		scriptOpts = append(scriptOpts, cluster.ScriptOpts{
 			Name:                 script["name"].(string),
 			Uri:                  script["uri"].(string),
 			Parameters:           script["parameters"].(string),
 			Nodes:                nodes,
-			ActiveMaster:         script["active_master"].(bool),
-			BeforeComponentStart: script["before_component_start"].(bool),
+			ActiveMaster:         &activeMaster,
+			BeforeComponentStart: &beforeComponent,
 			FailAction:           script["fail_action"].(string),
-		}
-		scriptOpts = append(scriptOpts, v)
+		})
 	}
 
-	log.Printf("[DEBUG] getAllClusterScripts: %#v", scriptOpts)
 	return scriptOpts
-}
-
-func ClusterStateRefreshFunc(client *golangsdk.ServiceClient, clusterID string) resource.StateRefreshFunc {
-	return func() (interface{}, string, error) {
-		clusterGet, err := cluster.Get(client, clusterID).Extract()
-		if err != nil {
-			if _, ok := err.(golangsdk.ErrDefault404); ok {
-				return clusterGet, "DELETED", nil
-			}
-			return nil, "", err
-		}
-		log.Printf("[DEBUG] ClusterStateRefreshFunc: %#v", clusterGet)
-		return clusterGet, clusterGet.Clusterstate, nil
-	}
 }
 
 func resourceClusterV1Create(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*cfg.Config)
 	client, err := config.MrsV1Client(config.GetRegion(d))
 	if err != nil {
-		return fmterr.Errorf("error creating OpenTelekomCloud MRS client: %s", err)
+		return fmterr.Errorf(ErrCreationClient, err)
 	}
-	vpcClient, err := config.NetworkingV1Client(config.GetRegion(d))
+	nwClient, err := config.NetworkingV1Client(config.GetRegion(d))
 	if err != nil {
-		return fmterr.Errorf("error creating OpenTelekomCloud Vpc client: %s", err)
+		return fmterr.Errorf("error creating OpenTelekomCloud NetworkingV1 client: %s", err)
 	}
 
 	// Get vpc name
-	vpc, err := vpcs.Get(vpcClient, d.Get("vpc_id").(string)).Extract()
+	vpc, err := vpcs.Get(nwClient, d.Get("vpc_id").(string)).Extract()
 	if err != nil {
-		return fmterr.Errorf("error retrieving OpenTelekomCloud Vpc: %s", err)
+		return fmterr.Errorf("error retrieving OpenTelekomCloud VPC: %s", err)
 	}
 	// Get subnet name
-	subnet, err := subnets.Get(vpcClient, d.Get("subnet_id").(string)).Extract()
+	subnet, err := subnets.Get(nwClient, d.Get("subnet_id").(string)).Extract()
 	if err != nil {
 		return fmterr.Errorf("error retrieving OpenTelekomCloud Subnet: %s", err)
 	}
@@ -598,16 +579,16 @@ func resourceClusterV1Create(ctx context.Context, d *schema.ResourceData, meta i
 
 	log.Printf("[DEBUG] Create Options: %#v", createOpts)
 
-	clusterCreate, err := cluster.Create(client, createOpts).Extract()
+	mrsCluster, err := cluster.Create(client, createOpts).Extract()
 	if err != nil {
 		return fmterr.Errorf("error creating Cluster: %s", err)
 	}
-	d.SetId(clusterCreate.ClusterID)
+	d.SetId(mrsCluster.ClusterID)
 
 	stateConf := &resource.StateChangeConf{
 		Pending:    []string{"starting"},
 		Target:     []string{"running"},
-		Refresh:    ClusterStateRefreshFunc(client, clusterCreate.ClusterID),
+		Refresh:    clusterStateRefreshFunc(client, mrsCluster.ClusterID),
 		Timeout:    d.Timeout(schema.TimeoutCreate),
 		Delay:      10 * time.Second,
 		MinTimeout: 3 * time.Second,
@@ -615,51 +596,15 @@ func resourceClusterV1Create(ctx context.Context, d *schema.ResourceData, meta i
 
 	_, err = stateConf.WaitForStateContext(ctx)
 	if err != nil {
-		return fmterr.Errorf(
-			"Error waiting for cluster (%s) to become ready: %s ",
-			clusterCreate.ClusterID, err)
+		return fmterr.Errorf("error waiting for cluster (%s) to become ready: %s ", mrsCluster.ClusterID, err)
 	}
 
-	// Set tags
-	if common.HasFilledOpt(d, "tags") {
-		tagmap := d.Get("tags").(map[string]interface{})
-		log.Printf("[DEBUG] Setting tags: %v", tagmap)
-		err = setTagForMrs(d, meta, clusterCreate.ClusterID, tagmap)
-		if err != nil {
-			log.Printf("[WARN] Error setting tags of MRS cluster:%s, err=%s", clusterCreate.ClusterID, err)
-		}
-	}
-
-	return resourceClusterV1Read(ctx, d, meta)
-}
-
-func resourceClusterV1Update(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	config := meta.(*cfg.Config)
-	client, err := config.MrsV1Client(config.GetRegion(d))
-	if err != nil {
-		return fmterr.Errorf("error creating OpenTelekomCloud MRS client: %s", err)
-	}
-
-	oldTags, err := tags.Get(client, d.Id()).Extract()
-	if err != nil {
-		return fmterr.Errorf("error fetching OpenTelekomCloud MRS cluster tags: %s", err)
-	}
-	if len(oldTags.Tags) > 0 {
-		deleteopts := tags.BatchOpts{Action: tags.ActionDelete, Tags: oldTags.Tags}
-		deleteTags := tags.BatchAction(client, d.Id(), deleteopts)
-		if deleteTags.Err != nil {
-			return fmterr.Errorf("error updating OpenTelekomCloud MRS cluster tags: %s", deleteTags.Err)
-		}
-	}
-
-	if common.HasFilledOpt(d, "tags") {
-		tagmap := d.Get("tags").(map[string]interface{})
-		if len(tagmap) > 0 {
-			log.Printf("[DEBUG] Setting tags: %v", tagmap)
-			err = setTagForMrs(d, meta, d.Id(), tagmap)
-			if err != nil {
-				return fmterr.Errorf("error updating tags of MRS cluster:%s, err:%s", d.Id(), err)
-			}
+	// set tags
+	tagRaw := d.Get("tags").(map[string]interface{})
+	if len(tagRaw) > 0 {
+		tagList := common.ExpandResourceTags(tagRaw)
+		if err := tags.Create(client, "clusters", mrsCluster.ClusterID, tagList).ExtractErr(); err != nil {
+			return fmterr.Errorf("error setting tags of MRS cluster %s: %s", mrsCluster.ClusterID, err)
 		}
 	}
 
@@ -670,110 +615,100 @@ func resourceClusterV1Read(_ context.Context, d *schema.ResourceData, meta inter
 	config := meta.(*cfg.Config)
 	client, err := config.MrsV1Client(config.GetRegion(d))
 	if err != nil {
-		return fmterr.Errorf("error creating OpenTelekomCloud MRS client: %s", err)
+		return fmterr.Errorf(ErrCreationClient, err)
 	}
 
-	clusterGet, err := cluster.Get(client, d.Id()).Extract()
+	mrsCluster, err := cluster.Get(client, d.Id()).Extract()
 	if err != nil {
 		return diag.FromErr(common.CheckDeleted(d, err, "Cluster"))
 	}
-	log.Printf("[DEBUG] Retrieved Cluster %s: %#v", d.Id(), clusterGet)
-	d.SetId(clusterGet.Clusterid)
+	log.Printf("[DEBUG] Retrieved Cluster %s: %#v", d.Id(), mrsCluster)
+
+	masterNodeNum, err := strconv.Atoi(mrsCluster.MasterNodeNum)
+	if err != nil {
+		return fmterr.Errorf("error converting MasterNodeNum: %s", err)
+	}
+	coreNodeNum, err := strconv.Atoi(mrsCluster.CoreNodeNum)
+	if err != nil {
+		return fmterr.Errorf("error converting CoreNodeNum: %s", err)
+	}
 
 	mErr := multierror.Append(
 		d.Set("region", config.GetRegion(d)),
-		d.Set("order_id", clusterGet.Orderid),
-		d.Set("cluster_id", clusterGet.Clusterid),
-		d.Set("available_zone_name", clusterGet.Azname),
-		d.Set("available_zone_id", clusterGet.Azid),
-		d.Set("cluster_version", clusterGet.Clusterversion),
-	)
-
-	masterNodeNum, err := strconv.Atoi(clusterGet.Masternodenum)
-	if err != nil {
-		return fmterr.Errorf("error converting Masternodenum: %s", err)
-	}
-	coreNodeNum, err := strconv.Atoi(clusterGet.Corenodenum)
-	if err != nil {
-		return fmterr.Errorf("error converting Corenodenum: %s", err)
-	}
-
-	mErr = multierror.Append(mErr,
+		d.Set("order_id", mrsCluster.OrderID),
+		d.Set("cluster_id", mrsCluster.ClusterID),
+		d.Set("available_zone_name", mrsCluster.AzName),
+		d.Set("available_zone_id", mrsCluster.AzID),
+		d.Set("cluster_version", mrsCluster.ClusterVersion),
 		d.Set("master_node_num", masterNodeNum),
 		d.Set("core_node_num", coreNodeNum),
-		d.Set("cluster_name", clusterGet.Clustername),
-		d.Set("core_node_size", clusterGet.Corenodesize),
-		d.Set("volume_size", clusterGet.Volumesize),
-		d.Set("master_data_volume_type", clusterGet.MasterDataVolumeType),
-		d.Set("master_data_volume_size", clusterGet.MasterDataVolumeSize),
-		d.Set("master_data_volume_count", clusterGet.MasterDataVolumeCount),
-		d.Set("core_data_volume_type", clusterGet.CoreDataVolumeType),
-		d.Set("core_data_volume_size", clusterGet.CoreDataVolumeSize),
-		d.Set("core_data_volume_count", clusterGet.CoreDataVolumeCount),
-		d.Set("node_public_cert_name", clusterGet.Nodepubliccertname),
-		d.Set("safe_mode", clusterGet.Safemode),
-		d.Set("master_node_size", clusterGet.Masternodesize),
-		d.Set("instance_id", clusterGet.Instanceid),
-		d.Set("hadoop_version", clusterGet.Hadoopversion),
-		d.Set("master_node_ip", clusterGet.Masternodeip),
-		d.Set("external_ip", clusterGet.Externalip),
-		d.Set("private_ip_first", clusterGet.Privateipfirst),
-		d.Set("internal_ip", clusterGet.Internalip),
-		d.Set("slave_security_groups_id", clusterGet.Slavesecuritygroupsid),
-		d.Set("security_groups_id", clusterGet.Securitygroupsid),
-		d.Set("external_alternate_ip", clusterGet.Externalalternateip),
-		d.Set("master_node_spec_id", clusterGet.Masternodespecid),
-		d.Set("core_node_spec_id", clusterGet.Corenodespecid),
-		d.Set("master_node_product_id", clusterGet.Masternodeproductid),
-		d.Set("core_node_product_id", clusterGet.Corenodeproductid),
-		d.Set("duration", clusterGet.Duration),
-		d.Set("vnc", clusterGet.Vnc),
-		d.Set("fee", clusterGet.Fee),
-		d.Set("deployment_id", clusterGet.Deploymentid),
-		d.Set("cluster_state", clusterGet.Clusterstate),
-		d.Set("error_info", clusterGet.Errorinfo),
-		d.Set("remark", clusterGet.Remark),
-		d.Set("tenant_id", clusterGet.Tenantid),
+		d.Set("cluster_name", mrsCluster.ClusterName),
+		d.Set("core_node_size", mrsCluster.CoreNodeSize),
+		d.Set("master_data_volume_type", mrsCluster.MasterDataVolumeType),
+		d.Set("master_data_volume_size", mrsCluster.MasterDataVolumeSize),
+		d.Set("master_data_volume_count", mrsCluster.MasterDataVolumeCount),
+		d.Set("core_data_volume_type", mrsCluster.CoreDataVolumeType),
+		d.Set("core_data_volume_size", mrsCluster.CoreDataVolumeSize),
+		d.Set("core_data_volume_count", mrsCluster.CoreDataVolumeCount),
+		d.Set("node_public_cert_name", mrsCluster.NodePublicCertName),
+		d.Set("safe_mode", mrsCluster.SafeMode),
+		d.Set("master_node_size", mrsCluster.MasterNodeSize),
+		d.Set("instance_id", mrsCluster.InstanceID),
+		d.Set("hadoop_version", mrsCluster.HadoopVersion),
+		d.Set("master_node_ip", mrsCluster.MasterNodeIp),
+		d.Set("external_ip", mrsCluster.ExternalIp),
+		d.Set("private_ip_first", mrsCluster.PrivateIpFirst),
+		d.Set("internal_ip", mrsCluster.InternalIp),
+		d.Set("slave_security_groups_id", mrsCluster.SlaveSecurityGroupsID),
+		d.Set("security_groups_id", mrsCluster.SecurityGroupsID),
+		d.Set("external_alternate_ip", mrsCluster.ExternalAlternateIp),
+		d.Set("master_node_spec_id", mrsCluster.MasterNodeSpecID),
+		d.Set("core_node_spec_id", mrsCluster.CoreNodeSpecID),
+		d.Set("master_node_product_id", mrsCluster.MasterNodeProductID),
+		d.Set("core_node_product_id", mrsCluster.CoreNodeProductID),
+		d.Set("duration", mrsCluster.Duration),
+		d.Set("vnc", mrsCluster.Vnc),
+		d.Set("fee", mrsCluster.Fee),
+		d.Set("deployment_id", mrsCluster.DeploymentID),
+		d.Set("cluster_state", mrsCluster.ClusterState),
+		d.Set("error_info", mrsCluster.ErrorInfo),
+		d.Set("remark", mrsCluster.Remark),
+		d.Set("tenant_id", mrsCluster.TenantID),
+		d.Set("duration", mrsCluster.Duration),
 	)
 
-	updateAt, err := strconv.ParseInt(clusterGet.Updateat, 10, 64)
+	updateAt, err := strconv.ParseInt(mrsCluster.UpdateAt, 10, 64)
 	if err != nil {
-		return fmterr.Errorf("error converting Updateat: %s", err)
+		return fmterr.Errorf("error converting UpdateAt: %s", err)
 	}
-	updateAtTm := time.Unix(updateAt, 0)
 
-	createAt, err := strconv.ParseInt(clusterGet.Createat, 10, 64)
+	createAt, err := strconv.ParseInt(mrsCluster.CreateAt, 10, 64)
 	if err != nil {
-		return fmterr.Errorf("error converting Createat: %s", err)
+		return fmterr.Errorf("error converting CreateAt: %s", err)
 	}
-	createAtTm := time.Unix(createAt, 0)
 
-	chargingStartTime, err := strconv.ParseInt(clusterGet.Chargingstarttime, 10, 64)
+	chargingStartTime, err := strconv.ParseInt(mrsCluster.ChargingStartTime, 10, 64)
 	if err != nil {
-		return fmterr.Errorf("error converting chargingStartTime: %s", err)
+		return fmterr.Errorf("error converting ChargingStartTime: %s", err)
 	}
-	chargingStartTimeTm := time.Unix(chargingStartTime, 0)
 
 	mErr = multierror.Append(mErr,
-		d.Set("update_at", updateAtTm.String()),
-		d.Set("create_at", createAtTm.String()),
-		d.Set("charging_start_time", chargingStartTimeTm.String()),
-		d.Set("duration", clusterGet.Duration),
+		d.Set("update_at", time.Unix(updateAt, 0).String()),
+		d.Set("create_at", time.Unix(createAt, 0).String()),
+		d.Set("charging_start_time", time.Unix(chargingStartTime, 0).String()),
 	)
 
-	components := make([]map[string]interface{}, len(clusterGet.Componentlist))
-	for i, attachment := range clusterGet.Componentlist {
+	components := make([]map[string]interface{}, len(mrsCluster.ComponentList))
+	for i, attachment := range mrsCluster.ComponentList {
 		components[i] = make(map[string]interface{})
-		components[i]["component_id"] = attachment.Componentid
-		components[i]["component_name"] = attachment.Componentname
-		components[i]["component_version"] = attachment.Componentversion
-		components[i]["component_desc"] = attachment.Componentdesc
-		log.Printf("[DEBUG] components: %v", components)
+		components[i]["component_id"] = attachment.ComponentID
+		components[i]["component_name"] = attachment.ComponentName
+		components[i]["component_version"] = attachment.ComponentVersion
+		components[i]["component_desc"] = attachment.ComponentDesc
 	}
-	mErr = multierror.Append(mErr, d.Set("component_list", components))
 
-	scripts := make([]map[string]interface{}, len(clusterGet.BootstrapScripts))
-	for i, script := range clusterGet.BootstrapScripts {
+	scripts := make([]map[string]interface{}, len(mrsCluster.BootstrapScripts))
+	for i, script := range mrsCluster.BootstrapScripts {
 		scripts[i] = make(map[string]interface{})
 		scripts[i]["name"] = script.Name
 		scripts[i]["uri"] = script.Uri
@@ -783,64 +718,63 @@ func resourceClusterV1Read(_ context.Context, d *schema.ResourceData, meta inter
 		scripts[i]["before_component_start"] = script.BeforeComponentStart
 		scripts[i]["fail_action"] = script.FailAction
 	}
-	log.Printf("[DEBUG] bootstrap_scripts: %v", scripts)
-	mErr = multierror.Append(mErr, d.Set("bootstrap_scripts", scripts))
+
+	mErr = multierror.Append(mErr,
+		d.Set("component_list", components),
+		d.Set("bootstrap_scripts", scripts),
+	)
 
 	if err := mErr.ErrorOrNil(); err != nil {
 		return diag.FromErr(err)
 	}
 
-	// Set instance tags
-	tagList, err := tags.Get(client, d.Id()).Extract()
+	// save tags
+	resourceTags, err := tags.Get(client, "clusters", d.Id()).Extract()
 	if err != nil {
-		return fmterr.Errorf("error fetching OpenTelekomCloud MRS cluster tags: %s", err)
+		return fmterr.Errorf("error fetching OpenTelekomCloud MRS Cluster tags: %s", err)
+	}
+	tagMap := common.TagsToMap(resourceTags)
+	if err := d.Set("tags", tagMap); err != nil {
+		return fmterr.Errorf("error saving tags for OpenTelekomCloud MRS Cluster: %s", err)
 	}
 
-	tagMap := make(map[string]string)
-	for _, val := range tagList.Tags {
-		tagMap[val.Key] = val.Value
-	}
-	if err := d.Set("tags", tagMap); err != nil {
-		return fmterr.Errorf("[DEBUG] Error saving tag to state for OpenTelekomCloud MRS cluster (%s): %s", d.Id(), err)
-	}
 	return nil
+}
+
+func resourceClusterV1Update(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+	config := meta.(*cfg.Config)
+	client, err := config.MrsV1Client(config.GetRegion(d))
+	if err != nil {
+		return fmterr.Errorf(ErrCreationClient, err)
+	}
+
+	// update tags
+	if d.HasChange("tags") {
+		if err := common.UpdateResourceTags(client, d, "clusters", d.Id()); err != nil {
+			return fmterr.Errorf("error updating tags of MRS cluster %s: %s", d.Id(), err)
+		}
+	}
+
+	return resourceClusterV1Read(ctx, d, meta)
 }
 
 func resourceClusterV1Delete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*cfg.Config)
 	client, err := config.MrsV1Client(config.GetRegion(d))
 	if err != nil {
-		return fmterr.Errorf("error creating OpenTelekomCloud MRS client: %s", err)
+		return fmterr.Errorf(ErrCreationClient, err)
 	}
 
-	rId := d.Id()
-	clusterGet, err := cluster.Get(client, d.Id()).Extract()
-	if err != nil {
-		if common.IsResourceNotFound(err) {
-			log.Printf("[INFO] getting an unavailable Cluster: %s", rId)
-			return nil
-		}
-		return fmterr.Errorf("error getting Cluster %s: %s", rId, err)
-	}
-
-	if clusterGet.Clusterstate == "terminated" {
-		log.Printf("[DEBUG] The Cluster %s has been terminated.", rId)
-		return nil
-	}
-
-	log.Printf("[DEBUG] Deleting Cluster %s", rId)
-
-	err = cluster.Delete(client, rId).ExtractErr()
-	if err != nil {
+	if err := cluster.Delete(client, d.Id()).ExtractErr(); err != nil {
 		return fmterr.Errorf("error deleting OpenTelekomCloud Cluster: %s", err)
 	}
 
-	log.Printf("[DEBUG] Waiting for Cluster (%s) to be terminated", rId)
+	log.Printf("[DEBUG] Waiting for Cluster (%s) to be terminated", d.Id())
 
 	stateConf := &resource.StateChangeConf{
 		Pending:    []string{"running", "terminating"},
 		Target:     []string{"terminated"},
-		Refresh:    ClusterStateRefreshFunc(client, rId),
+		Refresh:    clusterStateRefreshFunc(client, d.Id()),
 		Timeout:    d.Timeout(schema.TimeoutDelete),
 		Delay:      10 * time.Second,
 		MinTimeout: 3 * time.Second,
@@ -848,37 +782,23 @@ func resourceClusterV1Delete(ctx context.Context, d *schema.ResourceData, meta i
 
 	_, err = stateConf.WaitForStateContext(ctx)
 	if err != nil {
-		return fmterr.Errorf(
-			"Error waiting for Cluster (%s) to be terminated: %s",
-			d.Id(), err)
+		return fmterr.Errorf("error waiting for Cluster (%s) to be terminated: %s", d.Id(), err)
 	}
 
 	d.SetId("")
 	return nil
 }
 
-func setTagForMrs(d *schema.ResourceData, meta interface{}, instanceID string, tagmap map[string]interface{}) error {
-	config := meta.(*cfg.Config)
-	client, err := config.MrsV1Client(config.GetRegion(d))
-	if err != nil {
-		return fmt.Errorf("error creating OpenTelekomCloud MRS v1 client: %s", err)
-	}
-
-	rId := instanceID
-	taglist := []tags.Tag{}
-	for k, v := range tagmap {
-		tag := tags.Tag{
-			Key:   k,
-			Value: v.(string),
+func clusterStateRefreshFunc(client *golangsdk.ServiceClient, clusterID string) resource.StateRefreshFunc {
+	return func() (interface{}, string, error) {
+		n, err := cluster.Get(client, clusterID).Extract()
+		if err != nil {
+			if _, ok := err.(golangsdk.ErrDefault404); ok {
+				return n, "DELETED", nil
+			}
+			return nil, "", err
 		}
-		taglist = append(taglist, tag)
-	}
 
-	createOpts := tags.BatchOpts{Action: tags.ActionCreate, Tags: taglist}
-	createTags := tags.BatchAction(client, rId, createOpts)
-	if createTags.Err != nil {
-		return fmt.Errorf("error creating OpenTelekomCloud MRS cluster tags: %s", createTags.Err)
+		return n, n.ClusterState, nil
 	}
-
-	return nil
 }
