@@ -1,0 +1,4 @@
+---
+fixes:
+  - |
+    **[ELB]** Fix wrong endpoint in ``EU-NL`` region (`#1617 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/1617>`_)
