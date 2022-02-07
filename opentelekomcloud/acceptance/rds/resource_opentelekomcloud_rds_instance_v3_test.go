@@ -6,12 +6,10 @@ import (
 	"regexp"
 	"testing"
 
-	"github.com/opentelekomcloud/gophertelekomcloud/openstack/rds/v3/instances"
-
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/acctest"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
-
+	"github.com/opentelekomcloud/gophertelekomcloud/openstack/rds/v3/instances"
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/acceptance/common"
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/acceptance/env"
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common/cfg"
@@ -49,6 +47,41 @@ func TestAccRdsInstanceV3Basic(t *testing.T) {
 					resource.TestCheckResourceAttr(instanceV3ResourceName, "flavor", "rds.pg.c2.large"),
 					resource.TestCheckResourceAttr(instanceV3ResourceName, "volume.0.size", "100"),
 					resource.TestCheckResourceAttr(instanceV3ResourceName, "tags.muh", "value-update"),
+				),
+			},
+		},
+	})
+}
+
+func TestAccRdsInstanceV3RestoreBackup(t *testing.T) {
+	postfix := acctest.RandString(3)
+	var rdsInstance instances.RdsInstanceResponse
+	var restoredInstance instances.RdsInstanceResponse
+
+	restoredResourceName := "opentelekomcloud_rds_instance_v3.from_backup"
+
+	resource.Test(t, resource.TestCase{
+		PreCheck:          func() { common.TestAccPreCheck(t) },
+		ProviderFactories: common.TestAccProviderFactories,
+		CheckDestroy:      testAccCheckRdsInstanceV3Destroy,
+		Steps: []resource.TestStep{
+			{
+				Config: testAccRdsInstanceV3Basic(postfix),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckRdsInstanceV3Exists(instanceV3ResourceName, &rdsInstance),
+				),
+			},
+			{
+				PreConfig: func() {
+					forceRdsBackup(t, &rdsInstance.Id)
+				},
+				Config: testAccRdsInstanceV3Restored(postfix),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckRdsInstanceV3Exists(instanceV3ResourceName, &rdsInstance),
+					testAccCheckRdsInstanceV3Exists(restoredResourceName, &restoredInstance),
+					resource.TestCheckResourceAttr(restoredResourceName, "flavor", "rds.pg.c2.medium"),
+					resource.TestCheckResourceAttr(restoredResourceName, "volume.0.size", "40"),
+					resource.TestCheckResourceAttr(restoredResourceName, "tags.muh", "value-create"),
 				),
 			},
 		},
@@ -659,6 +692,78 @@ resource "opentelekomcloud_rds_instance_v3" "instance" {
     size = 40
   }
   flavor = "bla.bla.rds"
+}
+`, common.DataSourceSecGroupDefault, common.DataSourceSubnet, postfix, env.OS_AVAILABILITY_ZONE)
+}
+
+func testAccRdsInstanceV3Restored(postfix string) string {
+	return fmt.Sprintf(`
+%s
+%s
+
+resource "opentelekomcloud_rds_instance_v3" "instance" {
+  name              = "tf_rds_instance_%s"
+  availability_zone = ["%s"]
+  db {
+    password = "Postgres!120521"
+    type     = "PostgreSQL"
+    version  = "10"
+    port     = "8635"
+  }
+  security_group_id = data.opentelekomcloud_networking_secgroup_v2.default_secgroup.id
+  subnet_id         = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.network_id
+  vpc_id            = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.vpc_id
+  volume {
+    type = "COMMON"
+    size = 40
+  }
+  flavor = "rds.pg.c2.medium"
+  backup_strategy {
+    start_time = "08:00-09:00"
+    keep_days  = 1
+  }
+  tags = {
+    muh = "value-create"
+    kuh = "value-create"
+  }
+}
+
+data "opentelekomcloud_rds_backup_v3" "backup" {
+  instance_id = opentelekomcloud_rds_instance_v3.instance.id
+  type        = "auto"
+}
+
+resource "opentelekomcloud_rds_instance_v3" "from_backup" {
+  name              = "${opentelekomcloud_rds_instance_v3.instance.name}-restored"
+  availability_zone = opentelekomcloud_rds_instance_v3.instance.availability_zone
+
+  restore_point {
+    instance_id = opentelekomcloud_rds_instance_v3.instance.id
+    backup_id   = data.opentelekomcloud_rds_backup_v3.backup.id
+  }
+
+  db {
+    password = "Postgres!120521"
+    type     = "PostgreSQL"
+    version  = "10"
+    port     = "8635"
+  }
+  security_group_id = data.opentelekomcloud_networking_secgroup_v2.default_secgroup.id
+  subnet_id         = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.network_id
+  vpc_id            = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.vpc_id
+  volume {
+    type = "COMMON"
+    size = 40
+  }
+  flavor = "rds.pg.c2.medium"
+  backup_strategy {
+    start_time = "08:00-09:00"
+    keep_days  = 1
+  }
+  tags = {
+    muh = "value-create"
+    kuh = "value-create"
+  }
 }
 `, common.DataSourceSecGroupDefault, common.DataSourceSubnet, postfix, env.OS_AVAILABILITY_ZONE)
 }

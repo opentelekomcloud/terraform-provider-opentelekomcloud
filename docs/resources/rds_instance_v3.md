@@ -221,6 +221,44 @@ resource "opentelekomcloud_rds_instance_v3" "instance" {
 }
 ```
 
+### Restore backup to a new instance
+
+```hcl
+data "opentelekomcloud_rds_backup_v3" "backup" {
+  instance_id = var.rds_instance_id
+  type        = "auto"
+}
+
+resource "opentelekomcloud_rds_instance_v3" "from_backup" {
+  name              = "instance-restored"
+  availability_zone = opentelekomcloud_rds_instance_v3.instance.availability_zone
+  flavor            = "rds.pg.c2.medium"
+
+  restore_point {
+    instance_id = data.opentelekomcloud_rds_backup_v3.backup.instance_id
+    backup_id   = data.opentelekomcloud_rds_backup_v3.backup.id
+  }
+
+  db {
+    password = "Postgres!120521"
+    type     = "PostgreSQL"
+    version  = "10"
+    port     = "8635"
+  }
+  security_group_id = var.security_group_id
+  subnet_id         = var.os_network_id
+  vpc_id            = var.os_router_id
+  volume {
+    type = "COMMON"
+    size = 40
+  }
+  backup_strategy {
+    start_time = "08:00-09:00"
+    keep_days  = 1
+  }
+}
+```
+
 ## Argument Reference
 
 The following arguments are supported:
@@ -273,6 +311,8 @@ The following arguments are supported:
 
 * `tags` - (Optional) Tags key/value pairs to associate with the instance.
 
+* `restore_point` - (Optional) Specifies the restoration information.
+
 The `db` block supports:
 
 * `password` - (Required) Specifies the database password. The value cannot be
@@ -324,6 +364,17 @@ The `backup_strategy` block supports:
   be 1 greater than the hh value. The values of mm and MM must be
   the same and must be set to any of the following: 00, 15, 30, or
   45. Example value: 08:15-09:15 23:00-00:00.
+
+The `restore_point` block supports:
+
+* `instance_id` - (Required) Specifies the original DB instance ID.
+
+* `backup_id` - (Optional) Specifies the ID of the backup used to restore data.
+
+* `restore_time` - (Optional) Specifies the time point of data restoration in the UNIX timestamp.
+  The unit is millisecond and the time zone is UTC.
+
+-> Exactly one of `backup_id` and `restore_time` needs to be set.
 
 ## Attributes Reference
 
