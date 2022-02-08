@@ -1,0 +1,5 @@
+---
+enhancements:
+  - |
+    **[CCE]** ``initial_node_count`` can now be zero in ``opentelekomcloud_cce_node_pool_v3``
+    (`#1620 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/1620>`_)
