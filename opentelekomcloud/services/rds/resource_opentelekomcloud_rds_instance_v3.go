@@ -23,7 +23,6 @@ import (
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/rds/v3/configurations"
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/rds/v3/flavors"
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/rds/v3/instances"
-
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common"
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common/cfg"
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common/fmterr"
@@ -61,6 +60,33 @@ func ResourceRdsInstanceV3() *schema.Resource {
 					Type: schema.TypeString,
 				},
 			},
+			"restore_point": {
+				Type:     schema.TypeList,
+				Optional: true,
+				ForceNew: true,
+				MaxItems: 1,
+				Elem: &schema.Resource{
+					Schema: map[string]*schema.Schema{
+						"instance_id": {
+							Type:     schema.TypeString,
+							Required: true,
+							ForceNew: true,
+						},
+						"restore_time": {
+							Type:         schema.TypeInt,
+							Optional:     true,
+							ExactlyOneOf: []string{"restore_point.0.backup_id"},
+							ForceNew:     true,
+						},
+						"backup_id": {
+							Type:         schema.TypeString,
+							Optional:     true,
+							ExactlyOneOf: []string{"restore_point.0.restore_time"},
+							ForceNew:     true,
+						},
+					},
+				},
+			},
 			"db": {
 				Type:     schema.TypeList,
 				Required: true,
@@ -76,7 +102,8 @@ func ResourceRdsInstanceV3() *schema.Resource {
 						},
 						"type": {
 							Type:     schema.TypeString,
-							Required: true,
+							Optional: true, // can't be set in case of restored backup
+							Computed: true,
 							ForceNew: true,
 							ValidateFunc: validation.StringInSlice([]string{
 								"PostgreSQL", "MySQL", "SQLServer",
@@ -84,7 +111,8 @@ func ResourceRdsInstanceV3() *schema.Resource {
 						},
 						"version": {
 							Type:     schema.TypeString,
-							Required: true,
+							Optional: true, // can't be set in case of restored backup
+							Computed: true,
 							ForceNew: true,
 						},
 						"port": {
@@ -336,36 +364,57 @@ func resourceRdsInstanceV3Create(ctx context.Context, d *schema.ResourceData, me
 		dbPortString = ""
 	}
 
-	createOpts := instances.CreateRdsOpts{
-		Name:             d.Get("name").(string),
-		Datastore:        resourceRDSDataStore(d),
-		Ha:               resourceRDSHa(d),
-		ConfigurationId:  d.Get("param_group_id").(string),
-		Port:             dbPortString,
-		Password:         dbInfo["password"].(string),
-		BackupStrategy:   resourceRDSBackupStrategy(d),
-		DiskEncryptionId: volumeInfo["disk_encryption_id"].(string),
-		FlavorRef:        d.Get("flavor").(string),
-		Volume:           resourceRDSVolume(d),
-		Region:           config.GetRegion(d),
-		AvailabilityZone: resourceRDSAvailabilityZones(d),
-		VpcId:            d.Get("vpc_id").(string),
-		SubnetId:         d.Get("subnet_id").(string),
-		SecurityGroupId:  d.Get("security_group_id").(string),
-		ChargeInfo:       resourceRDSChangeMode(),
-	}
-	createResult := instances.Create(client, createOpts)
-	r, err := createResult.Extract()
-	if err != nil {
-		return diag.FromErr(err)
-	}
-	jobResponse, err := createResult.ExtractJobResponse()
-	if err != nil {
-		return diag.FromErr(err)
+	var r *instances.CreateRds
+	if _, ok := d.GetOk("restore_point"); ok {
+		restoreOpts := backups.RestoreToNewOpts{
+			Name:             d.Get("name").(string),
+			Ha:               resourceRDSHa(d),
+			ConfigurationId:  d.Get("param_group_id").(string),
+			Port:             dbPortString,
+			Password:         dbInfo["password"].(string),
+			BackupStrategy:   resourceRDSBackupStrategy(d),
+			DiskEncryptionId: volumeInfo["disk_encryption_id"].(string),
+			FlavorRef:        d.Get("flavor").(string),
+			Volume:           resourceRDSVolume(d),
+			AvailabilityZone: resourceRDSAvailabilityZones(d),
+			VpcId:            d.Get("vpc_id").(string),
+			SubnetId:         d.Get("subnet_id").(string),
+			SecurityGroupId:  d.Get("security_group_id").(string),
+			RestorePoint:     resourceRestorePoint(d),
+		}
+		restored, err := backups.RestoreToNew(client, restoreOpts).Extract()
+		if err != nil {
+			return fmterr.Errorf("error creating new RDSv3 instance from backup: %w", err)
+		}
+		r = restored
+	} else {
+		createOpts := instances.CreateRdsOpts{
+			Name:             d.Get("name").(string),
+			Datastore:        resourceRDSDataStore(d),
+			Ha:               resourceRDSHa(d),
+			ConfigurationId:  d.Get("param_group_id").(string),
+			Port:             dbPortString,
+			Password:         dbInfo["password"].(string),
+			BackupStrategy:   resourceRDSBackupStrategy(d),
+			DiskEncryptionId: volumeInfo["disk_encryption_id"].(string),
+			FlavorRef:        d.Get("flavor").(string),
+			Volume:           resourceRDSVolume(d),
+			Region:           config.GetRegion(d),
+			AvailabilityZone: resourceRDSAvailabilityZones(d),
+			VpcId:            d.Get("vpc_id").(string),
+			SubnetId:         d.Get("subnet_id").(string),
+			SecurityGroupId:  d.Get("security_group_id").(string),
+			ChargeInfo:       resourceRDSChangeMode(),
+		}
+		created, err := instances.Create(client, createOpts).Extract()
+		if err != nil {
+			return fmterr.Errorf("error creating new RDSv3 instance: %w", err)
+		}
+		r = created
 	}
 
 	timeout := d.Timeout(schema.TimeoutCreate)
-	if err := instances.WaitForJobCompleted(client, int(timeout.Seconds()), jobResponse.JobID); err != nil {
+	if err := instances.WaitForJobCompleted(client, int(timeout.Seconds()), r.JobId); err != nil {
 		return diag.FromErr(err)
 	}
 
@@ -410,9 +459,11 @@ func resourceRdsInstanceV3Create(ctx context.Context, d *schema.ResourceData, me
 		}
 	}
 
+	clientCtx := common.CtxWithClient(ctx, client, keyClientV3)
+
 	ip := getPublicIP(d)
 	if ip != "" {
-		if err := resourceRdsInstanceV3Read(ctx, d, meta); err != nil {
+		if err := resourceRdsInstanceV3Read(clientCtx, d, meta); err != nil {
 			return err
 		}
 		nw, err := config.NetworkingV2Client(config.GetRegion(d))
@@ -447,7 +498,21 @@ func resourceRdsInstanceV3Create(ctx context.Context, d *schema.ResourceData, me
 		}
 	}
 
-	return resourceRdsInstanceV3Read(ctx, d, meta)
+	return resourceRdsInstanceV3Read(clientCtx, d, meta)
+}
+
+func resourceRestorePoint(d *schema.ResourceData) backups.RestorePoint {
+	restorePoint := backups.RestorePoint{
+		InstanceID: d.Get("restore_point.0.instance_id").(string),
+	}
+	if tm, ok := d.GetOk("restore_point.0.restore_time"); ok {
+		restorePoint.RestoreTime = tm.(int)
+		restorePoint.Type = backups.TypeTimestamp
+	} else if id, ok := d.GetOk("restore_point.0.backup_id"); ok {
+		restorePoint.BackupID = id.(string)
+		restorePoint.Type = backups.TypeBackup
+	}
+	return restorePoint
 }
 
 func assureTemplateApplied(d *schema.ResourceData, client *golangsdk.ServiceClient) (bool, error) {
@@ -844,7 +909,8 @@ func resourceRdsInstanceV3Update(ctx context.Context, d *schema.ResourceData, me
 		}
 	}
 
-	return resourceRdsInstanceV3Read(ctx, d, meta)
+	clientCtx := common.CtxWithClient(ctx, client, keyClientV3)
+	return resourceRdsInstanceV3Read(clientCtx, d, meta)
 }
 
 func getMasterID(nodes []instances.Nodes) (nodeID string) {
@@ -856,9 +922,11 @@ func getMasterID(nodes []instances.Nodes) (nodeID string) {
 	return
 }
 
-func resourceRdsInstanceV3Read(_ context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceRdsInstanceV3Read(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*cfg.Config)
-	client, err := config.RdsV3Client(config.GetRegion(d))
+	client, err := common.ClientFromCtx(ctx, keyClientV3, func() (*golangsdk.ServiceClient, error) {
+		return config.RdsV3Client(config.GetRegion(d))
+	})
 	if err != nil {
 		return fmterr.Errorf(errCreateClient, err)
 	}

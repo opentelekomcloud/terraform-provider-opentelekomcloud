@@ -60,7 +60,7 @@ data "opentelekomcloud_rds_backup_v3" "backup" {
 `, testAccRdsInstanceV3Basic(postfix))
 }
 
-func forceRdsBackup(t *testing.T, instanceID *string) string {
+func forceRdsBackup(t *testing.T, instanceID *string) {
 	config := common.TestAccProvider.Meta().(*cfg.Config)
 	client, err := config.RdsV3Client(env.OS_REGION_NAME)
 	th.AssertNoErr(t, err)
@@ -81,7 +81,6 @@ func forceRdsBackup(t *testing.T, instanceID *string) string {
 	})
 	th.AssertNoErr(t, err)
 
-	var backupID string
 	err = golangsdk.WaitFor(600, func() (bool, error) {
 		pages, err := backups.List(client, backups.ListOpts{
 			InstanceID: *instanceID,
@@ -97,7 +96,6 @@ func forceRdsBackup(t *testing.T, instanceID *string) string {
 			return false, nil
 		}
 		backup := bList[0]
-		backupID = backup.ID
 		if backup.Status == backups.StatusCompleted {
 			return true, nil
 		}
@@ -107,6 +105,4 @@ func forceRdsBackup(t *testing.T, instanceID *string) string {
 		return false, nil
 	})
 	th.AssertNoErr(t, err)
-
-	return backupID
 }

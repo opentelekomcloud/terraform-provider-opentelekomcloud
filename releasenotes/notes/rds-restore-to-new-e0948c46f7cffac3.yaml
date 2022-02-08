@@ -1,0 +1,6 @@
+---
+enhancements:
+  - |
+    **[RDS]** Add ``restore_point`` argument to ``opentelekomcloud_rds_instance_v3`` resource allowing to
+    restore RDS instance backup as a new instance
+    (`#1624 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/1624>`_)
