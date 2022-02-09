@@ -3,7 +3,6 @@ package nat
 import (
 	"context"
 	"log"
-	"strconv"
 	"time"
 
 	"github.com/hashicorp/go-multierror"
@@ -137,13 +136,11 @@ func resourceNatSnatRuleV2Read(_ context.Context, d *schema.ResourceData, meta i
 		d.Set("cidr", snatRule.Cidr),
 		d.Set("region", config.GetRegion(d)),
 	)
-	sourceType, err := strconv.Atoi(snatRule.SourceType)
-	if err != nil {
-		return fmterr.Errorf("error converting `source_type`: %w", err)
+	if sourceType, ok := snatRule.SourceType.(int); ok {
+		mErr = multierror.Append(mErr,
+			d.Set("source_type", sourceType),
+		)
 	}
-	mErr = multierror.Append(mErr,
-		d.Set("source_type", sourceType),
-	)
 
 	if err := mErr.ErrorOrNil(); err != nil {
 		return diag.FromErr(err)
