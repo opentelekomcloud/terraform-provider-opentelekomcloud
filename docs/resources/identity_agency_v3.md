@@ -39,7 +39,7 @@ The following arguments are supported:
   grant permissions to agency on project. The structure is documented below.
 
 * `domain_roles` - (optional) An array of role names which stand for the
-  permissionis to be granted to agency on domain.
+  permissions to be granted to agency on domain.
 
 The `project_role` block supports:
 
@@ -71,3 +71,11 @@ The following attributes are exported:
 * `expire_time` - The expiration time of agency
 
 * `create_time` - The time when the agency was created.
+
+## Import
+
+Agencies can be imported using the `id`, e.g.
+
+```shell
+terraform import opentelekomcloud_identity_agency_v3.this 1bc93b8b-37a4-4b50-92cc-daa4c89d4e4c
+```

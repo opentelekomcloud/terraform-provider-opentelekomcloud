@@ -1,0 +1,4 @@
+---
+other:
+  - |
+    **[IAM]** Add missing ``import`` section in ``resource/opentelekomcloud_identity_agency_v3`` documentation (`#1626 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/1626>`_)
