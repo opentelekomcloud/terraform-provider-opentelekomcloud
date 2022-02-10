@@ -137,9 +137,14 @@ func resourceNatSnatRuleV2Read(_ context.Context, d *schema.ResourceData, meta i
 		d.Set("cidr", snatRule.Cidr),
 		d.Set("region", config.GetRegion(d)),
 	)
-	sourceType, err := strconv.Atoi(snatRule.SourceType)
-	if err != nil {
-		return fmterr.Errorf("error converting `source_type`: %w", err)
+	var sourceType int
+	if i, okFloat := snatRule.SourceType.(float64); okFloat {
+		sourceType = int(i)
+	} else if s, okStr := snatRule.SourceType.(string); okStr {
+		sourceType, err = strconv.Atoi(s)
+		if err != nil {
+			return fmterr.Errorf("error converting `source_type`: %w", err)
+		}
 	}
 	mErr = multierror.Append(mErr,
 		d.Set("source_type", sourceType),
