@@ -58,6 +58,8 @@ resource "opentelekomcloud_identity_agency_v3" "agency_1" {
 
 data "opentelekomcloud_identity_agency_v3" "agency_1" {
   name = "%[1]s"
+
+  depends_on = [opentelekomcloud_identity_agency_v3.agency_1]
 }
 `, name, delegatedDomainName, env.OS_TENANT_NAME)
 }
