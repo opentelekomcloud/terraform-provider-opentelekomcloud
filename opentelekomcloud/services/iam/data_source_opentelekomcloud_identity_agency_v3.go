@@ -56,7 +56,7 @@ func DataSourceIdentityAgencyV3() *schema.Resource {
 
 func dataSourceIdentityAgencyV3Read(_ context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*cfg.Config)
-	client, err := config.IdentityV30Client()
+	client, err := agencyClient(d, config)
 	if err != nil {
 		return fmterr.Errorf("error creating OpenTelekomCloud identity client: %s", err)
 	}
