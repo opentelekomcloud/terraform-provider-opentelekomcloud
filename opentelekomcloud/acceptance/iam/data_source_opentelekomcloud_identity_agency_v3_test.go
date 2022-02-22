@@ -21,8 +21,11 @@ func TestDataSourceIdentityAgencyV3_basic(t *testing.T) {
 	resource.Test(t, resource.TestCase{
 		PreCheck: func() {
 			common.TestAccPreCheck(t)
-			TestAccIdentityV3AgencyPreCheck(t)
 			common.TestAccPreCheckAdminOnly(t)
+
+			if delegatedDomainName == "" {
+				t.Skip("environment variable OS_DELEGATED_DOMAIN_NAME should be set for this test")
+			}
 		},
 		ProviderFactories: common.TestAccProviderFactories,
 		CheckDestroy:      testAccCheckIdentityV3AgencyDestroy,
