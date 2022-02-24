@@ -21,10 +21,6 @@ func DataSourceIdentityAgencyV3() *schema.Resource {
 				Type:     schema.TypeString,
 				Optional: true,
 			},
-			"domain_id": {
-				Type:     schema.TypeString,
-				Optional: true,
-			},
 			"trust_domain_id": {
 				Type:     schema.TypeString,
 				Optional: true,
@@ -63,7 +59,7 @@ func dataSourceIdentityAgencyV3Read(_ context.Context, d *schema.ResourceData, m
 
 	opts := agency.ListOpts{
 		Name:          d.Get("name").(string),
-		DomainID:      d.Get("domain_id").(string),
+		DomainID:      client.DomainID,
 		TrustDomainID: d.Get("trust_domain_id").(string),
 	}
 	pages, err := agency.List(client, opts).AllPages()
