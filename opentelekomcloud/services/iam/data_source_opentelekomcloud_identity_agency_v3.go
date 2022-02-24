@@ -82,7 +82,6 @@ func dataSourceIdentityAgencyV3Read(_ context.Context, d *schema.ResourceData, m
 	d.SetId(result.ID)
 	mErr := multierror.Append(
 		d.Set("name", result.Name),
-		d.Set("domain_id", result.DomainID),
 		d.Set("trust_domain_id", result.DelegatedDomainID),
 		d.Set("trust_domain_name", result.DelegatedDomainName),
 		d.Set("description", result.Description),
