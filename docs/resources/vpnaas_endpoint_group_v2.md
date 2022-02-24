@@ -13,8 +13,16 @@ resource "opentelekomcloud_vpnaas_endpoint_group_v2" "group_1" {
   name      = "Group 1"
   type      = "cidr"
   endpoints = ["10.2.0.0/24", "10.3.0.0/24"]
+
+  lifecycle {
+    create_before_destroy = true
+  }
 }
 ```
+
+~>
+  Endpoint group can't be deleted when used, `create_before_destroy` makes it possible to make
+  changes which require endpoint group recreation.
 
 ## Argument Reference
 

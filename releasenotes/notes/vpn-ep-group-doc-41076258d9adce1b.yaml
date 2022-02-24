@@ -1,0 +1,5 @@
+---
+other:
+  - |
+    **[VPN]** Add example of ``create_before_destroy`` usage to ``opentelekomcloud_vpnaas_endpoint_group_v2``
+    documentation (`#1632 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/1632>`_)
