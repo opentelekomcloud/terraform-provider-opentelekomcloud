@@ -5,9 +5,9 @@ e.g. ECS, EVS, OBS ... please refer to the tf files.
 
 ### Folders And Files
 
-mainfile.tf: Module difinitions
-provider.tf: Two provider difinitions.
-var.tf: All variable difinitions.
+mainfile.tf: Module definitions
+provider.tf: Two provider definitions.
+var.tf: All variable definitions.
 outputs.tf: Module outputs.
 public-2048.txt: the key using when creating keypair.
 privite-xshell-2048.pem: The login private key.
@@ -26,6 +26,6 @@ privite-xshell-2048.pem: The login private key.
 ......
 
 modules: Contains the basic examples, Currently has more than 30 resources, they are:
-	main.tf: resource difinitions.
-	outputs.tf: the output information difinitions.
+	main.tf: resource definitions.
+	outputs.tf: the output information definitions.
 	var.tf: the variables, please change its value with your case.
