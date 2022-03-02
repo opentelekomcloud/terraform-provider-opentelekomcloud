@@ -1,0 +1,5 @@
+---
+enhancements:
+  - |
+    **[CSS]** Add ``tags`` argument to ``resource/opentelekomcloud_css_cluster_v1``
+    (`#1639 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/1639>`_)

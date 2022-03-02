@@ -49,6 +49,30 @@ func TestAccCssClusterV1_basic(t *testing.T) {
 	})
 }
 
+func TestAccCssClusterV1_tags(t *testing.T) {
+	name := fmt.Sprintf("css-%s", acctest.RandString(10))
+	var cluster clusters.Cluster
+
+	resource.ParallelTest(t, resource.TestCase{
+		PreCheck: func() {
+			common.TestAccPreCheck(t)
+			quotas.BookMany(t, sharedFlavorQuotas(t, 2, 40))
+		},
+		ProviderFactories: common.TestAccProviderFactories,
+		CheckDestroy:      testAccCheckCssClusterV1Destroy,
+		Steps: []resource.TestStep{
+			{
+				Config: testAccCssClusterV1Tags(name),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckCssClusterV1Exists(resourceClusterName, &cluster),
+					resource.TestCheckResourceAttr(resourceClusterName, "nodes.#", "1"),
+					resource.TestCheckResourceAttr(resourceClusterName, "tags.say", "hi"),
+				),
+			},
+		},
+	})
+}
+
 func TestAccCssClusterV1_validateDiskAndFlavor(t *testing.T) {
 	name := fmt.Sprintf("css-%s", acctest.RandString(10))
 
@@ -189,6 +213,43 @@ resource "opentelekomcloud_css_cluster_v1" "cluster" {
   enable_https     = true
   enable_authority = true
   admin_pass       = "QwertyUI!"
+}
+`, common.DataSourceSecGroupDefault, common.DataSourceSubnet, name, env.OS_AVAILABILITY_ZONE)
+}
+
+func testAccCssClusterV1Tags(name string) string {
+	return fmt.Sprintf(`
+%s
+
+%s
+
+resource "opentelekomcloud_css_cluster_v1" "cluster" {
+  expect_node_num = 1
+  name            = "%s"
+  node_config {
+    flavor = "css.medium.8"
+    network_info {
+      security_group_id = data.opentelekomcloud_networking_secgroup_v2.default_secgroup.id
+      network_id        = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.network_id
+      vpc_id            = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.vpc_id
+    }
+    volume {
+      volume_type = "COMMON"
+      size        = 40
+    }
+
+    availability_zone = "%s"
+  }
+  datastore {
+    version = "7.6.2"
+  }
+  enable_https     = true
+  enable_authority = true
+  admin_pass       = "QwertyUI!"
+
+  tags = {
+    say = "hi"
+  }
 }
 `, common.DataSourceSecGroupDefault, common.DataSourceSubnet, name, env.OS_AVAILABILITY_ZONE)
 }
