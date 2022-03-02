@@ -67,6 +67,8 @@ lowercase letters, numbers, and special characters (`~!@#$%^&*()-_=+\\|[{}];:,<.
 
 * `expect_node_num` - (Optional) Number of cluster instances. The value range is `1` to `32`.
 
+* `tags` - (Optional) Tags key/value pairs to associate with the cluster.
+
 The `node_config` block supports:
 
 * `availability_zone` - (Optional) Availability zone (AZ). Changing this parameter will create a new resource.

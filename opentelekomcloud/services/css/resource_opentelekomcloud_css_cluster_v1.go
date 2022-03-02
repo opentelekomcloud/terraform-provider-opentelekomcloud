@@ -13,6 +13,7 @@ import (
 	golangsdk "github.com/opentelekomcloud/gophertelekomcloud"
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/css/v1/clusters"
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/css/v1/flavors"
+	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common"
 
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common/cfg"
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common/fmterr"
@@ -38,7 +39,6 @@ func ResourceCssClusterV1() *schema.Resource {
 				Required: true,
 				ForceNew: true,
 			},
-
 			"node_config": {
 				Type:     schema.TypeList,
 				Required: true,
@@ -111,39 +111,33 @@ func ResourceCssClusterV1() *schema.Resource {
 					},
 				},
 			},
-
 			"enable_https": {
 				Type:     schema.TypeBool,
 				Computed: true,
 				Optional: true,
 				ForceNew: true,
 			},
-
 			"enable_authority": {
 				Type:     schema.TypeBool,
 				Computed: true,
 				Optional: true,
 				ForceNew: true,
 			},
-
 			"admin_pass": {
 				Type:         schema.TypeString,
 				Optional:     true,
 				RequiredWith: []string{"enable_authority"},
 				ForceNew:     true,
 			},
-
 			"expect_node_num": {
 				Type:     schema.TypeInt,
 				Optional: true,
 				Default:  1,
 			},
-
 			"created": {
 				Type:     schema.TypeString,
 				Computed: true,
 			},
-
 			"datastore": {
 				Type:     schema.TypeList,
 				Optional: true,
@@ -167,12 +161,16 @@ func ResourceCssClusterV1() *schema.Resource {
 					},
 				},
 			},
-
+			"tags": {
+				Type:         schema.TypeMap,
+				Optional:     true,
+				ForceNew:     true,
+				ValidateFunc: common.ValidateTags,
+			},
 			"endpoint": {
 				Type:     schema.TypeString,
 				Computed: true,
 			},
-
 			"nodes": {
 				Type:     schema.TypeList,
 				Computed: true,
@@ -193,7 +191,6 @@ func ResourceCssClusterV1() *schema.Resource {
 					},
 				},
 			},
-
 			"updated": {
 				Type:     schema.TypeString,
 				Computed: true,
@@ -230,6 +227,7 @@ func resourceCssClusterV1Create(ctx context.Context, d *schema.ResourceData, met
 		},
 		AuthorityEnabled: d.Get("enable_authority").(bool),
 		AdminPassword:    d.Get("admin_pass").(string),
+		Tags:             common.ExpandResourceTags(d.Get("tags").(map[string]interface{})),
 	}
 	if enable, ok := d.GetOk("enable_https"); ok {
 		opts.HttpsEnabled = fmt.Sprint(enable.(bool))
@@ -282,9 +280,9 @@ func resourceCssClusterV1Read(_ context.Context, d *schema.ResourceData, meta in
 		d.Set("created", cluster.Created),
 		d.Set("updated", cluster.Updated),
 		d.Set("endpoint", cluster.Endpoint),
-
 		d.Set("nodes", extractNodes(cluster)),
 		d.Set("datastore", extractDatastore(cluster)),
+		d.Set("tags", common.TagsToMap(cluster.Tags)),
 	)
 
 	if err := mErr.ErrorOrNil(); err != nil {
