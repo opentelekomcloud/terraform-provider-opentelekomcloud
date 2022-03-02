@@ -155,8 +155,8 @@ func ResourceCssClusterV1() *schema.Resource {
 						"type": {
 							Type:     schema.TypeString,
 							Optional: true,
-							Computed: true,
 							ForceNew: true,
+							Default:  "elasticsearch",
 						},
 						"version": {
 							Type:     schema.TypeString,
