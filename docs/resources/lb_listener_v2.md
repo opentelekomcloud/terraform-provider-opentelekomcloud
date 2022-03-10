@@ -69,6 +69,10 @@ The following arguments are supported:
   [here](https://docs.otc.t-systems.com/api/elb/elb_zq_jt_0001.html) for details about the supported cipher
   suites. The option is effective only in conjunction with `TERMINATED_HTTPS`.
 
+* `transparent_client_ip_enable` - (Optional) Specifies whether to pass source IP addresses of the clients to
+  backend servers. The value can be true or false, and the default value is false for `TCP` and `UDP` listeners.
+  The value can only be true for `HTTP` and `HTTPS` listeners.
+
 * `admin_state_up` - (Optional) The administrative state of the Listener.
   A valid value is `true` (UP) or `false` (DOWN).
 

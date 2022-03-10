@@ -2,7 +2,9 @@ package v2
 
 import (
 	"context"
+	"fmt"
 	"log"
+	"strings"
 	"time"
 
 	"github.com/hashicorp/go-multierror"
@@ -10,13 +12,14 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
+	golangsdk "github.com/opentelekomcloud/gophertelekomcloud"
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/common/tags"
-
+	v3listeners "github.com/opentelekomcloud/gophertelekomcloud/openstack/elb/v3/listeners"
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/networking/v2/extensions/lbaas_v2/listeners"
-
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common"
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common/cfg"
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common/fmterr"
+	v3 "github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/services/elb/v3"
 )
 
 func ResourceListenerV2() *schema.Resource {
@@ -105,6 +108,11 @@ func ResourceListenerV2() *schema.Resource {
 				ValidateFunc: validation.StringInSlice([]string{
 					"tls-1-0", "tls-1-1", "tls-1-2", "tls-1-2-strict"}, false),
 			},
+			"transparent_client_ip_enable": {
+				Type:     schema.TypeBool,
+				Optional: true,
+				Computed: true,
+			},
 			"admin_state_up": {
 				Type:     schema.TypeBool,
 				Default:  true,
@@ -184,6 +192,11 @@ func resourceListenerV2Create(ctx context.Context, d *schema.ResourceData, meta 
 
 	d.SetId(listener.ID)
 
+	// using v3 API
+	if err := updateTransparentIPEnable(d, config); err != nil {
+		return fmterr.Errorf("error updating ELB v2 Listener `transparent_client_ip_enable`: %w", err)
+	}
+
 	return resourceListenerV2Read(ctx, d, meta)
 }
 
@@ -215,6 +228,9 @@ func resourceListenerV2Read(_ context.Context, d *schema.ResourceData, meta inte
 		d.Set("sni_container_refs", listener.SniContainerRefs),
 		d.Set("tls_ciphers_policy", listener.TlsCiphersPolicy),
 		d.Set("admin_state_up", listener.AdminStateUp),
+
+		// done using v3 API
+		readTransparentIPEnable(d, config),
 	)
 
 	if mErr.ErrorOrNil() != nil {
@@ -239,6 +255,12 @@ func resourceListenerV2Update(ctx context.Context, d *schema.ResourceData, meta 
 	client, err := config.ElbV2Client(config.GetRegion(d))
 	if err != nil {
 		return fmterr.Errorf(ErrCreationV2Client, err)
+	}
+
+	if d.HasChange("transparent_client_ip_enable") {
+		if err := updateTransparentIPEnable(d, config); err != nil {
+			return fmterr.Errorf("error updating ELB v2 `transparent_client_ip_enable`: %w", err)
+		}
 	}
 
 	var updateOpts listeners.UpdateOpts
@@ -347,4 +369,49 @@ func resourceListenerV2Delete(ctx context.Context, d *schema.ResourceData, meta 
 	}
 
 	return nil
+}
+
+// elbV3Client user as temporary stub for missing in service catalog for eu-de, but working endpoint
+func elbV3Client(config *cfg.Config, region string) (*golangsdk.ServiceClient, error) {
+	v3Client, err := config.ElbV3Client(region)
+	if err == nil { // for eu-nl
+		return v3Client, nil
+	}
+	client, err := config.ElbV1Client(region)
+	if err != nil {
+		return nil, fmt.Errorf("both v1 and v3 clients are not available for %s region: %w", region, err)
+	}
+	client.Endpoint = strings.Replace(client.Endpoint, "v1.0/", "v3/", 1)
+	client.ResourceBase = client.Endpoint + "elb/"
+
+	return client, nil
+}
+
+func readTransparentIPEnable(d *schema.ResourceData, config *cfg.Config) error {
+	client, err := elbV3Client(config, config.GetRegion(d))
+	if err != nil {
+		return fmt.Errorf(v3.ErrCreateClient, err)
+	}
+	listener, err := v3listeners.Get(client, d.Id()).Extract()
+	if err != nil {
+		return err
+	}
+	return d.Set("transparent_client_ip_enable", listener.TransparentClientIP)
+}
+
+func updateTransparentIPEnable(d *schema.ResourceData, config *cfg.Config) error {
+	v, ok := d.GetOkExists("transparent_client_ip_enable") // nolint:staticcheck
+	if !ok {
+		return nil
+	}
+	enable := v.(bool)
+
+	client, err := elbV3Client(config, config.GetRegion(d))
+	if err != nil {
+		return fmt.Errorf(v3.ErrCreateClient, err)
+	}
+
+	opts := v3listeners.UpdateOpts{TransparentClientIP: &enable}
+	_, err = v3listeners.Update(client, d.Id(), opts).Extract()
+	return err
 }
