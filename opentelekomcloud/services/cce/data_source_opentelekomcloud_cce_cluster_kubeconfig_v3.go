@@ -18,12 +18,6 @@ func DataSourceCCEClusterKubeConfigV3() *schema.Resource {
 		ReadContext: dataSourceCCEClusterKubeConfigV3Read,
 
 		Schema: map[string]*schema.Schema{
-			"region": {
-				Type:     schema.TypeString,
-				Optional: true,
-				Computed: true,
-				ForceNew: true,
-			},
 			"cluster_id": {
 				Type:         schema.TypeString,
 				Required:     true,
@@ -70,7 +64,6 @@ func dataSourceCCEClusterKubeConfigV3Read(_ context.Context, d *schema.ResourceD
 		d.Set("cluster_id", clusterID),
 		d.Set("expiration", expiration),
 		d.Set("kubeconfig", kubeconfig),
-		d.Set("region", config.GetRegion(d)),
 	)
 	if err := mErr.ErrorOrNil(); err != nil {
 		return diag.FromErr(err)
