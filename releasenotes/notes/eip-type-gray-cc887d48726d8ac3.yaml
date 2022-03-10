@@ -1,0 +1,5 @@
+---
+other:
+  - |
+    **[VPC]** Add ``5_gray`` type to ``resource/opentelekomcloud_vpc_eip_v1`` documentation and examples
+    (`#1646 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/1646>`_)

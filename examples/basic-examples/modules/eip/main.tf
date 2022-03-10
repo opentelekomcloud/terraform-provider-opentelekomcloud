@@ -26,7 +26,7 @@ resource "opentelekomcloud_vpc_eip_v1" "eip_1" {
 
 resource "opentelekomcloud_vpc_eip_v1" "eip_lb" {
   publicip {
-    type = "5_bgp"
+    type = "5_gray"
   }
   bandwidth {
     name        = "${var.bw_name}_lb"
