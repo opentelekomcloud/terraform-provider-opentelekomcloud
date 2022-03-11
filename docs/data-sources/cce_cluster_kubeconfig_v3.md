@@ -4,7 +4,7 @@ subcategory: "Cloud Container Engine (CCE)"
 
 # opentelekomcloud_cce_cluster_kubeconfig_v3
 
-Use this data source to get details about a cluster kubeconfig file from OpenTelekomCloud.
+Use this data source to get a cluster's kubeconfig file from OpenTelekomCloud.
 
 ## Example Usage
 
@@ -32,4 +32,4 @@ All above argument parameters can be exported as attribute parameters along with
 
 * `id` - The ID of the cluster.
 
-* `kubeconfig` - The kubeconfig file of the cluster.
+* `kubeconfig` - The cluster's kubeconfig file contents.
