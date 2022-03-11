@@ -1,0 +1,5 @@
+---
+enhancements:
+  - |
+    **[ELB]** Add ``transparent_client_ip_enable`` argument to ``resource/opentelekomcloud_lb_listener_v2``
+    (`#1648 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/1648>`_)

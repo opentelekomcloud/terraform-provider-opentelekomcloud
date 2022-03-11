@@ -36,6 +36,7 @@ func TestAccLBV2Listener_basic(t *testing.T) {
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckLBV2ListenerExists(resourceName, &listener),
 					resource.TestCheckResourceAttr(resourceName, "tags.muh", "value-create"),
+					resource.TestCheckResourceAttr(resourceName, "transparent_client_ip_enable", "true"),
 				),
 			},
 			{
@@ -122,6 +123,40 @@ func TestAccLBV2ListenerSni(t *testing.T) {
 				Config: testAccLBV2ListenerConfigCert(3),
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr(resourceName, "sni_container_refs.#", "3"),
+				),
+			},
+		},
+	})
+}
+
+func TestAccLBV2Listener_SSLPassthrough(t *testing.T) {
+	var listener listeners.Listener
+	resourceName := "opentelekomcloud_lb_listener_v2.listener_1"
+
+	resource.ParallelTest(t, resource.TestCase{
+		PreCheck: func() {
+			common.TestAccPreCheck(t)
+			qts := quotas.MultipleQuotas{
+				{Q: quotas.LoadBalancer, Count: 1},
+				{Q: quotas.LbListener, Count: 1},
+			}
+			quotas.BookMany(t, qts)
+		},
+		ProviderFactories: common.TestAccProviderFactories,
+		CheckDestroy:      testAccCheckLBV2ListenerDestroy,
+		Steps: []resource.TestStep{
+			{
+				Config: testAccLBV2ListenerConfigSSLPassthrough,
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckLBV2ListenerExists(resourceName, &listener),
+					resource.TestCheckResourceAttr(resourceName, "transparent_client_ip_enable", "false"),
+				),
+			},
+			{
+				Config: testAccLBV2ListenerConfigSSLPassthroughUpdate,
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr(resourceName, "name", "listener_1_updated"),
+					resource.TestCheckResourceAttr(resourceName, "transparent_client_ip_enable", "true"),
 				),
 			},
 		},
@@ -479,6 +514,42 @@ resource "opentelekomcloud_lb_listener_v2" "listener_tls" {
     update = "5m"
     delete = "5m"
   }
+}
+`, common.DataSourceSubnet)
+
+	testAccLBV2ListenerConfigSSLPassthrough = fmt.Sprintf(`
+%s
+
+resource "opentelekomcloud_lb_loadbalancer_v2" "loadbalancer_1" {
+  name = "loadbalancer_1"
+  vip_subnet_id = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.subnet_id
+}
+
+resource "opentelekomcloud_lb_listener_v2" "listener_1" {
+  name            = "listener_1"
+  protocol        = "TCP"
+  protocol_port   = 8080
+  loadbalancer_id = opentelekomcloud_lb_loadbalancer_v2.loadbalancer_1.id
+
+  transparent_client_ip_enable = false
+}
+`, common.DataSourceSubnet)
+
+	testAccLBV2ListenerConfigSSLPassthroughUpdate = fmt.Sprintf(`
+%s
+
+resource "opentelekomcloud_lb_loadbalancer_v2" "loadbalancer_1" {
+  name = "loadbalancer_1"
+  vip_subnet_id = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.subnet_id
+}
+
+resource "opentelekomcloud_lb_listener_v2" "listener_1" {
+  name            = "listener_1_updated"
+  protocol        = "TCP"
+  protocol_port   = 8080
+  loadbalancer_id = opentelekomcloud_lb_loadbalancer_v2.loadbalancer_1.id
+
+  transparent_client_ip_enable = true
 }
 `, common.DataSourceSubnet)
 )
