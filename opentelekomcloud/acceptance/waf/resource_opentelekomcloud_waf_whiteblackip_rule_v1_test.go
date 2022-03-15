@@ -14,6 +14,8 @@ import (
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common/cfg"
 )
 
+const resourceRuleName = "opentelekomcloud_waf_whiteblackip_rule_v1.rule_1"
+
 func TestAccWafWhiteBlackIpRuleV1_basic(t *testing.T) {
 	var rule whiteblackip_rules.WhiteBlackIP
 
@@ -23,23 +25,19 @@ func TestAccWafWhiteBlackIpRuleV1_basic(t *testing.T) {
 		CheckDestroy:      testAccCheckWafWhiteBlackIpRuleV1Destroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccWafWhiteBlackIpRuleV1_basic,
+				Config: testAccWafWhiteBlackIpRuleV1Basic,
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckWafWhiteBlackIpRuleV1Exists("opentelekomcloud_waf_whiteblackip_rule_v1.rule_1", &rule),
-					resource.TestCheckResourceAttr(
-						"opentelekomcloud_waf_whiteblackip_rule_v1.rule_1", "addr", "192.168.0.0/24"),
-					resource.TestCheckResourceAttr(
-						"opentelekomcloud_waf_whiteblackip_rule_v1.rule_1", "white", "0"),
+					testAccCheckWafWhiteBlackIpRuleV1Exists(resourceRuleName, &rule),
+					resource.TestCheckResourceAttr(resourceRuleName, "addr", "192.168.0.0/24"),
+					resource.TestCheckResourceAttr(resourceRuleName, "white", "0"),
 				),
 			},
 			{
-				Config: testAccWafWhiteBlackIpRuleV1_update,
+				Config: testAccWafWhiteBlackIpRuleV1Update,
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckWafWhiteBlackIpRuleV1Exists("opentelekomcloud_waf_whiteblackip_rule_v1.rule_1", &rule),
-					resource.TestCheckResourceAttr(
-						"opentelekomcloud_waf_whiteblackip_rule_v1.rule_1", "addr", "192.168.0.125"),
-					resource.TestCheckResourceAttr(
-						"opentelekomcloud_waf_whiteblackip_rule_v1.rule_1", "white", "1"),
+					testAccCheckWafWhiteBlackIpRuleV1Exists(resourceRuleName, &rule),
+					resource.TestCheckResourceAttr(resourceRuleName, "addr", "192.168.0.125"),
+					resource.TestCheckResourceAttr(resourceRuleName, "white", "1"),
 				),
 			},
 		},
@@ -98,25 +96,25 @@ func testAccCheckWafWhiteBlackIpRuleV1Exists(n string, rule *whiteblackip_rules.
 	}
 }
 
-const testAccWafWhiteBlackIpRuleV1_basic = `
+const testAccWafWhiteBlackIpRuleV1Basic = `
 resource "opentelekomcloud_waf_policy_v1" "policy_1" {
-	name = "policy_updated"
+  name = "policy_updated"
 }
 
 resource "opentelekomcloud_waf_whiteblackip_rule_v1" "rule_1" {
-	policy_id = opentelekomcloud_waf_policy_v1.policy_1.id
-	addr = "192.168.0.0/24"
+  policy_id = opentelekomcloud_waf_policy_v1.policy_1.id
+  addr      = "192.168.0.0/24"
 }
 `
 
-const testAccWafWhiteBlackIpRuleV1_update = `
+const testAccWafWhiteBlackIpRuleV1Update = `
 resource "opentelekomcloud_waf_policy_v1" "policy_1" {
-	name = "policy_updated"
+  name = "policy_updated"
 }
 
 resource "opentelekomcloud_waf_whiteblackip_rule_v1" "rule_1" {
-	policy_id = opentelekomcloud_waf_policy_v1.policy_1.id
-	addr = "192.168.0.125"
-	white = 1
+  policy_id = opentelekomcloud_waf_policy_v1.policy_1.id
+  addr      = "192.168.0.125"
+  white     = 1
 }
 `

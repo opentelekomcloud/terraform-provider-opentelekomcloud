@@ -1,0 +1,5 @@
+---
+fixes:
+  - |
+    **[WAF]** Fix reading of ``policy_id`` in ``resource/opentelekomcloud_waf_whiteblackip_rule_v1``
+    (`#1653 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/1653>`_)

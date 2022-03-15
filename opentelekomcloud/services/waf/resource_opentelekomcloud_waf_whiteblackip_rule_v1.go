@@ -8,6 +8,7 @@ import (
 	"github.com/hashicorp/go-multierror"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 	golangsdk "github.com/opentelekomcloud/gophertelekomcloud"
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/waf/v1/whiteblackip_rules"
 
@@ -39,13 +40,11 @@ func ResourceWafWhiteBlackIpRuleV1() *schema.Resource {
 			"addr": {
 				Type:     schema.TypeString,
 				Required: true,
-				ForceNew: false,
 			},
 			"white": {
-				Type:     schema.TypeInt,
-				Optional: true,
-				ForceNew: false,
-				Default:  0,
+				Type:         schema.TypeInt,
+				Optional:     true,
+				ValidateFunc: validation.IntBetween(0, 1),
 			},
 		},
 	}
@@ -65,8 +64,8 @@ func resourceWafWhiteBlackIpRuleV1Create(ctx context.Context, d *schema.Resource
 		White: d.Get("white").(int),
 	}
 
-	policy_id := d.Get("policy_id").(string)
-	rule, err := whiteblackip_rules.Create(wafClient, policy_id, createOpts).Extract()
+	policyID := d.Get("policy_id").(string)
+	rule, err := whiteblackip_rules.Create(wafClient, policyID, createOpts).Extract()
 	if err != nil {
 		return fmterr.Errorf("error creating OpenTelekomcomCloud WAF WhiteBlackIP Rule: %s", err)
 	}
@@ -83,15 +82,15 @@ func resourceWafWhiteBlackIpRuleV1Read(_ context.Context, d *schema.ResourceData
 	if err != nil {
 		return fmterr.Errorf("error creating OpenTelekomCloud WAF client: %s", err)
 	}
-	policy_id := d.Get("policy_id").(string)
-	n, err := whiteblackip_rules.Get(wafClient, policy_id, d.Id()).Extract()
+
+	policyID := d.Get("policy_id").(string)
+	n, err := whiteblackip_rules.Get(wafClient, policyID, d.Id()).Extract()
 
 	if err != nil {
 		if _, ok := err.(golangsdk.ErrDefault404); ok {
 			d.SetId("")
 			return nil
 		}
-
 		return fmterr.Errorf("error retrieving OpenTelekomCloud Waf WhiteBlackIP Rule: %s", err)
 	}
 
@@ -116,19 +115,19 @@ func resourceWafWhiteBlackIpRuleV1Update(ctx context.Context, d *schema.Resource
 	}
 	var updateOpts whiteblackip_rules.UpdateOpts
 
-	if d.HasChange("addr") || d.HasChange("white") {
+	if d.HasChange("addr") {
 		updateOpts.Addr = d.Get("addr").(string)
+	}
+	if d.HasChange("white") {
 		white := d.Get("white").(int)
 		updateOpts.White = &white
 	}
 	log.Printf("[DEBUG] updateOpts: %#v", updateOpts)
 
-	if updateOpts != (whiteblackip_rules.UpdateOpts{}) {
-		policyID := d.Get("policy_id").(string)
-		_, err = whiteblackip_rules.Update(wafClient, policyID, d.Id(), updateOpts).Extract()
-		if err != nil {
-			return fmterr.Errorf("error updating OpenTelekomCloud WAF WhiteBlackIP Rule: %s", err)
-		}
+	policyID := d.Get("policy_id").(string)
+	_, err = whiteblackip_rules.Update(wafClient, policyID, d.Id(), updateOpts).Extract()
+	if err != nil {
+		return fmterr.Errorf("error updating OpenTelekomCloud WAF WhiteBlackIP Rule: %s", err)
 	}
 
 	return resourceWafWhiteBlackIpRuleV1Read(ctx, d, meta)
