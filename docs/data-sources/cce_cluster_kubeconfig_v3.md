@@ -12,7 +12,7 @@ Use this data source to get a cluster's kubeconfig file from OpenTelekomCloud.
 variable "cluster_id" {}
 
 data "opentelekomcloud_cce_cluster_kubeconfig_v3" "this" {
-  name = var.cluster_id
+  cluster_id = var.cluster_id
 }
 ```
 
