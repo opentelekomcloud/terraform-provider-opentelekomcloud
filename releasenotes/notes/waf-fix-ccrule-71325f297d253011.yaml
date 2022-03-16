@@ -1,0 +1,8 @@
+---
+fixes:
+  - |
+    **[WAF]** Fix creation of ``resource/opentelekomcloud_waf_ccattackprotection_rule_v1``
+    (`#1656 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/1656>`_)
+  - |
+    **[WAF]** Fix import of ``resource/opentelekomcloud_waf_ccattackprotection_rule_v1``
+    (`#1656 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/1656>`_)
