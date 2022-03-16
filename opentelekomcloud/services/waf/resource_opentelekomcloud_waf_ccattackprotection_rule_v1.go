@@ -10,6 +10,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	golangsdk "github.com/opentelekomcloud/gophertelekomcloud"
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/waf/v1/ccattackprotection_rules"
+	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common"
 
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common/cfg"
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common/fmterr"
@@ -21,7 +22,7 @@ func ResourceWafCcAttackProtectionRuleV1() *schema.Resource {
 		ReadContext:   resourceWafCcAttackProtectionRuleV1Read,
 		DeleteContext: resourceWafCcAttackProtectionRuleV1Delete,
 		Importer: &schema.ResourceImporter{
-			StateContext: schema.ImportStatePassthroughContext,
+			StateContext: common.ImportByPath("policy_id", "id"),
 		},
 
 		Timeouts: &schema.ResourceTimeout{
@@ -144,29 +145,29 @@ func resourceWafCcAttackProtectionRuleV1Create(ctx context.Context, d *schema.Re
 		return fmterr.Errorf("error creating OpenTelekomcomCloud WAF Client: %s", err)
 	}
 
-	limit_num := d.Get("limit_num").(int)
-	limit_period := d.Get("limit_period").(int)
-	lock_time := d.Get("lock_time").(int)
+	limitNum := d.Get("limit_num").(int)
+	limitPeriod := d.Get("limit_period").(int)
+	lockTime := d.Get("lock_time").(int)
 	createOpts := ccattackprotection_rules.CreateOpts{
-		Url:         d.Get("url").(string),
-		LimitNum:    &limit_num,
-		LimitPeriod: &limit_period,
-		LockTime:    &lock_time,
+		Path:        d.Get("url").(string),
+		LimitNum:    &limitNum,
+		LimitPeriod: &limitPeriod,
+		LockTime:    &lockTime,
 		TagType:     d.Get("tag_type").(string),
 		TagIndex:    d.Get("tag_index").(string),
 		Action:      getCcAction(d),
 	}
 
-	_, tag_category_ok := d.GetOk("tag_category")
-	_, tag_contents_ok := d.GetOk("tag_contents")
-	if tag_category_ok && tag_contents_ok {
+	_, tagCategoryOk := d.GetOk("tag_category")
+	_, tagContentsOk := d.GetOk("tag_contents")
+	if tagCategoryOk && tagContentsOk {
 		createOpts.TagCondition = getTagCondition(d)
 	}
 
-	policy_id := d.Get("policy_id").(string)
-	rule, err := ccattackprotection_rules.Create(wafClient, policy_id, createOpts).Extract()
+	policyID := d.Get("policy_id").(string)
+	rule, err := ccattackprotection_rules.Create(wafClient, policyID, createOpts).Extract()
 	if err != nil {
-		return fmterr.Errorf("error creating OpenTelekomcomCloud WAF CC Attack Protection Rule: %s", err)
+		return fmterr.Errorf("error creating OpenTelekomCloud WAF CC Attack Protection Rule: %s", err)
 	}
 
 	log.Printf("[DEBUG] Waf cc attack protection rule created: %#v", rule)
@@ -181,8 +182,8 @@ func resourceWafCcAttackProtectionRuleV1Read(_ context.Context, d *schema.Resour
 	if err != nil {
 		return fmterr.Errorf("error creating OpenTelekomCloud WAF client: %s", err)
 	}
-	policy_id := d.Get("policy_id").(string)
-	n, err := ccattackprotection_rules.Get(wafClient, policy_id, d.Id()).Extract()
+	policyID := d.Get("policy_id").(string)
+	n, err := ccattackprotection_rules.Get(wafClient, policyID, d.Id()).Extract()
 
 	if err != nil {
 		if _, ok := err.(golangsdk.ErrDefault404); ok {
@@ -196,7 +197,7 @@ func resourceWafCcAttackProtectionRuleV1Read(_ context.Context, d *schema.Resour
 	d.SetId(n.Id)
 	mErr := multierror.Append(
 		d.Set("policy_id", n.PolicyID),
-		d.Set("url", n.Url),
+		d.Set("url", n.Path),
 		d.Set("limit_num", n.LimitNum),
 		d.Set("limit_period", n.LimitPeriod),
 		d.Set("lock_time", n.LockTime),
@@ -224,8 +225,8 @@ func resourceWafCcAttackProtectionRuleV1Delete(_ context.Context, d *schema.Reso
 		return fmterr.Errorf("error creating OpenTelekomCloud WAF client: %s", err)
 	}
 
-	policy_id := d.Get("policy_id").(string)
-	err = ccattackprotection_rules.Delete(wafClient, policy_id, d.Id()).ExtractErr()
+	policyID := d.Get("policy_id").(string)
+	err = ccattackprotection_rules.Delete(wafClient, policyID, d.Id()).ExtractErr()
 	if err != nil {
 		return fmterr.Errorf("error deleting OpenTelekomCloud WAF CC Attack Protection Rule: %s", err)
 	}

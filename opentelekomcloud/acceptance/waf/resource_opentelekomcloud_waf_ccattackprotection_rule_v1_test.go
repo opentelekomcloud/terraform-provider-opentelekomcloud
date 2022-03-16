@@ -14,6 +14,8 @@ import (
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common/cfg"
 )
 
+const resourceCCRuleName = "opentelekomcloud_waf_ccattackprotection_rule_v1.rule_1"
+
 func TestAccWafCcAttackProtectionRuleV1_basic(t *testing.T) {
 	var rule ccattackprotection_rules.CcAttack
 
@@ -23,12 +25,34 @@ func TestAccWafCcAttackProtectionRuleV1_basic(t *testing.T) {
 		CheckDestroy:      testAccCheckWafCcAttackProtectionRuleV1Destroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccWafCcAttackProtectionRuleV1_basic,
+				Config: testAccWafCcAttackProtectionRuleV1Basic,
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckWafCcAttackProtectionRuleV1Exists("opentelekomcloud_waf_ccattackprotection_rule_v1.rule_1", &rule),
-					resource.TestCheckResourceAttr(
-						"opentelekomcloud_waf_ccattackprotection_rule_v1.rule_1", "url", "/abc1"),
+					testAccCheckWafCcAttackProtectionRuleV1Exists(resourceCCRuleName, &rule),
+					resource.TestCheckResourceAttr(resourceCCRuleName, "url", "/abc1"),
 				),
+			},
+		},
+	})
+}
+
+func TestAccWafCcAttackProtectionRuleV1_import(t *testing.T) {
+	resource.Test(t, resource.TestCase{
+		PreCheck:          func() { common.TestAccPreCheck(t) },
+		ProviderFactories: common.TestAccProviderFactories,
+		CheckDestroy:      testAccCheckWafCcAttackProtectionRuleV1Destroy,
+		Steps: []resource.TestStep{
+			{
+				Config: testAccWafCcAttackProtectionRuleV1Basic,
+			},
+			{
+				ResourceName: resourceCCRuleName,
+				ImportStateIdFunc: func(s *terraform.State) (string, error) {
+					policyID := s.RootModule().Resources["opentelekomcloud_waf_policy_v1.policy_1"].Primary.ID
+					ccRuleID := s.RootModule().Resources[resourceCCRuleName].Primary.ID
+					return fmt.Sprintf("%s/%s", policyID, ccRuleID), nil
+				},
+				ImportState:       true,
+				ImportStateVerify: true,
 			},
 		},
 	})
@@ -87,21 +111,21 @@ func testAccCheckWafCcAttackProtectionRuleV1Exists(n string, rule *ccattackprote
 	}
 }
 
-const testAccWafCcAttackProtectionRuleV1_basic = `
+const testAccWafCcAttackProtectionRuleV1Basic = `
 resource "opentelekomcloud_waf_policy_v1" "policy_1" {
-	name = "policy_1"
+  name = "policy_1"
 }
 
 resource "opentelekomcloud_waf_ccattackprotection_rule_v1" "rule_1" {
-	policy_id = opentelekomcloud_waf_policy_v1.policy_1.id
-	url = "/abc1"
-	limit_num = 10
-	limit_period = 60
-	lock_time = 10
-	tag_type = "cookie"
-	tag_index = "sessionid"
-	action_category = "block"
-	block_content_type = "application/json"
-	block_content = "{\"error\":\"forbidden\"}"
+  policy_id          = opentelekomcloud_waf_policy_v1.policy_1.id
+  url                = "/abc1"
+  limit_num          = 10
+  limit_period       = 60
+  lock_time          = 10
+  tag_type           = "cookie"
+  tag_index          = "sessionid"
+  action_category    = "block"
+  block_content_type = "application/json"
+  block_content      = "{\"error\":\"forbidden\"}"
 }
 `

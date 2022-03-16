@@ -46,7 +46,12 @@ func SetIDComponents(d *schema.ResourceData, attributes ...string) error {
 
 	mErr := &multierror.Error{}
 	for i, attr := range attributes {
-		mErr = multierror.Append(mErr, d.Set(attr, parts[i]))
+		v := parts[i]
+		if attr == "id" {
+			d.SetId(v)
+			continue
+		}
+		mErr = multierror.Append(mErr, d.Set(attr, v))
 	}
 	return mErr.ErrorOrNil()
 }
