@@ -12,7 +12,6 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 	golangsdk "github.com/opentelekomcloud/gophertelekomcloud"
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/waf/v1/preciseprotection_rules"
-
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common/cfg"
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common/fmterr"
 )
@@ -22,9 +21,7 @@ func ResourceWafPreciseProtectionRuleV1() *schema.Resource {
 		CreateContext: resourceWafPreciseProtectionRuleV1Create,
 		ReadContext:   resourceWafPreciseProtectionRuleV1Read,
 		DeleteContext: resourceWafPreciseProtectionRuleV1Delete,
-		Importer: &schema.ResourceImporter{
-			StateContext: schema.ImportStatePassthroughContext,
-		},
+		Importer:      wafRuleImporter(),
 
 		Timeouts: &schema.ResourceTimeout{
 			Create: schema.DefaultTimeout(10 * time.Minute),
