@@ -85,8 +85,8 @@ The following attributes are exported:
 
 ## Import
 
-Precise Protection Rules can be imported using the `id`, e.g.
+Precise Protection Rules can be imported using `policy_id/id`, e.g.
 
 ```sh
-terraform import opentelekomcloud_waf_preciseprotection_rule_v1.rule_1 7117d38e-4c8f-4624-a505-bd96b97d024c
+terraform import opentelekomcloud_waf_preciseprotection_rule_v1.rule_1 ff95e71c8ae74eba9887193ab22c5757/b39f3a5a1b4f447a8030f0b0703f47f5
 ```

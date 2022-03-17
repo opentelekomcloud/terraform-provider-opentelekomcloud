@@ -14,6 +14,8 @@ import (
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common/cfg"
 )
 
+const resourcePPRuleName = "opentelekomcloud_waf_preciseprotection_rule_v1.rule_1"
+
 func TestAccWafPreciseProtectionRuleV1_basic(t *testing.T) {
 	var rule preciseprotection_rules.Precise
 
@@ -25,10 +27,28 @@ func TestAccWafPreciseProtectionRuleV1_basic(t *testing.T) {
 			{
 				Config: testAccWafPreciseProtectionRuleV1_basic,
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckWafPreciseProtectionRuleV1Exists("opentelekomcloud_waf_preciseprotection_rule_v1.rule_1", &rule),
-					resource.TestCheckResourceAttr(
-						"opentelekomcloud_waf_preciseprotection_rule_v1.rule_1", "name", "rule_1"),
+					testAccCheckWafPreciseProtectionRuleV1Exists(resourcePPRuleName, &rule),
+					resource.TestCheckResourceAttr(resourcePPRuleName, "name", "rule_1"),
 				),
+			},
+		},
+	})
+}
+
+func TestAccWafPreciseProtectionRuleV1_import(t *testing.T) {
+	resource.Test(t, resource.TestCase{
+		PreCheck:          func() { common.TestAccPreCheck(t) },
+		ProviderFactories: common.TestAccProviderFactories,
+		CheckDestroy:      testAccCheckWafPreciseProtectionRuleV1Destroy,
+		Steps: []resource.TestStep{
+			{
+				Config: testAccWafPreciseProtectionRuleV1_basic,
+			},
+			{
+				ResourceName:      resourcePPRuleName,
+				ImportState:       true,
+				ImportStateVerify: true,
+				ImportStateIdFunc: ruleImportStateIDFunc(resourcePPRuleName),
 			},
 		},
 	})
