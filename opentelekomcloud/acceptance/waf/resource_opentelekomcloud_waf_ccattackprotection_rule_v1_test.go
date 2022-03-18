@@ -44,22 +44,9 @@ func TestAccWafCcAttackProtectionRuleV1_import(t *testing.T) {
 			{
 				Config: testAccWafCcAttackProtectionRuleV1Basic,
 			},
-			{
-				ResourceName:      resourceCCRuleName,
-				ImportStateIdFunc: ruleImportStateIDFunc(resourceCCRuleName),
-				ImportState:       true,
-				ImportStateVerify: true,
-			},
+			stepWAFRuleImport(resourceCCRuleName),
 		},
 	})
-}
-
-func ruleImportStateIDFunc(resourceName string) resource.ImportStateIdFunc {
-	return func(s *terraform.State) (string, error) {
-		policyID := s.RootModule().Resources["opentelekomcloud_waf_policy_v1.policy_1"].Primary.ID
-		ccRuleID := s.RootModule().Resources[resourceName].Primary.ID
-		return fmt.Sprintf("%s/%s", policyID, ccRuleID), nil
-	}
 }
 
 func testAccCheckWafCcAttackProtectionRuleV1Destroy(s *terraform.State) error {

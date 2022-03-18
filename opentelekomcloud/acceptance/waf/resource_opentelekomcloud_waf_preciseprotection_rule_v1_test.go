@@ -44,12 +44,7 @@ func TestAccWafPreciseProtectionRuleV1_import(t *testing.T) {
 			{
 				Config: testAccWafPreciseProtectionRuleV1_basic,
 			},
-			{
-				ResourceName:      resourcePPRuleName,
-				ImportState:       true,
-				ImportStateVerify: true,
-				ImportStateIdFunc: ruleImportStateIDFunc(resourcePPRuleName),
-			},
+			stepWAFRuleImport(resourcePPRuleName),
 		},
 	})
 }
