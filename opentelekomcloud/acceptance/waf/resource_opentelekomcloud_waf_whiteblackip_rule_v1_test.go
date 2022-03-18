@@ -14,7 +14,7 @@ import (
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common/cfg"
 )
 
-const resourceRuleName = "opentelekomcloud_waf_whiteblackip_rule_v1.rule_1"
+const resourceBWRuleName = "opentelekomcloud_waf_whiteblackip_rule_v1.rule_1"
 
 func TestAccWafWhiteBlackIpRuleV1_basic(t *testing.T) {
 	var rule whiteblackip_rules.WhiteBlackIP
@@ -27,19 +27,33 @@ func TestAccWafWhiteBlackIpRuleV1_basic(t *testing.T) {
 			{
 				Config: testAccWafWhiteBlackIpRuleV1Basic,
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckWafWhiteBlackIpRuleV1Exists(resourceRuleName, &rule),
-					resource.TestCheckResourceAttr(resourceRuleName, "addr", "192.168.0.0/24"),
-					resource.TestCheckResourceAttr(resourceRuleName, "white", "0"),
+					testAccCheckWafWhiteBlackIpRuleV1Exists(resourceBWRuleName, &rule),
+					resource.TestCheckResourceAttr(resourceBWRuleName, "addr", "192.168.0.0/24"),
+					resource.TestCheckResourceAttr(resourceBWRuleName, "white", "0"),
 				),
 			},
 			{
 				Config: testAccWafWhiteBlackIpRuleV1Update,
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckWafWhiteBlackIpRuleV1Exists(resourceRuleName, &rule),
-					resource.TestCheckResourceAttr(resourceRuleName, "addr", "192.168.0.125"),
-					resource.TestCheckResourceAttr(resourceRuleName, "white", "1"),
+					testAccCheckWafWhiteBlackIpRuleV1Exists(resourceBWRuleName, &rule),
+					resource.TestCheckResourceAttr(resourceBWRuleName, "addr", "192.168.0.125"),
+					resource.TestCheckResourceAttr(resourceBWRuleName, "white", "1"),
 				),
 			},
+		},
+	})
+}
+
+func TestAccWafWhiteBlackIpRuleV1_import(t *testing.T) {
+	resource.Test(t, resource.TestCase{
+		PreCheck:          func() { common.TestAccPreCheck(t) },
+		ProviderFactories: common.TestAccProviderFactories,
+		CheckDestroy:      testAccCheckWafWhiteBlackIpRuleV1Destroy,
+		Steps: []resource.TestStep{
+			{
+				Config: testAccWafWhiteBlackIpRuleV1Basic,
+			},
+			stepWAFRuleImport(resourceBWRuleName),
 		},
 	})
 }
