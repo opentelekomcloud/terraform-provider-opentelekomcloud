@@ -22,9 +22,7 @@ func ResourceWafWhiteBlackIpRuleV1() *schema.Resource {
 		ReadContext:   resourceWafWhiteBlackIpRuleV1Read,
 		UpdateContext: resourceWafWhiteBlackIpRuleV1Update,
 		DeleteContext: resourceWafWhiteBlackIpRuleV1Delete,
-		Importer: &schema.ResourceImporter{
-			StateContext: schema.ImportStatePassthroughContext,
-		},
+		Importer:      wafRuleImporter(),
 
 		Timeouts: &schema.ResourceTimeout{
 			Create: schema.DefaultTimeout(10 * time.Minute),
