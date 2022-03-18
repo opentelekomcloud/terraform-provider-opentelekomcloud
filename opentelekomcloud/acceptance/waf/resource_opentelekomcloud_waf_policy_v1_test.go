@@ -25,24 +25,37 @@ func TestAccWafPolicyV1_basic(t *testing.T) {
 			{
 				Config: testAccWafPolicyV1_basic,
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckWafPolicyV1Exists("opentelekomcloud_waf_policy_v1.policy_1", &policy),
-					resource.TestCheckResourceAttr(
-						"opentelekomcloud_waf_policy_v1.policy_1", "name", "policy_1"),
-					resource.TestCheckResourceAttr(
-						"opentelekomcloud_waf_policy_v1.policy_1", "level", "2"),
-					resource.TestCheckResourceAttr(
-						"opentelekomcloud_waf_policy_v1.policy_1", "full_detection", "false"),
+					testAccCheckWafPolicyV1Exists(resourcePolicyName, &policy),
+					resource.TestCheckResourceAttr(resourcePolicyName, "name", "policy_1"),
+					resource.TestCheckResourceAttr(resourcePolicyName, "level", "2"),
+					resource.TestCheckResourceAttr(resourcePolicyName, "full_detection", "false"),
 				),
 			},
 			{
 				Config: testAccWafPolicyV1_update,
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckWafPolicyV1Exists("opentelekomcloud_waf_policy_v1.policy_1", &policy),
-					resource.TestCheckResourceAttr(
-						"opentelekomcloud_waf_policy_v1.policy_1", "name", "policy_updated"),
-					resource.TestCheckResourceAttr(
-						"opentelekomcloud_waf_policy_v1.policy_1", "level", "1"),
+					testAccCheckWafPolicyV1Exists(resourcePolicyName, &policy),
+					resource.TestCheckResourceAttr(resourcePolicyName, "name", "policy_updated"),
+					resource.TestCheckResourceAttr(resourcePolicyName, "level", "1"),
 				),
+			},
+		},
+	})
+}
+
+func TestAccWafPolicyV1_import(t *testing.T) {
+	resource.Test(t, resource.TestCase{
+		PreCheck:          func() { common.TestAccPreCheck(t) },
+		ProviderFactories: common.TestAccProviderFactories,
+		CheckDestroy:      testAccCheckWafPolicyV1Destroy,
+		Steps: []resource.TestStep{
+			{
+				Config: testAccWafPolicyV1_basic,
+			},
+			{
+				ResourceName:      resourcePolicyName,
+				ImportState:       true,
+				ImportStateVerify: true,
 			},
 		},
 	})
