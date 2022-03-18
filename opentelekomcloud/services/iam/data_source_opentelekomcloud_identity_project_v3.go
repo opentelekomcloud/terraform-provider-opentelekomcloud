@@ -61,8 +61,16 @@ func dataSourceIdentityProjectV3Read(_ context.Context, d *schema.ResourceData, 
 		return fmterr.Errorf(clientCreationFail, err)
 	}
 
+	var domainID string
+	rawDomainID, ok := d.GetOk("domain_id")
+	if ok {
+		domainID = rawDomainID.(string)
+	} else {
+		domainID = client.DomainID
+	}
+
 	listOpts := projects.ListOpts{
-		DomainID: d.Get("domain_id").(string),
+		DomainID: domainID,
 		Name:     d.Get("name").(string),
 		ParentID: d.Get("parent_id").(string),
 	}
@@ -107,8 +115,11 @@ func dataSourceIdentityProjectV3Read(_ context.Context, d *schema.ResourceData, 
 	}
 
 	if len(filteredProjects) > 1 {
-		log.Printf("[DEBUG] Multiple results found: %#v", allProjects)
-		return fmterr.Errorf("your query returned more than one result")
+		rawProject, err := projects.Get(client, client.ProjectID).Extract()
+		if err != nil {
+			return diag.FromErr(err)
+		}
+		filteredProjects = append(filteredProjects, *rawProject)
 	}
 	project = filteredProjects[0]
 
