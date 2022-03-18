@@ -21,12 +21,13 @@ func skipFalseAlarmMasking(t *testing.T) {
 }
 
 func TestAccWafFalseAlarmMaskingRuleV1_basic(t *testing.T) {
-	skipFalseAlarmMasking(t)
-
 	var rule falsealarmmasking_rules.AlarmMasking
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:          func() { common.TestAccPreCheck(t) },
+		PreCheck: func() {
+			skipFalseAlarmMasking(t)
+			common.TestAccPreCheck(t)
+		},
 		ProviderFactories: common.TestAccProviderFactories,
 		CheckDestroy:      testAccCheckWafFalseAlarmMaskingRuleV1Destroy,
 		Steps: []resource.TestStep{
@@ -46,7 +47,10 @@ func TestAccWafFalseAlarmMaskingRuleV1_import(t *testing.T) {
 	skipFalseAlarmMasking(t)
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:          func() { common.TestAccPreCheck(t) },
+		PreCheck: func() {
+			skipFalseAlarmMasking(t)
+			common.TestAccPreCheck(t)
+		},
 		ProviderFactories: common.TestAccProviderFactories,
 		CheckDestroy:      testAccCheckWafFalseAlarmMaskingRuleV1Destroy,
 		Steps: []resource.TestStep{
