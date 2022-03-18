@@ -19,14 +19,14 @@ func ResourceWafFalseAlarmMaskingRuleV1() *schema.Resource {
 		CreateContext: resourceWafFalseAlarmMaskingRuleV1Create,
 		ReadContext:   resourceWafFalseAlarmMaskingRuleV1Read,
 		DeleteContext: resourceWafFalseAlarmMaskingRuleV1Delete,
-		Importer: &schema.ResourceImporter{
-			StateContext: schema.ImportStatePassthroughContext,
-		},
+		Importer:      wafRuleImporter(),
 
 		Timeouts: &schema.ResourceTimeout{
 			Create: schema.DefaultTimeout(10 * time.Minute),
 			Delete: schema.DefaultTimeout(10 * time.Minute),
 		},
+
+		DeprecationMessage: "This resource is known to be broken due to the API changes and will be fixed in the upcoming releases",
 
 		Schema: map[string]*schema.Schema{
 			"policy_id": {
@@ -58,8 +58,8 @@ func resourceWafFalseAlarmMaskingRuleV1Create(ctx context.Context, d *schema.Res
 	}
 
 	createOpts := falsealarmmasking_rules.CreateOpts{
-		Url:  d.Get("url").(string),
-		Rule: d.Get("rule").(string),
+		Path: d.Get("url").(string),
+		// Rule: d.Get("rule").(string),
 	}
 
 	policyID := d.Get("policy_id").(string)
@@ -90,7 +90,7 @@ func resourceWafFalseAlarmMaskingRuleV1Read(_ context.Context, d *schema.Resourc
 		if r.Id == d.Id() {
 			d.SetId(r.Id)
 			mErr := multierror.Append(
-				d.Set("url", r.Url),
+				d.Set("url", r.Path),
 				d.Set("rule", r.Rule),
 				d.Set("policy_id", r.PolicyID),
 			)

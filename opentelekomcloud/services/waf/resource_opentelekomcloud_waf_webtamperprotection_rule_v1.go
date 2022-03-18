@@ -20,9 +20,7 @@ func ResourceWafWebTamperProtectionRuleV1() *schema.Resource {
 		CreateContext: resourceWafWebTamperProtectionRuleV1Create,
 		ReadContext:   resourceWafWebTamperProtectionRuleV1Read,
 		DeleteContext: resourceWafWebTamperProtectionRuleV1Delete,
-		Importer: &schema.ResourceImporter{
-			StateContext: schema.ImportStatePassthroughContext,
-		},
+		Importer:      wafRuleImporter(),
 
 		Timeouts: &schema.ResourceTimeout{
 			Create: schema.DefaultTimeout(10 * time.Minute),
@@ -60,7 +58,7 @@ func resourceWafWebTamperProtectionRuleV1Create(ctx context.Context, d *schema.R
 
 	createOpts := webtamperprotection_rules.CreateOpts{
 		Hostname: d.Get("hostname").(string),
-		Url:      d.Get("url").(string),
+		Path:     d.Get("url").(string),
 	}
 
 	policyID := d.Get("policy_id").(string)
@@ -96,7 +94,7 @@ func resourceWafWebTamperProtectionRuleV1Read(_ context.Context, d *schema.Resou
 	d.SetId(n.Id)
 	mErr := multierror.Append(
 		d.Set("hostname", n.Hostname),
-		d.Set("url", n.Url),
+		d.Set("url", n.Path),
 		d.Set("policy_id", n.PolicyID),
 	)
 	if err := mErr.ErrorOrNil(); err != nil {

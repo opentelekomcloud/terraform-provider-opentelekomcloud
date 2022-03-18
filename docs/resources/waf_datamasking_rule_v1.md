@@ -41,8 +41,8 @@ The following attributes are exported:
 
 ## Import
 
-Data Masking Rules can be imported using the `id`, e.g.
+Data Masking Rules can be imported using the `policy_id/id`, e.g.
 
 ```sh
-terraform import opentelekomcloud_waf_datamasking_rule_v1.rule_1 7117d38e-4c8f-4624-a505-bd96b97d024c
+terraform import opentelekomcloud_waf_datamasking_rule_v1.rule_1 b39f3a5a1b4f447a8030f0b0703f47f5/7117d38e4c8f4624a505bd96b97d024c
 ```

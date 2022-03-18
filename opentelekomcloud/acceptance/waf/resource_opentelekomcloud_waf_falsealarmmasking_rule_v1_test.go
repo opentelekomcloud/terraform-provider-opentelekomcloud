@@ -14,7 +14,15 @@ import (
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common/cfg"
 )
 
+const resourceFAMRuleName = "opentelekomcloud_waf_falsealarmmasking_rule_v1.rule_1"
+
+func skipFalseAlarmMasking(t *testing.T) {
+	t.Skip("This test requires existing alarms")
+}
+
 func TestAccWafFalseAlarmMaskingRuleV1_basic(t *testing.T) {
+	skipFalseAlarmMasking(t)
+
 	var rule falsealarmmasking_rules.AlarmMasking
 
 	resource.Test(t, resource.TestCase{
@@ -25,13 +33,27 @@ func TestAccWafFalseAlarmMaskingRuleV1_basic(t *testing.T) {
 			{
 				Config: testAccWafFalseAlarmMaskingRuleV1_basic,
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckWafFalseAlarmMaskingRuleV1Exists("opentelekomcloud_waf_falsealarmmasking_rule_v1.rule_1", &rule),
-					resource.TestCheckResourceAttr(
-						"opentelekomcloud_waf_falsealarmmasking_rule_v1.rule_1", "url", "/a"),
-					resource.TestCheckResourceAttr(
-						"opentelekomcloud_waf_falsealarmmasking_rule_v1.rule_1", "rule", "100001"),
+					testAccCheckWafFalseAlarmMaskingRuleV1Exists(resourceFAMRuleName, &rule),
+					resource.TestCheckResourceAttr(resourceFAMRuleName, "url", "/a"),
+					resource.TestCheckResourceAttr(resourceFAMRuleName, "rule", "100001"),
 				),
 			},
+		},
+	})
+}
+
+func TestAccWafFalseAlarmMaskingRuleV1_import(t *testing.T) {
+	skipFalseAlarmMasking(t)
+
+	resource.Test(t, resource.TestCase{
+		PreCheck:          func() { common.TestAccPreCheck(t) },
+		ProviderFactories: common.TestAccProviderFactories,
+		CheckDestroy:      testAccCheckWafFalseAlarmMaskingRuleV1Destroy,
+		Steps: []resource.TestStep{
+			{
+				Config: testAccWafFalseAlarmMaskingRuleV1_basic,
+			},
+			stepWAFRuleImport(resourceFAMRuleName),
 		},
 	})
 }
