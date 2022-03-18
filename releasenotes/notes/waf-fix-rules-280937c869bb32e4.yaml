@@ -1,0 +1,12 @@
+---
+issues:
+  - |
+    **[WAF]** ``resource/opentelekomcloud_waf_falsealarmmasking_rule_v1`` marked as deprecated due to API changes
+    (`#1664 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/1664>`_)
+fixes:
+  - |
+    **[WAF]** Fix broken ``resource/opentelekomcloud_waf_webtamperprotection_rule_v1``
+    (`#1664 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/1664>`_)
+  - |
+    **[WAF]** Fix broken ``resource/opentelekomcloud_waf_datamasking_rule_v1``
+    (`#1664 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/1664>`_)

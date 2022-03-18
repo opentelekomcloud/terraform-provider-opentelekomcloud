@@ -14,6 +14,8 @@ import (
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common/cfg"
 )
 
+const resourceWTRuleName = "opentelekomcloud_waf_webtamperprotection_rule_v1.rule_1"
+
 func TestAccWebTamperProtectionRuleV1_basic(t *testing.T) {
 	var rule webtamperprotection_rules.WebTamper
 
@@ -25,13 +27,25 @@ func TestAccWebTamperProtectionRuleV1_basic(t *testing.T) {
 			{
 				Config: testAccWafWebTamperProtectionRuleV1_basic,
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckWebTamperProtectionRuleV1Exists("opentelekomcloud_waf_webtamperprotection_rule_v1.rule_1", &rule),
-					resource.TestCheckResourceAttr(
-						"opentelekomcloud_waf_webtamperprotection_rule_v1.rule_1", "hostname", "www.abc.com"),
-					resource.TestCheckResourceAttr(
-						"opentelekomcloud_waf_webtamperprotection_rule_v1.rule_1", "url", "/a"),
+					testAccCheckWebTamperProtectionRuleV1Exists(resourceWTRuleName, &rule),
+					resource.TestCheckResourceAttr(resourceWTRuleName, "hostname", "www.abc.com"),
+					resource.TestCheckResourceAttr(resourceWTRuleName, "url", "/a"),
 				),
 			},
+		},
+	})
+}
+
+func TestAccWebTamperProtectionRuleV1_import(t *testing.T) {
+	resource.Test(t, resource.TestCase{
+		PreCheck:          func() { common.TestAccPreCheck(t) },
+		ProviderFactories: common.TestAccProviderFactories,
+		CheckDestroy:      testAccCheckWafWebTamperProtectionRuleV1Destroy,
+		Steps: []resource.TestStep{
+			{
+				Config: testAccWafWebTamperProtectionRuleV1_basic,
+			},
+			stepWAFRuleImport(resourceWTRuleName),
 		},
 	})
 }

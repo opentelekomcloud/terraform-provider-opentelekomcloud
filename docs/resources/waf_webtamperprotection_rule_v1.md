@@ -38,8 +38,8 @@ The following attributes are exported:
 
 ## Import
 
-Web Tamper Protection Rules can be imported using the `id`, e.g.
+Web Tamper Protection Rules can be imported using the `policy_id/id`, e.g.
 
 ```sh
-terraform import opentelekomcloud_waf_webtamperprotection_rule_v1.rule_1 7117d38e-4c8f-4624-a505-bd96b97d024c
+terraform import opentelekomcloud_waf_webtamperprotection_rule_v1.rule_1 ff95e71c8ae74eba9887193ab22c5757/7117d38e4c8f4624a505-bd96b97d024c
 ```

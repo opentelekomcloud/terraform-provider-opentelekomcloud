@@ -14,6 +14,8 @@ import (
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common/cfg"
 )
 
+const resourceDMRuleName = "opentelekomcloud_waf_datamasking_rule_v1.rule_1"
+
 func TestAccWafDataMaskingRuleV1_basic(t *testing.T) {
 	var rule datamasking_rules.DataMasking
 
@@ -25,27 +27,35 @@ func TestAccWafDataMaskingRuleV1_basic(t *testing.T) {
 			{
 				Config: testAccWafDataMaskingRuleV1_basic,
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckWafDataMaskingRuleV1Exists("opentelekomcloud_waf_datamasking_rule_v1.rule_1", &rule),
-					resource.TestCheckResourceAttr(
-						"opentelekomcloud_waf_datamasking_rule_v1.rule_1", "url", "/login"),
-					resource.TestCheckResourceAttr(
-						"opentelekomcloud_waf_datamasking_rule_v1.rule_1", "category", "params"),
-					resource.TestCheckResourceAttr(
-						"opentelekomcloud_waf_datamasking_rule_v1.rule_1", "index", "password"),
+					testAccCheckWafDataMaskingRuleV1Exists(resourceDMRuleName, &rule),
+					resource.TestCheckResourceAttr(resourceDMRuleName, "url", "/login"),
+					resource.TestCheckResourceAttr(resourceDMRuleName, "category", "params"),
+					resource.TestCheckResourceAttr(resourceDMRuleName, "index", "password"),
 				),
 			},
 			{
 				Config: testAccWafDataMaskingRuleV1_update,
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckWafDataMaskingRuleV1Exists("opentelekomcloud_waf_datamasking_rule_v1.rule_1", &rule),
-					resource.TestCheckResourceAttr(
-						"opentelekomcloud_waf_datamasking_rule_v1.rule_1", "url", "/login_new"),
-					resource.TestCheckResourceAttr(
-						"opentelekomcloud_waf_datamasking_rule_v1.rule_1", "category", "params"),
-					resource.TestCheckResourceAttr(
-						"opentelekomcloud_waf_datamasking_rule_v1.rule_1", "index", "password"),
+					testAccCheckWafDataMaskingRuleV1Exists(resourceDMRuleName, &rule),
+					resource.TestCheckResourceAttr(resourceDMRuleName, "url", "/login_new"),
+					resource.TestCheckResourceAttr(resourceDMRuleName, "category", "params"),
+					resource.TestCheckResourceAttr(resourceDMRuleName, "index", "password"),
 				),
 			},
+		},
+	})
+}
+
+func TestAccWafDataMaskingRuleV1_import(t *testing.T) {
+	resource.Test(t, resource.TestCase{
+		PreCheck:          func() { common.TestAccPreCheck(t) },
+		ProviderFactories: common.TestAccProviderFactories,
+		CheckDestroy:      testAccCheckWafDataMaskingRuleV1Destroy,
+		Steps: []resource.TestStep{
+			{
+				Config: testAccWafDataMaskingRuleV1_basic,
+			},
+			stepWAFRuleImport(resourceDMRuleName),
 		},
 	})
 }
