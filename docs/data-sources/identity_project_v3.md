@@ -14,6 +14,16 @@ data "opentelekomcloud_identity_project_v3" "project_1" {
 }
 ```
 
+### Query Current Project details
+
+If `name` or `domain_id` are not provided, data source gets info about current project.
+
+```hcl
+data "opentelekomcloud_identity_project_v3" "project_1" {
+}
+```
+
+
 ## Argument Reference
 
 The following arguments are supported:
