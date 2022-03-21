@@ -115,12 +115,15 @@ func dataSourceIdentityProjectV3Read(_ context.Context, d *schema.ResourceData, 
 	}
 
 	if len(filteredProjects) > 1 {
-		rawProject, err := projects.Get(client, client.ProjectID).Extract()
-		if err != nil {
-			return diag.FromErr(err)
+		projectID := config.HwClient.ProjectID
+		for _, p := range filteredProjects {
+			if p.ID == projectID {
+				filteredProjects = []projects.Project{p}
+				break
+			}
 		}
-		filteredProjects = append(filteredProjects, *rawProject)
 	}
+
 	project = filteredProjects[0]
 
 	log.Printf("[DEBUG] Single project found: %s", project.ID)
