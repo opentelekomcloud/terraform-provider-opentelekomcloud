@@ -1,0 +1,5 @@
+---
+other:
+  - |
+    **[ELB]** Clarify ``transparent_client_ip_enable`` argument description in documentation of
+    ``resource/opentelekomcloud_lb_listener_v2`` (`#1666 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/1666>`_)
