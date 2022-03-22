@@ -112,15 +112,15 @@ const (
 resource "opentelekomcloud_rts_software_config_v1" "config_1" {
   name = "opentelekomcloud-config"
   output_values = [{
-    type = "String"
-    name = "result"
+    type         = "String"
+    name         = "result"
     error_output = "false"
-    description = "value1"
+    description  = "value1"
   }]
-  input_values=[{
-    default = "0"
-    type = "String"
-    name = "foo"
+  input_values = [{
+    default     = "0"
+    type        = "String"
+    name        = "foo"
     description = "value2"
   }]
   group = "script"
@@ -130,15 +130,15 @@ resource "opentelekomcloud_rts_software_config_v1" "config_1" {
 resource "opentelekomcloud_rts_software_config_v1" "config_1" {
   name = "opentelekomcloud-config"
   output_values = [{
-    type = "String"
-    name = "result"
+    type         = "String"
+    name         = "result"
     error_output = "false"
-    description = "value1"
+    description  = "value1"
   }]
-  input_values=[{
-    default = "0"
-    type = "String"
-    name = "foo"
+  input_values = [{
+    default     = "0"
+    type        = "String"
+    name        = "foo"
     description = "value2"
   }]
   group = "script"

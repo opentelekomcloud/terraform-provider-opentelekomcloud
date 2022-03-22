@@ -247,10 +247,10 @@ resource "opentelekomcloud_lb_pool_v2" "pool_1" {
 }
 
 resource "opentelekomcloud_lb_monitor_v2" "monitor_1" {
-  type         = "TCP"
-  delay        = 20
-  timeout      = 10
-  max_retries  = 5
-  pool_id      = opentelekomcloud_lb_pool_v2.pool_1.id
+  type        = "TCP"
+  delay       = 20
+  timeout     = 10
+  max_retries = 5
+  pool_id     = opentelekomcloud_lb_pool_v2.pool_1.id
 }
 `, common.DataSourceSubnet)

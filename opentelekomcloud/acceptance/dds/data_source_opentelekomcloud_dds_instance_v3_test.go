@@ -66,9 +66,9 @@ resource "opentelekomcloud_dds_instance_v3" "instance_1" {
   password          = "5ecuredPa55w0rd@"
   mode              = "ReplicaSet"
   flavor {
-    type = "replica"
-    num = 1
-    size = 20
+    type      = "replica"
+    num       = 1
+    size      = 20
     spec_code = "dds.mongodb.s2.medium.4.repset"
   }
 }

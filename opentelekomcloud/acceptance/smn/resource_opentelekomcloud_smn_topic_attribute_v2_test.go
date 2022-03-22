@@ -111,7 +111,7 @@ func testAccCheckSMNV2TopicAttributeExists(n string) resource.TestCheckFunc {
 
 const TestAccSMNV2TopicAttributeConfigBasic = `
 resource "opentelekomcloud_smn_topic_v2" "topic_1" {
-  name		   = "topic_1"
+  name         = "topic_1"
   display_name = "The display name of topic_1"
 }
 

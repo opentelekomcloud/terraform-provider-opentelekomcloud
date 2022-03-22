@@ -57,7 +57,7 @@ resource "opentelekomcloud_vpnaas_service_v2" "service_1" {
 }
 
 data "opentelekomcloud_vpnaas_service_v2" "by_id" {
-  router_id = opentelekomcloud_vpnaas_service_v2.service_1.router_id
+  router_id      = opentelekomcloud_vpnaas_service_v2.service_1.router_id
   admin_state_up = "true"
 }
 `

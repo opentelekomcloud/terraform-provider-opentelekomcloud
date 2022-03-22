@@ -73,7 +73,7 @@ resource "opentelekomcloud_compute_instance_v2" "instance_1" {
 }
 
 data "opentelekomcloud_deh_server_v1" "servers" {
-  dedicated_host_id  = opentelekomcloud_deh_host_v1.deh1.id
-  server_id          = opentelekomcloud_compute_instance_v2.instance_1.id
+  dedicated_host_id = opentelekomcloud_deh_host_v1.deh1.id
+  server_id         = opentelekomcloud_compute_instance_v2.instance_1.id
 }
 `, common.DataSourceSubnet, env.OS_AVAILABILITY_ZONE)

@@ -160,14 +160,14 @@ func testAccCheckNetworkingV2NetworkDestroy(s *terraform.State) error {
 
 const testAccNetworkingV2NetworkBasic = `
 resource "opentelekomcloud_networking_network_v2" "network_1" {
-  name = "network_1"
+  name           = "network_1"
   admin_state_up = "true"
 }
 `
 
 const testAccNetworkingV2NetworkImport = `
 resource "opentelekomcloud_networking_network_v2" "network_1" {
-  name = "network_1_imp"
+  name           = "network_1_imp"
   admin_state_up = "true"
 }
 `
@@ -182,13 +182,13 @@ resource "opentelekomcloud_networking_network_v2" "network_1" {
 
 const testAccNetworkingV2NetworkNetstack = `
 resource "opentelekomcloud_networking_network_v2" "network_1" {
-  name = "network_1"
+  name           = "network_1"
   admin_state_up = "true"
 }
 
 resource "opentelekomcloud_networking_subnet_v2" "subnet_1" {
-  name = "subnet_1"
-  cidr = "192.168.10.0/24"
+  name       = "subnet_1"
+  cidr       = "192.168.10.0/24"
   ip_version = 4
   network_id = opentelekomcloud_networking_network_v2.network_1.id
 }
@@ -205,7 +205,7 @@ resource "opentelekomcloud_networking_router_interface_v2" "ri_1" {
 
 const testAccNetworkingV2NetworkTimeout = `
 resource "opentelekomcloud_networking_network_v2" "network_1" {
-  name = "network_1"
+  name           = "network_1"
   admin_state_up = "true"
 
   timeouts {
@@ -218,12 +218,12 @@ resource "opentelekomcloud_networking_network_v2" "network_1" {
 const testAccNetworkingV2NetworkMultipleSegmentMappings = `
 resource "opentelekomcloud_networking_network_v2" "network_1" {
   name = "network_1"
-  segments =[
+  segments = [
     {
-      segmentation_id = 2,
-      network_type = "vxlan"
+      segmentation_id = 2
+      network_type    = "vxlan"
     }
-  ],
+  ]
   admin_state_up = "true"
 }
 `

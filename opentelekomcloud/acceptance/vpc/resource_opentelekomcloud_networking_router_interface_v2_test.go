@@ -124,7 +124,7 @@ func testAccCheckNetworkingV2RouterInterfaceDestroy(s *terraform.State) error {
 
 const testAccNetworkingV2RouterInterfaceBasicSubnet = `
 resource "opentelekomcloud_networking_router_v2" "router_1" {
-  name = "router_1_ri_sn"
+  name           = "router_1_ri_sn"
   admin_state_up = "true"
 }
 
@@ -134,12 +134,12 @@ resource "opentelekomcloud_networking_router_interface_v2" "int_1" {
 }
 
 resource "opentelekomcloud_networking_network_v2" "network_1" {
-  name = "network_1_ri_sn"
+  name           = "network_1_ri_sn"
   admin_state_up = "true"
 }
 
 resource "opentelekomcloud_networking_subnet_v2" "subnet_1" {
-  cidr = "192.168.199.0/24"
+  cidr       = "192.168.199.0/24"
   ip_version = 4
   network_id = opentelekomcloud_networking_network_v2.network_1.id
 }
@@ -147,33 +147,33 @@ resource "opentelekomcloud_networking_subnet_v2" "subnet_1" {
 
 const testAccNetworkingV2RouterInterfaceBasicPort = `
 resource "opentelekomcloud_networking_router_v2" "router_1" {
-  name = "router_1_bp"
+  name           = "router_1_bp"
   admin_state_up = "true"
 }
 
 resource "opentelekomcloud_networking_router_interface_v2" "int_1" {
   router_id = opentelekomcloud_networking_router_v2.router_1.id
-  port_id = opentelekomcloud_networking_port_v2.port_1.id
+  port_id   = opentelekomcloud_networking_port_v2.port_1.id
 }
 
 resource "opentelekomcloud_networking_network_v2" "network_1" {
-  name = "network_1_ri_bp"
+  name           = "network_1_ri_bp"
   admin_state_up = "true"
 }
 
 resource "opentelekomcloud_networking_subnet_v2" "subnet_1" {
-  cidr = "192.168.199.0/24"
+  cidr       = "192.168.199.0/24"
   ip_version = 4
   network_id = opentelekomcloud_networking_network_v2.network_1.id
 }
 
 resource "opentelekomcloud_networking_port_v2" "port_1" {
-  name = "port_1_ri_bp"
+  name           = "port_1_ri_bp"
   admin_state_up = "true"
-  network_id = opentelekomcloud_networking_network_v2.network_1.id
+  network_id     = opentelekomcloud_networking_network_v2.network_1.id
 
   fixed_ip {
-    subnet_id = opentelekomcloud_networking_subnet_v2.subnet_1.id
+    subnet_id  = opentelekomcloud_networking_subnet_v2.subnet_1.id
     ip_address = "192.168.199.1"
   }
 }
@@ -181,7 +181,7 @@ resource "opentelekomcloud_networking_port_v2" "port_1" {
 
 const testAccNetworkingV2RouterInterfaceTimeout = `
 resource "opentelekomcloud_networking_router_v2" "router_1" {
-  name = "router_1_ri_t"
+  name           = "router_1_ri_t"
   admin_state_up = "true"
 }
 
@@ -196,12 +196,12 @@ resource "opentelekomcloud_networking_router_interface_v2" "int_1" {
 }
 
 resource "opentelekomcloud_networking_network_v2" "network_1" {
-  name = "network_1_ri_t"
+  name           = "network_1_ri_t"
   admin_state_up = "true"
 }
 
 resource "opentelekomcloud_networking_subnet_v2" "subnet_1" {
-  cidr = "192.168.199.0/24"
+  cidr       = "192.168.199.0/24"
   ip_version = 4
   network_id = opentelekomcloud_networking_network_v2.network_1.id
 }

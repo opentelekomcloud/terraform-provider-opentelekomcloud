@@ -174,16 +174,16 @@ var testAccSInstanceV1ConfigBasic = fmt.Sprintf(`
 %s
 
 data "opentelekomcloud_rds_flavors_v1" "flavor" {
-    region = "eu-de"
-    datastore_name = "PostgreSQL"
-    datastore_version = "9.5.5"
-    speccode = "rds.pg.s1.medium.ha"
+  region            = "eu-de"
+  datastore_name    = "PostgreSQL"
+  datastore_version = "9.5.5"
+  speccode          = "rds.pg.s1.medium.ha"
 }
 
 resource "opentelekomcloud_rds_instance_v1" "instance" {
   name = "rds-instance"
   datastore {
-    type = "PostgreSQL"
+    type    = "PostgreSQL"
     version = "9.5.5"
   }
   flavorref = data.opentelekomcloud_rds_flavors_v1.flavor.id
@@ -191,9 +191,9 @@ resource "opentelekomcloud_rds_instance_v1" "instance" {
     type = "COMMON"
     size = 100
   }
-  region = "eu-de"
+  region           = "eu-de"
   availabilityzone = "eu-de-01"
-  vpc = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.vpc_id
+  vpc              = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.vpc_id
   nics {
     subnetid = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.network_id
   }
@@ -203,11 +203,11 @@ resource "opentelekomcloud_rds_instance_v1" "instance" {
   dbport = "8635"
   backupstrategy {
     starttime = "01:00:00"
-    keepdays = 1
+    keepdays  = 1
   }
   dbrtpd = "Huangwei!120521"
   ha {
-    enable = true
+    enable          = true
     replicationmode = "async"
   }
   tag = {
@@ -221,16 +221,16 @@ var testAccSInstanceV1ConfigUpdatetag = fmt.Sprintf(`
 %s
 
 data "opentelekomcloud_rds_flavors_v1" "flavor" {
-    region = "eu-de"
-    datastore_name = "PostgreSQL"
-    datastore_version = "9.5.5"
-    speccode = "rds.pg.s1.medium.ha"
+  region            = "eu-de"
+  datastore_name    = "PostgreSQL"
+  datastore_version = "9.5.5"
+  speccode          = "rds.pg.s1.medium.ha"
 }
 
 resource "opentelekomcloud_rds_instance_v1" "instance" {
   name = "rds-instance"
   datastore {
-    type = "PostgreSQL"
+    type    = "PostgreSQL"
     version = "9.5.5"
   }
   flavorref = data.opentelekomcloud_rds_flavors_v1.flavor.id
@@ -238,9 +238,9 @@ resource "opentelekomcloud_rds_instance_v1" "instance" {
     type = "COMMON"
     size = 100
   }
-  region = "eu-de"
+  region           = "eu-de"
   availabilityzone = "eu-de-01"
-  vpc = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.vpc_id
+  vpc              = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.vpc_id
   nics {
     subnetid = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.network_id
   }
@@ -250,16 +250,16 @@ resource "opentelekomcloud_rds_instance_v1" "instance" {
   dbport = "8635"
   backupstrategy {
     starttime = "01:00:00"
-    keepdays = 1
+    keepdays  = 1
   }
   dbrtpd = "Huangwei!120521"
   ha {
-    enable = true
+    enable          = true
     replicationmode = "async"
   }
   tag = {
     foo2 = "bar2"
-    key = "value2"
+    key  = "value2"
   }
 }`, common.DataSourceSecGroupDefault, common.DataSourceSubnet)
 
@@ -268,16 +268,16 @@ var testAccSInstanceV1ConfigNoTags = fmt.Sprintf(`
 %s
 
 data "opentelekomcloud_rds_flavors_v1" "flavor" {
-    region = "eu-de"
-    datastore_name = "PostgreSQL"
-    datastore_version = "9.5.5"
-    speccode = "rds.pg.s1.medium.ha"
+  region            = "eu-de"
+  datastore_name    = "PostgreSQL"
+  datastore_version = "9.5.5"
+  speccode          = "rds.pg.s1.medium.ha"
 }
 
 resource "opentelekomcloud_rds_instance_v1" "instance" {
   name = "rds-instance"
   datastore {
-    type = "PostgreSQL"
+    type    = "PostgreSQL"
     version = "9.5.5"
   }
   flavorref = data.opentelekomcloud_rds_flavors_v1.flavor.id
@@ -285,9 +285,9 @@ resource "opentelekomcloud_rds_instance_v1" "instance" {
     type = "COMMON"
     size = 100
   }
-  region = "eu-de"
+  region           = "eu-de"
   availabilityzone = "eu-de-01"
-  vpc = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.vpc_id
+  vpc              = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.vpc_id
   nics {
     subnetid = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.network_id
   }
@@ -297,11 +297,11 @@ resource "opentelekomcloud_rds_instance_v1" "instance" {
   dbport = "8635"
   backupstrategy {
     starttime = "01:00:00"
-    keepdays = 1
+    keepdays  = 1
   }
   dbrtpd = "Huangwei!120521"
   ha {
-    enable = true
+    enable          = true
     replicationmode = "async"
   }
 }`, common.DataSourceSecGroupDefault, common.DataSourceSubnet)

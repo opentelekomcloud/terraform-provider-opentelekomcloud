@@ -294,24 +294,24 @@ func testAccCheckNetworkingV2PortPortSecurity(port *testPortWithExtensions, expe
 
 const testAccNetworkingV2PortBasic = `
 resource "opentelekomcloud_networking_network_v2" "network_1" {
-  name = "network_1"
+  name           = "network_1"
   admin_state_up = "true"
 }
 
 resource "opentelekomcloud_networking_subnet_v2" "subnet_1" {
-  name = "subnet_1"
-  cidr = "192.168.199.0/24"
+  name       = "subnet_1"
+  cidr       = "192.168.199.0/24"
   ip_version = 4
   network_id = opentelekomcloud_networking_network_v2.network_1.id
 }
 
 resource "opentelekomcloud_networking_port_v2" "port_1" {
-  name = "port_1"
+  name           = "port_1"
   admin_state_up = "true"
-  network_id = opentelekomcloud_networking_network_v2.network_1.id
+  network_id     = opentelekomcloud_networking_network_v2.network_1.id
 
   fixed_ip {
-    subnet_id =  opentelekomcloud_networking_subnet_v2.subnet_1.id
+    subnet_id  = opentelekomcloud_networking_subnet_v2.subnet_1.id
     ip_address = "192.168.199.23"
   }
 }
@@ -319,43 +319,43 @@ resource "opentelekomcloud_networking_port_v2" "port_1" {
 
 const testAccNetworkingV2PortNoIP = `
 resource "opentelekomcloud_networking_network_v2" "network_1" {
-  name = "network_1"
+  name           = "network_1"
   admin_state_up = "true"
 }
 
 resource "opentelekomcloud_networking_subnet_v2" "subnet_1" {
-  name = "subnet_1"
-  cidr = "192.168.199.0/24"
+  name       = "subnet_1"
+  cidr       = "192.168.199.0/24"
   ip_version = 4
   network_id = opentelekomcloud_networking_network_v2.network_1.id
 }
 
 resource "opentelekomcloud_networking_port_v2" "port_1" {
-  name = "port_1"
+  name           = "port_1"
   admin_state_up = "true"
-  network_id = opentelekomcloud_networking_network_v2.network_1.id
+  network_id     = opentelekomcloud_networking_network_v2.network_1.id
 
   fixed_ip {
-    subnet_id =  opentelekomcloud_networking_subnet_v2.subnet_1.id
+    subnet_id = opentelekomcloud_networking_subnet_v2.subnet_1.id
   }
 }
 `
 
 const testAccNetworkingV2PortAllowedAddressPairs = `
 resource "opentelekomcloud_networking_network_v2" "vrrp_network" {
-  name = "vrrp_network"
+  name           = "vrrp_network"
   admin_state_up = "true"
 }
 
 resource "opentelekomcloud_networking_subnet_v2" "vrrp_subnet" {
-  name = "vrrp_subnet"
-  cidr = "10.0.0.0/24"
+  name       = "vrrp_subnet"
+  cidr       = "10.0.0.0/24"
   ip_version = 4
   network_id = opentelekomcloud_networking_network_v2.vrrp_network.id
 
   allocation_pools {
     start = "10.0.0.2"
-    end = "10.0.0.200"
+    end   = "10.0.0.200"
   }
 }
 
@@ -369,39 +369,39 @@ resource "opentelekomcloud_networking_router_interface_v2" "vrrp_interface" {
 }
 
 resource "opentelekomcloud_networking_port_v2" "vrrp_port_1" {
-  name = "vrrp_port_1"
+  name           = "vrrp_port_1"
   admin_state_up = "true"
-  network_id = opentelekomcloud_networking_network_v2.vrrp_network.id
+  network_id     = opentelekomcloud_networking_network_v2.vrrp_network.id
 
   fixed_ip {
-    subnet_id =  opentelekomcloud_networking_subnet_v2.vrrp_subnet.id
+    subnet_id  = opentelekomcloud_networking_subnet_v2.vrrp_subnet.id
     ip_address = "10.0.0.202"
   }
 }
 
 resource "opentelekomcloud_networking_port_v2" "vrrp_port_2" {
-  name = "vrrp_port_2"
+  name           = "vrrp_port_2"
   admin_state_up = "true"
-  network_id = opentelekomcloud_networking_network_v2.vrrp_network.id
+  network_id     = opentelekomcloud_networking_network_v2.vrrp_network.id
 
   fixed_ip {
-    subnet_id =  opentelekomcloud_networking_subnet_v2.vrrp_subnet.id
+    subnet_id  = opentelekomcloud_networking_subnet_v2.vrrp_subnet.id
     ip_address = "10.0.0.201"
   }
 }
 
 resource "opentelekomcloud_networking_port_v2" "instance_port" {
-  name = "instance_port"
+  name           = "instance_port"
   admin_state_up = "true"
-  network_id = opentelekomcloud_networking_network_v2.vrrp_network.id
+  network_id     = opentelekomcloud_networking_network_v2.vrrp_network.id
 
   allowed_address_pairs {
-    ip_address = opentelekomcloud_networking_port_v2.vrrp_port_1.fixed_ip.0.ip_address
+    ip_address  = opentelekomcloud_networking_port_v2.vrrp_port_1.fixed_ip.0.ip_address
     mac_address = opentelekomcloud_networking_port_v2.vrrp_port_1.mac_address
   }
 
   allowed_address_pairs {
-    ip_address = opentelekomcloud_networking_port_v2.vrrp_port_2.fixed_ip.0.ip_address
+    ip_address  = opentelekomcloud_networking_port_v2.vrrp_port_2.fixed_ip.0.ip_address
     mac_address = opentelekomcloud_networking_port_v2.vrrp_port_2.mac_address
   }
 }
@@ -455,24 +455,24 @@ resource "opentelekomcloud_networking_port_v2" "port_1" {
 
 const testAccNetworkingV2PortTimeout = `
 resource "opentelekomcloud_networking_network_v2" "network_1" {
-  name = "network_1"
+  name           = "network_1"
   admin_state_up = "true"
 }
 
 resource "opentelekomcloud_networking_subnet_v2" "subnet_1" {
-  name = "subnet_1"
-  cidr = "192.168.199.0/24"
+  name       = "subnet_1"
+  cidr       = "192.168.199.0/24"
   ip_version = 4
   network_id = opentelekomcloud_networking_network_v2.network_1.id
 }
 
 resource "opentelekomcloud_networking_port_v2" "port_1" {
-  name = "port_1"
+  name           = "port_1"
   admin_state_up = "true"
-  network_id = opentelekomcloud_networking_network_v2.network_1.id
+  network_id     = opentelekomcloud_networking_network_v2.network_1.id
 
   fixed_ip {
-    subnet_id =  opentelekomcloud_networking_subnet_v2.subnet_1.id
+    subnet_id  = opentelekomcloud_networking_subnet_v2.subnet_1.id
     ip_address = "192.168.199.23"
   }
 

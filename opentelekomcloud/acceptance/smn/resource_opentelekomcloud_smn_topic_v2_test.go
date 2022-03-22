@@ -128,15 +128,15 @@ func testAccCheckSMNV2TopicExists(n string, topic *topics.TopicGet, projectName 
 
 var TestAccSMNV2TopicConfig_basic = `
 resource "opentelekomcloud_smn_topic_v2" "topic_1" {
-  name		  = "topic_1"
-  display_name    = "The display name of topic_1"
+  name         = "topic_1"
+  display_name = "The display name of topic_1"
 }
 `
 
 var TestAccSMNV2TopicConfig_update = `
 resource "opentelekomcloud_smn_topic_v2" "topic_1" {
-  name		  = "topic_1"
-  display_name    = "The update display name of topic_1"
+  name         = "topic_1"
+  display_name = "The update display name of topic_1"
 }
 `
 

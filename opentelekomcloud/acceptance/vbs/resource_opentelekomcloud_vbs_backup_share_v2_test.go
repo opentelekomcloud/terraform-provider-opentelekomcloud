@@ -104,43 +104,43 @@ func testAccVBSBackupShareV2Exists(n string, share *shares.Share) resource.TestC
 
 var testAccVBSBackupShareV2_basic = fmt.Sprintf(`
 resource "opentelekomcloud_blockstorage_volume_v2" "volume_1" {
-  name = "volume_123"
+  name        = "volume_123"
   description = "first test volume"
-  size = 40
-  cascade = true
+  size        = 40
+  cascade     = true
 }
 
 resource "opentelekomcloud_vbs_backup_v2" "backup_1" {
-  volume_id = opentelekomcloud_blockstorage_volume_v2.volume_1.id
-  name = "vbs-backup"
+  volume_id   = opentelekomcloud_blockstorage_volume_v2.volume_1.id
+  name        = "vbs-backup"
   description = "Backup_Demo"
 }
 
 resource "opentelekomcloud_vbs_backup_share_v2" "share" {
-  backup_id =opentelekomcloud_vbs_backup_v2.backup_1.id
+  backup_id      = opentelekomcloud_vbs_backup_v2.backup_1.id
   to_project_ids = ["%s"]
 }
 `, env.OS_TO_TENANT_ID)
 
 var testAccVBSBackupShareV2_timeout = fmt.Sprintf(`
 resource "opentelekomcloud_blockstorage_volume_v2" "volume_1" {
-  name = "volume_123"
+  name        = "volume_123"
   description = "first test volume"
-  size = 40
-  cascade = true
+  size        = 40
+  cascade     = true
 }
 
 resource "opentelekomcloud_vbs_backup_v2" "backup_1" {
-  volume_id = opentelekomcloud_blockstorage_volume_v2.volume_1.id
-  name = "vbs-backup"
+  volume_id   = opentelekomcloud_blockstorage_volume_v2.volume_1.id
+  name        = "vbs-backup"
   description = "Backup_Demo"
 }
 
 resource "opentelekomcloud_vbs_backup_share_v2" "share" {
-  backup_id =opentelekomcloud_vbs_backup_v2.backup_1.id
+  backup_id      = opentelekomcloud_vbs_backup_v2.backup_1.id
   to_project_ids = ["%s"]
 
-timeouts {
+  timeouts {
     create = "5m"
     delete = "5m"
   }

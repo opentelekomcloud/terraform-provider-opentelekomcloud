@@ -72,8 +72,8 @@ resource "opentelekomcloud_networking_port_v2" "port_1" {
 }
 
 resource "opentelekomcloud_networking_port_v2" "port_2" {
-  name               = "port_ds_2"
-  network_id         = opentelekomcloud_networking_network_v2.network_1.id
+  name           = "port_ds_2"
+  network_id     = opentelekomcloud_networking_network_v2.network_1.id
   admin_state_up = "true"
 
   security_group_ids = [

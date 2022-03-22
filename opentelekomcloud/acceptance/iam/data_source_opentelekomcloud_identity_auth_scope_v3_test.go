@@ -50,6 +50,6 @@ func testAccCheckIdentityAuthScopeV3DataSourceID(n string) resource.TestCheckFun
 
 const testAccOpenTelekomCloudIdentityAuthScopeV3DataSource_basic = `
 data "opentelekomcloud_identity_auth_scope_v3" "token" {
-	name = "my_token"
+  name = "my_token"
 }
 `

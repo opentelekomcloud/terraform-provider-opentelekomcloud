@@ -104,12 +104,12 @@ func testAccCheckWebTamperProtectionRuleV1Exists(n string, rule *webtamperprotec
 
 const testAccWafWebTamperProtectionRuleV1_basic = `
 resource "opentelekomcloud_waf_policy_v1" "policy_1" {
-	name = "policy_updated"
+  name = "policy_updated"
 }
 
 resource "opentelekomcloud_waf_webtamperprotection_rule_v1" "rule_1" {
-	policy_id = opentelekomcloud_waf_policy_v1.policy_1.id
-	hostname = "www.abc.com"
-	url = "/a"
+  policy_id = opentelekomcloud_waf_policy_v1.policy_1.id
+  hostname  = "www.abc.com"
+  url       = "/a"
 }
 `

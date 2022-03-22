@@ -175,55 +175,55 @@ func testAccCheckNetworkingV2SecGroupRuleExists(n string, securityGroupRule *rul
 
 const testAccNetworkingV2SecGroupRuleBasic = `
 resource "opentelekomcloud_networking_secgroup_v2" "secgroup_1" {
-  name = "secgroup_1"
+  name        = "secgroup_1"
   description = "terraform security group rule acceptance test"
 }
 
 resource "opentelekomcloud_networking_secgroup_v2" "secgroup_2" {
-  name = "secgroup_2"
+  name        = "secgroup_2"
   description = "terraform security group rule acceptance test"
 }
 
 resource "opentelekomcloud_networking_secgroup_rule_v2" "secgroup_rule_1" {
-  description = "test secgroup rule"
-  direction = "ingress"
-  ethertype = "IPv4"
-  port_range_max = 22
-  port_range_min = 22
-  protocol = "tcp"
-  remote_ip_prefix = "0.0.0.0/0"
+  description       = "test secgroup rule"
+  direction         = "ingress"
+  ethertype         = "IPv4"
+  port_range_max    = 22
+  port_range_min    = 22
+  protocol          = "tcp"
+  remote_ip_prefix  = "0.0.0.0/0"
   security_group_id = opentelekomcloud_networking_secgroup_v2.secgroup_1.id
 }
 
 resource "opentelekomcloud_networking_secgroup_rule_v2" "secgroup_rule_2" {
-  direction = "ingress"
-  ethertype = "IPv4"
-  port_range_max = 80
-  port_range_min = 80
-  protocol = "tcp"
-  remote_group_id = opentelekomcloud_networking_secgroup_v2.secgroup_1.id
+  direction         = "ingress"
+  ethertype         = "IPv4"
+  port_range_max    = 80
+  port_range_min    = 80
+  protocol          = "tcp"
+  remote_group_id   = opentelekomcloud_networking_secgroup_v2.secgroup_1.id
   security_group_id = opentelekomcloud_networking_secgroup_v2.secgroup_2.id
 }
 `
 
 const testAccNetworkingV2SecGroupRuleTimeout = `
 resource "opentelekomcloud_networking_secgroup_v2" "secgroup_1" {
-  name = "secgroup_1"
+  name        = "secgroup_1"
   description = "terraform security group rule acceptance test"
 }
 
 resource "opentelekomcloud_networking_secgroup_v2" "secgroup_2" {
-  name = "secgroup_2"
+  name        = "secgroup_2"
   description = "terraform security group rule acceptance test"
 }
 
 resource "opentelekomcloud_networking_secgroup_rule_v2" "secgroup_rule_1" {
-  direction = "ingress"
-  ethertype = "IPv4"
-  port_range_max = 22
-  port_range_min = 22
-  protocol = "tcp"
-  remote_ip_prefix = "0.0.0.0/0"
+  direction         = "ingress"
+  ethertype         = "IPv4"
+  port_range_max    = 22
+  port_range_min    = 22
+  protocol          = "tcp"
+  remote_ip_prefix  = "0.0.0.0/0"
   security_group_id = opentelekomcloud_networking_secgroup_v2.secgroup_1.id
 
   timeouts {
@@ -232,12 +232,12 @@ resource "opentelekomcloud_networking_secgroup_rule_v2" "secgroup_rule_1" {
 }
 
 resource "opentelekomcloud_networking_secgroup_rule_v2" "secgroup_rule_2" {
-  direction = "ingress"
-  ethertype = "IPv4"
-  port_range_max = 80
-  port_range_min = 80
-  protocol = "tcp"
-  remote_group_id = opentelekomcloud_networking_secgroup_v2.secgroup_1.id
+  direction         = "ingress"
+  ethertype         = "IPv4"
+  port_range_max    = 80
+  port_range_min    = 80
+  protocol          = "tcp"
+  remote_group_id   = opentelekomcloud_networking_secgroup_v2.secgroup_1.id
   security_group_id = opentelekomcloud_networking_secgroup_v2.secgroup_2.id
 
   timeouts {
@@ -248,17 +248,17 @@ resource "opentelekomcloud_networking_secgroup_rule_v2" "secgroup_rule_2" {
 
 const testAccNetworkingV2SecGroupRuleNumericProtocol = `
 resource "opentelekomcloud_networking_secgroup_v2" "secgroup_1" {
-  name = "secgroup_1"
+  name        = "secgroup_1"
   description = "terraform security group rule acceptance test"
 }
 
 resource "opentelekomcloud_networking_secgroup_rule_v2" "secgroup_rule_1" {
-  direction = "ingress"
-  ethertype = "IPv4"
-  port_range_max = 22
-  port_range_min = 22
-  protocol = "115"
-  remote_ip_prefix = "0.0.0.0/0"
+  direction         = "ingress"
+  ethertype         = "IPv4"
+  port_range_max    = 22
+  port_range_min    = 22
+  protocol          = "115"
+  remote_ip_prefix  = "0.0.0.0/0"
   security_group_id = opentelekomcloud_networking_secgroup_v2.secgroup_1.id
 }
 `

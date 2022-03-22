@@ -175,80 +175,80 @@ func testAccCheckNetworkingV2SubnetDestroy(s *terraform.State) error {
 
 const testAccNetworkingV2SubnetBasic = `
 resource "opentelekomcloud_networking_network_v2" "network_1" {
-  name = "network_1"
+  name           = "network_1"
   admin_state_up = "true"
 }
 
 resource "opentelekomcloud_networking_subnet_v2" "subnet_1" {
-  cidr = "192.168.199.0/24"
+  cidr       = "192.168.199.0/24"
   network_id = opentelekomcloud_networking_network_v2.network_1.id
 
   allocation_pools {
     start = "192.168.199.100"
-    end = "192.168.199.200"
+    end   = "192.168.199.200"
   }
 }
 `
 const testAccNetworkingV2SubnetImport = `
 resource "opentelekomcloud_networking_network_v2" "network_1" {
-  name = "network_1_i"
+  name           = "network_1_i"
   admin_state_up = "true"
 }
 
 resource "opentelekomcloud_networking_subnet_v2" "subnet_1" {
-  cidr = "192.168.199.0/24"
+  cidr       = "192.168.199.0/24"
   network_id = opentelekomcloud_networking_network_v2.network_1.id
 
   allocation_pools {
     start = "192.168.199.100"
-    end = "192.168.199.200"
+    end   = "192.168.199.200"
   }
 }
 `
 
 const testAccNetworkingV2SubnetUpdate = `
 resource "opentelekomcloud_networking_network_v2" "network_1" {
-  name = "network_1"
+  name           = "network_1"
   admin_state_up = "true"
 }
 
 resource "opentelekomcloud_networking_subnet_v2" "subnet_1" {
-  name = "subnet_1"
-  cidr = "192.168.199.0/24"
+  name       = "subnet_1"
+  cidr       = "192.168.199.0/24"
   gateway_ip = "192.168.199.1"
   network_id = opentelekomcloud_networking_network_v2.network_1.id
 
   allocation_pools {
     start = "192.168.199.150"
-    end = "192.168.199.200"
+    end   = "192.168.199.200"
   }
 }
 `
 
 const testAccNetworkingV2SubnetEnableDHCP = `
 resource "opentelekomcloud_networking_network_v2" "network_1" {
-  name = "network_1_dhcp"
+  name           = "network_1_dhcp"
   admin_state_up = "true"
 }
 
 resource "opentelekomcloud_networking_subnet_v2" "subnet_1" {
-  name = "subnet_1_dhcp"
-  cidr = "192.168.199.0/24"
-  gateway_ip = "192.168.199.1"
+  name        = "subnet_1_dhcp"
+  cidr        = "192.168.199.0/24"
+  gateway_ip  = "192.168.199.1"
   enable_dhcp = true
-  network_id = opentelekomcloud_networking_network_v2.network_1.id
+  network_id  = opentelekomcloud_networking_network_v2.network_1.id
 }
 `
 
 const testAccNetworkingV2SubnetNoGateway = `
 resource "opentelekomcloud_networking_network_v2" "network_1" {
-  name = "network_1_no_gw"
+  name           = "network_1_no_gw"
   admin_state_up = "true"
 }
 
 resource "opentelekomcloud_networking_subnet_v2" "subnet_1" {
-  name = "subnet_1_no_gw"
-  cidr = "192.168.199.0/24"
+  name       = "subnet_1_no_gw"
+  cidr       = "192.168.199.0/24"
   no_gateway = true
   network_id = opentelekomcloud_networking_network_v2.network_1.id
 }
@@ -256,29 +256,29 @@ resource "opentelekomcloud_networking_subnet_v2" "subnet_1" {
 
 const testAccNetworkingV2SubnetImpliedGateway = `
 resource "opentelekomcloud_networking_network_v2" "network_1" {
-  name = "network_1_i_gw"
+  name           = "network_1_i_gw"
   admin_state_up = "true"
 }
 resource "opentelekomcloud_networking_subnet_v2" "subnet_1" {
-  name = "subnet_1_i_gw"
-  cidr = "192.168.199.0/24"
+  name       = "subnet_1_i_gw"
+  cidr       = "192.168.199.0/24"
   network_id = opentelekomcloud_networking_network_v2.network_1.id
 }
 `
 
 const testAccNetworkingV2SubnetTimeout = `
 resource "opentelekomcloud_networking_network_v2" "network_1" {
-  name = "network_1_t"
+  name           = "network_1_t"
   admin_state_up = "true"
 }
 
 resource "opentelekomcloud_networking_subnet_v2" "subnet_1" {
-  cidr = "192.168.199.0/24"
+  cidr       = "192.168.199.0/24"
   network_id = opentelekomcloud_networking_network_v2.network_1.id
 
   allocation_pools {
     start = "192.168.199.100"
-    end = "192.168.199.200"
+    end   = "192.168.199.200"
   }
 
   timeouts {

@@ -30,6 +30,6 @@ func TestAccOpenStackIdentityV3GroupDataSource_basic(t *testing.T) {
 
 const testAccOpenStackIdentityV3GroupDataSource_basic = `
 data "opentelekomcloud_identity_group_v3" "group_1" {
-    name = "admins"
+  name = "admins"
 }
 `

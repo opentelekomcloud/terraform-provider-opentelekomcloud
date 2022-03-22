@@ -131,7 +131,7 @@ data "opentelekomcloud_compute_flavor_v2" "flavor_1" {
 
 const testAccComputeV2FlavorDataSourceQueryVCPUs = `
 data "opentelekomcloud_compute_flavor_v2" "flavor_1" {
-  name = "hl1.8xlarge.8"
+  name  = "hl1.8xlarge.8"
   vcpus = 32
 }
 `

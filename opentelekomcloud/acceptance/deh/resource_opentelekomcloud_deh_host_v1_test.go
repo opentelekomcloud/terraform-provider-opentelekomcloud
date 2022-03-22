@@ -138,28 +138,28 @@ func testAccCheckDeHV1Exists(n string, host *hosts.Host) resource.TestCheckFunc 
 
 var testAccDeHV1Basic = fmt.Sprintf(`
 resource "opentelekomcloud_deh_host_v1" "deh1" {
-  availability_zone= "%s"
-  auto_placement= "off"
-  host_type= "h1"
-  name = "test-deh-1"
+  availability_zone = "%s"
+  auto_placement    = "off"
+  host_type         = "h1"
+  name              = "test-deh-1"
 }
 `, env.OS_AVAILABILITY_ZONE)
 
 var testAccDeHV1Update = fmt.Sprintf(`
 resource "opentelekomcloud_deh_host_v1" "deh1" {
-  availability_zone= "%s"
-  auto_placement= "on"
-  host_type= "h1"
-  name = "test-deh-2"
+  availability_zone = "%s"
+  auto_placement    = "on"
+  host_type         = "h1"
+  name              = "test-deh-2"
 }
 `, env.OS_AVAILABILITY_ZONE)
 
 var testAccDeHV1Timeout = fmt.Sprintf(`
 resource "opentelekomcloud_deh_host_v1" "deh1" {
-  availability_zone= "%s"
-  auto_placement= "off"
-  host_type= "h1"
-  name = "test-deh-1"
+  availability_zone = "%s"
+  auto_placement    = "off"
+  host_type         = "h1"
+  name              = "test-deh-1"
   timeouts {
     create = "5m"
     delete = "5m"

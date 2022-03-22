@@ -73,13 +73,13 @@ func testAccCheckNetworkingV2FloatingIPAssociateDestroy(s *terraform.State) erro
 
 const testAccNetworkingV2FloatingIPAssociateBasic = `
 resource "opentelekomcloud_networking_network_v2" "network_1" {
-  name = "network_1_eip_ass"
+  name           = "network_1_eip_ass"
   admin_state_up = "true"
 }
 
 resource "opentelekomcloud_networking_subnet_v2" "subnet_1" {
-  name = "subnet_1_eip_ass"
-  cidr = "192.168.199.0/24"
+  name       = "subnet_1_eip_ass"
+  cidr       = "192.168.199.0/24"
   ip_version = 4
   network_id = opentelekomcloud_networking_network_v2.network_1.id
 }
@@ -90,16 +90,16 @@ resource "opentelekomcloud_networking_router_interface_v2" "router_interface_1" 
 }
 
 resource "opentelekomcloud_networking_router_v2" "router_1" {
-  name = "router_1_eip_ass"
+  name           = "router_1_eip_ass"
   admin_state_up = "true"
 }
 
 resource "opentelekomcloud_networking_port_v2" "port_1" {
   admin_state_up = "true"
-  network_id = opentelekomcloud_networking_subnet_v2.subnet_1.network_id
+  network_id     = opentelekomcloud_networking_subnet_v2.subnet_1.network_id
 
   fixed_ip {
-    subnet_id = opentelekomcloud_networking_subnet_v2.subnet_1.id
+    subnet_id  = opentelekomcloud_networking_subnet_v2.subnet_1.id
     ip_address = "192.168.199.20"
   }
 }
@@ -109,6 +109,6 @@ resource "opentelekomcloud_networking_floatingip_v2" "fip_1" {
 
 resource "opentelekomcloud_networking_floatingip_associate_v2" "fip_1" {
   floating_ip = opentelekomcloud_networking_floatingip_v2.fip_1.address
-  port_id = opentelekomcloud_networking_port_v2.port_1.id
+  port_id     = opentelekomcloud_networking_port_v2.port_1.id
 }
 `

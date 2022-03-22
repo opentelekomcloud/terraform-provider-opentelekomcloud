@@ -259,7 +259,7 @@ resource "opentelekomcloud_compute_secgroup_v2" "secgroup_3" {
   description = "Security group for AS config tf test"
 }
 
-resource "opentelekomcloud_as_configuration_v1" "as_config"{
+resource "opentelekomcloud_as_configuration_v1" "as_config" {
   scaling_configuration_name = "as_config"
   instance_config {
     image = data.opentelekomcloud_images_image_v2.latest_image.id
@@ -273,7 +273,7 @@ resource "opentelekomcloud_as_configuration_v1" "as_config"{
       volume_type = "SATA"
       disk_type   = "DATA"
     }
-    key_name        = "%s"
+    key_name = "%s"
     security_groups = [
       opentelekomcloud_compute_secgroup_v2.secgroup_1.id,
       opentelekomcloud_compute_secgroup_v2.secgroup_2.id,

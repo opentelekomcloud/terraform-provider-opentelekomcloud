@@ -116,21 +116,21 @@ func testAccCheckWafPolicyV1Exists(n string, policy *policies.Policy) resource.T
 
 const testAccWafPolicyV1_basic = `
 resource "opentelekomcloud_waf_policy_v1" "policy_1" {
-	name = "policy_1"
-	options {
-		webattack = true
-		crawler = true
-	}
-	full_detection = false
+  name = "policy_1"
+  options {
+    webattack = true
+    crawler   = true
+  }
+  full_detection = false
 }
 `
 
 const testAccWafPolicyV1_update = `
 resource "opentelekomcloud_waf_policy_v1" "policy_1" {
-	name = "policy_updated"
-	level = 1
-	action {
-		category = "block"
-	}
+  name  = "policy_updated"
+  level = 1
+  action {
+    category = "block"
+  }
 }
 `

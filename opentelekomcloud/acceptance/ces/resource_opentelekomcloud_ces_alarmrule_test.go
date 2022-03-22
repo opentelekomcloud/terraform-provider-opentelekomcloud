@@ -138,7 +138,7 @@ resource "opentelekomcloud_ces_alarmrule" "alarmrule_1" {
   alarm_action_enabled = false
 
   alarm_actions {
-    type              = "notification"
+    type = "notification"
     notification_list = [
       opentelekomcloud_smn_topic_v2.topic_1.topic_urn
     ]
@@ -184,7 +184,7 @@ resource "opentelekomcloud_ces_alarmrule" "alarmrule_1" {
   alarm_enabled        = false
 
   alarm_actions {
-    type              = "notification"
+    type = "notification"
     notification_list = [
       opentelekomcloud_smn_topic_v2.topic_1.topic_urn
     ]

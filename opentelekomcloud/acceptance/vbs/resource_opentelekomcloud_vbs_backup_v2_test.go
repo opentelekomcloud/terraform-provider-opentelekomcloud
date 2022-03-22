@@ -111,30 +111,30 @@ func testAccCheckVBSBackupV2Exists(n string, configs *backups.Backup) resource.T
 
 const testAccVBSBackupV2_basic = `
 resource "opentelekomcloud_blockstorage_volume_v2" "volume_1" {
-  name = "volume_123"
+  name        = "volume_123"
   description = "first test volume"
-  size = 40
-  cascade = true
+  size        = 40
+  cascade     = true
 }
 
 resource "opentelekomcloud_vbs_backup_v2" "backup_1" {
-  volume_id = opentelekomcloud_blockstorage_volume_v2.volume_1.id
-  name = "vbs-backup"
+  volume_id   = opentelekomcloud_blockstorage_volume_v2.volume_1.id
+  name        = "vbs-backup"
   description = "Backup_Demo"
 }
 `
 
 const testAccVBSBackupV2_timeout = `
 resource "opentelekomcloud_blockstorage_volume_v2" "volume_1" {
-  name = "volume_123"
+  name        = "volume_123"
   description = "first test volume"
-  size = 40
-  cascade = true
+  size        = 40
+  cascade     = true
 }
 
 resource "opentelekomcloud_vbs_backup_v2" "backup_1" {
-  volume_id = opentelekomcloud_blockstorage_volume_v2.volume_1.id
-  name = "vbs-backup"
+  volume_id   = opentelekomcloud_blockstorage_volume_v2.volume_1.id
+  name        = "vbs-backup"
   description = "Backup_Demo"
 
   timeouts {

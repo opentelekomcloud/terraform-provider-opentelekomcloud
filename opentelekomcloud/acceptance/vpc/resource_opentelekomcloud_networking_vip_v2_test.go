@@ -101,13 +101,13 @@ var testAccNetworkingV2VIPConfigBasic = fmt.Sprintf(`
 %s
 
 resource "opentelekomcloud_networking_network_v2" "network_1" {
-  name = "network_1_vip"
+  name           = "network_1_vip"
   admin_state_up = "true"
 }
 
 resource "opentelekomcloud_networking_subnet_v2" "subnet_1" {
-  name = "subnet_1_vip"
-  cidr = "192.168.199.0/24"
+  name       = "subnet_1_vip"
+  cidr       = "192.168.199.0/24"
   ip_version = 4
   network_id = opentelekomcloud_networking_network_v2.network_1.id
 }
@@ -118,12 +118,12 @@ resource "opentelekomcloud_networking_router_interface_v2" "router_interface_1" 
 }
 
 resource "opentelekomcloud_networking_router_v2" "router_1" {
-  name = "router_1_vip"
+  name             = "router_1_vip"
   external_gateway = data.opentelekomcloud_networking_network_v2.ext_network.id
 }
 
 resource "opentelekomcloud_networking_vip_v2" "vip_1" {
   network_id = opentelekomcloud_networking_network_v2.network_1.id
-  subnet_id = opentelekomcloud_networking_subnet_v2.subnet_1.id
+  subnet_id  = opentelekomcloud_networking_subnet_v2.subnet_1.id
 }
 `, common.DataSourceExtNetwork)

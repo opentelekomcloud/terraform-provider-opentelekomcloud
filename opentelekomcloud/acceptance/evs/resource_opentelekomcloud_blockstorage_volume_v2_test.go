@@ -419,7 +419,7 @@ resource "opentelekomcloud_blockstorage_volume_v2" "volume_1" {
   }
   tags = {
     foo = "bar"
-	key = "value"
+    key = "value"
   }
   size = 1
 }
@@ -434,7 +434,7 @@ resource "opentelekomcloud_blockstorage_volume_v2" "volume_1" {
   }
   tags = {
     foo2 = "bar2"
-	key2 = "value2"
+    key2 = "value2"
   }
   size = 1
 }
@@ -443,7 +443,7 @@ resource "opentelekomcloud_blockstorage_volume_v2" "volume_1" {
 resource "opentelekomcloud_blockstorage_volume_v2" "volume_1" {
   name        = "volume_1"
   description = "first test volume"
-  size = 1
+  size        = 1
   device_type = "SCSI"
 
   timeouts {

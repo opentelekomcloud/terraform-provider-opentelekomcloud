@@ -281,82 +281,82 @@ func testAccCheckImagesImageV2TagCount(n string, expected int) resource.TestChec
 }
 
 var testAccImagesImageV2_basic = `
-  resource "opentelekomcloud_images_image_v2" "image_1" {
-      name   = "Rancher TerraformAccTest"
-      image_source_url = "https://releases.rancher.com/os/latest/rancheros-openstack.img"
-      container_format = "bare"
-      disk_format = "qcow2"
-  }`
+resource "opentelekomcloud_images_image_v2" "image_1" {
+  name             = "Rancher TerraformAccTest"
+  image_source_url = "https://releases.rancher.com/os/latest/rancheros-openstack.img"
+  container_format = "bare"
+  disk_format      = "qcow2"
+}`
 
 var testAccImagesImageV2_name_1 = `
-  resource "opentelekomcloud_images_image_v2" "image_1" {
-      name   = "Rancher TerraformAccTest"
-      image_source_url = "https://releases.rancher.com/os/latest/rancheros-openstack.img"
-      container_format = "bare"
-      disk_format = "qcow2"
-  }`
+resource "opentelekomcloud_images_image_v2" "image_1" {
+  name             = "Rancher TerraformAccTest"
+  image_source_url = "https://releases.rancher.com/os/latest/rancheros-openstack.img"
+  container_format = "bare"
+  disk_format      = "qcow2"
+}`
 
 var testAccImagesImageV2_name_2 = `
-  resource "opentelekomcloud_images_image_v2" "image_1" {
-      name   = "TerraformAccTest Rancher"
-      image_source_url = "https://releases.rancher.com/os/latest/rancheros-openstack.img"
-      container_format = "bare"
-      disk_format = "qcow2"
-  }`
+resource "opentelekomcloud_images_image_v2" "image_1" {
+  name             = "TerraformAccTest Rancher"
+  image_source_url = "https://releases.rancher.com/os/latest/rancheros-openstack.img"
+  container_format = "bare"
+  disk_format      = "qcow2"
+}`
 
 var testAccImagesImageV2_tags_1 = `
-  resource "opentelekomcloud_images_image_v2" "image_1" {
-      name   = "Rancher TerraformAccTest"
-      image_source_url = "https://releases.rancher.com/os/latest/rancheros-openstack.img"
-      container_format = "bare"
-      disk_format = "qcow2"
-      tags = ["foo","bar"]
-  }`
+resource "opentelekomcloud_images_image_v2" "image_1" {
+  name             = "Rancher TerraformAccTest"
+  image_source_url = "https://releases.rancher.com/os/latest/rancheros-openstack.img"
+  container_format = "bare"
+  disk_format      = "qcow2"
+  tags             = ["foo", "bar"]
+}`
 
 var testAccImagesImageV2_tags_2 = `
-  resource "opentelekomcloud_images_image_v2" "image_1" {
-      name   = "Rancher TerraformAccTest"
-      image_source_url = "https://releases.rancher.com/os/latest/rancheros-openstack.img"
-      container_format = "bare"
-      disk_format = "qcow2"
-      tags = ["foo","bar","baz"]
-  }`
+resource "opentelekomcloud_images_image_v2" "image_1" {
+  name             = "Rancher TerraformAccTest"
+  image_source_url = "https://releases.rancher.com/os/latest/rancheros-openstack.img"
+  container_format = "bare"
+  disk_format      = "qcow2"
+  tags             = ["foo", "bar", "baz"]
+}`
 
 var testAccImagesImageV2_tags_3 = `
-  resource "opentelekomcloud_images_image_v2" "image_1" {
-      name   = "Rancher TerraformAccTest"
-      image_source_url = "https://releases.rancher.com/os/latest/rancheros-openstack.img"
-      container_format = "bare"
-      disk_format = "qcow2"
-      tags = ["foo","baz"]
-  }`
+resource "opentelekomcloud_images_image_v2" "image_1" {
+  name             = "Rancher TerraformAccTest"
+  image_source_url = "https://releases.rancher.com/os/latest/rancheros-openstack.img"
+  container_format = "bare"
+  disk_format      = "qcow2"
+  tags             = ["foo", "baz"]
+}`
 
 var testAccImagesImageV2_visibility_1 = `
-  resource "opentelekomcloud_images_image_v2" "image_1" {
-      name   = "Rancher TerraformAccTest"
-      image_source_url = "https://releases.rancher.com/os/latest/rancheros-openstack.img"
-      container_format = "bare"
-      disk_format = "qcow2"
-      visibility = "private"
-  }`
+resource "opentelekomcloud_images_image_v2" "image_1" {
+  name             = "Rancher TerraformAccTest"
+  image_source_url = "https://releases.rancher.com/os/latest/rancheros-openstack.img"
+  container_format = "bare"
+  disk_format      = "qcow2"
+  visibility       = "private"
+}`
 
 var testAccImagesImageV2_visibility_2 = `
-  resource "opentelekomcloud_images_image_v2" "image_1" {
-      name   = "Rancher TerraformAccTest"
-      image_source_url = "https://releases.rancher.com/os/latest/rancheros-openstack.img"
-      container_format = "bare"
-      disk_format = "qcow2"
-      visibility = "public"
-  }`
+resource "opentelekomcloud_images_image_v2" "image_1" {
+  name             = "Rancher TerraformAccTest"
+  image_source_url = "https://releases.rancher.com/os/latest/rancheros-openstack.img"
+  container_format = "bare"
+  disk_format      = "qcow2"
+  visibility       = "public"
+}`
 
 var testAccImagesImageV2_timeout = `
-  resource "opentelekomcloud_images_image_v2" "image_1" {
-      name   = "Rancher TerraformAccTest"
-      image_source_url = "https://releases.rancher.com/os/latest/rancheros-openstack.img"
-      container_format = "bare"
-      disk_format = "qcow2"
+resource "opentelekomcloud_images_image_v2" "image_1" {
+  name             = "Rancher TerraformAccTest"
+  image_source_url = "https://releases.rancher.com/os/latest/rancheros-openstack.img"
+  container_format = "bare"
+  disk_format      = "qcow2"
 
-      timeouts {
-        create = "10m"
-      }
-  }`
+  timeouts {
+    create = "10m"
+  }
+}`

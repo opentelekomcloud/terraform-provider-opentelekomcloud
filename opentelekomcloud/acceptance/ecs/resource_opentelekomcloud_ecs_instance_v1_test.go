@@ -267,9 +267,9 @@ resource "opentelekomcloud_ecs_instance_v1" "instance_1" {
     type = "SAS"
   }
 
-  password          = "Password@123"
-  availability_zone = "%s"
-  auto_recovery     = true
+  password                    = "Password@123"
+  availability_zone           = "%s"
+  auto_recovery               = true
   delete_disks_on_termination = true
 
   tags = {

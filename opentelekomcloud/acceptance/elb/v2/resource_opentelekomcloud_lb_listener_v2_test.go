@@ -221,7 +221,7 @@ var (
 %s
 
 resource "opentelekomcloud_lb_loadbalancer_v2" "loadbalancer_1" {
-  name = "loadbalancer_1"
+  name          = "loadbalancer_1"
   vip_subnet_id = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.subnet_id
 }
 
@@ -248,17 +248,17 @@ resource "opentelekomcloud_lb_listener_v2" "listener_1" {
 %s
 
 resource "opentelekomcloud_lb_loadbalancer_v2" "loadbalancer_1" {
-  name = "loadbalancer_1"
+  name          = "loadbalancer_1"
   vip_subnet_id = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.subnet_id
 }
 
 resource "opentelekomcloud_lb_listener_v2" "listener_1" {
-  name              = "listener_1_updated"
-  protocol          = "HTTP"
-  protocol_port     = 8080
+  name          = "listener_1_updated"
+  protocol      = "HTTP"
+  protocol_port = 8080
   #connection_limit = 100
-  admin_state_up    = "true"
-  loadbalancer_id   = opentelekomcloud_lb_loadbalancer_v2.loadbalancer_1.id
+  admin_state_up  = "true"
+  loadbalancer_id = opentelekomcloud_lb_loadbalancer_v2.loadbalancer_1.id
 
   tags = {
     muh = "value-update"
@@ -521,7 +521,7 @@ resource "opentelekomcloud_lb_listener_v2" "listener_tls" {
 %s
 
 resource "opentelekomcloud_lb_loadbalancer_v2" "loadbalancer_1" {
-  name = "loadbalancer_1"
+  name          = "loadbalancer_1"
   vip_subnet_id = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.subnet_id
 }
 
@@ -539,7 +539,7 @@ resource "opentelekomcloud_lb_listener_v2" "listener_1" {
 %s
 
 resource "opentelekomcloud_lb_loadbalancer_v2" "loadbalancer_1" {
-  name = "loadbalancer_1"
+  name          = "loadbalancer_1"
   vip_subnet_id = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.subnet_id
 }
 

@@ -165,19 +165,19 @@ func testAccCheckAwsS3ObjectDataSourceExists(n string, obj *s3.GetObjectOutput) 
 func testAccDataSourceS3ObjectConfig_basic(randInt int) (string, string) {
 	resources := fmt.Sprintf(`
 resource "opentelekomcloud_s3_bucket" "object_bucket" {
-	bucket = "tf-object-test-bucket-%d"
+  bucket = "tf-object-test-bucket-%d"
 }
 resource "opentelekomcloud_s3_bucket_object" "object" {
-	bucket = opentelekomcloud_s3_bucket.object_bucket.bucket
-	key = "tf-testing-obj-%d"
-	content = "Hello World"
+  bucket  = opentelekomcloud_s3_bucket.object_bucket.bucket
+  key     = "tf-testing-obj-%d"
+  content = "Hello World"
 }
 `, randInt, randInt)
 
 	both := fmt.Sprintf(`%s
 data "opentelekomcloud_s3_bucket_object" "obj" {
-	bucket = "tf-object-test-bucket-%d"
-	key = "tf-testing-obj-%d"
+  bucket = "tf-object-test-bucket-%d"
+  key    = "tf-testing-obj-%d"
 }`, resources, randInt, randInt)
 
 	return resources, both
@@ -186,20 +186,20 @@ data "opentelekomcloud_s3_bucket_object" "obj" {
 func testAccDataSourceS3ObjectConfig_readableBody(randInt int) (string, string) {
 	resources := fmt.Sprintf(`
 resource "opentelekomcloud_s3_bucket" "object_bucket" {
-	bucket = "tf-object-test-bucket-%d"
+  bucket = "tf-object-test-bucket-%d"
 }
 resource "opentelekomcloud_s3_bucket_object" "object" {
-	bucket = opentelekomcloud_s3_bucket.object_bucket.bucket
-	key = "tf-testing-obj-%d-readable"
-	content = "yes"
-	content_type = "text/plain"
+  bucket       = opentelekomcloud_s3_bucket.object_bucket.bucket
+  key          = "tf-testing-obj-%d-readable"
+  content      = "yes"
+  content_type = "text/plain"
 }
 `, randInt, randInt)
 
 	both := fmt.Sprintf(`%s
 data "opentelekomcloud_s3_bucket_object" "obj" {
-	bucket = "tf-object-test-bucket-%d"
-	key = "tf-testing-obj-%d-readable"
+  bucket = "tf-object-test-bucket-%d"
+  key    = "tf-testing-obj-%d-readable"
 }`, resources, randInt, randInt)
 
 	return resources, both
@@ -208,30 +208,30 @@ data "opentelekomcloud_s3_bucket_object" "obj" {
 func testAccDataSourceS3ObjectConfig_allParams(randInt int) (string, string) {
 	resources := fmt.Sprintf(`
 resource "opentelekomcloud_s3_bucket" "object_bucket" {
-	bucket = "tf-object-test-bucket-%d"
-	versioning {
-		enabled = true
-	}
+  bucket = "tf-object-test-bucket-%d"
+  versioning {
+    enabled = true
+  }
 }
 
 resource "opentelekomcloud_s3_bucket_object" "object" {
-	bucket = opentelekomcloud_s3_bucket.object_bucket.bucket
-	key = "tf-testing-obj-%d-all-params"
-	content = <<CONTENT
+  bucket              = opentelekomcloud_s3_bucket.object_bucket.bucket
+  key                 = "tf-testing-obj-%d-all-params"
+  content             = <<CONTENT
 {"msg": "Hi there!"}
 CONTENT
-	content_type = "application/unknown"
-	cache_control = "no-cache"
-	content_disposition = "attachment"
-	content_encoding = "identity"
-	content_language = "en-GB"
+  content_type        = "application/unknown"
+  cache_control       = "no-cache"
+  content_disposition = "attachment"
+  content_encoding    = "identity"
+  content_language    = "en-GB"
 }
 `, randInt, randInt)
 
 	both := fmt.Sprintf(`%s
 data "opentelekomcloud_s3_bucket_object" "obj" {
-	bucket = "tf-object-test-bucket-%d"
-	key = "tf-testing-obj-%d-all-params"
+  bucket = "tf-object-test-bucket-%d"
+  key    = "tf-testing-obj-%d-all-params"
 }`, resources, randInt, randInt)
 
 	return resources, both

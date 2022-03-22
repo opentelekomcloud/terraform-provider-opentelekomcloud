@@ -176,7 +176,7 @@ resource "opentelekomcloud_blockstorage_volume_v2" "volume_1" {
 }
 
 resource "opentelekomcloud_compute_instance_v2" "instance_1" {
-  name = "instance_1"
+  name            = "instance_1"
   security_groups = ["default"]
   network {
     uuid = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.network_id
@@ -185,7 +185,7 @@ resource "opentelekomcloud_compute_instance_v2" "instance_1" {
 
 resource "opentelekomcloud_compute_volume_attach_v2" "va_1" {
   instance_id = opentelekomcloud_compute_instance_v2.instance_1.id
-  volume_id = opentelekomcloud_blockstorage_volume_v2.volume_1.id
+  volume_id   = opentelekomcloud_blockstorage_volume_v2.volume_1.id
 }
 `, common.DataSourceSubnet)
 
@@ -198,7 +198,7 @@ resource "opentelekomcloud_blockstorage_volume_v2" "volume_1" {
 }
 
 resource "opentelekomcloud_compute_instance_v2" "instance_1" {
-  name = "instance_1"
+  name            = "instance_1"
   security_groups = ["default"]
   network {
     uuid = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.network_id
@@ -207,8 +207,8 @@ resource "opentelekomcloud_compute_instance_v2" "instance_1" {
 
 resource "opentelekomcloud_compute_volume_attach_v2" "va_1" {
   instance_id = opentelekomcloud_compute_instance_v2.instance_1.id
-  volume_id = opentelekomcloud_blockstorage_volume_v2.volume_1.id
-  device = "/dev/vdc"
+  volume_id   = opentelekomcloud_blockstorage_volume_v2.volume_1.id
+  device      = "/dev/vdc"
 }
 `, common.DataSourceSubnet)
 
@@ -221,7 +221,7 @@ resource "opentelekomcloud_blockstorage_volume_v2" "volume_1" {
 }
 
 resource "opentelekomcloud_compute_instance_v2" "instance_1" {
-  name = "instance_1"
+  name            = "instance_1"
   security_groups = ["default"]
   network {
     uuid = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.network_id
@@ -230,7 +230,7 @@ resource "opentelekomcloud_compute_instance_v2" "instance_1" {
 
 resource "opentelekomcloud_compute_volume_attach_v2" "va_1" {
   instance_id = opentelekomcloud_compute_instance_v2.instance_1.id
-  volume_id = opentelekomcloud_blockstorage_volume_v2.volume_1.id
+  volume_id   = opentelekomcloud_blockstorage_volume_v2.volume_1.id
 
   timeouts {
     create = "5m"
