@@ -216,7 +216,7 @@ resource "opentelekomcloud_waf_policy_v1" "policy_1" {
 }
 
 resource "opentelekomcloud_waf_policy_v1" "policy_2" {
-  name = "policy_2"
+  name           = "policy_2"
   full_detection = true
 }
 
@@ -251,7 +251,7 @@ resource "opentelekomcloud_waf_certificate_v1" "certificate_2" {
 }
 
 resource "opentelekomcloud_waf_policy_v1" "policy_2" {
-  name = "policy_2"
+  name           = "policy_2"
   full_detection = true
 }
 
