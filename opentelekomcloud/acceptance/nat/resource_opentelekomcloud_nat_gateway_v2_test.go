@@ -6,6 +6,7 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
+	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/services/nat"
 
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/networking/v2/extensions/natgateways"
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/acceptance/common"
@@ -28,6 +29,7 @@ func TestAccNatGateway_basic(t *testing.T) {
 					resource.TestCheckResourceAttr(resourceGatewayName, "name", "nat_1"),
 					resource.TestCheckResourceAttr(resourceGatewayName, "description", "test for terraform"),
 					resource.TestCheckResourceAttr(resourceGatewayName, "spec", "1"),
+					resource.TestCheckResourceAttr(resourceGatewayName, "tags.muh", "value-create"),
 				),
 			},
 			{
@@ -36,6 +38,7 @@ func TestAccNatGateway_basic(t *testing.T) {
 					resource.TestCheckResourceAttr(resourceGatewayName, "name", "nat_1_updated"),
 					resource.TestCheckResourceAttr(resourceGatewayName, "description", "nat_1 updated description"),
 					resource.TestCheckResourceAttr(resourceGatewayName, "spec", "2"),
+					resource.TestCheckResourceAttr(resourceGatewayName, "tags.muh", "value-update"),
 				),
 			},
 		},
@@ -46,7 +49,7 @@ func testAccCheckNatV2GatewayDestroy(s *terraform.State) error {
 	config := common.TestAccProvider.Meta().(*cfg.Config)
 	client, err := config.NatV2Client(env.OS_REGION_NAME)
 	if err != nil {
-		return fmt.Errorf("error creating OpenTelekomCloud NATv2 client: %s", err)
+		return fmt.Errorf(nat.ErrCreationClient, err)
 	}
 
 	for _, rs := range s.RootModule().Resources {
@@ -77,7 +80,7 @@ func testAccCheckNatV2GatewayExists(n string) resource.TestCheckFunc {
 		config := common.TestAccProvider.Meta().(*cfg.Config)
 		client, err := config.NatV2Client(env.OS_REGION_NAME)
 		if err != nil {
-			return fmt.Errorf("error creating OpenTelekomCloud NATv2 client: %s", err)
+			return fmt.Errorf(nat.ErrCreationClient, err)
 		}
 
 		found, err := natgateways.Get(client, rs.Primary.ID).Extract()
@@ -102,6 +105,11 @@ resource "opentelekomcloud_nat_gateway_v2" "nat_1" {
   spec                = "1"
   internal_network_id = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.network_id
   router_id           = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.vpc_id
+
+  tags = {
+    muh = "value-create"
+    kuh = "value-create"
+  }
 }
 `, common.DataSourceSubnet)
 
@@ -114,5 +122,9 @@ resource "opentelekomcloud_nat_gateway_v2" "nat_1" {
   spec                = "2"
   internal_network_id = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.network_id
   router_id           = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.vpc_id
+
+  tags = {
+    muh = "value-update"
+  }
 }
 `, common.DataSourceSubnet)
