@@ -1,0 +1,13 @@
+---
+enhancements:
+  - |
+    **[WAF]** Removal automatically created policy when ``policy_id`` is set in ``resource/opentelekomcloud_waf_domain_v1``
+    (`#1667 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/1667>`_)
+fixes:
+  - |
+    **[WAF]** Fix policy-related errors in ``resource/opentelekomcloud_waf_domain_v1``
+    (`#1667 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/1667>`_)
+deprecations:
+  - |
+    **[WAF]** Deprecating applying policy to domain via ``hosts`` argument of ``resource/opentelekomcloud_waf_domain_v1``
+    (`#1667 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/1667>`_)
