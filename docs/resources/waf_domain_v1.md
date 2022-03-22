@@ -44,7 +44,10 @@ The following arguments are supported:
 
 * `proxy` - (Required) Specifies whether a proxy is configured.
 
-* `policy_id` - The policy ID associate with the domain. Changing this create a new domain.
+* `policy_id` - (Optional) The policy ID associate with the domain.
+
+->
+  If no policy ID is defined, default policy will be automatically created and assigned to the domain.
 
 * `sip_header_name` - (Optional) The type of the source IP header. This parameter is required only when proxy is set to `true`.
   The options are as follows: `default`, `cloudflare`, `akamai`, and `custom`.

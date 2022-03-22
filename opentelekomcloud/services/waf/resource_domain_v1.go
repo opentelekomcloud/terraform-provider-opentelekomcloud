@@ -119,10 +119,6 @@ func ResourceWafDomainV1() *schema.Resource {
 				Optional: true,
 				Computed: true,
 			},
-			"auto_policy_id": { // ID of the automatically created policy
-				Type:     schema.TypeString,
-				Computed: true,
-			},
 			"access_code": {
 				Type:     schema.TypeString,
 				Computed: true,
@@ -222,11 +218,14 @@ func resourceWafDomainV1Create(ctx context.Context, d *schema.ResourceData, meta
 	}
 
 	d.SetId(domain.Id)
-	_ = d.Set("auto_policy_id", domain.PolicyID)
 
-	if v, ok := d.GetOk("policy_id"); ok {
-		if err := assignDomainPolicy(client, d.Id(), v.(string)); err != nil {
+	if p, ok := d.GetOk("policy_id"); ok {
+		if err := assignDomainPolicy(client, d.Id(), p.(string)); err != nil {
 			return err
+		}
+
+		if err := policies.Delete(client, domain.PolicyID).ExtractErr(); err != nil {
+			return fmterr.Errorf("error removing automatically created policy: %w", err)
 		}
 	}
 
@@ -362,14 +361,6 @@ func resourceWafDomainV1Delete(_ context.Context, d *schema.ResourceData, meta i
 
 	if err := domains.Delete(client, d.Id()).ExtractErr(); err != nil {
 		return fmterr.Errorf("error deleting OpenTelekomCloud WAF Domain: %w", err)
-	}
-
-	autoPolicyID := d.Get("auto_policy_id").(string)
-	if err := policies.Delete(client, autoPolicyID).ExtractErr(); err != nil {
-		if _, ok := err.(golangsdk.ErrDefault404); ok {
-			return nil
-		}
-		return fmterr.Errorf("error deleting orphan policy: %w", err)
 	}
 
 	d.SetId("")
