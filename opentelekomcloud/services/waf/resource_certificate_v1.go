@@ -71,7 +71,7 @@ func resourceWafCertificateV1Create(ctx context.Context, d *schema.ResourceData,
 	config := meta.(*cfg.Config)
 	wafClient, err := config.WafV1Client(config.GetRegion(d))
 	if err != nil {
-		return fmterr.Errorf(WafClientError, err)
+		return fmterr.Errorf(ClientError, err)
 	}
 
 	createOpts := certificates.CreateOpts{
@@ -95,7 +95,7 @@ func resourceWafCertificateV1Read(_ context.Context, d *schema.ResourceData, met
 	config := meta.(*cfg.Config)
 	wafClient, err := config.WafV1Client(config.GetRegion(d))
 	if err != nil {
-		return fmterr.Errorf(WafClientError, err)
+		return fmterr.Errorf(ClientError, err)
 	}
 	n, err := certificates.Get(wafClient, d.Id()).Extract()
 
@@ -125,7 +125,7 @@ func resourceWafCertificateV1Update(ctx context.Context, d *schema.ResourceData,
 	config := meta.(*cfg.Config)
 	wafClient, err := config.WafV1Client(config.GetRegion(d))
 	if err != nil {
-		return fmterr.Errorf(WafClientError, err)
+		return fmterr.Errorf(ClientError, err)
 	}
 
 	var updateOpts certificates.UpdateOpts
@@ -145,7 +145,7 @@ func resourceWafCertificateV1Delete(_ context.Context, d *schema.ResourceData, m
 	config := meta.(*cfg.Config)
 	wafClient, err := config.WafV1Client(config.GetRegion(d))
 	if err != nil {
-		return fmterr.Errorf(WafClientError, err)
+		return fmterr.Errorf(ClientError, err)
 	}
 
 	err = certificates.Delete(wafClient, d.Id()).ExtractErr()
@@ -176,7 +176,7 @@ func importCertificateByIdOrName(ctx context.Context, d *schema.ResourceData, me
 	config := meta.(*cfg.Config)
 	client, err := config.WafV1Client(config.GetRegion(d))
 	if err != nil {
-		return nil, fmt.Errorf(WafClientError, err)
+		return nil, fmt.Errorf(ClientError, err)
 	}
 
 	// If there is such ID, use standard import

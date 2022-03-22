@@ -51,7 +51,7 @@ func testAccCheckWafAlarmNotificationV1Destroy(s *terraform.State) error {
 	config := common.TestAccProvider.Meta().(*cfg.Config)
 	client, err := config.WafV1Client(env.OS_REGION_NAME)
 	if err != nil {
-		return fmt.Errorf(waf.WafClientError, err)
+		return fmt.Errorf(waf.ClientError, err)
 	}
 
 	for _, rs := range s.RootModule().Resources {
@@ -85,7 +85,7 @@ func testAccCheckWafAlarmNotificationV1Exists(n string, notification *alarmnotif
 		config := common.TestAccProvider.Meta().(*cfg.Config)
 		client, err := config.WafV1Client(env.OS_REGION_NAME)
 		if err != nil {
-			return fmt.Errorf(waf.WafClientError, err)
+			return fmt.Errorf(waf.ClientError, err)
 		}
 
 		found, err := alarmnotifications.List(client).Extract()
