@@ -4,17 +4,24 @@ subcategory: "NAT"
 
 # opentelekomcloud_nat_gateway_v2
 
-Manages a V2 nat gateway resource within OpenTelekomCloud Nat.
+Manages a V2 NAT Gateway resource within OpenTelekomCloud.
 
 ## Example Usage
 
 ```hcl
-resource "opentelekomcloud_nat_gateway_v2" "nat_1" {
-  name                = "Terraform"
-  description         = "test for terraform2"
+variable "router_id" {}
+variable "internal_network_id" {}
+
+resource "opentelekomcloud_nat_gateway_v2" "this" {
+  name                = "tf_nat"
+  description         = "NAT GW created by terraform"
   spec                = "1"
-  router_id           = "2c1fe4bd-ebad-44ca-ae9d-e94e63847b75"
-  internal_network_id = "dc8632e2-d9ff-41b1-aa0c-d455557314a0"
+  router_id           = var.router_id
+  internal_network_id = var.internal_network_id
+
+  tags = {
+    muh = "kuh"
+  }
 }
 ```
 
@@ -22,20 +29,22 @@ resource "opentelekomcloud_nat_gateway_v2" "nat_1" {
 
 The following arguments are supported:
 
-* `name` - (Required) The name of the nat gateway.
+* `name` - (Required) The name of the NAT Gateway.
 
-* `description` - (Optional) The description of the nat gateway.
+* `description` - (Optional) The description of the NAT Gateway.
 
-* `spec` - (Required) The specification of the nat gateway, valid values are "1", "2", "3", "4".
+* `spec` - (Required) The specification of the NAT Gateway, valid values are `"1"`, `"2"`, `"3"`, `"4"`.
 
-* `tenant_id` - (Optional) The target tenant ID in which to allocate the nat
-  gateway. Changing this creates a new nat gateway.
+* `tenant_id` - (Optional) The target tenant ID in which to allocate the NAT
+  Gateway. Changing this creates a new NAT Gateway.
 
-* `router_id` - (Required) ID of the router (or VPC) this nat gateway belongs to. Changing
-  this creates a new nat gateway.
+* `router_id` - (Required) ID of the router (or VPC) this NAT Gateway belongs to. Changing
+  this creates a new NAT Gateway.
 
-* `internal_network_id` - (Required) ID of the network this nat gateway connects to.
-  Changing this creates a new nat gateway.
+* `internal_network_id` - (Required) ID of the network this NAT Gateway connects to.
+  Changing this creates a new NAT Gateway.
+
+* `tags` - (Optional) Tags key/value pairs to associate with the NAT Gateway.
 
 ## Attributes Reference
 

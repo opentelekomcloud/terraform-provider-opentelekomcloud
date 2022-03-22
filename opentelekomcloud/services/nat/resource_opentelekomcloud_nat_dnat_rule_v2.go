@@ -103,7 +103,7 @@ func resourceNatDnatRuleCreate(ctx context.Context, d *schema.ResourceData, meta
 	config := meta.(*cfg.Config)
 	client, err := config.NatV2Client(config.GetRegion(d))
 	if err != nil {
-		return fmterr.Errorf(errCreationClient, err)
+		return fmterr.Errorf(ErrCreationClient, err)
 	}
 
 	portID, portOk := d.GetOk("port_id")
@@ -151,7 +151,7 @@ func resourceNatDnatRuleRead(_ context.Context, d *schema.ResourceData, meta int
 	config := meta.(*cfg.Config)
 	client, err := config.NatV2Client(config.GetRegion(d))
 	if err != nil {
-		return fmterr.Errorf(errCreationClient, err)
+		return fmterr.Errorf(ErrCreationClient, err)
 	}
 	dnatRule, err := dnatrules.Get(client, d.Id()).Extract()
 	if err != nil {
@@ -182,7 +182,7 @@ func resourceNatDnatRuleDelete(ctx context.Context, d *schema.ResourceData, meta
 	config := meta.(*cfg.Config)
 	client, err := config.NatV2Client(config.GetRegion(d))
 	if err != nil {
-		return fmterr.Errorf(errCreationClient, err)
+		return fmterr.Errorf(ErrCreationClient, err)
 	}
 
 	stateConf := &resource.StateChangeConf{
