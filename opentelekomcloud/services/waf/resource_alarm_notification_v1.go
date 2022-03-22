@@ -65,7 +65,7 @@ func resourceWafAlarmNotificationV1Create(ctx context.Context, d *schema.Resourc
 	config := meta.(*cfg.Config)
 	client, err := config.WafV1Client(config.GetRegion(d))
 	if err != nil {
-		return fmterr.Errorf(WafClientError, err)
+		return fmterr.Errorf(ClientError, err)
 	}
 	alarmNotification, err := alarmnotifications.List(client).Extract()
 	if err != nil {
@@ -97,7 +97,7 @@ func resourceWafAlarmNotificationV1Read(_ context.Context, d *schema.ResourceDat
 	config := meta.(*cfg.Config)
 	client, err := config.WafV1Client(config.GetRegion(d))
 	if err != nil {
-		return fmterr.Errorf(WafClientError, err)
+		return fmterr.Errorf(ClientError, err)
 	}
 
 	alarmNotification, err := alarmnotifications.List(client).Extract()
@@ -125,7 +125,7 @@ func resourceWafAlarmNotificationV1Update(ctx context.Context, d *schema.Resourc
 	config := meta.(*cfg.Config)
 	client, err := config.WafV1Client(config.GetRegion(d))
 	if err != nil {
-		return fmterr.Errorf(WafClientError, err)
+		return fmterr.Errorf(ClientError, err)
 	}
 
 	enabled := d.Get("enabled").(bool)
@@ -151,7 +151,7 @@ func resourceWafAlarmNotificationV1Delete(_ context.Context, d *schema.ResourceD
 	config := meta.(*cfg.Config)
 	client, err := config.WafV1Client(config.GetRegion(d))
 	if err != nil {
-		return fmterr.Errorf(WafClientError, err)
+		return fmterr.Errorf(ClientError, err)
 	}
 
 	disabled := false

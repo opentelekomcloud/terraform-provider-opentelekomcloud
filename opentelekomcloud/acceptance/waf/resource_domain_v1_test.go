@@ -54,6 +54,24 @@ func TestAccWafDomainV1Basic(t *testing.T) {
 	})
 }
 
+func TestAccWafDomain_import(t *testing.T) {
+	resource.Test(t, resource.TestCase{
+		PreCheck:          func() { common.TestAccPreCheck(t) },
+		ProviderFactories: common.TestAccProviderFactories,
+		CheckDestroy:      testAccCheckWafDomainV1Destroy,
+		Steps: []resource.TestStep{
+			{
+				Config: testAccWafDomainV1Basic,
+			},
+			{
+				ResourceName:      resourceDomainName,
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+		},
+	})
+}
+
 func testAccCheckWafDomainV1Destroy(s *terraform.State) error {
 	config := common.TestAccProvider.Meta().(*cfg.Config)
 	wafClient, err := config.WafV1Client(env.OS_REGION_NAME)
@@ -197,6 +215,11 @@ resource "opentelekomcloud_waf_policy_v1" "policy_1" {
   full_detection = false
 }
 
+resource "opentelekomcloud_waf_policy_v1" "policy_2" {
+  name           = "policy_2"
+  full_detection = true
+}
+
 resource "opentelekomcloud_waf_domain_v1" "domain_1" {
   hostname = "www.b.com"
   cipher   = "cipher_default"
@@ -207,7 +230,7 @@ resource "opentelekomcloud_waf_domain_v1" "domain_1" {
     port            = 80
   }
   certificate_id = opentelekomcloud_waf_certificate_v1.certificate_1.id
-  policy_id      = opentelekomcloud_waf_policy_v1.policy_1.id
+  policy_id      = opentelekomcloud_waf_policy_v1.policy_2.id
   proxy          = false
 }
 `
@@ -227,13 +250,9 @@ resource "opentelekomcloud_waf_certificate_v1" "certificate_2" {
   key     = "-----BEGIN RSA PRIVATE KEY-----MIICXQIBAAKBgQDFPN9ojPndxSC4E1pqWQVKGHCFlXAAGBOxbGfSzXqzsoyacotueqMqXQbxrPSQFATeVmhZPNVEMdvcAMjYsV/mymtAwVqVA6q/OFdX/b3UHO+b/VqLo3J5SrM-----END RSA PRIVATE KEY-----"
 }
 
-resource "opentelekomcloud_waf_policy_v1" "policy_1" {
-  name = "policy_1"
-  options {
-    webattack = true
-    crawler   = true
-  }
-  full_detection = false
+resource "opentelekomcloud_waf_policy_v1" "policy_2" {
+  name           = "policy_2"
+  full_detection = true
 }
 
 resource "opentelekomcloud_waf_domain_v1" "domain_1" {
@@ -246,7 +265,7 @@ resource "opentelekomcloud_waf_domain_v1" "domain_1" {
     port            = 80
   }
   certificate_id = opentelekomcloud_waf_certificate_v1.certificate_2.id
-  policy_id      = opentelekomcloud_waf_policy_v1.policy_1.id
+  policy_id      = opentelekomcloud_waf_policy_v1.policy_2.id
   proxy          = false
 }
 `
