@@ -105,21 +105,21 @@ var testAccLBV2WhitelistConfigBasic = fmt.Sprintf(`
 %s
 
 resource "opentelekomcloud_lb_loadbalancer_v2" "loadbalancer_1" {
-  name = "loadbalancer_1"
+  name          = "loadbalancer_1"
   vip_subnet_id = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.subnet_id
 }
 
 resource "opentelekomcloud_lb_listener_v2" "listener_1" {
-  name = "listener_1"
-  protocol = "HTTP"
-  protocol_port = 8080
+  name            = "listener_1"
+  protocol        = "HTTP"
+  protocol_port   = 8080
   loadbalancer_id = opentelekomcloud_lb_loadbalancer_v2.loadbalancer_1.id
 }
 
 resource "opentelekomcloud_lb_whitelist_v2" "whitelist_1" {
   enable_whitelist = true
-  whitelist = "192.168.11.1,192.168.0.1/24"
-  listener_id = opentelekomcloud_lb_listener_v2.listener_1.id
+  whitelist        = "192.168.11.1,192.168.0.1/24"
+  listener_id      = opentelekomcloud_lb_listener_v2.listener_1.id
 }
 `, common.DataSourceSubnet)
 
@@ -127,20 +127,20 @@ var testAccLBV2WhitelistConfigUpdate = fmt.Sprintf(`
 %s
 
 resource "opentelekomcloud_lb_loadbalancer_v2" "loadbalancer_1" {
-  name = "loadbalancer_1"
+  name          = "loadbalancer_1"
   vip_subnet_id = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.subnet_id
 }
 
 resource "opentelekomcloud_lb_listener_v2" "listener_1" {
-  name = "listener_1"
-  protocol = "HTTP"
-  protocol_port = 8080
+  name            = "listener_1"
+  protocol        = "HTTP"
+  protocol_port   = 8080
   loadbalancer_id = opentelekomcloud_lb_loadbalancer_v2.loadbalancer_1.id
 }
 
 resource "opentelekomcloud_lb_whitelist_v2" "whitelist_1" {
   enable_whitelist = true
-  whitelist = "192.168.11.1,192.168.0.1/24,192.168.201.18/8"
-  listener_id = opentelekomcloud_lb_listener_v2.listener_1.id
+  whitelist        = "192.168.11.1,192.168.0.1/24,192.168.201.18/8"
+  listener_id      = opentelekomcloud_lb_listener_v2.listener_1.id
 }
 `, common.DataSourceSubnet)

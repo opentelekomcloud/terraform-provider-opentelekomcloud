@@ -118,8 +118,8 @@ var testAccImagesV2ImageDataSource_basic = fmt.Sprintf(`
 %s
 
 data "opentelekomcloud_images_image_v2" "image_1" {
-	most_recent = true
-	name        = opentelekomcloud_images_image_v2.image_1.name
+  most_recent = true
+  name        = opentelekomcloud_images_image_v2.image_1.name
 }
 `, testAccImagesV2ImageDataSource_cirros)
 

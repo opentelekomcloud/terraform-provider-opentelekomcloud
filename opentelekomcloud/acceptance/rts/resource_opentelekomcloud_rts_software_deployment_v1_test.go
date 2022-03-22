@@ -127,23 +127,23 @@ var testAccRtsSoftwareDeploymentV1Basic = fmt.Sprintf(`
 %s
 
 resource "opentelekomcloud_compute_instance_v2" "vm_1" {
-  name = "instance_1"
-  image_id = data.opentelekomcloud_images_image_v2.latest_image.id
+  name      = "instance_1"
+  image_id  = data.opentelekomcloud_images_image_v2.latest_image.id
   flavor_id = "%s"
   network {
     uuid = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.network_id
   }
 }
 resource "opentelekomcloud_rts_software_config_v1" "config_1" {
-  name="terraform-provider_test"
+  name = "terraform-provider_test"
 }
 
 resource "opentelekomcloud_rts_software_deployment_v1" "deployment_1" {
-  config_id = opentelekomcloud_rts_software_config_v1.config_1.id
-  server_id = opentelekomcloud_compute_instance_v2.vm_1.id
-  status= "IN_PROGRESS"
-  action= "CREATE"
-  status_reason= "Deploy data"
+  config_id     = opentelekomcloud_rts_software_config_v1.config_1.id
+  server_id     = opentelekomcloud_compute_instance_v2.vm_1.id
+  status        = "IN_PROGRESS"
+  action        = "CREATE"
+  status_reason = "Deploy data"
 }
 `, common.DataSourceImage, common.DataSourceSubnet, env.OsFlavorID)
 
@@ -152,26 +152,26 @@ var testAccRtsSoftwareDeploymentV1Update = fmt.Sprintf(`
 %s
 
 resource "opentelekomcloud_compute_instance_v2" "vm_1" {
-  name = "instance_1"
-  image_id = data.opentelekomcloud_images_image_v2.latest_image.id
+  name      = "instance_1"
+  image_id  = data.opentelekomcloud_images_image_v2.latest_image.id
   flavor_id = "%s"
   network {
     uuid = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.network_id
   }
 }
 resource "opentelekomcloud_rts_software_config_v1" "config_1" {
-  name="terraform-provider_test"
+  name = "terraform-provider_test"
 }
 
 resource "opentelekomcloud_rts_software_deployment_v1" "deployment_1" {
   config_id = opentelekomcloud_rts_software_config_v1.config_1.id
   server_id = opentelekomcloud_compute_instance_v2.vm_1.id
   output_values = {
-    deploy_stdout= "Writing to /tmp/baaaaa\nWritten to /tmp/baaaaa\n"
+    deploy_stdout = "Writing to /tmp/baaaaa\nWritten to /tmp/baaaaa\n"
   }
-  status= "COMPLETE"
-  action= "CREATE"
-  status_reason= "Outputs received"
+  status        = "COMPLETE"
+  action        = "CREATE"
+  status_reason = "Outputs received"
 }
 `, common.DataSourceImage, common.DataSourceSubnet, env.OsFlavorID)
 
@@ -180,23 +180,23 @@ var testAccRtsSoftwareDeploymentV1Timeout = fmt.Sprintf(`
 %s
 
 resource "opentelekomcloud_compute_instance_v2" "vm_1" {
-  name = "instance_1"
-  image_id = data.opentelekomcloud_images_image_v2.latest_image.id
+  name      = "instance_1"
+  image_id  = data.opentelekomcloud_images_image_v2.latest_image.id
   flavor_id = "%s"
   network {
     uuid = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.network_id
   }
 }
 resource "opentelekomcloud_rts_software_config_v1" "config_1" {
-  name="terraform-provider_test"
+  name = "terraform-provider_test"
 }
 
 resource "opentelekomcloud_rts_software_deployment_v1" "deployment_1" {
-  config_id = opentelekomcloud_rts_software_config_v1.config_1.id
-  server_id = opentelekomcloud_compute_instance_v2.vm_1.id
-  status= "COMPLETE"
-  action= "CREATE"
-  status_reason= "Outputs received"
+  config_id     = opentelekomcloud_rts_software_config_v1.config_1.id
+  server_id     = opentelekomcloud_compute_instance_v2.vm_1.id
+  status        = "COMPLETE"
+  action        = "CREATE"
+  status_reason = "Outputs received"
 
   timeouts {
     create = "10m"

@@ -157,19 +157,19 @@ func testAccCheckObsObjectDataSourceExists(n string, obj *obs.GetObjectOutput) r
 func testAccDataSourceObsObjectConfigBasic(randInt int) (string, string) {
 	resources := fmt.Sprintf(`
 resource "opentelekomcloud_obs_bucket" "object_bucket" {
-	bucket = "tf-object-test-bucket-%d"
+  bucket = "tf-object-test-bucket-%d"
 }
 resource "opentelekomcloud_obs_bucket_object" "object" {
-	bucket = opentelekomcloud_obs_bucket.object_bucket.bucket
-	key = "tf-testing-obj-%d"
-	content = "Hello World"
+  bucket  = opentelekomcloud_obs_bucket.object_bucket.bucket
+  key     = "tf-testing-obj-%d"
+  content = "Hello World"
 }
 `, randInt, randInt)
 
 	both := fmt.Sprintf(`%s
 data "opentelekomcloud_obs_bucket_object" "obj" {
-	bucket = "tf-object-test-bucket-%d"
-	key = "tf-testing-obj-%d"
+  bucket = "tf-object-test-bucket-%d"
+  key    = "tf-testing-obj-%d"
 }`, resources, randInt, randInt)
 
 	return resources, both
@@ -178,20 +178,20 @@ data "opentelekomcloud_obs_bucket_object" "obj" {
 func testAccDataSourceObsObjectConfigReadableBody(randInt int) (string, string) {
 	resources := fmt.Sprintf(`
 resource "opentelekomcloud_obs_bucket" "object_bucket" {
-	bucket = "tf-object-test-bucket-%d"
+  bucket = "tf-object-test-bucket-%d"
 }
 resource "opentelekomcloud_obs_bucket_object" "object" {
-	bucket = opentelekomcloud_obs_bucket.object_bucket.bucket
-	key = "tf-testing-obj-%d-readable"
-	content = "yes"
-	content_type = "text/plain"
+  bucket       = opentelekomcloud_obs_bucket.object_bucket.bucket
+  key          = "tf-testing-obj-%d-readable"
+  content      = "yes"
+  content_type = "text/plain"
 }
 `, randInt, randInt)
 
 	both := fmt.Sprintf(`%s
 data "opentelekomcloud_obs_bucket_object" "obj" {
-	bucket = "tf-object-test-bucket-%d"
-	key = "tf-testing-obj-%d-readable"
+  bucket = "tf-object-test-bucket-%d"
+  key    = "tf-testing-obj-%d-readable"
 }`, resources, randInt, randInt)
 
 	return resources, both
@@ -200,24 +200,24 @@ data "opentelekomcloud_obs_bucket_object" "obj" {
 func testAccDataSourceObsObjectConfigAllParams(randInt int) (string, string) { // nolint:unused
 	resources := fmt.Sprintf(`
 resource "opentelekomcloud_obs_bucket" "object_bucket" {
-	bucket = "tf-object-test-bucket-%[1]d"
-	versioning = true
+  bucket     = "tf-object-test-bucket-%[1]d"
+  versioning = true
 }
 
 resource "opentelekomcloud_obs_bucket_object" "object" {
-	bucket = opentelekomcloud_obs_bucket.object_bucket.bucket
-	key = "tf-testing-obj-%[1]d-all-params"
-	content = <<CONTENT
+  bucket       = opentelekomcloud_obs_bucket.object_bucket.bucket
+  key          = "tf-testing-obj-%[1]d-all-params"
+  content      = <<CONTENT
 {"msg": "Hi there!"}
 CONTENT
-	content_type = "application/unknown"
+  content_type = "application/unknown"
 }
 `, randInt)
 
 	both := fmt.Sprintf(`%s
 data "opentelekomcloud_obs_bucket_object" "obj" {
-	bucket = "tf-object-test-bucket-%[2]d"
-	key = "tf-testing-obj-%[2]d-all-params"
+  bucket = "tf-object-test-bucket-%[2]d"
+  key    = "tf-testing-obj-%[2]d-all-params"
 }`, resources, randInt)
 
 	return resources, both

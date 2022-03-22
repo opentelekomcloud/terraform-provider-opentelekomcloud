@@ -50,15 +50,15 @@ func testAccSubnetIdV2DataSourceID(n string) resource.TestCheckFunc {
 
 const testAccSubnetIdV2DataSourceVpcSubnet = `
 resource "opentelekomcloud_vpc_v1" "vpc_1" {
-	name = "test_vpc_ds_ids"
-	cidr= "192.168.0.0/16"
+  name = "test_vpc_ds_ids"
+  cidr = "192.168.0.0/16"
 }
 
 resource "opentelekomcloud_vpc_subnet_v1" "subnet_1" {
-  name = "opentelekomcloud_subnet_ds_ids"
-  cidr = "192.168.0.0/24"
+  name       = "opentelekomcloud_subnet_ds_ids"
+  cidr       = "192.168.0.0/24"
   gateway_ip = "192.168.0.1"
-  vpc_id = opentelekomcloud_vpc_v1.vpc_1.id
+  vpc_id     = opentelekomcloud_vpc_v1.vpc_1.id
 }
 `
 

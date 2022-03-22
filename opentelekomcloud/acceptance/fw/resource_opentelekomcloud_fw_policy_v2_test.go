@@ -182,8 +182,8 @@ resource "opentelekomcloud_fw_policy_v2" "policy_1" {
 
 const testAccFWPolicyV2_addRules = `
 resource "opentelekomcloud_fw_policy_v2" "policy_1" {
-  name = "policy_1"
-  description =  "terraform acceptance test"
+  name        = "policy_1"
+  description = "terraform acceptance test"
   rules = [
     opentelekomcloud_fw_rule_v2.udp_deny.id,
     opentelekomcloud_fw_rule_v2.tcp_allow.id
@@ -192,19 +192,19 @@ resource "opentelekomcloud_fw_policy_v2" "policy_1" {
 
 resource "opentelekomcloud_fw_rule_v2" "tcp_allow" {
   protocol = "tcp"
-  action = "allow"
+  action   = "allow"
 }
 
 resource "opentelekomcloud_fw_rule_v2" "udp_deny" {
   protocol = "udp"
-  action = "deny"
+  action   = "deny"
 }
 `
 
 const testAccFWPolicyV2_deleteRules = `
 resource "opentelekomcloud_fw_policy_v2" "policy_1" {
-  name = "policy_1"
-  description =  "terraform acceptance test"
+  name        = "policy_1"
+  description = "terraform acceptance test"
   rules = [
     opentelekomcloud_fw_rule_v2.udp_deny.id
   ]
@@ -212,7 +212,7 @@ resource "opentelekomcloud_fw_policy_v2" "policy_1" {
 
 resource "opentelekomcloud_fw_rule_v2" "udp_deny" {
   protocol = "udp"
-  action = "deny"
+  action   = "deny"
 }
 `
 
@@ -226,26 +226,26 @@ resource "opentelekomcloud_fw_policy_v2" "policy_1" {
 
 const testAccFWPolicyV2SingleRule = `
 resource "opentelekomcloud_fw_rule_v2" "rule_1" {
-  name = "rule_1"
-  action = "allow"
-  description = "allow-all"
-  protocol = "any"
-  source_ip_address = "0.0.0.0/0"
+  name                   = "rule_1"
+  action                 = "allow"
+  description            = "allow-all"
+  protocol               = "any"
+  source_ip_address      = "0.0.0.0/0"
   destination_ip_address = "0.0.0.0/0"
-  source_port = ""
-  destination_port = ""
-  ip_version = "4"
+  source_port            = ""
+  destination_port       = ""
+  ip_version             = "4"
 }
 
 resource "opentelekomcloud_fw_policy_v2" "policy_1" {
-  name = "policy_1"
+  name  = "policy_1"
   rules = [opentelekomcloud_fw_rule_v2.rule_1.id]
 }
 `
 
 const testAccFWPolicyV2SingleRule_removeRule = `
 resource "opentelekomcloud_fw_policy_v2" "policy_1" {
-  name = "policy_1"
+  name  = "policy_1"
   rules = []
 }
 `

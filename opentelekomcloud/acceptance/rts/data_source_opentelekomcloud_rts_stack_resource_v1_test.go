@@ -46,12 +46,11 @@ func testAccCheckRTSStackResourcesV1DataSourceID(n string) resource.TestCheckFun
 }
 
 const testAccDataSourceRTSStackResourcesV1Config = `
-
 resource "opentelekomcloud_rts_stack_v1" "stack_1" {
-  name = "opentelekomcloud_rts_stack"
-  disable_rollback= true
-  timeout_mins=60
-  template_body = <<JSON
+  name             = "opentelekomcloud_rts_stack"
+  disable_rollback = true
+  timeout_mins     = 60
+  template_body    = <<JSON
           {
             "outputs": {
               "str1": {
@@ -83,7 +82,7 @@ JSON
 }
 
 data "opentelekomcloud_rts_stack_resource_v1" "resource_1" {
-  stack_name = opentelekomcloud_rts_stack_v1.stack_1.name
+  stack_name    = opentelekomcloud_rts_stack_v1.stack_1.name
   resource_name = "random"
 }
 `

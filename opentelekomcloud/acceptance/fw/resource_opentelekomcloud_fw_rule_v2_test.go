@@ -173,50 +173,50 @@ func testAccCheckFWRuleV2Exists(n string, expected *rules.Rule) resource.TestChe
 
 const testAccFWRuleV2_basic_1 = `
 resource "opentelekomcloud_fw_rule_v2" "rule_1" {
-	name = "rule_1"
-	protocol = "udp"
-	action = "deny"
+  name     = "rule_1"
+  protocol = "udp"
+  action   = "deny"
 }
 `
 
 const testAccFWRuleV2_basic_2 = `
 resource "opentelekomcloud_fw_rule_v2" "rule_1" {
-	name = "rule_1"
-	description = "Terraform accept test"
-	protocol = "udp"
-	action = "deny"
-	ip_version = 4
-	source_ip_address = "1.2.3.4"
-	destination_ip_address = "4.3.2.0/24"
-	source_port = "444"
-	destination_port = "555"
-	enabled = true
+  name                   = "rule_1"
+  description            = "Terraform accept test"
+  protocol               = "udp"
+  action                 = "deny"
+  ip_version             = 4
+  source_ip_address      = "1.2.3.4"
+  destination_ip_address = "4.3.2.0/24"
+  source_port            = "444"
+  destination_port       = "555"
+  enabled                = true
 }
 `
 
 const testAccFWRuleV2_basic_3 = `
 resource "opentelekomcloud_fw_rule_v2" "rule_1" {
-	name = "rule_1"
-	description = "Terraform accept test updated"
-	protocol = "tcp"
-	action = "allow"
-	ip_version = 4
-	source_ip_address = "1.2.3.0/24"
-	destination_ip_address = "4.3.2.8"
-	source_port = "666"
-	destination_port = "777"
-	enabled = false
+  name                   = "rule_1"
+  description            = "Terraform accept test updated"
+  protocol               = "tcp"
+  action                 = "allow"
+  ip_version             = 4
+  source_ip_address      = "1.2.3.0/24"
+  destination_ip_address = "4.3.2.8"
+  source_port            = "666"
+  destination_port       = "777"
+  enabled                = false
 }
 `
 
 const testAccFWRuleV2_anyProtocol = `
 resource "opentelekomcloud_fw_rule_v2" "rule_1" {
-	name = "rule_1"
-	description = "Allow any protocol"
-	protocol = "any"
-	action = "allow"
-	ip_version = 4
-	source_ip_address = "192.168.199.0/24"
-	enabled = true
+  name              = "rule_1"
+  description       = "Allow any protocol"
+  protocol          = "any"
+  action            = "allow"
+  ip_version        = 4
+  source_ip_address = "192.168.199.0/24"
+  enabled           = true
 }
 `

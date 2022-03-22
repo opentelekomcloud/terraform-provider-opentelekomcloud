@@ -150,8 +150,8 @@ resource "opentelekomcloud_vpc_v1" "vpc_2" {
 }
 
 resource "opentelekomcloud_vpc_peering_connection_v2" "peering_1" {
-  name = "opentelekomcloud_peering"
-  vpc_id = opentelekomcloud_vpc_v1.vpc_1.id
+  name        = "opentelekomcloud_peering"
+  vpc_id      = opentelekomcloud_vpc_v1.vpc_1.id
   peer_vpc_id = opentelekomcloud_vpc_v1.vpc_2.id
 }
 `
@@ -167,8 +167,8 @@ resource "opentelekomcloud_vpc_v1" "vpc_2" {
 }
 
 resource "opentelekomcloud_vpc_peering_connection_v2" "peering_1" {
-  name = "opentelekomcloud_peering_imp"
-  vpc_id = opentelekomcloud_vpc_v1.vpc_1.id
+  name        = "opentelekomcloud_peering_imp"
+  vpc_id      = opentelekomcloud_vpc_v1.vpc_1.id
   peer_vpc_id = opentelekomcloud_vpc_v1.vpc_2.id
 }
 `
@@ -184,8 +184,8 @@ resource "opentelekomcloud_vpc_v1" "vpc_2" {
 }
 
 resource "opentelekomcloud_vpc_peering_connection_v2" "peering_1" {
-  name = "opentelekomcloud_peering_1"
-  vpc_id = opentelekomcloud_vpc_v1.vpc_1.id
+  name        = "opentelekomcloud_peering_1"
+  vpc_id      = opentelekomcloud_vpc_v1.vpc_1.id
   peer_vpc_id = opentelekomcloud_vpc_v1.vpc_2.id
 }
 `
@@ -201,11 +201,11 @@ resource "opentelekomcloud_vpc_v1" "vpc_2" {
 }
 
 resource "opentelekomcloud_vpc_peering_connection_v2" "peering_1" {
-  name = "opentelekomcloud_peering"
-  vpc_id = opentelekomcloud_vpc_v1.vpc_1.id
+  name        = "opentelekomcloud_peering"
+  vpc_id      = opentelekomcloud_vpc_v1.vpc_1.id
   peer_vpc_id = opentelekomcloud_vpc_v1.vpc_2.id
 
- timeouts {
+  timeouts {
     create = "5m"
     delete = "5m"
   }

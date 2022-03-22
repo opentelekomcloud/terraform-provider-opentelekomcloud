@@ -121,12 +121,12 @@ func testAccCheckWafFalseAlarmMaskingRuleV1Exists(n string, rule *falsealarmmask
 
 const testAccWafFalseAlarmMaskingRuleV1_basic = `
 resource "opentelekomcloud_waf_policy_v1" "policy_1" {
-	name = "policy_1"
+  name = "policy_1"
 }
 
 resource "opentelekomcloud_waf_falsealarmmasking_rule_v1" "rule_1" {
-	policy_id = opentelekomcloud_waf_policy_v1.policy_1.id
-	url = "/a"
-	rule = "100001"
+  policy_id = opentelekomcloud_waf_policy_v1.policy_1.id
+  url       = "/a"
+  rule      = "100001"
 }
 `

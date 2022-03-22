@@ -124,10 +124,10 @@ func testAccCheckRTSStackV1Exists(n string, stack *stacks.RetrievedStack) resour
 const (
 	testAccRTSStackV1Basic = `
 resource "opentelekomcloud_rts_stack_v1" "stack_1" {
-  name = "terraform_provider_stack"
-  disable_rollback= true
-  timeout_mins=60
-  template_body = <<JSON
+  name             = "terraform_provider_stack"
+  disable_rollback = true
+  timeout_mins     = 60
+  template_body    = <<JSON
           {
     "outputs": {
       "str1": {
@@ -161,10 +161,10 @@ JSON
 `
 	testAccRTSStackV1Update = `
 resource "opentelekomcloud_rts_stack_v1" "stack_1" {
-  name = "terraform_provider_stack"
-  disable_rollback= false
-  timeout_mins=50
-  template_body = <<JSON
+  name             = "terraform_provider_stack"
+  disable_rollback = false
+  timeout_mins     = 50
+  template_body    = <<JSON
            {
     "outputs": {
       "str1": {
@@ -198,9 +198,9 @@ JSON
 `
 	testAccRTSStackV1Timeout = `
 resource "opentelekomcloud_rts_stack_v1" "stack_1" {
-  name = "terraform_provider_stack"
-  disable_rollback= true
-  timeout_mins=60
+  name             = "terraform_provider_stack"
+  disable_rollback = true
+  timeout_mins     = 60
 
   template_body = <<JSON
           {

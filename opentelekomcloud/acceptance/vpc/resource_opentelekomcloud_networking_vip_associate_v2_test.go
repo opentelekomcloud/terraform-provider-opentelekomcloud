@@ -151,13 +151,13 @@ var TestAccNetworkingV2VIPAssociateConfigBasic = fmt.Sprintf(`
 %s
 
 resource "opentelekomcloud_networking_network_v2" "network_1" {
-  name = "network_vip_ass_1"
+  name           = "network_vip_ass_1"
   admin_state_up = "true"
 }
 
 resource "opentelekomcloud_networking_subnet_v2" "subnet_1" {
-  name = "subnet_vip_ass_1"
-  cidr = "192.168.199.0/24"
+  name       = "subnet_vip_ass_1"
+  cidr       = "192.168.199.0/24"
   ip_version = 4
   network_id = opentelekomcloud_networking_network_v2.network_1.id
 }
@@ -168,21 +168,21 @@ resource "opentelekomcloud_networking_router_interface_v2" "router_interface_1" 
 }
 
 resource "opentelekomcloud_networking_router_v2" "router_1" {
-  name = "router_vip_ass_1"
+  name             = "router_vip_ass_1"
   external_gateway = data.opentelekomcloud_networking_network_v2.ext_network.id
 }
 
 resource "opentelekomcloud_networking_port_v2" "port_1" {
-  name = "port_1"
+  name           = "port_1"
   admin_state_up = "true"
-  network_id = opentelekomcloud_networking_network_v2.network_1.id
+  network_id     = opentelekomcloud_networking_network_v2.network_1.id
   fixed_ip {
-    subnet_id =  opentelekomcloud_networking_subnet_v2.subnet_1.id
+    subnet_id = opentelekomcloud_networking_subnet_v2.subnet_1.id
   }
 }
 
 resource "opentelekomcloud_compute_instance_v2" "instance_1" {
-  name = "instance_vip_ass_1"
+  name            = "instance_vip_ass_1"
   security_groups = ["default"]
 
   network {
@@ -191,16 +191,16 @@ resource "opentelekomcloud_compute_instance_v2" "instance_1" {
 }
 
 resource "opentelekomcloud_networking_port_v2" "port_2" {
-  name = "port_2"
+  name           = "port_2"
   admin_state_up = "true"
-  network_id = opentelekomcloud_networking_network_v2.network_1.id
+  network_id     = opentelekomcloud_networking_network_v2.network_1.id
   fixed_ip {
-    subnet_id =  opentelekomcloud_networking_subnet_v2.subnet_1.id
+    subnet_id = opentelekomcloud_networking_subnet_v2.subnet_1.id
   }
 }
 
 resource "opentelekomcloud_compute_instance_v2" "instance_2" {
-  name = "instance_vip_ass_2"
+  name            = "instance_vip_ass_2"
   security_groups = ["default"]
 
   network {
@@ -210,11 +210,11 @@ resource "opentelekomcloud_compute_instance_v2" "instance_2" {
 
 resource "opentelekomcloud_networking_vip_v2" "vip_1" {
   network_id = opentelekomcloud_networking_network_v2.network_1.id
-  subnet_id = opentelekomcloud_networking_subnet_v2.subnet_1.id
+  subnet_id  = opentelekomcloud_networking_subnet_v2.subnet_1.id
 }
 
 resource "opentelekomcloud_networking_vip_associate_v2" "vip_associate_1" {
-  vip_id = opentelekomcloud_networking_vip_v2.vip_1.id
+  vip_id   = opentelekomcloud_networking_vip_v2.vip_1.id
   port_ids = [opentelekomcloud_networking_port_v2.port_1.id, opentelekomcloud_networking_port_v2.port_2.id]
 }
 `, common.DataSourceExtNetwork)

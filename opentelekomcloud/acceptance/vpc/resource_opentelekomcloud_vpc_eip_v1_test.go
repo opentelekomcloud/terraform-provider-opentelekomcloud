@@ -143,9 +143,9 @@ resource "opentelekomcloud_vpc_eip_v1" "eip_1" {
     type = "5_bgp"
   }
   bandwidth {
-    name = "acc-band-update"
-    size = 25
-    share_type = "PER"
+    name        = "acc-band-update"
+    size        = 25
+    share_type  = "PER"
     charge_mode = "traffic"
   }
   tags = {

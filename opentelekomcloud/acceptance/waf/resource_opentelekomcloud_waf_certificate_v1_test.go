@@ -114,9 +114,9 @@ const (
 
 	testAccWafCertificateV1Basic = `
 resource "opentelekomcloud_waf_certificate_v1" "certificate_1" {
-	name = "cert_1"
+  name = "cert_1"
 
-	content = <<EOT
+  content = <<EOT
 -----BEGIN CERTIFICATE-----
 MIIDazCCAlOgAwIBAgIUehx07qc7un7IB7/X9lHCLkt/jPowDQYJKoZIhvcNAQEL
 BQAwRTELMAkGA1UEBhMCQVUxEzARBgNVBAgMClNvbWUtU3RhdGUxITAfBgNVBAoM
@@ -140,7 +140,7 @@ ZoURg5WiRskhtHEvBsLF
 -----END CERTIFICATE-----
 EOT
 
-	key = <<EOT
+  key = <<EOT
 -----BEGIN PRIVATE KEY-----
 MIIEvgIBADANBgkqhkiG9w0BAQEFAASCBKgwggSkAgEAAoIBAQCvmuH5ViGtGOle
 vJ8vOoN3Ak4pp3SescdAfQa/r4cOz/bmBqBcZJTX9HODhiQzdemyLLs9aOkQXYIc
@@ -174,9 +174,9 @@ EOT
 `
 	testAccWafCertificateV1Update = `
 resource "opentelekomcloud_waf_certificate_v1" "certificate_1" {
-	name = "cert_update"
+  name = "cert_update"
 
-	content = <<EOT
+  content = <<EOT
 -----BEGIN CERTIFICATE-----
 MIIDazCCAlOgAwIBAgIUehx07qc7un7IB7/X9lHCLkt/jPowDQYJKoZIhvcNAQEL
 BQAwRTELMAkGA1UEBhMCQVUxEzARBgNVBAgMClNvbWUtU3RhdGUxITAfBgNVBAoM
@@ -200,7 +200,7 @@ ZoURg5WiRskhtHEvBsLF
 -----END CERTIFICATE-----
 EOT
 
-	key = <<EOT
+  key = <<EOT
 -----BEGIN PRIVATE KEY-----
 MIIEvgIBADANBgkqhkiG9w0BAQEFAASCBKgwggSkAgEAAoIBAQCvmuH5ViGtGOle
 vJ8vOoN3Ak4pp3SescdAfQa/r4cOz/bmBqBcZJTX9HODhiQzdemyLLs9aOkQXYIc
@@ -234,9 +234,9 @@ EOT
 `
 	testAccWafCertificateV1InvalidName = `
 resource "opentelekomcloud_waf_certificate_v1" "certificate_1" {
-	name = "cert_1!!!"
+  name = "cert_1!!!"
 
-	content = <<EOT
+  content = <<EOT
 -----BEGIN CERTIFICATE-----
 MIIDazCCAlOgAwIBAgIUehx07qc7un7IB7/X9lHCLkt/jPowDQYJKoZIhvcNAQEL
 BQAwRTELMAkGA1UEBhMCQVUxEzARBgNVBAgMClNvbWUtU3RhdGUxITAfBgNVBAoM
@@ -260,7 +260,7 @@ ZoURg5WiRskhtHEvBsLF
 -----END CERTIFICATE-----
 EOT
 
-	key = <<EOT
+  key = <<EOT
 -----BEGIN PRIVATE KEY-----
 MIIEvgIBADANBgkqhkiG9w0BAQEFAASCBKgwggSkAgEAAoIBAQCvmuH5ViGtGOle
 vJ8vOoN3Ak4pp3SescdAfQa/r4cOz/bmBqBcZJTX9HODhiQzdemyLLs9aOkQXYIc

@@ -81,7 +81,7 @@ func testAccDataSourceVpcSubnetV1Check(n, name, cidr, gatewayIP, availabilityZon
 const testAccDataSourceVpcSubnetV1Config = `
 resource "opentelekomcloud_vpc_v1" "vpc_1" {
   name = "test_vpc_ds_sn"
-  cidr= "10.0.1.0/24"
+  cidr = "10.0.1.0/24"
 }
 
 resource "opentelekomcloud_vpc_subnet_v1" "subnet_1" {

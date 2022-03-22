@@ -105,7 +105,7 @@ data "opentelekomcloud_vpc_route_v2" "by_id" {
 }
 
 data "opentelekomcloud_vpc_route_v2" "by_vpc_id" {
-  vpc_id      = opentelekomcloud_vpc_route_v2.route_1.vpc_id
+  vpc_id = opentelekomcloud_vpc_route_v2.route_1.vpc_id
 
   depends_on = [opentelekomcloud_vpc_route_v2.route_1]
 }

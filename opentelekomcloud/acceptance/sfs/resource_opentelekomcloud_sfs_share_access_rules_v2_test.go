@@ -60,13 +60,13 @@ func testAccCheckSFSShareAccessRulesV2Destroy(s *terraform.State) error {
 
 const testAccSFSShareAccessRulesV2Basic = `
 resource "opentelekomcloud_vpc_v1" "vpc_1" {
-  name   = "sfs_share_vpc_1"
-  cidr   = "192.168.0.0/16"
+  name = "sfs_share_vpc_1"
+  cidr = "192.168.0.0/16"
 }
 
 resource "opentelekomcloud_vpc_v1" "vpc_2" {
-  name   = "sfs_share_vpc_2"
-  cidr   = "192.168.0.0/16"
+  name = "sfs_share_vpc_2"
+  cidr = "192.168.0.0/16"
 }
 
 resource "opentelekomcloud_sfs_file_system_v2" "sfs_1" {
@@ -95,13 +95,13 @@ resource "opentelekomcloud_sfs_share_access_rules_v2" "sfs_rules" {
 
 const testAccSFSShareAccessRulesV2Update = `
 resource "opentelekomcloud_vpc_v1" "vpc_1" {
-  name   = "sfs_share_vpc_1"
-  cidr   = "192.168.0.0/16"
+  name = "sfs_share_vpc_1"
+  cidr = "192.168.0.0/16"
 }
 
 resource "opentelekomcloud_vpc_v1" "vpc_2" {
-  name   = "sfs_share_vpc_2"
-  cidr   = "192.168.0.0/16"
+  name = "sfs_share_vpc_2"
+  cidr = "192.168.0.0/16"
 }
 
 resource "opentelekomcloud_sfs_file_system_v2" "sfs_1" {

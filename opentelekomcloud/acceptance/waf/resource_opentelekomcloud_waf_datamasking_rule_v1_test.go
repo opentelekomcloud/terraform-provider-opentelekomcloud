@@ -114,26 +114,26 @@ func testAccCheckWafDataMaskingRuleV1Exists(n string, rule *datamasking_rules.Da
 
 const testAccWafDataMaskingRuleV1_basic = `
 resource "opentelekomcloud_waf_policy_v1" "policy_1" {
-	name = "policy_1"
+  name = "policy_1"
 }
 
 resource "opentelekomcloud_waf_datamasking_rule_v1" "rule_1" {
-	policy_id = opentelekomcloud_waf_policy_v1.policy_1.id
-	url = "/login"
-	category = "params"
-	index = "password"
+  policy_id = opentelekomcloud_waf_policy_v1.policy_1.id
+  url       = "/login"
+  category  = "params"
+  index     = "password"
 }
 `
 
 const testAccWafDataMaskingRuleV1_update = `
 resource "opentelekomcloud_waf_policy_v1" "policy_1" {
-	name = "policy_updated"
+  name = "policy_updated"
 }
 
 resource "opentelekomcloud_waf_datamasking_rule_v1" "rule_1" {
-	policy_id = opentelekomcloud_waf_policy_v1.policy_1.id
-	url = "/login_new"
-	category = "params"
-	index = "password"
+  policy_id = opentelekomcloud_waf_policy_v1.policy_1.id
+  url       = "/login_new"
+  category  = "params"
+  index     = "password"
 }
 `

@@ -44,14 +44,14 @@ func testAccCheckVBSBackupPolicyV2DataSource(n string) resource.TestCheckFunc {
 
 var testAccVBSBackupPolicyV2DataSource_basic = `
 resource "opentelekomcloud_vbs_backup_policy_v2" "vbs_1" {
-  name = "policy_001"
-  start_time  = "12:00"
-  status  = "ON"
+  name                = "policy_001"
+  start_time          = "12:00"
+  status              = "ON"
   retain_first_backup = "N"
-  rentention_num = 2
-  frequency = 1
+  rentention_num      = 2
+  frequency           = 1
   tags {
-    key = "k2"
+    key   = "k2"
     value = "v2"
   }
 }

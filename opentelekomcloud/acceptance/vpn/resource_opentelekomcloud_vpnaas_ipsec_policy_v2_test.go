@@ -124,7 +124,7 @@ func testAccCheckIPSecPolicyV2Exists(n string, policy *ipsecpolicies.Policy) res
 }
 
 const testAccIPSecPolicyV2Basic = `
-resource "opentelekomcloud_vpnaas_ipsec_policy_v2" "policy_1" { }
+resource "opentelekomcloud_vpnaas_ipsec_policy_v2" "policy_1" {}
 `
 
 const testAccIPSecPolicyV2Update = `

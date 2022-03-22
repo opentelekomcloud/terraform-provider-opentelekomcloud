@@ -144,7 +144,7 @@ func testAccCheckWafDomainV1CertificateChanged(n string, domain *domains.Domain)
 }
 
 const testAccWafDomainV1Basic = `
-resource "opentelekomcloud_networking_floatingip_v2" "fip_1" { }
+resource "opentelekomcloud_networking_floatingip_v2" "fip_1" {}
 
 resource "opentelekomcloud_waf_certificate_v1" "certificate_1" {
   name    = "cert_1"
@@ -180,7 +180,7 @@ resource "opentelekomcloud_waf_domain_v1" "domain_1" {
 `
 
 const testAccWafDomainV1Update = `
-resource "opentelekomcloud_networking_floatingip_v2" "fip_1" { }
+resource "opentelekomcloud_networking_floatingip_v2" "fip_1" {}
 
 resource "opentelekomcloud_waf_certificate_v1" "certificate_1" {
   name    = "cert_1"
@@ -213,7 +213,7 @@ resource "opentelekomcloud_waf_domain_v1" "domain_1" {
 `
 
 const testAccWafDomainV1UpdateCertificate = `
-resource "opentelekomcloud_networking_floatingip_v2" "fip_1" { }
+resource "opentelekomcloud_networking_floatingip_v2" "fip_1" {}
 
 resource "opentelekomcloud_waf_certificate_v1" "certificate_1" {
   name    = "cert_1"

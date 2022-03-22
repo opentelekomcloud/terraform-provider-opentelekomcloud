@@ -105,11 +105,11 @@ func testAccCheckVpcFlowLogV1Exists(n string, flowlog *flowlogs.FlowLog) resourc
 
 var testAccVpcFlowLogV1Basic = fmt.Sprintf(`
 resource "opentelekomcloud_logtank_group_v2" "log_group1" {
-  group_name  = "vpc_group"
+  group_name = "vpc_group"
 }
 
 resource "opentelekomcloud_logtank_topic_v2" "log_topic1" {
-  group_id = opentelekomcloud_logtank_group_v2.log_group1.id
+  group_id   = opentelekomcloud_logtank_group_v2.log_group1.id
   topic_name = "vpc_topic"
 }
 
@@ -119,7 +119,7 @@ resource "opentelekomcloud_vpc_v1" "vpc_1" {
 }
 
 resource "opentelekomcloud_vpc_flow_log_v1" "flow_logl" {
-  name = "%s"
+  name          = "%s"
   description   = "this is a flow log from testacc"
   resource_type = "vpc"
   resource_id   = opentelekomcloud_vpc_v1.vpc_1.id
@@ -131,11 +131,11 @@ resource "opentelekomcloud_vpc_flow_log_v1" "flow_logl" {
 
 var testAccVpcFlowLogV1Update = fmt.Sprintf(`
 resource "opentelekomcloud_logtank_group_v2" "log_group1" {
-  group_name  = "vpc_group"
+  group_name = "vpc_group"
 }
 
 resource "opentelekomcloud_logtank_topic_v2" "log_topic1" {
-  group_id = opentelekomcloud_logtank_group_v2.log_group1.id
+  group_id   = opentelekomcloud_logtank_group_v2.log_group1.id
   topic_name = "vpc_topic"
 }
 
@@ -145,7 +145,7 @@ resource "opentelekomcloud_vpc_v1" "vpc_1" {
 }
 
 resource "opentelekomcloud_vpc_flow_log_v1" "flow_logl" {
-  name = "%s"
+  name          = "%s"
   description   = "this is a flow log from testacc update"
   resource_type = "vpc"
   resource_id   = opentelekomcloud_vpc_v1.vpc_1.id

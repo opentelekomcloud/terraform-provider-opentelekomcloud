@@ -47,6 +47,6 @@ func testAccCheckIdentityV3DataSourceID(n string) resource.TestCheckFunc {
 
 const testAccOpenStackIdentityV3RoleDataSource_basic = `
 data "opentelekomcloud_identity_role_v3" "role_1" {
-    name = "admin"
+  name = "admin"
 }
 `

@@ -120,7 +120,7 @@ func testAccCheckIdentityV3AgencyExists(n string, a *agency.Agency) resource.Tes
 
 var testAccIdentityV3AgencyBasic = fmt.Sprintf(`
 resource "opentelekomcloud_identity_agency_v3" "agency_1" {
-  name = "test"
+  name                  = "test"
   delegated_domain_name = "op_svc_evs"
   project_role {
     project = "%s"

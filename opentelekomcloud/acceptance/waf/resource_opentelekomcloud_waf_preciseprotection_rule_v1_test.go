@@ -104,23 +104,23 @@ func testAccCheckWafPreciseProtectionRuleV1Exists(n string, rule *preciseprotect
 
 const testAccWafPreciseProtectionRuleV1_basic = `
 resource "opentelekomcloud_waf_policy_v1" "policy_1" {
-	name = "policy_1"
+  name = "policy_1"
 }
 
 resource "opentelekomcloud_waf_preciseprotection_rule_v1" "rule_1" {
-	policy_id = opentelekomcloud_waf_policy_v1.policy_1.id
-	name = "rule_1"
-	conditions {
-		category = "path"
-		contents = ["/login"]
-		logic = "contain"
-	}
-	conditions {
-		category = "ip"
-		contents = ["192.168.1.1"]
-		logic = "equal"
-	}
-	action_category = "block"
-	priority = 10
+  policy_id = opentelekomcloud_waf_policy_v1.policy_1.id
+  name      = "rule_1"
+  conditions {
+    category = "path"
+    contents = ["/login"]
+    logic    = "contain"
+  }
+  conditions {
+    category = "ip"
+    contents = ["192.168.1.1"]
+    logic    = "equal"
+  }
+  action_category = "block"
+  priority        = 10
 }
 `

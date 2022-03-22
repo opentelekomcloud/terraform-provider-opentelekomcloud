@@ -192,7 +192,7 @@ resource "opentelekomcloud_lb_pool_v2" "pool_1" {
   listener_id = opentelekomcloud_lb_listener_v2.listener_1.id
 }
 
-resource "opentelekomcloud_as_configuration_v1" "as_config"{
+resource "opentelekomcloud_as_configuration_v1" "as_config" {
   scaling_configuration_name = "as_config"
   instance_config {
     image = data.opentelekomcloud_images_image_v2.latest_image.id
@@ -205,7 +205,7 @@ resource "opentelekomcloud_as_configuration_v1" "as_config"{
   }
 }
 
-resource "opentelekomcloud_as_group_v1" "as_group"{
+resource "opentelekomcloud_as_group_v1" "as_group" {
   scaling_group_name       = "as_group"
   scaling_configuration_id = opentelekomcloud_as_configuration_v1.as_config.id
   networks {
@@ -258,7 +258,7 @@ resource "opentelekomcloud_lb_pool_v2" "pool_1" {
   listener_id = opentelekomcloud_lb_listener_v2.listener_1.id
 }
 
-resource "opentelekomcloud_as_configuration_v1" "as_config"{
+resource "opentelekomcloud_as_configuration_v1" "as_config" {
   scaling_configuration_name = "as_config"
   instance_config {
     image = data.opentelekomcloud_images_image_v2.latest_image.id
@@ -271,7 +271,7 @@ resource "opentelekomcloud_as_configuration_v1" "as_config"{
   }
 }
 
-resource "opentelekomcloud_as_group_v1" "as_group"{
+resource "opentelekomcloud_as_group_v1" "as_group" {
   scaling_group_name       = "as_group"
   scaling_configuration_id = opentelekomcloud_as_configuration_v1.as_config.id
   networks {
@@ -307,15 +307,15 @@ var testAccASV1GroupRemoveWithSetMinNumber = fmt.Sprintf(`
 resource "opentelekomcloud_as_configuration_v1" "as_config" {
   scaling_configuration_name = "as_config"
   instance_config {
-    image     = data.opentelekomcloud_images_image_v2.latest_image.id
-    key_name  = "%s"
+    image    = data.opentelekomcloud_images_image_v2.latest_image.id
+    key_name = "%s"
     disk {
       size        = 40
       volume_type = "SATA"
       disk_type   = "SYS"
     }
 
-    metadata  = {
+    metadata = {
       environment  = "otc-test"
       generator    = "terraform"
       puppetmaster = "pseudo-puppet"
@@ -361,15 +361,15 @@ var testAccASV1GroupWithoutSGs = fmt.Sprintf(`
 resource "opentelekomcloud_as_configuration_v1" "as_config" {
   scaling_configuration_name = "as_config"
   instance_config {
-    image     = data.opentelekomcloud_images_image_v2.latest_image.id
-    key_name  = "%s"
+    image    = data.opentelekomcloud_images_image_v2.latest_image.id
+    key_name = "%s"
     disk {
       size        = 40
       volume_type = "SATA"
       disk_type   = "SYS"
     }
 
-    metadata  = {
+    metadata = {
       environment  = "otc-test"
       generator    = "terraform"
       puppetmaster = "pseudo-puppet"

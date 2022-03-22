@@ -137,10 +137,10 @@ var testAccComputeV2BmsInstanceBasic = fmt.Sprintf(`
 %s
 
 resource "opentelekomcloud_compute_bms_server_v2" "instance_1" {
-  name = "instance_1"
-  flavor_id = "physical.o2.medium"
-  flavor_name = "physical.o2.medium"
-  security_groups = ["default"]
+  name              = "instance_1"
+  flavor_id         = "physical.o2.medium"
+  flavor_name       = "physical.o2.medium"
+  security_groups   = ["default"]
   availability_zone = "%s"
   metadata = {
     foo = "bar"
@@ -155,10 +155,10 @@ var testAccComputeV2BmsInstanceUpdate = fmt.Sprintf(`
 %s
 
 resource "opentelekomcloud_compute_bms_server_v2" "instance_1" {
-  name = "instance_2"
-  flavor_id = "physical.o2.medium"
-  flavor_name = "physical.o2.medium"
-  security_groups = ["default"]
+  name              = "instance_2"
+  flavor_id         = "physical.o2.medium"
+  flavor_name       = "physical.o2.medium"
+  security_groups   = ["default"]
   availability_zone = "%s"
   metadata = {
     foo = "bar"
@@ -173,10 +173,10 @@ var testAccComputeV2BmsInstanceTimeout = fmt.Sprintf(`
 %s
 
 resource "opentelekomcloud_compute_bms_server_v2" "instance_1" {
-  name = "instance_1"
-  flavor_id = "physical.o2.medium"
-  flavor_name = "physical.o2.medium"
-  security_groups = ["default"]
+  name              = "instance_1"
+  flavor_id         = "physical.o2.medium"
+  flavor_name       = "physical.o2.medium"
+  security_groups   = ["default"]
   availability_zone = "%s"
   network {
     uuid = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.network_id
@@ -192,24 +192,24 @@ var testAccComputeV2BmsInstanceBootFromVolumeImage = fmt.Sprintf(`
 %s
 
 resource "opentelekomcloud_compute_bms_server_v2" "instance_1" {
-  name = "instance_1"
-  flavor_id = "physical.h2.large"
-  flavor_name = "physical.h2.large"
-  security_groups = ["default"]
+  name              = "instance_1"
+  flavor_id         = "physical.h2.large"
+  flavor_name       = "physical.h2.large"
+  security_groups   = ["default"]
   availability_zone = "%s"
   network {
     uuid = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.network_id
   }
 
   block_device {
-	uuid = "d50b4060-92cc-4d38-ae88-bd91bc3df00f"
-	source_type = "image"
-	volume_type = "SATA"
-	volume_size = 100
-	boot_index = 0
-	destination_type = "volume"
-	delete_on_termination = true
-	device_name = "/dev/sda"
+    uuid                  = "d50b4060-92cc-4d38-ae88-bd91bc3df00f"
+    source_type           = "image"
+    volume_type           = "SATA"
+    volume_size           = 100
+    boot_index            = 0
+    destination_type      = "volume"
+    delete_on_termination = true
+    device_name           = "/dev/sda"
   }
   timeouts {
     create = "20m"

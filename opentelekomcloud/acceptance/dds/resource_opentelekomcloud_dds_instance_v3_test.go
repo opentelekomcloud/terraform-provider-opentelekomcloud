@@ -136,15 +136,15 @@ resource "opentelekomcloud_dds_instance_v3" "instance" {
   password          = "5ecuredPa55w0rd@"
   mode              = "ReplicaSet"
   flavor {
-    type = "replica"
-    num = 1
-    storage = "ULTRAHIGH"
-    size = 20
+    type      = "replica"
+    num       = 1
+    storage   = "ULTRAHIGH"
+    size      = 20
     spec_code = "dds.mongodb.s2.medium.4.repset"
   }
   backup_strategy {
     start_time = "08:00-09:00"
-    keep_days = "1"
+    keep_days  = "1"
   }
 }`, common.DataSourceSecGroupDefault, common.DataSourceSubnet, env.OS_AVAILABILITY_ZONE)
 
@@ -167,9 +167,9 @@ resource "opentelekomcloud_dds_instance_v3" "instance" {
   password          = "5ecuredPa55w0rd@"
   mode              = "ReplicaSet"
   flavor {
-    type = "replica"
-    num = 1
-    size = 20
+    type      = "replica"
+    num       = 1
+    size      = 20
     spec_code = "dds.mongodb.s2.medium.4.repset"
   }
 }`, common.DataSourceSecGroupDefault, common.DataSourceSubnet, env.OS_AVAILABILITY_ZONE)
