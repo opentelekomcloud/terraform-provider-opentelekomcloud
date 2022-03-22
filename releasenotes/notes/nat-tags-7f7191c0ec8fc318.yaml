@@ -1,0 +1,5 @@
+---
+enhancements:
+  - |
+    **[NAT]** Add ``tags`` argument to ``resource/opentelekomcloud_nat_gateway_v2``
+    (`#1669 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/1669>`_)
