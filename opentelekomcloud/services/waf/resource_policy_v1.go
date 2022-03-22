@@ -36,13 +36,11 @@ func ResourceWafPolicyV1() *schema.Resource {
 			"name": {
 				Type:     schema.TypeString,
 				Required: true,
-				ForceNew: false,
 			},
 			"action": {
 				Type:     schema.TypeList,
 				Optional: true,
 				Computed: true,
-				ForceNew: false,
 				MaxItems: 1,
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
@@ -138,23 +136,21 @@ func ResourceWafPolicyV1() *schema.Resource {
 				Type:         schema.TypeInt,
 				Optional:     true,
 				Computed:     true,
-				ForceNew:     false,
 				ValidateFunc: validation.IntInSlice([]int{0, 1, 2, 3}),
 			},
 			"full_detection": {
 				Type:     schema.TypeBool,
 				Optional: true,
 				Computed: true,
-				ForceNew: false,
 			},
 			"hosts": {
 				Type:     schema.TypeList,
 				Optional: true,
 				Computed: true,
-				ForceNew: false,
 				Elem: &schema.Schema{
 					Type: schema.TypeString,
 				},
+				Deprecated: "Please set `policy_id` in the `domain` resource instead. Using `hosts` will result in orphan policies.",
 			},
 		},
 	}

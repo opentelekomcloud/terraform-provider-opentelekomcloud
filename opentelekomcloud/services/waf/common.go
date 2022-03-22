@@ -6,7 +6,7 @@ import (
 )
 
 const (
-	WafClientError = "error creating OpenTelekomCloud WAF client: %w"
+	ClientError = "error creating OpenTelekomCloud WAF client: %w"
 )
 
 func wafRuleImporter() *schema.ResourceImporter {

@@ -75,7 +75,7 @@ The `server` block supports:
 
 * `cipher` - (Optional) Cipher suite to use with TLS. Possible values are:
   * `cipher_default` - Default cipher suite: Good browser compatibility, most clients supported, sufficient for most scenarios
-  * `cipher_1` - Cipher suite 1: Recommended configuration, best combination of compatibility and security
+  * `cipher_1` - Cipher suite 1: Recommended configuration, the best combination of compatibility and security
   * `cipher_2` - Cipher suite 2: Strict compliance with forward secrecy requirements of PCI DSS and excellent protection, but older browsers may be unable to access the websites
   * `cipher_3` - Cipher suite 3: Support for ECDHE, DHE-GCM, and RSA-AES-GCM algorithms but not CBC
 
@@ -90,7 +90,7 @@ In addition to all arguments above, the following attributes are exported:
 
 * `id` -  ID of the domain.
 
-* `access_code` - The acccess code.
+* `access_code` - The access code.
 
 * `cname` - The CNAME value.
 
@@ -104,6 +104,8 @@ In addition to all arguments above, the following attributes are exported:
   `1`: The domain name is connected to WAF.
 
 * `protocol` - The protocol type of the client. The options are `HTTP`, `HTTPS`, and `HTTP&HTTPS`.
+
+* `auto_policy_id` - ID of the policy automatically created for the domain.
 
 ## Import
 

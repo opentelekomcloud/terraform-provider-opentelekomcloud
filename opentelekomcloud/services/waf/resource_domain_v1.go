@@ -119,6 +119,10 @@ func ResourceWafDomainV1() *schema.Resource {
 				Optional: true,
 				Computed: true,
 			},
+			"auto_policy_id": { // ID of the automatically created policy
+				Type:     schema.TypeString,
+				Computed: true,
+			},
 			"access_code": {
 				Type:     schema.TypeString,
 				Computed: true,
@@ -186,17 +190,7 @@ func resourceWafDomainV1Create(ctx context.Context, d *schema.ResourceData, meta
 	config := meta.(*cfg.Config)
 	client, err := config.WafV1Client(config.GetRegion(d))
 	if err != nil {
-		return fmterr.Errorf(WafClientError, err)
-	}
-
-	var hosts []string
-	if v, ok := d.GetOk("policy_id"); ok {
-		policyID := v.(string)
-		policy, err := policies.Get(client, policyID).Extract()
-		if err != nil {
-			return fmterr.Errorf("error retrieving OpenTelekomCloud Waf Policy %s: %w", policyID, err)
-		}
-		hosts = append(hosts, policy.Hosts...)
+		return fmterr.Errorf(ClientError, err)
 	}
 
 	sipHeaderList := d.Get("sip_header_list").([]interface{})
@@ -228,17 +222,11 @@ func resourceWafDomainV1Create(ctx context.Context, d *schema.ResourceData, meta
 	}
 
 	d.SetId(domain.Id)
+	_ = d.Set("auto_policy_id", domain.PolicyID)
 
 	if v, ok := d.GetOk("policy_id"); ok {
-		var updateHostsOpts policies.UpdateHostsOpts
-		policyId := v.(string)
-		hosts = append(hosts, d.Id())
-		updateHostsOpts.Hosts = hosts
-		log.Printf("[DEBUG] Waf policy update Hosts: %#v", hosts)
-
-		_, err = policies.UpdateHosts(client, policyId, updateHostsOpts).Extract()
-		if err != nil {
-			return fmterr.Errorf("error updating OpenTelekomCloud WAF Policy Hosts: %w", err)
+		if err := assignDomainPolicy(client, d.Id(), v.(string)); err != nil {
+			return err
 		}
 	}
 
@@ -249,17 +237,12 @@ func resourceWafDomainV1Read(_ context.Context, d *schema.ResourceData, meta int
 	config := meta.(*cfg.Config)
 	client, err := config.WafV1Client(config.GetRegion(d))
 	if err != nil {
-		return fmterr.Errorf(WafClientError, err)
+		return fmterr.Errorf(ClientError, err)
 	}
 	n, err := domains.Get(client, d.Id()).Extract()
 
 	if err != nil {
-		if _, ok := err.(golangsdk.ErrDefault404); ok {
-			d.SetId("")
-			return nil
-		}
-
-		return fmterr.Errorf("error retrieving OpenTelekomCloud Waf Domain: %w", err)
+		return diag.FromErr(common.CheckDeleted(d, err, "error retrieving OpenTelekomCloud Waf Domain"))
 	}
 
 	mErr := multierror.Append(nil,
@@ -274,11 +257,7 @@ func resourceWafDomainV1Read(_ context.Context, d *schema.ResourceData, meta int
 		d.Set("sub_domain", n.SubDomain),
 		d.Set("cipher", n.Cipher),
 		d.Set("tls", n.TLS),
-	)
-	if n.PolicyID != "" {
-		mErr = multierror.Append(mErr, d.Set("policy_id", n.PolicyID))
-	}
-	mErr = multierror.Append(mErr,
+		d.Set("policy_id", n.PolicyID),
 		d.Set("protect_status", n.ProtectStatus),
 		d.Set("access_status", n.AccessStatus),
 		d.Set("protocol", n.Protocol),
@@ -308,7 +287,7 @@ func resourceWafDomainV1Update(ctx context.Context, d *schema.ResourceData, meta
 	config := meta.(*cfg.Config)
 	client, err := config.WafV1Client(config.GetRegion(d))
 	if err != nil {
-		return fmterr.Errorf(WafClientError, err)
+		return fmterr.Errorf(ClientError, err)
 	}
 	var updateOpts domains.UpdateOpts
 
@@ -351,18 +330,46 @@ func resourceWafDomainV1Update(ctx context.Context, d *schema.ResourceData, meta
 	if err != nil {
 		return fmterr.Errorf("error updating OpenTelekomCloud WAF Domain: %w", err)
 	}
+
+	if d.HasChange("policy_id") {
+		if err := assignDomainPolicy(client, d.Id(), d.Get("policy_id").(string)); err != nil {
+			return err
+		}
+	}
+
 	return resourceWafDomainV1Read(ctx, d, meta)
+}
+
+func assignDomainPolicy(client *golangsdk.ServiceClient, id, policyID string) diag.Diagnostics {
+	if policyID == "" {
+		return fmterr.Errorf("can't assign to empty policy")
+	}
+	opts := policies.UpdateHostsOpts{
+		Hosts: []string{id},
+	}
+	if _, err := policies.UpdateHosts(client, policyID, opts).Extract(); err != nil {
+		return fmterr.Errorf("error assigning OpenTelekomCloud WAF Policy to domain: %w", err)
+	}
+	return nil
 }
 
 func resourceWafDomainV1Delete(_ context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*cfg.Config)
 	client, err := config.WafV1Client(config.GetRegion(d))
 	if err != nil {
-		return fmterr.Errorf(WafClientError, err)
+		return fmterr.Errorf(ClientError, err)
 	}
 
 	if err := domains.Delete(client, d.Id()).ExtractErr(); err != nil {
 		return fmterr.Errorf("error deleting OpenTelekomCloud WAF Domain: %w", err)
+	}
+
+	autoPolicyID := d.Get("auto_policy_id").(string)
+	if err := policies.Delete(client, autoPolicyID).ExtractErr(); err != nil {
+		if _, ok := err.(golangsdk.ErrDefault404); ok {
+			return nil
+		}
+		return fmterr.Errorf("error deleting orphan policy: %w", err)
 	}
 
 	d.SetId("")
