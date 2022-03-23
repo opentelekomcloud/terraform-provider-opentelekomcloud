@@ -43,6 +43,24 @@ func TestAccOpenStackIdentityV3ProjectDataSource_basic(t *testing.T) {
 	})
 }
 
+func TestAccOpenStackIdentityV3ProjectDataSource_empty(t *testing.T) {
+	resource.Test(t, resource.TestCase{
+		PreCheck: func() {
+			common.TestAccPreCheck(t)
+		},
+		ProviderFactories: common.TestAccProviderFactories,
+		Steps: []resource.TestStep{
+			{
+				Config: testAccOpenStackIdentityProjectV3DataSource_project_empty(),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttrSet(
+						"data.opentelekomcloud_identity_project_v3.project_1", "id"),
+				),
+			},
+		},
+	})
+}
+
 func testAccCheckIdentityV3ProjectDataSourceID(n string) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
 		rs, ok := s.RootModule().Resources[n]
@@ -65,6 +83,13 @@ resource "opentelekomcloud_identity_project_v3" "project_1" {
   description = "%s"
 }
 `, name, description)
+}
+
+func testAccOpenStackIdentityProjectV3DataSource_project_empty() string {
+	return `
+data "opentelekomcloud_identity_project_v3" "project_1" {
+}
+`
 }
 
 func testAccOpenStackIdentityProjectV3DataSource_basic(name, description string) string {
