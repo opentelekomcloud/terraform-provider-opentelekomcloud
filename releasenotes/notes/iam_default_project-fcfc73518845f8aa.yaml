@@ -1,0 +1,4 @@
+---
+enhancements:
+  - |
+    **[IAM]** Make project data source provider return current project (`#1665 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/1665>`)
