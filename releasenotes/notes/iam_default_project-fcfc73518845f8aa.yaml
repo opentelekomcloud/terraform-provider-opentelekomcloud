@@ -1,4 +1,5 @@
 ---
 enhancements:
   - |
-    **[IAM]** Make project data source provider return current project (`#1665 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/1665>`)
+    **[IAM]** Make ``data/opentelekomcloud_identity_project_v3`` use current project by default
+    (`#1665 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/1665>`_)
