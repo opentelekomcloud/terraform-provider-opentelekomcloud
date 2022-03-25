@@ -10,6 +10,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
+	golangsdk "github.com/opentelekomcloud/gophertelekomcloud"
 
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/networking/v2/extensions/lbaas_v2/pools"
 
@@ -115,6 +116,11 @@ func resourceMemberV2Create(ctx context.Context, d *schema.ResourceData, meta in
 	err = resource.RetryContext(ctx, timeout, func() *resource.RetryError {
 		member, err = pools.CreateMember(client, poolID, createOpts).Extract()
 		if err != nil {
+			if _, ok := err.(golangsdk.ErrDefault429); ok {
+				time.Sleep(1 * time.Minute)
+				return resource.RetryableError(err)
+			}
+			time.Sleep(5 * time.Second)
 			return common.CheckForRetryableError(err)
 		}
 		return nil
@@ -196,8 +202,13 @@ func resourceMemberV2Update(ctx context.Context, d *schema.ResourceData, meta in
 	err = resource.RetryContext(ctx, timeout, func() *resource.RetryError {
 		_, err = pools.UpdateMember(client, poolID, d.Id(), updateOpts).Extract()
 		if err != nil {
+			if _, ok := err.(golangsdk.ErrDefault429); ok {
+				time.Sleep(1 * time.Minute)
+				return resource.RetryableError(err)
+			}
 			return common.CheckForRetryableError(err)
 		}
+		time.Sleep(5 * time.Second)
 		return nil
 	})
 
@@ -230,8 +241,13 @@ func resourceMemberV2Delete(ctx context.Context, d *schema.ResourceData, meta in
 	err = resource.RetryContext(ctx, timeout, func() *resource.RetryError {
 		err = pools.DeleteMember(client, poolID, d.Id()).ExtractErr()
 		if err != nil {
+			if _, ok := err.(golangsdk.ErrDefault429); ok {
+				time.Sleep(1 * time.Minute)
+				return resource.RetryableError(err)
+			}
 			return common.CheckForRetryableError(err)
 		}
+		time.Sleep(5 * time.Second)
 		return nil
 	})
 	if err != nil {
