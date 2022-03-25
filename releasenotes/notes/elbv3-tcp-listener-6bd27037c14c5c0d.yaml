@@ -1,0 +1,5 @@
+---
+fixes:
+  - |
+    **[ELB]** Fix creation and update for ``resource/opentelekomcloud_lb_listener_v3`` with TCP protocol
+    (`#1677 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/1677>`_)
