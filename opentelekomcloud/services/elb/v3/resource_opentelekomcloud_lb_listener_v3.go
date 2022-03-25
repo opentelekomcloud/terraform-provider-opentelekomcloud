@@ -188,15 +188,13 @@ func resourceListenerV3Create(ctx context.Context, d *schema.ResourceData, meta 
 	}
 
 	adminStateUp := d.Get("admin_state_up").(bool)
-	http2Enable := d.Get("http2_enable").(bool)
-	memberRetryEnable := d.Get("member_retry_enable").(bool)
-	createOpts := listeners.CreateOpts{
+	protocol := listeners.Protocol(d.Get("protocol").(string))
+	opts := listeners.CreateOpts{
 		AdminStateUp:           &adminStateUp,
 		CAContainerRef:         d.Get("client_ca_tls_container_ref").(string),
 		DefaultPoolID:          d.Get("default_pool_id").(string),
 		DefaultTlsContainerRef: d.Get("default_tls_container_ref").(string),
 		Description:            d.Get("description").(string),
-		Http2Enable:            &http2Enable,
 		LoadbalancerID:         d.Get("loadbalancer_id").(string),
 		Name:                   d.Get("name").(string),
 		Protocol:               listeners.Protocol(d.Get("protocol").(string)),
@@ -204,15 +202,23 @@ func resourceListenerV3Create(ctx context.Context, d *schema.ResourceData, meta 
 		SniContainerRefs:       common.ExpandToStringSlice(d.Get("sni_container_refs").(*schema.Set).List()),
 		Tags:                   common.ExpandResourceTags(d.Get("tags").(map[string]interface{})),
 		TlsCiphersPolicy:       d.Get("tls_ciphers_policy").(string),
-		EnableMemberRetry:      &memberRetryEnable,
 		KeepAliveTimeout:       d.Get("keep_alive_timeout").(int),
 		ClientTimeout:          d.Get("client_timeout").(int),
 		MemberTimeout:          d.Get("member_timeout").(int),
 		InsertHeaders:          getInsertHeaders(d),
 	}
+	switch protocol {
+	case listeners.ProtocolHTTPS:
+		http2Enable := d.Get("http2_enable").(bool)
+		opts.Http2Enable = &http2Enable
+		fallthrough
+	case listeners.ProtocolHTTP:
+		memberRetryEnable := d.Get("member_retry_enable").(bool)
+		opts.EnableMemberRetry = &memberRetryEnable
+	}
 
-	log.Printf("[DEBUG] Create Options: %#v", createOpts)
-	lb, err := listeners.Create(client, createOpts).Extract()
+	log.Printf("[DEBUG] Create Options: %#v", opts)
+	lb, err := listeners.Create(client, opts).Extract()
 	if err != nil {
 		return fmterr.Errorf("error creating LoadBalancerV3: %w", err)
 	}
@@ -264,7 +270,6 @@ func setLBListenerFields(d *schema.ResourceData, listener *listeners.Listener) d
 		d.Set("protocol_port", listener.ProtocolPort),
 		d.Set("sni_container_refs", listener.SniContainerRefs),
 		d.Set("tls_ciphers_policy", listener.TlsCiphersPolicy),
-		d.Set("member_retry_enable", listener.EnableMemberRetry),
 		d.Set("keep_alive_timeout", listener.KeepAliveTimeout),
 		d.Set("client_timeout", listener.ClientTimeout),
 		d.Set("member_timeout", listener.MemberTimeout),
@@ -273,6 +278,14 @@ func setLBListenerFields(d *schema.ResourceData, listener *listeners.Listener) d
 		d.Set("updated_at", listener.UpdatedAt),
 		d.Set("tags", common.TagsToMap(listener.Tags)),
 	)
+
+	switch listeners.Protocol(listener.Protocol) {
+	case listeners.ProtocolHTTPS, listeners.ProtocolHTTP:
+		mErr = multierror.Append(mErr,
+			d.Set("member_retry_enable", listener.EnableMemberRetry),
+		)
+	}
+
 	if err := mErr.ErrorOrNil(); err != nil {
 		return diag.FromErr(err)
 	}

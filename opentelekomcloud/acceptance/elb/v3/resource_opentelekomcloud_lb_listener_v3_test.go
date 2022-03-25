@@ -51,6 +51,79 @@ func TestAccLBV3Listener_basic(t *testing.T) {
 	})
 }
 
+func TestAccLBV3Listener_TCP(t *testing.T) {
+	var listener listeners.Listener
+
+	t.Parallel()
+	qts := []*quotas.ExpectedQuota{
+		{Q: quotas.LbCertificate, Count: 1},
+		{Q: quotas.LoadBalancer, Count: 1},
+		{Q: quotas.LbListener, Count: 1},
+	}
+	quotas.BookMany(t, qts)
+
+	resource.Test(t, resource.TestCase{
+		PreCheck:          func() { common.TestAccPreCheck(t) },
+		ProviderFactories: common.TestAccProviderFactories,
+		CheckDestroy:      testAccCheckLBV3ListenerDestroy,
+		Steps: []resource.TestStep{
+			{
+				Config: testAccLBV3ListenerConfigTCP,
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckLBV3ListenerExists(resourceListenerName, &listener),
+					resource.TestCheckResourceAttr(resourceListenerName, "name", "listener_1"),
+					resource.TestCheckResourceAttr(resourceListenerName, "description", "some interesting description"),
+				),
+			},
+			{
+				Config: testAccLBV3ListenerConfigTCPUpdated,
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckLBV3ListenerExists(resourceListenerName, &listener),
+					resource.TestCheckResourceAttr(resourceListenerName, "name", "listener_1"),
+					resource.TestCheckResourceAttr(resourceListenerName, "description", "other description"),
+				),
+			},
+		},
+	})
+}
+
+func TestAccLBV3Listener_HTTP_to_TCP(t *testing.T) {
+	var listener listeners.Listener
+
+	t.Parallel()
+	qts := []*quotas.ExpectedQuota{
+		{Q: quotas.LbCertificate, Count: 1},
+		{Q: quotas.LoadBalancer, Count: 1},
+		{Q: quotas.LbListener, Count: 1},
+	}
+	quotas.BookMany(t, qts)
+
+	resource.Test(t, resource.TestCase{
+		PreCheck:          func() { common.TestAccPreCheck(t) },
+		ProviderFactories: common.TestAccProviderFactories,
+		CheckDestroy:      testAccCheckLBV3ListenerDestroy,
+		Steps: []resource.TestStep{
+
+			{
+				Config: testAccLBV3ListenerConfigBasic,
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckLBV3ListenerExists(resourceListenerName, &listener),
+					resource.TestCheckResourceAttr(resourceListenerName, "name", "listener_1"),
+					resource.TestCheckResourceAttr(resourceListenerName, "description", "some interesting description"),
+				),
+			},
+			{
+				Config: testAccLBV3ListenerConfigTCP,
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckLBV3ListenerExists(resourceListenerName, &listener),
+					resource.TestCheckResourceAttr(resourceListenerName, "name", "listener_1"),
+					resource.TestCheckResourceAttr(resourceListenerName, "description", "some interesting description"),
+				),
+			},
+		},
+	})
+}
+
 func TestAccLBV3Listener_import(t *testing.T) {
 	t.Parallel()
 	qts := []*quotas.ExpectedQuota{
@@ -188,3 +261,42 @@ resource "opentelekomcloud_lb_listener_v3" "listener_1" {
   default_tls_container_ref = opentelekomcloud_lb_certificate_v3.certificate_1.id
 }
 `, common.DataSourceSubnet, env.OS_AVAILABILITY_ZONE, privateKey, certificate)
+
+var testAccLBV3ListenerConfigTCP = fmt.Sprintf(`
+%s
+
+resource "opentelekomcloud_lb_loadbalancer_v3" "loadbalancer_1" {
+  name        = "loadbalancer_1"
+  router_id   = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.vpc_id
+  network_ids = [data.opentelekomcloud_vpc_subnet_v1.shared_subnet.network_id]
+
+  availability_zones = ["%s"]
+}
+
+resource "opentelekomcloud_lb_listener_v3" "listener_1" {
+  name            = "listener_1"
+  description     = "some interesting description"
+  loadbalancer_id = opentelekomcloud_lb_loadbalancer_v3.loadbalancer_1.id
+  protocol        = "TCP"
+  protocol_port   = 5000
+}
+`, common.DataSourceSubnet, env.OS_AVAILABILITY_ZONE)
+
+var testAccLBV3ListenerConfigTCPUpdated = fmt.Sprintf(`
+%s
+resource "opentelekomcloud_lb_loadbalancer_v3" "loadbalancer_1" {
+  name        = "loadbalancer_1"
+  router_id   = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.vpc_id
+  network_ids = [data.opentelekomcloud_vpc_subnet_v1.shared_subnet.network_id]
+
+  availability_zones = ["%s"]
+}
+
+resource "opentelekomcloud_lb_listener_v3" "listener_1" {
+  name            = "listener_1"
+  description     = "other description"
+  loadbalancer_id = opentelekomcloud_lb_loadbalancer_v3.loadbalancer_1.id
+  protocol        = "TCP"
+  protocol_port   = 5360
+}
+`, common.DataSourceSubnet, env.OS_AVAILABILITY_ZONE)
