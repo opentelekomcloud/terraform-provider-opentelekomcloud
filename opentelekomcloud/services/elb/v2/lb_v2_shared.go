@@ -71,12 +71,13 @@ func waitForLBV2LoadBalancer(ctx context.Context, networkingClient *golangsdk.Se
 	log.Printf("[DEBUG] Waiting for loadbalancer %s to become %s.", id, target)
 
 	stateConf := &resource.StateChangeConf{
-		Target:     []string{target},
-		Pending:    pending,
-		Refresh:    resourceLBV2LoadBalancerRefreshFunc(networkingClient, id),
-		Timeout:    timeout,
-		Delay:      5 * time.Second,
-		MinTimeout: 1 * time.Second,
+		Target:       []string{target},
+		Pending:      pending,
+		Refresh:      resourceLBV2LoadBalancerRefreshFunc(networkingClient, id),
+		Timeout:      timeout,
+		Delay:        5 * time.Second,
+		MinTimeout:   1 * time.Second,
+		PollInterval: 2 * time.Second,
 	}
 
 	_, err := stateConf.WaitForStateContext(ctx)

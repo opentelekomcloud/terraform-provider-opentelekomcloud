@@ -1,0 +1,5 @@
+---
+enhancements:
+  - |
+    **[ELB]** Reduce number of requests when creating and deleting ``resoure/opentelekomcloud_lb_member_v2`` to
+    avoid throttling errors (`#1678 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/1678>`_)
