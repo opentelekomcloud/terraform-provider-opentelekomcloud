@@ -70,3 +70,11 @@ The following attributes are exported:
 * `address` - See Argument Reference above.
 
 * `protocol_port` - See Argument Reference above.
+
+## Import
+
+Members can be imported using the `pool_id/member_id`, e.g.
+
+```sh
+terraform import opentelekomcloud_lb_member_v2.member 7b80e108-1636-44e5-aece-986b0052b7dd/1bb93b8b-37a4-4b50-92cc-daa4c89d4e4c
+```

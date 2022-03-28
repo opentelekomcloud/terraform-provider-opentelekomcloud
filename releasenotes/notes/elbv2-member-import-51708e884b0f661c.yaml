@@ -1,0 +1,5 @@
+---
+enhancements:
+  - |
+    **[ELB]** Add import support to ``resource/opentelekomcloud_lb_member_v2``
+    (`#1684 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/1684>`_)

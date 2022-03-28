@@ -26,6 +26,10 @@ func ResourceMemberV2() *schema.Resource {
 		UpdateContext: resourceMemberV2Update,
 		DeleteContext: resourceMemberV2Delete,
 
+		Importer: &schema.ResourceImporter{
+			StateContext: common.ImportByPath("pool_id", "id"),
+		},
+
 		Timeouts: &schema.ResourceTimeout{
 			Create: schema.DefaultTimeout(10 * time.Minute),
 			Update: schema.DefaultTimeout(10 * time.Minute),
