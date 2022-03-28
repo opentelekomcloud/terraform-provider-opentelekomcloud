@@ -15,9 +15,12 @@ import (
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common/cfg"
 )
 
+var (
+	resourceMemberName1 = "opentelekomcloud_lb_member_v2.member_1"
+	resourceMemberName2 = "opentelekomcloud_lb_member_v2.member_2"
+)
+
 func TestAccLBV2Member_basic(t *testing.T) {
-	resourceMemberName1 := "opentelekomcloud_lb_member_v2.member_1"
-	resourceMemberName2 := "opentelekomcloud_lb_member_v2.member_2"
 	var member1 pools.Member
 	var member2 pools.Member
 
@@ -52,6 +55,42 @@ func TestAccLBV2Member_basic(t *testing.T) {
 			},
 		},
 	})
+}
+
+func TestAccLBV2Member_import(t *testing.T) {
+	resource.ParallelTest(t, resource.TestCase{
+		PreCheck: func() {
+			common.TestAccPreCheck(t)
+			qts := quotas.MultipleQuotas{
+				{Q: quotas.LoadBalancer, Count: 1},
+				{Q: quotas.LbListener, Count: 1},
+				{Q: quotas.LbPool, Count: 1},
+			}
+			quotas.BookMany(t, qts)
+		},
+		ProviderFactories: common.TestAccProviderFactories,
+		CheckDestroy:      testAccCheckLBV2MemberDestroy,
+		Steps: []resource.TestStep{
+			{
+				Config:             testAccLBV2MemberConfigBasic,
+				ExpectNonEmptyPlan: true, // Because admin_state_up remains false, unfinished elb?
+			},
+			{
+				ResourceName:      resourceMemberName1,
+				ImportState:       true,
+				ImportStateVerify: true,
+				ImportStateIdFunc: memberImportStateIDFunc(resourceMemberName1),
+			},
+		},
+	})
+}
+
+func memberImportStateIDFunc(memberResourceName string) resource.ImportStateIdFunc {
+	return func(s *terraform.State) (string, error) {
+		policyID := s.RootModule().Resources[resourcePoolName].Primary.ID
+		ccRuleID := s.RootModule().Resources[memberResourceName].Primary.ID
+		return fmt.Sprintf("%s/%s", policyID, ccRuleID), nil
+	}
 }
 
 func testAccCheckLBV2MemberDestroy(s *terraform.State) error {
