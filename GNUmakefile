@@ -20,7 +20,7 @@ test: fmtcheck
 	go test -v ./...
 
 acceptance: fmtcheck
-	@bash "$(CURDIR)/scripts/run-acceptance.sh"
+	go test -v -timeout 720m "$(CURDIR)/opentelekomcloud/acceptance/.."
 
 vet:
 	@echo "go vet ."
