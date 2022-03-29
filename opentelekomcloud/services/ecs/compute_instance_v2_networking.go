@@ -447,13 +447,19 @@ func FlattenInstanceNetworks(d *schema.ResourceData, meta interface{}) ([]map[st
 				// on this same network in another Terraform network block.
 				instanceNIC := instanceAddresses.InstanceNICs[0]
 				copy(instanceAddresses.InstanceNICs, instanceAddresses.InstanceNICs[1:])
+
+				port := instanceNetwork.Port
+				if port == "" {
+					port = findPortByNetID(serverNICs, instanceNetwork.UUID)
+				}
+
 				v := map[string]interface{}{
 					"name":           instanceAddresses.NetworkName,
 					"fixed_ip_v4":    instanceNIC.FixedIPv4,
 					"fixed_ip_v6":    instanceNIC.FixedIPv6,
 					"mac":            instanceNIC.MAC,
 					"uuid":           instanceNetwork.UUID,
-					"port":           instanceNetwork.Port,
+					"port":           port,
 					"access_network": instanceNetwork.AccessNetwork,
 				}
 				networkList = append(networkList, v)
@@ -463,6 +469,15 @@ func FlattenInstanceNetworks(d *schema.ResourceData, meta interface{}) ([]map[st
 
 	log.Printf("[DEBUG] flattenInstanceNetworks: %#v", networkList)
 	return networkList, nil
+}
+
+func findPortByNetID(nics []servers.NIC, network string) string {
+	for _, nic := range nics {
+		if nic.NetID == network {
+			return nic.PortID
+		}
+	}
+	return ""
 }
 
 // GetInstanceAccessAddresses determines the best IP address to communicate
