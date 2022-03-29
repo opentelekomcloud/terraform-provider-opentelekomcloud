@@ -13,26 +13,31 @@ resource "opentelekomcloud_obs_bucket" "bucket" {
   bucket = "my-tf-test-bucket"
 }
 
-resource "opentelekomcloud_obs_bucket_policy" "policy" {
+resource "opentelekomcloud_obs_bucket_policy" "bucket" {
   bucket = opentelekomcloud_obs_bucket.bucket.id
   policy = <<POLICY
-  {
-  "Id": "MYBUCKETPOLICY",
-  "Statement": [
-    {
-      "Sid": "IPAllow",
-      "Effect": "Deny",
-      "Principal": "*",
-      "Action": "s3:*",
-      "Resource": "arn:aws:s3:::${opentelekomcloud_obs_bucket.bucket.id}/*",
-      "Condition": {
-         "IpAddress": {"aws:SourceIp": "8.8.8.8/32"}
-      }
-    }
-  ]}
+{
+  "Statement": [{
+    "Effect": "Allow",
+    "Principal": {
+      "ID": ["*"]
+    },
+    "Action": [
+      "ListBucket",
+      "ListBucketVersions"
+    ],
+    "Resource": [
+      "${opentelekomcloud_obs_bucket.bucket.bucket}/*"
+    ]
+  }]
+}
 POLICY
 }
 ```
+
+~>
+  Please note that used policy syntax is OBS-specific. For s3-compatible policies check
+  `opentelekomcloud_s3_bucket_policy` resource.
 
 ## Argument Reference
 
