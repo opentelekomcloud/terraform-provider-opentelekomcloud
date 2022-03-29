@@ -43,6 +43,7 @@ func TestAccComputeV2Instance_basic(t *testing.T) {
 					resource.TestCheckResourceAttr(resourceInstanceV2Name, "name", "instance_1"),
 					resource.TestCheckResourceAttr(resourceInstanceV2Name, "availability_zone", env.OS_AVAILABILITY_ZONE),
 					resource.TestCheckResourceAttr(resourceInstanceV2Name, "tags.muh", "value-create"),
+					resource.TestCheckResourceAttrSet(resourceInstanceV2Name, "network.0.port"),
 				),
 			},
 			{

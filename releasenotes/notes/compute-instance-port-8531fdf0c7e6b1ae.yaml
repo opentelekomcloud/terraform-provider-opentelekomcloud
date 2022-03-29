@@ -1,0 +1,5 @@
+---
+fixes:
+  - |
+    **[ECS]** Fix populating value of ``network.port`` of ``resource/opentelekomcloud_compute_instance_v2``
+    (`#1686 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/1686>`_)
