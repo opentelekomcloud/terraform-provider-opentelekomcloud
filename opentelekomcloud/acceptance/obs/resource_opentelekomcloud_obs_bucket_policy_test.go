@@ -21,8 +21,25 @@ func TestAccObsBucketPolicyBasic(t *testing.T) {
 	name := fmt.Sprintf("tf-test-bucket-%d", acctest.RandInt())
 
 	expectedPolicyText := fmt.Sprintf(
-		`{"Version":"2008-10-17","Statement":[{"Effect":"Allow","Principal":{"AWS":["*"]},"Action":["s3:*"],"Resource":["arn:aws:s3:::%s/*","arn:aws:s3:::%s"]}]}`,
-		name, name)
+		`{
+  "Statement": [
+    {
+      "Effect": "Allow",
+      "Principal": {
+        "ID": [
+          "*"
+        ]
+      },
+      "Action": [
+        "*"
+      ],
+      "Resource": [
+        "%[1]s/*",
+        "%[1]s"
+      ]
+    }
+  ]
+}`, name)
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:          func() { common.TestAccPreCheck(t) },
@@ -44,12 +61,12 @@ func TestAccObsBucketPolicyUpdate(t *testing.T) {
 	name := fmt.Sprintf("tf-test-bucket-%d", acctest.RandInt())
 
 	expectedPolicyText1 := fmt.Sprintf(
-		`{"Version":"2008-10-17","Statement":[{"Effect":"Allow","Principal":{"AWS":["*"]},"Action":["s3:*"],"Resource":["arn:aws:s3:::%s/*","arn:aws:s3:::%s"]}]}`,
-		name, name)
+		`{"Statement":[{"Effect":"Allow","Principal":{"ID":["*"]},"Action":["*"],"Resource":["%s/*","%[1]s"]}]}`,
+		name)
 
 	expectedPolicyText2 := fmt.Sprintf(
-		`{"Version":"2008-10-17","Statement":[{"Effect":"Allow","Principal":{"AWS":["*"]},"Action":["s3:DeleteBucket", "s3:ListBucket", "s3:ListBucketVersions"], "Resource":["arn:aws:s3:::%s/*","arn:aws:s3:::%s"]}]}`,
-		name, name)
+		`{"Statement":[{"Effect":"Allow","Principal":{"ID":["*"]},"Action":["DeleteBucket", "ListBucket", "ListBucketVersions"], "Resource":["%s/*","%[1]s"]}]}`,
+		name)
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:          func() { common.TestAccPreCheck(t) },
@@ -136,24 +153,27 @@ resource "opentelekomcloud_obs_bucket_policy" "bucket" {
   bucket = opentelekomcloud_obs_bucket.bucket.bucket
   policy = <<POLICY
 {
-	"Version": "2008-10-17",
-	"Statement": [{
-		"Effect": "Allow",
-		"Principal": {
-			"AWS": ["*"]
-		},
-		"Action": [
-			"s3:*"
-		],
-		"Resource": [
-			"arn:aws:s3:::%s",
-			"arn:aws:s3:::%s/*"
-		]
-	}]
+  "Statement": [
+    {
+      "Effect": "Allow",
+      "Principal": {
+        "ID": [
+          "*"
+        ]
+      },
+      "Action": [
+        "*"
+      ],
+      "Resource": [
+        "%[1]s/*",
+        "%[1]s"
+      ]
+    }
+  ]
 }
 POLICY
 }
-`, bucketName, bucketName, bucketName)
+`, bucketName)
 }
 
 func testAccObsBucketPolicyConfigUpdated(bucketName string) string {
@@ -166,22 +186,21 @@ resource "opentelekomcloud_obs_bucket_policy" "bucket" {
   bucket = opentelekomcloud_obs_bucket.bucket.bucket
   policy = <<POLICY
 {
-	"Version": "2008-10-17",
-	"Statement": [{
-		"Effect": "Allow",
-		"Principal": {
-			"AWS": ["*"]
-		},
-		"Action": [
-			"s3:DeleteBucket",
-			"s3:ListBucket",
-			"s3:ListBucketVersions"
-		],
-		"Resource": [
-			"arn:aws:s3:::%s",
-			"arn:aws:s3:::%s/*"
-		]
-	}]
+  "Statement": [{
+    "Effect": "Allow",
+    "Principal": {
+      "ID": ["*"]
+    },
+    "Action": [
+      "DeleteBucket",
+      "ListBucket",
+      "ListBucketVersions"
+    ],
+    "Resource": [
+      "%s",
+      "%s/*"
+    ]
+  }]
 }
 POLICY
 }
@@ -198,7 +217,7 @@ resource "opentelekomcloud_obs_bucket_policy" "bucket" {
   bucket = opentelekomcloud_obs_bucket.bucket.bucket
   policy = <<POLICY
 {
-    "Id": "BUCKET_POLICY",
+    "Sid": "BUCKET_POLICY",
     "Statement": [
         {
             "Effect": "Allow",
@@ -208,17 +227,17 @@ resource "opentelekomcloud_obs_bucket_policy" "bucket" {
                 ]
             },
             "Action": [
-                "s3:GetObject",
-                "s3:PutObject",
-                "s3:ListBucket",
-                "s3:ListBucketVersions",
-                "s3:ListBucketMultipartUploads",
-                "s3:GetBucketLocation",
-                "s3:GetBucketStorage"
+                "GetObject",
+                "PutObject",
+                "ListBucket",
+                "ListBucketVersions",
+                "ListBucketMultipartUploads",
+                "GetBucketLocation",
+                "GetBucketStorage"
             ],
             "Resource": [
-                "arn:aws:s3:::bucket/*",
-                "arn:aws:s3:::bucket"
+                "bucket/*",
+                "bucket"
             ]
         }
     ]
