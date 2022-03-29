@@ -1,12 +1,18 @@
 ---
+prelude:
+  OBS resources now do not support S3-compatibility mode (see below for the details)."
 issues:
   - |
-    Fix not encrypting OBS bucket with `kms` algorythm (`#1180 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/1180>`_)
+    **[OBS]** Fix not encrypting OBS bucket with ``kms`` algorythm
+    (`#1685 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/1685>`_)
 upgrade:
   - |
-    S3-compatibility is broken for OBS resources. SSE stop supporting `aws:kms` algorythm. Rules passed to `opentelekomcloud_obs_bucket_policy`
-    should be OBS-specififc, e.g.
+    **[OBS]** SSE algorithm ``aws:kms`` is now not supported for ``resource/opentelekomcloud_obs_bucket``, please use ``kms`` instead.
+  - |
+    **[OBS]** Rules passed to ``resource/opentelekomcloud_obs_bucket_policy`` should be OBS-specififc, e.g.
+
     .. code-block:: JSON
+
         {
           "Statement": [
             {
@@ -26,8 +32,11 @@ upgrade:
             }
           ]
         }
+
     instead of S3-compatible
+
     .. code-block:: JSON
+
         {
           "Version": "2008-10-17",
           "Statement": [
@@ -48,3 +57,5 @@ upgrade:
             }
           ]
         }
+
+    For S3-compatible rules use ``resource/opentelekomcloud_s3_bucket_policy``.

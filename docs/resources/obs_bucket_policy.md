@@ -13,7 +13,7 @@ resource "opentelekomcloud_obs_bucket" "bucket" {
   bucket = "my-tf-test-bucket"
 }
 
-resource "opentelekomcloud_obs_bucket_policy" "bucket" {
+resource "opentelekomcloud_obs_bucket_policy" "policy" {
   bucket = opentelekomcloud_obs_bucket.bucket.id
   policy = <<POLICY
 {
