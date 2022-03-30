@@ -11,10 +11,12 @@ Manages a V2 VM instance resource within OpenTelekomCloud.
 ### Basic Instance
 
 ```hcl
+variable image_id {}
+
 resource "opentelekomcloud_compute_instance_v2" "basic" {
   name            = "basic"
-  image_id        = "ad091b52-742f-469e-8f3c-fd81cadf0743"
-  flavor_id       = "3"
+  image_id        = var.image_id
+  flavor_id       = "s2.large.4"
   key_pair        = "my_key_pair_name"
   security_groups = ["default"]
 
@@ -35,15 +37,17 @@ resource "opentelekomcloud_compute_instance_v2" "basic" {
 ### Instance With Attached Volume
 
 ```hcl
+variable image_id {}
+
 resource "opentelekomcloud_blockstorage_volume_v2" "myvol" {
   name = "myvol"
-  size = 1
+  size = 4
 }
 
 resource "opentelekomcloud_compute_instance_v2" "myinstance" {
   name            = "myinstance"
-  image_id        = "ad091b52-742f-469e-8f3c-fd81cadf0743"
-  flavor_id       = "3"
+  image_id        = var.image_id
+  flavor_id       = "s2.large.4"
   key_pair        = "my_key_pair_name"
   security_groups = ["default"]
 
@@ -61,14 +65,16 @@ resource "opentelekomcloud_compute_volume_attach_v2" "attached" {
 ### Boot From Volume
 
 ```hcl
+variable image_id {}
+
 resource "opentelekomcloud_compute_instance_v2" "boot-from-volume" {
   name            = "boot-from-volume"
-  flavor_id       = "3"
+  flavor_id       = "s2.large.4"
   key_pair        = "my_key_pair_name"
   security_groups = ["default"]
 
   block_device {
-    uuid                  = "<image-id>"
+    uuid                  = var.image_id
     source_type           = "image"
     volume_size           = 5
     boot_index            = 0
@@ -86,15 +92,17 @@ resource "opentelekomcloud_compute_instance_v2" "boot-from-volume" {
 ### Boot From an Existing Volume
 
 ```hcl
+variable image_id {}
+
 resource "opentelekomcloud_blockstorage_volume_v2" "myvol" {
   name     = "myvol"
   size     = 5
-  image_id = "<image-id>"
+  image_id = var.image_id
 }
 
 resource "opentelekomcloud_compute_instance_v2" "boot-from-volume" {
   name            = "bootfromvolume"
-  flavor_id       = "3"
+  flavor_id       = "s2.large.4"
   key_pair        = "my_key_pair_name"
   security_groups = ["default"]
 
@@ -115,15 +123,18 @@ resource "opentelekomcloud_compute_instance_v2" "boot-from-volume" {
 ### Boot Instance, Create Volume, and Attach Volume as a Block Device
 
 ```hcl
+variable image_id {}
+variable data_image_id {}
+
 resource "opentelekomcloud_compute_instance_v2" "instance_1" {
   name            = "instance_1"
-  image_id        = "<image-id>"
-  flavor_id       = "3"
+  image_id        = var.image_id
+  flavor_id       = "s2.large.4"
   key_pair        = "my_key_pair_name"
   security_groups = ["default"]
 
   block_device {
-    uuid                  = "<image-id>"
+    uuid                  = var.data_image_id
     source_type           = "image"
     destination_type      = "volume"
     boot_index            = 0
@@ -143,6 +154,9 @@ resource "opentelekomcloud_compute_instance_v2" "instance_1" {
 ### Boot Instance and Attach Existing Volume as a Block Device
 
 ```hcl
+variable image_id {}
+variable data_image_id {}
+
 resource "opentelekomcloud_blockstorage_volume_v2" "volume_1" {
   name = "volume_1"
   size = 1
@@ -150,13 +164,13 @@ resource "opentelekomcloud_blockstorage_volume_v2" "volume_1" {
 
 resource "opentelekomcloud_compute_instance_v2" "instance_1" {
   name            = "instance_1"
-  image_id        = "<image-id>"
-  flavor_id       = "3"
+  image_id        = var.image_id
+  flavor_id       = "s2.large.4"
   key_pair        = "my_key_pair_name"
   security_groups = ["default"]
 
   block_device {
-    uuid                  = "<image-id>"
+    uuid                  = var.data_image_id
     source_type           = "image"
     destination_type      = "volume"
     boot_index            = 0
@@ -176,14 +190,16 @@ resource "opentelekomcloud_compute_instance_v2" "instance_1" {
 ### Instance With Multiple Networks
 
 ```hcl
+variable image_id {}
+
 resource "opentelekomcloud_networking_floatingip_v2" "myip" {
   pool = "admin_external_net"
 }
 
 resource "opentelekomcloud_compute_instance_v2" "multi-net" {
   name            = "multi-net"
-  image_id        = "ad091b52-742f-469e-8f3c-fd81cadf0743"
-  flavor_id       = "3"
+  image_id        = var.image_id
+  flavor_id       = "s2.large.4"
   key_pair        = "my_key_pair_name"
   security_groups = ["default"]
 
@@ -206,10 +222,13 @@ resource "opentelekomcloud_compute_floatingip_associate_v2" "myip" {
 ### Instance with Multiple Ephemeral Disks
 
 ```hcl
+variable image_id {}
+variable data_image_id {}
+
 resource "opentelekomcloud_compute_instance_v2" "multi-eph" {
   name            = "multi_eph"
-  image_id        = "ad091b52-742f-469e-8f3c-fd81cadf0743"
-  flavor_id       = "3"
+  image_id        = var.image_id
+  flavor_id       = "s2.large.4"
   key_pair        = "my_key_pair_name"
   security_groups = ["default"]
 
@@ -218,7 +237,7 @@ resource "opentelekomcloud_compute_instance_v2" "multi-eph" {
     delete_on_termination = true
     destination_type      = "volume"
     source_type           = "image"
-    uuid                  = "<image-id>"
+    uuid                  = var.data_image_id
   }
 
   block_device {
@@ -242,10 +261,12 @@ resource "opentelekomcloud_compute_instance_v2" "multi-eph" {
 ### Instance with User Data (cloud-init)
 
 ```hcl
+variable image_id {}
+
 resource "opentelekomcloud_compute_instance_v2" "instance_1" {
   name            = "basic"
-  image_id        = "ad091b52-742f-469e-8f3c-fd81cadf0743"
-  flavor_id       = "3"
+  image_id        = var.image_id
+  flavor_id       = "s2.large.4"
   key_pair        = "my_key_pair_name"
   security_groups = ["default"]
   user_data       = "#cloud-config\nhostname: instance_1.example.com\nfqdn: instance_1.example.com"
@@ -555,7 +576,7 @@ terraform import opentelekomcloud_compute_instance_v2.basic_instance <instance_i
 Nova returns the network interfaces grouped by network, thus not in creation order. That means that if you have multiple
 network interfaces you must take care of the order of networks in your configuration.
 
-As example we want to import an instance with one ephemeral root disk, and 3 network interfaces.
+As example, we want to import an instance with one ephemeral root disk, and 3 network interfaces.
 
 Examples
 
@@ -574,7 +595,7 @@ resource "opentelekomcloud_compute_instance_v2" "boot-from-volume" {
   }
   network {
     name        = var.network_1_name
-    fixed_ip_v4 = "<fixed_ip_v4>"
+    fixed_ip_v4 = var.fixed_ip_v4
   }
 
 }
