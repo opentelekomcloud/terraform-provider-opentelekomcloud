@@ -1,0 +1,5 @@
+---
+other:
+  - |
+    **[ECS]** Fix incorrect values in the documentation examples of ``resource/opentelekomcloud_compute_instance_v2``
+    (`#1687 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/1687>`_)
