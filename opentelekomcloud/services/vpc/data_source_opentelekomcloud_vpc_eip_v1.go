@@ -87,12 +87,12 @@ func dataSourceVPCEipV1Read(_ context.Context, d *schema.ResourceData, meta inte
 	}
 
 	listOpts := eips.ListOpts{
-		ID:               d.Get("id").(string),
-		Status:           d.Get("status").(string),
-		PrivateIPAddress: d.Get("private_ip_address").(string),
-		PortID:           d.Get("port_id").(string),
-		BandwidthID:      d.Get("bandwidth_id").(string),
-		PublicIPAddress:  d.Get("public_ip_address").(string),
+		ID:             d.Get("id").(string),
+		Status:         d.Get("status").(string),
+		PrivateAddress: d.Get("private_ip_address").(string),
+		PortID:         d.Get("port_id").(string),
+		BandwidthID:    d.Get("bandwidth_id").(string),
+		PublicAddress:  d.Get("public_ip_address").(string),
 	}
 
 	refinedEIPs, err := eips.List(client, listOpts)
