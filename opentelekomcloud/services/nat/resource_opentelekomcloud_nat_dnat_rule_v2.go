@@ -124,14 +124,14 @@ func resourceNatDnatRuleCreate(ctx context.Context, d *schema.ResourceData, meta
 		Protocol:            d.Get("protocol").(string),
 	}
 
-	dnatRule, err := dnatrules.Create(client, createOpts).Extract()
+	rule, err := createRuleWithRetry(ctx, client, createOpts, time.Minute)
 	if err != nil {
-		return diag.FromErr(err)
+		return fmterr.Errorf("error creating OpenTelekomCloud DNAT Rule: %w", err)
 	}
 
 	stateConf := &resource.StateChangeConf{
 		Target:     []string{"ACTIVE"},
-		Refresh:    waitForDnatRuleActive(client, dnatRule.ID),
+		Refresh:    waitForDnatRuleActive(client, rule.ID),
 		Timeout:    d.Timeout(schema.TimeoutCreate),
 		Delay:      5 * time.Second,
 		MinTimeout: 3 * time.Second,
@@ -139,12 +139,38 @@ func resourceNatDnatRuleCreate(ctx context.Context, d *schema.ResourceData, meta
 
 	_, err = stateConf.WaitForStateContext(ctx)
 	if err != nil {
-		return fmterr.Errorf("error creating OpenTelekomCloud DNAT Rule: %w", err)
+		return fmterr.Errorf("error waiting for DNAT rule to become active: %w", err)
 	}
 
-	d.SetId(dnatRule.ID)
+	d.SetId(rule.ID)
 
 	return resourceNatDnatRuleRead(ctx, d, meta)
+}
+
+var createRulePollInterval = 5 * time.Second
+
+// createRuleWithRetry retries creation of DNAT rule in case err 400 is received (handling DnatRuleInValidPortID erorr)
+// time between requests is set by createRulePollInterval
+func createRuleWithRetry(ctx context.Context, client *golangsdk.ServiceClient, opts dnatrules.CreateOpts, timeout time.Duration) (*dnatrules.DnatRule, error) {
+	var rule *dnatrules.DnatRule
+	err := resource.RetryContext(ctx, timeout, func() *resource.RetryError {
+		var err error
+		rule, err = dnatrules.Create(client, opts).Extract()
+		if err != nil {
+			// we are retrying DnatRuleInValidPortID which is HTTP 400
+			if _, ok := err.(golangsdk.ErrDefault400); ok {
+				// will wait for some time here, no need to retry just now
+				time.Sleep(createRulePollInterval)
+				return resource.RetryableError(err)
+			}
+			return resource.NonRetryableError(err)
+		}
+		return nil
+	})
+	if err != nil {
+		return nil, err
+	}
+	return rule, nil
 }
 
 func resourceNatDnatRuleRead(_ context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
