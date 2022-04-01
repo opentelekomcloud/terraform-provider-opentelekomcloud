@@ -11,6 +11,8 @@ import (
 func TestAccVpcEipV1DataSource_basic(t *testing.T) {
 	dataSourceNameByID := "data.opentelekomcloud_vpc_eip_v1.by_id"
 	dataSourceNameByTags := "data.opentelekomcloud_vpc_eip_v1.by_tags"
+	dataSourceNameByIP := "data.opentelekomcloud_vpc_eip_v1.by_ip"
+
 	t.Parallel()
 	quotas.BookOne(t, quotas.FloatingIP)
 
@@ -30,6 +32,9 @@ func TestAccVpcEipV1DataSource_basic(t *testing.T) {
 					resource.TestCheckResourceAttr(dataSourceNameByTags, "type", "5_bgp"),
 					resource.TestCheckResourceAttr(dataSourceNameByTags, "bandwidth_share_type", "PER"),
 					resource.TestCheckResourceAttr(dataSourceNameByTags, "status", "DOWN"),
+					resource.TestCheckResourceAttr(dataSourceNameByIP, "type", "5_bgp"),
+					resource.TestCheckResourceAttr(dataSourceNameByIP, "bandwidth_share_type", "PER"),
+					resource.TestCheckResourceAttr(dataSourceNameByIP, "status", "DOWN"),
 				),
 			},
 			{
@@ -78,6 +83,10 @@ resource "opentelekomcloud_vpc_eip_v1" "eip" {
 
 data "opentelekomcloud_vpc_eip_v1" "by_id" {
   id = opentelekomcloud_vpc_eip_v1.eip.id
+}
+
+data "opentelekomcloud_vpc_eip_v1" "by_ip" {
+  public_ip_address = opentelekomcloud_vpc_eip_v1.eip.publicip.0.ip_address
 }
 
 data "opentelekomcloud_vpc_eip_v1" "by_tags" {

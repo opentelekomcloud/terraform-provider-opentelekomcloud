@@ -1,0 +1,5 @@
+---
+fixes:
+  - |
+    **[VPC]** Fix not empty result of searching by public or private IP in ``data_source/opentelekomcloud_vpc_eip_v1``
+    (`#1690 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/1690>`_)
