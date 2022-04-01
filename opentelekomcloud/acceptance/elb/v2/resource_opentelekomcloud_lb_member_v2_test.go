@@ -43,6 +43,8 @@ func TestAccLBV2Member_basic(t *testing.T) {
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckLBV2MemberExists(resourceMemberName1, &member1),
 					testAccCheckLBV2MemberExists(resourceMemberName2, &member2),
+					resource.TestCheckResourceAttr(resourceMemberName1, "weight", "0"),
+					resource.TestCheckResourceAttr(resourceMemberName2, "weight", "10"),
 				),
 			},
 			{
@@ -50,7 +52,7 @@ func TestAccLBV2Member_basic(t *testing.T) {
 				ExpectNonEmptyPlan: true, // Because admin_state_up remains false, unfinished elb?
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr(resourceMemberName1, "weight", "10"),
-					resource.TestCheckResourceAttr(resourceMemberName2, "weight", "15"),
+					resource.TestCheckResourceAttr(resourceMemberName2, "weight", "0"),
 				),
 			},
 		},
@@ -175,6 +177,7 @@ resource "opentelekomcloud_lb_member_v2" "member_1" {
   protocol_port = 8080
   pool_id       = opentelekomcloud_lb_pool_v2.pool_1.id
   subnet_id     = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.subnet_id
+  weight        = 0
 }
 
 resource "opentelekomcloud_lb_member_v2" "member_2" {
@@ -182,6 +185,7 @@ resource "opentelekomcloud_lb_member_v2" "member_2" {
   protocol_port = 8080
   pool_id       = opentelekomcloud_lb_pool_v2.pool_1.id
   subnet_id     = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.subnet_id
+  weight        = 10
 }
 `, common.DataSourceSubnet)
 
@@ -219,7 +223,7 @@ resource "opentelekomcloud_lb_member_v2" "member_1" {
 resource "opentelekomcloud_lb_member_v2" "member_2" {
   address        = "192.168.0.11"
   protocol_port  = 8080
-  weight         = 15
+  weight         = 0
   admin_state_up = true
   pool_id        = opentelekomcloud_lb_pool_v2.pool_1.id
   subnet_id      = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.subnet_id
