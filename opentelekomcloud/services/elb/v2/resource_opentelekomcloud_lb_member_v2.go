@@ -66,8 +66,8 @@ func ResourceMemberV2() *schema.Resource {
 			"weight": {
 				Type:         schema.TypeInt,
 				Optional:     true,
-				Computed:     true,
-				ValidateFunc: validation.IntBetween(1, 100),
+				ValidateFunc: validation.IntBetween(0, 100),
+				Default:      1,
 			},
 			"subnet_id": {
 				Type:     schema.TypeString,
@@ -101,7 +101,7 @@ func resourceMemberV2Create(ctx context.Context, d *schema.ResourceData, meta in
 		ProtocolPort: d.Get("protocol_port").(int),
 		Name:         d.Get("name").(string),
 		TenantID:     d.Get("tenant_id").(string),
-		Weight:       d.Get("weight").(int),
+		Weight:       golangsdk.IntToPointer(d.Get("weight").(int)),
 		SubnetID:     d.Get("subnet_id").(string),
 		AdminStateUp: &adminStateUp,
 	}
@@ -188,7 +188,7 @@ func resourceMemberV2Update(ctx context.Context, d *schema.ResourceData, meta in
 		updateOpts.Name = d.Get("name").(string)
 	}
 	if d.HasChange("weight") {
-		updateOpts.Weight = d.Get("weight").(int)
+		updateOpts.Weight = golangsdk.IntToPointer(d.Get("weight").(int))
 	}
 	if d.HasChange("admin_state_up") {
 		asu := d.Get("admin_state_up").(bool)

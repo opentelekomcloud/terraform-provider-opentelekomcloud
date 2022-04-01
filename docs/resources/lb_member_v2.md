@@ -44,7 +44,7 @@ The following arguments are supported:
 * `weight` - (Optional)  A positive integer value that indicates the relative
   portion of traffic that this member should receive from the pool. For
   example, a member with a `weight` of `10` receives five times as much traffic
-  as a member with a `weight` of `2`.
+  as a member with a `weight` of `2`. If the value is `0`, the backend server will not accept new requests
 
 * `admin_state_up` - (Optional) The administrative state of the member.
   A valid value is `true` (UP) or `false` (DOWN).
