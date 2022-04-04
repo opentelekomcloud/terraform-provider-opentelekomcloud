@@ -1,0 +1,5 @@
+---
+other:
+  - |
+    **[ECS]** Add example for encrypted disks usage with ``resource/opentelekomcloud_ecs_instance_v1``
+    (`#1695 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/1695>`_)

@@ -163,6 +163,41 @@ resource "opentelekomcloud_ecs_instance_v1" "basic" {
 -> `user_data` can come from a variety of sources: inline, read in from the `file`
 function, or the `template_cloudinit_config` resource.
 
+### Instance with encrypted disks
+
+```hcl
+resource opentelekomcloud_ecs_instance_v1 ecs {
+  name              = var.host_name
+  flavor            = var.flavor_name
+  availability_zone = var.az
+  security_groups   = [data.opentelekomcloud_networking_secgroup_v2.default.id]
+  vpc_id            = var.vpc_id
+  image_id          = var.image_id
+  auto_recovery     = true
+
+  nics {
+    network_id = var.vpc_subnetwork_id
+    ip_address = var.private_ip
+  }
+
+  system_disk_type            = var.disk_type
+  system_disk_size            = var.disk_size
+  system_disk_kms_id          = var.key_disk_encryption
+  delete_disks_on_termination = true
+
+  data_disks {
+    type   = "SSD"
+    size   = 40
+    kms_id = var.key_disk_encryption
+  }
+}
+```
+
+~>
+  Encrypted disks requires EVS to be authorized to use KMS keys. The easiest way is to create an encrypted
+  instance  via the console - this should be done only once per project. Another way is to use an agency,
+  same way it's [done for CCE](cce_cluster_v3.md#creating-agency).
+
 ## Argument Reference
 
 The following arguments are supported:
