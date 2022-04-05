@@ -82,7 +82,7 @@ func resourceBandwidthAssociateV2Read(ctx context.Context, d *schema.ResourceDat
 
 	bandwidth, err := bandwidths.Get(client, d.Id()).Extract()
 	if err != nil {
-		return diag.FromErr(common.CheckDeleted(d, err, "error getting bandwidth info"))
+		return common.CheckDeletedDiag(d, err, "error getting bandwidth info")
 	}
 	ips := make([]string, len(bandwidth.PublicIpInfo))
 	for i, ipInfo := range bandwidth.PublicIpInfo {

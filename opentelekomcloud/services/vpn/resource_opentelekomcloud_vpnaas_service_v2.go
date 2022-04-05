@@ -153,7 +153,7 @@ func resourceVpnServiceV2Read(_ context.Context, d *schema.ResourceData, meta in
 
 	service, err := services.Get(networkingClient, d.Id()).Extract()
 	if err != nil {
-		return diag.FromErr(common.CheckDeleted(d, err, "service"))
+		return common.CheckDeletedDiag(d, err, "service")
 	}
 
 	log.Printf("[DEBUG] Read OpenTelekomCloud Service %s: %#v", d.Id(), service)

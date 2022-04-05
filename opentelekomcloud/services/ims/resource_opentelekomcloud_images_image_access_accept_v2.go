@@ -121,7 +121,7 @@ func resourceImagesImageAccessAcceptV2Read(_ context.Context, d *schema.Resource
 
 	member, err := members.Get(client, imageID, memberID).Extract()
 	if err != nil {
-		return diag.FromErr(common.CheckDeleted(d, err, "image_access_accept_v2"))
+		return common.CheckDeletedDiag(d, err, "image_access_accept_v2")
 	}
 
 	mErr := multierror.Append(
@@ -190,7 +190,7 @@ func resourceImagesImageAccessAcceptV2Delete(ctx context.Context, d *schema.Reso
 		Status: status,
 	}
 	if err := members.Update(client, imageID, memberID, opts).Err; err != nil {
-		return diag.FromErr(common.CheckDeleted(d, err, "image_access_accept_v2"))
+		return common.CheckDeletedDiag(d, err, "image_access_accept_v2")
 	}
 	state := &resource.StateChangeConf{
 		Target:  []string{status},

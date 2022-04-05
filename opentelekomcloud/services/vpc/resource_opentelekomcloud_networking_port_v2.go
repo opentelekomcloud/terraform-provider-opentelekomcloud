@@ -251,7 +251,7 @@ func resourceNetworkingPortV2Read(_ context.Context, d *schema.ResourceData, met
 	var port portWithPortSecurityExtensions
 	err = ports.Get(client, d.Id()).ExtractInto(&port)
 	if err != nil {
-		return diag.FromErr(common.CheckDeleted(d, err, "port"))
+		return common.CheckDeletedDiag(d, err, "port")
 	}
 
 	log.Printf("[DEBUG] Retrieved Port %s: %+v", d.Id(), port)

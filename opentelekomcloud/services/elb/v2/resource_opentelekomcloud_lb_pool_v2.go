@@ -222,7 +222,7 @@ func resourceLBPoolV2Read(_ context.Context, d *schema.ResourceData, meta interf
 
 	pool, err := pools.Get(client, d.Id()).Extract()
 	if err != nil {
-		return diag.FromErr(common.CheckDeleted(d, err, "pool"))
+		return common.CheckDeletedDiag(d, err, "pool")
 	}
 
 	log.Printf("[DEBUG] Retrieved pool %s: %#v", d.Id(), pool)

@@ -169,7 +169,7 @@ func resourceMonitorV3Read(ctx context.Context, d *schema.ResourceData, meta int
 
 	monitor, err := monitors.Get(client, d.Id()).Extract()
 	if err != nil {
-		return diag.FromErr(common.CheckDeleted(d, err, "error reading LB monitor v3"))
+		return common.CheckDeletedDiag(d, err, "error reading LB monitor v3")
 	}
 
 	mErr := multierror.Append(
@@ -240,7 +240,7 @@ func resourceMonitorV3Delete(ctx context.Context, d *schema.ResourceData, meta i
 
 	err = monitors.Delete(client, d.Id()).ExtractErr()
 	if err != nil {
-		return diag.FromErr(common.CheckDeleted(d, err, "error deleting LB monitor v3"))
+		return common.CheckDeletedDiag(d, err, "error deleting LB monitor v3")
 	}
 
 	return nil

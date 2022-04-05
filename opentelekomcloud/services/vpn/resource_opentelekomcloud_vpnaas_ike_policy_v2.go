@@ -192,7 +192,7 @@ func resourceVpnIKEPolicyV2Read(_ context.Context, d *schema.ResourceData, meta 
 
 	policy, err := ikepolicies.Get(networkingClient, d.Id()).Extract()
 	if err != nil {
-		return diag.FromErr(common.CheckDeleted(d, err, "IKE policy"))
+		return common.CheckDeletedDiag(d, err, "IKE policy")
 	}
 
 	log.Printf("[DEBUG] Read OpenTelekomCloud IKE Policy %s: %#v", d.Id(), policy)

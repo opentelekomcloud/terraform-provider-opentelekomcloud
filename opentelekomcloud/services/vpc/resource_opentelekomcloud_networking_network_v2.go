@@ -220,7 +220,7 @@ func resourceNetworkingNetworkV2Read(_ context.Context, d *schema.ResourceData, 
 	asu, id := ExtractValSFromNid(d.Id())
 	n, err := networks.Get(networkingClient, id).Extract()
 	if err != nil {
-		return diag.FromErr(common.CheckDeleted(d, err, "network"))
+		return common.CheckDeletedDiag(d, err, "network")
 	}
 
 	log.Printf("[DEBUG] Retrieved Network %s: %+v", d.Id(), n)

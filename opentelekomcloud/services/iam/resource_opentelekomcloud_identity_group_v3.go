@@ -85,7 +85,7 @@ func resourceIdentityGroupV3Read(_ context.Context, d *schema.ResourceData, meta
 
 	group, err := groups.Get(identityClient, d.Id()).Extract()
 	if err != nil {
-		return diag.FromErr(common.CheckDeleted(d, err, "group"))
+		return common.CheckDeletedDiag(d, err, "group")
 	}
 
 	log.Printf("[DEBUG] Retrieved OpenTelekomCloud Group: %#v", group)

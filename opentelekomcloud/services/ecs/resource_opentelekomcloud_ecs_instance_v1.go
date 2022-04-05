@@ -260,7 +260,7 @@ func resourceEcsInstanceV1Read(ctx context.Context, d *schema.ResourceData, meta
 
 	server, err := cloudservers.Get(client, d.Id()).Extract()
 	if err != nil {
-		return diag.FromErr(common.CheckDeleted(d, err, "CloudServer"))
+		return common.CheckDeletedDiag(d, err, "CloudServer")
 	}
 	if server.Status == "DELETED" {
 		d.SetId("")

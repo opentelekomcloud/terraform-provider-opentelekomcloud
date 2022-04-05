@@ -142,7 +142,7 @@ func resourceVpnEndpointGroupV2Read(_ context.Context, d *schema.ResourceData, m
 
 	group, err := endpointgroups.Get(networkingClient, d.Id()).Extract()
 	if err != nil {
-		return diag.FromErr(common.CheckDeleted(d, err, "group"))
+		return common.CheckDeletedDiag(d, err, "group")
 	}
 
 	log.Printf("[DEBUG] Read OpenTelekomCloud Endpoint EndpointGroup %s: %#v", d.Id(), group)

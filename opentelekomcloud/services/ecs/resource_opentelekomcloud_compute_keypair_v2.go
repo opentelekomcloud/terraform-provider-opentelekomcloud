@@ -106,7 +106,7 @@ func resourceComputeKeypairV2Read(_ context.Context, d *schema.ResourceData, met
 
 	kp, err := keypairs.Get(client, d.Id()).Extract()
 	if err != nil {
-		return diag.FromErr(common.CheckDeleted(d, err, "keypair"))
+		return common.CheckDeletedDiag(d, err, "keypair")
 	}
 
 	mErr := multierror.Append(

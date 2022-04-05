@@ -384,7 +384,7 @@ func resourceIdentityAgencyV3Read(_ context.Context, d *schema.ResourceData, met
 
 	a, err := agency.Get(client, d.Id()).Extract()
 	if err != nil {
-		return diag.FromErr(common.CheckDeleted(d, err, "Identity-Agency"))
+		return common.CheckDeletedDiag(d, err, "Identity-Agency")
 	}
 	log.Printf("[DEBUG] Retrieved Identity-Agency %s: %#v", d.Id(), a)
 

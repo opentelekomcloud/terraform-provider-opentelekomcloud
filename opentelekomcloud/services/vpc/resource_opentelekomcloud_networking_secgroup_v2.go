@@ -116,7 +116,7 @@ func resourceNetworkingSecGroupV2Read(_ context.Context, d *schema.ResourceData,
 
 	securityGroup, err := groups.Get(networkingClient, d.Id()).Extract()
 	if err != nil {
-		return diag.FromErr(common.CheckDeleted(d, err, "OpenTelekomCloud Neutron Security group"))
+		return common.CheckDeletedDiag(d, err, "OpenTelekomCloud Neutron Security group")
 	}
 
 	me := multierror.Append(nil,

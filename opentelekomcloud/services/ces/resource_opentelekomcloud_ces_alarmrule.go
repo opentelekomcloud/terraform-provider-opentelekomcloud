@@ -367,7 +367,7 @@ func resourceAlarmRuleRead(_ context.Context, d *schema.ResourceData, meta inter
 
 	r, err := alarmrule.Get(client, d.Id()).Extract()
 	if err != nil {
-		return diag.FromErr(common.CheckDeleted(d, err, "alarmrule"))
+		return common.CheckDeletedDiag(d, err, "alarmrule")
 	}
 	log.Printf("[DEBUG] Retrieved alarm rule %s: %#v", d.Id(), r)
 

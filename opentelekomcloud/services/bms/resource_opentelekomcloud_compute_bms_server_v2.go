@@ -422,7 +422,7 @@ func resourceComputeBMSInstanceV2Read(_ context.Context, d *schema.ResourceData,
 
 	server, err := bms.Get(computeClient, d.Id()).Extract()
 	if err != nil {
-		return diag.FromErr(common.CheckDeleted(d, err, "server"))
+		return common.CheckDeletedDiag(d, err, "server")
 	}
 
 	log.Printf("[DEBUG] Retrieved Server %s: %+v", d.Id(), server)

@@ -154,7 +154,7 @@ func resourceComputeSecGroupV2Read(_ context.Context, d *schema.ResourceData, me
 
 	sg, err := secgroups.Get(computeClient, d.Id()).Extract()
 	if err != nil {
-		return diag.FromErr(common.CheckDeleted(d, err, "security group"))
+		return common.CheckDeletedDiag(d, err, "security group")
 	}
 	me := multierror.Append(nil,
 		d.Set("name", sg.Name),

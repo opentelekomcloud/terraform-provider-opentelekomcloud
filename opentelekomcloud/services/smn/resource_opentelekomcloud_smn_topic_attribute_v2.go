@@ -95,7 +95,7 @@ func resourceSMNTopicAttributeV2Read(_ context.Context, d *schema.ResourceData, 
 
 	topicAttributesMap, err := topicattributes.List(client, topicURN, listOpts).Extract()
 	if err != nil {
-		return diag.FromErr(common.CheckDeleted(d, err, "topic attributes"))
+		return common.CheckDeletedDiag(d, err, "topic attributes")
 	}
 	normalizePolicy, err := structure.NormalizeJsonString(topicAttributesMap["access_policy"])
 	if err != nil {

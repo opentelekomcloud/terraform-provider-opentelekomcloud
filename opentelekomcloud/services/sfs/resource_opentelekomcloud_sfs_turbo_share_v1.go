@@ -161,7 +161,7 @@ func resourceSFSTurboShareV1Read(_ context.Context, d *schema.ResourceData, meta
 
 	share, err := shares.Get(client, d.Id()).Extract()
 	if err != nil {
-		return diag.FromErr(common.CheckDeleted(d, err, "Error deleting SFS Turbo"))
+		return common.CheckDeletedDiag(d, err, "Error deleting SFS Turbo")
 	}
 
 	mErr := multierror.Append(nil,
@@ -267,7 +267,7 @@ func resourceSFSTurboShareV1Delete(ctx context.Context, d *schema.ResourceData, 
 	}
 
 	if err := shares.Delete(client, d.Id()).ExtractErr(); err != nil {
-		return diag.FromErr(common.CheckDeleted(d, err, "Error deleting SFS Turbo"))
+		return common.CheckDeletedDiag(d, err, "Error deleting SFS Turbo")
 	}
 
 	stateConf := &resource.StateChangeConf{

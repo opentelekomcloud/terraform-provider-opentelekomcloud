@@ -136,7 +136,7 @@ func resourceCertificateV2Read(_ context.Context, d *schema.ResourceData, meta i
 
 	c, err := certificates.Get(networkingClient, d.Id()).Extract()
 	if err != nil {
-		return diag.FromErr(common.CheckDeleted(d, err, "certificate"))
+		return common.CheckDeletedDiag(d, err, "certificate")
 	}
 	log.Printf("[DEBUG] Retrieved certificate %s: %#v", d.Id(), c)
 

@@ -223,7 +223,7 @@ func resourceNetworkingSubnetV2Read(_ context.Context, d *schema.ResourceData, m
 
 	s, err := subnets.Get(networkingClient, d.Id()).Extract()
 	if err != nil {
-		return diag.FromErr(common.CheckDeleted(d, err, "subnet"))
+		return common.CheckDeletedDiag(d, err, "subnet")
 	}
 
 	log.Printf("[DEBUG] Retrieved Subnet %s: %#v", d.Id(), s)

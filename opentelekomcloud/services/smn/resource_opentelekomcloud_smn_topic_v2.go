@@ -95,7 +95,7 @@ func resourceTopicRead(_ context.Context, d *schema.ResourceData, meta interface
 	topicUrn := d.Id()
 	topicGet, err := topics.Get(client, topicUrn).ExtractGet()
 	if err != nil {
-		return diag.FromErr(common.CheckDeleted(d, err, "topic"))
+		return common.CheckDeletedDiag(d, err, "topic")
 	}
 
 	log.Printf("[DEBUG] Retrieved topic %s: %#v", topicUrn, topicGet)

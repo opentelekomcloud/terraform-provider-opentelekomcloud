@@ -127,7 +127,7 @@ func resourceDNSPtrRecordV2Read(_ context.Context, d *schema.ResourceData, meta 
 
 	ptr, err := ptrrecords.Get(client, d.Id()).Extract()
 	if err != nil {
-		return diag.FromErr(common.CheckDeleted(d, err, "Unable to delete ptr_record"))
+		return common.CheckDeletedDiag(d, err, "Unable to delete ptr_record")
 	}
 
 	log.Printf("[DEBUG] Retrieved PTR record %s: %#v", d.Id(), ptr)

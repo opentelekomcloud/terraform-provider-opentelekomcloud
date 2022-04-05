@@ -204,7 +204,7 @@ func resourceL7PolicyV2Read(_ context.Context, d *schema.ResourceData, meta inte
 
 	l7Policy, err := l7policies.Get(lbClient, d.Id()).Extract()
 	if err != nil {
-		return diag.FromErr(common.CheckDeleted(d, err, "L7 Policy"))
+		return common.CheckDeletedDiag(d, err, "L7 Policy")
 	}
 
 	log.Printf("[DEBUG] Retrieved L7 Policy %s: %#v", d.Id(), l7Policy)
@@ -346,7 +346,7 @@ func resourceL7PolicyV2Delete(ctx context.Context, d *schema.ResourceData, meta 
 	// Get a clean copy of the L7 Policy.
 	l7Policy, err := l7policies.Get(lbClient, d.Id()).Extract()
 	if err != nil {
-		return diag.FromErr(common.CheckDeleted(d, err, "Unable to retrieve L7 Policy"))
+		return common.CheckDeletedDiag(d, err, "Unable to retrieve L7 Policy")
 	}
 
 	// Wait for Listener to become active before continuing.
@@ -365,7 +365,7 @@ func resourceL7PolicyV2Delete(ctx context.Context, d *schema.ResourceData, meta 
 	})
 
 	if err != nil {
-		return diag.FromErr(common.CheckDeleted(d, err, "Error deleting L7 Policy"))
+		return common.CheckDeletedDiag(d, err, "Error deleting L7 Policy")
 	}
 
 	err = waitForLBV2L7Policy(ctx, lbClient, listener, l7Policy, "DELETED", lbPendingDeleteStatuses, timeout)

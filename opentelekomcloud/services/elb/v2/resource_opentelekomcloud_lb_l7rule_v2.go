@@ -206,7 +206,7 @@ func resourceL7RuleV2Read(_ context.Context, d *schema.ResourceData, meta interf
 
 	l7Rule, err := l7policies.GetRule(lbClient, l7policyID, d.Id()).Extract()
 	if err != nil {
-		return diag.FromErr(common.CheckDeleted(d, err, "L7 Rule"))
+		return common.CheckDeletedDiag(d, err, "L7 Rule")
 	}
 
 	log.Printf("[DEBUG] Retrieved L7 Rule %s: %#v", d.Id(), l7Rule)
@@ -344,7 +344,7 @@ func resourceL7RuleV2Delete(ctx context.Context, d *schema.ResourceData, meta in
 	// Get a clean copy of the L7 Rule.
 	l7Rule, err := l7policies.GetRule(lbClient, l7policyID, d.Id()).Extract()
 	if err != nil {
-		return diag.FromErr(common.CheckDeleted(d, err, "Unable to retrieve L7 Rule"))
+		return common.CheckDeletedDiag(d, err, "Unable to retrieve L7 Rule")
 	}
 
 	// Wait for parent L7 Policy to become active before continuing
@@ -363,7 +363,7 @@ func resourceL7RuleV2Delete(ctx context.Context, d *schema.ResourceData, meta in
 	})
 
 	if err != nil {
-		return diag.FromErr(common.CheckDeleted(d, err, "Error deleting L7 Rule"))
+		return common.CheckDeletedDiag(d, err, "Error deleting L7 Rule")
 	}
 
 	err = waitForLBV2L7Rule(ctx, lbClient, parentListener, parentL7Policy, l7Rule, "DELETED", lbPendingDeleteStatuses, timeout)

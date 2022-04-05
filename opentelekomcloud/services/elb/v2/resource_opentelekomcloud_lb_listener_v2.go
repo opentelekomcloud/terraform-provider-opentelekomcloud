@@ -209,7 +209,7 @@ func resourceListenerV2Read(_ context.Context, d *schema.ResourceData, meta inte
 
 	listener, err := listeners.Get(client, d.Id()).Extract()
 	if err != nil {
-		return diag.FromErr(common.CheckDeleted(d, err, "listener"))
+		return common.CheckDeletedDiag(d, err, "listener")
 	}
 
 	log.Printf("[DEBUG] Retrieved listener %s: %#v", d.Id(), listener)

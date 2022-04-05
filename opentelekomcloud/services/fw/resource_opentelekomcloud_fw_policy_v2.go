@@ -136,7 +136,7 @@ func resourceFWPolicyV2Read(_ context.Context, d *schema.ResourceData, meta inte
 
 	policy, err := policies.Get(networkingClient, d.Id()).Extract()
 	if err != nil {
-		return diag.FromErr(common.CheckDeleted(d, err, "FW policy"))
+		return common.CheckDeletedDiag(d, err, "FW policy")
 	}
 
 	log.Printf("[DEBUG] Read OpenTelekomCloud Firewall Policy %s: %#v", d.Id(), policy)

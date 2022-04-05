@@ -240,7 +240,7 @@ func resourceVpnSiteConnectionV2Read(_ context.Context, d *schema.ResourceData, 
 
 	conn, err := siteconnections.Get(networkingClient, d.Id()).Extract()
 	if err != nil {
-		return diag.FromErr(common.CheckDeleted(d, err, "site_connection"))
+		return common.CheckDeletedDiag(d, err, "site_connection")
 	}
 
 	log.Printf("[DEBUG] Read OpenTelekomCloud SiteConnection %s: %#v", d.Id(), conn)

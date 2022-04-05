@@ -90,7 +90,7 @@ func resourceNetworkingFloatingIPAssociateV2Read(_ context.Context, d *schema.Re
 
 	floatingIP, err := floatingips.Get(networkingClient, d.Id()).Extract()
 	if err != nil {
-		return diag.FromErr(common.CheckDeleted(d, err, "floating IP"))
+		return common.CheckDeletedDiag(d, err, "floating IP")
 	}
 
 	mErr := multierror.Append(

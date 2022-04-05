@@ -85,7 +85,7 @@ func resourceNetworkingVIPAssociateV2Create(ctx context.Context, d *schema.Resou
 		fauxid = fmt.Sprintf("%s/%s", fauxid, portid)
 		port, err := ports.Get(networkingClient, portid).Extract()
 		if err != nil {
-			return diag.FromErr(common.CheckDeleted(d, err, "port"))
+			return common.CheckDeletedDiag(d, err, "port")
 		}
 
 		ipaddress := ""
@@ -99,7 +99,7 @@ func resourceNetworkingVIPAssociateV2Create(ctx context.Context, d *schema.Resou
 		// Then get the vip information
 		vip, err := ports.Get(networkingClient, vipid).Extract()
 		if err != nil {
-			return diag.FromErr(common.CheckDeleted(d, err, "vip"))
+			return common.CheckDeletedDiag(d, err, "vip")
 		}
 
 		// Finnaly associate vip to port
@@ -174,7 +174,7 @@ func resourceNetworkingVIPAssociateV2Read(_ context.Context, d *schema.ResourceD
 	// Then try to do this by querying the vip API.
 	vip, err := ports.Get(networkingClient, vipid).Extract()
 	if err != nil {
-		return diag.FromErr(common.CheckDeleted(d, err, "vip"))
+		return common.CheckDeletedDiag(d, err, "vip")
 	}
 
 	// port by port
@@ -182,7 +182,7 @@ func resourceNetworkingVIPAssociateV2Read(_ context.Context, d *schema.ResourceD
 	for _, portid := range portids {
 		p, err := ports.Get(networkingClient, portid).Extract()
 		if err != nil {
-			return diag.FromErr(common.CheckDeleted(d, err, "port"))
+			return common.CheckDeletedDiag(d, err, "port")
 		}
 
 		for _, ip := range p.FixedIPs {
@@ -243,7 +243,7 @@ func resourceNetworkingVIPAssociateV2Delete(_ context.Context, d *schema.Resourc
 		// First get the port information
 		port, err := ports.Get(networkingClient, portid).Extract()
 		if err != nil {
-			return diag.FromErr(common.CheckDeleted(d, err, "port"))
+			return common.CheckDeletedDiag(d, err, "port")
 		}
 
 		ipaddress := ""
@@ -257,7 +257,7 @@ func resourceNetworkingVIPAssociateV2Delete(_ context.Context, d *schema.Resourc
 		// Then get the vip information
 		vip, err := ports.Get(networkingClient, vipid).Extract()
 		if err != nil {
-			return diag.FromErr(common.CheckDeleted(d, err, "vip"))
+			return common.CheckDeletedDiag(d, err, "vip")
 		}
 
 		// Update VIP AllowedAddressPairs

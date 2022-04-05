@@ -181,7 +181,7 @@ func resourceNatDnatRuleRead(_ context.Context, d *schema.ResourceData, meta int
 	}
 	dnatRule, err := dnatrules.Get(client, d.Id()).Extract()
 	if err != nil {
-		return diag.FromErr(common.CheckDeleted(d, err, "dnat rule"))
+		return common.CheckDeletedDiag(d, err, "dnat rule")
 	}
 
 	mErr := multierror.Append(

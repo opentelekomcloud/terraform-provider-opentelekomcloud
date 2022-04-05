@@ -173,7 +173,7 @@ func resourceMonitorV2Read(_ context.Context, d *schema.ResourceData, meta inter
 
 	monitor, err := monitors.Get(client, d.Id()).Extract()
 	if err != nil {
-		return diag.FromErr(common.CheckDeleted(d, err, "monitor"))
+		return common.CheckDeletedDiag(d, err, "monitor")
 	}
 
 	log.Printf("[DEBUG] Retrieved monitor %s: %#v", d.Id(), monitor)

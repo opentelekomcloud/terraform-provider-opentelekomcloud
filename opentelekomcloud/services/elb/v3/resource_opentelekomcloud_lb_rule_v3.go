@@ -108,7 +108,7 @@ func resourceLBRuleV3Read(ctx context.Context, d *schema.ResourceData, meta inte
 
 	rule, err := rules.Get(client, policyID(d), ruleID(d)).Extract()
 	if err != nil {
-		return diag.FromErr(common.CheckDeleted(d, err, "error viewing details of LB Rule v3"))
+		return common.CheckDeletedDiag(d, err, "error viewing details of LB Rule v3")
 	}
 
 	mErr := multierror.Append(

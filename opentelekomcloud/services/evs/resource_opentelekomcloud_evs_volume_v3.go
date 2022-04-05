@@ -219,7 +219,7 @@ func resourceEvsVolumeV3Read(_ context.Context, d *schema.ResourceData, meta int
 
 	v, err := volumes.Get(client, d.Id()).Extract()
 	if err != nil {
-		return diag.FromErr(common.CheckDeleted(d, err, "volume"))
+		return common.CheckDeletedDiag(d, err, "volume")
 	}
 
 	log.Printf("[DEBUG] Retrieved volume %s: %+v", d.Id(), v)
