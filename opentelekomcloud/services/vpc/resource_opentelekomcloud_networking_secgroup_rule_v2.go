@@ -172,7 +172,7 @@ func resourceNetworkingSecGroupRuleV2Read(_ context.Context, d *schema.ResourceD
 	securityGroupRule, err := rules.Get(networkingClient, d.Id()).Extract()
 
 	if err != nil {
-		return diag.FromErr(common.CheckDeleted(d, err, "OpenTelekomCloud Security Group Rule"))
+		return common.CheckDeletedDiag(d, err, "OpenTelekomCloud Security Group Rule")
 	}
 
 	mErr := multierror.Append(

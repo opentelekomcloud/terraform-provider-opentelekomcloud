@@ -115,7 +115,7 @@ func resourceIdentityUserV3Read(_ context.Context, d *schema.ResourceData, meta 
 
 	user, err := users.Get(client, d.Id()).Extract()
 	if err != nil {
-		return diag.FromErr(common.CheckDeleted(d, err, "user"))
+		return common.CheckDeletedDiag(d, err, "user")
 	}
 
 	log.Printf("[DEBUG] Retrieved OpenStack user: %#v", user)

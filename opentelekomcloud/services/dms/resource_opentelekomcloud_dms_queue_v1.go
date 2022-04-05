@@ -156,7 +156,7 @@ func resourceDmsQueuesV1Delete(_ context.Context, d *schema.ResourceData, meta i
 
 	v, err := queues.Get(DmsV1Client, d.Id(), false).Extract()
 	if err != nil {
-		return diag.FromErr(common.CheckDeleted(d, err, "queue"))
+		return common.CheckDeletedDiag(d, err, "queue")
 	}
 
 	err = queues.Delete(DmsV1Client, d.Id()).ExtractErr()

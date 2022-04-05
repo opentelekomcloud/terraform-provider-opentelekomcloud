@@ -395,7 +395,7 @@ func resourceInstanceRead(_ context.Context, d *schema.ResourceData, meta interf
 	instanceID := d.Id()
 	instance, err := instances.Get(client, instanceID).Extract()
 	if err != nil {
-		return diag.FromErr(common.CheckDeleted(d, err, "instance"))
+		return common.CheckDeletedDiag(d, err, "instance")
 	}
 
 	log.Printf("[DEBUG] Retrieved instance %s: %#v", instanceID, instance)

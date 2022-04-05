@@ -84,7 +84,7 @@ func resourceBandwidthV2Read(ctx context.Context, d *schema.ResourceData, meta i
 
 	bandwidth, err := bandwidths.Get(client, d.Id()).Extract()
 	if err != nil {
-		return diag.FromErr(common.CheckDeleted(d, err, "error reading bandwidth"))
+		return common.CheckDeletedDiag(d, err, "error reading bandwidth")
 	}
 
 	mErr := multierror.Append(

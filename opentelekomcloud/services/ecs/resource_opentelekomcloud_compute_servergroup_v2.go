@@ -92,7 +92,7 @@ func resourceComputeServerGroupV2Read(_ context.Context, d *schema.ResourceData,
 
 	sg, err := servergroups.Get(computeClient, d.Id()).Extract()
 	if err != nil {
-		return diag.FromErr(common.CheckDeleted(d, err, "server group"))
+		return common.CheckDeletedDiag(d, err, "server group")
 	}
 
 	log.Printf("[DEBUG] Retrieved ServerGroup %s: %+v", d.Id(), sg)

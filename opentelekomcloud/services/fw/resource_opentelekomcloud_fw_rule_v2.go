@@ -144,7 +144,7 @@ func resourceFWRuleV2Read(_ context.Context, d *schema.ResourceData, meta interf
 
 	rule, err := rules.Get(networkingClient, d.Id()).Extract()
 	if err != nil {
-		return diag.FromErr(common.CheckDeleted(d, err, "FW rule"))
+		return common.CheckDeletedDiag(d, err, "FW rule")
 	}
 
 	log.Printf("[DEBUG] Read OpenTelekomCloud Firewall Rule %s: %#v", d.Id(), rule)

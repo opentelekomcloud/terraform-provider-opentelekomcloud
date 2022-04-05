@@ -125,7 +125,7 @@ func resourceLBMemberV3Read(ctx context.Context, d *schema.ResourceData, meta in
 
 	member, err := members.Get(client, poolID(d), memberID(d)).Extract()
 	if err != nil {
-		return diag.FromErr(common.CheckDeleted(d, err, "error reading LB pool member v3"))
+		return common.CheckDeletedDiag(d, err, "error reading LB pool member v3")
 	}
 	mErr := multierror.Append(
 		d.Set("address", member.Address),

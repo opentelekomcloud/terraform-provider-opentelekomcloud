@@ -230,7 +230,7 @@ func resourceASPolicyV2Read(_ context.Context, d *schema.ResourceData, meta inte
 
 	asPolicy, err := policies.Get(client, d.Id()).Extract()
 	if err != nil {
-		return diag.FromErr(common.CheckDeleted(d, err, "AS Policy"))
+		return common.CheckDeletedDiag(d, err, "AS Policy")
 	}
 
 	mErr := multierror.Append(

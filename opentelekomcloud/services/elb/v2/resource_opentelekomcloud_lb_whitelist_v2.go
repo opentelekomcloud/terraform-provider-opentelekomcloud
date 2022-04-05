@@ -90,7 +90,7 @@ func resourceWhitelistV2Read(_ context.Context, d *schema.ResourceData, meta int
 
 	wl, err := whitelists.Get(networkingClient, d.Id()).Extract()
 	if err != nil {
-		return diag.FromErr(common.CheckDeleted(d, err, "whitelist"))
+		return common.CheckDeletedDiag(d, err, "whitelist")
 	}
 
 	log.Printf("[DEBUG] Retrieved whitelist %s: %#v", d.Id(), wl)

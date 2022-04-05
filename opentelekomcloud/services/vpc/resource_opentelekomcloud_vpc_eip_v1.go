@@ -158,7 +158,7 @@ func resourceVpcEIPV1Read(_ context.Context, d *schema.ResourceData, meta interf
 
 	eip, err := eips.Get(client, d.Id()).Extract()
 	if err != nil {
-		return diag.FromErr(common.CheckDeleted(d, err, "eIP"))
+		return common.CheckDeletedDiag(d, err, "eIP")
 	}
 	bandWidth, err := bandwidths.Get(client, eip.BandwidthID).Extract()
 	if err != nil {
@@ -220,7 +220,7 @@ func resourceVpcEIPV1Update(ctx context.Context, d *schema.ResourceData, meta in
 
 		eip, err := eips.Get(client, d.Id()).Extract()
 		if err != nil {
-			return diag.FromErr(common.CheckDeleted(d, err, "Error deleting eip"))
+			return common.CheckDeletedDiag(d, err, "Error deleting eip")
 		}
 		_, err = bandwidths.Update(client, eip.BandwidthID, updateOpts).Extract()
 		if err != nil {

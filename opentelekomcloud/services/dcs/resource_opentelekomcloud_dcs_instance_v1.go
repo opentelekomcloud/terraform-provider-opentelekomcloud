@@ -505,7 +505,7 @@ func resourceDcsInstancesV1Delete(ctx context.Context, d *schema.ResourceData, m
 
 	_, err = instances.Get(client, d.Id()).Extract()
 	if err != nil {
-		return diag.FromErr(common.CheckDeleted(d, err, "DCS instance"))
+		return common.CheckDeletedDiag(d, err, "DCS instance")
 	}
 
 	err = instances.Delete(client, d.Id()).ExtractErr()

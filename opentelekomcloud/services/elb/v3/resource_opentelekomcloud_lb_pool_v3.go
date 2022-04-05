@@ -162,7 +162,7 @@ func resourceLBPoolV3Read(ctx context.Context, d *schema.ResourceData, meta inte
 
 	pool, err := pools.Get(client, d.Id()).Extract()
 	if err != nil {
-		return diag.FromErr(common.CheckDeleted(d, err, "error viewing details of LB Pool v3"))
+		return common.CheckDeletedDiag(d, err, "error viewing details of LB Pool v3")
 	}
 
 	mErr := multierror.Append(

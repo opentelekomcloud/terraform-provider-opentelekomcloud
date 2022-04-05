@@ -192,7 +192,7 @@ func resourceDNSRecordSetV2Read(_ context.Context, d *schema.ResourceData, meta 
 
 	n, err := recordsets.Get(dnsClient, zoneID, recordsetID).Extract()
 	if err != nil {
-		return diag.FromErr(common.CheckDeleted(d, err, "record_set"))
+		return common.CheckDeletedDiag(d, err, "record_set")
 	}
 
 	log.Printf("[DEBUG] Retrieved  record set %s: %#v", recordsetID, n)

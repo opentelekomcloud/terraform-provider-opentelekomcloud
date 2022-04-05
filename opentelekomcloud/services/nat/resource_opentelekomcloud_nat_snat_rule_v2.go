@@ -127,7 +127,7 @@ func resourceNatSnatRuleV2Read(_ context.Context, d *schema.ResourceData, meta i
 
 	snatRule, err := snatrules.Get(client, d.Id()).Extract()
 	if err != nil {
-		return diag.FromErr(common.CheckDeleted(d, err, "Snat Rule"))
+		return common.CheckDeletedDiag(d, err, "Snat Rule")
 	}
 
 	mErr := multierror.Append(

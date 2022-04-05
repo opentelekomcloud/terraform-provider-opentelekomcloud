@@ -187,7 +187,7 @@ func resourceVpnIPSecPolicyV2Read(_ context.Context, d *schema.ResourceData, met
 
 	policy, err := ipsecpolicies.Get(client, d.Id()).Extract()
 	if err != nil {
-		return diag.FromErr(common.CheckDeleted(d, err, "IPSec policy"))
+		return common.CheckDeletedDiag(d, err, "IPSec policy")
 	}
 
 	log.Printf("[DEBUG] Read OpenTelekomCloud IPSec policy %s: %#v", d.Id(), policy)

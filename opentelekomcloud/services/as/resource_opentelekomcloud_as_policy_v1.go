@@ -236,7 +236,7 @@ func resourceASPolicyRead(_ context.Context, d *schema.ResourceData, meta interf
 
 	asPolicy, err := policies.Get(asClient, d.Id()).Extract()
 	if err != nil {
-		return diag.FromErr(common.CheckDeleted(d, err, "AS Policy"))
+		return common.CheckDeletedDiag(d, err, "AS Policy")
 	}
 
 	log.Printf("[DEBUG] Retrieved ASPolicy %q: %+v", d.Id(), asPolicy)

@@ -131,7 +131,7 @@ func resourceImagesImageAccessV2Read(_ context.Context, d *schema.ResourceData, 
 
 	member, err := members.Get(client, imageID, memberID).Extract()
 	if err != nil {
-		return diag.FromErr(common.CheckDeleted(d, err, "image_access_v2"))
+		return common.CheckDeletedDiag(d, err, "image_access_v2")
 	}
 
 	mErr := multierror.Append(

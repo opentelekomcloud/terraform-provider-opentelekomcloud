@@ -520,7 +520,7 @@ func resourceComputeInstanceV2Read(ctx context.Context, d *schema.ResourceData, 
 
 	server, err := servers.Get(client, d.Id()).Extract()
 	if err != nil {
-		return diag.FromErr(common.CheckDeleted(d, err, "server"))
+		return common.CheckDeletedDiag(d, err, "server")
 	}
 
 	log.Printf("[DEBUG] Retrieved Server %s: %+v", d.Id(), server)
@@ -625,7 +625,7 @@ func resourceComputeInstanceV2Read(ctx context.Context, d *schema.ResourceData, 
 	// Do another Get so the above work is not disturbed.
 	err = servers.Get(client, d.Id()).ExtractInto(&serverWithAZ)
 	if err != nil {
-		return diag.FromErr(common.CheckDeleted(d, err, "server"))
+		return common.CheckDeletedDiag(d, err, "server")
 	}
 
 	mErr = multierror.Append(mErr,
@@ -1214,7 +1214,7 @@ func setBlockDevice(d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 
 	raw := servers.Get(computeClient, d.Id())
 	if raw.Err != nil {
-		return diag.FromErr(common.CheckDeleted(d, raw.Err, "opentelekomcloud_compute_instance_v2"))
+		return common.CheckDeletedDiag(d, raw.Err, "opentelekomcloud_compute_instance_v2")
 	}
 
 	var serverWithAttachments struct {

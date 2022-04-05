@@ -93,7 +93,7 @@ func resourceGroupV2Delete(_ context.Context, d *schema.ResourceData, meta inter
 
 	err = loggroups.Delete(client, d.Id()).ExtractErr()
 	if err != nil {
-		return diag.FromErr(common.CheckDeleted(d, err, "Error deleting log group"))
+		return common.CheckDeletedDiag(d, err, "Error deleting log group")
 	}
 
 	d.SetId("")

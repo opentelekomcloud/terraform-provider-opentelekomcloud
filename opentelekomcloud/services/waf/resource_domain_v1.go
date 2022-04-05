@@ -241,7 +241,7 @@ func resourceWafDomainV1Read(_ context.Context, d *schema.ResourceData, meta int
 	n, err := domains.Get(client, d.Id()).Extract()
 
 	if err != nil {
-		return diag.FromErr(common.CheckDeleted(d, err, "error retrieving OpenTelekomCloud Waf Domain"))
+		return common.CheckDeletedDiag(d, err, "error retrieving OpenTelekomCloud Waf Domain")
 	}
 
 	mErr := multierror.Append(nil,

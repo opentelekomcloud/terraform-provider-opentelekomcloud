@@ -108,7 +108,7 @@ func resourceTopicV2Delete(_ context.Context, d *schema.ResourceData, meta inter
 	groupId := d.Get("group_id").(string)
 	err = logtopics.Delete(client, groupId, d.Id()).ExtractErr()
 	if err != nil {
-		return diag.FromErr(common.CheckDeleted(d, err, "Error deleting log topic"))
+		return common.CheckDeletedDiag(d, err, "Error deleting log topic")
 	}
 
 	d.SetId("")

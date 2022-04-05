@@ -264,7 +264,7 @@ func resourceImagesImageV2Read(_ context.Context, d *schema.ResourceData, meta i
 
 	img, err := images.Get(imageClient, d.Id()).Extract()
 	if err != nil {
-		return diag.FromErr(common.CheckDeleted(d, err, "image"))
+		return common.CheckDeletedDiag(d, err, "image")
 	}
 
 	log.Printf("[DEBUG] Retrieved Image %s: %#v", d.Id(), img)

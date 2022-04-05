@@ -278,7 +278,7 @@ func resourceKmsKeyV1Delete(_ context.Context, d *schema.ResourceData, meta inte
 
 	key, err := keys.Get(client, d.Id()).ExtractKeyInfo()
 	if err != nil {
-		return diag.FromErr(common.CheckDeleted(d, err, "key"))
+		return common.CheckDeletedDiag(d, err, "key")
 	}
 
 	deleteOpts := &keys.DeleteOpts{

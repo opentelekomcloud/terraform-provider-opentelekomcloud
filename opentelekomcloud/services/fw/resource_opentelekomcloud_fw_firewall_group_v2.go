@@ -163,7 +163,7 @@ func resourceFWFirewallGroupV2Read(_ context.Context, d *schema.ResourceData, me
 	var firewallGroup FirewallGroup
 	err = firewall_groups.Get(networkingClient, d.Id()).ExtractInto(&firewallGroup)
 	if err != nil {
-		return diag.FromErr(common.CheckDeleted(d, err, "firewall"))
+		return common.CheckDeletedDiag(d, err, "firewall")
 	}
 
 	log.Printf("[DEBUG] Read OpenTelekomCloud Firewall group %s: %#v", d.Id(), firewallGroup)

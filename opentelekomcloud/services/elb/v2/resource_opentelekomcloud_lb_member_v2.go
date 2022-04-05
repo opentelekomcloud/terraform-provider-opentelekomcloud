@@ -153,7 +153,7 @@ func resourceMemberV2Read(_ context.Context, d *schema.ResourceData, meta interf
 	poolID := d.Get("pool_id").(string)
 	member, err := pools.GetMember(client, poolID, d.Id()).Extract()
 	if err != nil {
-		return diag.FromErr(common.CheckDeleted(d, err, "member"))
+		return common.CheckDeletedDiag(d, err, "member")
 	}
 
 	log.Printf("[DEBUG] Retrieved member %s: %#v", d.Id(), member)

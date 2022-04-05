@@ -241,7 +241,7 @@ func resourceBlockStorageVolumeV2Read(_ context.Context, d *schema.ResourceData,
 
 	v, err := volumes.Get(blockStorageClient, d.Id()).Extract()
 	if err != nil {
-		return diag.FromErr(common.CheckDeleted(d, err, "volume"))
+		return common.CheckDeletedDiag(d, err, "volume")
 	}
 
 	log.Printf("[DEBUG] Retrieved volume %s: %+v", d.Id(), v)
@@ -306,7 +306,7 @@ OUTER:
 
 		v, err := volumes_v3.Get(blockStorageClientV3, d.Id()).Extract()
 		if err != nil {
-			return diag.FromErr(common.CheckDeleted(d, err, "volume"))
+			return common.CheckDeletedDiag(d, err, "volume")
 		}
 
 		log.Printf("[DEBUG] Retrieved volume %s: %+v", d.Id(), v)
@@ -393,7 +393,7 @@ func resourceBlockStorageVolumeV2Delete(ctx context.Context, d *schema.ResourceD
 
 	v, err := volumes.Get(blockStorageClient, d.Id()).Extract()
 	if err != nil {
-		return diag.FromErr(common.CheckDeleted(d, err, "volume"))
+		return common.CheckDeletedDiag(d, err, "volume")
 	}
 
 	// make sure this volume is detached from all instances before deleting
@@ -436,7 +436,7 @@ func resourceBlockStorageVolumeV2Delete(ctx context.Context, d *schema.ResourceD
 	// If this is true, just move on. It'll eventually delete.
 	if v.Status != "deleting" {
 		if err := volumes.Delete(blockStorageClient, d.Id(), deleteOpts).ExtractErr(); err != nil {
-			return diag.FromErr(common.CheckDeleted(d, err, "volume"))
+			return common.CheckDeletedDiag(d, err, "volume")
 		}
 	}
 

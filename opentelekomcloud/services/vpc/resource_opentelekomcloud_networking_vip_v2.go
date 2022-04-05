@@ -114,7 +114,7 @@ func resourceNetworkingVIPV2Read(_ context.Context, d *schema.ResourceData, meta
 
 	vip, err := ports.Get(client, d.Id()).Extract()
 	if err != nil {
-		return diag.FromErr(common.CheckDeleted(d, err, "vip"))
+		return common.CheckDeletedDiag(d, err, "vip")
 	}
 
 	log.Printf("[DEBUG] Retrieved VIP %s: %+v", d.Id(), vip)

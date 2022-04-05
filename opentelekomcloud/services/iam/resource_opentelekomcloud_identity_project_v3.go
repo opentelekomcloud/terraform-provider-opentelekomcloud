@@ -112,7 +112,7 @@ func resourceIdentityProjectV3Read(_ context.Context, d *schema.ResourceData, me
 
 	project, err := projects.Get(identityClient, d.Id()).Extract()
 	if err != nil {
-		return diag.FromErr(common.CheckDeleted(d, err, "project"))
+		return common.CheckDeletedDiag(d, err, "project")
 	}
 
 	log.Printf("[DEBUG] Retrieved OpenStack project: %#v", project)

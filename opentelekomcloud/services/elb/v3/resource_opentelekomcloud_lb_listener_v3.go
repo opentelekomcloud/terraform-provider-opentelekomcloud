@@ -240,7 +240,7 @@ func resourceListenerV3Read(ctx context.Context, d *schema.ResourceData, meta in
 
 	listener, err := listeners.Get(client, d.Id()).Extract()
 	if err != nil {
-		return diag.FromErr(common.CheckDeleted(d, err, "listenerV3"))
+		return common.CheckDeletedDiag(d, err, "listenerV3")
 	}
 
 	log.Printf("[DEBUG] Retrieved listener %s: %#v", d.Id(), listener)

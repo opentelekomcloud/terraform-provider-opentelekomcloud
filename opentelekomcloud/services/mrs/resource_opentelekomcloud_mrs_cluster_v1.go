@@ -620,7 +620,7 @@ func resourceClusterV1Read(_ context.Context, d *schema.ResourceData, meta inter
 
 	mrsCluster, err := cluster.Get(client, d.Id()).Extract()
 	if err != nil {
-		return diag.FromErr(common.CheckDeleted(d, err, "Cluster"))
+		return common.CheckDeletedDiag(d, err, "Cluster")
 	}
 	log.Printf("[DEBUG] Retrieved Cluster %s: %#v", d.Id(), mrsCluster)
 

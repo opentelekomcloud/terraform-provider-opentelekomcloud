@@ -125,7 +125,7 @@ func resourceCertificateV3Read(ctx context.Context, d *schema.ResourceData, meta
 
 	cert, err := certificates.Get(client, d.Id()).Extract()
 	if err != nil {
-		return diag.FromErr(common.CheckDeleted(d, err, "certificateV3"))
+		return common.CheckDeletedDiag(d, err, "certificateV3")
 	}
 	log.Printf("[DEBUG] Retrieved certificate %s: %#v", d.Id(), cert)
 

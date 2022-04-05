@@ -238,7 +238,7 @@ func resourceDNSZoneV2Read(_ context.Context, d *schema.ResourceData, meta inter
 
 	n, err := zones.Get(dnsClient, d.Id()).Extract()
 	if err != nil {
-		return diag.FromErr(common.CheckDeleted(d, err, "zone"))
+		return common.CheckDeletedDiag(d, err, "zone")
 	}
 
 	log.Printf("[DEBUG] Retrieved Zone %s: %#v", d.Id(), n)

@@ -183,7 +183,7 @@ func resourceComputeFloatingIPAssociateV2Delete(_ context.Context, d *schema.Res
 
 	err = floatingips.DisassociateInstance(computeClient, instanceId, disassociateOpts).ExtractErr()
 	if err != nil {
-		return diag.FromErr(common.CheckDeleted(d, err, "floating ip association"))
+		return common.CheckDeletedDiag(d, err, "floating ip association")
 	}
 
 	return nil

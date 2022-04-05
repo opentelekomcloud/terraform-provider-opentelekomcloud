@@ -345,7 +345,7 @@ func resourceASConfigurationRead(_ context.Context, d *schema.ResourceData, meta
 
 	asConfig, err := configurations.Get(client, d.Id()).Extract()
 	if err != nil {
-		return diag.FromErr(common.CheckDeleted(d, err, "AS Configuration"))
+		return common.CheckDeletedDiag(d, err, "AS Configuration")
 	}
 
 	log.Printf("[DEBUG] Retrieved ASConfiguration %q: %+v", d.Id(), asConfig)

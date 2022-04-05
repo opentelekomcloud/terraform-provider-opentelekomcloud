@@ -136,7 +136,7 @@ func resourceNatGatewayV2Read(_ context.Context, d *schema.ResourceData, meta in
 
 	natGateway, err := natgateways.Get(client, d.Id()).Extract()
 	if err != nil {
-		return diag.FromErr(common.CheckDeleted(d, err, "NAT Gateway"))
+		return common.CheckDeletedDiag(d, err, "NAT Gateway")
 	}
 
 	mErr := multierror.Append(

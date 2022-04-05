@@ -87,7 +87,7 @@ func resourceComputeFloatingIPV2Read(_ context.Context, d *schema.ResourceData, 
 
 	fip, err := floatingips.Get(computeClient, d.Id()).Extract()
 	if err != nil {
-		return diag.FromErr(common.CheckDeleted(d, err, "floating ip"))
+		return common.CheckDeletedDiag(d, err, "floating ip")
 	}
 
 	log.Printf("[DEBUG] Retrieved Floating IP %s: %+v", d.Id(), fip)

@@ -172,7 +172,7 @@ func resourceMRSJobV1Read(_ context.Context, d *schema.ResourceData, meta interf
 
 	jobGet, err := job.Get(client, d.Id()).Extract()
 	if err != nil {
-		return diag.FromErr(common.CheckDeleted(d, err, "MRS Job"))
+		return common.CheckDeletedDiag(d, err, "MRS Job")
 	}
 	log.Printf("[DEBUG] Retrieved MRS Job %s: %#v", d.Id(), jobGet)
 

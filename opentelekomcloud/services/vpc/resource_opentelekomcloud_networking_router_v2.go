@@ -230,7 +230,7 @@ func resourceNetworkingRouterV2Delete(ctx context.Context, d *schema.ResourceDat
 	}
 
 	if err := routers.Delete(client, d.Id()).ExtractErr(); err != nil {
-		return diag.FromErr(common.CheckDeleted(d, err, "networking_router_v2"))
+		return common.CheckDeletedDiag(d, err, "networking_router_v2")
 	}
 
 	stateConf := &resource.StateChangeConf{
