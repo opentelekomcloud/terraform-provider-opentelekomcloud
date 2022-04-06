@@ -8,12 +8,6 @@
     post-run: playbooks/infra-post.yaml
 
 - job:
-    name: golang-make-lint
-    parent: otc-golang-make
-    vars:
-      make_command: lint
-
-- job:
     name: tflint
     parent: golang-make
     vars:
