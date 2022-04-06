@@ -29,7 +29,7 @@
       - release-notes-jobs
     check:
       jobs:
-        - golang-make-lint
+        - otc-golangci-lint
         - golang-make-test
         - golang-make-vet
         - tflint
