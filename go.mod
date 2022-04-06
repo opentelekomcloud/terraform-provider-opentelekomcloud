@@ -1,6 +1,6 @@
 module github.com/opentelekomcloud/terraform-provider-opentelekomcloud
 
-go 1.16
+go 1.15
 
 require (
 	github.com/apparentlymart/go-cidr v1.1.0
