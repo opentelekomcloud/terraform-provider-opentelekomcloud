@@ -140,6 +140,20 @@ func ResourceCCEClusterV3() *schema.Resource {
 				Computed: true,
 				ForceNew: true,
 			},
+			"eni_subnet_id": {
+				Type:         schema.TypeString,
+				Optional:     true,
+				ForceNew:     true,
+				Computed:     true,
+				RequiredWith: []string{"eni_subnet_cidr"},
+			},
+			"eni_subnet_cidr": {
+				Type:         schema.TypeString,
+				Optional:     true,
+				ForceNew:     true,
+				Computed:     true,
+				RequiredWith: []string{"eni_subnet_id"},
+			},
 			"authentication_mode": {
 				Type:     schema.TypeString,
 				Optional: true,
@@ -368,6 +382,14 @@ func resourceCCEClusterV3Create(ctx context.Context, d *schema.ResourceData, met
 		},
 	}
 
+	if _, ok := d.GetOk("eni_subnet_id"); ok {
+		eniNetwork := clusters.EniNetworkSpec{
+			SubnetId: d.Get("eni_subnet_id").(string),
+			Cidr:     d.Get("eni_subnet_cidr").(string),
+		}
+		createOpts.Spec.EniNetwork = eniNetwork
+	}
+
 	create, err := clusters.Create(cceClient, createOpts).Extract()
 
 	if err != nil {
@@ -446,6 +468,8 @@ func resourceCCEClusterV3Read(_ context.Context, d *schema.ResourceData, meta in
 		d.Set("highway_subnet_id", cluster.Spec.HostNetwork.HighwaySubnet),
 		d.Set("container_network_type", cluster.Spec.ContainerNetwork.Mode),
 		d.Set("container_network_cidr", cluster.Spec.ContainerNetwork.Cidr),
+		d.Set("eni_subnet_id", cluster.Spec.EniNetwork.SubnetId),
+		d.Set("eni_subnet_cidr", cluster.Spec.EniNetwork.Cidr),
 		d.Set("authentication_mode", cluster.Spec.Authentication.Mode),
 		d.Set("kubernetes_svc_ip_range", cluster.Spec.KubernetesSvcIpRange),
 		d.Set("kube_proxy_mode", cluster.Spec.KubeProxyMode),

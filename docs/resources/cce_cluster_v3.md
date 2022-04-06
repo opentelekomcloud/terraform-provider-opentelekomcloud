@@ -120,6 +120,10 @@ The following arguments are supported:
 
 * `container_network_cidr` - (Optional) Container network segment. Changing this parameter will create a new cluster resource.
 
+* `eni_subnet_id` - The ENI subnet ID.
+
+* `eni_subnet_cidr` - The ENI network segment.
+
 * `authentication_mode` - (Optional) Authentication mode of the cluster, possible values are `rbac` and `authenticating_proxy`.
   Defaults to `rbac`. Changing this parameter will create a new cluster resource.
 
