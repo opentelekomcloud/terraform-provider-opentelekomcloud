@@ -61,6 +61,7 @@ resource "opentelekomcloud_lb_loadbalancer_v3" "lb_1" {
   availability_zones = [var.az]
 
   public_ip {
+    bandwidth_name       = "lb-bandwidth"
     ip_type              = "5_bgp"
     bandwidth_size       = 10
     bandwidth_share_type = "PER"
