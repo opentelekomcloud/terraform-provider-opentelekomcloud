@@ -1,0 +1,4 @@
+---
+other:
+  - |
+    **[ELB]** Add missing ``bandwidth_name`` to example in ``opentelekomcloud_lb_loadbalancer_v3`` documentation
