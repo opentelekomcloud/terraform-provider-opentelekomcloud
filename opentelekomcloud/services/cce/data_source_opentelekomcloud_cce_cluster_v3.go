@@ -68,6 +68,14 @@ func DataSourceCCEClusterV3() *schema.Resource {
 				Type:     schema.TypeString,
 				Computed: true,
 			},
+			"eni_subnet_id": {
+				Type:     schema.TypeString,
+				Computed: true,
+			},
+			"eni_subnet_cidr": {
+				Type:     schema.TypeString,
+				Computed: true,
+			},
 			"authentication_mode": {
 				Type:     schema.TypeString,
 				Computed: true,
@@ -182,6 +190,8 @@ func dataSourceCCEClusterV3Read(_ context.Context, d *schema.ResourceData, meta 
 		d.Set("highway_subnet_id", cluster.Spec.HostNetwork.HighwaySubnet),
 		d.Set("container_network_cidr", cluster.Spec.ContainerNetwork.Cidr),
 		d.Set("container_network_type", cluster.Spec.ContainerNetwork.Mode),
+		d.Set("eni_subnet_id", cluster.Spec.EniNetwork.SubnetId),
+		d.Set("eni_subnet_cidr", cluster.Spec.EniNetwork.Cidr),
 		d.Set("authentication_mode", cluster.Spec.Authentication.Mode),
 		d.Set("status", cluster.Status.Phase),
 		d.Set("internal", cluster.Status.Endpoints[0].Internal),
