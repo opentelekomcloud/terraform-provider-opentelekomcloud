@@ -387,7 +387,7 @@ func resourceCCEClusterV3Create(ctx context.Context, d *schema.ResourceData, met
 			SubnetId: d.Get("eni_subnet_id").(string),
 			Cidr:     d.Get("eni_subnet_cidr").(string),
 		}
-		createOpts.Spec.EniNetwork = eniNetwork
+		createOpts.Spec.EniNetwork = &eniNetwork
 	}
 
 	create, err := clusters.Create(cceClient, createOpts).Extract()
