@@ -442,6 +442,13 @@ func resourceCCEEipIDs(d *schema.ResourceData) []string {
 	return id
 }
 
+func explainNodesJob(job *nodes.Job) string {
+	return fmt.Sprintf(`Job %s in status "%s":
+Reason: %s
+Message: %s
+`, job.Metadata.ID, job.Status.Phase, job.Status.Reason, job.Status.Message)
+}
+
 func resourceCCENodeV3Create(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*cfg.Config)
 	client, err := config.CceV3Client(config.GetRegion(d))
@@ -566,6 +573,9 @@ func resourceCCENodeV3Create(ctx context.Context, d *schema.ResourceData, meta i
 			nodeID = s.Spec.ResourceID
 			break
 		}
+	}
+	if nodeID == "" {
+		return fmterr.Errorf("can't find node ID in job response\n%s", explainNodesJob(subJob))
 	}
 
 	log.Printf("[DEBUG] Waiting for CCE Node (%s) to become available", node.Metadata.Name)

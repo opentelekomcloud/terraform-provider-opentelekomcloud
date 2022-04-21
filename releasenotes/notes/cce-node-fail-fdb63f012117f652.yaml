@@ -1,0 +1,5 @@
+---
+enhancements:
+  - |
+    **[CCE]** Make ``resource/opentelekomcloud_cce_node_v3`` creation fail early if node ID can't be determined
+    (`#1706 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/1706>`_)
