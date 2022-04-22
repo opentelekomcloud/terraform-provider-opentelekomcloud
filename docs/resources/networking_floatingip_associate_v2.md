@@ -48,7 +48,7 @@ resource "opentelekomcloud_compute_instance_v2" "this" {
 
 resource "opentelekomcloud_networking_floatingip_associate_v2" "this" {
   floating_ip = opentelekomcloud_networking_floatingip_v2.this.address
-  port_id    = opentelekomcloud_compute_instance_v2.this.network.0.port_id
+  port_id     = opentelekomcloud_compute_instance_v2.this.network.0.port_id
 }
 ```
 
