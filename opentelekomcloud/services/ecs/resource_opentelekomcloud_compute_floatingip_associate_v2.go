@@ -24,9 +24,12 @@ func ResourceComputeFloatingIPAssociateV2() *schema.Resource {
 		CreateContext: resourceComputeFloatingIPAssociateV2Create,
 		ReadContext:   resourceComputeFloatingIPAssociateV2Read,
 		DeleteContext: resourceComputeFloatingIPAssociateV2Delete,
+
 		Importer: &schema.ResourceImporter{
 			StateContext: schema.ImportStatePassthroughContext,
 		},
+
+		DeprecationMessage: "Please use `opentelekomcloud_networking_floatingip_associate_v2` resource instead.",
 
 		Schema: map[string]*schema.Schema{
 			"region": {

@@ -28,6 +28,8 @@ func ResourceComputeFloatingIPV2() *schema.Resource {
 			StateContext: schema.ImportStatePassthroughContext,
 		},
 
+		DeprecationMessage: "Please use `opentelekomcloud_networking_floatingip_v2` or `opentelekomcloud_vpc_eip_v1` resources instead",
+
 		Schema: map[string]*schema.Schema{
 			"region": {
 				Type:     schema.TypeString,
