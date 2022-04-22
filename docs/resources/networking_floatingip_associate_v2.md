@@ -23,7 +23,7 @@ resource "opentelekomcloud_networking_floatingip_associate_v2" "fip_1" {
 }
 ```
 
-### Automatically detect the correct network
+### Associate an instance with `port_id`
 
 ```hcl
 variable "keypair" {}
