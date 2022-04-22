@@ -10,6 +10,8 @@ where you have a pre-allocated floating IP or are unable to use the
 
 ## Example Usage
 
+### Basic FloatingIP associate
+
 ```hcl
 resource "opentelekomcloud_networking_port_v2" "port_1" {
   network_id = "a5bbd213-e1d3-49b6-aed1-9df60ea94b9a"
@@ -18,6 +20,35 @@ resource "opentelekomcloud_networking_port_v2" "port_1" {
 resource "opentelekomcloud_networking_floatingip_associate_v2" "fip_1" {
   floating_ip = "1.2.3.4"
   port_id     = opentelekomcloud_networking_port_v2.port_1.id
+}
+```
+
+### Automatically detect the correct network
+
+```hcl
+variable "keypair" {}
+variable "image_id" {}
+variable "network_name" {}
+
+resource "opentelekomcloud_networking_floatingip_v2" "this" {
+  pool = "admin_external_net"
+}
+
+resource "opentelekomcloud_compute_instance_v2" "this" {
+  name            = "example-instance"
+  image_id        = var.image_id
+  flavor_id       = "s2.large.4"
+  key_pair        = var.keypair
+  security_groups = ["default"]
+
+  network {
+    name = var.network_name
+  }
+}
+
+resource "opentelekomcloud_networking_floatingip_associate_v2" "this" {
+  floating_ip = opentelekomcloud_networking_floatingip_v2.this.address
+  port_id    = opentelekomcloud_compute_instance_v2.this.network.0.port_id
 }
 ```
 
