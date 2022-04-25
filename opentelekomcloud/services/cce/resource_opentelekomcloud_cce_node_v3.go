@@ -38,6 +38,7 @@ var (
 		"kubernetes.io/os",
 		"node.kubernetes.io/baremetal",
 		"node.kubernetes.io/subnetid",
+		"node.kubernetes.io/container-engine",
 		"os.architecture",
 		"os.name",
 		"os.version",
