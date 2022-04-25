@@ -56,6 +56,23 @@ func TestAccCCENodesV3Basic(t *testing.T) {
 	})
 }
 
+func TestAccCCENodesV3Multiple(t *testing.T) {
+	t.Parallel()
+	shared.BookCluster(t)
+	quotas.BookMany(t, singleNodeQuotas.X(2))
+
+	resource.Test(t, resource.TestCase{
+		PreCheck:          func() { testAccCCEKeyPairPreCheck(t) },
+		ProviderFactories: common.TestAccProviderFactories,
+		CheckDestroy:      testAccCheckCCENodeV3Destroy,
+		Steps: []resource.TestStep{
+			{
+				Config: testAccCCENodeV3Multiple,
+			},
+		},
+	})
+}
+
 func TestAccCCENodesV3Timeout(t *testing.T) {
 	var node nodes.Nodes
 
@@ -514,6 +531,30 @@ resource "opentelekomcloud_cce_node_v3" "node_1" {
 }
 `, shared.DataSourceCluster, env.OS_AVAILABILITY_ZONE, env.OS_KEYPAIR_NAME, privateIP)
 }
+
+var testAccCCENodeV3Multiple = fmt.Sprintf(`
+%s
+
+resource "opentelekomcloud_cce_node_v3" "node_1" {
+  cluster_id = data.opentelekomcloud_cce_cluster_v3.cluster.id
+  name       = "test-node"
+  flavor_id  = "s3.medium.1"
+  count      = 2
+
+  availability_zone = "%s"
+  key_pair          = "%s"
+
+  root_volume {
+    size       = 40
+    volumetype = "SATA"
+  }
+
+  data_volumes {
+    size       = 100
+    volumetype = "SATA"
+  }
+}
+`, shared.DataSourceCluster, env.OS_AVAILABILITY_ZONE, env.OS_KEYPAIR_NAME)
 
 var testAccCCENodeV3Timeout = fmt.Sprintf(`
 %s

@@ -557,26 +557,9 @@ func resourceCCENodeV3Create(ctx context.Context, d *schema.ResourceData, meta i
 		return fmterr.Errorf("error creating OpenTelekomCloud Node: %s", err)
 	}
 
-	job, err := nodes.GetJobDetails(client, node.Status.JobID).ExtractJob()
+	nodeID, err := getNodeIDFromJob(ctx, client, node.Status.JobID, d.Timeout(schema.TimeoutCreate))
 	if err != nil {
 		return fmterr.Errorf("error fetching OpenTelekomCloud Job Details: %s", err)
-	}
-	jobResourceId := job.Spec.SubJobs[0].Metadata.ID
-
-	subJob, err := nodes.GetJobDetails(client, jobResourceId).ExtractJob()
-	if err != nil {
-		return fmterr.Errorf("error fetching OpenTelekomCloud Job Details: %s", err)
-	}
-
-	var nodeID string
-	for _, s := range subJob.Spec.SubJobs {
-		if s.Spec.Type == "CreateNodeVM" {
-			nodeID = s.Spec.ResourceID
-			break
-		}
-	}
-	if nodeID == "" {
-		return fmterr.Errorf("can't find node ID in job response\n%s", explainNodesJob(subJob))
 	}
 
 	log.Printf("[DEBUG] Waiting for CCE Node (%s) to become available", node.Metadata.Name)
@@ -595,6 +578,49 @@ func resourceCCENodeV3Create(ctx context.Context, d *schema.ResourceData, meta i
 
 	d.SetId(nodeID)
 	return resourceCCENodeV3Read(ctx, d, meta)
+}
+
+// getNodeIDFromJob wait until job starts (status Running) and returns Node ID
+func getNodeIDFromJob(ctx context.Context, client *golangsdk.ServiceClient, jobID string, timeout time.Duration) (string, error) {
+	job, err := nodes.GetJobDetails(client, jobID).ExtractJob()
+	if err != nil {
+		return "", fmt.Errorf("error fetching OpenTelekomCloud Job Details: %s", err)
+	}
+	jobResourceId := job.Spec.SubJobs[0].Metadata.ID
+
+	stateConf := &resource.StateChangeConf{
+		Pending: []string{"Initializing"},
+		Target:  []string{"Running"},
+		Refresh: func() (interface{}, string, error) {
+			subJob, err := nodes.GetJobDetails(client, jobResourceId).ExtractJob()
+			if err != nil {
+				return nil, "ERROR", fmt.Errorf("error fetching OpenTelekomCloud Job Details: %s", err)
+			}
+			return subJob, subJob.Status.Phase, nil
+		},
+		Timeout:    timeout,
+		Delay:      2 * time.Second,
+		MinTimeout: 3 * time.Second,
+	}
+	j, err := stateConf.WaitForStateContext(ctx)
+	if err != nil {
+		return "", fmt.Errorf("error creating OpenTelekomCloud CCE Node: %s", err)
+	}
+	log.Printf("job: %+v", j)
+	subJob := j.(*nodes.Job)
+
+	var nodeID string
+	for _, s := range subJob.Spec.SubJobs {
+		if s.Spec.Type == "CreateNodeVM" {
+			nodeID = s.Spec.ResourceID
+			break
+		}
+	}
+
+	if nodeID == "" {
+		return "", fmt.Errorf("can't find node ID in job response\n%s", explainNodesJob(subJob))
+	}
+	return nodeID, nil
 }
 
 func resourceCCENodeV3Read(_ context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
