@@ -1,0 +1,4 @@
+---
+fixes:
+  - |
+    **[CCE]** Fix issue with new k8s tag which produces ``ForceNew`` in ``resource/opentelekomcloud_cce_node_v3`` (`#1711 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/1711>`_)
