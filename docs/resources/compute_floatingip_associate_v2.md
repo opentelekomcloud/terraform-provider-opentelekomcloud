@@ -7,6 +7,10 @@ subcategory: "Elastic Cloud Server (ECS)"
 Associate a floating IP to an instance. This can be used instead of the
 `floating_ip` options in `opentelekomcloud_compute_instance_v2`.
 
+~>
+Floating IP compute APIs are marked as discarded in [help center](https://docs.otc.t-systems.com/en-us/api/ecs/en-us_topic_0065817682.html).
+Please use `resource/opentelekomcloud_networking_floatingip_associate_v2`
+
 ## Example Usage
 
 ### Automatically detect the correct network

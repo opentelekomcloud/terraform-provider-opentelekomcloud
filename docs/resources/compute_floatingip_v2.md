@@ -13,6 +13,10 @@ Floating IPs created with this module will have a bandwidth of 1000Mbit/s,
 for manually specifying the bandwidth please use the
 [`opentelekomcloud_vpc_eip_v1`](vpc_eip_v1.md) module.
 
+~>
+Floating IP compute APIs are marked as discarded in [help center](https://docs.otc.t-systems.com/en-us/api/ecs/en-us_topic_0065817682.html).
+Please use `resource/opentelekomcloud_networking_floatingip_v2` or `resource/opentelekomcloud_vpc_eip_v1`.
+
 
 ## Example Usage
 
