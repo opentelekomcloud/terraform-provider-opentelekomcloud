@@ -97,6 +97,11 @@ func ResourceLoadBalancerV3() *schema.Resource {
 					Schema: map[string]*schema.Schema{
 						"id": {
 							Type:     schema.TypeString,
+							Optional: true,
+							Computed: true,
+						},
+						"_managed": {
+							Type:     schema.TypeBool,
 							Computed: true,
 						},
 						"address": {
@@ -104,21 +109,27 @@ func ResourceLoadBalancerV3() *schema.Resource {
 							Computed: true,
 						},
 						"ip_type": {
-							Type:     schema.TypeString,
-							Required: true,
-							ForceNew: true,
+							Type:         schema.TypeString,
+							Optional:     true,
+							Computed:     true,
+							ExactlyOneOf: []string{"public_ip.0.id"},
+							ForceNew:     true,
 							ValidateFunc: validation.StringInSlice([]string{
-								"5_bgp", "5_mailbgp", "5_gray",
+								"5_gray", "5_mailbgp",
 							}, false),
 						},
 						"bandwidth_name": {
-							Type:     schema.TypeString,
-							Required: true,
-							ForceNew: true,
+							Type:         schema.TypeString,
+							Optional:     true,
+							Computed:     true,
+							RequiredWith: []string{"public_ip.0.ip_type"},
+							ForceNew:     true,
 						},
 						"bandwidth_size": {
 							Type:         schema.TypeInt,
-							Required:     true,
+							Optional:     true,
+							Computed:     true,
+							RequiredWith: []string{"public_ip.0.ip_type"},
 							ForceNew:     true,
 							ValidateFunc: validation.IntBetween(0, 99999),
 						},
@@ -132,9 +143,11 @@ func ResourceLoadBalancerV3() *schema.Resource {
 							}, false),
 						},
 						"bandwidth_share_type": {
-							Type:     schema.TypeString,
-							Required: true,
-							ForceNew: true,
+							Type:         schema.TypeString,
+							Optional:     true,
+							Computed:     true,
+							RequiredWith: []string{"public_ip.0.ip_type"},
+							ForceNew:     true,
 							ValidateFunc: validation.StringInSlice([]string{
 								"PER", "WHOLE",
 							}, false),
@@ -170,6 +183,8 @@ func getPublicIp(d *schema.ResourceData) *loadbalancers.PublicIp {
 		return nil
 	}
 	publicIpElement := publicIpRaw[0].(map[string]interface{})
+	publicIpElement["_managed"] = true
+	_ = d.Set("public_ip", publicIpRaw)
 
 	publicIpOpts := &loadbalancers.PublicIp{
 		NetworkType: publicIpElement["ip_type"].(string),
@@ -205,9 +220,16 @@ func resourceLoadBalancerV3Create(ctx context.Context, d *schema.ResourceData, m
 		Tags:                 common.ExpandResourceTags(d.Get("tags").(map[string]interface{})),
 		AdminStateUp:         &adminStateUp,
 		L7Flavor:             d.Get("l7_flavor").(string),
-		PublicIp:             getPublicIp(d),
 		ElbSubnetIDs:         common.ExpandToStringSlice(d.Get("network_ids").(*schema.Set).List()),
 		IpTargetEnable:       &ipTargetEnable,
+	}
+
+	// currently API supports only a single EIP
+	if id, ok := d.GetOk("public_ip.0.id"); ok {
+		createOpts.PublicIpIDs = []string{id.(string)}
+		_ = d.Set("public_ip", []map[string]interface{}{{"_managed": false}})
+	} else {
+		createOpts.PublicIp = getPublicIp(d)
 	}
 
 	log.Printf("[DEBUG] Create Options: %#v", createOpts)
@@ -307,7 +329,7 @@ func resourceLoadBalancerV3Delete(ctx context.Context, d *schema.ResourceData, m
 		return fmterr.Errorf("unable to delete LoadBalancerV3 %s: %s", d.Id(), err)
 	}
 
-	if d.Get("public_ip.#").(int) > 0 {
+	if d.Get("public_ip.#").(int) > 0 && d.Get("public_ip.0._managed").(bool) {
 		config := meta.(*cfg.Config)
 		nwV1Client, err := config.NetworkingV1Client(config.GetRegion(d))
 		if err != nil {
@@ -330,6 +352,7 @@ func setLoadBalancerFields(d *schema.ResourceData, meta interface{}, lb *loadbal
 		if err != nil {
 			return diag.FromErr(err)
 		}
+		info["_managed"] = d.Get("public_ip.0._managed")
 		publicIpInfo[0] = info
 	}
 	tagMap := common.TagsToMap(lb.Tags)

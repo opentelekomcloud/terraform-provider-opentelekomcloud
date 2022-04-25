@@ -1,0 +1,9 @@
+---
+fixes:
+  - |
+    **[ELB]** Allow passing `id` to `public_ip` block in ``resource/opentelekomcloud_lb_loadbalancer_v3`` for using
+    existing EIP. (`#1713 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/1713>`_)
+other:
+  - |
+    **[ELB]** Update EIP type limitation in ``resource/opentelekomcloud_lb_loadbalancer_v3`` to be up to the documentation.
+    (`#1713 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/1713>`_)

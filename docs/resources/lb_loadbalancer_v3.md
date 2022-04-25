@@ -52,6 +52,8 @@ resource "opentelekomcloud_lb_loadbalancer_v3" "lb_1" {
 
 ### Public load balancer (with floating IP)
 
+#### Newly created
+
 ```hcl
 resource "opentelekomcloud_lb_loadbalancer_v3" "lb_1" {
   name        = "example-loadbalancer"
@@ -62,9 +64,25 @@ resource "opentelekomcloud_lb_loadbalancer_v3" "lb_1" {
 
   public_ip {
     bandwidth_name       = "lb-bandwidth"
-    ip_type              = "5_bgp"
+    ip_type              = "5_gray"
     bandwidth_size       = 10
     bandwidth_share_type = "PER"
+  }
+}
+```
+
+#### Already existing
+
+```hcl
+resource "opentelekomcloud_lb_loadbalancer_v3" "lb_1" {
+  name        = "example-loadbalancer"
+  subnet_id   = var.subnet_id
+  network_ids = [var.network_id]
+
+  availability_zones = [var.az]
+
+  public_ip {
+    id = var.eip_id
   }
 }
 ```
@@ -108,15 +126,22 @@ The following arguments are supported:
 
 The `public_ip` block supports:
 
-* `ip_type` - (Required) Elastic IP type. Possible values are: `5_bgp`, `5_mailbgp`, `5_gray`.
+* `id` - (Optional) ID of an existing elastic IP. Required when using existing EIP.
 
-* `bandwidth_name` - (Required) Bandwidth name.
+* `ip_type` - (Optional) Elastic IP type. The value can be `5_gray` and `5_mailbgp`.
+  Required when creating a new EIP.
 
-* `bandwidth_size` - (Required) Bandwidth size.
+->
+  In `eu-de` region the value can only be `5_gray`.
+
+* `bandwidth_name` - (Optional) Bandwidth name. Required when creating a new EIP.
+
+* `bandwidth_size` - (Optional) Bandwidth size. Required when creating a new EIP.
 
 * `bandwidth_charge_mode` - (Optional) Bandwidth billing type. Possible value is `traffic`.
 
-* `bandwidth_share_type` - (Required) Bandwidth sharing type. Possible values are: `PER`, `WHOLE`.
+* `bandwidth_share_type` - (Optional) Bandwidth sharing type. Possible values are: `PER`, `WHOLE`.
+  Required when creating a new EIP.
 
 ## Attributes Reference
 

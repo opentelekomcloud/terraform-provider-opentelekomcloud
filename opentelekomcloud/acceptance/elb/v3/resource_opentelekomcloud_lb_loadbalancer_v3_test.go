@@ -44,6 +44,28 @@ func TestAccLBV3LoadBalancer_basic(t *testing.T) {
 	})
 }
 
+func TestAccLBV3LoadBalancer_eipIDs(t *testing.T) {
+	var lb loadbalancers.LoadBalancer
+
+	qts := lbQuotas()
+	t.Parallel()
+	quotas.BookMany(t, qts)
+
+	resource.Test(t, resource.TestCase{
+		PreCheck:          func() { common.TestAccPreCheck(t) },
+		ProviderFactories: common.TestAccProviderFactories,
+		CheckDestroy:      testAccCheckLBV3LoadBalancerDestroy,
+		Steps: []resource.TestStep{
+			{
+				Config: testAccLBV3LoadBalancerEIPs,
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckLBV3LoadBalancerExists(resourceLBName, &lb),
+				),
+			},
+		},
+	})
+}
+
 func TestAccLBV3LoadBalancer_import(t *testing.T) {
 	qts := lbQuotas()
 	t.Parallel()
@@ -58,9 +80,10 @@ func TestAccLBV3LoadBalancer_import(t *testing.T) {
 				Config: testAccLBV3LoadBalancerConfigBasic,
 			},
 			{
-				ResourceName:      resourceLBName,
-				ImportState:       true,
-				ImportStateVerify: true,
+				ResourceName:            resourceLBName,
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"public_ip.0._managed"},
 			},
 		},
 	})
@@ -130,7 +153,7 @@ resource "opentelekomcloud_lb_loadbalancer_v3" "loadbalancer_1" {
   availability_zones = ["%s"]
 
   public_ip {
-    ip_type              = "5_bgp"
+    ip_type              = "5_gray"
     bandwidth_name       = "lb_band"
     bandwidth_size       = 10
     bandwidth_share_type = "PER"
@@ -154,7 +177,7 @@ resource "opentelekomcloud_lb_loadbalancer_v3" "loadbalancer_1" {
   availability_zones = ["%s"]
 
   public_ip {
-    ip_type              = "5_bgp"
+    ip_type              = "5_gray"
     bandwidth_name       = "lb_band"
     bandwidth_size       = 10
     bandwidth_share_type = "PER"
@@ -163,6 +186,34 @@ resource "opentelekomcloud_lb_loadbalancer_v3" "loadbalancer_1" {
   tags = {
     muh = "value-create"
     kuh = "value-create"
+  }
+}
+`, common.DataSourceSubnet, env.OS_AVAILABILITY_ZONE)
+
+var testAccLBV3LoadBalancerEIPs = fmt.Sprintf(`
+%s
+
+resource "opentelekomcloud_vpc_eip_v1" "eip_1" {
+  publicip {
+    type = "5_gray"
+  }
+  bandwidth {
+    name        = "test"
+    size        = 8
+    share_type  = "PER"
+    charge_mode = "traffic"
+  }
+}
+
+resource "opentelekomcloud_lb_loadbalancer_v3" "loadbalancer_1" {
+  name        = "loadbalancer_1"
+  router_id   = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.vpc_id
+  network_ids = [data.opentelekomcloud_vpc_subnet_v1.shared_subnet.network_id]
+
+  availability_zones = ["%s"]
+
+  public_ip {
+    id = opentelekomcloud_vpc_eip_v1.eip_1.id
   }
 }
 `, common.DataSourceSubnet, env.OS_AVAILABILITY_ZONE)
