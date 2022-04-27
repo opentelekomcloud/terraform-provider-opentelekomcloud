@@ -1,0 +1,5 @@
+---
+features:
+  - |
+    **New Data Source:**  ``opentelekomcloud_dns_nameservers_v2``
+    (`#1715 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/1715>`_)
