@@ -71,10 +71,6 @@ func dataSourceDNSNameserverRead(_ context.Context, d *schema.ResourceData, meta
 		nameserverList = append(nameserverList, nameserverEntry)
 	}
 
-	if err := d.Set("nameservers", nameserverList); err != nil {
-		return diag.FromErr(err)
-	}
-
 	listID := nameserverList[0]["hostname"].(string)
 	d.SetId(listID)
 
