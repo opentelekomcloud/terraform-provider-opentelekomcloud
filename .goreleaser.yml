@@ -55,9 +55,13 @@ signs:
       - "${signature}"
       - "--detach-sign"
       - "${artifact}"
+changelog:
+  use: github
 release:
   # Visit your project's GitHub Releases page to publish this release.
   github:
     owner: opentelekomcloud
     name: terraform-provider-opentelekomcloud
+  footer: |
+    **Full Changelog**: https://docs-beta.otc.t-systems.com/releasenotes/terraform-provider-opentelekomcloud#{{ replace .Tag "." "-" }}
   prerelease: auto

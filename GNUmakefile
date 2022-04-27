@@ -11,10 +11,10 @@ build: fmtcheck
 	go install
 
 release:
-	goreleaser release --release-notes <(./scripts/changelog-link.sh)
+	goreleaser release
 
 snapshot:
-	goreleaser release --snapshot --parallelism 2 --rm-dist --release-notes <(./scripts/changelog-link.sh)
+	goreleaser release --snapshot --parallelism 2 --rm-dist
 
 test: fmtcheck
 	go test -v ./...
