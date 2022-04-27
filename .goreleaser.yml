@@ -56,7 +56,7 @@ signs:
       - "--detach-sign"
       - "${artifact}"
 changelog:
-  use: github
+  use: git
 release:
   # Visit your project's GitHub Releases page to publish this release.
   github:
