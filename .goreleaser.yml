@@ -57,6 +57,13 @@ signs:
       - "${artifact}"
 changelog:
   use: git
+  filters:
+    exclude:
+      - '^ci:'
+      - '^reno:'
+      - '^release:'
+      - '^github:'
+      - '^acceptance:'
 release:
   # Visit your project's GitHub Releases page to publish this release.
   github:
