@@ -70,8 +70,9 @@ resource "opentelekomcloud_compute_instance_v2" "debian_ecs" {
 
 Don't forget to fill in the required variables.
 
-Developing the Provider
------------------------
+## Developing the Provider
+
+See [Contribution Guide](.github/CONTRIBUTING.md) for the details.
 
 ### Requirements
 - [Terraform](https://www.terraform.io/downloads.html) 0.13+ (but 1.x is recommended)
