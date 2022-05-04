@@ -344,14 +344,14 @@ func resourceCCENodePoolV3Create(ctx context.Context, d *schema.ResourceData, me
 	}
 
 	clusterID := d.Get("cluster_id").(string)
-	stateCluster := &resource.StateChangeConf{
+	clusterStateConf := &resource.StateChangeConf{
 		Target:     []string{"Available"},
 		Refresh:    waitForClusterAvailable(client, clusterID),
 		Timeout:    d.Timeout(schema.TimeoutDefault),
 		Delay:      15 * time.Second,
 		MinTimeout: 3 * time.Second,
 	}
-	if _, err := stateCluster.WaitForStateContext(ctx); err != nil {
+	if _, err := clusterStateConf.WaitForStateContext(ctx); err != nil {
 		return fmterr.Errorf("error waiting for cluster to be available: %w", err)
 	}
 
@@ -359,7 +359,7 @@ func resourceCCENodePoolV3Create(ctx context.Context, d *schema.ResourceData, me
 	pool, err := nodepools.Create(client, clusterID, createOpts).Extract()
 	switch err.(type) {
 	case golangsdk.ErrDefault403:
-		if _, err := stateCluster.WaitForStateContext(ctx); err != nil {
+		if _, err := clusterStateConf.WaitForStateContext(ctx); err != nil {
 			return fmterr.Errorf("error waiting for cluster to be available: %w", err)
 		}
 		retried, err := nodepools.Create(client, clusterID, createOpts).Extract()
@@ -374,7 +374,7 @@ func resourceCCENodePoolV3Create(ctx context.Context, d *schema.ResourceData, me
 	}
 	d.SetId(pool.Metadata.Id)
 
-	stateNodePool := &resource.StateChangeConf{
+	stateConf := &resource.StateChangeConf{
 		Pending:      []string{"Synchronizing", "Synchronized"},
 		Target:       []string{""},
 		Refresh:      waitForCceNodePoolActive(client, clusterID, d.Id()),
@@ -382,7 +382,7 @@ func resourceCCENodePoolV3Create(ctx context.Context, d *schema.ResourceData, me
 		Delay:        120 * time.Second,
 		PollInterval: 20 * time.Second,
 	}
-	if _, err := stateNodePool.WaitForStateContext(ctx); err != nil {
+	if _, err := stateConf.WaitForStateContext(ctx); err != nil {
 		return fmterr.Errorf(createError, err)
 	}
 
