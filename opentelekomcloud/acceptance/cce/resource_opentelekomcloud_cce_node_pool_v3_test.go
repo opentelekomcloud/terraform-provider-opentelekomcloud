@@ -102,7 +102,6 @@ func testAccCCENodePoolV3ImportStateIdFunc() resource.ImportStateIdFunc {
 
 func TestAccCCENodePoolsV3_randomAZ(t *testing.T) {
 	var nodePool nodepools.NodePool
-	nodePoolName := "opentelekomcloud_cce_node_pool_v3.node_pool"
 
 	t.Parallel()
 	shared.BookCluster(t)
@@ -115,8 +114,8 @@ func TestAccCCENodePoolsV3_randomAZ(t *testing.T) {
 			{
 				Config: testAccCCENodePoolV3RandomAZ,
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckCCENodePoolV3Exists(nodePoolName, shared.DataSourceClusterName, &nodePool),
-					resource.TestCheckResourceAttr(nodePoolName, "availability_zone", "random"),
+					testAccCheckCCENodePoolV3Exists(nodePoolResourceName, shared.DataSourceClusterName, &nodePool),
+					resource.TestCheckResourceAttr(nodePoolResourceName, "availability_zone", "random"),
 				),
 			},
 		},
@@ -125,7 +124,6 @@ func TestAccCCENodePoolsV3_randomAZ(t *testing.T) {
 
 func TestAccCCENodePoolsV3EncryptedVolume(t *testing.T) {
 	var nodePool nodepools.NodePool
-	nodePoolName := "opentelekomcloud_cce_node_pool_v3.node_pool"
 
 	t.Parallel()
 	shared.BookCluster(t)
@@ -138,8 +136,8 @@ func TestAccCCENodePoolsV3EncryptedVolume(t *testing.T) {
 			{
 				Config: testAccCCENodePoolV3Encrypted,
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckCCENodePoolV3Exists(nodePoolName, shared.DataSourceClusterName, &nodePool),
-					resource.TestCheckResourceAttr(nodePoolName, "data_volumes.0.kms_id", env.OS_KMS_ID),
+					testAccCheckCCENodePoolV3Exists(nodePoolResourceName, shared.DataSourceClusterName, &nodePool),
+					resource.TestCheckResourceAttr(nodePoolResourceName, "data_volumes.0.kms_id", env.OS_KMS_ID),
 				),
 			},
 		},
@@ -148,7 +146,6 @@ func TestAccCCENodePoolsV3EncryptedVolume(t *testing.T) {
 
 func TestAccCCENodePoolsV3ExtendParams(t *testing.T) {
 	var nodePool nodepools.NodePool
-	nodePoolName := "opentelekomcloud_cce_node_pool_v3.node_pool"
 
 	t.Parallel()
 	shared.BookCluster(t)
@@ -161,7 +158,7 @@ func TestAccCCENodePoolsV3ExtendParams(t *testing.T) {
 			{
 				Config: testAccCCENodePoolV3ExtendParams,
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckCCENodePoolV3Exists(nodePoolName, shared.DataSourceClusterName, &nodePool),
+					testAccCheckCCENodePoolV3Exists(nodePoolResourceName, shared.DataSourceClusterName, &nodePool),
 				),
 			},
 		},
@@ -210,7 +207,7 @@ func testAccCheckCCENodePoolV3Exists(n string, cluster string, nodePool *nodepoo
 			return fmt.Errorf("no ID is set")
 		}
 		if c.Primary.ID == "" {
-			return fmt.Errorf("cluster id is not set")
+			return fmt.Errorf("cluster ID is not set")
 		}
 
 		config := common.TestAccProvider.Meta().(*cfg.Config)

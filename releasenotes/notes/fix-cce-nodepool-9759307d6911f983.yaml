@@ -1,0 +1,4 @@
+---
+fixes:
+  - |
+    **[CCE]** Fix issue with missing ``ForceNew`` in ``resource/opentelekomcloud_cce_node_pool_v3`` (`#1725 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/1725>`_)
