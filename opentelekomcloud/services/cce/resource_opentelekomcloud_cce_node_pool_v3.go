@@ -555,21 +555,21 @@ func waitForCceNodePoolActive(cceClient *golangsdk.ServiceClient, clusterId, nod
 	}
 }
 
-func waitForCceNodePoolDelete(cceClient *golangsdk.ServiceClient, clusterId, nodePoolId string) resource.StateRefreshFunc {
+func waitForCceNodePoolDelete(cceClient *golangsdk.ServiceClient, clusterID, nodePoolID string) resource.StateRefreshFunc {
 	return func() (interface{}, string, error) {
-		log.Printf("[DEBUG] Attempting to delete Open Telekom Cloud CCE Node Pool %s.\n", nodePoolId)
+		log.Printf("[DEBUG] Attempting to delete Open Telekom Cloud CCE Node Pool %s.\n", nodePoolID)
 
-		r, err := nodepools.Get(cceClient, clusterId, nodePoolId).Extract()
+		r, err := nodepools.Get(cceClient, clusterID, nodePoolID).Extract()
 
 		if err != nil {
 			if _, ok := err.(golangsdk.ErrDefault404); ok {
-				log.Printf("[DEBUG] Successfully deleted Open Telekom Cloud CCE Node Pool %s", nodePoolId)
+				log.Printf("[DEBUG] Successfully deleted Open Telekom Cloud CCE Node Pool %s", nodePoolID)
 				return r, "Deleted", nil
 			}
 			return r, "Deleting", err
 		}
 
-		log.Printf("[DEBUG] Open Telekom Cloud Node Pool %s still available.\n", nodePoolId)
+		log.Printf("[DEBUG] Open Telekom Cloud Node Pool %s still available.\n", nodePoolID)
 		return r, r.Status.Phase, nil
 	}
 }
