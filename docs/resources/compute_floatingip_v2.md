@@ -15,7 +15,8 @@ for manually specifying the bandwidth please use the
 
 ~>
 Floating IP compute APIs are marked as discarded in [help center](https://docs.otc.t-systems.com/en-us/api/ecs/en-us_topic_0065817682.html).
-Please use `resource/opentelekomcloud_networking_floatingip_v2` or `resource/opentelekomcloud_vpc_eip_v1`.
+Please use [`resource/opentelekomcloud_networking_floatingip_v2`](networking_floatingip_v2.md) or
+[`resource/opentelekomcloud_vpc_eip_v1`](vpc_eip_v1.md).
 
 
 ## Example Usage

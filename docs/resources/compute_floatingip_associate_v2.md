@@ -9,7 +9,7 @@ Associate a floating IP to an instance. This can be used instead of the
 
 ~>
 Floating IP compute APIs are marked as discarded in [help center](https://docs.otc.t-systems.com/en-us/api/ecs/en-us_topic_0065817682.html).
-Please use `resource/opentelekomcloud_networking_floatingip_associate_v2`
+Please use [`resource/opentelekomcloud_networking_floatingip_associate_v2`](networking_floatingip_associate_v2.md).
 
 ## Example Usage
 
