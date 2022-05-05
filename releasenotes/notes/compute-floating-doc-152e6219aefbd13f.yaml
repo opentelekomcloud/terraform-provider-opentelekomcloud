@@ -1,0 +1,5 @@
+---
+enhancements:
+  - |
+    **[ECS]** Minor style fixes in documentation of ``resource/opentelekomcloud_compute_floatingip_v2`` and
+    ``resource/opentelekomcloud_compute_floatingip_associate_v2``
