@@ -17,7 +17,6 @@
         - otc-golangci-lint
         - golang-make-test
         - golang-make-vet
-        - tflint
         - goreleaser-build
     check-post:
       jobs:
@@ -27,7 +26,6 @@
         - otc-golangci-lint
         - golang-make-test
         - golang-make-vet
-        - tflint
         - goreleaser-build
     tag:
       jobs:
