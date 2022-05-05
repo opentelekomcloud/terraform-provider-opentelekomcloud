@@ -12,7 +12,6 @@
     parent: golang-make
     vars:
       make_command: tflint
-    nodeset: fedora-pod
 
 - project:
     merge-mode: squash-merge
@@ -27,8 +26,7 @@
         - golang-make-test
         - golang-make-vet
         - tflint
-        - goreleaser-build:
-            nodeset: fedora-32-large
+        - goreleaser-build
     check-post:
       jobs:
         - terraform-functional
@@ -38,9 +36,7 @@
         - golang-make-test
         - golang-make-vet
         - tflint
-        - goreleaser-build:
-            nodeset: fedora-32-large
+        - goreleaser-build
     tag:
       jobs:
-        - release-goreleaser:
-            nodeset: fedora-32-large
+        - release-goreleaser
