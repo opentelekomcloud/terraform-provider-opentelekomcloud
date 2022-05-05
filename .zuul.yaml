@@ -3,34 +3,32 @@
     name: tflint
     parent: golang-make
     vars:
-      make_command: vet
+      make_command: tflint
 
 - project:
     merge-mode: squash-merge
+    vars:
+      functest_project_name: "eu-de_zuul_tf"
     default-branch: devel
     templates:
       - release-notes-jobs
     check:
       jobs:
-        - golangci-lint:
-            vars:
-              golangci_lint_version: 1.41.1
+        - otc-golangci-lint
         - golang-make-test
         - golang-make-vet
         - tflint
-        - goreleaser-build:
-            nodeset: fedora-32-large
+        - goreleaser-build
+    check-post:
+      jobs:
+        - terraform-functional
     gate:
       jobs:
-        - golangci-lint:
-            vars:
-              golangci_lint_version: 1.41.1
+        - otc-golangci-lint
         - golang-make-test
         - golang-make-vet
         - tflint
-        - goreleaser-build:
-            nodeset: fedora-32-large
+        - goreleaser-build
     tag:
       jobs:
-        - release-goreleaser:
-            nodeset: fedora-32-large
+        - release-goreleaser
