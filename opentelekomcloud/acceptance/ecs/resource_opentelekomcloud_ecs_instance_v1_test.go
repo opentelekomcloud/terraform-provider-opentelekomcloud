@@ -535,7 +535,7 @@ resource "opentelekomcloud_networking_floatingip_v2" "this" {
 }
 
 resource "opentelekomcloud_ecs_instance_v1" "instance_1" {
-  name     = "server"
+  name     = "server_1"
   image_id = data.opentelekomcloud_images_image_v2.latest_image.id
   flavor   = "s2.medium.1"
   vpc_id   = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.vpc_id
