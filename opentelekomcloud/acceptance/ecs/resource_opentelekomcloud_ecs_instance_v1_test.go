@@ -51,6 +51,32 @@ func TestAccEcsV1InstanceBasic(t *testing.T) {
 		},
 	})
 }
+
+func TestAccEcsV1InstanceIp(t *testing.T) {
+	var instance cloudservers.CloudServer
+	qts := serverQuotas(10+4, "s2.medium.1")
+	t.Parallel()
+	quotas.BookMany(t, qts)
+
+	resource.Test(t, resource.TestCase{
+		PreCheck:          func() { common.TestAccPreCheck(t) },
+		ProviderFactories: common.TestAccProviderFactories,
+		CheckDestroy:      testAccCheckEcsV1InstanceDestroy,
+		Steps: []resource.TestStep{
+			{
+				Config: testAccEcsV1InstanceIp,
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckEcsV1InstanceExists(resourceInstanceV1Name, &instance),
+					resource.TestCheckResourceAttr(resourceInstanceV1Name, "availability_zone", env.OS_AVAILABILITY_ZONE),
+					resource.TestCheckResourceAttr(resourceInstanceV1Name, "auto_recovery", "false"),
+					resource.TestCheckResourceAttr(resourceInstanceV1Name, "security_groups.#", "1"),
+					resource.TestCheckResourceAttrSet(resourceInstanceV1Name, "nics.0.port_id"),
+				),
+			},
+		},
+	})
+}
+
 func TestAccEcsV1InstanceDeleted(t *testing.T) {
 	var instance cloudservers.CloudServer
 	qts := serverQuotas(10+4, "s2.medium.1")
@@ -496,3 +522,43 @@ resource "opentelekomcloud_ecs_instance_v1" "instance_1" {
   delete_disks_on_termination = true
 }
 `, common.DataSourceImage, common.DataSourceSubnet, env.OS_AVAILABILITY_ZONE, env.OS_KMS_ID)
+
+var testAccEcsV1InstanceIp = fmt.Sprintf(`
+%s
+
+%s
+
+%s
+
+resource "opentelekomcloud_networking_floatingip_v2" "this" {
+  pool = "admin_external_net"
+}
+
+resource "opentelekomcloud_ecs_instance_v1" "instance_1" {
+  name     = "server"
+  image_id = data.opentelekomcloud_images_image_v2.latest_image.id
+  flavor   = "s2.medium.1"
+  vpc_id   = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.vpc_id
+
+  nics {
+    network_id = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.network_id
+  }
+
+  data_disks {
+    size = 10
+    type = "SAS"
+  }
+
+  password                    = "Password@123"
+  security_groups             = [data.opentelekomcloud_networking_secgroup_v2.default_secgroup.id]
+  availability_zone           = "%s"
+  auto_recovery               = false
+  delete_disks_on_termination = true
+}
+
+
+resource "opentelekomcloud_networking_floatingip_associate_v2" "this" {
+  floating_ip = opentelekomcloud_networking_floatingip_v2.this.address
+  port_id     = opentelekomcloud_ecs_instance_v1.instance_1.nics.0.port_id
+}
+`, common.DataSourceSecGroupDefault, common.DataSourceImage, common.DataSourceSubnet, env.OS_AVAILABILITY_ZONE)
