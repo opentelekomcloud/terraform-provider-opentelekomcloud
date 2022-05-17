@@ -115,9 +115,11 @@ resource "opentelekomcloud_compute_volume_attach_v2" "attached" {
 ### Instance With Multiple Networks
 
 ```hcl
-resource "opentelekomcloud_networking_floatingip_v2" "myip" {}
+resource "opentelekomcloud_networking_floatingip_v2" "this" {
+  pool = "admin_external_net"
+}
 
-resource "opentelekomcloud_ecs_instance_v1" "multi-net" {
+resource "opentelekomcloud_ecs_instance_v1" "this" {
   name     = "server_1"
   image_id = "ad091b52-742f-469e-8f3c-fd81cadf0743"
   flavor   = "s2.large.2"
@@ -135,10 +137,9 @@ resource "opentelekomcloud_ecs_instance_v1" "multi-net" {
   key_name          = "KeyPair-test"
 }
 
-resource "opentelekomcloud_compute_floatingip_associate_v2" "myip" {
-  floating_ip = opentelekomcloud_networking_floatingip_v2.myip.address
-  instance_id = opentelekomcloud_ecs_instance_v1.multi-net.id
-  fixed_ip    = opentelekomcloud_ecs_instance_v1.multi-net.nics.0.ip_address
+resource "opentelekomcloud_networking_floatingip_associate_v2" "this" {
+  floating_ip = opentelekomcloud_networking_floatingip_v2.this.address
+  port_id     = opentelekomcloud_ecs_instance_v1.this.nics.0.port_id
 }
 ```
 
@@ -286,8 +287,11 @@ The `data_disks` block supports:
 
 In addition to all arguments above, the following attributes are exported:
 
-* `id` - The ID of the server.
 * `nics/mac_address` - The MAC address of the NIC on that network.
+
+* `nics/type` - The type of the address of the NIC on that network.
+
+* `nics/port_id` - The port ID of the NIC on that network.
 
 ## Import
 

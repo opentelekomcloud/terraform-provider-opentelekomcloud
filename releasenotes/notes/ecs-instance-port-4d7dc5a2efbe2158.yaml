@@ -1,0 +1,7 @@
+---
+enhancements:
+  - |
+    **[ECS]** Export ``nics.*.port_id`` and ``nics.*.type`` values in ``resource/opentelekomcloud_ecs_instance_v1`` (`#1737 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/1737>`_)
+other:
+  - |
+    **[ECS]** Remove use-cases with deprecated resources in documentation examples in ``resource/opentelekomcloud_ecs_instance_v1`` (`#1737 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/1737>`_)
