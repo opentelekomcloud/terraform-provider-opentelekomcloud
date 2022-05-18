@@ -6,7 +6,7 @@ subcategory: "Virtual Private Cloud (VPC)"
 
 Associates a floating IP to a port. This is useful for situations
 where you have a pre-allocated floating IP or are unable to use the
-`opentelekomcloud_networking_floatingip_v2` resource to create a floating IP.
+[`resource/opentelekomcloud_networking_floatingip_v2`](networking_floatingip_v2.md) to create a floating IP.
 
 ## Example Usage
 
@@ -48,7 +48,7 @@ resource "opentelekomcloud_compute_instance_v2" "this" {
 
 resource "opentelekomcloud_networking_floatingip_associate_v2" "this" {
   floating_ip = opentelekomcloud_networking_floatingip_v2.this.address
-  port_id     = opentelekomcloud_compute_instance_v2.this.network.0.port_id
+  port_id     = opentelekomcloud_compute_instance_v2.this.network.0.port
 }
 ```
 
