@@ -88,7 +88,7 @@ func ResourceVpnSiteConnectionV2() *schema.Resource {
 			"admin_state_up": {
 				Type:     schema.TypeBool,
 				Optional: true,
-				Default:  false,
+				Default:  true,
 			},
 			"psk": {
 				Type:     schema.TypeString,
@@ -151,19 +151,21 @@ func ResourceVpnSiteConnectionV2() *schema.Resource {
 
 func resourceVpnSiteConnectionV2Create(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*cfg.Config)
-	networkingClient, err := config.NetworkingV2Client(config.GetRegion(d))
+	client, err := common.ClientFromCtx(ctx, keyClientV2, func() (*golangsdk.ServiceClient, error) {
+		return config.NetworkingV2Client(config.GetRegion(d))
+	})
 	if err != nil {
-		return fmterr.Errorf("error creating OpenTelekomCloud networking client: %s", err)
+		return fmterr.Errorf(errCreationV2Client, err)
 	}
 
 	var createOpts siteconnections.CreateOptsBuilder
 
 	dpd := resourceSiteConnectionV2DPDCreateOpts(d.Get("dpd").(*schema.Set))
 
-	v := d.Get("peer_cidrs").([]interface{})
-	peerCidrs := make([]string, len(v))
-	for i, v := range v {
-		peerCidrs[i] = v.(string)
+	peerCidrsRaw := d.Get("peer_cidrs").([]interface{})
+	peerCidrs := make([]string, len(peerCidrsRaw))
+	for i, peerCids := range peerCidrsRaw {
+		peerCidrs[i] = peerCids.(string)
 	}
 
 	adminStateUp := d.Get("admin_state_up").(bool)
@@ -194,7 +196,7 @@ func resourceVpnSiteConnectionV2Create(ctx context.Context, d *schema.ResourceDa
 
 	log.Printf("[DEBUG] Create site connection: %#v", createOpts)
 
-	conn, err := siteconnections.Create(networkingClient, createOpts).Extract()
+	conn, err := siteconnections.Create(client, createOpts).Extract()
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -202,13 +204,11 @@ func resourceVpnSiteConnectionV2Create(ctx context.Context, d *schema.ResourceDa
 	stateConf := &resource.StateChangeConf{
 		Pending:    []string{"NOT_CREATED"},
 		Target:     []string{"PENDING_CREATE"},
-		Refresh:    waitForSiteConnectionCreation(networkingClient, conn.ID),
+		Refresh:    waitForSiteConnectionCreation(client, conn.ID),
 		Timeout:    d.Timeout(schema.TimeoutCreate),
-		Delay:      0,
 		MinTimeout: 2 * time.Second,
 	}
 	_, err = stateConf.WaitForStateContext(ctx)
-
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -220,30 +220,36 @@ func resourceVpnSiteConnectionV2Create(ctx context.Context, d *schema.ResourceDa
 	// create tags
 	tagRaw := d.Get("tags").(map[string]interface{})
 	if len(tagRaw) > 0 {
-		taglist := common.ExpandResourceTags(tagRaw)
-		if tagErr := tags.Create(networkingClient, "ipsec-site-connections", d.Id(), taglist).ExtractErr(); tagErr != nil {
-			return fmterr.Errorf("error setting tags of VPN site connection %s: %s", d.Id(), tagErr)
+		tagList := common.ExpandResourceTags(tagRaw)
+		if err := tags.Create(client, "ipsec-site-connections", d.Id(), tagList).ExtractErr(); err != nil {
+			return fmterr.Errorf("error setting tags of VPN site connection %s: %s", d.Id(), err)
 		}
 	}
 
 	return resourceVpnSiteConnectionV2Read(ctx, d, meta)
 }
 
-func resourceVpnSiteConnectionV2Read(_ context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	log.Printf("[DEBUG] Retrieve information about site connection: %s", d.Id())
-
+func resourceVpnSiteConnectionV2Read(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*cfg.Config)
-	networkingClient, err := config.NetworkingV2Client(config.GetRegion(d))
+	client, err := common.ClientFromCtx(ctx, keyClientV2, func() (*golangsdk.ServiceClient, error) {
+		return config.NetworkingV2Client(config.GetRegion(d))
+	})
 	if err != nil {
-		return fmterr.Errorf("error creating OpenTelekomCloud networking client: %s", err)
+		return fmterr.Errorf(errCreationV2Client, err)
 	}
 
-	conn, err := siteconnections.Get(networkingClient, d.Id()).Extract()
+	conn, err := siteconnections.Get(client, d.Id()).Extract()
 	if err != nil {
 		return common.CheckDeletedDiag(d, err, "site_connection")
 	}
 
 	log.Printf("[DEBUG] Read OpenTelekomCloud SiteConnection %s: %#v", d.Id(), conn)
+
+	dpd := []map[string]interface{}{{
+		"action":   conn.DPD.Action,
+		"interval": conn.DPD.Interval,
+		"timeout":  conn.DPD.Timeout,
+	}}
 
 	mErr := multierror.Append(
 		d.Set("name", conn.Name),
@@ -263,30 +269,20 @@ func resourceVpnSiteConnectionV2Read(_ context.Context, d *schema.ResourceData, 
 		// d.Set("psk", conn.PSK)
 		d.Set("mtu", conn.MTU),
 		d.Set("peer_cidrs", conn.PeerCIDRs),
+		d.Set("dpd", &dpd),
 	)
 
 	if err := mErr.ErrorOrNil(); err != nil {
 		return diag.FromErr(err)
 	}
 
-	// Set the dpd
-	dpd := []map[string]interface{}{{
-		"action":   conn.DPD.Action,
-		"interval": conn.DPD.Interval,
-		"timeout":  conn.DPD.Timeout,
-	}}
-	if err := d.Set("dpd", &dpd); err != nil {
-		log.Printf("[WARN] unable to set Site connection DPD")
-	}
-
 	// Set tags
-	resourceTags, err := tags.Get(networkingClient, "ipsec-site-connections", d.Id()).Extract()
+	resourceTags, err := tags.Get(client, "ipsec-site-connections", d.Id()).Extract()
 	if err != nil {
 		return fmterr.Errorf("error fetching VPN site connection tags: %s", err)
 	}
-
-	tagmap := common.TagsToMap(resourceTags)
-	if err := d.Set("tags", tagmap); err != nil {
+	tagMap := common.TagsToMap(resourceTags)
+	if err := d.Set("tags", tagMap); err != nil {
 		return fmterr.Errorf("error saving tags for VPN site connection %s: %s", d.Id(), err)
 	}
 
@@ -295,9 +291,11 @@ func resourceVpnSiteConnectionV2Read(_ context.Context, d *schema.ResourceData, 
 
 func resourceVpnSiteConnectionV2Update(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*cfg.Config)
-	networkingClient, err := config.NetworkingV2Client(config.GetRegion(d))
+	client, err := common.ClientFromCtx(ctx, keyClientV2, func() (*golangsdk.ServiceClient, error) {
+		return config.NetworkingV2Client(config.GetRegion(d))
+	})
 	if err != nil {
-		return fmterr.Errorf("error creating OpenTelekomCloud networking client: %s", err)
+		return fmterr.Errorf(errCreationV2Client, err)
 	}
 
 	opts := siteconnections.UpdateOpts{}
@@ -376,20 +374,20 @@ func resourceVpnSiteConnectionV2Update(ctx context.Context, d *schema.ResourceDa
 	log.Printf("[DEBUG] Updating site connection with id %s: %#v", d.Id(), opts)
 
 	if hasChange {
-		conn, err := siteconnections.Update(networkingClient, d.Id(), opts).Extract()
+		conn, err := siteconnections.Update(client, d.Id(), opts).Extract()
 		if err != nil {
 			return diag.FromErr(err)
 		}
+
 		stateConf := &resource.StateChangeConf{
 			Pending:    []string{"PENDING_UPDATE"},
 			Target:     []string{"UPDATED"},
-			Refresh:    waitForSiteConnectionUpdate(networkingClient, conn.ID),
-			Timeout:    d.Timeout(schema.TimeoutCreate),
-			Delay:      0,
+			Refresh:    waitForSiteConnectionUpdate(client, conn.ID),
+			Timeout:    d.Timeout(schema.TimeoutUpdate),
 			MinTimeout: 2 * time.Second,
 		}
-		_, err = stateConf.WaitForStateContext(ctx)
 
+		_, err = stateConf.WaitForStateContext(ctx)
 		if err != nil {
 			return diag.FromErr(err)
 		}
@@ -398,46 +396,47 @@ func resourceVpnSiteConnectionV2Update(ctx context.Context, d *schema.ResourceDa
 	}
 
 	// update tags
-	tagErr := common.UpdateResourceTags(networkingClient, d, "ipsec-site-connections", d.Id())
-	if tagErr != nil {
-		return fmterr.Errorf("error updating tags of VPN site connection %s: %s", d.Id(), tagErr)
+	if d.HasChange("tags") {
+		if err := common.UpdateResourceTags(client, d, "ipsec-site-connections", d.Id()); err != nil {
+			return fmterr.Errorf("error updating tags of VPN site connection %s: %s", d.Id(), err)
+		}
 	}
 
 	return resourceVpnSiteConnectionV2Read(ctx, d, meta)
 }
 
 func resourceVpnSiteConnectionV2Delete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	log.Printf("[DEBUG] Destroy service: %s", d.Id())
-
 	config := meta.(*cfg.Config)
-	networkingClient, err := config.NetworkingV2Client(config.GetRegion(d))
+	client, err := common.ClientFromCtx(ctx, keyClientV2, func() (*golangsdk.ServiceClient, error) {
+		return config.NetworkingV2Client(config.GetRegion(d))
+	})
 	if err != nil {
-		return fmterr.Errorf("error creating OpenTelekomCloud networking client: %s", err)
+		return fmterr.Errorf(errCreationV2Client, err)
 	}
 
-	err = siteconnections.Delete(networkingClient, d.Id()).Err
-
-	if err != nil {
+	if err := siteconnections.Delete(client, d.Id()).ExtractErr(); err != nil {
 		return diag.FromErr(err)
 	}
 
 	stateConf := &resource.StateChangeConf{
 		Pending:    []string{"DELETING"},
 		Target:     []string{"DELETED"},
-		Refresh:    waitForSiteConnectionDeletion(networkingClient, d.Id()),
+		Refresh:    waitForSiteConnectionDeletion(client, d.Id()),
 		Timeout:    d.Timeout(schema.TimeoutDelete),
-		Delay:      0,
 		MinTimeout: 2 * time.Second,
 	}
 
 	_, err = stateConf.WaitForStateContext(ctx)
+	if err != nil {
+		return diag.FromErr(err)
+	}
 
-	return diag.FromErr(err)
+	return nil
 }
 
-func waitForSiteConnectionDeletion(networkingClient *golangsdk.ServiceClient, id string) resource.StateRefreshFunc {
+func waitForSiteConnectionDeletion(client *golangsdk.ServiceClient, id string) resource.StateRefreshFunc {
 	return func() (interface{}, string, error) {
-		conn, err := siteconnections.Get(networkingClient, id).Extract()
+		conn, err := siteconnections.Get(client, id).Extract()
 		log.Printf("[DEBUG] Got site connection %s => %#v", id, conn)
 
 		if err != nil {
@@ -453,9 +452,9 @@ func waitForSiteConnectionDeletion(networkingClient *golangsdk.ServiceClient, id
 	}
 }
 
-func waitForSiteConnectionCreation(networkingClient *golangsdk.ServiceClient, id string) resource.StateRefreshFunc {
+func waitForSiteConnectionCreation(client *golangsdk.ServiceClient, id string) resource.StateRefreshFunc {
 	return func() (interface{}, string, error) {
-		service, err := siteconnections.Get(networkingClient, id).Extract()
+		service, err := siteconnections.Get(client, id).Extract()
 		if err != nil {
 			return "", "NOT_CREATED", nil
 		}
@@ -463,9 +462,9 @@ func waitForSiteConnectionCreation(networkingClient *golangsdk.ServiceClient, id
 	}
 }
 
-func waitForSiteConnectionUpdate(networkingClient *golangsdk.ServiceClient, id string) resource.StateRefreshFunc {
+func waitForSiteConnectionUpdate(client *golangsdk.ServiceClient, id string) resource.StateRefreshFunc {
 	return func() (interface{}, string, error) {
-		conn, err := siteconnections.Get(networkingClient, id).Extract()
+		conn, err := siteconnections.Get(client, id).Extract()
 		if err != nil {
 			return "", "PENDING_UPDATE", nil
 		}
@@ -473,9 +472,9 @@ func waitForSiteConnectionUpdate(networkingClient *golangsdk.ServiceClient, id s
 	}
 }
 
-func resourceSiteConnectionV2Initiator(initatorString string) siteconnections.Initiator {
+func resourceSiteConnectionV2Initiator(initiatorString string) siteconnections.Initiator {
 	var ini siteconnections.Initiator
-	switch initatorString {
+	switch initiatorString {
 	case "bi-directional":
 		ini = siteconnections.InitiatorBiDirectional
 	case "response-only":
