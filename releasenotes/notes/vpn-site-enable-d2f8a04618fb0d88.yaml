@@ -1,0 +1,4 @@
+---
+enhancements:
+  - |
+    **[VPN]** Make ``resource/opentelekomcloud_vpnaas_site_connection_v2`` enabled by default (`#1743 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/1743>`_)
