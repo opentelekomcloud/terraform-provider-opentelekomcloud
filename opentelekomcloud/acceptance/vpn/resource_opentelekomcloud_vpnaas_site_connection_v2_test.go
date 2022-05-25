@@ -41,6 +41,27 @@ func TestAccVpnSiteConnectionV2_basic(t *testing.T) {
 	})
 }
 
+func TestAccVpnSiteConnectionV2_import(t *testing.T) {
+	resource.Test(t, resource.TestCase{
+		PreCheck:          func() { common.TestAccPreCheck(t) },
+		ProviderFactories: common.TestAccProviderFactories,
+		CheckDestroy:      testAccCheckSiteConnectionV2Destroy,
+		Steps: []resource.TestStep{
+			{
+				Config: testAccSiteConnectionV2Basic,
+			},
+			{
+				ResourceName:      resourceSiteConnectionName,
+				ImportState:       true,
+				ImportStateVerify: true,
+				ImportStateVerifyIgnore: []string{
+					"psk",
+				},
+			},
+		},
+	})
+}
+
 func testAccCheckSiteConnectionV2Destroy(s *terraform.State) error {
 	config := common.TestAccProvider.Meta().(*cfg.Config)
 	client, err := config.NetworkingV2Client(env.OS_REGION_NAME)
