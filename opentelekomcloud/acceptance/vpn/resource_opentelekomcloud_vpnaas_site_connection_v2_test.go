@@ -2,17 +2,17 @@ package acceptance
 
 import (
 	"fmt"
-	"strconv"
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
-	golangsdk "github.com/opentelekomcloud/gophertelekomcloud"
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/networking/v2/extensions/vpnaas/siteconnections"
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/acceptance/common"
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/acceptance/env"
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common/cfg"
 )
+
+const resourceSiteConnectionName = "opentelekomcloud_vpnaas_site_connection_v2.conn_1"
 
 func TestAccVpnSiteConnectionV2_basic(t *testing.T) {
 	var conn siteconnections.Connection
@@ -24,19 +24,39 @@ func TestAccVpnSiteConnectionV2_basic(t *testing.T) {
 			{
 				Config: testAccSiteConnectionV2Basic,
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckSiteConnectionV2Exists(
-						"opentelekomcloud_vpnaas_site_connection_v2.conn_1", &conn),
-					resource.TestCheckResourceAttrPtr("opentelekomcloud_vpnaas_site_connection_v2.conn_1", "ikepolicy_id", &conn.IKEPolicyID),
-					resource.TestCheckResourceAttr("opentelekomcloud_vpnaas_site_connection_v2.conn_1", "admin_state_up", strconv.FormatBool(conn.AdminStateUp)),
-					resource.TestCheckResourceAttr("opentelekomcloud_vpnaas_site_connection_v2.conn_1", "tags.foo", "bar"),
-					resource.TestCheckResourceAttr("opentelekomcloud_vpnaas_site_connection_v2.conn_1", "tags.key", "value"),
-					resource.TestCheckResourceAttrPtr("opentelekomcloud_vpnaas_site_connection_v2.conn_1", "ipsecpolicy_id", &conn.IPSecPolicyID),
-					resource.TestCheckResourceAttrPtr("opentelekomcloud_vpnaas_site_connection_v2.conn_1", "vpnservice_id", &conn.VPNServiceID),
-					resource.TestCheckResourceAttrPtr("opentelekomcloud_vpnaas_site_connection_v2.conn_1", "local_ep_group_id", &conn.LocalEPGroupID),
-					resource.TestCheckResourceAttrPtr("opentelekomcloud_vpnaas_site_connection_v2.conn_1", "local_id", &conn.LocalID),
-					resource.TestCheckResourceAttrPtr("opentelekomcloud_vpnaas_site_connection_v2.conn_1", "peer_ep_group_id", &conn.PeerEPGroupID),
-					resource.TestCheckResourceAttrPtr("opentelekomcloud_vpnaas_site_connection_v2.conn_1", "name", &conn.Name),
+					testAccCheckSiteConnectionV2Exists(resourceSiteConnectionName, &conn),
+					resource.TestCheckResourceAttrPtr(resourceSiteConnectionName, "ikepolicy_id", &conn.IKEPolicyID),
+					resource.TestCheckResourceAttr(resourceSiteConnectionName, "admin_state_up", "true"),
+					resource.TestCheckResourceAttr(resourceSiteConnectionName, "tags.foo", "bar"),
+					resource.TestCheckResourceAttr(resourceSiteConnectionName, "tags.key", "value"),
+					resource.TestCheckResourceAttrPtr(resourceSiteConnectionName, "ipsecpolicy_id", &conn.IPSecPolicyID),
+					resource.TestCheckResourceAttrPtr(resourceSiteConnectionName, "vpnservice_id", &conn.VPNServiceID),
+					resource.TestCheckResourceAttrPtr(resourceSiteConnectionName, "local_ep_group_id", &conn.LocalEPGroupID),
+					resource.TestCheckResourceAttrPtr(resourceSiteConnectionName, "local_id", &conn.LocalID),
+					resource.TestCheckResourceAttrPtr(resourceSiteConnectionName, "peer_ep_group_id", &conn.PeerEPGroupID),
+					resource.TestCheckResourceAttrPtr(resourceSiteConnectionName, "name", &conn.Name),
 				),
+			},
+		},
+	})
+}
+
+func TestAccVpnSiteConnectionV2_import(t *testing.T) {
+	resource.Test(t, resource.TestCase{
+		PreCheck:          func() { common.TestAccPreCheck(t) },
+		ProviderFactories: common.TestAccProviderFactories,
+		CheckDestroy:      testAccCheckSiteConnectionV2Destroy,
+		Steps: []resource.TestStep{
+			{
+				Config: testAccSiteConnectionV2Basic,
+			},
+			{
+				ResourceName:      resourceSiteConnectionName,
+				ImportState:       true,
+				ImportStateVerify: true,
+				ImportStateVerifyIgnore: []string{
+					"psk",
+				},
 			},
 		},
 	})
@@ -44,20 +64,18 @@ func TestAccVpnSiteConnectionV2_basic(t *testing.T) {
 
 func testAccCheckSiteConnectionV2Destroy(s *terraform.State) error {
 	config := common.TestAccProvider.Meta().(*cfg.Config)
-	networkingClient, err := config.NetworkingV2Client(env.OS_REGION_NAME)
+	client, err := config.NetworkingV2Client(env.OS_REGION_NAME)
 	if err != nil {
-		return fmt.Errorf("error creating OpenTelekomCloud networking client: %s", err)
+		return fmt.Errorf("error creating OpenTelekomCloud NetworkingV2 client: %s", err)
 	}
+
 	for _, rs := range s.RootModule().Resources {
-		if rs.Type != "opentelekomcloud_vpnaas_site_connection" {
+		if rs.Type != "opentelekomcloud_vpnaas_site_connection_v2" {
 			continue
 		}
-		_, err = siteconnections.Get(networkingClient, rs.Primary.ID).Extract()
+		_, err = siteconnections.Get(client, rs.Primary.ID).Extract()
 		if err == nil {
-			return fmt.Errorf("site connection (%s) still exists.", rs.Primary.ID)
-		}
-		if _, ok := err.(golangsdk.ErrDefault404); !ok {
-			return err
+			return fmt.Errorf("site connection (%s) still exists", rs.Primary.ID)
 		}
 	}
 	return nil
@@ -75,17 +93,18 @@ func testAccCheckSiteConnectionV2Exists(n string, conn *siteconnections.Connecti
 		}
 
 		config := common.TestAccProvider.Meta().(*cfg.Config)
-		networkingClient, err := config.NetworkingV2Client(env.OS_REGION_NAME)
+		client, err := config.NetworkingV2Client(env.OS_REGION_NAME)
 		if err != nil {
-			return fmt.Errorf("error creating OpenTelekomCloud networking client: %s", err)
+			return fmt.Errorf("error creating OpenTelekomCloud NetworkingV2 client: %s", err)
 		}
 
 		var found *siteconnections.Connection
 
-		found, err = siteconnections.Get(networkingClient, rs.Primary.ID).Extract()
+		found, err = siteconnections.Get(client, rs.Primary.ID).Extract()
 		if err != nil {
 			return err
 		}
+
 		*conn = *found
 
 		return nil
@@ -95,37 +114,14 @@ func testAccCheckSiteConnectionV2Exists(n string, conn *siteconnections.Connecti
 var testAccSiteConnectionV2Basic = fmt.Sprintf(`
 %s
 
-resource "opentelekomcloud_networking_network_v2" "network_1" {
-  name           = "tf_test_network"
-  admin_state_up = "true"
-}
-
-resource "opentelekomcloud_networking_subnet_v2" "subnet_1" {
-  network_id = opentelekomcloud_networking_network_v2.network_1.id
-  cidr       = "192.168.199.0/24"
-  ip_version = 4
-}
-
-resource "opentelekomcloud_networking_router_v2" "router_1" {
-  name             = "my_router"
-  external_gateway = data.opentelekomcloud_networking_network_v2.ext_network.id
-}
-
-resource "opentelekomcloud_networking_router_interface_v2" "router_interface_1" {
-  router_id = opentelekomcloud_networking_router_v2.router_1.id
-  subnet_id = opentelekomcloud_networking_subnet_v2.subnet_1.id
-}
-
 resource "opentelekomcloud_vpnaas_service_v2" "service_1" {
-  router_id      = opentelekomcloud_networking_router_v2.router_1.id
-  admin_state_up = "false"
+  router_id      = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.vpc_id
+  admin_state_up = true
 }
 
-resource "opentelekomcloud_vpnaas_ipsec_policy_v2" "policy_1" {
-}
+resource "opentelekomcloud_vpnaas_ipsec_policy_v2" "policy_1" {}
 
-resource "opentelekomcloud_vpnaas_ike_policy_v2" "policy_2" {
-}
+resource "opentelekomcloud_vpnaas_ike_policy_v2" "policy_2" {}
 
 resource "opentelekomcloud_vpnaas_endpoint_group_v2" "group_1" {
   type      = "cidr"
@@ -133,7 +129,7 @@ resource "opentelekomcloud_vpnaas_endpoint_group_v2" "group_1" {
 }
 resource "opentelekomcloud_vpnaas_endpoint_group_v2" "group_2" {
   type      = "subnet"
-  endpoints = [opentelekomcloud_networking_subnet_v2.subnet_1.id]
+  endpoints = [data.opentelekomcloud_vpc_subnet_v1.shared_subnet.subnet_id]
 }
 
 resource "opentelekomcloud_vpnaas_site_connection_v2" "conn_1" {
@@ -151,7 +147,5 @@ resource "opentelekomcloud_vpnaas_site_connection_v2" "conn_1" {
     foo = "bar"
     key = "value"
   }
-
-  depends_on = ["opentelekomcloud_networking_router_interface_v2.router_interface_1"]
 }
-`, common.DataSourceExtNetwork)
+`, common.DataSourceSubnet)
