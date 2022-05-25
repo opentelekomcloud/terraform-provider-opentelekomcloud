@@ -119,9 +119,9 @@ resource "opentelekomcloud_vpnaas_service_v2" "service_1" {
   admin_state_up = true
 }
 
-resource "opentelekomcloud_vpnaas_ipsec_policy_v2" "policy_1" { }
+resource "opentelekomcloud_vpnaas_ipsec_policy_v2" "policy_1" {}
 
-resource "opentelekomcloud_vpnaas_ike_policy_v2" "policy_2" { }
+resource "opentelekomcloud_vpnaas_ike_policy_v2" "policy_2" {}
 
 resource "opentelekomcloud_vpnaas_endpoint_group_v2" "group_1" {
   type      = "cidr"
