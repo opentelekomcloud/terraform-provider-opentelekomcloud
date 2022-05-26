@@ -226,7 +226,8 @@ func resourceVpnSiteConnectionV2Create(ctx context.Context, d *schema.ResourceDa
 		}
 	}
 
-	return resourceVpnSiteConnectionV2Read(ctx, d, meta)
+	clientCtx := common.CtxWithClient(ctx, client, keyClientV2)
+	return resourceVpnSiteConnectionV2Read(clientCtx, d, meta)
 }
 
 func resourceVpnSiteConnectionV2Read(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
@@ -402,7 +403,8 @@ func resourceVpnSiteConnectionV2Update(ctx context.Context, d *schema.ResourceDa
 		}
 	}
 
-	return resourceVpnSiteConnectionV2Read(ctx, d, meta)
+	clientCtx := common.CtxWithClient(ctx, client, keyClientV2)
+	return resourceVpnSiteConnectionV2Read(clientCtx, d, meta)
 }
 
 func resourceVpnSiteConnectionV2Delete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
