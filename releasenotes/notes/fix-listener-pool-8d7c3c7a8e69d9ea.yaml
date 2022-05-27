@@ -1,0 +1,4 @@
+---
+fixes:
+  - |
+    **[ELB]** Fix issue with ``null`` value of ``default_pool_id`` in ``resource/opentelekomcloud_lb_listener_v3`` (`#1746 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/1746>`_)

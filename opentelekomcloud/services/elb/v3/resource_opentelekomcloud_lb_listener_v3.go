@@ -50,6 +50,7 @@ func ResourceListenerV3() *schema.Resource {
 			"default_pool_id": {
 				Type:     schema.TypeString,
 				Optional: true,
+				Computed: true,
 			},
 			"default_tls_container_ref": {
 				Type:     schema.TypeString,
