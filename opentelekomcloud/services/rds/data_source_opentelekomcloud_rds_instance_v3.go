@@ -60,6 +60,7 @@ func DataSourceRdsInstanceV3() *schema.Resource {
 			"id": {
 				Type:     schema.TypeString,
 				Computed: true,
+				Optional: true,
 			},
 			"security_group_id": {
 				Type:     schema.TypeString,
@@ -98,22 +99,6 @@ func DataSourceRdsInstanceV3() *schema.Resource {
 			"disk_encryption_id": {
 				Type:     schema.TypeString,
 				Computed: true,
-			},
-			"volume": {
-				Type:     schema.TypeList,
-				Computed: true,
-				Elem: &schema.Resource{
-					Schema: map[string]*schema.Schema{
-						"size": {
-							Type:     schema.TypeInt,
-							Computed: true,
-						},
-						"type": {
-							Type:     schema.TypeString,
-							Computed: true,
-						},
-					},
-				},
 			},
 			"volume_type": {
 				Type:     schema.TypeString,

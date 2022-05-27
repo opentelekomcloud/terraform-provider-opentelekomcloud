@@ -2,7 +2,6 @@ package acceptance
 
 import (
 	"fmt"
-	"regexp"
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/acctest"
@@ -23,7 +22,6 @@ func TestAccRdsInstanceDataSource_basic(t *testing.T) {
 			{
 				Config: testAccRdsInstanceDataSource_basic(postfix),
 				Check: resource.ComposeTestCheckFunc(
-					resource.TestMatchResourceAttr(dataSourceName, "instances.#", regexp.MustCompile(`\d+`)),
 					resource.TestCheckResourceAttrSet(dataSourceName, "instances.0.name"),
 				),
 			},
