@@ -555,7 +555,7 @@ func assureTemplateApplied(d *schema.ResourceData, client *golangsdk.ServiceClie
 }
 
 func restartInstance(d *schema.ResourceData, client *golangsdk.ServiceClient) error {
-	job, err := instances.Restart(client, instances.RestartRdsInstanceOpts{Restart: "{}"}, d.Id()).Extract()
+	job, err := instances.Restart(client, instances.RestartRdsInstanceOpts{}, d.Id()).Extract()
 	if err != nil {
 		return fmt.Errorf("error restarting RDS instance: %w", err)
 	}
