@@ -1,0 +1,4 @@
+---
+fixes:
+  - |
+    **[RDS]** Fix issue with ``Restart`` call in ``resource/opentelekomcloud_rds_instance_v3`` (`#1747 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/1747>`_)
