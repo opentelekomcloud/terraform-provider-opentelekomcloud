@@ -4,6 +4,7 @@ subcategory: "Relational Database Service (RDS)"
 
 # opentelekomcloud_rds_instance_v3
 
+Use the `opentelekomcloud_rds_instance_v3` datasource to query DB instances according to search criteria.
 
 ## Example Usage
 
