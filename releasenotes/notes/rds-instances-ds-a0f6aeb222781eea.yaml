@@ -1,0 +1,5 @@
+---
+features:
+  - |
+    **New Data Source:** Add ``opentelekomcloud_rds_instance_v3``
+    (`#1739 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/1739>`_)

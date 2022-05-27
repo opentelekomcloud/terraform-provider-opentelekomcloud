@@ -539,7 +539,7 @@ func assureTemplateApplied(d *schema.ResourceData, client *golangsdk.ServiceClie
 	needsReapply := false
 	for _, val := range current.Parameters {
 		param, ok := appliedParams[val.Name]
-		if !ok { // than it's not from the template
+		if !ok { // Then it's not from the template
 			continue
 		}
 		if val.Value != param.Value {
@@ -848,7 +848,7 @@ func resourceRdsInstanceV3Update(ctx context.Context, d *schema.ResourceData, me
 		newIPs := newPublicIps.([]interface{})
 		switch len(newIPs) {
 		case 0:
-			err := unAssignEipFromInstance(nwClient, oldIPs[0].(string)) // if it become 0, it was 1 before
+			err := unAssignEipFromInstance(nwClient, oldIPs[0].(string)) // if it becomes 0, it was 1 before
 			if err != nil {
 				return diag.FromErr(err)
 			}
@@ -1097,7 +1097,7 @@ func resourceRdsInstanceV3Delete(_ context.Context, d *schema.ResourceData, meta
 
 	_, err = instances.Delete(client, d.Id()).Extract()
 	if err != nil {
-		return fmterr.Errorf("eror deleting OpenTelekomCloud RDSv3 instance: %s", err)
+		return fmterr.Errorf("error deleting OpenTelekomCloud RDSv3 instance: %s", err)
 	}
 
 	d.SetId("")
