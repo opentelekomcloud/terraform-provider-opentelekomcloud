@@ -22,7 +22,10 @@ func TestAccRdsInstanceDataSource_basic(t *testing.T) {
 			{
 				Config: testAccRdsInstanceDataSource_basic(postfix),
 				Check: resource.ComposeTestCheckFunc(
-					resource.TestCheckResourceAttrSet(dataSourceName, "instances.0.name"),
+					resource.TestCheckResourceAttrSet(dataSourceName, "name"),
+					resource.TestCheckResourceAttr(dataSourceName, "datastore_type", "PostgreSQL"),
+					resource.TestCheckResourceAttr(dataSourceName, "port", "8635"),
+					resource.TestCheckResourceAttr(dataSourceName, "flavor", "rds.pg.c2.medium"),
 				),
 			},
 		},
