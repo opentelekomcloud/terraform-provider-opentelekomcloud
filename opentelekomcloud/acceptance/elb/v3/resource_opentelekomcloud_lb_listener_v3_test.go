@@ -7,8 +7,6 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/elb/v3/listeners"
-	"github.com/opentelekomcloud/gophertelekomcloud/openstack/elb/v3/pools"
-	th "github.com/opentelekomcloud/gophertelekomcloud/testhelper"
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/acceptance/common"
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/acceptance/common/quotas"
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/acceptance/env"
@@ -47,43 +45,6 @@ func TestAccLBV3Listener_basic(t *testing.T) {
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr(resourceListenerName, "name", "listener_1_updated"),
 					resource.TestCheckResourceAttr(resourceListenerName, "description", ""),
-				),
-			},
-		},
-	})
-}
-
-func TestAccLBV3Listener_withPool(t *testing.T) {
-	var listener listeners.Listener
-
-	t.Parallel()
-	qts := []*quotas.ExpectedQuota{
-		{Q: quotas.LbCertificate, Count: 1},
-		{Q: quotas.LoadBalancer, Count: 1},
-		{Q: quotas.LbListener, Count: 1},
-	}
-	quotas.BookMany(t, qts)
-
-	resource.Test(t, resource.TestCase{
-		PreCheck:          func() { common.TestAccPreCheck(t) },
-		ProviderFactories: common.TestAccProviderFactories,
-		CheckDestroy:      testAccCheckLBV3ListenerDestroy,
-		Steps: []resource.TestStep{
-			{
-				Config: testAccLBV3ListenerConfigBasic,
-				Check: resource.ComposeTestCheckFunc(
-					testAccCheckLBV3ListenerExists(resourceListenerName, &listener),
-					resource.TestCheckResourceAttr(resourceListenerName, "name", "listener_1"),
-					resource.TestCheckResourceAttr(resourceListenerName, "description", "some interesting description"),
-				),
-			},
-			{
-				PreConfig: func() {
-					addElbV3Pool(t, &listener.ID)
-				},
-				Config: testAccLBV3ListenerConfigBasic,
-				Check: resource.ComposeTestCheckFunc(
-					resource.TestCheckResourceAttr(resourceListenerName, "name", "listener_1"),
 				),
 			},
 		},
@@ -240,21 +201,6 @@ func testAccCheckLBV3ListenerExists(n string, listener *listeners.Listener) reso
 
 		return nil
 	}
-}
-
-func addElbV3Pool(t *testing.T, instanceID *string) {
-	config := common.TestAccProvider.Meta().(*cfg.Config)
-	client, err := config.ElbV3Client(env.OS_REGION_NAME)
-	th.AssertNoErr(t, err)
-
-	createOpts := pools.CreateOpts{
-		LBMethod:   "ROUND_ROBIN",
-		Protocol:   "HTTP",
-		ListenerID: *instanceID,
-	}
-
-	pool, err := pools.Create(client, createOpts).Extract()
-	th.AssertNoErr(t, err)
 }
 
 var testAccLBV3ListenerConfigBasic = fmt.Sprintf(`
