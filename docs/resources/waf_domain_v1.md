@@ -65,6 +65,8 @@ The following arguments are supported:
   * `cipher_2` - Cipher suite 2: Strict compliance with forward secrecy requirements of PCI DSS and excellent protection, but older browsers may be unable to access the websites
   * `cipher_3` - Cipher suite 3: Support for ECDHE, DHE-GCM, and RSA-AES-GCM algorithms but not CBC
 
+-> `сipher_2`  is not supported if `TLS v1.1` is selected.
+
 * `tls` - (Optional) Minimum TLS version for accessing the protected domain name  if `client_protocol` is set to `HTTPS`.
   Possible values are: `TLS v1.1` and `TLS v1.2`.
 
@@ -84,8 +86,6 @@ The `server` block supports:
   For example, `192.168.1.1` or `www.bla-bla.com`.
 
 * `port` - (Required) Port number used by the web server. The value ranges from `0` to `65535`, for example, `8080`.
-
--> `сipher_2`  is not supported if `TLS v1.1` is selected.
 
 ## Attributes Reference
 
