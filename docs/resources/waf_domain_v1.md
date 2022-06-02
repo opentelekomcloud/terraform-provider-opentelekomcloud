@@ -59,6 +59,15 @@ The following arguments are supported:
   * If `sip_header_name` is `akamai`, `sip_header_list` is `["True-Client-IP"]`.
   * If `sip_header_name` is `custom`, you can customize a value.
 
+* `cipher` - (Optional) Cipher suite to use with TLS. Possible values are:
+  * `cipher_default` - Default cipher suite: Good browser compatibility, most clients supported, sufficient for most scenarios
+  * `cipher_1` - Cipher suite 1: Recommended configuration, the best combination of compatibility and security
+  * `cipher_2` - Cipher suite 2: Strict compliance with forward secrecy requirements of PCI DSS and excellent protection, but older browsers may be unable to access the websites
+  * `cipher_3` - Cipher suite 3: Support for ECDHE, DHE-GCM, and RSA-AES-GCM algorithms but not CBC
+
+* `tls` - (Optional) Minimum TLS version for accessing the protected domain name  if `client_protocol` is set to `HTTPS`.
+  Possible values are: `TLS v1.1` and `TLS v1.2`.
+
 The `server` block supports:
 
 * `client_protocol` - (Optional) Protocol type of the client. The options are HTTP and HTTPS.
@@ -75,15 +84,6 @@ The `server` block supports:
   For example, `192.168.1.1` or `www.bla-bla.com`.
 
 * `port` - (Required) Port number used by the web server. The value ranges from `0` to `65535`, for example, `8080`.
-
-* `cipher` - (Optional) Cipher suite to use with TLS. Possible values are:
-  * `cipher_default` - Default cipher suite: Good browser compatibility, most clients supported, sufficient for most scenarios
-  * `cipher_1` - Cipher suite 1: Recommended configuration, the best combination of compatibility and security
-  * `cipher_2` - Cipher suite 2: Strict compliance with forward secrecy requirements of PCI DSS and excellent protection, but older browsers may be unable to access the websites
-  * `cipher_3` - Cipher suite 3: Support for ECDHE, DHE-GCM, and RSA-AES-GCM algorithms but not CBC
-
-* `tls` - (Optional) Minimum TLS version for accessing the protected domain name  if `client_protocol` is set to `HTTPS`.
-  Possible values are: `TLS v1.1` and `TLS v1.2`.
 
 -> `сipher_2`  is not supported if `TLS v1.1` is selected.
 
