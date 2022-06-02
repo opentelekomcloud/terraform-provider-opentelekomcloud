@@ -67,9 +67,11 @@ func ResourceNetworkingSecGroupV2() *schema.Resource {
 
 func resourceNetworkingSecGroupV2Create(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*cfg.Config)
-	networkingClient, err := config.NetworkingV2Client(config.GetRegion(d))
+	client, err := common.ClientFromCtx(ctx, keyClientV2, func() (*golangsdk.ServiceClient, error) {
+		return config.NetworkingV2Client(config.GetRegion(d))
+	})
 	if err != nil {
-		return fmterr.Errorf("error creating OpenTelekomCloud NetworkingV2 client: %s", err)
+		return fmterr.Errorf(errCreationV2Client, err)
 	}
 
 	opts := groups.CreateOpts{
@@ -80,7 +82,7 @@ func resourceNetworkingSecGroupV2Create(ctx context.Context, d *schema.ResourceD
 
 	log.Printf("[DEBUG] Create OpenTelekomCloud Neutron Security Group: %#v", opts)
 
-	securityGroup, err := groups.Create(networkingClient, opts).Extract()
+	securityGroup, err := groups.Create(client, opts).Extract()
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -88,12 +90,12 @@ func resourceNetworkingSecGroupV2Create(ctx context.Context, d *schema.ResourceD
 	// Delete the default security group rules if it has been requested.
 	deleteDefaultRules := d.Get("delete_default_rules").(bool)
 	if deleteDefaultRules {
-		securityGroup, err := groups.Get(networkingClient, securityGroup.ID).Extract()
+		securityGroup, err := groups.Get(client, securityGroup.ID).Extract()
 		if err != nil {
 			return diag.FromErr(err)
 		}
 		for _, rule := range securityGroup.Rules {
-			if err := rules.Delete(networkingClient, rule.ID).ExtractErr(); err != nil {
+			if err := rules.Delete(client, rule.ID).ExtractErr(); err != nil {
 				return fmterr.Errorf("there was a problem deleting a default security group rule: %s", err)
 			}
 		}
@@ -102,39 +104,47 @@ func resourceNetworkingSecGroupV2Create(ctx context.Context, d *schema.ResourceD
 
 	d.SetId(securityGroup.ID)
 
-	return resourceNetworkingSecGroupV2Read(ctx, d, meta)
+	clientCtx := common.CtxWithClient(ctx, client, keyClientV2)
+	return resourceNetworkingSecGroupV2Read(clientCtx, d, meta)
 }
 
-func resourceNetworkingSecGroupV2Read(_ context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	log.Printf("[DEBUG] Retrieve information about security group: %s", d.Id())
-
+func resourceNetworkingSecGroupV2Read(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*cfg.Config)
-	networkingClient, err := config.NetworkingV2Client(config.GetRegion(d))
+	client, err := common.ClientFromCtx(ctx, keyClientV2, func() (*golangsdk.ServiceClient, error) {
+		return config.NetworkingV2Client(config.GetRegion(d))
+	})
 	if err != nil {
-		return fmterr.Errorf("error creating OpenTelekomCloud NetworkingV2 client: %s", err)
+		return fmterr.Errorf(errCreationV2Client, err)
 	}
 
-	securityGroup, err := groups.Get(networkingClient, d.Id()).Extract()
+	securityGroup, err := groups.Get(client, d.Id()).Extract()
 	if err != nil {
 		return common.CheckDeletedDiag(d, err, "OpenTelekomCloud Neutron Security group")
 	}
 
-	me := multierror.Append(nil,
+	mErr := multierror.Append(nil,
 		d.Set("description", securityGroup.Description),
 		d.Set("tenant_id", securityGroup.TenantID),
 		d.Set("name", securityGroup.Name),
 		d.Set("region", config.GetRegion(d)),
 	)
 
-	return diag.FromErr(me.ErrorOrNil())
+	if err := mErr.ErrorOrNil(); err != nil {
+		return diag.FromErr(err)
+	}
+
+	return nil
 }
 
 func resourceNetworkingSecGroupV2Update(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*cfg.Config)
-	networkingClient, err := config.NetworkingV2Client(config.GetRegion(d))
+	client, err := common.ClientFromCtx(ctx, keyClientV2, func() (*golangsdk.ServiceClient, error) {
+		return config.NetworkingV2Client(config.GetRegion(d))
+	})
 	if err != nil {
-		return fmterr.Errorf("error creating OpenTelekomCloud Networkingv2 client: %s", err)
+		return fmterr.Errorf(errCreationV2Client, err)
 	}
+
 	var updateOpts groups.UpdateOpts
 
 	if d.HasChange("name") {
@@ -146,27 +156,28 @@ func resourceNetworkingSecGroupV2Update(ctx context.Context, d *schema.ResourceD
 	}
 
 	log.Printf("[DEBUG] Updating SecGroup %s with options: %#v", d.Id(), updateOpts)
-	_, err = groups.Update(networkingClient, d.Id(), updateOpts).Extract()
+	_, err = groups.Update(client, d.Id(), updateOpts).Extract()
 	if err != nil {
 		return fmterr.Errorf("error updating OpenTelekomCloud networking SecGroup: %s", err)
 	}
 
-	return resourceNetworkingSecGroupV2Read(ctx, d, meta)
+	clientCtx := common.CtxWithClient(ctx, client, keyClientV2)
+	return resourceNetworkingSecGroupV2Read(clientCtx, d, meta)
 }
 
 func resourceNetworkingSecGroupV2Delete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	log.Printf("[DEBUG] Destroy security group: %s", d.Id())
-
 	config := meta.(*cfg.Config)
-	networkingClient, err := config.NetworkingV2Client(config.GetRegion(d))
+	client, err := common.ClientFromCtx(ctx, keyClientV2, func() (*golangsdk.ServiceClient, error) {
+		return config.NetworkingV2Client(config.GetRegion(d))
+	})
 	if err != nil {
-		return fmterr.Errorf("error creating OpenTelekomCloud NetworkingV2 client: %s", err)
+		return fmterr.Errorf(errCreationV2Client, err)
 	}
 
 	stateConf := &resource.StateChangeConf{
 		Pending:    []string{"ACTIVE"},
 		Target:     []string{"DELETED"},
-		Refresh:    waitForSecGroupDelete(networkingClient, d.Id()),
+		Refresh:    waitForSecGroupDelete(client, d.Id()),
 		Timeout:    d.Timeout(schema.TimeoutDelete),
 		Delay:      5 * time.Second,
 		MinTimeout: 3 * time.Second,
@@ -178,14 +189,14 @@ func resourceNetworkingSecGroupV2Delete(ctx context.Context, d *schema.ResourceD
 	}
 
 	d.SetId("")
-	return diag.FromErr(err)
+	return nil
 }
 
-func waitForSecGroupDelete(networkingClient *golangsdk.ServiceClient, secGroupId string) resource.StateRefreshFunc {
+func waitForSecGroupDelete(client *golangsdk.ServiceClient, secGroupId string) resource.StateRefreshFunc {
 	return func() (interface{}, string, error) {
 		log.Printf("[DEBUG] Attempting to delete OpenTelekomCloud Security Group %s.\n", secGroupId)
 
-		r, err := groups.Get(networkingClient, secGroupId).Extract()
+		r, err := groups.Get(client, secGroupId).Extract()
 		if err != nil {
 			if _, ok := err.(golangsdk.ErrDefault404); ok {
 				log.Printf("[DEBUG] Successfully deleted OpenTelekomCloud Neutron Security Group %s", secGroupId)
@@ -194,7 +205,7 @@ func waitForSecGroupDelete(networkingClient *golangsdk.ServiceClient, secGroupId
 			return r, "ACTIVE", err
 		}
 
-		err = groups.Delete(networkingClient, secGroupId).ExtractErr()
+		err = groups.Delete(client, secGroupId).ExtractErr()
 		if err != nil {
 			if _, ok := err.(golangsdk.ErrDefault404); ok {
 				log.Printf("[DEBUG] Successfully deleted OpenTelekomCloud Neutron Security Group %s", secGroupId)

@@ -1,0 +1,4 @@
+---
+enhancements:
+  - |
+    **[VPC]** Fix issue with throttling in ``resource/opentelekomcloud_networking_secgroup_rule_v2`` and ``resource/opentelekomcloud_networking_secgroup_v2`` (`#1754 <https://github.com/opentelekomcloud/terraform-provider-opentelekomcloud/pull/1754>`_)
