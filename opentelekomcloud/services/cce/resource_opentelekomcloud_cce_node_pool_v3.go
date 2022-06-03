@@ -272,7 +272,9 @@ func resourceCCENodePoolUserTags(d *schema.ResourceData) []tags.ResourceTag {
 
 func resourceCCENodePoolV3Create(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*cfg.Config)
-	client, err := config.CceV3Client(config.GetRegion(d))
+	client, err := common.ClientFromCtx(ctx, keyClientV3, func() (*golangsdk.ServiceClient, error) {
+		return config.CceV3Client(config.GetRegion(d))
+	})
 	if err != nil {
 		return fmterr.Errorf(cceClientError, err)
 	}
@@ -386,12 +388,15 @@ func resourceCCENodePoolV3Create(ctx context.Context, d *schema.ResourceData, me
 		return fmterr.Errorf(createError, err)
 	}
 
-	return resourceCCENodePoolV3Read(ctx, d, meta)
+	clientCtx := common.CtxWithClient(ctx, client, keyClientV3)
+	return resourceCCENodePoolV3Read(clientCtx, d, meta)
 }
 
-func resourceCCENodePoolV3Read(_ context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceCCENodePoolV3Read(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*cfg.Config)
-	client, err := config.CceV3Client(config.GetRegion(d))
+	client, err := common.ClientFromCtx(ctx, keyClientV3, func() (*golangsdk.ServiceClient, error) {
+		return config.CceV3Client(config.GetRegion(d))
+	})
 	if err != nil {
 		return fmterr.Errorf(cceClientError, err)
 	}
@@ -466,10 +471,13 @@ func resourceCCENodePoolV3Read(_ context.Context, d *schema.ResourceData, meta i
 
 func resourceCCENodePoolV3Update(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*cfg.Config)
-	client, err := config.CceV3Client(config.GetRegion(d))
+	client, err := common.ClientFromCtx(ctx, keyClientV3, func() (*golangsdk.ServiceClient, error) {
+		return config.CceV3Client(config.GetRegion(d))
+	})
 	if err != nil {
 		return fmterr.Errorf(cceClientError, err)
 	}
+
 	updateOpts := nodepools.UpdateOpts{
 		Kind:       "NodePool",
 		ApiVersion: "v3",
@@ -511,12 +519,15 @@ func resourceCCENodePoolV3Update(ctx context.Context, d *schema.ResourceData, me
 		return fmterr.Errorf("error waiting for Open Telekom Cloud CCE Node Pool to update: %w", err)
 	}
 
-	return resourceCCENodePoolV3Read(ctx, d, meta)
+	clientCtx := common.CtxWithClient(ctx, client, keyClientV3)
+	return resourceCCENodePoolV3Read(clientCtx, d, meta)
 }
 
 func resourceCCENodePoolV3Delete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*cfg.Config)
-	client, err := config.CceV3Client(config.GetRegion(d))
+	client, err := common.ClientFromCtx(ctx, keyClientV3, func() (*golangsdk.ServiceClient, error) {
+		return config.CceV3Client(config.GetRegion(d))
+	})
 	if err != nil {
 		return fmterr.Errorf(cceClientError, err)
 	}
