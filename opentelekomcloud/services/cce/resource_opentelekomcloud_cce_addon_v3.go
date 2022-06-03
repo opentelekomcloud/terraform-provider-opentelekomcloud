@@ -14,6 +14,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	golangsdk "github.com/opentelekomcloud/gophertelekomcloud"
 	"github.com/opentelekomcloud/gophertelekomcloud/openstack/cce/v3/addons"
+	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common"
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common/cfg"
 	"github.com/opentelekomcloud/terraform-provider-opentelekomcloud/opentelekomcloud/common/fmterr"
 )
@@ -82,9 +83,11 @@ func ResourceCCEAddonV3() *schema.Resource {
 
 func resourceCCEAddonV3Create(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*cfg.Config)
-	client, err := config.CceV3AddonClient(config.GetRegion(d))
+	client, err := common.ClientFromCtx(ctx, keyClientAddonV3, func() (*golangsdk.ServiceClient, error) {
+		return config.CceV3AddonClient(config.GetRegion(d))
+	})
 	if err != nil {
-		return fmterr.Errorf("error creating CCE client: %w", err)
+		return fmterr.Errorf(cceClientError, err)
 	}
 
 	clusterID := d.Get("cluster_id").(string)
@@ -127,14 +130,17 @@ func resourceCCEAddonV3Create(ctx context.Context, d *schema.ResourceData, meta 
 
 	d.SetId(addon.Metadata.Id)
 
-	return resourceCCEAddonV3Read(ctx, d, meta)
+	clientCtx := common.CtxWithClient(ctx, client, keyClientAddonV3)
+	return resourceCCEAddonV3Read(clientCtx, d, meta)
 }
 
-func resourceCCEAddonV3Read(_ context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceCCEAddonV3Read(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*cfg.Config)
-	client, err := config.CceV3AddonClient(config.GetRegion(d))
+	client, err := common.ClientFromCtx(ctx, keyClientAddonV3, func() (*golangsdk.ServiceClient, error) {
+		return config.CceV3AddonClient(config.GetRegion(d))
+	})
 	if err != nil {
-		return fmterr.Errorf("error creating CCE client: %w", logHttpError(err))
+		return fmterr.Errorf(cceClientError, err)
 	}
 
 	clusterID := d.Get("cluster_id").(string)
@@ -176,10 +182,13 @@ func getAddonValues(d *schema.ResourceData) (basic, custom map[string]interface{
 
 func resourceCCEAddonV3Delete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*cfg.Config)
-	client, err := config.CceV3AddonClient(config.GetRegion(d))
+	client, err := common.ClientFromCtx(ctx, keyClientAddonV3, func() (*golangsdk.ServiceClient, error) {
+		return config.CceV3AddonClient(config.GetRegion(d))
+	})
 	if err != nil {
-		return fmterr.Errorf("error creating CCE client: %w", err)
+		return fmterr.Errorf(cceClientError, err)
 	}
+
 	clusterID := d.Get("cluster_id").(string)
 
 	stateConf := &resource.StateChangeConf{
