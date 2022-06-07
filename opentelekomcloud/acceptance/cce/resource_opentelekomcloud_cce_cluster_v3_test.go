@@ -312,7 +312,7 @@ resource "opentelekomcloud_cce_cluster_v3" "cluster_1" {
   kubernetes_svc_ip_range = "10.247.0.0/16"
   ignore_addons           = true
   eni_subnet_id           = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.network_id
-  eni_subnet_cidr         = "192.168.0.0/16"
+  eni_subnet_cidr         = "192.168.0.0/24"
 }
 `, common.DataSourceSubnet, clusterName)
 }
