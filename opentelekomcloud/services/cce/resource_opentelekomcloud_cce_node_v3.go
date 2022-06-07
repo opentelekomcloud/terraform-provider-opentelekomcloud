@@ -452,7 +452,9 @@ Message: %s
 
 func resourceCCENodeV3Create(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*cfg.Config)
-	client, err := config.CceV3Client(config.GetRegion(d))
+	client, err := common.ClientFromCtx(ctx, keyClientV3, func() (*golangsdk.ServiceClient, error) {
+		return config.CceV3Client(config.GetRegion(d))
+	})
 	if err != nil {
 		return fmterr.Errorf(cceClientError, err)
 	}
@@ -577,7 +579,9 @@ func resourceCCENodeV3Create(ctx context.Context, d *schema.ResourceData, meta i
 	}
 
 	d.SetId(nodeID)
-	return resourceCCENodeV3Read(ctx, d, meta)
+
+	clientCtx := common.CtxWithClient(ctx, client, keyClientV3)
+	return resourceCCENodeV3Read(clientCtx, d, meta)
 }
 
 // getNodeIDFromJob wait until job starts (status Running) and returns Node ID
@@ -623,12 +627,15 @@ func getNodeIDFromJob(ctx context.Context, client *golangsdk.ServiceClient, jobI
 	return nodeID, nil
 }
 
-func resourceCCENodeV3Read(_ context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceCCENodeV3Read(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*cfg.Config)
-	client, err := config.CceV3Client(config.GetRegion(d))
+	client, err := common.ClientFromCtx(ctx, keyClientV3, func() (*golangsdk.ServiceClient, error) {
+		return config.CceV3Client(config.GetRegion(d))
+	})
 	if err != nil {
 		return fmterr.Errorf(cceClientError, err)
 	}
+
 	clusterID := d.Get("cluster_id").(string)
 	node, err := nodes.Get(client, clusterID, d.Id()).Extract()
 	if err != nil {
@@ -750,7 +757,9 @@ func setK8sNodeFields(d *schema.ResourceData, config *cfg.Config, clusterID, pri
 
 func resourceCCENodeV3Update(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*cfg.Config)
-	client, err := config.CceV3Client(config.GetRegion(d))
+	client, err := common.ClientFromCtx(ctx, keyClientV3, func() (*golangsdk.ServiceClient, error) {
+		return config.CceV3Client(config.GetRegion(d))
+	})
 	if err != nil {
 		return fmterr.Errorf(cceClientError, err)
 	}
@@ -832,15 +841,19 @@ func resourceCCENodeV3Update(ctx context.Context, d *schema.ResourceData, meta i
 		}
 	}
 
-	return resourceCCENodeV3Read(ctx, d, meta)
+	clientCtx := common.CtxWithClient(ctx, client, keyClientV3)
+	return resourceCCENodeV3Read(clientCtx, d, meta)
 }
 
 func resourceCCENodeV3Delete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*cfg.Config)
-	client, err := config.CceV3Client(config.GetRegion(d))
+	client, err := common.ClientFromCtx(ctx, keyClientV3, func() (*golangsdk.ServiceClient, error) {
+		return config.CceV3Client(config.GetRegion(d))
+	})
 	if err != nil {
 		return fmterr.Errorf(cceClientError, err)
 	}
+
 	clusterID := d.Get("cluster_id").(string)
 	if err := nodes.Delete(client, clusterID, d.Id()).ExtractErr(); err != nil {
 		return fmterr.Errorf("error deleting OpenTelekomCloud CCE Cluster: %w", err)
