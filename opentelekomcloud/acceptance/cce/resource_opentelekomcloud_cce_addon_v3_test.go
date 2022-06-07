@@ -181,6 +181,7 @@ resource opentelekomcloud_cce_cluster_v3 cluster_1 {
   flavor_id               = "cce.s1.small"
   vpc_id                  = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.vpc_id
   subnet_id               = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.network_id
+  cluster_version         = "v1.19"
   container_network_type  = "overlay_l2"
   kubernetes_svc_ip_range = "10.247.0.0/16"
 }
@@ -238,6 +239,7 @@ resource opentelekomcloud_cce_cluster_v3 cluster_1 {
   flavor_id               = "cce.s1.small"
   vpc_id                  = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.vpc_id
   subnet_id               = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.network_id
+  cluster_version         = "v1.19"
   container_network_type  = "overlay_l2"
   kubernetes_svc_ip_range = "10.247.0.0/16"
 }
@@ -295,6 +297,7 @@ resource opentelekomcloud_cce_cluster_v3 cluster_1 {
   flavor_id               = "cce.s1.medium"
   vpc_id                  = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.vpc_id
   subnet_id               = data.opentelekomcloud_vpc_subnet_v1.shared_subnet.network_id
+  cluster_version         = "v1.19"
   container_network_type  = "overlay_l2"
   kubernetes_svc_ip_range = "10.247.0.0/16"
 }
